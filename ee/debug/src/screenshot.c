@@ -81,13 +81,13 @@ int ps2_screenshot_file( const char* pFilename,unsigned int VramAdress,
   static u32 in_buffer[1024*4];  // max 1024*32bit for a line, should be ok
   static u32 out_buffer[1024*4]; // max 1024*32bit for a line, should be ok
 
-	unsigned char header[18] = 
+  unsigned char header[18] = 
   {
-		 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
+     0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
      0, 0, // Width 
      0, 0, // Heigth
     32, 8
-	};
+  };
 
   s16* p_header = (s16*)&header;
 
