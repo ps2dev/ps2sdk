@@ -1,0 +1,27 @@
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004.
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+
+2004-09-06 Version 1.1
+
+  - emmon: Added screen capture routines for debugging.
+  - lukasz, Added freesd.
+  - mrbrown, Fixed reference to newlib. Uses internal libc.
+  - Drakonite, Fixed file permissions in install.
+  - warren, fix C++ linker flags and order.
+  - clement, provide 48bit LBA support to ps2atad.
+  - tryanid, provide initial commit of USBD (not finished).
+  - hiryu, added libkernel to IOP for creating IOP library files.
+  - linuzapp, fixed IOP compiler detection in build.
+  - raizor, added AHX sound library to IOP.
+
+
+2004-05-02 Version 1.0Alpha
+
+   - Initial release.
+   - Brings together ps2lib, ps2drv, ps2hid, ps2ip, etc.
+
