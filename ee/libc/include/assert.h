@@ -21,12 +21,14 @@
 #ifdef NDEBUG
 #define assert(cond)
 #else
-void __assert_fail (const char *assertion, const char *file, unsigned int line, const char *function) __attribute__((noreturn));
-#define assert(cond) { \
-    if (!cond) \
-	__assert_fail(#cond, __FILE__, __LINE__, __FUNCTION__); \
+#ifdef __cplusplus
+extern "C" {
+#endif
+    int __assert_fail (const char *assertion, const char *file, unsigned int line) __attribute__((noreturn));
+#ifdef __cplusplus
 }
 #endif
-
+#define assert(cond) (void)((cond)?0:__assert_fail(#cond, __FILE__, __LINE))
+#endif
 
 #endif

@@ -12,6 +12,7 @@
   - pixel, fixed realloc's alignment bug.
   - pixel, added timer.h
   - kaylakaze, fixed some iop's makefiles.
+  - pixel, assert was not working nicely. fixed.
 
 2005-01-04
   - radad, fixed pad samples.
