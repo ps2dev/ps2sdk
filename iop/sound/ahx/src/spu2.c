@@ -574,7 +574,7 @@ void SdSetParam(u16 reg, u16 val)
 
 }
 
-IntrCallback SdSetTransCallback(int core, IntrCallback cb)
+IntrCallback SdSetTransCallback(s32 core, IntrCallback cb)
 {
 	IntrCallback old_cb;
 
@@ -742,7 +742,7 @@ s32 BlockTransRead(u8 *iopaddr, u32 size, s32 chan, s16 mode)
 #endif
 
 
-int SdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, u8 *startaddr)
+s32 SdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, u8 *startaddr)
 {
 	#ifndef ISJPCM
 	int transfer_dir = mode & 3;

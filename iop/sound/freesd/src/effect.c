@@ -192,7 +192,7 @@ s32 SdSetEffectAttr(s32 core, SdEffectAttr *attr)
 	return 0;
 }
 
-void SdGetEffectAttr(int core, SdEffectAttr *attr)
+void SdGetEffectAttr(s32 core, SdEffectAttr *attr)
 {
 	*attr = EffectAttr[core & 1];
 }

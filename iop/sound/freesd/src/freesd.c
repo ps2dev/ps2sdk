@@ -680,7 +680,7 @@ u16 SdGetCoreAttr(u16 entry)
 }
 
 
-SdTransIntrHandler SdSetTransIntrHandler(int chan, SdTransIntrHandler func, void *data)
+SdTransIntrHandler SdSetTransIntrHandler(s32 chan, SdTransIntrHandler func, void *data)
 {
 	SdTransIntrHandler old_handler;
 
@@ -765,7 +765,7 @@ u32 SdGetAddr(u16 reg)
 	return rethi | retlo;
 }
 
-IntrCallback SdSetTransCallback(int core, IntrCallback cb)
+IntrCallback SdSetTransCallback(s32 core, IntrCallback cb)
 {
 	IntrCallback old_cb;
 

@@ -359,10 +359,10 @@ int UsbInit(void);
  * listen for USB bus events.  The events are device probe, connect, and disconnect.
  * They return USB_RC_OK if successful.
  */
-int UsbRegisterDriver(UsbDriver *driver);
+s32 UsbRegisterDriver(UsbDriver *driver);
 #define I_UsbRegisterDriver DECLARE_IMPORT(4,UsbRegisterDriver)
 
-int UsbUnregisterDriver(UsbDriver *driver);
+s32 UsbUnregisterDriver(UsbDriver *driver);
 #define I_UsbUnregisterDriver DECLARE_IMPORT(5,UsbUnregisterDriver)
 
 /*
@@ -381,10 +381,10 @@ void *UsbGetDeviceStaticDescriptor(int devID, void *data, u8 type);
  * USB device driver may store configuration data for each specific device 
  * under its control.
  */
-int UsbSetDevicePrivateData(int devID, void *data);
+s32 UsbSetDevicePrivateData(s32 devID, void *data);
 #define I_UsbSetDevicePrivateData DECLARE_IMPORT(7,UsbSetDevicePrivateData)
 
-void *UsbGetDevicePrivateData(int devID);
+void *UsbGetDevicePrivateData(s32 devID);
 #define I_UsbGetDevicePrivateData DECLARE_IMPORT(8,UsbGetDevicePrivateData)
 
 
@@ -393,13 +393,13 @@ void *UsbGetDevicePrivateData(int devID);
  * passed in.  This endpoint ID is then used when transfering data to the device, 
  * and to close the endpoint.
  */
-int UsbOpenEndpoint(int devID, UsbEndpointDescriptor *epDesc);
+s32 UsbOpenEndpoint(s32 devID, UsbEndpointDescriptor *epDesc);
 #define I_UsbOpenEndpoint DECLARE_IMPORT(9, UsbOpenEndpoint)
 
 int UsbOpenBulkEndpoint(int devID, UsbEndpointDescriptor *epDesc);
 #define I_UsbOpenBulkEndpoint DECLARE_IMPORT(12,UsbOpenBulkEndpoint)
 
-int UsbCloseEndpoint(int epID);
+s32 UsbCloseEndpoint(s32 epID);
 #define I_UsbCloseEndpoint DECLARE_IMPORT(10, UsbCloseEndpoint)
 
 
@@ -415,7 +415,7 @@ typedef	void (*UsbTransferDoneCallBack)(int resultCode, int bytes, void *arg);
  * transfer is determined by the parameters that are passed in.  The types are:
  * control, isochronous, interrupt, and bulk transfers.
  */
-int UsbTransfer(int epID, void *data, int length, void *optionalData, UsbTransferDoneCallBack doneCB, void *arg);
+s32 UsbTransfer(s32 epID, void *data, s32 length, void *optionalData, UsbTransferDoneCallBack doneCB, void *arg);
 #define I_UsbTransfer DECLARE_IMPORT(11,UsbTransfer)
 
 	
