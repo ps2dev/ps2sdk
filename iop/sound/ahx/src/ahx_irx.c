@@ -334,14 +334,14 @@ void* AHX_rpc_server(unsigned int funcno, void *data, int size)
 //***************************************************************
 void* AHX_Init(unsigned int* sbuff)
 {
+	iop_thread_t play_thread; // play thread
+
 	// init AXH Player
 	AHXPlayer_Init();
 
 	#ifndef COMPACT_CODE
 		printf("AHX INIT DONE!\n");
 	#endif	
-
-	iop_thread_t play_thread; // play thread
 
 	// Initialise SPU
 	SdInit(SD_INIT_COLD);
