@@ -55,86 +55,86 @@ int UsbControlTransfer(int epID, int reqtyp, int req, int val, int index, int le
 /* standard control transfers */
 
 #define UsbClearDeviceFeature(epID, feature, doneCB, arg)	\
-	UsbControlTransfer((epID), USB_DIR_OUT & USB_RECIP_DEVICE, USB_REQ_CLEAR_FEATURE, \
+	UsbControlTransfer((epID), USB_DIR_OUT | USB_RECIP_DEVICE, USB_REQ_CLEAR_FEATURE, \
 	(feature), 0, 0, NULL, (doneCB), (arg))
 
 #define UsbSetDeviceFeature(epID, feature, doneCB, arg)	\
-	UsbControlTransfer((epID), USB_DIR_OUT & USB_RECIP_DEVICE, USB_REQ_SET_FEATURE, \
+	UsbControlTransfer((epID), USB_DIR_OUT | USB_RECIP_DEVICE, USB_REQ_SET_FEATURE, \
 	(feature), 0, 0, NULL, (doneCB), (arg))
 
 #define UsbGetDeviceConfiguration(epID, dataptr, doneCB, arg) \
-	UsbControlTransfer((epID), USB_DIR_IN & USB_RECIP_DEVICE, USB_REQ_GET_CONFIGURATION, \
+	UsbControlTransfer((epID), USB_DIR_IN | USB_RECIP_DEVICE, USB_REQ_GET_CONFIGURATION, \
 	0, 0, 1, (dataptr), (doneCB), (arg))
 
 #define UsbSetDeviceConfiguration(epID, config, doneCB, arg) \
-	UsbControlTransfer((epID), USB_DIR_OUT & USB_RECIP_DEVICE, USB_REQ_SET_CONFIGURATION, (config), 0, 0, NULL, (doneCB), (arg))
+	UsbControlTransfer((epID), USB_DIR_OUT | USB_RECIP_DEVICE, USB_REQ_SET_CONFIGURATION, (config), 0, 0, NULL, (doneCB), (arg))
 
 #define UsbGetDeviceDescriptor(epID, type, index, language, dataptr, len, doneCB, arg) \
-	UsbControlTransfer((epID), USB_DIR_IN & USB_RECIP_DEVICE, USB_REQ_GET_DESCRIPTOR, \
+	UsbControlTransfer((epID), USB_DIR_IN | USB_RECIP_DEVICE, USB_REQ_GET_DESCRIPTOR, \
 	((type) << 8) | (index), (language), (len), (dataptr), (doneCB), (arg))
 
 #define UsbSetDeviceDescriptor(epID, type, index, language, dataptr, len, doneCB, arg) \
-	UsbControlTransfer((epID), USB_DIR_OUT & USB_RECIP_DEVICE, USB_REQ_SET_DESCRIPTOR, \
+	UsbControlTransfer((epID), USB_DIR_OUT | USB_RECIP_DEVICE, USB_REQ_SET_DESCRIPTOR, \
 	((type) << 8) | (index), (language), (len), (dataptr), (doneCB), (arg))
 
 #define UsbGetDeviceStatus(epID, dataptr, doneCB, arg) \
-	UsbControlTransfer((epID), USB_DIR_IN & USB_RECIP_DEVICE, USB_REQ_GET_STATUS, \
+	UsbControlTransfer((epID), USB_DIR_IN | USB_RECIP_DEVICE, USB_REQ_GET_STATUS, \
 	0, 0, 2, (dataptr), (doneCB), (arg))
 
 #define UsbSetDeviceAddress(epID, address, doneCB, arg) \
-	UsbControlTransfer((epID), USB_DIR_OUT & USB_RECIP_DEVICE, USB_REQ_SET_ADDRESS, \
+	UsbControlTransfer((epID), USB_DIR_OUT | USB_RECIP_DEVICE, USB_REQ_SET_ADDRESS, \
 	(address), 0, 0, NULL, (doneCB), (arg))
 
 #define UsbClearInterfaceFeature(epID, feature, interface, doneCB, arg)	\
-	UsbControlTransfer((epID), USB_DIR_OUT & USB_RECIP_INTERFACE, USB_REQ_CLEAR_FEATURE, \
+	UsbControlTransfer((epID), USB_DIR_OUT | USB_RECIP_INTERFACE, USB_REQ_CLEAR_FEATURE, \
 	(feature), (interface), 0, NULL, (doneCB), (arg))
 
 #define UsbSetInterfaceFeature(epID, feature, interface, doneCB, arg)	\
-	UsbControlTransfer((epID), USB_DIR_OUT & USB_RECIP_INTERFACE, USB_REQ_SET_FEATURE, \
+	UsbControlTransfer((epID), USB_DIR_OUT | USB_RECIP_INTERFACE, USB_REQ_SET_FEATURE, \
 	(feature), (interface), 0, NULL, (doneCB), (arg))
 
 #define UsbGetInterface(epID, interface, dataptr, doneCB, arg) \
-	UsbControlTransfer((epID), USB_DIR_IN & USB_RECIP_INTERFACE, USB_REQ_GET_INTERFACE, \
+	UsbControlTransfer((epID), USB_DIR_IN | USB_RECIP_INTERFACE, USB_REQ_GET_INTERFACE, \
 	0, (interface), 1, (dataptr), (doneCB), (arg))
 
 #define UsbSetInterface(epID, interface, alt_setting, doneCB, arg) \
-	UsbControlTransfer((epID), USB_DIR_OUT & USB_RECIP_INTERFACE, USB_REQ_SET_INTERFACE, \
+	UsbControlTransfer((epID), USB_DIR_OUT | USB_RECIP_INTERFACE, USB_REQ_SET_INTERFACE, \
 	(alt_setting), (interface), 0, NULL, (doneCB), (arg))
 
 #define UsbGetInterfaceDescriptor(epID, type, index, language, dataptr, len, doneCB, arg) \
-	UsbControlTransfer((epID), USB_DIR_IN & USB_RECIP_INTERFACE, USB_REQ_GET_DESCRIPTOR, \
+	UsbControlTransfer((epID), USB_DIR_IN | USB_RECIP_INTERFACE, USB_REQ_GET_DESCRIPTOR, \
 	((type) << 8) | (index), (language), (len), (dataptr), (doneCB), (arg))
 
 #define UsbSetInterfaceDescriptor(epID, type, index, language, dataptr, len, doneCB, arg) \
-	UsbControlTransfer((epID), USB_DIR_OUT & USB_RECIP_INTERFACE, USB_REQ_SET_DESCRIPTOR, \
+	UsbControlTransfer((epID), USB_DIR_OUT | USB_RECIP_INTERFACE, USB_REQ_SET_DESCRIPTOR, \
 	((type) << 8) | (index), (language), (len), (dataptr), (doneCB), (arg))
 
 #define UsbGetInterfaceStatus(epID, interface, dataptr, doneCB, arg) \
-	UsbControlTransfer((epID), USB_DIR_IN & USB_RECIP_INTERFACE, USB_REQ_GET_STATUS, \
+	UsbControlTransfer((epID), USB_DIR_IN | USB_RECIP_INTERFACE, USB_REQ_GET_STATUS, \
 	0, (interface), 2, (dataptr), (doneCB), (arg))
 
 #define UsbClearEndpointFeature(epID, feature, endpoint, doneCB, arg)	\
-	UsbControlTransfer((epID), USB_DIR_OUT & USB_RECIP_ENDPOINT, USB_REQ_CLEAR_FEATURE, \
+	UsbControlTransfer((epID), USB_DIR_OUT | USB_RECIP_ENDPOINT, USB_REQ_CLEAR_FEATURE, \
 	(feature), (endpoint), 0, NULL, (doneCB), (arg))
 
 #define UsbSetEndpointFeature(epID, feature, endpoint, doneCB, arg)	\
-	UsbControlTransfer((epID), USB_DIR_OUT & USB_RECIP_ENDPOINT, USB_REQ_SET_FEATURE, \
+	UsbControlTransfer((epID), USB_DIR_OUT | USB_RECIP_ENDPOINT, USB_REQ_SET_FEATURE, \
 	(feature), (endpoint), 0, NULL, (doneCB), (arg))
 
 #define UsbGetEndpointStatus(epID, endpoint, dataptr, doneCB, arg) \
-	UsbControlTransfer((epID), USB_DIR_IN & USB_RECIP_ENDPOINT, USB_REQ_GET_STATUS, \
+	UsbControlTransfer((epID), USB_DIR_IN | USB_RECIP_ENDPOINT, USB_REQ_GET_STATUS, \
 	0, (endpoint), 2, (dataptr), (doneCB), (arg))
 
 #define UsbGetEndpointDescriptor(epID, type, index, language, dataptr, len, doneCB, arg) \
-	UsbControlTransfer((epID), USB_DIR_IN & USB_RECIP_ENDPOINT, USB_REQ_GET_DESCRIPTOR, \
+	UsbControlTransfer((epID), USB_DIR_IN | USB_RECIP_ENDPOINT, USB_REQ_GET_DESCRIPTOR, \
 	((type) << 8) | (index), (language), (len), (dataptr), (doneCB), (arg))
 
 #define UsbSetEndpointDescriptor(epID, type, index, language, dataptr, len, doneCB, arg) \
-	UsbControlTransfer((epID), USB_DIR_OUT & USB_RECIP_ENDPOINT, USB_REQ_SET_DESCRIPTOR, \
+	UsbControlTransfer((epID), USB_DIR_OUT | USB_RECIP_ENDPOINT, USB_REQ_SET_DESCRIPTOR, \
 	((type) << 8) | (index), (language), (len), (dataptr), (doneCB), (arg))
 
 #define UsbSynchEndpointFrame(epID, endpoint, pfn, doneCB, arg)	\
-	UsbControlTransfer((pid), USB_DIR_IN & USB_RECIP_ENDPOINT, USB_REQ_SYNCH_FRAME, \
+	UsbControlTransfer((pid), USB_DIR_IN | USB_RECIP_ENDPOINT, USB_REQ_SYNCH_FRAME, \
 	0, (endpoint), 2, (pfn), (doneCB), (arg))
 
 #endif
