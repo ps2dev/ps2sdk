@@ -14,7 +14,7 @@
   - Drakonite, Fixed file permissions in install.
   - warren, fix C++ linker flags and order.
   - clement, provide 48bit LBA support to ps2atad.
-  - tryanid, provide initial commit of USBD (not finished).
+  - tyranid, provide initial commit of USBD (not finished).
   - hiryu, added libkernel to IOP for creating IOP library files.
   - linuzapp, fixed IOP compiler detection in build.
   - raizor, added AHX sound library to IOP.
