@@ -8,6 +8,17 @@
 #
 # $Id$
 
+2005-01-27
+  - oopo, added an install target
+  - blackdroid, fixed dev9's hardware registers
+
+2005-01-20
+  - herben, added SifExitRpc to SifRebootIop
+  - drakonite, added scr_setXY, scr_getX, scr_getY and scr_clear
+
+2005-01-18
+  - herben, fixed various strncpy bugs
+
 2005-01-13
   - pixel, added simple ctype for IOP
   - pixel, made AHX beeing usable :)
