@@ -7,6 +7,6 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 
-#SUBDIRS = hello
+SUBDIRS = hello
 
 include $(PS2SDKSRC)/Rules.make
