@@ -194,7 +194,7 @@ s32 cdSearchFile(CdvdFileSpec_t * file, const char *name)
 		bindSearchFile = 0;
 	}
 
-	strncpy(searchFileSendBuff.name, name, 256);
+	strncpy(searchFileSendBuff.name, name, 255);
 	searchFileSendBuff.name[255] = '\0';
 	searchFileSendBuff.dest = &searchFileSendBuff;
 
