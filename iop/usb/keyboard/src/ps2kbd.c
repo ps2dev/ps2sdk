@@ -9,18 +9,20 @@
  * See the file LICENSE included with this distribution for licensing terms.
  */
 
-#include <tamtypes.h>
-#include <fileio.h>
-#include <kernel.h>
-#include <stdio.h>
-#include <sifcmd.h>
-#include <sifrpc.h>
-#include <libsd.h>
-#include <sysclib.h>
-#include <sysmem.h>
-#include <usbd.h>
-#include <timer.h>
-#include <thevent.h>
+#include "types.h"
+#include "iomanX.h"
+#include "loadcore.h"
+#include "stdio.h"
+#include "sifcmd.h"
+#include "sifrpc.h"
+#include "sysclib.h"
+#include "sysmem.h"
+#include "usbd.h"
+#include "usbd_macro.h"
+#include "thbase.h"
+#include "thevent.h"
+#include "thsemap.h"
+
 #include "ps2kbd.h"
 #include "us_keymap.h"
 
@@ -444,7 +446,7 @@ u32 ps2kbd_repeathandler(void *arg)
 
 {
   kbd_dev *dev = arg;
-  struct timestamp t;
+  iop_sys_clock_t t;
   //printf("Repeat handler\n");
 
   iSetEventFlag(eventid, dev->eventmask);
@@ -452,7 +454,7 @@ u32 ps2kbd_repeathandler(void *arg)
   USec2SysClock(kbd_repeatrate * 1000, &t);
   iSetAlarm(&t, ps2kbd_repeathandler, arg);
 
-  return t.cnt;
+  return t.hi;
 }
 
 void ps2kbd_getkeys(u8 keyMods, u8 ledStatus, const u8 *keys, kbd_dev *dev)
@@ -580,7 +582,7 @@ void ps2kbd_getkeys(u8 keyMods, u8 ledStatus, const u8 *keys, kbd_dev *dev)
 
   if(byteCount > 0) 
     {
-      struct timestamp t;
+      iop_sys_clock_t t;
       /* Set alarm to do repeat rate */
       //printf("repeatkeys %d %d\n", kbd_repeatkeys[0], kbd_repeatkeys[1]);
       USec2SysClock(PS2KBD_REPEATWAIT * 1000, &t);
@@ -816,15 +818,15 @@ void ps2kbd_data_recv(int resultCode, int bytes, void *arg)
 void flushbuffer()
 
 {
-  struct t_sema s;
+  iop_sema_t s;
 
   lineStartP = 0;
   lineEndP = 0;
   memset(lineBuffer, 0, lineSize);
   
   DeleteSema(bufferSema);
-  s.init_count = 0;
-  s.max_count = lineSize;
+  s.initial = 0;
+  s.max = lineSize;
   s.option = 0;
   s.attr = 0;
   bufferSema = CreateSema(&s); /* Create a sema to maintain status of readable data */
@@ -1126,7 +1128,7 @@ void repeat_thread(void *arg)
 
   for(;;)
     {
-      WaitEventFlag(eventid, 0xFFFFFFFF, EW_OR | EW_CLEAR, &eventmask);
+      WaitEventFlag(eventid, 0xFFFFFFFF, 0x01 | 0x10, &eventmask);
       //printf("Recieved event %08X\n", eventmask);
       for(devLoop = 0; devLoop < PS2KBD_MAXDEV; devLoop++)
 	{
@@ -1176,19 +1178,19 @@ int init_repeatthread()
      /* Creates a thread to handle key repeats */
 
 {
-  struct t_thread param;
-  struct t_event event;
+  iop_thread_t param;
+  iop_event_t event;
 
   event.attr = 0;
   event.option = 0;
-  event.init_mask = 0;
+  event.bits = 0;
   eventid = CreateEventFlag(&event);
 
-  param.type         = TH_C;
-  param.function     = repeat_thread;
-  param.priority 	 = 40;
-  param.stackSize    = 0x800;
-  param.unknown      = 0;
+  param.attr         = TH_C;
+  param.thread    = repeat_thread;
+  param.priority     = 40;
+  param.stacksize    = 0x800;
+  param.option       = 0;
 
   repeat_tid = CreateThread(&param);
   if (repeat_tid > 0) {
@@ -1205,10 +1207,10 @@ int ps2kbd_init()
 
 {
   int ret;
-  struct t_sema s;
+  iop_sema_t s;
 
-  s.init_count = 1;
-  s.max_count = 1;
+  s.initial = 1;
+  s.max = 1;
   s.option = 0;
   s.attr = 0;
   lineSema = CreateSema(&s);
@@ -1218,8 +1220,8 @@ int ps2kbd_init()
       return 1;
     }
 
-  s.init_count = 0;
-  s.max_count = PS2KBD_DEFLINELEN;
+  s.initial = 0;
+  s.max = PS2KBD_DEFLINELEN;
   s.option = 0;
   s.attr = 0;
   bufferSema = CreateSema(&s); /* Create a sema to maintain status of readable data */
