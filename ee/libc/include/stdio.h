@@ -28,7 +28,7 @@ typedef unsigned int size_t;
 
 /* Some defines for the unix 'unistd' functions */
 // was using variadic macro for that... but it breaks emoon's pedantic compiler :P
-__inline__ int open(const char *fname, int flags, ...) { return fioOpen(fname, flags); }
+static __inline__ int open(const char *fname, int flags, ...) { return fioOpen(fname, flags); }
 #define close(handle) fioClose(handle)
 #define read(handle,buffer,size) fioRead(handle,buffer,size)
 #define write(handle,buffer,size) fioWrite(handle,buffer,size)
