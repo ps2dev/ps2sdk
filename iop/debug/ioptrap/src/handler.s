@@ -10,6 +10,9 @@
 # $Id$
 */
 
+
+#include "as_reg_compat.h"
+
 #define GENERAL_ATSAVE             0x400
 #define GENERAL_SRSAVE
 
