@@ -1,11 +1,14 @@
 /*
-  _____     ___ ____ 
-   ____|   |    ____|      PSX2 OpenSource Project
-  |     ___|   |____       (C)2003, adresd (adresd_ps2dev@yahoo.com)
-  ------------------------------------------------------------------------
-  errno.h
-			global error codes and string values
-			gives return values for all things
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+# global error codes and string values
 */
 
 #ifndef _ERRNO_H

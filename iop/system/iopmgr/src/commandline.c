@@ -1,11 +1,15 @@
 /*
- * commandline.c - command line parser and handler for iop manager.
- *
- * Copyright (c) 2003, 2004 adresd <adresd_ps2dev@yahoo.com>
- *
- * Licensed under the AFL v2.0. See the file LICENSE included with this
- * distribution for licensing terms.
- */
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+# command line parser and handler for iop manager.
+*/
 
 #include "defs.h"
 #include "iomanX.h"

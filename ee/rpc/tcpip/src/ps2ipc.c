@@ -1,10 +1,14 @@
 /*
-  _____     ___ ____ 
-   ____|   |    ____|      PSX2 OpenSource Project
-  |     ___|   |____       (C)2003, Nick Van Veen (nickvv@xtra.co.nz)
-  ------------------------------------------------------------------------
-  ps2ipc.c
-			   ps2ip ee client to iop ps2ip.
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+# ps2ip ee client to iop ps2ip.
 */
 
 #include <tamtypes.h>

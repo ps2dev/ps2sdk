@@ -1,16 +1,21 @@
 /*
-  _____     ___ ____
-   ____|   |    ____|      PS2 OpenSource Project
-  |     ___|   |____       (C) 2002 Nicholas Van Veen (nickvv@xtra.co.nz)
-                               2003 loser (loser@internalreality.com)
-  ------------------------------------------------------------------------
-  mclib.h
-        Macro's, structures & function prototypes for mclib. Thanks to Hiryu 
-        for providing memory card related info.
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+# Macro's, structures & function prototypes for mclib.
+*/
 
-		NOTE: These functions will work with the MCMAN/MCSERV or XMCMAN/XMCSERV
-		modules stored in rom0. To determine which one you are using, send the
-		appropriate arg to the mcInit() function (MC_TYPE_MC or MC_TYPE_XMC)
+
+/*
+	NOTE: These functions will work with the MCMAN/MCSERV or XMCMAN/XMCSERV
+	modules stored in rom0. To determine which one you are using, send the
+	appropriate arg to the mcInit() function (MC_TYPE_MC or MC_TYPE_XMC)
         
         NOTE: These functions seem to work for both psx and ps2 memcards
         

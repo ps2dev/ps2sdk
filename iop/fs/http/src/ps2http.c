@@ -1,12 +1,17 @@
 /*
-  _____     ___ ____
-   ____|   |    ____|      PSX2 OpenSource Project
-  |     ___|   |____       (C)2002, David Ryan ( oobles@hotmail.com )
-                           (C)2002-2004, Nicholas Van Veen (nickvv@xtra.co.nz)
-                           (C)2004, Herben (herben@napalm-x.com), thx to Chip-Nat for "Host: " tip. :D
-  ------------------------------------------------------------------------
-  ps2http.c                HTTP CLIENT FILE SYSTEM DRIVER.
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+# HTTP CLIENT FILE SYSTEM DRIVER.
+*/
 
+/*
 
   The HTTP file io driver is a read only driver that slots into the PS2
   IO subsystem and provides access to HTTP.

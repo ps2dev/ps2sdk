@@ -1,12 +1,16 @@
 /*      
-  _____     ___ ____ 
-   ____|   |    ____|      PSX2 OpenSource Project
-  |     ___|   |____       (C)2001, Gustavo Scotti (gustavo@scotti.com)
-  ------------------------------------------------------------------------
-  font.c
-  			EE UGLY DEBUG ON SCREEN - FONT BASE
-                        This is mostly based on Duke's work
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+# EE UGLY DEBUG ON SCREEN - FONT BASE
 */
+
 #include <tamtypes.h>
 
 u8 msx[]=

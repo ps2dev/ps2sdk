@@ -1,15 +1,15 @@
 /*
- * stdio.h - Standard C Library I/O.
- *
- * Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
- *
- * This file is based off of the work [RO]man, Herben, and any others involved
- * in the "modules" project at http://ps2dev.pgamers.com/.  It is also based
- * off of the work of the many contributors to the ps2lib project at
- * http://ps2dev.livemedia.com.au/.
- *
- * See the file LICENSE included with this distribution for licensing terms.
- */
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+# Standard C Library I/O.
+*/
 
 #ifndef IOP_STDIO_H
 #define IOP_STDIO_H

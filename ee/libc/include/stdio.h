@@ -1,12 +1,15 @@
 /*
-**
-**  [file] - stdio.h
-**  [desc] - LIBC (stdio) type, constant and function declarations.
-**  [date] - 1/12/2004
-**  [auth] - Andrew Joaquin
-**
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+# LIBC (stdio) type, constant and function declarations.
 */
-
 
 #ifndef __STDIO_H__
 #define __STDIO_H__

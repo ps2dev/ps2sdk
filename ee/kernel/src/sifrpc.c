@@ -1,15 +1,16 @@
 /*
-  _____     ___ ____ 
-   ____|   |    ____|      PSX2 OpenSource Project
-  |     ___|   |____       (C)2001, Gustavo Scotti (gustavo@scotti.com)
-                           (c) 2003 Marcus R. Brown (mrbrown@0xd6.org)
-  ------------------------------------------------------------------------
-  sifrpc.c
-			EE SIF RPC commands
-                        These are my findings based on debug-info elf files.
-
-			MRB: This file now contains the SIF routines included
-			with libpsware.  Bug reports welcome.
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+# EE SIF RPC commands
+# MRB: This file now contains the SIF routines included
+# with libpsware.  Bug reports welcome.
 */
 
 #include <tamtypes.h>

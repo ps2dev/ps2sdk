@@ -1,17 +1,15 @@
 /*
- * ioman_mod.h - IOMAN definitions and imports.
- *
- * Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
- * Copyright (c) 2004 adresd <adresd_ps2dev@yahoo.com>
- *
- * This is so that ioman and iomanx devices can be accessed at the
- * same time from the iop.
- *
- * If using ioman and iomanx devices together, include this file instead
- * of ioman.h, for the ioman functions
- *
- * See the file LICENSE included with this distribution for licensing terms.
- */
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+# IOMAN definitions and imports.
+*/
 
 #ifndef IOP_IOMAN_MOD_H
 #define IOP_IOMAN_MOD_H

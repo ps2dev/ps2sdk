@@ -1,10 +1,15 @@
 /*
- * cdvdman.h - Definitions and imports for cdvdman
- *
- * Copyright (c) 2003 Nicholas Van Veen <nickvv@xtra.co.nz>
- *
- * See the file LICENSE included with this distribution for licensing terms.
- */
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+# Definitions and imports for cdvdman
+*/
 
 #ifndef IOP_CDVDMAN_H
 #define IOP_CDVDMAN_H

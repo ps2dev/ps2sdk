@@ -1,10 +1,17 @@
 /*
- * siftoo.c - SIFToo low-level driver.
- *
- * Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
- *
- * Licensed under the Academic Free License version 2.0.
- *
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+# SIFToo low-level driver.
+*/
+
+/*
  * The SBUS Interface (SIF) has 3 DMA channels, with the first 2 reserved
  * for SCEI's SIF RPC interface.  As far as I know, the last channel is
  * only used for debugging within the EE's kernel (I haven't seen it in use

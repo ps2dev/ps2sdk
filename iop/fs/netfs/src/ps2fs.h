@@ -1,15 +1,15 @@
 /*
- * ps2fs.h - Protocol and packet definitions for ps2netfs.
- *
- * Copyright (C) 2003 Tord Lindstrom   (pukko@home.se)
- * Copyright (C) 2004 adresd <adresd_ps2dev@yahoo.com>
- *
- * Protocol is based on the ps2link fileio one, and is reproduced in an
- * expanded form with permission from : Tord Lindstrom (pukko@home.se)
- *
- * Licensed under the AFL v2.0. See the file LICENSE included with this
- * distribution for licensing terms.
- */
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+# Protocol and packet definitions for ps2netfs.
+*/
 
 /** \defgroup ps2netfs ps2netfs - TCP fs driver*/ 
 

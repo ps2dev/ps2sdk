@@ -1,14 +1,15 @@
 /*
- * extflash - NAND Flash via Dev9 driver.
- *
- * Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
- *
- * Low-level device driver for "external flash", or the Memory Stick interface
- * found in the PSX series.
- *
- * Licensed under the AFL v2.0. See the file LICENSE included with this
- * distribution for licensing terms.
- */
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+# NAND Flash via Dev9 driver.
+*/
 
 #include "types.h"
 #include "defs.h"

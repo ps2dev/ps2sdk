@@ -1,13 +1,16 @@
 /*
- *  hcd.c - USB driver for PS2
- * 
- *  (c) 2004 TyRaNiD <tiraniddo at hotmail dot com>
- *
- *  This file contains the code to control the HC.
- *
- *  See the file LICENSE included with this distribution for
- *  licensing terms.
- */
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+# USB driver for PS2
+# This file contains the code to control the HC.
+*/
 
 #include "types.h"
 #include "defs.h"

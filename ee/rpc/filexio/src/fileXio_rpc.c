@@ -1,14 +1,15 @@
 /*
- * fileXioiop.c - fileXio RPC client 
- *
- * (c) 2003 adresd <adresd_ps2dev@yahoo.com>
- * (c) 2003 Nicholas Van Veen <nickvv@xtra.co.nz>
- *
- * This module provides an RPC interface on the EE to the functions 
- * of ioman/fileio.
- *
- * See the file LICENSE included with this distribution for licensing terms.
- */
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+# fileXio RPC client 
+*/
 
 #include <tamtypes.h>
 #include <kernel.h>

@@ -1,27 +1,14 @@
 /*
-  _____     ___ ____
-   ____|   |    ____|      PS2 OpenSource Project
-  |     ___|   |____       (C) 2002 Nicholas Van Veen (nickvv@xtra.co.nz)
-                               2003 loser (loser@internalreality.com)
-  ------------------------------------------------------------------------
-  mclib.c
-  		Function defenitions for mclib. Thanks to Hiryu for providing 
-		memory card related info.
-		
-		NOTE: These functions will work with the MCMAN/MCSERV or XMCMAN/XMCSERV
-		modules stored in rom0. To determine which one you are using, send the
-		appropriate arg to the mcInit() function (MC_TYPE_MC or MC_TYPE_XMC)
-        
-        NOTE: These functions seem to work for both psx and ps2 memcards
-        
-        to use memcards:
-        1) first load modules (sio2man then mcman/mcserv)
-        2) call mcInit(MC_TYPE)
-        3) use mcGetInfo() to see if memcards are connected
-        4) use mcSync to check that the function has finished
-        
-        all mc* functions except mcInit() are asynchronous and require mcSync()
-        usage to test when they are done
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+# Function defenitions for mclib.
 */
 
 #include <tamtypes.h>

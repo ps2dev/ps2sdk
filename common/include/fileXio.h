@@ -1,12 +1,16 @@
 /*
- * fileXio_iop.c - fileXio RPC client/server shared includes 
- *
- * Copyright (c) 2003 adresd <adresd_ps2dev@yahoo.com>
- *
- * This is the main header that users of the fileXio RPC need to include 
- *
- * See the file LICENSE included with this distribution for licensing terms.
- */
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+# fileXio RPC client/server shared includes 
+*/
+
 #ifndef _FILEXIO_H
 #define _FILEXIO_H
 

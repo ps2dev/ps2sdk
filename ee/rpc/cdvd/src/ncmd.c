@@ -1,17 +1,20 @@
 /*
-  _____     ___ ____
-   ____|   |    ____|      PS2 OpenSource Project
-  |     ___|   |____       (C) 2002 Nicholas Van Veen (nickvv@xtra.co.nz)
-                               2003 loser (loser@internalreality.com)
-			   (c) 2004 Marcus R. Brown <mrbrown@0xd6.org>
-  ------------------------------------------------------------------------
-  ncmd.c
-  		Function definitions for libcdvd (EE side calls to the iop module cdvdfsv).
-		
-		NOTE: These functions will work with the CDVDMAN/CDVDFSV or XCDVDMAN/XCDVDFSV
-		modules stored in rom0.
-		
-		NOTE: not all functions work with each set of modules!
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+#
+# Function definitions for libcdvd (EE side calls to the iop module cdvdfsv).
+#
+# NOTE: These functions will work with the CDVDMAN/CDVDFSV or XCDVDMAN/XCDVDFSV
+# modules stored in rom0.
+#
+# NOTE: not all functions work with each set of modules!
 */
 
 #include "stdio.h"

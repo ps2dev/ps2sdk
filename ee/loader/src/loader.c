@@ -1,22 +1,15 @@
-/*==================================================================
-==											==
-==	Copyright(c)2004  Adam Metcalf(gamblore_@hotmail.com)		==
-==	Copyright(c)2004  Thomas Hawcroft(t0mb0la@yahoo.com)		==
-==	This file is subject to terms and conditions shown in the	==
-==	file LICENSE which should be kept in the top folder of	==
-==	this distribution.							==
-==											==
-==	Portions of this code taken from PS2Link:				==
-==				pkoLoadElf						==
-==				wipeUserMemory					==
-==				(C) 2003 Tord Lindstrom (pukko@home.se)	==
-==				(C) 2003 adresd (adresd_ps2dev@yahoo.com)	==
-==	Portions of this code taken from Independence MC exploit	==
-==				tLoadElf						==
-==				LoadAndRunHDDElf					==
-==				(C) 2003 Marcus Brown <mrbrown@0xd6.org>	==
-==											==
-==================================================================*/
+/*
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+*/
+
 #include "stdio.h"
 #include "tamtypes.h"
 #include "kernel.h"

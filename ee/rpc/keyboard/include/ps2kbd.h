@@ -1,13 +1,15 @@
 /*
- * ps2kbd.h - USB Keyboard Driver for PS2
- *
- * (c) 2003 TyRaNiD <tiraniddo@hotmail.com>
- *
- * This module handles the setup and manipulation of USB keyboard devices
- * on the PS2
- *
- * See the file LICENSE included with this distribution for licensing terms.
- */
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+# ps2kbd.h - USB Keyboard Driver for PS2
+*/
 
 #ifndef __PS2KBD_H__
 #define __PS2KBD_H__
