@@ -24,6 +24,39 @@ typedef unsigned int size_t;
 #include <stdarg.h>
 #include <io_common.h>
 #include <errno.h>
+#include <fileio.h>
+
+/* Some defines for the unix 'unistd' functions */
+#define open(fname,rights,mode...) fioOpen(fname,rights)
+#define close(handle) fioClose(handle)
+#define read(handle,buffer,size) fioRead(handle,buffer,size)
+#define write(handle,buffer,size) fioWrite(handle,buffer,size)
+#define lseek(handle,position,wheel) fioLseek(handle,position,wheel)
+
+/* Some win32 equivalents... baaah */
+#define _open open
+#define _close close
+#define _read read
+#define _write write
+#define _lseek lseek
+
+#define _O_APPEND O_APPEND
+#define _O_BINARY O_BINARY
+#define _O_CREAT  O_CREAT
+#define _O_RDONKY O_RDONKY
+#define _O_RDWR   O_RDWR
+#define _O_TEXT   O_TEXT
+#define _O_TRUNC  O_TRUNC
+#define _O_WRONLY O_WRONLY
+
+#ifndef O_BINARY
+#define O_BINARY 0
+#endif
+
+#ifndef O_TEXT
+#define O_TEXT 0
+#endif
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -84,8 +117,8 @@ typedef struct {
 extern FILE __iob[_NFILE];
 
 
-#define stdout                         (&__iob[0])
-#define stdin                          (&__iob[1])
+#define stdin                          (&__iob[0])
+#define stdout                         (&__iob[1])
 #define stderr                         (&__iob[2])
 
 
