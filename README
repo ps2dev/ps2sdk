@@ -102,7 +102,12 @@ Each sub project has a tree structure which can include:
 Please review the Makefiles to see how to create your own subproject
 in the tree.
 
-
+ Issues
+ -----------------------------------------------------------------------
+28th of May 2004: (Lukasz Bruun)
+ printf and family will not work with floats if used together with
+ -fshort-double compiler option, this is a compiler issue.
+  
 
  History
  -----------------------------------------------------------------------
