@@ -12,7 +12,7 @@
 # Creates the base ee directory structure in target directory.
 #
 
-RELEASE_EE_DIRS = ee/ ee/include/ ee/lib/ ee/startup 
+RELEASE_EE_DIRS = ee/ ee/include/ ee/lib/ ee/bin/ ee/startup 
 RELEASE_EE_DIRS := $(RELEASE_EE_DIRS:%=$(PS2SDK)/%)
 
 
@@ -30,6 +30,18 @@ release-lib:
 	   echo Installing $(EE_LIB) to $(PS2SDK)/ee/lib ; \
 	   cp -f $(EE_LIB) $(PS2SDK)/ee/lib ; \
 	   chmod 622 $(PS2SDK)/ee/$(EE_LIB) ; \
+	fi;
+
+
+#
+# Any elf files should go to ee/bin
+#
+
+release-bin: 
+	@if test $(EE_BIN) ; then \
+	   echo Installing $(EE_BIN) to $(PS2SDK)/ee/bin ; \
+	   cp -f $(EE_BIN) $(PS2SDK)/ee/bin ; \
+	   chmod 622 $(PS2SDK)/ee/$(EE_BIN) ; \
 	fi;
 
 #
@@ -61,7 +73,7 @@ release-samples:
 	fi;
 
 
-release: release-dirs release-lib release-include release-samples
+release: release-dirs release-lib release-bin release-include release-samples
 
 release-clean:
 	rm -f $(PS2SDK)/ee/include/*.*
