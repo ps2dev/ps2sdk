@@ -280,7 +280,7 @@ iop_file_t *get_new_file()
 
 	return NULL;
 }
-	
+
 int open(const char *name, int flags, ...)
 {
 	va_list args;
@@ -468,19 +468,31 @@ static int mode2modex(int mode)
 
 int dread(int fd, void *buf)
 {
-	io_dirent_t *dirent = (io_dirent_t *)buf;
+	iox_dirent_t *iox_dirent = (iox_dirent_t *) buf;
+	io_dirent_t io_dirent;
 	iop_file_t *f = get_file(fd);
 	int res;
 
 	if (f == NULL ||  !(f->mode & 8))
 		return -EBADF;
 
-	res = f->device->ops->dread(f, buf);
+	res = f->device->ops->dread(f, &io_dirent);
 
 	/* If this is a legacy device (such as mc:) then we need to convert the mode
 	   variable of the stat structure to iomanX's extended format.  */
 	if ((f->device->type & 0xf0000000) != IOP_DT_FSEXT)
-		dirent->stat.mode = mode2modex(dirent->stat.mode);
+		iox_dirent->stat.mode = mode2modex(io_dirent.stat.mode);
+    else
+        iox_dirent->stat.mode = io_dirent.stat.mode;
+
+    iox_dirent->stat.attr = io_dirent.stat.attr;
+    iox_dirent->stat.size = io_dirent.stat.size;
+    memcpy(iox_dirent->stat.ctime, io_dirent.stat.ctime, sizeof(io_dirent.stat.ctime));
+    memcpy(iox_dirent->stat.atime, io_dirent.stat.atime, sizeof(io_dirent.stat.atime));
+    memcpy(iox_dirent->stat.mtime, io_dirent.stat.mtime, sizeof(io_dirent.stat.mtime));
+    iox_dirent->stat.hisize = io_dirent.stat.hisize;
+
+    strncpy(iox_dirent->name, io_dirent.name, sizeof(iox_dirent->name));
 
 	return res;
 }
