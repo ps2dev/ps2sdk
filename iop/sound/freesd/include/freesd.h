@@ -92,6 +92,8 @@
 #define BATCH_GETADDR				0x13
 #define BATCH_GETCORE				0x14
 
+#ifndef IOP_LIBSD_H
+
 typedef struct
 {	
 	u32 mode;
@@ -120,6 +122,8 @@ typedef struct _SdBatch
 typedef int (*SdSpu2IntrHandler)(int core, void *data);
 typedef int (*SdTransIntrHandler)(int channel, void *data);
 typedef int (*IntrCallback)(void *data);
+
+
 
 s32 SdQuit();
 
@@ -159,5 +163,7 @@ s32	SdClearEffectWorkArea (s32 core, s32 channel, s32 effect_mode );
 
 SdTransIntrHandler SdSetTransIntrHandler(s32 channel, SdTransIntrHandler func, void *arg);
 SdSpu2IntrHandler SdSetSpu2IntrHandler(SdSpu2IntrHandler func, void *arg);
+
+#endif
 
 #endif
