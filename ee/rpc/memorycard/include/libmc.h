@@ -345,15 +345,6 @@ int mcChangeThreadPriority(int level);
 //			-1 = no function registered
 int mcSync(int mode, int *cmd, int *result);
 
-// strcpy_sjis written by Hiryu
-// copies ascii string to sjis string
-// 
-// args:    dest sjis string buffer
-//          source ascii string buffer
-// returns: length of ascii string copied
-int strcpy_sjis(short* sjis_buff, const char* ascii_buff);
-
-
 #ifdef __cplusplus
 }
 #endif

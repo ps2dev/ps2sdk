@@ -643,9 +643,9 @@ struct s_strargument {    /* Describes the string being written to */
   char *last;                   /* Last available slot in the string */
 };
 
-void sout(char *, int, void *);
+void __sout(char *, int, void *);
 #ifdef F_sout
-void sout(txt,amt,arg)
+void __sout(txt,amt,arg)
   char *txt;
   int amt;
   void *arg;
@@ -674,7 +674,7 @@ int vsnprintf(char *buf, size_t n, const char *fmt, va_list ap){
   arg.next = buf;
   arg.last = &buf[n-1];
   *buf = 0;
-  return vxprintf(sout,&arg,fmt,ap);
+  return vxprintf(__sout,&arg,fmt,ap);
 }
 #endif
 
@@ -689,7 +689,7 @@ int snprintf(char *str, size_t sz, const char *format, ...)
 	arg.last = &str[sz-1];
 
 	va_start(args, format);
-	ret = vxprintf(sout, &arg, format, args);
+	ret = vxprintf(__sout, &arg, format, args);
 	va_end(args);
 
 	return ret;
@@ -702,7 +702,7 @@ int vsprintf(char *buf, const char *fmt, va_list ap){
   arg.next = buf;
   arg.last = NULL;
   *buf = 0;
-  return vxprintf(sout,&arg,fmt,ap);
+  return vxprintf(__sout,&arg,fmt,ap);
 }
 #endif
 
@@ -718,7 +718,7 @@ int sprintf (char *str, const char *format, ...)
 	arg.last = NULL;
 
 	va_start(args, format);
-	ret = vxprintf(sout, &arg, format, args);
+	ret = vxprintf(__sout, &arg, format, args);
 	va_end(args);
 
 	return ret;
@@ -741,11 +741,11 @@ struct sgMprintf {
   int  nAlloc;     /* Amount of space allocated in zText */
 };
 
-void mout(char *, int, void*);
+void __mout(char *, int, void*);
 
-#ifdef F_mout
+#ifdef F___mout
 /* The xprintf callback function. */
-void mout(zNewText,nNewChar,arg)
+void __mout(zNewText,nNewChar,arg)
   char *zNewText;
   int nNewChar;
   void *arg;
@@ -788,7 +788,7 @@ char *mprintf(const char *zFormat, ...){
   sMprintf.nAlloc = sizeof(zBuf);
   sMprintf.zText = zBuf;
   sMprintf.zBase = zBuf;
-  vxprintf(mout,&sMprintf,zFormat,ap);
+  vxprintf(__mout,&sMprintf,zFormat,ap);
   va_end(ap);
   if( sMprintf.zText==sMprintf.zBase ){
     zNew = malloc( sMprintf.nChar+1 );
@@ -814,7 +814,7 @@ char *vmprintf(const char *zFormat,va_list ap){
   sMprintf.zText = zBuf;
   sMprintf.nAlloc = sizeof(zBuf);
   sMprintf.zBase = zBuf;
-  vxprintf(mout,&sMprintf,zFormat,ap);
+  vxprintf(__mout,&sMprintf,zFormat,ap);
   if( sMprintf.zText==sMprintf.zBase ){
     sMprintf.zText = malloc( strlen(zBuf)+1 );
     if( sMprintf.zText ) strcpy(sMprintf.zText,zBuf);
@@ -837,7 +837,7 @@ int asprintf(char ** strp, const char *zFormat, ...){
   sMprintf.nAlloc = sizeof(zBuf);
   sMprintf.zText = zBuf;
   sMprintf.zBase = zBuf;
-  vxprintf(mout,&sMprintf,zFormat,ap);
+  vxprintf(__mout,&sMprintf,zFormat,ap);
   va_end(ap);
   if( sMprintf.zText==sMprintf.zBase ){
     zNew = malloc( sMprintf.nChar+1 );
@@ -860,7 +860,7 @@ int vasprintf(char **strp, const char *format, va_list ap) {
   sMprintf.zText = zBuf;
   sMprintf.nAlloc = sizeof(zBuf);
   sMprintf.zBase = zBuf;
-  vxprintf(mout,&sMprintf,format,ap);
+  vxprintf(__mout,&sMprintf,format,ap);
   if( sMprintf.zText==sMprintf.zBase ){
     sMprintf.zText = malloc( strlen(zBuf)+1 );
     if( sMprintf.zText ) strcpy(sMprintf.zText,zBuf);
@@ -877,10 +877,10 @@ int vasprintf(char **strp, const char *format, va_list ap) {
 ** for pthreads.
 */
 
-void fout(char *, int, void *);
+void __fout(char *, int, void *);
 
-#ifdef F_fout
-void fout(zNewText,nNewChar,arg)
+#ifdef F___fout
+void __fout(zNewText,nNewChar,arg)
   char *zNewText;
   int nNewChar;
   void *arg;
@@ -896,7 +896,7 @@ int fprintf(FILE *pOut, const char *zFormat, ...){
   int retc;
 
   va_start(ap,zFormat);  
-  retc = vxprintf(fout,pOut,zFormat,ap);
+  retc = vxprintf(__fout,pOut,zFormat,ap);
   va_end(ap);
   return retc;
 }
@@ -904,7 +904,7 @@ int fprintf(FILE *pOut, const char *zFormat, ...){
 
 #ifdef F_vfprintf
 int vfprintf(FILE *pOut, const char *zFormat, va_list ap){
-  return vxprintf(fout,pOut,zFormat,ap);
+  return vxprintf(__fout,pOut,zFormat,ap);
 }
 #endif
 

@@ -948,34 +948,3 @@ int mcSync(int mode, int *cmd, int *result)
 	
 	return 1;
 }
-
-// strcpy_sjis written by Hiryu
-// copies ascii string to sjis string
-// 
-// args:	dest sjis string buffer
-//			source ascii string buffer
-// returns:	length of ascii string copied
-int strcpy_sjis(short* sjis_buff, const char* ascii_buff)
-{
-	int i;
-	short ascii;
-	short sjis;
-
-	int len = strlen(ascii_buff);
-
-	for (i=0;i<len;i++)
-	{
-		ascii = ascii_buff[i];
-		if (ascii<=96)
-			sjis = ((ascii + 0x1f) << 8) | 0x82;
-		else
-			sjis = ((ascii + 0x20) << 8) | 0x82;
-
-		sjis_buff[i] = sjis;
-
-	}
-	sjis_buff[i+1]=0;
-
-	return len;
-}
-

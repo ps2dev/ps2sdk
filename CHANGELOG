@@ -9,6 +9,7 @@
 2004-09-09
   - pixel, added iop's excepman.h
   - pixel, put and tweaked jenova0's stdio code.
+  - satanskji, adding new strcpy_sjis and strcpy_ascii.
 
 2004-09-07
   - pixel, added sbv-lite to ps2sdk.

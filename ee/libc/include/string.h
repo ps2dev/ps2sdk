@@ -42,6 +42,20 @@ char *	strncat(char *, const char *, size_t);
 char *	strncpy(char *, const char *, size_t);
 
 
+// copies ascii string to sjis string
+// 
+// args:    dest sjis string buffer
+//          source ascii string buffer
+// returns: length of ascii string copied
+int strcpy_sjis(short* sjis_buff, const char* ascii_buff);
+
+// copies sjis string to ascii string
+// 
+// args:    dest ascii string buffer
+//          source sjis string buffer
+// returns: length of sjis string copied
+int strcpy_ascii(char* ascii_buff, const short* sjis_buff);
+
 
 /* C String functions by Hiryu (A.Lee) */
 #define stricmp strcasecmp
@@ -84,4 +98,3 @@ int isxdigit(int);
 #endif
 
 #endif	// _STRING_H
-

@@ -32,11 +32,11 @@ ALLOC_OBJS = malloc.o realloc.o calloc.o memalign.o free.o __builtin_alloc.o
 ALLOC_OBJS := $(ALLOC_OBJS:%=$(EE_OBJS_DIR)%)
 
 STRING_C_OBJS = strcasecmp.o strncasecmp.o strtok.o strrchr.o strstr.o strtol.o strtoul.o \
-	strupr.o strlwr.o ctype.o
+	strupr.o strlwr.o ctype.o _sjis_internals.o strcpy_ascii.o strcpy_sjis.o
 STRING_C_OBJS := $(STRING_C_OBJS:%=$(EE_OBJS_DIR)%)
 
-XPRINTF_OBJS = vxprintf.o xprintf.o sout.o vsnprintf.o snprintf.o vsprintf.o sprintf.o \
-	mout.o mprintf.o vmprintf.o fout.o fprintf.o vfprintf.o printf.o vprintf.o putchar.o \
+XPRINTF_OBJS = vxprintf.o xprintf.o __sout.o vsnprintf.o snprintf.o vsprintf.o sprintf.o \
+	__mout.o mprintf.o vmprintf.o __fout.o fprintf.o vfprintf.o printf.o vprintf.o putchar.o \
 	npmPuts.o nprintf.o vnprintf.o asprintf.o vasprintf.o
 XPRINTF_OBJS := $(XPRINTF_OBJS:%=$(EE_OBJS_DIR)%)
 
