@@ -22,7 +22,7 @@ void init_scr(void);
 void scr_printf(const char *, ...) __attribute__((format(printf,1,2)));
 void _putchar(int x, int y, u32 color, u8 ch);
 void ps2GetStackTrace(unsigned int* results,int max);
-void _setXY(int x, int y);
+void scr_setXY(int x, int y);
 int scr_getX(void);
 int scr_getY(void);
 
