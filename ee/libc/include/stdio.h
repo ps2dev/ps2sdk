@@ -34,6 +34,7 @@ static __inline__ int close(int handle) { return fioClose(handle); }
 static __inline__ ssize_t read(int handle, void * buffer, size_t size) { return fioRead(handle, buffer, size); }
 static __inline__ ssize_t write(int handle, const void * buffer, size_t size) { return fioWrite(handle, buffer, size); }
 static __inline__ off_t lseek(int handle, off_t position, int wheel) { return fioLseek(handle, position, wheel); }
+static __inline__ off_t tell(int handle) { return fioLseek(handle, 0, 1); }
 
 /* Some win32 equivalents... baaah */
 #define _open open
@@ -107,6 +108,8 @@ typedef struct {
   int  fd;
   int  cnt;
   int  flag;
+  int  has_putback;
+  u8   putback;
 } FILE;
 #endif // __FILE_DEFINED
 
