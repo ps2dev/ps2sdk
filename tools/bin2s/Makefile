@@ -20,7 +20,7 @@ TOOLS_BIN = $(TOOLS_BIN_DIR)bin2s
 all: $(TOOLS_OBJS_DIR) $(TOOLS_BIN_DIR) $(TOOLS_BIN)
 
 clean:
-	rm -f -r $(TOOLS_OBJS_DIR) $(TOOLS_LIB_DIR)
+	rm -f -r $(TOOLS_OBJS_DIR) $(TOOLS_BIN_DIR)
 
 
 include $(PS2SDKSRC)/Defs.make
