@@ -25,6 +25,7 @@ void ps2GetStackTrace(unsigned int* results,int max);
 void scr_setXY(int x, int y);
 int scr_getX(void);
 int scr_getY(void);
+void scr_clear(void);
 
 #define DEBUG_BGCOLOR(col) *((u64 *) 0x120000e0) = (u64) (col)
 

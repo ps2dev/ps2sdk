@@ -290,3 +290,11 @@ int scr_getY()
 {
 	return Y;
 }
+
+void scr_clear()
+{
+	int y;
+	for(y=0;y<MY;y++)
+		clear_line(y);
+	scr_setXY(0,0);
+}
