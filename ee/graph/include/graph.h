@@ -62,15 +62,15 @@ extern "C" {
 
  int graph_vram_write(int address, int width, int height, int bpp, void *data, int data_size);
 
- ///////////////////////////
- // GRAPH VSYNC FUNCTIONS //
- ///////////////////////////
+ //////////////////////////
+ // GRAPH WAIT FUNCTIONS //
+ //////////////////////////
 
- int graph_vsync_wait(void);
+ int graph_wait_finish(void);
 
- int graph_vsync_handler_add(void *handler);
+ int graph_wait_hsync(void);
 
- int graph_vsync_handler_remove(void);
+ int graph_wait_vsync(void);
 
 #ifdef __cplusplus
 }

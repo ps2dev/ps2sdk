@@ -48,7 +48,7 @@
   for (loop0=0;loop0<20;loop0++) {
 
    // Wait for the vsync period.
-   graph_vsync_wait();
+   graph_wait_vsync();
 
    // Draw another square on the screen.
    dma_packet_clear(&packet);

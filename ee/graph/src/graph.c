@@ -107,7 +107,7 @@
 
   // Set up the draw buffer.
   dma_packet_clear(&graph_packet);
-  dma_packet_append(&graph_packet, GIF_SET_TAG(4, 1, 0, 0, 0, 1));
+  dma_packet_append(&graph_packet, GIF_SET_TAG(4, 1, 0, 0, GIF_TAG_PACKED, 1));
   dma_packet_append(&graph_packet, 0x0E);
   dma_packet_append(&graph_packet, GIF_SET_FRAME(address >> 13, width >> 6, bpp, 0));
   dma_packet_append(&graph_packet, GIF_REG_FRAME_1);
@@ -128,7 +128,7 @@
 
   // Set up the zbuffer.
   dma_packet_clear(&graph_packet);
-  dma_packet_append(&graph_packet, GIF_SET_TAG(1, 1, 0, 0, 0, 1));
+  dma_packet_append(&graph_packet, GIF_SET_TAG(1, 1, 0, 0, GIF_TAG_PACKED, 1));
   dma_packet_append(&graph_packet, 0x0E);
   dma_packet_append(&graph_packet, GIF_SET_ZBUF(address >> 13, bpp, 0));
   dma_packet_append(&graph_packet, GIF_REG_ZBUF_1);
@@ -143,7 +143,7 @@
 
   // Clear the screen.
   dma_packet_clear(&graph_packet);
-  dma_packet_append(&graph_packet, GIF_SET_TAG(6, 1, 0, 0, 0, 1));
+  dma_packet_append(&graph_packet, GIF_SET_TAG(6, 1, 0, 0, GIF_TAG_PACKED, 1));
   dma_packet_append(&graph_packet, 0x0E);
   dma_packet_append(&graph_packet, GIF_SET_TEST(0, 0, 0, 0, 0, 0, 0, 1));
   dma_packet_append(&graph_packet, GIF_REG_TEST_1);
@@ -181,9 +181,9 @@
 
   // Write the data into vram.
   dma_packet_clear(&graph_packet);
-  dma_packet_append(&graph_packet, DMA_SET_TAG(6, 0, 1, 0, 0, 0));
+  dma_packet_append(&graph_packet, DMA_SET_TAG(6, 0, DMA_TAG_CNT, 0, 0, 0));
   dma_packet_append(&graph_packet, 0x00);
-  dma_packet_append(&graph_packet, GIF_SET_TAG(4, 1, 0, 0, 0, 1));
+  dma_packet_append(&graph_packet, GIF_SET_TAG(4, 1, 0, 0, GIF_TAG_PACKED, 1));
   dma_packet_append(&graph_packet, 0x0E);
   dma_packet_append(&graph_packet, GIF_SET_BITBLTBUF(0, 0, 0, address >> 8, width >> 6, bpp));
   dma_packet_append(&graph_packet, GIF_REG_BITBLTBUF);
@@ -193,13 +193,13 @@
   dma_packet_append(&graph_packet, GIF_REG_TRXREG);
   dma_packet_append(&graph_packet, GIF_SET_TRXDIR(0));
   dma_packet_append(&graph_packet, GIF_REG_TRXDIR);
-  dma_packet_append(&graph_packet, GIF_SET_TAG(data_size >> 4, 1, 0, 0, 2, 1));
+  dma_packet_append(&graph_packet, GIF_SET_TAG(data_size >> 4, 1, 0, 0, GIF_TAG_IMAGE, 1));
   dma_packet_append(&graph_packet, 0x00);
-  dma_packet_append(&graph_packet, DMA_SET_TAG(data_size >> 4, 0, 3, 0, (u32)data, 0));
+  dma_packet_append(&graph_packet, DMA_SET_TAG(data_size >> 4, 0, DMA_TAG_REF, 0, (u32)data, 0));
   dma_packet_append(&graph_packet, 0x00);
-  dma_packet_append(&graph_packet, DMA_SET_TAG(2, 0, 7, 0, 0, 0));
+  dma_packet_append(&graph_packet, DMA_SET_TAG(2, 0, DMA_TAG_END, 0, 0, 0));
   dma_packet_append(&graph_packet, 0x00);
-  dma_packet_append(&graph_packet, GIF_SET_TAG(1, 1, 0, 0, 0, 1));
+  dma_packet_append(&graph_packet, GIF_SET_TAG(1, 1, 0, 0, GIF_TAG_PACKED, 1));
   dma_packet_append(&graph_packet, 0x0E);
   dma_packet_append(&graph_packet, 0x00);
   dma_packet_append(&graph_packet, GIF_REG_TEXFLUSH);
@@ -210,35 +210,52 @@
 
  }
 
- ///////////////////////////
- // GRAPH VSYNC FUNCTIONS //
- ///////////////////////////
+ //////////////////////////
+ // GRAPH WAIT FUNCTIONS //
+ //////////////////////////
 
- int graph_vsync_wait(void) {
+ int graph_wait_finish(void) {
 
-  // Enable the Vsync interrupt and flush the GS.
-  GS_REG_CSR &= GS_SET_CSR(0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0);
+  // Enable the finish event.
+  GS_REG_CSR |= GS_SET_CSR(0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+  // Wait for the finish event.
+  while (!(GS_REG_CSR & (GS_SET_CSR(0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))) { }
+
+  // Disable the finish event.
+  GS_REG_CSR &= ~GS_SET_CSR(0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+  // End function.
+  return 0;
+
+ }
+
+ int graph_wait_hsync(void) {
+
+  // Enable the hsync interrupt.
+  GS_REG_CSR |= GS_SET_CSR(0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+  // Wait for the hsync interrupt.
+  while (!(GS_REG_CSR & (GS_SET_CSR(0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0)))) { }
+
+  // Disable the hsync interrupt.
+  GS_REG_CSR &= ~GS_SET_CSR(0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+
+  // End function.
+  return 0;
+
+ }
+
+ int graph_wait_vsync(void) {
+
+  // Enable the vsync interrupt.
+  GS_REG_CSR |= GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
 
   // Wait for the vsync interrupt.
-  while(!(GS_REG_CSR & (GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0)))) { }
+  while (!(GS_REG_CSR & (GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0)))) { }
 
-  // End function.
-  return 0;
-
- }
-
- int graph_vsync_handler_add(void *handler) {
-
-  // NOT READY YET
-
-  // End function.
-  return 0;
-
- }
-
- int graph_vsync_handler_remove(void) {
-
-  // NOT READY YET
+  // Disable the vsync interrupt.
+  GS_REG_CSR &= ~GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
 
   // End function.
   return 0;

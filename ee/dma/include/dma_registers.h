@@ -87,11 +87,6 @@ extern "C" {
  // DMA CHANNEL REGISTERS //
  ///////////////////////////
 
- #define DMA_SET_TAG(A,B,C,D,E,F) \
-  (u64)((A) & 0x0000FFFF) <<  0 | (u64)((B) & 0x00000003) << 26 | \
-  (u64)((C) & 0x00000007) << 28 | (u64)((D) & 0x00000001) << 31 | \
-  (u64)((E) & 0x7FFFFFFF) << 32 | (u64)((F) & 0x00000001) << 63
-
  #define DMA_SET_CHCR(A,B,C,D,E,F,G) \
   (u32)((A) & 0x00000001) <<  0 | (u32)((B) & 0x00000003) <<  2 | \
   (u32)((C) & 0x00000003) <<  4 | (u32)((D) & 0x00000001) <<  6 | \
@@ -115,6 +110,24 @@ extern "C" {
 
  #define DMA_SET_QWC(A) \
   (u32)((A) & 0x0000FFFF) <<  0
+
+ ///////////////////////
+ // DMA TAG REGISTERS //
+ ///////////////////////
+
+ #define DMA_TAG_REFE	0x00
+ #define DMA_TAG_CNT	0x01
+ #define DMA_TAG_NEXT	0x02
+ #define DMA_TAG_REF	0x03
+ #define DMA_TAG_REFS	0x04
+ #define DMA_TAG_CALL	0x05
+ #define DMA_TAG_RET	0x06
+ #define DMA_TAG_END	0x07
+
+ #define DMA_SET_TAG(A,B,C,D,E,F) \
+  (u64)((A) & 0x0000FFFF) <<  0 | (u64)((B) & 0x00000003) << 26 | \
+  (u64)((C) & 0x00000007) << 28 | (u64)((D) & 0x00000001) << 31 | \
+  (u64)((E) & 0x7FFFFFFF) << 32 | (u64)((F) & 0x00000001) << 63
 
 #ifdef __cplusplus
 }

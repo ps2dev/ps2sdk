@@ -254,11 +254,6 @@ extern "C" {
  #define GIF_REG_ZBUF_1		0x4E	// Z-Buffer setting. (Context 1)
  #define GIF_REG_ZBUF_2		0x4F	// Z-Buffer setting. (Context 2)
 
- #define GIF_SET_TAG(A,B,C,D,E,F) \
-  (u64)((A) & 0x00007FFF) <<  0 | (u64)((B) & 0x00000001) << 15 | \
-  (u64)((C) & 0x00000001) << 46 | (u64)((D) & 0x000007FF) << 47 | \
-  (u64)((E) & 0x00000003) << 58 | (u64)((F) & 0x0000000F) << 60
-
  #define GIF_SET_ALPHA(A,B,C,D,E) \
   (u64)((A) & 0x00000003) <<  0 | (u64)((B) & 0x00000003) <<  2 | \
   (u64)((C) & 0x00000003) <<  4 | (u64)((D) & 0x00000003) <<  6 | \
@@ -409,6 +404,19 @@ extern "C" {
  #define GIF_SET_ZBUF(A,B,C) \
   (u64)((A) & 0x000001FF) <<  0 | (u64)((B) & 0x0000000F) << 24 | \
   (u64)((C) & 0x00000001) << 32
+
+ ///////////////////////
+ // GIF TAG REGISTERS //
+ ///////////////////////
+
+ #define GIF_TAG_PACKED		0x00
+ #define GIF_TAG_REGLIST	0x01
+ #define GIF_TAG_IMAGE		0x02
+
+ #define GIF_SET_TAG(A,B,C,D,E,F) \
+  (u64)((A) & 0x00007FFF) <<  0 | (u64)((B) & 0x00000001) << 15 | \
+  (u64)((C) & 0x00000001) << 46 | (u64)((D) & 0x000007FF) << 47 | \
+  (u64)((E) & 0x00000003) << 58 | (u64)((F) & 0x0000000F) << 60
 
 #ifdef __cplusplus
 }

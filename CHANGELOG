@@ -8,17 +8,21 @@
 #
 # $Id$
 
-2002-02-09
+2005-03-17
+  - oopo, added dma library
+  - oopo, added simple graph library
+
+2005-02-09
   - herben, better locking into iopcontrol to check init after reboot.
 
-2002-02-07
+2005-02-07
   - herben, added section alignment for .ctors and .dtors sections.
   - herben, fixed dread in iomanX.
 
-2002-02-04
+2005-02-04
   - pixel, split the libcdvd into .o files.
 
-2002-02-01
+2005-02-01
   - Neil Stevens, fixed samples/Makefile.eeglobal_sample's link order.
 
 2005-01-27
