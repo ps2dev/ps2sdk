@@ -1017,8 +1017,10 @@ int npmPuts(const char *buf)
 	/* If the buffer is already 16-byte aligned, no need to copy it.  */
 	if (((u32)buf & 15) == 0)
 		p = (void *)buf;
-	else
-		strncpy(p, buf, 512);
+	else {
+		strncpy(p, buf, 511);
+		p[511] = '\0';
+	}
 
 	if (SifCallRpc(&npm_cd, NPM_RPC_PUTS, 0, p, 512, NULL, 0, NULL, NULL) < 0)
 		return -E_SIF_RPC_CALL;
