@@ -48,6 +48,10 @@ int SifLoadModuleEncrypted(const char *path, int arg_len, const char *args);
 int SifLoadModuleBuffer(void *ptr, int arg_len, const char *args);
 int SifLoadStartModuleBuffer(void *ptr, int arg_len, const char *args, int *mod_res);
 
+int SifStopModule(int id, int arg_len, const char *args, int *mod_res);
+int SifUnloadModule(int id);
+int SifSearchModuleByName(const char *name);
+
 int SifLoadElfPart(const char *path, const char *secname, t_ExecData *data);
 int SifLoadElf(const char *path, t_ExecData *data);
 int SifLoadElfEncrypted(const char *path, t_ExecData *data);
