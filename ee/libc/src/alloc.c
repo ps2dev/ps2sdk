@@ -17,6 +17,9 @@
 #include <kernel.h>
 #include <malloc.h>
 #include <string.h>
+#ifdef DEBUG_ALLOC
+#include <stdio.h>
+#endif
 
 /* Use this to set the default malloc() alignment. */
 #define DEFAULT_ALIGNMENT	16
@@ -25,8 +28,15 @@
 #define ALIGN(x, align) (((x)+((align)-1))&~((align)-1))
 #endif
 
+#ifdef DEBUG_ALLOC
+#define ALLOC_MAGIC 0xa110ca73
+#endif
+
 /* _heap_mem_block_header structure. */
 typedef struct _heap_mem_header {
+#ifdef DEBUG_ALLOC
+	u32     magic;
+#endif
 	void *	ptr;
 	size_t	size;
 	struct _heap_mem_header * prev;
@@ -95,6 +105,9 @@ void * malloc(size_t size)
 		ptr = (void *)((u32)mem_ptr + sizeof(heap_mem_header_t));
 
 		__alloc_heap_head       = (heap_mem_header_t *)mem_ptr;
+#ifdef DEBUG_ALLOC
+		__alloc_heap_head->magic = ALLOC_MAGIC;
+#endif
 		__alloc_heap_head->ptr  = ptr;
 		__alloc_heap_head->size = mem_sz - sizeof(heap_mem_header_t);
 		__alloc_heap_head->prev = NULL;
@@ -109,6 +122,9 @@ void * malloc(size_t size)
 		new_mem = (heap_mem_header_t *)__alloc_heap_base;
 		ptr     = (void *)((u32)new_mem + sizeof(heap_mem_header_t));
 
+#ifdef DEBUG_ALLOC
+		new_mem->magic = ALLOC_MAGIC;
+#endif
 		new_mem->ptr  = ptr;
 		new_mem->size = mem_sz - sizeof(heap_mem_header_t);
 		new_mem->prev = NULL;
@@ -125,6 +141,9 @@ void * malloc(size_t size)
 		new_mem = (heap_mem_header_t *)((u32)prev_mem->ptr + prev_mem->size);
 		ptr     = (void *)((u32)new_mem + sizeof(heap_mem_header_t));
 
+#ifdef DEBUG_ALLOC
+		new_mem->magic = ALLOC_MAGIC;
+#endif
 		new_mem->ptr  = ptr;
 		new_mem->size = mem_sz - sizeof(heap_mem_header_t);
 		new_mem->prev = prev_mem;
@@ -143,6 +162,9 @@ void * malloc(size_t size)
 	ptr = (void *)((u32)mem_ptr + sizeof(heap_mem_header_t));
 
 	new_mem       = (heap_mem_header_t *)mem_ptr;
+#ifdef DEBUG_ALLOC
+	new_mem->magic = ALLOC_MAGIC;
+#endif
 	new_mem->ptr  = ptr;
 	new_mem->size = mem_sz - sizeof(heap_mem_header_t);
 	new_mem->prev = __alloc_heap_tail;
@@ -159,11 +181,11 @@ __attribute__((weak))
 void * realloc(void *ptr, size_t size)
 {
 	heap_mem_header_t *prev_mem;
-	void *new = NULL;
+	void *new_ptr = NULL;
 
 	if (!size && ptr != NULL) {
 		free(ptr);
-		return new;
+		return new_ptr;
 	}
 
 	if (ptr == NULL)
@@ -171,17 +193,50 @@ void * realloc(void *ptr, size_t size)
 
 	prev_mem = (heap_mem_header_t *)((u32)ptr - sizeof(heap_mem_header_t));
 
+#ifdef DEBUG_ALLOC
+	if (prev_mem->magic != ALLOC_MAGIC) {
+		fprintf(stderr, "realloc: Pointer at %p was not malloc()ed before, or got overwritten.\n", ptr);
+		return NULL;
+	}
+#endif
+
 	/* Don't do anything if asked for same sized block. */
-	if (prev_mem->size == size)
+	/* If the new size is shorter, let's just shorten the block. */
+	if (prev_mem->size >= size) {
+		/* However, if this is the last block, we have to shrink the heap. */
+		if (!prev_mem->next)
+			ps2_sbrk(ptr + size - ps2_sbrk(0));
+		prev_mem->size = size;
 		return ptr;
+	}
+	
+	
+	/* We are asked for a larger block of memory. */
+	
+	/* Are we the last memory block ? */
+	if (!prev_mem->next) {
+		/* Yes, let's just extend the heap then. */
+		if (ps2_sbrk(size - prev_mem->size) == (void*) -1)
+			return NULL;
+		prev_mem->size = size;
+		return ptr;
+	}
+	
+	/* Is the next block far enough so we can extend the current block ? */
+	if ((prev_mem->next->ptr - ptr) > size) {
+		prev_mem->size = size;
+		return ptr;
+	}
+	
+	/* We got out of luck, let's allocate a new block of memory. */
+	if ((new_ptr = malloc(size)) == NULL)
+		return new_ptr;
 
-	if ((new = malloc(size)) == NULL)
-		return new;
-
-	memcpy(new, ptr, prev_mem->size < size ? prev_mem->size : size);
+        /* New block is larger, we only copy the old data. */
+	memcpy(new_ptr, ptr, prev_mem->size);
 
 	free(ptr);
-	return new;
+	return new_ptr;
 }
 #endif
 
@@ -256,6 +311,14 @@ void free(void *ptr)
 	if (!__alloc_heap_head)
 		return;
 
+#ifdef DEBUG_ALLOC
+	cur = (heap_mem_header_t *)((u32)ptr - sizeof(heap_mem_header_t));
+	if (cur->magic != ALLOC_MAGIC) {
+		fprintf(stderr, "free: Pointer at %p was not malloc()ed before, or got overwritten.\n", ptr);
+		return;
+	}
+#endif
+
 	/* Freeing the head pointer is a special case.  */
 	if (ptr == __alloc_heap_head->ptr) {
 		size = __alloc_heap_head->size +
@@ -308,4 +371,35 @@ void * __builtin_new(size_t size) { return malloc(size); }
 
 __attribute__((weak))
 void __builtin_delete(void *ptr) { free(ptr); }
+#endif
+
+#ifdef F___mem_walk
+void * __mem_walk_begin() {
+	return __alloc_heap_head;
+}
+
+void __mem_walk_read(void * token, u32 * size, void ** ptr, int * valid) {
+        heap_mem_header_t * cur = (heap_mem_header_t *) token;
+    
+#ifdef DEBUG_ALLOC
+	if (cur->magic != ALLOC_MAGIC) {
+    		*valid = 0;
+		return;
+	}
+#endif
+	*valid = 1;
+    
+	*size = cur->size;
+	*ptr = cur->ptr;
+}
+
+void * __mem_walk_inc(void * token) {
+	heap_mem_header_t * cur = (heap_mem_header_t *) token;
+    
+	return cur->next;
+}
+
+int __mem_walk_end(void * token) {
+	return token == NULL;
+}
 #endif

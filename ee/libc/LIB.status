@@ -30,8 +30,7 @@ drand48   - missing
 
 all *rand48 missing
 
-malloc, calloc, realloc, free, are defined in alloc.c. Maybe reviewing realloc.c
-could be an idea...
+malloc, calloc, realloc, free, are defined in alloc.c.
 
 abort  - clean ? should call atexit functions ?
 atexit - ok, but not used
@@ -43,7 +42,7 @@ setenv - ok
 system - missing, and won't be here anyway I think...
 
 bsearch - ok
-qsort   - missing. Anyone? :P
+qsort   - ok
 abs     - ok
 labs    - ok
 llabs   - ok
@@ -128,7 +127,7 @@ strncmp     - ok, asm
 strcoll     - missing
 strxfrm     - missing
 
-strdup      - missing (duh?)
+strdup      - ok
 
 strchr      - ok, asm
 strrchr     - ok

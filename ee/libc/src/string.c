@@ -17,7 +17,16 @@
 #include <ps2lib_err.h>
 #include <limits.h>
 #include <string.h>
+#include <malloc.h>
 
+#ifdef F_strdup
+char *strdup(const char *s) {
+	size_t str_size = strlen(s);
+	char * r = (char *)malloc(str_size + 1);
+	
+	return strcpy(r, s);
+}
+#endif
 
 #ifdef F_strcasecmp
 int	strcasecmp(const char * string1, const char * string2)
