@@ -40,7 +40,7 @@ STRING_C_OBJS := $(STRING_C_OBJS:%=$(EE_OBJS_DIR)%)
 
 XPRINTF_OBJS = vxprintf.o xprintf.o __sout.o vsnprintf.o snprintf.o vsprintf.o sprintf.o \
 	__mout.o mprintf.o vmprintf.o __fout.o fprintf.o vfprintf.o printf.o vprintf.o putchar.o \
-	npmPuts.o nprintf.o vnprintf.o asprintf.o vasprintf.o
+	npmPuts.o nprintf.o vnprintf.o asprintf.o vasprintf.o sio_printf.o
 XPRINTF_OBJS := $(XPRINTF_OBJS:%=$(EE_OBJS_DIR)%)
 
 STDIO_OBJS = clearerr.o fclose.o fcloseall.o feof.o ferror.o fflush.o fflushall.o fgetc.o \

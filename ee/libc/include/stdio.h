@@ -190,6 +190,7 @@ int putchar(int);
 int npmPuts(const char *buf);
 int nprintf(const char *format, ...);
 int vnprintf(const char *format, va_list args);
+int sio_printf(const char *format, ...);
 
 #ifdef __cplusplus
 }

@@ -662,7 +662,6 @@ int fioChstat(const char *name, fio_stat_t *buf, u32 cbit)
 }
 #endif
 
-
 #ifdef F_fio_format
 int fioFormat(const char *name)
 {
@@ -687,4 +686,3 @@ int fioFormat(const char *name)
 	return arg.result;
 }
 #endif
-

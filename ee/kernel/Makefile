@@ -54,7 +54,7 @@ GLUE_OBJS = DIntr.o EIntr.o EnableIntc.o DisableIntc.o EnableDmac.o DisableDmac.
 GLUE_OBJS := $(GLUE_OBJS:%=$(EE_OBJS_DIR)%)
 
 SIO_OBJS = sio_init.o sio_putc.o sio_getc.o sio_write.o sio_read.o sio_puts.o \
-	sio_gets.o sio_printf.o
+	sio_gets.o
 SIO_OBJS := $(SIO_OBJS:%=$(EE_OBJS_DIR)%)
 
 CONFIG_OBJS = _config_internals.o GetRomName.o IsT10K.o configGetLanguage.o \
@@ -71,7 +71,7 @@ TIMER_OBJS := $(TIMER_OBJS:%=$(EE_OBJS_DIR)%)
 
 ### SYSCALL OBJECTS
 
-SYSCALL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
+KERNEL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
 	RFU009.o AddSbusIntcHandler.o RemoveSbusIntcHandler.o Interrupt2Iop.o \
 	SetVTLBRefillHandler.o SetVCommonHandler.o SetVInterruptHandler.o \
 	AddIntcHandler.o AddIntcHandler2.o RemoveIntcHandler.o AddDmacHandler.o \
@@ -100,13 +100,14 @@ SYSCALL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
 	SetPgifHandler.o SetVSyncFlag.o SetSyscall.o SifDmaStat.o iSifDmaStat.o \
 	SifSetDma.o iSifSetDma.o SifSetDChain.o iSifSetDChain.o SifSetReg.o \
 	SifGetReg.o ExecOSD.o Deci2Call.o PSMode.o MachineType.o GetMemorySize.o \
-	SifWriteBackDCache.o _SyncDCache.o _InvalidDCache.o __errno.o errno.o
+	SifWriteBackDCache.o _SyncDCache.o _InvalidDCache.o __errno.o errno.o \
+	strncpy.o strlen.o memcpy.o memset.o
 
-SYSCALL_OBJS := $(SYSCALL_OBJS:%=$(EE_OBJS_DIR)%)
+KERNEL_OBJS := $(KERNEL_OBJS:%=$(EE_OBJS_DIR)%)
 
 LIBSYSCALL_OBJS = obj/dummy.o
 
-LIBKERNEL_OBJS = $(SYSCALL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
+LIBKERNEL_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(CONFIG_OBJS) \
 	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS)
 
@@ -121,7 +122,7 @@ $(LIBSYSCALL_LIB): $(LIBSYSCALL_OBJS)
 obj/dummy.o: src/kernel.S
 	$(EE_C_COMPILE) $< -c -o $@
 
-$(SYSCALL_OBJS): src/kernel.S
+$(KERNEL_OBJS): src/kernel.S
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(SIFCMD_OBJS): src/sifcmd.c

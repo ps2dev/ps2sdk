@@ -678,3 +678,661 @@ __errno:
 errno:
 	.space	4
 #endif
+
+#ifdef F_strlen
+/* Assembler version of strlen that uses quadword instructions.
+	
+   Jeff Johnston, Cygnus Solutions, Feb 10/1999.
+
+   ============================================================
+   Copyright (C) 1999 by Cygnus Solutions. All rights reserved.
+ 
+   Permission to use, copy, modify, and distribute this
+   software is freely granted, provided that this notice
+   is preserved.
+   ============================================================  */
+	
+	.text
+	.align	2
+	.globl	strlen
+	.text
+	.ent	strlen
+	.weak	strlen
+strlen:
+	.frame	$sp,0,$31		# vars= 0, regs= 0/0, args= 0, extra= 0
+	.mask	0x00000000,0
+	.fmask	0x00000000,0
+
+#ifndef __OPTIMIZE_SIZE__
+
+/* check if src is quadword aligned, doubleword aligned, or neither in which case
+   perform checking for null terminator one byte at a time. */
+	
+	andi	$2,$4,0x7
+	.set	noreorder
+	.set	nomacro
+	bne	$2,$0,$L15
+	move	$7,$4
+	.set	macro
+	.set	reorder
+
+	andi	$3,$4,0xf
+	dli	$2,0x0101010101010101
+	.set	noreorder
+	.set	nomacro
+	bne	$3,$0,$L12
+	move	$5,$4
+	.set	macro
+	.set	reorder
+
+/* src is quadword aligned.  Load a quadword at a time and check for null terminator.
+   If null terminator is found, go and find exact position by looking at each byte
+   of the last quadword.  Otherwise, continue to next quadword and keep searching. */
+	
+	lq	$3,0($5)
+	pcpyld	$8,$2,$2
+	dli	$4,0x8080808080808080
+	psubb	$2,$3,$8
+	pnor	$3,$0,$3
+	pcpyld	$9,$4,$4
+	pand	$2,$2,$3
+	pand	$2,$2,$9
+	pcpyud	$3,$2,$8
+	or	$6,$3,$2
+	.set	noreorder
+	.set	nomacro
+	bnel	$6,$0,$L15
+	move	$4,$5
+	.set	macro
+	.set	reorder
+
+	addu	$5,$5,16
+$L14:
+	lq	$2,0($5)
+	#nop
+	pnor	$3,$0,$2
+	psubb	$2,$2,$8
+	pand	$2,$2,$3
+	pand	$4,$2,$9
+	pcpyud	$3,$4,$6
+	or	$3,$3,$4
+	.set	noreorder
+	.set	nomacro
+	beql	$3,$0,$L14
+	addu	$5,$5,16
+	.set	macro
+	.set	reorder
+
+	.set	noreorder
+	.set	nomacro
+	b	$L15
+	move	$4,$5
+	.set	macro
+	.set	reorder
+
+/* src is doubleword aligned.  Load a doubleword at a time and check for null terminator.
+   If null terminator is found, go and find exact position by looking at each byte
+   of the last doubleword.  Otherwise, continue to next doubleword and keep searching. */
+	
+
+$L12:	
+	ld	$3,0($5)
+	dli	$4,0x8080808080808080
+	dsubu	$2,$3,$2
+	nor	$3,$0,$3
+	and	$2,$2,$3
+	and	$2,$2,$4
+	.set	noreorder
+	.set	nomacro
+	bnel	$2,$0,$L15
+	move	$4,$5
+	.set	macro
+	.set	reorder
+
+	dli	$6,0x0101010101010101
+	addu	$5,$5,8
+$L16:
+	ld	$2,0($5)
+	#nop
+	nor	$3,$0,$2
+	dsubu	$2,$2,$6
+	and	$2,$2,$3
+	and	$2,$2,$4
+	.set	noreorder
+	.set	nomacro
+	beql	$2,$0,$L16
+	addu	$5,$5,8
+	.set	macro
+	.set	reorder
+
+	move	$4,$5
+	
+#else /* __OPTIMIZE_SIZE__ */
+	
+	move	$7,$4
+	
+#endif /* __OPTIMIZE_SIZE__ */
+
+/* search a byte at a time for null terminator and then calculate length by subtracting
+   original string address from null terminator address. */
+		
+$L9:
+$L15:
+	.set	noreorder
+	.set	nomacro
+
+	lb	$2,0($4)
+	#nop
+	beq	$2,$0,1f
+	addu	$4,$4,1
+
+	lb	$2,0($4)
+	#nop
+	bne	$2,$0,$L9
+	addu	$4,$4,1
+1:
+	subu	$4,$4,1
+
+	.set	macro
+	.set	reorder
+
+	.set	noreorder
+	.set	nomacro
+	j	$31
+	subu	$2,$4,$7
+	.set	macro
+	.set	reorder
+
+	.end	strlen
+#endif
+
+#ifdef F_strncpy
+/* Assembler version of strncpy using quadword instructions
+	
+   Jeff Johnston, Cygnus Solutions, Feb 10/1999.
+
+   ============================================================
+   Copyright (C) 1999 by Cygnus Solutions. All rights reserved.
+ 
+   Permission to use, copy, modify, and distribute this
+   software is freely granted, provided that this notice
+   is preserved.
+   ============================================================  */
+	
+	.text
+	.p2align 3
+	.globl	strncpy
+	.text
+	.ent	strncpy
+	.weak	strncpy
+strncpy:
+	.frame	$sp,0,$31		# vars= 0, regs= 0/0, args= 0, extra= 0
+	.mask	0x00000000,0
+	.fmask	0x00000000,0
+
+	move	$8,$4
+	
+#ifndef __OPTIMIZE_SIZE__
+
+/* check if src and dest are doubleword aligned, quadword aligned, or neither in which
+   case copy byte by byte */
+	
+	or	$7,$5,$4
+	li	$10,0x10
+	andi	$2,$7,0x7
+	li	$9,0x8
+	.set	noreorder
+	.set	nomacro
+	bne	$2,$0,$L9
+	andi	$2,$7,0xf
+	.set	macro
+	.set	reorder
+	movz	$9,$10,$2
+	.set	noreorder
+	.set	nomacro
+	bne	$2,$0,$L17
+	sltu	$2,$6,$9
+	.set	macro
+	.set	reorder
+
+/* src and dest are quadword aligned.  Check a quadword at a time looking for a
+   null terminator or until the nth byte is reached.  Otherwise, copy the
+   quadword to dest and continue looping checking quadwords.   Once a null
+   terminator is found or n is < 16 go copy a byte at a time. */
+	 
+$L31:	
+	bne	$2,$0,$L9
+	dli	$7,0x0101010101010101
+	lq	$3,0($5)
+	pcpyld	$9,$7,$7
+	pnor	$3,$0,$3
+	dli	$7,0x8080808080808080
+	psubb	$2,$3,$9
+	pcpyld	$10,$7,$7
+	pand	$2,$2,$3
+	pand	$2,$2,$10
+	pcpyud	$3,$2,$4
+	or	$3,$2,$3
+	.set	noreorder
+	.set	nomacro
+	bne	$3,$0,$L5
+	move	$7,$8
+	.set	macro
+	.set	reorder
+	lq	$3,0($5)
+	.p2align 3
+$L39:		
+	addu	$6,$6,-16
+	addu	$5,$5,16
+	sltu	$2,$6,16
+	sq	$3,0($7)
+	.set	noreorder
+	.set	nomacro
+	bne	$2,$0,$L5
+	addu	$7,$7,16
+	.set	macro
+	.set	reorder
+
+	lq	$2,0($5)
+	#nop
+	pnor	$3,$0,$2
+	psubb	$2,$2,$9
+	pand	$2,$2,$3
+	pand	$2,$2,$10
+	pcpyud	$3,$2,$4
+	or	$2,$2,$3
+	.set	noreorder
+	.set	nomacro
+	beql	$2,$0,$L19
+	lq	$3,0($5)
+	b	$L9
+	move	$4,$7
+	.set	macro
+	.set	reorder
+					
+/* src and dest are quadword aligned.  Check a quadword at a time looking for a
+   null terminator or until the nth byte is reached.  Otherwise, copy the
+   quadword to dest and continue looping checking quadwords.   Once a null
+   terminator is found or n is < 16 go copy a byte at a time. */
+	
+$L17:		
+	bne	$2,$0,$L9
+	ld	$3,0($5)
+	dli	$9,0x0101010101010101
+	dli	$10,0x8080808080808080
+	dsubu	$2,$3,$9
+	nor	$3,$0,$3
+	and	$2,$2,$3
+	and	$2,$2,$10
+	.set	noreorder
+	.set	nomacro
+	bne	$2,$0,$L5
+	move	$7,$8
+	.set	macro
+	.set	reorder
+	ld	$3,0($5)
+	.p2align 3
+$L19:
+	addu	$6,$6,-8
+	addu	$5,$5,8
+	sltu	$2,$6,8
+	sd	$3,0($7)
+	.set	noreorder
+	.set	nomacro
+	bne	$2,$0,$L5
+	addu	$7,$7,8
+	.set	macro
+	.set	reorder
+
+	ld	$2,0($5)
+	#nop
+	nor	$3,$0,$2
+	dsubu	$2,$2,$9
+	and	$2,$2,$3
+	and	$2,$2,$10
+	.set	noreorder
+	.set	nomacro
+	beql	$2,$0,$L19
+	ld	$3,0($5)
+	.set	macro
+	.set	reorder
+
+$L5:
+	move	$4,$7
+	
+#endif /* !__OPTIMIZE_SIZE__ */
+
+/* check a byte at a time looking for either the null terminator or until n bytes are
+   copied.  If the null terminator is found and n is not reached yet, copy null
+   bytes until n is reached. */
+		
+	.p2align 3
+$L9:
+	.set	noreorder
+	.set	nomacro
+	beq	$6,$0,$L18
+	move	$2,$6
+	.set	macro
+	.set	reorder
+
+	lbu	$2,0($5)
+	addu	$6,$6,-1
+	addu	$5,$5,1
+	sb	$2,0($4)
+	sll	$2,$2,24
+	.set	noreorder
+	.set	nomacro
+	bne	$2,$0,$L9
+	addu	$4,$4,1
+	.set	macro
+	.set	reorder
+
+	move	$2,$6
+$L20:
+	.set	noreorder
+	.set	nomacro
+	beq	$2,$0,$L18
+	addu	$6,$6,-1
+	.set	macro
+	.set	reorder
+
+	.p2align 3
+$L16:
+	sb	$0,0($4)
+	move	$2,$6
+	addu	$4,$4,1
+	.set	noreorder
+	.set	nomacro
+	bne	$2,$0,$L16
+	addu	$6,$6,-1
+	.set	macro
+	.set	reorder
+
+$L18:
+	.set	noreorder
+	.set	nomacro
+	j	$31
+	move	$2,$8
+	.set	macro
+	.set	reorder
+
+	.end	strncpy
+#endif
+
+#ifdef F_memcpy
+/* Assembler version of memcpy using quadword instructions.
+	
+   Jeff Johnston, Cygnus Solutions, Feb 10/1999.
+
+   ============================================================
+   Copyright (C) 1999 by Cygnus Solutions. All rights reserved.
+ 
+   Permission to use, copy, modify, and distribute this
+   software is freely granted, provided that this notice
+   is preserved.
+   ============================================================  */
+	
+	.text
+	.align	2
+	.globl	memcpy
+	.text
+	.ent	memcpy
+	.weak	memcpy
+memcpy:
+	.frame	$sp,0,$31		# vars= 0, regs= 0/0, args= 0, extra= 0
+	.mask	0x00000000,0
+	.fmask	0x00000000,0
+	move	$8,$4
+
+#ifndef __OPTIMIZE_SIZE__
+
+/* if bytes to move are < 32 or src or dest are not quadword aligned, jump to
+   code that moves one byte at a time */
+
+	sltu	$2,$6,32
+	.set	noreorder
+	.set	nomacro
+	bne	$2,$0,$L2
+	move	$3,$8
+	.set	macro
+	.set	reorder
+
+	or	$2,$5,$8
+	andi	$2,$2,0xF
+	.set	noreorder
+	.set	nomacro
+	bnel	$2,$0,$L20
+	addu	$6,$6,-1
+	.set	macro
+	.set	reorder
+
+	move	$7,$8
+
+/* while remainder to move is >= 32 bytes, use LQ/SQ quadword instructions
+   to move data */
+
+$L5:
+	lq	$3,0($5)
+	addu	$6,$6,-32
+	addu	$5,$5,16
+	sltu	$4,$6,32
+	sq	$3,0($7)
+	addu	$7,$7,16
+	lq	$2,0($5)
+	addu	$5,$5,16
+	sq	$2,0($7)
+	.set	noreorder
+	.set	nomacro
+	beq	$4,$0,$L5
+	addu	$7,$7,16
+	.set	macro
+	.set	reorder
+
+	sltu	$2,$6,8
+	.set	noreorder
+	.set	nomacro
+	bne	$2,$0,$L2
+	move	$3,$7
+	.set	macro
+	.set	reorder
+
+/* while remainder to move is >= 8 bytes, use LD/SD doubleword instructions
+   to move data */
+
+$L9:
+	ld	$3,0($5)
+	addu	$6,$6,-8
+	addu	$5,$5,8
+	sltu	$2,$6,8
+	sd	$3,0($7)
+	.set	noreorder
+	.set	nomacro
+	beq	$2,$0,$L9
+	addu	$7,$7,8
+	.set	macro
+	.set	reorder
+
+	move	$3,$7
+
+#else  /* __OPTIMIZE_SIZE__ */
+
+	move	$3,$8
+
+#endif /* !__OPTIMIZE_SIZE__ */
+
+/* Move any remaining bytes one at a time */
+
+$L2:
+	addu	$6,$6,-1
+$L20:
+	li	$2,-1			# 0xffffffffffffffff
+	.set	noreorder
+	.set	nomacro
+	beq	$6,$2,$L12
+	move	$4,$2
+	.set	macro
+	.set	reorder
+
+$L13:
+	lbu	$2,0($5)
+	addu	$6,$6,-1
+	addu	$5,$5,1
+	sb	$2,0($3)
+	.set	noreorder
+	.set	nomacro
+	bne	$6,$4,$L13
+	addu	$3,$3,1
+	.set	macro
+	.set	reorder
+
+$L12:
+	.set	noreorder
+	.set	nomacro
+	j	$31
+	move	$2,$8
+	.set	macro
+	.set	reorder
+
+	.end	memcpy
+#endif
+
+#ifdef F_memset
+/* Assembler version of memset using quadword instructions.
+	
+   Jeff Johnston, Cygnus Solutions, Feb 10/1999.
+
+   ============================================================
+   Copyright (C) 1999 by Cygnus Solutions. All rights reserved.
+ 
+   Permission to use, copy, modify, and distribute this
+   software is freely granted, provided that this notice
+   is preserved.
+   ============================================================  */
+	
+	.text
+	.align	2
+	.globl	memset
+	.text
+	.ent	memset
+	.weak	memset
+memset:
+	.frame	$sp,0,$31		# vars= 0, regs= 0/0, args= 0, extra= 0
+	.mask	0x00000000,0
+	.fmask	0x00000000,0
+
+#ifndef __OPTIMIZE_SIZE__
+
+/* if not setting a double word or more, go and set one byte at a time */
+
+	sltu	$2,$6,8
+	.set	noreorder
+	.set	nomacro
+	bne	$2,$0,$L2
+	move	$3,$4
+	.set	macro
+	.set	reorder
+
+/* if not aligned on a quadword boundary, set one byte at a time */
+
+	andi	$2,$4,0xf
+	.set	noreorder
+	.set	nomacro
+	bne	$2,$0,$L2
+	move	$7,$4
+	.set	macro
+	.set	reorder
+
+/* otherwise, build a double word containing the bytes to set */
+
+	andi	$9,$5,0xff
+	sltu	$10,$6,32
+	move	$8,$9
+	dsll	$3,$8,8
+	or	$8,$3,$9
+	pcpyh	$3,$8
+	.set	noreorder
+	.set	nomacro
+
+/* check if setting 32 bytes or more, otherwise set 8 bytes at a time */
+
+	bne	$10,$0,$L31
+	sltu	$2,$6,8
+	.set	macro
+	.set	reorder
+
+/* take double word built from the byte to set and make a quadword */
+
+	pcpyld	$8,$3,$3
+
+/* loop while bytes to set >=32 and use quadword stores */
+
+$L12:
+	sq	$8,0($7)
+	addu	$6,$6,-32
+	addu	$7,$7,16
+	sltu	$2,$6,32
+	sq	$8,0($7)
+	.set	noreorder
+	.set	nomacro
+	beq	$2,$0,$L12
+	addu	$7,$7,16
+	.set	macro
+	.set	reorder
+
+	.set	noreorder
+	.set	nomacro
+	b	$L31
+	sltu	$2,$6,8
+	.set	macro
+	.set	reorder
+
+$L16:
+	addu	$6,$6,-8
+	addu	$7,$7,8
+	sltu	$2,$6,8
+$L31:
+	.set	noreorder
+	.set	nomacro
+	beql	$2,$0,$L16
+	sd	$3,0($7)
+	.set	macro
+	.set	reorder
+
+	move	$3,$7
+
+#else  /* __OPTIMIZE_SIZE__ */
+ 
+	move	$3,$4
+
+#endif /* __OPTIMIZE_SIZE__ */
+
+/* loop while bytes left to set and set one byte at a time */
+
+$L2:
+	li	$2,4294901760			# 0xffff0000
+	addu	$6,$6,-1
+	ori	$2,$2,0xffff
+	beq	$6,$2,$L19
+	li	$2,4294901760			# 0xffff0000
+	ori	$2,$2,0xffff
+
+$L20:
+	sb	$5,0($3)
+	addu	$6,$6,-1
+	.set	noreorder
+	.set	nomacro
+	bne	$6,$2,$L20
+	addu	$3,$3,1
+	.set	macro
+	.set	reorder
+
+$L19:
+	.set	noreorder
+	.set	nomacro
+	j	$31
+	move	$2,$4
+	.set	macro
+	.set	reorder
+
+	.end	memset
+#endif

@@ -69,8 +69,6 @@ size_t sio_read(void *buf, size_t size);
 int sio_puts(const char *str);
 char *sio_gets(char *str);
 
-int sio_printf(const char *format, ...);
-
 #ifdef __cplusplus
 }
 #endif
