@@ -709,8 +709,9 @@ int getchar(void)
 
 #ifdef F_getfdtype
 /* the present working directory variable. */
-extern char __direct_pwd[256];
-
+#if 0
+char __direct_pwd[256];
+#endif
 
 /*
 **
@@ -733,10 +734,12 @@ int __stdio_get_fd_type(const char *s)
   else if (strncmp(s, "mc1:", 4) == 0) ret = STD_IOBUF_TYPE_MC;
   else if (strncmp(s, "host0:", 6) == 0) ret = STD_IOBUF_TYPE_HOST;
   else if (strncmp(s, "cdrom0:", 7) == 0) ret = STD_IOBUF_TYPE_CDROM;
+#if 0
   else if (strncmp(__direct_pwd, "mc0:", 4) == 0) ret = STD_IOBUF_TYPE_MC;
   else if (strncmp(__direct_pwd, "mc1:", 4) == 0) ret = STD_IOBUF_TYPE_MC;
   else if (strncmp(__direct_pwd, "host0:", 6) == 0) ret = STD_IOBUF_TYPE_HOST;
   else if (strncmp(__direct_pwd, "cdrom0:", 7) == 0) ret = STD_IOBUF_TYPE_CDROM;
+#endif
   else ret = -1;
   return (ret);
 }
