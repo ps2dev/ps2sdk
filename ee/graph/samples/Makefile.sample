@@ -6,9 +6,22 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 
+EE_BIN = graph.elf
+EE_OBJS = graph.o
+EE_LIBS = -ldma -lgraph -ldma -lc
 
-SUBDIRS = kernel libc rpc startup loader debug sbv dma graph
+all: $(EE_BIN)
 
-include $(PS2SDKSRC)/Rules.make
+clean:
+	rm -f *.elf *.o *.a
+
+run: $(EE_BIN)
+	ps2client execee host:$(EE_BIN)
+
+reset:
+	ps2client reset
+
+include $(PS2SDK)/samples/Makefile.pref
+include $(PS2SDK)/samples/Makefile.eeglobal
+

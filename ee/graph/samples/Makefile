@@ -9,6 +9,6 @@
 # $Id$
 
 
-SUBDIRS = kernel libc rpc startup loader debug sbv dma graph
+SAMPLE_DIR = graph
 
-include $(PS2SDKSRC)/Rules.make
+include $(PS2SDKSRC)/samples/Rules.samples
