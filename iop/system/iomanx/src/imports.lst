@@ -1,0 +1,15 @@
+
+loadcore_IMPORTS_start
+I_RegisterLibraryEntries
+I_QueryLibraryEntryTable
+loadcore_IMPORTS_end
+
+sysclib_IMPORTS_start
+I_memcmp
+I_memcpy
+I_strcmp
+I_index
+I_strlen
+I_strncpy
+I_strtol
+sysclib_IMPORTS_end

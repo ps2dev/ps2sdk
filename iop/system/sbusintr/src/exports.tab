@@ -1,0 +1,12 @@
+DECLARE_EXPORT_TABLE(sbusintr, 1, 1)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(sbus_intr_exit)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(sbus_intr_init)
+	DECLARE_EXPORT(sbus_intr_handler_add)
+	DECLARE_EXPORT(sbus_intr_handler_del)
+	DECLARE_EXPORT(sbus_intr_main_interrupt)
+END_EXPORT_TABLE
+
+void _retonly() {}
