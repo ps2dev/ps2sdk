@@ -126,17 +126,17 @@ strncat     - ok, asm
 strcmp      - ok, asm
 strncmp     - ok, asm
 
-strcspn     - missing
-strcoll     - missing
-strxfrm     - missing
+strcoll     - ok, binded to strcmp (will we ever support locales ?)
+strxfrm     - ok, binded to strncpy (will we ever support locales ?)
 
 strdup      - ok
 
 strchr      - ok, asm
 strrchr     - ok
 
-strspn      - missing
-strpbrk     - missing
+strcspn     - ok
+strspn      - ok
+strpbrk     - ok
 strstr      - ok
 strcasestr  - missing
 strtok      - ok

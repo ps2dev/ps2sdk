@@ -46,6 +46,12 @@ char *	strcpy(char *, const char *);
 char *	strncat(char *, const char *, size_t);
 char *	strncpy(char *, const char *, size_t);
 
+char *  strpbrk(const char *s, const char *accept);
+size_t  strspn(const char *s, const char *accept);
+size_t  strcspn(const char *s, const char *reject);
+
+static __inline__ int strcoll(const char *s1, const char *s2) { return strcmp(s1, s2); }
+static __inline__ size_t strxfrm(char *dest, const char *src, size_t n) { strncpy(dest, src, n); return n; }
 
 // copies ascii string to sjis string
 // 

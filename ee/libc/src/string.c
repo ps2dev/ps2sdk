@@ -470,3 +470,44 @@ int strcpy_sjis(short* sjis_buff, const char* ascii_buff)
     return len;
 }
 #endif
+
+#ifdef F_strpbrk
+char *strpbrk(const char *s, const char *accept)
+{
+    const char *needle;
+    for (; *s; s++) {
+        for (needle = accept; *needle; needle++) {
+            if (*s == *needle)
+                return (char *) s;
+        }
+    }
+    
+    return NULL;
+}
+#endif
+
+#ifdef F_strspn
+size_t strspn(const char *s, const char *accept) {
+    const char *c;
+
+    for (c = s; *c; c++) {
+        if (!strchr(accept, *c))
+            return c - s;
+    }
+
+    return c - s;
+}
+#endif
+
+#ifdef F_strcspn
+size_t strcspn(const char *s, const char *reject) {
+    const char *c;
+    
+    for (c = s; *c; c++) {
+        if (strchr(reject, *c))
+            return c - s;
+    }
+    
+    return c - s;
+}
+#endif
