@@ -106,8 +106,8 @@
   for (;;) {
 
    // Spin the cube a bit.
-   object_rotation[1] += 0.010f;
-   object_rotation[2] += 0.013f;
+   object_rotation[1] += 0.010f; if (object_rotation[1] > 3.14f) { object_rotation[1] -= 6.28f; }
+   object_rotation[2] += 0.013f; if (object_rotation[2] > 3.14f) { object_rotation[2] -= 6.28f; }
 
    // Create the local_world matrix. (object space)
    create_local_world(local_world, object_position, object_rotation);

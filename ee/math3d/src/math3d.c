@@ -11,6 +11,7 @@
 
  #include <math.h>
  #include <math3d.h>
+ #include "math3d_utils.c"
 
  //////////////////////
  // VECTOR FUNCTIONS //
@@ -49,7 +50,7 @@
   float length;
 
   // Find the length of the vector.
-  length = sqrt(input0[0] * input0[0] + input0[1] * input0[1] + input0[2] * input0[2]);
+  length = math3d_sqrt(input0[0] * input0[0] + input0[1] * input0[1] + input0[2] * input0[2]);
 
   // Normalize the vector.
   output[0] = input0[0] / length;
@@ -148,10 +149,10 @@
 
   // Create the rotation matrix.
   matrix_unit(work);
-  work[1][1] =  cos(rx);
-  work[1][2] = -sin(rx);
-  work[2][1] =  sin(rx);
-  work[2][2] =  cos(rx);
+  work[1][1] =  math3d_cos(rx);
+  work[1][2] = -math3d_sin(rx);
+  work[2][1] =  math3d_sin(rx);
+  work[2][2] =  math3d_cos(rx);
 
   // Apply the rotation matrix.
   matrix_multiply(output, work, input0);
@@ -165,10 +166,10 @@
 
   // Create the rotation matrix.
   matrix_unit(work);
-  work[0][0] =  cos(ry);
-  work[2][0] =  sin(ry);
-  work[0][2] = -sin(ry);
-  work[2][2] =  cos(ry);
+  work[0][0] =  math3d_cos(ry);
+  work[2][0] =  math3d_sin(ry);
+  work[0][2] = -math3d_sin(ry);
+  work[2][2] =  math3d_cos(ry);
 
   // Apply the rotation matrix.
   matrix_multiply(output, work, input0);
@@ -182,10 +183,10 @@
 
   // Create the rotation matrix.
   matrix_unit(work);
-  work[0][0] =  cos(rz);
-  work[0][1] = -sin(rz);
-  work[1][0] =  sin(rz);
-  work[1][1] =  cos(rz);
+  work[0][0] =  math3d_cos(rz);
+  work[0][1] = -math3d_sin(rz);
+  work[1][0] =  math3d_sin(rz);
+  work[1][1] =  math3d_cos(rz);
 
   // Apply the rotation matrix.
   matrix_multiply(output, work, input0);
