@@ -7,7 +7,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 
-SUBDIRS = ee iop tools common
+SUBDIRS = tools ee iop common samples
 
 all: build 
 	@echo .;
