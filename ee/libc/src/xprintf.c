@@ -644,7 +644,7 @@ struct s_strargument {    /* Describes the string being written to */
 };
 
 void __sout(char *, int, void *);
-#ifdef F_sout
+#ifdef F___sout
 void __sout(txt,amt,arg)
   char *txt;
   int amt;
