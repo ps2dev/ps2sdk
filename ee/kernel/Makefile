@@ -133,12 +133,12 @@ $(SIO_OBJS): src/sio.c
 clean:
 	rm -f -r $(EE_OBJS_DIR) $(EE_LIB_DIR)
 
-install:
-	$(CP) $(LIBSYSCALL_LIB) $(PS2SDK)/ee/lib
-	$(CP) include/*.h $(PS2SDK)/ee/include
-
-
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make
 include $(PS2SDKSRC)/ee/Rules.release
+
+release:
+	cp -f $(LIBSYSCALL_LIB) $(PS2SDK)/ee/lib
+	cp -f $(LIBKERNEL_LIB) $(PS2SDK)/ee/lib
+	cp -f include/*.h $(PS2SDK)/ee/include
