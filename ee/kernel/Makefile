@@ -43,7 +43,7 @@ IOPHEAP_OBJS = SifInitIopHeap.o SifExitIopHeap.o SifAllocIopHeap.o \
 IOPHEAP_OBJS := $(IOPHEAP_OBJS:%=$(EE_OBJS_DIR)%)
 
 IOPCONTROL_OBJS = SifIopReset.o SifResetIop.o SifIopIsAlive.o SifIopSync.o
-IOPCONTROL_OBJS := $(IOPCONTROL_OBJS:%=$(OBJDIR)%)
+IOPCONTROL_OBJS := $(IOPCONTROL_OBJS:%=$(EE_OBJS_DIR)%)
 
 GLUE_OBJS = DIntr.o EIntr.o EnableIntc.o DisableIntc.o EnableDmac.o DisableDmac.o \
 	iEnableIntc.o iDisableIntc.o iEnableDmac.o iDisableDmac.o SyncDCache.o \
