@@ -1,0 +1,44 @@
+
+DECLARE_EXPORT_TABLE(iopmgr, 1, 1)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(shutdown)
+	DECLARE_EXPORT(_retonly)
+
+	/* 4 */
+	DECLARE_EXPORT(smod_get_next_mod)
+	DECLARE_EXPORT(smod_get_mod_by_name)
+	DECLARE_EXPORT(smod_get_modcount_by_name)
+	DECLARE_EXPORT(smod_get_modversion_by_name)
+
+	DECLARE_EXPORT(_retonly0)
+	DECLARE_EXPORT(_retonly0)
+
+	/* 10 */
+	DECLARE_EXPORT(slib_get_lib_by_name)
+	DECLARE_EXPORT(slib_get_exportlist_by_name)
+	DECLARE_EXPORT(slib_get_version_by_name)
+	DECLARE_EXPORT(slib_release_library)
+	DECLARE_EXPORT(_retonly0)
+
+      /* 15 */
+	DECLARE_EXPORT(iopmgr_get_iomandev)
+	DECLARE_EXPORT(iopmgr_get_iomanxdev)
+	DECLARE_EXPORT(iopmgr_get_device)
+	DECLARE_EXPORT(iopmgr_get_devicetype)
+	DECLARE_EXPORT(iopmgr_get_devicelist)
+
+	/* 20 */
+	DECLARE_EXPORT(_retonly0)
+	DECLARE_EXPORT(_retonly0)
+	DECLARE_EXPORT(_retonly0)
+	DECLARE_EXPORT(_retonly0)
+	DECLARE_EXPORT(_retonly0)
+
+	/* 25 */
+	DECLARE_EXPORT(_retonly0)
+
+END_EXPORT_TABLE
+
+void _retonly() {}
+int  _retonly0() {return 0;}

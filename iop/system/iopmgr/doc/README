@@ -1,0 +1,63 @@
+iopmgr - IOP Manager v1.1
+-------------------------
+Copyright (c) 2003       Marcus R. Brown <mrbrown@0xd6.org>
+Copyright (c) 2003,2004  adresd <adresd_ps2dev@yahoo.com>
+Licensed under the Academic Free License version 2.0.
+--
+
+This includes libsmod (library for iop programs) which is based on "smod - Sub-CPU module 
+interface" from Marcus R. Browns's sbv-lite, adapted for native IOP use.
+
+This has been expanded into a general framework for a IOP Manager, handling modules, 
+devices and libraries.
+
+smod enables access to the loaded module list, which contains details of all 
+currently loaded IRX files, including description and version number.
+
+slib allows easy functions to query registered libraries (exports) and also to 
+unregister any loaded ones, or find exported functions.
+
+IOP Manager contains functions for  handling access to devices and device drivers on 
+the IOP. Including testing if a certain filesystem driver is currently loaded and being
+handled, and if it is which ioman is handling that device (ioman or iomanx).
+
+IOP Manager is very much a WIP, so expect it to expand.
+
+
+
+NOTES ON IOP:
+It is quite important to think of IRX's consisting of two parts: 
+
+One is the IRX as a module, and any associated threads.
+The other is any exports that it registers, as they create a library entry for the mod.
+
+There are modules that do not export functions, so do not have a library entry.
+And a module that offers exports can be loaded without the exports being registered as
+a library.
+
+This also has implications, as the module name is not the same as the library name, and the
+same goes for version numbers as well.
+The library name and version is the one specified in the export list (export.lst) when building.
+The module name and version come from the IRX_ID (if using ps2drv framework).
+
+This presumably is so the the exports can stay the same (with same library version) while
+the module name and/or version changes, without affecting other modules loading those exports.
+
+This is one reason why the slib and smod functions are prefixed by their name, to make the
+user think about it and make sure to use the right function.
+
+NOTES ON USAGE:
+
+This IRX will load and make itself resident if passed no parameters.
+If passed parameters it will run in command mode. 
+Try the param 'help' for a list of available commands.
+
+OTHER COMMENTS:
+
+See the export list and header for supported calls, also the 'commandline.c' file is
+a good example of its use. The whole code is really an example of its own use.
+
+ADDITIONAL CREDITS:
+
+Thanks go to Marcus R. Brown for the original sbv-lite library which contained the smod
+module used as a base and inspiration for the one in iopmgr.
