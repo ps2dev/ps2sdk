@@ -55,7 +55,8 @@ STDIO_OBJS := $(STDIO_OBJS:%=$(EE_OBJS_DIR)%)
 
 STDLIB_OBJS = abs.o atexit.o atof.o bsearch.o div.o getenv.o _itoa.o labs.o \
 	ldiv.o llabs.o lldiv.o _lltoa.o _ltoa.o rand.o setenv.o srand.o __stdlib_internals.o \
-	strtod.o strtol.o strtoul.o __assert_fail.o
+	strtod.o strtol.o strtoul.o __assert_fail.o \
+	__stdlib_internals.o 
 # multibytes hell... do we want it ? is it stable ??
 # mblen.o mbstowcs.o mbtowc.o wcstombs.o wctomb.o
 STDLIB_OBJS := $(STDLIB_OBJS:%=$(EE_OBJS_DIR)%)

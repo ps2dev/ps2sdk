@@ -15,17 +15,21 @@ void _ps2sdk_alloc_init();
 void _ps2sdk_alloc_deinit();
 void _ps2sdk_stdio_init();
 void _ps2sdk_stdio_deinit();
+void _ps2sdk_stdlib_init();
+void _ps2sdk_stdlib_deinit();
 
 __attribute__((weak))
 void _ps2sdk_libc_init()
 {
     _ps2sdk_alloc_init();
     _ps2sdk_stdio_init();
+    _ps2sdk_stdlib_init();
 }
 
 __attribute__((weak))
 void _ps2sdk_libc_deinit()
 {
+    _ps2sdk_stdlib_deinit();
     _ps2sdk_stdio_deinit();
     _ps2sdk_alloc_deinit();
 }

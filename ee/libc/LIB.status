@@ -33,8 +33,8 @@ all *rand48 missing
 malloc, calloc, realloc, free, are defined in alloc.c.
 
 abort  - clean ? should call atexit functions ?
-atexit - ok, but not used
-exit   - no atexit support
+atexit - ok
+exit   - ok
 
 getenv - ok
 setenv - ok
