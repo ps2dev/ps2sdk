@@ -76,7 +76,7 @@ fflush     - ok (memory card)
 fcloseall  - ok
 fopen      - ok
 freopen    - missing
-fdopen     - missing
+fdopen     - ok
 setbuf     - missing
 setvbuf    - missing
 
