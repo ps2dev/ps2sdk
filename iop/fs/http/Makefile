@@ -16,7 +16,7 @@ IOP_OBJS = obj/ps2http.o obj/imports.o
 
 IOP_CFLAGS += -Wall -fno-builtin
 IOP_LDFLAGS += -s
-IOP_INCS += -I$(PS2SDKSRC)/iop/tcpip/tcpip/include
+IOP_INCS += -I$(PS2SDKSRC)/iop/tcpip/tcpip/include -I$(PS2SDKSRC)/iop/tcpip/dns/include
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

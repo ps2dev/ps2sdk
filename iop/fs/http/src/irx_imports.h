@@ -21,5 +21,7 @@
 #include "sysclib.h"
 #include "sysmem.h"
 #include "thbase.h"
+#include "dns.h"
+#include "ioman_mod.h"
 
 #endif /* IOP_IRX_IMPORTS_H */

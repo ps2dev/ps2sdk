@@ -2,7 +2,7 @@
   _____     ___ ____
    ____|   |    ____|      PSX2 OpenSource Project
   |     ___|   |____       (C)2002, David Ryan ( oobles@hotmail.com )
-                           (C)2002, Nicholas Van Veen (nickvv@xtra.co.nz)
+                           (C)2002-2004, Nicholas Van Veen (nickvv@xtra.co.nz)
   ------------------------------------------------------------------------
   ps2http.c                HTTP CLIENT FILE SYSTEM DRIVER.
 
@@ -25,33 +25,25 @@
   address. This will change once we get a DNS resolver up & running with lwip.
 */
 
-#include "types.h"
-#include "sysclib.h"
-#include "iomanX.h"
-#include "stdio.h"
+#include <types.h>
+#include <irx.h>
+#include <stdio.h>
+#include <thbase.h>
+#include <sysclib.h>
+#include <ioman_mod.h>
+#include <sysmem.h>
 
 #include "ps2ip.h"
+#include "dns.h"
 
-// How many handles do we keep open.
-#define HCOUNT 32
+//#define DEBUG
 
 typedef struct
 {
-	int fd;
 	int sockFd;
 	int fileSize;
 	int filePos;
-	int used;
-} handle;
-
-// These are the list of socket file handles.
-static handle handles[ HCOUNT ];
-
-// FileIO structure.
-static iop_device_t driver;
-
-// Function array for fileio structure.
-static iop_device_ops_t functions;
+} t_fioPrivData;
 
 
 // example of basic HTTP 1.0 protocol request.
@@ -62,11 +54,6 @@ char HTTPGETEND[] = " HTTP/1.0\r\n";
 char HTTPUSERAGENT[] = "User-Agent: PS2IP HTTP Client\r\n";
 char HTTPENDHEADER[] = "\r\n";
 
-#define DOMAINHOST_SIZE 200
-char HTTPHOST[] = "Host: ";
-static char domainHost[ DOMAINHOST_SIZE ];
-
-#define CONTENTLENGTH "Content-Length:"
 //
 // This function will parse the Content-Length header line and return the file size
 //
@@ -74,13 +61,11 @@ int parseContentLength(char *mimeBuffer)
 {
 	char *line;
 
-	line = strstr(mimeBuffer, CONTENTLENGTH );
-	line += strlen( CONTENTLENGTH );
+	line = strstr(mimeBuffer, "CONTENT-LENGTH:");
+	line += strlen("CONTENT-LENGTH:");
 
 	// Advance past any whitepace characters
 	while((*line == ' ') || (*line == '\t')) line++;
-
-	//printf( "strtol on %s\n", line );
 
 	return (int)strtol(line,NULL, 10);
 }
@@ -132,14 +117,7 @@ int readLine( int socket, char * buffer, int size )
 	{
 		rc = recv( socket, ptr, 1, 0 ); 
 
-		if ( rc <= 0 ) 
-		{
-			//printf( "recv failed in readLine %i\n", rc );
-			return rc;
-		}
-
-		// If its a linefeed ignore it.
-		if ( *ptr == '\r' ) continue;
+		if ( rc <= 0 ) return rc;
 
 		if ( (*ptr == '\n') ) break;
      
@@ -156,18 +134,21 @@ int readLine( int socket, char * buffer, int size )
 }
 
 
-#define CONNECT_BUFFER_SIZE 500
 //
 // This is the main HTTP client connect work.  Makes the connection
 // and handles the protocol and reads the return headers.  Needs
 // to leave the stream at the start of the real data.
 //
-int httpConnect( struct sockaddr_in * server, char * url, handle *pHandle )
+int httpConnect( struct sockaddr_in * server, char * url, t_fioPrivData *pHandle )
 {
 	int sockHandle;
 	int peerHandle;
 	int rc;
-	char mimeBuffer[CONNECT_BUFFER_SIZE];
+	char mimeBuffer[100];
+
+#ifdef DEBUG
+	printf( "create socket\n" );
+#endif
 
 	sockHandle = socket( PF_INET, SOCK_STREAM, IPPROTO_TCP );
 	if ( sockHandle < 0 )
@@ -176,6 +157,10 @@ int httpConnect( struct sockaddr_in * server, char * url, handle *pHandle )
 		return -1;
 	}
 
+#ifdef DEBUG
+	printf( "connect\n" );
+#endif
+
 	peerHandle = connect( sockHandle, (struct sockaddr *) server, sizeof(*server));
 	if ( peerHandle < 0 )
 	{
@@ -183,66 +168,50 @@ int httpConnect( struct sockaddr_in * server, char * url, handle *pHandle )
 		return -1;
 	}
 
-	strcpy( mimeBuffer, HTTPGET );
-	strcat( mimeBuffer, url );
-	strcat( mimeBuffer, HTTPGETEND );
-	
-	strcat( mimeBuffer, domainHost );
-	strcat( mimeBuffer, HTTPUSERAGENT );
-	strcat( mimeBuffer, HTTPENDHEADER );
+#ifdef DEBUG
+	printf( "send\n" );
+#endif
 
-	rc = send( peerHandle, mimeBuffer, strlen( mimeBuffer), 0 );
-	if ( rc < 0 )
-	{
-		printf( "failed to send request %i\n", rc );
-		disconnect( peerHandle );
-		return rc;
-	}
 	// Needs more error checking here.....
+	rc = send( peerHandle, HTTPGET,  sizeof( HTTPGET ) - 1, 0 );
+	rc = send( peerHandle, url, strlen( url ), 0 );
+	rc = send( peerHandle, HTTPGETEND, sizeof( HTTPGETEND ) - 1, 0 );
+	rc = send( peerHandle, HTTPUSERAGENT, sizeof( HTTPUSERAGENT ) - 1, 0 );
+	rc = send( peerHandle, HTTPENDHEADER, sizeof( HTTPENDHEADER ) - 1, 0 );
 
 	// We now need to read the header information
 	while ( 1 )
 	{
+		int i;
+
 		// read a line from the header information.
-		rc = readLine( peerHandle, mimeBuffer, CONNECT_BUFFER_SIZE ); 
+		rc = readLine( peerHandle, mimeBuffer, 100 ); 
 
-
-		//printf( "lineread = '%s'\n", mimeBuffer );
-
-		if ( rc < 0 )
-		{
-			printf( "readLine failed %d\n", rc );
-			disconnect( peerHandle );
-			return rc;
-		}
+#ifdef DEBUG
+		printf(">> %s", mimeBuffer);
+#endif
+		if ( rc < 0 ) return rc;
 
 		// End of headers is a blank line.  exit. 
-		if ( rc == 0 )
-		{
-			printf( "readLine returned 0\n" );
-			break;
-		}
-
+		if ( rc == 0 ) break;
 		if ( (rc == 1) && (mimeBuffer[0] == '\r') ) break;
 
+		// Convert mimeBuffer to upper case, so we can do string comps
+		for(i = 0; i < strlen(mimeBuffer); i++)
+			mimeBuffer[i] = toupper(mimeBuffer[i]);
 	  
-		// First line of header, contains status code. 
-		// Check for an error code
-		if( !strncmp( mimeBuffer, "HTTP/1.", 7 ) ) 
-		{
-			//printf( "check errorcode %s\n", mimeBuffer );
-			if( (rc = isErrorHeader(mimeBuffer) ) ) 
-			{
-				//printf("status code = %d!\n", rc);
-				disconnect( peerHandle );
+		if(strstr(mimeBuffer, "HTTP/1.")) // First line of header, contains status code. Check for an error code
+			if((rc = isErrorHeader(mimeBuffer))) {
+				printf("status code = %d!\n", rc);
 				return -rc;
 			}
-		}
 
-		if ( strstr(mimeBuffer, CONTENTLENGTH ) ) 
+		if(strstr(mimeBuffer, "CONTENT-LENGTH:")) 
 		{
-			//printf( "check content-len: %s\n", mimeBuffer );
 			pHandle->fileSize = parseContentLength(mimeBuffer);
+#ifdef DEBUG
+			printf("fileSize = %d\n", pHandle->fileSize);
+#endif
 		}
 	} 
 
@@ -264,11 +233,10 @@ int httpConnect( struct sockaddr_in * server, char * url, handle *pHandle )
 char *resolveAddress( struct sockaddr_in *server, char * url )
 {
 	unsigned char w,x,y,z;
-	short port;
 	char *char_ptr;
 	char ip[128];
-	int i = 0;
-        unsigned char iptype = 0;
+	int i = 0, rv;
+	unsigned char iptype = 0;
 
 	// eg url= //192.168.0.1/fred.elf  (the http: is already stripped)
 
@@ -280,24 +248,20 @@ char *resolveAddress( struct sockaddr_in *server, char * url )
 	   return NULL;
 	}
 
-        // See if we have a domain name or ip address.
-        // iptype can only have numbers 0-9 and . in the host.
-
-        iptype = 1;
-        char_ptr = url + 2;
-        while (*char_ptr != '/' && *char_ptr != 0 )
-        {
-           if ( ( *char_ptr >= '0' && *char_ptr <= '9' ) || *char_ptr == '.' )
-           {
-                char_ptr++;
-           }
- 	   else
-	   {
-           	iptype = 0;
-           	break;
-	   }
-        }
-
+	// See if we have a domain name or ip address.
+	// iptype can only have numbers 0-9 and . in the host.
+	iptype = 1;
+	char_ptr = url + 2;
+	while (*char_ptr != '/' && *char_ptr != 0 )
+	{
+		if ( ( *char_ptr >= '0' && *char_ptr <= '9' ) || *char_ptr == '.' )
+			char_ptr++;
+		else
+		{
+			iptype = 0;
+			break;
+		}
+	}
 
 	// Copy host addy from url into seperate buffer
 	char_ptr = url + 2; // advance past initial '/' characters
@@ -308,10 +272,10 @@ char *resolveAddress( struct sockaddr_in *server, char * url )
 		char_ptr++;
 	}
 
-        // null terminate the string.
+	// null terminate the string.
 	ip[i]=0;
 
-	if ( iptype == 1 )
+	if(iptype == 1)
 	{
 		// turn '.' characters in ip string into null characters
 		for(i = 0; i < 16; i++)
@@ -332,56 +296,44 @@ char *resolveAddress( struct sockaddr_in *server, char * url )
 		z = (int)strtol(&ip[i],NULL, 10);
 		i += (strlen(&ip[i]) + 1);
 
-		//	printf("IP = %d.%d.%d.%d\n", w, x, y, z);
-
-		port = 80;
-
-		// Success.  We resolved the address.
-		IP4_ADDR( ((struct ip_addr*)&(server->sin_addr)) ,w,x,y,z );
-		server->sin_port = htons( port );
-
+		IP4_ADDR( (struct ip_addr *)&(server->sin_addr) ,w,x,y,z );
 	}
 	else
 	{
 		// resolve the host name.
-		//if ( gethostbyname( ip, &server  ) != 0 )
-		//  return NULL;
-
-		// While the DNS resolver doesn't work, you must
-		// provide the host name when the http driver is run.
-		return NULL;
-
+		rv = gethostbyname(ip, &server->sin_addr);
+		if(rv != 0)
+			return NULL;
 	}
 
+	server->sin_port = htons(80);
+	server->sin_family = AF_INET;
+
+#if 1
 	char_ptr = url + 2;
 	while(*char_ptr != '/') char_ptr++;
 
 	return char_ptr;
+#else
+	return url + 2;
+#endif
 }
 
 //
 // Any calls we don't implement calls dummy.
 // 
-int dummy()
+int httpDummy()
 {
 	printf("PS2HTTP: dummy function called\n");
 	return -5;
 }
 
-//
-// Initialise clears our list of socket handles that
-// keeps track of open connections.
-//
-void fd_initialize( iop_device_t *driver)
+int httpInitialize(iop_io_device_t *driver)
 {
+	printf("PS2HTTP: filesystem driver initialized\n");
 
-	printf("PS2HTTP: initializing '%s' file driver.\n", driver->name );
-  
-	// Clear the file handles. 
-	memset(&handles, 0, sizeof(handles));
-
+	return 0;
 }
-
 
 //
 // Open has the most work to do in the file driver.  It must:
@@ -392,57 +344,48 @@ void fd_initialize( iop_device_t *driver)
 //  4. Send a GET request to the server
 //  5. Parse the GET response header from the server
 //
-int fd_open( iop_file_t *f, char *name, int mode)
+int httpOpen(iop_io_file_t *f, char *name, int mode)
 {
 	int peerHandle = 0;
 	struct sockaddr_in server;
 	char *getName;
-	int handle;
+	t_fioPrivData *privData;
 
-	//printf( "HTTP: fd_open %i %s\n", f->num, name );
+#ifdef DEBUG
+	printf("httpOpen(-, %s, %d)\n", name, mode);
+#endif
 
-	// First find an open Handle.
-	for(handle = 0; handle < HCOUNT; handle++)
-		if(handles[handle].used == 0) break;
+	privData = AllocSysMemory(ALLOC_FIRST, sizeof(t_fioPrivData), NULL);
+	if(!privData)
+		return -1;
 
-	// No free handles. exit.
-	if(handle >= HCOUNT) return -1;
+	f->privdata = privData;
 
-	// Reserve this for our use.
-	// We don't have mutex semaphores protecting.. so quicker we
-	// stop another thread stealing our it the better.
-	handles[handle].used = 1;
-
-	// Store kernel file handle
-	handles[handle].fd = f->unit;
-
-	handles[handle].fileSize = 0;
-	handles[handle].filePos = 0;
+	privData->fileSize = 0;
+	privData->filePos = 0;
 
 	// Check valid IP address and URL
 	getName = resolveAddress( &server, name );
 	if ( getName == NULL ) 
 	{
-		// free up the handle and return error.
-		handles[handle].used = 0;
+		FreeSysMemory(privData);
 		return -1;
 	}
 
 	// Now we connect and initiate the transfer by sending a 
 	// request header to the server, and receiving the response header
-	peerHandle = httpConnect( &server, getName, &handles[handle] );   
+	peerHandle = httpConnect( &server, getName, privData );   
 	if ( peerHandle < 0 )
 	{
-		// free up the handle and return error.
-		handles[handle].used = 0;
+		FreeSysMemory(privData);
 		return peerHandle;   
 	}
 
 	// http connect returns valid socket.  Save in handle list.
-	handles[handle].sockFd = peerHandle;
+	privData->sockFd = peerHandle;
 
 	// return success.  We got it all ready. :)
-	return f->unit;
+	return 0;
 }
 
 
@@ -451,28 +394,26 @@ int fd_open( iop_file_t *f, char *name, int mode)
 // Read is simple.  It simply needs to find the socket no
 // based on the file handle and call recv.
 //
-int fd_read( iop_file_t *f, char * buffer, int size )
+int httpRead(iop_io_file_t *f, void *buffer, int size)
 {
 	int bytesRead = 0;
-	int handle;
+	t_fioPrivData *privData = (t_fioPrivData *)f->privdata;
 	int left = size;
 	int totalRead = 0;
 
-	//printf( "HTTP: fd_read %i\n", size );
-
-	// First find correct handle
-	for(handle = 0; handle < HCOUNT; handle++)
-		if(handles[handle].fd == f->unit ) break;
-
-	if(handle >= HCOUNT) return -1;
+#ifdef DEBUG
+	printf("httpRead(-, 0x%X, %d)\n", (int)buffer, size);
+#endif
 
 	// Read until: there is an error, we've read "size" bytes or the remote 
 	//             side has closed the connection.
 	do {
 
-		bytesRead = recv( handles[handle].sockFd, buffer + totalRead, left, 0 ); 
+		bytesRead = recv( privData->sockFd, buffer + totalRead, left, 0 ); 
 
-		//printf("bytesRead = %d\n", bytesRead);
+#ifdef DEBUG
+//		printf("bytesRead = %d\n", bytesRead);
+#endif
 
 		if(bytesRead <= 0) break;
 
@@ -481,21 +422,6 @@ int fd_read( iop_file_t *f, char * buffer, int size )
 
 	} while(left);
 
-	// Check for EOF condition.  
-	if ( bytesRead == 0  && totalRead == 0 )
-	{
-		//printf( "HTTP: fd_read ret -1\n" );
-		return -1;
-	}
-
-	// Check for Error condition.
-	if ( bytesRead < 0 && totalRead == 0 )
-	{
-		//printf( "HTTP: fd_read ret %i\n", bytesRead );
-		return bytesRead;
-	}
-
-	//printf( "HTTP: fd_read ret %i %i\n", totalRead, (int) buffer[0] );
 	return totalRead; 
 }
 
@@ -504,20 +430,16 @@ int fd_read( iop_file_t *f, char * buffer, int size )
 // Close finds the correct handle and
 // calls disconnect.
 //
-int fd_close( iop_file_t *f )
+int httpClose(iop_io_file_t *f)
 {
-	int handle;
+	t_fioPrivData *privData = (t_fioPrivData *)f->privdata;
 
-	//printf( "HTTP: fd_close\n" );
+#ifdef DEBUG
+	printf("httpClose(-)\n");
+#endif
 
-	for(handle = 0; handle < HCOUNT; handle++)
-		if(handles[handle].fd == f->unit) break;
-
-	if(handle >= HCOUNT) return -1;
-
-	disconnect(handles[handle].sockFd);
-
-	handles[handle].used = 0;
+	lwip_close(privData->sockFd);
+	FreeSysMemory(privData);
 
 	return 0;
 }
@@ -527,42 +449,49 @@ int fd_close( iop_file_t *f )
 // does modify the filePos member, this does not have any effect on the read position
 // of the file in the current implimentation.
 //
-int fd_lseek( iop_file_t *f, unsigned long offset, int whence)
+int httpLseek(iop_io_file_t *f, unsigned long offset, int mode)
 {
-	int handle;
+	t_fioPrivData *privData = (t_fioPrivData *)f->privdata;
 
-	//printf( "HTTP: fd_lseek %i, %i\n", offset, whence );
+#ifdef DEBUG
+	printf("httpLseek(-, %d, %d)\n", (int)offset, mode);
+#endif
 
-	// First find correct handle
-	for(handle = 0; handle < HCOUNT; handle++)
-		if(handles[handle].fd == f->unit ) break;
-
-	if(handle >= HCOUNT) return -1;
-
-	//printf( "HTTP: fd_lseek %i, %i, %i, %i\n",f->num, handle, offset, whence );
-
-	switch(whence)
+	switch(mode)
 	{
-	case SEEK_SET:
-		handle[handles].filePos = offset;
-		break;
+		case SEEK_SET:
+			privData->filePos = offset;
+			break;
 
-	case SEEK_CUR:
-		handle[handles].filePos += offset;
-		break;
+		case SEEK_CUR:
+			privData->filePos += offset;
+			break;
 
-	case SEEK_END:
-		handle[handles].filePos = handle[handles].fileSize + offset;
-		break;
+		case SEEK_END:
+			privData->filePos = privData->fileSize + offset;
+			break;
 
-	default:
-		return -1;
+		default:
+			return -1;
 	}
 
-	//printf( "filePos %i\n", handle[handles].filePos );
-
-	return handle[handles].filePos;
+	return privData->filePos;
 }
+
+
+iop_io_device_ops_t ps2httpOps = {
+	httpInitialize, httpDummy, httpDummy, httpOpen, httpClose, httpRead, httpDummy, httpLseek,
+	httpDummy, httpDummy, httpDummy, httpDummy, httpDummy, httpDummy, httpDummy, httpDummy, 
+	httpDummy
+};
+
+iop_io_device_t ps2httpDev = {
+	"http",
+	IOP_DT_FS,
+	1,
+	"HTTP client file driver",
+	&ps2httpOps
+};
 
 
 //
@@ -572,48 +501,9 @@ int _start( int argc, char **argv)
 {
 	printf("PS2HTTP: Module Loaded\n");
 
-
-	// Argv[1] is the IP address to resolve to for all
- 	// non-ip addresses.
-
-	if ( argc >= 2 )
-	{
-		strcpy( domainHost, HTTPHOST );
-		strcat( domainHost, argv[2] );
-		strcat( domainHost, HTTPENDHEADER );
-	}
-	else
-	{
-		domainHost[0] = '\0';
-	}
-
- 
-	driver.name = "http";
-	driver.type = 16;
-	driver.version = 1;
-	driver.desc = "http client file driver";
-	driver.ops = &functions;
-
-	functions.init = fd_initialize;
-	functions.deinit = dummy;
-	functions.format = dummy;
-	functions.open = fd_open;
-	functions.close = fd_close;
-	functions.read = fd_read;
-	functions.write = dummy;
-	functions.lseek = fd_lseek;
-	functions.ioctl = dummy;
-	functions.remove = dummy;
-	functions.mkdir = dummy;
-	functions.rmdir = dummy;
-	functions.dopen = dummy;
-	functions.dclose = dummy;
-	functions.dread = dummy;
-	functions.getstat = dummy;
-	functions.chstat = dummy;
- 
-	DelDrv( "http");
-	AddDrv( &driver);
+	printf("PS2HTTP: Adding 'http' driver into io system\n");
+	io_DelDrv( "http");
+	io_AddDrv(&ps2httpDev);
 
 	return 0;
 }
