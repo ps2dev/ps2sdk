@@ -22,8 +22,6 @@ typedef enum {
     EXCEPTION_RESERVED14          /* would be FPE, but that's not going to happen on the IOP */
 } exception_type_t;
 
-const char * get_exception_name(exception_type_t type);
-
 typedef struct exception_frame {
     u32 epc;
     u32 cause;
@@ -35,32 +33,44 @@ typedef struct exception_frame {
     u32 dcic;
 } exception_frame_t;
 
-/* Will act as a setjmp. Returns 0 to say it was the first call,
-   otherwise, returns the exception number. (note that you'll never
-   get any interrupt...) Note that using this will completely disable
-   user defined exception handlers. */
-exception_type_t dbg_setjmp();
-
 /* Beware: the handler will be run in a 'bad' state. Consider you are
    on interrupt mode, so, only i* functions. */
 typedef void (*trap_exception_handler_t)(exception_type_t, exception_frame_t *);
-
-/* Will return the old handler. */
-
-trap_exception_handler_t set_exception_handler(exception_type_t type, trap_exception_handler_t handler);
-trap_exception_handler_t get_exception_handler(exception_type_t type);
 
 #define DCIC_WR (1<<27)
 #define DCIC_RD (1<<26)
 #define DCIC_DA (1<<25)
 #define DCIC_PC (1<<24)
 
+
+const char * get_exception_name(exception_type_t type);
+#define I_get_exception_name DECLARE_IMPORT(4, get_exception_name)
+
+/* Will act as a setjmp. Returns 0 to say it was the first call,
+   otherwise, returns the exception number. (note that you'll never
+   get any interrupt...) Note that using this will completely disable
+   user defined exception handlers. */
+exception_type_t dbg_setjmp();
+#define I_dbg_setjmp DECLARE_IMPORT(5, dbg_setjmp)
+
+/* Will return the old handler. */
+trap_exception_handler_t set_exception_handler(exception_type_t type, trap_exception_handler_t handler);
+#define I_set_exception_handler DECLARE_IMPORT(6, set_exception_handler)
+trap_exception_handler_t get_exception_handler(exception_type_t type);
+#define I_get_exception_handler DECLARE_IMPORT(7, get_exception_handler)
+
 /* Breakpoint stuff. */
 void set_dba(u32 v);
+#define I_set_dba DECLARE_IMPORT(8, set_dba)
 void set_dbam(u32 v);
+#define I_set_dbam DECLARE_IMPORT(9, set_dbam)
 void set_dcic(u32 v);
+#define I_set_dcic DECLARE_IMPORT(10, set_dcic)
 u32 get_dba();
+#define I_get_dba DECLARE_IMPORT(11, get_dba)
 u32 get_dbam();
+#define I_get_dbam DECLARE_IMPORT(12, get_dbam)
 u32 get_dcic();
+#define I_get_dcic DECLARE_IMPORT(13, get_dcic)
 
 #endif
