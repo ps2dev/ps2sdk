@@ -15,8 +15,8 @@ clean:
 	rm -f -r $(EE_OBJS_DIR)
 
 release:
-	cp src/linkfile $(PS2SDK)/ee/startup
-	cp obj/crt0.o $(PS2SDK)/ee/startup
+	cp -f src/linkfile $(PS2SDK)/ee/startup
+	cp -f obj/crt0.o $(PS2SDK)/ee/startup
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make
