@@ -40,6 +40,7 @@ enum _lf_functions {
 	LF_F_MOD_UNLOAD,
 	
 	LF_F_SEARCH_MOD_BY_NAME,
+	LF_F_SEARCH_MOD_BY_ADDRESS,
 };
 
 struct _lf_iop_val_arg {
@@ -306,6 +307,29 @@ int SifSearchModuleByName(const char * name)
 	arg.name[LF_PATH_MAX - 1] = 0;
 
 	if (SifCallRpc(&_lf_cd, LF_F_SEARCH_MOD_BY_NAME, 0, &arg, sizeof arg, &arg, 4, NULL, NULL) < 0)
+		return -E_SIF_RPC_CALL;
+
+	return arg.id;
+}
+#endif
+
+#ifdef F_SifSearchModuleByAddress
+struct _lf_search_module_by_address_arg {
+	union {
+		const void	*ptr
+		int	id;
+	} p;
+} ALIGNED(16);
+
+int SifSearchModuleByName(const void *ptr)
+{
+	struct _lf_search_module_by_address_arg arg;
+	if (!_lf_init && SifLoadFileInit() < 0)
+		return -E_LIB_API_INIT;
+	
+	arg.p.ptr = ptr;
+	
+	if (SifCallRpc(&_lf_cd, LF_F_SEARCH_MOD_BY_ADDRESS, 0, &arg, sizeof arg, &arg, 4, NULL, NULL) < 0)
 		return -E_SIF_RPC_CALL;
 
 	return arg.id;
