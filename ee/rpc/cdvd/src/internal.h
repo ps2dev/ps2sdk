@@ -38,12 +38,19 @@ extern s32 nCmdNum;
 extern u8 sCmdRecvBuff[];
 extern u8 nCmdRecvBuff[];
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void cdSemaInit(void);
 
 void cdCallback(void *funcNum);
 
 s32  cdSyncS(s32 mode);
 
+#ifdef __cplusplus
+}
+#endif
 
 #endif	// _LIBCDVD_INTERNAL_H_
 

@@ -77,6 +77,9 @@ struct remote_data
 #define RM_START	0x0030D5DA
 #define RM_SELECT	0x0000D5DA
 
+#ifdef _cplusplus
+extern "C" {
+#endif
 
 int RMMan_Init(void);
 int RMMan_End(void);
@@ -84,5 +87,9 @@ int RMMan_Open(int port, int slot, void *pData);
 int RMMan_Close(int port, int slot);
 void RMMan_Read(int port, int slot, struct remote_data *data);
 u32 RMMan_GetModuleVersion(void);
+
+#ifdef _cplusplus
+}
+#endif
 
 #endif

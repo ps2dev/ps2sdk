@@ -15,6 +15,10 @@
 
 #include "tcpip.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int ps2ip_init();
 int accept(int s, struct sockaddr *addr, int *addrlen);
 int bind(int s, struct sockaddr *name, int namelen);
@@ -30,5 +34,9 @@ int ps2ip_setconfig(t_ip_info *ip_info);
 int ps2ip_getconfig(char *netif_name, t_ip_info *ip_info);
 int select(int maxfdp1, struct fd_set *readset, struct fd_set *writeset, struct fd_set *exceptset, struct timeval *timeout);
 int ioctlsocket(int s, long cmd, void *argp);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _EE_PS2IP_H */
