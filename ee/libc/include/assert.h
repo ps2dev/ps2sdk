@@ -28,7 +28,7 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#define assert(cond) (void)((cond)?0:__assert_fail(#cond, __FILE__, __LINE))
+#define assert(cond) (void)((cond)?0:__assert_fail(#cond, __FILE__, __LINE__))
 #endif
 
 #endif
