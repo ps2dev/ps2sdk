@@ -25,11 +25,10 @@
   address. This will change once we get a DNS resolver up & running with lwip.
 */
 
-#include <tamtypes.h>
-#include <fileio.h>
-#include <stdlib.h>
-#include <kernel.h>
-#include <sysclib.h>
+#include "types.h"
+#include "sysclib.h"
+#include "iomanX.h"
+#include "stdio.h"
 
 #include "ps2ip.h"
 
@@ -338,7 +337,7 @@ char *resolveAddress( struct sockaddr_in *server, char * url )
 		port = 80;
 
 		// Success.  We resolved the address.
-		IP4_ADDR( &(server->sin_addr) ,w,x,y,z );
+		IP4_ADDR( ((struct ip_addr*)&(server->sin_addr)) ,w,x,y,z );
 		server->sin_port = htons( port );
 
 	}
@@ -415,7 +414,7 @@ int fd_open( iop_file_t *f, char *name, int mode)
 	handles[handle].used = 1;
 
 	// Store kernel file handle
-	handles[handle].fd = f->num;
+	handles[handle].fd = f->unit;
 
 	handles[handle].fileSize = 0;
 	handles[handle].filePos = 0;
@@ -443,7 +442,7 @@ int fd_open( iop_file_t *f, char *name, int mode)
 	handles[handle].sockFd = peerHandle;
 
 	// return success.  We got it all ready. :)
-	return f->num;
+	return f->unit;
 }
 
 
@@ -463,7 +462,7 @@ int fd_read( iop_file_t *f, char * buffer, int size )
 
 	// First find correct handle
 	for(handle = 0; handle < HCOUNT; handle++)
-		if(handles[handle].fd == f->num ) break;
+		if(handles[handle].fd == f->unit ) break;
 
 	if(handle >= HCOUNT) return -1;
 
@@ -512,7 +511,7 @@ int fd_close( iop_file_t *f )
 	//printf( "HTTP: fd_close\n" );
 
 	for(handle = 0; handle < HCOUNT; handle++)
-		if(handles[handle].fd == f->num) break;
+		if(handles[handle].fd == f->unit) break;
 
 	if(handle >= HCOUNT) return -1;
 
@@ -536,7 +535,7 @@ int fd_lseek( iop_file_t *f, unsigned long offset, int whence)
 
 	// First find correct handle
 	for(handle = 0; handle < HCOUNT; handle++)
-		if(handles[handle].fd == f->num ) break;
+		if(handles[handle].fd == f->unit ) break;
 
 	if(handle >= HCOUNT) return -1;
 
