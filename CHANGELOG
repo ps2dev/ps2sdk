@@ -8,7 +8,7 @@
 
 2004-09-06 Version 1.1
 
-  - emmon: Added screen capture routines for debugging.
+  - emoon, Added screen capture routines for debugging.
   - lukasz, Added freesd.
   - mrbrown, Fixed reference to newlib. Uses internal libc.
   - Drakonite, Fixed file permissions in install.
