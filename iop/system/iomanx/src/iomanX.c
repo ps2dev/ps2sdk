@@ -95,58 +95,29 @@ static u32 *ioman_exports;
 /* This is called by a module wanting to add a device to legacy ioman.  */
 static int sbv_AddDrv(iop_device_t *device)
 {
-	int i, res = -1;
-	if (p_AddDrv) {
-	if((res = p_AddDrv(device)) >= 0) {
-		for (i = 0; i < MAX_DEVICES; i++) // find an open device slot
-			if (dev_list[i] == NULL) {
-				dev_list[i] = device;
-				return(res);
-			}
-		}
-	}
-	else
-		res = AddDrv(device);
-	return res;
-}
-
-//static int sbv_AddDrv(iop_device_t *device)
-//{
-//	int res;
+	int res;
 
 	/* We get first dibs!  */
-//	res = AddDrv(device);
+	res = AddDrv(device);
 
-//	if (p_AddDrv)
-//		return p_AddDrv(device);
+	if (p_AddDrv)
+		return p_AddDrv(device);
 
-//	return res;
-//}
+	return res;
+}
 
 /* This is called by a module wanting to delete a device from legacy ioman.  */
 static int sbv_DelDrv(const char *name)
 {
-	int i, res;
-	res = p_DelDrv(name);
-	for (i = 0; i < MAX_DEVICES; i++) {
-		if (dev_list[i] != NULL && !strcmp(name, dev_list[i]->name)) {
-			dev_list[i] = NULL;
-			break;
-		}
-	}
+	int res;
+
+	res = DelDrv(name);
+
+	if (p_DelDrv)
+		return p_DelDrv(name);
+
 	return res;
 }
-//static int sbv_DelDrv(const char *name)
-//{
-//	int res;
-
-//	res = DelDrv(name);
-
-//	if (p_DelDrv)
-//		return p_DelDrv(name);
-
-//	return res;
-//}
 
 int _start(int argc, char **argv)
 {
