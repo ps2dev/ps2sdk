@@ -51,7 +51,7 @@ $(EE_OBJS_DIR):
 	mkdir $(EE_OBJS_DIR)
 
 $(EE_BIN) : $(EE_OBJS) $(PS2SDKSRC)/ee/startup/obj/crt0.o
-	$(EE_CC) -nostartfiles -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_LDFLAGS) \
+	$(EE_CC) -mno-crt0 -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_LDFLAGS) \
 		-o $(EE_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_LIBS)
 
 $(EE_LIB) : $(EE_OBJS)

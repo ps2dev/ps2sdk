@@ -16,6 +16,17 @@
 .global _start
 .global	_exit
 
+	# Support for _init() and _fini().
+	.global _init
+	.global _fini
+	.type	_init, @function
+	.type	_fini, @function
+
+	# The .weak keyword ensures there's no error if
+	# _init/_fini aren't defined.
+	.weak	_init
+	.weak	_fini
+
 	.extern	_heap_size
 	.extern	_stack
 	.extern _stack_size
@@ -71,6 +82,15 @@ loop:
 	move	$4,$0
 	syscall			# FlushCache(0) - Writeback data cache
 
+	# Call global constructors through _init().
+	la	$8, _init
+	beqz	$8, 1f		# does _init() exist?
+	nop
+
+	jalr	$8
+	nop
+1:
+
 # Jump main, now that environment and args are setup
 	ei
 
@@ -97,6 +117,15 @@ loop:
 
 	.ent	_exit
 _exit:
+	# Call global deconstructors through _fini().
+	la	$8, _fini
+	beqz	$8, 3f		# does _fini() exist?
+	nop
+
+	jalr	$8
+	nop
+3:
+
 # If we received our program arguments in a0, then we were executed by a
 # loader, and we don't want to return to the browser.
 	la	$4, _args_ptr

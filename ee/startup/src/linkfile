@@ -19,6 +19,8 @@ SECTIONS {
 		*(.text)
 		*(.text.*)
 		*(.gnu.linkonce.t*)
+		KEEP(*(.init))
+		KEEP(*(.fini))
 		QUAD(0)
 	}
 
@@ -26,6 +28,20 @@ SECTIONS {
 	PROVIDE(etext = .);
 
 	.reginfo : { *(.reginfo) }
+
+	/* Global/static constructors and deconstructors. */
+	.ctors : {
+		KEEP(*crtbegin*.o(.ctors))
+		KEEP(*(EXCLUDE_FILE(*crtend*.o) .ctors))
+		KEEP(*(SORT(.ctors.*)))
+		KEEP(*(.ctors))
+	}
+	.dtors : {
+		KEEP(*crtbegin*.o(.dtors))
+		KEEP(*(EXCLUDE_FILE(*crtend*.o) .dtors))
+		KEEP(*(SORT(.dtors.*)))
+		KEEP(*(.dtors))
+	}
 
 	/* Static data.  */
 	.rodata ALIGN(128): {
@@ -39,6 +55,7 @@ SECTIONS {
 		*(.data)
 		*(.data.*)
 		*(.gnu.linkonce.d*)
+		SORT(CONSTRUCTORS)
 	}
 
 	.rdata ALIGN(128): { *(.rdata) }
