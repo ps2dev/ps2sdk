@@ -18,7 +18,7 @@ IOP_BIN  = bin/ioptrap.irx
 IOP_OBJS = obj/ioptrap.o obj/handler.o obj/breakpoint.o obj/exports.o obj/imports.o 
 IOP_INCS = 
 
-IOP_CFLAGS  += -Wall -fno-builtin-printf -DTEST_TRAP
+IOP_CFLAGS  += -Wall -fno-builtin-printf
 IOP_LDFLAGS += -s
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
