@@ -88,12 +88,8 @@
 */
 #define MAXDIG 20
 
-// Warning fix
-#ifndef F_vsnprintf
-int vxprintf(void (*func)(char*,int,void*), void *arg, const char *format, va_list ap);
-#endif
+#ifdef F_vsnprintf
 
-#if defined(F_vsnprintf) || defined(F_vsprintf) || defined(F_sprintf) || defined(F_snprintf)
 /*
 ** Now for string-print, also as found in any standard library.
 ** Add to this the snprint function which stops added characters
@@ -128,14 +124,12 @@ static void sout(txt,amt,arg)
   *head = 0;
   ((struct s_strargument*)arg)->next = head;
 }
-#endif
 
 /*
 ** Conversion types fall into various categories as defined by the
 ** following enumeration.
 */
 
-#ifdef F_vsnprintf
 enum e_type {    /* The type of the format field */
    RADIX,            /* Integer types.  %d, %x, %o, and so forth */
    FLOAT,            /* Floating point.  %f */
@@ -742,54 +736,42 @@ int xprintf(
 }
 #endif
 
-
 #ifdef F_sprintf
 __attribute__((weak))
-int sprintf(char *buf, const char *fmt, ...){
-  int rc;
-  va_list ap;
-  struct s_strargument arg;
+int sprintf (char *str, const char *format, ...)
+{
+	va_list args;
+	int ret;
 
-  va_start(ap,fmt);
-  arg.next = buf;
-  arg.last = 0;
-  *arg.next = 0;
-  rc = vxprintf(sout,&arg,fmt,ap);
-  va_end(ap);
+	va_start(args, format);
+	ret = vsprintf(str, format, args);
+	va_end(args);
 
-  // lkz
-  return rc;
+	return ret;
 }
 #endif
 
 #ifdef F_vsprintf
 __attribute__((weak))
-int vsprintf(char *buf,const char *fmt,va_list ap){
-  struct s_strargument arg;
-  arg.next = buf;
-  arg.last = 0;
-  *buf = 0;
-  return vxprintf(sout,&arg,fmt,ap);
+int vsprintf(char *str, const char *format, va_list args)
+{
+	return vsnprintf(str, PS2LIB_STR_MAX, format, args);
 }
-
 #endif
 
 #ifdef F_snprintf
 __attribute__((weak))
-int snprintf(char *buf, size_t n, const char *fmt, ...){
-  int rc;
-  va_list ap;
-  struct s_strargument arg;
+int snprintf (char *str, size_t sz, const char *format, ...)
+{
+	va_list args;
+	int ret;
 
-  va_start(ap,fmt);
-  arg.next = buf;
-  arg.last = &arg.next[n-1];
-  *arg.next = 0;
-  rc = vxprintf(sout,&arg,fmt,ap);
-  va_end(ap);
-  // lkz
- return rc;
-}  
+	va_start(args, format);
+	ret = vsnprintf(str, sz, format, args);
+	va_end(args);
+
+	return ret;
+}
 #endif
 
 /*
