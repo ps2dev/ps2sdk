@@ -34,7 +34,6 @@ int toupper(int);
 
 #ifdef __cplusplus
 }
-#endif
 
 
 /* To be compatible with C++'s ctype_base.h */
@@ -51,5 +50,6 @@ namespace std {
 	_B =	0200,
     };
 };
+#endif
 
 #endif
