@@ -9,9 +9,10 @@
 
 EE_BIN = graph.elf
 EE_OBJS = graph.o
-EE_LIBS = -ldma -lgraph -ldma -lc
+EE_LIBS = -lgraph -ldma -lc
 
 all: $(EE_BIN)
+	ee-strip --strip-all $(EE_BIN)
 
 clean:
 	rm -f *.elf *.o *.a

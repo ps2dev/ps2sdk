@@ -18,6 +18,19 @@
 extern "C" {
 #endif
 
+ #define DMA_CHANNEL_VIF0	0x00
+ #define DMA_CHANNEL_VIF1	0x01
+ #define DMA_CHANNEL_GIF	0x02
+ #define DMA_CHANNEL_fromIPU	0x03
+ #define DMA_CHANNEL_toIPU	0x04
+ #define DMA_CHANNEL_SIF0	0x05
+ #define DMA_CHANNEL_SIF1	0x06
+ #define DMA_CHANNEL_SIF2	0x07
+ #define DMA_CHANNEL_fromSPR	0x08
+ #define DMA_CHANNEL_toSPR	0x09
+
+ typedef struct { int count; u64 *data; int data_size; } DMA_PACKET;
+
  ///////////////////
  // DMA FUNCTIONS //
  ///////////////////
@@ -29,17 +42,6 @@ extern "C" {
  ///////////////////////////
  // DMA CHANNEL FUNCTIONS //
  ///////////////////////////
-
- #define DMA_CHANNEL_VIF0	0x00
- #define DMA_CHANNEL_VIF1	0x01
- #define DMA_CHANNEL_GIF	0x02
- #define DMA_CHANNEL_fromIPU	0x03
- #define DMA_CHANNEL_toIPU	0x04
- #define DMA_CHANNEL_SIF0	0x05
- #define DMA_CHANNEL_SIF1	0x06
- #define DMA_CHANNEL_SIF2	0x07
- #define DMA_CHANNEL_fromSPR	0x08
- #define DMA_CHANNEL_toSPR	0x09
 
  int dma_channel_initialize(int channel, void *handler);
 
@@ -64,8 +66,6 @@ extern "C" {
  //////////////////////////
  // DMA PACKET FUNCTIONS //
  //////////////////////////
-
- typedef struct { int count; u64 *data; int data_size; } DMA_PACKET;
 
  int dma_packet_allocate(DMA_PACKET *packet, int data_size);
 

@@ -40,19 +40,25 @@ extern "C" {
 
  int graph_shutdown(void);
 
+ //////////////////////////
+ // GRAPH MODE FUNCTIONS //
+ //////////////////////////
+
+ int graph_mode_set(int mode, int bpp, int zpp);
+
+ int graph_mode_get(GRAPH_MODE *mode);
+
  /////////////////////////
  // GRAPH SET FUNCTIONS //
  /////////////////////////
 
- int graph_set_displaymode(int mode, int bpp);
-
  int graph_set_displaybuffer(int address);
 
- int graph_set_drawbuffer(int address, int width, int height, int bpp);
+ int graph_set_drawbuffer(int address);
 
- int graph_set_zbuffer(int address, int bpp);
+ int graph_set_zbuffer(int address);
 
- int graph_set_clearbuffer(int red, int green, int blue, int alpha);
+ int graph_set_clearbuffer(int red, int green, int blue);
 
  //////////////////////////
  // GRAPH VRAM FUNCTIONS //

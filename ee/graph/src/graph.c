@@ -9,6 +9,8 @@
 #
 */
 
+ #include <string.h>
+
  #include <graph.h>
  #include <graph_registers.h>
 
@@ -21,13 +23,13 @@
  GRAPH_MODE graph_mode[4] = {
   { 640, 448, 0x02, 1, 660, 48, 3, 0, 2559, 447 }, // NTSC (640x448i)
   { 640, 512, 0x03, 1, 652, 30, 3, 0, 2559, 511 }, // PAL  (640x512i)
-  { 720, 480, 0x50, 0, 232, 35, 2, 0, 2159, 479 }, // HDTV (720x480p)
-  { 640, 480, 0x1A, 0, 280, 18, 3, 0, 2559, 479 }  // VGA  (640x480p)
+  { 720, 480, 0x50, 0, 232, 35, 1, 0, 2559, 479 }, // HDTV (720x480p)
+  { 640, 480, 0x1A, 0, 280, 18, 1, 0, 2559, 479 }  // VGA  (640x480p)
  };
 
  DMA_PACKET graph_packet;
 
- int current_mode = 0, current_bpp = 0;
+ int current_mode = 0, current_bpp = 0, current_zpp = 0;
 
  /////////////////////
  // GRAPH FUNCTIONS //
@@ -65,27 +67,44 @@
 
  }
 
- /////////////////////////
- // GRAPH SET FUNCTIONS //
- /////////////////////////
+ //////////////////////////
+ // GRAPH MODE FUNCTIONS //
+ //////////////////////////
 
- int graph_set_displaymode(int mode, int bpp) {
+ int graph_mode_set(int mode, int bpp, int zpp) {
 
   // Request the mode change.
   SetGsCrt(graph_mode[mode].interlace, graph_mode[mode].mode, 0);
 
   // Set up the mode.
-  GS_REG_PMODE = GS_SET_PMODE(1, 1, 0, 0, 0, 256);
+  GS_REG_PMODE = GS_SET_PMODE(1, 1, 0, 0, 0, 128);
   GS_REG_DISPLAY1 = GS_SET_DISPLAY(graph_mode[mode].dx, graph_mode[mode].dy, graph_mode[mode].magh, graph_mode[mode].magv, graph_mode[mode].dw, graph_mode[mode].dh);
   GS_REG_DISPLAY2 = GS_SET_DISPLAY(graph_mode[mode].dx, graph_mode[mode].dy, graph_mode[mode].magh, graph_mode[mode].magv, graph_mode[mode].dw, graph_mode[mode].dh);
 
-  // Save the mode and bpp.
-  current_mode = mode; current_bpp = bpp;
+  // Save the mode, bpp and zpp.
+  current_mode = mode; current_bpp = bpp; current_zpp = zpp;
 
   // End function.
   return 0;
 
  }
+
+ int graph_mode_get(GRAPH_MODE *mode) {
+
+  // If no mode is given, return the current mode.
+  if (mode == NULL) { return current_mode; }
+
+  // Copy the mode structure.
+  memcpy(mode, &graph_mode[current_mode], sizeof(GRAPH_MODE));
+
+  // End function.
+  return current_mode;
+
+ }
+
+ /////////////////////////
+ // GRAPH SET FUNCTIONS //
+ /////////////////////////
 
  int graph_set_displaybuffer(int address) {
 
@@ -98,25 +117,22 @@
 
  }
 
- int graph_set_drawbuffer(int address, int width, int height, int bpp) {
-
-  // Autofill width, height and bpp if none are given.
-  if (width  < 0) { width  = graph_mode[current_mode].width;  }
-  if (height < 0) { height = graph_mode[current_mode].height; }
-  if (bpp    < 0) { bpp = current_bpp; }
+ int graph_set_drawbuffer(int address) {
 
   // Set up the draw buffer.
   dma_packet_clear(&graph_packet);
-  dma_packet_append(&graph_packet, GIF_SET_TAG(4, 1, 0, 0, GIF_TAG_PACKED, 1));
+  dma_packet_append(&graph_packet, GIF_SET_TAG(5, 1, 0, 0, GIF_TAG_PACKED, 1));
   dma_packet_append(&graph_packet, 0x0E);
-  dma_packet_append(&graph_packet, GIF_SET_FRAME(address >> 13, width >> 6, bpp, 0));
+  dma_packet_append(&graph_packet, GIF_SET_FRAME(address >> 13, graph_mode[current_mode].width >> 6, current_bpp, 0));
   dma_packet_append(&graph_packet, GIF_REG_FRAME_1);
-  dma_packet_append(&graph_packet, GIF_SET_SCISSOR(0, width - 1, 0, height - 1));
+  dma_packet_append(&graph_packet, GIF_SET_SCISSOR(0, graph_mode[current_mode].width - 1, 0, graph_mode[current_mode].height - 1));
   dma_packet_append(&graph_packet, GIF_REG_SCISSOR_1);
   dma_packet_append(&graph_packet, GIF_SET_TEST(0, 0, 0, 0, 0, 0, 1, 2));
   dma_packet_append(&graph_packet, GIF_REG_TEST_1);
-  dma_packet_append(&graph_packet, GIF_SET_XYOFFSET(0, 0));
+  dma_packet_append(&graph_packet, GIF_SET_XYOFFSET((2048 - (graph_mode[current_mode].width >> 1)) << 4, (2048 - (graph_mode[current_mode].height >> 1)) << 4));
   dma_packet_append(&graph_packet, GIF_REG_XYOFFSET_1);
+  dma_packet_append(&graph_packet, GIF_SET_PRMODECONT(1));
+  dma_packet_append(&graph_packet, GIF_REG_PRMODECONT);
   dma_packet_send(&graph_packet, DMA_CHANNEL_GIF);
 
   // End function.
@@ -124,13 +140,13 @@
 
  }
 
- int graph_set_zbuffer(int address, int bpp) {
+ int graph_set_zbuffer(int address) {
 
   // Set up the zbuffer.
   dma_packet_clear(&graph_packet);
   dma_packet_append(&graph_packet, GIF_SET_TAG(1, 1, 0, 0, GIF_TAG_PACKED, 1));
   dma_packet_append(&graph_packet, 0x0E);
-  dma_packet_append(&graph_packet, GIF_SET_ZBUF(address >> 13, bpp, 0));
+  dma_packet_append(&graph_packet, GIF_SET_ZBUF(address >> 13, current_zpp, 0));
   dma_packet_append(&graph_packet, GIF_REG_ZBUF_1);
   dma_packet_send(&graph_packet, DMA_CHANNEL_GIF);
 
@@ -139,21 +155,21 @@
 
  }
 
- int graph_set_clearbuffer(int red, int green, int blue, int alpha) {
+ int graph_set_clearbuffer(int red, int green, int blue) {
 
   // Clear the screen.
   dma_packet_clear(&graph_packet);
   dma_packet_append(&graph_packet, GIF_SET_TAG(6, 1, 0, 0, GIF_TAG_PACKED, 1));
   dma_packet_append(&graph_packet, 0x0E);
-  dma_packet_append(&graph_packet, GIF_SET_TEST(0, 0, 0, 0, 0, 0, 0, 1));
+  dma_packet_append(&graph_packet, GIF_SET_TEST(0, 0, 0, 0, 0, 0, 1, 1));
   dma_packet_append(&graph_packet, GIF_REG_TEST_1);
   dma_packet_append(&graph_packet, GIF_SET_PRIM(6, 0, 0, 0, 0, 0, 0, 0, 0));
   dma_packet_append(&graph_packet, GIF_REG_PRIM);
-  dma_packet_append(&graph_packet, GIF_SET_RGBAQ(red, green, blue, alpha, 0x3F800000));
+  dma_packet_append(&graph_packet, GIF_SET_RGBAQ(red, green, blue, 0x80, 0x3F800000));
   dma_packet_append(&graph_packet, GIF_REG_RGBAQ);
-  dma_packet_append(&graph_packet, GIF_SET_XYZ(0, 0, 0));
+  dma_packet_append(&graph_packet, GIF_SET_XYZ(0x0000, 0x0000, 0x0000));
   dma_packet_append(&graph_packet, GIF_REG_XYZ2);
-  dma_packet_append(&graph_packet, GIF_SET_XYZ(65535, 65535, 0));
+  dma_packet_append(&graph_packet, GIF_SET_XYZ(0xFFFF, 0xFFFF, 0x0000));
   dma_packet_append(&graph_packet, GIF_REG_XYZ2);
   dma_packet_append(&graph_packet, GIF_SET_TEST(0, 0, 0, 0, 0, 0, 1, 2));
   dma_packet_append(&graph_packet, GIF_REG_TEST_1);

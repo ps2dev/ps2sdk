@@ -6,8 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 
-SUBDIRS = kernel libc rpc startup loader debug sbv dma graph math3d
+SAMPLE_DIR = math3d
 
-include $(PS2SDKSRC)/Rules.make
+include $(PS2SDKSRC)/samples/Rules.samples
