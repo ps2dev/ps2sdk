@@ -14,13 +14,17 @@ $(RELEASE_COMMON_DIRS):
 	mkdir $(RELEASE_COMMON_DIRS)
 
 release: all $(RELEASE_COMMON_DIRS)
-	for file in include/* ; do \
-	   echo Installing $$file to $(PS2SDK)/common/include ; \
-	   cp -f $$file $(PS2SDK)/common/include ; \
+	@for file in include/* ; do \
+	   if test -f $$file ; then \
+	     echo Installing $$file to $(PS2SDK)/common/include ; \
+	     cp -f $$file $(PS2SDK)/common/include ; \
+	   fi \
 	done; 
-	for file in include/sys/* ; do \
-	   echo Installing $$file to $(PS2SDK)/common/include/sys ; \
-	   cp -f $$file $(PS2SDK)/common/include/sys ; \
+	@for file in include/sys/* ; do \
+	   if test -f $$file ; then \
+	     echo Installing $$file to $(PS2SDK)/common/include/sys ; \
+	     cp -f $$file $(PS2SDK)/common/include/sys ; \
+	   fi \
 	done;
 
 release-clean:
