@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <sysclib.h>
 #include <sysmem.h>
-#include "AHX.h"
+#include "ahx.h"
 
 // if this is defined the irx will be compiled without PRINTF output
 #define COMPACT_CODE

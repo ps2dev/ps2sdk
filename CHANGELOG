@@ -10,6 +10,7 @@
 
 2005-01-13
   - pixel, added simple ctype for IOP
+  - pixel, made AHX beeing usable :)
 
 2005-01-12
   - pixel, created alloc.irx

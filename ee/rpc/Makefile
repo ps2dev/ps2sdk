@@ -9,6 +9,6 @@
 # $Id$
 
 
-SUBDIRS = cdvd filexio hdd keyboard memorycard mouse multitap pad poweroff tcpip padx remote
+SUBDIRS = ahx cdvd filexio hdd keyboard memorycard mouse multitap pad poweroff tcpip padx remote
 
 include $(PS2SDKSRC)/Rules.make
