@@ -1,0 +1,96 @@
+libmtap - Playstation 2 multi-tap access library
+------------------------------------------------
+
+Copyright (c) 2004 Nicholas Van Veen <nickvv@xtra.co.nz>
+
+Introduction
+------------
+
+libmtap is a simple library which allows you to poll controllers connected
+through a PS2 multi-tap. libmtap works alongside the standard pad library, 
+libpad. Steps for polling a controller connected to a multi-tap are as 
+follows:
+
+ 1. Load required IRX files
+ 2. Init the multi-tap library
+ 3. Init the pad library
+ 4. Open the multi-tap port
+ 5. Check if a multi-tap is connected to the opened port - if not, you may
+    close the port (note that a port must be opened in order to determine
+    if a multi-tap is connected).
+ 6. "Open" each controller with padPortOpen(port, slot);
+ 7. Use standard libpad functions such as padGetState, padRead to get the state
+    of each controller connected to the multi-tap.
+
+Ports & Slots
+-------------
+
+The pad library requires two parameters when using a controller - port, and slot.
+Port relates to either of the two ports on the PS2. Slot relates to one of the 
+4 slots present on a multi-tap. The diagram below should give you a better idea
+of this system.
+
+				      _________[ Port 1, Slot 3 ]
+                                     /    _____[ Port 1, Slot 2 ]
+  |------------|                     |   /     
+  |            |                   |-------|
+  |            |                   | C   D |
+  |     PS2    |          |--------|       | <- Multi-tap
+  |            |          |        | A   B |
+  |            |          |        |-------|
+  |            |          |          |   \_____ [ Port 1, Slot 1 ]
+  |     Port 1 |]---------|          \__________[ Port 1, Slot 0 ]
+  |            |
+  |     Port 0 |]---[ Port 0, Slot 0 ]
+  |            |
+  |------------|
+
+Example code
+------------
+
+ 1. Loading the required IRX files
+
+    // NOTE: X** modules must be used!
+    SifLoadModule("rom0:XSIO2MAN", 0, NULL);
+    SifLoadModule("rom0:XMTAPMAN", 0, NULL);
+    SifLoadModule("rom0:XPADMAN", 0, NULL);
+
+ 2. Init, opening ports
+
+    // Init libmtap
+    mtapInit();
+
+    // Init libpad
+    padInit(0);
+
+    // Open ports
+    mtapPortOpen(0);
+    mtapPortOpen(1);
+
+ 3. Check connections
+
+    rv = mtapGetConnection(0);
+    if(rv == 1)
+        printf("- Multitap exists on slot 0\n");
+    else
+    {
+        printf("- No multitap exists on slot 0\n");
+        mtapPortClose(0);
+    }
+
+    rv = mtapGetConnection(1);
+    if(rv == 1)
+        printf("- Multitap exists on slot 1\n");
+    else
+    {
+        printf("- No multitap exists on slot 1\n");
+        mtapPortClose(1);
+    }
+   
+ 4. Open the controllers
+
+    padPortOpen(0, 0, padBuf1A);
+    padPortOpen(0, 1, padBuf1B);
+    padPortOpen(0, 2, padBuf1C);
+    padPortOpen(0, 3, padBuf1D);
+
