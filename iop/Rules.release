@@ -14,8 +14,10 @@ $(RELEASE_IOP_DIRS):
 	mkdir $(RELEASE_IOP_DIRS)
 
 release: all $(RELEASE_IOP_DIRS)
-	@echo Installing $(IOP_BIN) to $(PS2SDK)/iop/irx
-	@cp -f $(IOP_BIN) $(PS2SDK)/iop/irx/
+	@if test $(IOP_BIN) ; then \
+	   echo Installing $(IOP_BIN) to $(PS2SDK)/iop/irx ; \
+	   cp -f $(IOP_BIN) $(PS2SDK)/iop/irx/ ; \
+	fi;
 	@if test -d include ; then \
 	   for file in include/*; do \
 	     if test -f $$file ; then \
