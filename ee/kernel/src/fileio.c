@@ -52,6 +52,7 @@ struct _fio_read_data {
 	u8	buf2[16];
 };
 
+extern int _iop_reboot_count;
 extern SifRpcClientData_t _fio_cd;
 extern int _fio_init;
 extern int _fio_block_mode;
@@ -76,8 +77,14 @@ int fioInit()
 {
 	int res;
 	ee_sema_t compSema;
+	static int _rb_count = 0;
+	if(_rb_count != _iop_reboot_count)
+	{
+	    _rb_count = _iop_reboot_count;
+	    _fio_init = 0;
+	}
 
-	if (_fio_init)
+    if (_fio_init)
 		return 0;
 
 	SifInitRpc(0);
@@ -85,7 +92,7 @@ int fioInit()
 	while (((res = SifBindRpc(&_fio_cd, 0x80000001, 0)) >= 0) &&
 			(_fio_cd.server == NULL))
 		nopdelay();
-	
+
 	if (res < 0)
 		return res;
 
@@ -136,12 +143,12 @@ int fioSync(int mode, int *retVal)
 
 			if(PollSema(_fio_completion_sema) < 0)
 				return FIO_INCOMPLETE;
-	
+
 			SignalSema(_fio_completion_sema);
 
 			if(retVal != NULL)
 				*retVal = *(int *)UNCACHED_SEG(&_fio_recv_data[0]);
-		
+
 			return FIO_COMPLETE;
 
 		default:
@@ -211,7 +218,7 @@ int fioClose(int fd)
 	WaitSema(_fio_completion_sema);
 
 	arg.fd = fd;
-	
+
 	if ((res = SifCallRpc(&_fio_cd, FIO_F_CLOSE, 0, &arg, 4, &arg, 4,
 					(void *)_fio_intr, NULL)) < 0)
 		return res;
@@ -319,7 +326,7 @@ int fioWrite(int fd, const void *ptr, int size)
 					_fio_recv_data, 4, (void *)_fio_intr, NULL)) < 0)
 		return res;
 
-	
+
 	if(_fio_block_mode == FIO_NOWAIT)
 		return 0;
 	else
