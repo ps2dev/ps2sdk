@@ -11,6 +11,11 @@
 
 #include "types.h"
 
+/* Defines for WaitEventFlag */
+#define WEF_AND		0
+#define WEF_OR		1
+#define WEF_CLEAR	0x10
+
 typedef struct {
 	u32	attr;
 	u32	option;
