@@ -1,0 +1,11 @@
+DECLARE_EXPORT_TABLE(dns, 1, 0)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_ret0)
+	DECLARE_EXPORT(_ret0)
+	DECLARE_EXPORT(_ret0)
+
+	DECLARE_EXPORT(gethostbyname)
+	DECLARE_EXPORT(dnsSetNameserverAddress)	// 5
+END_EXPORT_TABLE
+
+int _ret0() { return 0; }

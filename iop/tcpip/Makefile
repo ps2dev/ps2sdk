@@ -7,7 +7,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 
-SUBDIRS = tcpip tcpips udptty 
+SUBDIRS = tcpip tcpips udptty dns
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
