@@ -21,13 +21,25 @@ enum iop_irq_list {
 	IOP_IRQ_VBLANK = 0,
 	IOP_IRQ_SBUS,
 
+	IOP_IRQ_RTC0 = 0x04,
+	IOP_IRQ_RTC1 = 0x05,
+	IOP_IRQ_RTC2 = 0x06,
+
 	IOP_IRQ_DEV9 = 0x0d,
+
+	IOP_IRQ_RTC3 = 0x0e,
+	IOP_IRQ_RTC4 = 0x0f,
+	IOP_IRQ_RTC5 = 0x10,
+
 	IOP_IRQ_SIO2 = 0x11,
 	IOP_IRQ_USB = 0x16,
 	IOP_IRQ_ILINK = 0x18,
 
 	IOP_IRQ_DMA2 = 0x22,
-	IOP_IRQ_DMA_DEV9 = 0x29
+	IOP_IRQ_DMA_DEV9 = 0x29,
+
+	IOP_IRQ_DMA_SIF0 = 0x2A,
+	IOP_IRQ_DMA_SIF1 = 0x2B,
 };
 
 #define intrman_IMPORTS_start DECLARE_IMPORT_TABLE(intrman, 1, 2)
@@ -58,5 +70,24 @@ int QueryIntrContext();
 #define I_QueryIntrContext DECLARE_IMPORT(23, QueryIntrContext)
 int QueryIntrStack();
 #define I_QueryIntrStack DECLARE_IMPORT(24, QueryIntrStack)
+
+#define intrman_IMPORTS \
+	intrman_IMPORTS_start \
+ \
+ 	I_RegisterIntrHandler \
+	I_ReleaseIntrHandler \
+ \
+ 	I_EnableIntr \
+	I_DisableIntr \
+ \
+ 	I_CpuDisableIntr \
+	I_CpuEnableIntr \
+ \
+ 	I_CpuSuspendIntr \
+	I_CpuResumeIntr \
+ \
+ 	I_QueryIntrContext \
+ \
+	intrman_IMPORTS_end
 
 #endif /* IOP_INTRMAN_H */

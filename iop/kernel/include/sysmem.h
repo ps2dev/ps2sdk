@@ -52,4 +52,23 @@ void Kprintf_set(char* (*newKprintf)(unsigned int unk, const char *, ...),
 		unsigned int newunk);
 #define I_Kprintf_set DECLARE_IMPORT(15, Kprintf_set)
 
+#define sysmem_IMPORTS \
+	sysmem_IMPORTS_start \
+ \
+ 	I_AllocSysMemory \
+ \
+ 	I_FreeSysMemory \
+ \
+ 	I_QueryMemSize \
+	I_QueryMaxFreeMemSize \
+	I_QueryTotalFreeMemSize \
+	I_QueryBlockTopAddress \
+	I_QueryBlockSize \
+ \
+ 	I_Kprintf \
+ 	I_Kprintf_set \
+ \
+	sysmem_IMPORTS_end END_IMPORT_TABLE
+
+
 #endif /* IOP_SYSMEM_H */

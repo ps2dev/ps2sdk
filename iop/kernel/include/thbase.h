@@ -115,4 +115,51 @@ void SysClock2USec(iop_sys_clock_t *sys_clock, u32 *sec, u32 *usec);
 int GetSystemStatusFlag();
 #define I_GetSystemStatusFlag DECLARE_IMPORT(41, GetSystemStatusFlag)
 
+
+#define thbase_IMPORTS \
+	thbase_IMPORTS_start \
+ \
+ 	I_CreateThread \
+	I_DeleteThread \
+ \
+ 	I_StartThread \
+	I_StartThreadArgs \
+ \
+ 	I_ExitThread \
+	I_ExitDeleteThread \
+	I_TerminateThread \
+	I_iTerminateThread \
+ \
+ 	I_ChangeThreadPriority \
+	I_iChangeThreadPriority \
+ \
+ 	I_RotateThreadReadyQueue \
+	I_iRotateThreadReadyQueue \
+ \
+ 	I_ReleaseWaitThread \
+	I_iReleaseWaitThread \
+ \
+ 	I_GetThreadId \
+	I_ReferThreadStatus \
+	I_iReferThreadStatus \
+ \
+ 	I_SleepThread \
+	I_WakeupThread \
+	I_iWakeupThread \
+ \
+ 	I_DelayThread \
+ \
+ 	I_GetSystemTime \
+	I_SetAlarm \
+	I_iSetAlarm \
+	I_CancelAlarm \
+	I_iCancelAlarm \
+	I_USec2SysClock \
+	I_SysClock2USec \
+ \
+ 	I_GetSystemStatusFlag \
+ \
+	thbase_IMPORTS_end
+
+
 #endif /* IOP_THBASE_H */

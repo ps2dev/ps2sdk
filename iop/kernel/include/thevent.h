@@ -51,4 +51,24 @@ int WaitEventFlag(int ef, u32 bits, int mode, u32 *resbits);
 int PollEventFlag(int ef, u32 bits, int mode, u32 *resbits);
 #define I_PollEventFlag DECLARE_IMPORT(11, PollEventFlag)
 
+
+#define thevent_IMPORTS \
+	thevent_IMPORTS_start \
+ \
+ 	I_CreateEventFlag \
+	I_DeleteEventFlag \
+ \
+ 	I_SetEventFlag \
+	I_iSetEventFlag \
+ \
+ 	I_ClearEventFlag \
+	I_iClearEventFlag \
+ \
+ 	I_WaitEventFlag \
+ \
+ 	I_PollEventFlag \
+ \
+	thevent_IMPORTS_end END_IMPORT_TABLE
+
+
 #endif /* IOP_THEVENT_H */

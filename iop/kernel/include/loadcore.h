@@ -55,4 +55,21 @@ void *QueryLibraryEntryTable(iop_library_t *library);
 int * QueryBootMode(int mode);
 #define I_QueryBootMode DECLARE_IMPORT(12, QueryBootMode)
 
+#define loadcore_IMPORTS \
+	loadcore_IMPORTS_start \
+ \
+ 	I_GetLibraryEntryTable \
+ \
+ 	I_FlushIcache \
+	I_FlushDcache \
+ \
+ 	I_RegisterLibraryEntries \
+	I_ReleaseLibraryEntries \
+ \
+ 	I_QueryLibraryEntryTable \
+	I_QueryBootMode \
+ \
+	loadcore_IMPORTS_end
+
+
 #endif /* IOP_LOADCORE_H */

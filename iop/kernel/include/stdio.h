@@ -25,4 +25,12 @@ int printf(const char *format, ...);
 int puts(const char *s);
 #define I_puts DECLARE_IMPORT(7, puts)
 
+#define stdio_IMPORTS \
+	stdio_IMPORTS_start \
+ \
+ 	I_printf \
+	I_puts \
+ \
+	stdio_IMPORTS_end
+
 #endif /* IOP_STDIO_H */

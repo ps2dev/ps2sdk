@@ -26,8 +26,16 @@ typedef struct t_SifDmaTransfer
 } SifDmaTransfer_t;
 
 /* Modes for DMA transfers */
-#define SIF_DMA_TO_EE		1
+#define SIF_DMA_FROM_IOP	0x0
+#define SIF_DMA_TO_IOP		0x1
+#define SIF_DMA_FROM_EE		0x0
+#define SIF_DMA_TO_EE		0x1
+
+#define SIF_DMA_INT_I		0x2
+#define SIF_DMA_INT_O		0x4
+#define SIF_DMA_SPR		0x8
 #define SIF_DMA_BSN		0x10 /* ? what is this? */
+#define SIF_DMA_TAG		0x20
 
 #define sifman_IMPORTS_start DECLARE_IMPORT_TABLE(sifman, 1, 1)
 #define sifman_IMPORTS_end END_IMPORT_TABLE

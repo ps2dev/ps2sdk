@@ -61,11 +61,11 @@ char *rindex(const char *s, int c);
 #define I_rindex DECLARE_IMPORT(26, rindex)
 size_t strlen(const char *s);
 #define I_strlen DECLARE_IMPORT(27, strlen)
-int strncat(char *dest, const char *src, size_t size);
+char *strncat(char *dest, const char *src, size_t size);
 #define I_strncat DECLARE_IMPORT(28, strncat)
 int strncmp(const char *p, const char *q, size_t size);
 #define I_strncmp DECLARE_IMPORT(29, strncmp)
-int strncpy(char *dest, const char *src, size_t size);
+char *strncpy(char *dest, const char *src, size_t size);
 #define I_strncpy DECLARE_IMPORT(30, strncpy)
 char *strpbrk(const char *s, const char *accept);
 #define I_strpbrk DECLARE_IMPORT(31, strpbrk)
@@ -81,5 +81,43 @@ long strtol(const char *s, char **endptr, int base);
 #define I_strtol DECLARE_IMPORT(36, strtol)
 unsigned long strtoul(const char *s, char **endptr, int base);
 #define I_strtoul DECLARE_IMPORT(38, strtoul)
+
+#define sysclib_IMPORTS \
+	sysclib_IMPORTS_start \
+ \
+ 	I_setjmp \
+	I_longjmp \
+ \
+	I_toupper \
+	I_tolower \
+	I_look_ctype_table \
+	I_memchr \
+	I_memcmp \
+	I_memcpy \
+	I_memmove \
+	I_memset \
+ \
+	I_sprintf \
+ \
+	I_strcat \
+	I_strchr \
+	I_strcmp \
+	I_strcpy \
+	I_strcspn \
+	I_index \
+	I_rindex \
+	I_strlen \
+	I_strncat \
+	I_strncmp \
+	I_strncpy \
+	I_strpbrk \
+	I_strrchr \
+	I_strspn \
+	I_strstr \
+	I_strtok \
+	I_strtol \
+	I_strtoul \
+ \
+	sysclib_IMPORTS_end
 
 #endif /* IOP_SYSCLIB_H */
