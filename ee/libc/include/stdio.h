@@ -17,17 +17,18 @@
 /* include file. */
 #include <stdlib.h>
 #include <stdarg.h>
+#include <stddef.h>
+#include <sys/types.h>
 #include <io_common.h>
 #include <errno.h>
 #include <fileio.h>
 
-/* Some defines for the unix 'unistd' functions */
-// was using variadic macro for that... but it breaks emoon's pedantic compiler :P
+/* Some aliases for the unix 'unistd' functions */
 static __inline__ int open(const char *fname, int flags, ...) { return fioOpen(fname, flags); }
-#define close(handle) fioClose(handle)
-#define read(handle,buffer,size) fioRead(handle,buffer,size)
-#define write(handle,buffer,size) fioWrite(handle,buffer,size)
-#define lseek(handle,position,wheel) fioLseek(handle,position,wheel)
+static __inline__ int close(int handle) { return fioClose(handle); }
+static __inline__ ssize_t read(int handle, void * buffer, size_t size) { return fioRead(handle, buffer, size); }
+static __inline__ ssize_t write(int handle, void * buffer, size_t size) { return fioWrite(handle, buffer, size); }
+static __inline__ off_t lseek(int handle, off_t position, int wheel) { return fioLseek(handle, position, wheel); }
 
 /* Some win32 equivalents... baaah */
 #define _open open
