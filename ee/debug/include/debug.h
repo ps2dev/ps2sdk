@@ -22,6 +22,7 @@ void init_scr(void);
 void scr_printf(const char *, ...) __attribute__((format(printf,1,2)));
 void _putchar(int x, int y, u32 color, u8 ch);
 void ps2GetStackTrace(unsigned int* results,int max);
+void _setXY(int x, int y);
 
 #define DEBUG_BGCOLOR(col) *((u64 *) 0x120000e0) = (u64) (col)
 

@@ -275,4 +275,8 @@ void scr_printf(const char *format, ...)
 }
 
 
-
+void _setXY(int x, int y)
+{
+	if( x<MX && x>=0 ) X=x;
+	if( y<MY && y>=0 ) Y=y;
+}
