@@ -8,6 +8,10 @@
 #
 # $Id$
 
+
+2004-12-17
+  - radad, fixed libpad.h for some naming mistakes.
+
 2004-11-22
   - stefan, complete support for C++ global constructors and deconstructors.
   - pixel, fixing libkernel/libc dependancy.
