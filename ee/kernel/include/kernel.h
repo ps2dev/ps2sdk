@@ -133,7 +133,7 @@ void iInvalidDCache(void *start, void *end);
 /* System call prototypes */
 void ResetEE(u32 init_bitfield);
 void SetGsCrt(s16 interlace, s16 pal_ntsc, s16 field);
-void Exit(s32 exit_code);
+void Exit(s32 exit_code) __attribute__((noreturn));
 void LoadExecPS2(const char *filename, s32 num_args, char *args[]);
 s32  ExecPS2(void *entry, void *gp, int num_args, char *args[]);
 void RFU009(u32 arg0, u32 arg1);
@@ -261,9 +261,9 @@ void _SyncDCache(void *start, void *end);
 void _InvalidDCache(void *start, void *end);
 
 /* stdio */
-int	printf(const char *format, ...);
-int	sprintf(char *str, const char *format, ...);
-int	snprintf(char *str, size_t sz, const char *format, ...);
+int	printf(const char *format, ...) __attribute__((format(printf,1,2)));
+int	sprintf(char *str, const char *format, ...) __attribute__((format(printf,2,3)));
+int	snprintf(char *str, size_t sz, const char *format, ...) __attribute__((format(printf,3,4)));
 
 int	vprintf(const char *format, va_list args);
 int	vsprintf(char *str, const char *format, va_list ap);
@@ -273,9 +273,9 @@ int	putchar(int c);
 int	puts(const char *str);
 
 /* stdlib - program termination */
-void	abort(void);
-void	exit(int retval);
-void	_exit(int retval);
+void	abort(void) __attribute__((noreturn));
+void	exit(int retval) __attribute__((noreturn));
+void	_exit(int retval) __attribute__((noreturn));
 
 /* errno.h */
 #ifndef errno
@@ -285,7 +285,7 @@ int *__errno(void);
 
 /* Napalm/Naplink puts() and printf().  */
 int	npmPuts(const char *buf);
-int	nprintf(const char *format, ...);
+int	nprintf(const char *format, ...) __attribute__((format(printf,1,2)));
 
 #ifdef __cplusplus
 }
