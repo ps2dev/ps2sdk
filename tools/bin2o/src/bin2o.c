@@ -88,18 +88,21 @@ void create_elf(FILE * dest, unsigned char * source, u32 size, char * label) {
     struct elf_section_t section;
     struct elf_symbol_t symbol;
     u32 strtab_size;
-    char strtab[256];
+    char strtab[512];
+    u32 data_size[4];
     
     for (i = 0; i < sizeof(elf_header); i++) {
 	fputc(elf_header[i], dest);
     }
     
-    strtab_size = (strlen(label) * 2 + 13);
+    strtab_size = (strlen(label) * 3 + 1 + 7 + 5 + 6);
     strtab[0] = 0;
     strcpy(strtab + 1, label);
     strcat(strtab + 1, "_start");
-    strcpy(strtab + strlen(label) + 8, label);
-    strcat(strtab + strlen(label) + 8, "_end");
+    strcpy(strtab + 1 + strlen(label) + 7, label);
+    strcat(strtab + 1 + strlen(label) + 7, "_end");
+    strcpy(strtab + 1 + strlen(label) + 7 + strlen(label) + 5, label);
+    strcat(strtab + 1 + strlen(label) + 7 + strlen(label) + 5, "_size");
     
     // section 0 (NULL)
     section.sh_name = section.sh_type = section.sh_flags = section.sh_addr = section.sh_offset = section.sh_size =
@@ -129,7 +132,7 @@ void create_elf(FILE * dest, unsigned char * source, u32 size, char * label) {
     section.sh_flags = 0;
     section.sh_addr = 0;
     section.sh_offset = LE32(40 * 5 + 0x34 + 33);
-    section.sh_size = LE32(0x20);
+    section.sh_size = LE32(0x30);
     section.sh_link = LE32(3);
     section.sh_info = 0;
     section.sh_addralign = LE32(4);
@@ -143,7 +146,7 @@ void create_elf(FILE * dest, unsigned char * source, u32 size, char * label) {
     section.sh_type = LE32(3); // STRTAB
     section.sh_flags = 0;
     section.sh_addr = 0;
-    section.sh_offset = LE32(40 * 5 + 0x34 + 33 + 0x20);
+    section.sh_offset = LE32(40 * 5 + 0x34 + 33 + 0x30);
     section.sh_size = LE32(strtab_size);
     section.sh_link = 0;
     section.sh_info = 0;
@@ -158,8 +161,8 @@ void create_elf(FILE * dest, unsigned char * source, u32 size, char * label) {
     section.sh_type = LE32(1); // PROGBITS
     section.sh_flags = LE32(3); // Write + Alloc
     section.sh_addr = 0;
-    section.sh_offset = LE32(40 * 5 + 0x34 + 33 + 0x20 + strtab_size);
-    section.sh_size = LE32(size);
+    section.sh_offset = LE32(40 * 5 + 0x34 + 33 + 0x30 + strtab_size);
+    section.sh_size = LE32(size + 16);
     section.sh_link = 0;
     section.sh_addralign = LE32(16);
     section.sh_entsize = 0;
@@ -169,21 +172,38 @@ void create_elf(FILE * dest, unsigned char * source, u32 size, char * label) {
     
     
     fwrite(shstrtab, 1, 33, dest);
+
     symbol.st_name = LE32(1);
-    symbol.st_value = 0;
+    symbol.st_value = 16;
     symbol.st_size = LE32(size);
     symbol.st_info = 0x11;
     symbol.st_other = 0;
     symbol.st_shndx = LE16(4);
     fwrite(&symbol, 1, sizeof(symbol), dest);
-    symbol.st_name = LE32(strlen(label) + 8);
-    symbol.st_value = LE32(size);
+
+    symbol.st_name = LE32(strlen(label) + 1 + 7);
+    symbol.st_value = LE32(size + 16);
     symbol.st_size = 0;
     symbol.st_info = 0x11;
     symbol.st_other = 0;
     symbol.st_shndx = LE16(4);
     fwrite(&symbol, 1, sizeof(symbol), dest);
+
+    symbol.st_name = LE32(strlen(label) * 2 + 1 + 7 + 5);
+    symbol.st_value = 0;
+    symbol.st_size = 4;
+    symbol.st_info = 0x11;
+    symbol.st_other = 0;
+    symbol.st_shndx = LE16(4);
+    fwrite(&symbol, 1, sizeof(symbol), dest);
+
     fwrite(strtab, 1, strtab_size, dest);
+    
+    data_size[0] = LE32(size);
+    data_size[1] = 0;
+    data_size[2] = 0;
+    data_size[3] = 0;
+    fwrite(data_size, 4, 4, dest);
     fwrite(source, 1, size, dest);
 }
 
@@ -228,6 +248,7 @@ int main(int argc, char *argv[])
     create_elf(dest, buffer, fd_size, argv[3]);
 
     fclose(dest);
+    free(buffer);
 
     return 0;
 }
