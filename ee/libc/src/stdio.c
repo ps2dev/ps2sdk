@@ -88,10 +88,10 @@ int fclose(FILE *stream)
 #endif
 
 
-#ifdef F__fcloseall
+#ifdef F_fcloseall
 /*
 **
-**  [func] - _fcloseall.
+**  [func] - fcloseall.
 **  [desc] - attempts to close all the open files. if able to close all the open
 **           files then returns the number of files closed. else returns -1.
 **  [entr] - none.
@@ -100,7 +100,7 @@ int fclose(FILE *stream)
 **  [post] - all open non-system files are closed.
 **
 */
-int _fcloseall(void)
+int fcloseall(void)
 {
   int  i, ret = 0;
   FILE *iob;

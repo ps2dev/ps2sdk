@@ -41,7 +41,7 @@ XPRINTF_OBJS = vxprintf.o xprintf.o __sout.o vsnprintf.o snprintf.o vsprintf.o s
 	npmPuts.o nprintf.o vnprintf.o asprintf.o vasprintf.o
 XPRINTF_OBJS := $(XPRINTF_OBJS:%=$(EE_OBJS_DIR)%)
 
-STDIO_OBJS = clearerr.o fclose.o _fcloseall.o feof.o ferror.o fflush.o fflushall.o fgetc.o \
+STDIO_OBJS = clearerr.o fclose.o fcloseall.o feof.o ferror.o fflush.o fflushall.o fgetc.o \
 	fgetpos.o fgets.o fopen.o fputc.o fputs.o fread.o fseek.o fsetpos.o ftell.o fwrite.o \
 	getc.o getchar.o getfdtype.o gets.o perror.o putc.o puts.o remove.o rename.o \
 	rewind.o skipatoi.o sscanf.o stdio.o tmpfile.o tmpnam.o ungetc.o updatestdoutxy.o strerror.o

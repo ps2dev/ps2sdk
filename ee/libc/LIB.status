@@ -1,0 +1,110 @@
+Stdlib:
+------
+
+What should stdlib contain, and current status.
+
+atof     - ok
+atoi     - some macro conflict ?
+atol     - ok
+strtod   - ok
+strtof   - ok
+strtold  - missing (do we want to support long double anyway?)
+strtol   - ok
+strtoul  - ok
+strtoq   - missing
+strtouq  - missing
+strtoll  - missing (same as strtoq, different "standard")
+strtoull - missing (same as strtouq, different "standard")
+
+
+no locale function at all (__strtol_l, etc...)
+
+
+random    - missing
+srandom   - missing
+initstate - missing
+setstate  - missing
+rand      - ok (should be...)
+srand     - ok
+drand48   - missing
+
+all *rand48 missing
+
+malloc, calloc, realloc, free, are defined in alloc.c. Maybe reviewing realloc.c
+could be an idea...
+
+abort  - clean ? should call atexit functions ?
+atexit - ok, but not used
+exit   - no atexit support
+
+getenv - ok
+setenv - ok
+
+system - missing, and won't be here anyway I think...
+
+bsearch - ok
+qsort   - missing. Anyone? :P
+abs     - ok
+labs    - ok
+llabs   - ok
+div     - ok, but shouldn't it use some asm ?
+ldiv    - ok, same
+lldiv   - ok, same
+
+ecvt    - missing
+fcvt    - missing
+gcvt    - won't compile
+
+Multibyte function disabled... I don't trust them. Somebody please advice.
+mblen, mbtowc, wctomb, mbstowcs, wcstombs
+
+
+Stdio:
+-----
+
+stdin, stdout, stderr, ok. Maybe some specific ps2 function to switch stderr
+to SIO could be an idea.
+
+Also, should have buffering...
+
+remove     - missing
+rename     - missing
+tmp*       - missing
+fclose     - ok
+fflush     - ok (memory card)
+fcloseall  - ok
+fopen      - ok
+freopen    - missing
+fdopen     - missing
+setbuf     - missing
+setvbuf    - missing
+
+*printf    - ok (f, s, vf, v, vs, sn, vsn, vas, as)
+*dprintf   - missing
+*scanf     - missing
+*getc      - ok
+getchar    - ok
+*putc      - ok
+putchar    - ok
+{get,put}w - missing
+*gets      - ok
+getdelim   - missing, gnu replacement to gets
+getline    - missing, gnu replacement to gets
+*puts      - ok
+ungetc     - missing, buffering needed
+fread      - ok, buffering needed
+fwrite     - ok, buffering needed
+fseek      - ok
+ftell      - ok
+rewind     - ok
+fgetpos    - ok
+fsetpos    - ok
+clearerr   - ok
+feof       - ok
+ferror     - ok
+
+perror     - ok
+fileno     - missing
+pipe funcs - missing, can we make them ?
+lock funcs - missing, can we make them ?
+
