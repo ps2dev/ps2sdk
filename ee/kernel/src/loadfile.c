@@ -552,6 +552,10 @@ int SifExecModuleBuffer(void *ptr, u32 size, u32 arg_len, const char *args, int 
 	SifDmaTransfer_t dmat;
 	void *iop_addr;
 	int res;
+	unsigned int qid;
+	
+	/* Round the size up to the nearest 16 bytes. */
+	size = (size + 15) & -16;
 
 	if (!(iop_addr = SifAllocIopHeap(size)))
 		return -E_IOP_NO_MEMORY;
@@ -560,7 +564,13 @@ int SifExecModuleBuffer(void *ptr, u32 size, u32 arg_len, const char *args, int 
 	dmat.dest = iop_addr;
 	dmat.size = size;
 	dmat.attr = 0;
-	SifSetDma(&dmat, 1);
+	SifWriteBackDCache(ptr, size);
+	qid = SifSetDma(&dmat, 1);
+	
+	if (!qid)
+	    return somerror;
+	
+	while(SifDmaStat(qid) >= 0);
 
 	res = _SifLoadModuleBuffer(iop_addr, arg_len, args, mod_res);
 	SifFreeIopHeap(iop_addr);

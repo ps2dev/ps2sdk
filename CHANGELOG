@@ -9,6 +9,9 @@
 # $Id$
 
 
+2004-09-16
+  - mrhtford, fixed SifExecModuleBuffer (bad DMA behavior).
+
 2004-09-14
   - pixel, put and tweaked jenova0's stdlib code.
 
