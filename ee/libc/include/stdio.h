@@ -14,14 +14,6 @@
 #ifndef __STDIO_H__
 #define __STDIO_H__
 
-
-/* ensure size_t is defined. */
-#ifndef __SIZE_T_DEFINED
-#define __SIZE_T_DEFINED
-typedef unsigned int size_t;
-#endif // __SIZE_T_DEFINED
-
-
 /* include file. */
 #include <stdlib.h>
 #include <stdarg.h>
