@@ -51,6 +51,9 @@ $(IOP_OBJS_DIR):
 $(IOP_BIN_DIR):
 	mkdir $(IOP_BIN_DIR)
 
+$(IOP_LIB_DIR):
+	mkdir $(IOP_LIB_DIR)
+
 $(IOP_BIN) : $(IOP_OBJS)
 	$(IOP_CC) $(IOP_LDFLAGS) -o $(IOP_BIN) $(IOP_OBJS) $(IOP_LIBS)
 
