@@ -1,0 +1,20 @@
+####################################################
+# Change the settings, so they match yours         #
+####################################################
+
+EE_PREFIX = ee-
+EE_CC = $(EE_PREFIX)gcc
+EE_CXX= $(EE_PREFIX)g++
+EE_AS = $(EE_PREFIX)as
+EE_LD = $(EE_PREFIX)ld
+EE_AR = $(EE_PREFIX)ar
+EE_OBJCOPY = $(EE_PREFIX)objcopy
+EE_STRIP = $(EE_PREFIX)strip
+
+IOP_PREFIX = iop-
+IOP_CC = $(IOP_PREFIX)gcc
+IOP_AS = $(IOP_PREFIX)as
+IOP_LD = $(IOP_PREFIX)ld
+IOP_AR = $(IOP_PREFIX)ar
+IOP_OBJCOPY = $(IOP_PREFIX)objcopy
+IOP_STRIP = $(IOP_PREFIX)strip
