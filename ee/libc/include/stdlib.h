@@ -86,6 +86,7 @@ void          abort(void) __attribute__ ((noreturn));
 int           abs(int);
 int           atexit(void (*)(void));
 double        atof(const char *);
+void          exit(int);
 //int           atoi(const char *);
 //long          atol(const char *);
 #define       atoi(x) strtol(x, NULL, 10)
