@@ -31,21 +31,25 @@
 
 // rpc bind values
 #define CD_SERVER_INIT			0x80000592
-#define CD_SERVER_SEARCHFILE	0x80000597
+#define CD_SERVER_SEARCHFILE		0x80000597
 #define CD_SERVER_DISKREADY		0x8000059A
 #define CD_SERVER_EXTRA			0x80000596	// XCDVDFSV only
 
-
-// set this to 1 or 2 to print cdvd debug messages
-s32 cdDebug = 0;
 
 // allows access to gp reg value from linker script
 extern void *_gp;
 
 // prototypes
 void cdSemaExit(void);
-static void cdCallbackLoop(void);
 
+// searchfile structure
+typedef struct {
+	u8 padding[32];
+	char name[256];
+	void *dest;
+} SearchFilePkt;
+
+#ifdef F__libcdvd_internals
 // bind variables
 s32 bindInit = -1;
 s32 bindDiskReady = -1;
@@ -55,12 +59,15 @@ SifRpcClientData_t clientInit __attribute__ ((aligned(64)));	// for cdInit()
 SifRpcClientData_t clientDiskReady __attribute__ ((aligned(64)));	// for cdDiskReady() (s-cmd)
 SifRpcClientData_t clientSearchFile __attribute__ ((aligned(64)));	// for cdSearchFile() (n-cmd)
 
+// set this to 1 or 2 to print cdvd debug messages
+s32 cdDebug = 0;
+
 // semaphore ids
 s32 callbackSemaId = -1;	// callback semaphore id
-volatile s32 cbSema = 0;	// callback semaphore variable (not a real semaphore)
+vs32 cbSema = 0;	// callback semaphore variable (not a real semaphore)
 
 // callbacks
-volatile s32 cdCallbackNum __attribute__ ((aligned(64)));
+vs32 cdCallbackNum __attribute__ ((aligned(64)));
 volatile CdCBFunc cdCallbackFunc __attribute__ ((aligned(64)));
 
 // threads
@@ -76,14 +83,31 @@ s32 trayReqData __attribute__ ((aligned(64)));
 u32 initMode __attribute__ ((aligned(64)));
 
 // searchfile stuff
-typedef struct {
-	u8 padding[32];
-	char name[256];
-	void *dest;
-} SearchFilePkt;
 SearchFilePkt searchFileSendBuff __attribute__ ((aligned(64)));
 u32 searchFileRecvBuff __attribute__ ((aligned(64)));
+#endif
 
+// Prototypes for multimodule
+extern s32 bindInit;
+extern s32 bindDiskReady;
+extern s32 bindSearchFile;
+extern SifRpcClientData_t clientInit;
+extern SifRpcClientData_t clientDiskReady;
+extern SifRpcClientData_t clientSearchFile;
+extern s32 cdDebug;
+extern s32 callbackSemaId;
+extern vs32 cbSema;
+extern vs32 cdCallbackNum;
+extern volatile CdCBFunc cdCallbackFunc;
+extern s32 cdThreadId;
+extern ee_thread_t cdThreadParam;
+extern s32 callbackThreadId;
+extern ee_thread_t callbackThreadParam;
+extern s32 diskReadyMode;
+extern s32 trayReqData;
+extern u32 initMode;
+extern SearchFilePkt searchFileSendBuff;
+extern u32 searchFileRecvBuff;
 
 
 
@@ -96,6 +120,7 @@ u32 searchFileRecvBuff __attribute__ ((aligned(64)));
 // args:        init mode (CDVD_INIT_???)
 // returns:     1 if successful
 //                      0 if error
+#ifdef F_cdInit
 s32 cdInit(s32 mode)
 {
 	s32 i;
@@ -139,9 +164,10 @@ s32 cdInit(s32 mode)
 
 	return 1;
 }
-
+#endif
 
 // convert from sector number to minute:second:frame
+#ifdef F_cdIntToPos
 CdvdLocation_t *cdIntToPos(s32 i, CdvdLocation_t * p)
 {
 	p->minute = (((((i + 150) / 75) / 60) / 10) * 16) + ((((i + 150) / 75) / 60) % 10);
@@ -149,13 +175,16 @@ CdvdLocation_t *cdIntToPos(s32 i, CdvdLocation_t * p)
 	p->sector = ((((i + 150) % 75) / 10) * 16) + (((i + 150) % 75) % 10);
 	return p;
 }
+#endif
 
 // convert from minute:second:frame to sector number
+#ifdef F_cdPosToInt
 s32 cdPosToInt(CdvdLocation_t * p)
 {
 	return ((((p->minute / 16) * 10) + (p->minute & 0xF)) * 60 + ((p->second / 16) * 10) + (p->second & 0xF)
 	    ) * 75 + (p->sector / 16) * 10 + (p->sector & 0xF) - 150;
 }
+#endif
 
 
 // search for a file on disc
@@ -165,6 +194,7 @@ s32 cdPosToInt(CdvdLocation_t * p)
 //                              (should be in the form '\\SYSTEM.CNF;1')
 // returns:     1 if successful
 //                      0 if error (or no file found)
+#ifdef F_cdSearchFile
 s32 cdSearchFile(CdvdFileSpec_t * file, const char *name)
 {
 	s32 i;
@@ -224,12 +254,14 @@ s32 cdSearchFile(CdvdFileSpec_t * file, const char *name)
 //	return 1;
 	return *(s32*)UNCACHED_SEG(nCmdRecvBuff);
 }
+#endif
 
 // checks if drive is ready
 // 
 // args:         mode
 // returns:     CDVD_READY_READY if ready
 //                      CDVD_READY_NOTREADY if busy
+#ifdef F_cdDiskReady
 s32 cdDiskReady(s32 mode)
 {
 	s32 i;
@@ -273,8 +305,9 @@ s32 cdDiskReady(s32 mode)
 	SignalSema(sCmdSemaId);
 	return *(s32 *) UNCACHED_SEG(sCmdRecvBuff);
 }
+#endif
 
-
+#ifdef F_cdSemaInit
 void cdSemaInit(void)
 {
 	struct t_ee_sema semaParam;
@@ -294,7 +327,9 @@ void cdSemaInit(void)
 
 	cbSema = 0;
 }
+#endif
 
+#ifdef F_cdSemaExit
 void cdSemaExit(void)
 {
 	if (callbackThreadId) {
@@ -305,6 +340,7 @@ void cdSemaExit(void)
 	DeleteSema(sCmdSemaId);
 	DeleteSema(callbackSemaId);
 }
+#endif
 
 // initialise callback thread
 // 
@@ -313,6 +349,8 @@ void cdSemaExit(void)
 //                      callback thread stack size
 // returns:     1 if initialised callback
 //                      0 if only priority was changed
+#ifdef F_cdInitCallbackThread
+static void cdCallbackLoop(void);
 s32 cdInitCallbackThread(s32 priority, void *stackAddr, s32 stackSize)
 {
 	// if callback thread has already been initialised, just change its priority
@@ -333,6 +371,7 @@ s32 cdInitCallbackThread(s32 priority, void *stackAddr, s32 stackSize)
 
 	return 1;
 }
+#endif
 
 // sets the cd callback function
 // gets called when the following functions complete:
@@ -340,6 +379,7 @@ s32 cdInitCallbackThread(s32 priority, void *stackAddr, s32 stackSize)
 // 
 // args:        pointer to new callback function (or null)
 // returns:     pointer to old function
+#ifdef F_cdSetCallback
 CdCBFunc cdSetCallback(CdCBFunc newFunc)
 {
 	CdCBFunc oldFunc = cdCallbackFunc;
@@ -350,7 +390,7 @@ CdCBFunc cdSetCallback(CdCBFunc newFunc)
 	cdCallbackFunc = newFunc;
 	return oldFunc;
 }
-
+#endif
 
 // **** Util Functions ****
 
@@ -359,6 +399,7 @@ CdCBFunc cdSetCallback(CdCBFunc newFunc)
 // once callbacks have been inited using cdInitCallbackThread()
 // this function continually loops until a callback with function
 // number '-1' is generated
+#ifdef F_cdInitCallbackThread
 static void cdCallbackLoop(void)
 {
 	while (1) {
@@ -378,8 +419,10 @@ static void cdCallbackLoop(void)
 		cbSema = 0;
 	}
 }
+#endif
 
 // generic cd callback function
+#ifdef F_cdCallback
 void cdCallback(void *funcNum)
 {
 	// set the currently executing function num
@@ -401,3 +444,4 @@ void cdCallback(void *funcNum)
 	cdCallbackNum = 0;
 
 }
+#endif

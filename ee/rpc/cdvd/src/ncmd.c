@@ -45,6 +45,7 @@
 
 s32 cdCheckNCmd(s32 cmd);
 
+#ifdef F__ncmd_internals
 s32 bindNCmd = -1;
 
 SifRpcClientData_t clientNCmd __attribute__ ((aligned(64)));	// for n-cmds
@@ -66,6 +67,25 @@ s32 streamStatus = 0;
 CdvdReadMode_t dummyMode;
 u32 seekSector __attribute__ ((aligned(64)));
 u8 cdda_st_buf[64] ALIGNED(64);
+#endif
+
+extern s32 bindNcmd;
+extern SifRpcClientData_t clientNCmd;
+extern s32 nCmdSemaId;
+extern s32 nCmdNum;
+extern u32 readStreamData[5];
+extern u32 readData[6];
+extern CdvdChain_t readChainData[66];
+extern u32 getTocSendBuff[3];
+extern u32 _rd_intr_data[64];
+extern u32 curReadPos;
+extern u8 tocBuff[2064];
+extern u8 nCmdRecvBuff[48];
+extern u8 nCmdSendBuff[48];
+extern s32 streamStatus;
+extern CdvdReadMode_t dummyMode;
+extern u32 seekSector;
+extern u8 cdda_st_buf[64];
 
 s32 cdNCmdDiskReady(void);
 
@@ -81,9 +101,11 @@ struct _cdvd_read_data
 	u32		src2;
 };
 
+void cdAlignReadBuffer(struct _cdvd_read_data *data);
 // this gets called when the cdRead function finishes
 // to copy the data read in to unaligned buffers
-static void cdAlignReadBuffer(struct _cdvd_read_data *data)
+#ifdef F__cdAlignReadBuffer
+void cdAlignReadBuffer(struct _cdvd_read_data *data)
 {
 	struct _cdvd_read_data *uncached = UNCACHED_SEG(data);
 	
@@ -97,6 +119,7 @@ static void cdAlignReadBuffer(struct _cdvd_read_data *data)
 	
 	cdCallback((void*)&cdCallbackNum);
 }
+#endif
 
 // read data from cd
 // non-blocking, requires cdSync() call
@@ -107,6 +130,7 @@ static void cdAlignReadBuffer(struct _cdvd_read_data *data)
 //                      mode to read as
 // returns: 1 if successful
 //                      0 if error
+#ifdef F_cdRead
 s32 cdRead(u32 sectorLoc, u32 numSectors, void *buf, CdvdReadMode_t * mode)
 {
 	s32 bufSize;
@@ -157,7 +181,9 @@ s32 cdRead(u32 sectorLoc, u32 numSectors, void *buf, CdvdReadMode_t * mode)
 	SignalSema(nCmdSemaId);
 	return 1;
 }
+#endif
 
+#ifdef F_cdDvdRead
 int cdDvdRead(u32 lbn, u32 nsectors, void *buf, CdvdReadMode_t *rm)
 {
 	if (cdNCmdDiskReady() == CDVD_READY_NOTREADY)
@@ -189,7 +215,9 @@ int cdDvdRead(u32 lbn, u32 nsectors, void *buf, CdvdReadMode_t *rm)
 	SignalSema(nCmdSemaId);
 	return 1;
 }
+#endif
 
+#ifdef F_cdCddaRead
 int cdCddaRead(u32 lbn, u32 nsectors, void *buf, CdvdReadMode_t *rm)
 {
 	u32 sector_size;
@@ -235,12 +263,14 @@ int cdCddaRead(u32 lbn, u32 nsectors, void *buf, CdvdReadMode_t *rm)
 	SignalSema(nCmdSemaId);
 	return 1;
 }
+#endif
 
 // get toc from inserted disc
 // 
 // args:        buffer to hold toc (1024 or 2064 bytes?)
 // returns:     1 if successful
 //                      0 otherwise
+#ifdef F_cdGetToc
 s32 cdGetToc(u8 * toc)
 {
 	u8 *tocPtr, *tocEnd;
@@ -280,6 +310,7 @@ s32 cdGetToc(u8 * toc)
 	SignalSema(nCmdSemaId);
 	return *(s32 *) UNCACHED_SEG(nCmdRecvBuff);
 }
+#endif
 
 // seek to given sector on disc
 // non-blocking, requires cdSync() call
@@ -287,6 +318,7 @@ s32 cdGetToc(u8 * toc)
 // args:        sector to seek to on disc
 // returns:     1 if successful
 //                      0 if error
+#ifdef F_cdSeek
 s32 cdSeek(u32 sectorLoc)
 {
 	if (cdNCmdDiskReady() == CDVD_READY_NOTREADY)
@@ -310,12 +342,14 @@ s32 cdSeek(u32 sectorLoc)
 	SignalSema(nCmdSemaId);
 	return 1;
 }
+#endif
 
 // puts ps2 cd drive into standby mode
 // non-blocking, requires cdSync() call
 // 
 // returns:     1 if successful
 //                      0 if error
+#ifdef F_cdStandby
 s32 cdStandby(void)
 {
 	if (cdNCmdDiskReady() == CDVD_READY_NOTREADY)
@@ -335,12 +369,14 @@ s32 cdStandby(void)
 	SignalSema(nCmdSemaId);
 	return 1;
 }
+#endif
 
 // stops ps2 cd drive from spinning
 // non-blocking, requires cdSync() call
 // 
 // returns:     1 if successful
 //                      0 if error
+#ifdef F_cdStop
 s32 cdStop(void)
 {
 	if (cdNCmdDiskReady() == CDVD_READY_NOTREADY)
@@ -360,12 +396,14 @@ s32 cdStop(void)
 	SignalSema(nCmdSemaId);
 	return 1;
 }
+#endif
 
 // pauses ps2 cd drive
 // non-blocking, requires cdSync() call
 // 
 // returns:     1 if successful
 //                      0 if error
+#ifdef F_cdPause
 s32 cdPause(void)
 {
 	if (cdNCmdDiskReady() == CDVD_READY_NOTREADY)
@@ -385,6 +423,7 @@ s32 cdPause(void)
 	SignalSema(nCmdSemaId);
 	return 1;
 }
+#endif
 
 // send an n-command by function number
 // 
@@ -395,6 +434,7 @@ s32 cdPause(void)
 //                      size of output buffer (0 - 16 bytes)
 // returns:     1 if successful
 //                      0 if error
+#ifdef F_cdApplyNCmd
 s32 cdApplyNCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff, u16 outBuffSize)
 {
 	if (cdNCmdDiskReady() == CDVD_READY_NOTREADY)
@@ -420,6 +460,7 @@ s32 cdApplyNCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff, u1
 	SignalSema(nCmdSemaId);
 	return *(s32 *) UNCACHED_SEG(nCmdRecvBuff);
 }
+#endif
 
 // read data to iop memory
 // non-blocking, requires cdSync() call
@@ -430,6 +471,7 @@ s32 cdApplyNCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff, u1
 //                      read mode
 // returns:     1 if successful
 //                      0 if error
+#ifdef F_cdReadIOPMem
 s32 cdReadIOPMem(u32 sectorLoc, u32 numSectors, void *buf, CdvdReadMode_t * mode)
 {
 	if (cdNCmdDiskReady() == CDVD_READY_NOTREADY)
@@ -461,6 +503,7 @@ s32 cdReadIOPMem(u32 sectorLoc, u32 numSectors, void *buf, CdvdReadMode_t * mode
 	SignalSema(nCmdSemaId);
 	return 1;
 }
+#endif
 
 // wait for disc to finish all n-commands
 // (shouldnt really need to call this yourself)
@@ -468,6 +511,7 @@ s32 cdReadIOPMem(u32 sectorLoc, u32 numSectors, void *buf, CdvdReadMode_t * mode
 // returns:     6 if busy
 //                      2 if ready
 //                      0 if error
+#ifdef F_cdNCmdDiskReady
 s32 cdNCmdDiskReady(void)
 {
 	if (cdCheckNCmd(CD_NCMD_DISKREADY) == 0)
@@ -481,6 +525,7 @@ s32 cdNCmdDiskReady(void)
 	SignalSema(nCmdSemaId);
 	return *(s32 *) UNCACHED_SEG(nCmdRecvBuff);
 }
+#endif
 
 // do a 'chain' of reads with one command
 // last chain values must be all 0xFFFFFFFF
@@ -493,6 +538,7 @@ s32 cdNCmdDiskReady(void)
 //                      read mode
 // returns:     1 if successful
 //                      0 if error
+#ifdef F_cdReadChain
 s32 cdReadChain(CdvdChain_t * readChain, CdvdReadMode_t * mode)
 {
 	s32 chainNum, i, sectorType;
@@ -566,8 +612,10 @@ s32 cdReadChain(CdvdChain_t * readChain, CdvdReadMode_t * mode)
 	SignalSema(nCmdSemaId);
 	return 1;
 }
+#endif
 
 // get the current read position (when reading using cdRead)
+#ifdef F_cdGetReadPos
 u32 cdGetReadPos(void)
 {
 	if (cdCallbackNum == CD_NCMD_READ) {
@@ -575,6 +623,7 @@ u32 cdGetReadPos(void)
 	}
 	return 0;
 }
+#endif
 
 // **** Stream Functions ****
 
@@ -585,11 +634,13 @@ u32 cdGetReadPos(void)
 //                      mode to read in
 // returns:     1 if successful
 //                      0 otherwise
+#ifdef F_cdStStart
 s32 cdStStart(u32 sectorLoc, CdvdReadMode_t * mode)
 {
 	streamStatus = 1;
 	return cdStream(sectorLoc, 0, NULL, CDVD_ST_CMD_START, mode);
 }
+#endif
 
 // read stream data
 // 
@@ -599,6 +650,7 @@ s32 cdStStart(u32 sectorLoc, CdvdReadMode_t * mode)
 //                      error value holder
 // returns:     number of sectors read if successful
 //                      0 otherwise
+#ifdef F_cdStRead
 s32 cdStRead(u32 sectorType, u32 * buffer, u32 mode, u32 * error)
 {
 	s32 ret, i, err, sectorReadSize;
@@ -638,26 +690,31 @@ s32 cdStRead(u32 sectorType, u32 * buffer, u32 mode, u32 * error)
 		printf("sceCdStRead BLK Read Ended\n");
 	return i;
 }
+#endif
 
 // stop streaming
 // 
 // returns:     1 if successful
 //                      0 otherwise
+#ifdef F_cdStStop
 s32 cdStStop(void)
 {
 	streamStatus = 0;
 	return cdStream(0, 0, NULL, CDVD_ST_CMD_STOP, &dummyMode);
 }
+#endif
 
 // seek to a new stream position
 // 
 // args:        sector location to start streaming from
 // returns:     1 if successful
 //                      0 otherwise
+#ifdef F_cdStSeek
 s32 cdStSeek(u32 sectorLoc)
 {
 	return cdStream(sectorLoc, 0, NULL, CDVD_ST_CMD_SEEK, &dummyMode);
 }
+#endif
 
 // init streaming
 // 
@@ -666,43 +723,52 @@ s32 cdStSeek(u32 sectorLoc)
 //                      buffer address on iop
 // returns:     1 if successful
 //                      0 otherwise
+#ifdef F_cdStInit
 s32 cdStInit(u32 buffSize, u32 numBuffers, void *buf)
 {
 	streamStatus = 0;
 	return cdStream(buffSize, numBuffers, buf, CDVD_ST_CMD_INIT, &dummyMode);
 }
+#endif
 
 // get stream read status
 // 
 // returns:     number of sectors read if successful
 //                      0 otherwise
+#ifdef F_cdStStat
 s32 cdStStat(void)
 {
 	streamStatus = 0;
 	return cdStream(0, 0, NULL, CDVD_ST_CMD_STAT, &dummyMode);
 }
+#endif
 
 // pause streaming
 // 
 // returns:     1 if successful
 //                      0 otherwise
+#ifdef F_cdStPause
 s32 cdStPause(void)
 {
 	streamStatus = 0;
 	return cdStream(0, 0, NULL, CDVD_ST_CMD_PAUSE, &dummyMode);
 }
+#endif
 
 // continue streaming
 // 
 // returns:     1 if successful
 //                      0 otherwise
+#ifdef F_cdStResume
 s32 cdStResume(void)
 {
 	streamStatus = 0;
 	return cdStream(0, 0, NULL, CDVD_ST_CMD_RESUME, &dummyMode);
 }
+#endif
 
 // perform the stream operation
+#ifdef F_cdStream
 int cdStream(u32 lbn, u32 nsectors, void *buf, CdvdStCmd_t cmd, CdvdReadMode_t *rm)
 {
 	if (cdCheckNCmd(15) == 0)
@@ -732,7 +798,9 @@ int cdStream(u32 lbn, u32 nsectors, void *buf, CdvdStCmd_t cmd, CdvdReadMode_t *
 	SignalSema(nCmdSemaId);
 	return *(int *)UNCACHED_SEG(nCmdRecvBuff);
 }
+#endif
 
+#ifdef F_cdCddaStream
 int cdCddaStream(u32 lbn, u32 nsectors, void *buf, CdvdStCmd_t cmd, CdvdReadMode_t *rm)
 {
 	u32 sector_size;
@@ -764,7 +832,7 @@ int cdCddaStream(u32 lbn, u32 nsectors, void *buf, CdvdStCmd_t cmd, CdvdReadMode
 	SignalSema(nCmdSemaId);
 	return *(int *)UNCACHED_SEG(nCmdRecvBuff);
 }
-
+#endif
 
 // waits/checks for completion of n-commands
 // 
@@ -772,6 +840,7 @@ int cdCddaStream(u32 lbn, u32 nsectors, void *buf, CdvdStCmd_t cmd, CdvdReadMode
 //                      1 = check current status and return immediately
 // returns:     0 if completed
 //              1 if still executing command
+#ifdef F_cdSync
 s32 cdSync(s32 mode)
 {
 	// block till completed mode
@@ -790,12 +859,14 @@ s32 cdSync(s32 mode)
 
 	return 0;
 }
+#endif
 
 // check whether ready to send an n-command
 // 
 // args:        current command
 // returns:     1 if read to send
 //                      0 if busy/error
+#ifdef F_cdCheckNCmd
 s32 cdCheckNCmd(s32 cmd)
 {
 	s32 i;
@@ -834,3 +905,4 @@ s32 cdCheckNCmd(s32 cmd)
 	bindNCmd = 0;
 	return 1;
 }
+#endif

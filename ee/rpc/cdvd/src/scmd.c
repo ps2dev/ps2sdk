@@ -41,6 +41,7 @@
 #define CD_SCMD_MMODE			0x22	// XCDVDFSV only
 #define CD_SCMD_SETTHREADPRI	0x23	// XCDVDFSV only
 
+#ifdef F__scmd_internals
 s32 bindSCmd = -1;
 
 SifRpcClientData_t clientSCmd __attribute__ ((aligned(64)));	// for s-cmds
@@ -51,6 +52,14 @@ u8 sCmdRecvBuff[48] __attribute__ ((aligned(64)));
 u8 sCmdSendBuff[48] __attribute__ ((aligned(64)));
 
 s32 sCmdNum = 0;
+#endif
+
+extern s32 bindSCmd;
+extern SifRpcClientData_t clientSCmd;
+extern s32 sCmdSemaId;
+extern u8 sCmdREcvBuff[48];
+extern u8 sCmdSendBuff[48];
+extern s32 sCmdNum;
 
 s32 cdCheckSCmd(s32 cmd);
 
@@ -63,6 +72,7 @@ s32 cdCheckSCmd(s32 cmd);
 // args:        time/date struct
 // returns:     1 if successful
 //                      0 if error
+#ifdef F_cdReadClock
 s32 cdReadClock(CdvdClock_t * clock)
 {
 	if (cdCheckSCmd(CD_SCMD_READCLOCK) == 0)
@@ -84,12 +94,14 @@ s32 cdReadClock(CdvdClock_t * clock)
 	SignalSema(sCmdSemaId);
 	return *(s32 *) UNCACHED_SEG(sCmdRecvBuff);
 }
+#endif
 
 // write clock value to ps2s clock
 // 
 // args:        time/date struct to set clocks time with
 // returns:     1 if successful
 //                      0 if error
+#ifdef F_cdWriteClock
 s32 cdWriteClock(const CdvdClock_t * clock)
 {
 	if (cdCheckSCmd(CD_SCMD_WRITECLOCK) == 0)
@@ -108,10 +120,12 @@ s32 cdWriteClock(const CdvdClock_t * clock)
 	SignalSema(sCmdSemaId);
 	return *(s32 *) UNCACHED_SEG(sCmdRecvBuff);
 }
+#endif
 
 // gets the type of the currently inserted disc
 // 
 // returns:     disk type (CDVD_TYPE_???)
+#ifdef F_cdGetDiscType
 CdvdDiscType_t cdGetDiscType(void)
 {
 	if (cdCheckSCmd(CD_SCMD_GETDISCTYPE) == 0)
@@ -125,10 +139,12 @@ CdvdDiscType_t cdGetDiscType(void)
 	SignalSema(sCmdSemaId);
 	return *(s32 *) UNCACHED_SEG(sCmdRecvBuff);
 }
+#endif
 
 // gets the last error that occurred
 // 
 // returns:     error type (CDVD_ERR_???)
+#ifdef F_cdGetError
 s32 cdGetError(void)
 {
 	if (cdCheckSCmd(CD_SCMD_GETERROR) == 0)
@@ -142,6 +158,7 @@ s32 cdGetError(void)
 	SignalSema(sCmdSemaId);
 	return *(s32 *) UNCACHED_SEG(sCmdRecvBuff);
 }
+#endif
 
 // open/close/check disk tray
 // 
@@ -149,6 +166,7 @@ s32 cdGetError(void)
 //                      address for returning tray state change
 // returns:     1 if successful
 //                      0 if error
+#ifdef F_cdTrayReq
 s32 cdTrayReq(s32 param, u32 * traychk)
 {
 	if (cdCheckSCmd(CD_SCMD_TRAYREQ) == 0)
@@ -168,6 +186,7 @@ s32 cdTrayReq(s32 param, u32 * traychk)
 	SignalSema(sCmdSemaId);
 	return *(s32 *) UNCACHED_SEG(sCmdRecvBuff);
 }
+#endif
 
 // send an s-command by function number
 // 
@@ -178,6 +197,7 @@ s32 cdTrayReq(s32 param, u32 * traychk)
 //                      size of output buffer (0 - 16 bytes)
 // returns:     1 if successful
 //                      0 if error
+#ifdef F_cdApplySCmd
 s32 cdApplySCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff, u16 outBuffSize)
 {
 	if (cdCheckSCmd(CD_SCMD_SCMD) == 0)
@@ -200,10 +220,12 @@ s32 cdApplySCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff, u1
 	SignalSema(sCmdSemaId);
 	return 1;
 }
+#endif
 
 // gets the status of the cd system
 // 
 // returns:     status (CDVD_STAT_???)
+#ifdef F_cdStatus
 s32 cdStatus(void)
 {
 	if (cdCheckSCmd(CD_SCMD_STATUS) == 0)
@@ -220,11 +242,13 @@ s32 cdStatus(void)
 	SignalSema(sCmdSemaId);
 	return *(s32 *) UNCACHED_SEG(sCmdRecvBuff);
 }
+#endif
 
 // 'breaks' the currently executing command
 // 
 // returns:     1 if successful
 //                      0 if error
+#ifdef F_cdBreak
 s32 cdBreak(void)
 {
 	if (cdCheckSCmd(CD_SCMD_BREAK) == 0)
@@ -238,6 +262,7 @@ s32 cdBreak(void)
 	SignalSema(sCmdSemaId);
 	return *(s32 *) UNCACHED_SEG(sCmdRecvBuff);
 }
+#endif
 
 // cancel power off
 // 
@@ -246,6 +271,7 @@ s32 cdBreak(void)
 // args:        result
 // returns:     1 if successful
 //                      0 if error
+#ifdef F_cdCancelPowerOff
 s32 cdCancelPowerOff(u32 * result)
 {
 	if (cdCheckSCmd(CD_SCMD_CANCELPOWEROFF) == 0)
@@ -260,6 +286,7 @@ s32 cdCancelPowerOff(u32 * result)
 	SignalSema(sCmdSemaId);
 	return *(s32 *) UNCACHED_SEG(sCmdRecvBuff);
 }
+#endif
 
 // blue led control
 // 
@@ -269,6 +296,7 @@ s32 cdCancelPowerOff(u32 * result)
 //                      result
 // returns:     1 if successful
 //                      0 if error
+#ifdef F_cdBlueLedCtrl
 s32 cdBlueLedCtrl(u8 control, u32 * result)
 {
 	if (cdCheckSCmd(CD_SCMD_BLUELEDCTRL) == 0)
@@ -286,6 +314,7 @@ s32 cdBlueLedCtrl(u8 control, u32 * result)
 	SignalSema(sCmdSemaId);
 	return *(s32 *) UNCACHED_SEG(sCmdRecvBuff);
 }
+#endif
 
 // power off
 // 
@@ -294,6 +323,7 @@ s32 cdBlueLedCtrl(u8 control, u32 * result)
 // args:        result
 // returns:     1 if successful
 //                      0 if error
+#ifdef F_cdPowerOff
 s32 cdPowerOff(u32 * result)
 {
 	if (cdCheckSCmd(CD_SCMD_POWEROFF) == 0)
@@ -308,6 +338,7 @@ s32 cdPowerOff(u32 * result)
 	SignalSema(sCmdSemaId);
 	return *(s32 *) UNCACHED_SEG(sCmdRecvBuff);
 }
+#endif
 
 // set media mode
 // 
@@ -316,6 +347,7 @@ s32 cdPowerOff(u32 * result)
 // args:        media mode
 // returns:     1 if successful
 //                      0 if error
+#ifdef F_cdSetMediaMode
 s32 cdSetMediaMode(u32 mode)
 {
 	if (cdCheckSCmd(CD_SCMD_MMODE) == 0)
@@ -332,6 +364,7 @@ s32 cdSetMediaMode(u32 mode)
 	SignalSema(sCmdSemaId);
 	return *(s32 *) UNCACHED_SEG(sCmdRecvBuff);
 }
+#endif
 
 // change cd thread priority
 // 
@@ -340,6 +373,7 @@ s32 cdSetMediaMode(u32 mode)
 // args:        media mode
 // returns:     1 if successful
 //                      0 if error
+#ifdef F_cdChangeThreadPriority
 s32 cdChangeThreadPriority(u32 priority)
 {
 	if (cdCheckSCmd(CD_SCMD_SETTHREADPRI) == 0)
@@ -356,13 +390,14 @@ s32 cdChangeThreadPriority(u32 priority)
 	SignalSema(sCmdSemaId);
 	return *(s32 *) UNCACHED_SEG(sCmdRecvBuff);
 }
-
+#endif
 
 // check whether ready to send an s-command
 // 
 // args:        current command
 // returns:     1 if ready to send
 //                      0 if busy/error
+#ifdef F_cdCheckSCmd
 s32 cdCheckSCmd(s32 cur_cmd)
 {
 	s32 i;
@@ -398,7 +433,7 @@ s32 cdCheckSCmd(s32 cur_cmd)
 	bindSCmd = 0;
 	return 1;
 }
-
+#endif
 
 // s-command wait
 // (shouldnt really need to call this yourself)
@@ -407,6 +442,7 @@ s32 cdCheckSCmd(s32 cur_cmd)
 //                      1 = check current status and return immediately
 // returns:     0 = completed
 //                      1 = not completed
+#ifdef F_cdSyncS
 s32 cdSyncS(s32 mode)
 {
 	if (mode == 0) {
@@ -418,3 +454,4 @@ s32 cdSyncS(s32 mode)
 	}
 	return SifCheckStatRpc(&clientSCmd);
 }
+#endif
