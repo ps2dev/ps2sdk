@@ -41,11 +41,23 @@ extern "C" {
 
  int dma_channel_initialize(int channel, void *handler);
 
+ int dma_channel_initialize_i(int channel, void *handler);
+
  int dma_channel_wait(int channel, int timeout);
+
+ int dma_channel_wait_i(int channel, int timeout);
 
  int dma_channel_send(int channel, void *data, int data_size);
 
+ int dma_channel_send_i(int channel, void *data, int data_size);
+
+ int dma_channel_send_chain(int channel, void *data);
+
+ int dma_channel_send_chain_i(int channel, void *data);
+
  int dma_channel_shutdown(int channel);
+
+ int dma_channel_shutdown_i(int channel);
 
 #ifdef __cplusplus
 }
