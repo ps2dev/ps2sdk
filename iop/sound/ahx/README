@@ -1,0 +1,30 @@
+AHX Player v1.0b
+================
+
+This is an AHX replayer for the IOP. Based on source by
+Dexter/Abyss and utilising LKZ's FreeSD framework.
+
+It has been designed to compile with PS2SDK (tested with
+ps2sdk v1.0alpha). The src directory contains the IRX
+sourcecode and AHX player sourcecode (iop dir) and an
+EE side RPC interface (ee dir).
+
+The compiled IRX is completely standalone and does not
+require either LIBSD or FREESD.
+
+I will include some example code to make using the IRX
+easy to understand (it's quite simple).
+
+Thanks to Emoon, LKZ and NiK for their help with this
+project.
+
+Please consult the included LICENSE for information
+on the AFL license that applies to this work.
+
+Raizor (2nd September 2004)
+
+todo:
+1. Comment RPC interface source
+2. Create example application
+3. Write some docs
+
