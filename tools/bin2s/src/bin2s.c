@@ -14,7 +14,7 @@ int main(int argc, char *argv[])
 	int i;
 	unsigned char *data;
 
-	if(argc <= 1) {
+	if(argc != 4) {
 		printf("bin2s - By Sjeep\n"
 			   "Usage: bin2s infile outfile label\n\n");
 		return 1;
