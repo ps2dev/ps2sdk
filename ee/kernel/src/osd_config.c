@@ -16,7 +16,7 @@
 #include <tamtypes.h>
 #include <kernel.h>
 #include <fileio.h>
-#include <config.h>
+#include <osd_config.h>
 
 // config for dev ps2 T-10000
 typedef struct

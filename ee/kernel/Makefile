@@ -120,7 +120,7 @@ $(FILEIO_OBJS): src/fileio.c
 $(LOADFILE_OBJS): src/loadfile.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(CONFIG_OBJS): src/config.c
+$(CONFIG_OBJS): src/osd_config.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(IOPHEAP_OBJS): src/iopheap.c
