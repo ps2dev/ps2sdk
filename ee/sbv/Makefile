@@ -33,5 +33,5 @@ clean:
 
 
 include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/sbv/Rules.make
-include $(PS2SDKSRC)/sbv/Rules.release
+include $(PS2SDKSRC)/ee/sbv/Rules.make
+include $(PS2SDKSRC)/ee/sbv/Rules.release

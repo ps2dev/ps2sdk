@@ -11,7 +11,7 @@ ifeq ($(PS2SDKSRC), "")
 PS2SDKSRC=$(pwd)
 endif
 
-SUBDIRS = tools iop ee common sbv samples
+SUBDIRS = tools iop ee common samples
 
 all: build 
 	@echo .;
