@@ -39,7 +39,8 @@
 #define   SIO_LSR_FE 0x08	/* Framing Error.  */
 
 #define SIO_IER		0x1000f120	/* Interrupt Enable Register.  */
-#define   SIO_IER_ELSI 0x04	/* Enable Line Status Interrupt.  */
+#define SIO_IER_ERDAI	0x01		/* Enable Received Data Available Interrupt */
+#define SIO_IER_ELSI 	0x04		/* Enable Line Status Interrupt.  */
 
 #define SIO_ISR		0x1000f130	/* Interrupt Status Register (?).  */
 
