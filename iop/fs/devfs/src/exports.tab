@@ -1,0 +1,14 @@
+/**/
+
+DECLARE_EXPORT_TABLE(devfs, 1, 1)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(DevFSAddDevice)
+	DECLARE_EXPORT(DevFSDelDevice)
+	DECLARE_EXPORT(DevFSAddSubDevice)
+	DECLARE_EXPORT(DevFSDelSubDevice)
+END_EXPORT_TABLE
+
+void _retonly() {}
