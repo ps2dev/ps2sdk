@@ -8,6 +8,9 @@
 #
 # $Id$
 
+2005-01-02
+  - herben, added volatiles counterparts to tamtypes.h
+
 2005-01-01 Version 1.2 - new year's release.
   - pixel, put errno var into errno.h (duh)
   - pixel, changed write functions to use const buffers.
