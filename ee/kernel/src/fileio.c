@@ -122,7 +122,7 @@ int fioSync(int mode, int *retVal)
 {
 	int res;
 
-	if (!_fio_init && ((res = fioInit()) < 0))
+	if ((res = fioInit()) < 0)
 		return res;
 
 	if(_fio_block_mode != FIO_NOWAIT) return -E_LIB_UNSUPPORTED;
@@ -184,7 +184,7 @@ int fioOpen(const char *name, int mode)
 	struct _fio_open_arg arg;
 	int res;
 
-	if (!_fio_init && ((res = fioInit()) < 0))
+	if ((res = fioInit()) < 0)
 		return res;
 
 	WaitSema(_fio_completion_sema);
@@ -212,7 +212,7 @@ int fioClose(int fd)
 	union { int fd; int result; } arg;
 	int res;
 
-	if (!_fio_init && ((res = fioInit()) < 0))
+	if ((res = fioInit()) < 0)
 		return res;
 
 	WaitSema(_fio_completion_sema);
@@ -257,7 +257,7 @@ int fioRead(int fd, void *ptr, int size)
 	struct _fio_read_arg arg;
 	int res;
 
-	if (!_fio_init && ((res = fioInit()) < 0))
+	if ((res = fioInit()) < 0)
 		return res;
 
 	WaitSema(_fio_completion_sema);
@@ -297,7 +297,7 @@ int fioWrite(int fd, const void *ptr, int size)
 	struct _fio_write_arg arg;
 	int mis, res;
 
-	if (!_fio_init && ((res = fioInit()) < 0))
+	if ((res = fioInit()) < 0)
 		return res;
 
 	WaitSema(_fio_completion_sema);
@@ -349,7 +349,7 @@ int fioLseek(int fd, int offset, int whence)
 	struct _fio_lseek_arg arg;
 	int res;
 
-	if (!_fio_init && ((res = fioInit()) < 0))
+	if ((res = fioInit()) < 0)
 		return res;
 
 	WaitSema(_fio_completion_sema);
@@ -381,7 +381,7 @@ int fioIoctl(int fd, int request, void *data)
 	struct _fio_ioctl_arg arg;
 	int res;
 
-	if (!_fio_init && ((res = fioInit()) < 0))
+	if ((res = fioInit()) < 0)
 		return res;
 
 	WaitSema(_fio_completion_sema);
@@ -407,7 +407,7 @@ int fioRemove(const char *name)
 	} arg;
 	int res;
 
-	if (!_fio_init && ((res = fioInit()) < 0))
+	if ((res = fioInit()) < 0)
 		return res;
 
 	WaitSema(_fio_completion_sema);
@@ -432,7 +432,7 @@ int fioMkdir(const char* path)
 	} arg;
 	int res;
 
- 	if (!_fio_init && ((res = fioInit()) < 0))
+ 	if ((res = fioInit()) < 0)
 		return res;
 
 	WaitSema(_fio_completion_sema);
@@ -457,7 +457,7 @@ int fioRmdir(const char* dirname)
 	} arg;
 	int res;
 
-	if (!_fio_init && ((res = fioInit()) < 0))
+	if ((res = fioInit()) < 0)
 		return res;
 
 	WaitSema(_fio_completion_sema);
@@ -529,7 +529,7 @@ int fioDopen(const char *name)
 	} arg;
 	int res;
 
-	if (!_fio_init && ((res = fioInit()) < 0))
+	if ((res = fioInit()) < 0)
 		return res;
 
 	WaitSema(_fio_completion_sema);
@@ -554,7 +554,7 @@ int fioDclose(int fd)
 	} arg;
 	int res;
 
-	if (!_fio_init && ((res = fioInit()) < 0))
+	if ((res = fioInit()) < 0)
 		return res;
 
 	WaitSema(_fio_completion_sema);
@@ -583,7 +583,7 @@ int fioDread(int fd, fio_dirent_t *buf)
 	struct _fio_dread_arg arg;
 	int res;
 
-	if (!_fio_init && ((res = fioInit()) < 0))
+	if ((res = fioInit()) < 0)
 		return res;
 
 	WaitSema(_fio_completion_sema);
@@ -616,7 +616,7 @@ int fioGetstat(const char *name, fio_stat_t *buf)
 	struct _fio_getstat_arg arg;
 	int res;
 
-	if (!_fio_init && ((res = fioInit()) < 0))
+	if ((res = fioInit()) < 0)
 		return res;
 
 	WaitSema(_fio_completion_sema);
@@ -651,7 +651,7 @@ int fioChstat(const char *name, fio_stat_t *buf, u32 cbit)
 	struct _fio_chstat_arg arg;
 	int res;
 
-	if (!_fio_init && ((res = fioInit()) < 0))
+	if ((res = fioInit()) < 0)
 		return res;
 
 	WaitSema(_fio_completion_sema);
@@ -678,7 +678,7 @@ int fioFormat(const char *name)
 	} arg;
 	int res;
 
-	if (!_fio_init && ((res = fioInit()) < 0))
+	if ((res = fioInit()) < 0)
 		return res;
 
 	WaitSema(_fio_completion_sema);

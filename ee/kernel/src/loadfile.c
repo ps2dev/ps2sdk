@@ -35,10 +35,10 @@ enum _lf_functions {
 	LF_F_MG_ELF_LOAD,
 
 	LF_F_MOD_BUF_LOAD,
-	
+
 	LF_F_MOD_STOP,
 	LF_F_MOD_UNLOAD,
-	
+
 	LF_F_SEARCH_MOD_BY_NAME,
 	LF_F_SEARCH_MOD_BY_ADDRESS,
 };
@@ -56,6 +56,7 @@ struct _lf_iop_val_arg {
 	} val;
 } ALIGNED(16);
 
+extern int _iop_reboot_count;
 extern SifRpcClientData_t _lf_cd;
 extern int _lf_init;
 
@@ -78,8 +79,14 @@ int _lf_init = 0;
 int SifLoadFileInit()
 {
 	int res;
+	static int _rb_count = 0;
+	if(_rb_count != _iop_reboot_count)
+	{
+	    _rb_count = _iop_reboot_count;
+	    _lf_init = 0;
+	}
 
-	if (_lf_init)
+    if (_lf_init)
 		return 0;
 
 	SifInitRpc(0);
@@ -125,7 +132,7 @@ int _SifLoadModule(const char *path, int arg_len, const char *args, int *modres,
 {
 	struct _lf_module_load_arg arg;
 
-	if (!_lf_init && SifLoadFileInit() < 0)
+	if (SifLoadFileInit() < 0)
 		return -E_LIB_API_INIT;
 
 	memset(&arg, 0, sizeof arg);
@@ -245,18 +252,18 @@ int SifStopModule(int id, int arg_len, const char *args, int *mod_res)
 {
 	struct _lf_module_stop_arg arg;
 
-	if (!_lf_init && SifLoadFileInit() < 0)
+	if (SifLoadFileInit() < 0)
 		return -E_LIB_API_INIT;
-	
+
 	arg.p.id = id;
-	
+
 	if (args && arg_len) {
 		arg.q.arg_len = arg_len > LF_ARG_MAX ? LF_ARG_MAX : arg_len;
 		memcpy(arg.args, args, arg.q.arg_len);
 	} else {
 		arg.q.arg_len = 0;
 	}
-	
+
 	if (SifCallRpc(&_lf_cd, LF_F_MOD_STOP, 0, &arg, sizeof arg, &arg, 8, NULL, NULL) < 0)
 		return -E_SIF_RPC_CALL;
 
@@ -277,11 +284,11 @@ int SifUnloadModule(int id)
 {
 	union _lf_module_unload_arg arg;
 
-	if (!_lf_init && SifLoadFileInit() < 0)
+	if (SifLoadFileInit() < 0)
 		return -E_LIB_API_INIT;
-	
+
 	arg.id = id;
-	
+
 	if (SifCallRpc(&_lf_cd, LF_F_MOD_UNLOAD, 0, &arg, sizeof arg, &arg, 4, NULL, NULL) < 0)
 		return -E_SIF_RPC_CALL;
 
@@ -300,9 +307,9 @@ struct _lf_search_module_by_name_arg {
 int SifSearchModuleByName(const char * name)
 {
 	struct _lf_search_module_by_name_arg arg;
-	if (!_lf_init && SifLoadFileInit() < 0)
+	if (SifLoadFileInit() < 0)
 		return -E_LIB_API_INIT;
-	
+
 	strncpy(arg.name, name, LF_PATH_MAX - 1);
 	arg.name[LF_PATH_MAX - 1] = 0;
 
@@ -324,11 +331,11 @@ struct _lf_search_module_by_address_arg {
 int SifSearchModuleByName(const void *ptr)
 {
 	struct _lf_search_module_by_address_arg arg;
-	if (!_lf_init && SifLoadFileInit() < 0)
+	if (SifLoadFileInit() < 0)
 		return -E_LIB_API_INIT;
-	
+
 	arg.p.ptr = ptr;
-	
+
 	if (SifCallRpc(&_lf_cd, LF_F_SEARCH_MOD_BY_ADDRESS, 0, &arg, sizeof arg, &arg, 4, NULL, NULL) < 0)
 		return -E_SIF_RPC_CALL;
 
@@ -351,7 +358,7 @@ int _SifLoadElfPart(const char *path, const char *secname, t_ExecData *data, int
 {
 	struct _lf_elf_load_arg arg;
 
-	if (!_lf_init && SifLoadFileInit() < 0)
+	if (SifLoadFileInit() < 0)
 		return -E_LIB_API_INIT;
 
 	strncpy(arg.path, path, LF_PATH_MAX - 1);
@@ -472,7 +479,7 @@ int SifIopSetVal(u32 iop_addr, int val, int type)
 {
 	struct _lf_iop_val_arg arg;
 
-	if (!_lf_init && SifLoadFileInit() < 0)
+	if (SifLoadFileInit() < 0)
 		return -E_LIB_API_INIT;
 
 	switch (type) {
@@ -526,7 +533,7 @@ int SifIopGetVal(u32 iop_addr, void *val, int type)
 {
 	struct _lf_iop_val_arg arg;
 
-	if (!_lf_init && SifLoadFileInit() < 0)
+	if (SifLoadFileInit() < 0)
 		return -E_LIB_API_INIT;
 
 	arg.p.iop_addr = iop_addr;
@@ -572,7 +579,7 @@ int _SifLoadModuleBuffer(void *ptr, int arg_len, const char *args, int *modres)
 {
 	struct _lf_module_buffer_load_arg arg;
 
-	if (!_lf_init && SifLoadFileInit() < 0)
+	if (SifLoadFileInit() < 0)
 		return -E_LIB_API_INIT;
 
 	memset(&arg, 0, sizeof arg);
@@ -676,7 +683,7 @@ int SifExecModuleBuffer(void *ptr, u32 size, u32 arg_len, const char *args, int 
 	void *iop_addr;
 	int res;
 	unsigned int qid;
-	
+
 	/* Round the size up to the nearest 16 bytes. */
 	size = (size + 15) & -16;
 
@@ -689,10 +696,10 @@ int SifExecModuleBuffer(void *ptr, u32 size, u32 arg_len, const char *args, int 
 	dmat.attr = 0;
 	SifWriteBackDCache(ptr, size);
 	qid = SifSetDma(&dmat, 1);
-	
+
 	if (!qid)
 	    return -1; // should have a better error here...
-	
+
 	while(SifDmaStat(qid) >= 0);
 
 	res = _SifLoadModuleBuffer(iop_addr, arg_len, args, mod_res);

@@ -22,6 +22,7 @@
 
 #define IH_C_BOUND	0x0001
 
+extern int _iop_reboot_count;
 extern SifRpcClientData_t _ih_cd;
 extern int _ih_caps;
 
@@ -32,6 +33,13 @@ int _ih_caps = 0;
 int SifInitIopHeap()
 {
 	int res;
+
+	static int _rb_count = 0;
+	if(_rb_count != _iop_reboot_count)
+	{
+	    _rb_count = _iop_reboot_count;
+	    _ih_caps = 0;
+	}
 
 	if (_ih_caps)
 		return 0;
@@ -63,7 +71,7 @@ void * SifAllocIopHeap(int size)
 {
 	union { int size; u32 addr; } arg;
 
-	if (!_ih_caps && SifInitIopHeap() < 0)
+	if (SifInitIopHeap() < 0)
 		return NULL;
 
 	arg.size = size;
@@ -80,7 +88,7 @@ int SifFreeIopHeap(void *addr)
 {
 	union { void *addr; int result; } arg;
 
-	if (!_ih_caps && SifInitIopHeap() < 0)
+	if (SifInitIopHeap() < 0)
 		return -E_LIB_API_INIT;
 
 	arg.addr = addr;
@@ -109,7 +117,7 @@ int SifLoadIopHeap(const char *path, void *addr)
 {
 	struct _iop_load_heap_arg arg;
 
-	if (!_ih_caps && SifInitIopHeap() < 0)
+	if (SifInitIopHeap() < 0)
 		return -E_LIB_API_INIT;
 
 	arg.p.addr = addr;

@@ -45,6 +45,7 @@ struct cmd_data {
 	int	*sregs;
 };
 
+extern int _iop_reboot_count;
 extern struct cmd_data _sif_cmd_data;
 int _SifCmdIntHandler();
 
@@ -223,6 +224,12 @@ void SifInitCmd()
 {
 	u32 packet[5];	/* Implicitly aligned to 16 bytes */
 	int i;
+	static int _rb_count = 0;
+	if(_rb_count != _iop_reboot_count)
+	{
+	    _rb_count = _iop_reboot_count;
+	    init = 0;
+	}
 
 	if (init)
 		return;

@@ -39,6 +39,7 @@ struct rpc_data {
 	void	*active_queue;
 };
 
+extern int _iop_reboot_count;
 extern struct rpc_data _sif_rpc_data;
 
 void *_rpc_get_packet(struct rpc_data *rpc_data);
@@ -385,6 +386,12 @@ static void _request_rdata(SifRpcOtherDataPkt_t *rdata, void *data)
 void SifInitRpc(int mode)
 {
 	u32 *cmdp;
+	static int _rb_count = 0;
+	if(_rb_count != _iop_reboot_count)
+	{
+	    _rb_count = _iop_reboot_count;
+	    init = 0;
+	}
 
 	if (init)
 		return;
