@@ -196,7 +196,7 @@ u8 RFU059(void);
 s32  RFU060(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) __attribute__((deprecated));
 void RFU061(s32 arg0, s32 arg1) __attribute__((deprecated));
 
-s32  SetupThread(void * gp, void * stack, s32 stack_size, void * args, void * root_func);
+void * SetupThread(void * gp, void * stack, s32 stack_size, void * args, void * root_func);
 void SetupHeap(void * heap_start, s32 heap_size);
 void *EndOfHeap(void);
 
@@ -242,7 +242,7 @@ u64  iGsGetIMR(void);
 u64  GsPutIMR(u64 imr);
 u64  iGsPutIMR(u64 imr);
 void SetPgifHandler(void* handler);
-void SetVSyncFlag(s32 arg1, s32 arg2);
+void SetVSyncFlag(u32 *, u64 *);
 void SetSyscall(s32 syscall_num, void* handler);
 //void _print(const char *fmt, ...);		// null function
 
