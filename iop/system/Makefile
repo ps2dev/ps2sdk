@@ -7,7 +7,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 
-SUBDIRS = iomanx iopmgr sbusintr siftoo
+SUBDIRS = iomanx iopmgr sbusintr siftoo sio2log
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
