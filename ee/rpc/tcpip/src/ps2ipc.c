@@ -380,7 +380,7 @@ int select(int maxfdp1, struct fd_set *readset, struct fd_set *writeset, struct 
 	return _rpc_buffer[0];
 }
 
-int ioctlsocket(int s, unsigned int cmd, void *argp)
+int ioctlsocket(int s, long cmd, void *argp)
 {
 	((int*)_rpc_buffer)[0] = s;
 	((int*)_rpc_buffer)[1] = (int)cmd;
