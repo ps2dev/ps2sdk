@@ -100,16 +100,16 @@ void send_td(sio2_transfer_data_t *td)
 	}
 
 	if (td->in_dma.addr) {
-		dmac_request(IOP_DMA_SIO2in, td->in_dma.addr, td->in_dma.size,
+		dmac_request(IOP_DMAC_SIO2in, td->in_dma.addr, td->in_dma.size,
 				td->in_dma.count, DMAC_FROM_MEM);
-		dmac_transfer(IOP_DMA_SIO2in);
+		dmac_transfer(IOP_DMAC_SIO2in);
 		log_dma(LOG_TRS_DMA_IN, &td->in_dma);
 	}
 
 	if (td->out_dma.addr) {
-		dmac_request(IOP_DMA_SIO2out, td->out_dma.addr, td->out_dma.size,
+		dmac_request(IOP_DMAC_SIO2out, td->out_dma.addr, td->out_dma.size,
 				td->out_dma.count, DMAC_TO_MEM);
-		dmac_transfer(IOP_DMA_SIO2out);
+		dmac_transfer(IOP_DMAC_SIO2out);
 		log_dma(LOG_TRS_DMA_OUT, &td->out_dma);
 	}
 }
@@ -225,8 +225,8 @@ void shutdown(void)
 	ReleaseIntrHandler(IOP_IRQ_SIO2);
 	CpuResumeIntr(state);
 
-	dmac_disable(IOP_DMA_SIO2in);
-	dmac_disable(IOP_DMA_SIO2out);
+	dmac_disable(IOP_DMAC_SIO2in);
+	dmac_disable(IOP_DMAC_SIO2out);
 }
 
 int _start(int argc, const char **argv)
@@ -254,10 +254,10 @@ int _start(int argc, const char **argv)
 	EnableIntr(IOP_IRQ_SIO2);
 	CpuResumeIntr(state);
 
-	dmac_ch_set_dpcr(IOP_DMA_SIO2in, 3);
-	dmac_ch_set_dpcr(IOP_DMA_SIO2out, 3);
-	dmac_enable(IOP_DMA_SIO2in);
-	dmac_enable(IOP_DMA_SIO2out);
+	dmac_ch_set_dpcr(IOP_DMAC_SIO2in, 3);
+	dmac_ch_set_dpcr(IOP_DMAC_SIO2out, 3);
+	dmac_enable(IOP_DMAC_SIO2in);
+	dmac_enable(IOP_DMAC_SIO2out);
 
 	StartThread(thid, NULL);
 
