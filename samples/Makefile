@@ -24,5 +24,6 @@ release-samples:
 	cp -f Makefile.pref_sample $(SAMPLES_TARGET)/Makefile.pref
 	cp -f Makefile.eeglobal_sample $(SAMPLES_TARGET)/Makefile.eeglobal
 	cp -f Makefile.eeglobal_cpp_sample $(SAMPLES_TARGET)/Makefile.eeglobal_cpp
+	cp -f Makefile.iopglobal_sample $(SAMPLES_TARGET)/Makefile.iopglobal
 
 
