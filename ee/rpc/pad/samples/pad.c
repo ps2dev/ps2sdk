@@ -264,7 +264,7 @@ main()
         ret = padRead(port, slot, &buttons); // port, slot, buttons
             
         if (ret != 0) {
-            paddata = buttons.btns;
+            paddata = 0xffff ^ buttons.btns;
                 
             new_pad = paddata & ~old_pad;
             old_pad = paddata;
