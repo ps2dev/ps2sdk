@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 
 	if(argc != 4) {
 		printf("bin2c - from bin2s By Sjeep\n"
-			   "Usage: bin2c infile outfile label %i\n\n", argc);
+			   "Usage: bin2c infile outfile label\n\n");
 		return 1;
 	}
 
