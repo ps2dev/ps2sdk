@@ -229,10 +229,8 @@ int _start( int argc, char **argv )
 	}
       else
       {
-		strncpy( base, argv[1] ,sizeof(base));
-
 		// Copy the base location.
-		strncpy( base, argv[1] ,sizeof(base));
+		strncpy( base, argv[1] ,sizeof(base) - 1);
       	printf("redirecting '%s:' to '%s'\n",FS_REPNAME,base);
 		fd_global = 1;
 
