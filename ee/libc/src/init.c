@@ -8,7 +8,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 # $Id$
-# Standard ANSI string functions to complement the ASM funcs
+# The global init/deinit code for our crt0.
 */
 
 void _ps2sdk_alloc_init();
