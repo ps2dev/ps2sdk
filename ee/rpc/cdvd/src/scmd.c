@@ -28,31 +28,9 @@
 #define CD_SCMD_GETDISCTYPE		0x03
 #define CD_SCMD_GETERROR		0x04
 #define CD_SCMD_TRAYREQ			0x05
-#define CD_SCMD_READILINKID		0x06
-#define CD_SCMD_WRITEILINKID	0x07
-#define CD_SCMD_READNVM			0x08
-#define CD_SCMD_WRITENVM		0x09
-#define CD_SCMD_DECSET			0x0A
 #define CD_SCMD_SCMD			0x0B
 #define CD_SCMD_STATUS			0x0C
-#define CD_SCMD_SETHDMODE		0x0D
-#define CD_SCMD_OPENCONFIG		0x0E
-#define CD_SCMD_CLOSECONFIG		0x0F
-#define CD_SCMD_READCONFIG		0x10
-#define CD_SCMD_WRITECONFIG		0x11
-#define CD_SCMD_READCONSOLEID	0x12
-#define CD_SCMD_WRITECONSOLEID	0x13
-#define CD_SCMD_GETMECHAVERSION	0x14
-#define CD_SCMD_CTRLAUDIOOUT	0x15
 #define CD_SCMD_BREAK			0x16
-#define CD_SCMD_READSUBQ		0x17
-#define CD_SCMD_FORBIDDVDP		0x18
-#define CD_SCMD_AUTOADUJSTCTRL	0x19
-#define CD_SCMD_RM				0x1A	// XCDVDFSV only
-#define CD_SCMD_WM				0x1B	// XCDVDFSV only
-#define CD_SCMD_FORBIDREAD		0x1C	// XCDVDFSV only
-#define CD_SCMD_SC				0x1D	// XCDVDFSV only
-#define CD_SCMD_BOOTCERTIFY		0x1E	// XCDVDFSV only
 #define CD_SCMD_CANCELPOWEROFF	0x1F	// XCDVDFSV only
 #define CD_SCMD_BLUELEDCTRL		0x20	// XCDVDFSV only
 #define CD_SCMD_POWEROFF		0x21	// XCDVDFSV only
@@ -68,12 +46,10 @@ s32 sCmdSemaId = -1;		// s-cmd semaphore id
 u8 sCmdRecvBuff[48] __attribute__ ((aligned(64)));
 u8 sCmdSendBuff[48] __attribute__ ((aligned(64)));
 
-u32 configSize = 0;
-u8 configBuff[1032] __attribute__ ((aligned(64)));
-
 s32 sCmdNum = 0;
 
 s32 cdCheckSCmd(s32 cmd);
+
 
 // **** S-Command Functions ****
 

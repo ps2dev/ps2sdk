@@ -33,7 +33,6 @@
 #define CD_NCMD_PAUSE			0x08
 #define CD_NCMD_STREAM			0x09
 #define CD_NCMD_CDDASTREAM		0x0A
-#define CD_NCMD_READKEY			0x0B
 #define CD_NCMD_NCMD			0x0C
 #define CD_NCMD_READIOPMEM		0x0D
 #define CD_NCMD_DISKREADY		0x0E
@@ -67,33 +66,32 @@ s32 cdNCmdDiskReady(void);
 
 // **** N-Command Functions ****
 
+struct _cdvd_read_data
+{
+	u32		size1;
+	u32		size2;
+	void	*dest1;
+	void	*dest2;
+	u32		src1;
+	u32		src2;
+};
+
 // this gets called when the cdRead function finishes
 // to copy the data read in to unaligned buffers
-static void cdAlignReadBuffer(u32 * data)
+static void cdAlignReadBuffer(struct _cdvd_read_data *data)
 {
-
-	s32 *pkt = (s32 *) UNCACHED_SEG(data);
-	u8 *src, *dest;
-	s32 size, i;
-
-	size = pkt[0];
-	dest = (u8 *) pkt[2];
-	src = (u8 *) & pkt[4];
-	for (i = 0; dest && i < size; i++) {
-		dest[i] = src[i];
+	struct _cdvd_read_data *uncached = UNCACHED_SEG(data);
+	
+	if (uncached->size1 && uncached->dest1)	{
+		memcpy(uncached->dest1, &uncached->src1, uncached->size1);
 	}
-
-	size = pkt[1];
-	dest = (u8 *) pkt[3];
-	src = (u8 *) & pkt[8];
-	for (i = 0; dest && i < size; i++) {
-		dest[i] = src[i];
+	
+	if (uncached->size2 && uncached->dest2)	{
+		memcpy(uncached->dest2, &uncached->src2, uncached->size2);
 	}
-
-	// call generic cd callback func
+	
 	cdCallback((void*)&cdCallbackNum);
 }
-
 
 // read data from cd
 // non-blocking, requires cdSync() call
@@ -118,7 +116,7 @@ s32 cdRead(u32 sectorLoc, u32 numSectors, void *buf, CdvdReadMode_t * mode)
 	readData[2] = (u32) buf;
 	readData[3] = (mode->retries) | (mode->readSpeed << 8) | (mode->sectorType << 16);
 	readData[4] = (u32) _rd_intr_data;
-	readData[5] = (u32) & curReadPos;
+	readData[5] = (u32) &curReadPos;
 
 	// work out buffer size
 	if (mode->sectorType == CDVD_SECTOR_2328)
@@ -159,7 +157,7 @@ int cdDvdRead(u32 lbn, u32 nsectors, void *buf, CdvdReadMode_t *rm)
 {
 	if (cdNCmdDiskReady() == CDVD_READY_NOTREADY)
 		return 0;
-	if (cdCheckNCmd(6) == 0)
+	if (cdCheckNCmd(CD_NCMD_DVDREAD) == 0)
 		return 0;
 
 	readData[0] = lbn;
@@ -172,8 +170,8 @@ int cdDvdRead(u32 lbn, u32 nsectors, void *buf, CdvdReadMode_t *rm)
 	SifWriteBackDCache(_rd_intr_data, 144);
 	SifWriteBackDCache(readData, 24);
 
-	cdCallbackNum = 9;
-	cbSema = 0;
+	cdCallbackNum = CD_NCMD_DVDREAD;
+	cbSema = 1;
 
 	if (SifCallRpc(&clientNCmd, CD_NCMD_DVDREAD, SIF_RPC_M_NOWAIT, readData, 24,
 				NULL, 0, NULL, NULL) < 0) {
@@ -193,7 +191,7 @@ int cdCddaRead(u32 lbn, u32 nsectors, void *buf, CdvdReadMode_t *rm)
 
 	if (cdNCmdDiskReady() == CDVD_READY_NOTREADY)
 		return 0;
-	if (cdCheckNCmd(7) == 0)
+	if (cdCheckNCmd(CD_NCMD_CDDAREAD) == 0)
 		return 0;
 
 	readData[0] = lbn;
@@ -218,7 +216,7 @@ int cdCddaRead(u32 lbn, u32 nsectors, void *buf, CdvdReadMode_t *rm)
 	SifWriteBackDCache(_rd_intr_data, 144);
 	SifWriteBackDCache(readData, 24);
 
-	cdCallbackNum = 2;
+	cdCallbackNum = CD_NCMD_CDDAREAD;
 	cbSema = 1;
 
 	if (SifCallRpc(&clientNCmd, CD_NCMD_CDDAREAD, SIF_RPC_M_NOWAIT, readData, 24,

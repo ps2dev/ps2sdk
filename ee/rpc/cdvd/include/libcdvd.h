@@ -13,15 +13,14 @@
 		NOTE: not all functions work with each set of modules!
 */
 
-#ifndef _LIB_CDVD_H_
-#define _LIB_CDVD_H_
+#ifndef _LIBCDVD_H_
+#define _LIBCDVD_H_
 
 #include <tamtypes.h>
 
 
 // struct for chain reading
-typedef struct
-{
+typedef struct {
 	u32 sectorLoc;		// sector location to start reading from
 	u32 numSectors;		// number of sectors to read
 	u32 buffer;			// buffer address to read to ( bit0: 0=EE, 1=IOP )
@@ -29,7 +28,7 @@ typedef struct
 } CdvdChain_t;
 
 
-// fio_open() flag to open file for streaming
+// fioOpen() flag to open file for streaming
 #define CDVD_STREAM			0x40000000
 
 // Low Level File System for CdSearchFile() 
@@ -37,8 +36,7 @@ typedef struct
 #define CDVD_FILE_MAXDIRS	128			// max number of directories
 #define CDVD_FILE_MAXLEVELS	8			// max levels of directories
 
-typedef struct
-{
+typedef struct {
 	u32	 lsn;							// file location
 	u32	 size;							// file size
 	char name[16];						// file name (body)
@@ -47,8 +45,7 @@ typedef struct
 
 
 // Cdvd Read Mode struct
-typedef struct
-{
+typedef struct {
 	u8 retries;							// number of times to retry reads when an error occurs
 	u8 readSpeed;						// speed to read at CDVD_SPIN_??? (also speed to spin at)
 	u8 sectorType;						// sector size value CDVD_SECTOR_???
@@ -137,8 +134,7 @@ typedef void (*CdCBFunc)(s32);
 
 
 // cdvd location struct, used with cdIntToPos() and cdPosToInt()
-typedef struct
-{
+typedef struct {
 	u8 minute;							// minute (BCD)
 	u8 second;							// second (BCD)
 	u8 sector;							// sector (BCD)
@@ -165,8 +161,7 @@ typedef struct
 
 
 // struct for ps2 clock values cdReadClock()/cdWriteClock()
-typedef struct
-{
+typedef struct {
 	u8 status;							// status
 	u8 second;							// second
 	u8 minute;							// minute
@@ -177,7 +172,7 @@ typedef struct
 	u8 year;							// year
 } CdvdClock_t;
 
-/* Stream commands.  */
+/* Stream commands. */
 typedef enum {
 	CDVD_ST_CMD_START = 1,
 	CDVD_ST_CMD_READ,
@@ -537,4 +532,5 @@ CdCBFunc cdSetCallback(CdCBFunc func);
 #endif
 
 
-#endif // _LIB_CDVD_H_
+#endif // _LIBCDVD_H_
+

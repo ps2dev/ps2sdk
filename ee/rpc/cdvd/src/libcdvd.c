@@ -376,14 +376,22 @@ static void cdCallbackLoop(void)
 // generic cd callback function
 void cdCallback(void *funcNum)
 {
-	cdCallbackNum = *(s32 *) funcNum;
+	// set the currently executing function num
+	cdCallbackNum = *(s32*) funcNum;
 	iSignalSema(nCmdSemaId);
-	if (callbackThreadId) {
-		if (cdCallbackFunc) {
+	
+	// check if user callback is registered
+	if (callbackThreadId)
+	{
+		if (cdCallbackFunc)
+		{
 			iSignalSema(callbackSemaId);
 			return;
 		}
 	}
+	
+	// clear the currently executing function num
 	cbSema = 0;
 	cdCallbackNum = 0;
+
 }
