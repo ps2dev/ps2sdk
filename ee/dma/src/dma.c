@@ -11,9 +11,10 @@
 
  #include <dma.h>
  #include <dma_registers.h>
-
  #include <tamtypes.h>
  #include <kernel.h>
+ #include <malloc.h>
+ #include <string.h>
 
  u32 dma_chcr[10] = { 0x10008000, 0x10009000, 0x1000A000, 0x1000B000, 0x1000B400, 0x1000C000, 0x1000C400, 0x1000C800, 0x1000D000, 0x1000D400 };
  u32 dma_madr[10] = { 0x10008010, 0x10009010, 0x1000A010, 0x1000B010, 0x1000B410, 0x1000C010, 0x1000C410, 0x1000C810, 0x1000D010, 0x1000D410 };
@@ -58,10 +59,7 @@
  int dma_channel_initialize(int channel, void *handler) {
 
   // Check to see if we're initialized.
-  if (!dma_initialized) { if (dma_initialize() < 0) { return -1; } }
-
-  // Check for a valid channel.
-  if (channel < 0 || channel > 9) { return -1; }
+  if (dma_initialized == 0) { if (dma_initialize() < 0) { return -1; } }
 
   // Shut down the channel before making changes.
   if (dma_channel_shutdown(channel) < 0) { return -1; }
@@ -87,9 +85,6 @@
   // Check to see if we're initialized.
   if (!dma_initialized) { if (dma_initialize() < 0) { return -1; } }
 
-  // Check for a valid channel.
-  if (channel < 0 || channel > 9) { return -1; }
-
   // Shut down the channel before making changes.
   if (dma_channel_shutdown_i(channel) < 0) { return -1; }
 
@@ -111,9 +106,6 @@
 
  int dma_channel_wait(int channel, int timeout) {
 
-  // Check for a valid channel.
-  if (channel < 0 || channel > 9) { return -1; }
-
   // While the channel is not ready...
   while (*(volatile u32 *)dma_chcr[channel] & 0x00000100) {
 
@@ -129,9 +121,6 @@
 
  int dma_channel_wait_i(int channel, int timeout) {
 
-  // Check for a valid channel.
-  if (channel < 0 || channel > 9) { return -1; }
-
   // While the channel is not ready...
   while (*(volatile u32 *)dma_chcr[channel] & 0x00000100) {
 
@@ -146,23 +135,6 @@
  }
 
  int dma_channel_send(int channel, void *data, int data_size) {
-
-  // Check for a valid channel.
-  if (channel < 0 || channel > 9) { return -1; }
-
-  // Check for valid data.
-  if (data == NULL || data_size < 0) { return -1; }
-
-  // If the transfer is too large...
-  if (data_size > 1048576) {
-
-   // Split up the transfer.
-   dma_channel_send(channel, (u32 *)data + 1048576, data_size - 1048576);
-
-   // Truncate the data size.
-   data_size = 1048576;
-
-  }
 
   // Wait for the channel to become ready.
   if (dma_channel_wait(channel, 100000) == -1) { return -1; }
@@ -186,12 +158,6 @@
 
  int dma_channel_send_i(int channel, void *data, int data_size) {
 
-  // Check for a valid channel.
-  if (channel < 0 || channel > 9) { return -1; }
-
-  // Check for valid data.
-  if (data == NULL || data_size < 0) { return -1; }
-
   // Wait for the channel to become ready.
   if (dma_channel_wait_i(channel, 100000) == -1) { return -1; }
 
@@ -213,12 +179,6 @@
  }
 
  int dma_channel_send_chain(int channel, void *data) {
-
-  // Check for a valid channel.
-  if (channel < 0 || channel > 9) { return -1; }
-
-  // Check for valid data.
-  if (data == NULL) { return -1; }
 
   // Wait for the channel to become ready.
   if (dma_channel_wait(channel, 100000) == -1) { return -1; }
@@ -245,12 +205,6 @@
 
  int dma_channel_send_chain_i(int channel, void *data) {
 
-  // Check for a valid channel.
-  if (channel < 0 || channel > 9) { return -1; }
-
-  // Check for valid data.
-  if (data == NULL) { return -1; }
-
   // Wait for the channel to become ready.
   if (dma_channel_wait_i(channel, 100000) == -1) { return -1; }
 
@@ -276,9 +230,6 @@
 
  int dma_channel_shutdown(int channel) {
 
-  // Check for a valid channel.
-  if (channel < 0 || channel > 9) { return -1; }
-
   // If a handler was provided...
   if (dma_handler_id[channel] != 0) {
 
@@ -300,9 +251,6 @@
 
  int dma_channel_shutdown_i(int channel) {
 
-  // Check for a valid channel.
-  if (channel < 0 || channel > 9) { return -1; }
-
   // If a handler was provided...
   if (dma_handler_id[channel] != 0) {
 
@@ -316,6 +264,114 @@
    dma_handler_id[channel] = 0;
 
   }
+
+  // End function.
+  return 0;
+
+ }
+
+ //////////////////////////
+ // DMA PACKET FUNCTIONS //
+ //////////////////////////
+
+ int dma_packet_allocate(DMA_PACKET *packet, int data_size) {
+
+  // Check for an already allocated packet.
+  if (packet != NULL) { dma_packet_free(packet); }
+
+  // Allocate the data buffer.
+  packet->data = memalign(data_size, 128);
+
+  // Save the data size.
+  packet->data_size = data_size;
+
+  // Clear before use.
+  dma_packet_clear(packet);
+
+  // End function.
+  return 0;
+
+ }
+
+ int dma_packet_clear(DMA_PACKET *packet) {
+
+  // Clear the data.
+  memset(packet->data, 0x00, packet->data_size);
+
+  // Reset the counter.
+  packet->count = 0;
+
+  // End function.
+  return 0;
+
+ }
+
+ int dma_packet_append(DMA_PACKET *packet, u64 data) {
+
+  // Append the data.
+  packet->data[packet->count++] = data;
+
+  // End function.
+  return 0;
+
+ }
+
+ int dma_packet_send(DMA_PACKET *packet, int channel) {
+
+  // Pad to the nearest quadword.
+  if (packet->count & 0x01) { dma_packet_append(packet, 0); }
+
+  // Send to the specified channel.
+  dma_channel_send(channel, packet->data, packet->count << 3);
+
+  // End function.
+  return 0;
+
+ }
+
+ int dma_packet_send_i(DMA_PACKET *packet, int channel) {
+
+  // Pad to the nearest quadword.
+  if (packet->count & 0x01) { dma_packet_append(packet, 0); }
+
+  // Send to the specified channel.
+  dma_channel_send_i(channel, packet->data, packet->count << 3);
+
+  // End function.
+  return 0;
+
+ }
+
+ int dma_packet_send_chain(DMA_PACKET *packet, int channel) {
+
+  // Pad to the nearest quadword.
+  if (packet->count & 0x01) { dma_packet_append(packet, 0); }
+
+  // Send to the specified channel.
+  dma_channel_send_chain(channel, packet->data);
+
+  // End function.
+  return 0;
+
+ }
+
+ int dma_packet_send_chain_i(DMA_PACKET *packet, int channel) {
+
+  // Pad to the nearest quadword.
+  if (packet->count & 0x01) { dma_packet_append(packet, 0); }
+
+  // Send to the specified channel.
+  dma_channel_send_chain_i(channel, packet->data);
+
+  // End function.
+  return 0;
+
+ }
+
+ int dma_packet_free(DMA_PACKET *packet) {
+
+  // Free the data buffer.
+  free(packet->data);
 
   // End function.
   return 0;

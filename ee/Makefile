@@ -8,7 +8,6 @@
 #
 # $Id$
 
-
 SUBDIRS = kernel libc rpc startup loader debug sbv dma graph
 
 include $(PS2SDKSRC)/Rules.make
