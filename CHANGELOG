@@ -8,6 +8,8 @@
 #
 # $Id$
 
+2004-12-29
+  - pixel, reversed and added StopModule, UnloadModule, and SearchModuleByName
 
 2004-12-17
   - radad, fixed libpad.h for some naming mistakes.

@@ -35,6 +35,11 @@ enum _lf_functions {
 	LF_F_MG_ELF_LOAD,
 
 	LF_F_MOD_BUF_LOAD,
+	
+	LF_F_MOD_STOP,
+	LF_F_MOD_UNLOAD,
+	
+	LF_F_SEARCH_MOD_BY_NAME,
 };
 
 struct _lf_iop_val_arg {
@@ -130,6 +135,8 @@ int _SifLoadModule(const char *path, int arg_len, const char *args, int *modres,
 	if (args && arg_len) {
 		arg.p.arg_len = arg_len > LF_ARG_MAX ? LF_ARG_MAX : arg_len;
 		memcpy(arg.args, args, arg.p.arg_len);
+	} else {
+		arg.p.arg_len = 0;
 	}
 
 	if (SifCallRpc(&_lf_cd, fno, 0, &arg, sizeof arg, &arg, 8, NULL, NULL) < 0)
@@ -216,6 +223,92 @@ int SifLoadStartModule(const char *path, int arg_len, const char *args, int *mod
 int SifLoadModuleEncrypted(const char *path, int arg_len, const char *args)
 {
 	return _SifLoadModule(path, arg_len, args, NULL, LF_F_MG_MOD_LOAD);
+}
+#endif
+
+#ifdef F_SifStopModule
+struct _lf_module_stop_arg {
+	union {
+		int	id;
+		int	result;
+	} p;
+	union {
+    		int	arg_len;
+		int	modres;
+	} q;
+	char	dummy[LF_PATH_MAX];
+	char	args[LF_ARG_MAX];
+} ALIGNED(16);
+
+int SifStopModule(int id, int arg_len, const char *args, int *mod_res)
+{
+	struct _lf_module_stop_arg arg;
+
+	if (!_lf_init && SifLoadFileInit() < 0)
+		return -E_LIB_API_INIT;
+	
+	arg.p.id = id;
+	
+	if (args && arg_len) {
+		arg.q.arg_len = arg_len > LF_ARG_MAX ? LF_ARG_MAX : arg_len;
+		memcpy(arg.args, args, arg.q.arg_len);
+	} else {
+		arg.q.arg_len = 0;
+	}
+	
+	if (SifCallRpc(&_lf_cd, LF_F_MOD_STOP, 0, &arg, sizeof arg, &arg, 8, NULL, NULL) < 0)
+		return -E_SIF_RPC_CALL;
+
+	if (mod_res)
+		*mod_res = arg.q.modres;
+
+	return arg.p.result;
+}
+#endif
+
+#ifdef F_SifUnloadModule
+union _lf_module_unload_arg {
+	int	id;
+	int	result;
+} ALIGNED(16);
+
+int SifUnloadModule(int id)
+{
+	union _lf_module_unload_arg arg;
+
+	if (!_lf_init && SifLoadFileInit() < 0)
+		return -E_LIB_API_INIT;
+	
+	arg.id = id;
+	
+	if (SifCallRpc(&_lf_cd, LF_F_MOD_UNLOAD, 0, &arg, sizeof arg, &arg, 4, NULL, NULL) < 0)
+		return -E_SIF_RPC_CALL;
+
+	return arg.result;
+}
+#endif
+
+#ifdef F_SifSearchModuleByName
+struct _lf_search_module_by_name_arg {
+	int	id;
+	int	dummy1;
+	char	name[LF_PATH_MAX];
+	char	dummy2[LF_ARG_MAX];
+} ALIGNED(16);
+
+int SifSearchModuleByName(const char * name)
+{
+	struct _lf_search_module_by_name_arg arg;
+	if (!_lf_init && SifLoadFileInit() < 0)
+		return -E_LIB_API_INIT;
+	
+	strncpy(arg.name, name, LF_PATH_MAX - 1);
+	arg.name[LF_PATH_MAX - 1] = 0;
+
+	if (SifCallRpc(&_lf_cd, LF_F_SEARCH_MOD_BY_NAME, 0, &arg, sizeof arg, &arg, 4, NULL, NULL) < 0)
+		return -E_SIF_RPC_CALL;
+
+	return arg.id;
 }
 #endif
 
@@ -464,6 +557,8 @@ int _SifLoadModuleBuffer(void *ptr, int arg_len, const char *args, int *modres)
 	if (args && arg_len) {
 		arg.q.arg_len = arg_len > LF_ARG_MAX ? LF_ARG_MAX : arg_len;
 		memcpy(arg.args, args, arg.q.arg_len);
+	} else {
+		arg.q.arg_len = 0;
 	}
 
 	if (SifCallRpc(&_lf_cd, LF_F_MOD_BUF_LOAD, 0, &arg, sizeof arg, &arg, 8,
