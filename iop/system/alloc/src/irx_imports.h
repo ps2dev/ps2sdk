@@ -17,6 +17,7 @@
 #include "irx.h"
 
 /* Please keep these in alphabetical order!  */
+#include "loadcore.h"
 #include "sysmem.h"
 #include "sysclib.h"
 #include "thsemap.h"

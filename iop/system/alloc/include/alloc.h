@@ -15,6 +15,9 @@
 
 #include <types.h>
 
+#define alloc_IMPORTS_start DECLARE_IMPORT_TABLE(alloc, 1, 1)
+#define alloc_IMPORTS_end END_IMPORT_TABLE
+
 void * malloc(size_t size);
 #define I_malloc DECLARE_IMPORT(4, malloc)
 void * realloc(void * ptr, size_t size);

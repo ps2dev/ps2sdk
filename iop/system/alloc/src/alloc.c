@@ -16,11 +16,14 @@
 
 #include "types.h"
 #include "defs.h"
+#include "alloc.h"
 #include "irx_imports.h"
 #include "sys/stat.h"
 
 #define MODNAME "alloc"
 IRX_ID("Basic alloc library", 1, 1);
+
+struct irx_export_table _exp_alloc;
 
 static vs32 alloc_sema = -1;
 
@@ -44,6 +47,9 @@ static void alloc_unlock() {
 int _start(int argc, char **argv)
 {
     iop_sema_t sem_info;
+    
+    if (RegisterLibraryEntries(&_exp_alloc) != 0)
+	return 1;
     
     // check arguments for a heap_size parameter.
     
@@ -101,7 +107,7 @@ static heap_mem_header_t *__alloc_heap_tail = NULL;
 
 static void * alloc_sbrk(size_t increment)
 {
-        void *mp, *ret = (void *)-1;
+        u8 *mp, *ret = (void *)-1;
 
         if (increment == 0)
                 return _heap_ptr;

@@ -1,3 +1,7 @@
+loadcore_IMPORTS_start
+I_RegisterLibraryEntries
+loadcore_IMPORTS_end
+
 thsemap_IMPORTS_start
 I_CreateSema
 I_DeleteSema
