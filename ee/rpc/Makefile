@@ -7,6 +7,6 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 
-SUBDIRS = cdvd filexio keyboard memorycard mouse multitap pad tcpip
+SUBDIRS = cdvd filexio hdd keyboard memorycard mouse multitap pad poweroff tcpip
 
 include $(PS2SDKSRC)/Rules.make
