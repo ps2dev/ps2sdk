@@ -12,7 +12,7 @@ EE_SRC_DIR = src/
 all:  $(EE_OBJS_DIR) obj/crt0.o
 
 clean:
-	rm -f *.elf *.o *.a
+	rm -f -r $(EE_OBJS_DIR)
 
 release:
 	cp obj/crt0.o $(PS2SDK)/ee/startup
