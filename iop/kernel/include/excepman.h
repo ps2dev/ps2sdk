@@ -10,7 +10,7 @@
 #include "types.h"
 #include "irx.h"
 
-#define excepman_IMPORTS_start DECLARE_IMPORT_TABLE(excepman, 1, 1)
+#define excepman_IMPORTS_start DECLARE_IMPORT_TABLE(excepman, 1, 2)
 #define excepman_IMPORTS_end END_IMPORT_TABLE
 
 /* From any r3000's cop0 documentation */
@@ -51,6 +51,10 @@ int RegisterPriorityExceptionHandler(int exception, int priority, exception_hand
 #define I_RegisterPriorityExceptionHandler DECLARE_IMPORT(5, RegisterPriorityExceptionHandler)
 int RegisterDefaultExceptionHandler(exception_handler_t);
 #define I_RegisterDefaultExceptionHandler DECLARE_IMPORT(6, RegisterDefaultExceptionHandler)
+int ReleaseExceptionHandler(int exception, exception_handler_t);
+#define I_ReleaseExceptionHandler DECLARE_IMPORT(7, ReleaseExceptionHandler)
+int ReleaseDefaultExceptionHandler(exception_handler_t);
+#define I_ReleaseDefaultExceptionHandler DECLARE_IMPORT(4, ReleaseDefaultExceptionHandler)
 
 
 #endif /* IOP_EXCEPMAN_H */
