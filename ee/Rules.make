@@ -50,4 +50,4 @@ $(EE_BIN) : $(EE_OBJS) $(PS2SDKSRC)/ee/startup/crt0.o
 		-o $(EE_BIN) $(PS2SDKSRC)/ee/startup/crt0.o $(EE_OBJS) $(EE_LIBS)
 
 $(EE_LIB) : $(EE_OBJS)
-	$(EE_AR) cru $(EE_LIB) $<
+	$(EE_AR) cru $(EE_LIB) $(EE_OBJS)

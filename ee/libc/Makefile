@@ -15,8 +15,12 @@ EE_OBJS_DIR = obj/
 EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
+EE_SAMPLE_DIR = samples/
 
 EE_LIB = $(LIBC_LIB)
+EE_SAMPLES = hello
+
+EE_SAMPLES := $(EE_SAMPLES:%=$(EE_SAMPLE_DIR)%)
 
 
 ALLOC_OBJS = malloc.o realloc.o calloc.o memalign.o free.o __builtin_alloc.o
@@ -30,6 +34,10 @@ CORE_OBJS = sbrk.o memchr.o memcpy.o memset.o strcat.o \
 	strncmp.o memcmp.o memmove.o strcpy.o strncat.o \
 	strncpy.o terminate.o strlen.o strchr.o strcmp.o
 CORE_OBJS := $(CORE_OBJS:%=$(EE_OBJS_DIR)%)
+
+XPRINTF_OBJS = vsnprintf.o vsprintf.o vprintf.o printf.o sprintf.o snprintf.o \
+	npmPuts.o nprintf.o putchar.o puts.o
+XPRINTF_OBJS := $(XPRINTF_OBJS:%=$(EE_OBJS_DIR)%)
 
 MULT_OBJS = $(XPRINTF_OBJS) $(ALLOC_OBJS) $(STRING_C_OBJS) 
 

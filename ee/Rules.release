@@ -8,15 +8,32 @@
 
 
 
-RELEASE_EE_DIRS = ee/ ee/include/ ee/lib/ ee/startup
+RELEASE_EE_DIRS = ee/ ee/include/ ee/lib/ ee/startup ee/samples
 RELEASE_EE_DIRS := $(RELEASE_EE_DIRS:%=$(PS2SDK)/%)
+
+EE_MAKEFILES = Makefile Makefile.pref Makefile.eeglobal Makefile.eeglobal_cpp
+EE_MAKEFILES_SDK = $(EE_MAKEFILES:%=$(PS2SDK)/ee/samples/%)
+EE_MAKEFILES_SRC = $(EE_MAKEFILES:%=$(PS2SDKSRC)/ee/%_sample)
+
+$(EE_MAKEFILES_SDK): 
+	cp $(PS2SDKSRC)/ee/Makefile_sample $(PS2SDK)/ee/samples/Makefile
+	cp $(PS2SDKSRC)/ee/Makefile.pref_sample $(PS2SDK)/ee/samples/Makefile.pref
+	cp $(PS2SDKSRC)/ee/Makefile.eeglobal_sample $(PS2SDK)/ee/samples/Makefile.eeglobal
+	cp $(PS2SDKSRC)/ee/Makefile.eeglobal_cpp_sample $(PS2SDK)/ee/samples/Makefile.eeglobal_cpp
+
 
 $(RELEASE_EE_DIRS):
 	mkdir $(RELEASE_EE_DIRS)
 
-release: all $(RELEASE_EE_DIRS)
+$(PS2SDK)/ee/$(EE_SAMPLES):
+	mkdir $(PS2SDK)/ee/$(EE_SAMPLES)
+	cp -f $(EE_SAMPLES)/Makefile $(PS2SDK)/ee/$(EE_SAMPLES)/Makefile
+	cp -f $(EE_SAMPLES)/*.* $(PS2SDK)/ee/$(EE_SAMPLES)
+
+release: all $(RELEASE_EE_DIRS) $(EE_MAKEFILES_SDK) $(PS2SDK)/ee/$(EE_SAMPLES)
 	cp -f $(EE_LIB) $(PS2SDK)/ee/lib/
 	cp -f $(EE_INC_DIR)*.h $(PS2SDK)/ee/include/
+	
 
 release-clean:
 	rm -f $(PS2SDK)/ee/include/*.*

@@ -36,7 +36,13 @@ build: env_build_check $(subdir_list)
 
 clean: env_build_check $(subdir_clean)
 
-release: env_build_check release_base $(subdir_release)
+$(PS2SDK)/common/include:
+	mkdir $(PS2SDK)/common
+	mkdir $(PS2SDK)/common/include
+	cp -f $(PS2SDKSRC)/common/include/*.h $(PS2SDK)/common/include/
+
+release: env_build_check release_base $(PS2SDK)/common/include $(subdir_release) 
+
 
 release_base: env_release_check
 	@if test ! -d $(PS2SDK) ; then \
