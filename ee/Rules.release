@@ -57,7 +57,7 @@ release-include:
 
 release-samples:
 	@if test -d samples ; then \
-	   make -C samples release ; \
+	   $(MAKE) -C samples release ; \
 	fi;
 
 
