@@ -25,7 +25,7 @@
 #define isspace(c) (isblank(c) || (c == '\f') || (c == '\n') || (c == '\r') || (c == '\v'))
 #define isxdigit(c) (isdigit(c) || ((c >= 'A') && (c <= 'F')))
 
-#define isalnum(c) (salpha(c) || isdigit(c))
+#define isalnum(c) (isalpha(c) || isdigit(c))
 #define isalpha(c) (isupper(c) || islower(c))
 #define isgraph(c) (isprint(c) && !isspace(c))
 #define ispunct(c) (isprint(c) && !(isspace(c) || isalnum(c)))
