@@ -49,6 +49,7 @@ release_base: env_release_check
 	  mkdir -p $(PS2SDK) ; \
 	fi
 	cp -f README $(PS2SDK)
+	cp -f AUTHORS $(PS2SDK)
 	cp -f LICENSE $(PS2SDK)
 	cp -f ID $(PS2SDK)
 
