@@ -433,6 +433,13 @@ FILE *fopen(const char *fname, const char *mode)
 }
 #endif
 
+#ifdef F_fileno
+int fileno(FILE * stream)
+{
+  return stream->fd;
+}
+#endif
+
 #ifdef F_fdopen
 /*
 **

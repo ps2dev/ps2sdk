@@ -105,7 +105,7 @@ feof       - ok
 ferror     - ok
 
 perror     - ok
-fileno     - missing
+fileno     - ok
 pipe funcs - missing, can we make them ?
 lock funcs - missing, can we make them ?
 
