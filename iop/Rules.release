@@ -7,15 +7,21 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 
-RELEASE_IOP_DIRS = iop/ iop/include/ iop/irx/ iop/startup
+RELEASE_IOP_DIRS = iop/ iop/include/ iop/irx/ 
 RELEASE_IOP_DIRS := $(RELEASE_IOP_DIRS:%=$(PS2SDK)/%)
 
 $(RELEASE_IOP_DIRS):
 	mkdir $(RELEASE_IOP_DIRS)
 
 release: all $(RELEASE_IOP_DIRS)
-	cp $(IOP_LIB) $(PS2SDK)/ee/lib/
-	cp $(IOP_INC_DIR)*.h $(PS2SDK)/ee/include/
+	@echo Installing $(IOP_BIN) to $(PS2SDK)/iop/irx
+	@cp -f $(IOP_BIN) $(PS2SDK)/iop/irx/
+	@if test -d include ; then \
+	   for file in include/*; do \
+	     echo Installing $$file to $(PS2SDK)/iop/include ; \
+	     cp -f $$file $(PS2SDK)/iop/include ; \
+	   done; \
+	fi;
 
 release-clean:
 	rm -f $(PS2SDK)/iop/include/*.*
