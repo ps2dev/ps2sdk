@@ -17,13 +17,23 @@
 typedef	unsigned char 		u8;
 typedef unsigned short 		u16;
 
+typedef	volatile unsigned char 		vu8;
+typedef volatile unsigned short 		vu16;
+
 #ifdef _EE
 typedef unsigned int		u32;
 typedef unsigned long int	u64;
 typedef unsigned int		u128 __attribute__(( mode(TI) ));
+
+typedef volatile unsigned int		vu32;
+typedef volatile unsigned long int	vu64;
+
 #else
 typedef unsigned long int	u32;
 typedef unsigned long long	u64;
+
+typedef volatile unsigned long int	vu32;
+typedef volatile unsigned long long	vu64;
 #endif
 
 typedef signed char 		s8;
