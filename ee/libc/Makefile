@@ -26,7 +26,7 @@ EE_SAMPLES := $(EE_SAMPLES:%=$(EE_SAMPLE_DIR)%)
 ALLOC_OBJS = malloc.o realloc.o calloc.o memalign.o free.o __builtin_alloc.o
 ALLOC_OBJS := $(ALLOC_OBJS:%=$(EE_OBJS_DIR)%)
 
-STRING_C_OBJS = strcasecmp.o strncasecmp.o strtok.o strrchr.o strstr.o strtol.o \
+STRING_C_OBJS = strcasecmp.o strncasecmp.o strtok.o strrchr.o strstr.o strtol.o strtoul.o \
 	strupr.o strlwr.o ctype.o
 STRING_C_OBJS := $(STRING_C_OBJS:%=$(EE_OBJS_DIR)%)
 
