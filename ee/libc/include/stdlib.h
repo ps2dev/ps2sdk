@@ -103,6 +103,10 @@ double        strtod(const char *, char **);
 long          strtol(const char *, char **, int);
 unsigned long strtoul(const char *, char **, int);
 
+
+void          qsort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *));
+		     
+
 /* Multibyte disabled for now...
 int           mblen(const char *, size_t);
 size_t        mbstowcs(wchar_t *, const char *, size_t);
