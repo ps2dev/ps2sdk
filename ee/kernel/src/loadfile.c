@@ -568,7 +568,7 @@ int SifExecModuleBuffer(void *ptr, u32 size, u32 arg_len, const char *args, int 
 	qid = SifSetDma(&dmat, 1);
 	
 	if (!qid)
-	    return somerror;
+	    return -1; // should have a better error here...
 	
 	while(SifDmaStat(qid) >= 0);
 
