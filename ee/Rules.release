@@ -29,7 +29,7 @@ release-lib:
 	@if test $(EE_LIB) ; then \
 	   echo Installing $(EE_LIB) to $(PS2SDK)/ee/lib ; \
 	   cp -f $(EE_LIB) $(PS2SDK)/ee/lib ; \
-	   chmod 622 $(PS2SDK)/ee/$(EE_LIB) ; \
+	   chmod 644 $(PS2SDK)/ee/$(EE_LIB) ; \
 	fi;
 
 
@@ -41,7 +41,7 @@ release-bin:
 	@if test $(EE_BIN) ; then \
 	   echo Installing $(EE_BIN) to $(PS2SDK)/ee/bin ; \
 	   cp -f $(EE_BIN) $(PS2SDK)/ee/bin ; \
-	   chmod 622 $(PS2SDK)/ee/$(EE_BIN) ; \
+	   chmod 644 $(PS2SDK)/ee/$(EE_BIN) ; \
 	fi;
 
 #
@@ -55,7 +55,7 @@ release-include:
 	      if test -f $$file ; then \
 	         echo Installing $$file to $(PS2SDK)/ee/include ; \
 	         cp -f $$file $(PS2SDK)/ee/include ; \
-	         chmod 622 $(PS2SDK)/ee/$$file ; \
+	         chmod 644 $(PS2SDK)/ee/$$file ; \
 	      fi \
 	   done; \
 	fi;
