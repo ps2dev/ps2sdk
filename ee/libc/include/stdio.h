@@ -23,6 +23,11 @@
 #include <errno.h>
 #include <fileio.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 /* Some aliases for the unix 'unistd' functions */
 static __inline__ int open(const char *fname, int flags, ...) { return fioOpen(fname, flags); }
 static __inline__ int close(int handle) { return fioClose(handle); }
@@ -52,11 +57,6 @@ static __inline__ off_t lseek(int handle, off_t position, int wheel) { return fi
 
 #ifndef O_TEXT
 #define O_TEXT 0
-#endif
-
-
-#ifdef __cplusplus
-extern "C" {
 #endif
 
 
