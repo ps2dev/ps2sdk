@@ -10,6 +10,7 @@
 
 2004-12-29
   - pixel, reversed and added StopModule, UnloadModule, and SearchModuleByName
+  - pixel, filling some blanks in iop's modload.h, using kernel.s stubs.
 
 2004-12-17
   - radad, fixed libpad.h for some naming mistakes.
