@@ -49,6 +49,8 @@ llabs   - ok
 div     - ok, but shouldn't it use some asm ?
 ldiv    - ok, same
 lldiv   - ok, same
+frexp   - missing
+ldexp   - missing
 
 ecvt    - missing
 fcvt    - missing
@@ -124,6 +126,7 @@ strncat     - ok, asm
 strcmp      - ok, asm
 strncmp     - ok, asm
 
+strcspn     - missing
 strcoll     - missing
 strxfrm     - missing
 
@@ -133,7 +136,6 @@ strchr      - ok, asm
 strrchr     - ok
 
 strspn      - missing
-strcspn     - missing
 strpbrk     - missing
 strstr      - ok
 strcasestr  - missing
@@ -152,3 +154,27 @@ stricmp     - ok (macro)
 strcasecmp  - ok
 strnicmp    - ok (macro)
 strncasecmp - ok
+
+isalnum     - ok
+iscntrl     - ok
+isdigit     - ok
+isgraph     - ok
+islower     - ok
+isprint     - ok
+ispunct     - ok
+isspace     - ok
+isupper     - ok
+isxdigit    - ok
+
+asctime     - missing
+clock       - missing
+ctime       - missing
+difftime    - missing
+gmtime      - missing
+localtime   - missing
+mktime      - missing
+
+longjmp     - ok
+setjmp      - ok
+
+raise       - missing, can we build signals ?
