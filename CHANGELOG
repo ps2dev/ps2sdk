@@ -11,6 +11,7 @@
 2004-12-29
   - pixel, reversed and added StopModule, UnloadModule, and SearchModuleByName
   - pixel, filling some blanks in iop's modload.h, using kernel.s stubs.
+  - pixel, added strpbrk, strspn, strcspn, strcoll and strxfrm to libc.
 
 2004-12-17
   - radad, fixed libpad.h for some naming mistakes.
