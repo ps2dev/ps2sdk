@@ -63,6 +63,7 @@ u32 ata_active_port;
 #define ATA_C_IDENTIFY_PKT_DEVICE 0xa1
 #define ATA_C_IDLE		0xe3
 #define ATA_C_FLUSH_CACHE	0xe7
+#define ATA_C_FLUSH_CACHE_EXT	0xea
 #define ATA_C_IDENTIFY_DEVICE	0xec
 
 #define ATA_C_SET_FEATURES	0xef
@@ -73,7 +74,9 @@ u32 ata_active_port;
 #define   ATA_C_SMART_GET_STATUS	0xda
 
 #define ATA_C_READ_DMA		0xc8
+#define ATA_C_READ_DMA_EXT	0x25
 #define ATA_C_WRITE_DMA		0xca
+#define ATA_C_WRITE_DMA_EXT	0x35
 
 #define ATA_C_SEC_SET_PASSWORD	0xf1
 #define ATA_C_SEC_UNLOCK	0xf2
@@ -82,7 +85,9 @@ u32 ata_active_port;
 
 /* Offsets for the data returned from IDENTIFY DEVICE commands.  */
 enum _ata_identify_offsets {
-	ATA_ID_SECTOTAL_LO = 60, ATA_ID_SECTOTAL_HI,
+	ATA_ID_SECTOTAL_LO = 60, ATA_ID_SECTOTAL_HI = 61,
+	ATA_ID_COMMAND_SETS_SUPPORTED = 83,
+	ATA_ID_48BIT_SECTOTAL_LO = 100, ATA_ID_48BIT_SECTOTAL_MI = 101, ATA_ID_48BIT_SECTOTAL_HI = 102,
 	ATA_ID_SECURITY_STATUS = 128
 };
 
@@ -91,3 +96,4 @@ enum _ata_identify_offsets {
 #define ATA_F_SEC_LOCKED	(1<<2)
 
 #endif /* DRV_ATAHW_H */
+

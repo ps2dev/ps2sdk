@@ -6,6 +6,8 @@
  * This module provides the low-level ATA support for hard disk drives.  It is
  * 100% compatible with its proprietary counterpart called atad.irx.
  *
+ * This module also include support for 48-bit feature set (done by Clement).
+ *
  * See the file LICENSE included with this distribution for licensing terms.
  */
 
@@ -30,10 +32,13 @@ IRX_ID(MODNAME, 1, 1);
 	printf(MODNAME ": " format, ## args)
 
 #define BANNER "ATA device driver %s - Copyright (c) 2003 Marcus R. Brown\n"
-#define VERSION "v1.0"
+#define VERSION "v1.1"
 
 static int ata_devinfo_init = 0;
 static int ata_evflg = -1;
+
+/* Used for indicating 48-bit LBA support.  */
+static int lba_48bit[2] = {0, 0};
 
 /* This is true if this is a SCEI-modified HDD.  */
 static int is_sony_hdd[2] = {0, 0};
@@ -57,7 +62,7 @@ static ata_cmd_info_t ata_cmd_table[] = {
 	{0xc4,2},{0xc5,3},{0xc6,1},{0xc8,4},{0xca,4},{0xcd,3},{0xda,1},{0xde,1},
 	{0xdf,1},{0xe0,1},{0xe1,1},{0xe2,1},{0xe3,1},{0xe4,2},{0xe5,1},{0xe6,1},
 	{0xe7,1},{0xe8,3},{0xec,2},{0xed,1},{0xef,1},{0xf1,3},{0xf2,3},{0xf3,1},
-	{0xf4,3},{0xf5,1},{0xf6,3},{0xf8,1},{0xf9,1}
+	{0xf4,3},{0xf5,1},{0xf6,3},{0xf8,1},{0xf9,1},{0x25,4},{0x35,4},{0xea,1}
 };
 #define ATA_CMD_TABLE_SIZE	(sizeof ata_cmd_table/sizeof(ata_cmd_info_t))
 
@@ -67,7 +72,7 @@ static ata_cmd_info_t sec_ctrl_cmd_table[] = {
 #define SEC_CTRL_CMD_TABLE_SIZE	(sizeof sec_ctrl_cmd_table/sizeof(ata_cmd_info_t))
 
 static ata_cmd_info_t smart_cmd_table[] = {
-	{0xd0,2},{0xd2,1},{0xd3,1},{0xd4,1},{0xd5,2},{0xD6,3},{0xd8,1},{0xd9,1},
+	{0xd0,2},{0xd2,1},{0xd3,1},{0xd4,1},{0xd5,2},{0xd6,3},{0xd8,1},{0xd9,1},
 	{0xda,1}
 };
 #define SMART_CMD_TABLE_SIZE	(sizeof smart_cmd_table/sizeof(ata_cmd_info_t))
@@ -235,7 +240,7 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector,
 		return res;
 
 	/* For the SCE and SMART commands, we need to search on the subcommand
-	   specified in the feature register.  */
+	specified in the feature register.  */
 	if (command == ATA_C_SCE_SEC_CONTROL) {
 		cmd_table = sec_ctrl_cmd_table;
 		cmd_table_size = SEC_CTRL_CMD_TABLE_SIZE;
@@ -247,7 +252,7 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector,
 	} else {
 		cmd_table = ata_cmd_table;
 		cmd_table_size = ATA_CMD_TABLE_SIZE;
-		searchcmd = command;
+		searchcmd = command & 0xff;
 	}
 
 	type = 0;
@@ -287,7 +292,8 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector,
 			using_timeout = 1;
 			break;
 		case 4:
-			atad_cmd_state.dir = (command != 0xc8);
+			/* Modified to include ATA_C_READ_DMA_EXT.  */
+			atad_cmd_state.dir = ((command != 0xc8) && (command != 0x25));
 			using_timeout = 1;
 	}
 
@@ -310,17 +316,28 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector,
 	/* Finally!  We send off the ATA command with arguments.  */
 	ata_hwport->r_control = (using_timeout == 0) << 1;
 
-	ata_hwport->r_feature = feature;
-	ata_hwport->r_nsector = nsector;
-	ata_hwport->r_sector  = sector;
-	ata_hwport->r_lcyl    = lcyl;
-	ata_hwport->r_hcyl    = hcyl;
-	ata_hwport->r_select  = select;
-	ata_hwport->r_command = command;
+	/* 48-bit LBA requires writing to the address registers twice,
+	   24 bits of the LBA address is written each time.
+	   Writing to registers twice does not affect 28-bit LBA since
+	   only the latest data stored in address registers is used.  */
+	ata_hwport->r_feature = (feature >> 8) & 0xff;
+	ata_hwport->r_nsector = (nsector >> 8) & 0xff;
+	ata_hwport->r_sector  = (sector >> 8) & 0xff;
+	ata_hwport->r_lcyl    = (lcyl >> 8) & 0xff;
+	ata_hwport->r_hcyl    = (hcyl >> 8) & 0xff;
+
+	ata_hwport->r_feature = feature & 0xff;
+	ata_hwport->r_nsector = nsector & 0xff;
+	ata_hwport->r_sector  = sector & 0xff;
+	ata_hwport->r_lcyl    = lcyl & 0xff;
+	ata_hwport->r_hcyl    = hcyl & 0xff;
+	ata_hwport->r_select  = select & 0xff;
+	ata_hwport->r_command = command & 0xff;
 
 	/* Turn on the LED.  */
 	SPD_REG8(SPD_R_PIO_DIR) = 1;
 	SPD_REG8(SPD_R_PIO_DATA) = 0;
+
 	return 0;
 }
 
@@ -525,9 +542,14 @@ int ata_reset_devices()
 int ata_device_flush_cache(int device)
 {
 	int res;
-		
-	res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff,
-			ATA_C_FLUSH_CACHE);
+	
+	if (lba_48bit[device]) {
+		res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff,
+				ATA_C_FLUSH_CACHE_EXT);
+	} else {	
+		res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff,
+				ATA_C_FLUSH_CACHE);
+	}
 	if (!res)
 		return ata_io_finish();
 	return res;
@@ -573,8 +595,8 @@ int ata_device_sce_security_init(int device, void *data)
 {
 	int res;
 
-	res = ata_io_start(data, 1, 0xec, 0, 0, 0, 0, (device << 4) & 0xffff,
-			ATA_C_SCE_SEC_CONTROL);
+	res = ata_io_start(data, 1, 0xec, 0, 0, 0, 0,
+			(device << 4) & 0xffff, ATA_C_SCE_SEC_CONTROL);
 	if (!res)
 		return ata_io_finish();
 	return res;
@@ -662,15 +684,27 @@ int ata_device_dma_transfer(int device, void *buf, u32 lba, u32 nsectors, int di
 		len = (nsectors > 256) ? 256 : nsectors;
 
 		ata_dma_set_dir(dir);
-		/* Setup for LBA addressing.  */
-		sector = lba & 0xff;
-		lcyl   = (lba >> 8) & 0xff;
-		hcyl   = (lba >> 16) & 0xff;
-		/* 0x40 enables LBA.  */
-		select = ((device << 4)|((lba >> 24) & 0xf)|0x40) & 0xffff;
-		command = (dir == 1) ? ATA_C_WRITE_DMA : ATA_C_READ_DMA;
 
-		if ((res = ata_io_start(buf, len, 0, len & 0xff, sector, lcyl,
+		/* Variable lba is only 32 bits so no change for lcyl and hcyl.  */
+		lcyl = (lba >> 8) & 0xff;
+		hcyl = (lba >> 16) & 0xff;
+
+		if (lba_48bit[device]) {
+			/* Setup for 48-bit LBA.  */
+			/* Combine bits 24-31 and bits 0-7 of lba into sector.  */
+			sector = ((lba >> 16) & 0xff00) | (lba & 0xff);
+			/* 0x40 enables LBA.  */
+			select = ((device << 4) | 0x40) & 0xffff;
+			command = (dir == 1) ? ATA_C_WRITE_DMA_EXT : ATA_C_READ_DMA_EXT;
+		} else {
+			/* Setup for 28-bit LBA.  */
+			sector = lba & 0xff;
+			/* 0x40 enables LBA.  */
+			select = ((device << 4) | ((lba >> 24) & 0xf) | 0x40) & 0xffff;
+			command = (dir == 1) ? ATA_C_WRITE_DMA : ATA_C_READ_DMA;
+		}
+
+		if ((res = ata_io_start(buf, len, 0, len, sector, lcyl,
 					hcyl, select, command)) != 0)
 			return res;
 		if ((res = ata_io_finish()) != 0)
@@ -853,7 +887,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 		if (!devinfo[i].exists)
 			continue;
 
-		/* Send the IDENTIFY DEVICE command (if it doesn't succeed
+		/* Send the IDENTIFY DEVICE command. if it doesn't succeed
 		   devinfo is disabled.  */
 		if (!devinfo[i].has_packet) {
 			res = ata_device_identify(i, ata_param);
@@ -870,8 +904,24 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 		if (!devinfo[i].exists || devinfo[i].has_packet)
 			continue;
 
-		devinfo[i].total_sectors = (ata_param[ATA_ID_SECTOTAL_HI] << 16)|
-			ata_param[ATA_ID_SECTOTAL_LO];
+		/* This section is to detect whether the HDD supports 48-bit LBA 
+		   (IDENITFY DEVICE bit 10 word 83) and get the total sectors from
+		   either words(61:60) for 28-bit or words(103:100) for 48-bit.  */
+		if (ata_param[ATA_ID_COMMAND_SETS_SUPPORTED] & 0x0400) {
+			lba_48bit[i] = 1;
+			/* I don't think anyone would use a >2TB HDD but just in case.  */
+			if (ata_param[ATA_ID_48BIT_SECTOTAL_HI]) {
+				devinfo[i].total_sectors = 0xffffffff;
+			} else {
+				devinfo[i].total_sectors = 
+					(ata_param[ATA_ID_48BIT_SECTOTAL_MI] << 16)|
+					ata_param[ATA_ID_48BIT_SECTOTAL_LO];
+			}
+		} else {
+			lba_48bit[i] = 0;
+			devinfo[i].total_sectors = (ata_param[ATA_ID_SECTOTAL_HI] << 16)|
+				ata_param[ATA_ID_SECTOTAL_LO];
+		}
 		devinfo[i].security_status = ata_param[ATA_ID_SECURITY_STATUS];
 
 		/* Ultra DMA mode 4.  */
