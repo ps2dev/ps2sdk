@@ -1,0 +1,20 @@
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004.
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+
+EE_BIN = pad_example.elf
+EE_OBJS = pad.o
+EE_LIBS = -lpad -lc
+
+all: $(EE_BIN)
+
+clean:
+	rm -f *.elf *.o *.a
+
+include $(PS2SDK)/samples/Makefile.pref
+include $(PS2SDK)/samples/Makefile.eeglobal
+
