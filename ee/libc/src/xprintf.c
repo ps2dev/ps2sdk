@@ -279,7 +279,9 @@ static int vxprintf(func,arg,format,ap)
   int flag_zeropad;         /* True if field width constant starts with zero */
   int flag_long;            /* True if "l" flag is present */
   int flag_center;          /* True if "=" flag is present */
-  unsigned long longvalue;  /* Value for integer types */
+//  unsigned long longvalue;  /* Value for integer types */
+  unsigned int longvalue;  // Sign extension fix. - Lukasz
+
   long double realvalue;    /* Value for real types */
   info *infop;              /* Pointer to the appropriate info structure */
   char buf[BUFSIZE];        /* Conversion buffer */
