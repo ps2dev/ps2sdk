@@ -4,6 +4,7 @@
 sysclib_IMPORTS_start
 I_memset
 I_strcmp
+I_memcpy
 sysclib_IMPORTS_end
 
 loadcore_IMPORTS_start
