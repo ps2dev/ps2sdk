@@ -249,7 +249,7 @@ void dev9IntrDisable(int mask)
 int dev9DmaTransfer(int ctrl, void *buf, int bcr, int dir)
 {
 	USE_SPD_REGS;
-	iop_dmac_chan_t *dev9_chan = (iop_dmac_chan_t *)DEV9_DMAC_BASE;
+	volatile iop_dmac_chan_t *dev9_chan = (iop_dmac_chan_t *)DEV9_DMAC_BASE;
 	int stat, res = 0;
 
 	if ((res = WaitSema(dma_lock_sem)) < 0)
