@@ -17,6 +17,6 @@
 typedef _JBTYPE jmp_buf[_JBLEN];
 
 int setjmp(jmp_buf env);
-int sigsetjmp(sigjmp_buf env, int savesigs);	      
+void longjmp(jmp_buf env, int val);
 
 #endif
