@@ -42,12 +42,15 @@ $(EE_OBJS_DIR)%.o : $(EE_SRC_DIR)%.s
 $(EE_LIB_DIR):
 	mkdir $(EE_LIB_DIR)
 
+$(EE_BIN_DIR):
+	mkdir $(EE_BIN_DIR)
+
 $(EE_OBJS_DIR):
 	mkdir $(EE_OBJS_DIR)
 
-$(EE_BIN) : $(EE_OBJS) $(PS2SDKSRC)/ee/startup/crt0.o
-	$(EE_CC) -nostartfiles -T$(PS2SDKSRC)/ee/startup/linkfile $(EE_LDFLAGS) \
-		-o $(EE_BIN) $(PS2SDKSRC)/ee/startup/crt0.o $(EE_OBJS) $(EE_LIBS)
+$(EE_BIN) : $(EE_OBJS) $(PS2SDKSRC)/ee/startup/obj/crt0.o
+	$(EE_CC) -nostartfiles -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_LDFLAGS) \
+		-o $(EE_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_LIBS)
 
 $(EE_LIB) : $(EE_OBJS)
 	$(EE_AR) cru $(EE_LIB) $(EE_OBJS)
