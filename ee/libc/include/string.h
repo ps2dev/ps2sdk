@@ -38,6 +38,8 @@ int	strncmp(const char *, const char *, size_t);
 
 unsigned int strlen(const char *);
 
+char *  strdup(const char *s);
+
 char *	strcat(char *, const char *);
 char *	strchr(const char *, int);
 char *	strcpy(char *, const char *);
