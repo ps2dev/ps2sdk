@@ -20,7 +20,7 @@ IOP_OBJS = obj/hw.o obj/ahx_irx.o obj/spu2.o obj/imports.o obj/AHX.o
 IOP_CFLAGS  += -Wall -fno-builtin-printf -I$(PS2SDKSRC)/iop/sound/freesd/include/
 IOP_LDFLAGS += -s
 
-all: clean $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
+all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 
 clean:
 	rm -f -r $(IOP_OBJS_DIR) $(IOP_BIN_DIR)
