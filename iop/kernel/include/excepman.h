@@ -40,6 +40,12 @@
 #define EX_CPU 11
 // Arithmetic Overflow Exception
 #define EX_OVF 12
+// Reserved 13
+#define EX_R13 13
+// Reserved 14. This is FPE though, but won't be useful on IOP.
+#define EX_R14 14
+// What's this ... ?
+#define EX_HDB 15
 
 // does it really return void ?
 typedef void (*exception_handler_t)(void);
