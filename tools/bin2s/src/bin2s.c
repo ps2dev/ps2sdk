@@ -20,7 +20,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	if((source=fopen( argv[1], "r")) == NULL) {
+	if((source=fopen( argv[1], "rb")) == NULL) {
 		printf("Error opening %s for reading.\n",argv[1]);
 		return 1;
 	}
