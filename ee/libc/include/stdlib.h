@@ -16,6 +16,7 @@
 
 #include <stddef.h>
 #include <ps2lib_err.h>
+#include <malloc.h>
 
 #ifdef __cplusplus
 extern "C" {
