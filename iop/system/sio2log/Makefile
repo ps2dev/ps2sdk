@@ -16,7 +16,7 @@ IOP_INC_DIR = include/
 
 IOP_BIN  = bin/sio2log.irx
 IOP_OBJS = obj/sio2man.o obj/log.o 
-IOP_INCS = 
+#IOP_INCS = 
 
 IOP_CFLAGS  += -Wall -fno-builtin-printf
 IOP_LDFLAGS += -s

@@ -16,7 +16,7 @@ IOP_INC_DIR = include/
 
 IOP_BIN  = bin/siftoo.irx
 IOP_OBJS = obj/siftoo.o obj/pipe.o obj/exports.o obj/imports.o 
-IOP_INCS = -I$(PS2SDKSRC)/iop/system/sbusintr/include
+IOP_INCS += -I$(PS2SDKSRC)/iop/system/sbusintr/include
 
 IOP_CFLAGS  += -Wall -fno-builtin-printf
 IOP_LDFLAGS += -s

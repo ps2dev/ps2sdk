@@ -16,7 +16,7 @@ IOP_INC_DIR = include/
 
 IOP_BIN = bin/udptty.irx
 IOP_OBJS = obj/main.o obj/smap.o obj/udp.o obj/tty.o obj/imports.o
-IOP_INCS = -I. -I$(PS2SDKSRC)/iop/dev9/dev9/include
+IOP_INCS += -I. -I$(PS2SDKSRC)/iop/dev9/dev9/include
 
 IOP_CFLAGS = -Wall
 IOP_LDFLAGS = -s
