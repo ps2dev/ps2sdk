@@ -10,6 +10,10 @@
 
 2005-01-05
   - pixel, fixed realloc's alignment bug.
+  - pixel, added timer.h
+
+2005-01-04
+  - radad, fixed pad samples.
 
 2005-01-03
   - pixel, started a small skeleton, put a hello.irx file there.
