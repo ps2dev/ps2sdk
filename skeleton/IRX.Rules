@@ -1,0 +1,33 @@
+all: libs/$(IOP_TARGET)
+
+objs/%.o: src/%.c
+	$(IOP_CC) $(IOP_CFLAGS) $(IOP_CPPFLAGS) -c $< -o $@
+
+objs/%.o: src/%.cpp
+	$(IOP_CXX) $(IOP_CXXFLAGS) $(IOP_CPPFLAGS) -c $< -o $@
+
+objs/%.o: src/%.S
+	$(IOP_CC) $(IOP_CPPFLAGS) -c $< -o $@
+
+objs/%.o: src/%.s
+	$(IOP_AS) $(IOP_ASFLAGS) -c $< -o $@
+
+libs/$(IOP_TARGET): $(IOP_OBJS) objs/imports.o objs/exports.o src/irx_imports.h
+	$(IOP_CC) $(IOP_LDFLAGS) -miop -nostdlib -s -o libs/$(IOP_TARGET) $(IOP_OBJS) objs/imports.o objs/exports.o
+
+objs/imports.o:
+	echo "#include \"irx_imports.h\"" > src/build-imports.c
+	cat src/imports.lst >> src/build-imports.c
+	$(IOP_CC) $(IOP_CFLAGS) $(IOP_CPPFLAGS) -c src/build-imports.c -o objs/imports.o
+	rm -f src/build-imports.c
+
+objs/exports.o:
+	echo "#include \"irx.h\"" > src/build-exports.c
+	cat src/exports.tab >> src/build-exports.c
+	$(IOP_CC) $(IOP_CFLAGS) $(IOP_CPPFLAGS) -c src/build-exports.c -o objs/exports.o
+	rm -f src/build-exports.c
+
+clean:
+	rm -f objs/*.o libs/$(IOP_TARGET)
+
+rebuild: clean all
