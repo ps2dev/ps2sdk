@@ -124,7 +124,8 @@ int _SifLoadModule(const char *path, int arg_len, const char *args, int *modres,
 
 	memset(&arg, 0, sizeof arg);
 
-	strncpy(arg.path, path, LF_PATH_MAX);
+	strncpy(arg.path, path, LF_PATH_MAX - 1);
+	arg.path[LF_PATH_MAX - 1] = 0;
 
 	if (args && arg_len) {
 		arg.p.arg_len = arg_len > LF_ARG_MAX ? LF_ARG_MAX : arg_len;
@@ -236,8 +237,10 @@ int _SifLoadElfPart(const char *path, const char *secname, t_ExecData *data, int
 	if (!_lf_init && SifLoadFileInit() < 0)
 		return -E_LIB_API_INIT;
 
-	strncpy(arg.path, path, LF_PATH_MAX);
-	strncpy(arg.secname, secname, LF_ARG_MAX);
+	strncpy(arg.path, path, LF_PATH_MAX - 1);
+	strncpy(arg.secname, secname, LF_ARG_MAX - 1);
+	arg.path[LF_PATH_MAX - 1] = 0;
+	arg.secname[LF_ARG_MAX - 1] = 0;
 
 	if (SifCallRpc(&_lf_cd, fno, 0, &arg, sizeof arg, &arg,
 				sizeof(t_ExecData), NULL, NULL) < 0)
