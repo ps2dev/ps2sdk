@@ -15,7 +15,12 @@ $(RELEASE_TOOLS_DIRS):
 	mkdir $(RELEASE_TOOLS_DIRS)
 
 release: all $(RELEASE_TOOLS_DIRS)
-	cp $(TOOLS_BIN) $(PS2SDK)/bin/
+	@if test -d $(TOOLS_BIN_DIR) ; then \
+	   for file in $(TOOLS_BIN_DIR)* ; do \
+	      echo Installing $$file to $(PS2SDK)/bin ; \
+	      cp -f $$file $(PS2SDK)/bin ; \
+	   done; \
+	fi; \
 
 release-clean:
 	rm -f $(PS2SDK)/bin/*.*
