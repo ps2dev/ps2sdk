@@ -144,9 +144,9 @@ strtok      - ok
 strlen      - ok
 strerror    - ok (but in stdio)
 
-bzero       - ok (macro, in stdlib)
-bcopy       - ok (macro, in stdlib)
-bcmp        - missing
+bzero       - ok (macro, in string.h)
+bcopy       - ok (macro, in string.h)
+bcmp        - ok (macro, in string.h)
 index       - missing
 rindex      - missing
 

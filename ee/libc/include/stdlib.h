@@ -66,17 +66,6 @@ typedef struct {
 #endif // __LLDIV_T_DEFINED
 
 
-/* ensure bzero is defined. */
-#ifndef bzero
-#define bzero(p, n)                    memset(p, 0, n)
-#endif // bzero
-
-
-/* ensure bcopy is defined. */
-#ifndef bcopy
-#define bcopy(d, s, n)                 memcpy(d, s, n)
-#endif // bcopy
-
 /* we don't check for any previously defined value. This HAS to be that. */
 #define        RAND_MAX        2147483647
 
