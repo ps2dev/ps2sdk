@@ -7,7 +7,11 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 
-SUBDIRS = tools iop ee common samples
+ifeq ($(PS2SDKSRC), "")
+PS2SDKSRC=$(pwd)
+endif
+
+SUBDIRS = tools iop ee common sbv samples
 
 all: build 
 	@echo .;
@@ -58,8 +62,7 @@ release_base: env_release_check
 env_build_check: 
 	@if test -z $(PS2SDKSRC) ; \
 	then \
-	  echo PS2SDKSRC environment variable must be defined. ; \
-	  exit 1; \
+	  echo PS2SDKSRC environment variable should be defined. ; \
 	fi
 
 env_release_check:

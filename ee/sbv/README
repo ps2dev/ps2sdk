@@ -1,0 +1,74 @@
+sbv - Alternatives.
+
+Version 1.0-lite
+
+Copyright (c) 2003  Marcus R. Brown <mrbrown@0xd6.org>
+
+This distribution is licensed under the Academic Free License version 2.0.  See
+the file LICENSE for more details.
+
+
+Introduction
+------------
+
+sbv is my abbreviation for _subversion_, meaning:
+
+   1. The act or an instance of subverting.
+   2. The condition of being subverted.
+      
+sbv was partly written to overcome certain limitations and restrictions imposed
+by Sony onto the Playstation 2's BIOS.  It consists of a library and runtime
+patches for code running on the Emotion Engine (EE).
+
+The included library isn't limited to runtime patching, and it has many other
+uses for exerting unholy control over the PS2's I/O processor (IOP) and EE
+kernel.
+
+The sbv library code included in this package is part of a larger set of
+libraries I've developed.  Some bits I felt were best given away for everyone
+to use, so here they are.  I might do a larger version of sbv later on,
+depending on what I'm doing at that particular point and time.
+
+
+Usage
+-----
+
+I have tried to document the individual routines in each source file, and
+eventually I'll get them processed into SGML files.
+
+To compile sbv, you'll need a GNU-based toolchain capable of building code for
+the EE (see http://ps2dev.org or http://ps2dev.sourceforge.net for details on
+how to download or build one) and PS2Lib 2.1 or later
+(http://ps2dev.sourceforge.net/ps2lib.html).
+
+In your own program, modify your CFLAGS and LDFLAGS Makefile variables to point
+to sbv's include/ and lib/ directories, respectively.  Add -lsbv_patches to
+your list of libraries.  In your code, include sbv_patches.h and call the
+appropiate patch.  If the patch returns 0, everything went fine; if it doesn't
+return 0 then please send me a detailed bug report.
+
+
+Terms
+-----
+
+Some of these are SCE's own definitions, but I put them here in case you get
+lost while reading the source:
+
+SCE - Sony Computer Entertainment.  Used to denote areas of RAM that are
+modified that belong to the SCE kernel or other code SCE has written.
+
+Sub CPU - The IOP.
+
+Main CPU - The EE.
+
+EE kernel - The hunk of code that sits at address 0 in EE RAM.  Unless you are
+running under the PS2/Linux RTE, the EE kernel is in control of the PS2 (well,
+in reality the IOP is in control, but don't tell any PS2 GFX programmer that!).
+
+
+Feedback
+--------
+
+If you have any questions, comments, or bug reports about sbv, you can mail me
+at mrbrown@0xd6.org.  Don't get carried away though, I'm getting better and
+better at procmail filtering every day.
