@@ -475,7 +475,12 @@ int fputs(const char *s, FILE *stream)
 {
   size_t len;
 
-  return ((fwrite(s, 1, (len = strlen(s)), stream) == len) ? (int)len : EOF);
+  len = ((fwrite(s, 1, (len = strlen(s)), stream) == len) ? (int)len : EOF);
+  
+  if (len != EOF) {
+    fputc('\n', stream);
+  }
+  return len + 1;
 }
 #endif
 
