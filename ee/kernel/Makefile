@@ -65,6 +65,9 @@ CONFIG_OBJS = _config_internals.o GetRomName.o IsT10K.o configGetLanguage.o \
 	configIsDaylightSavingEnabled.o configSetDaylightSavingEnabled.o
 CONFIG_OBJS := $(CONFIG_OBJS:%=$(EE_OBJS_DIR)%)
 
+TIMER_OBJS = cpu_ticks.o
+TIMER_OBJS := $(TIMER_OBJS:%=$(EE_OBJS_DIR)%)
+
 
 ### SYSCALL OBJECTS
 
@@ -103,7 +106,7 @@ LIBSYSCALL_OBJS := $(LIBSYSCALL_OBJS:%=$(EE_OBJS_DIR)%)
 
 LIBKERNEL_OBJS = $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(CONFIG_OBJS) \
-	$(GLUE_OBJS) $(SIO_OBJS)
+	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS)
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBSYSCALL_LIB) $(LIBKERNEL_LIB)
 
@@ -130,6 +133,9 @@ $(LOADFILE_OBJS): src/loadfile.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(CONFIG_OBJS): src/osd_config.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(TIMER_OBJS): src/timer.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(IOPHEAP_OBJS): src/iopheap.c
