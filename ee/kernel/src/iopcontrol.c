@@ -21,7 +21,14 @@
 
 #define RESET_ARG_MAX	79
 
+#ifdef F___iop_control_internals
+int _iop_reboot_count = 0;
+#endif
+
+extern int _iop_reboot_count;
+
 #ifdef F_SifIopReset
+
 struct _iop_reset_pkt {
 	struct t_SifCmdHeader header;
 	int	arglen;
@@ -33,6 +40,8 @@ int SifIopReset(const char *arg, int mode)
 {
 	struct _iop_reset_pkt reset_pkt;  /* Implicitly aligned. */
 	struct t_SifDmaTransfer dmat;
+
+    _iop_reboot_count++; // increment reboot counter to allow RPC clients to detect unbinding!
 
 	SifExitRpc(); // exit RPC in case it's already been init'd
 
