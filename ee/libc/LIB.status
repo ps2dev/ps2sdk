@@ -4,7 +4,7 @@ Stdlib:
 What should stdlib contain, and current status.
 
 atof     - ok
-atoi     - some macro conflict ?
+atoi     - ok
 atol     - ok
 strtod   - ok
 strtof   - ok
@@ -108,3 +108,48 @@ fileno     - missing
 pipe funcs - missing, can we make them ?
 lock funcs - missing, can we make them ?
 
+
+String:
+------
+
+memcpy      - ok, asm version
+memmove     - ok, asm
+memset      - ok, asm
+memcmp      - ok, asm
+memchr      - ok, asm
+
+strcpy      - ok, asm
+strncpy     - ok, asm
+strcat      - ok, asm
+strncat     - ok, asm
+strcmp      - ok, asm
+strncmp     - ok, asm
+
+strcoll     - missing
+strxfrm     - missing
+
+strdup      - missing (duh?)
+
+strchr      - ok, asm
+strrchr     - ok
+
+strspn      - missing
+strcspn     - missing
+strpbrk     - missing
+strstr      - ok
+strcasestr  - missing
+strtok      - ok
+
+strlen      - ok
+strerror    - ok (but in stdio)
+
+bzero       - ok (macro, in stdlib)
+bcopy       - ok (macro, in stdlib)
+bcmp        - missing
+index       - missing
+rindex      - missing
+
+stricmp     - ok (macro)
+strcasecmp  - ok
+strnicmp    - ok (macro)
+strncasecmp - ok

@@ -105,7 +105,7 @@ void          abort(void) __attribute__ ((noreturn));
 int           abs(int);
 int           atexit(void (*)(void));
 double        atof(const char *);
-int           _atoi(const char *);
+int           atoi(const char *);
 long          atol(const char *);
 void          *bsearch(const void *, const void *, size_t, size_t, int (*)(const void *, const void *));
 div_t         div(int, int);

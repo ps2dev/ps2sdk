@@ -69,11 +69,6 @@ char *	strrchr(const char *, int);
 
 char *	strstr(const char *, const char *);
 
-long strtol(const char *nptr, char **endptr, int base);
-unsigned long strtoul(const char *s, char **endptr, int base);
-
-#define atoi(s) strtol(s,NULL,10)
-
 char * strupr(char *);
 char * strlwr(char *);
 

@@ -106,10 +106,10 @@ double atof(const char *s)
 #endif
 
 
-#ifdef F__atoi
+#ifdef F_atoi
 /*
 **
-**  [func] - _atoi.
+**  [func] - atoi.
 **  [desc] - if the string s begins with a valid integer then returns the
 **           integer value of the string s. else returns 0.
 **  [entr] - const char *s; the source string pointer.
@@ -118,7 +118,7 @@ double atof(const char *s)
 **  [post] - none.
 **
 */
-int _atoi(const char *s)
+int atoi(const char *s)
 {
   int neg = 0, ret = 0;
 
