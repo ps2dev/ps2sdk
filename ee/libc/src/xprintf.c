@@ -1019,7 +1019,7 @@ int npmPuts(const char *buf)
 		p = (void *)buf;
 	else {
 		strncpy(p, buf, 511);
-		p[511] = '\0';
+		((char *) p)[511] = '\0';
 	}
 
 	if (SifCallRpc(&npm_cd, NPM_RPC_PUTS, 0, p, 512, NULL, 0, NULL, NULL) < 0)
