@@ -17,6 +17,7 @@
 ==				(C) 2003 Marcus Brown <mrbrown@0xd6.org>	==
 ==											==
 ==================================================================*/
+#include "stdio.h"
 #include "tamtypes.h"
 #include "kernel.h"
 #include "sifrpc.h"

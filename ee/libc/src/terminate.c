@@ -6,6 +6,7 @@
   abort.c
 */
 
+#include <stdio.h>
 #include <tamtypes.h>
 #include <kernel.h>
 

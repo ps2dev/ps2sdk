@@ -14,6 +14,7 @@
 		NOTE: not all functions work with each set of modules!
 */
 
+#include "stdio.h"
 #include "tamtypes.h"
 #include "kernel.h"
 #include "sifrpc.h"

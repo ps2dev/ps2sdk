@@ -8,6 +8,7 @@
                         This is mostly based on Duke's work
 */
 
+#include <stdio.h>
 #include <tamtypes.h>
 #include <sifcmd.h>
 #include <kernel.h>

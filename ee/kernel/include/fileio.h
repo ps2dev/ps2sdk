@@ -41,10 +41,6 @@ int fioGets(int fd, char* buff, int n);
 void fioSetBlockMode(int blocking);
 int fioSync(int mode, int *retVal);
 
-int nprintf(const char *format, ...);
-int printf(const char *format, ...);
-int sprintf(char*, const char *format, ...);
-
 // Yet to be properly tested..
 int fioIoctl(int fd, int request, void *data);
 int fioDopen(const char *name);

@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <tamtypes.h>
 #include <kernel.h>
 #include <string.h>

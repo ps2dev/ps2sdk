@@ -1,77 +1,15 @@
 /*
-** It turns out that the printf functions in the stock MIT pthread library
-** is busted.  It isn't thread safe.  If two threads try to do a printf
-** of a floating point value at the same time, a core-dump might result.
-** So this code is substituted.
+  _____     ___ ____
+   ____|   |    ____|      PSX2 OpenSource Project
+  |     ___|   |____
+  ------------------------------------------------------------------------
+  xprintf.c                Various printf functions.
 */
-/*
-** NAME:    $Source$
-** VERSION: $Revision$
-** DATE:    $Date$
-**
-** ONELINER:   A replacement for formatted printing programs.
-**
-** COPYRIGHT:
-**   Copyright (c) 1990 by D. Richard Hipp.  This code is an original
-**   work and has been prepared without reference to any prior
-**   implementations of similar functions.  No part of this code is
-**   subject to licensing restrictions of any telephone company or
-**   university.
-**
-**   This copyright was released and the code placed in the public domain
-**   by the author, D. Richard Hipp, on October 3, 1996.
-**
-** DESCRIPTION:
-**   This program is an enhanced replacement for the "printf" programs
-**   found in the standard library.  The following enhancements are
-**   supported:
-**
-**      +  Additional functions.  The standard set of "printf" functions
-**         includes printf, fprintf, sprintf, vprintf, vfprintf, and
-**         vsprintf.  This module adds the following:
-**
-**           *  snprintf -- Works like sprintf, but has an extra argument
-**                          which is the size of the buffer written to.
-**
-**           *  mprintf --  Similar to sprintf.  Writes output to memory
-**                          obtained from mem_alloc.
-**
-**           *  xprintf --  Calls a function to dispose of output.
-**
-**           *  nprintf --  No output, but returns the number of characters
-**                          that would have been output by printf.
-**
-**           *  A v- version (ex: vsnprintf) of every function is also
-**              supplied.
-**
-**      +  A few extensions to the formatting notation are supported:
-**
-**           *  The "=" flag (similar to "-") causes the output to be
-**              be centered in the appropriately sized field.
-**
-**           *  The %b field outputs an integer in binary notation.
-**
-**           *  The %c field now accepts a precision.  The character output
-**              is repeated by the number of times the precision specifies.
-**
-**           *  The %' field works like %c, but takes as its character the
-**              next character of the format string, instead of the next
-**              argument.  For example,  printf("%.78'-")  prints 78 minus
-**              signs, the same as  printf("%.78c",'-').
-**
-**      +  When compiled using GCC on a SPARC, this version of printf is
-**         faster than the library printf for SUN OS 4.1.
-**
-**      +  All functions are fully reentrant.
-**
-*/
-/*
-** Undefine COMPATIBILITY to make some slight changes in the way things
-** work.  I think the changes are an improvement, but they are not
-** backwards compatible.
-*/
-/* #define COMPATIBILITY       / * Compatible with SUN OS 4.1 */
 
+/* Code borrowed from mysql's xprintf.c, by Richard Hipp */
+/* This xprintf.c file on which this one is based is in public domain. */
+
+#include <stdio.h>
 #include <tamtypes.h>
 #include <ps2lib_err.h>
 #include <kernel.h>
@@ -88,43 +26,7 @@
 */
 #define MAXDIG 20
 
-#ifdef F_vsnprintf
-
-/*
-** Now for string-print, also as found in any standard library.
-** Add to this the snprint function which stops added characters
-** to the string at a given length.
-**
-** Note that snprint returns the length of the string as it would
-** be if there were no limit on the output.
-*/
-struct s_strargument {    /* Describes the string being written to */
-  char *next;                   /* Next free slot in the string */
-  char *last;                   /* Last available slot in the string */
-};
-
-static void sout(txt,amt,arg)
-  char *txt;
-  int amt;
-  void *arg;
-{
-  register char *head;
-  register const char *t;  
-  register int a;
-  register char *tail;
-  a = amt;
-  t = txt;
-  head = ((struct s_strargument*)arg)->next;
-  tail = ((struct s_strargument*)arg)->last;
-  if( tail ){
-    while( a-- >0 && head<tail ) *(head++) = *(t++);
-  }else{
-    while( a-- >0 ) *(head++) = *(t++);
-  }
-  *head = 0;
-  ((struct s_strargument*)arg)->next = head;
-}
-
+#ifdef F_vxprintf
 /*
 ** Conversion types fall into various categories as defined by the
 ** following enumeration.
@@ -258,7 +160,7 @@ static int getdigit(long double *val, int *cnt){
 ** will run.
 */
 
-static int vxprintf(func,arg,format,ap)
+int vxprintf(func,arg,format,ap)
   void (*func)(char*,int,void*);
   void *arg;
   const char *format;
@@ -710,19 +612,9 @@ static int vxprintf(func,arg,format,ap)
   }/* End for loop over the format string */
   return errorflag ? -1 : count;
 } /* End of function */
-
-__attribute__((weak))
-int vsnprintf(char *buf, size_t n, const char *fmt, va_list ap){
-  struct s_strargument arg;
-  arg.next = buf;
-  arg.last = &buf[n-1];
-  *buf = 0;
-  return vxprintf(sout,&arg,fmt,ap);
-}
 #endif
 
 #ifdef F_xprintf
-__attribute__((weak))
 /*
 ** This non-standard function is still occasionally useful....
 */
@@ -738,15 +630,66 @@ int xprintf(
 }
 #endif
 
-#ifdef F_sprintf
-__attribute__((weak))
-int sprintf (char *str, const char *format, ...)
+/*
+** Now for string-print, also as found in any standard library.
+** Add to this the snprint function which stops added characters
+** to the string at a given length.
+**
+** Note that snprint returns the length of the string as it would
+** be if there were no limit on the output.
+*/
+struct s_strargument {    /* Describes the string being written to */
+  char *next;                   /* Next free slot in the string */
+  char *last;                   /* Last available slot in the string */
+};
+
+void sout(char *, int, void *);
+#ifdef F_sout
+void sout(txt,amt,arg)
+  char *txt;
+  int amt;
+  void *arg;
+{
+  register char *head;
+  register const char *t;  
+  register int a;
+  register char *tail;
+  a = amt;
+  t = txt;
+  head = ((struct s_strargument*)arg)->next;
+  tail = ((struct s_strargument*)arg)->last;
+  if( tail ){
+    while( a-- >0 && head<tail ) *(head++) = *(t++);
+  }else{
+    while( a-- >0 ) *(head++) = *(t++);
+  }
+  *head = 0;
+  ((struct s_strargument*)arg)->next = head;
+}
+#endif
+
+#ifdef F_vsnprintf
+int vsnprintf(char *buf, size_t n, const char *fmt, va_list ap){
+  struct s_strargument arg;
+  arg.next = buf;
+  arg.last = &buf[n-1];
+  *buf = 0;
+  return vxprintf(sout,&arg,fmt,ap);
+}
+#endif
+
+#ifdef F_snprintf
+int snprintf(char *str, size_t sz, const char *format, ...)
 {
 	va_list args;
+	struct s_strargument arg;
 	int ret;
+	
+	arg.next = str;
+	arg.last = &str[sz-1];
 
 	va_start(args, format);
-	ret = vsprintf(str, format, args);
+	ret = vxprintf(sout, &arg, format, args);
 	va_end(args);
 
 	return ret;
@@ -754,22 +697,28 @@ int sprintf (char *str, const char *format, ...)
 #endif
 
 #ifdef F_vsprintf
-__attribute__((weak))
-int vsprintf(char *str, const char *format, va_list args)
-{
-	return vsnprintf(str, PS2LIB_STR_MAX, format, args);
+int vsprintf(char *buf, const char *fmt, va_list ap){
+  struct s_strargument arg;
+  arg.next = buf;
+  arg.last = NULL;
+  *buf = 0;
+  return vxprintf(sout,&arg,fmt,ap);
 }
 #endif
 
-#ifdef F_snprintf
+#ifdef F_sprintf
 __attribute__((weak))
-int snprintf (char *str, size_t sz, const char *format, ...)
+int sprintf (char *str, const char *format, ...)
 {
 	va_list args;
+	struct s_strargument arg;
 	int ret;
+	
+	arg.next = str;
+	arg.last = NULL;
 
 	va_start(args, format);
-	ret = vsnprintf(str, sz, format, args);
+	ret = vxprintf(sout, &arg, format, args);
 	va_end(args);
 
 	return ret;
@@ -784,7 +733,6 @@ int snprintf (char *str, size_t sz, const char *format, ...)
 /* This structure is used to store state information about the
 ** write in progress
 */
-#ifdef mout
 __attribute__((weak))
 struct sgMprintf {
   char *zBase;     /* A base allocation */
@@ -793,8 +741,11 @@ struct sgMprintf {
   int  nAlloc;     /* Amount of space allocated in zText */
 };
 
+void mout(char *, int, void*);
+
+#ifdef F_mout
 /* The xprintf callback function. */
-static void mout(zNewText,nNewChar,arg)
+void mout(zNewText,nNewChar,arg)
   char *zNewText;
   int nNewChar;
   void *arg;
@@ -826,7 +777,6 @@ static void mout(zNewText,nNewChar,arg)
 */
 
 #ifdef F_mprintf
-__attribute__((weak))
 char *mprintf(const char *zFormat, ...){
   va_list ap;
   struct sgMprintf sMprintf;
@@ -857,7 +807,6 @@ char *mprintf(const char *zFormat, ...){
 ** conventions.
 */
 #ifdef F_vmprintf
-__attribute__((weak))
 char *vmprintf(const char *zFormat,va_list ap){
   struct sgMprintf sMprintf;
   char zBuf[200];
@@ -876,23 +825,71 @@ char *vmprintf(const char *zFormat,va_list ap){
 }
 #endif
 
+#ifdef F_asprintf
+int asprintf(char ** strp, const char *zFormat, ...){
+  va_list ap;
+  struct sgMprintf sMprintf;
+  char *zNew;
+  char zBuf[200];
+
+  va_start(ap,zFormat);
+  sMprintf.nChar = 0;
+  sMprintf.nAlloc = sizeof(zBuf);
+  sMprintf.zText = zBuf;
+  sMprintf.zBase = zBuf;
+  vxprintf(mout,&sMprintf,zFormat,ap);
+  va_end(ap);
+  if( sMprintf.zText==sMprintf.zBase ){
+    zNew = malloc( sMprintf.nChar+1 );
+    if( zNew ) strcpy(zNew,zBuf);
+  }else{
+    zNew = realloc(sMprintf.zText,sMprintf.nChar+1);
+  }
+  
+  *strp = zNew;
+
+  return sMprintf.nChar+1;
+}
+#endif
+
+#ifdef F_vasprintf
+int vasprintf(char **strp, const char *format, va_list ap) {
+  struct sgMprintf sMprintf;
+  char zBuf[200];
+  sMprintf.nChar = 0;
+  sMprintf.zText = zBuf;
+  sMprintf.nAlloc = sizeof(zBuf);
+  sMprintf.zBase = zBuf;
+  vxprintf(mout,&sMprintf,format,ap);
+  if( sMprintf.zText==sMprintf.zBase ){
+    sMprintf.zText = malloc( strlen(zBuf)+1 );
+    if( sMprintf.zText ) strcpy(sMprintf.zText,zBuf);
+  }else{
+    sMprintf.zText = realloc(sMprintf.zText,sMprintf.nChar+1);
+  }
+  *strp = sMprintf.zText;
+  return sMprintf.nChar;
+}
+#endif
+
 /*
 ** The following section of code handles the standard fprintf routines
 ** for pthreads.
 */
 
-/* The xprintf callback function. */
-#ifdef F_fprintf
-__attribute__((weak))
-static void fout(zNewText,nNewChar,arg)
+void fout(char *, int, void *);
+
+#ifdef F_fout
+void fout(zNewText,nNewChar,arg)
   char *zNewText;
   int nNewChar;
   void *arg;
 {
 	fwrite(zNewText,1,nNewChar,(FILE*)arg);
 }
+#endif
 
-
+#ifdef F_fprintf
 /* The public interface routines */
 int fprintf(FILE *pOut, const char *zFormat, ...){
   va_list ap;
@@ -906,27 +903,40 @@ int fprintf(FILE *pOut, const char *zFormat, ...){
 #endif
 
 #ifdef F_vfprintf
-__attribute__((weak))
 int vfprintf(FILE *pOut, const char *zFormat, va_list ap){
   return vxprintf(fout,pOut,zFormat,ap);
 }
 #endif
 
 
-#ifdef F_puts
-__attribute__((weak))
-int puts(const char *str)
+#ifdef F_printf
+int printf(const char *format, ...)
 {
-	int len = strlen(str);
+	va_list args;
+	int ret;
 
-	fioWrite(1, (void *)str, len);
-	putchar('\n');
-	return len + 1;
+	va_start(args, format);
+	ret = vprintf(format, args);
+	va_end(args);
+
+	return ret;
+}
+#endif
+
+#ifdef F_vprintf
+int vprintf(const char *format, va_list args)
+{
+  static char buf[PS2LIB_STR_MAX];
+	int ret;
+
+	ret = vsnprintf(buf, PS2LIB_STR_MAX, format, args);
+
+	fioWrite(1, buf, ret);
+	return ret;
 }
 #endif
 
 #ifdef F_putchar
-__attribute__((weak))
 int putchar( int chr )
 {
 	fioWrite(1, &chr, 1);
@@ -935,6 +945,7 @@ int putchar( int chr )
 #endif
 
 /* Napalm puts() and printf() */
+/* Who are still using them anyway? :P */
 
 #ifdef F_npmPuts
 
@@ -971,7 +982,6 @@ static int npm_puts_init()
 	return 0;
 }
 
-__attribute__((weak))
 int npmPuts(const char *buf)
 {
 	u8 puts_buf[512]; /* Implicitly aligned. */
@@ -998,10 +1008,9 @@ int npmPuts(const char *buf)
 #endif
 
 #ifdef F_nprintf
-__attribute__((weak))
 int nprintf(const char *format, ...)
 {
-	static char buf[PS2LIB_STR_MAX];
+	char buf[PS2LIB_STR_MAX];
 	va_list args;
 	int ret;
 
@@ -1014,33 +1023,15 @@ int nprintf(const char *format, ...)
 }
 #endif
 
-#ifdef F_printf
-__attribute__((weak))
-int printf(const char *format, ...)
+#ifdef F_vnprintf
+int vnprintf(const char *format, va_list args)
 {
-	va_list args;
-	int ret;
-
-	va_start(args, format);
-	ret = vprintf(format, args);
-	va_end(args);
-
-	return ret;
-}
-#endif
-
-#ifdef F_vprintf
-__attribute__((weak))
-int vprintf(const char *format, va_list args)
-{
-  static char buf[PS2LIB_STR_MAX];
+	char buf[PS2LIB_STR_MAX];
 	int ret;
 
 	ret = vsnprintf(buf, PS2LIB_STR_MAX, format, args);
+	npmPuts(buf);
 
-	fioWrite(1, buf, ret);
 	return ret;
 }
 #endif
-
-

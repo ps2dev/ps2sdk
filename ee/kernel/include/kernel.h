@@ -260,18 +260,6 @@ void SifWriteBackDCache(void *ptr, int size);
 void _SyncDCache(void *start, void *end);
 void _InvalidDCache(void *start, void *end);
 
-/* stdio */
-int	printf(const char *format, ...) __attribute__((format(printf,1,2)));
-int	sprintf(char *str, const char *format, ...) __attribute__((format(printf,2,3)));
-int	snprintf(char *str, size_t sz, const char *format, ...) __attribute__((format(printf,3,4)));
-
-int	vprintf(const char *format, va_list args);
-int	vsprintf(char *str, const char *format, va_list ap);
-int	vsnprintf(char *str, size_t sz, const char *format, va_list args);
-
-int	putchar(int c);
-int	puts(const char *str);
-
 /* stdlib - program termination */
 void	abort(void) __attribute__((noreturn));
 void	exit(int retval) __attribute__((noreturn));
