@@ -173,5 +173,9 @@ tcpip_init(void (* initfunc)(void *), void *arg)
 }
 
 
-
-
+//Boman666: This function has been added to enable ps2ip.c to directly post to the tcpip-thread's messagebox.
+sys_mbox_t
+tcpip_getmbox(void)
+{
+	return	mbox;
+}

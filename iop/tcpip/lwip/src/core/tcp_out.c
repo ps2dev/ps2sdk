@@ -102,6 +102,9 @@ tcp_enqueue(struct tcp_pcb *pcb, void *arg, u16_t len,
   u16_t seglen;
   void *ptr;
   u8_t queuelen;
+#if		defined(PS2IP_EVEN_TCP_SEG)
+  int		iSegCNT=0;
+#endif	//defined(PS2IP_EVEN_TCP_SEG)
 
   LWIP_DEBUGF(TCP_OUTPUT_DEBUG, ("tcp_enqueue(pcb=%p, arg=%p, len=%u, flags=%x, copy=%u)\n",
     (void *)pcb, arg, len, (unsigned int)flags, (unsigned int)copy));
@@ -142,7 +145,25 @@ tcp_enqueue(struct tcp_pcb *pcb, void *arg, u16_t len,
 
     /* The segment length should be the MSS if the data to be enqueued
      * is larger than the MSS. */
-    seglen = left > pcb->mss? pcb->mss: left;
+
+		//Boman666: My PC (WinXP) wants to ACK two packets at a time. If an odd number of packets is sent, the last ACK is delayed
+		//~172msec (probably after a timeout occur on the PC-side). Since unacked packets inhibits new TCP segments from being sent
+		//this has an abysmal impact on the performace. The code-snippet below makes sure the data is split up in an even number of
+		//segments, if it's possible.
+
+#if		defined(PS2IP_EVEN_TCP_SEG)
+		++iSegCNT;
+		if	(left>pcb->mss)
+		{
+			seglen=pcb->mss;
+		}
+		else
+		{
+			seglen=iSegCNT%2==1 ? ((left+1)/2):left;
+		}
+#else		//defined(PS2IP_EVEN_TCP_SEG)
+      seglen = left > pcb->mss? pcb->mss: left;
+#endif	//defined(PS2IP_EVEN_TCP_SEG)
 
     /* Allocate memory for tcp_seg, and fill in fields. */
     seg = memp_malloc(MEMP_TCP_SEG);
@@ -469,6 +490,7 @@ tcp_output(struct tcp_pcb *pcb)
   }
   return ERR_OK;
 }
+
 
 static void
 tcp_output_segment(struct tcp_seg *seg, struct tcp_pcb *pcb)

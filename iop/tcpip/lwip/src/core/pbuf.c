@@ -208,6 +208,7 @@ pbuf_pool_alloc(void)
  * @return the allocated pbuf. If multiple pbufs where allocated, this
  * is the first pbuf of a pbuf chain.
  */
+
 struct pbuf *
 pbuf_alloc(pbuf_layer l, u16_t length, pbuf_flag flag)
 {
@@ -260,7 +261,7 @@ pbuf_alloc(pbuf_layer l, u16_t length, pbuf_flag flag)
     /* set the length of the first pbuf in the chain */
     p->len = length > PBUF_POOL_BUFSIZE - offset? PBUF_POOL_BUFSIZE - offset: length;
     /* set reference count (needed here in case we fail) */
-    p->ref = 1;
+	 p->ref = 1;
 
     /* now allocate the tail of the pbuf chain */
 
@@ -303,13 +304,19 @@ pbuf_alloc(pbuf_layer l, u16_t length, pbuf_flag flag)
     break;
   case PBUF_RAM:
     /* If pbuf is to be allocated in RAM, allocate memory for it. */
-    p = mem_malloc(MEM_ALIGN_SIZE(sizeof(struct pbuf) + length + offset));
+    p = mem_malloc(MEM_ALIGN_SIZE(sizeof(struct pbuf) + offset + length));
     if (p == NULL) {
       return NULL;
     }
     /* Set up internal structure of the pbuf. */
-    p->payload = MEM_ALIGN((void *)((u8_t *)p + sizeof(struct pbuf) + offset));
-    p->len = p->tot_len = length;
+
+	 //Boman666: The memory isn't allocated to allow payload to be aligned. If payload is aligned according to the commented out
+	 //line the last two bytes in payload will be located outside the allocated memoryblock. Which will have the effect of
+	 //screwing up the memory-allocation structures, causing a crash.
+//    p->payload = MEM_ALIGN((void *)((u8_t *)p + sizeof(struct pbuf) + offset));
+    p->payload = (void*)((u8_t *)p + sizeof(struct pbuf) + offset);
+
+	 p->len = p->tot_len = length;
     p->next = NULL;
     p->flags = PBUF_FLAG_RAM;
 

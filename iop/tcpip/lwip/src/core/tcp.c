@@ -74,7 +74,6 @@ static u8_t tcp_timer;
 
 static u16_t tcp_new_port(void);
 
-
 /*
  * tcp_init():
  *
@@ -745,7 +744,7 @@ tcp_fasttmr(void)
   for(pcb = tcp_active_pcbs; pcb != NULL; pcb = pcb->next) {
     if (pcb->flags & TF_ACK_DELAY) {
       LWIP_DEBUGF(TCP_DEBUG, ("tcp_fasttmr: delayed ACK\n"));
-      tcp_ack_now(pcb);
+		tcp_ack_now(pcb);
       pcb->flags &= ~(TF_ACK_DELAY | TF_ACK_NOW);
     }
   }

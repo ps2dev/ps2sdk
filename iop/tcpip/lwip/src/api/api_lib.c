@@ -616,80 +616,113 @@ netconn_send(struct netconn *conn, struct netbuf *buf)
   return conn->err;
 }
 
+
 err_t
 netconn_write(struct netconn *conn, void *dataptr, u16_t size, u8_t copy)
 {
-  struct api_msg *msg;
-  u16_t len;
-  
-  if (conn == NULL) {
-    return ERR_VAL;
-  }
+	struct api_msg*	msg;
+	u16_t					len;
 
-  if (conn->err != ERR_OK) {
-    return conn->err;
-  }
-  
-  if (conn->sem == SYS_SEM_NULL) {
-    conn->sem = sys_sem_new(0);
-    if (conn->sem == SYS_SEM_NULL) {
-      return ERR_MEM;
-    }
-  }
+	if	(conn==NULL)
+	{
+		return	ERR_VAL;
+	}
 
-  if ((msg = memp_malloc(MEMP_API_MSG)) == NULL) {
-    return (conn->err = ERR_MEM);
-  }
-  msg->type = API_MSG_WRITE;
-  msg->msg.conn = conn;
-        
+	if	(conn->err != ERR_OK)
+	{
+		return	conn->err;
+	}
 
-  conn->state = NETCONN_WRITE;
-  while (conn->err == ERR_OK && size > 0) {
-    msg->msg.msg.w.dataptr = dataptr;
-    msg->msg.msg.w.copy = copy;
-    
-    if (conn->type == NETCONN_TCP) {
-      if (tcp_sndbuf(conn->pcb.tcp) == 0) {
-  sys_sem_wait(conn->sem);
-  if (conn->err != ERR_OK) {
-    goto ret;
-  }
-      }
-      if (size > tcp_sndbuf(conn->pcb.tcp)) {
-  /* We cannot send more than one send buffer's worth of data at a
-     time. */
-  len = tcp_sndbuf(conn->pcb.tcp);
-      } else {
-  len = size;
-      }
-    } else {
-      len = size;
-    }
-    
-    LWIP_DEBUGF(API_LIB_DEBUG, ("netconn_write: writing %d bytes (%d)\n", len, copy));
-    msg->msg.msg.w.len = len;
-    api_msg_post(msg);
-    sys_mbox_fetch(conn->mbox, NULL);    
-    if (conn->err == ERR_OK) {
-      dataptr = (void *)((char *)dataptr + len);
-      size -= len;
-    } else if (conn->err == ERR_MEM) {
-      conn->err = ERR_OK;
-      sys_sem_wait(conn->sem);
-    } else {
-      goto ret;
-    }
-  }
- ret:
-  memp_free(MEMP_API_MSG, msg);
-  conn->state = NETCONN_NONE;
-  if (conn->sem != SYS_SEM_NULL) {
-    sys_sem_free(conn->sem);
-    conn->sem = SYS_SEM_NULL;
-  }
-  
-  return conn->err;
+	if	(conn->sem == SYS_SEM_NULL)
+	{
+		conn->sem = sys_sem_new(0);
+		if	(conn->sem == SYS_SEM_NULL)
+		{
+			return	ERR_MEM;
+		}
+	}
+
+	if	((msg = memp_malloc(MEMP_API_MSG)) == NULL)
+	{
+		return	(conn->err = ERR_MEM);
+	}
+	msg->type = API_MSG_WRITE;
+	msg->msg.conn = conn;
+
+	conn->state = NETCONN_WRITE;
+	while (conn->err == ERR_OK && size > 0)
+	{
+		msg->msg.msg.w.dataptr = dataptr;
+		msg->msg.msg.w.copy = copy;
+
+		if (conn->type == NETCONN_TCP)
+		{
+
+			//Boman666: If we're going to send more than half the sendbuffer-size, wait for atleast half of the sendbuffer to be
+			//available and only send half of the sendbuffer-size at a time. This is to prevent a large send-size to be split up in
+			//unnecessary small sub-transmissions.
+
+			len=(size>TCP_SND_BUF/2) ? TCP_SND_BUF/2:size;
+
+			while	(tcp_sndbuf(conn->pcb.tcp) < len)
+			{
+				sys_sem_wait(conn->sem);
+				if (conn->err != ERR_OK)
+				{
+					goto	ret;
+				}
+			}
+/*			if (tcp_sndbuf(conn->pcb.tcp) == 0)
+			{
+				sys_sem_wait(conn->sem);
+				if (conn->err != ERR_OK)
+				{
+					goto	ret;
+				}
+			}
+			if (size > tcp_sndbuf(conn->pcb.tcp))
+			{
+				// We cannot send more than one send buffer's worth of data at a time.
+				len = tcp_sndbuf(conn->pcb.tcp);
+			}
+			else
+			{
+				len = size;
+			}*/
+		}
+		else
+		{
+			len = size;
+		}
+
+		LWIP_DEBUGF(API_LIB_DEBUG, ("netconn_write: writing %d bytes (%d)\n", len, copy));
+		msg->msg.msg.w.len = len;
+		api_msg_post(msg);
+		sys_mbox_fetch(conn->mbox, NULL);    
+		if	(conn->err == ERR_OK)
+		{
+			dataptr = (void *)((char *)dataptr + len);
+			size -= len;
+		}
+		else if (conn->err == ERR_MEM)
+		{
+			conn->err = ERR_OK;
+			sys_sem_wait(conn->sem);
+		}
+		else
+		{
+			goto ret;
+		}
+	}
+ret:
+	memp_free(MEMP_API_MSG, msg);
+	conn->state = NETCONN_NONE;
+	if	(conn->sem != SYS_SEM_NULL)
+	{
+		sys_sem_free(conn->sem);
+		conn->sem = SYS_SEM_NULL;
+	}
+	return	conn->err;
 }
 
 err_t

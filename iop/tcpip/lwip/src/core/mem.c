@@ -60,7 +60,8 @@ struct mem {
 }; 
 
 static struct mem *ram_end;
-static u8_t ram[MEM_SIZE + sizeof(struct mem) + MEM_ALIGNMENT];
+static u8_t* ram;
+static u8_t ramblock[MEM_SIZE + sizeof(struct mem) + MEM_ALIGNMENT];
 
 #define MIN_SIZE 12
 #if 0 /* this one does not align correctly for some, resulting in crashes */
@@ -70,6 +71,7 @@ static u8_t ram[MEM_SIZE + sizeof(struct mem) + MEM_ALIGNMENT];
                           (((sizeof(struct mem) % MEM_ALIGNMENT) == 0)? 0 : \
                           (4 - (sizeof(struct mem) % MEM_ALIGNMENT))))
 #endif
+
 
 static struct mem *lfree;   /* pointer to the lowest free block */
 
@@ -113,6 +115,9 @@ mem_init(void)
 {
   struct mem *mem;
 
+  //Boman666: Originally ram was the array now called ramblock. I didn't experience any problem but ram could end up incorrecly
+  //aligned, causing a crash.
+  ram=MEM_ALIGN(ramblock+MEM_ALIGNMENT-1);
   memset(ram, 0, MEM_SIZE);
   mem = (struct mem *)ram;
   mem->next = MEM_SIZE;
@@ -131,6 +136,7 @@ mem_init(void)
   lwip_stats.mem.avail = MEM_SIZE;
 #endif /* MEM_STATS */
 }
+
 void
 mem_free(void *rmem)
 {
@@ -140,7 +146,7 @@ mem_free(void *rmem)
     LWIP_DEBUGF(MEM_DEBUG | DBG_TRACE | 2, ("mem_free(p == NULL) was called.\n"));
     return;
   }
-  
+
   sys_sem_wait(mem_sem);
 
   LWIP_ASSERT("mem_free: legal memory", (u8_t *)rmem >= (u8_t *)ram &&
@@ -261,7 +267,8 @@ mem_malloc(mem_size_t size)
     mem = (struct mem *)&ram[ptr];
     if (!mem->used &&
        mem->next - (ptr + SIZEOF_STRUCT_MEM) >= size + SIZEOF_STRUCT_MEM) {
-      ptr2 = ptr + SIZEOF_STRUCT_MEM + size;
+
+		ptr2 = ptr + SIZEOF_STRUCT_MEM + size;
       mem2 = (struct mem *)&ram[ptr2];
 
       mem2->prev = ptr;      
@@ -291,7 +298,8 @@ mem_malloc(mem_size_t size)
         LWIP_ASSERT("mem_malloc: !lfree->used", !lfree->used);
       }
       sys_sem_signal(mem_sem);
-      LWIP_ASSERT("mem_malloc: allocated memory not above ram_end.",
+
+		LWIP_ASSERT("mem_malloc: allocated memory not above ram_end.",
        (u32_t)mem + SIZEOF_STRUCT_MEM + size <= (u32_t)ram_end);
       LWIP_ASSERT("mem_malloc: allocated memory properly aligned.",
        (unsigned long)((u8_t *)mem + SIZEOF_STRUCT_MEM) % MEM_ALIGNMENT == 0);
