@@ -1,0 +1,67 @@
+
+
+DECLARE_IMPORT_TABLE(atad, 1, 1)// temp!
+DECLARE_IMPORT(4, atadInit)
+DECLARE_IMPORT(9, atadDmaTransfer)
+DECLARE_IMPORT(11, atadSceUnlock)
+DECLARE_IMPORT(13, atadIdle)
+DECLARE_IMPORT(14, atadSceIdentifyDrive)
+DECLARE_IMPORT(15, atadGetStatus)
+DECLARE_IMPORT(16, atadUpdateAttrib)
+DECLARE_IMPORT(17, atadFlushCache)
+END_IMPORT_TABLE
+
+DECLARE_IMPORT_TABLE(dev9, 1, 1)// temp!
+DECLARE_IMPORT(6, dev9Shutdown)
+END_IMPORT_TABLE
+
+cdvdman_IMPORTS_start
+DECLARE_IMPORT(0x16, CdReadIlinkID)
+I_sceCdReadClock
+cdvdman_IMPORTS_end
+
+intrman_IMPORTS_start
+I_CpuDisableIntr
+I_CpuEnableIntr
+intrman_IMPORTS_end
+
+//DECLARE_IMPORT_TABLE(ioman, 1, 1)// temp!
+//DECLARE_IMPORT(0x14, AddDrv)
+//DECLARE_IMPORT(0x15, DelDrv)
+//END_IMPORT_TABLE
+
+iomanX_IMPORTS_start
+I_AddDrv
+I_DelDrv
+iomanX_IMPORTS_end
+
+stdio_IMPORTS_start
+I_printf
+stdio_IMPORTS_end
+
+sysclib_IMPORTS_start
+I_memcmp
+I_memcpy
+I_memset
+I_strchr
+I_strcmp
+I_strcpy
+I_strlen
+I_strncmp
+I_strncpy
+I_strrchr
+I_strtol
+I_sprintf// not use but :P
+sysclib_IMPORTS_end
+
+sysmem_IMPORTS_start
+I_AllocSysMemory
+//I_FreeSysMemory
+sysmem_IMPORTS_end
+
+thsemap_IMPORTS_start
+I_CreateSema
+I_DeleteSema
+I_SignalSema
+I_WaitSema
+thsemap_IMPORTS_end
