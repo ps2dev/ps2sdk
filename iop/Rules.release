@@ -18,8 +18,10 @@ release: all $(RELEASE_IOP_DIRS)
 	@cp -f $(IOP_BIN) $(PS2SDK)/iop/irx/
 	@if test -d include ; then \
 	   for file in include/*; do \
-	     echo Installing $$file to $(PS2SDK)/iop/include ; \
-	     cp -f $$file $(PS2SDK)/iop/include ; \
+	     if test -f $$file ; then \
+	       echo Installing $$file to $(PS2SDK)/iop/include ; \
+	       cp -f $$file $(PS2SDK)/iop/include ; \
+	     fi \
 	   done; \
 	fi;
 
