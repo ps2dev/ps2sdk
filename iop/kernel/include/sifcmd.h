@@ -111,6 +111,9 @@ typedef struct t_SifRpcDataQueue {
 	struct t_SifRpcDataQueue *next;
 } SifRpcDataQueue_t;
 
+void sceSifRemoveCmdHandler(int cid);
+#define I_sceSifRemoveCmdHandler DECLARE_IMPORT(11, sceSifRemoveCmdHandler)
+
 unsigned int sceSifSendCmd(int cmd, void *packet, int packet_size, void *src_extra, 
 	void *dest_extra, int size_extra);
 #define I_sceSifSendCmd DECLARE_IMPORT(12, sceSifSendCmd)
