@@ -10,12 +10,11 @@
 LIBSYSCALL_LIB = lib/libsyscall.a
 
 EE_LIB = $(LIBSYSCALL_LIB)
-EE_INC_DIR = include/
 
-OBJDIR = obj/
-OBJEXIST = $(OBJDIR).created
-LIBDIR = lib/
-LIBEXIST = $(LIBDIR).created
+EE_OBJS_DIR = obj/
+EE_LIB_DIR = lib/
+EE_SRC_DIR = src/
+EE_INC_DIR = include/
 
 
 LIBSYSCALL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
@@ -49,31 +48,22 @@ LIBSYSCALL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
 	SifGetReg.o ExecOSD.o Deci2Call.o PSMode.o MachineType.o GetMemorySize.o \
 	SifWriteBackDCache.o _SyncDCache.o _InvalidDCache.o __errno.o errno.o
 
-LIBSYSCALL_OBJS := $(LIBSYSCALL_OBJS:%=$(OBJDIR)%)
+LIBSYSCALL_OBJS := $(LIBSYSCALL_OBJS:%=$(EE_OBJS_DIR)%)
 
 EE_OBJS = $(LIBSYSCALL_OBJS)
 
-all: $(OBJEXIST) $(LIBEXIST) $(LIBSYSCALL_LIB)
+all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBSYSCALL_LIB)
 
 # $(LIBSYSCALL_LIB): $(LIBSYSCALL_OBJS)
 #	$(EE_AR) cru $(LIBSYSCALL_LIB) $(LIBSYSCALL_OBJS)
 
-$(OBJEXIST):
-	@echo; echo "Creating object directory"
-	test -d $(dir $@) || mkdir $(dir $@)
-	touch $@
-
-$(LIBEXIST):
-	@echo; echo "Creating library directory"
-	test -d $(dir $@) || mkdir $(dir $@)
-	touch $@
 
 $(LIBSYSCALL_OBJS): src/kernel.S
 	$(EE_C_COMPILE) -DF_$(*:$(OBJDIR)%=%) $< -c -o $@
 
 
 clean:
-	$(RM) -rf $(OBJDIR)
+	rm -f -r $(EE_OBJS_DIR) $(EE_LIB_DIR)
 
 install:
 	$(CP) $(LIBSYSCALL_LIB) $(PS2SDK)/ee/lib
