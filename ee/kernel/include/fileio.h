@@ -36,7 +36,7 @@ void fioExit(void);
 int fioOpen(const char *fname, int mode);
 int fioClose( int fd);
 int fioRead( int fd, void *buff, int buff_size);
-int fioWrite( int fd, void *buff, int buff_size);
+int fioWrite( int fd, const void *buff, int buff_size);
 int fioLseek( int fd, int offset, int whence);
 int fioMkdir(const char* dirname);
 int fioPutc(int fd,int c);

@@ -32,7 +32,7 @@ extern "C" {
 static __inline__ int open(const char *fname, int flags, ...) { return fioOpen(fname, flags); }
 static __inline__ int close(int handle) { return fioClose(handle); }
 static __inline__ ssize_t read(int handle, void * buffer, size_t size) { return fioRead(handle, buffer, size); }
-static __inline__ ssize_t write(int handle, void * buffer, size_t size) { return fioWrite(handle, buffer, size); }
+static __inline__ ssize_t write(int handle, const void * buffer, size_t size) { return fioWrite(handle, buffer, size); }
 static __inline__ off_t lseek(int handle, off_t position, int wheel) { return fioLseek(handle, position, wheel); }
 
 /* Some win32 equivalents... baaah */

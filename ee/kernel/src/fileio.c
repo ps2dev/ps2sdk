@@ -285,7 +285,7 @@ struct _fio_write_arg {
 	u8	aligned[16];
 } ALIGNED(16);
 
-int fioWrite(int fd, void *ptr, int size)
+int fioWrite(int fd, const void *ptr, int size)
 {
 	struct _fio_write_arg arg;
 	int mis, res;
