@@ -10,7 +10,7 @@
  */
 
 #include "types.h"
-#include "iomanX.h"
+#include "ioman.h"
 #include "loadcore.h"
 #include "stdio.h"
 #include "sifcmd.h"
@@ -970,7 +970,7 @@ int fio_dummy()
 
 int fio_init(iop_device_t *driver)
 {
-  //printf("fio_init()\n");
+  printf("fio_init()\n");
   return 0;
 }
 
@@ -983,7 +983,7 @@ int fio_format(iop_file_t *f, ...)
 
 int fio_open(iop_file_t *f, const char *name, int mode, ...)
 {
-  //printf("fio_open() %s %d\n", name, mode);
+  printf("fio_open() %s %d\n", name, mode);
   if(strcmp(name, PS2KBD_KBDFILE)) /* If not the keyboard file */
     {
       return -1;
@@ -1254,7 +1254,7 @@ int ps2kbd_init()
   memcpy(control_map, us_control_map, PS2KBD_KEYMAP_SIZE);
   memcpy(alt_map, us_alt_map, PS2KBD_KEYMAP_SIZE);
 
-  init_fio();
+  printf("ps2kbd AddDrv [%d]\n", init_fio());
   init_repeatthread();
 
   ret = UsbRegisterDriver(&kbd_driver);

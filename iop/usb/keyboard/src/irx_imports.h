@@ -14,7 +14,7 @@
 /* Please keep these in alphabetical order!  */
 #include "dmacman.h"
 #include "intrman.h"
-#include "iomanX.h"
+#include "ioman.h"
 #include "libsd.h"
 #include "loadcore.h"
 #include "stdio.h"
