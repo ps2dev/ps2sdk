@@ -8,6 +8,12 @@
 #
 # $Id$
 
+2005-04-03
+  - tyranid, added getsyscall
+
+2005-03-20
+  - pixel, added a new bin2o in pure C
+
 2005-03-17
   - oopo, added dma library
   - oopo, added simple graph library
