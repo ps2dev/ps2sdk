@@ -18,7 +18,7 @@ EE_OBJS = loader.o fakehost.o poweroff.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
 EE_LDFLAGS = -L$(PS2SDKSRC)/ee/kernel/lib -L$(PS2SDKSRC)/ee/libc/lib -L$(PS2SDKSRC)/ee/rpc/hdd/lib -L$(PS2SDKSRC)/ee/rpc/filexio/lib -L$(PS2SDKSRC)/ee/rpc/poweroff/lib
-EE_LIBS = -lkernel -lpoweroff -lhdd -lfileXio -lsyscall -lc -lkernel
+EE_LIBS = -lc -lkernel -lpoweroff -lhdd -lfileXio -lsyscall -lc -lkernel
 
 EE_BIN = $(EE_BIN_DIR)loader.elf
 
