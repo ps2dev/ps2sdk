@@ -86,7 +86,7 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
 	GetThreadId.o ReferThreadStatus.o iReferThreadStatus.o SleepThread.o \
 	WakeupThread.o iWakeupThread.o CancelWakeupThread.o iCancelWakeupThread.o \
 	SuspendThread.o iSuspendThread.o ResumeThread.o iResumeThread.o \
-	RFU059.o RFU060.o RFU061.o EndOfHeap.o CreateSema.o DeleteSema.o \
+	RFU059.o RFU060.o SetupThread.o RFU061.o SetupHeap.o EndOfHeap.o CreateSema.o DeleteSema.o \
 	iSignalSema.o SignalSema.o WaitSema.o PollSema.o iPollSema.o \
 	ReferSemaStatus.o iReferSemaStatus.o iDeleteSema.o SetOsdConfigParam.o \
 	GetOsdConfigParam.o GetGsHParam.o GetGsVParam.o SetGsHParam.o \

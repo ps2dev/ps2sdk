@@ -264,8 +264,16 @@ SYSCALL(RFU059, 0x3b)
 SYSCALL(RFU060, 0x3c)
 #endif
 
+#ifdef F_SetupThread
+SYSCALL(SetupThread, 0x3c)
+#endif
+
 #ifdef F_RFU061
 SYSCALL(RFU061, 0x3d)
+#endif
+
+#ifdef F_SetupHeap
+SYSCALL(SetupHeap, 0x3d)
 #endif
 
 #ifdef F_EndOfHeap
