@@ -27,6 +27,9 @@
 
 IRX_ID("ioptrap_driver", 1, 1);
 
+struct irx_export_table _exp_ioptrap;
+
+
 static const char *exception_type_name[] = {
     "Interrupt",
     "TLB Modification",
@@ -191,6 +194,9 @@ void do_tests() {
 int _start(int argc, char **argv)
 {
     int rv;
+
+	if(RegisterLibraryEntries(&_exp_ioptrap) != 0) return 1;
+
     memset(handlers, 0, sizeof(trap_exception_handler_t) * 16);
     printf("ioptrap starts.\n");
     if((rv = RegisterDefaultExceptionHandler(def_exc_handler)) < 0) {

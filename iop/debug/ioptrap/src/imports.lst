@@ -7,6 +7,10 @@ I_ExitDeleteThread
 thbase_IMPORTS_end
 #endif
 
+loadcore_IMPORTS_start
+I_RegisterLibraryEntries
+loadcore_IMPORTS_end
+
 excepman_IMPORTS_start
 I_RegisterDefaultExceptionHandler
 I_RegisterPriorityExceptionHandler
