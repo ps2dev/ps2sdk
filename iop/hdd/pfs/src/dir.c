@@ -55,6 +55,7 @@ pfs_cache_t *getDentry(pfs_cache_t *clink, char *path, pfs_dentry **dentry, u32 
 			for (d2=(pfs_dentry*)((int)d+512); d < d2; (int)d+=aLen)
 			{
 				aLen=(d->aLen & 0xFFF);
+				
 				if (aLen & 3){
 					printf("ps2fs: Error: dir-entry allocated length/4 != 0\n");
 					goto _exit;
@@ -76,7 +77,7 @@ pfs_cache_t *getDentry(pfs_cache_t *clink, char *path, pfs_dentry **dentry, u32 
 						break;
 					case 1: // hrm..
 						result = ((d->inode) || (aLen < dentryLen)) ? ((aLen - ((d->pLen + 8 + 3) & 0x1FC))
-							 >= dentryLen) : 1;
+								> dentryLen) : 1;
 						break;
 					case 2: // result = 1 when dir path is not empty, "." or ".."
 						result = d->pLen && strcmp(d->path, ".") && strcmp(d->path, "..");
