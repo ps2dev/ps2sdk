@@ -7,6 +7,6 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 
-SUBDIRS = kernel libc rpc startup
+SUBDIRS = kernel libc rpc startup loader
 
 include $(PS2SDKSRC)/Rules.make
