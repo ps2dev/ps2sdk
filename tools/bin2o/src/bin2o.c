@@ -210,7 +210,7 @@ void create_elf(FILE * dest, const unsigned char * source, u32 size, const char 
     if (have_size) {
         symbol.st_name = LE32(l_size * 2 + 1 + 7 + 5);
         symbol.st_value = 0;
-        symbol.st_size = 4;
+        symbol.st_size = LE32(4);
         symbol.st_info = 0x11;
         symbol.st_other = 0;
         symbol.st_shndx = LE16(4);
