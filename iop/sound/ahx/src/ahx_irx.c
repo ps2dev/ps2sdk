@@ -117,7 +117,7 @@ int _start ()
 //***************************************************************
 void AHX_Thread(void* param)
 {
-	int i;
+	// int i;
 	iop_sema_t sema; // semaphore
 
 	// set sema properties and create...

@@ -18,6 +18,7 @@
 #include <string.h>
 #include <malloc.h>
 #include <fileio.h>
+#include <stdio.h>
 #include "ahx_rpc.h"
 
 static unsigned sbuff[64] __attribute__((aligned (64)));
@@ -50,7 +51,7 @@ void iop_readwrite(void *addr, void *buf, u32 size, u32 read)
 int AHX_Init()
 {
 	int i;	
-	struct t_SifDmaTransfer sdt;
+	// struct t_SifDmaTransfer sdt;
 
 	// if already init'd, exit
 	if (ahx_init_done) return 0;

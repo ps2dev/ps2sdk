@@ -26,6 +26,8 @@
 #include <stdarg.h>
 #include <stddef.h>
 
+#include "sio.h"
+
 /*
 ** The maximum number of digits of accuracy in a floating-point conversion.
 */

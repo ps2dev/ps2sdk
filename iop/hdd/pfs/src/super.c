@@ -74,14 +74,14 @@ int formatSub(block_device *blockDev, int fd, u32 sub, u32 reserved, u32 scale, 
 			*b |= 1 << (i & 0x1F);
 		}
 
-		dprintf("ps2fs: Format sub: sub = %d, sector start = %d, ", sub, sector);
+		dprintf("ps2fs: Format sub: sub = %ld, sector start = %ld, ", sub, sector);
 
 		// set the rest of the bitmap to the fragment
 		while (count-- && ((result=blockDev->transfer(fd, cache->u.bitmap, sub, sector++, 1, 1))>=0))
 			for (i=127; i>=0; i--)
 				cache->u.bitmap[i]=fragment;
 
-		dprintf("sector end = %d\n", sector - 1);
+		dprintf("sector end = %ld\n", sector - 1);
 
 		cacheAdd(cache);
 	}
@@ -115,7 +115,7 @@ int _format(block_device *blockDev, int fd, int zonesize, int fragment)
 		sb->log.number = getBitmapBocks(scale, mainsize) + (0x2000 >> scale) + 1;
 		sb->log.count = 0x20000 / zonesize ? 0x20000 / zonesize : 1;
 
-		dprintf("ps2fs: Format: log.number = %d, log.count = %d\n", sb->log.number << scale, sb->log.count);
+		dprintf("ps2fs: Format: log.number = %ld, log.count = %d\n", sb->log.number << scale, sb->log.count);
 
 		sb->root.count = 1;
 		sb->root.number = sb->log.number + sb->log.count;

@@ -104,7 +104,7 @@ int blockAllocNewSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 block
 	pfs_mount_t *pfsMount=clink->pfsMount;
 	u32 i, old_blocks = blocks;
 
-	dprintf2("ps2fs CALL: allocNewBlockSegment(, , %d)\n", blocks);
+	dprintf2("ps2fs CALL: allocNewBlockSegment(, , %ld)\n", blocks);
 
 	if (cacheIsFull())
 		return -ENOMEM;

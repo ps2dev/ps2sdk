@@ -636,17 +636,17 @@ static int card_find_manfid(u32 manfid)
 				 SPD_REG8(spdaddr + 4);
 			if (manfid == tuple)
 				return 0;
-			M_PRINTF("MANFID 0x%08x doesn't match expected 0x%08x\n",
+			M_PRINTF("MANFID 0x%08lx doesn't match expected 0x%08lx\n",
 					tuple, manfid);
 			return -1;
 		}
 		spdaddr = next;
 	}
 
-	M_PRINTF("MANFID 0x%08x not found.\n", manfid);
+	M_PRINTF("MANFID 0x%08lx not found.\n", manfid);
 	return -1;
 error:
-	M_PRINTF("Invalid tuples at offset 0x%08x.\n", spdaddr - SPD_REGBASE);
+	M_PRINTF("Invalid tuples at offset 0x%08lx.\n", spdaddr - SPD_REGBASE);
 	return -1;
 }
 

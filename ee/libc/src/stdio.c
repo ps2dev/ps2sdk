@@ -1199,7 +1199,7 @@ char *tmpnam(char *name)
 */
 int ungetc(int c, FILE *stream)
 {
-  int ret = EOF;
+  // int ret = EOF;
 
   if (c == EOF || stream->has_putback) {
     /* invalid input, or putback queue full */

@@ -689,8 +689,8 @@ int devctlSetOsdMBR(u32 device, hddSetOsdMBR_t *mbrInfo)
 	if(!(clink=cacheGetHeader(device, APA_SECTOR_MBR, 0, &rv)))
 		return rv;
 
-	dprintf1("ps2hdd: mbr start: %d\n"
-			 "ps2hdd: mbr size : %d\n", mbrInfo->start, mbrInfo->size);
+	dprintf1("ps2hdd: mbr start: %ld\n"
+			 "ps2hdd: mbr size : %ld\n", mbrInfo->start, mbrInfo->size);
 	clink->header->mbr.osdStart=mbrInfo->start;
 	clink->header->mbr.osdSize=mbrInfo->size;
 	clink->flags|=CACHE_FLAG_DIRTY;

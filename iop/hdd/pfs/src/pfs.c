@@ -188,7 +188,7 @@ int _start(int argc, char *argv[])
 		argv++;
 	}
 
-	printf("ps2fs: Max mount: %d, Max open: %d, Number of buffers: %d\n", pfsConfig.maxMount,
+	printf("ps2fs: Max mount: %ld, Max open: %ld, Number of buffers: %d\n", pfsConfig.maxMount,
 			pfsConfig.maxOpen, numBuf);
 
 	// Do we have enough buffers ?

@@ -84,7 +84,7 @@ int cacheTransfer(pfs_cache_t* clink, int mode)
 			}
 		}
 		if(err!=0) {
-			printf("ps2fs: Error: Disk error partition %d, block %d, err %d\n",
+			printf("ps2fs: Error: Disk error partition %ld, block %ld, err %d\n",
 				clink->sub, clink->sector, err);
 			pfsMount->blockDev->setPartitionError(pfsMount->fd);
 			fsckStat(pfsMount, clink->u.superblock, FSCK_STAT_WRITE_ERROR, MODE_SET_FLAG);

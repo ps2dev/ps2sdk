@@ -46,6 +46,8 @@
 
 #include "lwip/stats.h"
 
+#include "sysclib.h"
+
 struct mem {
   mem_size_t next, prev;
 #if MEM_ALIGNMENT == 1

@@ -67,7 +67,7 @@ int cacheTransfer(apa_cache *clink, int type)
 
 	if(err)
 	{
-		dprintf1("ps2hdd: Error: disk err %d on device %d, sector %d, type %d\n",
+		dprintf1("ps2hdd: Error: disk err %d on device %ld, sector %ld, type %d\n",
 			err, clink->device, clink->sector, type);
 		if(type==0)// save any read error's..
 			apaSaveError(clink->device, clink->header, APA_SECTOR_SECTOR_ERROR, clink->sector);

@@ -55,7 +55,7 @@ UsbDriver g_root_ldd = {
 static void usbd_dump_dev(dev_data_t *dev)
 
 {
-   printf("Device %p, devno %d, dev_ldd %p, next %p, prev %p, desc %p\n", 
+   printf("Device %p, devno %ld, dev_ldd %p, next %p, prev %p, desc %p\n", 
 	 dev, dev->devno, dev->dev_ldd, dev->next_dev, dev->prev_dev, dev->static_desc);
 }
 
@@ -318,7 +318,7 @@ s32 UsbRegisterDriver(UsbDriver *ldd)
 	" add %0, $0, $28\n"
         : "=r"(curr_gp)
    ); 
-   printf("Register Ldd gp = %08X\n", curr_gp);
+   printf("Register Ldd gp = %08lX\n", curr_gp);
 
    if((ldd == NULL) || (ldd->next) || (ldd->prev) || (ldd->name == NULL))
    {

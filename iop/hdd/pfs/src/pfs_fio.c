@@ -676,7 +676,7 @@ s64 _seek(pfs_file_slot_t *fileSlot, s64 offset, int whence, int mode)
 		return rv;
 	}
 
-	dprintf("ps2fs: Seek successfull! newPos = %d\n", (u32)newPos);
+	dprintf("ps2fs: Seek successfull! newPos = %ld\n", (u32)newPos);
 
 	return newPos;
 }

@@ -58,6 +58,8 @@
 
 #include "lwip/stats.h"
 
+#include "sysclib.h"
+
 #if LWIP_TCP
 
 /* Forward declarations.*/

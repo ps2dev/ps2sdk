@@ -39,6 +39,8 @@
 
 #include "lwip/sockets.h"
 
+#include "sysclib.h"
+
 #define NUM_SOCKETS MEMP_NUM_NETCONN
 
 struct lwip_socket {

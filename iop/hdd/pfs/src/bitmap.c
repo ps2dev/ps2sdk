@@ -338,7 +338,7 @@ void bitmapShow(pfs_mount_t *pfsMount)
 			if (info.chunk == info.partitionChunks)
 				bitcnt=info.partitionRemainder;
 
-			printf("ps2fs: Zone show: pn %d, bn %d, bitcnt %d\n", pn, info.chunk, bitcnt);
+			printf("ps2fs: Zone show: pn %ld, bn %ld, bitcnt %ld\n", pn, info.chunk, bitcnt);
 			
 			for(i=0; (i < (1<<blockSize)) && ((i * 512) < (bitcnt / 8)); i++)
 				printBitmap(clink->u.bitmap+128*i);

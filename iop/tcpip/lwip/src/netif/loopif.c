@@ -43,6 +43,8 @@
 #include "lwip/tcp.h"
 #include "lwip/ip.h"
 
+#include "sysclib.h"
+
 static void
 loopif_input( void * arg )
 {

@@ -747,7 +747,7 @@ void *rpcCommandHandler(u32 command, void *buffer, int size)
       break;
     case PS2MOUSE_GETVERSION: do_ps2mouse_getversion((u32 *) buffer, size);
       break;
-    default : printf("Unknown PS2MOUSE command %d\n", command);
+    default : printf("Unknown PS2MOUSE command %ld\n", command);
       break;
     }
 

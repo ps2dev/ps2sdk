@@ -131,7 +131,7 @@ void hcd_dump_ohciregs(void)
    for(loop = 0; loop < 21; loop++)
    {
       val = regs[loop];
-      dbgprintf("%s - %08X - %s\n", ohci_regnames[loop], val, get_asbits(val));
+      dbgprintf("%s - %08lX - %s\n", ohci_regnames[loop], val, get_asbits(val));
    } 
 }
 
@@ -763,7 +763,7 @@ void hcd_handle_rhsc(void)
    for(loop = 18; loop < 23; loop++)
    {
       val = regs[loop];
-      dbgprintf("%s - %08X - %s\n", ohci_regnames[loop], val, get_asbits(val));
+      dbgprintf("%s - %08lX - %s\n", ohci_regnames[loop], val, get_asbits(val));
    }
 }
 

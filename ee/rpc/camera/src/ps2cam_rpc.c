@@ -12,6 +12,8 @@
 #include <tamtypes.h>
 #include <kernel.h>
 #include <sifrpc.h>
+#include <stdio.h>
+#include <string.h>
 #include "../include/ps2cam_rpc.h"
 
 
@@ -34,7 +36,7 @@ int sem;
 
 int PS2CamInit(int mode)
 {
-	unsigned int	i;
+	// unsigned int	i;
 	int				ret=0;
 	int				*buf;
 	int				timeout;

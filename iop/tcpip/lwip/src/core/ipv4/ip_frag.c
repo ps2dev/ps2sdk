@@ -47,6 +47,7 @@
 
 #include "lwip/stats.h"
 
+#include "sysclib.h"
 
 /*
  * Copy len bytes from offset in pbuf to buffer 

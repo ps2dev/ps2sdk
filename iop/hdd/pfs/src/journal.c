@@ -124,7 +124,7 @@ int journalResetore(pfs_mount_t *pfsMount)
 
 	for(i = 0; i < journalBuf.num; i++)
 	{
-		printf("ps2fs: Log overwrite %d:%08x\n", journalBuf.log[i].sub, journalBuf.log[i].sector);
+		printf("ps2fs: Log overwrite %d:%08lx\n", journalBuf.log[i].sub, journalBuf.log[i].sector);
 
 		// Read data in from log section on disk into cache buffer
 		rv = pfsMount->blockDev->transfer(pfsMount->fd, clink->u.data, 0, 

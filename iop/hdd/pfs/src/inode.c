@@ -24,9 +24,9 @@ int blockSize=1;// block size(in sectors(512) )
 
 void inodePrint(pfs_inode *inode)
 {
-	dprintf("ps2fs: inodePrint: Checksum = 0x%X, Magic = 0x%X\n", inode->checksum, inode->magic);
+	dprintf("ps2fs: inodePrint: Checksum = 0x%lX, Magic = 0x%lX\n", inode->checksum, inode->magic);
 	dprintf("ps2fs:     Mode = 0x%X, attr = 0x%X\n", inode->mode, inode->attr);
-	dprintf("ps2fs:     size = 0x%08X%08X\n", (u32)(inode->size >> 32), (u32)(inode->size));
+	dprintf("ps2fs:     size = 0x%08lX%08lX\n", (u32)(inode->size >> 32), (u32)(inode->size));
 }
 
 int inodeCheckSum(pfs_inode *inode)

@@ -161,7 +161,7 @@ int flash_get_info(flash_info_t *info)
 			continue;
 
 		memcpy(info, &devices[i], sizeof(flash_info_t));
-		M_PRINTF("Device: ID 0x%02x, %dMbit, %d bytes/page, %d pages/block, %d blocks total.\n",
+		M_PRINTF("Device: ID 0x%02x, %ld Mbit, %ld bytes/page, %ld pages/block, %ld blocks total.\n",
 				id, info->mbits, info->page_bytes, info->block_pages, info->blocks);
 		return 0;
 	}

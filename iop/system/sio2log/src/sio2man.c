@@ -155,7 +155,7 @@ void main_thread(void *unused)
 			SetEventFlag(event_flag, EF_MTAP_TRANSFER_READY);
 			log_default(LOG_MTAP_READY);
 		} else {
-			EPRINTF("Unknown event %08x. Exiting.\n", resbits[0]);
+			EPRINTF("Unknown event %08lx. Exiting.\n", resbits[0]);
 			return;
 		}
 

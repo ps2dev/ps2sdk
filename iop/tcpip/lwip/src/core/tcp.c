@@ -53,6 +53,9 @@
 #include "lwip/memp.h"
 
 #include "lwip/tcp.h"
+
+#include "sysclib.h"
+
 #if LWIP_TCP
 
 /* Incremented every coarse grained timer shot

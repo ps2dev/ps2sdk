@@ -44,6 +44,8 @@
 
 #include "lwip/snmp.h"
 
+#include "sysclib.h"
+
 void
 icmp_input(struct pbuf *p, struct netif *inp)
 {

@@ -57,6 +57,8 @@
 #include "arch/perf.h"
 #include "lwip/snmp.h"
 
+#include "sysclib.h"
+
 /* The list of UDP PCBs */
 #if LWIP_UDP
 /* was static, but we may want to access this from a socket layer */
