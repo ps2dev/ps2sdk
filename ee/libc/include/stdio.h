@@ -124,6 +124,7 @@ void   clearerr(FILE *);
 int    feof(FILE *);
 int    ferror(FILE *);
 FILE   *fopen(const char *, const char *);
+FILE   *fdopen(int, const char *);
 int    fclose(FILE *);
 int    fflush(FILE *);
 int    fgetc(FILE *);
