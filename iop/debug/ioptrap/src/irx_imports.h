@@ -23,7 +23,7 @@
 #include "sifman.h"
 #include "stdio.h"
 #include "sysclib.h"
-#ifdef TRAP_TEST
+#ifdef TEST_TRAP
 #include "thbase.h"
 #endif
 
