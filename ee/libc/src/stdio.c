@@ -920,6 +920,8 @@ int puts(const char *s)
     if ((putchar(*s) == (int)*s) && (ret >= 0)) ++ret;
     else ret = EOF;
   }
+  if ((putchar('\n') == '\n') && (ret >= 0)) ++ret;
+  else ret = EOF;
   return (ret);
 }
 #endif

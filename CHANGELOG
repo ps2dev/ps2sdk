@@ -10,6 +10,7 @@
 
 2005-01-03
   - pixel, started a small skeleton, put a hello.irx file there.
+  - pixel, fixing printf-to-puts "gcc-optimisation" issue *AGAIN*.
 
 2005-01-02
   - herben, added volatiles counterparts to tamtypes.h
