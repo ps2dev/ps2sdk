@@ -19,7 +19,7 @@
 
 #include <iopcontrol.h>
 
-#define RESET_ARG_MAX	79  
+#define RESET_ARG_MAX	79
 
 #ifdef F_SifIopReset
 struct _iop_reset_pkt {
@@ -34,6 +34,8 @@ int SifIopReset(const char *arg, int mode)
 	struct _iop_reset_pkt reset_pkt;  /* Implicitly aligned. */
 	struct t_SifDmaTransfer dmat;
 
+	SifExitRpc(); // exit RPC in case it's already been init'd
+
 	SifStopDma();
 
 	memset(&reset_pkt, 0, sizeof reset_pkt);
@@ -43,11 +45,10 @@ int SifIopReset(const char *arg, int mode)
 
 	reset_pkt.mode = mode;
 	if (arg != NULL) {
-		reset_pkt.arglen = strlen(arg);
-		if (reset_pkt.arglen > RESET_ARG_MAX)
-			reset_pkt.arglen = RESET_ARG_MAX;
-		strncpy(reset_pkt.arg, arg, reset_pkt.arglen);
+		strncpy(reset_pkt.arg, arg, RESET_ARG_MAX);
 		reset_pkt.arg[RESET_ARG_MAX] = '\0';
+
+		reset_pkt.arglen = strlen(reset_pkt.arg) + 1;
 	}
 
 	dmat.src  = &reset_pkt;
