@@ -30,6 +30,9 @@ IOP_LDFLAGS := $(LDFLAGS_TARGET) -fno-builtin -nostdlib $(IOP_LDFLAGS)
 $(IOP_OBJS_DIR)%.o : $(IOP_SRC_DIR)%.c
 	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
 
+$(IOP_OBJS_DIR)%.o : $(IOP_SRC_DIR)%.S
+	$(IOP_CC) $(IOP_CFLAGS) $(IOP_INCS) -c $< -o $@
+	
 $(IOP_OBJS_DIR)%.o : $(IOP_SRC_DIR)%.s
 	$(IOP_AS) $(IOP_ASFLAGS) $< -o $@
 
