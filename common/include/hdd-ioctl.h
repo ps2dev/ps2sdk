@@ -1,0 +1,38 @@
+#ifndef _HDD_IOCTL_H
+#define _HDD_IOCTL_H
+
+// ioctl2 commands for ps2hdd.irx
+#define HDDIO_ADD_SUB			0x00006801
+#define HDDIO_DELETE_END_SUB	0x00006802
+#define HDDIO_NUMBER_OF_SUBS	0x00006803
+#define HDDIO_FLUSH_CACHE		0x00006804
+#define HDDIO_GETSIZE			0x00006833	// for main(0)/subs(1+)
+
+// devctl commands for ps2hdd.irx
+#define HDDCTL_MAX_SECTORS		0x00004801
+#define HDDCTL_TOTAL_SECTORS	0x00004802
+#define HDDCTL_IDLE				0x00004803
+#define HDDCTL_FLUSH_CACHE		0x00004804
+#define HDDCTL_SWAP_TMP			0x00004805
+#define HDDCTL_DEV9_SHUTDOWN	0x00004806
+#define HDDCTL_STATUS			0x00004807
+#define HDDCTL_FORMAT			0x00004808
+#define HDDCTL_SMART_STAT		0x00004809
+#define HDDCTL_FREE_SECTORS		0x0000480A
+
+// ioctl2 commands for ps2fs.irx
+#define PFSIO_ALLOC				0x7001
+#define PFSIO_FREE				0x7002
+#define PFSIO_ATTR_ADD			0x7003
+#define PFSIO_ATTR_DEL			0x7004
+#define PFSIO_ATTR_LOOKUP		0x7005
+#define PFSIO_ATTR_READ			0x7006
+
+// devctl commands for ps2fs.irx
+#define PFSCTL_GET_ZONE_SIZE	0x5001
+#define PFSCTL_GET_ZONE_FREE	0x5002
+#define PFSCTL_CLOSE_ALL		0x5003
+#define PFSCTL_GET_STAT			0x5004
+#define PFSCTL_CLEAR_STAT		0x5005
+
+#endif /* _HDD_IOCTL_H */
