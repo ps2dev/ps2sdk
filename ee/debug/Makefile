@@ -31,7 +31,7 @@ all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBDEBUG_LIB)
 	$(EE_CC) $(EE_CFLAGS) $(EE_INC) -c $< -o obj/$@
 
 clean:
-	rm -f -r $(EE_OBJS_DIR)/* $(EE_LIB_DIR)/*
+	rm -f -r $(EE_OBJS_DIR) $(EE_LIB_DIR)
 
 
 include $(PS2SDKSRC)/Defs.make
