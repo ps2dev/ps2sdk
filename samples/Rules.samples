@@ -53,11 +53,11 @@ sample-files:
 	   elif [ $$file = "Makefile.sample" ] ; then \
 	      echo Installing $$file to $(TARGET)/Makefile ; \
 	      cp -f $$file $(TARGET)/Makefile ; \
-	      chmod 622 $(TARGET)/Makefile ; \
+	      chmod 644 $(TARGET)/Makefile ; \
 	   elif test -f $$file  ; then \
 	      echo Installing $$file to $(TARGET) ; \
 	      cp -f $$file $(TARGET) ; \
-	      chmod 622 $(TARGET)/$$file ; \
+	      chmod 644 $(TARGET)/$$file ; \
 	   fi ; \
 	done
 
