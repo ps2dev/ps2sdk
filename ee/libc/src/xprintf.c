@@ -73,7 +73,7 @@ typedef struct s_info {   /* Information about each format field */
 */
 static info fmtinfo[] = {
   { 'd',  10,  "0123456789",       1,    0, RADIX,      },
-  { 's',   0,  0,                  0,    0, STRING,     }, 
+  { 's',   0,  0,                  0,    0, STRING,     },
   { 'S',   0,  0,                  0,    0, SEEIT,      },
   { 'z',   0,  0,                  0,    0, MEM_STRING, },
   { 'c',   0,  0,                  0,    0, CHAR,       },
@@ -195,7 +195,7 @@ int vxprintf(func,arg,format,ap)
   int  errorflag = 0;       /* True if an error is encountered */
   enum e_type xtype;        /* Conversion paradigm */
   char *zMem = 0;           /* String to be freed */
-  static char spaces[] = 
+  static char spaces[] =
      "                                                    ";
 #define SPACESIZE (sizeof(spaces)-1)
 #ifndef NOFLOATINGPOINT
@@ -227,7 +227,7 @@ int vxprintf(func,arg,format,ap)
       break;
     }
     /* Find out what flags are present */
-    flag_leftjustify = flag_plussign = flag_blanksign = 
+    flag_leftjustify = flag_plussign = flag_blanksign =
      flag_alternateform = flag_zeropad = flag_center = 0;
     do{
       switch( c ){
@@ -673,7 +673,7 @@ void __sout(txt,amt,arg)
   void *arg;
 {
   register char *head;
-  register const char *t;  
+  register const char *t;
   register int a;
   register char *tail;
   a = amt;
@@ -706,7 +706,7 @@ int snprintf(char *str, size_t sz, const char *format, ...)
 	va_list args;
 	struct s_strargument arg;
 	int ret;
-	
+
 	arg.next = str;
 	arg.last = &str[sz-1];
 
@@ -735,7 +735,7 @@ int sprintf (char *str, const char *format, ...)
 	va_list args;
 	struct s_strargument arg;
 	int ret;
-	
+
 	arg.next = str;
 	arg.last = NULL;
 
@@ -823,7 +823,7 @@ char *mprintf(const char *zFormat, ...){
 }
 #endif
 
-/* This is the varargs version of mprintf.  
+/* This is the varargs version of mprintf.
 **
 ** The name is changed to TclVMPrintf() to conform with Tcl naming
 ** conventions.
@@ -867,7 +867,7 @@ int asprintf(char ** strp, const char *zFormat, ...){
   }else{
     zNew = realloc(sMprintf.zText,sMprintf.nChar+1);
   }
-  
+
   *strp = zNew;
 
   return sMprintf.nChar+1;
@@ -917,7 +917,7 @@ int fprintf(FILE *pOut, const char *zFormat, ...){
   va_list ap;
   int retc;
 
-  va_start(ap,zFormat);  
+  va_start(ap,zFormat);
   retc = vxprintf(__fout,pOut,zFormat,ap);
   va_end(ap);
   return retc;
@@ -974,6 +974,8 @@ int putchar( int chr )
 #define NPM_RPC_SERVER	0x14d704e
 #define NPM_RPC_PUTS	1
 
+extern int _iop_reboot_count;
+
 static int npm_puts_sema = -1;
 static int init = 0;
 static SifRpcClientData_t npm_cd;
@@ -982,6 +984,15 @@ static int npm_puts_init()
 {
 	int res;
 	ee_sema_t sema;
+	static int _rb_count = 0;
+	if(_rb_count != _iop_reboot_count)
+	{
+	    _rb_count = _iop_reboot_count;
+	    init = 0;
+	}
+
+	if(init)
+	    return(0);
 
 	sema.init_count = 0;
 	sema.max_count  = 1;
@@ -1009,7 +1020,7 @@ int npmPuts(const char *buf)
 	u8 puts_buf[512]; /* Implicitly aligned. */
 	void *p = puts_buf;
 
-	if (!init && npm_puts_init() < 0)
+	if (npm_puts_init() < 0)
 		return -E_LIB_API_INIT;
 
 	WaitSema(npm_puts_sema);
