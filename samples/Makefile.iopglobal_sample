@@ -1,0 +1,42 @@
+IOP_CC_VERSION := $(shell $(IOP_CC) -v 2>&1 | sed -n 's/^.*version //p')
+
+ASFLAGS_TARGET = -mcpu=r3000
+
+ifeq ($(IOP_CC_VERSION),3.2.2)
+CFLAGS_TARGET  = -miop
+ASFLAGS_TARGET = -march=r3000
+LDFLAGS_TARGET = -miop
+endif
+
+# include dir
+IOP_INCS := -I$(PS2SDK)/iop/include -I$(PS2SDK)/common/include \
+	-I. $(IOP_INCS)
+
+# C compiler flags
+IOP_CFLAGS := $(CFLAGS_TARGET) -O2 -G0 -c $(IOP_INCS) $(IOP_CFLAGS)
+
+# linker flags
+IOP_LDFLAGS := $(LDFLAGS_TARGET) -nostdlib -L$(PS2SDK)/iop/lib $(IOP_LDFLAGS)
+
+# asssembler flags
+IOP_ASFLAGS := $(ASFLAGS_TARGET) -EL -G0 $(IOP_ASFLAGS)
+
+# link with following libraries (libs need to be defined multiple times in order for linking to work!!)
+IOP_LIBS += -lkernel -lgcc
+
+# Externally defined variables: IOP_BIN, IOP_OBJS, IOP_LIB
+
+%.o : %.c
+	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+
+%.o : %.S
+	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+
+%.o : %.s
+	$(IOP_AS) $(IOP_ASFLAGS) $< -o $@
+
+$(IOP_BIN) : $(IOP_OBJS)
+	$(IOP_CC) $(IOP_LDFLAGS) -o $(IOP_BIN) $(IOP_OBJS) $(IOP_LIBS)
+
+$(IOP_LIB) : $(IOP_OBJS)
+	$(IOP_AR) cru $(IOP_LIB) $(IOP_OBJS)
