@@ -30,10 +30,16 @@ typedef struct
 	u8  timeFormat;
 }
 T10KConfig;
+
+extern T10KConfig t10KConfig;
+extern char RomName[];
+
+#ifdef F__config_internals
 T10KConfig t10KConfig = {0x21C, 0, 0, 0, 0, 0, 0};
 
 // stores romname of ps2
 char RomName[15] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+#endif
 
 
 // bool IS_JAP_PS2(u32 config)
@@ -44,6 +50,7 @@ char RomName[15] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 #define IS_JAP_PS2(config)	(((config >> 13) & 0x07) == 0)
 
 
+#ifdef F_GetRomName
 // gets the romname from the current ps2
 // 14 chars - doesnt set a null terminator
 // 
@@ -61,8 +68,10 @@ char* GetRomName(char *romname)
 	fioClose(fd);
 	return romname;
 }
+#endif
 
 
+#ifdef F_IsT10K
 // check whether ps2 is actually dev model T-10000
 // 
 // returns: 1 if T-10000
@@ -74,8 +83,10 @@ s32  IsT10K(void)
 		return 1;
 	return 0;
 }
+#endif
 
 
+#ifdef F_configGetLanguage
 // get the language the ps2 is currently set to
 // 
 // returns:	0 = japanese
@@ -98,6 +109,10 @@ s32  configGetLanguage(void)
 		return (config>> 4) & 0x01;
 	return (config>>16) & 0x1F;
 }
+#endif
+
+
+#ifdef F_configSetLanguage
 // sets the default language of the ps2
 // 
 // args:	0 = japanese
@@ -126,8 +141,10 @@ void configSetLanguage(s32 language)
 		config = (config&(~(0x1F<<16))) | ((language&0x1F)<<16);
 	SetOsdConfigParam(&config);
 }
+#endif
 
 
+#ifdef F_configGetTvScreenType
 // get the tv screen type the ps2 is setup for
 // 
 // returns:	0 = 4:3
@@ -143,6 +160,10 @@ s32  configGetTvScreenType(void)
 	GetOsdConfigParam(&config);
 	return (config>> 1) & 0x03;
 }
+#endif
+
+
+#ifdef F_configSetTvScreenType
 // set the tv screen type
 // 
 // args:	0 = 4:3
@@ -163,8 +184,10 @@ void configSetTvScreenType(s32 screenType)
 	config = (config&(~(0x03<<1))) | ((screenType&0x03)<<1);
 	SetOsdConfigParam(&config);
 }
+#endif
 
 
+#ifdef F_configGetDateFormat
 // gets the date display format
 // 
 // returns:	0 = yyyy/mm/dd
@@ -184,6 +207,10 @@ s32  configGetDateFormat(void)
 	GetOsdConfigParam2(&config2, 1, 1);
 	return config2 >> 6;
 }
+#endif
+
+
+#ifdef F_configSetDateFormat
 // sets the date display format
 // 
 // args:	0 = yyyy/mm/dd
@@ -208,8 +235,10 @@ void configSetDateFormat(s32 dateFormat)
 	config2 = (config2&(~(3<<6))) | ((dateFormat&3)<<6);
 	SetOsdConfigParam2(&config2, 1, 1);
 }
+#endif
 
 
+#ifdef F_configGetTimeFormat
 // gets the time display format
 // (whether 24hour time or not)
 // 
@@ -229,6 +258,10 @@ s32  configGetTimeFormat(void)
 	GetOsdConfigParam2(&config2, 1, 1);
 	return (config2 >> 5) & 0x01;
 }
+#endif
+
+
+#ifdef F_configSetTimeFormat
 // sets the time display format
 // (whether 24hour time or not)
 // 
@@ -253,8 +286,10 @@ void configSetTimeFormat(s32 timeFormat)
 	config2 = (config2&(~(0x01<<5))) | ((timeFormat&0x01)<<5);
 	SetOsdConfigParam2(&config2, 1, 1);
 }
+#endif
 
 
+#ifdef F_configGetTimezone
 // get timezone
 // 
 // returns: offset in minutes from GMT
@@ -270,6 +305,10 @@ s32  configGetTimezone(void)
 		return 0x21C;
 	return (config >> 21)&0x7FF;
 }
+#endif
+
+
+#ifdef F_configSetTimezone
 // set timezone
 // 
 // args:	offset in minutes from GMT
@@ -287,8 +326,10 @@ void configSetTimezone(s32 offset)
 	config = (config&(~(0x7FF<<21))) | ((offset&0x7FF)<<21);
 	SetOsdConfigParam(&config);
 }
+#endif
 
 
+#ifdef F_configIsSpdifEnabled
 // checks whether the spdif is enabled or not
 // 
 // returns:	1 = on
@@ -303,6 +344,10 @@ s32  configIsSpdifEnabled(void)
 	GetOsdConfigParam(&config);
 	return (config & 0x01)^0x01;
 }
+#endif
+
+
+#ifdef F_configSetSpdifEnabled
 // sets whether the spdif is enabled or not
 // 
 // args:	1 = on
@@ -318,8 +363,10 @@ void configSetSpdifEnabled(s32 enabled)
 	config = (config&(~0x01)) | (0x01^(enabled&0x01));
 	SetOsdConfigParam(&config);
 }
+#endif
 
 
+#ifdef F_configIsDaylightSavingEnabled
 // checks whether daylight saving is currently set
 // 
 // returns:	1 = on
@@ -339,6 +386,10 @@ s32  configIsDaylightSavingEnabled(void)
 	
 	return (config2 >> 4) & 0x01;
 }
+#endif
+
+
+#ifdef F_configSetDaylightSavingEnabled
 // checks whether daylight saving is currently set
 // 
 // returns:	1 = on
@@ -359,5 +410,4 @@ void configSetDaylightSavingEnabled(s32 enabled)
 	SetOsdConfigParam2(&config2, 1, 1);
 	
 }
-
-
+#endif

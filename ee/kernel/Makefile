@@ -56,6 +56,13 @@ SIO_OBJS = sio_init.o sio_putc.o sio_getc.o sio_write.o sio_read.o sio_puts.o \
 	sio_gets.o sio_printf.o
 SIO_OBJS := $(SIO_OBJS:%=$(EE_OBJS_DIR)%)
 
+CONFIG_OBJS = _config_internals.o GetRomName.o IsT10K.o configGetLanguage.o \
+	configSetLanguage.o configGetTvScreenType.o configSetTvScreenType.o \
+	configGetDateFormat.o configSetDateFormat.o configGetTimeFormat.o \
+	configSetTimeFormat.o configGetTimezone.o configSetTimezone.o \
+	configIsSpdifEnabled.o configSetSpdifEnabled.o \
+	configIsDaylightSavingEnabled.o configSetDaylightSavingEnabled.o
+
 
 ### SYSCALL OBJECTS
 
@@ -146,3 +153,4 @@ include $(PS2SDKSRC)/ee/Rules.release
 release: release-dirs release-include
 	cp -f $(LIBSYSCALL_LIB) $(PS2SDK)/ee/lib
 	cp -f $(LIBKERNEL_LIB) $(PS2SDK)/ee/lib
+
