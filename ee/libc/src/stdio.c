@@ -429,6 +429,7 @@ FILE *fopen(const char *fname, const char *mode)
           __iob[i].fd = fd;
           __iob[i].cnt = 0;
           __iob[i].flag = flag;
+          __iob[i].has_putback = 0;
           ret = (__iob + i);
         }
       }
@@ -438,6 +439,71 @@ FILE *fopen(const char *fname, const char *mode)
 }
 #endif
 
+#ifdef F_fdopen
+/*
+**
+**  [func] - fdopen.
+**  [desc] - produces a file descriptor of type `FILE *', from a 
+**           descriptor for an already-open file (returned, for 
+**           example, by the system subroutine `open' rather than by `fopen').
+**           The MODE argument has the same meanings as in `fopen'.
+**  [entr] - int fd; file descriptor returned by 'open'.
+**           const char *mode; the file mode string pointer.
+**  [exit] - file pointer or `NULL', as for `fopen'.
+**
+*/
+FILE *fdopen(int fd, const char *mode)
+{
+  FILE *ret = NULL;
+  int  flag = 0, i, iomode = 0;
+
+  /* ensure valid descriptor, and that mode is not a NULL string. */
+  if (fd >= 0) {
+    if ((mode != NULL) && (*mode != '\0')) {
+      /* test the file mode. */
+      switch(*mode++) {
+        case 'r':
+          flag = _IOREAD;
+          iomode = O_RDONLY;
+          break;
+        case 'w':
+          flag = _IOWRT;
+          iomode = (O_WRONLY | O_CREAT);
+          break;
+        case 'a':
+          flag = _IORW;
+          iomode = O_APPEND;
+          break;
+      }
+      /* test the extended file mode. */
+      for (; (*mode++ != '\0'); ) {
+        switch(*mode) {
+          case 'b':
+            continue;
+          case '+':
+            flag |= (_IOREAD | _IOWRT);
+            iomode |= (O_RDWR | O_CREAT | O_TRUNC);
+            continue;
+          default:
+            break;
+        }
+      }
+      /* search for an available fd slot. */
+      for (i = 2; i < _NFILE; ++i) if (__iob[i].fd < 0) break;
+      if (i < _NFILE) {
+        /* attempt to open the fname file. */
+        __iob[i].type = STD_IOBUF_TYPE_NONE;
+        __iob[i].fd = fd;
+        __iob[i].cnt = 0;
+        __iob[i].flag = flag;
+        __iob[i].has_putback = 0;
+        ret = (__iob + i);
+      }
+    }
+  }
+  return (ret);
+}
+#endif
 
 #ifdef F_fputc
 /*
