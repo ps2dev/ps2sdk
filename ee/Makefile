@@ -10,4 +10,3 @@
 SUBDIRS = kernel libc rpc startup
 
 include $(PS2SDKSRC)/Rules.make
-

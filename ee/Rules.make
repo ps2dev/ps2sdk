@@ -26,21 +26,28 @@ EE_ASFLAGS := -G0 $(EE_ASFLAGS)
 EE_C_COMPILE = $(EE_CC) $(EE_CFLAGS) $(EE_INCS)
 EE_CXX_COMPILE = $(EE_CC) $(EE_CXXFLAGS) $(EE_INCS)
 
-obj/%.o : src/%.c
+
+$(EE_OBJS_DIR)%.o : $(EE_SRC_DIR)%.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
-obj/%.o : src/%.cpp
+$(EE_OBJS_DIR)%.o : $(EE_SRC_DIR)%.cpp
 	$(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS) -c $< -o $@
 
-obj/%.o : src/%.S
+$(EE_OBJS_DIR)%.o : $(EE_SRC_DIR)%.S
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
-obj/%.o : src/%.s
+$(EE_OBJS_DIR)%.o : $(EE_SRC_DIR)%.s
 	$(EE_AS) $(EE_ASFLAGS) $< -o $@
+
+$(EE_LIB_DIR):
+	mkdir $(EE_LIB_DIR)
+
+$(EE_OBJS_DIR):
+	mkdir $(EE_OBJS_DIR)
 
 $(EE_BIN) : $(EE_OBJS) $(PS2SDKSRC)/ee/startup/crt0.o
 	$(EE_CC) -nostartfiles -T$(PS2SDKSRC)/ee/startup/linkfile $(EE_LDFLAGS) \
 		-o $(EE_BIN) $(PS2SDKSRC)/ee/startup/crt0.o $(EE_OBJS) $(EE_LIBS)
 
 $(EE_LIB) : $(EE_OBJS)
-	$(EE_AR) cru $(EE_LIB) $(EE_OBJS)
+	$(EE_AR) cru $(EE_LIB) $<

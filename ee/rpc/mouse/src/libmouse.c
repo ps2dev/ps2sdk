@@ -9,6 +9,7 @@
  * See the file LICENSE included with this distribution for licensing terms.
  */
 
+#include <tamtypes.h>
 #include <sifrpc.h>
 #include <kernel.h>
 #include <string.h>

@@ -10,4 +10,3 @@
 SUBDIRS = cdvd filexio keyboard memorycard mouse multitap pad tcpip
 
 include $(PS2SDKSRC)/Rules.make
-

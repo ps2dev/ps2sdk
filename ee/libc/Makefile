@@ -13,6 +13,14 @@ LIBC_LIB  = lib/libc.a
 
 # TODO: This is a hack ... it will be killed when new build system is
 # installed.
+
+EE_OBJS_DIR = obj/
+EE_LIB_DIR = lib/
+EE_SRC_DIR = src/
+EE_INC_DIR = include/
+
+EE_LIB = $(LIBC_LIB)
+
 OBJDIR = obj/
 OBJEXIST = $(OBJDIR).created
 LIBDIR = lib/
@@ -33,10 +41,12 @@ CORE_OBJS := $(CORE_OBJS:%=$(OBJDIR)%)
 
 MULT_OBJS = $(XPRINTF_OBJS) $(ALLOC_OBJS) $(STRING_C_OBJS) 
 
+EE_OBJS = $(CORE_OBJS) $(MULT_OBJS)
+
 all: $(OBJEXIST) $(LIBEXIST) $(LIBC_LIB) 
 
-$(LIBC_LIB): $(CORE_OBJS) $(MULT_OBJS) 
-	$(EE_AR) cru $(LIBC_LIB) $(CORE_OBJS) $(MULT_OBJS) 
+#$(LIBC_LIB): $(CORE_OBJS) $(MULT_OBJS) 
+#	$(EE_AR) cru $(LIBC_LIB) $(CORE_OBJS) $(MULT_OBJS) 
 
 
 $(OBJEXIST):
@@ -69,4 +79,4 @@ clean:
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make
-
+include $(PS2SDKSRC)/ee/Rules.release

@@ -7,22 +7,17 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 
-EE_OBJS_DIR = obj/
-EE_LIB_DIR = lib/
-EE_SRC_DIR = src/
-EE_INC_DIR = include/
 
-EE_OBJS = libpad.o
-EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
+RELEASE_EE_DIRS = ee/ ee/include/ ee/lib/ ee/startup
+RELEASE_EE_DIRS := $(RELEASE_DIRS:%=$(PS2SDK)/%)
 
-EE_LIB = $(EE_LIB_DIR)libpad.a
+$(RELEASE_EE_DIRS):
+	mkdir $(RELEASE_EE_DIRS)
 
-all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
+release: all $(RELEASE_EE_DIRS)
+	cp $(EE_LIB) $(PS2SDK)/ee/lib/
+	cp $(EE_INC_DIR)*.h $(PS2SDK)/ee/include/
 
-clean:
-	rm -f -r $(EE_OBJS_DIR) $(EE_LIB_DIR)
-
-
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/ee/Rules.make
-include $(PS2SDKSRC)/ee/Rules.release
+release-clean:
+	rm -f $(PS2SDK)/ee/include/*.*
+	rm -f $(PS2SDK)/ee/lib/*.*

@@ -7,19 +7,24 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 
-EE_LIB = lib/libfileXio.a
-EE_OBJS = obj/fileXio_rpc.o
+EE_OBJS_DIR = obj/
+EE_LIB_DIR = lib/
+EE_SRC_DIR = src/
+EE_INC_DIR = include/
+
+EE_OBJS = fileXio_rpc.o
+EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
+
+EE_LIB = $(EE_LIB_DIR)libfileXio.a
 
 #EE_CFLAGS += -I$(PS2DRV)/ee/include -I$(PS2DRV)/common/include
 EE_LDFLAGS += -s
 
-all: $(EE_LIB)
+all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
 
 clean:
-	rm -f $(EE_LIB) $(EE_OBJS)
-
-makedist:
-	rm -f $(EE_OBJS)
+	rm -f -r $(EE_OBJS_DIR) $(EE_LIB_DIR)
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make
+include $(PS2SDKSRC)/ee/Rules.release

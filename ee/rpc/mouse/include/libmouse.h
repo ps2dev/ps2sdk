@@ -12,7 +12,7 @@
 #ifndef __LIBMOUSE_H__
 #define __LIBMOUSE_H__
 
-#include <ps2mouse.h>
+#include "ps2mouse.h"
 
 typedef mouse_data PS2MouseData;
 

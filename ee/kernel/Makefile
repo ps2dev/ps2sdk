@@ -9,6 +9,9 @@
 
 LIBSYSCALL_LIB = lib/libsyscall.a
 
+EE_LIB = $(LIBSYSCALL_LIB)
+EE_INC_DIR = include/
+
 OBJDIR = obj/
 OBJEXIST = $(OBJDIR).created
 LIBDIR = lib/
@@ -48,10 +51,12 @@ LIBSYSCALL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
 
 LIBSYSCALL_OBJS := $(LIBSYSCALL_OBJS:%=$(OBJDIR)%)
 
+EE_OBJS = $(LIBSYSCALL_OBJS)
+
 all: $(OBJEXIST) $(LIBEXIST) $(LIBSYSCALL_LIB)
 
-$(LIBSYSCALL_LIB): $(LIBSYSCALL_OBJS)
-	$(EE_AR) cru $(LIBSYSCALL_LIB) $(LIBSYSCALL_OBJS)
+# $(LIBSYSCALL_LIB): $(LIBSYSCALL_OBJS)
+#	$(EE_AR) cru $(LIBSYSCALL_LIB) $(LIBSYSCALL_OBJS)
 
 $(OBJEXIST):
 	@echo; echo "Creating object directory"
@@ -76,3 +81,4 @@ install:
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make
+include $(PS2SDKSRC)/ee/Rules.release

@@ -7,14 +7,22 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 
-EE_LIB = lib/libmouse.a
-EE_OBJS = obj/libmouse.o
+EE_OBJS_DIR = obj/
+EE_LIB_DIR = lib/
+EE_SRC_DIR = src/
+EE_INC_DIR = include/
 
-all: $(EE_LIB)
+EE_OBJS = libmouse.o
+EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
+
+EE_LIB = $(EE_LIB_DIR)libmouse.a
+
+all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
 
 clean:
-	rm -f *.elf *.o *.a $(EE_LIB)
+	rm -f -r $(EE_OBJS_DIR) $(EE_LIB_DIR)
+
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make
-
+include $(PS2SDKSRC)/ee/Rules.release

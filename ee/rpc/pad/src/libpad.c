@@ -15,6 +15,7 @@
 
 #include <tamtypes.h>
 #include <kernel.h>
+#include <string.h>
 #include <sifrpc.h>
 #include <sifcmd.h>
 #include "libpad.h"

@@ -8,6 +8,7 @@
 */
 
 #include <tamtypes.h>
+#include <string.h>
 #include <kernel.h>
 #include <sifrpc.h>
 

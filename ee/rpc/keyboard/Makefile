@@ -7,15 +7,24 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 
-EE_LIB = lib/libkbd.a
-EE_OBJS = obj/libkbd.o
+EE_OBJS_DIR = obj/
+EE_LIB_DIR = lib/
+EE_SRC_DIR = src/
+EE_INC_DIR = include/
+
+EE_OBJS = libkbd.o
+EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
+
+EE_LIB = $(EE_LIB_DIR)libkbd.a
+
 #EE_INCS = -I../../iop/include -I../include
 
-all: $(EE_LIB)
+all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
 
 clean:
-	rm -f *.elf *.o *.a $(EE_LIB)
+	rm -f -r $(EE_OBJS_DIR) $(EE_LIB_DIR)
+
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make
-
+include $(PS2SDKSRC)/ee/Rules.release
