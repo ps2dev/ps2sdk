@@ -121,32 +121,47 @@ int ps2_screenshot_file( const char* pFilename,unsigned int VramAdress,
         
       for( x = 0; x < Width; x++ )
       {
-        u32 r =  (((p_in[x])>>11)&31)<<3;
-        u32 g =  (((p_in[x])>>6)&63)<<2;
-        u32 b =  (((p_in[x]))&31)<<3;
-        p_out[x] = (0xff<<24)|(b<<16)|(g<<8)|r;
+	 u32 r = (p_in[x] & 31) << 3;
+	 u32 g = ((p_in[x] >> 5) & 31) << 3;
+	 u32 b = ((p_in[x] >> 10) & 31) << 3;
+         p_out[x] = (0xff<<24)|(r<<16)|(g<<8)|b;
       }
     }
-
+    else
     if( Psm == PS2SS_GSPSMCT24 )
     {
       u32 x;
-      u16* p_in  = (u16*)&in_buffer;
+      u8* p_in  = (u8*)&in_buffer;
         
       for( x = 0; x < Width; x++ )
       {
         u8 r =  *p_in++;
         u8 g =  *p_in++;
         u8 b =  *p_in++;
-        p_out[x] = (0xff<<24)|(b<<16)|(g<<8)|r;
+        p_out[x] = (0xff<<24)|(r<<16)|(g<<8)|b;
       }
+    }
+    else
+    {
+       u8 *p_in = (u8 *) &in_buffer;
+       u32 x;
+
+       for(x = 0; x < Width; x++)
+       {
+	  u8 r = *p_in++;
+	  u8 g = *p_in++;
+	  u8 b = *p_in++;
+	  u8 a = *p_in++;
+	  p_out[x] = (a << 24) | (r << 16) | (g << 8) | b;
+       }
     }
 
     fioWrite( file_handle, p_out, Width*4 );
   }
 
-
   fioClose( file_handle );
+
+  return 0;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
