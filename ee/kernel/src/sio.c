@@ -15,6 +15,10 @@
 #include "string.h"
 #include "sio.h"
 
+#ifndef PS2LIB_STR_MAX
+#define PS2LIB_STR_MAX 4096
+#endif
+
 #define CPUCLK		294912000	/* Use this to determine the baud divide value.  */
 #define LCR_SCS_VAL	(1<<5)		/* Baud rate generator output that divided CPUCLK.  */
 
