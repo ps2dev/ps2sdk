@@ -119,8 +119,9 @@ struct argData
 
 	int fd, size, i, ret;
 
-//	strncpy(volume, filename, 5);
-//	ret = fileXioMount(volume, partition, FIO_MT_RDWR);
+//	strncpy(dev, filename, 7);
+    dev[7] = '\0';
+//	ret = fileXioMount(dev, partition, FIO_MT_RDWR);
 	if ((fd = fileXioOpen(filename, O_RDONLY, fileMode)) < 0)
 	{
 		dbgprintf("Failed in fileXioOpen %s\n",filename);
@@ -186,7 +187,7 @@ pkoLoadElf(char *path)
     ee_thread_t th_attr;
     int ret=0;
     int pid;
-	char volume[5];
+	char dev[8];
 
 // Some lines added here to check for loading from HDD, at the moment it should only
 // call tLoadElf, but support for loading ELF from mc0, host or any other device may
@@ -196,8 +197,9 @@ pkoLoadElf(char *path)
 //    else if(!strncmp(path, "cdfs", 4)) ret = SifLoadElf(path, &elfdata);
     if(!strncmp(path, "pfs", 3)) 
 	{
-		strncpy(volume, path, 5);
-		fileXioMount(volume, partition, FIO_MT_RDWR);
+		strncpy(dev, path, 7);
+		dev[7] = '\0';
+		fileXioMount(dev, partition, FIO_MT_RDWR);
 	}
 //	ret = tLoadElf(path);
 	ret = SifLoadElf(path, &elfdata);
@@ -330,7 +332,10 @@ int main(int argc, char *argv[])
 	{
 		strcpy(fakepart,HDDpath);
 		ptr=strrchr(fakepart,'/');
-		if(ptr==NULL) strncpy(fakepart, HDDpath, 5);
+		if(ptr==NULL) {
+		    strncpy(fakepart, HDDpath, 7);
+    		fakepart[7] = '\0';
+		}
 		else
 		{
 			ptr++;
