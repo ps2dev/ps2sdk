@@ -8,14 +8,51 @@
 
 
 LIBSYSCALL_LIB = lib/libsyscall.a
-
-EE_LIB = $(LIBSYSCALL_LIB)
+LIBKERNEL_LIB = lib/libkernel.a
 
 EE_OBJS_DIR = obj/
 EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
+SIFCMD_OBJS = sif_cmd_send.o _sif_cmd_int_handler.o sif_cmd_main.o \
+	sif_cmd_addhandler.o sif_sreg_get.o
+SIFCMD_OBJS := $(SIFCMD_OBJS:%=$(EE_OBJS_DIR)%)
+
+SIFRPC_OBJS = SifBindRpc.o SifCallRpc.o SifRpcGetOtherData.o \
+	SifRegisterRpc.o SifSetRpcQueue.o SifGetNextRequest.o \
+	SifExecRequest.o SifRpcLoop.o SifRpcMain.o _rpc_get_packet.o \
+	_rpc_get_fpacket.o SifCheckStatRpc.o
+SIFRPC_OBJS := $(SIFRPC_OBJS:%=$(EE_OBJS_DIR)%)
+
+FILEIO_OBJS = fio_main.o fio_exit.o fio_open.o fio_close.o fio_read.o \
+	fio_write.o fio_lseek.o fio_mkdir.o _fio_read_intr.o fio_getc.o fio_putc.o \
+	fio_ioctl.o fio_dopen.o fio_dclose.o fio_dread.o fio_getstat.o fio_chstat.o \
+	fio_remove.o fio_format.o fio_rmdir.o fio_gets.o
+FILEIO_OBJS := $(FILEIO_OBJS:%=$(EE_OBJS_DIR)%)
+
+LOADFILE_OBJS = SifLoadFileInit.o SifLoadFileExit.o _SifLoadModule.o \
+	SifLoadModule.o SifLoadModuleEncrypted.o _SifLoadElfPart.o \
+	SifLoadElfPart.o SifLoadElf.o SifLoadElfEncrypted.o SifIopSetVal.o \
+	SifIopGetVal.o _SifLoadModuleBuffer.o SifLoadModuleBuffer.o \
+	SifExecModuleBuffer.o SifExecModuleFile.o
+LOADFILE_OBJS := $(LOADFILE_OBJS:%=$(EE_OBJS_DIR)%)
+
+IOPHEAP_OBJS = SifInitIopHeap.o SifExitIopHeap.o SifAllocIopHeap.o \
+	SifFreeIopHeap.o SifLoadIopHeap.o
+IOPHEAP_OBJS := $(IOPHEAP_OBJS:%=$(EE_OBJS_DIR)%)
+
+GLUE_OBJS = DIntr.o EIntr.o EnableIntc.o DisableIntc.o EnableDmac.o DisableDmac.o \
+	iEnableIntc.o iDisableIntc.o iEnableDmac.o iDisableDmac.o SyncDCache.o \
+	iSyncDCache.o InvalidDCache.o iInvalidDCache.o
+GLUE_OBJS := $(GLUE_OBJS:%=$(EE_OBJS_DIR)%)
+
+SIO_OBJS = sio_init.o sio_putc.o sio_getc.o sio_write.o sio_read.o sio_puts.o \
+	sio_gets.o sio_printf.o
+SIO_OBJS := $(SIO_OBJS:%=$(EE_OBJS_DIR)%)
+
+
+### SYSCALL OBJECTS
 
 LIBSYSCALL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
 	RFU009.o AddSbusIntcHandler.o RemoveSbusIntcHandler.o Interrupt2Iop.o \
@@ -50,17 +87,48 @@ LIBSYSCALL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
 
 LIBSYSCALL_OBJS := $(LIBSYSCALL_OBJS:%=$(EE_OBJS_DIR)%)
 
-EE_OBJS = $(LIBSYSCALL_OBJS)
+LIBKERNEL_OBJS = $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
+	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(CONFIG_OBJS) \
+	$(GLUE_OBJS) $(SIO_OBJS)
 
-all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBSYSCALL_LIB)
+all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBSYSCALL_LIB) $(LIBKERNEL_LIB)
 
-# $(LIBSYSCALL_LIB): $(LIBSYSCALL_OBJS)
-#	$(EE_AR) cru $(LIBSYSCALL_LIB) $(LIBSYSCALL_OBJS)
+$(LIBKERNEL_LIB): $(LIBKERNEL_OBJS) 
+	$(EE_AR) cru $(LIBKERNEL_LIB) $(LIBKERNEL_OBJS) 
+
+$(LIBSYSCALL_LIB): $(LIBSYSCALL_OBJS)
+	$(EE_AR) cru $(LIBSYSCALL_LIB) $(LIBSYSCALL_OBJS)
 
 
 $(LIBSYSCALL_OBJS): src/kernel.S
-	$(EE_C_COMPILE) -DF_$(*:$(OBJDIR)%=%) $< -c -o $@
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
+$(SIFCMD_OBJS): src/sifcmd.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(SIFRPC_OBJS): src/sifrpc.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(FILEIO_OBJS): src/fileio.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(LOADFILE_OBJS): src/loadfile.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(CONFIG_OBJS): src/config.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(IOPHEAP_OBJS): src/iopheap.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(IOPCONTROL_OBJS): src/iopcontrol.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(GLUE_OBJS): src/glue.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(SIO_OBJS): src/sio.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 clean:
 	rm -f -r $(EE_OBJS_DIR) $(EE_LIB_DIR)
@@ -68,6 +136,8 @@ clean:
 install:
 	$(CP) $(LIBSYSCALL_LIB) $(PS2SDK)/ee/lib
 	$(CP) include/*.h $(PS2SDK)/ee/include
+
+
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make
