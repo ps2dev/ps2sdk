@@ -9,7 +9,7 @@
 #
 # $Id$
 # IOP filesystem driver v1.0
-# This redirects an iomanx device (eg a pfs mount point) the ioman device called 'host' 
+# This redirects an iomanx device (eg a pfs mount point) the ioman device called 'host'
 # it also installs a naplink RPC driver.
 # This basically sets up ready to run programs as though they were run from naplink or
 # pukklink, regarding host and naplink printf.
@@ -33,7 +33,7 @@
 #define TRUE	1
 #define FALSE	0
 
-/** \defgroup fakehost fakehost - host: to hdd driver */ 
+/** \defgroup fakehost fakehost - host: to hdd driver */
 
 #define MODNAME "fakehost"
 
@@ -57,7 +57,7 @@ extern int ttyMount(void);
 extern int naplinkRpcInit(void);
 
 /*! \brief Make a full pathname string, adding base on.
- *  \ingroup fakehost 
+ *  \ingroup fakehost
  *
  *  \param buffer buffer to hold result.
  *  \param name   name to add base to.
@@ -74,7 +74,7 @@ char * fd_name( char * buffer, const char * name )
 }
 
 /*! \brief Store filedescriptor and get client filedescriptor.
- *  \ingroup fakehost 
+ *  \ingroup fakehost
  *
  *  \param fd  filedescriptor to store.
  *  \param f   io_file pointer to store fd in .
@@ -89,7 +89,7 @@ int fd_save( int fd, iop_io_file_t *f )
 }
 
 /*! \brief Get real filedescriptor.
- *  \ingroup fakehost 
+ *  \ingroup fakehost
  *
  *  \param f   io_file pointer to get fd from.
  *  \return real filedescriptor.
@@ -101,7 +101,7 @@ int realfd( iop_io_file_t *f )
 }
 
 /*! \brief Dummy function, for where needed.
- *  \ingroup fakehost 
+ *  \ingroup fakehost
  */
 int dummy()
 {
@@ -112,7 +112,7 @@ int dummy()
 }
 
 /*! \brief Initialise fs driver.
- *  \ingroup fakehost 
+ *  \ingroup fakehost
  *
  *  \param driver  io_device pointer to device
  *  \return Status (0=successful).
@@ -125,7 +125,7 @@ int fd_initialize( iop_io_device_t *driver)
 }
 
 /*! \brief Handle open request.
- *  \ingroup fakehost 
+ *  \ingroup fakehost
  *
  *  \param f     Pointer to io_device structure.
  *  \param name  pathname.
@@ -148,7 +148,7 @@ int fd_open( iop_io_file_t *f, const char *name, int mode)
 }
 
 /*! \brief Handle close request.
- *  \ingroup fakehost 
+ *  \ingroup fakehost
  *
  *  \param f     Pointer to io_device structure.
  *  \return Status (as for fileio close).
@@ -160,7 +160,7 @@ int fd_close( iop_io_file_t *f )
 }
 
 /*! \brief Handle read request.
- *  \ingroup fakehost 
+ *  \ingroup fakehost
  *
  *  \param f       Pointer to io_device structure.
  *  \param buffer  Pointer to read buffer.
@@ -170,11 +170,11 @@ int fd_close( iop_io_file_t *f )
  */
 int fd_read( iop_io_file_t *f, char * buffer, int size )
 {
-	return read( realfd(f), buffer, size ); 
+	return read( realfd(f), buffer, size );
 }
 
 /*! \brief Handle write request.
- *  \ingroup fakehost 
+ *  \ingroup fakehost
  *
  *  \param f       Pointer to io_device structure.
  *  \param buffer  Pointer to read buffer.
@@ -188,7 +188,7 @@ int fd_write( iop_io_file_t *fd, void *buffer, int size )
 }
 
 /*! \brief Handle lseek request.
- *  \ingroup fakehost 
+ *  \ingroup fakehost
  *
  *  \param f       Pointer to io_device structure.
  *  \param offset  Offset for seek.
@@ -202,7 +202,7 @@ int fd_lseek( iop_io_file_t *fd, unsigned long offset, int whence)
 }
 
 /*! \brief Entry point for IRX.
- *  \ingroup fakehost 
+ *  \ingroup fakehost
  *
  *  if argc != 2 , quit, as it needs parameter
  *  if argc == 2 , use arv[1] as basename.
@@ -231,6 +231,8 @@ int _start( int argc, char **argv )
       {
 		// Copy the base location.
 		strncpy( base, argv[1] ,sizeof(base) - 1);
+		base[sizeof(base) - 1] = '\0';
+
       	printf("redirecting '%s:' to '%s'\n",FS_REPNAME,base);
 		fd_global = 1;
 
@@ -262,7 +264,7 @@ int _start( int argc, char **argv )
 
 		// Install naplink RPC handler
 		naplinkRpcInit();
-	
+
       	// now install the fileio driver
 		io_DelDrv( FS_REPNAME );
 		io_AddDrv( &driver );
