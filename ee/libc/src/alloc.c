@@ -261,6 +261,7 @@ void * memalign(size_t align, size_t size)
 {
 	heap_mem_header_t new_mem;
 	heap_mem_header_t *cur_mem;
+	heap_mem_header_t *old_mem;
 	void *ptr = NULL;
 
 	if (align <= DEFAULT_ALIGNMENT)
@@ -280,6 +281,8 @@ void * memalign(size_t align, size_t size)
 
 	/* Otherwise, align the pointer and fixup our hearder accordingly.  */
 	ptr = (void *)ALIGN((u32)ptr, align);
+	
+	old_mem = cur_mem;
 
 	/* Copy the heap_mem_header_t locally, before repositioning (to make
 	   sure we don't overwrite ourselves.  */
@@ -291,6 +294,12 @@ void * memalign(size_t align, size_t size)
 		cur_mem->prev->next = cur_mem;
 	if (cur_mem->next)
 		cur_mem->next->prev = cur_mem;
+	
+	if (__alloc_heap_head == old_mem)
+		__alloc_heap_head = cur_mem;
+	
+	if (__alloc_heap_tail == old_mem)
+		__alloc_heap_tail = cur_mem;
 
 	cur_mem->ptr = ptr;
 	return ptr;
