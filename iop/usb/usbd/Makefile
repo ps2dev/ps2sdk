@@ -6,13 +6,22 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+IOP_OBJS_DIR = obj/
+IOP_BIN_DIR = bin/
+IOP_SRC_DIR = src/
+IOP_INC_DIR = include/
 
-all:
-	@echo Nothing to build in usbd.  Someone please fix!  
+IOP_BIN  = bin/usbd.irx
+IOP_OBJS = obj/usbd.o obj/hub.o obj/hcd.o obj/main.o obj/imports.o obj/exports.o
+
+IOP_CFLAGS=-Wall 
+IOP_LDFLAGS=-Wl,-s
+
+all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 
 clean:
-	@echo Nothing to clean in usbd.
-
+	rm -f -r $(IOP_OBJS_DIR) $(IOP_BIN_DIR)
 
 include $(PS2SDKSRC)/Defs.make
+include $(PS2SDKSRC)/iop/Rules.make
 include $(PS2SDKSRC)/iop/Rules.release

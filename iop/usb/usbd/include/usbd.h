@@ -338,7 +338,7 @@ typedef struct _UsbDriver {
 	 *
 	 * Any help figuring out what it is for would be greatly appreciated.
 	 */
-	u32 unknown;
+	u32 gp;
 } UsbDriver __attribute__ ((packed));
 
 /* 
@@ -460,5 +460,9 @@ int UsbTransfer(int epID, void *data, int length, void *optionalData, UsbTransfe
 
 /* mask for configuration attributes */
 #define USB_CONFIG_ATTRIBUTE_MASK 0x60
+
+/* Indicates the passed LDD had invalid parameter, i.e. next/prev not NULL */
+#define USBD_ERROR_LDD_INVALID -1
+#define USBD_ERROR_UNLOCKED    -2
 
 #endif	/* !_USBD_H */
