@@ -8,9 +8,22 @@
 #
 # $Id$
 
+2002-02-09
+  - herben, better locking into iopcontrol to check init after reboot.
+
+2002-02-07
+  - herben, added section alignment for .ctors and .dtors sections.
+  - herben, fixed dread in iomanX.
+
+2002-02-04
+  - pixel, split the libcdvd into .o files.
+
+2002-02-01
+  - Neil Stevens, fixed samples/Makefile.eeglobal_sample's link order.
+
 2005-01-27
-  - oopo, added an install target
-  - blackdroid, fixed dev9's hardware registers
+  - oopo, added an install target.
+  - herben, fixed dev9's hardware registers.
 
 2005-01-20
   - herben, added SifExitRpc to SifRebootIop
