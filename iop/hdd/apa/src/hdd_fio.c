@@ -218,7 +218,9 @@ int hddFormat(iop_file_t *f, ...)
 		header->length=(1024*256);	// 128MB
 		header->type=APA_TYPE_MBR;
 		strcpy(header->id,"__mbr");
-		strncpy(header->mbr.magic, mbrMagic, 0x20);
+		strncpy(header->mbr.magic, mbrMagic, 31);
+		header->mbr.magic[31] = '\0';
+
 		header->mbr.version=APA_MBR_VERSION;
 		header->mbr.nsector=0;
 		getPs2Time(&header->created);
@@ -257,7 +259,7 @@ int hddRemove(iop_file_t *f, char *name)
 	int			rv;
 	input_param	params;
 
-	if((rv=fioGetInput(name, &params)) < 0) 
+	if((rv=fioGetInput(name, &params)) < 0)
 		return rv;
 
 	WaitSema(fioSema);
@@ -275,7 +277,7 @@ int hddOpen(iop_file_t *f, char *name, int mode, ...)
 		return -ENODEV;
 
 	if(!(f->mode & O_DIROPEN))
-		if((rv=fioGetInput(name, &params)) < 0) 
+		if((rv=fioGetInput(name, &params)) < 0)
 			return rv;
 
 	WaitSema(fioSema);
@@ -412,8 +414,8 @@ int hddDread(iop_file_t *f, iox_dirent_t *dirent)
 		return 0;// end :)
 
 	WaitSema(fioSema);
-	if((clink=cacheGetHeader(f->unit, fileSlot->start, 0, &rv)) && 
-		clink->header->length) 
+	if((clink=cacheGetHeader(f->unit, fileSlot->start, 0, &rv)) &&
+		clink->header->length)
 	{
 		if(clink->header->flags & APA_FLAG_SUB) {
 			// if sub get id from main header...
@@ -452,7 +454,8 @@ int hddReName(iop_file_t *f, const char *oldname, const char *newname)
 	WaitSema(fioSema);
 	// look to see if can make(newname) or not...
 	memset(tmpBuf, 0, APA_IDMAX);
-	strncpy(tmpBuf, newname, APA_IDMAX);
+	strncpy(tmpBuf, newname, APA_IDMAX - 1);
+	tmpBuf[APA_IDMAX - 1] = '\0';
 	if((clink=apaFindPartition(f->unit, tmpBuf, &rv))){
 		cacheAdd(clink);
 		SignalSema(fioSema);
@@ -461,7 +464,8 @@ int hddReName(iop_file_t *f, const char *oldname, const char *newname)
 
 	// look to see if open(oldname)
 	memset(tmpBuf, 0, APA_IDMAX);
-	strncpy(tmpBuf, oldname, APA_IDMAX);
+	strncpy(tmpBuf, oldname, APA_IDMAX - 1);
+	tmpBuf[APA_IDMAX - 1] = '\0';
 	for(i=0;i<maxOpen;i++)
 	{
 		if(fileSlots[i].f!=0)
@@ -482,7 +486,9 @@ int hddReName(iop_file_t *f, const char *oldname, const char *newname)
 
 	// do the renameing :) note: subs have no names!!
 	memset(clink->header->id, 0, APA_IDMAX);		// all cmp are done with memcmp!
-	strncpy(clink->header->id, newname, APA_IDMAX);
+	strncpy(clink->header->id, newname, APA_IDMAX - 1);
+	clink->header->id[APA_IDMAX - 1] = '\0';
+
 	clink->flags|=CACHE_FLAG_DIRTY;
 	cacheFlushAllDirty(f->unit);
 	cacheAdd(clink);
@@ -567,7 +573,7 @@ int ioctl2DeleteLastSub(hdd_file_slot_t *fileSlot)
 	if(!(mainPart=cacheGetHeader(device, fileSlot->start, 0, &rv)))
 		return rv;
 
-	if((subPart=cacheGetHeader(device, 
+	if((subPart=cacheGetHeader(device,
 		mainPart->header->subs[mainPart->header->nsub-1].start, 0, &rv))) {
 		fileSlot->nsub--;
 		mainPart->header->nsub--;
@@ -769,8 +775,8 @@ int hddDevctl(iop_file_t *f, char *devname, int cmd, void *arg,
 		break;
 
 	case APA_DEVCTL_ATA_WRITE:
-		rv=atadDmaTransfer(f->unit, ((hddAtaTransfer_t *)arg)->data, 
-			((hddAtaTransfer_t *)arg)->lba, ((hddAtaTransfer_t *)arg)->size, 
+		rv=atadDmaTransfer(f->unit, ((hddAtaTransfer_t *)arg)->data,
+			((hddAtaTransfer_t *)arg)->lba, ((hddAtaTransfer_t *)arg)->size,
 				ATAD_MODE_WRITE);
 		break;
 

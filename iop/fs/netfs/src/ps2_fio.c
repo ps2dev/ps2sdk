@@ -1203,7 +1203,8 @@ static int ps2netfs_op_dread(char *buf, int len)
         dreadrly->size   = htonl(dirent.stat.size);
         dreadrly->hisize = htonl(0);
         memcpy(dreadrly->ctime,dirent.stat.ctime,8*3);
-        strncpy(dreadrly->name,dirent.name,256);
+        strncpy(dreadrly->name,dirent.name,255);
+        dreadrly->name[255] = '\0';
       }
     }
     else if (fdptr->devtype == IOPMGR_DEVTYPE_IOMANX)
@@ -1217,7 +1218,8 @@ static int ps2netfs_op_dread(char *buf, int len)
         dreadrly->size   = htonl(dirent.stat.size);
         dreadrly->hisize = htonl(0);
         memcpy(dreadrly->ctime,dirent.stat.ctime,8*3);
-        strncpy(dreadrly->name,dirent.name,256);
+        strncpy(dreadrly->name,dirent.name,255);
+        dreadrly->name[255] = '\0';
       }
     }
   }

@@ -64,8 +64,10 @@ int getPartErrorName(u32 device, char *name)
 		if(clink->header->type!=APA_TYPE_FREE && 
 			!(clink->header->flags & CACHE_FLAG_DIRTY) && 
 			clink->header->start==lba) {
-				if(name)
-					strncpy(name, clink->header->id, APA_IDMAX);
+				if(name) {
+					strncpy(name, clink->header->id, APA_IDMAX - 1);
+					name[APA_IDMAX - 1] = '\0';
+				}
 				cacheAdd(clink);
 				return 1;
 		}

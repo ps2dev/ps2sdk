@@ -456,7 +456,7 @@ static void ChapReceiveChallenge(chap_state *cstate, u_char *inp, int id, int le
 	
 	/* Microsoft doesn't send their name back in the PPP packet */
 	if (ppp_settings.remote_name[0] != 0 && (ppp_settings.explicit_remote || rhostname[0] == 0)) {
-		strncpy(rhostname, ppp_settings.remote_name, sizeof(rhostname));
+		strncpy(rhostname, ppp_settings.remote_name, sizeof(rhostname) - 1);
 		rhostname[sizeof(rhostname) - 1] = 0;
 		CHAPDEBUG((LOG_INFO, "ChapReceiveChallenge: using '%s' as remote name\n",
 			   rhostname));
