@@ -1,0 +1,28 @@
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004.
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+
+
+RELEASE_COMMON_DIRS = common/ common/include/ common/include/sys 
+RELEASE_COMMON_DIRS := $(RELEASE_COMMON_DIRS:%=$(PS2SDK)/%)
+
+$(RELEASE_COMMON_DIRS):
+	mkdir $(RELEASE_COMMON_DIRS)
+
+release: all $(RELEASE_COMMON_DIRS)
+	for file in include/* ; do \
+	   echo Installing $$file to $(PS2SDK)/common/include ; \
+	   cp -f $$file $(PS2SDK)/common/include ; \
+	done; 
+	for file in include/sys/* ; do \
+	   echo Installing $$file to $(PS2SDK)/common/include/sys ; \
+	   cp -f $$file $(PS2SDK)/common/include/sys ; \
+	done;
+
+release-clean:
+	rm -f -r $(PS2SDK)/common
+
