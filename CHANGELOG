@@ -8,6 +8,50 @@
 #
 # $Id$
 
+2004-11-22
+  - stefan, complete support for C++ global constructors and deconstructors.
+  - pixel, fixing libkernel/libc dependancy.
+  - pixel, fixing various strncpy bugs in libkernel.
+
+2004-11-17
+  - emoon, Added stacktrace.
+
+2004-11-06
+  - myria, changed data types in tamtypes.h
+
+2004-11-01
+  - raipsu, fixed memalign.
+  - blackdroid, pixel, lots of small stdio fixes and tweaks since a few days.
+
+2004-10-29
+  - pixel, rewrote realloc, and wrote a basic memory walker. Added strdup.
+  - neovanglist, fixed xprintf's %p.
+
+2004-10-26
+  - neovanglist, added FIONREAD and FIONBIO to TCP/IP stack headers.
+
+2004-10-25
+  - pixel, fixed realloc, reported by raipsu.
+
+2004-10-19
+  - stefan, cleaned up ps2_sbrk().
+
+2004-10-08
+  - pixel, renamed config.h/c to osd_config.h/c.
+
+2004-10-05
+  - pixel, added a small assert.h.
+
+2004-10-01
+  - pixel, various stdlib tweaks and fixes.
+  - chipnat, changing qsort.c introduced by pixel to fix license problem.
+
+2004-09-21
+  - lukasz, fixed ioptrap so it has correct import/exports.
+
+2004-09-19
+  - tyranid, Added new interrupt bit to sio.h.
+  - pixel, fixing printf-to-puts "gcc-optimisation" issue.
 
 2004-09-16
   - mrhtford, fixed SifExecModuleBuffer (bad DMA behavior).
@@ -17,6 +61,7 @@
 
 2004-09-12
   - pixel, added ioptrap, from verse.
+  - pixel, fixed setjmp/longjmp
   - tyranid, added remote and padx
 
 2004-09-09
