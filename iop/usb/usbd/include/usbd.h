@@ -11,6 +11,8 @@
 #if !defined(_USBD_H)
 #define _USBD_H
 
+#include "irx.h"
+
 #define usbd_IMPORTS_start DECLARE_IMPORT_TABLE(usbd,1,1)
 #define usbd_IMPORTS_end END_IMPORT_TABLE
 
