@@ -348,6 +348,7 @@ int vxprintf(func,arg,format,ap)
 #endif
         if( infop->flag_signed ){
           if( *(long*)&longvalue<0 ){
+	    longvalue = -*(long*)&longvalue;
             prefix = '-';
           }else if( flag_plussign )  prefix = '+';
           else if( flag_blanksign )  prefix = ' ';
