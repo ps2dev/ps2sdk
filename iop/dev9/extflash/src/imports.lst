@@ -1,0 +1,17 @@
+loadcore_IMPORTS_start
+I_RegisterLibraryEntries
+loadcore_IMPORTS_end
+
+stdio_IMPORTS_start
+I_printf
+stdio_IMPORTS_end
+
+thbase_IMPORTS_start
+I_SetAlarm
+I_CancelAlarm
+thbase_IMPORTS_end
+
+sysclib_IMPORTS_start
+I_memcpy
+I_memset
+sysclib_IMPORTS_end

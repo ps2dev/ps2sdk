@@ -1,0 +1,19 @@
+DECLARE_EXPORT_TABLE(fls, 1, 1)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(flash_detect)
+	DECLARE_EXPORT(flash_device_reset)
+	DECLARE_EXPORT(flash_get_info)
+	DECLARE_EXPORT(flash_page_erase)
+	DECLARE_EXPORT(flash_page_read)
+	DECLARE_EXPORT(flash_page_write)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_start)
+END_EXPORT_TABLE
+
+void _retonly() {}
