@@ -12,7 +12,6 @@ int main(int argc, char *argv[])
 	int fd_size;
 	FILE *source,*dest;
 	int i;
-	unsigned char *data;
 
 	if(argc != 4) {
 		printf("bin2s - By Sjeep\n"

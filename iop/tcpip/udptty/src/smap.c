@@ -6,6 +6,7 @@
  */
 
 #include "udptty.h"
+#include "sysclib.h"
 
 typedef struct {
 	u16	txfree;		/* Number of bytes free in the TX FIFO.  */

@@ -10,6 +10,7 @@
 #include "types.h"
 #include "freesd.h"
 #include "spu2regs.h"
+#include "sysclib.h"
 
 
 extern u32 VoiceTransIoMode[2];

@@ -26,18 +26,17 @@ static int PowerOffSema;
 
 static unsigned int getStatusReg() {
     register unsigned int rv;
-    asm volatile ("
-        mfc0 %0, $12
-        nop" : "=r" 
+    asm volatile (
+        "mfc0 %0, $12\n"
+        "nop\n" : "=r" 
 	(rv) : );
     return rv;
 }
 
 static void setStatusReg(unsigned int v) {
-    asm volatile ("
-        mtc0 %0, $12
-        nop
-        "
+    asm volatile (
+        "mtc0 %0, $12\n"
+        "nop\n"
 	: : "r" (v) );
 }
 

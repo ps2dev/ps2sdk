@@ -91,7 +91,7 @@ u32 dmac_get_dicr2(void);
 
 /* Initialize the given channel and start the transfer.  Returns 1 if the
    transfer was started, and 0 on error.  */
-int dmac_request(u32 channel, u32 addr, u32 size, u32 count, int dir);
+int dmac_request(u32 channel, void * addr, u32 size, u32 count, int dir);
 #define I_dmac_request DECLARE_IMPORT(28, dmac_request)
 
 /* Start a transfer on the given channel.  */

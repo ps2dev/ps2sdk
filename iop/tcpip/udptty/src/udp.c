@@ -6,6 +6,7 @@
  */
 
 #include "udptty.h"
+#include "sysclib.h"
 
 typedef struct { u8 addr[4]; } ip_addr_t __attribute__((packed));
 
