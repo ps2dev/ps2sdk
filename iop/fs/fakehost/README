@@ -1,0 +1,40 @@
+fakehost v1.0
+Copyright (c) 2004 adresd <adresd_ps2dev@yahoo.com>
+Licensed under the Academic Free License version 2.0.
+--
+
+fakehost is a filesystem driver for the IOP processor.
+
+It accepts one parameter, this parameter is a path to an iomanx filesystem, for example pfs0:/
+When run, it will install a filesystem driver to redirect the host: device to the given device's directory.
+It also installs a naplink style rpc interface, for programs that 
+require that to run.
+This together with the host drive is sufficient to allow most programs
+designed to run from one of the loader utilities to function in this
+environment.
+
+Usage is: fakehost.irx pfs0:/dir/
+
+Example: from ps2link, make sure the needed support modules are loaded and a partition mounted. 
+Then do, from pksh: execiop host:fakehost.irx pfs0:/dir
+
+OR alternatively call it with the parameters from EE via loadmodule.
+
+
+NOTES:
+This does not handle any mounting of partitions, it is designed to accept
+a pfs device as the parameter. The calling program must do any 
+required setup first.
+
+This module relies upon:
+iomanx and fileXio IOP modules.
+
+It is also advised that you load:
+ps2dev9, ps2atad,ps2hdd and ps2fs  
+for hdd access.
+
+
+Credits:
+Tord Lindstrom <pukko@home.se> for the Naplink RPC Handler
+David Ryan (david@livemedia.com.au) for the basic HOST redirection handler (ioman ver)
+

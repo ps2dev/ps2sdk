@@ -1,0 +1,70 @@
+PS2 Device Filing System for IOP v1.0
+Copyright (c) 2004 James Forshaw (TyRaNiD) <tiraniddo@hotmail.com>
+Licensed under the Academic Free License version 2.0.
+--
+
+This file describes the PS2 Device Filing System (devfs) for use on the IOP.
+
+What is it?
+--
+
+The module provided works with ioman/X to provide a consistent interface for
+exporting device orientated files for access on the IOP or EE. It is analogous
+to a *nix style /dev heirarchy where each device can be read or written to and
+commands passed using the ioctl functions. 
+
+Why?
+--
+
+The first question you will probably ask is, why with ioman/iomanX providing 
+similar functionality is there a need for something else. Well what devfs
+provides (in no particular order) is: 
+
+- Easy configuration for devices without going having to add a complete ioman
+driver.
+- Trivial listing of available devices accessible by the system. To list the
+currently available devices you can use the standard dopen, dread, dclose
+functions. Listing top level ioman devices is decidedly less trivial.
+- Reduction in effort, a driver only has to provide at most 3 access functions
+. You could provide none at all but that would be kind of pointless.
+- ioman can only handle 16 top level devices, iomanX 32. It is theoretically
+possible to require many more device nodes than this. By comparison devfs can
+provide theoretically unlimited top level devices (up to limits of IOP ram) and
+up to 16 sub devices in a standard build.
+- All devices accessible under a common heirarchy.
+
+Of course there are counter reasons for devfs including,
+- Replication in some part of ioman/X functionality
+- You still need ioman/X for it to operate
+- Might run out of ram before enough devices are in use to make it worthwhile.
+
+Usage
+--
+
+Well if you are still with me, how to use it.
+
+The devfs.irx should have been built along with the rest of ps2drv, to use it 
+just load the irx and then access the functions via the exported interface.
+
+A quick run down of how the file system is structured.
+
+The ioman fs is under the devfs: device. A device consists of a root node and
+a number of sub devices. The root node itself is not represented in the fs
+but any sub devices are. The name you provide when registering the devices
+will be suffixed with the sub device number i.e. if you register the device
+'test' and add sub device 0 then you will see a 'test0' file in the fs. 
+
+The root device holds references to a read, write and ioctl handler. If one or
+more are set to NULL then they will be ignored. Device seeking is done by devfs
+itself, the current location being passed to the handler functions.
+
+A sub device can be assigned an extent (which is its size to the seek code). It
+can also be assigned certain access rights such as read/write or exclusive mode
+(where only one file can be opened on the device). 
+
+For an example of use see the devfs sample. 
+
+--
+
+Thanks go to the various members of PS2 deving, especially those involved with
+the creation of so much infrastructure such as ps2lib and ps2drv.
