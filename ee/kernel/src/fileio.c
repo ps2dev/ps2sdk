@@ -21,6 +21,8 @@
 
 /* TODO: Add versioning support.  */
 
+#define D(fmt, args...) printf("(%s:%s:%i):" # fmt, __FILE__, __FUNCTION__, __LINE__, ## args)
+
 enum _fio_functions {
 	FIO_F_OPEN = 0,
 	FIO_F_CLOSE,
@@ -84,7 +86,7 @@ int fioInit()
 	    _fio_init = 0;
 	}
 
-    if (_fio_init)
+        if (_fio_init)
 		return 0;
 
 	SifInitRpc(0);
@@ -286,7 +288,7 @@ int fioRead(int fd, void *ptr, int size)
 #ifdef F_fio_write
 struct _fio_write_arg {
 	int	fd;
-	void	*ptr;
+	const void	*ptr;
 	u32	size;
 	u32	mis;
 	u8	aligned[16];
