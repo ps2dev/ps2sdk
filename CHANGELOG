@@ -6,6 +6,13 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+2004-09-07
+  - pixel, added sbv-lite to ps2sdk.
+  - pixel, added bin2c tool.
+
+2004-09-06
+  - pixel, Added strtoul function to ee kernel.
+
 2004-09-06 Version 1.1
 
   - emoon, Added screen capture routines for debugging.
