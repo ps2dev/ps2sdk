@@ -6,6 +6,11 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+IOP_OBJS_DIR = obj/
+IOP_BIN_DIR = bin/
+IOP_SRC_DIR = src/
+IOP_INC_DIR = include/
+
 
 LWIP=$(PS2SDKSRC)/iop/tcpip/lwip
 
@@ -15,13 +20,13 @@ ifdef PS2IP_DHCP
 ps2ip_OBJECTS+= dhcp.o
 endif
 
-ps2ip_OBJECTS := $(ps2ip_OBJECTS:%=obj/%)
+ps2ip_OBJECTS := $(ps2ip_OBJECTS:%=$(IOP_OBJS_DIR)%)
 
 ps2api_OBJECTS = api_lib.o api_msg.o err.o sockets.o tcpip.o
-ps2api_OBJECTS := $(ps2api_OBJECTS:%=obj/%)
+ps2api_OBJECTS := $(ps2api_OBJECTS:%=$(IOP_OBJS_DIR)%)
 
 ps2api_IPV4 = icmp.o ip.o ip_addr.o ip_frag.o loopif.o
-ps2api_IPV4 := $(ps2api_IPV4:%=obj/%)
+ps2api_IPV4 := $(ps2api_IPV4:%=$(IOP_OBJS_DIR)%)
 
 # Turns DHCP on.
 
@@ -35,10 +40,16 @@ IOP_INCS += -I$(LWIP)/src/include -I$(LWIP)/src/include/ipv4 -Isrc/include
 IOP_CFLAGS += -Wall -fno-builtin-printf -DLWIP_NOASSERT
 IOP_LDFLAGS += -s
 
-all: $(IOP_BIN)
+
+all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
+
+clean:
+	rm -f -r $(IOP_OBJS_DIR) $(IOP_BIN_DIR)
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.make
+include $(PS2SDKSRC)/iop/Rules.release
+
 
 obj/loopif.o: $(LWIP)/src/netif/loopif.c
 	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
