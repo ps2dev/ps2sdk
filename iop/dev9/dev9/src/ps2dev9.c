@@ -604,8 +604,8 @@ static int card_find_manfid(u32 manfid)
 	_sw(0x1a00bb, SSBUS_R_1418);
 
 	/* Scan the card for the MANFID tuple.  */
-	spdaddr = SPD_REGBASE;
-	spdend = SPD_REGBASE + 0x1000;
+	spdaddr = 0;
+	spdend = 0x1000;
 	/* I hate this code, and it hates me.  */
 	while (spdaddr < spdend) {
 		hdr = SPD_REG8(spdaddr) & 0xff;
