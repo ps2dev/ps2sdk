@@ -1283,3 +1283,10 @@ int wctomb(char *s, wchar_t wc)
   return (ret);
 }
 #endif
+
+#ifdef F___assert_fail
+void __assert_fail (const char *assertion, const char *file, unsigned int line, const char *function)
+{
+    fprintf(stderr, "Error: assertion %s failed in function %s in %s:%i\n", assertion, function, file, line);
+}
+#endif

@@ -21,11 +21,10 @@
 #ifdef NDEBUG
 #define assert(cond)
 #else
+void __assert_fail (const char *assertion, const char *file, unsigned int line, const char *function) __attribute__((noreturn));
 #define assert(cond) { \
-    if (!cond) { \
-        fprintf(stderr, "assert failed at line %i of file %s:\n %s is false.\n", __LINE__, __FILE__, #cond); \
-	SleepThread(); \
-    } \
+    if (!cond) \
+	__assert_fail(#cond, __FILE__, __LINE__, __FUNCTION__); \
 }
 #endif
 
