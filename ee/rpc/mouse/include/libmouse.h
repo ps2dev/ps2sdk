@@ -16,6 +16,10 @@
 
 typedef mouse_data PS2MouseData;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Initialise the RPC library */
 int PS2MouseInit(void);
 /* Reads the current mouse data (depending on read mode) */
@@ -37,5 +41,9 @@ u32 PS2MouseEnum();
 int PS2MouseSetDblClickTime(u32 msec);
 u32 PS2MouseGetDblClickTIme();
 u32 PS2MouseGetVersion();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -16,6 +16,10 @@
 typedef kbd_rawkey PS2KbdRawKey;
 typedef kbd_keymap PS2KbdKeyMap;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int PS2KbdInit(void);
 /* Initialise the keyboard library */
 int PS2KbdRead(char *key);
@@ -44,5 +48,9 @@ int PS2KbdResetKeymap(void);
 /* Resets the keymap to the default US mapping */
 int PS2KbdClose(void);
 /* Close down the keyboard library */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
