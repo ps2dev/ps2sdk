@@ -1,0 +1,29 @@
+extflash - Flash interface via expansion port.
+
+Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
+--
+
+The PS2 50000 series BIOS introduced a new expansion (Dev9) device driver for
+NAND (serial) flash and a method for booting off of this device - the "External
+Flash ROM".  This flash is the same type as the 64Mbit flash found in the PS2
+memory card.  As far as I know, these chips come from either Samsung or Toshiba
+(datasheets can be found on their semiconductor websites).  Toshiba part numbers
+are listed below.
+
+	Part No.           Size
+	TC48V64BFT         64Mbit (8MB)
+	TC58128AFT         128Mbit (16MB)
+	TC58256AFT         256Mbit (32MB)
+	TC58512FT          512Mbit (64MB)
+	TH58100FT          1024Mbit (128MB)
+
+These devices are accessed via SmartMedia commands.
+
+Apparently these devices are formatted using MCFS, the filesystem used on
+normal PS2 memory cards. The OSD can boot from these devices the same way it
+can boot from the HDD.
+
+Why SCEI would include this driver within the 50k BIOS remains a mystery.  It's
+possible that this is the "firmware update" inside the PSX.  I wrote the
+extflash driver to get a better understanding of the hardware interface to
+these devices.
