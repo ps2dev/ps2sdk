@@ -36,8 +36,15 @@ build: env_build_check $(subdir_list)
 
 clean: env_build_check $(subdir_clean)
 
-release: env_release_check env_build_check $(subdir_release)
+release: env_build_check release_base $(subdir_release)
 
+release_base: env_release_check
+	@if test ! -d $(PS2SDK) ; then \
+	  mkdir -p $(PS2SDK) ; \
+	fi
+	cp -f README $(PS2SDK)
+	cp -f LICENSE $(PS2SDK)
+	cp -f ID $(PS2SDK)
 
 env_build_check: 
 	@if test -z $(PS2SDKSRC) ; \
