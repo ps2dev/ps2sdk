@@ -1,0 +1,22 @@
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004.
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+
+
+
+RELEASE_TOOLS_DIRS = bin/ 
+RELEASE_TOOLS_DIRS := $(RELEASE_TOOLS_DIRS:%=$(PS2SDK)/%)
+
+$(RELEASE_TOOLS_DIRS):
+	mkdir $(RELEASE_TOOLS_DIRS)
+
+release: all $(RELEASE_TOOLS_DIRS)
+	cp $(TOOLS_BIN) $(PS2SDK)/bin/
+
+release-clean:
+	rm -f $(PS2SDK)/bin/*.*
+
