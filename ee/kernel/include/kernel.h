@@ -287,10 +287,6 @@ int *__errno(void);
 int	npmPuts(const char *buf);
 int	nprintf(const char *format, ...);
 
-/* Screen output routines.  NOTE: these are going away VERY soon... */
-void	init_scr(void);
-void	scr_printf(const char *format, ...);
-
 #ifdef __cplusplus
 }
 #endif
