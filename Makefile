@@ -52,6 +52,7 @@ release_base: env_release_check
 	cp -f AUTHORS $(PS2SDK)
 	cp -f LICENSE $(PS2SDK)
 	cp -f ID $(PS2SDK)
+	cp -f Defs.make $(PS2SDK)
 
 env_build_check: 
 	@if test -z $(PS2SDKSRC) ; \
