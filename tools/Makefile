@@ -7,7 +7,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 
-SUBDIRS = bin2s
+SUBDIRS = bin2s bin2c
 
 include $(PS2SDKSRC)/Rules.make
 
