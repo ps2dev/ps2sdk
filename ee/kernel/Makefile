@@ -71,7 +71,7 @@ TIMER_OBJS := $(TIMER_OBJS:%=$(EE_OBJS_DIR)%)
 
 ### SYSCALL OBJECTS
 
-LIBSYSCALL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
+SYSCALL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
 	RFU009.o AddSbusIntcHandler.o RemoveSbusIntcHandler.o Interrupt2Iop.o \
 	SetVTLBRefillHandler.o SetVCommonHandler.o SetVInterruptHandler.o \
 	AddIntcHandler.o AddIntcHandler2.o RemoveIntcHandler.o AddDmacHandler.o \
@@ -102,9 +102,11 @@ LIBSYSCALL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
 	SifGetReg.o ExecOSD.o Deci2Call.o PSMode.o MachineType.o GetMemorySize.o \
 	SifWriteBackDCache.o _SyncDCache.o _InvalidDCache.o __errno.o errno.o
 
-LIBSYSCALL_OBJS := $(LIBSYSCALL_OBJS:%=$(EE_OBJS_DIR)%)
+SYSCALL_OBJS := $(SYSCALL_OBJS:%=$(EE_OBJS_DIR)%)
 
-LIBKERNEL_OBJS = $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
+LIBSYSCALL_OBJS = obj/dummy.o
+
+LIBKERNEL_OBJS = $(SYSCALL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(CONFIG_OBJS) \
 	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS)
 
@@ -116,8 +118,10 @@ $(LIBKERNEL_LIB): $(LIBKERNEL_OBJS)
 $(LIBSYSCALL_LIB): $(LIBSYSCALL_OBJS)
 	$(EE_AR) cru $(LIBSYSCALL_LIB) $(LIBSYSCALL_OBJS)
 
+obj/dummy.o: src/kernel.S
+	$(EE_C_COMPILE) $< -c -o $@
 
-$(LIBSYSCALL_OBJS): src/kernel.S
+$(SYSCALL_OBJS): src/kernel.S
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(SIFCMD_OBJS): src/sifcmd.c
