@@ -1,0 +1,33 @@
+
+DECLARE_EXPORT_TABLE(libsd, 1, 4)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(SdQuit)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(SdInit)
+	DECLARE_EXPORT(SdSetParam) // 5
+	DECLARE_EXPORT(SdGetParam)
+	DECLARE_EXPORT(SdSetSwitch)
+	DECLARE_EXPORT(SdGetSwitch)
+	DECLARE_EXPORT(SdSetAddr)
+	DECLARE_EXPORT(SdGetAddr) // 10
+	DECLARE_EXPORT(SdSetCoreAttr)
+	DECLARE_EXPORT(SdGetCoreAttr) 
+	DECLARE_EXPORT(SdNote2Pitch)
+	DECLARE_EXPORT(SdPitch2Note) 
+	DECLARE_EXPORT(SdProcBatch) // 15
+	DECLARE_EXPORT(SdProcBatchEx) 
+	DECLARE_EXPORT(SdVoiceTrans)
+	DECLARE_EXPORT(SdBlockTrans)
+	DECLARE_EXPORT(SdVoiceTransStatus)
+	DECLARE_EXPORT(SdBlockTransStatus) // 20
+	DECLARE_EXPORT(SdSetTransCallback)
+	DECLARE_EXPORT(SdSetIRQCallback)
+	DECLARE_EXPORT(SdSetEffectAttr)
+	DECLARE_EXPORT(SdGetEffectAttr) 
+	DECLARE_EXPORT(SdClearEffectWorkArea) // 25
+	DECLARE_EXPORT(SdSetTransIntrHandler)
+	DECLARE_EXPORT(SdSetSpu2IntrHandler)
+END_EXPORT_TABLE
+
+void _retonly() {}

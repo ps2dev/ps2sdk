@@ -1,0 +1,17 @@
+FREESD v1.0
+Copyright (c) 2004  TyRaNiD <tiraniddo@hotmail.com>
+Copyright (c) 2004  Lukasz Bruun <ps2@lukasz.dk>
+Licensed under the Academic Free License version 2.0.
+--
+
+FREESD is a LIBSD compatible sound driver for PS2.
+
+Some early Japanse PS2 models came without LIBSD 
+in the BIOS, this will work as a free replacement.
+
+Credits:
+Neill Corlett <neill@neillcorlett.com> for very valuable information on sound registers.
+[RO]man <roman_ps2dev@hotmail.com> for register information.
+adresd <adresd_ps2dev@yahoo.com>, Nicholas Van Veen <nickvv@xtra.co.nz>, Vzzrzzn,
+MrHTFord <mrhtford_ps2dev@hotmail.com> for their work with libsd and thereby providing test data.
+
