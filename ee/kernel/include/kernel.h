@@ -281,6 +281,9 @@ int *__errno(void);
 int	npmPuts(const char *buf);
 int	nprintf(const char *format, ...) __attribute__((format(printf,1,2)));
 
+/* Added GetSyscall method */
+void* GetSyscall(u32 syscall);
+
 #ifdef __cplusplus
 }
 #endif

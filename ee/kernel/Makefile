@@ -69,6 +69,9 @@ CONFIG_OBJS := $(CONFIG_OBJS:%=$(EE_OBJS_DIR)%)
 TIMER_OBJS = cpu_ticks.o
 TIMER_OBJS := $(TIMER_OBJS:%=$(EE_OBJS_DIR)%)
 
+GETSYSCALL_OBJS = GetSyscall.o
+GETSYSCALL_OBJS := $(GETSYSCALL_OBJS:%=$(EE_OBJS_DIR)%)
+
 
 ### SYSCALL OBJECTS
 
@@ -110,7 +113,7 @@ LIBSYSCALL_OBJS = obj/dummy.o
 
 LIBKERNEL_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(CONFIG_OBJS) \
-	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS)
+	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(GETSYSCALL_OBJS)
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBSYSCALL_LIB) $(LIBKERNEL_LIB)
 
@@ -142,6 +145,9 @@ $(CONFIG_OBJS): src/osd_config.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(TIMER_OBJS): src/timer.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(GETSYSCALL_OBJS): src/getsyscall.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(IOPHEAP_OBJS): src/iopheap.c
