@@ -121,9 +121,12 @@ char          *_itoa(int, char *, int);
 char          *_ltoa(long, char *, int);
 char          *_lltoa(long long, char *, int);
 
-
 #ifdef __cplusplus
 }
+
+/* C++ is evil, let's defeat it... */
+#define _CPP_CSTDLIB 1
+
 #endif
 
 

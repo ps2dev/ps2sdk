@@ -207,7 +207,7 @@ char * strlwr(char *str)
 #endif
 
 
-#ifdef F_ctype
+#ifdef F_tolower
 int tolower(int c)
 {
 	if (isupper(c))
@@ -215,7 +215,9 @@ int tolower(int c)
 
 	return c;
 }
+#endif
 
+#ifdef F_toupper
 int toupper(int c)
 {
 	if (islower(c))
@@ -223,8 +225,9 @@ int toupper(int c)
 
 	return c;
 }
+#endif
 
-
+#ifdef F_isupper
 int isupper(int c)
 {
 	if (c < 'A')
@@ -237,7 +240,9 @@ int isupper(int c)
 	// is an upper case alpha char
 	return 1;
 }
+#endif
 
+#ifdef F_islower
 int islower(int c)
 {
 	if (c < 'a')
@@ -250,7 +255,9 @@ int islower(int c)
 	// is a lower case alpha char
 	return 1;
 }
+#endif
 
+#ifdef F_isalpha
 int isalpha(int c)
 {
 	if (islower(c) || isupper(c))
@@ -258,7 +265,9 @@ int isalpha(int c)
 
 	return 0;
 }
+#endif
 
+#ifdef F_isdigit
 int isdigit(int c)
 {
 	if (c < '0')
@@ -271,7 +280,9 @@ int isdigit(int c)
 	// is a numerical char
 	return 1;
 }
+#endif
 
+#ifdef F_isalnum
 int isalnum(int c)
 {
 	if (isalpha(c) || isdigit(c))
@@ -279,7 +290,9 @@ int isalnum(int c)
 
 	return 0;
 }
+#endif
 
+#ifdef F_iscntrl
 int iscntrl(int c)
 {
 	if (c < 0x20)
@@ -290,8 +303,9 @@ int iscntrl(int c)
 
 	return 0;
 }
+#endif
 
-
+#ifdef F_isgraph
 int isgraph(int c)
 {
 	if (iscntrl(c))
@@ -302,8 +316,9 @@ int isgraph(int c)
 
 	return 1;
 }
+#endif
 
-
+#ifdef F_isprint
 int isprint(int c)
 {
 	if (iscntrl(c))
@@ -311,7 +326,9 @@ int isprint(int c)
 
 	return 1;
 }
+#endif
 
+#ifdef F_ispunct
 int ispunct(int c)
 {
 	if (iscntrl(c))
@@ -328,7 +345,9 @@ int ispunct(int c)
 	// so its a punctuation character
 	return 1;
 }
+#endif
 
+#ifdef isspace
 int isspace(int c)
 {
 	if ((c>=0x09) && (c<=0x0D))
@@ -339,9 +358,9 @@ int isspace(int c)
 
 	return 0;
 }
+#endif
 
-
-
+#ifdef isxdigit
 int isxdigit(int c)
 {
 	if (isdigit(c))

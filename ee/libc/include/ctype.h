@@ -11,13 +11,12 @@
 # A few ctype's functions. They should be macros but...
 */
 
-#ifndef _CTYPE_H
-#define _CTYPE_H
+#ifndef __CTYPE_H__
+#define __CTYPE_H__
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
 
 int isalnum(int);
 int isalpha(int);
@@ -30,10 +29,23 @@ int ispunct(int);
 int isspace(int);
 int isupper(int);
 int isxdigit(int);
-
+int tolower(int);
+int toupper(int);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif	// _CTYPE_H
+
+/* To be compatible with C++'s ctype_base.h */
+
+#define	_U	01
+#define	_L	02
+#define	_N	04
+#define	_S	010
+#define _P	020
+#define _C	040
+#define _X	0100
+#define	_B	0200
+
+#endif
