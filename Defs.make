@@ -36,4 +36,14 @@ IOP_AR = $(IOP_TOOL_PREFIX)ar
 IOP_OBJCOPY = $(IOP_TOOL_PREFIX)objcopy
 IOP_STRIP = $(IOP_TOOL_PREFIX)strip
 
+#
+# Definitions for the local toolchain
+#
+
+CC = gcc
+AS = as
+LD = ld
+AR = ar
+OBJCOPY = objcopy
+STRIP = strip
 
