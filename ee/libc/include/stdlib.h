@@ -14,6 +14,7 @@
 #ifndef __STDLIB_H__
 #define __STDLIB_H__
 
+#include <stddef.h>
 #include <ps2lib_err.h>
 
 #ifdef __cplusplus
@@ -34,22 +35,6 @@ extern "C" {
 
 /* multibyte maximum character constant. */
 #define MB_CUR_MAX                     1
-
-
-/* ensure wchar_t is defined. */
-#ifndef __WCHAR_T_DEFINED
-#define __WCHAR_T_DEFINED
-#define _WCHAR_T_DECLARED
-typedef short wchar_t;
-#endif // __WCHAR_T_DEFINED
-
-
-/* ensure size_t is defined. */
-#ifndef __SIZE_T_DEFINED
-#define __SIZE_T_DEFINED
-typedef unsigned int size_t;
-#endif // __SIZE_T_DEFINED
-
 
 /* ensure div_t is defined. */
 #ifndef __DIV_T_DEFINED
