@@ -993,5 +993,6 @@ void DirEntryCopy(struct fileXioDirEntry* dirEntry, iox_dirent_t* internalDirEnt
 {
 	dirEntry->fileSize = internalDirEntry->stat.size;
 	dirEntry->fileProperties = internalDirEntry->stat.attr;
-	strncpy(dirEntry->filename,internalDirEntry->name,128);
+	strncpy(dirEntry->filename,internalDirEntry->name,127);
+	dirEntry->filename[127] = '\0';
 }

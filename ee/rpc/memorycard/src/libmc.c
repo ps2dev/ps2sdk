@@ -844,7 +844,7 @@ int mcRename(int port, int slot, const char* oldName, const char* newName)
 	mcCmd.table = (int)buffFileInfo;
 	strncpy(mcCmd.name, oldName, 1023);
 	mcCmd.name[1023] = 0;
-	strncpy(&buffFileInfo[0x20], newName, 32);
+	strncpy(&buffFileInfo[0x20], newName, 31);
 	buffFileInfo[63] = 0;
 	FlushCache(0);
 	
