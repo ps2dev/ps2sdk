@@ -38,6 +38,18 @@
 #endif // bcmp
 
 
+/* ensure index is defined. */
+#ifndef index
+#define index(s, c)                    strchr(s, c)
+#endif // index
+
+
+/* ensure rindex is defined. */
+#ifndef rindex
+#define rindex(s, c)                   strrchr(s, c)
+#endif // rindex
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif

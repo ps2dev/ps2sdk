@@ -147,8 +147,8 @@ strerror    - ok (but in stdio)
 bzero       - ok (macro, in string.h)
 bcopy       - ok (macro, in string.h)
 bcmp        - ok (macro, in string.h)
-index       - missing
-rindex      - missing
+index       - ok (macro, in string.h)
+rindex      - ok (macro, in string.h)
 
 stricmp     - ok (macro)
 strcasecmp  - ok
