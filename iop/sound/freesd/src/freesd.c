@@ -67,7 +67,7 @@ volatile u16 *ParamRegList[] =
 	SD_A_TSA_HI(0),		SD_A_STD(0),
 	// 1AE & 1B0 are both related to core attr & dma somehow
 	U16_REGISTER(0x1AE),	U16_REGISTER(0x1B0), 
-	SD_C_STATX(0)
+	(u16*)0xBF900334
 
 };
 
@@ -208,6 +208,7 @@ void RegisterInterrupts()
 void ResetAll()
 {
 	u32 core;
+	volatile u16 *statx;
 
 	*SD_C_SPDIF_OUT = 0;
 	nopdelay();
@@ -226,8 +227,10 @@ void ResetAll()
 
 		*SD_P_MVOLL(core)		= 0;
 		*SD_P_MVOLR(core)		= 0;
+		
+		statx = U16_REGISTER(0x344 + (core * 1024));
 
-		while(*SD_C_STATX(core) & 0x7FF);
+		while(*statx & 0x7FF);
 		
 		*SD_A_KOFF_HI(core)		= 0xFFFF;
 		*SD_A_KOFF_LO(core)		= 0xFFFF; // Should probably only be 0xFF
@@ -302,7 +305,8 @@ u16 VoiceDataInit[16] = { 0x707, 0x707, 0x707, 0x707, 0x707, 0x707, 0x707, 0x707
 void InitVoices()
 {
 	s32 voice, i;
-	
+	volatile u16 *statx;
+
 	// Set Start Address of data to transfer.
 	*SD_A_TSA_HI(0) = 0;
 	*SD_A_TSA_LO(0) = 0x5000 >> 1;
@@ -314,8 +318,10 @@ void InitVoices()
 	// Set Transfer mode to IO
 	*SD_CORE_ATTR(0) = (*SD_CORE_ATTR(0) & ~SD_CORE_DMA) | SD_DMA_IO;
 
+	statx = U16_REGISTER(0x344);
+
 	// Wait for transfer to complete;
-	while(*SD_C_STATX(0) & SD_IO_IN_PROCESS);
+	while(*statx & SD_IO_IN_PROCESS);
 
 	// Reset DMA settings
 	*SD_CORE_ATTR(0) &= ~SD_CORE_DMA;

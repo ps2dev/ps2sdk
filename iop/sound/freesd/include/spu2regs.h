@@ -52,7 +52,7 @@
 #define SD_VA_LSAX(core, voice)			SD_VA_REG((core), (voice), 0x04)
 #define SD_VA_NAX(core, voice)			SD_VA_REG((core), (voice), 0x08)
 
-#define SD_C_STATX(core)				((volatile u16*)(0xBF900334 + ((core) << 10))) // This is not the official name
+//#define SD_C_STATX(core)				((volatile u16*)(0xBF900334 + ((core) << 10))) // This is not the official name
 
 #define SD_S_ENDX_HI(core)				((volatile u16*)(0xBF900340 + ((core) << 10)))
 #define SD_S_ENDX_LO(core)				((volatile u16*)(0xBF900342 + ((core) << 10)))
