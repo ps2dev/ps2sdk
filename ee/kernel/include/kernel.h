@@ -24,7 +24,10 @@ extern "C" {
 #define DI	DIntr
 #define EI	EIntr
 
-#define EE_SYNC() __asm__ volatile ("sync")
+// note: 'sync' is the same as 'sync.l'
+#define EE_SYNC()	__asm__ volatile ("sync")
+#define EE_SYNCL()	__asm__ volatile ("sync.l")
+#define EE_SYNCP()	__asm__ volatile ("sync.p")
 
 #define UNCACHED_SEG(x)		\
    ((void *)(((u32)(x)) | 0x20000000))
