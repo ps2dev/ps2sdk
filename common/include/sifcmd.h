@@ -16,8 +16,6 @@
 extern "C" {
 #endif
 
-#include <tamtypes.h>
-#include <sifdma.h>
 
 #define SYSTEM_CMD	0x80000000
 
