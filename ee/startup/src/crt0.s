@@ -82,6 +82,10 @@ loop:
 	move	$4,$0
 	syscall			# FlushCache(0) - Writeback data cache
 
+	# Call ps2sdk's libc initialisation.
+	jal	_ps2sdk_libc_init
+	nop
+	
 	# Call global constructors through _init().
 	la	$8, _init
 	beqz	$8, 1f		# does _init() exist?
@@ -125,7 +129,10 @@ _exit:
 	jalr	$8
 	nop
 3:
-
+	# Call ps2sdk's libc deinitialisation.
+	jal     _ps2sdk_libc_deinit
+	nop
+	
 # If we received our program arguments in a0, then we were executed by a
 # loader, and we don't want to return to the browser.
 	la	$4, _args_ptr

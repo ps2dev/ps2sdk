@@ -8,6 +8,13 @@
 #
 # $Id$
 
+2005-01-11
+  - pixel, renamed RFU060 and RFU061 to SetupThread and SetupHeap.
+  - pixel, introduced locking in the sdk, to fix issues with malloc.
+
+2005-01-10
+  - pixel, definitively (?) fixed xprintf's signed/unsigned printouts.
+
 2005-01-05
   - pixel, fixed realloc's alignment bug.
   - pixel, added timer.h

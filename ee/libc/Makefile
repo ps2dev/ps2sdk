@@ -28,10 +28,10 @@ EE_SAMPLES := $(EE_SAMPLES:%=$(EE_SAMPLE_DIR)%)
 CORE_OBJS = sbrk.o memchr.o memcpy.o memset.o strcat.o \
 	strncmp.o memcmp.o memmove.o strcpy.o strncat.o \
 	strncpy.o terminate.o strlen.o strchr.o strcmp.o \
-	setjmp.o qsort.o
+	setjmp.o qsort.o init.o
 CORE_OBJS := $(CORE_OBJS:%=$(EE_OBJS_DIR)%)
 
-ALLOC_OBJS = malloc.o realloc.o calloc.o memalign.o free.o __builtin_alloc.o __mem_walk.o
+ALLOC_OBJS = malloc.o realloc.o calloc.o memalign.o free.o __builtin_alloc.o __alloc_internals.o __mem_walk.o
 ALLOC_OBJS := $(ALLOC_OBJS:%=$(EE_OBJS_DIR)%)
 
 STRING_C_OBJS = strdup.o strcasecmp.o strncasecmp.o strtok.o strrchr.o strstr.o \
@@ -49,7 +49,8 @@ XPRINTF_OBJS := $(XPRINTF_OBJS:%=$(EE_OBJS_DIR)%)
 STDIO_OBJS = clearerr.o fclose.o fcloseall.o feof.o ferror.o fflush.o fflushall.o fgetc.o \
 	fgetpos.o fgets.o fopen.o fputc.o fputs.o fread.o fseek.o fsetpos.o ftell.o fwrite.o \
 	getc.o getchar.o getfdtype.o gets.o perror.o putc.o puts.o remove.o rename.o \
-	rewind.o skipatoi.o sscanf.o stdio.o tmpfile.o tmpnam.o ungetc.o updatestdoutxy.o strerror.o
+	rewind.o skipatoi.o sscanf.o stdio.o tmpfile.o tmpnam.o ungetc.o updatestdoutxy.o strerror.o \
+	__stdio_internals.o
 STDIO_OBJS := $(STDIO_OBJS:%=$(EE_OBJS_DIR)%)
 
 STDLIB_OBJS = abs.o atexit.o atof.o bsearch.o div.o getenv.o _itoa.o labs.o \

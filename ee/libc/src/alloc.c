@@ -32,6 +32,43 @@
 #define ALLOC_MAGIC 0xa110ca73
 #endif
 
+void _ps2sdk_alloc_init();
+void _ps2sdk_alloc_deinit();
+void _ps2sdk_alloc_lock();
+void _ps2sdk_alloc_unlock();
+
+#ifdef F___alloc_internals
+static vs32 alloc_sema = -1;
+void _ps2sdk_alloc_init()
+{
+    ee_sema_t alloc_sema_struct;
+    alloc_sema_struct.init_count = 1;
+    alloc_sema_struct.max_count = 1;
+    alloc_sema = CreateSema(&alloc_sema_struct);
+}
+
+void _ps2sdk_alloc_deinit()
+{
+    if (alloc_sema >= 0) {
+	DeleteSema(alloc_sema);
+    }
+}
+
+void _ps2sdk_alloc_lock()
+{
+    if (alloc_sema >= 0) {
+	WaitSema(alloc_sema);
+    }
+}
+
+void _ps2sdk_alloc_unlock()
+{
+    if (alloc_sema >= 0) {
+	SignalSema(alloc_sema);
+    }
+}
+#endif
+
 /* _heap_mem_block_header structure. */
 typedef struct _heap_mem_header {
 #ifdef DEBUG_ALLOC
@@ -87,6 +124,8 @@ void * malloc(size_t size)
 
 	if ((mem_sz & (DEFAULT_ALIGNMENT - 1)) != 0)
 		mem_sz = ALIGN(mem_sz, DEFAULT_ALIGNMENT);
+	
+	_ps2sdk_alloc_lock();
 
 	/* If we don't have any allocated blocks, reserve the first block from
 	   the OS and initialize __alloc_heap_tail.  */
@@ -114,6 +153,8 @@ void * malloc(size_t size)
 		__alloc_heap_head->next = NULL;
 
 		__alloc_heap_tail = __alloc_heap_head;
+		
+		_ps2sdk_alloc_unlock();
 		return ptr;
 	}
 
@@ -131,7 +172,8 @@ void * malloc(size_t size)
 		new_mem->next = __alloc_heap_head;
 		new_mem->next->prev = new_mem;
 		__alloc_heap_head = new_mem;
-
+		
+		_ps2sdk_alloc_unlock();
 		return ptr;
 	}
 
@@ -151,13 +193,16 @@ void * malloc(size_t size)
 		new_mem->next->prev = new_mem;
 		prev_mem->next = new_mem;
 
+		_ps2sdk_alloc_unlock();
 		return ptr;
 	}
 
 	/* Extend the heap, but make certain the block is inserted in
 	   order. */
-	if ((mem_ptr = ps2_sbrk(mem_sz)) == (void *)-1)
+	if ((mem_ptr = ps2_sbrk(mem_sz)) == (void *)-1) {
+		_ps2sdk_alloc_unlock();
 		return ptr;	/* NULL */
+	}
 
 	ptr = (void *)((u32)mem_ptr + sizeof(heap_mem_header_t));
 
@@ -172,6 +217,8 @@ void * malloc(size_t size)
 
 	__alloc_heap_tail->next = new_mem;
 	__alloc_heap_tail       = new_mem;
+	
+	_ps2sdk_alloc_unlock();
 	return ptr;
 }
 #endif
@@ -194,11 +241,14 @@ void * realloc(void *ptr, size_t size)
 	if ((size & (DEFAULT_ALIGNMENT - 1)) != 0)
 		size = ALIGN(size, DEFAULT_ALIGNMENT);
 
+	_ps2sdk_alloc_lock();
 	prev_mem = (heap_mem_header_t *)((u32)ptr - sizeof(heap_mem_header_t));
 
 #ifdef DEBUG_ALLOC
 	if (prev_mem->magic != ALLOC_MAGIC) {
 		fprintf(stderr, "realloc: Pointer at %p was not malloc()ed before, or got overwritten.\n", ptr);
+
+		_ps2sdk_alloc_unlock();
 		return NULL;
 	}
 #endif
@@ -210,6 +260,8 @@ void * realloc(void *ptr, size_t size)
 		if (!prev_mem->next)
 			ps2_sbrk(ptr + size - ps2_sbrk(0));
 		prev_mem->size = size;
+		
+		_ps2sdk_alloc_unlock();
 		return ptr;
 	}
 	
@@ -222,14 +274,20 @@ void * realloc(void *ptr, size_t size)
 		if (ps2_sbrk(size - prev_mem->size) == (void*) -1)
 			return NULL;
 		prev_mem->size = size;
+		
+		_ps2sdk_alloc_unlock();
 		return ptr;
 	}
 	
 	/* Is the next block far enough so we can extend the current block ? */
 	if ((prev_mem->next->ptr - ptr) > size) {
 		prev_mem->size = size;
+		
+		_ps2sdk_alloc_unlock();
 		return ptr;
 	}
+	
+	_ps2sdk_alloc_unlock();
 	
 	/* We got out of luck, let's allocate a new block of memory. */
 	if ((new_ptr = malloc(size)) == NULL)
@@ -275,12 +333,13 @@ void * memalign(size_t align, size_t size)
 	if ((ptr = malloc(size + align)) == NULL)
 		return ptr;	/* NULL */
 
-	cur_mem = (heap_mem_header_t *)((u32)ptr - sizeof(heap_mem_header_t));
-	cur_mem->size -= align;
-
 	/* If malloc returned it aligned for us we're fine.  */
 	if (((u32)ptr & (align - 1)) == 0)
 		return ptr;
+
+	_ps2sdk_alloc_lock();
+	cur_mem = (heap_mem_header_t *)((u32)ptr - sizeof(heap_mem_header_t));
+	cur_mem->size -= align;
 
 	/* Otherwise, align the pointer and fixup our hearder accordingly.  */
 	ptr = (void *)ALIGN((u32)ptr, align);
@@ -305,6 +364,8 @@ void * memalign(size_t align, size_t size)
 		__alloc_heap_tail = cur_mem;
 
 	cur_mem->ptr = ptr;
+	
+	_ps2sdk_alloc_unlock();
 	return ptr;
 }
 #endif
@@ -320,13 +381,19 @@ void free(void *ptr)
 	if (!ptr)
 		return;
 
-	if (!__alloc_heap_head)
+	_ps2sdk_alloc_lock();
+	
+	if (!__alloc_heap_head) {
+		_ps2sdk_alloc_unlock();
 		return;
+	}
 
 #ifdef DEBUG_ALLOC
 	cur = (heap_mem_header_t *)((u32)ptr - sizeof(heap_mem_header_t));
 	if (cur->magic != ALLOC_MAGIC) {
 		fprintf(stderr, "free: Pointer at %p was not malloc()ed before, or got overwritten.\n", ptr);
+		
+		_ps2sdk_alloc_unlock();
 		return;
 	}
 #endif
@@ -345,15 +412,18 @@ void free(void *ptr)
 
 			ps2_sbrk(-size);
 		}
-
+		
+		_ps2sdk_alloc_unlock();
 		return;
 	}
 
 	cur = __alloc_heap_head;
 	while (ptr != cur->ptr)  {
 		/* ptr isn't in our list */
-		if (cur->next == NULL)
+		if (cur->next == NULL) {
+			_ps2sdk_alloc_unlock();
 			return;
+		}
 
 		cur = cur->next;
 	}
@@ -373,6 +443,8 @@ void free(void *ptr)
 	}
 
 	cur->prev->next = cur->next;
+	
+	_ps2sdk_alloc_unlock();
 }
 #endif
 

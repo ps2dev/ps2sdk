@@ -1173,3 +1173,14 @@ void __stdio_update_stdout_xy(int x, int y)
 #endif
 }
 #endif
+
+
+#ifdef F___stdio_internals
+void _ps2sdk_stdio_init()
+{
+}
+
+void _ps2sdk_stdio_deinit()
+{
+}
+#endif
