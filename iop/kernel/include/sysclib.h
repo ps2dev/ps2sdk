@@ -11,9 +11,14 @@
 
 #include "types.h"
 #include "irx.h"
+#include "setjmp.h"
 
 #define sysclib_IMPORTS_start DECLARE_IMPORT_TABLE(sysclib, 1, 1)
 #define sysclib_IMPORTS_end END_IMPORT_TABLE
+
+/* These functions are already defined in setjmp.h */
+#define I_setjmp DECLARE_IMPORT(4, setjmp)
+#define I_longjmp DECLARE_IMPORT(5, longjmp)
 
 char toupper(char c);
 #define I_toupper DECLARE_IMPORT(6, toupper)
