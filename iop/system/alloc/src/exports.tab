@@ -1,0 +1,18 @@
+DECLARE_EXPORT_TABLE(alloc, 1, 1)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(shutdown)
+	DECLARE_EXPORT(_retonly)
+
+	DECLARE_EXPORT(malloc)
+/*05*/	DECLARE_EXPORT(realloc)
+	DECLARE_EXPORT(free)
+	DECLARE_EXPORT(calloc)
+	DECLARE_EXPORT(memalign)
+	DECLARE_EXPORT(__mem_walk_begin)
+/*10*/  DECLARE_EXPORT(__mem_walk_read)
+	DECLARE_EXPORT(__mem_walk_inc)
+	DECLARE_EXPORT(__mem_walk_end)
+END_EXPORT_TABLE
+
+void _retonly() {}
