@@ -111,7 +111,7 @@ enum _sif_regs {
 	SIF_REG_MAINADDR = 1,
 	SIF_REG_SUBADDR,
 	SIF_REG_MSFLAG,
-	SIF_REG_SMFLAG,
+	SIF_REG_SMFLAG
 };
 
 /* Glue routines.  */
