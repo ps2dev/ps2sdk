@@ -75,5 +75,7 @@ env_release_check:
 	  exit 1; \
 	fi
 
+docs:
+	doxygen doxy.conf
 
 include Defs.make
