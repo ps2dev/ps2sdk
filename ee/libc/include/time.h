@@ -14,7 +14,10 @@
 #ifndef _TIME_H
 #define _TIME_H
 
+#ifndef __clock_t_defined
 typedef unsigned long clock_t;
+#define __clock_t_defined
+#endif
 
 struct tm
 {
