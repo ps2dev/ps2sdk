@@ -151,7 +151,6 @@ int    scanf(const char *, ...);
 int    setbuf(FILE *, char *);
 int    setvbuf(FILE *, char *, int, size_t);
 int    sscanf(const char *, const char *, ...);
-char   *strerror(int err);
 FILE   *tmpfile(void);
 char   *tmpnam(char *);
 int    vsscanf(const char *, const char *, va_list);
