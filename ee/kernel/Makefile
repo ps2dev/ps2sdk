@@ -62,6 +62,7 @@ CONFIG_OBJS = _config_internals.o GetRomName.o IsT10K.o configGetLanguage.o \
 	configSetTimeFormat.o configGetTimezone.o configSetTimezone.o \
 	configIsSpdifEnabled.o configSetSpdifEnabled.o \
 	configIsDaylightSavingEnabled.o configSetDaylightSavingEnabled.o
+CONFIG_OBJS := $(CONFIG_OBJS:%=$(EE_OBJS_DIR)%)
 
 
 ### SYSCALL OBJECTS
