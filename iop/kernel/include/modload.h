@@ -27,18 +27,18 @@ int LoadModuleAddress(const char *name, int, int);
 #define I_LoadModuleAddress DECLARE_IMPORT(5, LoadModuleAddress)
 
 int LoadModule(const char *name);
-#define I_LoadModule DECLARE_IMPORTS(6, LoadModule)
+#define I_LoadModule DECLARE_IMPORT(6, LoadModule)
 
 int LoadStartModule(const char *name, int arglen, const char *args, int *result);
 #define I_LoadStartModule DECLARE_IMPORT(7, LoadStartModule)
 
 int StartModule(int, const char *name, int arg_len, const char *args, int *result);
-#define I_StartModule DECLARE_IMPORTS(8, StartModule)
+#define I_StartModule DECLARE_IMPORT(8, StartModule)
 
 int LoadModuleBufferAddress(void *buffer, int, int);
-#define I_LoadModuleBufferAddress DECLARE_IMPORTS(9, LoadModuleBufferAddress)
+#define I_LoadModuleBufferAddress DECLARE_IMPORT(9, LoadModuleBufferAddress)
 
 int LoadModuleBuffer(void *buffer);
-#define I_LoadModuleBuffer DECLARE_IMPORTS(10, LoadModuleBuffer)
+#define I_LoadModuleBuffer DECLARE_IMPORT(10, LoadModuleBuffer)
 
 #endif /* IOP_MODLOAD_H */
