@@ -8,6 +8,9 @@
 #
 # $Id$
 
+2005-01-05
+  - pixel, fixed realloc's alignment bug.
+
 2005-01-03
   - pixel, started a small skeleton, put a hello.irx file there.
   - pixel, fixing printf-to-puts "gcc-optimisation" issue *AGAIN*.

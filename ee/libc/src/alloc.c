@@ -191,6 +191,9 @@ void * realloc(void *ptr, size_t size)
 	if (ptr == NULL)
 		return malloc(size);
 
+	if ((size & (DEFAULT_ALIGNMENT - 1)) != 0)
+		size = ALIGN(size, DEFAULT_ALIGNMENT);
+
 	prev_mem = (heap_mem_header_t *)((u32)ptr - sizeof(heap_mem_header_t));
 
 #ifdef DEBUG_ALLOC
