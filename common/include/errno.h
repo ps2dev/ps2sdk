@@ -288,4 +288,6 @@ char *file_errors[] = {
 #define error_to_string(errnum) (file_errors[errnum*-1])
 #endif
 
+extern int errno;
+
 #endif // _ERRNO_H_
