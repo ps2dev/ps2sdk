@@ -29,6 +29,7 @@ typedef struct {
 	u8 ebuffer[16];
 } rests_pkt; // sizeof = 48
 
+extern int _iop_reboot_count;
 static SifRpcClientData_t cd0;
 static unsigned sbuff[0x1300] __attribute__((aligned (64)));
 static int _intr_data[0xC00] __attribute__((aligned(64)));
@@ -45,6 +46,12 @@ int fileXioInit()
 {
 	int res;
 	ee_sema_t compSema;
+	static int _rb_count = 0;
+	if(_rb_count != _iop_reboot_count)
+	{
+	    _rb_count = _iop_reboot_count;
+	    fileXioInited = 0;
+	}
 
 	if(fileXioInited)
 		return 0;
