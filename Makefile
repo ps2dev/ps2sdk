@@ -48,6 +48,8 @@ $(PS2SDK)/common/include:
 	mkdir $(PS2SDK)/common/include
 	cp -f $(PS2SDKSRC)/common/include/*.h $(PS2SDK)/common/include/
 
+install: release
+
 release: build release_base $(PS2SDK)/common/include $(subdir_release) 
 
 
