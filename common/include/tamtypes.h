@@ -54,7 +54,7 @@ typedef volatile signed int		vs128 __attribute__(( mode(TI) ));
 typedef signed long int		s32;
 typedef signed long long	s64;
 
-typedef volatile signed int		vs32;
+typedef volatile signed long int	vs32;
 typedef volatile signed long long	vs64;
 #endif
 
