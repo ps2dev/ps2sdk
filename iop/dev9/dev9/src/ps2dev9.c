@@ -26,8 +26,7 @@
 #include "speedregs.h"
 #include "smapregs.h"
 
-#define MODNAME "ps2dev9"
-
+#define MODNAME "dev9_driver"
 IRX_ID(MODNAME, 1, 1);
 
 #define M_PRINTF(format, args...)	\
@@ -67,7 +66,7 @@ static int dev9_intr_dispatch(int flag);
 static int dev9_dma_intr(void *arg);
 
 static int dev9x_fs_null(void);
-static int dev9x_fs_devctl(const char *, int, void *, unsigned int, void *,
+static int dev9x_fs_devctl(iop_file_t *f, const char *, int, void *, unsigned int, void *,
 		unsigned int);
 
 static void smap_set_stat(int stat);
@@ -605,7 +604,7 @@ static int card_find_manfid(u32 manfid)
 
 	/* Scan the card for the MANFID tuple.  */
 	spdaddr = 0;
-	spdend = 0x1000;
+	spdend =  0x1000;
 	/* I hate this code, and it hates me.  */
 	while (spdaddr < spdend) {
 		hdr = SPD_REG8(spdaddr) & 0xff;
@@ -831,7 +830,7 @@ static iop_device_t dev9x_fsdev = {
 
 static int dev9x_fs_null(void) { return 0; }
 
-static int dev9x_fs_devctl(const char *dev, int command, void *arg,
+static int dev9x_fs_devctl(iop_file_t *f, const char *dev, int command, void *arg,
 		unsigned int arglen, void *buf, unsigned int buflen)
 {
 	if (command == DEV9CTLTYPE)

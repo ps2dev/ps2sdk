@@ -23,8 +23,7 @@
 #include "speedregs.h"
 #include "atahw.h"
 
-#define MODNAME "ps2atad"
-
+#define MODNAME "atad_driver"
 IRX_ID(MODNAME, 1, 1);
 
 #define M_PRINTF(format, args...)	\
