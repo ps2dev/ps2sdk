@@ -105,14 +105,14 @@ struct padButtonStatus
     unsigned char ljoy_h;
     unsigned char ljoy_v;
     // pressure mode
+    unsigned char right_p;
     unsigned char left_p;
-    unsigned char rigth_p;
     unsigned char up_p;
     unsigned char down_p;
     unsigned char triangle_p;
     unsigned char circle_p;
-    unsigned char square_p;
     unsigned char cross_p;
+    unsigned char square_p;
     unsigned char l1_p;
     unsigned char r1_p;
     unsigned char l2_p;
