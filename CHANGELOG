@@ -8,6 +8,14 @@
 #
 # $Id$
 
+2005-01-01
+  - pixel, put errno var into errno.h (duh)
+  - pixel, changed write functions to use const buffers.
+
+2004-12-31
+  - oopo, moved toolchain.sh to a new ps2toolchain project.
+  - pixel, various hacks to make g++ happy when using stl objects.
+
 2004-12-29
   - pixel, reversed and added StopModule, UnloadModule, and SearchModuleByName
   - pixel, filling some blanks in iop's modload.h, using kernel.s stubs.
