@@ -19,14 +19,14 @@
 
 #include <iopcontrol.h>
 
-#define RESET_ARG_MAX	80
+#define RESET_ARG_MAX	79  
 
 #ifdef F_SifIopReset
 struct _iop_reset_pkt {
 	struct t_SifCmdHeader header;
 	int	arglen;
 	int	mode;
-	char	arg[RESET_ARG_MAX];
+	char	arg[RESET_ARG_MAX + 1];
 } ALIGNED(16);
 
 int SifIopReset(const char *arg, int mode)
@@ -47,6 +47,7 @@ int SifIopReset(const char *arg, int mode)
 		if (reset_pkt.arglen > RESET_ARG_MAX)
 			reset_pkt.arglen = RESET_ARG_MAX;
 		strncpy(reset_pkt.arg, arg, reset_pkt.arglen);
+		reset_pkt.arg[RESET_ARG_MAX] = '\0';
 	}
 
 	dmat.src  = &reset_pkt;
