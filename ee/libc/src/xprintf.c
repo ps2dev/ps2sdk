@@ -92,7 +92,7 @@ static info fmtinfo[] = {
   { 'S',   0,  0,                  0,    0, SEEIT,      },
   { '%',   0,  0,                  0,    0, PERCENT,    },
   { 'b',   2,  "01",               0, "b0", RADIX,      }, /* Binary notation */
-  { 'p',  16,  "0123456789ABCDEF", 0,    0, RADIX,      }, /* Pointers */
+  { 'p',  16,  "0123456789ABCDEF", 0, "x0", RADIX,      }, /* Pointers */
   { '\'',  0,  0,                  0,    0, CHARLIT,    }, /* Literal char */
 };
 #define NINFO  (sizeof(fmtinfo)/sizeof(info))  /* Size of the fmtinfo table */
@@ -378,6 +378,12 @@ int vxprintf(func,arg,format,ap)
           }while( longvalue>0 );
 	}
         length = (int)(&buf[BUFSIZE]-bufpt);
+	if(infop->fmttype == 'p')
+        {
+		precision = 8;
+		flag_alternateform = 1;
+        }
+
         for(idx=precision-length; idx>0; idx--){
           *(--bufpt) = '0';                             /* Zero pad */
 	}
@@ -389,6 +395,7 @@ int vxprintf(func,arg,format,ap)
             for(pre=infop->prefix; (x=(*pre))!=0; pre++) *(--bufpt) = x;
 	  }
         }
+
         length = (int)(&buf[BUFSIZE]-bufpt);
         break;
       case FLOAT:
