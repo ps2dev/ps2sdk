@@ -291,16 +291,27 @@ int open(const char *name, int flags, ...)
 	va_start(args, flags);
 	mode = va_arg(args, int);
 	va_end(args);
-
+	
 	if (!f)
+	{
 		return -EMFILE;
+	}
 
 	if ((filename = find_iop_device(name, &f->unit, &f->device)) == (char *)-1)
+	{
 		return -ENODEV;
+	}
 
 	f->mode = flags;
 	if ((res = f->device->ops->open(f, filename, flags, mode)) >= 0)
+	{
 		res = (int)(f - file_table);
+	}
+	else
+	{
+        f->mode = 0;
+        f->device = NULL;
+	}
 
 	return res;
 }
@@ -311,12 +322,18 @@ int close(int fd)
 	int res;
 
 	if ((f = get_file(fd)) == NULL)
+	{
 		return -EBADF;
+	}
 
-	if (f->mode & 8)	/* Directory.  */
+	if (f->mode & 8)
+	{	/* Directory.  */
 		res = f->device->ops->dclose(f);
+	}
 	else
+	{
 		res = f->device->ops->close(f);
+	}
 
 	f->mode = 0;
 	f->device = NULL;
