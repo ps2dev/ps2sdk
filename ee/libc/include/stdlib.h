@@ -14,6 +14,7 @@
 #ifndef __STDLIB_H__
 #define __STDLIB_H__
 
+#include <ps2lib_err.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -106,8 +107,10 @@ void          abort(void) __attribute__ ((noreturn));
 int           abs(int);
 int           atexit(void (*)(void));
 double        atof(const char *);
-int           atoi(const char *);
-long          atol(const char *);
+//int           atoi(const char *);
+//long          atol(const char *);
+#define       atoi(x) strtol(x, NULL, 10)
+#define       atol atoi
 void          *bsearch(const void *, const void *, size_t, size_t, int (*)(const void *, const void *));
 div_t         div(int, int);
 char          *getenv(const char *);
