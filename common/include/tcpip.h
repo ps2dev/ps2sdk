@@ -285,14 +285,15 @@ struct sockaddr {
   typedef struct fd_set {
           unsigned char fd_bits [(FD_SETSIZE+7)/8];
   } fd_set;
-
-  struct timeval {
-	  long    tv_sec;         /* seconds */
-	  long    tv_usec;        /* and microseconds */
-  };
-
 #endif
 
+#ifndef TIMEVAL
+#	define TIMEVAL
+  struct timeval {
+    long    tv_sec;         /* seconds */
+    long    tv_usec;        /* and microseconds */
+  };
+#endif 
 
 #if		!defined(INVALID_SOCKET)
 #	define	INVALID_SOCKET -1
@@ -301,14 +302,51 @@ struct sockaddr {
 #if		!defined(htonl)
 #	define	htonl(x)		((((x)&0xff)<<24)|(((x)&0xff00)<<8)|(((x)&0xff0000)>>8)|(((x)&0xff000000)>>24))
 #endif
+
 #if		!defined(htons)
 #	define	htons(x)		((((x)&0xff)<<8)|(((x)&0xff00)>>8))
 #endif
+
 #if		!defined(ntohl)
 #	define	ntohl(x)		htonl(x)
 #endif
+
 #if		!defined(ntohs)
 #	define	ntohs(x)		htons(x)
+#endif
+
+/*
+ * Commands for ioctlsocket(),  taken from the BSD file fcntl.h.
+ *
+ *
+ * Ioctl's have the command encoded in the lower word,
+ * and the size of any in or out parameters in the upper
+ * word.  The high 2 bits of the upper word are used
+ * to encode the in/out status of the parameter; for now
+ * we restrict parameters to at most 128 bytes.
+ */
+
+#if !defined(FIONREAD) || !defined(FIONBIO)
+#	define IOCPARM_MASK    0x7f            /* parameters must be < 128 bytes */
+#	define IOC_VOID        0x20000000      /* no parameters */
+#	define IOC_OUT         0x40000000      /* copy out parameters */
+#	define IOC_IN          0x80000000      /* copy in parameters */
+#	define IOC_INOUT       (IOC_IN|IOC_OUT)
+                                        /* 0x20000000 distinguishes new &
+                                           old ioctl's */
+#	define _IO(x,y)        (IOC_VOID|((x)<<8)|(y))
+
+#	define _IOR(x,y,t)     (IOC_OUT|(((long)sizeof(t)&IOCPARM_MASK)<<16)|((x)<<8)|(y))
+
+#	define _IOW(x,y,t)     (IOC_IN|(((long)sizeof(t)&IOCPARM_MASK)<<16)|((x)<<8)|(y))
+#endif
+
+#ifndef FIONREAD
+#	define FIONREAD    _IOR('f', 127, unsigned int) /* get # bytes to read */
+#endif
+
+#ifndef FIONBIO
+#	define FIONBIO     _IOW('f', 126, unsigned int) /* set/clear non-blocking i/o */
 #endif
 
 typedef struct
