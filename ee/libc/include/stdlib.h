@@ -65,13 +65,6 @@ typedef struct {
 #endif // __LLDIV_T_DEFINED
 
 
-/* ensure size_t is defined. */
-#ifndef __SIZE_T_DEFINED
-#define __SIZE_T_DEFINED
-typedef unsigned int size_t;
-#endif // __SIZE_T_DEFINED
-
-
 /* ensure bzero is defined. */
 #ifndef bzero
 #define bzero(p, n)                    memset(p, 0, n)
