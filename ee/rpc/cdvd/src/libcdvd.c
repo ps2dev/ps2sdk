@@ -3,7 +3,9 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# (C) 2002 Nicholas Van Veen (nickvv@xtra.co.nz)
+#     2003 loser (loser@internalreality.com)
+# (c) 2004 Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
