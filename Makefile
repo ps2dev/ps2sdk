@@ -7,8 +7,8 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 
-ifeq ($(PS2SDKSRC), "")
-PS2SDKSRC=$(pwd)
+ifeq (x$(PS2SDKSRC), x)
+PS2SDKSRC=`pwd`
 endif
 
 SUBDIRS = tools iop ee common samples
@@ -29,16 +29,18 @@ subdir_release = $(patsubst %,release-%,$(SUBDIRS))
 subdirs: dummy $(subdir_list)
 
 $(subdir_list): dummy
-	$(MAKE) -C $(patsubst all-%,%,$@)
+	PS2SDKSRC=$(PS2SDKSRC) $(MAKE) -C $(patsubst all-%,%,$@)
 $(subdir_clean): dummy
-	$(MAKE) -C $(patsubst clean-%,%,$@) clean
+	PS2SDKSRC=$(PS2SDKSRC) $(MAKE) -C $(patsubst clean-%,%,$@) clean
 $(subdir_release): dummy
-	$(MAKE) -C $(patsubst release-%,%,$@) release
+	PS2SDKSRC=$(PS2SDKSRC) $(MAKE) -C $(patsubst release-%,%,$@) release
 
 
 build: env_build_check $(subdir_list)
 
 clean: env_build_check $(subdir_clean)
+
+rebuild: env_build_check $(subdir_clean) $(subdir_list)
 
 $(PS2SDK)/common/include:
 	mkdir $(PS2SDK)/common
