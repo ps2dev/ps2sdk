@@ -99,6 +99,8 @@ int sceCdPause(void);
 int sceCdBreak(void);
 #define I_sceCdBreak DECLARE_IMPORT(39, sceCdBreak)
 u32 sceCdGetReadPos(void);
+#define I_sceCdReadConsoleID DECLARE_IMPORT(41, sceCdReadConsoleID)
+int sceCdReadConsoleID( u32 *res, int *idBuf );
 #define I_sceCdGetReadPos DECLARE_IMPORT(44 , sceCdGetReadPos)
 int sceCdMmode(int mode);
 #define I_sceCdMmode DECLARE_IMPORT(75 , sceCdMmode)
