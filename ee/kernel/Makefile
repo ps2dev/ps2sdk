@@ -138,7 +138,6 @@ include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make
 include $(PS2SDKSRC)/ee/Rules.release
 
-release:
+release: release-dirs release-include
 	cp -f $(LIBSYSCALL_LIB) $(PS2SDK)/ee/lib
 	cp -f $(LIBKERNEL_LIB) $(PS2SDK)/ee/lib
-	cp -f include/*.h $(PS2SDK)/ee/include
