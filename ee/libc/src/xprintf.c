@@ -186,8 +186,7 @@ int vxprintf(func,arg,format,ap)
   int flag_zeropad;         /* True if field width constant starts with zero */
   int flag_long;            /* True if "l" flag is present */
   int flag_center;          /* True if "=" flag is present */
-//  unsigned long longvalue;  /* Value for integer types */
-  unsigned int longvalue;  // Sign extension fix. - Lukasz
+  unsigned long longvalue;  /* Value for integer types */
 
   long double realvalue;    /* Value for real types */
   info *infop;              /* Pointer to the appropriate info structure */
@@ -325,8 +324,19 @@ int vxprintf(func,arg,format,ap)
     switch( xtype ){
       case ORDINAL:
       case RADIX:
-        if( flag_long )  longvalue = va_arg(ap,long);
-	else             longvalue = va_arg(ap,int);
+        if(( flag_long )&&( infop->flag_signed )){
+	    signed long t = va_arg(ap,signed long);
+	    longvalue = t;
+	}else if(( flag_long )&&( !infop->flag_signed )){
+	    unsigned long t = va_arg(ap,unsigned long);
+	    longvalue = t;
+	}else if(( !flag_long )&&( infop->flag_signed )){
+	    signed int t = va_arg(ap,signed int) & ((unsigned long) 0xffffffff);
+	    longvalue = t;
+	}else{
+	    unsigned int t = va_arg(ap,unsigned int) & ((unsigned long) 0xffffffff);
+	    longvalue = t;
+	}
 #ifdef COMPATIBILITY
         /* For the format %#x, the value zero is printed "0" not "0x0".
         ** I think this is stupid. */
@@ -338,7 +348,6 @@ int vxprintf(func,arg,format,ap)
 #endif
         if( infop->flag_signed ){
           if( *(long*)&longvalue<0 ){
-            longvalue = -*(long*)&longvalue;
             prefix = '-';
           }else if( flag_plussign )  prefix = '+';
           else if( flag_blanksign )  prefix = ' ';
