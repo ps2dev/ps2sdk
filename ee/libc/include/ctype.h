@@ -39,13 +39,17 @@ int toupper(int);
 
 /* To be compatible with C++'s ctype_base.h */
 
-#define	_U	01
-#define	_L	02
-#define	_N	04
-#define	_S	010
-#define _P	020
-#define _C	040
-#define _X	0100
-#define	_B	0200
+namespace std {
+    enum {
+	_U =	01,
+	_L =	02,
+	_N =	04,
+	_S =	010,
+	_P =	020,
+	_C =	040,
+	_X =	0100,
+	_B =	0200,
+    };
+};
 
 #endif
