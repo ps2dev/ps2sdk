@@ -28,7 +28,7 @@ EE_SAMPLES := $(EE_SAMPLES:%=$(EE_SAMPLE_DIR)%)
 CORE_OBJS = sbrk.o memchr.o memcpy.o memset.o strcat.o \
 	strncmp.o memcmp.o memmove.o strcpy.o strncat.o \
 	strncpy.o terminate.o strlen.o strchr.o strcmp.o \
-	setjmp.o qsort.o init.o
+	setjmp.o qsort.o init.o cxx.o
 CORE_OBJS := $(CORE_OBJS:%=$(EE_OBJS_DIR)%)
 
 ALLOC_OBJS = malloc.o realloc.o calloc.o memalign.o free.o __builtin_alloc.o __alloc_internals.o __mem_walk.o
@@ -54,7 +54,7 @@ STDIO_OBJS = clearerr.o fclose.o fcloseall.o feof.o ferror.o fflush.o fflushall.
 STDIO_OBJS := $(STDIO_OBJS:%=$(EE_OBJS_DIR)%)
 
 STDLIB_OBJS = abs.o atexit.o atof.o bsearch.o div.o getenv.o _itoa.o labs.o \
-	ldiv.o llabs.o lldiv.o _lltoa.o _ltoa.o rand.o setenv.o srand.o __stdlib_internals.o \
+	ldiv.o llabs.o lldiv.o _lltoa.o _ltoa.o rand.o setenv.o srand.o \
 	strtod.o strtol.o strtoul.o __assert_fail.o \
 	__stdlib_internals.o 
 # multibytes hell... do we want it ? is it stable ??
