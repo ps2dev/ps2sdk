@@ -347,7 +347,7 @@ int ispunct(int c)
 }
 #endif
 
-#ifdef isspace
+#ifdef F_isspace
 int isspace(int c)
 {
 	if ((c>=0x09) && (c<=0x0D))
@@ -360,7 +360,7 @@ int isspace(int c)
 }
 #endif
 
-#ifdef isxdigit
+#ifdef F_isxdigit
 int isxdigit(int c)
 {
 	if (isdigit(c))

@@ -37,7 +37,7 @@ ALLOC_OBJS := $(ALLOC_OBJS:%=$(EE_OBJS_DIR)%)
 STRING_C_OBJS = strdup.o strcasecmp.o strncasecmp.o strtok.o strrchr.o strstr.o \
 	strupr.o strlwr.o _sjis_internals.o strcpy_ascii.o strcpy_sjis.o \
 	strpbrk.o strspn.o strcspn.o \
-	tolower.o isupper.o islower.o isalpha.o isdigit.o isalnum.o iscntrl.o \
+	tolower.o toupper.o isupper.o islower.o isalpha.o isdigit.o isalnum.o iscntrl.o \
 	isgraph.o isprint.o ispunct.o isspace.o isxdigit.o
 STRING_C_OBJS := $(STRING_C_OBJS:%=$(EE_OBJS_DIR)%)
 
