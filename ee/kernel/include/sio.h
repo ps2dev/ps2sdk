@@ -62,12 +62,15 @@ void sio_init(u32 baudrate, u8 lcr_ueps, u8 lcr_upen, u8 lcr_usbl, u8 lcr_umode)
 
 int sio_putc(int c);
 int sio_getc(void);
+int sio_getc_block(void);
 
 size_t sio_write(void *buf, size_t size);
 size_t sio_read(void *buf, size_t size);
 
 int sio_puts(const char *str);
 char *sio_gets(char *str);
+
+void sio_flush(void);
 
 #ifdef __cplusplus
 }

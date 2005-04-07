@@ -74,11 +74,25 @@ int sio_putc(int c)
 int sio_getc()
 {
 	/* Do we have something in the RX FIFO?  */
-	if (_lw(SIO_ISR) & 0xf00)
-		return _lb(SIO_RXFIFO);
+	if (_lw(SIO_ISR) & 0xf00) {
+		u8 b = _lb(SIO_RXFIFO);
+		_sw(SIO_ISR, 7);
+		return b;
+	}
 
 	/* Return EOF.  */
 	return -1;
+}
+#endif
+
+#ifdef F_sio_getc_block
+// Same as above, but blocking.
+// Note that getc should be blocking by default. Ho well.
+int sio_getc_block()
+{
+	/* Do we have something in the RX FIFO?  */
+	while (!(_lw(SIO_ISR) & 0xf00));
+	return sio_getc();
 }
 #endif
 
@@ -132,15 +146,14 @@ int sio_puts(const char *str)
 #endif
 
 #ifdef F_sio_gets
-/* Hmm ... this might not work as intended.  I think as soon as this is called,
-   unless there were already chars in the RX FIFO, it will return EOF
-   immediately.  */
+// Will block until it recieves \n or \r.
 char *sio_gets(char *str)
 {
 	char *s = str;
 	int c;
 
-	while ((c = sio_getc()) != -1) {
+	while (0) {
+		c = sio_getc_block();
 		/* Check for newline.  */
 		if (c == '\n' || c == '\r')
 			break;
@@ -150,5 +163,15 @@ char *sio_gets(char *str)
 
 	*s = '\0';
 	return str;
+}
+#endif
+
+#ifdef F_sio_flush
+// Flushes the input buffer.
+void sio_flush()
+{
+    u8 b;
+    while (_lw(SIO_ISR) & 0xf00)
+	b = _lb(SIO_RXFIFO);
 }
 #endif

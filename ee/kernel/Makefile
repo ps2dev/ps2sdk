@@ -55,7 +55,7 @@ GLUE_OBJS = DIntr.o EIntr.o EnableIntc.o DisableIntc.o EnableDmac.o DisableDmac.
 GLUE_OBJS := $(GLUE_OBJS:%=$(EE_OBJS_DIR)%)
 
 SIO_OBJS = sio_init.o sio_putc.o sio_getc.o sio_write.o sio_read.o sio_puts.o \
-	sio_gets.o
+	sio_gets.o sio_getc_block.o sio_flush.o
 SIO_OBJS := $(SIO_OBJS:%=$(EE_OBJS_DIR)%)
 
 CONFIG_OBJS = _config_internals.o GetRomName.o IsT10K.o configGetLanguage.o \
