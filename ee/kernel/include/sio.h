@@ -39,10 +39,13 @@
 #define   SIO_LSR_FE 0x08	/* Framing Error.  */
 
 #define SIO_IER		0x1000f120	/* Interrupt Enable Register.  */
-#define SIO_IER_ERDAI	0x01		/* Enable Received Data Available Interrupt */
-#define SIO_IER_ELSI 	0x04		/* Enable Line Status Interrupt.  */
+#define   SIO_IER_ERDAI	0x01		/* Enable Received Data Available Interrupt */
+#define   SIO_IER_ELSI 	0x04		/* Enable Line Status Interrupt.  */
 
 #define SIO_ISR		0x1000f130	/* Interrupt Status Register (?).  */
+#define   SIO_ISR_RX_DATA  0x01
+#define   SIO_ISR_TX_EMPTY 0x02
+#define   SIO_ISR_RX_ERROR 0x04
 
 #define SIO_FCR		0x1000f140	/* FIFO Control Register.  */
 #define   SIO_FCR_FRSTE 0x01	/* FIFO Reset Enable.  */
