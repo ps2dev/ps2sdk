@@ -57,6 +57,8 @@
 #define SIO_TXFIFO	0x1000f180	/* Transmit FIFO.  */
 #define SIO_RXFIFO	0x1000f1c0	/* Receive FIFO.  */
 
+#define SIO_CAUSE_BIT	(1 << 12) /* The bit in the EE cause register which indicates an SIO exception */
+
 #ifdef __cplusplus
 extern "C" {
 #endif
