@@ -77,6 +77,11 @@ char* strtok(char * strToken, const char * strDelimit)
 		start=end;
 	}
 
+	if(*start == 0)
+	{
+		return 0;
+	}
+
 	// Strip out any leading delimiters
 	while (strchr(strDelimit, *start))
 	{
