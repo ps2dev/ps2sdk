@@ -76,7 +76,7 @@ int sio_getc()
 	/* Do we have something in the RX FIFO?  */
 	if (_lw(SIO_ISR) & 0xf00) {
 		u8 b = _lb(SIO_RXFIFO);
-		_sw(SIO_ISR, 7);
+		_sw(7, SIO_ISR);
 		return b;
 	}
 
