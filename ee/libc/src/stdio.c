@@ -505,6 +505,12 @@ FILE *fdopen(int fd, const char *mode)
 }
 #endif
 
+#ifdef F_fileno
+int fileno(FILE * f) {
+    return f->fd;
+}
+#endif
+
 #ifdef F_fputc
 /*
 **
