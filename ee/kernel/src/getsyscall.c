@@ -24,34 +24,12 @@ static u32* g_pSyscallTable = NULL;
 static void InitSyscallTable(void)
 {
 	u32 *pAddr;
-	int iLoop;
-
-	// Set up some garbage syscalls
-	SetSyscall(SYSCALL_1, (void*) SYSCALL_1_ADDR);
-	SetSyscall(SYSCALL_2, (void*) SYSCALL_2_ADDR);
 
 	ee_kmode_enter();
-	pAddr = (u32 *) 0x80000000;
-	for(iLoop = SYSCALL_1; iLoop < (0x3fff0); iLoop++)
-	{
-		if((pAddr[iLoop] == SYSCALL_1_ADDR) && (pAddr[iLoop+(SYSCALL_2-SYSCALL_1)] == SYSCALL_2_ADDR))
-		{
-			break;
-		}
-	}
+	pAddr = (u32 *) 0x800002f0;
+	g_pSyscallTable = (u32 *) ((pAddr[0] << 16) | (pAddr[2] & 0xFFFF));
 	ee_kmode_exit();
 
-	SetSyscall(0x80, NULL);
-	SetSyscall(0x83, NULL);
-
-	if(iLoop == 0x3fff0)
-	{
-		g_pSyscallTable = NULL;
-	}
-	else
-	{
-		g_pSyscallTable = &pAddr[iLoop - SYSCALL_1];
-	}
 }
 
 /** Get the address of a syscall function.
