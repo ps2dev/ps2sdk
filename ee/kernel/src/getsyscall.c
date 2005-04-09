@@ -25,10 +25,12 @@ static void InitSyscallTable(void)
 {
 	u32 *pAddr;
 
+	DIntr();
 	ee_kmode_enter();
 	pAddr = (u32 *) 0x800002f0;
 	g_pSyscallTable = (u32 *) ((pAddr[0] << 16) | (pAddr[2] & 0xFFFF));
 	ee_kmode_exit();
+	EIntr();
 
 }
 
