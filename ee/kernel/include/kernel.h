@@ -46,7 +46,7 @@ extern "C" {
 
 #define ALIGNED(x) __attribute__((aligned((x))))
 
-static inline void nopdelay()
+static inline void nopdelay(void)
 {
 	int i = 0xfffff;
 
@@ -55,7 +55,7 @@ static inline void nopdelay()
 	} while (i-- != -1);
 }
 
-static inline int ee_kmode_enter()
+static inline int ee_kmode_enter(void)
 {
 	int status, mask;
 
@@ -70,7 +70,7 @@ static inline int ee_kmode_enter()
 	return status;
 }
 
-static inline int ee_kmode_exit()
+static inline int ee_kmode_exit(void)
 {
 	int status;
 

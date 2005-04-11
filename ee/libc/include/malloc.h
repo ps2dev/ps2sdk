@@ -30,7 +30,7 @@ void *	memalign(size_t align, size_t size);
 void	free(void * ptr);
 
 /* Memory walkers. Used for debugging/profiling purposes. */
-void * __mem_walk_begin();
+void * __mem_walk_begin(void);
 void __mem_walk_read(void * token, u32 * size, void ** ptr, int * valid);
 void * __mem_walk_inc(void * token);
 int __mem_walk_end(void * token);
