@@ -57,6 +57,7 @@ typedef struct {
 #endif // __LDIV_T_DEFINED
 
 
+#ifndef __STRICT_ANSI__
 #ifndef __LLDIV_T_DEFINED
 #define __LLDIV_T_DEFINED
 typedef struct {
@@ -64,7 +65,7 @@ typedef struct {
   long long rem;
 } lldiv_t;
 #endif // __LLDIV_T_DEFINED
-
+#endif // __STRICT_ANSI__
 
 /* we don't check for any previously defined value. This HAS to be that. */
 #define        RAND_MAX        2147483647
@@ -85,8 +86,10 @@ div_t         div(int, int);
 char          *getenv(const char *);
 long          labs(long);
 ldiv_t        ldiv(long, long);
+#ifndef __STRICT_ANSI__
 long long     llabs(long long);
 lldiv_t       lldiv(long long, long long);
+#endif
 int           rand(void);
 int           setenv(const char *, const char *, int);
 void          srand(unsigned int);
@@ -109,7 +112,9 @@ int           wctomb(char *, wchar_t);
 //char          *_gcvt(double, size_t, char *);
 char          *_itoa(int, char *, int);
 char          *_ltoa(long, char *, int);
+#ifndef __STRICT_ANSI__
 char          *_lltoa(long long, char *, int);
+#endif
 
 #ifdef __cplusplus
 }
