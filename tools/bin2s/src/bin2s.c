@@ -64,9 +64,9 @@ int main(int argc, char *argv[])
 	fprintf(dest, ".globl %s\n",argv[3]);
 	fprintf(dest, "%s:\n\n",argv[3]);
 
-	for(i=0;i<fd_size;i+=4) {
-		if((i % 16) == 0) fprintf(dest, "\n\t.word 0x%08x", *(int*)&buffer[i]);
-		else fprintf(dest, ", 0x%08x", *(int*)&buffer[i]);
+	for(i=0;i<fd_size;i++) {
+		if((i % 16) == 0) fprintf(dest, "\n\t.byte 0x%02x", buffer[i]);
+		else fprintf(dest, ", 0x%02x", buffer[i]);
 	}
 
 	fprintf(dest, "\n");
