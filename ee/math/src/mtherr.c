@@ -98,9 +98,7 @@ static char *ermsg[7] = {
 // return 0;
 // }
 
-/*
 int mtherr(char *name, int code)
 {
 	return 0;
 }
-*/
