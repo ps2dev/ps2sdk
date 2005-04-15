@@ -22,15 +22,15 @@ extern "C" {
  // DMA CONTROL REGISTERS //
  ///////////////////////////
 
- #define DMA_REG_CTRL		*(volatile u32 *)0x1000E000	// DMA Control Register
- #define DMA_REG_STAT		*(volatile u32 *)0x1000E010	// Interrupt Status Register
- #define DMA_REG_PCR		*(volatile u32 *)0x1000E020	// Priority Control Register
- #define DMA_REG_SQWC		*(volatile u32 *)0x1000E030	// Interleave Size Register
- #define DMA_REG_RBSR		*(volatile u32 *)0x1000E040	// Ring Buffer Size Register
- #define DMA_REG_RBOR		*(volatile u32 *)0x1000E050	// Ring Buffer Address Register
- #define DMA_REG_STADR		*(volatile u32 *)0x1000E060	// Stall Address Register
- #define DMA_REG_ENABLER	*(volatile u32 *)0x1000F520	// DMA Hold State Register
- #define DMA_REG_ENABLEW	*(volatile u32 *)0x1000F590	// DMA Hold Control Register
+ #define DMA_REG_CTRL		*(vu32 *)0x1000E000	// DMA Control Register
+ #define DMA_REG_STAT		*(vu32 *)0x1000E010	// Interrupt Status Register
+ #define DMA_REG_PCR		*(vu32 *)0x1000E020	// Priority Control Register
+ #define DMA_REG_SQWC		*(vu32 *)0x1000E030	// Interleave Size Register
+ #define DMA_REG_RBSR		*(vu32 *)0x1000E040	// Ring Buffer Size Register
+ #define DMA_REG_RBOR		*(vu32 *)0x1000E050	// Ring Buffer Address Register
+ #define DMA_REG_STADR		*(vu32 *)0x1000E060	// Stall Address Register
+ #define DMA_REG_ENABLER	*(vu32 *)0x1000F520	// DMA Hold State Register
+ #define DMA_REG_ENABLEW	*(vu32 *)0x1000F590	// DMA Hold Control Register
 
  #define DMA_SET_CTRL(A,B,C,D,E,F) \
   (u32)((A) & 0x00000001) <<  0 | (u32)((B) & 0x00000001) <<  1 | \

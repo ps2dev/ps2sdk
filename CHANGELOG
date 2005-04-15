@@ -13,6 +13,7 @@
 
 2005-03-20
   - pixel, added a new bin2o in pure C
+  - oopo, added math3d library
 
 2005-03-17
   - oopo, added dma library
