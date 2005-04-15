@@ -23,7 +23,7 @@
 
  static int dma_handler_id[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
- int dma_initialized = 0;
+ int dma_initialized = -1;
 
  ///////////////////
  // DMA FUNCTIONS //
@@ -45,7 +45,7 @@
  int dma_shutdown(void) {
 
   // Save the shutdown status.
-  dma_initialized = 0;
+  dma_initialized = -1;
 
   // End function.
   return 0;
@@ -59,7 +59,7 @@
  int dma_channel_initialize(int channel, void *handler) {
 
   // Check to see if we're initialized.
-  if (dma_initialized == 0) { if (dma_initialize() < 0) { return -1; } }
+  if (dma_initialized < 0) { if (dma_initialize() < 0) { return -1; } }
 
   // Shut down the channel before making changes.
   if (dma_channel_shutdown(channel) < 0) { return -1; }
@@ -83,7 +83,7 @@
  int dma_channel_initialize_i(int channel, void *handler) {
 
   // Check to see if we're initialized.
-  if (!dma_initialized) { if (dma_initialize() < 0) { return -1; } }
+  if (dma_initialized < 0) { if (dma_initialize() < 0) { return -1; } }
 
   // Shut down the channel before making changes.
   if (dma_channel_shutdown_i(channel) < 0) { return -1; }
@@ -222,6 +222,25 @@
 
   // Start the transfer.
   *(volatile u32 *)dma_chcr[channel] = DMA_SET_CHCR(1, 1, 0, 0, 1, 1, 0);
+
+  // End function.
+  return 0;
+
+ }
+
+ int dma_channel_receive(int channel, void *data, int data_size) {
+
+  // Wait for the channel to become ready.
+  // if (dma_channel_wait(channel, 100000) == -1) { return -1; }
+
+  // Set the size of the data, in quadwords.
+  *(volatile u32 *)dma_size[channel] = DMA_SET_QWC(((data_size + 16) >> 4));
+
+  // Set the address of the data.
+  *(volatile u32 *)dma_madr[channel] = DMA_SET_MADR((u32)data, 0);
+
+  // Start the transfer.
+  *(volatile u32 *)dma_chcr[channel] = DMA_SET_CHCR(0, 0, 0, 0, 1, 1, 0);
 
   // End function.
   return 0;
