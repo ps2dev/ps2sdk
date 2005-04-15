@@ -21,10 +21,10 @@
  #include <kernel.h>
 
  GRAPH_MODE graph_mode[4] = {
-  { 640, 448, 0x02, 1, 660, 48, 3, 0, 2559, 447 }, // NTSC (640x448i)
-  { 640, 512, 0x03, 1, 652, 30, 3, 0, 2559, 511 }, // PAL  (640x512i)
-  { 720, 480, 0x50, 0, 232, 35, 1, 0, 2559, 479 }, // HDTV (720x480p)
-  { 640, 480, 0x1A, 0, 280, 18, 1, 0, 2559, 479 }  // VGA  (640x480p)
+  { 640, 448, 0x02, 1, GS_SET_DISPLAY(660, 48, 3, 0, 2559, 447) }, // NTSC (640x448i)
+  { 640, 512, 0x03, 1, GS_SET_DISPLAY(652, 30, 3, 0, 2559, 511) }, // PAL  (640x512i)
+  { 720, 480, 0x50, 0, GS_SET_DISPLAY(232, 35, 1, 0, 2559, 479) }, // HDTV (720x480p)
+  { 640, 480, 0x1A, 0, GS_SET_DISPLAY(280, 18, 1, 0, 2559, 479) }  // VGA  (640x480p)
  };
 
  int current_mode = 0, current_psm = 0, current_zpsm = 0;
@@ -73,8 +73,8 @@
 
   // Set up the mode.
   GS_REG_PMODE = GS_SET_PMODE(1, 1, 0, 0, 0, 128);
-  GS_REG_DISPLAY1 = GS_SET_DISPLAY(graph_mode[mode].dx, graph_mode[mode].dy, graph_mode[mode].magh, graph_mode[mode].magv, graph_mode[mode].dw, graph_mode[mode].dh);
-  GS_REG_DISPLAY2 = GS_SET_DISPLAY(graph_mode[mode].dx, graph_mode[mode].dy, graph_mode[mode].magh, graph_mode[mode].magv, graph_mode[mode].dw, graph_mode[mode].dh);
+  GS_REG_DISPLAY1 = graph_mode[mode].display;
+  GS_REG_DISPLAY2 = graph_mode[mode].display;
 
   // Save the mode, psm and zpsm.
   current_mode = mode; current_psm = psm; current_zpsm = zpsm;

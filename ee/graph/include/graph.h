@@ -12,6 +12,8 @@
 #ifndef __GRAPH_H__
 #define __GRAPH_H__
 
+ #include <tamtypes.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -30,7 +32,7 @@ extern "C" {
  #define GRAPH_PSM_4HH		0x24	// 4 bits per pixel, palettized.
  #define GRAPH_PSM_4HL		0x2C	// 4 bits per pixel, palettized.
 
- typedef struct { int width, height, mode, interlace, dx, dy, magh, magv, dw, dh; } GRAPH_MODE;
+ typedef struct { int width, height, mode, interlace; u64 display; } GRAPH_MODE;
 
  /////////////////////
  // GRAPH FUNCTIONS //
