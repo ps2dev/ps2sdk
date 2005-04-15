@@ -46,6 +46,8 @@
   // Initialize the gif dma channel.
   dma_channel_initialize(DMA_CHANNEL_GIF, NULL);
 
+  dma_channel_initialize(DMA_CHANNEL_VIF1, NULL);
+
   // Allocate an internal use packet.
   dma_packet_allocate(&graph_packet, 1024);
 
@@ -184,9 +186,37 @@
  // GRAPH VRAM FUNCTIONS //
  //////////////////////////
 
+ #define VIF1_REG_STAT *((vu32 *)(0x10003C00))
+
  int graph_vram_read(int address, int width, int height, int bpp, void *data, int data_size) {
 
-  // NOT READY YET
+  // Send the transmission parameters.
+  dma_packet_clear(&graph_packet);
+  dma_packet_append(&graph_packet, GIF_SET_TAG(4, 1, 0, 0, GIF_TAG_PACKED, 1));
+  dma_packet_append(&graph_packet, 0x0E);
+  dma_packet_append(&graph_packet, GIF_SET_BITBLTBUF(address >> 8, width >> 6, bpp, 0, 0, 0));
+  dma_packet_append(&graph_packet, GIF_REG_BITBLTBUF);
+  dma_packet_append(&graph_packet, GIF_SET_TRXPOS(0, 0, 0, 0, 0));
+  dma_packet_append(&graph_packet, GIF_REG_TRXPOS);
+  dma_packet_append(&graph_packet, GIF_SET_TRXREG(width, height));
+  dma_packet_append(&graph_packet, GIF_REG_TRXREG);
+  dma_packet_append(&graph_packet, GIF_SET_TRXDIR(1));
+  dma_packet_append(&graph_packet, GIF_REG_TRXDIR);
+  dma_packet_send(&graph_packet, DMA_CHANNEL_GIF);
+  dma_channel_wait(DMA_CHANNEL_GIF, 0);
+
+  // Reverse the bus direction.
+  GS_REG_BUSDIR = GS_SET_BUSDIR(1); VIF1_REG_STAT = (1 << 23);
+
+  // Receive the vram data.
+  dma_channel_receive(DMA_CHANNEL_VIF1, data, data_size);
+  dma_channel_wait(DMA_CHANNEL_VIF1, 0);
+
+  // Restore the bus direction.
+  GS_REG_BUSDIR = GS_SET_BUSDIR(0); VIF1_REG_STAT = (0 << 23);
+
+  // Flush the cache, just in case.
+  FlushCache(0);
 
   // End function.
   return 0;
@@ -229,22 +259,6 @@
  //////////////////////////
  // GRAPH WAIT FUNCTIONS //
  //////////////////////////
-
- int graph_wait_finish(void) {
-
-  // Enable the finish event.
-  GS_REG_CSR |= GS_SET_CSR(0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-
-  // Wait for the finish event.
-  while (!(GS_REG_CSR & (GS_SET_CSR(0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)))) { }
-
-  // Disable the finish event.
-  GS_REG_CSR &= ~GS_SET_CSR(0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-
-  // End function.
-  return 0;
-
- }
 
  int graph_wait_hsync(void) {
 

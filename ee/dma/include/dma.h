@@ -59,6 +59,14 @@ extern "C" {
 
  int dma_channel_send_chain_i(int channel, void *data);
 
+ int dma_channel_receive(int channel, void *data, int data_size);
+
+ int dma_channel_receive_i(int channel, void *data, int data_size);
+
+ int dma_channel_receive_chain(int channel, void *data, int data_size);
+
+ int dma_channel_receive_chain_i(int channel, void *data, int data_size);
+
  int dma_channel_shutdown(int channel);
 
  int dma_channel_shutdown_i(int channel);

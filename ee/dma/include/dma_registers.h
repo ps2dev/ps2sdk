@@ -68,20 +68,15 @@ extern "C" {
  #define DMA_SET_SQWC(A,B) \
   (u32)((A) & 0x000000FF) <<  0 | (u32)((B) & 0x000000FF) << 16
 
- #define DMA_SET_RBOR(A) \
-  (u32)((A) & 0x00007FFF) <<  0
+ #define DMA_SET_RBOR(A) (u32)((A) & 0x00007FFF)
 
- #define DMA_SET_RBSR(A) \
-  (u32)((A) & 0x00007FFF) <<  0
+ #define DMA_SET_RBSR(A) (u32)((A) & 0x00007FFF)
 
- #define DMA_SET_STADR(A) \
-  (u32)((A) & 0x00007FFF) <<  0
+ #define DMA_SET_STADR(A) (u32)((A) & 0x00007FFF)
 
- #define DMA_SET_ENABLEW(A) \
-  (u32)((A) & 0x00000001) << 16
+ #define DMA_SET_ENABLEW(A) (u32)((A) & 0x00000001) << 16
 
- #define DMA_SET_ENABLER(A) \
-  (u32)((A) & 0x00000001) << 16
+ #define DMA_SET_ENABLER(A) (u32)((A) & 0x00000001) << 16
 
  ///////////////////////////
  // DMA CHANNEL REGISTERS //
@@ -105,11 +100,9 @@ extern "C" {
  #define DMA_SET_ASR1(A,B) \
   (u32)((A) & 0x7FFFFFFF) <<  0 | (u32)((B) & 0x00000001) << 31
 
- #define DMA_SET_SADR(A) \
-  (u32)((A) & 0x00003FFF) <<  0
+ #define DMA_SET_SADR(A) (u32)((A) & 0x00003FFF)
 
- #define DMA_SET_QWC(A) \
-  (u32)((A) & 0x0000FFFF) <<  0
+ #define DMA_SET_QWC(A) (u32)((A) & 0x0000FFFF)
 
  ///////////////////////
  // DMA TAG REGISTERS //

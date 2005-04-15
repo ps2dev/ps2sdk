@@ -109,23 +109,11 @@
   // While the channel is not ready...
   while (*(volatile u32 *)dma_chcr[channel] & 0x00000100) {
 
-   // Decrement the timeout counter, exiting if it expires.
-   if (timeout-- < 0) { return -1; }
-
-  }
-
-  // End function.
-  return 0;
-
- }
-
- int dma_channel_wait_i(int channel, int timeout) {
-
-  // While the channel is not ready...
-  while (*(volatile u32 *)dma_chcr[channel] & 0x00000100) {
+   // Delay for a little while.
+   asm __volatile__( "nop;nop;nop;nop;nop;nop;nop;nop" );
 
    // Decrement the timeout counter, exiting if it expires.
-   if (timeout-- < 0) { return -1; }
+   if (timeout > 0) { if (timeout-- == 0) { return -1; } }
 
   }
 
@@ -137,13 +125,13 @@
  int dma_channel_send(int channel, void *data, int data_size) {
 
   // Wait for the channel to become ready.
-  if (dma_channel_wait(channel, 100000) == -1) { return -1; }
+  if (dma_channel_wait(channel, 100000) < 0) { return -1; }
 
   // Flush the data cache.
   SyncDCache(data, data + data_size);
 
   // Set the size of the data, in quadwords.
-  *(volatile u32 *)dma_size[channel] = DMA_SET_QWC(((data_size + 16) >> 4));
+  *(volatile u32 *)dma_size[channel] = DMA_SET_QWC(((data_size + 15) >> 4));
 
   // Set the address of the data.
   *(volatile u32 *)dma_madr[channel] = DMA_SET_MADR((u32)data, 0);
@@ -159,13 +147,13 @@
  int dma_channel_send_i(int channel, void *data, int data_size) {
 
   // Wait for the channel to become ready.
-  if (dma_channel_wait_i(channel, 100000) == -1) { return -1; }
+  if (dma_channel_wait(channel, 100000) < 0) { return -1; }
 
   // Flush the data cache.
   iSyncDCache(data, data + data_size);
 
   // Set the size of the data, in quadwords.
-  *(volatile u32 *)dma_size[channel] = DMA_SET_QWC(((data_size + 16) >> 4));
+  *(volatile u32 *)dma_size[channel] = DMA_SET_QWC(((data_size + 15) >> 4));
 
   // Set the address of the data.
   *(volatile u32 *)dma_madr[channel] = DMA_SET_MADR((u32)data, 0);
@@ -181,7 +169,7 @@
  int dma_channel_send_chain(int channel, void *data) {
 
   // Wait for the channel to become ready.
-  if (dma_channel_wait(channel, 100000) == -1) { return -1; }
+  if (dma_channel_wait(channel, 100000) < 0) { return -1; }
 
   // Flush the data cache.
   FlushCache(0);
@@ -206,7 +194,7 @@
  int dma_channel_send_chain_i(int channel, void *data) {
 
   // Wait for the channel to become ready.
-  if (dma_channel_wait_i(channel, 100000) == -1) { return -1; }
+  if (dma_channel_wait(channel, 100000) < 0) { return -1; }
 
   // Flush the data cache.
   iFlushCache(0);
@@ -231,16 +219,16 @@
  int dma_channel_receive(int channel, void *data, int data_size) {
 
   // Wait for the channel to become ready.
-  // if (dma_channel_wait(channel, 100000) == -1) { return -1; }
+  if (dma_channel_wait(channel, 100000) < 0) { return -1; }
 
   // Set the size of the data, in quadwords.
-  *(volatile u32 *)dma_size[channel] = DMA_SET_QWC(((data_size + 16) >> 4));
+  *(volatile u32 *)dma_size[channel] = DMA_SET_QWC(((data_size + 15) >> 4));
 
   // Set the address of the data.
-  *(volatile u32 *)dma_madr[channel] = DMA_SET_MADR((u32)data, 0);
+  *(volatile u32 *)dma_madr[channel] = DMA_SET_MADR((u32)data & 0x0FFFFFFF, 0);
 
   // Start the transfer.
-  *(volatile u32 *)dma_chcr[channel] = DMA_SET_CHCR(0, 0, 0, 0, 1, 1, 0);
+  *(volatile u32 *)dma_chcr[channel] = DMA_SET_CHCR(0, 0, 0, 0, 0, 1, 0);
 
   // End function.
   return 0;

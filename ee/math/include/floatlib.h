@@ -95,7 +95,7 @@ float knf( int, float );
 float ldexpf(float, int);
 float lgamf(float);
 float logf( float );
-float log2f( float );
+float log2f(float);
 float log10f( float );
 float nbdtrcf( int, int, float );
 float nbdtrf( int, int, float );

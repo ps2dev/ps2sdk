@@ -377,7 +377,7 @@ extern "C" {
   (u64)((A) & 0x0000003F) <<  0 | (u64)((B) & 0x0000003F) <<  6 | \
   (u64)((C) & 0x00000FFF) << 12
 
- #define GIF_SET_TRXDIR(A) (u64)((A) & 0x00000003) << 0
+ #define GIF_SET_TRXDIR(A) (u64)((A) & 0x00000003)
 
  #define GIF_SET_TRXPOS(A,B,C,D,E) \
   (u64)((A) & 0x000007FF) <<  0 | (u64)((B) & 0x000007FF) << 16 | \

@@ -9,9 +9,8 @@
 #
 */
 
- #include <math.h>
  #include <math3d.h>
- #include "../../math/include/protos.h"
+ #include "../../math/include/floatlib.h"
 
  //////////////////////
  // VECTOR FUNCTIONS //

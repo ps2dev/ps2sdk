@@ -72,8 +72,6 @@ extern "C" {
  // GRAPH WAIT FUNCTIONS //
  //////////////////////////
 
- int graph_wait_finish(void);
-
  int graph_wait_hsync(void);
 
  int graph_wait_vsync(void);
