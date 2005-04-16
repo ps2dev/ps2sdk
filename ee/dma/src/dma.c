@@ -136,7 +136,7 @@
   } else {
 
    // Set the size of the data, in quadwords.
-   *(vu32 *)dma_qwc[channel] = DMA_SET_QWC(((data_size + 15) >> 4));
+   *(vu32 *)dma_qwc[channel] = DMA_SET_QWC((data_size + 15) >> 4);
 
    // Set the address of the data.
    if (flags && DMA_FLAG_SCRATCHPAD) {
@@ -161,7 +161,7 @@
   if (dma_channel_wait(channel, 100000, flags) < 0) { return -1; }
 
   // Set the size of the data, in quadwords.
-  *(vu32 *)dma_qwc[channel] = DMA_SET_QWC(((data_size + 15) >> 4));
+  *(vu32 *)dma_qwc[channel] = DMA_SET_QWC((data_size + 15) >> 4);
 
   // Set the address of the data.
   if (flags && DMA_FLAG_SCRATCHPAD) {

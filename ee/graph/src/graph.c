@@ -20,11 +20,15 @@
  #include <tamtypes.h>
  #include <kernel.h>
 
- GRAPH_MODE graph_mode[4] = {
-  { 640, 448, 0x02, 1, GS_SET_DISPLAY(660, 48, 3, 0, 2559, 447) }, // NTSC (640x448i)
-  { 640, 512, 0x03, 1, GS_SET_DISPLAY(652, 30, 3, 0, 2559, 511) }, // PAL  (640x512i)
-  { 720, 480, 0x50, 0, GS_SET_DISPLAY(232, 35, 1, 0, 2559, 479) }, // HDTV (720x480p)
-  { 640, 480, 0x1A, 0, GS_SET_DISPLAY(280, 18, 1, 0, 2559, 479) }  // VGA  (640x480p)
+ GRAPH_MODE graph_mode[8] = {
+  { 640, 448, 0x02, 1, 286720, GS_SET_DISPLAY(660, 48, 3, 0, 2559, 447) }, // NTSC	(640x448i)
+  { 768, 448, 0x02, 1, 344064, GS_SET_DISPLAY(660, 48, 1, 0, 2559, 447) }, // NTSC_WIDE	(768x448i)
+  { 640, 512, 0x03, 1, 327680, GS_SET_DISPLAY(652, 30, 3, 0, 2559, 511) }, // PAL	(640x512i)
+  { 896, 512, 0x03, 1, 458752, GS_SET_DISPLAY(652, 30, 3, 0, 2559, 511) }, // PAL_WIDE	(896x512i)
+  { 640, 480, 0x50, 0, 327680, GS_SET_DISPLAY(232, 35, 1, 0, 2559, 479) }, // HDTV	(640x480p) (aligned to 640x512)
+  { 832, 480, 0x50, 0, 425984, GS_SET_DISPLAY(232, 35, 1, 0, 2559, 479) }, // HDTV_WIDE	(832x480p) (aligned to 640x512)
+  { 640, 480, 0x1A, 0, 327680, GS_SET_DISPLAY(280, 18, 1, 0, 2559, 479) }, // VGA	(640x480p) (aligned to 640x512)
+  { 832, 480, 0x1A, 0, 425984, GS_SET_DISPLAY(280, 18, 1, 0, 2559, 479) }  // VGA_WIDE	(832x480p) (aligned to 640x512)
  };
 
  int current_mode = 0, current_psm = 0, current_zpsm = 0;
