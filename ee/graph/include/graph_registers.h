@@ -35,12 +35,12 @@ extern "C" {
  #define GS_REG_IMR		*(volatile u64 *)0x12001010	// Interrupt Mask Control
  #define GS_REG_PMODE		*(volatile u64 *)0x12000000	// PCRTC Mode Setting
  #define GS_REG_SIGLBLID	*(volatile u64 *)0x12001080	// Signal ID Value Read
- #define GS_REG_SMODE1		*(volatile u64 *)0x12000010	// ????
+ #define GS_REG_SMODE1		*(volatile u64 *)0x12000010	// VHP,VCKSEL,SLCK2,NVCK,CLKSEL,PEVS,PEHS,PVS,PHS,GCONT,SPML,PCK2,XPCK,SINT,PRST,EX,CMOD,SLCK,T1248,LC,RC
  #define GS_REG_SMODE2		*(volatile u64 *)0x12000020	// Setting For Modes Related to Video Synchronization
  #define GS_REG_SRFSH		*(volatile u64 *)0x12000030	// DRAM Refresh Settings
- #define GS_REG_SYNCH1		*(volatile u64 *)0x12000040	// ????
- #define GS_REG_SYNCH2		*(volatile u64 *)0x12000050	// ????
- #define GS_REG_SYNCHV		*(volatile u64 *)0x12000060	// ????
+ #define GS_REG_SYNCH1		*(volatile u64 *)0x12000040	// HS,HSVS,HSEQ,HBP,HFP
+ #define GS_REG_SYNCH2		*(volatile u64 *)0x12000050	// HB,HF
+ #define GS_REG_SYNCHV		*(volatile u64 *)0x12000060	// VS,VDP,VBPE,VBP,VFPE,VFP
 
  #define GS_SET_BGCOLOR(A,B,C) \
   (u64)((A) & 0x000000FF) <<  0 | (u64)((B) & 0x000000FF) <<  8 | \

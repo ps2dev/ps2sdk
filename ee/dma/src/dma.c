@@ -110,7 +110,7 @@
  int dma_channel_send(int channel, void *data, int data_size, int flags) {
 
   // Wait for the channel to become ready.
-  if (dma_channel_wait(channel, 100000, flags) < 0) { return -1; }
+  if (dma_channel_wait(channel, -1, flags) < 0) { return -1; }
 
   // Flush the data cache.
   if (flags && DMA_FLAG_INTERRUPTSAFE) {
@@ -158,7 +158,7 @@
  int dma_channel_receive(int channel, void *data, int data_size, int flags) {
 
   // Wait for the channel to become ready.
-  if (dma_channel_wait(channel, 100000, flags) < 0) { return -1; }
+  if (dma_channel_wait(channel, -1, flags) < 0) { return -1; }
 
   // Set the size of the data, in quadwords.
   *(vu32 *)dma_qwc[channel] = DMA_SET_QWC((data_size + 15) >> 4);
