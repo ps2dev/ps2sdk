@@ -50,6 +50,9 @@
   // Allocate space for the packet.
   if (packet_allocate(&graph_packet, 1024) < 0) { return -1; }
 
+  // Reset the current mode, psm and zpsm.
+  current_mode = -1; current_psm = -1; current_zpsm = -1;
+
   // Tell everyone we are initialized.
   graph_initialized = 1;
 
@@ -65,6 +68,9 @@
 
   // Free the space for the packet.
   if (packet_free(&graph_packet) < 0) { return -1; }
+
+  // Reset the current mode, psm and zpsm.
+  current_mode = -1; current_psm = -1; current_zpsm = -1;
 
   // Tell everyone we are not initialized.
   graph_initialized = -1;
@@ -125,19 +131,6 @@
 
  }
 
- int graph_get_size(void) {
-
-  // If we are not initialized, initialize the library.
-  if (graph_initialized < 0) { if (graph_initialize() < 0) { return -1; } }
-
-  // If no mode is set, return an error.
-  if (current_mode < 0) { return -1; }
-
-  // Return the size of the current mode.
-  return graph_mode[current_mode].size;
-
- }
-
  int graph_get_mode(GRAPH_MODE *mode) {
 
   // If we are not initialized, initialize the library.
@@ -154,6 +147,32 @@
 
   // End function.
   return current_mode;
+
+ }
+
+ int graph_get_psm(void) {
+
+  // If we are not initialized, initialize the library.
+  if (graph_initialized < 0) { if (graph_initialize() < 0) { return -1; } }
+
+  // If no psm is set, return an error.
+  if (current_psm < 0) { return -1; }
+
+  // Return the the current psm.
+  return current_psm;
+
+ }
+
+ int graph_get_size(void) {
+
+  // If we are not initialized, initialize the library.
+  if (graph_initialized < 0) { if (graph_initialize() < 0) { return -1; } }
+
+  // If no mode is set, return an error.
+  if (current_mode < 0) { return -1; }
+
+  // Return the size of the current mode.
+  return graph_mode[current_mode].size;
 
  }
 
@@ -188,6 +207,19 @@
 
   // End function.
   return 0;
+
+ }
+
+ int graph_get_zpsm(void) {
+
+  // If we are not initialized, initialize the library.
+  if (graph_initialized < 0) { if (graph_initialize() < 0) { return -1; } }
+
+  // If no zpsm is set, return an error.
+  if (current_zpsm < 0) { return -1; }
+
+  // Return the the current zpsm.
+  return current_zpsm;
 
  }
 

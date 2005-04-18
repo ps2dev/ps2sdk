@@ -18,7 +18,7 @@
 extern "C" {
 #endif
 
- typedef struct { int size, count; void *data; } PACKET;
+ typedef struct { int size, count; u8 *data; } PACKET;
 
  //////////////////////
  // PACKET FUNCTIONS //

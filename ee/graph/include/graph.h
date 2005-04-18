@@ -59,13 +59,17 @@ extern "C" {
 
  int graph_get_interlace(void);
 
- int graph_get_size(void);
-
  int graph_get_mode(GRAPH_MODE *mode);
+
+ int graph_get_psm(void);
+
+ int graph_get_size(void);
 
  int graph_get_width(void);
 
- int graph_get_zpp(void);
+ int graph_get_zbpp(void);
+
+ int graph_get_zpsm(void);
 
  /////////////////////////
  // GRAPH SET FUNCTIONS //
