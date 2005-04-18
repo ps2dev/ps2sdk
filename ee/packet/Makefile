@@ -12,12 +12,10 @@ EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
-EE_INCS += -I../dma/include -I../packet/include
-
-EE_OBJS = graph.o
+EE_OBJS = packet.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
-EE_LIB = $(EE_LIB_DIR)libgraph.a
+EE_LIB = $(EE_LIB_DIR)libpacket.a
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
 

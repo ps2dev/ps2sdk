@@ -9,12 +9,14 @@
 #
 */
 
- #include <dma.h>
- #include <dma_registers.h>
  #include <tamtypes.h>
+
+ #include <dma.h>
  #include <kernel.h>
  #include <malloc.h>
  #include <string.h>
+
+ #include <dma_registers.h>
 
  u32 dma_qwc[10]  = { 0x10008020, 0x10009020, 0x1000A020, 0x1000B020, 0x1000B420, 0x1000C020, 0x1000C420, 0x1000C820, 0x1000D020, 0x1000D420 };
  u32 dma_madr[10] = { 0x10008010, 0x10009010, 0x1000A010, 0x1000B010, 0x1000B410, 0x1000C010, 0x1000C410, 0x1000C810, 0x1000D010, 0x1000D410 };
@@ -23,7 +25,7 @@
 
  static int dma_handler_id[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
- int dma_initialized = -1;
+ int dma_initialized = -1, dma_channel_initialized[10] = { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 };
 
  ///////////////////
  // DMA FUNCTIONS //
@@ -34,7 +36,7 @@
   // Reset the dma controller.
   ResetEE(0x01);
 
-  // Save the initialization status.
+  // Tell everyone we are initialized.
   dma_initialized = 1;
 
   // End function.
@@ -44,7 +46,10 @@
 
  int dma_shutdown(void) {
 
-  // Save the shutdown status.
+  // If we are not initialized, no need to shut down.
+  if (dma_initialized < 0) { return 0; }
+
+  // Tell everyone we are not initialized.
   dma_initialized = -1;
 
   // End function.
@@ -58,8 +63,13 @@
 
  int dma_channel_initialize(int channel, void *handler, int flags) {
 
-  // Check to see if we're initialized.
-  if (dma_initialized < 0) { if (dma_initialize() < 0) { return -1; } }
+  // If we are not initialized...
+  if (dma_initialized < 0) {
+
+   // Initialize the library.
+   if (dma_initialize() < 0) { return -1; }
+
+  }
 
   // Shut down the channel before making changes.
   if (dma_channel_shutdown(channel, flags) < 0) { return -1; }
@@ -79,12 +89,23 @@
 
   }
 
+  // Tell everyone we are initialized.
+  dma_channel_initialized[channel] = 1;
+
   // End function.
   return 0;
 
  }
 
  int dma_channel_wait(int channel, int timeout, int flags) {
+
+  // If we are not initialized...
+  if (dma_channel_initialized[channel] < 0) {
+
+   // Initialize the channel.
+   if (dma_channel_initialize(channel, NULL, flags) < 0) { return -1; }
+
+  }
 
   // While the channel is not ready...
   while (*(vu32 *)dma_chcr[channel] & 0x00000100) {
@@ -109,6 +130,14 @@
 
  int dma_channel_send(int channel, void *data, int data_size, int flags) {
 
+  // If we are not initialized...
+  if (dma_channel_initialized[channel] < 0) {
+
+   // Initialize the channel.
+   if (dma_channel_initialize(channel, NULL, flags) < 0) { return -1; }
+
+  }
+
   // Wait for the channel to become ready.
   if (dma_channel_wait(channel, -1, flags) < 0) { return -1; }
 
@@ -119,6 +148,7 @@
    SyncDCache(data, data + data_size);
   }
 
+  // If chain mode was requested...
   if (flags & DMA_FLAG_CHAIN) {
 
    // Set the size of the data, in quadwords.
@@ -133,6 +163,7 @@
    // Start the transfer.
    *(vu32 *)dma_chcr[channel] = DMA_SET_CHCR(1, 1, 0, 0, 1, 1, 0);
 
+  // Else, send in normal mode...
   } else {
 
    // Set the size of the data, in quadwords.
@@ -156,6 +187,14 @@
  }
 
  int dma_channel_receive(int channel, void *data, int data_size, int flags) {
+
+  // If we are not initialized...
+  if (dma_channel_initialized[channel] < 0) {
+
+   // Initialize the channel.
+   if (dma_channel_initialize(channel, NULL, flags) < 0) { return -1; }
+
+  }
 
   // Wait for the channel to become ready.
   if (dma_channel_wait(channel, -1, flags) < 0) { return -1; }
@@ -184,6 +223,9 @@
 
  int dma_channel_shutdown(int channel, int flags) {
 
+  // If we are not initialized, no need to shut down.
+  if (dma_channel_initialized[channel] < 0) { return 0; }
+
   // If a handler was provided...
   if (dma_handler_id[channel] != 0) {
 
@@ -201,6 +243,9 @@
    dma_handler_id[channel] = 0;
 
   }
+
+  // Tell everyone we are not initialized.
+  dma_channel_initialized[channel] = -1;
 
   // End function.
   return 0;

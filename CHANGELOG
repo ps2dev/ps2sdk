@@ -8,6 +8,9 @@
 #
 # $Id$
 
+2005-04-17
+  - oopo, added packet library
+
 2005-04-03
   - tyranid, added getsyscall
 

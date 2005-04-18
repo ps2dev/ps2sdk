@@ -8,6 +8,6 @@
 #
 # $Id$
 
-SUBDIRS = kernel libc rpc startup loader debug sbv dma graph math3d math
+SUBDIRS = kernel libc rpc startup loader debug sbv dma graph math3d math packet
 
 include $(PS2SDKSRC)/Rules.make

@@ -14,6 +14,8 @@
 
  #include <tamtypes.h>
 
+ #include <dma_registers.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif

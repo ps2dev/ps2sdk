@@ -14,6 +14,8 @@
 
  #include <tamtypes.h>
 
+ #include <graph_registers.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -47,25 +49,37 @@ extern "C" {
 
  int graph_shutdown(void);
 
- //////////////////////////
- // GRAPH MODE FUNCTIONS //
- //////////////////////////
+ /////////////////////////
+ // GRAPH GET FUNCTIONS //
+ /////////////////////////
 
- int graph_mode_set(int mode, int psm, int zpsm);
+ int graph_get_bpp(void);
 
- int graph_mode_get(GRAPH_MODE *mode);
+ int graph_get_height(void);
+
+ int graph_get_interlace(void);
+
+ int graph_get_size(void);
+
+ int graph_get_mode(GRAPH_MODE *mode);
+
+ int graph_get_width(void);
+
+ int graph_get_zpp(void);
 
  /////////////////////////
  // GRAPH SET FUNCTIONS //
  /////////////////////////
 
+ int graph_set_clearbuffer(int red, int green, int blue);
+
  int graph_set_displaybuffer(int address);
 
  int graph_set_drawbuffer(int address);
 
- int graph_set_zbuffer(int address);
+ int graph_set_mode(int mode, int psm, int zpsm);
 
- int graph_set_clearbuffer(int red, int green, int blue);
+ int graph_set_zbuffer(int address);
 
  //////////////////////////
  // GRAPH VRAM FUNCTIONS //
