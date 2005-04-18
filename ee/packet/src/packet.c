@@ -1,9 +1,9 @@
 
  #include <tamtypes.h>
 
+ #include <dma.h>
  #include <stdlib.h>
  #include <packet.h>
- #include "../../dma/include/dma.h"
 
  //////////////////////
  // PACKET FUNCTIONS //
