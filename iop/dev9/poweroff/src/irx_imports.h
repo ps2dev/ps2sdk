@@ -23,5 +23,6 @@
 #include "stdio.h"
 #include "thbase.h"
 #include "thsemap.h"
+#include "sysclib.h"
 
 #endif /* IOP_IRX_IMPORTS_H */

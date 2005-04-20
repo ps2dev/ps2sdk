@@ -21,26 +21,27 @@
 #include "thbase.h"
 #include "intrman.h"
 #include "loadcore.h"
+#include "thsemap.h"
+#include "poweroff.h"
 
 #define DEBUG
 
-#ifdef DEBUG
-#include "thsemap.h"
-#endif
 
 #define INT_CDROM	0x02
 #define TYPE_C		1
 #define CDVDreg_PWOFF	(*(volatile unsigned char*)0xBF402008)
 
 #define POFF_SIF_CMD	20
+#define MAX_CALLBACKS	4
 
 IRX_ID("Poweroff_Handler", 1, 1);
 
+extern struct irx_export_table _exp_poweroff;
+
 //---------------------------------------------------------------------
 
-typedef void (*pwoffcb)(void*);
-
 int  _start(int, char**);
+
 
 //---------------------------------------------------------------------
 typedef int (*intrhandler)(void*);
@@ -52,23 +53,26 @@ struct handlerTableEntry{
 	void		*param;
 };
 
+struct CallbackEntry
+{
+	pwoffcb cb;
+	void *data;
+} CallbackTable[MAX_CALLBACKS];
+
 //---------------------------------------------------------------------
 
-char cmdData[16];
-int pid;
-#ifdef DEBUG
-int poffSema;
-#endif
+static char cmdData[16];
+static int pid;
+static int poffSema;
 
-int myCdHandler(void *param)
+static int myCdHandler(void *param)
 {
 
 	if (((CDVDreg_PWOFF & 1)==0) && (CDVDreg_PWOFF & 4)) 
 	{
+		/* can't seem to register a sif cmd callback in ps2link so... */
 		isceSifSendCmd(POFF_SIF_CMD, cmdData, 16, NULL, NULL, 0);
-#ifdef DEBUG
 		iSignalSema(poffSema);
-#endif
 	}
 
 	return old(param);
@@ -78,25 +82,83 @@ int myCdHandler(void *param)
 //-----------------------------------------------------------entrypoint
 //---------------------------------------------------------------------
 
-#ifdef DEBUG
-void pDebugThread(void *arg)
+static void pCallbackThread(void *arg)
 {
+	int i;
 	while(1)
 	{
 		WaitSema(poffSema);
+		/* Do callbacks in reverse order */
+		for(i = MAX_CALLBACKS-1; i >= 0; i--)
+		{
+			if(CallbackTable[i].cb)
+			{
+				CallbackTable[i].cb(CallbackTable[i].data);
+			}
+		}
+#ifdef DEBUG	
 		printf("Poweroff!!!!\n");
+#endif
 	}
 }
+
+void AddPowerOffHandler(pwoffcb func, void* param)
+{
+	int i;
+
+	for(i = 0; i < MAX_CALLBACKS; i++)
+	{
+		if(CallbackTable[i].cb == 0)
+		{
+			CallbackTable[i].cb = func;
+			CallbackTable[i].data = param;
+#ifdef DEBUG
+			printf("Added callback at position %d\n", i);
 #endif
+			break;
+		}
+	}
+
+	if(i == MAX_CALLBACKS)
+	{
+		printf("Could not add poweroff callback\n");
+	}
+}
+
+void RemovePowerOffHandler(pwoffcb func)
+{
+	int i;
+
+	for(i = 0; i < MAX_CALLBACKS; i++)
+	{
+		if(CallbackTable[i].cb == func)
+		{
+			break;
+		}
+	}
+
+	if(i < MAX_CALLBACKS)
+	{
+		for(; i < (MAX_CALLBACKS-1); i++)
+		{
+			CallbackTable[i] = CallbackTable[i+1];
+		}
+		memset(&CallbackTable[i], 0, sizeof(struct CallbackEntry));
+	}
+}
 
 int _start(int argc, char* argv[])
 {
 	register struct handlerTableEntry *handlers=(struct handlerTableEntry*)0x480;//iopmem
-#ifdef DEBUG
 	iop_thread_t mythread;
 	iop_sema_t sem_info;
 	int i;
-#endif
+
+	if(RegisterLibraryEntries(&_exp_poweroff) != 0)
+	{
+		printf("Poweroff already registered\n");
+		return 1;
+	}
 
 	FlushDcache();
 	CpuEnableIntr(0);
@@ -114,10 +176,11 @@ int _start(int argc, char* argv[])
 	old=(intrhandler)((int)handlers[INT_CDROM].handler & ~3);
 	handlers[INT_CDROM].handler=(intrhandler)((int)myCdHandler | TYPE_C);
 
-#ifdef DEBUG
+	memset(CallbackTable, 0, sizeof(struct CallbackEntry) * MAX_CALLBACKS);
+
 	mythread.attr = 0x02000000;
 	mythread.option = 0;
-	mythread.thread = pDebugThread;
+	mythread.thread = pCallbackThread;
 	mythread.stacksize = 0x1000;
 	mythread.priority = 0x27;
 
@@ -142,7 +205,6 @@ int _start(int argc, char* argv[])
 		printf( "CreateSema failed %i\n", poffSema);
 		return 1;
 	}
-#endif
 
 	return 0;
 }

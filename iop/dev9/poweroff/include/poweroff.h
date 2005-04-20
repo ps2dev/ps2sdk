@@ -13,27 +13,14 @@
 #ifndef __POWEROFF_H__
 #define __POWEROFF_H__
 
-#include "types.h"
-#include "defs.h"
-#include "irx.h"
-#include "loadcore.h"
-#include "sysmem.h"
-#include "stdio.h"
-#include "sysclib.h"
-#include "atad.h"
-#include "list.h"
-#include "errno.h"
-#include "sys/fcntl.h"
-#include "sys/stat.h"
-#include "iomanX.h"
-#include "thbase.h"
-#include "thevent.h"
-#include "thsemap.h"
-#include "intrman.h"
-#include "cdvdman.h"
+#define poweroff_IMPORTS_start DECLARE_IMPORT_TABLE(poweroff, 1, 1)
+#define poweroff_IMPORTS_end END_IMPORT_TABLE
 
 typedef void (*pwoffcb)(void*);
 
-void SetPowerOffCallback(pwoffcb func, void* param);
+void AddPowerOffHandler(pwoffcb func, void* param);
+#define I_AddPowerOffHandler DECLARE_IMPORT(4, AddPowerOffHandler)
+void RemovePowerOffHandler(pwoffcb func);
+#define I_RemovePowerOffHandler DECLARE_IMPORT(5, RemovePowerOffHandler)
 
 #endif /* __POWEROFF_H__ */

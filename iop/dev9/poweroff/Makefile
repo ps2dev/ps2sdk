@@ -15,9 +15,9 @@ IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
 IOP_BIN  = bin/poweroff.irx
-IOP_OBJS = obj/poweroff.o obj/imports.o
+IOP_OBJS = obj/poweroff.o obj/imports.o obj/exports.o
 
-IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include
+IOP_INCS += -Iinclude/
 IOP_CFLAGS  += -Wall
 IOP_LDFLAGS += -s
 

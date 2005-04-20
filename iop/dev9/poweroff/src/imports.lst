@@ -10,6 +10,10 @@ stdio_IMPORTS_start
 I_printf
 stdio_IMPORTS_end
 
+sysclib_IMPORTS_start
+I_memset
+sysclib_IMPORTS_end
+
 intrman_IMPORTS_start
 I_CpuSuspendIntr
 I_CpuResumeIntr
@@ -22,6 +26,7 @@ sifcmd_IMPORTS_end
 
 loadcore_IMPORTS_start
 I_FlushDcache
+I_RegisterLibraryEntries
 loadcore_IMPORTS_end
 
 thsemap_IMPORTS_start
