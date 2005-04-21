@@ -32,7 +32,7 @@
   { 5, 0, 1 }, { 6, 7, 2 }, { 7, 2, 3 }
  };
 
- VECTOR points[8] = {
+ VECTOR points[8] __attribute__ ((aligned (128))) = {
   { -10.00f, -10.00f, -10.00f, 1.00f },
   {  10.00f, -10.00f, -10.00f, 1.00f },
   { -10.00f,  10.00f, -10.00f, 1.00f },
@@ -61,7 +61,7 @@
 
   PACKET packet;
 
-  VECTORI pointsi[8];
+  VECTORI pointsi[8]  __attribute__ ((aligned (128)));
 
   MATRIX local_world;
   MATRIX world_view;
@@ -154,11 +154,11 @@
     packet_append_64(&packet, 0x0E);
     packet_append_64(&packet, GIF_SET_RGBAQ(0x00, 0x00, 0x00, 0x80, 0x3F800000));
     packet_append_64(&packet, GIF_REG_RGBAQ);
-    packet_append_64(&packet, GIF_SET_XYZ(pointsi[lines[loop0][0]][0], pointsi[lines[loop0][0]][1], pointsi[lines[loop0][0]][2]));
+    packet_append_64(&packet, GIF_SET_XYZ(pointsi[lines[loop0][0]].x, pointsi[lines[loop0][0]].y, pointsi[lines[loop0][0]].z));
     packet_append_64(&packet, GIF_REG_XYZ2);
     packet_append_64(&packet, GIF_SET_RGBAQ(0x00, 0x00, 0x00, 0x80, 0x3F800000));
     packet_append_64(&packet, GIF_REG_RGBAQ);
-    packet_append_64(&packet, GIF_SET_XYZ(pointsi[lines[loop0][1]][0], pointsi[lines[loop0][1]][1], pointsi[lines[loop0][1]][2]));
+    packet_append_64(&packet, GIF_SET_XYZ(pointsi[lines[loop0][1]].x, pointsi[lines[loop0][1]].y, pointsi[lines[loop0][1]].z));
     packet_append_64(&packet, GIF_REG_XYZ2);
    }
 
@@ -168,15 +168,15 @@
     packet_append_64(&packet, 0x0E);
     packet_append_64(&packet, colours[loop0 >> 2]);
     packet_append_64(&packet, GIF_REG_RGBAQ);
-    packet_append_64(&packet, GIF_SET_XYZ(pointsi[triangles[loop0][0]][0], pointsi[triangles[loop0][0]][1], pointsi[triangles[loop0][0]][2]));
+    packet_append_64(&packet, GIF_SET_XYZ(pointsi[triangles[loop0][0]].x, pointsi[triangles[loop0][0]].y, pointsi[triangles[loop0][0]].z));
     packet_append_64(&packet, GIF_REG_XYZ2);
     packet_append_64(&packet, colours[loop0 >> 2]);
     packet_append_64(&packet, GIF_REG_RGBAQ);
-    packet_append_64(&packet, GIF_SET_XYZ(pointsi[triangles[loop0][1]][0], pointsi[triangles[loop0][1]][1], pointsi[triangles[loop0][1]][2]));
+    packet_append_64(&packet, GIF_SET_XYZ(pointsi[triangles[loop0][1]].x, pointsi[triangles[loop0][1]].y, pointsi[triangles[loop0][1]].z));
     packet_append_64(&packet, GIF_REG_XYZ2);
     packet_append_64(&packet, colours[loop0 >> 2]);
     packet_append_64(&packet, GIF_REG_RGBAQ);
-    packet_append_64(&packet, GIF_SET_XYZ(pointsi[triangles[loop0][2]][0], pointsi[triangles[loop0][2]][1], pointsi[triangles[loop0][2]][2]));
+    packet_append_64(&packet, GIF_SET_XYZ(pointsi[triangles[loop0][2]].x, pointsi[triangles[loop0][2]].y, pointsi[triangles[loop0][2]].z));
     packet_append_64(&packet, GIF_REG_XYZ2);
    }
 
