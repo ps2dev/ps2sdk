@@ -15,9 +15,9 @@ endif
 SUBDIRS = tools iop ee common samples
 
 all: build 
-	@echo .;
-	@echo .PS2SDK Built.;
-	@echo .;
+	@$(ECHO) .;
+	@$(ECHO) .PS2SDK Built.;
+	@$(ECHO) .;
 
 # Common rules shared by all build targets.
 
@@ -44,12 +44,12 @@ clean: env_build_check $(subdir_clean)
 rebuild: env_build_check $(subdir_clean) $(subdir_list)
 
 $(PS2SDK)/common/include:
-	mkdir $(PS2SDK)/common
-	mkdir $(PS2SDK)/common/include
+	$(MKDIR) $(PS2SDK)/common
+	$(MKDIR) $(PS2SDK)/common/include
 	cp -f $(PS2SDKSRC)/common/include/*.h $(PS2SDK)/common/include/
 
 $(PS2SDK)/ports:
-	mkdir $(PS2SDK)/ports
+	$(MKDIR) $(PS2SDK)/ports
 
 install: release
 
@@ -58,7 +58,7 @@ release: build release_base $(PS2SDK)/common/include $(PS2SDK)/ports $(subdir_re
 
 release_base: env_release_check
 	@if test ! -d $(PS2SDK) ; then \
-	  mkdir -p $(PS2SDK) ; \
+	  $(MKDIR) -p $(PS2SDK) ; \
 	fi
 	cp -f README $(PS2SDK)
 	cp -f CHANGELOG $(PS2SDK)
@@ -70,13 +70,13 @@ release_base: env_release_check
 env_build_check: 
 	@if test -z $(PS2SDKSRC) ; \
 	then \
-	  echo PS2SDKSRC environment variable should be defined. ; \
+	  $(ECHO) PS2SDKSRC environment variable should be defined. ; \
 	fi
 
 env_release_check:
 	@if test -z $(PS2SDK) ; \
 	then \
-	  echo PS2SDK environment variable must be defined. ; \
+	  $(ECHO) PS2SDK environment variable must be defined. ; \
 	  exit 1; \
 	fi
 
