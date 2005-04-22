@@ -38,26 +38,26 @@ $(IOP_OBJS_DIR)%.o : $(IOP_SRC_DIR)%.s
 
 # A rule to build imports.lst.
 $(IOP_OBJS_DIR)%.o : $(IOP_SRC_DIR)%.lst
-	echo "#include \"irx_imports.h\"" > $(IOP_OBJS_DIR)build-imports.c
+	$(ECHO) "#include \"irx_imports.h\"" > $(IOP_OBJS_DIR)build-imports.c
 	cat $< >> $(IOP_OBJS_DIR)build-imports.c
 	$(IOP_CC) $(IOP_CFLAGS) -I$(IOP_SRC_DIR) $(IOP_OBJS_DIR)build-imports.c -o $@
 	-rm -f $(IOP_OBJS_DIR)build-imports.c
 
 # A rule to build exports.tab.
 $(IOP_OBJS_DIR)%.o : $(IOP_SRC_DIR)%.tab
-	echo "#include \"irx.h\"" > $(IOP_OBJS_DIR)build-exports.c
+	$(ECHO) "#include \"irx.h\"" > $(IOP_OBJS_DIR)build-exports.c
 	cat $< >> $(IOP_OBJS_DIR)build-exports.c
 	$(IOP_CC) $(IOP_CFLAGS) -I$(IOP_SRC_DIR) $(IOP_OBJS_DIR)build-exports.c -o $@
 	-rm -f $(IOP_OBJS_DIR)build-exports.c
 
 $(IOP_OBJS_DIR):
-	mkdir $(IOP_OBJS_DIR)
+	$(MKDIR) -p $(IOP_OBJS_DIR)
 
 $(IOP_BIN_DIR):
-	mkdir $(IOP_BIN_DIR)
+	$(MKDIR) -p $(IOP_BIN_DIR)
 
 $(IOP_LIB_DIR):
-	mkdir $(IOP_LIB_DIR)
+	$(MKDIR) -p $(IOP_LIB_DIR)
 
 $(IOP_BIN) : $(IOP_OBJS)
 	$(IOP_CC) $(IOP_LDFLAGS) -o $(IOP_BIN) $(IOP_OBJS) $(IOP_LIBS)

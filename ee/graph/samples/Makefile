@@ -9,4 +9,5 @@
 
 SAMPLE_DIR = graph
 
+include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/samples/Rules.samples

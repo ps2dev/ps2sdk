@@ -11,5 +11,6 @@
 
 SAMPLE_DIR = rpc/pad
 
+include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/samples/Rules.samples
 

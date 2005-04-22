@@ -10,10 +10,10 @@
 
 
 all:
-	@echo Nothing to build in common
+	@$(ECHO) Nothing to build in common
 
 clean:
-	@echo Nothing to clean in common
+	@$(ECHO) Nothing to clean in common
 
 
 include $(PS2SDKSRC)/Defs.make

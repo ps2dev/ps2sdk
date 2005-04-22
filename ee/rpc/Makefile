@@ -11,4 +11,5 @@
 
 SUBDIRS = ahx camera cdvd filexio hdd keyboard memorycard mouse multitap pad poweroff tcpip padx remote
 
+include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make

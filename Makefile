@@ -29,12 +29,19 @@ subdir_clean = $(patsubst %,clean-%,$(SUBDIRS))
 subdir_release = $(patsubst %,release-%,$(SUBDIRS))
 subdirs: dummy $(subdir_list)
 
+SYSTEM := $(shell uname)
+ifeq ($(SYSTEM),CYGWIN_NT-5.1)
+	MAKEREC = $(MAKE) -C 
+else
+	MAKEREC = PS2SDKSRC=$(PS2SDKSRC) $(MAKE) -C 
+endif
+
 $(subdir_list): dummy
-	PS2SDKSRC=$(PS2SDKSRC) $(MAKE) -C $(patsubst all-%,%,$@)
+	$(MAKEREC) $(patsubst all-%,%,$@)
 $(subdir_clean): dummy
-	PS2SDKSRC=$(PS2SDKSRC) $(MAKE) -C $(patsubst clean-%,%,$@) clean
+	$(MAKEREC) $(patsubst clean-%,%,$@) clean
 $(subdir_release): dummy
-	PS2SDKSRC=$(PS2SDKSRC) $(MAKE) -C $(patsubst release-%,%,$@) release
+	$(MAKEREC) $(patsubst release-%,%,$@) release
 
 
 build: env_build_check $(subdir_list)
@@ -44,12 +51,12 @@ clean: env_build_check $(subdir_clean)
 rebuild: env_build_check $(subdir_clean) $(subdir_list)
 
 $(PS2SDK)/common/include:
-	$(MKDIR) $(PS2SDK)/common
-	$(MKDIR) $(PS2SDK)/common/include
+	$(MKDIR) -p $(PS2SDK)/common
+	$(MKDIR) -p $(PS2SDK)/common/include
 	cp -f $(PS2SDKSRC)/common/include/*.h $(PS2SDK)/common/include/
 
 $(PS2SDK)/ports:
-	$(MKDIR) $(PS2SDK)/ports
+	$(MKDIR) -p $(PS2SDK)/ports
 
 install: release
 

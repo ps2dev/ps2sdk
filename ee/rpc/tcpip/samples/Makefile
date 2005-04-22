@@ -11,5 +11,6 @@
 
 SAMPLE_DIR = tcpip/ee-echo
 
+include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/samples/Rules.samples
 

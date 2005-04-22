@@ -33,7 +33,7 @@ endif
 all: $(TARGET_DIR) $(FINAL_TARGET) $(EXTRATARGETS)
 
 $(FINAL_TARGET): $(BUILD_TARGETS) $(OBJS)
-	@echo $(TARGET):$@
+	@$(ECHO) $(TARGET):$@
 	@$(LINKSTEP)
 
 .PHONY: clean
@@ -45,16 +45,16 @@ clean: $(EXTRACLEAN)
 Makefile: $(BUILDDIR) $(OBJDIR) $(DEPDIR) $(LSTDIR)
 
 $(TARGET_DIR):
-	$(MKDIR) $(TARGET_DIR)
+	$(MKDIR) -p $(TARGET_DIR)
 
 $(BUILDDIR):
-	@$(MKDIR) $(BUILDDIR)
+	@$(MKDIR) -p $(BUILDDIR)
 $(OBJDIR):
-	@$(MKDIR) $(OBJDIR)
+	@$(MKDIR) -p $(OBJDIR)
 $(DEPDIR):
-	@$(MKDIR) $(DEPDIR)
+	@$(MKDIR) -p $(DEPDIR)
 $(LSTDIR):
-	@$(MKDIR) $(LSTDIR)
+	@$(MKDIR) -p $(LSTDIR)
 
 # Make sure 'make' knows where to look for object files
 #
@@ -77,23 +77,23 @@ endif
 .SUFFIXES: .c .cc .cpp .s .S .dsm .o
 
 %.o: %.s
-	@echo $(TARGET):$(OBJDIR)/$@
+	@$(ECHO) $(TARGET):$(OBJDIR)/$@
 	@$(AS_COMPILE) -o $(OBJDIR)/$@ $< $(LSTFILE)
 
 %.o: %.S
-	@echo $(TARGET):$(OBJDIR)/$@
+	@$(ECHO) $(TARGET):$(OBJDIR)/$@
 	@$(AS_COMPILE) -o $(OBJDIR)/$@ $< $(LSTFILE)
 
 ifeq ($(CPU),ee)
 %.o: %.dsm
-	@echo $(TARGET):$(OBJDIR)/$@
+	@$(ECHO) $(TARGET):$(OBJDIR)/$@
 	@$(DVPAS_COMPILE) -o $(OBJDIR)/$@ $< $(LSTFILE)
 endif
 
 # These rules will also generate source dependencies
 #
 %.o: %.c
-	@echo $(TARGET):$(OBJDIR)/$@
+	@$(ECHO) $(TARGET):$(OBJDIR)/$@
 	@if $(C_COMPILE) -MD -MP -MF "$(DEPDIR)/$*.Td" \
 	  -c $< -o $(OBJDIR)/$*.o $(LSTFILE); \
 	then sed 's/$(subst /,\/,$(OBJDIR))\/\($*\)\.o[ :]*/\1.o : /g' < "$(DEPDIR)/$*.Td" > "$(DEPDIR)/$*.d"; \
@@ -102,7 +102,7 @@ endif
 	fi
 
 %.o: %.cc
-	@echo $(TARGET):$(OBJDIR)/$@
+	@$(ECHO) $(TARGET):$(OBJDIR)/$@
 	@if $(CXX_COMPILE) -MD -MP -MF "$(DEPDIR)/$*.Td" \
 	  -c $< -o $(OBJDIR)/$*.o $(LSTFILE); \
 	then sed 's/$(subst /,\/,$(OBJDIR))\/\($*\)\.o[ :]*/\1.o : /g' < "$(DEPDIR)/$*.Td" > "$(DEPDIR)/$*.d"; \
@@ -111,7 +111,7 @@ endif
 	fi
 
 %.o: %.cpp
-	@echo $(TARGET):$(OBJDIR)/$@
+	@$(ECHO) $(TARGET):$(OBJDIR)/$@
 	@if $(CXX_COMPILE) -MD -MP -MF "$(DEPDIR)/$*.Td" \
 	  -c $< -o $(OBJDIR)/$*.o $(LSTFILE); \
 	then sed 's/$(subst /,\/,$(OBJDIR))\/\($*\)\.o[ :]*/\1.o : /g' < "$(DEPDIR)/$*.Td" > "$(DEPDIR)/$*.d"; \

@@ -16,13 +16,13 @@ libs/$(IOP_TARGET): $(IOP_OBJS) objs/imports.o objs/exports.o src/irx_imports.h
 	$(IOP_CC) $(IOP_LDFLAGS) -miop -nostdlib -s -o libs/$(IOP_TARGET) $(IOP_OBJS) objs/imports.o objs/exports.o
 
 objs/imports.o:
-	echo "#include \"irx_imports.h\"" > src/build-imports.c
+	$(ECHO) "#include \"irx_imports.h\"" > src/build-imports.c
 	cat src/imports.lst >> src/build-imports.c
 	$(IOP_CC) $(IOP_CFLAGS) $(IOP_CPPFLAGS) -c src/build-imports.c -o objs/imports.o
 	rm -f src/build-imports.c
 
 objs/exports.o:
-	echo "#include \"irx.h\"" > src/build-exports.c
+	$(ECHO) "#include \"irx.h\"" > src/build-exports.c
 	cat src/exports.tab >> src/build-exports.c
 	$(IOP_CC) $(IOP_CFLAGS) $(IOP_CPPFLAGS) -c src/build-exports.c -o objs/exports.o
 	rm -f src/build-exports.c

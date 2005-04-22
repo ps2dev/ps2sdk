@@ -13,18 +13,18 @@ RELEASE_COMMON_DIRS = common/ common/include/ common/include/sys
 RELEASE_COMMON_DIRS := $(RELEASE_COMMON_DIRS:%=$(PS2SDK)/%)
 
 $(RELEASE_COMMON_DIRS):
-	mkdir -p $(RELEASE_COMMON_DIRS)
+	$(MKDIR) -p $(RELEASE_COMMON_DIRS)
 
 release: all $(RELEASE_COMMON_DIRS)
 	@for file in include/* ; do \
 	   if test -f $$file ; then \
-	     echo Installing $$file to $(PS2SDK)/common/include ; \
+	     $(ECHO) Installing $$file to $(PS2SDK)/common/include ; \
 	     cp -f $$file $(PS2SDK)/common/include ; \
 	   fi \
 	done; 
 	@for file in include/sys/* ; do \
 	   if test -f $$file ; then \
-	     echo Installing $$file to $(PS2SDK)/common/include/sys ; \
+	     $(ECHO) Installing $$file to $(PS2SDK)/common/include/sys ; \
 	     cp -f $$file $(PS2SDK)/common/include/sys ; \
 	   fi \
 	done;

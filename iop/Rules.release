@@ -13,21 +13,21 @@ RELEASE_IOP_DIRS = iop/ iop/include/ iop/irx/ iop/lib
 RELEASE_IOP_DIRS := $(RELEASE_IOP_DIRS:%=$(PS2SDK)/%)
 
 $(RELEASE_IOP_DIRS):
-	mkdir $(RELEASE_IOP_DIRS)
+	$(MKDIR) -p $(RELEASE_IOP_DIRS)
 
 release: all $(RELEASE_IOP_DIRS)
 	@if test $(IOP_BIN) ; then \
-	   echo Installing $(IOP_BIN) to $(PS2SDK)/iop/irx ; \
+	   $(ECHO) Installing $(IOP_BIN) to $(PS2SDK)/iop/irx ; \
 	   cp -f $(IOP_BIN) $(PS2SDK)/iop/irx/ ; \
 	fi;
 	@if test $(IOP_LIB) ; then \
-	   echo Installing $(IOP_LIB) to $(PS2SDK)/iop/lib ; \
+	   $(ECHO) Installing $(IOP_LIB) to $(PS2SDK)/iop/lib ; \
 	   cp -f $(IOP_LIB) $(PS2SDK)/iop/lib/ ; \
 	fi;
 	@if test -d include ; then \
 	   for file in include/*; do \
 	     if test -f $$file ; then \
-	       echo Installing $$file to $(PS2SDK)/iop/include ; \
+	       $(ECHO) Installing $$file to $(PS2SDK)/iop/include ; \
 	       cp -f $$file $(PS2SDK)/iop/include ; \
 	     fi \
 	   done; \

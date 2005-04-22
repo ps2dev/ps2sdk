@@ -43,13 +43,13 @@ $(EE_OBJS_DIR)%.o : $(EE_SRC_DIR)%.s
 	$(EE_AS) $(EE_ASFLAGS) $< -o $@
 
 $(EE_LIB_DIR):
-	mkdir $(EE_LIB_DIR)
+	$(MKDIR) -p $(EE_LIB_DIR)
 
 $(EE_BIN_DIR):
-	mkdir $(EE_BIN_DIR)
+	$(MKDIR) -p $(EE_BIN_DIR)
 
 $(EE_OBJS_DIR):
-	mkdir $(EE_OBJS_DIR)
+	$(MKDIR) -p $(EE_OBJS_DIR)
 
 $(EE_BIN) : $(EE_OBJS) $(PS2SDKSRC)/ee/startup/obj/crt0.o
 	$(EE_CC) -mno-crt0 -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_LDFLAGS) \

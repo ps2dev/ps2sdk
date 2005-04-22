@@ -19,7 +19,7 @@ RELEASE_SBV_DIRS := $(RELEASE_SBV_DIRS:%=$(PS2SDK)/%)
 
 
 release-dirs:
-	mkdir -p $(RELEASE_SBV_DIRS)
+	$(MKDIR) -p $(RELEASE_SBV_DIRS)
 
 
 #
@@ -29,7 +29,7 @@ release-dirs:
 
 release-lib: 
 	@if test $(EE_LIB) ; then \
-	   echo Installing $(EE_LIB) to $(PS2SDK)/sbv/lib ; \
+	   $(ECHO) Installing $(EE_LIB) to $(PS2SDK)/sbv/lib ; \
 	   cp -f $(EE_LIB) $(PS2SDK)/sbv/lib ; \
 	   chmod 644 $(PS2SDK)/sbv/$(EE_LIB) ; \
 	fi;
@@ -41,7 +41,7 @@ release-lib:
 
 release-bin: 
 	@if test $(EE_BIN) ; then \
-	   echo Installing $(EE_BIN) to $(PS2SDK)/sbv/bin ; \
+	   $(ECHO) Installing $(EE_BIN) to $(PS2SDK)/sbv/bin ; \
 	   cp -f $(EE_BIN) $(PS2SDK)/sbv/bin ; \
 	   chmod 644 $(PS2SDK)/sbv/$(EE_BIN) ; \
 	fi;
@@ -55,7 +55,7 @@ release-include:
 	@if test -d include ; then \
 	   for file in include/*; do \
 	      if test -f $$file ; then \
-	         echo Installing $$file to $(PS2SDK)/sbv/include ; \
+	         $(ECHO) Installing $$file to $(PS2SDK)/sbv/include ; \
 	         cp -f $$file $(PS2SDK)/sbv/include ; \
 	         chmod 644 $(PS2SDK)/sbv/$$file ; \
 	      fi \

@@ -70,14 +70,20 @@ endif
 # Other utilities
 #
 TOUCH = touch
-MKDIR = mkdir -p
-RMDIR = rmdir -p
-ECHO  = echo
-# these versions are used for the cygwin toolchain in a dos environment
-# since they need to overwrite the standard dos versions of each command
-#MKDIR = cyg-mkdir -p
-#RMDIR = cyg-rmdir -p
-#ECHO  = cyg-echo
+MAKE = make
+
+SYSTEM := $(shell uname)
+ifeq ($(SYSTEM),CYGWIN_NT-5.1)
+  # these versions are used for the cygwin toolchain in a dos environment
+  # since they need to overwrite the standard dos versions of each command
+  MKDIR = cyg-mkdir
+  RMDIR = cyg-rmdir
+  ECHO  = cyg-echo
+else
+  MKDIR = mkdir
+  RMDIR = rmdir
+  ECHO  = echo
+endif
 
 # Aliases used to build source files
 #

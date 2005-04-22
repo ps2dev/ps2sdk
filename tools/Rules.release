@@ -13,12 +13,12 @@ RELEASE_TOOLS_DIRS = bin/
 RELEASE_TOOLS_DIRS := $(RELEASE_TOOLS_DIRS:%=$(PS2SDK)/%)
 
 $(RELEASE_TOOLS_DIRS):
-	mkdir $(RELEASE_TOOLS_DIRS)
+	$(MKDIR) -p $(RELEASE_TOOLS_DIRS)
 
 release: all $(RELEASE_TOOLS_DIRS)
 	@if test -d $(TOOLS_BIN_DIR) ; then \
 	   for file in $(TOOLS_BIN_DIR)* ; do \
-	      echo Installing $$file to $(PS2SDK)/bin ; \
+	      $(ECHO) Installing $$file to $(PS2SDK)/bin ; \
 	      cp -f $$file $(PS2SDK)/bin ; \
 	   done; \
 	fi; \
