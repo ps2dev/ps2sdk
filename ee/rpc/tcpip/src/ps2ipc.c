@@ -352,6 +352,8 @@ int ps2ip_getconfig(char *netif_name, t_ip_info *ip_info)
 
 int select(int maxfdp1, struct fd_set *readset, struct fd_set *writeset, struct fd_set *exceptset, struct timeval *timeout)
 {
+	char *uncached_buf = UNCACHED_SEG(_rpc_buffer);
+
 	if(!_init_check) return -1;
 
 	_rpc_buffer[0] = (int)maxfdp1;
@@ -381,28 +383,26 @@ int select(int maxfdp1, struct fd_set *readset, struct fd_set *writeset, struct 
 	}
 
 	SifCallRpc(&_ps2ip, ID_SELECT, 0, (void*)_rpc_buffer, 46, (void*)_rpc_buffer, 46, 0, 0);
-	/* Just in case */
-	FlushCache(0);
 
 	if( timeout )
 	{
-		timeout->tv_sec = ((long*)_rpc_buffer)[3];
-		timeout->tv_usec = ((long*)_rpc_buffer)[4];
+		timeout->tv_sec = ((long*)uncached_buf)[3];
+		timeout->tv_usec = ((long*)uncached_buf)[4];
 	}
 	if( readset )
 	{
-		readset->fd_bits[0] = ((char*)_rpc_buffer)[40];
-		readset->fd_bits[1] = ((char*)_rpc_buffer)[41];
+		readset->fd_bits[0] = ((char*)uncached_buf)[40];
+		readset->fd_bits[1] = ((char*)uncached_buf)[41];
 	}
 	if( writeset )
 	{
-		writeset->fd_bits[0] = ((char*)_rpc_buffer)[42];
-		writeset->fd_bits[1] = ((char*)_rpc_buffer)[43];
+		writeset->fd_bits[0] = ((char*)uncached_buf)[42];
+		writeset->fd_bits[1] = ((char*)uncached_buf)[43];
 	}
 	if( exceptset )
  	{
-		exceptset->fd_bits[0] = ((char*)_rpc_buffer)[44];
-		exceptset->fd_bits[1] = ((char*)_rpc_buffer)[45];
+		exceptset->fd_bits[0] = ((char*)uncached_buf)[44];
+		exceptset->fd_bits[1] = ((char*)uncached_buf)[45];
 	}
 
 
