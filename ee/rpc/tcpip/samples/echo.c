@@ -17,16 +17,6 @@
 #include <loadfile.h>
 #include "ps2ip.h"
 
-t_ip_info ip_info;
-
-// Change these to fit your network configuration
-#define IPADDR "192.168.0.10"
-#define NETMASK "255.255.255.0"
-#define GWADDR "192.168.0.1"
-
-// Change this path to reflect your setup
-#define HOSTPATH "host:"
-
 
 void serverThread();
 
@@ -37,23 +27,7 @@ int main()
 
 	SifInitRpc(0);
 
-	// You may also need to change the paths to reflect your setup
-	SifLoadModule(HOSTPATH "../../iop/bin/ps2ip.irx", 0, NULL);
-
-    memset(args, 0, LF_ARG_MAX);
-    argsLen = 0;
-    // Make smap argument list. Each argument is a null-separated string.
-    // Argument length is the total length of the list, including null chars
-    strcpy(args, IPADDR);
-    argsLen += strlen(IPADDR) + 1;
-    strcpy(&args[argsLen], NETMASK);
-    argsLen += strlen(NETMASK) + 1;
-    strcpy(&args[argsLen], GWADDR);
-    argsLen += strlen(GWADDR) + 1;
-
-	SifLoadModule(HOSTPATH "../../../ps2eth/bin/ps2smap.irx", argsLen, args);
-	SifLoadModule(HOSTPATH "../../iop/bin/ps2echo.irx", 0,NULL );
-	SifLoadModule(HOSTPATH "../../iop/bin/ps2ips.irx", 0, NULL);
+	SifLoadModule("host:ps2ips.irx", 0, NULL);
 
 	if(ps2ip_init() < 0) {
 		printf("ERROR: ps2ip_init falied!\n");
@@ -66,31 +40,20 @@ int main()
 char buffer[100];
 
 
-void HandleClient( int cs )
+int HandleClient( int cs )
 {
    int rcvSize,sntSize;
+   fd_set rd_set;
 
    rcvSize = recv( cs, buffer, 100, 0);
    if ( rcvSize <= 0 )
    {
       printf( "PS2ECHO: recv returned %i\n", rcvSize );
-      return;
+      return -1;
    }
-   while( rcvSize > 0 )
-   {
-      sntSize = send( cs, buffer, rcvSize, 0 );
-      if ( sntSize != rcvSize )
-      {
-         printf( "PS2ECHO: send != recv\n" );
-         return;
-      }
+   sntSize = send( cs, buffer, rcvSize, 0 );
 
-      rcvSize = recv( cs, buffer, 100, 0 );
-      if ( rcvSize <= 0 )
-      {
-         printf( "PS2ECHO: recv returned %i\n", rcvSize );
-      }
-   }
+   return 0;
 }
 
 
@@ -102,6 +65,8 @@ void serverThread()
    struct sockaddr_in echoClntAddr;
    int clntLen;
    int rc;
+   fd_set active_rd_set;
+   fd_set rd_set;
 
    printf( "PS2ECHO: Server Thread Started.\n" );
 
@@ -140,22 +105,44 @@ void serverThread()
 
    printf(  "PS2ECHO: listen returned %i\n", rc );
  
+   FD_ZERO(&active_rd_set);
+   FD_SET(sh, &active_rd_set);
    while(1)
    {
+	   int i;
       clntLen = sizeof( echoClntAddr );
-      cs = accept( sh, (struct sockaddr *)&echoClntAddr, &clntLen );
-      if ( cs < 0 )
-      {
-         printf( "PS2ECHO: accept failed.\n" );
-         SleepThread();
-      }
+	  rd_set = active_rd_set;
+	  if(select(FD_SETSIZE, &rd_set, NULL, NULL, NULL) < 0)
+	  {
+		  printf("PS2ECHO: Select failed.\n");
+		  SleepThread();
+	  }
 
-      printf( "PS2ECHO: accept returned %i.\n", cs );
-
-      HandleClient( cs );
-
-	  disconnect(cs);
-	  disconnect(sh);
+	  for(i = 0; i < FD_SETSIZE; i++)
+	  {
+		  if(FD_ISSET(i, &rd_set))
+		  {
+			  if(i == sh)
+			  {
+				  cs = accept( sh, (struct sockaddr *)&echoClntAddr, &clntLen );
+				  if ( cs < 0 )
+				  {
+					 printf( "PS2ECHO: accept failed.\n" );
+					 SleepThread();
+				  }
+				  FD_SET(cs, &active_rd_set);
+				  printf( "PS2ECHO: accept returned %i.\n", cs );
+			  }
+			  else
+			  {
+				  if(HandleClient( i ) < 0)
+				  {
+					  FD_CLR(i, &active_rd_set);
+					  disconnect(i);
+				  }
+			  }
+		  }
+	  }
    } 
 
 	SleepThread();
