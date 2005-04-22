@@ -380,7 +380,32 @@ int select(int maxfdp1, struct fd_set *readset, struct fd_set *writeset, struct 
 		((char*)_rpc_buffer)[45] = exceptset->fd_bits[1];
 	}
 
-	SifCallRpc(&_ps2ip, ID_SELECT, 0, (void*)_rpc_buffer, 46, (void*)_rpc_buffer, 4, 0, 0);
+	SifCallRpc(&_ps2ip, ID_SELECT, 0, (void*)_rpc_buffer, 46, (void*)_rpc_buffer, 46, 0, 0);
+	/* Just in case */
+	FlushCache(0);
+
+	if( timeout )
+	{
+		timeout->tv_sec = ((long*)_rpc_buffer)[3];
+		timeout->tv_usec = ((long*)_rpc_buffer)[4];
+	}
+	if( readset )
+	{
+		readset->fd_bits[0] = ((char*)_rpc_buffer)[40];
+		readset->fd_bits[1] = ((char*)_rpc_buffer)[41];
+	}
+	if( writeset )
+	{
+		writeset->fd_bits[0] = ((char*)_rpc_buffer)[42];
+		writeset->fd_bits[1] = ((char*)_rpc_buffer)[43];
+	}
+	if( exceptset )
+ 	{
+		exceptset->fd_bits[0] = ((char*)_rpc_buffer)[44];
+		exceptset->fd_bits[1] = ((char*)_rpc_buffer)[45];
+	}
+
+
 
 	return _rpc_buffer[0];
 }

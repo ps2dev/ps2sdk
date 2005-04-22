@@ -697,6 +697,29 @@ void do_select( void * rpcBuffer, int size )
 
 	ret = select( maxfdp1, readset_p, writeset_p, exceptset_p, timeout_p );
 	ptr[0] = ret;
+
+	if( timeout_p )
+	{
+		((long long*)rpcBuffer)[3] = timeout_p->tv_sec;
+		((long long*)rpcBuffer)[4] = timeout_p->tv_usec;
+	}
+	if( readset_p )
+	{
+		((char*)rpcBuffer)[40] = readset_p->fd_bits[0];
+		((char*)rpcBuffer)[41] = readset_p->fd_bits[1];
+	}
+	if( writeset_p )
+	{
+		((char*)rpcBuffer)[42] = writeset_p->fd_bits[0];
+		((char*)rpcBuffer)[43] = writeset_p->fd_bits[1];
+	}
+	if( exceptset_p )
+	{
+		((char*)rpcBuffer)[44] = exceptset_p->fd_bits[0];
+		((char*)rpcBuffer)[45] = exceptset_p->fd_bits[1];
+	}
+
+
 }
 
 // cmd should be 64 bits wide; I think.
