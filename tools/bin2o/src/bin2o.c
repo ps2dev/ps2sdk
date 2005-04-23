@@ -231,18 +231,21 @@ void create_elf(FILE * dest, const unsigned char * source, u32 size, const char 
 
 void usage() {
     printf("bin2o - Converts a binary file into a .o file.\n"
-           "Usage: bin2o [-a XX] [-n] [-i] infile outfile label\n"
+           "Usage: bin2o [-a XX] [-n] [-i] [-b XX] [-e XX] [-s XX] infile outfile label\n"
 	   "  -i    - create an iop-compatible .o file.\n"
 	   "  -n    - don't add label_size symbol.\n"
 	   "  -a XX - set .data section alignment to XX.\n"
 	   "          (has to be a power of two).\n"
+	   "  -b XX - start reading file at this offset.\n"
+	   "  -e XX - stop reading file at this offset.\n"
+	   "  -s XX - force output data to be of this size.\n"
 	   "\n"
 	  );
 }
 
 int main(int argc, char *argv[])
 {
-    u32 fd_size;
+    u32 fd_size, start = 0, end = 0xffffffff, size = 0xffffffff;
     unsigned char * buffer;
     FILE * source, * dest;
     char * f_source = 0, * f_dest = 0, * f_label = 0;
@@ -274,6 +277,48 @@ int main(int argc, char *argv[])
 		break;
 	    case 'i':
 		have_irx = 1;
+		break;
+	    case 'b':
+		i++;
+		if (!argv[i]) {
+		    usage();
+		    printf("-b requires an argument.\n");
+		    return 1;
+		}
+		if (argv[i][0] == '-') {
+		    usage();
+		    printf("-b requires an argument.\n");
+		    return 1;
+		}
+		start = atoi(argv[i]);
+		break;
+	    case 'e':
+		i++;
+		if (!argv[i]) {
+		    usage();
+		    printf("-e requires an argument.\n");
+		    return 1;
+		}
+		if (argv[i][0] == '-') {
+		    usage();
+		    printf("-e requires an argument.\n");
+		    return 1;
+		}
+		end = atoi(argv[i]);
+		break;
+	    case 's':
+		i++;
+		if (!argv[i]) {
+		    usage();
+		    printf("-s requires an argument.\n");
+		    return 1;
+		}
+		if (argv[i][0] == '-') {
+		    usage();
+		    printf("-s requires an argument.\n");
+		    return 1;
+		}
+		size = atoi(argv[i]);
 		break;
 	    default:
 		usage();
@@ -308,15 +353,21 @@ int main(int argc, char *argv[])
 
     fseek(source, 0, SEEK_END);
     fd_size = ftell(source);
-    fseek(source, 0, SEEK_SET);
+    fseek(source, start, SEEK_SET);
+    
+    if (fd_size < end)
+	end = fd_size;
+    
+    if (end < (size + start))
+	size = end - start;
 
-    buffer = malloc(fd_size);
+    buffer = malloc(size);
     if (buffer == NULL) {
 	printf("Failed to allocate memory.\n");
 	return 1;
     }
 
-    if (fread(buffer, 1, fd_size, source) != fd_size) {
+    if (fread(buffer, 1, size, source) != fd_size) {
 	printf("Failed to read file.\n");
 	return 1;
     }
@@ -327,7 +378,7 @@ int main(int argc, char *argv[])
 	return 1;
     }
     
-    create_elf(dest, buffer, fd_size, f_label);
+    create_elf(dest, buffer, size, f_label);
 
     fclose(dest);
     free(buffer);
