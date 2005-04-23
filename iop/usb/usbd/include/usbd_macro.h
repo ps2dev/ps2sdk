@@ -15,7 +15,7 @@
 #define _USBD_MACRO_H
 
 
-int UsbControlTransfer(int epID, int reqtyp, int req, int val, int index, int leng, void *dataptr, void *doneCB, void* arg)
+static int UsbControlTransfer(int epID, int reqtyp, int req, int val, int index, int leng, void *dataptr, void *doneCB, void* arg)
 
 {
   UsbDeviceRequest devreq; 
