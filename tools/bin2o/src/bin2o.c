@@ -367,7 +367,7 @@ int main(int argc, char *argv[])
 	return 1;
     }
 
-    if (fread(buffer, 1, size, source) != fd_size) {
+    if (fread(buffer, 1, size, source) != size) {
 	printf("Failed to read file.\n");
 	return 1;
     }
