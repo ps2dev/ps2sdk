@@ -9,7 +9,9 @@
 # $Id$
 
 
-SUBDIRS = ahx camera cdvd filexio hdd keyboard memorycard mouse multitap pad poweroff tcpip padx remote
+SUBDIRS = \
+	ahx camera cdvd filexio hdd keyboard memorycard \
+	mouse multitap pad poweroff tcpip padx remote audsrv
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
