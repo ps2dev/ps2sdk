@@ -9,7 +9,7 @@
 # $Id$
 
 
-SUBDIRS = freesd ahx
+SUBDIRS = freesd ahx audsrv
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
