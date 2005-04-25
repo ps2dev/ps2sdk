@@ -29,6 +29,7 @@
 #define STD_IOBUF_TYPE_HOST           16
 #define STD_IOBUF_TYPE_STDOUTHOST     32
 
+extern char __direct_pwd[256];
 
 #ifdef F_clearerr
 /*
@@ -94,7 +95,7 @@ int fclose(FILE *stream)
 #ifdef F_fcloseall
 /*
 **
-**  [func] - fcloseall.
+**  [func] - _fcloseall.
 **  [desc] - attempts to close all the open files. if able to close all the open
 **           files then returns the number of files closed. else returns -1.
 **  [entr] - none.
@@ -103,7 +104,7 @@ int fclose(FILE *stream)
 **  [post] - all open non-system files are closed.
 **
 */
-int fcloseall(void)
+int _fcloseall(void)
 {
   int  i, ret = 0;
   FILE *iob;
@@ -214,7 +215,7 @@ int fflush(FILE *stream)
 #ifdef F_fflushall
 /*
 **
-**  [func] - _fcloseall.
+**  [func] - _fflushall.
 **  [desc] - attempts to flush all the open files with write-access. if able
 **           to flush all the open files with write-access then returns the
 **           number of files flushed. else returns -1.
@@ -423,15 +424,68 @@ FILE *fopen(const char *fname, const char *mode)
       /* search for an available fd slot. */
       for (i = 2; i < _NFILE; ++i) if (__iob[i].fd < 0) break;
       if (i < _NFILE) {
-        /* attempt to open the fname file. */
-        if ((fd = fioOpen((char *)fname, iomode)) >= 0) {
-          __iob[i].type = __stdio_get_fd_type(fname);
+        char * t_fname = fname;
+	char b_fname[FILENAME_MAX];
+        __iob[i].type = __stdio_get_fd_type(fname);
+	if (!strchr(fname, ':')) { // filename doesn't contain device
+	  t_fname = b_fname;
+	  if (fname[0] == '/') {   // does it contain root ?
+	    char * device_end = strchr(__direct_pwd, ':');
+	    if (device_end) {      // yes, let's strip pwd a bit to keep device only
+	      strncpy(b_fname, __direct_pwd, device_end - __direct_pwd);
+	      strcpy(b_fname + (device_end - __direct_pwd), fname);
+	    } else {               // but pwd doesn't contain any device, let's default to host
+	      strcpy(b_fname, "host:");
+	      strcpy(b_fname + 5, fname);
+	    }
+	  } else {                 // otherwise, it's relative directory, let's copy pwd straight
+  	    int b_fname_len = strlen(__direct_pwd);
+	    if (!strchr(__direct_pwd, ':')) { // check if pwd contains device name
+	      strcpy(b_fname, "host:");
+	      strcpy(b_fname + 5, __direct_pwd);
+	      if (__direct_pwd[b_fname_len - 1] == '/') { // does it has trailing slash ?
+	        b_fname[b_fname_len + 5] = '/';
+	        b_fname[b_fname_len + 6] = 0;
+		b_fname_len += 2;
+	      }
+	      b_fname_len += 5;
+	      strcpy(b_fname + b_fname_len, fname);
+	    } else {                          // device name is here
+	      if (b_fname_len) {
+	        strcpy(b_fname, __direct_pwd);
+	        if (b_fname[b_fname_len - 1] != '/') {
+	          b_fname[b_fname_len] = '/';
+	          b_fname[b_fname_len + 1] = 0;
+	          b_fname_len += 2;
+	        }
+	        strcpy(b_fname + b_fname_len, fname);
+	      }
+	    }
+	  }
+	}
+        if ((fd = fioOpen((char *)t_fname, iomode)) >= 0) {
           __iob[i].fd = fd;
           __iob[i].cnt = 0;
           __iob[i].flag = flag;
           __iob[i].has_putback = 0;
           ret = (__iob + i);
-        }
+        } else if ((__iob[i].type == STD_IOBUF_TYPE_CDROM)) {
+	  int fname_len = strlen(t_fname);
+	  if (!((t_fname[fname_len - 2] == ';') && (t_fname[fname_len - 1] == '1'))) {
+	    char cd_fname[fname_len + 3];
+	    strcpy(cd_fname, t_fname);
+	    cd_fname[fname_len + 0] = ';';
+	    cd_fname[fname_len + 1] = '1';
+	    cd_fname[fname_len + 2] = 0;
+    	    if ((fd = fioOpen((char *)t_fname, iomode)) >= 0) {
+              __iob[i].fd = fd;
+              __iob[i].cnt = 0;
+              __iob[i].flag = flag;
+              __iob[i].has_putback = 0;
+              ret = (__iob + i);
+	    }
+	  }
+	}
       }
     }
   }
@@ -491,7 +545,6 @@ FILE *fdopen(int fd, const char *mode)
       /* search for an available fd slot. */
       for (i = 2; i < _NFILE; ++i) if (__iob[i].fd < 0) break;
       if (i < _NFILE) {
-        /* attempt to open the fname file. */
         __iob[i].type = STD_IOBUF_TYPE_NONE;
         __iob[i].fd = fd;
         __iob[i].cnt = 0;
@@ -792,11 +845,24 @@ int getchar(void)
 #endif
 
 
+extern char __direct_pwd[256];
 #ifdef F_getfdtype
 /* the present working directory variable. */
-#if 0
-char __direct_pwd[256];
-#endif
+char __direct_pwd[256] = "";
+
+static struct {
+  char * prefix;
+  int len;
+  int ret;
+} __prefix_types[] = {
+    { "cdrom0:", 7, STD_IOBUF_TYPE_CDROM },
+    { "cdrom:",  6, STD_IOBUF_TYPE_CDROM },
+    { "mc0:",    4, STD_IOBUF_TYPE_MC },
+    { "mc1:",    4, STD_IOBUF_TYPE_MC },
+    { "host0:",  6, STD_IOBUF_TYPE_HOST },
+    { "host:",   5, STD_IOBUF_TYPE_HOST },
+    { 0, 0 }
+};
 
 /*
 **
@@ -812,21 +878,19 @@ char __direct_pwd[256];
 */
 int __stdio_get_fd_type(const char *s)
 {
-  int ret;
+  int i;
+  
+  for (i = 0; __prefix_types[i].prefix; i++) {
+    if (!strncmp(s, __prefix_types[i].prefix, __prefix_types[i].len))
+      return __prefix_types[i].ret;
+  }
 
-  if (strncmp(s, "cdrom0:", 7) == 0) ret = STD_IOBUF_TYPE_CDROM;
-  else if (strncmp(s, "mc0:", 4) == 0) ret = STD_IOBUF_TYPE_MC;
-  else if (strncmp(s, "mc1:", 4) == 0) ret = STD_IOBUF_TYPE_MC;
-  else if (strncmp(s, "host0:", 6) == 0) ret = STD_IOBUF_TYPE_HOST;
-  else if (strncmp(s, "cdrom0:", 7) == 0) ret = STD_IOBUF_TYPE_CDROM;
-#if 0
-  else if (strncmp(__direct_pwd, "mc0:", 4) == 0) ret = STD_IOBUF_TYPE_MC;
-  else if (strncmp(__direct_pwd, "mc1:", 4) == 0) ret = STD_IOBUF_TYPE_MC;
-  else if (strncmp(__direct_pwd, "host0:", 6) == 0) ret = STD_IOBUF_TYPE_HOST;
-  else if (strncmp(__direct_pwd, "cdrom0:", 7) == 0) ret = STD_IOBUF_TYPE_CDROM;
-#endif
-  else ret = -1;
-  return (ret);
+  for (i = 0; __prefix_types[i].prefix; i++) {
+    if (!strncmp(__direct_pwd, __prefix_types[i].prefix, __prefix_types[i].len))
+      return __prefix_types[i].ret;
+  }
+  
+  return -1;
 }
 #endif
 
@@ -1123,19 +1187,6 @@ FILE __iob[_NFILE] = {
 #else
   { STD_IOBUF_TYPE_STDOUTHOST, 0, 0, 0 }, // stdout
 #endif
-  { 0, -1, 0, 0 },
-  { 0, -1, 0, 0 },
-  { 0, -1, 0, 0 },
-  { 0, -1, 0, 0 },
-  { 0, -1, 0, 0 },
-  { 0, -1, 0, 0 },
-  { 0, -1, 0, 0 },
-  { 0, -1, 0, 0 },
-  { 0, -1, 0, 0 },
-  { 0, -1, 0, 0 },
-  { 0, -1, 0, 0 },
-  { 0, -1, 0, 0 },
-  { 0, -1, 0, 0 }
 };
 char __stdio_tmpnam[256];
 #ifdef USE_GS
@@ -1254,9 +1305,27 @@ void __stdio_update_stdout_xy(int x, int y)
 #ifdef F___stdio_internals
 void _ps2sdk_stdio_init()
 {
+    int i;
+    
+    for (i = 3; i < _NFILE; i++) {
+	__iob[i].type = 0;
+	__iob[i].fd = -1;
+	__iob[i].cnt = 0;
+	__iob[i].flag = 0;
+	__iob[i].has_putback = 0;
+	__iob[i].putback = 0;
+    }
 }
 
 void _ps2sdk_stdio_deinit()
 {
+//    _fflushall();  will require libmc...
+    _fcloseall();
+}
+#endif
+
+#ifdef F_chdir
+int chdir(const char *path) {
+    strcpy(__direct_pwd, path);
 }
 #endif

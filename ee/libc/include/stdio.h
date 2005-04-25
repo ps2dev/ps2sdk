@@ -163,6 +163,8 @@ int    ungetc(int, FILE *);
 int    _fcloseall(void);
 int    _fflushall(void);
 
+int    chdir(const char *path);
+
 
 /* from xprintf */
 int vxprintf(void (*func)(char*, int, void *), void * arg, const char * format, va_list ap);
