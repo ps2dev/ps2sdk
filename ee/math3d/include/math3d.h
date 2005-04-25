@@ -20,7 +20,7 @@ extern "C" {
 
  typedef float VECTOR[4];
 
- typedef float MATRIX[4][4];
+ typedef float MATRIX[16];
 
  typedef struct { int x, y, z; float w; } VECTORI;
 
@@ -64,11 +64,15 @@ extern "C" {
 
  void create_world_view(MATRIX world_view, VECTOR translation, VECTOR rotation);
 
- void create_view_screen(MATRIX view_screen, int max_x, int max_y, int max_z, int aspect_x, int aspect_y, float scrz, float nearz, float farz);
+ void create_view_clip(MATRIX view_clip, float aspect, float left, float right, float bottom, float top, float near, float far);
 
- void create_local_screen(MATRIX local_screen, MATRIX local_world, MATRIX world_view, MATRIX view_screen);
+ void create_local_clip(MATRIX local_clip, MATRIX local_world, MATRIX world_view, MATRIX view_clip);
 
- void point_calculate(VECTORI *output, MATRIX local_screen, VECTOR *input, int count);
+ void create_clip_screen(MATRIX clip_screen, float max_x, float max_y, float max_z);
+
+ void point_calculate(VECTORI *output, VECTOR *input, int count, MATRIX local_clip, MATRIX clip_screen);
+
+ void point_calculate_vu0(VECTORI *output, VECTOR *input, int count, MATRIX local_clip, MATRIX clip_screen);
 
 #ifdef __cplusplus
 }
