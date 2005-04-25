@@ -33,6 +33,7 @@ extern "C" {
  #define GRAPH_PSM_32		0x00	// 32 bits per pixel.
  #define GRAPH_PSM_24		0x01	// 24 bits per pixel.
  #define GRAPH_PSM_16		0x02	// 16 bits per pixel.
+ #define GRAPH_PSM_16S		0x0A	// 16 bits per pixel.
  #define GRAPH_PSM_8		0x13	// 8 bits per pixel, palettized.
  #define GRAPH_PSM_4		0x14	// 4 bits per pixel, palettized.
  #define GRAPH_PSM_8H		0x1B	// 8 bits per pixel, palettized.
