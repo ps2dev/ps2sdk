@@ -96,9 +96,10 @@
   if (current_psm < 0) { return -1; }
 
   // Return the bpp of the current mode.
-  if (current_psm == GRAPH_PSM_32) { return 32; } else
-  if (current_psm == GRAPH_PSM_24) { return 24; } else
-  if (current_psm == GRAPH_PSM_16) { return 16; } else { return -1; }
+  if (current_psm == GRAPH_PSM_32)  { return 32; } else
+  if (current_psm == GRAPH_PSM_24)  { return 24; } else
+  if (current_psm == GRAPH_PSM_16)  { return 16; } else
+  if (current_psm == GRAPH_PSM_16S) { return 16; } else { return -1; }
 
   // End function.
   return 0;
@@ -201,9 +202,10 @@
   if (current_zpsm < 0) { return -1; }
 
   // Return the zbpp of the current mode.
-  if (current_zpsm == GRAPH_PSM_32) { return 32; } else
-  if (current_zpsm == GRAPH_PSM_24) { return 24; } else
-  if (current_zpsm == GRAPH_PSM_16) { return 16; } else { return -1; }
+  if (current_zpsm == GRAPH_PSM_32)  { return 32; } else
+  if (current_zpsm == GRAPH_PSM_24)  { return 24; } else
+  if (current_zpsm == GRAPH_PSM_16)  { return 16; } else
+  if (current_zpsm == GRAPH_PSM_16S) { return 16; } else { return -1; }
 
   // End function.
   return 0;
