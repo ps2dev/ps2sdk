@@ -71,7 +71,7 @@ release-include:
 
 release-samples:
 	@if test -d samples ; then \
-	   $(MAKE) -C samples release ; \
+	   $(GNUMAKE) -C samples release ; \
 	fi;
 
 

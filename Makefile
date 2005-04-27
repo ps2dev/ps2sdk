@@ -31,9 +31,9 @@ subdirs: dummy $(subdir_list)
 
 SYSTEM := $(shell uname)
 ifeq ($(SYSTEM),CYGWIN_NT-5.1)
-	MAKEREC = $(MAKE) -C 
+	MAKEREC = $(GNUMAKE) -C 
 else
-	MAKEREC = PS2SDKSRC=$(PS2SDKSRC) $(MAKE) -C 
+	MAKEREC = PS2SDKSRC=$(PS2SDKSRC) $(GNUMAKE) -C 
 endif
 
 $(subdir_list): dummy

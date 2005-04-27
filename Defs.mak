@@ -70,7 +70,6 @@ endif
 # Other utilities
 #
 TOUCH = touch
-MAKE = make
 
 SYSTEM := $(shell uname)
 ifeq ($(SYSTEM),CYGWIN_NT-5.1)
@@ -79,10 +78,12 @@ ifeq ($(SYSTEM),CYGWIN_NT-5.1)
   MKDIR = cyg-mkdir
   RMDIR = cyg-rmdir
   ECHO  = cyg-echo
+  GNUMAKE = make
 else
   MKDIR = mkdir
   RMDIR = rmdir
   ECHO  = echo
+  GNUMAKE = make
 endif
 
 # Aliases used to build source files
