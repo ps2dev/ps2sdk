@@ -30,6 +30,7 @@
 #define STD_IOBUF_TYPE_STDOUTHOST     32
 
 extern char __direct_pwd[256];
+extern int __stdio_initialised;
 
 #ifdef F_clearerr
 /*
@@ -389,6 +390,10 @@ FILE *fopen(const char *fname, const char *mode)
 {
   FILE *ret = NULL;
   int  fd, flag = 0, i, iomode = 0;
+  
+  // some people won't use our crt0...
+  if (!__stdio_initialised)
+    _ps2sdk_stdio_init();
 
   /* ensure file name and mode are not NULL strings. */
   if ((fname != NULL) && (*fname != '\0')) {
@@ -1175,6 +1180,8 @@ int sscanf(const char *buf, const char *format, ...)
 
 #ifdef F_stdio
 /* stdio data variables. */
+int __stdio_initialised = 0;
+
 FILE __iob[_NFILE] = {
   { -1,                 0, 0, 0 },     // stdin
 #ifdef USE_GS
@@ -1315,12 +1322,16 @@ void _ps2sdk_stdio_init()
 	__iob[i].has_putback = 0;
 	__iob[i].putback = 0;
     }
+    
+    __stdio_initialised = 1;
 }
 
 void _ps2sdk_stdio_deinit()
 {
 //    _fflushall();  will require libmc...
     _fcloseall();
+    
+    __stdio_initialised = 0;
 }
 #endif
 
