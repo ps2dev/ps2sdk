@@ -51,6 +51,12 @@ OBJCOPY = objcopy
 STRIP = strip
 
 SYSTEM = $(shell uname)
+
+MKDIR = mkdir
+RMDIR = rmdir
+ECHO  = echo
+GNUMAKE = make
+
 ifeq ($(SYSTEM),CYGWIN_NT-5.1)
   # these versions are used for the cygwin toolchain in a dos environment
   # since they need to overwrite the standard dos versions of each command
@@ -58,9 +64,14 @@ ifeq ($(SYSTEM),CYGWIN_NT-5.1)
   RMDIR = cyg-rmdir
   ECHO  = cyg-echo
   GNUMAKE = make
-else
-  MKDIR = mkdir
-  RMDIR = rmdir
-  ECHO  = echo
-  GNUMAKE = make
+endif
+
+ifeq ($(findstring BSD, $(SYSTEM)), BSD)
+  # *BSD needs gnu make
+  GNUMAKE = gmake
+endif
+
+ifeq ($(SYSTEM), Darwin)
+  # OSX needs gnu make
+  GNUMAKE = gmake
 endif
