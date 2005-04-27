@@ -150,24 +150,24 @@
   // Apply the z-axis rotation.
   matrix_unit(work);
   work[0x00] =  cosf(input1[2]);
-  work[0x01] =  sinf(input1[2]);
-  work[0x04] = -sinf(input1[2]);
+  work[0x01] = -sinf(input1[2]);
+  work[0x04] =  sinf(input1[2]);
   work[0x05] =  cosf(input1[2]);
   matrix_multiply(output, work, input0);
 
   // Apply the y-axis rotation.
   matrix_unit(work);
   work[0x00] =  cosf(input1[1]);
-  work[0x02] = -sinf(input1[1]);
-  work[0x08] =  sinf(input1[1]);
+  work[0x02] =  sinf(input1[1]);
+  work[0x08] = -sinf(input1[1]);
   work[0x0A] =  cosf(input1[1]);
   matrix_multiply(output, work, output);
 
   // Apply the x-axis rotation.
   matrix_unit(work);
   work[0x05] =  cosf(input1[0]);
-  work[0x06] =  sinf(input1[0]);
-  work[0x09] = -sinf(input1[0]);
+  work[0x06] = -sinf(input1[0]);
+  work[0x09] =  sinf(input1[0]);
   work[0x0A] =  cosf(input1[0]);
   matrix_multiply(output, work, output);
 
@@ -268,7 +268,7 @@
   view_clip[0x08] = (right + left) / (right - left);
   view_clip[0x09] = (top + bottom) / (top - bottom);
   view_clip[0x0A] = (far + near) / (far - near);
-  view_clip[0x0B] = 1.00f;
+  view_clip[0x0B] = -1.00f;
   view_clip[0x0E] = (2 * far * near) / (far - near);
   view_clip[0x0F] = 0.00f;
 
@@ -288,34 +288,50 @@
 
   // Create the clip_screen matrix.
   matrix_unit(clip_screen);
-  clip_screen[0x00] = max_x;
+  clip_screen[0x00] = (max_x / 2);
   clip_screen[0x0C] = (max_x / 2);
-  clip_screen[0x05] = max_y;
+  clip_screen[0x05] = (max_y / 2);
   clip_screen[0x0D] = (max_y / 2);
-  clip_screen[0x0A] = -max_z;
-  clip_screen[0x0E] = max_z - (max_z / 2);
+  clip_screen[0x0A] = (max_z / 2);
+  clip_screen[0x0E] = (max_z / 2);
 
  }
 
  void point_calculate(VECTORI *output, VECTOR *input, int count, MATRIX local_clip, MATRIX clip_screen) {
   VECTOR work; int loop0;
 
+  // For each coordinate...
   for (loop0=0;loop0<count;loop0++) {
 
    // Apply the local_clip matrix.
    vector_multiply(work, input[loop0], local_clip);
 
-   // Check for clipping.
-   // FIXME: CLIPPING CHECK HERE.
+   // If the X coordinate is not clipped...
+   if (fabsf(work[0]) < fabsf(work[3])) {
 
-   // Apply the clip_screen matrix.
-   vector_multiply(work, work, clip_screen);
+    // If the Y coordinate is not clipped...
+    if (fabsf(work[1]) < fabsf(work[3])) {
 
-   // Normalize and convert the result.
-   output[loop0].x = (work[0] / work[3]) * 16;
-   output[loop0].y = (work[1] / work[3]) * 16;
-   output[loop0].z = (work[2] / work[3]);
-   output[loop0].w = work[3];
+     // If the Z coordinate is not clipped...
+     if (fabsf(work[2]) < fabsf(work[3])) {
+
+      // Apply the clip_screen matrix.
+      vector_multiply(work, work, clip_screen);
+
+      // Normalize and convert the result.
+      output[loop0].x = (work[0] / work[3]) * 16;
+      output[loop0].y = (work[1] / work[3]) * 16;
+      output[loop0].z = (work[2] / work[3]);
+      output[loop0].w = work[3];
+
+     // Else, set the coordinate as clipped.
+     } else { output[loop0].w = 0.00f; }
+
+    // Else, set the coordinate as clipped.
+    } else { output[loop0].w = 0.00f; }
+
+   // Else, set the coordinate as clipped.
+   } else { output[loop0].w = 0.00f; }
 
   }
 
@@ -331,17 +347,22 @@
    "lqc2		vf06, 0x10(%4)		\n"
    "lqc2		vf07, 0x20(%4)		\n"
    "lqc2		vf08, 0x30(%4)		\n"
-   "1:						\n"
+   "1:						\n" // 1: BEGIN LOOP
    "lqc2		vf09, 0x00(%1)		\n"
-   "vmulax.xyzw		 ACC, vf01, vf09	\n"
-   "vmadday.xyzw	 ACC, vf02, vf09	\n"
-   "vmaddaz.xyzw	 ACC, vf03, vf09	\n"
+   "vmulax.xyzw		ACC, vf01, vf09		\n"
+   "vmadday.xyzw	ACC, vf02, vf09		\n"
+   "vmaddaz.xyzw	ACC, vf03, vf09		\n"
    "vmaddw.xyzw		vf10, vf04, vf09	\n"
    "vclipw.xyz		vf10, vf10		\n"
-   // FIXME: CLIPPING CHECK HERE
-   "vmulax.xyzw		 ACC, vf05, vf10	\n"
-   "vmadday.xyzw	 ACC, vf06, vf10	\n"
-   "vmaddaz.xyzw	 ACC, vf07, vf10	\n"
+   "cfc2		$10, $18		\n"
+   "beq			$10, $0, 3f		\n"
+   "2:						\n" // 2: CLIP FAILED
+   "sqc2		vi00, 0x00(%0)		\n"
+   "j			4f			\n"
+   "3:						\n" // 3: CLIP PASSED
+   "vmulax.xyzw		ACC, vf05, vf10		\n"
+   "vmadday.xyzw	ACC, vf06, vf10		\n"
+   "vmaddaz.xyzw	ACC, vf07, vf10		\n"
    "vmaddw.xyzw		vf11, vf08, vf10	\n"
    "vdiv		Q, vf0w, vf11w		\n"
    "vwaitq					\n"
@@ -350,10 +371,12 @@
    "vftoi0.z		vf12, vf11		\n"
    "vmove.w		vf12, vf11		\n"
    "sqc2		vf12, 0x00(%0)		\n"
+   "4:						\n" // 4: END LOOP
    "addi		%0, 0x10		\n"
    "addi		%1, 0x10		\n"
    "addi		%2, -1			\n"
    "bne			$0, %2, 1b		\n"
-   : : "r" (output), "r" (input), "r" (count), "r" (local_clip), "r" (clip_screen)
+   : : "r" (output), "r" (input), "r" (count), "r" (local_clip), "r" (clip_screen) : "$10"
   );
+
  }

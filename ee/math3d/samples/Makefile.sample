@@ -9,7 +9,7 @@
 
 EE_BIN = math3d.elf
 EE_OBJS = math3d.o
-EE_LIBS = -ldma -lgraph -lmath3d -lmf -lpacket
+EE_LIBS = -lgraph -lmath3d -ldma -lmf -lpacket
 
 all: $(EE_BIN)
 	ee-strip --strip-all $(EE_BIN)

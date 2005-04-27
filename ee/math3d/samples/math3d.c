@@ -69,20 +69,11 @@
   MATRIX local_clip;
   MATRIX clip_screen;
 
-  // Initialize the dma library.
-  dma_initialize();
-
-  // Initialize the graphics library.
-  graph_initialize();
-
   // Allocate space for the packet.
   packet_allocate(&packet, 1024);
 
   // Set the graphics mode.
-  graph_set_mode(GRAPH_MODE_NTSC, GRAPH_PSM_32, GRAPH_PSM_32);		// NTSC (640x448i@60Hz)
-  // graph_mode_set(GRAPH_MODE_PAL,  GRAPH_PSM_32, GRAPH_PSM_32);	// PAL  (640x512i@50Hz)
-  // graph_mode_set(GRAPH_MODE_HDTV, GRAPH_PSM_32, GRAPH_PSM_32);	// HDTV (720x420p@60Hz)
-  // graph_mode_set(GRAPH_MODE_VGA,  GRAPH_PSM_32, GRAPH_PSM_32);	// VGA  (640x480p@60Hz)
+  graph_set_mode(GRAPH_MODE_NTSC, GRAPH_PSM_32, GRAPH_PSM_32);
 
   // Set the display buffer address.
   graph_set_displaybuffer(0);
@@ -91,21 +82,20 @@
   graph_set_drawbuffer(0);
 
   // Set the zbuffer address.
-  graph_set_zbuffer(graph_get_width() * graph_get_height() * (graph_get_bpp() >> 3));
+  graph_set_zbuffer(graph_get_size() * (graph_get_bpp() >> 3));
 
-  // Create the view_clip matrix.
-  // ASPECT = (4 / 3) * (448 / 640) = 0.933f
-  create_view_clip(view_clip, 0.933f, -5.00f, 5.00f, -5.00f, 5.00f, 1.00f, 10000.00f);
+  // Create the view_clip matrix. (ASPECT = (4 / 3) * (448 / 640) = 0.933f)
+  create_view_clip(view_clip, 0.933f, -2.00f, 2.00f, -2.00f, 2.00f, 1.00f, 1000.00f);
 
   // Create the clip_screen matrix.
-  create_clip_screen(clip_screen, 4096, 4096, 16777215.00f);
+  create_clip_screen(clip_screen, 4096.00f, 4096.00f, 16777215.00f);
 
   // The main loop...
   for (;;) {
 
    // Spin the cube a bit.
-   object_rotation[0] += 0.020f; if (object_rotation[0] > 3.14f) { object_rotation[0] -= 6.28f; }
-   object_rotation[1] += 0.012f; if (object_rotation[1] > 3.14f) { object_rotation[1] -= 6.28f; }
+   object_rotation[0] += 0.028f; while (object_rotation[0] > 3.14f) { object_rotation[0] -= 6.28f; }
+   object_rotation[1] += 0.012f; while (object_rotation[1] > 3.14f) { object_rotation[1] -= 6.28f; }
 
    // Create the local_world matrix. (object space)
    create_local_world(local_world, object_position, object_rotation);
@@ -118,7 +108,6 @@
 
    // Apply the local_screen matrix to the points.
    point_calculate(pointsi, points, 8, local_clip, clip_screen);
-   // point_calculate_vu0(pointsi, points, 8, local_clip, clip_screen);
 
    // Wait for the vsync period.
    graph_wait_vsync();
@@ -155,34 +144,44 @@
 
    // Draw the lines.
    for (loop0=0;loop0<12;loop0++) {
-    packet_append_64(&packet, GIF_SET_TAG(4, 1, 1, GIF_SET_PRIM(1, 1, 0, 0, 0, 1, 0, 0, 0), GIF_TAG_PACKED, 1));
-    packet_append_64(&packet, 0x0E);
-    packet_append_64(&packet, GIF_SET_RGBAQ(0x00, 0x00, 0x00, 0x80, 0x3F800000));
-    packet_append_64(&packet, GIF_REG_RGBAQ);
-    packet_append_64(&packet, GIF_SET_XYZ(pointsi[lines[loop0][0]].x, pointsi[lines[loop0][0]].y, pointsi[lines[loop0][0]].z));
-    packet_append_64(&packet, GIF_REG_XYZ2);
-    packet_append_64(&packet, GIF_SET_RGBAQ(0x00, 0x00, 0x00, 0x80, 0x3F800000));
-    packet_append_64(&packet, GIF_REG_RGBAQ);
-    packet_append_64(&packet, GIF_SET_XYZ(pointsi[lines[loop0][1]].x, pointsi[lines[loop0][1]].y, pointsi[lines[loop0][1]].z));
-    packet_append_64(&packet, GIF_REG_XYZ2);
+    if (pointsi[lines[loop0][0]].w != 0) {
+     if (pointsi[lines[loop0][1]].w != 0) {
+      packet_append_64(&packet, GIF_SET_TAG(4, 1, 1, GIF_SET_PRIM(1, 1, 0, 0, 0, 1, 0, 0, 0), GIF_TAG_PACKED, 1));
+      packet_append_64(&packet, 0x0E);
+      packet_append_64(&packet, GIF_SET_RGBAQ(0x00, 0x00, 0x00, 0x80, 0x3F800000));
+      packet_append_64(&packet, GIF_REG_RGBAQ);
+      packet_append_64(&packet, GIF_SET_XYZ(pointsi[lines[loop0][0]].x, pointsi[lines[loop0][0]].y, pointsi[lines[loop0][0]].z));
+      packet_append_64(&packet, GIF_REG_XYZ2);
+      packet_append_64(&packet, GIF_SET_RGBAQ(0x00, 0x00, 0x00, 0x80, 0x3F800000));
+      packet_append_64(&packet, GIF_REG_RGBAQ);
+      packet_append_64(&packet, GIF_SET_XYZ(pointsi[lines[loop0][1]].x, pointsi[lines[loop0][1]].y, pointsi[lines[loop0][1]].z));
+      packet_append_64(&packet, GIF_REG_XYZ2);
+     }
+    }
    }
 
    // Draw the triangles.
    for (loop0=0;loop0<12;loop0++) {
-    packet_append_64(&packet, GIF_SET_TAG(6, 1, 1, GIF_SET_PRIM(3, 1, 0, 0, 0, 0, 0, 0, 0), GIF_TAG_PACKED, 1));
-    packet_append_64(&packet, 0x0E);
-    packet_append_64(&packet, colours[loop0 >> 2]);
-    packet_append_64(&packet, GIF_REG_RGBAQ);
-    packet_append_64(&packet, GIF_SET_XYZ(pointsi[triangles[loop0][0]].x, pointsi[triangles[loop0][0]].y, pointsi[triangles[loop0][0]].z));
-    packet_append_64(&packet, GIF_REG_XYZ2);
-    packet_append_64(&packet, colours[loop0 >> 2]);
-    packet_append_64(&packet, GIF_REG_RGBAQ);
-    packet_append_64(&packet, GIF_SET_XYZ(pointsi[triangles[loop0][1]].x, pointsi[triangles[loop0][1]].y, pointsi[triangles[loop0][1]].z));
-    packet_append_64(&packet, GIF_REG_XYZ2);
-    packet_append_64(&packet, colours[loop0 >> 2]);
-    packet_append_64(&packet, GIF_REG_RGBAQ);
-    packet_append_64(&packet, GIF_SET_XYZ(pointsi[triangles[loop0][2]].x, pointsi[triangles[loop0][2]].y, pointsi[triangles[loop0][2]].z));
-    packet_append_64(&packet, GIF_REG_XYZ2);
+    if (pointsi[triangles[loop0][0]].w != 0) {
+     if (pointsi[triangles[loop0][1]].w != 0) {
+      if (pointsi[triangles[loop0][2]].w != 0) {
+       packet_append_64(&packet, GIF_SET_TAG(6, 1, 1, GIF_SET_PRIM(3, 1, 0, 0, 0, 0, 0, 0, 0), GIF_TAG_PACKED, 1));
+       packet_append_64(&packet, 0x0E);
+       packet_append_64(&packet, colours[loop0 >> 2]);
+       packet_append_64(&packet, GIF_REG_RGBAQ);
+       packet_append_64(&packet, GIF_SET_XYZ(pointsi[triangles[loop0][0]].x, pointsi[triangles[loop0][0]].y, pointsi[triangles[loop0][0]].z));
+       packet_append_64(&packet, GIF_REG_XYZ2);
+       packet_append_64(&packet, colours[loop0 >> 2]);
+       packet_append_64(&packet, GIF_REG_RGBAQ);
+       packet_append_64(&packet, GIF_SET_XYZ(pointsi[triangles[loop0][1]].x, pointsi[triangles[loop0][1]].y, pointsi[triangles[loop0][1]].z));
+       packet_append_64(&packet, GIF_REG_XYZ2);
+       packet_append_64(&packet, colours[loop0 >> 2]);
+       packet_append_64(&packet, GIF_REG_RGBAQ);
+       packet_append_64(&packet, GIF_SET_XYZ(pointsi[triangles[loop0][2]].x, pointsi[triangles[loop0][2]].y, pointsi[triangles[loop0][2]].z));
+       packet_append_64(&packet, GIF_REG_XYZ2);
+      }
+     }
+    }
    }
 
    // Send off the packet.
