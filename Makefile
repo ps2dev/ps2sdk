@@ -9,7 +9,7 @@
 # $Id$
 
 ifeq (x$(PS2SDKSRC), x)
-PS2SDKSRC=`pwd`
+  export PS2SDKSRC=$(shell pwd)
 endif
 
 SUBDIRS = tools iop ee common samples
@@ -28,13 +28,6 @@ subdir_list  = $(patsubst %,all-%,$(SUBDIRS))
 subdir_clean = $(patsubst %,clean-%,$(SUBDIRS))
 subdir_release = $(patsubst %,release-%,$(SUBDIRS))
 subdirs: dummy $(subdir_list)
-
-SYSTEM := $(shell uname)
-ifeq ($(SYSTEM),CYGWIN_NT-5.1)
-	MAKEREC = $(GNUMAKE) -C 
-else
-	MAKEREC = PS2SDKSRC=$(PS2SDKSRC) $(GNUMAKE) -C 
-endif
 
 $(subdir_list): dummy
 	$(MAKEREC) $(patsubst all-%,%,$@)
