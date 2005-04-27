@@ -14,6 +14,9 @@ IOP_BIN_DIR = bin/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
+ifeq ($(DEBUG),1)
+DEBUG_FLAGS = -DDEBUG -DLWIP_DEBUG
+endif
 
 LWIP=$(PS2SDKSRC)/iop/tcpip/lwip
 
@@ -34,13 +37,13 @@ ps2api_IPV4 := $(ps2api_IPV4:%=$(IOP_OBJS_DIR)%)
 # Turns DHCP on.
 
 ifdef PS2IP_DHCP
-IOP_CFLAGS += -DPS2IP_DHCP
+IOP_CFLAGS += -DPS2IP_DHCP -DLWIP_DHCP
 endif
 
 IOP_BIN = bin/ps2ip.irx
 IOP_OBJS = $(ps2ip_OBJECTS) $(ps2api_OBJECTS) $(ps2api_IPV4)
 IOP_INCS += -I$(LWIP)/src/include -I$(LWIP)/src/include/ipv4 -Isrc/include
-IOP_CFLAGS += -Wall -fno-builtin-printf -DLWIP_NOASSERT
+IOP_CFLAGS += -Wall -fno-builtin-printf -DLWIP_NOASSERT $(DEBUG_FLAGS)
 IOP_LDFLAGS += -s
 
 
