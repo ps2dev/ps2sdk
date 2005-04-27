@@ -136,12 +136,24 @@ size_t sio_read(void *buf, size_t size)
 int sio_puts(const char *str)
 {
 	int res;
-
-	res = sio_write((void *)str, strlen(str));
-
+	
+	res = sio_putsn(str);
+	
 	sio_putc('\r');
 	sio_putc('\n');
 	return res + 2;
+}
+#endif
+
+#ifdef F_sio_putsn
+int sio_putsn(const char *str)
+{
+	int res;
+
+	for (res = 0; *str; res++, str++)
+	    sio_putc(*str);
+
+	return res;
 }
 #endif
 

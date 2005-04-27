@@ -73,6 +73,7 @@ size_t sio_write(void *buf, size_t size);
 size_t sio_read(void *buf, size_t size);
 
 int sio_puts(const char *str);
+int sio_putsn(const char *str); // no newline for this one
 char *sio_gets(char *str);
 
 void sio_flush(void);
