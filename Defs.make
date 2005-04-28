@@ -50,14 +50,18 @@ AR = ar
 OBJCOPY = objcopy
 STRIP = strip
 
-SYSTEM = $(shell uname)
+#
+# Definitions for local shell operations
+#
 
 MKDIR = mkdir
 RMDIR = rmdir
 ECHO  = echo
 GNUMAKE = make
 
-ifeq ($(SYSTEM),CYGWIN_NT-5.1)
+SYSTEM = $(shell uname)
+
+ifeq ($(findstring Windows, $(SYSTEM)), Windows)
   # these versions are used for the cygwin toolchain in a dos environment
   # since they need to overwrite the standard dos versions of each command
   MKDIR = cyg-mkdir
