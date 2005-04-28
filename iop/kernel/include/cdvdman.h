@@ -103,9 +103,11 @@ int sceCdPause(void);
 #define I_sceCdPause DECLARE_IMPORT(38 , sceCdPause)
 int sceCdBreak(void);
 #define I_sceCdBreak DECLARE_IMPORT(39, sceCdBreak)
-u32 sceCdGetReadPos(void);
-#define I_sceCdReadConsoleID DECLARE_IMPORT(41, sceCdReadConsoleID)
+int sceCdReadCdda(u32 lsn, u32 sectors, void *buf, cd_read_mode_t *mode);
+#define I_sceCdReadCdda DECLARE_IMPORT(40 , sceCdReadCdda)
 int sceCdReadConsoleID( u32 *res, int *idBuf );
+#define I_sceCdReadConsoleID DECLARE_IMPORT(41, sceCdReadConsoleID)
+u32 sceCdGetReadPos(void);
 #define I_sceCdGetReadPos DECLARE_IMPORT(44 , sceCdGetReadPos)
 int sceCdMmode(int mode);
 #define I_sceCdMmode DECLARE_IMPORT(75 , sceCdMmode)
@@ -132,6 +134,7 @@ int sceCdMmode(int mode);
 #define CdCallback sceCdCallback
 #define CdPause sceCdPause
 #define CdBreak sceCdBreak
+#define CdReadCdda sceCdReadCdda
 #define CdGetReadPos sceCdGetReadPos
 #define CdMmode sceCdMmode
 
