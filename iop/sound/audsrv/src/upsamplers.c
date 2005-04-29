@@ -277,6 +277,12 @@ static int up_22050_16_stereo(struct upsample_t *up)
 	return 470; /* (22050 / 48000) * 256 * 2 * 2 */
 }
 
+static int up_44100_16_mono(struct upsample_t *up)
+{
+	up_generic_16_mono(up, up_44100_lut);
+	return 470; /* (44100 / 48000) * 256 * 2 */
+}
+
 static int up_44100_16_stereo(struct upsample_t *up)
 {
 	up_generic_16_stereo(up, up_44100_lut);
@@ -307,7 +313,8 @@ static entry_t upsamplers[] =
 	{22050, 16, 1, up_22050_16_mono},
 	{22050, 16, 2, up_22050_16_stereo},
 	{24000, 16, 2, up_24000_16_stereo},
-	{44110, 16, 2, up_44100_16_stereo},
+	{44100, 16, 1, up_44100_16_mono},
+	{44100, 16, 2, up_44100_16_stereo},
 	{48000, 16, 2, up_48000_16_stereo},
 	{0, 0, 0, 0}
 };
