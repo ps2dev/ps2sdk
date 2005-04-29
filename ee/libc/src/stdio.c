@@ -427,14 +427,14 @@ FILE *fopen(const char *fname, const char *mode)
         }
       }
       /* search for an available fd slot. */
-      for (i = 2; i < _NFILE; ++i) if (__iob[i].fd < 0) break;
+      for (i = 3; i < _NFILE; ++i) if (__iob[i].fd < 0) break;
       if (i < _NFILE) {
         char * t_fname = fname;
 	char b_fname[FILENAME_MAX];
         __iob[i].type = __stdio_get_fd_type(fname);
 	if (!strchr(fname, ':')) { // filename doesn't contain device
 	  t_fname = b_fname;
-	  if (fname[0] == '/') {   // does it contain root ?
+	  if (fname[0] == '/' || fname[0] == '\\' ) {   // does it contain root ?
 	    char * device_end = strchr(__direct_pwd, ':');
 	    if (device_end) {      // yes, let's strip pwd a bit to keep device only
 	      strncpy(b_fname, __direct_pwd, device_end - __direct_pwd);
@@ -448,20 +448,28 @@ FILE *fopen(const char *fname, const char *mode)
 	    if (!strchr(__direct_pwd, ':')) { // check if pwd contains device name
 	      strcpy(b_fname, "host:");
 	      strcpy(b_fname + 5, __direct_pwd);
-	      if (__direct_pwd[b_fname_len - 1] == '/') { // does it has trailing slash ?
-	        b_fname[b_fname_len + 5] = '/';
-	        b_fname[b_fname_len + 6] = 0;
-		b_fname_len += 2;
+	      if (!(__direct_pwd[b_fname_len - 1] == '/' || __direct_pwd[b_fname_len - 1] == '\\')) { // does it has trailing slash ?
+ 	        if(__iob[i].type == STD_IOBUF_TYPE_CDROM)
+	      	 b_fname[b_fname_len + 5] = '\\';
+      	    else 
+             b_fname[b_fname_len + 5] = '/';
+	        // b_fname[b_fname_len + 6] = 0; 
+		    // b_fname_len += 2;
+		    b_fname_len++;
 	      }
 	      b_fname_len += 5;
 	      strcpy(b_fname + b_fname_len, fname);
 	    } else {                          // device name is here
 	      if (b_fname_len) {
 	        strcpy(b_fname, __direct_pwd);
-	        if (b_fname[b_fname_len - 1] != '/') {
-	          b_fname[b_fname_len] = '/';
-	          b_fname[b_fname_len + 1] = 0;
-	          b_fname_len += 2;
+	        if (!(b_fname[b_fname_len - 1] == '/' || b_fname[b_fname_len - 1] == '\\')) {
+	          if(__iob[i].type == STD_IOBUF_TYPE_CDROM)
+	          	b_fname[b_fname_len] = '\\';
+          	  else
+          	    b_fname[b_fname_len] = '/';
+          	  // b_fname[b_fname_len + 1] = 0; // #neofar
+          	  // b_fname_len += 2;
+          	  b_fname_len++;
 	        }
 	        strcpy(b_fname + b_fname_len, fname);
 	      }
@@ -482,7 +490,7 @@ FILE *fopen(const char *fname, const char *mode)
 	    cd_fname[fname_len + 0] = ';';
 	    cd_fname[fname_len + 1] = '1';
 	    cd_fname[fname_len + 2] = 0;
-    	    if ((fd = fioOpen((char *)t_fname, iomode)) >= 0) {
+    	    if ((fd = fioOpen((char *)cd_fname, iomode)) >= 0) {
               __iob[i].fd = fd;
               __iob[i].cnt = 0;
               __iob[i].flag = flag;
