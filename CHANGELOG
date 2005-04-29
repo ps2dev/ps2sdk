@@ -8,6 +8,10 @@
 #
 # $Id$
 
+
+2005-04-28
+  - pixel and neofar, added chdir and tweaked fopen
+
 2005-04-24
   - gawd, added audsrv
 
