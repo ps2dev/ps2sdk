@@ -82,6 +82,30 @@ loop:
 	move	$4,$0
 	syscall			# FlushCache(0) - Writeback data cache
 
+# Let's try to set up the initial cwd; have to pass on argc and argv.
+# That may be used for other purposes as well, such as tweaking the command
+# line on the fly, while providing gnu-style "generic option system".
+
+# Check for arguments pased via ExecPS2 or LoadExecPS2
+	la	$2, _args
+	lw	$3, ($2)
+	bnez	$3, 1f
+	nop
+
+# Otherwise check for arguments passed by a loader via a0 (_arg_ptr)
+	la	$2, _args_ptr
+	lw	$3, ($2)
+	beqzl	$3, 2f
+	addu	$4, $0, 0
+
+	addiu	$2, $3, 4
+1:
+	lw	$4, ($2)
+	addiu	$5, $2, 4
+2:
+	jal	_ps2sdk_args_parse
+	nop
+
 	# Call ps2sdk's libc initialisation.
 	jal	_ps2sdk_libc_init
 	nop
@@ -94,6 +118,7 @@ loop:
 	jalr	$8
 	nop
 1:
+
 
 # Jump main, now that environment and args are setup
 	ei

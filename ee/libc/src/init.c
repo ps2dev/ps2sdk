@@ -18,6 +18,8 @@ void _ps2sdk_stdio_deinit();
 void _ps2sdk_stdlib_init();
 void _ps2sdk_stdlib_deinit();
 
+int chdir(const char *path);
+
 __attribute__((weak))
 void _ps2sdk_libc_init()
 {
@@ -32,4 +34,30 @@ void _ps2sdk_libc_deinit()
     _ps2sdk_stdlib_deinit();
     _ps2sdk_stdio_deinit();
     _ps2sdk_alloc_deinit();
+}
+
+__attribute__((weak))
+void _ps2sdk_args_parse(int argc, char ** argv)
+{
+    if (argc == 0) // naplink!
+    {
+	chdir("host:");
+    } else {
+	char * p, * s = 0;
+	// let's find the last slash, or at worst, the :
+	for (p = argv[0]; *p; p++) {
+	    if ((*p == '/') || (*p == '\\') || (*p == ':')) {
+		s = p;
+	    }
+	}
+	// Nothing?! strange, let's use host.
+	if (!s) {
+	    chdir("host:");
+	} else {
+	    char backup = *(++s);
+	    *s = 0;
+	    chdir(argv[0]);
+	    *s = backup;
+	}
+    }
 }
