@@ -14,6 +14,8 @@
 #ifndef IOP_SYSCLIB_H
 #define IOP_SYSCLIB_H
 
+#include <stdarg.h>
+
 #include "types.h"
 #include "irx.h"
 #include "setjmp.h"
@@ -41,10 +43,15 @@ void *memmove(void *dest, const void *src, size_t size);
 #define I_memmove DECLARE_IMPORT(13, memmove)
 void * memset(void *ptr, int c, size_t size);
 #define I_memset DECLARE_IMPORT(14, memset)
+int bcmp(const void *, const void *, size_t);
+#define I_bcmp DECLARE_IMPORT(15, bcmp);
+void bcopy(const void *, void *, size_t);
+#define I_bcopy DECLARE_IMPORT(16, bcopy);
+void bzero(void *, size_t);
+#define I_bzero DECLARE_IMPORT(17, bzero);
 
 int sprintf(char *str, const char *format, ...);
 #define I_sprintf DECLARE_IMPORT(19, sprintf)
-
 char *strcat(char *dest, const char *src);
 #define I_strcat DECLARE_IMPORT(20, strcat)
 char *strchr(const char *s, int c);
@@ -81,6 +88,9 @@ long strtol(const char *s, char **endptr, int base);
 #define I_strtol DECLARE_IMPORT(36, strtol)
 unsigned long strtoul(const char *s, char **endptr, int base);
 #define I_strtoul DECLARE_IMPORT(38, strtoul)
+
+int vsprintf(char *, const char *, va_list);
+#define I_vsprintf DECLARE_IMPORT(42, vsprintf)
 
 #define sysclib_IMPORTS \
 	sysclib_IMPORTS_start \

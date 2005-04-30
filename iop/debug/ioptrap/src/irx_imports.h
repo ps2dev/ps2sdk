@@ -3,7 +3,7 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
+# Copyright (c) 2001, 2005 ps2dev - http;//www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
@@ -17,14 +17,10 @@
 #include "irx.h"
 
 /* Please keep these in alphabetical order!  */
-#include "excepman.h"
 #include "loadcore.h"
-#include "intrman.h"
-#include "sifman.h"
+#include "sifcmd.h"
 #include "stdio.h"
 #include "sysclib.h"
-#ifdef TEST_TRAP
 #include "thbase.h"
-#endif
 
 #endif /* IOP_IRX_IMPORTS_H */

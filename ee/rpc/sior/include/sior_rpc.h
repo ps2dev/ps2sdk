@@ -1,3 +1,4 @@
+/*
 # _____     ___ ____     ___ ____
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
@@ -7,11 +8,22 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 # $Id$
+# EE-side SIO remote service.
+*/
 
+#ifndef __SIOR_RPC_H__
+#define __SIOR_RPC_H__
 
-SUBDIRS = ioptrap sior
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+#define	SIOR_IRX              0xC001510
 
+int SIOR_Init(int priority);
 
+#ifdef __cplusplus
+}
+#endif
+
+#endif

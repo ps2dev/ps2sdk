@@ -9,9 +9,23 @@
 # $Id$
 
 
-SUBDIRS = \
-	ahx camera cdvd filexio hdd keyboard memorycard \
-	mouse multitap pad poweroff sior tcpip padx remote audsrv
+IOP_OBJS_DIR = obj/
+IOP_BIN_DIR = bin/
+IOP_SRC_DIR = src/
+IOP_INC_DIR = include/
+
+IOP_BIN  = bin/sior.irx
+IOP_OBJS = obj/sior.o obj/exports.o obj/imports.o
+IOP_INCS = 
+
+IOP_CFLAGS  += -Wall -fno-builtin-printf
+IOP_LDFLAGS += -s
+
+all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
+
+clean:
+	rm -f -r $(IOP_OBJS_DIR) $(IOP_BIN_DIR)
 
 include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+include $(PS2SDKSRC)/iop/Rules.make
+include $(PS2SDKSRC)/iop/Rules.release
