@@ -1,0 +1,22 @@
+DECLARE_EXPORT_TABLE(sior, 1, 1)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	
+	DECLARE_EXPORT(sio_init)
+/*05*/  DECLARE_EXPORT(sio_putc)
+	DECLARE_EXPORT(sio_getc)
+	DECLARE_EXPORT(sio_getc_block)
+	DECLARE_EXPORT(sio_write)
+	DECLARE_EXPORT(sio_read)
+/*10*/	DECLARE_EXPORT(sio_puts)
+	DECLARE_EXPORT(sio_putsn)
+	DECLARE_EXPORT(sio_gets)
+	DECLARE_EXPORT(sio_flush)
+	DECLARE_EXPORT(sio_printf)
+/*15*/	DECLARE_EXPORT(sio_vprintf)
+	
+END_EXPORT_TABLE
+
+void _retonly() {}
