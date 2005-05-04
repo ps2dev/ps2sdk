@@ -1,0 +1,20 @@
+DECLARE_EXPORT_TABLE(audsrv, 1, 1)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	
+	DECLARE_EXPORT(audsrv_init)
+/*05*/  DECLARE_EXPORT(audsrv_format_ok)
+	DECLARE_EXPORT(audsrv_set_format)
+	DECLARE_EXPORT(audsrv_wait_audio)
+	DECLARE_EXPORT(audsrv_play_audio)
+	DECLARE_EXPORT(audsrv_stop_audio)
+/*10*/	DECLARE_EXPORT(audsrv_set_volume)
+	DECLARE_EXPORT(audsrv_quit)
+	DECLARE_EXPORT(audsrv_play_cd)
+	DECLARE_EXPORT(audsrv_set_cdvol)
+	DECLARE_EXPORT(audsrv_stop_cd)
+END_EXPORT_TABLE
+
+void _retonly() {}

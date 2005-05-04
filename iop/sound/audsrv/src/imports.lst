@@ -44,6 +44,7 @@ sifcmd_IMPORTS_end
 
 loadcore_IMPORTS_start
 I_FlushDcache
+I_RegisterLibraryEntries
 loadcore_IMPORTS_end
 
 thsemap_IMPORTS_start

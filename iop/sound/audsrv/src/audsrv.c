@@ -31,6 +31,11 @@
  * \date 04-24-05
  */
 
+IRX_ID("audsrv", 1, 1);
+
+struct irx_export_table _exp_audsrv;
+
+
 #define VERSION "0.75"
 
 /* globals */
@@ -647,6 +652,11 @@ static int create_thread(void *func, int priority, void *param)
 int _start()
 {
 	int rpc_tid;
+	
+	if (RegisterLibraryEntries(&_exp_audsrv)) {
+		printf("audsrv: couldn't register itself.\n");
+		return 1;
+	}
 
 	printf("audsrv: greetings from version " VERSION " !\n");
 
