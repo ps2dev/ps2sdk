@@ -45,37 +45,37 @@ extern "C" {
 #define audsrv_IMPORTS_end END_IMPORT_TABLE
 
 int audsrv_init();
-#define I_audsrv_init DECLARE_IMPORT(audsrv_init, 4)
+#define I_audsrv_init DECLARE_IMPORT(4, audsrv_init)
 
 int audsrv_format_ok(int freq, int bits, int channels);
-#define I_audsrv_format_ok DECLARE_IMPORT(audsrv_format_ok, 5)
+#define I_audsrv_format_ok DECLARE_IMPORT(5, audsrv_format_ok)
 
 int audsrv_set_format(int freq, int bits, int channels);
-#define I_audsrv_set_format DECLARE_IMPORT(audsrv_set_format, 6)
+#define I_audsrv_set_format DECLARE_IMPORT(6, audsrv_set_format)
 
 int audsrv_wait_audio(int buflen);
-#define I_audsrv_wait_audio DECLARE_IMPORT(audsrv_wait_audio, 7)
+#define I_audsrv_wait_audio DECLARE_IMPORT(7, audsrv_wait_audio)
 
 int audsrv_play_audio(const char *buf, int buflen);
-#define I_audsrv_play_audio DECLARE_IMPORT(audsrv_play_audio, 8)
+#define I_audsrv_play_audio DECLARE_IMPORT(8, audsrv_play_audio)
 
 int audsrv_stop_audio();
-#define I_audsrv_stop_audio DECLARE_IMPORT(audsrv_stop_audio, 9)
+#define I_audsrv_stop_audio DECLARE_IMPORT(9, audsrv_stop_audio)
 
 int audsrv_set_volume(int vol);
-#define I_audsrv_set_volume DECLARE_IMPORT(audsrv_set_volume, 10)
+#define I_audsrv_set_volume DECLARE_IMPORT(10, audsrv_set_volume)
 
 int audsrv_quit();
-#define I_audsrv_quit DECLARE_IMPORT(audsrv_quit, 11)
+#define I_audsrv_quit DECLARE_IMPORT(11, audsrv_quit)
 
 int audsrv_play_cd(int track);
-#define I_audsrv_play_cd DECLARE_IMPORT(audsrv_play_cd, 12)
+#define I_audsrv_play_cd DECLARE_IMPORT(12, audsrv_play_cd)
 
 int audsrv_set_cdvol(int vol);
-#define I_audsrv_set_cdvol DECLARE_IMPORT(audsrv_set_cdvol, 13)
+#define I_audsrv_set_cdvol DECLARE_IMPORT(13, audsrv_set_cdvol)
 
 int audsrv_stop_cd();
-#define I_audsrv_stop_cd DECLARE_IMPORT(audsrv_stop_cd, 14)
+#define I_audsrv_stop_cd DECLARE_IMPORT(14, audsrv_stop_cd)
 
 #ifdef __cplusplus
 }
