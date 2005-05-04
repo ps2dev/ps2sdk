@@ -41,6 +41,9 @@ extern "C" {
 #define AUDSRV_ERR_OUT_OF_MEMORY           0x0004
 #define AUDSRV_ERR_ARGS                    0x0005
 
+#define audsrv_IMPORTS_start DECLARE_IMPORT_TABLE(audsrv, 1, 1)
+#define audsrv_IMPORTS_end END_IMPORT_TABLE
+
 int audsrv_init();
 #define I_audsrv_init DECLARE_IMPORT(audsrv_init, 4)
 
