@@ -82,7 +82,7 @@
   graph_set_drawbuffer(0);
 
   // Set the zbuffer address.
-  graph_set_zbuffer(graph_get_size() * (graph_get_bpp() >> 3));
+  graph_set_zbuffer(graph_get_size());
 
   // Create the view_clip matrix. (ASPECT = (4 / 3) * (448 / 640) = 0.933f)
   create_view_clip(view_clip, 0.933f, -2.00f, 2.00f, -2.00f, 2.00f, 1.00f, 1000.00f);

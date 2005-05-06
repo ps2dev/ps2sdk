@@ -92,14 +92,30 @@
   // If no mode is set, return an error.
   if (current_mode < 0) { return -1; }
 
-  // If no psm is set, return an error.
-  if (current_psm < 0) { return -1; }
-
-  // Return the bpp of the current mode.
+  // Return the framebuffer bpp of the current mode.
   if (current_psm == GRAPH_PSM_32)  { return 32; } else
   if (current_psm == GRAPH_PSM_24)  { return 24; } else
   if (current_psm == GRAPH_PSM_16)  { return 16; } else
   if (current_psm == GRAPH_PSM_16S) { return 16; } else { return -1; }
+
+  // End function.
+  return 0;
+
+ }
+
+ int graph_get_displayfield(void) {
+
+  // If we are not initialized, initialize the library.
+  if (graph_initialized < 0) { if (graph_initialize() < 0) { return -1; } }
+
+  // If no mode is set, return an error.
+  if (current_mode < 0) { return -1; }
+
+  // If the current mode isn't interlaced, both fields are displayed.
+  if (graph_mode[current_mode].interlace == 0) { return GRAPH_FIELD_BOTH; }
+
+  // Return the currently displayed field.
+  if (GS_REG_CSR & (1 << 13)) { return GRAPH_FIELD_ODD; } else { return GRAPH_FIELD_EVEN; }
 
   // End function.
   return 0;
@@ -114,7 +130,7 @@
   // If no mode is set, return an error.
   if (current_mode < 0) { return -1; }
 
-  // Return the height of the current mode.
+  // Return the pixel height of the current mode.
   return graph_mode[current_mode].height;
 
  }
@@ -127,27 +143,8 @@
   // If no mode is set, return an error.
   if (current_mode < 0) { return -1; }
 
-  // Return the interlace of the current mode.
+  // Return the interlace setting of the current mode.
   return graph_mode[current_mode].interlace;
-
- }
-
- int graph_get_mode(GRAPH_MODE *mode) {
-
-  // If we are not initialized, initialize the library.
-  if (graph_initialized < 0) { if (graph_initialize() < 0) { return -1; } }
-
-  // If no mode is set, return an error.
-  if (current_mode < 0) { return -1; }
-
-  // If no mode is given, just return the current mode.
-  if (mode == NULL) { return current_mode; }
-
-  // Copy the mode structure.
-  memcpy(mode, &graph_mode[current_mode], sizeof(GRAPH_MODE));
-
-  // End function.
-  return current_mode;
 
  }
 
@@ -156,10 +153,10 @@
   // If we are not initialized, initialize the library.
   if (graph_initialized < 0) { if (graph_initialize() < 0) { return -1; } }
 
-  // If no psm is set, return an error.
-  if (current_psm < 0) { return -1; }
+  // If no mode is set, return an error.
+  if (current_mode < 0) { return -1; }
 
-  // Return the the current psm.
+  // Return the the framebuffer psm of the current mode.
   return current_psm;
 
  }
@@ -172,8 +169,8 @@
   // If no mode is set, return an error.
   if (current_mode < 0) { return -1; }
 
-  // Return the size of the current mode.
-  return graph_mode[current_mode].size;
+  // Return the framebuffer size of the current mode.
+  return graph_mode[current_mode].size * (graph_get_bpp() >> 3);
 
  }
 
@@ -185,7 +182,7 @@
   // If no mode is set, return an error.
   if (current_mode < 0) { return -1; }
 
-  // Return the width of the current mode.
+  // Return the pixel width of the current mode.
   return graph_mode[current_mode].width;
 
  }
@@ -198,10 +195,7 @@
   // If no mode is set, return an error.
   if (current_mode < 0) { return -1; }
 
-  // If no zpsm is set, return an error.
-  if (current_zpsm < 0) { return -1; }
-
-  // Return the zbpp of the current mode.
+  // Return the zbuffer bpp of the current mode.
   if (current_zpsm == GRAPH_PSM_32)  { return 32; } else
   if (current_zpsm == GRAPH_PSM_24)  { return 24; } else
   if (current_zpsm == GRAPH_PSM_16)  { return 16; } else
@@ -217,11 +211,24 @@
   // If we are not initialized, initialize the library.
   if (graph_initialized < 0) { if (graph_initialize() < 0) { return -1; } }
 
-  // If no zpsm is set, return an error.
-  if (current_zpsm < 0) { return -1; }
+  // If no mode is set, return an error.
+  if (current_mode < 0) { return -1; }
 
-  // Return the the current zpsm.
+  // Return the zbuffer psm of the current mode.
   return current_zpsm;
+
+ }
+
+ int graph_get_zsize(void) {
+
+  // If we are not initialized, initialize the library.
+  if (graph_initialized < 0) { if (graph_initialize() < 0) { return -1; } }
+
+  // If no mode is set, return an error.
+  if (current_mode < 0) { return -1; }
+
+  // Return the zbuffer size of the current mode.
+  return graph_mode[current_mode].size * (graph_get_zbpp() >> 3);
 
  }
 
@@ -234,10 +241,13 @@
   // If we are not initialized, initialize the library.
   if (graph_initialized < 0) { if (graph_initialize() < 0) { return -1; } }
 
+  // If no mode is set, return an error.
+  if (current_mode < 0) { return -1; }
+
   // Reset the packet.
   if (packet_reset(&graph_packet) < 0) { return -1; }
 
-  // Clear the screen.
+  // Clear the draw framebuffer and zbuffer.
   packet_append_64(&graph_packet, GIF_SET_TAG(6, 1, 0, 0, GIF_TAG_PACKED, 1));
   packet_append_64(&graph_packet, 0x0E);
   packet_append_64(&graph_packet, GIF_SET_TEST(0, 0, 0, 0, 0, 0, 1, 1));
@@ -266,7 +276,10 @@
   // If we are not initialized, initialize the library.
   if (graph_initialized < 0) { if (graph_initialize() < 0) { return -1; } }
 
-  // Set up the display buffer.
+  // If no mode is set, return an error.
+  if (current_mode < 0) { return -1; }
+
+  // Set up the display framebuffer.
   GS_REG_DISPFB1 = GS_SET_DISPFB(address >> 13, graph_get_width() >> 6, current_psm, 0, 0);
   GS_REG_DISPFB2 = GS_SET_DISPFB(address >> 13, graph_get_width() >> 6, current_psm, 0, 0);
 
@@ -279,6 +292,9 @@
 
   // If we are not initialized, initialize the library.
   if (graph_initialized < 0) { if (graph_initialize() < 0) { return -1; } }
+
+  // If no mode is set, return an error.
+  if (current_mode < 0) { return -1; }
 
   // Reset the packet.
   if (packet_reset(&graph_packet) < 0) { return -1; }
@@ -296,6 +312,49 @@
   packet_append_64(&graph_packet, GIF_REG_XYOFFSET_1);
   packet_append_64(&graph_packet, GIF_SET_PRMODECONT(1));
   packet_append_64(&graph_packet, GIF_REG_PRMODECONT);
+
+  // Send the packet.
+  if (packet_send(&graph_packet, DMA_CHANNEL_GIF, DMA_FLAG_NORMAL) < 0) { return -1; }
+
+  // End function.
+  return 0;
+
+ }
+
+ int graph_set_drawfield(int field) {
+
+  // If we are not initialized, initialize the library.
+  if (graph_initialized < 0) { if (graph_initialize() < 0) { return -1; } }
+
+  // If no mode is set, return an error.
+  if (current_mode < 0) { return -1; }
+
+  // Reset the packet.
+  if (packet_reset(&graph_packet) < 0) { return -1; }
+
+  // Draw only to odd scalines.
+  if (field == GRAPH_FIELD_ODD) {
+   packet_append_64(&graph_packet, GIF_SET_TAG(1, 1, 0, 0, GIF_TAG_PACKED, 1));
+   packet_append_64(&graph_packet, 0x0E);
+   packet_append_64(&graph_packet, GIF_SET_SCANMSK(2));
+   packet_append_64(&graph_packet, GIF_REG_SCANMSK);
+  }
+
+  // Draw only to even scanlines.
+  else if (field == GRAPH_FIELD_EVEN) {
+   packet_append_64(&graph_packet, GIF_SET_TAG(1, 1, 0, 0, GIF_TAG_PACKED, 1));
+   packet_append_64(&graph_packet, 0x0E);
+   packet_append_64(&graph_packet, GIF_SET_SCANMSK(3));
+   packet_append_64(&graph_packet, GIF_REG_SCANMSK);
+  }
+
+  // Draw to all scanlines.
+  else {
+   packet_append_64(&graph_packet, GIF_SET_TAG(1, 1, 0, 0, GIF_TAG_PACKED, 1));
+   packet_append_64(&graph_packet, 0x0E);
+   packet_append_64(&graph_packet, GIF_SET_SCANMSK(0));
+   packet_append_64(&graph_packet, GIF_REG_SCANMSK);
+  }
 
   // Send the packet.
   if (packet_send(&graph_packet, DMA_CHANNEL_GIF, DMA_FLAG_NORMAL) < 0) { return -1; }
@@ -330,6 +389,9 @@
 
   // If we are not initialized, initialize the library.
   if (graph_initialized < 0) { if (graph_initialize() < 0) { return -1; } }
+
+  // If no mode is set, return an error.
+  if (current_mode < 0) { return -1; }
 
   // Reset the packet.
   if (packet_reset(&graph_packet) < 0) { return -1; }
