@@ -24,7 +24,7 @@
 #include "thsemap.h"
 #include "poweroff.h"
 
-#define DEBUG
+//#define DEBUG
 
 
 #define INT_CDROM	0x02
@@ -71,6 +71,8 @@ static int myCdHandler(void *param)
 	if (((CDVDreg_PWOFF & 1)==0) && (CDVDreg_PWOFF & 4)) 
 	{
 		/* can't seem to register a sif cmd callback in ps2link so... */
+		/* Clear interrupt bit */
+		CDVDreg_PWOFF = 4;
 		isceSifSendCmd(POFF_SIF_CMD, cmdData, 16, NULL, NULL, 0);
 		iSignalSema(poffSema);
 	}
@@ -97,7 +99,7 @@ static void pCallbackThread(void *arg)
 			}
 		}
 #ifdef DEBUG	
-		printf("Poweroff!!!!\n");
+		printf("Poweroff!!!! %08x\n", CDVDreg_PWOFF);
 #endif
 	}
 }
