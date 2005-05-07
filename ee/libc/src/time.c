@@ -24,4 +24,11 @@ clock_t clock(void)
 	return (clock_t)-1;
 }
 
+time_t time(time_t *t)
+{
+	if (t != 0) {
+		*t = (time_t)-1;
+	}
 
+	return (time_t)-1;
+}

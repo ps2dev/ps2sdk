@@ -19,6 +19,11 @@ typedef unsigned long clock_t;
 #define __clock_t_defined
 #endif
 
+#ifndef __time_t_defined
+typedef unsigned long time_t;
+#define __time_t_defined
+#endif
+
 struct tm
 {
   int	tm_sec;
@@ -33,5 +38,6 @@ struct tm
 };
 
 clock_t clock();
+time_t time(time_t *t);
 
 #endif  // TIME_H
