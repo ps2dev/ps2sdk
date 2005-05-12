@@ -15,6 +15,22 @@
 	.text
 	.p2align 3
 
+#ifdef USE_KMODE
+#define SYSCALL(name, number) \
+	.set	push;		\
+	.set	noreorder;	\
+	.text;			\
+	.align 4;		\
+	.globl	name;		\
+	.type	name,@function;	\
+	.ent	name,0;		\
+name:	j	__syscall;	\
+	li	$3, number;	\
+	nop;			\
+	.end	name;		\
+	.size	name,.-name;	\
+	.set	pop;		
+#else
 #define SYSCALL(name, number) \
 	.set	push;		\
 	.set	noreorder;	\
@@ -29,8 +45,40 @@ name:	li	$3, number;	\
 	nop;			\
 	.end	name;		\
 	.size	name,.-name;	\
-	.set	pop;		\
+	.set	pop;		
+#endif
 
+#ifdef F___syscall
+.set	push
+.set	noreorder
+.text
+.align	4
+.globl	__syscall
+.type	__syscall,@function
+.ent	__syscall,0
+__syscall:
+        mfc0        $v0, $12
+        andi        $v0, $v0, 0x18
+        beqz        $v0, _kMode
+        nop
+        syscall
+        jr          $ra
+        nop
+_kMode:
+        sll         $v1, $v1, 2
+        lui         $k0, 0x8000
+        lhu         $v0, 0x02F0($k0)
+        sll         $v0, $v0, 16
+        lh          $k0, 0x02F8($k0)
+        add         $v0, $k0
+        addu        $v1, $v0
+        lw          $k0, 0x00($v1)
+        jr          $k0
+        nop
+.end	__syscall
+.size	__syscall,.-__syscall
+.set	pop
+#endif
 
 #ifdef F_ResetEE
 SYSCALL(ResetEE, 1)
