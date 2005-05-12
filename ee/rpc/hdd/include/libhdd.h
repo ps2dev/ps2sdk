@@ -33,7 +33,8 @@ extern "C" {
 #define ATTR_MAIN_PARTITION		0x0000
 #define ATTR_SUB_PARTITION		0x0001
 
-#include "../../common/include/hdd-ioctl.h"
+#include <hdd-ioctl.h>
+#include <tamtypes.h>
 
 typedef struct {
 	char name[32];			// Filesystem name
