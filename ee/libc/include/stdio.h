@@ -133,6 +133,7 @@ int    fflush(FILE *);
 int    fgetc(FILE *);
 int    fgetpos(FILE *, fpos_t *);
 char   *fgets(char *, int, FILE *);
+int    fileno(FILE *);
 int    fputc(int, FILE *);
 int    fputs(const char *, FILE *);
 size_t fread(void *, size_t, size_t, FILE *);
