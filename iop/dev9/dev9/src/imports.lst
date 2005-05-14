@@ -2,6 +2,7 @@
 loadcore_IMPORTS_start
 I_RegisterLibraryEntries
 I_QueryBootMode
+I_GetLibraryEntryTable
 loadcore_IMPORTS_end
 
 intrman_IMPORTS_start

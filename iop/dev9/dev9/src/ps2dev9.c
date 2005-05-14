@@ -28,6 +28,7 @@
 #include "smapregs.h"
 
 #define MODNAME "dev9_driver"
+#define DRIVERNAME "dev9"
 IRX_ID(MODNAME, 1, 1);
 
 #define M_PRINTF(format, args...)	\
@@ -98,7 +99,26 @@ int _start(int argc, char **argv)
 	int res = 1;
 	u16 dev9hw;
 
+	iop_library_table_t *libtable;
+	iop_library_t *libptr;
+
 	printf(BANNER, VERSION);
+
+	libtable = GetLibraryEntryTable();
+	libptr = libtable->tail;
+	while ((libptr != 0))
+	{
+		int i;
+		for (i = 0; i <= sizeof(DRIVERNAME); i++) {
+			if (libptr->name[i] != DRIVERNAME[i])
+				break;
+		}
+		if (i > sizeof(DRIVERNAME)) {
+			M_PRINTF("Driver already loaded.\n");
+			return 1;
+		}
+		libptr = libptr->prev;
+        }
 
 	dev9hw = DEV9_REG(DEV9_R_REV) & 0xf0;
 	if (dev9hw == 0x20) {		/* CXD9566 (PCMCIA) */
@@ -109,25 +129,23 @@ int _start(int argc, char **argv)
 		res = expbay_init();
 	}
 
-	if (!res) {
-		if (RegisterLibraryEntries(&_exp_dev9) != 0) {
-			res = 1;
-			goto out;
-		}
-
-		/* Add dev9 fs driver for devctl().  */
-		DelDrv("dev9x");
-		if (AddDrv(&dev9x_fsdev) != 0) {
-			res = 1;
-			goto out;
-		}
-
-		/* Normal termination.  */
-		M_PRINTF("Driver loaded.\n");
+	if (res)
+		return res;
+	
+	if (RegisterLibraryEntries(&_exp_dev9) != 0) {
+		return 1;
 	}
 
-out:
-	return res;
+	/* Add dev9 fs driver for devctl().  */
+	DelDrv("dev9x");
+	if (AddDrv(&dev9x_fsdev) != 0) {
+		return 1;
+	}
+
+	/* Normal termination.  */
+	M_PRINTF("Driver loaded.\n");
+
+	return 0;
 }
 
 int __attribute__((unused)) shutdown() { return 0; }
