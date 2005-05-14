@@ -34,7 +34,7 @@ iop_device_t *iopmgr_get_iomandev(char *device)
   smod_mod_info_t *info = 0;
   iop_device_t **devinfo_table;
   int i;
-  int len = strlen(device);
+  int len = strlen(device) + 1;
 
   if (!(info = smod_get_mod_by_name(IOPMGR_IOMAN_IDENT))) {
     return 0;
@@ -67,7 +67,7 @@ iop_device_t *iopmgr_get_iomanxdev(char *device)
   smod_mod_info_t *info;
   iop_device_t **devinfo_table;
   int i;
-  int len = strlen(device);
+  int len = strlen(device) + 1;
 
   if (!(info = smod_get_mod_by_name(IOPMGR_IOMANX_IDENT))) {
     return 0;
