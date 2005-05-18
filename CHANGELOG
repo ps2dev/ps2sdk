@@ -9,6 +9,9 @@
 # $Id$
 
 
+2005-05-18
+  - linuzappz, added timrman stub (.h/.S at iop kernel)
+
 2005-04-28
   - pixel and neofar, added chdir and tweaked fopen
 
