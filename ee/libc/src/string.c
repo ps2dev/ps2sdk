@@ -535,3 +535,24 @@ size_t strcspn(const char *s, const char *reject) {
     return c - s;
 }
 #endif
+
+#ifdef F_ctype
+const u8 ctype[256] = {
+    _C,     _C,    _C,    _C,    _C,    _C,    _C,    _C,
+    _C,     _C|_S, _C|_S, _C|_S, _C|_S, _C|_S, _C,    _C,
+    _C,     _C,    _C,    _C,    _C,    _C,    _C,    _C,
+    _C,     _C,    _C,    _C,    _C,    _C,    _C,    _C,
+    _S|_B,  _P,    _P,    _P,    _P,    _P,    _P,    _P,
+    _P,	    _P,    _P,    _P,    _P,    _P,    _P,    _P,
+    _N,	    _N,    _N,    _N,    _N,    _N,    _N,    _N,
+    _N,	    _N,    _P,    _P,    _P,    _P,    _P,    _P,
+    _P,	    _U|_X, _U|_X, _U|_X, _U|_X, _U|_X, _U|_X, _U,
+    _U,	    _U,    _U,    _U,    _U,    _U,    _U,    _U,
+    _U,	    _U,    _U,    _U,    _U,    _U,    _U,    _U,
+    _U,	    _U,    _U,    _P,    _P,    _P,    _P,    _P,
+    _P,	    _L|_X, _L|_X, _L|_X, _L|_X, _L|_X, _L|_X, _L,
+    _L,	    _L,    _L,    _L,    _L,    _L,    _L,    _L,
+    _L,	    _L,    _L,    _L,    _L,    _L,    _L,    _L,
+    _L,	    _L,    _L,    _P,    _P,    _P,    _P,    _C
+};
+#endif
