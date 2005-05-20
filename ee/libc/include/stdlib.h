@@ -79,8 +79,8 @@ double        atof(const char *);
 void          exit(int);
 //int           atoi(const char *);
 //long          atol(const char *);
-#define       atoi(x) strtol(x, NULL, 10)
-#define       atol atoi
+//#define       atoi(x) strtol(x, NULL, 10)
+//#define       atol atoi
 void          *bsearch(const void *, const void *, size_t, size_t, int (*)(const void *, const void *));
 div_t         div(int, int);
 char          *getenv(const char *);
@@ -96,18 +96,19 @@ void          srand(unsigned int);
 double        strtod(const char *, char **);
 long          strtol(const char *, char **, int);
 unsigned long strtoul(const char *, char **, int);
+static __inline__ int atoi(const char * x) { return strtol(x, NULL, 10); }
+static __inline__ long atol(const char * x) { return strtol(x, NULL, 10); }
 
 
 void          qsort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *));
 		     
 
-/* Multibyte disabled for now...
+/* Multibyte disabled, but prototyped for C++... */
 int           mblen(const char *, size_t);
 size_t        mbstowcs(wchar_t *, const char *, size_t);
 int           mbtowc(wchar_t *, const char *, size_t);
 size_t        wcstombs(char *, const wchar_t *, size_t);
 int           wctomb(char *, wchar_t);
-*/
 
 //char          *_gcvt(double, size_t, char *);
 char          *_itoa(int, char *, int);
@@ -115,6 +116,9 @@ char          *_ltoa(long, char *, int);
 #ifndef __STRICT_ANSI__
 char          *_lltoa(long long, char *, int);
 #endif
+
+// blah! C++ is evil.
+int system (const char * string);
 
 #ifdef __cplusplus
 }

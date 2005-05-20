@@ -20,36 +20,6 @@
 /* The maximum length of a string within PS2Lib.  */
 #define PS2LIB_STR_MAX	4096
 
-/* ensure bzero is defined. */
-#ifndef bzero
-#define bzero(p, n)                    memset(p, 0, n)
-#endif // bzero
-
-
-/* ensure bcopy is defined. */
-#ifndef bcopy
-#define bcopy(d, s, n)                 memcpy(d, s, n)
-#endif // bcopy
-
-
-/* ensure bcmp is defined. */
-#ifndef bcmp
-#define bcmp(d, s, n)                  memcmp(d, s, n)
-#endif // bcmp
-
-
-/* ensure index is defined. */
-#ifndef index
-#define index(s, c)                    strchr(s, c)
-#endif // index
-
-
-/* ensure rindex is defined. */
-#ifndef rindex
-#define rindex(s, c)                   strrchr(s, c)
-#endif // rindex
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -114,6 +84,12 @@ char *	strstr(const char *, const char *);
 
 char * strupr(char *);
 char * strlwr(char *);
+
+static __inline__ void bzero(void * p, size_t n) { memset(p, 0, n); }
+static __inline__ void bcopy(const void * s, void * d, size_t n) { memcpy(d, s, n); }
+static __inline__ int bcmp(const void * s1, const void * s2, size_t n) { return memcmp(s1, s2, n); }
+static __inline__ char * index(const char * s, int c) { return strchr(s, c); }
+static __inline__ char * rindex(const char * s, int c) { return strrchr(s, c); }
 
 /* Backward compatibility... */
 #include <ctype.h>

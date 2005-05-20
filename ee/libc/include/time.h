@@ -37,7 +37,24 @@ struct tm
   int	tm_isdst;
 };
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 clock_t clock();
 time_t time(time_t *t);
+
+// to be implemented...
+double difftime(time_t time1, time_t time0);
+time_t mktime(struct tm *timeptr);
+char *asctime(const struct tm *timeptr);
+char *ctime(const time_t *timep);
+struct tm *gmtime(const time_t *timep);
+struct tm *localtime(const time_t *timep);
+size_t strftime(char *s, size_t max, const char *format, const struct tm *tm);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  // TIME_H
