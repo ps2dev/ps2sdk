@@ -14,6 +14,8 @@
 #ifndef _TIME_H
 #define _TIME_H
 
+#include <stddef.h>
+
 #ifndef __clock_t_defined
 typedef unsigned long clock_t;
 #define __clock_t_defined
