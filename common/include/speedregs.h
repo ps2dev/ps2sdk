@@ -16,7 +16,7 @@
 
 #include "types.h"
 
-#ifdef PS2DRV_FROM_EE
+#ifdef _EE
 #define SPD_REGBASE			0xb4000000
 #else
 #define SPD_REGBASE			0xb0000000
