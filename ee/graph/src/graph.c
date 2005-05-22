@@ -369,6 +369,14 @@
   // If we are not initialized, initialize the library.
   if (graph_initialized < 0) { if (graph_initialize() < 0) { return -1; } }
 
+  // If an automatic mode is requested...
+  if (mode == GRAPH_MODE_AUTO) {
+
+   // Determine if PAL or NTSC is the default mode for this system.
+   if (*(volatile char *)(0x1FC7FF52) == 'E') { mode = GRAPH_MODE_PAL; } else { mode = GRAPH_MODE_NTSC; }
+
+  }
+
   // Request the mode change.
   SetGsCrt(graph_mode[mode].interlace, graph_mode[mode].mode, 0);
 

@@ -29,6 +29,7 @@ extern "C" {
  #define GRAPH_MODE_VGA_800	0x06	//  800 x  600
  #define GRAPH_MODE_VGA_1024	0x07	// 1024 x  768
  #define GRAPH_MODE_VGA_1280	0x08	// 1280 x 1024
+ #define GRAPH_MODE_AUTO	0xFF	// Automatic NTSC or PAL mode setting.
 
  #define GRAPH_PSM_32		0x00	// 32 bits per pixel.
  #define GRAPH_PSM_24		0x01	// 24 bits per pixel.

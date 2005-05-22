@@ -73,7 +73,7 @@
   packet_allocate(&packet, 1024);
 
   // Set the graphics mode.
-  graph_set_mode(GRAPH_MODE_NTSC, GRAPH_PSM_32, GRAPH_PSM_32);
+  graph_set_mode(GRAPH_MODE_AUTO, GRAPH_PSM_32, GRAPH_PSM_32);
 
   // Set the display buffer address.
   graph_set_displaybuffer(0);
