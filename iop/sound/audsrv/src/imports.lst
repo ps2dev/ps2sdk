@@ -40,9 +40,11 @@ I_sceSifInitRpc
 I_sceSifRegisterRpc
 I_sceSifSetRpcQueue
 I_sceSifRpcLoop
+I_sceSifSendCmd
 sifcmd_IMPORTS_end
 
 loadcore_IMPORTS_start
+I_RegisterLibraryEntries
 I_FlushDcache
 I_RegisterLibraryEntries
 loadcore_IMPORTS_end
@@ -67,3 +69,19 @@ I_sceSdSetCoreAttr
 I_sceSdBlockTrans
 I_sceSdBlockTransStatus
 libsd_IMPORTS_end
+
+cdvdman_IMPORTS_start
+I_sceCdInit
+I_sceCdRead
+I_sceCdReadCdda
+I_sceCdGetError
+I_sceCdGetToc
+I_sceCdSync
+I_sceCdGetDiskType
+I_sceCdDiskReady
+I_sceCdTrayReq
+I_sceCdPosToInt
+I_sceCdIntToPos
+I_sceCdStatus
+I_sceCdMmode
+cdvdman_IMPORTS_end

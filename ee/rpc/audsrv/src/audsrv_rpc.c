@@ -35,6 +35,10 @@ static unsigned int sbuff[4096] __attribute__((aligned (64)));
 static int initialized = 0;
 static int audsrv_error = AUDSRV_ERR_NOERROR;
 
+/* nasty forwards */
+static void fillbuf_requested(void *pkt, void *arg);
+static void cdda_stopped(void *pkt, void *arg);
+
 /** Internal function to set last error
     @param err
 */
@@ -60,6 +64,23 @@ static int call_rpc_1(int func, int arg)
 {
 	sbuff[0] = arg;
 	SifCallRpc(&cd0, func, 0, sbuff, 1*4, sbuff, 4, 0, 0);
+	FlushCache(0);
+
+	set_error(sbuff[0]);
+	return sbuff[0];
+}
+
+/** Internal function to simplify RPC calling
+    @param func    procedure to invoke
+    @param arg1    optional argument
+    @param arg2    optional argument
+    @returns value returned by RPC server
+*/
+static int call_rpc_2(int func, int arg1, int arg2)
+{
+	sbuff[0] = arg1;
+	sbuff[1] = arg2;
+	SifCallRpc(&cd0, func, 0, sbuff, 2*4, sbuff, 4, 0, 0);
 	FlushCache(0);
 
 	set_error(sbuff[0]);
@@ -115,6 +136,115 @@ int audsrv_wait_audio(int bytes)
 int audsrv_set_volume(int volume)
 {
 	return call_rpc_1(AUDSRV_SET_VOLUME, volume);
+}
+
+/** Starts playing the request track
+    @param track segment to play
+    @returns status code
+*/
+int audsrv_play_cd(int track)
+{
+	return call_rpc_1(AUDSRV_PLAY_CD, track);
+}
+
+/** Starts playing at a specific sector
+    @param start first sector to play
+    @param end   last sector to play
+    @returns status code
+*/
+int audsrv_play_sectors(int start, int end)
+{
+	return call_rpc_2(AUDSRV_PLAY_SECTORS, start, end);
+}
+
+/** Stops CD from playing.
+    @returns status code
+*/
+int audsrv_stop_cd()
+{
+	int ret; 
+	ret = call_rpc_1(AUDSRV_STOP_CD, 0);
+	return ret;
+}
+
+/** Returns the current playing sector
+    @returns sector number
+
+    CDDA type discs have sector size of 2352 bytes. There are 75
+    such sectors per second.
+*/
+int audsrv_get_cdpos()
+{
+	return call_rpc_1(AUDSRV_GET_CDPOS, 0);
+}
+
+/** Returns the current playing sector, relative to track
+    @returns sector number
+
+    There are 75 sectors a second. To translate this position to mm:ss:ff 
+    use the following:
+    mm = sector / (75*60)
+    ss = (sector / 75) % 60
+    ff = sector % 75 
+
+    where ff is the frame number, 1/75th of a second.
+*/
+int audsrv_get_trackpos()
+{
+	return call_rpc_1(AUDSRV_GET_TRACKPOS, 0);
+}
+
+/** Returns the number of tracks available on the CD in tray
+    @returns positive track count, or negative error status code
+*/
+int audsrv_get_numtracks()
+{
+	return call_rpc_1(AUDSRV_GET_NUMTRACKS, 0);
+}
+
+/** Returns the first sector for the given track
+    @param track   track index, must be between 1 and the trackcount
+    @returns sector number, or negative status code
+*/
+int audsrv_get_track_offset(int track)
+{
+	return call_rpc_1(AUDSRV_GET_TRACKOFFSET, track);
+}
+
+/** Pauses CDDA playing
+    @returns error status code
+
+    If CDDA is paused, no operation is taken
+*/
+int audsrv_pause_cd()
+{
+	return call_rpc_1(AUDSRV_PAUSE_CD, 0);
+}
+
+/** Resumes CDDA playing
+    @returns error status code
+
+    If CDDA was not paused, no operation is taken
+*/
+int audsrv_resume_cd()
+{
+	return call_rpc_1(AUDSRV_RESUME_CD, 0);
+}
+
+/** Returns the type of disc currently in tray
+    @returns value as defined in libcdvd, negative on error
+*/
+int audsrv_get_cd_type()
+{
+	return call_rpc_1(AUDSRV_GET_CD_TYPE, 0);
+}
+
+/** Returns the status of the CD tray (open, closed, seeking etc.)
+    @returns value as defined in libcdvd, negative on error
+*/
+int audsrv_get_cd_status()
+{
+	return call_rpc_1(AUDSRV_GET_CD_STATUS, 0);
 }
 
 /** Uploads audio buffer to SPU
@@ -193,8 +323,20 @@ int audsrv_init()
 	SifCallRpc(&cd0, AUDSRV_INIT, 0, sbuff, 64, sbuff, 64, 0, 0);
 	FlushCache(0);
 	ret = sbuff[0];
-	set_error(ret);
-	return ret;
+	if (ret != 0)
+	{
+		set_error(ret);
+		return ret;
+	}
+
+	/* register a callback handler */
+	DI();
+	SifAddCmdHandler(AUDSRV_CDDA_CALLBACK, cdda_stopped, 0);
+	SifAddCmdHandler(AUDSRV_FILLBUF_CALLBACK, fillbuf_requested, 0);
+	EI();
+
+	set_error(AUDSRV_ERR_NOERROR);
+	return AUDSRV_ERR_NOERROR;
 }
 
 /** Translates audsrv_get_error() response to readable string
@@ -218,7 +360,71 @@ const char *audsrv_get_error_string()
 
 		case AUDSRV_ERR_FORMAT_NOT_SUPPORTED:
 		return "Format not supported";
+
+		case AUDSRV_ERR_NO_DISC:
+		return "No disc in drive";
 	}
 
 	return "Unknown error";	
+}
+
+static audsrv_callback_t on_cdda_stop = 0;
+static void *on_cdda_stop_arg = 0;
+
+static audsrv_callback_t on_fillbuf = 0;
+static void *on_fillbuf_arg = 0;
+
+/** Installs a callback function upon completion of a cdda track
+    @param cb your callback
+    @param arg extra parameter to pass to callback function later
+    @returns status code
+*/
+int audsrv_on_cdda_stop(audsrv_callback_t cb, void *arg)
+{
+	on_cdda_stop = cb;
+	on_cdda_stop_arg = arg;
+	return AUDSRV_ERR_NOERROR;
+}
+
+/** Installs a callback function to be called when ringbuffer has enough
+    space to transmit the request number of bytes.
+    @param bytes request a callback when this amount of bytes is available
+    @param cb your callback
+    @param arg extra parameter to pass to callback function later
+    @returns AUDSRV_ERR_NOERROR, AUDSRV_ERR_ARGS if amount is greater than sizeof(ringbuf)
+*/
+int audsrv_on_fillbuf(int amount, audsrv_callback_t cb, void *arg)
+{
+	int err;
+
+	on_fillbuf = 0;
+	on_fillbuf_arg = 0;
+
+	err = call_rpc_1(AUDSRV_SET_THRESHOLD, amount);
+	if (err != 0)
+	{
+		return err;
+	}
+
+	on_fillbuf = cb;
+	on_fillbuf_arg = arg;
+	return AUDSRV_ERR_NOERROR;
+}
+
+/** SIF command handler */
+static void cdda_stopped(void *pkt, void *arg)
+{
+	if (on_cdda_stop != 0)
+	{
+		on_cdda_stop(on_cdda_stop_arg);
+	}
+}
+
+/** SIF command handler */
+static void fillbuf_requested(void *pkt, void *arg)
+{
+	if (on_fillbuf != 0)
+	{
+		on_fillbuf(on_fillbuf_arg);
+	}
 }

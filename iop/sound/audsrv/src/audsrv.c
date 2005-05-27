@@ -5,7 +5,6 @@
 #-----------------------------------------------------------------------
 # Copyright 2005, ps2dev - http://www.ps2dev.org
 # Licenced under GNU Library General Public License version 2
-# Review ps2sdk README & LICENSE files for further details.
 #
 # $Id$
 # audsrv IOP server
@@ -22,8 +21,11 @@
 
 #include <audsrv.h>
 #include "audsrv.c.h"
+#include "common.h"
+#include "rpc_server.h"
 #include "upsamplers.h"
 #include "hw.h"
+#include "spu.h"
 
 /**
  * \file audsrv.c
@@ -31,19 +33,14 @@
  * \date 04-24-05
  */
 
+#define VERSION "0.85"
 IRX_ID("audsrv", 1, 1);
 
-struct irx_export_table _exp_audsrv;
-
-
-#define VERSION "0.75"
-
 /* globals */
-static int core1_volume = MAX_VOLUME;   ///< core1 volume when playing
+static int core1_volume = MAX_VOLUME;   ///< core1 (sfx) volume 
 static int core1_freq = 0;              ///< frequency set by user
 static int core1_bits = 0;              ///< bits per sample, set by user
 static int core1_channels = 0;          ///< number of audio channels
-static int core1_cdvolume = 0;          ///< core1 cdrom volume, when playing
 static int core1_sample_shift = 0;      ///< shift count from bytes to samples
 
 /* status */
@@ -60,23 +57,18 @@ static int writepos;                    ///< writing head pointer
 static int play_tid = 0;                ///< playing thread id
 static int queue_sema = 0;              ///< semaphore for wait_audio()
 static int transfer_sema = 0;           ///< SPU2 transfer complete semaphore
+static int fillbuf_threshold = 0;       ///< threshold to initiate a callback
 
 static int format_changed = 0;          ///< boolean to notify when format has changed
 
 /** double buffer for streaming */
-static char spubuf[0x800] __attribute__((aligned (64)));
+static char core1_buf[0x1000] __attribute__((aligned (64)));
 
-/* rpc server variables */
-static int rpc_buffer[18000/4];         ///< buffer for RPC DMA
-static SifRpcDataQueue_t qd;            ///< RPC thread variables
-static SifRpcServerData_t sd0;          ///< RPC thread variables
-
-/** Find the minimum value between A and B */
-#define MIN(a,b) ((a) <= (b)) ? (a) : (b)
+/** exports table */
+struct irx_export_table _exp_audsrv;
 
 /* forward declarations */
 static void play_thread(void *arg);
-static int create_thread(void *func, int priority, void *param);
 
 /** Transfer complete callback.
     @param arg     not used
@@ -97,21 +89,39 @@ static void update_volume()
 {
 	int vol;
 
+	/* external input */
+	sceSdSetParam(SD_CORE_1 | SD_P_AVOLL, 0x7fff);
+	sceSdSetParam(SD_CORE_1 | SD_P_AVOLR, 0x7fff);
+
+	/* core0 input */
+	sceSdSetParam(SD_CORE_0 | SD_P_BVOLL, 0x7fff);
+	sceSdSetParam(SD_CORE_0 | SD_P_BVOLR, 0x7fff);
+
+	/* core1 input */
 	vol = playing ? core1_volume : 0;
 	sceSdSetParam(SD_CORE_1 | SD_P_BVOLL, vol);
 	sceSdSetParam(SD_CORE_1 | SD_P_BVOLR, vol);
+
+	/* set master volume for core 0 */
+	sceSdSetParam(SD_CORE_0 | SD_P_MVOLL, MAX_VOLUME);
+	sceSdSetParam(SD_CORE_0 | SD_P_MVOLR, MAX_VOLUME);
+
+	/* set master volume for core 1 */
+	sceSdSetParam(SD_CORE_1 | SD_P_MVOLL, MAX_VOLUME);
+	sceSdSetParam(SD_CORE_1 | SD_P_MVOLR, MAX_VOLUME);
 }
 
 /** Stops all audio playing
     @returns 0, always
 
-    Mutes output and stops accepting audio blocks
+    Mutes output and stops accepting audio blocks; also, clears callbacks.
 */
 int audsrv_stop_audio()
 {
 	/* audio is still playing, just mute */
 	playing = 0;
 	update_volume();
+	fillbuf_threshold = 0;
 
 	return AUDSRV_ERR_NOERROR;
 }
@@ -170,10 +180,12 @@ int audsrv_set_format(int freq, int bits, int channels)
 	core1_bits = bits;
 	core1_channels = channels;
 
-	/* set ring buffer size to 20 iterations worth of data (~100 ms) */
-	feed_size = (256 * (core1_freq << core1_sample_shift)) / 48000;
-	ringbuf_size = feed_size * 20;
-	readpos = writepos = 0;
+	/* set ring buffer size to 10 iterations worth of data (~50 ms) */
+	feed_size = (512 * (core1_freq << core1_sample_shift)) / 48000;
+	ringbuf_size = feed_size * 10;
+
+	writepos = 0;
+	readpos = (feed_size * 5) & ~3;
 	
 	printf("audsrv: freq %d bits %d channels %d ringbuf_sz %d feed_size %d shift %d\n", freq, bits, channels, ringbuf_size, feed_size, core1_sample_shift);
 
@@ -203,38 +215,32 @@ int audsrv_init()
 
 	/* initialize transfer_complete's semaphore */
 	transfer_sema = CreateMutex(0);
-	if (transfer_sema <= 0)
+	if (transfer_sema < 0)
 	{
 		return AUDSRV_ERR_OUT_OF_MEMORY;
 	}
 
 	queue_sema = CreateMutex(0);
-	if (queue_sema <= 0)
+	if (queue_sema < 0)
 	{
 		DeleteSema(transfer_sema);
 		return AUDSRV_ERR_OUT_OF_MEMORY;
 	}
 
-	//SdSetCoreAttr(SD_CORE_1|SD_C_NOISE_CLK,0);
-
 	/* audio is always playing in the background. trick is to 
 	 * set the data input volume to zero
 	 */
 	audsrv_stop_audio();
-	sceSdSetParam(SD_CORE_1 | SD_P_MVOLL, MAX_VOLUME);
-	sceSdSetParam(SD_CORE_1 | SD_P_MVOLR, MAX_VOLUME);
 
 	/* initialize transfer-complete callback */
 	sceSdSetTransCallback(SD_CORE_1, (void *)transfer_complete);
-
-	/* kick streaming */
-	sceSdBlockTrans(SD_CORE_1, SD_BLOCK_LOOP, spubuf, SPU_BUF_SZ);
+	sceSdBlockTrans(SD_CORE_1, SD_BLOCK_LOOP, core1_buf, sizeof(core1_buf));
 
 	/* default to SPU's native */
 	audsrv_set_format(48000, 16, 2);
 
 	play_tid = create_thread(play_thread, 39, 0);
-	printf("audsrv: playing thread %x started\n", play_tid);
+	printf("audsrv: playing thread 0x%x started\n", play_tid);
 
 	printf("audsrv: kickstarted\n");
 
@@ -251,7 +257,7 @@ int audsrv_init()
 */
 int audsrv_available()
 {
-	if (writepos < readpos)
+	if (writepos <= readpos)
 	{
 		return readpos - writepos;
 	}
@@ -270,12 +276,6 @@ int audsrv_available()
 */
 int audsrv_wait_audio(int buflen)
 {
-	if (queue_sema <= 0)
-	{
-		/* not initialized */
-		return AUDSRV_ERR_NOT_INITIALIZED;
-	}
-
 	if (ringbuf_size < buflen)
 	{
 		/* this will never happen */
@@ -284,7 +284,7 @@ int audsrv_wait_audio(int buflen)
 
 	while (1)
 	{
-		if (audsrv_available() > buflen)
+		if (audsrv_available() >= buflen)
 		{
 			/* enough space! */
 			return AUDSRV_ERR_NOERROR;
@@ -318,7 +318,6 @@ int audsrv_play_audio(const char *buf, int buflen)
 		/* audio is always playing, just change the volume */
 		playing = 1;
 		update_volume();
-		readpos = writepos = 0;
 	}
 
 	//printf("play audio %d bytes, readpos %d, writepos %d avail %d\n", buflen, readpos, writepos, audsrv_available());
@@ -367,6 +366,109 @@ int audsrv_set_volume(int vol)
 	return AUDSRV_ERR_NOERROR;
 }
 
+int audsrv_set_threshold(int amount)
+{
+	if (amount > (ringbuf_size / 2))
+	{
+		/* amount is greater than what we'd recommend */
+		return AUDSRV_ERR_ARGS;
+	}
+
+	printf("audsrv: callback threshold: %d\n", amount);
+	fillbuf_threshold = amount;
+	return 0;
+}
+
+static short rendered_left[512];
+static short rendered_right[512];
+
+/** Main playing thread
+    @param arg   not used
+
+    This is the main playing thread. It feeds the SPU with upsampled, demux'd
+    audio data, from what has been queued beforehand. The stream is 
+    constructed as a ring buffer. This thread only ends with TerminateThread,
+    and is usually asleep, waiting for SPU to complete playing the current
+    wave. SPU plays 2048 bytes blocks, which yields that this thread wakes
+    and sleeps 93.75 times a second
+*/
+static void play_thread(void *arg)
+{
+	int block;
+	char *bufptr;
+	int intr_state;
+	int step;
+	int available;
+	struct upsample_t up;
+	upsampler_t upsampler = NULL;
+
+	printf("starting play thread\n");
+	while (1) 
+	{
+		if (format_changed)
+		{
+			upsampler = find_upsampler(core1_freq, core1_bits, core1_channels);
+			format_changed = 0;
+		}
+
+		if (playing && upsampler != NULL)
+		{
+			up.src = (const unsigned char *)ringbuf + readpos;
+			up.left = rendered_left;
+			up.right = rendered_right;
+			step = upsampler(&up);
+
+			readpos = readpos + step;
+			if (readpos >= ringbuf_size)
+			{
+				/* wrap around */
+				readpos = 0;
+			}
+		}
+		else
+		{
+			/* not playing */
+			memset(rendered_left, '\0', sizeof(rendered_left));
+			memset(rendered_right, '\0', sizeof(rendered_right));
+		}
+		
+		/* wait until it's safe to transmit another block */
+		WaitSema(transfer_sema);
+
+		/* suspend all interrupts */
+		CpuSuspendIntr(&intr_state);
+
+		/* one block is playing currently, other is idle */
+		block = 1 - (sceSdBlockTransStatus(SD_CORE_1, 0) >> 24);
+
+		/* copy 1024 bytes from left and right buffers, into core1_buf */
+		bufptr = core1_buf + (block << 11);
+		wmemcpy(bufptr +    0, rendered_left + 0, 512);
+		wmemcpy(bufptr +  512, rendered_right + 0, 512);
+		wmemcpy(bufptr + 1024, rendered_left + 256, 512);
+		wmemcpy(bufptr + 1536, rendered_right + 256, 512);
+
+		CpuResumeIntr(intr_state);
+
+		available = audsrv_available();
+		if (available >= (ringbuf_size / 10))
+		{
+			/* arbitrarily selected ringbuf_size / 10, to reduce
+			 * number of semaphores signalled.
+			 */
+			SignalSema(queue_sema);
+		}
+
+		if (fillbuf_threshold > 0 && available >= fillbuf_threshold)
+		{
+			/* EE client requested a callback */
+			sif_send_cmd(AUDSRV_FILLBUF_CALLBACK, 0);
+		}
+
+		//printf("avaiable: %d, queued: %d\n", available, ringbuf_size - available);
+	}
+}
+
 /** Shutdowns audsrv
     @returns AUDSRV_ERR_NOERROR
 */
@@ -374,6 +476,7 @@ int audsrv_quit()
 {
 	/* silence! */
 	audsrv_stop_audio();
+	audsrv_stop_cd();
 
 	/* stop transmission */
 	sceSdSetTransCallback(SD_CORE_1, NULL);
@@ -402,246 +505,10 @@ int audsrv_quit()
 	return 0;
 }
 
-/** Plays CD audio track
-    @param track    segment to play [1 .. 99]
-    @returns error status
-*/
-int audsrv_play_cd(int track)
+__attribute__((weak))
+void unittest_start() 
 {
-	if (initialized == 0)
-	{
-		return AUDSRV_ERR_NOT_INITIALIZED;
-	}
-
-	return AUDSRV_ERR_NOERROR;
-}
-
-/** Sets global CD volume
-    @param left     volume for left channel
-    @param right    volume for right channel
-    @returns error status
-*/
-int audsrv_set_cdvol(int vol)
-{
-	printf("set cd volume %d\n", vol);
-
-	if (vol < 0 || vol > MAX_VOLUME)
-	{
-		/* bad joke */
-		return AUDSRV_ERR_ARGS;
-	}
-
-	core1_cdvolume = vol;
-	update_volume();
-	return AUDSRV_ERR_NOERROR;
-}
-
-/** Stops CD play
-    @returns 0, always
-
-    Stops CD from being played; this has no effect on other music
-    audsrv is currently playing
-*/
-int audsrv_stop_cd()
-{
-	return 0;
-}
-
-/** RPC command handler.
-    @param func     command (one of AUDSRV_x)
-    @param data     pointer to data array
-    @param size     size of data array (in bytes)
-    @returns value depends on function invoked
-
-    This is a single rpc handler, it unpacks the data array and calls 
-    local functions.
-*/
-static void *rpc_command(int func, unsigned *data, int size)
-{
-	int ret;
-
-	/* printf("audsrv: rpc command %d\n", func); */
-	switch(func)
-	{
-		case AUDSRV_INIT:
-		ret = audsrv_init();
-		break;
-
-		case AUDSRV_FORMAT_OK:
-		ret = audsrv_format_ok(data[0], data[1], data[2]);
-		break;
-
-		case AUDSRV_SET_FORMAT:
-		ret = audsrv_set_format(data[0], data[1], data[2]);
-		break;
-
-		case AUDSRV_WAIT_AUDIO:
-		ret = audsrv_wait_audio(data[0]);
-		break;
-
-		case AUDSRV_PLAY_AUDIO:
-		ret = audsrv_play_audio((const char *)&data[1], data[0]);
-		break;
-
-		case AUDSRV_STOP_AUDIO:
-		ret = audsrv_stop_audio();
-		break;
-
-		case AUDSRV_SET_VOLUME:
-		ret = audsrv_set_volume(data[0]);
-		break;
-
-		case AUDSRV_QUIT:
-		ret = audsrv_quit();
-		break;
-
-		case AUDSRV_PLAY_CD:
-		ret = audsrv_play_cd(data[0]);
-		break;
-
-		case AUDSRV_SET_CDVOL:
-		ret = audsrv_set_cdvol(data[0]);
-		break;
-
-		case AUDSRV_STOP_CD:
-		ret = audsrv_stop_cd();
-		break;
-
-		default:
-		ret = -1;
-		break;
-	}
-
-	data[0] = ret;
-	return data;
-}
-
-/** RPC listener thread
-    @param arg   not used
-
-    This is the main RPC thread. Nothing fancy here.
-*/
-static void rpc_server_thread(void *arg)
-{
-	SifInitRpc(0);
-
-	printf("audsrv: creating rpc server\n");
-
-	SifSetRpcQueue(&qd, GetThreadId());
-	SifRegisterRpc(&sd0, AUDSRV_IRX, (void *)rpc_command, rpc_buffer, 0, 0, &qd);
-	SifRpcLoop(&qd);
-}
-
-static short rendered_left[256];
-static short rendered_right[256];
-
-/** Main playing thread
-    @param arg   not used
-
-    This is the main playing thread. It feeds the SPU with upsampled, demux'd
-    audio data, from what has been queued beforehand. The stream is 
-    constructed as a ring buffer. This thread only ends with TerminateThread,
-    and is usually asleep, waiting for SPU to complete playing the current
-    wave. SPU plays 1024 bytes blocks, which yields that this thread wakes
-    and sleeps 187.5 times a second (alot!)
-*/
-static void play_thread(void *arg)
-{
-	int block;
-	char *bufptr;
-	int intr_state;
-	int step;
-	struct upsample_t up;
-	upsampler_t upsampler = NULL;
-
-	printf("starting play thread\n");
-	while (1) 
-	{
-		if (format_changed)
-		{
-			upsampler = find_upsampler(core1_freq, core1_bits, core1_channels);
-			format_changed = 0;
-		}
-
-		if (playing && upsampler != NULL)
-		{
-			if (readpos != writepos)
-			{
-				up.src = (const unsigned char *)ringbuf + readpos;
-				up.left = rendered_left;
-				up.right = rendered_right;
-				step = upsampler(&up);
-
-				readpos = readpos + step;
-				if (readpos >= ringbuf_size)
-				{
-					/* wrap around */
-					readpos = 0;
-				}
-			}
-			else
-			{
-				/* whoops, not enough samples! */
-				memset(rendered_left, '\0', sizeof(rendered_left));
-				memset(rendered_right, '\0', sizeof(rendered_right));
-			}
-		}
-		
-		/* wait until it's safe to transmit another block */
-		WaitSema(transfer_sema);
-
-		/* suspend all interrupts */
-		CpuSuspendIntr(&intr_state);
-
-		/* one block is playing currently, other is idle */
-		block = 1 - (sceSdBlockTransStatus(1, 0) >> 24);
-
-		/* copy 512 bytes from left and right buffers, into spubuf */
-		bufptr = spubuf + (block << 10);
-		wmemcpy(bufptr, rendered_left, 512);
-		wmemcpy(bufptr + 512, rendered_right, 512);
-
-		CpuResumeIntr(intr_state);
-
-		if (audsrv_available() >= (ringbuf_size / 10))
-		{
-			/* arbitrarily selected ringbuf_size / 10, to reduce
-			 * number of semaphores signalled.
-			 */
-			SignalSema(queue_sema);
-		}
-	}
-}
-
-/** Helper function to easily create threads
-    @param func       thread procedure
-    @param priority   thread priority (usually 40)
-    @param param      optional argument for thread procedure
-    @returns thread_id (int), zero on error
-
-    Creates a thread based on the given parameter. Upon completion,
-    thread is started.
-*/
-static int create_thread(void *func, int priority, void *param)
-{
-	int tid;
-	iop_thread_t thr;
-
-	memset(&thr, '\0', sizeof(thr));
-	thr.attr = TH_C;
-	thr.thread = func;
-	thr.option = (int)param;
-	thr.priority = priority;
-	thr.stacksize = 2048;
-	thr.attr = 0x2000000;
-	tid = CreateThread(&thr);
-	if (tid <= 0) 
-	{
-		return 0;
-	}
-
-	StartThread(tid, 0);
-	return tid;
+	/* override this from a unittest */
 }
 
 /** IRX _start function
@@ -651,14 +518,16 @@ static int create_thread(void *func, int priority, void *param)
 */
 int _start()
 {
-	int rpc_tid;
-	
-	if (RegisterLibraryEntries(&_exp_audsrv)) {
-		printf("audsrv: couldn't register itself.\n");
-		return 1;
-	}
+	int err;
 
 	printf("audsrv: greetings from version " VERSION " !\n");
+
+	err = RegisterLibraryEntries(&_exp_audsrv);
+	if (err != 0)
+	{
+		printf("audsrv: couldn't register library entries. Error %d\n", err);
+		return 1;
+	}
 
 	/* enable SPU2 DMA interrupts */
 	FlushDcache();
@@ -667,9 +536,14 @@ int _start()
 	EnableIntr(SPU_DMA_CHN1_IRQ);
 	EnableIntr(SPU_IRQ);
 
+#ifndef NO_RPC_THREAD
 	/* create RPC listener thread */
-	rpc_tid = create_thread(rpc_server_thread, 40, 0);
-	printf("audsrv: rpc server thread %x started\n", rpc_tid);
+	initialize_rpc_thread();
+#endif
+
+	/* call unittest, if available */
+	unittest_start();
 
 	return 0;
 }
+

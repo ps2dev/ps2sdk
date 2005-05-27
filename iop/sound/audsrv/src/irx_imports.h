@@ -12,7 +12,7 @@
 #include <sysmem.h>
 #include <thbase.h>
 #include <thsemap.h>
-
+#include <cdvdman.h>
 #include <libsd.h>
 
 #endif

@@ -5,15 +5,14 @@
 #-----------------------------------------------------------------------
 # Copyright 2005, ps2dev - http://www.ps2dev.org
 # Licenced under GNU Library General Public License version 2
-# Review ps2sdk README & LICENSE files for further details.
 #
 # $Id$
-# audsrv EE-side RPC code.
+# word-copy helper
 */
 
 #ifndef __WMEMCPY_INCLUDED__
 #define __WMEMCPY_INCLUDED__
 
-void wmemcpy(void *dest, void *src, int numwords);
+void wmemcpy(void *dest, const void *src, int numwords);
 
 #endif

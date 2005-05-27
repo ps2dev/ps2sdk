@@ -14,9 +14,12 @@ IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
 IOP_BIN  = bin/audsrv.irx
-IOP_OBJS = obj/audsrv.o obj/upsamplers.o obj/exports.o obj/imports.o obj/hw.o
+IOP_OBJS = \
+obj/audsrv.o obj/upsamplers.o obj/hw.o obj/rpc_server.o \
+obj/common.o obj/cdrom.o \
+obj/imports.o obj/exports.o
 
-IOP_CFLAGS  += -Wall -fno-builtin-printf -fno-builtin-memcpy
+IOP_CFLAGS  += -Wall -fno-builtin-printf -fno-builtin-memcpy -D_IOP
 IOP_LDFLAGS += -s
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
