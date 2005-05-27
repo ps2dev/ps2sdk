@@ -8,15 +8,22 @@
 #
 # $Id$
 
-EE_BIN = playwav.elf
+BINS = playwav.elf playcdda.elf playwav2.elf testcd.elf
+
+OBJS = playwav.o playcdda.o playwav2.o testcd.o
 EE_INCS = -I../include
-EE_OBJS = playwav.o
 EE_LIBS = -L../lib -lc -laudsrv
 
-all: $(EE_BIN)
+all: $(BINS)
+
+install:
+
+%.elf : %.o $(PS2SDK)/ee/startup/crt0.o
+	$(EE_CC) -mno-crt0 -T$(PS2SDK)/ee/startup/linkfile $(EE_LDFLAGS) \
+		-o $@ $(PS2SDK)/ee/startup/crt0.o $< $(EE_LIBS)
 
 clean:
-	rm -f *.elf *.o *.a
+	rm -f $(BINS) $(OBJS)
 
 include $(PS2SDK)/samples/Makefile.pref
 include $(PS2SDK)/samples/Makefile.eeglobal
