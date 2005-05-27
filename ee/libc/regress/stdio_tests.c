@@ -112,7 +112,7 @@ static const char *test_fseek_ftell(void *arg)
 	}
 
 	/* seek forward */
-	ret = fseek(fp, +3, SEEK_CUR);
+	ret = fseek(fp, +2, SEEK_CUR);
 	off = ftell(fp);
 	if (ret != 0 || off != 4)
 	{
@@ -128,7 +128,7 @@ static const char *test_fseek_ftell(void *arg)
 	}
 
 	/* seek backward */
-	ret = fseek(fp, -1, SEEK_CUR);
+	ret = fseek(fp, -2, SEEK_CUR);
 	off = ftell(fp);
 	if (ret != 0 || off != 4)
 	{
