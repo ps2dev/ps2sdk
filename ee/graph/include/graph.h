@@ -71,7 +71,7 @@ extern "C" {
 
  int graph_draw_clear(int red, int green, int blue);
 
- int graph_draw_primatives(int type, int count, VECTORI *points, u64 *rgbaq, u64 *st);
+ int graph_draw_primitives(int type, int count, VECTORI *points, u64 *rgbaq, u64 *st);
 
  /////////////////////////
  // GRAPH GET FUNCTIONS //

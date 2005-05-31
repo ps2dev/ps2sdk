@@ -172,7 +172,7 @@
    draw_gradient();
 
    // Draw the triangles.
-   graph_draw_primatives(GRAPH_PRIM_TRIANGLE, 36, pointsi, colours, NULL);
+   graph_draw_primitives(GRAPH_PRIM_TRIANGLE, 36, pointsi, colours, NULL);
 
   }
 

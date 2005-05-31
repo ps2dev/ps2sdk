@@ -121,7 +121,7 @@
 
  }
 
- int graph_draw_primatives(int type, int count, VECTORI *points, u64 *rgbaq, u64 *st) {
+ int graph_draw_primitives(int type, int count, VECTORI *points, u64 *rgbaq, u64 *st) {
   int loop0;
 
   // If we are not initialized, initialize the library.
