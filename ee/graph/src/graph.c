@@ -13,6 +13,7 @@
 
  #include <dma.h>
  #include <graph.h>
+ #include <math3d.h>
  #include <string.h>
  #include <kernel.h>
  #include <packet.h>
@@ -75,6 +76,106 @@
 
   // Tell everyone we are not initialized.
   graph_initialized = -1;
+
+  // End function.
+  return 0;
+
+ }
+
+ //////////////////////////
+ // GRAPH DRAW FUNCTIONS //
+ //////////////////////////
+
+ int graph_draw_clear(int red, int green, int blue) {
+
+  // If we are not initialized, initialize the library.
+  if (graph_initialized < 0) { if (graph_initialize() < 0) { return -1; } }
+
+  // If no mode is set, return an error.
+  if (current_mode < 0) { return -1; }
+
+  // Reset the packet.
+  if (packet_reset(&graph_packet) < 0) { return -1; }
+
+  // Clear the draw framebuffer and zbuffer.
+  packet_append_64(&graph_packet, GIF_SET_TAG(6, 1, 0, 0, GIF_TAG_PACKED, 1));
+  packet_append_64(&graph_packet, 0x0E);
+  packet_append_64(&graph_packet, GIF_SET_TEST(0, 0, 0, 0, 0, 0, 1, 1));
+  packet_append_64(&graph_packet, GIF_REG_TEST_1);
+  packet_append_64(&graph_packet, GIF_SET_PRIM(6, 0, 0, 0, 0, 0, 0, 0, 0));
+  packet_append_64(&graph_packet, GIF_REG_PRIM);
+  packet_append_64(&graph_packet, GIF_SET_RGBAQ(red, green, blue, 0x80, 0x3F800000));
+  packet_append_64(&graph_packet, GIF_REG_RGBAQ);
+  packet_append_64(&graph_packet, GIF_SET_XYZ(0x0000, 0x0000, 0x0000));
+  packet_append_64(&graph_packet, GIF_REG_XYZ2);
+  packet_append_64(&graph_packet, GIF_SET_XYZ(0xFFFF, 0xFFFF, 0x0000));
+  packet_append_64(&graph_packet, GIF_REG_XYZ2);
+  packet_append_64(&graph_packet, GIF_SET_TEST(0, 0, 0, 0, 0, 0, 1, 2));
+  packet_append_64(&graph_packet, GIF_REG_TEST_1);
+
+  // Send the packet.
+  if (packet_send(&graph_packet, DMA_CHANNEL_GIF, DMA_FLAG_NORMAL) < 0) { return -1; }
+
+  // End function.
+  return 0;
+
+ }
+
+ int graph_draw_primatives(int type, int count, VECTORI *points, u64 *rgbaq, u64 *st) {
+  int loop0;
+
+  // If we are not initialized, initialize the library.
+  if (graph_initialized < 0) { if (graph_initialize() < 0) { return -1; } }
+
+  // If no mode is set, return an error.
+  if (current_mode < 0) { return -1; }
+
+  // Reset the packet.
+  if (packet_reset(&graph_packet) < 0) { return -1; }
+
+  // Start the packet by adding the giftag.
+  packet_append_64(&graph_packet, GIF_SET_TAG(count, 1, 1, GIF_SET_PRIM(type, 1, 0, 0, 1, 0, 0, 0, 0), GIF_TAG_PACKED, 2));
+  packet_append_64(&graph_packet, 0xEE);
+
+  // Add the points to the packet.
+  for (loop0=0;loop0<count;loop0++) {
+
+   // If no colours were specified...
+   if (rgbaq == NULL) {
+
+    // Assign a grey colour.
+    packet_append_64(&graph_packet, GIF_SET_RGBAQ(0x80, 0x80, 0x80, 0x80, 0x3F800000));
+    packet_append_64(&graph_packet, GIF_REG_RGBAQ);
+
+   // Else...
+   } else {
+
+    // Assign the colour.
+    packet_append_64(&graph_packet, rgbaq[loop0]);
+    packet_append_64(&graph_packet, GIF_REG_RGBAQ);
+
+   }
+
+   // If the point is clipped...
+   if (points[loop0].w == 0.00f) {
+
+    // Assign the point without a drawing kick.
+    packet_append_64(&graph_packet, GIF_SET_XYZ(points[loop0].x, points[loop0].y, points[loop0].z));
+    packet_append_64(&graph_packet, GIF_REG_XYZ3);
+
+   // Else...
+   } else {
+
+    // Assign the point with a drawing kick.
+    packet_append_64(&graph_packet, GIF_SET_XYZ(points[loop0].x, points[loop0].y, points[loop0].z));
+    packet_append_64(&graph_packet, GIF_REG_XYZ2);
+
+   }
+
+  }
+
+  // Send the packet.
+  if (packet_send(&graph_packet, DMA_CHANNEL_GIF, DMA_FLAG_NORMAL) < 0) { return -1; }
 
   // End function.
   return 0;
@@ -256,33 +357,11 @@
 
  int graph_set_clearbuffer(int red, int green, int blue) {
 
-  // If we are not initialized, initialize the library.
-  if (graph_initialized < 0) { if (graph_initialize() < 0) { return -1; } }
+  // Print a warning about this function disappearing.
+  printf("warning: graph_set_clearbuffer() will disappear soon, use graph_draw_clear() instead!\n");
 
-  // If no mode is set, return an error.
-  if (current_mode < 0) { return -1; }
-
-  // Reset the packet.
-  if (packet_reset(&graph_packet) < 0) { return -1; }
-
-  // Clear the draw framebuffer and zbuffer.
-  packet_append_64(&graph_packet, GIF_SET_TAG(6, 1, 0, 0, GIF_TAG_PACKED, 1));
-  packet_append_64(&graph_packet, 0x0E);
-  packet_append_64(&graph_packet, GIF_SET_TEST(0, 0, 0, 0, 0, 0, 1, 1));
-  packet_append_64(&graph_packet, GIF_REG_TEST_1);
-  packet_append_64(&graph_packet, GIF_SET_PRIM(6, 0, 0, 0, 0, 0, 0, 0, 0));
-  packet_append_64(&graph_packet, GIF_REG_PRIM);
-  packet_append_64(&graph_packet, GIF_SET_RGBAQ(red, green, blue, 0x80, 0x3F800000));
-  packet_append_64(&graph_packet, GIF_REG_RGBAQ);
-  packet_append_64(&graph_packet, GIF_SET_XYZ(0x0000, 0x0000, 0x0000));
-  packet_append_64(&graph_packet, GIF_REG_XYZ2);
-  packet_append_64(&graph_packet, GIF_SET_XYZ(0xFFFF, 0xFFFF, 0x0000));
-  packet_append_64(&graph_packet, GIF_REG_XYZ2);
-  packet_append_64(&graph_packet, GIF_SET_TEST(0, 0, 0, 0, 0, 0, 1, 2));
-  packet_append_64(&graph_packet, GIF_REG_TEST_1);
-
-  // Send the packet.
-  if (packet_send(&graph_packet, DMA_CHANNEL_GIF, DMA_FLAG_NORMAL) < 0) { return -1; }
+  // Clear the screen anyway.
+  graph_draw_clear(red, green, blue);
 
   // End function.
   return 0;

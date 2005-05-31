@@ -43,7 +43,7 @@
   graph_set_zbuffer(graph_get_width() * graph_get_height() * (graph_get_bpp() >> 3));
 
   // Clear the screen.
-  graph_set_clearbuffer(0, 64, 0);
+  graph_draw_clear(0, 64, 0);
 
   // Draw 20 squares...
   for (loop0=0;loop0<20;loop0++) {
