@@ -59,6 +59,8 @@ extern "C" {
  // GRAPH GET FUNCTIONS //
  /////////////////////////
 
+ float graph_get_aspect(void);		// Returns the aspect ratio of the current mode. (scale_x : 1)
+
  int graph_get_bpp(void);		// Returns the framebuffer bpp of the current mode.
 
  int graph_get_displayfield(void);	// Returns the currently displayed field.

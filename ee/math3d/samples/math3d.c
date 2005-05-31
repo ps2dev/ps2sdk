@@ -84,8 +84,8 @@
   // Set the zbuffer address.
   graph_set_zbuffer(graph_get_size());
 
-  // Create the view_clip matrix. (ASPECT = (4 / 3) * (448 / 640) = 0.933f)
-  create_view_clip(view_clip, 0.933f, -2.00f, 2.00f, -2.00f, 2.00f, 1.00f, 1000.00f);
+  // Create the view_clip matrix.
+  create_view_clip(view_clip, graph_get_aspect(), -2.00f, 2.00f, -2.00f, 2.00f, 1.00f, 1000.00f);
 
   // Create the clip_screen matrix.
   create_clip_screen(clip_screen, 4096.00f, 4096.00f, 16777215.00f);

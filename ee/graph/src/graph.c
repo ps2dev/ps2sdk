@@ -16,6 +16,7 @@
  #include <string.h>
  #include <kernel.h>
  #include <packet.h>
+ #include <osd_config.h>
 
  GRAPH_MODE graph_mode[9] = {
   {  640,  448, 0x02, 1,  286720, GS_SET_DISPLAY(632, 50, 3, 0, 2559,  447) }, // GRAPH_MODE_NTSC
@@ -83,6 +84,23 @@
  /////////////////////////
  // GRAPH GET FUNCTIONS //
  /////////////////////////
+
+ float graph_get_aspect(void) {
+  float aspect = 1.00f;
+
+  // If we are not initialized, initialize the library.
+  if (graph_initialized < 0) { if (graph_initialize() < 0) { return -1; } }
+
+  // If no mode is set, return an error.
+  if (current_mode < 0) { return -1; }
+
+  // Determine the aspect as defined by the osd configuration.
+  if (configGetTvScreenType() == TV_SCREEN_169) { aspect = 1.7778f; } else { aspect = 1.3333f; }
+
+  // Return the aspect ratio of the current mode.
+  return (float)((float)aspect * (float)((float)graph_get_height() / (float)graph_get_width()));
+
+ }
 
  int graph_get_bpp(void) {
 
