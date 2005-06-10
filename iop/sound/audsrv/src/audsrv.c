@@ -181,7 +181,7 @@ int audsrv_set_format(int freq, int bits, int channels)
 	core1_channels = channels;
 
 	/* set ring buffer size to 10 iterations worth of data (~50 ms) */
-	feed_size = (512 * (core1_freq << core1_sample_shift)) / 48000;
+	feed_size = ((512 * core1_freq) / 48000) << core1_sample_shift;
 	ringbuf_size = feed_size * 10;
 
 	writepos = 0;
