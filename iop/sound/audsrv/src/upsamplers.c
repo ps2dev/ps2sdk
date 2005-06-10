@@ -386,7 +386,7 @@ static void up_generic_8_mono(struct upsample_t *up, const unsigned short *lut)
 	signed char b;
 	short *left = up->left;
 	short *right = up->right;
-	short *src = (short *)up->src;
+	char *src = (char *)up->src;
 
 	for (p=0; p<512; p++)
 	{
@@ -402,7 +402,7 @@ static void up_generic_8_stereo(struct upsample_t *up, const unsigned short *lut
 	signed char b;
 	short *left = up->left;
 	short *right = up->right;
-	short *src = (short *)up->src;
+	char *src = (char *)up->src;
 
 	for (p=0; p<512; p++)
 	{
@@ -423,19 +423,25 @@ static int up_11025_8_mono(struct upsample_t *up)
 static int up_11025_8_stereo(struct upsample_t *up)
 {
 	up_generic_8_stereo(up, up_11025_lut);
-	return 234; /* (11025 / 48000) * 512 * 2 */
+	return 234; /* (11025 / 48000) * 512 * stereo */
 }
 
 static int up_11025_16_mono(struct upsample_t *up)
 {
 	up_generic_16_mono(up, up_11025_lut);
-	return 234; /* (11025 / 48000) * 512 * 2 */
+	return 234; /* (11025 / 48000) * 512 * 16bit */
 }
 
 static int up_11025_16_stereo(struct upsample_t *up)
 {
 	up_generic_16_stereo(up, up_11025_lut);
-	return 470; /* (11025 / 48000) * 512 * 2 * 2 */
+	return 470; /* (11025 / 48000) * 512 * stereo * 16bit */
+}
+
+static int up_22050_8_mono(struct upsample_t *up)
+{
+	up_generic_8_mono(up, up_22050_lut);
+	return 235; /* (22050 / 48000) * 512 */
 }
 
 static int up_22050_16_mono(struct upsample_t *up)
@@ -447,26 +453,47 @@ static int up_22050_16_mono(struct upsample_t *up)
 static int up_22050_16_stereo(struct upsample_t *up)
 {
 	up_generic_16_stereo(up, up_22050_lut);
-	return 940; /* (22050 / 48000) * 512 * 2 * 2 */
+	return 940; /* (22050 / 48000) * 512 * stereo * 16bit */
+}
+
+static int up_44100_8_mono(struct upsample_t *up)
+{
+	up_generic_8_mono(up, up_44100_lut);
+	return 470; /* (44100 / 48000) * 512 */
 }
 
 static int up_44100_16_mono(struct upsample_t *up)
 {
 	up_generic_16_mono(up, up_44100_lut);
-	return 940; /* (44100 / 48000) * 512 * 2 */
+	return 940; /* (44100 / 48000) * 512 * 16bit */
 }
 
 static int up_44100_16_stereo(struct upsample_t *up)
 {
 	up_generic_16_stereo(up, up_44100_lut);
-	return 1880; /* (44100 / 48000) * 512 * 2 * 2 */
+	return 1880; /* (44100 / 48000) * 512 * stereo * 16bit */
 }
 
-/** Simple demux */
+static int up_48000_16_mono(struct upsample_t *up)
+{
+	int i;
+	short *left = (short *)up->left;
+	short *right = (short *)up->right;
+	short *src = (short *)up->src;
+
+	for (i=0; i<512; i++)
+	{
+		*left++ = *right++ = *src++;
+	}
+
+	return 1024; /* 512 * 16bit */
+}
+
 static int up_48000_16_stereo(struct upsample_t *up)
 {
+	/* simple demux */
 	demux((short *)up->src, up->left, up->right, 512);
-	return 2048;
+	return 2048; /* 512 * stereo * 16bit */
 }
 
 typedef struct entry_t
@@ -485,11 +512,14 @@ static entry_t upsamplers[] =
 	{11025, 16, 1, up_11025_16_mono},
 	{11025, 16, 2, up_11025_16_stereo},
 	{12000, 16, 2, up_12000_16_stereo},
+	{22050,  8, 1, up_22050_8_mono},
 	{22050, 16, 1, up_22050_16_mono},
 	{22050, 16, 2, up_22050_16_stereo},
 	{24000, 16, 2, up_24000_16_stereo},
+	{44100,  8, 1, up_44100_8_mono},
 	{44100, 16, 1, up_44100_16_mono},
 	{44100, 16, 2, up_44100_16_stereo},
+	{48000, 16, 1, up_48000_16_mono},
 	{48000, 16, 2, up_48000_16_stereo},
 	{0, 0, 0, 0}
 };
