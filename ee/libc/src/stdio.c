@@ -684,6 +684,8 @@ size_t fread(void *buf, size_t r, size_t n, FILE *stream)
 int fseek(FILE *stream, long offset, int origin)
 {
   int ret;
+  
+  stream->has_putback = 0;
 
   switch(stream->type) {
     case STD_IOBUF_TYPE_NONE:
