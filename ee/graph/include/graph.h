@@ -12,11 +12,9 @@
 #ifndef __GRAPH_H__
 #define __GRAPH_H__
 
- #include <tamtypes.h>
-
- #include <math3d.h>
-
  #include <graph_registers.h>
+
+ typedef struct { int width, height, mode, interlace, size; u64 display; } GRAPH_MODE;
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,19 +41,12 @@ extern "C" {
  #define GRAPH_PSM_4HH			0x24	// 4 bits per pixel, palettized.
  #define GRAPH_PSM_4HL			0x2C	// 4 bits per pixel, palettized.
 
+ #define GRAPH_NONINTERLACED		0x00	// The current mode is non-interlaced.
+ #define GRAPH_INTERLACED		0x01	// The current mode is interlaced.
+
  #define GRAPH_FIELD_EVEN		0x00	// Use even fields only.
  #define GRAPH_FIELD_ODD		0x01	// Use odd fields only.
  #define GRAPH_FIELD_BOTH		0x02	// Use both field types.
-
- #define GRAPH_PRIM_POINT		0x00	// 
- #define GRAPH_PRIM_LINE		0x01	// 
- #define GRAPH_PRIM_LINE_STRIP		0x02	// 
- #define GRAPH_PRIM_TRIANGLE		0x03	// 
- #define GRAPH_PRIM_TRIANGLE_STRIP	0x04	// 
- #define GRAPH_PRIM_TRIANGLE_FAN	0x05	// 
- #define GRAPH_PRIM_SPRITE		0x06	// 
-
- typedef struct { int width, height, mode, interlace, size; u64 display; } GRAPH_MODE;
 
  /////////////////////
  // GRAPH FUNCTIONS //
@@ -65,55 +56,57 @@ extern "C" {
 
  int graph_shutdown(void);
 
- //////////////////////////
- // GRAPH DRAW FUNCTIONS //
- //////////////////////////
-
- int graph_draw_clear(int red, int green, int blue);
-
- int graph_draw_primitives(int type, int count, VECTORI *points, u64 *rgbaq, u64 *st);
-
  /////////////////////////
  // GRAPH GET FUNCTIONS //
  /////////////////////////
 
- float graph_get_aspect(void);					// Returns the aspect ratio of the current mode. (scale_x : 1)
+ float graph_get_aspect(void);						// Returns the aspect ratio of the current mode. (scale_x : 1)
 
- int graph_get_bpp(void);					// Returns the framebuffer bpp of the current mode.
+ int graph_get_bpp(void);						// Returns the framebuffer bpp of the current mode.
 
- int graph_get_displayfield(void);				// Returns the currently displayed field.
+ int graph_get_displaybuffer(void);					// Returns the display buffer vram address of the current mode.
 
- int graph_get_height(void);					// Returns the pixel height of the current mode.
+ int graph_get_displayfield(void);					// Returns the display field of the current mode.
 
- int graph_get_interlace(void);					// Returns 1 if the current mode is interlaced, 0 otherwise.
+ int graph_get_drawbuffer(void);					// Returns the draw buffer vram address of the current mode.
 
- int graph_get_psm(void);					// Returns the framebuffer psm of the current mode.
+ int graph_get_drawfield(void);						// Returns the draw field of the current mode.
 
- int graph_get_size(void);					// Returns the framebuffer size of the current mode.
+ int graph_get_height(void);						// Returns the pixel height of the current mode.
 
- int graph_get_width(void);					// Returns the pixel width of the current mode.
+ int graph_get_interlace(void);						// Returns the interlace of the current mode.
 
- int graph_get_zbpp(void);					// Returns the zbuffer bpp of the current mode.
+ int graph_get_psm(void);						// Returns the framebuffer psm of the current mode.
 
- int graph_get_zpsm(void);					// Returns the zbuffer psm of the current mode.
+ int graph_get_size(void);						// Returns the framebuffer size of the current mode.
 
- int graph_get_zsize(void);					// Returns the zbuffer size of the current mode.
+ int graph_get_width(void);						// Returns the pixel width of the current mode.
+
+ int graph_get_zbpp(void);						// Returns the zbuffer bpp of the current mode.
+
+ int graph_get_zbuffer(void);						// Returns the zbuffer vram address of the current mode.
+
+ int graph_get_zpsm(void);						// Returns the zbuffer psm of the current mode.
+
+ int graph_get_zsize(void);						// Returns the zbuffer size of the current mode.
 
  /////////////////////////
  // GRAPH SET FUNCTIONS //
  /////////////////////////
 
- int graph_set_clearbuffer(int red, int green, int blue);	// Clears the draw framebuffer and zbuffer.
+ int graph_set_clearbuffer(int red, int green, int blue);		// Clear the draw buffer with the specified colour.
 
- int graph_set_displaybuffer(int address);			// Sets the vram address of the display framebuffer.
+ int graph_set_displaybuffer(int address);				// Sets the vram address of the display framebuffer.
 
- int graph_set_drawbuffer(int address);				// Sets the vram address of the draw framebuffer.
+ int graph_set_drawbuffer(int address);					// Sets the vram address of the draw framebuffer.
 
- int graph_set_drawfield(int field);				// Sets the draw interlace field.
+ int graph_set_drawfield(int field);					// Sets the draw interlace field.
 
- int graph_set_mode(int mode, int psm, int zpsm);		// Sets the graphics mode.
+ int graph_set_mode(int mode, int psm, int zpsm);			// Sets the graphics mode.
 
- int graph_set_zbuffer(int address);				// Sets the vram address of the zbuffer.
+ int graph_set_texture(int address, int width, int height, int psm);	// Sets the texture information.
+
+ int graph_set_zbuffer(int address);					// Sets the vram address of the zbuffer.
 
  //////////////////////////
  // GRAPH VRAM FUNCTIONS //
