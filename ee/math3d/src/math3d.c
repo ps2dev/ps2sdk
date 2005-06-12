@@ -11,6 +11,7 @@
 
  #include <tamtypes.h>
 
+ #include <graph.h>
  #include <math3d.h>
  #include <string.h>
  #include <floatlib.h>
@@ -19,24 +20,81 @@
  // VECTOR FUNCTIONS //
  //////////////////////
 
- void vector_copy(VECTOR output, VECTOR input0) {
+ void vector_apply(VECTOR output, VECTOR input0, MATRIX input1) {
+  asm __volatile__ (
+   "lqc2		vf1, 0x00(%2)	\n"
+   "lqc2		vf2, 0x10(%2)	\n"
+   "lqc2		vf3, 0x20(%2)	\n"
+   "lqc2		vf4, 0x30(%2)	\n"
+   "lqc2		vf5, 0x00(%1)	\n"
+   "vmulaw		ACC, vf4, vf0	\n"
+   "vmaddax		ACC, vf1, vf5	\n"
+   "vmadday		ACC, vf2, vf5	\n"
+   "vmaddz		vf6, vf3, vf5	\n"
+   "sqc2		vf6, 0x00(%0)	\n"
+   : : "r" (output), "r" (input0), "r" (input1)
+  );
+ }
+
+ void vector_clamp(VECTOR output, VECTOR input0, float min, float max) {
+  VECTOR work;
 
   // Copy the vector.
-  output[0] = input0[0];
-  output[1] = input0[1];
-  output[2] = input0[2];
-  output[3] = input0[3];
+  vector_copy(work, input0);
+
+  // Clamp the minimum values.
+  if (work[0] < min) { work[0] = min; }
+  if (work[1] < min) { work[1] = min; }
+  if (work[2] < min) { work[2] = min; }
+  if (work[3] < min) { work[3] = min; }
+
+  // Clamp the maximum values.
+  if (work[0] > max) { work[0] = max; }
+  if (work[1] > max) { work[1] = max; }
+  if (work[2] > max) { work[2] = max; }
+  if (work[3] > max) { work[3] = max; }
+
+  // Output the result.
+  vector_copy(output, work);
 
  }
 
- void vector_multiply(VECTOR output, VECTOR input0, MATRIX input1) {
+ void vector_copy(VECTOR output, VECTOR input0) {
+  asm __volatile__ (
+   "lqc2		vf1, 0x00(%1)	\n"
+   "sqc2		vf1, 0x00(%0)	\n"
+   : : "r" (output), "r" (input0)
+  );
+ }
+
+ float vector_innerproduct(VECTOR input0, VECTOR input1) {
+  VECTOR work0, work1;
+
+  // Normalize the first vector.
+  work0[0] = (input0[0] / input0[3]);
+  work0[1] = (input0[1] / input0[3]);
+  work0[2] = (input0[2] / input0[3]);
+  work0[3] = 1.00f;
+
+  // Normalize the second vector.
+  work1[0] = (input1[0] / input1[3]);
+  work1[1] = (input1[1] / input1[3]);
+  work1[2] = (input1[2] / input1[3]);
+  work1[3] = 1.00f;
+
+  // Return the inner product.
+  return (work0[0] * work1[0]) + (work0[1] * work1[1]) + (work0[2] * work1[2]);
+
+ }
+
+ void vector_multiply(VECTOR output, VECTOR input0, VECTOR input1) {
   VECTOR work;
 
-  // Multiply the vector by the matrix.
-  work[0] = (input0[0] * input1[0x00]) + (input0[1] * input1[0x04]) + (input0[2] * input1[0x08]) + (input0[3] * input1[0x0C]);
-  work[1] = (input0[0] * input1[0x01]) + (input0[1] * input1[0x05]) + (input0[2] * input1[0x09]) + (input0[3] * input1[0x0D]);
-  work[2] = (input0[0] * input1[0x02]) + (input0[1] * input1[0x06]) + (input0[2] * input1[0x0A]) + (input0[3] * input1[0x0E]);
-  work[3] = (input0[0] * input1[0x03]) + (input0[1] * input1[0x07]) + (input0[2] * input1[0x0B]) + (input0[3] * input1[0x0F]);
+  // Multiply the vectors together.
+  work[0] = input0[0] * input1[0];
+  work[1] = input0[1] * input1[1];
+  work[2] = input0[2] * input1[2];
+  work[3] = input0[3] * input1[3];
 
   // Output the result.
   vector_copy(output, work);
@@ -44,34 +102,31 @@
  }
 
  void vector_normalize(VECTOR output, VECTOR input0) {
-  VECTOR work;
-
-  // Find the length of the vector.
-  work[3] = sqrtf(input0[0] * input0[0] + input0[1] * input0[1] + input0[2] * input0[2]);
-
-  // Normalize the vector.
-  work[0] = (input0[0] / work[3]);
-  work[1] = (input0[1] / work[3]);
-  work[2] = (input0[2] / work[3]);
-  work[3] = 1.00f;
-
-  // Output the result.
-  vector_copy(output, work);
-
+  asm __volatile__ (
+   "lqc2		vf1, 0x00(%1)	\n"
+   "vmul.xyz		vf2, vf1, vf1	\n"
+   "vmulax.w		ACC, vf0, vf2	\n"
+   "vmadday.w		ACC, vf0, vf2	\n"
+   "vmaddz.w		vf2, vf0, vf2	\n"
+   "vrsqrt		Q, vf0w, vf2w	\n"
+   "vsub.w		vf1, vf0, vf0	\n"
+   "vwaitq				\n"
+   "vmulq.xyz		vf1, vf1, Q	\n"
+   "sqc2		vf1, 0x00(%0)	\n"
+   : : "r" (output), "r" (input0)
+  );
  }
 
  void vector_outerproduct(VECTOR output, VECTOR input0, VECTOR input1) {
-  VECTOR work;
-
-  // Calculate the outer product.
-  work[0] = (input0[1] * input1[2]) - (input0[2] * input1[1]);
-  work[1] = (input0[2] * input1[0]) - (input0[0] * input1[2]);
-  work[2] = (input0[0] * input1[1]) - (input0[1] * input1[0]);
-  work[3] = 0.00f;
-
-  // Output the result.
-  vector_copy(output, work);
-
+  asm __volatile__ (
+   "lqc2		vf1, 0x00(%1)	\n"
+   "lqc2		vf2, 0x00(%2)	\n"
+   "vopmula.xyz		ACC, vf1, vf2	\n"
+   "vopmsub.xyz		vf2, vf2, vf1	\n"
+   "vsub.w		vf2, vf0, vf0	\n"
+   "sqc2		vf2, 0x00(%0)	\n"
+   : : "r" (output), "r" (input0), "r" (input1)
+  );
  }
 
  //////////////////////
@@ -79,25 +134,17 @@
  //////////////////////
 
  void matrix_copy(MATRIX output, MATRIX input0) {
-
-  // Copy the matrix.
-  output[0x00] = input0[0x00];
-  output[0x01] = input0[0x01];
-  output[0x02] = input0[0x02];
-  output[0x03] = input0[0x03];
-  output[0x04] = input0[0x04];
-  output[0x05] = input0[0x05];
-  output[0x06] = input0[0x06];
-  output[0x07] = input0[0x07];
-  output[0x08] = input0[0x08];
-  output[0x09] = input0[0x09];
-  output[0x0A] = input0[0x0A];
-  output[0x0B] = input0[0x0B];
-  output[0x0C] = input0[0x0C];
-  output[0x0D] = input0[0x0D];
-  output[0x0E] = input0[0x0E];
-  output[0x0F] = input0[0x0F];
-
+  asm __volatile__ (
+   "lqc2		vf1, 0x00(%1)	\n"
+   "lqc2		vf2, 0x10(%1)	\n"
+   "lqc2		vf3, 0x20(%1)	\n"
+   "lqc2		vf4, 0x30(%1)	\n"
+   "sqc2		vf1, 0x00(%0)	\n"
+   "sqc2		vf2, 0x10(%0)	\n"
+   "sqc2		vf3, 0x20(%0)	\n"
+   "sqc2		vf4, 0x30(%0)	\n"
+   : : "r" (output), "r" (input0)
+  );
  }
 
  void matrix_inverse(MATRIX output, MATRIX input0) {
@@ -119,29 +166,37 @@
  }
 
  void matrix_multiply(MATRIX output, MATRIX input0, MATRIX input1) {
-  MATRIX work;
-
-  // Multiply the matrices together.
-  work[0x00] = (input0[0x00] * input1[0x00]) + (input0[0x04] * input1[0x01]) + (input0[0x08] * input1[0x02]) + (input0[0x0C] * input1[0x03]);
-  work[0x01] = (input0[0x01] * input1[0x00]) + (input0[0x05] * input1[0x01]) + (input0[0x09] * input1[0x02]) + (input0[0x0D] * input1[0x03]);
-  work[0x02] = (input0[0x02] * input1[0x00]) + (input0[0x06] * input1[0x01]) + (input0[0x0A] * input1[0x02]) + (input0[0x0E] * input1[0x03]);
-  work[0x03] = (input0[0x03] * input1[0x00]) + (input0[0x07] * input1[0x01]) + (input0[0x0B] * input1[0x02]) + (input0[0x0F] * input1[0x03]);
-  work[0x04] = (input0[0x00] * input1[0x04]) + (input0[0x04] * input1[0x05]) + (input0[0x08] * input1[0x06]) + (input0[0x0C] * input1[0x07]);
-  work[0x05] = (input0[0x01] * input1[0x04]) + (input0[0x05] * input1[0x05]) + (input0[0x09] * input1[0x06]) + (input0[0x0D] * input1[0x07]);
-  work[0x06] = (input0[0x02] * input1[0x04]) + (input0[0x06] * input1[0x05]) + (input0[0x0A] * input1[0x06]) + (input0[0x0E] * input1[0x07]);
-  work[0x07] = (input0[0x03] * input1[0x04]) + (input0[0x07] * input1[0x05]) + (input0[0x0B] * input1[0x06]) + (input0[0x0F] * input1[0x07]);
-  work[0x08] = (input0[0x00] * input1[0x08]) + (input0[0x04] * input1[0x09]) + (input0[0x08] * input1[0x0A]) + (input0[0x0C] * input1[0x0B]);
-  work[0x09] = (input0[0x01] * input1[0x08]) + (input0[0x05] * input1[0x09]) + (input0[0x09] * input1[0x0A]) + (input0[0x0D] * input1[0x0B]);
-  work[0x0A] = (input0[0x02] * input1[0x08]) + (input0[0x06] * input1[0x09]) + (input0[0x0A] * input1[0x0A]) + (input0[0x0E] * input1[0x0B]);
-  work[0x0B] = (input0[0x03] * input1[0x08]) + (input0[0x07] * input1[0x09]) + (input0[0x0B] * input1[0x0A]) + (input0[0x0F] * input1[0x0B]);
-  work[0x0C] = (input0[0x00] * input1[0x0C]) + (input0[0x04] * input1[0x0D]) + (input0[0x08] * input1[0x0E]) + (input0[0x0C] * input1[0x0F]);
-  work[0x0D] = (input0[0x01] * input1[0x0C]) + (input0[0x05] * input1[0x0D]) + (input0[0x09] * input1[0x0E]) + (input0[0x0D] * input1[0x0F]);
-  work[0x0E] = (input0[0x02] * input1[0x0C]) + (input0[0x06] * input1[0x0D]) + (input0[0x0A] * input1[0x0E]) + (input0[0x0E] * input1[0x0F]);
-  work[0x0F] = (input0[0x03] * input1[0x0C]) + (input0[0x07] * input1[0x0D]) + (input0[0x0B] * input1[0x0E]) + (input0[0x0F] * input1[0x0F]);
-
-  // Output the result.
-  matrix_copy(output, work);
-
+  asm __volatile__ (
+   "lqc2		vf1, 0x00(%1)	\n"
+   "lqc2		vf2, 0x10(%1)	\n"
+   "lqc2		vf3, 0x20(%1)	\n"
+   "lqc2		vf4, 0x30(%1)	\n"
+   "lqc2		vf5, 0x00(%2)	\n"
+   "lqc2		vf6, 0x10(%2)	\n"
+   "lqc2		vf7, 0x20(%2)	\n"
+   "lqc2		vf8, 0x30(%2)	\n"
+   "vmulax.xyzw		ACC, vf5, vf1	\n"
+   "vmadday.xyzw	ACC, vf6, vf1	\n"
+   "vmaddaz.xyzw	ACC, vf7, vf1	\n"
+   "vmaddw.xyzw		vf1, vf8, vf1	\n"
+   "vmulax.xyzw		ACC, vf5, vf2	\n"
+   "vmadday.xyzw	ACC, vf6, vf2	\n"
+   "vmaddaz.xyzw	ACC, vf7, vf2	\n"
+   "vmaddw.xyzw		vf2, vf8, vf2	\n"
+   "vmulax.xyzw		ACC, vf5, vf3	\n"
+   "vmadday.xyzw	ACC, vf6, vf3	\n"
+   "vmaddaz.xyzw	ACC, vf7, vf3	\n"
+   "vmaddw.xyzw		vf3, vf8, vf3	\n"
+   "vmulax.xyzw		ACC, vf5, vf4	\n"
+   "vmadday.xyzw	ACC, vf6, vf4	\n"
+   "vmaddaz.xyzw	ACC, vf7, vf4	\n"
+   "vmaddw.xyzw		vf4, vf8, vf4	\n"
+   "sqc2		vf1, 0x00(%0)	\n"
+   "sqc2		vf2, 0x10(%0)	\n"
+   "sqc2		vf3, 0x20(%0)	\n"
+   "sqc2		vf4, 0x30(%0)	\n"
+   : : "r" (output), "r" (input0), "r" (input1)
+  );
  }
 
  void matrix_rotate(MATRIX output, MATRIX input0, VECTOR input1) {
@@ -150,38 +205,38 @@
   // Apply the z-axis rotation.
   matrix_unit(work);
   work[0x00] =  cosf(input1[2]);
-  work[0x01] = -sinf(input1[2]);
-  work[0x04] =  sinf(input1[2]);
+  work[0x01] =  sinf(input1[2]);
+  work[0x04] = -sinf(input1[2]);
   work[0x05] =  cosf(input1[2]);
-  matrix_multiply(output, work, input0);
+  matrix_multiply(output, input0, work);
 
   // Apply the y-axis rotation.
   matrix_unit(work);
   work[0x00] =  cosf(input1[1]);
-  work[0x02] =  sinf(input1[1]);
-  work[0x08] = -sinf(input1[1]);
+  work[0x02] = -sinf(input1[1]);
+  work[0x08] =  sinf(input1[1]);
   work[0x0A] =  cosf(input1[1]);
-  matrix_multiply(output, work, output);
+  matrix_multiply(output, output, work);
 
   // Apply the x-axis rotation.
   matrix_unit(work);
   work[0x05] =  cosf(input1[0]);
-  work[0x06] = -sinf(input1[0]);
-  work[0x09] =  sinf(input1[0]);
+  work[0x06] =  sinf(input1[0]);
+  work[0x09] = -sinf(input1[0]);
   work[0x0A] =  cosf(input1[0]);
-  matrix_multiply(output, work, output);
+  matrix_multiply(output, output, work);
 
  }
 
  void matrix_scale(MATRIX output, MATRIX input0, VECTOR input1) {
   MATRIX work;
 
-  // Apply the scale factor.
+  // Apply the scaling.
   matrix_unit(work);
   work[0x00] = input1[0];
   work[0x05] = input1[1];
   work[0x0A] = input1[2];
-  matrix_multiply(output, work, input0);
+  matrix_multiply(output, input0, work);
 
  }
 
@@ -193,7 +248,7 @@
   work[0x0C] = input1[0];
   work[0x0D] = input1[1];
   work[0x0E] = input1[2];
-  matrix_multiply(output, work, input0);
+  matrix_multiply(output, input0, work);
 
  }
 
@@ -234,9 +289,9 @@
 
  }
 
- ////////////////////////
- // PIPELINE FUNCTIONS //
- ////////////////////////
+ //////////////////////
+ // CREATE FUNCTIONS //
+ //////////////////////
 
  void create_local_world(MATRIX local_world, VECTOR translation, VECTOR rotation) {
 
@@ -247,136 +302,185 @@
 
  }
 
- void create_world_view(MATRIX world_view, VECTOR translation, VECTOR rotation) {
+ void create_local_light(MATRIX local_light, VECTOR rotation) {
 
-  // Create the world_view matrix.
-  matrix_unit(world_view);
-  matrix_translate(world_view, world_view, translation);
-  matrix_rotate(world_view, world_view, rotation);
+  // Create the local_light matrix.
+  matrix_unit(local_light);
+  matrix_rotate(local_light, local_light, rotation);
 
  }
 
- void create_view_clip(MATRIX view_clip, float aspect, float left, float right, float bottom, float top, float near, float far) {
+ void create_world_view(MATRIX world_view, VECTOR translation, VECTOR rotation) {
+  VECTOR work0, work1;
+
+  // Reverse the translation.
+  work0[0] = -translation[0];
+  work0[1] = -translation[1];
+  work0[2] = -translation[2];
+  work0[3] = translation[3];
+
+  // Reverse the rotation.
+  work1[0] = -rotation[0];
+  work1[1] = -rotation[1];
+  work1[2] = -rotation[2];
+  work1[3] = rotation[3];
+
+  // Create the world_view matrix.
+  matrix_unit(world_view);
+  matrix_translate(world_view, world_view, work0);
+  matrix_rotate(world_view, world_view, work1);
+
+ }
+
+ void create_view_screen(MATRIX view_screen, float aspect, float left, float right, float bottom, float top, float near, float far) {
 
   // Apply the aspect ratio adjustment.
   left = (left * aspect); right = (right * aspect);
 
-  // Create the view_clip matrix.
-  matrix_unit(view_clip);
-  view_clip[0x00] = (2 * near) / (right - left);
-  view_clip[0x05] = (2 * near) / (top - bottom);
-  view_clip[0x08] = (right + left) / (right - left);
-  view_clip[0x09] = (top + bottom) / (top - bottom);
-  view_clip[0x0A] = (far + near) / (far - near);
-  view_clip[0x0B] = -1.00f;
-  view_clip[0x0E] = (2 * far * near) / (far - near);
-  view_clip[0x0F] = 0.00f;
+  // Create the view_screen matrix.
+  matrix_unit(view_screen);
+  view_screen[0x00] = (2 * near) / (right - left);
+  view_screen[0x05] = (2 * near) / (top - bottom);
+  view_screen[0x08] = (right + left) / (right - left);
+  view_screen[0x09] = (top + bottom) / (top - bottom);
+  view_screen[0x0A] = (far + near) / (far - near);
+  view_screen[0x0B] = -1.00f;
+  view_screen[0x0E] = (2 * far * near) / (far - near);
+  view_screen[0x0F] = 0.00f;
 
  }
 
- void create_local_clip(MATRIX local_clip, MATRIX local_world, MATRIX world_view, MATRIX view_clip) {
+ void create_local_screen(MATRIX local_screen, MATRIX local_world, MATRIX world_view, MATRIX view_screen) {
 
   // Create the local_screen matrix.
-  matrix_unit(local_clip);
-  matrix_multiply(local_clip, local_world, local_clip);
-  matrix_multiply(local_clip, world_view,  local_clip);
-  matrix_multiply(local_clip, view_clip,   local_clip);
+  matrix_unit(local_screen);
+  matrix_multiply(local_screen, local_screen, local_world);
+  matrix_multiply(local_screen, local_screen, world_view);
+  matrix_multiply(local_screen, local_screen, view_screen);
 
  }
 
- void create_clip_screen(MATRIX clip_screen, float max_x, float max_y, float max_z) {
+ /////////////////////////
+ // CALCULATE FUNCTIONS //
+ /////////////////////////
 
-  // Create the clip_screen matrix.
-  matrix_unit(clip_screen);
-  clip_screen[0x00] = (max_x / 2);
-  clip_screen[0x0C] = (max_x / 2);
-  clip_screen[0x05] = (max_y / 2);
-  clip_screen[0x0D] = (max_y / 2);
-  clip_screen[0x0A] = (max_z / 2);
-  clip_screen[0x0E] = (max_z / 2);
-
+ void calculate_normals(VECTOR *output, int count, VECTOR *normals, MATRIX local_world) {
+  asm __volatile__ (
+   "lqc2		vf1, 0x00(%3)	\n"
+   "lqc2		vf2, 0x10(%3)	\n"
+   "lqc2		vf3, 0x20(%3)	\n"
+   "lqc2		vf4, 0x30(%3)	\n"
+   "1:					\n"
+   "lqc2		vf6, 0x00(%2)	\n"
+   "vmulaw		ACC, vf4, vf0	\n"
+   "vmaddax		ACC, vf1, vf6	\n"
+   "vmadday		ACC, vf2, vf6	\n"
+   "vmaddz		vf7, vf3, vf6	\n"
+   "vdiv		Q, vf0w, vf7w	\n"
+   "vwaitq				\n"
+   "vmulq.xyzw		vf7, vf7, Q	\n"
+   "sqc2		vf7, 0x00(%0)	\n"
+   "addi		%0, 0x10	\n"
+   "addi		%2, 0x10	\n"
+   "addi		%1, -1		\n"
+   "bne			$0, %1, 1b	\n"
+   : : "r" (output), "r" (count), "r" (normals), "r" (local_world)
+  );
  }
 
- void point_calculate(VECTORI *output, VECTOR *input, int count, MATRIX local_clip, MATRIX clip_screen) {
-  VECTOR work; int loop0;
+ void calculate_lights(VECTOR *output, int count, VECTOR *normals, VECTOR *light_direction, VECTOR *light_colour, int *light_type, int light_count) {
+  int loop0, loop1; float intensity = 0.00f;
 
-  // For each coordinate...
+  // Clear the output values.
+  memset(output, 0, sizeof(VECTOR) * count);
+
+  // For each normal...
   for (loop0=0;loop0<count;loop0++) {
 
-   // Apply the local_clip matrix.
-   vector_multiply(work, input[loop0], local_clip);
+   // For each light...
+   for (loop1=0;loop1<light_count;loop1++) {
 
-   // If the X coordinate is not clipped...
-   if (fabsf(work[0]) < fabsf(work[3])) {
+    // If this is an ambient light...
+    if (light_type[loop1] == LIGHT_AMBIENT)  {
 
-    // If the Y coordinate is not clipped...
-    if (fabsf(work[1]) < fabsf(work[3])) {
+     // Set the intensity to full.
+     intensity = 1.00f;
 
-     // If the Z coordinate is not clipped...
-     if (fabsf(work[2]) < fabsf(work[3])) {
+    // Else, if this is a directional light...
+    } else if (light_type[loop1] == LIGHT_DIRECTIONAL)  {
 
-      // Apply the clip_screen matrix.
-      vector_multiply(work, work, clip_screen);
+     // Get the light intensity.
+     intensity = -vector_innerproduct(normals[loop0], light_direction[loop1]);
 
-      // Normalize and convert the result.
-      output[loop0].x = (work[0] / work[3]) * 16;
-      output[loop0].y = (work[1] / work[3]) * 16;
-      output[loop0].z = (work[2] / work[3]);
-      output[loop0].w = work[3];
+     // Clamp the minimum intensity.
+     if (intensity < 0.00f) { intensity = 0.00f; }
 
-     // Else, set the coordinate as clipped.
-     } else { output[loop0].w = 0.00f; }
+    // Else, this is an invalid light type.
+    } else { intensity = 0.00f; }
 
-    // Else, set the coordinate as clipped.
-    } else { output[loop0].w = 0.00f; }
+    // If the light has intensity...
+    if (intensity > 0.00f) {
 
-   // Else, set the coordinate as clipped.
-   } else { output[loop0].w = 0.00f; }
+     // Add the light value.
+     output[loop0][0] += (light_colour[loop1][0] * intensity);
+     output[loop0][1] += (light_colour[loop1][1] * intensity);
+     output[loop0][2] += (light_colour[loop1][2] * intensity);
+     output[loop0][3] = 1.00f;
+
+    }
+
+   }
 
   }
 
  }
 
- void point_calculate_vu0(VECTORI *output, VECTOR *input, int count, MATRIX local_clip, MATRIX clip_screen) {
-  asm __volatile__ (
-   "lqc2		vf01, 0x00(%3)		\n"
-   "lqc2		vf02, 0x10(%3)		\n"
-   "lqc2		vf03, 0x20(%3)		\n"
-   "lqc2		vf04, 0x30(%3)		\n"
-   "lqc2		vf05, 0x00(%4)		\n"
-   "lqc2		vf06, 0x10(%4)		\n"
-   "lqc2		vf07, 0x20(%4)		\n"
-   "lqc2		vf08, 0x30(%4)		\n"
-   "1:						\n" // 1: BEGIN LOOP
-   "lqc2		vf09, 0x00(%1)		\n"
-   "vmulax.xyzw		ACC, vf01, vf09		\n"
-   "vmadday.xyzw	ACC, vf02, vf09		\n"
-   "vmaddaz.xyzw	ACC, vf03, vf09		\n"
-   "vmaddw.xyzw		vf10, vf04, vf09	\n"
-   "vclipw.xyz		vf10, vf10		\n"
-   "cfc2		$10, $18		\n"
-   "beq			$10, $0, 3f		\n"
-   "2:						\n" // 2: CLIP FAILED
-   "sqc2		vi00, 0x00(%0)		\n"
-   "j			4f			\n"
-   "3:						\n" // 3: CLIP PASSED
-   "vmulax.xyzw		ACC, vf05, vf10		\n"
-   "vmadday.xyzw	ACC, vf06, vf10		\n"
-   "vmaddaz.xyzw	ACC, vf07, vf10		\n"
-   "vmaddw.xyzw		vf11, vf08, vf10	\n"
-   "vdiv		Q, vf0w, vf11w		\n"
-   "vwaitq					\n"
-   "vmulq.xyz		vf11, vf11, Q		\n"
-   "vftoi4.xy		vf12, vf11		\n"
-   "vftoi0.z		vf12, vf11		\n"
-   "vmove.w		vf12, vf11		\n"
-   "sqc2		vf12, 0x00(%0)		\n"
-   "4:						\n" // 4: END LOOP
-   "addi		%0, 0x10		\n"
-   "addi		%1, 0x10		\n"
-   "addi		%2, -1			\n"
-   "bne			$0, %2, 1b		\n"
-   : : "r" (output), "r" (input), "r" (count), "r" (local_clip), "r" (clip_screen) : "$10"
-  );
+ void calculate_colours(VECTOR *output, int count, VECTOR *colours, VECTOR *lights) {
+  int loop0;
 
+  // For each colour...
+  for (loop0=0;loop0<count;loop0++) {
+
+   // Apply the light value to the colour.
+   output[loop0][0] = (colours[loop0][0] * lights[loop0][0]);
+   output[loop0][1] = (colours[loop0][1] * lights[loop0][1]);
+   output[loop0][2] = (colours[loop0][2] * lights[loop0][2]);
+
+   // Clamp the colour value.
+   vector_clamp(output[loop0], output[loop0], 0.00f, 1.99f);
+
+  }
+
+ }
+
+ void calculate_vertices(VECTOR *output, int count, VECTOR *vertices, MATRIX local_screen) {
+  asm __volatile__ (
+   "lqc2		vf1, 0x00(%3)	\n"
+   "lqc2		vf2, 0x10(%3)	\n"
+   "lqc2		vf3, 0x20(%3)	\n"
+   "lqc2		vf4, 0x30(%3)	\n"
+   "1:					\n"
+   "lqc2		vf6, 0x00(%2)	\n"
+   "vmulaw		ACC, vf4, vf0	\n"
+   "vmaddax		ACC, vf1, vf6	\n"
+   "vmadday		ACC, vf2, vf6	\n"
+   "vmaddz		vf7, vf3, vf6	\n"
+   "vclipw.xyz		vf7, vf7	\n" // FIXME: Clip detection is still kinda broken.
+   "cfc2		$10, $18	\n"
+   "beq			$10, $0, 3f	\n"
+   "2:					\n"
+   "sqc2		vi00, 0x00(%0)	\n"
+   "j			4f		\n"
+   "3:					\n"
+   "vdiv		Q, vf0w, vf7w	\n"
+   "vwaitq				\n"
+   "vmulq.xyz		vf7, vf7, Q	\n"
+   "sqc2		vf7, 0x00(%0)	\n"
+   "4:					\n"
+   "addi		%0, 0x10	\n"
+   "addi		%2, 0x10	\n"
+   "addi		%1, -1		\n"
+   "bne			$0, %1, 1b	\n"
+   : : "r" (output), "r" (count), "r" (vertices), "r" (local_screen) : "$10"
+  );
  }

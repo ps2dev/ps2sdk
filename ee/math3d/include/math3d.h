@@ -18,19 +18,25 @@
 extern "C" {
 #endif
 
- typedef float VECTOR[4];
+ typedef float VECTOR[4] __attribute__((__aligned__(16)));
 
- typedef float MATRIX[16];
-
- typedef struct { int x, y, z; float w; } VECTORI;
+ typedef float MATRIX[16] __attribute__((__aligned__(16)));
 
  //////////////////////
  // VECTOR FUNCTIONS //
  //////////////////////
 
+ void vector_apply(VECTOR output, VECTOR input0, MATRIX input1);
+
+ void vector_clamp(VECTOR output, VECTOR input0, float min, float max);
+
  void vector_copy(VECTOR output, VECTOR input0);
 
- void vector_multiply(VECTOR output, VECTOR input0, MATRIX input1);
+ void vector_flatten(VECTOR output, VECTOR input0);
+
+ float vector_innerproduct(VECTOR input0, VECTOR input1);
+
+ void vector_multiply(VECTOR output, VECTOR input0, VECTOR input1);
 
  void vector_normalize(VECTOR output, VECTOR input0);
 
@@ -56,23 +62,34 @@ extern "C" {
 
  void matrix_unit(MATRIX output);
 
- ////////////////////////
- // PIPELINE FUNCTIONS //
- ////////////////////////
+ //////////////////////
+ // CREATE FUNCTIONS //
+ //////////////////////
 
  void create_local_world(MATRIX local_world, VECTOR translation, VECTOR rotation);
 
+ void create_local_light(MATRIX local_light, VECTOR rotation);
+
  void create_world_view(MATRIX world_view, VECTOR translation, VECTOR rotation);
 
- void create_view_clip(MATRIX view_clip, float aspect, float left, float right, float bottom, float top, float near, float far);
+ void create_view_screen(MATRIX view_screen, float aspect, float left, float right, float bottom, float top, float near, float far);
 
- void create_local_clip(MATRIX local_clip, MATRIX local_world, MATRIX world_view, MATRIX view_clip);
+ void create_local_screen(MATRIX local_screen, MATRIX local_world, MATRIX world_view, MATRIX view_screen);
 
- void create_clip_screen(MATRIX clip_screen, float max_x, float max_y, float max_z);
+ /////////////////////////
+ // CALCULATE FUNCTIONS //
+ /////////////////////////
 
- void point_calculate(VECTORI *output, VECTOR *input, int count, MATRIX local_clip, MATRIX clip_screen);
+ #define LIGHT_AMBIENT		0	// Ambient light source.
+ #define LIGHT_DIRECTIONAL	1	// Directional light source.
 
- void point_calculate_vu0(VECTORI *output, VECTOR *input, int count, MATRIX local_clip, MATRIX clip_screen);
+ void calculate_normals(VECTOR *output, int count, VECTOR *normals, MATRIX local_world);
+
+ void calculate_lights(VECTOR *output, int count, VECTOR *normals, VECTOR *light_directions, VECTOR *light_colours, int *light_types, int light_count);
+
+ void calculate_colours(VECTOR *output, int count, VECTOR *colours, VECTOR *lights);
+
+ void calculate_vertices(VECTOR *output, int count, VECTOR *vertices, MATRIX local_screen);
 
 #ifdef __cplusplus
 }
