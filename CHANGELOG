@@ -8,6 +8,8 @@
 #
 # $Id$
 
+2005-06-12
+  - oopo, added draw library
 
 2005-05-18
   - linuzappz, added timrman stub (.h/.S at iop kernel)

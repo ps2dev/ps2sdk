@@ -8,7 +8,7 @@
 #
 # $Id$
 
-SUBDIRS = hello
+SUBDIRS = cube debug/callstacktest graph hello rpc/memorycard rpc/pad tcpip/ee-echo teapot
 
 all: $(patsubst %, _dir_%, $(SUBDIRS)) 
 
