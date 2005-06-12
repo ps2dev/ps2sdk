@@ -15,7 +15,7 @@
   if (packet == NULL) { return -1; }
 
   // Allocate the data area.
-  if ((packet->data = memalign(size, 128)) == NULL) { return -1; }
+  if ((packet->data = memalign(128, size)) == NULL) { return -1; }
 
   // Save the data size.
   packet->size = size;
