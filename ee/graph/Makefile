@@ -14,7 +14,7 @@ EE_INC_DIR = include/
 
 EE_INCS += -I../dma/include -I../packet/include -I../math3d/include
 
-EE_OBJS = graph.o
+EE_OBJS = graph.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
 EE_LIB = $(EE_LIB_DIR)libgraph.a

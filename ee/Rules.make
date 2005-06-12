@@ -8,19 +8,19 @@
 #
 # $Id$
 
-EE_INCS := $(EE_INCS) -I$(PS2SDKSRC)/ee/kernel/include -I$(PS2SDKSRC)/common/include -I$(PS2SDKSRC)/ee/libc/include -Iinclude
+EE_INCS := $(EE_INCS) -I$(PS2SDKSRC)/ee/kernel/include -I$(PS2SDKSRC)/common/include -I$(PS2SDKSRC)/ee/libc/include -I$(PS2SDKSRC)/ee/erl/include -Iinclude
 
 # C compiler flags
-EE_CFLAGS := -D_EE -O2 -G0 -Wall $(EE_CFLAGS)
+EE_CFLAGS := -D_EE -G0 -O2 -Wall $(EE_CFLAGS)
 
 # C++ compiler flags
-EE_CXXFLAGS := -D_EE -O2 -G0 -Wall $(EE_CXXFLAGS)
+EE_CXXFLAGS := -D_EE -G0 -O2 -Wall $(EE_CXXFLAGS)
 
 # Linker flags
 #EE_LDFLAGS := $(EE_LDFLAGS)
 
 # Assembler flags
-EE_ASFLAGS := -G0 $(EE_ASFLAGS)
+EE_ASFLAGS := $(EE_ASFLAGS)
 
 # Externally defined variables: EE_BIN, EE_OBJS, EE_LIB
 
@@ -54,5 +54,9 @@ $(EE_BIN) : $(EE_OBJS) $(PS2SDKSRC)/ee/startup/obj/crt0.o
 	$(EE_CC) -mno-crt0 -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_LDFLAGS) \
 		-o $(EE_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_LIBS)
 
-$(EE_LIB) : $(EE_OBJS)
+$(EE_LIB) : $(EE_OBJS) $(EE_LIB:%.a=%.erl)
 	$(EE_AR) cru $(EE_LIB) $(EE_OBJS)
+
+$(EE_LIB:%.a=%.erl) : $(EE_OBJS)
+	$(EE_CC) -mno-crt0 -Wl,-r -o $(EE_LIB:%.a=%.erl) $(EE_OBJS)
+	$(EE_STRIP) --strip-unneeded -R .mdebug.eabi64 -R .reginfo -R .comment $(EE_LIB:%.a=%.erl)

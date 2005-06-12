@@ -31,7 +31,8 @@ release-lib:
 	@if test $(EE_LIB) ; then \
 	   $(ECHO) Installing $(EE_LIB) to $(PS2SDK)/ee/lib ; \
 	   cp -f $(EE_LIB) $(PS2SDK)/ee/lib ; \
-	   chmod 644 $(PS2SDK)/ee/$(EE_LIB) ; \
+	   cp -f $(EE_LIB:%.a=%.erl) $(PS2SDK)/ee/lib ; \
+	   chmod 644 $(PS2SDK)/ee/$(EE_LIB) $(PS2SDK)/ee/$(EE_LIB:%.a=%.erl); \
 	fi;
 
 

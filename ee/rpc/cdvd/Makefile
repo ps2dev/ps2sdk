@@ -36,7 +36,7 @@ SCMD_OBJS = _scmd_internals.o cdReadClock.o cdWriteClock.o cdGetDiscType.o \
 SCMD_OBJS := $(SCMD_OBJS:%=$(EE_OBJS_DIR)%)
 
 EE_LIB := $(EE_LIB:%=$(EE_LIB_DIR)%)
-EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
+EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%) $(EE_OBJS_DIR)erl-support.c
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
 

@@ -14,7 +14,7 @@ EE_INC_DIR = include/
 
 EE_INCS += -I../dma/include
 
-EE_OBJS = packet.o
+EE_OBJS = packet.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
 EE_LIB = $(EE_LIB_DIR)libpacket.a

@@ -14,7 +14,7 @@ EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
-EE_OBJS = ps2ipc.o
+EE_OBJS = ps2ipc.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
 EE_LIB = $(EE_LIB_DIR)libps2ip.a

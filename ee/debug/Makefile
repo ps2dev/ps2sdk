@@ -21,7 +21,7 @@ EE_SAMPLE_DIR = samples/
 
 EE_LIB = $(LIBDEBUG_LIB)
 
-EE_OBJS = scr_printf.o  font.o screenshot.o callstack.o callstackget.o hwbp.o
+EE_OBJS = scr_printf.o font.o screenshot.o callstack.o callstackget.o hwbp.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBDEBUG_LIB) 

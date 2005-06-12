@@ -10,7 +10,7 @@
 
 
 LIBSYSCALL_LIB = lib/libsyscall.a
-LIBKERNEL_LIB = lib/libkernel.a
+EE_LIB = lib/libkernel.a
 
 EE_OBJS_DIR = obj/
 EE_LIB_DIR = lib/
@@ -105,20 +105,17 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
 	SifSetDma.o iSifSetDma.o SifSetDChain.o iSifSetDChain.o SifSetReg.o \
 	SifGetReg.o ExecOSD.o Deci2Call.o PSMode.o MachineType.o GetMemorySize.o \
 	SifWriteBackDCache.o _SyncDCache.o _InvalidDCache.o __errno.o errno.o \
-	strncpy.o strlen.o memcpy.o memset.o
+	strncpy.o strlen.o memcpy.o memset.o __syscall.o
 
 KERNEL_OBJS := $(KERNEL_OBJS:%=$(EE_OBJS_DIR)%)
 
-LIBSYSCALL_OBJS = obj/dummy.o
+LIBSYSCALL_OBJS = $(EE_OBJS_DIR)dummy.o
 
-LIBKERNEL_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
+EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(CONFIG_OBJS) \
-	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(GETSYSCALL_OBJS)
+	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(GETSYSCALL_OBJS) $(EE_OBJS_DIR)erl-support.o
 
-all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBSYSCALL_LIB) $(LIBKERNEL_LIB)
-
-$(LIBKERNEL_LIB): $(LIBKERNEL_OBJS) 
-	$(EE_AR) cru $(LIBKERNEL_LIB) $(LIBKERNEL_OBJS) 
+all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBSYSCALL_LIB) $(EE_LIB)
 
 $(LIBSYSCALL_LIB): $(LIBSYSCALL_OBJS)
 	$(EE_AR) cru $(LIBSYSCALL_LIB) $(LIBSYSCALL_OBJS)
@@ -172,5 +169,6 @@ include $(PS2SDKSRC)/ee/Rules.release
 
 release: release-dirs release-include
 	cp -f $(LIBSYSCALL_LIB) $(PS2SDK)/ee/lib
-	cp -f $(LIBKERNEL_LIB) $(PS2SDK)/ee/lib
-
+	cp -f $(EE_LIB) $(PS2SDK)/ee/lib
+	cp -f $(EE_LIB:%.a=%.erl) $(PS2SDK)/ee/lib
+	chmod 644 $(PS2SDK)/ee/$(LIBSYSCALL_LIB) $(PS2SDK)/ee/$(EE_LIB) $(PS2SDK)/ee/$(EE_LIB:%.a=%.erl)

@@ -14,7 +14,7 @@ EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
-EE_OBJS = sior_rpc.o
+EE_OBJS = sior_rpc.o erl-support.o
 EE_LIB = libsior.a
 
 EE_LIB := $(EE_LIB:%=$(EE_LIB_DIR)%)
