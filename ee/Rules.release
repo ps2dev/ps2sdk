@@ -70,7 +70,7 @@ release-include:
 #
 
 release-samples:
-	@if test -d samples ; then \
+	@if test -f samples/Makefile ; then \
 	   $(GNUMAKE) -C samples release ; \
 	fi;
 
