@@ -15,6 +15,7 @@
 #include <sifcmd.h>
 #include <kernel.h>
 #include <sifrpc.h>
+#include <stdio.h>
 #include "sio.h"
 
 int main()

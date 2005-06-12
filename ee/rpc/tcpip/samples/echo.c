@@ -15,6 +15,9 @@
 #include <sifrpc.h>
 #include <sifrpc.h>
 #include <loadfile.h>
+#include <stdio.h>
+#include <string.h>
+
 #include "ps2ip.h"
 
 
@@ -22,8 +25,8 @@ void serverThread();
 
 int main()
 {
-    char args[LF_ARG_MAX];
-    int argsLen;
+    // char args[LF_ARG_MAX];
+    // int argsLen;
 
 	SifInitRpc(0);
 
@@ -35,6 +38,7 @@ int main()
 	}
 
 	serverThread();
+	return 0;
 }
 
 char buffer[100];
@@ -43,7 +47,7 @@ char buffer[100];
 int HandleClient( int cs )
 {
    int rcvSize,sntSize;
-   fd_set rd_set;
+   // fd_set rd_set;
 
    rcvSize = recv( cs, buffer, 100, 0);
    if ( rcvSize <= 0 )

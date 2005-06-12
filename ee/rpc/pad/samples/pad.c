@@ -17,6 +17,7 @@
 #include <kernel.h>
 #include <sifrpc.h>
 #include <loadfile.h>
+#include <stdio.h>
 
 #include "libpad.h"
 

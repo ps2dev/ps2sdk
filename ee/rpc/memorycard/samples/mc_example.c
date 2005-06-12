@@ -18,7 +18,8 @@
 #include <fileio.h>
 #include <malloc.h>
 #include <libmc.h>
-
+#include <stdio.h>
+#include <string.h>
 
 //
 // TODO: Update comments to reflect recent modifications to libmc (ie: support for 
@@ -144,6 +145,7 @@ int main() {
 	LoadExecPS2("", 0, NULL);
 
 	SleepThread();
+	return 0;
 }
 
 int CreateSave(void)
