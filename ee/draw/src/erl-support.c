@@ -13,7 +13,7 @@
 
 #include <erl.h>
 
-char * erl_id = "draw";
+char * erl_id = "libdraw";
 char * erl_dependancies[] = {
     "libdraw",
     "libpacket",
