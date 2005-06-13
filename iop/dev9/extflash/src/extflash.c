@@ -115,7 +115,7 @@ int flash_device_reset()
 	tmp = SPD_REG16(0x480c);
 	tmp = SPD_REG16(0x480c);
 
-	SetAlarm(&timeout, timeout_cb, &has_timedout);
+	SetAlarm(&timeout, (void *)timeout_cb, &has_timedout);
 
 	while ((SPD_REG16(0x480c) & 0x01) == 0) {
 		if (has_timedout) {
@@ -127,7 +127,7 @@ int flash_device_reset()
 		}
 	}
 
-	CancelAlarm(timeout_cb, &has_timedout);
+	CancelAlarm((void *)timeout_cb, &has_timedout);
 
 	SPD_REG16(0x4804) = SM_CMD_GETSTATUS;
 	if (SPD_REG16(0x4814) & 0x01) {
@@ -217,7 +217,7 @@ int flash_page_erase(flash_info_t *info, u32 page)
 	tmp = SPD_REG16(0x480c);
 	tmp = SPD_REG16(0x480c);
 
-	SetAlarm(&timeout, timeout_cb, &has_timedout);
+	SetAlarm(&timeout, (void *)timeout_cb, &has_timedout);
 
 	while ((SPD_REG16(0x480c) & 0x01) == 0) {
 		if (has_timedout) {
@@ -229,7 +229,7 @@ int flash_page_erase(flash_info_t *info, u32 page)
 		}
 	}
 
-	CancelAlarm(timeout_cb, &has_timedout);
+	CancelAlarm((void *)timeout_cb, &has_timedout);
 
 	SPD_REG16(0x4804) = SM_CMD_GETSTATUS;
 	if (SPD_REG16(0x4814) & 0x01) {
@@ -283,7 +283,7 @@ int flash_page_read(flash_info_t *info, u32 page, u32 count, void *buf)
 		tmp = SPD_REG16(0x480c);
 
 		has_timedout = 0;
-		SetAlarm(&timeout, timeout_cb, &has_timedout);
+		SetAlarm(&timeout, (void *)timeout_cb, &has_timedout);
 
 		while ((SPD_REG16(0x480c) & 0x01) == 0) {
 			if (has_timedout) {
@@ -295,7 +295,7 @@ int flash_page_read(flash_info_t *info, u32 page, u32 count, void *buf)
 			}
 		}
 
-		CancelAlarm(timeout_cb, &has_timedout);
+		CancelAlarm((void *)timeout_cb, &has_timedout);
 
 		SPD_REG16(0x480c) = func | 0x800;
 
@@ -342,7 +342,7 @@ int flash_page_write(flash_info_t *info, u32 page, void *buf)
 	tmp = SPD_REG16(0x480c);
 	tmp = SPD_REG16(0x480c);
 
-	SetAlarm(&timeout, timeout_cb, &has_timedout);
+	SetAlarm(&timeout, (void *)timeout_cb, &has_timedout);
 
 	while ((SPD_REG16(0x480c) & 0x01) == 0) {
 		if (has_timedout) {
@@ -354,7 +354,7 @@ int flash_page_write(flash_info_t *info, u32 page, void *buf)
 		}
 	}
 
-	CancelAlarm(timeout_cb, &has_timedout);
+	CancelAlarm((void *)timeout_cb, &has_timedout);
 
 	SPD_REG16(0x4804) = SM_CMD_GETSTATUS;
 	if (SPD_REG16(0x4814) & 0x01) {

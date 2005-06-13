@@ -142,6 +142,9 @@ s32  configIsDaylightSavingEnabled(void);
 //			0 = off
 void configSetDaylightSavingEnabled(s32 enabled);
 
+// Internal functions.
+s32  IsT10K(void);
+char* GetRomName(char *romname);
 
 #ifdef __cplusplus
 }

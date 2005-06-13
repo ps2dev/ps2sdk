@@ -309,7 +309,7 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector,
 		if ((command == 0xf4) || (command == 0x8e && feature == 0xf4))
 			USec2SysClock(180000000, &cmd_timeout);
 
-		if ((res = SetAlarm(&cmd_timeout, ata_alarm_cb, NULL)) < 0)
+		if ((res = SetAlarm(&cmd_timeout, (void *)ata_alarm_cb, NULL)) < 0)
 			return res;
 	}
 
@@ -503,7 +503,7 @@ int ata_io_finish()
 
 finish:
 	/* The command has completed (with an error or not), so clean things up.  */
-	CancelAlarm(ata_alarm_cb, NULL);
+	CancelAlarm((void *)ata_alarm_cb, NULL);
 	/* Turn off the LED.  */
 	SPD_REG8(SPD_R_PIO_DIR) = 1;
 	SPD_REG8(SPD_R_PIO_DATA) = 1;

@@ -18,6 +18,7 @@
 #include <intrman.h>
 #include <sifcmd.h>
 #include <libsd.h>
+#include <sysclib.h>
 
 #include <audsrv.h>
 #include "audsrv.c.h"

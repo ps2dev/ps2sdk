@@ -13,6 +13,8 @@ This also decreases memory fragmentation, and freeing structures
 --------------------------------------------------------------------
 */
 
+#include <string.h>
+
 #ifndef STANDARD
 # include "standard.h"
 #endif
@@ -36,7 +38,7 @@ void  refree(r)
 struct reroot *r;
 {
    recycle *temp;
-   if (temp = r->list) while (r->list)
+   if ((temp = r->list)) while (r->list)
    {
       temp = r->list->next;
       free((char *)r->list);

@@ -161,7 +161,7 @@ apa_cache *apaFindPartition(u32 device, char *id, int *err)
 			if(memcmp(clink->header->id, id, APA_IDMAX)==0)
 				return clink;	// found
 		}
-		clink=apaGetNextHeader(clink, err);
+		clink=apaGetNextHeader(clink, (int *)err);
 	}
 	if(*err==0) {
 		*err=-ENOENT;
@@ -365,7 +365,7 @@ apa_cache *apaRemovePartition(u32 device, u32 start, u32 next, u32 prev,
 	apa_cache *clink;
 	u32 err;
 
-	if((clink=cacheGetHeader(device, start, 1, &err))==NULL)
+	if((clink=cacheGetHeader(device, start, 1, (int *)&err))==NULL)
 		return NULL;
 	memset(clink->header, 0, sizeof(apa_header));
 	clink->header->magic=APA_MAGIC;

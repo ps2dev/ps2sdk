@@ -60,7 +60,7 @@ int _start(int argc, char **argv)
 		return 1;
 	}
 
-	CpuSuspendIntr(&state);
+	CpuSuspendIntr((int *)&state);
 	sceSifDma2Init();
 	CpuResumeIntr(state);
 

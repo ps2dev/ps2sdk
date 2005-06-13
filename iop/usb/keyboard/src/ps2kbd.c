@@ -454,7 +454,7 @@ u32 ps2kbd_repeathandler(void *arg)
   iSetEventFlag(eventid, dev->eventmask);
 
   USec2SysClock(kbd_repeatrate * 1000, &t);
-  iSetAlarm(&t, ps2kbd_repeathandler, arg);
+  iSetAlarm(&t, (void *)ps2kbd_repeathandler, arg);
 
   return t.hi;
 }
@@ -588,7 +588,7 @@ void ps2kbd_getkeys(u8 keyMods, u8 ledStatus, const u8 *keys, kbd_dev *dev)
       /* Set alarm to do repeat rate */
       //printf("repeatkeys %d %d\n", kbd_repeatkeys[0], kbd_repeatkeys[1]);
       USec2SysClock(PS2KBD_REPEATWAIT * 1000, &t);
-      SetAlarm(&t, ps2kbd_repeathandler, dev);
+      SetAlarm(&t, (void *)ps2kbd_repeathandler, dev);
     }
 
   for(loopKey = 0; loopKey < byteCount; loopKey++) /* Signal the sema to indicate data */
@@ -726,7 +726,7 @@ void ps2kbd_data_recv(int resultCode, int bytes, void *arg)
 /* 	} */
 /*       printf("\n"); */
 
-  CancelAlarm(ps2kbd_repeathandler, dev); /* Make sure repeat alarm is cancelled */
+  CancelAlarm((void *)ps2kbd_repeathandler, dev); /* Make sure repeat alarm is cancelled */
 
   /* Check for phantom states */
   phantom = 1;
@@ -852,7 +852,7 @@ void ps2kbd_ioctl_setreadmode(u32 readmode)
       //printf("ioctl_setreadmode %d\n", readmode);
       for(devLoop = 0; devLoop < PS2KBD_MAXDEV; devLoop++)
 	{
-	  CancelAlarm(ps2kbd_repeathandler, devices[devLoop]);
+	  CancelAlarm((void *)ps2kbd_repeathandler, devices[devLoop]);
 	}
 
       WaitSema(lineSema);

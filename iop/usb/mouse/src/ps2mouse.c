@@ -448,7 +448,7 @@ void ps2mouse_data_recv(int resultCode, int bytes, void *arg)
 	      int msec;
 
 	      GetSystemTime(&t);
-	      SysClock2USec(&t, &sec, &usec);
+	      SysClock2USec(&t, (u32 *)&sec, (u32 *)&usec);
 	      msec = (sec * 1000) + (usec / 1000);
 	      //printf("%d %d %d\n", msec, sec, usec);
 

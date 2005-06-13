@@ -36,7 +36,7 @@ pfs_cache_t *getDentry(pfs_cache_t *clink, char *path, pfs_dentry **dentry, u32 
 	block_pos.block_segment = 1;
 	block_pos.block_offset = 0;
 	block_pos.byte_offset = 0;
-	dentCache = getDentriesChunk(&block_pos, &result);
+	dentCache = getDentriesChunk(&block_pos, (int *)&result);
 
 	if (dentCache)
 	{
@@ -50,7 +50,7 @@ pfs_cache_t *getDentry(pfs_cache_t *clink, char *path, pfs_dentry **dentry, u32 
 					break;
 				cacheAdd(dentCache);
 
-				if ((dentCache=getDentriesChunk(&block_pos, &result))==0)
+				if ((dentCache=getDentriesChunk(&block_pos, (int *)&result))==0)
 					break;
 				d=dentCache->u.dentry;
 			}

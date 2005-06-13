@@ -26,7 +26,7 @@ s32 SifDmaBatch(u32 ee_addr, void *iop_addr, u32 size)
 	dma.size = size;
 	dma.attr = 0;
 
-	CpuSuspendIntr(&intr_stat);
+	CpuSuspendIntr((int *)&intr_stat);
 	dma_id = SifSetDma(&dma, SIF_DMA_TO_EE);
 	CpuResumeIntr(intr_stat);
 	

@@ -401,7 +401,7 @@ ComputeTimeDiff(iop_sys_clock_t* pStart,iop_sys_clock_t* pEnd)
 	Diff.lo=pEnd->lo-pStart->lo;
 	Diff.hi=pEnd->hi-pStart->hi;
 
-	SysClock2USec(&Diff,&iSec,&iUSec);
+	SysClock2USec(&Diff, (u32 *)&iSec, (u32 *)&iUSec);
 	iDiff=(iSec*1000)+(iUSec/1000);
 
 	return	iDiff!=0 ? iDiff:1;

@@ -109,8 +109,8 @@ int sio_vprintf(const char * str, va_list args) {
     char * tbuf[2048];
     int res;
     
-    res = vsprintf(tbuf, str, args);
-    sio_putsn(tbuf);
+    res = vsprintf((char *)tbuf, str, args);
+    sio_putsn((char *)tbuf);
     
     return res;
 }
@@ -128,7 +128,7 @@ int sio_printf(const char * str, ...) {
 
 int _start(int argc, char **argv)
 {
-    int rv, retries;
+    int /* rv, */ retries;
     
     memset(&cd0, 0, sizeof(cd0));
     

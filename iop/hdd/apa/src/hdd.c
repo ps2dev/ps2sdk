@@ -161,7 +161,7 @@ int _start(int argc, char **argv)
 		if(hddDeviceBuf[i].status<2){
 			if(journalResetore(i)!=0)
 				return 1;
-			if(apaGetFormat(i, &hddDeviceBuf[i].format))
+			if(apaGetFormat(i, (int *)&hddDeviceBuf[i].format))
 				hddDeviceBuf[i].status--;
 			printf("ps2hdd: drive status %ld, format version %08lx\n",
 				hddDeviceBuf[i].status, hddDeviceBuf[i].format);

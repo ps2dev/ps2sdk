@@ -63,7 +63,7 @@ volatile u16 *ParamRegList[] =
 };
 #endif
 
-s32 TransInterrupt(void *data)
+int TransInterrupt(void *data)
 {
 	IntrData *intr = (IntrData*) data;
 	s32 dir;
@@ -179,10 +179,10 @@ void RegisterInterrupts()
 {
 	s32 ret;
 
-	DisableIntr(0x24, &ret);
-	DisableIntr(0x28, &ret);
+	DisableIntr(0x24, (int *)&ret);
+	DisableIntr(0x28, (int *)&ret);
 	#ifndef ISJPCM
-	DisableIntr(0x9, &ret);
+	DisableIntr(0x9, (int *)&ret);
 	#endif
 
 	ReleaseIntrHandler(0x24);

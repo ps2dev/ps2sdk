@@ -102,7 +102,7 @@ s32 _start(char **argv, int argc)
 	return 0;
 }
 
-s32 TransInterrupt(void *data)
+int TransInterrupt(void *data)
 {
 	IntrData *intr = (IntrData*) data;
 	s32 dir;
@@ -188,16 +188,16 @@ void RegisterInterrupts()
 {
 	s32 ret;
 
-	DisableIntr(0x24, &ret);
-	DisableIntr(0x28, &ret);
-	DisableIntr(0x9, &ret);
+	DisableIntr(0x24, (int *)&ret);
+	DisableIntr(0x28, (int *)&ret);
+	DisableIntr(0x9, (int *)&ret);
 	
 	ReleaseIntrHandler(0x24);
 	ReleaseIntrHandler(0x28);
 
 	RegisterIntrHandler(0x24, 1, TransInterrupt, &TransIntrData[0]);
 	RegisterIntrHandler(0x28, 1, TransInterrupt, &TransIntrData[1]);
-	
+
 	VoiceTransComplete[0] = 0;
 	VoiceTransComplete[1] = 0;
 	
@@ -700,9 +700,9 @@ s32 SdQuit()
 	DmaStop(0);
 	DmaStop(1);
 
-	DisableIntr(0x28, &ret);
-	DisableIntr(0x24, &ret);
-	DisableIntr(0x9, &ret);
+	DisableIntr(0x28, (int *)&ret);
+	DisableIntr(0x24, (int *)&ret);
+	DisableIntr(0x9, (int *)&ret);
 	ReleaseIntrHandler(0x28);
 	ReleaseIntrHandler(0x24);
 	ReleaseIntrHandler(0x9);

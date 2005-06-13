@@ -322,7 +322,7 @@ int fioWrite(int fd, const void *ptr, int size)
 		memcpy(arg.aligned, ptr, mis);
 
 	if (!IS_UNCACHED_SEG(ptr))
-		SifWriteBackDCache(ptr, size);
+		SifWriteBackDCache((struct fileXioDirEntry *)ptr, size);
 
 	if ((res = SifCallRpc(&_fio_cd, FIO_F_WRITE, _fio_block_mode, &arg, sizeof arg,
 					_fio_recv_data, 4, (void *)_fio_intr, NULL)) < 0)
