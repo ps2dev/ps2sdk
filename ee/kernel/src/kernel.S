@@ -57,23 +57,23 @@ name:	li	$3, number;	\
 .type	__syscall,@function
 .ent	__syscall,0
 __syscall:
-        mfc0        $v0, $12
-        andi        $v0, $v0, 0x18
-        beqz        $v0, _kMode
+        mfc0        $2, $12
+        andi        $2, $2, 0x18
+        beqz        $2, _kMode
         nop
         syscall
-        jr          $ra
+        jr          $31
         nop
 _kMode:
-        sll         $v1, $v1, 2
-        lui         $k0, 0x8000
-        lhu         $v0, 0x02F0($k0)
-        sll         $v0, $v0, 16
-        lh          $k0, 0x02F8($k0)
-        add         $v0, $k0
-        addu        $v1, $v0
-        lw          $k0, 0x00($v1)
-        jr          $k0
+        sll         $3, $3, 2
+        lui         $26, 0x8000
+        lhu         $2, 0x02F0($26)
+        sll         $2, $2, 16
+        lh          $26, 0x02F8($26)
+        add         $2, $26
+        addu        $3, $2
+        lw          $26, 0x00($3)
+        jr          $26
         nop
 .end	__syscall
 .size	__syscall,.-__syscall
