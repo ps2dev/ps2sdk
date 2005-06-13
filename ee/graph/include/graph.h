@@ -53,76 +53,107 @@ extern "C" {
  /////////////////////
 
  int graph_initialize(void);
+ // Initialize the graphics library and hardware.
 
  int graph_shutdown(void);
+ // Shut down the graphics library and hardware.
 
  /////////////////////////
  // GRAPH GET FUNCTIONS //
  /////////////////////////
 
- float graph_get_aspect(void);						// Returns the aspect ratio of the current mode. (scale_x : 1)
+ float graph_get_aspect(void);
+ // Returns the current aspect ratio. (value : 1)
 
- int graph_get_bpp(void);						// Returns the framebuffer bpp of the current mode.
+ int graph_get_bpp(void);
+ // Returns the framebuffer bits-per-pixel.
 
- int graph_get_displaybuffer(void);					// Returns the display buffer vram address of the current mode.
+ int graph_get_displaybuffer(void);
+ // Returns the vram address of the display buffer, in bytes.
 
- int graph_get_displayfield(void);					// Returns the display field of the current mode.
+ int graph_get_displayfield(void);
+ // Returns the currently displayed field value.
+ // Used mainly for interlaced video modes.
 
- int graph_get_drawbuffer(void);					// Returns the draw buffer vram address of the current mode.
+ int graph_get_drawbuffer(void);
+ // Returns the vram address of the draw buffer, in bytes.
 
- int graph_get_drawfield(void);						// Returns the draw field of the current mode.
+ int graph_get_drawfield(void);
+ // Returns the current draw field value.
+ // Used mainly for interlaced video modes.
 
- int graph_get_height(void);						// Returns the pixel height of the current mode.
+ int graph_get_height(void);
+ // Returns the framebuffer height, in pixels.
 
- int graph_get_interlace(void);						// Returns the interlace of the current mode.
+ int graph_get_interlace(void);
+ // Returns the interlacing value for the current mode.
 
- int graph_get_psm(void);						// Returns the framebuffer psm of the current mode.
+ int graph_get_psm(void);
+ // Returns the framebuffer pixel storage method.
 
- int graph_get_size(void);						// Returns the framebuffer size of the current mode.
+ int graph_get_size(void);
+ // Returns the size of the framebuffer, in bytes.
 
- int graph_get_width(void);						// Returns the pixel width of the current mode.
+ int graph_get_width(void);
+ // Returns the framebuffer width, in pixels.
 
- int graph_get_zbpp(void);						// Returns the zbuffer bpp of the current mode.
+ int graph_get_zbpp(void);
+ // Returns the zbuffer bits-per-pixel.
 
- int graph_get_zbuffer(void);						// Returns the zbuffer vram address of the current mode.
+ int graph_get_zbuffer(void);
+ // Returns the vram address of the zbuffer, in bytes.
 
- int graph_get_zpsm(void);						// Returns the zbuffer psm of the current mode.
+ int graph_get_zpsm(void);
+ // Returns the zbuffer pixel storage method.
 
- int graph_get_zsize(void);						// Returns the zbuffer size of the current mode.
+ int graph_get_zsize(void);
+ // Returns the size of the zbuffer, in bytes.
 
  /////////////////////////
  // GRAPH SET FUNCTIONS //
  /////////////////////////
 
- int graph_set_clearbuffer(int red, int green, int blue);		// Clear the draw buffer with the specified colour.
+ int graph_set_clearbuffer(int red, int green, int blue);
+ // Clears the draw buffer with the specified colour.
 
- int graph_set_displaybuffer(int address);				// Sets the vram address of the display framebuffer.
+ int graph_set_displaybuffer(int address);
+ // Sets the vram address of the display buffer, in bytes.
 
- int graph_set_drawbuffer(int address);					// Sets the vram address of the draw framebuffer.
+ int graph_set_drawbuffer(int address);
+ // Sets the vram address of the draw buffer, in bytes.
 
- int graph_set_drawfield(int field);					// Sets the draw interlace field.
+ int graph_set_drawfield(int field);
+ // Sets the draw field value.
+ // Used mainly for interlaced video modes.
 
- int graph_set_mode(int mode, int psm, int zpsm);			// Sets the graphics mode.
+ int graph_set_mode(int mode, int psm, int zpsm);
+ // Sets the graphics mode.
 
- int graph_set_texture(int address, int width, int height, int psm);	// Sets the texture information.
+ int graph_set_texture(int address, int width, int height, int psm);
+ // Sets the texture information.
 
- int graph_set_zbuffer(int address);					// Sets the vram address of the zbuffer.
+ int graph_set_zbuffer(int address);
+ // Sets the vram address of the zbuffer, in bytes.
 
  //////////////////////////
  // GRAPH VRAM FUNCTIONS //
  //////////////////////////
 
  int graph_vram_read(int address, int width, int height, int psm, void *data, int data_size);
+ // Uploads data to the vram. Address is specified in bytes.
 
  int graph_vram_write(int address, int width, int height, int psm, void *data, int data_size);
+ // Uploads data to vram. Address is specified in bytes.
 
  //////////////////////////
  // GRAPH WAIT FUNCTIONS //
  //////////////////////////
 
  int graph_wait_hsync(void);
+ // Wait for a horizontal sync event to occur.
 
  int graph_wait_vsync(void);
+ // Wait for a vertical sync event to occur.
 
 #ifdef __cplusplus
 }

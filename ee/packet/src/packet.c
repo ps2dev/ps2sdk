@@ -117,7 +117,7 @@
 
  }
 
- int packet_send(PACKET *packet, int channel, int flags) {
+ int packet_send(PACKET *packet, int dma_channel, int dma_flags) {
 
   // Check the packet argument.
   if (packet == NULL) { return -1; }
@@ -129,7 +129,7 @@
   while (packet->count & 0x000F) { packet_append_8(packet, 0); }
 
   // Send the packet data.
-  if (dma_channel_send(channel, packet->data, packet->count, flags) < 0) { return -1; }
+  if (dma_channel_send(dma_channel, packet->data, packet->count, dma_flags) < 0) { return -1; }
 
   // End function.
   return 0;

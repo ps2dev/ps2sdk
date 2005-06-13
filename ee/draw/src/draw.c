@@ -153,7 +153,7 @@
    output[loop0] = GIF_SET_XYZ(
     (int)((vertices[loop0][0] + 1.00f) *  32768),
     (int)((vertices[loop0][1] + 1.00f) * -32768),
-    (int)((vertices[loop0][2] + 1.00f) * max_z)  // (1 << graph_get_zbpp) 16777216) // FIXME: GET MAX_Z FROM GRAPH?
+    (int)((vertices[loop0][2] + 1.00f) * max_z)
    );
 
   }

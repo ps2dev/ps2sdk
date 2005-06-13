@@ -41,22 +41,29 @@ extern "C" {
  ///////////////////
 
  int dma_initialize(void);
+ // Initialize the dma library and hardware.
 
  int dma_shutdown(void);
+ // Shut down the dma library and hardware.
 
  ///////////////////////////
  // DMA CHANNEL FUNCTIONS //
  ///////////////////////////
 
  int dma_channel_initialize(int channel, void *handler, int flags);
+ // Initializes the specified dma channel.
 
  int dma_channel_wait(int channel, int timeout, int flags);
+ // Wait until the specified dma channel is ready.
 
  int dma_channel_send(int channel, void *data, int data_size, int flags);
+ // Send data to the specified dma channel.
 
  int dma_channel_receive(int channel, void *data, int data_size, int flags);
+ // Receive data from the specified dma channel.
 
  int dma_channel_shutdown(int channel, int flags);
+ // Shut down the specified dma channel.
 
 #ifdef __cplusplus
 }

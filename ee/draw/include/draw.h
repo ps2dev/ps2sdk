@@ -14,6 +14,7 @@
 
  #include <tamtypes.h>
 
+ #include <graph.h>
  #include <math3d.h>
 
 #ifdef __cplusplus
@@ -25,26 +26,38 @@ extern "C" {
  ////////////////////
 
  int draw_initialize(int mode, int bpp, int zbpp);
+ // Initialize the draw library and set the specified mode.
 
  int draw_swap(void);
+ // Swap the current display and draw buffers.
 
  int draw_clear(float red, float green, float blue);
+ // Clear the current draw buffer with the specified colours.
+ // Valid range for red, green and blue is: 0.00f - 1.00f
 
  /////////////////////////////
  // DRAW GENERATE FUNCTIONS //
  /////////////////////////////
 
  int draw_generate_xyz(u64 *output, int count, VECTOR *vertices);
+ // Generate XYZ register values for an array of vertices.
+ // Valid range for vertex values are: -1.00f - 1.00f
 
  int draw_generate_rgbaq(u64 *output, int count, VECTOR *vertices, VECTOR *colours);
+ // Generate RGBAQ register values from an array of vertices and colours.
+ // Valid range for vertex values are: -1.00f - 1.00f
+ // Valid range for colour values are:  0.00f - 1.00f
 
- int draw_generate_st(u64 *output, int count, VECTOR *coords);
+ int draw_generate_st(u64 *output, int count, VECTOR *coordinates);
+ // Generate ST register values from an array of texture coordinates.
+ // Valid range for texture coordinates are: 0.00f - 1.00f
 
  //////////////////////////////
  // DRAW PRIMITIVE FUNCTIONS //
  //////////////////////////////
 
  int draw_triangles(int *points, int count, u64 *xyz, u64 *rgbaq);
+ // Draw untextured triangles from an array of points and register values.
 
 #ifdef __cplusplus
 }

@@ -14,6 +14,8 @@
 
  #include <tamtypes.h>
 
+ #include <dma.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -25,19 +27,27 @@ extern "C" {
  //////////////////////
 
  int packet_allocate(PACKET *packet, int size);
+ // Allocate a new packet for use.
 
  int packet_reset(PACKET *packet);
+ // Reset the packet, clearing its contents.
 
  int packet_append_8(PACKET *packet, u8 data);
+ // Append an 8-bit value to the packet.
 
  int packet_append_16(PACKET *packet, u16 data);
+ // Append a 16-bit value to the packet.
 
  int packet_append_32(PACKET *packet, u32 data);
+ // Append a 32-bit value to the packet.
 
  int packet_append_64(PACKET *packet, u64 data);
+ // Append a 64-bit value to the packet.
 
- int packet_send(PACKET *packet, int channel, int flags);
+ int packet_send(PACKET *packet, int dma_channel, int dma_flags);
+ // Send the packet to the specified dma channel.
 
  int packet_free(PACKET *packet);
+ // Free the packet.
 
 #endif

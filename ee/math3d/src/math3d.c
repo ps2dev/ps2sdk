@@ -364,7 +364,7 @@
  // CALCULATE FUNCTIONS //
  /////////////////////////
 
- void calculate_normals(VECTOR *output, int count, VECTOR *normals, MATRIX local_world) {
+ void calculate_normals(VECTOR *output, int count, VECTOR *normals, MATRIX local_light) {
   asm __volatile__ (
    "lqc2		vf1, 0x00(%3)	\n"
    "lqc2		vf2, 0x10(%3)	\n"
@@ -384,7 +384,7 @@
    "addi		%2, 0x10	\n"
    "addi		%1, -1		\n"
    "bne			$0, %1, 1b	\n"
-   : : "r" (output), "r" (count), "r" (normals), "r" (local_world)
+   : : "r" (output), "r" (count), "r" (normals), "r" (local_light)
   );
  }
 
