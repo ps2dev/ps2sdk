@@ -1288,6 +1288,7 @@ int wctomb(char *s, wchar_t wc)
 int __assert_fail (const char *assertion, const char *file, unsigned int line)
 {
     fprintf(stderr, "Error: assertion `%s' failed in %s:%i\n", assertion, file, line);
+    return 0;
 }
 #endif
 

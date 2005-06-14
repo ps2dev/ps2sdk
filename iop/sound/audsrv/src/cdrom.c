@@ -25,6 +25,7 @@
 #include <sifcmd.h>
 #include <libsd.h>
 #include <cdvdman.h>
+#include <sysclib.h>
 
 #include <audsrv.h>
 #include "cdrom.c.h"

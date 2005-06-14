@@ -134,6 +134,7 @@ int AHX_SubSong(int songNo)
 	sbuff[0] = (unsigned)songNo;
 	SifCallRpc(&cd0,AHX_PAUSE,0,(void*)(&sbuff[0]),64,(void*)(&sbuff[0]),64,0,0);
 	FlushCache(0);
+	return 0;
 }
 
 //***************************************************************

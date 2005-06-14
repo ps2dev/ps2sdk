@@ -17,6 +17,7 @@
 #include <sysmem.h>
 #include <intrman.h>
 #include <sifcmd.h>
+#include <sysclib.h>
 
 /** used for callbacks, sif requires a buffer of atleast 16 bytes */
 static int cmdData[4]  __attribute__((aligned (64)));

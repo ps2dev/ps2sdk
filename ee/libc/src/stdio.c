@@ -19,6 +19,7 @@
 #include <string.h>
 #include <limits.h>
 
+void _ps2sdk_stdio_init();
 
 /* std I/O buffer type constants. */
 #define STD_IOBUF_TYPE_NONE            0
@@ -429,7 +430,7 @@ FILE *fopen(const char *fname, const char *mode)
       /* search for an available fd slot. */
       for (i = 3; i < _NFILE; ++i) if (__iob[i].fd < 0) break;
       if (i < _NFILE) {
-        char * t_fname = fname;
+        char * t_fname = (char *)fname;
 	char b_fname[FILENAME_MAX];
         __iob[i].type = __stdio_get_fd_type(fname);
 	if (!strchr(fname, ':')) { // filename doesn't contain device
@@ -618,7 +619,9 @@ int fputs(const char *s, FILE *stream)
 {
   size_t len;
 
-  len = ((fwrite(s, 1, (len = strlen(s)), stream) == len) ? (int)len : EOF);
+  int temp = strlen(s);
+
+  len = ((fwrite(s, 1, temp, stream) == temp) ? temp : EOF);
   
   if (len != EOF) {
     fputc('\n', stream);
@@ -1348,5 +1351,6 @@ void _ps2sdk_stdio_deinit()
 #ifdef F_chdir
 int chdir(const char *path) {
     strcpy(__direct_pwd, path);
+    return 0;
 }
 #endif

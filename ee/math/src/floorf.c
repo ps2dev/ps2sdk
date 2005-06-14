@@ -233,7 +233,7 @@ union
     float y;
     unsigned short i[2];
   } u;
-int i, k;
+int i; // , k;
 short *q;
 
 u.y = x;
