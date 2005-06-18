@@ -48,7 +48,7 @@ struct remote_data
 #define RM_NINE		0x0080D049
 #define RM_ZERO		0x0090D049
 #define RM_CLEAR	0x00F0D049
-#define RM_TIME		0x0080D049
+#define RM_TIME		0x0080D249
 #define RM_PREV		0x0000D349
 #define RM_NEXT		0x0010D349
 #define RM_ATOB		0x00A0D249
@@ -66,7 +66,7 @@ struct remote_data
 #define RM_UP		0x0040D5DA
 #define RM_DOWN		0x00A0D749
 #define RM_LEFT		0x00B0D749
-#define RM_RIGHT	0x0040D5DA
+#define RM_RIGHT	0x0050D5DA
 #define RM_ENTER	0x00B0D049
 #define RM_L1		0x00A0D5DA
 #define RM_L2		0x0080D5DA
@@ -76,6 +76,8 @@ struct remote_data
 #define RM_R3		0x0020D5DA
 #define RM_START	0x0030D5DA
 #define RM_SELECT	0x0000D5DA
+#define RM_EJECT	0x0060D1DA
+#define RM_RESET	0x0050D1DA
 
 #ifdef _cplusplus
 extern "C" {
