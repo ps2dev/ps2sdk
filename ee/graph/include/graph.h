@@ -20,16 +20,27 @@
 extern "C" {
 #endif
 
- #define GRAPH_MODE_NTSC		0x00	//  640 x  448
- #define GRAPH_MODE_PAL			0x01	//  640 x  512
- #define GRAPH_MODE_HDTV_480P		0x02	//  640 x  480
- #define GRAPH_MODE_HDTV_720P		0x03	// 1280 x  720
- #define GRAPH_MODE_HDTV_1080I		0x04	// 1920 x 1080
- #define GRAPH_MODE_VGA_640		0x05	//  640 x  480
- #define GRAPH_MODE_VGA_800		0x06	//  800 x  600
- #define GRAPH_MODE_VGA_1024		0x07	// 1024 x  768
- #define GRAPH_MODE_VGA_1280		0x08	// 1280 x 1024
- #define GRAPH_MODE_AUTO		0xFF	// Automatic NTSC or PAL mode setting.
+ #define GRAPH_MODE_NTSC		0	//  640 x  448
+ #define GRAPH_MODE_PAL			1	//  640 x  512
+ #define GRAPH_MODE_HDTV_480P		2	//  640 x  480
+ #define GRAPH_MODE_HDTV_720P		3	// 1280 x  720
+ #define GRAPH_MODE_HDTV_1080I		4	// 1920 x 1080
+ #define GRAPH_MODE_VGA_640_60		5	//  640 x  480 @ 60hz
+ #define GRAPH_MODE_VGA_640_72		6	//  640 x  480 @ 72hz
+ #define GRAPH_MODE_VGA_640_75		7	//  640 x  480 @ 75hz
+ #define GRAPH_MODE_VGA_640_85		8	//  640 x  480 @ 85hz
+ #define GRAPH_MODE_VGA_800_56		9	//  800 x  600 @ 56hz
+ #define GRAPH_MODE_VGA_800_60		10	//  800 x  600 @ 60hz
+ #define GRAPH_MODE_VGA_800_72		11	//  800 x  600 @ 72hz
+ #define GRAPH_MODE_VGA_800_75		12	//  800 x  600 @ 75hz
+ #define GRAPH_MODE_VGA_800_85		13	//  800 x  600 @ 85hz
+ #define GRAPH_MODE_VGA_1024_60		14	// 1024 x  768 @ 60hz
+ #define GRAPH_MODE_VGA_1024_70		15	// 1024 x  768 @ 70hz
+ #define GRAPH_MODE_VGA_1024_75		16	// 1024 x  768 @ 75hz
+ #define GRAPH_MODE_VGA_1024_85		17	// 1024 x  768 @ 85hz
+ #define GRAPH_MODE_VGA_1280_60		18	// 1280 x 1024 @ 60hz
+ #define GRAPH_MODE_VGA_1280_75		19	// 1280 x 1024 @ 75hz
+ #define GRAPH_MODE_AUTO		99	// Automatic NTSC or PAL mode setting.
 
  #define GRAPH_PSM_32			0x00	// 32 bits per pixel.
  #define GRAPH_PSM_24			0x01	// 24 bits per pixel.
