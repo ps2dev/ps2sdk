@@ -77,16 +77,8 @@ extern "C" {
  // GRAPH CONFIG FUNCTIONS //
  ////////////////////////////
 
- int graph_config_get(char *config);
- // Returns a string describing the current config information.
- // The string format is: mode:psm:zpsm:
-
  int graph_config_read(char *filename);
  // Reads a string from a file and sets it as the current config information.
- // The string format is: mode:psm:zpsm:
-
- int graph_config_set(char *config); 
- // Sets the current config information as described by a string.
  // The string format is: mode:psm:zpsm:
 
  int graph_config_write(char *filename);
@@ -102,6 +94,10 @@ extern "C" {
 
  int graph_get_bpp(void);
  // Returns the framebuffer bits-per-pixel.
+
+ int graph_get_config(char *config);
+ // Returns a string describing the current config information.
+ // The string format is: mode:psm:zpsm:
 
  int graph_get_displaybuffer(void);
  // Returns the vram address of the display buffer, in bytes.
@@ -150,6 +146,10 @@ extern "C" {
 
  int graph_set_clearbuffer(int red, int green, int blue);
  // Clears the draw buffer with the specified colour.
+
+ int graph_set_config(char *config); 
+ // Sets the current config information as described by a string.
+ // The string format is: mode:psm:zpsm:
 
  int graph_set_displaybuffer(int address);
  // Sets the vram address of the display buffer, in bytes.

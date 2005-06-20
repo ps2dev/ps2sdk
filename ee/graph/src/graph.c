@@ -94,7 +94,72 @@
  // GRAPH CONFIG FUNCTIONS //
  ////////////////////////////
 
- int graph_config_get(char *config) {
+ int graph_config_read(char *filename) {
+  FILE *infile; char config[512];
+
+  // Open the config file.
+  if ((infile = fopen(filename, "r")) < 0) { return -1; }
+
+  // Read the config file contents.
+  if (fread(config, 1, sizeof(config), infile) < 0) { return -1; }
+
+  // Close the config file.
+  if (fclose(infile) < 0) { return -1; }
+
+  // Set the current mode config information.
+  return graph_set_config(config);
+
+ }
+ 
+ int graph_config_write(char *filename) {
+  FILE *outfile; char config[512];
+
+  // Get the current mode config information.  
+  graph_get_config(config);
+
+  // Open the config file.
+  if ((outfile = fopen(filename, "w")) < 0) { return -1; }
+
+  // Write the config file contents.
+  if (fwrite(config, 1, strlen(config), outfile) < 0) { return -1; }
+
+  // Close the config file.
+  if (fclose(outfile) < 0) { return -1; } 
+
+  // End function.
+  return 0;
+
+ }
+
+ /////////////////////////
+ // GRAPH GET FUNCTIONS //
+ /////////////////////////
+
+ float graph_get_aspect(void) {
+  float aspect = 1.00f;
+
+  // Get the tv screen type as defined in the osd configuration.
+  if (configGetTvScreenType() == TV_SCREEN_169) { aspect = 1.78f; } else { aspect = 1.33f; }
+
+  // Return the current aspect ratio.
+  return (float)((float)aspect * (float)((float)graph_get_height() / (float)graph_get_width()));
+
+ }
+
+ int graph_get_bpp(void) {
+
+  // Return the framebuffer bits-per-pixel.
+  if (current_psm == GRAPH_PSM_32)  { return 32; } else
+  if (current_psm == GRAPH_PSM_24)  { return 24; } else
+  if (current_psm == GRAPH_PSM_16)  { return 16; } else
+  if (current_psm == GRAPH_PSM_16S) { return 16; }
+
+  // End function.
+  return -1;
+
+ }
+
+ int graph_get_config(char *config) {
 
   // Save the current mode value.
   switch (current_mode) {
@@ -141,129 +206,6 @@
 
   // End function.
   return 0;
-
- }
-
- int graph_config_read(char *filename) {
-  FILE *infile; char config[512];
-
-  // Open the config file.
-  if ((infile = fopen(filename, "r")) < 0) { return -1; }
-
-  // Read the config file contents.
-  if (fread(config, 1, sizeof(config), infile) < 0) { return -1; }
-
-  // Close the config file.
-  if (fclose(infile) < 0) { return -1; }
-
-  // Set the current mode config information.
-  return graph_config_set(config);
-
- }
- 
- int graph_config_set(char *config) {
-  char *temp0, *temp1; int mode, psm, zpsm;
-
-  // Extract the mode config value.
-  temp0 = config; temp1 = strtok(temp0, ":"); temp0 += strlen(temp1) + 1;
-
-  // Parse the mode config value.
-  if (strcmp(temp1, "GRAPH_MODE_NTSC"        ) == 0) { mode = GRAPH_MODE_NTSC;        } else
-  if (strcmp(temp1, "GRAPH_MODE_PAL"         ) == 0) { mode = GRAPH_MODE_PAL;         } else
-  if (strcmp(temp1, "GRAPH_MODE_HDTV_480P"   ) == 0) { mode = GRAPH_MODE_HDTV_480P;   } else
-  if (strcmp(temp1, "GRAPH_MODE_HDTV_720P"   ) == 0) { mode = GRAPH_MODE_HDTV_720P;   } else
-  if (strcmp(temp1, "GRAPH_MODE_HDTV_1080I"  ) == 0) { mode = GRAPH_MODE_HDTV_1080I;  } else
-  if (strcmp(temp1, "GRAPH_MODE_VGA_640"     ) == 0) { mode = GRAPH_MODE_VGA_640;     } else
-  if (strcmp(temp1, "GRAPH_MODE_VGA_640_60"  ) == 0) { mode = GRAPH_MODE_VGA_640_60;  } else
-  if (strcmp(temp1, "GRAPH_MODE_VGA_640_72"  ) == 0) { mode = GRAPH_MODE_VGA_640_72;  } else
-  if (strcmp(temp1, "GRAPH_MODE_VGA_640_75"  ) == 0) { mode = GRAPH_MODE_VGA_640_75;  } else
-  if (strcmp(temp1, "GRAPH_MODE_VGA_640_85"  ) == 0) { mode = GRAPH_MODE_VGA_640_85;  } else
-  if (strcmp(temp1, "GRAPH_MODE_VGA_800"     ) == 0) { mode = GRAPH_MODE_VGA_800;     } else
-  if (strcmp(temp1, "GRAPH_MODE_VGA_800_56"  ) == 0) { mode = GRAPH_MODE_VGA_800_56;  } else
-  if (strcmp(temp1, "GRAPH_MODE_VGA_800_60"  ) == 0) { mode = GRAPH_MODE_VGA_800_60;  } else
-  if (strcmp(temp1, "GRAPH_MODE_VGA_800_72"  ) == 0) { mode = GRAPH_MODE_VGA_800_72;  } else
-  if (strcmp(temp1, "GRAPH_MODE_VGA_800_75"  ) == 0) { mode = GRAPH_MODE_VGA_800_75;  } else
-  if (strcmp(temp1, "GRAPH_MODE_VGA_800_85"  ) == 0) { mode = GRAPH_MODE_VGA_800_85;  } else
-  if (strcmp(temp1, "GRAPH_MODE_VGA_1024"    ) == 0) { mode = GRAPH_MODE_VGA_1024;    } else
-  if (strcmp(temp1, "GRAPH_MODE_VGA_1024_60" ) == 0) { mode = GRAPH_MODE_VGA_1024_60; } else
-  if (strcmp(temp1, "GRAPH_MODE_VGA_1024_70" ) == 0) { mode = GRAPH_MODE_VGA_1024_70; } else
-  if (strcmp(temp1, "GRAPH_MODE_VGA_1024_75" ) == 0) { mode = GRAPH_MODE_VGA_1024_75; } else
-  if (strcmp(temp1, "GRAPH_MODE_VGA_1024_85" ) == 0) { mode = GRAPH_MODE_VGA_1024_85; } else
-  if (strcmp(temp1, "GRAPH_MODE_VGA_1280"    ) == 0) { mode = GRAPH_MODE_VGA_1280;    } else
-  if (strcmp(temp1, "GRAPH_MODE_VGA_1280_60" ) == 0) { mode = GRAPH_MODE_VGA_1280_60; } else
-  if (strcmp(temp1, "GRAPH_MODE_VGA_1280_75" ) == 0) { mode = GRAPH_MODE_VGA_1280_75; } else { mode = GRAPH_MODE_AUTO; }
-
-  // Read the psm config value.
-  temp1 = strtok(temp0, ":"); temp0 += strlen(temp1) + 1;
-
-  // Parse the psm config value.
-  if (strcmp(temp1, "GRAPH_PSM_32"  ) == 0) { psm = GRAPH_PSM_32;  } else
-  if (strcmp(temp1, "GRAPH_PSM_24"  ) == 0) { psm = GRAPH_PSM_24;  } else
-  if (strcmp(temp1, "GRAPH_PSM_16"  ) == 0) { psm = GRAPH_PSM_16;  } else
-  if (strcmp(temp1, "GRAPH_PSM_16S" ) == 0) { psm = GRAPH_PSM_16S; } else { psm = GRAPH_PSM_32; }
-
-  // Read the zpsm config value.
-  temp1 = strtok(temp0, ":"); temp0 += strlen(temp1) + 1;
-
-  // Parse the zpsm config value.
-  if (strcmp(temp1, "GRAPH_PSM_32" ) == 0) { zpsm = GRAPH_PSM_32;  } else
-  if (strcmp(temp1, "GRAPH_PSM_24" ) == 0) { zpsm = GRAPH_PSM_24;  } else
-  if (strcmp(temp1, "GRAPH_PSM_16" ) == 0) { zpsm = GRAPH_PSM_16;  } else
-  if (strcmp(temp1, "GRAPH_PSM_16S") == 0) { zpsm = GRAPH_PSM_16S; } else { zpsm = GRAPH_PSM_32; }
-
-  // Set the video mode with the configured values.
-  if (graph_set_mode(mode, psm, zpsm) < 0) { return -1; }
-
-  // End function.
-  return 0;
-
- }
-
- int graph_config_write(char *filename) {
-  FILE *outfile; char config[512];
-
-  // Get the current mode config information.  
-  graph_config_get(config);
-
-  // Open the config file.
-  if ((outfile = fopen(filename, "w")) < 0) { return -1; }
-
-  // Write the config file contents.
-  if (fwrite(config, 1, strlen(config), outfile) < 0) { return -1; }
-
-  // Close the config file.
-  if (fclose(outfile) < 0) { return -1; } 
-
-  // End function.
-  return 0;
-
- }
-
- /////////////////////////
- // GRAPH GET FUNCTIONS //
- /////////////////////////
-
- float graph_get_aspect(void) {
-  float aspect = 1.00f;
-
-  // Get the tv screen type as defined in the osd configuration.
-  if (configGetTvScreenType() == TV_SCREEN_169) { aspect = 1.78f; } else { aspect = 1.33f; }
-
-  // Return the current aspect ratio.
-  return (float)((float)aspect * (float)((float)graph_get_height() / (float)graph_get_width()));
-
- }
-
- int graph_get_bpp(void) {
-
-  // Return the framebuffer bits-per-pixel.
-  if (current_psm == GRAPH_PSM_32)  { return 32; } else
-  if (current_psm == GRAPH_PSM_24)  { return 24; } else
-  if (current_psm == GRAPH_PSM_16)  { return 16; } else
-  if (current_psm == GRAPH_PSM_16S) { return 16; }
-
-  // End function.
-  return -1;
 
  }
 
@@ -407,6 +349,64 @@
 
   // Send the packet.
   if (packet_send(&graph_packet, DMA_CHANNEL_GIF, DMA_FLAG_NORMAL) < 0) { return -1; }
+
+  // End function.
+  return 0;
+
+ }
+
+ int graph_set_config(char *config) {
+  char *temp0, *temp1; int mode, psm, zpsm;
+
+  // Extract the mode config value.
+  temp0 = config; temp1 = strtok(temp0, ":"); temp0 += strlen(temp1) + 1;
+
+  // Parse the mode config value.
+  if (strcmp(temp1, "GRAPH_MODE_NTSC"        ) == 0) { mode = GRAPH_MODE_NTSC;        } else
+  if (strcmp(temp1, "GRAPH_MODE_PAL"         ) == 0) { mode = GRAPH_MODE_PAL;         } else
+  if (strcmp(temp1, "GRAPH_MODE_HDTV_480P"   ) == 0) { mode = GRAPH_MODE_HDTV_480P;   } else
+  if (strcmp(temp1, "GRAPH_MODE_HDTV_720P"   ) == 0) { mode = GRAPH_MODE_HDTV_720P;   } else
+  if (strcmp(temp1, "GRAPH_MODE_HDTV_1080I"  ) == 0) { mode = GRAPH_MODE_HDTV_1080I;  } else
+  if (strcmp(temp1, "GRAPH_MODE_VGA_640"     ) == 0) { mode = GRAPH_MODE_VGA_640;     } else
+  if (strcmp(temp1, "GRAPH_MODE_VGA_640_60"  ) == 0) { mode = GRAPH_MODE_VGA_640_60;  } else
+  if (strcmp(temp1, "GRAPH_MODE_VGA_640_72"  ) == 0) { mode = GRAPH_MODE_VGA_640_72;  } else
+  if (strcmp(temp1, "GRAPH_MODE_VGA_640_75"  ) == 0) { mode = GRAPH_MODE_VGA_640_75;  } else
+  if (strcmp(temp1, "GRAPH_MODE_VGA_640_85"  ) == 0) { mode = GRAPH_MODE_VGA_640_85;  } else
+  if (strcmp(temp1, "GRAPH_MODE_VGA_800"     ) == 0) { mode = GRAPH_MODE_VGA_800;     } else
+  if (strcmp(temp1, "GRAPH_MODE_VGA_800_56"  ) == 0) { mode = GRAPH_MODE_VGA_800_56;  } else
+  if (strcmp(temp1, "GRAPH_MODE_VGA_800_60"  ) == 0) { mode = GRAPH_MODE_VGA_800_60;  } else
+  if (strcmp(temp1, "GRAPH_MODE_VGA_800_72"  ) == 0) { mode = GRAPH_MODE_VGA_800_72;  } else
+  if (strcmp(temp1, "GRAPH_MODE_VGA_800_75"  ) == 0) { mode = GRAPH_MODE_VGA_800_75;  } else
+  if (strcmp(temp1, "GRAPH_MODE_VGA_800_85"  ) == 0) { mode = GRAPH_MODE_VGA_800_85;  } else
+  if (strcmp(temp1, "GRAPH_MODE_VGA_1024"    ) == 0) { mode = GRAPH_MODE_VGA_1024;    } else
+  if (strcmp(temp1, "GRAPH_MODE_VGA_1024_60" ) == 0) { mode = GRAPH_MODE_VGA_1024_60; } else
+  if (strcmp(temp1, "GRAPH_MODE_VGA_1024_70" ) == 0) { mode = GRAPH_MODE_VGA_1024_70; } else
+  if (strcmp(temp1, "GRAPH_MODE_VGA_1024_75" ) == 0) { mode = GRAPH_MODE_VGA_1024_75; } else
+  if (strcmp(temp1, "GRAPH_MODE_VGA_1024_85" ) == 0) { mode = GRAPH_MODE_VGA_1024_85; } else
+  if (strcmp(temp1, "GRAPH_MODE_VGA_1280"    ) == 0) { mode = GRAPH_MODE_VGA_1280;    } else
+  if (strcmp(temp1, "GRAPH_MODE_VGA_1280_60" ) == 0) { mode = GRAPH_MODE_VGA_1280_60; } else
+  if (strcmp(temp1, "GRAPH_MODE_VGA_1280_75" ) == 0) { mode = GRAPH_MODE_VGA_1280_75; } else { mode = GRAPH_MODE_AUTO; }
+
+  // Read the psm config value.
+  temp1 = strtok(temp0, ":"); temp0 += strlen(temp1) + 1;
+
+  // Parse the psm config value.
+  if (strcmp(temp1, "GRAPH_PSM_32"  ) == 0) { psm = GRAPH_PSM_32;  } else
+  if (strcmp(temp1, "GRAPH_PSM_24"  ) == 0) { psm = GRAPH_PSM_24;  } else
+  if (strcmp(temp1, "GRAPH_PSM_16"  ) == 0) { psm = GRAPH_PSM_16;  } else
+  if (strcmp(temp1, "GRAPH_PSM_16S" ) == 0) { psm = GRAPH_PSM_16S; } else { psm = GRAPH_PSM_32; }
+
+  // Read the zpsm config value.
+  temp1 = strtok(temp0, ":"); temp0 += strlen(temp1) + 1;
+
+  // Parse the zpsm config value.
+  if (strcmp(temp1, "GRAPH_PSM_32" ) == 0) { zpsm = GRAPH_PSM_32;  } else
+  if (strcmp(temp1, "GRAPH_PSM_24" ) == 0) { zpsm = GRAPH_PSM_24;  } else
+  if (strcmp(temp1, "GRAPH_PSM_16" ) == 0) { zpsm = GRAPH_PSM_16;  } else
+  if (strcmp(temp1, "GRAPH_PSM_16S") == 0) { zpsm = GRAPH_PSM_16S; } else { zpsm = GRAPH_PSM_32; }
+
+  // Set the video mode with the configured values.
+  if (graph_set_mode(mode, psm, zpsm) < 0) { return -1; }
 
   // End function.
   return 0;
