@@ -73,6 +73,16 @@ extern "C" {
  int graph_shutdown(void);
  // Shut down the graphics library and hardware.
 
+ ////////////////////////////
+ // GRAPH CONFIG FUNCTIONS //
+ ////////////////////////////
+
+ int graph_config_read(char *filename);
+ // Reads a config file and sets its contents as the current mode.
+
+ int graph_config_write(char *filename);
+ // Writes the current mode information into a config file.
+
  /////////////////////////
  // GRAPH GET FUNCTIONS //
  /////////////////////////
@@ -143,6 +153,9 @@ extern "C" {
 
  int graph_set_mode(int mode, int psm, int zpsm);
  // Sets the graphics mode.
+
+ int graph_set_mode_manual(int width, int height, int mode, int interlace, int size, u64 display, int psm, int zpsm);
+ // Sets the graphic mode by specifying the actual graph_mode structure values.
 
  int graph_set_texture(int address, int width, int height, int psm);
  // Sets the texture information.
