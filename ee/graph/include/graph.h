@@ -77,15 +77,21 @@ extern "C" {
  // GRAPH CONFIG FUNCTIONS //
  ////////////////////////////
 
+ int graph_config_get(char *config);
+ // Returns a string describing the current config information.
+ // The string format is: mode:psm:zpsm:
+
  int graph_config_read(char *filename);
- // Reads a config file and sets its contents as the current mode.
+ // Reads a string from a file and sets it as the current config information.
+ // The string format is: mode:psm:zpsm:
+
+ int graph_config_set(char *config); 
+ // Sets the current config information as described by a string.
+ // The string format is: mode:psm:zpsm:
 
  int graph_config_write(char *filename);
- // Writes the current mode information into a config file.
- 
- int graph_config_mem_read(char * config);
- void graph_config_mem_write(char * config);
- // Same as above, but uses a memory buffer instead.
+ // Writes the current mode information into a config file as a string.
+ // The string format is: mode:psm:zpsm:
 
  /////////////////////////
  // GRAPH GET FUNCTIONS //

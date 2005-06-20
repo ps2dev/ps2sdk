@@ -89,10 +89,60 @@
   return 0;
 
  }
-
+ 
  ////////////////////////////
  // GRAPH CONFIG FUNCTIONS //
  ////////////////////////////
+
+ int graph_config_get(char *config) {
+
+  // Save the current mode value.
+  switch (current_mode) {
+   case GRAPH_MODE_NTSC:	sprintf(config, "GRAPH_MODE_NTSC:");		break;
+   case GRAPH_MODE_PAL:		sprintf(config, "GRAPH_MODE_PAL:");		break;
+   case GRAPH_MODE_HDTV_480P:	sprintf(config, "GRAPH_MODE_HDTV_480P:");	break;
+   case GRAPH_MODE_HDTV_720P:	sprintf(config, "GRAPH_MODE_HDTV_720P:");	break;
+   case GRAPH_MODE_HDTV_1080I:	sprintf(config, "GRAPH_MODE_HDTV_1080I:");	break;
+   case GRAPH_MODE_VGA_640_60:	sprintf(config, "GRAPH_MODE_VGA_640_60:");	break;
+   case GRAPH_MODE_VGA_640_72:	sprintf(config, "GRAPH_MODE_VGA_640_72:");	break;
+   case GRAPH_MODE_VGA_640_75:	sprintf(config, "GRAPH_MODE_VGA_640_75:");	break;
+   case GRAPH_MODE_VGA_640_85:	sprintf(config, "GRAPH_MODE_VGA_640_85:");	break;
+   case GRAPH_MODE_VGA_800_56:	sprintf(config, "GRAPH_MODE_VGA_800_56:");	break;
+   case GRAPH_MODE_VGA_800_60:	sprintf(config, "GRAPH_MODE_VGA_800_60:");	break;
+   case GRAPH_MODE_VGA_800_72:	sprintf(config, "GRAPH_MODE_VGA_800_72:");	break;
+   case GRAPH_MODE_VGA_800_75:	sprintf(config, "GRAPH_MODE_VGA_800_75:");	break;
+   case GRAPH_MODE_VGA_800_85:	sprintf(config, "GRAPH_MODE_VGA_800_85:");	break;
+   case GRAPH_MODE_VGA_1024_60:	sprintf(config, "GRAPH_MODE_VGA_1024_60:");	break;
+   case GRAPH_MODE_VGA_1024_70:	sprintf(config, "GRAPH_MODE_VGA_1024_70:");	break;
+   case GRAPH_MODE_VGA_1024_75:	sprintf(config, "GRAPH_MODE_VGA_1024_75:");	break;
+   case GRAPH_MODE_VGA_1024_85:	sprintf(config, "GRAPH_MODE_VGA_1024_85:");	break;
+   case GRAPH_MODE_VGA_1280_60:	sprintf(config, "GRAPH_MODE_VGA_1280_60:");	break;
+   case GRAPH_MODE_VGA_1280_75:	sprintf(config, "GRAPH_MODE_VGA_1280_75:");	break;
+   default:			sprintf(config, "GRAPH_MODE_AUTO:");		break;
+  }
+
+  // Save the current psm value.
+  switch (current_psm) {
+   case GRAPH_PSM_32:		sprintf(config, "%sGRAPH_PSM_32:",  config);	break;
+   case GRAPH_PSM_24:		sprintf(config, "%sGRAPH_PSM_24:",  config);	break;
+   case GRAPH_PSM_16:		sprintf(config, "%sGRAPH_PSM_16:",  config);	break;
+   case GRAPH_PSM_16S:		sprintf(config, "%sGRAPH_PSM_16S:", config);	break;
+   default:			sprintf(config, "%sGRAPH_PSM_32:",  config);	break;
+  }
+
+  // Save the current zpsm value.
+  switch (current_zpsm) {
+   case GRAPH_PSM_32:		sprintf(config, "%sGRAPH_PSM_32:",  config);	break;
+   case GRAPH_PSM_24:		sprintf(config, "%sGRAPH_PSM_24:",  config);	break;
+   case GRAPH_PSM_16:		sprintf(config, "%sGRAPH_PSM_16:",  config);	break;
+   case GRAPH_PSM_16S:		sprintf(config, "%sGRAPH_PSM_16S:", config);	break;
+   default:			sprintf(config, "%sGRAPH_PSM_32:",  config);	break;
+  }
+
+  // End function.
+  return 0;
+
+ }
 
  int graph_config_read(char *filename) {
   FILE *infile; char config[512];
@@ -106,13 +156,14 @@
   // Close the config file.
   if (fclose(infile) < 0) { return -1; }
 
-  return graph_config_mem_read(config);
+  // Set the current mode config information.
+  return graph_config_set(config);
 
  }
  
- int graph_config_mem_read(char * config) {
+ int graph_config_set(char *config) {
   char *temp0, *temp1; int mode, psm, zpsm;
-  
+
   // Extract the mode config value.
   temp0 = config; temp1 = strtok(temp0, ":"); temp0 += strlen(temp1) + 1;
 
@@ -170,8 +221,9 @@
 
  int graph_config_write(char *filename) {
   FILE *outfile; char config[512];
-  
-  graph_config_mem_write(config);
+
+  // Get the current mode config information.  
+  graph_config_get(config);
 
   // Open the config file.
   if ((outfile = fopen(filename, "w")) < 0) { return -1; }
@@ -187,52 +239,6 @@
 
  }
 
- void graph_config_mem_write(char * config) {
-  // Save the current mode value.
-  switch (current_mode) {
-   case GRAPH_MODE_NTSC:	sprintf(config, "GRAPH_MODE_NTSC:");		break;
-   case GRAPH_MODE_PAL:		sprintf(config, "GRAPH_MODE_PAL:");		break;
-   case GRAPH_MODE_HDTV_480P:	sprintf(config, "GRAPH_MODE_HDTV_480P:");	break;
-   case GRAPH_MODE_HDTV_720P:	sprintf(config, "GRAPH_MODE_HDTV_720P:");	break;
-   case GRAPH_MODE_HDTV_1080I:	sprintf(config, "GRAPH_MODE_HDTV_1080I:");	break;
-   case GRAPH_MODE_VGA_640_60:	sprintf(config, "GRAPH_MODE_VGA_640_60:");	break;
-   case GRAPH_MODE_VGA_640_72:	sprintf(config, "GRAPH_MODE_VGA_640_72:");	break;
-   case GRAPH_MODE_VGA_640_75:	sprintf(config, "GRAPH_MODE_VGA_640_75:");	break;
-   case GRAPH_MODE_VGA_640_85:	sprintf(config, "GRAPH_MODE_VGA_640_85:");	break;
-   case GRAPH_MODE_VGA_800_56:	sprintf(config, "GRAPH_MODE_VGA_800_56:");	break;
-   case GRAPH_MODE_VGA_800_60:	sprintf(config, "GRAPH_MODE_VGA_800_60:");	break;
-   case GRAPH_MODE_VGA_800_72:	sprintf(config, "GRAPH_MODE_VGA_800_72:");	break;
-   case GRAPH_MODE_VGA_800_75:	sprintf(config, "GRAPH_MODE_VGA_800_75:");	break;
-   case GRAPH_MODE_VGA_800_85:	sprintf(config, "GRAPH_MODE_VGA_800_85:");	break;
-   case GRAPH_MODE_VGA_1024_60:	sprintf(config, "GRAPH_MODE_VGA_1024_60:");	break;
-   case GRAPH_MODE_VGA_1024_70:	sprintf(config, "GRAPH_MODE_VGA_1024_70:");	break;
-   case GRAPH_MODE_VGA_1024_75:	sprintf(config, "GRAPH_MODE_VGA_1024_75:");	break;
-   case GRAPH_MODE_VGA_1024_85:	sprintf(config, "GRAPH_MODE_VGA_1024_85:");	break;
-   case GRAPH_MODE_VGA_1280_60:	sprintf(config, "GRAPH_MODE_VGA_1280_60:");	break;
-   case GRAPH_MODE_VGA_1280_75:	sprintf(config, "GRAPH_MODE_VGA_1280_75:");	break;
-   default:			sprintf(config, "GRAPH_MODE_AUTO:");		break;
-  }
-
-  // Save the current psm value.
-  switch (current_psm) {
-   case GRAPH_PSM_32:		sprintf(config, "%sGRAPH_PSM_32:", config);	break;
-   case GRAPH_PSM_24:		sprintf(config, "%sGRAPH_PSM_24:", config);	break;
-   case GRAPH_PSM_16:		sprintf(config, "%sGRAPH_PSM_16:", config);	break;
-   case GRAPH_PSM_16S:		sprintf(config, "%sGRAPH_PSM_16S:", config);	break;
-   default:			sprintf(config, "%sGRAPH_PSM_32:", config);	break;
-  }
-
-  // Save the current zpsm value.
-  switch (current_zpsm) {
-   case GRAPH_PSM_32:		sprintf(config, "%sGRAPH_PSM_32:", config);	break;
-   case GRAPH_PSM_24:		sprintf(config, "%sGRAPH_PSM_24:", config);	break;
-   case GRAPH_PSM_16:		sprintf(config, "%sGRAPH_PSM_16:", config);	break;
-   case GRAPH_PSM_16S:		sprintf(config, "%sGRAPH_PSM_16S:", config);	break;
-   default:			sprintf(config, "%sGRAPH_PSM_32:", config);	break;
-  }
-
- }
- 
  /////////////////////////
  // GRAPH GET FUNCTIONS //
  /////////////////////////
