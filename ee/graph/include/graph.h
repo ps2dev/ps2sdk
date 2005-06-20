@@ -82,6 +82,10 @@ extern "C" {
 
  int graph_config_write(char *filename);
  // Writes the current mode information into a config file.
+ 
+ int graph_config_mem_read(char * config);
+ void graph_config_mem_write(char * config);
+ // Same as above, but uses a memory buffer instead.
 
  /////////////////////////
  // GRAPH GET FUNCTIONS //

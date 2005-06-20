@@ -95,7 +95,7 @@
  ////////////////////////////
 
  int graph_config_read(char *filename) {
-  FILE *infile; char config[512], *temp0, *temp1; int mode, psm, zpsm;
+  FILE *infile; char config[512];
 
   // Open the config file.
   if ((infile = fopen(filename, "r")) < 0) { return -1; }
@@ -106,6 +106,13 @@
   // Close the config file.
   if (fclose(infile) < 0) { return -1; }
 
+  return graph_config_mem_read(config);
+
+ }
+ 
+ int graph_config_mem_read(char * config) {
+  char *temp0, *temp1; int mode, psm, zpsm;
+  
   // Extract the mode config value.
   temp0 = config; temp1 = strtok(temp0, ":"); temp0 += strlen(temp1) + 1;
 
@@ -163,7 +170,24 @@
 
  int graph_config_write(char *filename) {
   FILE *outfile; char config[512];
+  
+  graph_config_mem_write(config);
 
+  // Open the config file.
+  if ((outfile = fopen(filename, "w")) < 0) { return -1; }
+
+  // Write the config file contents.
+  if (fwrite(config, 1, strlen(config), outfile) < 0) { return -1; }
+
+  // Close the config file.
+  if (fclose(outfile) < 0) { return -1; } 
+
+  // End function.
+  return 0;
+
+ }
+
+ void graph_config_mem_write(char * config) {
   // Save the current mode value.
   switch (current_mode) {
    case GRAPH_MODE_NTSC:	sprintf(config, "GRAPH_MODE_NTSC:");		break;
@@ -207,20 +231,8 @@
    default:			sprintf(config, "%sGRAPH_PSM_32:", config);	break;
   }
 
-  // Open the config file.
-  if ((outfile = fopen(filename, "w")) < 0) { return -1; }
-
-  // Write the config file contents.
-  if (fwrite(config, 1, strlen(config), outfile) < 0) { return -1; }
-
-  // Close the config file.
-  if (fclose(outfile) < 0) { return -1; } 
-
-  // End function.
-  return 0;
-
  }
-
+ 
  /////////////////////////
  // GRAPH GET FUNCTIONS //
  /////////////////////////
