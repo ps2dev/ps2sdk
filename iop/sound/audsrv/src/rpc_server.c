@@ -116,6 +116,14 @@ static void *rpc_command(int func, unsigned *data, int size)
 		ret = audsrv_get_cd_type();
 		break;
 
+		case AUDSRV_PAUSE_CD:
+		ret = audsrv_cd_pause();
+		break;
+
+		case AUDSRV_RESUME_CD:
+		ret = audsrv_cd_resume();
+		break;
+
 		default:
 		ret = -1;
 		break;
