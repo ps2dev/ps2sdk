@@ -75,9 +75,4 @@ ifeq ($(findstring BSD, $(SYSTEM)), BSD)
   GNUMAKE = gmake
 endif
 
-ifeq ($(SYSTEM), Darwin)
-  # OSX needs gnu make
-  GNUMAKE = gmake
-endif
-
 MAKEREC = $(GNUMAKE) -C
