@@ -146,6 +146,9 @@ void sceSifExecRequest(SifRpcServerData_t * srv);
 #define I_sceSifExecRequest DECLARE_IMPORT(21, sceSifExecRequest)
 void sceSifRpcLoop(SifRpcDataQueue_t *qd);
 #define I_sceSifRpcLoop DECLARE_IMPORT(22, sceSifRpcLoop)
+void sceSifServeData *sceSifRemoveRpc(SifRpcServerData_t *sd, SifRpcDataQueue_t *qd);
+#define I_sceSifRemoveRpc DECLARE_IMPORT(24, sceSifRemoveRpc)
+
 
 int sceSifGetOtherData(SifRpcReceiveData_t *rd, void *src, void *dest, int size, int mode);
 #define I_sceSifGetOtherData DECLARE_IMPORT(23, sceSifGetOtherData)
