@@ -857,7 +857,7 @@ static void ata_device_probe(ata_devinfo_t *devinfo)
 	hcyl = ata_hwport->r_hcyl & 0xff;
 	select = ata_hwport->r_select;
 
-	if ((nsector != 1) || (nsector != 1))
+	if ((nsector != 1) || (sector != 1))
 		return;
 	devinfo->exists = 1;
 
