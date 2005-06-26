@@ -1165,32 +1165,6 @@ int __stdio_skip_atoi(const char **s)
 #endif
 
 
-#ifdef F_sscanf
-/*
-**
-**  [func] - sscanf.
-**  [desc] -
-**  [entr] - const char *buf;
-**           const char *format; the format string pointer.
-**           ...;
-**  [exit] - int;
-**  [prec] - buf and format are valid string pointers.
-**  [post] - the memory pointed to by format string arguments are
-**
-*/
-int sscanf(const char *buf, const char *format, ...)
-{
-  int     ret;
-  va_list va;
-
-  va_start(va, format);
-  ret = vsscanf(buf, format, va);
-  va_end(va);
-  return (ret);
-}
-#endif
-
-
 #ifdef F_stdio
 /* stdio data variables. */
 int __stdio_initialised = 0;

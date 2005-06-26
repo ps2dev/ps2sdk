@@ -82,7 +82,7 @@ setvbuf    - missing
 
 *printf    - ok (f, s, vf, v, vs, sn, vsn, vas, as)
 *dprintf   - missing
-*scanf     - missing
+*scanf     - ok (f, s, vf, v, vs)
 *getc      - ok
 getchar    - ok
 *putc      - ok

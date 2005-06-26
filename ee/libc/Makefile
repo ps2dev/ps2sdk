@@ -46,10 +46,13 @@ XPRINTF_OBJS = vxprintf.o xprintf.o __sout.o vsnprintf.o snprintf.o vsprintf.o s
 	npmPuts.o nprintf.o vnprintf.o asprintf.o vasprintf.o sio_printf.o
 XPRINTF_OBJS := $(XPRINTF_OBJS:%=$(EE_OBJS_DIR)%)
 
+XSCANF_OBJS = vxscanf.o xscanf.o scanf.o vscanf.o sscanf.o vsscanf.o fscanf.o vfscanf.o _xscanf_internals.o
+XSCANF_OBJS := $(XSCANF_OBJS:%=$(EE_OBJS_DIR)%)
+
 STDIO_OBJS = clearerr.o fclose.o fcloseall.o feof.o ferror.o fflush.o fflushall.o fgetc.o \
 	fgetpos.o fgets.o fopen.o fputc.o fputs.o fread.o fseek.o fsetpos.o ftell.o fwrite.o fileno.o \
 	getc.o getchar.o getfdtype.o gets.o perror.o putc.o puts.o remove.o rename.o fdopen.o \
-	rewind.o skipatoi.o sscanf.o stdio.o tmpfile.o tmpnam.o ungetc.o updatestdoutxy.o strerror.o \
+	rewind.o skipatoi.o stdio.o tmpfile.o tmpnam.o ungetc.o updatestdoutxy.o strerror.o \
 	__stdio_internals.o chdir.o
 STDIO_OBJS := $(STDIO_OBJS:%=$(EE_OBJS_DIR)%)
 
@@ -64,7 +67,7 @@ STDLIB_OBJS := $(STDLIB_OBJS:%=$(EE_OBJS_DIR)%)
 TIME_OBJS = clock.o
 TIME_OBJS := $(TIME_OBJS:%=$(EE_OBJS_DIR)%)
 
-MULT_OBJS = $(XPRINTF_OBJS) $(ALLOC_OBJS) $(STRING_C_OBJS) $(STDIO_OBJS) $(STDLIB_OBJS) $(TIME_OBJS)
+MULT_OBJS = $(XPRINTF_OBJS) $(XSCANF_OBJS) $(ALLOC_OBJS) $(STRING_C_OBJS) $(STDIO_OBJS) $(STDLIB_OBJS) $(TIME_OBJS)
 
 EE_OBJS = $(CORE_OBJS) $(MULT_OBJS)
 
@@ -75,6 +78,9 @@ all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBC_LIB)
 	$(EE_CC) $(EE_CFLAGS) $(EE_INC) -c $< -o obj/$@
 
 $(XPRINTF_OBJS): src/xprintf.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(XSCANF_OBJS): src/xscanf.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(ALLOC_OBJS): src/alloc.c

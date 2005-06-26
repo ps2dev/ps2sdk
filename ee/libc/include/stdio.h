@@ -158,7 +158,12 @@ int    setvbuf(FILE *, char *, int, size_t);
 int    sscanf(const char *, const char *, ...);
 FILE   *tmpfile(void);
 char   *tmpnam(char *);
+int    vfscanf(FILE *, const char *, va_list);
+int    vscanf(const char *, va_list);
 int    vsscanf(const char *, const char *, va_list);
+int    vxscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, const char *, va_list);
+int    xscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, const char *, ...);
+
 int    ungetc(int, FILE *);
 
 int    _fcloseall(void);
