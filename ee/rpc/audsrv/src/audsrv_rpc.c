@@ -22,6 +22,7 @@
 #include <sifrpc.h>
 #include <tamtypes.h>
 #include <string.h>
+#include <iopheap.h>
 
 #include <audsrv.h>
 #include "audsrv_rpc.c.h"
@@ -335,8 +336,93 @@ int audsrv_init()
 	SifAddCmdHandler(AUDSRV_FILLBUF_CALLBACK, fillbuf_requested, 0);
 	EI();
 
+	/* Init iop heap - for adpcm */
+	SifInitIopHeap();
+
 	set_error(AUDSRV_ERR_NOERROR);
 	return AUDSRV_ERR_NOERROR;
+}
+
+int audsrv_adpcm_init()
+{
+	if (initialized)
+	{
+		/* already done */
+		return 0;
+	}
+
+	memset(&cd0, '\0', sizeof(cd0));
+
+	while (1)
+	{
+		if (SifBindRpc(&cd0, AUDSRV_IRX, 0) < 0)
+		{
+			set_error(AUDSRV_ERR_RPC_FAILED);
+			return -1;
+		}
+
+ 		if (cd0.server != 0) 
+		{
+			break;
+		}
+
+		nopdelay();
+	}
+	return 0;
+}
+/** Load a ADPCM sample. */
+int audsrv_load_adpcm(audsrv_adpcm_t* adpcm, void* buffer, int size)
+{
+	void* iop_addr;
+	SifDmaTransfer_t sifdma;
+	int id;
+
+	iop_addr = SifAllocIopHeap(size);
+
+	if(iop_addr == 0)
+		return AUDSRV_ERR_FAILED_TO_LOAD_ADPCM;
+	
+	sifdma.src = buffer;
+	sifdma.dest = iop_addr;
+	sifdma.size = size;
+	sifdma.attr = 0;
+
+	id = SifSetDma(&sifdma, 1);
+
+	while(SifDmaStat(id) >= 0);;
+	
+	sbuff[0] = (int)iop_addr;
+	sbuff[1] = size;
+	sbuff[2] = (int)adpcm; /* use as id */
+
+	SifCallRpc(&cd0, AUDSRV_LOAD_ADPCM, 0, sbuff, 12, sbuff, 16, 0, 0);
+
+	SifFreeIopHeap(iop_addr);
+
+	if(sbuff[0] != 0) 
+	{
+		adpcm->buffer = 0;	
+		return sbuff[0];
+	}
+	else
+	{
+		adpcm->buffer = buffer;
+		adpcm->size = size;	
+		adpcm->pitch = sbuff[1];
+		adpcm->loop = sbuff[2];
+		adpcm->channels = sbuff[3];
+		return 0;
+	}
+}
+
+/** Play a ADPCM sample. */
+int audsrv_play_adpcm(audsrv_adpcm_t* adpcm)
+{
+	sbuff[0] = (int)adpcm;
+
+	SifCallRpc(&cd0, AUDSRV_PLAY_ADPCM, 0, sbuff, 4, sbuff, 4, 0, 0);
+
+	return sbuff[0];
 }
 
 /** Translates audsrv_get_error() response to readable string

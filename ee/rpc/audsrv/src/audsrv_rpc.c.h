@@ -53,4 +53,7 @@
 #define AUDSRV_FILLBUF_CALLBACK     0x0010
 #define AUDSRV_CDDA_CALLBACK        0x0011
 
+#define AUDSRV_LOAD_ADPCM						0x0020
+#define AUDSRV_PLAY_ADPCM						0x0021
+
 #endif

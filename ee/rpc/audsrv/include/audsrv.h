@@ -39,7 +39,9 @@ extern "C" {
 #define AUDSRV_ERR_FORMAT_NOT_SUPPORTED    0x0003
 #define AUDSRV_ERR_OUT_OF_MEMORY           0x0004
 #define AUDSRV_ERR_ARGS                    0x0005
-#define AUDSRV_ERR_NO_DISC                 0x0006
+#define AUDSRV_ERR_NO_DISC								 0x0006
+
+#define AUDSRV_ERR_FAILED_TO_LOAD_ADPCM    0x0010
 
 /** structure used to set new format */
 typedef struct audsrv_fmt_t
@@ -48,6 +50,16 @@ typedef struct audsrv_fmt_t
 	int bits;                       ///< bits per sample (8, 16)
 	int channels;                   ///< output channels (1, 2)
 } audsrv_fmt_t;
+
+typedef struct audsrv_adpcm_t
+{
+	int pitch;
+	int loop;
+	int channels;
+	void* buffer;
+	int size;
+} audsrv_adpcm_t;
+
 
 typedef int (*audsrv_callback_t)(void *arg);
 
@@ -191,6 +203,16 @@ int audsrv_get_cd_type();
     @returns AUDSRV_ERR_NOERROR, AUDSRV_ERR_ARGS if amount is greater than sizeof(ringbuf)
 */
 int audsrv_on_fillbuf(int amount, audsrv_callback_t cb, void *arg);
+
+
+int audsrv_adpcm_init();
+
+/** Load a ADPCM sample. */
+int audsrv_load_adpcm(audsrv_adpcm_t* adpcm, void* buffer, int size);
+
+/** Play a ADPCM sample. */
+int audsrv_play_adpcm(audsrv_adpcm_t* adpcm);
+
 
 #ifdef __cplusplus
 }

@@ -8,19 +8,22 @@
 #
 # $Id$
 
-BINS = playwav.elf playcdda.elf playwav2.elf testcd.elf
+BINS = playwav.elf playcdda.elf playwav2.elf testcd.elf playadpcm.elf
 
-OBJS = playwav.o playcdda.o playwav2.o testcd.o
+OBJS = playwav.o playcdda.o playwav2.o testcd.o playadpcm.o
 EE_INCS = -I../include
 EE_LIBS = -L../lib -lc -laudsrv
 
-all: $(BINS)
+all: $(BINS)  evillaugh.adp
 
 install:
 
 %.elf : %.o $(PS2SDK)/ee/startup/crt0.o
 	$(EE_CC) -mno-crt0 -T$(PS2SDK)/ee/startup/linkfile $(EE_LDFLAGS) \
 		-o $@ $(PS2SDK)/ee/startup/crt0.o $< $(EE_LIBS)
+
+%.adp : %.wav
+	$(PS2SDK)/bin/adpenc $< $@
 
 clean:
 	rm -f $(BINS) $(OBJS)

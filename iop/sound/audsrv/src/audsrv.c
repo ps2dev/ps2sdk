@@ -537,6 +537,8 @@ int _start()
 	EnableIntr(SPU_DMA_CHN1_IRQ);
 	EnableIntr(SPU_IRQ);
 
+	audsrv_adpcm_init();
+
 #ifndef NO_RPC_THREAD
 	/* create RPC listener thread */
 	initialize_rpc_thread();

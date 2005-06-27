@@ -17,7 +17,8 @@ IOP_BIN  = bin/audsrv.irx
 IOP_OBJS = \
 obj/audsrv.o obj/upsamplers.o obj/hw.o obj/rpc_server.o \
 obj/common.o obj/cdrom.o \
-obj/imports.o obj/exports.o
+obj/imports.o obj/exports.o \
+obj/adpcm.o
 
 IOP_CFLAGS  += -Wall -fno-builtin-printf -fno-builtin-memcpy -D_IOP
 IOP_LDFLAGS += -s

@@ -48,4 +48,20 @@
 #define SD_BLOCK_TRANS_STOP	0x02
 #define SD_BLOCK_LOOP		0x10
 
+// VoiceTrans
+#define SD_VOICE_TRANS_WRITE		0
+#define SD_VOICE_TRANS_READ			1
+#define SD_VOICE_TRANS_STOP			2
+#define	SD_VOICE_TRANS_MODE_DMA		0
+#define SD_VOICE_TRANS_MODE_IO		8
+
+#define SD_S_ENDX       (0x17<<8)
+
+#define SD_VOICE_KEYON        (0x15<<8)
+#define SD_VOICE_KEYOFF       (0x16<<8)
+#define SD_VOICE_START				((0x20<<8)|(0x1<<6))
+#define SD_VOICE_PITCH				(0x2<<8)
+#define SD_VOICE_VOLL					(0x0<<8)
+#define SD_VOICE_VOLR					(0x1<<8)
+
 #endif

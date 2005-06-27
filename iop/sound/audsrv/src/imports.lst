@@ -65,7 +65,13 @@ I_sceSdInit
 I_sceSdSetTransCallback
 I_sceSdSetParam
 I_sceSdSetCoreAttr
+I_sceSdSetAddr
+I_sceSdGetAddr
+I_sceSdSetSwitch
+I_sceSdGetSwitch
+I_sceSdVoiceTrans
 I_sceSdBlockTrans
+I_sceSdVoiceTransStatus
 I_sceSdBlockTransStatus
 libsd_IMPORTS_end
 
