@@ -710,7 +710,7 @@
   packet_append_64(&graph_packet, GIF_REG_TEXFLUSH);
 
   // Send the packet.
-  if (packet_send(&graph_packet, DMA_CHANNEL_GIF, DMA_FLAG_NORMAL) < 0) { return -1; }
+  if (packet_send(&graph_packet, DMA_CHANNEL_GIF, DMA_FLAG_CHAIN) < 0) { return -1; }
 
   // End function.
   return 0;
