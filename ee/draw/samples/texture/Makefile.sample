@@ -7,7 +7,22 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 
-SUBDIRS = cube teapot texture
+EE_BIN = texture.elf
+EE_OBJS = texture.o
+EE_LIBS = -ldraw -lgraph -lmath3d -lmf -lpacket -ldma
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+all: $(EE_BIN)
+	ee-strip --strip-all $(EE_BIN)
+
+clean:
+	rm -f *.elf *.o *.a
+
+run: $(EE_BIN)
+	ps2client execee host:$(EE_BIN)
+
+reset:
+	ps2client reset
+
+include $(PS2SDK)/samples/Makefile.pref
+include $(PS2SDK)/samples/Makefile.eeglobal
+

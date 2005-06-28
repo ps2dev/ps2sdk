@@ -578,25 +578,41 @@
  }
 
  int graph_set_texture(int address, int width, int height, int psm) {
-  int tw = 8, th = 8;
-
-// FIXME: This isn't finished yet.
+  int tw, th;
 
   // Determine the TW value.
-  if (width == 256) { tw = 8; }
+  if (width <=   2) { tw = 1; } else
+  if (width <=   4) { tw = 2; } else
+  if (width <=   8) { tw = 3; } else
+  if (width <=  16) { tw = 4; } else
+  if (width <=  32) { tw = 5; } else
+  if (width <=  64) { tw = 6; } else
+  if (width <= 128) { tw = 7; } else
+  if (width <= 256) { tw = 8; } else
+  if (width <= 512) { tw = 9; } else { tw = 10; }
 
   // Determine the TH value.
-  if (height == 256) { th = 8; }
+  if (height <=   2) { th = 1; } else
+  if (height <=   4) { th = 2; } else
+  if (height <=   8) { th = 3; } else
+  if (height <=  16) { th = 4; } else
+  if (height <=  32) { th = 5; } else
+  if (height <=  64) { th = 6; } else
+  if (height <= 128) { th = 7; } else
+  if (height <= 256) { th = 8; } else
+  if (height <= 512) { th = 9; } else { th = 10; }
 
   // Reset the packet.
   if (packet_reset(&graph_packet) < 0) { return -1; }
 
   // Set up the texture.
-  packet_append_64(&graph_packet, GIF_SET_TAG(1, 1, 0, 0, GIF_TAG_PACKED, 3));
-  packet_append_64(&graph_packet, 0x0000000000000EEE);
+  packet_append_64(&graph_packet, GIF_SET_TAG(1, 1, 0, 0, GIF_TAG_PACKED, 4));
+  packet_append_64(&graph_packet, 0x0000000000000EEEE);
   packet_append_64(&graph_packet, GIF_SET_CLAMP(0, 0, 0, 0, 0, 0));
   packet_append_64(&graph_packet, GIF_REG_CLAMP_1);
-  packet_append_64(&graph_packet, GIF_SET_TEX0(address >> 8, width >> 6, psm, tw, th, 0, 1, 0, 0, 0, 0, 0));
+  packet_append_64(&graph_packet, GIF_SET_TEXA(0, 1, 255));
+  packet_append_64(&graph_packet, GIF_REG_TEXA);
+  packet_append_64(&graph_packet, GIF_SET_TEX0(address >> 8, width >> 6, psm, tw, th, 1, 0, 0, 0, 0, 0, 0));
   packet_append_64(&graph_packet, GIF_REG_TEX0_1);
   packet_append_64(&graph_packet, GIF_SET_TEX1(1, 0, 1, 1, 0, 0, 0));
   packet_append_64(&graph_packet, GIF_REG_TEX1_1);

@@ -178,7 +178,7 @@
     (int)(colours[loop0][1] * 128),
     (int)(colours[loop0][2] * 128),
     (int)(colours[loop0][3] * 128),
-    *(int *)&q
+    *(unsigned int *)&q
    );
 
   }
@@ -188,16 +188,23 @@
 
  }
 
- int draw_generate_st(u64 *output, int count, VECTOR *coords) {
-  int loop0;
+ int draw_generate_st(u64 *output, int count, VECTOR *vertices, VECTOR *coords) {
+  int loop0; float q = 1.00f, s = 1.00f, t = 1.00f;
 
-  // For each coord...
+  // For each coordinate...
   for (loop0=0;loop0<count;loop0++) {
+
+   // Calculate the Q value.
+   if (vertices[loop0][3] != 0) { q = 1 / vertices[loop0][3]; }
+
+   // Calculate the S and T values.
+   s = (float)(coords[loop0][0] * q);
+   t = (float)(coords[loop0][1] * q);
 
    // Calculate the ST register value.
    output[loop0] = GIF_SET_ST(
-    *(int *)&(coords[loop0][0]),
-    *(int *)&(coords[loop0][1])
+    *(unsigned int *)&s,
+    *(unsigned int *)&t
    );
 
   }
@@ -238,6 +245,53 @@
 
   // For each point...
   for (loop0=0;loop0<count;loop0++) {
+
+   // Add the RGBAQ register value.
+   packet_append_64(&draw_packet, rgbaq[points[loop0]]);
+
+   // Add the XYZ register value.
+   packet_append_64(&draw_packet, xyz[points[loop0]]);
+
+  }
+
+  // Send the packet.
+  if (packet_send(&draw_packet, DMA_CHANNEL_GIF, DMA_FLAG_NORMAL) < 0) { return -1; }
+
+  // End function.
+  return 0;
+
+ }
+
+ int draw_triangles_textured(int *points, int count, u64 *xyz, u64 *rgbaq, u64 *st) {
+  int loop0;
+
+  // If the packet is too small...
+  if (draw_packet.size < (48 + (16 * count))) {
+
+   // Free the packet.
+   packet_free(&draw_packet);
+
+   // Allocate a larger packet.
+   packet_allocate(&draw_packet, (48 + (16 * count)));
+
+  }
+
+  // Reset the packet.
+  if (packet_reset(&draw_packet) < 0) { return -1; }
+
+  // Set up the draw process.
+  packet_append_64(&draw_packet, GIF_SET_TAG(1, 0, 0, 0, GIF_TAG_PACKED, 1));
+  packet_append_64(&draw_packet, 0x000000000000000E);
+  packet_append_64(&draw_packet, GIF_SET_PRIM(3, 1, 1, 0, 0, 0, 0, 0, 0));
+  packet_append_64(&draw_packet, GIF_REG_PRIM);
+  packet_append_64(&draw_packet, GIF_SET_TAG(count, 1, 0, 0, GIF_TAG_REGLIST, 3));
+  packet_append_64(&draw_packet, 0x0000000000000512);
+
+  // For each point...
+  for (loop0=0;loop0<count;loop0++) {
+
+   // Add the ST register value.
+   packet_append_64(&draw_packet, st[points[loop0]]);
 
    // Add the RGBAQ register value.
    packet_append_64(&draw_packet, rgbaq[points[loop0]]);

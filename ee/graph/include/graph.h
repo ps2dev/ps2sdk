@@ -178,7 +178,7 @@ extern "C" {
  //////////////////////////
 
  int graph_vram_read(int address, int width, int height, int psm, void *data, int data_size);
- // Uploads data to the vram. Address is specified in bytes.
+ // Downloads data from vram. Address is specified in bytes.
 
  int graph_vram_write(int address, int width, int height, int psm, void *data, int data_size);
  // Uploads data to vram. Address is specified in bytes.

@@ -48,8 +48,8 @@ extern "C" {
  // Valid range for vertex values are: -1.00f - 1.00f
  // Valid range for colour values are:  0.00f - 1.00f
 
- int draw_generate_st(u64 *output, int count, VECTOR *coordinates);
- // Generate ST register values from an array of texture coordinates.
+ int draw_generate_st(u64 *output, int count, VECTOR *vertices, VECTOR *coordinates);
+ // Generate ST register values from an array of vertices and texture coordinates.
  // Valid range for texture coordinates are: 0.00f - 1.00f
 
  //////////////////////////////
@@ -58,6 +58,9 @@ extern "C" {
 
  int draw_triangles(int *points, int count, u64 *xyz, u64 *rgbaq);
  // Draw untextured triangles from an array of points and register values.
+
+ int draw_triangles_textured(int *points, int count, u64 *xyz, u64 *rgbaq, u64 *st);
+ // Draw textured triangles from an array of points and register values.
 
 #ifdef __cplusplus
 }
