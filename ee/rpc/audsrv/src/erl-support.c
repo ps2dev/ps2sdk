@@ -13,7 +13,7 @@
 
 #include <erl.h>
 
-char * erl_id = "libcdvd";
+char * erl_id = "libaudsrv";
 
 char * erl_dependancies[] = {
     "libkernel",
