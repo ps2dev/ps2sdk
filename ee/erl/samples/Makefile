@@ -11,4 +11,5 @@
 
 SUBDIRS = hello cpp-hello
 
+include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
