@@ -28,12 +28,12 @@ I_sceSifInitRpc
 I_sceSifSetRpcQueue
 I_sceSifRegisterRpc
 I_sceSifRpcLoop
+I_sceSifGetOtherData
 sifcmd_IMPORTS_end
 
 sifman_IMPORTS_start
 I_sceSifDmaStat
 I_sceSifSetDma
-I_sceSifGetOtherData
 sifman_IMPORTS_end
 
 ps2ip_IMPORTS_start
