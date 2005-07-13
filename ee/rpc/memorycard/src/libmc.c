@@ -19,6 +19,11 @@
 
 //#define MC_DEBUG
 
+#ifdef MC_DEBUG
+#include <stdio.h>
+#endif
+
+
 // rpc command function numbers
 #define MC_RPCCMD_INIT		0x00
 #define MC_RPCCMD_GET_INFO	0x01
@@ -219,7 +224,6 @@ static void mcStoreDir(volatile int* arg)
 //			< 0 = error
 int mcInit(int type)
 {
-	unsigned int i;
 	int ret=0;
 
 	if(mclibInited)
@@ -229,17 +233,26 @@ int mcInit(int type)
 
 	// set which modules to use
 	mcType = type;
-
-	while (((ret = SifBindRpc(&cdata, 0x80000400, 0)) >= 0) &&
-			(cdata.server == NULL))
-		nopdelay();
 	
-	if (ret < 0)
-		return ret;
+	// bind to mc rpc on iop
+	do
+	{
+		if((ret=SifBindRpc(&cdata, 0x80000400, 0)) < 0)
+		{
+			#ifdef MC_DEBUG
+				printf("libmc: bind error\n");
+			#endif
+			
+			return ret;
+		}
+		if(cdata.server == NULL)
+			nopdelay();
+	}
+	while (cdata.server == NULL);
 	
 	// for some reason calling this init sif function with 'mcserv' makes all other
 	// functions not work properly. although NOT calling it means that detecting
-	// whether or not cards are formatted doesnt seemt o work :P
+	// whether or not cards are formatted doesnt seem to work :P
 	if(mcType == MC_TYPE_MC)
 	{
 #ifdef MC_DEBUG
@@ -248,43 +261,41 @@ int mcInit(int type)
 	}
 	else if(mcType == MC_TYPE_XMC)
 	{
+#ifdef MC_DEBUG
+		printf("libmc: using XMCMAN & XMCSERV\n");
+#endif		
+		
 		// call init function
-		if((ret = SifCallRpc(&cdata, mcRpcCmd[mcType][MC_RPCCMD_INIT], 0, &mcCmd, 48, rdata, 12, 0, 0)) != 0)
+		if((ret = SifCallRpc(&cdata, mcRpcCmd[mcType][MC_RPCCMD_INIT], 0, &mcCmd, 48, rdata, 12, 0, 0)) < 0)
 		{
 			// init error
 #ifdef MC_DEBUG
 			printf("libmc: initialisation error\n");
 #endif
 			mclibInited = 0;
-			return ret-100;
+			return ret - 100;
 		}
 		
-#ifdef MC_DEBUG
-		printf("libmc: using XMCMAN & XMCSERV\n");
-#endif		
-
 		// check if old version of mcserv loaded
-		POPDATA( int, UNCACHED_SEG((rdata+4)), ret, i);
-		if(ret < 0x205)
+		if(*(s32*)UNCACHED_SEG(rdata+4) < 0x205)
 		{
 #ifdef MC_DEBUG
-			printf("libmc: mcserv is too old (%x)\n", ret);
+			printf("libmc: mcserv is too old (%x)\n", *(s32*)UNCACHED_SEG(rdata+4));
 #endif
 			mclibInited = 0;
 			return -120;
 		}
 		
 		// check if old version of mcman loaded
-		POPDATA( int, UNCACHED_SEG((rdata+8)), ret, i);
-		if(ret < 0x206)
+		if(*(s32*)UNCACHED_SEG(rdata+8) < 0x206)
 		{
 #ifdef MC_DEBUG
-			printf("libmc: mcman is too old (%x)\n", ret);
+			printf("libmc: mcman is too old (%x)\n", *(s32*)UNCACHED_SEG(rdata+8));
 #endif
 			mclibInited = 0;
 			return -121;
 		}
-		POPDATA( int, UNCACHED_SEG(rdata), ret, i);
+		ret = *(s32*)UNCACHED_SEG(rdata+0);
 	}
 	
 	// successfully inited
@@ -713,6 +724,7 @@ int mcDelete(int port, int slot, const char *name)
 	// set global variables
 	mcCmd.port = port;
 	mcCmd.slot = slot;
+	mcCmd.flags = 0;
 	strncpy(mcCmd.name, name, 1023);
 	mcCmd.name[1023] = 0;
 	
