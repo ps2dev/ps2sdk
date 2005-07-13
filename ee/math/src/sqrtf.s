@@ -17,8 +17,7 @@ sqrtf:
     .globl rsqrtf
     .ent rsqrtf
 rsqrtf:
-    rsqrt.s $f0, $f12
-, $f13
+    rsqrt.s $f0, $f12, $f13
     jal $31
     nop
     .end rsqrtf
