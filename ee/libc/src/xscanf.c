@@ -112,10 +112,10 @@
 #ifdef F_vxscanf
 #define w_xgetc(s) xgetc(s), clen++
 
-int vxscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, const char *fmt, va_list ap) {
+int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, const char *fmt, va_list ap) {
 	union {
 #if SCANF_LEVEL >= SCANF_FLT
-		double	d;
+		float	d;
 #endif
 		unsigned long ul;
 		long	l;
@@ -142,10 +142,9 @@ int vxscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, co
 #endif
 
 	while ((c = *(fmt++))) {
-
-		fmt++;
-
 #if SCANF_LEVEL >= SCANF_FLT
+		if (isspace(c))
+			continue;
 		if (flags & FLBRACKET) {
 			if (c == '^' && i == 0 && !(flags & FLNEGATE)) {
 				flags |= FLNEGATE; /* negate set */
@@ -173,10 +172,10 @@ int vxscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, co
 				if (!(flags & FLSTAR))
 					a.cp = va_arg(ap, char *);
 				while (width-- > 0) {
-					if ((i = w_xgetc(stream)) == EOF)
+					if ((i = w_xgetc(&stream)) == EOF)
 						break;
 					if (!xscanf_bit_is_set(i)) {
-						xungetc(i, stream);
+						xungetc(i, &stream);
 						break;
 					}
 					if (!(flags & FLSTAR))
@@ -268,7 +267,7 @@ int vxscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, co
 					width = 1;
 				while (width-- > 0) {
 #endif /* SCANF_LEVEL > SCANF_MIN */
-					if ((i = w_xgetc(stream)) == EOF)
+					if ((i = w_xgetc(&stream)) == EOF)
 						goto leave;
 #if SCANF_LEVEL > SCANF_MIN
 					if (!(flags & FLSTAR))
@@ -285,7 +284,7 @@ int vxscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, co
 #endif /* SCANF_LEVEL > SCANF_MIN */
 					a.cp = va_arg(ap, char *);
 				do {
-					i = w_xgetc(stream);
+					i = w_xgetc(&stream);
 				} while (isspace(i));
 				if (i == EOF)
 					goto leave;
@@ -297,14 +296,14 @@ int vxscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, co
 #endif /* SCANF_LEVEL > SCANF_MIN */
 				{
 					if (isspace(i)) {
-						xungetc(i, stream);
+						xungetc(i, &stream);
 						break;
 					}
 #if SCANF_LEVEL > SCANF_MIN
 					if (!(flags & FLSTAR))
 #endif /* SCANF_LEVEL > SCANF_MIN */
 						*a.cp++ = i;
-					if ((i = w_xgetc(stream)) == EOF)
+					if ((i = w_xgetc(&stream)) == EOF)
 						break;
 				}
 #if SCANF_LEVEL > SCANF_MIN
@@ -336,7 +335,7 @@ int vxscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, co
 			case 'i':
 			  dointeger:
 				do {
-					i = w_xgetc(stream);
+					i = w_xgetc(&stream);
 				} while (isspace(i));
 				if (i == EOF)
 					goto leave;
@@ -353,7 +352,7 @@ int vxscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, co
 #endif /* SCANF_LEVEL > SCANF_MIN */
 					if ((char)i == '-')
 						flags |= FLMINUS;
-					if ((i = w_xgetc(stream)) == EOF)
+					if ((i = w_xgetc(&stream)) == EOF)
 						goto leave;
 				}
 
@@ -382,7 +381,7 @@ int vxscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, co
 					if (--width <= 0)
 						goto intdone;
 #endif /* SCANF_LEVEL > SCANF_MIN */
-					if ((i = w_xgetc(stream)) == EOF)
+					if ((i = w_xgetc(&stream)) == EOF)
 						goto intdone;
 					if ((char)tolower(i) == 'x') {
 						if (c == 'o' ||
@@ -391,11 +390,11 @@ int vxscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, co
 							 * Invalid 0x in
 							 * %d/%u/%o
 							 */
-							xungetc(i, stream);
+							xungetc(i, &stream);
 							goto intdone;
 						}
 						base = 16;
-						if ((i = w_xgetc(stream)) == EOF)
+						if ((i = w_xgetc(&stream)) == EOF)
 							goto intdone;
 					} else if (c == 'i')
 						base = 8;
@@ -428,7 +427,7 @@ int vxscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, co
 						 */
 					}
 					if (j < 0 || j >= base) {
-						xungetc(i, stream);
+						xungetc(i, &stream);
 						break;
 					}
 					a.ul *= base;
@@ -437,7 +436,7 @@ int vxscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, co
 					if (--width <= 0)
 						break;
 #endif /* SCANF_LEVEL > SCANF_MIN */
-					if ((i = w_xgetc(stream)) == EOF)
+					if ((i = w_xgetc(&stream)) == EOF)
 						break;
 				}
 				/*
@@ -487,7 +486,7 @@ int vxscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, co
 			case 'f':
 			case 'g':
 				do {
-					i = w_xgetc(stream);
+					i = w_xgetc(&stream);
 				} while (isspace(i));
 				if (i == EOF)
 					goto leave;
@@ -495,7 +494,7 @@ int vxscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, co
 				if ((char)i == '-' || (char)i == '+') {
 					if ((char)i == '-')
 						flags |= FLMINUS;
-					if ((i = w_xgetc(stream)) == EOF)
+					if ((i = w_xgetc(&stream)) == EOF)
 						goto leave;
 				}
 
@@ -503,8 +502,10 @@ int vxscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, co
 				for (bp = buf;
 				     bp < buf + FLTBUF - 1 && width > 0;
 				     width--) {
+						if (isspace(i))
+							break;
 					if (strchr(fltchars, i) == 0) {
-						xungetc(i, stream);
+						xungetc(i, &stream);
 						break;
 					}
 					if ((char)i == 'e' ||
@@ -515,7 +516,7 @@ int vxscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, co
 						 */
 						fltchars[10] = 0;
 						*bp++ = i;
-						if ((i = w_xgetc(stream)) == EOF)
+						if ((i = w_xgetc(&stream)) == EOF)
 							break;
 						if ((char)i != '-' &&
 						    (char)i != '+')
@@ -530,14 +531,14 @@ int vxscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, co
 						 */
 						fltchars[12] = 0;
 					*bp++ = i;
-					if ((i = w_xgetc(stream)) == EOF)
+					if ((i = w_xgetc(&stream)) == EOF)
 						break;
 				}
 				*bp++ = 0;
-				a.d = strtod(buf, 0);
+				a.d = (float)strtod(buf, 0);
 				if (flags & FLMINUS)
 					a.d = -a.d;
-				*(va_arg(ap, double *)) = a.d;
+				*(va_arg(ap, float  *)) = a.d;
 				/*
 				 * Restore the 'E' and '.' chars that
 				 * might have been clobbered above.
@@ -575,15 +576,15 @@ int vxscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, co
 		} else if (isspace(c)) {
 			/* match against any whitspace */
 			do {
-				i = w_xgetc(stream);
+				i = w_xgetc(&stream);
 			} while (isspace(i));
 			if (i == EOF)
 				goto leave;
-			xungetc(i, stream);
+			xungetc(i, &stream);
 		} else {
 			/* literal character in format, match it */
 		  literal:
-			if ((i = w_xgetc(stream)) == EOF)
+			if ((i = w_xgetc(&stream)) == EOF)
 				goto leave;
 			if (i != c)
 				goto leave;
@@ -615,7 +616,7 @@ leave:
 #endif
 
 #ifdef F_xscanf
-int xscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, const char *fmt, ...) {
+int xscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, const char *fmt, ...) {
 	int r;
         va_list args;
         va_start(args, fmt);
@@ -625,26 +626,26 @@ int xscanf(int (*xgetc)(void *), void (*xungetc)(int, void *), void *stream, con
 }
 #endif
 
-int _f_xgetc(void *);
-void _f_xungetc(int, void *);
-int _s_xgetc(void *);
-void _s_xungetc(int, void *);
+int _f_xgetc(void **);
+void _f_xungetc(int, void **);
+int _s_xgetc(void **);
+void _s_xungetc(int, void **);
 
 #ifdef F__xscanf_internals
-int _f_xgetc(void * stream) {
-    return fgetc((FILE *) stream);
+int _f_xgetc(void ** stream) {
+    return fgetc(*(FILE**)stream);
 }
 
-void _f_xungetc(int c, void * stream) {
-    ungetc(c, (FILE *) stream);
+void _f_xungetc(int c, void ** stream) {
+    ungetc(c, *(FILE**)stream);
 }
 
-int _s_xgetc(void * p_str) {
-    char c = *((*((char **)p_str))++);
+int _s_xgetc(void** p_str) {
+    char c = *((*(char**)p_str)++);
     return c ? c : EOF;
 }
 
-void _s_xungetc(int c, void * p_str) {
+void _s_xungetc(int c, void ** p_str) {
     *(--(*((char **)p_str))) = c;
 }
 #endif
