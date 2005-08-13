@@ -65,6 +65,9 @@ static int format_changed = 0;          ///< boolean to notify when format has c
 /** double buffer for streaming */
 static char core1_buf[0x1000] __attribute__((aligned (64)));
 
+static short rendered_left [ 512 ];
+static short rendered_right[ 512 ];
+
 /** exports table */
 struct irx_export_table _exp_audsrv;
 
@@ -93,19 +96,23 @@ static void update_volume()
 	/* external input */
 	sceSdSetParam(SD_CORE_1 | SD_P_AVOLL, 0x7fff);
 	sceSdSetParam(SD_CORE_1 | SD_P_AVOLR, 0x7fff);
-
+/* EEUG: why maximum volume here ?
+         (core 0 is unused ? Sometimes it causes spontaneous noise)
+*/
 	/* core0 input */
-	sceSdSetParam(SD_CORE_0 | SD_P_BVOLL, 0x7fff);
-	sceSdSetParam(SD_CORE_0 | SD_P_BVOLR, 0x7fff);
+	sceSdSetParam(SD_CORE_0 | SD_P_BVOLL, 0/*0x7fff*/);
+	sceSdSetParam(SD_CORE_0 | SD_P_BVOLR, 0/*0x7fff*/);
 
 	/* core1 input */
 	vol = playing ? core1_volume : 0;
 	sceSdSetParam(SD_CORE_1 | SD_P_BVOLL, vol);
 	sceSdSetParam(SD_CORE_1 | SD_P_BVOLR, vol);
-
+/* EEUG: why maximum volume here ?
+         (core 0 is unused ? Sometimes it causes spontaneous noise)
+*/
 	/* set master volume for core 0 */
-	sceSdSetParam(SD_CORE_0 | SD_P_MVOLL, MAX_VOLUME);
-	sceSdSetParam(SD_CORE_0 | SD_P_MVOLR, MAX_VOLUME);
+	sceSdSetParam(SD_CORE_0 | SD_P_MVOLL, 0/*MAX_VOLUME*/);
+	sceSdSetParam(SD_CORE_0 | SD_P_MVOLR, 0/*MAX_VOLUME*/);
 
 	/* set master volume for core 1 */
 	sceSdSetParam(SD_CORE_1 | SD_P_MVOLL, MAX_VOLUME);
@@ -379,9 +386,6 @@ int audsrv_set_threshold(int amount)
 	fillbuf_threshold = amount;
 	return 0;
 }
-
-static short rendered_left[512];
-static short rendered_right[512];
 
 /** Main playing thread
     @param arg   not used
