@@ -50,4 +50,8 @@ extern "C" {
  int packet_free(PACKET *packet);
  // Free the packet.
 
+#ifdef __cplusplus
+}
+#endif
+
 #endif
