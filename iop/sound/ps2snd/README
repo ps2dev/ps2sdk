@@ -1,0 +1,199 @@
+PS2SND - PlayStation2 Sound Module
+ 
+  ___                    _            
+ / _ \__  _____ _ ___  _(_)_____  __  __
+| (_) \ \/ / -_) '_\ \/ / / -_) \/  \/ /
+ \___/ \__/\___|_|  \__/|_\___|\__/\__/ 
+========================================                                    
+
+What the IRX provides:
+* Remote (EE) usage of libsd (or freesd) functions 
+* ADPCM streaming from a file (no EE participation required!)
+* ADPCM streaming from EE ram
+* A way to sync to the ADPCM stream
+* SPU2 memory&voice managment
+
+What the IRX requires:
+* A sane version of libsd or freesd
+
+ ___      _        _ _    
+|   \ ___| |_ __ _(_) |___
+| |) / -_)  _/ _` | | (_-<
+|___/\___|\__\__,_|_|_/__/
+==========================
+
+Terminology
+-----------
+
+Block = SPU ADPCM block, 28 PCM samples, 16bytes
+Chunk = A bunch of ADPCM blocks that are for the same channel
+
+File layout
+------------------
+Stereo:
+╒════════════╤════════════╤════════════╤════════════╤═══╤════════════╤════════════╕
+│ LeftChunk  │ RightChunk │ LeftChunk  │ RightChunk │...│ LeftChunk  │ RightChunk │ 
+╘════════════╧════════════╧════════════╧════════════╧═══╧════════════╧════════════╛
+
+Obviously the chunk size matters here, so make sure you give ps2adpcm (the ADPCM encoder) the same chunk size as ps2snd (the IOP module), otherwise the SPU2 will sound like it's been taking some rather fun drug.
+At the end of the file, channels _MUST_ be padded out to the chunk size, and must have end flags set.
+
+In a mono file, it doesn't matter if it's padded to chunk size or not.
+
+
+SPU2 Buffer layout for streaming
+--------------------------------
+
+    Interrupt points
+    ▼        ▼
+╒═══╤════════╤════════╤ ═ ═ ═ ═ ═ ═ ═ ═ ╤═══╕
+│...│ Left1  │ Left2  │ Right1 │ Right2 │...│ 
+╘═══╧════════╧════════╧ ═ ═ ═ ═ ═ ═ ═ ═ ╧═══╛
+    ▲                 ▲                 ▲
+    BufAddr           BufAddr+          BufAddr+
+                      (BufSize*2)       (BufSize*4)
+
+
+For mono streams, only the left buffer is used and allocated.
+
+The SPU2 only provides one address trap, but it's relativly safe to assume that if one channel triggers an interrupt the other will too. Please note that if you mess around with certain registers for one stream channel and not the other, they could get out of sync.
+The SPU2 changes buffers automagicly using it's internal loop funcitonality, this way the end to begining transition is always smooth, but it sounds fun if we miss a refill.
+
+Sequence:
+
+1  buf1 and buf2 are initialy filled. 
+2  buf1 is refilled when the SPU2 hits buf2.
+3  buf2 is refilled when the SPU2 hits buf1.
+4  goto 2
+10 print "hello world ;)" 
+
+NOTE: The stream must be at least two buflens big!!!
+
+ ___             _   _             
+| __|  _ _ _  __| |_(_)___ _ _  ___
+| _| || | ' \/ _|  _| / _ \ ' \(_-<
+|_| \_,_|_||_\__|\__|_\___/_||_/__/
+===================================                                   
+
+
+sndStreamOpen
+-------------
+Description:
+	Opens a stream and sets up the SPU2 to receive it, also prefills buffers.
+
+Prototype:
+	int sndStreamOpen(char *file, uint32_t voices, uint32_t flags, uint32_t bufaddr, uint32_t chunk);
+	
+Arguments:
+	file    - Name of the stream file
+	voices  - lower 16bits specifies voice for ch0(left), upper 16bits specifies voice for ch1(right);
+	flags   - Various flags, bit0 means stereo
+	bufaddr - Address of buffer in spu2 ram
+	chunk   - Size of one chunk 
+
+Returns:
+	0  - success
+	<0 - failure
+
+
+
+sndStreamClose
+--------------
+Description:
+	Closes the currently open stream.
+
+Prototype:
+	int sndStreamClose(void);
+
+Returns:
+	0  - success
+	<0 - failure
+
+
+
+sndStreamPlay
+-------------
+Description:
+	Plays the currently open stream.
+
+Prototype:
+	int sndStreamPlay(void);
+
+Returns:
+	-1 - No stream!
+	0  - Already playing
+	1  - Started playing
+
+
+
+sndStreamPause
+--------------
+Description:
+	Pauses the currently open stream.
+
+Prototype:
+	int sndStreamPaused(void);
+
+Returns:
+	-1 - No stream!
+	0  - Already paused
+	1  - Paused
+
+
+
+sndStreamSetPosition
+--------------------
+Description:
+	Seeks somewhere in the stream, takes effect immediatly.
+
+Prototype:
+	int sndStreamSetPosition(int block);
+
+Arguments:
+	block - Block number to seek to (will get locked to a chunk)
+
+Returns:
+	-2  - Invalid block!
+	-1  - No stream!
+	>=0 - Actual block seeked to
+
+
+sndStreamGetPosition
+--------------------
+Description:
+	Gets the current block number.
+	When paused it'll tell the block of what'll be played when Play is called.
+	When playing it'll tell the actual block the SPU2 is playing!
+
+Prototype:
+	int sndStreamGetPosition(void)
+
+Retruns:
+	-1  - No stream!
+	>=0 - Block number
+
+ ___              
+| _ )_  _ __ _ ___
+| _ \ || / _` (_-<
+|___/\_,_\__, /__/
+         |___/    
+==================
+
+This is quite untested in real life situations, i'm sure there are lots of interesting bugs.
+If you find one report it to jbit on #ps2dev, or email jbit<at>jbit<dot>net, or send in a patch.
+
+The only one i'm aware of at the moment is sometimes the IOP locks up when streaming from "host:" and you reset using "ps2client reset", this could be a ps2link problem however. To be safe (until the bug is fixed) make sure the stream is _CLOSED_ before reseting.
+
+
+ ___     _                
+| __|  _| |_ _  _ _ _ ___ 
+| _| || |  _| || | '_/ -_)
+|_| \_,_|\__|\_,_|_| \___|
+==========================
+
+It may be possible to allow multiple streams if the streams are all locked together, or using some SPU2 method that I don't know about.
+
+Play/Pause/SetPosition could setup the SPU so they are block accurate instead of chunk acccurate.
+
+Who knows?
+

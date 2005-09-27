@@ -1,0 +1,17 @@
+PS2SND - PlayStation2 Sound Library
+ 
+  ___                    _            
+ / _ \__  _____ _ ___  _(_)_____  __  __
+| (_) \ \/ / -_) '_\ \/ / / -_) \/  \/ /
+ \___/ \__/\___|_|  \__/|_\___|\__/\__/ 
+========================================                                    
+
+What the library provides:
+* Usage of libsd (or freesd) functions on the EE
+* ADPCM streaming from a file (no EE participation required!)
+* A way to sync to the ADPCM stream
+* SPU2 memory&voice managment
+
+What the library requires:
+* libsd.irx on the IOP
+

@@ -16,26 +16,12 @@
 
 #include "types.h"
 #include "irx.h"
+#include <libsd-common.h>
 
 #define libsd_IMPORTS_start DECLARE_IMPORT_TABLE(libsd, 1, 4)
 #define libsd_IMPORTS_end END_IMPORT_TABLE
 
-typedef struct {
-	u16 func;
-	u16 entry;
-	u32  value;
-} SdBatch;
 
-typedef struct {
-     int     core;
-     int     mode;
-     short   depth_L;
-     short   depth_R;
-     int     delay;
-     int     feedback;
-} SdEffectAttr;
-
-typedef int (*SdIntrHandler)(int, void *);
 
 int sceSdInit(int flag);
 #define I_sceSdInit DECLARE_IMPORT(4, sceSdInit);

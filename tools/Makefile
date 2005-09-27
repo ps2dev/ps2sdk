@@ -9,7 +9,7 @@
 # $Id$
 
 
-SUBDIRS = bin2s bin2c bin2o adpenc
+SUBDIRS = bin2s bin2c bin2o adpenc ps2adpcm
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make

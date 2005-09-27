@@ -6,12 +6,18 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
+# $Id: Makefile.sample 577 2004-09-14 14:41:46Z pixel $
 
 
-SUBDIRS = freesd ahx audsrv ps2snd
+EE_BIN = ps2snd-sample.elf
+EE_OBJS = stream.o
+EE_LIBS = -lps2snd -lc
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+all: $(EE_BIN)
 
+clean:
+	rm -f *.elf *.o *.a
+
+include $(PS2SDK)/samples/Makefile.pref
+include $(PS2SDK)/samples/Makefile.eeglobal
 
