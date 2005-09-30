@@ -15,7 +15,6 @@
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
-#include <alloca.h>
 #include <stdint.h>
 #include "adpcm.h"
 
