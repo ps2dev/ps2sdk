@@ -336,67 +336,54 @@ int audsrv_init()
 	SifAddCmdHandler(AUDSRV_FILLBUF_CALLBACK, fillbuf_requested, 0);
 	EI();
 
-	/* Init iop heap - for adpcm */
+	/* initialize IOP heap (for adpcm samples) */
 	SifInitIopHeap();
 
 	set_error(AUDSRV_ERR_NOERROR);
 	return AUDSRV_ERR_NOERROR;
 }
 
+/** Initializes adpcm unit of audsrv
+
+    @returns zero on success, negative value on error
+*/
 int audsrv_adpcm_init()
 {
-	if (initialized)
-	{
-		/* already done */
-		return 0;
-	}
-
-	memset(&cd0, '\0', sizeof(cd0));
-
-	while (1)
-	{
-		if (SifBindRpc(&cd0, AUDSRV_IRX, 0) < 0)
-		{
-			set_error(AUDSRV_ERR_RPC_FAILED);
-			return -1;
-		}
-
- 		if (cd0.server != 0) 
-		{
-			break;
-		}
-
-		nopdelay();
-	}
-	return 0;
+	return call_rpc_1(AUDSRV_INIT_ADPCM, 0);
 }
-/** Load a ADPCM sample. */
-int audsrv_load_adpcm(audsrv_adpcm_t* adpcm, void* buffer, int size)
+
+/** Uploads a sample to SPU2 memory
+    @param adpcm    adpcm descriptor structure
+    @param buffer   pointer to adpcm sample
+    @param size     size of sample (including the header)
+    @returns zero on success, negative error code otherwise
+*/
+int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size)
 {
 	void* iop_addr;
 	SifDmaTransfer_t sifdma;
 	int id;
 
 	iop_addr = SifAllocIopHeap(size);
-
-	if(iop_addr == 0)
-		return AUDSRV_ERR_FAILED_TO_LOAD_ADPCM;
+	if (iop_addr == 0)
+	{
+		return -AUDSRV_ERR_OUT_OF_MEMORY;
+	}
 	
 	sifdma.src = buffer;
 	sifdma.dest = iop_addr;
 	sifdma.size = size;
 	sifdma.attr = 0;
 
+	/* send by dma */
 	id = SifSetDma(&sifdma, 1);
-
-	while(SifDmaStat(id) >= 0);;
+	while(SifDmaStat(id) >= 0);
 	
 	sbuff[0] = (int)iop_addr;
 	sbuff[1] = size;
 	sbuff[2] = (int)adpcm; /* use as id */
 
 	SifCallRpc(&cd0, AUDSRV_LOAD_ADPCM, 0, sbuff, 12, sbuff, 16, 0, 0);
-
 	SifFreeIopHeap(iop_addr);
 
 	if(sbuff[0] != 0) 
@@ -411,18 +398,22 @@ int audsrv_load_adpcm(audsrv_adpcm_t* adpcm, void* buffer, int size)
 		adpcm->pitch = sbuff[1];
 		adpcm->loop = sbuff[2];
 		adpcm->channels = sbuff[3];
-		return 0;
+		return AUDSRV_ERR_NOERROR;
 	}
 }
 
-/** Play a ADPCM sample. */
-int audsrv_play_adpcm(audsrv_adpcm_t* adpcm)
+/** Plays an adpcm sample already uploaded with audsrv_load_adpcm()
+    @param adpcm   exact same adpcm descriptor used in load()
+    @returns zero on success, negative value on error
+
+    The sample will be played in an unoccupied channel. If all 24 channels
+    are used, then -AUDSRV_ERR_NO_MORE_CHANNELS is returned. Trying to play
+    a sample which is unavailable will result in -AUDSRV_ERR_ARGS
+*/
+int audsrv_play_adpcm(audsrv_adpcm_t *adpcm)
 {
-	sbuff[0] = (int)adpcm;
-
-	SifCallRpc(&cd0, AUDSRV_PLAY_ADPCM, 0, sbuff, 4, sbuff, 4, 0, 0);
-
-	return sbuff[0];
+	/* on iop side, the sample id is like the pointer on ee side */
+	return call_rpc_1(AUDSRV_PLAY_ADPCM, (u32)adpcm);
 }
 
 /** Translates audsrv_get_error() response to readable string

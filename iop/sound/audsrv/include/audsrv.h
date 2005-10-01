@@ -43,12 +43,12 @@ extern "C" {
 #define AUDSRV_GET_CD_STATUS        0x0014
 #define AUDSRV_GET_CD_TYPE          0x0015
 
+#define AUDSRV_INIT_ADPCM           0x0016
+#define AUDSRV_LOAD_ADPCM           0x0017
+#define AUDSRV_PLAY_ADPCM           0x0018
+
 #define AUDSRV_FILLBUF_CALLBACK     0x0010
 #define AUDSRV_CDDA_CALLBACK        0x0011
-
-#define AUDSRV_LOAD_ADPCM						0x0020
-#define AUDSRV_PLAY_ADPCM						0x0021
-
 
 /* error codes */
 #define AUDSRV_ERR_NOERROR                 0x0000
@@ -58,6 +58,7 @@ extern "C" {
 #define AUDSRV_ERR_OUT_OF_MEMORY           0x0004
 #define AUDSRV_ERR_ARGS                    0x0005
 #define AUDSRV_ERR_NO_DISC                 0x0006
+#define AUDSRV_ERR_NO_MORE_CHANNELS        0x0007
 
 int audsrv_init();
 int audsrv_quit();
@@ -85,9 +86,9 @@ int audsrv_get_cd_status();
 int audsrv_get_cd_type();
 
 /* adpcm functions */
-void audsrv_adpcm_init();
-void* audsrv_load_adpcm(u32* buffer, int size, int id);
-void* audsrv_play_adpcm(u32 id);
+int audsrv_adpcm_init();
+void *audsrv_load_adpcm(u32 *buffer, int size, int id);
+int audsrv_play_adpcm(u32 id);
 
 #define audsrv_IMPORTS_start DECLARE_IMPORT_TABLE(audsrv, 1, 1)
 #define I_audsrv_init              DECLARE_IMPORT( 4, audsrv_init)
@@ -114,6 +115,10 @@ void* audsrv_play_adpcm(u32 id);
 #define I_audsrv_cd_play_sectors   DECLARE_IMPORT(21, audsrv_cd_play_sectors)
 #define I_audsrv_get_cd_status     DECLARE_IMPORT(22, audsrv_get_cd_status)
 #define I_audsrv_get_cd_type       DECLARE_IMPORT(23, audsrv_get_cd_type)
+
+#define I_audsrv_adpcm_init        DECLARE_IMPORT(24, audsrv_adpcm_init)
+#define I_audsrv_load_adpcm        DECLARE_IMPORT(25, audsrv_load_adpcm)
+#define I_audsrv_play_adpcm        DECLARE_IMPORT(26, audsrv_play_adpcm)
 
 #define audsrv_IMPORTS_end END_IMPORT_TABLE
 

@@ -39,7 +39,8 @@ extern "C" {
 #define AUDSRV_ERR_FORMAT_NOT_SUPPORTED    0x0003
 #define AUDSRV_ERR_OUT_OF_MEMORY           0x0004
 #define AUDSRV_ERR_ARGS                    0x0005
-#define AUDSRV_ERR_NO_DISC								 0x0006
+#define AUDSRV_ERR_NO_DISC                 0x0006
+#define AUDSRV_ERR_NO_MORE_CHANNELS        0x0007
 
 #define AUDSRV_ERR_FAILED_TO_LOAD_ADPCM    0x0010
 
@@ -51,15 +52,15 @@ typedef struct audsrv_fmt_t
 	int channels;                   ///< output channels (1, 2)
 } audsrv_fmt_t;
 
+/** adpcm sample definition */
 typedef struct audsrv_adpcm_t
 {
 	int pitch;
 	int loop;
 	int channels;
-	void* buffer;
+	void *buffer;
 	int size;
 } audsrv_adpcm_t;
-
 
 typedef int (*audsrv_callback_t)(void *arg);
 
@@ -204,15 +205,31 @@ int audsrv_get_cd_type();
 */
 int audsrv_on_fillbuf(int amount, audsrv_callback_t cb, void *arg);
 
+/** Initializes adpcm unit of audsrv
+    @returns zero on success, negative value on error
 
+    Frees up all memory taken by samples, and stops all voices from
+    being played. This can be called multiple times
+*/
 int audsrv_adpcm_init();
 
-/** Load a ADPCM sample. */
-int audsrv_load_adpcm(audsrv_adpcm_t* adpcm, void* buffer, int size);
+/** Uploads a sample to SPU2 memory
+    @param adpcm    adpcm descriptor structure
+    @param buffer   pointer to adpcm sample
+    @param size     size of sample (including the header)
+    @returns zero on success, negative error code otherwise
+*/
+int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size);
 
-/** Play a ADPCM sample. */
-int audsrv_play_adpcm(audsrv_adpcm_t* adpcm);
+/** Plays an adpcm sample already uploaded with audsrv_load_adpcm()
+    @param id    sample identifier, as specified in load()
+    @returns zero on success, negative value on error
 
+    The sample will be played in an unoccupied channel. If all 24 channels
+    are used, then -AUDSRV_ERR_NO_MORE_CHANNELS is returned. Trying to play
+    a sample which is unavailable will result in -AUDSRV_ERR_ARGS
+*/
+int audsrv_play_adpcm(audsrv_adpcm_t *adpcm);
 
 #ifdef __cplusplus
 }

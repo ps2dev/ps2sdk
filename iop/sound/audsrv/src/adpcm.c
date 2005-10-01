@@ -7,8 +7,14 @@
 # Licenced under GNU Library General Public License version 2
 #
 # $Id$
-# audsrv IOP server
+# audsrv adpcm module
 */
+
+/**
+ * \file adpcm.c
+ * \author lukasz
+ * \date 05-06-27
+ */
 
 #include <stdio.h>
 #include <thbase.h>
@@ -26,53 +32,90 @@
 #include "rpc_server.h"
 #include "spu.h"
 
-#define NEW(x)		 AllocSysMemory(0, sizeof(x), 0);
+#define NEW(x)    AllocSysMemory(0, sizeof(x), 0);
 
 typedef struct adpcm_list_t
 {
+	struct adpcm_list_t *next;
+
 	int id;
 	int pitch;
 	int loop;
 	int channels;
 	int size;
 	int spu2_addr;
-	struct adpcm_list_t* next;
 } adpcm_list_t;
 
-adpcm_list_t *adpcm_list_head = 0;
-adpcm_list_t *adpcm_list_tail = 0;
+static adpcm_list_t *adpcm_list_head = 0;
+static adpcm_list_t *adpcm_list_tail = 0;
 
-u32 sbuffer[16]	__attribute__((aligned(64)));
+static u32 sbuffer[16] __attribute__((aligned(64)));
 
-adpcm_list_t* adpcm_loaded(int id)
+/** Frees up all memory taken by the linked list of samples
+*/
+static void free_all_samples()
+{
+	adpcm_list_t *p = adpcm_list_head;
+
+	while (p != 0)
+	{
+		adpcm_list_t *q = p->next;
+		FreeSysMemory(p);
+		p = q;
+	}
+		
+	adpcm_list_head = 0;
+	adpcm_list_tail = 0;	
+}
+
+/** Looks up the given identifier in list of loaded samples
+    @param id    sample identifier
+    @returns node entry from container, NULL on failure
+*/
+static adpcm_list_t *adpcm_loaded(int id)
 {
 	adpcm_list_t *cur = adpcm_list_head;
 
-	while(cur)
+	while (cur != 0)
 	{
-		if(cur->id == id) return cur;
+		if (cur->id == id)
+		{
+			return cur;
+		}
 
 		cur = cur->next;
 	}
-	return 0;
+
+	return NULL;
 }
 
-void audsrv_read_adpcm_header(adpcm_list_t* adpcm, u32* buffer)
+/** Extracts adpcm parameters from header
+    @param adpcm   node entry
+    @param buffer  pointer to adpcm header
+*/
+static void audsrv_read_adpcm_header(adpcm_list_t *adpcm, u32 *buffer)
 {
 	adpcm->pitch = buffer[2];
 	adpcm->loop = (buffer[1] >> 16) & 0xFF;
 	adpcm->channels = (buffer[1] >> 8) & 0xFF;
 }
 
-/* Load adpcm sample from iop memory to spu2 memory */
-void* audsrv_load_adpcm(u32* buffer, int size, int id)
+/** Uploads a sample to SPU2 memory
+    @param buffer    pointer to adpcm sample header
+    @param size      size of sample in bytes
+    @param id        sample identifier (to be later used in play())
+    @returns         pointer to local adpcm buffer
+*/
+void *audsrv_load_adpcm(u32 *buffer, int size, int id)
 {
 	adpcm_list_t *adpcm;
 
-	if((adpcm = adpcm_loaded(id)) == 0)
+	adpcm = adpcm_loaded(id);
+	if (adpcm == 0)
 	{
-		if(adpcm_list_head == 0)
+		if (adpcm_list_head == 0)
 		{
+			/* first entry ever! yay! */
 			adpcm = NEW(adpcm_list_t);
 			adpcm->id = id;
 			adpcm->spu2_addr = 0x5010; /* Need to change this so it considers to PCM streaming space usage :) */
@@ -86,16 +129,16 @@ void* audsrv_load_adpcm(u32* buffer, int size, int id)
 		}
 		else
 		{
+			/* add at the end of the list */
 			adpcm = NEW(adpcm_list_t);
 			adpcm->id = id;
-			adpcm->spu2_addr = adpcm_list_tail->spu2_addr+adpcm_list_tail->size;
+			adpcm->spu2_addr = adpcm_list_tail->spu2_addr + adpcm_list_tail->size;
 			adpcm->size = size - 16; /* header is 16 bytes */
 
 			audsrv_read_adpcm_header(adpcm, buffer);
 
 			adpcm_list_tail->next = adpcm;
 			adpcm_list_tail = adpcm;			
-
 		}	
 		
 		/* DMA from IOP to SPU2 */
@@ -110,66 +153,88 @@ void* audsrv_load_adpcm(u32* buffer, int size, int id)
 	return sbuffer;
 }
 
-/* Play adpcm sample already in spu2 memory */
-void* audsrv_play_adpcm(u32 id)
+/** Plays an adpcm sample already uploaded with audsrv_load_adpcm()
+    @param id    sample identifier, as specified in load()
+    @returns zero on success, negative value on error
+
+    The sample will be played in an unoccupied channel. If all 24 channels
+    are used, then -AUDSRV_ERR_NO_MORE_CHANNELS is returned. Trying to play
+    a sample which is unavailable will result in -AUDSRV_ERR_ARGS
+*/
+int audsrv_play_adpcm(u32 id)
 {
-	adpcm_list_t* a = adpcm_list_head;
+	int i, channel;
+	u32 endx;
+	adpcm_list_t *a;
 
-	while(a)
-	{	
-		// sample is in spu2 memory
-		if(a->id == id)
-		{
-			s32 channel = -1;
-			u32 endx = sceSdGetSwitch(SD_CORE_1 | SD_S_ENDX);
-			u32 i = 1;
-
-			// all channels are occupied
-			if(endx == 0) 
-			{	
-				sbuffer[0] = -1;
-				return sbuffer;
-			}
-			// Find first available
-			while((channel < 0) && (i < 24))
-			{
-				if(endx & (1 << i))
-				{
-					channel = i;
-				}
-				i++;
-			}
-
-			if(channel != -1)
-			{
-				sceSdSetParam(SD_CORE_1  | (channel << 1) | SD_VOICE_PITCH ,  a->pitch );
-				sceSdSetAddr(SD_CORE_1   | (channel << 1) | SD_VOICE_START, a->spu2_addr );
-				sceSdSetSwitch(SD_CORE_1 | SD_VOICE_KEYON, (1 << channel));
-				sbuffer[0] = 0;
-				return sbuffer;
-			}
-		}
-		a = a->next;
+	a = adpcm_loaded(id);
+	if (a == 0)
+	{
+		/* bad joke */
+		return AUDSRV_ERR_ARGS;
 	}
-	sbuffer[0] = 1;
-	return sbuffer;
+
+	/* sample was loaded */
+	endx = sceSdGetSwitch(SD_CORE_1 | SD_S_ENDX);
+	if (endx == 0) 
+	{	
+		/* all channels are occupied */
+		return -AUDSRV_ERR_NO_MORE_CHANNELS;
+	}
+
+	/* find first channel available */
+	i = 1;
+	channel = -1;
+	while ((channel < 0) && (i < 24))
+	{
+		if (endx & (1 << i))
+		{
+			channel = i;
+		}
+
+        	i++;
+	}
+
+	if (channel == -1)
+	{
+		/* cannot find a single channel free */
+		return -AUDSRV_ERR_NO_MORE_CHANNELS;
+	}
+	
+	sceSdSetParam(SD_CORE_1 | (channel << 1) | SD_VOICE_PITCH, a->pitch);
+	sceSdSetAddr(SD_CORE_1 | (channel << 1) | SD_VOICE_START, a->spu2_addr);
+	sceSdSetSwitch(SD_CORE_1 | SD_VOICE_KEYON, (1 << channel));
+	return AUDSRV_ERR_NOERROR;
 }
 
+/** Initializes adpcm unit of audsrv
 
-void audsrv_adpcm_init()
+    @returns zero on success, negative value on error
+*/
+int audsrv_adpcm_init()
 {
 	u32 voice;
 
+	printf("audsrv_adpcm_init()\n");
+
 	sceSdInit(0);
 
-	sceSdSetParam(SD_CORE_1 | SD_P_MVOLL ,0x3fff);
-	sceSdSetParam(SD_CORE_1 | SD_P_MVOLR ,0x3fff);
+	sceSdSetParam(SD_CORE_1 | SD_P_MVOLL, 0x3fff);
+	sceSdSetParam(SD_CORE_1 | SD_P_MVOLR, 0x3fff);
 
-	for(voice = 1; voice < 24; voice++)
+	for (voice = 1; voice < 24; voice++)
 	{
-		sceSdSetParam(SD_CORE_1 | (voice << 1) | SD_VOICE_VOLL , 0x3fff );
-		sceSdSetParam(SD_CORE_1 | (voice << 1) | SD_VOICE_VOLR , 0x3fff );
+		sceSdSetParam(SD_CORE_1 | (voice << 1) | SD_VOICE_VOLL, 0x3fff);
+		sceSdSetParam(SD_CORE_1 | (voice << 1) | SD_VOICE_VOLR, 0x3fff);
 	}
+
+	if (adpcm_list_head != 0)
+	{
+		/* called second time, after samples were already uploaded */
+		free_all_samples();
+	}
+
+	return AUDSRV_ERR_NOERROR;
 }
 
 

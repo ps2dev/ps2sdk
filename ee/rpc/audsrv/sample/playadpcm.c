@@ -1,3 +1,15 @@
+/*
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2005, ps2dev - http://www.ps2dev.org
+# Licenced under GNU Library General Public License version 2
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+# audsrv adpcm sample
+*/
 #include <stdio.h>
 #include <string.h>
 
@@ -8,10 +20,9 @@
 
 #include <audsrv.h>
 
-
 int main(int argc, char **argv)
 {
-	int ret;
+	int i, ret;
 	FILE* adpcm;
 	audsrv_adpcm_t sample;
 	int size;
@@ -27,7 +38,7 @@ int main(int argc, char **argv)
 	ret = SifLoadModule("host:audsrv.irx", 0, NULL);
 	printf("audsrv loadmodule %d\n", ret);
 
-	ret = audsrv_adpcm_init();
+	ret = audsrv_init();
 	if (ret != 0)
 	{
 		printf("sample: failed to initialize audsrv\n");
@@ -53,17 +64,26 @@ int main(int argc, char **argv)
 	fread(buffer, 1, size, adpcm);
 	fclose(adpcm);
 
+	printf("playing sample..\n");
 
+	audsrv_adpcm_init();
 	audsrv_set_volume(MAX_VOLUME);
 	audsrv_load_adpcm(&sample, buffer, size);
 	audsrv_play_adpcm(&sample);
 
-	free(buffer);
-
-	while(1)
+	/* Uncomment to hear two samples played simultaenously
+	for (i=0; i<100; i++)
 	{
-
+		nopdelay();
 	}
 
+	audsrv_play_adpcm(&sample);
+	*/
+
+	printf("sample played..\n");
+
+	free(buffer);
+
+	while (1);
 	return 0;
 }

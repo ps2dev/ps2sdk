@@ -499,6 +499,7 @@ int audsrv_cd_play_sectors(int start, int end)
 int audsrv_play_cd(int track)
 {
 	int type;
+	int ret;
 	int start, end;
 
 	printf("request to play track %d\n", track);
@@ -532,7 +533,17 @@ int audsrv_play_cd(int track)
 		return AUDSRV_ERR_ARGS; //FIXME:
 	}
 
-	return audsrv_cd_play_sectors(start, end);
+	ret = audsrv_cd_play_sectors(start, end);
+
+	/* core0 input (known as Evilo's patch #1) */
+	sceSdSetParam(SD_CORE_0 | SD_P_BVOLL, 0x7fff);
+	sceSdSetParam(SD_CORE_0 | SD_P_BVOLR, 0x7fff);
+ 	
+	/* set master volume for core 0 */
+	sceSdSetParam(SD_CORE_0 | SD_P_MVOLL, MAX_VOLUME);
+	sceSdSetParam(SD_CORE_0 | SD_P_MVOLR, MAX_VOLUME);
+
+	return ret;	
 }
 
 /** Stops CD play

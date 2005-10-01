@@ -49,11 +49,13 @@
 #define AUDSRV_PLAY_SECTORS         0x0013
 #define AUDSRV_GET_CD_STATUS        0x0014
 #define AUDSRV_GET_CD_TYPE          0x0015
+
+/** adpcm functions */
+#define AUDSRV_INIT_ADPCM           0x0016
+#define AUDSRV_LOAD_ADPCM           0x0017
+#define AUDSRV_PLAY_ADPCM           0x0018
                                     
 #define AUDSRV_FILLBUF_CALLBACK     0x0010
 #define AUDSRV_CDDA_CALLBACK        0x0011
-
-#define AUDSRV_LOAD_ADPCM						0x0020
-#define AUDSRV_PLAY_ADPCM						0x0021
 
 #endif

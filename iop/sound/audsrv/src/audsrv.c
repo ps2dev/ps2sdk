@@ -34,7 +34,7 @@
  * \date 04-24-05
  */
 
-#define VERSION "0.85"
+#define VERSION "0.90"
 IRX_ID("audsrv", 1, 1);
 
 /* globals */
@@ -96,23 +96,19 @@ static void update_volume()
 	/* external input */
 	sceSdSetParam(SD_CORE_1 | SD_P_AVOLL, 0x7fff);
 	sceSdSetParam(SD_CORE_1 | SD_P_AVOLR, 0x7fff);
-/* EEUG: why maximum volume here ?
-         (core 0 is unused ? Sometimes it causes spontaneous noise)
-*/
+
 	/* core0 input */
-	sceSdSetParam(SD_CORE_0 | SD_P_BVOLL, 0/*0x7fff*/);
-	sceSdSetParam(SD_CORE_0 | SD_P_BVOLR, 0/*0x7fff*/);
+	sceSdSetParam(SD_CORE_0 | SD_P_BVOLL, 0);
+	sceSdSetParam(SD_CORE_0 | SD_P_BVOLR, 0);
 
 	/* core1 input */
 	vol = playing ? core1_volume : 0;
 	sceSdSetParam(SD_CORE_1 | SD_P_BVOLL, vol);
 	sceSdSetParam(SD_CORE_1 | SD_P_BVOLR, vol);
-/* EEUG: why maximum volume here ?
-         (core 0 is unused ? Sometimes it causes spontaneous noise)
-*/
+
 	/* set master volume for core 0 */
-	sceSdSetParam(SD_CORE_0 | SD_P_MVOLL, 0/*MAX_VOLUME*/);
-	sceSdSetParam(SD_CORE_0 | SD_P_MVOLR, 0/*MAX_VOLUME*/);
+	sceSdSetParam(SD_CORE_0 | SD_P_MVOLL, 0);
+	sceSdSetParam(SD_CORE_0 | SD_P_MVOLR, 0);
 
 	/* set master volume for core 1 */
 	sceSdSetParam(SD_CORE_1 | SD_P_MVOLL, MAX_VOLUME);
