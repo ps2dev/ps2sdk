@@ -67,7 +67,13 @@ STDLIB_OBJS := $(STDLIB_OBJS:%=$(EE_OBJS_DIR)%)
 TIME_OBJS = clock.o
 TIME_OBJS := $(TIME_OBJS:%=$(EE_OBJS_DIR)%)
 
-MULT_OBJS = $(XPRINTF_OBJS) $(XSCANF_OBJS) $(ALLOC_OBJS) $(STRING_C_OBJS) $(STDIO_OBJS) $(STDLIB_OBJS) $(TIME_OBJS)
+GPROF_OBJS = mcount.o mcount_internal.o
+GPROF_OBJS := $(GPROF_OBJS:%=$(EE_OBJS_DIR)%)
+
+MULT_OBJS = $(XPRINTF_OBJS) $(XSCANF_OBJS) $(ALLOC_OBJS) $(STRING_C_OBJS) $(STDIO_OBJS) $(STDLIB_OBJS) $(TIME_OBJS) $(GPROF_OBJS)
+
+# uncomment the following line to enable profile on libc
+# EE_CFLAGS += -pg
 
 EE_OBJS = $(CORE_OBJS) $(MULT_OBJS)
 

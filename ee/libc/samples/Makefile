@@ -9,7 +9,7 @@
 # $Id$
 
 
-SUBDIRS = hello
+SUBDIRS = hello prof
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make

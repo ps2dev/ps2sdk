@@ -8,6 +8,9 @@
 #
 # $Id$
 
+2005-10-03
+  - gawd, added -pg gprof profiling (plus a sample)
+
 2005-06-12
   - oopo, added draw library
   - pixel, added erl feature - dynamic library
