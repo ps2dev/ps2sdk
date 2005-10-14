@@ -91,6 +91,10 @@ int sceCdPosToInt(cd_location_t *p);
 #define I_sceCdPosToInt DECLARE_IMPORT(16 , sceCdPosToInt)
 cd_location_t *sceCdIntToPos(int i, cd_location_t *p);
 #define I_sceCdIntToPos DECLARE_IMPORT(17 , sceCdIntToPos)
+int sceCdReadPFI(int,int);
+#define I_sceCdReadPFI DECLARE_IMPORT(19 , sceCdReadPFI)
+int sceCdReadDVDV(int,int,void*,cd_read_mode_t*);
+#define I_sceCdReadDVDV DECLARE_IMPORT(20 , sceCdReadDVDV)
 int sceCdReadClock(cd_clock_t *rtc);
 #define I_sceCdReadClock DECLARE_IMPORT(24 , sceCdReadClock)
 int sceCdStatus(void);
