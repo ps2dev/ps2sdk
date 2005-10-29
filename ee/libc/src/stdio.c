@@ -407,7 +407,7 @@ FILE *fopen(const char *fname, const char *mode)
           break;
         case 'w':
           flag = _IOWRT;
-          iomode = (O_WRONLY | O_CREAT);
+          iomode = (O_WRONLY | O_CREAT | O_TRUNC);
           break;
         case 'a':
           flag = _IORW;
@@ -421,7 +421,7 @@ FILE *fopen(const char *fname, const char *mode)
             continue;
           case '+':
             flag |= (_IOREAD | _IOWRT);
-            iomode |= (O_RDWR | O_CREAT | O_TRUNC);
+            iomode |= (O_RDWR);
             continue;
           default:
             break;
