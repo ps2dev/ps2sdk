@@ -290,6 +290,16 @@ int audsrv_play_audio(const char *chunk, int bytes)
 	return sent;
 }
 
+/** Stops audio from playing.
+    @returns status code
+*/
+int audsrv_stop_audio()
+{
+	int ret; 
+	ret = call_rpc_1(AUDSRV_STOP_AUDIO, 0);
+	return ret;
+}
+
 /** Initializes audsrv library
     @returns error code
 */

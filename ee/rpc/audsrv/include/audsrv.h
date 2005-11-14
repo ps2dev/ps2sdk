@@ -112,6 +112,11 @@ int audsrv_set_volume(int volume);
 */
 int audsrv_play_audio(const char *chunk, int bytes);
 
+/** Stops audio from playing.
+    @returns status code
+*/
+int audsrv_stop_audio();
+
 /** Returns the last error audsrv raised
     @returns error code
 */
