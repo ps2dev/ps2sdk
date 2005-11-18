@@ -19,6 +19,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #include <io_common.h>
 #include <errno.h>
 #include <fileio.h>
@@ -163,14 +164,15 @@ int    vscanf(const char *, va_list);
 int    vsscanf(const char *, const char *, va_list);
 int    vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, const char *, va_list);
 int    xscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, const char *, ...);
-
 int    ungetc(int, FILE *);
 
 int    _fcloseall(void);
 int    _fflushall(void);
 
 int    chdir(const char *path);
-
+int    mkdir(const char *path, int mode);
+int    rmdir(const char *path);
+int    stat(const char *path, struct stat *sbuf);
 
 /* from xprintf */
 int vxprintf(void (*func)(char*, int, void *), void * arg, const char * format, va_list ap);

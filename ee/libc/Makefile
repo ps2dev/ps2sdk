@@ -53,7 +53,7 @@ STDIO_OBJS = clearerr.o fclose.o fcloseall.o feof.o ferror.o fflush.o fflushall.
 	fgetpos.o fgets.o fopen.o fputc.o fputs.o fread.o fseek.o fsetpos.o ftell.o fwrite.o fileno.o \
 	getc.o getchar.o getfdtype.o gets.o perror.o putc.o puts.o remove.o rename.o fdopen.o \
 	rewind.o skipatoi.o stdio.o tmpfile.o tmpnam.o ungetc.o updatestdoutxy.o strerror.o \
-	__stdio_internals.o chdir.o
+	__stdio_internals.o stat.o chdir.o getcwd.o mkdir.o rmdir.o
 STDIO_OBJS := $(STDIO_OBJS:%=$(EE_OBJS_DIR)%)
 
 STDLIB_OBJS = abs.o atexit.o atof.o bsearch.o div.o getenv.o _itoa.o labs.o \

@@ -116,4 +116,22 @@ typedef struct {
 	unsigned int unknown;
 } io_dirent_t;
 
+/* ANSI C stat structure */
+#define	S_IFMT		0170000	/* type of file */
+#define	S_IFDIR		0040000	/* directory */
+#define	S_IFREG		0100000	/* regular */
+#define	S_IFLNK		0120000	/* symbolic link */
+
+#define	S_ISDIR(m)  (((m)&S_IFMT) == S_IFDIR)
+#define	S_ISREG(m)  (((m)&S_IFMT) == S_IFREG)
+#define	S_ISLNK(m)  (((m)&S_IFMT) == S_IFLNK)
+
+struct stat {
+	unsigned int st_mode;
+	unsigned int st_size;
+	unsigned int st_mtime;
+	unsigned int st_atime;
+	unsigned int st_ctime;
+};
+
 #endif /* SYS_STAT_H */

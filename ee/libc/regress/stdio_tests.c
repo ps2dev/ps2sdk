@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <sys/stat.h>
 #include <string.h>
 
 #include <testsuite.h>
@@ -212,14 +213,67 @@ static const char *test_fread(void *arg)
 	return error;
 }
 
+static const char *test_stat_file(void *arg)
+{
+	struct stat st;
+
+	stat((const char *)arg, &st);
+	printf("fn %s mode 0x%x, size %d\n", (char *)arg, st.st_mode, st.st_size);
+	if (S_ISDIR(st.st_mode))
+	{
+		return "expected file, not a directory";
+	}
+
+	return 0;
+}
+
+static const char *test_stat_dir(void *arg)
+{
+	struct stat st;
+
+	stat((const char *)arg, &st);
+	printf("fn %s mode 0x%x, size %d\n", (char *)arg, st.st_mode, st.st_size);
+	if (S_ISDIR(st.st_mode) == 0)
+	{
+		return "expected directory, not regular file";
+	}
+
+	return 0;
+}
+
+static const char *test_mkdir(void *arg)
+{
+	if (mkdir(arg, 0770) != 0)
+	{
+		return "failed to create directory";
+	}
+
+	return 0;
+}
+
+static const char *test_rmdir(void *arg)
+{
+	if (rmdir(arg) != 0)
+	{
+		return "failed to delete directory";
+	}
+
+	return 0;
+}
+
 int libc_add_tests(test_suite *p)
 {
 	const char *textfile;
+	const char *dir, *dir2;
 
 	#ifdef _EE
 	textfile = "host:testfiles/dummy";
+	dir = "host:testfiles";
+	dir2 = "host:dummydir";
 	#else
 	textfile = "testfiles/dummy";
+	dir = "textfiles/";
+	dir2 = "dummydir";
 	#endif
 
         add_test(p, "fopen, fclose", test_fopen_fclose, (void *)textfile);
@@ -227,6 +281,10 @@ int libc_add_tests(test_suite *p)
 	add_test(p, "fread", test_fread, (void *)textfile);
 	add_test(p, "fgetc", test_fgetc, (void *)textfile);
 	add_test(p, "fseek, ftell", test_fseek_ftell, (void *)textfile);
+	add_test(p, "stat", test_stat_file, (void *)textfile);
+	add_test(p, "stat", test_stat_dir, (void *)dir);
+	add_test(p, "mkdir", test_mkdir, (void *)dir2);
+	add_test(p, "rmdir", test_rmdir, (void *)dir2);
 	return 0;
 }
 

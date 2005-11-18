@@ -1340,3 +1340,34 @@ int chdir(const char *path) {
     return 0;
 }
 #endif
+
+#ifdef F_getcwd
+char *getcwd(char *buf, int len)
+{
+	strncpy(buf, __direct_pwd, len);
+	return buf;
+}
+#endif
+
+#ifdef F_mkdir
+int mkdir(const char *path, int mode)
+{
+	/* mode not used */
+	return fioMkdir(path);
+}
+#endif
+
+#ifdef F_rmdir
+int rmdir(const char *path)
+{
+	return fioRmdir(path);
+}
+#endif
+
+#ifdef F_stat
+int stat(const char *path, struct stat *sbuf)
+{
+	return -1;
+}
+#endif
+
