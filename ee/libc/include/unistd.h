@@ -16,5 +16,19 @@
 #define __UNISTD_H__
 
 #include <stdio.h>
+#include <sys/stat.h>
+
+/** does file exist */
+#define	F_OK     0 
+/** is it executable or searchable */
+#define X_OK     1
+/** is it writeable */
+#define	W_OK     2
+/** is it readable */
+#define	R_OK     4
+
+int    stat(const char *path, struct stat *sbuf);
+int    access(const char *path, int mode);
+char  *getcwd(char *buf, int len);
 
 #endif

@@ -53,7 +53,7 @@ STDIO_OBJS = clearerr.o fclose.o fcloseall.o feof.o ferror.o fflush.o fflushall.
 	fgetpos.o fgets.o fopen.o fputc.o fputs.o fread.o fseek.o fsetpos.o ftell.o fwrite.o fileno.o \
 	getc.o getchar.o getfdtype.o gets.o perror.o putc.o puts.o remove.o rename.o fdopen.o \
 	rewind.o skipatoi.o stdio.o tmpfile.o tmpnam.o ungetc.o updatestdoutxy.o strerror.o \
-	__stdio_internals.o stat.o chdir.o getcwd.o mkdir.o rmdir.o
+	__stdio_internals.o chdir.o getcwd.o mkdir.o rmdir.o
 STDIO_OBJS := $(STDIO_OBJS:%=$(EE_OBJS_DIR)%)
 
 STDLIB_OBJS = abs.o atexit.o atof.o bsearch.o div.o getenv.o _itoa.o labs.o \
@@ -64,13 +64,16 @@ STDLIB_OBJS = abs.o atexit.o atof.o bsearch.o div.o getenv.o _itoa.o labs.o \
 # mblen.o mbstowcs.o mbtowc.o wcstombs.o wctomb.o
 STDLIB_OBJS := $(STDLIB_OBJS:%=$(EE_OBJS_DIR)%)
 
+UNISTD_OBJS = stat.o access.o
+UNISTD_OBJS := $(UNISTD_OBJS:%=$(EE_OBJS_DIR)%)
+
 TIME_OBJS = clock.o
 TIME_OBJS := $(TIME_OBJS:%=$(EE_OBJS_DIR)%)
 
 GPROF_OBJS = mcount.o mcount_internal.o
 GPROF_OBJS := $(GPROF_OBJS:%=$(EE_OBJS_DIR)%)
 
-MULT_OBJS = $(XPRINTF_OBJS) $(XSCANF_OBJS) $(ALLOC_OBJS) $(STRING_C_OBJS) $(STDIO_OBJS) $(STDLIB_OBJS) $(TIME_OBJS) $(GPROF_OBJS)
+MULT_OBJS = $(XPRINTF_OBJS) $(XSCANF_OBJS) $(ALLOC_OBJS) $(STRING_C_OBJS) $(STDIO_OBJS) $(STDLIB_OBJS) $(UNISTD_OBJS) $(TIME_OBJS) $(GPROF_OBJS)
 
 # uncomment the following line to enable profile on libc
 # EE_CFLAGS += -pg
@@ -99,6 +102,9 @@ $(STDIO_OBJS): src/stdio.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(STDLIB_OBJS): src/stdlib.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(UNISTD_OBJS): src/unistd.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(TIME_OBJS): src/time.c
