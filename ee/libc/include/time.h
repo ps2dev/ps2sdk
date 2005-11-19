@@ -15,16 +15,7 @@
 #define _TIME_H
 
 #include <stddef.h>
-
-#ifndef __clock_t_defined
-typedef unsigned long clock_t;
-#define __clock_t_defined
-#endif
-
-#ifndef __time_t_defined
-typedef unsigned long time_t;
-#define __time_t_defined
-#endif
+#include <sys/time.h>
 
 struct tm
 {

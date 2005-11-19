@@ -14,6 +14,8 @@
 #ifndef SYS_STAT_H
 #define SYS_STAT_H
 
+#include <sys/time.h>
+
 // Flags for chstat 'statmask'
 #define FIO_CST_MODE	0x0001
 #define FIO_CST_ATTR	0x0002
@@ -127,11 +129,12 @@ typedef struct {
 #define	S_ISLNK(m)  (((m)&S_IFMT) == S_IFLNK)
 
 struct stat {
-	unsigned int st_mode;
-	unsigned int st_size;
-	unsigned int st_mtime;
-	unsigned int st_atime;
-	unsigned int st_ctime;
+	unsigned st_mode;  /* mode */
+	unsigned st_size;  /* file size */
+
+	time_t st_mtime;   /* modification time */
+	time_t st_atime;   /* access time */
+	time_t st_ctime;   /* creation time */
 };
 
 #endif /* SYS_STAT_H */

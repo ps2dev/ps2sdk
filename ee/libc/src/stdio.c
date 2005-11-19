@@ -167,10 +167,18 @@ int ferror(FILE *stream)
 }
 #endif
 
-
 #ifdef F_fflush
-int mcFlush(int fd);
-int mcSync(int mode, int *cmd, int *result);
+__attribute__((weak))
+int mcFlush(int fd)
+{
+	return 0;
+}
+
+__attribute__((weak))
+int mcSync(int mode, int *cmd, int *result)
+{
+	return 0;
+}
 
 /*
 **

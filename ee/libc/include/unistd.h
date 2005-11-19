@@ -3,15 +3,13 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Copyright 2001-2005, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
 # $Id$
 # Trap the unistd.h include and redirect it to stdio.h
 */
-
-
 #ifndef __UNISTD_H__
 #define __UNISTD_H__
 
@@ -27,8 +25,18 @@
 /** is it readable */
 #define	R_OK     4
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int    stat(const char *path, struct stat *sbuf);
+int    fstat(int filedes, struct stat *sbuf);
 int    access(const char *path, int mode);
 char  *getcwd(char *buf, int len);
+int    unlink(const char *path);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
