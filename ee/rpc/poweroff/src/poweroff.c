@@ -100,7 +100,7 @@ void hddSetUserPoweroffCallback(void (*user_callback)(void *arg), void *arg)
 
 void hddPreparePoweroff()
 {
-	ee_thread_t thread;
+	ee_thread_t thread, thisThread;
 	ee_sema_t sema;
 	int tid;
 
@@ -109,12 +109,17 @@ void hddPreparePoweroff()
 	sema.option = 0;
 	PowerOffSema = CreateSema(&sema);
 
-	ChangeThreadPriority(GetThreadId(), 51);
+	ReferThreadStatus(GetThreadId(), &thisThread);
+	if (thisThread.current_priority == 0) {
+		ChangeThreadPriority(GetThreadId(), 51);
+		thread.initial_priority = 50;
+	} else
+		thread.initial_priority = thisThread.current_priority - 1;
+
 	thread.stack_size = 512 * 16;
 	thread.gp_reg = &_gp;
 	thread.func = PowerOffThread;
 	thread.stack = (void *)poffThreadStack;
-	thread.initial_priority = 50;
 	tid = CreateThread(&thread);
 	StartThread(tid, NULL);
 	
