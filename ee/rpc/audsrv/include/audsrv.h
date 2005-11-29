@@ -43,6 +43,7 @@ extern "C" {
 #define AUDSRV_ERR_NO_MORE_CHANNELS        0x0007
 
 #define AUDSRV_ERR_FAILED_TO_LOAD_ADPCM    0x0010
+#define AUDSRV_ERR_FAILED_TO_CREATE_SEMA    0x0011
 
 /** structure used to set new format */
 typedef struct audsrv_fmt_t

@@ -35,6 +35,7 @@ static unsigned int sbuff[4096] __attribute__((aligned (64)));
 
 static int initialized = 0;
 static int audsrv_error = AUDSRV_ERR_NOERROR;
+static int completion_sema;
 
 /* nasty forwards */
 static void fillbuf_requested(void *pkt, void *arg);
@@ -46,6 +47,11 @@ static void cdda_stopped(void *pkt, void *arg);
 static void set_error(int err)
 {
 	audsrv_error = err;
+}
+
+static void _audsrv_intr()
+{
+	iSignalSema(completion_sema);
 }
 
 /** Returns the last error audsrv raised
@@ -63,8 +69,10 @@ int audsrv_get_error()
 */
 static int call_rpc_1(int func, int arg)
 {
+	WaitSema(completion_sema);
+
 	sbuff[0] = arg;
-	SifCallRpc(&cd0, func, 0, sbuff, 1*4, sbuff, 4, 0, 0);
+	SifCallRpc(&cd0, func, 0, sbuff, 1*4, sbuff, 4, _audsrv_intr, 0);
 	FlushCache(0);
 
 	set_error(sbuff[0]);
@@ -79,9 +87,11 @@ static int call_rpc_1(int func, int arg)
 */
 static int call_rpc_2(int func, int arg1, int arg2)
 {
+	WaitSema(completion_sema);
+
 	sbuff[0] = arg1;
 	sbuff[1] = arg2;
-	SifCallRpc(&cd0, func, 0, sbuff, 2*4, sbuff, 4, 0, 0);
+	SifCallRpc(&cd0, func, 0, sbuff, 2*4, sbuff, 4, _audsrv_intr, 0);
 	FlushCache(0);
 
 	set_error(sbuff[0]);
@@ -93,8 +103,12 @@ static int call_rpc_2(int func, int arg1, int arg2)
 */
 int audsrv_quit()
 {
-	SifCallRpc(&cd0, AUDSRV_QUIT, 0, sbuff, 1*4, sbuff, 4, 0, 0);
+	WaitSema(completion_sema);
+
+	SifCallRpc(&cd0, AUDSRV_QUIT, 0, sbuff, 1*4, sbuff, 4, _audsrv_intr, 0);
 	set_error(AUDSRV_ERR_NOERROR);
+
+	DeleteSema(completion_sema);
 	return 0;
 }
 
@@ -109,10 +123,12 @@ int audsrv_quit()
 */
 int audsrv_set_format(struct audsrv_fmt_t *fmt)
 {
+	WaitSema(completion_sema);
+
 	sbuff[0] = fmt->freq;
 	sbuff[1] = fmt->bits;
 	sbuff[2] = fmt->channels;
-	SifCallRpc(&cd0, AUDSRV_SET_FORMAT, 0, sbuff, 3*4, sbuff, 4, 0, 0);
+	SifCallRpc(&cd0, AUDSRV_SET_FORMAT, 0, sbuff, 3*4, sbuff, 4, _audsrv_intr, 0);
 	FlushCache(0);
 	set_error(sbuff[0]);
 	return sbuff[0];
@@ -268,11 +284,13 @@ int audsrv_play_audio(const char *chunk, int bytes)
 	maxcopy = sizeof(sbuff) - sizeof(int);
 	while (bytes > 0)
 	{
+		WaitSema(completion_sema);
+
 		copy = MIN(bytes, maxcopy);
 		sbuff[0] = copy;
 		memcpy(&sbuff[1], chunk, copy);
 		packet_size = copy + sizeof(int);
-		SifCallRpc(&cd0, AUDSRV_PLAY_AUDIO, 0, sbuff, packet_size, sbuff, 1*4, 0, 0);
+		SifCallRpc(&cd0, AUDSRV_PLAY_AUDIO, 0, sbuff, packet_size, sbuff, 1*4, _audsrv_intr, 0);
 		FlushCache(0);
 
 		if (sbuff[0] < 0)
@@ -331,6 +349,17 @@ int audsrv_init()
 		nopdelay();
 	}
 
+	ee_sema_t compSema;
+	compSema.init_count = 1;
+	compSema.max_count = 1;
+	compSema.option = 0;
+	completion_sema = CreateSema(&compSema);
+	if (completion_sema < 0)
+	{
+		set_error(AUDSRV_ERR_FAILED_TO_CREATE_SEMA);
+		return -1;
+	}
+
 	SifCallRpc(&cd0, AUDSRV_INIT, 0, sbuff, 64, sbuff, 64, 0, 0);
 	FlushCache(0);
 	ret = sbuff[0];
@@ -374,6 +403,8 @@ int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size)
 	SifDmaTransfer_t sifdma;
 	int id;
 
+	WaitSema(completion_sema);
+
 	iop_addr = SifAllocIopHeap(size);
 	if (iop_addr == 0)
 	{
@@ -393,7 +424,7 @@ int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size)
 	sbuff[1] = size;
 	sbuff[2] = (int)adpcm; /* use as id */
 
-	SifCallRpc(&cd0, AUDSRV_LOAD_ADPCM, 0, sbuff, 12, sbuff, 16, 0, 0);
+	SifCallRpc(&cd0, AUDSRV_LOAD_ADPCM, 0, sbuff, 12, sbuff, 16, _audsrv_intr, 0);
 	SifFreeIopHeap(iop_addr);
 
 	if(sbuff[0] != 0) 
