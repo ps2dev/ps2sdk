@@ -365,7 +365,11 @@ void fioGetStatFiller(apa_cache *clink, iox_stat_t *stat)
 	stat->mode=clink->header->type;
 	stat->attr=clink->header->flags;
 	stat->hisize=0;
-	stat->size=clink->header->length;
+	u64 size = clink->header->length;
+	size *= 1024;
+	stat->size=size & 0xFFFFFFFF;
+	size >>= 32;
+	stat->hisize=size & 0xFFFFFFFF;
 	header=clink->header;
 	memcpy(&stat->ctime, &clink->header->created, sizeof(ps2time));
 	memcpy(&stat->atime, &clink->header->created, sizeof(ps2time));
