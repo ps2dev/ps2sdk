@@ -10,35 +10,134 @@
 # $Id$
 # USB Driver function prototypes and constants.
 */
-
-#if !defined(_USBD_H)
-#define _USBD_H
+#ifndef __USBD_H__
+#define __USBD_H__
 
 #include "irx.h"
 
 #define usbd_IMPORTS_start DECLARE_IMPORT_TABLE(usbd,1,1)
 #define usbd_IMPORTS_end END_IMPORT_TABLE
 
-/* 
- * RC5Stint Note: This section of comments and #defines were copied 
- * verbatim from the file include/linux/usb.h in the PS2 Linux Kit. 
- */
+typedef unsigned int uint32;
+typedef unsigned short uint16;
+typedef unsigned char uint8;
+typedef signed int int32;
+typedef signed short int16;
+typedef signed char int8;
 
-/* USB constants */
+typedef struct {
+	uint8  requesttype;
+	uint8  request;
+	uint16 value;
+	uint16 index;
+	uint16 length;
+} UsbDeviceRequest __attribute__ ((packed));
+
+typedef void (*UsbCallbackProc)(int result, int count, void *arg);
+
+typedef struct {
+	uint8 bLength;
+	uint8 bDescriptorType;
+	uint8 bNbrPorts;
+	uint8 wHubCharacteristicsLb;
+	uint8 wHubCharacteristicsHb;
+	uint8 bPwrOn2PwrGood;
+	uint8 bHubContrCurrent;
+	uint8 deviceRemovable[8]; // arbitrary number, depends on number of ports
+} UsbHubDescriptor __attribute__ ((packed));
+
+
+/* USB driver bus event listener structure */
+typedef struct _UsbDriver {
+	struct _UsbDriver *next, *prev;
+
+	/* short sweet name for your driver, like "usbmouse" or "pl2301" */
+	char *name;
+
+	int (*probe)(int devID);
+
+	int (*connect)(int devID);
+
+	int (*disconnect)(int devID);
+	uint32 reserved1;
+	uint32 reserved2;
+	uint32 reserved3;
+	uint32 reserved4;
+	uint32 reserved5;
+	void *gp;
+} UsbDriver __attribute__ ((packed));
+
+typedef struct {
+	uint8 bLength;
+	uint8 bDescriptorType;
+	uint16 bcdUSB;
+	uint8 bDeviceClass;
+	uint8 bDeviceSubClass;
+	uint8 bDeviceProtocol;
+	uint8 bMaxPacketSize0;
+	uint16 idVendor;
+	uint16 idProduct;
+	uint16 bcdDevice;
+	uint8 iManufacturer;
+	uint8 iProduct;
+	uint8 iSerialNumber;
+	uint8 bNumConfigurations;
+} UsbDeviceDescriptor __attribute__ ((packed));
+
+typedef struct {
+	uint8 bLength;
+	uint8 bDescriptorType;
+	//uint8 wTotalLengthLb;
+	//uint8 wTotalLengthHb;
+	uint16 wTotalLength; // apparently we can expect this to be aligned, for some reason
+	uint8 bNumInterfaces;
+	uint8 bConfigurationValue;
+	uint8 iConfiguration;
+	uint8 bmAttributes;
+	uint8 maxPower;
+} UsbConfigDescriptor __attribute__ ((packed));
+
+typedef struct {
+	uint8 bLength;
+	uint8 bDescriptorType;
+	uint8 bInterfaceNumber;
+	uint8 bAlternateSetting;
+	uint8 bNumEndpoints;
+	uint8 bInterfaceClass;
+	uint8 bInterfaceSubClass;
+	uint8 bInterfaceProtocol;
+	uint8 iInterface;
+} UsbInterfaceDescriptor __attribute__ ((packed));
+
+typedef struct {
+	uint8 bLength;
+	uint8 bDescritorLength;
+	uint8 bEndpointAddress;
+	uint8 bmAttributes;
+	uint8 wMaxPacketSizeLB;
+	uint8 wMaxPacketSizeHB;
+	uint8 bInterval;
+} UsbEndpointDescriptor __attribute__ ((packed));
+
+typedef struct {
+	uint8  bLength;
+	uint8  bDescriptorType;
+	uint16 wData[1];
+} UsbStringDescriptor __attribute__ ((packed));
 
 /*
  * Device and/or Interface Class codes
  */
 #define USB_CLASS_PER_INTERFACE		0	/* for DeviceClass */
-#define USB_CLASS_AUDIO			1
-#define USB_CLASS_COMM			2
-#define USB_CLASS_HID			3
-#define USB_CLASS_PHYSICAL		5
-#define USB_CLASS_PRINTER		7
+#define USB_CLASS_AUDIO				1
+#define USB_CLASS_COMM				2
+#define USB_CLASS_HID				3
+#define USB_CLASS_PHYSICAL			5
+#define USB_CLASS_PRINTER			7
 #define USB_CLASS_MASS_STORAGE		8
-#define USB_CLASS_HUB			9
-#define USB_CLASS_DATA			10
-#define USB_CLASS_APP_SPEC		0xfe
+#define USB_CLASS_HUB				9
+#define USB_CLASS_DATA				10
+#define USB_CLASS_APP_SPEC			0xfe
 #define USB_CLASS_VENDOR_SPEC		0xff
 
 /*
@@ -57,99 +156,12 @@
 #define USB_RECIP_ENDPOINT		0x02
 #define USB_RECIP_OTHER			0x03
 
-/*
- * USB directions
- */
-#define USB_DIR_OUT			0
-#define USB_DIR_IN			0x80
+#define USB_ENDPOINT_XFER_CONTROL		0
+#define USB_ENDPOINT_XFER_ISOC			1
+#define USB_ENDPOINT_XFER_BULK			2
+#define USB_ENDPOINT_XFER_INT			3
+#define USB_ENDPOINT_XFERTYPE_MASK		3
 
-/*
- * Descriptor types
- */
-#define USB_DT_DEVICE			0x01
-#define USB_DT_CONFIG			0x02
-#define USB_DT_STRING			0x03
-#define USB_DT_INTERFACE		0x04
-#define USB_DT_ENDPOINT			0x05
-
-#define USB_DT_HID			(USB_TYPE_CLASS | 0x01)
-#define USB_DT_REPORT			(USB_TYPE_CLASS | 0x02)
-#define USB_DT_PHYSICAL			(USB_TYPE_CLASS | 0x03)
-#define USB_DT_HUB			(USB_TYPE_CLASS | 0x09)
-
-/*
- * Descriptor sizes per descriptor type
- */
-#define USB_DT_DEVICE_SIZE		18
-#define USB_DT_CONFIG_SIZE		9
-#define USB_DT_INTERFACE_SIZE		9
-#define USB_DT_ENDPOINT_SIZE		7
-#define USB_DT_ENDPOINT_AUDIO_SIZE	9	/* Audio extension */
-#define USB_DT_HUB_NONVAR_SIZE		7
-#define USB_DT_HID_SIZE			9
-
-/*
- * Endpoints
- */
-#define USB_ENDPOINT_NUMBER_MASK	0x0f	/* in bEndpointAddress */
-#define USB_ENDPOINT_DIR_MASK		0x80
-
-#define USB_ENDPOINT_XFERTYPE_MASK	0x03	/* in bmAttributes */
-#define USB_ENDPOINT_XFER_CONTROL	0
-#define USB_ENDPOINT_XFER_ISOC		1
-#define USB_ENDPOINT_XFER_BULK		2
-#define USB_ENDPOINT_XFER_INT		3
-
-/*
- * USB Packet IDs (PIDs)
- */
-/* 
- * RC5Stint Note: some of these PIDs are for USB 2.0.
- * As far as I know, they may not apply to USBD.IRX.
- */
-#define USB_PID_UNDEF_0                        0xf0
-#define USB_PID_OUT                            0xe1
-#define USB_PID_ACK                            0xd2
-#define USB_PID_DATA0                          0xc3
-
-#define USB_PID_PING                           0xb4	/* USB 2.0 */
-
-#define USB_PID_SOF                            0xa5
-
-#define USB_PID_NYET                           0x96	/* USB 2.0 */
-#define USB_PID_DATA2                          0x87	/* USB 2.0 */
-#define USB_PID_SPLIT                          0x78	/* USB 2.0 */
-
-#define USB_PID_IN                             0x69
-#define USB_PID_NAK                            0x5a
-#define USB_PID_DATA1                          0x4b
-#define USB_PID_PREAMBLE                       0x3c	/* Token mode */
-
-#define USB_PID_ERR                            0x3c	/* USB 2.0: handshake mode */
-
-#define USB_PID_SETUP                          0x2d
-#define USB_PID_STALL                          0x1e
-
-#define USB_PID_MDATA                          0x0f	/* USB 2.0 */
-
-/*
- * Standard requests
- */
-#define USB_REQ_GET_STATUS		0x00
-#define USB_REQ_CLEAR_FEATURE		0x01
-#define USB_REQ_SET_FEATURE		0x03
-#define USB_REQ_SET_ADDRESS		0x05
-#define USB_REQ_GET_DESCRIPTOR		0x06
-#define USB_REQ_SET_DESCRIPTOR		0x07
-#define USB_REQ_GET_CONFIGURATION	0x08
-#define USB_REQ_SET_CONFIGURATION	0x09
-#define USB_REQ_GET_INTERFACE		0x0A
-#define USB_REQ_SET_INTERFACE		0x0B
-#define USB_REQ_SYNCH_FRAME		0x0C
-
-/*
- * HID requests
- */
 #define USB_REQ_GET_REPORT		0x01
 #define USB_REQ_GET_IDLE		0x02
 #define USB_REQ_GET_PROTOCOL		0x03
@@ -157,278 +169,36 @@
 #define USB_REQ_SET_IDLE		0x0A
 #define USB_REQ_SET_PROTOCOL		0x0B
 
-// Note: end of verbatim copy from PS2 Linux Kit
-
-/* 
- * RC5Stint Note: These structs are modified versions of the structs 
- * in the file include/linux/usb.h in the PS2 Linux Kit.  They were 
- * modified to fit the structures used by USBD.IRX, and to use the 
- * typedefs from Gustavo Scotti's psx2lib.
- */
-
-typedef struct _UsbDeviceRequest {
-	u8 requesttype;
-	u8 request;
-	u16 value;
-	u16 index;
-	u16 length;
-} UsbDeviceRequest __attribute__ ((packed));
-
-/* Device descriptor */
-typedef struct _UsbDeviceDescriptor {
-	u8  bLength;
-	u8  bDescriptorType;
-	u16 bcdUSB;
-	u8  bDeviceClass;
-	u8  bDeviceSubClass;
-	u8  bDeviceProtocol;
-	u8  bMaxPacketSize0;
-	u16 idVendor;
-	u16 idProduct;
-	u16 bcdDevice;
-	u8  iManufacturer;
-	u8  iProduct;
-	u8  iSerialNumber;
-	u8  bNumConfigurations;
-} UsbDeviceDescriptor __attribute__ ((packed));
-
-/* Configuration descriptor information.. */
-typedef struct _UsbConfigDescriptor {
-	u8  bLength;
-	u8  bDescriptorType;
-	u16 wTotalLength;
-	u8  bNumInterfaces;
-	u8  bConfigurationValue;
-	u8  iConfiguration;
-	u8  bmAttributes;
-	u8  MaxPower;
 /*
- * RC5Stint Note: These have been commented out because USBD.IRX
- * does not have them in its structures.
+ * USB directions
  */
-/*	struct usb_interface *interface; */
+#define USB_DIR_OUT					0
+#define USB_DIR_IN					0x80
+#define USB_ENDPOINT_DIR_MASK		0x80
 
-/*	unsigned char *extra; */	/* Extra descriptors */
-/*	int extralen; */
-} UsbConfigDescriptor __attribute__ ((packed));
+#define USB_DT_DEVICE		   1
+#define USB_DT_CONFIG		   2
+#define USB_DT_STRING		   3
+#define USB_DT_INTERFACE	   4
+#define USB_DT_ENDPOINT		   5
+#define USB_DT_HUB			0x29
 
-/* Interface descriptor */
-typedef struct _UsbInterfaceDescriptor {
-	u8  bLength;
-	u8  bDescriptorType;
-	u8  bInterfaceNumber;
-	u8  bAlternateSetting;
-	u8  bNumEndpoints;
-	u8  bInterfaceClass;
-	u8  bInterfaceSubClass;
-	u8  bInterfaceProtocol;
-	u8  iInterface;
-/*
- * RC5Stint Note: These have been commented out because USBD.IRX
- * does not have them in its structures.
- */
-/*	UsbEndpointDescriptor *endpoint; */
+#define USB_CLASS_HUB		9
 
-/*	unsigned char *extra; */	/* Extra descriptors */
-/*	int extralen; */
-} UsbInterfaceDescriptor __attribute__ ((packed));
+#define USB_RT_HUB		(USB_TYPE_CLASS | USB_RECIP_DEVICE)
+#define USB_RT_PORT		(USB_TYPE_CLASS | USB_RECIP_OTHER)
 
-typedef struct _UsbInterface {
-/*
- * RC5Stint Note: These have been commented out because USBD.IRX
- * does not have them in its structures.
- */
-/*	UsbInterfaceDescriptor *altsetting; */
-
-	int act_altsetting;		/* active alternate setting */
-	int num_altsetting;		/* number of alternate settings */
-	int max_altsetting;		/* total memory allocated */
- 
-/*
- * RC5Stint Note: These have been commented out because USBD.IRX
- * does not have them in its structures.
- */
-/*	UsbDriver *driver; */
-/*	void *private_data; */
-} UsbInterface __attribute__ ((packed));
-
-/* Endpoint descriptor */
-typedef struct _UsbEndpointDescriptor {
-	u8  bLength;
-	u8  bDescriptorType;
-	u8  bEndpointAddress;
-	u8  bmAttributes;
-	u8 wMaxPacketSizeLB;
-	u8 wMaxPacketSizeHB;
-	u8  bInterval;
-/*
- * RC5Stint Note: These have been commented out because USBD.IRX
- * does not have them in its structures.
- */
-/*	u8  bRefresh; */
-/*	u8  bSynchAddress; */
-
-/*	unsigned char *extra; */   /* Extra descriptors */
-/*	int extralen; */
-} UsbEndpointDescriptor __attribute__ ((packed));
-
-/* String descriptor */
-typedef struct _UsbStringDescriptor {
-	u8  bLength;
-	u8  bDescriptorType;
-	u16 wData[1];
-} UsbStringDescriptor __attribute__ ((packed));
-
-/* RC5Stint Note: end of modified copy from PS2 Linux Kit */
-
-/* 
- * RC5Stint Note: Here are the function prototypes and 
- * typedefs specific to USBD.IRX.
- */
-
-/* USB driver bus event listener structure */
-typedef struct _UsbDriver {
-	/*
-	 * These pointers are used internally by USBD.IRX to keep a 
-	 * doubly linked list of drivers.  They should be set to NULL 
-	 * before the driver is registered.  USBD.IRX will set them as 
-	 * necessary.
-	 *
-	 * Note: leave them alone after your driver has been registered!
-	 */
-	struct _UsbDriver *next, *prev;
-
-	/* short sweet name for your driver, like "usbmouse" or "pl2301" */
-	char *name;
-
-	/* 
-	 * This function pointer is called when a device is added to the bus.
-	 * The probe function should examine the device's static descriptors, 
-	 * to see if it can support the device.
-	 *
-	 * It should return a 1 if it can support the device, 0 if it cannot.
-	 */
-	int (*probe)(int devID);
-
-	/*
-	 * This function pointer is called after the probe function returns a 1
-	 * for a particular device ID.  The connect function should allocate any 
-	 * private data needed to keep configuration for this device ID, set the 
-	 * private data pointer for the device, and open any endpoints necessary 
-	 * to communicate with this device.
-	 *
-	 * It should return 0 if successful, or -1 if not successful.
-	 */
-	int (*connect)(int devID);
-
-	/*
-	 * This function pointer is called after a connected device is removed
-	 * from the bus.  The disconnect function should deallocate any private 
-	 * data needed to keep configuration for this device ID, and close any 
-	 * endpoints that were left open to communicate with this device.
-	 *
-	 * It should return 0 if successful, or -1 if not successful.
-	 */
-	int (*disconnect)(int devID);
-
-	/*
-	 * None of the drivers I've reverse-engineered touch the next 20 bytes.
-	 * They don't seem to be used for anything.
-	 */
-	u8 reserved[20];
-
-	/*
-	 * It is used, but some drivers leave it unset.  For this reason, 
-	 * it doesn't seem to be all that important.
-	 *
-	 * Any help figuring out what it is for would be greatly appreciated.
-	 */
-	u32 gp;
-} UsbDriver __attribute__ ((packed));
-
-/* 
- * initialize USBD.IRX
- * Note: UsbInit is automatically called first whenever USBD.IRX is loaded.
- * There should never be a need to reinitialize the driver.  In fact, it may 
- * not even work.  But I'm providing the function hook anyhow. <shrug>
- */
-int UsbInit(void);
-
-/*
- * These two functions are used to register and unregister USB device drivers to
- * listen for USB bus events.  The events are device probe, connect, and disconnect.
- * They return USB_RC_OK if successful.
- */
-s32 UsbRegisterDriver(UsbDriver *driver);
-#define I_UsbRegisterDriver DECLARE_IMPORT(4,UsbRegisterDriver)
-
-s32 UsbUnregisterDriver(UsbDriver *driver);
-#define I_UsbUnregisterDriver DECLARE_IMPORT(5,UsbUnregisterDriver)
-
-/*
- * This function is used to get the static descriptors for the specific USB 
- * device.  These descriptors identify the device uniquely and help determine 
- * what type of device we are dealing with, and what its capabilities and 
- * features are.
- */
-void *UsbGetDeviceStaticDescriptor(int devID, void *data, u8 type);
-#define I_UsbGetDeviceStaticDescriptor DECLARE_IMPORT(6,UsbGetDeviceStaticDescriptor)
-
-
-/*
- * These two functions are used to assign relevant data to a specific device.  
- * The type of data is entirely up to the caller.  For example, a particular 
- * USB device driver may store configuration data for each specific device 
- * under its control.
- */
-s32 UsbSetDevicePrivateData(s32 devID, void *data);
-#define I_UsbSetDevicePrivateData DECLARE_IMPORT(7,UsbSetDevicePrivateData)
-
-void *UsbGetDevicePrivateData(s32 devID);
-#define I_UsbGetDevicePrivateData DECLARE_IMPORT(8,UsbGetDevicePrivateData)
-
-
-/* 
- * This function returns an endpoint ID for the device ID and endpoint descriptor 
- * passed in.  This endpoint ID is then used when transfering data to the device, 
- * and to close the endpoint.
- */
-s32 UsbOpenEndpoint(s32 devID, UsbEndpointDescriptor *epDesc);
-#define I_UsbOpenEndpoint DECLARE_IMPORT(9, UsbOpenEndpoint)
-
-int UsbOpenBulkEndpoint(int devID, UsbEndpointDescriptor *epDesc);
-#define I_UsbOpenBulkEndpoint DECLARE_IMPORT(12,UsbOpenBulkEndpoint)
-
-s32 UsbCloseEndpoint(s32 epID);
-#define I_UsbCloseEndpoint DECLARE_IMPORT(10, UsbCloseEndpoint)
-
-
-/*
- * The data transfer function uses a callback of this type to notify the caller 
- * that the transfer is done, whether or not it was successful, and how many 
- * bytes were actually transferred.
- */
-typedef	void (*UsbTransferDoneCallBack)(int resultCode, int bytes, void *arg);
-
-/*
- * This function is used for all types of USB data transfers.  Which type of 
- * transfer is determined by the parameters that are passed in.  The types are:
- * control, isochronous, interrupt, and bulk transfers.
- */
-s32 UsbTransfer(s32 epID, void *data, s32 length, void *optionalData, UsbTransferDoneCallBack doneCB, void *arg);
-#define I_UsbTransfer DECLARE_IMPORT(11,UsbTransfer)
-
-	
-/* 
- * Note: The values of these #defines were found by reverse engineering 
- * the file PS2USBC.IRX in the Unreal Tournament for PS2 CD, and the files 
- * USBKEYBD.IRX and USBMOUSE.IRX in other demo and game CDs.
- */
-
-/* control, isochronous, bulk, and interrupt transfers */
-
-
-/* result codes for transfer done callback */
+#define USB_REQ_GET_STATUS			0x00
+#define USB_REQ_CLEAR_FEATURE		0x01
+#define USB_REQ_SET_FEATURE			0x03
+#define USB_REQ_SET_ADDRESS			0x05
+#define USB_REQ_GET_DESCRIPTOR		0x06
+#define USB_REQ_SET_DESCRIPTOR		0x07
+#define USB_REQ_GET_CONFIGURATION	0x08
+#define USB_REQ_SET_CONFIGURATION	0x09
+#define USB_REQ_GET_INTERFACE		0x0A
+#define USB_REQ_SET_INTERFACE		0x0B
+#define USB_REQ_SYNCH_FRAME			0x0C
 
 #define USB_RC_OK			0x000	// No Error
 #define USB_RC_CRC			0x001	// Bad CRC
@@ -440,34 +210,56 @@ s32 UsbTransfer(s32 epID, void *data, s32 length, void *optionalData, UsbTransfe
 #define USB_RC_WRONGPID		0x007	// Unexpected PID 
 #define USB_RC_DATAOVER		0x008	// Data Overrun
 #define USB_RC_DATAUNDER	0x009	// Data Underrun
-
-#define USB_RC_BUFFOVER		0x00c	// Buffer Overrun
-#define USB_RC_BUFFUNDER	0x00d	// Buffer Underrun
+#define USB_RC_BUFFOVER		0x00C	// Buffer Overrun
+#define USB_RC_BUFFUNDER	0x00D	// Buffer Underrun
+#define USB_RC_NOTACCESSED	0x00E	// Not Accessed
+#define USB_RC_NOTACCESSED2	0x00F	// Not Accessed
 
 #define USB_RC_BADDEV		0x101	// Invalid device ID
 #define USB_RC_BADPIPE		0x102	// Invalid pipe ID
 #define USB_RC_BADLENGTH	0x103	// Invalid length
 #define USB_RC_BADDRIVER	0x104	// Invalid driver
 #define USB_RC_BADCONTEXT	0x105	// Invalid context
+#define USB_RC_BADALIGN		0x106
+#define USB_RC_BADHUBDEPTH	0x107
 
-#define USB_RC_ED			0x111	// No space for Endpoint Descriptor
+//#define USB_RC_ED			0x111	// No space for Endpoint Descriptor
 #define USB_RC_IOREQ		0x112	// No space for Input/Output Request
 #define USB_RC_BADOPTION	0x113	// Bad Option
 
 #define USB_RC_BUSY			0x121	// Device or Bus Busy
 #define USB_RC_ABORTED		0x122	// Operation Aborted
 
-#define USB_RC_NOSUPPORT	0x131	// Unsupported Operation (not implemented)
-#define USB_RC_UNKNOWN		0x132	// Unknown Error (USBD.IRX doesn't know what went wrong)
+//#define USB_RC_NOSUPPORT	0x131	// Unsupported Operation (not implemented)
+//#define USB_RC_UNKNOWN		0x132	// Unknown Error (USBD.IRX doesn't know what went wrong)
 
-/* Unicode Language ID for English (United States) */
-#define USB_LANG_ID_ENGLISH_USA 0x0409
+int UsbRegisterDriver(UsbDriver *driver);
+int UsbUnregisterDriver(UsbDriver *driver);
+void *UsbGetDeviceStaticDescriptor(int devId, void *data, uint8 type);
+int UsbGetDeviceLocation(int devId, uint8 *path);
+int UsbSetDevicePrivateData(int devId, void *data);
+void *UsbGetDevicePrivateData(int devId);
+int UsbOpenEndpoint(int devId, UsbEndpointDescriptor *desc);
+int UsbCloseEndpoint(int id);
+int UsbTransfer(int id, void *data, uint32 len, void *option, UsbCallbackProc callback, void *cbArg);
+int UsbOpenEndpointAligned(int devId, UsbEndpointDescriptor *desc);
 
-/* mask for configuration attributes */
-#define USB_CONFIG_ATTRIBUTE_MASK 0x60
+// these aren't implemented:
+int UsbRegisterAutoloader(UsbDriver *drv);
+int UsbUnregisterAutoloader(UsbDriver *drv);
+int UsbChangeThreadPriority(void);
 
-/* Indicates the passed LDD had invalid parameter, i.e. next/prev not NULL */
-#define USBD_ERROR_LDD_INVALID -1
-#define USBD_ERROR_UNLOCKED    -2
 
-#endif	/* !_USBD_H */
+#define I_UsbRegisterDriver DECLARE_IMPORT(4,UsbRegisterDriver)
+#define I_UsbUnregisterDriver DECLARE_IMPORT(5,UsbUnregisterDriver)
+#define I_UsbGetDeviceStaticDescriptor DECLARE_IMPORT(6,UsbGetDeviceStaticDescriptor)
+#define I_UsbSetDevicePrivateData DECLARE_IMPORT(7,UsbSetDevicePrivateData)
+#define I_UsbGetDevicePrivateData DECLARE_IMPORT(8,UsbGetDevicePrivateData)
+#define I_UsbOpenEndpoint DECLARE_IMPORT(9, UsbOpenEndpoint)
+#define I_UsbCloseEndpoint DECLARE_IMPORT(10, UsbCloseEndpoint)
+#define I_UsbTransfer DECLARE_IMPORT(11,UsbTransfer)
+#define I_UsbOpenEndpointAligned DECLARE_IMPORT(12,UsbOpenEndpointAligned)
+
+#endif // __USBD_H__
+
+

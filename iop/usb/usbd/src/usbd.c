@@ -8,409 +8,272 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 # $Id$
-# USB driver for PS2
-# This file contains the exported interface and usbd functionality
+# USB Driver function prototypes and constants.
 */
+#include "usbdpriv.h"
+#include "mem.h"
+#include "hcd.h"
+#include "hub.h"
+#include "usbio.h"
 
-#include "types.h"
-#include "defs.h"
-#include "irx.h"
-#include "loadcore.h"
-#include "thbase.h"
-#include "thevent.h"
-#include "thsemap.h"
-#include "intrman.h"
 #include "stdio.h"
 #include "sysclib.h"
-#include "usbd.h"
-#include "usbhw.h"
-#include "sysmem.h"
-#include "usbd_mod.h"
+#include "thsemap.h"
+#include "loadcore.h"
 
-int hcd_alloc_data(void);
-int hcd_setup(void);
+#define WELCOME_STR "FreeUsbd v.0.1.0\n"
 
-static u8 *mem_pool;
+extern struct irx_export_table _exp_usbd;
 
-static dev_data_t *devs;
-static dev_data_t *free_devs;
-static dev_data_t *used_devs;
+UsbdConfig usbConfig = {
+	0x20,	// maxDevices
+	0x40,	// maxEndpoints
+	0x80,	// maxTransDesc
+	0x80,	// maxIsoTransfDesc
+	0x100,	// maxIoReqs
+	0x200,	// maxStaticDescSize
+	8,		// maxHubDevices
+	8,		// maxPortsPerHub
 
-extern u32 g_num_devices;
-extern u32 g_conf_size;
-extern int g_lock_sema;
-
-/* Define a root ldd, this is never used as a target */
-/* Just makes managing the list easier :) */
-UsbDriver g_root_ldd = { 
-    NULL, NULL,
-    "Root",
-    NULL,
-    NULL,
-    NULL,
-    { 0 },
-    0
+	0x1E,	// hcdThreadPrio
+	0x24	// cbThreadPrio
 };
 
-static void usbd_dump_dev(dev_data_t *dev)
+int usbdSema;
 
-{
-   printf("Device %p, devno %ld, dev_ldd %p, next %p, prev %p, desc %p\n", 
-	 dev, dev->devno, dev->dev_ldd, dev->next_dev, dev->prev_dev, dev->static_desc);
+int usbdLock(void) {
+	return WaitSema(usbdSema);
 }
 
-void usbd_debug_print_devs(void)
-
-{
-   dev_data_t *dev;
-
-   dev = used_devs;
-
-   printf("used_devs %p, free_devs %p\n", used_devs, free_devs);
-
-   printf("Used devices\n");
-   while(dev)
-   {
-      usbd_dump_dev(dev);
-      dev = dev->next_dev;
-   }
-
-   printf("Free devices\n");
-   dev = free_devs;
-   while(dev)
-   {
-      usbd_dump_dev(dev);
-      dev = dev->next_dev;
-   }
+int usbdUnlock(void) {
+	return SignalSema(usbdSema);
 }
 
-/* Returns the device structure */
-dev_data_t *usbd_alloc_dev(void)
-
-{
-   dev_data_t *dev;
-
-   if(free_devs == NULL)
-   {
-      M_PRINTF("No free devices left\n");
-      return NULL;
-   }
-
-   LOCK(g_lock_sema, NULL);
-
-   /* Get next device and unlink from free chain */
-   dev = free_devs;
-   if(dev->next_dev != NULL)
-   {
-      dev->next_dev->prev_dev = NULL;
-   }
-   
-   /* Free list will point to NULL if this was the last device */
-   free_devs = dev->next_dev;
-
-   if(used_devs)
-   {
-      used_devs->prev_dev = dev;
-   }
-
-   dev->next_dev = used_devs;
-   dev->prev_dev = NULL;
-   used_devs = dev;
-
-   UNLOCK(g_lock_sema);
-
-   return dev;
+int doGetDeviceLocation(Device *dev, uint8 *path) {
+	uint8 tempPath[6];
+	int count, cpCount;
+	for (count = 0; (count < 6) && (dev != memPool.deviceTreeRoot); count++) {
+		tempPath[count] = dev->attachedToPortNo;
+		dev = dev->parent;
+	}
+	if (dev == memPool.deviceTreeRoot) {
+		for (cpCount = 0; cpCount < 7; cpCount++) {
+			if (cpCount < count)
+				path[cpCount] = tempPath[count - (cpCount + 1)];
+			else
+				path[cpCount] = 0;
+		}
+		return 0;
+	} else
+		return USB_RC_BADHUBDEPTH;
 }
 
-/* Connect the device, starts off a callback chain to get the static data etc. */
-/* Will return almost immediately irrespective of whether the connect was successful */
-int usbd_connect_dev(dev_data_t *dev)
+void processDoneQueue_IsoTd(HcIsoTD *arg) {
+	uint32 tdHcRes = arg->hcArea >> 28;
+	uint32 pswRes = arg->psw[0] >> 12;
+	uint32 pswOfs = arg->psw[0] & 0x7FF;
 
-{
-   if(dev == NULL)
-   {
-      M_PRINTF("Cannot connect a NULL device\n");
-      return -1;
-   }
+	IoRequest *listStart = NULL, *listEnd = NULL;
 
-   LOCK(g_lock_sema, -1);
+	IoRequest *req = memPool.hcIsoTdToIoReqLUT[arg - memPool.hcIsoTdBuf];
+	if (!req)
+		return;
+	
+	memPool.hcIsoTdToIoReqLUT[arg - memPool.hcIsoTdBuf] = NULL;
+	freeIsoTd(arg);
+	req->transferedBytes = 0;
+	req->resultCode = (pswRes << 4) | tdHcRes;
 
-   /* Setup device, read in static descriptors etc. */
-   /* Run through LDD chain and call in sequence */
+	if ((tdHcRes == USB_RC_OK) && ((pswRes == USB_RC_OK) || (pswRes == USB_RC_DATAUNDER))) {
+		if ((req->correspEndpoint->hcEd.hcArea & HCED_DIR_MASK) == HCED_DIR_IN)
+			req->transferedBytes = pswOfs;
+		else
+			req->transferedBytes = req->length;
+	}
 
-   UNLOCK(g_lock_sema);
+	req->prev = listEnd;
+	if (listEnd)
+		listEnd->next = req;
+	else
+		listStart = req;
+	req->next = NULL;
+	listEnd = req;
 
-   return 0;
+	HcED *ed = &req->correspEndpoint->hcEd;
+	if (ED_HALTED(req->correspEndpoint->hcEd)) {
+		HcIsoTD *curTd = (HcIsoTD *)((uint32)ed->tdHead & ~0xF);
+
+		while (curTd && (curTd != (HcIsoTD*)ed->tdTail)) {
+			HcIsoTD *nextTd = curTd->next;
+			freeIsoTd(curTd);
+
+			IoRequest *req = memPool.hcIsoTdToIoReqLUT[curTd - memPool.hcIsoTdBuf];
+			if (req) {
+				memPool.hcIsoTdToIoReqLUT[arg - memPool.hcIsoTdBuf] = NULL;
+				IoRequest *listPos;
+				for (listPos = listStart; listPos != NULL; listPos = listPos->next)
+					if (listPos == req)
+						break;
+				if (listPos == NULL) {
+					req->resultCode = USB_RC_ABORTED;
+					req->prev = listEnd;
+					if (listEnd)
+						listEnd->next = req;
+					else
+						listStart = req;
+					req->next = NULL;
+					listEnd = req;
+				}
+			}
+			curTd = nextTd;
+		}
+		ed->tdHead = ed->tdTail;
+	}
+
+	IoRequest *listPos = listStart;
+	while (listPos) {
+		IoRequest *listNext = listPos->next;
+		listPos->busyFlag = 0;
+		if (listPos->correspEndpoint->correspDevice) {
+			if (listPos->callbackProc)
+				listPos->callbackProc(listPos);
+		} else
+			freeIoRequest(listPos);
+		listPos = listNext;
+	}
+	checkTdQueue(ISOTD_QUEUE);
 }
 
-int usbd_free_dev(dev_data_t *dev)
+void processDoneQueue_GenTd(HcTD *arg) {
+	IoRequest *req;
+	IoRequest *firstElem = NULL, *lastElem = NULL;
 
-{
-   if(dev == NULL)
-   {
-      M_PRINTF("Cannot free a NULL device\n");
-      return -1;
-   }
+	uint32 hcRes;
+	
+	if ((req = memPool.hcTdToIoReqLUT[arg - memPool.hcTdBuf])) {
+		memPool.hcTdToIoReqLUT[arg - memPool.hcTdBuf] = NULL;
+		
+		uint32 tdHcArea = arg->HcArea;
+		
+		if (arg->bufferEnd && (tdHcArea & 0x180000)) { // dir != SETUP
+			if (arg->curBufPtr == 0) // transfer successful
+				req->transferedBytes = req->length;
+			else
+				req->transferedBytes = (uint8 *)arg->curBufPtr - (uint8 *)req->destPtr;
+		}
+		hcRes = tdHcArea >> 28;
+		freeTd(arg);
 
-   LOCK(g_lock_sema, -1);
+		if (req->resultCode == USB_RC_OK)
+			req->resultCode = hcRes;
 
-   if(dev->next_dev)
-   {
-      dev->next_dev->prev_dev = dev->prev_dev;
-   }
+		if (hcRes || ((tdHcArea & 0xE00000) != 0xE00000)) { // E00000: interrupts disabled
+			req->prev = lastElem;
+			if (lastElem)
+				lastElem->next = req;
+			else
+				firstElem = req;
+			req->next = NULL;
+			lastElem = req;
+		}
 
-   if(dev->prev_dev == NULL)
-   {
-      used_devs = dev->next_dev;
-   }
-   else
-   {
-      dev->prev_dev->next_dev = dev->next_dev;
-   }
+		HcED *ed = &req->correspEndpoint->hcEd;
+		if (hcRes && ED_HALTED(req->correspEndpoint->hcEd)) {
+			HcTD *tdListPos = (HcTD*)((uint32)ed->tdHead & ~0xF);
+			while (tdListPos && (tdListPos != ed->tdTail)) {
+				HcTD *nextTd = tdListPos->next;
+				freeTd(tdListPos);
 
-   /* Relink at head of free list */
-   dev->next_dev = free_devs;
-   if(dev->next_dev)
-   {
-      dev->next_dev->prev_dev = dev;
-   }
+				IoRequest *req = memPool.hcTdToIoReqLUT[tdListPos - memPool.hcTdBuf];
+				if (req) {
+					memPool.hcTdToIoReqLUT[tdListPos - memPool.hcTdBuf] = NULL;
 
-   dev->prev_dev = NULL;
-   free_devs = dev;
+					IoRequest *listPos;
+					for (listPos = firstElem; listPos != NULL; listPos = listPos->next)
+						if (listPos == req)
+							break;
 
-   UNLOCK(g_lock_sema);
+					if (!listPos) {
+						req->resultCode = USB_RC_ABORTED;
+						req->prev = lastElem;
+						if (lastElem)
+							lastElem->next = req;
+						else
+							firstElem = req;
+						req->next = NULL;
+						lastElem = req;
+					}
+				}
+				tdListPos = nextTd;
+			}
+			ed->tdHead = ed->tdTail;
+		}
 
-   return 0;
+		IoRequest *pos = firstElem;
+		while (pos) {
+			pos->busyFlag = 0;
+			Device *dev = pos->correspEndpoint->correspDevice;
+			IoRequest *next = pos->next;
+			if (dev) {
+				if (pos->callbackProc)
+					pos->callbackProc(pos);
+			} else
+				freeIoRequest(pos);
+			pos = next;
+		}
+		checkTdQueue(GENTD_QUEUE);
+	}
 }
 
-void *usbd_alloc_sysmem(u32 size)
+void handleTimerList(void) {
+	TimerCbStruct *timer = memPool.timerListStart;
+	if (timer) {
+		if (timer->delayCount > 0)
+			timer->delayCount--;
 
-{
-   return AllocSysMemory(ALLOC_FIRST, size, NULL);
+		while (memPool.timerListStart && (memPool.timerListStart->delayCount == 0)) {
+			dbg_printf("timer expired\n");
+			timer = memPool.timerListStart;
+
+			memPool.timerListStart = timer->next;
+			if (timer->next)
+				timer->next->prev = NULL;
+			else
+				memPool.timerListEnd = NULL;
+			timer->next = timer->prev = NULL;
+			timer->isActive = 0;
+			timer->callbackProc(timer->callbackArg);
+		}
+	}
+	// disable SOF interrupts if there are no timers left
+	if (memPool.timerListStart == NULL)
+		memPool.ohciRegs->HcInterruptDisable = OHCI_INT_SF;
 }
 
-int usbd_alloc_data(void)
+int _start(int argc, char **argv) {
+	iop_sema_t sema;
 
-{
-   int data_size;
-   int dev_loop;
-   u8 *curr_pool;
+	// todo: parse args
 
-   g_num_devices += 1; /* Take into account the root hub */
+	printf(WELCOME_STR);
 
-   data_size = g_num_devices * sizeof(dev_data_t) + g_conf_size * g_num_devices;
-   mem_pool = usbd_alloc_sysmem(data_size); 
-   if(mem_pool == NULL)
-   {
-      return -1;
-   }
+	dbg_printf("library entries...\n");
 
-   memset(mem_pool, 0, data_size);
-   devs = (dev_data_t *) mem_pool;
-   curr_pool = &mem_pool[g_num_devices * sizeof(dev_data_t)];
+	if (RegisterLibraryEntries(&_exp_usbd) != 0) {
+		dbg_printf("RegisterLibraryEntries failed\n");
+		// todo: handle correctly...
+		return 1;
+	}
 
-   for(dev_loop = 0; dev_loop < g_num_devices; dev_loop++)
-   {
-      devs[dev_loop].devno = dev_loop; /* Statically allocate devices */
-      devs[dev_loop].next_dev = &devs[dev_loop + 1];
-      devs[dev_loop].prev_dev = &devs[dev_loop - 1];
-      devs[dev_loop].static_desc = curr_pool;
-      curr_pool += g_conf_size;
-   }
+    sema.attr = 1;
+	sema.option = 0;
+	sema.initial = 1;
+	sema.max = 1;
+	usbdSema = CreateSema(&sema);
 
-   /* Fix linked list */
-   devs[0].prev_dev = NULL;
-   devs[g_num_devices - 1].next_dev = NULL;
+	hcdInit();
 
-   used_devs = NULL;
-   free_devs = &devs[0];
-
-   return 0;
+	dbg_printf("Init done\n");
+    return 0;
 }
 
-void usbd_dealloc_data(void)
-
-{
-   FreeSysMemory(mem_pool);
-}
-
-int usbd_init(void)
-
-{
-   if(hcd_alloc_data() < 0)
-   {
-      M_PRINTF("Failed to allocate hcd data\n");
-      return -1;
-   }
-
-   if(usbd_alloc_data() < 0)
-   {
-      M_PRINTF("Failed to allocate usbd data\n");
-   }
-
-   if(hcd_setup() < 0)
-   {
-      return -1;
-   }
-
-   return 0;
-}
-
-s32 UsbChangeThreadPriority(s32 p1, s32 p2)
-
-{
-   return 0;
-}
-
-s32 UsbCloseEndpoint(s32 pipeid)
-
-{
-   return 0;
-}
-
-int UsbGetDeviceLocation(s32 devid, u8 *locs)
-
-{
-   return 0;
-}
-
-void *UsbGetDevicePrivateData(s32 devid)
-
-{
-   void *data = NULL;
-
-   if(devid < g_num_devices)
-   {
-      LOCK(g_lock_sema, NULL);
-      data = devs[devid].priv_data;
-      UNLOCK(g_lock_sema);
-   }
-
-   return data;
-}
-
-s32 UsbGetReportDescriptor(s32 devid, s32 config, s32 interface, void **desc)
-
-{
-   return 0;
-}
-
-s32 UsbOpenEndpoint(s32 devid, UsbEndpointDescriptor *desc)
-
-{
-   return 0;
-} 
-
-s32 UsbOpenEndpointAligned(s32 devid, UsbEndpointDescriptor *desc)
-
-{
-   return 0;
-}
-
-s32 UsbRegisterDriver(UsbDriver *ldd)
-
-{
-   UsbDriver *curr_ldd;
-   u32 curr_gp = 0;
-
-   /* Grab $gp register */
-   asm __volatile__ ( 
-	" add %0, $0, $28\n"
-        : "=r"(curr_gp)
-   ); 
-   printf("Register Ldd gp = %08lX\n", curr_gp);
-
-   if((ldd == NULL) || (ldd->next) || (ldd->prev) || (ldd->name == NULL))
-   {
-      return USBD_ERROR_LDD_INVALID;
-   }
-
-   LOCK(g_lock_sema, USBD_ERROR_UNLOCKED);
-   
-   curr_ldd = &g_root_ldd;
-
-   while(curr_ldd->next)
-   {
-      curr_ldd = curr_ldd->next; 
-   }
-
-   /* Found end of chain */
-   curr_ldd->next = ldd;
-   ldd->prev = curr_ldd;
-   ldd->gp = curr_gp;
-
-   UNLOCK(g_lock_sema);
-   
-   return 0;
-}
-
-s32 UsbGetStaticDescriptor(s32 devid, void *data, u8 type)
-
-{
-   return 0;
-}
-
-s32 UsbSetDevicePrivateData(s32 devid, void *data)
-
-{
-   if(devid < g_num_devices)
-   {
-      LOCK(g_lock_sema, USBD_ERROR_UNLOCKED);
-      devs[devid].priv_data = data;
-      UNLOCK(g_lock_sema);
-   }
-   else
-   {
-      return -1;
-   }
-
-   return 0;
-}
-
-s32 UsbTransfer(s32 pipe, void *data, s32 len, void *option, UsbTransferDoneCallBack func, void *cb_arg)
-
-{
-   return 0;
-}
-
-s32 UsbUnregisterDriver(UsbDriver *ldd)
-
-{
-   if(ldd == NULL)
-   {
-      return USBD_ERROR_LDD_INVALID;
-   }
-
-   /* Flush out all waiting transfers for this ldd */
-
-   /* Grab a sema before modifying the ldd list */
-   LOCK(g_lock_sema, USBD_ERROR_UNLOCKED);
-
-   /* Unlink ldd from chain */
-   if(ldd->prev)
-   {
-      ldd->prev->prev = ldd->next;
-   }
-
-   if(ldd->next)
-   {
-      ldd->next->prev = ldd->prev;
-   }
-
-   UNLOCK(g_lock_sema);
-
-   return 0;
-}
-
-/* No idea what these two do, are exported from the irx I had though */
-s32 UsbCall14(s32 param)
-
-{
-   return 0;
-}
-
-s32 UsbCall15(void)
-
-{
-   return 0;
-}
