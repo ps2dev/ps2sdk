@@ -7,9 +7,10 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
+# $Id: $
 # USB Driver function prototypes and constants.
 */
+
 #include "usbdpriv.h"
 #include "mem.h"
 #include "usbio.h"
@@ -322,7 +323,8 @@ int initHardware(void) {
 }
 
 int initHcdStructs(void) {
-	int    i;
+	int		i;
+	HcCA	*hcCommArea;
 	memPool.ohciRegs = (volatile OhciRegs*)OHCI_REG_BASE;
 
 	initHardware();
@@ -347,6 +349,7 @@ int initHcdStructs(void) {
 	uint8 *memBuf	= AllocSysMemory(ALLOC_FIRST, memSize, 0);
 	memset(memBuf, 0, memSize);
 
+	hcCommArea					= (HcCA *)		memBuf;
 	memPool.hcHCCA				= (HcCA *)		((((uint32)memBuf + (uint32)memPool.hcHCCA) & 0x1FFFFFFF) | 0xA0000000);
 	memPool.hcIsoTdBuf			= (HcIsoTD *)	((uint32)memBuf + (uint32)memPool.hcIsoTdBuf);
 	memPool.hcIsoTdBufEnd		= (HcIsoTD *)	((uint32)memBuf + (uint32)memPool.hcIsoTdBufEnd);
@@ -439,7 +442,7 @@ int initHcdStructs(void) {
 		int intrId = i - 31;
 		if (intrId >= 0) {
 			intrId = ((intrId & 1) << 4) | ((intrId & 2) << 2) | (intrId & 4) | ((intrId & 8) >> 2) | ((intrId & 0x10) >> 4);
-			memPool.hcHCCA->InterruptTable[intrId] = ed;
+			hcCommArea->InterruptTable[intrId] = ed;
 		}
 		ed++;
 	}
@@ -455,7 +458,7 @@ int initHcdStructs(void) {
 	ed->hcArea = HCED_SKIP;
 	memPool.hcEdBuf->next = ed; // the isochronous endpoint
 
-	memPool.ohciRegs->HcHCCA = memPool.hcHCCA;
+	memPool.ohciRegs->HcHCCA = hcCommArea;
 	memPool.ohciRegs->HcFmInterval = 0x27782EDF;
 	memPool.ohciRegs->HcPeriodicStart = 0x2A2F;
 	memPool.ohciRegs->HcInterruptEnable = OHCI_INT_MIE | OHCI_INT_RHSC | OHCI_INT_UE | OHCI_INT_WDH | OHCI_INT_SO;
