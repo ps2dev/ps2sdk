@@ -275,6 +275,7 @@ int attachIoReqToEndpoint(Endpoint *ep, IoRequest *req, void *destdata, uint16 l
 	req->destPtr = destdata;
 	req->length  = length;
 	req->resultCode = 0;
+	req->transferedBytes = 0;
 	req->callbackProc = callback;
 
 	req->next = NULL;
