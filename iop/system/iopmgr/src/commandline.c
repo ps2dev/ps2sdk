@@ -163,7 +163,7 @@ void list_fs_devices(int mgrtype)
  *
  *  \param command Pointer to command string.
  */
-void cmdline_handle(char *command)
+void cmdline_handle(char *command, char *arg1)
 {
   if (!strncmp("modlist",command,7))
     list_all_modules();
@@ -190,6 +190,20 @@ void cmdline_handle(char *command)
   else if (!strncmp("help",command,4))
   {
     printf("\nCommands are:\n modlist - List of Loaded Modules\n iomanx  - List iomanx Devices\n ioman   - List ioman Devices\n devices - List all Devices\n libs    - List Registered Libraries\n release - release iopmgr lib if loaded\n help    - This page\n");
+  }
+  else if (!strncmp("unreg",command,7))
+  {
+    if (arg1 != 0)
+    { 
+      printf("unregistering : '%s' - ",arg1);
+      switch(slib_release_library(arg1))
+      {
+        case 0: printf("UnRegistered\n"); break;
+        case -1: printf("Failed to UnRegister\n"); break;
+        case -2: printf("Library Not Present\n"); break;
+      } 
+    }
+    else printf("\nNo Library Specified\n");
   }
   else printf("\nUnknown Command , try 'help'\n");
 }

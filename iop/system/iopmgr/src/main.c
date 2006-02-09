@@ -26,7 +26,7 @@ IRX_ID(IOPMGR_MODNAME, IOPMGR_VERSION_HIGH, IOPMGR_VERSION_LOW);
 
 struct irx_export_table _exp_iopmgr;
 
-extern void cmdline_handle(char *command);
+extern void cmdline_handle(char *command, char *arg1);
 
 /*! \brief Entry point for IRX.
  *  \ingroup iopmgr 
@@ -49,7 +49,14 @@ int _start(int argc, char *argv[])
 
   if (argc > 1)
   { /* Execute in command line mode, so parse command */
-    cmdline_handle(argv[1]);
+    if(argc>2)
+    {
+      cmdline_handle(argv[1],argv[2]);
+    }
+    else
+    {
+      cmdline_handle(argv[1],NULL);
+    }
   }
   else
   { /* no params, so set into resident mode */
