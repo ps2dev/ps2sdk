@@ -328,7 +328,7 @@ struct _lf_search_module_by_address_arg {
 	} p;
 } ALIGNED(16);
 
-int SifSearchModuleByName(const void *ptr)
+int SifSearchModuleByAddress(const void *ptr)
 {
 	struct _lf_search_module_by_address_arg arg;
 	if (SifLoadFileInit() < 0)
