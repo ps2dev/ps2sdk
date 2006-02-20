@@ -25,9 +25,8 @@ int main(int argc, char *argv[])
 	FILE *source,*dest;
 	int i;
 
-	if(argc != 4) {
-		printf("bin2s - By Sjeep\n"
-			   "Usage: bin2s infile outfile label\n\n");
+	if(argc != 4 && argc != 5) {
+		printf("Usage: bin2s infile outfile label [section]\n\n");
 		return 1;
 	}
 
@@ -59,7 +58,12 @@ int main(int argc, char *argv[])
 
 	fprintf(dest, ".sdata\n\n");
 	fprintf(dest, ".globl size_%s\nsize_%s:\t.word %d\n\n", argv[3], argv[3], fd_size);
-	fprintf(dest, ".data\n\n");
+
+	if( argc == 5 )
+		fprintf(dest, ".SECTION %s\n\n",argv[4]);
+	else
+		fprintf(dest, ".data\n\n");
+
 	fprintf(dest, ".balign 16\n\n");
 	fprintf(dest, ".globl %s\n",argv[3]);
 	fprintf(dest, "%s:\n\n",argv[3]);
