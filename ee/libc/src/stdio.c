@@ -356,10 +356,11 @@ char *fgets(char *buf, int n, FILE *stream)
         switch(c = fgetc(stream)) {
           case '\r':
           case '\n':
-            if (n > 0) {
+            if (n > 1) {
               /* newline terminates fgets. */
+              *buf++ = (char)c;
               *buf++ = '\0';
-              --n;
+              n -= 2;
               done = 1;
               break;
             }
@@ -942,7 +943,16 @@ int __stdio_get_fd_type(const char *s)
 */
 char *gets(char *buf)
 {
-  return (fgets(buf, INT_MAX, stdin));
+  char *str = NULL;
+  char c = 0;
+
+  if ((str = fgets(buf, INT_MAX, stdin)) != NULL) {
+    /* remove the trailing new line (if it exists) */
+    c = str[strlen(str) - 1];
+    if (c == '\n' || c == '\r')
+      str[strlen(str) - 1] = '\0';
+  }
+  return (str);
 }
 #endif
 
