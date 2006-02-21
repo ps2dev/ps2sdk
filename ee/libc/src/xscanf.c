@@ -87,12 +87,12 @@
 #endif
 
 #if SCANF_LEVEL >= SCANF_STD
-#define FLSTAR		0x10	/* suppress assingment (* fmt) */
+#define FLSTAR		0x20	/* suppress assingment (* fmt) */
 #endif
 
 #if SCANF_LEVEL >= SCANF_FLT
-#define FLBRACKET	0x20	/* %[ found, now collecting the set */
-#define FLNEGATE	0x40	/* negate %[ set */
+#define FLBRACKET	0x40	/* %[ found, now collecting the set */
+#define FLNEGATE	0x80	/* negate %[ set */
 
 /* bit set macros for %[ format */
 #define xscanf_set_bit(i) \
@@ -172,7 +172,8 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 				if (!(flags & FLSTAR))
 					a.cp = va_arg(ap, char *);
 				while (width-- > 0) {
-					if ((i = w_xgetc(&stream)) == EOF)
+					i = w_xgetc(&stream);
+					if (i == EOF)
 						break;
 					if (!xscanf_bit_is_set(i)) {
 						xungetc(i, &stream);
@@ -267,7 +268,8 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 					width = 1;
 				while (width-- > 0) {
 #endif /* SCANF_LEVEL > SCANF_MIN */
-					if ((i = w_xgetc(&stream)) == EOF)
+					i = w_xgetc(&stream);
+					if (i == EOF)
 						goto leave;
 #if SCANF_LEVEL > SCANF_MIN
 					if (!(flags & FLSTAR))
@@ -303,7 +305,8 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 					if (!(flags & FLSTAR))
 #endif /* SCANF_LEVEL > SCANF_MIN */
 						*a.cp++ = i;
-					if ((i = w_xgetc(&stream)) == EOF)
+					i = w_xgetc(&stream);
+					if (i == EOF)
 						break;
 				}
 #if SCANF_LEVEL > SCANF_MIN
@@ -352,7 +355,8 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 #endif /* SCANF_LEVEL > SCANF_MIN */
 					if ((char)i == '-')
 						flags |= FLMINUS;
-					if ((i = w_xgetc(&stream)) == EOF)
+					i = w_xgetc(&stream);
+					if (i == EOF)
 						goto leave;
 				}
 
@@ -381,7 +385,8 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 					if (--width <= 0)
 						goto intdone;
 #endif /* SCANF_LEVEL > SCANF_MIN */
-					if ((i = w_xgetc(&stream)) == EOF)
+					i = w_xgetc(&stream);
+					if (i == EOF)
 						goto intdone;
 					if ((char)tolower(i) == 'x') {
 						if (c == 'o' ||
@@ -394,7 +399,8 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 							goto intdone;
 						}
 						base = 16;
-						if ((i = w_xgetc(&stream)) == EOF)
+						i = w_xgetc(&stream);
+						if (i == EOF)
 							goto intdone;
 					} else if (c == 'i')
 						base = 8;
@@ -436,7 +442,8 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 					if (--width <= 0)
 						break;
 #endif /* SCANF_LEVEL > SCANF_MIN */
-					if ((i = w_xgetc(&stream)) == EOF)
+					i = w_xgetc(&stream);
+					if (i == EOF)
 						break;
 				}
 				/*
@@ -494,7 +501,8 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 				if ((char)i == '-' || (char)i == '+') {
 					if ((char)i == '-')
 						flags |= FLMINUS;
-					if ((i = w_xgetc(&stream)) == EOF)
+					i = w_xgetc(&stream);
+					if (i == EOF)
 						goto leave;
 				}
 
@@ -516,7 +524,8 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 						 */
 						fltchars[10] = 0;
 						*bp++ = i;
-						if ((i = w_xgetc(&stream)) == EOF)
+						i = w_xgetc(&stream);
+						if (i == EOF)
 							break;
 						if ((char)i != '-' &&
 						    (char)i != '+')
@@ -531,7 +540,8 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 						 */
 						fltchars[12] = 0;
 					*bp++ = i;
-					if ((i = w_xgetc(&stream)) == EOF)
+					i = w_xgetc(&stream);
+					if (i == EOF)
 						break;
 				}
 				*bp++ = 0;
@@ -558,15 +568,20 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 #if SCANF_LEVEL >= SCANF_FLT
 		  nextconv:
 #endif
-			flags = 0;
-			if (clen > olen)
+			if (clen > olen && !(flags & FLSTAR)) {
+				flags = 0;
 				nconvs++;
-			else if (c != 'n' || i == EOF)
+			}
+			else if (i == EOF) {
 				/*
 				 * If one conversion failed completely,
 				 * punt.
 				 */
+				flags = 0;
 				goto leave;
+			}
+			else
+				flags = 0;
 		} else if (c == '%') {
 			flags = FLHASPERCENT;
 			base = 10;
@@ -584,7 +599,8 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 		} else {
 			/* literal character in format, match it */
 		  literal:
-			if ((i = w_xgetc(&stream)) == EOF)
+		  	i = w_xgetc(&stream);
+			if (i == EOF)
 				goto leave;
 			if (i != c)
 				goto leave;
@@ -646,7 +662,7 @@ int _s_xgetc(void** p_str) {
 }
 
 void _s_xungetc(int c, void ** p_str) {
-    *(--(*((char **)p_str))) = c;
+    *(--(*((char **)p_str))) = (c == EOF ? 0 : c);
 }
 #endif
 
