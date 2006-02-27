@@ -563,7 +563,7 @@ padInfoMode(int port, int slot, int infoMode, int index)
             if(index == -1) {
                 return pdata->nrOfModes;
             }
-            else if (pdata->nrOfModes < index) {
+            else if (index < pdata->nrOfModes) {
                 return pdata->modeTable[index];
             }
             else {
