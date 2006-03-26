@@ -115,7 +115,7 @@ int _start(int argc, char *argv[])
 		case 'i': debug_level = OUT_INFO;    break; /* and info */
 		case 'd': debug_level = OUT_DEBUG;   break; /* and debuging */
 		}
-		printf("devug_level = %d (%c)\n", debug_level, argv[1][0]);
+		printf("debug_level = %d (%c)\n", debug_level, argv[1][0]);
 	}
 	
 	thread.attr      = TH_C;
