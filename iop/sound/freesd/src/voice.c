@@ -59,7 +59,7 @@ s32 VoiceTransDma(s16 chan, u16 mode, u8 *iop_addr, u32 *spu_addr, u32 size)
 	}
 
 	*SD_DMA_ADDR(chan)	= (u32)iop_addr;
-	*SD_DMA_MSIZE(chan) = ((size/64) << 16) | 0x10; 
+	*SD_DMA_MSIZE(chan) = (((size+63)/64) << 16) | 0x10; 
 	*SD_DMA_CHCR(chan)	= SD_DMA_CS | SD_DMA_START | direction;
 
 	return size;
