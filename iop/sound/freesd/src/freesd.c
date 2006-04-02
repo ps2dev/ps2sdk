@@ -179,7 +179,7 @@ int Spu2Interrupt(void *data)
 		*SD_CORE_ATTR(0) = *SD_CORE_ATTR(0) & 0xffbf;
 		
 	if (val&2)
-		*SD_CORE_ATTR(0) = *SD_CORE_ATTR(0) & 0xffbf;
+		*SD_CORE_ATTR(1) = *SD_CORE_ATTR(1) & 0xffbf;
 
 	if(Spu2IntrHandler != NULL)
 	{
