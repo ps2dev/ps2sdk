@@ -168,13 +168,22 @@ int TransInterrupt(void *data)
 }
 
 int Spu2Interrupt(void *data)
-
 {
-	volatile u16 *reg1 = U16_REGISTER(0x7C2);
-	
+	u16 val;
+
+	val = ((*SD_C_IRQINFO)&0xc)>>2;
+	if (!val)
+		return 1;
+
+	if (val&1)
+		*SD_CORE_ATTR(0) = *SD_CORE_ATTR(0) & 0xffbf;
+		
+	if (val&2)
+		*SD_CORE_ATTR(0) = *SD_CORE_ATTR(0) & 0xffbf;
+
 	if(Spu2IntrHandler != NULL)
 	{
-		Spu2IntrHandler((*reg1 & 0xC) >> 2, Spu2IntrData);
+		Spu2IntrHandler(val, Spu2IntrData);
 	}
 	else
 	{
