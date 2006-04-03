@@ -47,6 +47,7 @@ static u32 stream_bufid; /* The current buffer the SPU2 is playing */
 static int stream_cur; /* The 16-byte block ID of the begining of bufid */
 static int stream_status;
 static u8 *stream_buf; /* buffer */
+static u32 stream_chans;
 static u32 stream_buflen; /* length of buffers (clipped to 16bytes) */
 static u32 stream_bufspu[2]; /* position of buffer in spu ram 0=left, 1=right */
 static u32 stream_voice[2]; /* voice ID */
@@ -95,7 +96,7 @@ int fillbuf(int id, int chan)
 		return(0);   /* EOF */
 
 	/* If we're stereo and we've read less than a chunk, we're screwed  */
-	if ((stream_flags&FLAG_STEREO) && (size<stream_buflen)) 
+	if ((stream_chans>1) && (size<stream_buflen)) 
 	{
 		dprintf(OUT_ERROR, "Channel%d: failed to read entire chunk (read %d bytes)\n", chan, size);
 		return(-1);
@@ -124,7 +125,7 @@ void stream_thread(void *a)
 		dprintf(OUT_DEBUG, "SPU2 now playing buffer %d (block %d)\n", (int)stream_bufid, stream_cur);
 
 		/* Fill the buffer the SPU2 isn't playing */
-		for (int i=0;i<1+(stream_flags&FLAG_STEREO);i++)
+		for (int i=0;i<stream_chans;i++)
 		{
 			int r;
 			r = fillbuf(stream_bufsafe, i);
@@ -136,7 +137,7 @@ void stream_thread(void *a)
 		}
 
 		sceSdSetAddr(SD_ADDR_IRQA, stream_bufspu[0]+(stream_bufsafe*stream_buflen));
-		sceSdSetCoreAttr((2<<1), 1);
+		sceSdSetCoreAttr(SD_CORE_IRQ_ENABLE, 1);
 	}
 
 }
@@ -210,6 +211,7 @@ int sndStreamOpen(char *file, u32 voices, u32 flags, u32 bufaddr, u32 bufsize)
 	if (stream_flags&FLAG_STEREO)
 	{
 		dprintf(OUT_INFO, "stereo...\n");
+		stream_chans = 2;
 		sceSdSetParam(stream_voice[0] | SD_VPARAM_VOLL,  0x1fff);
 		sceSdSetParam(stream_voice[0] | SD_VPARAM_VOLR,  0);
 		sceSdSetParam(stream_voice[1] | SD_VPARAM_VOLL,  0);
@@ -218,12 +220,13 @@ int sndStreamOpen(char *file, u32 voices, u32 flags, u32 bufaddr, u32 bufsize)
 	else
 	{
 		dprintf(OUT_INFO, "mono...\n");
+		stream_chans = 1;
 		sceSdSetParam(stream_voice[0] | SD_VPARAM_VOLL,  0x1fff);
 		sceSdSetParam(stream_voice[0] | SD_VPARAM_VOLR,  0x1fff);
 	}
 
 	/* Setup other SPU2 voice stuff... */
-	for (int i=0;i<1+(stream_flags&FLAG_STEREO);i++) /* XXX */ 
+	for (int i=0;i<stream_chans;i++) /* XXX */ 
 	{
 		sceSdSetParam(stream_voice[i] | SD_VPARAM_PITCH, 0x1000); /* 0x1000 = normal pitch */
 		sceSdSetParam(stream_voice[i] | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0, 0xf, 0xf));
@@ -248,7 +251,7 @@ int sndStreamOpen(char *file, u32 voices, u32 flags, u32 bufaddr, u32 bufsize)
 	StartThread(stream_thid, NULL);
 
 	/* Get some interrupts going! */
-	sceSdSetCoreAttr((2<<1), 0); /* disable pesky interrupts for a minute */
+	sceSdSetCoreAttr(SD_CORE_IRQ_ENABLE, 0); /* disable pesky interrupts for a minute */
 	sceSdSetSpu2IntrHandler(stream_handler, (void*)1);
 
 	stream_status = STATUS_OPEN;
@@ -295,12 +298,12 @@ int sndStreamPlay(void)
 		return(0);
 
 	/* Press down the keys :) */
-	if (stream_flags&FLAG_STEREO)
+	if (stream_chans>1)
 		sceSdSetSwitch((stream_voice[0]&1) | SD_SWITCH_KEYDOWN, 1<<(stream_voice[0]>>1) | 1<<(stream_voice[1]>>1));
 	else
 		sceSdSetSwitch((stream_voice[0]&1) | SD_SWITCH_KEYDOWN, 1<<(stream_voice[0]>>1));
 
-	sceSdSetCoreAttr((2<<1), 1); 
+	sceSdSetCoreAttr(SD_CORE_IRQ_ENABLE, 1); 
 
 	stream_status=STATUS_PLAYING;
 
@@ -317,12 +320,12 @@ int sndStreamPause(void)
 		return(0);
 
 	/* Release keys */
-	if (stream_flags&FLAG_STEREO)
+	if (stream_chans>1)
 		sceSdSetSwitch((stream_voice[0]&1) | SD_SWITCH_KEYUP, 1<<(stream_voice[0]>>1) | 1<<(stream_voice[1]>>1));
 	else
 		sceSdSetSwitch((stream_voice[0]&1) | SD_SWITCH_KEYUP, 1<<(stream_voice[0]>>1));
 
-	sceSdSetCoreAttr((2<<1), 0); /* disable pesky interrupts for a minute */
+	sceSdSetCoreAttr(SD_CORE_IRQ_ENABLE, 0); /* disable pesky interrupts for a minute */
 
 	stream_status=STATUS_OPEN;
 
@@ -342,19 +345,19 @@ int sndStreamSetPosition(int block)
 		return(-2);
 
 	/* lock block number to a chunk */
-	chunk = (stream_buflen/16)*(1+(stream_flags&FLAG_STEREO)); /* XXX */
+	chunk = (stream_buflen/16)*stream_chans;
 	dprintf(OUT_DEBUG, "chunk = %d\n", chunk);
 	block = (block/chunk)*chunk;
 
 	stream_cur = block;
-	lseek(stream_fd, block*16, SEEK_SET);
+	lseek(stream_fd, block*16*stream_chans, SEEK_SET);
 
 	stream_bufid = 0;
 
 	sceSdSetAddr(SD_ADDR_IRQA, stream_bufspu[0]+stream_buflen);
 
 	for (int i=0;i<2;i++)
-	for (int c=0;c<1+(stream_flags&FLAG_STEREO);c++) /* XXX */ 
+	for (int c=0;c<stream_chans;c++)
 	if (fillbuf(i, c)<=0)
 		{
 			dprintf(OUT_ERROR, "Hit EOF or error on buffer fill %d\n", i);
@@ -362,10 +365,8 @@ int sndStreamSetPosition(int block)
 			return(-1);
 		}
 
-	for (int c=0;c<1+(stream_flags&FLAG_STEREO);c++) /* XXX */ 
-	{
+	for (int c=0;c<stream_chans;c++)
 		sceSdSetAddr(stream_voice[c] | SD_VADDR_SSA, stream_bufspu[c]);
-	}
 
 	/* Restart playing if we were playing before */
 	if (r)
@@ -398,7 +399,7 @@ int sndStreamSetVolume(int left, int right)
 	if (stream_status==STATUS_CLOSED)
 		return(-1);
 
-	if (stream_flags&FLAG_STEREO)
+	if (stream_chans>1)
 	{
 		sceSdSetParam(stream_voice[0] | SD_VPARAM_VOLL,  left);
 		sceSdSetParam(stream_voice[0] | SD_VPARAM_VOLR,  0);

@@ -42,8 +42,6 @@ void *rpc_server(u32 func, void *data, u32 size)
 	u32 *ru = rpc_buffer[1];
 	s32  *rs = rpc_buffer[1];
 	
-	dprintf(OUT_DEBUG, "func:0x%x, data:%p, size:%u\n", (unsigned int)func, data, (unsigned int)size);
-
 	switch(func)
 	{
 	case PS2SND_Init:             *rs = sceSdInit       (DS[0]); break;
