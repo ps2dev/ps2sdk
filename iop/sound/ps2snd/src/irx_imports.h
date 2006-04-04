@@ -7,7 +7,7 @@
 #include <libsd.h>
 #include <sifcmd.h>
 #include <thbase.h>
-#include <ioman.h>
+#include <iomanX.h>
 #include <thsemap.h>
 #include <intrman.h>
 #include <sysmem.h>
