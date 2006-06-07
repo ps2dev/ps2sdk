@@ -19,7 +19,7 @@
  #include <packet.h>
  #include <osd_config.h>
 
- GRAPH_MODE graph_mode[20] = {
+ GRAPH_MODE graph_mode[21] = {
   {  640,  448, 0x02, 1,  286720, GS_SET_DISPLAY(632, 50, 3, 0, 2559,  447) },
   {  640,  512, 0x03, 1,  327680, GS_SET_DISPLAY(652, 72, 3, 0, 2559,  511) },
   {  720,  480, 0x50, 0,  368640, GS_SET_DISPLAY(232, 35, 1, 0, 1439,  479) },
@@ -40,6 +40,7 @@
   { 1024,  768, 0x3E, 0,  786432, GS_SET_DISPLAY(580, 34, 1, 0, 2047,  767) },
   { 1280, 1024, 0x4A, 0, 1310720, GS_SET_DISPLAY(348, 40, 0, 0, 1279, 1023) },
   { 1280, 1024, 0x4B, 0, 1310720, GS_SET_DISPLAY(348, 40, 0, 0, 1279, 1023) },
+  {  640,  224, 0x02, 0,  143360, GS_SET_DISPLAY(632, 30, 3, 0, 2559,  223) },
  };
 
  PACKET graph_packet;

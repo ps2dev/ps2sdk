@@ -57,12 +57,12 @@
 
   }
 
+  // Initialize the packet.
+  if (packet_allocate(&draw_packet, 1024) < 0) { return -1; }
+
   // Wait and clear both buffers.
   draw_swap(); draw_clear(0.00f, 0.00f, 0.00f);
   draw_swap(); draw_clear(0.00f, 0.00f, 0.00f);
-
-  // Initialize the packet.
-  if (packet_allocate(&draw_packet, 1024) < 0) { return -1; }
 
   // End function.
   return 0;
