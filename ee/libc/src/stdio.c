@@ -275,12 +275,7 @@ int _fflushall(void)
 int fgetc(FILE *stream)
 {
   char c;
-  int  ret;
-
-  if (stream->has_putback) {
-    stream->has_putback = 0;
-    return stream->putback;
-  }
+  int ret;
 
   switch(stream->type) {
     case STD_IOBUF_TYPE_GS:
@@ -315,7 +310,8 @@ int fgetpos(FILE *stream, fpos_t *pos)
 {
   long n;
 
-  if ((n = ftell(stream)) >= 0) *pos = (fpos_t)n;
+  n = (ftell(stream) - (stream->has_putback ? 1 : 0));
+  if (n >= 0) *pos = (fpos_t)n;
   return ((n >= 0) ? 0 : -1);
 }
 #endif
@@ -676,7 +672,16 @@ size_t fread(void *buf, size_t r, size_t n, FILE *stream)
       break;
     default:
       /* attempt to read from the stream file. */
-      ret = (_ps2sdk_read(stream->fd, buf, (int)(r * n)) / (int)r);
+      if (stream->has_putback) {
+        unsigned char *ptr = (unsigned char *)buf;
+        *ptr = stream->putback;
+        buf = ptr + 1;
+        stream->has_putback = 0;
+        /* subtract 1 from r * n to avoid buffer overflow */
+        ret = (_ps2sdk_read(stream->fd, buf, (int)((r * n) -1 )) / (int)r);
+      } else {
+        ret = (_ps2sdk_read(stream->fd, buf, (int)(r * n)) / (int)r);
+      }
   }
   return (ret);
 }
@@ -738,6 +743,7 @@ int fseek(FILE *stream, long offset, int origin)
 */
 int fsetpos(FILE *stream, const fpos_t *pos)
 {
+  stream->has_putback = 0;
   return (fseek(stream, (long)*pos, SEEK_SET));
 }
 #endif
@@ -775,7 +781,10 @@ long ftell(FILE *stream)
         errno = EBADF;
         ret = -1L;
       }
-      else ret = (((n = _ps2sdk_lseek(stream->fd, 0, SEEK_CUR)) >= 0) ? (long)n : -1L);
+      else {
+        ret = (((n = _ps2sdk_lseek(stream->fd, 0, SEEK_CUR)) >= 0) ? (long)n : -1L);
+        if ((n >= 0) && stream->has_putback) ret--;
+      }
   }
   return (ret);
 }
@@ -801,6 +810,12 @@ long ftell(FILE *stream)
 size_t fwrite(const void *buf, size_t r, size_t n, FILE *stream)
 {
   size_t i, len, ret;
+  
+  if (stream->has_putback) 
+  {
+      fseek(stream, -1, SEEK_CUR);
+      stream->has_putback = 0;
+  }
 
   switch(stream->type) {
     case STD_IOBUF_TYPE_GS:
