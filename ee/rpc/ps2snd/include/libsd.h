@@ -1,6 +1,10 @@
 #ifndef __LIBSD_H
 #define __LIBSD_H 1
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <libsd-common.h>
 
 int  SdInit(int flag);
@@ -23,6 +27,10 @@ u32  SdBlockTransStatus (s16 channel, s16 flag);
 int  SdSetEffectAttr (int core, SdEffectAttr *attr);
 void SdGetEffectAttr (int core, SdEffectAttr *attr);
 int  SdClearEffectWorkArea (int core, int channel, int effect_mode);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __LIBSD_H */
 
