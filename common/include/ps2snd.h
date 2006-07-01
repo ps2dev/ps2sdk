@@ -57,6 +57,10 @@
 
 #define PS2SND_QueryMaxFreeMemSize    99 /* XXX: Hack until i can figure out how to do it right */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifdef _EE
 int sndLoadSample(void *buf, u32 spuaddr, int size);
 u32 sndQueryMaxFreeMemSize(void);
@@ -70,5 +74,9 @@ int sndStreamSetPosition(int block);
 int sndStreamGetPosition(void);
 int sndStreamSetVolume(int left, int right);
 u32 sndQueryMaxFreeMemSize();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __PS2SND_H */
