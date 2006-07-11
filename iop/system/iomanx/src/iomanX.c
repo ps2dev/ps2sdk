@@ -457,6 +457,11 @@ int dopen(const char *name)
 	f->mode = 8;	/* Indicates a directory.  */
 	if ((res = f->device->ops->dopen(f, filename)) >= 0)
 		res = (int)(f - file_table);
+	else
+	{
+        f->mode = 0;
+        f->device = NULL;
+	}
 
 	return res;
 }
