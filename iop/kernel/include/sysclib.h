@@ -20,6 +20,8 @@
 #include "irx.h"
 #include "setjmp.h"
 
+typedef void (*print_callback_t)(void * opaque, u8 char_to_print);
+
 #define sysclib_IMPORTS_start DECLARE_IMPORT_TABLE(sysclib, 1, 1)
 #define sysclib_IMPORTS_end END_IMPORT_TABLE
 
@@ -49,7 +51,8 @@ void bcopy(const void *, void *, size_t);
 #define I_bcopy DECLARE_IMPORT(16, bcopy);
 void bzero(void *, size_t);
 #define I_bzero DECLARE_IMPORT(17, bzero);
-
+int prnt(print_callback_t, void * opaque, const char * format, va_list ap);
+#define I_prnt DECLARE_IMPORT(18, prnt)
 int sprintf(char *str, const char *format, ...);
 #define I_sprintf DECLARE_IMPORT(19, sprintf)
 char *strcat(char *dest, const char *src);
