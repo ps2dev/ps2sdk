@@ -55,31 +55,35 @@ static inline void nopdelay(void)
 	} while (i-- != -1);
 }
 
-static inline int ee_kmode_enter(void)
+static inline int ee_kmode_enter()
 {
 	int status, mask;
 
 	__asm__ volatile (
+		".set\tpush\n\t"		\
 		".set\tnoreorder\n\t"		\
 		"mfc0\t%0, $12\n\t"		\
 		"li\t%1, 0xffffffe7\n\t"	\
 		"and\t%0, %1\n\t"		\
 		"mtc0\t%0, $12\n\t"		\
-		"sync.p\n\t" : "=r" (status), "=r" (mask));
+		"sync.p\n\t"
+		".set\tpop\n\t" : "=r" (status), "=r" (mask));
 
 	return status;
 }
 
-static inline int ee_kmode_exit(void)
+static inline int ee_kmode_exit()
 {
 	int status;
 
 	__asm__ volatile (
+		".set\tpush\n\t"		\
 		".set\tnoreorder\n\t"		\
 		"mfc0\t%0, $12\n\t"		\
 		"ori\t%0, 0x10\n\t"		\
 		"mtc0\t%0, $12\n\t"		\
-		"sync.p\n\t" : "=r" (status));
+		"sync.p\n\t" \
+		".set\tpop\n\t" : "=r" (status));
 
 	return status;
 }
