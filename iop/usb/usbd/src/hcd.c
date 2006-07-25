@@ -460,10 +460,10 @@ int initHcdStructs(void) {
 
 	memPool.ohciRegs->HcHCCA = hcCommArea;
 	memPool.ohciRegs->HcFmInterval = 0x27782EDF;
-	memPool.ohciRegs->HcPeriodicStart = 0x2A2F;
-	memPool.ohciRegs->HcInterruptEnable = OHCI_INT_MIE | OHCI_INT_RHSC | OHCI_INT_UE | OHCI_INT_WDH | OHCI_INT_SO;
-	memPool.ohciRegs->HcControl |= OHCI_CTR_USB_OPERATIONAL | OHCI_CTR_PLE | OHCI_CTR_IE | OHCI_CTR_CLE | OHCI_CTR_BLE | 3;
-	return 0;
+    memPool.ohciRegs->HcPeriodicStart = 0x2A2F;
+    memPool.ohciRegs->HcInterruptEnable = OHCI_INT_MIE | OHCI_INT_RHSC | OHCI_INT_UE | OHCI_INT_WDH | OHCI_INT_SO;
+    memPool.ohciRegs->HcControl = OHCI_CTR_USB_OPERATIONAL | OHCI_CTR_PLE | OHCI_CTR_IE | OHCI_CTR_CLE | OHCI_CTR_BLE | 3;
+    return 0;
 }
 
 int hcdInit(void) {
