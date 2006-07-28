@@ -97,8 +97,6 @@ void hubStatusChangeCallback(IoRequest *req) {
 	UsbHub *dev = (UsbHub *)req->userCallbackArg;
 	int port;
 
-	printf("hubStatusChangeCallback\n");
-
 	if (req->resultCode == USB_RC_OK) {
 		if (dev->statusChangeInfo[0] & 1) {
 			dev->statusChangeInfo[0] &= ~1;
