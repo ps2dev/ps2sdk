@@ -96,11 +96,14 @@ void getHubStatusChange(UsbHub *dev);
 void hubStatusChangeCallback(IoRequest *req) {
 	UsbHub *dev = (UsbHub *)req->userCallbackArg;
 	int port;
+
+	printf("hubStatusChangeCallback\n");
+
 	if (req->resultCode == USB_RC_OK) {
 		if (dev->statusChangeInfo[0] & 1) {
 			dev->statusChangeInfo[0] &= ~1;
-			HubControlTransfer(dev, 
-				USB_DIR_IN | USB_RT_HUB, USB_REQ_GET_STATUS, 0, 0, 4, &dev->hubStatus, 
+			HubControlTransfer(dev,
+				USB_DIR_IN | USB_RT_HUB, USB_REQ_GET_STATUS, 0, 0, 4, &dev->hubStatus,
 				hubGetHubStatusCallback);
 		} else {
 			if (dev->hubStatusCounter > 0) {
@@ -137,13 +140,13 @@ void hubGetHubStatusCallback(IoRequest *req) {
 		if (dev->hubStatusChange & BIT(C_HUB_LOCAL_POWER)) {
 			dev->hubStatusChange &= ~BIT(C_HUB_LOCAL_POWER);
 			HubControlTransfer(dev,
-				USB_DIR_OUT | USB_RT_HUB, USB_REQ_CLEAR_FEATURE, C_HUB_LOCAL_POWER, 0, 0, NULL, 
+				USB_DIR_OUT | USB_RT_HUB, USB_REQ_CLEAR_FEATURE, C_HUB_LOCAL_POWER, 0, 0, NULL,
 				hubGetHubStatusCallback);
 
 		} else if (dev->hubStatusChange & BIT(C_HUB_OVER_CURRENT)) {
 			dev->hubStatusChange &= ~BIT(C_HUB_OVER_CURRENT);
 			HubControlTransfer(dev,
-				USB_DIR_OUT | USB_RT_HUB, USB_REQ_CLEAR_FEATURE, C_HUB_OVER_CURRENT, 0, 0, NULL, 
+				USB_DIR_OUT | USB_RT_HUB, USB_REQ_CLEAR_FEATURE, C_HUB_OVER_CURRENT, 0, 0, NULL,
 				hubGetHubStatusCallback);
 
 		} else
@@ -166,14 +169,14 @@ int cancelTimerCallback(TimerCbStruct *arg) {
 		arg->prev = arg->next = NULL;
 		arg->isActive = 0;
         return 0;
-	} else 
+	} else
 		return -1;
 }
 
 int addTimerCallback(TimerCbStruct *arg, TimerCallback func, void *cbArg, uint32 delay) {
 	if (arg->isActive)
 		return -1;
-	
+
 	arg->isActive = 1;
 	arg->callbackProc = func;
 	arg->callbackArg  = cbArg;
@@ -302,7 +305,7 @@ int hubResetDevice(Device *dev) {
 			hub->hubStatusCounter = dev->attachedToPortNo;
 
 			HubControlTransfer(hub,
-				USB_DIR_OUT | USB_RT_PORT, USB_REQ_SET_FEATURE, PORT_RESET, dev->attachedToPortNo, 0, NULL, 
+				USB_DIR_OUT | USB_RT_PORT, USB_REQ_SET_FEATURE, PORT_RESET, dev->attachedToPortNo, 0, NULL,
 				hubDeviceResetCallback);
 		}
 		return 1;
@@ -364,7 +367,7 @@ void flushPort(Device *dev) {
 				dev->childListStart = child->next;
 
 			flushPort(child);
-			
+
 			freeDevice(child);
 		}
 		dev->ioRequest.busyFlag = 0;
@@ -401,13 +404,13 @@ void fetchConfigDescriptors(IoRequest *req) {
 			dbg_printf("USBD: Device ignored, Device descriptors too large\n");
 			return; // buffer is too small, silently ignore the device
 		}
-		
+
 		if (curDescNum < ((UsbDeviceDescriptor*)dev->staticDeviceDescPtr)->bNumConfigurations) {
 			doControlTransfer(ep, &dev->ioRequest,
 				USB_DIR_IN | USB_RECIP_DEVICE, USB_REQ_GET_DESCRIPTOR, (USB_DT_CONFIG << 8) | curDescNum, 0, readLen,
 				dev->staticDeviceDescEndPtr, fetchConfigDescriptors);
 		} else
-			connectNewDevice(dev); 
+			connectNewDevice(dev);
 	} else
 		killDevice(dev, ep);
 }
@@ -440,8 +443,8 @@ void requestDeviceDescriptor(IoRequest *req, uint16 length) {
 
 	dev->staticDeviceDescEndPtr = dev->staticDeviceDescPtr;
 
-	doControlTransfer(ep, &dev->ioRequest, 
-		USB_DIR_IN | USB_RECIP_DEVICE, USB_REQ_GET_DESCRIPTOR, USB_DT_DEVICE << 8, 0, length, dev->staticDeviceDescEndPtr, 
+	doControlTransfer(ep, &dev->ioRequest,
+		USB_DIR_IN | USB_RECIP_DEVICE, USB_REQ_GET_DESCRIPTOR, USB_DT_DEVICE << 8, 0, length, dev->staticDeviceDescEndPtr,
 		requestDevDescrptCb);
 }
 
@@ -506,8 +509,8 @@ void hubGetPortStatusCallback(IoRequest *req) {
 
 		if (feature >= 0) {
 			dev->portStatusChange &= ~BIT(feature);
-			HubControlTransfer(dev, 
-				USB_DIR_OUT | USB_RT_PORT, USB_REQ_CLEAR_FEATURE, feature, dev->portCounter, 0, NULL, 
+			HubControlTransfer(dev,
+				USB_DIR_OUT | USB_RT_PORT, USB_REQ_CLEAR_FEATURE, feature, dev->portCounter, 0, NULL,
 				hubGetPortStatusCallback);
 		} else {
 			port = fetchPortElemByNumber(dev->controlEp->correspDevice, dev->portCounter);
@@ -545,7 +548,7 @@ void hubGetPortStatusCallback(IoRequest *req) {
 
 void getHubStatusChange(UsbHub *dev) {
 	if (dev->statusIoReq.busyFlag == 0) {
-		attachIoReqToEndpoint(dev->statusChangeEp, &dev->statusIoReq, 
+		attachIoReqToEndpoint(dev->statusChangeEp, &dev->statusIoReq,
 			dev->statusChangeInfo, (dev->numChildDevices + 8) >> 3, hubStatusChangeCallback);
 	} else
 		dbg_printf("getHubStatusChange: StatusChangeEP IoReq is busy!\n");
@@ -559,7 +562,7 @@ void hubSetPortPower(IoRequest *req) {
 		dev->portCounter++;
 		if (dev->portCounter <= dev->numChildDevices) {
 			HubControlTransfer(dev,
-				USB_DIR_OUT | USB_RT_PORT, USB_REQ_SET_FEATURE, PORT_POWER, dev->portCounter, 0, NULL, 
+				USB_DIR_OUT | USB_RT_PORT, USB_REQ_SET_FEATURE, PORT_POWER, dev->portCounter, 0, NULL,
 				hubSetPortPower);
 		} else
 			getHubStatusChange(dev);
@@ -604,7 +607,7 @@ void hubCheckDeviceDesc(IoRequest *req) {
 		if (dev->desc.bDescriptorType == USB_DT_HUB)
 			hubCheckPorts(req);	// we've got the descriptor already
 		else
-			HubControlTransfer(dev, 
+			HubControlTransfer(dev,
 				USB_DIR_IN | USB_RT_HUB, USB_REQ_GET_DESCRIPTOR, USB_DT_HUB << 8, 0, sizeof(UsbHubDescriptor), &dev->desc,
 				hubCheckPorts);
 	}
@@ -627,7 +630,6 @@ int hubDrvConnect(int devId) {
 	UsbHubDescriptor *hubDesc;
 	Device *dev;
 	UsbHub *hubDevice;
-	uint16 pktSize;
 
 	dev = fetchDeviceById(devId);
 	if (!dev)
@@ -635,32 +637,27 @@ int hubDrvConnect(int devId) {
 
 	confDesc = doGetDeviceStaticDescriptor(devId, NULL, USB_DT_CONFIG);
 	if (!confDesc || (confDesc->bNumInterfaces != 1))
-		return -1;
+		return -2;
 
 	intfDesc = doGetDeviceStaticDescriptor(devId, confDesc, USB_DT_INTERFACE);
 	if (!intfDesc || (intfDesc->bNumEndpoints != 1))
-		return -1;
+		return -3;
 
 	endpDesc = doGetDeviceStaticDescriptor(devId, intfDesc, USB_DT_ENDPOINT);
 	if (!endpDesc)
-		return -1;
+		return -4;
 
 	if ((endpDesc->bEndpointAddress & USB_DIR_IN) == 0)
-		return -1;
+		return -5;
 
 	if ((endpDesc->bmAttributes & USB_ENDPOINT_XFERTYPE_MASK) != USB_ENDPOINT_XFER_INT)
-		return -1;
+		return -6;
 
-	pktSize = (endpDesc->wMaxPacketSizeHB << 8) | endpDesc->wMaxPacketSizeLB;
-
-	if (((usbConfig.maxPortsPerHub + 8) >> 3) < pktSize)
-		return -1;
-    
 	hubDesc = doGetDeviceStaticDescriptor(devId, endpDesc, USB_DT_HUB);
 
 	hubDevice = allocHubBuffer();
 	if (!hubDevice)
-		return -1;
+		return -8;
 
 	dev->privDataField = hubDevice;
 	hubDevice->controlEp = dev->endpointListStart;
@@ -668,12 +665,12 @@ int hubDrvConnect(int devId) {
 	hubDevice->statusChangeEp = doOpenEndpoint(dev, endpDesc, 0);
 	if (!hubDevice->statusChangeEp) {
 		freeHubBuffer(hubDevice);
-		return -1;
+		return -9;
 	}
 
 	hubDevice->controlIoReq.userCallbackArg = hubDevice;
 	hubDevice->statusIoReq.userCallbackArg = hubDevice;
-	
+
 	if (hubDesc) {
 		uint8 len = hubDesc->bLength;
 		if (len > sizeof(UsbHubDescriptor))
@@ -682,7 +679,7 @@ int hubDrvConnect(int devId) {
 	} else
 		memset(&hubDevice->desc, 0, sizeof(UsbHubDescriptor));
 
-	HubControlTransfer(hubDevice, 
+	HubControlTransfer(hubDevice,
 		USB_DIR_OUT, USB_REQ_SET_CONFIGURATION, confDesc->bConfigurationValue, 0, 0, NULL,
 		hubCheckDeviceDesc);
 
