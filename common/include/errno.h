@@ -55,6 +55,7 @@
 #define	EL2NSYNC 38	/* Level 2 not synchronized */
 #define	EL3HLT 39	/* Level 3 halted */
 #define	EL3RST 40	/* Level 3 reset */
+#define  EWOULDBLOCK  EAGAIN  /* Operation would block */
 #define	ELNRNG 41	/* Link number out of range */
 #define	EUNATCH 42	/* Protocol driver not attached */
 #define	ENOCSI 43	/* No CSI structure available */
