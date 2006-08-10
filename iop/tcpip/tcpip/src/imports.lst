@@ -33,6 +33,15 @@ I_PollSema
 I_DeleteSema
 thsemap_IMPORTS_end
 
+thmsgbx_IMPORTS_start
+I_CreateMbx
+I_DeleteMbx
+I_SendMbx
+I_iSendMbx
+I_PollMbx
+I_ReceiveMbx
+thmsgbx_IMPORTS_end
+
 sysclib_IMPORTS_start
 I_memset
 I_strcpy

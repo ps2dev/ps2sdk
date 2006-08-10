@@ -52,11 +52,12 @@ extern struct irx_export_table	_exp_ps2ip;
 
 
 static int		iTimerARP=0;
+
 #if		defined(PS2IP_DHCP)
 static int		iTimerDHCP=0;
 #endif	//defined(PS2IP_DHCP)
-static NetIF	LoopIF;
 
+static NetIF	LoopIF;
 
 int
 ps2ip_getconfig(char* pszName,t_ip_info* pInfo)
@@ -288,7 +289,7 @@ InputCB(void* pvArg)
 
 		//IP-packet. Update ARP table, obtain first queued packet.
 
-		pARP=etharp_ip_input(pNetIF,pInput);
+		etharp_ip_input(pNetIF,pInput);
 
 		//Skip Ethernet header.
 
@@ -300,17 +301,17 @@ InputCB(void* pvArg)
 
 		//Send out the ARP reply or ARP queued packet.
 
-		SendARPReply(pNetIF,pARP);
+		SendARPReply(pNetIF,NULL);
 		break;
 	case	ETHTYPE_ARP:
 
 		//ARP-packet. Pass pInput to ARP module, get ARP reply or ARP queued packet.
 
-		pARP=etharp_arp_input(pNetIF,(struct eth_addr*)&pNetIF->hwaddr,pInput);
+		etharp_arp_input(pNetIF,(struct eth_addr*)&pNetIF->hwaddr,pInput);
 
 		//Send out the ARP reply or ARP queued packet.
 
-		SendARPReply(pNetIF,pARP);
+		SendARPReply(pNetIF,NULL);
 		break;
 	default:
 
@@ -340,15 +341,16 @@ ps2ip_input(PBuf* pInput,NetIF* pNetIF)
 	InputMSG*				pIMSG;
 	struct tcpip_msg*		pMSG;
 	sys_mbox_t				pMBox=tcpip_getmbox();
+	arch_message *          msg;
 
-	//Is the messagebox or the messagequeue full?
+	//Is the messagequeue full?
 
-	if	(IsMessageBoxFull(pMBox)||IsMSGQueueFull())
+	if(IsMSGQueueFull() || ((msg = alloc_msg()) == NULL))
 	{
 
 		//Yes, silently drop the packet!
 
-		dbgprintf("ps2ip_input: Messagebox or MessageQueue full, dropping packet\n");
+		dbgprintf("ps2ip_input: MessageQueue or MessagePool full, dropping packet\n");
 		pbuf_free(pInput);
 		return	ERR_OK;
 	}
@@ -368,11 +370,11 @@ ps2ip_input(PBuf* pInput,NetIF* pNetIF)
 	pMSG=(struct tcpip_msg*)memp_malloc(MEMP_TCPIP_MSG);
 	if	(pMSG==NULL)
 	{
-
 		//Memory allocation failed, drop packet!
 
 		dbgprintf("ps2ip_input: Failed to allocate memory for tcpip_msg, dropping packet\n");
 		pbuf_free(pInput);
+		free_msg(msg);
 		return	ERR_MEM;  
 	}
 	pMSG->type=TCPIP_MSG_CALLBACK;
@@ -381,7 +383,8 @@ ps2ip_input(PBuf* pInput,NetIF* pNetIF)
 
 	//Post the message in the tcpip-thread's messagebox.
 
-	PostInputMSG(pMBox,pMSG);
+    msg->sys_msg = pMSG;
+	PostInputMSG(pMBox, msg);
 	return	ERR_OK;
 }
 
@@ -395,8 +398,8 @@ ps2ip_Stub(void)
 int
 ps2ip_ShutDown(void)
 {
-	printf("ps2ip_ShutDown: Shutting down ps2ip-module\n");
-	return	0;
+//	printf("ps2ip_ShutDown: Shutting down ps2ip-module\n");
+	return(1); // return "not resident"!
 }
 
 

@@ -14,13 +14,15 @@ IOP_BIN_DIR = bin/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
+#PS2IP_DHCP=1
+
 ifeq ($(DEBUG),1)
 DEBUG_FLAGS = -DDEBUG -DLWIP_DEBUG
 endif
 
-LWIP=$(PS2SDKSRC)/iop/tcpip/lwip
+LWIP=$(PS2SDKSRC)/iop/tcpip/lwip-1.1.1
 
-ps2ip_OBJECTS = ps2ip.o sys.o sys_arch.o exports.o imports.o inet.o mem.o netif.o pbuf.o stats.o tcp_in.o tcp_out.o udp.o memp.o tcp.o etharp.o
+ps2ip_OBJECTS = ps2ip.o sys.o sys_arch.o exports.o imports.o inet.o mem.o netif.o pbuf.o stats.o tcp_in.o tcp_out.o udp.o memp.o tcp.o etharp.o raw.o
 
 ifdef PS2IP_DHCP
 ps2ip_OBJECTS+= dhcp.o
@@ -115,6 +117,9 @@ obj/tcp_out.o: $(LWIP)/src/core/tcp_out.c
 	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
 
 obj/sys.o: $(LWIP)/src/core/sys.c
+	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+
+obj/raw.o: $(LWIP)/src/core/raw.c
 	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
 
 obj/etharp.o: $(LWIP)/src/netif/etharp.c

@@ -24,5 +24,6 @@
 #include "sysmem.h"
 #include "thbase.h"
 #include "thsemap.h"
+#include "thmsgbx.h"
 
 #endif /* IOP_IRX_IMPORTS_H */

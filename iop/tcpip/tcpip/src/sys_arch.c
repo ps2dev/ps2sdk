@@ -15,6 +15,7 @@
 #include <sysmem.h>
 #include <thsemap.h>
 #include <thbase.h>
+#include <thmsgbx.h>
 #include <sysclib.h>
 #include <intrman.h>
 
@@ -25,34 +26,17 @@
 #include "lwip/pbuf.h"
 #include "arch/sys_arch.h"
 
-
 #if		defined(DEBUG)
 #define	dbgprintf(args...)	printf(args)
 #else
 #define	dbgprintf(args...)	((void)0)
 #endif
 
-
-struct sys_mbox_msg
-{
-	struct sys_mbox_msg*		pNext;
-	void*							pvMSG;
-};
-
 #define	SYS_THREAD_PRIO_BASE		0x22
-#define	SYS_MBOX_SIZE				64
 
-struct sys_mbox
-{
-	u16_t			u16First;
-	u16_t			u16Last;
-	void*			apvMSG[SYS_MBOX_SIZE];
-	sys_sem_t	Mail;
-	sys_sem_t	Mutex;
-	int			iWaitPost;
-	int			iWaitFetch;
-};
-
+static int sema_count = 0;
+static int mbox_count = 0;
+static int thread_count = 0;
 
 typedef struct Timeout	Timeout;
 
@@ -66,321 +50,48 @@ struct Timeout
 
 #define	SYS_TIMEOUT_MAX	10
 
-
 static Timeout		aTimeouts[SYS_TIMEOUT_MAX];
 static Timeout*	pFreeTimeouts;
 static Timeout*	pActiveTimeouts;
-static u16			u16SemaCNT;
-static u16			u16MBoxCNT;
-static u16			u16ThreadCNT;
 
+// this is probably excessive but since each "message" is only 8 bytes...
+// I have no idea how many messages would be queued at once...
+#define SYS_MAX_MESSAGES    512
 
-sys_thread_t
-sys_thread_new(void (*pFunction)(void* pvArg),void* pvArg,int iPrio)
+// 4096 bytes
+arch_message msg_pool[SYS_MAX_MESSAGES];
+
+arch_message *alloc_msg(void)
 {
+    int i;
+    int oldIntr;
 
-	//Create a new thread.
+    CpuSuspendIntr(&oldIntr);
 
-	iop_thread_t	Info={TH_C,0,pFunction,0x900,iPrio+SYS_THREAD_PRIO_BASE};
-	int				iThreadID;
+    for(i = 0; i < SYS_MAX_MESSAGES; i++)
+    {
+        if((msg_pool[i].next == NULL) && (msg_pool[i].sys_msg == NULL))
+        {
+            msg_pool[i].next = (arch_message *) 0xFFFFFFFF;
+            msg_pool[i].sys_msg = (void *) 0xFFFFFFFF;
+            CpuResumeIntr(oldIntr);
+            return(&msg_pool[i]);
+        }
+    }
 
-	dbgprintf("sys_thread_new: Thread new (TID: %d)\n",GetThreadId());
-
-	iThreadID=CreateThread(&Info);
-	if	(iThreadID<0)
-   {
-		printf("sys_thread_new: CreateThread failed, EC: %d\n",iThreadID);
-		return	-1;
-	}
-
-	StartThread(iThreadID,pvArg);
-	++u16ThreadCNT;
-
-	return	iThreadID;
+    CpuResumeIntr(oldIntr);
+    return(NULL);
 }
 
-
-sys_mbox_t
-sys_mbox_new(void)
+void free_msg(arch_message *msg)
 {
+    int oldIntr;
 
-	//Create a new messagebox.
-
-	sys_mbox_t	pMBox;
-
-	dbgprintf("sys_mbox_new: Create MBox (TID: %d).\n",GetThreadId());
-
-	pMBox=(sys_mbox_t)AllocSysMemory(0,sizeof(struct sys_mbox),0);
-	if	(pMBox==NULL)
-	{
-		printf("sys_mbox_new: Out of memory\n");
-		return	NULL;
-	}
-	pMBox->u16First=pMBox->u16Last=0;
-	pMBox->Mail=sys_sem_new(0);
-	pMBox->Mutex=sys_sem_new(1);
-	pMBox->iWaitPost=pMBox->iWaitFetch=0;
-	++u16MBoxCNT;
-	return	pMBox;
+    CpuSuspendIntr(&oldIntr);
+    msg->next = NULL;
+    msg->sys_msg = NULL;
+    CpuResumeIntr(oldIntr);
 }
-
-
-void
-sys_mbox_free(sys_mbox_t pMBox)
-{
-
-	//Delete the messagebox, pMBox.
-
-	dbgprintf("sys_mbox_free: Free MBox (TID: %d)\n",GetThreadId());
-
-	if	(pMBox==NULL)
-	{
-		return;
-	}
-
-	sys_arch_sem_wait(pMBox->Mutex,0);
-
-	sys_sem_free(pMBox->Mail);
-	sys_sem_free(pMBox->Mutex);
-	pMBox->Mail=pMBox->Mutex=SYS_SEM_NULL;
-	FreeSysMemory(pMBox);
-	--u16MBoxCNT;
-}
-
-
-static u16_t
-GenNextMBoxIndex(u16_t u16Index)
-{
-	return	(u16Index+1)%SYS_MBOX_SIZE;
-}
-
-
-int
-IsMessageBoxFull(sys_mbox_t pMBox)
-{
-	return	GenNextMBoxIndex(pMBox->u16Last)==pMBox->u16First;
-}
-
-
-int
-IsMessageBoxEmpty(sys_mbox_t pMBox)
-{
-	return	pMBox->u16Last==pMBox->u16First;
-}
-
-
-void
-PostInputMSG(sys_mbox_t pMBox,void* pvMSG)
-{
-
-	//This function should only be invoked by ps2ip_input. It'll be invoked from an interrupt-context and the pMBox is non-full.
-	//Start with storing the message last in the message-queue.
-
-	pMBox->apvMSG[pMBox->u16Last]=pvMSG;
-	pMBox->u16Last=GenNextMBoxIndex(pMBox->u16Last);
-
-	//Is there a thread waiting for the arrival of a message in the mbox?
-
-	if	(pMBox->iWaitFetch>0)
-	{
-
-		//Yes, signal the Mail-semaphore that a message has arrived.
-
-		iSignalSema(pMBox->Mail);
-	}
-}
-
-
-void
-sys_mbox_post(sys_mbox_t pMBox,void* pvMSG)
-{
-
-	//Post the message, pvMSG, in the messagebox, pMBox.
-
-	sys_prot_t	Flags;
-
-	dbgprintf("sys_mbox_post: MBox Post (TID: %d)\n",GetThreadId());
-
-	if	(pMBox==NULL)
-	{
-		return;
-	}
-
-	Flags=sys_arch_protect();
-
-	//Is the mbox full?
-
-	while	(IsMessageBoxFull(pMBox))
-	{
-
-		//Yes, wait for the mbox to become non-full.
-
-		u32_t		u32WaitTime;
-
-		dbgprintf("sys_mbox_post: MBox full\n");
-
-		//Increase the waitpost-count to indicate that there is a thread waiting to for the mbox to become non-full.
-
-		++pMBox->iWaitPost;
-		sys_arch_unprotect(Flags);
-
-		//Wait for a signal indicating that the mbox has become non-full.
-
-		u32WaitTime=sys_arch_sem_wait(pMBox->Mail,0);
-
-		//Decrease the waitpost-count, since we aren't waiting anymore.
-
-		Flags=sys_arch_protect();
-		--pMBox->iWaitPost;
-
-		//Has the mbox become non-full or did sys_arch_sem_wait fail?
-
-		if	(u32WaitTime==SYS_ARCH_TIMEOUT) 
-		{
-
-			//sys_arch_sem_wait failed, exit!
-
-			sys_arch_unprotect(Flags);
-			return;
-		}
-
-		//We've received a signal that the mbox has become non-full.
-	}
-
-	//Now, the mbox isn't full, store the message last in the mbox.
-
-	pMBox->apvMSG[pMBox->u16Last]=pvMSG;
-	pMBox->u16Last=GenNextMBoxIndex(pMBox->u16Last);
-
-	//Is there a thread waiting for the arrival of a message in the mbox?
-
-	if	(pMBox->iWaitFetch>0)
-	{
-
-		//Yes, send it a signal that one has arrived.
-
-		sys_sem_signal(pMBox->Mail);
-	}
-
-	sys_arch_unprotect(Flags);
-}
-
-
-u32_t
-sys_arch_mbox_fetch(sys_mbox_t pMBox,void** ppvMSG,u32_t u32Timeout)
-{
-
-	//Retrieve the first message in the messagebox, pMBox.
-
-	sys_prot_t	Flags;
-	u32_t			u32Time=0;
-
-	if	(pMBox==NULL)
-	{
-		if	(ppvMSG!=NULL)
-		{
-			*ppvMSG=NULL;
-		}
-		return	SYS_ARCH_TIMEOUT;
-	}
-
-	dbgprintf("sys_arch_mbox_fetch: MBox fetch (TID: %d, MTX: %x)\n",GetThreadId(),pMBox->Mutex);
-
-	Flags=sys_arch_protect();
-
-	//Is the mbox empty?
-
-	while	(IsMessageBoxEmpty(pMBox))
-	{
-		u32_t		u32WaitTime;
-
-		dbgprintf("sys_mbox_post: MBox empty\n");
-
-		//Yes, increase the waitfetch-count to indicate that there is a thread waiting to for the mbox to receive a message.
-
-		++pMBox->iWaitFetch;
-		sys_arch_unprotect(Flags);
-
-		//Wait for a message to arrive.
-
-		u32WaitTime=sys_arch_sem_wait(pMBox->Mail,u32Timeout);
-
-		//Decrease the waitfetch-count since we aren't waiting anymore.
-
-		Flags=sys_arch_protect();
-		--pMBox->iWaitFetch;
-
-		//Has the mbox received a new message or did we time out?
-
-		if	(u32WaitTime==SYS_ARCH_TIMEOUT) 
-		{
-
-			//The sys_arch_sem_wait timed out. Return SYS_ARCH_TIMEOUT to indicate that a timeout occured.
-
-			sys_arch_unprotect(Flags);
-			return	SYS_ARCH_TIMEOUT;
-		}
-
-		//We've received a signal that a message has arrived. Add the time we spent waiting to the total time we've spent trying to
-		//fetch this message.
-
-		u32Time+=u32WaitTime;
-
-		//In the unlikely event the mbox has become empty again, decrease the timeout time with the time we spend waiting.
-
-		u32Timeout-=u32WaitTime;
-	}
-
-	//Now, there is atleast one message in the mbox, retrieve the first message!
-
-	if	(ppvMSG!=NULL)
-	{
-		LWIP_DEBUGF(SYS_DEBUG,("sys_arch_mbox_fetch: MBox: %p MSG: %p\n",pMBox,*ppvMSG));
-		*ppvMSG=pMBox->apvMSG[pMBox->u16First];
-	}
-	pMBox->u16First=GenNextMBoxIndex(pMBox->u16First);
-
-	//Is there a thread waiting for the mbox to become non-full?
-
-	if	(pMBox->iWaitPost>0)
-	{
-
-		//Yes, send it a signal that the mbox is non-full.
-
-		sys_sem_signal(pMBox->Mail);
-	}    
-
-	sys_arch_unprotect(Flags);
-
-	//Return the number of msec waited.
-
-	return	u32Time;
-}     
-
-
-sys_sem_t
-sys_sem_new(u8_t u8Count)
-{
-
-	//Create a new semaphore.
-
-	iop_sema_t	Sema={1,1,u8Count,1};
-	int			iSema;
-
-	dbgprintf("sys_sem_new: CreateSema (TID: %d, CNT: %d)\n",GetThreadId(),u8Count);
-
-	iSema=CreateSema(&Sema);
-	if	(iSema<=0)
-	{
-		printf("sys_sem_new: CreateSema failed, EC: %d\n",iSema);
-		return	SYS_SEM_NULL;
-	}
-
-	++u16SemaCNT;
-
-	return	iSema;
-}
-
 
 static unsigned int
 TimeoutHandler(void* pvArg)
@@ -388,7 +99,6 @@ TimeoutHandler(void* pvArg)
 	iReleaseWaitThread((int)pvArg);
 	return	0;
 }
-
 
 static u32_t
 ComputeTimeDiff(iop_sys_clock_t* pStart,iop_sys_clock_t* pEnd)
@@ -404,7 +114,160 @@ ComputeTimeDiff(iop_sys_clock_t* pStart,iop_sys_clock_t* pEnd)
 	SysClock2USec(&Diff, (u32 *)&iSec, (u32 *)&iUSec);
 	iDiff=(iSec*1000)+(iUSec/1000);
 
-	return	iDiff!=0 ? iDiff:1;
+	return	iDiff != 0 ? iDiff : 1;
+}
+
+//Create a new thread.
+sys_thread_t
+sys_thread_new(void (*pFunction)(void* pvArg), void* pvArg, int iPrio)
+{
+	iop_thread_t thp;
+	int tid, rv;
+
+    thp.attr = TH_C;
+    thp.option = 0;
+    thp.thread = pFunction;
+    thp.stacksize = 0x900; // why this magic number??
+    thp.priority = iPrio + SYS_THREAD_PRIO_BASE;
+
+	dbgprintf("sys_thread_new: Thread new (TID: %d)\n",GetThreadId());
+
+	if((tid = CreateThread(&thp)) < 0)
+    {
+		dbgprintf("sys_thread_new: CreateThread failed, EC: %d\n", tid);
+		return	-1;
+	}
+
+	if((rv = StartThread(tid, pvArg)) < 0)
+	{
+		dbgprintf("sys_thread_new: StartThread failed, EC: %d\n", rv);
+	    DeleteThread(tid);
+	    return(-1);
+	}
+
+	thread_count++;
+
+	return((sys_thread_t) tid);
+}
+
+
+sys_mbox_t
+sys_mbox_new(void)
+{
+    iop_mbx_t mbp;
+    int mbid;
+
+	dbgprintf("sys_mbox_new: Create MBox (TID: %d)\n",GetThreadId());
+
+    mbp.attr = 0;
+    mbp.option = 0;
+
+    if((mbid = CreateMbx(&mbp)) < 0)
+    {
+		printf("sys_mbox_new: CreateMbx failed, EC: %d\n", mbid);
+		return	-1;
+    }
+
+	mbox_count++;
+	return((sys_mbox_t) mbid);
+}
+
+
+//Delete the messagebox, pMBox.
+
+void
+sys_mbox_free(sys_mbox_t pMBox)
+{
+	dbgprintf("sys_mbox_free: Free MBox (TID: %d)\n",GetThreadId());
+
+	if(pMBox <= 0) { return; }
+
+    // should refer status and see if mbox is empty, if not should give an error...
+
+    DeleteMbx(pMBox);
+
+	mbox_count--;
+}
+
+void PostInputMSG(sys_mbox_t mbid, arch_message *msg)
+{
+	//This function should only be invoked by ps2ip_input. It'll be invoked from an interrupt-context and the pMBox is non-full.
+    iSendMbx(mbid, (iop_message_t *) msg);
+}
+
+
+void sys_mbox_post(sys_mbox_t mbid, void *sys_msg)
+{
+	arch_message *msg;
+	//This function should only be invoked by ps2ip_input. It'll be invoked from an interrupt-context and the pMBox is non-full.
+
+    // FIXME: Not sure if this is the best thing to do, will this lock up the only thread which will free up a message??
+    while((msg = alloc_msg()) == NULL) { DelayThread(100); }
+
+    msg->sys_msg = sys_msg;
+    SendMbx(mbid, (iop_message_t *) msg);
+}
+
+u32_t
+sys_arch_mbox_fetch(sys_mbox_t pMBox,void** ppvMSG,u32_t u32Timeout)
+{
+    void *pmsg;
+    u32 u32Time = 0;
+	iop_sys_clock_t	ClockTicks;
+	iop_sys_clock_t	Start;
+	iop_sys_clock_t	End;
+
+    if(PollMbx(&pmsg, pMBox) != 0)
+    {
+    	int iPID=GetThreadId();
+
+        if(u32Timeout > 0)
+        {
+    		GetSystemTime(&Start);
+    		USec2SysClock(u32Timeout * 1000, &ClockTicks);
+    		SetAlarm(&ClockTicks, TimeoutHandler, (void*)iPID);
+    	}
+
+        if(ReceiveMbx(&pmsg, pMBox) != 0) { return(SYS_ARCH_TIMEOUT); }
+
+        if(u32Timeout > 0)
+        {
+    		CancelAlarm(TimeoutHandler,(void*)iPID);
+    		GetSystemTime(&End);
+
+    		u32Time = ComputeTimeDiff(&Start,&End);
+    	}
+    }
+
+    if(ppvMSG) { *ppvMSG = ((arch_message *) pmsg)->sys_msg; }
+
+    free_msg((arch_message *) pmsg);
+
+	//Return the number of msec waited.
+	return	u32Time;
+}
+
+sys_sem_t
+sys_sem_new(u8_t u8Count)
+{
+
+	//Create a new semaphore.
+
+	iop_sema_t	Sema={1,1,u8Count,1};
+	int			iSema;
+
+	dbgprintf("sys_sem_new: CreateSema (TID: %d, CNT: %d)\n",GetThreadId(),u8Count);
+
+	iSema=CreateSema(&Sema);
+	if(iSema<=0)
+	{
+		printf("sys_sem_new: CreateSema failed, EC: %d\n",iSema);
+		return	SYS_SEM_NULL;
+	}
+
+	++sema_count;
+
+	return	iSema;
 }
 
 
@@ -416,14 +279,14 @@ sys_arch_sem_wait(sys_sem_t Sema,u32_t u32Timeout)
 
 	dbgprintf("sys_arch_sem_wait: Sema: %d, Timeout: %x (TID: %d)\n",Sema,u32Timeout,GetThreadId());
 
-	if	(u32Timeout==0)
-	{ 
+	if(u32Timeout==0)
+	{
 
 		//Wait with no timeouts.
 
 		return	WaitSema(Sema)==0 ? 0:SYS_ARCH_TIMEOUT;
 	}
-	else if	(u32Timeout==1)
+	else if(u32Timeout==1)
 	{
 
 		//Poll.
@@ -445,7 +308,7 @@ sys_arch_sem_wait(sys_sem_t Sema,u32_t u32Timeout)
 		USec2SysClock(u32Timeout*1000,&ClockTicks);
 		SetAlarm(&ClockTicks,TimeoutHandler,(void*)iPID);
 
-		if	(WaitSema(Sema)!=0)
+		if(WaitSema(Sema)!=0)
 		{
 			return	SYS_ARCH_TIMEOUT;
 		}
@@ -472,31 +335,38 @@ sys_sem_free(sys_sem_t Sema)
 {
 	dbgprintf("sys_sem_free: Sema: %d (TID: %d)\n",Sema,GetThreadId());
 
-	if	(Sema==SYS_SEM_NULL)
+	if(Sema==SYS_SEM_NULL)
 	{
 		printf("sys_sem_free: Trying to delete illegal sema: %d\n",Sema);
 		return;
 	}
 	DeleteSema(Sema);
-	--u16SemaCNT;
+	--sema_count;
 }
-
 
 void
 sys_init(void)
 {
-	int			iA;
+	int i;
 	Timeout**	ppTimeout=&pFreeTimeouts;
 
 	dbgprintf("sys_init: Initializing (TID: %d)\n",GetThreadId());
 
-	for	(iA=0;iA<SYS_TIMEOUT_MAX;++iA)
+	for(i = 0; i < SYS_MAX_MESSAGES; i++)
 	{
-		Timeout*		pTimeout=&aTimeouts[iA];
-		
+	    msg_pool[i].next = NULL;
+	    msg_pool[i].sys_msg = NULL;
+	}
+
+
+	for	(i = 0; i < SYS_TIMEOUT_MAX; i++)
+	{
+		Timeout*		pTimeout=&aTimeouts[i];
+
 		*ppTimeout=pTimeout;
 		ppTimeout=&pTimeout->pNext;
 	}
+
 	*ppTimeout=NULL;
 }
 
@@ -602,7 +472,6 @@ sys_arch_timeouts(void)
 	return	&pTimeout->Timeouts;
 }
 
-
 sys_prot_t
 sys_arch_protect(void)
 {
@@ -622,20 +491,6 @@ sys_arch_unprotect(sys_prot_t Flags)
 
 #if		defined(DEBUG)
 
-static int
-CountTimeouts(Timeout* pTimeout)
-{
-	int	iCNT=0;
-
-	while	(pTimeout!=NULL)
-	{
-		++iCNT;
-		pTimeout=pTimeout->pNext;
-	}
-	return	iCNT;
-}
-
-
 void
 DumpMBox(sys_mbox_t pMBox)
 {
@@ -651,11 +506,9 @@ DumpMBox(sys_mbox_t pMBox)
 void
 DumpSysStats(void)
 {
-	printf("u16SemaCNT: %d\n",u16SemaCNT);
-	printf("u16MBoxCNT: %d\n",u16MBoxCNT);
-	printf("u16ThreadCNT: %d\n",u16ThreadCNT);
-	printf("FreeTimeouts: %d (%d)\n",CountTimeouts(pFreeTimeouts),SYS_TIMEOUT_MAX);
-	printf("ActiveTimeouts: %d (%d)\n",CountTimeouts(pActiveTimeouts),SYS_TIMEOUT_MAX);
+	printf("sema_count: %d\n",sema_count);
+	printf("mbox_count: %d\n",mbox_count);
+	printf("thread_count: %d\n",thread_count);
 	printf("Interrupt-context: %s\n",QueryIntrContext()==1 ? "True":"False");
 }
 
@@ -677,7 +530,7 @@ GetPBufType(int iFlag)
 		return	"Unknown";
 	}
 }
- 
+
 
 void
 DumpPBuf(struct pbuf* pBuf)

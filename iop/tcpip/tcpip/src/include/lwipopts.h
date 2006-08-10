@@ -163,8 +163,6 @@ a lot of data that needs to be copied, this should be set high. */
 #define RAW_STATS			1
 #endif	/*LWIP_STATS*/
 
-#define	LWIP_PROVIDE_ERRNO
-
 //Boman666: This define will force the TX-data to be splitted in an even number of TCP-segments. This will significantly increase
 //the upload speed, atleast on my configuration (PC - WinXP).
 #define	PS2IP_EVEN_TCP_SEG
