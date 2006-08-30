@@ -30,11 +30,17 @@ struct { const char *n; u16 v;} _irx_id = { \
 
 struct irx_import_table {
 	u32	magic;
-	struct irx_import_stub *next;
+	struct irx_import_table *next;
 	u16	version;
 	u16	mode;
 	char	name[8];
 	void	*stubs[0];
+};
+
+struct irx_import_stub {
+    u32 jump;
+    u16 fno;
+    u16 ori_zero;
 };
 
 /*
