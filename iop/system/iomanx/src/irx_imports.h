@@ -18,6 +18,7 @@
 
 /* Please keep these in alphabetical order!  */
 #include "loadcore.h"
+#include "stdio.h"
 #include "sysclib.h"
 
 #endif /* IOP_IRX_IMPORTS_H */

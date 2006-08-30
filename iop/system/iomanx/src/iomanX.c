@@ -36,146 +36,33 @@ static iop_file_t file_table[MAX_FILES];
 
 struct irx_export_table _exp_iomanx;
 
-/* This bit of code allows iomanX to "steal" the original ioman's registered devices
-   and use them as its own.  Although this functionality is now in iopmgr, this small
-   bit was included here to avoid a dependency on iopmgr.  */
+extern int hook_ioman();
+extern int unhook_ioman();
 
-/* Module info entry.  */
-typedef struct _smod_mod_info {
-	struct _smod_mod_info *next;
-	u8	*name;
-	u16	version;
-	u16	newflags;	/* For modload shipped with games.  */
-	u16	id;
-	u16	flags;		/* I believe this is where flags are kept for BIOS versions.  */
-	u32	entry;		/* _start */
-	u32	gp;
-	u32	text_start;
-	u32	text_size;
-	u32	data_size;
-	u32	bss_size;
-	u32	unused1;
-	u32	unused2;
-} smod_mod_info_t;
-
-static const char *ioman_modname = "IO/File_Manager";
-
-static int smod_get_next_mod(smod_mod_info_t *cur_mod, smod_mod_info_t *next_mod)
+iop_device_t **_get_dev_list(void)
 {
-	void *addr;
-
-	/* If cur_mod is 0, return the head of the list (IOP address 0x800).  */
-	if (!cur_mod) {
-		addr = (void *)0x800;
-	} else {
-		if (!cur_mod->next)
-			return 0;
-		else
-			addr = cur_mod->next;
-	}
-
-	memcpy(next_mod, addr, sizeof(smod_mod_info_t));
-	return next_mod->id;
-}
-
-static int smod_get_mod_by_name(const char *name, smod_mod_info_t *info)
-{
-	int len = strlen(name) + 1; /* Thanks to adresd for this fix.  */
-
-	if (!smod_get_next_mod(0, info))
-		return 0;
-
-	do {
-		if (!memcmp(info->name, name, len))
-			return info->id;
-	} while (smod_get_next_mod(info, info) != 0);
-
-	return 0;
-}
-
-static int (*p_AddDrv)(iop_device_t *) = 0;
-static int (*p_DelDrv)(const char *) = 0;
-static u32 *ioman_exports;
-
-/* This is called by a module wanting to add a device to legacy ioman.  */
-static int sbv_AddDrv(iop_device_t *device)
-{
-	int res;
-
-	/* We get first dibs!  */
-	res = AddDrv(device);
-
-	if (p_AddDrv)
-		return p_AddDrv(device);
-
-	return res;
-}
-
-/* This is called by a module wanting to delete a device from legacy ioman.  */
-static int sbv_DelDrv(const char *name)
-{
-	int res;
-
-	res = DelDrv(name);
-
-	if (p_DelDrv)
-		return p_DelDrv(name);
-
-	return res;
+    return(dev_list);
 }
 
 int _start(int argc, char **argv)
 {
-	iop_library_t ioman_library = { NULL, NULL, 0x102, 0, "ioman\0\0" };
-	smod_mod_info_t info;
-	iop_device_t **devinfo_table;
-	int i;
-
-	if (RegisterLibraryEntries(&_exp_iomanx) != 0)
+	if(RegisterLibraryEntries(&_exp_iomanx) != 0)
+    {
 		return 1;
-
-	/* Steal the original ioman's registered devices.  */
-	if (smod_get_mod_by_name(ioman_modname, &info)) {
-		devinfo_table = (iop_device_t **)(info.text_start + info.text_size + info.data_size + 0x0c);
-
-		/* There are a maximum of 16 entries in the original ioman.  */
-		for (i = 0; i < 16; i++)
-			if (devinfo_table[i])
-				dev_list[i] = devinfo_table[i];
 	}
 
-	/* Patch ioman's AddDrv and DelDrv calls, so any modules loaded after us will get the patched
-	   versions.  */
-	if ((ioman_exports = (u32 *)QueryLibraryEntryTable(&ioman_library)) != NULL) {
-		p_AddDrv = (void *)ioman_exports[20];
-		p_DelDrv = (void *)ioman_exports[21];
-
-		ioman_exports[20] = (u32)sbv_AddDrv;
-		ioman_exports[21] = (u32)sbv_DelDrv;
-	}
+    if(hook_ioman() != 0)
+    {
+        return 1;
+    }
 
 	return 0;
 }
 
 int shutdown()
 {
-	int i;
-
-	/* Remove all registered devices.  */
-	for (i = 0; i < MAX_DEVICES; i++) {
-		if (dev_list[i] != NULL) {
-			dev_list[i]->ops->deinit(dev_list[i]);
-			dev_list[i] = NULL;
-		}
-	}
-
-	/* Restore ioman's library exports.  */
-	if (p_AddDrv && p_DelDrv) {
-		ioman_exports[20] = (u32)p_AddDrv;
-		ioman_exports[21] = (u32)p_DelDrv;
-	}
-
-	return 0;
+    unhook_ioman();
+	return 1;
 }
 
 int AddDrv(iop_device_t *device)
@@ -291,7 +178,7 @@ int open(const char *name, int flags, ...)
 	va_start(args, flags);
 	mode = va_arg(args, int);
 	va_end(args);
-	
+
 	if (!f)
 	{
 		return -EMFILE;
@@ -493,26 +380,26 @@ int dread(int fd, void *buf)
     iox_dirent_t *iox_dirent = (iox_dirent_t *) buf;
     iop_file_t *f = get_file(fd);
     int res;
-    
+
     if (f == NULL ||  !(f->mode & 8))
             return -EBADF;
-    
+
     /* If this is a legacy device (such as mc:) then we need to convert the mode
        variable of the stat structure to iomanX's extended format.  */
     if ((f->device->type & 0xf0000000) != IOP_DT_FSEXT)
     {
         io_dirent_t io_dirent;
         res = f->device->ops->dread(f, &io_dirent);
-        
+
         iox_dirent->stat.mode = mode2modex(io_dirent.stat.mode);
-    
+
         iox_dirent->stat.attr = io_dirent.stat.attr;
         iox_dirent->stat.size = io_dirent.stat.size;
         memcpy(iox_dirent->stat.ctime, io_dirent.stat.ctime, sizeof(io_dirent.stat.ctime));
         memcpy(iox_dirent->stat.atime, io_dirent.stat.atime, sizeof(io_dirent.stat.atime));
         memcpy(iox_dirent->stat.mtime, io_dirent.stat.mtime, sizeof(io_dirent.stat.mtime));
         iox_dirent->stat.hisize = io_dirent.stat.hisize;
-    
+
         strncpy(iox_dirent->name, io_dirent.name, sizeof(iox_dirent->name));
     }
     else

@@ -15,7 +15,7 @@ IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
 IOP_BIN  = bin/iomanX.irx
-IOP_OBJS = obj/iomanX.o obj/exports.o obj/imports.o
+IOP_OBJS = obj/iomanX.o obj/ioman_sbv.o obj/exports.o obj/imports.o
 
 IOP_CFLAGS  += -Wall -fno-builtin
 IOP_LDFLAGS += -s
