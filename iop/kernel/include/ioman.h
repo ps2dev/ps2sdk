@@ -33,6 +33,9 @@ int write(int fd, void *ptr, size_t size);
 int lseek(int fd, unsigned long pos, int mode);
 #define I_lseek DECLARE_IMPORT(8, lseek)
 
+int format(const char *dev);
+#define I_format DECLARE_IMPORT(18, format)
+
 /* Device drivers.  */
 
 /* Device types.  */

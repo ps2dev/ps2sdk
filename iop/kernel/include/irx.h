@@ -28,20 +28,22 @@ struct { const char *n; u16 v;} _irx_id = { \
  */
 #define IMPORT_MAGIC	0x41e00000
 
-struct irx_import_table {
+struct irx_import_table
+{
 	u32	magic;
 	struct irx_import_table *next;
 	u16	version;
 	u16	mode;
 	char	name[8];
 	void	*stubs[0];
-};
+} __attribute ((packed));
 
-struct irx_import_stub {
+struct irx_import_stub
+{
     u32 jump;
     u16 fno;
     u16 ori_zero;
-};
+} __attribute ((packed));
 
 /*
  * Ugly, yet functional.
