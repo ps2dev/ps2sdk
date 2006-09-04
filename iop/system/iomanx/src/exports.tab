@@ -3,7 +3,7 @@ DECLARE_EXPORT_TABLE(iomanx, 1, 1)
 	DECLARE_EXPORT(_start)
 	DECLARE_EXPORT(_retonly)
 	DECLARE_EXPORT(shutdown)
-	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(GetDeviceList)
 
 	DECLARE_EXPORT(open)
 /*05*/	DECLARE_EXPORT(close)

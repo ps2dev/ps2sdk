@@ -20,5 +20,6 @@
 #include "loadcore.h"
 #include "stdio.h"
 #include "sysclib.h"
+#include "intrman.h"
 
 #endif /* IOP_IRX_IMPORTS_H */

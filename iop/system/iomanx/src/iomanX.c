@@ -19,6 +19,7 @@
 #include "loadcore.h"
 #include "iomanX.h"
 #include "sysclib.h"
+#include "intrman.h"
 #include "sys/stat.h"
 
 #define MODNAME "iomanx"
@@ -30,7 +31,7 @@ IRX_ID("IOX/File_Manager", 1, 1);
 #define MAX_FILES   32
 
 static iop_device_t *dev_list[MAX_DEVICES];
-static iop_file_t file_table[MAX_FILES];
+iop_file_t file_table[MAX_FILES];
 
 #define isnum(c) ((c) >= '0' && (c) <= '9')
 
@@ -39,7 +40,7 @@ struct irx_export_table _exp_iomanx;
 extern int hook_ioman();
 extern int unhook_ioman();
 
-iop_device_t **_get_dev_list(void)
+iop_device_t **GetDeviceList(void)
 {
     return(dev_list);
 }
@@ -50,6 +51,9 @@ int _start(int argc, char **argv)
     {
 		return 1;
 	}
+
+    memset(dev_list, 0, sizeof(dev_list));
+    memset(file_table, 0, sizeof(file_table));
 
     if(hook_ioman() != 0)
     {
@@ -68,19 +72,34 @@ int shutdown()
 int AddDrv(iop_device_t *device)
 {
 	int i, res = -1;
+    int oldIntr;
 
-	for (i = 0; i < MAX_DEVICES; i++) {
+    CpuSuspendIntr(&oldIntr);
+
+	for (i = 0; i < MAX_DEVICES; i++)
+	{
 		if (dev_list[i] == NULL)
 			break;
 	}
 
 	if (i >= MAX_DEVICES)
+	{
+	    CpuResumeIntr(oldIntr);
 		return res;
+	}
 
-	if ((res = device->ops->init(device)) >= 0)
-		dev_list[i] = device;
+	dev_list[i] = device;
+    CpuResumeIntr(oldIntr);
 
-	return res;
+    FlushIcache();
+
+	if ((res = device->ops->init(device)) < 0)
+	{
+		dev_list[i] = NULL;
+		return(-1);
+	}
+
+	return(0);
 }
 
 int DelDrv(const char *name)
@@ -91,7 +110,6 @@ int DelDrv(const char *name)
 		if (dev_list[i] != NULL && !strcmp(name, dev_list[i]->name)) {
 			dev_list[i]->ops->deinit(dev_list[i]);
 			dev_list[i] = NULL;
-
 			return 0;
 		}
 	}
@@ -157,15 +175,29 @@ iop_file_t *get_file(int fd)
 	return NULL;
 }
 
-iop_file_t *get_new_file()
+iop_file_t *get_new_file(void)
 {
 	int i;
+	iop_file_t *fd = NULL;
+	int oldIntr;
+
+	CpuSuspendIntr(&oldIntr);
 
 	for (i = 0; i < MAX_FILES; i++)
-		if (!file_table[i].mode && !file_table[i].device)
-			return &file_table[i];
+	{
+		if (!file_table[i].device)
+		{
+			fd = &file_table[i];
 
-	return NULL;
+			// fill in "device" temporarily to mark the fd as allocated.
+			fd->device = (iop_device_t *) 0xFFFFFFFF;
+			break;
+		}
+	}
+
+	CpuResumeIntr(oldIntr);
+
+	return fd;
 }
 
 int open(const char *name, int flags, ...)
@@ -186,6 +218,7 @@ int open(const char *name, int flags, ...)
 
 	if ((filename = find_iop_device(name, &f->unit, &f->device)) == (char *)-1)
 	{
+        f->device = NULL;
 		return -ENODEV;
 	}
 
@@ -339,7 +372,10 @@ int dopen(const char *name)
 		return -EMFILE;
 
 	if ((filename = find_iop_device(name, &f->unit, &f->device)) == (char *)-1)
+	{
+        f->device = NULL;
 		return -ENODEV;
+	}
 
 	f->mode = 8;	/* Indicates a directory.  */
 	if ((res = f->device->ops->dopen(f, filename)) >= 0)
