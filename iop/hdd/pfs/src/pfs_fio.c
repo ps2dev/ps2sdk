@@ -33,7 +33,7 @@ int checkFileSlot(pfs_file_slot_t *fileSlot)
 {
 	WaitSema(pfsFioSema);
 
-	if(fileSlot->clink==NULL) 
+	if(fileSlot->clink==NULL)
 	{
 		SignalSema(pfsFioSema);
 		return -EBADF;
@@ -46,11 +46,11 @@ void closeFileSlot(pfs_file_slot_t *fileSlot)
 {
 	pfs_mount_t *pfsMount=fileSlot->clink->pfsMount;
 
-	if(fileSlot->fd->mode & O_WRONLY) 
+	if(fileSlot->fd->mode & O_WRONLY)
 	{
-		if(fileSlot->restsInfo.dirty!=0) 
+		if(fileSlot->restsInfo.dirty!=0)
 		{
-			pfsMount->blockDev->transfer(pfsMount->fd, fileSlot->restsBuffer, 
+			pfsMount->blockDev->transfer(pfsMount->fd, fileSlot->restsBuffer,
 				fileSlot->restsInfo.sub, fileSlot->restsInfo.sector, 1, IOCTL2_TMODE_WRITE);
 		}
 		inodeUpdateTime(fileSlot->clink);	// set time :P
@@ -74,7 +74,7 @@ pfs_mount_t *fioGetMountedUnit(int unit)
 }
 
 int mountDevice(block_device *blockDev, int fd, int unit, int flag)
-{ 
+{
 	u32 i;
 	int rv;
 
@@ -162,7 +162,7 @@ int	openFile(pfs_mount_t *pfsMount, pfs_file_slot_t *freeSlot, const char *filen
 					goto label;
 				}
 
-				parentInode=inodeGetParent(pfsMount, parentInode, (char*)&fileInode->u.inode->data[1], 
+				parentInode=inodeGetParent(pfsMount, parentInode, (char*)&fileInode->u.inode->data[1],
 												file, &result);
 				cacheAdd(fileInode);
 				if ((parentInode==0) ||
@@ -208,8 +208,8 @@ int	openFile(pfs_mount_t *pfsMount, pfs_file_slot_t *freeSlot, const char *filen
 		}
 
 	// Otherwise, if file doesnt already exist..
-	}else{ 
-		
+	}else{
+
 		dprintf("ps2fs: File inode does not exist..\n");
 
 		if ((openFlags & O_CREAT) && (result==-ENOENT) &&
@@ -290,12 +290,14 @@ label:
 		}
 		freeSlot->clink=NULL;
 	}
-	cacheAdd(fileInode);
+
+	if(fileInode) cacheAdd(fileInode);
+
 	return checkForLastError(pfsMount, result);
 }
 
 // Reads unaligned data, or remainder data (size < 512)
-int fileTransferRemainder(pfs_file_slot_t *fileSlot, void *buf, int size, int operation) 
+int fileTransferRemainder(pfs_file_slot_t *fileSlot, void *buf, int size, int operation)
 {
 	u32 sector, pos;
 	int result;
@@ -333,7 +335,7 @@ int fileTransferRemainder(pfs_file_slot_t *fileSlot, void *buf, int size, int op
 		memcpy(buf, fileSlot->restsBuffer+pos, size=min(size, 512-(int)pos));
 	else
 		memcpy(fileSlot->restsBuffer+pos, buf, size=min(size, 512-(int)pos));
-	
+
 	if (operation == 1)
 	{
 		if (pfsMount->flags & FIO_ATTR_WRITEABLE)
@@ -377,7 +379,7 @@ int fileTransfer(pfs_file_slot_t *fileSlot, u8 *buf, int size, int operation)
 	{
 		pfs_blockinfo *bi;
 		u32 sectors;
-		
+
 		// Get block info for current file position
 		bi=blockGetCurrent(blockpos);
 
@@ -394,7 +396,7 @@ int fileTransfer(pfs_file_slot_t *fileSlot, u8 *buf, int size, int operation)
 					return 0;
 				}
 
-				result = blockAllocNewSegment(fileSlot->clink, blockpos, 
+				result = blockAllocNewSegment(fileSlot->clink, blockpos,
 								(size - 1 + pfsMount->zsize) / pfsMount->zsize);
 				if(result<0)
 					break;
@@ -430,7 +432,7 @@ int fileTransfer(pfs_file_slot_t *fileSlot, u8 *buf, int size, int operation)
 		{
 			sectors = bytes_remain / 512;
 			if ((size / 512) < sectors)	sectors = size / 512; //sectors=min(size/512, sectors)
-		
+
 			// Do the ATA sector transfer
 			result=pfsMount->blockDev->transfer(pfsMount->fd, buf, bi->subpart,
 				 ((bi->number + blockpos->block_offset) << pfsMount->sector_scale)+(blockpos->byte_offset / 512),
@@ -533,7 +535,7 @@ int	pfsOpen(iop_file_t *f, const char *name, int flags, int mode)
 	}
 
 	// Find free file slot
-	for(i = 0; i < pfsConfig.maxOpen; i++) 
+	for(i = 0; i < pfsConfig.maxOpen; i++)
 	{
 		if(!fileSlots[i].fd) {
 			freeSlot = &fileSlots[i];
@@ -545,7 +547,7 @@ int	pfsOpen(iop_file_t *f, const char *name, int flags, int mode)
 	freeSlot = NULL;
 
 pfsOpen_slotFound:
-	
+
 	if(!freeSlot) {
 		rv = -EMFILE;
 		goto pfsOpen_end;
@@ -588,7 +590,7 @@ int pfsRead(iop_file_t *f, void *buf, int size)
 	pfs_file_slot_t *fileSlot = (pfs_file_slot_t*)f->privdata;
 	int result = checkFileSlot(fileSlot);
 
-	if (result)	
+	if (result)
 	{
 		dprintf("ps2fs: bad file slot on read\n");
 		return result;
@@ -648,7 +650,7 @@ s64 _seek(pfs_file_slot_t *fileSlot, s64 offset, int whence, int mode)
 	case SEEK_END:
 		startPos = fileSlot->clink->u.inode->size;
 		break;
-	default: 
+	default:
 		return -EINVAL;
 	}
 	newPos = startPos + offset;
@@ -670,7 +672,7 @@ s64 _seek(pfs_file_slot_t *fileSlot, s64 offset, int whence, int mode)
 		blockInitPos(fileSlot->clink, &fileSlot->block_pos, 0);
 	}
 
-	if (rv)	
+	if (rv)
 	{
 		dprintf("ps2fs: Cant seek: failed to blockInitPos\n");
 		return rv;
@@ -681,7 +683,7 @@ s64 _seek(pfs_file_slot_t *fileSlot, s64 offset, int whence, int mode)
 	return newPos;
 }
 
-int pfsLseek(iop_file_t *f, unsigned long pos, int whence) 
+int pfsLseek(iop_file_t *f, unsigned long pos, int whence)
 {
 	pfs_file_slot_t *fileSlot = (pfs_file_slot_t*)f->privdata;
 	int result = checkFileSlot(fileSlot);
@@ -721,7 +723,7 @@ int _remove(pfs_mount_t *pfsMount, const char *path, int mode)
 
 	if((file=inodeGetFileInDir(parent, szPath, &rv))!=NULL)
 	{
-		if(mode!=0) 
+		if(mode!=0)
 		{// remove dir
 			if((file->u.inode->mode & FIO_S_IFMT) != FIO_S_IFDIR)
 				rv=-ENOTDIR;
@@ -773,7 +775,7 @@ int	pfsMkdir(iop_file_t *f, const char *path, int mode)
 {
 	pfs_mount_t *pfsMount;
 	int rv;
-	
+
 	mode = (mode & 0xfff) | 0x10000 | FIO_S_IFDIR;	// TODO: change to some constant/macro
 
 	if(!(pfsMount = fioGetMountedUnit(f->unit)))
@@ -822,19 +824,19 @@ int	pfsDread(iop_file_t *f, iox_dirent_t *dirent)
 		return rv;
 
 	pfsMount = fileSlot->clink->pfsMount;
-	
+
 	if((fileSlot->clink->u.inode->mode & FIO_S_IFMT) != FIO_S_IFDIR)
 	{
 		dprintf("ps2fs: dread error: not directory!\n");
 		rv = -ENOTDIR;
 	}
 	else
-		if((rv = getNextDentry(fileSlot->clink, &fileSlot->block_pos, (u32 *)&fileSlot->position, 
+		if((rv = getNextDentry(fileSlot->clink, &fileSlot->block_pos, (u32 *)&fileSlot->position,
 									dirent->name, &bi)) > 0)
 		{
 
 			clink = inodeGetData(pfsMount, bi.subpart, bi.number, &result);
-			if(clink != NULL) 
+			if(clink != NULL)
 			{
 				fioStatFiller(clink, &dirent->stat);
 				cacheAdd(clink);
@@ -877,7 +879,7 @@ int	pfsGetstat(iop_file_t *f, const char *name, iox_stat_t *stat)
 		return -ENODEV;
 
 	clink=inodeGetFile(pfsMount, NULL, name, &rv);
-	if(clink!=NULL) 
+	if(clink!=NULL)
 	{
 		fioStatFiller(clink, stat);
 		cacheAdd(clink);
@@ -901,7 +903,7 @@ int	pfsChstat(iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int st
 
 		rv = checkAccess(clink, 0x02);
 		if(rv == 0) {
-	
+
 			clink->flags |= 0x01;
 
 			if((statmask & FIO_CST_MODE) && ((clink->u.inode->mode & FIO_S_IFMT) != FIO_S_IFLNK))
@@ -933,7 +935,7 @@ int	pfsChstat(iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int st
 	return checkForLastError(pfsMount, rv);
 }
 
-int pfsRename(iop_file_t *ff, const char *old, const char *new) 
+int pfsRename(iop_file_t *ff, const char *old, const char *new)
 {
 	char path1[256], path2[256];
 	int result=0;
@@ -943,7 +945,7 @@ int pfsRename(iop_file_t *ff, const char *old, const char *new)
 	pfs_cache_t *removeOld=NULL, *removeNew=NULL;
 	pfs_cache_t *iFileOld=NULL, *iFileNew=NULL;
 	pfs_cache_t *newParent=NULL,*addNew=NULL;
-	
+
 	pfsMount=fioGetMountedUnit(ff->unit);
 	if (pfsMount==0)	return -ENODEV;
 
@@ -1124,7 +1126,7 @@ void _sync()
 		pfs_restsInfo_t *info=&fileSlots[i].restsInfo;
 		if(info->dirty) {
 			pfs_mount_t *pfsMount=fileSlots[i].clink->pfsMount;
-			pfsMount->blockDev->transfer(pfsMount->fd, &fileSlots[i].restsBuffer, 
+			pfsMount->blockDev->transfer(pfsMount->fd, &fileSlots[i].restsBuffer,
 				info->sub, info->sector, 1, IOCTL2_TMODE_WRITE);
 			fileSlots[i].restsInfo.dirty=0;
 		}
@@ -1156,7 +1158,7 @@ int pfsMount(iop_file_t *f, const char *fsname, const char *devname, int flag, v
 		return -ENXIO;
 
 	WaitSema(pfsFioSema);
-	
+
 	fd = open(devname, (flag & O_RDONLY) ? O_RDONLY : O_RDWR); // ps2hdd.irx fd
 	if(fd < 0)
 		rv = fd;
@@ -1192,9 +1194,9 @@ int pfsUmount(iop_file_t *f, const char *fsname)
 	if((pfsMount = fioGetMountedUnit(f->unit))==NULL)
 		return -ENODEV;
 
-	for(i = 0; i < pfsConfig.maxOpen; i++) 
-	{	
-		if((fileSlots[i].clink!=NULL) && (fileSlots[i].clink->pfsMount==pfsMount)) 
+	for(i = 0; i < pfsConfig.maxOpen; i++)
+	{
+		if((fileSlots[i].clink!=NULL) && (fileSlots[i].clink->pfsMount==pfsMount))
 		{
 			busy_flag=1;
 			break;
@@ -1236,7 +1238,7 @@ int pfsReadlink(iop_file_t *f, const char *path, char *buf, int buflen)
 	pfs_mount_t *pfsMount;
 	pfs_cache_t *clink;
 
-	if(buflen < 0) 
+	if(buflen < 0)
 		return -EINVAL;
 	if(!(pfsMount=fioGetMountedUnit(f->unit)))
 		return -ENODEV;
@@ -1245,7 +1247,7 @@ int pfsReadlink(iop_file_t *f, const char *path, char *buf, int buflen)
 	{
 		if((clink->u.inode->mode & FIO_S_IFMT) == FIO_S_IFLNK)
 			rv=-EINVAL;
-		else 
+		else
 		{
 			rv=strlen((char *)&clink->u.inode->data[1]);
 			if(buflen < rv)
