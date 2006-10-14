@@ -869,7 +869,7 @@ double strtod(const char *s, char **eptr)
           e *= 10;
           e += (int)(*s - '0');
         }
-        if (esign >= 0) for (i = 0; i < e; ++i) ret *= 1.0;
+        if (esign >= 0) for (i = 0; i < e; ++i) ret *= 10.0;
         else for (i = 0; i < e; ++i) ret *= 0.1;
       }
     }
