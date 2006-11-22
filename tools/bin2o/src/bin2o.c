@@ -358,7 +358,7 @@ int main(int argc, char *argv[])
     if (fd_size < end)
 	end = fd_size;
     
-    if (end < (size + start))
+    if (end < (size - start))
 	size = end - start;
 
     buffer = malloc(size);
