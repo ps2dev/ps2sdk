@@ -35,6 +35,7 @@ void _ps2sdk_stdio_init();
 #define STD_IOBUF_TYPE_MC              8
 #define STD_IOBUF_TYPE_HOST           16
 #define STD_IOBUF_TYPE_STDOUTHOST     32
+#define STD_IOBUF_TYPE_MASS           64
 
 extern char __direct_pwd[256];
 extern int __stdio_initialised;
@@ -274,7 +275,7 @@ int _fflushall(void)
 */
 int fgetc(FILE *stream)
 {
-  char c;
+  unsigned char c;
   int ret;
 
   switch(stream->type) {
@@ -385,6 +386,67 @@ char *fgets(char *buf, int n, FILE *stream)
 int __stdio_get_fd_type(const char *);
 
 
+ /* Normalize a pathname by removing
+  . and .. components, duplicated /, etc. */
+char* __ps2_normalize_path(char *path_name)
+{
+        int i, j;
+        int first, next;
+        static char out[255];
+
+        /* First copy the path into our temp buffer */
+        strcpy(out, path_name);
+        /* Then append "/" to make the rest easier */
+        strcat(out,"/");
+
+        /* Convert "//" to "/" */
+        for(i=0; out[i+1]; i++) {
+                if(out[i]=='/' && out[i+1]=='/') {
+                        for(j=i+1; out[j]; j++)
+                                out[j] = out[j+1];
+                        i--;
+                ;}
+        }
+
+        /* Convert "/./" to "/" */
+        for(i=0; out[i] && out[i+1] && out[i+2]; i++) {
+                if(out[i]=='/' && out[i+1]=='.' && out[i+2]=='/') {
+                        for(j=i+1; out[j]; j++)
+                                out[j] = out[j+2];
+                        i--;
+                }
+        }
+
+        /* Convert "/path/../" to "/" until we can't anymore.  Also
+         * convert leading "/../" to "/" */
+        first = next = 0;
+        while(1) {
+                /* If a "../" follows, remove it and the parent */
+                if(out[next+1] && out[next+1]=='.' && 
+                   out[next+2] && out[next+2]=='.' &&
+                   out[next+3] && out[next+3]=='/') {
+                        for(j=0; out[first+j+1]; j++)
+                                out[first+j+1] = out[next+j+4];
+                        first = next = 0;
+                        continue;
+                }
+
+                /* Find next slash */
+                first = next;
+                for(next=first+1; out[next] && out[next] != '/'; next++)
+                        continue;
+                if(!out[next]) break;
+        }
+
+        /* Remove trailing "/" */
+        for(i=1; out[i]; i++)
+                continue;
+        if(i >= 1 && out[i-1] == '/') 
+                out[i-1] = 0;
+
+        return (char*)out;
+}
+
 /*
 **
 **  [func] - fopen.
@@ -441,53 +503,53 @@ FILE *fopen(const char *fname, const char *mode)
       /* search for an available fd slot. */
       for (i = 3; i < _NFILE; ++i) if (__iob[i].fd < 0) break;
       if (i < _NFILE) {
-        char * t_fname = (char *)fname;
-	char b_fname[FILENAME_MAX];
+        char * t_fname = __ps2_normalize_path((char *)fname);
+        char b_fname[FILENAME_MAX];
         __iob[i].type = __stdio_get_fd_type(fname);
-	if (!strchr(fname, ':')) { // filename doesn't contain device
-	  t_fname = b_fname;
-	  if (fname[0] == '/' || fname[0] == '\\' ) {   // does it contain root ?
-	    char * device_end = strchr(__direct_pwd, ':');
-	    if (device_end) {      // yes, let's strip pwd a bit to keep device only
-	      strncpy(b_fname, __direct_pwd, device_end - __direct_pwd);
-	      strcpy(b_fname + (device_end - __direct_pwd), fname);
-	    } else {               // but pwd doesn't contain any device, let's default to host
-	      strcpy(b_fname, "host:");
-	      strcpy(b_fname + 5, fname);
-	    }
-	  } else {                 // otherwise, it's relative directory, let's copy pwd straight
-  	    int b_fname_len = strlen(__direct_pwd);
-	    if (!strchr(__direct_pwd, ':')) { // check if pwd contains device name
-	      strcpy(b_fname, "host:");
-	      strcpy(b_fname + 5, __direct_pwd);
-	      if (!(__direct_pwd[b_fname_len - 1] == '/' || __direct_pwd[b_fname_len - 1] == '\\')) { // does it has trailing slash ?
- 	        if(__iob[i].type == STD_IOBUF_TYPE_CDROM)
-	      	 b_fname[b_fname_len + 5] = '\\';
-      	    else 
+        if (!strchr(fname, ':')) { // filename doesn't contain device
+          t_fname = b_fname;
+          if (fname[0] == '/' || fname[0] == '\\' ) {   // does it contain root ?
+            char * device_end = strchr(__direct_pwd, ':');
+            if (device_end) {      // yes, let's strip pwd a bit to keep device only
+              strncpy(b_fname, __direct_pwd, device_end - __direct_pwd);
+              strcpy(b_fname + (device_end - __direct_pwd), fname);
+            } else {               // but pwd doesn't contain any device, let's default to host
+              strcpy(b_fname, "host:");
+              strcpy(b_fname + 5, fname);
+            }
+          } else {                 // otherwise, it's relative directory, let's copy pwd straight
+            int b_fname_len = strlen(__direct_pwd);
+            if (!strchr(__direct_pwd, ':')) { // check if pwd contains device name
+              strcpy(b_fname, "host:");
+              strcpy(b_fname + 5, __direct_pwd);
+              if (!(__direct_pwd[b_fname_len - 1] == '/' || __direct_pwd[b_fname_len - 1] == '\\')) { // does it has trailing slash ?
+                if(__iob[i].type == STD_IOBUF_TYPE_CDROM)
+              	 b_fname[b_fname_len + 5] = '\\';
+            else 
              b_fname[b_fname_len + 5] = '/';
-	        // b_fname[b_fname_len + 6] = 0; 
-		    // b_fname_len += 2;
-		    b_fname_len++;
-	      }
-	      b_fname_len += 5;
-	      strcpy(b_fname + b_fname_len, fname);
-	    } else {                          // device name is here
-	      if (b_fname_len) {
-	        strcpy(b_fname, __direct_pwd);
-	        if (!(b_fname[b_fname_len - 1] == '/' || b_fname[b_fname_len - 1] == '\\')) {
-	          if(__iob[i].type == STD_IOBUF_TYPE_CDROM)
-	          	b_fname[b_fname_len] = '\\';
-          	  else
-          	    b_fname[b_fname_len] = '/';
-          	  // b_fname[b_fname_len + 1] = 0; // #neofar
-          	  // b_fname_len += 2;
-          	  b_fname_len++;
-	        }
-	        strcpy(b_fname + b_fname_len, fname);
-	      }
-	    }
-	  }
-	}
+                // b_fname[b_fname_len + 6] = 0; 
+                    // b_fname_len += 2;
+                    b_fname_len++;
+              }
+              b_fname_len += 5;
+              strcpy(b_fname + b_fname_len, fname);
+            } else {                          // device name is here
+              if (b_fname_len) {
+                strcpy(b_fname, __direct_pwd);
+                if (!(b_fname[b_fname_len - 1] == '/' || b_fname[b_fname_len - 1] == '\\')) {
+                  if(__iob[i].type == STD_IOBUF_TYPE_CDROM)
+                  	b_fname[b_fname_len] = '\\';
+                  else
+                    b_fname[b_fname_len] = '/';
+                  // b_fname[b_fname_len + 1] = 0; // #neofar
+                  // b_fname_len += 2;
+                  b_fname_len++;
+                }
+                strcpy(b_fname + b_fname_len, fname);
+              }
+            }
+          }
+        }
         if ((fd = _ps2sdk_open((char *)t_fname, iomode)) >= 0) {
           __iob[i].fd = fd;
           __iob[i].cnt = 0;
@@ -495,22 +557,22 @@ FILE *fopen(const char *fname, const char *mode)
           __iob[i].has_putback = 0;
           ret = (__iob + i);
         } else if ((__iob[i].type == STD_IOBUF_TYPE_CDROM)) {
-	  int fname_len = strlen(t_fname);
-	  if (!((t_fname[fname_len - 2] == ';') && (t_fname[fname_len - 1] == '1'))) {
-	    char cd_fname[fname_len + 3];
-	    strcpy(cd_fname, t_fname);
-	    cd_fname[fname_len + 0] = ';';
-	    cd_fname[fname_len + 1] = '1';
-	    cd_fname[fname_len + 2] = 0;
-    	    if ((fd = _ps2sdk_open((char *)cd_fname, iomode)) >= 0) {
+          int fname_len = strlen(t_fname);
+          if (!((t_fname[fname_len - 2] == ';') && (t_fname[fname_len - 1] == '1'))) {
+            char cd_fname[fname_len + 3];
+            strcpy(cd_fname, t_fname);
+            cd_fname[fname_len + 0] = ';';
+            cd_fname[fname_len + 1] = '1';
+            cd_fname[fname_len + 2] = 0;
+            if ((fd = _ps2sdk_open((char *)cd_fname, iomode)) >= 0) {
               __iob[i].fd = fd;
               __iob[i].cnt = 0;
               __iob[i].flag = flag;
               __iob[i].has_putback = 0;
               ret = (__iob + i);
-	    }
-	  }
-	}
+            }
+          }
+        }
       }
     }
   }
@@ -605,9 +667,7 @@ int fileno(FILE * f) {
 */
 int fputc(int c, FILE *stream)
 {
-  char ch;
-
-  ch = (char)c;
+  unsigned char ch = (unsigned char)c;
   return ((fwrite(&ch, 1, 1, stream) == 1) ? 0 : EOF);
 }
 #endif
@@ -660,7 +720,7 @@ int fputs(const char *s, FILE *stream)
 */
 size_t fread(void *buf, size_t r, size_t n, FILE *stream)
 {
-  size_t ret;
+  size_t ret = 0, read_len = r * n;
 
   switch(stream->type) {
     case STD_IOBUF_TYPE_NONE:
@@ -677,11 +737,11 @@ size_t fread(void *buf, size_t r, size_t n, FILE *stream)
         *ptr = stream->putback;
         buf = ptr + 1;
         stream->has_putback = 0;
-        /* subtract 1 from r * n to avoid buffer overflow */
-        ret = (_ps2sdk_read(stream->fd, buf, (int)((r * n) -1 )) / (int)r);
-      } else {
-        ret = (_ps2sdk_read(stream->fd, buf, (int)(r * n)) / (int)r);
+        ret++;
+        /* subtract 1 to read_len to avoid buffer overflow */
+        read_len--;
       }
+      ret += _ps2sdk_read(stream->fd, buf, read_len) / r;
   }
   return (ret);
 }
@@ -854,7 +914,7 @@ size_t fwrite(const void *buf, size_t r, size_t n, FILE *stream)
 */
 int getc(FILE *stream)
 {
-  char c;
+  unsigned char c;
   int  ret;
 
   switch(stream->type) {
@@ -909,6 +969,8 @@ static struct {
     { "mc1:",    4, STD_IOBUF_TYPE_MC },
     { "host0:",  6, STD_IOBUF_TYPE_HOST },
     { "host:",   5, STD_IOBUF_TYPE_HOST },
+    { "mass0:",  6, STD_IOBUF_TYPE_MASS },
+    { "mass:",   5, STD_IOBUF_TYPE_MASS },
     { 0, 0 }
 };
 
