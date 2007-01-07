@@ -20,6 +20,10 @@ This also decreases memory fragmentation, and freeing all structures
 #ifndef RECYCLE
 #define RECYCLE
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define RESTART    0
 #define REMAX      32000
 
@@ -61,5 +65,9 @@ char    *renewx(/*_ struct reroot *r _*/);
 /* malloc, but exit program if no joy */
 /* use plain free() to free memory allocated by remalloc() */
 char    *remalloc(/*_ size_t len _*/);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif  /* RECYCLE */

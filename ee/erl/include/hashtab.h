@@ -35,6 +35,10 @@ This implements a hash table.
 #ifndef HASHTAB
 #define HASHTAB
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* PRIVATE TYPES AND DEFINITIONS */
 
 struct hitem
@@ -209,5 +213,9 @@ word hnbucket(/*_ htab *t _*/);
     Also expect "existing" to be about 2.
  */
 void hstat(/*_ htab *t _*/);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif   /* HASHTAB */

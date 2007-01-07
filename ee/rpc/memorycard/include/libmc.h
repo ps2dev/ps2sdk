@@ -79,13 +79,22 @@ extern "C" {
 //#define MC_FUNC_UNKNOWN_1	0x5A	// mcserv version
 //#define MC_FUNC_UNKNOWN_2	0x5C	// mcserv version
 
+// These types show up in the OSD browser when set.
+// If the OSD doesn't know the number it'll display "Unrecognizable Data" or so.
+// AFAIK these have no other effects.
+// Known type IDs for icon.sys file:
+#define MCICON_TYPE_SAVED_DATA    0 // "Saved Data (PlayStation(r)2)"
+#define MCICON_TYPE_SOFTWARE_PS2  1 // "Software (PlayStation(r)2)"
+#define MCICON_TYPE_SOFTWARE_PKT  3 // "Software (PocketStation(r))"
+#define MCICON_TYPE_SETTINGS_DATA 4 // "Settings File (PlayStation(r)2)"
+
 typedef int iconIVECTOR[4];
 typedef float iconFVECTOR[4];
 
 typedef struct
 {
     unsigned char  head[4];     // header = "PS2D"
-    unsigned short unknown1;    // unknown
+    unsigned short type;        // filetype, used to be "unknown1" (see MC_ICONTYPE_* above)
     unsigned short nlOffset;    // new line pos within title name
     unsigned unknown2;          // unknown
     unsigned trans;             // transparency

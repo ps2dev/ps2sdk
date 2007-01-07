@@ -16,6 +16,10 @@
 
 #include <tamtypes.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 struct htab;
 
 #define ERL_FLAG_STICKY 1
@@ -58,4 +62,8 @@ struct symbol_t * erl_find_symbol(const char * symbol);
 
 void erl_flush_symbols(struct erl_record_t * erl);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif // __ERL_H__
