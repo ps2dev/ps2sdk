@@ -384,25 +384,37 @@ static void destroy_erl_record(struct erl_record_t * erl) {
 }
 
 static int apply_reloc(u8 * reloc, int type, u32 addr) {
-    u32 u_current_data = *((u32 *) reloc);
-    s32 s_current_data = *((s32 *) reloc);
+    u32 u_current_data;
+    s32 s_current_data;
+	u32 newstate;
+
+	if (((u32)reloc)&0x3)
+	{
+		printf("Unaligned reloc (%p) type=%d!\n", reloc, type);
+	}
+	memcpy(&u_current_data, reloc, 4);
+	memcpy(&s_current_data, reloc, 4);
+
     switch (type) {
-    case R_MIPS_32:
-	*(u32 *)reloc = s_current_data + addr;
-	break;
-    case R_MIPS_26:
-	*(u32 *)reloc = (u_current_data & 0xfc000000) | (((u_current_data & 0x03ffffff) + (addr >> 2)) & 0x3ffffff);
-	break;
-    case R_MIPS_HI16:
-        *(u32 *)reloc = (u_current_data & 0xffff0000) | ((((s_current_data << 16) >> 16) + (addr >> 16) + ((addr & 0xffff) >= 0x8000 ? 1 : 0)) & 0xffff);
-	break;
-    case R_MIPS_LO16:
-        *(u32 *)reloc = (u_current_data & 0xffff0000) | ((((s_current_data << 16) >> 16) + (addr & 0xffff)) & 0xffff);
-	break;
-    default:
-	return -1;
+	case R_MIPS_32:
+		newstate = s_current_data + addr;
+		break;
+	case R_MIPS_26:
+		newstate = (u_current_data & 0xfc000000) | (((u_current_data & 0x03ffffff) + (addr >> 2)) & 0x3ffffff);
+		break;
+	case R_MIPS_HI16:
+		newstate = (u_current_data & 0xffff0000) | ((((s_current_data << 16) >> 16) + (addr >> 16) + ((addr & 0xffff) >= 0x8000 ? 1 : 0)) & 0xffff);
+		break;
+	case R_MIPS_LO16:
+		newstate = (u_current_data & 0xffff0000) | ((((s_current_data << 16) >> 16) + (addr & 0xffff)) & 0xffff);
+		break;
+	default:
+		return -1;
     }
-    dprintf("Changed data at %08X from %08X to %08X.\n", reloc, u_current_data, *(u32 *)reloc);
+
+	memcpy(reloc, &newstate, 4);
+
+    dprintf("Changed data at %08X from %08X to %08X.\n", reloc, u_current_data, newstate);
     return 0;
 }
 
@@ -817,7 +829,7 @@ return code
 	    case NOTYPE:
 		rprintf("external symbol reloc to symbol %s\n", strtab_names + sym[sym_n].st_name);
 		if (!(s = erl_find_symbol(strtab_names + sym[sym_n].st_name))) {
-		    dprintf("Symbol not found, adding as loosy relocation.\n");
+		    printf("%s: Symbol not found, adding as loosy relocation.\n", strtab_names + sym[sym_n].st_name);
 		    add_loosy(erl_record, erl_record->bytes + sec[sec[i].sh_info].sh_addr + reloc.r_offset, reloc.r_info & 255, strtab_names + sym[sym_n].st_name);
 		} else {
 		    dprintf("Found symbol at %08X, relocating.\n", s->address);
@@ -934,11 +946,11 @@ static struct erl_record_t * load_erl(const char * fname, u8 * elf_mem, int argc
 	close(elf_handle);
     }
     
-    if ((s = erl_find_local_symbol("erl_id", r))) {
-	r->name = (char *) s->address;
-    } else {
-	r->name = 0;
-    }
+	if ((s = erl_find_local_symbol("erl_id", r))) {
+		r->name = *(char **) s->address;
+	} else {
+		r->name = 0;
+	}
     
     dprintf("erl_id = %08X.\n", r->name);
     
