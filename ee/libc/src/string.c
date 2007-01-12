@@ -468,7 +468,7 @@ int strcpy_ascii(char* ascii_buff, const short* sjis_buff)
 	}
 	ascii_buff[i] = ascii;
     }
-    ascii_buff[i+1]=0;
+    ascii_buff[i]=0;
     return len;
 }
 #endif
@@ -490,7 +490,7 @@ int strcpy_sjis(short* sjis_buff, const char* ascii_buff)
 	}
         sjis_buff[i] = sjis;
     }
-    sjis_buff[i+1]=0;
+    sjis_buff[i]=0;
     return len;
 }
 #endif
