@@ -44,7 +44,7 @@ int getPs2Time(pfs_datetime *tm)
 		timeBuf.min=(((tmp<<2)+tmp)<<1)+(cdtime.minute&0x0F);
 		tmp=cdtime.hour>>4;
 		timeBuf.hour=(((tmp<<2)+tmp)<<1)+(cdtime.hour&0x0F);
-		timeBuf.hour = (timeBuf.hour + 4) % 24; // TEMP FIX (need to deal with timezones?)
+//		timeBuf.hour = (timeBuf.hour + 4) % 24; // TEMP FIX (need to deal with timezones?) ... aparently not!
 		tmp=cdtime.day>>4;
 		timeBuf.day=(((tmp<<2)+tmp)<<1)+(cdtime.day&0x0F);
 		tmp=cdtime.month>>4;

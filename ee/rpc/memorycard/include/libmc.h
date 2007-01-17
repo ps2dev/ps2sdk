@@ -53,7 +53,9 @@ extern "C" {
 #define MC_ATTR_WRITEABLE       0x0002
 #define MC_ATTR_EXECUTABLE      0x0004
 #define MC_ATTR_PROTECTED       0x0008
+#define MC_ATTR_FILE            0x0010 
 #define MC_ATTR_SUBDIR          0x0020
+#define MC_ATTR_OBJECT          0x0030 // File or directory
 #define MC_ATTR_CLOSED          0x0080
 #define MC_ATTR_PDAEXEC         0x0800
 #define MC_ATTR_PSX             0x1000
@@ -94,7 +96,7 @@ typedef float iconFVECTOR[4];
 typedef struct
 {
     unsigned char  head[4];     // header = "PS2D"
-    unsigned short type;        // filetype, used to be "unknown1" (see MC_ICONTYPE_* above)
+    unsigned short type;        // filetype, used to be "unknown1" (see MCICON_TYPE_* above)
     unsigned short nlOffset;    // new line pos within title name
     unsigned unknown2;          // unknown
     unsigned trans;             // transparency
@@ -282,7 +284,7 @@ int mcGetDir(int port, int slot, const char *name, unsigned mode, int maxent, mc
 //			flags to show which data is valid
 // returns:	0   = successful
 //			< 0 = error
-int mcSetFileInfo(int port, int slot, const char* name, const char* info, unsigned flags);
+int mcSetFileInfo(int port, int slot, const char* name, const mcTable* info, unsigned flags);
 
 // delete file
 // mcSync returns:	0 if deleted successfully
@@ -358,6 +360,11 @@ int mcChangeThreadPriority(int level);
 //			1  = function has finished executing
 //			-1 = no function registered
 int mcSync(int mode, int *cmd, int *result);
+
+// Reset (force deinit) of library
+// 
+// returns:	0  = success
+int mcReset();
 
 #ifdef __cplusplus
 }

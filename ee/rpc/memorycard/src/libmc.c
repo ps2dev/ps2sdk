@@ -670,7 +670,7 @@ int mcGetDir(int port, int slot, const char *name, unsigned mode, int maxent, mc
 //			flags to show which data is valid
 // returns:	0   = successful
 //			< 0 = error
-int mcSetFileInfo(int port, int slot, const char* name, const char* info, unsigned flags)
+int mcSetFileInfo(int port, int slot, const char* name, const mcTable* info, unsigned flags)
 {
 	int ret;
 	
@@ -946,4 +946,11 @@ int mcSync(int mode, int *cmd, int *result)
 	}
 	
 	return 1;
+}
+
+int mcReset()
+{
+	mclibInited = 0;
+	cdata.server = NULL;
+	return 0; 
 }

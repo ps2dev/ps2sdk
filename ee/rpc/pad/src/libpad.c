@@ -202,6 +202,21 @@ padGetDmaStr(int port, int slot)
  * padSetVrefParam() <- dunno
  */
 
+/* 
+ * Since padEnd() further below doesn't work right, a pseudo function is needed
+ * to allow recovery after IOP reset. This function has nothing to do with the
+ * functions of the IOP modules. It merely resets variables for the EE routines.
+ */
+int
+padReset() 
+{
+    padInitialised = 0;
+    padsif[0].server = NULL;
+    padsif[1].server = NULL;
+    return 0;
+}
+ 
+
 /*
  * Initialise padman
  * a = 0 should work..
@@ -565,7 +580,7 @@ padInfoMode(int port, int slot, int infoMode, int index)
             if(index == -1) {
                 return pdata->nrOfModes;
             }
-            else if (pdata->nrOfModes < index) {
+            else if (index < pdata->nrOfModes) {
                 return pdata->modeTable[index];
             }
             else {
