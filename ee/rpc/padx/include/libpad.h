@@ -263,6 +263,11 @@ int padSetActDirect(int port, int slot, char act_align[6]);
  */
 int padGetConnection(int port, int slot);
 
+/*
+ * Reset (deinit) EE library
+ */
+int padReset();
+
 #ifdef __cplusplus
 }
 #endif
