@@ -159,7 +159,8 @@ static int padInitialised = 0;
 
 // pad rpc call
 static SifRpcClientData_t padsif[2] __attribute__((aligned(64)));
-static char buffer[128] __attribute__((aligned(16)));
+static char buffer[128] __attribute__((aligned(128)));
+static char buffer2[256] __attribute__((aligned(128)));
 
 /* Port state data */
 static struct pad_state PadState[2][8]; 
@@ -259,7 +260,13 @@ padInit(int a)
     }
 
 #ifndef ROM_PADMAN
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_INIT;
+    ((u32 *)(&buffer[0]))[0]=PAD_RPCCMD_INIT;
+    
+    // NOTE: This is a lame fix but it solves a serious issue.
+    //  xpadman RPC "init" call will transfer 256 bytes to whatever address
+    //  is supplied here.  If this is not set, random parts of the EE RAM
+    //  can be overwritten by DMA!
+    ((u32 *)(&buffer[0]))[4]=(u32) &buffer2;
     if (SifCallRpc( &padsif[0], 1, 0, buffer, 128, buffer, 128, 0, 0) < 0)
         return -1;
 #endif
