@@ -17,7 +17,7 @@ IOP_INC_DIR = include/
 IOP_BIN  = bin/poweroff.irx
 IOP_OBJS = obj/poweroff.o obj/imports.o obj/exports.o
 
-IOP_INCS += -Iinclude/
+IOP_INCS += -Iinclude/ -I../dev9/include/
 IOP_CFLAGS  += -Wall
 IOP_LDFLAGS += -s
 

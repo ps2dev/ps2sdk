@@ -23,9 +23,9 @@
 #include "loadcore.h"
 #include "thsemap.h"
 #include "poweroff.h"
+#include "dev9.h"
 
 //#define DEBUG
-
 
 #define INT_CDROM	0x02
 #define TYPE_C		1
@@ -68,7 +68,7 @@ static int poffSema;
 static int myCdHandler(void *param)
 {
 
-	if (((CDVDreg_PWOFF & 1)==0) && (CDVDreg_PWOFF & 4)) 
+	if (((CDVDreg_PWOFF & 1)==0) && (CDVDreg_PWOFF & 4))
 	{
 		/* can't seem to register a sif cmd callback in ps2link so... */
 		/* Clear interrupt bit */
@@ -86,21 +86,33 @@ static int myCdHandler(void *param)
 
 static void pCallbackThread(void *arg)
 {
-	int i;
+	int i, h = 0;
 	while(1)
 	{
 		WaitSema(poffSema);
 		/* Do callbacks in reverse order */
-		for(i = MAX_CALLBACKS-1; i >= 0; i--)
+		for(i = MAX_CALLBACKS-1, h = 0; i >= 0; i--)
 		{
 			if(CallbackTable[i].cb)
 			{
 				CallbackTable[i].cb(CallbackTable[i].data);
+				h = 1;
 			}
 		}
-#ifdef DEBUG	
+
+#ifdef DEBUG
 		printf("Poweroff!!!! %08x\n", CDVDreg_PWOFF);
 #endif
+
+        // if no handlers were registered, shut down the system.
+        if(h == 0)
+        {
+            dev9IntrDisable(-1);
+            dev9Shutdown();
+
+            *((unsigned char *)0xBF402017) = 0;
+            *((unsigned char *)0xBF402016) = 0xF;
+        }
 	}
 }
 
@@ -192,7 +204,7 @@ int _start(int argc, char* argv[])
 		if ((i=StartThread(pid, NULL)) < 0) {
 			printf("StartThread failed (%d)\n", i);
 		}
-	} 
+	}
 	else {
 		printf("CreateThread failed (%d)\n", pid);
 	}

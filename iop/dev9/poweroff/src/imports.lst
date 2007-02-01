@@ -34,3 +34,8 @@ I_iSignalSema
 I_WaitSema
 I_CreateSema
 thsemap_IMPORTS_end
+
+dev9_IMPORTS_start
+I_dev9Shutdown
+I_dev9IntrDisable
+dev9_IMPORTS_end
