@@ -50,7 +50,7 @@ struct irx_import_stub
  */
 #define DECLARE_IMPORT_TABLE(modname, major, minor)	\
 static struct irx_import_table _imp_##modname 		\
-	__attribute__((section(".text"), unused))= {	\
+	__attribute__((section(".text\n\t#"), unused))= {	\
 	magic: IMPORT_MAGIC, version: IRX_VER(major, minor),	\
 	name: #modname, };
 
@@ -86,7 +86,7 @@ struct irx_export_table {
 
 #define DECLARE_EXPORT_TABLE(modname, major, minor)	\
 struct irx_export_table _exp_##modname			\
-	__attribute__((section(".text"), unused)) = {	\
+	__attribute__((section(".text\n\t#"), unused)) = {	\
 	magic: EXPORT_MAGIC, version: IRX_VER(major, minor),	\
 	name: #modname, };
 
