@@ -24,12 +24,14 @@ EE_SAMPLES = hello
 
 EE_SAMPLES := $(EE_SAMPLES:%=$(EE_SAMPLE_DIR)%)
 
-
 CORE_OBJS = sbrk.o memchr.o memcpy.o memset.o strcat.o \
 	strncmp.o memcmp.o memmove.o strcpy.o strncat.o \
 	strncpy.o terminate.o strlen.o strchr.o strcmp.o \
-	setjmp.o qsort.o init.o cxx.o
+	setjmp.o qsort.o cxx.o
 CORE_OBJS := $(CORE_OBJS:%=$(EE_OBJS_DIR)%)
+
+INIT_OBJS = init_libc.o init_args.o
+INIT_OBJS := $(INIT_OBJS:%=$(EE_OBJS_DIR)%)
 
 ALLOC_OBJS = malloc.o realloc.o calloc.o memalign.o free.o __builtin_alloc.o __alloc_internals.o __mem_walk.o
 ALLOC_OBJS := $(ALLOC_OBJS:%=$(EE_OBJS_DIR)%)
@@ -81,7 +83,7 @@ GPROF_OBJS := $(GPROF_OBJS:%=$(EE_OBJS_DIR)%)
 
 MULT_OBJS = $(XPRINTF_OBJS) $(XSCANF_OBJS) $(ALLOC_OBJS) $(STRING_C_OBJS) \
 	$(STDIO_OBJS) $(STDLIB_OBJS) $(UNISTD_OBJS) $(TIME_OBJS) \
-	$(GPROF_OBJS) $(LIBGEN_OBJS) $(DIRENT_OBJS)
+	$(GPROF_OBJS) $(LIBGEN_OBJS) $(DIRENT_OBJS) $(INIT_OBJS)
 
 # uncomment the following line to enable profile on libc
 # EE_CFLAGS += -pg
@@ -122,6 +124,9 @@ $(LIBGEN_OBJS): src/libgen.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(DIRENT_OBJS): src/dirent.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(INIT_OBJS): src/init.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 clean:

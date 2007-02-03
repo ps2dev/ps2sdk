@@ -20,6 +20,7 @@ void _ps2sdk_stdlib_deinit();
 
 int chdir(const char *path);
 
+#ifdef F_init_libc
 __attribute__((weak))
 void _ps2sdk_libc_init()
 {
@@ -35,7 +36,9 @@ void _ps2sdk_libc_deinit()
     _ps2sdk_stdio_deinit();
     _ps2sdk_alloc_deinit();
 }
+#endif
 
+#ifdef F_init_args
 __attribute__((weak))
 void _ps2sdk_args_parse(int argc, char ** argv)
 {
@@ -61,3 +64,5 @@ void _ps2sdk_args_parse(int argc, char ** argv)
 	}
     }
 }
+#endif
+
