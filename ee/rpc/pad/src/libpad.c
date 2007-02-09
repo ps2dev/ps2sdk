@@ -112,11 +112,12 @@ struct pad_data
     unsigned char unkn7;
     unsigned char data[32];
     unsigned int length;
-    unsigned int unkn44;
-    unsigned int unkn48;
-    unsigned int unkn52;
-    unsigned int unkn54;
-    unsigned int unkn60;
+    unsigned char request;
+    unsigned char CTP;       //CTP=1/no config; CTP=2/config, acts...
+    unsigned char model;    //1, 2 or 3
+    unsigned char correction;  //the data in the buffer is already corrected
+    unsigned char errorCount;
+    unsigned char unk49[15];
 };
 #else
 struct pad_data 

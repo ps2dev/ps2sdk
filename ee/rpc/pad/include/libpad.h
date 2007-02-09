@@ -63,7 +63,9 @@ extern "C" {
 #define PAD_TYPE_ANALOG	    0x5
 #define PAD_TYPE_NAMCOGUN   0x6
 #define PAD_TYPE_DUALSHOCK	0x7
-
+#define PAD_TYPE_JOGCON     0xE
+#define PAD_TYPE_EX_TSURICON 0x100
+#define PAD_TYPE_EX_JOGCON  0x300 
 /*
  * padInfoMode values
  */
