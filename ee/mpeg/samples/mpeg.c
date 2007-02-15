@@ -3,7 +3,7 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright (c) 2006 Eugene Plotnikov <e-plotnikov@operamail.com>
+# Copyright (c) 2006-2007 Eugene Plotnikov <e-plotnikov@operamail.com>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
@@ -13,6 +13,7 @@
 #       decoder. Scalable extensions are not supported either.
 #       Test bitstreams can be obtained for free at ftp://ftp.tek.com/tv/test/streams/Element/MPEG-Video-Conformance/main-profile/
 #       This program was only tested on SCPH-3004R PAL console.
+#       For real life usage of 'libmpeg' refer SMS project.
 */
 #include "libmpeg.h"
 
@@ -51,6 +52,7 @@ int main ( void ) {
  InitCBParam lInfo;
  int         lFD = fioOpen ( MPEG_BITSTREAM_FILE, O_RDONLY );
  long        lSize;
+ long        lPTS, lCurPTS;
 
  if ( lFD < 0 ) {
   printf ( "test_mpeg: could not open '%s'\n", MPEG_BITSTREAM_FILE );
@@ -118,7 +120,7 @@ int main ( void ) {
 /* bytes are avaliable for dynamic allocation (possibly using   */
 /* ps2_sbrk ( 0 ) call) where W and H are picture dimensions in */
 /* units of pixels.                                             */
- MPEG_Initialize ( SetDMA, NULL, InitCB, &lInfo );
+ MPEG_Initialize ( SetDMA, NULL, InitCB, &lInfo, &lCurPTS );
 /* during decoding scratchpad RAM from address 0x0000 to 0x3C00 */
 /* is used by the decoder.                                      */
 /* let's go                                                     */
@@ -132,7 +134,7 @@ int main ( void ) {
 /* application can benefit from it. Usage of IPU and DMA channels */
 /* to/from IPU and DRAM -> SPR is strictly forbidden during       */
 /* decoding :).                                                   */
-  if (  !MPEG_Picture ( lInfo.m_pData )  ) {
+  if (  !MPEG_Picture ( lInfo.m_pData, &lPTS )  ) {
 /* MPEG_Picture returns nonzero if the picture was successfully */
 /* decoded. Zero return means one of the following:             */
 /* - end of stream was detected (SetDMA function returned zero) */

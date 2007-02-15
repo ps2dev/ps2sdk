@@ -3,7 +3,7 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright (c) 2006 Eugene Plotnikov <e-plotnikov@operamail.com>
+# Copyright (c) 2006-2007 Eugene Plotnikov <e-plotnikov@operamail.com>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 # Based on refernce software of MSSG
@@ -16,55 +16,33 @@
 #include <string.h>
 #include <kernel.h>
 
-#define MEMALIGN( a, s ) memalign (  ( a ), ( s )  )
-#define FREE( p )        free (  ( p )  )
-#define _U( p )          (    ( void* )(   (  ( unsigned )( p )  ) | 0x20000000   )    )
-
 static _MPEGContext s_MPEG12Ctx;
+static long*        s_pCurPTS;
 
-static void ( *PutLumaOp[ 4 ] ) ( _MPEGMotion* ) = {
- _MPEG_put_luma,
- _MPEG_put_luma_X,
- _MPEG_put_luma_Y,
- _MPEG_put_luma_XY
+static void ( *LumaOp[ 8 ] ) ( _MPEGMotion* ) = {
+ _MPEG_put_luma, _MPEG_put_luma_X, _MPEG_put_luma_Y, _MPEG_put_luma_XY,
+ _MPEG_avg_luma, _MPEG_avg_luma_X, _MPEG_avg_luma_Y, _MPEG_avg_luma_XY
 };
 
-static void ( *PutChromaOp[ 4 ] ) ( void ) = {
- _MPEG_put_chroma,
- _MPEG_put_chroma_X,
- _MPEG_put_chroma_Y,
- _MPEG_put_chroma_XY
-};
-
-static void ( *AvgLumaOp[ 4 ] ) ( _MPEGMotion* ) = {
- _MPEG_avg_luma,
- _MPEG_avg_luma_X,
- _MPEG_avg_luma_Y,
- _MPEG_avg_luma_XY
-};
-
-static void ( *AvgChromaOp[ 4 ] ) ( void ) = {
- _MPEG_avg_chroma,
- _MPEG_avg_chroma_X,
- _MPEG_avg_chroma_Y,
- _MPEG_avg_chroma_XY
+static void ( *ChromaOp[ 8 ] ) ( void ) = {
+ _MPEG_put_chroma, _MPEG_put_chroma_X, _MPEG_put_chroma_Y, _MPEG_put_chroma_XY,
+ _MPEG_avg_chroma, _MPEG_avg_chroma_X, _MPEG_avg_chroma_Y, _MPEG_avg_chroma_XY
 };
 
 static void ( *PutBlockOp[ 3 ] ) ( _MPEGMotions* ) = {
- _MPEG_put_block_il,
- _MPEG_put_block_fr,
- _MPEG_put_block_fl
+ _MPEG_put_block_il, _MPEG_put_block_fr, _MPEG_put_block_fl
 };
 
-static void ( *AddBlockOp[ 2 ][ 2 ][ 2 ] ) ( _MPEGMotions* ) = {
- {
-  { _MPEG_add_block_frfr, _MPEG_add_block_frfl },
-  { _MPEG_add_block_flfr, _MPEG_add_block_flfl }
- },
- {
-  { _MPEG_add_block_ilfl, _MPEG_add_block_ilfl },
-  { _MPEG_add_block_ilfl, _MPEG_add_block_ilfl }
- }
+static void ( *AddBlockOp[ 2 ][ 2 ] ) ( _MPEGMotions* ) = {
+ { _MPEG_add_block_frfr, _MPEG_add_block_frfl },
+ { _MPEG_add_block_ilfl, _MPEG_add_block_ilfl }
+};
+
+static float s_FrameRate[ 16 ] = {
+  0.0F, (  ( 23.0F * 1000.0F ) / 1001.0F  ),
+ 24.0F, 25.0F, (  ( 30.0F * 1000.0F ) / 1001.0F  ),
+ 30.0F, 50.0F, (  ( 60.0F * 1000.0F ) / 1001.0F  ),
+ 60.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F
 };
 
 static void* ( *_init_cb ) ( void*, MPEGSequenceInfo* );
@@ -91,36 +69,30 @@ static void _ext_pic_ssc ( void );
 static void _ext_pic_tsc ( void );
 static void _xtra_bitinf ( void );
 
-static int _get_next_picture  ( void* );
-static int _get_first_picture ( void* );
+static int _get_next_picture  ( void*, long* );
+static int _get_first_picture ( void*, long* );
 
-int ( *MPEG_Picture ) ( void* );
+int ( *MPEG_Picture ) ( void*, long* );
 
 static void ( *DoMC ) ( void );
 
 static void _mpeg12_picture_data ( void );
 static int  _mpeg12_slice        ( int  );
-static int  _mpeg12_dec_mb       ( int*, int*, int*, int[ 2 ][ 2 ][ 2 ], int [ 2 ][ 2 ], int[ 2 ] );
+static int  _mpeg12_dec_mb       ( int*, int*, int[ 2 ][ 2 ][ 2 ], int [ 2 ][ 2 ], int[ 2 ] );
 
 void MPEG_Initialize (
       int   ( *apDataCB ) ( void*                    ), void* apDataCBParam,
-      void* ( *apInitCB ) ( void*, MPEGSequenceInfo* ), void* apInitCBParam
+      void* ( *apInitCB ) ( void*, MPEGSequenceInfo* ), void* apInitCBParam,
+      long* apCurPTS
      ) {
 
- unsigned long lOldGP;
-
- __asm__ __volatile__(
-  ".set noreorder\n\t"
-  "sd   $gp, %0\n\t"
-  "la   $gp, g_MPEGP\n\t"
-  ".set reorder\n\t"
-  ::"m"( lOldGP )
- );
+ memset (  &s_MPEG12Ctx, 0, sizeof ( s_MPEG12Ctx )  );
 
  _MPEG_Initialize ( &s_MPEG12Ctx, apDataCB, apDataCBParam, &s_MPEG12Ctx.m_SI.m_fEOF );
 
  _init_cb       = apInitCB;
  s_pInitCBParam = apInitCBParam;
+ s_pCurPTS      = apCurPTS;
 
  s_MPEG12Ctx.m_SI.m_FrameCnt  =  0;
  s_MPEG12Ctx.m_SI.m_fEOF      =  0;
@@ -139,42 +111,18 @@ void MPEG_Initialize (
 
  MPEG_Picture = _get_first_picture;
 
- __asm__ __volatile__(
-  ".set noreorder\n\t"
-  "ld   $gp, %0\n\t"
-  ".set reorder\n\t"
-  ::"m"( lOldGP )
- );
-
 }  /* end MPEG_Initialize */
 
 void MPEG_Destroy ( void ) {
 
- unsigned long lOldGP;
-
- __asm__ __volatile__(
-  ".set noreorder\n\t"
-  "sd   $gp, %0\n\t"
-  "la   $gp, g_MPEGP\n\t"
-  ".set reorder\n\t"
-  ::"m"( lOldGP )
- );
-
  _destroy_seq  ();
  _MPEG_Destroy ();
-
- __asm__ __volatile__(
-  ".set noreorder\n\t"
-  "ld   $gp, %0\n\t"
-  ".set reorder\n\t"
-  ::"m"( lOldGP )
- );
 
 }  /* end MPEG_Destroy */
 
 static void* _init_seq ( void ) {
 
- int i, lSize;
+ int i, lSize, lMBWidth, lMBHeight;
 
  if ( !s_MPEG12Ctx.m_fMPEG2 ) {
   s_MPEG12Ctx.m_fProgSeq   = 1;
@@ -182,28 +130,39 @@ static void* _init_seq ( void ) {
   s_MPEG12Ctx.m_fFPFrmDCT  = 1;
  }  /* end if */
 
- s_MPEG12Ctx.m_MBWidth  = ( s_MPEG12Ctx.m_SI.m_Width + 15 ) / 16;
- s_MPEG12Ctx.m_MBHeight = s_MPEG12Ctx.m_fMPEG2 && !s_MPEG12Ctx.m_fProgSeq ? 2 * (  ( s_MPEG12Ctx.m_SI.m_Height + 31 ) / 32  )
-                                                                          : ( s_MPEG12Ctx.m_SI.m_Height + 15 ) / 16;
- s_MPEG12Ctx.m_SI.m_Width  = s_MPEG12Ctx.m_MBWidth  << 4;
- s_MPEG12Ctx.m_SI.m_Height = s_MPEG12Ctx.m_MBHeight << 4;
+ lMBWidth  = ( s_MPEG12Ctx.m_SI.m_Width + 15 ) / 16;
+ lMBHeight = s_MPEG12Ctx.m_fMPEG2 && !s_MPEG12Ctx.m_fProgSeq ? 2 * (  ( s_MPEG12Ctx.m_SI.m_Height + 31 ) / 32  )
+                                                             : ( s_MPEG12Ctx.m_SI.m_Height + 15 ) / 16;
 
- s_MPEG12Ctx.m_MBStride = s_MPEG12Ctx.m_MBWidth * sizeof ( _MPEGMacroBlock8 );
+ if ( lMBWidth  != s_MPEG12Ctx.m_MBWidth ||
+      lMBHeight != s_MPEG12Ctx.m_MBHeight
+ ) {
 
- lSize = s_MPEG12Ctx.m_MBWidth * ( s_MPEG12Ctx.m_MBHeight + 1 ) * sizeof ( _MPEGMacroBlock8 ) + sizeof ( _MPEGMacroBlock8 );
+  if ( s_MPEG12Ctx.m_pFwdFrame ) _destroy_seq ();
 
- s_MPEG12Ctx.m_pFwdFrame = ( _MPEGMacroBlock8* )MEMALIGN ( 16, lSize );
- s_MPEG12Ctx.m_pBckFrame = ( _MPEGMacroBlock8* )MEMALIGN ( 16, lSize );
- s_MPEG12Ctx.m_pAuxFrame = ( _MPEGMacroBlock8* )MEMALIGN ( 16, lSize );
+  s_MPEG12Ctx.m_MBWidth     = lMBWidth;
+  s_MPEG12Ctx.m_MBHeight    = lMBHeight;
+  s_MPEG12Ctx.m_SI.m_Width  = lMBWidth  << 4;
+  s_MPEG12Ctx.m_SI.m_Height = lMBHeight << 4;
 
- s_MPEG12Ctx.m_pMBXY = ( _MPEGMBXY* )malloc (
-  sizeof ( _MPEGMBXY ) * ( s_MPEG12Ctx.m_MBCount = s_MPEG12Ctx.m_MBWidth * s_MPEG12Ctx.m_MBHeight )
- );
+  s_MPEG12Ctx.m_MBStride = lMBWidth * sizeof ( _MPEGMacroBlock8 );
 
- for ( i = 0; i < s_MPEG12Ctx.m_MBCount; ++i ) {
-  s_MPEG12Ctx.m_pMBXY[ i ].m_X = i % s_MPEG12Ctx.m_MBWidth;
-  s_MPEG12Ctx.m_pMBXY[ i ].m_Y = i / s_MPEG12Ctx.m_MBWidth;
- }  /* end for */
+  lSize = lMBWidth * ( lMBHeight + 1 ) * sizeof ( _MPEGMacroBlock8 ) + sizeof ( _MPEGMacroBlock8 );
+
+  s_MPEG12Ctx.m_pFwdFrame = ( _MPEGMacroBlock8* )memalign ( 64, lSize );
+  s_MPEG12Ctx.m_pBckFrame = ( _MPEGMacroBlock8* )memalign ( 64, lSize );
+  s_MPEG12Ctx.m_pAuxFrame = ( _MPEGMacroBlock8* )memalign ( 64, lSize );
+
+  s_MPEG12Ctx.m_pMBXY = ( _MPEGMBXY* )malloc (
+   sizeof ( _MPEGMBXY ) * ( s_MPEG12Ctx.m_MBCount = s_MPEG12Ctx.m_MBWidth * s_MPEG12Ctx.m_MBHeight )
+  );
+
+  for ( i = 0; i < s_MPEG12Ctx.m_MBCount; ++i ) {
+   s_MPEG12Ctx.m_pMBXY[ i ].m_X = i % lMBWidth;
+   s_MPEG12Ctx.m_pMBXY[ i ].m_Y = i / lMBWidth;
+  }  /* end for */
+
+ }  /* end if */
 
  return _init_cb ( s_pInitCBParam, &s_MPEG12Ctx.m_SI );
 
@@ -214,17 +173,17 @@ static void _destroy_seq ( void ) {
  MPEG_Picture = _get_first_picture;
 
  if ( s_MPEG12Ctx.m_pAuxFrame ) {
-  FREE( s_MPEG12Ctx.m_pAuxFrame );
+  free ( s_MPEG12Ctx.m_pAuxFrame );
   s_MPEG12Ctx.m_pAuxFrame = NULL;
  }  /* end if */
 
  if (  s_MPEG12Ctx.m_pBckFrame ) {
-  FREE( s_MPEG12Ctx.m_pBckFrame );
+  free ( s_MPEG12Ctx.m_pBckFrame );
   s_MPEG12Ctx.m_pBckFrame = NULL;
  }  /* end if */
 
  if ( s_MPEG12Ctx.m_pFwdFrame ) {
-  FREE( s_MPEG12Ctx.m_pFwdFrame );
+  free ( s_MPEG12Ctx.m_pFwdFrame );
   s_MPEG12Ctx.m_pFwdFrame = NULL;
  }  /* end if */
 
@@ -232,6 +191,9 @@ static void _destroy_seq ( void ) {
   free ( s_MPEG12Ctx.m_pMBXY );
   s_MPEG12Ctx.m_pMBXY = NULL;
  }  /* end if */
+
+ s_MPEG12Ctx.m_MBWidth  =
+ s_MPEG12Ctx.m_MBHeight = 0;
 
 }  /* end _destroy_seq */
 
@@ -258,6 +220,7 @@ static int _get_hdr ( void ) {
    return 1;
 
    case _MPEG_CODE_SEQ_END:
+    MPEG_Picture = _get_first_picture;
     return 0;
    break;
 
@@ -273,7 +236,9 @@ static void _seq_header ( void ) {
  s_MPEG12Ctx.m_SI.m_Height = _MPEG_GetBits ( 12 );
 
  _MPEG_GetBits (  4 );  /* aspect_ratio_information    */
- _MPEG_GetBits (  4 );  /* frame_rate_code             */
+ s_MPEG12Ctx.m_SI.m_MSPerFrame = ( int )(
+  (  1000.0F / s_FrameRate[ s_MPEG12Ctx.m_FRCode = _MPEG_GetBits ( 4 ) ]  ) + 0.5F
+ );
  _MPEG_GetBits ( 18 );  /* bit_rate_value              */
  _MPEG_GetBits (  1 );  /* marker_bit                  */
  _MPEG_GetBits ( 10 );  /* vbv_buffer_size             */
@@ -310,29 +275,26 @@ static void _gop_header ( void ) {
 
 static void _pic_header ( void ) {
 
- unsigned int lCtrl = *( volatile unsigned int* )0x10002010;
+ unsigned int lPicCT;
 
  _MPEG_GetBits ( 10 );  /* temporal_reference */
-
- lCtrl &= 0xF8FFFFFF;
-
- s_MPEG12Ctx.m_PictCodingType = _MPEG_GetBits ( 3 );
+ lPicCT = _MPEG_GetBits ( 3 );
  _MPEG_GetBits ( 16 );  /* vbv_delay          */
 
- *( volatile unsigned int* )0x10002010 = lCtrl | ( s_MPEG12Ctx.m_PictCodingType << 24 );
-
- if ( s_MPEG12Ctx.m_PictCodingType == _MPEG_PT_P || s_MPEG12Ctx.m_PictCodingType == _MPEG_PT_B ) {
+ if ( lPicCT == _MPEG_PT_P || lPicCT == _MPEG_PT_B ) {
   s_MPEG12Ctx.m_FPFVector = _MPEG_GetBits ( 1 );
   s_MPEG12Ctx.m_FwdFCode  = _MPEG_GetBits ( 3 );
  }  /* end if */
 
- if ( s_MPEG12Ctx.m_PictCodingType == _MPEG_PT_B ) {
+ if ( lPicCT == _MPEG_PT_B ) {
   s_MPEG12Ctx.m_FPBVector = _MPEG_GetBits ( 1 );
   s_MPEG12Ctx.m_BckFCode  = _MPEG_GetBits ( 3 );
  }  /* end if */
 
  _xtra_bitinf ();
  _ext_and_ud  ();
+
+ _MPEG_SetPCT ( s_MPEG12Ctx.m_PictCodingType = lPicCT );
 
 }  /* end _pic_header */
 
@@ -420,6 +382,7 @@ static void _ext_seq ( void ) {
  int lHSzX;
  int lVSzX;
  int lProfLevel;
+ int lFRXn, lFRXd;
 
  s_MPEG12Ctx.m_fMPEG2 = 1;
 
@@ -435,11 +398,20 @@ static void _ext_seq ( void ) {
  _MPEG_GetBits (  1 );  /* marker_bit                */
  _MPEG_GetBits (  8 );  /* vbv_buffer_size_extension */
  _MPEG_GetBits (  1 );  /* low_delay                 */
- _MPEG_GetBits (  2 );  /* frame_rate_extension_n    */
- _MPEG_GetBits (  5 );  /* frame_rate_extension_d    */
+ lFRXn = _MPEG_GetBits ( 2 );
+ lFRXd = _MPEG_GetBits ( 5 );
 #else
- _MPEG_GetBits ( 29 );
+ _MPEG_GetBits ( 22 );
+ lFRXn = _MPEG_GetBits ( 2 );
+ lFRXd = _MPEG_GetBits ( 5 );
 #endif  /* _DEBUG */
+ s_MPEG12Ctx.m_SI.m_MSPerFrame = ( int )(
+  (  1000.0F / (
+      s_FrameRate[ s_MPEG12Ctx.m_FRCode ] * (  ( lFRXn + 1.0F ) / ( lFRXd + 1.0F )  )
+     )
+  ) + 0.5F
+ );
+
  if(  ( lProfLevel >> 7 ) & 1  ) {
   
   if (  ( lProfLevel & 15 ) == 5  ) {
@@ -593,17 +565,7 @@ static void _xtra_bitinf ( void ) {
 
 }  /* end _xtra_bitinf */
 
-static int _get_first_picture ( void* apData ) {
-
- unsigned long lOldGP;
-
- __asm__ __volatile__(
-  ".set noreorder\n\t"
-  "sd   $gp, %0\n\t"
-  "la   $gp, g_MPEGP\n\t"
-  ".set reorder\n\t"
-  ::"m"( lOldGP )
- );
+static int _get_first_picture ( void* apData, long* apPTS ) {
 
  int retVal = _get_hdr ();
 
@@ -620,32 +582,15 @@ static int _get_first_picture ( void* apData ) {
 
   if ( !s_MPEG12Ctx.m_fSecField ) ++s_MPEG12Ctx.m_SI.m_FrameCnt;
 
-  retVal = _get_next_picture ( apData );
+  retVal = _get_next_picture ( apData, apPTS );
 
  }  /* end if */
-
- __asm__ __volatile__(
-  ".set noreorder\n\t"
-  "ld   $gp, %0\n\t"
-  ".set reorder\n\t"
-  ::"m"( lOldGP )
- );
 
  return retVal;
 
 }  /* end _get_first_picture */
 
-static int _get_next_picture ( void* apData ) {
-
- unsigned long lOldGP;
-
- __asm__ __volatile__(
-  ".set noreorder\n\t"
-  "sd   $gp, %0\n\t"
-  "la   $gp, g_MPEGP\n\t"
-  ".set reorder\n\t"
-  ::"m"( lOldGP )
- );
+static int _get_next_picture ( void* apData, long* apPTS ) {
 
  int retVal;
 
@@ -657,12 +602,20 @@ static int _get_next_picture ( void* apData ) {
 
    _mpeg12_picture_data ();
 
-   if (  s_MPEG12Ctx.m_SI.m_FrameCnt && ( s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME || s_MPEG12Ctx.m_fSecField )  ) {
-    _MPEG_CSCImage (
-     s_MPEG12Ctx.m_PictCodingType == _MPEG_PT_B ? s_MPEG12Ctx.m_pAuxFrame : s_MPEG12Ctx.m_pFwdFrame,
-     apData, s_MPEG12Ctx.m_MBCount
-    );
-    lfPic = 1;
+   if (  ( s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME || s_MPEG12Ctx.m_fSecField ) && s_MPEG12Ctx.m_SI.m_FrameCnt  ) {
+
+    void* lpData;
+
+    if ( s_MPEG12Ctx.m_PictCodingType == _MPEG_PT_B ) {
+     lpData = s_MPEG12Ctx.m_pAuxFrame;
+     *apPTS = s_MPEG12Ctx.m_AuxPTS;
+    } else {
+     lpData = s_MPEG12Ctx.m_pFwdFrame;
+     *apPTS = s_MPEG12Ctx.m_FwdPTS;
+    }  /* end else */
+
+    lfPic = _MPEG_CSCImage ( lpData, apData, s_MPEG12Ctx.m_MBCount );
+
    }  /* end if */
 
    if ( s_MPEG12Ctx.m_PictStruct != _MPEG_PS_FRAME ) s_MPEG12Ctx.m_fSecField ^= 1;
@@ -671,21 +624,9 @@ static int _get_next_picture ( void* apData ) {
 
    if ( lfPic ) break;
 
-  } else {
-
-   _destroy_seq ();
-   break;
-
-  }  /* end else */
+  } else break;
 
  }  /* end while */
-
- __asm__ __volatile__(
-  ".set noreorder\n\t"
-  "ld   $gp, %0\n\t"
-  ".set reorder\n\t"
-  ::"m"( lOldGP )
- );
 
  return retVal;
 
@@ -717,18 +658,24 @@ static void _mpeg12_picture_data ( void ) {
 
  int               lMBAMax = s_MPEG12Ctx.m_MBWidth * s_MPEG12Ctx.m_MBHeight;
  _MPEGMacroBlock8* lpMB;
+ long              lPTS;
 
  if ( s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME && s_MPEG12Ctx.m_fSecField ) s_MPEG12Ctx.m_fSecField = 0;
 
  if ( s_MPEG12Ctx.m_PictCodingType == _MPEG_PT_B ) {
   s_MPEG12Ctx.m_pCurFrame = s_MPEG12Ctx.m_pAuxFrame;
+  s_MPEG12Ctx.m_AuxPTS    = *s_pCurPTS;
  } else {
   if ( !s_MPEG12Ctx.m_fSecField ) {
-   lpMB  = s_MPEG12Ctx.m_pFwdFrame;
+   lpMB = s_MPEG12Ctx.m_pFwdFrame;
+   lPTS = s_MPEG12Ctx.m_FwdPTS;
    s_MPEG12Ctx.m_pFwdFrame = s_MPEG12Ctx.m_pBckFrame;
+   s_MPEG12Ctx.m_FwdPTS    = s_MPEG12Ctx.m_BckPTS;
    s_MPEG12Ctx.m_pBckFrame = lpMB;
+   s_MPEG12Ctx.m_BckPTS    = lPTS;
   }  /* end if */
   s_MPEG12Ctx.m_pCurFrame = s_MPEG12Ctx.m_pBckFrame;
+  s_MPEG12Ctx.m_BckPTS    = *s_pCurPTS;
  }  /* end else */
  s_MPEG12Ctx.m_pCurFrameY    = ( unsigned char* )s_MPEG12Ctx.m_pCurFrame;
  s_MPEG12Ctx.m_pCurFrameCbCr = ( unsigned char* )s_MPEG12Ctx.m_pCurFrame + 256;
@@ -802,7 +749,7 @@ static void _mpeg12_dual_prime_vector ( int aDMV[][ 2 ], int* apDMVector, int aM
   aDMV[ 0 ][ 1 ] = (   (  aMVY + ( aMVY > 0 )  ) >> 1   ) + apDMVector[ 1 ];
 
   if ( s_MPEG12Ctx.m_PictStruct == _MPEG_PS_TOP_FIELD )
-   --aDMV[0][ 1 ];
+   --aDMV[ 0 ][ 1 ];
   else ++aDMV[ 0 ][ 1 ];
 
  }  /* end else */
@@ -868,7 +815,7 @@ static void _mpeg12_motion_vectors (
 }  /* end _mpeg12_motion_vectors */
 
 static int _mpeg12_dec_mb (
-            int* apMBType, int* apMotionType, int* apDCType,
+            int* apMBType, int* apMotionType,
             int aPMV[ 2 ][ 2 ][ 2 ], int aMVFS[ 2 ][ 2 ], int aDMVector[ 2 ]
            ) {
 
@@ -908,7 +855,7 @@ static int _mpeg12_dec_mb (
  lDMV     = lMotionType == _MPEG_MC_DMV;
  lMVScale = lMVFmt == _MPEG_MV_FIELD && s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME;
  lDCType  = s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME &&
-            !s_MPEG12Ctx.m_fFPFrmDCT                  &&
+           !s_MPEG12Ctx.m_fFPFrmDCT                    &&
             lMBType & ( _MPEG_MBT_PATTERN | _MPEG_MBT_INTRA ) ? _MPEG_GetBits ( 1 ) : 0;
 
  if ( lMBType & _MPEG_MBT_QUANT ) s_MPEG12Ctx.m_QScale = _MPEG_GetBits ( 5 );
@@ -976,7 +923,6 @@ static int _mpeg12_dec_mb (
 
  *apMBType     = lMBType;
  *apMotionType = lMotionType;
- *apDCType     = lDCType;
 
  return 1;
 
@@ -996,16 +942,21 @@ static void _mpeg12_get_ref (
  int          lMBY     = lSrcY >> 4;
  _MPEGMotion* lpMotion = &s_MPEG12Ctx.m_pCurMotions -> m_Motion[ s_MPEG12Ctx.m_pCurMotions -> m_nMotions++ ];
 
- void ( **MCLuma  ) ( _MPEGMotion* );
- void ( **MChroma ) ( void         );
+ afAvg <<= 2;
 
- if ( afAvg ) {
-  MCLuma  = AvgLumaOp;
-  MChroma = AvgChromaOp;
- } else {
-  MCLuma  = PutLumaOp;
-  MChroma = PutChromaOp;
- }  /* end else */
+ __asm__ __volatile__(
+  ".set noat\n\t"
+  "pnor     $v0, $zero, $zero\n\t"
+  "ld       $at, %4\n\t"
+  "pextlw   %0, %3, %0\n\t"
+  "paddw    $at, $at, $v0\n\t"
+  "pmaxw    %0, %0, $zero\n\t"
+  "pminw    %0, %0, $at\n\t"
+  "dsrl32   %1, %0, 0\n\t"
+  "sll      %0, %0, 0\n\t"
+  ".set at\n\t"
+  : "=r"( lMBX ), "=r"( lMBY ) : "r"( lMBX ), "r"( lMBY ), "m"( s_MPEG12Ctx.m_MBWidth ) : "at", "v0"
+ );
  
  lpMotion -> m_pSrc     = ( unsigned char* )(  apMBSrc + lMBX + lMBY * s_MPEG12Ctx.m_MBWidth  );
  lpMotion -> m_pDstY    = ( short* )(  s_MPEG12Ctx.m_pCurMotions -> m_pSPRRes       + ( aFDst << 5 )  );
@@ -1015,8 +966,8 @@ static void _mpeg12_get_ref (
  lpMotion -> m_H        = aH;
  lpMotion -> m_fInt     = lfInt;
  lpMotion -> m_Field    = aFSrc;
- lpMotion -> MC_Luma    = MCLuma [ lDXY  ];
- lpMotion -> MC_Chroma  = MChroma[ lUVXY ];
+ lpMotion -> MC_Luma    = LumaOp  [ lDXY  + afAvg ];
+ lpMotion -> MC_Chroma  = ChromaOp[ lUVXY + afAvg ];
 
 }  /* end _mpeg12_get_ref */
 
@@ -1196,16 +1147,14 @@ static void _mpeg12_get_refs (
  _MPEG_dma_ref_image (
   ( _MPEGMacroBlock8* )s_MPEG12Ctx.m_pCurMotions -> m_pSPRMC,
   &s_MPEG12Ctx.m_pCurMotions -> m_Motion[ 0 ],
-  s_MPEG12Ctx.m_pCurMotions -> m_nMotions,
-  s_MPEG12Ctx.m_MBWidth
+  s_MPEG12Ctx.m_pCurMotions -> m_nMotions, s_MPEG12Ctx.m_MBWidth
  );
-
 
 }  /* end _mpeg12_get_refs */
 
 static void _mpeg2_mc (
              int aMBA, int aMBType, int aMotionType, int aPMV[ 2 ][ 2 ][ 2 ],
-             int aMVFS[ 2 ][ 2 ], int aDMVector[ 2 ], int aDCType, int aMBAI
+             int aMVFS[ 2 ][ 2 ], int aDMVector[ 2 ], int aMBAI
             ){
 
  int lBX, lBY;
@@ -1224,8 +1173,8 @@ static void _mpeg2_mc (
  lfFiledMV = aMotionType & _MPEG_MC_FIELD;
 
  s_MPEG12Ctx.m_pCurMotions -> m_Stride     = s_MPEG12Ctx.m_MBStride;
- s_MPEG12Ctx.m_pCurMotions -> m_pMBDstY    = _U( s_MPEG12Ctx.m_pCurFrameY    + lOffset );
- s_MPEG12Ctx.m_pCurMotions -> m_pMBDstCbCr = _U( s_MPEG12Ctx.m_pCurFrameCbCr + lOffset );
+ s_MPEG12Ctx.m_pCurMotions -> m_pMBDstY    = UNCACHED_SEG( s_MPEG12Ctx.m_pCurFrameY    + lOffset );
+ s_MPEG12Ctx.m_pCurMotions -> m_pMBDstCbCr = UNCACHED_SEG( s_MPEG12Ctx.m_pCurFrameCbCr + lOffset );
 
  lBX <<= 4;
  lBY <<= 4;
@@ -1233,7 +1182,7 @@ static void _mpeg2_mc (
  if ( !lfIntra ) {
   _mpeg12_get_refs ( lBX, lBY, aMBType, aMotionType, aPMV, aMVFS, aDMVector );
   if (  lfNoSkip && ( aMBType & _MPEG_MBT_PATTERN )  )
-   s_MPEG12Ctx.m_pCurMotions -> BlockOp = AddBlockOp[ lfField ][ aDCType ][ lfFiledMV ];
+   s_MPEG12Ctx.m_pCurMotions -> BlockOp = AddBlockOp[ lfField ][ lfFiledMV ];
   else {
    s_MPEG12Ctx.m_pCurMotions -> m_pSrc  = s_MPEG12Ctx.m_pCurMotions -> m_pSPRRes;
    s_MPEG12Ctx.m_pCurMotions -> BlockOp = PutBlockOp[ !lfField + ( lfNoSkip && lfFiledMV && !lfField ) ];
@@ -1241,17 +1190,17 @@ static void _mpeg2_mc (
  } else {
   s_MPEG12Ctx.m_pCurMotions -> m_Motion[ 0 ].MC_Luma = NULL;
   s_MPEG12Ctx.m_pCurMotions -> m_pSrc  = s_MPEG12Ctx.m_pCurMotions -> m_pSPRBlk;
-  s_MPEG12Ctx.m_pCurMotions -> BlockOp = PutBlockOp[ !lfField + aDCType ];
+  s_MPEG12Ctx.m_pCurMotions -> BlockOp = PutBlockOp[ !lfField ];
  }  /* end else */
 
 }  /* end _mpeg2_mc */
 
 static int _mpeg12_slice ( int aMBAMax ) {
 
- int lPMV[ 2 ][ 2 ][ 2 ];
- int lMVFS[ 2 ][ 2 ];
+ int lPMV     [ 2 ][ 2 ][ 2 ];
+ int lMVFS    [ 2 ][ 2 ];
  int lDMVector[ 2 ];
- int lMBA, lMBAI, lMBType, lMotionType, lDCType;
+ int lMBA, lMBAI, lMBType, lMotionType;
  int retVal;
 
  s_MPEG12Ctx.m_fError = 0;
@@ -1260,6 +1209,7 @@ static int _mpeg12_slice ( int aMBAMax ) {
  if ( lMBType < _MPEG_CODE_SLICE_MIN || lMBType > _MPEG_CODE_SLICE_MAX ) return -1;
 
  _MPEG_GetBits ( 32 );
+
  s_MPEG12Ctx.m_QScale = _MPEG_GetBits ( 5 );
 
  if (  _MPEG_GetBits ( 1 )  ) {
@@ -1298,7 +1248,7 @@ resync:
 
     lMBAI = _MPEG_GetMBAI ();
 
-    if ( s_MPEG12Ctx.m_fError ) goto resync;
+    if ( !lMBAI ) goto resync;
 
    }  /* end else */
 
@@ -1308,7 +1258,7 @@ resync:
 
   if ( lMBAI == 1 ) {
 
-   retVal = _mpeg12_dec_mb ( &lMBType, &lMotionType, &lDCType, lPMV, lMVFS, lDMVector );
+   retVal = _mpeg12_dec_mb ( &lMBType, &lMotionType, lPMV, lMVFS, lDMVector );
 
    if ( retVal < 0 ) return retVal;
    if ( !retVal    ) goto resync;
@@ -1323,7 +1273,7 @@ resync:
    if ( s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME )
     lMotionType = _MPEG_MC_FRAME;
    else {
-    lMotionType   = _MPEG_MC_FIELD;
+    lMotionType = _MPEG_MC_FIELD;
     lMVFS[ 0 ][ 0 ] =
     lMVFS[ 0 ][ 1 ] = s_MPEG12Ctx.m_PictStruct == _MPEG_PS_BOTTOM_FIELD;
    }  /* end else */
@@ -1332,7 +1282,7 @@ resync:
 
   }  /* end else */
 
-  _mpeg2_mc ( lMBA, lMBType, lMotionType, lPMV, lMVFS, lDMVector, lDCType, lMBAI );
+  _mpeg2_mc ( lMBA, lMBType, lMotionType, lPMV, lMVFS, lDMVector, lMBAI );
 
   DoMC ();
 

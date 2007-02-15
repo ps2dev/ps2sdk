@@ -1,4 +1,4 @@
-Copyright (c) 2006  Eugene Plotnikov <e-plotnikov@operamail.com>
+Copyright (c) 2006-2007  Eugene Plotnikov <e-plotnikov@operamail.com>
 
 This distribution is licensed under the Academic Free License
 version 2.0. See the file LICENSE for more details.

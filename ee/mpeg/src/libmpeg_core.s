@@ -2,7 +2,7 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright (c) 2006 Eugene Plotnikov <e-plotnikov@operamail.com>
+# Copyright (c) 2006-2007 Eugene Plotnikov <e-plotnikov@operamail.com>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 .set noreorder
@@ -23,6 +23,7 @@
 .globl _MPEG_GetDMVector
 .globl _MPEG_SetIDCP
 .globl _MPEG_SetQSTIVFAS
+.globl _MPEG_SetPCT
 .globl _MPEG_BDEC
 .globl _MPEG_WaitBDEC
 .globl _MPEG_put_block_fr
@@ -30,8 +31,6 @@
 .globl _MPEG_put_block_il
 .globl _MPEG_add_block_frfr
 .globl _MPEG_add_block_ilfl
-.globl _MPEG_add_block_flfl
-.globl _MPEG_add_block_flfr
 .globl _MPEG_add_block_frfl
 .globl _MPEG_dma_ref_image
 .globl _MPEG_do_mc
@@ -52,9 +51,10 @@
 .globl _MPEG_avg_luma_XY
 .globl _MPEG_avg_chroma_XY
 .globl _MPEG_CSCImage
-.globl g_MPEGP
+.globl _MPEG_Suspend
+.globl _MPEG_Resume
 
-.data
+.sdata
 .align 4
 s_DefQM:    .word 0x13101008, 0x16161310, 0x16161616, 0x1B1A181A
             .word 0x1A1A1B1B, 0x1B1B1A1A, 0x1D1D1D1B, 0x1D222222
@@ -62,16 +62,17 @@ s_DefQM:    .word 0x13101008, 0x16161310, 0x16161616, 0x1B1A181A
             .word 0x28262623, 0x30302828, 0x38382E2E, 0x5345453A
             .word 0x10101010, 0x10101010, 0x10101010, 0x10101010
 
-.section ".bss"
-
-.align 4
-g_MPEGP   :
+.section ".sbss"
+.align 6
 s_DMAPack : .space 128
 s_DataBuf : .space   8
 s_SetDMA  : .space   8
 s_IPUState: .space  32
 s_pEOF    : .space   4
 s_Sema    : .space   4
+s_CSCParam: .space  12
+s_CSCID   : .space   4
+s_CSCFlag : .space   1
 
 .text
 
@@ -79,10 +80,10 @@ _MPEG_Initialize:
     addiu   $sp, $sp, -48
     lui     $v0, 0x1000
     lui     $v1, 0x4000
-    sw      $a1, 136($gp)
+    sw      $a1, s_SetDMA + 0
     sw      $v1, 0x2010($v0)
-    sw      $a2, 140($gp)
-    sw      $a3, 176($gp)
+    sw      $a2, s_SetDMA + 4
+    sw      $a3, s_pEOF
 1:
     lw      $v1, 0x2010($v0)
     bltz    $v1, 1b
@@ -104,18 +105,37 @@ _MPEG_Initialize:
     addiu   $v1, $zero, 64
     addu    $a0, $sp, 4
     syscall
+    sw      $v0, s_Sema
+    addiu   $a0, $zero,  3
+    addiu   $v1, $zero, 18
+    lui     $a1, %hi( _mpeg_dmac_handler )
+    la      $a3, s_CSCParam
+    xor     $a2, $a2, $a2
+    addiu   $a1, %lo( _mpeg_dmac_handler )
     lw      $ra, 0($sp)
+    syscall
     addiu   $sp, $sp, 48
-    sw      $v0, 180($gp)
+    sw      $v0, s_CSCID
     jr      $ra
-    sd      $zero, 128($gp)
+    sd      $zero, s_DataBuf
 
 _MPEG_Destroy:
+1:
+    lb      $v1, s_CSCFlag
+    bne     $v1, $zero, 1b
+    lw      $a1, s_CSCID
+    addiu   $a0, $zero, 3
+    addiu   $v1, $zero, 19
+    syscall
     addiu   $v1, $zero, 65
-    lw      $a0, 180($gp)
+    lw      $a0, s_Sema
     syscall
     jr      $ra
 
+_MPEG_Suspend:
+1:
+    lb      $v0, s_CSCFlag
+    bne     $v0, $zero, 1b
 _ipu_suspend:
     lui     $a1, 0x1001
     lui     $v0, 0x0001
@@ -136,14 +156,14 @@ _ipu_suspend:
     and     $at, $at, $a3
     sw      $at, -19456($a1)
     lw      $a2, -2784($a1)
-    sw      $at, 144($gp)
+    sw      $at, s_IPUState + 0
     and     $a2, $a2, $v1
     sw      $a2, -2672($a1)
     ei
     lw      $at, -19440($a1)
     lw      $a2, -19424($a1)
-    sw      $at, 148($gp)
-    sw      $a2, 152($gp)
+    sw      $at, s_IPUState + 4
+    sw      $a2, s_IPUState + 8
 1:
     lw      $at, 0x2010($t1)
     andi    $at, $at, 0x00F0
@@ -163,102 +183,201 @@ _ipu_suspend:
     and     $at, $at, $a3
     sw      $at, -20480($a1)
     lw      $a2, -2784($a1)
-    sw      $at, 156($gp)
+    sw      $at, s_IPUState + 12
     and     $a2, $a2, $v1
     sw      $a2, -2672($a1)
     ei
     lw      $at, -20464($a1)
     lw      $a2, -20448($a1)
-    sw      $at, 160($gp)
-    sw      $a2, 164($gp)
+    sw      $at, s_IPUState + 16
+    sw      $a2, s_IPUState + 20
     lw      $at, 0x2010($t1)
     lw      $a2, 0x2020($t1)
-    sw      $at, 168($gp)
+    sw      $at, s_IPUState + 24
     jr      $ra
-    sw      $a2, 172($gp)
+    sw      $a2, s_IPUState + 28
 
+_MPEG_Resume:
 _ipu_resume:
-    lw      $v1, 164($gp)
+    lw      $v1, s_IPUState + 20
     lui     $a0, 0x1001
     lui     $a1, 0x1000
     addiu   $a2, $zero, 0x0100
     beq     $v1, $zero, 1f
-    lw      $at, 172($gp)
-    lw      $a3, 156($gp)
-    lw      $v0, 160($gp)
+    lw      $at, s_IPUState + 28
+    lw      $a3, s_IPUState + 12
+    lw      $v0, s_IPUState + 16
     sw      $v0, -20464($a0)
     or      $a3, $a3, $a2
     sw      $v1, -20448($a0)
     sw      $a3, -20480($a0)
 1:
-    lw      $a3, 152($gp)
+    lw      $a3, s_IPUState + 8
     andi    $v0, $at, 0x007F
     srl     $v1, $at, 16
     srl     $at, $at,  8
     andi    $v1, $v1, 0x0003
     andi    $at, $at, 0x000F
     addu    $v1, $v1, $at
-    lw      $at, 148($gp)
+    lw      $at, s_IPUState + 4
     addu    $a3, $a3, $v1
     beq     $a3, $zero, 2f
     sll     $v1, $v1, 4
     subu    $at, $at, $v1
     sw      $v0, 0x2000($a1)
-    lw      $v1, 144($gp)
+    lw      $v1, s_IPUState + 0
 1:
     lw      $v0, 0x2010($a1)
     bltz    $v0, 1b
     nop
+    lw      $v0, s_IPUState + 24
     or      $v1, $v1, $a2
+    sw      $v0, 0x2010($a1)
     sw      $at, -19440($a0)
     sw      $a3, -19424($a0)
     sw      $v1, -19456($a0)
 2:
     jr      $ra
-    nop
+    addiu   $v0, $v0, 1
 
-_ipu_sync:
-    addiu   $sp, $sp, -16
-    sw      $ra, 0($sp)
+_mpeg_dmac_handler:
+    lw      $at, 8($a1)
+    beql    $at, $zero, 1f
+    addiu   $v1, $zero, -29
+    lw      $a0, 0($a1)
+    lw      $a2, 4($a1)
+    addiu   $a3, $zero, 1023
+    addiu   $v1, $zero,  384
+    pminw   $a3, $a3, $at
+    lui     $t1, 0x1001
+    sll     $v0, $a3, 10
+    mult    $v1, $v1, $a3
+    subu    $at, $at, $a3
+    sw      $a2, -20464($t1)
+    sw      $a0, -19440($t1)
+    addu    $a2, $a2, $v0
+    srl     $v0, $v0, 4
+    addu    $a0, $a0, $v1
+    sw      $a0, 0($a1)
+    srl     $v1, $v1, 4
+    sw      $a2, 4($a1)
+    lui     $t0, 0x1000
+    sw      $at, 8($a1)
+    sw      $v0, -20448($t1)
+    lui     $v0, 0x7000
+    sw      $v1, -19424($t1)
+    addiu   $v1, $zero, 0x0101
+    or      $v0, $v0, $a3
+    sw      $v1, -19456($t1)
+    andi    $v1, 0x0100
+    sw      $v0, 0x2000($t0)
+    sw      $v1, -20480($t1)
+    jr      $ra
+    nor     $v0, $zero, $zero
 1:
+    addiu   $a0, $zero, 3
+    syscall
+    lw      $a0, s_Sema
+    addiu   $v1, $zero, -67
+    syscall
+    sb      $zero, s_CSCFlag
+    jr      $ra
+    nor     $v0, $zero, $zero
+
+_MPEG_CSCImage:
+    addiu   $sp, $sp, -16
+    sw      $ra,  0($sp)
+    sw      $a0,  4($sp)
+    sw      $a1,  8($sp)
+    bgezal  $zero, _ipu_suspend
+    sw      $a2, 12($sp)
+    sw      $zero, 0x2000($t1)
+    addiu   $t0, $zero, 1023
+    addiu   $v0, $zero,    8
+    addiu   $a0, $zero,    3
+    addiu   $v1, $zero,   22
+    lw      $a2, 12($sp)
+    addiu   $t3, $zero,  384
+    sw      $v0, -8176($a1)
+    pminw   $t0, $t0, $a2
+    lw      $t4, 4($sp)
+    lw      $a3, 8($sp)
+    subu    $a2, $a2, $t0
+    mult    $t3, $t3, $t0
+    sll     $t5, $t0, 10
+    sw      $a3, -20464($a1)
+    sw      $t4, -19440($a1)
+    sw      $a2, s_CSCParam + 8
+    addu    $t4, $t4, $t3
+    addu    $a3, $a3, $t5
+    sw      $t4, s_CSCParam
+    srl     $t3, $t3, 4
+    sw      $a3, s_CSCParam + 4
+    srl     $t5, $t5, 4
+    sw      $t3, -19424($a1)
+    sw      $t5, -20448($a1)
+    sw      $t0, 4($sp)
+    syscall
+    lw      $t0, 4($sp)
+    addiu   $v1, $zero, 0x0101
+    lui     $at, 0x1001
+    lui     $v0, 0x7000
+    lui     $a0, 0x1000
+    or      $v0, $v0, $t0
+    sw      $v1, -19456($at)
+    andi    $v1, $v1, 0x0100
+    sw      $v0, 0x2000($a0)
+    sw      $v1, -20480($at)
+    lw      $a0, s_Sema
+    addiu   $v1, $zero, 68
+    sb      $v1, s_CSCFlag
+    syscall
+    lw      $ra, 0($sp)
+    beq     $zero, $zero, _ipu_resume
+    addiu   $sp, $sp, 16
+1:
+    lw      $v1, 0x2010($at)
+_ipu_sync:
     lui     $a1, 0x0003
-    andi    $v1, $a0, 0xFF00
+    andi    $a2, $a0, 0xFF00
     and     $v0, $a0, $a1
-    srl     $v1, $v1, 1
-    srl     $v0, $v0, 9
-    addu    $v1, $v1, $v0
     andi    $a0, $a0, 0x007F
-    subu    $v0, $v1, $a0
-    slti    $v0, $v0, 64
-    beql    $v0, $zero, 2f
-    lw      $v0, 0x2010($at)
-    lui     $v0, 0x1001
-    lw      $v0, -19424($v0)
-    bgtzl   $v0, 1b
+    addiu   $a1, $zero, 0x4000
+    srl     $a2, $a2, 1
+    srl     $v0, $v0, 9
+    and     $a1, $a1, $v1
+    addu    $a2, $a2, $v0
+    subu    $a2, $a2, $a0
+    bne     $a1, $zero, 3f
+    slti    $a2, $a2, 32
+    beq     $a2, $zero, 2f
+    lui     $a2, 0x1001
+    lw      $a2, -19424($a2)
+    bgtzl   $a2, 1b
     lw      $a0, 0x2020($at)
-    sd      $gp, 8($sp)
-    lw      $v0, 136($gp)
-    jalr    $v0
-    lw      $a0, 140($gp)
-    ld      $gp, 8($sp)
-    lui     $at, 0x1000
+    addiu   $sp, $sp, -16
+    lw      $a2, s_SetDMA + 0
+    sw      $ra, 0($sp)
+    jalr    $a2
+    lw      $a0, s_SetDMA + 4
+    lw      $ra, 0($sp)
+    addiu   $sp, $sp, 16
     beql    $v0, $zero, 4f
-    lw      $v1, 176($gp)
-    lw      $v0, 0x2010($at)
+    lw      $v1, s_pEOF
+    lui     $at, 0x1000
 2:
-    bltzl   $v0, 1b
+    lw      $v1, 0x2010($at)
+    bltzl   $v1, _ipu_sync
     lw      $a0, 0x2020($at)
 3:
-    lw      $ra, 0($sp)
     jr      $ra
-    addiu   $sp, $sp, 16
 4:
     addiu   $a0, $zero, 32
     addiu   $v0, $zero, 0x01B7
-    sw      $a0, 128($gp)
-    sw      $v0, 132($gp)
-    beq     $zero, $zero, 3b
-    sw      $at, 0($v1)
+    sw      $a0, s_DataBuf
+    sw      $v0, s_DataBuf + 4
+    jr      $ra
+    sw      $a0, 0($v1)
 
 _ipu_sync_data:
     lui     $at, 0x1000
@@ -266,11 +385,7 @@ _ipu_sync_data:
     bltzl   $v0, 1f
     lw      $a0, 0x2020($at)
     jr      $ra
-    nop
 1:
-    addiu   $sp, $sp, -16
-    sw      $ra, 0($sp)
-3:
     lui     $a1, 0x0003
     andi    $v1, $a0, 0xFF00
     and     $v0, $a0, $a1
@@ -279,36 +394,27 @@ _ipu_sync_data:
     addu    $v1, $v1, $v0
     andi    $a0, $a0, 0x7F
     subu    $v0, $v1, $a0
-    sltiu   $v0, $v0, 64
-    beql    $v0, $zero, 2f
-    ld      $v0, 0x2000($at)
+    sltiu   $v0, $v0, 32
+    beq     $v0, $zero, 2f
     lui     $v0, 0x1001
     lw      $v0, -19424($v0)
-    bgtzl   $v0, 3b
+    bgtzl   $v0, 1b
     lw      $a0, 0x2020($at)
-    sd      $gp, 8($sp)
-    lw      $v0, 136($gp)
+    lw      $v0, s_SetDMA + 0
+    addiu   $sp, $sp, -16
+    sw      $ra, 0($sp)
     jalr    $v0
-    lw      $a0, 140($gp)
-    ld      $gp, 8($sp)
-    lui     $at, 0x1000
-    beql    $v0, $zero, 5f
-    lw      $v1, 176($gp)
-    ld      $v0, 0x2000($at)
-2:
-    bltzl   $v0, 3b
-    lw      $a0, 0x2020($at)
-4:
+    lw      $a0, s_SetDMA + 4
     lw      $ra, 0($sp)
-    jr      $ra
     addiu   $sp, $sp, 16
-5:
-    addiu   $a0, $zero, 32
-    addiu   $v0, $zero, 0x01B7
-    sw      $a0, 128($gp)
-    sw      $v0, 132($gp)
-    beq     $zero, $zero, 4b
-    sw      $at, 0($v1)
+    beql    $v0, $zero, 4b
+    lw      $v1, s_pEOF
+    lui     $at, 0x1000
+2:
+    ld      $v0, 0x2000($at)
+    bltzl   $v0, 1b
+    lw      $a0, 0x2020($at)
+    jr      $ra
 
 _MPEG_GetBits:
 _ipu_get_bits:
@@ -320,10 +426,10 @@ _ipu_get_bits:
     addu    $s0, $zero, $a0
     bltzall $v1, _ipu_sync
     lw      $a0, 0x2020($at)
-    lw      $v1, 128($gp)
+    lw      $v1, s_DataBuf + 0
     slt     $v0, $v1, $s0
     beqzl   $v0, 1f
-    lw      $v0, 132($gp)
+    lw      $v0, s_DataBuf + 4
     lui     $at, 0x1000
     lui     $a1, 0x4000
     bgezal  $zero, _ipu_sync_data
@@ -334,11 +440,11 @@ _ipu_get_bits:
     or      $a1, $a1, $s0
     subu    $v1, $v1, $s0
     sw      $a1, 0x2000($at)
-    sw      $v1, 128($gp)
+    sw      $v1, s_DataBuf + 0
     subu    $a2, $zero, $s0
     sllv    $v1, $v0, $s0
     srlv    $v0, $v0, $a2
-    sw      $v1, 132($gp)
+    sw      $v1, s_DataBuf + 4
     ld      $ra, 0($sp)
     ld      $s0, 8($sp)
     jr      $ra
@@ -346,10 +452,10 @@ _ipu_get_bits:
 
 _MPEG_ShowBits:
 _ipu_show_bits:
-    lw      $v1, 128($gp)
+    lw      $v1, s_DataBuf + 0
     slt     $v0, $v1, $a0
     beqzl   $v0, 1f
-    lw      $v0, 132($gp)
+    lw      $v0, s_DataBuf + 4
     lui     $at, 0x1000
     addiu   $sp, $sp, -16
     lw      $v1, 0x2010($at)
@@ -362,8 +468,8 @@ _ipu_show_bits:
     bgezal  $zero, _ipu_sync_data
     sw      $a1, 0x2000($at)
     addiu   $v1, $zero, 32
-    sw      $v1, 128($gp)
-    sw      $v0, 132($gp)
+    sw      $v1, s_DataBuf + 0
+    sw      $v0, s_DataBuf + 4
     lw      $ra, 0($sp)
     lw      $a0, 4($sp)
     addiu   $sp, $sp, 16
@@ -419,9 +525,8 @@ _MPEG_SetDefQM:
     bgezal  $zero, _ipu_suspend
     nop
     lui     $v1, 0x1000
-    lui     $at, %hi( s_DefQM )
+    la      $at, s_DefQM
     sw      $zero, 0x2000($v1)
-    addiu   $at, %lo( s_DefQM )
     lq      $a0,  0($at)
     lq      $a1, 16($at)
     lq      $a2, 32($at)
@@ -471,7 +576,7 @@ _MPEG_SetQM:
     ld      $s0, 8($sp)
     addiu   $sp, $sp, 16
     jr      $ra
-    sd      $zero, 128($gp)
+    sd      $zero, s_DataBuf
 
 _MPEG_GetMBAI:
     lui     $at, 0x1000
@@ -501,8 +606,8 @@ _MPEG_GetMBAI:
 2:
     addiu   $v1, $zero, 32
     ld      $a0, 0x2030($at)
-    sw      $v1, 128($gp)
-    sw      $a0, 132($gp)
+    sw      $v1, s_DataBuf + 0
+    sw      $a0, s_DataBuf + 4
 1:
     addu    $v0, $zero, $s0
     lw      $ra, 0($sp)
@@ -524,8 +629,8 @@ _MPEG_GetMBType:
     addiu   $v1, $zero, 32
     ld      $a1, 0x2030($at)
     andi    $v0, $v0, 0xFFFF
-    sw      $v1, 128($gp)
-    sw      $a1, 132($gp)
+    sw      $v1, s_DataBuf + 0
+    sw      $a1, s_DataBuf + 4
 1:
     lw      $ra, 0($sp)
     jr      $ra
@@ -546,8 +651,8 @@ _MPEG_GetMotionCode:
     addiu   $v1, $zero, 32
     ld      $a1, 0x2030($at)
     andi    $v0, $v0, 0xFFFF
-    sw      $v1, 128($gp)
-    sw      $a1, 132($gp)
+    sw      $v1, s_DataBuf + 0
+    sw      $a1, s_DataBuf + 4
 1:
     dsll32  $v0, $v0, 16
     lw      $ra, 0($sp)
@@ -568,8 +673,8 @@ _MPEG_GetDMVector:
     addiu   $v1, $zero, 32
     ld      $a1, 0x2030($at)
     dsll32  $v0, $v0, 16
-    sw      $v1, 128($gp)
-    sw      $a1, 132($gp)
+    sw      $v1, s_DataBuf + 0
+    sw      $a1, s_DataBuf + 4
     lw      $ra, 0($sp)
     dsra32  $v0, $v0, 16
     jr      $ra
@@ -617,6 +722,25 @@ _MPEG_SetQSTIVFAS:
     jr      $ra
     sw      $a0, 0x2010($at)
 
+_MPEG_SetPCT:
+    sll     $a0, $a0, 24
+    addiu   $sp, $sp, -16
+    lui     $at, 0x1000
+    sw      $ra, 0($sp)
+    sw      $a0, 4($sp)
+    lw      $v1, 0x2010($at)
+    bltzl   $v1, _ipu_sync
+    lw      $a0, 0x2020($at)
+    lw      $v0, 4($sp)
+    lui     $a0, 0xF8FF
+    ori     $a0, $a0, 0xFFFF
+    and     $v1, $v1, $a0
+    or      $v1, $v1, $v0
+    lw      $ra, 0($sp)
+    addiu   $sp, $sp, 16
+    jr      $ra
+    sw      $v1, 0x2010($at)
+
 _MPEG_BDEC:
     addiu   $sp, $sp, -16
     sll     $a0, $a0, 27
@@ -651,55 +775,59 @@ _MPEG_BDEC:
     addiu   $sp, $sp, 16
 
 _MPEG_WaitBDEC:
-    lui     $at, 0x1000
     addiu   $sp, $sp, -16
+    lui     $at, 0x1000
     lw      $v1, 0x2010($at)
     sw      $ra, 0($sp)
+1:
     bltzall $v1, _ipu_sync
     lw      $a0, 0x2020($at)
-    lw      $v1, 176($gp)
+    lw      $v1, s_pEOF
     addiu   $a0, $zero, 0x4000
-    lw      $v0, 0x2010($at)
-    lw      $ra, 0($sp)
     lw      $v1, 0($v1)
-    addiu   $sp, $sp, 16
     lui     $a2, 0x1001
-    bnel    $v1, $zero, 1f
-    xor     $v0, $v0, $v0
+    bne     $v1, $zero, 3f
+    lw      $v0, 0x2010($at)
     and     $v0, $v0, $a0
-    bnel    $v0, $zero, 1f
-    xor     $v0, $v0, $v0
-    addiu   $v1, $zero, 32
-    ld      $a1, 0x2030($at)
-    addiu   $v0, $v0, 1
+    bne     $v0, $zero, 3f
+    lw      $a2, -20448($a2)
+    addiu   $v0, $zero, 1
+    bnel    $a2, $zero, 1b
+    lw      $v1, 0x2010($at)
+    ld      $v1, 0x2030($at)
+    addiu   $ra, $zero, 32
+    addiu   $v0, $zero, 1
+    pextlw  $v1, $v1, $ra
 2:
-    lw      $at, -20448($a2)
-    bne     $at, $zero, 2b
-    nop
-    sw      $v1, 128($gp)
+    lw      $ra, 0($sp)
+    sd      $v1, s_DataBuf
     jr      $ra
-    sw      $a1, 132($gp)
-1:
-    lui     $v1, 0x0001
-2:
+    addiu   $sp, $sp, 16
+3:
+    bgezal  $zero, _ipu_suspend
+    lui     $t0, 0x4000
+    bgezal  $zero, _ipu_resume
+    sw      $t0, 0x2010($t1)
+    lui     $v0, 0x0001
+4:
     di
     sync.p
-    mfc0    $a0, $12
-    and     $a0, $a0, $v1
-    nop
-    bne     $a0, $zero, 2b
-    lui     $a3, 0xFFFE
-    lw      $a1, -2784($a2)
-    ori     $a3, 0xFFFF
-    or      $a1, $a1, $v1
-    sw      $a1, -2672($a2)
-    sw      $zero, -20480($a2)
-    sw      $zero, -20448($a2)
-    lw      $a1, -2784($a2)
-    and     $a1, $a1, $a3
-    sw      $a1, -2672($a2)
-    jr      $ra
+    mfc0    $at, $12
+    and     $at, $at, $v0
+    nor     $a2, $v0, $zero
+    bne     $at, $zero, 4b
+    lw      $at, -2784($a0)
+    xor     $v1, $v1, $v1
+    or      $at, $at, $v0
+    sw      $at, -2672($a0)
+    sw      $zero, -20480($a0)
+    lw      $at, -2784($a0)
+    xor     $v0, $v0, $v0
+    and     $at, $at, $a2
+    sw      $at, -2672($a0)
     ei
+    beq     $zero, $zero, 2b
+    sw      $zero, -20448($a0)
 
 _MPEG_put_block_fr:
     lw      $a2, 0($a0)
@@ -870,9 +998,9 @@ _MPEG_put_block_il:
     ppacb   $t6, $t7, $t6
     sq      $t0,  0($a2)
     sq      $t2, 32($a2)
+    addiu   $a2, $a2, 64
     sq      $t4,  0($at)
     sq      $t6, 32($at)
-    addiu   $a2, $a2, 64
     bgtzl   $v1, 1b
     addiu   $at, $at, 64
     lw      $a2,  4($a0)
@@ -1123,244 +1251,6 @@ _MPEG_add_block_ilfl:
     addiu   $a1, $a1, 128
     jr      $ra
 
-_MPEG_add_block_flfl:
-    pnor    $v0, $zero, $zero
-    lw      $a2,  0($a0)
-    lw      $a3, 12($a0)
-    lw      $a1, 16($a0)
-    addiu   $v1, $zero, 4
-    psrlh   $v0, $v0, 8
-1:
-    lq      $t0,   0($a3)
-    lq      $t1,  16($a3)
-    lq      $t2,  32($a3)
-    lq      $t3,  48($a3)
-    addiu   $v1, $v1, -1
-    lq      $t4,   0($a1)
-    lq      $t5,  16($a1)
-    lq      $t6,  32($a1)
-    lq      $t7,  48($a1)
-    paddh   $t0, $t0, $t4
-    paddh   $t1, $t1, $t5
-    paddh   $t2, $t2, $t6
-    paddh   $t3, $t3, $t7
-    pmaxh   $t0, $zero, $t0
-    pmaxh   $t1, $zero, $t1
-    pmaxh   $t2, $zero, $t2
-    pmaxh   $t3, $zero, $t3
-    pminh   $t0, $v0, $t0
-    pminh   $t1, $v0, $t1
-    pminh   $t2, $v0, $t2
-    pminh   $t3, $v0, $t3
-    ppacb   $t0, $t1, $t0
-    ppacb   $t2, $t3, $t2
-    sq      $t0,   0($a2)
-    sq      $t2,  32($a2)
-    lq      $t4, 256($a3)
-    lq      $t5, 272($a3)
-    lq      $t6, 288($a3)
-    lq      $t7, 304($a3)
-    addiu   $a3, $a3, 64
-    lq      $t0, 256($a1)
-    lq      $t1, 272($a1)
-    lq      $t2, 288($a1)
-    lq      $t3, 304($a1)
-    paddh   $t4, $t4, $t0
-    paddh   $t5, $t5, $t1
-    paddh   $t6, $t6, $t2
-    paddh   $t7, $t7, $t3
-    pmaxh   $t4, $zero, $t4
-    pmaxh   $t5, $zero, $t5
-    pmaxh   $t6, $zero, $t6
-    pmaxh   $t7, $zero, $t7
-    pminh   $t4, $v0, $t4
-    pminh   $t5, $v0, $t5
-    pminh   $t6, $v0, $t6
-    pminh   $t7, $v0, $t7
-    ppacb   $t4, $t5, $t4
-    ppacb   $t6, $t7, $t6
-    sq      $t4, 16($a2)
-    sq      $t6, 48($a2)
-    addiu   $a1, $a1, 64
-    bgtzl   $v1, 1b
-    addiu   $a2, $a2, 64
-    lw      $a2, 4($a0)
-    addiu   $v1, $zero, 2
-2:
-    lq      $t0, 256($a3)
-    lq      $t1, 272($a3)
-    lq      $t2, 288($a3)
-    lq      $t3, 304($a3)
-    addiu   $v1, $v1, -1
-    lq      $t4, 256($a1)
-    lq      $t5, 320($a1)
-    lq      $t6, 272($a1)
-    lq      $t7, 336($a1)
-    paddh   $t0, $t0, $t4
-    paddh   $t1, $t1, $t5
-    paddh   $t2, $t2, $t6
-    paddh   $t3, $t3, $t7
-    pmaxh   $t0, $zero, $t0
-    pmaxh   $t1, $zero, $t1
-    pmaxh   $t2, $zero, $t2
-    pmaxh   $t3, $zero, $t3
-    pminh   $t0, $v0, $t0
-    pminh   $t1, $v0, $t1
-    pminh   $t2, $v0, $t2
-    pminh   $t3, $v0, $t3
-    ppacb   $t0, $t1, $t0
-    ppacb   $t2, $t3, $t2
-    sq      $t0,  0($a2)
-    sq      $t2, 16($a2)
-    lq      $t4, 320($a3)
-    lq      $t5, 336($a3)
-    lq      $t6, 352($a3)
-    lq      $t7, 368($a3)
-    addiu   $a3, $a3, 128
-    lq      $t0, 288($a1)
-    lq      $t1, 352($a1)
-    lq      $t2, 304($a1)
-    lq      $t3, 368($a1)
-    paddh   $t4, $t4, $t0
-    paddh   $t5, $t5, $t1
-    paddh   $t6, $t6, $t2
-    paddh   $t7, $t7, $t3
-    pmaxh   $t4, $zero, $t4
-    pmaxh   $t5, $zero, $t5
-    pmaxh   $t6, $zero, $t6
-    pmaxh   $t7, $zero, $t7
-    pminh   $t4, $v0, $t4
-    pminh   $t5, $v0, $t5
-    pminh   $t6, $v0, $t6
-    pminh   $t7, $v0, $t7
-    ppacb   $t4, $t5, $t4
-    ppacb   $t6, $t7, $t6
-    sq      $t4, 32($a2)
-    sq      $t6, 48($a2)
-    addiu   $a2, $a2, 64
-    bgtzl   $v1, 2b
-    addiu   $a1, $a1, 128
-    jr      $ra
-
-_MPEG_add_block_flfr:
-    pnor    $v0, $zero, $zero
-    lw      $a2,  0($a0)
-    lw      $a3, 12($a0)
-    lw      $a1, 16($a0)
-    addiu   $v1, $zero, 4
-    psrlh   $v0, $v0, 8
-1:
-    lq      $t0,   0($a3)
-    lq      $t1,  16($a3)
-    lq      $t2, 256($a3)
-    lq      $t3, 272($a3)
-    addiu   $v1, $v1, -1
-    lq      $t4,   0($a1)
-    lq      $t5,  16($a1)
-    lq      $t6,  32($a1)
-    lq      $t7,  48($a1)
-    paddh   $t0, $t0, $t4
-    paddh   $t1, $t1, $t5
-    paddh   $t2, $t2, $t6
-    paddh   $t3, $t3, $t7
-    pmaxh   $t0, $zero, $t0
-    pmaxh   $t1, $zero, $t1
-    pmaxh   $t2, $zero, $t2
-    pmaxh   $t3, $zero, $t3
-    pminh   $t0, $v0, $t0
-    pminh   $t1, $v0, $t1
-    pminh   $t2, $v0, $t2
-    pminh   $t3, $v0, $t3
-    ppacb   $t0, $t1, $t0
-    ppacb   $t2, $t3, $t2
-    sq      $t0,   0($a2)
-    sq      $t2,  16($a2)
-    lq      $t4,  32($a3)
-    lq      $t5,  48($a3)
-    lq      $t6, 288($a3)
-    lq      $t7, 304($a3)
-    addiu   $a3, $a3, 64
-    lq      $t0,  64($a1)
-    lq      $t1,  80($a1)
-    lq      $t2,  96($a1)
-    lq      $t3, 112($a1)
-    paddh   $t4, $t4, $t0
-    paddh   $t5, $t5, $t1
-    paddh   $t6, $t6, $t2
-    paddh   $t7, $t7, $t3
-    pmaxh   $t4, $zero, $t4
-    pmaxh   $t5, $zero, $t5
-    pmaxh   $t6, $zero, $t6
-    pmaxh   $t7, $zero, $t7
-    pminh   $t4, $v0, $t4
-    pminh   $t5, $v0, $t5
-    pminh   $t6, $v0, $t6
-    pminh   $t7, $v0, $t7
-    ppacb   $t4, $t5, $t4
-    ppacb   $t6, $t7, $t6
-    sq      $t4, 32($a2)
-    sq      $t6, 48($a2)
-    addiu   $a1, $a1, 128
-    bgtzl   $v1, 1b
-    addiu   $a2, $a2, 64
-    lw      $a2, 4($a0)
-    addiu   $v1, $zero, 2
-2:
-    lq      $t0, 256($a3)
-    lq      $t1, 272($a3)
-    lq      $t2, 288($a3)
-    lq      $t3, 304($a3)
-    addiu   $v1, $v1, -1
-    lq      $t4,  0($a1)
-    lq      $t5, 16($a1)
-    lq      $t6, 32($a1)
-    lq      $t7, 48($a1)
-    paddh   $t0, $t0, $t4
-    paddh   $t1, $t1, $t5
-    paddh   $t2, $t2, $t6
-    paddh   $t3, $t3, $t7
-    pmaxh   $t0, $zero, $t0
-    pmaxh   $t1, $zero, $t1
-    pmaxh   $t2, $zero, $t2
-    pmaxh   $t3, $zero, $t3
-    pminh   $t0, $v0, $t0
-    pminh   $t1, $v0, $t1
-    pminh   $t2, $v0, $t2
-    pminh   $t3, $v0, $t3
-    ppacb   $t0, $t1, $t0
-    ppacb   $t2, $t3, $t2
-    sq      $t0,  0($a2)
-    sq      $t2, 16($a2)
-    lq      $t4, 320($a3)
-    lq      $t5, 336($a3)
-    lq      $t6, 352($a3)
-    lq      $t7, 368($a3)
-    addiu   $a3, $a3, 128
-    lq      $t0,  64($a1)
-    lq      $t1,  80($a1)
-    lq      $t2,  96($a1)
-    lq      $t3, 112($a1)
-    paddh   $t4, $t4, $t0
-    paddh   $t5, $t5, $t1
-    paddh   $t6, $t6, $t2
-    paddh   $t7, $t7, $t3
-    pmaxh   $t4, $zero, $t4
-    pmaxh   $t5, $zero, $t5
-    pmaxh   $t6, $zero, $t6
-    pmaxh   $t7, $zero, $t7
-    pminh   $t4, $v0, $t4
-    pminh   $t5, $v0, $t5
-    pminh   $t6, $v0, $t6
-    pminh   $t7, $v0, $t7
-    ppacb   $t4, $t5, $t4
-    ppacb   $t6, $t7, $t6
-    sq      $t4, 32($a2)
-    sq      $t6, 48($a2)
-    addiu   $a2, $a2, 64
-    bgtzl   $v1, 2b
-    addiu   $a1, $a1, 128
-    jr      $ra
-
 _MPEG_add_block_frfl:
     pnor    $v0, $zero, $zero
     lw      $a2,  0($a0)
@@ -1481,12 +1371,17 @@ _MPEG_add_block_frfl:
     jr      $ra
 
 _MPEG_dma_ref_image:
-    addiu   $at, $zero, 384
+    addiu   $at, $zero, 4
+    pminw   $a2, $a2, $at
+    bgtzl   $a2, 1f
+    addiu   $at, $at, 380
+    jr      $ra
+1:
     lui     $v0, 0x1001
     mult    $a3, $a3, $at
     sll     $at, $a0, 4
     lui     $t1, 0x2000
-    la      $t0, 0($gp)
+    la      $t0, s_DMAPack
 1:
     lw      $v1, -11264($v0)
     andi    $v1, $v1, 0x0100
@@ -1523,7 +1418,7 @@ _MPEG_dma_ref_image:
 _MPEG_do_mc:
     addiu   $v0, $zero, 16
     lw      $a1,  0($a0)
-    addiu   $sp, $sp, -4
+    addiu   $sp, $sp, -16
     lw      $a2,  4($a0)
     lw      $a3, 12($a0)
     lw      $t0, 16($a0)
@@ -1562,7 +1457,7 @@ _MPEG_do_mc:
     addu    $a1, $a1, $at
     subu    $at, $t1, $v1
     jr      $t5
-    addiu   $sp, $sp, 4
+    addiu   $sp, $sp, 16
 
 _MPEG_put_luma:
     mtsab   $a3, 0
@@ -1832,6 +1727,7 @@ _MPEG_put_chroma_XY:
     pnor    $t9, $zero, $zero
     ld      $a0,   0($a1)
     ld      $v0,  64($a1)
+    mtsab   $zero, 1
     ld      $t0, 384($a1)
     ld      $t1, 448($a1)
     pcpyld  $a0, $t0, $a0
@@ -1842,7 +1738,6 @@ _MPEG_put_chroma_XY:
     psllh   $t9, $t9, 1
     addu    $a1, $a1, $t3
     addiu   $v1, $v1, -1
-    mtsab   $zero, 1
     qfsrv   $t0, $a0, $a0
     qfsrv   $t1, $v0, $v0
     pextlb  $a0, $zero, $a0
@@ -1856,9 +1751,9 @@ _MPEG_put_chroma_XY:
 1:
     ld      $t5,   0($a1)
     ld      $t7,  64($a1)
+    mtsab   $a3, 0
     ld      $t6, 384($a1)
     ld      $t8, 448($a1)
-    mtsab   $a3, 0
     pcpyld  $t5, $t6, $t5
     pcpyld  $t7, $t8, $t7
     qfsrv   $t5, $t5, $t5
@@ -1937,10 +1832,10 @@ _MPEG_avg_chroma:
 1:
     ld      $t5,   0($a1)
     ld      $t6,  64($a1)
+    addiu   $v1, $v1, -1
     ld      $t7, 384($a1)
     ld      $t8, 448($a1)
     addu    $a1, $a1, $t3
-    addiu   $v1, $v1, -1
     pcpyld  $t5, $t7, $t5
     pcpyld  $t6, $t8, $t6
     qfsrv   $t5, $t5, $t5
@@ -2032,11 +1927,11 @@ _MPEG_avg_chroma_X:
 1:
     ld      $t5,   0($a1)
     ld      $t6,  64($a1)
+    mtsab   $a3, 0
     ld      $t7, 384($a1)
     ld      $t8, 448($a1)
     pcpyld  $t5, $t7, $t5
     pcpyld  $t6, $t8, $t6
-    mtsab   $a3, 0
     qfsrv   $t5, $t5, $t5
     qfsrv   $t6, $t6, $t6
     addiu   $t9, $zero, 1
@@ -2162,10 +2057,10 @@ _MPEG_avg_chroma_Y:
 1:
     ld      $t5,   0($a1)
     ld      $t6,  64($a1)
+    addiu   $v1, $v1, -1
     ld      $t7, 384($a1)
     ld      $t8, 448($a1)
     addu    $a1, $a1, $t3
-    addiu   $v1, $v1, -1
     pcpyld  $t5, $t7, $t5
     pcpyld  $t6, $t8, $t6
     qfsrv   $t5, $t5, $t5
@@ -2288,6 +2183,7 @@ _MPEG_avg_chroma_XY:
     pnor    $t9, $zero, $zero
     ld      $a0,   0($a1)
     ld      $v0,  64($a1)
+    mtsab   $zero, 1
     ld      $t0, 384($a1)
     ld      $t1, 448($a1)
     pcpyld  $a0, $t0, $a0
@@ -2298,7 +2194,6 @@ _MPEG_avg_chroma_XY:
     psllh   $t9, $t9,  1
     addu    $a1, $a1, $t3
     addiu   $v1, $v1, -1
-    mtsab   $zero, 1
     qfsrv   $t0, $a0, $a0
     qfsrv   $t1, $v0, $v0
     pextlb  $a0, $zero, $a0
@@ -2312,9 +2207,9 @@ _MPEG_avg_chroma_XY:
 1:
     ld      $t5,   0($a1)
     ld      $t7,  64($a1)
+    mtsab   $a3, 0
     ld      $t6, 384($a1)
     ld      $t8, 448($a1)
-    mtsab   $a3, 0
     pcpyld  $t5, $t6, $t5
     pcpyld  $t7, $t8, $t7
     qfsrv   $t5, $t5, $t5
@@ -2369,111 +2264,3 @@ _MPEG_avg_chroma_XY:
     jr      $ra
     nop
 
-_mpeg_dmac_handler:
-    lw      $at, 8($a1)
-    beql    $at, $zero, 1f
-    addiu   $v1, $zero, -29
-    lw      $a0, 0($a1)
-    lw      $a2, 4($a1)
-    addiu   $a3, $zero, 1023
-    addiu   $v1, $zero,  384
-    pminw   $a3, $a3, $at
-    lui     $t1, 0x1001
-    sll     $v0, $a3, 10
-    mult    $v1, $v1, $a3
-    subu    $at, $at, $a3
-    sw      $a2, -20464($t1)
-    sw      $a0, -19440($t1)
-    addu    $a2, $a2, $v0
-    srl     $v0, $v0, 4
-    addu    $a0, $a0, $v1
-    sw      $a0, 0($a1)
-    srl     $v1, $v1, 4
-    sw      $a2, 4($a1)
-    lui     $t0, 0x1000
-    sw      $at, 8($a1)
-    sw      $v0, -20448($t1)
-    lui     $v0, 0x7000
-    sw      $v1, -19424($t1)
-    addiu   $v1, $zero, 0x0101
-    or      $v0, $v0, $a3
-    sw      $v1, -19456($t1)
-    andi    $v1, 0x0100
-    sw      $v0, 0x2000($t0)
-    sw      $v1, -20480($t1)
-    jr      $ra
-    xor     $v0, $v0, $v0
-1:
-    addiu   $a0, $zero, 3
-    syscall
-    lui     $a0, %hi(s_Sema)
-    lw      $a0, %lo(s_Sema)($a0)
-    addiu   $v1, $zero, -67
-    syscall
-    jr      $ra
-    addiu   $v0, $zero, 1
-
-_MPEG_CSCImage:
-    addiu   $sp, $sp, -32
-    sw      $ra,  0($sp)
-    sw      $a0,  4($sp)
-    sw      $a1,  8($sp)
-    bgezal  $zero, _ipu_suspend
-    sw      $a2, 12($sp)
-    sw      $zero, 0x2000($t1)
-    addiu   $t0, $zero, 1023
-    addiu   $a0, $zero,    3
-    addiu   $v1, $zero,   18
-    addiu   $v0, $zero,    8
-    lw      $a2, 12($sp)
-    addiu   $t3, $zero,  384
-    sw      $v0, -8176($a1)
-    pminw   $t0, $t0, $a2
-    lw      $t4, 4($sp)
-    lw      $a3, 8($sp)
-    subu    $a2, $a2, $t0
-    mult    $t3, $t3, $t0
-    sll     $t5, $t0, 10
-    sw      $a3, -20464($a1)
-    sw      $t4, -19440($a1)
-    sw      $a2, 12($sp)
-    addu    $t4, $t4, $t3
-    addu    $a3, $a3, $t5
-    sw      $t4, 4($sp)
-    srl     $t3, $t3, 4
-    sw      $a3, 8($sp)
-    srl     $t5, $t5, 4
-    sw      $t3, -19424($a1)
-    sw      $t5, -20448($a1)
-    lui     $a1, %hi(_mpeg_dmac_handler)
-    addiu   $a3, $sp, 4
-    xor     $a2, $a2, $a2
-    addiu   $a1, %lo(_mpeg_dmac_handler)
-    sw      $t0, 20($sp)
-    syscall
-    addiu   $a0, $zero, 3
-    addiu   $v1, $zero, 22
-    sw      $v0, 16($sp)
-    syscall
-    lw      $t0, 20($sp)
-    addiu   $v1, $zero, 0x0101
-    lui     $at, 0x1001
-    lui     $v0, 0x7000
-    lui     $a0, 0x1000
-    or      $v0, $v0, $t0
-    sw      $v1, -19456($at)
-    andi    $v1, $v1, 0x0100
-    sw      $v0, 0x2000($a0)
-    sw      $v1, -20480($at)
-    lw      $a0, 180($gp)
-    addiu   $v1, $zero, 68
-    syscall
-    lw      $a1, 16($sp)
-    addiu   $a0, $zero, 3
-    addiu   $v1, $zero, 19
-    syscall
-1:
-
-    lw      $ra, 0($sp)
-    beq     $zero, $zero, _ipu_resume
-    addiu   $sp, $sp, 32

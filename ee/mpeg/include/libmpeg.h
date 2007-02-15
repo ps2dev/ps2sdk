@@ -3,7 +3,7 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright (c) 2006 Eugene Plotnikov <e-plotnikov@operamail.com>
+# Copyright (c) 2006-2007 Eugene Plotnikov <e-plotnikov@operamail.com>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 */
@@ -43,6 +43,7 @@ typedef struct MPEGSequenceInfo {
  int m_ChromaFmt;
  int m_VideoFmt;
  int m_fEOF;
+ int m_MSPerFrame;
 
 } MPEGSequenceInfo;
 
@@ -50,9 +51,10 @@ typedef struct MPEGSequenceInfo {
 extern "C" {
 # endif  /* __cplusplus */
 
-void MPEG_Initialize (  int ( * ) ( void* ), void*, void* ( * ) ( void*, MPEGSequenceInfo* ), void*  );
+void MPEG_Initialize (  int ( * ) ( void* ), void*, void* ( * ) ( void*, MPEGSequenceInfo* ), void*, long*  );
 void MPEG_Destroy    ( void );
-int  ( *MPEG_Picture ) ( void* );
+int  ( *MPEG_Picture ) ( void*, long* );
+
 # ifdef __cplusplus
 }
 # endif  /* __cplusplus */

@@ -105,6 +105,11 @@ typedef struct _MPEGMotions {
 typedef struct _MPEGContext {
 
  MPEGSequenceInfo  m_SI;
+ long              m_FwdPTS;
+ long              m_BckPTS;
+ long              m_AuxPTS;
+ int               m_MBWidth;
+ int               m_MBHeight;
  _MPEGMacroBlock8* m_pFwdFrame;
  _MPEGMacroBlock8* m_pBckFrame;
  _MPEGMacroBlock8* m_pAuxFrame;
@@ -112,8 +117,7 @@ typedef struct _MPEGContext {
  _MPEGMBXY*        m_pMBXY;
  unsigned char*    m_pCurFrameY;
  unsigned char*    m_pCurFrameCbCr;
- int               m_MBWidth;
- int               m_MBHeight;
+ int               m_FRCode;
  int               m_MBStride;
  int               m_MBCount;
  int               m_fProgSeq;
@@ -141,7 +145,7 @@ typedef struct _MPEGContext {
 
 void         _MPEG_Initialize     (  _MPEGContext*, int ( * ) ( void* ), void*, int*  );
 void         _MPEG_Destroy        ( void                                              );
-void         _MPEG_CSCImage       ( void*, void*, int                                 );
+int          _MPEG_CSCImage       ( void*, void*, int                                 );
 void         _MPEG_SetDefQM       ( int                                               );
 void         _MPEG_SetQM          ( int                                               );
 int          _MPEG_GetMBAI        ( void                                              );
@@ -154,6 +158,7 @@ unsigned int _MPEG_GetBits        ( unsigned int                                
 unsigned int _MPEG_ShowBits       ( unsigned int                                      );
 void         _MPEG_SetIDCP        ( void                                              );
 void         _MPEG_SetQSTIVFAS    ( void                                              );
+void         _MPEG_SetPCT         ( unsigned int                                      );
 void         _MPEG_BDEC           ( int, int, int, int, void*                         );
 int          _MPEG_WaitBDEC       ( void                                              );
 void         _MPEG_dma_ref_image  ( _MPEGMacroBlock8*, _MPEGMotion*, int, int         );
@@ -180,6 +185,6 @@ void         _MPEG_put_block_il   ( _MPEGMotions*                               
 void         _MPEG_add_block_ilfl ( _MPEGMotions*                                     );
 void         _MPEG_add_block_frfr ( _MPEGMotions*                                     );
 void         _MPEG_add_block_frfl ( _MPEGMotions*                                     );
-void         _MPEG_add_block_flfr ( _MPEGMotions*                                     );
-void         _MPEG_add_block_flfl ( _MPEGMotions*                                     );
+void         _MPEG_Suspend        ( void                                              );
+void         _MPEG_Resume         ( void                                              );
 #endif  /* __libmpeg_internal_H */
