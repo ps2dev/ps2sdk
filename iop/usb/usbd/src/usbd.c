@@ -21,6 +21,8 @@
 #include "thsemap.h"
 #include "loadcore.h"
 
+IRX_ID("usbd", 1, 1);
+
 #define WELCOME_STR "FreeUsbd v.0.1.2\n"
 
 extern struct irx_export_table _exp_usbd;
