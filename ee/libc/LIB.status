@@ -68,8 +68,8 @@ to SIO could be an idea.
 
 Also, should have buffering...
 
-remove     - missing
-rename     - missing
+remove     - ok, doesn't use cwd
+rename     - ok, doesn't use cwd
 tmp*       - missing
 fclose     - ok
 fflush     - ok (memory card)
@@ -109,7 +109,11 @@ fileno     - ok
 pipe funcs - missing, can we make them ?
 lock funcs - missing, can we make them ?
 
+mkdir      - ok, doesn't use cwd
+rmdir      - ok, doesn't use cwd
+
 chdir      - ok
+getcwd     - ok
 
 
 String:

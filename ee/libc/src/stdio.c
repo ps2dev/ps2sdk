@@ -11,6 +11,11 @@
 # Simple standard C library implementation.
 */
 	   
+#ifdef F_strerror
+#define E_USE_NAMES
+#include "errno.h"
+#endif
+
 #include <stdio.h>
 #include <tamtypes.h>
 #include <kernel.h>
@@ -24,6 +29,10 @@ extern int (*_ps2sdk_open)(const char*, int);
 extern int (*_ps2sdk_read)(int, void*, int);
 extern int (*_ps2sdk_lseek)(int, int, int);
 extern int (*_ps2sdk_write)(int, const void*, int);
+extern int (*_ps2sdk_remove)(const char*);
+extern int (*_ps2sdk_rename)(const char*, const char*);
+extern int (*_ps2sdk_mkdir)(const char*, int);
+extern int (*_ps2sdk_rmdir)(const char*);
 
 void _ps2sdk_stdio_init();
 
@@ -36,6 +45,7 @@ void _ps2sdk_stdio_init();
 #define STD_IOBUF_TYPE_HOST           16
 #define STD_IOBUF_TYPE_STDOUTHOST     32
 #define STD_IOBUF_TYPE_MASS           64
+#define STD_IOBUF_TYPE_PFS           128
 
 extern char __direct_pwd[256];
 extern int __stdio_initialised;
@@ -780,7 +790,7 @@ int fseek(FILE *stream, long offset, int origin)
       break;
     default:
       /* attempt to seek to offset from origin. */
-      ret = ((_ps2sdk_lseek(stream->fd, (int)offset, origin) >= 0) ? 0 : -1);
+      ret = _ps2sdk_lseek(stream->fd, (int)offset, origin);
   }
   return (ret);
 }
@@ -953,7 +963,6 @@ int getchar(void)
 #endif
 
 
-extern char __direct_pwd[256];
 #ifdef F_getfdtype
 /* the present working directory variable. */
 char __direct_pwd[256] = "";
@@ -971,6 +980,10 @@ static struct {
     { "host:",   5, STD_IOBUF_TYPE_HOST },
     { "mass0:",  6, STD_IOBUF_TYPE_MASS },
     { "mass:",   5, STD_IOBUF_TYPE_MASS },
+    { "pfs0:",   5, STD_IOBUF_TYPE_PFS },
+    { "pfs1:",   5, STD_IOBUF_TYPE_PFS },
+    { "pfs2:",   5, STD_IOBUF_TYPE_PFS },
+    { "pfs3:",   5, STD_IOBUF_TYPE_PFS },
     { 0, 0 }
 };
 
@@ -1035,8 +1048,6 @@ char *gets(char *buf)
 
 
 #ifdef F_strerror
-#define E_USE_NAMES
-#include "errno.h"
 char * strerror(int err) {
     return error_to_string(err);
 }
@@ -1201,7 +1212,7 @@ int puts(const char *s)
 */
 int remove(const char *s)
 {
-  return (0);
+  return _ps2sdk_remove(s);
 }
 #endif
 
@@ -1220,8 +1231,9 @@ int remove(const char *s)
 */
 int rename(const char *name, const char *newname)
 {
-  int ret = 0;
-  
+  int ret = -1;
+  if (_ps2sdk_rename)
+    ret = _ps2sdk_rename(name, newname);
   return (ret);
 }
 #endif
@@ -1398,11 +1410,21 @@ void __stdio_update_stdout_xy(int x, int y)
 
 
 #ifdef F___stdio_internals
+static int fioMkdirHelper(const char* source, int mode)
+{
+    /* mode not used */
+	return fioMkdir(source);
+}
+
 int (*_ps2sdk_close)(int) = fioClose;
 int (*_ps2sdk_open)(const char*, int) = fioOpen;
 int (*_ps2sdk_read)(int, void*, int) = fioRead;
 int (*_ps2sdk_lseek)(int, int, int) = fioLseek;
 int (*_ps2sdk_write)(int, const void*, int) = fioWrite;
+int (*_ps2sdk_remove)(const char*) = fioRemove;
+int (*_ps2sdk_rename)(const char*, const char*) = 0;
+int (*_ps2sdk_mkdir)(const char*, int) = fioMkdirHelper;
+int (*_ps2sdk_rmdir)(const char*) = fioRmdir;
 
 void _ps2sdk_stdio_init()
 {
@@ -1439,14 +1461,13 @@ int chdir(const char *path) {
 #ifdef F_mkdir
 int mkdir(const char *path, int mode)
 {
-	/* mode not used */
-	return fioMkdir(path);
+	return _ps2sdk_mkdir(path, mode);
 }
 #endif
 
 #ifdef F_rmdir
 int rmdir(const char *path)
 {
-	return fioRmdir(path);
+	return _ps2sdk_rmdir(path);
 }
 #endif
