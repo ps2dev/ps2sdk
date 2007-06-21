@@ -27,7 +27,7 @@ int PS2KbdInit(void)
       return 0;
     }
 
-  kbd_fd = fioOpen(PS2KBD_DEVFILE, 0);
+  kbd_fd = fioOpen(PS2KBD_DEVFILE, O_RDONLY);
   if(kbd_fd < 0)
     {
       return 0;
