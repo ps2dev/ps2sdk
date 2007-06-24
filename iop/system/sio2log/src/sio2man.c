@@ -24,9 +24,16 @@
 #include <ioman.h>
 
 #include "sio2man.h"
-#include "log.h"
 
-IRX_ID("sio2man_logger", 2, 1);
+#ifndef XSIO2MAN
+	#include "log.h"
+#endif
+
+#ifndef XSIO2MAN
+	IRX_ID("sio2man_logger", 2, 1);
+#else
+	IRX_ID("freesio2", 1, 1);
+#endif
 
 #define SIO2_REG_BASE		0xbf808200
 #define SIO2_REG_PORT0_CTRL1	0xbf808240
@@ -81,54 +88,73 @@ void send_td(sio2_transfer_data_t *td)
 {
 	int i;
 
+#ifndef XSIO2MAN
 	log_default(LOG_TRS);
+#endif
 
 	for (i = 0; i < 4; i++) {
 		sio2_portN_ctrl1_set(i, td->port_ctrl1[i]);
 		sio2_portN_ctrl2_set(i, td->port_ctrl2[i]);
 	}
+
+#ifndef XSIO2MAN
 	log_portdata(td->port_ctrl1, td->port_ctrl2);
+#endif
 
 	for (i = 0; i < 16; i++)
 		sio2_regN_set(i, td->regdata[i]);
+
+#ifndef XSIO2MAN
 	log_regdata(td->regdata);
+#endif
 
 	if (td->in_size) {
 		for (i = 0; i < td->in_size; i++)
 			sio2_data_out(td->in[i]);
+	#ifndef XSIO2MAN
 		log_data(LOG_TRS_DATA, td->in, td->in_size);
+	#endif
 	}
 
 	if (td->in_dma.addr) {
 		dmac_request(IOP_DMAC_SIO2in, td->in_dma.addr, td->in_dma.size,
 				td->in_dma.count, DMAC_FROM_MEM);
 		dmac_transfer(IOP_DMAC_SIO2in);
+
+	#ifndef XSIO2MAN
 		log_dma(LOG_TRS_DMA_IN, &td->in_dma);
+	#endif
 	}
 
 	if (td->out_dma.addr) {
 		dmac_request(IOP_DMAC_SIO2out, td->out_dma.addr, td->out_dma.size,
 				td->out_dma.count, DMAC_TO_MEM);
 		dmac_transfer(IOP_DMAC_SIO2out);
+	
+	#ifndef XSIO2MAN
 		log_dma(LOG_TRS_DMA_OUT, &td->out_dma);
+	#endif
 	}
 }
 
 void recv_td(sio2_transfer_data_t *td)
 {
 	int i;
-
+#ifndef XSIO2MAN
 	log_default(LOG_TRR);
-
+#endif
 	td->stat6c = sio2_stat6c_get();
 	td->stat70 = sio2_stat70_get();
 	td->stat74 = sio2_stat74_get();
+#ifndef XSIO2MAN
 	log_stat(td->stat6c, td->stat70, td->stat74);
-
+#endif
 	if (td->out_size) {
 		for (i = 0; i < td->out_size; i++)
 			td->out[i] = sio2_data_in();
+#ifndef XSIO2MAN
 		log_data(LOG_TRR_DATA, td->out, td->out_size);
+#endif
 	}
 }
 
@@ -137,7 +163,9 @@ void main_thread(void *unused)
 	u32 resbits[4];
 
 	while (1) {
+	#ifndef XSIO2MAN
 		log_flush(0);
+	#endif
 		WaitEventFlag(event_flag, EF_PAD_TRANSFER_INIT |
 				EF_MC_TRANSFER_INIT | EF_MTAP_TRANSFER_INIT,
 				1, resbits);
@@ -145,15 +173,21 @@ void main_thread(void *unused)
 		if (resbits[0] & EF_PAD_TRANSFER_INIT) {
 			ClearEventFlag(event_flag, ~EF_PAD_TRANSFER_INIT);
 			SetEventFlag(event_flag, EF_PAD_TRANSFER_READY);
+#ifndef XSIO2MAN
 			log_default(LOG_PAD_READY);
+#endif
 		} else if (resbits[0] & EF_MC_TRANSFER_INIT) {
 			ClearEventFlag(event_flag, ~EF_MC_TRANSFER_INIT);
 			SetEventFlag(event_flag, EF_MC_TRANSFER_READY);
+#ifndef XSIO2MAN
 			log_default(LOG_MC_READY);
+#endif
 		} else if (resbits[0] & EF_MTAP_TRANSFER_INIT) {
 			ClearEventFlag(event_flag, ~EF_MTAP_TRANSFER_INIT);
 			SetEventFlag(event_flag, EF_MTAP_TRANSFER_READY);
+#ifndef XSIO2MAN
 			log_default(LOG_MTAP_READY);
+#endif
 		} else {
 			EPRINTF("Unknown event %08lx. Exiting.\n", resbits[0]);
 			return;
@@ -164,7 +198,9 @@ transfer_loop:
 
 		if (resbits[0] & EF_TRANSFER_RESET) {
 			ClearEventFlag(event_flag, ~EF_TRANSFER_RESET);
+#ifndef XSIO2MAN
 			log_default(LOG_RESET);
+#endif
 			continue;
 		}
 
@@ -217,9 +253,9 @@ int create_event_flag(void)
 void shutdown(void)
 {
 	int state;
-
+#ifndef XSIO2MAN
 	log_flush(1);
-
+#endif
 	CpuSuspendIntr(&state);
 	DisableIntr(IOP_IRQ_SIO2, 0);
 	ReleaseIntrHandler(IOP_IRQ_SIO2);
@@ -260,8 +296,9 @@ int _start(int argc, const char **argv)
 	dmac_enable(IOP_DMAC_SIO2out);
 
 	StartThread(thid, NULL);
-
+#ifndef XSIO2MAN
 	EPRINTF("Logging started.\n");
+#endif
 	return 0;
 }
 
@@ -387,29 +424,29 @@ DECLARE_EXPORT_TABLE(sio2man, 1, 2)
 
 	/* Register manipulation 04 - 22 */
 	DECLARE_EXPORT(sio2_ctrl_set)
-	DECLARE_EXPORT(sio2_ctrl_get)
+	DECLARE_EXPORT(sio2_ctrl_get) // 5
 	DECLARE_EXPORT(sio2_stat6c_get)
 	DECLARE_EXPORT(sio2_portN_ctrl1_set)
 	DECLARE_EXPORT(sio2_portN_ctrl1_get)
 	DECLARE_EXPORT(sio2_portN_ctrl2_set)
-	DECLARE_EXPORT(sio2_portN_ctrl2_get)
+	DECLARE_EXPORT(sio2_portN_ctrl2_get) // 10
 	DECLARE_EXPORT(sio2_stat70_get)
 	DECLARE_EXPORT(sio2_regN_set)
 	DECLARE_EXPORT(sio2_regN_get)
 	DECLARE_EXPORT(sio2_stat74_get)
-	DECLARE_EXPORT(sio2_unkn78_set)
+	DECLARE_EXPORT(sio2_unkn78_set) // 15
 	DECLARE_EXPORT(sio2_unkn78_get)
 	DECLARE_EXPORT(sio2_unkn7c_set)
 	DECLARE_EXPORT(sio2_unkn7c_get)
 	DECLARE_EXPORT(sio2_data_out)
-	DECLARE_EXPORT(sio2_data_in)
+	DECLARE_EXPORT(sio2_data_in) // 20
 	DECLARE_EXPORT(sio2_stat_set)
 	DECLARE_EXPORT(sio2_stat_get)
 
 	/* Transfer events 23 - 26 */
 	DECLARE_EXPORT(sio2_pad_transfer_init)
 	DECLARE_EXPORT(sio2_mc_transfer_init)
-	DECLARE_EXPORT(sio2_transfer)
+	DECLARE_EXPORT(sio2_transfer) // 25
 	DECLARE_EXPORT(sio2_transfer_reset)
 
 	/* Repeat of register routines 27 - 45 */
@@ -438,14 +475,14 @@ DECLARE_EXPORT_TABLE(sio2man, 1, 2)
 	DECLARE_EXPORT(sio2_mc_transfer_init)
 	DECLARE_EXPORT(sio2_mtap_transfer_init)
 	DECLARE_EXPORT(sio2_transfer)
-	DECLARE_EXPORT(sio2_transfer_reset)
+	DECLARE_EXPORT(sio2_transfer_reset) // 50
 
 	/* Callbacks 51 - 58 */
 	DECLARE_EXPORT(sio2_cb1_set)
 	DECLARE_EXPORT(sio2_cb2_set)
 	DECLARE_EXPORT(sio2_cb3_set)
 	DECLARE_EXPORT(sio2_cb4_set)
-	DECLARE_EXPORT(sio2_func1)
+	DECLARE_EXPORT(sio2_func1) // 55
 	DECLARE_EXPORT(sio2_func2)
 	DECLARE_EXPORT(sio2_func3)
 	DECLARE_EXPORT(sio2_func4)

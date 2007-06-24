@@ -13,30 +13,30 @@
 #ifndef SIO2MAN_H
 #define SIO2MAN_H
 
-struct _sio2_dma_arg {
+struct _sio2_dma_arg { // size 12
 	void	*addr;
 	int	size;
-	int	count;
+	int	count; 
 };
 
 typedef struct {
 	u32	stat6c;
 
 	u32	port_ctrl1[4];
-	u32	port_ctrl2[4];
+	u32	port_ctrl2[4]; 
 
 	u32	stat70;
 
-	u32	regdata[16];
+	u32	regdata[16]; 
 
-	u32	stat74;
+	u32	stat74; 
 
-	u32	in_size;
-	u32	out_size;
+	u32	in_size; 
+	u32	out_size; 
 	u8	*in;
-	u8	*out;
+	u8	*out; 
 
-	struct _sio2_dma_arg in_dma;
+	struct _sio2_dma_arg in_dma; 
 	struct _sio2_dma_arg out_dma;
 } sio2_transfer_data_t;
 
