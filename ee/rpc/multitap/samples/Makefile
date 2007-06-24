@@ -6,25 +6,11 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
+# $Id: Makefile 1021 2005-04-22 04:56:26Z loser $
 
 
-EE_OBJS_DIR = obj/
-EE_LIB_DIR = lib/
-EE_SRC_DIR = src/
-EE_INC_DIR = include/
-
-EE_OBJS = libmtap.o erl-support.o
-EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
-
-EE_LIB = $(EE_LIB_DIR)libmtap.a
-
-all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
-
-clean:
-	rm -f -r $(EE_OBJS_DIR) $(EE_LIB_DIR)
-
+SAMPLE_DIR = rpc/mtap
 
 include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/ee/Rules.make
-include $(PS2SDKSRC)/ee/Rules.release
+include $(PS2SDKSRC)/samples/Rules.samples
+
