@@ -21,7 +21,8 @@
 /* baseado nas libs do Duke... */
 
 static int X = 0, Y = 0;
-static int MX=80, MY=25;
+static int MX=80, MY=40;
+static u32 bgcolor = 0;
 
 
 struct t_setupscr
@@ -176,6 +177,11 @@ static inline void progdma( void *addr, int size)
                 : "r" (addr), "r" (size) );
 }                      
 
+void scr_setbgcolor(u32 color)
+{
+	bgcolor = color;
+}
+
 void init_scr()
 {
    X = Y = 0;
@@ -205,7 +211,7 @@ _putchar( int x, int y, u32 color, u8 ch)
           if ((*font & (128 >> j)))
               pixel = color;
           else
-              pixel = 0;
+              pixel = bgcolor;
           charmap[ l + j] = pixel; 
           }
    setupchar.x = x;
@@ -225,7 +231,7 @@ static void  clear_line( int Y)
 {
    int i;
    for (i=0; i < MX; i++)
-    _putchar( i*7 , Y * 8, 0, 219);
+    _putchar( i*8 , Y * 8, bgcolor, ' ');
 
 
 }
