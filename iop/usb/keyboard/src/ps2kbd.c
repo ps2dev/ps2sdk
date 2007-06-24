@@ -976,14 +976,13 @@ int fio_init(iop_device_t *driver)
   return 0;
 }
 
-int fio_format(iop_file_t *f, ...)
-
+int fio_format(iop_file_t *f)
 {
   //printf("fio_format()\n");
   return 0;
 }
 
-int fio_open(iop_file_t *f, const char *name, int mode, ...)
+int fio_open(iop_file_t *f, const char *name, int mode)
 {
   printf("fio_open() %s %d\n", name, mode);
   if(strcmp(name, PS2KBD_KBDFILE)) /* If not the keyboard file */

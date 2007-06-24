@@ -177,6 +177,67 @@ int ioman_format(const char *dev)
 {
     return(format(dev, NULL, NULL, 0));
 }
+
+iop_file_t *get_file(int fd);
+
+static int modex2mode(int modex)
+{
+	int mode = 0;
+
+	if (FIO_S_ISLNK(modex))
+		mode |= FIO_SO_IFLNK;
+	if (FIO_S_ISREG(modex))
+		mode |= FIO_SO_IFREG;
+	if (FIO_S_ISDIR(modex))
+		mode |= FIO_SO_IFDIR;
+
+	/* Convert the file access modes.  */
+	if (modex & (FIO_S_IRUSR | FIO_S_IRGRP | FIO_S_IROTH))
+		mode |= FIO_SO_IROTH;
+	if (modex & (FIO_S_IWUSR | FIO_S_IWGRP | FIO_S_IWOTH))
+		mode |= FIO_SO_IWOTH;
+	if (modex & (FIO_S_IXUSR | FIO_S_IXGRP | FIO_S_IXOTH))
+		mode |= FIO_SO_IXOTH;
+
+	return mode;
+}
+
+int ioman_dread(int fd, io_dirent_t *io_dirent)
+{
+    iop_file_t *f = get_file(fd);
+    int res;
+
+    if (f == NULL ||  !(f->mode & 8))
+            return -EBADF;
+
+    /* If this is a new device (such as pfs:) then we need to convert the mode
+       variable of the stat structure to ioman's format.  */
+    if ((f->device->type & 0xf0000000) == IOP_DT_FSEXT)
+    {
+        iox_dirent_t iox_dirent;
+        res = f->device->ops->dread(f, &iox_dirent);
+
+        io_dirent->stat.mode = modex2mode(iox_dirent.stat.mode);
+
+        io_dirent->stat.attr = iox_dirent.stat.attr;
+        io_dirent->stat.size = iox_dirent.stat.size;
+        memcpy(io_dirent->stat.ctime, iox_dirent.stat.ctime, sizeof(iox_dirent.stat.ctime));
+        memcpy(io_dirent->stat.atime, iox_dirent.stat.atime, sizeof(iox_dirent.stat.atime));
+        memcpy(io_dirent->stat.mtime, iox_dirent.stat.mtime, sizeof(iox_dirent.stat.mtime));
+        io_dirent->stat.hisize = iox_dirent.stat.hisize;
+
+        strncpy(io_dirent->name, iox_dirent.name, sizeof(iox_dirent.name));
+    }
+    else
+    {
+        typedef int	io_dread_t(iop_file_t *, io_dirent_t *);
+        io_dread_t *io_dread = (io_dread_t*) f->device->ops->dread;
+        res = io_dread(f, io_dirent);
+    }
+
+    return res;
+}
+
 #endif
 
 int hook_ioman(void)
@@ -230,7 +291,7 @@ int hook_ioman(void)
 		ioman_exports[12] = (u32) rmdir;
 		ioman_exports[13] = (u32) dopen;
 		ioman_exports[14] = (u32) close;
-		ioman_exports[15] = (u32) dread;
+		ioman_exports[15] = (u32) ioman_dread;
 		ioman_exports[16] = (u32) getstat;
 		ioman_exports[17] = (u32) chstat;
 		ioman_exports[18] = (u32) ioman_format;

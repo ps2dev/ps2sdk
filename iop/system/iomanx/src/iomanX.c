@@ -12,8 +12,6 @@
 # Advanced I/O library.
 */
 
-#include <stdarg.h>
-
 #include "types.h"
 #include "defs.h"
 #include "loadcore.h"
@@ -200,16 +198,11 @@ iop_file_t *get_new_file(void)
 	return fd;
 }
 
-int open(const char *name, int flags, ...)
+int open(const char *name, int flags, int mode)
 {
-	va_list args;
 	iop_file_t *f = get_new_file();
 	char *filename;
-	int mode, res = -ENOSYS;
-
-	va_start(args, flags);
-	mode = va_arg(args, int);
-	va_end(args);
+	int res = -ENOSYS;
 
 	if (!f)
 	{
@@ -345,15 +338,8 @@ static int path_common(const char *name, int arg, int code)
 	return -EINVAL;
 }
 
-int mkdir(const char *name, ...)
+int mkdir(const char *name, int mode)
 {
-	va_list args;
-	int mode;
-
-	va_start(args, name);
-	mode = va_arg(args, int);
-	va_end(args);
-
 	return path_common(name, mode, 4);
 }
 
@@ -411,9 +397,8 @@ static int mode2modex(int mode)
 	return modex;
 }
 
-int dread(int fd, void *buf)
+int dread(int fd, iox_dirent_t *iox_dirent)
 {
-    iox_dirent_t *iox_dirent = (iox_dirent_t *) buf;
     iop_file_t *f = get_file(fd);
     int res;
 
@@ -424,8 +409,10 @@ int dread(int fd, void *buf)
        variable of the stat structure to iomanX's extended format.  */
     if ((f->device->type & 0xf0000000) != IOP_DT_FSEXT)
     {
+        typedef int	io_dread_t(iop_file_t *, io_dirent_t *);
         io_dirent_t io_dirent;
-        res = f->device->ops->dread(f, &io_dirent);
+        io_dread_t *io_dread = (io_dread_t*) f->device->ops->dread;
+        res = io_dread(f, &io_dirent);
 
         iox_dirent->stat.mode = mode2modex(io_dirent.stat.mode);
 
@@ -468,14 +455,14 @@ static int stat_common(const char *name, void *buf, int mask, int code)
 	return res;
 }
 
-int getstat(const char *name, void *buf)
+int getstat(const char *name, iox_stat_t *stat)
 {
-	return stat_common(name, buf, 0, 2);
+	return stat_common(name, stat, 0, 2);
 }
 
-int chstat(const char *name, void *buf, unsigned int mask)
+int chstat(const char *name, iox_stat_t *stat, unsigned int mask)
 {
-	return stat_common(name, buf, mask, 1);
+	return stat_common(name, stat, mask, 1);
 }
 
 int format(const char *dev, const char *blockdev, void *arg, size_t arglen)

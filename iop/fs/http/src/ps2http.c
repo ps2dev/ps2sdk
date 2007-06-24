@@ -152,7 +152,7 @@ int readLine( int socket, char * buffer, int size )
 // and handles the protocol and reads the return headers.  Needs
 // to leave the stream at the start of the real data.
 //
-int httpConnect( struct sockaddr_in * server, char *hostAddr, char * url, t_fioPrivData *pHandle )
+int httpConnect( struct sockaddr_in * server, char *hostAddr, const char * url, t_fioPrivData *pHandle )
 {
 	int sockHandle;
 	int peerHandle;
@@ -182,7 +182,7 @@ int httpConnect( struct sockaddr_in * server, char *hostAddr, char * url, t_fioP
 
 	// Needs more error checking here.....
 	rc = send( peerHandle, HTTPGET,  sizeof( HTTPGET ) - 1, 0 );
-	rc = send( peerHandle, url, strlen( url ), 0 );
+	rc = send( peerHandle, (void*) url, strlen( url ), 0 );
 	rc = send( peerHandle, HTTPGETEND, sizeof( HTTPGETEND ) - 1, 0 );
 
 	rc = send( peerHandle, HTTPHOST,  sizeof( HTTPHOST ) - 1, 0 );
@@ -251,10 +251,10 @@ char *strnchr(char *str, char ch, int max) {
 // requests, and fill the structure pointed to by *server with the
 // correct values.
 //
-char *resolveAddress( struct sockaddr_in *server, char * url, char *hostAddr )
+const char *resolveAddress( struct sockaddr_in *server, const char * url, char *hostAddr )
 {
 	unsigned char w,x,y,z;
-	char *char_ptr;
+	const char *char_ptr;
 	char addr[128];
 	char port[6] = "80"; // default port of 80(HTTP)
 	int i = 0, rv;
@@ -361,11 +361,11 @@ int httpInitialize(iop_io_device_t *driver)
 //  4. Send a GET request to the server
 //  5. Parse the GET response header from the server
 //
-int httpOpen(iop_io_file_t *f, char *name, int mode)
+int httpOpen(iop_io_file_t *f, const char *name, int mode)
 {
 	int peerHandle = 0;
 	struct sockaddr_in server;
-	char *getName;
+	const char *getName;
 	t_fioPrivData *privData;
 	char hostAddr[100];
 

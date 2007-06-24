@@ -168,7 +168,7 @@ int fd_close( iop_io_file_t *f )
  *  \return Status (as for fileio read).
  *
  */
-int fd_read( iop_io_file_t *f, char * buffer, int size )
+int fd_read( iop_io_file_t *f, void * buffer, int size )
 {
 	return read( realfd(f), buffer, size );
 }

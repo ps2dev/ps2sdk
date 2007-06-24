@@ -502,7 +502,7 @@ int	pfsFormat(iop_file_t *t, const char *dev, const char *blockdev, void *args, 
 
 	WaitSema(pfsFioSema);
 
-	fd = open(blockdev, O_RDWR);
+	fd = open(blockdev, O_RDWR, 0644);
 
 	dprintf("ps2fs: Format: fragment = 0x%X\n", fragment);
 
@@ -1159,7 +1159,7 @@ int pfsMount(iop_file_t *f, const char *fsname, const char *devname, int flag, v
 
 	WaitSema(pfsFioSema);
 
-	fd = open(devname, (flag & O_RDONLY) ? O_RDONLY : O_RDWR); // ps2hdd.irx fd
+	fd = open(devname, (flag & O_RDONLY) ? O_RDONLY : O_RDWR, 0644); // ps2hdd.irx fd
 	if(fd < 0)
 		rv = fd;
 	else {

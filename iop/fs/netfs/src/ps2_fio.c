@@ -514,7 +514,7 @@ static int ps2netfs_op_open(char *buf, int len)
     if (devtype == IOPMGR_DEVTYPE_IOMAN)
       retval = io_open(cmd->path,ntohl(cmd->flags));
     else if (devtype == IOPMGR_DEVTYPE_IOMANX)
-      retval = open(cmd->path,ntohl(cmd->flags));
+      retval = open(cmd->path,ntohl(cmd->flags),0644);
     if (retval > 0)
       retval = fdh_getfd(devtype,retval);
   }
@@ -952,7 +952,7 @@ static int ps2netfs_op_mkdir(char *buf, int len)
     if (devtype == IOPMGR_DEVTYPE_IOMAN)
       retval = io_mkdir(cmd->path);
     else if (devtype == IOPMGR_DEVTYPE_IOMANX)
-      retval = mkdir(cmd->path);
+      retval = mkdir(cmd->path,0644);
   }
 
   // now build the response

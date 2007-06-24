@@ -4,6 +4,7 @@ I_AllocSysMemory
 sysmem_IMPORTS_end
 
 sysclib_IMPORTS_start
+I_memset
 I_strncpy
 sysclib_IMPORTS_end
 

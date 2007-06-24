@@ -31,8 +31,8 @@ int _start(int argc, char *argv[])
 	if (AddDrv(&tty_device) < 0)
 		return 1;
 
-	open(DEVNAME "00:", 0x1000|O_RDWR);
-	open(DEVNAME "00:", O_WRONLY);
+	open(DEVNAME "00:", 0x1000|O_RDWR, 0644);
+	open(DEVNAME "00:", O_WRONLY, 0644);
 
 	return 0;
 }

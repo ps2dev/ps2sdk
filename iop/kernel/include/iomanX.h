@@ -18,6 +18,7 @@
 #include "irx.h"
 
 #include "sys/fcntl.h"
+#include "sys/stat.h"
 
 /* Device drivers.  */
 
@@ -52,7 +53,7 @@ typedef struct _iop_device_ops {
 	int	(*init)(iop_device_t *);
 	int	(*deinit)(iop_device_t *);
 	int	(*format)(iop_file_t *, const char *, const char *, void *, size_t);
-	int	(*open)(iop_file_t *, const char *, int, ...);
+	int	(*open)(iop_file_t *, const char *, int, int);
 	int	(*close)(iop_file_t *);
 	int	(*read)(iop_file_t *, void *, int);
 	int	(*write)(iop_file_t *, void *, int);
@@ -63,9 +64,9 @@ typedef struct _iop_device_ops {
 	int	(*rmdir)(iop_file_t *, const char *);
 	int	(*dopen)(iop_file_t *, const char *);
 	int	(*dclose)(iop_file_t *);
-	int	(*dread)(iop_file_t *, void *);
-	int	(*getstat)(iop_file_t *, const char *, void *);
-	int	(*chstat)(iop_file_t *, const char *, void *, unsigned int);
+	int	(*dread)(iop_file_t *, iox_dirent_t *);
+	int	(*getstat)(iop_file_t *, const char *, iox_stat_t *);
+	int	(*chstat)(iop_file_t *, const char *, iox_stat_t *, unsigned int);
 
 #ifndef IOMAN_NO_EXTENDED
 	/* Extended ops start here.  */
@@ -88,8 +89,7 @@ typedef struct _iop_device_ops {
 iop_device_t **GetDeviceList(void);
 #define I_GetDeviceList DECLARE_IMPORT(3, GetDeviceList)
 
-/* open() takes an optional mode argument.  */
-int open(const char *name, int flags, ...);
+int open(const char *name, int flags, int mode);
 #define I_open DECLARE_IMPORT(4, open)
 int close(int fd);
 #define I_close DECLARE_IMPORT(5, close)
@@ -105,8 +105,7 @@ int ioctl(int fd, unsigned long cmd, void *param);
 int remove(const char *name);
 #define I_remove DECLARE_IMPORT(10, remove)
 
-/* mkdir() takes an optional mode argument.  */
-int mkdir(const char *path, ...);
+int mkdir(const char *path, int mode);
 #define I_mkdir DECLARE_IMPORT(11, mkdir)
 int rmdir(const char *path);
 #define I_rmdir DECLARE_IMPORT(12, rmdir)
@@ -114,12 +113,12 @@ int dopen(const char *path);
 #define I_dopen DECLARE_IMPORT(13, dopen)
 int dclose(int fd);
 #define I_dclose DECLARE_IMPORT(14, dclose)
-int dread(int fd, void *buf);
+int dread(int fd, iox_dirent_t *buf);
 #define I_dread DECLARE_IMPORT(15, dread)
 
-int getstat(const char *name, void *stat);
+int getstat(const char *name, iox_stat_t *stat);
 #define I_getstat DECLARE_IMPORT(16, getstat)
-int chstat(const char *name, void *stat, unsigned int statmask);
+int chstat(const char *name, iox_stat_t *stat, unsigned int statmask);
 #define I_chstat DECLARE_IMPORT(17, chstat)
 
 /* This can take take more than one form.  */

@@ -46,11 +46,11 @@ int io_dopen(const char *path, int mode);
 #define I_io_dopen DECLARE_IMPORT(13, io_dopen)
 int io_dclose(int fd);
 #define I_io_dclose DECLARE_IMPORT(14, io_dclose)
-int io_dread(int fd, void *buf);
+int io_dread(int fd, io_dirent_t *buf);
 #define I_io_dread DECLARE_IMPORT(15, io_dread)
-int io_getstat(const char *name, iox_stat_t *stat);
+int io_getstat(const char *name, io_stat_t *stat);
 #define I_io_getstat DECLARE_IMPORT(16, io_getstat)
-int io_chstat(const char *name, iox_stat_t *stat, unsigned int statmask);
+int io_chstat(const char *name, io_stat_t *stat, unsigned int statmask);
 #define I_io_chstat DECLARE_IMPORT(17, io_chstat)
 
 /* Device drivers.  */
@@ -82,8 +82,8 @@ typedef struct _iop_io_device {
 typedef struct _iop_io_device_ops {
 	int	(*io_init)(iop_io_device_t *);
 	int	(*io_deinit)(iop_io_device_t *);
-	int	(*io_format)(iop_io_file_t *, ...);
-	int	(*io_open)(iop_io_file_t *, const char *, int, ...);
+	int	(*io_format)(iop_io_file_t *);
+	int	(*io_open)(iop_io_file_t *, const char *, int);
 	int	(*io_close)(iop_io_file_t *);
 	int	(*io_read)(iop_io_file_t *, void *, int);
 	int	(*io_write)(iop_io_file_t *, void *, int);
@@ -94,9 +94,9 @@ typedef struct _iop_io_device_ops {
 	int	(*io_rmdir)(iop_io_file_t *, const char *);
 	int	(*io_dopen)(iop_io_file_t *, const char *);
 	int	(*io_dclose)(iop_io_file_t *);
-	int	(*io_dread)(iop_io_file_t *, void *);
-	int	(*io_getstat)(iop_io_file_t *, const char *, void *);
-	int	(*io_chstat)(iop_io_file_t *, const char *, void *, unsigned int);
+	int	(*io_dread)(iop_io_file_t *, io_dirent_t *);
+	int	(*io_getstat)(iop_io_file_t *, const char *, io_stat_t *);
+	int	(*io_chstat)(iop_io_file_t *, const char *, io_stat_t *, unsigned int);
 } iop_io_device_ops_t;
 
 int io_AddDrv(iop_io_device_t *device);

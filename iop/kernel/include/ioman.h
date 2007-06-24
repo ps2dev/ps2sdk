@@ -16,6 +16,7 @@
 
 #include "types.h"
 #include "irx.h"
+#include <io_common.h>
 
 #include "sys/fcntl.h"
 
@@ -65,8 +66,8 @@ typedef struct _iop_device {
 typedef struct _iop_device_ops {
 	int	(*init)(iop_device_t *);
 	int	(*deinit)(iop_device_t *);
-	int	(*format)(iop_file_t *, ...);
-	int	(*open)(iop_file_t *, const char *, int, ...);
+	int	(*format)(iop_file_t *);
+	int	(*open)(iop_file_t *, const char *, int);
 	int	(*close)(iop_file_t *);
 	int	(*read)(iop_file_t *, void *, int);
 	int	(*write)(iop_file_t *, void *, int);
@@ -77,9 +78,9 @@ typedef struct _iop_device_ops {
 	int	(*rmdir)(iop_file_t *, const char *);
 	int	(*dopen)(iop_file_t *, const char *);
 	int	(*dclose)(iop_file_t *);
-	int	(*dread)(iop_file_t *, void *);
-	int	(*getstat)(iop_file_t *, const char *, void *);
-	int	(*chstat)(iop_file_t *, const char *, void *, unsigned int);
+	int	(*dread)(iop_file_t *, fio_dirent_t *);
+	int	(*getstat)(iop_file_t *, const char *, fio_stat_t *);
+	int	(*chstat)(iop_file_t *, const char *, fio_stat_t *, unsigned int);
 } iop_device_ops_t;
 
 int AddDrv(iop_device_t *device);

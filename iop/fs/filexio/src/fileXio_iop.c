@@ -94,7 +94,7 @@ int _start( int argc, char **argv)
 
 int fileXio_CopyFile_RPC(const char *src, const char *dest, int mode)
 {
-  int stat[2];
+  iox_stat_t stat;
   int infd, outfd, size, remain, i, retval = 0;
 
   if ((infd = open(src, O_RDONLY, 0666)) < 0) {
@@ -119,8 +119,8 @@ int fileXio_CopyFile_RPC(const char *src, const char *dest, int mode)
   close(infd);
   close(outfd);
 
-  stat[0] = mode;
-  chstat(dest, stat, 1);
+  stat.mode = mode;
+  chstat(dest, &stat, 1);
 
   return size;
 }
@@ -271,7 +271,6 @@ int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEntry[], 
 	int matched_entries;
       int fd, res;
   	iox_dirent_t dirbuf;
-      char *buf = (char *)&dirbuf;
 	struct fileXioDirEntry localDirEntry;
 	int intStatus;	// interrupt status - for dis/en-abling interrupts
 	struct t_SifDmaTransfer dmaStruct;
@@ -296,8 +295,8 @@ int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEntry[], 
         res = 1;
         while (res > 0)
         {
-          for (res=0;res<100;res++)buf[res] = 0;
-          res = dread(fd, buf);
+          memset(&dirbuf, 0, sizeof(dirbuf));
+          res = dread(fd, &dirbuf);
           if (res > 0)
           {
 		// check for too many entries

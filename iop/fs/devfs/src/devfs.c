@@ -358,8 +358,11 @@ int devfs_deinit(iop_device_t *dev)
     @param mode: Open file mode settings
     @returns 0 if success, -1 on error
 */
-int devfs_open(iop_file_t *file, const char *name, int mode, ...)
-
+#ifdef USE_IOMAN
+int devfs_open(iop_file_t *file, const char *name, int mode)
+#else
+int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
+#endif
 {
    devfs_device_t *dev;
    int loop;
@@ -886,7 +889,11 @@ int devfs_dclose(iop_file_t *file)
    return 0;
 }
 
-int devfs_dread(iop_file_t *file, void *buf)
+#ifdef USE_IOMAN
+int devfs_dread(iop_file_t *file, fio_dirent_t *buf)
+#else
+int devfs_dread(iop_file_t *file, iox_dirent_t *buf)
+#endif
 {
    directory_file_t *dir;
    int ret = 0;
@@ -895,7 +902,7 @@ int devfs_dread(iop_file_t *file, void *buf)
    dir = (directory_file_t *) file->privdata;
    if((dir) && (dir->hDev == INVALID_HDEV) && (buf))
    {
-      ret = devfs_fill_dirent((iox_dirent_t *) buf, dir->devno);
+      ret = devfs_fill_dirent(buf, dir->devno);
       if(ret)
       { 
          dir->devno++;
@@ -908,14 +915,16 @@ int devfs_dread(iop_file_t *file, void *buf)
 /** ioman getstat handler
     @param file: Pointer to an ioman file structure
     @param name: Name of the file to stat
-    @param buf: Buffer to receive the dirent
+    @param stat: Buffer to receive the stat
     @returns 0 on success, -1 on error
 */
-int devfs_getstat(iop_file_t *file, const char *name, void *buf)
-
+#ifdef USE_IOMAN
+int devfs_getstat(iop_file_t *file, const char *name, fio_stat_t *stat)
+#else
+int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
+#endif
 {
    devfs_device_t *dev;
-   iox_dirent_t *dirent = (iox_dirent_t *) buf;
    int fn_offset = 0;
 
    if(name == NULL)
@@ -928,7 +937,7 @@ int devfs_getstat(iop_file_t *file, const char *name, void *buf)
       fn_offset = 1;
    }    
   
-   if(buf == NULL)
+   if(stat == NULL)
    {
       return -1;
    }
@@ -971,21 +980,22 @@ int devfs_getstat(iop_file_t *file, const char *name, void *buf)
         return -1;
       } 
 
-      memset(dirent, 0, sizeof(iox_dirent_t));
-      dirent->stat.size = dev->subdevs[subdev].extent.loc32[0];
-      dirent->stat.hisize = dev->subdevs[subdev].extent.loc32[1];
-      dirent->stat.mode = FIO_S_IFREG;
+#ifdef USE_IOMAN
+      memset(stat, 0, sizeof(fio_stat_t));
+#else
+      memset(stat, 0, sizeof(iox_stat_t));
+#endif
+      stat->size = dev->subdevs[subdev].extent.loc32[0];
+      stat->hisize = dev->subdevs[subdev].extent.loc32[1];
+      stat->mode = FIO_S_IFREG;
       if(dev->subdevs[subdev].mode & DEVFS_MODE_R)
       {
-         dirent->stat.mode |= FIO_S_IRUSR;
+         stat->mode |= FIO_S_IRUSR;
       }
       if(dev->subdevs[subdev].mode & DEVFS_MODE_W)
       {
-         dirent->stat.mode |= FIO_S_IWUSR;
+         stat->mode |= FIO_S_IWUSR;
       }
-      dirent->name[0] = 0;
-      strcpy(dirent->name, dev->node.name);
-      strcat(dirent->name, devfs_subdev_to_str(subdev));
    }
       
    return 0;
