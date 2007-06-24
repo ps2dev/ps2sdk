@@ -35,7 +35,10 @@ enum _iop_thinfo {
 	IOP_THINFO_MAX = 17
 };
 
-typedef struct {
+typedef struct 
+{
+	
+
 	u32	info[IOP_THINFO_MAX];
 } iop_thread_info_t;
 
