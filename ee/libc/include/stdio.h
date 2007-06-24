@@ -35,6 +35,8 @@ static __inline__ ssize_t read(int handle, void * buffer, size_t size) { return 
 static __inline__ ssize_t write(int handle, const void * buffer, size_t size) { return fioWrite(handle, buffer, size); }
 static __inline__ off_t lseek(int handle, off_t position, int wheel) { return fioLseek(handle, position, wheel); }
 static __inline__ off_t tell(int handle) { return fioLseek(handle, 0, 1); }
+static __inline__ int mkdir(const char *path) { return fioMkdir(path); }
+static __inline__ int rmdir(const char *path) { return fioRmdir(path); }
 
 /* Some win32 equivalents... baaah */
 #define _open open
@@ -150,7 +152,6 @@ void   perror(const char *);
 int    putc(int, FILE *);
 int    puts(const char *);
 int    remove(const char *);
-int    rename(const char *, const char *);
 void   rewind(FILE *);
 int    scanf(const char *, ...);
 int    setbuf(FILE *, char *);
@@ -169,8 +170,6 @@ int    _fcloseall(void);
 int    _fflushall(void);
 
 int    chdir(const char *path);
-int    mkdir(const char *path, int mode);
-int    rmdir(const char *path);
 
 /* from xprintf */
 int vxprintf(void (*func)(char*, int, void *), void * arg, const char * format, va_list ap);

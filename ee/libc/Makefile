@@ -53,9 +53,9 @@ XSCANF_OBJS := $(XSCANF_OBJS:%=$(EE_OBJS_DIR)%)
 
 STDIO_OBJS = clearerr.o fclose.o fcloseall.o feof.o ferror.o fflush.o fflushall.o fgetc.o \
 	fgetpos.o fgets.o fopen.o fputc.o fputs.o fread.o fseek.o fsetpos.o ftell.o fwrite.o fileno.o \
-	getc.o getchar.o getfdtype.o gets.o perror.o putc.o puts.o remove.o rename.o fdopen.o \
+	getc.o getchar.o getfdtype.o gets.o perror.o putc.o puts.o remove.o fdopen.o \
 	rewind.o skipatoi.o stdio.o tmpfile.o tmpnam.o ungetc.o updatestdoutxy.o strerror.o \
-	__stdio_internals.o chdir.o mkdir.o rmdir.o
+	__stdio_internals.o chdir.o
 STDIO_OBJS := $(STDIO_OBJS:%=$(EE_OBJS_DIR)%)
 
 STDLIB_OBJS = abs.o atexit.o atof.o bsearch.o div.o getenv.o _itoa.o labs.o \
