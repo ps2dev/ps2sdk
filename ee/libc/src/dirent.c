@@ -1,4 +1,5 @@
 #include <dirent.h>
+#include <stdio.h>
 
 #ifdef F_opendir
 /** Open a directory
@@ -45,5 +46,3 @@ int closedir(DIR *dir)
 	return 0;
 }
 #endif
-
-	

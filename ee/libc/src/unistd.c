@@ -12,6 +12,7 @@
 */
 #include <unistd.h>
 #include <sys/stat.h>
+#include <string.h>
 
 #ifdef F_getcwd
 extern char __direct_pwd[256];
