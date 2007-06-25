@@ -92,6 +92,40 @@ int _start( int argc, char **argv)
 	return 0;
 }
 
+int fileXio_GetDeviceList_RPC(struct fileXioDevice* ee_devices, int eecount)
+{
+    int device_count = 0;
+    iop_device_t **devices = GetDeviceList();
+    struct fileXioDevice local_devices[FILEXIO_MAX_DEVICES];
+    while (devices[device_count] && device_count < eecount)
+    {
+        iop_device_t *device = devices[device_count];
+        strncpy(local_devices[device_count].name, device->name, 128);
+        local_devices[device_count].name[127] = '\0';
+        local_devices[device_count].type = device->type;
+        local_devices[device_count].version = device->version;
+        strncpy(local_devices[device_count].desc, device->desc, 128);
+        local_devices[device_count].desc[127] = '\0';
+        ++device_count;
+    }
+    if (device_count)
+    {
+        struct t_SifDmaTransfer dmaStruct;
+        int intStatus;	// interrupt status - for dis/en-abling interrupts
+        
+        dmaStruct.src = local_devices;
+        dmaStruct.dest = ee_devices;
+        dmaStruct.size = sizeof(struct fileXioDevice) * device_count;
+        dmaStruct.attr = 0;
+        
+        // Do the DMA transfer
+        CpuSuspendIntr(&intStatus);
+        SifSetDma(&dmaStruct, 1);
+        CpuResumeIntr(intStatus);
+    }
+    return device_count;
+}
+
 int fileXio_CopyFile_RPC(const char *src, const char *dest, int mode)
 {
   iox_stat_t stat;
@@ -411,6 +445,21 @@ void* fileXioRpc_Stop()
 		printf("RPC Stop Request\n");
 	#endif
 	return NULL;
+}
+
+// Send:   Offset 0 = pointer to array of fileXioDevice structures in EE mem
+// Send:   Offset 4 = requested number of entries
+// Return: Offset 0 = ret val (number of entries). Size = int
+void* fileXioRpc_GetDeviceList(unsigned int* sbuff)
+{
+	int ret;
+
+	ret=fileXio_GetDeviceList_RPC(
+		(struct fileXioDevice*) sbuff[0/4],
+		sbuff[4/4]
+		);
+	sbuff[0] = ret;
+	return sbuff;
 }
 
 // Send:   Offset 0 = filename string (512 bytes)
@@ -982,6 +1031,8 @@ void* fileXio_rpc_server(int fno, void *data, int size)
 			return fileXioRpc_Ioctl2((unsigned*)data);
 		case FILEXIO_LSEEK64:
 			return fileXioRpc_Lseek64((unsigned*)data);
+		case FILEXIO_GETDEVICELIST:
+			return fileXioRpc_GetDeviceList((unsigned*)data);
 	}
 	return NULL;
 }

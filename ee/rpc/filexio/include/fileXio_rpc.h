@@ -33,6 +33,7 @@ void fileXioSetBlockMode(int blocking);
 int fileXioWaitAsync(int mode, int *retVal);
 
 void fileXioStop();
+int fileXioGetDeviceList(struct fileXioDevice deviceEntry[], unsigned int req_entries);
 int fileXioGetdir(const char* pathname, struct fileXioDirEntry DirEntry[], unsigned int req_entries);
 int fileXioMount(const char* mountpoint, const char* blockdev, int flag);
 int fileXioUmount(const char* mountpoint);

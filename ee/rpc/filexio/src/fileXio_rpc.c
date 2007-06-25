@@ -106,6 +106,28 @@ void fileXioStop()
 	return;
 }
 
+int fileXioGetDeviceList(struct fileXioDevice deviceEntry[], unsigned int req_entries)
+{
+	volatile int rv;
+
+	if(fileXioInit() < 0)
+		return -ENOPKG;
+
+    _lock();
+	WaitSema(fileXioCompletionSema);
+
+	sbuff[0/4] = (int)deviceEntry;
+	sbuff[4/4] = req_entries;
+
+	// This will get the directory contents, and fill dirEntry via DMA
+	SifCallRpc(&cd0, FILEXIO_GETDEVICELIST, fileXioBlockMode, sbuff, 4+4, sbuff, 4, (void *)_fxio_intr, 0);
+	
+	if(fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
+	else { rv = sbuff[0]; }
+	_unlock();
+	return(rv);
+}
+
 int fileXioGetdir(const char* pathname, struct fileXioDirEntry dirEntry[], unsigned int req_entries)
 {
 	volatile int rv;

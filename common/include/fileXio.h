@@ -50,6 +50,7 @@
 #define FILEXIO_LSEEK64	0x1c
 #define FILEXIO_MKDIR	0x1d
 #define FILEXIO_REMOVE	0x1e
+#define FILEXIO_GETDEVICELIST	0x1f
 
 #define FILEXIO_MOUNTFLAG_NORMAL	0
 #define FILEXIO_MOUNTFLAG_READONLY	1
@@ -60,11 +61,28 @@
 
 #define CTL_BUF_SIZE	2048
 
+#define FILEXIO_MAX_DEVICES 32
+
+#define FILEXIO_DT_CHAR	0x01
+#define FILEXIO_DT_CONS	0x02
+#define FILEXIO_DT_BLOCK	0x04
+#define FILEXIO_DT_RAW	0x08
+#define FILEXIO_DT_FS	0x10
+#define FILEXIO_DT_FSEXT	0x10000000	/* Supports calls after chstat().  */
+
 struct fileXioDirEntry
 {
 	u32   fileSize;
 	u8	fileProperties;
 	u8	filename[128+1];
+} __attribute__((aligned(64)));
+
+struct fileXioDevice
+{
+	char name[15];
+	unsigned int type;
+	unsigned int version;	/* Not so sure about this one.  */
+	char desc[128];
 } __attribute__((aligned(64)));
 
 struct devctl_packet {
