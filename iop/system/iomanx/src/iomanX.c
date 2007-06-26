@@ -375,7 +375,7 @@ int dopen(const char *name)
 	return res;
 }
 
-static int mode2modex(int mode)
+int mode2modex(int mode)
 {
 	int modex = 0;
 
@@ -395,6 +395,28 @@ static int mode2modex(int mode)
 		modex |= FIO_S_IXUSR | FIO_S_IXGRP | FIO_S_IXOTH;
 
 	return modex;
+}
+
+int modex2mode(int modex)
+{
+	int mode = 0;
+
+	if (FIO_S_ISLNK(modex))
+		mode |= FIO_SO_IFLNK;
+	if (FIO_S_ISREG(modex))
+		mode |= FIO_SO_IFREG;
+	if (FIO_S_ISDIR(modex))
+		mode |= FIO_SO_IFDIR;
+
+	/* Convert the file access modes.  */
+	if (modex & (FIO_S_IRUSR | FIO_S_IRGRP | FIO_S_IROTH))
+		mode |= FIO_SO_IROTH;
+	if (modex & (FIO_S_IWUSR | FIO_S_IWGRP | FIO_S_IWOTH))
+		mode |= FIO_SO_IWOTH;
+	if (modex & (FIO_S_IXUSR | FIO_S_IXGRP | FIO_S_IXOTH))
+		mode |= FIO_SO_IXOTH;
+
+	return mode;
 }
 
 int dread(int fd, iox_dirent_t *iox_dirent)
@@ -431,38 +453,42 @@ int dread(int fd, iox_dirent_t *iox_dirent)
     return res;
 }
 
-static int stat_common(const char *name, void *buf, int mask, int code)
+int getstat(const char *name, iox_stat_t *stat)
 {
 	iop_file_t file;
-	io_stat_t *stat = (io_stat_t *)buf;
 	char *filename;
 	int res;
 
 	if ((filename = find_iop_device(name, &file.unit, &file.device)) == (char *)-1)
 		return -ENODEV;
 
-	if (code == 1)	{ /* chstat() */
-		return file.device->ops->chstat(&file, filename, buf, mask);
-	}
+	res = file.device->ops->getstat(&file, filename, stat);
 
-	res = file.device->ops->getstat(&file, filename, buf);
-
-	/* If this is a legacy device (such as mc:) then we need to convert the mode
-	   variable to iomanX's extended format.  */
-	if ((file.device->type & 0xf0000000) != IOP_DT_FSEXT)
-		stat->mode = mode2modex(stat->mode);
+    if (res == 0)
+    {
+    	/* If this is a legacy device (such as mc:) then we need to convert the mode
+    	   variable to iomanX's extended format.  */
+    	if ((file.device->type & 0xf0000000) != IOP_DT_FSEXT)
+    		stat->mode = mode2modex(stat->mode);
+    }
 
 	return res;
 }
 
-int getstat(const char *name, iox_stat_t *stat)
-{
-	return stat_common(name, stat, 0, 2);
-}
-
 int chstat(const char *name, iox_stat_t *stat, unsigned int mask)
 {
-	return stat_common(name, stat, mask, 1);
+	iop_file_t file;
+	char *filename;
+
+	if ((filename = find_iop_device(name, &file.unit, &file.device)) == (char *)-1)
+		return -ENODEV;
+
+	/* If this is a legacy device (such as mc:) then we need to convert the mode
+	   variable to iomanX's extended format.  */
+	if ((file.device->type & 0xf0000000) != IOP_DT_FSEXT)
+		stat->mode = modex2mode(stat->mode);
+        
+    return file.device->ops->chstat(&file, filename, stat, mask);
 }
 
 int format(const char *dev, const char *blockdev, void *arg, size_t arglen)

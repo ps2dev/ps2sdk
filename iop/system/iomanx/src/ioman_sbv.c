@@ -180,26 +180,29 @@ int ioman_format(const char *dev)
 
 iop_file_t *get_file(int fd);
 
-static int modex2mode(int modex)
+int mode2modex(int mode);
+int modex2mode(int mode);
+
+static void statx2stat(iox_stat_t *iox_stat, io_stat_t* stat)
 {
-	int mode = 0;
+    stat->mode = modex2mode(iox_stat->mode);
+    stat->attr = iox_stat->attr;
+    stat->size = iox_stat->size;
+    memcpy(stat->ctime, iox_stat->ctime, sizeof(iox_stat->ctime));
+    memcpy(stat->atime, iox_stat->atime, sizeof(iox_stat->atime));
+    memcpy(stat->mtime, iox_stat->mtime, sizeof(iox_stat->mtime));
+    stat->hisize = iox_stat->hisize;
+}
 
-	if (FIO_S_ISLNK(modex))
-		mode |= FIO_SO_IFLNK;
-	if (FIO_S_ISREG(modex))
-		mode |= FIO_SO_IFREG;
-	if (FIO_S_ISDIR(modex))
-		mode |= FIO_SO_IFDIR;
-
-	/* Convert the file access modes.  */
-	if (modex & (FIO_S_IRUSR | FIO_S_IRGRP | FIO_S_IROTH))
-		mode |= FIO_SO_IROTH;
-	if (modex & (FIO_S_IWUSR | FIO_S_IWGRP | FIO_S_IWOTH))
-		mode |= FIO_SO_IWOTH;
-	if (modex & (FIO_S_IXUSR | FIO_S_IXGRP | FIO_S_IXOTH))
-		mode |= FIO_SO_IXOTH;
-
-	return mode;
+static void stat2statx(io_stat_t* stat, iox_stat_t *iox_stat)
+{
+    iox_stat->mode = mode2modex(stat->mode);
+    iox_stat->attr = stat->attr;
+    iox_stat->size = stat->size;
+    memcpy(iox_stat->ctime, stat->ctime, sizeof(stat->ctime));
+    memcpy(iox_stat->atime, stat->atime, sizeof(stat->atime));
+    memcpy(iox_stat->mtime, stat->mtime, sizeof(stat->mtime));
+    iox_stat->hisize = stat->hisize;
 }
 
 int ioman_dread(int fd, io_dirent_t *io_dirent)
@@ -217,14 +220,7 @@ int ioman_dread(int fd, io_dirent_t *io_dirent)
         iox_dirent_t iox_dirent;
         res = f->device->ops->dread(f, &iox_dirent);
 
-        io_dirent->stat.mode = modex2mode(iox_dirent.stat.mode);
-
-        io_dirent->stat.attr = iox_dirent.stat.attr;
-        io_dirent->stat.size = iox_dirent.stat.size;
-        memcpy(io_dirent->stat.ctime, iox_dirent.stat.ctime, sizeof(iox_dirent.stat.ctime));
-        memcpy(io_dirent->stat.atime, iox_dirent.stat.atime, sizeof(iox_dirent.stat.atime));
-        memcpy(io_dirent->stat.mtime, iox_dirent.stat.mtime, sizeof(iox_dirent.stat.mtime));
-        io_dirent->stat.hisize = iox_dirent.stat.hisize;
+        statx2stat(&iox_dirent.stat, &io_dirent->stat);
 
         strncpy(io_dirent->name, iox_dirent.name, sizeof(iox_dirent.name));
     }
@@ -236,6 +232,22 @@ int ioman_dread(int fd, io_dirent_t *io_dirent)
     }
 
     return res;
+}
+
+int ioman_getstat(const char *name, io_stat_t *stat)
+{
+    iox_stat_t iox_stat;
+    int res = getstat(name, &iox_stat);
+    if (res == 0)
+        statx2stat(&iox_stat, stat);
+    return res;
+}
+
+int ioman_chstat(const char *name, io_stat_t *stat, unsigned int mask)
+{
+    iox_stat_t iox_stat;
+    stat2statx(stat, &iox_stat);
+    return chstat(name, &iox_stat, mask);
 }
 
 #endif
@@ -292,8 +304,8 @@ int hook_ioman(void)
 		ioman_exports[13] = (u32) dopen;
 		ioman_exports[14] = (u32) close;
 		ioman_exports[15] = (u32) ioman_dread;
-		ioman_exports[16] = (u32) getstat;
-		ioman_exports[17] = (u32) chstat;
+		ioman_exports[16] = (u32) ioman_getstat;
+		ioman_exports[17] = (u32) ioman_chstat;
 		ioman_exports[18] = (u32) ioman_format;
 		ioman_exports[20] = (u32) AddDrv;
 		ioman_exports[21] = (u32) DelDrv;
