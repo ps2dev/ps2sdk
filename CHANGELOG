@@ -8,6 +8,21 @@
 #
 # $Id$
 
+2007-06-25
+  - lukasz, added freemtap
+
+2007-06-24
+  - lukasz, added freesio2, built from sio2log source
+
+2007-01-30
+  - herben, fixed libpadx
+
+2006-08-11
+  - herben, added lwip 1.1.1 and updated ps2ip to use lwip 1.1.1
+
+2006-01-28
+  - tyranid, added a working USBD supplied by Cody56
+
 2005-10-03
   - gawd, added -pg gprof profiling (plus a sample)
 
