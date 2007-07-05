@@ -41,6 +41,10 @@ I_lwip_accept
 I_lwip_bind
 I_lwip_close
 I_lwip_connect
+I_lwip_getpeername
+I_lwip_getsockname
+I_lwip_getsockopt
+I_lwip_setsockopt
 I_lwip_listen
 I_lwip_recv
 I_lwip_recvfrom
@@ -52,3 +56,7 @@ I_lwip_ioctl
 I_ps2ip_getconfig
 I_ps2ip_setconfig
 ps2ip_IMPORTS_end
+
+dns_IMPORTS_start
+I_gethostbyname
+dns_IMPORTS_end

@@ -144,3 +144,8 @@ err_t     ps2ip_input(struct pbuf* pBuf, struct netif* pNetIF);
 #define I_ps2ip_input DECLARE_IMPORT(22, ps2ip_input)
 
 #endif /* IOP_PS2IP_H */
+// ntba2
+#define getsockname		lwip_getsockname
+#define getpeername		lwip_getpeername
+#define getsockopt		lwip_getsockopt
+#define setsockopt		lwip_setsockopt

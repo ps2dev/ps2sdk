@@ -361,4 +361,21 @@ typedef struct
 	u8					hw_addr[8];
 } t_ip_info;
 
+#ifndef FAR
+#define FAR
 #endif
+struct hostent {
+	char    FAR * h_name;				/* official name of host */
+	char    FAR * FAR * h_aliases;		/* alias list */
+	short   h_addrtype;					/* host address type */
+	short   h_length;					/* length of address */
+	char    FAR * FAR * h_addr_list;	/* list of addresses */
+#define h_addr  h_addr_list[0]				/* address, for backward compat */
+};
+
+#if !defined(INADDR_NONE)
+#define INADDR_NONE		((u32) 0xffffffff)  /* 255.255.255.255 */
+#endif
+
+#endif
+

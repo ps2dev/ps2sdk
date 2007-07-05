@@ -31,6 +31,8 @@ NOTES:
 #include <intrman.h>
 #include <ps2ip.h>
 
+#include "../../dns/include/dns.h"
+
 #define PS2IP_IRX 0xB0125F2
 
 #define ID_ACCEPT 1
@@ -47,6 +49,11 @@ NOTES:
 #define ID_GETCONFIG  13
 #define ID_SELECT   14
 #define ID_IOCTL    15
+#define ID_GETSOCKNAME	16
+#define ID_GETPEERNAME	17
+#define ID_GETSOCKOPT	18
+#define ID_SETSOCKOPT	19
+#define ID_GETHOSTBYNAME	20
 
 #define BUFF_SIZE	(1024)
 
@@ -743,6 +750,86 @@ void do_ioctlsocket( void *rpcBuffer, int size )
 	ret = ioctlsocket( s, cmd, argp );
 	ptr[0] = ret;
 }
+void do_getsockname( void *rpcBuffer, int size )
+{
+	int *ptr = rpcBuffer;
+	cmd_pkt *pkt = (cmd_pkt *)ptr;
+	struct sockaddr addr;
+	int addrlen, ret;
+
+	ret = getsockname(pkt->socket, &addr, &addrlen);
+
+	pkt->socket = ret;
+	memcpy(&pkt->sockaddr, &addr, sizeof(struct sockaddr));
+	pkt->len = sizeof(struct sockaddr);
+}
+  
+void do_getpeername( void *rpcBuffer, int size )
+{
+	int *ptr = rpcBuffer;
+	cmd_pkt *pkt = (cmd_pkt *)ptr;
+	struct sockaddr addr;
+	int addrlen, ret;
+
+	ret = getpeername(pkt->socket, &addr, &addrlen);
+
+	pkt->socket = ret;
+	memcpy(&pkt->sockaddr, &addr, sizeof(struct sockaddr));
+	pkt->len = sizeof(struct sockaddr);
+}
+
+void do_getsockopt( void *rpcBuffer, int size )
+{
+	int *ptr = rpcBuffer, ret;
+	int s;
+	int level;
+	int optname;
+	unsigned char optval[128];
+	int optlen;
+
+	s		= ((int*)_rpc_buffer)[0];
+	level	= ((int*)_rpc_buffer)[1];
+	optname	= ((int*)_rpc_buffer)[2];
+	optlen	= sizeof(optval);
+
+	ret = getsockopt(s, level, optname, optval, &optlen);
+
+	ptr[0] = ret;						// 4
+	ptr[1] = optlen;					// 4
+	memcpy( &ptr[2], optval, 128 );		// 128
+
+	// 136 bytes returned
+}
+
+void do_setsockopt( void *rpcBuffer, int size )
+{
+	int *ptr = rpcBuffer, ret;
+	int s;
+	int level;
+	int optname;
+	int optlen;
+	unsigned char optval[128];
+
+	s		= ((int*)_rpc_buffer)[0];
+	level	= ((int*)_rpc_buffer)[1];
+	optname	= ((int*)_rpc_buffer)[2];
+	optlen	= ((int*)_rpc_buffer)[3];
+	memcpy(optval, &_rpc_buffer[4], optlen);
+
+	ret = setsockopt(s, level, optname, optval, optlen);
+	ptr[0] = ret;
+}
+
+void do_gethostbyname( void *rpcBuffer, int size )
+{
+	int *ptr = rpcBuffer, ret;
+	struct in_addr addr;
+
+	ret = gethostbyname((char*)_rpc_buffer, &addr);
+
+	ptr[0] = ret;
+	memcpy(&ptr[1], &addr, sizeof(struct in_addr));
+}
 
 void * rpcHandlerFunction(unsigned int command, void * rpcBuffer, int size)
 {
@@ -790,6 +877,21 @@ void * rpcHandlerFunction(unsigned int command, void * rpcBuffer, int size)
         break;
   case ID_IOCTL:
 		do_ioctlsocket(rpcBuffer, size);
+		break;
+  case ID_GETSOCKNAME:
+		do_getsockname(rpcBuffer, size);
+		break;
+  case ID_GETPEERNAME:
+		do_getpeername(rpcBuffer, size);
+		break;
+  case ID_GETSOCKOPT:
+		do_getsockopt(rpcBuffer, size);
+		break;
+  case ID_SETSOCKOPT:
+		do_setsockopt(rpcBuffer, size);
+		break;
+  case ID_GETHOSTBYNAME:
+		do_gethostbyname(rpcBuffer, size);
 		break;
   default:
         printf("PS2IPS: Unknown Function called!\n");
@@ -850,3 +952,4 @@ int _start( int argc, char **argv)
   
    return 0;
 } 
+
