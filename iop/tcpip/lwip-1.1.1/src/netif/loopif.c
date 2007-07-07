@@ -31,6 +31,8 @@
  */
 #include "lwip/opt.h"
 
+#include <sysclib.h>
+
 #if LWIP_HAVE_LOOPIF
 
 #include "netif/loopif.h"

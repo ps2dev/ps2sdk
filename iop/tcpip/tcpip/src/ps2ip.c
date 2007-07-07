@@ -272,7 +272,6 @@ InputCB(void* pvArg)
 	InputMSG*	pMSG=(InputMSG*)pvArg;
 	PBuf*			pInput=pMSG->pInput;
 	NetIF*		pNetIF=pMSG->pNetIF;
-	PBuf*			pARP;
 	int			iFlags;
 
 	//Remove the first message in the message-queue. BTW: pMSG == &aMSGs[u8FirstMSG].

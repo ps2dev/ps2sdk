@@ -32,7 +32,7 @@
  *
  */
 
-////#include <string.h>
+#include <sysclib.h>
 #include <errno.h>
 
 #include "lwip/opt.h"

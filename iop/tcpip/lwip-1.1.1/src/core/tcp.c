@@ -41,7 +41,7 @@
  *
  */
 
-//#include <string.h>
+#include <sysclib.h>
 
 #include "lwip/opt.h"
 #include "lwip/def.h"

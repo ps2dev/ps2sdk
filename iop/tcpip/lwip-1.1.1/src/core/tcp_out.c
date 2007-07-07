@@ -39,7 +39,7 @@
  *
  */
 
-//#include <string.h>
+#include <sysclib.h>
 
 #include "lwip/def.h"
 #include "lwip/opt.h"
