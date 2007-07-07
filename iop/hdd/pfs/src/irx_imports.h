@@ -20,11 +20,10 @@
 #include "cdvdman.h"
 #include "intrman.h"
 #include "iomanX.h"
+#include "poweroff.h"
 #include "stdio.h"
 #include "sysclib.h"
 #include "sysmem.h"
-#include "thbase.h"
-#include "thevent.h"
 #include "thsemap.h"
 
 #endif /* IOP_IRX_IMPORTS_H */

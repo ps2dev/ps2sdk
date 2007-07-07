@@ -23,7 +23,7 @@
 #include "loadcore.h"
 #include "thsemap.h"
 #include "poweroff.h"
-#include "dev9.h"
+#include "pwroff_rpc.h"
 
 //#define DEBUG
 
@@ -31,8 +31,7 @@
 #define TYPE_C		1
 #define CDVDreg_PWOFF	(*(volatile unsigned char*)0xBF402008)
 
-#define POFF_SIF_CMD	20
-#define MAX_CALLBACKS	4
+#define MAX_CALLBACKS	8
 
 IRX_ID("Poweroff_Handler", 1, 1);
 
@@ -41,12 +40,13 @@ extern struct irx_export_table _exp_poweroff;
 //---------------------------------------------------------------------
 
 int  _start(int, char**);
-
+static void Shutdown();
+static void SendCmd(void* data);
 
 //---------------------------------------------------------------------
 typedef int (*intrhandler)(void*);
 
-intrhandler	old=0;
+intrhandler	oldCdHandler=0;
 
 struct handlerTableEntry{
 	intrhandler	handler;
@@ -62,58 +62,61 @@ struct CallbackEntry
 //---------------------------------------------------------------------
 
 static char cmdData[16];
-static int pid;
-static int poffSema;
+static pwoffcb poweroff_button_cb = 0;
+static void *poweroff_button_data = 0;
+static struct t_SifRpcDataQueue qd;
+static struct t_SifRpcServerData sd0;
 
 static int myCdHandler(void *param)
 {
-
 	if (((CDVDreg_PWOFF & 1)==0) && (CDVDreg_PWOFF & 4))
 	{
 		/* can't seem to register a sif cmd callback in ps2link so... */
 		/* Clear interrupt bit */
 		CDVDreg_PWOFF = 4;
-		isceSifSendCmd(POFF_SIF_CMD, cmdData, 16, NULL, NULL, 0);
-		iSignalSema(poffSema);
+#ifdef DEBUG
+		printf("Poweroff!!!! %08x\n", CDVDreg_PWOFF);
+#endif
+		if (poweroff_button_cb)
+			poweroff_button_cb(poweroff_button_data);
 	}
 
-	return old(param);
+	return oldCdHandler(param);
+}
+
+static void Shutdown(void* data)
+{
+#ifdef DEBUG
+	printf("Shutdown\n");
+#endif
+	int i;
+	/* Do callbacks in reverse order */
+	for(i = MAX_CALLBACKS-1; i >= 0; i--)
+	{
+		if(CallbackTable[i].cb)
+		{
+			CallbackTable[i].cb(CallbackTable[i].data);
+		}
+	}
+
+	// Turn off PS2
+	*((unsigned char *)0xBF402017) = 0;
+	*((unsigned char *)0xBF402016) = 0xF;
+}
+
+static void SendCmd(void* data)
+{
+	isceSifSendCmd(POFF_SIF_CMD, cmdData, 16, NULL, NULL, 0);
 }
 
 //---------------------------------------------------------------------
 //-----------------------------------------------------------entrypoint
 //---------------------------------------------------------------------
 
-static void pCallbackThread(void *arg)
+void SetPowerButtonHandler(pwoffcb func, void* param)
 {
-	int i, h = 0;
-	while(1)
-	{
-		WaitSema(poffSema);
-		/* Do callbacks in reverse order */
-		for(i = MAX_CALLBACKS-1, h = 0; i >= 0; i--)
-		{
-			if(CallbackTable[i].cb)
-			{
-				CallbackTable[i].cb(CallbackTable[i].data);
-				h = 1;
-			}
-		}
-
-#ifdef DEBUG
-		printf("Poweroff!!!! %08x\n", CDVDreg_PWOFF);
-#endif
-
-        // if no handlers were registered, shut down the system.
-        if(h == 0)
-        {
-            dev9IntrDisable(-1);
-            dev9Shutdown();
-
-            *((unsigned char *)0xBF402017) = 0;
-            *((unsigned char *)0xBF402016) = 0xF;
-        }
-	}
+	poweroff_button_cb = func;
+	poweroff_button_data = param;
 }
 
 void AddPowerOffHandler(pwoffcb func, void* param)
@@ -161,11 +164,45 @@ void RemovePowerOffHandler(pwoffcb func)
 	}
 }
 
+void PoweroffShutdown()
+{
+	Shutdown(0);
+}
+
+void* poweroff_rpc_server(int fno, void *data, int size)
+{
+	switch(fno) {
+	case PWROFF_SHUTDOWN:
+		Shutdown(0);
+		break;
+		
+	case PWROFF_ENABLE_AUTO_SHUTOFF:
+		{
+			int* sbuff = data;
+			if (sbuff[0])
+				SetPowerButtonHandler(Shutdown, 0);
+			else
+				SetPowerButtonHandler(SendCmd, 0);
+			sbuff[0] = 1;
+			return sbuff;
+		}
+	}
+	return NULL;
+}
+
+void poweroff_rpc_Thread(void* param)
+{
+	SifInitRpc(0);
+	
+	SifSetRpcQueue(&qd, GetThreadId());
+	SifRegisterRpc(&sd0, PWROFF_IRX, poweroff_rpc_server, cmdData, 0, 0, &qd);
+	SifRpcLoop(&qd);
+}
+
 int _start(int argc, char* argv[])
 {
 	register struct handlerTableEntry *handlers=(struct handlerTableEntry*)0x480;//iopmem
 	iop_thread_t mythread;
-	iop_sema_t sem_info;
 	int i;
 
 	if(RegisterLibraryEntries(&_exp_poweroff) != 0)
@@ -173,6 +210,8 @@ int _start(int argc, char* argv[])
 		printf("Poweroff already registered\n");
 		return 1;
 	}
+	
+	SetPowerButtonHandler(Shutdown, 0);
 
 	FlushDcache();
 	CpuEnableIntr(0);
@@ -187,38 +226,30 @@ int _start(int argc, char* argv[])
 		return 1;
 	}
 
-	old=(intrhandler)((int)handlers[INT_CDROM].handler & ~3);
+	oldCdHandler=(intrhandler)((int)handlers[INT_CDROM].handler & ~3);
 	handlers[INT_CDROM].handler=(intrhandler)((int)myCdHandler | TYPE_C);
 
 	memset(CallbackTable, 0, sizeof(struct CallbackEntry) * MAX_CALLBACKS);
 
 	mythread.attr = 0x02000000;
 	mythread.option = 0;
-	mythread.thread = pCallbackThread;
+	mythread.thread = poweroff_rpc_Thread;
 	mythread.stacksize = 0x1000;
 	mythread.priority = 0x27;
 
-	pid = CreateThread(&mythread);
+	int pid = CreateThread(&mythread);
 
 	if (pid > 0) {
 		if ((i=StartThread(pid, NULL)) < 0) {
 			printf("StartThread failed (%d)\n", i);
+			return 1;
 		}
 	}
 	else {
 		printf("CreateThread failed (%d)\n", pid);
-	}
-
-	sem_info.attr = 1;
-	sem_info.option = 1;
-	sem_info.initial = 0;
-	sem_info.max = 1;
-
-	poffSema = CreateSema(&sem_info);
-	if (poffSema <= 0) {
-		printf( "CreateSema failed %i\n", poffSema);
 		return 1;
 	}
 
+	printf("Poweroff installed\n");
 	return 0;
 }

@@ -17,37 +17,37 @@
 IRX_ID("hdd_driver", 1, 1);
 
 iop_device_ops_t hddOps={
-	(void *)hddInit,
-	(void *)hddDeinit,
-	(void *)hddFormat,
-	(void *)hddOpen,
-	(void *)hddClose,
-	(void *)hddRead,
-	(void *)hddWrite,
-	(void *)hddLseek,
-	(void *)fioUnsupported,
-	(void *)hddRemove,
-	(void *)fioUnsupported,
-	(void *)fioUnsupported,
-	(void *)hddOpen,
-	(void *)hddClose,
-	(void *)hddDread,
-	(void *)hddGetStat,
-	(void *)fioUnsupported,
-	(void *)hddReName,
-	(void *)fioUnsupported,
-	(void *)fioUnsupported,
-	(void *)fioUnsupported,
-	(void *)fioUnsupported,
-	(void *)fioUnsupported,
-	(void *)hddDevctl,
-	(void *)fioUnsupported,
-	(void *)fioUnsupported,
-	(void *)hddIoctl2,
+	hddInit,
+	hddDeinit,
+	hddFormat,
+	hddOpen,
+	hddClose,
+	hddRead,
+	hddWrite,
+	hddLseek,
+	(void*)fioUnsupported,
+	hddRemove,
+	(void*)fioUnsupported,
+	(void*)fioUnsupported,
+	(void*)hddOpen,
+	hddClose,
+	hddDread,
+	hddGetStat,
+	(void*)fioUnsupported,
+	hddReName,
+	(void*)fioUnsupported,
+	(void*)fioUnsupported,
+	(void*)fioUnsupported,
+	(void*)fioUnsupported,
+	(void*)fioUnsupported,
+	hddDevctl,
+	(void*)fioUnsupported,
+	(void*)fioUnsupported,
+	hddIoctl2,
 };
 iop_device_t hddFioDev={
 	"hdd",
-	IOP_DT_FS | IOP_DT_FSEXT,
+	IOP_DT_BLOCK | IOP_DT_FSEXT,
 	1,
 	"HDD",
 	(struct _iop_device_ops *)&hddOps,
@@ -141,10 +141,10 @@ int _start(int argc, char **argv)
 			printf("ps2hdd: Error: ata initialization failed.\n");
 			return 0;
 		}
-		if(hddInfo->devicePresent!=0 && hddInfo->supportPACKET==0){
+		if(hddInfo->exists!=0 && hddInfo->has_packet==0){
 				hddDeviceBuf[i].status--;
-				hddDeviceBuf[i].totalLBA=hddInfo->totalLBA;
-				hddDeviceBuf[i].partitionMaxSize=apaGetPartitionMax(hddInfo->totalLBA);
+				hddDeviceBuf[i].totalLBA=hddInfo->total_sectors;
+				hddDeviceBuf[i].partitionMaxSize=apaGetPartitionMax(hddInfo->total_sectors);
 				if(unlockDrive(i)==0)
 					hddDeviceBuf[i].status--;
 				printf("ps2hdd: disk%d: 0x%08lx sectors, max 0x%08lx\n", i,

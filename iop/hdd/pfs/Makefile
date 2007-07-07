@@ -21,7 +21,7 @@ IOP_OBJS = obj/bitmap.o obj/dir.o obj/inode.o obj/journal.o obj/misc.o \
 
 IOP_CFLAGS  += -Wall -fno-builtin-printf
 IOP_LDFLAGS += -s
-IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/atad/include
+IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/atad/include -I$(PS2SDKSRC)/iop/dev9/poweroff/include
 IOP_LIBS += -lgcc
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)

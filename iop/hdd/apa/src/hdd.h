@@ -17,23 +17,22 @@
 #include "types.h"
 #include "defs.h"
 #include "irx.h"
+#include "atad.h"
+#include "dev9.h"
 #include "loadcore.h"
+#include "poweroff.h"
 #include "sysmem.h"
 #include "stdio.h"
 #include "sysclib.h"
-#include "list.h"
 #include "errno.h"
 #include "sys/fcntl.h"
 #include "sys/stat.h"
 #include "iomanX.h"
 #include "thbase.h"
-#include "thevent.h"
 #include "thsemap.h"
 #include "intrman.h"
 #include "cdvdman.h"
 
-//#include "atad.h"
-//#include "dev9.h"
 #include "helper.h"// for old atad, dev9 names need..
 
 #define DEBUG_LEVEL1

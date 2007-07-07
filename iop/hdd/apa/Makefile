@@ -17,6 +17,7 @@ IOP_INC_DIR = include/
 IOP_BIN  = bin/ps2hdd.irx
 IOP_OBJS = obj/misc.o obj/cache.o obj/apa.o obj/journal.o obj/hdd_fio.o obj/hdd.o
 
+IOP_INCS += -I../../dev9/poweroff/include/ -I../../dev9/dev9/include/ -I../../dev9/atad/include/
 IOP_CFLAGS  += -Wall -fno-builtin-printf
 IOP_LDFLAGS += -s
 

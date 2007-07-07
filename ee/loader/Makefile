@@ -14,7 +14,7 @@ EE_BIN_DIR = bin/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
-EE_INCS = -I$(PS2SDKSRC)/ee/rpc/hdd/include -I$(PS2SDKSRC)/ee/rpc/filexio/include
+EE_INCS = -I$(PS2SDKSRC)/ee/rpc/hdd/include -I$(PS2SDKSRC)/ee/rpc/poweroff/include -I$(PS2SDKSRC)/ee/rpc/filexio/include
 
 EE_OBJS = loader.o fakehost.o poweroff.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)

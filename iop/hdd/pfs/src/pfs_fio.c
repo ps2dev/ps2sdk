@@ -462,6 +462,12 @@ int fileTransfer(pfs_file_slot_t *fileSlot, u8 *buf, int size, int operation)
 	return result < 0 ? result : total;
 }
 
+void	pfsPowerOffHandler(void* data)
+{
+	printf("pfs close all\n");
+	devctlCloseAll();
+}
+
 int	pfsInit(iop_device_t *f)
 {
 	iop_sema_t sema;
@@ -473,6 +479,7 @@ int	pfsInit(iop_device_t *f)
 
 	pfsFioSema = CreateSema(&sema);
 
+	AddPowerOffHandler(pfsPowerOffHandler, 0);
 	return 0;
 }
 

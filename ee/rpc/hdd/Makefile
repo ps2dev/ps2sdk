@@ -17,7 +17,7 @@ EE_INC_DIR = include/
 EE_OBJS = libhdd.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
-EE_INCS = -I$(PS2SDKSRC)/ee/rpc/filexio/include
+EE_INCS = -I$(PS2SDKSRC)/ee/rpc/filexio/include -I$(PS2SDKSRC)/ee/rpc/poweroff/include
 
 EE_LIB = $(EE_LIB_DIR)libhdd.a
 

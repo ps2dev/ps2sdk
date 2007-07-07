@@ -5,8 +5,10 @@ DECLARE_EXPORT_TABLE(poweroff, 1, 1)
 	DECLARE_EXPORT(_retonly)
 
 	/* 4 */
+	DECLARE_EXPORT(SetPowerButtonHandler)
 	DECLARE_EXPORT(AddPowerOffHandler)
 	DECLARE_EXPORT(RemovePowerOffHandler)
+	DECLARE_EXPORT(PoweroffShutdown)
 END_EXPORT_TABLE
 
 void _retonly() {}

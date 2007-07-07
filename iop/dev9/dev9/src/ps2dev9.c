@@ -18,10 +18,9 @@
 #include "dmacman.h"
 #include "thbase.h"
 #include "thsemap.h"
-#include "iomanX.h"
 #include "stdio.h"
 #include "dev9.h"
-#include "sys/ioctl.h"
+#include "poweroff.h"
 
 #include "dev9regs.h"
 #include "speedregs.h"
@@ -62,14 +61,10 @@ static s16 eeprom_data[5];	/* 2-byte EEPROM status (0/-1 = invalid, 1 = valid),
    SMAP interrupt status register (0xbx000028).  */
 static dev9_intr_cb_t dev9_intr_cbs[16];
 
-static iop_device_t dev9x_fsdev;	/* Forward declaration.  */
-
 static int dev9_intr_dispatch(int flag);
 static int dev9_dma_intr(void *arg);
 
-static int dev9x_fs_null(void);
-static int dev9x_fs_devctl(iop_file_t *f, const char *, int, void *, unsigned int, void *,
-		unsigned int);
+static void dev9x_on_shutdown(void*);
 
 static void smap_set_stat(int stat);
 static int read_eeprom_data(void);
@@ -136,14 +131,10 @@ int _start(int argc, char **argv)
 		return 1;
 	}
 
-	/* Add dev9 fs driver for devctl().  */
-	DelDrv("dev9x");
-	if (AddDrv(&dev9x_fsdev) != 0) {
-		return 1;
-	}
+	AddPowerOffHandler(dev9x_on_shutdown, 0);
 
 	/* Normal termination.  */
-	M_PRINTF("Driver loaded.\n");
+	M_PRINTF("Dev9 loaded.\n");
 
 	return 0;
 }
@@ -831,31 +822,9 @@ static int expbay_init(void)
 	return 0;
 }
 
-/* DEV9 filesystem - only used for devctl (which is only used from the EE).  */
-static void *dev9x_dops[] = {
-	dev9x_fs_null, dev9x_fs_null, dev9x_fs_null, dev9x_fs_null,
-	dev9x_fs_null, dev9x_fs_null, dev9x_fs_null, dev9x_fs_null,
-	dev9x_fs_null, dev9x_fs_null, dev9x_fs_null, dev9x_fs_null,
-	dev9x_fs_null, dev9x_fs_null, dev9x_fs_null, dev9x_fs_null,
-	dev9x_fs_null, dev9x_fs_null, dev9x_fs_null, dev9x_fs_null,
-	dev9x_fs_null, dev9x_fs_null, dev9x_fs_null, dev9x_fs_devctl,
-	dev9x_fs_null, dev9x_fs_null, dev9x_fs_null
-};
-
-static iop_device_t dev9x_fsdev = {
-	"dev9x", IOP_DT_FSEXT|IOP_DT_FS, 1, "DEV9",
-	(iop_device_ops_t *)&dev9x_dops
-};
-
-static int dev9x_fs_null(void) { return 0; }
-
-static int dev9x_fs_devctl(iop_file_t *f, const char *dev, int command, void *arg,
-		unsigned int arglen, void *buf, unsigned int buflen)
+static void dev9x_on_shutdown(void*p)
 {
-	if (command == DEV9CTLTYPE)
-		return dev9type;
-	else if (command == DEV9CTLSHUTDOWN)
-		dev9Shutdown();
-
-	return 0;
+	M_PRINTF("shutdown\n");
+	dev9IntrDisable(-1);
+	dev9Shutdown();
 }

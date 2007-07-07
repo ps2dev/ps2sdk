@@ -18,9 +18,13 @@
 
 typedef void (*pwoffcb)(void*);
 
+void SetPowerButtonHandler(pwoffcb func, void* param);
+#define I_SetPowerButtonHandler DECLARE_IMPORT(4, SetPowerButtonHandler)
 void AddPowerOffHandler(pwoffcb func, void* param);
-#define I_AddPowerOffHandler DECLARE_IMPORT(4, AddPowerOffHandler)
+#define I_AddPowerOffHandler DECLARE_IMPORT(5, AddPowerOffHandler)
 void RemovePowerOffHandler(pwoffcb func);
-#define I_RemovePowerOffHandler DECLARE_IMPORT(5, RemovePowerOffHandler)
+#define I_RemovePowerOffHandler DECLARE_IMPORT(6, RemovePowerOffHandler)
+void PoweroffShutdown();
+#define I_PoweroffShutdown DECLARE_IMPORT(7, PoweroffShutdown)
 
 #endif /* __POWEROFF_H__ */

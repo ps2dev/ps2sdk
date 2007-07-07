@@ -10,6 +10,8 @@
 # $Id$
 */
 
+#include "libpwroff.h"
+
 #include <stdio.h>
 #include <tamtypes.h>
 #include <kernel.h>
@@ -18,6 +20,7 @@
 #include <loadfile.h>
 #include <iopheap.h>
 #include <malloc.h>
+#include <pwroff_rpc.h>
 
 // PS2DRV includes
 #include "sys/fcntl.h"
@@ -26,40 +29,16 @@
 #include "fileXio_rpc.h"
 #include "errno.h"
 
-#include "libhdd.h"
-
-#define POFF_SIF_CMD	20
-
 extern void *_gp;
 
-static void (*userCallbackFunc)(void *) = NULL;
-static void *userCallbackArg = NULL;
+static poweroff_callback poweroff_cb = NULL;
+static void *poweroff_data = NULL;
+
 static u8 poffThreadStack[512 * 16] __attribute__ ((aligned(16)));
 static int PowerOffSema;
 
-static unsigned int getStatusReg() {
-    register unsigned int rv;
-    asm volatile (
-        "mfc0 %0, $12\n"
-        "nop\n" : "=r" 
-	(rv) : );
-    return rv;
-}
-
-static void setStatusReg(unsigned int v) {
-    asm volatile (
-        "mtc0 %0, $12\n"
-        "nop\n"
-	: : "r" (v) );
-}
-
-static void setKernelMode() {
-    setStatusReg(getStatusReg() & (~0x18));
-}
-
-static void setUserMode() {
-    setStatusReg((getStatusReg() & (~0x18)) | 0x10);
-}
+extern int _iop_reboot_count;
+static SifRpcClientData_t cd0;
 
 static void PowerOffThread(void *dat)
 {
@@ -69,21 +48,8 @@ static void PowerOffThread(void *dat)
 
 		printf("EE: poweroff thread woken up\n");
 
-		// Execute user callback if it exists
-		if(userCallbackFunc)
-			userCallbackFunc(userCallbackArg);
-
-		fileXioDevctl("pfs:", PFSCTL_CLOSE_ALL, NULL, 0, NULL, 0);
-		fileXioDevctl("hdd0:", HDDCTL_FLUSH_CACHE, NULL, 0, NULL, 0);
-		while(fileXioDevctl("dev9x:", DEV9CTLSHUTDOWN, NULL, 0, NULL, 0) < 0);
-
-		// Turn off PS2
-		setKernelMode();
-
-		*((unsigned char *)0xBF402017) = 0;
-		*((unsigned char *)0xBF402016) = 0xF;
-
-		setUserMode();
+		if (poweroff_cb)
+			poweroff_cb(poweroff_data);
 	}
 }
 
@@ -92,14 +58,18 @@ static void _poff_intr_callback(void *pkt, void *param)
 	iSignalSema(PowerOffSema);
 }
 
-void hddSetUserPoweroffCallback(void (*user_callback)(void *arg), void *arg)
+int poweroffInit()
 {
-	userCallbackFunc = (void *)user_callback;
-	userCallbackArg = arg;
-}
+	int res;
+	static int _init_count = -1;
 
-void hddPreparePoweroff()
-{
+	if(_init_count == _iop_reboot_count)
+		return 0;
+	_init_count = _iop_reboot_count;
+
+	while(((res = SifBindRpc(&cd0, PWROFF_IRX, 0)) >= 0) && (cd0.server == NULL))
+		nopdelay();
+
 	ee_thread_t thread, thisThread;
 	ee_sema_t sema;
 	int tid;
@@ -126,9 +96,24 @@ void hddPreparePoweroff()
 	DIntr();
 	SifAddCmdHandler(POFF_SIF_CMD, _poff_intr_callback, NULL);
 	EIntr();
+
+	int autoShutdown = 0;
+	SifCallRpc(&cd0, PWROFF_ENABLE_AUTO_SHUTOFF, 0, NULL, 0, &autoShutdown, sizeof(autoShutdown), 0, 0);
+	
+	return res;
 }
 
-void hddPowerOff()
+void poweroffSetCallback(poweroff_callback cb, void *arg)
 {
-	SignalSema(PowerOffSema);
+	poweroffInit();
+
+	poweroff_cb = cb;
+	poweroff_data = arg;
+}
+
+void poweroffShutdown()
+{
+	poweroffInit();
+	
+	SifCallRpc(&cd0, PWROFF_SHUTDOWN, 0, NULL, 0, NULL, 0, 0, 0);
 }

@@ -17,6 +17,7 @@ IOP_INC_DIR = include/
 IOP_BIN  = bin/ps2dev9.irx
 IOP_OBJS = obj/ps2dev9.o obj/exports.o obj/imports.o
 
+IOP_INCS += -I../poweroff/include/
 IOP_CFLAGS  += -Wall -fno-builtin-printf
 IOP_LDFLAGS += -s
 

@@ -60,9 +60,12 @@ int hddMakeFilesystem(int fsSizeMB, char *name, int type);
 int hddRemoveFilesystem(t_hddFilesystem *fs);
 int hddExpandFilesystem(t_hddFilesystem *fs, int extraMB);
 
-void hddPreparePoweroff();
-void hddSetUserPoweroffCallback(void (*user_callback)(void *arg), void *arg);
-void hddPowerOff();
+// These hdd* functions are deprecated
+// Use the poweroff* version instead
+#include "libpwroff.h"
+#define hddPreparePoweroff poweroffInit
+#define hddSetUserPoweroffCallback poweroffSetCallback
+#define hddPowerOff poweroffShutdown
 
 #ifdef __cplusplus
 }

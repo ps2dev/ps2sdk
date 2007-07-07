@@ -37,7 +37,7 @@ int fioPartitionSizeLookUp(char *str)
 	return -EINVAL;
 }
 
-int fioInputBreaker(char **arg, char *outBuf, int maxout)
+int fioInputBreaker(char const **arg, char *outBuf, int maxout)
 {
 	u32 len;
 	char *p;
@@ -57,7 +57,7 @@ int fioInputBreaker(char **arg, char *outBuf, int maxout)
 }
 
 // NOTE: Changed so format = partitionID,size (used to be partitionID,fpswd,rpswd,size,filesystem)
-int fioGetInput(char *arg, input_param *params)
+int fioGetInput(const char *arg, input_param *params)
 {
 	char	szBuf[32];
 	int		rv=0;
@@ -160,7 +160,13 @@ int ioctl2Transfer(u32 device, hdd_file_slot_t *fileSlot, hddIoctl2Transfer_t *a
 	return 0;
 }
 
-int hddInit(void)
+void hddPowerOffHandler(void* data)
+{
+	printf("hdd flush cache\n");
+	atadFlushCache(0);
+}
+
+int hddInit(iop_device_t *f)
 {
 	iop_sema_t sema;
 
@@ -169,16 +175,18 @@ int hddInit(void)
 	sema.max=1;
 	sema.option=0;
 	fioSema=CreateSema(&sema);
+
+	AddPowerOffHandler(hddPowerOffHandler, 0);
 	return 0;
 }
 
-int hddDeinit(void)
+int hddDeinit(iop_device_t *f)
 {
 	DeleteSema(fioSema);
 	return 0;
 }
 
-int hddFormat(iop_file_t *f, ...)
+int hddFormat(iop_file_t *f, const char *dev, const char *blockdev, void *arg, size_t arglen)
 {
 	int				rv=0;
 	apa_cache		*clink;
@@ -253,7 +261,7 @@ int hddFormat(iop_file_t *f, ...)
 	return rv;
 }
 
-int hddRemove(iop_file_t *f, char *name)
+int hddRemove(iop_file_t *f, const char *name)
 {
 	int			rv;
 	input_param	params;
@@ -266,7 +274,7 @@ int hddRemove(iop_file_t *f, char *name)
 	return SignalSema(fioSema);
 }
 
-int hddOpen(iop_file_t *f, char *name, int mode, ...)
+int hddOpen(iop_file_t *f, const char *name, int mode, int other_mode)
 {
 	int			rv;
 	input_param	params;
@@ -317,7 +325,7 @@ int hddWrite(iop_file_t *f, void *buf, int size)
 	return fioDataTransfer(f, buf, size, ATAD_MODE_WRITE);
 }
 
-int hddLseek(iop_file_t *f, s32 post, s32 whence)
+int hddLseek(iop_file_t *f, unsigned long post, int whence)
 {
 	int 	rv=0;
 	hdd_file_slot_t *fileSlot;
@@ -385,7 +393,7 @@ void fioGetStatFiller(apa_cache *clink, iox_stat_t *stat)
 	stat->private_5=clink->header->start;// sony ver
 }
 
-int hddGetStat(iop_file_t *f, char *name, void *stat)
+int hddGetStat(iop_file_t *f, const char *name, iox_stat_t *stat)
 {
 	apa_cache	*clink;
 	input_param	params;
@@ -588,8 +596,8 @@ int ioctl2DeleteLastSub(hdd_file_slot_t *fileSlot)
 	return rv;
 }
 
-int hddIoctl2(iop_file_t *f, long req, void *argp, long arglen,
-			  void *bufp, long buflen)
+int hddIoctl2(iop_file_t *f, int req, void *argp, unsigned int arglen,
+			  void *bufp, unsigned int buflen)
 {
 	u32 rv=0;
 	hdd_file_slot_t *fileSlot=f->privdata;
@@ -702,8 +710,8 @@ int devctlSetOsdMBR(u32 device, hddSetOsdMBR_t *mbrInfo)
 	return rv;
 }
 
-int hddDevctl(iop_file_t *f, char *devname, int cmd, void *arg,
-			  int arglen, void *bufp, long buflen)
+int hddDevctl(iop_file_t *f, const char *devname, int cmd, void *arg,
+			  unsigned int arglen, void *bufp, unsigned int buflen)
 {
 	int	rv=0;
 
@@ -796,4 +804,4 @@ int hddDevctl(iop_file_t *f, char *devname, int cmd, void *arg,
 	return rv;
 }
 
-int fioUnsupported(void){return -1;}
+int fioUnsupported(iop_file_t *f){return -1;}

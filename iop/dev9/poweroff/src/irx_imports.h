@@ -21,9 +21,7 @@
 #include "loadcore.h"
 #include "sifcmd.h"
 #include "stdio.h"
-#include "thbase.h"
-#include "thsemap.h"
 #include "sysclib.h"
-#include "../include/dev9.h"
+#include "thbase.h"
  
 #endif /* IOP_IRX_IMPORTS_H */
