@@ -290,7 +290,7 @@ int ps2kbd_disconnect(int devId)
 
 {
   int devLoop;
-  printf("PS2Kbd_disconnect devId %d\n", devId);
+  //printf("PS2Kbd_disconnect devId %d\n", devId);
 
   for(devLoop = 0; devLoop < PS2KBD_MAXDEV; devLoop++)
     {
@@ -333,7 +333,7 @@ void ps2kbd_getstring_set(int resultCode, int bytes, void *arg)
 	{
 	  string[strLoop] = str->wData[strLoop] & 0xFF;
 	}
-      printf("%s: %s\n", strBuf->desc, string);
+      printf("PS2KBD %s: %s\n", strBuf->desc, string);
     }
   
   FreeSysMemory(arg);
@@ -835,7 +835,7 @@ void flushbuffer()
   
   if(bufferSema <= 0)
     {
-      printf("Error creating buffer sema\n");
+      printf("PS2KBD: Error creating buffer sema\n");
     }
 }
 
@@ -972,7 +972,7 @@ int fio_dummy()
 
 int fio_init(iop_device_t *driver)
 {
-  printf("fio_init()\n");
+  //printf("fio_init()\n");
   return 0;
 }
 
@@ -984,7 +984,7 @@ int fio_format(iop_file_t *f)
 
 int fio_open(iop_file_t *f, const char *name, int mode)
 {
-  printf("fio_open() %s %d\n", name, mode);
+  //printf("fio_open() %s %d\n", name, mode);
   if(strcmp(name, PS2KBD_KBDFILE)) /* If not the keyboard file */
     {
       return -1;
@@ -1114,7 +1114,7 @@ int init_fio()
 
 {
   kbd_filedrv.name = PS2KBD_FSNAME;
-  kbd_filedrv.type = IOP_DT_FS;
+  kbd_filedrv.type = IOP_DT_CHAR;
   kbd_filedrv.version = 0;
   kbd_filedrv.desc = "USB Keyboard FIO driver";
   kbd_filedrv.ops = &fio_ops;
@@ -1217,7 +1217,7 @@ int ps2kbd_init()
   lineSema = CreateSema(&s);
   if(lineSema <= 0)
     {
-      printf("Error creating sema\n");
+      printf("PS2KBD: Error creating sema\n");
       return 1;
     }
 
@@ -1228,14 +1228,14 @@ int ps2kbd_init()
   bufferSema = CreateSema(&s); /* Create a sema to maintain status of readable data */
   if(bufferSema <= 0)
     {
-      printf("Error creating buffer sema\n");
+      printf("PS2KBD: Error creating buffer sema\n");
       return 1;
     }
 
   lineBuffer = (u8 *) AllocSysMemory(0, PS2KBD_DEFLINELEN, NULL);
   if(lineBuffer == NULL)
     {
-      printf("Error allocating line buffer\n");
+      printf("PS2KBD: Error allocating line buffer\n");
       return 1;
     }
   lineStartP = 0;
@@ -1255,17 +1255,18 @@ int ps2kbd_init()
   memcpy(control_map, us_control_map, PS2KBD_KEYMAP_SIZE);
   memcpy(alt_map, us_alt_map, PS2KBD_KEYMAP_SIZE);
 
-  printf("ps2kbd AddDrv [%d]\n", init_fio());
+  ret = init_fio();
+  //printf("ps2kbd AddDrv [%d]\n", ret);
   init_repeatthread();
 
   ret = UsbRegisterDriver(&kbd_driver);
   if(ret != USB_RC_OK)
     {
-      printf("Error registering USB devices\n");
+      printf("PS2KBD: Error registering USB devices\n");
       return 1;
     }
 
-  printf("UsbRegisterDriver %d\n", ret);
+  //printf("UsbRegisterDriver %d\n", ret);
 
   return 0;
 }
