@@ -15,6 +15,8 @@
 #include <fileio.h>
 #include "libkbd.h"
 
+extern int _iop_reboot_count;
+static int kbd_iop = -1;
 static int kbd_fd = -1;
 static int curr_blockmode = PS2KBD_NONBLOCKING;
 static int curr_readmode = PS2KBD_READMODE_NORMAL;
@@ -22,9 +24,15 @@ static int curr_readmode = PS2KBD_READMODE_NORMAL;
 int PS2KbdInit(void)
 /* Initialise the keyboard library */
 {
+  if (kbd_iop != _iop_reboot_count)
+    {
+      kbd_iop = _iop_reboot_count;
+      kbd_fd = -1;
+    }
+    
   if(kbd_fd >= 0) /* Already initialised */
     {
-      return 0;
+      return 2;
     }
 
   kbd_fd = fioOpen(PS2KBD_DEVFILE, O_RDONLY);
