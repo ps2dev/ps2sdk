@@ -36,17 +36,17 @@
 extern "C" {
 #endif
 
-#define MC_WAIT			0
-#define MC_NOWAIT		1
+#define MC_WAIT					0
+#define MC_NOWAIT				1
 
-#define MC_TYPE_PSX     1
-#define MC_TYPE_PS2     2
-#define MC_TYPE_POCKET  3
-#define MC_TYPE_NONE    0
+#define MC_TYPE_PSX				1
+#define MC_TYPE_PS2				2
+#define MC_TYPE_POCKET			3
+#define MC_TYPE_NONE			0
 
 // Problem: Format is always 0 with ROM irx's
-#define MC_FORMATTED    -1
-#define MC_UNFORMATTED  0
+#define MC_FORMATTED			-1
+#define MC_UNFORMATTED			0
 
 // Valid bits in memcard file attributes (mctable.AttrFile)
 #define MC_ATTR_READABLE        0x0001
@@ -55,40 +55,42 @@ extern "C" {
 #define MC_ATTR_PROTECTED       0x0008
 #define MC_ATTR_FILE            0x0010 
 #define MC_ATTR_SUBDIR          0x0020
-#define MC_ATTR_OBJECT          0x0030 // File or directory
+#define MC_ATTR_OBJECT          0x0030	// File or directory
 #define MC_ATTR_CLOSED          0x0080
 #define MC_ATTR_PDAEXEC         0x0800
 #define MC_ATTR_PSX             0x1000
+#define MC_ATTR_HIDDEN          0x2000	// not hidden in osdsys, but it is to games
 
 // function numbers returned by mcSync in the 'cmd' pointer
-#define MC_FUNC_GET_INFO	0x01
-#define MC_FUNC_OPEN		0x02
-#define MC_FUNC_CLOSE		0x03
-#define MC_FUNC_SEEK		0x04
-#define MC_FUNC_READ		0x05
-#define MC_FUNC_WRITE		0x06
-#define MC_FUNC_FLUSH		0x0A
-#define MC_FUNC_MK_DIR		0x0B
-#define MC_FUNC_CH_DIR		0x0C
-#define MC_FUNC_GET_DIR		0x0D
-#define MC_FUNC_SET_INFO	0x0E
-#define MC_FUNC_DELETE		0x0F
-#define MC_FUNC_FORMAT		0x10
-#define MC_FUNC_UNFORMAT	0x11
-#define MC_FUNC_GET_ENT		0x12
-#define MC_FUNC_RENAME		0x13
-#define MC_FUNC_CHG_PRITY	0x14
-//#define MC_FUNC_UNKNOWN_1	0x5A	// mcserv version
-//#define MC_FUNC_UNKNOWN_2	0x5C	// mcserv version
+#define MC_FUNC_NONE			0x00
+#define MC_FUNC_GET_INFO		0x01
+#define MC_FUNC_OPEN			0x02
+#define MC_FUNC_CLOSE			0x03
+#define MC_FUNC_SEEK			0x04
+#define MC_FUNC_READ			0x05
+#define MC_FUNC_WRITE			0x06
+#define MC_FUNC_FLUSH			0x0A
+#define MC_FUNC_MK_DIR			0x0B
+#define MC_FUNC_CH_DIR			0x0C
+#define MC_FUNC_GET_DIR			0x0D
+#define MC_FUNC_SET_INFO		0x0E
+#define MC_FUNC_DELETE			0x0F
+#define MC_FUNC_FORMAT			0x10
+#define MC_FUNC_UNFORMAT		0x11
+#define MC_FUNC_GET_ENT			0x12
+#define MC_FUNC_RENAME			0x13
+#define MC_FUNC_CHG_PRITY		0x14
+//#define MC_FUNC_UNKNOWN_1		0x5A	// mcserv version
+//#define MC_FUNC_UNKNOWN_2		0x5C	// mcserv version
 
 // These types show up in the OSD browser when set.
 // If the OSD doesn't know the number it'll display "Unrecognizable Data" or so.
 // AFAIK these have no other effects.
 // Known type IDs for icon.sys file:
-#define MCICON_TYPE_SAVED_DATA    0 // "Saved Data (PlayStation(r)2)"
-#define MCICON_TYPE_SOFTWARE_PS2  1 // "Software (PlayStation(r)2)"
-#define MCICON_TYPE_SOFTWARE_PKT  3 // "Software (PocketStation(r))"
-#define MCICON_TYPE_SETTINGS_DATA 4 // "Settings File (PlayStation(r)2)"
+#define MCICON_TYPE_SAVED_DATA		0	// "Saved Data (PlayStation(r)2)"
+#define MCICON_TYPE_SOFTWARE_PS2	1	// "Software (PlayStation(r)2)"
+#define MCICON_TYPE_SOFTWARE_PKT	3	// "Software (PocketStation(r))"
+#define MCICON_TYPE_SETTINGS_DATA	4	// "Settings File (PlayStation(r)2)"
 
 typedef int iconIVECTOR[4];
 typedef float iconFVECTOR[4];
