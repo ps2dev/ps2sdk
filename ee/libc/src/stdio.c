@@ -781,6 +781,8 @@ int fseek(FILE *stream, long offset, int origin)
     default:
       /* attempt to seek to offset from origin. */
       ret = fioLseek(stream->fd, (int)offset, origin);
+      if (ret >= 0)
+        ret = 0;
   }
   return (ret);
 }
