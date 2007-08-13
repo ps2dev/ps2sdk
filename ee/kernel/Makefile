@@ -58,11 +58,11 @@ SIO_OBJS = sio_init.o sio_putc.o sio_getc.o sio_write.o sio_read.o sio_puts.o \
 	sio_gets.o sio_getc_block.o sio_flush.o sio_putsn.o
 SIO_OBJS := $(SIO_OBJS:%=$(EE_OBJS_DIR)%)
 
-CONFIG_OBJS = _config_internals.o GetRomName.o IsT10K.o configGetLanguage.o \
+CONFIG_OBJS = _config_internals.o GetRomName.o IsT10K.o IsEarlyJap.o configGetLanguage.o \
 	configSetLanguage.o configGetTvScreenType.o configSetTvScreenType.o \
 	configGetDateFormat.o configSetDateFormat.o configGetTimeFormat.o \
 	configSetTimeFormat.o configGetTimezone.o configSetTimezone.o \
-	configIsSpdifEnabled.o configSetSpdifEnabled.o \
+	configIsSpdifEnabled.o configSetSpdifEnabled.o configGetTime.o \
 	configIsDaylightSavingEnabled.o configSetDaylightSavingEnabled.o
 CONFIG_OBJS := $(CONFIG_OBJS:%=$(EE_OBJS_DIR)%)
 
@@ -139,7 +139,7 @@ $(LOADFILE_OBJS): src/loadfile.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(CONFIG_OBJS): src/osd_config.c
-	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+	$(EE_C_COMPILE) -I../rpc/cdvd/include -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(TIMER_OBJS): src/timer.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
