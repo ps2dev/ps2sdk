@@ -5,8 +5,8 @@ DECLARE_EXPORT_TABLE(mtapman, 1, 2)
 	DECLARE_EXPORT(_retonly)
 	DECLARE_EXPORT(mtapPortOpen)
 	DECLARE_EXPORT(mtapPortClose)
-	DECLARE_EXPORT(_retonly) // actually unused function
-	DECLARE_EXPORT(_retonly) // actually unused function
+	DECLARE_EXPORT(mtapGetSlotNumber)
+	DECLARE_EXPORT(mtapChangeSlot)
 END_EXPORT_TABLE
 
 void _retonly() {}

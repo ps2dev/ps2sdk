@@ -1,3 +1,10 @@
 freemtap is a free replacement module for XMTAPMAN.
 
 - Lukasz Bruun
+
+Changelog
+-------------------------------------------------------------------------------
+2007-08-29
+  - Updated the exports.tab
+2007-06-25
+  - lukasz, initial release

@@ -170,8 +170,8 @@ main()
 	
     struct padButtonStatus buttons;
     u32 paddata;
-    u32 old_pad = 0;
-    u32 new_pad;
+    u32 old_pad[2][4];
+    u32 new_pad[2][4];
 	s32 ret;
 	
 	SifInitRpc(0);
@@ -195,6 +195,10 @@ main()
 		padConnected[1][i] = 0;
 		padOpen[0][i] = 0;
 		padOpen[1][i] = 0;
+		old_pad[0][i] = 0;
+		old_pad[1][i] = 0;
+		new_pad[0][i] = 0;
+		new_pad[1][i] = 0;
 
 		padBuf[0][i] = memalign(64, 256);
 		padBuf[1][i] = memalign(64, 256);
@@ -218,29 +222,29 @@ main()
 					{
             			paddata = 0xffff ^ buttons.btns;
 	
-						new_pad = paddata & ~old_pad;
-            			old_pad = paddata;
+						new_pad[port][slot] = paddata & ~old_pad[port][slot];
+            			old_pad[port][slot] = paddata;
                 
-						if(new_pad) printf("Controller (%i,%i) button(s) pressed: ", (int)port, (int)slot);
+						if(new_pad[port][slot]) printf("Controller (%i,%i) button(s) pressed: ", (int)port, (int)slot);
 
-            			if(new_pad & PAD_LEFT)		printf("LEFT ");
-						if(new_pad & PAD_RIGHT) 	printf("RIGHT ");
-						if(new_pad & PAD_UP) 		printf("UP ");		
-						if(new_pad & PAD_DOWN) 		printf("DOWN ");
-						if(new_pad & PAD_START) 	printf("START ");
-						if(new_pad & PAD_SELECT) 	printf("SELECT ");
-						if(new_pad & PAD_SQUARE) 	printf("SQUARE ");
-						if(new_pad & PAD_TRIANGLE)	printf("TRIANGLE ");
-						if(new_pad & PAD_CIRCLE)	printf("CIRCLE ");
-						if(new_pad & PAD_CROSS)		printf("CROSS ");
-						if(new_pad & PAD_L1)		printf("L1 ");
-						if(new_pad & PAD_L2)		printf("L2 ");
-						if(new_pad & PAD_L3)		printf("L3 ");
-						if(new_pad & PAD_R1)		printf("R1 ");
-						if(new_pad & PAD_R2)		printf("R2 ");
-						if(new_pad & PAD_R3)		printf("R3 ");
+            			if(new_pad[port][slot] & PAD_LEFT)		printf("LEFT ");
+						if(new_pad[port][slot] & PAD_RIGHT) 	printf("RIGHT ");
+						if(new_pad[port][slot] & PAD_UP) 		printf("UP ");		
+						if(new_pad[port][slot] & PAD_DOWN) 		printf("DOWN ");
+						if(new_pad[port][slot] & PAD_START) 	printf("START ");
+						if(new_pad[port][slot] & PAD_SELECT) 	printf("SELECT ");
+						if(new_pad[port][slot] & PAD_SQUARE) 	printf("SQUARE ");
+						if(new_pad[port][slot] & PAD_TRIANGLE)	printf("TRIANGLE ");
+						if(new_pad[port][slot] & PAD_CIRCLE)	printf("CIRCLE ");
+						if(new_pad[port][slot] & PAD_CROSS)		printf("CROSS ");
+						if(new_pad[port][slot] & PAD_L1)		printf("L1 ");
+						if(new_pad[port][slot] & PAD_L2)		printf("L2 ");
+						if(new_pad[port][slot] & PAD_L3)		printf("L3 ");
+						if(new_pad[port][slot] & PAD_R1)		printf("R1 ");
+						if(new_pad[port][slot] & PAD_R2)		printf("R2 ");
+						if(new_pad[port][slot] & PAD_R3)		printf("R3 ");
 
-						if(new_pad) printf("\n");
+						if(new_pad[port][slot]) printf("\n");
 
 
 					}
