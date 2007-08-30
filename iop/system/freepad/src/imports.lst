@@ -3,25 +3,35 @@ loadcore_IMPORTS_start
 I_RegisterLibraryEntries
 loadcore_IMPORTS_end
 
-stdio_IMPORTS_start
-I_printf
-stdio_IMPORTS_end
+intrman_IMPORTS_start
+I_CpuEnableIntr
+I_CpuSuspendIntr
+I_CpuResumeIntr
+intrman_IMPORTS_end
 
 thbase_IMPORTS_start
 I_CreateThread
+I_DeleteThread
 I_StartThread
 I_ExitThread
 I_GetThreadId
+I_ReferThreadStatus
+I_iReferThreadStatus
 thbase_IMPORTS_end
 
 thevent_IMPORTS_start
 I_CreateEventFlag
+I_DeleteEventFlag
 I_SetEventFlag
+I_iSetEventFlag
+I_ClearEventFlag
 I_WaitEventFlag
 thevent_IMPORTS_end
 
 sifman_IMPORTS_start
 I_sceSifInit
+I_sceSifSetDma
+I_sceSifDmaStat
 I_sceSifCheckInit
 sifman_IMPORTS_end
 
@@ -32,13 +42,22 @@ I_sceSifSetRpcQueue
 I_sceSifRpcLoop
 sifcmd_IMPORTS_end
 
+stdio_IMPORTS_start
+I_printf
+stdio_IMPORTS_end
+
+vblank_IMPORTS_start
+I_RegisterVblankHandler
+I_ReleaseVblankHandler
+vblank_IMPORTS_end
+
 xsio2man_IMPORTS_start
-I_sio2_mtap_transfer_init
+I_sio2_stat70_get
+I_sio2_pad_transfer_init
 I_sio2_transfer
 I_sio2_transfer_reset
-I_sio2_mtap_change_slot_set
-I_sio2_mtap_get_slot_max_set
-I_sio2_mtap_get_slot_max_set2
-I_sio2_mtap_update_slots_set
+I_sio2_mtap_change_slot
+I_sio2_mtap_get_slot_max
+I_sio2_mtap_update_slots
 xsio2man_IMPORTS_end
 

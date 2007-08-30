@@ -1,0 +1,24 @@
+DECLARE_EXPORT_TABLE(padman, 1, 2)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(padInit)
+	DECLARE_EXPORT(padEnd)
+	DECLARE_EXPORT(padPortOpen)
+	DECLARE_EXPORT(padPortClose)
+	DECLARE_EXPORT(padGetInBuffer)
+	DECLARE_EXPORT(setupEEButtonData)
+	DECLARE_EXPORT(padGetModeConfig)
+	DECLARE_EXPORT(padInfoAct)
+	DECLARE_EXPORT(padInfoComb)
+	DECLARE_EXPORT(padInfoMode)
+	DECLARE_EXPORT(padSetMainMode)
+	DECLARE_EXPORT(padSetActDirect)
+	DECLARE_EXPORT(padSetActAlign)
+	DECLARE_EXPORT(padGetButtonMask)
+	DECLARE_EXPORT(padSetButtonInfo);
+
+END_EXPORT_TABLE
+
+void _retonly() {}

@@ -9,13 +9,15 @@ void sio2_pad_transfer_init();
 int sio2_transfer(sio2_transfer_data_t *td);
 void sio2_mtap_transfer_init();
 void sio2_transfer_reset();
-void sio2_cb1_set(int (*cb)(u32 *));
-void sio2_cb2_set(int (*cb)(int)); 
-void sio2_cb3_set(int (*cb)(int));
-void sio2_cb4_set(void (*cb)(void));
-int sio2_func1(u32 *arg);
-int sio2_func2(u32 *arg);
-void sio2_func4();
+
+void sio2_mtap_change_slot_set(int (*cb)(u32 *));
+void sio2_mtap_get_slot_max_set(int (*cb)(int)); 
+void sio2_mtap_get_slot_max_set2(int (*cb)(int));
+void sio2_mtap_update_slots_set(void (*cb)(void));
+
+int sio2_mtap_change_slot(u32 *arg);
+int sio2_mtap_get_slot_max(u32 port);
+void sio2_mtap_update_slots();
 
 // IRX Imports
 #define xsio2man_IMPORTS_start DECLARE_IMPORT_TABLE(sio2man, 1, 2)
@@ -27,13 +29,13 @@ void sio2_func4();
 #define I_sio2_mtap_transfer_init	DECLARE_IMPORT(48, sio2_mtap_transfer_init)
 //#define I_sio2_transfer DECLARE_IMPORT(49, sio2_transfer)
 #define I_sio2_transfer_reset DECLARE_IMPORT(50, sio2_transfer_reset)
-#define I_sio2_cb1_set DECLARE_IMPORT(51, sio2_cb1_set)
-#define I_sio2_cb2_set DECLARE_IMPORT(52, sio2_cb2_set)
-#define I_sio2_cb3_set DECLARE_IMPORT(53, sio2_cb3_set)
-#define I_sio2_cb4_set DECLARE_IMPORT(54, sio2_cb4_set)
-#define I_sio2_pad_func1 DECLARE_IMPORT(55, sio2_func1)
-#define I_sio2_pad_func2 DECLARE_IMPORT(56, sio2_func2)
-#define I_sio2_pad_func4 DECLARE_IMPORT(58, sio2_func4)
+#define I_sio2_mtap_change_slot_set DECLARE_IMPORT(51, sio2_mtap_change_slot_set)
+#define I_sio2_mtap_get_slot_max_set DECLARE_IMPORT(52, sio2_mtap_get_slot_max_set)
+#define I_sio2_mtap_get_slot_max_set2 DECLARE_IMPORT(53, sio2_mtap_get_slot_max_set2)
+#define I_sio2_mtap_update_slots_set DECLARE_IMPORT(54, sio2_mtap_update_slots_set)
+#define I_sio2_mtap_change_slot DECLARE_IMPORT(55, sio2_mtap_change_slot)
+#define I_sio2_mtap_get_slot_max DECLARE_IMPORT(56, sio2_mtap_get_slot_max)
+#define I_sio2_mtap_update_slots DECLARE_IMPORT(58, sio2_mtap_update_slots)
 
 #endif
 

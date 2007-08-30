@@ -10,13 +10,14 @@
 # $Id: pad.c 1152 2005-06-12 17:49:50Z oopo $
 */
 
-// Based on pad sample by pukko, check the pad sample for more advanced features.
+// Based on pad sample by pukko, check the pad samples for more advanced features.
 
 #include <tamtypes.h>
 #include <kernel.h>
 #include <sifrpc.h>
 #include <loadfile.h>
 #include <stdio.h>
+#include <string.h>
 
 #include "graph_registers.h"
 #include "libpad.h"
@@ -46,31 +47,59 @@ static u32 maxslot[2];
 
  }
 
-void loadModules(void)
+void loadmodules(int free)
 {
     int ret;
 
-    ret = SifLoadModule("rom0:XSIO2MAN", 0, NULL);
+	if(free == 1)
+	{
+		ret = SifLoadModule("host0:freesio2.irx", 0, NULL);
 
-    if (ret < 0) {
-        printf("sifLoadModule sio failed: %d\n", ret);
-        SleepThread();
-    }    
+	    if (ret < 0) {
+	        printf("SifLoadModule freesio2.irx failed: %d\n", ret);
+	        SleepThread();
+	    }    
 
-	ret = SifLoadModule("rom0:XMTAPMAN", 0, NULL);
+		ret = SifLoadModule("host0:freemtap.irx", 0, NULL);
 
-    if (ret < 0) {
-        printf("sifLoadModule mtap failed: %d\n", ret);
-        SleepThread();
-    }
+	    if (ret < 0) {
+	        printf("SifLoadModule freemtap.irx failed: %d\n", ret);
+	        SleepThread();
+	    }
 
-    ret = SifLoadModule("rom0:XPADMAN", 0, NULL);
+	    ret = SifLoadModule("host0:freepad.irx", 0, NULL);
 
-    if (ret < 0) {
-        printf("sifLoadModule pad failed: %d\n", ret);
-        SleepThread();
-    }
+	    if (ret < 0) {
+	        printf("SifLoadModule freepad.irx failed: %d\n", ret);
+	        SleepThread();
+	    }	
 
+	}
+	else
+	{
+
+	    ret = SifLoadModule("rom0:XSIO2MAN", 0, NULL);
+
+	    if (ret < 0) {
+	        printf("SifLoadModule XSIO2MAN failed: %d\n", ret);
+	        SleepThread();
+	    }    
+
+		ret = SifLoadModule("rom0:XMTAPMAN", 0, NULL);
+
+	    if (ret < 0) {
+	        printf("SifLoadModule XMTAPMAN failed: %d\n", ret);
+	        SleepThread();
+	    }
+
+	    ret = SifLoadModule("rom0:XPADMAN", 0, NULL);
+
+	    if (ret < 0) {
+	        printf("SifLoadModule XPADMAN failed: %d\n", ret);
+	        SleepThread();
+	    }
+
+	}
 
 
 }
@@ -96,7 +125,7 @@ void find_controllers()
 
 		if((mtapcon == 0) && (mtapConnected[port] == 1))
 		{
-			printf("Multitap (%i) disconnected\n", (int)port);
+			printf("Multitap (%i) disconnected(int argc, char **argv)\n", (int)port);
 		}
 
 		mtapConnected[port] = mtapcon;
@@ -163,8 +192,7 @@ void find_controllers()
 
 
 
-int
-main()
+int main(int argc, char **argv)
 {
 	u32 i;
 	
@@ -176,9 +204,23 @@ main()
 	
 	SifInitRpc(0);
 
-    printf("\n--- mtap sample, based on pad sample by pukko. - Lukasz ---\n");
+    printf("libmtap sample");
 
-    loadModules();
+	if((argc == 2) && (strncmp(argv[1], "free", 4) == 0))
+	{
+		printf(" - Using PS2SDK freesio2.irx, freemtap.irx and freepad.irx modules.\n");
+		loadmodules(1);	
+	}
+	else
+	{
+		printf(" - Using ROM XSIO2MAN, XMTAP and XPADMAN modules.\n");
+		printf("Start this sample with 'free' as an argument to load freesio2.irx, freemtap.irx and freepad.irx\n");
+		printf("Example: ps2client execee host:mtap_sample.elf free\n");
+		loadmodules(0);
+	}
+	
+
+  
 
 	mtapInit();
     padInit(0);

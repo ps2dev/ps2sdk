@@ -9,21 +9,17 @@
 # $Id: Makefile.sample 577 2004-09-14 14:41:46Z pixel $
 
 
-EE_BIN = mtap_sample.elf
-EE_OBJS = mtap_sample.o
-EE_LIBS = -lpadx -lc -lmtap
+EE_BIN = padx_sample.elf
+EE_OBJS = padx.o
+EE_LIBS = -lpadx
 
-all: $(EE_BIN) freesio2.irx freemtap.irx freepad.irx
+all: $(EE_BIN) freesio2.irx freepad.irx
 
 clean:
-	rm -f *.elf *.o *.a freesio2.irx freemtap.irx freepad.irx
+	rm -f *.elf *.o *.a freepad.irx freesio2.irx
 
 freesio2.irx: 
 	cp $(PS2SDK)/iop/irx/freesio2.irx $@
-
-freemtap.irx:
-	cp $(PS2SDK)/iop/irx/freemtap.irx $@
-
 
 freepad.irx: 
 	cp $(PS2SDK)/iop/irx/freepad.irx $@

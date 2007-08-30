@@ -1,0 +1,14 @@
+freepad is a free replacement module for XPADMAN.
+
+I'd like to thank pukko for libpad(x), Hanimar for ps2dis, [RO]man for 
+padspecs.txt and Marcus R. Brown for sio2log.
+
+You can uncomment -DDEBUG in the makefile, to build a debug version which prints
+debug output to stdout.
+
+- Lukasz Bruun
+
+Changelog
+-------------------------------------------------------------------------------
+2007-08-30
+  - lukasz, initial release

@@ -117,31 +117,45 @@ struct pad_data
     unsigned int unkn60;
 };
 #else
+
 struct pad_data 
 {
-    unsigned char data[32]; // 0, length = 32 bytes
-    unsigned int unkn32;    // not used??
-    unsigned int unkn36;    // not used??
-    unsigned int unkn40;    // byte 40  not used??
-    unsigned int unkn44;    // not used?? 44
-    unsigned char actData[32]; // actuator (6x4?) 48
-    unsigned short modeTable[4];  // padInfo   80
-    unsigned int frame;     // byte 88, u32 22
-    unsigned int unkn92;    // not used ??
-    unsigned int length;    // 96
-    unsigned char modeOk;   // padInfo  100 Dunno about the name though...
-    unsigned char modeCurId; // padInfo    101
-    unsigned char unkn102;  // not used??
-    unsigned char unknown;  // unknown
-    unsigned char nrOfModes;   // padInfo   104
-    unsigned char modeCurOffs; // padInfo   105
-    unsigned char nrOfActuators;     // act  106
-    unsigned char unkn107[5];  // not used??
-    unsigned char state;    // byte 112
-    unsigned char reqState; // byte 113
-    unsigned char ok;       // padInfo  114
-    unsigned char unkn115[13];  // not used??
+    u8 data[32]; 
+	u32 actDirData[2];
+	u32 actAlignData[2];
+    u8  actData[32]; 
+    u16 modeTable[4]; 
+    u32 frame;
+    u32 findPadRetries;
+    u32 length;
+    u8 modeConfig;
+    u8 modeCurId;
+    u8 model;
+    u8 buttonDataReady;
+    u8 nrOfModes;
+    u8 modeCurOffs; 
+    u8 nrOfActuators; 
+	u8 numActComb;
+	u8 val_c6;
+	u8 mode;
+    u8 lock;
+	u8 actDirSize;
+    u8 state;
+    u8 reqState;
+    u8 currentTask; 
+	u8 runTask;
+	u8 stat70bit;
+    u8 padding[11];
 };
+
+
+struct open_slot
+{
+	u32 frame;
+	u32 openSlots[2];
+	u8  padding[116];
+};
+
 #endif
 
 
@@ -160,7 +174,11 @@ static int padInitialised = 0;
 // pad rpc call
 static SifRpcClientData_t padsif[2] __attribute__((aligned(64)));
 static char buffer[128] __attribute__((aligned(128)));
-static char buffer2[256] __attribute__((aligned(128)));
+
+#ifndef ROM_PADMAN
+static struct open_slot openSlot[2];
+//static char buffer2[256] __attribute__((aligned(128)));
+#endif
 
 /* Port state data */
 static struct pad_state PadState[2][8]; 
@@ -266,7 +284,7 @@ padInit(int a)
     //  xpadman RPC "init" call will transfer 256 bytes to whatever address
     //  is supplied here.  If this is not set, random parts of the EE RAM
     //  can be overwritten by DMA!
-    ((u32 *)(&buffer[0]))[4]=(u32) &buffer2;
+    ((u32 *)(&buffer[0]))[4]=(u32)openSlot;
     if (SifCallRpc( &padsif[0], 1, 0, buffer, 128, buffer, 128, 0, 0) < 0)
         return -1;
 #endif
@@ -325,10 +343,10 @@ padPortOpen(int port, int slot, void *padArea)
         dma_buf[i].length = 0;
         dma_buf[i].state = PAD_STATE_EXECCMD;
         dma_buf[i].reqState = PAD_RSTAT_BUSY;
-        dma_buf[i].ok = 0;
+        dma_buf[i].currentTask = 0;
         dma_buf[i].length = 0;
 #ifndef ROM_PADMAN
-        dma_buf[i].unknown = 0; // Should be cleared in newer padman
+        dma_buf[i].buttonDataReady = 0; // Should be cleared in newer padman
 #endif
     }
     
@@ -554,7 +572,7 @@ padInfoMode(int port, int slot, int infoMode, int index)
 
     pdata = padGetDmaStr(port, slot);    
 
-    if (pdata->ok != 1)
+    if (pdata->currentTask != 1)
         return 0;
     if (pdata->reqState == PAD_RSTAT_BUSY)
         return 0;
@@ -568,20 +586,20 @@ padInfoMode(int port, int slot, int infoMode, int index)
         break;
 
     case PAD_MODECUREXID:
-        if (pdata->modeOk == pdata->ok)
+        if (pdata->modeConfig == pdata->currentTask)
             return 0;
         return pdata->modeTable[pdata->modeCurOffs];
         break;
 
     case PAD_MODECUROFFS:
-        if (pdata->modeOk != 0)
+        if (pdata->modeConfig != 0)
             return pdata->modeCurOffs;
         else
             return 0;
         break;
 
     case PAD_MODETABLE:
-        if (pdata->modeOk != 0) {
+        if (pdata->modeConfig != 0) {
             if(index == -1) {
                 return pdata->nrOfModes;
             }
@@ -737,9 +755,9 @@ padInfoAct(int port, int slot, int actuator, int cmd)
     
     pdata = padGetDmaStr(port, slot);
 
-    if (pdata->ok != 1)
+    if (pdata->currentTask != 1)
         return 0;
-    if (pdata->modeOk < 2)
+    if (pdata->modeConfig < 2)
         return 0;
     if (actuator >= pdata->nrOfActuators)
         return 0;
@@ -813,9 +831,6 @@ padSetActDirect(int port, int slot, char actAlign[6])
 
 
 /*
- * Dunno about this one.. always returns 1?
- * I guess it should've returned if the pad was connected..
- *
  * NOT SUPPORTED with module rom0:padman
  */
 int
@@ -824,14 +839,13 @@ padGetConnection(int port, int slot)
 #ifdef ROM_PADMAN
     return 1;
 #else
+	struct open_slot *oslot;
 
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_GET_CONNECT;
-    *(u32 *)(&buffer[4])=port;
-    *(u32 *)(&buffer[8])=slot;
-        
-    if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, 0, 0) < 0)
-        return -1;
+	if(openSlot[0].frame < openSlot[1].frame)
+		oslot = &openSlot[1];
+	else
+		oslot = &openSlot[0];
 
-    return *(int *)(&buffer[12]);
+	return ((oslot->openSlots[port] >> slot) & 0x1);
 #endif
 }
