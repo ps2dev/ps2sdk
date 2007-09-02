@@ -141,8 +141,8 @@ u32	SdGetAddr(u16 entry );
 void SdSetCoreAttr(u16 entry, u16 value );
 u16	SdGetCoreAttr(u16 entry );
 
-u16	SdNote2Pitch(u16 center_note, u16 center_fine, u16 note, s16 fine);
-u16	SdPitch2Note(u16 center_note, u16 center_fine, u16 pitch);
+u16 SdNote2Pitch(s16 center_note, s16 center_fine, s16 note, s16 fine);
+u16	SdPitch2Note(s16 center_note, s16 center_fine, s16 pitch);
 
 s32	SdProcBatch(SdBatch* batch, u32 returns[], u32 num  );
 s32	SdProcBatchEx(SdBatch* batch, u32 returns[], u32 num, u32 voice  );

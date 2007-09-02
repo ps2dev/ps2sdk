@@ -2,7 +2,7 @@
  * freesd.c - IOP Sound Driver
  *
  * Copyright (c) 2004 TyRaNiD <tiraniddo@hotmail.com>
- * Copyright (c) 2004 Lukasz Bruun <ps2@lukasz.dk>
+ * Copyright (c) 2004,2007 Lukasz Bruun <mail@lukasz.dk>
  *
  * See the file LICENSE included with this distribution for licensing terms.
  */
@@ -18,7 +18,7 @@
 struct irx_export_table _exp_libsd;
 
 #define BANNER "FREESD %s\n"
-#define VERSION "v0.9"
+#define VERSION "v1.0"
 
 #define MODNAME "freesd"
 
@@ -69,6 +69,30 @@ volatile u16 *ParamRegList[] =
 	U16_REGISTER(0x1AE),	U16_REGISTER(0x1B0), 
 	(u16*)0xBF900334
 
+};
+
+u16 NotePitchTable[] =
+{
+	0x8000, 0x879C, 0x8FAC, 0x9837, 0xA145, 0xAADC, 0xB504,
+	0xBFC8, 0xCB2F, 0xD744, 0xE411, 0xF1A1, 0x8000, 0x800E,
+	0x801D, 0x802C, 0x803B, 0x804A, 0x8058, 0x8067, 0x8076,
+	0x8085, 0x8094, 0x80A3, 0x80B1, 0x80C0, 0x80CF, 0x80DE,
+	0x80ED, 0x80FC, 0x810B, 0x811A, 0x8129, 0x8138, 0x8146,
+	0x8155, 0x8164, 0x8173, 0x8182, 0x8191, 0x81A0, 0x81AF,
+	0x81BE, 0x81CD, 0x81DC, 0x81EB, 0x81FA, 0x8209, 0x8218,
+	0x8227, 0x8236, 0x8245, 0x8254, 0x8263, 0x8272, 0x8282,
+	0x8291, 0x82A0, 0x82AF, 0x82BE, 0x82CD, 0x82DC, 0x82EB,
+	0x82FA, 0x830A, 0x8319, 0x8328, 0x8337, 0x8346, 0x8355,
+	0x8364, 0x8374, 0x8383, 0x8392, 0x83A1, 0x83B0, 0x83C0,
+	0x83CF, 0x83DE, 0x83ED, 0x83FD, 0x840C, 0x841B, 0x842A,
+	0x843A, 0x8449, 0x8458, 0x8468, 0x8477, 0x8486, 0x8495,
+	0x84A5, 0x84B4, 0x84C3, 0x84D3, 0x84E2, 0x84F1, 0x8501,
+	0x8510, 0x8520, 0x852F, 0x853E, 0x854E, 0x855D, 0x856D,
+	0x857C, 0x858B, 0x859B, 0x85AA, 0x85BA, 0x85C9, 0x85D9,
+	0x85E8, 0x85F8, 0x8607, 0x8617, 0x8626, 0x8636, 0x8645,
+	0x8655, 0x8664, 0x8674, 0x8683, 0x8693, 0x86A2, 0x86B2,
+	0x86C1, 0x86D1, 0x86E0, 0x86F0, 0x8700, 0x870F, 0x871F,
+	0x872E, 0x873E, 0x874E, 0x875D, 0x876D, 0x877D, 0x878C
 };
 
 void nopdelay()
@@ -581,15 +605,115 @@ void SetDmaRead(s32 chan)
 	*reg = (*reg & 0xF0FFFFFF) | 0x22000000;
 }
 
-u16 SdNote2Pitch(u16 centre_note, u16 centre_fine, u16 note, s16 fine)
+u16 SdNote2Pitch(s16 center_note, s16 center_fine, s16 note, s16 fine)
 {
-	return 0;
+	s32 _fine;
+	s32 _fine2;
+	s32 _note;
+	s32 offset1, offset2;
+	s32 val;
+	s32 val2;
+	s32 val3;
+	s32 ret;
+
+	_fine = fine + (u16)center_fine;	
+	_fine2 = _fine;
+
+	if(_fine < 0) _fine2 = _fine + 127;
+
+	_fine2 = _fine2 / 128;	
+	_note = note + _fine2 - center_note;	
+	val3 = _note / 6;	
+	
+	if(_note < 0) val3--;
+
+	offset2 = _fine - _fine2 * 128;	
+
+	if(_note < 0) val2 = -1; else val2 = 0;
+	if(val3 < 0) val3--;
+
+	val2 = (val3 / 2) - val2;	
+	val = val2 - 2;	
+	offset1 = _note - (val2 * 12);	
+		
+	if((offset1 < 0) || ((offset1 == 0) && (offset2 < 0))) 
+	{
+		offset1 = offset1 + 12;	
+		val = val2 - 3;	
+	}
+
+	if(offset2 < 0)
+	{
+		offset1 = (offset1-1) + _fine2;	
+		offset2 += (_fine2+1) * 128;	
+	}
+	
+	ret = (NotePitchTable[offset1] * NotePitchTable[offset2 + 12]) / 0x10000;	
+
+	if(val < 0)	ret = (ret + (1 << (-val -1))) >> -val;	
+
+	return (u16)ret;		
 }
 
-u16 SdPitch2Note(u16 centre_note, u16 centre_fine, u16 pitch)
+
+u16	SdPitch2Note(s16 center_note, s16 center_fine, s16 pitch)
 {
-	return 0;
+	s32 _pitch;
+	s32 i = 0;
+	s32 bit = 0;
+	s32 offset1 = 0;
+	s32 offset2 = 0;
+	s32 val;
+	s32 ret;	
+
+	if(((u16)pitch) >= 0x4000) pitch = 0x3FFF; 
+
+	_pitch = (u16)pitch; 
+
+	do
+	{
+		if((_pitch & 1) == 1) bit = i;  
+
+		_pitch >>= 1;
+		i++; 
+	} while(i < 14);
+	
+	val = (u16)pitch << (15 - bit);
+	i = 11; 
+	
+	do
+	{
+		if((u16)val >= NotePitchTable[i]) 
+		{
+			offset1 = i;
+			break;
+		}
+	
+		i--;	
+	} while(i >= 0);
+	
+	val = ((u16)val * 0x8000) / NotePitchTable[(u16)offset1];
+	i = 127;
+
+	do
+	{
+		if((u16)val >= NotePitchTable[12 + i])
+		{
+			offset2 = i;
+			break;
+		}
+
+		i--;
+
+	} while(i >= 0);
+
+	val = (u16)(center_fine + offset2 +1);
+	ret = (center_note + offset1 + ((bit - 12) * 12) + (val/128)) * 256;
+	ret = (ret + (val & 0x7E)) & 0xFFFE;
+
+	return (u16)ret;
 }
+
 
 void SetSpdifMode(u16 val)
 {
