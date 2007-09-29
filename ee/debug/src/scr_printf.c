@@ -184,20 +184,12 @@ void scr_setbgcolor(u32 color)
 
 void init_scr()
 {
-/// begin EEUG: fix for SCPH-77004
- char lBuf[ 16 ];
- int  lFD = fioOpen ( "rom0:ROMVER", O_RDONLY );
- fioRead ( lFD, lBuf, 16 );
- fioClose ( lFD );
-/// end EEUG
    X = Y = 0;
    EI();
    DmaReset();
-#if 0   /// begin EEUG: old code (crashes on SCPH-77004)
+/// EEUG: note that access to 0x1FC7FF52 causes
+///       crash on SCPH-77004. Probably this code must be revised
    Init_GS( 0, ((*((char*)0x1FC7FF52))=='E')+2, 1);
-#else   /// new code (should be OK in all cases)
-   Init_GS( 0, (lBuf[4]=='E')+2, 1);
-#endif  /// end EEUG
    SetVideoMode();
    Dma02Wait();
    progdma( &setupscr, 15);
