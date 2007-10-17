@@ -51,6 +51,10 @@ sceSifSetCmdBuffer:
 	j	$31
 	li	$0, 0x08
 
+	.globl	sceSifSetSysCmdBuffer			# 0x09
+sceSifSetSysCmdBuffer:
+	j	$31
+	li	$0, 0x09
 
 	.globl	sceSifAddCmdHandler		# 0x0a
 sceSifAddCmdHandler:
@@ -67,8 +71,8 @@ sceSifSendCmd:
 	j	$31
 	li	$0, 0x0c
 
-	.globl	I_sceSifSendCmd			# 0x0d
-I_sceSifSendCmd:
+	.globl	isceSifSendCmd			# 0x0d
+isceSifSendCmd:
 	j	$31
 	li	$0, 0x0d
 
@@ -117,8 +121,8 @@ sceSifRpcLoop:
 	j	$31
 	li	$0, 0x16
 
-	.globl	sceSifRpcGetOtherData		# 0x17
-sceSifRpcGetOtherData:
+	.globl	sceSifGetOtherData		# 0x17
+sceSifGetOtherData:
 	j	$31
 	li	$0, 0x17
 
@@ -132,13 +136,23 @@ sceSifRemoveRpcQueue:
 	j	$31
 	li	$0, 0x19
 
+	.globl	sceSifSetSif1CB		# 0x1A
+sceSifSetSif1CB:
+	j	$31
+	li	$0, 0x1A
+
+	.globl	sceSifClearSif1CB		# 0x1B
+sceSifClearSif1CB:
+	j	$31
+	li	$0, 0x1B
+
 	.globl	sceSifSendCmdIntr		# 0x20
 sceSifSendCmdIntr:
 	j	$31
 	li	$0, 0x20
 
-	.globl	I_sceSifSendCmdIntr		# 0x21
-I_sceSifSendCmdIntr:
+	.globl	isceSifSendCmdIntr		# 0x21
+isceSifSendCmdIntr:
 	j	$31
 	li	$0, 0x21
 
