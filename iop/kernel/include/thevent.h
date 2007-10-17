@@ -27,6 +27,15 @@ typedef struct {
 	u32	bits;
 } iop_event_t;
 
+typedef struct {
+	u32 attr;			// set by CreateEventFlag
+	u32 option;			// set by CreateEventFlag
+	u32 initBits;		// initial 'bits' value set by CreateEventFlag
+	u32 currBits;		// current 'bits' value
+	u32 numThreads;		// number of threads waiting on this event
+} iop_event_info_t;
+
+
 #define thevent_IMPORTS_start DECLARE_IMPORT_TABLE(thevent, 1, 1)
 #define thevent_IMPORTS_end END_IMPORT_TABLE
 
@@ -51,6 +60,11 @@ int WaitEventFlag(int ef, u32 bits, int mode, u32 *resbits);
 int PollEventFlag(int ef, u32 bits, int mode, u32 *resbits);
 #define I_PollEventFlag DECLARE_IMPORT(11, PollEventFlag)
 
+int ReferEventFlagStatus(int ef, iop_event_info_t* info);
+#define I_ReferEventFlagStatus DECLARE_IMPORT(13, ReferEventFlagStatus)
+int iReferEventFlagStatus(int ef, iop_event_info_t* info);
+#define I_iReferEventFlagStatus DECLARE_IMPORT(14, iReferEventFlagStatus)
+
 
 #define thevent_IMPORTS \
 	thevent_IMPORTS_start \
@@ -67,6 +81,9 @@ int PollEventFlag(int ef, u32 bits, int mode, u32 *resbits);
  	I_WaitEventFlag \
  \
  	I_PollEventFlag \
+ \
+ 	I_ReferEventFlagStatus \
+	I_iReferEventFlagStatus \
  \
 	thevent_IMPORTS_end END_IMPORT_TABLE
 
