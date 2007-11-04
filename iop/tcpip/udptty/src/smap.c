@@ -169,7 +169,7 @@ int smap_init()
 	u32 val;
 	int i;
 
-	if (!(SPD_REG16(SPD_R_REV_3) & 0x01) || SPD_REG16(SPD_R_REV_1) <= 16)
+	if (!(SPD_REG16(SPD_R_REV_3) & SPD_CAPS_SMAP) || SPD_REG16(SPD_R_REV_1) <= 16)
 		return 1;
 
 	dev9IntrDisable(SMAP_INTR_BITMSK);

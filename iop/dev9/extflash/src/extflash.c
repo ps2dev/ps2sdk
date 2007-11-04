@@ -94,7 +94,7 @@ int flash_detect()
 	}
 
 	/* Check bit 5 of the revision register.  */
-	if ((rev = SPD_REG16(SPD_R_REV_3)) & 0x20) {
+	if ((rev = SPD_REG16(SPD_R_REV_3)) & SPD_CAPS_FLASH) {
 		M_PRINTF("Detected flash (rev3 0x%02x).\n", rev);
 		return 0;
 	}

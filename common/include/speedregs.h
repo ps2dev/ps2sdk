@@ -31,11 +31,22 @@
 #define SPD_R_REV			0x00
 #define SPD_R_REV_1			0x02
 #define SPD_R_REV_3			0x04
-#define SPD_R_0e			0x0e
+#define   SPD_CAPS_SMAP			(1<<0)
+#define   SPD_CAPS_ATA			(1<<1)
+#define   SPD_CAPS_UART			(1<<3)
+#define   SPD_CAPS_DVR			(1<<4)
+#define   SPD_CAPS_FLASH		(1<<5)
+#define SPD_R_REV_8			0x0e
 
 #define SPD_R_DMA_CTRL			0x24
 #define SPD_R_INTR_STAT			0x28
 #define SPD_R_INTR_MASK			0x2a
+#define	  SPD_INTR_ATA0			(1<<0)
+#define	  SPD_INTR_ATA1			(1<<1)
+#define	  SPD_INTR_ATA			(SPD_INTR_ATA0|SPD_INTR_ATA1)	//mask=0x0003
+//see smapregs.h for SMAP_INTR_*(TXDNV|RXDNV|TXEND|RXEND|EMAC3)		//mask=0x007C
+#define   SPD_INTR_DVR			(1<<9)				//mask=0x0200
+#define   SPD_INTR_UART			(1<<12)				//mask=0x1000
 #define SPD_R_PIO_DIR			0x2c
 #define SPD_R_PIO_DATA			0x2e
 #define	  SPD_PP_DOUT		(1<<4)	/* Data output, read port */

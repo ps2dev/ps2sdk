@@ -110,7 +110,7 @@ int _start(int argc, char *argv[])
 
 	printf(BANNER, VERSION);
 
-	if (!(SPD_REG16(SPD_R_REV_3) & 0x02) || !(SPD_REG16(SPD_R_0e) & 0x02)) {
+	if (!(SPD_REG16(SPD_R_REV_3) & SPD_CAPS_ATA) || !(SPD_REG16(SPD_R_REV_8) & 0x02)) {
 		M_PRINTF("HDD is not connected, exiting.\n");
 		goto out;
 	}
@@ -130,8 +130,8 @@ int _start(int argc, char *argv[])
 
 	ata_pio_mode(0);
 
-	dev9RegisterIntrCb(1, ata_intr_cb);
-	dev9RegisterIntrCb(0, ata_intr_cb);
+	dev9RegisterIntrCb(SPD_INTR_ATA1, ata_intr_cb);
+	dev9RegisterIntrCb(SPD_INTR_ATA0, ata_intr_cb);
 
 	res = 0;
 	M_PRINTF("Driver loaded.\n");
@@ -147,7 +147,7 @@ static int ata_intr_cb(int flag)
 		memset(atad_devinfo, 0, sizeof atad_devinfo);
 		is_sony_hdd[0] = is_sony_hdd[1] = 0;
 	} else {
-		dev9IntrDisable(3);
+		dev9IntrDisable(SPD_INTR_ATA);
 		iSetEventFlag(ata_evflg, 0x02);
 	}
 
@@ -315,7 +315,7 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector,
 
 	/* Enable the command completion interrupt.  */
 	if (type == 1)
-		dev9IntrEnable(1);
+		dev9IntrEnable(SPD_INTR_ATA0);
 
 	/* Finally!  We send off the ATA command with arguments.  */
 	ata_hwport->r_control = (using_timeout == 0) << 1;
@@ -407,7 +407,7 @@ static int ata_dma_complete(void *buf, int blkcount, int dir)
 		if (dma_stat)
 			goto next_transfer;
 
-		dev9IntrEnable(3);
+		dev9IntrEnable(SPD_INTR_ATA);
 		/* Wait for the previous transfer to complete or a timeout.  */
 		WaitEventFlag(ata_evflg, 0x03, 0x11, &bits);
 
@@ -468,7 +468,7 @@ int ata_io_finish()
 			if ((stat = SPD_REG16(SPD_R_INTR_STAT) & 0x01))
 				break;
 		if (!stat) {
-			dev9IntrEnable(1);
+			dev9IntrEnable(SPD_INTR_ATA0);
 			WaitEventFlag(ata_evflg, 0x03, 0x11, &bits);
 			if (bits & 0x01) {
 				M_PRINTF("Error: ATA timeout on DMA completion.\n");

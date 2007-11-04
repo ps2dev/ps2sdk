@@ -18,6 +18,8 @@
 #include "irx.h"
 
 typedef int (*dev9_intr_cb_t)(int flag);
+typedef void (*dev9_shutdown_cb_t)(void);
+typedef void (*dev9_dma_cb_t)(int bcr, int dir);
 
 #define dev9_IMPORTS_start DECLARE_IMPORT_TABLE(dev9, 1, 1)
 #define dev9_IMPORTS_end END_IMPORT_TABLE
@@ -40,5 +42,14 @@ int dev9GetEEPROM(u16 *buf);
 
 void dev9LEDCtl(int ctl);
 #define I_dev9LEDCtl DECLARE_IMPORT(10, dev9LEDCtl)
+
+int dev9RegisterShutdownCb(int idx, dev9_shutdown_cb_t cb);
+#define I_dev9RegisterShutdownCb DECLARE_IMPORT(11, dev9RegisterShutdownCb)
+
+void dev9RegisterPreDmaCb(int ctrl, dev9_dma_cb_t cb);
+#define I_dev9RegisterPreDmaCb DECLARE_IMPORT(12, dev9RegisterPreDmaCb)
+
+void dev9RegisterPostDmaCb(int ctrl, dev9_dma_cb_t cb);
+#define I_dev9RegisterPostDmaCb DECLARE_IMPORT(13, dev9RegisterPostDmaCb)
 
 #endif /* IOP_PS2DEV9_H */

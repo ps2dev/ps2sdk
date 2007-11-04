@@ -61,6 +61,10 @@ static s16 eeprom_data[5];	/* 2-byte EEPROM status (0/-1 = invalid, 1 = valid),
    SMAP interrupt status register (0xbx000028).  */
 static dev9_intr_cb_t dev9_intr_cbs[16];
 
+static dev9_shutdown_cb_t dev9_shutdown_cbs[16];
+
+static dev9_dma_cb_t dev9_predma_cbs[4], dev9_postdma_cbs[4];
+
 static int dev9_intr_dispatch(int flag);
 static int dev9_dma_intr(void *arg);
 
@@ -91,7 +95,7 @@ struct irx_export_table _exp_dev9;
 int _start(int argc, char **argv)
 {
 	USE_DEV9_REGS;
-	int res = 1;
+	int idx, res = 1;
 	u16 dev9hw;
 
 	iop_library_table_t *libtable;
@@ -114,6 +118,9 @@ int _start(int argc, char **argv)
 		}
 		libptr = libptr->prev;
         }
+
+	for (idx = 0; idx < 16; idx++)
+		dev9_shutdown_cbs[idx] = NULL;
 
 	dev9hw = DEV9_REG(DEV9_R_REV) & 0xf0;
 	if (dev9hw == 0x20) {		/* CXD9566 (PCMCIA) */
@@ -147,6 +154,17 @@ void dev9RegisterIntrCb(int intr, dev9_intr_cb_t cb)
 	dev9_intr_cbs[intr] = cb;
 }
 
+/* Export 12 */
+void dev9RegisterPreDmaCb(int ctrl, dev9_dma_cb_t cb){
+	dev9_predma_cbs[ctrl] = cb;
+}
+
+/* Export 13 */
+void dev9RegisterPostDmaCb(int ctrl, dev9_dma_cb_t cb){
+	dev9_postdma_cbs[ctrl] = cb;
+}
+
+// flag is 1 if a card (pcmcia) was removed or added
 static int dev9_intr_dispatch(int flag)
 {
 	USE_SPD_REGS;
@@ -212,17 +230,22 @@ static int smap_device_reset()
 /* Export 6 */
 void dev9Shutdown()
 {
+	int idx;
 	USE_DEV9_REGS;
 
+	for (idx = 0; idx < 16; idx++)
+		if (dev9_shutdown_cbs[idx])
+			dev9_shutdown_cbs[idx]();
+
 	if (dev9type == 0) {	/* PCMCIA */
-		DEV9_REG(DEV9_R_146C) = 0;
+		DEV9_REG(DEV9_R_POWER) = 0;
 		DEV9_REG(DEV9_R_1474) = 0;
 	} else if (dev9type == 1) {
 		DEV9_REG(DEV9_R_1466) = 1;
 		DEV9_REG(DEV9_R_1464) = 0;
 		DEV9_REG(DEV9_R_1460) = DEV9_REG(DEV9_R_1464);
-		DEV9_REG(DEV9_R_146C) = DEV9_REG(DEV9_R_146C) & 0xfffb;
-		DEV9_REG(DEV9_R_146C) = DEV9_REG(DEV9_R_146C) & 0xfffe;
+		DEV9_REG(DEV9_R_POWER) = DEV9_REG(DEV9_R_POWER) & ~4;
+		DEV9_REG(DEV9_R_POWER) = DEV9_REG(DEV9_R_POWER) & ~1;
 	}
 	DelayThread(1000000);
 }
@@ -259,16 +282,35 @@ int dev9DmaTransfer(int ctrl, void *buf, int bcr, int dir)
 {
 	USE_SPD_REGS;
 	volatile iop_dmac_chan_t *dev9_chan = (iop_dmac_chan_t *)DEV9_DMAC_BASE;
-	int stat, res = 0;
+	int stat, res = 0, dmactrl;
+
+	switch(ctrl){
+	case 0:
+	case 1:	dmactrl = ctrl;
+		break;
+
+	case 2:
+	case 3:
+		if (dev9_predma_cbs[ctrl] == NULL)	return -1;
+		if (dev9_postdma_cbs[ctrl] == NULL)	return -1;
+		dmactrl = (4 << ctrl);
+		break;
+
+	default:
+		return -1;
+	}
 
 	if ((res = WaitSema(dma_lock_sem)) < 0)
 		return res;
 
 	if (SPD_REG16(SPD_R_REV_1) < 17)
-		ctrl = (ctrl & 0x03) | 0x04;
+		dmactrl = (dmactrl & 0x03) | 0x04;
 	else
-		ctrl = (ctrl & 0x01) | 0x06;
-	SPD_REG16(SPD_R_DMA_CTRL) = ctrl;
+		dmactrl = (dmactrl & 0x01) | 0x06;
+	SPD_REG16(SPD_R_DMA_CTRL) = dmactrl;
+
+	if (dev9_predma_cbs[ctrl])
+		dev9_predma_cbs[ctrl](bcr, dir);
 
 	EnableIntr(IOP_IRQ_DMA_DEV9);
 	dev9_chan->madr = (u32)buf;
@@ -281,6 +323,10 @@ int dev9DmaTransfer(int ctrl, void *buf, int bcr, int dir)
 		res = 0;
 
 	DisableIntr(IOP_IRQ_DMA_DEV9, &stat);
+
+	if (dev9_postdma_cbs[ctrl])
+		dev9_postdma_cbs[ctrl](bcr, dir);
+
 	SignalSema(dma_lock_sem);
 	return res;
 }
@@ -376,6 +422,16 @@ void dev9LEDCtl(int ctl)
 	SPD_REG8(SPD_R_PIO_DATA) = (ctl == 0);
 }
 
+/* Export 11 */
+int dev9RegisterShutdownCb(int idx, dev9_shutdown_cb_t cb){
+	if (idx < 16)
+	{
+		dev9_shutdown_cbs[idx] = cb;
+		return 0;
+	}
+	return -1;
+}
+
 static int smap_subsys_init(void)
 {
 	int i, stat, flags;
@@ -403,6 +459,11 @@ static int smap_subsys_init(void)
 	/* Reset the SMAP interrupt callback table. */
 	for (i = 0; i < 16; i++)
 		dev9_intr_cbs[i] = NULL;
+
+	for (i = 0; i < 4; i++){
+		dev9_predma_cbs[i] = NULL;
+		dev9_postdma_cbs[i] = NULL;
+	}
 
 	/* Read in the MAC address.  */
 	read_eeprom_data();
@@ -459,9 +520,10 @@ static int pcic_get_cardtype()
 	USE_DEV9_REGS;
 	u16 val = DEV9_REG(DEV9_R_1462) & 0x03;
 
-	if (!val)
+	if (val == 0)
 		return 1;	/* 16-bit */
-	else if (val != 3)
+	else
+	if (val < 3)
 		return 2;	/* CardBus */
 	return 0;
 }
@@ -486,20 +548,20 @@ static int pcic_power(int voltage, int flag)
 	u16 cstc1, cstc2;
 	u16 val = (voltage == 1) << 2;
 
-	DEV9_REG(DEV9_R_146C) = 0;
+	DEV9_REG(DEV9_R_POWER) = 0;
 
 	if (voltage == 2)
 		val |= 0x08;
 	if (flag == 1)
 		val |= 0x10;
 
-	DEV9_REG(DEV9_R_146C) = val;
+	DEV9_REG(DEV9_R_POWER) = val;
 	DelayThread(22000);
 
 	if (DEV9_REG(DEV9_R_1462) & 0x100)
 		return 0;
 
-	DEV9_REG(DEV9_R_146C) = 0;
+	DEV9_REG(DEV9_R_POWER) = 0;
 	DEV9_REG(DEV9_R_1464) = cstc1 = DEV9_REG(DEV9_R_1464);
 	DEV9_REG(DEV9_R_1466) = cstc2 = DEV9_REG(DEV9_R_1466);
 	return -1;
@@ -558,7 +620,7 @@ static int pcic_ssbus_mode(int voltage)
 	_sw(0xe01a3043, SSBUS_R_1418);
 
 	DelayThread(5000);
-	DEV9_REG(DEV9_R_146C) = DEV9_REG(DEV9_R_146C) & 0xfffe;
+	DEV9_REG(DEV9_R_POWER) = DEV9_REG(DEV9_R_POWER) & ~1;
 	return 0;
 }
 
@@ -593,10 +655,10 @@ static int pcmcia_device_reset(void)
 	if (pcic_power(pcic_voltage, 1) < 0)
 		return -1;
 
-	DEV9_REG(DEV9_R_146C) = DEV9_REG(DEV9_R_146C) | 0x02;
+	DEV9_REG(DEV9_R_POWER) = DEV9_REG(DEV9_R_POWER) | 0x02;
 	DelayThread(500000);
 
-	DEV9_REG(DEV9_R_146C) = DEV9_REG(DEV9_R_146C) | 0x01;
+	DEV9_REG(DEV9_R_POWER) = DEV9_REG(DEV9_R_POWER) | 0x01;
 	DEV9_REG(DEV9_R_1464) = cstc1 = DEV9_REG(DEV9_R_1464);
 	DEV9_REG(DEV9_R_1466) = cstc2 = DEV9_REG(DEV9_R_1466);
 	return 0;
@@ -680,7 +742,11 @@ static int pcmcia_intr(void *unused)
 	if (cstc1 & 0x03 || cstc2 & 0x03) {	/* Card removed or added? */
 		if (p_dev9_intr_cb)
 			p_dev9_intr_cb(1);
-		dev9Shutdown();			/* Shutdown the card.  */
+		
+		/* Shutdown the card.  */
+		DEV9_REG(DEV9_R_POWER) = 0;	
+		DEV9_REG(DEV9_R_1474) = 0;
+
 		pcmcia_device_probe();
 	}
 	if (cstc1 & 0x80 || cstc2 & 0x80) {
@@ -717,8 +783,8 @@ static int pcmcia_init(void)
 		}
 	}
 
-	if (DEV9_REG(DEV9_R_146C) == 0) {
-		DEV9_REG(DEV9_R_146C) = 0;
+	if (DEV9_REG(DEV9_R_POWER) == 0) {
+		DEV9_REG(DEV9_R_POWER) = 0;
 		DEV9_REG(DEV9_R_147E) = 1;
 		DEV9_REG(DEV9_R_1460) = 0;
 		DEV9_REG(DEV9_R_1474) = 0;
@@ -770,11 +836,11 @@ static int expbay_device_reset(void)
 	if (expbay_device_probe() < 0)
 		return -1;
 
-	DEV9_REG(DEV9_R_146C) = (DEV9_REG(DEV9_R_146C) & 0xfffe) | 0x04;
+	DEV9_REG(DEV9_R_POWER) = (DEV9_REG(DEV9_R_POWER) & ~1) | 0x04;	// power on
 	DelayThread(500000);
 
 	DEV9_REG(DEV9_R_1460) = DEV9_REG(DEV9_R_1460) | 0x01;
-	DEV9_REG(DEV9_R_146C) = DEV9_REG(DEV9_R_146C) | 0x01;
+	DEV9_REG(DEV9_R_POWER) = DEV9_REG(DEV9_R_POWER) | 0x01;
 	DelayThread(500000);
 	return 0;
 }
@@ -800,7 +866,7 @@ static int expbay_init(void)
 	_sw(0xe01a3043, SSBUS_R_1418);
 	_sw(0xef1a3043, SSBUS_R_141c);
 
-	if ((DEV9_REG(DEV9_R_146C) & 0x04) == 0) {
+	if ((DEV9_REG(DEV9_R_POWER) & 0x04) == 0) { // if not already powered
 		DEV9_REG(DEV9_R_1466) = 1;
 		DEV9_REG(DEV9_R_1464) = 0;
 		DEV9_REG(DEV9_R_1460) = DEV9_REG(DEV9_R_1464);
