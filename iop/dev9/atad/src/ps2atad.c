@@ -130,8 +130,8 @@ int _start(int argc, char *argv[])
 
 	ata_pio_mode(0);
 
-	dev9RegisterIntrCb(SPD_INTR_ATA1, ata_intr_cb);
-	dev9RegisterIntrCb(SPD_INTR_ATA0, ata_intr_cb);
+	dev9RegisterIntrCb(1, ata_intr_cb);
+	dev9RegisterIntrCb(0, ata_intr_cb);
 
 	res = 0;
 	M_PRINTF("Driver loaded.\n");
