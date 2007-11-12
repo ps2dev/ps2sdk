@@ -42,9 +42,7 @@ int SifIopReset(const char *arg, int mode)
 	struct t_SifDmaTransfer dmat;
 
     _iop_reboot_count++; // increment reboot counter to allow RPC clients to detect unbinding!
-
-	SifExitRpc(); // exit RPC in case it's already been init'd
-
+	
 	SifStopDma();
 
 	memset(&reset_pkt, 0, sizeof reset_pkt);
@@ -66,6 +64,8 @@ int SifIopReset(const char *arg, int mode)
 	dmat.attr = 0x40 | SIF_DMA_INT_O;
 	SifWriteBackDCache(&reset_pkt, sizeof reset_pkt);
 
+	SifSetReg(SIF_REG_SMFLAG, 0x40000);
+	
 	if (!SifSetDma(&dmat, 1))
 		return 0;
 
@@ -75,6 +75,27 @@ int SifIopReset(const char *arg, int mode)
 	SifSetReg(0x80000000, 0);
 
 	return 1;
+}
+#endif
+
+#ifdef F_SifRebootIop
+int SifRebootIop(const char* filename)
+{
+	char param_str[RESET_ARG_MAX+1];
+	int param_size = strlen( filename[i] ) + 11;
+	if(param_size > RESET_ARG_MAX)
+	{
+		printf("too long parameter '%s'\n", filename);
+		return 0;
+	}
+	
+	SifInitRpc(0);
+	SifExitRpc();
+	
+	strcpy(param_str, "rom0:UNDL ");
+	strcat(param_str, filename);
+	
+	return SifResetIop(param_str, 0);
 }
 #endif
 
@@ -103,7 +124,6 @@ int SifIopIsAlive()
 int SifIopSync()
 {
 	if (SifGetReg(SIF_REG_SMFLAG) & 0x40000) {
-		SifSetReg(SIF_REG_SMFLAG, 0x40000);
 		return 1;
 	}
 	return 0;
