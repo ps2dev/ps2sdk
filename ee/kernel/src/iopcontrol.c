@@ -82,10 +82,10 @@ int SifIopReset(const char *arg, int mode)
 int SifIopReboot(const char* filename)
 {
 	char param_str[RESET_ARG_MAX+1];
-	int param_size = strlen( filename[i] ) + 11;
+	int param_size = strlen( filename ) + 11;
 	if(param_size > RESET_ARG_MAX)
 	{
-		printf("too long parameter '%s'\n", filename);
+//		printf("too long parameter '%s'\n", filename);
 		return 0;
 	}
 	
