@@ -78,8 +78,8 @@ int SifIopReset(const char *arg, int mode)
 }
 #endif
 
-#ifdef F_SifRebootIop
-int SifRebootIop(const char* filename)
+#ifdef F_SifIopReboot
+int SifIopReboot(const char* filename)
 {
 	char param_str[RESET_ARG_MAX+1];
 	int param_size = strlen( filename[i] ) + 11;
