@@ -61,7 +61,7 @@ extern SifRpcClientData_t _lf_cd;
 extern int _lf_init;
 
 int _SifLoadModule(const char *path, int arg_len, const char *args,
-		int *modres, int fno);
+		int *modres, int fno, int dontwait);
 int _SifLoadElfPart(const char *path, const char *secname, t_ExecData *data, int fno);
 int _SifLoadModuleBuffer(void *ptr, int arg_len, const char *args, int *modres);
 
@@ -128,7 +128,7 @@ struct _lf_module_load_arg {
 } ALIGNED(16);
 
 int _SifLoadModule(const char *path, int arg_len, const char *args, int *modres,
-		int fno)
+		int fno, int dontwait)
 {
 	struct _lf_module_load_arg arg;
 
@@ -183,7 +183,7 @@ int _SifLoadModule(const char *path, int arg_len, const char *args, int *modres,
 */
 int SifLoadModule(const char *path, int arg_len, const char *args)
 {
-	return _SifLoadModule(path, arg_len, args, NULL, LF_F_MOD_LOAD);
+	return _SifLoadModule(path, arg_len, args, NULL, LF_F_MOD_LOAD, 0);
 }
 #endif
 
@@ -208,7 +208,7 @@ int SifLoadModule(const char *path, int arg_len, const char *args)
 */
 int SifLoadStartModule(const char *path, int arg_len, const char *args, int *mod_res)
 {
-	return _SifLoadModule(path, arg_len, args, mod_res, LF_F_MOD_LOAD);
+	return _SifLoadModule(path, arg_len, args, mod_res, LF_F_MOD_LOAD, 0);
 }
 #endif
 
@@ -230,7 +230,7 @@ int SifLoadStartModule(const char *path, int arg_len, const char *args, int *mod
 */
 int SifLoadModuleEncrypted(const char *path, int arg_len, const char *args)
 {
-	return _SifLoadModule(path, arg_len, args, NULL, LF_F_MG_MOD_LOAD);
+	return _SifLoadModule(path, arg_len, args, NULL, LF_F_MG_MOD_LOAD, 0);
 }
 #endif
 
@@ -323,7 +323,7 @@ int SifSearchModuleByName(const char * name)
 #ifdef F_SifSearchModuleByAddress
 struct _lf_search_module_by_address_arg {
 	union {
-		const void	*ptr
+		const void	*ptr;
 		int	id;
 	} p;
 } ALIGNED(16);
@@ -339,7 +339,7 @@ int SifSearchModuleByAddress(const void *ptr)
 	if (SifCallRpc(&_lf_cd, LF_F_SEARCH_MOD_BY_ADDRESS, 0, &arg, sizeof arg, &arg, 4, NULL, NULL) < 0)
 		return -E_SIF_RPC_CALL;
 
-	return arg.id;
+	return arg.p.id;
 }
 #endif
 

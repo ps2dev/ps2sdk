@@ -34,12 +34,12 @@ FILEIO_OBJS = __fio_internals.o fio_init.o _fio_intr.o fio_sync.o fio_setblockmo
 	fio_remove.o fio_format.o fio_rmdir.o fio_gets.o
 FILEIO_OBJS := $(FILEIO_OBJS:%=$(EE_OBJS_DIR)%)
 
-LOADFILE_OBJS = SifLoadFileInit.o SifLoadFileExit.o _SifLoadModule.o \
-	SifLoadModule.o SifLoadModuleEncrypted.o _SifLoadElfPart.o \
-	SifLoadElfPart.o SifLoadElf.o SifLoadElfEncrypted.o SifIopSetVal.o \
-	SifIopGetVal.o _SifLoadModuleBuffer.o SifLoadModuleBuffer.o \
-	SifExecModuleBuffer.o SifExecModuleFile.o SifStopModule.o \
-	SifUnloadModule.o SifSearchModuleByName.o
+LOADFILE_OBJS = SifLoadFileInit.o SifLoadFileExit.o _SifLoadModule.o SifLoadModule.o \
+	SifLoadStartModule.o SifLoadModuleEncrypted.o SifStopModule.o SifUnloadModule.o \
+	SifSearchModuleByName.o SifSearchModuleByAddress.o _SifLoadElfPart.o SifLoadElfPart.o \
+	SifLoadElf.o SifLoadElfEncrypted.o SifIopSetVal.o SifIopGetVal.o \
+	_SifLoadModuleBuffer.o SifLoadModuleBuffer.o SifLoadStartModuleBuffer.o \
+	SifExecModuleBuffer.o SifExecModuleFile.o 
 LOADFILE_OBJS := $(LOADFILE_OBJS:%=$(EE_OBJS_DIR)%)
 
 IOPHEAP_OBJS = SifInitIopHeap.o SifExitIopHeap.o SifAllocIopHeap.o \
