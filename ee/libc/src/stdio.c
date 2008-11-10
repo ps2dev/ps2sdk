@@ -752,7 +752,7 @@ size_t fread(void *buf, size_t r, size_t n, FILE *stream)
         read_len--;
       }
       //ret += fioRead(stream->fd, buf, read_len) / r;
-      ret += _ps2sdk_read(stream->fd, buf, read_len) / n;
+      ret += _ps2sdk_read(stream->fd, buf, read_len) / r;
   }
   return (ret);
 }
