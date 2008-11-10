@@ -2,7 +2,7 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Copyright (c) 2001-2007 ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
@@ -10,182 +10,228 @@
 # Standard startup file.
 
 
-.set noat
-.set noreorder
+   .globl   _init
+   .type   _init, @function
+   .weak   _init
 
-.global _start
-.global	_exit
+   .globl   _fini
+   .type   _fini, @function
+   .weak   _fini
 
-	# Support for _init() and _fini().
-	.global _init
-	.global _fini
-	.type	_init, @function
-	.type	_fini, @function
+   .extern   _heap_size
+   .extern   _stack
+   .extern   _stack_size   
 
-	# The .weak keyword ensures there's no error if
-	# _init/_fini aren't defined.
-	.weak	_init
-	.weak	_fini
+   .globl   _ps2sdk_args_parse
+   .type   _ps2sdk_args_parse, @function
+   .weak   _ps2sdk_args_parse
 
-	.extern	_heap_size
-	.extern	_stack
-	.extern _stack_size
+   .globl   _ps2sdk_libc_init
+   .type   _ps2sdk_libc_init, @function
+   .weak   _ps2sdk_libc_init
 
-	.text
+   .globl   _ps2sdk_libc_deinit
+   .type   _ps2sdk_libc_deinit, @function
+   .weak   _ps2sdk_libc_deinit
 
-	nop
-	nop
+   .set   noat
+   .set   noreorder
 
-	.ent _start
+   .text
+   .align   2
+
+   nop
+   nop
+
+   .globl   _start
+   .ent   _start
 _start:
 
-# Clear bss elf segment (static uninitalised data)
 zerobss:
-	la	$2, _fbss
-	la	$3, _end
-loop:
-	nop
-	nop
-	nop
-	sq	$0,($2)
-	sltu	$1,$2,$3
-	bne	$1,$0,loop
-	addiu	$2,$2,16
+   # clear bss area
 
-# Some program loaders (such as Pukklink) execute programs as a thread, but
-# support passing argc and argv values via a0.  This also indicates that when
-# the program terminates, control should be returned to the program loader
-# instead of the PS2 browser.
-	la	$2, _args_ptr
-    	sw	$4,($2)
+   la   $2, _fbss
+   la   $3, _end
 
-# Setup a thread to use
-	la	$4, _gp
-	la	$5, _stack
-	la	$6, _stack_size
-	la	$7, _args
-	la	$8, _root
-	move	$28,$4
-	addiu	$3,$0,60
-	syscall			# RFU060(gp, stack, stack_size, args, root_func)
-	move	$29, $2
-
-# Heap
-	addiu	$3,$0,61
-	la	$4, _end
-	la	$5, _heap_size
-	syscall			# RFU061(heap_start, heap_size)
-	nop
-
-# Flush the data cache (no need to preserve regs for this call)
-	li	$3, 0x64
-	move	$4,$0
-	syscall			# FlushCache(0) - Writeback data cache
-
-# Let's try to set up the initial cwd; have to pass on argc and argv.
-# That may be used for other purposes as well, such as tweaking the command
-# line on the fly, while providing gnu-style "generic option system".
-
-# Check for arguments pased via ExecPS2 or LoadExecPS2
-	la	$2, _args
-	lw	$3, ($2)
-	bnez	$3, 1f
-	nop
-
-# Otherwise check for arguments passed by a loader via a0 (_arg_ptr)
-	la	$2, _args_ptr
-	lw	$3, ($2)
-	beqzl	$3, 2f
-	addu	$4, $0, 0
-
-	addiu	$2, $3, 4
 1:
-	lw	$4, ($2)
-	addiu	$5, $2, 4
+   sltu   $1, $2, $3
+   beq   $1, $0, 2f
+   nop
+   sq   $0, ($2)
+   addiu   $2, $2, 16
+   j   1b
+   nop
 2:
-	jal	_ps2sdk_args_parse
-	nop
 
-	# Call ps2sdk's libc initialisation.
-	jal	_ps2sdk_libc_init
-	nop
-	
-	# Call global constructors through _init().
-	la	$8, _init
-	beqz	$8, 1f		# does _init() exist?
-	nop
+   # store eventual loader arguments (passed via a0)
 
-	jalr	$8
-	nop
+   la   $2, _loader_args
+   sw   $4, ($2)
+
+setupthread:
+   # setup current thread
+
+   la   $4, _gp
+   la   $5, _stack
+   la   $6, _stack_size
+   la   $7, _args
+   la   $8, _root
+   move   $gp, $4
+   addiu   $3, $0, 60
+   syscall         # SetupThread(_gp, _stack, _stack_size, _args, _root)
+   move   $sp, $2
+
+   # initialize heap
+
+   la   $4, _end
+   la   $5, _heap_size
+   addiu   $3, $0, 61
+   syscall         # SetupHeap(_end, _heap_size)
+
+   # writeback data cache
+
+   move   $4, $0
+   addiu   $3, $0, 100
+   syscall         # FlushCache(0)
+
+parseargs:
+   # call ps2sdk argument parsing (weak)
+
+   la   $8, _ps2sdk_args_parse
+   beqz   $8, 1f
+   nop
+
+   jal   _getargs
+   nop
+   jalr   $8      # _ps2sdk_args_parse(argc, argv)
+   nop
 1:
 
+libc_init:
+   # initialize ps2sdk libc (weak)
 
-# Jump main, now that environment and args are setup
-	ei
+   la   $8, _ps2sdk_libc_init
+   beqz   $8, 1f
+   nop
+   jalr   $8      # _ps2sdk_libc_init()
+   nop
+1:   
 
-# Check for arguments pased via ExecPS2 or LoadExecPS2
-	la	$2, _args
-	lw	$3, ($2)
-	bnez	$3, 1f
-	nop
+ctors:
+   # call global constructors (weak)
 
-# Otherwise check for arguments passed by a loader via a0 (_arg_ptr)
-	la	$2, _args_ptr
-	lw	$3, ($2)
-	beqzl	$3, 2f
-	addu	$4, $0, 0
-
-	addiu	$2, $3, 4
+   la   $8, _init
+   beqz   $8, 1f
+   nop
+   jalr   $8      # _init()
+   nop
 1:
-	lw	$4, ($2)
-	addiu	$5, $2, 4
-2:
-	jal	main
-	nop
-	.end	_start
 
-	.ent	_exit
+   # call main
+
+   ei
+   jal   _getargs
+   nop
+   jal   main      # main(argc, argv)
+   nop
+
+   # call _exit
+
+   j   _exit      # _exit(retval)
+   move   $4, $2
+   .end   _start
+
+   .align   3
+
+   .globl   _exit
+   .ent   _exit
+   .text
 _exit:
-	# Call global deconstructors through _fini().
-	la	$8, _fini
-	beqz	$8, 3f		# does _fini() exist?
-	nop
+   la   $2, _retval
+   sw   $4, ($2)
 
-	jalr	$8
-	nop
-3:
-	# Call ps2sdk's libc deinitialisation.
-	jal     _ps2sdk_libc_deinit
-	nop
-	
-# If we received our program arguments in a0, then we were executed by a
-# loader, and we don't want to return to the browser.
-	la	$4, _args_ptr
-	lw	$5, ($4)
-	beqz	$5, 1f
-	move	$4, $2		# main()'s return code
+dtors:
+   # call global destructors (weak)
 
-	lw	$6, ($5)
-	sw	$0, ($6)
-	addiu	$3, $0, 36
-	syscall			# ExitDeleteThread(void)
-
-# Return to the browser via Exit()
+   la   $8, _fini
+   beqz   $8, 1f
+   nop
+   jalr   $8      # _fini()
+   nop
 1:
-	addiu	$3, $0, 4
-	syscall			# Exit(void)
-	.end	_exit
 
-# Call ExitThread()
-	.ent	_root
+libc_uninit:
+   # uninitialize ps2sdk libc (weak)
+
+   la   $8, _ps2sdk_libc_deinit
+   beqz   $8, 1f
+   nop
+   jalr   $8      # _ps2sdk_libc_deinit()
+   nop
+1:
+
+   # conditional exit (depending on if we got arguments through the loader or not)
+
+   la   $2, _retval
+   lw   $4, ($2)
+
+   la   $5, _loader_args
+   lw   $6, ($5)
+   beqz   $6, 1f
+   nop
+
+   # called from a loader, close thread
+
+   lw   $7, ($6)
+   sw   $0, ($7)   # clear thread id
+
+   addiu   $3, $0, 36
+   syscall         # ExitDeleteThread() (noreturn)
+1:
+
+   # not called from a loader, return to browser
+
+   addiu   $3, $0, 4
+   syscall         # Exit(retval) (noreturn)
+
+   .end   _exit
+
+   .ent   _root
 _root:
-	addiu	$3, $0, 35
-	syscall
-	.end	_root
+   addiu   $3, $0, 35
+   syscall         # ExitThread() (noreturn)
+   .end   _root
 
-	.bss
-	.align	6
+   .ent   _getargs
+_getargs:
+   # check normal arguments
+
+   la   $2, _args
+   lw   $3, ($2)
+   bnez   $3, 1f
+   nop
+
+   # check for arguments passed by a loader
+
+   la   $2, _loader_args
+   lw   $3, ($2)
+   beqzl   $3, 2f
+   addu   $4, $0, 0
+
+   addiu   $2, $3, 4
+1:
+   lw   $4, ($2)
+   addiu   $5, $2, 4
+2:
+   jr   $ra      # $4 = argc, $5 = argv
+   nop
+   .end   _getargs
+
+   .bss
+   .align   6
 _args:
-	.space	256+16*4+4
-_args_ptr:
-	.space	4
+   .space   4+16*4+256   # argc, 16 arguments, 256 bytes payload
+_loader_args:
+   .space   4      # pointer to loader arguments: thread id, argc, argv
+_retval:
+   .space   4

@@ -24,6 +24,13 @@
 #include <string.h>
 #include <limits.h>
 
+extern int (*_ps2sdk_close)(int);
+extern int (*_ps2sdk_open)(const char*, int);
+extern int (*_ps2sdk_read)(int, void*, int);
+extern int (*_ps2sdk_lseek)(int, int, int);
+extern int (*_ps2sdk_write)(int, const void*, int);
+extern int (*_ps2sdk_remove)(const char*);
+
 void _ps2sdk_stdio_init();
 
 /* std I/O buffer type constants. */
@@ -87,7 +94,8 @@ int fclose(FILE *stream)
       ret = EOF;
       break;
     default:
-      if ((stream->fd >= 0) && (fioClose(stream->fd) >= 0)) {
+      //if ((stream->fd >= 0) && (fioClose(stream->fd) >= 0)) {
+      if ((stream->fd >= 0) && (_ps2sdk_close(stream->fd) >= 0)) {
         stream->type = STD_IOBUF_TYPE_NONE;
         stream->fd = -1;
         stream->cnt = 0;
@@ -550,7 +558,8 @@ FILE *fopen(const char *fname, const char *mode)
             }
           }
         }
-        if ((fd = fioOpen((char *)t_fname, iomode)) >= 0) {
+        //if ((fd = fioOpen((char *)t_fname, iomode)) >= 0) {
+        if ((fd = _ps2sdk_open((char *)t_fname, iomode)) >= 0) {
           __iob[i].fd = fd;
           __iob[i].cnt = 0;
           __iob[i].flag = flag;
@@ -564,7 +573,8 @@ FILE *fopen(const char *fname, const char *mode)
             cd_fname[fname_len + 0] = ';';
             cd_fname[fname_len + 1] = '1';
             cd_fname[fname_len + 2] = 0;
-            if ((fd = fioOpen((char *)cd_fname, iomode)) >= 0) {
+            //if ((fd = fioOpen((char *)cd_fname, iomode)) >= 0) {
+            if ((fd = _ps2sdk_open((char *)cd_fname, iomode)) >= 0) {
               __iob[i].fd = fd;
               __iob[i].cnt = 0;
               __iob[i].flag = flag;
@@ -741,7 +751,8 @@ size_t fread(void *buf, size_t r, size_t n, FILE *stream)
         /* subtract 1 to read_len to avoid buffer overflow */
         read_len--;
       }
-      ret += fioRead(stream->fd, buf, read_len) / r;
+      //ret += fioRead(stream->fd, buf, read_len) / r;
+      ret += _ps2sdk_read(stream->fd, buf, read_len) / n;
   }
   return (ret);
 }
@@ -780,9 +791,8 @@ int fseek(FILE *stream, long offset, int origin)
       break;
     default:
       /* attempt to seek to offset from origin. */
-      ret = fioLseek(stream->fd, (int)offset, origin);
-      if (ret >= 0)
-        ret = 0;
+      //ret = fioLseek(stream->fd, (int)offset, origin);
+      ret = _ps2sdk_lseek(stream->fd, (int)offset, origin);
   }
   return (ret);
 }
@@ -844,7 +854,8 @@ long ftell(FILE *stream)
         ret = -1L;
       }
       else {
-        ret = (((n = fioLseek(stream->fd, 0, SEEK_CUR)) >= 0) ? (long)n : -1L);
+        //ret = (((n = fioLseek(stream->fd, 0, SEEK_CUR)) >= 0) ? (long)n : -1L);
+        ret = (((n = _ps2sdk_lseek(stream->fd, 0, SEEK_CUR)) >= 0) ? (long)n : -1L);
         if ((n >= 0) && stream->has_putback) ret--;
       }
   }
@@ -886,7 +897,8 @@ size_t fwrite(const void *buf, size_t r, size_t n, FILE *stream)
       ret = r;
       break;
     case STD_IOBUF_TYPE_STDOUTHOST:
-      ret = (fioWrite(1, (void *) buf, (int)(r * n)) / (int)r);
+      //ret = (fioWrite(1, (void *) buf, (int)(r * n)) / (int)r);
+      ret = (_ps2sdk_write(1, (void *) buf, (int)(r * n)) / (int)r);
       break;
     case STD_IOBUF_TYPE_SIO:
       for (i = 0, len = (r * n); i < len; ++i) sio_putc((int)((char *)buf)[i]);
@@ -894,7 +906,8 @@ size_t fwrite(const void *buf, size_t r, size_t n, FILE *stream)
       break;
     default:
       /* attempt to write the stream file. */
-      ret = (fioWrite(stream->fd, (void *)buf, (int)(r * n)) / (int)r);
+      //ret = (fioWrite(stream->fd, (void *)buf, (int)(r * n)) / (int)r);
+      ret = (_ps2sdk_write(stream->fd, (void *)buf, (int)(r * n)) / (int)r);
   }
   return (ret);
 }
@@ -1204,9 +1217,9 @@ int puts(const char *s)
 */
 int remove(const char *s)
 {
-  int ret = fioRemove(s);
-  fioRmdir(s);
-  return ret;
+  int ret = _ps2sdk_remove(s);
+
+  return (ret * -1);
 }
 #endif
 
@@ -1382,6 +1395,22 @@ void __stdio_update_stdout_xy(int x, int y)
 
 
 #ifdef F___stdio_internals
+int (*_ps2sdk_close)(int) = fioClose;
+int (*_ps2sdk_open)(const char*, int) = fioOpen;
+int (*_ps2sdk_read)(int, void*, int) = fioRead;
+int (*_ps2sdk_lseek)(int, int, int) = fioLseek;
+int (*_ps2sdk_write)(int, const void*, int) = fioWrite;
+int fioRemove_Helper(const char *s)
+{
+  int ret = fioRemove(s);
+  fioRmdir(s);
+
+  return ret;
+}
+
+int (*_ps2sdk_remove)(const char*) = fioRemove_Helper;
+
+
 void _ps2sdk_stdio_init()
 {
     int i;

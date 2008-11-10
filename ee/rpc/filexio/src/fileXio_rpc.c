@@ -19,6 +19,19 @@
 #include "sys/stat.h"
 #include "fileXio_rpc.h"
 
+// from stdio.c
+extern int (*_ps2sdk_close)(int);
+extern int (*_ps2sdk_open)(const char*, int);
+extern int (*_ps2sdk_read)(int, unsigned char*, int);
+extern int (*_ps2sdk_lseek)(int, long, int); // assume long = int
+extern int (*_ps2sdk_write)(int, unsigned char*, int);
+extern int (*_ps2sdk_remove)(const char*);
+
+static int fileXioOpenHelper(const char* source, int flags)
+{
+	return fileXioOpen(source, flags, 0666);
+}
+
 typedef struct {
 	int  ssize;
 	int  esize;
@@ -91,6 +104,13 @@ int fileXioInit()
 
 	fileXioInited = 1;
 	fileXioBlockMode = FXIO_WAIT;
+
+	_ps2sdk_close = fileXioClose;
+	_ps2sdk_open = fileXioOpenHelper;
+	_ps2sdk_read = fileXioRead;
+	_ps2sdk_lseek = fileXioLseek;
+	_ps2sdk_write = fileXioWrite;
+	_ps2sdk_remove= fileXioRemove;
 
 	return 0;
 }
