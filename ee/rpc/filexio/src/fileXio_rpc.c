@@ -26,6 +26,7 @@ extern int (*_ps2sdk_read)(int, unsigned char*, int);
 extern int (*_ps2sdk_lseek)(int, long, int); // assume long = int
 extern int (*_ps2sdk_write)(int, unsigned char*, int);
 extern int (*_ps2sdk_remove)(const char*);
+extern int (*_ps2sdk_rename)(const char*,const char*);
 
 static int fileXioOpenHelper(const char* source, int flags)
 {
@@ -111,6 +112,7 @@ int fileXioInit()
 	_ps2sdk_lseek = fileXioLseek;
 	_ps2sdk_write = fileXioWrite;
 	_ps2sdk_remove= fileXioRemove;
+	_ps2sdk_rename= fileXioRename;
 
 	return 0;
 }
