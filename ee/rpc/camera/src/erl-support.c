@@ -13,7 +13,7 @@
 
 #include <erl.h>
 
-char * erl_id = "libcamera";
+char * erl_id = "libps2cam";
 
 char * erl_dependancies[] = {
     "libkernel",
