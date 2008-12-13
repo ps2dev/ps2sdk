@@ -2,7 +2,7 @@
  * voice.c - Part of the IOP Sound Driver
  *
  * Copyright (c) 2004 TyRaNiD <tiraniddo@hotmail.com>
- * Copyright (c) 2004,2007 Lukasz Bruun <mail@lukasz.dk>
+ * Copyright (c) 2004,2007,2008 Lukasz Bruun <mail@lukasz.dk>
  *
  * See the file LICENSE included with this distribution for licensing terms.
  */
@@ -99,9 +99,9 @@ s32 VoiceTrans_Write_IOMode(u32 iopaddr, u32 spu_addr, s32 size, s16 chan)
 			}
 
 			// Set Transfer mode to IO
-			*SD_CORE_ATTR(0) = (*SD_CORE_ATTR(0) & ~SD_CORE_DMA) | SD_DMA_IO;
+			*SD_CORE_ATTR(chan) = (*SD_CORE_ATTR(chan) & ~SD_CORE_DMA) | SD_DMA_IO;
 
-			statx = U16_REGISTER(0x344);
+			statx = U16_REGISTER(0x344 + (chan << 10));
 
 			// Wait for transfer to complete;
 			while(*statx & SD_IO_IN_PROCESS);
@@ -111,7 +111,7 @@ s32 VoiceTrans_Write_IOMode(u32 iopaddr, u32 spu_addr, s32 size, s16 chan)
 	}
 
 	// Reset DMA settings
-	*SD_CORE_ATTR(0) &= ~SD_CORE_DMA;
+	*SD_CORE_ATTR(chan) &= ~SD_CORE_DMA;
 
 	return 0;
 }

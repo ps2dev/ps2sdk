@@ -55,7 +55,6 @@ s32 BlockTransWriteFrom(u8 *iopaddr, u32 size, s32 chan, u16 mode, u8 *startaddr
 	if(*SD_CORE_ATTR(core) & SD_DMA_IN_PROCESS) return -1;
 	if(*SD_DMA_CHCR(core) & SD_DMA_START) return -1;
 
-	// 0x26B8
 	*SD_CORE_ATTR(core) &= 0xFFCF;
 	
 	*SD_A_TSA_HI(core) = 0;
@@ -84,7 +83,6 @@ s32 BlockTransWrite(u8 *iopaddr, u32 size, s32 chan)
 	if(*SD_CORE_ATTR(core) & SD_DMA_IN_PROCESS) return -1;
 	if(*SD_DMA_CHCR(core) & SD_DMA_START) return -1;
 
-	// 0x26B8
 	*SD_CORE_ATTR(core) &= 0xFFCF;
 	
 	*SD_A_TSA_HI(core) = 0;

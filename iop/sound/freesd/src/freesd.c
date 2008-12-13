@@ -18,7 +18,7 @@
 struct irx_export_table _exp_libsd;
 
 #define BANNER "FREESD %s\n"
-#define VERSION "v1.0"
+#define VERSION "v1.01"
 
 #define MODNAME "freesd"
 
