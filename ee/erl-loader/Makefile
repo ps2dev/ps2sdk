@@ -20,6 +20,13 @@ EE_OBJS = erl-loader.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
 EE_LDFLAGS = -L$(PS2SDKSRC)/ee/kernel/lib -L$(PS2SDKSRC)/ee/libc/lib -L$(PS2SDKSRC)/ee/erl/lib
+
+# Since we are using non-builtin symbols
+EE_LDFLAGS += -fno-builtin-memcmp -fno-builtin-memcpy -fno-builtin-memset
+EE_LDFLAGS += -fno-builtin-printf -fno-builtin-strcat -fno-builtin-strchr
+EE_LDFLAGS += -fno-builtin-strcmp -fno-builtin-strcpy -fno-builtin-strlen
+EE_LDFLAGS += -fno-builtin-strncpy -fno-builtin-strrchr
+
 EE_LIBS = -lerl -lc -lkernel
 
 LOADER_BIN = $(EE_BIN_DIR)erl-loader.elf
@@ -33,7 +40,7 @@ $(LOADER_BIN) : $(EE_OBJS) $(PS2SDKSRC)/ee/startup/obj/crt0.o
 	rm $(EE_BIN_DIR)tmp.elf
 	$(EE_CC) -mno-crt0 -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_LDFLAGS) \
 	-o $(LOADER_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_LIBS) $(EE_SRC_DIR)exports.c
-	#rm $(EE_SRC_DIR)exports.c
+#	rm $(EE_SRC_DIR)exports.c
 
 clean:
 	rm -f -r $(EE_OBJS_DIR) $(EE_BIN_DIR)

@@ -26,7 +26,7 @@ static SifRpcDataQueue_t qd __attribute__((aligned(64)));
 static SifRpcServerData_t Sd0 __attribute__((aligned(64)));
 static u32 buffer[32] __attribute__((aligned(64)));
 
-#define IOP_MEM	0xbc000000 // EE mapped IOP mem 
+#define IOP_MEM	0xbc000000 // EE mapped IOP mem
 
 enum {
     SIOR_INIT = 1,
@@ -107,7 +107,7 @@ static void * sior_rpc_server(u32 funcno, void * data, int size) {
 	p = *((char **) data) + IOP_MEM;
 	DI();
 	ee_kmode_enter();
-	res = sio_gets(p);
+	(char*)res = sio_gets(p);
 	ee_kmode_exit();
 	EI();
 	break;
@@ -115,16 +115,16 @@ static void * sior_rpc_server(u32 funcno, void * data, int size) {
 	sio_flush();
 	break;
     }
-    
+
     *((int *) data) = res;
-    
+
     return data;
 }
 
 static void sior_thread(void) {
     SifInitRpc(0);
     SifSetRpcQueue(&qd, GetThreadId());
-    SifRegisterRpc(&Sd0, SIOR_IRX, sior_rpc_server, buffer, 0, 0, &qd);
+    SifRegisterRpc(&Sd0, SIOR_IRX, (SifRpcFunc_t)sior_rpc_server, buffer, 0, 0, &qd);
     SifRpcLoop(&qd);
 }
 

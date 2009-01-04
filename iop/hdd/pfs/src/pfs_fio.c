@@ -815,6 +815,11 @@ int	pfsRmdir(iop_file_t *f, const char *path)
 	return rv;
 }
 
+int pfsDopen(iop_file_t *f, const char *name)
+{
+    return pfsOpen(f, name, 0, 0);
+}
+
 int	pfsDread(iop_file_t *f, iox_dirent_t *dirent)
 {
 	pfs_file_slot_t *fileSlot = (pfs_file_slot_t *)f->privdata;

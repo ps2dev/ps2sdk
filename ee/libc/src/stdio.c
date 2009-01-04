@@ -10,7 +10,7 @@
 # $Id$
 # Simple standard C library implementation.
 */
-	   
+
 #ifdef F_strerror
 #define E_USE_NAMES
 #include "errno.h"
@@ -80,7 +80,7 @@ void clearerr(FILE *stream)
 */
 int fclose(FILE *stream)
 {
-  int ret;
+  int ret = EOF;
 
   /* test the file stream type. */
   switch(stream->type) {
@@ -104,8 +104,8 @@ int fclose(FILE *stream)
         ret = 0;
       }
       else {
-	errno = (ret * -1);
-	ret = EOF;
+        errno = (ret * -1);
+        ret = EOF;
       }
   }
   return (ret);
@@ -440,7 +440,7 @@ char* __ps2_normalize_path(char *path_name)
         first = next = 0;
         while(1) {
                 /* If a "../" follows, remove it and the parent */
-                if(out[next+1] && out[next+1]=='.' && 
+                if(out[next+1] && out[next+1]=='.' &&
                    out[next+2] && out[next+2]=='.' &&
                    out[next+3] && out[next+3]=='/') {
                         for(j=0; out[first+j+1]; j++)
@@ -459,7 +459,7 @@ char* __ps2_normalize_path(char *path_name)
         /* Remove trailing "/" */
         for(i=1; out[i]; i++)
                 continue;
-        if(i >= 1 && out[i-1] == '/') 
+        if(i >= 1 && out[i-1] == '/')
                 out[i-1] = 0;
 
         return (char*)out;
@@ -482,7 +482,7 @@ FILE *fopen(const char *fname, const char *mode)
 {
   FILE *ret = NULL;
   int  fd = 0, flag = 0, i, iomode = 0;
-  
+
   // some people won't use our crt0...
   if (!__stdio_initialised)
     _ps2sdk_stdio_init();
@@ -543,9 +543,9 @@ FILE *fopen(const char *fname, const char *mode)
               if (!(__direct_pwd[b_fname_len - 1] == '/' || __direct_pwd[b_fname_len - 1] == '\\')) { // does it has trailing slash ?
                 if(__iob[i].type == STD_IOBUF_TYPE_CDROM)
               	  b_fname[b_fname_len + 5] = '\\';
-                else 
+                else
                   b_fname[b_fname_len + 5] = '/';
-                  // b_fname[b_fname_len + 6] = 0; 
+                  // b_fname[b_fname_len + 6] = 0;
                   // b_fname_len += 2;
                 b_fname_len++;
               }
@@ -613,8 +613,8 @@ FILE *fopen(const char *fname, const char *mode)
 /*
 **
 **  [func] - fdopen.
-**  [desc] - produces a file descriptor of type `FILE *', from a 
-**           descriptor for an already-open file (returned, for 
+**  [desc] - produces a file descriptor of type `FILE *', from a
+**           descriptor for an already-open file (returned, for
 **           example, by the system subroutine `open' rather than by `fopen').
 **           The MODE argument has the same meanings as in `fopen'.
 **  [entr] - int fd; file descriptor returned by 'open'.
@@ -676,14 +676,14 @@ FILE *fdopen(int fd, const char *mode)
   } else {
     errno = EBADF;
   }
-  
+
   return (ret);
 }
 #endif
 
 #ifdef F_fileno
 int fileno(FILE * f) {
-    if (f->fd > 0) 
+    if (f->fd > 0)
       return f->fd;
     else
       errno = EBADF;
@@ -733,7 +733,7 @@ int fputs(const char *s, FILE *stream)
   int temp = strlen(s);
 
   len = ((fwrite(s, 1, temp, stream) == temp) ? temp : EOF);
-  
+
   if (len != EOF) {
     fputc('\n', stream);
   }
@@ -814,7 +814,7 @@ size_t fread(void *buf, size_t r, size_t n, FILE *stream)
 int fseek(FILE *stream, long offset, int origin)
 {
   int ret;
-  
+
   stream->has_putback = 0;
 
   switch(stream->type) {
@@ -877,7 +877,7 @@ int fsetpos(FILE *stream, const fpos_t *pos)
 */
 long ftell(FILE *stream)
 {
-  long n, ret;
+  long n, ret = -1L;
 
   switch(stream->type) {
     case STD_IOBUF_TYPE_NONE:
@@ -931,8 +931,8 @@ size_t fwrite(const void *buf, size_t r, size_t n, FILE *stream)
 {
   size_t i, len, ret;
   int written = 0;
-  
-  if (stream->has_putback) 
+
+  if (stream->has_putback)
   {
       fseek(stream, -1, SEEK_CUR);
       stream->has_putback = 0;
@@ -1063,7 +1063,7 @@ static struct {
 int __stdio_get_fd_type(const char *s)
 {
   int i;
-  
+
   for (i = 0; __prefix_types[i].prefix; i++) {
     if (!strncmp(s, __prefix_types[i].prefix, __prefix_types[i].len))
       return __prefix_types[i].ret;
@@ -1073,7 +1073,7 @@ int __stdio_get_fd_type(const char *s)
     if (!strncmp(__direct_pwd, __prefix_types[i].prefix, __prefix_types[i].len))
       return __prefix_types[i].ret;
   }
-  
+
   return -1;
 }
 #endif
@@ -1290,9 +1290,9 @@ int remove(const char *s)
 **  [entr] - const char *newfn; the new filename string pointer.
 **  [exit] - int; 0 if able to rename the file. else -1.
 **  [prec] - oldfn and newfn are valid string pointers
-**           if oldfn points to a non directory, newfn must not 
+**           if oldfn points to a non directory, newfn must not
 **           point to a directory and vice-versa
-**           if newfn points to existing directory or file 
+**           if newfn points to existing directory or file
 **           it is removed and oldfn is renamed to newfn
 **  [post] - oldfn is renamed to newfn
 **
@@ -1404,7 +1404,7 @@ extern char __stdio_tmpnam[256];
 /*
 **
 **  [func] - tmpnam.
-**  [desc] - creates a temporary filename string, 
+**  [desc] - creates a temporary filename string,
 **  [entr] - char *name; the pointer to the destination string pointer.
 **  [exit] - char *;
 **  [prec] -
@@ -1507,7 +1507,7 @@ int (*_ps2sdk_rename)(const char*, const char*) = fioRename;
 void _ps2sdk_stdio_init()
 {
     int i;
-    
+
     for (i = 3; i < _NFILE; i++) {
 	__iob[i].type = 0;
 	__iob[i].fd = -1;
@@ -1516,7 +1516,7 @@ void _ps2sdk_stdio_init()
 	__iob[i].has_putback = 0;
 	__iob[i].putback = 0;
     }
-    
+
     __stdio_initialised = 1;
 }
 
@@ -1524,7 +1524,7 @@ void _ps2sdk_stdio_deinit()
 {
 //    _fflushall();  will require libmc...
     _fcloseall();
-    
+
     __stdio_initialised = 0;
 }
 #endif

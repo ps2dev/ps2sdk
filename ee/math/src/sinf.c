@@ -31,7 +31,7 @@
  * arithmetic	domain		# trials	  peak		 rms
  *	  IEEE	  -4096,+4096	100,000 	 1.2e-7 	3.0e-8
  *	  IEEE	  -8192,+8192	100,000 	 3.0e-7 	3.0e-8
- * 
+ *
  * ERROR MESSAGES:
  *
  *	 message		   condition		value returned
@@ -95,6 +95,7 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 static float FOPI = 1.27323954473516;
 
 extern float PIO4F;
+extern int fptosi(float);
 /* Note, these constants are for a 32-bit significand: */
 /*
 static float DP1 =	0.7853851318359375;

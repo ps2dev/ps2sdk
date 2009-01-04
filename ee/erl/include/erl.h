@@ -30,7 +30,7 @@ struct erl_record_t {
     char * name;
     char ** dependancies;
     u32 flags;
-    
+
     /* Private */
     struct htab * symbols;
     struct erl_record_t * next, * prev;
@@ -43,13 +43,13 @@ struct symbol_t {
 
 extern char _init_erl_prefix[];
 
-typedef struct erl_record_t * (*erl_loader_t)(const char * erl_id);
+typedef struct erl_record_t * (*erl_loader_t)(char * erl_id);
 
 extern erl_loader_t _init_load_erl;
 
 struct erl_record_t * load_erl_from_mem(u8 * mem, int argc, char ** argv);
 struct erl_record_t * load_erl_from_file(const char * fname, int argc, char ** argv);
-struct erl_record_t * _init_load_erl_from_file(const char * fname, const char * erl_id);
+struct erl_record_t * _init_load_erl_from_file(const char * fname, char * erl_id);
 int unload_erl(struct erl_record_t * erl);
 
 int erl_add_global_symbol(const char * symbol, u32 address);

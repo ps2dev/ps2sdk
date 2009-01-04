@@ -98,7 +98,7 @@ char *sio_gets(char * str) {
     buffer[0] = (u32) str;
     SifCallRpc(&cd0, SIOR_GETS, 0, buffer, 4, buffer, 4, 0, 0);
     FlushDcache();
-    return *((char *)buffer);
+    return ((char *)buffer);
 }
 
 void sio_flush(void) {
@@ -108,10 +108,10 @@ void sio_flush(void) {
 int sio_vprintf(const char * str, va_list args) {
     char * tbuf[2048];
     int res;
-    
+
     res = vsprintf((char *)tbuf, str, args);
     sio_putsn((char *)tbuf);
-    
+
     return res;
 }
 
@@ -122,16 +122,16 @@ int sio_printf(const char * str, ...) {
     va_start(args, str);
     res = sio_vprintf(str, args);
     va_end(args);
-    
+
     return res;
 }
 
 int _start(int argc, char **argv)
 {
     int /* rv, */ retries;
-    
+
     memset(&cd0, 0, sizeof(cd0));
-    
+
     for (retries = 0; retries < 15; retries++) {
 	printf("Binding RPC.\n");
 	if (SifBindRpc(&cd0, SIOR_IRX, 0) < 0) {
@@ -150,9 +150,9 @@ int _start(int argc, char **argv)
 	printf("Huh, not available, retrying... ?\n");
 	DelayThread(1000);
     }
-    
+
     printf("Giving up.\n");
-    
+
     return 1;
 }
 

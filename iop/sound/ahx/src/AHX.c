@@ -1086,8 +1086,8 @@ void AHXOutput_MixChunk(int NrSamples, int** mb)
 			if(Oversampling) {
 				for(i = 0; i < thiscount; i++) {
 					offset = pos[v] >> 16;
-					sample1 = VolTab[Voices[v].VoiceBuffer[offset]];
-					sample2 = VolTab[Voices[v].VoiceBuffer[offset+1]];
+					sample1 = VolTab[(int)Voices[v].VoiceBuffer[offset]];
+					sample2 = VolTab[(int)Voices[v].VoiceBuffer[offset+1]];
 					frac1 = pos[v] & ((1 << 16) - 1);
 					frac2 = (1 << 16) - frac1;
 					(*mb)[mixpos++] += ((sample1 * frac2) + (sample2 * frac1)) >> 16;
@@ -1095,7 +1095,7 @@ void AHXOutput_MixChunk(int NrSamples, int** mb)
 				}
 			} else {
 				for(i = 0; i < thiscount; i++) {
-					(*mb)[mixpos++] += VolTab[Voices[v].VoiceBuffer[pos[v] >> 16]];
+					(*mb)[mixpos++] += VolTab[(int)Voices[v].VoiceBuffer[pos[v] >> 16]];
 					pos[v] += delta;
 				}
 			}

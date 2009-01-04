@@ -31,7 +31,7 @@ iop_device_ops_t pfsOps = {
 	pfsRemove,
 	pfsMkdir,
 	pfsRmdir,
-	pfsOpen,
+	pfsDopen,
 	pfsClose,
 	pfsDread,
 	pfsGetstat,
