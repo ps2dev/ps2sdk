@@ -81,6 +81,7 @@ typedef struct _ioRequest {
 typedef struct _device {
 	uint32 id;
 	struct _device *next, *prev;
+	struct _device *nextConnected, *prevConnected;
 	struct _endpoint *endpointListStart, *endpointListEnd;
 	UsbDriver  *devDriver;
 	uint8  deviceStatus;
@@ -221,6 +222,9 @@ typedef struct _memPool {
 	struct _timerCbStruct *timerListEnd;
 
 	struct _device		*deviceTreeRoot;
+
+	struct _device		*deviceConnectedListStart;
+	struct _device		*deviceConnectedListEnd;
 
 	uint32 delayResets;
 } MemoryPool;

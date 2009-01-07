@@ -353,6 +353,19 @@ void flushPort(Device *dev) {
 		while (dev->endpointListStart)
 			removeEndpointFromDevice(dev, dev->endpointListStart);
 
+		if (dev->nextConnected)
+			dev->nextConnected->prevConnected = dev->prevConnected;
+		else
+			memPool.deviceConnectedListEnd = dev->prevConnected;
+
+		if (dev->prevConnected)
+			dev->prevConnected->nextConnected = dev->nextConnected;
+		else
+			memPool.deviceConnectedListStart = dev->nextConnected;
+
+		dev->nextConnected = NULL;
+		dev->prevConnected = NULL;
+
 		while ((child = dev->childListStart)) {
 			if (child->next)
 				child->next->prev = child->prev;
@@ -407,8 +420,17 @@ void fetchConfigDescriptors(IoRequest *req) {
 			doControlTransfer(ep, &dev->ioRequest,
 				USB_DIR_IN | USB_RECIP_DEVICE, USB_REQ_GET_DESCRIPTOR, (USB_DT_CONFIG << 8) | curDescNum, 0, readLen,
 				dev->staticDeviceDescEndPtr, fetchConfigDescriptors);
-		} else
+		} else {
+			dev->prevConnected = memPool.deviceConnectedListEnd;
+			if (memPool.deviceConnectedListEnd)
+				memPool.deviceConnectedListEnd->nextConnected = dev;
+			else
+				memPool.deviceConnectedListStart = dev;
+			dev->nextConnected = NULL;
+			memPool.deviceConnectedListEnd = dev;
+
 			connectNewDevice(dev);
+		}
 	} else
 		killDevice(dev, ep);
 }

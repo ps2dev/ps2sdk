@@ -53,6 +53,19 @@ void probeDeviceTree(Device *tree, UsbDriver *drv) {
 		}
 }
 
+void probeDeviceConnectList(UsbDriver *drv) {
+	Device *curDevice;
+	for (curDevice = memPool.deviceConnectedListStart; curDevice != NULL; curDevice = curDevice->nextConnected)
+		if (curDevice->deviceStatus == DEVICE_READY) {
+			if (curDevice->devDriver == NULL) {
+				if (callUsbDriverFunc(drv->probe, curDevice->id, drv->gp) != 0) {
+					curDevice->devDriver = drv;
+					callUsbDriverFunc(drv->connect, curDevice->id, drv->gp);
+				}
+			}
+		}
+}
+
 int doRegisterDriver(UsbDriver *drv, void *drvGpSeg) {
 	if (drv->next || drv->prev)
 		return USB_RC_BUSY;
@@ -74,7 +87,7 @@ int doRegisterDriver(UsbDriver *drv, void *drvGpSeg) {
 	drvListEnd = drv;
 
 	if (drv->probe)
-		probeDeviceTree(memPool.deviceTreeRoot, drv);
+		probeDeviceConnectList(drv);
 
 	return 0;
 }
