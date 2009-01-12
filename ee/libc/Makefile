@@ -66,7 +66,7 @@ STDLIB_OBJS = abs.o atexit.o atof.o bsearch.o div.o getenv.o _itoa.o labs.o \
 # mblen.o mbstowcs.o mbtowc.o wcstombs.o wctomb.o
 STDLIB_OBJS := $(STDLIB_OBJS:%=$(EE_OBJS_DIR)%)
 
-UNISTD_OBJS = stat.o fstat.o access.o unlink.o getcwd.o
+UNISTD_OBJS = stat.o fstat.o access.o unlink.o getcwd.o sleep.o
 UNISTD_OBJS := $(UNISTD_OBJS:%=$(EE_OBJS_DIR)%)
 
 LIBGEN_OBJS = basename.o dirname.o

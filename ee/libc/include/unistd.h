@@ -35,6 +35,8 @@ int    access(const char *path, int mode);
 char  *getcwd(char *buf, int len);
 int    unlink(const char *path);
 
+unsigned int sleep(unsigned int seconds);
+
 #ifdef __cplusplus
 }
 #endif
