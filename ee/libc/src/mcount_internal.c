@@ -12,6 +12,8 @@
 */
 #include <stdio.h>
 #include <string.h>
+#include <kernel.h>
+#include <timer.h>
 
 #define	GMON_PROF_ON	0
 #define	GMON_PROF_BUSY	1
@@ -21,22 +23,16 @@
 #define GMONVERSION	0x00051879
 
 #ifndef MCOUNT_USE_T1
-#define INTC_TIM       9
-#define T_COUNT        (volatile u32 *)0x10000000
-#define T_MODE         (volatile u32 *)0x10000010
-#define T_COMP         (volatile u32 *)0x10000020
+#define INTC_TIM       kINTC_TIMER0
+#define T_COUNT        T0_COUNT
+#define T_MODE         T0_MODE
+#define T_COMP         T0_COMP
 #else
-#define INTC_TIM       10
-#define T_COUNT        (volatile u32 *)0x10000800
-#define T_MODE         (volatile u32 *)0x10000810
-#define T_COMP         (volatile u32 *)0x10000820
+#define INTC_TIM       kINTC_TIMER1
+#define T_COUNT        T1_COUNT
+#define T_MODE         T1_MODE
+#define T_COMP         T1_COMP
 #endif
-
-/* defined by kernel */
-int EnableIntc(int intc);
-s32 AddIntcHandler2(s32 cause, s32(*handler_func)(s32 cause, void* arg, void* addr), s32 next, void* arg);
-int DisableIntc(int intc);
-s32 RemoveIntcHandler(s32 cause, s32 handler_id);
 
 /** gmon.out file header */
 struct gmonhdr 

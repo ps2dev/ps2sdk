@@ -1,6 +1,6 @@
 EE_BIN   = ps2tests.elf
 EE_OBJS  = runner.o testsuite.o 
-EE_OBJS += stdio_tests.o
+EE_OBJS += stdio_tests.o time_tests.o
 
 EE_INCS = 
 EE_LIBS =

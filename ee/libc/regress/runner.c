@@ -19,6 +19,7 @@
 #endif
 
 extern int libc_add_tests(test_suite *p);
+extern int time_add_tests(test_suite *p);
 
 int main(int argc, char *argv[])
 {
@@ -33,6 +34,7 @@ int main(int argc, char *argv[])
 
 	/* add all tests to this suite */
 	libc_add_tests(&suite);
+	time_add_tests(&suite);
 
 	/* run all tests */
 	run_testsuite(&suite);

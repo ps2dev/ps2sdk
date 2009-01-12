@@ -17,6 +17,8 @@ void _ps2sdk_stdio_init();
 void _ps2sdk_stdio_deinit();
 void _ps2sdk_stdlib_init();
 void _ps2sdk_stdlib_deinit();
+void _ps2sdk_time_init();
+void _ps2sdk_time_deinit();
 
 int chdir(const char *path);
 
@@ -27,11 +29,13 @@ void _ps2sdk_libc_init()
     _ps2sdk_alloc_init();
     _ps2sdk_stdio_init();
     _ps2sdk_stdlib_init();
+    _ps2sdk_time_init();
 }
 
 __attribute__((weak))
 void _ps2sdk_libc_deinit()
 {
+    _ps2sdk_time_deinit();
     _ps2sdk_stdlib_deinit();
     _ps2sdk_stdio_deinit();
     _ps2sdk_alloc_deinit();

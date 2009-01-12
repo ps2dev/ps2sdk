@@ -17,6 +17,8 @@
 #include <stddef.h>
 #include <sys/time.h>
 
+#define CLOCKS_PER_SEC (147456000 / 256)    // ie kBUSCLKBY256  from <timer.h>
+
 struct tm
 {
   int	tm_sec;
@@ -34,7 +36,7 @@ struct tm
 extern "C" {
 #endif
 
-clock_t clock();
+clock_t clock(void);
 time_t time(time_t *t);
 
 // to be implemented...

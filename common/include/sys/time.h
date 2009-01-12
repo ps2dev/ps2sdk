@@ -15,7 +15,7 @@
 #define SYS_TIME_H
 
 #ifndef __clock_t_defined
-typedef unsigned long clock_t;
+typedef unsigned long long clock_t;
 #define __clock_t_defined
 #endif
 
