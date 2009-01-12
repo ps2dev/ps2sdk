@@ -1,8 +1,19 @@
 #include <stdio.h>
 #include <sys/stat.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <testsuite.h>
+
+static const char *test_init(void *arg)
+{
+    // _ps2sdk_args_parse should setup the initial cwd called from crt0.s
+    char cwd[256];
+    if (getcwd(cwd, 256)[0] == '\0')
+        return "failed to setup cwd";
+        
+    return NULL;
+}
 
 static const char *test_fgets(void *arg)
 {
@@ -243,7 +254,7 @@ static const char *test_stat_dir(void *arg)
 
 static const char *test_mkdir(void *arg)
 {
-	if (mkdir(arg, 0770) != 0)
+	if (mkdir(arg) != 0)
 	{
 		return "failed to create directory";
 	}
@@ -276,7 +287,8 @@ int libc_add_tests(test_suite *p)
 	dir2 = "dummydir";
 	#endif
 
-        add_test(p, "fopen, fclose", test_fopen_fclose, (void *)textfile);
+    add_test(p, "init", test_init, NULL);
+    add_test(p, "fopen, fclose", test_fopen_fclose, (void *)textfile);
 	add_test(p, "fgets", test_fgets, (void *)textfile);
 	add_test(p, "fread", test_fread, (void *)textfile);
 	add_test(p, "fgetc", test_fgetc, (void *)textfile);
