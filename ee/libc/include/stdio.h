@@ -151,6 +151,7 @@ char   *gets(char *);
 void   perror(const char *);
 int    putc(int, FILE *);
 int    puts(const char *);
+int    rename(const char *, const char *);
 int    remove(const char *);
 void   rewind(FILE *);
 int    scanf(const char *, ...);

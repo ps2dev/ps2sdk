@@ -830,7 +830,7 @@ int fseek(FILE *stream, long offset, int origin)
       //ret = fioLseek(stream->fd, (int)offset, origin);
       ret = _ps2sdk_lseek(stream->fd, (int)offset, origin);
   }
-  if (ret > 0)
+  if (ret >= 0)
     return 0;
   else {
     errno = (ret * -1);
@@ -897,7 +897,7 @@ long ftell(FILE *stream)
       else {
         //ret = (((n = fioLseek(stream->fd, 0, SEEK_CUR)) >= 0) ? (long)n : -1L);
         //ret = (((n = _ps2sdk_lseek(stream->fd, 0, SEEK_CUR)) >= 0) ? (long)n : -1L);
-        if ((n = _ps2sdk_lseek(stream->fd, 0, SEEK_CUR) >= 0))
+        if ((n = _ps2sdk_lseek(stream->fd, 0, SEEK_CUR)) >= 0)
              ret = (long)n;
         else if (n < 0) {
               errno = (n * -1);
