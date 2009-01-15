@@ -25,7 +25,7 @@ EE_LDFLAGS = -L$(PS2SDKSRC)/ee/kernel/lib -L$(PS2SDKSRC)/ee/libc/lib -L$(PS2SDKS
 EE_LDFLAGS += -fno-builtin-memcmp -fno-builtin-memcpy -fno-builtin-memset
 EE_LDFLAGS += -fno-builtin-printf -fno-builtin-strcat -fno-builtin-strchr
 EE_LDFLAGS += -fno-builtin-strcmp -fno-builtin-strcpy -fno-builtin-strlen
-EE_LDFLAGS += -fno-builtin-strncpy -fno-builtin-strrchr
+EE_LDFLAGS += -fno-builtin-strncpy -fno-builtin-strrchr -fno-builtin-strncmp
 
 EE_LIBS = -lerl -lc -lkernel
 
