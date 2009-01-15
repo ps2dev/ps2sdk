@@ -16,13 +16,8 @@
 
 #define _IOC(type, nr)		(((type) << 8)|(nr))
 
-#define DEV9_CTL_TYPE		'd'
 #define HDD_IOC_TYPE		'H'
 #define HDD_CTL_TYPE		'h'
-
-/* DEV9 devctl().  */
-#define DEV9CTLSHUTDOWN 	_IOC(DEV9_CTL_TYPE, 1)	/* Shutdown DEV9.  */
-#define DEV9CTLTYPE		_IOC(DEV9_CTL_TYPE, 2)	/* Return type of device.  */
 
 /* hddfsd ioctl2().  */
 #define HDDIOCADDSUB		_IOC(HDD_IOC_TYPE, 1)	/* Add a subpartition.  */
