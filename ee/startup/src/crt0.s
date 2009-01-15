@@ -10,29 +10,29 @@
 # Standard startup file.
 
 
-   .globl   _init
-   .type   _init, @function
-   .weak   _init
+   .weakext  _init_weak, _init
+   .globl    _init_weak
+   .type     _init_weak, @function
 
-   .globl   _fini
-   .type   _fini, @function
-   .weak   _fini
+   .weakext  _fini_weak, _fini
+   .globl    _fini_weak
+   .type     _fini_weak, @function
 
    .extern   _heap_size
    .extern   _stack
    .extern   _stack_size   
 
-   .globl   _ps2sdk_args_parse
-   .type   _ps2sdk_args_parse, @function
-   .weak   _ps2sdk_args_parse
+   .weakext _ps2sdk_args_parse_weak, _ps2sdk_args_parse
+   .globl   _ps2sdk_args_parse_weak
+   .type    _ps2sdk_args_parse_weak, @function
 
-   .globl   _ps2sdk_libc_init
-   .type   _ps2sdk_libc_init, @function
-   .weak   _ps2sdk_libc_init
+   .weakext _ps2sdk_libc_init_weak, _ps2sdk_libc_init
+   .globl   _ps2sdk_libc_init_weak
+   .type    _ps2sdk_libc_init_weak, @function
 
-   .globl   _ps2sdk_libc_deinit
-   .type   _ps2sdk_libc_deinit, @function
-   .weak   _ps2sdk_libc_deinit
+   .weakext _ps2sdk_libc_deinit_weak, _ps2sdk_libc_deinit
+   .globl   _ps2sdk_libc_deinit_weak
+   .type    _ps2sdk_libc_deinit_weak, @function
 
    .set   noat
    .set   noreorder
@@ -43,8 +43,8 @@
    nop
    nop
 
-   .globl   _start
-   .ent   _start
+   .globl  _start
+   .ent    _start
 _start:
 
 zerobss:
@@ -97,7 +97,7 @@ setupthread:
 parseargs:
    # call ps2sdk argument parsing (weak)
 
-   la   $8, _ps2sdk_args_parse
+   la   $8, _ps2sdk_args_parse_weak
    beqz   $8, 1f
    nop
 
@@ -110,7 +110,7 @@ parseargs:
 libc_init:
    # initialize ps2sdk libc (weak)
 
-   la   $8, _ps2sdk_libc_init
+   la   $8, _ps2sdk_libc_init_weak
    beqz   $8, 1f
    nop
    jalr   $8      # _ps2sdk_libc_init()
@@ -120,7 +120,7 @@ libc_init:
 ctors:
    # call global constructors (weak)
 
-   la   $8, _init
+   la   $8, _init_weak
    beqz   $8, 1f
    nop
    jalr   $8      # _init()
@@ -153,7 +153,7 @@ _exit:
 dtors:
    # call global destructors (weak)
 
-   la   $8, _fini
+   la   $8, _fini_weak
    beqz   $8, 1f
    nop
    jalr   $8      # _fini()
@@ -163,7 +163,7 @@ dtors:
 libc_uninit:
    # uninitialize ps2sdk libc (weak)
 
-   la   $8, _ps2sdk_libc_deinit
+   la   $8, _ps2sdk_libc_deinit_weak
    beqz   $8, 1f
    nop
    jalr   $8      # _ps2sdk_libc_deinit()
