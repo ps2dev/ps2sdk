@@ -29,7 +29,7 @@ iop_device_ops_t hddOps={
 	hddRemove,
 	(void*)fioUnsupported,
 	(void*)fioUnsupported,
-	(void*)hddOpen,
+	hddDopen,
 	hddClose,
 	hddDread,
 	hddGetStat,

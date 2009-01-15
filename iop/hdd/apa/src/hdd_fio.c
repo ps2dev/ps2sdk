@@ -412,6 +412,11 @@ int hddGetStat(iop_file_t *f, const char *name, iox_stat_t *stat)
 	return rv;
 }
 
+int hddDopen(iop_file_t *f, const char *name)
+{
+    return hddOpen(f, name, 0, 0);
+}
+
 int hddDread(iop_file_t *f, iox_dirent_t *dirent)
 {
 	int				rv;
