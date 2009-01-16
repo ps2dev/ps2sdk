@@ -9,14 +9,11 @@
 # $Id$
 # Standard startup file.
 
+   .weak  _init
+   .type  _init, @function
 
-   .weakext  _init_weak, _init
-   .globl    _init_weak
-   .type     _init_weak, @function
-
-   .weakext  _fini_weak, _fini
-   .globl    _fini_weak
-   .type     _fini_weak, @function
+   .weak  _fini
+   .type  _fini, @function
 
    .extern   _heap_size
    .extern   _stack
@@ -120,7 +117,7 @@ libc_init:
 ctors:
    # call global constructors (weak)
 
-   la   $8, _init_weak
+   la   $8, _init
    beqz   $8, 1f
    nop
    jalr   $8      # _init()
@@ -153,7 +150,7 @@ _exit:
 dtors:
    # call global destructors (weak)
 
-   la   $8, _fini_weak
+   la   $8, _fini
    beqz   $8, 1f
    nop
    jalr   $8      # _fini()
