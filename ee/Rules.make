@@ -26,7 +26,7 @@ EE_ASFLAGS := $(EE_ASFLAGS)
 
 # These macros can be used to simplify certain build rules.
 EE_C_COMPILE = $(EE_CC) $(EE_CFLAGS) $(EE_INCS)
-EE_CXX_COMPILE = $(EE_CC) $(EE_CXXFLAGS) $(EE_INCS)
+EE_CXX_COMPILE = $(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS)
 
 
 $(EE_OBJS_DIR)%.o : $(EE_SRC_DIR)%.c

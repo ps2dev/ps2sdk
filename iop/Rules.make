@@ -14,16 +14,14 @@ IOP_CC_VERSION := $(shell $(IOP_CC) --version 2>&1 | sed -n 's/^.*(GCC) //p')
 ASFLAGS_TARGET = -mcpu=r3000
 
 ifeq ($(IOP_CC_VERSION),3.2.2)
-CFLAGS_TARGET  = -fno-builtin
 ASFLAGS_TARGET = -march=r3000
-LDFLAGS_TARGET = -fno-builtin
 endif
 
 IOP_INCS := $(IOP_INCS) -I$(PS2SDKSRC)/iop/kernel/include -I$(PS2SDKSRC)/common/include -Iinclude
 
-IOP_CFLAGS  := $(CFLAGS_TARGET) -O2 -G0 -c $(IOP_INCS) $(IOP_CFLAGS)
+IOP_CFLAGS  := -fno-builtin -O2 -G0 -c $(IOP_INCS) $(IOP_CFLAGS)
 IOP_ASFLAGS := $(ASFLAGS_TARGET) -EL -G0 $(IOP_ASFLAGS)
-IOP_LDFLAGS := $(LDFLAGS_TARGET) -fno-builtin -nostdlib $(IOP_LDFLAGS)
+IOP_LDFLAGS := -fno-builtin -nostdlib $(IOP_LDFLAGS)
 
 # Externally defined variables: IOP_BIN, IOP_OBJS, IOP_LIB
 
