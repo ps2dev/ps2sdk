@@ -9,10 +9,13 @@ ps2cam.c:				PS2 Camera driver irx
 
 //(1) Please keep this file neat.
 //(2) This irx must always be backwords compatible.
+#include <stdio.h>
+#include <sysclib.h>
 #include <tamtypes.h>
 #include <thbase.h>
 #include <sifcmd.h>
 #include <sifrpc.h>
+#include <loadcore.h>
 #include <ioman.h>
 #include <usbd.h>
 #include <usbd_macro.h>
@@ -33,7 +36,7 @@ ps2cam.c:				PS2 Camera driver irx
 static SifRpcDataQueue_t	rpc_queue			__attribute((aligned(64)));
 static SifRpcServerData_t	rpc_server			__attribute((aligned(64)));
 static int					_rpc_buffer[1024]	__attribute((aligned(64)));
-static int					threadId;
+//static int					threadId;
 static int					maintain_thread;
 UsbDriver					cam_driver = {NULL,
 											 NULL,
@@ -221,9 +224,10 @@ int PS2CamConnect(int devId)
 	UsbConfigDescriptor		*conf;
 	
 	UsbInterfaceDescriptor	*intf0,*intf1;
-	UsbEndpointDescriptor	*endp0,*endp1;
+	UsbEndpointDescriptor   *endp1;
+	//UsbEndpointDescriptor	*endp0,*endp1;
 
-	CAMERA_DEVICE			*cam;
+	CAMERA_DEVICE			*cam = NULL;
 	
 
 	
@@ -300,7 +304,7 @@ int PS2CamConnect(int devId)
 int PS2CamDisconnect(int devId)
 {
 	int						i;
-	CAMERA_DEVICE			*cam;
+	CAMERA_DEVICE			*cam = NULL;
 
 	printf("camera was unplugged\n");
 
@@ -369,7 +373,7 @@ int PS2CamDisconnect(int devId)
 
 void rpcMainThread(void* param)
 {
-	int ret=-1;
+	//int ret=-1;
 	int tid;
 
 	sceSifInitRpc(0);
@@ -385,7 +389,7 @@ void rpcMainThread(void* param)
 void *rpcCommandHandler(u32 command, void *buffer, int size)
 {
 	int*	buf = (int*) buffer;
-	char*	ptr = (char*) buffer;
+	//char*	ptr = (char*) buffer;
 	int		ret = 0;
 
 
@@ -544,7 +548,7 @@ void PS2CamSetDeviceConfiguration(CAMERA_DEVICE *dev,int id)
 /*---------------------------------------*/
 void PS2CamSetDeviceDefaults(CAMERA_DEVICE *dev)
 {
-	int i;
+	//int i;
 	static int width,height;
 
 
@@ -668,7 +672,7 @@ void PS2CamSetDeviceDefaults(CAMERA_DEVICE *dev)
 /*-----------------------------------------------*/
 void PS2CamCallback(int resultCode, int bytes, void *arg) 
 {
-	unsigned char	*val;
+	//unsigned char	*val;
 	int				semh;
 	
 	semh = (int)arg;
@@ -833,8 +837,8 @@ void PS2CamGetDeviceSring(CAMERA_DEVICE* dev, int index, char *str, int strmax)
 int PS2CamSelectInterface(CAMERA_DEVICE* dev, int interface, int altSetting)
 {
 	int ret;
-	int semh;
-	iop_sema_t s;
+	//int semh;
+	//iop_sema_t s;
 
 
 	WaitSema(ps2cam_sema);
@@ -903,6 +907,7 @@ void camClearSnapButton(CAMERA_DEVICE *dev)
 int  camCheckAutoLaunch(CAMERA_DEVICE *dev)
 {
 	//setReg8Mask(dev, EYETOY_CREG_SNAPSHOT, 10,10);
+	return 0;
 }
 
 
@@ -1024,7 +1029,7 @@ int read_byts;
 
 void PS2CamReadDataCallback(int resultCode, int bytes, void *arg) 
 {
-	unsigned char	*val;
+	//unsigned char	*val;
 	int				semh;
 	
 	semh = (int)arg;
@@ -1160,8 +1165,8 @@ int PS2CamGetDeviceCount(void)
 int PS2CamOpenDevice(int device_index)
 {
 	int						i;
-	CAMERA_DEVICE			*cam;
-	PS2CAM_DEVICE_HANDLE	*handle;
+	CAMERA_DEVICE			*cam = NULL;
+	PS2CAM_DEVICE_HANDLE	*handle = NULL;
 	int						index;
 
 	if(! irx_initialized)

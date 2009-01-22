@@ -9,7 +9,7 @@
 # $Id$
 
 
-SUBDIRS = usbd keyboard mouse
+SUBDIRS = usbd keyboard camera mouse
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make

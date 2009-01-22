@@ -2,22 +2,20 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright 2001-2005, ps2dev - http://www.ps2dev.org
+# Copyright 2005, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: Makefile.sample 577 2004-09-14 14:41:46Z pixel $
+# $Id: Makefile 1187 2005-06-27 17:34:43Z lukasz $
 
-EE_BIN = prof.elf
-EE_OBJS = prof.o
-EE_CFLAGS = -pg
-EE_LIBS = -lc
+EE_BIN = playwav2.elf
+EE_OBJS = playwav2.o
+EE_LIBS = -laudsrv -lc
 
 all: $(EE_BIN)
 
 clean:
-	rm -f *.elf *.o *.a
+	rm -f *.o *.elf
 
 include $(PS2SDK)/samples/Makefile.pref
 include $(PS2SDK)/samples/Makefile.eeglobal
-

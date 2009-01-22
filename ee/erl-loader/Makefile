@@ -22,10 +22,10 @@ EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 EE_LDFLAGS = -L$(PS2SDKSRC)/ee/kernel/lib -L$(PS2SDKSRC)/ee/libc/lib -L$(PS2SDKSRC)/ee/erl/lib
 
 # Since we are using non-builtin symbols
-EE_LDFLAGS += -fno-builtin-memcmp -fno-builtin-memcpy -fno-builtin-memset
-EE_LDFLAGS += -fno-builtin-printf -fno-builtin-strcat -fno-builtin-strchr
-EE_LDFLAGS += -fno-builtin-strcmp -fno-builtin-strcpy -fno-builtin-strlen
-EE_LDFLAGS += -fno-builtin-strncpy -fno-builtin-strrchr -fno-builtin-strncmp
+EE_CFLAGS = -fno-builtin-memcmp -fno-builtin-memcpy -fno-builtin-memset
+EE_CFLAGS += -fno-builtin-printf -fno-builtin-strcat -fno-builtin-strchr
+EE_CFLAGS += -fno-builtin-strcmp -fno-builtin-strcpy -fno-builtin-strlen
+EE_CFLAGS += -fno-builtin-strncpy -fno-builtin-strrchr -fno-builtin-strncmp
 
 EE_LIBS = -lerl -lc -lkernel
 
@@ -34,12 +34,12 @@ LOADER_BIN = $(EE_BIN_DIR)erl-loader.elf
 all: $(EE_OBJS_DIR) $(EE_BIN_DIR) $(LOADER_BIN)
 
 $(LOADER_BIN) : $(EE_OBJS) $(PS2SDKSRC)/ee/startup/obj/crt0.o
-	$(EE_CC) -mno-crt0 -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_LDFLAGS) \
-	-o bin/tmp.elf $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_LIBS) $(EE_SRC_DIR)dummy-exports.c
+	$(EE_CC) -mno-crt0 -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_CFLAGS) \
+	-o bin/tmp.elf $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS) $(EE_SRC_DIR)dummy-exports.c
 	$(EE_SRC_DIR)build-exports.sh
 	rm $(EE_BIN_DIR)tmp.elf
-	$(EE_CC) -mno-crt0 -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_LDFLAGS) \
-	-o $(LOADER_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_LIBS) $(EE_SRC_DIR)exports.c
+	$(EE_CC) -mno-crt0 -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_CFLAGS) \
+	-o $(LOADER_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS) $(EE_SRC_DIR)exports.c
 #	rm $(EE_SRC_DIR)exports.c
 
 clean:

@@ -60,75 +60,75 @@ include $(PS2SDKSRC)/iop/Rules.release
 
 
 obj/loopif.o: $(LWIP)/src/netif/loopif.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 obj/api_lib.o: $(LWIP)/src/api/api_lib.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 obj/api_msg.o: $(LWIP)/src/api/api_msg.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 obj/icmp.o: $(LWIP)/src/core/ipv4/icmp.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 obj/ip.o: $(LWIP)/src/core/ipv4/ip.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 obj/ip_addr.o: $(LWIP)/src/core/ipv4/ip_addr.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 obj/ip_frag.o: $(LWIP)/src/core/ipv4/ip_frag.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 obj/err.o: $(LWIP)/src/api/err.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 obj/sockets.o: $(LWIP)/src/api/sockets.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 obj/tcpip.o: $(LWIP)/src/api/tcpip.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 obj/inet.o: $(LWIP)/src/core/inet.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 obj/mem.o: $(LWIP)/src/core/mem.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 obj/memp.o: $(LWIP)/src/core/memp.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 obj/netif.o: $(LWIP)/src/core/netif.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 obj/pbuf.o: $(LWIP)/src/core/pbuf.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 obj/stats.o: $(LWIP)/src/core/stats.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 obj/tcp.o: $(LWIP)/src/core/tcp.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 obj/tcp_in.o: $(LWIP)/src/core/tcp_in.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 obj/tcp_out.o: $(LWIP)/src/core/tcp_out.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 obj/sys.o: $(LWIP)/src/core/sys.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 obj/raw.o: $(LWIP)/src/core/raw.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 obj/etharp.o: $(LWIP)/src/netif/etharp.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 ifdef PS2IP_DHCP
 obj/dhcp.o: $(LWIP)/src/core/dhcp.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 endif
 
 obj/udp.o: $(LWIP)/src/core/udp.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@

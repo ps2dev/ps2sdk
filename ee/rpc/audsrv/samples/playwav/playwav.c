@@ -7,8 +7,8 @@
 # Licenced under GNU Library General Public License version 2
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
-# audsrv sample using callbacks
+# $Id: playwav.c 1037 2005-04-24 13:35:02Z gawd $
+# audsrv sample
 */
 
 #include <stdio.h>
@@ -21,22 +21,13 @@
 
 #include <audsrv.h>
 
-static int fillbuffer(void *arg)
-{
-	iSignalSema((int)arg);
-	return 0;
-}
-
 int main(int argc, char **argv)
 {
 	int ret;
 	int played;
 	int err;
-	int bytes;
 	char chunk[2048];
 	FILE *wav;
-	ee_sema_t sema;
-	int fillbuffer_sema;
 	struct audsrv_fmt_t format;
 
 	SifInitRpc(0); 
@@ -66,18 +57,6 @@ int main(int argc, char **argv)
 
 	audsrv_set_volume(MAX_VOLUME);
 
-	sema.init_count = 0;
-	sema.max_count = 1;
-	sema.option = 0;
-	fillbuffer_sema = CreateSema(&sema);
-
-	err = audsrv_on_fillbuf(sizeof(chunk), fillbuffer, (void *)fillbuffer_sema);
-	if (err != AUDSRV_ERR_NOERROR)
-	{
-		printf("audsrv_on_fillbuf failed with err=%d\n", err);
-		goto loser;
-	}
-
 	wav = fopen("host:song_22k.wav", "rb");
 	if (wav == NULL)
 	{
@@ -90,13 +69,12 @@ int main(int argc, char **argv)
 
 	printf("starting play loop\n");
 	played = 0;
-	bytes = 0;
 	while (1)
 	{
 		ret = fread(chunk, 1, sizeof(chunk), wav);
 		if (ret > 0)
 		{
-			WaitSema(fillbuffer_sema);
+			audsrv_wait_audio(ret);
 			audsrv_play_audio(chunk, ret);
 		}
 
@@ -107,11 +85,9 @@ int main(int argc, char **argv)
 		}
 
 		played++;
-		bytes = bytes + ret;
-
 		if (played % 8 == 0)
 		{
-			printf("\r%d bytes sent..", bytes);
+			printf(".");
 		}
 
 		if (played == 512) break;
@@ -119,7 +95,6 @@ int main(int argc, char **argv)
 
 	fclose(wav);
 
-loser:
 	printf("sample: stopping audsrv\n");
 	audsrv_quit();
 

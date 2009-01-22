@@ -7,8 +7,8 @@
 # Licenced under GNU Library General Public License version 2
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
-# audsrv sample
+# $Id: testcd.c 1116 2005-05-27 16:49:33Z gawd $
+# audsrv cdda toc sample
 */
 
 #include <stdio.h>
@@ -24,11 +24,8 @@
 int main(int argc, char **argv)
 {
 	int ret;
-	int played;
-	int err;
-	char chunk[2048];
-	FILE *wav;
-	struct audsrv_fmt_t format;
+	int n, track;
+	int lastpos;
 
 	SifInitRpc(0); 
 
@@ -48,56 +45,26 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	format.bits = 16;
-	format.freq = 22050;
-	format.channels = 2;
-	err = audsrv_set_format(&format);
-	printf("set format returned %d\n", err);
-	printf("audsrv returned error string: %s\n", audsrv_get_error_string());
+	n = audsrv_get_numtracks();
+	printf("There are %d tracks on this disc\n", n);
 
-	audsrv_set_volume(MAX_VOLUME);
-
-	wav = fopen("host:song_22k.wav", "rb");
-	if (wav == NULL)
+	lastpos = 0;
+	for (track=0; track<=n; track++)
 	{
-		printf("failed to open wav file\n");
-		audsrv_quit();
-		return 1;
+		int pos = audsrv_get_track_offset(track);
+
+		if (track > 0)
+		{
+			int length = pos - lastpos;
+
+			printf("Track %02d: sector 0x%x, length: %02d:%02d:%02d\n",
+			track, pos, length / (75*60), (length / 75) % 60, length % 75);
+		}
+
+		lastpos = pos;
 	}
 
-	fseek(wav, 0x30, SEEK_SET);
-
-	printf("starting play loop\n");
-	played = 0;
-	while (1)
-	{
-		ret = fread(chunk, 1, sizeof(chunk), wav);
-		if (ret > 0)
-		{
-			audsrv_wait_audio(ret);
-			audsrv_play_audio(chunk, ret);
-		}
-
-		if (ret < sizeof(chunk))
-		{
-			/* no more data */
-			break;
-		}
-
-		played++;
-		if (played % 8 == 0)
-		{
-			printf(".");
-		}
-
-		if (played == 512) break;
-	}
-
-	fclose(wav);
-
-	printf("sample: stopping audsrv\n");
 	audsrv_quit();
-
 	printf("sample: ended\n");
 	return 0;
 }

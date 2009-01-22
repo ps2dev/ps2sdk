@@ -6,27 +6,27 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
+# $Id: Makefile 577 2004-09-14 14:41:46Z pixel $
 
 
-EE_OBJS_DIR = obj/
-EE_LIB_DIR = lib/
-EE_SRC_DIR = src/
-EE_INC_DIR = include/
+IOP_OBJS_DIR = obj/
+IOP_BIN_DIR = bin/
+IOP_SRC_DIR = src/
+IOP_INC_DIR = include/
 
-EE_OBJS = fileXio_rpc.o erl-support.o
-EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
+IOP_BIN=bin/ps2cam.irx
+IOP_OBJS=obj/ps2cam.o obj/imports.o
 
-EE_LIB = $(EE_LIB_DIR)libfileXio.a
+IOP_CFLAGS=-Wall
+IOP_LDFLAGS=-s
 
-#EE_CFLAGS += -I$(PS2DRV)/ee/include -I$(PS2DRV)/common/include
-EE_LDFLAGS += -s
+IOP_INCS += -I$(PS2SDKSRC)/iop/usb/usbd/include
 
-all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
+all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 
 clean:
-	rm -f -r $(EE_OBJS_DIR) $(EE_LIB_DIR)
+	rm -f -r $(IOP_OBJS_DIR) $(IOP_BIN_DIR)
 
 include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/ee/Rules.make
-include $(PS2SDKSRC)/ee/Rules.release
+include $(PS2SDKSRC)/iop/Rules.make
+include $(PS2SDKSRC)/iop/Rules.release

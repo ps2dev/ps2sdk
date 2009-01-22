@@ -7,10 +7,9 @@
 # Licenced under GNU Library General Public License version 2
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
-# audsrv cdda toc sample
+# $Id: playadpcm.c 1221 2005-10-01 16:19:49Z gawd $
+# audsrv adpcm sample
 */
-
 #include <stdio.h>
 #include <string.h>
 
@@ -23,9 +22,11 @@
 
 int main(int argc, char **argv)
 {
-	int ret;
-	int n, track;
-	int lastpos;
+	int i, ret;
+	FILE* adpcm;
+	audsrv_adpcm_t sample;
+	int size;
+	u8* buffer;
 
 	SifInitRpc(0); 
 
@@ -45,26 +46,44 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	n = audsrv_get_numtracks();
-	printf("There are %d tracks on this disc\n", n);
+	adpcm = fopen("host:evillaugh.adp", "rb");
 
-	lastpos = 0;
-	for (track=0; track<=n; track++)
+	if (adpcm == NULL)
 	{
-		int pos = audsrv_get_track_offset(track);
-
-		if (track > 0)
-		{
-			int length = pos - lastpos;
-
-			printf("Track %02d: sector 0x%x, length: %02d:%02d:%02d\n",
-			track, pos, length / (75*60), (length / 75) % 60, length % 75);
-		}
-
-		lastpos = pos;
+		printf("failed to open adpcm file\n");
+		audsrv_quit();
+		return 1;
 	}
 
-	audsrv_quit();
-	printf("sample: ended\n");
+	fseek(adpcm, 0, SEEK_END);
+	size = ftell(adpcm);
+	fseek(adpcm, 0, SEEK_SET);
+
+	buffer = malloc(size);
+
+	fread(buffer, 1, size, adpcm);
+	fclose(adpcm);
+
+	printf("playing sample..\n");
+
+	audsrv_adpcm_init();
+	audsrv_set_volume(MAX_VOLUME);
+	audsrv_load_adpcm(&sample, buffer, size);
+	audsrv_play_adpcm(&sample);
+
+	/* Uncomment to hear two samples played simultaenously
+	for (i=0; i<100; i++)
+	{
+		nopdelay();
+	}
+
+	audsrv_play_adpcm(&sample);
+	*/
+
+	printf("sample played..\n");
+
+	free(buffer);
+
+	while (1);
 	return 0;
 }

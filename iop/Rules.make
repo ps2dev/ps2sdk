@@ -19,14 +19,14 @@ endif
 
 IOP_INCS := $(IOP_INCS) -I$(PS2SDKSRC)/iop/kernel/include -I$(PS2SDKSRC)/common/include -Iinclude
 
-IOP_CFLAGS  := -fno-builtin -O2 -G0 -c $(IOP_INCS) $(IOP_CFLAGS)
+IOP_CFLAGS  := -fno-builtin -O2 -G0 $(IOP_INCS) $(IOP_CFLAGS)
 IOP_ASFLAGS := $(ASFLAGS_TARGET) -EL -G0 $(IOP_ASFLAGS)
-IOP_LDFLAGS := -fno-builtin -nostdlib $(IOP_LDFLAGS)
+IOP_LDFLAGS := -nostdlib $(IOP_LDFLAGS)
 
 # Externally defined variables: IOP_BIN, IOP_OBJS, IOP_LIB
 
 $(IOP_OBJS_DIR)%.o : $(IOP_SRC_DIR)%.c
-	$(IOP_CC) $(IOP_CFLAGS) $< -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 $(IOP_OBJS_DIR)%.o : $(IOP_SRC_DIR)%.S
 	$(IOP_CC) $(IOP_CFLAGS) $(IOP_INCS) -c $< -o $@
@@ -38,14 +38,14 @@ $(IOP_OBJS_DIR)%.o : $(IOP_SRC_DIR)%.s
 $(IOP_OBJS_DIR)%.o : $(IOP_SRC_DIR)%.lst
 	$(ECHO) "#include \"irx_imports.h\"" > $(IOP_OBJS_DIR)build-imports.c
 	cat $< >> $(IOP_OBJS_DIR)build-imports.c
-	$(IOP_CC) $(IOP_CFLAGS) -I$(IOP_SRC_DIR) $(IOP_OBJS_DIR)build-imports.c -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -I$(IOP_SRC_DIR) -c $(IOP_OBJS_DIR)build-imports.c -o $@
 	-rm -f $(IOP_OBJS_DIR)build-imports.c
 
 # A rule to build exports.tab.
 $(IOP_OBJS_DIR)%.o : $(IOP_SRC_DIR)%.tab
 	$(ECHO) "#include \"irx.h\"" > $(IOP_OBJS_DIR)build-exports.c
 	cat $< >> $(IOP_OBJS_DIR)build-exports.c
-	$(IOP_CC) $(IOP_CFLAGS) -I$(IOP_SRC_DIR) $(IOP_OBJS_DIR)build-exports.c -o $@
+	$(IOP_CC) $(IOP_CFLAGS) -I$(IOP_SRC_DIR) -c $(IOP_OBJS_DIR)build-exports.c -o $@
 	-rm -f $(IOP_OBJS_DIR)build-exports.c
 
 $(IOP_OBJS_DIR):
@@ -58,7 +58,7 @@ $(IOP_LIB_DIR):
 	$(MKDIR) -p $(IOP_LIB_DIR)
 
 $(IOP_BIN) : $(IOP_OBJS)
-	$(IOP_CC) $(IOP_LDFLAGS) -o $(IOP_BIN) $(IOP_OBJS) $(IOP_LIBS)
+	$(IOP_CC) $(IOP_CFLAGS) -o $(IOP_BIN) $(IOP_OBJS) $(IOP_LDFLAGS) $(IOP_LIBS)
 
 $(IOP_LIB) : $(IOP_OBJS)
 	$(IOP_AR) cru $(IOP_LIB) $(IOP_OBJS)
