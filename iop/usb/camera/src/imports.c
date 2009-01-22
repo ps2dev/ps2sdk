@@ -83,7 +83,6 @@ sifcmd_IMPORTS_end
 usbd_IMPORTS_start
 I_UsbGetDeviceStaticDescriptor
 I_UsbOpenEndpoint
-I_UsbOpenBulkEndpoint
 I_UsbCloseEndpoint
 I_UsbSetDevicePrivateData
 I_UsbTransfer

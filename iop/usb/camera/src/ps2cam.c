@@ -383,92 +383,6 @@ void rpcMainThread(void* param)
 	sceSifRpcLoop(&rpc_queue);
 }
 
-
-
-
-void *rpcCommandHandler(u32 command, void *buffer, int size)
-{
-	int*	buf = (int*) buffer;
-	//char*	ptr = (char*) buffer;
-	int		ret = 0;
-
-
-	
-
-	switch (command)
-	{
-		case PS2CAM_RPC_GETIRXVERSION:
-			ret = PS2CamGetIRXVersion();
-		
-		break;
-		case PS2CAM_RPC_INITIALIZE:
-			ret = PS2CamInit(buf[0]);
-		
-		break;
-		case PS2CAM_RPC_GETDEVCOUNT:
-			ret = PS2CamGetDeviceCount();
-		
-		break;
-		case PS2CAM_RPC_OPENDEVICE:
-			ret = PS2CamOpenDevice(buf[0]);
-		
-		break;
-		case PS2CAM_RPC_CLOSEDEVICE:
-			ret = PS2CamCloseDevice(buf[0]);
-		
-		break;
-		case PS2CAM_RPC_GETDEVSTATUS:
-			ret = PS2CamGetDeviceStatus(buf[0]);
-		
-		break;
-		case PS2CAM_RPC_GETDEVINFO:
-			ret = PS2CamGetDeviceInfo(buf[0],&buf[1]);
-		
-		break;
-		case PS2CAM_RPC_SETDEVBANDWIDTH:
-			ret = PS2CamSetDeviceBandwidth(buf[0], buf[1]);
-			
-		break;
-		case PS2CAM_RPC_READPACKET:
-			ret = PS2CamReadPacket(buf[0]);
-
-			//get mem address so i can access it from ee
-			buf[1] = (int )&campacket[0];
-		
-		break;
-		
-		case PS2CAM_RPC_SETLEDMODE:
-			ret = PS2CamSetLEDMode(buf[0], buf[1]);
-
-		break;
-		case PS2CAM_RPC_SETDEVCONFIG:
-			ret = PS2CamSetDeviceConfig(buf[0], &buf[1]);
-
-		break;
-		default:
-			ret = CAM_ERROR_COMMUNKNOWN;
-
-		break;
-	}
-
-
-	buf[0] = ret;
-
-	
-	return buffer;
-}
-
-
-
-
-
-
-
-
-
-
-
-
 /*=======================================*/
 /*=	CAMERA HIGH LEVEL FUNTIONS			=*/
 /*=										=*/
@@ -1640,3 +1554,71 @@ int PS2CamSetDeviceConfig(int handle, void *config)
 }
 
 
+void *rpcCommandHandler(u32 command, void *buffer, int size)
+{
+	int*	buf = (int*) buffer;
+	//char*	ptr = (char*) buffer;
+	int		ret = 0;
+
+	switch (command)
+	{
+		case PS2CAM_RPC_GETIRXVERSION:
+			ret = PS2CamGetIRXVersion();
+		
+		break;
+		case PS2CAM_RPC_INITIALIZE:
+			ret = PS2CamInit(buf[0]);
+		
+		break;
+		case PS2CAM_RPC_GETDEVCOUNT:
+			ret = PS2CamGetDeviceCount();
+		
+		break;
+		case PS2CAM_RPC_OPENDEVICE:
+			ret = PS2CamOpenDevice(buf[0]);
+		
+		break;
+		case PS2CAM_RPC_CLOSEDEVICE:
+			ret = PS2CamCloseDevice(buf[0]);
+		
+		break;
+		case PS2CAM_RPC_GETDEVSTATUS:
+			ret = PS2CamGetDeviceStatus(buf[0]);
+		
+		break;
+		case PS2CAM_RPC_GETDEVINFO:
+			ret = PS2CamGetDeviceInfo(buf[0],&buf[1]);
+		
+		break;
+		case PS2CAM_RPC_SETDEVBANDWIDTH:
+			ret = PS2CamSetDeviceBandwidth(buf[0], buf[1]);
+			
+		break;
+		case PS2CAM_RPC_READPACKET:
+			ret = PS2CamReadPacket(buf[0]);
+
+			//get mem address so i can access it from ee
+			buf[1] = (int )&campacket[0];
+		
+		break;
+		
+		case PS2CAM_RPC_SETLEDMODE:
+			ret = PS2CamSetLEDMode(buf[0], buf[1]);
+
+		break;
+		case PS2CAM_RPC_SETDEVCONFIG:
+			ret = PS2CamSetDeviceConfig(buf[0], &buf[1]);
+
+		break;
+		default:
+			ret = CAM_ERROR_COMMUNKNOWN;
+
+		break;
+	}
+
+
+	buf[0] = ret;
+
+	
+	return buffer;
+}
