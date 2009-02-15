@@ -157,7 +157,6 @@ int PS2CamProbe(int devId)
 	
 
 
-	printf("Device '%d' class = '%d_%d_%d'\n",devId,intf->bInterfaceClass,intf->bInterfaceSubClass,intf->bInterfaceProtocol);
 
 	// check for a free device slot. if none just ignore new device
 	count=0;
@@ -234,7 +233,7 @@ int PS2CamConnect(int devId)
 	iop_thread_t	param;
 	
 
-	printf("connect\n");
+	printf("camera was connected\n");
 
 
 	dev   = UsbGetDeviceStaticDescriptor(devId, NULL, USB_DT_DEVICE);
