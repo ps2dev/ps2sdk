@@ -19,7 +19,8 @@ ps2cam.c:				PS2 Camera driver irx
 #include <ioman.h>
 #include <usbd.h>
 #include <usbd_macro.h>
-#include "thsemap.h"
+#include <thsemap.h>
+#include <sysmem.h>
 
 
 #include "ps2cam.h"
@@ -224,16 +225,12 @@ int PS2CamConnect(int devId)
 	
 	UsbInterfaceDescriptor	*intf0,*intf1;
 	UsbEndpointDescriptor   *endp1;
-	//UsbEndpointDescriptor	*endp0,*endp1;
-
 	CAMERA_DEVICE			*cam = NULL;
-	
-
-	
-	iop_thread_t	param;
+	iop_thread_t			param;
 	
 
 	printf("camera was connected\n");
+	
 
 
 	dev   = UsbGetDeviceStaticDescriptor(devId, NULL, USB_DT_DEVICE);
@@ -267,6 +264,10 @@ int PS2CamConnect(int devId)
 	cam->stream				= UsbOpenEndpoint(devId, endp1);
 	cam->stream_pocket_size	= (endp1->wMaxPacketSizeHB * 256 + endp1->wMaxPacketSizeLB);
 	
+
+
+
+
 
 
 	
@@ -395,31 +396,42 @@ void rpcMainThread(void* param)
 /*---------------------------------------*/	
 /*- called after a camera is accepted	-*/
 /*---------------------------------------*/
-void PS2CamInitializeNewDevice(CAMERA_DEVICE *dev)
+void PS2CamInitializeNewDevice(CAMERA_DEVICE *cam)
 {
+	unsigned char			*temp_str;
+	UsbDeviceDescriptor		*d;
 	
-	PS2CamSetDeviceConfiguration(dev,1);
-	
-	camStopStream(dev);
-	PS2CamSelectInterface(dev,0,0);
-	camStartStream(dev);
 
-	PS2CamSetDeviceDefaults(dev);
+	PS2CamSetDeviceConfiguration(cam,1);
+	
+	camStopStream(cam);
+	PS2CamSelectInterface(cam,0,0);
+	camStartStream(cam);
+
+	PS2CamSetDeviceDefaults(cam);
 
 /*	camStopStream(dev);
 	setReg16(dev, 0x30, 384);
 	camStartStream(dev);
 */	
-	camStopStream(dev);
-	PS2CamSelectInterface(dev,0,EYETOY_ALTERNATE_SIZE_384);
-	camStartStream(dev);
+	camStopStream(cam);
+	PS2CamSelectInterface(cam,0,EYETOY_ALTERNATE_SIZE_384);
+	camStartStream(cam);
 
-	dev->status = CAM_STATUS_CONNECTEDREADY;
+	cam->status = CAM_STATUS_CONNECTEDREADY;
 
 
 
-	printf("cam initialized\n");
+	// connected message (alloc som mem and get device string then print it and free the mem we alloced)
+	d   = UsbGetDeviceStaticDescriptor(cam->device_id, NULL, USB_DT_DEVICE);
+	temp_str = AllocSysMemory(0, 128, 0);
+	temp_str[0]=0x00;
+	PS2CamGetDeviceSring(cam, d->iProduct,      (char *)temp_str, 128);
+	printf("cam initialized(%s)\n",temp_str);
+	FreeSysMemory(temp_str);
 
+
+	
 	DeleteThread(maintain_thread);
 	
 	return;
@@ -1621,3 +1633,10 @@ void *rpcCommandHandler(u32 command, void *buffer, int size)
 	
 	return buffer;
 }
+
+
+
+
+
+
+/*EOF*/
