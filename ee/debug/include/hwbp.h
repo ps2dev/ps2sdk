@@ -11,8 +11,8 @@
 # Hardware breakpoint functions
 */
 
-#ifndef __DEBUG_H__
-#define __DEBUG_H__
+#ifndef __HWBP_H__
+#define __HWBP_H__
 
 #include <tamtypes.h>
 
