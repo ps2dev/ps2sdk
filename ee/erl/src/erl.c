@@ -367,8 +367,12 @@ static void destroy_erl_record(struct erl_record_t * erl) {
     if (!erl)
 	return;
 
-    if (erl->bytes)
-	free(erl->bytes);
+    if (erl->bytes) {
+        if (erl->flags & ERL_FLAG_CLEAR)
+            memset(erl->bytes, 0, erl->fullsize);
+        if (!(erl->flags & ERL_FLAG_STATIC))
+            free(erl->bytes);
+    }
 
     erl_flush_symbols(erl);
 
@@ -569,7 +573,7 @@ int erl_add_global_symbol(const char * symbol, u32 address) {
     return add_symbol(0, symbol, address);
 }
 
-static int read_erl(int elf_handle, u8 * elf_mem, struct erl_record_t ** p_erl_record) {
+static int read_erl(int elf_handle, u8 * elf_mem, u32 addr, struct erl_record_t ** p_erl_record) {
     struct elf_header_t head;
     struct elf_section_t * sec = 0;
     struct elf_symbol_t * sym = 0;
@@ -739,7 +743,17 @@ return code
     dprintf("Computed needed size to load the erl file: %i\n", fullsize);
 
    // Loading progbits sections.
-    erl_record->bytes = (u8 *) malloc(fullsize);
+    if (addr == ERL_DYN_ADDR) {
+        erl_record->bytes = (u8 *) malloc(fullsize);
+        if (!erl_record->bytes) {
+            dprintf("Cannot allocate ERL bytes.\n");
+            free_and_return(-1);
+        }
+    } else {
+        erl_record->bytes = (u8 *) addr;
+        erl_record->flags |= ERL_FLAG_STATIC;
+    }
+
     erl_record->fullsize = fullsize;
     dprintf("Base address: %08X\n", erl_record->bytes);
     for (i = 1; i < head.e_shnum; i++) {
@@ -920,7 +934,7 @@ static struct erl_record_t * _init_load_erl_wrapper_from_file(char * erl_id) {
 
 erl_loader_t _init_load_erl = _init_load_erl_wrapper_from_file;
 
-static struct erl_record_t * load_erl(const char * fname, u8 * elf_mem, int argc, char ** argv) {
+static struct erl_record_t * load_erl(const char * fname, u8 * elf_mem, u32 addr, int argc, char ** argv) {
     struct erl_record_t * r;
     struct symbol_t * s;
     int elf_handle = 0;
@@ -934,7 +948,7 @@ static struct erl_record_t * load_erl(const char * fname, u8 * elf_mem, int argc
 	}
     }
 
-    if (read_erl(elf_handle, elf_mem, &r) < 0) {
+    if (read_erl(elf_handle, elf_mem, addr, &r) < 0) {
 	dprintf("Error loading erl file.\n");
 	if (fname) {
 	    close(elf_handle);
@@ -1011,11 +1025,46 @@ struct erl_record_t * _init_load_erl_from_file(const char * fname, char * erl_id
 }
 
 struct erl_record_t * load_erl_from_file(const char * fname, int argc, char ** argv) {
-    return load_erl(fname, 0, argc, argv);
+    return load_erl(fname, 0, ERL_DYN_ADDR, argc, argv);
 }
 
 struct erl_record_t * load_erl_from_mem(u8 * mem, int argc, char ** argv) {
-    return load_erl(0, mem, argc, argv);
+    return load_erl(0, mem, ERL_DYN_ADDR, argc, argv);
+}
+
+/*
+ * Load ERL from memory and relocate it at a specific memory address.
+ */
+struct erl_record_t * load_erl_from_mem_to_addr(u8 * mem, u32 addr, int argc, char ** argv) {
+    return load_erl(0, mem, addr, argc, argv);
+}
+
+/*
+ * Load ERL from file and relocate it at a specific memory address.
+ */
+struct erl_record_t * load_erl_from_file_to_addr(const char * fname, u32 addr, int argc, char ** argv) {
+    return load_erl(fname, 0, addr, argc, argv);
+}
+
+/*
+ * Load ERL from file and relocate it at a specific memory address. Prepend _init_erl_prefix to filename.
+ */
+struct erl_record_t * _init_load_erl_from_file_to_addr(const char * fname, u32 addr, char * erl_id) {
+    char tfname[1024];
+    struct erl_record_t * r;
+    char * argv[2];
+
+    if (erl_id)
+        if ((r = find_erl(erl_id)))
+    	    return r;
+
+    argv[0] = erl_id;
+    argv[1] = 0;
+
+    strcpy(tfname, _init_erl_prefix);
+    strcat(tfname, fname);
+
+    return load_erl_from_file_to_addr(tfname, addr, 1, argv);
 }
 
 void r_unload_dependancies(char ** d) {

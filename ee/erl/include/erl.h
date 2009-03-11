@@ -22,7 +22,12 @@ extern "C" {
 
 struct htab;
 
+/* ERL is sticky and cannot be unloaded */
 #define ERL_FLAG_STICKY 1
+/* ERL is relocated at a static memory address; set by *_to_addr functions */
+#define ERL_FLAG_STATIC 2
+/* Clear ERL bytes on unload */
+#define ERL_FLAG_CLEAR  4
 
 struct erl_record_t {
     u8 * bytes;
@@ -50,6 +55,18 @@ extern erl_loader_t _init_load_erl;
 struct erl_record_t * load_erl_from_mem(u8 * mem, int argc, char ** argv);
 struct erl_record_t * load_erl_from_file(const char * fname, int argc, char ** argv);
 struct erl_record_t * _init_load_erl_from_file(const char * fname, char * erl_id);
+
+/*
+ * By default, ERLs are relocated at a dynamic memory address -- a pointer
+ * returned by malloc().  The *_to_addr functions allow you to define a static
+ * address (must be different from ERL_DYN_ADDR) without allocating any memory.
+ */
+#define ERL_DYN_ADDR 0
+
+struct erl_record_t * load_erl_from_mem_to_addr(u8 * mem, u32 addr, int argc, char ** argv);
+struct erl_record_t * load_erl_from_file_to_addr(const char * fname, u32 addr, int argc, char ** argv);
+struct erl_record_t * _init_load_erl_from_file_to_addr(const char * fname, u32 addr, char * erl_id);
+
 int unload_erl(struct erl_record_t * erl);
 
 int erl_add_global_symbol(const char * symbol, u32 address);
