@@ -1,5 +1,5 @@
 #!/bin/sh
-ee-readelf -a bin/tmp.elf |
+ee-readelf -sW bin/tmp.elf |
 grep '\(GLOBAL\|WEAK\)' |
 grep -v '\(export_list\|UND\|HIDDEN\)' |
 awk ' { print $8 } ' |
