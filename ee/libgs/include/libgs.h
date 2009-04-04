@@ -18,12 +18,6 @@
 
 
 
-#ifndef QWORD
-typedef struct 
-{
-	unsigned long lo, hi;
-}QWORD __attribute__((aligned(128)));
-#endif
 
 
 
@@ -114,7 +108,7 @@ typedef struct
 #define GS_TEX_MIPMAP_DEFINE			0	//use values in MIPTBP1
 #define GS_TEX_MIPMAP_AUTO				1	//auto calculate mipmap address
 	
-//Texture Funtion (used in TEX0->tcc)
+//Texture Funtion (used in TEX0->tex_cc)
 #define GS_TEX_MODULATE					0	// brighten texture based on Pixel's Alpha 
 #define GS_TEX_DECAL					1	// keep texture as is
 #define GS_TEX_HIGHLIHGT1				2	// used when highlighting translucent polygons
@@ -244,28 +238,28 @@ typedef struct {
 /*SMODE2*/
 /*
 typedef struct {
-	unsigned RC   : 8;	// PLL Reference Divider
-	unsigned LC   :13;	// PLL Loop Divider
-	unsigned T1248: 4;	// PLL Output Divider
-	unsigned SCLK : 2;	// VESA mode Clock
-	unsigned CMOD : 2;	// Display mode
-	unsigned INT  : 1;	// Interlace mode
-	unsigned FFMD : 1;	//
-	unsigned EX   : 1;	//
-	unsigned VHH  : 1;	// Half H VBLANK
-	unsigned VHP  : 1;	// Half H Pulse
-	unsigned PRST : 1;	// PLL reset
-	unsigned SINT : 1;	//
-	unsigned SHCL : 1;	//
-	unsigned PCK2 : 1;	//
-	unsigned SPML : 4;	//
+	unsigned rc   : 8;	// pll reference divider
+	unsigned lc   :13;	// pll loop divider
+	unsigned t1248: 4;	// pll output divider
+	unsigned sclk : 2;	// vesa mode clock
+	unsigned cmod : 2;	// display mode
+	unsigned int  : 1;	// interlace mode
+	unsigned ffmd : 1;	//
+	unsigned ex   : 1;	//
+	unsigned vhh  : 1;	// half h vblank
+	unsigned vhp  : 1;	// half h pulse
+	unsigned prst : 1;	// pll reset
+	unsigned sint : 1;	//
+	unsigned shcl : 1;	//
+	unsigned pck2 : 1;	//
+	unsigned spml : 4;	//
 	unsigned p0   : 1;	//
-	unsigned DPMS : 2;	// VESA DPMS mode
-	unsigned PHS  : 1;	// HSync output
-	unsigned PVS  : 1;	// VSync output
-	unsigned PEHS : 1;	//
-	unsigned PEVS : 1;	//
-	unsigned RFSH : 6;	// Refresh rate
+	unsigned dpms : 2;	// vesa dpms mode
+	unsigned phs  : 1;	// hsync output
+	unsigned pvs  : 1;	// vsync output
+	unsigned pehs : 1;	//
+	unsigned pevs : 1;	//
+	unsigned rfsh : 6;	// refresh rate
 	unsigned p1   : 9;	//
 }GS_SMODE2;
 */
@@ -276,7 +270,7 @@ typedef struct {
 	unsigned field_frame :1;
 	unsigned vesta_dpms  :2;
 	unsigned long pad2	 :60;
-}GS_SMODE22;
+}GS_SMODE2;
 
 
 
@@ -391,9 +385,9 @@ typedef struct {
 
 /*BUSDIR*/
 typedef struct {
-	unsigned direction		:1;	// Transmission direction(0=host->local, 1=host<-local)
-	unsigned p0				:31;// Pad with zeros
-    unsigned int p1;			// Pad with more zeros
+	unsigned		direction		:1;	// Transmission direction(0=host->local, 1=host<-local)
+	unsigned		p0				:31;// Pad with zeros
+    unsigned int	p1;			// Pad with more zeros
 }GS_BUSDIR;
 
 
@@ -518,30 +512,30 @@ typedef struct {
 
 
 typedef struct {
-	unsigned long fb_addr     :14;
-	unsigned long fb_width    :6;
-	unsigned long pix_mode    :6;
-	unsigned long tex_width   :4;
-	unsigned long tex_height  :4;
-	unsigned long col_comp	  :1;
-	unsigned long tfx		  :2;
-	unsigned long clutb_addr  :14;
-	unsigned long clut_pixmode:4;
-	unsigned long clut_smode  :1;
-	unsigned long clut_offset :5;
-	unsigned long cld		  :3;
+	unsigned long tb_addr		:14;
+	unsigned long tb_width		:6;
+	unsigned long pix_mode		:6;
+	unsigned long tex_width		:4;
+	unsigned long tex_height	:4;
+	unsigned long tex_cc		:1;
+	unsigned long tex_funtion	:2;
+	unsigned long cb_addr		:14;
+	unsigned long clut_pixmode	:4;
+	unsigned long clut_smode	:1;
+	unsigned long clut_offset	:5;
+	unsigned long clut_loadmode	:3;
 
 }GS_TEX0;
 
 
 typedef struct {
-	unsigned long wms:2;
-	unsigned long wmt:2;
-	unsigned long minu:10;
-	unsigned long maxu:10;
-	unsigned long minv:10;
-	unsigned long maxv:10;
-	unsigned long pad0:20;
+	unsigned long wrap_mode_s	:2;
+	unsigned long wrap_mode_t	:2;
+	unsigned long min_clamp_u	:10;
+	unsigned long max_clamp_u	:10;
+	unsigned long min_clamp_v	:10;
+	unsigned long max_clamp_v	:10;
+	unsigned long pad0			:20;
 }GS_CLAMP;
 
 
@@ -552,29 +546,29 @@ typedef struct {
 
 
 typedef struct {
-	unsigned long lcm	:1;
-	unsigned long pad1	:1;
-	unsigned long mxl	:3;
-	unsigned long mmag	:1;
-	unsigned long mmin	:3;
-	unsigned long mtba	:1;
-	unsigned long pad2	:9;
-	unsigned long l		:2;
-	unsigned long pad3	:11;
-	unsigned long k		:12;
-	unsigned long pad4	:20;
+	unsigned long calc_method	:1;
+	unsigned long pad1			:1;
+	unsigned long max_mipmap	:3;
+	unsigned long expand_mode	:1;
+	unsigned long reduce_mode	:3;
+	unsigned long address_mode	:1;
+	unsigned long pad2			:9;
+	unsigned long L				:2;
+	unsigned long pad3			:11;
+	unsigned long K				:12;
+	unsigned long pad4			:20;
 }GS_TEX1;
 
 
 typedef struct {
-	unsigned long pad1:20;
-	unsigned long psm:6;
-	unsigned long pad2:11;
-	unsigned long cbp:14;
-	unsigned long cpsm:4;
-	unsigned long csm:1;
-	unsigned long csa:5;
-	unsigned long cld:3;
+	unsigned long pad1			:20;
+	unsigned long psm			:6;
+	unsigned long pad2			:11;
+	unsigned long cb_addr		:14;
+	unsigned long clut_psm		:4;
+	unsigned long clut_smode	:1;
+	unsigned long clut_offset	:5;
+	unsigned long clut_loadmode	:3;
 }GS_TEX2;
 
 
@@ -607,48 +601,48 @@ typedef struct {
 
 
 typedef struct {
-	unsigned long cbw:6;
-	unsigned long cou:6;
-	unsigned long cov:10;
+	unsigned long cb_width		:6;
+	unsigned long clut_uoffset	:6;
+	unsigned long clut_voffset	:10;
 	unsigned long pad0:42;
 }GS_TEXCLUT;
 
 
 typedef struct {
-	unsigned long msk:2;
+	unsigned long mask:2;
 	unsigned long pad0:62;
 }GS_SCANMSK;
 
 
 typedef struct {
-	unsigned long tbp1:14;
-	unsigned long tbw1:6;
-	unsigned long tbp2:14;
-	unsigned long tbw2:6;
-	unsigned long tbp3:14;
-	unsigned long tbw3:6;
-	unsigned long pad1:4;
-} GS_MIPTBP1;
+	unsigned long tb_addr1	:14;
+	unsigned long tb_width1	:6;
+	unsigned long tb_addr2	:14;
+	unsigned long tb_width2	:6;
+	unsigned long tb_addr3	:14;
+	unsigned long tb_width3	:6;
+	unsigned long pad1		:4;
+}GS_MIPTBP1;
 
 
 typedef struct {
-	unsigned long tbp4:14;
-	unsigned long tbw4:6;
-	unsigned long tbp5:14;
-	unsigned long tbw5:6;
-	unsigned long tbp6:14;
-	unsigned long tbw6:6;
-	unsigned long pad0:4;
+	unsigned long tb_addr4	:14;
+	unsigned long tb_width4	:6;
+	unsigned long tb_addr5	:14;
+	unsigned long tb_width5	:6;
+	unsigned long tb_addr6	:14;
+	unsigned long tb_width6	:6;
+	unsigned long pad0		:4;
 }GS_MIPTBP2;
 
 
 typedef struct {
-	unsigned long ta0	: 8;
-	unsigned long pad1	: 7;
-	unsigned long aem	: 1;
-	unsigned long pad2	:16;
-	unsigned long ta1	: 8;
-	unsigned long pad3	:24;
+	unsigned long alpha_0		: 8;
+	unsigned long pad1			: 7;
+	unsigned long alpha_method	: 1;
+	unsigned long pad2			:16;
+	unsigned long alpha_1		: 8;
+	unsigned long pad3			:24;
 }GS_TEXA;
 
 
@@ -678,13 +672,13 @@ typedef struct {
 
 
 typedef struct {
-	unsigned long a:2;
-	unsigned long b:2;
-	unsigned long c:2;
-	unsigned long d:2;
-	unsigned long pad1:24;
-	unsigned long fix:8;
-	unsigned long pad2:24;
+	unsigned long a		:2;
+	unsigned long b		:2;
+	unsigned long c		:2;
+	unsigned long d		:2;
+	unsigned long pad0	:24;
+	unsigned long alpha	:8;
+	unsigned long pad1	:24;
 }GS_ALPHA;
 
 
@@ -740,15 +734,15 @@ typedef struct {
 
 
 typedef struct {
-	unsigned long ATE	:1;
-	unsigned long ATST	:3;
-	unsigned long AREF	:8;
-	unsigned long AFAIL	:2;
-	unsigned long DATE	:1;
-	unsigned long DATM	:1;
-	unsigned long ZTE	:1;
-	unsigned long ZTST	:2;
-	unsigned long pad1	:45;
+	unsigned long atest_enable		:1;
+	unsigned long atest_method		:3;
+	unsigned long atest_fre			:8;
+	unsigned long atest_fail_method	:2;
+	unsigned long datest_enable		:1;
+	unsigned long datest_mode		:1;
+	unsigned long ztest_enable		:1;
+	unsigned long ztest_method		:2;
+	unsigned long pad1				:45;
 } GS_TEST;
 
 
@@ -932,7 +926,7 @@ typedef struct {
 	unsigned long tex_width   :4;
 	unsigned long tex_height  :4;
 	unsigned long col_comp	  :1;
-	unsigned long tfx		  :2;
+	unsigned long tex_cc		  :2;
 	unsigned long clutb_addr  :14;
 	unsigned long clut_pixmode:4;
 	unsigned long clut_smode  :1;
@@ -1038,13 +1032,12 @@ typedef struct {
 
 
 typedef struct {
-	unsigned long tbp1:14;
-	unsigned long tbw1:6;
-	unsigned long tbp2:14;
-	unsigned long tbw2:6;
-	unsigned long tbp3:14;
-	unsigned long tbw3:6;
-	unsigned long pad0:4;
+	unsigned long tb_addr4	:14;
+	unsigned long tb_width4	:6;
+	unsigned long tb_addr5	:14;
+	unsigned long tb_width5	:6;
+	unsigned long tb_addr6	:14;
+	unsigned long tb_width6	:6;
 	unsigned long reg;
 } GS_R_MIPTBP1;
 
@@ -1062,12 +1055,12 @@ typedef struct {
 
 
 typedef struct {
-	unsigned long ta0	: 8;
-	unsigned long pad0	: 7;
-	unsigned long aem	: 1;
-	unsigned long pad1	:16;
-	unsigned long ta1	: 8;
-	unsigned long pad2	:24;
+	unsigned long alpha_0		: 8;
+	unsigned long pad1			: 7;
+	unsigned long alpha_method	: 1;
+	unsigned long pad2			:16;
+	unsigned long alpha_1		: 8;
+	unsigned long pad3			:24;
 	unsigned long reg;
 }GS_R_TEXA;
 
@@ -1101,13 +1094,13 @@ typedef struct {
 
 
 typedef struct {
-	unsigned long a:2;
-	unsigned long b:2;
-	unsigned long c:2;
-	unsigned long d:2;
-	unsigned long pad0:24;
-	unsigned long fix:8;
-	unsigned long pad1:24;
+	unsigned long a		:2;
+	unsigned long b		:2;
+	unsigned long c		:2;
+	unsigned long d		:2;
+	unsigned long pad0	:24;
+	unsigned long alpha	:8;
+	unsigned long pad1	:24;
 	unsigned long reg;
 }GS_R_ALPHA;
 
@@ -1167,15 +1160,15 @@ typedef struct {
 
 
 typedef struct {
-	unsigned long ATE	:1;
-	unsigned long ATST	:3;
-	unsigned long AREF	:8;
-	unsigned long AFAIL	:2;
-	unsigned long DATE	:1;
-	unsigned long DATM	:1;
-	unsigned long ZTE	:1;
-	unsigned long ZTST	:2;
-	unsigned long pad1	:45;
+	unsigned long atest_enable		:1;
+	unsigned long atest_method		:3;
+	unsigned long atest_fre			:8;
+	unsigned long atest_fail_method	:2;
+	unsigned long datest_enable		:1;
+	unsigned long datest_mode		:1;
+	unsigned long ztest_enable		:1;
+	unsigned long ztest_method		:2;
+	unsigned long pad1				:45;
 	unsigned long reg;
 } GS_R_TEST;
 
@@ -1365,14 +1358,14 @@ typedef struct {
 	(p)->z = _z	
 
 
-#define gs_setTEX0_1(p, _fb_addr,_fb_width,_pix_mode,_tex_width,_tex_height,_col_comp,_tfx,_clutb_addr,_clut_pixmode,_clut_smode,_clut_offset,_cld)\
+#define gs_setTEX0_1(p, _fb_addr,_fb_width,_pix_mode,_tex_width,_tex_height,_col_comp,_tex_cc,_clutb_addr,_clut_pixmode,_clut_smode,_clut_offset,_cld)\
 	(p)->fb_addr	= _fb_addr,			\
 	(p)->fb_width	= _fb_width,		\
 	(p)->pix_mode	= _pix_mode,		\
 	(p)->tex_width	= twh4(_tex_width),	\
 	(p)->tex_height	= twh4(_tex_height),\
 	(p)->col_comp	= _col_comp,		\
-	(p)->tfx		= _tfx,				\
+	(p)->tex_cc		= _tex_cc,				\
 	(p)->clutb_addr	= _clutb_addr,		\
 	(p)->clut_pixmode=_clut_pixmode,	\
 	(p)->clut_smode	= _clut_smode,		\
@@ -1506,12 +1499,12 @@ typedef struct {
 
 
 
-#define gs_setALPHA_1(p, _a,_b,_c,_d,_fix)	\
+#define gs_setALPHA_1(p, _a,_b,_c,_d,_alpha)\
 	(p)->a		= _a,						\
 	(p)->b		= _b,						\
 	(p)->c		= _c,						\
 	(p)->d		= _d,						\
-	(p)->fix	= _fix	
+	(p)->alpha	= _alpha	
 
 #define gs_setALPHA_2				gs_setALPHA_1
 
@@ -1698,13 +1691,13 @@ typedef struct {
 						(p)->reg = 	gs_g_xyz3
 
 
-#define gs_setR_TEX0_1(p, _fb_addr,_fb_width,_pix_mode,_tex_width,_tex_height,_col_comp,_tfx,_clutb_addr,_clut_pixmode,_clut_smode,_clut_offset,_cld)\
-							gs_setTEX0_1(p, _fb_addr,_fb_width,_pix_mode,_tex_width,_tex_height,_col_comp,_tfx,_clutb_addr,_clut_pixmode,_clut_smode,_clut_offset,_cld),\
+#define gs_setR_TEX0_1(p, _fb_addr,_fb_width,_pix_mode,_tex_width,_tex_height,_col_comp,_tex_cc,_clutb_addr,_clut_pixmode,_clut_smode,_clut_offset,_cld)\
+							gs_setTEX0_1(p, _fb_addr,_fb_width,_pix_mode,_tex_width,_tex_height,_col_comp,_tex_cc,_clutb_addr,_clut_pixmode,_clut_smode,_clut_offset,_cld),\
 							(p)->reg = 	gs_g_tex0_1
 	
 			
-#define gs_setR_TEX0_2(p, _fb_addr,_fb_width,_pix_mode,_tex_width,_tex_height,_col_comp,_tfx,_clutb_addr,_clut_pixmode,_clut_smode,_clut_offset,_cld)\
-							gs_setTEX0_2(p, _fb_addr,_fb_width,_pix_mode,_tex_width,_tex_height,_col_comp,_tfx,_clutb_addr,_clut_pixmode,_clut_smode,_clut_offset,_cld),\
+#define gs_setR_TEX0_2(p, _fb_addr,_fb_width,_pix_mode,_tex_width,_tex_height,_col_comp,_tex_cc,_clutb_addr,_clut_pixmode,_clut_smode,_clut_offset,_cld)\
+							gs_setTEX0_2(p, _fb_addr,_fb_width,_pix_mode,_tex_width,_tex_height,_col_comp,_tex_cc,_clutb_addr,_clut_pixmode,_clut_smode,_clut_offset,_cld),\
 							(p)->reg = 	gs_g_tex0_2
 
 
@@ -2272,6 +2265,10 @@ typedef struct
 }GS_IMAGE;
 
 
+
+
+
+
 typedef struct
 {
 	unsigned char	 img_psm;
@@ -2287,6 +2284,7 @@ typedef struct
 }GS_EE_IMAGE;
 
 
+
 typedef struct  {
 	unsigned short			qwc;	
 	unsigned short			pad1:10;
@@ -2299,40 +2297,10 @@ typedef struct  {
 }sDMA_CHAIN __attribute__((aligned(16)));;
 
 
-typedef struct
-{
-	QWORD			pocket;
-	 
-}GS_GIFPOCKET0;
-
-
-typedef struct
-{
-	sDMA_CHAIN		tag;
-	QWORD			pocket[128];
-	
-}GS_GIFPOCKET1;
-
-
-typedef struct
-{
-	unsigned long	mode;				//0=normal,1=chain
-	unsigned long	path;				//0
-	unsigned long	qwords;				//use only in normal mode
-	unsigned long	*system0;			//do not use
-	QWORD			*pocket_addr;		//a memry buffer that is 64-bit aligned
-}GS_GIF_TABLE;
 
 
 
 
-
-typedef struct
-{
-	sDMA_CHAIN	chain;
-	sDMA_CHAIN  *next;
-	 
-}GS_GIFPOCKET2;
 
 
 
