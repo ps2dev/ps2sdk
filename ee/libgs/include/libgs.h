@@ -2342,62 +2342,62 @@ typedef struct
 --													--
 ------------------------------------------------------*/
 
-extern short GsInit(void);
-extern void	 GsSetVideoMode(unsigned short mode);
-extern short GsSetCRTCMode(unsigned long option, unsigned char alpha_value);
+//extern short GsInit(void);
+//extern void	 GsSetVideoMode(unsigned short mode);
+//extern short GsSetCRTCMode(unsigned long option, unsigned char alpha_value);
 
 /*Set Structure Members*/
-extern short GsSetDefDrawEnv(GS_DRAWENV *drawenv, unsigned short x, unsigned short y, unsigned short w, unsigned short h);
-extern short GsSetDefDispEnv(GS_DISPENV *dispenv, unsigned short x, unsigned short y, unsigned short w, unsigned short h);
-extern short GsSetDefDrawEnvAddress(GS_DRAWENV *drawenv, unsigned short vram_page, unsigned char	vram_width, unsigned char pix_mode, unsigned short vram_x, unsigned short vram_y);
-extern short GsSetDefDispEnvAddress(GS_DISPENV *dispenv, unsigned short vram_page, unsigned char	vram_width, unsigned char pix_mode, unsigned short vram_x, unsigned short vram_y);
-extern short GsSetDefZBufferEnv(GS_ZENV *zenv, unsigned short vram_addr, unsigned char pix_mode, unsigned char update_mask);
+//extern short GsSetDefDrawEnv(GS_DRAWENV *drawenv, unsigned short x, unsigned short y, unsigned short w, unsigned short h);
+//extern short GsSetDefDispEnv(GS_DISPENV *dispenv, unsigned short x, unsigned short y, unsigned short w, unsigned short h);
+//extern short GsSetDefDrawEnvAddress(GS_DRAWENV *drawenv, unsigned short vram_page, unsigned char	vram_width, unsigned char pix_mode, unsigned short vram_x, unsigned short vram_y);
+//extern short GsSetDefDispEnvAddress(GS_DISPENV *dispenv, unsigned short vram_page, unsigned char	vram_width, unsigned char pix_mode, unsigned short vram_x, unsigned short vram_y);
+//extern short GsSetDefZBufferEnv(GS_ZENV *zenv, unsigned short vram_addr, unsigned char pix_mode, unsigned char update_mask);
 /*Apply To Registers*/
-extern short GsPutDrawEnv1(GS_DRAWENV *drawenv);
-extern short GsPutDrawEnv2(GS_DRAWENV *drawenv);
-extern short GsPutDispEnv1(GS_DISPENV *dispenv);
-extern short GsPutDispEnv2(GS_DISPENV *dispenv);
-extern short GsPutZBufferEnv1(GS_ZENV *zenv);
-extern short GsPutZBufferEnv2(GS_ZENV *zenv);
+//extern short GsPutDrawEnv1(GS_DRAWENV *drawenv);
+//extern short GsPutDrawEnv2(GS_DRAWENV *drawenv);
+//extern short GsPutDispEnv1(GS_DISPENV *dispenv);
+//extern short GsPutDispEnv2(GS_DISPENV *dispenv);
+//extern short GsPutZBufferEnv1(GS_ZENV *zenv);
+//extern short GsPutZBufferEnv2(GS_ZENV *zenv);
 /*Texture/Image Funtions*/
-extern short GsLoadImage(unsigned int *src_addr, GS_IMAGE *dest);
+//extern short GsLoadImage(unsigned int *src_addr, GS_IMAGE *dest);
 /**/
-extern short GsLoadTexPage1(unsigned short tex_addr, unsigned char addr_width, unsigned char tex_pixmode, unsigned short tex_width, unsigned short tex_height, unsigned short clut_addr, unsigned char clut_pixmode, unsigned char clut_storagemode,unsigned char clut_offset);
-extern short GsLoadTexPage2(unsigned short tex_addr, unsigned char addr_width, unsigned char tex_pixmode, unsigned short tex_width, unsigned short tex_height, unsigned short clut_addr, unsigned char clut_pixmode, unsigned char clut_storagemode,unsigned char clut_offset);
-extern void  GsDrawGifPocket(GS_GIF_TABLE *pocket);
-extern unsigned int *GsGifPocketAlloc(unsigned short qwords, GS_GIF_TABLE *gif_table);
+//extern short GsLoadTexPage1(unsigned short tex_addr, unsigned char addr_width, unsigned char tex_pixmode, unsigned short tex_width, unsigned short tex_height, unsigned short clut_addr, unsigned char clut_pixmode, unsigned char clut_storagemode,unsigned char clut_offset);
+//extern short GsLoadTexPage2(unsigned short tex_addr, unsigned char addr_width, unsigned char tex_pixmode, unsigned short tex_width, unsigned short tex_height, unsigned short clut_addr, unsigned char clut_pixmode, unsigned char clut_storagemode,unsigned char clut_offset);
+//extern void  GsDrawGifPocket(GS_GIF_TABLE *pocket);
+//extern unsigned int *GsGifPocketAlloc(unsigned short qwords, GS_GIF_TABLE *gif_table);
 
 /*Screen Font Funtions*/
-extern void  GsFntLoad(unsigned short vram_addr, unsigned char addr_width,unsigned char x, unsigned char y);
-extern short GsFntSetColor(unsigned char r, unsigned char g, unsigned char b);
-extern short GsFntSetSize(unsigned short width, unsigned short height);
-extern short GsFntPrint(unsigned short x, unsigned short y, char *str,...);
+//extern void  GsFntLoad(unsigned short vram_addr, unsigned char addr_width,unsigned char x, unsigned char y);
+//extern short GsFntSetColor(unsigned char r, unsigned char g, unsigned char b);
+//extern short GsFntSetSize(unsigned short width, unsigned short height);
+//extern short GsFntPrint(unsigned short x, unsigned short y, char *str,...);
 /**/
-extern void	 GsOverridePrimAttr(char override, char iip, char tme, char fge, char abe, char aa1, char fst, char ctxt, char fix);
-extern void  GsEnableAlphaTransparentcy1(unsigned short enable,unsigned short method,unsigned char alpha_ref,unsigned short update_mode);
-extern void  GsEnableAlphaTransparentcy2(unsigned short enable,unsigned short method,unsigned char alpha_ref,unsigned short update_mode);
-extern void	 GsEnableAlphaBlending1(unsigned short enable);
-extern void  GsEnableZbuffer1(unsigned short enable,unsigned short test_mode);
-extern void  GsEnableZbuffer2(unsigned short enable,unsigned short test_mode);
-extern void  GsEnableColorClamp(unsigned short enable);
+//extern void	 GsOverridePrimAttr(char override, char iip, char tme, char fge, char abe, char aa1, char fst, char ctxt, char fix);
+//extern void  GsEnableAlphaTransparentcy1(unsigned short enable,unsigned short method,unsigned char alpha_ref,unsigned short update_mode);
+//extern void  GsEnableAlphaTransparentcy2(unsigned short enable,unsigned short method,unsigned char alpha_ref,unsigned short update_mode);
+//extern void	 GsEnableAlphaBlending1(unsigned short enable);
+//extern void  GsEnableZbuffer1(unsigned short enable,unsigned short test_mode);
+//extern void  GsEnableZbuffer2(unsigned short enable,unsigned short test_mode);
+//extern void  GsEnableColorClamp(unsigned short enable);
 /**/
-extern void  GsSetTextureDetail1(unsigned char quality_mode, unsigned char mipmap_count, unsigned char near_quality, unsigned char far_quality, unsigned char mipmap_address_mode, unsigned short L, short K);
-extern void  GsSetTextureDetail2(unsigned char quality_mode, unsigned char mipmap_count, unsigned char near_quality, unsigned char far_quality, unsigned char mipmap_address_mode, unsigned short L, short K);
+//extern void  GsSetTextureDetail1(unsigned char quality_mode, unsigned char mipmap_count, unsigned char near_quality, unsigned char far_quality, unsigned char mipmap_address_mode, unsigned short L, short K);
+//extern void  GsSetTextureDetail2(unsigned char quality_mode, unsigned char mipmap_count, unsigned char near_quality, unsigned char far_quality, unsigned char mipmap_address_mode, unsigned short L, short K);
 /**/
-extern void	 GsSetFogColor(unsigned char r, unsigned char g, unsigned char b);
+//extern void	 GsSetFogColor(unsigned char r, unsigned char g, unsigned char b);
 /**/
-extern short GsDrawSync(short mode);
-extern short GsHSync(short mode);
-extern short GsVSync(short mode);
+//extern short GsDrawSync(short mode);
+//extern short GsHSync(short mode);
+//extern short GsVSync(short mode);
 /**/
-extern int	 GsSwapFrameBuffer(void);
-extern int	 GsGetActiveBuffer(void);
+//extern int	 GsSwapFrameBuffer(void);
+//extern int	 GsGetActiveBuffer(void);
 
 
 
 
-extern GS_DRAWENV		GS_DrawEnv1;
-extern GS_DRAWENV		GS_DrawEnv2;
+//extern GS_DRAWENV		GS_DrawEnv1;
+//extern GS_DRAWENV		GS_DrawEnv2;
 
 
 
@@ -2410,13 +2410,13 @@ extern GS_DRAWENV		GS_DrawEnv2;
 
 
 /* These Use Gif-Dma To Transfer */
-extern short GsSetXYOffset1(unsigned short x, unsigned short y);
-extern short GsSetXYOffset2(unsigned short x, unsigned short y);
-extern short GsSetScissor1(unsigned short upper_x, unsigned short upper_y, unsigned short lower_x, unsigned short lower_y);
-extern short GsSetScissor2(unsigned short upper_x, unsigned short upper_y, unsigned short lower_x, unsigned short lower_y);
-extern short GsSetFrame1(unsigned short framebuffer_addr, unsigned char framebuffer_width, unsigned char pix_mode, unsigned int draw_mask);
-extern short GsSetFrame2(unsigned short framebuffer_addr, unsigned char framebuffer_width, unsigned char pix_mode, unsigned int draw_mask);
-extern short GsTexFlush(void);
+//extern short GsSetXYOffset1(unsigned short x, unsigned short y);
+//extern short GsSetXYOffset2(unsigned short x, unsigned short y);
+//extern short GsSetScissor1(unsigned short upper_x, unsigned short upper_y, unsigned short lower_x, unsigned short lower_y);
+//extern short GsSetScissor2(unsigned short upper_x, unsigned short upper_y, unsigned short lower_x, unsigned short lower_y);
+//extern short GsSetFrame1(unsigned short framebuffer_addr, unsigned char framebuffer_width, unsigned char pix_mode, unsigned int draw_mask);
+//extern short GsSetFrame2(unsigned short framebuffer_addr, unsigned char framebuffer_width, unsigned char pix_mode, unsigned int draw_mask);
+//extern short GsTexFlush(void);
 
 
 
