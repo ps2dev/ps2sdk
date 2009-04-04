@@ -453,9 +453,9 @@ typedef struct {
 
 
 /*--------------------------------------------------------
---	GENERAL PURPOSE REG STRUCTS	'WITHOUT' 64 BIT REG'	--
+--	GENERAL PURPOSE REG STRUCTS							--
 --														--
---	Remember that these structs have a size of 64 bits	--
+--	these structs have a size of 64 bits 				--
 ----------------------------------------------------------*/
 
 
@@ -856,431 +856,243 @@ typedef struct {
 
 
 /*--------------------------------------------------------
---	GENERAL PURPOSE REG STRUCTS	'WITH' 64 BIT REG'		--
+--	GENERAL PURPOSE REG STRUCTS	'WITH' A 64 BIT REG		--
 --														--
---	Remember that these structs have a size of 128 bits	--
+--	these structs have a size of 128 bits (1 QWORD)		--
 ----------------------------------------------------------*/
 
 typedef struct {
-	unsigned long prim_type	:3;
-	unsigned long iip		:1;
-	unsigned long tme		:1;
-	unsigned long fge		:1;
-	unsigned long abe		:1;
-	unsigned long aa1		:1;
-	unsigned long fst		:1;
-	unsigned long ctxt		:1;
-	unsigned long fix		:1;
-	unsigned long pad1		:53;
-	unsigned long reg;
+	GS_PRIM			data;
+	unsigned long	reg;
 }GS_R_PRIM;
 
 
 typedef struct {
-	unsigned char r;
-	unsigned char g;
-	unsigned char b;
-	unsigned char a;
-	float		  q;
-	unsigned long reg;
+	GS_RGBAQ		data;
+	unsigned long	reg;
 }GS_R_RGBAQ;
 
 
 typedef struct {
-	float			s;
-	float			t;
+	GS_ST			data;
 	unsigned long	reg;
 }GS_R_ST;
 
 
 typedef struct {
-	unsigned long u		:14;
-	unsigned long pad1	:2;
-	unsigned long v		:14;
-	unsigned long pad2	:34;
-	unsigned long reg;
+	GS_UV			data;
+	unsigned long	reg;
 }GS_R_UV;
 
 
 typedef struct {
-	unsigned short	x;
-	unsigned short	y;
-	unsigned int	z:24;
-	unsigned char	f;
+	GS_XYZF			data;
 	unsigned long	reg;
 }GS_R_XYZF;
 
 
 typedef struct {
-	unsigned short	x;
-	unsigned short	y;
-	unsigned int	z;
+	GS_XYZ			data;
 	unsigned long	reg;
 }GS_R_XYZ;
 
 
 typedef struct {
-	unsigned long fb_addr     :14;
-	unsigned long fb_width    :6;
-	unsigned long pix_mode    :6;
-	unsigned long tex_width   :4;
-	unsigned long tex_height  :4;
-	unsigned long col_comp	  :1;
-	unsigned long tex_cc		  :2;
-	unsigned long clutb_addr  :14;
-	unsigned long clut_pixmode:4;
-	unsigned long clut_smode  :1;
-	unsigned long clut_offset :5;
-	unsigned long cld		  :3;
-	unsigned long reg;
+	GS_TEX0			data;
+	unsigned long	reg;
 }GS_R_TEX0;
 
 
 typedef struct {
-	unsigned long wms:2;
-	unsigned long wmt:2;
-	unsigned long minu:10;
-	unsigned long maxu:10;
-	unsigned long minv:10;
-	unsigned long maxv:10;
-	unsigned long pad44:20;
-	unsigned long reg;
+	GS_CLAMP		data;
+	unsigned long	reg;
 }GS_R_CLAMP;
 
 
 typedef struct {
-		unsigned long pad1	:56;
-		unsigned char f;
-		unsigned long reg;
+	GS_FOG			data;
+	unsigned long	reg;
 }GS_R_FOG;
 
 
 typedef struct {
-	unsigned long lcm	:1;
-	unsigned long pad1	:1;
-	unsigned long mxl	:3;
-	unsigned long mmag	:1;
-	unsigned long mmin	:3;
-	unsigned long mtba	:1;
-	unsigned long pad2	:9;
-	unsigned long l		:2;
-	unsigned long pad3	:11;
-	unsigned long k		:12;
-	unsigned long pad4	:20;
-	unsigned long reg;
+	GS_TEX1			data;
+	unsigned long	reg;
 }GS_R_TEX1;
 
 
 typedef struct {
-	unsigned long pad00:20;
-	unsigned long psm:6;
-	unsigned long pad26:11;
-	unsigned long cbp:14;
-	unsigned long cpsm:4;
-	unsigned long csm:1;
-	unsigned long csa:5;
-	unsigned long cld:3;
-	unsigned long reg;
+	GS_TEX2			data;
+	unsigned long	reg;
 }GS_R_TEX2;
 
 
 typedef struct {
-	unsigned long  offset_x	:16;
-	unsigned short pad1;
-	unsigned long  offset_y	:16;
-	unsigned short pad2;
-	unsigned long  reg;
+	GS_XYOFFSET		data;
+	unsigned long	reg;
 } GS_R_XYOFFSET;
 
 
 typedef struct {
-	unsigned long control:1;
-	unsigned long pad1	:63;
-	unsigned long reg;
+	GS_PRMODECONT	data;
+	unsigned long	reg;
 }GS_R_PRMODECONT;
 
 
 typedef struct {
-	unsigned long pad1	:3;
-	unsigned long iip	:1;
-	unsigned long tme	:1;
-	unsigned long fge	:1;
-	unsigned long abe	:1;
-	unsigned long aa1	:1;
-	unsigned long fst	:1;
-	unsigned long ctxt	:1;
-	unsigned long fix	:1;
-	unsigned long pad2	:53;
-	unsigned long reg;
+	GS_PRMODE		data;
+	unsigned long	reg;
 }GS_R_PRMODE;
 
 
 typedef struct {
-	unsigned long cbw:6;
-	unsigned long cou:6;
-	unsigned long cov:10;
-	unsigned long pad0:42;
-	unsigned long reg;
+	GS_TEXCLUT		data;
+	unsigned long	reg;
 }GS_R_TEXCLUT;
 
 
 typedef struct {
-	unsigned long msk:2;
-	unsigned long pad0:62;
-	unsigned long reg;
+	GS_SCANMSK		data;
+	unsigned long	reg;
 }GS_R_SCANMSK;
 
 
 typedef struct {
-	unsigned long tb_addr4	:14;
-	unsigned long tb_width4	:6;
-	unsigned long tb_addr5	:14;
-	unsigned long tb_width5	:6;
-	unsigned long tb_addr6	:14;
-	unsigned long tb_width6	:6;
-	unsigned long reg;
+	GS_MIPTBP1		data;
+	unsigned long	reg;
 } GS_R_MIPTBP1;
 
 
 typedef struct {
-	unsigned long tbp4:14;
-	unsigned long tbw4:6;
-	unsigned long tbp5:14;
-	unsigned long tbw5:6;
-	unsigned long tbp6:14;
-	unsigned long tbw6:6;
-	unsigned long pad0:4;
-	unsigned long reg;
+	GS_MIPTBP2		data;
+	unsigned long	reg;
 }GS_R_MIPTBP2;
 
 
 typedef struct {
-	unsigned long alpha_0		: 8;
-	unsigned long pad1			: 7;
-	unsigned long alpha_method	: 1;
-	unsigned long pad2			:16;
-	unsigned long alpha_1		: 8;
-	unsigned long pad3			:24;
-	unsigned long reg;
+	GS_TEXA			data;
+	unsigned long	reg;
 }GS_R_TEXA;
 
 
 typedef struct {
-	unsigned long r		:8;
-	unsigned long g		:8;
-	unsigned long b		:8;
-	unsigned long pad1	:40;
-	unsigned long reg;
+	GS_FOGCOLOR		data;
+	unsigned long	reg;
 }GS_R_FOGCOLOR;
 
 
 typedef struct {
-	unsigned long pad1;			// Pad With Zeros
-	unsigned long reg;			
+	GS_TEXFLUSH		data;			// Pad With Zeros
+	unsigned long	reg;			
 } GS_R_TEXFLUSH;
 
 
 typedef struct {
-	unsigned long clip_x0 :11;
-	unsigned long pad1    :5;
-	unsigned long clip_x1 :11;
-	unsigned long pad2    :5;
-	unsigned long clip_y0 :11;
-	unsigned long pad3    :5;
-	unsigned long clip_y1 :11;
-	unsigned long pad4    :5;
-	unsigned long reg;
+	GS_SCISSOR		data;
+	unsigned long	reg;
 }GS_R_SCISSOR;
 
 
 typedef struct {
-	unsigned long a		:2;
-	unsigned long b		:2;
-	unsigned long c		:2;
-	unsigned long d		:2;
-	unsigned long pad0	:24;
-	unsigned long alpha	:8;
-	unsigned long pad1	:24;
-	unsigned long reg;
+	GS_ALPHA		data;
+	unsigned long	reg;
 }GS_R_ALPHA;
 
 
 typedef struct {
-	unsigned long dimx00:3;
-	unsigned long pad0:1;
-	unsigned long dimx01:3;
-	unsigned long pad1:1;
-	unsigned long dimx02:3;
-	unsigned long pad2:1;
-	unsigned long dimx03:3;
-	unsigned long pad3:1;
-
-	unsigned long dimx10:3;
-	unsigned long pad4:1;
-	unsigned long dimx11:3;
-	unsigned long pad5:1;
-	unsigned long dimx12:3;
-	unsigned long pad6:1;
-	unsigned long dimx13:3;
-	unsigned long pad7:1;
-
-	unsigned long dimx20:3;
-	unsigned long pad8:1;
-	unsigned long dimx21:3;
-	unsigned long pad9:1;
-	unsigned long dimx22:3;
-	unsigned long pad10:1;
-	unsigned long dimx23:3;
-	unsigned long pad11:1;
-
-	unsigned long dimx30:3;
-	unsigned long pad12:1;
-	unsigned long dimx31:3;
-	unsigned long pad13:1;
-	unsigned long dimx32:3;
-	unsigned long pad14:1;
-	unsigned long dimx33:3;
-	unsigned long pad15:1;
-	unsigned long reg;
+	GS_DIMX			data;
+	unsigned long	reg;
 } GS_R_DIMX;
 
 
 typedef struct {
-	unsigned long enable:1;
-	unsigned long pad01:63;
-	unsigned long reg;
+	GS_DTHE			data;
+	unsigned long	reg;
 } GS_R_DTHE;
 
 
 typedef struct {
-	unsigned long clamp:1;
-	unsigned long pad01:63;
-	unsigned long reg;
+	GS_COLCLAMP		data;
+	unsigned long	reg;
 }GS_R_COLCLAMP;
 
 
 typedef struct {
-	unsigned long atest_enable		:1;
-	unsigned long atest_method		:3;
-	unsigned long atest_fre			:8;
-	unsigned long atest_fail_method	:2;
-	unsigned long datest_enable		:1;
-	unsigned long datest_mode		:1;
-	unsigned long ztest_enable		:1;
-	unsigned long ztest_method		:2;
-	unsigned long pad1				:45;
-	unsigned long reg;
+	GS_TEST			data;
+	unsigned long	reg;
 } GS_R_TEST;
 
 
 typedef struct {
-	unsigned long enable:1;
-	unsigned long pad0:63;
-	unsigned long reg;
+	GS_PABE		data;
+	unsigned long	reg;
 }GS_R_PABE;
 
 
 typedef struct {
-	unsigned long alpha:1;
-	unsigned long pad0:63;
-	unsigned long reg;
+	GS_FBA			data;
+	unsigned long	reg;
 }GS_R_FBA;
 
 
 typedef struct {
-	unsigned long fb_addr	:9;
-	unsigned long pad1		:7;
-	unsigned long fb_width	:6;
-	unsigned long pad2		:2;
-	unsigned long pix_mode	:6;
-	unsigned long pad3		:2;
-	unsigned long draw_mask	:32;
-	unsigned long reg;
+	GS_FRAME		data;
+	unsigned long	reg;
 } GS_R_FRAME;
 
 
 typedef struct {
-	unsigned long fb_addr	:9;
-	unsigned long pad1			:15;
-	unsigned long pix_mode		:4;
-	unsigned long pad2			:4;
-	unsigned long update_mask	:1;
-	unsigned long pad3			:31;
-	unsigned long reg;
+	GS_ZBUF			data;
+	unsigned long	reg;
 }GS_R_ZBUF;
 
 
 typedef struct {
-	unsigned long src_addr	  :14;
-	unsigned long pad1		  :2;
-	unsigned long src_width	  :6;
-	unsigned long pad2		  :2;
-	unsigned long src_pixmode :6;
-	unsigned long pad3		  :2;
-	unsigned long dest_addr	  :14;
-	unsigned long pad4		  :2;
-	unsigned long dest_width  :6;
-	unsigned long pad5		  :2;
-	unsigned long dest_pixmode:6;
-	unsigned long pad6		  :2;
-	unsigned long reg;
+	GS_BITBLTBUF	data;
+	unsigned long	reg;
 }GS_R_BITBLTBUF;
 
 
 typedef struct {
-	unsigned long src_x		:11;
-	unsigned long pad1		:5;
-	unsigned long src_y		:11;
-	unsigned long pad2		:5;
-	unsigned long dest_x	:11;
-	unsigned long pad3		:5;
-	unsigned long dest_y	:11;
-	unsigned long direction	:2;
-	unsigned long pad4		:3;
-	unsigned long reg;
+	GS_TRXPOS		data;
+	unsigned long	reg;
 }GS_R_TRXPOS;
 
 
 typedef struct {
-	unsigned long trans_w	:12;
-	unsigned long pad1		:20;
-	unsigned long trans_h	:12;
-	unsigned long pad2		:20;
-	unsigned long reg;
+	GS_TRXREG		data;
+	unsigned long	reg;
 }GS_R_TRXREG;
 
 
 typedef struct {
-	unsigned long trans_dir	:2;
-	unsigned long pad1		:62;
-	unsigned long reg;
+	GS_TRXDIR		data;
+	unsigned long	reg;
 }GS_R_TRXDIR;
 
 
 
 typedef struct {
-	unsigned long data;
-	unsigned long reg;
+	GS_HWREG		data;
+	unsigned long	reg;
 }GS_R_HWREG;
 
 
 typedef struct {
-	unsigned int signal_id;
-	unsigned int update_mask;
-	unsigned long reg;
+	GS_SIGNAL		data;
+	unsigned long	reg;
 }GS_R_SIGNAL;
 
 
 typedef struct {
-	unsigned long pad0;
-	unsigned long reg;
+	GS_FINISH		data;
+	unsigned long	reg;
 }GS_R_FINISH;
 
 
 typedef struct {
-	unsigned int label_id;
-	unsigned int update_mask;
-	unsigned long reg;
+	GS_LABEL		data;
+	unsigned long	reg;
 }GS_R_LABEL;
 
 
