@@ -1102,6 +1102,270 @@ typedef struct {
 
 
 
+
+
+
+
+
+
+
+
+/*----------------------------------------------------
+--	Set Funtion For GS Privileged Regs				--
+--													--
+--													--
+----------------------------------------------------*/
+
+
+
+
+#define GS_SET_PMODE(enable_rc1, enable_rc2, mmod, amod, blend_style, blend_value) \
+			*(volatile unsigned long *)gs_p_pmode =			\
+		(unsigned long)((enable_rc1	) & 0x00000001) <<  0 | \
+		(unsigned long)((enable_rc2	) & 0x00000001) <<  1 | \
+		(unsigned long)((1			) & 0x00000007) <<  2 | \
+		(unsigned long)((mmod		) & 0x00000001) <<  5 | \
+		(unsigned long)((amod		) & 0x00000001) <<  6 | \
+		(unsigned long)((blend_style) & 0x00000001) <<  7 | \
+		(unsigned long)((blend_value) & 0x000000FF) <<  8
+
+
+/* un-documented
+#define GS_SET_SMODE1(interlace, field_frame, vesta_dpms) \
+			*(volatile unsigned long *)gs_p_smode1=			\
+		
+*/
+
+#define GS_SET_SMODE2(interlace, field_frame, vesta_dpms) \
+			*(volatile unsigned long *)gs_p_smode2 =		\
+		(unsigned long)((interlace	) & 0x00000001) <<  0 | \
+		(unsigned long)((field_frame) & 0x00000001) <<  1 | \
+		(unsigned long)((vesta_dpms	) & 0x00000003) <<  2
+
+
+
+#define GS_SET_DISPFB1(address, width, pix_mode, x, y) \
+			*(volatile unsigned long *)gs_p_dispfb1=\
+		(unsigned long)((address	) & 0x000001FF) <<  0 | \
+		(unsigned long)((width		) & 0x0000003F) <<  9 | \
+		(unsigned long)((pix_mode	) & 0x0000001F) << 15 | \
+		(unsigned long)((x			) & 0x000007FF) << 32 | \
+		(unsigned long)((y			) & 0x000007FF) << 43
+
+
+
+#define GS_SET_DISPFB2(address, width, pix_mode, x, y) \
+			*(volatile unsigned long *)gs_p_dispfb2=\
+		(unsigned long)((address	) & 0x000001FF) <<  0 | \
+		(unsigned long)((width		) & 0x0000003F) <<  9 | \
+		(unsigned long)((pix_mode	) & 0x0000001F) << 15 | \
+		(unsigned long)((x			) & 0x000007FF) << 32 | \
+		(unsigned long)((y			) & 0x000007FF) << 43
+
+
+
+#define GS_SET_DISPLAY1(display_x, display_y,magnify_h,magnify_v,display_w,display_h) \
+			*(volatile unsigned long *)gs_p_display1 =		\
+		(unsigned long)((display_x) & 0x00000FFF) <<  0 |	\
+		(unsigned long)((display_y) & 0x000007FF) << 12 |	\
+		(unsigned long)((magnify_h) & 0x0000000F) << 23 |	\
+		(unsigned long)((magnify_v) & 0x00000003) << 27 |	\
+		(unsigned long)((display_w) & 0x00000FFF) << 32 |	\
+		(unsigned long)((display_h) & 0x000007FF) << 44
+
+
+
+#define GS_SET_DISPLAY2(display_x, display_y,magnify_h,magnify_v,display_w,display_h) \
+			*(volatile unsigned long *)gs_p_display2 =		\
+		(unsigned long)((display_x) & 0x00000FFF) <<  0 |	\
+		(unsigned long)((display_y) & 0x000007FF) << 12 |	\
+		(unsigned long)((magnify_h) & 0x0000000F) << 23 |	\
+		(unsigned long)((magnify_v) & 0x00000003) << 27 |	\
+		(unsigned long)((display_w) & 0x00000FFF) << 32 |	\
+		(unsigned long)((display_h) & 0x000007FF) << 44
+
+
+
+#define GS_SET_EXTBUF(A,B,C,D,E,F,G,H) \
+			*(volatile unsigned long *)gs_p_extbuf =	\
+		(unsigned long)((A) & 0x00003FFF) <<  0 | \
+		(unsigned long)((B) & 0x0000003F) << 14 | \
+		(unsigned long)((C) & 0x00000003) << 20 | \
+		(unsigned long)((D) & 0x00000001) << 22 | \
+		(unsigned long)((E) & 0x00000003) << 23 | \
+		(unsigned long)((F) & 0x00000003) << 25 | \
+		(unsigned long)((G) & 0x000007FF) << 32 | \
+		(unsigned long)((H) & 0x000007FF) << 43
+
+
+
+#define GS_SET_EXTDATA(x, y, sample_r_h, sample_r_v, write_w, write_h) \
+			*(volatile unsigned long *)gs_p_extdata =		\
+		(unsigned long)((x			) & 0x00000FFF) <<  0 | \
+		(unsigned long)((y			) & 0x000007FF) << 12 | \
+		(unsigned long)((sample_r_h	) & 0x0000000F) << 23 | \
+		(unsigned long)((sample_r_v	) & 0x00000003) << 27 | \
+		(unsigned long)((write_w	) & 0x00000FFF) << 32 | \
+		(unsigned long)((write_h	) & 0x000007FF) << 44
+
+
+
+#define GS_SET_EXTWRITE(write)\
+			*(volatile unsigned long *)gs_p_extwrite = \
+		(unsigned long)((write) & 0x00000001)
+
+
+
+#define GS_SET_BGCOLOR(r,g,b) \
+			*(volatile unsigned long *)gs_p_bgcolor =	\
+		(unsigned long)((r) & 0x000000FF) <<  0 | \
+		(unsigned long)((g) & 0x000000FF) <<  8 | \
+		(unsigned long)((b) & 0x000000FF) << 16
+
+
+
+#define GS_SET_CSR(signal_evnt,finish_evnt,hsync_intrupt,vsync_intrupt,write_terminate,flush,reset,nfield,current_field,fifo_status,gs_rev_number,gs_id) \
+			*(volatile unsigned long *)gs_p_csr =				\
+		(unsigned long)((signal_evnt	) & 0x00000001) <<  0 | \
+		(unsigned long)((finish_evnt	) & 0x00000001) <<  1 | \
+		(unsigned long)((hsync_intrupt	) & 0x00000001) <<  2 | \
+		(unsigned long)((vsync_intrupt	) & 0x00000001) <<  3 | \
+		(unsigned long)((write_terminate) & 0x00000001) <<  4 | \
+		(unsigned long)((flush			) & 0x00000001) <<  8 | \
+		(unsigned long)((reset			) & 0x00000001) <<  9 | \
+		(unsigned long)((nfield			) & 0x00000001) << 12 | \
+		(unsigned long)((current_field	) & 0x00000001) << 13 | \
+		(unsigned long)((fifo_status	) & 0x00000003) << 14 | \
+		(unsigned long)((gs_rev_number	) & 0x000000FF) << 16 | \
+		(unsigned long)((gs_id			) & 0x000000FF) << 24
+
+
+
+#define GS_SET_IMR(signal_mask, finish_mask, hsync_mask, vsync_mask, write_mask, exhs_mask, exvs_mask) \
+			*(volatile unsigned long *)gs_p_imr =			\
+		(unsigned long)((signal_mask) & 0x00000001) <<  8 | \
+		(unsigned long)((finish_mask) & 0x00000001) <<  9 | \
+		(unsigned long)((hsync_mask	) & 0x00000001) << 10 | \
+		(unsigned long)((vsync_mask	) & 0x00000001) << 11 | \
+		(unsigned long)((write_mask	) & 0x00000001) << 12 | \
+		(unsigned long)((exhs_mask	) & 0x00000001) << 13 | \
+		(unsigned long)((exvs_mask	) & 0x00000001) << 14
+
+
+
+#define GS_SET_BUSDIR(direction) \
+			*(volatile unsigned long *)gs_p_busdir = \
+		(unsigned long)((direction) & 0x00000001)
+
+
+
+#define GS_SET_SIGLBLID(signal_id, label_id) \
+			*(volatile unsigned long *)gs_p_siglblid =	\
+		(unsigned long)((signal_id	) & 0xFFFFFFFF) <<  0 | \
+		(unsigned long)((label_id	) & 0xFFFFFFFF) << 32
+
+
+
+
+/*
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+x These are use to GET the individual values		x
+x in each of the readable Privileged registers.		x 
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+*/
+
+/*CSR */
+#define GS_GET_CSR_signal_evnt \
+			(*((volatile unsigned long *)(gs_p_csr)) & (0x00000001 << 0))
+
+#define GS_GET_CSR_finish_evnt \
+			(*((volatile unsigned long *)(gs_p_csr)) & (0x00000001 << 1))
+
+#define GS_GET_CSR_hsync_intrupt \
+			(*((volatile unsigned long *)(gs_p_csr)) & (0x00000001 << 2))
+
+#define GS_GET_CSR_vsync_intrupt \
+			(*((volatile unsigned long *)(gs_p_csr)) & (0x00000001 << 3))
+
+#define GS_GET_CSR_write_terminate \
+			(*((volatile unsigned long *)(gs_p_csr)) & (0x00000001 << 4))
+/*flush (w)*/
+
+/*reset (w)*/
+
+#define GS_GET_CSR_write_nfield \
+			(*((volatile unsigned long *)(gs_p_csr)) & (0x00000001 << 12))
+
+#define GS_GET_CSR_current_field \
+			(*((volatile unsigned long *)(gs_p_csr)) & (0x00000001 << 13))
+
+#define GS_GET_CSR_fifo_status \
+			(*((volatile unsigned long *)(gs_p_csr)) & (0x00000003 << 14))
+
+#define GS_GET_CSR_gs_rev_number \
+			(*((volatile unsigned long *)(gs_p_csr)) & (0x000000FF << 16))
+
+
+#define GS_GET_CSR_gs_id \
+			(*((volatile unsigned long *)(gs_p_csr)) & (0x000000FF << 24))
+
+
+
+
+
+
+
+/*
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+x These are use to SET the individual values		x
+x in each of the readable Privileged registers.		x 
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+*/
+
+/*CSR */
+#define GS_SET_CSR_signal_evnt(val) \
+			GS_SET_CSR(val,0,0,0,0,0,0,0,0,0,0,0)
+
+#define GS_SET_CSR_finish_evnt(val) \
+			GS_SET_CSR(0,val,0,0,0,0,0,0,0,0,0,0)
+
+#define GS_SET_CSR_hsync_intrupt(val) \
+			GS_SET_CSR(0,0,val,0,0,0,0,0,0,0,0,0)
+
+#define GS_SET_CSR_vsync_intrupt(val) \
+			GS_SET_CSR(0,0,0,val,0,0,0,0,0,0,0,0)
+
+#define GS_SET_CSR_write_terminate(val) \
+			GS_SET_CSR(0,0,0,0,val,0,0,0,0,0,0,0)
+
+#define GS_SET_CSR_flush(val) \
+			GS_SET_CSR(0,0,0,0,0,val,0,0,0,0,0,0)
+
+#define GS_SET_CSR_reset(val) \
+			GS_SET_CSR(0,0,0,0,0,0,val,0,0,0,0,0)
+
+/*nfield		(r)*/
+/*current_field (r)*/
+/*fifo_status	(r)*/
+/*gs_rev_number (r)*/
+/*gs_id			(r)*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*--------------------------------------------------------
 --	'SET' GENERAL PURPOSE REG STRUCTS 'WITHOUT' REG		--
 --														--
@@ -1463,41 +1727,38 @@ typedef struct {
 #define gs_setR_PRIM(p, _prim_type,_iip,_tme,_fge,_abe,_aa1,_fst,_ctxt,_fix)\
 						gs_setPRIM(p, _prim_type,_iip,_tme,_fge,_abe,_aa1,_fst,_ctxt,_fix),\
 						p->reg = gs_g_prim
-	
 
-//RGBAQ
+
 #define gs_setR_RGBAQ(p, _r,_g,_b,_a,_q)	\
 						gs_setRGBAQ(p, _r,_g,_b,_a,_q),\
 						(p)->reg = gs_g_rgbaq
 
 
-
-//ST
 #define gs_setR_ST(p, _s,_t)	\
 						gs_setST(p, _s,_t),\
 						(p)->reg = gs_g_st
 
-//UV
+
 #define gs_setR_UV(p, _u,_v)	\
 						gs_setUV(p, _u,_v),\
 						(p)->reg = gs_g_uv
 
-//XYZF2
+
 #define gs_setR_XYZF2(p, _x,_y,_z,_f)	\
 						gs_setXYZF2(p, _x,_y,_z,_f),\
 						(p)->reg = gs_g_xyzf2
 
 
-//XYZF3
 #define gs_setR_XYZF3(p, _x,_y,_z,_f)	\
 						gs_setR_XYZF3(p, _x,_y,_z,_f),\
 						(p)->reg = gs_g_xyzf3
-		
+
 
 #define gs_setR_XYZ2(p, _x,_y,_z)	\
 						gs_setXYZ2(p, _x,_y,_z),\
 						(p)->reg = 	gs_g_xyz2		
 				
+
 #define gs_setR_XYZ3(p, _x,_y,_z)	\
 						gs_setXYZ3(p, _x,_y,_z),\
 						(p)->reg = 	gs_g_xyz3
@@ -1513,7 +1774,6 @@ typedef struct {
 							(p)->reg = 	gs_g_tex0_2
 
 
-
 #define gs_setR_CLAMP_1(p, wms,wmt,minu,maxu,minv,maxv)	\
 							gs_setCLAMP_1(p, wms,wmt,minu,maxu,minv,maxv),\
 							(p)->reg = 	gs_g_clamp_1
@@ -1524,7 +1784,6 @@ typedef struct {
 							(p)->reg = 	gs_g_clamp_2
 	
 
-
 #define gs_setR_FOG(p, _f)	\
 							gs_setFOG(p, _f),\
 							(p)->reg = 	gs_g_fog
@@ -1534,25 +1793,26 @@ typedef struct {
 							gs_setTEX1_1(p, _lcm,_mxl,_mmag,_mmin,_mtba,_l,_k),\
 							(p)->reg = 	gs_g_tex1_1
 
+
 #define gs_setR_TEX1_2(p, _lcm,_mxl,_mmag,_mmin,_mtba,_l,_k)	\
 							gs_setTEX1_2(p, _lcm,_mxl,_mmag,_mmin,_mtba,_l,_k),\
 							(p)->reg = 	gs_g_tex1_2
-
 
 
 #define gs_setR_TEX2_1(p, _psm,_cbp,_cpsm,_csm,_csa,_cld)	\
 							gs_setTEX2_1(p, _psm,_cbp,_cpsm,_csm,_csa,_cld),\
 							(p)->reg = 	gs_g_tex2_1
 
+
 #define gs_setR_TEX2_2(p, _psm,_cbp,_cpsm,_csm,_csa,_cld)	\
 							gs_setTEX2_2(p, _psm,_cbp,_cpsm,_csm,_csa,_cld),\
 							(p)->reg = 	gs_g_tex2_2
 
-	
 
 #define gs_setR_XYOFFSET_1(p, _offset_x,_offset_y)	\
 							gs_set_XYOFFSET_1(p, _offset_x,_offset_y),\
 							(p)->reg = 	gs_g_xyoffset_1
+
 
 #define gs_setR_XYOFFSET_2(p, _offset_x,_offset_y)	\
 							gs_set_XYOFFSET_2(p, _offset_x,_offset_y),\
@@ -1564,7 +1824,6 @@ typedef struct {
 							(p)->reg = 	gs_g_prmodecont
 
 
-
 #define gs_setR_PRMODE(p, _iip,_tme,_fge,_abe,_aa1,_fst,_ctxt,_fix)	\
 							gs_setPRMODE(p, _iip,_tme,_fge,_abe,_aa1,_fst,_ctxt,_fix),\
 							(p)->reg = 	gs_g_prmode
@@ -1573,6 +1832,7 @@ typedef struct {
 #define gs_setR_TEXCLUT(p, _cbw,_cou,_cov)	\
 							gs_setTEXCLUT(p, _cbw,_cou,_cov),\
 							(p)->reg = 	gs_g_texclut
+
 
 #define gs_setR_SCANMSK(p, _msk)	\
 							gs_setSCANMSK(p, _msk),\
@@ -1583,6 +1843,7 @@ typedef struct {
 							gs_setMIPTBP1_1(p, _tbp1,_tbw1,_tbp2,_tbw2,_tbp3,_tbw3),\
 							(p)->reg = 	gs_g_miptbp1_1
 
+
 #define gs_setR_MIPTBP1_2(p, _tbp1,_tbw1,_tbp2,_tbw2,_tbp3,_tbw3)	\
 							gs_setMIPTBP1_2(p, _tbp1,_tbw1,_tbp2,_tbw2,_tbp3,_tbw3),\
 							(p)->reg = 	gs_g_miptbp1_2
@@ -1591,6 +1852,7 @@ typedef struct {
 #define gs_setR_MIPTBP2_1(p, _tbp4,_tbw4,_tbp5,_tbw5,_tbp6,_tbw6)	\
 							gs_setR_MIPTBP2_1(p, _tbp4,_tbw4,_tbp5,_tbw5,_tbp6,_tbw6),\
 							(p)->reg = 	gs_g_miptbp2_1
+
 
 #define gs_setR_MIPTBP2_2(p, _tbp4,_tbw4,_tbp5,_tbw5,_tbp6,_tbw6)	\
 							gs_setMIPTBP2_2(p, _tbp4,_tbw4,_tbp5,_tbw5,_tbp6,_tbw6),\
@@ -1605,6 +1867,7 @@ typedef struct {
 							gs_setFOGCOLOR(p, _r,_g,_b),\
 							(p)->reg = 	gs_g_fogcol
 
+
 #define gs_setR_TEXFLUSH(p)\
 							(p)->reg = 	gs_g_texflush
 	
@@ -1613,20 +1876,20 @@ typedef struct {
 							gs_setSCISSOR_1(p, _clip_x0,_clip_x1,_clip_y0,_clip_y1),\
 							(p)->reg = 	gs_g_scissor_1
 
+
 #define gs_setR_SCISSOR_2(p, _clip_x0,_clip_x1,_clip_y0,_clip_y1)	\
 							gs_setSCISSOR_2(p, _clip_x0,_clip_x1,_clip_y0,_clip_y1),\
 							(p)->reg = 	gs_g_scissor_2
-
 
 
 #define gs_setR_ALPHA_1(p, _a,_b,_c,_d,_fix)	\
 							gs_setALPHA_1(p, _a,_b,_c,_d,_fix),\
 							(p)->reg = 	gs_g_alpha_1
 
+
 #define gs_setR_ALPHA_2(p, _a,_b,_c,_d,_fix)	\
 							gs_setALPHA_2(p, _a,_b,_c,_d,_fix),\
 							(p)->reg = 	gs_g_alpha_2
-
 
 
 #define gs_setR_DIMX(p, _dimx00,_dimx01,_dimx02,_dimx03,_dimx10,_dimx11,_dimx12,_dimx13,_dimx20,_dimx21,_dimx22,_dimx23,_dimx30,_dimx31,_dimx32,_dimx33)	\
@@ -1634,11 +1897,10 @@ typedef struct {
 							(p)->reg = 	gs_g_dimx
 
 
-
 #define gs_setR_DTHE(p, _enable)	\
 							gs_setDTHE(p, _enable),\
 							(p)->reg = 	gs_g_dthe
-		
+
 
 #define gs_setR_COLCLAMP(p, _clamp)	\
 							gs_setCOLCLAMP(p, _clamp),\
@@ -1648,6 +1910,7 @@ typedef struct {
 #define gs_setR_TEST_1(p, _ATE,_ATST,_AREF,_AFAIL,_DATE,_DATM,_ZTE,_ZTST)	\
 							gs_setTEST_1(p, _ATE,_ATST,_AREF,_AFAIL,_DATE,_DATM,_ZTE,_ZTST),\
 							(p)->reg = gs_g_test_1
+
 
 #define gs_setR_TEST_2(p, _ATE,_ATST,_AREF,_AFAIL,_DATE,_DATM,_ZTE,_ZTST)	\
 							gs_setTEST_2(p, _ATE,_ATST,_AREF,_AFAIL,_DATE,_DATM,_ZTE,_ZTST),\
@@ -1668,6 +1931,7 @@ typedef struct {
 							gs_setFRAME_1(p, _fb_addr,_fb_width,_pix_mode,_draw_mask),\
 							(p)->reg = gs_g_frame_1
 
+
 #define gs_setR_FRAME_2(p, _fb_addr,_fb_width,_pix_mode,_draw_mask)	\
 							gs_setFRAME_2(p, _fb_addr,_fb_width,_pix_mode,_draw_mask),\
 							(p)->reg = gs_g_frame_2
@@ -1677,11 +1941,10 @@ typedef struct {
 							gs_setZBUF_1(p, _fb_addr,_pix_mode,_update_mask),\
 							(p)->reg = gs_g_zbuf_1
 
+
 #define gs_setR_ZBUF_2(p, _fb_addr,_pix_mode,_update_mask)	\
 							gs_setZBUF_2(p, _fb_addr,_pix_mode,_update_mask),\
 							(p)->reg = gs_g_zbuf_2
-
-
 
 
 #define gs_setR_BITBLTBUF(p, _src_addr,_src_width,_src_pixmode,_dest_addr,_dest_width,_dest_pixmode)	\
@@ -1693,6 +1956,7 @@ typedef struct {
 							gs_setTRXPOS(p, _src_x,_src_y,_dest_x,_dest_y,_direction),\
 							(p)->reg = gs_g_trxpos
 
+
 #define gs_setR_TRXREG(p, _trans_w,_trans_h)	\
 							gs_setTRXREG(p, _trans_w,_trans_h),\
 							(p)->reg = gs_g_trxreg
@@ -1701,7 +1965,6 @@ typedef struct {
 #define gs_setR_TRXDIR(p, _trans_dir)	\
 							gs_setTRXDIR(p, _trans_dir),\
 							(p)->reg = gs_g_trxdir
-
 
 
 #define gs_setR_HWREG(p, _data)	\
@@ -1713,8 +1976,10 @@ typedef struct {
 							gs_setSIGNAL(p, _signal_id,_update_mask),\
 							(p)->reg = gs_g_signal
 
+
 #define gs_setR_FINISH(p)\
 							(p)->reg = gs_g_finish
+
 
 #define gs_setR_LABEL(p, _label_id,_update_mask)	\
 							gs_setLABEL(p, _label_id,_update_mask),\
@@ -2064,7 +2329,7 @@ typedef struct
 }GS_SPRITE_FT4;				/*Size= 5 QWords*/
 
 
-
+/*
 typedef struct
 {
 	unsigned short	x;			// X Offset in Vram Address 
@@ -2107,6 +2372,30 @@ typedef struct  {
 	unsigned short			spr	:1;
 	unsigned long			pad2;
 }sDMA_CHAIN __attribute__((aligned(16)));;
+*/
+
+
+
+
+
+
+
+
+/*----------------------------------------------------
+--	LOW LEVEL FUNTIONS								--
+--													--
+--													--
+------------------------------------------------------*/
+
+
+/* These Use Gif-Dma To Transfer */
+//extern short GsSetXYOffset1(unsigned short x, unsigned short y);
+//extern short GsSetXYOffset2(unsigned short x, unsigned short y);
+//extern short GsSetScissor1(unsigned short upper_x, unsigned short upper_y, unsigned short lower_x, unsigned short lower_y);
+//extern short GsSetScissor2(unsigned short upper_x, unsigned short upper_y, unsigned short lower_x, unsigned short lower_y);
+//extern short GsSetFrame1(unsigned short framebuffer_addr, unsigned char framebuffer_width, unsigned char pix_mode, unsigned int draw_mask);
+//extern short GsSetFrame2(unsigned short framebuffer_addr, unsigned char framebuffer_width, unsigned char pix_mode, unsigned int draw_mask);
+//extern short GsTexFlush(void);
 
 
 
@@ -2182,264 +2471,7 @@ typedef struct  {
 
 
 
-/*----------------------------------------------------
---	LOW LEVEL FUNTIONS								--
---													--
---													--
-------------------------------------------------------*/
 
-
-/* These Use Gif-Dma To Transfer */
-//extern short GsSetXYOffset1(unsigned short x, unsigned short y);
-//extern short GsSetXYOffset2(unsigned short x, unsigned short y);
-//extern short GsSetScissor1(unsigned short upper_x, unsigned short upper_y, unsigned short lower_x, unsigned short lower_y);
-//extern short GsSetScissor2(unsigned short upper_x, unsigned short upper_y, unsigned short lower_x, unsigned short lower_y);
-//extern short GsSetFrame1(unsigned short framebuffer_addr, unsigned char framebuffer_width, unsigned char pix_mode, unsigned int draw_mask);
-//extern short GsSetFrame2(unsigned short framebuffer_addr, unsigned char framebuffer_width, unsigned char pix_mode, unsigned int draw_mask);
-//extern short GsTexFlush(void);
-
-
-
-
-
-
-
-
-
-
-
-/*Write Directly to GS Privileged regs*/
-
-#define GS_SET_PMODE(enable_rc1, enable_rc2, mmod, amod, blend_style, blend_value) \
-			*(volatile unsigned long *)gs_p_pmode =			\
-		(unsigned long)((enable_rc1	) & 0x00000001) <<  0 | \
-		(unsigned long)((enable_rc2	) & 0x00000001) <<  1 | \
-		(unsigned long)((1			) & 0x00000007) <<  2 | \
-		(unsigned long)((mmod		) & 0x00000001) <<  5 | \
-		(unsigned long)((amod		) & 0x00000001) <<  6 | \
-		(unsigned long)((blend_style) & 0x00000001) <<  7 | \
-		(unsigned long)((blend_value) & 0x000000FF) <<  8
-
-
-/* un-documented
-#define GS_SET_SMODE1(interlace, field_frame, vesta_dpms) \
-			*(volatile unsigned long *)gs_p_smode1=			\
-		
-*/
-
-#define GS_SET_SMODE2(interlace, field_frame, vesta_dpms) \
-			*(volatile unsigned long *)gs_p_smode2 =		\
-		(unsigned long)((interlace	) & 0x00000001) <<  0 | \
-		(unsigned long)((field_frame) & 0x00000001) <<  1 | \
-		(unsigned long)((vesta_dpms	) & 0x00000003) <<  2
-
-
-
-#define GS_SET_DISPFB1(address, width, pix_mode, x, y) \
-			*(volatile unsigned long *)gs_p_dispfb1=\
-		(unsigned long)((address	) & 0x000001FF) <<  0 | \
-		(unsigned long)((width		) & 0x0000003F) <<  9 | \
-		(unsigned long)((pix_mode	) & 0x0000001F) << 15 | \
-		(unsigned long)((x			) & 0x000007FF) << 32 | \
-		(unsigned long)((y			) & 0x000007FF) << 43
-
-
-
-#define GS_SET_DISPFB2(address, width, pix_mode, x, y) \
-			*(volatile unsigned long *)gs_p_dispfb2=\
-		(unsigned long)((address	) & 0x000001FF) <<  0 | \
-		(unsigned long)((width		) & 0x0000003F) <<  9 | \
-		(unsigned long)((pix_mode	) & 0x0000001F) << 15 | \
-		(unsigned long)((x			) & 0x000007FF) << 32 | \
-		(unsigned long)((y			) & 0x000007FF) << 43
-
-
-
-#define GS_SET_DISPLAY1(display_x, display_y,magnify_h,magnify_v,display_w,display_h) \
-			*(volatile unsigned long *)gs_p_display1 =		\
-		(unsigned long)((display_x) & 0x00000FFF) <<  0 |	\
-		(unsigned long)((display_y) & 0x000007FF) << 12 |	\
-		(unsigned long)((magnify_h) & 0x0000000F) << 23 |	\
-		(unsigned long)((magnify_v) & 0x00000003) << 27 |	\
-		(unsigned long)((display_w) & 0x00000FFF) << 32 |	\
-		(unsigned long)((display_h) & 0x000007FF) << 44
-
-
-
-#define GS_SET_DISPLAY2(display_x, display_y,magnify_h,magnify_v,display_w,display_h) \
-			*(volatile unsigned long *)gs_p_display2 =		\
-		(unsigned long)((display_x) & 0x00000FFF) <<  0 |	\
-		(unsigned long)((display_y) & 0x000007FF) << 12 |	\
-		(unsigned long)((magnify_h) & 0x0000000F) << 23 |	\
-		(unsigned long)((magnify_v) & 0x00000003) << 27 |	\
-		(unsigned long)((display_w) & 0x00000FFF) << 32 |	\
-		(unsigned long)((display_h) & 0x000007FF) << 44
-
-
-
-#define GS_SET_EXTBUF(A,B,C,D,E,F,G,H) \
-			*(volatile unsigned long *)gs_p_extbuf =	\
-		(unsigned long)((A) & 0x00003FFF) <<  0 | \
-		(unsigned long)((B) & 0x0000003F) << 14 | \
-		(unsigned long)((C) & 0x00000003) << 20 | \
-		(unsigned long)((D) & 0x00000001) << 22 | \
-		(unsigned long)((E) & 0x00000003) << 23 | \
-		(unsigned long)((F) & 0x00000003) << 25 | \
-		(unsigned long)((G) & 0x000007FF) << 32 | \
-		(unsigned long)((H) & 0x000007FF) << 43
-
-
-
-#define GS_SET_EXTDATA(x, y, sample_r_h, sample_r_v, write_w, write_h) \
-			*(volatile unsigned long *)gs_p_extdata =		\
-		(unsigned long)((x			) & 0x00000FFF) <<  0 | \
-		(unsigned long)((y			) & 0x000007FF) << 12 | \
-		(unsigned long)((sample_r_h	) & 0x0000000F) << 23 | \
-		(unsigned long)((sample_r_v	) & 0x00000003) << 27 | \
-		(unsigned long)((write_w	) & 0x00000FFF) << 32 | \
-		(unsigned long)((write_h	) & 0x000007FF) << 44
-
-
-
-#define GS_SET_EXTWRITE(write)\
-			*(volatile unsigned long *)gs_p_extwrite = \
-		(unsigned long)((write) & 0x00000001)
-
-
-
-#define GS_SET_BGCOLOR(r,g,b) \
-			*(volatile unsigned long *)gs_p_bgcolor =	\
-		(unsigned long)((r) & 0x000000FF) <<  0 | \
-		(unsigned long)((g) & 0x000000FF) <<  8 | \
-		(unsigned long)((b) & 0x000000FF) << 16
-
-
-
-#define GS_SET_CSR(signal_evnt,finish_evnt,hsync_intrupt,vsync_intrupt,write_terminate,flush,reset,nfield,current_field,fifo_status,gs_rev_number,gs_id) \
-			*(volatile unsigned long *)gs_p_csr =				\
-		(unsigned long)((signal_evnt	) & 0x00000001) <<  0 | \
-		(unsigned long)((finish_evnt	) & 0x00000001) <<  1 | \
-		(unsigned long)((hsync_intrupt	) & 0x00000001) <<  2 | \
-		(unsigned long)((vsync_intrupt	) & 0x00000001) <<  3 | \
-		(unsigned long)((write_terminate) & 0x00000001) <<  4 | \
-		(unsigned long)((flush			) & 0x00000001) <<  8 | \
-		(unsigned long)((reset			) & 0x00000001) <<  9 | \
-		(unsigned long)((nfield			) & 0x00000001) << 12 | \
-		(unsigned long)((current_field	) & 0x00000001) << 13 | \
-		(unsigned long)((fifo_status	) & 0x00000003) << 14 | \
-		(unsigned long)((gs_rev_number	) & 0x000000FF) << 16 | \
-		(unsigned long)((gs_id			) & 0x000000FF) << 24
-
-
-
-#define GS_SET_IMR(signal_mask, finish_mask, hsync_mask, vsync_mask, write_mask, exhs_mask, exvs_mask) \
-			*(volatile unsigned long *)gs_p_imr =			\
-		(unsigned long)((signal_mask) & 0x00000001) <<  8 | \
-		(unsigned long)((finish_mask) & 0x00000001) <<  9 | \
-		(unsigned long)((hsync_mask	) & 0x00000001) << 10 | \
-		(unsigned long)((vsync_mask	) & 0x00000001) << 11 | \
-		(unsigned long)((write_mask	) & 0x00000001) << 12 | \
-		(unsigned long)((exhs_mask	) & 0x00000001) << 13 | \
-		(unsigned long)((exvs_mask	) & 0x00000001) << 14
-
-
-
-#define GS_SET_BUSDIR(direction) \
-			*(volatile unsigned long *)gs_p_busdir = \
-		(unsigned long)((direction) & 0x00000001)
-
-
-
-#define GS_SET_SIGLBLID(signal_id, label_id) \
-			*(volatile unsigned long *)gs_p_siglblid =	\
-		(unsigned long)((signal_id	) & 0xFFFFFFFF) <<  0 | \
-		(unsigned long)((label_id	) & 0xFFFFFFFF) << 32
-
-
-
-
-/*
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-x These are use to SET the individual values		x
-x in each of the readable Privileged registers.		x 
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-*/
-
-/*CSR */
-#define GS_GET_CSR_signal_evnt \
-			(*((volatile unsigned long *)(gs_p_csr)) & (0x00000001 << 0))
-
-#define GS_GET_CSR_finish_evnt \
-			(*((volatile unsigned long *)(gs_p_csr)) & (0x00000001 << 1))
-
-#define GS_GET_CSR_hsync_intrupt \
-			(*((volatile unsigned long *)(gs_p_csr)) & (0x00000001 << 2))
-
-#define GS_GET_CSR_vsync_intrupt \
-			(*((volatile unsigned long *)(gs_p_csr)) & (0x00000001 << 3))
-
-#define GS_GET_CSR_write_terminate \
-			(*((volatile unsigned long *)(gs_p_csr)) & (0x00000001 << 4))
-/*flush (w)*/
-
-/*reset (w)*/
-
-#define GS_GET_CSR_write_nfield \
-			(*((volatile unsigned long *)(gs_p_csr)) & (0x00000001 << 12))
-
-#define GS_GET_CSR_current_field \
-			(*((volatile unsigned long *)(gs_p_csr)) & (0x00000001 << 13))
-
-#define GS_GET_CSR_fifo_status \
-			(*((volatile unsigned long *)(gs_p_csr)) & (0x00000003 << 14))
-
-#define GS_GET_CSR_gs_rev_number \
-			(*((volatile unsigned long *)(gs_p_csr)) & (0x000000FF << 16))
-
-
-#define GS_GET_CSR_gs_id \
-			(*((volatile unsigned long *)(gs_p_csr)) & (0x000000FF << 24))
-
-
-
-
-
-
-
-/*
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-x These are use to SET the individual values		x
-x in each of the readable Privileged registers.		x 
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-*/
-
-/*CSR */
-#define GS_SET_CSR_signal_evnt(val) \
-			GS_SET_CSR(val,0,0,0,0,0,0,0,0,0,0,0)
-
-#define GS_SET_CSR_finish_evnt(val) \
-			GS_SET_CSR(0,val,0,0,0,0,0,0,0,0,0,0)
-
-#define GS_SET_CSR_hsync_intrupt(val) \
-			GS_SET_CSR(0,0,val,0,0,0,0,0,0,0,0,0)
-
-#define GS_SET_CSR_vsync_intrupt(val) \
-			GS_SET_CSR(0,0,0,val,0,0,0,0,0,0,0,0)
-
-#define GS_SET_CSR_write_terminate(val) \
-			GS_SET_CSR(0,0,0,0,val,0,0,0,0,0,0,0)
-
-#define GS_SET_CSR_flush(val) \
-			GS_SET_CSR(0,0,0,0,0,val,0,0,0,0,0,0)
-
-#define GS_SET_CSR_reset(val) \
-			GS_SET_CSR(0,0,0,0,0,0,val,0,0,0,0,0)
-
-/*nfield		(r)*/
-/*current_field (r)*/
-/*fifo_status	(r)*/
-/*gs_rev_number (r)*/
-/*gs_id			(r)*/
 
 
 
