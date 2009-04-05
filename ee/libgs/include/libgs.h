@@ -300,20 +300,20 @@ typedef struct {
 
 /*
 typedef struct {
-	unsigned EN1     : 1;	//
-	unsigned EN2     : 1;	//
-	unsigned CRTMD   : 3;	//
-	unsigned MMOD    : 1;	//
-	unsigned AMOD    : 1;	//
-	unsigned SLBG    : 1;	//
-	unsigned ALP     : 8;	//
-	unsigned NFLD    : 1;	//
+	unsigned en1     : 1;	//
+	unsigned en2     : 1;	//
+	unsigned crtmd   : 3;	//
+	unsigned mmod    : 1;	//
+	unsigned amod    : 1;	//
+	unsigned slbg    : 1;	//
+	unsigned alp     : 8;	//
+	unsigned nfld    : 1;	//
 	unsigned p0      :15;	//
-	unsigned EXVWINS :10;	//
-	unsigned EXVWINE :10;	//
-	unsigned EXSYNCMD: 1;	//
+	unsigned exvwins :10;	//
+	unsigned exvwine :10;	//
+	unsigned exsyncmd: 1;	//
 	unsigned p1      :11;	//
-} GS_EXTBUF;
+}GS_EXTBUF;
 */
 
 /*EXTDATA*/
@@ -337,11 +337,11 @@ typedef struct {
 
 /*BGCOLOR*/
 typedef struct {
-	unsigned char	r;	// Background Color Red
-	unsigned char	g;	// Background Color Green
-	unsigned char	b;	// Background Color Blue
-	unsigned char	pada;
-	float			padq;
+	unsigned char	r;		// Background Color Red
+	unsigned char	g;		// Background Color Green
+	unsigned char	b;		// Background Color Blue
+	unsigned char	pada;	// 0x0
+	float			padq;	// 0x0
 }GS_BGCOLOR;
 
 
@@ -402,37 +402,6 @@ typedef struct {
 
 
 
-
-
-
-
-
-
-
-/*GIFTAG*/
-typedef struct {
-	unsigned long nloop	:15;
-	unsigned long eop	:1;
-	unsigned long pad1	:16;
-	unsigned long id	:14;
-	unsigned long pre	:1;
-	unsigned long prim	:11;
-	unsigned long flg	:2;
-	unsigned long nreg	:4;
-	unsigned long reg	:64;
-}GS_PRIMTAG;
-
-
-
-#define gs_setPRIMTAG(p, _nloop,_eop,_id,_pre,_prim,_flg,_nreg,_reg)\
-	(p)->nloop	= _nloop,				\
-	(p)->eop	= _eop,					\
-	(p)->id		= _id,					\
-	(p)->pre	= _pre,					\
-	(p)->prim	= _prim,				\
-	(p)->flg	= _flg,					\
-	(p)->nreg	= _nreg,				\
-	(p)->reg	= _reg	
 
 
 
@@ -982,7 +951,7 @@ typedef struct {
 
 
 typedef struct {
-	GS_TEXFLUSH		data;			// Pad With Zeros
+	GS_TEXFLUSH		data;			
 	unsigned long	reg;			
 } GS_R_TEXFLUSH;
 
@@ -1115,7 +1084,6 @@ typedef struct {
 --													--
 --													--
 ----------------------------------------------------*/
-
 
 
 
@@ -1267,6 +1235,51 @@ typedef struct {
 
 
 
+
+
+
+
+/*
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+x These are use to SET the individual values		x
+x in each of the readable Privileged registers.		x 
+xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+*/
+
+/*CSR */
+#define GS_SET_CSR_signal_evnt(val) \
+			GS_SET_CSR(val,0,0,0,0,0,0,0,0,0,0,0)
+
+#define GS_SET_CSR_finish_evnt(val) \
+			GS_SET_CSR(0,val,0,0,0,0,0,0,0,0,0,0)
+
+#define GS_SET_CSR_hsync_intrupt(val) \
+			GS_SET_CSR(0,0,val,0,0,0,0,0,0,0,0,0)
+
+#define GS_SET_CSR_vsync_intrupt(val) \
+			GS_SET_CSR(0,0,0,val,0,0,0,0,0,0,0,0)
+
+#define GS_SET_CSR_write_terminate(val) \
+			GS_SET_CSR(0,0,0,0,val,0,0,0,0,0,0,0)
+
+#define GS_SET_CSR_flush(val) \
+			GS_SET_CSR(0,0,0,0,0,val,0,0,0,0,0,0)
+
+#define GS_SET_CSR_reset(val) \
+			GS_SET_CSR(0,0,0,0,0,0,val,0,0,0,0,0)
+
+/*nfield		(r)*/
+/*current_field (r)*/
+/*fifo_status	(r)*/
+/*gs_rev_number (r)*/
+/*gs_id			(r)*/
+
+
+
+
+
+
+
 /*
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 x These are use to GET the individual values		x
@@ -1315,40 +1328,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 
 
-/*
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-x These are use to SET the individual values		x
-x in each of the readable Privileged registers.		x 
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-*/
 
-/*CSR */
-#define GS_SET_CSR_signal_evnt(val) \
-			GS_SET_CSR(val,0,0,0,0,0,0,0,0,0,0,0)
-
-#define GS_SET_CSR_finish_evnt(val) \
-			GS_SET_CSR(0,val,0,0,0,0,0,0,0,0,0,0)
-
-#define GS_SET_CSR_hsync_intrupt(val) \
-			GS_SET_CSR(0,0,val,0,0,0,0,0,0,0,0,0)
-
-#define GS_SET_CSR_vsync_intrupt(val) \
-			GS_SET_CSR(0,0,0,val,0,0,0,0,0,0,0,0)
-
-#define GS_SET_CSR_write_terminate(val) \
-			GS_SET_CSR(0,0,0,0,val,0,0,0,0,0,0,0)
-
-#define GS_SET_CSR_flush(val) \
-			GS_SET_CSR(0,0,0,0,0,val,0,0,0,0,0,0)
-
-#define GS_SET_CSR_reset(val) \
-			GS_SET_CSR(0,0,0,0,0,0,val,0,0,0,0,0)
-
-/*nfield		(r)*/
-/*current_field (r)*/
-/*fifo_status	(r)*/
-/*gs_rev_number (r)*/
-/*gs_id			(r)*/
 
 
 
@@ -1690,7 +1670,8 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	(p)->signal_id	= _signal_id,					\
 	(p)->update_mask= _update_mask	
 
-#define gs_setFINISH(p)
+
+#define gs_setFINISH(p) // nothing to set
 
 
 #define gs_setLABEL(p, _label_id,_update_mask)	\
@@ -1993,6 +1974,40 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 
 
+/*---------------------------------------------------
+-- GIF STUFF
+--
+____________________________________________________*/
+
+
+
+/*GIFTAG*/
+typedef struct {
+	unsigned long nloop	:15;
+	unsigned long eop	:1;
+	unsigned long pad1	:16;
+	unsigned long id	:14;
+	unsigned long pre	:1;
+	unsigned long prim	:11;
+	unsigned long flg	:2;
+	unsigned long nreg	:4;
+	unsigned long reg	:64;
+}GS_GIF_PRIMTAG;
+
+
+
+#define gs_setGIF_PRIMTAG(p, _nloop,_eop,_id,_pre,_prim,_flg,_nreg,_reg)\
+	(p)->nloop	= _nloop,				\
+	(p)->eop	= _eop,					\
+	(p)->id		= _id,					\
+	(p)->pre	= _pre,					\
+	(p)->prim	= _prim,				\
+	(p)->flg	= _flg,					\
+	(p)->nreg	= _nreg,				\
+	(p)->reg	= _reg	
+
+
+
 
 
 
@@ -2012,27 +2027,23 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 --													--
 ------------------------------------------------------*/
 
-/* ReadCircuit Options For GsSetCRTCMode() */
+/* settings for GsSetCRTCSettings() */
+
 /*A Default setting*/
+#define CRTC_SETTINGS_DEFAULT		CRTC_SETTINGS_EN1|CRTC_SETTINGS_BLENDVAL|CRTC_SETTINGS_OUTRC2|CRTC_SETTINGS_STYLERC1
 
-#define CRTC_OPTION_DEFAULT				CRTC_OPTION_EN1|CRTC_OPTION_BLENDVAL|CRTC_OPTION_OUTRC2|CRTC_OPTION_STYLERC1
-
-/**/
-#define CRTC_OPTION_EN1			((unsigned long)(1)<<0)			// Enable RC1(ReadCircuit 1)
-#define CRTC_OPTION_EN2			((unsigned long)(1)<<1)			// Enable RC2(ReadCircuit 1)
-#define CRTC_OPTION_ENBOTH		CRTC_OPTION_EN1|CRTC_OPTION_EN2	// Enable RC1 & R2
-#define CRTC_OPTION_BLENDRC1	((unsigned long)(0)<<5)			// Use Alpha value from rc1 for blending
-#define CRTC_OPTION_BLENDVAL	((unsigned long)(1)<<5)			// Use Alpha value from alpha_value of GsSetCRTCMode() for blending
-#define CRTC_OPTION_OUTRC1		((unsigned long)(0)<<6)			// Output Final image to RC1
-#define CRTC_OPTION_OUTRC2		((unsigned long)(1)<<6)			// Output Final image to RC2
-#define CRTC_OPTION_STYLERC1	((unsigned long)(0)<<7)			// Blend With The Out Put of RC1
-#define CRTC_OPTION_STYLEBG		((unsigned long)(1)<<7)			// Blend With The Out Put of BG(background)
-
-
-/**/
+/*setting*/
+#define CRTC_SETTINGS_EN1			((unsigned long)(1)<<0)				// Enable RC1(ReadCircuit 1)
+#define CRTC_SETTINGS_EN2			((unsigned long)(1)<<1)				// Enable RC2(ReadCircuit 1)
+#define CRTC_SETTINGS_ENBOTH		CRTC_SETTINGS_EN1|CRTC_SETTINGS_EN2	// Enable RC1 & R2
+#define CRTC_SETTINGS_BLENDRC1		((unsigned long)(0)<<5)				// Use Alpha value from rc1 for blending
+#define CRTC_SETTINGS_BLENDVAL		((unsigned long)(1)<<5)				// Use Alpha value from alpha_value of GsSetCRTCMode() for blending
+#define CRTC_SETTINGS_OUTRC1		((unsigned long)(0)<<6)				// Output Final image to RC1
+#define CRTC_SETTINGS_OUTRC2		((unsigned long)(1)<<6)				// Output Final image to RC2
+#define CRTC_SETTINGS_STYLERC1		((unsigned long)(0)<<7)				// Blend With The Out Put of RC1
+#define CRTC_SETTINGS_STYLEBG		((unsigned long)(1)<<7)				// Blend With The Out Put of BG(background)
 
 
- 
 
 
 typedef struct {
@@ -2068,8 +2079,8 @@ typedef struct {
 
 /*Screen Draw Environment*/
 typedef struct {
-	unsigned short	offset_x;	// Draw offset X in vram
-	unsigned short	offset_y;	// Draw offset Y in vram
+	unsigned short	offset_x;	// Draw offset X
+	unsigned short	offset_y;	// Draw offset Y
 	GS_URECT		clip;		// Draw Clip rect
 	unsigned short	vram_page;	// Vram Page / Address in frame buffer
 	unsigned char	vram_width;	// Width of vram (1=64)
@@ -2078,7 +2089,7 @@ typedef struct {
 	unsigned short	vram_y;		// Y offset in vram;
 	unsigned int	draw_mask;	// Draw Mask (0=draw, 1=no draw)
 	unsigned char	auto_clear;	// Set To 1 If You Want The Draw Environment's Backgroud to Clear When GsPutDrawEnv() is called	
-	unsigned char	r,g,b,a;	// Color To Use When Backgroud is Cleared
+	GS_RGBAQ		bg_color;	// Color to use to clear backgroud
 }GS_DRAWENV;
 
 
@@ -2411,17 +2422,21 @@ typedef struct  {
 --													--
 ------------------------------------------------------*/
 
-//extern short GsInit(void);
-//extern void	 GsSetVideoMode(unsigned short mode);
-//extern short GsSetCRTCMode(unsigned long option, unsigned char alpha_value);
+extern	short GsInit(void);
+extern	short GsSetCRTCMode(int interlace,  int videomode,  int fieldmode);
+extern	short GsSetCRTCSettings(unsigned long settings, unsigned char alpha_value);
+extern	short GsSetVideoMode(int interlace,  int videomode,  int fieldmode);
 
-/*Set Structure Members*/
-//extern short GsSetDefDrawEnv(GS_DRAWENV *drawenv, unsigned short x, unsigned short y, unsigned short w, unsigned short h);
-//extern short GsSetDefDispEnv(GS_DISPENV *dispenv, unsigned short x, unsigned short y, unsigned short w, unsigned short h);
-//extern short GsSetDefDrawEnvAddress(GS_DRAWENV *drawenv, unsigned short vram_page, unsigned char	vram_width, unsigned char pix_mode, unsigned short vram_x, unsigned short vram_y);
-//extern short GsSetDefDispEnvAddress(GS_DISPENV *dispenv, unsigned short vram_page, unsigned char	vram_width, unsigned char pix_mode, unsigned short vram_x, unsigned short vram_y);
-//extern short GsSetDefZBufferEnv(GS_ZENV *zenv, unsigned short vram_addr, unsigned char pix_mode, unsigned char update_mask);
-/*Apply To Registers*/
+
+/*Initialise structs with defaults Based On Input*/
+extern	short GsSetDefaultDrawEnv(GS_DRAWENV *drawenv, unsigned short x, unsigned short y, unsigned short w, unsigned short h);
+extern	short GsSetDefaultDrawEnvAddress(GS_DRAWENV *drawenv, unsigned short vram_page, unsigned char	vram_width, unsigned char pix_mode, unsigned short vram_x, unsigned short vram_y);
+extern	short GsSetDefaultDisplayEnv(GS_DISPENV *dispenv, unsigned short x, unsigned short y, unsigned short w, unsigned short h);
+extern	short GsSetDefaultDisplayEnvAddress(GS_DISPENV *dispenv, unsigned short vram_page, unsigned char	vram_width, unsigned char pix_mode);
+extern	short GsSetDefaultZBufferEnv(sGS_ZENV *zenv, unsigned short vram_addr, unsigned char pix_mode, unsigned char update_mask);
+
+
+/*Apply structs to Registers*/
 //extern short GsPutDrawEnv1(GS_DRAWENV *drawenv);
 //extern short GsPutDrawEnv2(GS_DRAWENV *drawenv);
 //extern short GsPutDispEnv1(GS_DISPENV *dispenv);
