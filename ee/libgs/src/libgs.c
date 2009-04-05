@@ -18,6 +18,19 @@
 
 
 
+
+
+
+/*static*/
+short	gs_dma_send(unsigned int *addr, unsigned int qwords);
+#define gs_dma_wait()	while(*((volatile unsigned int *)(0x1000a000)) & ((unsigned int)1<<8))
+
+
+
+
+
+
+
 short GsInit(void)
 {
 		/*Reset dma(gif channel only)*/
@@ -124,7 +137,7 @@ short GsSetVideoMode(int interlace,  int videomode,  int fieldmode)
 
 
 
-short GsSetDefaultDrawEnv(sGS_DRAWENV *drawenv, unsigned short x, unsigned short y, unsigned short w, unsigned short h)
+short GsSetDefaultDrawEnv(GS_DRAWENV *drawenv, unsigned short x, unsigned short y, unsigned short w, unsigned short h)
 {
 	drawenv->offset_x	= x;
 	drawenv->offset_y	= y;
@@ -151,7 +164,7 @@ short GsSetDefaultDrawEnv(sGS_DRAWENV *drawenv, unsigned short x, unsigned short
 
 
 
-short GsSetDefaultDrawEnvAddress(sGS_DRAWENV *drawenv, unsigned short vram_page, unsigned char	vram_width, unsigned char pix_mode)
+short GsSetDefaultDrawEnvAddress(GS_DRAWENV *drawenv, unsigned short vram_page, unsigned char	vram_width, unsigned char pix_mode)
 {
 	drawenv->vram_page	= vram_page;
 	drawenv->vram_width = vram_width;
@@ -202,11 +215,75 @@ short GsSetDefaultDisplayEnvAddress(GS_DISPENV *dispenv, unsigned short vram_pag
 
 
 
-short GsSetDefaultZBufferEnv(sGS_ZENV *zenv, unsigned short vram_addr, unsigned char pix_mode, unsigned char update_mask)
+short GsSetDefaultZBufferEnv(GS_ZENV *zenv, unsigned short vram_addr, unsigned char pix_mode, unsigned char update_mask)
 {
 	zenv->vram_page   = vram_addr;
 	zenv->pix_mode    = pix_mode;
 	zenv->update_mask = update_mask;
 	
 	return 1;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/******************************************************************
+* STATIC MISC
+*
+*
+******************************************************************/
+
+typedef struct {
+	unsigned direction	:1;	// Direction
+	unsigned pad1		:1; // Pad with zeros
+	unsigned mode		:2;	// Mode
+	unsigned asp		:2;	// Address stack pointer
+	unsigned tte		:1;	// Tag trasfer enable
+	unsigned tie		:1;	// Tag interrupt enable
+	unsigned start_flag	:1;	// start
+	unsigned pad2		:7; // Pad with more zeros
+	unsigned tag		:16;// DMAtag
+}DMA_CHCR;
+
+
+
+
+static short gs_dma_send(unsigned int *addr, unsigned int qwords)
+{
+	DMA_CHCR		chcr;
+	static char		spr;
+
+	if(addr >= (unsigned int *)0x70000000 && addr <= (unsigned int *)0x70003fff)
+	{
+		spr = 1;
+	}
+	else
+	{
+		spr = 0;
+	}
+
+
+	*((volatile unsigned int *)(0x1000a010)) = ( unsigned int )((( unsigned int )addr) & 0x7FFFFFFF) << 0 | (unsigned int)((spr) & 0x00000001) << 31;;
+
+	*((volatile unsigned int *)(0x1000a020)) = qwords;
+
+	chcr.direction	=1;
+	chcr.mode		=0;
+	chcr.asp		=0;
+	chcr.tte		=0;
+	chcr.tie		=0;
+	chcr.start_flag	=1;
+	chcr.tag		=0;
+	*((volatile unsigned int *)(0x1000a000)) = *(unsigned int *)&chcr;
+	return 0;
 }
