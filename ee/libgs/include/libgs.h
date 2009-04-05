@@ -2430,10 +2430,10 @@ extern	short GsSetVideoMode(int interlace,  int videomode,  int fieldmode);
 
 /*Initialise structs with defaults Based On Input*/
 extern	short GsSetDefaultDrawEnv(GS_DRAWENV *drawenv, unsigned short x, unsigned short y, unsigned short w, unsigned short h);
-extern	short GsSetDefaultDrawEnvAddress(GS_DRAWENV *drawenv, unsigned short vram_page, unsigned char	vram_width, unsigned char pix_mode, unsigned short vram_x, unsigned short vram_y);
+extern	short GsSetDefaultDrawEnvAddress(GS_DRAWENV *drawenv, unsigned short vram_page, unsigned char	vram_width, unsigned char pix_mode);
 extern	short GsSetDefaultDisplayEnv(GS_DISPENV *dispenv, unsigned short x, unsigned short y, unsigned short w, unsigned short h);
 extern	short GsSetDefaultDisplayEnvAddress(GS_DISPENV *dispenv, unsigned short vram_page, unsigned char	vram_width, unsigned char pix_mode);
-extern	short GsSetDefaultZBufferEnv(sGS_ZENV *zenv, unsigned short vram_addr, unsigned char pix_mode, unsigned char update_mask);
+extern	short GsSetDefaultZBufferEnv(GS_ZENV *zenv, unsigned short vram_addr, unsigned char pix_mode, unsigned char update_mask);
 
 
 /*Apply structs to Registers*/
