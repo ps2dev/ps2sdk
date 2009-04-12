@@ -7,7 +7,22 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 
-SAMPLE_DIR = libgs_draw
+EE_BIN = main.elf
+EE_OBJS = main.o
+EE_LIBS = -lgs
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/samples/Rules.samples
+all: $(EE_BIN)
+	ee-strip --strip-all $(EE_BIN)
+
+clean:
+	rm -f *.elf *.o *.a
+
+run: $(EE_BIN)
+	ps2client execee host:$(EE_BIN)
+
+reset:
+	ps2client reset
+
+include $(PS2SDK)/samples/Makefile.pref
+include $(PS2SDK)/samples/Makefile.eeglobal
+
