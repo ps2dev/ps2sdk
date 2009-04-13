@@ -2486,7 +2486,7 @@ typedef struct  {
 
 
 
-#ifdef __cplusplus
+#if defined(__LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
 extern "C" {
 #endif
 
@@ -2562,20 +2562,32 @@ extern short  GsGifPacketsExecute(GS_PACKET_TABLE	*table, unsigned short wait);
 
 
 /**/
-extern short GsOverridePrimAttributes(char override, char iip, char tme, char fge, char abe, char aa1, char fst, char ctxt, char fix);
-extern void	 GsEnableDithering(unsigned char enable, int mode);
-extern void  GsEnableAlphaTransparency1(unsigned short enable,unsigned short method,unsigned char alpha_ref,unsigned short fail_method);
-extern void  GsEnableAlphaTransparency2(unsigned short enable,unsigned short method,unsigned char alpha_ref,unsigned short fail_method);
-extern void  GsEnableZbuffer1(unsigned short enable,unsigned short test_method);
-extern void  GsEnableZbuffer2(unsigned short enable,unsigned short test_method);
-extern void  GsEnableAlphaBlending1(unsigned short enable, unsigned short mode);
-extern void  GsEnableAlphaBlending2(unsigned short enable, unsigned short mode);
+extern short  GsOverridePrimAttributes(char override, char iip, char tme, char fge, char abe, char aa1, char fst, char ctxt, char fix);
+extern void	  GsEnableDithering(unsigned char enable, int mode);
+extern void	  GsEnableAlphaTransparency1(unsigned short enable,unsigned short method,unsigned char alpha_ref,unsigned short fail_method);
+extern void	  GsEnableAlphaTransparency2(unsigned short enable,unsigned short method,unsigned char alpha_ref,unsigned short fail_method);
+extern void	  GsEnableZbuffer1(unsigned short enable,unsigned short test_method);
+extern void	  GsEnableZbuffer2(unsigned short enable,unsigned short test_method);
+extern void	  GsEnableAlphaBlending1(unsigned short enable, unsigned short mode);
+extern void	  GsEnableAlphaBlending2(unsigned short enable, unsigned short mode);
 
 /**/
 extern short  GsDrawSync(short mode);
 extern short  GsHSync(short mode);
 extern short  GsVSync(short mode);
 
+
+
+/* Vram Allocation*/
+extern int	  GsVramAllocFrameBuffer(short w, short h, short psm);
+extern int	  GsVramAllocTextureBuffer(short w, short h, short psm);
+extern void	  GsVramFreeAllTextureBuffer(void);  //free texture buffer without freeing frame buffer
+extern void	  GsVramFreeAll(void);
+
+/* Just used for buffer swapping*/
+extern int	  GsDbGetDrawBuffer(void);
+extern int	  GsDbGetDisplayBuffer(void);
+extern void	  GsDbSwapBuffer(void);
 
 
 
@@ -2586,9 +2598,9 @@ extern char  twh4(short wh);
 
 
 
-#ifdef __cplusplus
+#if defined(__LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
 }
-#endif /*__CPLUSPLUS*/
+#endif		
 
 
 
