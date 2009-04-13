@@ -31,7 +31,7 @@ static void  gs_flush_cache(int mode);
 GS_TEST		GSGLOBAL_TEST1;
 GS_TEST		GSGLOBAL_TEST2;
 
-
+static int	gs_db_draw_buffer=0;
 
 /*-------------------------------------------
 -											-
@@ -1065,6 +1065,256 @@ short GsVSync(short mode)
 
 	return 0;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*************************************************
+*
+*
+* VRAM
+*
+*************************************************/
+
+
+
+
+
+
+
+static unsigned int		vr_addr=0;
+static unsigned int		vr_tex_start=0;
+static unsigned int		vr_2ndtolast_alloc=0;	//address before last alloc so we can Free the last alloc
+
+
+int GsVramAllocFrameBuffer(short w, short h, short psm)
+{
+	static int size;
+	static int remainder;
+	static int ret;
+	static int byte_pp;	// byte per pixel
+
+	switch(psm)
+	{
+	case GS_PIXMODE_32:	
+	case GS_TEX_4HH:		// these are 32bit
+	case GS_TEX_4HL:		// ..
+	case GS_TEX_8H:			// ..
+	case GS_ZBUFF_32:		//
+	case GS_ZBUFF_24:		//
+	case GS_PIXMODE_24:		// also 24bit takes up 4 bytes
+		
+		byte_pp = 4;
+	break;
+	case GS_PIXMODE_16:
+	case GS_PIXMODE_16S:
+	case GS_ZBUFF_16:
+
+		byte_pp = 2;
+	break;
+	case GS_TEX_8:
+
+		byte_pp	= 1;
+	break;
+	case GS_TEX_4:
+
+		byte_pp	= 0;
+	break;
+	default:
+
+		byte_pp	= 4;
+	break;
+	}
+
+
+
+	if(byte_pp > 0)			// 8 to 32 bit
+	{
+		size = ((w*h)*byte_pp)/4;
+
+	}
+	else if(byte_pp==0)		// 4 bit
+	{
+		size = (w*h)/2;
+	}
+
+
+
+	remainder = (vr_addr % (2048));
+
+
+	
+
+
+	if(remainder)
+		vr_addr += ((2048)-remainder);
+
+
+	ret = vr_addr/(2048);
+
+	vr_addr += size;
+	
+
+	
+	vr_tex_start = vr_addr;
+
+	return ret;
+}
+
+
+
+
+
+
+int GsVramAllocTextureBuffer(short w, short h, short psm)
+{
+	static int size;
+	static int remainder;
+	static int ret;
+	static int byte_pp;	// byte per pixel
+
+	switch(psm)
+	{
+	case GS_PIXMODE_32:
+	case GS_PIXMODE_24:		// also 24bit takes up 4 bytes
+	case GS_TEX_8H:			// ..	
+	case GS_TEX_4HH:		// these are 32bit
+	case GS_TEX_4HL:		// ..
+	
+
+		byte_pp = 4;
+	break;
+	case GS_PIXMODE_16:
+	case GS_PIXMODE_16S:
+
+		byte_pp = 2;
+	break;
+	case GS_TEX_8:
+
+		byte_pp	= 1;
+	break;
+	case GS_TEX_4:
+
+		byte_pp	= 0;
+	break;
+	default:
+
+		byte_pp	= 4;
+	break;
+	}
+
+
+
+	if(byte_pp > 0)			// 8 to 32 bit
+	{
+		size = ((w*h)*byte_pp)/4;
+
+	}
+	else if(byte_pp==0)		// 4 bit
+	{
+		size = (w*h)/2;
+	}
+
+
+
+	remainder = (vr_addr % (64));
+
+
+	//---
+	vr_2ndtolast_alloc = vr_addr;
+
+
+	if(remainder)
+		vr_addr += ((64)-remainder);	
+	
+
+	ret = vr_addr/(64);
+
+	vr_addr += size;
+	
+
+	
+
+
+	return ret;
+}
+
+
+
+void GsVramFreeAllTextureBuffer(void)
+{
+	vr_addr = vr_tex_start;
+
+}
+
+
+/*
+int VramFreeLastTextureBuffer()
+{
+	if(vr_2ndtolast_alloc)
+	{
+		vr_addr = vr_2ndtolast_alloc;
+		vr_2ndtolast_alloc =0;
+	}
+
+}
+*/
+
+void GsVramFreeAll(void)
+{
+	vr_addr			= 0;
+	vr_tex_start	= 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+/*****************************************************************
+*** 
+***
+*****************************************************************/
+
+int GsDbGetDrawBuffer(void)
+{
+	return gs_db_draw_buffer;
+}
+
+
+int GsDbGetDisplayBuffer(void)
+{
+	int ret;
+
+	ret = gs_db_draw_buffer? 0: 1;
+
+	return ret;
+}
+
+
+void GsDbSwapBuffer(void)
+{
+	
+	gs_db_draw_buffer = gs_db_draw_buffer? 0: 1;
+}
+
+
 
 
 
