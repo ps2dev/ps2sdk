@@ -2430,21 +2430,21 @@ typedef struct
 
 
 
-/*
+
 typedef struct
 {
 	unsigned short	x;			// X Offset in Vram Address 
 	unsigned short	y;			// X Offset in Vram Address
 	unsigned short	width;		// Height of image
 	unsigned short	height;		// Width  of image
-	unsigned short	vram_page;	// Vram Page / Address in frame buffer
+	unsigned short	vram_addr;	// Address in frame buffer
 	unsigned char	vram_width;	// Width of vram (0=64)
 	unsigned char	pix_mode;	// Pixel Mode / PSM
 }GS_IMAGE;
 
 
 
-
+/*
 
 
 typedef struct
@@ -2557,7 +2557,7 @@ extern short  GsGifPacketsExecute(GS_PACKET_TABLE	*table, unsigned short wait);
 
 
 /* Texture/Image Funtions*/
-//extern short GsLoadImage(unsigned int *src_addr, GS_IMAGE *dest);
+extern short  GsLoadImage(void *source_addr, GS_IMAGE *dest);
 
 
 
