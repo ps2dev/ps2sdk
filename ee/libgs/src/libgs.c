@@ -1080,6 +1080,122 @@ short GsVSync(short mode)
 
 
 
+
+short GsLoadImage(void *source_addr, GS_IMAGE *dest)
+{
+	int i;
+	static int	current,max,remainder,img_qwc;
+	
+
+	switch(dest->pix_mode)
+	{
+	case 0:		//32 bit image
+		img_qwc = ((dest->width * dest->height)*4)/16;
+	break;
+	case 1:		//24 bit image
+		img_qwc = ((dest->width * dest->height)*3)/16;
+	break;
+	case 2:		//16 bit image
+		img_qwc = ((dest->width * dest->height)*2)/16;
+	break;
+	case 19:	//8 bit image
+		img_qwc = ((dest->width * dest->height)*1)/16;
+	break;
+	case 20:	//4 bit image
+		img_qwc = ((dest->width * dest->height)/2)/16;
+	break;
+	default:
+		//printf("unable to load unsupported image(%02x)",dest->pix_mode);
+	break;
+	}
+
+	//flush buffer to be safe
+	GsTextureFlush();
+
+
+
+	gs_setGIF_TAG(((GS_GIF_TAG				*)&prim_work[0]), 4,1,0,0,0,0,1,0x0e);
+	gs_setR_BITBLTBUF(((GS_R_BITBLTBUF		*)&prim_work[1]),0,0,0,dest->vram_addr,dest->vram_width,dest->pix_mode);
+	gs_setR_TRXPOS(((GS_R_TRXPOS			*)&prim_work[2]), 0,0,dest->x,dest->y,0);
+	gs_setR_TRXREG(((GS_R_TRXREG			*)&prim_work[3]), dest->width,dest->height);
+	gs_setR_TRXDIR(((GS_R_TRXDIR			*)&prim_work[4]), 0);
+	
+	gs_flush_cache(0);
+	gs_dma_send((unsigned int *)&prim_work[0],4+1);
+	gs_dma_wait();
+
+
+
+
+	// Ok , We Send Image Now
+	max			= img_qwc / 16384;
+	remainder	= img_qwc % 16384;
+	current		= 16384;
+	for(i=0;i<max;i++)
+	{
+
+		//1st we signal gs we are about to send
+		//16384 qwords
+	
+		gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), current,1,0,0,0,2,0,0x00);
+
+		gs_flush_cache(0);
+		gs_dma_send((unsigned int *)&prim_work[0],0+1);
+		gs_dma_wait();
+
+
+		//we now send 16384 more qwords
+		gs_dma_send((unsigned int *)source_addr,current);
+		gs_dma_wait();
+
+
+		(unsigned char *)source_addr += current*16;
+	}
+
+
+
+	//transfer the rest if we have left overs
+	current = remainder;
+	//or exit if none is left
+	if(current)
+	{
+
+		// we signal are about to send whats left
+		gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), current,1,0,0,0,2,0,0x00);
+
+		gs_flush_cache(0);
+		gs_dma_send((unsigned int *)&prim_work[0],0+1);
+		gs_dma_wait();
+	
+		//send data leftover
+		gs_dma_send((unsigned int *)source_addr,current);
+
+		//dont wait
+		gs_dma_wait();
+	}
+
+
+	//do a final flush
+	GsTextureFlush();
+
+	return 1;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /*************************************************
 *
 *
