@@ -744,6 +744,16 @@ void GsEnableAlphaTransparency1(unsigned short enable,unsigned short method,unsi
 	GsSetPixelTest1(GSGLOBAL_TEST1.atest_enable	, GSGLOBAL_TEST1.atest_method, GSGLOBAL_TEST1.atest_reference, GSGLOBAL_TEST1.atest_fail_method,
 					GSGLOBAL_TEST1.datest_enable, GSGLOBAL_TEST1.datest_mode,
 					GSGLOBAL_TEST1.ztest_enable,  GSGLOBAL_TEST1.ztest_method);
+
+
+	// tell GS in 16bit texture 1=transparent,0=solid
+	gs_setGIF_TAG(((GS_GIF_TAG		*)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
+	gs_setR_TEXA(((GS_R_TEXA		*)&prim_work[1]), 0x80, 0, 0x00);
+	
+
+	gs_flush_cache(0);
+	gs_dma_send((unsigned int *)&prim_work[0],1+1);
+	gs_dma_wait();
 	
 }
 
@@ -762,6 +772,15 @@ void GsEnableAlphaTransparency2(unsigned short enable,unsigned short method,unsi
 					GSGLOBAL_TEST2.datest_enable, GSGLOBAL_TEST2.datest_mode,
 					GSGLOBAL_TEST2.ztest_enable,  GSGLOBAL_TEST2.ztest_method);
 	
+
+	// tell GS in 16bit texture 1=transparent,0=solid
+	gs_setGIF_TAG(((GS_GIF_TAG		*)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
+	gs_setR_TEXA(((GS_R_TEXA		*)&prim_work[1]), 0x80, 0, 0x00);
+	
+
+	gs_flush_cache(0);
+	gs_dma_send((unsigned int *)&prim_work[0],1+1);
+	gs_dma_wait();
 }
 
 
