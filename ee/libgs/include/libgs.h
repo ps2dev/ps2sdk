@@ -2438,7 +2438,7 @@ typedef struct
 	unsigned short	width;		// Height of image
 	unsigned short	height;		// Width  of image
 	unsigned short	vram_addr;	// Address in frame buffer
-	unsigned char	vram_width;	// Width of vram (0=64)
+	unsigned char	vram_width;	// Width of vram (1=64)
 	unsigned char	pix_mode;	// Pixel Mode / PSM
 }GS_IMAGE;
 
@@ -2592,8 +2592,8 @@ extern void	  GsDbSwapBuffer(void);
 
 
 
-/* return a propper val for	(dont use it if you dont have to)*/
-/* GS_TEX0->tex_width/tex_height (ito)*/
+/* return a propper value for												 */
+/* GS_TEX0->tex_width/tex_height (ito)	(dont use it if you dont have to)*/
 extern char  twh4(short wh);
 
 
