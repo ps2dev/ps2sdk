@@ -14,7 +14,6 @@
 
 
 
-//PLEASE WAIT. &  your ps2sdk source will still compile with no problem
 
 
 
@@ -28,17 +27,30 @@ static short gs_dma_wait(void);
 static void  gs_flush_cache(int mode);
 
 
+
+QWORD		prim_work[64] __attribute__((aligned(16))); /*aligne to 128bits*/
+
 GS_TEST		GSGLOBAL_TEST1;
 GS_TEST		GSGLOBAL_TEST2;
 
 static int	gs_db_draw_buffer=0;
+
+
+
+
+
+
+
+
+
+
 
 /*-------------------------------------------
 -											-
 - LOW LEVEL FUNTIONS						-           
 -											-
 -------------------------------------------*/
-QWORD		prim_work[64] __attribute__((aligned(16))); /*aligne to 128bits*/
+
 
 
 
