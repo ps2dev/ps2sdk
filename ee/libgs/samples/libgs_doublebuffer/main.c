@@ -54,7 +54,6 @@ int active_buffer=0; // the buffer that we are currently writiing stuff to
 
 int main()
 {
-
 	
 
 	InitGraphics();
@@ -150,7 +149,7 @@ int InitGraphics()
 
 	GsInit();
 
-	GsSetCRTCMode(1, 2, 0);
+	GsSetVideoMode(1, 2, 0);
 	GsSetCRTCSettings(CRTC_SETTINGS_DEFAULT1, 255); //display contex 1
 
 

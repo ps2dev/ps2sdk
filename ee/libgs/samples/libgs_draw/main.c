@@ -49,13 +49,9 @@ int DrawSprites(GS_PACKET_TABLE *table);
 
 int main()
 {
-	int i=0;
+	
 
-	GsInit();
-
-	GsSetCRTCMode(1, 2, 0);
-	GsSetCRTCSettings(CRTC_SETTINGS_DEFAULT1, 255); //display contex 1
-
+	
 	InitGraphics();
 
 
@@ -116,6 +112,11 @@ int main()
 
 int InitGraphics()
 {
+	GsInit();
+
+	GsSetVideoMode(1, 2, 0);
+	GsSetCRTCSettings(CRTC_SETTINGS_DEFAULT1, 255); //display contex 1
+
 
 
 	GsSetDefaultDrawEnv(&draw_env, SCREEN_OFFSET_X, SCREEN_OFFSET_Y, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -302,3 +303,12 @@ int DrawSprites(GS_PACKET_TABLE *table)
 	return 0;
 
 }
+
+
+
+
+
+
+
+
+/*EOF*/
