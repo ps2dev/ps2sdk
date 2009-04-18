@@ -115,7 +115,7 @@ int InitGraphics()
 	GsInit();
 
 	GsSetVideoMode(1, 2, 0);
-	GsSetCRTCSettings(CRTC_SETTINGS_DEFAULT1, 255); //display context 1
+	GsSetCRTCSettings(CRTC_SETTINGS_DEFAULT1, 255); //display context 1 on tv
 
 
 
@@ -137,11 +137,15 @@ int InitGraphics()
 	//set some common stuff
 	GsOverridePrimAttributes(GS_DISABLE, 0, 0, 0, 0, 0, 0, 0, 0);
 
-	// context 1
-	GsSetPixelTest1(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, 0x00, // alpha transparent
-					GS_DISABLE, 0,		 // dest alpha test
-					GS_DISABLE, 0);		 // disable z buffer
+	// contex 1
+	GsEnableAlphaTransparency1(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, 0x00);
+	// contex 2
+	GsEnableAlphaTransparency2(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, 0x00);
 
+
+	
+	GsEnableAlphaBlending1(GS_ENABLE, 0);
+	GsEnableAlphaBlending2(GS_ENABLE, 0);
 
 
 	return 0;

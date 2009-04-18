@@ -197,15 +197,14 @@ int InitGraphics()
 	GsOverridePrimAttributes(GS_DISABLE, 0, 0, 0, 0, 0, 0, 0, 0);
 
 	// contex 1
-	GsSetPixelTest1(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, 0x00, // alpha transparent
-					GS_DISABLE, 0,		 // dest alpha test
-					GS_DISABLE, 0);		 // disable z buffer
-
+	GsEnableAlphaTransparency1(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, 0x00);
 	// contex 2
-	GsSetPixelTest2(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, 0x00, // alpha transparent
-					GS_DISABLE, 0,		 // dest alpha test
-					GS_DISABLE, 0);		 // disable z buffer
+	GsEnableAlphaTransparency2(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, 0x00);
 
+
+	
+	GsEnableAlphaBlending1(GS_ENABLE, 0);
+	GsEnableAlphaBlending2(GS_ENABLE, 0);
 
 
 	return 0;
