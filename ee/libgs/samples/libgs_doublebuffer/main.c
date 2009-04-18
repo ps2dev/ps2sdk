@@ -44,9 +44,9 @@ GS_PACKET_TABLE					packet_table[2];				//we need 2 for double buffering
 
 
 int	 InitGraphics();
-void SelectDisplayContex(int contex_id);
-void ClearDrawingContex(int contex_id);
-int  DrawTriangles(GS_PACKET_TABLE *table, int contex_index);
+void SelectDisplayContext(int context_id);
+void ClearDrawingContext(int context_id);
+int  DrawTriangles(GS_PACKET_TABLE *table, int context_index);
 void MovePoint();
 
 int active_buffer=0; // the buffer that we are currently writiing stuff to
@@ -111,10 +111,10 @@ int main()
 		GsVSync(0);
 
 		//display the previous drawn buffer
-		SelectDisplayContex(   GsDbGetDisplayBuffer()   ); //tell CRTC which context we want to see on our tv
+		SelectDisplayContext(   GsDbGetDisplayBuffer()   ); //tell CRTC which context we want to see on our tv
 		
 		// clear the draw environment before we draw stuff on it
-		ClearDrawingContex(active_buffer);
+		ClearDrawingContext(active_buffer);
 				
 		GsGifPacketsExecute(&packet_table[active_buffer], 0); // '0' we dont have to wait because we have 2 buffers (GsDrawSync(0) will do the wait)
 		GsDbSwapBuffer();
@@ -222,25 +222,25 @@ int InitGraphics()
 
 
 
-void SelectDisplayContex(int contex_id)
+void SelectDisplayContext(int context_id)
 {
 	// the CRTC is used to select which contex we see on our TV/VGA/HDTV 
 
 
-	if(contex_id==0)
+	if(context_id==0)
 		GsSetCRTCSettings(CRTC_SETTINGS_DEFAULT1, 255);
 
-	if(contex_id==1)
+	if(context_id==1)
 		GsSetCRTCSettings(CRTC_SETTINGS_DEFAULT2, 255);
 
 }
 
 
-void ClearDrawingContex(int contex_id)
+void ClearDrawingContext(int context_id)
 {
 
 
-	if(contex_id==0)
+	if(context_id==0)
 		GsClearDrawEnv1(&draw_env[0]);		
 	else
 		GsClearDrawEnv2(&draw_env[1]);
@@ -256,7 +256,7 @@ void ClearDrawingContex(int contex_id)
 int		point_x=100,point_y=100;
 int		dir_x=0, dir_y=0;
 
-int DrawTriangles(GS_PACKET_TABLE *table, int contex_index)
+int DrawTriangles(GS_PACKET_TABLE *table, int context_index)
 {
 
 	QWORD	*p;
@@ -269,7 +269,7 @@ int DrawTriangles(GS_PACKET_TABLE *table, int contex_index)
 
 
 	gs_setGIF_TAG(((GS_GIF_TAG	*)&p[0]), 5,1,0,0,0,0,1,0x0e);
-	gs_setR_PRIM(((GS_R_PRIM	*)&p[1]), GS_PRIM_TRI,0, 0, 0, 1, 0, 0, contex_index, 0);
+	gs_setR_PRIM(((GS_R_PRIM	*)&p[1]), GS_PRIM_TRI,0, 0, 0, 1, 0, 0, context_index, 0);
 	gs_setR_RGBAQ(((GS_R_RGBAQ	*)&p[2]), 200, 100, 100, 0x80, 0.0f);
 	gs_setR_XYZ2(((GS_R_XYZ		*)&p[3]), (SCREEN_OFFSET_X+0)<<4,		(SCREEN_OFFSET_Y+0)<<4, 0x00000000);
 	gs_setR_XYZ2(((GS_R_XYZ		*)&p[4]), (SCREEN_OFFSET_X+200)<<4,		(SCREEN_OFFSET_Y+0)<<4, 0x00000000);
@@ -283,7 +283,7 @@ int DrawTriangles(GS_PACKET_TABLE *table, int contex_index)
 
 
 	gs_setGIF_TAG(((GS_GIF_TAG	*)&p[0]), 5,1,0,0,0,0,1,0x0e);
-	gs_setR_PRIM(((GS_R_PRIM	*)&p[1]), GS_PRIM_TRI,0, 0, 0, 1, 0, 0, contex_index, 0);
+	gs_setR_PRIM(((GS_R_PRIM	*)&p[1]), GS_PRIM_TRI,0, 0, 0, 1, 0, 0, context_index, 0);
 	gs_setR_RGBAQ(((GS_R_RGBAQ	*)&p[2]), 100, 200, 100, 0x80, 0.0f);
 	gs_setR_XYZ2(((GS_R_XYZ		*)&p[3]), (SCREEN_OFFSET_X+SCREEN_WIDTH-200)<<4,		(SCREEN_OFFSET_Y+0)<<4, 0x00000000);
 	gs_setR_XYZ2(((GS_R_XYZ		*)&p[4]), (SCREEN_OFFSET_X+SCREEN_WIDTH)<<4,		(SCREEN_OFFSET_Y+0)<<4, 0x00000000);
@@ -297,7 +297,7 @@ int DrawTriangles(GS_PACKET_TABLE *table, int contex_index)
 
 
 	gs_setGIF_TAG(((GS_GIF_TAG	*)&p[0]), 5,1,0,0,0,0,1,0x0e);
-	gs_setR_PRIM(((GS_R_PRIM	*)&p[1]), GS_PRIM_TRI,0, 0, 0, 1, 0, 0, contex_index, 0);
+	gs_setR_PRIM(((GS_R_PRIM	*)&p[1]), GS_PRIM_TRI,0, 0, 0, 1, 0, 0, context_index, 0);
 	gs_setR_RGBAQ(((GS_R_RGBAQ	*)&p[2]), 100, 100, 200, 0x80, 0.0f);
 	gs_setR_XYZ2(((GS_R_XYZ		*)&p[3]), (SCREEN_OFFSET_X+SCREEN_WIDTH-200)<<4,		(SCREEN_OFFSET_Y+SCREEN_HEIGHT)<<4, 0x00000000);
 	gs_setR_XYZ2(((GS_R_XYZ		*)&p[4]), (SCREEN_OFFSET_X+SCREEN_WIDTH)<<4,		(SCREEN_OFFSET_Y+SCREEN_HEIGHT)<<4, 0x00000000);
@@ -310,7 +310,7 @@ int DrawTriangles(GS_PACKET_TABLE *table, int contex_index)
 
 
 	gs_setGIF_TAG(((GS_GIF_TAG	*)&p[0]), 5,1,0,0,0,0,1,0x0e);
-	gs_setR_PRIM(((GS_R_PRIM	*)&p[1]), GS_PRIM_TRI,0, 0, 0, 1, 0, 0, contex_index, 0);
+	gs_setR_PRIM(((GS_R_PRIM	*)&p[1]), GS_PRIM_TRI,0, 0, 0, 1, 0, 0, context_index, 0);
 	gs_setR_RGBAQ(((GS_R_RGBAQ	*)&p[2]), 100, 200, 200, 0x80, 0.0f);
 	gs_setR_XYZ2(((GS_R_XYZ		*)&p[3]), (SCREEN_OFFSET_X+0)<<4,		(SCREEN_OFFSET_Y+SCREEN_HEIGHT)<<4, 0x00000000);
 	gs_setR_XYZ2(((GS_R_XYZ		*)&p[4]), (SCREEN_OFFSET_X+200)<<4,		(SCREEN_OFFSET_Y+SCREEN_HEIGHT)<<4, 0x00000000);

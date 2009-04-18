@@ -115,7 +115,7 @@ int InitGraphics()
 	GsInit();
 
 	GsSetVideoMode(1, 2, 0);
-	GsSetCRTCSettings(CRTC_SETTINGS_DEFAULT1, 255); //display contex 1
+	GsSetCRTCSettings(CRTC_SETTINGS_DEFAULT1, 255); //display context 1
 
 
 
@@ -127,7 +127,7 @@ int InitGraphics()
 
 
 
-	//execute draw/display environment(s)  (contex 1)
+	//execute draw/display environment(s)  (context 1)
 	GsPutDrawEnv1(&draw_env);
 	GsPutDisplayEnv1(&disp_env);
 
@@ -137,7 +137,7 @@ int InitGraphics()
 	//set some common stuff
 	GsOverridePrimAttributes(GS_DISABLE, 0, 0, 0, 0, 0, 0, 0, 0);
 
-	// contex 1
+	// context 1
 	GsSetPixelTest1(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, 0x00, // alpha transparent
 					GS_DISABLE, 0,		 // dest alpha test
 					GS_DISABLE, 0);		 // disable z buffer
