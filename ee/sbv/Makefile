@@ -22,7 +22,8 @@ EE_SAMPLE_DIR = samples/
 
 EE_LIB = $(LIBSBV_LIB)
 
-EE_OBJS = smem.o smod.o slib.o patch_enable_lmb.o patch_disable_prefix_check.o erl-support.o
+EE_OBJS = smem.o smod.o slib.o patch_enable_lmb.o patch_disable_prefix_check.o \
+	patch_user_mem_clear.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBSBV_LIB) 
