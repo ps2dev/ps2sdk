@@ -2510,7 +2510,7 @@ extern short  GsSetPixelTest1(unsigned char enable_alpha_test, unsigned char alp
 extern short  GsSetPixelTest2(unsigned char enable_alpha_test, unsigned char alpha_test_method, unsigned char alpha_reference, unsigned char alpha_fail_method, unsigned char enable_dest_alpha_test, unsigned char dest_alpha_test_mode, unsigned char enable_zbuff_test, unsigned char alpha_zbuff_method);
 extern short  GsSelectTexure1(unsigned short tex_addr, unsigned char addr_width, unsigned char tex_pixmode, unsigned short tex_width, unsigned short tex_height, unsigned short clut_addr, unsigned char clut_pixmode, unsigned char clut_storagemode,unsigned char clut_offset);
 extern short  GsSelectTexure2(unsigned short tex_addr, unsigned char addr_width, unsigned char tex_pixmode, unsigned short tex_width, unsigned short tex_height, unsigned short clut_addr, unsigned char clut_pixmode, unsigned char clut_storagemode,unsigned char clut_offset);
-extern void	  GsSetFogColor(unsigned char r, unsigned char g, unsigned char b);
+extern void   GsSetFogColor(unsigned char r, unsigned char g, unsigned char b);
 //extern void  GsSetTextureDetail1(unsigned char quality_mode, unsigned char mipmap_count, unsigned char near_quality, unsigned char far_quality, unsigned char mipmap_address_mode, unsigned short L, short K);
 //extern void  GsSetTextureDetail2(unsigned char quality_mode, unsigned char mipmap_count, unsigned char near_quality, unsigned char far_quality, unsigned char mipmap_address_mode, unsigned short L, short K);
 
@@ -2563,13 +2563,13 @@ extern short  GsLoadImage(void *source_addr, GS_IMAGE *dest);
 
 /**/
 extern short  GsOverridePrimAttributes(char override, char iip, char tme, char fge, char abe, char aa1, char fst, char ctxt, char fix);
-extern void	  GsEnableDithering(unsigned char enable, int mode);
-extern void	  GsEnableAlphaTransparency1(unsigned short enable,unsigned short method,unsigned char alpha_ref,unsigned short fail_method);
-extern void	  GsEnableAlphaTransparency2(unsigned short enable,unsigned short method,unsigned char alpha_ref,unsigned short fail_method);
-extern void	  GsEnableZbuffer1(unsigned short enable,unsigned short test_method);
-extern void	  GsEnableZbuffer2(unsigned short enable,unsigned short test_method);
-extern void	  GsEnableAlphaBlending1(unsigned short enable, unsigned short mode);
-extern void	  GsEnableAlphaBlending2(unsigned short enable, unsigned short mode);
+extern void   GsEnableDithering(unsigned char enable, int mode);
+extern void   GsEnableAlphaTransparency1(unsigned short enable,unsigned short method,unsigned char alpha_ref,unsigned short fail_method);
+extern void   GsEnableAlphaTransparency2(unsigned short enable,unsigned short method,unsigned char alpha_ref,unsigned short fail_method);
+extern void   GsEnableZbuffer1(unsigned short enable,unsigned short test_method);
+extern void   GsEnableZbuffer2(unsigned short enable,unsigned short test_method);
+extern void   GsEnableAlphaBlending1(unsigned short enable, unsigned short mode);
+extern void   GsEnableAlphaBlending2(unsigned short enable, unsigned short mode);
 
 /**/
 extern short  GsDrawSync(short mode);
@@ -2579,22 +2579,22 @@ extern short  GsVSync(short mode);
 
 
 /* Vram Allocation*/
-extern int	  GsVramAllocFrameBuffer(short w, short h, short psm);
-extern int	  GsVramAllocTextureBuffer(short w, short h, short psm);
-extern void	  GsVramFreeAllTextureBuffer(void);  //free texture buffer without freeing frame buffer
-extern void	  GsVramFreeAll(void);
+extern int    GsVramAllocFrameBuffer(short w, short h, short psm);
+extern int    GsVramAllocTextureBuffer(short w, short h, short psm);
+extern void   GsVramFreeAllTextureBuffer(void);  //free texture buffer without freeing frame buffer
+extern void   GsVramFreeAll(void);
 
 /* Just used for buffer swapping*/
-extern int	  GsDbGetDrawBuffer(void);
-extern int	  GsDbGetDisplayBuffer(void);
-extern void	  GsDbSwapBuffer(void);
+extern int    GsDbGetDrawBuffer(void);
+extern int    GsDbGetDisplayBuffer(void);
+extern void   GsDbSwapBuffer(void);
 
 
 
 
 /* return a propper value for												 */
 /* GS_TEX0->tex_width/tex_height (ito)	(dont use it if you dont have to)*/
-extern char  twh4(short wh);
+extern char   twh4(short wh);
 
 
 
