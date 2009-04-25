@@ -214,32 +214,24 @@ void Vu0CopyMatrix(VU_MATRIX *dest, VU_MATRIX *src)
 float Vu0DotProduct(VU_VECTOR *v0, VU_VECTOR *v1)
 {
 	float ret;
-
-	 
-
-
-
    
-//	return (v0.x*v1.x + v0.y*v1.y + v0.z*v1.z);
+	/*	ret = (v0.x*v1.x + v0.y*v1.y + v0.z*v1.z);*/
 
 	asm __volatile__ (
-   "lqc2		vf1,   0(%0)		\n"		// load 1 qword from ee
-   "lqc2		vf2,   0(%1)		\n"		// load 1 qword from ee
+   "lqc2		vf1, 0(%0)		\n"		// load 1 qword from ee
+   "lqc2		vf2, 0(%1)		\n"		// load 1 qword from ee
    
-   "vmul.xyz	vf3,  vf1,  vf2		\n"		
+   "vmul.xyz	vf3, vf1, vf2	\n"		// mul v0 by v1 
    
-   "vaddy.x		vf3,  vf3,  vf3y	\n"	// add x+y and store in x
-   "vaddz.x		vf3,  vf3,  vf3z	\n"	// add z+x and store in z
+   "vaddy.x		vf3, vf3, vf3y	\n"		// add x+y and store in x
+   "vaddz.x		vf3, vf3, vf3z	\n"		// add z+x and store in x
 
-   "qmfc2		$2,  vf3	\n"	// add z+x and store in z
+   "qmfc2		$2, vf3			\n"		// copy vector to ee reg
 
-	"sw			$2,  0(%2)			\n"		// store 1 qword in ee
+	"sw			$2, 0(%2)		\n"		// copy reg to mem
    
    : : "r" (v0), "r" (v1), "r" (&ret)
    );	
-
-
-	
 
 	return ret;
 }

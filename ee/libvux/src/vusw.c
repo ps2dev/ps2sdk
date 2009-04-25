@@ -805,7 +805,7 @@ float VuxRotTransPers3(VU_VECTOR *v0, VU_VECTOR *v1, VU_VECTOR *v2, VU_SXYZ *sxy
 void VuxRotTransPersN(VU_VECTOR *verts, VU_SXYZ *sxyz, unsigned int num_verts)
 {
 	unsigned int i;
-	VU_VECTOR	tv;
+	
 
 
 	for(i=0;i<num_verts;i++)
