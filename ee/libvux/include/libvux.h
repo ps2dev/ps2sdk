@@ -101,15 +101,15 @@ typedef struct
 
 
 #ifndef ftoi4
-#define ftoi4(f)		((int)((f)*16.0f))
+#define ftoi4(f)				((int)((f)*16.0f))
 #endif
 
 #ifndef deg2radian
-#define deg2radian(angle)		((angle*3.1415926535)/180)
+#define deg2radian(angle)		((angle*3.1415926535f)/180)
 #endif
 
 #ifndef radian2deg
-#define radian2deg(radian) ((180.0f / D3DX_PI) * (radian))
+#define radian2deg(radian)		((180.0f / 3.1415926535f) * (radian))
 #endif
 
 
