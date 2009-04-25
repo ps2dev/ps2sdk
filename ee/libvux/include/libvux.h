@@ -100,6 +100,10 @@ typedef struct
 
 
 
+
+
+
+
 #ifndef ftoi4
 #define ftoi4(f)				((int)((f)*16.0f))
 #endif
@@ -115,6 +119,17 @@ typedef struct
 
 
 
+
+
+
+
+
+
+
+
+#if defined(__LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
+extern "C" {
+#endif /*__cplusplus*/
 
 
 
@@ -205,6 +220,30 @@ extern VU_MATRIX	VuWorldMatrix;
 extern VU_MATRIX	VuViewMatrix;		  
 extern VU_MATRIX	VuPrjectionMatrix;	
 extern VU_MATRIX	VuLocalScreenMatrix; 
+
+
+
+
+
+
+
+#if defined(__LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
+}
+#endif /*__cplusplus*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
