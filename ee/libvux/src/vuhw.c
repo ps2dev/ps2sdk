@@ -211,7 +211,7 @@ void Vu0CopyMatrix(VU_MATRIX *dest, VU_MATRIX *src)
 
 
 
-float Vu0DotProduct(VU_VECTOR v0, VU_VECTOR v1)
+float Vu0DotProduct(VU_VECTOR *v0, VU_VECTOR *v1)
 {
 	float ret;
 
@@ -235,7 +235,7 @@ float Vu0DotProduct(VU_VECTOR v0, VU_VECTOR v1)
 
 	"sw			$2,  0(%2)			\n"		// store 1 qword in ee
    
-   : : "r" (&v0), "r" (&v1), "r" (&ret)
+   : : "r" (v0), "r" (v1), "r" (&ret)
    );	
 
 

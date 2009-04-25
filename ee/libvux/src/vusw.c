@@ -344,22 +344,22 @@ void VuxCopyMatrix(VU_MATRIX *dest, VU_MATRIX *src)
 
 
 
-float VuxDotProduct(VU_VECTOR v0, VU_VECTOR v1)
+float VuxDotProduct(VU_VECTOR *v0, VU_VECTOR *v1)
 {
-    return (v0.x*v1.x + v0.y*v1.y + v0.z*v1.z);
+    return (v0->x*v1->x + v0->y*v1->y + v0->z*v1->z);
 }
 
 
 
 
 
-VU_VECTOR VuxCrossProduct(VU_VECTOR v0, VU_VECTOR v1)
+VU_VECTOR VuxCrossProduct(VU_VECTOR *v0, VU_VECTOR *v1)
 {
 	VU_VECTOR	ret;
 	
-	ret.x = v0.y*v1.z - v0.z*v1.y;
-	ret.y = v0.z*v1.x - v0.x*v1.z;
-	ret.z = v0.x*v1.y - v0.y*v1.x;
+	ret.x = v0->y*v1->z - v0->z*v1->y;
+	ret.y = v0->z*v1->x - v0->x*v1->z;
+	ret.z = v0->x*v1->y - v0->y*v1->x;
 
 	return ret;
 }
@@ -589,11 +589,11 @@ void VuxMakeLookAtViewMatrix(VU_MATRIX *out, VU_VECTOR *eye, VU_VECTOR *target, 
 	zaxis.z = target->z - eye->z;
 	VuxVectorNormal(&zaxis);
 
-	xaxis = VuxCrossProduct(*up, zaxis);
+	xaxis = VuxCrossProduct(up, &zaxis);
 
 	VuxVectorNormal(&xaxis);
 
-	yaxis = VuxCrossProduct(zaxis, xaxis);
+	yaxis = VuxCrossProduct(&zaxis, &xaxis);
     
 	out->m[0][0] = xaxis.x;
 	out->m[0][1] = yaxis.x;
@@ -610,9 +610,9 @@ void VuxMakeLookAtViewMatrix(VU_MATRIX *out, VU_VECTOR *eye, VU_VECTOR *target, 
 	out->m[2][2] = zaxis.z;
 	out->m[2][3] = 0.0f;
 
-	out->m[3][0] = -VuxDotProduct(xaxis, *eye);
-	out->m[3][1] = -VuxDotProduct(yaxis, *eye);
-	out->m[3][2] = -VuxDotProduct(zaxis, *eye);
+	out->m[3][0] = -VuxDotProduct(&xaxis, eye);
+	out->m[3][1] = -VuxDotProduct(&yaxis, eye);
+	out->m[3][2] = -VuxDotProduct(&zaxis, eye);
 	out->m[3][3] = 1.0f;
 
 
