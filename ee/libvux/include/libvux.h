@@ -146,6 +146,8 @@ extern void  Vu0ScaleMatrix(VU_MATRIX *m, VU_VECTOR *s);
 extern void  Vu0ScaleMatrixXYZ(VU_MATRIX *m, float x, float y, float z);
 extern void  Vu0MulMatrix(VU_MATRIX *m0, VU_MATRIX *m1, VU_MATRIX *out);
 //extern void Vu0InverseMatrix(VU_MATRIX *in, VU_MATRIX *out);
+extern void  Vu0ApplyMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out);
+extern void  Vu0ApplyRotMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out);
 extern void  Vu0CopyMatrix(VU_MATRIX *dest, VU_MATRIX *src);
 extern float Vu0DotProduct(VU_VECTOR *v0, VU_VECTOR *v1);
 
@@ -170,6 +172,7 @@ extern void  VuxApplyMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out);
 extern void  VuxApplyRotMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out);
 extern float VuxDotProduct(VU_VECTOR *v0, VU_VECTOR *v1);
 extern VU_VECTOR  VuxCrossProduct(VU_VECTOR *v0, VU_VECTOR *v1);
+extern void  VuxCrossProduct0(VU_VECTOR *v0, VU_VECTOR *v1, VU_VECTOR *out);
 extern void  VuxVectorNormal(VU_VECTOR *v);
 extern void  VuxVectorNormal0(VU_VECTOR *in, VU_VECTOR *out);
 

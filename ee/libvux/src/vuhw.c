@@ -26,10 +26,17 @@ void Vu0IdMatrix(VU_MATRIX *m)
 
 void Vu0ResetMatrix(VU_MATRIX *m)
 {
-	m->m[0][0]=1.0f; m->m[0][1]=0.0f; m->m[0][2]=0.0f; m->m[0][3]=0.0f;
-	m->m[1][0]=0.0f; m->m[1][1]=1.0f; m->m[1][2]=0.0f; m->m[1][3]=0.0f;
-	m->m[2][0]=0.0f; m->m[2][1]=0.0f; m->m[2][2]=1.0f; m->m[2][3]=0.0f;
-	m->m[3][0]=0.0f; m->m[3][1]=0.0f; m->m[3][2]=0.0f; m->m[3][3]=1.0f;
+	asm __volatile__(
+	"vmr32.xyzw  vf18, vf00			\n"
+	"sqc2        vf00, 0x30(%0)		\n"
+	"vmr32.xyzw  vf17, vf18			\n"
+	"sqc2        vf18, 0x20(%0)		\n"
+	"vmr32.xyzw  vf16, vf17			\n"
+	"sqc2        vf17, 0x10(%0)		\n"
+	"sqc2        vf16, 0x00(%0)		\n"
+
+	: : "r"(m)
+    );
 }
 
 
@@ -185,6 +192,66 @@ void Vu0InverseMatrix(VU_MATRIX *in, VU_MATRIX *out)
 
 
 }
+
+
+
+
+
+void Vu0ApplyMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
+{
+	/*
+	out->x = m->m[0][0]*v0->x + m->m[1][0]*v0->y + m->m[2][0]*v0->z + m->m[3][0]*v0->w;
+	out->y = m->m[0][1]*v0->x + m->m[1][1]*v0->y + m->m[2][1]*v0->z + m->m[3][1]*v0->w;
+	out->z = m->m[0][2]*v0->x + m->m[1][2]*v0->y + m->m[2][2]*v0->z + m->m[3][2]*v0->w;
+	out->w = m->m[0][3]*v0->x + m->m[1][3]*v0->y + m->m[2][3]*v0->z + m->m[3][3]*v0->w;
+	
+	*/
+
+	asm __volatile__(
+        "lqc2            vf20,  0x00(%1)	\n"
+        "lqc2            vf16,  0x00(%0)	\n"
+        "lqc2            vf17,  0x10(%0)	\n"
+        "lqc2            vf18,  0x20(%0)	\n"
+        "lqc2            vf19,  0x30(%0)	\n"
+        "vmulax.xyzw     ACC,   vf16,vf20	\n"
+        "vmadday.xyzw    ACC,   vf17,vf20	\n"
+        "vmaddaz.xyzw    ACC,   vf18,vf20	\n"
+        "vmaddw.xyzw     vf20,  vf19,vf20	\n"
+        "sqc2            vf20,0x00(%2)	\n"
+        
+        : : "r"(m), "r"(v0), "r"(out)
+    );
+
+}
+
+
+
+
+void Vu0ApplyRotMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
+{
+	/*	
+	out->x = m->m[0][0]*v0->x + m->m[1][0]*v0->y + m->m[2][0]*v0->z;
+	out->y = m->m[0][1]*v0->x + m->m[1][1]*v0->y + m->m[2][1]*v0->z;
+	out->z = m->m[0][2]*v0->x + m->m[1][2]*v0->y + m->m[2][2]*v0->z;
+	*/
+
+	asm __volatile__(
+        "lqc2            vf20,  0x00(%1)	\n"
+        "lqc2            vf16,  0x00(%0)	\n"
+        "lqc2            vf17,  0x10(%0)	\n"
+        "lqc2            vf18,  0x20(%0)	\n"
+        "vmulax.xyz		 ACC,   vf16,vf20	\n"
+        "vmadday.xyz	 ACC,   vf17,vf20	\n"
+        "vmaddz.xyz		 vf20,  vf18,vf20	\n"
+		"vmulw.w		 vf20,	vf0, vf0	\n"	// out->w = 1.0f
+        "sqc2            vf20,	0x00(%2)	\n" // copy result to out
+        
+        : : "r"(m), "r"(v0), "r"(out)
+    );
+
+}
+
+
 
 
 

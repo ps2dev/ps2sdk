@@ -340,12 +340,35 @@ void VuxCopyMatrix(VU_MATRIX *dest, VU_MATRIX *src)
 
 
 
+void VuxApplyMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
+{
+
+
+	out->x = m->m[0][0]*v0->x + m->m[1][0]*v0->y + m->m[2][0]*v0->z + m->m[3][0]*v0->w;
+	out->y = m->m[0][1]*v0->x + m->m[1][1]*v0->y + m->m[2][1]*v0->z + m->m[3][1]*v0->w;
+	out->z = m->m[0][2]*v0->x + m->m[1][2]*v0->y + m->m[2][2]*v0->z + m->m[3][2]*v0->w;
+	out->w = m->m[0][3]*v0->x + m->m[1][3]*v0->y + m->m[2][3]*v0->z + m->m[3][3]*v0->w;
+}
+
+
+
+
+void VuxApplyRotMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
+{
+
+	out->x = m->m[0][0]*v0->x + m->m[1][0]*v0->y + m->m[2][0]*v0->z;
+	out->y = m->m[0][1]*v0->x + m->m[1][1]*v0->y + m->m[2][1]*v0->z;
+	out->z = m->m[0][2]*v0->x + m->m[1][2]*v0->y + m->m[2][2]*v0->z;
+	out->w = 1.0f;
+}
+
 
 
 
 
 float VuxDotProduct(VU_VECTOR *v0, VU_VECTOR *v1)
 {
+
     return (v0->x*v1->x + v0->y*v1->y + v0->z*v1->z);
 }
 
@@ -365,13 +388,30 @@ VU_VECTOR VuxCrossProduct(VU_VECTOR *v0, VU_VECTOR *v1)
 }
 
 
+
+
+
+void VuxCrossProduct0(VU_VECTOR *v0, VU_VECTOR *v1, VU_VECTOR *out)
+{
+	
+	
+	out->x = v0->y*v1->z - v0->z*v1->y;
+	out->y = v0->z*v1->x - v0->x*v1->z;
+	out->z = v0->x*v1->y - v0->y*v1->x;
+}
+
+
+
+
+
 void VuxVectorNormal(VU_VECTOR *v)
 {
-   float m = sqrtf(v->x*v->x + v->y*v->y + v->z*v->z);
+   float m = sqrtf(v->x*v->x + v->y*v->y + v->z*v->z + v->w*v->w);
 
    v->x /= m;
    v->y /= m;
    v->z /= m;
+   v->w /= m;
 }
 
 
@@ -379,38 +419,18 @@ void VuxVectorNormal(VU_VECTOR *v)
 
 void VuxVectorNormal0(VU_VECTOR *in, VU_VECTOR *out)
 {
-   float m = sqrtf(in->x*in->x + in->y*in->y + in->z*in->z);
+   float m = sqrtf(in->x*in->x + in->y*in->y + in->z*in->z + in->w*in->w);
 
    out->x /= m;
    out->y /= m;
    out->z /= m;
+   out->w /= m;
 }
 
 
 
 
-void VuxApplyMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
-{
 
-	out->x = m->m[0][0]*v0->x + m->m[1][0]*v0->y + m->m[2][0]*v0->z + m->m[3][0];
-	out->y = m->m[0][1]*v0->x + m->m[1][1]*v0->y + m->m[2][1]*v0->z + m->m[3][1];
-	out->z = m->m[0][2]*v0->x + m->m[1][2]*v0->y + m->m[2][2]*v0->z + m->m[3][2];
-	out->w = m->m[0][3]*v0->x + m->m[1][3]*v0->y + m->m[2][3]*v0->z + m->m[3][3];
-	
-	out->x = out->x / out->w;
-	out->y = out->y / out->w;
-	out->z = out->z / out->w;
-}
-
-
-
-
-void VuxApplyRotMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
-{
-	out->x = m->m[0][0]*v0->x + m->m[1][0]*v0->y + m->m[2][0]*v0->z;
-	out->y = m->m[0][1]*v0->x + m->m[1][1]*v0->y + m->m[2][1]*v0->z;
-	out->z = m->m[0][2]*v0->x + m->m[1][2]*v0->y + m->m[2][2]*v0->z;
-}
 
 
 
@@ -419,13 +439,21 @@ void VuxApplyRotMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
 
 
 /**/
-
+int extern_switch=0;
 	
 void VuxApplyMatrixLS(VU_VECTOR *v0, VU_VECTOR *out)
 {
 
 
-	VuxApplyMatrix(&VuLocalScreenMatrix, v0, out);
+	if(extern_switch==1)
+	{
+		Vu0ApplyMatrix(&VuLocalScreenMatrix, v0, out);
+	}
+	else
+	{
+		VuxApplyMatrix(&VuLocalScreenMatrix, v0, out);
+	}
+
 }
 
 
@@ -434,6 +462,7 @@ void VuxApplyMatrixLS(VU_VECTOR *v0, VU_VECTOR *out)
 void VuxApplyRotMatrixLS(VU_VECTOR *v0, VU_VECTOR *out)
 {
 	
+
 	VuxApplyRotMatrix(&VuLocalScreenMatrix, v0, out);
 
 }
@@ -672,8 +701,8 @@ void VuxPers(VU_VECTOR *v0, VU_SXYZ *sxyz0)
 	if(vu_projection_type==0)
 	{
 
-		sxyz0->x = ftoi4((vu_projection * v0->x / (v0->z))		+vu_offset_x);
-		sxyz0->y = ftoi4((vu_projection * v0->y / (v0->z))		-vu_offset_y);
+		sxyz0->x = ftoi4( (vu_projection * v0->x / (v0->z))		+vu_offset_x);
+		sxyz0->y = ftoi4(-(vu_projection * v0->y / (v0->z))		-vu_offset_y);
 		sxyz0->z = 0xffffff-(short)(float)v0->z;
 	}
 	else	// use projection matrix
