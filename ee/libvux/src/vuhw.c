@@ -222,6 +222,9 @@ void Vu0ApplyMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
         : : "r"(m), "r"(v0), "r"(out)
     );
 
+
+
+
 }
 
 

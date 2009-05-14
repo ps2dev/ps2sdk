@@ -30,6 +30,7 @@ y
 | /
 0-------x
 
+row major
 */
 
 
@@ -132,8 +133,24 @@ extern "C" {
 #endif /*__cplusplus*/
 
 
+/**** common vu stuff ****/
+extern void  VuSetGeometryXYOffset(unsigned short x, unsigned short y);
+extern void  VuSetProjection(float z);
+extern void  VuSetProjectionMatrix(VU_MATRIX	*projection);
+extern void  VuSetWorldMatrix(VU_MATRIX			*world);
+extern void  VuSetViewMatrix(VU_MATRIX			*view);
+extern void  VuSetLocalScreenMatrix(VU_MATRIX	*m);
 
-/*99% hw(vu0 macro mode)*/
+
+
+
+
+
+
+
+
+
+/**** 99% hw(vu0 macro mode) ****/
 extern void  Vu0IdMatrix(VU_MATRIX *m);
 extern void  Vu0ResetMatrix(VU_MATRIX *m);
 //extern void  VuxRotMatrixX(VU_MATRIX *m, float x);
@@ -153,7 +170,10 @@ extern float Vu0DotProduct(VU_VECTOR *v0, VU_VECTOR *v1);
 
 
 
-/*100% sw*/
+
+
+
+/**** 100% sw ****/
 extern void  VuxIdMatrix(VU_MATRIX *m);
 extern void  VuxResetMatrix(VU_MATRIX *m);
 extern void  VuxRotMatrix(VU_MATRIX *m, VU_VECTOR *v);
@@ -179,18 +199,15 @@ extern void  VuxVectorNormal0(VU_VECTOR *in, VU_VECTOR *out);
 extern void  VuxApplyMatrixLS(VU_VECTOR *v0, VU_VECTOR *out);
 extern void  VuxApplyRotMatrixLS(VU_VECTOR *v0, VU_VECTOR *out);
 
-extern void  VuxSetGeometryXYOffset(unsigned short x, unsigned short y);
-extern void  VuxSetProjection(float z);
-extern void  VuxSetProjectionMatrix(VU_MATRIX	*world);
-extern void  VuxSetWorldMatrix(VU_MATRIX	*world);
-extern void  VuxSetViewMatrix(VU_MATRIX		*view);
-
 extern void  VuxMakeLocalScreenMatrix(VU_MATRIX *out, VU_MATRIX *world, VU_MATRIX *view);
 extern void  VuxMakeLocalScreenMatrix2(VU_MATRIX *out, VU_MATRIX *world, VU_MATRIX *view, VU_MATRIX *projection);
-extern void  VuxSetLocalScreenMatrix(VU_MATRIX *m);
 
 extern void  VuxMakeViewMatrix(VU_MATRIX *out, VU_VECTOR *rot, VU_VECTOR *pos, VU_VECTOR *scale);
 extern void  VuxMakeLookAtViewMatrix(VU_MATRIX *out, VU_VECTOR *eye, VU_VECTOR *target, VU_VECTOR *up);
+extern void  VuxMakeProjectionMatrix(VU_MATRIX *proj, float near_plane_w, float near_plane_h, float near_plane_z, float far_plane_z);
+
+// update lsm using view, world, proj
+extern void  VuxUpdateLocalScreenMatrix(void);
 
 extern void  VuxRotTrans(VU_VECTOR *v0, VU_VECTOR *out);
 extern void  VuxRotTrans3(VU_VECTOR *v0, VU_VECTOR *v1, VU_VECTOR *v2,  VU_VECTOR *tv0, VU_VECTOR *tv1, VU_VECTOR *tv2);
@@ -207,11 +224,6 @@ extern int   VuxRotTransPersClip3(VU_VECTOR *v0, VU_VECTOR *v1, VU_VECTOR *v2, V
 
 
 extern int   VuxSxyzClip(VU_SXYZ *sxyz0, VU_SXYZ *sxyz1, VU_SXYZ *sxyz2);
-
-
-
-
-
 
 
 

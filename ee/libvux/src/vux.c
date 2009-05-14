@@ -66,6 +66,68 @@ float			vu_fog_far			= 45000.0f;
 
 
 
+/**/
+void VuSetGeometryXYOffset(unsigned short x, unsigned short y)
+{
+
+	vu_offset_x = x;
+	vu_offset_y = y;
+}
+
+
+
+
+void VuSetProjection(float z)
+{
+
+	vu_projection = z;
+	vu_projection_type = 0;
+}
+
+
+
+
+void VuSetProjectionMatrix(VU_MATRIX *projection)
+{
+	VuPrjectionMatrix	= *projection;
+
+	vu_projection_type	= 1; // use projection matrix
+}
+
+
+
+void VuSetWorldMatrix(VU_MATRIX *world)
+{
+
+	VuWorldMatrix =		*world;
+}
+
+
+
+
+void VuSetViewMatrix(VU_MATRIX *view)
+{
+
+	VuViewMatrix =		*view;
+}
+
+
+
+
+
+void VuSetLocalScreenMatrix(VU_MATRIX *m)
+{
+
+	VuLocalScreenMatrix = *m;
+}
+
+
+
+
+
+
+
+
 
 
 
