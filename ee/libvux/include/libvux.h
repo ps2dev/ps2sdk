@@ -128,12 +128,19 @@ typedef struct
 
 
 
-#if defined(__LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
+#ifdef __cplusplus
 extern "C" {
 #endif /*__cplusplus*/
 
 
-/**** common vu stuff ****/
+
+
+
+/*
+-----------------------------
+- common vu stuff
+-----------------------------
+*/
 extern void  VuSetGeometryXYOffset(unsigned short x, unsigned short y);
 extern void  VuSetProjection(float z);
 extern void  VuSetProjectionMatrix(VU_MATRIX	*projection);
@@ -150,7 +157,12 @@ extern void  VuSetLocalScreenMatrix(VU_MATRIX	*m);
 
 
 
-/**** 99% hw(vu0 macro mode) ****/
+
+/*
+-----------------------------
+- 99% hw(vu0 macro mode)
+-----------------------------
+*/
 extern void  Vu0IdMatrix(VU_MATRIX *m);
 extern void  Vu0ResetMatrix(VU_MATRIX *m);
 //extern void  VuxRotMatrixX(VU_MATRIX *m, float x);
@@ -173,7 +185,11 @@ extern float Vu0DotProduct(VU_VECTOR *v0, VU_VECTOR *v1);
 
 
 
-/**** 100% sw ****/
+/*
+--------------------------
+- 100% sw
+--------------------------
+*/
 extern void  VuxIdMatrix(VU_MATRIX *m);
 extern void  VuxResetMatrix(VU_MATRIX *m);
 extern void  VuxRotMatrix(VU_MATRIX *m, VU_VECTOR *v);
@@ -242,7 +258,7 @@ extern VU_MATRIX	VuLocalScreenMatrix;
 
 
 
-#if defined(__LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
+#ifdef __cplusplus
 }
 #endif /*__cplusplus*/
 
