@@ -544,16 +544,16 @@ typedef struct {
 
 
 typedef struct {
-	unsigned long calc_method	:1;
+	unsigned long lcm			:1;
 	unsigned long pad1			:1;
-	unsigned long max_mipmap	:3;
-	unsigned long expand_mode	:1;
-	unsigned long reduce_mode	:3;
-	unsigned long address_mode	:1;
+	unsigned long mxl			:3;
+	unsigned long mmag			:1;
+	unsigned long mmin			:3;
+	unsigned long mtba			:1;
 	unsigned long pad2			:9;
-	unsigned long L				:2;
+	unsigned long l				:2;
 	unsigned long pad3			:11;
-	unsigned long K				:12;
+	unsigned long k				:12;
 	unsigned long pad4			:20;
 }GS_TEX1;
 
