@@ -91,7 +91,9 @@ void Vu0TransMatrixXYZ(VU_MATRIX *m,float x, float y, float z)
 }
 
 
-
+/*
+	THIS SCALE IS CROP, CLEAN IT UP ************************(99999999(****************************
+ */
 
 void Vu0ScaleMatrix(VU_MATRIX *m, VU_VECTOR *s)
 {

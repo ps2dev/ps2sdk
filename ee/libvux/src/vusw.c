@@ -18,8 +18,7 @@
 
 
 
-static float proj_mtrx_near_plane_w;
-static float proj_mtrx_near_plane_h;
+
 
 
 
@@ -31,6 +30,7 @@ static float proj_mtrx_near_plane_h;
 
 void VuxIdMatrix(VU_MATRIX *m)
 {
+
 	VuxResetMatrix(m);
 }
 
@@ -39,6 +39,7 @@ void VuxIdMatrix(VU_MATRIX *m)
 
 void VuxResetMatrix(VU_MATRIX *m)
 {
+
 	m->m[0][0]=1.0f; m->m[0][1]=0.0f; m->m[0][2]=0.0f; m->m[0][3]=0.0f;
 	m->m[1][0]=0.0f; m->m[1][1]=1.0f; m->m[1][2]=0.0f; m->m[1][3]=0.0f;
 	m->m[2][0]=0.0f; m->m[2][1]=0.0f; m->m[2][2]=1.0f; m->m[2][3]=0.0f;
@@ -60,8 +61,10 @@ void VuxRotMatrix(VU_MATRIX *m, VU_VECTOR *r)
 	VuxRotMatrixY(&my, r->y);
 	VuxRotMatrixZ(&mz, r->z);
 
-	VuxMulMatrix(&my, &mx, &m0);
-	VuxMulMatrix(&mz, &m0, m);
+//	VuxMulMatrix(&my, &mx, &m0);
+//	VuxMulMatrix(&mz, &m0, m);
+	VuxMulMatrix(&mz, &mx, &m0);
+	VuxMulMatrix(&my, &m0, m);
 }
 
 
@@ -165,8 +168,8 @@ void VuxRotMatrixXYZ(VU_MATRIX *m, float x,float y, float z)
 
 	
 
-//	VuxMulMatrix(&my, &mx, &m0);
-//	VuxMulMatrix(&mz, &m0, m);
+//	VuxMulMatrix(&mx, &my, &m0);
+//	VuxMulMatrix(&m0, &mz, m);
 
 //	VuxMulMatrix(&mz, &my, &m0);
 //	VuxMulMatrix(&mx, &m0, m);
@@ -185,11 +188,11 @@ void VuxRotMatrixXYZ(VU_MATRIX *m, float x,float y, float z)
 
 void VuxTransMatrix(VU_MATRIX *m, VU_VECTOR *t)
 {
+
 	m->m[3][0] =  t->x;
 	m->m[3][1] =  t->y;
 	m->m[3][2] =  t->z;
 	m->m[3][3] =  1.0f;
-
 }
 
 
@@ -199,6 +202,7 @@ void VuxTransMatrix(VU_MATRIX *m, VU_VECTOR *t)
 /*move matrix to given xyz position*/
 void VuxTransMatrixXYZ(VU_MATRIX *m,float x, float y, float z)
 {
+
 	m->m[3][0] =  x;
 	m->m[3][1] =  y;
 	m->m[3][2] =  z;
@@ -212,11 +216,15 @@ void VuxTransMatrixXYZ(VU_MATRIX *m,float x, float y, float z)
 
 void VuxScaleMatrix(VU_MATRIX *m, VU_VECTOR *s)
 {
-	m->m[0][0] *= s->x;
-	m->m[1][1] *= s->y;
-	m->m[2][2] *= s->z;
-	m->m[3][3] *= 1.0f;
+	VU_MATRIX	w;
 
+	VuxResetMatrix(&w);
+
+	w.m[0][0] = s->x;
+	w.m[1][1] = s->y;
+	w.m[2][2] = s->z;
+
+	VuxMulMatrix(m, &w, m);
 }
 
 
@@ -224,10 +232,15 @@ void VuxScaleMatrix(VU_MATRIX *m, VU_VECTOR *s)
 
 void VuxScaleMatrixXYZ(VU_MATRIX *m, float x, float y, float z)
 {
-	m->m[0][0] *= x;
-	m->m[1][1] *= y;
-	m->m[2][2] *= z;
-	m->m[3][3] *= 1.0f;
+	VU_MATRIX	w;
+
+	VuxResetMatrix(&w);
+
+	w.m[0][0] = x;
+	w.m[1][1] = y;
+	w.m[2][2] = z;
+
+	VuxMulMatrix(m, &w, m);
 
 }
 
@@ -611,8 +624,7 @@ void VuxMakeProjectionMatrix(VU_MATRIX *proj, float near_plane_w, float near_pla
 	proj->m[3][2] = near_plane_z*far_plane_z/(near_plane_z-far_plane_z);
 	
 
-	proj_mtrx_near_plane_w = near_plane_w;
-	proj_mtrx_near_plane_h = near_plane_h;
+
 }
 
 
@@ -650,8 +662,8 @@ void VuxUpdateLocalScreenMatrix(void)
 
 void VuxRotTrans(VU_VECTOR *v0, VU_VECTOR *out)
 {
-	VuxApplyMatrixLS(v0, out);
 
+	VuxApplyMatrixLS(v0, out);
 }
 
 
@@ -674,11 +686,11 @@ void VuxRotTransN(VU_VECTOR *verts,  VU_VECTOR *tverts, unsigned int num_verts)
 {
 	unsigned int i;
 
+
 	for(i=0;i<num_verts;i++)
 	{
 		VuxApplyMatrixLS(&verts[i], &tverts[i]);
 	}
-
 }
 
 
@@ -699,8 +711,8 @@ void VuxPers(VU_VECTOR *v0, VU_SXYZ *sxyz0)
 	else	// use projection matrix
 	{
 
-		sxyz0->x = ftoi4( (((v0->x)/(v0->w))*proj_mtrx_near_plane_w)	+vu_offset_x);
-		sxyz0->y = ftoi4(-(((v0->y)/(v0->w))*proj_mtrx_near_plane_h)	+vu_offset_y);
+		sxyz0->x = ftoi4( (((v0->x)/(v0->w))*vu_near_plane_w)	+vu_offset_x);
+		sxyz0->y = ftoi4(-(((v0->y)/(v0->w))*vu_near_plane_h)	+vu_offset_y);
 
 		(int)sxyz0->z =  (int)(-(v0->z/v0->w) * 0xffff);
 	}
@@ -734,16 +746,16 @@ void VuxPers3(VU_VECTOR *v0, VU_VECTOR *v1, VU_VECTOR *v2, VU_SXYZ *sxyz0, VU_SX
 	}
 	else	// use projection matrix
 	{
-		sxyz0->x = ftoi4( (((v0->x)/(v0->w))*proj_mtrx_near_plane_w)	+vu_offset_x);
-		sxyz0->y = ftoi4(-(((v0->y)/(v0->w))*proj_mtrx_near_plane_h)	+vu_offset_y);
+		sxyz0->x = ftoi4( (((v0->x)/(v0->w))*vu_near_plane_w)	+vu_offset_x);
+		sxyz0->y = ftoi4(-(((v0->y)/(v0->w))*vu_near_plane_h)	+vu_offset_y);
 		(int)sxyz0->z =  (int)(-(v0->z/v0->w) * 0xffff);
 
-		sxyz1->x = ftoi4( (((v1->x)/(v1->w))*proj_mtrx_near_plane_w)	+vu_offset_x);
-		sxyz1->y = ftoi4(-(((v1->y)/(v1->w))*proj_mtrx_near_plane_h)	+vu_offset_y);
+		sxyz1->x = ftoi4( (((v1->x)/(v1->w))*vu_near_plane_w)	+vu_offset_x);
+		sxyz1->y = ftoi4(-(((v1->y)/(v1->w))*vu_near_plane_h)	+vu_offset_y);
 		(int)sxyz1->z =  (int)(-(v1->z/v1->w) * 0xffff);
 
-		sxyz2->x = ftoi4( (((v2->x)/(v2->w))*proj_mtrx_near_plane_w)	+vu_offset_x);
-		sxyz2->y = ftoi4(-(((v2->y)/(v2->w))*proj_mtrx_near_plane_h)	+vu_offset_y);
+		sxyz2->x = ftoi4( (((v2->x)/(v2->w))*vu_near_plane_w)	+vu_offset_x);
+		sxyz2->y = ftoi4(-(((v2->y)/(v2->w))*vu_near_plane_h)	+vu_offset_y);
 		(int)sxyz2->z =  (int)(-(v2->z/v2->w) * 0xffff);
 	}
 }
@@ -756,6 +768,7 @@ void VuxPers3(VU_VECTOR *v0, VU_VECTOR *v1, VU_VECTOR *v2, VU_SXYZ *sxyz0, VU_SX
 void VuxPersN(VU_VECTOR *verts, VU_SXYZ *sxyz, unsigned int num_verts)
 {
 	unsigned int	i;
+
 
 	for(i=0;i<num_verts;i++)
 	{
@@ -792,21 +805,21 @@ int VuxPersClip3(VU_VECTOR *v0, VU_VECTOR *v1, VU_VECTOR *v2, VU_SXYZ *sxyz0, VU
 	}
 	else	// use projection matrix
 	{
-		sxyz0->x = ftoi4( (((v0->x)/(v0->w))*proj_mtrx_near_plane_w)	+vu_offset_x);
-		sxyz0->y = ftoi4(-(((v0->y)/(v0->w))*proj_mtrx_near_plane_h)	+vu_offset_y);
+		sxyz0->x = ftoi4( (((v0->x)/(v0->w))*vu_near_plane_w)	+vu_offset_x);
+		sxyz0->y = ftoi4(-(((v0->y)/(v0->w))*vu_near_plane_h)	+vu_offset_y);
 		(int)sxyz0->z =  (int)(-(v0->z/v0->w) * 0xffff);
 
-		sxyz1->x = ftoi4( (((v1->x)/(v1->w))*proj_mtrx_near_plane_w)	+vu_offset_x);
-		sxyz1->y = ftoi4(-(((v1->y)/(v1->w))*proj_mtrx_near_plane_h)	+vu_offset_y);
+		sxyz1->x = ftoi4( (((v1->x)/(v1->w))*vu_near_plane_w)	+vu_offset_x);
+		sxyz1->y = ftoi4(-(((v1->y)/(v1->w))*vu_near_plane_h)	+vu_offset_y);
 		(int)sxyz1->z =  (int)(-(v1->z/v1->w) * 0xffff);
 
-		sxyz2->x = ftoi4( (((v2->x)/(v2->w))*proj_mtrx_near_plane_w)	+vu_offset_x);
-		sxyz2->y = ftoi4(-(((v2->y)/(v2->w))*proj_mtrx_near_plane_h)	+vu_offset_y);
+		sxyz2->x = ftoi4( (((v2->x)/(v2->w))*vu_near_plane_w)	+vu_offset_x);
+		sxyz2->y = ftoi4(-(((v2->y)/(v2->w))*vu_near_plane_h)	+vu_offset_y);
 		(int)sxyz2->z =  (int)(-(v2->z/v2->w) * 0xffff);
 	}
 
 
-	return VuxSxyzClip(sxyz0, sxyz1, sxyz2);
+	return VuxClipSxyz(sxyz0, sxyz1, sxyz2);
 }
 
 
@@ -868,7 +881,7 @@ int VuxRotTransPersClip3(VU_VECTOR *v0, VU_VECTOR *v1, VU_VECTOR *v2, VU_SXYZ *s
 	VuxPers3(&tv0, &tv1, &tv2, sxyz0, sxyz1, sxyz2);
 
 
-	return VuxSxyzClip(sxyz0, sxyz1, sxyz2);
+	return VuxClipSxyz(sxyz0, sxyz1, sxyz2);
 }
 
 
@@ -879,7 +892,7 @@ int VuxRotTransPersClip3(VU_VECTOR *v0, VU_VECTOR *v1, VU_VECTOR *v2, VU_SXYZ *s
 
 
 
-int VuxSxyzClip(VU_SXYZ *sxyz0, VU_SXYZ *sxyz1, VU_SXYZ *sxyz2)
+int VuxClipSxyz(VU_SXYZ *sxyz0, VU_SXYZ *sxyz1, VU_SXYZ *sxyz2)
 {
 
 	return (sxyz1->x - sxyz0->x) * (sxyz2->y - sxyz0->y) - (sxyz2->x - sxyz0->x) * (sxyz1->y - sxyz0->y);
@@ -887,12 +900,72 @@ int VuxSxyzClip(VU_SXYZ *sxyz0, VU_SXYZ *sxyz1, VU_SXYZ *sxyz2)
 
 
 
+int VuxClipW(VU_VECTOR *tv0)
+{
+	int	ret;
+
+	return ret;
+}
 
 
 
 
 
 
+
+
+/**********************************************
+* LIGHTING
+*
+*
+***********************************************/
+
+
+
+int VuxLightNormal(VU_VECTOR *normal, VU_CVECTOR *col0, void *light, unsigned int light_type, VU_CVECTOR *out0)
+{
+	float			dot;
+	VU_FCVECTOR		final;
+	VU_FCVECTOR		c0;
+	VU_FLAT_LIGHT	*f_light;
+
+	
+	c0.r = col0->r * 0.0078125f;
+	c0.g = col0->g * 0.0078125f;
+	c0.b = col0->b * 0.0078125f;
+
+
+	if(light_type == VU_LIGHT_TYPE_FLAT)
+	{
+		f_light = (VU_FLAT_LIGHT *)light;
+
+		dot = -VuxDotProduct(normal, &f_light->direction);
+		if(dot <0.0f)dot = 0.0f;
+
+		
+
+		final.r = vu_light_ambient.r + (c0.r * dot * f_light->color.r);
+		final.g = vu_light_ambient.g + (c0.g * dot * f_light->color.g);
+		final.b = vu_light_ambient.b + (c0.b * dot * f_light->color.b);
+	}
+	else
+	{
+		final.r = vu_light_ambient.r + c0.r;
+		final.g = vu_light_ambient.g + c0.g;
+		final.b = vu_light_ambient.b + c0.b;
+	}
+
+
+
+	out0->r =final.r*128.0f;
+	out0->g =final.g*128.0f;
+	out0->b =final.b*128.0f;
+	out0->a =0x80;
+	out0->q =1.0f;
+
+
+	return 0;
+}
 
 
 

@@ -34,6 +34,9 @@ row major
 */
 
 
+#define VU_LIGHT_TYPE_FLAT			0x10
+
+
 
 
 /*Float Matrix (4x4)*/
@@ -102,6 +105,36 @@ typedef struct
 
 
 
+/*float version of color vector(128)*/
+typedef struct
+{
+	float			r;
+	float			g;
+	float			b;
+	float			a;
+
+}VU_FCVECTOR;
+
+
+
+
+
+
+typedef struct
+{
+	VU_VECTOR		direction;
+	VU_FCVECTOR		color;
+
+}VU_FLAT_LIGHT;
+
+
+
+
+
+
+
+
+
 
 
 
@@ -138,18 +171,20 @@ extern "C" {
 
 /*
 -----------------------------
-- common vu stuff
+- common stuff
 -----------------------------
 */
+extern void  VuInit(void);
+
 extern void  VuSetGeometryXYOffset(unsigned short x, unsigned short y);
 extern void  VuSetProjection(float z);
 extern void  VuSetProjectionMatrix(VU_MATRIX	*projection);
+extern void  VuSetProjectionType(unsigned int type);
 extern void  VuSetWorldMatrix(VU_MATRIX			*world);
 extern void  VuSetViewMatrix(VU_MATRIX			*view);
 extern void  VuSetLocalScreenMatrix(VU_MATRIX	*m);
-
-
-
+extern void  VuSetProjectionNearPlaneWH(unsigned int w, unsigned int h);
+extern void  VuSetAmbientLight(float r, float g, float b);
 
 
 
@@ -239,9 +274,11 @@ extern int   VuxRotTransPersClip3(VU_VECTOR *v0, VU_VECTOR *v1, VU_VECTOR *v2, V
 
 
 
-extern int   VuxSxyzClip(VU_SXYZ *sxyz0, VU_SXYZ *sxyz1, VU_SXYZ *sxyz2);
+extern int   VuxClipSxyz(VU_SXYZ *sxyz0, VU_SXYZ *sxyz1, VU_SXYZ *sxyz2);
 
 
+/*lighting*/
+extern int VuxLightNormal(VU_VECTOR *normal, VU_CVECTOR *col0, void *light, unsigned int light_type, VU_CVECTOR *out0);
 
 
 
