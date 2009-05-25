@@ -43,8 +43,6 @@ static int	gs_db_draw_buffer=0;
 
 
 
-
-
 /*-------------------------------------------
 -											-
 - LOW LEVEL FUNTIONS						-           
