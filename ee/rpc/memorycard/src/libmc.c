@@ -41,7 +41,10 @@
 #define MC_RPCCMD_UNFORMAT	0x0D
 #define MC_RPCCMD_GET_ENT	0x0E
 #define MC_RPCCMD_CHG_PRITY	0x0F
-#define MC_RPCCMD_UNKNOWN_1	0x10
+#define MC_RPCCMD_CHECKBLOCK	0x10
+#define MC_RPCCMD_READPAGE	0x0E
+#define MC_RPCCMD_WRITEPAGE	0x0F
+#define MC_RPCCMD_ERASEBLOCK	0x10
 
 // rpc command function numbers
 // mcRpcCmd[MC_TYPE_??][MC_RPCCMD_???]
@@ -63,9 +66,9 @@ static const int mcRpcCmd[2][17] =
 	0x79,	// MC_RPCCMD_DELETE
 	0x77,	// MC_RPCCMD_FORMAT
 	0x80,	// MC_RPCCMD_UNFORMAT
-	0x7E,	// MC_RPCCMD_GET_ENT
-	0x7D,	// MC_RPCCMD_UNKNOWN_1 (calls mcman_funcs: 39, 17, 20, 19, 30)
-	0x7F,	// MC_RPCCMD_UNKNOWN_2 (calls mcman_funcs: 20, 19)
+	0x7E,	// MC_RPCCMD_READPAGE
+	0x7D,	// MC_RPCCMD_ERASEBLOCK (calls mcman_funcs: 39, 17, 20, 19, 30)
+	0x7F,	// MC_RPCCMD_WRITEPAGE (calls mcman_funcs: 20, 19)
 	},
 	// XMCMAN/XMCSERV values
 	{
@@ -85,7 +88,7 @@ static const int mcRpcCmd[2][17] =
 	0x11,	// MC_RPCCMD_UNFORMAT
 	0x12,	// MC_RPCCMD_GET_ENT
 	0x14,	// MC_RPCCMD_CHG_PRITY
-	0x33,	// MC_RPCCMD_UNKNOWN_1 (calls xmcman_funcs: 45)
+	0x33,	// MC_RPCCMD_CHECKBLOCK (calls xmcman_funcs: 45)
 	}
 };
 
@@ -810,7 +813,7 @@ int mcGetEntSpace(int port, int slot, const char* path)
 	int ret;
 	
 	// check lib is inited
-	if(!g_mclibInited)
+	if((!g_mclibInited)||(g_mcType==MC_TYPE_MC))
 		return -1;
 	// check nothing else is processing
 	if(g_currentCmd != MC_FUNC_NONE)
@@ -823,7 +826,7 @@ int mcGetEntSpace(int port, int slot, const char* path)
 	g_nameParam.name[1023] = 0;
 	
 	// call sif function
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_FUNC_GET_ENT], 1, &g_nameParam, sizeof(g_nameParam), g_rdata, 4, 0, 0)) != 0)
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_GET_ENT], 1, &g_nameParam, sizeof(g_nameParam), g_rdata, 4, 0, 0)) != 0)
 		return ret;
 	g_currentCmd = MC_FUNC_GET_ENT;
 	return ret;
@@ -862,7 +865,7 @@ int mcRename(int port, int slot, const char* oldName, const char* newName)
 	FlushCache(0);
 	
 	// call sif function
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_FUNC_SET_INFO], 1, &g_nameParam, sizeof(g_nameParam), g_rdata, 4, 0, 0)) != 0)
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_SET_INFO], 1, &g_nameParam, sizeof(g_nameParam), g_rdata, 4, 0, 0)) != 0)
 		return ret;
 	g_currentCmd = MC_FUNC_RENAME;
 	return ret;
@@ -881,7 +884,7 @@ int mcChangeThreadPriority(int level)
 	int ret;
 	
 	// check lib is inited
-	if(!g_mclibInited)
+	if((!g_mclibInited)||(g_mcType==MC_TYPE_MC))
 		return -1;
 	// check nothing else is processing
 	if(g_currentCmd != MC_FUNC_NONE)
@@ -891,7 +894,7 @@ int mcChangeThreadPriority(int level)
 //	*(u32*)mcCmd.name = level;
 	
 	// call sif function
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_FUNC_CHG_PRITY], 1, &g_descParam, sizeof(g_descParam), g_rdata, 4, 0, 0)) != 0)
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_CHG_PRITY], 1, &g_descParam, sizeof(g_descParam), g_rdata, 4, 0, 0)) != 0)
 		return ret;
 	g_currentCmd = MC_FUNC_CHG_PRITY;
 	return ret;
