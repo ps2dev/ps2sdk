@@ -12,11 +12,13 @@
 # EE Kernel functions
 */
 
+#include <syscallnr.h>
+
 	.text
 	.p2align 3
 
 #ifdef USE_KMODE
-#define SYSCALL(name, number) \
+#define SYSCALL(name) 		\
 	.set	push;		\
 	.set	noreorder;	\
 	.text;			\
@@ -25,13 +27,13 @@
 	.type	name,@function;	\
 	.ent	name,0;		\
 name:	j	__syscall;	\
-	li	$3, number;	\
+	li	$3, __NR_##name;\
 	nop;			\
 	.end	name;		\
 	.size	name,.-name;	\
 	.set	pop;		
 #else
-#define SYSCALL(name, number) \
+#define SYSCALL(name) 		\
 	.set	push;		\
 	.set	noreorder;	\
 	.text;			\
@@ -39,7 +41,7 @@ name:	j	__syscall;	\
 	.globl	name;		\
 	.type	name,@function;	\
 	.ent	name,0;		\
-name:	li	$3, number;	\
+name:	li	$3, __NR_##name;\
 	syscall;		\
 	jr	$31;		\
 	nop;			\
@@ -81,507 +83,507 @@ _kMode:
 #endif
 
 #ifdef F_ResetEE
-SYSCALL(ResetEE, 1)
+SYSCALL(ResetEE)
 #endif
 
 #ifdef F_SetGsCrt
-SYSCALL(SetGsCrt, 2)
+SYSCALL(SetGsCrt)
 #endif
 
 #ifdef F_Exit
-SYSCALL(Exit, 4)
+SYSCALL(Exit)
 #endif
 
 #ifdef F_LoadExecPS2
-SYSCALL(LoadExecPS2, 6)
+SYSCALL(LoadExecPS2)
 #endif
 
 #ifdef F_ExecPS2
-SYSCALL(ExecPS2, 7)
+SYSCALL(ExecPS2)
 #endif
 
 #ifdef F_RFU009
-SYSCALL(RFU009, 9)
+SYSCALL(RFU009)
 #endif
 
 #ifdef F_AddSbusIntcHandler
-SYSCALL(AddSbusIntcHandler, 0xa)
+SYSCALL(AddSbusIntcHandler)
 #endif
 
 #ifdef F_RemoveSbusIntcHandler
-SYSCALL(RemoveSbusIntcHandler, 0xb)
+SYSCALL(RemoveSbusIntcHandler)
 #endif
 
 #ifdef F_Interrupt2Iop
-SYSCALL(Interrupt2Iop, 0xc)
+SYSCALL(Interrupt2Iop)
 #endif
 
 #ifdef F_SetVTLBRefillHandler
-SYSCALL(SetVTLBRefillHandler, 0xd)
+SYSCALL(SetVTLBRefillHandler)
 #endif
 
 #ifdef F_SetVCommonHandler
-SYSCALL(SetVCommonHandler, 0xe)
+SYSCALL(SetVCommonHandler)
 #endif
 
 #ifdef F_SetVInterruptHandler
-SYSCALL(SetVInterruptHandler, 0xf)
+SYSCALL(SetVInterruptHandler)
 #endif
 
 #ifdef F_AddIntcHandler
-SYSCALL(AddIntcHandler, 0x10)
+SYSCALL(AddIntcHandler)
 #endif
 
 #ifdef F_AddIntcHandler2
-SYSCALL(AddIntcHandler2, 0x10)
+SYSCALL(AddIntcHandler2)
 #endif
 
 #ifdef F_RemoveIntcHandler
-SYSCALL(RemoveIntcHandler, 0x11)
+SYSCALL(RemoveIntcHandler)
 #endif
 
 #ifdef F_AddDmacHandler
-SYSCALL(AddDmacHandler, 0x12)
+SYSCALL(AddDmacHandler)
 #endif
 
 #ifdef F_RemoveDmacHandler
-SYSCALL(RemoveDmacHandler, 0x13)
+SYSCALL(RemoveDmacHandler)
 #endif
 
 #ifdef F__EnableIntc
-SYSCALL(_EnableIntc, 0x14)
+SYSCALL(_EnableIntc)
 #endif
 
 #ifdef F__DisableIntc
-SYSCALL(_DisableIntc, 0x15)
+SYSCALL(_DisableIntc)
 #endif
 
 #ifdef F__EnableDmac
-SYSCALL(_EnableDmac, 0x16)
+SYSCALL(_EnableDmac)
 #endif
 
 #ifdef F__DisableDmac
-SYSCALL(_DisableDmac, 0x17)
+SYSCALL(_DisableDmac)
 #endif
 
 #ifdef F_SetAlarm
-SYSCALL(SetAlarm, 0x18)
+SYSCALL(SetAlarm)
 #endif
 
 #ifdef F_ReleaseAlarm
-SYSCALL(ReleaseAlarm, 0x19)
+SYSCALL(ReleaseAlarm)
 #endif
 
 #ifdef F__iEnableIntc
-SYSCALL(_iEnableIntc,- 0x1a)
+SYSCALL(_iEnableIntc)
 #endif
 
 #ifdef F__iDisableIntc
-SYSCALL(_iDisableIntc, -0x1b)
+SYSCALL(_iDisableIntc)
 #endif
 
 #ifdef F__iEnableDmac
-SYSCALL(_iEnableDmac, -0x1c)
+SYSCALL(_iEnableDmac)
 #endif
 
 #ifdef F__iDisableDmac
-SYSCALL(_iDisableDmac, -0x1d)
+SYSCALL(_iDisableDmac)
 #endif
 
 #ifdef F_iSetAlarm
-SYSCALL(iSetAlarm, -0x1e)
+SYSCALL(iSetAlarm)
 #endif
 
 #ifdef F_iReleaseAlarm
-SYSCALL(iReleaseAlarm, -0x1f)
+SYSCALL(iReleaseAlarm)
 #endif
 
 #ifdef F_CreateThread
-SYSCALL(CreateThread, 0x20)
+SYSCALL(CreateThread)
 #endif
 
 #ifdef F_DeleteThread
-SYSCALL(DeleteThread, 0x21)
+SYSCALL(DeleteThread)
 #endif
 
 #ifdef F_StartThread
-SYSCALL(StartThread, 0x22)
+SYSCALL(StartThread)
 #endif
 
 #ifdef F_ExitThread
-SYSCALL(ExitThread, 0x23)
+SYSCALL(ExitThread)
 #endif
 
 #ifdef F_ExitDeleteThread
-SYSCALL(ExitDeleteThread, 0x24)
+SYSCALL(ExitDeleteThread)
 #endif
 
 #ifdef F_TerminateThread
-SYSCALL(TerminateThread, 0x25)
+SYSCALL(TerminateThread)
 #endif
 
 #ifdef F_iTerminateThread
-SYSCALL(iTerminateThread, -0x26)
+SYSCALL(iTerminateThread)
 #endif
 
 #ifdef F_DisableDispatchThread
-SYSCALL(DisableDispatchThread, 0x27)
+SYSCALL(DisableDispatchThread)
 #endif
 
 #ifdef F_EnableDispatchThread
-SYSCALL(EnableDispatchThread, 0x28)
+SYSCALL(EnableDispatchThread)
 #endif
 
 #ifdef F_ChangeThreadPriority
-SYSCALL(ChangeThreadPriority, 0x29)
+SYSCALL(ChangeThreadPriority)
 #endif
 
 #ifdef F_iChangeThreadPriority
-SYSCALL(iChangeThreadPriority, -0x2a)
+SYSCALL(iChangeThreadPriority)
 #endif
 
 #ifdef F_RotateThreadReadyQueue
-SYSCALL(RotateThreadReadyQueue, 0x2b)
+SYSCALL(RotateThreadReadyQueue)
 #endif
 
 #ifdef F_iRotateThreadReadyQueue
-SYSCALL(iRotateThreadReadyQueue, -0x2c)
+SYSCALL(iRotateThreadReadyQueue)
 #endif
 
 #ifdef F_ReleaseWaitThread
-SYSCALL(ReleaseWaitThread, 0x2d)
+SYSCALL(ReleaseWaitThread)
 #endif
 
 #ifdef F_iReleaseWaitThread
-SYSCALL(iReleaseWaitThread, -0x2e)
+SYSCALL(iReleaseWaitThread)
 #endif
 
 #ifdef F_GetThreadId
-SYSCALL(GetThreadId, 0x2f)
+SYSCALL(GetThreadId)
 #endif
 
 #ifdef F_ReferThreadStatus
-SYSCALL(ReferThreadStatus, 0x30)
+SYSCALL(ReferThreadStatus)
 #endif
 
 #ifdef F_iReferThreadStatus
-SYSCALL(iReferThreadStatus, -0x31)
+SYSCALL(iReferThreadStatus)
 #endif
 
 #ifdef F_SleepThread
-SYSCALL(SleepThread, 0x32)
+SYSCALL(SleepThread)
 #endif
 
 #ifdef F_WakeupThread
-SYSCALL(WakeupThread, 0x33)
+SYSCALL(WakeupThread)
 #endif
 
 #ifdef F_iWakeupThread
-SYSCALL(iWakeupThread, -0x34)
+SYSCALL(iWakeupThread)
 #endif
 
 #ifdef F_CancelWakeupThread
-SYSCALL(CancelWakeupThread, 0x35)
+SYSCALL(CancelWakeupThread)
 #endif
 
 #ifdef F_iCancelWakeupThread
-SYSCALL(iCancelWakeupThread, -0x36)
+SYSCALL(iCancelWakeupThread)
 #endif
 
 #ifdef F_SuspendThread
-SYSCALL(SuspendThread, 0x37)
+SYSCALL(SuspendThread)
 #endif
 
 #ifdef F_iSuspendThread
-SYSCALL(iSuspendThread, -0x38)
+SYSCALL(iSuspendThread)
 #endif
 
 #ifdef F_ResumeThread
-SYSCALL(ResumeThread, 0x39)
+SYSCALL(ResumeThread)
 #endif
 
 #ifdef F_iResumeThread
-SYSCALL(iResumeThread, -0x3a)
+SYSCALL(iResumeThread)
 #endif
 
 #ifdef F_RFU059
-SYSCALL(RFU059, 0x3b)
+SYSCALL(RFU059)
 #endif
 
 #ifdef F_RFU060
-SYSCALL(RFU060, 0x3c)
+SYSCALL(RFU060)
 #endif
 
 #ifdef F_SetupThread
-SYSCALL(SetupThread, 0x3c)
+SYSCALL(SetupThread)
 #endif
 
 #ifdef F_RFU061
-SYSCALL(RFU061, 0x3d)
+SYSCALL(RFU061)
 #endif
 
 #ifdef F_SetupHeap
-SYSCALL(SetupHeap, 0x3d)
+SYSCALL(SetupHeap)
 #endif
 
 #ifdef F_EndOfHeap
-SYSCALL(EndOfHeap, 0x3e)
+SYSCALL(EndOfHeap)
 #endif
 
 #ifdef F_CreateSema
-SYSCALL(CreateSema, 0x40)
+SYSCALL(CreateSema)
 #endif
 
 #ifdef F_DeleteSema
-SYSCALL(DeleteSema, 0x41)
+SYSCALL(DeleteSema)
 #endif
 
 #ifdef F_SignalSema
-SYSCALL(SignalSema, 0x42)
+SYSCALL(SignalSema)
 #endif
 
 #ifdef F_iSignalSema
-SYSCALL(iSignalSema, -0x43)
+SYSCALL(iSignalSema)
 #endif
 
 #ifdef F_WaitSema
-SYSCALL(WaitSema, 0x44)
+SYSCALL(WaitSema)
 #endif
 
 #ifdef F_PollSema
-SYSCALL(PollSema, 0x45)
+SYSCALL(PollSema)
 #endif
 
 #ifdef F_iPollSema
-SYSCALL(iPollSema, -0x46)
+SYSCALL(iPollSema)
 #endif
 
 #ifdef F_ReferSemaStatus
-SYSCALL(ReferSemaStatus, 0x47)
+SYSCALL(ReferSemaStatus)
 #endif
 
 #ifdef F_iReferSemaStatus
-SYSCALL(iReferSemaStatus, -0x48)
+SYSCALL(iReferSemaStatus)
 #endif
 
 #ifdef F_iDeleteSema
-SYSCALL(iDeleteSema, -0x49)
+SYSCALL(iDeleteSema)
 #endif
 
 #ifdef F_SetOsdConfigParam
-SYSCALL(SetOsdConfigParam, 0x4a)
+SYSCALL(SetOsdConfigParam)
 #endif
 
 #ifdef F_GetOsdConfigParam
-SYSCALL(GetOsdConfigParam, 0x4b)
+SYSCALL(GetOsdConfigParam)
 #endif
 
 #ifdef F_GetGsHParam
-SYSCALL(GetGsHParam, 0x4c)
+SYSCALL(GetGsHParam)
 #endif
 
 #ifdef F_GetGsVParam
-SYSCALL(GetGsVParam, 0x4d)
+SYSCALL(GetGsVParam)
 #endif
 
 #ifdef F_SetGsHParam
-SYSCALL(SetGsHParam, 0x4e)
+SYSCALL(SetGsHParam)
 #endif
 
 #ifdef F_SetGsVParam
-SYSCALL(SetGsVParam, 0x4f)
+SYSCALL(SetGsVParam)
 #endif
 
 #ifdef F_CreateEventFlag
-SYSCALL(CreateEventFlag, 0x50)
+SYSCALL(CreateEventFlag)
 #endif
 
 #ifdef F_DeleteEventFlag
-SYSCALL(DeleteEventFlag, 0x51)
+SYSCALL(DeleteEventFlag)
 #endif
 
 #ifdef F_SetEventFlag
-SYSCALL(SetEventFlag, 0x52)
+SYSCALL(SetEventFlag)
 #endif
 
 #ifdef F_iSetEventFlag
-SYSCALL(iSetEventFlag, 0x53)
+SYSCALL(iSetEventFlag)
 #endif
 
 #ifdef F_EnableIntcHandler
-SYSCALL(EnableIntcHandler, 0x5C)
+SYSCALL(EnableIntcHandler)
 #endif
 
 #ifdef F_iEnableIntcHandler
-SYSCALL(iEnableIntcHandler, -0x5C)
+SYSCALL(iEnableIntcHandler)
 #endif
 
 #ifdef F_DisableIntcHandler
-SYSCALL(DisableIntcHandler, 0x5D)
+SYSCALL(DisableIntcHandler)
 #endif
 
 #ifdef F_iDisableIntcHandler
-SYSCALL(iDisableIntcHandler, -0x5D)
+SYSCALL(iDisableIntcHandler)
 #endif
 
 #ifdef F_EnableDmacHandler
-SYSCALL(EnableDmacHandler, 0x5E)
+SYSCALL(EnableDmacHandler)
 #endif
 
 #ifdef F_iEnableDmacHandler
-SYSCALL(iEnableDmacHandler, -0x5E)
+SYSCALL(iEnableDmacHandler)
 #endif
 
 #ifdef F_DisableDmacHandler
-SYSCALL(DisableDmacHandler, 0x5F)
+SYSCALL(DisableDmacHandler)
 #endif
 
 #ifdef F_iDisableDmacHandler
-SYSCALL(iDisableDmacHandler, -0x5F)
+SYSCALL(iDisableDmacHandler)
 #endif
 
 #ifdef F_KSeg0
-SYSCALL(KSeg0, 0x60)
+SYSCALL(KSeg0)
 #endif
 
 #ifdef F_EnableCache
-SYSCALL(EnableCache, 0x61)
+SYSCALL(EnableCache)
 #endif
 
 #ifdef F_DisableCache
-SYSCALL(DisableCache, 0x62)
+SYSCALL(DisableCache)
 #endif
 
 #ifdef F_GetCop0
-SYSCALL(GetCop0, 0x63)
+SYSCALL(GetCop0)
 #endif
 
 #ifdef F_FlushCache
-SYSCALL(FlushCache, 0x64)
+SYSCALL(FlushCache)
 #endif
 
 #ifdef F_CpuConfig
-SYSCALL(CpuConfig, 0x66)
+SYSCALL(CpuConfig)
 #endif
 
 #ifdef F_iGetCop0
-SYSCALL(iGetCop0, -0x67)
+SYSCALL(iGetCop0)
 #endif
 
 #ifdef F_iFlushCache
-SYSCALL(iFlushCache, -0x68)
+SYSCALL(iFlushCache)
 #endif
 
 #ifdef F_RFU105
-SYSCALL(RFU105, 0x69)
+SYSCALL(RFU105)
 #endif
 
 #ifdef F_iCpuConfig
-SYSCALL(iCpuConfig, -0x6a)
+SYSCALL(iCpuConfig)
 #endif
 
 #ifdef F_SifStopDma
-SYSCALL(SifStopDma, 0x6b)
+SYSCALL(SifStopDma)
 #endif
 
 #ifdef F_SetCPUTimerHandler
-SYSCALL(SetCPUTimerHandler, 0x6c)
+SYSCALL(SetCPUTimerHandler)
 #endif
 
 #ifdef F_SetCPUTimer
-SYSCALL(SetCPUTimer, 0x6d)
+SYSCALL(SetCPUTimer)
 #endif
 
 #ifdef F_SetOsdConfigParam2
-SYSCALL(SetOsdConfigParam2, 0x6e)
+SYSCALL(SetOsdConfigParam2)
 #endif
 
 #ifdef F_GetOsdConfigParam2
-SYSCALL(GetOsdConfigParam2, 0x6f)
+SYSCALL(GetOsdConfigParam2)
 #endif
 
 #ifdef F_GsGetIMR
-SYSCALL(GsGetIMR, 0x70)
+SYSCALL(GsGetIMR)
 #endif
 
 #ifdef F_iGsGetIMR
-SYSCALL(iGsGetIMR, -0x70)
+SYSCALL(iGsGetIMR)
 #endif
 
 #ifdef F_GsPutIMR
-SYSCALL(GsPutIMR, 0x71)
+SYSCALL(GsPutIMR)
 #endif
 
 #ifdef F_iGsPutIMR
-SYSCALL(iGsPutIMR, -0x71)
+SYSCALL(iGsPutIMR)
 #endif
 
 #ifdef F_SetPgifHandler
-SYSCALL(SetPgifHandler, 0x72)
+SYSCALL(SetPgifHandler)
 #endif
 
 #ifdef F_SetVSyncFlag
-SYSCALL(SetVSyncFlag, 0x73)
+SYSCALL(SetVSyncFlag)
 #endif
 
 #ifdef F_SetSyscall
-SYSCALL(SetSyscall, 0x74)
+SYSCALL(SetSyscall)
 #endif
 
 //#ifdef F_print
-//SYSCALL(_print, 0x75)
+//SYSCALL(_print)
 //#endif
 
 #ifdef F_SifDmaStat
-SYSCALL(SifDmaStat, 0x76)
+SYSCALL(SifDmaStat)
 #endif
 
 #ifdef F_iSifDmaStat
-SYSCALL(iSifDmaStat, -0x76)
+SYSCALL(iSifDmaStat)
 #endif
 
 #ifdef F_SifSetDma
-SYSCALL(SifSetDma, 0x77)
+SYSCALL(SifSetDma)
 #endif
 
 #ifdef F_iSifSetDma
-SYSCALL(iSifSetDma, -0x77)
+SYSCALL(iSifSetDma)
 #endif
 
 #ifdef F_SifSetDChain
-SYSCALL(SifSetDChain, 0x78)
+SYSCALL(SifSetDChain)
 #endif
 
 #ifdef F_iSifSetDChain
-SYSCALL(iSifSetDChain, -0x78)
+SYSCALL(iSifSetDChain)
 #endif
 
 #ifdef F_SifSetReg
-SYSCALL(SifSetReg, 0x79)
+SYSCALL(SifSetReg)
 #endif
 
 #ifdef F_SifGetReg
-SYSCALL(SifGetReg, 0x7a)
+SYSCALL(SifGetReg)
 #endif
 
 #ifdef F_ExecOSD
-SYSCALL(ExecOSD, 0x7b)
+SYSCALL(ExecOSD)
 #endif
 
 #ifdef F_Deci2Call
-SYSCALL(Deci2Call, 0x7c)
+SYSCALL(Deci2Call)
 #endif
 
 #ifdef F_PSMode
-SYSCALL(PSMode, 0x7d)
+SYSCALL(PSMode)
 #endif
 
 #ifdef F_MachineType
-SYSCALL(MachineType, 0x7e)
+SYSCALL(MachineType)
 #endif
 
 #ifdef F_GetMemorySize
-SYSCALL(GetMemorySize, 0x7f)
+SYSCALL(GetMemorySize)
 #endif
 
 
