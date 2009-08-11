@@ -492,7 +492,7 @@ void hubSetFuncAddressCB(IoRequest *req) {
 		ep->hcEd.hcArea |= dev->functionAddress & 0x7F;
 		dev->deviceStatus = DEVICE_READY;
 
-		addTimerCallback(&dev->timer, (TimerCallback)hubPeekDeviceDescriptor, req, 4);
+		addTimerCallback(&dev->timer, (TimerCallback)hubPeekDeviceDescriptor, req, 10);
 	}
 }
 
