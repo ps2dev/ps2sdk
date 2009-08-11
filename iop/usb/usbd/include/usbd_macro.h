@@ -134,7 +134,7 @@ static int UsbControlTransfer(int epID, int reqtyp, int req, int val, int index,
 	((type) << 8) | (index), (language), (len), (dataptr), (doneCB), (arg))
 
 #define UsbSynchEndpointFrame(epID, endpoint, pfn, doneCB, arg)	\
-	UsbControlTransfer((pid), USB_DIR_IN | USB_RECIP_ENDPOINT, USB_REQ_SYNCH_FRAME, \
+	UsbControlTransfer((epID), USB_DIR_IN | USB_RECIP_ENDPOINT, USB_REQ_SYNCH_FRAME, \
 	0, (endpoint), 2, (pfn), (doneCB), (arg))
 
 #endif
