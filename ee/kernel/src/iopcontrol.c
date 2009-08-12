@@ -92,9 +92,9 @@ int SifIopReboot(const char* filename)
 	SifInitRpc(0);
 	SifExitRpc();
 	
-	strcpy(param_str, "rom0:UNDL ");
-	strcat(param_str, filename);
-	
+	strncpy(param_str, "rom0:UDNL ", 10);
+	strncpy(&param_str[10], filename, strlen(filename));
+
 	return SifResetIop(param_str, 0);
 }
 #endif
