@@ -17,6 +17,9 @@
 #include "smem.h"
 #include "smod.h"
 
+/* from slib.c */
+extern int __memcmp(const void *s1, const void *s2, unsigned int length);
+
 /**
  * smod_get_next_mod - Return the next module referenced in the global module list.
  */
@@ -52,7 +55,7 @@ int smod_get_mod_by_name(const char *name, smod_mod_info_t *info)
 	do {
 		smem_read(info->name, search_name, sizeof search_name);
 
-		if (!memcmp(search_name, name, len))
+		if (!__memcmp(search_name, name, len))
 			return info->id;
 	} while (smod_get_next_mod(info, info) != 0);
 

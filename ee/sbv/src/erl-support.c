@@ -17,6 +17,5 @@ char * erl_id = "libsbv";
 
 char * erl_dependancies[] = {
     "libkernel",
-    "libc",
     0
 };

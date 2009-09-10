@@ -22,6 +22,20 @@ slib_exp_lib_list_t _slib_cur_exp_lib_list = {0, 0};
 #define SEARCH_SIZE	(16 * 1024)
 static u8 smem_buf[SEARCH_SIZE];
 
+/* Do not link to memcmp() from libc, so we only depend on libkernel. */
+int __memcmp(const void *s1, const void *s2, unsigned int length)
+{
+	const char *a = s1;
+	const char *b = s2;
+
+	while (length--) {
+		if (*a++ != *b++)
+			return 1;
+	}
+
+	return 0;
+}
+
 /**
  * slib_exp_lib_list - Find the head and tail of the export library list.
  *
@@ -57,7 +71,7 @@ slib_exp_lib_list_t *slib_exp_lib_list()
 		/* SYSMEM's export library sits at 0x830, so it should appear in
 		   LOADCORE's prev pointer.  */
 		if (*(u32 *)(smem_loc + i) == 0x830) {
-			if (!memcmp(smem_loc + i + 12, "loadcore", 8))
+			if (!__memcmp(smem_loc + i + 12, "loadcore", 8))
 				break;
 		}
 	}
@@ -105,7 +119,7 @@ int slib_get_exp_lib(const char *name, slib_exp_lib_t *library)
 	while (cur_lib) {
 		smem_read(cur_lib, exp_lib, sizeof buf);
 
-		if (!memcmp(exp_lib->name, name, len)) {
+		if (!__memcmp(exp_lib->name, name, len)) {
 			while (exp_lib->exports[count] != 0)
 				count++;
 
