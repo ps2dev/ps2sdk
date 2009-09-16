@@ -58,5 +58,5 @@ $(EE_LIB) : $(EE_OBJS) $(EE_LIB:%.a=%.erl)
 	$(EE_AR) cru $(EE_LIB) $(EE_OBJS)
 
 $(EE_LIB:%.a=%.erl) : $(EE_OBJS)
-	$(EE_CC) -mno-crt0 -Wl,-r -o $(EE_LIB:%.a=%.erl) $(EE_OBJS)
+	$(EE_CC) -mno-crt0 -Wl,-r -Wl,-d -o $(EE_LIB:%.a=%.erl) $(EE_OBJS)
 	$(EE_STRIP) --strip-unneeded -R .mdebug.eabi64 -R .reginfo -R .comment $(EE_LIB:%.a=%.erl)
