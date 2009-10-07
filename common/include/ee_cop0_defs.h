@@ -61,7 +61,7 @@ extern "C" {
 // Bits in EE Cop0 Breakpoint Control(BPC)
 
 // Instruction Address breakpoint Enable
-#define EE_BPC_IAE         (1 << 31)
+#define EE_BPC_IAE          (1 << 31)
 
 // Data Read breakpoint Enable
 #define EE_BPC_DRE         (1 << 30)
@@ -119,4 +119,3 @@ extern "C" {
 #endif
 
 #endif // _EE_COP0_DEFS_H_
-
