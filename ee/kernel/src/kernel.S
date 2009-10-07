@@ -62,11 +62,13 @@ __syscall:
         mfc0        $2, $12
         andi        $2, $2, 0x18
         beqz        $2, _kMode
-        nop
+        slt         $2, $3, $0
         syscall
         jr          $31
         nop
 _kMode:
+        subu        $26, $0, $3
+        movn        $3, $26, $2
         sll         $3, $3, 2
         lui         $26, 0x8000
         lhu         $2, 0x02F0($26)
