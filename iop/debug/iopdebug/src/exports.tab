@@ -1,0 +1,37 @@
+/* Exports for IOPDEBUG */
+
+DECLARE_EXPORT_TABLE(iopdebug, 1, 1)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_stop)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+/* 5 */
+	DECLARE_EXPORT(iop_dbg_install)
+	DECLARE_EXPORT(iop_dbg_remove)
+	DECLARE_EXPORT(iop_dbg_get_handler)
+	DECLARE_EXPORT(iop_dbg_set_handler)
+	DECLARE_EXPORT(iop_dbg_get_dcic)
+/* 10 */
+	DECLARE_EXPORT(iop_dbg_set_dcic)
+	DECLARE_EXPORT(iop_dbg_get_bpc)
+	DECLARE_EXPORT(iop_dbg_set_bpc)
+	DECLARE_EXPORT(iop_dbg_get_bpcm)
+	DECLARE_EXPORT(iop_dbg_set_bpcm)
+/* 15 */
+	DECLARE_EXPORT(iop_dbg_get_bda)
+	DECLARE_EXPORT(iop_dbg_set_bda)
+	DECLARE_EXPORT(iop_dbg_get_bdam)
+	DECLARE_EXPORT(iop_dbg_set_bdam)
+	DECLARE_EXPORT(iop_dbg_set_bpr)
+/* 20 */
+	DECLARE_EXPORT(iop_dbg_set_bpw)
+	DECLARE_EXPORT(iop_dbg_set_bpx)
+	DECLARE_EXPORT(iop_dbg_clr_bps)
+	DECLARE_EXPORT(iop_dbg_clr_bpda)
+	DECLARE_EXPORT(iop_dbg_clr_bpx)
+
+END_EXPORT_TABLE
+
+void _retonly() {}
+
