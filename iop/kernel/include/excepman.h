@@ -22,37 +22,37 @@
 
 /* From any r3000's cop0 documentation */
 // External Interrupt
-#define EX_INT	0
+#define IOP_EXCEPTION_INT	0
 // TLB Modification Exception
-#define EX_MOD	1
+#define IOP_EXCEPTION_MOD	1
 // TLB miss Exception (Load or instruction fetch)
-#define EX_TLBL 2
+#define IOP_EXCEPTION_TLBL 2
 // TLB miss exception (Store)
-#define EX_TLBS 3
+#define IOP_EXCEPTION_TLBS 3
 // Address Error Exception (Load or instruction fetch)
-#define EX_ADEL 4
+#define IOP_EXCEPTION_ADEL 4
 // Address Error Exception (Store)
-#define EX_ADES 5
+#define IOP_EXCEPTION_ADES 5
 // Bus Error Exception (for Instruction Fetch)
-#define EX_IBE  6
+#define IOP_EXCEPTION_IBE  6
 // Bus Error Exception (for data Load or Store)
-#define EX_DBE  7
+#define IOP_EXCEPTION_DBE  7
 // SYSCALL Exception
-#define EX_SYS  8
+#define IOP_EXCEPTION_SYS  8
 // Breakpoint Exception
-#define EX_BP   9
+#define IOP_EXCEPTION_BP   9
 // Reserved Instruction Exception
-#define EX_RI  10
+#define IOP_EXCEPTION_RI  10
 // Co-Processor Unusable Exception
-#define EX_CPU 11
+#define IOP_EXCEPTION_CPU 11
 // Arithmetic Overflow Exception
-#define EX_OVF 12
+#define IOP_EXCEPTION_OVF 12
 // Reserved 13
-#define EX_R13 13
+#define IOP_EXCEPTION_R13 13
 // Reserved 14. This is FPE though, but won't be useful on IOP.
-#define EX_R14 14
-// What's this ... ?
-#define EX_HDB 15
+#define IOP_EXCEPTION_R14 14
+// Hardware DeBug(aka "Hardware Breakpoint")
+#define IOP_EXCEPTION_HDB 15
 
 // does it really return void ?
 typedef void (*exception_handler_t)(void);
@@ -69,5 +69,5 @@ int ReleaseExceptionHandler(int exception, exception_handler_t);
 int ReleaseDefaultExceptionHandler(exception_handler_t);
 #define I_ReleaseDefaultExceptionHandler DECLARE_IMPORT(4, ReleaseDefaultExceptionHandler)
 
-
 #endif /* IOP_EXCEPMAN_H */
+
