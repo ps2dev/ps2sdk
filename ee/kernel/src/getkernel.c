@@ -61,13 +61,14 @@ void *GetSyscallHandler(int syscall_no)
 extern void *GetSyscallHandler(int syscall_no);
 
 /** Get the address of an EE exception handler function.
-    @param exception_no - The exception cause number.
+    @param ex_cause_no - The exception cause number.
 	@return - The address of the exception handler function (or NULL)
 */
 void *GetExceptionHandler(int ex_cause_no)
 {
     u32 oldintr, oldop;
 	u32 addr;
+    u16 lo16, hi16;
 
     if((ex_cause_no >= 1) && (ex_cause_no < 4))
     {
@@ -121,9 +122,10 @@ void *GetInterruptHandler(int intr_cause_no)
 {
     u32 oldintr, oldop;
 	u32 addr;
+    u16 lo16, hi16;
 
     // make sure intr_cause_no is between 0 and 7
-    if((irq < 0) || (irq > 7))
+    if((intr_cause_no < 0) || (intr_cause_no > 7))
     {
         return(NULL);
     }
