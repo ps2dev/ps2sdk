@@ -71,9 +71,40 @@ static inline void nopdelay(void)
 	} while (i-- != -1);
 }
 
+static inline int ee_get_opmode(void)
+{
+	u32 status;
+
+	__asm__ volatile (
+		".set\tpush\n\t"		\
+		".set\tnoreorder\n\t"		\
+		"mfc0\t%0, $12\n\t"		\
+		".set\tpop\n\t" : "=r" (status));
+
+	return((status >> 3) & 3);
+}
+
+static inline int ee_set_opmode(u32 opmode)
+{
+	u32 status, mask;
+
+	__asm__ volatile (
+		".set\tpush\n\t"		\
+		".set\tnoreorder\n\t"		\
+		"mfc0\t%0, $12\n\t"		\
+		"li\t%1, 0xffffffe7\n\t"	\
+		"and\t%0, %1\n\t"		\
+		"or\t%0, %2\n\t"		\
+		"mtc0\t%0, $12\n\t"		\
+		"sync.p\n\t"
+		".set\tpop\n\t" : "=r" (status), "=r" (mask) : "r" (opmode));
+
+	return((status >> 3) & 3);
+}
+
 static inline int ee_kmode_enter()
 {
-	int status, mask;
+	u32 status, mask;
 
 	__asm__ volatile (
 		".set\tpush\n\t"		\
@@ -301,8 +332,9 @@ int *__errno(void);
 int	npmPuts(const char *buf);
 int	nprintf(const char *format, ...) __attribute__((format(printf,1,2)));
 
-/* Added GetSyscall method */
-void* GetSyscall(u32 syscall);
+void *GetSyscallHandler(int syscall_no);
+void *GetExceptionHandler(int except_no);
+void *GetInterruptHandler(int intr_no);
 
 #ifdef __cplusplus
 }
