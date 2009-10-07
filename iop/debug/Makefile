@@ -9,7 +9,7 @@
 # $Id$
 
 
-SUBDIRS = ioptrap sior
+SUBDIRS = iopdebug ioptrap sior
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
