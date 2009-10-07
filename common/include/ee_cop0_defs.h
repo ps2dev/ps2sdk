@@ -17,6 +17,30 @@
 extern "C" {
 #endif
 
+#define M_EE_GET_CAUSE_EXCODE(__cause) (((__cause) >> 2) & 0x1F)
+#define M_EE_GET_CAUSE_EXC2(__cause) (((__cause) >> 16) & 0x7)
+
+// EE COP0 Register name defs
+#define EE_COP0_Index       $0
+#define EE_COP0_Random      $1
+#define EE_COP0_EntryLo0    $2
+#define EE_COP0_EntryLo1    $3
+#define EE_COP0_Context     $4
+#define EE_COP0_Wired       $5
+#define EE_COP0_BadVAddr    $8
+#define EE_COP0_Count       $9
+#define EE_COP0_EntryHi     $10
+#define EE_COP0_Compare     $11
+#define EE_COP0_Status      $12
+#define EE_COP0_Cause       $13
+#define EE_COP0_EPC         $14
+#define EE_COP0_PRId        $15
+#define EE_COP0_Config      $16
+#define EE_COP0_BadPAddr    $23
+#define EE_COP0_TagLo       $28
+#define EE_COP0_TagHi       $29
+#define EE_COP0_ErrorEPC    $30
+
 // Bits for COP0 "Status" register.
 #define EE_STATUS_IE    (1 << 0)
 #define EE_STATUS_EXL   (1 << 1)
@@ -37,7 +61,7 @@ extern "C" {
 // Bits in EE Cop0 Breakpoint Control(BPC)
 
 // Instruction Address breakpoint Enable
-#define EE_BPC_IAE         (1 << 31
+#define EE_BPC_IAE         (1 << 31)
 
 // Data Read breakpoint Enable
 #define EE_BPC_DRE         (1 << 30)
@@ -89,7 +113,6 @@ extern "C" {
 
 // Instruction Address Breakpoint
 #define EE_BPC_IAB         (1 << 0)
-
 
 #ifdef __cplusplus
 }
