@@ -203,7 +203,7 @@ int _start(int argc, char **argv)
         printf("RegisterDefaultExceptionHandler failed, rv=%d\n", rv);
         return 1;
     }
-    if((rv = RegisterPriorityExceptionHandler(EX_HDB, 0, bp_exc_handler)) < 0) {
+    if((rv = RegisterPriorityExceptionHandler(IOP_EXCEPTION_HDB, 0, bp_exc_handler)) < 0) {
 	// shouldn't we release the default exception handler here... ?
         printf("RegisterDefaultExceptionHandler failed, rv=%d\n", rv);
         return 1;
