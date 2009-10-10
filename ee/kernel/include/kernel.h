@@ -147,16 +147,34 @@ typedef struct t_ee_sema
 
 typedef struct t_ee_thread
 {
-	int   status;
-	void* func;
-	void* stack;
-	int   stack_size;
-	void* gp_reg;
-	int   initial_priority;
-	int   current_priority;
-	u32   attr;
-	u32   option;
+    int status; // 0x00
+    void *func; // 0x04
+    void *stack; // 0x08
+    int stack_size; // 0x0C
+    void *gp_reg; // 0x10
+    int initial_priority; // 0x14
+    int current_priority; // 0x18
+    u32 attr; // 0x1C
+    u32 option; // 0x20
+
 } ee_thread_t;
+
+// sizeof() == 0x30
+typedef struct t_ee_thread_status
+{
+    int status; // 0x00
+    void *func; // 0x04
+    void *stack; // 0x08
+    int stack_size; // 0x0C
+    void *gp_reg; // 0x10
+    int initial_priority; // 0x14
+    int current_priority; // 0x18
+    u32 attr; // 0x1C
+    u32 option; // 0x20
+    u32 u32_24; // 0x24
+    u32 u32_28; // 0x28
+    u32 u32_2C; // 0x2C
+} ee_thread_status_t;
 
 enum _sif_regs {
 	SIF_REG_MAINADDR = 1,
@@ -230,8 +248,8 @@ s32  iRotateThreadReadyQueue(s32 priority);
 s32  ReleaseWaitThread(s32 thread_id);
 s32  iReleaseWaitThread(s32 thread_id);
 s32	 GetThreadId(void);
-s32  ReferThreadStatus(s32 thread_id, ee_thread_t *info);
-s32  iReferThreadStatus(s32 thread_id, ee_thread_t *info);
+s32  ReferThreadStatus(s32 thread_id, ee_thread_status_t *info);
+s32  iReferThreadStatus(s32 thread_id, ee_thread_status_t *info);
 s32  SleepThread(void);
 s32	 WakeupThread(s32 thread_id);
 s32	 iWakeupThread(s32 thread_id);
