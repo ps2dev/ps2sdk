@@ -59,14 +59,23 @@ void sio_init(u32 baudrate, u8 lcr_ueps, u8 lcr_upen, u8 lcr_usbl, u8 lcr_umode)
 #endif
 
 #ifdef F_sio_putc
+static u8 ___last_sio_putc = 0;
 int sio_putc(int c)
 {
-	/* Block until we're ready to transmit.  */
-	while ((_lw(SIO_ISR) & 0xf000) == 0x8000)
-		;
+    if((c == '\n') && (___last_sio_putc != '\r'))
+    {
+        // hack: if the character to be outputted is a '\n'
+        //  and the previously-outputted character is not a '\r',
+        //  output a '\r' first.
+        sio_putc('\r');
+    }
 
-	_sb(c, SIO_TXFIFO);
-	return c;
+    /* Block until we're ready to transmit.  */
+    while ((_lw(SIO_ISR) & 0xf000) == 0x8000);
+
+    _sb(c, SIO_TXFIFO);
+    ___last_sio_putc = c;
+    return c;
 }
 #endif
 
