@@ -1,0 +1,49 @@
+/* Exports for SBUS */
+
+DECLARE_EXPORT_TABLE(sbus, 1, 1)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_stop)
+	DECLARE_EXPORT(_retonly)
+
+// SBUS
+    // 4
+	DECLARE_EXPORT(SBUS_init)
+    // 5
+	DECLARE_EXPORT(SBUS_deinit)
+    // 6
+	DECLARE_EXPORT(SBUS_set_irq_handler)
+    // 7
+	DECLARE_EXPORT(SBUS_rem_irq_handler)
+    // 8
+	DECLARE_EXPORT(SBUS_get_reg)
+    // 9
+	DECLARE_EXPORT(SBUS_set_reg)
+    // 10
+	DECLARE_EXPORT(SBUS_interrupt_remote)
+    // 11
+	DECLARE_EXPORT(SBUS_check_intr)
+
+// SIF2 DMA
+    // 12
+	DECLARE_EXPORT(SIF2_init)
+    // 13
+	DECLARE_EXPORT(SIF2_deinit)
+    // 14
+	DECLARE_EXPORT(SIF2_set_dma)
+    // 15
+	DECLARE_EXPORT(SIF2_sync_dma)
+
+// SIF2 CMD
+    // 16
+	DECLARE_EXPORT(SIF2_init_cmd)
+    // 17
+	DECLARE_EXPORT(SIF2_set_cmd_handler)
+    // 18
+	DECLARE_EXPORT(SIF2_rem_cmd_handler)
+    // 19
+	DECLARE_EXPORT(SIF2_send_cmd)
+
+END_EXPORT_TABLE
+
+void _retonly() {}
