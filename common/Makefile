@@ -8,13 +8,9 @@
 #
 # $Id$
 
-
-all:
-	@$(ECHO) Nothing to build in common
-
-clean:
-	@$(ECHO) Nothing to clean in common
-
+SUBDIRS = sbus
 
 include $(PS2SDKSRC)/Defs.make
+include $(PS2SDKSRC)/Rules.make
 include $(PS2SDKSRC)/common/Rules.release
+
