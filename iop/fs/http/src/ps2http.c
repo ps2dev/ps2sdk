@@ -171,12 +171,13 @@ int httpConnect( struct sockaddr_in * server, char *hostAddr, const char * url, 
 
 	DBG_printf( "connect\n" );
 
-	peerHandle = connect( sockHandle, (struct sockaddr *) server, sizeof(*server));
-	if ( peerHandle < 0 )
+	rc = connect( sockHandle, (struct sockaddr *) server, sizeof(*server));
+	if ( rc < 0 )
 	{
 		printf( "HTTP: CONNECT FAILED %i\n", peerHandle );
 		return -1;
 	}
+	peerHandle = sockHandle;
 
 	DBG_printf( "send\n" );
 
@@ -265,9 +266,10 @@ const char *resolveAddress( struct sockaddr_in *server, const char * url, char *
 	// NOTE: Need more error checking in parsing code
 
 	// URL must start with double forward slashes.
-	if((url[0] != '/') || (url[1] != '/' )) return(NULL);
+	while(url[0] == '/') {
+		url++;
+	}
 
-	url += 2;
 	for(i = 0; ((url[i] != '\0') && (url[i] != '/')) && (i < 127); i++)
 	    if((((addr[i] = url[i]) < '0') || (url[i] > '9')) && (url[i] != '.')) {
 
@@ -298,8 +300,8 @@ const char *resolveAddress( struct sockaddr_in *server, const char * url, char *
 		for(i = 0, w = 0; i < 16; i++)
 			if(addr[i] == '.') { addr[i] = '\0'; w++; }
 
-        if(w < 4) { // w is used as a simple error check here
-            printf("HTTP: invalid IP address '%s'\n", addr);
+        if(w != 3) { // w is used as a simple error check here
+            printf("HTTP: invalid IP address '%s'\n", hostAddr);
             return(NULL);
             }
 
@@ -381,6 +383,7 @@ int httpOpen(iop_io_file_t *f, const char *name, int mode)
 	privData->fileSize = 0;
 	privData->filePos = 0;
 
+	memset(&server, 0, sizeof(server));
 	// Check valid IP address and URL
 	if((getName = resolveAddress( &server, name, hostAddr )) == NULL)
 	{
