@@ -12,9 +12,12 @@
 */
 
 #include "tamtypes.h"
+#include "string.h"
 
 #include "smem.h"
 #include "slib.h"
+
+extern slib_exp_lib_list_t _slib_cur_exp_lib_list;
 
 int sbv_patch_disable_prefix_check()
 {
@@ -24,6 +27,8 @@ int sbv_patch_disable_prefix_check()
 
 	patch[0] = 0x03e00008;	/* jr $ra */
 	patch[1] = 0x00001021;	/* addiu $v0, $0, 0 */
+
+	memset(&_slib_cur_exp_lib_list, 0, sizeof(slib_exp_lib_list_t));
 
 	if (!slib_get_exp_lib("modload", modload_lib))
 		return -1;

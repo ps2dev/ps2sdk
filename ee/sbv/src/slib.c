@@ -110,7 +110,7 @@ int slib_get_exp_lib(const char *name, slib_exp_lib_t *library)
 	void *cur_lib;
 	int len = strlen(name), count = 0;
 
-	if (!(exp_lib_list = slib_exp_lib_list()) && !exp_lib_list->head)
+	if (!exp_lib_list->head && !(exp_lib_list = slib_exp_lib_list()))
 		return 0;
 
 	/* Read the tail export library to initiate the search.  */

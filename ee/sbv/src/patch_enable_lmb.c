@@ -20,6 +20,8 @@
 #include "smod.h"
 #include "slib.h"
 
+extern slib_exp_lib_list_t _slib_cur_exp_lib_list;
+
 #define JAL(addr)	(0x0c000000 | (0x3ffffff & ((addr) >> 2)))
 #define HI16(addr)	(0x3c110000 | (((addr) >> 16) & 0xffff))	/* lui $s1, HI(addr) */
 #define LO16(addr)	(0x36310000 | ((addr) & 0xffff))		/* ori $s1, LO(addr) */
@@ -65,6 +67,8 @@ int sbv_patch_enable_lmb()
 	void *pStartModule, *pLoadModuleBuffer, *lf_text_start, *patch_addr;
 	u32 lf_rpc_dispatch, lf_jump_table, result;
 	int nexps, id, i;
+
+	memset(&_slib_cur_exp_lib_list, 0, sizeof(slib_exp_lib_list_t));
 
 	/* Locate the modload export library - it must have at least 16 exports.  */
 	if ((nexps = slib_get_exp_lib("modload", modload_lib)) < 16)
