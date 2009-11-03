@@ -46,10 +46,11 @@ void * QueryBlockTopAddress(void *address);
 int QueryBlockSize(void *address);
 #define I_QueryBlockSize DECLARE_IMPORT(10, QueryBlockSize)
 
+typedef char *(kprintf_handler_func_t)(unsigned int unk, const char *, ...);
+
 char * Kprintf(const char *format,...);
 #define I_Kprintf DECLARE_IMPORT(14, Kprintf)
-void Kprintf_set(char* (*newKprintf)(unsigned int unk, const char *, ...),
-		unsigned int newunk);
+void Kprintf_set(kprintf_handler_func_t *, unsigned int newunk);
 #define I_Kprintf_set DECLARE_IMPORT(15, Kprintf_set)
 
 #define sysmem_IMPORTS \
