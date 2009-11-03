@@ -20,6 +20,7 @@
 enum iop_irq_list {
 	IOP_IRQ_VBLANK = 0,
 	IOP_IRQ_SBUS,
+	IOP_IRQ_CDVD,
 
 	IOP_IRQ_RTC0 = 0x04,
 	IOP_IRQ_RTC1 = 0x05,
