@@ -9,7 +9,7 @@
 # $Id$
 
 
-SUBDIRS = tcpip tcpips udptty dns
+SUBDIRS = tcpip tcpip131 tcpips udptty dns
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
