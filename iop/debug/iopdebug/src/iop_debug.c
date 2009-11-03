@@ -63,7 +63,7 @@ IOP_ExceptionHandler *iop_dbg_set_handler(int cause, IOP_ExceptionHandler *handl
 }
 
 // this is called by the IOP debug/exception handlers
-void iop_exception_handler(IOP_RegFrame *frame)
+void iop_exception_dispatcher(IOP_RegFrame *frame)
 {
     int excode = M_IOP_GET_CAUSE_EXCODE(frame->cause);
     IOP_ExceptionHandler *handler = iop_exception_handlers[excode];
@@ -163,6 +163,7 @@ int iop_dbg_install(void)
     _is_iop_dbg_installed = 1;
     return(0);
 }
+
 int iop_dbg_remove(void)
 {
     // if not installed, return with an error.
@@ -188,5 +189,11 @@ int iop_dbg_remove(void)
 
     _is_iop_dbg_installed = 0;
     return(0);
+}
+
+void iop_dbg_get_reg_frames(IOP_RegFrame **def_frame_ptr, IOP_RegFrame **dbg_frame_ptr)
+{
+    if(def_frame_ptr) { *def_frame_ptr = &_iop_ex_def_frame; }
+    if(dbg_frame_ptr) { *dbg_frame_ptr = &_iop_ex_dbg_frame; }
 }
 

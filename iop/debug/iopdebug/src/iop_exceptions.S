@@ -182,7 +182,7 @@ _iop_ex_cmn:
                         jal     _iop_save_frame
                         nop
 
-                        jal     iop_exception_handler
+                        jal     iop_exception_dispatcher
                         move    $a0, $s0
 
                         jal     _iop_load_frame
@@ -212,13 +212,6 @@ ___iop_ex_def_handler_start:
                         sw      $sp, 0x068($k0) // Save $k0
                         lw      $at, 0x400($0) // at is saved here by default exception prologue (at 0x80)
                         la      $sp, _iop_ex_def_stack + _EX_DEF_STACK_SIZE
-
-/*
-                        la      $s0, _iop_exception_state
-                        li      $ra, 1
-                        sw      $ra, 0($s0)
-                        nop
-*/
 
                         jal     _iop_ex_cmn
                         move    $s0, $k0
@@ -268,13 +261,6 @@ _iop_ex_dbg_handler:
                         sw      $sp, 0x068($k0) // Save $k0
                         sw      $s0, 0x090($k0) // Save IOP_COP0_DCIC
                         la      $sp, _iop_ex_dbg_stack + _EX_DBG_STACK_SIZE
-
-/*
-                        la      $s0, _iop_exception_state
-                        li      $ra, 2
-                        sw      $ra, 0($s0)
-                        nop
-*/
 
                         jal     _iop_ex_cmn
                         move    $s0, $k0
