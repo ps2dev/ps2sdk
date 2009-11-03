@@ -7,6 +7,117 @@
 #define A_IOP_SIF1_HANDLER ((vu32 *) (0x000003D0))
 #define A_IOP_SIF2_HANDLER ((vu32 *) (0x000003E0))
 
+#define M_reg8(___base, ___reg_num) ((vu8 *) (___base + (___reg_num)))
+
+// N_CMD is written to supply the command number for a CDVD "N" command.
+#define R_CDVD_N_CMD M_reg8(A_CDVD_REG_BASE, 0x04)
+
+// CDVD Register 0x05 is written to add a byte to N-command param FIFO
+// and read to determine N-command status.
+// Command status:
+// bit      explaination
+// ---      ------------
+//   0      Unknown
+//   1      Unknown
+//   2      Unknown
+//   3      Unknown
+//   4      Unknown
+//   5      Unknown
+//   6      result FIFO empty(0 = result in FIFO, 1 = result FIFO is empty)
+//   7      busy(1 if currently processing a N-command)
+#define R_CDVD_N_CMD_STATUS M_reg8(A_CDVD_REG_BASE, 0x05)
+#define R_CDVD_N_CMD_PARAM_FIFO M_reg8(A_CDVD_REG_BASE, 0x05)
+
+#define R_CDVD_LAST_ERROR M_reg8(A_CDVD_REG_BASE, 0x06)
+
+// 0x01 is written to this register to cause a "break" to occur, along with an interrupt.
+#define R_CDVD_REG07 M_reg8(A_CDVD_REG_BASE, 0x07)
+
+// TRAY_STAT is read to get the status of the drive tray.
+// Tray status:
+// bit      explaination
+// ---      ------------
+//   0      Tray Open(1 if tray is open, 0 if closed)
+// 1-7      Unknown
+#define R_CDVD_TRAY_STATUS M_reg8(A_CDVD_REG_BASE, 0x0A)
+
+// bits for CDVD_TRAY_STAT register
+#define CDVD_TRAY_STAT_OPEN (1 << 0)
+
+#define R_CDVD_DISK_TYPE M_reg8(A_CDVD_REG_BASE, 0x0F)
+
+// CDVD Register "S_CMD" : 0x16
+// write 8-bit "S" command number after parameters.
+// read: unknown
+#define R_CDVD_S_CMD M_reg8(A_CDVD_REG_BASE, 0x16)
+
+// CDVD Register 0x17 is written to add a parameter to the S-command param FIFO
+// and read to determine command status.
+// Command status:
+// bit      explaination
+// ---      ------------
+//   0      Unknown
+//   1      Unknown
+//   2      Unknown
+//   3      Unknown
+//   4      Unknown
+//   5      Unknown
+//   6      result FIFO empty(0 = result in FIFO, 1 = result FIFO is empty)
+//   7      busy(1 if currently processing a command)
+#define R_CDVD_S_STATUS M_reg8(A_CDVD_REG_BASE, 0x17)
+#define R_CDVD_S_PARAM_FIFO M_reg8(A_CDVD_REG_BASE, 0x17)
+
+#define CDVD_S_STAT_RFIFO_EMPTY (1 << 6)
+#define CDVD_S_STAT_BUSY (1 << 7)
+
+// S_RES_FIFO is read to get a byte from the S-command result FIFO.
+#define R_CDVD_S_RES_FIFO M_reg8(A_CDVD_REG_BASE, 0x18)
+
+#define R_CDVD_KEY_DATA0  M_reg8(A_CDVD_REG_BASE, 0x20)
+#define R_CDVD_KEY_DATA1  M_reg8(A_CDVD_REG_BASE, 0x21)
+#define R_CDVD_KEY_DATA2  M_reg8(A_CDVD_REG_BASE, 0x22)
+#define R_CDVD_KEY_DATA3  M_reg8(A_CDVD_REG_BASE, 0x23)
+#define R_CDVD_KEY_DATA4  M_reg8(A_CDVD_REG_BASE, 0x24)
+
+#define R_CDVD_KEY_DATA5  M_reg8(A_CDVD_REG_BASE, 0x28)
+#define R_CDVD_KEY_DATA6  M_reg8(A_CDVD_REG_BASE, 0x29)
+#define R_CDVD_KEY_DATA7  M_reg8(A_CDVD_REG_BASE, 0x2A)
+#define R_CDVD_KEY_DATA8  M_reg8(A_CDVD_REG_BASE, 0x2B)
+#define R_CDVD_KEY_DATA9  M_reg8(A_CDVD_REG_BASE, 0x2C)
+
+#define R_CDVD_KEY_DATAA  M_reg8(A_CDVD_REG_BASE, 0x30)
+#define R_CDVD_KEY_DATAB  M_reg8(A_CDVD_REG_BASE, 0x31)
+#define R_CDVD_KEY_DATAC  M_reg8(A_CDVD_REG_BASE, 0x32)
+#define R_CDVD_KEY_DATAD  M_reg8(A_CDVD_REG_BASE, 0x33)
+#define R_CDVD_KEY_DATAE  M_reg8(A_CDVD_REG_BASE, 0x34)
+
+// Flags indicating the format of the key data.
+// Bits 0-2 set indicate that the corresponding 5-byte key data block is valid.
+// Bits 3-7 are unknown, but may be used to determine additional encryption measures used for DSP<->mechacon communication.
+#define R_CDVD_KEY_FLAGS  M_reg8(A_CDVD_REG_BASE, 0x38)
+
+// Key Data Block XOR key
+// XOR'd with each byte of each valid Key Data Block to decrypt their values.
+#define R_CDVD_KEY_XOR    M_reg8(A_CDVD_REG_BASE, 0x39)
+
+// Decryption control, enable/disable decryption algorithms on data being read from disc using 5th byte of current
+//      key as the XOR key.
+// Bit 0 is Data XOR enable, this causes data being read from the disc to be XOR'd with the value of the CDVD_KEY_DATA4
+//      register.
+// Bit 1 is Rotate Left enable, this causes data being read to be rotated left by a specified number of bits(see Bits 4-6).
+// Bit 2 doesn't seem to do anything..
+// Bit 3 is Swap Nibble enable, this causes data being read to have the the high and low nibbles of each byte
+//      to be swapped.
+// Bits 4-7 is the number of bits the data being read will be shifted left byte, if enabled.
+#define R_CDVD_DEC_CTRL   M_reg8(A_CDVD_REG_BASE, 0x3A)
+
+// bits for CDVD_DEC_CTRL(bits 4-7 are "rotate left number")
+#define CDVD_DEC_XOR_EN     (1 << 0)
+#define CDVD_DEC_ROTL_EN    (1 << 1)
+#define CDVD_DEC_UNK_EN     (1 << 2)
+#define CDVD_DEC_SWAP_EN    (1 << 3)
+
+
 #define A_IOP_IRQ_CTRL 0xBF801450
 #define A_IOP_REG_1454 0xBF801454
 
@@ -249,6 +360,8 @@
 
 #define R_IOP_SIF_1450 ((vu32 *) (A_IOP_SIF_1450))
 #define R_IOP_SIF_1454 ((vu32 *) (A_IOP_SIF_1454))
+
+
 
 #define R_PS1_CD_REG0 ((vu8 *) (A_PS1_CD_REG0))
 #define R_PS1_CD_REG1 ((vu8 *) (A_PS1_CD_REG1))
