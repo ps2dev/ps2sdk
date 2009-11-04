@@ -1,35 +1,32 @@
-IRX_NAME = iop_sbusdbg
-IRX_TARGET = $(IRX_NAME).irx
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id: Makefile 597 2004-09-21 16:15:05Z pixel $
 
-IOP_CPPFLAGS = -miop -O2 -G0 -I$(PS2SDKSRC)/iop/kernel/include -I$(PS2SDKSRC)/common/include -I$(PS2SDKSRC)/common/sbus/include -I$(PS2SDKSRC)/iop/debug/iopdebug/include -I./include -I./src -Wall -fno-builtin-printf -DIRX_NAME=$(IRX_NAME)
 
-IRX_OBJS = main.o sbus_dbg_low.o sbus_tty.o sbus_dbg.o
-IRX_OBJS := $(IRX_OBJS:%=obj/%)
+IOP_OBJS_DIR = obj/
+IOP_BIN_DIR = bin/
+IOP_SRC_DIR = src/
+IOP_INC_DIR = include/
 
-all: $(IRX_TARGET)
+IOP_BIN  = bin/iop_sbusdbg.irx
+IOP_OBJS = main.o sbus_dbg_low.o sbus_tty.o sbus_dbg.o imports.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
+IOP_INCS = -I$(PS2SDKSRC)/common/sbus/include -I$(PS2SDKSRC)/iop/debug/iopdebug/include
 
-obj/%.o: src/%.c
-	$(IOP_CC) $(IOP_CFLAGS) $(IOP_CPPFLAGS) -c $< -o $@
+IOP_CFLAGS  += -Wall -fno-builtin-printf
+IOP_LDFLAGS += -s
 
-obj/%.o: src/%.cpp
-	$(IOP_CXX) $(IOP_CXXFLAGS) $(IOP_CPPFLAGS) -c $< -o $@
-
-obj/%.o: src/%.S
-	$(IOP_CC) $(IOP_CPPFLAGS) -c $< -o $@
-
-obj/%.o: src/%.s
-	$(IOP_AS) $(IOP_ASFLAGS) -c $< -o $@
-
-$(IRX_TARGET): $(IRX_OBJS) src/imports.lst src/irx_imports.h
-	echo "#include \"irx_imports.h\"" > src/build-imports.c
-	cat src/imports.lst >> src/build-imports.c
-	$(IOP_CC) $(IOP_CFLAGS) $(IOP_CPPFLAGS) -c src/build-imports.c -o obj/imports.o
-	rm -f src/build-imports.c
-	$(IOP_CC) $(IOP_LDFLAGS) -miop -nostdlib -s -o bin/$(IRX_TARGET) $(IRX_OBJS) obj/imports.o
+all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 
 clean:
-	rm -f obj/*.o bin/$(IRX_TARGET)
-
-rebuild: clean all
+	rm -f -r $(IOP_OBJS_DIR) $(IOP_BIN_DIR)
 
 include $(PS2SDKSRC)/Defs.make
+include $(PS2SDKSRC)/iop/Rules.make
+include $(PS2SDKSRC)/iop/Rules.release
