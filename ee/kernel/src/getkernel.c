@@ -28,7 +28,7 @@ static void InitSyscallTable(void)
     ee_set_opmode(oldop);
     if(oldintr) { EIntr(); }
 }
-
+ 
 /** Get the address of an EE syscall handler function.
     @param syscall_no - The syscall number.
     @return - The address of the syscall handler function (or NULL)
@@ -54,6 +54,14 @@ void *GetSyscallHandler(int syscall_no)
 
     return (void *) addr;
 }
+#endif
+
+#ifdef F_GetSyscall
+/** Get the address of an EE syscall handler function. Deprecated, use GetSyscallHandler.
+    @param syscall_no - The syscall number.
+    @return - The address of the syscall handler function (or NULL)
+*/
+void *GetSyscall(int syscall_no) { return(GetSyscallHandler(syscall_no)); }
 #endif
 
 #ifdef F_GetExceptionHandler
@@ -118,7 +126,7 @@ void *GetInterruptHandler(int intr_cause_no)
     }
 
     // get address of the syscall "SetVInterruptHandler"
-    addr = GetSyscallHandler(15);
+    addr = (u32) GetSyscallHandler(15);
 
     // suspend interrupts and enter "kernel" operating mode.
     oldintr = DIntr();
