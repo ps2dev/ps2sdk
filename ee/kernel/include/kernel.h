@@ -350,6 +350,9 @@ int *__errno(void);
 int	npmPuts(const char *buf);
 int	nprintf(const char *format, ...) __attribute__((format(printf,1,2)));
 
+/* Legacy "GetSyscall".  Deprecated, use GetSyscallHandler. */
+void *GetSyscall(int syscall_no) __attribute__ ((deprecated));
+
 void *GetSyscallHandler(int syscall_no);
 void *GetExceptionHandler(int except_no);
 void *GetInterruptHandler(int intr_no);
