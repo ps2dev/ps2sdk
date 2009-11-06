@@ -69,7 +69,7 @@ CONFIG_OBJS := $(CONFIG_OBJS:%=$(EE_OBJS_DIR)%)
 TIMER_OBJS = cpu_ticks.o
 TIMER_OBJS := $(TIMER_OBJS:%=$(EE_OBJS_DIR)%)
 
-GETKERNEL_OBJS = GetSyscallHandler.o GetExceptionHandler.o GetInterruptHandler.o
+GETKERNEL_OBJS = GetSyscallHandler.o GetSyscall.o GetExceptionHandler.o GetInterruptHandler.o
 GETKERNEL_OBJS := $(GETKERNEL_OBJS:%=$(EE_OBJS_DIR)%)
 
 
