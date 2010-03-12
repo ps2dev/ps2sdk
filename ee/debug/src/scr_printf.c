@@ -66,6 +66,19 @@ static struct t_setupchar setupchar __attribute__ (( aligned (16) )) = {
 /* charmap must be 16 byte aligned.  */
 static u32	charmap[64] __attribute__ (( aligned (16) ));
 
+// from gsKit
+static int debug_detect_signal()
+{
+   char romname[14];
+   GetRomName((char *)romname);
+   if (romname[4] == 'E') {
+      return 1;
+   }
+   else {
+      return 0;
+   }
+}
+
 static void Init_GS( int a, int b, int c)
 {
    u64	*mem = (u64 *)0x12001000;
@@ -187,9 +200,15 @@ void init_scr()
    X = Y = 0;
    EI();
    DmaReset();
-/// EEUG: note that access to 0x1FC7FF52 causes
-///       crash on SCPH-77004. Probably this code must be revised
-   Init_GS( 0, ((*((char*)0x1FC7FF52))=='E')+2, 1);
+///// EEUG: note that access to 0x1FC7FF52 causes
+/////       crash on SCPH-77004. Probably this code must be revised
+//   Init_GS( 0, ((*((char*)0x1FC7FF52))=='E')+2, 1);
+     
+   if (debug_detect_signal() == 1)
+       Init_GS( 0, 3, 1);
+   else
+       Init_GS( 0, 2, 1);
+
    SetVideoMode();
    Dma02Wait();
    progdma( &setupscr, 15);
