@@ -58,6 +58,17 @@ typedef volatile signed long int	vs32;
 typedef volatile signed long long	vs64;
 #endif
 
+#ifdef _EE
+typedef union {
+	u128 qw;
+	u8   b[16];
+	u16  hw[8];
+	u32  sw[4];
+	u64  dw[2];
+} QWORD;
+
+#endif
+
 #ifndef NULL
 #define NULL	(void *)0
 #endif
