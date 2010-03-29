@@ -9,7 +9,7 @@
 
 EE_BIN = mpeg.elf
 EE_OBJS = mpeg.o
-EE_LIBS = -lgraph -ldma -lmpeg -lc -lpacket
+EE_LIBS = -ldraw -lgraph -ldma -lmpeg -lmf -lc -lpacket
 
 all: $(EE_BIN)
 	ee-strip --strip-all $(EE_BIN)

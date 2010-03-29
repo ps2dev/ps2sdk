@@ -17,11 +17,18 @@
 */
 #include "libmpeg.h"
 
+#include <dma_tags.h>
+#include <gif_tags.h>
+#include <gs_psm.h>
+#include <gs_gp.h>
+
 #include <kernel.h>
 #include <dma.h>
+#include <draw.h>
 #include <fileio.h>
 #include <malloc.h>
 #include <graph.h>
+#include <graph_vram.h>
 #include <packet.h>
 #include <stdio.h>
 
@@ -48,11 +55,28 @@ static void* InitCB ( void*, MPEGSequenceInfo* );
 
 int main ( void ) {
 /* read file (or part of it ) into memory */
- PACKET      lPck;
+ PACKET      *lPck = malloc(sizeof(PACKET));
+ QWORD       *q;
+ FRAMEBUFFER frame;
+ ZBUFFER z;
  InitCBParam lInfo;
  int         lFD = fioOpen ( MPEG_BITSTREAM_FILE, O_RDONLY );
  long        lSize;
  long        lPTS, lCurPTS;
+
+ frame.width = 640;
+ frame.height = 512;
+ frame.mask = 0;
+ frame.psm = GS_PSM_32;
+ frame.address = graph_vram_allocate(frame.width,frame.height, frame.psm, GRAPH_ALIGN_PAGE);
+
+ z.enable = 0;
+ z.mask = 0;
+ z.method = 0;
+ z.zsm = 0;
+ z.address = 0;
+
+ packet_allocate(lPck, 100, 0, 0);
 
  if ( lFD < 0 ) {
   printf ( "test_mpeg: could not open '%s'\n", MPEG_BITSTREAM_FILE );
@@ -83,33 +107,27 @@ int main ( void ) {
  }  /* end if */
 
  fioClose ( lFD );
+
 /* initialize DMAC (I have no idea what this code does as */
 /* I'm not quite familiar with ps2sdk)                    */
- dma_initialize ();
- dma_channel_initialize ( DMA_CHANNEL_toIPU, NULL, DMA_FLAG_NORMAL );
- dma_channel_initialize ( DMA_CHANNEL_GIF,   NULL, DMA_FLAG_CHAIN  );
+ dma_channel_initialize ( DMA_CHANNEL_toIPU, NULL, 0 );
+ dma_channel_initialize ( DMA_CHANNEL_GIF,   NULL, 0 );
+ dma_channel_fast_waits( DMA_CHANNEL_GIF );
+
 /* initialize graphics synthesizer */
- graph_initialize ();
- graph_set_mode ( GRAPH_MODE_AUTO, GRAPH_PSM_32, GRAPH_PSM_16S );
- graph_set_displaybuffer ( 0 );
- graph_set_drawbuffer ( 0 );
+ graph_initialize(0,640,512,GS_PSM_32,0,0);
+
 /* setup texture buffer address just after the framebuffer */
- lInfo.m_TexAddr = graph_get_width  () *
-                   graph_get_height () *
-                   (  graph_get_bpp () >> 3  );
+ lInfo.m_TexAddr = graph_vram_allocate(0,0,GS_PSM_32,GRAPH_ALIGN_BLOCK);
+
+ q = lPck->data;
+ q = draw_setup_environment(q,0,&frame,&z);
+
 /* clear screen */
- graph_set_clearbuffer ( 0, 0, 0 );
-/* ps2sdk's code sets XYOFFSET and TEST registers to some */
-/* "strange" values :). Let's set them to "ordinary" ones */
-/* and disable all pixel tests                            */
- packet_allocate ( &lPck, 48 );
-  packet_append_64 (  &lPck, GIF_SET_TAG( 2, 1, 0, 0, 0, 1 )  );
-  packet_append_64 (  &lPck, 0x0E  );
-  packet_append_64 (  &lPck, 0 );
-  packet_append_64 (  &lPck, GIF_REG_TEST_1 );
-  packet_append_64 (  &lPck, GIF_SET_XYOFFSET( 0, 0 )  );
-  packet_append_64 (  &lPck, GIF_REG_XYOFFSET_1 );
- packet_send ( &lPck, DMA_CHANNEL_GIF, DMA_FLAG_NORMAL );
+ q = draw_clear(q,0,0,0,640.0f,512.0f,0,0,0);
+
+ dma_channel_send_normal(DMA_CHANNEL_GIF, lPck->data, q - lPck->data, 0, 0);
+
 /* now it's time to initialize MPEG decoder (though it can be   */
 /* initialized any time). Just make sure that DMA transfers     */
 /* to and from IPU (and DRAM -> SPR) are not active, otherwise  */
@@ -146,18 +164,20 @@ int main ( void ) {
    else break;
   }  /* end if */
 /* now transfer decoded picture data into texture area of GS RAM */
-  packet_send ( &lInfo.m_XFerPck, DMA_CHANNEL_GIF, DMA_FLAG_CHAIN );
+  dma_wait_fast();
+  dma_channel_send_chain( DMA_CHANNEL_GIF, lInfo.m_XFerPck.data, lInfo.m_XFerPck.qwc, 0, 0);
 /* wait for vsync 2 times (we have interlaced frame mode)  */
   graph_wait_vsync ();
   graph_wait_vsync ();
 /* no need to wait for DMA transfer completion since vsyncs above */
 /* have enough lattency...                                        */
 /* ...and finally draw decoded picture...                         */
-  packet_send ( &lInfo.m_DrawPck, DMA_CHANNEL_GIF, DMA_FLAG_NORMAL );
+  dma_channel_send_normal( DMA_CHANNEL_GIF, lInfo.m_DrawPck.data, lInfo.m_DrawPck.qwc, 0, 0);
 /* ...and go back for the next one */
  }  /* end while */
 /* free memory and other resources */
  MPEG_Destroy ();
+
 end:
  printf ( "test_mpeg: test finished\n" );
  return SleepThread (), 0;
@@ -175,8 +195,9 @@ static int SetDMA ( void* apUserData ) {
 
  if ( s_pTransferPtr - s_pMPEGData >= s_MPEGDataSize ) return 0;
 
- dma_channel_send (
-  DMA_CHANNEL_toIPU, s_pTransferPtr, 2048, DMA_FLAG_NORMAL
+ dma_channel_wait(DMA_CHANNEL_toIPU,0);
+ dma_channel_send_normal(
+  DMA_CHANNEL_toIPU, s_pTransferPtr, 2048>>4, 0, 0
  );
  s_pTransferPtr += 2048;
 
@@ -184,11 +205,6 @@ static int SetDMA ( void* apUserData ) {
 
 }  /* end SetDMA */
 
-static int inline GS_PowerOf2 ( int aVal ) {
- int i;
- for ( i = 0; ( 1 << i ) < aVal; ++i );
- return i;
-}  /* end GS_PowerOf2 */
 /* This gets called when sequence start header is detected in the     */
 /* input bitstream. <apInfo> is filled by the decoder and callback    */
 /* function initializes display process and other required stuff      */
@@ -208,12 +224,13 @@ static void* InitCB ( void* apParam, MPEGSequenceInfo* apInfo ) {
  int          lMBW      = ( apInfo -> m_Width  ) >> 4;
  int          lMBH      = ( apInfo -> m_Height ) >> 4;
  int          lTBW      = ( apInfo -> m_Width + 63 ) >> 6;
- int          lTW       = GS_PowerOf2 ( apInfo -> m_Width  );
- int          lTH       = GS_PowerOf2 ( apInfo -> m_Height );
+ int          lTW       = draw_log2 ( apInfo -> m_Width  );
+ int          lTH       = draw_log2 ( apInfo -> m_Height );
  int          lX, lY;
  char*        lpImg;
+ QWORD*       q;
 
- lpParam -> m_TexAddr >>= 8;
+ lpParam -> m_TexAddr >>= 6;
 
  lpParam -> m_pData = lpImg = retVal;
  lpParam -> m_pInfo = apInfo;
@@ -223,53 +240,62 @@ static void* InitCB ( void* apParam, MPEGSequenceInfo* apInfo ) {
 /* 'subpictures' (macroblocks) and DMA controller */
 /* will transfer them all at once using source    */
 /* chain transfer mode.                           */
- packet_allocate (  &lpParam -> m_XFerPck, ( 10 + 12 * lMBW * lMBH ) << 3  );
- packet_append_64 (  &lpParam -> m_XFerPck, DMA_SET_TAG( 3, 0, DMA_TAG_CNT, 0, 0, 0 )  );
- packet_append_64 (  &lpParam -> m_XFerPck, 0  );
- packet_append_64 (  &lpParam -> m_XFerPck, GIF_SET_TAG( 2, 0, 0, 0, 0, 1 )  );
- packet_append_64 (  &lpParam -> m_XFerPck, 0x0E  );
- packet_append_64 (  &lpParam -> m_XFerPck, GIF_SET_TRXREG( 16, 16 )  );
- packet_append_64 (  &lpParam -> m_XFerPck, GIF_REG_TRXREG  );
- packet_append_64 (  &lpParam -> m_XFerPck, GIF_SET_BITBLTBUF( 0, 0, GRAPH_PSM_32, lpParam -> m_TexAddr, lTBW, GRAPH_PSM_32 )  );
- packet_append_64 (  &lpParam -> m_XFerPck, GIF_REG_BITBLTBUF  );
+ packet_allocate(&lpParam -> m_XFerPck,(10 + 12 * lMBW * lMBH )>>1,0,0);
+
+ q = lpParam-> m_XFerPck.data;
+
+ DMATAG_CNT(q, 3, 0, 0, 0);
+ q++;
+ PACK_GIFTAG(q,GIF_SET_TAG( 2, 0, 0, 0, 0, 1 ),GIF_REG_AD);
+ q++;
+ PACK_GIFTAG(q,GS_SET_TRXREG( 16, 16 ), GS_REG_TRXREG);
+ q++;
+ PACK_GIFTAG(q,GS_SET_BITBLTBUF( 0, 0, 0, lpParam -> m_TexAddr, lTBW, GS_PSM_32 ), GS_REG_BITBLTBUF);
+ q++;
 
  for ( lY = 0; lY < apInfo -> m_Height; lY += 16 ) {
   for ( lX = 0; lX < apInfo -> m_Width; lX += 16, lpImg  += 1024 ) {
-   packet_append_64 (  &lpParam -> m_XFerPck, DMA_SET_TAG( 4, 0, DMA_TAG_CNT, 0, 0, 0 )  );
-   packet_append_64 (  &lpParam -> m_XFerPck, 0 );
-   packet_append_64 (  &lpParam -> m_XFerPck, GIF_SET_TAG( 2, 0, 0, 0, 0, 1 )  );
-   packet_append_64 (  &lpParam -> m_XFerPck, 0x0E  );
-   packet_append_64 (  &lpParam -> m_XFerPck, GIF_SET_TRXPOS( 0, 0, lX, lY, 0 )  );
-   packet_append_64 (  &lpParam -> m_XFerPck, GIF_REG_TRXPOS  );
-   packet_append_64 (  &lpParam -> m_XFerPck, GIF_SET_TRXDIR( 0 )  );
-   packet_append_64 (  &lpParam -> m_XFerPck, GIF_REG_TRXDIR  );
-   packet_append_64 (  &lpParam -> m_XFerPck, GIF_SET_TAG( 64, 1, 0, 0, 2, 1 )  );
-   packet_append_64 (  &lpParam -> m_XFerPck, 0  );
-   packet_append_64 (  &lpParam -> m_XFerPck, DMA_SET_TAG( 64, 1, DMA_TAG_REF, 0, ( unsigned )lpImg, 0 )  );
-   packet_append_64 (  &lpParam -> m_XFerPck, 0  );
+   DMATAG_CNT(q, 4, 0, 0, 0 );
+   q++;
+   PACK_GIFTAG(q,GIF_SET_TAG( 2, 0, 0, 0, 0, 1 ), GIF_REG_AD );
+   q++;
+   PACK_GIFTAG(q,GS_SET_TRXPOS( 0, 0, lX, lY, 0 ), GS_REG_TRXPOS );
+   q++;
+   PACK_GIFTAG(q,GS_SET_TRXDIR( 0 ), GS_REG_TRXDIR );
+   q++;
+   PACK_GIFTAG(q,GIF_SET_TAG( 64, 1, 0, 0, 2, 0),0);
+   q++;
+   DMATAG_REF(q, 64, ( unsigned )lpImg, 0, 0, 0);
+   q++;
   }  /* end for */
  }  /* end for */
 
- packet_append_64 (  &lpParam -> m_XFerPck, DMA_SET_TAG( 0, 0, DMA_TAG_END, 0, 0, 0 )  );
- packet_append_64 (  &lpParam -> m_XFerPck, 0  );
+ //DMATAG_END(q,0,0,0,0);
+ //q++;
+
+ lpParam-> m_XFerPck.qwc = q - lpParam-> m_XFerPck.data;
+
 /* This initializes picture drawing packet. Just textrured sprite */
 /* that occupies the whole screen (no aspect ratio is taken into  */
 /* account for simplicity.                                        */
- packet_allocate (  &lpParam -> m_DrawPck, 112 );
- packet_append_64 (  &lpParam -> m_DrawPck, GIF_SET_TAG( 6, 1, 0, 0, 0, 1 )  );
- packet_append_64 (  &lpParam -> m_DrawPck, 0x0E  );
- packet_append_64 (  &lpParam -> m_DrawPck, GIF_SET_TEX0( lpParam -> m_TexAddr, lTBW, GRAPH_PSM_32, lTW, lTH, 1, 1, 0, 0, 0, 0, 0 )  );
- packet_append_64 (  &lpParam -> m_DrawPck, GIF_REG_TEX0_1 );
- packet_append_64 (  &lpParam -> m_DrawPck, GIF_SET_PRIM( 6, 0, 1, 0, 0, 0, 1, 0, 0 )  );
- packet_append_64 (  &lpParam -> m_DrawPck, GIF_REG_PRIM  );
- packet_append_64 (  &lpParam -> m_DrawPck, GIF_SET_UV( 0, 0 )  );
- packet_append_64 (  &lpParam -> m_DrawPck, GIF_REG_UV  );
- packet_append_64 (  &lpParam -> m_DrawPck, GIF_SET_XYZ( 0, 0, 0 )  );
- packet_append_64 (  &lpParam -> m_DrawPck, GIF_REG_XYZ2  );
- packet_append_64 (  &lpParam -> m_DrawPck, GIF_SET_UV( apInfo -> m_Width << 4, apInfo -> m_Height << 4 )  );
- packet_append_64 (  &lpParam -> m_DrawPck, GIF_REG_UV  );
- packet_append_64 (  &lpParam -> m_DrawPck, GIF_SET_XYZ(  graph_get_width () << 4, graph_get_height () << 4, 0 )  );
- packet_append_64 (  &lpParam -> m_DrawPck, GIF_REG_XYZ2  );
+ packet_allocate(&lpParam -> m_DrawPck,7,0,0);
+ q = lpParam -> m_DrawPck.data;
+ PACK_GIFTAG(q, GIF_SET_TAG( 6, 1, 0, 0, 0, 1 ), GIF_REG_AD );
+ q++;
+ PACK_GIFTAG(q, GS_SET_TEX0( lpParam -> m_TexAddr, lTBW, GS_PSM_32, lTW, lTH, 1, 1, 0, 0, 0, 0, 0 ), GS_REG_TEX0_1 );
+ q++;
+ PACK_GIFTAG(q, GS_SET_PRIM( 6, 0, 1, 0, 0, 0, 1, 0, 0 ), GS_REG_PRIM );
+ q++;
+ PACK_GIFTAG(q, GS_SET_UV( 0, 0 ), GS_REG_UV  );
+ q++;
+ PACK_GIFTAG(q, GS_SET_XYZ( 0, 0, 0 ), GS_REG_XYZ2 );
+ q++;
+ PACK_GIFTAG(q, GS_SET_UV( apInfo -> m_Width << 4, apInfo -> m_Height << 4 ), GS_REG_UV );
+ q++;
+ PACK_GIFTAG(q, GS_SET_XYZ(  640 << 4, 512 << 4, 0 ), GS_REG_XYZ2 );
+ q++;
+
+ lpParam -> m_DrawPck.qwc = q - lpParam -> m_DrawPck.data;
 
  return retVal;
 
