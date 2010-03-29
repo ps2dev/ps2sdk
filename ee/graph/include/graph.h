@@ -1,201 +1,134 @@
-/*
-# _____     ___ ____     ___ ____
-#  ____|   |    ____|   |        | |____|
-# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
-#-----------------------------------------------------------------------
-# (c) 2005 Dan Peori <peori@oopo.net>
-# Licenced under Academic Free License version 2.0
-# Review ps2sdk README & LICENSE files for further details.
-#
-*/
-
 #ifndef __GRAPH_H__
 #define __GRAPH_H__
 
- #include <graph_registers.h>
+// Sets screen mode
+#define GRAPH_MODE_AUTO				0	//  Automatic NTSC or PAL mode setting.
+#define GRAPH_MODE_NTSC				1	//  256 x  224 to 640 x 448
+#define GRAPH_MODE_PAL				2	//  256 x  256 to 640 x 512
+#define GRAPH_MODE_HDTV_480P		3	//  720 x  480
+#define GRAPH_MODE_HDTV_576P		4	//  656 x  576
+#define GRAPH_MODE_HDTV_720P		5	// 1280 x  720
+#define GRAPH_MODE_HDTV_1080I		6	// 1920 x 1080
+#define GRAPH_MODE_VGA_640_60		7	//  640 x  480 @ 60hz
+#define GRAPH_MODE_VGA_640_72		8	//  640 x  480 @ 72hz
+#define GRAPH_MODE_VGA_640_75		9	//  640 x  480 @ 75hz
+#define GRAPH_MODE_VGA_640_85		10	//  640 x  480 @ 85hz
+#define GRAPH_MODE_VGA_800_56		11	//  800 x  600 @ 56hz
+#define GRAPH_MODE_VGA_800_60		12	//  800 x  600 @ 60hz
+#define GRAPH_MODE_VGA_800_72		13	//  800 x  600 @ 72hz
+#define GRAPH_MODE_VGA_800_75		14	//  800 x  600 @ 75hz
+#define GRAPH_MODE_VGA_800_85		15	//  800 x  600 @ 85hz
+#define GRAPH_MODE_VGA_1024_60		16	// 1024 x  768 @ 60hz
+#define GRAPH_MODE_VGA_1024_70		17	// 1024 x  768 @ 70hz
+#define GRAPH_MODE_VGA_1024_75		18	// 1024 x  768 @ 75hz
+#define GRAPH_MODE_VGA_1024_85		19	// 1024 x  768 @ 85hz
+#define GRAPH_MODE_VGA_1280_60		20	// 1280 x 1024 @ 60hz
+#define GRAPH_MODE_VGA_1280_75		21	// 1280 x 1024 @ 75hz
 
- typedef struct { int width, height, mode, interlace, size; u64 display; } GRAPH_MODE;
+#define GRAPH_MODE_NONINTERLACED	0
+#define GRAPH_MODE_INTERLACED		1
+
+#define GRAPH_MODE_FIELD			0
+#define GRAPH_MODE_FRAME			1
+ 
+#define GRAPH_FIELD_EVEN			0
+#define GRAPH_FIELD_ODD				1
+
+// Generic use
+#define GRAPH_DISABLE				0
+#define GRAPH_ENABLE				1
+
+// Smode1 parameters
+#define GRAPH_GCONT_RGB				0
+#define GRAPH_GCONT_YCRCB			1
+
+#define GRAPH_CMOD_NTSC				2
+#define GRAPH_CMOD_PAL				3
+
+// Alpha Blending value to use
+#define GRAPH_VALUE_RC1				0
+#define GRAPH_VALUE_ALPHA			1
+
+// Alpha output value
+#define GRAPH_RC1_ALPHA				0
+#define GRAPH_RC2_ALPHA				1
+
+// Alpha blending method
+#define GRAPH_BLEND_RC2				0
+#define GRAPH_BLEND_BGCOLOR			1
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
- #define GRAPH_MODE_NTSC		0	//  640 x  448
- #define GRAPH_MODE_PAL			1	//  640 x  512
- #define GRAPH_MODE_HDTV_480P		2	//  640 x  480
- #define GRAPH_MODE_HDTV_720P		3	// 1280 x  720
- #define GRAPH_MODE_HDTV_1080I		4	// 1920 x 1080
- #define GRAPH_MODE_VGA_640		5	//  640 x  480 @ 60hz
- #define GRAPH_MODE_VGA_640_60		5	//  640 x  480 @ 60hz
- #define GRAPH_MODE_VGA_640_72		6	//  640 x  480 @ 72hz
- #define GRAPH_MODE_VGA_640_75		7	//  640 x  480 @ 75hz
- #define GRAPH_MODE_VGA_640_85		8	//  640 x  480 @ 85hz
- #define GRAPH_MODE_VGA_800		10	//  800 x  600 @ 60hz
- #define GRAPH_MODE_VGA_800_56		9	//  800 x  600 @ 56hz
- #define GRAPH_MODE_VGA_800_60		10	//  800 x  600 @ 60hz
- #define GRAPH_MODE_VGA_800_72		11	//  800 x  600 @ 72hz
- #define GRAPH_MODE_VGA_800_75		12	//  800 x  600 @ 75hz
- #define GRAPH_MODE_VGA_800_85		13	//  800 x  600 @ 85hz
- #define GRAPH_MODE_VGA_1024		14	// 1024 x  768 @ 60hz
- #define GRAPH_MODE_VGA_1024_60		14	// 1024 x  768 @ 60hz
- #define GRAPH_MODE_VGA_1024_70		15	// 1024 x  768 @ 70hz
- #define GRAPH_MODE_VGA_1024_75		16	// 1024 x  768 @ 75hz
- #define GRAPH_MODE_VGA_1024_85		17	// 1024 x  768 @ 85hz
- #define GRAPH_MODE_VGA_1280		18	// 1280 x 1024 @ 60hz
- #define GRAPH_MODE_VGA_1280_60		18	// 1280 x 1024 @ 60hz
- #define GRAPH_MODE_VGA_1280_75		19	// 1280 x 1024 @ 75hz
- #define GRAPH_MODE_NTSC_NI		20	//  640 x  224
- #define GRAPH_MODE_AUTO		99	// Automatic NTSC or PAL mode setting.
+	// Initializes a default NTSC/PAL mode with default settings.
+	int graph_initialize(int fbp, int width, int height, int psm, int x, int y);
 
- #define GRAPH_PSM_32			0x00	// 32 bits per pixel.
- #define GRAPH_PSM_24			0x01	// 24 bits per pixel.
- #define GRAPH_PSM_16			0x02	// 16 bits per pixel.
- #define GRAPH_PSM_16S			0x0A	// 16 bits per pixel.
- #define GRAPH_PSM_8			0x13	// 8 bits per pixel, palettized.
- #define GRAPH_PSM_4			0x14	// 4 bits per pixel, palettized.
- #define GRAPH_PSM_8H			0x1B	// 8 bits per pixel, palettized.
- #define GRAPH_PSM_4HH			0x24	// 4 bits per pixel, palettized.
- #define GRAPH_PSM_4HL			0x2C	// 4 bits per pixel, palettized.
+	// Retrieves the PS2's region for automatic mode selection.
+	int graph_get_region(void);
 
- #define GRAPH_NONINTERLACED		0x00	// The current mode is non-interlaced.
- #define GRAPH_INTERLACED		0x01	// The current mode is interlaced.
+	// Returns an aspect ratio calculated from system setting, width, and height
+	float graph_aspect_ratio(void);
 
- #define GRAPH_FIELD_EVEN		0x00	// Use even fields only.
- #define GRAPH_FIELD_ODD		0x01	// Use odd fields only.
- #define GRAPH_FIELD_BOTH		0x02	// Use both field types.
+	// Sets a default output method.
+	void graph_enable_output(void);
 
- /////////////////////
- // GRAPH FUNCTIONS //
- /////////////////////
+	// Turns off the read circuits.
+	void graph_disable_output(void);
 
- int graph_initialize(void);
- // Initialize the graphics library and hardware.
+	// Sets the graphics mode.
+	int graph_set_mode(int interlace, int mode, int ffmd, int flicker_filter);
 
- int graph_shutdown(void);
- // Shut down the graphics library and hardware.
+	// Sets the screen dimensions for the read circuits.
+	int graph_set_screen(int x, int y, int width, int height);
 
- ////////////////////////////
- // GRAPH CONFIG FUNCTIONS //
- ////////////////////////////
+	// Sets the framebuffer attributes for the read circuits with filter.
+	void graph_set_framebuffer_filtered(int fbp, int width, int psm, int x, int y);
 
- int graph_config_read(char *filename);
- // Reads a string from a file and sets it as the current config information.
- // The string format is: mode:psm:zpsm:
+	// Sets the framebuffer attributes for the read circuits.
+	void graph_set_framebuffer(int context, int fbp, int width, int psm, int x, int y);
 
- int graph_config_write(char *filename);
- // Writes the current mode information into a config file as a string.
- // The string format is: mode:psm:zpsm:
+	// Sets the background color for merge circuit.
+	void graph_set_bgcolor(unsigned char r, unsigned char g, unsigned char b);
 
- /////////////////////////
- // GRAPH GET FUNCTIONS //
- /////////////////////////
+	// Sets the read circuits and merge cicuit.
+	void graph_set_output(int rc1, int rc2, int alpha_select, int alpha_output, int blend_method, unsigned char alpha);
 
- float graph_get_aspect(void);
- // Returns the current aspect ratio. (value : 1)
+	// Add a vsync interrupt handler
+	int graph_add_vsync_handler(int (*vsync_callback)());
 
- int graph_get_bpp(void);
- // Returns the framebuffer bits-per-pixel.
+	// Remove a vsync interrupt handler
+	void graph_remove_vsync_handler(int callback_id);
 
- int graph_get_config(char *config);
- // Returns a string describing the current config information.
- // The string format is: mode:psm:zpsm:
+	// Starts a horizontal sync event and waits
+	void graph_wait_hsync(void);
 
- int graph_get_displaybuffer(void);
- // Returns the vram address of the display buffer, in bytes.
+	// Starts a vertical sync event and waits.
+	void graph_wait_vsync(void);
 
- int graph_get_displayfield(void);
- // Returns the currently displayed field value.
- // Used mainly for interlaced video modes.
+	// Checks if a vertical sync event is currently generated.
+	int graph_check_vsync(void);
 
- int graph_get_drawbuffer(void);
- // Returns the vram address of the draw buffer, in bytes.
+	// Starts a vertical sync event and returns immediately.
+	void graph_start_vsync(void);
 
- int graph_get_drawfield(void);
- // Returns the current draw field value.
- // Used mainly for interlaced video modes.
+	// Shut down the graphics library and hardware.
+	int graph_shutdown(void);
 
- int graph_get_height(void);
- // Returns the framebuffer height, in pixels.
-
- int graph_get_interlace(void);
- // Returns the interlacing value for the current mode.
-
- int graph_get_psm(void);
- // Returns the framebuffer pixel storage method.
-
- int graph_get_size(void);
- // Returns the size of the framebuffer, in bytes.
-
- int graph_get_width(void);
- // Returns the framebuffer width, in pixels.
-
- int graph_get_zbpp(void);
- // Returns the zbuffer bits-per-pixel.
-
- int graph_get_zbuffer(void);
- // Returns the vram address of the zbuffer, in bytes.
-
- int graph_get_zpsm(void);
- // Returns the zbuffer pixel storage method.
-
- int graph_get_zsize(void);
- // Returns the size of the zbuffer, in bytes.
-
- /////////////////////////
- // GRAPH SET FUNCTIONS //
- /////////////////////////
-
- int graph_set_clearbuffer(int red, int green, int blue);
- // Clears the draw buffer with the specified colour.
-
- int graph_set_config(char *config); 
- // Sets the current config information as described by a string.
- // The string format is: mode:psm:zpsm:
-
- int graph_set_displaybuffer(int address);
- // Sets the vram address of the display buffer, in bytes.
-
- int graph_set_drawbuffer(int address);
- // Sets the vram address of the draw buffer, in bytes.
-
- int graph_set_drawfield(int field);
- // Sets the draw field value.
- // Used mainly for interlaced video modes.
-
- int graph_set_mode(int mode, int psm, int zpsm);
- // Sets the graphics mode.
-
- int graph_set_mode_manual(int width, int height, int mode, int interlace, int size, u64 display, int psm, int zpsm);
- // Sets the graphic mode by specifying the actual graph_mode structure values.
-
- int graph_set_texture(int address, int width, int height, int psm);
- // Sets the texture information.
-
- int graph_set_zbuffer(int address);
- // Sets the vram address of the zbuffer, in bytes.
-
- //////////////////////////
- // GRAPH VRAM FUNCTIONS //
- //////////////////////////
-
- int graph_vram_read(int address, int width, int height, int psm, void *data, int data_size);
- // Downloads data from vram. Address is specified in bytes.
-
- int graph_vram_write(int address, int width, int height, int psm, void *data, int data_size);
- // Uploads data to vram. Address is specified in bytes.
-
- //////////////////////////
- // GRAPH WAIT FUNCTIONS //
- //////////////////////////
-
- int graph_wait_hsync(void);
- // Wait for a horizontal sync event to occur.
-
- int graph_wait_vsync(void);
- // Wait for a vertical sync event to occur.
+	///****************USE AT OWN RISK****************///
+	/// Sets PLL sync generator control register.     ///
+	///                                               ///
+	/// gcont sets RGB or RGB->YCrCb                  ///
+	/// cmod  sets the color subcarrier               ///
+	/// 2 = NTSC 3 = PAL                              ///
+	///                                               ///
+	/// Doesn't work...                               ///
+	///                                               ///
+	///void graph_set_smode1(char cmod, char gcont);  ///
+	///****************USE AT OWN RISK****************///
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /*__GRAPH_H__*/

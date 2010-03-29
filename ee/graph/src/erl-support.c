@@ -14,9 +14,9 @@
 #include <erl.h>
 
 char * erl_id = "libgraph";
-char * erl_dependancies[] = {
+char * erl_dependancies[] =
+{
     "libkernel",
-    "libdma",
-    "libpacket",
+	"libc",
     0
 };

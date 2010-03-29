@@ -9,7 +9,7 @@
 
 EE_BIN = graph.elf
 EE_OBJS = graph.o
-EE_LIBS = -lgraph -ldma -lc -lpacket
+EE_LIBS = -lpacket -ldma -lgraph -ldraw -lc -lm
 
 all: $(EE_BIN)
 	ee-strip --strip-all $(EE_BIN)

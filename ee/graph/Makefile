@@ -12,9 +12,9 @@ EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
-EE_INCS += -I../dma/include -I../packet/include -I../math3d/include -I../rpc/cdvd/include 
+EE_INCS += -I../dma/include -I../packet/include -I../rpc/cdvd/include
 
-EE_OBJS = graph.o erl-support.o
+EE_OBJS = graph.o graph_mode.o graph_vram.o graph_config.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
 EE_LIB = $(EE_LIB_DIR)libgraph.a
