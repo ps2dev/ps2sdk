@@ -1,153 +1,141 @@
+#include <string.h>
+#include <stdlib.h>
+#include <packet.h>
 
- #include <tamtypes.h>
+#define SPR_BEGIN 0x70000000
 
- #include <dma.h>
- #include <stdlib.h>
- #include <packet.h>
+int packet_allocate(PACKET *packet, int num, int ucab, int spr)
+{
 
- //////////////////////
- // PACKET FUNCTIONS //
- //////////////////////
+	if (packet == NULL)
+	{
 
- int packet_allocate(PACKET *packet, int size) {
+		return 0;
 
-  // Check the packet argument.
-  if (packet == NULL) { return -1; }
+	}
 
-  // Allocate the data area.
-  if ((packet->data = memalign(128, size)) == NULL) { return -1; }
+	if (spr && (num >= 0x1000))
+	{
 
-  // Save the data size.
-  packet->size = size;
+		(u32*)packet->data = (u32*)SPR_BEGIN; 
+		packet->total = 0x1000;
 
-  // Reset the packet.
-  if (packet_reset(packet) < 0) { return -1; }
-
-  // End function.
   return 0;
 
  }
 
- int packet_reset(PACKET *packet) {
+	// Size of qwords in bytes.
+	int byte_size = num << 4;
 
-  // Check the packet argument.
-  if (packet == NULL) { return -1; }
+	// Allocate the data area in bytes aligned to cache line.
+	if ((packet->data = memalign(64, byte_size)) == NULL)
+	{
 
-  // Reset the packet counter.
-  packet->count = 0;
+		return -1;
+
+ }
+
+	// Set the pointer attribute to ucab space.
+	if (ucab)
+	{
+
+		(u32)packet->data |= (u32)0x30000000;
+
+	}
+
+	// Clear the packet area.
+	memset(packet->data, 0, byte_size);
+
+	// Set the packet counts
+	packet->qwc = 0;
+	packet->total = num;
+	packet->spr = spr;
+	packet->ucab = ucab;
 
   // End function.
   return 0;
 
- }
+}
 
- int packet_append_8(PACKET *packet, u8 data) {
+void packet_free(PACKET *packet)
+{
 
-  // Check the packet argument.
-  if (packet == NULL) { return -1; }
+	// Free the allocated data buffer.
+	if (packet->spr)
+	{
 
-  // Check the packet data area.
-  if (packet->data == NULL) { return -1; }
+		packet->data = NULL; 
+		return;
 
-  // Append the data to the packet.
-  *(u8 *)(&packet->data[packet->count]) = data;
+	}
 
-  // Increment the counter.
-  if ((packet->count += sizeof(u8)) > packet->size) { return -1; }
+	if (packet->ucab) 
+	{
 
-  // End function.
-  return 0;
-
- }
-
- int packet_append_16(PACKET *packet, u16 data) {
-
-  // Check the packet argument.
-  if (packet == NULL) { return -1; }
-
-  // Check the packet data area.
-  if (packet->data == NULL) { return -1; }
-
-  // Append the data to the packet.
-  *(u16 *)(&packet->data[packet->count]) = data;
-
-  // Increment the counter.
-  if ((packet->count += sizeof(u16)) > packet->size) { return -1; }
-
-  // End function.
-  return 0;
+		(u32)packet->data ^= 0x30000000;
+		return;
 
  }
 
- int packet_append_32(PACKET *packet, u32 data) {
+	free(packet->data);
+	free(packet);
 
-  // Check the packet argument.
-  if (packet == NULL) { return -1; }
+}
 
-  // Check the packet data area.
-  if (packet->data == NULL) { return -1; }
+void packet_reset(PACKET *packet)
+{
 
-  // Append the data to the packet.
-  *(u32 *)(&packet->data[packet->count]) = data;
+	// Reset the quadword counter.
+	packet->qwc = 0;
 
-  // Increment the counter.
-  if ((packet->count += sizeof(u32)) > packet->size) { return -1; }
+	if (packet->spr) 
+	{
 
-  // End function.
-  return 0;
-
- }
-
- int packet_append_64(PACKET *packet, u64 data) {
-
-  // Check the packet argument.
-  if (packet == NULL) { return -1; }
-
-  // Check the packet data area.
-  if (packet->data == NULL) { return -1; }
-
-  // Append the data to the packet.
-  *(u64 *)(&packet->data[packet->count]) = data;
-
-  // Increment the counter.
-  if ((packet->count += sizeof(u64)) > packet->size) { return -1; }
-
-  // End function.
-  return 0;
+		(u8*)packet->data = (u8*)SPR_BEGIN;
+		return;
 
  }
 
- int packet_send(PACKET *packet, int dma_channel, int dma_flags) {
+	if (packet->ucab)
+	{
 
-  // Check the packet argument.
-  if (packet == NULL) { return -1; }
+		(u32)packet->data ^= 0x30000000;
 
-  // Check the packet data area.
-  if (packet->data == NULL) { return -1; }
+	}
 
-  // Fill out the packet out for quadword alignment.
-  while (packet->count & 0x000F) { packet_append_8(packet, 0); }
+	// Zero out the data
+	memset(packet->data, 0, packet->total << 4);
 
-  // Send the packet data.
-  if (dma_channel_send(dma_channel, packet->data, packet->count, dma_flags) < 0) { return -1; }
+	if (packet->ucab)
+	{
 
-  // End function.
-  return 0;
+		(u32)packet->data ^= 0x30000000;
 
  }
 
- int packet_free(PACKET *packet) {
+}
 
-  // Check the packet argument.
-  if (packet == NULL) { return -1; }
+// For those that like getters and setters
+QWORD *packet_get_qword(PACKET *packet)
+{
 
-  // Check the packet data area.
-  if (packet->data == NULL) { return -1; }
+	return packet->data;
 
-  // Free the allocated data buffer.
-  free(packet->data);
+}
 
-  // End function.
-  return 0;
+QWORD *packet_increment_qwc(PACKET *packet, int num)
+{
 
- }
+	// Check if we have enough qwords left
+	if ((packet->qwc += num) > packet->total) 
+	{
+
+		// Return the old qword count
+		packet->qwc -= num;
+
+	}
+
+	// Return the current qword count
+	return packet->data + packet->qwc+1;
+
+}
