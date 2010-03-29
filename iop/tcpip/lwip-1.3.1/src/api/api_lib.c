@@ -52,6 +52,7 @@
 #include "lwip/udp.h"
 #include "lwip/tcp.h"
 
+#include <stdio.h>
 #include <string.h>
 
 /**

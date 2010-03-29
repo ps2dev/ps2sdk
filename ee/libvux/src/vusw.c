@@ -902,7 +902,7 @@ int VuxClipSxyz(VU_SXYZ *sxyz0, VU_SXYZ *sxyz1, VU_SXYZ *sxyz2)
 
 int VuxClipW(VU_VECTOR *tv0)
 {
-	int	ret;
+	int	ret = 0;
 
 	return ret;
 }

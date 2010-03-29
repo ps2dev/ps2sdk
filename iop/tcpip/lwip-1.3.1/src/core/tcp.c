@@ -51,6 +51,7 @@
 #include "lwip/tcp.h"
 #include "lwip/debug.h"
 
+#include <stdio.h>
 #include <string.h>
 
 /* Incremented every coarse grained timer shot (typically every 500 ms). */

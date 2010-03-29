@@ -52,6 +52,7 @@
 #include "lwip/udp.h"
 #include "lwip/tcpip.h"
 
+#include <stdio.h>
 #include <string.h>
 
 #define NUM_SOCKETS MEMP_NUM_NETCONN

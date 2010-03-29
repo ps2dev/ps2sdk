@@ -15,6 +15,7 @@
 #include <tamtypes.h>
 #include <sifcmd.h>
 #include <kernel.h>
+#include <osd_config.h>
 #include <stdarg.h>
 #include <debug.h>
 

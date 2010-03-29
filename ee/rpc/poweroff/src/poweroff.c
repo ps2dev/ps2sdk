@@ -70,7 +70,9 @@ int poweroffInit()
 	while(((res = SifBindRpc(&cd0, PWROFF_IRX, 0)) >= 0) && (cd0.server == NULL))
 		nopdelay();
 
-	ee_thread_t thread, thisThread;
+	ee_thread_t thread;
+	ee_thread_status_t thisThread;
+
 	ee_sema_t sema;
 	int tid;
 

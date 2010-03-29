@@ -59,6 +59,7 @@
 #include "netif/ppp_oe.h"
 #endif /* PPPOE_SUPPORT */
 
+#include <stdio.h>
 #include <string.h>
 
 /** the time an ARP entry stays valid after its last update,

@@ -54,6 +54,7 @@
 #include "lwip/stats.h"
 #include "lwip/snmp.h"
 
+#include <stdio.h>
 #include <string.h>
 
 /* Forward declarations.*/

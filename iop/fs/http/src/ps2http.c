@@ -174,7 +174,7 @@ int httpConnect( struct sockaddr_in * server, char *hostAddr, const char * url, 
 	rc = connect( sockHandle, (struct sockaddr *) server, sizeof(*server));
 	if ( rc < 0 )
 	{
-		printf( "HTTP: CONNECT FAILED %i\n", peerHandle );
+		printf( "HTTP: CONNECT FAILED %i\n", sockHandle );
 		return -1;
 	}
 	peerHandle = sockHandle;

@@ -74,6 +74,7 @@
 #include "lwip/tcp.h"
 #endif
 
+#include <stdio.h>
 #include <string.h>
 
 #define SIZEOF_STRUCT_PBUF        LWIP_MEM_ALIGN_SIZE(sizeof(struct pbuf))

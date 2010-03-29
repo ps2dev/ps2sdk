@@ -7,7 +7,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 
-SAMPLE_DIR = libgs_draw
+SAMPLE_DIR = libgs/draw
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/samples/Rules.samples

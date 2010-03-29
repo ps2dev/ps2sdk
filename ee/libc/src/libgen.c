@@ -18,51 +18,51 @@
 #endif
 
 #ifdef F_basename
-const char *basename(const char *path)
+char *basename(char *path)
 {
-	char *last_slash;
+    static char base[PATH_MAX];
+    char *end;
 
-	last_slash = strrchr(path, '/');
-	if (last_slash != NULL)
-	{
-		return (last_slash + 1);
-	}
-	else
-	{
-		return path;
-	}
+    strcpy(base,".");
+
+    if (path == NULL || *path == '\0')
+        return base;
+
+    if ((end = strrchr(path, '/')) != NULL);
+    else if ((end = strrchr(path, '\\')) != NULL);
+    else if ((end = strrchr(path, ':')) != NULL);
+    else { strcpy(base,path); return base; }
+
+    end++;
+
+    if (*end != '\0')
+        strcpy(base,end);
+
+    return base;
 }
 #endif
 
 #ifdef F_dirname
-const char *dirname(const char *path)
+char *dirname(char *path)
 {
-	static char result[PATH_MAX];
-	char *last_slash;
+    static char dir[PATH_MAX];
+    char *end;
 
-	if (path == NULL || path[0] == '\0')
-	{
-		/* return local directory if no file specified */
-		return ".";
-	}
+    strcpy(dir,".");
 
-	last_slash = strrchr(path, '/');
-	if (last_slash != NULL)
-	{
-		/* strip up until the last slash */
-		int len = last_slash - path;
-		if (len >= PATH_MAX)
-		{ 
-			/* not enough memory */
-			return NULL;
-		}
+    if (path == NULL || *path == '\0')
+        return dir;
 
-		memcpy(result, path, len);
-		result[len] = '\0';
-		return result;
-	}
+    if ((end = strrchr(path, '/')) != NULL);
+    else if ((end = strrchr(path, '\\')) != NULL);
+    else if ((end = strrchr(path, ':')) != NULL);
+    else return dir;    
 
-	/* no slashes at all */
-	return ".";
+    if (*end == ':') end++;
+
+    memcpy(dir,path,end-path);
+    dir[end-path] = '\0';
+
+    return dir;
 }
 #endif

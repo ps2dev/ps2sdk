@@ -25,7 +25,7 @@ extern volatile s32 cdCallbackNum;
 extern volatile s32 cbSema;
 
 extern s32 cdThreadId;
-extern ee_thread_t cdThreadParam;
+extern ee_thread_status_t cdThreadParam;
 
 extern s32 bindNCmd;
 extern s32 bindSCmd;

@@ -43,6 +43,7 @@
 #include "lwip/netbuf.h"
 #include "lwip/memp.h"
 
+#include <stdio.h>
 #include <string.h>
 
 /**

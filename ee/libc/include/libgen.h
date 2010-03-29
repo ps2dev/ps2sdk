@@ -21,13 +21,13 @@ extern "C" {
     @param path
     @return last component of path
 */
-const char *basename (const char *path);
+char *basename (char *path);
 
 /** Extract the directory portion of a pathname
     @param path
     @return directory location of file
 */
-const char *dirname (const char *path);
+char *dirname (char *path);
 
 #ifdef __cplusplus
 }

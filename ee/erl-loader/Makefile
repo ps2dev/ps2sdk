@@ -43,7 +43,7 @@ $(LOADER_BIN) : $(EE_OBJS) $(PS2SDKSRC)/ee/startup/obj/crt0.o
 #	rm $(EE_SRC_DIR)exports.c
 
 clean:
-	rm -f -r $(EE_OBJS_DIR) $(EE_BIN_DIR)
+	rm -f -r $(EE_OBJS_DIR) $(EE_BIN_DIR) $(EE_SRC_DIR)exports.c
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make

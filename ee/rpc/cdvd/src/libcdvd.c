@@ -72,7 +72,7 @@ volatile CdCBFunc cdCallbackFunc __attribute__ ((aligned(64)));
 
 // threads
 s32 cdThreadId = 0;
-ee_thread_t cdThreadParam;
+ee_thread_status_t cdThreadParam;
 s32 callbackThreadId = 0;
 ee_thread_t callbackThreadParam;
 
@@ -100,7 +100,7 @@ extern vs32 cbSema;
 extern vs32 cdCallbackNum;
 extern volatile CdCBFunc cdCallbackFunc;
 extern s32 cdThreadId;
-extern ee_thread_t cdThreadParam;
+extern ee_thread_status_t cdThreadParam;
 extern s32 callbackThreadId;
 extern ee_thread_t callbackThreadParam;
 extern s32 diskReadyMode;

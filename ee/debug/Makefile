@@ -19,7 +19,7 @@ EE_SRC_DIR = src/
 EE_INC_DIR = include/
 EE_SAMPLE_DIR = samples/
 
-EE_INCS = -I../graph/include
+EE_INCS = -I../graph/include -I../rpc/cdvd/include
 
 EE_LIB = $(LIBDEBUG_LIB)
 

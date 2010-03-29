@@ -84,7 +84,7 @@ void *GetExceptionHandler(int ex_cause_no)
     }
     
     // get address of the syscall "SetVTLBRefillHandler"
-    addr = GetSyscallHandler(13);
+    addr = (u32)GetSyscallHandler(13);
 
     // suspend interrupts and enter "kernel" operating mode.
     oldintr = DIntr();
@@ -133,8 +133,8 @@ void *GetInterruptHandler(int intr_cause_no)
     oldop = ee_set_opmode(0);
 
     // harvest the address of the corresponding exception handler table.
-    lo16 = ((vu32 *) addr)[0x10 / 4];
-    hi16 = ((vu32 *) addr)[0x1C / 4];
+    hi16 = ((vu32 *) addr)[0x10 / 4];
+    lo16 = ((vu32 *) addr)[0x1C / 4];
 
     addr = ((u32 *) ((u32) (hi16 << 16) | lo16))[intr_cause_no];
 

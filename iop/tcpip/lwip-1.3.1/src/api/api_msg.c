@@ -52,6 +52,7 @@
 #include "lwip/igmp.h"
 #include "lwip/dns.h"
 
+#include <stdio.h>
 #include <string.h>
 
 /* forward declarations */
