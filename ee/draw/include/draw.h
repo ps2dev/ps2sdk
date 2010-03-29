@@ -1,69 +1,45 @@
-/*
-# _____     ___ ____     ___ ____
-#  ____|   |    ____|   |        | |____|
-# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
-#-----------------------------------------------------------------------
-# (c) 2005 Dan Peori <peori@oopo.net>
-# Licenced under Academic Free License version 2.0
-# Review ps2sdk README & LICENSE files for further details.
-#
-*/
-
 #ifndef __DRAW_H__
 #define __DRAW_H__
 
- #include <tamtypes.h>
+#include <tamtypes.h>
 
- #include <graph.h>
- #include <math3d.h>
+#include <draw_blending.h>
+#include <draw_buffers.h>
+#include <draw_dithering.h>
+#include <draw_fog.h>
+#include <draw_masking.h>
+#include <draw_primitives.h>
+#include <draw_sampling.h>
+#include <draw_tests.h>
+#include <draw_types.h>
+
+#define DRAW_DISABLE	0
+#define DRAW_ENABLE		1
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
- ////////////////////
- // DRAW FUNCTIONS //
- ////////////////////
+	// Sets up the drawing environment based on the framebuffer and zbuffer settings
+	QWORD *draw_setup_environment(QWORD *q, int context, FRAMEBUFFER *frame, ZBUFFER *z);
 
- int draw_initialize(int mode, int bpp, int zbpp);
- // Initialize the draw library and set the specified mode.
+	// Clear the screen based on the screen's origin, width, and height using the defined color.
+	QWORD *draw_clear(QWORD *q, int context, float x, float y, float width, float height, int r, int g, int b);
 
- int draw_swap(void);
- // Swap the current display and draw buffers.
+	// Signal that drawing is finished
+	QWORD *draw_finish(QWORD *q);
 
- int draw_clear(float red, float green, float blue);
- // Clear the current draw buffer with the specified colours.
- // Valid range for red, green and blue is: 0.00f - 1.00f
+	// Wait until finish event occurs
+	void draw_wait_finish(void);
 
- /////////////////////////////
- // DRAW GENERATE FUNCTIONS //
- /////////////////////////////
+	// Creates a dma chain filled with image information
+	QWORD *draw_texture_transfer(QWORD *q, void *src, int bytes, int width, int height, int psm, int buffer_width, int dest);
 
- int draw_generate_xyz(u64 *output, int count, VECTOR *vertices);
- // Generate XYZ register values for an array of vertices.
- // Valid range for vertex values are: -1.00f - 1.00f
-
- int draw_generate_rgbaq(u64 *output, int count, VECTOR *vertices, VECTOR *colours);
- // Generate RGBAQ register values from an array of vertices and colours.
- // Valid range for vertex values are: -1.00f - 1.00f
- // Valid range for colour values are:  0.00f - 1.00f
-
- int draw_generate_st(u64 *output, int count, VECTOR *vertices, VECTOR *coordinates);
- // Generate ST register values from an array of vertices and texture coordinates.
- // Valid range for texture coordinates are: 0.00f - 1.00f
-
- //////////////////////////////
- // DRAW PRIMITIVE FUNCTIONS //
- //////////////////////////////
-
- int draw_triangles(int *points, int count, u64 *xyz, u64 *rgbaq);
- // Draw untextured triangles from an array of points and register values.
-
- int draw_triangles_textured(int *points, int count, u64 *xyz, u64 *rgbaq, u64 *st);
- // Draw textured triangles from an array of points and register values.
+	// Flush the texture cache
+	QWORD *draw_texture_flush(QWORD *q);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /*__DRAW_H__*/

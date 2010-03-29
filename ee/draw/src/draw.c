@@ -1,310 +1,291 @@
-/*
-# _____     ___ ____     ___ ____
-#  ____|   |    ____|   |        | |____|
-# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
-#-----------------------------------------------------------------------
-# (c) 2005 Dan Peori <peori@oopo.net>
-# Licenced under Academic Free License version 2.0
-# Review ps2sdk README & LICENSE files for further details.
-#
-*/
+#include <dma_tags.h>
+#include <gif_tags.h>
+
+#include <gs_privileged.h>
+#include <gs_gp.h>
+#include <gs_psm.h>
+
+#include <draw.h>
+#include <draw2d.h>
+
+QWORD *draw_setup_environment(QWORD *q, int context, FRAMEBUFFER *frame, ZBUFFER *z)
+{
+
+	// Change this if modifying the gif packet after the giftag.
+	int qword_count = 14;
+
+	ALPHATEST atest;
+	DESTTEST  dtest;
+	DEPTHTEST ztest;
+	BLEND blend;
+	WRAP wrap;
+
+	atest.enable = DRAW_ENABLE;
+	atest.method = ATEST_METHOD_NOTEQUAL;
+	atest.compval = 0x00;
+	atest.keep = ATEST_KEEP_FRAMEBUFFER;
+
+	dtest.enable = DRAW_DISABLE;
+	dtest.pass = DRAW_DISABLE;
+
+	// Enable or Disable ZBuffer
+	if (z->enable)
+	{
+		ztest.enable = DRAW_ENABLE;
+		ztest.method = z->method;
+	}
+	else
+	{
+		z->mask = 1;
+		ztest.enable = DRAW_ENABLE;
+		ztest.method = ZTEST_METHOD_ALLPASS;
+	}
+
+	// Setup alpha blending
+	blend.color1 = BLEND_COLOR_SOURCE;
+	blend.color2 = BLEND_COLOR_DEST;
+	blend.alpha  = BLEND_ALPHA_SOURCE;
+	blend.color3 = BLEND_COLOR_DEST;
+	blend.fixed_alpha = 0x80;
+
+	// Setup whole texture clamping
+	wrap.horizontal = WRAP_CLAMP;
+	wrap.vertical = WRAP_CLAMP;
+	wrap.minu = wrap.maxu = 0;
+	wrap.minv = wrap.maxv = 0;
+
+	// Begin packed gif data packet with another qword.
+	PACK_GIFTAG(q,GIF_SET_TAG(qword_count,0,0,0,GIF_FLG_PACKED,1),GIF_REG_AD);
+	q++;
+	// Framebuffer setting
+	PACK_GIFTAG(q, GS_SET_FRAME(frame->address>>11,frame->width>>6,frame->psm,frame->mask), GS_REG_FRAME + context);
+	q++;
+	// ZBuffer setting
+	PACK_GIFTAG(q, GS_SET_ZBUF(z->address>>11,z->zsm,z->mask), GS_REG_ZBUF + context);
+	q++;
+	// Override Primitive Control
+	PACK_GIFTAG(q, GS_SET_PRMODECONT(PRIM_OVERRIDE_DISABLE),GS_REG_PRMODECONT);
+	q++;
+	// Primitive coordinate offsets
+	PACK_GIFTAG(q, GS_SET_XYOFFSET(0,0), GS_REG_XYOFFSET + context);
+	q++;
+	// Scissoring area
+	PACK_GIFTAG(q, GS_SET_SCISSOR(0,frame->width-1,0,frame->height-1), GS_REG_SCISSOR + context);
+	q++;
+	// Pixel testing
+	PACK_GIFTAG(q, GS_SET_TEST(atest.enable,atest.method,atest.compval,atest.keep,
+							   dtest.enable,dtest.pass,
+							   ztest.enable,ztest.method), GS_REG_TEST + context);
+	q++;
+	// Fog Color
+	PACK_GIFTAG(q, GS_SET_FOGCOL(0,0,0), GS_REG_FOGCOL);
+	q++;
+	// Per-pixel Alpha Blending (Blends if MSB of ALPHA is true)
+	PACK_GIFTAG(q, GS_SET_PABE(DRAW_DISABLE), GS_REG_PABE);
+	q++;
+	// Alpha Blending
+	PACK_GIFTAG(q, GS_SET_ALPHA(blend.color1,blend.color2,blend.alpha,
+								blend.color3,blend.fixed_alpha), GS_REG_ALPHA + context);
+	q++;
+	// Dithering
+	PACK_GIFTAG(q, GS_SET_DTHE(GS_DISABLE), GS_REG_DTHE);
+	q++;
+	PACK_GIFTAG(q, GS_SET_DIMX(4,2,5,3,0,6,1,7,5,3,4,2,1,7,0,6), GS_REG_DIMX);
+	q++;
+	// Color Clamp
+	PACK_GIFTAG(q,GS_SET_COLCLAMP(GS_ENABLE),GS_REG_COLCLAMP);
+	q++;
+	// Alpha Correction
+	if ((frame->psm == GS_PSM_16) || (frame->psm == GS_PSM_16S))
+	{
+		PACK_GIFTAG(q,GS_SET_FBA(ALPHA_CORRECT_RGBA16),GS_REG_FBA + context);
+		q++;
+	}
+	else
+	{
+		PACK_GIFTAG(q,GS_SET_FBA(ALPHA_CORRECT_RGBA32),GS_REG_FBA + context);
+		q++;
+	}
+	// Texture wrapping/clamping
+	PACK_GIFTAG(q, GS_SET_CLAMP(wrap.horizontal,wrap.vertical,wrap.minu,
+								wrap.maxu,wrap.minv,wrap.maxv), GS_REG_CLAMP + context);
+	q++;
 
- #include <tamtypes.h>
+	return q;
 
- #include <dma.h>
- #include <draw.h>
- #include <graph.h>
- #include <math3d.h>
- #include <packet.h>
+}
 
- PACKET draw_packet;
+QWORD *draw_disable_tests(QWORD *q, int context, ZBUFFER *z)
+{
 
- ////////////////////
- // DRAW FUNCTIONS //
- ////////////////////
+	PACK_GIFTAG(q,GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
+	q++;
+	PACK_GIFTAG(q, GS_SET_TEST(DRAW_ENABLE,ATEST_METHOD_NOTEQUAL,0x00,ATEST_KEEP_FRAMEBUFFER,
+							   DRAW_DISABLE,DRAW_DISABLE,
+							   DRAW_ENABLE,ZTEST_METHOD_ALLPASS), GS_REG_TEST + context);
+	q++;
 
- int draw_initialize(int mode, int bpp, int zbpp) {
+	return q;
 
-  // Initialize the graphics library.
-  if (graph_initialize() < 0) { return -1; }
+}
 
-  // Set the graphics mode.
-  if (graph_set_mode(mode, bpp, zbpp) < 0) { return -1; }
+QWORD *draw_enable_tests(QWORD *q, int context, ZBUFFER *z)
+{
 
-  // If the mode is interlaced...
-  if (graph_get_interlace() == GRAPH_INTERLACED) {
+	PACK_GIFTAG(q,GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
+	q++;
+	PACK_GIFTAG(q, GS_SET_TEST(DRAW_ENABLE,ATEST_METHOD_NOTEQUAL,0x00,ATEST_KEEP_FRAMEBUFFER,
+							   DRAW_DISABLE,DRAW_DISABLE,
+							   DRAW_ENABLE,z->method), GS_REG_TEST + context);
+	q++;
 
-   // Set the display buffer address.
-   if (graph_set_displaybuffer(0) < 0) { return -1; }
+	return q;
 
-   // Set the draw buffer address.
-   if (graph_set_drawbuffer(0) < 0) { return -1; }
+}
 
-   // Set the zbuffer address.
-   if (graph_set_zbuffer(graph_get_size()) < 0) { return -1; }
+QWORD *draw_clear(QWORD *q, int context, float x, float y, float width, float height, int r, int g, int b)
+{
 
-  // Else, the mode is non-interlaced...
-  } else {
+	VERTEX v0;
+	VERTEX v1;
+	COLOR c0;
 
-   // Set the display buffer address.
-   if (graph_set_displaybuffer(0) < 0) { return -1; }
+	float q0 = 1.0f;
 
-   // Set the draw buffer address.
-   if (graph_set_drawbuffer(graph_get_size()) < 0) { return -1; }
+	v0.x = x;
+	v0.y = y;
+	v0.z = 0x00000000;
 
-   // Set the zbuffer address.
-   if (graph_set_zbuffer(graph_get_size() * 2) < 0) { return -1; }
+	v1.x = x + width - 0.9375f;
+	v1.y = y + height - 0.9375f;
+	v1.z = 0x00000000;
 
-  }
+	c0.rgbaq = GS_SET_RGBAQ(r,g,b,0x80,*(unsigned int*)&q0);
 
-  // Initialize the packet.
-  if (packet_allocate(&draw_packet, 1024) < 0) { return -1; }
+	PACK_GIFTAG(q, GIF_SET_TAG(2,0,0,0,0,1), GIF_REG_AD);
+	q++;
+	PACK_GIFTAG(q, GS_SET_PRMODECONT(PRIM_OVERRIDE_ENABLE),GS_REG_PRMODECONT);
+	q++;
+	PACK_GIFTAG(q, GS_SET_PRMODE(0,0,0,0,0,0,context,1), GS_REG_PRMODE);
+	q++;
 
-  // Wait and clear both buffers.
-  draw_swap(); draw_clear(0.00f, 0.00f, 0.00f);
-  draw_swap(); draw_clear(0.00f, 0.00f, 0.00f);
+	q = draw_rect_filled_strips(q, context, &v0, &v1, &c0);
 
-  // End function.
-  return 0;
+	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,0,1), GIF_REG_AD);
+	q++;
+	PACK_GIFTAG(q, GS_SET_PRMODECONT(PRIM_OVERRIDE_DISABLE),GS_REG_PRMODECONT);
+	q++;
 
- }
+	return q;
 
- int draw_swap(void) {
+}
 
-  // If the mode is interlaced...
-  if (graph_get_interlace() == GRAPH_INTERLACED) {
+QWORD *draw_finish(QWORD *q)
+{
 
-   // If the display field is even.
-   if (graph_get_displayfield() == GRAPH_FIELD_EVEN) {
+	PACK_GIFTAG(q,GIF_SET_TAG(1,1,0,0,GIF_FLG_PACKED,1),GIF_REG_AD);
+	q++;
+	PACK_GIFTAG(q,1,GS_REG_FINISH);
+	q++;
 
-    // Set the drawfield to odd.
-    if (graph_set_drawfield(GRAPH_FIELD_ODD) < 0) { return -1; }
+	return q;
 
-   // Else, the display field is odd...
-   } else {
+}
 
-    // Set the drawfield to even.
-    if (graph_set_drawfield(GRAPH_FIELD_EVEN) < 0) { return -1; }
+void draw_wait_finish(void)
+{
 
-   }
+	while(!(*GS_REG_CSR & 2));
+	*GS_REG_CSR |= 2;
 
-  // Else, the mode is non-interlaced...
-  } else { int temp = 0;
+}
 
-   // Save the display buffer address.
-   temp = graph_get_displaybuffer();
+QWORD *draw_texture_flush(QWORD *q)
+{
 
-   // Set the display buffer address.
-   if (graph_set_displaybuffer(graph_get_drawbuffer()) < 0) { return -1; }
+	// Flush texture buffer
+	DMATAG_END(q,2,0,0,0);
+	q++;
+	PACK_GIFTAG(q,GIF_SET_TAG(1,1,0,0,GIF_FLG_PACKED,1),GIF_REG_AD);
+	q++;
+	PACK_GIFTAG(q,1,GS_REG_TEXFLUSH);
+	q++;
 
-   // Set the draw buffer address.
-   if (graph_set_drawbuffer(temp) < 0) { return -1; }
+	return q;
 
-  }
+}
 
-  // End function.
-  return 0;
+QWORD *draw_texture_transfer(QWORD *q, void *src, int bytes, int width, int height, int psm, int dest, int dest_width)
+{
 
- }
+	int i;
+	int remaining;
+	int qwords = bytes >> 4;
 
- int draw_clear(float red, float green, float blue) {
+	// Determine number of iterations based on the number of qwords
+	// that can be handled per dmatag
+	i = qwords / GIF_BLOCK_SIZE;
 
-  // Reset the packet.
-  if (packet_reset(&draw_packet) < 0) { return -1; }
+	// Now calculate the remaining image data left over
+	remaining  = qwords % GIF_BLOCK_SIZE;
 
-  // Clear the draw buffer and zbuffer.
-  packet_append_64(&draw_packet, GIF_SET_TAG(6, 1, 0, 0, GIF_TAG_PACKED, 1));
-  packet_append_64(&draw_packet, 0x0E);
-  packet_append_64(&draw_packet, GIF_SET_TEST(0, 0, 0, 0, 0, 0, 1, 1));
-  packet_append_64(&draw_packet, GIF_REG_TEST_1);
-  packet_append_64(&draw_packet, GIF_SET_PRIM(6, 0, 0, 0, 0, 0, 0, 0, 0));
-  packet_append_64(&draw_packet, GIF_REG_PRIM);
-  packet_append_64(&draw_packet, GIF_SET_RGBAQ((int)(red * 128), (int)(green * 128), (int)(blue * 128), 0x80, 0x3F800000));
-  packet_append_64(&draw_packet, GIF_REG_RGBAQ);
-  packet_append_64(&draw_packet, GIF_SET_XYZ(0x0000, 0x0000, 0x0000));
-  packet_append_64(&draw_packet, GIF_REG_XYZ2);
-  packet_append_64(&draw_packet, GIF_SET_XYZ(0xFFFF, 0xFFFF, 0x0000));
-  packet_append_64(&draw_packet, GIF_REG_XYZ2);
-  packet_append_64(&draw_packet, GIF_SET_TEST(0, 0, 0, 0, 0, 0, 1, 2));
-  packet_append_64(&draw_packet, GIF_REG_TEST_1);
+	// Setup the transfer
+	DMATAG_CNT(q,5,0,0,0);
+	q++;
+	PACK_GIFTAG(q,GIF_SET_TAG(4,0,0,0,GIF_FLG_PACKED,1),GIF_REG_AD);
+	q++;
+	PACK_GIFTAG(q,GS_SET_BITBLTBUF(0,0,0,dest>>6,dest_width>>6,psm),GS_REG_BITBLTBUF);
+	q++;
+	PACK_GIFTAG(q,GS_SET_TRXPOS(0,0,0,0,0),GS_REG_TRXPOS);
+	q++;
+	PACK_GIFTAG(q,GS_SET_TRXREG(width,height),GS_REG_TRXREG);
+	q++;
+	PACK_GIFTAG(q,GS_SET_TRXDIR(0),GS_REG_TRXDIR);
+	q++;
 
-  // Send the packet.
-  if (packet_send(&draw_packet, DMA_CHANNEL_GIF, DMA_FLAG_NORMAL) < 0) { return -1; }
 
-  // End function.
-  return 0;
+	while(i-- > 0)
+	{
 
- }
+		// Setup image data dma chain
+		DMATAG_CNT(q,1,0,0,0);
+		q++;
+		PACK_GIFTAG(q,GIF_SET_TAG(GIF_BLOCK_SIZE,0,0,0,2,0),0);
+		q++;
+		DMATAG_REF(q,GIF_BLOCK_SIZE,(unsigned int)src,0,0,0);
+		q++;
 
- /////////////////////////////
- // DRAW GENERATE FUNCTIONS //
- /////////////////////////////
+		//Now increment the address by the number of qwords in bytes
+		src += (GIF_BLOCK_SIZE*4);
 
- int draw_generate_xyz(u64 *output, int count, VECTOR *vertices) {
-  int loop0; unsigned int max_z;
+	}
 
-  // Find the maximum Z value.
-  max_z = 1 << (graph_get_zbpp() - 1);
+	if(remaining)
+	{
 
-  // For each vertex...
-  for (loop0=0;loop0<count;loop0++) {
+		// Setup remaining image data dma chain
+		DMATAG_CNT(q,1,0,0,0);
+		q++;
+		PACK_GIFTAG(q,GIF_SET_TAG(remaining,0,0,0,2,0),0);
+		q++;
+		DMATAG_REF(q,remaining,(unsigned int)src,0,0,0);
+		q++;
 
-   // Calculate the XYZ register value.
-   output[loop0] = GIF_SET_XYZ(
-    (int)((vertices[loop0][0] + 1.00f) *  32768),
-    (int)((vertices[loop0][1] + 1.00f) * -32768),
-    (int)((vertices[loop0][2] + 1.00f) * max_z)
-   );
+	}
 
-  }
+	return q;
 
-  // End function.
-  return 0;
+}
 
- }
+unsigned char draw_log2(unsigned int x)
+{
 
- int draw_generate_rgbaq(u64 *output, int count, VECTOR *vertices, VECTOR *colours) {
-  int loop0; float q = 1.00f;
+	unsigned char res;
 
-  // For each colour...
-  for (loop0=0;loop0<count;loop0++) {
+	__asm__ __volatile__ ("plzcw %0, %1\n\t" : "=r" (res) : "r" (x));
 
-   // Calculate the Q value.
-   if (vertices[loop0][3] != 0) { q = 1 / vertices[loop0][3]; }
+	res = 31 - (res + 1);
+	res += (x > (1<<res) ? 1 : 0);
 
-   // Calculate the RGBAQ register value.
-   output[loop0] = GIF_SET_RGBAQ(
-    (int)(colours[loop0][0] * 128),
-    (int)(colours[loop0][1] * 128),
-    (int)(colours[loop0][2] * 128),
-    (int)(colours[loop0][3] * 128),
-    *(unsigned int *)&q
-   );
-
-  }
-
-  // End function.
-  return 0;
-
- }
-
- int draw_generate_st(u64 *output, int count, VECTOR *vertices, VECTOR *coords) {
-  int loop0; float q = 1.00f, s = 1.00f, t = 1.00f;
-
-  // For each coordinate...
-  for (loop0=0;loop0<count;loop0++) {
-
-   // Calculate the Q value.
-   if (vertices[loop0][3] != 0) { q = 1 / vertices[loop0][3]; }
-
-   // Calculate the S and T values.
-   s = (float)(coords[loop0][0] * q);
-   t = (float)(coords[loop0][1] * q);
-
-   // Calculate the ST register value.
-   output[loop0] = GIF_SET_ST(
-    *(unsigned int *)&s,
-    *(unsigned int *)&t
-   );
-
-  }
-
-  // End function.
-  return 0;
-
- }
-
- //////////////////////////////
- // DRAW PRIMITIVE FUNCTIONS //
- //////////////////////////////
-
- int draw_triangles(int *points, int count, u64 *xyz, u64 *rgbaq) {
-  int loop0;
-
-  // If the packet is too small...
-  if (draw_packet.size < (48 + (16 * count))) {
-
-   // Free the packet.
-   packet_free(&draw_packet);
-
-   // Allocate a larger packet.
-   packet_allocate(&draw_packet, (48 + (16 * count)));
-
-  }
-
-  // Reset the packet.
-  if (packet_reset(&draw_packet) < 0) { return -1; }
-
-  // Set up the draw process.
-  packet_append_64(&draw_packet, GIF_SET_TAG(1, 0, 0, 0, GIF_TAG_PACKED, 1));
-  packet_append_64(&draw_packet, 0x000000000000000E);
-  packet_append_64(&draw_packet, GIF_SET_PRIM(3, 1, 0, 0, 0, 0, 0, 0, 0));
-  packet_append_64(&draw_packet, GIF_REG_PRIM);
-  packet_append_64(&draw_packet, GIF_SET_TAG(count, 1, 0, 0, GIF_TAG_REGLIST, 2));
-  packet_append_64(&draw_packet, 0x0000000000000051);
-
-  // For each point...
-  for (loop0=0;loop0<count;loop0++) {
-
-   // Add the RGBAQ register value.
-   packet_append_64(&draw_packet, rgbaq[points[loop0]]);
-
-   // Add the XYZ register value.
-   packet_append_64(&draw_packet, xyz[points[loop0]]);
-
-  }
-
-  // Send the packet.
-  if (packet_send(&draw_packet, DMA_CHANNEL_GIF, DMA_FLAG_NORMAL) < 0) { return -1; }
-
-  // End function.
-  return 0;
-
- }
-
- int draw_triangles_textured(int *points, int count, u64 *xyz, u64 *rgbaq, u64 *st) {
-  int loop0;
-
-  // If the packet is too small...
-  if (draw_packet.size < (48 + (16 * count))) {
-
-   // Free the packet.
-   packet_free(&draw_packet);
-
-   // Allocate a larger packet.
-   packet_allocate(&draw_packet, (48 + (16 * count)));
-
-  }
-
-  // Reset the packet.
-  if (packet_reset(&draw_packet) < 0) { return -1; }
-
-  // Set up the draw process.
-  packet_append_64(&draw_packet, GIF_SET_TAG(1, 0, 0, 0, GIF_TAG_PACKED, 1));
-  packet_append_64(&draw_packet, 0x000000000000000E);
-  packet_append_64(&draw_packet, GIF_SET_PRIM(3, 1, 1, 0, 0, 0, 0, 0, 0));
-  packet_append_64(&draw_packet, GIF_REG_PRIM);
-  packet_append_64(&draw_packet, GIF_SET_TAG(count, 1, 0, 0, GIF_TAG_REGLIST, 3));
-  packet_append_64(&draw_packet, 0x0000000000000512);
-
-  // For each point...
-  for (loop0=0;loop0<count;loop0++) {
-
-   // Add the ST register value.
-   packet_append_64(&draw_packet, st[points[loop0]]);
-
-   // Add the RGBAQ register value.
-   packet_append_64(&draw_packet, rgbaq[points[loop0]]);
-
-   // Add the XYZ register value.
-   packet_append_64(&draw_packet, xyz[points[loop0]]);
-
-  }
-
-  // Send the packet.
-  if (packet_send(&draw_packet, DMA_CHANNEL_GIF, DMA_FLAG_NORMAL) < 0) { return -1; }
-
-  // End function.
-  return 0;
-
- }
+	return res;
+}

@@ -15,7 +15,7 @@
 
 char * erl_id = "libdraw";
 char * erl_dependancies[] = {
-    "libgraph",
-    "libpacket",
+	"libc",
+	"libmf",
     0
 };

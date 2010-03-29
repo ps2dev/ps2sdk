@@ -9,86 +9,144 @@
 #
 */
 
- #include <tamtypes.h>
+#include <kernel.h>
+#include <stdlib.h>
+#include <tamtypes.h>
+#include <math3d.h>
 
- #include <dma.h>
- #include <draw.h>
- #include <stdio.h>
- #include <graph.h>
- #include <malloc.h>
- #include <math3d.h>
- #include <packet.h>
- #include <string.h>
+#include <dma_tags.h>
+#include <gif_tags.h>
+#include <gs_psm.h>
 
- #include "mesh_data.c"
+#include <dma.h>
 
- VECTOR object_position = { 0.00f, 0.00f, 0.00f, 1.00f };
- VECTOR object_rotation = { 0.00f, 0.00f, 0.00f, 1.00f };
+#include <graph.h>
+#include <graph_vram.h>
 
- VECTOR camera_position = { 0.00f, 0.00f, 100.00f, 1.00f };
- VECTOR camera_rotation = { 0.00f, 0.00f,   0.00f, 1.00f };
+#include <draw.h>
+#include <draw3d.h>
 
- int light_count = 4;
+#include "mesh_data.c"
 
- VECTOR light_direction[4] = {
+VECTOR camera_position = { 0.00f, 0.00f, 100.00f, 1.00f };
+VECTOR camera_rotation = { 0.00f, 0.00f,   0.00f, 1.00f };
+
+VECTOR *temp_normals;
+VECTOR *temp_lights;
+VECTOR *temp_colours;
+VECTOR *temp_vertices;
+
+XYZ *xyz;
+COLOR *rgbaq;
+
+int light_count = 4;
+
+VECTOR light_direction[4] = {
   {  0.00f,  0.00f,  0.00f, 1.00f },
   {  1.00f,  0.00f, -1.00f, 1.00f },
   {  0.00f,  1.00f, -1.00f, 1.00f },
   { -1.00f, -1.00f, -1.00f, 1.00f }
- };
+};
 
- VECTOR light_colour[4] = {
+VECTOR light_colour[4] = {
   { 0.00f, 0.00f, 0.00f, 1.00f },
   { 1.00f, 0.00f, 0.00f, 1.00f },
   { 0.30f, 0.30f, 0.30f, 1.00f },
   { 0.50f, 0.50f, 0.50f, 1.00f }
- };
+};
 
- int light_type[4] = {
+int light_type[4] = {
   LIGHT_AMBIENT,
   LIGHT_DIRECTIONAL,
   LIGHT_DIRECTIONAL,
   LIGHT_DIRECTIONAL
- };
+};
 
- //////////////////
- // MAIN PROGRAM //
- //////////////////
+void init_gs(FRAMEBUFFER *frame, ZBUFFER *z)
+{
 
- int main(int argc, char **argv) {
+	// Define a 32-bit 640x512 framebuffer.
+	frame->width = 640;
+	frame->height = 512;
+	frame->mask = 0;
+	frame->psm = GS_PSM_32;
 
-  MATRIX local_world;
-  MATRIX local_light;
-  MATRIX world_view;
-  MATRIX view_screen;
-  MATRIX local_screen;
+	// Allocate some vram for our framebuffer.
+	frame->address = graph_vram_allocate(frame->width,frame->height, frame->psm, GRAPH_ALIGN_PAGE);
 
-  VECTOR *temp_normals;
-  VECTOR *temp_lights;
-  VECTOR *temp_colours;
-  VECTOR *temp_vertices;
+	frame++;
 
-  u64 *xyz;
-  u64 *rgbaq;
+	frame->width = 640;
+	frame->height = 512;
+	frame->mask = 0;
+	frame->psm = GS_PSM_32;
 
-  // Allocate calculation space.
-  temp_normals  = memalign(128, sizeof(VECTOR) * vertex_count);
-  temp_lights   = memalign(128, sizeof(VECTOR) * vertex_count);
-  temp_colours  = memalign(128, sizeof(VECTOR) * vertex_count);
-  temp_vertices = memalign(128, sizeof(VECTOR) * vertex_count);
+	// Allocate some vram for our framebuffer.
+	frame->address = graph_vram_allocate(frame->width,frame->height, frame->psm, GRAPH_ALIGN_PAGE);
 
-  // Allocate register space.
-  xyz   = memalign(128, sizeof(u64) * vertex_count);
-  rgbaq = memalign(128, sizeof(u64) * vertex_count);
+	// Enable the zbuffer.
+	z->enable = DRAW_ENABLE;
+	z->mask = 0;
+	z->method = ZTEST_METHOD_GREATER_EQUAL;
+	z->zsm = GS_ZBUF_32;
+	z->address = graph_vram_allocate(frame->width,frame->height,z->zsm, GRAPH_ALIGN_PAGE);
 
-  // Initialize the draw library.
-  draw_initialize(GRAPH_MODE_AUTO, GRAPH_PSM_32, GRAPH_PSM_32);
+	// Initialize the screen and tie the first framebuffer to the read circuits.
+	graph_initialize(frame->address,frame->width,frame->height,frame->psm,0,0);
 
-  // Create the view_screen matrix.
-  create_view_screen(view_screen, graph_get_aspect(), -3.00f, 3.00f, -3.00f, 3.00f, 1.00f, 2000.00f);
+}
 
-  // The main loop...
-  for (;;) {
+void init_drawing_environment(PACKET *packet, FRAMEBUFFER *frame, ZBUFFER *z)
+{
+
+	// This is our generic qword pointer.
+	QWORD *q = packet->data;
+
+	// This will setup a default drawing environment.
+	q = draw_setup_environment(q,0,frame,z);
+
+	// Now reset the primitive origin to 2048-width/2,2048-height/2.
+	q = draw_primitive_xyoffset(q,0,(2048-320),(2048-256));
+
+	// Finish setting up the environment.
+	q = draw_finish(q);
+
+	// Now send the packet, no need to wait since it's the first.
+	dma_channel_send_normal(DMA_CHANNEL_GIF,packet->data,q - packet->data, 0, 0);
+
+}
+
+void flip_buffers(PACKET *flip,FRAMEBUFFER *frame)
+{
+
+	QWORD *q = flip->data;
+
+	q = draw_framebuffer(q,0,frame);
+	q = draw_finish(q);
+
+	dma_wait_fast();
+	dma_channel_send_normal_ucab(DMA_CHANNEL_GIF,flip->data,q - flip->data, 0);
+
+	draw_wait_finish();
+
+}
+
+QWORD *render_teapot(QWORD *q,MATRIX view_screen, VECTOR object_position, VECTOR object_rotation, PRIMITIVE *prim, COLOR *color, FRAMEBUFFER *frame, ZBUFFER *z)
+{
+
+	int i;
+
+	QWORD *dmatag;
+
+	MATRIX local_world;
+	MATRIX local_light;
+	MATRIX world_view;
+
+	MATRIX local_screen;
+
+	// Now grab our qword pointer and increment past the dmatag.
+	dmatag = q;
+	q++;
 
    // Spin the teapot a bit.
    object_rotation[0] += 0.008f; while (object_rotation[0] > 3.14f) { object_rotation[0] -= 6.28f; }
@@ -118,27 +176,168 @@
    // Calculate the vertex values.
    calculate_vertices(temp_vertices, vertex_count, vertices, local_screen);
 
-   // Generate the XYZ register values.
-   draw_generate_xyz(xyz, vertex_count, temp_vertices);
+	// Convert floating point vertices to fixed point and translate to center of screen.
+	draw_convert_xyz(xyz, 2048, 2048, 32, vertex_count, (VERTEXF*)temp_vertices);
 
-   // Generate the RGBAQ register values.
-   draw_generate_rgbaq(rgbaq, vertex_count, temp_vertices, temp_colours);
+	// Convert floating point colours to fixed point.
+	draw_convert_rgbq(rgbaq, vertex_count, (VERTEXF*)temp_vertices, (COLORF*)temp_colours, color->a);
 
-   // Wait for vsync.
+	// Draw the triangles using triangle primitive type.
+	q = draw_prim_start(q,0,prim,color);
+
+	for(i = 0; i < points_count; i++)
+	{
+		q->dw[0] = rgbaq[points[i]].rgbaq;
+		q->dw[1] = xyz[points[i]].xyz;
+		q++;
+	}
+
+	q = draw_prim_end(q,2,DRAW_RGBAQ_REGLIST,1);
+
+	// Define our dmatag for the dma chain.
+	DMATAG_CNT(dmatag,q-dmatag-1,0,0,0);
+
+
+	return q;
+
+}
+
+int render(PACKET *packet, FRAMEBUFFER *frame, ZBUFFER *z)
+{
+
+	int context = 0;
+
+	PACKET flip_pkt;
+
+	QWORD *q;
+	QWORD *dmatag;
+
+	PRIMITIVE prim;
+	COLOR color;
+
+	MATRIX view_screen;
+
+	packet_allocate(&flip_pkt,3,1,0);
+
+	VECTOR object_position = { 0.00f, 0.00f, 0.00f, 1.00f };
+	VECTOR object_rotation = { 0.00f, 0.00f, 0.00f, 1.00f };
+
+	// Define the triangle primitive we want to use.
+	prim.type = PRIM_TRIANGLE;
+	prim.shading = PRIM_SHADE_GOURAUD;
+	prim.mapping = DRAW_DISABLE;
+	prim.fogging = DRAW_DISABLE;
+	prim.blending = DRAW_ENABLE;
+	prim.antialiasing = DRAW_DISABLE;
+	prim.mapping_type = DRAW_DISABLE;
+	prim.colorfix = PRIM_UNFIXED;
+
+	color.r = 0x80;
+	color.g = 0x80;
+	color.b = 0x80;
+	color.a = 0x80;
+	color.q = 1.0f;
+
+	// Allocate calculation space.
+	temp_normals  = memalign(128, sizeof(VECTOR) * vertex_count);
+	temp_lights   = memalign(128, sizeof(VECTOR) * vertex_count);
+	temp_colours  = memalign(128, sizeof(VECTOR) * vertex_count);
+	temp_vertices = memalign(128, sizeof(VECTOR) * vertex_count);
+
+	// Allocate register space.
+	xyz   = memalign(128, sizeof(u64) * vertex_count);
+	rgbaq = memalign(128, sizeof(u64) * vertex_count);
+
+	// Create the view_screen matrix.
+	create_view_screen(view_screen, graph_aspect_ratio(), -3.00f, 3.00f, -3.00f, 3.00f, 1.00f, 2000.00f);
+
+	for (;;)
+	{
+
+		q = packet[context].data;
+
+		dmatag = q;
+		q++;
+
+		// Clear framebuffer without any pixel testing.
+		q = draw_disable_tests(q,0,z);
+		q = draw_clear(q,0,2048.0f-320.0f,2048.0f-256.0f,frame->width,frame->height,0x00,0x00,0x00);
+		q = draw_enable_tests(q,0,z);
+
+		DMATAG_CNT(dmatag,q-dmatag - 1,0,0,0);
+
+		//render teapots
+		color.a = 0x40;
+		object_position[0] = 30.0f;
+		q = render_teapot(q, view_screen, object_position, object_rotation, &prim, &color, frame, z);
+
+		object_position[0] = -30.0f;
+		q = render_teapot(q, view_screen, object_position, object_rotation, &prim, &color, frame, z);
+
+		color.a = 0x80;
+		object_position[0] = 0.0f;
+		object_position[1] = -20.0f;
+		q = render_teapot(q, view_screen, object_position, object_rotation, &prim, &color, frame, z);
+
+		object_position[1] = 20.0f;
+		q = render_teapot(q, view_screen, object_position, object_rotation, &prim, &color, frame, z);
+
+		object_position[0] = 0.0f;
+		object_position[1] = 0.0f;
+
+		dmatag = q;
+		q++;
+
+		q = draw_finish(q);
+
+		DMATAG_END(dmatag,q-dmatag-1,0,0,0);
+
+		// Now send our current dma chain.
+		dma_wait_fast();
+		dma_channel_send_chain(DMA_CHANNEL_GIF,packet[context].data, q - packet[context].data, 0, 0);
+
+		// Either block until a vsync, or keep rendering until there's one available.
    graph_wait_vsync();
 
-   // Swap the buffers.
-   draw_swap();
+		draw_wait_finish();
+		graph_set_framebuffer_filtered(frame[context].address,frame[context].width,frame[context].psm,0,0);
 
-   // Clear the screen.
-   draw_clear(0.00f, 0.00f, 0.00f);
+		// Switch context.
+		context ^= 1;
 
-   // Draw the triangles.
-   draw_triangles(points, points_count, xyz, rgbaq);
+		// We need to flip buffers outside of the chain, for some reason.
+		flip_buffers(&flip_pkt,&frame[context]);
 
   }
+
+}
+
+int main(int argc, char **argv)
+{
+
+	// The buffers to be used.
+	FRAMEBUFFER frame[2];
+	ZBUFFER z;
+
+	// The data packets for double buffering dma sends.
+	PACKET packets[2];
+
+	packet_allocate(&packets[0],40000,0,0);
+	packet_allocate(&packets[1],40000,0,0);
+
+	// Init GIF dma channel.
+	dma_channel_initialize(DMA_CHANNEL_GIF,NULL,0);
+	dma_channel_fast_waits(DMA_CHANNEL_GIF);
+
+	// Init the GS, framebuffer, and zbuffer.
+	init_gs(frame, &z);
+
+	// Init the drawing environment and framebuffer.
+	init_drawing_environment(packets,frame,&z);
+
+	render(packets,frame,&z);
 
   // End program.
   return 0;
 
- }
+}
