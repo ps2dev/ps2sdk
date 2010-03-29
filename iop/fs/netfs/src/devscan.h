@@ -21,7 +21,7 @@
 /*! \brief Device scan mask.
  *  \ingroup ps2netfs 
  */
-#define DEVSCAN_MASK (IOP_DT_FS)
+#define DEVSCAN_MASK (IOP_DT_FS | IOP_DT_BLOCK)
 
 /*! \brief Device type structure.
  *  \ingroup ps2netfs 
