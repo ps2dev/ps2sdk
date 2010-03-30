@@ -14,6 +14,8 @@
 #include <tamtypes.h>
 #include <math3d.h>
 
+#include <packet.h>
+
 #include <dma_tags.h>
 #include <gif_tags.h>
 #include <gs_psm.h>
