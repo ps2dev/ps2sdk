@@ -702,17 +702,24 @@ void* fileXioRpc_Lseek(unsigned int* sbuff)
 }
 
 // Send:   Offset 0 = fd (int)
-// Send:   Offset 4 = offset (long)
+// Send:   Offset 4 = offset (long long)
 // Send:   Offset 12 = whence (int)
-// Return: Offset 0 = return status (int)
+// Return: Offset 0 = return status (long long)
 void* fileXioRpc_Lseek64(unsigned int* sbuff)
 {
-	int ret;
+	long long ret;
 	#ifdef DEBUG
 		printf("RPC Lseek64 Request\n");
 	#endif
-	ret=lseek64(sbuff[0/4],(long)sbuff[4/4],sbuff[12/4]);
-	sbuff[0] = ret;
+
+	long long offsetHI = sbuff[8/4];
+	offsetHI = offsetHI << 32;
+	long long offset = offsetHI | sbuff[4/4];
+
+	ret=lseek64(sbuff[0/4],offset,sbuff[12/4]);
+	sbuff[0/4] = (int)(ret & 0xffffffff);
+	sbuff[4/4] = (int)((ret >> 32) & 0xffffffff);
+
 	return sbuff;
 }
 

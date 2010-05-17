@@ -75,7 +75,7 @@ typedef struct _iop_device_ops {
 	int	(*sync)(iop_file_t *, const char *, int);
 	int	(*mount)(iop_file_t *, const char *, const char *, int, void *, unsigned int);
 	int	(*umount)(iop_file_t *, const char *);
-	int	(*lseek64)(iop_file_t *, long long, int);
+	long long (*lseek64)(iop_file_t *, long long, int);
 	int	(*devctl)(iop_file_t *, const char *, int, void *, unsigned int, void *, unsigned int);
 	int	(*symlink)(iop_file_t *, const char *, const char *);
 	int	(*readlink)(iop_file_t *, const char *, char *, unsigned int);
@@ -137,7 +137,7 @@ int mount(const char *fsname, const char *devname, int flag, void *arg, size_t a
 #define I_mount DECLARE_IMPORT(28, mount)
 int umount(const char *fsname);
 #define I_umount DECLARE_IMPORT(29, umount)
-int lseek64(int fd, long long offset, int whence);
+long long lseek64(int fd, long long offset, int whence);
 #define I_lseek64 DECLARE_IMPORT(30, lseek64)
 int devctl(const char *name, int cmd, void *arg, size_t arglen, void *buf, size_t buflen);
 #define I_devctl DECLARE_IMPORT(31, devctl)

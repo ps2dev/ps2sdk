@@ -539,11 +539,11 @@ int fileXioLseek(int fd,long offset,int whence)
 }
 
 //
-// NOTE: needs to be fixed! 64-bit
+// NOTE: 64-bit
 //
-int fileXioLseek64(int fd, long long offset, int whence)
+long long fileXioLseek64(int fd, long long offset, int whence)
 {
-	volatile int rv;
+	long long rv;
 
 	if(fileXioInit() < 0)
 		return -ENOPKG;
@@ -552,14 +552,20 @@ int fileXioLseek64(int fd, long long offset, int whence)
 	WaitSema(fileXioCompletionSema);
 
 	sbuff[0/4] = fd;
-	sbuff[4/4] = offset;
-	sbuff[8/4] = whence;
+	sbuff[4/4] = (int)(offset & 0xffffffff);
+	sbuff[8/4] = (int)((offset >> 32) & 0xffffffff);
+	sbuff[12/4] = whence;
 
-	SifCallRpc(&cd0, FILEXIO_LSEEK64, fileXioBlockMode, sbuff, 12, sbuff, 4, (void *)_fxio_intr, 0);
+	SifCallRpc(&cd0, FILEXIO_LSEEK64, fileXioBlockMode, sbuff, 16, sbuff, 8, (void *)_fxio_intr, 0);
 
 	if(fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
-	else { rv = sbuff[0]; }
+	else { 
+		long long rvHI = sbuff[4/4];
+		rvHI = rvHI << 32;
+		rv = rvHI | sbuff[0/4];
+	}
 	_unlock();
+
 	return(rv);
 }
 
