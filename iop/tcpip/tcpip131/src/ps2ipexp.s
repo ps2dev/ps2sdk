@@ -7,7 +7,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: ps2ipexp.s 577 2004-09-14 14:41:46Z pixel $
+# $Id$
 # PS2 TCP/IP SOCKET EXPORT FUNCTIONS.
 */
 

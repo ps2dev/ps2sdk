@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: Makefile 1522 2009-01-22 09:48:56Z radad $
+# $Id$
 
 
 IOP_OBJS_DIR = obj/

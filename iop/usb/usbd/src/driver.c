@@ -7,7 +7,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: usbd_macro.h 1034 2005-04-23 09:58:42Z tyranid $
+# $Id$
 # USB Driver function prototypes and constants.
 */
 #include "usbdpriv.h"

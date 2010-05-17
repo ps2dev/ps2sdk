@@ -7,7 +7,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: ps2ip.c 1423 2007-07-07 12:21:26Z radad $
+# $Id$
 # PS2 TCP/IP STACK FOR IOP
 */
 

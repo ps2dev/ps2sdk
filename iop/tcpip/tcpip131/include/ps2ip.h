@@ -7,7 +7,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: ps2ip.h 1423 2007-07-07 12:21:26Z radad $
+# $Id$
 # Imports and definitions for ps2ip.
 */
 
