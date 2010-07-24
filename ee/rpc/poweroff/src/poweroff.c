@@ -35,10 +35,11 @@ static poweroff_callback poweroff_cb = NULL;
 static void *poweroff_data = NULL;
 
 static u8 poffThreadStack[512 * 16] __attribute__ ((aligned(16)));
-static int PowerOffSema;
+static int PowerOffSema = 0;
 
 extern int _iop_reboot_count;
 static SifRpcClientData_t cd0;
+static int powerOffThreadId = 0;
 
 static void PowerOffThread(void *dat)
 {
@@ -74,7 +75,20 @@ int poweroffInit()
 	ee_thread_status_t thisThread;
 
 	ee_sema_t sema;
-	int tid;
+
+	// Terminate and delete any previously created threads
+	if (powerOffThreadId) {
+		TerminateThread(powerOffThreadId);
+		DeleteThread(powerOffThreadId);
+		powerOffThreadId = 0;
+	}
+
+	// Delete any previously created semaphores
+	if (PowerOffSema)
+	{
+		DeleteSema(PowerOffSema);
+		PowerOffSema = 0;
+	}
 
 	sema.init_count = 0;
 	sema.max_count = 1;
@@ -82,6 +96,7 @@ int poweroffInit()
 	PowerOffSema = CreateSema(&sema);
 
 	ReferThreadStatus(GetThreadId(), &thisThread);
+
 	if (thisThread.current_priority == 0) {
 		ChangeThreadPriority(GetThreadId(), 51);
 		thread.initial_priority = 50;
@@ -92,8 +107,8 @@ int poweroffInit()
 	thread.gp_reg = &_gp;
 	thread.func = PowerOffThread;
 	thread.stack = (void *)poffThreadStack;
-	tid = CreateThread(&thread);
-	StartThread(tid, NULL);
+	powerOffThreadId = CreateThread(&thread);
+	StartThread(powerOffThreadId, NULL);
 	
 	DIntr();
 	SifAddCmdHandler(POFF_SIF_CMD, _poff_intr_callback, NULL);
