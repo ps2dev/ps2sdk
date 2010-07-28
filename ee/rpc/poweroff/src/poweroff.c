@@ -132,5 +132,7 @@ void poweroffShutdown()
 {
 	poweroffInit();
 	
+	SignalSema(PowerOffSema);
+
 	SifCallRpc(&cd0, PWROFF_SHUTDOWN, 0, NULL, 0, NULL, 0, 0, 0);
 }
