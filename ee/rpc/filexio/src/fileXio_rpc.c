@@ -66,8 +66,6 @@ inline int _unlock(void)
 	return(SignalSema(_lock_sema_id));
 }
 
-
-
 int fileXioInit()
 {
 	int res;

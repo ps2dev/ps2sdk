@@ -159,7 +159,7 @@ struct open_slot
 #endif
 
 
-
+extern int _iop_reboot_count;
 /*
  * Pad variables etc.
  */
@@ -243,6 +243,13 @@ padInit(int a)
 {
     int ver;
     int i;
+    static int _rb_count = 0;
+
+    if (_rb_count != _iop_reboot_count)
+    {
+        _rb_count = _iop_reboot_count;
+        padReset();
+    }
 
     if(padInitialised)
         return 0;

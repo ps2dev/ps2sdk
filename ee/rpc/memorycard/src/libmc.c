@@ -122,6 +122,9 @@ static struct {		// size = 48
 //static McRpcDescParam g_descParam  __attribute__((aligned(64)));
 //static unsigned int mcInfoCmd[12] __attribute__((aligned(64)));
 
+// external IOP reboot count
+extern int _iop_reboot_count;
+
 // rpc client data
 static SifRpcClientData_t g_cdata __attribute__((aligned(64)));
 
@@ -231,6 +234,13 @@ static void mcStoreDir(volatile int* arg)
 int mcInit(int type)
 {
 	int ret=0;
+	static int _rb_count = 0;
+
+	if(_rb_count != _iop_reboot_count)
+	{
+		_rb_count = _iop_reboot_count;
+		mcReset();
+	}
 
 	if(g_mclibInited)
 		return -1;
