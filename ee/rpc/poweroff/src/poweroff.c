@@ -35,11 +35,11 @@ static poweroff_callback poweroff_cb = NULL;
 static void *poweroff_data = NULL;
 
 static u8 poffThreadStack[512 * 16] __attribute__ ((aligned(16)));
-static int PowerOffSema = 0;
+static int PowerOffSema = -1;
 
 extern int _iop_reboot_count;
 static SifRpcClientData_t cd0;
-static int powerOffThreadId = 0;
+static int powerOffThreadId = -1;
 
 static void PowerOffThread(void *dat)
 {
@@ -77,17 +77,17 @@ int poweroffInit()
 	ee_sema_t sema;
 
 	// Terminate and delete any previously created threads
-	if (powerOffThreadId) {
+	if (powerOffThreadId >= 0) {
 		TerminateThread(powerOffThreadId);
 		DeleteThread(powerOffThreadId);
-		powerOffThreadId = 0;
+		powerOffThreadId = -1;
 	}
 
 	// Delete any previously created semaphores
-	if (PowerOffSema)
+	if (PowerOffSema >= 0)
 	{
 		DeleteSema(PowerOffSema);
-		PowerOffSema = 0;
+		PowerOffSema = -1;
 	}
 
 	sema.init_count = 0;
