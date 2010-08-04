@@ -22,7 +22,7 @@ typedef struct {
 	u8 spr;
 	u8 ucab;
 	QWORD *data __attribute__((aligned(64)));
-} __attribute__ ((packed)) PACKET;
+} PACKET;
 
 #ifdef __cplusplus
 extern "C" {
