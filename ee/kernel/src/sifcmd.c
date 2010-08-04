@@ -228,6 +228,11 @@ void SifInitCmd()
 	if(_rb_count != _iop_reboot_count)
 	{
 	    _rb_count = _iop_reboot_count;
+	    if (sif0_id >= 0)
+	    {
+    	        DisableDmac(5);
+    	        RemoveDmacHandler(5, sif0_id);
+	    }
 	    init = 0;
 	}
 

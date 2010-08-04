@@ -83,6 +83,7 @@ int SifLoadFileInit()
 	if(_rb_count != _iop_reboot_count)
 	{
 	    _rb_count = _iop_reboot_count;
+	    memset(&_lf_cd, 0, sizeof _lf_cd);
 	    _lf_init = 0;
 	}
 

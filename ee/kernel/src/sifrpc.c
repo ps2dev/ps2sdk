@@ -390,6 +390,7 @@ void SifInitRpc(int mode)
 	if(_rb_count != _iop_reboot_count)
 	{
 	    _rb_count = _iop_reboot_count;
+	    SifExitCmd();
 	    init = 0;
 	}
 
