@@ -33,7 +33,7 @@ extern "C" {
 	void draw_wait_finish(void);
 
 	// Creates a dma chain filled with image information
-	QWORD *draw_texture_transfer(QWORD *q, void *src, int bytes, int width, int height, int psm, int buffer_width, int dest);
+	QWORD *draw_texture_transfer(QWORD *q, void *src, int size, int width, int height, int psm, int dest, int dest_width);
 
 	// Flush the texture cache
 	QWORD *draw_texture_flush(QWORD *q);
