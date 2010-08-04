@@ -712,7 +712,7 @@ QWORD *fontx_print_ascii(QWORD *q, int context, const unsigned char *str, int al
 
 	}
 
-	q = draw_prim_end(q,2,DRAW_XYZ_REGLIST,1.0f);
+	q = draw_prim_end(q,2,DRAW_XYZ_REGLIST);
 
 	return q;
 
@@ -939,7 +939,7 @@ QWORD *fontx_print_sjis(QWORD *q, int context, const unsigned char *str, int ali
 
 	}
 
-	q = draw_prim_end(q,2,DRAW_XYZ_REGLIST,1.0f);
+	q = draw_prim_end(q,2,DRAW_XYZ_REGLIST);
 
 	return q;
 

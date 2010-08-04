@@ -562,7 +562,7 @@ QWORD *fontstudio_print_string(QWORD *q, int context, const unsigned char *str, 
 
 	}
 
-	q = draw_prim_end(q,2,DRAW_UV_REGLIST,1.0f);
+	q = draw_prim_end(q,2,DRAW_UV_REGLIST);
 
 	return q;
 }

@@ -177,7 +177,7 @@ int render(PACKET *packet,FRAMEBUFFER *frame, ZBUFFER *z)
 			q++;
 		}
 
-		q = draw_prim_end(q,2,DRAW_RGBAQ_REGLIST,1);
+		q = draw_prim_end(q,2,DRAW_RGBAQ_REGLIST);
 
 		// Setup a finish event.
 		q = draw_finish(q);

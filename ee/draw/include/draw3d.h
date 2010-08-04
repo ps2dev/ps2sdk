@@ -6,10 +6,6 @@
 #include <draw_types.h>
 #include <gif_tags.h>
 
-// Loops Per QWORD
-#define DRAW_UNMAPPED_LPQ	1.0f
-#define DRAW_MAPPED_LPQ		0.66667f
-
 // Register lists
 #define DRAW_XYZ_REGLIST \
 	((u64)GIF_REG_XYZ2) << 0 | \
@@ -41,8 +37,8 @@ extern "C" {
 	QWORD *draw_prim_start(QWORD *q, int context, PRIMITIVE *prim, COLOR *color);
 
 	// Ends a primitive by calculating the number of qwords used, the number of registers,
-	// the register list, and the amount of loop that is complete per qword (lpq)
-	QWORD *draw_prim_end(QWORD *q,int nreg, unsigned long reglist, float lpq);
+	// the register list
+	QWORD *draw_prim_end(QWORD *q,int nreg, unsigned long reglist);
 
 	// Converts floating point color, replacing alpha with constant value, and calculates q
 	int draw_convert_rgbq(COLOR *output, int count, VERTEXF *vertices, COLORF *colours, unsigned char alpha);

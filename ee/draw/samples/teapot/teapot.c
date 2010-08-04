@@ -194,7 +194,7 @@ QWORD *render_teapot(QWORD *q,MATRIX view_screen, VECTOR object_position, VECTOR
 		q++;
 	}
 
-	q = draw_prim_end(q,2,DRAW_RGBAQ_REGLIST,1);
+	q = draw_prim_end(q,2,DRAW_RGBAQ_REGLIST);
 
 	// Define our dmatag for the dma chain.
 	DMATAG_CNT(dmatag,q-dmatag-1,0,0,0);

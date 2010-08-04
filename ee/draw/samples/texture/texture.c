@@ -248,7 +248,7 @@ int render(PACKET *packet, FRAMEBUFFER *frame, ZBUFFER *z)
 		// The lpq is calculated from dividing 2 by the number of registers.
 		// It's used as a parameter for the ability to control the accuracy
 		// of calculating the loops.
-		q = draw_prim_end((QWORD*)dw,3,DRAW_STQ_REGLIST,2.0f/3.0f);
+		q = draw_prim_end((QWORD*)dw,3,DRAW_STQ_REGLIST);
 
 		// Setup a finish event.
 		q = draw_finish(q);

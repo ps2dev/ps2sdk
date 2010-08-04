@@ -35,8 +35,10 @@ QWORD *draw_prim_start(QWORD *q, int context, PRIMITIVE *prim, COLOR *color)
 
 }
 
-QWORD *draw_prim_end(QWORD *q,int nreg, unsigned long reglist, float lpq)
+QWORD *draw_prim_end(QWORD *q,int nreg, unsigned long reglist)
 {
+
+	float lpq = 2.0f / (float)nreg;
 
 	// Determine number qwords that were needed minus the reglist giftag
 	__vertex_qwords = q - __prim_start - 1;
