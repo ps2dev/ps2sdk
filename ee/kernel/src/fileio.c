@@ -71,7 +71,7 @@ int _fio_recv_data[512] __attribute__((aligned(64)));
 int _fio_intr_data[32] __attribute__((aligned(64)));
 int _fio_init = 0;
 int _fio_block_mode;
-int _fio_completion_sema;
+int _fio_completion_sema = -1;
 #endif
 
 #ifdef F_fio_init
@@ -80,9 +80,17 @@ int fioInit()
 	int res;
 	ee_sema_t compSema;
 	static int _rb_count = 0;
+
 	if(_rb_count != _iop_reboot_count)
 	{
 	    _rb_count = _iop_reboot_count;
+
+	    if (_fio_completion_sema >= 0)
+	    {
+	        DeleteSema(_fio_completion_sema);
+            }
+
+	    memset(&_fio_cd, 0, sizeof _fio_cd);
 	    _fio_init = 0;
 	}
 

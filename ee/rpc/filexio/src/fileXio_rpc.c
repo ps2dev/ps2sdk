@@ -48,14 +48,14 @@ static unsigned sbuff[0x1300] __attribute__((aligned (64)));
 static int _intr_data[0xC00] __attribute__((aligned(64)));
 static int fileXioInited = 0;
 static int fileXioBlockMode;
-static int fileXioCompletionSema;
+static int fileXioCompletionSema = -1;
 
 void _fxio_intr()
 {
 	iSignalSema(fileXioCompletionSema);
 }
 
-static int _lock_sema_id;
+static int _lock_sema_id = -1;
 inline int _lock(void)
 {
 	return(WaitSema(_lock_sema_id));
