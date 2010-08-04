@@ -424,8 +424,17 @@ padGetState(int port, int slot)
 
     pdata = padGetDmaStr(port, slot);
     
-    state = pdata->state;    
+    state = pdata->state;
 
+#ifdef NEW_PADMAN
+    if (state == PAD_STATE_ERROR)
+    {
+        if (pdata->findPadRetries)
+        {
+            return PAD_STATE_FINDPAD;
+        }
+    }
+#endif
     if (state == PAD_STATE_STABLE) { // Ok
         if (padGetReqState(port, slot) == PAD_RSTAT_BUSY) {
             return PAD_STATE_EXECCMD;
