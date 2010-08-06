@@ -12,7 +12,7 @@ QWORD *draw_setup_environment(QWORD *q, int context, FRAMEBUFFER *frame, ZBUFFER
 {
 
 	// Change this if modifying the gif packet after the giftag.
-	int qword_count = 14;
+	int qword_count = 15;
 
 	ALPHATEST atest;
 	DESTTEST  dtest;
@@ -109,6 +109,8 @@ QWORD *draw_setup_environment(QWORD *q, int context, FRAMEBUFFER *frame, ZBUFFER
 	// Texture wrapping/clamping
 	PACK_GIFTAG(q, GS_SET_CLAMP(wrap.horizontal,wrap.vertical,wrap.minu,
 								wrap.maxu,wrap.minv,wrap.maxv), GS_REG_CLAMP + context);
+	q++;
+	PACK_GIFTAG(q, GS_SET_TEXA(0x80,ALPHA_EXPAND_NORMAL,0x80),GS_REG_TEXA);
 	q++;
 
 	return q;
