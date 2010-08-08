@@ -10,8 +10,7 @@
 #include <gs_psm.h>
 #include <draw.h>
 
-#include <fsfont.h>
-#include <fontx.h>
+#include <font.h>
 
 extern unsigned int  image_clut32[];
 extern unsigned char  image_pixel[];
@@ -19,9 +18,9 @@ extern unsigned char  image_pixel[];
 int myaddress = 0;
 int clutaddress = 0;
 
-FSFONT impress;
-FONTX krom_u;
-FONTX krom_k;
+fsfont_t impress;
+fontx_t krom_u;
+fontx_t krom_k;
 
 void draw_init_env(packet_t *packet)
 {
@@ -183,10 +182,10 @@ int main(void)
 	dma_channel_initialize(DMA_CHANNEL_GIF,NULL,0);
 	dma_channel_fast_waits(DMA_CHANNEL_GIF);
 
-	load_fontx("rom0:KROM", &krom_u, SINGLE_BYTE, 2, 1, 1);
-	load_fontx("rom0:KROM", &krom_k, DOUBLE_BYTE, 2, 1, 1);
+	fontx_load("rom0:KROM", &krom_u, SINGLE_BYTE, 2, 1, 1);
+	fontx_load("rom0:KROM", &krom_k, DOUBLE_BYTE, 2, 1, 1);
 
-	load_fontstudio_ini(&impress,"host:impress.ini", 512, 256,20);
+	fontstudio_load_ini(&impress,"host:impress.ini", 512, 256,20);
 
 	draw_init_env(&packet);
 
@@ -194,10 +193,10 @@ int main(void)
 
 	test_something(packets);
 
-	unload_fontstudio_ini(&impress);
+	fontstudio_unload_ini(&impress);
 
-	unload_fontx(&krom_u);
-	unload_fontx(&krom_k);
+	fontx_unload(&krom_u);
+	fontx_unload(&krom_k);
 
 	return 0;
 }

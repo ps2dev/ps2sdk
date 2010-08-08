@@ -7,7 +7,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <fontx.h>
+#include <font.h>
 
 // Single byte fonts have only a single table whose offset starts after type.
 typedef struct {
@@ -86,7 +86,7 @@ unsigned short sjis_table[] = {
 0x9840,0x9872
 };
 
-int load_krom_single(FONTX *fontx)
+int fontx_load_single_krom(fontx_t *fontx)
 {
 
 	fontx_hdr *fontx_header;
@@ -164,7 +164,7 @@ int load_krom_single(FONTX *fontx)
 
 }
 
-int load_krom_double(FONTX *fontx)
+int fontx_load_double_krom(fontx_t *fontx)
 {
 
 	fontx_hdr *fontx_header;
@@ -246,7 +246,7 @@ int load_krom_double(FONTX *fontx)
 
 }
 
-int load_fontx(const char *path, FONTX* fontx, int type, int wmargin, int hmargin, int bold)
+int fontx_load(const char *path, fontx_t* fontx, int type, int wmargin, int hmargin, int bold)
 {
 
 	FILE *file = NULL;
@@ -262,13 +262,13 @@ int load_fontx(const char *path, FONTX* fontx, int type, int wmargin, int hmargi
 		if (type == SINGLE_BYTE)
 		{
 
-			ret = load_krom_single(fontx);
+			ret = fontx_load_single_krom(fontx);
 
 		}
 		else
 		{
 
-			ret = load_krom_double(fontx);
+			ret = fontx_load_double_krom(fontx);
 
 		}
 
@@ -367,7 +367,7 @@ int load_fontx(const char *path, FONTX* fontx, int type, int wmargin, int hmargi
 
 }
 
-void unload_fontx(FONTX *fontx)
+void fontx_unload(fontx_t *fontx)
 {
 
 	if (fontx->font != NULL)
@@ -379,7 +379,7 @@ void unload_fontx(FONTX *fontx)
 
 }
 
-unsigned char *get_fontx_char(FONTX* fontx, unsigned short c)
+unsigned char *fontx_get_char(fontx_t* fontx, unsigned short c)
 {
 
 	unsigned int i;
@@ -486,7 +486,7 @@ u64 *draw_fontx_row(u64 *dw, unsigned char byte, int x, int y, int z, int bold)
 
 }
 
-qword_t *draw_fontx_char(qword_t *q, unsigned short c, vertex_t *v0, FONTX *fontx)
+qword_t *draw_fontx_char(qword_t *q, unsigned short c, vertex_t *v0, fontx_t *fontx)
 {
 
 	u64 pdw;
@@ -503,7 +503,7 @@ qword_t *draw_fontx_char(qword_t *q, unsigned short c, vertex_t *v0, FONTX *font
 
 	fontx_hdr* fontx_header = (fontx_hdr*)fontx->font;
 
-	char_offset = get_fontx_char(fontx,c);
+	char_offset = fontx_get_char(fontx,c);
 
 	if (!char_offset)
 	{
@@ -543,7 +543,7 @@ qword_t *draw_fontx_char(qword_t *q, unsigned short c, vertex_t *v0, FONTX *font
 
 }
 
-qword_t *fontx_print_ascii(qword_t *q, int context, const unsigned char *str, int alignment, vertex_t *v0, color_t *c0, FONTX *fontx)
+qword_t *fontx_print_ascii(qword_t *q, int context, const unsigned char *str, int alignment, vertex_t *v0, color_t *c0, fontx_t *fontx)
 {
 
 	int i,j;
@@ -718,7 +718,7 @@ qword_t *fontx_print_ascii(qword_t *q, int context, const unsigned char *str, in
 
 }
 
-qword_t *fontx_print_sjis(qword_t *q, int context, const unsigned char *str, int alignment, vertex_t *v0, color_t *c0, FONTX *ascii, FONTX *kanji)
+qword_t *fontx_print_sjis(qword_t *q, int context, const unsigned char *str, int alignment, vertex_t *v0, color_t *c0, fontx_t *ascii, fontx_t *kanji)
 {
 
 	int i,j;

@@ -4,7 +4,7 @@
 #include <draw.h>
 #include <draw3d.h>
 
-#include <fsfont.h>
+#include <font.h>
 
 static prim_t charprim = 
 {
@@ -17,7 +17,7 @@ static prim_t charprim =
 #define NEWLINE 0xFFF1
 #define SPACE 0xFFF2
 
-int load_fontstudio_ini(FSFONT *font, const char *path, float width, float height, int lineheight)
+int fontstudio_load_ini(fsfont_t *font, const char *path, float width, float height, int lineheight)
 {
 
 	FILE *file;
@@ -97,12 +97,12 @@ int load_fontstudio_ini(FSFONT *font, const char *path, float width, float heigh
 	// Clear memory
 	memset(font->charmap,0,sizeof(short)*font->totalchars);
 
-	font->chardata = (inidata*)malloc(sizeof(inidata)*font->totalchars);
+	font->chardata = (inidata_t*)malloc(sizeof(inidata_t)*font->totalchars);
 
 	if (font->chardata == NULL)
 	{
 
-		printf("Error allocating %d bytes of memory.\n", sizeof(inidata)*font->totalchars);
+		printf("Error allocating %d bytes of memory.\n", sizeof(inidata_t)*font->totalchars);
 		free(ini);
 		free(font->charmap);
 		return -1;
@@ -110,7 +110,7 @@ int load_fontstudio_ini(FSFONT *font, const char *path, float width, float heigh
 	}
 
 	// Clear memory
-	memset(font->chardata,0,sizeof(inidata)*font->totalchars);
+	memset(font->chardata,0,sizeof(inidata_t)*font->totalchars);
 
 	for (i = 0; i < font->totalchars; i++)
 	{
@@ -248,7 +248,7 @@ int load_fontstudio_ini(FSFONT *font, const char *path, float width, float heigh
 
 }
 
-void unload_fontstudio_ini(FSFONT *font)
+void fontstudio_unload_ini(fsfont_t *font)
 {
 
 	if (font->charmap != NULL)
@@ -313,7 +313,7 @@ int convert_to_code(const unsigned char *in, unsigned short *out)
 
 }
 
-unsigned short get_char(unsigned short c, FSFONT *font)
+unsigned short get_char(unsigned short c, fsfont_t *font)
 {
 
 	unsigned short i;
@@ -334,7 +334,7 @@ unsigned short get_char(unsigned short c, FSFONT *font)
 
 }
 
-void convert_to_index(unsigned short *in, int num, FSFONT *font)
+void convert_to_index(unsigned short *in, int num, fsfont_t *font)
 {
 
 	int i;
@@ -364,7 +364,7 @@ void convert_to_index(unsigned short *in, int num, FSFONT *font)
 
 }
 
-qword_t *draw_fontstudio_char(qword_t *q, unsigned int c, vertex_t *v0, FSFONT *font)
+qword_t *draw_fontstudio_char(qword_t *q, unsigned int c, vertex_t *v0, fsfont_t *font)
 {
 
 	int x,y;
@@ -383,7 +383,7 @@ qword_t *draw_fontstudio_char(qword_t *q, unsigned int c, vertex_t *v0, FSFONT *
 
 }
 
-qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *str, int alignment, vertex_t *v0, color_t *c0, FSFONT *font)
+qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *str, int alignment, vertex_t *v0, color_t *c0, fsfont_t *font)
 {
 
 	int i = 0,j;
