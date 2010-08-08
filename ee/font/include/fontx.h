@@ -39,9 +39,9 @@ extern "C" {
 
 	void unload_fontx(FONTX *fontx);
 
-	QWORD *fontx_print_ascii(QWORD *q, int context, const unsigned char *str, int alignment, VERTEX *v0, COLOR *c0, FONTX *fontx);
+	qword_t *fontx_print_ascii(qword_t *q, int context, const unsigned char *str, int alignment, vertex_t *v0, color_t *c0, FONTX *fontx);
 
-	QWORD *fontx_print_sjis(QWORD *q, int context, const unsigned char *str, int alignment, VERTEX *v0, COLOR *c0, FONTX *ascii, FONTX *kanji);
+	qword_t *fontx_print_sjis(qword_t *q, int context, const unsigned char *str, int alignment, vertex_t *v0, color_t *c0, FONTX *ascii, FONTX *kanji);
 #ifdef __cplusplus
 }
 #endif

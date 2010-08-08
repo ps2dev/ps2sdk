@@ -65,7 +65,7 @@ typedef union {
 	u16  hw[8];
 	u32  sw[4];
 	u64  dw[2];
-} QWORD;
+} qword_t;
 
 #endif
 

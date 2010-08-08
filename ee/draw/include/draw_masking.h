@@ -17,10 +17,10 @@ extern "C" {
 #endif
 
 	// Scanline Masking (framebuffer)
-	QWORD *draw_scan_masking(QWORD *q, int mask);
+	qword_t *draw_scan_masking(qword_t *q, int mask);
 
 	// Color Masking/Clamping
-	QWORD *draw_color_clamping(QWORD *q, int enable);
+	qword_t *draw_color_clamping(qword_t *q, int enable);
 
 #ifdef __cplusplus
 }

@@ -6,7 +6,7 @@
 
 #include <fsfont.h>
 
-static PRIMITIVE charprim = 
+static prim_t charprim = 
 {
 	PRIM_SPRITE, PRIM_SHADE_FLAT, DRAW_ENABLE,
 	DRAW_DISABLE, DRAW_ENABLE, DRAW_DISABLE,
@@ -364,7 +364,7 @@ void convert_to_index(unsigned short *in, int num, FSFONT *font)
 
 }
 
-QWORD *draw_fontstudio_char(QWORD *q, unsigned int c, VERTEX *v0, FSFONT *font)
+qword_t *draw_fontstudio_char(qword_t *q, unsigned int c, vertex_t *v0, FSFONT *font)
 {
 
 	int x,y;
@@ -383,7 +383,7 @@ QWORD *draw_fontstudio_char(QWORD *q, unsigned int c, VERTEX *v0, FSFONT *font)
 
 }
 
-QWORD *fontstudio_print_string(QWORD *q, int context, const unsigned char *str, int alignment, VERTEX *v0, COLOR *c0, FSFONT *font)
+qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *str, int alignment, vertex_t *v0, color_t *c0, FSFONT *font)
 {
 
 	int i = 0,j;
@@ -392,7 +392,7 @@ QWORD *fontstudio_print_string(QWORD *q, int context, const unsigned char *str, 
 
 	int length = strlen(str);
 
-	VERTEX v_pos = *v0;
+	vertex_t v_pos = *v0;
 
 	unsigned short utf8[2048];
 

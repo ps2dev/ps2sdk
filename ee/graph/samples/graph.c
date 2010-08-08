@@ -25,7 +25,7 @@
 #include <graph_vram.h>
 #include <packet.h>
 
-void init_gs(FRAMEBUFFER *frame, ZBUFFER *z)
+void init_gs(framebuffer_t *frame, zbuffer_t *z)
 {
 
 	// Define a 32-bit 512x512 framebuffer.
@@ -58,11 +58,11 @@ void init_gs(FRAMEBUFFER *frame, ZBUFFER *z)
 
 }
 
-void init_drawing_environment(PACKET *packet, FRAMEBUFFER *frame, ZBUFFER *z)
+void init_drawing_environment(packet_t *packet, framebuffer_t *frame, zbuffer_t *z)
 {
 
 	// This is our generic qword pointer.
-	QWORD *q = packet->data;
+	qword_t *q = packet->data;
 
 	// This will setup a default drawing environment.
 	q = draw_setup_environment(q,0,frame,z);
@@ -81,14 +81,14 @@ void init_drawing_environment(PACKET *packet, FRAMEBUFFER *frame, ZBUFFER *z)
 
 }
 
-void render(PACKET *packet, FRAMEBUFFER *frame)
+void render(packet_t *packet, framebuffer_t *frame)
 {
 
 	// Used for the render loop.
 	int loop0;
 
 	// Used for the qword pointer.
-	QWORD *q = packet->data;
+	qword_t *q = packet->data;
 
 	// Since we only have one packet, we need to wait until the dmac is done
 	// before reusing our pointer;
@@ -147,11 +147,11 @@ int main(void)
 {
 
 	// The minimum buffers needed for single buffered rendering.
-	FRAMEBUFFER frame;
-	ZBUFFER z;
+	framebuffer_t frame;
+	zbuffer_t z;
 
 	// The data packet.
-	PACKET packet;
+	packet_t packet;
 	
 	packet_allocate(&packet, 50, 0, 0);
 

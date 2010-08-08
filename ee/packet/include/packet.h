@@ -21,27 +21,27 @@ typedef struct {
 	u16 qwc;
 	u8 spr;
 	u8 ucab;
-	QWORD *data __attribute__((aligned(64)));
-} PACKET;
+	qword_t *data __attribute__((aligned(64)));
+} packet_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 	// Allocate a new packet for use, size in quadwords.
-	int packet_allocate(PACKET *packet, int num, int ucab, int spr);
+	int packet_allocate(packet_t *packet, int num, int ucab, int spr);
 
 	// Reset the packet quadword counter and zero out data.
-	void packet_reset(PACKET *packet);
+	void packet_reset(packet_t *packet);
 
 	// Free the space allocated by packet.
-	void packet_free(PACKET *packet);
+	void packet_free(packet_t *packet);
 
 	// Returns the currently unused qword.
-	QWORD *packet_get_qword(PACKET *packet);
+	qword_t *packet_get_qword(packet_t *packet);
 
 	// Advances the qwc and returns the current qword count.
-	QWORD *packet_increment_qwc(PACKET *packet, int num);
+	qword_t *packet_increment_qwc(packet_t *packet, int num);
 
 #ifdef __cplusplus
 }

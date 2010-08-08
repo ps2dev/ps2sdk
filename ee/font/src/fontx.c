@@ -24,7 +24,7 @@ typedef struct {
 	} block[];
 } fontx_hdr;
 
-static PRIMITIVE charprim = 
+static prim_t charprim = 
 {
 	PRIM_POINT, PRIM_SHADE_FLAT, DRAW_DISABLE,
 	DRAW_DISABLE, DRAW_ENABLE, DRAW_DISABLE,
@@ -486,7 +486,7 @@ u64 *draw_fontx_row(u64 *dw, unsigned char byte, int x, int y, int z, int bold)
 
 }
 
-QWORD *draw_fontx_char(QWORD *q, unsigned short c, VERTEX *v0, FONTX *fontx)
+qword_t *draw_fontx_char(qword_t *q, unsigned short c, vertex_t *v0, FONTX *fontx)
 {
 
 	u64 pdw;
@@ -537,20 +537,20 @@ QWORD *draw_fontx_char(QWORD *q, unsigned short c, VERTEX *v0, FONTX *fontx)
 
 	}
 
-	q = (QWORD*)dw;
+	q = (qword_t*)dw;
 
 	return q;
 
 }
 
-QWORD *fontx_print_ascii(QWORD *q, int context, const unsigned char *str, int alignment, VERTEX *v0, COLOR *c0, FONTX *fontx)
+qword_t *fontx_print_ascii(qword_t *q, int context, const unsigned char *str, int alignment, vertex_t *v0, color_t *c0, FONTX *fontx)
 {
 
 	int i,j;
 
 	fontx_hdr *fontx_header = (fontx_hdr*)fontx->font;
 
-	VERTEX v_pos = *v0;
+	vertex_t v_pos = *v0;
 
 	int length = strlen(str);
 	short line_num[100];
@@ -718,7 +718,7 @@ QWORD *fontx_print_ascii(QWORD *q, int context, const unsigned char *str, int al
 
 }
 
-QWORD *fontx_print_sjis(QWORD *q, int context, const unsigned char *str, int alignment, VERTEX *v0, COLOR *c0, FONTX *ascii, FONTX *kanji)
+qword_t *fontx_print_sjis(qword_t *q, int context, const unsigned char *str, int alignment, vertex_t *v0, color_t *c0, FONTX *ascii, FONTX *kanji)
 {
 
 	int i,j;
@@ -726,7 +726,7 @@ QWORD *fontx_print_sjis(QWORD *q, int context, const unsigned char *str, int ali
 	fontx_hdr *ascii_header = (fontx_hdr*)ascii->font;
 	fontx_hdr *kanji_header = (fontx_hdr*)kanji->font;
 
-	VERTEX v_pos = *v0;
+	vertex_t v_pos = *v0;
 
 	int length = strlen(str);
 

@@ -6,14 +6,14 @@
 #include <draw.h>
 
 // Starting position of primitive
-static QWORD *__prim_start = NULL;
+static qword_t *__prim_start = NULL;
 
 // Amount of vertex loops
 static int __vertex_loops = 0;
 
 static float __vertex_qwords = 0;
 
-QWORD *draw_prim_start(QWORD *q, int context, PRIMITIVE *prim, COLOR *color)
+qword_t *draw_prim_start(qword_t *q, int context, prim_t *prim, color_t *color)
 {
 
 	// Set the primitive register in packed mode, but don't end the packet
@@ -35,7 +35,7 @@ QWORD *draw_prim_start(QWORD *q, int context, PRIMITIVE *prim, COLOR *color)
 
 }
 
-QWORD *draw_prim_end(QWORD *q,int nreg, unsigned long reglist)
+qword_t *draw_prim_end(qword_t *q,int nreg, unsigned long reglist)
 {
 
 	float lpq = 2.0f / (float)nreg;
@@ -57,7 +57,7 @@ QWORD *draw_prim_end(QWORD *q,int nreg, unsigned long reglist)
 
 }
 
-int draw_convert_rgbq(COLOR *output, int count, VERTEXF *vertices, COLORF *colours, unsigned char alpha)
+int draw_convert_rgbq(color_t *output, int count, vertex_f_t *vertices, color_f_t *colours, unsigned char alpha)
 {
 
 	int i;
@@ -89,7 +89,7 @@ int draw_convert_rgbq(COLOR *output, int count, VERTEXF *vertices, COLORF *colou
 
 }
 
-int draw_convert_rgbaq(COLOR *output, int count, VERTEXF *vertices, COLORF *colours)
+int draw_convert_rgbaq(color_t *output, int count, vertex_f_t *vertices, color_f_t *colours)
 {
 
 	int i;
@@ -121,7 +121,7 @@ int draw_convert_rgbaq(COLOR *output, int count, VERTEXF *vertices, COLORF *colo
 
 }
 
-int draw_convert_st(TEXEL *output, int count, VERTEXF *vertices, TEXELF *coords)
+int draw_convert_st(texel_t *output, int count, vertex_f_t *vertices, texel_f_t *coords)
 {
 
 	int i = 0;
@@ -148,7 +148,7 @@ int draw_convert_st(TEXEL *output, int count, VERTEXF *vertices, TEXELF *coords)
 
 }
 
-int draw_convert_xyz(XYZ *output, float x, float y, int z, int count, VERTEXF *vertices)
+int draw_convert_xyz(xyz_t *output, float x, float y, int z, int count, vertex_f_t *vertices)
 {
 
 	int i;

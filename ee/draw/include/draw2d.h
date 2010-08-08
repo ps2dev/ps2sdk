@@ -5,43 +5,75 @@
 
 #include <draw_types.h>
 
+typedef struct {
+	vertex_t v0;
+	color_t  color;
+} point_t;
+
+typedef struct {
+	vertex_t v0;
+	vertex_t v1;
+	color_t  color;
+} line_t;
+
+typedef struct {
+	vertex_t v0;
+	vertex_t v1;
+	vertex_t v2;
+	color_t  color;
+} triangle_t;
+
+typedef struct {
+	vertex_t v0;
+	vertex_t v1;
+	color_t  color;
+} rect_t;
+
+typedef struct {
+	vertex_t v0;
+	texel_t  t0;
+	vertex_t v1;
+	texel_t  t1;
+	color_t  color;
+} texrect_t;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 	// Draws a single point
-	QWORD *draw_point(QWORD *q, int context, VERTEX *v0, COLOR *color);
+	qword_t *draw_point(qword_t *q, int context, point_t *point);
 
 	// Draws a single line
-	QWORD *draw_line(QWORD *q, int context, VERTEX *v0, VERTEX *v1, COLOR *color);
+	qword_t *draw_line(qword_t *q, int context, line_t *line);
 
 	// Draws a triangle using a line strip
-	QWORD *draw_triangle_outline(QWORD *q, int context, VERTEX *v0, VERTEX *v1, VERTEX *v2, COLOR *color);
+	qword_t *draw_triangle_outline(qword_t *q, int context, triangle_t *triangle);
 
 	// Draws a single triangle
-	QWORD *draw_triangle_filled(QWORD *q, int context,VERTEX *v0, VERTEX *v1, VERTEX *v2, COLOR *color);
+	qword_t *draw_triangle_filled(qword_t *q, int context,triangle_t *triangle);
 
 	// Draws a rectangle using line primitives
-	QWORD *draw_rect_outline(QWORD *q, int context, VERTEX *v0, VERTEX *v1, COLOR *color);
+	qword_t *draw_rect_outline(qword_t *q, int context, rect_t *rect);
 
 	// Draws a single sprite
-	QWORD *draw_rect_filled(QWORD *q, int context, VERTEX *v0, VERTEX *v1, COLOR *color);
+	qword_t *draw_rect_filled(qword_t *q, int context, rect_t *rect);
 
 	// Draws a single texture mapped sprite
-	QWORD *draw_rect_textured(QWORD *q, int context, VERTEX *v0, TEXEL *t0, VERTEX *v1, TEXEL *t1, COLOR *color);
+	qword_t *draw_rect_textured(qword_t *q, int context, texrect_t *rect);
 
 	// Draws multiple sprite primitives
-	QWORD *draw_rect_filled_strips(QWORD *q, int context, VERTEX *v0, VERTEX *v1, COLOR *color);
+	qword_t *draw_rect_filled_strips(qword_t *q, int context, rect_t *rect);
 
 	// Draws multiple strips to render a large texture
 	// width must be multiple of 32 - 0.9375
-	QWORD *draw_rect_textured_strips(QWORD *q, int context, VERTEX *v0, TEXEL *t0, VERTEX *v1, TEXEL *t1, COLOR *color);
+	qword_t *draw_rect_textured_strips(qword_t *q, int context, texrect_t *rect);
 
 	// Draws an arc using line primitives
-	QWORD *draw_arc_outline(QWORD *q, int context, VERTEX *center, float radius, float angle_start, float angle_end, COLOR *color);
+	qword_t *draw_arc_outline(qword_t *q, int context, point_t *center, float radius, float angle_start, float angle_end);
 
 	// Draws multiple triangle fans
-	QWORD *draw_arc_filled(QWORD *q, int context, VERTEX *center, float radius, float angle_start, float angle_end, COLOR *color);
+	qword_t *draw_arc_filled(qword_t *q, int context, point_t *center, float radius, float angle_start, float angle_end);
 
 #ifdef __cplusplus
 }

@@ -40,8 +40,8 @@ typedef struct InitCBParam {
 
  MPEGSequenceInfo* m_pInfo;
  void*             m_pData;
- PACKET            m_XFerPck;
- PACKET            m_DrawPck;
+ packet_t            m_XFerPck;
+ packet_t            m_DrawPck;
  int               m_TexAddr;
 
 } InitCBParam;
@@ -55,10 +55,10 @@ static void* InitCB ( void*, MPEGSequenceInfo* );
 
 int main ( void ) {
 /* read file (or part of it ) into memory */
- PACKET      *lPck = malloc(sizeof(PACKET));
- QWORD       *q;
- FRAMEBUFFER frame;
- ZBUFFER z;
+ packet_t      *lPck = malloc(sizeof(packet_t));
+ qword_t       *q;
+ framebuffer_t frame;
+ zbuffer_t z;
  InitCBParam lInfo;
  int         lFD = fioOpen ( MPEG_BITSTREAM_FILE, O_RDONLY );
  long        lSize;
@@ -228,7 +228,7 @@ static void* InitCB ( void* apParam, MPEGSequenceInfo* apInfo ) {
  int          lTH       = draw_log2 ( apInfo -> m_Height );
  int          lX, lY;
  char*        lpImg;
- QWORD*       q;
+ qword_t*       q;
 
  lpParam -> m_TexAddr >>= 6;
 

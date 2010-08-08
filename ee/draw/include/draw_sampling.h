@@ -39,7 +39,7 @@ typedef struct {
 	unsigned char mipmap_select;
 	unsigned char l;
 	float k;
-} LOD;
+} lod_t;
 
 typedef struct {
 	int address1;
@@ -48,33 +48,33 @@ typedef struct {
 	char width1;
 	char width2;
 	char width3;
-} MIPMAP;
+} mipmap_t;
 
 typedef struct {
 	unsigned char horizontal;
 	unsigned char vertical;
 	int minu, maxu;
 	int minv, maxv;
-} WRAP;
+} texwrap_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 	// Texture Sampling, Level-of-Detail, and Filtering
-	QWORD *draw_texture_sampling(QWORD *q, int context, LOD *lod);
+	qword_t *draw_texture_sampling(qword_t *q, int context, lod_t *lod);
 
 	// Mipmap levels 1-3
-	QWORD *draw_mipmap1(QWORD *q, int context, MIPMAP *mipmap);
+	qword_t *draw_mipmap1(qword_t *q, int context, mipmap_t *mipmap);
 
 	// Mipmap levels 4-6
-	QWORD *draw_mipmap2(QWORD *q, int context, MIPMAP *mipmap);
+	qword_t *draw_mipmap2(qword_t *q, int context, mipmap_t *mipmap);
 
 	// Texture Clamping
-	QWORD *draw_texture_wrapping(QWORD *q, int context, WRAP *wrap);
+	qword_t *draw_texture_wrapping(qword_t *q, int context, texwrap_t *wrap);
 
 	// Alpha Expansion Values
-	QWORD *draw_texture_expand_alpha(QWORD *q, unsigned char zero_value, int expand, unsigned char one_value);
+	qword_t *draw_texture_expand_alpha(qword_t *q, unsigned char zero_value, int expand, unsigned char one_value);
 
 #ifdef __cplusplus
 }

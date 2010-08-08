@@ -40,7 +40,7 @@ VECTOR object_rotation = { 0.00f, 0.00f, 0.00f, 1.00f };
 VECTOR camera_position = { 0.00f, 0.00f, 100.00f, 1.00f };
 VECTOR camera_rotation = { 0.00f, 0.00f,   0.00f, 1.00f };
 
-void init_gs(FRAMEBUFFER *frame, ZBUFFER *z, TEXBUFFER *texbuf)
+void init_gs(framebuffer_t *frame, zbuffer_t *z, texbuffer_t *texbuf)
 {
 
 	// Define a 32-bit 640x512 framebuffer.
@@ -67,11 +67,11 @@ void init_gs(FRAMEBUFFER *frame, ZBUFFER *z, TEXBUFFER *texbuf)
 
 }
 
-void init_drawing_environment(PACKET *packet, FRAMEBUFFER *frame, ZBUFFER *z)
+void init_drawing_environment(packet_t *packet, framebuffer_t *frame, zbuffer_t *z)
 {
 
 	// This is our generic qword pointer.
-	QWORD *q = packet->data;
+	qword_t *q = packet->data;
 
 	// This will setup a default drawing environment.
 	q = draw_setup_environment(q,0,frame,z);
@@ -87,10 +87,10 @@ void init_drawing_environment(PACKET *packet, FRAMEBUFFER *frame, ZBUFFER *z)
 
 }
 
-void load_texture(PACKET *packet, TEXBUFFER *texbuf)
+void load_texture(packet_t *packet, texbuffer_t *texbuf)
 {
 
-	QWORD *q = packet->data;
+	qword_t *q = packet->data;
 
 	q = packet->data;
 
@@ -102,15 +102,15 @@ void load_texture(PACKET *packet, TEXBUFFER *texbuf)
 
 }
 
-void setup_texture(PACKET *packet, TEXBUFFER *texbuf)
+void setup_texture(packet_t *packet, texbuffer_t *texbuf)
 {
 
-	QWORD *q = packet->data;
+	qword_t *q = packet->data;
 
 	// Using a texture involves setting up a lot of information.
-	CLUTBUFFER clut;
-	TEXTURE texinfo;
-	LOD lod;
+	clutbuffer_t clut;
+
+	lod_t lod;
 
 	lod.calculation = LOD_USE_K;
 	lod.max_level = 0;
@@ -119,10 +119,10 @@ void setup_texture(PACKET *packet, TEXBUFFER *texbuf)
 	lod.l = 0;
 	lod.k = 0;
 
-	texinfo.width = draw_log2(256);
-	texinfo.height = draw_log2(256);
-	texinfo.components = TEXTURE_COMPONENTS_RGB;
-	texinfo.function = TEXTURE_FUNCTION_DECAL;
+	texbuf->info.width = draw_log2(256);
+	texbuf->info.height = draw_log2(256);
+	texbuf->info.components = TEXTURE_COMPONENTS_RGB;
+	texbuf->info.function = TEXTURE_FUNCTION_DECAL;
 
 	clut.storage_mode = CLUT_STORAGE_MODE1;
 	clut.start = 0;
@@ -131,7 +131,7 @@ void setup_texture(PACKET *packet, TEXBUFFER *texbuf)
 	clut.address = 0;
 
 	q = draw_texture_sampling(q,0,&lod);
-	q = draw_texturebuffer(q,0,texbuf,&texinfo,&clut);
+	q = draw_texturebuffer(q,0,texbuf,&clut);
 
 	// Now send the packet, no need to wait since it's the first.
 	dma_wait_fast();
@@ -139,13 +139,13 @@ void setup_texture(PACKET *packet, TEXBUFFER *texbuf)
 
 }
 
-int render(PACKET *packet, FRAMEBUFFER *frame, ZBUFFER *z)
+int render(packet_t *packet, framebuffer_t *frame, zbuffer_t *z)
 {
 
 	int i;
 	int context = 0;
 
-	QWORD *q;
+	qword_t *q;
 
 	u64 *dw;
 
@@ -154,14 +154,14 @@ int render(PACKET *packet, FRAMEBUFFER *frame, ZBUFFER *z)
   MATRIX view_screen;
   MATRIX local_screen;
 
-	PRIMITIVE prim;
-	COLOR color;
+	prim_t prim;
+	color_t color;
 
   VECTOR *temp_vertices;
 
-	XYZ *xyz;
-	COLOR *rgbaq;
-	TEXEL *st;
+	xyz_t *xyz;
+	color_t *rgbaq;
+	texel_t *st;
 
 	// Define the triangle primitive we want to use.
 	prim.type = PRIM_TRIANGLE;
@@ -211,13 +211,13 @@ int render(PACKET *packet, FRAMEBUFFER *frame, ZBUFFER *z)
    calculate_vertices(temp_vertices, vertex_count, vertices, local_screen);
 
    // Generate the XYZ register values.
-		draw_convert_xyz(xyz, 2048, 2048, 32, vertex_count, (VERTEXF*)temp_vertices);
+		draw_convert_xyz(xyz, 2048, 2048, 32, vertex_count, (vertex_f_t*)temp_vertices);
 
 		// Convert floating point colours to fixed point.
-		draw_convert_rgbq(rgbaq, vertex_count, (VERTEXF*)temp_vertices, (COLORF*)colours,color.a);
+		draw_convert_rgbq(rgbaq, vertex_count, (vertex_f_t*)temp_vertices, (color_f_t*)colours,color.a);
 
    // Generate the ST register values.
-		draw_convert_st(st, vertex_count, (VERTEXF*)temp_vertices, (TEXELF*)coordinates);
+		draw_convert_st(st, vertex_count, (vertex_f_t*)temp_vertices, (texel_f_t*)coordinates);
 
 		q = packet[context].data;
 
@@ -248,7 +248,7 @@ int render(PACKET *packet, FRAMEBUFFER *frame, ZBUFFER *z)
 		// The lpq is calculated from dividing 2 by the number of registers.
 		// It's used as a parameter for the ability to control the accuracy
 		// of calculating the loops.
-		q = draw_prim_end((QWORD*)dw,3,DRAW_STQ_REGLIST);
+		q = draw_prim_end((qword_t*)dw,3,DRAW_STQ_REGLIST);
 
 		// Setup a finish event.
 		q = draw_finish(q);
@@ -276,12 +276,12 @@ int main(int argc, char **argv)
 {
 
 	// The buffers to be used.
-	FRAMEBUFFER frame;
-	ZBUFFER z;
-	TEXBUFFER texbuf;
+	framebuffer_t frame;
+	zbuffer_t z;
+	texbuffer_t texbuf;
 
 	// The data packets for double buffering dma sends.
-	PACKET packets[2];
+	packet_t packets[2];
 
 	packet_allocate(&packets[0],100,0,0);
 	packet_allocate(&packets[1],100,0,0);

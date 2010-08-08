@@ -41,7 +41,7 @@ extern "C" {
 
 	void unload_fontstudio_ini(FSFONT *font);
 
-	QWORD *fontstudio_print_string(QWORD *q, int context, const unsigned char *string, int alignment, VERTEX *v0, COLOR *c0, FSFONT *font);
+	qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *string, int alignment, vertex_t *v0, color_t *c0, FSFONT *font);
 
 #ifdef __cplusplus
 }

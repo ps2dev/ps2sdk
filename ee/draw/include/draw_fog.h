@@ -8,7 +8,7 @@ extern "C" {
 #endif
 
 	// Fog Color
-	QWORD *draw_fog_color(QWORD *q, unsigned char r, unsigned char g, unsigned char b);
+	qword_t *draw_fog_color(qword_t *q, unsigned char r, unsigned char g, unsigned char b);
 
 #ifdef __cplusplus
 }

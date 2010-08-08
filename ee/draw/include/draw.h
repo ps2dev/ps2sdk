@@ -21,22 +21,22 @@ extern "C" {
 #endif
 
 	// Sets up the drawing environment based on the framebuffer and zbuffer settings
-	QWORD *draw_setup_environment(QWORD *q, int context, FRAMEBUFFER *frame, ZBUFFER *z);
+	qword_t *draw_setup_environment(qword_t *q, int context, framebuffer_t *frame, zbuffer_t *z);
 
 	// Clear the screen based on the screen's origin, width, and height using the defined color.
-	QWORD *draw_clear(QWORD *q, int context, float x, float y, float width, float height, int r, int g, int b);
+	qword_t *draw_clear(qword_t *q, int context, float x, float y, float width, float height, int r, int g, int b);
 
 	// Signal that drawing is finished
-	QWORD *draw_finish(QWORD *q);
+	qword_t *draw_finish(qword_t *q);
 
 	// Wait until finish event occurs
 	void draw_wait_finish(void);
 
 	// Creates a dma chain filled with image information
-	QWORD *draw_texture_transfer(QWORD *q, void *src, int size, int width, int height, int psm, int dest, int dest_width);
+	qword_t *draw_texture_transfer(qword_t *q, void *src, int size, int width, int height, int psm, int dest, int dest_width);
 
 	// Flush the texture cache
-	QWORD *draw_texture_flush(QWORD *q);
+	qword_t *draw_texture_flush(qword_t *q);
 
 #ifdef __cplusplus
 }

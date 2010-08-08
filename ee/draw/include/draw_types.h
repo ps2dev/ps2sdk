@@ -17,7 +17,7 @@ typedef union {
 		u16 y;
 		u32 z;
 	};
-} __attribute__((packed,aligned(8))) XYZ;
+} __attribute__((packed,aligned(8))) xyz_t;
 
 typedef union {
 	u64 uv;
@@ -29,7 +29,7 @@ typedef union {
 		float u;
 		float v;
 	};
-} __attribute__((packed,aligned(8))) TEXEL;
+} __attribute__((packed,aligned(8))) texel_t;
 
 typedef union {
 	u64 rgbaq;
@@ -40,14 +40,14 @@ typedef union {
 		u8 a;
 		float q;
 	};
-} __attribute__((packed,aligned(8))) COLOR;
+} __attribute__((packed,aligned(8))) color_t;
 
 // Using shorts complicates things for normal usage
 typedef struct {
 	float x;
 	float y;
 	unsigned int z;
-} VERTEX;
+} vertex_t;
 
 typedef union {
 	VECTOR strq;
@@ -57,7 +57,7 @@ typedef union {
 		float r;
 		float q;
 	};
-} __attribute__((packed,aligned(16))) TEXELF;
+} __attribute__((packed,aligned(16))) texel_f_t;
 
 typedef union {
 	VECTOR rgba;
@@ -67,7 +67,7 @@ typedef union {
 		float b;
 		float a;
 	};
-} __attribute__((packed,aligned(16))) COLORF;
+} __attribute__((packed,aligned(16))) color_f_t;
 
 typedef union {
 	VECTOR xyzw;
@@ -77,6 +77,6 @@ typedef union {
 		float z;
 		float w;
 	};
-} __attribute__((packed,aligned(16))) VERTEXF;
+} __attribute__((packed,aligned(16))) vertex_f_t;
 
 #endif /*__DRAW_TYPES_H__*/

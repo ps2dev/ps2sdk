@@ -4,7 +4,7 @@
 
 #define SPR_BEGIN 0x70000000
 
-int packet_allocate(PACKET *packet, int num, int ucab, int spr)
+int packet_allocate(packet_t *packet, int num, int ucab, int spr)
 {
 
 	if (packet == NULL)
@@ -57,7 +57,7 @@ int packet_allocate(PACKET *packet, int num, int ucab, int spr)
 
 }
 
-void packet_free(PACKET *packet)
+void packet_free(packet_t *packet)
 {
 
 	// Free the allocated data buffer.
@@ -82,7 +82,7 @@ void packet_free(PACKET *packet)
 
 }
 
-void packet_reset(PACKET *packet)
+void packet_reset(packet_t *packet)
 {
 
 	// Reset the quadword counter.
@@ -116,14 +116,14 @@ void packet_reset(PACKET *packet)
 }
 
 // For those that like getters and setters
-QWORD *packet_get_qword(PACKET *packet)
+qword_t *packet_get_qword(packet_t *packet)
 {
 
 	return packet->data;
 
 }
 
-QWORD *packet_increment_qwc(PACKET *packet, int num)
+qword_t *packet_increment_qwc(packet_t *packet, int num)
 {
 
 	// Check if we have enough qwords left

@@ -8,17 +8,17 @@
 #include <draw.h>
 #include <draw2d.h>
 
-QWORD *draw_setup_environment(QWORD *q, int context, FRAMEBUFFER *frame, ZBUFFER *z)
+qword_t *draw_setup_environment(qword_t *q, int context, framebuffer_t *frame, zbuffer_t *z)
 {
 
 	// Change this if modifying the gif packet after the giftag.
 	int qword_count = 15;
 
-	ALPHATEST atest;
-	DESTTEST  dtest;
-	DEPTHTEST ztest;
-	BLEND blend;
-	WRAP wrap;
+	atest_t atest;
+	dtest_t  dtest;
+	ztest_t ztest;
+	blend_t blend;
+	texwrap_t wrap;
 
 	atest.enable = DRAW_ENABLE;
 	atest.method = ATEST_METHOD_NOTEQUAL;
@@ -117,7 +117,7 @@ QWORD *draw_setup_environment(QWORD *q, int context, FRAMEBUFFER *frame, ZBUFFER
 
 }
 
-QWORD *draw_disable_tests(QWORD *q, int context, ZBUFFER *z)
+qword_t *draw_disable_tests(qword_t *q, int context, zbuffer_t *z)
 {
 
 	PACK_GIFTAG(q,GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -131,7 +131,7 @@ QWORD *draw_disable_tests(QWORD *q, int context, ZBUFFER *z)
 
 }
 
-QWORD *draw_enable_tests(QWORD *q, int context, ZBUFFER *z)
+qword_t *draw_enable_tests(qword_t *q, int context, zbuffer_t *z)
 {
 
 	PACK_GIFTAG(q,GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -145,24 +145,22 @@ QWORD *draw_enable_tests(QWORD *q, int context, ZBUFFER *z)
 
 }
 
-QWORD *draw_clear(QWORD *q, int context, float x, float y, float width, float height, int r, int g, int b)
+qword_t *draw_clear(qword_t *q, int context, float x, float y, float width, float height, int r, int g, int b)
 {
 
-	VERTEX v0;
-	VERTEX v1;
-	COLOR c0;
+	rect_t rect;
 
 	float q0 = 1.0f;
 
-	v0.x = x;
-	v0.y = y;
-	v0.z = 0x00000000;
+	rect.v0.x = x;
+	rect.v0.y = y;
+	rect.v0.z = 0x00000000;
 
-	v1.x = x + width - 0.9375f;
-	v1.y = y + height - 0.9375f;
-	v1.z = 0x00000000;
+	rect.color.rgbaq = GS_SET_RGBAQ(r,g,b,0x80,*(unsigned int*)&q0);
 
-	c0.rgbaq = GS_SET_RGBAQ(r,g,b,0x80,*(unsigned int*)&q0);
+	rect.v1.x = x + width - 0.9375f;
+	rect.v1.y = y + height - 0.9375f;
+	rect.v1.z = 0x00000000;
 
 	PACK_GIFTAG(q, GIF_SET_TAG(2,0,0,0,0,1), GIF_REG_AD);
 	q++;
@@ -171,7 +169,7 @@ QWORD *draw_clear(QWORD *q, int context, float x, float y, float width, float he
 	PACK_GIFTAG(q, GS_SET_PRMODE(0,0,0,0,0,0,context,1), GS_REG_PRMODE);
 	q++;
 
-	q = draw_rect_filled_strips(q, context, &v0, &v1, &c0);
+	q = draw_rect_filled_strips(q, context, &rect);
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,0,1), GIF_REG_AD);
 	q++;
@@ -182,7 +180,7 @@ QWORD *draw_clear(QWORD *q, int context, float x, float y, float width, float he
 
 }
 
-QWORD *draw_finish(QWORD *q)
+qword_t *draw_finish(qword_t *q)
 {
 
 	PACK_GIFTAG(q,GIF_SET_TAG(1,1,0,0,GIF_FLG_PACKED,1),GIF_REG_AD);
@@ -202,7 +200,7 @@ void draw_wait_finish(void)
 
 }
 
-QWORD *draw_texture_flush(QWORD *q)
+qword_t *draw_texture_flush(qword_t *q)
 {
 
 	// Flush texture buffer
@@ -217,7 +215,7 @@ QWORD *draw_texture_flush(QWORD *q)
 
 }
 
-QWORD *draw_texture_transfer(QWORD *q, void *src, int bytes, int width, int height, int psm, int dest, int dest_width)
+qword_t *draw_texture_transfer(qword_t *q, void *src, int bytes, int width, int height, int psm, int dest, int dest_width)
 {
 
 	int i;

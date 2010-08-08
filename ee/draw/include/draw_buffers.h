@@ -26,12 +26,19 @@
 #define CLUT_COMPARE_CBP1			5
 
 typedef struct {
+	unsigned char width;
+	unsigned char height;
+	unsigned char components;
+	unsigned char function;
+} texinfo_t;
+
+typedef struct {
 	unsigned int address;
 	unsigned int width;
 	unsigned int height;
 	unsigned int psm;
 	unsigned int mask;
-} FRAMEBUFFER;
+} framebuffer_t;
 
 typedef struct {
 	unsigned int enable;
@@ -39,13 +46,14 @@ typedef struct {
 	unsigned int address;
 	unsigned int zsm;
 	unsigned int mask;
-} ZBUFFER;
+} zbuffer_t;
 
 typedef struct {
 	unsigned int address;
 	unsigned int width;
 	unsigned int psm;
-} TEXBUFFER;
+	texinfo_t info;
+} texbuffer_t;
 
 typedef struct {
 	unsigned int address;
@@ -53,14 +61,7 @@ typedef struct {
 	unsigned int storage_mode;
 	unsigned int start;
 	unsigned int load_method;
-} CLUTBUFFER;
-
-typedef struct {
-	unsigned char width;
-	unsigned char height;
-	unsigned char components;
-	unsigned char function;
-} TEXTURE;
+} clutbuffer_t;
 
 #ifdef __cplusplus
 extern "C" {
@@ -70,19 +71,19 @@ extern "C" {
 	unsigned char draw_log2(unsigned int x);
 
 	// Framebuffer Attributes
-	QWORD *draw_framebuffer(QWORD *q, int context, FRAMEBUFFER *frame);
+	qword_t *draw_framebuffer(qword_t *q, int context, framebuffer_t *frame);
 
 	// ZBuffer Attributes
-	QWORD *draw_zbuffer(QWORD *q, int context, ZBUFFER *zbuffer);
+	qword_t *draw_zbuffer(qword_t *q, int context, zbuffer_t *zbuffer);
 
 	// TextureBuffer Attributes
-	QWORD *draw_texturebuffer(QWORD *q, int context, TEXBUFFER *texbuffer, TEXTURE *texture, CLUTBUFFER *clut);
+	qword_t *draw_texturebuffer(qword_t *q, int context, texbuffer_t *texbuffer, clutbuffer_t *clut);
 
 	// CLUT Storage Mode 1 Information
-	QWORD *draw_clutbuffer(QWORD *q, int context, int psm, CLUTBUFFER *clut);
+	qword_t *draw_clutbuffer(qword_t *q, int context, int psm, clutbuffer_t *clut);
 
 	// CLUT Storage Mode 2 Information
-	QWORD *draw_clut_offset(QWORD *q, int cbw, int u, int v);
+	qword_t *draw_clut_offset(qword_t *q, int cbw, int u, int v);
 
 #ifdef __cplusplus
 }

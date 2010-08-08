@@ -23,13 +23,13 @@ FSFONT impress;
 FONTX krom_u;
 FONTX krom_k;
 
-void draw_init_env(PACKET *packet)
+void draw_init_env(packet_t *packet)
 {
 
-	QWORD *q = packet->data;
+	qword_t *q = packet->data;
 
-	FRAMEBUFFER frame;
-	ZBUFFER z;
+	framebuffer_t frame;
+	zbuffer_t z;
 
 	frame.width = 640;
 	frame.height = 448;
@@ -53,12 +53,12 @@ void draw_init_env(PACKET *packet)
 
 }
 
-void init_texture(PACKET *packet)
+void init_texture(packet_t *packet)
 {
 
 	dma_wait_fast();
 
-	QWORD *q = packet->data;
+	qword_t *q = packet->data;
 
 	myaddress = graph_vram_allocate(512,256,GS_PSM_4, GRAPH_ALIGN_BLOCK);
 	clutaddress = graph_vram_allocate(8,2,GS_PSM_32, GRAPH_ALIGN_BLOCK);
@@ -73,27 +73,23 @@ void init_texture(PACKET *packet)
 
 }
 
-void test_something(PACKET *packet)
+void test_something(packet_t *packet)
 {
 
 	int context = 0;
 
-	PACKET *current = packet;
+	packet_t *current = packet;
 
-	QWORD *q = current->data;
+	qword_t *q = current->data;
 
-	VERTEX v0;
+	vertex_t v0;
 
-	COLOR c0;
-	COLOR c1;
+	color_t c0;
+	color_t c1;
 
-	TEXEL t0;
-	TEXEL t1;
-
-	TEXBUFFER texbuf;
-	CLUTBUFFER clut;
-	TEXTURE texinfo;
-	LOD lod;
+	texbuffer_t texbuf;
+	clutbuffer_t clut;
+	lod_t lod;
 
 	// Use linear filtering for good scaling results
 	lod.calculation = LOD_USE_K;
@@ -103,14 +99,14 @@ void test_something(PACKET *packet)
 	lod.l = 0;
 	lod.k = 0;
 
-	texinfo.width = draw_log2(512);
-	texinfo.height = draw_log2(256);
-	texinfo.components = TEXTURE_COMPONENTS_RGBA;
-	texinfo.function = TEXTURE_FUNCTION_MODULATE;
-
 	texbuf.width = 512;
 	texbuf.psm = GS_PSM_4;
 	texbuf.address = myaddress;
+
+	texbuf.info.width = draw_log2(512);
+	texbuf.info.height = draw_log2(256);
+	texbuf.info.components = TEXTURE_COMPONENTS_RGBA;
+	texbuf.info.function = TEXTURE_FUNCTION_MODULATE;
 
 	clut.storage_mode = CLUT_STORAGE_MODE1;
 	clut.start = 0;
@@ -118,12 +114,6 @@ void test_something(PACKET *packet)
 	clut.psm = GS_PSM_32;
 	clut.load_method = CLUT_LOAD;
 	clut.address = clutaddress;
-
-	t0.u = 0.5f;
-	t0.v = 0.5f;
-
-	t1.u = 510.5f;
-	t1.v = 254.5f;
 
 	v0.x = 320.0f;
 	v0.y = 240.0f;
@@ -140,6 +130,7 @@ void test_something(PACKET *packet)
 	c1.b = 0x00;
 	c1.a = 0x40;
 	c1.q = 1.0f;
+
 	dma_wait_fast();
 
 	// UTF-8
@@ -155,7 +146,7 @@ void test_something(PACKET *packet)
 		q = draw_clear(q,0,0,0,640.0f,448.0f,0x40,0x40,0x40);
 
 		q = draw_texture_sampling(q,0,&lod);
-		q = draw_texturebuffer(q,0,&texbuf,&texinfo,&clut);
+		q = draw_texturebuffer(q,0,&texbuf,&clut);
 
 		impress.scale = 3.0f;
 
@@ -182,8 +173,8 @@ void test_something(PACKET *packet)
 
 int main(void)
 {
-	PACKET packet;
-	PACKET packets[2];
+	packet_t packet;
+	packet_t packets[2];
 
 	packet_allocate(&packet,100,0,0);
 	packet_allocate(&packets[0],10000,0,0);

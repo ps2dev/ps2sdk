@@ -37,20 +37,20 @@ typedef struct {
 	unsigned char antialiasing;
 	unsigned char mapping_type;
 	unsigned char colorfix;
-} PRIMITIVE;
+} prim_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 	// Primitive Coordinate System offset
-	QWORD *draw_primitive_xyoffset(QWORD *q, int context, float x, float y);
+	qword_t *draw_primitive_xyoffset(qword_t *q, int context, float x, float y);
 
 	// Primitive Control
-	QWORD *draw_primitive_override(QWORD *q, int mode);
+	qword_t *draw_primitive_override(qword_t *q, int mode);
 
 	// Overridden Primitive Attributes
-	QWORD *draw_primitive_override_setting(QWORD *q, int context, PRIMITIVE *prim);
+	qword_t *draw_primitive_override_setting(qword_t *q, int context, prim_t *prim);
 
 #ifdef __cplusplus
 }

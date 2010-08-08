@@ -38,8 +38,8 @@ VECTOR *temp_lights;
 VECTOR *temp_colours;
 VECTOR *temp_vertices;
 
-XYZ *xyz;
-COLOR *rgbaq;
+xyz_t *xyz;
+color_t *rgbaq;
 
 int light_count = 4;
 
@@ -64,7 +64,7 @@ int light_type[4] = {
   LIGHT_DIRECTIONAL
 };
 
-void init_gs(FRAMEBUFFER *frame, ZBUFFER *z)
+void init_gs(framebuffer_t *frame, zbuffer_t *z)
 {
 
 	// Define a 32-bit 640x512 framebuffer.
@@ -98,11 +98,11 @@ void init_gs(FRAMEBUFFER *frame, ZBUFFER *z)
 
 }
 
-void init_drawing_environment(PACKET *packet, FRAMEBUFFER *frame, ZBUFFER *z)
+void init_drawing_environment(packet_t *packet, framebuffer_t *frame, zbuffer_t *z)
 {
 
 	// This is our generic qword pointer.
-	QWORD *q = packet->data;
+	qword_t *q = packet->data;
 
 	// This will setup a default drawing environment.
 	q = draw_setup_environment(q,0,frame,z);
@@ -118,10 +118,10 @@ void init_drawing_environment(PACKET *packet, FRAMEBUFFER *frame, ZBUFFER *z)
 
 }
 
-void flip_buffers(PACKET *flip,FRAMEBUFFER *frame)
+void flip_buffers(packet_t *flip,framebuffer_t *frame)
 {
 
-	QWORD *q = flip->data;
+	qword_t *q = flip->data;
 
 	q = draw_framebuffer(q,0,frame);
 	q = draw_finish(q);
@@ -133,12 +133,12 @@ void flip_buffers(PACKET *flip,FRAMEBUFFER *frame)
 
 }
 
-QWORD *render_teapot(QWORD *q,MATRIX view_screen, VECTOR object_position, VECTOR object_rotation, PRIMITIVE *prim, COLOR *color, FRAMEBUFFER *frame, ZBUFFER *z)
+qword_t *render_teapot(qword_t *q,MATRIX view_screen, VECTOR object_position, VECTOR object_rotation, prim_t *prim, color_t *color, framebuffer_t *frame, zbuffer_t *z)
 {
 
 	int i;
 
-	QWORD *dmatag;
+	qword_t *dmatag;
 
 	MATRIX local_world;
 	MATRIX local_light;
@@ -179,10 +179,10 @@ QWORD *render_teapot(QWORD *q,MATRIX view_screen, VECTOR object_position, VECTOR
    calculate_vertices(temp_vertices, vertex_count, vertices, local_screen);
 
 	// Convert floating point vertices to fixed point and translate to center of screen.
-	draw_convert_xyz(xyz, 2048, 2048, 32, vertex_count, (VERTEXF*)temp_vertices);
+	draw_convert_xyz(xyz, 2048, 2048, 32, vertex_count, (vertex_f_t*)temp_vertices);
 
 	// Convert floating point colours to fixed point.
-	draw_convert_rgbq(rgbaq, vertex_count, (VERTEXF*)temp_vertices, (COLORF*)temp_colours, color->a);
+	draw_convert_rgbq(rgbaq, vertex_count, (vertex_f_t*)temp_vertices, (color_f_t*)temp_colours, color->a);
 
 	// Draw the triangles using triangle primitive type.
 	q = draw_prim_start(q,0,prim,color);
@@ -204,18 +204,18 @@ QWORD *render_teapot(QWORD *q,MATRIX view_screen, VECTOR object_position, VECTOR
 
 }
 
-int render(PACKET *packet, FRAMEBUFFER *frame, ZBUFFER *z)
+int render(packet_t *packet, framebuffer_t *frame, zbuffer_t *z)
 {
 
 	int context = 0;
 
-	PACKET flip_pkt;
+	packet_t flip_pkt;
 
-	QWORD *q;
-	QWORD *dmatag;
+	qword_t *q;
+	qword_t *dmatag;
 
-	PRIMITIVE prim;
-	COLOR color;
+	prim_t prim;
+	color_t color;
 
 	MATRIX view_screen;
 
@@ -318,11 +318,11 @@ int main(int argc, char **argv)
 {
 
 	// The buffers to be used.
-	FRAMEBUFFER frame[2];
-	ZBUFFER z;
+	framebuffer_t frame[2];
+	zbuffer_t z;
 
 	// The data packets for double buffering dma sends.
-	PACKET packets[2];
+	packet_t packets[2];
 
 	packet_allocate(&packets[0],40000,0,0);
 	packet_allocate(&packets[1],40000,0,0);

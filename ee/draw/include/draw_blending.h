@@ -24,20 +24,20 @@ typedef struct {
 	char alpha;
 	char color3;
 	unsigned char fixed_alpha;
-} BLEND;
+} blend_t;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 	// Alpha Blending Per-Pixel MSB Control
-	QWORD *draw_pixel_alpha_control(QWORD *q, int enable);
+	qword_t *draw_pixel_alpha_control(qword_t *q, int enable);
 
 	// Alpha Blending
-	QWORD *draw_alpha_blending(QWORD *q, int context, BLEND *blend);
+	qword_t *draw_alpha_blending(qword_t *q, int context, blend_t *blend);
 
 	// Alpha Correction
-	QWORD *draw_alpha_correction(QWORD *q, int context, int alpha);
+	qword_t *draw_alpha_correction(qword_t *q, int context, int alpha);
 
 #ifdef __cplusplus
 }

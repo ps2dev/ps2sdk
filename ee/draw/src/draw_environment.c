@@ -6,7 +6,7 @@
 #include <draw.h>
 
 // Alpha Blending Per-Pixel MSB Control
-QWORD *draw_pixel_alpha_control(QWORD *q, int enable)
+qword_t *draw_pixel_alpha_control(qword_t *q, int enable)
 {
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -19,7 +19,7 @@ QWORD *draw_pixel_alpha_control(QWORD *q, int enable)
 }
 
 // Alpha Blending
-QWORD *draw_alpha_blending(QWORD *q, int context, BLEND *blend)
+qword_t *draw_alpha_blending(qword_t *q, int context, blend_t *blend)
 {
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -33,7 +33,7 @@ QWORD *draw_alpha_blending(QWORD *q, int context, BLEND *blend)
 }
 
 // Framebuffer Attributes
-QWORD *draw_framebuffer(QWORD *q, int context, FRAMEBUFFER *frame)
+qword_t *draw_framebuffer(qword_t *q, int context, framebuffer_t *frame)
 {
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -46,7 +46,7 @@ QWORD *draw_framebuffer(QWORD *q, int context, FRAMEBUFFER *frame)
 }
 
 // ZBuffer Attributes
-QWORD *draw_zbuffer(QWORD *q, int context, ZBUFFER *zbuffer)
+qword_t *draw_zbuffer(qword_t *q, int context, zbuffer_t *zbuffer)
 {
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -59,7 +59,7 @@ QWORD *draw_zbuffer(QWORD *q, int context, ZBUFFER *zbuffer)
 }
 
 // TextureBuffer Attributes
-QWORD *draw_texturebuffer(QWORD *q, int context, TEXBUFFER *texbuffer, TEXTURE *texture, CLUTBUFFER *clut)
+qword_t *draw_texturebuffer(qword_t *q, int context, texbuffer_t *texture, clutbuffer_t *clut)
 {
 
 	if(clut->storage_mode == CLUT_STORAGE_MODE2)
@@ -70,8 +70,8 @@ QWORD *draw_texturebuffer(QWORD *q, int context, TEXBUFFER *texbuffer, TEXTURE *
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
 	q++;
 
-	PACK_GIFTAG(q, GS_SET_TEX0(texbuffer->address>>6,texbuffer->width>>6,texbuffer->psm,
-							   texture->width,texture->height,texture->components,texture->function,
+	PACK_GIFTAG(q, GS_SET_TEX0(texture->address>>6,texture->width>>6,texture->psm,
+							   texture->info.width,texture->info.height,texture->info.components,texture->info.function,
 							   clut->address>>6,clut->psm,clut->storage_mode,clut->start,clut->load_method), GS_REG_TEX0 + context);
 	q++;
 
@@ -80,7 +80,7 @@ QWORD *draw_texturebuffer(QWORD *q, int context, TEXBUFFER *texbuffer, TEXTURE *
 }
 
 // CLUT Storage Mode 1 Information
-QWORD *draw_clutbuffer(QWORD *q, int context, int psm, CLUTBUFFER *clut)
+qword_t *draw_clutbuffer(qword_t *q, int context, int psm, clutbuffer_t *clut)
 {
 
 	if (clut->storage_mode == CLUT_STORAGE_MODE2)
@@ -99,7 +99,7 @@ QWORD *draw_clutbuffer(QWORD *q, int context, int psm, CLUTBUFFER *clut)
 }
 
 // CLUT Storage Mode 2 Information
-QWORD *draw_clut_offset(QWORD *q, int cbw, int u, int v)
+qword_t *draw_clut_offset(qword_t *q, int cbw, int u, int v)
 {
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -113,7 +113,7 @@ QWORD *draw_clut_offset(QWORD *q, int cbw, int u, int v)
 }
 
 // Dithering Switch
-QWORD *draw_dithering(QWORD *q, int enable)
+qword_t *draw_dithering(qword_t *q, int enable)
 {
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -127,7 +127,7 @@ QWORD *draw_dithering(QWORD *q, int enable)
 }
 
 // Dithering Matrix
-QWORD *draw_dither_matrix(QWORD *q,DITHERMATRIX dm)
+qword_t *draw_dither_matrix(qword_t *q,char *dm)
 {
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -144,7 +144,7 @@ QWORD *draw_dither_matrix(QWORD *q,DITHERMATRIX dm)
 }
 
 // Fog Color
-QWORD *draw_fog_color(QWORD *q, unsigned char r, unsigned char g, unsigned char b)
+qword_t *draw_fog_color(qword_t *q, unsigned char r, unsigned char g, unsigned char b)
 {
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -158,7 +158,7 @@ QWORD *draw_fog_color(QWORD *q, unsigned char r, unsigned char g, unsigned char 
 }
 
 // Scanline Masking (framebuffer)
-QWORD *draw_scan_masking(QWORD *q, int mask)
+qword_t *draw_scan_masking(qword_t *q, int mask)
 {
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -172,7 +172,7 @@ QWORD *draw_scan_masking(QWORD *q, int mask)
 }
 
 // Color Masking/Clamping
-QWORD *draw_color_clamping(QWORD *q, int enable)
+qword_t *draw_color_clamping(qword_t *q, int enable)
 {
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -186,7 +186,7 @@ QWORD *draw_color_clamping(QWORD *q, int enable)
 }
 
 // Alpha Correction
-QWORD *draw_alpha_correction(QWORD *q, int context, int alpha)
+qword_t *draw_alpha_correction(qword_t *q, int context, int alpha)
 {
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -200,7 +200,7 @@ QWORD *draw_alpha_correction(QWORD *q, int context, int alpha)
 }
 
 // Primitive Coordinate System offset
-QWORD *draw_primitive_xyoffset(QWORD *q, int context, float x, float y)
+qword_t *draw_primitive_xyoffset(qword_t *q, int context, float x, float y)
 {
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -214,7 +214,7 @@ QWORD *draw_primitive_xyoffset(QWORD *q, int context, float x, float y)
 }
 
 // Primitive Control
-QWORD *draw_primitive_override(QWORD *q, int mode)
+qword_t *draw_primitive_override(qword_t *q, int mode)
 {
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -228,7 +228,7 @@ QWORD *draw_primitive_override(QWORD *q, int mode)
 }
 
 // Overridden Primitive Attributes
-QWORD *draw_primitive_override_setting(QWORD *q, int context, PRIMITIVE *prim)
+qword_t *draw_primitive_override_setting(qword_t *q, int context, prim_t *prim)
 {
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -244,7 +244,7 @@ QWORD *draw_primitive_override_setting(QWORD *q, int context, PRIMITIVE *prim)
 }
 
 // Texture Sampling, Level-of-Detail, and Filtering
-QWORD *draw_texture_sampling(QWORD *q, int context, LOD *lod)
+qword_t *draw_texture_sampling(qword_t *q, int context, lod_t *lod)
 {
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -258,7 +258,7 @@ QWORD *draw_texture_sampling(QWORD *q, int context, LOD *lod)
 }
 
 // Mipmap levels 1-3
-QWORD *draw_mipmap1(QWORD *q, int context, MIPMAP *mipmap)
+qword_t *draw_mipmap1(qword_t *q, int context, mipmap_t *mipmap)
 {
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -274,7 +274,7 @@ QWORD *draw_mipmap1(QWORD *q, int context, MIPMAP *mipmap)
 }
 
 // Mipmap levels 4-6
-QWORD *draw_mipmap2(QWORD *q, int context, MIPMAP *mipmap)
+qword_t *draw_mipmap2(qword_t *q, int context, mipmap_t *mipmap)
 {
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -290,7 +290,7 @@ QWORD *draw_mipmap2(QWORD *q, int context, MIPMAP *mipmap)
 }
 
 // Scissoring pixel test area
-QWORD *draw_scissor_area(QWORD *q, int context, int x0, int x1, int y0, int y1)
+qword_t *draw_scissor_area(qword_t *q, int context, int x0, int x1, int y0, int y1)
 {
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -304,7 +304,7 @@ QWORD *draw_scissor_area(QWORD *q, int context, int x0, int x1, int y0, int y1)
 }
 
 // Pixel Testing
-QWORD *draw_pixel_test(QWORD *q, int context, ALPHATEST *atest, DESTTEST *dtest, DEPTHTEST *ztest)
+qword_t *draw_pixel_test(qword_t *q, int context, atest_t *atest, dtest_t *dtest, ztest_t *ztest)
 {
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -320,7 +320,7 @@ QWORD *draw_pixel_test(QWORD *q, int context, ALPHATEST *atest, DESTTEST *dtest,
 }
 
 // Texture Clamping
-QWORD *draw_texture_wrapping(QWORD *q, int context, WRAP *wrap)
+qword_t *draw_texture_wrapping(qword_t *q, int context, texwrap_t *wrap)
 {
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
@@ -335,7 +335,7 @@ QWORD *draw_texture_wrapping(QWORD *q, int context, WRAP *wrap)
 }
 
 // Alpha Expansion Values
-QWORD *draw_texture_expand_alpha(QWORD *q, unsigned char zero_value, int expand, unsigned char one_value)
+qword_t *draw_texture_expand_alpha(qword_t *q, unsigned char zero_value, int expand, unsigned char one_value)
 {
 
 	PACK_GIFTAG(q, GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);

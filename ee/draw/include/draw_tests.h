@@ -33,32 +33,33 @@ typedef struct {
 	unsigned char method;
 	unsigned char compval;
 	unsigned char keep;
-} ALPHATEST; 
+} atest_t; 
 
 typedef struct {
 	unsigned char enable;
 	unsigned char pass;
-} DESTTEST;
+} dtest_t;
 
 typedef struct {
 	unsigned char enable;
 	unsigned char method;
-} DEPTHTEST;
+} ztest_t;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 	// Scissoring pixel test area
-	QWORD *draw_scissor_area(QWORD *q, int context, int x0, int x1, int y0, int y1);
+	qword_t *draw_scissor_area(qword_t *q, int context, int x0, int x1, int y0, int y1);
 
 	// Pixel Testing
-	QWORD *draw_pixel_test(QWORD *q, int context, ALPHATEST *atest, DESTTEST *dtest, DEPTHTEST *ztest);
+	qword_t *draw_pixel_test(qword_t *q, int context, atest_t *atest, dtest_t *dtest, ztest_t *ztest);
 
 	// Disable pixel testing defaults
-	QWORD *draw_disable_tests(QWORD *q, int context, ZBUFFER *z);
+	qword_t *draw_disable_tests(qword_t *q, int context, zbuffer_t *z);
 
 	// Enable pixel testing defaults
-	QWORD *draw_enable_tests(QWORD *q, int context, ZBUFFER *z);
+	qword_t *draw_enable_tests(qword_t *q, int context, zbuffer_t *z);
 
 #ifdef __cplusplus
 }

@@ -36,7 +36,7 @@ VECTOR object_rotation = { 0.00f, 0.00f, 0.00f, 1.00f };
 VECTOR camera_position = { 0.00f, 0.00f, 100.00f, 1.00f };
 VECTOR camera_rotation = { 0.00f, 0.00f,   0.00f, 1.00f };
 
-void init_gs(FRAMEBUFFER *frame, ZBUFFER *z)
+void init_gs(framebuffer_t *frame, zbuffer_t *z)
 {
 
 	// Define a 32-bit 640x512 framebuffer.
@@ -58,11 +58,11 @@ void init_gs(FRAMEBUFFER *frame, ZBUFFER *z)
 
 }
 
-void init_drawing_environment(PACKET *packet, FRAMEBUFFER *frame, ZBUFFER *z)
+void init_drawing_environment(packet_t *packet, framebuffer_t *frame, zbuffer_t *z)
 {
 
 	// This is our generic qword pointer.
-	QWORD *q = packet->data;
+	qword_t *q = packet->data;
 
 	// This will setup a default drawing environment.
 	q = draw_setup_environment(q,0,frame,z);
@@ -78,17 +78,17 @@ void init_drawing_environment(PACKET *packet, FRAMEBUFFER *frame, ZBUFFER *z)
 
 }
 
-int render(PACKET *packet,FRAMEBUFFER *frame, ZBUFFER *z)
+int render(packet_t *packet,framebuffer_t *frame, zbuffer_t *z)
 {
 
 	int i;
 	int context = 0;
 
-	QWORD *q;
-	QWORD *dmatag;
+	qword_t *q;
+	qword_t *dmatag;
 
-	PRIMITIVE prim;
-	COLOR color;
+	prim_t prim;
+	color_t color;
 
   MATRIX local_world;
   MATRIX world_view;
@@ -97,15 +97,15 @@ int render(PACKET *packet,FRAMEBUFFER *frame, ZBUFFER *z)
 
   VECTOR *temp_vertices;
 
-	XYZ   *verts;
-	COLOR *colors;
+	xyz_t   *verts;
+	color_t *colors;
 
   // Allocate calculation space.
   temp_vertices = memalign(128, sizeof(VECTOR) * vertex_count);
 
   // Allocate register space.
-	verts  = memalign(128, sizeof(VERTEX) * vertex_count);
-	colors = memalign(128, sizeof(COLOR)  * vertex_count);
+	verts  = memalign(128, sizeof(vertex_t) * vertex_count);
+	colors = memalign(128, sizeof(color_t)  * vertex_count);
 
 	// Define the triangle primitive we want to use.
 	prim.type = PRIM_TRIANGLE;
@@ -150,10 +150,10 @@ int render(PACKET *packet,FRAMEBUFFER *frame, ZBUFFER *z)
    calculate_vertices(temp_vertices, vertex_count, vertices, local_screen);
 
 		// Convert floating point vertices to fixed point and translate to center of screen.
-		draw_convert_xyz(verts, 2048, 2048, 32, vertex_count, (VERTEXF*)temp_vertices);
+		draw_convert_xyz(verts, 2048, 2048, 32, vertex_count, (vertex_f_t*)temp_vertices);
 
 		// Convert floating point colours to fixed point.
-		draw_convert_rgbq(colors, vertex_count, (VERTEXF*)temp_vertices, (COLORF*)colours, color.a);
+		draw_convert_rgbq(colors, vertex_count, (vertex_f_t*)temp_vertices, (color_f_t*)colours, color.a);
 
 		// Grab our dmatag pointer for the dma chain.
 		dmatag = packet[context].data;
@@ -207,11 +207,11 @@ int main(int argc, char **argv)
 {
 
 	// The buffers to be used.
-	FRAMEBUFFER frame;
-	ZBUFFER z;
+	framebuffer_t frame;
+	zbuffer_t z;
 
 	// The data packets for double buffering dma sends.
-	PACKET packets[2];
+	packet_t packets[2];
 
 	packet_allocate(&packets[0],100,0,0);
 	packet_allocate(&packets[1],100,0,0);
