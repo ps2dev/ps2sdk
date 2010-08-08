@@ -3,7 +3,7 @@
 #include <loadfile.h>
 #include <stdio.h>
 #include <sifrpc.h>
-#include <graph_registers.h>
+#include <gs_privileged.h>
 #include <libpad.h>
 #include <string.h>
 
@@ -23,13 +23,13 @@ u8 actDirect[2][6] = { {0,0,0,0,0,0}, {0,0,0,0,0,0}};
 void wait_vsync() 
 {
 	// Enable the vsync interrupt.
-	GS_REG_CSR |= GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+	*GS_REG_CSR |= GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
 
 	// Wait for the vsync interrupt.
-	while (!(GS_REG_CSR & (GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0)))) { }
+	while (!(*GS_REG_CSR & (GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0)))) { }
 
 	// Disable the vsync interrupt.
-	GS_REG_CSR &= ~GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+	*GS_REG_CSR &= ~GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
 }
 
 void loadmodules(int free)

@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "graph_registers.h"
+#include "gs_privileged.h"
 #include "libpad.h"
 #include "libmtap.h"
 
@@ -34,13 +34,13 @@ static u32 maxslot[2];
  {
 
   // Enable the vsync interrupt.
-  GS_REG_CSR |= GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+  *GS_REG_CSR |= GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
 
   // Wait for the vsync interrupt.
-  while (!(GS_REG_CSR & (GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0)))) { }
+  while (!(*GS_REG_CSR & (GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0)))) { }
 
   // Disable the vsync interrupt.
-  GS_REG_CSR &= ~GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
+  *GS_REG_CSR &= ~GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
 
   // End function.
   return 0;
