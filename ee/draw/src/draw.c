@@ -67,7 +67,7 @@ qword_t *draw_setup_environment(qword_t *q, int context, framebuffer_t *frame, z
 	PACK_GIFTAG(q, GS_SET_PRMODECONT(PRIM_OVERRIDE_DISABLE),GS_REG_PRMODECONT);
 	q++;
 	// Primitive coordinate offsets
-	PACK_GIFTAG(q, GS_SET_XYOFFSET(0,0), GS_REG_XYOFFSET + context);
+	PACK_GIFTAG(q, GS_SET_XYOFFSET(ftoi4(2048.0f),ftoi4(2048.0f)), GS_REG_XYOFFSET + context);
 	q++;
 	// Scissoring area
 	PACK_GIFTAG(q, GS_SET_SCISSOR(0,frame->width-1,0,frame->height-1), GS_REG_SCISSOR + context);

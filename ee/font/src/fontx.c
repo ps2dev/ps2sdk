@@ -456,7 +456,7 @@ u64 *draw_fontx_row(u64 *dw, unsigned char byte, int x, int y, int z, int bold)
 		if (byte & mask)
 		{
 
-			*dw++ = GS_SET_XYZ(x+(i<<4),y,z);
+			*dw++ = GS_SET_XYZ((x+(i<<4)) + 32768,y+32768,z);
 			px = 1;
 
 		}
@@ -464,7 +464,7 @@ u64 *draw_fontx_row(u64 *dw, unsigned char byte, int x, int y, int z, int bold)
 		{
 
 			if (bold && px)
-				*dw++ = GS_SET_XYZ(x+(i<<4),y,z);
+				*dw++ = GS_SET_XYZ((x+(i<<4)) + 32768,y+32768,z);
 
 			px = 0;
 
@@ -478,7 +478,7 @@ u64 *draw_fontx_row(u64 *dw, unsigned char byte, int x, int y, int z, int bold)
 	if (bold && px)
 	{
 
-		*dw++ = GS_SET_XYZ(x+(i<<4),y,z);
+		*dw++ = GS_SET_XYZ((x+(i<<4)) + 32768,y+32768,z);
 
 	}
 

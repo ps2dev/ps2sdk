@@ -8,6 +8,15 @@
 
 #include <gs_gp.h>
 
+// Normal offset
+#define OFFSET 2048.0f
+
+// Leftmost/Topmost offset (2048.0f - 0.4375f + 1)
+#define START_OFFSET 2047.5625f
+
+// Bottommost/Rightmost offset (2048.0f + 0.5625f + 1)
+#define END_OFFSET 2048.5625f
+
 #define DRAW_POINT_NREG 4
 #define DRAW_POINT_REGLIST \
 		((u64)GIF_REG_PRIM)  <<  0 | \
@@ -25,7 +34,7 @@ qword_t *draw_point(qword_t *q, int context, point_t *point)
 	q->dw[1] = point->color.rgbaq;
 	q++;
 
-	q->dw[0] = GIF_SET_XYZ(ftoi4(point->v0.x),ftoi4(point->v0.y),point->v0.z);
+	q->dw[0] = GIF_SET_XYZ(ftoi4(point->v0.x + OFFSET),ftoi4(point->v0.y + OFFSET),point->v0.z);
 	q->dw[1] = 0;
 	q++;
 
@@ -50,8 +59,8 @@ qword_t *draw_line(qword_t *q, int context, line_t *line)
 	q->dw[1] = line->color.rgbaq;
 	q++;
 
-	q->dw[0] = GIF_SET_XYZ(ftoi4(line->v0.x),ftoi4(line->v0.y),line->v0.z);
-	q->dw[1] = GIF_SET_XYZ(ftoi4(line->v1.x),ftoi4(line->v1.y),line->v0.z);
+	q->dw[0] = GIF_SET_XYZ(ftoi4(line->v0.x + START_OFFSET),ftoi4(line->v0.y + START_OFFSET),line->v0.z);
+	q->dw[1] = GIF_SET_XYZ(ftoi4(line->v1.x + END_OFFSET),ftoi4(line->v1.y + END_OFFSET),line->v0.z);
 	q++;
 
 	return q;
@@ -70,8 +79,8 @@ qword_t *draw_line(qword_t *q, int context, line_t *line)
 qword_t *draw_triangle_outline(qword_t *q, int context, triangle_t *triangle)
 {
 
-	int __xi0 = ftoi4(triangle->v0.x);
-	int __yi0 = ftoi4(triangle->v0.y);
+	int __xi0 = ftoi4(triangle->v0.x + OFFSET);
+	int __yi0 = ftoi4(triangle->v0.y + OFFSET);
 
 	PACK_GIFTAG(q,GIF_SET_TAG(1,0,0,0,GIF_FLG_REGLIST,DRAW_TRIANGLE_OUT_NREG),DRAW_TRIANGLE_OUT_REGLIST);
 	q++;
@@ -81,10 +90,10 @@ qword_t *draw_triangle_outline(qword_t *q, int context, triangle_t *triangle)
 	q++;
 
 	q->dw[0] = GIF_SET_XYZ(__xi0,__yi0,triangle->v0.z);
-	q->dw[1] = GIF_SET_XYZ(ftoi4(triangle->v1.x),ftoi4(triangle->v1.y),triangle->v0.z);
+	q->dw[1] = GIF_SET_XYZ(ftoi4(triangle->v1.x + OFFSET),ftoi4(triangle->v1.y + OFFSET),triangle->v0.z);
 	q++;
 
-	q->dw[0] = GIF_SET_XYZ(ftoi4(triangle->v2.x),ftoi4(triangle->v2.y),triangle->v0.z);
+	q->dw[0] = GIF_SET_XYZ(ftoi4(triangle->v2.x + OFFSET),ftoi4(triangle->v2.y + OFFSET),triangle->v0.z);
 	q->dw[1] = GIF_SET_XYZ(__xi0,__yi0,triangle->v0.z);
 	q++;
 
@@ -112,11 +121,11 @@ qword_t *draw_triangle_filled(qword_t *q, int context,triangle_t *triangle)
 	q->dw[1] = triangle->color.rgbaq;
 	q++;
 
-	q->dw[0] = GIF_SET_XYZ(ftoi4(triangle->v0.x),ftoi4(triangle->v0.y),triangle->v0.z);
-	q->dw[1] = GIF_SET_XYZ(ftoi4(triangle->v1.x),ftoi4(triangle->v1.y),triangle->v0.z);
+	q->dw[0] = GIF_SET_XYZ(ftoi4(triangle->v0.x + OFFSET),ftoi4(triangle->v0.y + OFFSET),triangle->v0.z);
+	q->dw[1] = GIF_SET_XYZ(ftoi4(triangle->v1.x + OFFSET ),ftoi4(triangle->v1.y + OFFSET),triangle->v0.z);
 	q++;
 
-	q->dw[0] = GIF_SET_XYZ(ftoi4(triangle->v2.x),ftoi4(triangle->v2.y),triangle->v0.z);
+	q->dw[0] = GIF_SET_XYZ(ftoi4(triangle->v2.x + OFFSET),ftoi4(triangle->v2.y + OFFSET),triangle->v0.z);
 	q->dw[1] = 0;
 	q++;
 
@@ -138,10 +147,10 @@ qword_t *draw_triangle_filled(qword_t *q, int context,triangle_t *triangle)
 qword_t *draw_rect_outline(qword_t *q, int context, rect_t *rect)
 {
 
-	int __xi0 = ftoi4(rect->v0.x);
-	int __yi0 = ftoi4(rect->v0.y);
-	int __xi1 = ftoi4(rect->v1.x);
-	int __yi1 = ftoi4(rect->v1.y);
+	int __xi0 = ftoi4(rect->v0.x + START_OFFSET);
+	int __yi0 = ftoi4(rect->v0.y + START_OFFSET);
+	int __xi1 = ftoi4(rect->v1.x + END_OFFSET);
+	int __yi1 = ftoi4(rect->v1.y + END_OFFSET);
 
 	PACK_GIFTAG(q,GIF_SET_TAG(1,0,0,0,GIF_FLG_REGLIST,DRAW_RECT_OUT_NREG),DRAW_RECT_OUT_REGLIST);
 	q++;
@@ -183,8 +192,8 @@ qword_t *draw_rect_filled(qword_t *q, int context, rect_t *rect)
 	q->dw[1] = rect->color.rgbaq;
 	q++;
 
-	q->dw[0] = GIF_SET_XYZ(ftoi4(rect->v0.x),ftoi4(rect->v0.y),rect->v0.z);
-	q->dw[1] = GIF_SET_XYZ(ftoi4(rect->v1.x),ftoi4(rect->v1.y),rect->v0.z);
+	q->dw[0] = GIF_SET_XYZ(ftoi4(rect->v0.x + START_OFFSET),ftoi4(rect->v0.y + START_OFFSET),rect->v0.z);
+	q->dw[1] = GIF_SET_XYZ(ftoi4(rect->v1.x + END_OFFSET),ftoi4(rect->v1.y + END_OFFSET),rect->v0.z);
 	q++;
 
 	return q;
@@ -213,11 +222,11 @@ qword_t *draw_rect_textured(qword_t *q, int context, texrect_t *rect)
 	q++;
 
 	q->dw[0] = GIF_SET_UV(ftoi4(rect->t0.u),ftoi4(rect->t0.v));
-	q->dw[1] = GIF_SET_XYZ(ftoi4(rect->v0.x),ftoi4(rect->v0.y),rect->v0.z);
+	q->dw[1] = GIF_SET_XYZ(ftoi4(rect->v0.x + START_OFFSET),ftoi4(rect->v0.y + START_OFFSET),rect->v0.z);
 	q++;
 
 	q->dw[0] = GIF_SET_UV(ftoi4(rect->t1.u),ftoi4(rect->t1.v));
-	q->dw[1] = GIF_SET_XYZ(ftoi4(rect->v1.x),ftoi4(rect->v1.y),rect->v0.z);
+	q->dw[1] = GIF_SET_XYZ(ftoi4(rect->v1.x + END_OFFSET),ftoi4(rect->v1.y + END_OFFSET),rect->v0.z);
 	q++;
 
 	return q;
@@ -228,13 +237,12 @@ qword_t *draw_rect_filled_strips(qword_t *q, int context, rect_t *rect)
 {
 
 	qword_t *giftag;
-	float __xf0 = rect->v0.x;
-	int __yi0 = ftoi4(rect->v0.y);
 
-	// Weird thing that needs to be done to
-	// remain compatible with expected GS DDA behavior
-	float __xf1 = rect->v1.x + 0.9375f;
-	int __yi1 = ftoi4(rect->v1.y + 0.9375f);
+	int __xi0 = ftoi4(rect->v0.x);
+	int __yi0 = ftoi4(rect->v0.y + START_OFFSET);
+
+	int __xi1 = ftoi4(rect->v1.x);
+	int __yi1 = ftoi4(rect->v1.y + END_OFFSET);
 
 	// Start primitive
 	PACK_GIFTAG(q,GIF_SET_TAG(2,0,0,0,GIF_FLG_PACKED,1),GIF_REG_AD);
@@ -250,14 +258,26 @@ qword_t *draw_rect_filled_strips(qword_t *q, int context, rect_t *rect)
 	q++;
 
 	// Fill vertex information in 32 pixel wide strips
-	while(__xf0 < __xf1)
+	while(__xi0 < __xi1)
 	{
 
-		q->dw[0] = GIF_SET_XYZ(ftoi4(__xf0),__yi0,rect->v0.z);
+		//q->dw[0] = GIF_SET_XYZ(ftoi4(__xf0 + START_OFFSET),__yi0,rect->v0.z);
+		q->dw[0] = GIF_SET_XYZ(__xi0 + ftoi4(START_OFFSET),__yi0,rect->v0.z);
 
-		__xf0 += 32.0f;
+		// 31<<4
+		__xi0 += 496;
 
-		q->dw[1] = GIF_SET_XYZ(ftoi4(__xf0),__yi1,rect->v0.z);
+		// Uneven...
+		if (__xi0 >= __xi1)
+		{
+			__xi0 = __xi1;
+		}
+
+		q->dw[1] = GIF_SET_XYZ(__xi0 + ftoi4(END_OFFSET),__yi1,rect->v0.z);
+
+		// 1<<4
+		__xi0 += 16;
+
 		q++;
 
 	}
@@ -279,14 +299,11 @@ qword_t *draw_rect_textured_strips(qword_t *q, int context, texrect_t *rect)
 	int __vi1 = ftoi4(rect->t1.v);
 
 	// Primitive coordinates
-	float __xf0 = rect->v0.x;
-	int __yi0 = ftoi4(rect->v0.y);
+	int __xi0 = ftoi4(rect->v0.x);
+	int __yi0 = ftoi4(rect->v0.y + START_OFFSET);
 
-	// Weird thing that needs to be done to
-	// remain compatible with expected GS DDA behavior
-	float __xf1 = rect->v1.x + 0.9375f;
-	int __yi1 = ftoi4(rect->v1.y + 0.9375f);
-
+	int __xi1 = ftoi4(rect->v1.x);
+	int __yi1 = ftoi4(rect->v1.y + END_OFFSET);
 	float strip = 0.0f;
 
 	// Start primitive
@@ -303,11 +320,11 @@ qword_t *draw_rect_textured_strips(qword_t *q, int context, texrect_t *rect)
 	q++;
 
 	// Fill vertex information in 32 pixel wide strips along with texel information
-	while(__xf0 < __xf1)
+	while(__xi0 < __xi1)
 	{
 
 		q->dw[0] = GIF_SET_UV(ftoi4(__uf0),__vi0);
-		q->dw[1] = GIF_SET_XYZ(ftoi4(__xf0),__yi0,rect->v0.z);
+		q->dw[1] = GIF_SET_XYZ(__xi0 + ftoi4(START_OFFSET),__yi0,rect->v0.z);
 		q++;
 
 		// Due to the GS DDA, 0-32 only draws pixels 0-31
@@ -315,11 +332,19 @@ qword_t *draw_rect_textured_strips(qword_t *q, int context, texrect_t *rect)
 
 		strip += 32.0f;
 
-		__xf0 = rect->v0.x + strip;
-		__uf0 = strip - 1.5f;
+		__xi0 += 496;
+
+		if (__xi0 >= __xi1)
+		{
+			__xi0 = __xi1;
+		}
+
+		__uf0 = rect->t0.u + (strip - 1.5f);
 
 		q->dw[0] = GIF_SET_UV(ftoi4(__uf0),__vi1);
-		q->dw[1] = GIF_SET_XYZ(ftoi4(__xf0),__yi1,rect->v0.z);
+		q->dw[1] = GIF_SET_XYZ(__xi0 + ftoi4(END_OFFSET),__yi1,rect->v0.z);
+
+		__xi0 += 16;
 		q++;
 
 	}
@@ -338,8 +363,8 @@ qword_t *draw_arc_outline(qword_t *q, int context, point_t *center, float radius
 	u64 *dw;
 	u64 pdw;
 
-	int __xi0 = ftoi4(center->v0.x);
-	int __yi0 = ftoi4(center->v0.y);
+	int __xi0 = ftoi4(center->v0.x + OFFSET);
+	int __yi0 = ftoi4(center->v0.y + OFFSET);
 	int __xi1;
 	int __yi1;
 	float __arc_radians;
@@ -393,8 +418,8 @@ qword_t *draw_arc_filled(qword_t *q, int context, point_t *center, float radius,
 	u64 *dw;
 	u64 pdw;
 
-	int __xi0 = ftoi4(center->v0.x);
-	int __yi0 = ftoi4(center->v0.y);
+	int __xi0 = ftoi4(center->v0.x + OFFSET);
+	int __yi0 = ftoi4(center->v0.y + OFFSET);
 	int __xi1;
 	int __yi1;
 	float __arc_radians;
@@ -420,8 +445,8 @@ qword_t *draw_arc_filled(qword_t *q, int context, point_t *center, float radius,
 	for( ; angle_start <= angle_end; angle_start++)
 	{
 		__arc_radians = 0.017453293f * angle_start;
-		__xi1 = (int)(cosf(__arc_radians) * radius) * 16.0f;
-		__yi1 = (int)(sinf(__arc_radians) * radius) * 16.0f;
+		__xi1 = (int)((cosf(__arc_radians) * radius) * 16.0f);
+		__yi1 = (int)((sinf(__arc_radians) * radius) * 16.0f);
 		*dw++ = GIF_SET_XYZ(__xi0 + __xi1,__yi0 + __yi1,center->v0.z);
 	}
 

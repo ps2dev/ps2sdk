@@ -3,6 +3,7 @@
 
 #include <tamtypes.h>
 
+#include <draw_primitives.h>
 #include <draw_types.h>
 #include <gif_tags.h>
 

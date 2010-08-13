@@ -373,10 +373,10 @@ qword_t *draw_fontstudio_char(qword_t *q, unsigned int c, vertex_t *v0, fsfont_t
 	y = ftoi4(v0->y);
 
 	q->dw[0] = GIF_SET_UV(font->chardata[c].u1,font->chardata[c].v1);
-	q->dw[1] = GIF_SET_XYZ(x,y,v0->z);
+	q->dw[1] = GIF_SET_XYZ(x + 32759,y + 32759,v0->z);
 	q++;
 	q->dw[0] = GIF_SET_UV(font->chardata[c].u2, font->chardata[c].v2);
-	q->dw[1] = GIF_SET_XYZ(x + (int)((font->chardata[c].width*font->scale)*16.0f),y + (int)((font->chardata[c].height*font->scale)*16.0f),v0->z);
+	q->dw[1] = GIF_SET_XYZ(x + (int)((font->chardata[c].width*font->scale)*16.0f) + 32777,y + (int)((font->chardata[c].height*font->scale)*16.0f) + 32777,v0->z);
 	q++;
 
 	return q;

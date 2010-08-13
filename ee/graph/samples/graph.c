@@ -123,9 +123,9 @@ void render(packet_t *packet, framebuffer_t *frame)
 		q++;
 		PACK_GIFTAG(q, GIF_SET_RGBAQ((loop0 * 10), 0, 255 - (loop0 * 10), 0x80, 0x3F800000), GIF_REG_RGBAQ);
 		q++;
-		PACK_GIFTAG(q, GIF_SET_XYZ(((loop0 * 20)) << 4, ((loop0 * 10)) << 4, 0), GIF_REG_XYZ2);
+		PACK_GIFTAG(q, GIF_SET_XYZ(( (loop0 * 20) << 4) + (2048<<4), ((loop0 * 10) << 4) + (2048<<4), 0), GIF_REG_XYZ2);
 		q++;
-		PACK_GIFTAG(q, GIF_SET_XYZ(((loop0 * 20) + 100) << 4, ((loop0 * 10) + 100) << 4, 0), GIF_REG_XYZ2);
+		PACK_GIFTAG(q, GIF_SET_XYZ( (((loop0 * 20) + 100) << 4) + (2048<<4), (((loop0 * 10) + 100) << 4) + (2048<<4), 0), GIF_REG_XYZ2);
 		q++;
 
 		q = draw_finish(q);
