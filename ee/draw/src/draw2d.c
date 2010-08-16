@@ -466,3 +466,197 @@ qword_t *draw_arc_filled(qword_t *q, int context, point_t *center, float radius,
 	return q;
 
 }
+
+qword_t *draw_round_rect_filled(qword_t *q, int context, rect_t *rect)
+{
+
+	rect_t rect_center;
+	rect_t rect_side;
+	point_t point_corner;
+
+	int center_width;
+	int center_height;
+
+	float corner_size = 15.0f;
+
+	int width = rect->v1.x - rect->v0.x;
+	int height = rect->v1.y - rect->v0.y;
+
+	center_width = width - (int)(2.0f*corner_size);
+	center_height = height - (int)(2.0f*corner_size);
+
+	rect_center.color = rect->color;
+	rect_side.color = rect->color;
+	rect_center.v0.z = rect->v0.z;
+	rect_side.v0.z = rect->v0.z;
+
+	// Inside rectangle
+	rect_center.v0.x = rect->v0.x + corner_size;
+	rect_center.v0.y = rect->v0.y + corner_size;
+	rect_center.v1.x = rect_center.v0.x + (float)center_width;
+	rect_center.v1.y = rect_center.v0.y + (float)center_height;
+
+	q = draw_rect_filled_strips(q,context,&rect_center);
+
+	// sides
+	// top
+	rect_side.v0.x = rect_center.v0.x;
+	rect_side.v0.y = rect_center.v0.y - corner_size;
+	rect_side.v1.x = rect_center.v1.x;
+	rect_side.v1.y = rect_center.v0.y - 1.0f;
+
+	q = draw_rect_filled_strips(q,context,&rect_side);
+
+	// right
+	rect_side.v0.x = rect_center.v1.x + 1.0f;
+	rect_side.v0.y = rect_center.v0.y;
+	rect_side.v1.x = rect_center.v1.x + corner_size;
+	rect_side.v1.y = rect_center.v1.y;
+
+	q = draw_rect_filled(q,context,&rect_side);
+
+	// bottom
+	rect_side.v0.x = rect_center.v0.x;
+	rect_side.v0.y = rect_center.v1.y + 1.0f;
+	rect_side.v1.x = rect_center.v1.x;
+	rect_side.v1.y = rect_center.v1.y + corner_size;
+
+	q = draw_rect_filled_strips(q,context,&rect_side);
+
+	// left
+	rect_side.v0.x = rect_center.v0.x - corner_size;
+	rect_side.v0.y = rect_center.v0.y;
+	rect_side.v1.x = rect_center.v0.x - 1.0f;
+	rect_side.v1.y = rect_center.v1.y;
+
+	q = draw_rect_filled(q,context,&rect_side);
+
+	// corners
+	// top right
+	point_corner.v0.x = rect_center.v1.x;
+	point_corner.v0.y = rect_center.v0.y;
+	point_corner.color = rect->color;
+
+	q = draw_arc_filled(q,context,&point_corner,corner_size,270.0f,360.0f);
+
+	// bottom right
+	point_corner.v0.x = rect_center.v1.x;
+	point_corner.v0.y = rect_center.v1.y + 1.0f;
+	point_corner.color = rect->color;
+
+	q = draw_arc_filled(q,context,&point_corner,corner_size,0.0f,90.0f);
+
+	// bottom left
+	point_corner.v0.x = rect_center.v0.x - 1.0f;
+	point_corner.v0.y = rect_center.v1.y + 1.0f;
+	point_corner.color = rect->color;
+
+	q = draw_arc_filled(q,context,&point_corner,corner_size,90.0f,180.0f);
+
+	// top left
+	point_corner.v0.x = rect_center.v0.x - 1.0f;
+	point_corner.v0.y = rect_center.v0.y;
+	point_corner.color = rect->color;
+
+	q = draw_arc_filled(q,context,&point_corner,corner_size,180.0f,270.0f);
+
+	return q;
+
+}
+
+qword_t *draw_round_rect_outline(qword_t *q, int context, rect_t *rect)
+{
+
+	rect_t rect_center;
+	line_t line_side;
+	point_t point_corner;
+
+	int center_width;
+	int center_height;
+
+	float corner_size = 15.0f;
+
+	int width = rect->v1.x - rect->v0.x;
+	int height = rect->v1.y - rect->v0.y;
+
+	center_width = width - (int)(2.0f*corner_size);
+	center_height = height - (int)(2.0f*corner_size);
+
+	rect_center.color = rect->color;
+	line_side.color = rect->color;
+	rect_center.v0.z = rect->v0.z;
+	line_side.v0.z = rect->v0.z;
+
+	// Inside rectangle
+	rect_center.v0.x = rect->v0.x + corner_size;
+	rect_center.v0.y = rect->v0.y + corner_size;
+	rect_center.v1.x = rect_center.v0.x + (float)center_width;
+	rect_center.v1.y = rect_center.v0.y + (float)center_height;
+
+	//q = draw_rect_filled_strips(q,context,&rect_center);
+
+	// sides
+	// top
+	line_side.v0.x = rect_center.v0.x;
+	line_side.v0.y = rect_center.v0.y - corner_size + 1.0f;
+	line_side.v1.x = rect_center.v1.x;
+	line_side.v1.y = rect_center.v0.y - corner_size;
+
+	q = draw_line(q,context,&line_side);
+
+	// right
+	line_side.v0.x = rect_center.v1.x + corner_size;
+	line_side.v0.y = rect_center.v0.y;
+	line_side.v1.x = rect_center.v1.x + corner_size - 1.0f;
+	line_side.v1.y = rect_center.v1.y;
+
+	q = draw_line(q,context,&line_side);
+
+	// bottom
+	line_side.v0.x = rect_center.v0.x;
+	line_side.v0.y = rect_center.v1.y + corner_size + 1.0f;
+	line_side.v1.x = rect_center.v1.x;
+	line_side.v1.y = rect_center.v1.y + corner_size;
+
+	q = draw_line(q,context,&line_side);
+
+	// left
+	line_side.v0.x = rect_center.v0.x - corner_size;
+	line_side.v0.y = rect_center.v0.y;
+	line_side.v1.x = rect_center.v0.x - corner_size - 1.0f;
+	line_side.v1.y = rect_center.v1.y;
+
+	q = draw_line(q,context,&line_side);
+
+	// corners
+	// top right
+	point_corner.v0.x = rect_center.v1.x;
+	point_corner.v0.y = rect_center.v0.y;
+	point_corner.color = rect->color;
+
+	q = draw_arc_outline(q,context,&point_corner,corner_size,270.0f,360.0f);
+
+	// bottom right
+	point_corner.v0.x = rect_center.v1.x;
+	point_corner.v0.y = rect_center.v1.y;
+	point_corner.color = rect->color;
+
+	q = draw_arc_outline(q,context,&point_corner,corner_size,0.0f,90.0f);
+
+	// bottom left
+	point_corner.v0.x = rect_center.v0.x;
+	point_corner.v0.y = rect_center.v1.y;
+	point_corner.color = rect->color;
+
+	q = draw_arc_outline(q,context,&point_corner,corner_size,90.0f,180.0f);
+
+	// top left
+	point_corner.v0.x = rect_center.v0.x;
+	point_corner.v0.y = rect_center.v0.y;
+	point_corner.color = rect->color;
+
+	q = draw_arc_outline(q,context,&point_corner,corner_size,180.0f,270.0f);
+
+	return q;
+
+}

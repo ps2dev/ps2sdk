@@ -69,6 +69,12 @@ extern "C" {
 	// width must be multiple of 32 - 0.9375
 	qword_t *draw_rect_textured_strips(qword_t *q, int context, texrect_t *rect);
 
+	// Draws filled round rectangle, buggy with partial coordinates
+	qword_t *draw_round_rect_filled(qword_t *q, int context, rect_t *rect);
+
+	// Draws a hollow round rectangle, buggy with partial coordinates
+	qword_t *draw_round_rect_outline(qword_t *q, int context, rect_t *rect);
+
 	// Draws an arc using line primitives
 	qword_t *draw_arc_outline(qword_t *q, int context, point_t *center, float radius, float angle_start, float angle_end);
 
