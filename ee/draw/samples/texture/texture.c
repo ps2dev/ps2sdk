@@ -94,7 +94,7 @@ void load_texture(packet_t *packet, texbuffer_t *texbuf)
 
 	q = packet->data;
 
-	q = draw_texture_transfer(q,flower,size_flower,256,256,GS_PSM_24,texbuf->address,texbuf->width);
+	q = draw_texture_transfer(q,flower,256,256,GS_PSM_24,texbuf->address,texbuf->width);
 	q = draw_texture_flush(q);
 
 	dma_wait_fast();

@@ -215,12 +215,75 @@ qword_t *draw_texture_flush(qword_t *q)
 
 }
 
-qword_t *draw_texture_transfer(qword_t *q, void *src, int bytes, int width, int height, int psm, int dest, int dest_width)
+qword_t *draw_texture_transfer(qword_t *q, void *src, int width, int height, int psm, int dest, int dest_width)
 {
 
 	int i;
 	int remaining;
-	int qwords = bytes >> 4;
+	int qwords;
+
+	switch (psm)
+	{
+		case GS_PSM_8:
+		{
+			qwords = (width*height)>>4;
+			break;
+		}
+
+		case GS_PSM_32:
+		case GS_PSM_24:
+		{
+			qwords = (width*height)>>2;
+			break;
+		}
+
+		case GS_PSM_4:
+		{
+			qwords = (width*height)>>5;
+			break;
+		}
+
+		case GS_PSM_16:
+		case GS_PSM_16S:
+		{
+			qwords = (width*height)>>3;
+			break;
+		}
+
+		default:
+		{
+			switch (psm)
+			{
+				case GS_PSM_8H:
+				{
+					qwords = (width*height)>>4;
+					break;
+				}
+
+				case GS_PSMZ_32:
+				case GS_PSMZ_24:
+				{
+					qwords = (width*height)>>2;
+					break;
+				}
+
+				case GS_PSMZ_16:
+				case GS_PSMZ_16S:
+				{
+					qwords = (width*height)>>3;
+					break;
+				}
+
+				case GS_PSM_4HL:
+				case GS_PSM_4HH:
+				{
+					qwords = (width*height)>>5;
+					break;
+				}
+			}
+			break;
+		}
+	}
 
 	// Determine number of iterations based on the number of qwords
 	// that can be handled per dmatag
