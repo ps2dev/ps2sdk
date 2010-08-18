@@ -20,9 +20,9 @@ int packet_allocate(packet_t *packet, int num, int ucab, int spr)
 		(u32*)packet->data = (u32*)SPR_BEGIN; 
 		packet->total = 0x1000;
 
-  return 0;
+		return 0;
 
- }
+	}
 
 	// Size of qwords in bytes.
 	int byte_size = num << 4;
@@ -33,7 +33,7 @@ int packet_allocate(packet_t *packet, int num, int ucab, int spr)
 
 		return -1;
 
- }
+	}
 
 	// Set the pointer attribute to ucab space.
 	if (ucab)
@@ -52,8 +52,8 @@ int packet_allocate(packet_t *packet, int num, int ucab, int spr)
 	packet->spr = spr;
 	packet->ucab = ucab;
 
-  // End function.
-  return 0;
+	// End function.
+	return 0;
 
 }
 
@@ -75,7 +75,7 @@ void packet_free(packet_t *packet)
 		(u32)packet->data ^= 0x30000000;
 		return;
 
- }
+	}
 
 	free(packet->data);
 	free(packet);
@@ -94,7 +94,7 @@ void packet_reset(packet_t *packet)
 		(u8*)packet->data = (u8*)SPR_BEGIN;
 		return;
 
- }
+	}
 
 	if (packet->ucab)
 	{
@@ -111,7 +111,7 @@ void packet_reset(packet_t *packet)
 
 		(u32)packet->data ^= 0x30000000;
 
- }
+	}
 
 }
 

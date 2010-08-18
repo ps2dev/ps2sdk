@@ -2,60 +2,60 @@
 #define __GRAPH_H__
 
 // Sets screen mode
-#define GRAPH_MODE_AUTO				0	//  Automatic NTSC or PAL mode setting.
-#define GRAPH_MODE_NTSC				1	//  256 x  224 to 640 x 448
-#define GRAPH_MODE_PAL				2	//  256 x  256 to 640 x 512
-#define GRAPH_MODE_HDTV_480P		3	//  720 x  480
-#define GRAPH_MODE_HDTV_576P		4	//  656 x  576
-#define GRAPH_MODE_HDTV_720P		5	// 1280 x  720
-#define GRAPH_MODE_HDTV_1080I		6	// 1920 x 1080
-#define GRAPH_MODE_VGA_640_60		7	//  640 x  480 @ 60hz
-#define GRAPH_MODE_VGA_640_72		8	//  640 x  480 @ 72hz
-#define GRAPH_MODE_VGA_640_75		9	//  640 x  480 @ 75hz
-#define GRAPH_MODE_VGA_640_85		10	//  640 x  480 @ 85hz
-#define GRAPH_MODE_VGA_800_56		11	//  800 x  600 @ 56hz
-#define GRAPH_MODE_VGA_800_60		12	//  800 x  600 @ 60hz
-#define GRAPH_MODE_VGA_800_72		13	//  800 x  600 @ 72hz
-#define GRAPH_MODE_VGA_800_75		14	//  800 x  600 @ 75hz
-#define GRAPH_MODE_VGA_800_85		15	//  800 x  600 @ 85hz
-#define GRAPH_MODE_VGA_1024_60		16	// 1024 x  768 @ 60hz
-#define GRAPH_MODE_VGA_1024_70		17	// 1024 x  768 @ 70hz
-#define GRAPH_MODE_VGA_1024_75		18	// 1024 x  768 @ 75hz
-#define GRAPH_MODE_VGA_1024_85		19	// 1024 x  768 @ 85hz
-#define GRAPH_MODE_VGA_1280_60		20	// 1280 x 1024 @ 60hz
-#define GRAPH_MODE_VGA_1280_75		21	// 1280 x 1024 @ 75hz
+#define GRAPH_MODE_AUTO         0 //  Automatic NTSC or PAL mode setting.
+#define GRAPH_MODE_NTSC         1 //  256 x  224 to 640 x 448
+#define GRAPH_MODE_PAL          2 //  256 x  256 to 640 x 512
+#define GRAPH_MODE_HDTV_480P    3 //  720 x  480
+#define GRAPH_MODE_HDTV_576P    4 //  656 x  576
+#define GRAPH_MODE_HDTV_720P    5 // 1280 x  720
+#define GRAPH_MODE_HDTV_1080I   6 // 1920 x 1080
+#define GRAPH_MODE_VGA_640_60   7 //  640 x  480 @ 60hz
+#define GRAPH_MODE_VGA_640_72   8 //  640 x  480 @ 72hz
+#define GRAPH_MODE_VGA_640_75   9 //  640 x  480 @ 75hz
+#define GRAPH_MODE_VGA_640_85  10 //  640 x  480 @ 85hz
+#define GRAPH_MODE_VGA_800_56  11 //  800 x  600 @ 56hz
+#define GRAPH_MODE_VGA_800_60  12 //  800 x  600 @ 60hz
+#define GRAPH_MODE_VGA_800_72  13 //  800 x  600 @ 72hz
+#define GRAPH_MODE_VGA_800_75  14 //  800 x  600 @ 75hz
+#define GRAPH_MODE_VGA_800_85  15 //  800 x  600 @ 85hz
+#define GRAPH_MODE_VGA_1024_60 16 // 1024 x  768 @ 60hz
+#define GRAPH_MODE_VGA_1024_70 17 // 1024 x  768 @ 70hz
+#define GRAPH_MODE_VGA_1024_75 18 // 1024 x  768 @ 75hz
+#define GRAPH_MODE_VGA_1024_85 19 // 1024 x  768 @ 85hz
+#define GRAPH_MODE_VGA_1280_60 20 // 1280 x 1024 @ 60hz
+#define GRAPH_MODE_VGA_1280_75 21 // 1280 x 1024 @ 75hz
 
-#define GRAPH_MODE_NONINTERLACED	0
-#define GRAPH_MODE_INTERLACED		1
+#define GRAPH_MODE_NONINTERLACED 0
+#define GRAPH_MODE_INTERLACED    1
 
-#define GRAPH_MODE_FIELD			0
-#define GRAPH_MODE_FRAME			1
- 
-#define GRAPH_FIELD_EVEN			0
-#define GRAPH_FIELD_ODD				1
+#define GRAPH_MODE_FIELD         0
+#define GRAPH_MODE_FRAME         1
+
+#define GRAPH_FIELD_EVEN         0
+#define GRAPH_FIELD_ODD          1
 
 // Generic use
-#define GRAPH_DISABLE				0
-#define GRAPH_ENABLE				1
+#define GRAPH_DISABLE            0
+#define GRAPH_ENABLE             1
 
 // Smode1 parameters
-#define GRAPH_GCONT_RGB				0
-#define GRAPH_GCONT_YCRCB			1
+#define GRAPH_GCONT_RGB          0
+#define GRAPH_GCONT_YCRCB        1
 
-#define GRAPH_CMOD_NTSC				2
-#define GRAPH_CMOD_PAL				3
+#define GRAPH_CMOD_NTSC          2
+#define GRAPH_CMOD_PAL           3
 
 // Alpha Blending value to use
-#define GRAPH_VALUE_RC1				0
-#define GRAPH_VALUE_ALPHA			1
+#define GRAPH_VALUE_RC1          0
+#define GRAPH_VALUE_ALPHA        1
 
 // Alpha output value
-#define GRAPH_RC1_ALPHA				0
-#define GRAPH_RC2_ALPHA				1
+#define GRAPH_RC1_ALPHA          0
+#define GRAPH_RC2_ALPHA          1
 
 // Alpha blending method
-#define GRAPH_BLEND_RC2				0
-#define GRAPH_BLEND_BGCOLOR			1
+#define GRAPH_BLEND_RC2          0
+#define GRAPH_BLEND_BGCOLOR      1
 
 #ifdef __cplusplus
 extern "C" {

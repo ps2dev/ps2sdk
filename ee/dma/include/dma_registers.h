@@ -111,4 +111,4 @@
 
 #define DMA_SET_QWC(QWC)   (u32)((QWC)  & 0x0000FFFF)
 
-#endif
+#endif /*__DMA_REGISTERS_H__*/

@@ -48,18 +48,18 @@ int dma_reset(void)
 
 		dma_channel_shutdown(i,0);
 
- }
+	}
 
 	ResetEE(0x01);
 
-  return 0;
+	return 0;
 
 }
 
 int dma_channel_initialize(int channel, void *handler, int flags)
 {
 
-  // Shut down the channel before making changes.
+	// Shut down the channel before making changes.
 	if (dma_channel_shutdown(channel, flags) < 0)
 	{
 		return -1;
@@ -78,30 +78,30 @@ int dma_channel_initialize(int channel, void *handler, int flags)
 		*(vu32 *)dma_sadr[channel] = 0;
 	}
 
-  // If a handler is provided...
+	// If a handler is provided...
 	if (handler != NULL)
 	{
 
-   // Add the handler, storing the handler id.
-   dma_handler_id[channel] = AddDmacHandler(channel, handler, 0);
+	// Add the handler, storing the handler id.
+	dma_handler_id[channel] = AddDmacHandler(channel, handler, 0);
 
-   // Enable the channel interrupt.
+	// Enable the channel interrupt.
 		if (flags & DMA_FLAG_INTERRUPTSAFE)
 		{
-    iEnableDmac(channel);
+			iEnableDmac(channel);
 		}
 		else
 		{
-    EnableDmac(channel);
-   }
+			EnableDmac(channel);
+		}
 
-  }
+	}
 
-  // Tell everyone we are initialized.
-  dma_channel_initialized[channel] = 1;
+	// Tell everyone we are initialized.
+	dma_channel_initialized[channel] = 1;
 
-  // End function.
-  return 0;
+	// End function.
+	return 0;
 
 }
 
@@ -135,7 +135,7 @@ int dma_channel_wait(int channel, int timeout)
 	while (*((vu32 *)dma_chcr[channel]) & 0x00000100)
 	{
 
-    // Decrement the timeout counter, exiting if it expires.
+		// Decrement the timeout counter, exiting if it expires.
 		if (timeout > 0)
 		{
 
@@ -146,12 +146,12 @@ int dma_channel_wait(int channel, int timeout)
 
 			};
 
-   }
+		}
 
-  }
+	}
 
-  // End function.
-  return 0;
+	// End function.
+	return 0;
 
 }
 
@@ -168,7 +168,7 @@ int dma_channel_send_chain(int channel, void *data, int data_size, int flags, in
 	else
 	{
 		SyncDCache(data, data + (data_size<<4));
- }
+	}
 
 	// Set the size of the data, in quadwords.
 	*(vu32 *)dma_qwc[channel] = DMA_SET_QWC(0);
@@ -192,16 +192,16 @@ int dma_channel_send_chain_ucab(int channel, void *data, int qwc, int flags)
 	// clear channel status
 	*DMA_REG_STAT = 1 << channel;
 
-   // Set the size of the data, in quadwords.
-   *(vu32 *)dma_qwc[channel] = DMA_SET_QWC(0);
+	// Set the size of the data, in quadwords.
+	*(vu32 *)dma_qwc[channel] = DMA_SET_QWC(0);
 
-   // Set the address of the data.
-   *(vu32 *)dma_madr[channel] = DMA_SET_MADR(0, 0);
+	// Set the address of the data.
+	*(vu32 *)dma_madr[channel] = DMA_SET_MADR(0, 0);
 
-   // Set the address of the data tag.
+	// Set the address of the data tag.
 	*(vu32 *)dma_tadr[channel] = DMA_SET_TADR((u32)data - 0x30000000, 0);
 
-   // Start the transfer.
+	// Start the transfer.
 	*(vu32 *)dma_chcr[channel] = DMA_SET_CHCR(1, 1, 0, flags & DMA_FLAG_TRANSFERTAG, 1, 1, 0);
 
 	// End function.
@@ -225,10 +225,10 @@ int dma_channel_send_normal(int channel, void *data, int qwc, int flags, int spr
 		SyncDCache(data, data + (qwc<<4));
 	}
 
-   // Set the size of the data, in quadwords.
+	// Set the size of the data, in quadwords.
 	*(vu32 *)dma_qwc[channel] = DMA_SET_QWC(qwc);
 
-   // Set the address of the data.
+	// Set the address of the data.
 	*(vu32 *)dma_madr[channel] = DMA_SET_MADR((u32)data, spr);
 
 	// Start the transfer.
@@ -252,7 +252,7 @@ int dma_channel_send_normal_ucab(int channel, void *data, int qwc, int flags)
 	else
 	{
 		SyncDCache(data, data + (qwc<<4));
-   }
+	}
 
 	// Set the size of the data, in quadwords.
 	*(vu32 *)dma_qwc[channel] = DMA_SET_QWC(qwc);
@@ -260,7 +260,7 @@ int dma_channel_send_normal_ucab(int channel, void *data, int qwc, int flags)
 	// Set the address of the data.
 	*(vu32 *)dma_madr[channel] = DMA_SET_MADR((u32)data - 0x30000000, 0);
 
-   // Start the transfer.
+	// Start the transfer.
 	*(vu32 *)dma_chcr[channel] = DMA_SET_CHCR(1, 0, 0, flags & DMA_FLAG_TRANSFERTAG, 1, 1, 0);
 
 	return 0;
@@ -280,7 +280,7 @@ int dma_channel_receive_chain(int channel, void *data, int data_size, int flags,
 			return -1;
 		}
 
-  }
+	}
 
 	// Set the size of the data, in quadwords.
 	*(vu32 *)dma_qwc[channel] = DMA_SET_QWC((data_size + 15) >> 4);
@@ -291,75 +291,75 @@ int dma_channel_receive_chain(int channel, void *data, int data_size, int flags,
 	// Start the transfer.
 	*(vu32 *)dma_chcr[channel] = DMA_SET_CHCR(0, 1, 0, 0, 0, 1, 0);
 
-  // End function.
-  return 0;
+	// End function.
+	return 0;
 
 }
 
 int dma_channel_receive_normal(int channel, void *data, int data_size, int flags, int spr)
 {
 
-  // If we are not initialized...
+	// If we are not initialized...
 	if (dma_channel_initialized[channel] < 0)
 	{
 
-   // Initialize the channel.
+	// Initialize the channel.
 		if (dma_channel_initialize(channel, NULL, flags) < 0)
 		{
 			return -1;
-  }
+		}
 
 	}
 
-  // Set the size of the data, in quadwords.
-  *(vu32 *)dma_qwc[channel] = DMA_SET_QWC((data_size + 15) >> 4);
+	// Set the size of the data, in quadwords.
+	*(vu32 *)dma_qwc[channel] = DMA_SET_QWC((data_size + 15) >> 4);
 
-  // Set the address of the data.
+	// Set the address of the data.
 	*(vu32 *)dma_madr[channel] = DMA_SET_MADR((u32)data, spr);
 
-  // Start the transfer.
-   *(vu32 *)dma_chcr[channel] = DMA_SET_CHCR(0, 0, 0, 0, 0, 1, 0);
+	// Start the transfer.
+	*(vu32 *)dma_chcr[channel] = DMA_SET_CHCR(0, 0, 0, 0, 0, 1, 0);
 
-  // End function.
-  return 0;
+	// End function.
+	return 0;
 
 }
 
 int dma_channel_shutdown(int channel, int flags)
 {
 
-  // If we are not initialized, no need to shut down.
+	// If we are not initialized, no need to shut down.
 	if (dma_channel_initialized[channel] < 0)
 	{
 		return 0;
 	}
 
-  // If a handler was provided...
+	// If a handler was provided...
 	if (dma_handler_id[channel] != 0)
 	{
 
-   // Disable the channel.
+	// Disable the channel.
 		if (flags & DMA_FLAG_INTERRUPTSAFE)
 		{
-    iDisableDmac(channel);
+			iDisableDmac(channel);
 		}
 		else
 		{
-    DisableDmac(channel);
-   }
+			DisableDmac(channel);
+		}
 
-   // Remove the handler.
-   RemoveDmacHandler(channel, dma_handler_id[channel]);
+		// Remove the handler.
+		RemoveDmacHandler(channel, dma_handler_id[channel]);
 
-   // Clear the handler id.
-   dma_handler_id[channel] = 0;
+		// Clear the handler id.
+		dma_handler_id[channel] = 0;
 
-  }
+	}
 
-  // Tell everyone we are not initialized.
+	// Tell everyone we are not initialized.
 	dma_channel_initialized[channel] = 0;
 
-  // End function.
-  return 0;
+	// End function.
+	return 0;
 
 }

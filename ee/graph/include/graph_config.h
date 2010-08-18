@@ -20,7 +20,7 @@ extern "C" {
 
 	// Writes the current mode information into a config file as a string.
 	int graph_save_config(char *filename);
- 
+
 #ifdef __cplusplus
 }
 #endif

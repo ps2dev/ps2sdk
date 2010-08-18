@@ -15,11 +15,11 @@ int graph_initialize(int fbp, int width, int height, int psm, int x, int y)
 	if (mode == GRAPH_MODE_NTSC)
 	{
 		graph_set_screen(0,0,width,height);
- }
+	}
 	else
 	{
 		graph_set_screen(0,0,width,height);
- }
+	}
 
 	// Set black background
 	graph_set_bgcolor(0,0,0);
@@ -28,8 +28,8 @@ int graph_initialize(int fbp, int width, int height, int psm, int x, int y)
 
 	graph_enable_output();
 
-  // End function.
-  return 0;
+	// End function.
+	return 0;
 
 }
 
@@ -72,7 +72,7 @@ int graph_get_field(void)
 
 		return GRAPH_FIELD_ODD;
 
- }
+	}
 
 	return GRAPH_FIELD_EVEN;
 

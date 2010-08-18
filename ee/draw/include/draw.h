@@ -13,8 +13,8 @@
 #include <draw_tests.h>
 #include <draw_types.h>
 
-#define DRAW_DISABLE	0
-#define DRAW_ENABLE		1
+#define DRAW_DISABLE 0
+#define DRAW_ENABLE  1
 
 #ifdef __cplusplus
 extern "C" {

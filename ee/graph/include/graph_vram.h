@@ -2,13 +2,13 @@
 #define __GRAPH_VRAM_H__
 
 // Each word is 1 32-bit pixel
-#define GRAPH_VRAM_MAX_WORDS		1048576
+#define GRAPH_VRAM_MAX_WORDS 1048576
 
 // Frame Buffer and Z Buffer
-#define GRAPH_ALIGN_PAGE			2048
+#define GRAPH_ALIGN_PAGE     2048
 
 // Texture Buffer and CLUT Buffer
-#define GRAPH_ALIGN_BLOCK			64
+#define GRAPH_ALIGN_BLOCK    64
 
 #ifdef __cplusplus
 extern "C" {

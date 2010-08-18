@@ -104,7 +104,7 @@ void render(packet_t *packet, framebuffer_t *frame)
 	draw_wait_finish();
 
 	// Update the screen.
-   graph_wait_vsync();
+	graph_wait_vsync();
 
 	// Draw 20 100x100 squares from the origin point.
 	for (loop0=0;loop0<20;loop0++)
@@ -116,7 +116,7 @@ void render(packet_t *packet, framebuffer_t *frame)
 		// Wait for our previous dma transfer to end.
 		dma_wait_fast();
 
-   // Draw another square on the screen.
+		// Draw another square on the screen.
 		PACK_GIFTAG(q, GIF_SET_TAG(4, 1, 0, 0, 0, 1),GIF_REG_AD);
 		q++;
 		PACK_GIFTAG(q, GIF_SET_PRIM(6, 0, 0, 0, 0, 0, 0, 0, 0), GIF_REG_PRIM);
@@ -175,12 +175,12 @@ int main(void)
 	packet_free(&packet);
 
 	// Disable output and reset the GS.
-  graph_shutdown();
+	graph_shutdown();
 
 	// Shutdown our currently used dma channel.
 	dma_channel_shutdown(DMA_CHANNEL_GIF,0);
 
-  // End program.
-  return 0;
+	// End program.
+	return 0;
 
 }
