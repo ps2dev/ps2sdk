@@ -9,6 +9,7 @@
 #
 */
 
+#include <kernel.h>
 #include <tamtypes.h>
 #include <stdio.h>
 
@@ -138,7 +139,7 @@ void render(packet_t *packet, framebuffer_t *frame)
 		// Now initiate vsync.
 		graph_wait_vsync();
 
-  }
+	}
 
 }
 
@@ -150,9 +151,7 @@ int main(void)
 	zbuffer_t z;
 
 	// The data packet.
-	packet_t packet;
-	
-	packet_allocate(&packet, 50, 0, 0);
+	packet_t *packet = packet_init(50,PACKET_NORMAL);
 
 	// Init GIF dma channel.
 	dma_channel_initialize(DMA_CHANNEL_GIF,NULL,0);
@@ -162,16 +161,16 @@ int main(void)
 	init_gs(&frame,&z);
 
 	// Init the drawing environment and framebuffer.
-	init_drawing_environment(&packet,&frame,&z);
+	init_drawing_environment(packet,&frame,&z);
 
 	// Render the sample.
-	render(&packet,&frame);
+	render(packet,&frame);
 
 	// Free the vram.
 	graph_vram_free(frame.address);
 
 	// Free the packet.
-	packet_free(&packet);
+	packet_free(packet);
 
 	// Disable output and reset the GS.
 	graph_shutdown();
@@ -179,7 +178,9 @@ int main(void)
 	// Shutdown our currently used dma channel.
 	dma_channel_shutdown(DMA_CHANNEL_GIF,0);
 
-	// End program.
+	// Sleep
+	SleepThread();
+
 	return 0;
 
 }

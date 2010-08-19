@@ -43,24 +43,24 @@ color_t *rgbaq;
 int light_count = 4;
 
 VECTOR light_direction[4] = {
-  {  0.00f,  0.00f,  0.00f, 1.00f },
-  {  1.00f,  0.00f, -1.00f, 1.00f },
-  {  0.00f,  1.00f, -1.00f, 1.00f },
-  { -1.00f, -1.00f, -1.00f, 1.00f }
+	{  0.00f,  0.00f,  0.00f, 1.00f },
+	{  1.00f,  0.00f, -1.00f, 1.00f },
+	{  0.00f,  1.00f, -1.00f, 1.00f },
+	{ -1.00f, -1.00f, -1.00f, 1.00f }
 };
 
 VECTOR light_colour[4] = {
-  { 0.00f, 0.00f, 0.00f, 1.00f },
-  { 1.00f, 0.00f, 0.00f, 1.00f },
-  { 0.30f, 0.30f, 0.30f, 1.00f },
-  { 0.50f, 0.50f, 0.50f, 1.00f }
+	{ 0.00f, 0.00f, 0.00f, 1.00f },
+	{ 1.00f, 0.00f, 0.00f, 1.00f },
+	{ 0.30f, 0.30f, 0.30f, 1.00f },
+	{ 0.50f, 0.50f, 0.50f, 1.00f }
 };
 
 int light_type[4] = {
-  LIGHT_AMBIENT,
-  LIGHT_DIRECTIONAL,
-  LIGHT_DIRECTIONAL,
-  LIGHT_DIRECTIONAL
+	LIGHT_AMBIENT,
+	LIGHT_DIRECTIONAL,
+	LIGHT_DIRECTIONAL,
+	LIGHT_DIRECTIONAL
 };
 
 void init_gs(framebuffer_t *frame, zbuffer_t *z)
@@ -97,8 +97,10 @@ void init_gs(framebuffer_t *frame, zbuffer_t *z)
 
 }
 
-void init_drawing_environment(packet_t *packet, framebuffer_t *frame, zbuffer_t *z)
+void init_drawing_environment(framebuffer_t *frame, zbuffer_t *z)
 {
+
+	packet_t *packet = packet_init(20,PACKET_NORMAL);
 
 	// This is our generic qword pointer.
 	qword_t *q = packet->data;
@@ -114,6 +116,9 @@ void init_drawing_environment(packet_t *packet, framebuffer_t *frame, zbuffer_t 
 
 	// Now send the packet, no need to wait since it's the first.
 	dma_channel_send_normal(DMA_CHANNEL_GIF,packet->data,q - packet->data, 0, 0);
+	dma_wait_fast();
+
+	free(packet);
 
 }
 
@@ -149,33 +154,33 @@ qword_t *render_teapot(qword_t *q,MATRIX view_screen, VECTOR object_position, VE
 	dmatag = q;
 	q++;
 
-   // Spin the teapot a bit.
-   object_rotation[0] += 0.008f; while (object_rotation[0] > 3.14f) { object_rotation[0] -= 6.28f; }
-   object_rotation[1] += 0.112f; while (object_rotation[1] > 3.14f) { object_rotation[1] -= 6.28f; }
+	// Spin the teapot a bit.
+	object_rotation[0] += 0.008f; while (object_rotation[0] > 3.14f) { object_rotation[0] -= 6.28f; }
+	object_rotation[1] += 0.112f; while (object_rotation[1] > 3.14f) { object_rotation[1] -= 6.28f; }
 
-   // Create the local_world matrix.
-   create_local_world(local_world, object_position, object_rotation);
+	// Create the local_world matrix.
+	create_local_world(local_world, object_position, object_rotation);
 
-   // Create the local_light matrix.
-   create_local_light(local_light, object_rotation);
+	// Create the local_light matrix.
+	create_local_light(local_light, object_rotation);
 
-   // Create the world_view matrix.
-   create_world_view(world_view, camera_position, camera_rotation);
+	// Create the world_view matrix.
+	create_world_view(world_view, camera_position, camera_rotation);
 
-   // Create the local_screen matrix.
-   create_local_screen(local_screen, local_world, world_view, view_screen);
+	// Create the local_screen matrix.
+	create_local_screen(local_screen, local_world, world_view, view_screen);
 
-   // Calculate the normal values.
-   calculate_normals(temp_normals, vertex_count, normals, local_light);
+	// Calculate the normal values.
+	calculate_normals(temp_normals, vertex_count, normals, local_light);
 
-   // Calculate the lighting values.
-   calculate_lights(temp_lights, vertex_count, temp_normals, light_direction, light_colour, light_type, light_count);
+	// Calculate the lighting values.
+	calculate_lights(temp_lights, vertex_count, temp_normals, light_direction, light_colour, light_type, light_count);
 
-   // Calculate the colour values after lighting.
-   calculate_colours(temp_colours, vertex_count, colours, temp_lights);
+	// Calculate the colour values after lighting.
+	calculate_colours(temp_colours, vertex_count, colours, temp_lights);
 
-   // Calculate the vertex values.
-   calculate_vertices(temp_vertices, vertex_count, vertices, local_screen);
+	// Calculate the vertex values.
+	calculate_vertices(temp_vertices, vertex_count, vertices, local_screen);
 
 	// Convert floating point vertices to fixed point and translate to center of screen.
 	draw_convert_xyz(xyz, 2048, 2048, 32, vertex_count, (vertex_f_t*)temp_vertices);
@@ -203,12 +208,17 @@ qword_t *render_teapot(qword_t *q,MATRIX view_screen, VECTOR object_position, VE
 
 }
 
-int render(packet_t *packet, framebuffer_t *frame, zbuffer_t *z)
+int render(framebuffer_t *frame, zbuffer_t *z)
 {
 
 	int context = 0;
 
-	packet_t flip_pkt;
+	// Packets for doublebuffering dma sends
+	packet_t *packets[2];
+	packet_t *current;
+
+	// This packet is special for framebuffer switching
+	packet_t *flip_pkt;
 
 	qword_t *q;
 	qword_t *dmatag;
@@ -218,7 +228,11 @@ int render(packet_t *packet, framebuffer_t *frame, zbuffer_t *z)
 
 	MATRIX view_screen;
 
-	packet_allocate(&flip_pkt,3,1,0);
+	packets[0] = packet_init(40000,PACKET_NORMAL);
+	packets[1] = packet_init(40000,PACKET_NORMAL);
+
+	// Uncached accelerated
+	flip_pkt = packet_init(3,PACKET_UCAB);
 
 	VECTOR object_position = { 0.00f, 0.00f, 0.00f, 1.00f };
 	VECTOR object_rotation = { 0.00f, 0.00f, 0.00f, 1.00f };
@@ -255,7 +269,9 @@ int render(packet_t *packet, framebuffer_t *frame, zbuffer_t *z)
 	for (;;)
 	{
 
-		q = packet[context].data;
+		current = packets[context];
+
+		q = current->data;
 
 		dmatag = q;
 		q++;
@@ -295,10 +311,10 @@ int render(packet_t *packet, framebuffer_t *frame, zbuffer_t *z)
 
 		// Now send our current dma chain.
 		dma_wait_fast();
-		dma_channel_send_chain(DMA_CHANNEL_GIF,packet[context].data, q - packet[context].data, 0, 0);
+		dma_channel_send_chain(DMA_CHANNEL_GIF,current->data, q - current->data, 0, 0);
 
 		// Either block until a vsync, or keep rendering until there's one available.
-   graph_wait_vsync();
+		graph_wait_vsync();
 
 		draw_wait_finish();
 		graph_set_framebuffer_filtered(frame[context].address,frame[context].width,frame[context].psm,0,0);
@@ -306,10 +322,14 @@ int render(packet_t *packet, framebuffer_t *frame, zbuffer_t *z)
 		// Switch context.
 		context ^= 1;
 
-		// We need to flip buffers outside of the chain, for some reason.
-		flip_buffers(&flip_pkt,&frame[context]);
+		// We need to flip buffers outside of the chain, for some reason,
+		// so we use a separate small packet.
+		flip_buffers(flip_pkt,&frame[context]);
 
-  }
+	}
+
+	free(packets[0]);
+	free(packets[1]);
 
 }
 
@@ -320,12 +340,6 @@ int main(int argc, char **argv)
 	framebuffer_t frame[2];
 	zbuffer_t z;
 
-	// The data packets for double buffering dma sends.
-	packet_t packets[2];
-
-	packet_allocate(&packets[0],40000,0,0);
-	packet_allocate(&packets[1],40000,0,0);
-
 	// Init GIF dma channel.
 	dma_channel_initialize(DMA_CHANNEL_GIF,NULL,0);
 	dma_channel_fast_waits(DMA_CHANNEL_GIF);
@@ -334,11 +348,15 @@ int main(int argc, char **argv)
 	init_gs(frame, &z);
 
 	// Init the drawing environment and framebuffer.
-	init_drawing_environment(packets,frame,&z);
+	init_drawing_environment(frame,&z);
 
-	render(packets,frame,&z);
+	// Render teapots
+	render(frame,&z);
 
-  // End program.
-  return 0;
+	// Sleep
+	SleepThread();
+
+	// End program.
+	return 0;
 
 }

@@ -21,13 +21,15 @@ fsfont_t impress;
 fontx_t krom_u;
 fontx_t krom_k;
 
-void draw_init_env(packet_t *packet)
+void draw_init_env()
 {
-
-	qword_t *q = packet->data;
 
 	framebuffer_t frame;
 	zbuffer_t z;
+
+	packet_t *packet = packet_init(16,PACKET_NORMAL);
+
+	qword_t *q = packet->data;
 
 	frame.width = 640;
 	frame.height = 448;
@@ -48,13 +50,15 @@ void draw_init_env(packet_t *packet)
 	q = draw_finish(q);
 
 	dma_channel_send_normal(DMA_CHANNEL_GIF,packet->data, q - packet->data, 0,0);
+	dma_wait_fast();
+
+	packet_free(packet);
 
 }
 
-void init_texture(packet_t *packet)
+void init_texture()
 {
-
-	dma_wait_fast();
+	packet_t *packet = packet_init(50,PACKET_NORMAL);
 
 	qword_t *q = packet->data;
 
@@ -68,6 +72,9 @@ void init_texture(packet_t *packet)
 	q = draw_texture_flush(q);
 
 	dma_channel_send_chain(DMA_CHANNEL_GIF,packet->data, q - packet->data, 0,0);
+	dma_wait_fast();
+
+	packet_free(packet);
 
 }
 
@@ -75,10 +82,6 @@ void test_something(packet_t *packet)
 {
 
 	int context = 0;
-
-	packet_t *current = packet;
-
-	qword_t *q = current->data;
 
 	vertex_t v0;
 
@@ -88,6 +91,12 @@ void test_something(packet_t *packet)
 	texbuffer_t texbuf;
 	clutbuffer_t clut;
 	lod_t lod;
+
+	packet_t *packets[2];
+	packet_t *current;
+
+	packets[0] = packet_init(10000,PACKET_NORMAL);
+	packets[1] = packet_init(10000,PACKET_NORMAL);
 
 	// Use linear filtering for good scaling results
 	lod.calculation = LOD_USE_K;
@@ -129,8 +138,6 @@ void test_something(packet_t *packet)
 	c1.a = 0x40;
 	c1.q = 1.0f;
 
-	dma_wait_fast();
-
 	// UTF-8
 	unsigned char str0[] = { 0x61, 0x62, 0xC2, 0xA9, 0x78, 0xC2, 0xA5, 0xC2, 0xB2, '\0'};
 
@@ -140,6 +147,9 @@ void test_something(packet_t *packet)
 
 	while(1)
 	{
+
+		current = packets[context];
+		q = current->data;
 
 		q = draw_clear(q,0,0,0,640.0f,448.0f,0x40,0x40,0x40);
 
@@ -160,23 +170,16 @@ void test_something(packet_t *packet)
 
 		context ^= 1;
 
-		current = packet + context;
-		q = current->data;
-
 		graph_wait_vsync();
 
 	}
 
+	free(packets[0])
+	free(packets[1]);
 }
 
 int main(void)
 {
-	packet_t packet;
-	packet_t packets[2];
-
-	packet_allocate(&packet,100,0,0);
-	packet_allocate(&packets[0],10000,0,0);
-	packet_allocate(&packets[1],10000,0,0);
 
 	dma_channel_initialize(DMA_CHANNEL_GIF,NULL,0);
 	dma_channel_fast_waits(DMA_CHANNEL_GIF);
@@ -186,16 +189,18 @@ int main(void)
 
 	fontstudio_load_ini(&impress,"host:impress.ini", 512, 256,20);
 
-	draw_init_env(&packet);
+	draw_init_env();
 
-	init_texture(&packet);
+	init_texture();
 
-	test_something(packets);
+	test_something();
 
 	fontstudio_unload_ini(&impress);
 
 	fontx_unload(&krom_u);
 	fontx_unload(&krom_k);
+
+	SleepThread();
 
 	return 0;
 }

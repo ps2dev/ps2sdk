@@ -9,6 +9,9 @@
  */
 #define QWC_MAX 65535
 
+#define PACKET_NORMAL 0x00
+#define PACKET_UCAB   0x01
+#define PACKET_SPR    0x02
 /* 
  * Dmatags use qwc for the number of qwords for they handle.
  * 
@@ -17,10 +20,9 @@
  * 
  */
 typedef struct {
-	u32 total;
+	u32 qwords;
 	u16 qwc;
-	u8 spr;
-	u8 ucab;
+	u16 type;
 	qword_t *data __attribute__((aligned(64)));
 } packet_t;
 
@@ -29,7 +31,7 @@ extern "C" {
 #endif
 
 	// Allocate a new packet for use, size in quadwords.
-	int packet_allocate(packet_t *packet, int num, int ucab, int spr);
+	packet_t *packet_init(int qwords, int type);
 
 	// Reset the packet quadword counter and zero out data.
 	void packet_reset(packet_t *packet);
@@ -37,12 +39,16 @@ extern "C" {
 	// Free the space allocated by packet.
 	void packet_free(packet_t *packet);
 
-	// Returns the currently unused qword.
-	qword_t *packet_get_qword(packet_t *packet);
-
 	// Advances the qwc and returns the current qword count.
 	qword_t *packet_increment_qwc(packet_t *packet, int num);
 
+	// For those that like getters and setters
+	static inline qword_t *packet_get_qword(packet_t *packet)
+	{
+
+		return packet->data;
+
+	}
 #ifdef __cplusplus
 }
 #endif

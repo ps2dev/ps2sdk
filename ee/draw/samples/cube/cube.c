@@ -57,8 +57,10 @@ void init_gs(framebuffer_t *frame, zbuffer_t *z)
 
 }
 
-void init_drawing_environment(packet_t *packet, framebuffer_t *frame, zbuffer_t *z)
+void init_drawing_environment(framebuffer_t *frame, zbuffer_t *z)
 {
+
+	packet_t *packet = packet_init(16,PACKET_NORMAL);
 
 	// This is our generic qword pointer.
 	qword_t *q = packet->data;
@@ -74,35 +76,45 @@ void init_drawing_environment(packet_t *packet, framebuffer_t *frame, zbuffer_t 
 
 	// Now send the packet, no need to wait since it's the first.
 	dma_channel_send_normal(DMA_CHANNEL_GIF,packet->data,q - packet->data, 0, 0);
+	dma_wait_fast();
+
+	packet_free(packet);
 
 }
 
-int render(packet_t *packet,framebuffer_t *frame, zbuffer_t *z)
+int render(framebuffer_t *frame, zbuffer_t *z)
 {
 
 	int i;
 	int context = 0;
 
-	qword_t *q;
-	qword_t *dmatag;
+	// Matrices to setup the 3D environment and camera
+	MATRIX local_world;
+	MATRIX world_view;
+	MATRIX view_screen;
+	MATRIX local_screen;
+
+	VECTOR *temp_vertices;
 
 	prim_t prim;
 	color_t color;
 
-  MATRIX local_world;
-  MATRIX world_view;
-  MATRIX view_screen;
-  MATRIX local_screen;
-
-  VECTOR *temp_vertices;
-
 	xyz_t   *verts;
 	color_t *colors;
 
-  // Allocate calculation space.
-  temp_vertices = memalign(128, sizeof(VECTOR) * vertex_count);
+	// The data packets for double buffering dma sends.
+	packet_t *packets[2];
+	packet_t *current;
+	qword_t *q;
+	qword_t *dmatag;
 
-  // Allocate register space.
+	packets[0] = packet_init(100,PACKET_NORMAL);
+	packets[1] = packet_init(100,PACKET_NORMAL);
+
+	// Allocate calculation space.
+	temp_vertices = memalign(128, sizeof(VECTOR) * vertex_count);
+
+	// Allocate register space.
 	verts  = memalign(128, sizeof(vertex_t) * vertex_count);
 	colors = memalign(128, sizeof(color_t)  * vertex_count);
 
@@ -122,40 +134,42 @@ int render(packet_t *packet,framebuffer_t *frame, zbuffer_t *z)
 	color.a = 0x80;
 	color.q = 1.0f;
 
-  // Create the view_screen matrix.
+	// Create the view_screen matrix.
 	create_view_screen(view_screen, graph_aspect_ratio(), -3.00f, 3.00f, -3.00f, 3.00f, 1.00f, 2000.00f);
 
 	// Wait for any previous dma transfers to finish before starting.
 	dma_wait_fast();
 
-  // The main loop...
+	// The main loop...
 	for (;;)
 	{
 
-   // Spin the cube a bit.
+		current = packets[context];
+
+		// Spin the cube a bit.
 		object_rotation[0] += 0.008f; //while (object_rotation[0] > 3.14f) { object_rotation[0] -= 6.28f; }
 		object_rotation[1] += 0.012f; //while (object_rotation[1] > 3.14f) { object_rotation[1] -= 6.28f; }
 
-   // Create the local_world matrix.
-   create_local_world(local_world, object_position, object_rotation);
+		// Create the local_world matrix.
+		create_local_world(local_world, object_position, object_rotation);
 
-   // Create the world_view matrix.
-   create_world_view(world_view, camera_position, camera_rotation);
+		// Create the world_view matrix.
+		create_world_view(world_view, camera_position, camera_rotation);
 
-   // Create the local_screen matrix.
-   create_local_screen(local_screen, local_world, world_view, view_screen);
+		// Create the local_screen matrix.
+		create_local_screen(local_screen, local_world, world_view, view_screen);
 
-   // Calculate the vertex values.
-   calculate_vertices(temp_vertices, vertex_count, vertices, local_screen);
+		// Calculate the vertex values.
+		calculate_vertices(temp_vertices, vertex_count, vertices, local_screen);
 
 		// Convert floating point vertices to fixed point and translate to center of screen.
 		draw_convert_xyz(verts, 2048, 2048, 32, vertex_count, (vertex_f_t*)temp_vertices);
 
 		// Convert floating point colours to fixed point.
-		draw_convert_rgbq(colors, vertex_count, (vertex_f_t*)temp_vertices, (color_f_t*)colours, color.a);
+		draw_convert_rgbq(colors, vertex_count, (vertex_f_t*)temp_vertices, (color_f_t*)colours, 0x80);
 
 		// Grab our dmatag pointer for the dma chain.
-		dmatag = packet[context].data;
+		dmatag = current->data;
 
 		// Now grab our qword pointer and increment past the dmatag.
 		q = dmatag;
@@ -182,11 +196,11 @@ int render(packet_t *packet,framebuffer_t *frame, zbuffer_t *z)
 		q = draw_finish(q);
 
 		// Define our dmatag for the dma chain.
-		DMATAG_END(dmatag,q-packet[context].data-1,0,0,0);
+		DMATAG_END(dmatag,(q-current->data)-1,0,0,0);
 
 		// Now send our current dma chain.
 		dma_wait_fast();
-		dma_channel_send_chain(DMA_CHANNEL_GIF,packet[context].data, q - packet[context].data, 0, 0);
+		dma_channel_send_chain(DMA_CHANNEL_GIF,current->data, q - current->data, 0, 0);
 
 		// Now switch our packets so we can process data while the DMAC is working.
 		context ^= 1;
@@ -196,7 +210,10 @@ int render(packet_t *packet,framebuffer_t *frame, zbuffer_t *z)
 
 		graph_wait_vsync();
 
-  }
+	}
+
+	packet_free(packets[0]);
+	packet_free(packets[1]);
 
 	return 0;
 
@@ -209,12 +226,6 @@ int main(int argc, char **argv)
 	framebuffer_t frame;
 	zbuffer_t z;
 
-	// The data packets for double buffering dma sends.
-	packet_t packets[2];
-
-	packet_allocate(&packets[0],100,0,0);
-	packet_allocate(&packets[1],100,0,0);
-
 	// Init GIF dma channel.
 	dma_channel_initialize(DMA_CHANNEL_GIF,NULL,0);
 	dma_channel_fast_waits(DMA_CHANNEL_GIF);
@@ -223,11 +234,15 @@ int main(int argc, char **argv)
 	init_gs(&frame, &z);
 
 	// Init the drawing environment and framebuffer.
-	init_drawing_environment(packets,&frame,&z);
+	init_drawing_environment(&frame,&z);
 
-	render(packets,&frame,&z);
+	// Render the cube
+	render(&frame,&z);
 
-  // End program.
-  return 0;
+	// Sleep
+	SleepThread();
+
+	// End program.
+	return 0;
 
 }

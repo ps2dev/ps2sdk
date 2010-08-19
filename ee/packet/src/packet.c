@@ -4,39 +4,42 @@
 
 #define SPR_BEGIN 0x70000000
 
-int packet_allocate(packet_t *packet, int num, int ucab, int spr)
+packet_t *packet_init(int qwords, int type)
 {
+
+	int byte_size = 0;
+	packet_t *packet = (packet_t*)calloc(1,sizeof(packet_t));
 
 	if (packet == NULL)
 	{
 
-		return 0;
+		return NULL;
 
 	}
 
-	if (spr && (num >= 0x1000))
+	if (type == PACKET_SPR)
 	{
 
-		(u32*)packet->data = (u32*)SPR_BEGIN; 
-		packet->total = 0x1000;
-
-		return 0;
+		(u32*)packet->data = (u32*)SPR_BEGIN;
+		packet->qwc = 0x1000;
 
 	}
-
-	// Size of qwords in bytes.
-	int byte_size = num << 4;
-
-	// Allocate the data area in bytes aligned to cache line.
-	if ((packet->data = memalign(64, byte_size)) == NULL)
+	else
 	{
+		// Size of qwords in bytes.
+		byte_size = qwords << 4;
 
-		return -1;
+		// Allocate the data area in bytes aligned to cache line.
+		if ((packet->data = memalign(64, byte_size)) == NULL)
+		{
+			free(packet);
+			return NULL;
 
+		}
 	}
 
 	// Set the pointer attribute to ucab space.
-	if (ucab)
+	if (type == PACKET_UCAB)
 	{
 
 		(u32)packet->data |= (u32)0x30000000;
@@ -48,12 +51,11 @@ int packet_allocate(packet_t *packet, int num, int ucab, int spr)
 
 	// Set the packet counts
 	packet->qwc = 0;
-	packet->total = num;
-	packet->spr = spr;
-	packet->ucab = ucab;
+	packet->qwords = qwords;
+	packet->type = type;
 
 	// End function.
-	return 0;
+	return packet;
 
 }
 
@@ -61,23 +63,24 @@ void packet_free(packet_t *packet)
 {
 
 	// Free the allocated data buffer.
-	if (packet->spr)
+	if (packet->type == PACKET_SPR)
 	{
 
 		packet->data = NULL; 
-		return;
 
 	}
-
-	if (packet->ucab) 
+	else
 	{
+		if (packet->type == PACKET_UCAB) 
+		{
 
-		(u32)packet->data ^= 0x30000000;
-		return;
+			(u32)packet->data ^= 0x30000000;
 
+		}
+
+		free(packet->data);
 	}
 
-	free(packet->data);
 	free(packet);
 
 }
@@ -88,7 +91,7 @@ void packet_reset(packet_t *packet)
 	// Reset the quadword counter.
 	packet->qwc = 0;
 
-	if (packet->spr) 
+	if (packet->type == PACKET_SPR) 
 	{
 
 		(u8*)packet->data = (u8*)SPR_BEGIN;
@@ -96,46 +99,7 @@ void packet_reset(packet_t *packet)
 
 	}
 
-	if (packet->ucab)
-	{
-
-		(u32)packet->data ^= 0x30000000;
-
-	}
-
 	// Zero out the data
-	memset(packet->data, 0, packet->total << 4);
-
-	if (packet->ucab)
-	{
-
-		(u32)packet->data ^= 0x30000000;
-
-	}
-
-}
-
-// For those that like getters and setters
-qword_t *packet_get_qword(packet_t *packet)
-{
-
-	return packet->data;
-
-}
-
-qword_t *packet_increment_qwc(packet_t *packet, int num)
-{
-
-	// Check if we have enough qwords left
-	if ((packet->qwc += num) > packet->total) 
-	{
-
-		// Return the old qword count
-		packet->qwc -= num;
-
-	}
-
-	// Return the current qword count
-	return packet->data + packet->qwc+1;
+	memset(packet->data, 0, packet->qwords << 4);
 
 }

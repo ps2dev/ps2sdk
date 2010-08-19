@@ -31,7 +31,6 @@
 #include "mesh_data.c"
 
 extern unsigned char flower[];
-extern unsigned int size_flower;
 
 VECTOR object_position = { 0.00f, 0.00f, 0.00f, 1.00f };
 VECTOR object_rotation = { 0.00f, 0.00f, 0.00f, 1.00f };
@@ -66,8 +65,10 @@ void init_gs(framebuffer_t *frame, zbuffer_t *z, texbuffer_t *texbuf)
 
 }
 
-void init_drawing_environment(packet_t *packet, framebuffer_t *frame, zbuffer_t *z)
+void init_drawing_environment(framebuffer_t *frame, zbuffer_t *z)
 {
+
+	packet_t *packet = packet_init(20,PACKET_NORMAL);
 
 	// This is our generic qword pointer.
 	qword_t *q = packet->data;
@@ -83,11 +84,16 @@ void init_drawing_environment(packet_t *packet, framebuffer_t *frame, zbuffer_t 
 
 	// Now send the packet, no need to wait since it's the first.
 	dma_channel_send_normal(DMA_CHANNEL_GIF,packet->data,q - packet->data, 0, 0);
+	dma_wait_fast();
+
+	packet_free(packet);
 
 }
 
-void load_texture(packet_t *packet, texbuffer_t *texbuf)
+void load_texture(texbuffer_t *texbuf)
 {
+
+	packet_t *packet = packet_init(50,PACKET_NORMAL);
 
 	qword_t *q = packet->data;
 
@@ -96,13 +102,17 @@ void load_texture(packet_t *packet, texbuffer_t *texbuf)
 	q = draw_texture_transfer(q,flower,256,256,GS_PSM_24,texbuf->address,texbuf->width);
 	q = draw_texture_flush(q);
 
-	dma_wait_fast();
 	dma_channel_send_chain(DMA_CHANNEL_GIF,packet->data, q - packet->data, 0,0);
+	dma_wait_fast();
+
+	packet_free(packet);
 
 }
 
-void setup_texture(packet_t *packet, texbuffer_t *texbuf)
+void setup_texture(texbuffer_t *texbuf)
 {
+
+	packet_t *packet = packet_init(10,PACKET_NORMAL);
 
 	qword_t *q = packet->data;
 
@@ -133,34 +143,41 @@ void setup_texture(packet_t *packet, texbuffer_t *texbuf)
 	q = draw_texturebuffer(q,0,texbuf,&clut);
 
 	// Now send the packet, no need to wait since it's the first.
-	dma_wait_fast();
 	dma_channel_send_normal(DMA_CHANNEL_GIF,packet->data,q - packet->data, 0, 0);
+	dma_wait_fast();
+
+	packet_free(packet);
 
 }
 
-int render(packet_t *packet, framebuffer_t *frame, zbuffer_t *z)
+int render(framebuffer_t *frame, zbuffer_t *z)
 {
 
 	int i;
 	int context = 0;
 
-	qword_t *q;
+	packet_t *packets[2];
+	packet_t *current;
 
+	qword_t *q;
 	u64 *dw;
 
-  MATRIX local_world;
-  MATRIX world_view;
-  MATRIX view_screen;
-  MATRIX local_screen;
+	MATRIX local_world;
+	MATRIX world_view;
+	MATRIX view_screen;
+	MATRIX local_screen;
 
 	prim_t prim;
 	color_t color;
 
-  VECTOR *temp_vertices;
+	VECTOR *temp_vertices;
 
 	xyz_t *xyz;
 	color_t *rgbaq;
 	texel_t *st;
+
+	packets[0] = packet_init(100,PACKET_NORMAL);
+	packets[1] = packet_init(100,PACKET_NORMAL);
 
 	// Define the triangle primitive we want to use.
 	prim.type = PRIM_TRIANGLE;
@@ -178,47 +195,49 @@ int render(packet_t *packet, framebuffer_t *frame, zbuffer_t *z)
 	color.a = 0x40;
 	color.q = 1.0f;
 
-  // Allocate calculation space.
-  temp_vertices = memalign(128, sizeof(VECTOR) * vertex_count);
+	// Allocate calculation space.
+	temp_vertices = memalign(128, sizeof(VECTOR) * vertex_count);
 
-  // Allocate register space.
-  xyz   = memalign(128, sizeof(u64) * vertex_count);
-  rgbaq = memalign(128, sizeof(u64) * vertex_count);
-  st    = memalign(128, sizeof(u64) * vertex_count);
+	// Allocate register space.
+	xyz   = memalign(128, sizeof(u64) * vertex_count);
+	rgbaq = memalign(128, sizeof(u64) * vertex_count);
+	st    = memalign(128, sizeof(u64) * vertex_count);
 
-  // Create the view_screen matrix.
+	// Create the view_screen matrix.
 	create_view_screen(view_screen, graph_aspect_ratio(), -3.00f, 3.00f, -3.00f, 3.00f, 1.00f, 2000.00f);
 
-  // The main loop...
+	// The main loop...
 	for (;;)
 	{
 
-   // Spin the cube a bit.
-   object_rotation[0] += 0.008f; while (object_rotation[0] > 3.14f) { object_rotation[0] -= 6.28f; }
-   object_rotation[1] += 0.012f; while (object_rotation[1] > 3.14f) { object_rotation[1] -= 6.28f; }
+		current = packets[context];
 
-   // Create the local_world matrix.
-   create_local_world(local_world, object_position, object_rotation);
+		// Spin the cube a bit.
+		object_rotation[0] += 0.008f; while (object_rotation[0] > 3.14f) { object_rotation[0] -= 6.28f; }
+		object_rotation[1] += 0.012f; while (object_rotation[1] > 3.14f) { object_rotation[1] -= 6.28f; }
 
-   // Create the world_view matrix.
-   create_world_view(world_view, camera_position, camera_rotation);
+		// Create the local_world matrix.
+		create_local_world(local_world, object_position, object_rotation);
 
-   // Create the local_screen matrix.
-   create_local_screen(local_screen, local_world, world_view, view_screen);
+		// Create the world_view matrix.
+		create_world_view(world_view, camera_position, camera_rotation);
 
-   // Calculate the vertex values.
-   calculate_vertices(temp_vertices, vertex_count, vertices, local_screen);
+		// Create the local_screen matrix.
+		create_local_screen(local_screen, local_world, world_view, view_screen);
 
-   // Generate the XYZ register values.
+		// Calculate the vertex values.
+		calculate_vertices(temp_vertices, vertex_count, vertices, local_screen);
+
+		// Generate the XYZ register values.
 		draw_convert_xyz(xyz, 2048, 2048, 32, vertex_count, (vertex_f_t*)temp_vertices);
 
 		// Convert floating point colours to fixed point.
 		draw_convert_rgbq(rgbaq, vertex_count, (vertex_f_t*)temp_vertices, (color_f_t*)colours,color.a);
 
-   // Generate the ST register values.
+		// Generate the ST register values.
 		draw_convert_st(st, vertex_count, (vertex_f_t*)temp_vertices, (texel_f_t*)coordinates);
 
-		q = packet[context].data;
+		q = current->data;
 
 		// Clear framebuffer but don't update zbuffer.
 		q = draw_disable_tests(q,0,z);
@@ -244,9 +263,7 @@ int render(packet_t *packet, framebuffer_t *frame, zbuffer_t *z)
 
 		}
 
-		// The lpq is calculated from dividing 2 by the number of registers.
-		// It's used as a parameter for the ability to control the accuracy
-		// of calculating the loops.
+		// Only 3 registers rgbaq/st/xyz were used (standard STQ reglist)
 		q = draw_prim_end((qword_t*)dw,3,DRAW_STQ_REGLIST);
 
 		// Setup a finish event.
@@ -254,7 +271,7 @@ int render(packet_t *packet, framebuffer_t *frame, zbuffer_t *z)
 
 		// Now send our current dma chain.
 		dma_wait_fast();
-		dma_channel_send_normal(DMA_CHANNEL_GIF,packet[context].data, q - packet[context].data, 0, 0);
+		dma_channel_send_normal(DMA_CHANNEL_GIF,current->data, q - current->data, 0, 0);
 
 		// Now switch our packets so we can process data while the DMAC is working.
 		context ^= 1;
@@ -264,10 +281,13 @@ int render(packet_t *packet, framebuffer_t *frame, zbuffer_t *z)
 
 		graph_wait_vsync();
 
-  }
+	}
 
-  // End program.
-  return 0;
+	free(packets[0]);
+	free(packets[1]);
+
+	// End program.
+	return 0;
 
 }
 
@@ -279,12 +299,6 @@ int main(int argc, char **argv)
 	zbuffer_t z;
 	texbuffer_t texbuf;
 
-	// The data packets for double buffering dma sends.
-	packet_t packets[2];
-
-	packet_allocate(&packets[0],100,0,0);
-	packet_allocate(&packets[1],100,0,0);
-
 	// Init GIF dma channel.
 	dma_channel_initialize(DMA_CHANNEL_GIF,NULL,0);
 	dma_channel_fast_waits(DMA_CHANNEL_GIF);
@@ -293,14 +307,19 @@ int main(int argc, char **argv)
 	init_gs(&frame, &z, &texbuf);
 
 	// Init the drawing environment and framebuffer.
-	init_drawing_environment(&packets[0],&frame,&z);
+	init_drawing_environment(&frame,&z);
 
 	// Load the texture into vram.
-	load_texture(&packets[1], &texbuf);
+	load_texture(&texbuf);
 
-	setup_texture(&packets[0], &texbuf);
+	// Setup texture buffer
+	setup_texture(&texbuf);
 
-	render(packets,&frame,&z);
+	// Render textured cube
+	render(&frame,&z);
+
+	// Sleep
+	SleepThread();
 
 	// End program.
 	return 0;

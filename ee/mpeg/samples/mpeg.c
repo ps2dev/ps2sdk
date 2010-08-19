@@ -39,8 +39,8 @@ typedef struct InitCBParam {
 
  MPEGSequenceInfo* m_pInfo;
  void*             m_pData;
- packet_t            m_XFerPck;
- packet_t            m_DrawPck;
+ packet_t          *m_XFerPck;
+ packet_t          *m_DrawPck;
  int               m_TexAddr;
 
 } InitCBParam;
@@ -54,7 +54,7 @@ static void* InitCB ( void*, MPEGSequenceInfo* );
 
 int main ( void ) {
 /* read file (or part of it ) into memory */
- packet_t      *lPck = malloc(sizeof(packet_t));
+ packet_t      *lPck;
  qword_t       *q;
  framebuffer_t frame;
  zbuffer_t z;
@@ -75,7 +75,7 @@ int main ( void ) {
  z.zsm = 0;
  z.address = 0;
 
- packet_allocate(lPck, 100, 0, 0);
+ lPck = packet_init(100, PACKET_NORMAL);
 
  if ( lFD < 0 ) {
   printf ( "test_mpeg: could not open '%s'\n", MPEG_BITSTREAM_FILE );
@@ -164,14 +164,14 @@ int main ( void ) {
   }  /* end if */
 /* now transfer decoded picture data into texture area of GS RAM */
   dma_wait_fast();
-  dma_channel_send_chain( DMA_CHANNEL_GIF, lInfo.m_XFerPck.data, lInfo.m_XFerPck.qwc, 0, 0);
+  dma_channel_send_chain( DMA_CHANNEL_GIF, lInfo.m_XFerPck -> data, lInfo.m_XFerPck -> qwc, 0, 0);
 /* wait for vsync 2 times (we have interlaced frame mode)  */
   graph_wait_vsync ();
   graph_wait_vsync ();
 /* no need to wait for DMA transfer completion since vsyncs above */
 /* have enough lattency...                                        */
 /* ...and finally draw decoded picture...                         */
-  dma_channel_send_normal( DMA_CHANNEL_GIF, lInfo.m_DrawPck.data, lInfo.m_DrawPck.qwc, 0, 0);
+  dma_channel_send_normal( DMA_CHANNEL_GIF, lInfo.m_DrawPck -> data, lInfo.m_DrawPck -> qwc, 0, 0);
 /* ...and go back for the next one */
  }  /* end while */
 /* free memory and other resources */
@@ -239,9 +239,9 @@ static void* InitCB ( void* apParam, MPEGSequenceInfo* apInfo ) {
 /* 'subpictures' (macroblocks) and DMA controller */
 /* will transfer them all at once using source    */
 /* chain transfer mode.                           */
- packet_allocate(&lpParam -> m_XFerPck,(10 + 12 * lMBW * lMBH )>>1,0,0);
+ lpParam -> m_XFerPck = packet_init((10 + 12 * lMBW * lMBH )>>1,PACKET_NORMAL);
 
- q = lpParam-> m_XFerPck.data;
+ q = lpParam-> m_XFerPck -> data;
 
  DMATAG_CNT(q, 3, 0, 0, 0);
  q++;
@@ -272,13 +272,13 @@ static void* InitCB ( void* apParam, MPEGSequenceInfo* apInfo ) {
  //DMATAG_END(q,0,0,0,0);
  //q++;
 
- lpParam-> m_XFerPck.qwc = q - lpParam-> m_XFerPck.data;
+ lpParam-> m_XFerPck -> qwc = q - lpParam-> m_XFerPck -> data;
 
 /* This initializes picture drawing packet. Just textrured sprite */
 /* that occupies the whole screen (no aspect ratio is taken into  */
 /* account for simplicity.                                        */
- packet_allocate(&lpParam -> m_DrawPck,7,0,0);
- q = lpParam -> m_DrawPck.data;
+ lpParam -> m_DrawPck = packet_init(7,PACKET_NORMAL);
+ q = lpParam -> m_DrawPck -> data;
  PACK_GIFTAG(q, GIF_SET_TAG( 6, 1, 0, 0, 0, 1 ), GIF_REG_AD );
  q++;
  PACK_GIFTAG(q, GS_SET_TEX0( lpParam -> m_TexAddr, lTBW, GS_PSM_32, lTW, lTH, 1, 1, 0, 0, 0, 0, 0 ), GS_REG_TEX0_1 );
@@ -294,7 +294,7 @@ static void* InitCB ( void* apParam, MPEGSequenceInfo* apInfo ) {
  PACK_GIFTAG(q, GS_SET_XYZ(  (640 << 4) + (2048 << 4), (512 << 4) + (2048 << 4), 0 ), GS_REG_XYZ2 );
  q++;
 
- lpParam -> m_DrawPck.qwc = q - lpParam -> m_DrawPck.data;
+ lpParam -> m_DrawPck -> qwc = q - lpParam -> m_DrawPck -> data;
 
  return retVal;
 

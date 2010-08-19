@@ -220,7 +220,7 @@ qword_t *draw_texture_transfer(qword_t *q, void *src, int width, int height, int
 
 	int i;
 	int remaining;
-	int qwords;
+	int qwords = 0;
 
 	switch (psm)
 	{
