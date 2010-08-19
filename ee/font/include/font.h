@@ -1,6 +1,9 @@
 #ifndef __FONT_H__
 #define __FONT_H__
 
+#include <draw.h>
+#include <tamtypes.h>
+
 // FontX2 types
 #define SINGLE_BYTE 0
 #define DOUBLE_BYTE 1
