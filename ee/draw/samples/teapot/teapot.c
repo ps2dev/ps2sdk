@@ -23,7 +23,6 @@
 #include <dma.h>
 
 #include <graph.h>
-#include <graph_vram.h>
 
 #include <draw.h>
 #include <draw3d.h>

@@ -22,7 +22,6 @@
 
 #include <draw.h>
 #include <graph.h>
-#include <graph_vram.h>
 #include <packet.h>
 
 void init_gs(framebuffer_t *frame, zbuffer_t *z)

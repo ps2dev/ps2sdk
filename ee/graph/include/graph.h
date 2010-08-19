@@ -1,6 +1,8 @@
 #ifndef __GRAPH_H__
 #define __GRAPH_H__
 
+#include <graph_vram.h>
+
 // Sets screen mode
 #define GRAPH_MODE_AUTO         0 //  Automatic NTSC or PAL mode setting.
 #define GRAPH_MODE_NTSC         1 //  256 x  224 to 640 x 448

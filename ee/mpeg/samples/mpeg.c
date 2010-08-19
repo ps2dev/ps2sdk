@@ -28,7 +28,6 @@
 #include <fileio.h>
 #include <malloc.h>
 #include <graph.h>
-#include <graph_vram.h>
 #include <packet.h>
 #include <stdio.h>
 

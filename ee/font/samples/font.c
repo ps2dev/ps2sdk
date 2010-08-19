@@ -6,7 +6,6 @@
 
 #include <packet.h>
 #include <graph.h>
-#include <graph_vram.h>
 #include <gs_psm.h>
 #include <draw.h>
 
