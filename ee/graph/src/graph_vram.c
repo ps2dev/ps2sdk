@@ -47,16 +47,20 @@ int graph_vram_size(int width, int height, int psm, int alignment)
 	int size = 0;
 
 	// First correct the buffer width to be a multiple of 64 or 128
-	switch (psm)
+	// If the width is less than or equal to 16, then it's a palette
+	if (width > 16)
 	{
+		switch (psm)
+		{
 
-		case GS_PSM_8:
-		case GS_PSM_4:
-		case GS_PSM_8H:
-		case GS_PSM_4HL:
-		case GS_PSM_4HH:	width = -128 & (width + 127); break;
-		default:			width = -64  & (width + 63);  break;
+			case GS_PSM_8:
+			case GS_PSM_4:
+			case GS_PSM_8H:
+			case GS_PSM_4HL:
+			case GS_PSM_4HH:	width = -128 & (width + 127); break;
+			default:			width = -64  & (width + 63);  break;
 
+		}
 	}
 
 	// Texture storage size is in pixels/word
