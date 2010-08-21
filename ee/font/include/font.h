@@ -22,7 +22,10 @@ typedef struct {
 // FontStudio type fonts
 typedef struct {
 	char A;
+	char B;
 	char C;
+	char ox;
+	char oy;
 	char width;
 	char height;
 	unsigned short u1;

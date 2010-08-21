@@ -147,6 +147,20 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float width, float hei
 		if (temp1 == NULL)
 		{
 
+			printf("Error parsing B for char %d.\n", i);
+			free(ini);
+			free(font->charmap);
+			free(font->chardata);
+			return -1;
+
+		}
+		temp0 += strlen(temp1)+1;
+		font->chardata[i].B = (int)strtol(temp0,NULL,10);
+
+		temp1 = strtok(temp0,"=");
+		if (temp1 == NULL)
+		{
+
 			printf("Error parsing C for char %d.\n", i);
 			free(ini);
 			free(font->charmap);
@@ -156,6 +170,34 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float width, float hei
 		}
 		temp0 += strlen(temp1)+1;
 		font->chardata[i].C = (int)strtol(temp0,NULL,10);
+
+		temp1 = strtok(temp0,"=");
+		if (temp1 == NULL)
+		{
+
+			printf("Error parsing ox for char %d.\n", i);
+			free(ini);
+			free(font->charmap);
+			free(font->chardata);
+			return -1;
+
+		}
+		temp0 += strlen(temp1)+1;
+		font->chardata[i].ox = (int)strtol(temp0,NULL,10);
+
+		temp1 = strtok(temp0,"=");
+		if (temp1 == NULL)
+		{
+
+			printf("Error parsing oy for char %d.\n", i);
+			free(ini);
+			free(font->charmap);
+			free(font->chardata);
+			return -1;
+
+		}
+		temp0 += strlen(temp1)+1;
+		font->chardata[i].oy = (int)strtol(temp0,NULL,10);
 
 		temp1 = strtok(temp0,"=");
 		if (temp1 == NULL)
@@ -364,6 +406,10 @@ void convert_to_index(unsigned short *in, int num, fsfont_t *font)
 
 }
 
+#define DRAW_ST_REGLIST \
+	((u64)GIF_REG_ST)   << 0 | \
+	((u64)GIF_REG_XYZ2) << 4
+
 qword_t *draw_fontstudio_char(qword_t *q, unsigned int c, vertex_t *v0, fsfont_t *font)
 {
 
@@ -375,6 +421,7 @@ qword_t *draw_fontstudio_char(qword_t *q, unsigned int c, vertex_t *v0, fsfont_t
 	q->dw[0] = GIF_SET_UV(font->chardata[c].u1,font->chardata[c].v1);
 	q->dw[1] = GIF_SET_XYZ(x + 32759,y + 32759,v0->z);
 	q++;
+
 	q->dw[0] = GIF_SET_UV(font->chardata[c].u2, font->chardata[c].v2);
 	q->dw[1] = GIF_SET_XYZ(x + (int)((font->chardata[c].width*font->scale)*16.0f) + 32777,y + (int)((font->chardata[c].height*font->scale)*16.0f) + 32777,v0->z);
 	q++;
@@ -464,7 +511,7 @@ qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *s
 					}
 					if (utf8[i] == TAB)
 					{
-						line_num[line] += font->spacewidth * 4.0f;
+						line_num[line] += font->spacewidth * 4;
 					}
 					if (utf8[i] == SPACE)
 					{
@@ -474,7 +521,7 @@ qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *s
 				}
 
 				curchar = utf8[i];
-				line_num[line] += font->chardata[curchar].A + font->chardata[curchar].C;
+				line_num[line] += font->chardata[curchar].A + font->chardata[curchar].B + font->chardata[curchar].C;
 
 				if (i == length-1)
 				{
@@ -501,7 +548,7 @@ qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *s
 					}
 					if (utf8[i] == TAB)
 					{
-						line_num[line] += font->spacewidth * 4.0f;
+						line_num[line] += font->spacewidth * 4;
 					}
 					if (utf8[i] == SPACE)
 					{
@@ -511,7 +558,7 @@ qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *s
 				}
 
 				curchar = utf8[i];
-				line_num[line] += font->chardata[curchar].A + font->chardata[curchar].C;
+				line_num[line] += font->chardata[curchar].A + font->chardata[curchar].B + font->chardata[curchar].C;
 
 				if (i == length-1)
 				{
@@ -553,11 +600,11 @@ qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *s
 			j++;
 		}
 
-		v_pos.x += font->chardata[utf8[j]].A*font->scale;
+		v_pos.x += (font->chardata[utf8[j]].A*font->scale);
 
 		q = draw_fontstudio_char(q,utf8[j],&v_pos,font);
 
-		v_pos.x += font->chardata[utf8[j]].C*font->scale;
+		v_pos.x += (font->chardata[utf8[j]].B*font->scale) + (font->chardata[utf8[j]].C*font->scale);
 
 
 	}
