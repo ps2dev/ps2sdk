@@ -11,15 +11,8 @@ int graph_initialize(int fbp, int width, int height, int psm, int x, int y)
 	// Set a default interlaced video mode with flicker filter.
 	graph_set_mode(GRAPH_MODE_INTERLACED, mode, GRAPH_MODE_FIELD, GRAPH_ENABLE);
 
-	// Set the screen dimensions to PAL, for increased frame buffer.
-	if (mode == GRAPH_MODE_NTSC)
-	{
-		graph_set_screen(0,0,width,height);
-	}
-	else
-	{
-		graph_set_screen(0,0,width,height);
-	}
+	// Set the screen up
+	graph_set_screen(0,0,width,height);
 
 	// Set black background
 	graph_set_bgcolor(0,0,0);
