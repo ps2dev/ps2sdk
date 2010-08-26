@@ -13,6 +13,9 @@
 #include <draw_tests.h>
 #include <draw_types.h>
 
+#include <draw2d.h>
+#include <draw3d.h>
+
 #define DRAW_DISABLE 0
 #define DRAW_ENABLE  1
 
