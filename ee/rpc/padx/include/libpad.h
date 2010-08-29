@@ -20,6 +20,7 @@ extern "C" {
 /*
  * Button bits
  */
+#ifndef __INPUT_H__
 #define PAD_LEFT      0x0080
 #define PAD_DOWN      0x0040
 #define PAD_RIGHT     0x0020
@@ -36,7 +37,7 @@ extern "C" {
 #define PAD_L1        0x0400
 #define PAD_R2        0x0200
 #define PAD_L2        0x0100
-
+#endif
 /*
  * Pad states
  */
