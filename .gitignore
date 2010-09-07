@@ -1,0 +1,11 @@
+*.a
+*.elf
+*.erl
+*.exe
+*.irx
+*.o
+*.swp
+*.tmp
+ee/erl-loader/src/exports.c
+ee/loader/obj/
+tools/**/bin/
