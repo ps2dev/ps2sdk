@@ -7,7 +7,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: libgen.h $
+# $Id$
 # basename and dirname
 */
 #ifndef __LIBGEN_H__

@@ -7,7 +7,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: erl-support.c 1150 2005-06-12 11:42:08Z pixel $
+# $Id$
 # The erl-tags support
 */
 

@@ -7,7 +7,7 @@
 # Licenced under GNU Library General Public License version 2
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: playadpcm.c 1221 2005-10-01 16:19:49Z gawd $
+# $Id$
 # audsrv adpcm sample
 */
 #include <stdio.h>

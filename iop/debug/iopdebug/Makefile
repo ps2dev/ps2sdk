@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: $
+# $Id$
 
 IOP_OBJS_DIR = obj/
 IOP_BIN_DIR = bin/

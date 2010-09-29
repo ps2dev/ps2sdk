@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: Makefile 1187 2005-06-27 17:34:43Z lukasz $
+# $Id$
 
 EE_BIN = playwav2.elf
 EE_OBJS = playwav2.o

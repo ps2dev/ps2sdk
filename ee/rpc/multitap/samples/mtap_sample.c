@@ -7,7 +7,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: pad.c 1152 2005-06-12 17:49:50Z oopo $
+# $Id$
 */
 
 // Based on pad sample by pukko, check the pad samples for more advanced features.

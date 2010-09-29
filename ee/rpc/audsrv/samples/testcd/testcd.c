@@ -7,7 +7,7 @@
 # Licenced under GNU Library General Public License version 2
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: testcd.c 1116 2005-05-27 16:49:33Z gawd $
+# $Id$
 # audsrv cdda toc sample
 */
 

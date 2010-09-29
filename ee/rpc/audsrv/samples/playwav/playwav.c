@@ -7,7 +7,7 @@
 # Licenced under GNU Library General Public License version 2
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: playwav.c 1037 2005-04-24 13:35:02Z gawd $
+# $Id$
 # audsrv sample
 */
 
