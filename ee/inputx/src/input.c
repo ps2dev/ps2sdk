@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <libpad.h>
+#include <libmtap.h>
 
 #include <input.h>
 
@@ -25,7 +26,25 @@ pad_t *pad_open(int port, int slot, int mode, int lock)
 		pad->port = port;
 	}
 
-	pad->slot = 0;
+	if (mtapGetConnection(pad->port))
+	{
+		if (slot > 3)
+		{
+			pad->slot = 3;
+		}
+		else if (slot < 0)
+		{
+			pad->slot = 0;
+		}
+		else
+		{
+			pad->slot = slot;
+		}
+	}
+	else
+	{
+		pad->slot = 0;
+	}
 
 	// Placeholders
 	pad->type = PAD_TYPE_DIGITAL;
@@ -261,7 +280,7 @@ void pad_init_actuators(pad_t *pad)
 
 	if (pad->actuator == NULL)
 	{
-		if (padInfoMode(pad->port,pad->slot,PAD_MODECUREXID,0))
+		if (padInfoAct(pad->port, pad->slot, -1, 0))
 		{
 			pad_wait(pad);
 			pad->actuator = (actuator_t*)malloc(sizeof(actuator_t));

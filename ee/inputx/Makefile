@@ -12,12 +12,12 @@ EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
-EE_INCS += -I../rpc/pad/include
+EE_INCS += -I../rpc/padx/include -I../rpc/multitap/include
 
 EE_OBJS = input.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
-EE_LIB = $(EE_LIB_DIR)libinput.a
+EE_LIB = $(EE_LIB_DIR)libinputx.a
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
 

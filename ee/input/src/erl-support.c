@@ -1,3 +1,4 @@
+/*
 # _____     ___ ____     ___ ____
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
@@ -6,12 +7,15 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
+# $Id: erl-support.c 1150 2005-06-12 11:42:08Z pixel $
+# The erl-tags support
+*/
 
-SUBDIRS = kernel libc rpc startup loader debug \
-	  eedebug sbv dma graph math3d math \
-	  packet draw erl erl-loader mpeg libgs \
-	  libvux font input inputx
+#include <erl.h>
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+char * erl_id = "libinput";
+char * erl_dependancies[] = {
+    "libc",
+    "libpad",
+    0
+};
