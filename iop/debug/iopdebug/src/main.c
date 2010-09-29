@@ -16,7 +16,7 @@ main.c - startup code
 
 IRX_ID("iopdebug", 1, 0);
 
-extern struct irx_export_table _exp_iopdebug;
+extern struct irx_export_table _exp_iopdebug;
 int _start(int argc, char *argv[])
 {
     // install IOP debug system.
