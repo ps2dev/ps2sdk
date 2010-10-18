@@ -82,17 +82,34 @@ int SifIopReset(const char *arg, int mode)
 int SifIopReboot(const char* filename)
 {
 	char param_str[RESET_ARG_MAX+1];
-	int param_size = strlen( filename ) + 11;
-	if(param_size > RESET_ARG_MAX)
+	int param_size;
+
+	if ((filename != NULL) && (*filename != '\0'))
 	{
-//		printf("too long parameter '%s'\n", filename);
-		return -1;
+		param_size = strlen( filename ) + 11;
+
+		if(param_size > RESET_ARG_MAX)
+		{
+//			printf("too long parameter '%s'\n", filename);
+			return -1;
+		}
 	}
-	
+
 	SifInitRpc(0);
-	
-	strncpy(param_str, "rom0:UDNL ", 10);
-	strncpy(&param_str[10], filename, strlen(filename));
+
+	if ((filename != NULL) && (*filename != '\0'))
+	{
+		strncpy(param_str, "rom0:UDNL ", 10);
+	}
+	else
+	{
+		strncpy(param_str, "rom0:UDNL", 9);
+	}
+
+	if ((filename != NULL) && (*filename != '\0'))
+	{
+		strncpy(&param_str[10], filename, strlen(filename));
+	}
 
 	SifIopReset(param_str, 0);
 	while(!SifIopSync());
