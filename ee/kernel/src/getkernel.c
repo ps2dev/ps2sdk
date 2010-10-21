@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: GetSyscallHandler.c 961 2005-04-09 20:00:11Z tyranid $
+# $Id$
 # Routines for accessing the EE's on-chip serial port.
 */
 

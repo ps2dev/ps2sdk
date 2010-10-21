@@ -11,7 +11,7 @@
 SUBDIRS = kernel libc rpc startup loader debug \
 	  eedebug sbv dma graph math3d math \
 	  packet draw erl erl-loader mpeg libgs \
-	  libvux font input
+	  libvux font input inputx
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make

@@ -8,16 +8,15 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 # $Id$
-# poweroff RPC
+# The erl-tags support
 */
 
-#ifndef PWROFF_RPC_H
-#define PWROFF_RPC_H
+#include <erl.h>
 
-#define PWROFF_IRX 0x9090900
-#define PWROFF_SHUTDOWN 			0x01
-#define PWROFF_ENABLE_AUTO_SHUTOFF	0x02
-
-#define POFF_SIF_CMD	20
-
-#endif /* PWROFF_RPC_H */
+char * erl_id = "libinputx";
+char * erl_dependancies[] = {
+    "libc",
+    "libmtap",
+    "libpadx",
+    0
+};

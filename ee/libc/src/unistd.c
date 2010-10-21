@@ -7,7 +7,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: unistd.c $
+# $Id$
 # unistd implementation
 */
 #include <unistd.h>

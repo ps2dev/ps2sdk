@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: $
+# $Id$
 
 
 TOOLS_OBJS_DIR = obj/

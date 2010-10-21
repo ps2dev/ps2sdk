@@ -7,7 +7,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: iop_debug.c $
+# $Id$
 #
 # IOPDEBUG - IOP debugging library.
 #

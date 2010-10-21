@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: Makefile 1021 2005-04-22 04:56:26Z loser $
+# $Id$
 
 
 SAMPLE_DIR = rpc/ps2snd

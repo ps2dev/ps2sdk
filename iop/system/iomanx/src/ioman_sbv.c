@@ -8,7 +8,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: iomanX.c 1332 2006-07-11 17:02:42Z Herben $
+# $Id$
 # Advanced I/O library.
 */
 
