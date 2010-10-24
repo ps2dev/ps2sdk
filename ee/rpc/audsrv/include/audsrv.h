@@ -96,7 +96,7 @@ int audsrv_set_format(struct audsrv_fmt_t *fmt);
 int audsrv_wait_audio(int bytes);
 
 /** Sets output volume
-    @param vol volume in SPU2 units [MIN_VOLUME .. MAX_VOLUME]
+    @param vol volume in percentage
     @returns error code
 */
 int audsrv_set_volume(int volume);

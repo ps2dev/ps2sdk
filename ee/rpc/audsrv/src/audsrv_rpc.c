@@ -147,12 +147,31 @@ int audsrv_wait_audio(int bytes)
 }
 
 /** Sets output volume
-    @param vol volume in SPU2 units [MIN_VOLUME .. MAX_VOLUME]
+    @param vol volume in percentage
     @returns error code
 */
 int audsrv_set_volume(int volume)
 {
-	return call_rpc_1(AUDSRV_SET_VOLUME, volume);
+	unsigned short vol_values[26] =
+	{
+		0x0000,
+		0x0000, 0x0096, 0x0190, 0x0230, 0x0320,
+		0x042E, 0x0532, 0x05FA, 0x06C2, 0x088E,
+		0x09F6, 0x0BC2, 0x0DC0, 0x0FF0, 0x118A,
+		0x1482, 0x1752, 0x1B4E, 0x1F40, 0x2378,
+		0x28D2, 0x2EFE, 0x34F8, 0x3A5C, 0x3FFF
+	};
+
+	if (volume > 100)
+	{
+		volume = 100;
+	}
+	else if (volume < 0)
+	{
+		volume = 0;
+	}
+
+	return call_rpc_1(AUDSRV_SET_VOLUME, vol_values[volume/4]);
 }
 
 /** Starts playing the request track
