@@ -4,7 +4,7 @@
 
 #include <input.h>
 
-pad_t *pad_open(int port, int slot, int mode, int lock)
+pad_t *pad_open(unsigned int port, unsigned int slot, unsigned int mode, unsigned int lock)
 {
 
 	pad_t *pad = (pad_t*)malloc(sizeof(pad_t));
@@ -13,38 +13,37 @@ pad_t *pad_open(int port, int slot, int mode, int lock)
 	pad->buttons = (struct padButtonStatus*)malloc(sizeof(struct padButtonStatus));
 	pad->actuator = NULL;
 
+	// there are only two ports
 	if (port > 1)
 	{
-		pad->port = 1;
-	}
-	else if (port < 0)
-	{
-		pad->port = 0;
-	}
-	else
-	{
-		pad->port = port;
+		free(pad->buttons);
+		free(pad);
+		return NULL;
 	}
 
 	if (mtapGetConnection(pad->port))
 	{
+		// there are only four slots
 		if (slot > 3)
 		{
-			pad->slot = 3;
-		}
-		else if (slot < 0)
-		{
-			pad->slot = 0;
-		}
-		else
-		{
-			pad->slot = slot;
+			free(pad->buttons);
+			free(pad);
+			return NULL;
 		}
 	}
 	else
 	{
-		pad->slot = 0;
+		// there's only one slot
+		if (slot)
+		{
+			free(pad->buttons);
+			free(pad);
+			return NULL;
+		}
 	}
+
+	pad->port = port;
+	pad->slot = slot;
 
 	// Placeholders
 	pad->type = PAD_TYPE_DIGITAL;

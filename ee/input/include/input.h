@@ -59,7 +59,7 @@ typedef struct {
 } pad_t;
 
 	// Open and initialize a pad
-	pad_t *pad_open(int port, int slot, int mode, int lock);
+	pad_t *pad_open(unsigned int port, unsigned int slot, unsigned int mode, unsigned int lock);
 
 	// Get the pad's current button status
 	static inline void pad_get_buttons(pad_t *pad)
