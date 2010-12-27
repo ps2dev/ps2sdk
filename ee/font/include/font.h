@@ -36,7 +36,7 @@ typedef struct {
 
 typedef struct {
 	float scale;
-	char lineheight;
+	char height;
 	unsigned short *charmap;
 	int totalchars;
 	int spacewidth;
@@ -77,7 +77,7 @@ extern "C" {
 	// Make sure to setup the texture buffer with the font texture prior to printing
 
 	// Loads the FontStudio ini file that contains the font texture's characteristics
-	int fontstudio_load_ini(fsfont_t *font, const char *path, float width, float height, int lineheight);
+	int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float tex_height, int char_height);
 
 	// Frees memory if a ini is loaded
 	void fontstudio_unload_ini(fsfont_t *font);

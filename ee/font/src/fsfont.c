@@ -13,11 +13,12 @@ static prim_t charprim =
 	PRIM_MAP_UV, PRIM_UNFIXED
 };
 
-#define TAB 0xFFF0
-#define NEWLINE 0xFFF1
-#define SPACE 0xFFF2
+// WHY DID I DO THIS?
+#define TAB '\t'
+#define NEWLINE '\n'
+#define SPACE ' '
 
-int fontstudio_load_ini(fsfont_t *font, const char *path, float width, float height, int lineheight)
+int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float tex_height, int char_height)
 {
 
 	FILE *file;
@@ -29,7 +30,7 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float width, float hei
 
 	int i;
 
-	font->lineheight = lineheight;
+	font->height = char_height;
 	font->scale = 1.0f;
 
 	file = fopen(path, "r");
@@ -239,7 +240,7 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float width, float hei
 
 		}
 		temp0 += strlen(temp1)+1;
-		font->chardata[i].u1 = ftoi4(((float)(strtod(temp0,NULL) * width)));
+		font->chardata[i].u1 = ftoi4(((float)(strtod(temp0,NULL) * tex_width)));
 
 		temp1 = strtok(temp0,"=");
 		if (temp1 == NULL)
@@ -253,7 +254,7 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float width, float hei
 
 		}
 		temp0 += strlen(temp1)+1;
-		font->chardata[i].v1 = ftoi4(((float)(strtod(temp0,NULL) * height)));
+		font->chardata[i].v1 = ftoi4(((float)(strtod(temp0,NULL) * tex_height)));
 
 		temp1 = strtok(temp0,"=");
 		if (temp1 == NULL)
@@ -267,7 +268,7 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float width, float hei
 
 		}
 		temp0 += strlen(temp1)+1;
-		font->chardata[i].u2 = ftoi4(((float)(strtod(temp0,NULL) * width)));
+		font->chardata[i].u2 = ftoi4(((float)(strtod(temp0,NULL) * tex_width)));
 
 		temp1 = strtok(temp0,"=");
 		if (temp1 == NULL)
@@ -281,7 +282,7 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float width, float hei
 
 		}
 		temp0 += strlen(temp1)+1;
-		font->chardata[i].v2 = ftoi4(((float)(strtod(temp0,NULL) * height)));
+		font->chardata[i].v2 = ftoi4(((float)(strtod(temp0,NULL) * tex_height)));
 	}
 
 	free(ini);
@@ -305,7 +306,9 @@ void fontstudio_unload_ini(fsfont_t *font)
 
 }
 
-int convert_to_code(const unsigned char *in, unsigned short *out)
+// Decode unicode byte sequences into unicode a single numerical character U+XXXX
+// Returns the number of actual unicode characters
+int decode_unicode(const unsigned char *in, unsigned short *out)
 {
 
 	// 0x00 - 0x7f	- single byte ascii
@@ -371,7 +374,7 @@ unsigned short get_char(unsigned short c, fsfont_t *font)
 
 	}
 
-	// Use unknown <?> character
+	// Use unknown <?> character if character isn't in character map
 	return 0xFFFD;
 
 }
@@ -383,9 +386,10 @@ void convert_to_index(unsigned short *in, int num, fsfont_t *font)
 
 	for (i = 0; i < num; i++)
 	{
-
+		// These characters aren't included in the FontStudio index, I think
 		while (in[i] == '\n' || in[i] == '\t' || in[i] == ' ')
 		{
+			/*
 			if (in[i] == '\n')
 			{
 				in[i] = NEWLINE;
@@ -398,6 +402,7 @@ void convert_to_index(unsigned short *in, int num, fsfont_t *font)
 			{
 				in[i] = SPACE;
 			}
+			*/
 			i++;
 		}
 
@@ -437,7 +442,7 @@ qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *s
 
 	unsigned short curchar = 0;
 
-	int length = strlen(str);
+	int length;
 
 	vertex_t v_pos = *v0;
 
@@ -445,13 +450,17 @@ qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *s
 
 	memset(utf8,0,sizeof(short)*2048);
 
-	length = convert_to_code(str, utf8);
+	// Decodes the encoded string into unicode numbers U+xxxx
+	// length is the number of characters in the string
+	length = decode_unicode(str, utf8);
 
 	//for (i = 0; i < length; i++)
 	//{
 	//	printf("utf8[%d] = %d\n", i, utf8[i]);
 	//}
 
+	// Converts the unicode numbers into the index numbers
+	// used by the FontStudio ini
 	convert_to_index(utf8,length,font);
 
 	//for (i = 0; i < length; i++)
@@ -586,7 +595,7 @@ qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *s
 			if (utf8[j] == NEWLINE)
 			{
 				line++;
-				v_pos.y += font->lineheight*font->scale;
+				v_pos.y += font->height*font->scale;
 				v_pos.x = x_orig[line];
 			}
 			if (utf8[j] == TAB)
