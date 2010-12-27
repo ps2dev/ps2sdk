@@ -46,7 +46,7 @@ IOP_LIBS += -lkernel -lgcc
 	$(IOP_AS) $(IOP_ASFLAGS) $< -o $@
 
 $(IOP_BIN) : $(IOP_OBJS)
-	$(IOP_CC) $(IOP_CFLAGS) -o $(IOP_BIN) $(IOP_OBJS) $(IOP_LDFLAGS) $(IOP_LIBS)
+	$(IOP_CC) -o $(IOP_BIN) $(IOP_OBJS) $(IOP_LDFLAGS) $(IOP_LIBS)
 
 $(IOP_LIB) : $(IOP_OBJS)
 	$(IOP_AR) cru $(IOP_LIB) $(IOP_OBJS)
