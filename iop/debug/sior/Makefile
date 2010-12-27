@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
+# $Id: Makefile 1069 2005-04-30 14:19:15Z pixel $
 
 
 IOP_OBJS_DIR = obj/
@@ -15,7 +15,7 @@ IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
 IOP_BIN  = bin/sior.irx
-IOP_OBJS = obj/sior.o obj/exports.o obj/imports.o
+IOP_OBJS = obj/sior.o obj/xprintf.o obj/exports.o obj/imports.o
 IOP_INCS = 
 
 IOP_CFLAGS  += -Wall -fno-builtin-printf

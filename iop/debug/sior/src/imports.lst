@@ -14,7 +14,8 @@ stdio_IMPORTS_end
 
 sysclib_IMPORTS_start
 I_memset
-I_vsprintf
+I_strlen
+//I_vsprintf broken !!!
 sysclib_IMPORTS_end
 
 thbase_IMPORTS_start

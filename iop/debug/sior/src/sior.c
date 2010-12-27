@@ -7,7 +7,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
+# $Id: sior.c 1491 2009-01-04 23:46:22Z oopo $
 # IOP exception handling.
 */
 
@@ -18,6 +18,7 @@
 #include "irx.h"
 
 #include "sior.h"
+#include "xprintf.h"
 
 #include "irx_imports.h"
 IRX_ID("sioremote_driver", 1, 1);
@@ -26,6 +27,7 @@ struct irx_export_table _exp_sior;
 
 static struct t_SifRpcClientData cd0 __attribute__((aligned(64)));
 static u32 buffer[32] __attribute__((aligned(64)));
+static char tbuf[2048];
 
 struct init_arguments_t {
     u32 baudrate;
@@ -106,10 +108,10 @@ void sio_flush(void) {
 }
 
 int sio_vprintf(const char * str, va_list args) {
-    char * tbuf[2048];
     int res;
 
-    res = vsprintf((char *)tbuf, str, args);
+    res = vsnprintf((char *)tbuf, sizeof(tbuf), str, args);
+    printf("%s", tbuf);
     sio_putsn((char *)tbuf);
 
     return res;
