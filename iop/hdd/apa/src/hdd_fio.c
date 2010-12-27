@@ -368,12 +368,13 @@ int hddLseek(iop_file_t *f, unsigned long post, int whence)
 void fioGetStatFiller(apa_cache *clink, iox_stat_t *stat)
 {
 	apa_header *header;
+	u64 size;
 
 	stat->mode=clink->header->type;
 	stat->attr=clink->header->flags;
 	stat->hisize=0;
-	u64 size = clink->header->length;
-	size *= 1024;
+	size = clink->header->length;
+	size *= 512;
 	stat->size=size & 0xFFFFFFFF;
 	size >>= 32;
 	stat->hisize=size & 0xFFFFFFFF;

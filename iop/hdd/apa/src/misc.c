@@ -66,9 +66,11 @@ int getIlinkID(u8 *idbuf)
 	int err=0;
 
 	memset(idbuf, 0, 32);
+
 	if(CdReadIlinkID(idbuf, &err))
-		if(err==0)
-			return 0;
-	dprintf1("ps2hdd: Error: cannot get ilink id\n");
-	return -EIO;
+		if (err)
+			dprintf1("ps2hdd: Error when reading ilink id\n");
+
+	// Return all ok for compatibility
+	return 0;
 }
