@@ -7,7 +7,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
+# $Id: modload.h 817 2005-02-11 17:56:12Z herben $
 # Kernel module loader.
 */
 
@@ -40,5 +40,11 @@ int LoadModuleBufferAddress(void *buffer, int, int);
 
 int LoadModuleBuffer(void *buffer);
 #define I_LoadModuleBuffer DECLARE_IMPORT(10, LoadModuleBuffer)
+
+void SetSecrmanCallbacks(void *SecrCardBootFile_fnc, void *SecrDiskBootFile_fnc, void *SetLoadfileCallbacks_fnc);
+#define I_SetSecrmanCallbacks DECLARE_IMPORT(12, SetSecrmanCallbacks)
+
+void SetCheckKelfPathCallback(void *CheckKelfPath_fnc);
+#define I_SetCheckKelfPathCallback DECLARE_IMPORT(13, SetCheckKelfPathCallback)
 
 #endif /* IOP_MODLOAD_H */

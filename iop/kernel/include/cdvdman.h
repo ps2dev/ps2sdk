@@ -7,7 +7,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
+# $Id: cdvdman.h 1224 2005-10-14 16:37:42Z eeug $
 # Definitions and imports for cdvdman
 */
 
@@ -113,6 +113,8 @@ int sceCdReadConsoleID( u32 *res, int *idBuf );
 #define I_sceCdReadConsoleID DECLARE_IMPORT(41, sceCdReadConsoleID)
 u32 sceCdGetReadPos(void);
 #define I_sceCdGetReadPos DECLARE_IMPORT(44 , sceCdGetReadPos)
+int sceCdRC(cd_clock_t *rtc);
+#define I_sceCdRC DECLARE_IMPORT(51 , sceCdRC)
 int sceCdMmode(int mode);
 #define I_sceCdMmode DECLARE_IMPORT(75 , sceCdMmode)
 
@@ -140,6 +142,7 @@ int sceCdMmode(int mode);
 #define CdBreak sceCdBreak
 #define CdReadCdda sceCdReadCdda
 #define CdGetReadPos sceCdGetReadPos
+#define CdRC sceCdRC
 #define CdMmode sceCdMmode
 
 #endif /* IOP_CDVDMAN_H */

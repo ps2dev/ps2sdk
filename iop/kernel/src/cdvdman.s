@@ -7,7 +7,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
+# $Id: cdvdman.s 577 2004-09-14 14:41:46Z pixel $
 # CDVD Manager Functions.
 */
 
@@ -136,6 +136,11 @@ CdGetReadPos:
 	j	$31
 	li	$0, 44
 
+	.globl	CdRC			# 051
+CdRC:
+	j	$31
+	li	$0, 51
+	
 	.globl	CdReadChain		# 066
 CdReadChain:
 	j	$31

@@ -7,7 +7,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
+# $Id: modload.s 577 2004-09-14 14:41:46Z pixel $
 # Module Manager Functions.
 */
 
@@ -61,5 +61,15 @@ LoadModuleBuffer:
 	jr      $31
 	li      $0, 0x0A
 
+	.globl	SetSecrmanCallbacks		# 012
+SetSecrmanCallbacks:
+	jr      $31
+	li      $0, 0x0C
+
+	.globl	SetCheckKelfPathCallback	# 013
+SetCheckKelfPathCallback:
+	jr      $31
+	li      $0, 0x0D
+		
 	.word	0
 	.word	0
