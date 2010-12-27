@@ -1,0 +1,12 @@
+DECLARE_EXPORT_TABLE(mcserv, 1, 1)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_dummy)
+	DECLARE_EXPORT(_dummy)
+	DECLARE_EXPORT(_dummy)	
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_dummy)
+	DECLARE_EXPORT(_dummy)
+	DECLARE_EXPORT(_dummy)	
+END_EXPORT_TABLE
+
+void _dummy() {}

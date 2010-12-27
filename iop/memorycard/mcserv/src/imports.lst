@@ -1,0 +1,57 @@
+//---------------------------------------------------------------------------
+// File name:   imports.lst
+// Description: Used to generate code for IRX function imports
+//---------------------------------------------------------------------------
+
+#ifdef SIO_DEBUG
+sior_IMPORTS_start
+I_sio_init
+I_sio_printf
+sior_IMPORTS_end
+#endif
+
+loadcore_IMPORTS_start
+I_RegisterLibraryEntries
+I_GetLibraryEntryTable
+loadcore_IMPORTS_end
+
+intrman_IMPORTS_start
+I_CpuEnableIntr
+I_CpuSuspendIntr
+I_CpuResumeIntr
+intrman_IMPORTS_end
+
+sysclib_IMPORTS_start
+I_memcpy
+I_memset
+sysclib_IMPORTS_end
+
+sifman_IMPORTS_start
+I_sceSifInit
+I_sceSifSetDma
+I_sceSifDmaStat
+I_sceSifCheckInit
+sifman_IMPORTS_end
+
+sifcmd_IMPORTS_start
+I_sceSifInitRpc
+I_sceSifRegisterRpc
+I_sceSifSetRpcQueue
+I_sceSifRpcLoop
+I_sceSifGetOtherData
+sifcmd_IMPORTS_end
+
+thbase_IMPORTS_start
+I_CreateThread
+I_StartThread
+I_GetThreadId
+I_DelayThread
+thbase_IMPORTS_end
+
+stdio_IMPORTS_start
+I_printf
+stdio_IMPORTS_end
+
+//---------------------------------------------------------------------------
+// End of file: imports.lst
+//---------------------------------------------------------------------------
