@@ -13,25 +13,48 @@ static prim_t charprim =
 	PRIM_MAP_UV, PRIM_UNFIXED
 };
 
-// WHY DID I DO THIS?
 #define TAB '\t'
 #define NEWLINE '\n'
 #define SPACE ' '
 
-int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float tex_height, int char_height)
+fsfont_t *fontstudio_init( int char_height)
 {
 
-	FILE *file;
-	int size;
+	fsfont_t *font;
 
-	unsigned char *ini;
-	unsigned char *temp0;
-	unsigned char *temp1;
-
-	int i;
+	font = (fsfont_t*)malloc(sizeof(fsfont_t));
 
 	font->height = char_height;
 	font->scale = 1.0f;
+
+	return font;
+
+}
+
+void fontstudio_free(fsfont_t *font)
+{
+
+	if (font->charmap != NULL)
+	{
+		free(font->charmap);
+	}
+
+	if (font->chardata != NULL)
+	{
+		free(font->chardata);
+	}
+
+	free(font);
+
+}
+
+char *fontstudio_load_ini(const char *path)
+{
+
+	FILE *file;
+
+	unsigned char *ini;
+	int size;
 
 	file = fopen(path, "r");
 
@@ -39,7 +62,7 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float
 	{
 
 		printf("Error opening %s.\n", path);
-		return -1;
+		return NULL;
 
 	}
 
@@ -53,18 +76,29 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float
 	{
 		printf("Error allocated %d bytes of memory.\n", size);
 		fclose(file);
-		return -1;
+		return NULL;
 	}
 
 	fread(ini, size, 1, file);
 	fclose(file);
+
+	return ini;
+
+}
+
+int fontstudio_parse_ini(fsfont_t *font, char *ini, float tex_width, float tex_height)
+{
+
+	int i;
+
+	unsigned char *temp0;
+	unsigned char *temp1;
 
 	temp0 = ini;
 
 	temp1 = strtok(temp0,"=");
 	if (temp1 == NULL)
 	{
-		free(ini);
 		printf("Error parsing number of chars.\n");
 		return -1;
 	}
@@ -75,7 +109,6 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float
 	temp1 = strtok(temp0,"=");
 	if (temp1 == NULL)
 	{
-		free(ini);
 		printf("Error parsing space width.\n");
 		return -1;
 	}
@@ -90,7 +123,6 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float
 
 		//131 kilobytes of memory
 		printf("Error allocated %d bytes of memory.\n", sizeof(short)*font->totalchars);
-		free(ini);
 		return -1;
 
 	}
@@ -104,7 +136,6 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float
 	{
 
 		printf("Error allocating %d bytes of memory.\n", sizeof(inidata_t)*font->totalchars);
-		free(ini);
 		free(font->charmap);
 		return -1;
 
@@ -121,7 +152,6 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float
 		{
 
 			printf("Error parsing Char for char %d.\n", i);
-			free(ini);
 			free(font->charmap);
 			free(font->chardata);
 			return -1;
@@ -135,7 +165,6 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float
 		{
 
 			printf("Error parsing A for char %d.\n", i);
-			free(ini);
 			free(font->charmap);
 			free(font->chardata);
 			return -1;
@@ -149,7 +178,6 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float
 		{
 
 			printf("Error parsing B for char %d.\n", i);
-			free(ini);
 			free(font->charmap);
 			free(font->chardata);
 			return -1;
@@ -163,7 +191,6 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float
 		{
 
 			printf("Error parsing C for char %d.\n", i);
-			free(ini);
 			free(font->charmap);
 			free(font->chardata);
 			return -1;
@@ -177,7 +204,6 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float
 		{
 
 			printf("Error parsing ox for char %d.\n", i);
-			free(ini);
 			free(font->charmap);
 			free(font->chardata);
 			return -1;
@@ -191,7 +217,6 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float
 		{
 
 			printf("Error parsing oy for char %d.\n", i);
-			free(ini);
 			free(font->charmap);
 			free(font->chardata);
 			return -1;
@@ -205,7 +230,6 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float
 		{
 
 			printf("Error parsing Wid for char %d.\n", i);
-			free(ini);
 			free(font->charmap);
 			free(font->chardata);
 			return -1;
@@ -219,7 +243,6 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float
 		{
 
 			printf("Error parsing Hgt for char %d.\n", i);
-			free(ini);
 			free(font->charmap);
 			free(font->chardata);
 			return -1;
@@ -233,7 +256,6 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float
 		{
 
 			printf("Error parsing X1 for char %d.\n", i);
-			free(ini);
 			free(font->charmap);
 			free(font->chardata);
 			return -1;
@@ -247,7 +269,6 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float
 		{
 
 			printf("Error parsing Y1 for char %d.\n", i);
-			free(ini);
 			free(font->charmap);
 			free(font->chardata);
 			return -1;
@@ -261,7 +282,6 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float
 		{
 
 			printf("Error parsing X2 for char %d.\n", i);
-			free(ini);
 			free(font->charmap);
 			free(font->chardata);
 			return -1;
@@ -275,7 +295,6 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float
 		{
 
 			printf("Error parsing Y2 for char %d.\n", i);
-			free(ini);
 			free(font->charmap);
 			free(font->chardata);
 			return -1;
@@ -285,24 +304,7 @@ int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float
 		font->chardata[i].v2 = ftoi4(((float)(strtod(temp0,NULL) * tex_height)));
 	}
 
-	free(ini);
-
 	return 0;
-
-}
-
-void fontstudio_unload_ini(fsfont_t *font)
-{
-
-	if (font->charmap != NULL)
-	{
-		free(font->charmap);
-	}
-
-	if (font->chardata != NULL)
-	{
-		free(font->chardata);
-	}
 
 }
 

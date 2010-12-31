@@ -77,10 +77,15 @@ extern "C" {
 	// Make sure to setup the texture buffer with the font texture prior to printing
 
 	// Loads the FontStudio ini file that contains the font texture's characteristics
-	int fontstudio_load_ini(fsfont_t *font, const char *path, float tex_width, float tex_height, int char_height);
+	fsfont_t *fontstudio_init(int height);
 
-	// Frees memory if a ini is loaded
-	void fontstudio_unload_ini(fsfont_t *font);
+	void fontstudio_free(fsfont_t *font);
+
+	// Parses a font's ini for the font
+	int fontstudio_parse_ini(fsfont_t *font, char *ini, float tex_width, float tex_height);
+
+	// Loads an ini file into memory and returns pointer to it
+	char *fontstudio_load_ini(const char *path);
 
 	// Prints a unicode formatted string (UTF+8)
 	qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *string, int alignment, vertex_t *v0, color_t *c0, fsfont_t *font);
