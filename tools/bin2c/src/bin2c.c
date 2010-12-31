@@ -59,8 +59,8 @@ int main(int argc, char *argv[])
 	
 	fprintf(dest, "#ifndef __%s__\n", argv[3]);
 	fprintf(dest, "#define __%s__\n\n", argv[3]);
-	fprintf(dest, "static unsigned int size_%s = %d;\n", argv[3], fd_size);
-	fprintf(dest, "static unsigned char %s[] __attribute__((aligned(16))) = {", argv[3]);
+	fprintf(dest, "unsigned int size_%s = %d;\n", argv[3], fd_size);
+	fprintf(dest, "unsigned char %s[] __attribute__((aligned(16))) = {", argv[3]);
 
 	for(i=0;i<fd_size;i+=1) {
 		if((i % 16) == 0) fprintf(dest, "\n\t");
