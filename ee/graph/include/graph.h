@@ -59,6 +59,14 @@
 #define GRAPH_BLEND_RC2          0
 #define GRAPH_BLEND_BGCOLOR      1
 
+typedef struct {
+	int x,y; 
+	int width, height; 
+	int mode; 
+} GRAPH_MODE;
+
+extern GRAPH_MODE graph_mode[];
+
 #ifdef __cplusplus
 extern "C" {
 #endif

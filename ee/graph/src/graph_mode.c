@@ -6,12 +6,6 @@
 
 #include <graph.h>
 #include <graph_config.h>
-
-typedef struct {
-	int x,y; 
-	int width, height; 
-	int mode; 
-} GRAPH_MODE;
  
 /* y offset is non-interlaced */
 GRAPH_MODE graph_mode[22] =
