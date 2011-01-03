@@ -533,28 +533,28 @@ qword_t *draw_round_rect_filled(qword_t *q, int context, rect_t *rect)
 
 	// corners
 	// top right
-	point_corner.v0.x = rect_center.v1.x;
+	point_corner.v0.x = rect_center.v1.x + 1.0f;
 	point_corner.v0.y = rect_center.v0.y;
 	point_corner.color = rect->color;
 
 	q = draw_arc_filled(q,context,&point_corner,corner_size,270.0f,360.0f);
 
 	// bottom right
-	point_corner.v0.x = rect_center.v1.x;
+	point_corner.v0.x = rect_center.v1.x + 1.0f;
 	point_corner.v0.y = rect_center.v1.y + 1.0f;
 	point_corner.color = rect->color;
 
 	q = draw_arc_filled(q,context,&point_corner,corner_size,0.0f,90.0f);
 
 	// bottom left
-	point_corner.v0.x = rect_center.v0.x - 1.0f;
+	point_corner.v0.x = rect_center.v0.x;
 	point_corner.v0.y = rect_center.v1.y + 1.0f;
 	point_corner.color = rect->color;
 
 	q = draw_arc_filled(q,context,&point_corner,corner_size,90.0f,180.0f);
 
 	// top left
-	point_corner.v0.x = rect_center.v0.x - 1.0f;
+	point_corner.v0.x = rect_center.v0.x;
 	point_corner.v0.y = rect_center.v0.y;
 	point_corner.color = rect->color;
 
