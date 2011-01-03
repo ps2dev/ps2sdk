@@ -24,13 +24,25 @@
 		((u64)GIF_REG_XYZ2)  <<  8 | \
 		((u64)GIF_REG_NOP)   << 12
 
+static char blending = 0;
+
+void draw_enable_blending()
+{
+	blending = 1;
+}
+
+void draw_disable_blending()
+{
+	blending = 0;
+}
+
 qword_t *draw_point(qword_t *q, int context, point_t *point)
 {
 
 	PACK_GIFTAG(q,GIF_SET_TAG(1,0,0,0,GIF_FLG_REGLIST,DRAW_POINT_NREG),DRAW_POINT_REGLIST);
 	q++;
 
-	q->dw[0] = GIF_SET_PRIM(PRIM_POINT,0,0,0,DRAW_ENABLE,0,0,context,0);
+	q->dw[0] = GIF_SET_PRIM(PRIM_POINT,0,0,0,blending,0,0,context,0);
 	q->dw[1] = point->color.rgbaq;
 	q++;
 
@@ -55,7 +67,7 @@ qword_t *draw_line(qword_t *q, int context, line_t *line)
 	PACK_GIFTAG(q,GIF_SET_TAG(1,0,0,0,GIF_FLG_REGLIST,DRAW_LINE_NREG),DRAW_LINE_REGLIST);
 	q++;
 
-	q->dw[0] = GIF_SET_PRIM(PRIM_LINE,0,0,0,DRAW_ENABLE,0,0,context,0);
+	q->dw[0] = GIF_SET_PRIM(PRIM_LINE,0,0,0,blending,0,0,context,0);
 	q->dw[1] = line->color.rgbaq;
 	q++;
 
@@ -85,7 +97,7 @@ qword_t *draw_triangle_outline(qword_t *q, int context, triangle_t *triangle)
 	PACK_GIFTAG(q,GIF_SET_TAG(1,0,0,0,GIF_FLG_REGLIST,DRAW_TRIANGLE_OUT_NREG),DRAW_TRIANGLE_OUT_REGLIST);
 	q++;
 
-	q->dw[0] = GIF_SET_PRIM(PRIM_LINE_STRIP,0,0,0,DRAW_ENABLE,0,0,context,0);
+	q->dw[0] = GIF_SET_PRIM(PRIM_LINE_STRIP,0,0,0,blending,0,0,context,0);
 	q->dw[1] = triangle->color.rgbaq;
 	q++;
 
@@ -117,7 +129,7 @@ qword_t *draw_triangle_filled(qword_t *q, int context,triangle_t *triangle)
 	PACK_GIFTAG(q,GIF_SET_TAG(1,0,0,0,GIF_FLG_REGLIST,DRAW_TRIANGLE_NREG),DRAW_TRIANGLE_REGLIST);
 	q++;
 
-	q->dw[0] = GIF_SET_PRIM(PRIM_TRIANGLE,0,0,0,DRAW_ENABLE,0,0,context,0);
+	q->dw[0] = GIF_SET_PRIM(PRIM_TRIANGLE,0,0,0,blending,0,0,context,0);
 	q->dw[1] = triangle->color.rgbaq;
 	q++;
 
@@ -155,7 +167,7 @@ qword_t *draw_rect_outline(qword_t *q, int context, rect_t *rect)
 	PACK_GIFTAG(q,GIF_SET_TAG(1,0,0,0,GIF_FLG_REGLIST,DRAW_RECT_OUT_NREG),DRAW_RECT_OUT_REGLIST);
 	q++;
 
-	q->dw[0] = GIF_SET_PRIM(PRIM_LINE_STRIP,0,0,0,DRAW_ENABLE,0,0,context,0);
+	q->dw[0] = GIF_SET_PRIM(PRIM_LINE_STRIP,0,0,0,blending,0,0,context,0);
 	q->dw[1] = rect->color.rgbaq;
 	q++;
 
@@ -188,7 +200,7 @@ qword_t *draw_rect_filled(qword_t *q, int context, rect_t *rect)
 	PACK_GIFTAG(q,GIF_SET_TAG(1,0,0,0,GIF_FLG_REGLIST,DRAW_SPRITE_NREG),DRAW_SPRITE_REGLIST);
 	q++;
 
-	q->dw[0] = GIF_SET_PRIM(PRIM_SPRITE,0,0,0,DRAW_ENABLE,0,0,context,0);
+	q->dw[0] = GIF_SET_PRIM(PRIM_SPRITE,0,0,0,blending,0,0,context,0);
 	q->dw[1] = rect->color.rgbaq;
 	q++;
 
@@ -217,7 +229,7 @@ qword_t *draw_rect_textured(qword_t *q, int context, texrect_t *rect)
 	q++;
 
 	// Fill vertex information
-	q->dw[0] = GIF_SET_PRIM(PRIM_SPRITE,0,DRAW_ENABLE,0,DRAW_ENABLE,0,PRIM_MAP_UV,context,0);
+	q->dw[0] = GIF_SET_PRIM(PRIM_SPRITE,0,DRAW_ENABLE,0,blending,0,PRIM_MAP_UV,context,0);
 	q->dw[1] = rect->color.rgbaq;
 	q++;
 
@@ -248,7 +260,7 @@ qword_t *draw_rect_filled_strips(qword_t *q, int context, rect_t *rect)
 	PACK_GIFTAG(q,GIF_SET_TAG(2,0,0,0,GIF_FLG_PACKED,1),GIF_REG_AD);
 	q++;
 
-	PACK_GIFTAG(q,GIF_SET_PRIM(PRIM_SPRITE,0,0,0,DRAW_ENABLE,0,0,context,0),GIF_REG_PRIM);
+	PACK_GIFTAG(q,GIF_SET_PRIM(PRIM_SPRITE,0,0,0,blending,0,0,context,0),GIF_REG_PRIM);
 	q++;
 
 	PACK_GIFTAG(q,rect->color.rgbaq,GIF_REG_RGBAQ);
@@ -310,7 +322,7 @@ qword_t *draw_rect_textured_strips(qword_t *q, int context, texrect_t *rect)
 	PACK_GIFTAG(q,GIF_SET_TAG(2,0,0,0,GIF_FLG_PACKED,1),GIF_REG_AD);
 	q++;
 
-	PACK_GIFTAG(q,GIF_SET_PRIM(PRIM_SPRITE,0,DRAW_ENABLE,0,DRAW_ENABLE,0,PRIM_MAP_UV,context,0),GIF_REG_PRIM);
+	PACK_GIFTAG(q,GIF_SET_PRIM(PRIM_SPRITE,0,DRAW_ENABLE,0,blending,0,PRIM_MAP_UV,context,0),GIF_REG_PRIM);
 	q++;
 
 	PACK_GIFTAG(q,rect->color.rgbaq,GIF_REG_RGBAQ);
@@ -373,7 +385,7 @@ qword_t *draw_arc_outline(qword_t *q, int context, point_t *center, float radius
 	PACK_GIFTAG(q,GIF_SET_TAG(2,0,0,0,GIF_FLG_PACKED,1),GIF_REG_AD);
 	q++;
 
-	PACK_GIFTAG(q,GIF_SET_PRIM(PRIM_LINE_STRIP,0,0,0,DRAW_ENABLE,0,0,context,0),GIF_REG_PRIM);
+	PACK_GIFTAG(q,GIF_SET_PRIM(PRIM_LINE_STRIP,0,0,0,blending,0,0,context,0),GIF_REG_PRIM);
 	q++;
 
 	PACK_GIFTAG(q,center->color.rgbaq,GIF_REG_RGBAQ);
@@ -428,7 +440,7 @@ qword_t *draw_arc_filled(qword_t *q, int context, point_t *center, float radius,
 	PACK_GIFTAG(q,GIF_SET_TAG(2,0,0,0,GIF_FLG_PACKED,1),GIF_REG_AD);
 	q++;
 
-	PACK_GIFTAG(q,GIF_SET_PRIM(PRIM_TRIANGLE_FAN,0,0,0,DRAW_ENABLE,0,0,context,0),GIF_REG_PRIM);
+	PACK_GIFTAG(q,GIF_SET_PRIM(PRIM_TRIANGLE_FAN,0,0,0,blending,0,0,context,0),GIF_REG_PRIM);
 	q++;
 
 	PACK_GIFTAG(q,center->color.rgbaq,GIF_REG_RGBAQ);

@@ -41,6 +41,12 @@ typedef struct {
 extern "C" {
 #endif
 
+	// Enables alpha blending
+	void draw_enable_blending();
+
+	// Disables alpha blending
+	void draw_disable_blending();
+
 	// Draws a single point
 	qword_t *draw_point(qword_t *q, int context, point_t *point);
 
