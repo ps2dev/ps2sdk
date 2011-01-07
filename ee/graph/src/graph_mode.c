@@ -174,7 +174,7 @@ int graph_set_mode(int interlace, int mode, int ffmd, int flicker_filter)
 	graph_filter = flicker_filter;
 
 	// Set the requested mode.
-	SetGsCrt(graph_interlace, graph_crtmode, graph_ffmd);
+	SetGsCrt(graph_interlace, graph_mode[mode].mode, graph_ffmd);
 
 	return 0;
 
