@@ -24,6 +24,8 @@ int sbv_patch_disable_prefix_check(void);
 
 int sbv_patch_user_mem_clear(u32 start);
 
+int sbv_patch_protokernel(void);
+
 #ifdef __cplusplus
 }
 #endif
