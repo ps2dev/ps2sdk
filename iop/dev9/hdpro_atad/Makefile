@@ -9,9 +9,21 @@
 # $Id$
 
 
-SUBDIRS = dev9 extflash poweroff atad hdpro_atad
+IOP_OBJS_DIR = obj/
+IOP_BIN_DIR = bin/
+IOP_SRC_DIR = src/
+
+IOP_BIN  = bin/hdproatad.irx
+IOP_OBJS = obj/hdproatad.o obj/exports.o obj/imports.o
+
+IOP_CFLAGS  += -Wall -fno-builtin
+IOP_LDFLAGS += -s
+
+all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
+
+clean:
+	rm -f -r $(IOP_OBJS_DIR) $(IOP_BIN_DIR)
 
 include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
-
-
+include $(PS2SDKSRC)/iop/Rules.make
+include $(PS2SDKSRC)/iop/Rules.release
