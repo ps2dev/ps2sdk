@@ -21,7 +21,7 @@ extern "C" {
 /*!
  Resets IOP, arg can be NULL or a module that will be loaded afterwards.
  This is a high level wrapper for SifIopReset
- @param arg a const character pointer for path to module or NULL
+ @param arg a const character pointer for path to module or an empty string. NULL must not be specified.
  @return 1 for success or 0 for failure.
  */
 int SifIopReboot(const char *arg);
@@ -40,12 +40,6 @@ int SifIopIsAlive(void);
  @return 1 for success or 0 for failure.
  */ 
 int SifIopSync(void);
-
-/*!
- This is retained for compatibility.
- @return 1 for success or 0 for failure.
- */
-int SifResetIop();
 
 #ifdef __cplusplus
 }

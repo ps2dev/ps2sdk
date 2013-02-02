@@ -93,12 +93,12 @@ s32 cdNCmdDiskReady(void);
 
 struct _cdvd_read_data
 {
-	u32		size1;
-	u32		size2;
+	u32	size1;
+	u32	size2;
 	void	*dest1;
 	void	*dest2;
-	u32		src1;
-	u32		src2;
+	u8	src1[64];
+	u8	src2[64];
 };
 
 void cdAlignReadBuffer(struct _cdvd_read_data *data);
@@ -157,7 +157,7 @@ s32 cdRead(u32 sectorLoc, u32 numSectors, void *buf, CdvdReadMode_t * mode)
 
 	curReadPos = 0;
 	SifWriteBackDCache(buf, bufSize);
-	SifWriteBackDCache(_rd_intr_data, 144);
+	SifWriteBackDCache(_rd_intr_data, sizeof(struct _cdvd_read_data));
 	SifWriteBackDCache(readData, 24);
 	SifWriteBackDCache(&curReadPos, 4);
 

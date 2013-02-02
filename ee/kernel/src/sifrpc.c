@@ -230,7 +230,7 @@ int SifRpcGetOtherData(SifRpcReceiveData_t *rd, void *src, void *dest,
 	}
 
 	sema.max_count  = 1;
-	sema.init_count = 1;
+	sema.init_count = 0;
 	rd->hdr.sema_id = CreateSema(&sema);
 	if (rd->hdr.sema_id < 0)
 		return -E_LIB_SEMA_CREATE;
@@ -479,13 +479,12 @@ SifSetRpcQueue(SifRpcDataQueue_t *qd, int thread_id)
 	qd->end    = NULL;
 	qd->next   = NULL;
 
-	if (!_sif_rpc_data.active_queue) {
+	if (_sif_rpc_data.active_queue == NULL) {
 		_sif_rpc_data.active_queue = qd;
 	} else {
 		queue = _sif_rpc_data.active_queue;
 
-		while ((queue = queue->next))
-			;
+		while (queue->next!=NULL) queue = queue->next;
 
 		queue->next = qd;
 	}

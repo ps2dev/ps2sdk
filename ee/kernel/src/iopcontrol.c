@@ -41,7 +41,7 @@ int SifIopReset(const char *arg, int mode)
 	struct _iop_reset_pkt reset_pkt;  /* Implicitly aligned. */
 	struct t_SifDmaTransfer dmat;
 
-    _iop_reboot_count++; // increment reboot counter to allow RPC clients to detect unbinding!
+	_iop_reboot_count++; // increment reboot counter to allow RPC clients to detect unbinding!
 	
 	SifStopDma();
 
@@ -59,10 +59,10 @@ int SifIopReset(const char *arg, int mode)
 	}
 
 	dmat.src  = &reset_pkt;
-	dmat.dest = (void *)SifGetReg(SIF_REG_SUBADDR);
-	dmat.size = sizeof reset_pkt;
+	dmat.dest = (void *)SifGetReg(0x80000000);
+	dmat.size = sizeof(reset_pkt);
 	dmat.attr = 0x40 | SIF_DMA_INT_O;
-	SifWriteBackDCache(&reset_pkt, sizeof reset_pkt);
+	SifWriteBackDCache(&reset_pkt, sizeof(reset_pkt));
 
 	SifSetReg(SIF_REG_SMFLAG, 0x40000);
 	
@@ -79,60 +79,23 @@ int SifIopReset(const char *arg, int mode)
 #endif
 
 #ifdef F_SifIopReboot
-int SifIopReboot(const char* filename)
+int SifIopReboot(const char* arg)
 {
 	char param_str[RESET_ARG_MAX+1];
-	int param_size;
 
-	if ((filename != NULL) && (*filename != '\0'))
+	if(strlen(arg) + 11 > RESET_ARG_MAX)
 	{
-		param_size = strlen( filename ) + 11;
-
-		if(param_size > RESET_ARG_MAX)
-		{
-//			printf("too long parameter '%s'\n", filename);
-			return -1;
-		}
+		printf("too long parameter \'%s\'\n", arg);
+		return 0;
 	}
 
 	SifInitRpc(0);
+	SifExitRpc();
 
-	if ((filename != NULL) && (*filename != '\0'))
-	{
-		strncpy(param_str, "rom0:UDNL ", 10);
-	}
-	else
-	{
-		strncpy(param_str, "rom0:UDNL", 9);
-	}
+	strcpy(param_str, "rom0:UDNL ");
+	strcat(param_str, arg);
 
-	if ((filename != NULL) && (*filename != '\0'))
-	{
-		strncpy(&param_str[10], filename, strlen(filename));
-	}
-
-	SifIopReset(param_str, 0);
-	while(!SifIopSync());
-
-	SifInitRpc(0);
-
-	FlushCache(0);
-	FlushCache(2);
-
-	return 0;
-}
-#endif
-
-#ifdef F_SifResetIop
-int SifResetIop()
-{
-	int ret;
-
-	ret = SifIopReset("rom0:UDNL rom0:EELOADCNF", 0);
-	if(ret != 0)
-		while(!SifIopSync());
-
-	return ret;
+	return SifIopReset(param_str, 0);
 }
 #endif
 
@@ -146,9 +109,6 @@ int SifIopIsAlive()
 #ifdef F_SifIopSync
 int SifIopSync()
 {
-	if (SifGetReg(SIF_REG_SMFLAG) & 0x40000) {
-		return 1;
-	}
-	return 0;
+	return((SifGetReg(SIF_REG_SMFLAG) & 0x40000) != 0);
 }
 #endif
