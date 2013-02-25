@@ -851,11 +851,13 @@ void* fileXioRpc_Devctl(unsigned int* sbuff)
 //int io_ioctl(int fd, int cmd, void *arg);
 void* fileXioRpc_Ioctl(unsigned int* sbuff)
 {
-	int ret=-1;
+	struct ioctl_packet *packet = (struct ioctl_packet *)sbuff;
+	int ret;
 	#ifdef DEBUG
 		printf("RPC Ioctl Request\n");
 	#endif
 	//	BODY
+	ret=ioctl(packet->fd, packet->cmd, packet->arg);
 	sbuff[0] = ret;
 	return sbuff;
 }

@@ -60,6 +60,7 @@
 #define FILEXIO_DIRFLAGS_FILE	0x80
 
 #define CTL_BUF_SIZE	2048
+#define IOCTL_BUF_SIZE	1024
 
 #define FILEXIO_MAX_DEVICES 32
 
@@ -93,6 +94,12 @@ struct devctl_packet {
 	void *buf;
 	int buflen;
 	void *intr_data;
+};
+
+struct ioctl_packet {
+	int fd;
+	u8 arg[IOCTL_BUF_SIZE];
+	int cmd;
 };
 
 struct ioctl2_packet {
