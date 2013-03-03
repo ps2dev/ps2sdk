@@ -57,8 +57,9 @@ int getPs2Time(ps2time *tm)
 
 int passcmp(char *pw1, char *pw2)
 {
-	if(pw2==NULL) pw2=myPassHash;
-	return memcmp(pw1, pw2, APA_PASSMAX) ? -EACCES : 0;
+	//Passwords are not supported, hence this check should always pass.
+	/* return memcmp(pw1, (pw2==NULL)?myPassHash:pw2, APA_PASSMAX) ? -EACCES : 0; */
+	return 0;
 }
 
 int getIlinkID(u8 *idbuf)
