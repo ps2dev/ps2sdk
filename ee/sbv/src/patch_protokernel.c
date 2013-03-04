@@ -37,16 +37,31 @@ typedef struct {
 	u32	align;
 } elf_pheader_t;
 
+/*
+	The SetOsdConfigParam() and GetOsdConfigParam() functions of a Protokernel functions slightly differently because they were based on an older set of specifications.
+	If the region field is set to any other value other than 0, it gets reset. On newer kernels, it'll retain the value that is set.
+*/
+static inline int PatchIsNeeded(void){
+	ConfigParam original_config;
+	ConfigParam config;
 
-int sbv_patch_protokernel()
+	GetOsdConfigParam(&original_config);
+	config=original_config;
+	config.region=1;	/* config &0xFFFF1FFF, config |= 0x2000 */
+	SetOsdConfigParam(&config);
+	GetOsdConfigParam(&config);
+	SetOsdConfigParam(&original_config);
+
+	return(config.region<1);
+}
+
+int sbv_patch_protokernel(void)
 {
 	int res = -1;
 
-	DI();
-	ee_kmode_enter();
-
-	/* if protokernel is unpatched */
-	if (_lw((u32)KSEG0(0x00002f88)) == 0x0c0015fa) {
+	if(PatchIsNeeded()){
+		DI();
+		ee_kmode_enter();
 
 		/* we copy the patch to its placement in kernel memory */
 		u8 *elfptr = (u8 *)&protokernel_patch_bin;
@@ -55,10 +70,9 @@ int sbv_patch_protokernel()
 		int i;
 
 		for (i = 0; i < eh->phnum; i++) {
-			if (eph[i].type != ELF_PT_LOAD)
-				continue;
+			if (eph[i].type != ELF_PT_LOAD) continue;
 
-			memcpy(eph[i].vaddr, (void *)&elfptr[eph[i].offset], eph[i].filesz);
+			memcpy(eph[i].vaddr, &elfptr[eph[i].offset], eph[i].filesz);
 
 			if (eph[i].memsz > eph[i].filesz)
 				memset((void *)(eph[i].vaddr + eph[i].filesz), 0, eph[i].memsz - eph[i].filesz);
@@ -68,10 +82,10 @@ int sbv_patch_protokernel()
 		_sw(JAL(eh->entry), KSEG0(0x00002f88));
 
 		res = 0;
-	}
 
-	ee_kmode_exit();
-	EI();
+		ee_kmode_exit();
+		EI();
+	}
 
 	return res;
 }

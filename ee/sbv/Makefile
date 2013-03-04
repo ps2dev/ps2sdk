@@ -27,6 +27,8 @@ EE_OBJS = smem.o smod.o slib.o patch_enable_lmb.o patch_disable_prefix_check.o \
 	patch_fioremove.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
+EE_INCS += $(PS2SDKSRC)/ee/rpc/cdvd/include
+
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBSBV_LIB) 
 
 
