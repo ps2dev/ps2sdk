@@ -1,5 +1,6 @@
 #include <tamtypes.h>
 #include <kernel.h>
+#include <osd_config.h>
 #include <string.h>
 
 extern void protokernel_patch_bin;
