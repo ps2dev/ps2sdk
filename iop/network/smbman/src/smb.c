@@ -1693,6 +1693,7 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 	info->fileInfo.EndOfFile = FFRspData->EndOfFile;
 	for (i = 0, j =0; i < FFRspData->FileNameLen; i++, j+=CF)
 		info->FileName[i] = FFRspData->FileName[j];
+	info->FileName[i]='\0';
 
 	return 0;
 }
