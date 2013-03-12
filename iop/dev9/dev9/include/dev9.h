@@ -14,8 +14,8 @@
 #ifndef IOP_DEV9_H
 #define IOP_DEV9_H
 
-#include "types.h"
-#include "irx.h"
+#include <types.h>
+#include <irx.h>
 
 typedef int (*dev9_intr_cb_t)(int flag);
 typedef void (*dev9_shutdown_cb_t)(void);
