@@ -76,13 +76,9 @@ void *ExecPS2Patch(void *EntryPoint, void *gp, int argc, char *argv[]){
 	//Assuming that the EE kernel was really modeled after an early IOP kernel, the first thread is the "idle" thread.
 	for(i=1,tcb=p_TCBs; i<256; i++,tcb++){
 		if(tcb->status!=0 && i!=CurrentThreadID){
-			if(tcb->status!=THS_DORMANT){
-				p_TerminateThread(i);
-				p_DeleteThread(i);	//Gosh... why didn't they just put this outside of the if..else blocks? D:
-			}
-			else{
-				p_DeleteThread(i);
-			}
+			if(tcb->status!=THS_DORMANT) p_TerminateThread(i);
+
+			p_DeleteThread(i);
 		}
 	}
 
