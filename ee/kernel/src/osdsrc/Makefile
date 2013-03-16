@@ -23,4 +23,5 @@ $(EE_ELF) : $(EE_OBJS)
 clean:
 	rm -f $(EE_OBJS) $(EE_ELF) $(EE_BIN)
 
-include $(PS2SDK)/samples/Makefile.pref
+include $(PS2SDKSRC)/Defs.make
+
