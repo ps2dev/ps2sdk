@@ -31,6 +31,8 @@
    .globl   _ps2sdk_libc_deinit_weak
    .type    _ps2sdk_libc_deinit_weak, @function
 
+   .extern InitExecPS2
+
    .set   noat
    .set   noreorder
 
@@ -123,6 +125,9 @@ ctors:
    jalr   $8      # _init()
    nop
 1:
+   # Initialize the kernel (Apply necessary patches).
+   jal InitKernel
+   nop
 
    # call main
 

@@ -16,6 +16,7 @@
 #include <kernel.h>
 #include <sifrpc.h>
 #include <string.h>
+#include <stdio.h>
 
 #include <iopcontrol.h>
 

@@ -66,6 +66,9 @@ CONFIG_OBJS = _config_internals.o GetRomName.o IsT10K.o IsEarlyJap.o configGetLa
 	configIsDaylightSavingEnabled.o configSetDaylightSavingEnabled.o
 CONFIG_OBJS := $(CONFIG_OBJS:%=$(EE_OBJS_DIR)%)
 
+LIBKRNLUPD_OBJS = libkrnlupd.o libkrnlupd_syscalls.o osdsrc.o
+LIBKRNLUPD_OBJS := $(LIBKRNLUPD_OBJS:%=$(EE_OBJS_DIR)%)
+
 TIMER_OBJS = cpu_ticks.o
 TIMER_OBJS := $(TIMER_OBJS:%=$(EE_OBJS_DIR)%)
 
@@ -113,55 +116,62 @@ LIBSYSCALL_OBJS = $(EE_OBJS_DIR)dummy.o
 
 EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(CONFIG_OBJS) \
-	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(GETKERNEL_OBJS) $(EE_OBJS_DIR)erl-support.o
+	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(GETKERNEL_OBJS) $(LIBKRNLUPD_OBJS) $(EE_OBJS_DIR)erl-support.o
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBSYSCALL_LIB) $(EE_LIB)
 
 $(LIBSYSCALL_LIB): $(LIBSYSCALL_OBJS)
 	$(EE_AR) cru $(LIBSYSCALL_LIB) $(LIBSYSCALL_OBJS)
 
-obj/dummy.o: src/kernel.S
+$(EE_OBJS_DIR)dummy.o: $(EE_SRC_DIR)kernel.S
 	$(EE_C_COMPILE) $< -c -o $@
 
-$(KERNEL_OBJS): src/kernel.S
+$(KERNEL_OBJS): $(EE_SRC_DIR)kernel.S
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(SIFCMD_OBJS): src/sifcmd.c
+$(SIFCMD_OBJS): $(EE_SRC_DIR)sifcmd.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(SIFRPC_OBJS): src/sifrpc.c
+$(SIFRPC_OBJS): $(EE_SRC_DIR)sifrpc.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(FILEIO_OBJS): src/fileio.c
+$(FILEIO_OBJS): $(EE_SRC_DIR)fileio.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(LOADFILE_OBJS): src/loadfile.c
+$(LOADFILE_OBJS): $(EE_SRC_DIR)loadfile.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(CONFIG_OBJS): src/osd_config.c
-	$(EE_C_COMPILE) -I../rpc/cdvd/include -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+$(CONFIG_OBJS): $(EE_SRC_DIR)osd_config.c
+	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(TIMER_OBJS): src/timer.c
+$(TIMER_OBJS): $(EE_SRC_DIR)timer.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(GETKERNEL_OBJS): src/getkernel.c
+$(GETKERNEL_OBJS): $(EE_SRC_DIR)getkernel.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(IOPHEAP_OBJS): src/iopheap.c
+$(IOPHEAP_OBJS): $(EE_SRC_DIR)iopheap.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(IOPCONTROL_OBJS): src/iopcontrol.c
+$(IOPCONTROL_OBJS): $(EE_SRC_DIR)iopcontrol.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(GLUE_OBJS): src/glue.c
+$(GLUE_OBJS): $(EE_SRC_DIR)glue.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(SIO_OBJS): src/sio.c
+$(SIO_OBJS): $(EE_SRC_DIR)sio.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(EE_OBJS_DIR)libkrnlupd.o: $(EE_SRC_DIR)libkrnlupd.c $(EE_SRC_DIR)osdsrc.c $(EE_SRC_DIR)libkrnlupd_syscalls.S
+	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
+
+$(EE_SRC_DIR)osdsrc.c:
+	$(MAKE) -C $(EE_SRC_DIR)/osdsrc
+	bin2c $(EE_SRC_DIR)/osdsrc/osdsrc.bin $(EE_SRC_DIR)osdsrc.c osdsrc
 
 clean:
-	rm -f -r $(EE_OBJS_DIR) $(EE_LIB_DIR)
-
+	rm -fr $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_SRC_DIR)osdsrc.c
+	$(MAKE) -C $(EE_SRC_DIR)/osdsrc clean
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make
