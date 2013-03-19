@@ -430,7 +430,7 @@ u8 tobcd(u8 dec)
 	return dec + (dec/10)*6;
 }
 
-void converttobcd(CdvdClock_t* time)
+void converttobcd(sceCdCLOCK* time)
 {
 	time->second= tobcd(time->second);
 	time->minute= tobcd(time->minute);
@@ -439,7 +439,7 @@ void converttobcd(CdvdClock_t* time)
 	time->month	= tobcd(time->month);
 	time->year	= tobcd(time->year);
 }
-void convertfrombcd(CdvdClock_t* time)
+void convertfrombcd(sceCdCLOCK* time)
 {
 	time->second= frombcd(time->second);
 	time->minute= frombcd(time->minute);
@@ -453,7 +453,7 @@ static u8 gDaysInMonths[12] = {
 	31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 };
 
-void adddate(CdvdClock_t* time)
+void adddate(sceCdCLOCK* time)
 {
 	// get the days in each month and fix up feb depending on leap year
 	u8 days_in_months[12];
@@ -482,7 +482,7 @@ void adddate(CdvdClock_t* time)
 		}
 	}
 }
-void subdate(CdvdClock_t* time)
+void subdate(sceCdCLOCK* time)
 {
 	// get the days in each month and fix up feb depending on leap year
 	u8 days_in_months[12];
@@ -511,7 +511,7 @@ void subdate(CdvdClock_t* time)
 	}
 }
 
-void addhour(CdvdClock_t* time)
+void addhour(sceCdCLOCK* time)
 {
 	time->hour++;
 	if(time->hour == 24)
@@ -520,7 +520,7 @@ void addhour(CdvdClock_t* time)
 		time->hour = 0;
 	}
 }
-void subhour(CdvdClock_t* time)
+void subhour(sceCdCLOCK* time)
 {
 	if(time->hour == 0)
 	{
@@ -531,7 +531,7 @@ void subhour(CdvdClock_t* time)
 		time->hour--;
 }
 
-void AdjustTime(CdvdClock_t* time, s32 offset)
+void AdjustTime(sceCdCLOCK* time, s32 offset)
 {
 	convertfrombcd(time);
 	offset += time->minute;
@@ -561,14 +561,14 @@ void AdjustTime(CdvdClock_t* time, s32 offset)
 
 // converts the time returned from the ps2's clock into GMT time
 // (ps2 clock is in JST time)
-void configConvertToGmtTime(CdvdClock_t* time)
+void configConvertToGmtTime(sceCdCLOCK* time)
 {
 	AdjustTime(time, -540);
 }
 
 // converts the time returned from the ps2's clock into LOCAL time
 // (ps2 clock is in JST time)
-void configConvertToLocalTime(CdvdClock_t* time)
+void configConvertToLocalTime(sceCdCLOCK* time)
 {
 	s32 timezone_offset = configGetTimezone();
 	s32 daylight_saving = configIsDaylightSavingEnabled();
