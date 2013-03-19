@@ -33,7 +33,24 @@ int write(int fd, void *ptr, size_t size);
 #define I_write DECLARE_IMPORT(7, write)
 int lseek(int fd, unsigned long pos, int mode);
 #define I_lseek DECLARE_IMPORT(8, lseek)
-
+int ioctl(int fd, int command, void *arg);
+#define I_ioctl DECLARE_IMPORT(9, ioctl)
+int remove(const char *name);
+#define I_remove DECLARE_IMPORT(10, remove)
+int mkdir(const char *path);
+#define I_mkdir DECLARE_IMPORT(11, mkdir)
+int rmdir(const char *path);
+#define I_rmdir DECLARE_IMPORT(12, rmdir)
+int dopen(const char *path, int mode);
+#define I_dopen DECLARE_IMPORT(13, dopen)
+int dclose(int fd);
+#define I_dclose DECLARE_IMPORT(14, dclose)
+int dread(int fd, fio_dirent_t *buf);
+#define I_dread DECLARE_IMPORT(15, dread)
+int getstat(const char *name, fio_stat_t *stat);
+#define I_getstat DECLARE_IMPORT(16, getstat)
+int chstat(const char *name, fio_stat_t *stat, unsigned int statmask);
+#define I_chstat DECLARE_IMPORT(17, chstat)
 int format(const char *dev);
 #define I_format DECLARE_IMPORT(18, format)
 
