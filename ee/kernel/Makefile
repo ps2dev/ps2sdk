@@ -66,7 +66,7 @@ CONFIG_OBJS = _config_internals.o GetRomName.o IsT10K.o IsEarlyJap.o configGetLa
 	configIsDaylightSavingEnabled.o configSetDaylightSavingEnabled.o
 CONFIG_OBJS := $(CONFIG_OBJS:%=$(EE_OBJS_DIR)%)
 
-LIBKRNLUPD_OBJS = libkrnlupd.o libkrnlupd_syscalls.o osdsrc.o
+LIBKRNLUPD_OBJS = libkrnlupd.o libkrnlupd_syscalls.o osdsrc_bin.o
 LIBKRNLUPD_OBJS := $(LIBKRNLUPD_OBJS:%=$(EE_OBJS_DIR)%)
 
 TIMER_OBJS = cpu_ticks.o
@@ -162,16 +162,11 @@ $(GLUE_OBJS): $(EE_SRC_DIR)glue.c
 $(SIO_OBJS): $(EE_SRC_DIR)sio.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(EE_OBJS_DIR)libkrnlupd.o: $(EE_SRC_DIR)libkrnlupd.c $(EE_SRC_DIR)osdsrc.c $(EE_SRC_DIR)libkrnlupd_syscalls.S
+$(EE_OBJS_DIR)libkrnlupd.o: $(EE_SRC_DIR)libkrnlupd.c $(EE_SRC_DIR)osdsrc_bin.c $(EE_SRC_DIR)libkrnlupd_syscalls.S
 	$(EE_C_COMPILE) -I$(PS2SDKSRC)/common/include $< -c -o $@
 
-$(EE_SRC_DIR)osdsrc.c:
-	$(MAKE) -C $(EE_SRC_DIR)/osdsrc
-	bin2c $(EE_SRC_DIR)/osdsrc/osdsrc.bin $(EE_SRC_DIR)osdsrc.c osdsrc
-
 clean:
-	rm -fr $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_SRC_DIR)osdsrc.c
-	$(MAKE) -C $(EE_SRC_DIR)/osdsrc clean
+	rm -fr $(EE_OBJS_DIR) $(EE_LIB_DIR)
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make

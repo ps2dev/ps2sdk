@@ -26,7 +26,7 @@
 typedef struct cdda_toc
 {
 	int num_tracks;
-	cd_location_t tracks[100];
+	sceCdlLOCCD tracks[100];
 } cdda_toc;
 
 #endif

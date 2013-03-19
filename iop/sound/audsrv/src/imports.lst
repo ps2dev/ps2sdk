@@ -78,7 +78,7 @@ libsd_IMPORTS_end
 cdvdman_IMPORTS_start
 I_sceCdInit
 I_sceCdRead
-I_sceCdReadCdda
+I_sceCdReadCDDA
 I_sceCdGetError
 I_sceCdGetToc
 I_sceCdSync
@@ -88,5 +88,4 @@ I_sceCdTrayReq
 I_sceCdPosToInt
 I_sceCdIntToPos
 I_sceCdStatus
-I_sceCdMmode
 cdvdman_IMPORTS_end

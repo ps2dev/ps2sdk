@@ -35,9 +35,6 @@
 #include "spu.h"
 #include "hw.h"
 
-/** bcd to integer */
-#define btoi(b)	((((b) >> 4)*10 + ((b) & 0x0f)))
-
 /* cdda */
 static int cdda_initialized = 0;        ///< initialization status
 static int cd_playing = 0;              ///< cd status
@@ -92,7 +89,7 @@ static int cd_transfer_complete(void *arg)
 */
 int audsrv_get_cd_type()
 {
-	int type = CdGetDiskType();
+	int type = sceCdGetDiskType();
 
 	if (type == 0)
 	{
@@ -108,7 +105,7 @@ int audsrv_get_cd_type()
 */
 int audsrv_get_cd_status()
 {
-	return CdStatus();
+	return sceCdStatus();
 }
 
 /** Internal function to process raw toc loaded from disc
@@ -119,7 +116,7 @@ static int process_toc()
 	int track;
 
 	/* retrieve toc and parse it */
-	CdGetToc(raw_toc);
+	sceCdGetToc(raw_toc);
 	toc.num_tracks = btoi(raw_toc[17]);
 
 	//print_hex_buffer(raw_toc, sizeof(raw_toc));
@@ -164,17 +161,14 @@ static int initialize_cdda()
 	}
 
 	/* initialize cdrom and set media = cd */
-	CdInit(0);
-
-	printf("set cd mode\n");
-	CdMmode(CdMmodeCd);
+	sceCdInit(SCECdINIT);
 
 	/* make sure disc is inserted, and check for cdda */
-	CdTrayReq(2, (u32 *)&dummy);
+	sceCdTrayReq(SCECdTrayCheck, (u32 *)&dummy);
 	printf("TrayReq returned %d\n", dummy);
 
-	CdDiskReady(0);
-	CdSync(0);
+	sceCdDiskReady(0);
+	sceCdSync(0);
 
 	type = audsrv_get_cd_type();
 	printf("audsrv: disc type: %d\n", type);
@@ -240,21 +234,21 @@ int audsrv_get_track_offset(int track)
 */
 static int read_sectors(void *dest, int sector, int count)
 {               	
-	cd_read_mode_t mode;
+	sceCdRMode mode;
 	int max_retries = 32;
 	int tries = 0;
 
 	mode.trycount = max_retries;
-	mode.spindlctrl = CdSpinNom;
-	mode.datapattern = CdSecS2048;
+	mode.spindlctrl = SCECdSpinNom;
+	mode.datapattern = SCECdSecS2048;
 	mode.pad = 0;
 
 	while (tries < max_retries)
 	{
 		/* wait until CD is ready to receive commands */
-		CdDiskReady(0);
+		sceCdDiskReady(0);
 
-		if (CdReadCdda(sector, count, dest, &mode))
+		if (sceCdReadCDDA(sector, count, dest, &mode))
 		{
 			/* success! */
 			break;
@@ -263,7 +257,7 @@ static int read_sectors(void *dest, int sector, int count)
 		tries++;
 	}
 
-	CdSync(0);
+	sceCdSync(0);
 
 	if (tries == max_retries)
 	{
@@ -516,7 +510,7 @@ int audsrv_play_cd(int track)
 		return AUDSRV_ERR_ARGS;
 	}
 
-	type = CdGetDiskType();
+	type = sceCdGetDiskType();
 	if (track == 1 && (type == 11 || type == 0x13))
 	{
 		/* first track is data */

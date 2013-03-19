@@ -64,7 +64,7 @@ I_SecrAuthCard
 secrman_IMPORTS_end
 
 cdvdman_IMPORTS_start
-I_sceCdRC
+I_sceCdReadClock
 cdvdman_IMPORTS_end
 
 stdio_IMPORTS_start
