@@ -9,130 +9,102 @@
 #
 */
 
+#include <kernel.h>
 #include <libgs.h>
 
-#include "main.h"
+typedef struct
+{
+	int x_pos;		// x position of sprite
+	int y_pos;		// y position of sprite
+
+	char x_dir;		// x direction 0=left,1=right
+	char y_dir;		// y direction 0=up,1=down;
+
+	char x_speed;	// speed moving in x direction
+	char y_speed;	// speed moving in y direction
+
+	GS_RGBAQ color;
+}MAVING_SPRITE;
+
+const static char x_randspeeds[10] = {1,4,6,5,2,3,8,6,6,7};
+
+const static GS_RGBAQ randcolor[10] ={	{28 ,200,200,0x80,0.0f},
+					{255,  0,128,0x80,0.0f},
+					{255,128,0,0x80,0.0f},
+					{255,255,255,0x80,0.0f},
+					{0  ,128,255,0x80,0.0f},
+					{255,255,128,0x80,0.0f},
+					{128,128,255,0x80,0.0f},
+					{226,137,245,0x80,0.0f},
+					{172,177,210,0x80,0.0f},
+					{221,180,162,0x80,0.0f}
+				};
 
 
 #define MAX_SPRITES		1000
 
+#define	SCREEN_WIDTH		640	
+#define	SCREEN_HEIGHT		448
 
-
-
-
-
-#define	SCREEN_WIDTH			640	
-#define	SCREEN_HEIGHT			448
-
-#define SCREEN_OFFSET_X		2048 - (SCREEN_WIDTH/2)
-#define SCREEN_OFFSET_Y		2048 - ((SCREEN_HEIGHT/2))
+static short int ScreenOffsetX, ScreenOffsetY;
 
 #define GIF_PACKET_MAX		10
 
+static GS_DRAWENV		draw_env;
+static GS_DISPENV		disp_env;
 
+static GS_GIF_PACKET		packets[GIF_PACKET_MAX];
+static GS_PACKET_TABLE		giftable;
 
+static int InitGraphics(void);
+static int InitSprites(void);
+static int MoveSprites(void);
+static int DrawSprites(GS_PACKET_TABLE *table);
 
-GS_DRAWENV			draw_env;
-GS_DISPENV			disp_env;
-
-
-GS_GIF_PACKET		packets[GIF_PACKET_MAX];
-
-GS_PACKET_TABLE		giftable;
-
-
-int InitGraphics();
-int AddSomPrims(GS_PACKET_TABLE *table);
-int InitSprites();
-int MoveSprites();
-int DrawSprites(GS_PACKET_TABLE *table);
-
-int main()
+int main(int argc, char *argv[])
 {
-	
-
-	
 	InitGraphics();
 
-
-
 	giftable.packet_count	= GIF_PACKET_MAX;
-	giftable.packet			= &packets[0];
-
-
-
-	
+	giftable.packets	= packets;
 
 	InitSprites();
-
-	
-
-	
 
 	while(1)
 	{
 		GsGifPacketsClear(&giftable);		// clear the area that we are going to put the sprites/triangles/....
 
-		
-
 		MoveSprites();
-		DrawSprites(&giftable);				//add stuff to the packet area
-	
-		
-
+		DrawSprites(&giftable);			//add stuff to the packet area
 
 		GsDrawSync(0);
 		GsVSync(0);
-		GsClearDrawEnv1(&draw_env);			// clear the draw environment before we draw stuff on it
+		GsClearDrawEnv1(&draw_env);		// clear the draw environment before we draw stuff on it
 		GsGifPacketsExecute(&giftable, 1);	// set to '1' becuse we want to wait for drawing to finish. if we dont wait we will write on packets that is currently writing to the gif
-		
 	}
-
 
 	return 0;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-int InitGraphics()
+int InitGraphics(void)
 {
-	GsInit();
+	unsigned int FrameBufferVRAMAddress;
 
-	GsSetVideoMode(1, 2, 0);
-	GsSetCRTCSettings(CRTC_SETTINGS_DEFAULT1, 255); //display context 1 on tv
+	GsInit(GS_INTERLACED, GS_MODE_NTSC, GS_FFMD_INTERLACE);
 
+	FrameBufferVRAMAddress=GsVramAllocFrameBuffer(SCREEN_WIDTH, SCREEN_HEIGHT, GS_PIXMODE_32);
+	GsSetDefaultDrawEnv(&draw_env, SCREEN_WIDTH, SCREEN_HEIGHT);
+	//Retrieve screen offset parameters.
+	ScreenOffsetX=draw_env.offset_x;
+	ScreenOffsetY=draw_env.offset_y;
+	GsSetDefaultDrawEnvAddress(&draw_env, FrameBufferVRAMAddress, SCREEN_WIDTH/64, GS_PIXMODE_32);
 
-
-	GsSetDefaultDrawEnv(&draw_env, SCREEN_OFFSET_X, SCREEN_OFFSET_Y, SCREEN_WIDTH, SCREEN_HEIGHT);
-	GsSetDefaultDrawEnvAddress(&draw_env, 0, SCREEN_WIDTH/64, GS_PIXMODE_32);
-
-	GsSetDefaultDisplayEnv(&disp_env, 656, 36+(36/2), SCREEN_WIDTH, SCREEN_HEIGHT);
-	GsSetDefaultDisplayEnvAddress(&disp_env, 0, SCREEN_WIDTH/64, GS_PIXMODE_32);
-
-
+	GsSetDefaultDisplayEnv(&disp_env, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0);
+	GsSetDefaultDisplayEnvAddress(&disp_env, FrameBufferVRAMAddress, SCREEN_WIDTH/64, GS_PIXMODE_32);
 
 	//execute draw/display environment(s)  (context 1)
 	GsPutDrawEnv1(&draw_env);
 	GsPutDisplayEnv1(&disp_env);
-
-	
-
 
 	//set some common stuff
 	GsOverridePrimAttributes(GS_DISABLE, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -142,31 +114,15 @@ int InitGraphics()
 	// contex 2
 	GsEnableAlphaTransparency2(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, 0x00);
 
-
-	
 	GsEnableAlphaBlending1(GS_ENABLE, 0);
 	GsEnableAlphaBlending2(GS_ENABLE, 0);
-
 
 	return 0;
 }
 
+static MAVING_SPRITE sprites[MAX_SPRITES];
 
-
-
-
-
-
-
-
-
-
-
-
-MAVING_SPRITE	sprites[MAX_SPRITES];
-
-
-int InitSprites()
+static int InitSprites(void)
 {
 	int i,j;
 
@@ -194,12 +150,7 @@ int InitSprites()
 	return 0;
 }
 
-
-
-
-
-
-int MoveSprites()
+static int MoveSprites(void)
 {
 	int i;
 
@@ -210,16 +161,7 @@ int MoveSprites()
 	//	sprites[i].y_speed++;
 
 		if(sprites[i].x_speed>10)sprites[i].x_speed		=sprites[i].x_speed-10;
-
 		if(sprites[i].y_speed>10)sprites[i].y_speed		=sprites[i].y_speed-10;
-
-
-
-
-
-
-
-
 
 		//x
 		if(sprites[i].x_dir==0)
@@ -241,8 +183,6 @@ int MoveSprites()
 			}
 		}
 
-
-
 		//y
 		if(sprites[i].y_dir==0)
 		{
@@ -262,57 +202,30 @@ int MoveSprites()
 				sprites[i].y_dir=0;
 			}
 		}
-
-		
-		
-
-
 	}
 
 	return 0;
-
 }
 
-
-
-
-
-
-
-
-int DrawSprites(GS_PACKET_TABLE *table)
+static int DrawSprites(GS_PACKET_TABLE *table)
 {
 	int i;
-
-	QWORD	*p;
-
-
-	
-
+	QWORD *p;
 
 	for(i=0;i<MAX_SPRITES;i++)
 	{
-		
-		p = GsGifPacketsAlloc(table, 5); //alloc 5 qword for 1 untextured strite
-
+		//Use the uncached segment, to avoid needing to flush the data cache.
+		p = (QWORD*)UNCACHED_SEG(GsGifPacketsAlloc(table, 5)); //Allocate 5 qword for 1 untextured strite
 
 		gs_setGIF_TAG(((GS_GIF_TAG	*)&p[0]), 4,1,0,0,0,0,1,0x0e);
 		gs_setR_PRIM(((GS_R_PRIM	*)&p[1]), GS_PRIM_SPRITE,0, 0, 0, 1, 0, 0, 0, 0);
 		gs_setR_RGBAQ(((GS_R_RGBAQ	*)&p[2]), sprites[i].color.r, sprites[i].color.g, sprites[i].color.b, sprites[i].color.a, sprites[i].color.q);
-		gs_setR_XYZ2(((GS_R_XYZ		*)&p[3]), (SCREEN_OFFSET_X+sprites[i].x_pos)<<4,		(SCREEN_OFFSET_Y+sprites[i].y_pos)<<4, 0x00000000);
-		gs_setR_XYZ2(((GS_R_XYZ		*)&p[4]), (SCREEN_OFFSET_X+sprites[i].x_pos+10)<<4,	(SCREEN_OFFSET_Y+sprites[i].y_pos+10)<<4, 0x00000000);
-
+		gs_setR_XYZ2(((GS_R_XYZ		*)&p[3]), (ScreenOffsetX+sprites[i].x_pos)<<4,	(ScreenOffsetY+sprites[i].y_pos)<<4, 0x00000000);
+		gs_setR_XYZ2(((GS_R_XYZ		*)&p[4]), (ScreenOffsetX+sprites[i].x_pos+10)<<4,	(ScreenOffsetY+sprites[i].y_pos+10)<<4, 0x00000000);
 	}
 
 	return 0;
 
 }
-
-
-
-
-
-
-
 
 /*EOF*/

@@ -29,13 +29,13 @@ void *allocMem(int size)
 
 int getPs2Time(ps2time *tm)
 {
-	sceCdCLOCK	cdtime;
+	cd_clock_t	cdtime;
 	s32		tmp;
 	ps2time timeBuf={
 		0, 0x0D, 0x0E, 0x0A, 0x0D, 1, 2003// used if can not get time... 
 	};
 
-	if(sceCdReadClock(&cdtime)!=0 && cdtime.stat==0)
+	if(CdReadClock(&cdtime)!=0 && cdtime.stat==0)
 	{
 		tmp=cdtime.second>>4;
 		timeBuf.sec=(u32)(((tmp<<2)+tmp)<<1)+(cdtime.second&0x0F);

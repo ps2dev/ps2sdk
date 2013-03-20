@@ -19,13 +19,13 @@
 #ifndef _LIBCDVD_INTERNAL_H_
 #define _LIBCDVD_INTERNAL_H_
 
-extern s32 sceCdDebug;
+extern s32 cdDebug;
 
-extern volatile s32 sceCdCallbackNum;
+extern volatile s32 cdCallbackNum;
 extern volatile s32 cbSema;
 
-extern s32 sceCdThreadId;
-extern ee_thread_status_t sceCdThreadParam;
+extern s32 cdThreadId;
+extern ee_thread_status_t cdThreadParam;
 
 extern s32 bindNCmd;
 extern s32 bindSCmd;
@@ -42,11 +42,11 @@ extern u8 nCmdRecvBuff[];
 extern "C" {
 #endif
 
-void sceCdSemaInit(void);
+void cdSemaInit(void);
 
-void sceCdGenericCallbackFunction(void *funcNum);
+void cdCallback(void *funcNum);
 
-s32  sceCdSyncS(s32 mode);
+s32  cdSyncS(s32 mode);
 
 #ifdef __cplusplus
 }

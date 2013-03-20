@@ -16,28 +16,23 @@ EE_INC_DIR = include/
 
 EE_LIB = libcdvd.a
 
-LIBCDVD_OBJS = _libcdvd_internals.o sceCdInit.o sceCdIntToPos.o sceCdPosToInt.o \
-    sceCdSearchFile.o sceCdDiskReady.o sceCdSemaInit.o sceCdSemaExit.o \
-    sceCdInitCallbackThread.o sceCdCallback.o sceCdGenericCallbackFunction.o
+LIBCDVD_OBJS = _libcdvd_internals.o cdInit.o cdIntToPos.o cdPosToInt.o \
+    cdSearchFile.o cdDiskReady.o cdSemaInit.o cdSemaExit.o \
+    cdInitCallbackThread.o cdSetCallback.o cdCallback.o
 LIBCDVD_OBJS := $(LIBCDVD_OBJS:%=$(EE_OBJS_DIR)%)
 
-NCMD_OBJS = _ncmd_internals.o _sceCdAlignReadBuffer.o sceCdRead.o sceCdReadDVDV.o \
-    sceCdReadCDDA.o sceCdGetToc.o sceCdSeek.o sceCdStandby.o sceCdStop.o sceCdPause.o \
-    sceCdApplyNCmd.o sceCdReadIOPMem.o sceCdNCmdDiskReady.o sceCdReadChain.o \
-    sceCdGetReadPos.o sceCdStStart.o sceCdStRead.o sceCdStStop.o sceCdStSeek.o sceCdStInit.o \
-    sceCdStStat.o sceCdStPause.o sceCdStResume.o sceCdStream.o sceCdCddaStream.o sceCdSync.o \
-    sceCdCheckNCmd.o sceCdReadKey.o
+NCMD_OBJS = _ncmd_internals.o _cdAlignReadBuffer.o cdRead.o cdDvdRead.o \
+    cdCddaRead.o cdGetToc.o cdSeek.o cdStandby.o cdStop.o cdPause.o \
+    cdApplyNCmd.o cdReadIOPMem.o cdNCmdDiskReady.o cdReadChain.o \
+    cdGetReadPos.o cdStStart.o cdStRead.o cdStStop.o cdStSeek.o cdStInit.o \
+    cdStStat.o cdStPause.o cdStResume.o cdStream.o cdCddaStream.o cdSync.o \
+    cdCheckNCmd.o
 NCMD_OBJS := $(NCMD_OBJS:%=$(EE_OBJS_DIR)%)
 
-SCMD_OBJS = _scmd_internals.o sceCdReadClock.o sceCdWriteClock.o sceCdGetDiskType.o \
-    sceCdGetError.o sceCdTrayReq.o sceCdApplySCmd.o sceCdStatus.o sceCdBreak.o \
-    sceCdCancelPowerOff.o sceCdBlueLedCtrl.o sceCdPowerOff.o sceCdMMode.o \
-    sceCdChangeThreadPriority.o sceCdCheckSCmd.o \
-    sceCdForbidDVDP.o sceCdDecSet.o sceCdOpenConfig.o sceCdCloseConfig.o sceCdReadConfig.o \
-    sceCdWriteConfig.o sceCdReadNVM.o sceCdWriteNVM.o sceCdRI.o sceCdWI.o \
-    sceCdReadConsoleID.o sceCdWriteConsoleID.o sceCdMV.o \
-    sceCdBootCertify.o sceCdReadModelName.o sceCdWriteModelName.o \
-    sceCdSyncS.o
+SCMD_OBJS = _scmd_internals.o cdReadClock.o cdWriteClock.o cdGetDiscType.o \
+    cdGetError.o cdTrayReq.o cdApplySCmd.o cdStatus.o cdBreak.o \
+    cdCancelPowerOff.o cdBlueLedCtrl.o cdPowerOff.o cdSetMediaMode.o \
+    cdChangeThreadPriority.o cdCheckSCmd.o cdSyncS.o
 SCMD_OBJS := $(SCMD_OBJS:%=$(EE_OBJS_DIR)%)
 
 EE_LIB := $(EE_LIB:%=$(EE_LIB_DIR)%)

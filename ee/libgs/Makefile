@@ -12,10 +12,6 @@ EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
-EE_INCS +=
-
-
-
 EE_OBJS = libgs.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 

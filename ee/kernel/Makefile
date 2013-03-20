@@ -142,7 +142,7 @@ $(LOADFILE_OBJS): $(EE_SRC_DIR)loadfile.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(CONFIG_OBJS): $(EE_SRC_DIR)osd_config.c
-	$(EE_C_COMPILE) -I$(PS2SDKSRC)/common/include -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(TIMER_OBJS): $(EE_SRC_DIR)timer.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
@@ -163,7 +163,7 @@ $(SIO_OBJS): $(EE_SRC_DIR)sio.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(EE_OBJS_DIR)libkrnlupd.o: $(EE_SRC_DIR)libkrnlupd.c $(EE_SRC_DIR)osdsrc_bin.c $(EE_SRC_DIR)libkrnlupd_syscalls.S
-	$(EE_C_COMPILE) -I$(PS2SDKSRC)/common/include $< -c -o $@
+	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
 
 clean:
 	rm -fr $(EE_OBJS_DIR) $(EE_LIB_DIR)

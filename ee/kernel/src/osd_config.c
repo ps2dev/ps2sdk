@@ -50,11 +50,8 @@ char g_RomName[15] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 #ifdef F_GetRomName
 char* GetRomName(char *romname)
 {
-	s32 fd = 0;
-	// the romname from my pal bios
-//	memcpy(romname, "0120EC20000902", 14);
-	
-	fioInit();
+	int fd;
+
 	fd = fioOpen("rom0:ROMVER", O_RDONLY);
 	fioRead(fd, romname, 14);
 	fioClose(fd);
@@ -78,7 +75,7 @@ s32 IsT10K(void)
 #endif
 
 
-// check if ps2 is one of the really early japanese models
+// check if ps2 has a 'Protokernel' (Really early japanese models)
 // 
 // args:	u32 config value from GetOsdConfigParam() syscall
 // returns:	1 if early jap model
@@ -86,7 +83,7 @@ s32 IsT10K(void)
 #ifdef F_IsEarlyJap
 s32 IsEarlyJap(ConfigParam config)
 {
-	return config.region == 0;
+	return config.region == 0;	//Protokernels will always have 0 set to this field.
 }
 #endif
 
@@ -416,8 +413,6 @@ void configSetDaylightSavingEnabled(s32 daylightSaving)
 }
 #endif
 
-
-
 // the following functions are all used in time conversion
 
 #ifdef F_configGetTime
@@ -430,7 +425,7 @@ u8 tobcd(u8 dec)
 	return dec + (dec/10)*6;
 }
 
-void converttobcd(sceCdCLOCK* time)
+void converttobcd(CdvdClock_t* time)
 {
 	time->second= tobcd(time->second);
 	time->minute= tobcd(time->minute);
@@ -439,7 +434,7 @@ void converttobcd(sceCdCLOCK* time)
 	time->month	= tobcd(time->month);
 	time->year	= tobcd(time->year);
 }
-void convertfrombcd(sceCdCLOCK* time)
+void convertfrombcd(CdvdClock_t* time)
 {
 	time->second= frombcd(time->second);
 	time->minute= frombcd(time->minute);
@@ -453,7 +448,7 @@ static u8 gDaysInMonths[12] = {
 	31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 };
 
-void adddate(sceCdCLOCK* time)
+void adddate(CdvdClock_t* time)
 {
 	// get the days in each month and fix up feb depending on leap year
 	u8 days_in_months[12];
@@ -482,7 +477,7 @@ void adddate(sceCdCLOCK* time)
 		}
 	}
 }
-void subdate(sceCdCLOCK* time)
+void subdate(CdvdClock_t* time)
 {
 	// get the days in each month and fix up feb depending on leap year
 	u8 days_in_months[12];
@@ -511,7 +506,7 @@ void subdate(sceCdCLOCK* time)
 	}
 }
 
-void addhour(sceCdCLOCK* time)
+void addhour(CdvdClock_t* time)
 {
 	time->hour++;
 	if(time->hour == 24)
@@ -520,7 +515,7 @@ void addhour(sceCdCLOCK* time)
 		time->hour = 0;
 	}
 }
-void subhour(sceCdCLOCK* time)
+void subhour(CdvdClock_t* time)
 {
 	if(time->hour == 0)
 	{
@@ -531,7 +526,7 @@ void subhour(sceCdCLOCK* time)
 		time->hour--;
 }
 
-void AdjustTime(sceCdCLOCK* time, s32 offset)
+void AdjustTime(CdvdClock_t* time, s32 offset)
 {
 	convertfrombcd(time);
 	offset += time->minute;
@@ -561,14 +556,14 @@ void AdjustTime(sceCdCLOCK* time, s32 offset)
 
 // converts the time returned from the ps2's clock into GMT time
 // (ps2 clock is in JST time)
-void configConvertToGmtTime(sceCdCLOCK* time)
+void configConvertToGmtTime(CdvdClock_t* time)
 {
 	AdjustTime(time, -540);
 }
 
 // converts the time returned from the ps2's clock into LOCAL time
 // (ps2 clock is in JST time)
-void configConvertToLocalTime(sceCdCLOCK* time)
+void configConvertToLocalTime(CdvdClock_t* time)
 {
 	s32 timezone_offset = configGetTimezone();
 	s32 daylight_saving = configIsDaylightSavingEnabled();

@@ -9,8 +9,10 @@
 #
 # $Id$
 # PS2 Configuration settings
-# note: the 'set' methods are only valid till the ps2 gets
+# Note: the 'set' methods are only valid till the ps2 gets
 # turned off or reset!
+#
+# Note 2: Early Japanese consoles (The SCPH-10000 and SCPH-15000) have kernels ("Protokernels") based on older specifications. The SCPH-18000 has the same kernel as the first expansion bay model (SCPH-30000).
 */
 
 #ifndef _CONFIG_H_
@@ -21,7 +23,6 @@ extern "C" {
 
 #include <tamtypes.h>
 #include <libcdvd.h>
-
 
 // language values returned by: s32 getLanguage(void)
 #define LANGUAGE_JAPANESE	0
@@ -43,15 +44,14 @@ extern "C" {
 #define DATE_MMDDYYYY		1
 #define DATE_DDMMYYYY		2
 
-
 // parameter struct as used by GetOsdConfigParam/SetOsdConfigParam
 typedef struct {
 /*00*/u32 spdifMode:1;		// 0=enabled, 1=disabled
 /*01*/u32 screenType:2;		// 0=4:3, 1=fullscreen, 2=16:9
 /*03*/u32 videoOutput:1;	// 0=rgb(scart), 1=component
 /*04*/u32 japLanguage:1;	// 0=japanese, 1=english(non-japanese)
-/*05*/u32 unknown2:8;		// osdsys in pal bios sets this from the byte 0x1f1224
-/*13*/u32 region:3;			// this gets set to 2 in pal bios (hardcoded to set it) (maybe region since euro == 2) (in jap this is left as 0, this supports region arguement)
+/*05*/u32 ps1drvConfig:8;	// Playstation driver settings.
+/*13*/u32 region:3;		// 0 = Protokernel consoles, 1 = NTSC-U/C/J, 2 = PAL. Protokernels cannot retain the value set in this field (Hence always 0).
 /*16*/u32 language:5;		// LANGUAGE_??? value
 /*21*/u32 timezoneOffset:11;// timezone minutes offset from gmt
 } ConfigParam;
@@ -64,7 +64,6 @@ typedef struct {
 	u16	timeFormat:1;		// 0=24 hour, 1=12 hour
 	u16	dateFormat:2;		// 0=YYYYMMDD, 1=MMDDYYYY, 2=DDMMYYYY
 } Config2Param;
-
 
 // get the language the ps2 is currently set to
 // 
@@ -131,7 +130,6 @@ s32  configGetTimeFormat(void);
 //			1 = 12hour
 void configSetTimeFormat(s32 timeFormat);
 
-
 // get timezone
 // 
 // returns: offset in minutes from GMT
@@ -140,7 +138,6 @@ s32  configGetTimezone(void);
 // 
 // args:	offset in minutes from GMT
 void configSetTimezone(s32 offset);
-
 
 // checks whether the spdif is enabled or not
 // 
@@ -153,7 +150,6 @@ s32  configIsSpdifEnabled(void);
 //			0 = off
 void configSetSpdifEnabled(s32 enabled);
 
-
 // checks whether daylight saving is currently set
 // 
 // returns:	1 = on
@@ -165,21 +161,18 @@ s32  configIsDaylightSavingEnabled(void);
 //			0 = off
 void configSetDaylightSavingEnabled(s32 enabled);
 
-
 // converts the time returned from the ps2's clock into GMT time
 // (ps2 clock is in JST time)
-void configConvertToGmtTime(sceCdCLOCK* time);
+void configConvertToGmtTime(CdvdClock_t* time);
 
 // converts the time returned from the ps2's clock into LOCAL time
 // (ps2 clock is in JST time)
-void configConvertToLocalTime(sceCdCLOCK* time);
-
+void configConvertToLocalTime(CdvdClock_t* time);
 
 // Internal functions.
 s32  IsT10K(void);
 s32  IsEarlyJap(ConfigParam config);
 char* GetRomName(char *romname);
-
 
 #ifdef __cplusplus
 }

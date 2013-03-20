@@ -35,6 +35,9 @@
 #include "spu.h"
 #include "hw.h"
 
+/** bcd to integer */
+#define btoi(b)	((((b) >> 4)*10 + ((b) & 0x0f)))
+
 /* cdda */
 static int cdda_initialized = 0;        ///< initialization status
 static int cd_playing = 0;              ///< cd status
@@ -161,10 +164,10 @@ static int initialize_cdda()
 	}
 
 	/* initialize cdrom and set media = cd */
-	sceCdInit(SCECdINIT);
+	sceCdInit(0);
 
 	/* make sure disc is inserted, and check for cdda */
-	sceCdTrayReq(SCECdTrayCheck, (u32 *)&dummy);
+	sceCdTrayReq(2, (u32 *)&dummy);
 	printf("TrayReq returned %d\n", dummy);
 
 	sceCdDiskReady(0);
@@ -234,13 +237,13 @@ int audsrv_get_track_offset(int track)
 */
 static int read_sectors(void *dest, int sector, int count)
 {               	
-	sceCdRMode mode;
+	cd_read_mode_t mode;
 	int max_retries = 32;
 	int tries = 0;
 
 	mode.trycount = max_retries;
-	mode.spindlctrl = SCECdSpinNom;
-	mode.datapattern = SCECdSecS2048;
+	mode.spindlctrl = CdSpinNom;
+	mode.datapattern = CdSecS2048;
 	mode.pad = 0;
 
 	while (tries < max_retries)

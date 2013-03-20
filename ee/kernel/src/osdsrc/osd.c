@@ -29,7 +29,7 @@ void SetOsdConfigParam(ConfigParam* config){
 	OSDConfig.screenType=config->screenType;
 	OSDConfig.videoOutput=config->videoOutput;
 	OSDConfig.japLanguage=config->japLanguage;
-	OSDConfig.unknown2=config->unknown2;
+	OSDConfig.ps1drvConfig=config->ps1drvConfig;
 	OSDConfig.region=config->region;
 	OSDConfig.language=config->language;
 	OSDConfig.timezoneOffset=config->timezoneOffset;
@@ -40,7 +40,7 @@ void GetOsdConfigParam(ConfigParam* config){
 	config->screenType=OSDConfig.screenType;
 	config->videoOutput=OSDConfig.videoOutput;
 	config->japLanguage=OSDConfig.japLanguage;
-	config->unknown2=OSDConfig.unknown2;
+	config->ps1drvConfig=OSDConfig.ps1drvConfig;
 	config->region=OSDConfig.region;
 	config->language=OSDConfig.language;
 	config->timezoneOffset=OSDConfig.timezoneOffset;

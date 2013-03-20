@@ -9,39 +9,21 @@
 #
 */
 
+#include <errno.h>
+#include <kernel.h>
 #include <libgs.h>
 
-
-
-
-
-
-
-
-
-
 /*static*/
-static short gs_dma_send(unsigned int *addr, unsigned int qwords);
-static short gs_dma_send_tag(unsigned int *addr, unsigned int qwords, GS_GIF_DMACHAIN_TAG *tag);
-static short gs_dma_wait(void);
-static void  gs_flush_cache(int mode);
+static int gs_dma_send(unsigned int *addr, unsigned int qwords);
+static int gs_dma_send_tag(unsigned int *addr, unsigned int qwords, GS_GIF_DMACHAIN_TAG *tag);
+static int gs_dma_wait(void);
 
+static QWORD prim_work[64] __attribute__((aligned(64))); /*align to 64-byte boundaries. */
 
+static GS_TEST GSGLOBAL_TEST1;
+static GS_TEST GSGLOBAL_TEST2;
 
-QWORD		prim_work[64] __attribute__((aligned(16))); /*aligne to 128bits*/
-
-GS_TEST		GSGLOBAL_TEST1;
-GS_TEST		GSGLOBAL_TEST2;
-
-static int	gs_db_draw_buffer=0;
-
-
-
-
-
-
-
-
+static int gs_db_draw_buffer=0;
 
 /*-------------------------------------------
 -											-
@@ -49,193 +31,138 @@ static int	gs_db_draw_buffer=0;
 -											-
 -------------------------------------------*/
 
-
-
-
-short GsSetXYOffset1(unsigned short x, unsigned short y)
+int GsSetXYOffset1(unsigned short x, unsigned short y)
 {
-
 	gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
 	gs_setR_XYOFFSET_1(((GS_R_XYOFFSET *)&prim_work[1]), x,y);
 	
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],1+1);
+	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
+
+	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
 
 	return 0;
 }
 
-
-short GsSetXYOffset2(unsigned short x, unsigned short y)
+int GsSetXYOffset2(unsigned short x, unsigned short y)
 {
-
 	gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
 	gs_setR_XYOFFSET_2(((GS_R_XYOFFSET *)&prim_work[1]), x,y);
 	
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],1+1);
+	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
 	
 	return 0;
 }
 
-
-
-
-
-
-short GsSetScissor1(unsigned short upper_x, unsigned short upper_y, unsigned short lower_x, unsigned short lower_y)
+int GsSetScissor1(unsigned short upper_x, unsigned short upper_y, unsigned short lower_x, unsigned short lower_y)
 {
-	
-
 	gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
 	gs_setR_SCISSOR_1(((GS_R_SCISSOR *)&prim_work[1]), upper_x,lower_x,upper_y,lower_y);
 
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],1+1);
+	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
 
 	return 0;
 }
 
-
-
-
-short GsSetScissor2(unsigned short upper_x, unsigned short upper_y, unsigned short lower_x, unsigned short lower_y)
+int GsSetScissor2(unsigned short upper_x, unsigned short upper_y, unsigned short lower_x, unsigned short lower_y)
 {
 	gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
 	gs_setR_SCISSOR_2(((GS_R_SCISSOR *)&prim_work[1]), upper_x,lower_x,upper_y,lower_y);
 
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],1+1);
+	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
 
 	return 0;
 }
 
-
-
-
-short GsSetFrame1(unsigned short framebuffer_addr, unsigned char framebuffer_width, unsigned char pix_mode, unsigned int draw_mask)
+int GsSetFrame1(unsigned short framebuffer_addr, unsigned char framebuffer_width, unsigned char psm, unsigned int draw_mask)
 {
-	
-
 	gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
-	gs_setR_FRAME_1(((GS_R_FRAME *)&prim_work[1]), framebuffer_addr,framebuffer_width,pix_mode,draw_mask);
+	gs_setR_FRAME_1(((GS_R_FRAME *)&prim_work[1]), framebuffer_addr,framebuffer_width,psm,draw_mask);
 
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],1+1);
+	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
-	
 
 	return 0;
 }
 
-
-
-
-short GsSetFrame2(unsigned short framebuffer_addr, unsigned char framebuffer_width, unsigned char pix_mode, unsigned int draw_mask)
+int GsSetFrame2(unsigned short framebuffer_addr, unsigned char framebuffer_width, unsigned char psm, unsigned int draw_mask)
 {
-
 	gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
-	gs_setR_FRAME_2(((GS_R_FRAME *)&prim_work[1]), framebuffer_addr,framebuffer_width,pix_mode,draw_mask);
+	gs_setR_FRAME_2(((GS_R_FRAME *)&prim_work[1]), framebuffer_addr,framebuffer_width,psm,draw_mask);
 
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],1+1);
+	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
 
 	return 0;
 }
 
-
-
-short GsTextureFlush(void)
+int GsTextureFlush(void)
 {
-
 	gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
 	gs_setR_TEXFLUSH(((GS_R_TEXFLUSH *)&prim_work[1]));
 
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],1+1);
+	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
 	
-
 	return 0;
 }
 
-
-
-
-short GsSetPixelTest1(unsigned char enable_alpha_test, unsigned char alpha_test_method, unsigned char alpha_reference, unsigned char alpha_fail_method, unsigned char enable_dest_alpha_test, unsigned char dest_alpha_test_mode, unsigned char enable_zbuff_test, unsigned char alpha_zbuff_method)
+int GsSetPixelTest1(unsigned char enable_alpha_test, unsigned char alpha_test_method, unsigned char alpha_reference, unsigned char alpha_fail_method, unsigned char enable_dest_alpha_test, unsigned char dest_alpha_test_mode, unsigned char enable_zbuff_test, unsigned char alpha_zbuff_method)
 {
-
 	gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
 	gs_setR_TEST_1(((GS_R_TEST *)&prim_work[1]), enable_alpha_test, alpha_test_method, alpha_reference, alpha_fail_method, enable_dest_alpha_test, dest_alpha_test_mode, enable_zbuff_test, alpha_zbuff_method);
 
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],1+1);
+	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
-	
 
 	return 0;
 }
 
-
-
-
-short GsSetPixelTest2(unsigned char enable_alpha_test, unsigned char alpha_test_method, unsigned char alpha_reference, unsigned char alpha_fail_method, unsigned char enable_dest_alpha_test, unsigned char dest_alpha_test_mode, unsigned char enable_zbuff_test, unsigned char alpha_zbuff_method)
+int GsSetPixelTest2(unsigned char enable_alpha_test, unsigned char alpha_test_method, unsigned char alpha_reference, unsigned char alpha_fail_method, unsigned char enable_dest_alpha_test, unsigned char dest_alpha_test_mode, unsigned char enable_zbuff_test, unsigned char alpha_zbuff_method)
 {
-
 	gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
 	gs_setR_TEST_2(((GS_R_TEST *)&prim_work[1]), enable_alpha_test, alpha_test_method, alpha_reference, alpha_fail_method, enable_dest_alpha_test, dest_alpha_test_mode, enable_zbuff_test, alpha_zbuff_method);
 
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],1+1);
+	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
-	
 
 	return 0;
 }
 
-
-
-
-
-short GsSelectTexure1(unsigned short tex_addr, unsigned char addr_width, unsigned char tex_pixmode, unsigned short tex_width, unsigned short tex_height, unsigned short clut_addr, unsigned char clut_pixmode, unsigned char clut_storagemode,unsigned char clut_offset)
+int GsSelectTexure1(unsigned short tex_addr, unsigned char addr_width, unsigned char tex_pixmode, unsigned short tex_width, unsigned short tex_height, unsigned short clut_addr, unsigned char clut_pixmode, unsigned char clut_storagemode,unsigned char clut_offset)
 {
-
 	gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
 	gs_setR_TEX0_1(((GS_R_TEX0 *)&prim_work[1]), tex_addr,addr_width,tex_pixmode, twh4(tex_width), twh4(tex_height),1,0,clut_addr,clut_pixmode,clut_storagemode,clut_offset,4); /*4 load contex 0*/
 	
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],1+1);
+	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
 
 	return 0;
 }
 
-
-
-
-
-
-
-short GsSelectTexure2(unsigned short tex_addr, unsigned char addr_width, unsigned char tex_pixmode, unsigned short tex_width, unsigned short tex_height, unsigned short clut_addr, unsigned char clut_pixmode, unsigned char clut_storagemode,unsigned char clut_offset)
+int GsSelectTexure2(unsigned short tex_addr, unsigned char addr_width, unsigned char tex_pixmode, unsigned short tex_width, unsigned short tex_height, unsigned short clut_addr, unsigned char clut_pixmode, unsigned char clut_storagemode,unsigned char clut_offset)
 {
-
 	gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
 	gs_setR_TEX0_2(((GS_R_TEX0 *)&prim_work[1]), tex_addr, addr_width, tex_pixmode, twh4(tex_width), twh4(tex_height), 1, 0, clut_addr, clut_pixmode, clut_storagemode,clut_offset,5);/*5 load contex 2*/
 
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],1+1);
+	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
 
 	return 0;
 }
-
-
-
-
 
 void GsSetFogColor(unsigned char r, unsigned char g, unsigned char b)
 {
@@ -243,38 +170,32 @@ void GsSetFogColor(unsigned char r, unsigned char g, unsigned char b)
 	gs_setGIF_TAG(((GS_GIF_TAG		 *)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
 	gs_setR_FOGCOLOR(((GS_R_FOGCOLOR *)&prim_work[1]), r,g,b);
 	
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],1+1);
+	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
 }
-
-
 
 void GsEnableColorClamp(unsigned short enable)
 {
-
 	gs_setGIF_TAG(((GS_GIF_TAG			*)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
 	gs_setR_COLCLAMP(((GS_R_COLCLAMP	*)&prim_work[1]), enable);
 
-
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],1+1);
+	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
-
 }
 
-
-
-
 /*-------------------------------------------
--											-
-- 											-
--											-
+-
+- Initialization functions.											-
+-
 -------------------------------------------*/
 
-short GsInit(void)
+static unsigned short int VideoMode;
+
+int GsInit(short int interlace, short int videomode, short int ffmd)
 {
-		/*Reset/init dma(gif channel only)*/
+	/*Reset/init dma(gif channel only)*/
 	__asm__(
 	"li	$2,0x1000A000	\n"
 	"nop				\n"
@@ -303,11 +224,10 @@ short GsInit(void)
 	"sw	$3,0x1000E000	\n"
 	"nop				\n"
 	);
-	
+
 	//reset the GS
 	GS_SET_CSR_flush(1);
 	GS_SET_CSR_reset(1);
-		
 
 	//wait for GS to finish reset
 	__asm__( 
@@ -315,72 +235,28 @@ short GsInit(void)
 		"nop	\n"
 		);
 
-
-	
-
-	//default to ntsc to prevent crash
-	__asm__(
-		
-		"li	$3,0x02		\n"		// call SetGsCrt	
-		"li	$4,0x00		\n"		// non-interlace	
-		"li	$5,0x02		\n"		// ntsc
-		"li	$6,0x01		\n"		// frame mode
-		"syscall		\n"
-		"nop			\n"
-		);
-
-
-
-	return 0;
+	return GsSetVideoMode(interlace, videomode,  ffmd);
 }
 
-
-
-
-
-
-short GsSetCRTCMode(int interlace,  int videomode,  int fieldmode)
+int GsSetCRTCSettings(unsigned long settings, unsigned char alpha_value)
 {
-	__asm__(
-
-		"li	$3,0x02		\n"		// call SetGsCrt					
-		"syscall		\n"
-		"nop			\n"
-		);
-
-	return 0;
-}
-
-
-
-short GsSetCRTCSettings(unsigned long settings, unsigned char alpha_value)
-{
-	
 	*((volatile unsigned long *)(gs_p_pmode)) =  (settings|((unsigned long)(001) << 2)|((unsigned long)(alpha_value) 	<< 8));
 
 	return 0;
 }
 
-
-
-
-short GsSetVideoMode(int interlace,  int videomode,  int fieldmode)
+int GsSetVideoMode(short int interlace, short int videomode, short int ffmd)
 {
-
-	GsSetCRTCMode(interlace, videomode, fieldmode);
+	SetGsCrt(interlace, videomode, ffmd);
 	GsSetCRTCSettings(CRTC_SETTINGS_DEFAULT1, 255);
+	VideoMode=videomode;
 	return 0;
 }
 
-
-
-
-
-
-short GsSetDefaultDrawEnv(GS_DRAWENV *drawenv, unsigned short x, unsigned short y, unsigned short w, unsigned short h)
+int GsSetDefaultDrawEnv(GS_DRAWENV *drawenv, unsigned short int w, unsigned short int h)
 {
-	drawenv->offset_x	= x;
-	drawenv->offset_y	= y;
+	drawenv->offset_x	= 2048-w/2;
+	drawenv->offset_y	= 2048-h/2;
 	drawenv->clip.x		= 0;
 	drawenv->clip.y		= 0;
 	drawenv->clip.w		= w;
@@ -388,184 +264,141 @@ short GsSetDefaultDrawEnv(GS_DRAWENV *drawenv, unsigned short x, unsigned short 
 	drawenv->draw_mask	= 0;
 	drawenv->auto_clear	= 1;
 
-	drawenv->bg_color.r			= 0x01;
-	drawenv->bg_color.g			= 0x01;
-	drawenv->bg_color.b			= 0x01;
-	drawenv->bg_color.a			= 0x80;
-	drawenv->bg_color.q			= 0.0f;
-	
-
-	
-	return 0;
-}
-
-
-
-
-
-
-
-
-short GsSetDefaultDrawEnvAddress(GS_DRAWENV *drawenv, unsigned short vram_addr, unsigned char	vram_width, unsigned char pix_mode)
-{
-	drawenv->vram_addr	= vram_addr;
-	drawenv->vram_width = vram_width;
-	drawenv->pix_mode	= pix_mode;
-	drawenv->vram_x		= 0;
-	drawenv->vram_y		= 0;
+	drawenv->bg_color.r	= 0x01;
+	drawenv->bg_color.g	= 0x01;
+	drawenv->bg_color.b	= 0x01;
+	drawenv->bg_color.a	= 0x80;
+	drawenv->bg_color.q	= 0.0f;	
 
 	return 0;
 }
 
-
-
-
-
-
-
-short GsSetDefaultDisplayEnv(GS_DISPENV *dispenv, unsigned short x, unsigned short y, unsigned short w, unsigned short h)
+int GsSetDefaultDrawEnvAddress(GS_DRAWENV *drawenv, unsigned short vram_addr, unsigned char fbw, unsigned char psm)
 {
-	dispenv->screen.x	= x;
-	dispenv->screen.y	= y;
-	dispenv->screen.w	= w;
-	dispenv->screen.h	= h;
-
-	dispenv->magnify_h	= 4;
-	dispenv->magnify_v	= 0;
+	drawenv->vram_addr=vram_addr;
+	drawenv->fbw=fbw;
+	drawenv->psm=psm;
+	drawenv->vram_x=0;
+	drawenv->vram_y=0;
 
 	return 0;
 }
 
-
-
-
-
-
-
-short GsSetDefaultDisplayEnvAddress(GS_DISPENV *dispenv, unsigned short vram_addr, unsigned char	vram_width, unsigned char pix_mode)
+int GsSetDefaultDisplayEnv(GS_DISPENV *dispenv, unsigned short int w, unsigned short int h, unsigned short int x, unsigned short int y)
 {
-	dispenv->vram_addr	= vram_addr;
-	dispenv->vram_width = vram_width;
-	dispenv->pix_mode	= pix_mode;
-	dispenv->vram_x		= 0;
-	dispenv->vram_y		= 0;
+	int result;
+
+	dispenv->disp.pad1=dispenv->disp.pad2=0;
+
+	switch(VideoMode){
+		case GS_MODE_NTSC:	// NTSC
+			dispenv->disp.display_w	= 2560-1;
+			dispenv->disp.display_h	= h-1;
+			dispenv->disp.display_x	= 636+x*(2560/w);
+			dispenv->disp.display_y	= 50+y;
+			dispenv->disp.magnify_h	= (2560+w-1)/w-1;
+			dispenv->disp.magnify_v	= 0;
+			result=0;
+			break;
+		case GS_MODE_PAL:	// PAL
+			dispenv->disp.display_w	= 2560-1;
+			dispenv->disp.display_h	= h-1;
+			dispenv->disp.display_x	= 656+x*(2560/w);
+			dispenv->disp.display_y	= 72+y;
+			dispenv->disp.magnify_h	= (2560+w-1)/w-1;
+			dispenv->disp.magnify_v	= 0;
+			result=0;
+			break;
+		default:
+			result=-EINVAL;
+	}
 
 	return 0;
 }
 
-
-
-
-
-short GsSetDefaultZBufferEnv(GS_ZENV *zenv, unsigned char update_mask)
+int GsSetDefaultDisplayEnvAddress(GS_DISPENV *dispenv, unsigned short vram_addr, unsigned char fbw, unsigned char psm)
 {
-	
+	dispenv->dispfb.fbw=fbw;
+	dispenv->dispfb.psm=psm;
+	dispenv->dispfb.pad1=dispenv->dispfb.pad2=0;
+	dispenv->dispfb.x=0;
+	dispenv->dispfb.y=0;
+	dispenv->dispfb.address=vram_addr;
+
+	return 0;
+}
+
+int GsSetDefaultZBufferEnv(GS_ZENV *zenv, unsigned char update_mask)
+{
 	zenv->update_mask = update_mask;
 	
 	return 0;
 }
 
-
-short GsSetDefaultZBufferEnvAddress(GS_ZENV *zenv, unsigned short vram_addr, unsigned char pix_mode)
+int GsSetDefaultZBufferEnvAddress(GS_ZENV *zenv, unsigned short vram_addr, unsigned char psm)
 {
-	zenv->vram_addr   = vram_addr;
-	zenv->pix_mode    = pix_mode;
-	
+	zenv->vram_addr=vram_addr;
+	zenv->psm=psm;
+
 	return 0;
 }
 
-
-
-
-
-short GsPutDrawEnv1(GS_DRAWENV *drawenv)
+int GsPutDrawEnv1(GS_DRAWENV *drawenv)
 {
-
 	GsSetXYOffset1(drawenv->offset_x<<4, drawenv->offset_y<<4);
-	GsSetScissor1(drawenv->clip.x, drawenv->clip.y, drawenv->clip.x+drawenv->clip.w-1, drawenv->clip.y+drawenv->clip.h-1);
-	GsSetFrame1(drawenv->vram_addr, drawenv->vram_width, drawenv->pix_mode, drawenv->draw_mask);
-	
-	
+	GsSetScissor1(drawenv->clip.x, drawenv->clip.y, drawenv->clip.x+drawenv->clip.w, drawenv->clip.y+drawenv->clip.h);
+	GsSetFrame1(drawenv->vram_addr, drawenv->fbw, drawenv->psm, drawenv->draw_mask);
+
 	//use a sprite to clear background
 	if(drawenv->auto_clear)
 	{
-
 		GsClearDrawEnv1(drawenv);
 	}
 	
 	return 0;
 }
 
-
-
-
-
-
-
-
-
-short GsPutDrawEnv2(GS_DRAWENV *drawenv)
+int GsPutDrawEnv2(GS_DRAWENV *drawenv)
 {
-
 	GsSetXYOffset2(drawenv->offset_x<<4, drawenv->offset_y<<4);
-	GsSetScissor2(drawenv->clip.x, drawenv->clip.y, drawenv->clip.x+drawenv->clip.w-1, drawenv->clip.y+drawenv->clip.h-1);
-	GsSetFrame2(drawenv->vram_addr, drawenv->vram_width, drawenv->pix_mode, drawenv->draw_mask);
-	
-	
+	GsSetScissor2(drawenv->clip.x, drawenv->clip.y, drawenv->clip.x+drawenv->clip.w, drawenv->clip.y+drawenv->clip.h);
+	GsSetFrame2(drawenv->vram_addr, drawenv->fbw, drawenv->psm, drawenv->draw_mask);
+
 	//use a sprite to clear background
 	if(drawenv->auto_clear)
 	{
-
 		GsClearDrawEnv2(drawenv);
 	}
 	
 	return 0;
 }
 
-
-
-
-
-
-
-short GsClearDrawEnv1(GS_DRAWENV *drawenv)
+int GsClearDrawEnv1(GS_DRAWENV *drawenv)
 {
-	static unsigned char	context;
+	unsigned char context;
 
 	// use a sprite to clear background
-		
 	context =0; // contex 1
 
-
-
 	gs_setGIF_TAG(((GS_GIF_TAG	*)&prim_work[0]), 4,1,0,0,0,0,1,0x0e);
 	gs_setR_PRIM(((GS_R_PRIM	*)&prim_work[1]), GS_PRIM_SPRITE,0, 0, 0, 1, 0, 1, context, 0);
 	gs_setR_RGBAQ(((GS_R_RGBAQ	*)&prim_work[2]), drawenv->bg_color.r, drawenv->bg_color.g, drawenv->bg_color.b, drawenv->bg_color.a, drawenv->bg_color.q);
 	gs_setR_XYZ2(((GS_R_XYZ		*)&prim_work[3]), (drawenv->offset_x+drawenv->clip.x)<<4, (drawenv->offset_y+drawenv->clip.y)<<4, 0x00000000);
 	gs_setR_XYZ2(((GS_R_XYZ		*)&prim_work[4]), (drawenv->offset_x+drawenv->clip.x+drawenv->clip.w)<<4, (drawenv->offset_y+drawenv->clip.y+drawenv->clip.h)<<4, 0x00000000);
 
-	
-
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],4+1);
+	SyncDCache(prim_work, prim_work+5*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],5);
 	gs_dma_wait();
 
 	return 0;
 }
 
-
-
-
-
-short GsClearDrawEnv2(GS_DRAWENV *drawenv)
+int GsClearDrawEnv2(GS_DRAWENV *drawenv)
 {
-	static unsigned char	context;
+	unsigned char	context;
 
 	// use a sprite to clear background
-		
 	context =1; // contex 2
-
-
 
 	gs_setGIF_TAG(((GS_GIF_TAG	*)&prim_work[0]), 4,1,0,0,0,0,1,0x0e);
 	gs_setR_PRIM(((GS_R_PRIM	*)&prim_work[1]), GS_PRIM_SPRITE,0, 0, 0, 1, 0, 1, context, 0);
@@ -573,110 +406,55 @@ short GsClearDrawEnv2(GS_DRAWENV *drawenv)
 	gs_setR_XYZ2(((GS_R_XYZ		*)&prim_work[3]), (drawenv->offset_x+drawenv->clip.x)<<4, (drawenv->offset_y+drawenv->clip.y)<<4, 0x00000000);
 	gs_setR_XYZ2(((GS_R_XYZ		*)&prim_work[4]), (drawenv->offset_x+drawenv->clip.x+drawenv->clip.w)<<4, (drawenv->offset_y+drawenv->clip.y+drawenv->clip.h)<<4, 0x00000000);
 
-	
-
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],4+1);
+	SyncDCache(prim_work, prim_work+5*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],5);
 	gs_dma_wait();
 
 	return 0;
 }
 
-
-
-
-
-short GsPutDisplayEnv1(GS_DISPENV *dispenv)
+int GsPutDisplayEnv1(GS_DISPENV *dispenv)
 {
-	GS_DISPLAY		disp;
-	GS_DISPFB		dispfb;
-	disp.pad1		= disp.pad2 = 0;
-	disp.display_x	= dispenv->screen.x;
-	disp.display_y	= dispenv->screen.y;
-	disp.display_w	= (dispenv->screen.w*dispenv->magnify_h)-1;
-	disp.display_h	= dispenv->screen.h-1;
-	disp.magnify_h	= dispenv->magnify_h-1;
-	disp.magnify_v	= dispenv->magnify_v;
-	*((volatile unsigned long *)(gs_p_display1)) =  *(unsigned long *)(&disp);
-	
-	dispfb.pad1		 = dispfb.pad2 = 0;
-	dispfb.address	 = dispenv->vram_addr;
-	dispfb.width	 = dispenv->vram_width;
-	dispfb.pix_mode	 = dispenv->pix_mode;
-	dispfb.x		 = dispenv->vram_x;
-	dispfb.y		 = dispenv->vram_y;
-	*((volatile unsigned long *)(gs_p_dispfb1)) =  *(unsigned long *)(&dispfb);
+	*((volatile unsigned long *)(gs_p_display1)) =  *(unsigned long *)(&dispenv->disp);
+	*((volatile unsigned long *)(gs_p_dispfb1)) =  *(unsigned long *)(&dispenv->dispfb);
+
 	return 1;
 }
 
-
-
-
-
-
-
-short GsPutDisplayEnv2(GS_DISPENV *dispenv)
+int GsPutDisplayEnv2(GS_DISPENV *dispenv)
 {
-	GS_DISPLAY		disp;
-	GS_DISPFB		dispfb;
-	disp.pad1		= disp.pad2 = 0;
-	disp.display_x	= dispenv->screen.x;
-	disp.display_y	= dispenv->screen.y;
-	disp.display_w	= (dispenv->screen.w*dispenv->magnify_h)-1;
-	disp.display_h	= dispenv->screen.h-1;
-	disp.magnify_h	= dispenv->magnify_h-1;
-	disp.magnify_v	= dispenv->magnify_v;
-	*((volatile unsigned long *)(gs_p_display2)) =  *(unsigned long *)(&disp);
-	
-	dispfb.pad1 = dispfb.pad2 = 0;
-	dispfb.address	 = dispenv->vram_addr;
-	dispfb.width	 = dispenv->vram_width;
-	dispfb.pix_mode	 = dispenv->pix_mode;
-	dispfb.x		 = dispenv->vram_x;
-	dispfb.y		 = dispenv->vram_y;
-	*((volatile unsigned long *)(gs_p_dispfb2)) =  *(unsigned long *)(&dispfb);
+	*((volatile unsigned long *)(gs_p_display2)) =  *(unsigned long *)(&dispenv->disp);
+	*((volatile unsigned long *)(gs_p_dispfb2)) =  *(unsigned long *)(&dispenv->dispfb);
+
 	return 1;
 }
 
-
-
-
-short GsPutZBufferEnv1(GS_ZENV *zenv)
-{	
+int GsPutZBufferEnv1(GS_ZENV *zenv)
+{
 	gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
-	gs_setR_ZBUF_1(((GS_R_ZBUF *)&prim_work[1]), zenv->vram_addr, zenv->pix_mode, zenv->update_mask);
+	gs_setR_ZBUF_1(((GS_R_ZBUF *)&prim_work[1]), zenv->vram_addr, zenv->psm, zenv->update_mask);
 
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],1+1);
+	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
 
 	return 0;
 }
 
-
-short GsPutZBufferEnv2(GS_ZENV *zenv)
-{	
-	gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), 4,1,0,0,0,0,1,0x0e);
-	gs_setR_ZBUF_2(((GS_R_ZBUF *)&prim_work[1]), zenv->vram_addr, zenv->pix_mode, zenv->update_mask);
-
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],1+1);
-	gs_dma_wait();
-
-	return 0;
-}
-
-
-
-
-
-
-
-short GsOverridePrimAttributes(char override, char iip, char tme, char fge, char abe, char aa1, char fst, char ctxt, char fix)
+int GsPutZBufferEnv2(GS_ZENV *zenv)
 {
+	gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), 4,1,0,0,0,0,1,0x0e);
+	gs_setR_ZBUF_2(((GS_R_ZBUF *)&prim_work[1]), zenv->vram_addr, zenv->psm, zenv->update_mask);
 
+	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],2);
+	gs_dma_wait();
 
+	return 0;
+}
 
+int GsOverridePrimAttributes(char override, char iip, char tme, char fge, char abe, char aa1, char fst, char ctxt, char fix)
+{
 	gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), 2,1,0,0,0,0,1,0x0e);
 	
 	//override. (0 = use PRIM)(1 = use PRMODE)
@@ -689,32 +467,23 @@ short GsOverridePrimAttributes(char override, char iip, char tme, char fge, char
 		gs_setR_PRMODECONT(((GS_R_PRMODECONT *)&prim_work[1]), 1);
 	}
 
-	
 	gs_setR_PRMODE(((GS_R_PRMODE *)&prim_work[2]), iip,tme,fge,abe,aa1,fst,ctxt,fix);
 
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],2+1);
+	SyncDCache(prim_work, prim_work+3*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],3);
 	gs_dma_wait();
 	
 	return 0;
 }
 
-
-
-
-
-
 void GsEnableDithering(unsigned char enable, int mode)
 {
-
-	
 	if(enable)
 	{
 		gs_setGIF_TAG(((GS_GIF_TAG	*)&prim_work[0]), 3,1,0,0,0,0,1,0x0e);
 		gs_setR_DTHE(((GS_R_DTHE	*)&prim_work[1]), 1);
 		gs_setR_DIMX(((GS_R_DIMX	*)&prim_work[2]), 4,2,5,3,0,6,1,7,5,3,4,2,1,7,0,6); //thanks to:"Maximus32" on ps2dev.org
 		gs_setR_COLCLAMP(((GS_R_COLCLAMP *)&prim_work[3]), 1);
-		
 	}
 	else
 	{
@@ -722,26 +491,12 @@ void GsEnableDithering(unsigned char enable, int mode)
 		gs_setR_DTHE(((GS_R_DTHE	*)&prim_work[1]), 0);
 		gs_setR_DIMX(((GS_R_DIMX	*)&prim_work[2]), 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 		gs_setR_NOP (((GS_R_NOP		*)&prim_work[3])); // NOP to replace clamp
-		
-
 	}
 
-
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],3+1);
+	SyncDCache(prim_work, prim_work+4*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],4);
 	gs_dma_wait();
 }
-
-
-
-
-
-
-
-
-
-
-
 
 void GsEnableAlphaTransparency1(unsigned short enable,unsigned short method,unsigned char alpha_ref,unsigned short fail_method)
 {
@@ -755,20 +510,14 @@ void GsEnableAlphaTransparency1(unsigned short enable,unsigned short method,unsi
 					GSGLOBAL_TEST1.datest_enable, GSGLOBAL_TEST1.datest_mode,
 					GSGLOBAL_TEST1.ztest_enable,  GSGLOBAL_TEST1.ztest_method);
 
-
 	// tell GS in 16bit texture 1=transparent,0=solid
 	gs_setGIF_TAG(((GS_GIF_TAG		*)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
 	gs_setR_TEXA(((GS_R_TEXA		*)&prim_work[1]), 0x80, 0, 0x00);
 	
-
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],1+1);
+	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
-	
 }
-
-
-
 
 void GsEnableAlphaTransparency2(unsigned short enable,unsigned short method,unsigned char alpha_ref,unsigned short fail_method)
 {
@@ -777,39 +526,30 @@ void GsEnableAlphaTransparency2(unsigned short enable,unsigned short method,unsi
 	GSGLOBAL_TEST2.atest_reference	 = alpha_ref;
 	GSGLOBAL_TEST2.atest_fail_method = fail_method;
 
-	
 	GsSetPixelTest2(GSGLOBAL_TEST2.atest_enable	, GSGLOBAL_TEST2.atest_method, GSGLOBAL_TEST2.atest_reference, GSGLOBAL_TEST2.atest_fail_method,
 					GSGLOBAL_TEST2.datest_enable, GSGLOBAL_TEST2.datest_mode,
 					GSGLOBAL_TEST2.ztest_enable,  GSGLOBAL_TEST2.ztest_method);
-	
 
 	// tell GS in 16bit texture 1=transparent,0=solid
 	gs_setGIF_TAG(((GS_GIF_TAG		*)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
 	gs_setR_TEXA(((GS_R_TEXA		*)&prim_work[1]), 0x80, 0, 0x00);
 	
-
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],1+1);
+	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
 }
 
-
-
-void  GsEnableZbuffer1(unsigned short enable,unsigned short test_method)
+void GsEnableZbuffer1(unsigned short enable,unsigned short test_method)
 {
 	GSGLOBAL_TEST1.ztest_enable = enable;
 	GSGLOBAL_TEST1.ztest_method	= test_method;
 
-
 	GsSetPixelTest1(GSGLOBAL_TEST1.atest_enable	, GSGLOBAL_TEST1.atest_method, GSGLOBAL_TEST1.atest_reference, GSGLOBAL_TEST1.atest_fail_method,
 					GSGLOBAL_TEST1.datest_enable, GSGLOBAL_TEST1.datest_mode,
 					GSGLOBAL_TEST1.ztest_enable,  GSGLOBAL_TEST1.ztest_method);
-
 }
 
-
-
-void  GsEnableZbuffer2(unsigned short enable,unsigned short test_method)
+void GsEnableZbuffer2(unsigned short enable,unsigned short test_method)
 {
 	GSGLOBAL_TEST2.ztest_enable = enable;
 	GSGLOBAL_TEST2.ztest_method	= test_method;
@@ -821,110 +561,84 @@ void  GsEnableZbuffer2(unsigned short enable,unsigned short test_method)
 
 }
 
-
-
-
-
-short GsGifPacketsClear(GS_PACKET_TABLE *table)
+int GsGifPacketsClear(GS_PACKET_TABLE *table)
 {
-	
-	table->packet_offset	=0;
-	table->qword_offset		=0;
+	table->packet_offset=0;
+	table->qword_offset=0;
 	
 	return 0;
 }
 
-
-
-
-
 void GsEnableAlphaBlending1(unsigned short enable, unsigned short mode)
 {
+	gs_setGIF_TAG(((GS_GIF_TAG		*)&prim_work[0]), 4,1,0,0,0,0,1,0x0e);
 
 	if(enable)
 	{
-		gs_setGIF_TAG(((GS_GIF_TAG		*)&prim_work[0]), 4,1,0,0,0,0,1,0x0e);
 		gs_setR_ALPHA_1(((GS_R_ALPHA	*)&prim_work[1]), 0,1,0,1,0x00); //last arg(0x00) is not used bceause of other settings
-		gs_setR_PABE(((GS_R_PABE		*)&prim_work[2]), 0);
-		gs_setR_FBA_1(((GS_R_FBA		*)&prim_work[3]), 0);
-		gs_setR_TEXA(((GS_R_TEXA		*)&prim_work[4]), 0x80, 0, 0x00);
 	}
 	else
 	{
-		gs_setGIF_TAG(((GS_GIF_TAG		*)&prim_work[0]), 4,1,0,0,0,0,1,0x0e);
 		gs_setR_ALPHA_1(((GS_R_ALPHA	*)&prim_work[1]), 0,0,0,0,0x80);
-		gs_setR_PABE(((GS_R_PABE		*)&prim_work[2]), 0);
-		gs_setR_FBA_1(((GS_R_FBA		*)&prim_work[3]), 0);
-		gs_setR_TEXA(((GS_R_TEXA		*)&prim_work[4]), 0x80, 0, 0x00);
 	}
+	gs_setR_PABE(((GS_R_PABE		*)&prim_work[2]), 0);
+	gs_setR_FBA_1(((GS_R_FBA		*)&prim_work[3]), 0);
+	gs_setR_TEXA(((GS_R_TEXA		*)&prim_work[4]), 0x80, 0, 0x00);
 
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],4+1);
+	SyncDCache(prim_work, prim_work+5*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],5);
 	gs_dma_wait();
 }
-
-
-
-
 
 void GsEnableAlphaBlending2(unsigned short enable, unsigned short mode)
 {
+	gs_setGIF_TAG(((GS_GIF_TAG		*)&prim_work[0]), 4,1,0,0,0,0,1,0x0e);
 
 	if(enable)
 	{
-		gs_setGIF_TAG(((GS_GIF_TAG		*)&prim_work[0]), 4,1,0,0,0,0,1,0x0e);
 		gs_setR_ALPHA_2(((GS_R_ALPHA	*)&prim_work[1]), 0,1,0,1,0x00); //last arg(0x00) is not used bceause of other settings
-		gs_setR_PABE(((GS_R_PABE		*)&prim_work[2]), 0);
-		gs_setR_FBA_2(((GS_R_FBA		*)&prim_work[3]), 0);
-		gs_setR_TEXA(((GS_R_TEXA		*)&prim_work[4]), 0x80, 0, 0x00);
 	}
 	else
 	{
-		gs_setGIF_TAG(((GS_GIF_TAG		*)&prim_work[0]), 4,1,0,0,0,0,1,0x0e);
 		gs_setR_ALPHA_2(((GS_R_ALPHA	*)&prim_work[1]), 0,0,0,0,0x80);
-		gs_setR_PABE(((GS_R_PABE		*)&prim_work[2]), 0);
-		gs_setR_FBA_2(((GS_R_FBA		*)&prim_work[3]), 0);
-		gs_setR_TEXA(((GS_R_TEXA		*)&prim_work[4]), 0x80, 0, 0x00);
 	}
+	gs_setR_PABE(((GS_R_PABE		*)&prim_work[2]), 0);
+	gs_setR_FBA_2(((GS_R_FBA		*)&prim_work[3]), 0);
+	gs_setR_TEXA(((GS_R_TEXA		*)&prim_work[4]), 0x80, 0, 0x00);
 
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],4+1);
+	SyncDCache(prim_work, prim_work+5*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],5);
 	gs_dma_wait();
 }
-
-
-
-
 
 QWORD *GsGifPacketsAlloc(GS_PACKET_TABLE *table, unsigned int num_qwords)
 {
 	void	*pointer;
+	GS_GIF_PACKET *packet;
 	
 	if(num_qwords <= (GS_PACKET_DATA_QWORD_MAX-table->qword_offset))			//check if we can alloc in current packet
 	{
-		pointer		=		&table->packet[table->packet_offset].data[table->qword_offset];
-		
+		pointer=&table->packets[table->packet_offset].data[table->qword_offset];
 		table->qword_offset += num_qwords;
-		return pointer;
 	}
 	else	//couldnt fit so we going to have to try to jump to next packet
 	{
 		if(table->packet_offset+1 == table->packet_count) //no more packet available so we return error;
 		{
-
-			return (void *) -1;
+			pointer=NULL;
 		}
 		else //there is another pocket available so we can jump to it
 		{
 			//before we jup to this packet then we got to end current packet and point it to the new one
-			table->packet[table->packet_offset].tag.qwc		=table->qword_offset;
-			table->packet[table->packet_offset].tag.pad1	=0;
-			table->packet[table->packet_offset].tag.pce		=0;
-			table->packet[table->packet_offset].tag.id		=0x02; //next = tag.addr
-			table->packet[table->packet_offset].tag.irq		=0;
-			table->packet[table->packet_offset].tag.addr	=(unsigned int)&table->packet[table->packet_offset + 1].tag;
-			table->packet[table->packet_offset].tag.spr		=0;
-			table->packet[table->packet_offset].tag.pad2	=0;
+			packet=(GS_GIF_PACKET*)UNCACHED_SEG(&table->packets[table->packet_offset]);
+			packet->tag.qwc=table->qword_offset;
+			packet->tag.pad1=0;
+			packet->tag.pce=0;
+			packet->tag.id=0x02; //next = tag.addr
+			packet->tag.irq	=0;
+			packet->tag.addr=(unsigned int)&((GS_GIF_PACKET*)UNCACHED_SEG(&table->packets[table->packet_offset + 1]))->tag;
+			packet->tag.spr		=0;
+			packet->tag.pad2	=0;
 
 			//now reset qwords offset in this packet & update packet offset
 			table->qword_offset= 0;
@@ -932,134 +646,87 @@ QWORD *GsGifPacketsAlloc(GS_PACKET_TABLE *table, unsigned int num_qwords)
 		}
 
 		//now we use the new packet
-		
 		// but we still got to check if enough mem is available
 		if( num_qwords <= (GS_PACKET_DATA_QWORD_MAX-table->qword_offset) )
 		{
-			pointer		=		&table->packet[table->packet_offset].data[table->qword_offset];
-			 
+			pointer=&table->packets[table->packet_offset].data[table->qword_offset];
 			table->qword_offset += num_qwords;
-			return pointer;
 		}
 		else //not enough
 		{
-			return (void *) -1;
+			pointer=NULL;
 		}
-
-
-
 	}
 	
-	return 0;
+	return pointer;
 }
 
-
-
-
-
-
-short GsGifPacketsExecute(GS_PACKET_TABLE *table, unsigned short wait)
+int GsGifPacketsExecute(GS_PACKET_TABLE *table, unsigned short wait)
 {
+	GS_GIF_PACKET *packet;
+
 	if(table->packet_offset==0    &&   table->qword_offset==0)
 		return 0;
 
-	if(table->packet <= 0)
+	if(table->packets == NULL)
 		return -1;
 
 	//close the current pocket
-	table->packet[table->packet_offset].tag.qwc		=table->qword_offset;
-	table->packet[table->packet_offset].tag.pad1	=0;
-	table->packet[table->packet_offset].tag.pce		=0;
-	table->packet[table->packet_offset].tag.id		=0x07; //end
-	table->packet[table->packet_offset].tag.irq		=0;
-	table->packet[table->packet_offset].tag.addr	=(unsigned int)0;
-	table->packet[table->packet_offset].tag.spr		=0;
-	table->packet[table->packet_offset].tag.pad2	=0;
-	
-	
-	
-	gs_flush_cache(0);
-	gs_dma_send_tag(0, 0, (GS_GIF_DMACHAIN_TAG *)table->packet);
+	packet=(GS_GIF_PACKET*)UNCACHED_SEG(&table->packets[table->packet_offset]);
+	packet->tag.qwc		=table->qword_offset;
+	packet->tag.pad1	=0;
+	packet->tag.pce		=0;
+	packet->tag.id		=0x07; //end
+	packet->tag.irq		=0;
+	packet->tag.addr	=(unsigned int)0;
+	packet->tag.spr		=0;
+	packet->tag.pad2	=0;
+
+	gs_dma_send_tag(0, 0, &table->packets[0].tag);
 	if(wait)
 		gs_dma_wait();
 	
 	return 0;
 }
 
-
-
-
-
-
-
-
-
-short GsDrawSync(short mode)
+int GsDrawSync(int mode)
 {
-
 	switch(mode)
 	{
 	case 0:
-		gs_dma_wait();
-
-	break;
 	default:
-		gs_dma_wait();
-		
-	break;
+		gs_dma_wait();		
 	}
 
 	return 1;
 }
 
-
-
-
-
-
-
-
-short GsHSync(short mode)
+int GsHSync(int mode)
 {
 	unsigned short i;
 
 	switch(mode)
 	{
 	case 0:
-
 		GS_SET_CSR_hsync_intrupt(1);
 		while(!GS_GET_CSR_hsync_intrupt);
-		
-			
-	break;
-	case 1:
-		
-
 	break;
 	default:
 		if(mode>1)
 		{
-			
 			for(i=0;i<mode;i++)
 			{
 				GS_SET_CSR_hsync_intrupt(1);
-				while(!GS_GET_CSR_hsync_intrupt);
-				
+				while(!GS_GET_CSR_hsync_intrupt);	
 			}
 			return 0;
 		}
-		
-
-	break;
 	}
 
 	return 0;
 }
 
-
-
-
-short GsVSync(short mode)
+int GsVSync(int mode)
 {
 	unsigned short i;
 
@@ -1068,12 +735,6 @@ short GsVSync(short mode)
 	case 0: //just wait
 		GS_SET_CSR_vsync_intrupt(1);
 		while(!GS_GET_CSR_vsync_intrupt);
-		
-			
-	break;
-	case 1:
-		
-	
 	break;
 	default: // wait for num of vsync to pass
 		if(mode>1)
@@ -1087,74 +748,50 @@ short GsVSync(short mode)
 			}
 			return 0;
 		}
-		
-
-	break;
 	}
 
 	return 0;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-short GsLoadImage(void *source_addr, GS_IMAGE *dest)
+int GsLoadImage(void *source_addr, GS_IMAGE *dest)
 {
 	int i;
 	static int	current,max,remainder,img_qwc;
 	
-
-	switch(dest->pix_mode)
+	switch(dest->psm)
 	{
-	case 0:		//32 bit image
+	case GS_TEX_32:	//32 bit image
 		img_qwc = ((dest->width * dest->height)*4)/16;
 	break;
-	case 1:		//24 bit image
+	case GS_TEX_24:	//24 bit image
 		img_qwc = ((dest->width * dest->height)*3)/16;
 	break;
-	case 2:		//16 bit image
+	case GS_TEX_16:	//16 bit image
 		img_qwc = ((dest->width * dest->height)*2)/16;
 	break;
-	case 19:	//8 bit image
+	case GS_TEX_8:	//8 bit image
 		img_qwc = ((dest->width * dest->height)*1)/16;
 	break;
-	case 20:	//4 bit image
+	case GS_TEX_4:	//4 bit image
 		img_qwc = ((dest->width * dest->height)/2)/16;
 	break;
 	default:
-		//printf("unable to load unsupported image(%02x)",dest->pix_mode);
+		//printf("unable to load unsupported image(%02x)",dest->psm);
 	break;
 	}
 
 	//flush buffer to be safe
 	GsTextureFlush();
 
-
-
 	gs_setGIF_TAG(((GS_GIF_TAG				*)&prim_work[0]), 4,1,0,0,0,0,1,0x0e);
-	gs_setR_BITBLTBUF(((GS_R_BITBLTBUF		*)&prim_work[1]),0,0,0,dest->vram_addr,dest->vram_width,dest->pix_mode);
+	gs_setR_BITBLTBUF(((GS_R_BITBLTBUF		*)&prim_work[1]),0,0,0,dest->vram_addr,dest->vram_width,dest->psm);
 	gs_setR_TRXPOS(((GS_R_TRXPOS			*)&prim_work[2]), 0,0,dest->x,dest->y,0);
 	gs_setR_TRXREG(((GS_R_TRXREG			*)&prim_work[3]), dest->width,dest->height);
 	gs_setR_TRXDIR(((GS_R_TRXDIR			*)&prim_work[4]), 0);
 	
-	gs_flush_cache(0);
-	gs_dma_send((unsigned int *)&prim_work[0],4+1);
+	SyncDCache(prim_work, prim_work+5*sizeof(QWORD));
+	gs_dma_send((unsigned int *)&prim_work[0],5);
 	gs_dma_wait();
-
-
-
 
 	// Ok , We Send Image Now
 	max			= img_qwc / 16384;
@@ -1162,38 +799,32 @@ short GsLoadImage(void *source_addr, GS_IMAGE *dest)
 	current		= 16384;
 	for(i=0;i<max;i++)
 	{
-
 		//1st we signal gs we are about to send
 		//16384 qwords
 	
 		gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), current,1,0,0,0,2,0,0x00);
 
-		gs_flush_cache(0);
-		gs_dma_send((unsigned int *)&prim_work[0],0+1);
+		SyncDCache(prim_work, prim_work+1*sizeof(QWORD));
+		gs_dma_send((unsigned int *)&prim_work[0],1);
 		gs_dma_wait();
-
 
 		//we now send 16384 more qwords
 		gs_dma_send((unsigned int *)source_addr,current);
 		gs_dma_wait();
 
-
 		(unsigned char *)source_addr += current*16;
 	}
-
-
 
 	//transfer the rest if we have left overs
 	current = remainder;
 	//or exit if none is left
 	if(current)
 	{
-
 		// we signal are about to send whats left
 		gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), current,1,0,0,0,2,0,0x00);
 
-		gs_flush_cache(0);
-		gs_dma_send((unsigned int *)&prim_work[0],0+1);
+		SyncDCache(prim_work, prim_work+1*sizeof(QWORD));
+		gs_dma_send((unsigned int *)&prim_work[0],1);
 		gs_dma_wait();
 	
 		//send data leftover
@@ -1203,27 +834,11 @@ short GsLoadImage(void *source_addr, GS_IMAGE *dest)
 		gs_dma_wait();
 	}
 
-
 	//do a final flush
 	GsTextureFlush();
 
 	return 1;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /*************************************************
 *
@@ -1231,24 +846,13 @@ short GsLoadImage(void *source_addr, GS_IMAGE *dest)
 * VRAM
 *
 *************************************************/
-
-
-
-
-
-
-
 static unsigned int		vr_addr=0;
 static unsigned int		vr_tex_start=0;
 static unsigned int		vr_2ndtolast_alloc=0;	//address before last alloc so we can Free the last alloc
 
-
 int GsVramAllocFrameBuffer(short w, short h, short psm)
 {
-	static int size;
-	static int remainder;
-	static int ret;
-	static int byte_pp;	// byte per pixel
+	int size, remainder, ret, byte_pp;	// byte per pixel
 
 	switch(psm)
 	{
@@ -1259,75 +863,47 @@ int GsVramAllocFrameBuffer(short w, short h, short psm)
 	case GS_ZBUFF_32:		//
 	case GS_ZBUFF_24:		//
 	case GS_PIXMODE_24:		// also 24bit takes up 4 bytes
-		
 		byte_pp = 4;
 	break;
 	case GS_PIXMODE_16:
 	case GS_PIXMODE_16S:
 	case GS_ZBUFF_16:
-
 		byte_pp = 2;
 	break;
 	case GS_TEX_8:
-
 		byte_pp	= 1;
 	break;
 	case GS_TEX_4:
-
 		byte_pp	= 0;
 	break;
 	default:
-
-		byte_pp	= 4;
-	break;
+		return -EINVAL;
 	}
 
-
-
-	if(byte_pp > 0)			// 8 to 32 bit
+	if(byte_pp > 0)		// 8 to 32 bit
 	{
 		size = ((w*h)*byte_pp)/4;
-
 	}
-	else if(byte_pp==0)		// 4 bit
+	else			// 4 bit
 	{
 		size = (w*h)/2;
 	}
 
-
-
 	remainder = (vr_addr % (2048));
-
-
-	
-
 
 	if(remainder)
 		vr_addr += ((2048)-remainder);
 
-
 	ret = vr_addr/(2048);
-
-	vr_addr += size;
-	
-
-	
+	vr_addr += size;	
 	vr_tex_start = vr_addr;
 
 	return ret;
 }
 
-
-
-
-
-
 int GsVramAllocTextureBuffer(short w, short h, short psm)
 {
-	static int size;
-	static int remainder;
-	static int ret;
-	static int byte_pp;	// byte per pixel
+	int size, remainder, ret, byte_pp;	// byte per pixel
 
 	switch(psm)
 	{
@@ -1336,73 +912,49 @@ int GsVramAllocTextureBuffer(short w, short h, short psm)
 	case GS_TEX_8H:			// ..	
 	case GS_TEX_4HH:		// these are 32bit
 	case GS_TEX_4HL:		// ..
-	
-
 		byte_pp = 4;
 	break;
 	case GS_PIXMODE_16:
 	case GS_PIXMODE_16S:
-
 		byte_pp = 2;
 	break;
 	case GS_TEX_8:
-
 		byte_pp	= 1;
 	break;
 	case GS_TEX_4:
-
 		byte_pp	= 0;
 	break;
 	default:
-
-		byte_pp	= 4;
-	break;
+		return -EINVAL;
 	}
 
-
-
-	if(byte_pp > 0)			// 8 to 32 bit
+	if(byte_pp > 0)		// 8 to 32 bit
 	{
 		size = ((w*h)*byte_pp)/4;
-
 	}
-	else if(byte_pp==0)		// 4 bit
+	else			// 4 bit
 	{
 		size = (w*h)/2;
 	}
 
-
-
 	remainder = (vr_addr % (64));
-
 
 	//---
 	vr_2ndtolast_alloc = vr_addr;
 
-
 	if(remainder)
 		vr_addr += ((64)-remainder);	
-	
 
 	ret = vr_addr/(64);
-
 	vr_addr += size;
-	
-
-	
-
 
 	return ret;
 }
 
-
-
 void GsVramFreeAllTextureBuffer(void)
 {
 	vr_addr = vr_tex_start;
-
 }
-
 
 /*
 int VramFreeLastTextureBuffer()
@@ -1412,7 +964,6 @@ int VramFreeLastTextureBuffer()
 		vr_addr = vr_2ndtolast_alloc;
 		vr_2ndtolast_alloc =0;
 	}
-
 }
 */
 
@@ -1421,16 +972,6 @@ void GsVramFreeAll(void)
 	vr_addr			= 0;
 	vr_tex_start	= 0;
 }
-
-
-
-
-
-
-
-
-
-
 
 /*****************************************************************
 *** 
@@ -1442,31 +983,18 @@ int GsDbGetDrawBuffer(void)
 	return gs_db_draw_buffer;
 }
 
-
 int GsDbGetDisplayBuffer(void)
 {
-	int ret;
-
-	ret = gs_db_draw_buffer? 0: 1;
-
-	return ret;
+	return(gs_db_draw_buffer? 0: 1);
 }
 
-
 void GsDbSwapBuffer(void)
-{
-	
+{	
 	gs_db_draw_buffer = gs_db_draw_buffer? 0: 1;
 }
 
-
-
-
-
-
-
 /*****************************************************************
-*** MICS
+*** Miscellaneous
 ***
 *****************************************************************/
 
@@ -1481,7 +1009,7 @@ char twh4(short val)
 }
 
 /******************************************************************
-* STATIC(PRIVATE) MISC
+* STATIC(PRIVATE) Miscellaneous
 *
 *
 ******************************************************************/
@@ -1489,7 +1017,6 @@ char twh4(short val)
 #define gif_madr	0x1000a010	// Transfer Address Register
 #define gif_qwc		0x1000a020	// Transfer Size Register (in qwords)
 #define gif_tadr	0x1000a030	// ...
-
 
  #define DMA_TAG_REFE	0x00
  #define DMA_TAG_CNT	0x01
@@ -1499,9 +1026,6 @@ char twh4(short val)
  #define DMA_TAG_CALL	0x05
  #define DMA_TAG_RET	0x06
  #define DMA_TAG_END	0x07
-
-
-
 
 typedef struct {
 	unsigned direction	:1;	// Direction
@@ -1515,9 +1039,7 @@ typedef struct {
 	unsigned tag		:16;// DMAtag
 }DMA_CHCR;
 
-
-
-static short gs_dma_send(unsigned int *addr, unsigned int qwords)
+static int gs_dma_send(unsigned int *addr, unsigned int qwords)
 {
 	DMA_CHCR		chcr;
 	static char		spr;
@@ -1531,15 +1053,9 @@ static short gs_dma_send(unsigned int *addr, unsigned int qwords)
 		spr = 0;
 	}
 
-
 	*((volatile unsigned int *)(gif_madr)) = ( unsigned int )((( unsigned int )addr) & 0x7FFFFFFF) << 0 | (unsigned int)((spr) & 0x00000001) << 31;;
 
 	*((volatile unsigned int *)(gif_qwc)) = qwords;
-
-
-
-
-
 
 	chcr.direction	=1;
 	chcr.mode		=0;
@@ -1552,13 +1068,10 @@ static short gs_dma_send(unsigned int *addr, unsigned int qwords)
 	chcr.pad2		=0;
 	*((volatile unsigned int *)(gif_chcr)) = *(unsigned int *)&chcr;
 
-
 	return 0;
 }
 
-
-
-static short gs_dma_send_tag(unsigned int *addr, unsigned int qwords, GS_GIF_DMACHAIN_TAG *tag)
+static int gs_dma_send_tag(unsigned int *addr, unsigned int qwords, GS_GIF_DMACHAIN_TAG *tag)
 {
 	DMA_CHCR		chcr;
 	static char		spr;
@@ -1571,7 +1084,6 @@ static short gs_dma_send_tag(unsigned int *addr, unsigned int qwords, GS_GIF_DMA
 	{
 		spr = 0;
 	}
-
 
 	*((volatile unsigned int *)(gif_madr)) = ( unsigned int )((( unsigned int )addr) & 0x7FFFFFFF) << 0 | (unsigned int)((spr) & 0x00000001) << 31;;
 
@@ -1592,71 +1104,13 @@ static short gs_dma_send_tag(unsigned int *addr, unsigned int qwords, GS_GIF_DMA
 	chcr.pad2		=0;
 	*((volatile unsigned int *)(gif_chcr)) = *(unsigned int *)&chcr;
 
-
 	return 0;
 }
 
-
-
-
-
-static short gs_dma_wait(void)
+static int gs_dma_wait(void)
 {
 	while(*((volatile unsigned int *)(0x1000a000)) & ((unsigned int)1<<8));
 
 	return 0;
 }
 
-
-
-
-
-
-
-
-
-
-
-static void gs_flush_cache(int mode)
-{
-	__asm__(
-		
-			"li	$3,100	\n"
-			"syscall	\n"
-			"jr	$31		\n"
-			"nop		\n"
-			);
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*EOF*/
