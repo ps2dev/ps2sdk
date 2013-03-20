@@ -16,11 +16,9 @@
 #include <intrman.h>
 #include <loadcore.h>
 #include <thbase.h>
-#include <vblank.h>
 #include <modload.h>
 #include <sysclib.h>
 #include <thevent.h>
-#include <libsd.h>
 #include <sysmem.h>
 #include <lwip/memp.h>
 

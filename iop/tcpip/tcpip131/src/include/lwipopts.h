@@ -165,4 +165,14 @@ a lot of data that needs to be copied, this should be set high. */
 //the upload speed, atleast on my configuration (PC - WinXP).
 #define	PS2IP_EVEN_TCP_SEG
 
+/*
+   ------------------------------------
+   ---------- Thread options ----------
+   ------------------------------------
+*/
+#define DEFAULT_THREAD_STACKSIZE	0x800
+#define TCPIP_THREAD_STACKSIZE		DEFAULT_THREAD_STACKSIZE
+#define SLIPIF_THREAD_STACKSIZE		DEFAULT_THREAD_STACKSIZE
+#define PPP_THREAD_STACKSIZE		DEFAULT_THREAD_STACKSIZE
+
 #endif /* __LWIPOPTS_H__ */

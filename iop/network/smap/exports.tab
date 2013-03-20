@@ -1,0 +1,8 @@
+void _retonly(){};
+
+DECLARE_EXPORT_TABLE(smap, 1, 1)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+END_EXPORT_TABLE

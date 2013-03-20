@@ -126,7 +126,6 @@ sys_thread_t sys_thread_new(char *name, void (* thread)(void *arg), void *arg, i
     thp.attr = TH_C;
     thp.option = 0;
     thp.thread = thread;
-//    thp.stacksize = 0x900; // why this magic number??
     thp.stacksize = stacksize;
     thp.priority = prio + SYS_THREAD_PRIO_BASE;
 
