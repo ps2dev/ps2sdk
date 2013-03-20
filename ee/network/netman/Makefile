@@ -6,7 +6,7 @@ EE_INC_DIR = include/
 EE_OBJS = netman.o rpc_server.o rpc_client.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
-EE_INCS =
+EE_INCS = -I$(EE_SRC_DIR)/include
 EE_LIB = $(EE_LIB_DIR)libnetman.a
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)

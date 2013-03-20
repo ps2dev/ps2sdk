@@ -1,0 +1,6 @@
+-Some Firewire/IEEE1394 IDE/SATA to IEE1394/Firewire chipsets are not compatible.
+-iLinkman will cause bus errors on newer consoles that lack a physical i.Link port as DMAC #3 doesn't seem to exist on those consoles.
+	Even the DMACMAN module on those consoles do not seem to be aware of a lack of DMAC #3, and bus errors can occur within the DMACMAN module too.
+	**UPDATE: I've added a console version check that will cause iLinkman to not load if the console has a BIOS newer than v1.60.
+
+Last Updated: 2012/02/29

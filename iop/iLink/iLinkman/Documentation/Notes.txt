@@ -1,0 +1,8 @@
+There are some oddities when it comes to data transfers.
+Maybe it was already covered in the full, official documentation (Which I didn't have), but these were what I had noticed:
+
+1. When a write request is received, the data seems to be in little endian (For both quadlet and block write requests).
+2. When a read request is received, the data sent must be converted into little Endian if the request was a block read request.
+	>>Quadlet read requests seem to be fine when the payload of the response is sent in little endian. (!)
+3. When a read request is made, the data returned in the response seems to be in Big Endian format if it was a block read request.
+	>> If it was a quadlet read request that was made, the data returned seems to already be in little endian. (!!)

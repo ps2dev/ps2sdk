@@ -1,0 +1,30 @@
+void _funcret(){};
+
+DECLARE_EXPORT_TABLE(iLinkman, 1, 1)
+	DECLARE_EXPORT(_start)				/* 000 */
+	DECLARE_EXPORT(_funcret)
+	DECLARE_EXPORT(_exit)				/* 002 */
+	DECLARE_EXPORT(_funcret)			/* 003 */
+	DECLARE_EXPORT(iLinkEnableSBus)			/* 004 */
+	DECLARE_EXPORT(iLinkDisableSBus)		/* 005 */
+	DECLARE_EXPORT(iLinkResetSBus)			/* 006 */
+	DECLARE_EXPORT(iLinkSetNodeCapabilities)	/* 007 */
+	DECLARE_EXPORT(iLinkSetTrCallbackHandler)	/* 008 */
+	DECLARE_EXPORT(iLinkGetGenerationNumber)	/* 009 */
+	DECLARE_EXPORT(iLinkGetLocalNodeID)		/* 010 */
+	DECLARE_EXPORT(iLinkGetNodeCount)		/* 011 */
+	DECLARE_EXPORT(iLinkTrAlloc)			/* 012 */
+	DECLARE_EXPORT(iLinkTrFree)			/* 013 */
+	DECLARE_EXPORT(iLinkTrWrite)			/* 014 */
+	DECLARE_EXPORT(iLinkTrRead)			/* 015 */
+	DECLARE_EXPORT(iLinkCalculateCRC16)		/* 016 */
+	DECLARE_EXPORT(iLinkAddCROMUnit)		/* 017 */
+	DECLARE_EXPORT(iLinkDeleteCROMUnit)		/* 018 */
+	DECLARE_EXPORT(iLinkGetNodeCapabilities)	/* 019 */
+	DECLARE_EXPORT(iLinkGetNodeMaxSpeed)		/* 020 */
+	DECLARE_EXPORT(iLinkGetNodeTrSpeed)		/* 021 */
+	DECLARE_EXPORT(iLinkSetNodeTrSpeed)		/* 022 */
+	DECLARE_EXPORT(iLinkFindUnit)			/* 023 */
+	DECLARE_EXPORT(iLinkReadCROM)			/* 024 */
+	DECLARE_EXPORT(iLinkGetLocalNodeEUI64)		/* 025 */
+END_EXPORT_TABLE

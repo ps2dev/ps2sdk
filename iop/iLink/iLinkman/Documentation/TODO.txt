@@ -1,0 +1,11 @@
+-Add lock transaction support (?).
+-Add isochronous transaction support (?).
+-Write a API compatibility module to make this module compatible with SCE's functions (?).
+-Add multi-transaction label support(?)
+-Verify and fix compatibility with post v8 consoles (Consoles lacking the i.Link hardware).
+-Verify the validity of the configuration ROM.
+-Come up with a feasible system to determine whether the console contains a valid i.Link port or not.
+	It appears that consoles that do not have physical i.Link ports still contain sufficient chip logic to emulate a functional i.Link controller.
+-Discover and use the DMAC #3 interrupt entry in INTRMAN.
+
+Last updated: 2012/02/29

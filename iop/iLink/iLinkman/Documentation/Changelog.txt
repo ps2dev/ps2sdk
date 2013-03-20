@@ -1,0 +1,196 @@
+NOTE! The entry at the top is the oldest, and the entry at the bottom is the newest!
+------------------------------------------------------------------------------------
+
+2011/03/14 - v0.90
+=================================
+-Initial prototype version
+
+2011/03/17 - v0.91
+=================================
+-Variout fixes were made, first functional version that could be used with PS2ESDL.
+
+2011/03/17 - v0.91A
+=================================
+-Changed the way IEEE1394 read and write responses and requests were handled. They are now handled from within the hardware interrupt itself.
+	This reduces the amount of random freezes, and improves performance slightly.
+
+2011/03/20 - v0.92
+=================================
+-Re-written the read request handler, to reduce the amount of code.
+-Solved the problem where block read requests seem to be in big endian.
+	It was caused by iLinkWritePHTReq() not byte-swapping the data before it's sent.
+	Actually, it's a design fault in the IEEE1394 write request function that use the PHT.
+-Cleaned up the outstanding TODOs and FIXMEs.
+-Added synchronization code to the end of the functions used for sending responses to IEEE1394 read/write requests.
+
+2011/03/20 - v0.93
+=================================
+-Fixed iLinkReadCROM(), since it seemed to return some bogus value.
+-Modified iLinkTrRead() and iLinkTrWrite() to return -1 for all requests to the local node.
+	IEEE1394 read/write functionality to the local node has not been implemented yet.
+-Modified iLinkIntrHandler() to also check the level of DBUF Rx FIFO, as sometimes data that is received would go announced (And the hardware will still await a software acknowledgement).
+	As a result of the above, hotplugging of devices is now working. :)
+
+2011/04/15 - v0.94
+=================================
+-Modified the initialization code in iLink_intr.c, to use defined values instead of hardcoded values.
+-The above file was also modified to include initialization code that is slightly more stable. This will hopefully solve issues with my SCPH-10000 console.
+-Modified iLinkIntrHandler() to also check the level of DBUF 01's Rx FIFO, as sometimes data that is received would go announced (And the hardware will still await a software acknowledgement).
+	As a result of the above, it seems like iLinkman is now working on my SCPH-10000 console. :)
+-DBUF data handling code (In interrupt handler) had redundant code removed.
+-Removed iLink_DMA.c, as it was proven that the DMA Controller (DMAC) was not connected to the iLink hardware.
+	Hence the iLink hardware is incapable of DMA transfers.
+
+2011/05/01 - v0.95
+=================================
+-iLinkReadCROM() was changed to not keep allocating a new transaction context per call. This is for efficiency, given that most drivers that parse the configuration ROM of nodes won't be done after a handful of read requests.
+-Due to the change above, iLinkReadCROM() will now take in a transaction context descriptor instead of a node ID as the first argument.
+-Some of the configuration ROM manipulation functions that used to allocate a transaction context with the S100 speed as the starting speed have been modified to read data from the nodes at maximum speed.
+	There seems to be some issue with changing the speed on my SCPH-10000 console. :(
+	Once data was read from the device at S100 speed, it seems to be "reluctant" to work at a higher rate.
+
+2011/05/07 - v0.96
+=================================
+-iLink_PHT.c was modified so that the driver won't cause a freeze by waiting for the misbehaving hardware of some consoles to acknowledge that data was transmitted sucessfully.
+	Currently, it causes a bus reset to reset the serial bus.
+	However, that is not the best solution as that is slow and seems to cause some occasional instability.
+
+	At least the failure rate has dipped significantly.
+
+-iLink.c was also modified to include an approxmiately 5 seconds of delay before returning.
+	The delay seems to be necessary in order to give the serial bus time to stablize.
+	Otherwise, some node on the bus might cause a bus reset. :(
+-All configuration ROM access functions have been hard-coded to run at S100 speed only.
+	This is for stability.
+-Undid the change to iLinkReadCROM() as the old system was actually simpler to use and meant less code in the calling program.
+-iLinkPHTSendData() in iLink_PHT.c now uses interrupts again.
+-LocalCachedIntr0Register is no longer declared as volatile.
+-The driver should now be compiled with optimization turned of. Otherwise, corruption/freezing might occur. :(
+
+2011/05/25 - v0.97
+=================================
+-Sorted out the IEEE1394 Node Core initialization procedure.
+	Resorted to use normal (long) bus resets in place of the short bus resets, in case some older PS2 does not support short bus resets properly. D:
+-The PHY and LINK are now cold-booted after being shut-down during the initialization of iLinkman.
+	This seems to be required to ensure proper operation of the iLink hardware, and seems to get rid of the timeout issues on my SCPH-10000.
+	In other words, the PHT request timeout workaround is no longer needed! Yay! :D
+
+2011/05/27 - v0.97A
+=================================
+-Reverted back to using short bus resets, since Sony was doing it and the node controller cores are supposed to be IEEE1394A compliant.
+-The PHT request timeout was added back, as it seems like the issue with the PHT not responding on my SCPH-10000 was still there.
+	However, the 5-second data transfer time limit limitation is no longer present, as this new timeout mechanism only resets the iLink hardware if it detected the the PHT 01 had become stuck (PStk).
+-Fixed a bug in iLinkReadCROM() that caused garbage to be read when more than one quadlet was requested at a time.
+-iLinkReadCROM() will now automatically retry to read the target's configuration ROM after a failure, up to 5 retries.
+-Adjusted iLinkFindUnit() to use iLinkReadCROM() instead of reading data from the target's configuration ROM directly.
+-Fixed the way interrupts were acknowledged (Shifted to the front of the interrupt handler).
+	Some interrupt events need to be acknowledged as soon as possible or they will prevent the hardware from working properly.
+-Enabled compiler optimization for all files, as the fault with random freezes under load stems from the above fault.
+-Code in the interrupt handler was reduced.
+
+2011/05/29 - v0.97B
+=================================
+-Adjusted the speed lookup table in iLink.c to be constants.
+-Corrected the max_rec size to 10 (2^(10+1)=2048 bytes).
+-Corrected a bug in ParseUnitCROM() that might have resulted in incorrect address calculation (Shifted the increament of CROMOffset to the bottom of the loop at line 123).
+
+2011/06/01 - v0.97C
+=================================
+-Fixed several bugs in iLink_crom.c:
+	*Retries of read requests of the configuration ROM by iLinkReadCROM() will now stop once a read succeeds.
+	*iLinkGetNodeMaxSpeed() now returns the correct maximum supported speed for each node.
+-Implemented handling of PHY packets.
+-Fixed (yet again!) the receiving of SELF ID packets. This has got to be one of the most irritating parts of this driver. :(
+
+2011/06/26 - v0.98
+=================================
+-Discontinued the useage of the PHTs as it seems like some older consoles have some rather nasty issues with them. :(
+-Due to the above, the UBUFs will now see more usage.
+-Thankfully, it seems like the functionality of the PHTs not only extend to the packets/transactions that were issued by them, but to any incoming IEEE1394 transaction packets that fall into the range of DMAR.
+	(No wonder Sony didn't have any issues with the PHTs locking up and were yet able to use the DBUF FIFOs).
+-The Cycle Master bit of the CTRL0 register will now only be set after the SELF-ID phase.
+-The bus will be reset until the console is not the root node. It seems like block writes won't work properly when the console is the root node. @_@
+-PHY register reading and writing code (And other functions that poll interrupts) has been improved. Now interrupt registers will have the interrupts acknowledged (Despite these interrupts being disabled).
+
+2011/06/28 - v0.98A
+=================================
+-I've KILLED the bug that cases packets to not get transmitted (Or received by the receiver). :D :D :D
+	Apparently, there is a chip bug in the iLink hardware of most consoles (Read the README file for more details).
+-To accomplish the above, iLinkSetNodeTrSpeed() now locks the maximum data transfer rate to S100 whenever the console is the root node.
+-Since the matter on packets not being sent correctly has been resolved, iLinkReadCROM() can now read data from the configuration ROMs at full speed. :D
+-Cleaned up interrupts (Removed interrupt handling code and disable interrupts related to PHT control and status monitoring).
+-Cleaned up code (Removed some leftover code that were used to control and initialize part of PHT 01; E.g. the code that configures the STO register).
+
+2011/07/XX to 2011/07/XX - v0.98B/C/D/E/F
+=========================================
+-Various fixes and experiments were made (I think that all relevant fixes were carried over into future builds that remained practical for usage).
+
+2011/07/XX - v0.98F
+=================================
+-DBUF 00 is now used to transmit data.
+
+2011/07/18 - v0.98D1
+=================================
+-Multi-threaded version is now working. Probably the closest varient to the official Sony iLink driver.
+
+2011/07/20 - v0.98F1
+=================================
+-Code that sends a response with the PHT has been removed. It was never used, and I don't think that it will ever work (Was the PHT even capable of sending responses via the application interface without DMA transfers enabled?). :/
+
+2011/07/20 - v0.98A2
+=================================
+-UBUF-only Tx varient of iLinkman.
+-DBUF levels can now be read correctly. Previously, a logical right-shift of 18 followed by a logical AND of 0x1FFF was used to get the number of quads in the DBUF. However, that is not really correct as that might cause those reserved bits to affect the result.
+	The solution is the perform a logical AND with 0x7FF instead of 0x1FFF.
+-Some unused code was removed (E.g. Calls to CpuSuspendIntr() in iLinkSendData()).
+-iLink interrupt events will now be re-enabled only after the final call to iSetEventFlag() in iLink_intr().
+
+2011/07/31-2011/08/11 - v0.98F2/v0.98A3/v0.98E1
+===============================================
+-That "hack" that involved acknowledging the "missing" DBUF and UBUF packet interrupt events is now obsolete.
+-SELF-ID packets are only received after the Arbitration Reset Gap interrupt event occurs. The LSI document states that SELF-ID packets can be received after waiting for the ArbRstGap interrupt event after detecting a bus reset.
+	Hence, there is no way for SELF-ID packets to get lost by the driver once they have been received by the hardware.
+-Code has been cleaned up, adding the REQ_CHECK_MEM_BOUNDARIES option to configure the driver to have (or not to have) memory address checks for incoming requests.
+
+2011/08/13 - v0.98F3
+=================================
+-Reverted back to the old system of acknowledging interrupt events immediately when the interrupt was asserted, since the new method seems to cause instability under certain conditions.
+	The new system only seems to work properly with the MT version of iLinkman.
+
+2011/09/29 - v0.98F4
+=================================
+-Consolidated all calls to AllocSysMemory() and FreeSysMemory() to internal versions of malloc() and free() respectively. Within the malloc() and free() functions, AllocSysMemory() and FreeSysMemory() are called respectively after suspending interrupts and thread cycling.
+	This is to observe the requirements of AllocSysMemory() and FreeSysMemory().
+-Added a timeout to the code that waits for the arbitration reset gap before checking the FIFO for SELF-ID packets in iLink_intr.c, since the IOP is sooo slow that it might miss the one and only Arbitration reset gap if the PS2 is the only node on the network.
+	Anyway, is it even normal for there to be only one arbitration reset gap?! Of course, that is assuming that there is only one node present on the network at that time.
+-Cleaned up, shortened and simplified code here and there.
+-Replaced all "volatile unsigned long int" datatypes with "volatile unsigned int" of variables that refer to hardware registers, since registers are meant to be as long as a single word of the processor.
+-Shifted all literations of the code that denies transactions to the local node into iLinkTrAlloc(), since all transactions have to be allocated first.
+-Code that polls registers in loops within iLink_PHY.c now loop with calls to DelayThread(), so as to not hog the IOP.
+-Code that polls the PHY Access register of the iLink hardware have now been consolidated into the synchronization function within iLink_PHY.c.
+-The Makefile has been edited to use the default level of optimization as specified by the development environment.
+
+2011/11/20 and 2011/11/21 - v0.98G
+==================================
+-Added working DMA support.
+
+2012/02/21-2012/02/29 - v0.98H
+=================================
+-Large-scale system overhaul. Redesigned to have better reliability and to not suck the life force out of the IOP.
+	*The UBUF is now managed with a thread, which I suppose is what Sony would have intended.
+	*Interrupts are also handled with a thread, hence all callbacks will not be within an interrupt context.
+	*Transmissions made with the UBUF are now done with the UTD interrupt event and have a split-timeout mechanism.
+-Added iLinkGetLocalNodeEUI64(), which returns the EUI of the console.
+-The calls to the dmac_ch_get_dpcr() and dmac_ch_set_dpcr() functions used for enabling and disabling DMA channels have been replaced by calls to dmac_enable() and dmac_disable().
+-The CHCR register of DMA channels are now cleared before the channels are disabled. This is to prevent crashes that might occur when the channels are re-enabled.
+-Hardware interrupt events are now disabled before the i.Link hardware is reset.
+-Removed code from ResetHW() that was intended to be used to detect consoles that do not have functional i.Link controllers, since I've just discovered that my SCPH-77006 seems to have some chip logic that emulates a real i.Link controller... so those lines of code never works as intended.
+-Fixed a bug caused by all event flag bits being cleared by the call to ClearEventFlag() within the UBUF data handling thread in iLink_internal.c.
+-Added the REQ_CHECK_CONSOLE_VERSION option, which controls a version check on the console. Newer consoles that lack a physical i.Link port will cause a crash when anything related to DMAC #3 is accessed.
+	Although Sony seems to have included the iLink controller in my SCPH-77006 console, it seems like DMAC #3 is missing from it's usual spot, and rom0:DMACMAN doesn't even know about the change.
+	Doing anything with DMAC #3 resulted in bus errors. Strangely, DMAC #3 can be disabled at the startup of rom0:DMACMAN... I wonder why. Maybe I'm wrong, and DMACMAN doesn't disable the channels of DMAC #3 on my SCPH-77006 at bootup.
+
+2012/04/06 - v0.98H1
+=================================
+-Fixed UBUF split timeout handling. Previously, iLinkSync() did not check for the iLinkEventError bit properly and the split timeout was too short (Incorrectly calculated). iLinkSync() did not return an error whenever a split timeout occurred.
+-Changed the argument that specified which registers INTRMAN should preserve prior to calling the interrupt handler (Changed from 2 to 1), since it seems like all other interrupt handlers in other drivers use 1 anyway... and is it necessary to preserve the extra registers that will be saved with mode 2, compared to mode 1?
