@@ -1,0 +1,88 @@
+NOTE! The entry at the top is the oldest, and the entry at the bottom is the newest!
+------------------------------------------------------------------------------------
+
+2011/03/17 - v1.00
+=================================
+-Initial release that supported iLinkman v0.91A and later.
+
+2011/03/20 - v1.01
+=================================
+-Cleaned up ieee1394_Sync() to remove a redundant loop.
+-Added code to automatically retry logging in into the SBP-2 device in the event the first attempt at logging in was to fail.
+
+2011/04/15 - v1.02
+================================
+-Added ieee1394_Sync_withTimeout(). It's a wrapper function to ieee1394_Sync(), and accepts a value that will be used as a timeout.
+-Modified ieee1394_SendManagementORB() to use ieee1394_Sync_withTimeout() instead of ieee1394_Sync(), to prevent freezing up the console if the target device was to not respond.
+
+2011/05/01 - v1.03
+================================
+-Updated the driver to work with iLinkman v0.95.
+
+2011/05/07 - v1.04
+================================
+-Updated the driver to work with iLinkman v0.96.
+-Some of the event flag manipulation functions are using the wrong defines for waiting on/setting/clearing event flag bits.
+-Some redundant code was removed.
+-Calls to ClearEventFlag() were replaced by setting the event flag mode to include WEF_CLEAR for calls to WaitEventFlag().
+
+2011/05/17 - v1.05
+================================
+-Fixed sense code and response code handling.
+-Removed some of the unused structures from scsi.h.
+-Removed the volatile keyword from variables that have it, but their values are in no way adjusted by hardware.
+
+2011/05/25 - v1.06
+================================
+-Fixed sense code and response code handling yet again.
+-Shifted the READ CAPACITY command to immediately after the INQUIRY command. This is to prevent some devices with a Prolific chipset from malfunctioning.
+-Removed calls to READ SENSE. RBC enclosures might DIE after receiving such a command since they might not support it and were not well programmed to handle unimplemented commands. :(
+-Corrected the capacity calculation code and related structures to use UNSIGNED LONG integers instead of SIGNED integers.
+
+2011/05/27 - v1.06
+================================
+-Corrected the formatting of one of the debug messages (Line 505 of sbp2_driver.c).
+-Corrected yet again the sense and response code handling code, so that errors that occur during READ SECTOR operations would no longer go unnoticed.
+
+2011/05/29 - v1.06A
+================================
+-Fixed the max_payload field of all ORBs. Previously, all transactions will have a max_payload size of 9, which might not be a good thing for S100 and S200 transactions.
+-Fixed a bug in the code that parses the configuration ROM of the SBP-2 devices. If the Unit Directory offset was not the first entry within the Root Directory, there was quite a good chance that the offsets will be miscalculated.
+-The waiting time between the bus reset and initialization of all devices on the bus was reduced from 600000 usec to 500000 usec.
+
+2011/06/28 - v1.06B
+================================
+-The WRITE sector SCSI command function has been fixed, but is still untested.
+
+2011/08/11 - v1.06C
+================================
+-Removed old testing code in sbp2_driver.c: The payload size was always that of the S100 transfer mode.
+-Declaration the device name in main.c as const.
+-Edited main.c to make it neater.
+
+2011/08/12 - v1.06C1
+================================
+-Block size reduced to 65535 bytes - the maximum value that appears to be supported by my Oxford 934-based enclosure.
+
+2011/09/29 - v1.06D
+================================
+-Consolidated all calls to AllocSysMemory() and FreeSysMemory() to internal versions of malloc() and free() respectively. Within the malloc() and free() functions, AllocSysMemory() and FreeSysMemory() are called respectively after suspending interrupts and thread cycling.
+	This is to observe the requirements of AllocSysMemory() and FreeSysMemory().
+-Commented out the delay at line 262 of sbp2_driver.c. A delay is actually not required, but some devices just need it. Anyway, those devices should reset the bus again once they become ready.
+-ORBs are no longer allocated with AllocSysMemory(), but are now allocated from a fixed ORB buffer.
+	This is for performance, since AllocSysMemory() is slow.
+-Support for the reconnection ORB has been withdrawn. The system that determines whether the host was already logged into the target was not accurate at all.
+-The Makefile has been edited to use the default level of optimization as specified by the development environment,
+	and to only delete the object files and compiled binary whenever a "make clean" command is invoked.
+-Added code to fail device initialization if ConfigureSBP2Device() fails.
+
+2012/02/29 - v1.06E
+================================
+-Updated the driver to support the new DMA-enabled iLinkman module (v0.98H).
+	Hence, older versions of iLinkman are not supported as they do not use threads!
+-Block size reduced to 65024 bytes (65536-512). It seems like my Oxford 934 is capable of maximum transfers of less than 65536 bytes.
+	NOTE: I reduced the maximum block size here by 512, since transfers are done in (smallest) groups of 512 bytes!
+
+2012/04/06 - v1.06E1
+================================
+-Data read in will be byte-swapped asynchronously, as other requests are being executed.

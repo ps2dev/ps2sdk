@@ -1,0 +1,3 @@
+-Some enclosures are not working properly with the driver, mostly due to bugs in the enclosures' firmwares. :(
+
+Last updated: 2011/05/25

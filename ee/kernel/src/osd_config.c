@@ -33,14 +33,12 @@ typedef struct {
 extern ConfigParamT10K g_t10KConfig;
 extern char g_RomName[];
 
-
 #ifdef F__config_internals
 ConfigParamT10K g_t10KConfig = {540, TV_SCREEN_43, DATE_YYYYMMDD, LANGUAGE_JAPANESE, 0, 0, 0};
 
 // stores romname of ps2
-char g_RomName[15] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+char g_RomName[15];
 #endif
-
 
 // gets the romname from the current ps2
 // 14 chars - doesnt set a null terminator
@@ -444,7 +442,7 @@ void convertfrombcd(CdvdClock_t* time)
 	time->year	= frombcd(time->year);
 }
 
-static u8 gDaysInMonths[12] = {
+static const u8 gDaysInMonths[12] = {
 	31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 };
 

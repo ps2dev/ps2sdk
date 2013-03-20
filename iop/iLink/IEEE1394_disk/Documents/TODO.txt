@@ -1,0 +1,4 @@
+-Add reconnection support.
+-Add code to detect and determine the maximum block size for the SBP-2 device. Right now, it is fixed to 65024 bytes.
+
+Last updated: 2012/02/29

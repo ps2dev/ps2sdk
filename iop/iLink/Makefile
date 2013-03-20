@@ -8,8 +8,7 @@
 #
 # $Id$
 
-
-SUBDIRS = kernel dev9 fs hdd sound tcpip usb system debug memorycard network iLink
+SUBDIRS = iLinkman IEEE1394_disk
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
