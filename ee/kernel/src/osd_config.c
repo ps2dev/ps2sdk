@@ -37,7 +37,7 @@ extern char g_RomName[];
 ConfigParamT10K g_t10KConfig = {540, TV_SCREEN_43, DATE_YYYYMMDD, LANGUAGE_JAPANESE, 0, 0, 0};
 
 // stores romname of ps2
-char g_RomName[15];
+char g_RomName[15] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 #endif
 
 // gets the romname from the current ps2
