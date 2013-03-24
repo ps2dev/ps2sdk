@@ -14,7 +14,7 @@
 #ifndef DEV9REGS_H
 #define DEV9REGS_H
 
-#include "types.h"
+#include <tamtypes.h>
 
 enum _dev9_regnames { 
        DEV9_R_1460, DEV9_R_1462, DEV9_R_1464, DEV9_R_1466, DEV9_R_1468,

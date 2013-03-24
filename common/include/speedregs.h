@@ -14,7 +14,7 @@
 #ifndef SPEEDREGS_H
 #define SPEEDREGS_H
 
-#include "types.h"
+#include <tamtypes.h>
 
 #ifdef _EE
 #define SPD_REGBASE			0xb4000000

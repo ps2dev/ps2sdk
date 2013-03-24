@@ -9,13 +9,15 @@
 #
 # $Id$
 # SMAP (PS2 Network Adapter) register definitions.
+# Contains register definitions for the Ethernet MAC (EMAC).
+# The EMAC is similar to the EMAC from the IBM PowerPC 405gp.
 */
 
 #ifndef SMAPREGS_H
 #define SMAPREGS_H
 
-#include "types.h"
-#include "speedregs.h"
+#include <tamtypes.h>
+#include <speedregs.h>
 
 /* SMAP interrupt status bits (selected from the SPEED device).  */
 #define	SMAP_INTR_EMAC3			(1<<6)
