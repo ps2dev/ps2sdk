@@ -265,35 +265,6 @@ typedef struct {
 	unsigned pad2		:11;	// Pad with zeros
 }GS_PMODE;
 
-/*
-//SP193: This should be SMODE1, not 2. I've renamed it, but have no checked whether its definitions are correct.
-typedef struct {
-	unsigned rc   : 8;	// pll reference divider
-	unsigned lc   :13;	// pll loop divider
-	unsigned t1248: 4;	// pll output divider
-	unsigned sclk : 2;	// vesa mode clock
-	unsigned cmod : 2;	// display mode
-	unsigned int  : 1;	// interlace mode
-	unsigned ffmd : 1;	//
-	unsigned ex   : 1;	//
-	unsigned vhh  : 1;	// half h vblank
-	unsigned vhp  : 1;	// half h pulse
-	unsigned prst : 1;	// pll reset
-	unsigned sint : 1;	//
-	unsigned shcl : 1;	//
-	unsigned pck2 : 1;	//
-	unsigned spml : 4;	//
-	unsigned p0   : 1;	//
-	unsigned dpms : 2;	// vesa dpms mode
-	unsigned phs  : 1;	// hsync output
-	unsigned pvs  : 1;	// vsync output
-	unsigned pehs : 1;	//
-	unsigned pevs : 1;	//
-	unsigned rfsh : 6;	// refresh rate
-	unsigned p1   : 9;	//
-}GS_SMODE1;
-*/
-
 /*SMODE2*/
 typedef struct {
 	unsigned interlace   :1;

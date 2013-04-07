@@ -14,8 +14,8 @@
 #ifndef DRV_ATAHW_H
 #define DRV_ATAHW_H
 
-#include "types.h"
-#include "speedregs.h"
+#include <tamtypes.h>
+#include <speedregs.h>
 
 #define ATA_DEV9_HDD_BASE		(SPD_REGBASE + 0x40)
 /* AIF on T10Ks - Not supported yet.  */

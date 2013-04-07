@@ -459,6 +459,13 @@ struct sockaddr {
 #define MSG_DONTWAIT   0x08    /* Nonblocking i/o for this operation only */
 #define MSG_MORE       0x10    /* Sender will send more */
 
+#ifndef SHUT_RD
+  #define SHUT_RD   0
+  #define SHUT_WR   1
+  #define SHUT_RDWR 2
+#endif
+
+/* FD_SET used for lwip_select */
 #ifndef FD_SET
   #undef  FD_SETSIZE
   /* Make FD_SETSIZE match NUM_SOCKETS in socket.c */

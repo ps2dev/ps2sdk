@@ -20,26 +20,44 @@ int InitPS2IP(struct ip_addr *ip_address, struct ip_addr *subnet_mask, struct ip
 void DeinitPS2IP(void);
 
 /* From include/lwip/sockets.h:  */
+int lwip_accept(int s, struct sockaddr *addr, socklen_t *addrlen);
+int lwip_bind(int s, const struct sockaddr *name, socklen_t namelen);
+int lwip_shutdown(int s, int how);
+int lwip_getpeername (int s, struct sockaddr *name, socklen_t *namelen);
+int lwip_getsockname (int s, struct sockaddr *name, socklen_t *namelen);
+int lwip_getsockopt (int s, int level, int optname, void *optval, socklen_t *optlen);
+int lwip_setsockopt (int s, int level, int optname, const void *optval, socklen_t optlen);
+int lwip_close(int s);
+int lwip_connect(int s, const struct sockaddr *name, socklen_t namelen);
+int lwip_listen(int s, int backlog);
+int lwip_recv(int s, void *mem, size_t len, int flags);
+int lwip_read(int s, void *mem, size_t len);
+int lwip_recvfrom(int s, void *mem, size_t len, int flags, struct sockaddr *from, socklen_t *fromlen);
+int lwip_send(int s, const void *dataptr, size_t size, int flags);
+int lwip_sendto(int s, const void *dataptr, size_t size, int flags, const struct sockaddr *to, socklen_t tolen);
+int lwip_socket(int domain, int type, int protocol);
+int lwip_write(int s, const void *dataptr, size_t size);
+int lwip_select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptset, struct timeval *timeout);
+int lwip_ioctl(int s, long cmd, void *argp);
+int lwip_fcntl(int s, int cmd, int val);
 
-int       lwip_accept(int s, struct sockaddr *addr, socklen_t *addrlen);
-int       lwip_bind(int s, struct sockaddr *name, socklen_t namelen);
-int       lwip_close(int s);
-int       lwip_connect(int s, struct sockaddr *name, socklen_t namelen);
-int       lwip_listen(int s, int backlog);
-int       lwip_recv(int s, void *mem, int len, unsigned int flags);
-int       lwip_recvfrom(int s, void *mem, int len, unsigned int flags,
-                        struct sockaddr *from, socklen_t *fromlen);
-int       lwip_send(int s, void *dataptr, int size, unsigned int flags);
-int       lwip_sendto(int s, void *dataptr, int size, unsigned int flags,
-                      struct sockaddr *to, socklen_t tolen);
-int       lwip_socket(int domain, int type, int protocol);
-int       lwip_select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptset,
-                      struct timeval *timeout);
-int       lwip_ioctl(int s, long cmd, void *argp);
-int       lwip_getpeername (int s, struct sockaddr *name, socklen_t *namelen);
-int       lwip_getsockname (int s, struct sockaddr *name, socklen_t *namelen);
-int       lwip_getsockopt (int s, int level, int optname, void *optval, socklen_t *optlen);
-int       lwip_setsockopt (int s, int level, int optname, const void *optval, socklen_t optlen);
+#define accept(a,b,c)         lwip_accept(a,b,c)
+#define bind(a,b,c)           lwip_bind(a,b,c)
+#define shutdown(a,b)         lwip_shutdown(a,b)
+#define closesocket(s)        lwip_close(s)
+#define connect(a,b,c)        lwip_connect(a,b,c)
+#define getsockname(a,b,c)    lwip_getsockname(a,b,c)
+#define getpeername(a,b,c)    lwip_getpeername(a,b,c)
+#define setsockopt(a,b,c,d,e) lwip_setsockopt(a,b,c,d,e)
+#define getsockopt(a,b,c,d,e) lwip_getsockopt(a,b,c,d,e)
+#define listen(a,b)           lwip_listen(a,b)
+#define recv(a,b,c,d)         lwip_recv(a,b,c,d)
+#define recvfrom(a,b,c,d,e,f) lwip_recvfrom(a,b,c,d,e,f)
+#define send(a,b,c,d)         lwip_send(a,b,c,d)
+#define sendto(a,b,c,d,e,f)   lwip_sendto(a,b,c,d,e,f)
+#define socket(a,b,c)         lwip_socket(a,b,c)
+#define select(a,b,c,d,e)     lwip_select(a,b,c,d,e)
+#define ioctlsocket(a,b,c)    lwip_ioctl(a,b,c)
 
 int       ps2ip_setconfig(t_ip_info* ip_info);
 int       ps2ip_getconfig(char* netif_name,t_ip_info* ip_info);
@@ -80,26 +98,5 @@ u8               pbuf_clen(struct pbuf *p);
 void             pbuf_chain(struct pbuf *h, struct pbuf *t);
 struct pbuf*     pbuf_dechain(struct pbuf *p);
 struct pbuf*     pbuf_take(struct pbuf *f);
-
-/* Compatibility macros.  */
-
-#define	accept			lwip_accept
-#define	bind			lwip_bind
-#define	disconnect		lwip_close
-#define	connect			lwip_connect
-#define	listen			lwip_listen
-#define	recv			lwip_recv
-#define	recvfrom		lwip_recvfrom
-#define	send			lwip_send
-#define	sendto			lwip_sendto
-#define	socket			lwip_socket
-#define	select			lwip_select
-#define	ioctlsocket		lwip_ioctl
-
-// ntba2
-#define getsockname		lwip_getsockname
-#define getpeername		lwip_getpeername
-#define getsockopt		lwip_getsockopt
-#define setsockopt		lwip_setsockopt
 
 #endif /* IOP_PS2IP_H */
