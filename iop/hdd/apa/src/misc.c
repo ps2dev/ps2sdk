@@ -46,7 +46,7 @@ int getPs2Time(ps2time *tm)
 //		timeBuf.hour = (timeBuf.hour + 4) % 24; // TEMP FIX (need to deal with timezones?) ... aparently not
 		tmp=cdtime.day>>4;
 		timeBuf.day=(((tmp<<2)+tmp)<<1)+(cdtime.day&0x0F);
-		tmp=cdtime.month>>4;
+		tmp=(cdtime.month&0x7F)>>4;
 		timeBuf.month=(((tmp<<2)+tmp)<<1)+(cdtime.month&0x0F);
 		tmp=cdtime.year>>4;
 		timeBuf.year=(((tmp<<2)+tmp)<<1)+(cdtime.year&0xF)+2000;

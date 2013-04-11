@@ -1084,7 +1084,7 @@ int mcman_getmcrtime(sceMcStDateTime *time)
 	retries = 64;
 	
 	do {
-		if (sceCdReadClock(&cdtime))
+		if (sceCdRC(&cdtime))
 			break;
 	} while (--retries > 0);
 	
