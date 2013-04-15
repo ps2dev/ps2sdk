@@ -66,6 +66,7 @@ u32 ata_active_port;
 /* ATA command codes.  */
 #define ATA_C_SCE_SEC_CONTROL 0x8e
 #define ATA_C_IDENTIFY_PKT_DEVICE 0xa1
+#define ATA_C_IDLE_IMMEDIATE	0xe1
 #define ATA_C_IDLE		0xe3
 #define ATA_C_FLUSH_CACHE	0xe7
 #define ATA_C_FLUSH_CACHE_EXT	0xea
