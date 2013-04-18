@@ -50,8 +50,8 @@ int NetManInitRPCClient(void){
 		NetManIOSemaID=CreateSema(&SemaData);
 
 		TxActiveBankID=0;
-		memset(UNCACHED_SEG(&TxFIFOData1), 0, sizeof(TxFIFOData1));
-		memset(UNCACHED_SEG(&TxFIFOData2), 0, sizeof(TxFIFOData2));
+		memset(&TxFIFOData1, 0, sizeof(TxFIFOData1));
+		memset(&TxFIFOData2, 0, sizeof(TxFIFOData2));
 		CurrentTxFIFOData=UNCACHED_SEG(&TxFIFOData1);
 
 		SemaData.max_count=1;
@@ -137,12 +137,12 @@ int NetManRpcIoctl(unsigned int command, void *args, unsigned int args_len, void
 	return result;
 }
 
-static int NetmanTxWaitingThread=-1;
+static volatile int NetmanTxWaitingThread=-1;
 
 static void TxThread(void *arg){
 	struct TxFIFOData *TxFIFODataToTransmit;
 	SifDmaTransfer_t dmat;
-	int dmat_id;
+	int dmat_id, ThreadToWakeUp;
 
 	while(1){
 		SleepThread();
@@ -153,17 +153,19 @@ static void TxThread(void *arg){
 			// Switch banks
 			TxFIFODataToTransmit=CurrentTxFIFOData;
 			if(TxActiveBankID==0){
-				CurrentTxFIFOData=UNCACHED_SEG(&TxFIFOData2);
+				CurrentTxFIFOData=&TxFIFOData2;
 				TxActiveBankID=1;
 			}
 			else{
-				CurrentTxFIFOData=UNCACHED_SEG(&TxFIFOData1);
+				CurrentTxFIFOData=&TxFIFOData1;
 				TxActiveBankID=0;
 			}
 
 			SignalSema(TxBankAccessSema);
 
-			dmat.src=(void*)((unsigned int)&TxFIFODataToTransmit->PacketReqs&0x0FFFFFC0);
+			SifWriteBackDCache(&TxFIFODataToTransmit->PacketReqs, sizeof(TxFIFODataToTransmit->PacketReqs));
+
+			dmat.src=&TxFIFODataToTransmit->PacketReqs;
 			dmat.dest=TxFrameTagBuffer;
 			dmat.size=8+sizeof(struct PacketTag)*TxFIFODataToTransmit->PacketReqs.NumPackets;
 			dmat.attr=0;
@@ -171,7 +173,7 @@ static void TxThread(void *arg){
 			while((dmat_id=SifSetDma(&dmat, 1))==0){};
 
 			WaitSema(NetManIOSemaID);
-			SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_SEND_PACKETS, SIF_RPC_M_NOWBDC, TxFIFODataToTransmit->FrameBuffer, TxFIFODataToTransmit->PacketReqs.TotalLength, NULL, 0, NULL, NULL);
+			SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_SEND_PACKETS, 0, TxFIFODataToTransmit->FrameBuffer, TxFIFODataToTransmit->PacketReqs.TotalLength, NULL, 0, NULL, NULL);
 			SignalSema(NetManIOSemaID);
 
 			TxFIFODataToTransmit->PacketReqs.NumPackets=0;
@@ -179,7 +181,11 @@ static void TxThread(void *arg){
 		}
 		else SignalSema(TxBankAccessSema);
 
-		if(NetmanTxWaitingThread>0) WakeupThread(NetmanTxWaitingThread);
+		if(NetmanTxWaitingThread>=0){
+			ThreadToWakeUp=NetmanTxWaitingThread;
+			NetmanTxWaitingThread=-1;	//To prevent a race condition from occurring, invalidate NetmanTxWaitingThread before invoking WakeupThread.
+			WakeupThread(ThreadToWakeUp);
+		}
 	}
 }
 

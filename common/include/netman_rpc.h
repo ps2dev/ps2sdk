@@ -33,8 +33,8 @@ struct NetManInitResult{
 	void *FrameTagBuffer;
 };
 
-#define MAX_FRAME_SIZE	1600
-#define NETMAN_RPC_BLOCK_SIZE	32
+#define MAX_FRAME_SIZE		1600	//Keep aligned to 64 bytes.
+#define NETMAN_RPC_BLOCK_SIZE	31	//Keep aligned to 64 bytes (Check structures below).
 
 struct PacketTag{
 	unsigned int length;
