@@ -28,7 +28,7 @@
  * The priority value itself is platform-dependent, but is passed to
  * sys_thread_new() when the thread is created.
  */
-#define DEFAULT_THREAD_PRIO		0x18
+#define DEFAULT_THREAD_PRIO		0x58
 
 /**
  * TCPIP_THREAD_STACKSIZE: The stack size used by the main tcpip thread.

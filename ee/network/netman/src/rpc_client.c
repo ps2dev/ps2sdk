@@ -68,7 +68,7 @@ int NetManInitRPCClient(void){
 		ThreadData.stack=TxThreadStack;
 		ThreadData.stack_size=sizeof(TxThreadStack);
 		ThreadData.gp_reg=&_gp;
-		ThreadData.initial_priority=0x18;
+		ThreadData.initial_priority=0x58;
 		ThreadData.attr=ThreadData.option=0;
 
 		StartThread(TxThreadID=CreateThread(&ThreadData), NULL);

@@ -11,7 +11,7 @@
 #include "rpc_server.h"
 
 static int PS2IP_threadID=-1;
-static unsigned char PS2IP_ThreadStack[0x2000] ALIGNED(128);
+static unsigned char PS2IP_ThreadStack[0x1000] ALIGNED(128);
 
 static unsigned char FrameTagBuffer[(sizeof(struct PacketReqs)+0x3F)&~0x3F];
 static unsigned char IsInitialized=0;
@@ -86,7 +86,7 @@ int NetManInitRPCServer(void){
 		ThreadData.stack=PS2IP_ThreadStack;
 		ThreadData.stack_size=sizeof(PS2IP_ThreadStack);
 		ThreadData.gp_reg=&_gp;
-		ThreadData.initial_priority=0x19;	/* The RPC server thread should be given lower priority than the protocol stack, as frame transmission should be given priority. */
+		ThreadData.initial_priority=0x59;	/* The RPC server thread should be given lower priority than the protocol stack, as frame transmission should be given priority. */
 		ThreadData.attr=ThreadData.option=0;
 
 		if((PS2IP_threadID=CreateThread(&ThreadData))>=0){
