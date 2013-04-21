@@ -205,7 +205,7 @@ int cdDvdRead(u32 lbn, u32 nsectors, void *buf, CdvdReadMode_t *rm)
 	cbSema = 1;
 
 	if (SifCallRpc(&clientNCmd, CD_NCMD_DVDREAD, SIF_RPC_M_NOWAIT, readData, 24,
-				NULL, 0, NULL, NULL) < 0) {
+				NULL, 0, (void *)cdAlignReadBuffer, _rd_intr_data) < 0) {	//The Sony function was broken here: It doesn't set a callback, which will cause the library to enter a deadlocked state.
 		cdCallbackNum = 0;
 		cbSema = 0;
 		SignalSema(nCmdSemaId);
