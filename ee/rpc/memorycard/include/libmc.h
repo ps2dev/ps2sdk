@@ -44,9 +44,8 @@ extern "C" {
 #define MC_TYPE_POCKET			3
 #define MC_TYPE_NONE			0
 
-// Problem: Format is always 0 with ROM irx's
-#define MC_FORMATTED			-1
-#define MC_UNFORMATTED			0
+#define MC_FORMATTED		1
+#define MC_UNFORMATTED		0
 
 // Valid bits in memcard file attributes (mctable.AttrFile)
 #define MC_ATTR_READABLE        0x0001
@@ -62,35 +61,40 @@ extern "C" {
 #define MC_ATTR_HIDDEN          0x2000	// not hidden in osdsys, but it is to games
 
 // function numbers returned by mcSync in the 'cmd' pointer
-#define MC_FUNC_NONE			0x00
-#define MC_FUNC_GET_INFO		0x01
-#define MC_FUNC_OPEN			0x02
-#define MC_FUNC_CLOSE			0x03
-#define MC_FUNC_SEEK			0x04
-#define MC_FUNC_READ			0x05
-#define MC_FUNC_WRITE			0x06
-#define MC_FUNC_FLUSH			0x0A
-#define MC_FUNC_MK_DIR			0x0B
-#define MC_FUNC_CH_DIR			0x0C
-#define MC_FUNC_GET_DIR			0x0D
-#define MC_FUNC_SET_INFO		0x0E
-#define MC_FUNC_DELETE			0x0F
-#define MC_FUNC_FORMAT			0x10
-#define MC_FUNC_UNFORMAT		0x11
-#define MC_FUNC_GET_ENT			0x12
-#define MC_FUNC_RENAME			0x13
-#define MC_FUNC_CHG_PRITY		0x14
-//#define MC_FUNC_UNKNOWN_1		0x5A	// mcserv version
-//#define MC_FUNC_UNKNOWN_2		0x5C	// mcserv version
+enum MC_FUNC_NUMBERS{
+	MC_FUNC_NONE		= 0x00,
+	MC_FUNC_GET_INFO,
+	MC_FUNC_OPEN,
+	MC_FUNC_CLOSE,
+	MC_FUNC_SEEK,
+	MC_FUNC_READ,
+	MC_FUNC_WRITE,
+	MC_FUNC_FLUSH		= 0x0A,
+	MC_FUNC_MK_DIR,
+	MC_FUNC_CH_DIR,
+	MC_FUNC_GET_DIR,
+	MC_FUNC_SET_INFO,
+	MC_FUNC_DELETE,
+	MC_FUNC_FORMAT,
+	MC_FUNC_UNFORMAT,
+	MC_FUNC_GET_ENT,
+	MC_FUNC_RENAME,
+	MC_FUNC_CHG_PRITY,
+	MC_FUNC_ERASE_BLOCK	= 0x5A,
+	MC_FUNC_READ_PAGE,
+	MC_FUNC_WRITE_PAGE,
+};
 
 // These types show up in the OSD browser when set.
 // If the OSD doesn't know the number it'll display "Unrecognizable Data" or so.
 // AFAIK these have no other effects.
 // Known type IDs for icon.sys file:
-#define MCICON_TYPE_SAVED_DATA		0	// "Saved Data (PlayStation(r)2)"
-#define MCICON_TYPE_SOFTWARE_PS2	1	// "Software (PlayStation(r)2)"
-#define MCICON_TYPE_SOFTWARE_PKT	3	// "Software (PocketStation(r))"
-#define MCICON_TYPE_SETTINGS_DATA	4	// "Settings File (PlayStation(r)2)"
+enum MCICON_TYPES{
+	MCICON_TYPE_SAVED_DATA		= 0,	// "Saved Data (PlayStation(r)2)"
+	MCICON_TYPE_SOFTWARE_PS2,		// "Software (PlayStation(r)2)"
+	MCICON_TYPE_SOFTWARE_PKT,		// "Software (PocketStation(r))"
+	MCICON_TYPE_SETTINGS_DATA		// "Settings File (PlayStation(r)2)"
+};
 
 typedef int iconIVECTOR[4];
 typedef float iconFVECTOR[4];
@@ -169,7 +173,7 @@ int mcInit(int type);
 //          slot number
 //          pointer to get memcard type
 //          pointer to get number of free clusters
-//          pointer to get whether or not the card is formatted
+//          pointer to get whether or not the card is formatted	(Note: Originally, sceMcGetInfo didn't have a 5th argument for returning the format status. As this is emulated based on the return value of sceMcSync() when rom0:MCSERV is used, please keep track of the return value from sceMcSync instead!)
 // returns:	0   = successful
 //			< 0 = error
 int mcGetInfo(int port, int slot, int* type, int* free, int* format);
@@ -330,6 +334,7 @@ int mcUnformat(int port, int slot);
 //			-1 = error
 int mcGetEntSpace(int port, int slot, const char* path);
 
+// Note: rom0:MCSERV does not support this.
 // rename file or dir on memcard
 // mcSync returns:	0 if ok
 //					< 0 if error
@@ -338,10 +343,50 @@ int mcGetEntSpace(int port, int slot, const char* path);
 //			slot number
 //			name of file/dir to rename
 //			new name to give to file/dir
-// returns:	0  = success
-//			-1 = error
+// returns:	1  = success
+//			<0 = error
 int mcRename(int port, int slot, const char* oldName, const char* newName);
 
+// Note: rom0:XMCSERV does not support this.
+// Erases a block on the memory card.
+// mcSync returns:	0 if ok
+//					< 0 if error
+// 
+// args:	port number
+//			slot number
+//			Block number of the block to be erased.
+//			Mode: -1 to inhibit ECC recalculation of the erased block's pages (useful if sceMcWritePage is used to fill in its contents later on), 0 for normal operation.
+// returns:	0  = success
+//			-1 = error
+int mcEraseBlock(int port, int slot, int block, int mode);
+
+// Note: rom0:XMCSERV does not support this.
+// Reads a page from the memory card.
+// mcSync returns:	0 if ok
+//					< 0 if error
+// 
+// args:	port number
+//			slot number
+//			Page number of the page to be read.
+//			Pointer to buffer that will contain the read data.
+// returns:	0  = success
+//			-1 = error
+int mcReadPage(int port, int slot, unsigned int page, void *buffer);
+
+// Note: rom0:XMCSERV does not support this.
+// Writes a page to the memory card. (The block which the page resides on must be erased first!)
+// mcSync returns:	0 if ok
+//					< 0 if error
+// 
+// args:	port number
+//			slot number
+//			Page number of the page to be written.
+//			Pointer to buffer containing data to be written.
+// returns:	0  = success
+//			-1 = error
+int mcWritePage(int port, int slot, int page, const void *buffer);
+
+// Note: rom0:MCSERV does not support this.
 // change mcserv thread priority
 // (i dont think this is implemented properly)
 // mcSync returns:	0 if ok
@@ -366,7 +411,7 @@ int mcSync(int mode, int *cmd, int *result);
 // Reset (force deinit) of library
 // 
 // returns:	0  = success
-int mcReset();
+int mcReset(void);
 
 #ifdef __cplusplus
 }

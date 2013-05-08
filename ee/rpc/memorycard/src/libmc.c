@@ -25,26 +25,28 @@
 
 
 // rpc command function numbers
-#define MC_RPCCMD_INIT		0x00
-#define MC_RPCCMD_GET_INFO	0x01
-#define MC_RPCCMD_OPEN		0x02
-#define MC_RPCCMD_CLOSE		0x03
-#define MC_RPCCMD_SEEK		0x04
-#define MC_RPCCMD_READ		0x05
-#define MC_RPCCMD_WRITE		0x06
-#define MC_RPCCMD_FLUSH		0x07
-#define MC_RPCCMD_CH_DIR	0x08
-#define MC_RPCCMD_GET_DIR	0x09
-#define MC_RPCCMD_SET_INFO	0x0A
-#define MC_RPCCMD_DELETE	0x0B
-#define MC_RPCCMD_FORMAT	0x0C
-#define MC_RPCCMD_UNFORMAT	0x0D
-#define MC_RPCCMD_GET_ENT	0x0E
-#define MC_RPCCMD_CHG_PRITY	0x0F
-#define MC_RPCCMD_CHECKBLOCK	0x10
-#define MC_RPCCMD_READPAGE	0x0E
-#define MC_RPCCMD_WRITEPAGE	0x0F
-#define MC_RPCCMD_ERASEBLOCK	0x10
+enum MC_RPCCMD_NUMBERS{
+	MC_RPCCMD_INIT		= 0x00,
+	MC_RPCCMD_GET_INFO,
+	MC_RPCCMD_OPEN,
+	MC_RPCCMD_CLOSE,
+	MC_RPCCMD_SEEK,
+	MC_RPCCMD_READ,
+	MC_RPCCMD_WRITE,
+	MC_RPCCMD_FLUSH,
+	MC_RPCCMD_CH_DIR,
+	MC_RPCCMD_GET_DIR,
+	MC_RPCCMD_SET_INFO,
+	MC_RPCCMD_DELETE,
+	MC_RPCCMD_FORMAT,
+	MC_RPCCMD_UNFORMAT,
+	MC_RPCCMD_GET_ENT,
+	MC_RPCCMD_CHG_PRITY,
+	MC_RPCCMD_CHECK_BLOCK,
+	MC_RPCCMD_ERASE_BLOCK	= 0x0E,
+	MC_RPCCMD_READ_PAGE,
+	MC_RPCCMD_WRITE_PAGE
+};
 
 // rpc command function numbers
 // mcRpcCmd[MC_TYPE_??][MC_RPCCMD_???]
@@ -66,9 +68,9 @@ static const int mcRpcCmd[2][17] =
 	0x79,	// MC_RPCCMD_DELETE
 	0x77,	// MC_RPCCMD_FORMAT
 	0x80,	// MC_RPCCMD_UNFORMAT
-	0x7E,	// MC_RPCCMD_READPAGE
-	0x7D,	// MC_RPCCMD_ERASEBLOCK (calls mcman_funcs: 39, 17, 20, 19, 30)
-	0x7F,	// MC_RPCCMD_WRITEPAGE (calls mcman_funcs: 20, 19)
+	0x7D,	// MC_RPCCMD_ERASE_BLOCK (calls mcman_funcs: 39, 17, 20, 19, 30)
+	0x7E,	// MC_RPCCMD_READ_PAGE
+	0x7F,	// MC_RPCCMD_WRITE_PAGE (calls mcman_funcs: 20, 19)
 	},
 	// XMCMAN/XMCSERV values
 	{
@@ -88,7 +90,7 @@ static const int mcRpcCmd[2][17] =
 	0x11,	// MC_RPCCMD_UNFORMAT
 	0x12,	// MC_RPCCMD_GET_ENT
 	0x14,	// MC_RPCCMD_CHG_PRITY
-	0x33,	// MC_RPCCMD_CHECKBLOCK (calls xmcman_funcs: 45)
+	0x33,	// MC_RPCCMD_CHECK_BLOCK (calls xmcman_funcs: 45)
 	}
 };
 
@@ -169,11 +171,11 @@ static void mcGetInfoApdx(volatile int* info)
 	
 	if(g_pFormat!= NULL)
 	{
-		// older mcman doesnt support retrieving whether card is formatted
-		// so if a card is present, we will always say its formatted
+		// older MCSERV doesnt support retrieving whether card is formatted
+		// so if a card is present, determine whether its formatted based on the return value from MCSERV
 		if(g_mcType == MC_TYPE_MC)
 		{
-			if(u_info[0] == 0)
+			if(u_info[0] == 0 || *(int*)g_rdata==-2)
 				*g_pFormat	= 0;
 			else
 				*g_pFormat	= 1;
@@ -273,7 +275,23 @@ int mcInit(int type)
 	{
 #ifdef MC_DEBUG
 		printf("libmc: using MCMAN & MCSERV\n");
+
 #endif
+		g_descParam.offset=0xFFFFFF27;
+
+		// call init function
+		if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_INIT], 0, &g_descParam, sizeof(g_descParam), g_rdata, 4, 0, 0))>=0)
+		{
+			ret = *(s32*)g_rdata;
+		}
+		else{
+			// init error
+#ifdef MC_DEBUG
+			printf("libmc: initialisation error\n");
+#endif
+			g_mclibInited = 0;
+			return *(s32*)g_rdata - 100;
+		}
 	}
 	else if(g_mcType == MC_TYPE_XMC)
 	{
@@ -369,7 +387,7 @@ int mcGetInfo(int port, int slot, int* type, int* free, int* format)
 	SifWriteBackDCache(endParameter, 192);
 	
 	// send sif command
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_GET_INFO], 1, &g_descParam, sizeof(g_descParam), g_rdata, 4, (SifRpcEndFunc_t)mcGetInfoApdx, endParameter)) != 0)
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_GET_INFO], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), g_rdata, 4, (SifRpcEndFunc_t)mcGetInfoApdx, endParameter)) != 0)
 		return ret;
 	g_currentCmd = MC_FUNC_GET_INFO;
 	return ret;
@@ -404,7 +422,7 @@ int mcOpen(int port, int slot, const char *name, int mode)
 	g_nameParam.name[1023] = 0;
 	
 	// send sif command
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_OPEN], 1, &g_nameParam, sizeof(g_nameParam), g_rdata, 4, 0, 0)) != 0)
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_OPEN], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), g_rdata, 4, 0, 0)) != 0)
 		return ret;
 	g_currentCmd = MC_FUNC_OPEN;
 	return ret;
@@ -432,7 +450,7 @@ int mcClose(int fd)
 	g_descParam.fd	= fd;
 	
 	// send sif command
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_CLOSE], 1, &g_descParam, sizeof(g_descParam), g_rdata, 4, 0, 0)) != 0)
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_CLOSE], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), g_rdata, 4, 0, 0)) != 0)
 		return ret;
 	g_currentCmd = MC_FUNC_CLOSE;
 	return ret;
@@ -464,7 +482,7 @@ int mcSeek(int fd, int offset, int origin)
 	g_descParam.origin	= origin;
 	
 	// send sif command
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_SEEK], 1, &g_descParam, sizeof(g_descParam), g_rdata, 4, 0, 0)) != 0)
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_SEEK], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), g_rdata, 4, 0, 0)) != 0)
 		return ret;
 	g_currentCmd = MC_FUNC_SEEK;
 	return ret;
@@ -499,7 +517,7 @@ int mcRead(int fd, void *buffer, int size)
 	SifWriteBackDCache(endParameter, 192);
 	
 	// send sif command
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_READ], 1, &g_descParam, sizeof(g_descParam), g_rdata, 4, (SifRpcEndFunc_t)mcReadFixAlign, endParameter)) != 0)
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_READ], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), g_rdata, 4, (SifRpcEndFunc_t)mcReadFixAlign, endParameter)) != 0)
 		return ret;
 	g_currentCmd = MC_FUNC_READ;
 	return ret;
@@ -545,7 +563,7 @@ int mcWrite(int fd, const void *buffer, int size)
 	FlushCache(0);
 	
 	// send sif command
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_WRITE], 1, &g_descParam, sizeof(g_descParam), g_rdata, 4, 0, 0)) != 0)
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_WRITE], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), g_rdata, 4, 0, 0)) != 0)
 		return ret;
 	g_currentCmd = MC_FUNC_WRITE;
 	return ret;
@@ -573,7 +591,7 @@ int mcFlush(int fd)
 	g_descParam.fd	= fd;
 	
 	// send sif command
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_FLUSH], 1, &g_descParam, sizeof(g_descParam), g_rdata, 4, 0, 0)) != 0)
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_FLUSH], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), g_rdata, 4, 0, 0)) != 0)
 		return ret;
 	g_currentCmd = MC_FUNC_FLUSH;
 	return ret;
@@ -628,7 +646,7 @@ int mcChdir(int port, int slot, const char* newDir, char* currentDir)
 	SifWriteBackDCache(curDir, 1024);
 	
 	// send sif command
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_CH_DIR], 1, &g_nameParam, sizeof(g_nameParam), g_rdata, 4, (SifRpcEndFunc_t)mcStoreDir, currentDir)) != 0)
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_CH_DIR], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), g_rdata, 4, (SifRpcEndFunc_t)mcStoreDir, currentDir)) != 0)
 		return ret;
 	g_currentCmd = MC_FUNC_CH_DIR;
 	return ret;
@@ -669,7 +687,7 @@ int mcGetDir(int port, int slot, const char *name, unsigned mode, int maxent, mc
 	SifWriteBackDCache(table, maxent * sizeof(mcTable));
 	
 	// send sif command
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_GET_DIR], 1, &g_nameParam, sizeof(g_nameParam), g_rdata, 4, 0, 0)) != 0)
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_GET_DIR], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), g_rdata, 4, 0, 0)) != 0)
 		return ret;
 	g_currentCmd = MC_FUNC_GET_DIR;
    	return ret;
@@ -709,7 +727,7 @@ int mcSetFileInfo(int port, int slot, const char* name, const mcTable* info, uns
 	FlushCache(0);
 	
 	// send sif command
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_SET_INFO], 1, &g_nameParam, sizeof(g_nameParam), g_rdata, 4, 0, 0)) != 0)
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_SET_INFO], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), g_rdata, 4, 0, 0)) != 0)
 		return ret;
 	g_currentCmd = MC_FUNC_SET_INFO;
 	return ret;
@@ -743,7 +761,7 @@ int mcDelete(int port, int slot, const char *name)
 	g_nameParam.name[1023] = 0;
 	
 	// call delete function
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_DELETE], 1, &g_nameParam, sizeof(g_nameParam), g_rdata, 4, 0, 0)) != 0)
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_DELETE], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), g_rdata, 4, 0, 0)) != 0)
 		return ret;
 	g_currentCmd = MC_FUNC_DELETE;
    	return ret;
@@ -773,7 +791,7 @@ int mcFormat(int port, int slot)
 	g_descParam.slot = slot;
 	
 	// call format function
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_FORMAT], 1, &g_descParam, sizeof(g_descParam), g_rdata, 4, 0, 0)) != 0)
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_FORMAT], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), g_rdata, 4, 0, 0)) != 0)
 		return ret;
 	g_currentCmd = MC_FUNC_FORMAT;
 	return ret;
@@ -803,7 +821,7 @@ int mcUnformat(int port, int slot)
 	g_descParam.slot = slot;
 	
 	// call unformat function
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_UNFORMAT], 1, &g_descParam, sizeof(g_descParam), g_rdata, 4, 0, 0)) != 0)
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_UNFORMAT], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), g_rdata, 4, 0, 0)) != 0)
 		return ret;
 	g_currentCmd = MC_FUNC_UNFORMAT;
 	return ret;
@@ -836,7 +854,7 @@ int mcGetEntSpace(int port, int slot, const char* path)
 	g_nameParam.name[1023] = 0;
 	
 	// call sif function
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_GET_ENT], 1, &g_nameParam, sizeof(g_nameParam), g_rdata, 4, 0, 0)) != 0)
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_GET_ENT], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), g_rdata, 4, 0, 0)) != 0)
 		return ret;
 	g_currentCmd = MC_FUNC_GET_ENT;
 	return ret;
@@ -857,7 +875,7 @@ int mcRename(int port, int slot, const char* oldName, const char* newName)
 	int ret;
 	
 	// check lib is inited
-	if(!g_mclibInited)
+	if((!g_mclibInited)||(g_mcType==MC_TYPE_MC))	//I don't think that the old MCSERV module supports this because the v1.00 and v1.01 OSDSYS doesn't seem to have the sceMcRename function at all and the sceMcRename function was only introduced with SCE PS2SDK v1.50. I see that it doesn't work with rom0:MCSERV either way...
 		return -1;
 	// check nothing else is processing
 	if(g_currentCmd != MC_FUNC_NONE)
@@ -875,10 +893,107 @@ int mcRename(int port, int slot, const char* oldName, const char* newName)
 	FlushCache(0);
 	
 	// call sif function
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_SET_INFO], 1, &g_nameParam, sizeof(g_nameParam), g_rdata, 4, 0, 0)) != 0)
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_SET_INFO], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), g_rdata, 4, 0, 0)) != 0)
 		return ret;
 	g_currentCmd = MC_FUNC_RENAME;
 	return ret;
+}
+
+int mcEraseBlock(int port, int slot, int block, int mode){
+	int result;
+
+	// check lib is inited
+	if((!g_mclibInited)||(g_mcType==MC_TYPE_XMC))
+		return -1;
+	// check nothing else is processing
+	if(g_currentCmd != MC_FUNC_NONE)
+		return g_currentCmd;
+
+	g_descParam.port=port;
+	g_descParam.slot=slot;
+	g_descParam.offset=block;
+	g_descParam.origin=mode;
+
+	if((result=SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_ERASE_BLOCK], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), g_rdata, 4, NULL, NULL))==0){
+		g_currentCmd = MC_FUNC_ERASE_BLOCK;
+	}
+
+	return result;
+}
+
+struct libmc_PageReadAlignData{
+	unsigned int size1;
+	unsigned int size2;
+	void *dest1;
+	void *dest2;
+	unsigned char data1[16];
+	unsigned char data2[16];
+	unsigned char padding[16];
+};
+
+static struct libmc_PageReadAlignData libmc_ReadPageAlignData;
+
+static void libmc_ReadAlignFunction(struct libmc_PageReadAlignData *data){
+	unsigned int misaligned;
+
+	if((misaligned=(unsigned int)data->dest1&0xF)!=0){
+		memcpy(UNCACHED_SEG(data->dest1), UNCACHED_SEG(data->data1), 16-misaligned);
+		memcpy(UNCACHED_SEG((unsigned int)data->dest1+(16-misaligned)), UNCACHED_SEG((unsigned int)data->data1+(16-misaligned)+0x1F0), misaligned);
+	}
+}
+
+int mcReadPage(int port, int slot, unsigned int page, void *buffer){
+	int result;
+
+	// check lib is inited
+	if((!g_mclibInited)||(g_mcType==MC_TYPE_XMC))
+		return -1;
+	// check nothing else is processing
+	if(g_currentCmd != MC_FUNC_NONE)
+		return g_currentCmd;
+
+	g_descParam.fd=page;
+	g_descParam.port=port;
+	g_descParam.slot=slot;
+	g_descParam.buffer=(unsigned int)buffer;
+	g_descParam.param=(unsigned int)&libmc_ReadPageAlignData;
+
+	SifWriteBackDCache(buffer, 0x200);
+
+	if((result=SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_READ_PAGE], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), g_rdata, 4, (void*)&libmc_ReadAlignFunction, UNCACHED_SEG(&libmc_ReadPageAlignData)))==0){
+		g_currentCmd = MC_FUNC_READ_PAGE;
+	}
+
+	return result;
+}
+
+int mcWritePage(int port, int slot, int page, const void *buffer){
+	int result, misaligned;
+
+	// check lib is inited
+	if((!g_mclibInited)||(g_mcType==MC_TYPE_XMC))
+		return -1;
+	// check nothing else is processing
+	if(g_currentCmd != MC_FUNC_NONE)
+		return g_currentCmd;
+
+	g_descParam.fd=page;
+	g_descParam.port=port;
+	g_descParam.slot=slot;
+	g_descParam.buffer=(unsigned int)buffer;
+
+	SifWriteBackDCache((void*)buffer, 512);
+
+	if((misaligned=(unsigned int)buffer&0xF)!=0){
+		memcpy(g_descParam.data, buffer, 16-misaligned);
+		memcpy((void*)((unsigned int)g_descParam.data+(16-misaligned)), (void*)((unsigned int)buffer+(16-misaligned)+0x1F0), misaligned);
+	}
+
+	if((result=SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_WRITE_PAGE], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), g_rdata, 4, NULL, NULL))==0){
+		g_currentCmd = MC_FUNC_WRITE_PAGE;
+	}
+
+	return result;
 }
 
 // change mcserv thread priority
@@ -904,7 +1019,7 @@ int mcChangeThreadPriority(int level)
 //	*(u32*)mcCmd.name = level;
 	
 	// call sif function
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_CHG_PRITY], 1, &g_descParam, sizeof(g_descParam), g_rdata, 4, 0, 0)) != 0)
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_CHG_PRITY], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), g_rdata, 4, 0, 0)) != 0)
 		return ret;
 	g_currentCmd = MC_FUNC_CHG_PRITY;
 	return ret;
@@ -960,9 +1075,10 @@ int mcSync(int mode, int *cmd, int *result)
 	return 1;
 }
 
-int mcReset()
+int mcReset(void)
 {
 	g_mclibInited = 0;
 	g_cdata.server = NULL;
 	return 0; 
 }
+
