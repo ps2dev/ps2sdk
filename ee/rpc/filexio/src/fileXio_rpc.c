@@ -22,9 +22,9 @@
 // from stdio.c
 extern int (*_ps2sdk_close)(int);
 extern int (*_ps2sdk_open)(const char*, int);
-extern int (*_ps2sdk_read)(int, unsigned char*, int);
+extern int (*_ps2sdk_read)(int, void*, int);
 extern int (*_ps2sdk_lseek)(int, long, int); // assume long = int
-extern int (*_ps2sdk_write)(int, unsigned char*, int);
+extern int (*_ps2sdk_write)(int, const void*, int);
 extern int (*_ps2sdk_remove)(const char*);
 extern int (*_ps2sdk_rename)(const char*,const char*);
 
@@ -459,7 +459,7 @@ static void recv_intr(void *data_raw)
 	iSignalSema(fileXioCompletionSema);
 }
 
-int fileXioRead(int fd, unsigned char *buf, int size)
+int fileXioRead(int fd, void *buf, int size)
 {
 	volatile int rv;
 
@@ -487,7 +487,7 @@ int fileXioRead(int fd, unsigned char *buf, int size)
 	return(rv);
 }
 
-int fileXioWrite(int fd, unsigned char *buf, int size)
+int fileXioWrite(int fd, const void *buf, int size)
 {
 	unsigned int miss;
 	volatile int rv;
@@ -514,7 +514,7 @@ int fileXioWrite(int fd, unsigned char *buf, int size)
 	memcpy((void *)&sbuff[16/4], UNCACHED_SEG(buf), miss);
 
 	if(!IS_UNCACHED_SEG(buf))
-		SifWriteBackDCache(buf, size);
+		SifWriteBackDCache((void*)buf, size);
 
 	SifCallRpc(&cd0, FILEXIO_WRITE, fileXioBlockMode, sbuff, 32,sbuff, 4, (void *)_fxio_intr, 0);
 

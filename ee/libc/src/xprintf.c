@@ -947,6 +947,8 @@ int printf(const char *format, ...)
 }
 #endif
 
+extern int (*_ps2sdk_write)(int, const void*, int);
+
 #ifdef F_vprintf
 int vprintf(const char *format, va_list args)
 {
@@ -955,7 +957,7 @@ int vprintf(const char *format, va_list args)
 
 	ret = vsnprintf(buf, PS2LIB_STR_MAX, format, args);
 
-	fioWrite(1, buf, ret);
+	_ps2sdk_write(1, buf, ret);
 	return ret;
 }
 #endif
@@ -963,7 +965,7 @@ int vprintf(const char *format, va_list args)
 #ifdef F_putchar
 int putchar( int chr )
 {
-	fioWrite(1, &chr, 1);
+	_ps2sdk_write(1, &chr, 1);
 	return chr;
 }
 #endif

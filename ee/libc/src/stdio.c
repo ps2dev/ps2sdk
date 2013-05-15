@@ -786,7 +786,7 @@ size_t fread(void *buf, size_t r, size_t n, FILE *stream)
       //ret += _ps2sdk_read(stream->fd, buf, read_len) / r;
       read = _ps2sdk_read(stream->fd, buf, read_len);
       if (read < 0)
-        read = errno = (read * -1);
+        read = errno = -read;
 
       ret +=  read / r;
   }
@@ -1486,15 +1486,7 @@ int (*_ps2sdk_open)(const char*, int) = fioOpen;
 int (*_ps2sdk_read)(int, void*, int) = fioRead;
 int (*_ps2sdk_lseek)(int, int, int) = fioLseek;
 int (*_ps2sdk_write)(int, const void*, int) = fioWrite;
-int fioRemove_Helper(const char *s)
-{
-  int ret = fioRemove(s);
-  fioRmdir(s);
-
-  return ret;
-}
-
-int (*_ps2sdk_remove)(const char*) = fioRemove_Helper;
+int (*_ps2sdk_remove)(const char*) = fioRemove;
 
 int fioRename(const char *old, const char *new)
 {
