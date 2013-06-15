@@ -14,33 +14,52 @@
 #ifndef IOP_INTRMAN_H
 #define IOP_INTRMAN_H
 
-#include "types.h"
-#include "irx.h"
+#include <types.h>
+#include <irx.h>
 
+//I don't know where the PCSX2 development team for their interrupt numbers and names from for their intrman.h file, but I saw the same names and numbers as debug strings within the LED module of a System 246's boot ROM.
 enum iop_irq_list {
 	IOP_IRQ_VBLANK = 0,
-	IOP_IRQ_SBUS,
-	IOP_IRQ_CDVD,
-
-	IOP_IRQ_RTC0 = 0x04,
-	IOP_IRQ_RTC1 = 0x05,
-	IOP_IRQ_RTC2 = 0x06,
-
-	IOP_IRQ_DEV9 = 0x0d,
-
-	IOP_IRQ_RTC3 = 0x0e,
-	IOP_IRQ_RTC4 = 0x0f,
-	IOP_IRQ_RTC5 = 0x10,
-
-	IOP_IRQ_SIO2 = 0x11,
-	IOP_IRQ_USB = 0x16,
-	IOP_IRQ_ILINK = 0x18,
-
-	IOP_IRQ_DMA2 = 0x22,
-	IOP_IRQ_DMA_DEV9 = 0x29,
-
-	IOP_IRQ_DMA_SIF0 = 0x2A,
-	IOP_IRQ_DMA_SIF1 = 0x2B,
+	IOP_IRQ_SBUS,	//INUM_GM
+	IOP_IRQ_CDVD,	//INUM_CDROM
+	IOP_IRQ_DMA,	//Original DMA controller interrupt (DMA channels 0-6)
+	IOP_IRQ_RTC0,
+	IOP_IRQ_RTC1,
+	IOP_IRQ_RTC2,
+	IOP_IRQ_SIO0,
+	IOP_IRQ_SIO1,
+	IOP_IRQ_SPU,
+	IOP_IRQ_PIO,
+	IOP_IRQ_EVBLANK,
+	IOP_IRQ_DVD,	//Not sure what this is, if INUM_CDROM is the interrupt CDVDMAN uses.
+	IOP_IRQ_DEV9,	//INUM_PCMCIA
+	IOP_IRQ_RTC3,
+	IOP_IRQ_RTC4,
+	IOP_IRQ_RTC5,
+	IOP_IRQ_SIO2,
+	IOP_IRQ_HTR0,
+	IOP_IRQ_HTR1,
+	IOP_IRQ_HTR2,
+	IOP_IRQ_HTR3,
+	IOP_IRQ_USB,
+	IOP_IRQ_EXTR,
+	IOP_IRQ_ILINK,	//INUM_FWRE
+	IOP_IRQ_FDMA,
+	//There's a gap in interrupt numbers here.
+	IOP_IRQ_DMA_MDEC_IN = 0x20,	//INUM_DMA_0
+	IOP_IRQ_DMA_MDEC_OUT,	//INUM_DMA_1
+	IOP_IRQ_DMA_SIF2,	//INUM_DMA_2
+	IOP_IRQ_DMA_CDVD,	//INUM_DMA_3
+	IOP_IRQ_DMA_SPU,	//INUM_DMA_4
+	IOP_IRQ_DMA_PIO,	//INUM_DMA_5
+	IOP_IRQ_DMA_GPU_OTC,	//INUM_DMA_6
+	IOP_IRQ_DMA_BERR,	//INUM_DMA_BERR (DMA bus error)
+	IOP_IRQ_DMA_SPU2,	//INUM_DMA_7
+	IOP_IRQ_DMA_DEV9,	//INUM_DMA_8
+	IOP_IRQ_DMA_SIF0,	//INUM_DMA_9
+	IOP_IRQ_DMA_SIF1,	//INUM_DMA_10
+	IOP_IRQ_DMA_SIO2_IN,	//INUM_DMA_11
+	IOP_IRQ_DMA_SIO2_OUT,	//INUM_DMA_12
 };
 
 #define intrman_IMPORTS_start DECLARE_IMPORT_TABLE(intrman, 1, 2)
@@ -67,9 +86,9 @@ int CpuResumeIntr(int state);
 #define I_CpuResumeIntr DECLARE_IMPORT(18, CpuResumeIntr)
 
 /* Returns 1 if within the interrupt context */
-int QueryIntrContext();
+int QueryIntrContext(void);
 #define I_QueryIntrContext DECLARE_IMPORT(23, QueryIntrContext)
-int QueryIntrStack();
+int QueryIntrStack(void);
 #define I_QueryIntrStack DECLARE_IMPORT(24, QueryIntrStack)
 
 #define intrman_IMPORTS \
