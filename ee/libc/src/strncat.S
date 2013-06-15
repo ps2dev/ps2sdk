@@ -160,6 +160,10 @@ $L20:
 	lb	$2,0($4)
 	.set	noreorder
 	.set	nomacro
+	nop
+	nop
+	nop
+	nop
 	bnel	$2,$0,$L20
 	addu	$4,$4,1
 	.set	macro

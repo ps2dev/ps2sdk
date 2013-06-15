@@ -73,6 +73,7 @@ $L5:
 	addu	$6,$6,-1
 	.set	noreorder
 	.set	nomacro
+	nop
 	bne	$6,$4,$L5
 	sb	$2,0($3)
 	.set	macro
@@ -183,6 +184,7 @@ $L19:
 	sb	$2,0($3)
 	.set	noreorder
 	.set	nomacro
+	nop
 	bne	$6,$4,$L19
 	addu	$3,$3,1
 	.set	macro

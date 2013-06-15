@@ -36,20 +36,19 @@ flags:
 */
 
 #include <stdio.h>
+#include <errno.h>
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
 
 #define BUFFER_SIZE 128*28
 
-short wave[BUFFER_SIZE];
+static short wave[BUFFER_SIZE];
 
-void find_predict( short *samples, double *d_samples, int *predict_nr, int *shift_factor );
-void pack( double *d_samples, short *four_bit, int predict_nr, int shift_factor );
-void fputi( int d, FILE *fp );
+static void find_predict( short *samples, double *d_samples, int *predict_nr, int *shift_factor );
+static void pack( double *d_samples, short *four_bit, int predict_nr, int shift_factor );
 
-
-void adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop)
+int adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop)
 {
 	short *ptr;
 	double d_samples[28];
@@ -61,7 +60,9 @@ void adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop
 	unsigned char d;
 	int size;
     
-	flags = 0;  
+	flags = 0;
+	shift_factor = 0;
+	predict_nr = 0;
 	
 	// sample_len is number of 16 bit samples
   while( sample_len > 0 ) 
@@ -73,13 +74,21 @@ void adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop
 		{
 			for(i = 0; i < size; i++)
 			{
-				fread( wave+i, sizeof( short ), 1, fp );
-				fseek(fp, offset, SEEK_CUR);
+				if(fread( wave+i, sizeof( short ), 1, fp )==1){
+					fseek(fp, offset, SEEK_CUR);
+				}
+				else{
+					printf("Error: Can't read SAMPLE DATA in WAVE-file.\n");
+					return EIO;
+				}
 			}
 		}  
 		else
 		{
-			fread(wave, sizeof( short ), size, fp);
+			if(fread(wave, sizeof( short ), size, fp)!=size){
+				printf("Error: Can't read SAMPLE DATA in WAVE-file.\n");
+				return EIO;
+			}
 		}	   
 
 		// i = num of samples with size 28
@@ -141,6 +150,8 @@ void adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop
   
 	for ( i = 0; i < 14; i++ )
 			fputc( 0, sad ); 
+
+	return 0;
 }
 
 
@@ -152,7 +163,7 @@ static double f[5][2] = { { 0.0, 0.0 },
                   
 
 
-void find_predict( short *samples, double *d_samples, int *predict_nr, int *shift_factor )
+static void find_predict( short *samples, double *d_samples, int *predict_nr, int *shift_factor )
 {
     int i, j;
     double buffer[28][5];
@@ -220,7 +231,7 @@ void find_predict( short *samples, double *d_samples, int *predict_nr, int *shif
       
 }
 
-void pack( double *d_samples, short *four_bit, int predict_nr, int shift_factor )
+static void pack( double *d_samples, short *four_bit, int predict_nr, int shift_factor )
 {
     double ds;
     int di;
@@ -249,10 +260,3 @@ void pack( double *d_samples, short *four_bit, int predict_nr, int shift_factor 
     }
 }
 
-void fputi( int d, FILE *fp )
-{
-	fputc( d,       fp );
-	fputc( d >> 8,  fp );
-	fputc( d >> 16, fp );   
-	fputc( d >> 24, fp );
-}

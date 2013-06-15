@@ -206,6 +206,8 @@ $L16:
 	addu	$4,$4,1
 	.set	noreorder
 	.set	nomacro
+	nop
+	nop
 	bne	$2,$0,$L16
 	addu	$6,$6,-1
 	.set	macro

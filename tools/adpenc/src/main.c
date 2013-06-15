@@ -1,193 +1,216 @@
 #include <stdio.h>
+#include <errno.h>
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
 
-#define VERSION	"1.0"
+#define VERSION	"1.1"
 
-extern void adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop);
-extern void fputi( int d, FILE *fp );
+extern int adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop);
 
 enum{ monoF = (1 << 0), stereo = (1 << 1), loopF = (1 << 2) } sad_flag;
 
-int main( int argc, char *argv[] )
-{
+struct AdpcmHeader{
+	char id[4];	//"APCM"
+	unsigned char version;
+	unsigned char channels;
+	unsigned char loop;
+	unsigned char reserved;
+	unsigned int pitch;
+	unsigned int reserved2;
+};
+
+#define BSWAP32(x) ((x)<<24 | (x)>>24 | ((x)<<8&0xFF0000) | ((x)>>8&0xFF00))
+
+static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_loop){
 	FILE *fp, *sad;
-	char flag_loop;
-	int finput, foutput;
-	int sample_freq, sample_len;
+	int sample_freq, sample_len, result;
 	char s[4];
 	int chunk_data;
 	short e;
 	char channels;
+	struct AdpcmHeader AdpcmHeader;
 
-	if ( argc < 3 ) 
-	{
-		printf("ADPCM Encoder %s\n", VERSION);
-		printf("Usage: sadenc [-L] <input wave> <output sad>\n" );
-		printf("Options:\n");
-		printf("  -L  Loop\n");
-		return( -1 );
+	result=0;
+	if ( (fp = fopen(InputFile, "rb" )) != NULL ) 
+	{    
+		if (fread( s, 1, 4, fp )!=4 || strncmp( s, "RIFF", 4 ) ) 
+		{
+			printf( "Error: Not a WAVE-file (\"RIFF\" identifier not found)\n" );
+			result=-3;
+			goto InputFileIOEnd;
+		}
+
+		fseek( fp, 8, SEEK_SET );
+  
+		if (fread( s, 1, 4, fp )!=4 || strncmp( s, "WAVE", 4 ) ) 
+		{
+			printf( "Error: Not a WAVE-file (\"WAVE\" identifier not found)\n" );
+			result=-3;
+ 			goto InputFileIOEnd;
+		}
+
+		fseek( fp, 8 + 4, SEEK_SET );
+  
+		if (fread( s, 1, 4, fp )!=4 || strncmp( s, "fmt", 3 ) ) 
+		{
+			printf( "Error: Not a WAVE-file (\"fmt\" chunk not found)\n" );
+			result=-3;
+ 			goto InputFileIOEnd;
+		}
+    
+		if(fread( &chunk_data, 4, 1, fp )==1){
+			chunk_data += ftell( fp );
+      
+			if (fread( &e, 2, 1, fp )!=1 || e != 1 ) 
+			{	
+				printf( "Error: No PCM data in WAVE-file\n" );
+				result=-4;
+	 			goto InputFileIOEnd;
+			}
+		}
+		else{
+			printf( "Error: can't read CHUNK DATA in WAVE-file\n" );
+			result=-4;
+ 			goto InputFileIOEnd;
+		}
+    
+		if (fread( &e, 2, 1, fp )!=1 || ((e != 1) && (e != 2)))
+		{
+			printf( "Error: WAVE file must be MONO or STEREO (max 2 channels)\n" );
+			result=-5;
+ 			goto InputFileIOEnd;
+		}
+
+		channels = e;
+
+		if(fread( &sample_freq, 4, 1, fp )==1){
+			fseek( fp, 4 + 2, SEEK_CUR );
+			if (fread( &e, 2, 1, fp )!=1 || e != 16 ) 
+			{
+				printf( "Error: WAVE-file must 16 bit\n" );
+				result=-6;
+	 			goto InputFileIOEnd;
+			}
+		}
+		else{
+			printf("Error: Can't read SAMPLE FREQUENCY in WAVE-file\n");
+			result=-6;
+ 			goto InputFileIOEnd;
+		}
+        
+		fseek( fp, chunk_data, SEEK_SET );
+		if(fread( s, 1, 4, fp )==4){
+			// Skip 'fact' and possibly other chunks
+			while(strncmp( s, "data", 4 ))
+			{	
+				if(fread( &chunk_data, 4, 1, fp )==1){
+					chunk_data += ftell( fp );
+					fseek( fp, chunk_data, SEEK_SET );
+					if(fread( s, 1, 4, fp )!=4){
+						printf("Error: Read error in WAVE-file\n");
+						result=-6;
+			 			goto InputFileIOEnd;
+					}
+				}
+				else{
+					printf("Error: Read error in WAVE-file\n");
+					result=-6;
+		 			goto InputFileIOEnd;
+				}
+			}
+		}
+		else{
+			printf("Error: Read error in WAVE-file\n");
+			result=-6;
+ 			goto InputFileIOEnd;
+		}
+
+		if(fread( &sample_len, 4, 1, fp )==1){
+			sample_len /= (channels+1);
+		}
+		else{
+			printf("Error: Can't read SAMPLE LENGTH in WAVE-file\n");
+			result=-6;
+ 			goto InputFileIOEnd;
+		}
+    
+		if ( (sad = fopen(OutputFile, "wb" )) != NULL ) 
+		{
+			strncpy(AdpcmHeader.id, "APCM", 4);
+			AdpcmHeader.version=1;
+			AdpcmHeader.channels=channels;
+			AdpcmHeader.loop=flag_loop;
+			AdpcmHeader.reserved=0;
+			AdpcmHeader.pitch=BSWAP32((sample_freq*4096)/48000);	// pitch, to encode for PS1 change 48000 to 44100
+			AdpcmHeader.reserved2=0;
+			fwrite(&AdpcmHeader, sizeof(AdpcmHeader), 1, sad);
+
+			if(channels == 1)
+			{
+				result=adpcm_encode(fp, sad, 0, sample_len, flag_loop);
+			}
+			else
+			{
+				int data_offset = ftell(fp);
+		
+				// Encode left
+				if((result=adpcm_encode(fp, sad, 2, sample_len, flag_loop))==0){
+					fseek(fp, SEEK_SET, data_offset+2);
+					// Encode right
+					result=adpcm_encode(fp, sad, 2, sample_len, flag_loop);
+				}
+			}
+
+			fclose(sad);
+		}
+		else
+		{
+			printf( "Error: Can't write output file %s\n", OutputFile);
+			result=EIO;
+		}
+
+InputFileIOEnd:
+		fclose(fp);
 	}
-            
+	else
+	{
+		printf( "Error: Can't open %s\n", InputFile);
+		result=ENOENT;
+	}
+
+	return result;
+}
+
+int main( int argc, char *argv[] )
+{
+	int result;
+
 	if( argc == 4)
 	{
 		if( strncmp( argv[1], "-L", 2 ) )
 		{
 			printf("Error: Option '%s' not recognized\n", argv[1]);
-			return (-1);
+			result=EINVAL;
 		}
 		else
-		{	
-			finput = 2;
-			foutput = 3;
-			flag_loop = 1;
-		}
-	}
-	else
-	{
-		if(argc == 3)
 		{
-			finput = 1;
-			foutput = 2;
-			flag_loop = 0;
-		}
-		else
-		{		
-			printf("Error: Too many arguments\n");
-			return (-1);
+			result=ConvertFile(argv[2], argv[3], 1);
 		}
 	}
-
-	fp = fopen( argv[finput], "rb" );
-  
-	if ( fp == NULL ) 
+	else if(argc == 3)
 	{
-		printf( "Error: Can't open %s\n", argv[finput] );
-		return( -2 );
-	}
-	
-	fread( s, 1, 4, fp );
-    
-	if ( strncmp( s, "RIFF", 4 ) ) 
-	{	
-		printf( "Error: Not a WAVE-file (\"RIFF\" identifier not found)\n" );
-		return( -3 );
-	}
-	
-	fseek( fp, 8, SEEK_SET );
-	fread( s, 1, 4, fp );
-  
-	if ( strncmp( s, "WAVE", 4 ) ) 
-	{	
-		printf( "Error: Not a WAVE-file (\"WAVE\" identifier not found)\n" );
-		return( -3 );
-	}
-
-	fseek( fp, 8 + 4, SEEK_SET );
-	fread( s, 1, 4, fp );
-  
-	if ( strncmp( s, "fmt", 3 ) ) 
-	{
-		printf( "Error: Not a WAVE-file (\"fmt\" chunk not found)\n" );
-		return( -3 );
-	}
-    
-	fread( &chunk_data, 4, 1, fp ); 
-	chunk_data += ftell( fp );
-  
-	fread( &e, 2, 1, fp );
-    
-	if ( e != 1 ) 
-	{	
-		printf( "Error: No PCM data in WAVE-file\n" );
-		return( -4 );
-  }   
-
-	fread( &e, 2, 1, fp );
-    
-	if ( (e != 1) && (e != 2) ) 
-	{
-		printf( "Error: WAVE file must be MONO or STEREO (max 2 channels)\n" );
-    return( -5 );
-	}
-
-	channels = e;
-
-	fread( &sample_freq, 4, 1, fp );
-  fseek( fp, 4 + 2, SEEK_CUR );
-
-  fread( &e, 2, 1, fp );
-  
-	if ( e != 16 ) 
-	{
-		printf( "Error: WAVE-file must 16 bit\n" );
-		return( -6 );
-	}       
-        
-	fseek( fp, chunk_data, SEEK_SET );
-	fread( s, 1, 4, fp );
-    
-	// Skip 'fact' and possibly other chunks
-	while(strncmp( s, "data", 4 ))
-	{	
-		fread( &chunk_data, 4, 1, fp );
-		chunk_data += ftell( fp );
-		fseek( fp, chunk_data, SEEK_SET );
-		fread( s, 1, 4, fp );
-	}
-	
-	fread( &sample_len, 4, 1, fp );
-
-	sample_len /= (channels+1);
-
-  sad = fopen( argv[foutput], "wb" );
-    
-	if ( sad == NULL ) 
-	{	
-		printf( "Error: Can't write output file %s\n", argv[foutput] );
-		return( -8 );
-	}
-
-	/*
-	header: (16 bytes)
-	u32 id "APCM"
-	u8	version;	
-	u8	channels;
-	u8	loop;	
-	u8	reserved;
-	u32 pitch;
-	u32 reserved
-	*/
-
-	fprintf( sad, "APCM" );		// ID
-	fputc( 1, sad ); // version
-	fputc( channels, sad);		// channels		
-	fputc( flag_loop, sad);		// loop flag
-	fputc( 0, sad);
-	fputi((sample_freq*4096)/48000, sad );  // pitch, to encode for PS1 change 48000 to 44100
-	fputi( 0, sad); // resverd
-		
-
-	if(channels == 1)
-	{
-		adpcm_encode(fp, sad, 0, sample_len, flag_loop);
+		result=ConvertFile(argv[1], argv[2], 0);
 	}
 	else
 	{
-		int data_offset = ftell(fp);
-		
-		// Encode left
-		adpcm_encode(fp, sad, 2, sample_len, flag_loop);
-		
-		fseek(fp, SEEK_SET, data_offset+2);
-		// Encode right
-		adpcm_encode(fp, sad, 2, sample_len, flag_loop);
+		printf(	"ADPCM Encoder %s\n"
+			"Usage: sadenc [-L] <input wave> <output sad>\n"
+			"Options:\n"
+			"  -L  Loop\n", VERSION);
+		result=EINVAL;
 	}
 
-	fclose(fp);
-	fclose(sad);
-
-	return 0;
+	return result;
 }
 

@@ -150,9 +150,12 @@ $L4:
 $L9:				
 $L15:
 	lb	$2,0($4)
-	#nop
 	.set	noreorder
 	.set	nomacro
+	nop
+	nop
+	nop
+	nop
 	bnel	$2,$0,$L9
 	addu	$4,$4,1
 	.set	macro

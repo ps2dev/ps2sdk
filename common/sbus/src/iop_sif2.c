@@ -141,12 +141,12 @@ int SIF2_init(void)
         d = *R_IOP_DPCR;
     }
 
-    DisableIntr(IOP_IRQ_DMA2, &old_irq);
+    DisableIntr(IOP_IRQ_DMA_SIF2, &old_irq);
 
 #if 0
-    RegisterIntrHandler(IOP_IRQ_DMA2, 1, (void *) &_sif2_intr_handler, NULL);
+    RegisterIntrHandler(IOP_IRQ_DMA_SIF2, 1, (void *) &_sif2_intr_handler, NULL);
 
-    EnableIntr(IOP_IRQ_DMA2);
+    EnableIntr(IOP_IRQ_DMA_SIF2);
 #endif
 
     CpuResumeIntr(oldStat);
@@ -173,7 +173,7 @@ int SIF2_deinit(void)
         d = *R_IOP_DPCR;
     }
 
-    DisableIntr(IOP_IRQ_DMA2, &old_irq);
+    DisableIntr(IOP_IRQ_DMA_SIF2, &old_irq);
 
     CpuResumeIntr(oldStat);
 

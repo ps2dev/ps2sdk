@@ -130,6 +130,7 @@ $L13:
 	sb	$2,0($3)
 	.set	noreorder
 	.set	nomacro
+	nop
 	bne	$6,$4,$L13
 	addu	$3,$3,1
 	.set	macro

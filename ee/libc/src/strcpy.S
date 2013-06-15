@@ -153,6 +153,7 @@ $L7:
 	sll	$2,$2,24
 	.set	noreorder
 	.set	nomacro
+	nop
 	bne	$2,$0,$L7
 	addu	$3,$3,1
 	.set	macro
