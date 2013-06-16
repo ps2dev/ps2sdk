@@ -20,8 +20,6 @@ struct AdpcmHeader{
 	unsigned int reserved2;
 };
 
-#define BSWAP32(x) ((x)<<24 | (x)>>24 | ((x)<<8&0xFF0000) | ((x)>>8&0xFF00))
-
 static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_loop){
 	FILE *fp, *sad;
 	int sample_freq, sample_len, result;
@@ -142,7 +140,7 @@ static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_l
 			AdpcmHeader.channels=channels;
 			AdpcmHeader.loop=flag_loop;
 			AdpcmHeader.reserved=0;
-			AdpcmHeader.pitch=BSWAP32((sample_freq*4096)/48000);	// pitch, to encode for PS1 change 48000 to 44100
+			AdpcmHeader.pitch=(sample_freq*4096)/48000;	// pitch, to encode for PS1 change 48000 to 44100
 			AdpcmHeader.reserved2=0;
 			fwrite(&AdpcmHeader, sizeof(AdpcmHeader), 1, sad);
 
