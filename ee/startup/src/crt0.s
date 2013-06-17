@@ -31,7 +31,9 @@
    .globl   _ps2sdk_libc_deinit_weak
    .type    _ps2sdk_libc_deinit_weak, @function
 
-   .extern InitExecPS2
+   .extern InitKernel
+   .extern InitTLBFunctions
+   .extern InitTLB
 
    .set   noat
    .set   noreorder
@@ -129,8 +131,11 @@ ctors:
    jal InitKernel
    nop
 
-   # call main
+   # Initialize TLB functions.
+   jal InitTLBFunctions
+   nop
 
+   # call main
    ei
    jal   _getargs
    nop
@@ -171,6 +176,10 @@ libc_uninit:
    jalr   $8      # _ps2sdk_libc_deinit()
    nop
 1:
+
+   #Re-initialize the TLB
+   jal InitTLB
+   nop
 
    # conditional exit (depending on if we got arguments through the loader or not)
 

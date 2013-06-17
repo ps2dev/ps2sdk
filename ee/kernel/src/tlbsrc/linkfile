@@ -1,0 +1,26 @@
+/*
+ Copyright 2010, jimmikaelkael <jimmikaelkael@wanadoo.fr>
+ Licenced under Academic Free License version 3.0
+ Review Open-PS2-Loader README & LICENSE files for further details.
+*/
+
+ENTRY(_start);
+
+SECTIONS {
+	.text 0x80075000: {
+		_ftext = . ;
+		*(.text)
+		*(.text.*)
+		*(.gnu.linkonce.t*)
+		QUAD(0)
+	}
+
+	/* Static data.  */
+	.rodata ALIGN(128): {
+		*(.rodata)
+		*(.rodata.*)
+		*(.gnu.linkonce.r*)
+	}
+
+}
+

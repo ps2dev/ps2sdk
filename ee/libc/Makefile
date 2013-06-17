@@ -73,6 +73,9 @@ STDLIB_OBJS = abs.o atexit.o atof.o bsearch.o div.o getenv.o _itoa.o labs.o \
 # mblen.o mbstowcs.o mbtowc.o wcstombs.o wctomb.o
 STDLIB_OBJS := $(STDLIB_OBJS:%=$(EE_OBJS_DIR)%)
 
+WSTDLIB_OBJS = wcstol.o wcstoul.o
+WSTDLIB_OBJS := $(WSTDLIB_OBJS:%=$(EE_OBJS_DIR)%)
+
 UNISTD_OBJS = stat.o fstat.o access.o unlink.o getcwd.o sleep.o
 UNISTD_OBJS := $(UNISTD_OBJS:%=$(EE_OBJS_DIR)%)
 
@@ -89,7 +92,7 @@ GPROF_OBJS = mcount.o mcount_internal.o
 GPROF_OBJS := $(GPROF_OBJS:%=$(EE_OBJS_DIR)%)
 
 MULT_OBJS = $(XPRINTF_OBJS) $(WXPRINTF_OBJS) $(XSCANF_OBJS) $(ALLOC_OBJS) $(STRING_C_OBJS) \
-	$(WSTRING_C_OBJS) $(STDIO_OBJS) $(STDLIB_OBJS) $(UNISTD_OBJS) $(TIME_OBJS) \
+	$(WSTRING_C_OBJS) $(STDIO_OBJS) $(STDLIB_OBJS) $(WSTDLIB_OBJS) $(UNISTD_OBJS) $(TIME_OBJS) \
 	$(GPROF_OBJS) $(LIBGEN_OBJS) $(DIRENT_OBJS) $(INIT_OBJS)
 
 # uncomment the following line to enable profile on libc
@@ -125,6 +128,9 @@ $(STDIO_OBJS): src/stdio.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(STDLIB_OBJS): src/stdlib.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(WSTDLIB_OBJS): src/wstdlib.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(UNISTD_OBJS): src/unistd.c

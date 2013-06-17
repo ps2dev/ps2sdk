@@ -69,6 +69,9 @@ CONFIG_OBJS := $(CONFIG_OBJS:%=$(EE_OBJS_DIR)%)
 LIBKRNLUPD_OBJS = libkrnlupd.o libkrnlupd_syscalls.o osdsrc_bin.o
 LIBKRNLUPD_OBJS := $(LIBKRNLUPD_OBJS:%=$(EE_OBJS_DIR)%)
 
+TLBFUNC_OBJS = tlbfunc.o tlbsrc_bin.o
+TLBFUNC_OBJS := $(TLBFUNC_OBJS:%=$(EE_OBJS_DIR)%)
+
 TIMER_OBJS = cpu_ticks.o
 TIMER_OBJS := $(TIMER_OBJS:%=$(EE_OBJS_DIR)%)
 
@@ -97,16 +100,17 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
 	ReferSemaStatus.o iReferSemaStatus.o iDeleteSema.o SetOsdConfigParam.o \
 	GetOsdConfigParam.o GetGsHParam.o GetGsVParam.o SetGsHParam.o \
 	SetGsVParam.o CreateEventFlag.o DeleteEventFlag.o SetEventFlag.o \
-	iSetEventFlag.o EnableIntcHandler.o iEnableIntcHandler.o \
-	DisableIntcHandler.o iDisableIntcHandler.o EnableDmacHandler.o \
-	iEnableDmacHandler.o DisableDmacHandler.o iDisableDmacHandler.o KSeg0.o \
-	EnableCache.o DisableCache.o GetCop0.o FlushCache.o CpuConfig.o \
+	iSetEventFlag.o PutTLBEntry.o iPutTLBEntry.o _SetTLBEntry.o iSetTLBEntry.o \
+	GetTLBEntry.o iGetTLBEntry.o ProbeTLBEntry.o iProbeTLBEntry.o ExpandScratchPad.o \
+	EnableIntcHandler.o iEnableIntcHandler.o DisableIntcHandler.o iDisableIntcHandler.o \
+	EnableDmacHandler.o iEnableDmacHandler.o DisableDmacHandler.o iDisableDmacHandler.o \
+	KSeg0.o EnableCache.o DisableCache.o GetCop0.o FlushCache.o CpuConfig.o \
 	iGetCop0.o iFlushCache.o RFU105.o iCpuConfig.o SifStopDma.o \
 	SetCPUTimerHandler.o SetCPUTimer.o SetOsdConfigParam2.o \
 	GetOsdConfigParam2.o GsGetIMR.o iGsGetIMR.o GsPutIMR.o iGsPutIMR.o \
 	SetPgifHandler.o SetVSyncFlag.o SetSyscall.o SifDmaStat.o iSifDmaStat.o \
 	SifSetDma.o iSifSetDma.o SifSetDChain.o iSifSetDChain.o SifSetReg.o \
-	SifGetReg.o ExecOSD.o Deci2Call.o PSMode.o MachineType.o GetMemorySize.o \
+	SifGetReg.o ExecOSD.o Deci2Call.o PSMode.o MachineType.o GetMemorySize.o _InitTLB.o \
 	SifWriteBackDCache.o _SyncDCache.o _InvalidDCache.o __errno.o errno.o \
 	strncpy.o strlen.o memcpy.o memset.o __syscall.o
 
@@ -116,7 +120,8 @@ LIBSYSCALL_OBJS = $(EE_OBJS_DIR)dummy.o
 
 EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(CONFIG_OBJS) \
-	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(GETKERNEL_OBJS) $(LIBKRNLUPD_OBJS) $(EE_OBJS_DIR)erl-support.o
+	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(GETKERNEL_OBJS) $(LIBKRNLUPD_OBJS)	\
+	$(TLBFUNC_OBJS) $(EE_OBJS_DIR)erl-support.o
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBSYSCALL_LIB) $(EE_LIB)
 
@@ -164,6 +169,9 @@ $(SIO_OBJS): $(EE_SRC_DIR)sio.c
 
 $(EE_OBJS_DIR)libkrnlupd.o: $(EE_SRC_DIR)libkrnlupd.c $(EE_SRC_DIR)osdsrc_bin.c $(EE_SRC_DIR)libkrnlupd_syscalls.S
 	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
+
+$(EE_OBJS_DIR)tibfunc.o: $(EE_SRC_DIR)tlbfunc.c $(EE_SRC_DIR)tlbsrc_bin.c
+	$(EE_C_COMPILE) $< -c -o $@
 
 clean:
 	rm -fr $(EE_OBJS_DIR) $(EE_LIB_DIR)

@@ -285,6 +285,15 @@ void GetGsHParam(void* addr1, void* addr2, void* addr3);
 s32  GetGsVParam(void);
 void SetGsHParam(void* addr1, void* addr2, void* addr3, void* addr4);
 void SetGsVParam(s32 arg1);
+int PutTLBEntry(unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1);
+int iPutTLBEntry(unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1);
+int _SetTLBEntry(unsigned int index, unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1);
+int iSetTLBEntry(unsigned int index, unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1);
+int GetTLBEntry(unsigned int index, unsigned int *PageMask, unsigned int *EntryHi, unsigned int *EntryLo0, unsigned int *EntryLo1);
+int iGetTLBEntry(unsigned int index, unsigned int *PageMask, unsigned int *EntryHi, unsigned int *EntryLo0, unsigned int *EntryLo1);
+int ProbeTLBEntry(unsigned int EntryHi, unsigned int *PageMask, unsigned int *EntryLo0, unsigned int *EntryLo1);
+int iProbeTLBEntry(unsigned int EntryHi, unsigned int *PageMask, unsigned int *EntryLo0, unsigned int *EntryLo1);
+int ExpandScratchPad(unsigned int page);
 void EnableIntcHandler(u32 arg1);
 void iEnableIntcHandler(u32 arg1);
 void DisableIntcHandler(u32 arg1);
@@ -330,6 +339,8 @@ s32  Deci2Call(s32 , u32 *);
 void PSMode(void);
 s32  MachineType(void);
 s32  GetMemorySize(void);
+
+int  _InitTLB(void);
 
 void SifWriteBackDCache(void *ptr, int size);
 void _SyncDCache(void *start, void *end);

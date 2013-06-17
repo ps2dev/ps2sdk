@@ -412,6 +412,42 @@ SYSCALL(SetEventFlag)
 SYSCALL(iSetEventFlag)
 #endif
 
+#ifdef F_PutTLBEntry
+SYSCALL(PutTLBEntry)
+#endif
+
+#ifdef F_iPutTLBEntry
+SYSCALL(iPutTLBEntry)
+#endif
+
+#ifdef F__SetTLBEntry
+SYSCALL(_SetTLBEntry)
+#endif
+
+#ifdef F_iSetTLBEntry
+SYSCALL(iSetTLBEntry)
+#endif
+
+#ifdef F_GetTLBEntry
+SYSCALL(GetTLBEntry)
+#endif
+
+#ifdef F_iGetTLBEntry
+SYSCALL(iGetTLBEntry)
+#endif
+
+#ifdef F_ProbeTLBEntry
+SYSCALL(ProbeTLBEntry)
+#endif
+
+#ifdef F_iProbeTLBEntry
+SYSCALL(iProbeTLBEntry)
+#endif
+
+#ifdef F_ExpandScratchPad
+SYSCALL(ExpandScratchPad)
+#endif
+
 #ifdef F_EnableIntcHandler
 SYSCALL(EnableIntcHandler)
 #endif
@@ -588,6 +624,9 @@ SYSCALL(MachineType)
 SYSCALL(GetMemorySize)
 #endif
 
+#ifdef F_GetMemorySize
+SYSCALL(_InitTLB)
+#endif
 
 #ifdef F_SifWriteBackDCache
 

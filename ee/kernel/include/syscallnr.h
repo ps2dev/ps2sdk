@@ -86,6 +86,15 @@
 #define __NR_DeleteEventFlag		0x51
 #define __NR_SetEventFlag		0x52
 #define __NR_iSetEventFlag		0x53
+#define __NR_PutTLBEntry		0x55
+#define __NR_iPutTLBEntry		(-0x55)
+#define __NR__SetTLBEntry		0x56
+#define __NR_iSetTLBEntry		(-0x56)
+#define __NR_GetTLBEntry		0x57
+#define __NR_iGetTLBEntry		(-0x57)
+#define __NR_ProbeTLBEntry		0x58
+#define __NR_iProbeTLBEntry		(-0x58)
+#define __NR_ExpandScratchPad		0x59
 #define __NR_EnableIntcHandler		0x5C
 #define __NR_iEnableIntcHandler		(-0x5C)
 #define __NR_DisableIntcHandler		0x5D
@@ -130,5 +139,6 @@
 #define __NR_PSMode			0x7d
 #define __NR_MachineType		0x7e
 #define __NR_GetMemorySize		0x7f
+#define __NR__InitTLB			0x82
 
 #endif /* _SYSCALLNR_H_ */
