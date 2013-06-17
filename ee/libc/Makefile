@@ -44,7 +44,7 @@ STRING_C_OBJS = strdup.o strcasecmp.o strncasecmp.o strtok.o strrchr.o strstr.o 
 STRING_C_OBJS := $(STRING_C_OBJS:%=$(EE_OBJS_DIR)%)
 
 WSTRING_C_OBJS = wcsdup.o wcscasecmp.o wcsncasecmp.o wcstok.o wcsrchr.o wcswcs.o wcsupr.o wcslwr.o towlower.o towupper.o iswupper.o iswlower.o iswalpha.o iswdigit.o iswalnum.o iswcntrl.o iswgraph.o iswprint.o iswpunct.o iswspace.o iswxdigit.o wcscpy.o wcspbrk.o wcsspn.o wcscspn.o wcscmp.o wcsncmp.o wcslen.o wcschr.o 
-WSTRING_C_OBJS := $(STRING_C_OBJS:%=$(EE_OBJS_DIR)%)
+WSTRING_C_OBJS := $(WSTRING_C_OBJS:%=$(EE_OBJS_DIR)%)
 
 XPRINTF_OBJS = vxprintf.o xprintf.o __sout.o vsnprintf.o snprintf.o vsprintf.o sprintf.o \
 	__mout.o mprintf.o vmprintf.o __fout.o fprintf.o vfprintf.o printf.o vprintf.o putchar.o \
@@ -52,7 +52,7 @@ XPRINTF_OBJS = vxprintf.o xprintf.o __sout.o vsnprintf.o snprintf.o vsprintf.o s
 XPRINTF_OBJS := $(XPRINTF_OBJS:%=$(EE_OBJS_DIR)%)
 
 WXPRINTF_OBJS = vxwprintf.o __swout.o vsnwprintf.o snwprintf.o vswprintf.o swprintf.o
-WXPRINTF_OBJS := $(XPRINTF_OBJS:%=$(EE_OBJS_DIR)%)
+WXPRINTF_OBJS := $(WXPRINTF_OBJS:%=$(EE_OBJS_DIR)%)
 
 XSCANF_OBJS = vxscanf.o xscanf.o scanf.o vscanf.o sscanf.o vsscanf.o fscanf.o vfscanf.o _xscanf_internals.o
 XSCANF_OBJS := $(XSCANF_OBJS:%=$(EE_OBJS_DIR)%)
@@ -88,8 +88,8 @@ DIRENT_OBJS := $(DIRENT_OBJS:%=$(EE_OBJS_DIR)%)
 GPROF_OBJS = mcount.o mcount_internal.o
 GPROF_OBJS := $(GPROF_OBJS:%=$(EE_OBJS_DIR)%)
 
-MULT_OBJS = $(XPRINTF_OBJS) $(XSCANF_OBJS) $(ALLOC_OBJS) $(STRING_C_OBJS) \
-	$(STDIO_OBJS) $(STDLIB_OBJS) $(UNISTD_OBJS) $(TIME_OBJS) \
+MULT_OBJS = $(XPRINTF_OBJS) $(WXPRINTF_OBJS) $(XSCANF_OBJS) $(ALLOC_OBJS) $(STRING_C_OBJS) \
+	$(WSTRING_C_OBJS) $(STDIO_OBJS) $(STDLIB_OBJS) $(UNISTD_OBJS) $(TIME_OBJS) \
 	$(GPROF_OBJS) $(LIBGEN_OBJS) $(DIRENT_OBJS) $(INIT_OBJS)
 
 # uncomment the following line to enable profile on libc
@@ -106,7 +106,7 @@ all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBC_LIB)
 $(XPRINTF_OBJS): src/xprintf.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(WXPRINTF_OBJS): src/wxprintf.c
+$(WXPRINTF_OBJS): src/xwprintf.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(XSCANF_OBJS): src/xscanf.c
