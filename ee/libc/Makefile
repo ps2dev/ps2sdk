@@ -43,10 +43,16 @@ STRING_C_OBJS = strdup.o strcasecmp.o strncasecmp.o strtok.o strrchr.o strstr.o 
 	isgraph.o isprint.o ispunct.o isspace.o isxdigit.o
 STRING_C_OBJS := $(STRING_C_OBJS:%=$(EE_OBJS_DIR)%)
 
+WSTRING_C_OBJS = wcsdup.o wcscasecmp.o wcsncasecmp.o wcstok.o wcsrchr.o wcswcs.o wcsupr.o wcslwr.o towlower.o towupper.o iswupper.o iswlower.o iswalpha.o iswdigit.o iswalnum.o iswcntrl.o iswgraph.o iswprint.o iswpunct.o iswspace.o iswxdigit.o wcscpy.o wcspbrk.o wcsspn.o wcscspn.o wcscmp.o wcsncmp.o wcslen.o wcschr.o 
+WSTRING_C_OBJS := $(STRING_C_OBJS:%=$(EE_OBJS_DIR)%)
+
 XPRINTF_OBJS = vxprintf.o xprintf.o __sout.o vsnprintf.o snprintf.o vsprintf.o sprintf.o \
 	__mout.o mprintf.o vmprintf.o __fout.o fprintf.o vfprintf.o printf.o vprintf.o putchar.o \
 	npmPuts.o nprintf.o vnprintf.o asprintf.o vasprintf.o sio_printf.o
 XPRINTF_OBJS := $(XPRINTF_OBJS:%=$(EE_OBJS_DIR)%)
+
+WXPRINTF_OBJS = vxwprintf.o __swout.o vsnwprintf.o snwprintf.o vswprintf.o swprintf.o
+WXPRINTF_OBJS := $(XPRINTF_OBJS:%=$(EE_OBJS_DIR)%)
 
 XSCANF_OBJS = vxscanf.o xscanf.o scanf.o vscanf.o sscanf.o vsscanf.o fscanf.o vfscanf.o _xscanf_internals.o
 XSCANF_OBJS := $(XSCANF_OBJS:%=$(EE_OBJS_DIR)%)
@@ -61,8 +67,9 @@ STDIO_OBJS := $(STDIO_OBJS:%=$(EE_OBJS_DIR)%)
 STDLIB_OBJS = abs.o atexit.o atof.o bsearch.o div.o getenv.o _itoa.o labs.o \
 	ldiv.o llabs.o lldiv.o _lltoa.o _ltoa.o rand.o setenv.o srand.o \
 	strtod.o strtol.o strtoul.o __assert_fail.o \
-	__stdlib_internals.o 
+	__stdlib_internals.o
 # multibytes hell... do we want it ? is it stable ??
+# SP193: It's not usable in its current state: Functions and function declarations are missing, plus the C-type table is missing. D:
 # mblen.o mbstowcs.o mbtowc.o wcstombs.o wctomb.o
 STDLIB_OBJS := $(STDLIB_OBJS:%=$(EE_OBJS_DIR)%)
 
@@ -99,6 +106,9 @@ all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBC_LIB)
 $(XPRINTF_OBJS): src/xprintf.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
+$(WXPRINTF_OBJS): src/wxprintf.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
 $(XSCANF_OBJS): src/xscanf.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
@@ -106,6 +116,9 @@ $(ALLOC_OBJS): src/alloc.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(STRING_C_OBJS): src/string.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(WSTRING_C_OBJS): src/wstring.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(STDIO_OBJS): src/stdio.c
