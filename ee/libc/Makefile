@@ -43,7 +43,7 @@ STRING_C_OBJS = strdup.o strcasecmp.o strncasecmp.o strtok.o strrchr.o strstr.o 
 	isgraph.o isprint.o ispunct.o isspace.o isxdigit.o
 STRING_C_OBJS := $(STRING_C_OBJS:%=$(EE_OBJS_DIR)%)
 
-WSTRING_C_OBJS = wcsdup.o wcscasecmp.o wcsncasecmp.o wcstok.o wcsrchr.o wcswcs.o wcsupr.o wcslwr.o towlower.o towupper.o iswupper.o iswlower.o iswalpha.o iswdigit.o iswalnum.o iswcntrl.o iswgraph.o iswprint.o iswpunct.o iswspace.o iswxdigit.o wcscpy.o wcspbrk.o wcsspn.o wcscspn.o wcscmp.o wcsncmp.o wcslen.o wcschr.o 
+WSTRING_C_OBJS = wcsdup.o wcscasecmp.o wcsncasecmp.o wcstok.o wcsrchr.o wcswcs.o wcsupr.o wcslwr.o towlower.o towupper.o iswupper.o iswlower.o iswalpha.o iswdigit.o iswalnum.o iswcntrl.o iswgraph.o iswprint.o iswpunct.o iswspace.o iswxdigit.o wcscpy.o wcsncpy.o wcspbrk.o wcsspn.o wcscspn.o wcscmp.o wcsncmp.o wcslen.o wcschr.o wcscat.o wcsncat.o
 WSTRING_C_OBJS := $(WSTRING_C_OBJS:%=$(EE_OBJS_DIR)%)
 
 XPRINTF_OBJS = vxprintf.o xprintf.o __sout.o vsnprintf.o snprintf.o vsprintf.o sprintf.o \
@@ -73,7 +73,7 @@ STDLIB_OBJS = abs.o atexit.o atof.o bsearch.o div.o getenv.o _itoa.o labs.o \
 # mblen.o mbstowcs.o mbtowc.o wcstombs.o wctomb.o
 STDLIB_OBJS := $(STDLIB_OBJS:%=$(EE_OBJS_DIR)%)
 
-WSTDLIB_OBJS = wcstol.o wcstoul.o
+WSTDLIB_OBJS = wcstod.o wcstol.o wcstoul.o
 WSTDLIB_OBJS := $(WSTDLIB_OBJS:%=$(EE_OBJS_DIR)%)
 
 UNISTD_OBJS = stat.o fstat.o access.o unlink.o getcwd.o sleep.o

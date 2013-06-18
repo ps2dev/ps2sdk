@@ -13,7 +13,6 @@
 
 #include <tamtypes.h>
 #include <kernel.h>
-#include <sifrpc.h>
 #include <limits.h>
 #include <malloc.h>
 #include <wchar.h>
@@ -63,7 +62,7 @@ wchar_t* wcstok(wchar_t* wcs, const wchar_t* delimiters)
 	static wchar_t* start;
 	static wchar_t* end;
 
-	if (delimiters != NULL)
+	if (wcs != NULL)
 		start = wcs;
 	else
 	{
@@ -322,11 +321,33 @@ int iswxdigit(wint_t wc)
 #ifdef F_wcscpy
 wchar_t* wcscpy(wchar_t* destination, const wchar_t* source)
 {
+	wchar_t *ptr;
+
+	ptr=destination;
 	while(*source!='\0'){
-		*destination=*source;
-		destination++;
+		*ptr=*source;
+		ptr++;
 		source++;
 	}
+	*ptr='\0';
+
+	return destination;
+}
+#endif
+
+#ifdef F_wcsncpy
+wchar_t* wcsncpy(wchar_t* destination, const wchar_t* source, size_t num)
+{
+	wchar_t *ptr;
+	size_t i;
+
+	ptr=destination;
+	for(i=0; *source!='\0' && i<num; i++){
+		*ptr=*source;
+		ptr++;
+		source++;
+	}
+	*ptr='\0';
 
 	return destination;
 }
@@ -437,5 +458,40 @@ wchar_t *wcschr(const wchar_t *string, wint_t character)
 	}
 
 	return result;
+}
+#endif
+
+#ifdef F_wcscat
+wchar_t* wcscat(wchar_t* destination, const wchar_t* source)
+{
+	wchar_t *ptr;
+
+	ptr=&destination[wcslen(destination)];
+	while(*source!='\0'){
+		*ptr=*source;
+		ptr++;
+		source++;
+	}
+	*ptr='\0';
+
+	return destination;
+}
+#endif
+
+#ifdef F_wcsncat
+wchar_t* wcsncat(wchar_t* destination, const wchar_t* source, size_t num)
+{
+	wchar_t *ptr;
+	size_t i;
+
+	ptr=&destination[wcslen(destination)];
+	for(i=0; *source!='\0' && i<num; i++){
+		*ptr=*source;
+		ptr++;
+		source++;
+	}
+	*ptr='\0';
+
+	return destination;
 }
 #endif

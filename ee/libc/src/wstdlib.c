@@ -5,6 +5,75 @@
 #include <limits.h>
 #include <wchar.h>
 
+#ifdef F_wcstod
+/*
+**
+**  [func] - wcstod.
+**  [desc] - if s is a valid floating point number string then converts the
+**           string to it's corresponding float point value and returns the
+**           value. else returns 0.0. if eptr is not NULL then stores the
+**           pointer to the last processed character in the string.
+**  [entr] - const wchar_t *s; the source string pointer.
+**           wchar_t **endptr; the pointer to the store string end pointer.
+**  [exit] - double; the converted 64-bit float value. else 0.0.
+**  [prec] - s is a valid string pointer and eptr is a valid string pointer
+**           pointer.
+**  [post] - the memory pointed to by eptr is modified.
+**
+*/
+double wcstod(const wchar_t *s, wchar_t **eptr)
+{
+  double d, ret = 0.0, sign = 1.0;
+  int    e = 0, esign = 1, flags = 0, i;
+
+  /* remove leading white spaces. */
+  for (; (iswspace(*s) != 0); ) ++s;
+  if (*s == '-') {
+    /* negative value. */
+    sign = -1.0;
+    ++s;
+  }
+  else if (*s == '+') ++s;
+  for (; (iswdigit(*s) != 0); ++s) {
+    /* process digits before decimal point. */
+    flags |= 1;
+    ret *= 10.0;
+    ret += (double)(int)(*s - '0');
+  }
+  if (*s == '.') {
+    for (d = 0.1, ++s; (iswdigit(*s) != 0); ++s) {
+      /* process digits after decimal point. */
+      flags |= 2;
+      ret += (d * (double)(int)(*s - '0'));
+      d *= 0.1;
+    }
+  }
+  if (flags != 0) {
+    /* test for exponent token. */
+    if ((*s == 'e') || (*s == 'E')) {
+      ++s;
+      if (*s == '-') {
+        /* negative exponent. */
+        esign = -1;
+        ++s;
+      }
+      else if (*s == '+') ++s;
+      if (iswdigit(*s) != 0) {
+        for (; (iswdigit(*s) != 0); ++s) {
+          /* process exponent digits. */
+          e *= 10;
+          e += (int)(*s - '0');
+        }
+        if (esign >= 0) for (i = 0; i < e; ++i) ret *= 10.0;
+        else for (i = 0; i < e; ++i) ret *= 0.1;
+      }
+    }
+  }
+  if (eptr != NULL) *eptr = (wchar_t *)s;
+  return (ret * sign);
+}
+#endif
+
 #ifdef F_wcstol
 /*
 **
@@ -22,7 +91,7 @@
 **  [post] - the memory pointed to by eptr is modified.
 **
 */
-long wcstol(const wchar_t *nptr, wchar_t **endptr, int base)
+long int wcstol(const wchar_t *nptr, wchar_t **endptr, int base)
 {
          register const wchar_t *s = nptr;
          register unsigned long acc;

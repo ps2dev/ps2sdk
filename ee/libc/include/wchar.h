@@ -52,6 +52,7 @@ int iswpunct(wint_t wc);
 int iswspace(wint_t wc);
 int iswxdigit(wint_t wc);
 wchar_t* wcscpy(wchar_t* destination, const wchar_t* source);
+wchar_t* wcsncpy(wchar_t* destination, const wchar_t* source, size_t num);
 wchar_t* wcspbrk(const wchar_t* wcs1, const wchar_t* wcs2);
 size_t wcsspn(const wchar_t* ws1, const wchar_t* ws2);
 size_t wcscspn(const wchar_t* wcs1, const wchar_t* wcs2);
@@ -59,6 +60,8 @@ int wcscmp(const wchar_t *s1, const wchar_t *s2);
 int wcsncmp(const wchar_t *s1, const wchar_t *s2, int len);
 int wcslen(const wchar_t *string);
 wchar_t *wcschr(const wchar_t *string, wint_t character);
+wchar_t* wcscat(wchar_t* destination, const wchar_t* source);
+wchar_t* wcsncat(wchar_t* destination, const wchar_t* source, size_t num);
 
 int vxwprintf(void (*func)(wchar_t*,int,void*), void *arg, const wchar_t *format, va_list ap);
 void __swout(wchar_t *txt, int amt, void *arg);
@@ -66,5 +69,9 @@ int vsnwprintf(wchar_t *buf, size_t n, const wchar_t *fmt, va_list ap);
 int snwprintf(wchar_t *str, size_t sz, const wchar_t *format, ...);
 int vswprintf(wchar_t *buf, const wchar_t *fmt, va_list ap);
 int swprintf(wchar_t *str, size_t n, const wchar_t *format, ...);
+
+double wcstod(const wchar_t *s, wchar_t **eptr);
+long int wcstol(const wchar_t *nptr, wchar_t **endptr, int base);
+unsigned long int wcstoul(const wchar_t *nptr, wchar_t **endptr, int base);
 
 #endif /* _WCHAR_H_ */
