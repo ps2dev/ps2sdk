@@ -21,13 +21,13 @@
 
 // config param data as stored on T-10000 (TOOLs)
 typedef struct {
-	u16 timezoneOffset;
-	u8  screenType;
-	u8  dateFormat;
-	u8  language;
-	u8  spdifMode;
-	u8  daylightSaving;
-	u8  timeFormat;
+	unsigned short int timezoneOffset;
+	unsigned char  screenType;
+	unsigned char  dateFormat;
+	unsigned char  language;
+	unsigned char  spdifMode;
+	unsigned char  daylightSaving;
+	unsigned char  timeFormat;
 } ConfigParamT10K;
 
 extern ConfigParamT10K g_t10KConfig;
@@ -63,7 +63,7 @@ char* GetRomName(char *romname)
 // returns: 1 if T-10000
 //			0 if not
 #ifdef F_IsT10K
-s32 IsT10K(void)
+int IsT10K(void)
 {
 	// only read in the romname the first time
 	if(g_RomName[0] == 0)
@@ -73,31 +73,23 @@ s32 IsT10K(void)
 #endif
 
 
-// check if ps2 has a 'Protokernel' (Really early japanese models)
+// check if ps2 has a 'Protokernel' (Really early Japanese models)
 // 
-// args:	u32 config value from GetOsdConfigParam() syscall
+// args:	unsigned int config value from GetOsdConfigParam() syscall
 // returns:	1 if early jap model
 //			0 if not
 #ifdef F_IsEarlyJap
-s32 IsEarlyJap(ConfigParam config)
+int IsEarlyJap(ConfigParam config)
 {
-	return config.region == 0;	//Protokernels will always have 0 set to this field.
+	return config.region == 0;	//Unpatched protokernels will always have 0 set to this field.
 }
 #endif
 
-
 // get the language the ps2 is currently set to
 // 
-// returns:	0 = japanese
-//			1 = english
-//			2 = french
-//			3 = spanish
-//			4 = german
-//			5 = italian
-//			6 = dutch
-//			7 = portuguese
+// returns:		Language value (See OSD_LANGUAGES in header file)
 #ifdef F_configGetLanguage
-s32  configGetLanguage(void)
+int  configGetLanguage(void)
 {
 	ConfigParam config;
 	
@@ -111,19 +103,11 @@ s32  configGetLanguage(void)
 }
 #endif
 
-
 // sets the default language of the ps2
 // 
-// args:	0 = japanese
-//			1 = english
-//			2 = french
-//			3 = spanish
-//			4 = german
-//			5 = italian
-//			6 = dutch
-//			7 = portuguese
+// args:		Language value (See OSD_LANGUAGES in header file)
 #ifdef F_configSetLanguage
-void configSetLanguage(s32 language)
+void configSetLanguage(int language)
 {
 	ConfigParam config;
 	
@@ -143,14 +127,13 @@ void configSetLanguage(s32 language)
 }
 #endif
 
-
 // get the tv screen type the ps2 is setup for
 // 
 // returns:	0 = 4:3
 //			1 = fullscreen
 //			2 = 16:9
 #ifdef F_configGetTvScreenType
-s32  configGetTvScreenType(void)
+int  configGetTvScreenType(void)
 {
 	ConfigParam config;
 
@@ -162,14 +145,13 @@ s32  configGetTvScreenType(void)
 }
 #endif
 
-
 #ifdef F_configSetTvScreenType
 // set the tv screen type
 // 
 // args:	0 = 4:3
 //			1 = fullscreen
 //			2 = 16:9
-void configSetTvScreenType(s32 screenType)
+void configSetTvScreenType(int screenType)
 {
 	ConfigParam config;
 
@@ -186,14 +168,13 @@ void configSetTvScreenType(s32 screenType)
 }
 #endif
 
-
 // gets the date display format
 // 
 // returns:	0 = yyyy/mm/dd
 //			1 = mm/dd/yyyy
 //			2 = dd/mm/yyyy
 #ifdef F_configGetDateFormat
-s32  configGetDateFormat(void)
+int  configGetDateFormat(void)
 {
 	ConfigParam config;
 	Config2Param config2;
@@ -209,14 +190,13 @@ s32  configGetDateFormat(void)
 }
 #endif
 
-
 // sets the date display format
 // 
 // args:	0 = yyyy/mm/dd
 //			1 = mm/dd/yyyy
 //			2 = dd/mm/yyyy
 #ifdef F_configSetDateFormat
-void configSetDateFormat(s32 dateFormat)
+void configSetDateFormat(int dateFormat)
 {
 	ConfigParam config;
 	Config2Param config2;
@@ -237,14 +217,13 @@ void configSetDateFormat(s32 dateFormat)
 }
 #endif
 
-
 // gets the time display format
 // (whether 24hour time or not)
 // 
 // returns:	0 = 24hour
 //			1 = 12hour
 #ifdef F_configGetTimeFormat
-s32  configGetTimeFormat(void)
+int  configGetTimeFormat(void)
 {
 	ConfigParam config;
 	Config2Param config2;
@@ -260,14 +239,13 @@ s32  configGetTimeFormat(void)
 }
 #endif
 
-
 // sets the time display format
 // (whether 24hour time or not)
 // 
 // args:	0 = 24hour
 //			1 = 12hour
 #ifdef F_configSetTimeFormat
-void configSetTimeFormat(s32 timeFormat)
+void configSetTimeFormat(int timeFormat)
 {
 	ConfigParam config;
 	Config2Param config2;
@@ -288,12 +266,11 @@ void configSetTimeFormat(s32 timeFormat)
 }
 #endif
 
-
 // get timezone
 // 
 // returns: offset in minutes from GMT
 #ifdef F_configGetTimezone
-s32  configGetTimezone(void)
+int  configGetTimezone(void)
 {
 	ConfigParam config;
 
@@ -307,12 +284,11 @@ s32  configGetTimezone(void)
 }
 #endif
 
-
 // set timezone
 // 
 // args:	offset in minutes from GMT
 #ifdef F_configSetTimezone
-void configSetTimezone(s32 timezoneOffset)
+void configSetTimezone(int timezoneOffset)
 {
 	ConfigParam config;
 
@@ -328,13 +304,12 @@ void configSetTimezone(s32 timezoneOffset)
 }
 #endif
 
-
 // checks whether the spdif is enabled or not
 // 
 // returns:	1 = on
 //			0 = off
 #ifdef F_configIsSpdifEnabled
-s32  configIsSpdifEnabled(void)
+int  configIsSpdifEnabled(void)
 {
 	ConfigParam config;
 	
@@ -346,13 +321,12 @@ s32  configIsSpdifEnabled(void)
 }
 #endif
 
-
 // sets whether the spdif is enabled or not
 // 
 // args:	1 = on
 //			0 = off
 #ifdef F_configSetSpdifEnabled
-void configSetSpdifEnabled(s32 enabled)
+void configSetSpdifEnabled(int enabled)
 {
 	ConfigParam config;
 	
@@ -365,13 +339,12 @@ void configSetSpdifEnabled(s32 enabled)
 }
 #endif
 
-
 // checks whether daylight saving is currently set
 // 
 // returns:	1 = on
 //			0 = off
 #ifdef F_configIsDaylightSavingEnabled
-s32  configIsDaylightSavingEnabled(void)
+int  configIsDaylightSavingEnabled(void)
 {
 	ConfigParam config;
 	Config2Param config2;
@@ -388,13 +361,12 @@ s32  configIsDaylightSavingEnabled(void)
 }
 #endif
 
-
 // checks whether daylight saving is currently set
 // 
 // returns:	1 = on
 //			0 = off
 #ifdef F_configSetDaylightSavingEnabled
-void configSetDaylightSavingEnabled(s32 daylightSaving)
+void configSetDaylightSavingEnabled(int daylightSaving)
 {
 	ConfigParam config;
 	Config2Param config2;
@@ -414,11 +386,11 @@ void configSetDaylightSavingEnabled(s32 daylightSaving)
 // the following functions are all used in time conversion
 
 #ifdef F_configGetTime
-u8 frombcd(u8 bcd)
+unsigned char frombcd(unsigned char bcd)
 {
 	return bcd - (bcd>>4)*6;
 }
-u8 tobcd(u8 dec)
+unsigned char tobcd(unsigned char dec)
 {
 	return dec + (dec/10)*6;
 }
@@ -442,14 +414,14 @@ void convertfrombcd(CdvdClock_t* time)
 	time->year	= frombcd(time->year);
 }
 
-static const u8 gDaysInMonths[12] = {
+static const unsigned char gDaysInMonths[12] = {
 	31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31
 };
 
 void adddate(CdvdClock_t* time)
 {
 	// get the days in each month and fix up feb depending on leap year
-	u8 days_in_months[12];
+	unsigned char days_in_months[12];
 	memcpy(days_in_months, gDaysInMonths, 12);
 	if((time->year & 3) == 0)
 		days_in_months[1] = 29;
@@ -478,7 +450,7 @@ void adddate(CdvdClock_t* time)
 void subdate(CdvdClock_t* time)
 {
 	// get the days in each month and fix up feb depending on leap year
-	u8 days_in_months[12];
+	unsigned char days_in_months[12];
 	memcpy(days_in_months, gDaysInMonths, 12);
 	if((time->year & 3) == 0)
 		days_in_months[1] = 29;
@@ -524,7 +496,7 @@ void subhour(CdvdClock_t* time)
 		time->hour--;
 }
 
-void AdjustTime(CdvdClock_t* time, s32 offset)
+void AdjustTime(CdvdClock_t* time, int offset)
 {
 	convertfrombcd(time);
 	offset += time->minute;
@@ -563,8 +535,8 @@ void configConvertToGmtTime(CdvdClock_t* time)
 // (ps2 clock is in JST time)
 void configConvertToLocalTime(CdvdClock_t* time)
 {
-	s32 timezone_offset = configGetTimezone();
-	s32 daylight_saving = configIsDaylightSavingEnabled();
+	int timezone_offset = configGetTimezone();
+	int daylight_saving = configIsDaylightSavingEnabled();
 	AdjustTime(time, timezone_offset - 540 + (daylight_saving * 60));
 }
 #endif

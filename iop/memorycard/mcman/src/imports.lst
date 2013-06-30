@@ -58,8 +58,8 @@ I_DelDrv
 ioman_IMPORTS_end
 
 secrman_IMPORTS_start
-I_SetMcCommandCallback
-I_SetMcDevIDCallback
+I_SecrSetMcCommandHandler
+I_SecrSetMcDevIDHandler
 I_SecrAuthCard
 secrman_IMPORTS_end
 

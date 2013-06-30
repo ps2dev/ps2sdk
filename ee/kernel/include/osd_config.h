@@ -13,6 +13,7 @@
 # turned off or reset!
 #
 # Note 2: Early Japanese consoles (The SCPH-10000 and SCPH-15000) have kernels ("Protokernels") based on older specifications. The SCPH-18000 has the same kernel as the first expansion bay model (SCPH-30000).
+# 	The Protokernels can be "modernized" if patched. Newer games will automatically patch ExecPS2 of a Protokernel when they detect one, although only HDDOSDs will fully patch a Protokernel completely (causes the Protokernel to appear as a newer kernel to everything).
 */
 
 #ifndef _CONFIG_H_
@@ -24,69 +25,66 @@ extern "C" {
 #include <tamtypes.h>
 #include <libcdvd.h>
 
-// language values returned by: s32 getLanguage(void)
-#define LANGUAGE_JAPANESE	0
-#define LANGUAGE_ENGLISH	1
-#define LANGUAGE_FRENCH		2
-#define LANGUAGE_SPANISH	3
-#define LANGUAGE_GERMAN		4
-#define LANGUAGE_ITALIAN	5
-#define LANGUAGE_DUTCH		6
-#define LANGUAGE_PORTUGUESE	7
+// language values returned and used by: configGetLanguage() and configSetLanguage()
+enum OSD_LANGUAGES{
+	LANGUAGE_JAPANESE	= 0,
+	LANGUAGE_ENGLISH,
+	LANGUAGE_FRENCH,
+	LANGUAGE_SPANISH,
+	LANGUAGE_GERMAN,
+	LANGUAGE_ITALIAN,
+	LANGUAGE_DUTCH,
+	LANGUAGE_PORTUGUESE,
+	//Language values after here are not officially documented. Are supported by neither this library nor the original Sony libscf library, but can be found in the MECHACON's NVRAM and are used exclusively by the OSDs of consoles that support these languages.
+	LANGUAGE_RUSSIAN,
+	LANGUAGE_KOREAN,
+	LANGUAGE_TRAD_CHINESE,
+	LANGUAGE_SIMPL_CHINESE
+};
 
-// tv screen values returned by: s32 getTvScreenType(void)
-#define TV_SCREEN_43		0
-#define TV_SCREEN_FULL		1
-#define TV_SCREEN_169		2
+// tv screen values returned by: int getTvScreenType(void)
+enum TV_SCREEN_TYPES{
+	TV_SCREEN_43	= 0,
+	TV_SCREEN_FULL,
+	TV_SCREEN_169
+};
 
-// date format values returned by: s32 getDateFormat(void)
-#define DATE_YYYYMMDD		0
-#define DATE_MMDDYYYY		1
-#define DATE_DDMMYYYY		2
+// date format values returned by: int getDateFormat(void)
+enum DATE_FORMAT_TYPES{
+	DATE_YYYYMMDD	= 0,
+	DATE_MMDDYYYY,
+	DATE_DDMMYYYY
+};
 
 // parameter struct as used by GetOsdConfigParam/SetOsdConfigParam
 typedef struct {
-/*00*/u32 spdifMode:1;		// 0=enabled, 1=disabled
-/*01*/u32 screenType:2;		// 0=4:3, 1=fullscreen, 2=16:9
-/*03*/u32 videoOutput:1;	// 0=rgb(scart), 1=component
-/*04*/u32 japLanguage:1;	// 0=japanese, 1=english(non-japanese)
-/*05*/u32 ps1drvConfig:8;	// Playstation driver settings.
-/*13*/u32 region:3;		// 0 = Protokernel consoles, 1 = NTSC-U/C/J, 2 = PAL. Protokernels cannot retain the value set in this field (Hence always 0).
-/*16*/u32 language:5;		// LANGUAGE_??? value
-/*21*/u32 timezoneOffset:11;// timezone minutes offset from gmt
+/*00*/unsigned int spdifMode:1;		// 0=enabled, 1=disabled
+/*01*/unsigned int screenType:2;	// 0=4:3, 1=fullscreen, 2=16:9
+/*03*/unsigned int videoOutput:1;	// 0=rgb(scart), 1=component
+/*04*/unsigned int japLanguage:1;	// 0=japanese, 1=english(non-japanese)
+/*05*/unsigned int ps1drvConfig:8;	// Playstation driver settings.
+/*13*/unsigned int region:3;		// 0 = Protokernel consoles, 1 = NTSC-U/C/J, 2 = PAL. Protokernels cannot retain the value set in this field (Hence always 0).
+/*16*/unsigned int language:5;		// LANGUAGE_??? value
+/*21*/unsigned int timezoneOffset:11;// timezone minutes offset from gmt
 } ConfigParam;
 
 // parameter struct as used by GetOsdConfigParam2/SetOsdConfigParam2
-// (seems to not be supported by early jap ps2s)
+// (Not supported by unpatched Protokernels. Do NOT invoke GetOsdConfigParam2 or SetOsdConfigParam2 on one!)
 typedef struct {
-	u16	reserved:4;
-	u16	daylightSaving:1;	// 0=standard(winter), 1=daylight savings(summer)
-	u16	timeFormat:1;		// 0=24 hour, 1=12 hour
-	u16	dateFormat:2;		// 0=YYYYMMDD, 1=MMDDYYYY, 2=DDMMYYYY
+/*00*/unsigned short int reserved:4;
+/*04*/unsigned short int daylightSaving:1;	// 0=standard(winter), 1=daylight savings(summer)
+/*05*/unsigned short int timeFormat:1;		// 0=24 hour, 1=12 hour
+/*06*/unsigned short int dateFormat:2;		// 0=YYYYMMDD, 1=MMDDYYYY, 2=DDMMYYYY
 } Config2Param;
 
 // get the language the ps2 is currently set to
 // 
-// returns:	0 = japanese
-//			1 = english
-//			2 = french
-//			3 = spanish
-//			4 = german
-//			5 = italian
-//			6 = dutch
-//			7 = portuguese
-s32  configGetLanguage(void);
+// returns:	Language value (See OSD_LANGUAGES above)
+int  configGetLanguage(void);
 // sets the default language of the ps2
 // 
-// args:	0 = japanese
-//			1 = english
-//			2 = french
-//			3 = spanish
-//			4 = german
-//			5 = italian
-//			6 = dutch
-//			7 = portuguese
-void configSetLanguage(s32 language);
+// args:	Language value (See OSD_LANGUAGES above)
+void configSetLanguage(int language);
 
 
 // get the tv screen type the ps2 is setup for
@@ -94,13 +92,13 @@ void configSetLanguage(s32 language);
 // returns:	0 = 4:3
 //			1 = fullscreen
 //			2 = 16:9
-s32  configGetTvScreenType(void);
+int  configGetTvScreenType(void);
 // set the tv screen type
 // 
 // args:	0 = 4:3
 //			1 = fullscreen
 //			2 = 16:9
-void configSetTvScreenType(s32 screenType);
+void configSetTvScreenType(int screenType);
 
 
 // gets the date display format
@@ -108,13 +106,13 @@ void configSetTvScreenType(s32 screenType);
 // returns:	0 = yyyy/mm/dd
 //			1 = mm/dd/yyyy
 //			2 = dd/mm/yyyy
-s32  configGetDateFormat(void);
+int  configGetDateFormat(void);
 // sets the date display format
 // 
 // args:	0 = yyyy/mm/dd
 //			1 = mm/dd/yyyy
 //			2 = dd/mm/yyyy
-void configSetDateFormat(s32 dateFormat);
+void configSetDateFormat(int dateFormat);
 
 
 // gets the time display format
@@ -122,44 +120,44 @@ void configSetDateFormat(s32 dateFormat);
 // 
 // returns:	0 = 24hour
 //			1 = 12hour
-s32  configGetTimeFormat(void);
+int  configGetTimeFormat(void);
 // sets the time display format
 // (whether 24hour time or not)
 // 
 // args:	0 = 24hour
 //			1 = 12hour
-void configSetTimeFormat(s32 timeFormat);
+void configSetTimeFormat(int timeFormat);
 
 // get timezone
 // 
 // returns: offset in minutes from GMT
-s32  configGetTimezone(void);
+int  configGetTimezone(void);
 // set timezone
 // 
 // args:	offset in minutes from GMT
-void configSetTimezone(s32 offset);
+void configSetTimezone(int offset);
 
 // checks whether the spdif is enabled or not
 // 
 // returns:	1 = on
 //			0 = off
-s32  configIsSpdifEnabled(void);
+int  configIsSpdifEnabled(void);
 // sets whether the spdif is enabled or not
 // 
 // args:	1 = on
 //			0 = off
-void configSetSpdifEnabled(s32 enabled);
+void configSetSpdifEnabled(int enabled);
 
 // checks whether daylight saving is currently set
 // 
 // returns:	1 = on
 //			0 = off
-s32  configIsDaylightSavingEnabled(void);
+int  configIsDaylightSavingEnabled(void);
 // checks whether daylight saving is currently set
 // 
 // returns:	1 = on
 //			0 = off
-void configSetDaylightSavingEnabled(s32 enabled);
+void configSetDaylightSavingEnabled(int enabled);
 
 // converts the time returned from the ps2's clock into GMT time
 // (ps2 clock is in JST time)
@@ -170,8 +168,8 @@ void configConvertToGmtTime(CdvdClock_t* time);
 void configConvertToLocalTime(CdvdClock_t* time);
 
 // Internal functions.
-s32  IsT10K(void);
-s32  IsEarlyJap(ConfigParam config);
+int  IsT10K(void);
+int  IsEarlyJap(ConfigParam config);
 char* GetRomName(char *romname);
 
 #ifdef __cplusplus
@@ -179,4 +177,3 @@ char* GetRomName(char *romname);
 #endif
 
 #endif	// _CONFIG_H_
-

@@ -284,13 +284,13 @@ void mcman_initPS2com(void)
 #ifdef DEBUG
 	DPRINTF("mcman: mcman_initPS2com registering secrman_mc_command callback\n");
 #endif			
-	SetMcCommandCallback((void *)secrman_mc_command);
+	SecrSetMcCommandHandler((void *)secrman_mc_command);
 
 #ifdef DEBUG
 	DPRINTF("mcman: mcman_initPS2com registering mcman_getcnum callback\n");
 #endif			
 
-	SetMcDevIDCallback((void *)mcman_getcnum);
+	SecrSetMcDevIDHandler((void *)mcman_getcnum);
 }
 
 //-------------------------------------------------------------- 
