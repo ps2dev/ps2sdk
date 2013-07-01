@@ -23,11 +23,13 @@ typedef unsigned char u8;
 typedef unsigned short u16;
 typedef unsigned int u32;
 
-int alignment = 16;
-int have_size = 1;
-int have_irx = 0;
+static int alignment = 16;
+static int have_size = 1;
+static int have_irx = 0;
+static int use_SDATA = 0;
+static int SDATA_size_limit = 0;
 
-u32 LE32(u32 b) {
+static u32 LE32(u32 b) {
     u32 t = 0x12345678;
     if (*((unsigned char*)(&t)) == 0x78) {
 	return b;
@@ -39,7 +41,7 @@ u32 LE32(u32 b) {
     }
 }
 
-u16 LE16(u16 b) {
+static u16 LE16(u16 b) {
     u32 t = 0x12345678;
     if (*((unsigned char*)(&t)) == 0x78) {
 	return b;
@@ -49,7 +51,7 @@ u16 LE16(u16 b) {
     }
 }
 
-unsigned char elf_header[] = {
+static unsigned char elf_header[] = {
     0x7f,  'E',  'L',  'F', 0x01, 0x01, 0x01, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // e_ident
     0x01, 0x00,                                     // e_type (relocatable)
@@ -86,16 +88,19 @@ struct elf_symbol_t {
 
 //                 0 0000000001 11111111 12222222 22233
 //                 0 1234567890 12345678 90123456 78901
-char shstrtab[] = "\0.shstrtab\0.symtab\0.strtab\0.data";
+static const char shstrtab[] = "\0.shstrtab\0.symtab\0.strtab\0.data";
+static const char shstrtab_sdata[] = "\0.shstrtab\0.symtab\0.strtab\0.sdata";
 
-void create_elf(FILE * dest, const unsigned char * source, u32 size, const char * label) {
+static void create_elf(FILE * dest, const unsigned char * source, u32 size, const char * label) {
     int i, l_size;
     struct elf_section_t section;
     struct elf_symbol_t symbol;
     u32 strtab_size;
     char strtab[512];
     u32 data_size[4];
-    
+    unsigned int shrtabSectionNameLength;
+    const char *pshstrtab_ptr;
+
     if (have_irx) {
 	elf_header[36] = 1;
 	elf_header[37] = 0;
@@ -108,7 +113,7 @@ void create_elf(FILE * dest, const unsigned char * source, u32 size, const char 
     }
     
     l_size = strlen(label);
-    
+
     strtab[0] = 0;
     strcpy(strtab + 1, label);
     strcat(strtab + 1, "_start");
@@ -128,14 +133,20 @@ void create_elf(FILE * dest, const unsigned char * source, u32 size, const char 
     
     fwrite(&section, 1, sizeof(section), dest);
     
-    
     // section 1 (.shstrtab)
+    if(use_SDATA){
+	pshstrtab_ptr=shstrtab_sdata;
+	shrtabSectionNameLength=sizeof(shstrtab_sdata);
+    }else{
+	pshstrtab_ptr=shstrtab;
+	shrtabSectionNameLength=sizeof(shstrtab);
+    }
     section.sh_name = LE32(1);
     section.sh_type = LE32(3); // STRTAB
     section.sh_flags = 0;
     section.sh_addr = 0;
     section.sh_offset = LE32(40 * 5 + 0x34);
-    section.sh_size = LE32(33);
+    section.sh_size = LE32(shrtabSectionNameLength);
     section.sh_link = 0;
     section.sh_info = 0;
     section.sh_addralign = LE32(1);
@@ -149,7 +160,7 @@ void create_elf(FILE * dest, const unsigned char * source, u32 size, const char 
     section.sh_type = LE32(2); // SYMTAB
     section.sh_flags = 0;
     section.sh_addr = 0;
-    section.sh_offset = LE32(40 * 5 + 0x34 + 33);
+    section.sh_offset = LE32(40 * 5 + 0x34 + shrtabSectionNameLength);
     section.sh_size = LE32(have_size ? 0x30 : 0x20);
     section.sh_link = LE32(3);
     section.sh_info = 0;
@@ -164,7 +175,7 @@ void create_elf(FILE * dest, const unsigned char * source, u32 size, const char 
     section.sh_type = LE32(3); // STRTAB
     section.sh_flags = 0;
     section.sh_addr = 0;
-    section.sh_offset = LE32(40 * 5 + 0x34 + 33 + (have_size ? 0x30 : 0x20));
+    section.sh_offset = LE32(40 * 5 + 0x34 + shrtabSectionNameLength + (have_size ? 0x30 : 0x20));
     section.sh_size = LE32(strtab_size);
     section.sh_link = 0;
     section.sh_info = 0;
@@ -177,9 +188,9 @@ void create_elf(FILE * dest, const unsigned char * source, u32 size, const char 
     // section 4 (.data)
     section.sh_name = LE32(27);
     section.sh_type = LE32(1); // PROGBITS
-    section.sh_flags = LE32(3); // Write + Alloc
+    section.sh_flags = LE32(use_SDATA?0x10000003:3); // SHF_MIPS_GPREL + write + alloc or Write + Alloc
     section.sh_addr = 0;
-    section.sh_offset = LE32(40 * 5 + 0x34 + 33 + (have_size ? 0x30 : 0x20) + strtab_size);
+    section.sh_offset = LE32(40 * 5 + 0x34 + shrtabSectionNameLength + (have_size ? 0x30 : 0x20) + strtab_size);
     section.sh_size = LE32(size + have_size * 16);
     section.sh_link = 0;
     section.sh_addralign = LE32(alignment);
@@ -189,7 +200,7 @@ void create_elf(FILE * dest, const unsigned char * source, u32 size, const char 
     
     
     
-    fwrite(shstrtab, 1, 33, dest);
+    fwrite(pshstrtab_ptr, 1, shrtabSectionNameLength, dest);
 
     symbol.st_name = LE32(1);
     symbol.st_value = LE32(have_size * 16);
@@ -229,9 +240,9 @@ void create_elf(FILE * dest, const unsigned char * source, u32 size, const char 
     fwrite(source, 1, size, dest);
 }
 
-void usage() {
+static void usage(void) {
     printf("bin2o - Converts a binary file into a .o file.\n"
-           "Usage: bin2o [-a XX] [-n] [-i] [-b XX] [-e XX] [-s XX] infile outfile label\n"
+           "Usage: bin2o [-a XX] [-n] [-i] [-b XX] [-e XX] [-s XX] [-GXX] infile outfile label\n"
 	   "  -i    - create an iop-compatible .o file.\n"
 	   "  -n    - don't add label_size symbol.\n"
 	   "  -a XX - set .data section alignment to XX.\n"
@@ -239,6 +250,8 @@ void usage() {
 	   "  -b XX - start reading file at this offset.\n"
 	   "  -e XX - stop reading file at this offset.\n"
 	   "  -s XX - force output data to be of this size.\n"
+	   "  -GXX  - Puts data smaller than XX bytes within the sdata section\n"
+	   "          (same as the -G option of GCC).\n"
 	   "\n"
 	  );
 }
@@ -277,6 +290,10 @@ int main(int argc, char *argv[])
 		break;
 	    case 'i':
 		have_irx = 1;
+		break;
+	    case 'G':
+		use_SDATA = 1;
+		SDATA_size_limit = strtoul(&argv[i][2], NULL, 0);
 		break;
 	    case 'b':
 		i++;
@@ -360,6 +377,8 @@ int main(int argc, char *argv[])
     
     if (end < (size - start))
 	size = end - start;
+
+    if(use_SDATA && size>SDATA_size_limit) use_SDATA=0;
 
     buffer = malloc(size);
     if (buffer == NULL) {
