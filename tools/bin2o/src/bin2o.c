@@ -26,7 +26,7 @@ typedef unsigned int u32;
 static int alignment = 16;
 static int have_size = 1;
 static int have_irx = 0;
-static int use_SDATA = 0;
+static short int put_payload_in_SDATA = 0, put_labels_in_SDATA = 0;
 static int SDATA_size_limit = 0;
 
 static u32 LE32(u32 b) {
@@ -89,7 +89,7 @@ struct elf_symbol_t {
 //                 0 0000000001 11111111 12222222 22233
 //                 0 1234567890 12345678 90123456 78901
 static const char shstrtab[] = "\0.shstrtab\0.symtab\0.strtab\0.data";
-static const char shstrtab_sdata[] = "\0.shstrtab\0.symtab\0.strtab\0.sdata";
+static const char shstrtab_sdata[] = "\0.shstrtab\0.symtab\0.strtab\0.sdata\0.data";
 
 static void create_elf(FILE * dest, const unsigned char * source, u32 size, const char * label) {
     int i, l_size;
@@ -98,7 +98,7 @@ static void create_elf(FILE * dest, const unsigned char * source, u32 size, cons
     u32 strtab_size;
     char strtab[512];
     u32 data_size[4];
-    unsigned int shrtabSectionNameLength;
+    unsigned int shrtabSectionNameLength, NumSections;
     const char *pshstrtab_ptr;
 
     if (have_irx) {
@@ -107,7 +107,10 @@ static void create_elf(FILE * dest, const unsigned char * source, u32 size, cons
 	elf_header[38] = 0;
 	elf_header[39] = 0;
     }
-    
+
+    NumSections=(put_payload_in_SDATA || put_labels_in_SDATA)?6:5;
+    elf_header[sizeof(elf_header)-4]=NumSections;
+
     for (i = 0; i < sizeof(elf_header); i++) {
 	fputc(elf_header[i], dest);
     }
@@ -134,7 +137,7 @@ static void create_elf(FILE * dest, const unsigned char * source, u32 size, cons
     fwrite(&section, 1, sizeof(section), dest);
     
     // section 1 (.shstrtab)
-    if(use_SDATA){
+    if(put_payload_in_SDATA || put_labels_in_SDATA){
 	pshstrtab_ptr=shstrtab_sdata;
 	shrtabSectionNameLength=sizeof(shstrtab_sdata);
     }else{
@@ -145,7 +148,7 @@ static void create_elf(FILE * dest, const unsigned char * source, u32 size, cons
     section.sh_type = LE32(3); // STRTAB
     section.sh_flags = 0;
     section.sh_addr = 0;
-    section.sh_offset = LE32(40 * 5 + 0x34);
+    section.sh_offset = LE32(40 * NumSections + 0x34);
     section.sh_size = LE32(shrtabSectionNameLength);
     section.sh_link = 0;
     section.sh_info = 0;
@@ -160,7 +163,7 @@ static void create_elf(FILE * dest, const unsigned char * source, u32 size, cons
     section.sh_type = LE32(2); // SYMTAB
     section.sh_flags = 0;
     section.sh_addr = 0;
-    section.sh_offset = LE32(40 * 5 + 0x34 + shrtabSectionNameLength);
+    section.sh_offset = LE32(40 * NumSections + 0x34 + shrtabSectionNameLength);
     section.sh_size = LE32(have_size ? 0x30 : 0x20);
     section.sh_link = LE32(3);
     section.sh_info = 0;
@@ -168,14 +171,13 @@ static void create_elf(FILE * dest, const unsigned char * source, u32 size, cons
     section.sh_entsize = LE32(0x10);
     
     fwrite(&section, 1, sizeof(section), dest);
-    
-    
+
     // section 3 (.strtab)
     section.sh_name = LE32(19);
     section.sh_type = LE32(3); // STRTAB
     section.sh_flags = 0;
     section.sh_addr = 0;
-    section.sh_offset = LE32(40 * 5 + 0x34 + shrtabSectionNameLength + (have_size ? 0x30 : 0x20));
+    section.sh_offset = LE32(40 * NumSections + 0x34 + shrtabSectionNameLength + (have_size ? 0x30 : 0x20));
     section.sh_size = LE32(strtab_size);
     section.sh_link = 0;
     section.sh_info = 0;
@@ -183,31 +185,49 @@ static void create_elf(FILE * dest, const unsigned char * source, u32 size, cons
     section.sh_entsize = 0;
     
     fwrite(&section, 1, sizeof(section), dest);
+
+    if(put_payload_in_SDATA || put_labels_in_SDATA){
+	// section 4 (.sdata)
+	section.sh_name = LE32(27);
+	section.sh_type = LE32(1); // PROGBITS
+	section.sh_flags = LE32(0x10000003); // SHF_MIPS_GPREL + write + alloc
+	section.sh_addr = 0;
+	section.sh_offset = LE32(40 * NumSections + 0x34 + shrtabSectionNameLength + (have_size ? 0x30 : 0x20) + strtab_size);
+	section.sh_size = LE32(((put_payload_in_SDATA?size:0) + (put_labels_in_SDATA?have_size*16:0)));
+	section.sh_link = 0;
+	section.sh_addralign = LE32(alignment);
+	section.sh_entsize = 0;
     
-    
-    // section 4 (.data)
-    section.sh_name = LE32(27);
+	fwrite(&section, 1, sizeof(section), dest);
+    }
+
+    // section 4/5 (.data)
+    section.sh_name = LE32((put_payload_in_SDATA||put_labels_in_SDATA)?35:27);
     section.sh_type = LE32(1); // PROGBITS
-    section.sh_flags = LE32(use_SDATA?0x10000003:3); // SHF_MIPS_GPREL + write + alloc or Write + Alloc
+    section.sh_flags = LE32(3); // Write + Alloc
     section.sh_addr = 0;
-    section.sh_offset = LE32(40 * 5 + 0x34 + shrtabSectionNameLength + (have_size ? 0x30 : 0x20) + strtab_size);
-    section.sh_size = LE32(size + have_size * 16);
+    if(!put_payload_in_SDATA || !put_labels_in_SDATA){
+	section.sh_offset = LE32(40 * NumSections + 0x34 + shrtabSectionNameLength + (have_size ? 0x30 : 0x20) + strtab_size + ((put_payload_in_SDATA?size:0) + (put_labels_in_SDATA?have_size*16:0)));
+	section.sh_size = LE32(((put_payload_in_SDATA?0:size) + (put_labels_in_SDATA?0:have_size*16)));
+    }
+    else{
+	section.sh_offset = 0;
+	section.sh_size = 0;
+    }
     section.sh_link = 0;
     section.sh_addralign = LE32(alignment);
     section.sh_entsize = 0;
     
     fwrite(&section, 1, sizeof(section), dest);
     
-    
-    
     fwrite(pshstrtab_ptr, 1, shrtabSectionNameLength, dest);
 
     symbol.st_name = LE32(1);
-    symbol.st_value = LE32(have_size * 16);
+    symbol.st_value = LE32((have_size&&put_payload_in_SDATA==put_labels_in_SDATA)?16:0);	//If the size label and the payload exist in the same section, the size label will exist before the payload.
+    symbol.st_shndx = LE16((put_labels_in_SDATA&&!put_payload_in_SDATA)?5:4);
     symbol.st_size = LE32(size);
     symbol.st_info = 0x11;
     symbol.st_other = 0;
-    symbol.st_shndx = LE16(4);
     fwrite(&symbol, 1, sizeof(symbol), dest);
 
     symbol.st_name = LE32(l_size + 1 + 7);
@@ -224,7 +244,7 @@ static void create_elf(FILE * dest, const unsigned char * source, u32 size, cons
         symbol.st_size = LE32(4);
         symbol.st_info = 0x11;
         symbol.st_other = 0;
-        symbol.st_shndx = LE16(4);
+       	symbol.st_shndx = LE16(4);
         fwrite(&symbol, 1, sizeof(symbol), dest);
     }
 
@@ -292,7 +312,6 @@ int main(int argc, char *argv[])
 		have_irx = 1;
 		break;
 	    case 'G':
-		use_SDATA = 1;
 		SDATA_size_limit = strtoul(&argv[i][2], NULL, 0);
 		break;
 	    case 'b':
@@ -378,7 +397,13 @@ int main(int argc, char *argv[])
     if (end < (size - start))
 	size = end - start;
 
-    if(use_SDATA && size>SDATA_size_limit) use_SDATA=0;
+    if(SDATA_size_limit>0){
+	put_payload_in_SDATA=(SDATA_size_limit>=size)?1:0;
+	put_labels_in_SDATA=(have_size && SDATA_size_limit>=16)?1:0;
+    }
+    else{
+	put_payload_in_SDATA = put_labels_in_SDATA = 0;
+    }
 
     buffer = malloc(size);
     if (buffer == NULL) {
