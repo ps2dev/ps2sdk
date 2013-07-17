@@ -24,6 +24,7 @@ struct SmapDriverData{
 	unsigned char NetDevStopFlag;
 	unsigned char EnableLinkCheckTimer;
 	unsigned char LinkStatus;
+	unsigned char LinkMode;
 	iop_sys_clock_t LinkCheckTimer;
 };
 

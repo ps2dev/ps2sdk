@@ -88,12 +88,12 @@ static int _smap_read_phy(volatile u8 *emac3_regbase, unsigned int address){
 }
 
 static int DisplayHelpMessage(void){
-	printf(	"Usage: smap [<option>] [thpri=<prio>] [thstack=<stack>] [<conf>]\n"	\
-		"  <option>:\n"	\
-		"    -verbose       display verbose messages\n"	\
-		"    -auto          auto nego enable            [default]\n"	\
-		"    -no_auto       fixed mode\n"	\
-		"    -strap         use pin-strap config\n"	\
+	printf(	"Usage: smap [<option>] [thpri=<prio>] [thstack=<stack>] [<conf>]\n"
+		"  <option>:\n"
+		"    -verbose       display verbose messages\n"
+		"    -auto          auto nego enable            [default]\n"
+		"    -no_auto       fixed mode\n"
+		"    -strap         use pin-strap config\n"
 		"    -no_strap      do not use pin-strap config [default]\n");
 
 	return 2;
@@ -225,7 +225,9 @@ RepeatAutoNegoProcess:
 				}
 
 				if(i>=0x1E) goto RepeatAutoNegoProcess;
+				else SmapDrivPrivData->LinkStatus=1;
 			}
+			else SmapDrivPrivData->LinkStatus=1;
 		}
 	}
 
@@ -286,6 +288,9 @@ RepeatAutoNegoProcess:
 
 	if(LinkSpeed100M) result=LinkFDX?8:4;
 	else result=LinkFDX?2:1;
+
+	SmapDrivPrivData->LinkMode=result;
+	if(FlowControlEnabled) SmapDrivPrivData->LinkMode|=0x40;
 
 	DEBUG_PRINTF("smap: %s %s Duplex Mode %s Flow Control\n", LinkSpeed100M?"100BaseTX":"10BaseT", LinkFDX?"Full":"Half", FlowControlEnabled?"with":"without");
 
@@ -495,6 +500,34 @@ static void TxHandlerThread(void *arg){
 	}
 }
 
+static int SMAPGetLinkMode(void){
+	unsigned short int value;
+	int result;
+
+	result=-1;
+	if(SmapDriverData.LinkStatus){
+		value=SmapDriverData.LinkMode;
+		if(value&0x08){	/* 100Base-TX FDX */
+			result=NETMAN_NETIF_ETH_LINK_MODE_100M_FDX;
+		}
+		if(value&0x04){	/* 100Base-TX HDX */
+			result=NETMAN_NETIF_ETH_LINK_MODE_100M_HDX;
+		}
+		if(value&0x02){	/* 10Base-TX FDX */
+			result=NETMAN_NETIF_ETH_LINK_MODE_10M_FDX;
+		}
+		if(value&0x01){	/* 10Base-TX HDX */
+			result=NETMAN_NETIF_ETH_LINK_MODE_10M_HDX;
+		}
+	}
+
+	return result;
+}
+
+static int SMAPGetLinkStatus(void){
+	return(SmapDriverData.LinkStatus?NETMAN_NETIF_ETH_LINK_STATE_UP:NETMAN_NETIF_ETH_LINK_STATE_DOWN);
+}
+
 int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, void *output, unsigned int length){
 	int result;
 
@@ -503,6 +536,12 @@ int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, void *out
 	switch(command){
 		case NETMAN_NETIF_IOCTL_ETH_GET_MAC:
 			result=SMAPGetMACAddress(output);
+			break;
+		case NETMAN_NETIF_IOCTL_ETH_GET_LINK_MODE:
+			result=SMAPGetLinkMode();
+			break;
+		case NETMAN_NETIF_IOCTL_GET_LINK_STATUS:
+			result=SMAPGetLinkStatus();
 			break;
 		default:
 			result=-1;
