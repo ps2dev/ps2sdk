@@ -667,7 +667,7 @@ static int ParseSmapConfiguration(const char *cmd, unsigned int *configuration){
 		if(value>=base) goto fail_end;
 
 		result=result*base+value;
-	}while((character=*(DigitStart++))!='\0');
+	}while((character=*(++DigitStart))!='\0');
 	*configuration=result;
 
 	return 0;
