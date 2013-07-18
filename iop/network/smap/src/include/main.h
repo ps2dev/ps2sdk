@@ -8,10 +8,24 @@
 #define RestoreGP() \
 	__asm volatile("move $gp, %0" :: "r"(_ori_gp))
 
+struct RuntimeStats{
+	unsigned int RxDroppedFrameCount;
+	unsigned short int RxFrameOverrunCount;
+	unsigned short int RxFrameBadLengthCount;
+	unsigned short int RxFrameBadFCSCount;
+	unsigned short int RxFrameBadAlignmentCount;
+	unsigned int TxDroppedFrameCount;
+	unsigned short int TxFrameLOSSCRCount;
+	unsigned short int TxFrameEDEFERCount;
+	unsigned short int TxFrameCollisionCount;
+	unsigned short int TxFrameUnderrunCount;
+};
+
 struct SmapDriverData{
 	volatile u8 *smap_regbase;
 	volatile u8 *emac3_regbase;
 	unsigned int TxBufferSpaceAvailable;
+	struct RuntimeStats RuntimeStats;
 	unsigned char NumPacketsInTx;
 	unsigned char TxBDIndex;
 	unsigned char RxBDIndex;

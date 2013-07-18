@@ -15,7 +15,7 @@
 
 #include <tamtypes.h>
 #include <kernel.h>
-#include <fileio.h>
+#include <stdio.h>
 #include <string.h>
 #include <osd_config.h>
 
@@ -40,6 +40,10 @@ ConfigParamT10K g_t10KConfig = {540, TV_SCREEN_43, DATE_YYYYMMDD, LANGUAGE_JAPAN
 char g_RomName[15] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 #endif
 
+extern int (*_ps2sdk_close)(int);
+extern int (*_ps2sdk_open)(const char*, int);
+extern int (*_ps2sdk_read)(int, void*, int);
+
 // gets the romname from the current ps2
 // 14 chars - doesnt set a null terminator
 // 
@@ -50,9 +54,9 @@ char* GetRomName(char *romname)
 {
 	int fd;
 
-	fd = fioOpen("rom0:ROMVER", O_RDONLY);
-	fioRead(fd, romname, 14);
-	fioClose(fd);
+	fd = _ps2sdk_open("rom0:ROMVER", O_RDONLY);
+	_ps2sdk_read(fd, romname, 14);
+	_ps2sdk_close(fd);
 	return romname;
 }
 #endif

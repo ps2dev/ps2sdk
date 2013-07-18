@@ -312,17 +312,26 @@ static int HandleTxIntr(struct SmapDriverData *SmapDrivPrivData){
 	int result, OldState;
 	volatile u8 *smap_regbase;
 	USE_SMAP_TX_BD;
+	unsigned short int ctrl_stat;
 
 	smap_regbase=SmapDrivPrivData->smap_regbase;
 	result=0;
 	if(SmapDrivPrivData->NumPacketsInTx>0){
 		do{
-			if(tx_bd[SmapDrivPrivData->TxDNVBDIndex&0x3F].ctrl_stat&SMAP_BD_TX_READY) break;
+			if((ctrl_stat=tx_bd[SmapDrivPrivData->TxDNVBDIndex&(SMAP_BD_MAX_ENTRY-1)].ctrl_stat)&SMAP_BD_TX_READY) break;
 
 			CpuSuspendIntr(&OldState);
-			SmapDrivPrivData->TxBufferSpaceAvailable+=(tx_bd[SmapDrivPrivData->TxDNVBDIndex&0x3F].length+3)&~3;
+			SmapDrivPrivData->TxBufferSpaceAvailable+=(tx_bd[SmapDrivPrivData->TxDNVBDIndex&(SMAP_BD_MAX_ENTRY-1)].length+3)&~3;
 			SmapDrivPrivData->NumPacketsInTx--;
 			CpuResumeIntr(OldState);
+
+			if(ctrl_stat&(SMAP_BD_TX_UNDERRUN|SMAP_BD_TX_LCOLL|SMAP_BD_TX_ECOLL|SMAP_BD_TX_EDEFER|SMAP_BD_TX_LOSSCR)){
+				SmapDrivPrivData->RuntimeStats.TxDroppedFrameCount++;
+				if(ctrl_stat&SMAP_BD_TX_LOSSCR) SmapDrivPrivData->RuntimeStats.TxFrameLOSSCRCount++;
+				if(ctrl_stat&SMAP_BD_TX_EDEFER) SmapDrivPrivData->RuntimeStats.TxFrameEDEFERCount++;
+				if(ctrl_stat&(SMAP_BD_TX_SCOLL|SMAP_BD_TX_MCOLL|SMAP_BD_TX_LCOLL|SMAP_BD_TX_ECOLL)) SmapDrivPrivData->RuntimeStats.TxFrameCollisionCount++;
+				if(ctrl_stat&SMAP_BD_TX_UNDERRUN) SmapDrivPrivData->RuntimeStats.TxFrameUnderrunCount++;
+			}
 
 			result++;
 			SmapDrivPrivData->TxDNVBDIndex++;
@@ -426,17 +435,6 @@ static int Dev9TXEndIntrHandler(int flag){
 	return 0;
 }
 
-/* static int Dev9TXDNVIntrHandler(int flag){
-	USE_SMAP_REGS;
-
-	SaveGP();
-	SMAP_REG16(SMAP_R_INTR_CLR)=SMAP_INTR_TXDNV;
-	HandleTxIntr(&SmapDriverData);
-	RestoreGP();
-
-	return 0;
-} */
-
 /* Note: The GP register does not need to be loaded and restored in these two functions as DEV9 does not use the GP register.
 	But is it a good idea? Sony doesn't bother with the GP register within these two functions, but what if DEV9 gets modified to use the GP register? */
 static void Dev9PreDmaCbHandler(int bcr, int dir){
@@ -500,31 +498,23 @@ static void TxHandlerThread(void *arg){
 	}
 }
 
-static int SMAPGetLinkMode(void){
+static inline int SMAPGetLinkMode(void){
 	unsigned short int value;
 	int result;
 
 	result=-1;
 	if(SmapDriverData.LinkStatus){
 		value=SmapDriverData.LinkMode;
-		if(value&0x08){	/* 100Base-TX FDX */
-			result=NETMAN_NETIF_ETH_LINK_MODE_100M_FDX;
-		}
-		if(value&0x04){	/* 100Base-TX HDX */
-			result=NETMAN_NETIF_ETH_LINK_MODE_100M_HDX;
-		}
-		if(value&0x02){	/* 10Base-TX FDX */
-			result=NETMAN_NETIF_ETH_LINK_MODE_10M_FDX;
-		}
-		if(value&0x01){	/* 10Base-TX HDX */
-			result=NETMAN_NETIF_ETH_LINK_MODE_10M_HDX;
-		}
+		if(value&0x08) result=NETMAN_NETIF_ETH_LINK_MODE_100M_FDX;	/* 100Base-TX FDX */
+		if(value&0x04) result=NETMAN_NETIF_ETH_LINK_MODE_100M_HDX;	/* 100Base-TX HDX */
+		if(value&0x02) result=NETMAN_NETIF_ETH_LINK_MODE_10M_FDX;	/* 10Base-TX FDX */
+		if(value&0x01) result=NETMAN_NETIF_ETH_LINK_MODE_10M_HDX;	/* 10Base-TX HDX */
 	}
 
 	return result;
 }
 
-static int SMAPGetLinkStatus(void){
+static inline int SMAPGetLinkStatus(void){
 	return(SmapDriverData.LinkStatus?NETMAN_NETIF_ETH_LINK_STATE_UP:NETMAN_NETIF_ETH_LINK_STATE_DOWN);
 }
 
@@ -542,6 +532,36 @@ int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, void *out
 			break;
 		case NETMAN_NETIF_IOCTL_GET_LINK_STATUS:
 			result=SMAPGetLinkStatus();
+			break;
+		case NETMAN_NETIF_IOCTL_GET_TX_DROPPED_COUNT:
+			result=SmapDriverData.RuntimeStats.TxDroppedFrameCount;
+			break;
+		case NETMAN_NETIF_IOCTL_GET_RX_DROPPED_COUNT:
+			result=SmapDriverData.RuntimeStats.RxDroppedFrameCount;
+			break;
+		case NETMAN_NETIF_IOCTL_ETH_GET_RX_EOVERRUN_CNT:
+			result=SmapDriverData.RuntimeStats.RxFrameOverrunCount;
+			break;
+		case NETMAN_NETIF_IOCTL_ETH_GET_RX_EBADLEN_CNT:
+			result=SmapDriverData.RuntimeStats.RxFrameBadLengthCount;
+			break;
+		case NETMAN_NETIF_IOCTL_ETH_GET_RX_EBADFCS_CNT:
+			result=SmapDriverData.RuntimeStats.RxFrameBadFCSCount;
+			break;
+		case NETMAN_NETIF_IOCTL_ETH_GET_RX_EBADALIGN_CNT:
+			result=SmapDriverData.RuntimeStats.RxFrameBadAlignmentCount;
+			break;
+		case NETMAN_NETIF_IOCTL_ETH_GET_TX_ELOSSCR_CNT:
+			result=SmapDriverData.RuntimeStats.TxFrameLOSSCRCount;
+			break;
+		case NETMAN_NETIF_IOCTL_ETH_GET_TX_EEDEFER_CNT:
+			result=SmapDriverData.RuntimeStats.TxFrameEDEFERCount;
+			break;
+		case NETMAN_NETIF_IOCTL_ETH_GET_TX_ECOLL_CNT:
+			result=SmapDriverData.RuntimeStats.TxFrameCollisionCount;
+			break;
+		case NETMAN_NETIF_IOCTL_ETH_GET_TX_EUNDERRUN_CNT:
+			result=SmapDriverData.RuntimeStats.TxFrameUnderrunCount;
 			break;
 		default:
 			result=-1;
@@ -791,7 +811,6 @@ int smap_init(int argc, char *argv[]){
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_TxMODE1, 7<<SMAP_E3_TX_LOW_REQ_BITSFT | 0xF<<SMAP_E3_TX_URG_REQ_BITSFT);	/* SMAP_R_EMAC3_TxMODE1=0x0000380F */
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_RxMODE, SMAP_E3_RX_STRIP_PAD|SMAP_E3_RX_STRIP_FCS|SMAP_E3_RX_INDIVID_ADDR|SMAP_E3_RX_BCAST|SMAP_E3_RX_MCAST);	/* SMAP_R_EMAC3_RxMODE=0x0000C058 */
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_INTR_STAT, SMAP_E3_INTR_TX_ERR_0|SMAP_E3_INTR_SQE_ERR_0|SMAP_E3_INTR_DEAD_0);	/* SMAP_R_EMAC3_INTR_STAT=0x01c00000 */
-//	SMAP_EMAC3_SET(SMAP_R_EMAC3_INTR_ENABLE, SMAP_E3_INTR_TX_ERR_0|SMAP_E3_INTR_SQE_ERR_0|SMAP_E3_INTR_DEAD_0);	/* SMAP_R_EMAC3_INTR_ENABLE=0x01c00000 */
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_INTR_ENABLE, 0);
 
 	mac_address=eeprom_data[0]>>8 | eeprom_data[0]<<8;
@@ -812,10 +831,7 @@ int smap_init(int argc, char *argv[]){
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_TX_THRESHOLD, 0xC<<SMAP_E3_TX_THRESHLD_BITSFT);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_RX_WATERMARK, 0x8<<SMAP_E3_RX_LO_WATER_BITSFT|0x40<<SMAP_E3_RX_HI_WATER_BITSFT);
 
-//	dev9RegisterIntrCb(2, &Dev9TXDNVIntrHandler);	/* TXDNV */
 	dev9RegisterIntrCb(4, &Dev9TXEndIntrHandler);	/* TXEND */
-//	dev9RegisterIntrCb(6, &Dev9IntrCb);		/* EMAC3 */
-//	dev9RegisterIntrCb(3, &Dev9RXDNVIntrHandler);	/* RXDNV */
 	dev9RegisterIntrCb(5, &Dev9IntrCb);		/* RXEND */
 
 	dev9RegisterPreDmaCb(1, &Dev9PreDmaCbHandler);
