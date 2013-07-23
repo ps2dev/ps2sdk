@@ -159,6 +159,11 @@ int  configIsDaylightSavingEnabled(void);
 //			0 = off
 void configSetDaylightSavingEnabled(int enabled);
 
+#ifdef _LIBXCDVD_H_
+//Descriptions are the same as below. The clock structure's definitions are the same, but just labeled differently.
+void configConvertToGmtTime(sceCdCLOCK* time);
+void configConvertToLocalTime(sceCdCLOCK* time);
+#else
 // converts the time returned from the ps2's clock into GMT time
 // (ps2 clock is in JST time)
 void configConvertToGmtTime(CdvdClock_t* time);
@@ -166,6 +171,7 @@ void configConvertToGmtTime(CdvdClock_t* time);
 // converts the time returned from the ps2's clock into LOCAL time
 // (ps2 clock is in JST time)
 void configConvertToLocalTime(CdvdClock_t* time);
+#endif
 
 // Internal functions.
 int  IsT10K(void);

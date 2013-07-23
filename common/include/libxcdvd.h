@@ -13,6 +13,7 @@
 
 #ifndef _LIBCDVD_H_
 #define _LIBCDVD_H_
+#define _LIBXCDVD_H_
 
 /* File open modes */
 #define SCE_CdSTREAM	0x40000000  /* Open file for streaming */
