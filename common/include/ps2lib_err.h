@@ -62,6 +62,9 @@ enum _ps2lib_errors {
 	E_SIF_PKT_ALLOC		= 0xd610,	/* Can't allocate SIF packet. */
 	E_SIF_PKT_SEND		= 0xd611,	/* Can't send SIF packet. */
 	E_SIF_RPC_BIND		= 0xd612,	/* Couldn't bind to server. */
-	E_SIF_RPC_CALL		= 0xd613	/* Couldn't execute RPC call. */
+	E_SIF_RPC_CALL		= 0xd613,	/* Couldn't execute RPC call. */
+
+	/* RPC server module errors */
+	E_RPC_MISMATCHED_VER	= 65540		/* Incorrect IOP RPC module version */
 };
 #endif /* PS2LIB_ERR_H */

@@ -1,6 +1,7 @@
 
 sysmem_IMPORTS_start
 I_AllocSysMemory
+I_FreeSysMemory
 sysmem_IMPORTS_end
 
 sysclib_IMPORTS_start

@@ -8,22 +8,15 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 # $Id$
-# Defines all IRX imports.
+# The erl-tags support
 */
 
-#ifndef IOP_IRX_IMPORTS_H
-#define IOP_IRX_IMPORTS_H
+#include <erl.h>
 
-#include <irx.h>
+char * erl_id = "libcdvd";
 
-/* Please keep these in alphabetical order!  */
-#include <intrman.h>
-#include <iomanX.h>
-#include <sifcmd.h>
-#include <sifman.h>
-#include <stdio.h>
-#include <sysclib.h>
-#include <sysmem.h>
-#include <thbase.h>
-
-#endif /* IOP_IRX_IMPORTS_H */
+char * erl_dependancies[] = {
+    "libkernel",
+    "libc",
+    0
+};

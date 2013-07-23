@@ -44,8 +44,6 @@ int fioGetc(int fd);
 int fioGets(int fd, char* buff, int n);
 void fioSetBlockMode(int blocking);
 int fioSync(int mode, int *retVal);
-
-// Yet to be properly tested..
 int fioIoctl(int fd, int request, void *data);
 int fioDopen(const char *name);
 int fioDclose(int fd);

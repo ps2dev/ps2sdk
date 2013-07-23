@@ -15,8 +15,8 @@
 #define _FILEXIO_RPC_H
 
 // include the common definitions
-#include "fileXio.h"
-#include "sys/stat.h"
+#include <fileXio.h>
+#include <sys/stat.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,7 +28,8 @@ extern "C" {
 #define FXIO_COMPLETE	1
 #define FXIO_INCOMPLETE	0
 
-int fileXioInit();
+int fileXioInit(void);
+void fileXioExit(void);
 void fileXioSetBlockMode(int blocking);
 int fileXioWaitAsync(int mode, int *retVal);
 
@@ -53,7 +54,7 @@ int fileXioLseek(int fd, long offset, int whence);
 long long fileXioLseek64(int fd, long long offset, int whence);
 int fileXioChStat(const char *name, iox_stat_t *stat, int mask);
 int fileXioGetStat(const char *name, iox_stat_t *stat);
-int fileXioFormat(const char *dev, const char *blockdev, const char *args, int arglen);
+int fileXioFormat(const char *dev, const char *blockdev, const void *args, int arglen);
 int fileXioSync(const char *devname, int flag);
 int fileXioDopen(const char *name);
 int fileXioDclose(int fd);
@@ -61,6 +62,7 @@ int fileXioDread(int fd, iox_dirent_t *dirent);
 int fileXioDevctl(const char *name, int cmd, void *arg, unsigned int arglen, void *buf,unsigned int buflen);
 int fileXioIoctl(int fd, int cmd, void *arg);
 int fileXioIoctl2(int fd, int command, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+int fileXioSetRWBufferSize(int size);
 
 #ifdef __cplusplus
 }

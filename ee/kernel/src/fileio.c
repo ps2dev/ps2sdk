@@ -19,8 +19,6 @@
 #include <fileio.h>
 #include <string.h>
 
-/* TODO: Add versioning support.  */
-
 #define D(fmt, args...) printf("(%s:%s:%i):" # fmt, __FILE__, __FUNCTION__, __LINE__, ## args)
 
 enum _fio_functions {
@@ -58,10 +56,13 @@ extern int _iop_reboot_count;
 extern SifRpcClientData_t _fio_cd;
 extern int _fio_init;
 extern int _fio_block_mode;
+extern int _fio_io_sema;
 extern int _fio_completion_sema;
+extern int _fio_fs_version_new_flag;
 extern int _fio_recv_data[512];
 extern int _fio_intr_data[32];
 
+int _fio_version(void);
 void _fio_read_intr(struct _fio_read_data *);
 void _fio_intr();
 
@@ -71,27 +72,24 @@ int _fio_recv_data[512] __attribute__((aligned(64)));
 int _fio_intr_data[32] __attribute__((aligned(64)));
 int _fio_init = 0;
 int _fio_block_mode;
+int _fio_io_sema;
 int _fio_completion_sema = -1;
+int _fio_fs_version_new_flag = 0;
 #endif
 
 #ifdef F_fio_init
-int fioInit()
+int fioInit(void)
 {
 	int res;
-	ee_sema_t compSema;
+	ee_sema_t sema;
 	static int _rb_count = 0;
+	static void *rcv_adr_45;	//Don't know how it got its name, but Sony named it like this.
 
 	if(_rb_count != _iop_reboot_count)
 	{
-	    _rb_count = _iop_reboot_count;
+		_rb_count = _iop_reboot_count;
 
-	    if (_fio_completion_sema >= 0)
-	    {
-	        DeleteSema(_fio_completion_sema);
-            }
-
-	    memset(&_fio_cd, 0, sizeof _fio_cd);
-	    _fio_init = 0;
+		fioExit();
 	}
 
         if (_fio_init)
@@ -106,12 +104,31 @@ int fioInit()
 	if (res < 0)
 		return res;
 
-	compSema.init_count = 1;
-	compSema.max_count = 1;
-	compSema.option = 0;
-	_fio_completion_sema = CreateSema(&compSema);
+	sema.init_count = 1;
+	sema.max_count = 1;
+	sema.option = 0;
+	_fio_completion_sema = CreateSema(&sema);
 	if (_fio_completion_sema < 0)
 		return -E_LIB_SEMA_CREATE;
+
+	sema.init_count = 1;
+	sema.max_count = 1;
+	sema.option = 0;
+	_fio_io_sema = CreateSema(&sema);
+	if (_fio_io_sema < 0)
+		return -E_LIB_SEMA_CREATE;
+
+	//The original FILEIO EE RPC client for the ROM OSDs don't do this, as nobody from Sony would ever use an obsolete EE client to connect to a newer IOP FILEIO server. But since the homebrew SDK may do that, better protect ourselves..
+	rcv_adr_45=_fio_intr_data;
+	if (SifCallRpc(&_fio_cd, 0xFF, 0, &rcv_adr_45, 4,
+					_fio_recv_data, 4, NULL, NULL) >= 0)
+	{
+		_fio_fs_version_new_flag=1;	//The OSD FILEIO server doesn't have the init function.
+	}
+	else
+	{
+		_fio_fs_version_new_flag=0;
+	}
 
 	_fio_init = 1;
 	_fio_block_mode = FIO_WAIT;
@@ -120,8 +137,15 @@ int fioInit()
 }
 #endif
 
+#ifdef F__fio_version
+int _fio_version(void)
+{
+	return _fio_fs_version_new_flag;
+}
+#endif
+
 #ifdef F__fio_intr
-void _fio_intr()
+void _fio_intr(void)
 {
 	iSignalSema(_fio_completion_sema);
 }
@@ -176,10 +200,21 @@ void fioSetBlockMode(int blocking)
 #endif
 
 #ifdef F_fio_exit
-void fioExit()
+void fioExit(void)
 {
-	_fio_init = 0;
-	memset(&_fio_cd, 0, sizeof _fio_cd);
+	if(_fio_init)
+	{
+		_fio_init = 0;
+		memset(&_fio_cd, 0, sizeof _fio_cd);
+		if (_fio_completion_sema >= 0)
+		{
+			DeleteSema(_fio_completion_sema);
+        	}
+		if(_fio_io_sema >= 0)
+		{
+			DeleteSema(_fio_io_sema);
+		}
+	}
 }
 #endif
 
@@ -192,11 +227,14 @@ struct _fio_open_arg {
 int fioOpen(const char *name, int mode)
 {
 	struct _fio_open_arg arg;
-	int res;
+	int res, result;
 
 	if ((res = fioInit()) < 0)
 		return res;
+	if(_fio_version())
+		return -E_RPC_MISMATCHED_VER;	//Library mismatch.
 
+	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	arg.mode = mode;
@@ -206,13 +244,18 @@ int fioOpen(const char *name, int mode)
 	/* TODO: All of these can be cleaned up (get rid of res), and an
 	   appropiate error from errno.h be used instead.  */
 	if ((res = SifCallRpc(&_fio_cd, FIO_F_OPEN, _fio_block_mode, &arg, sizeof arg,
-					_fio_recv_data, 4, (void *)_fio_intr, NULL)) < 0)
-		return res;
-
-	if(_fio_block_mode == FIO_NOWAIT)
-		return 0;
+					_fio_recv_data, 4, (void *)_fio_intr, NULL)) >= 0)
+	{
+		result=(_fio_block_mode == FIO_NOWAIT)?0:_fio_recv_data[0];
+	}
 	else
-		return _fio_recv_data[0];
+	{
+		result=res;
+	}
+
+	SignalSema(_fio_io_sema);
+
+	return result;
 }
 #endif
 
@@ -220,20 +263,29 @@ int fioOpen(const char *name, int mode)
 int fioClose(int fd)
 {
 	union { int fd; int result; } arg;
-	int res;
+	int res, result;
 
 	if ((res = fioInit()) < 0)
 		return res;
 
+	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	arg.fd = fd;
 
 	if ((res = SifCallRpc(&_fio_cd, FIO_F_CLOSE, 0, &arg, 4, &arg, 4,
-					(void *)_fio_intr, NULL)) < 0)
-		return res;
+					(void *)_fio_intr, NULL)) >= 0)
+	{
+		result=arg.result;
+	}
+	else
+	{
+		result=res;
+	}
 
-	return arg.result;
+	SignalSema(_fio_io_sema);
+
+	return result;
 }
 #endif
 
@@ -265,11 +317,12 @@ struct _fio_read_arg {
 int fioRead(int fd, void *ptr, int size)
 {
 	struct _fio_read_arg arg;
-	int res;
+	int res, result;
 
 	if ((res = fioInit()) < 0)
 		return res;
 
+	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	arg.fd      = fd;
@@ -279,17 +332,20 @@ int fioRead(int fd, void *ptr, int size)
 
 	if (!IS_UNCACHED_SEG(ptr))
 		SifWriteBackDCache(ptr, size);
-	SifWriteBackDCache(_fio_intr_data, 128);
-	SifWriteBackDCache(&arg, sizeof(arg));
 
 	if ((res = SifCallRpc(&_fio_cd, FIO_F_READ, _fio_block_mode, &arg, sizeof arg,
-					_fio_recv_data, 4, (void *)_fio_read_intr, _fio_intr_data)) < 0)
-		return res;
-
-	if(_fio_block_mode == FIO_NOWAIT)
-		return 0;
+					_fio_recv_data, 4, (void *)_fio_read_intr, _fio_intr_data)) >= 0)
+	{
+		result=(_fio_block_mode == FIO_NOWAIT)?0:_fio_recv_data[0];
+	}
 	else
-		return _fio_recv_data[0];
+	{
+		result=res;
+	}
+
+	SignalSema(_fio_io_sema);
+
+	return result;
 }
 #endif
 
@@ -305,11 +361,12 @@ struct _fio_write_arg {
 int fioWrite(int fd, const void *ptr, int size)
 {
 	struct _fio_write_arg arg;
-	int mis, res;
+	int mis, res, result;
 
 	if ((res = fioInit()) < 0)
 		return res;
 
+	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	arg.fd = fd;
@@ -325,7 +382,6 @@ int fioWrite(int fd, const void *ptr, int size)
 	}
 	arg.mis = mis;
 
-
 	if (mis)
 		memcpy(arg.aligned, ptr, mis);
 
@@ -333,14 +389,18 @@ int fioWrite(int fd, const void *ptr, int size)
 		SifWriteBackDCache((struct fileXioDirEntry *)ptr, size);
 
 	if ((res = SifCallRpc(&_fio_cd, FIO_F_WRITE, _fio_block_mode, &arg, sizeof arg,
-					_fio_recv_data, 4, (void *)_fio_intr, NULL)) < 0)
-		return res;
-
-
-	if(_fio_block_mode == FIO_NOWAIT)
-		return 0;
+					_fio_recv_data, 4, (void *)_fio_intr, NULL)) >= 0)
+	{
+		result=(_fio_block_mode == FIO_NOWAIT)?0:_fio_recv_data[0];
+	}
 	else
-		return _fio_recv_data[0];
+	{
+		result=res;
+	}
+
+	SignalSema(_fio_io_sema);
+	
+	return result;
 }
 #endif
 
@@ -357,11 +417,12 @@ struct _fio_lseek_arg {
 int fioLseek(int fd, int offset, int whence)
 {
 	struct _fio_lseek_arg arg;
-	int res;
+	int res, result;
 
 	if ((res = fioInit()) < 0)
 		return res;
 
+	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	arg.p.fd   = fd;
@@ -369,10 +430,18 @@ int fioLseek(int fd, int offset, int whence)
 	arg.whence = whence;
 
 	if ((res = SifCallRpc(&_fio_cd, FIO_F_LSEEK, 0, &arg, sizeof arg,
-					&arg, 4, (void *)_fio_intr, NULL)) < 0)
-		return res;
+					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
+	{
+		result=arg.p.result;
+	}
+	else
+	{
+		result=res;
+	}
 
-	return arg.p.result;
+	SignalSema(_fio_io_sema);
+
+	return result;
 }
 #endif
 
@@ -389,11 +458,12 @@ struct _fio_ioctl_arg {
 int fioIoctl(int fd, int request, void *data)
 {
 	struct _fio_ioctl_arg arg;
-	int res;
+	int res, result;
 
 	if ((res = fioInit()) < 0)
 		return res;
 
+	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	arg.p.fd = fd;
@@ -401,10 +471,18 @@ int fioIoctl(int fd, int request, void *data)
 	memcpy(arg.data, data, 1024);
 
 	if ((res = SifCallRpc(&_fio_cd, FIO_F_IOCTL, 0, &arg, sizeof arg,
-					&arg, 4, (void *)_fio_intr, NULL)) < 0)
-		return res;
+					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
+	{
+		result=arg.p.result;
+	}
+	else
+	{
+		result=res;
+	}
 
-	return arg.p.result;
+	SignalSema(_fio_io_sema);
+
+	return result;
 }
 #endif
 
@@ -415,21 +493,30 @@ int fioRemove(const char *name)
 		char path[FIO_PATH_MAX];
 		int	result;
 	} arg;
-	int res;
+	int res, result;
 
 	if ((res = fioInit()) < 0)
 		return res;
 
+	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	strncpy(arg.path, name, FIO_PATH_MAX - 1);
 	arg.path[FIO_PATH_MAX - 1] = 0;
 
 	if ((res = SifCallRpc(&_fio_cd, FIO_F_REMOVE, 0, &arg, sizeof arg,
-					&arg, 4, (void *)_fio_intr, NULL)) < 0)
-		return res;
+					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
+	{
+		result=arg.result;
+	}
+	else
+	{
+		result=res;
+	}
 
-	return arg.result;
+	SignalSema(_fio_io_sema);
+
+	return result;
 }
 #endif
 
@@ -440,21 +527,30 @@ int fioMkdir(const char* path)
 		char path[FIO_PATH_MAX];
 		int	result;
 	} arg;
-	int res;
+	int res, result;
 
  	if ((res = fioInit()) < 0)
 		return res;
 
+	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	strncpy(arg.path, path, FIO_PATH_MAX - 1);
 	arg.path[FIO_PATH_MAX - 1] = 0;
 
 	if ((res = SifCallRpc(&_fio_cd, FIO_F_MKDIR, 0, &arg, sizeof arg,
-					&arg, 4, (void *)_fio_intr, NULL)) < 0)
-		return res;
+					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
+	{
+		result=arg.result;
+	}
+	else
+	{
+		result=res;
+	}
 
-	return arg.result;
+	SignalSema(_fio_io_sema);
+
+	return result;
 }
 #endif
 
@@ -465,21 +561,30 @@ int fioRmdir(const char* dirname)
 		char path[FIO_PATH_MAX];
 		int	result;
 	} arg;
-	int res;
+	int res, result;
 
 	if ((res = fioInit()) < 0)
 		return res;
 
+	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	strncpy(arg.path, dirname, FIO_PATH_MAX - 1);
 	arg.path[FIO_PATH_MAX - 1] = 0;
 
 	if ((res = SifCallRpc(&_fio_cd, FIO_F_RMDIR, 0, &arg, sizeof arg,
-					&arg, 4, (void *)_fio_intr, NULL)) < 0)
-		return res;
+					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
+	{
+		result=arg.result;
+	}
+	else
+	{
+		result=res;
+	}
 
-	return arg.result;
+	SignalSema(_fio_io_sema);
+
+	return result;
 }
 #endif
 
@@ -537,21 +642,30 @@ int fioDopen(const char *name)
 		char name[FIO_PATH_MAX];
 		int	result;
 	} arg;
-	int res;
+	int res, result;
 
 	if ((res = fioInit()) < 0)
 		return res;
 
+	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	strncpy(arg.name, name, FIO_PATH_MAX - 1);
 	arg.name[FIO_PATH_MAX - 1] = 0;
 
 	if ((res = SifCallRpc(&_fio_cd, FIO_F_DOPEN, 0, &arg, sizeof arg,
-					&arg, 4, (void *)_fio_intr, NULL)) < 0)
-		return res;
+					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
+	{
+		result=arg.result;
+	}
+	else
+	{
+		result=res;
+	}
 
-	return arg.result;
+	SignalSema(_fio_io_sema);
+
+	return result;
 }
 #endif
 
@@ -562,20 +676,29 @@ int fioDclose(int fd)
 		int fd;
 		int result;
 	} arg;
-	int res;
+	int res, result;
 
 	if ((res = fioInit()) < 0)
 		return res;
 
+	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	arg.fd = fd;
 
 	if ((res = SifCallRpc(&_fio_cd, FIO_F_DCLOSE, 0, &arg, sizeof arg,
-					&arg, 4, (void *)_fio_intr, NULL)) < 0)
-		return res;
+					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
+	{
+		result=arg.result;
+	}
+	else
+	{
+		result=res;
+	}
 
-	return arg.result;
+	SignalSema(_fio_io_sema);
+
+	return result;
 }
 #endif
 
@@ -591,11 +714,12 @@ struct _fio_dread_arg {
 int fioDread(int fd, fio_dirent_t *buf)
 {
 	struct _fio_dread_arg arg;
-	int res;
+	int res, result;
 
 	if ((res = fioInit()) < 0)
 		return res;
 
+	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	arg.p.fd = fd;
@@ -605,10 +729,18 @@ int fioDread(int fd, fio_dirent_t *buf)
 		SifWriteBackDCache(buf, sizeof(fio_dirent_t));
 
 	if ((res = SifCallRpc(&_fio_cd, FIO_F_DREAD, 0, &arg, sizeof arg,
-					&arg, 4, (void *)_fio_intr, NULL)) < 0)
-		return res;
+					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
+	{
+		result=arg.p.result;
+	}
+	else
+	{
+		result=res;
+	}
 
-	return arg.p.result;
+	SignalSema(_fio_io_sema);
+
+	return result;
 }
 #endif
 
@@ -624,11 +756,12 @@ struct _fio_getstat_arg {
 int fioGetstat(const char *name, fio_stat_t *buf)
 {
 	struct _fio_getstat_arg arg;
-	int res;
+	int res, result;
 
 	if ((res = fioInit()) < 0)
 		return res;
 
+	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	arg.p.buf = buf;
@@ -639,10 +772,18 @@ int fioGetstat(const char *name, fio_stat_t *buf)
 		SifWriteBackDCache(buf, sizeof(fio_stat_t));
 
 	if ((res = SifCallRpc(&_fio_cd, FIO_F_GETSTAT, 0, &arg, sizeof arg,
-					&arg, 4, (void *)_fio_intr, NULL)) < 0)
-		return res;
+					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
+	{
+		result=arg.p.result;
+	}
+	else
+	{
+		result=res;
+	}
 
-	return arg.p.result;
+	SignalSema(_fio_io_sema);
+
+	return result;
 }
 #endif
 
@@ -659,11 +800,12 @@ struct _fio_chstat_arg {
 int fioChstat(const char *name, fio_stat_t *buf, u32 cbit)
 {
 	struct _fio_chstat_arg arg;
-	int res;
+	int res, result;
 
 	if ((res = fioInit()) < 0)
 		return res;
 
+	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	arg.p.cbit = cbit;
@@ -672,10 +814,18 @@ int fioChstat(const char *name, fio_stat_t *buf, u32 cbit)
 	arg.name[FIO_PATH_MAX - 1] = 0;
 
 	if ((res = SifCallRpc(&_fio_cd, FIO_F_CHSTAT, 0, &arg, sizeof arg,
-					&arg, 4, (void *)_fio_intr, NULL)) < 0)
-		return res;
+					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
+	{
+		result=arg.p.result;
+	}
+	else
+	{
+		result=res;
+	}
 
-	return arg.p.result;
+	SignalSema(_fio_io_sema);
+
+	return result;
 }
 #endif
 
@@ -686,20 +836,29 @@ int fioFormat(const char *name)
 		char path[FIO_PATH_MAX];
 		int	result;
 	} arg;
-	int res;
+	int res, result;
 
 	if ((res = fioInit()) < 0)
 		return res;
 
+	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	strncpy(arg.path, name, FIO_PATH_MAX - 1);
 	arg.path[FIO_PATH_MAX - 1] = 0;
 
 	if ((res = SifCallRpc(&_fio_cd, FIO_F_FORMAT, 0, &arg, sizeof arg,
-					&arg, 4, (void *)_fio_intr, NULL)) < 0)
-		return res;
+					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
+	{
+		result=arg.result;
+	}
+	else
+	{
+		result=res;
+	}
 
-	return arg.result;
+	SignalSema(_fio_io_sema);
+
+	return result;
 }
 #endif

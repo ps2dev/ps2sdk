@@ -16,16 +16,17 @@
 //#define DEBUG
 
 
-#include "types.h"
-#include "stdio.h"
-#include "sysclib.h"
-#include "thbase.h"
-#include "intrman.h"
-#include "sysmem.h"
-#include "sifman.h"
-#include "sifcmd.h"
+#include <types.h>
+#include <stdio.h>
+#include <sysclib.h>
+#include <thbase.h>
+#include <intrman.h>
+#include <iomanX.h>
+#include <loadcore.h>
+#include <sysmem.h>
+#include <sifman.h>
+#include <sifcmd.h>
 
-#include "iomanX.h"
 #include "fileXio_iop.h"
 
 #define MODNAME "IOX/File_Manager_Rpc"
@@ -37,8 +38,9 @@ IRX_ID(MODNAME, 1, 1);
 #define MIN(a, b)	(((a)<(b))?(a):(b))
 #define RDOWN_16(a)	(((a) >> 4) << 4)
 
-#define RWSIZE	16384
+#define DEFAULT_RWSIZE	16384
 static void *rwbuf = NULL;
+static unsigned int RWBufferSize=DEFAULT_RWSIZE;
 static unsigned int *buffer; // RPC send/receive buffer
 struct t_SifRpcDataQueue qd;
 struct t_SifRpcServerData sd0;
@@ -71,9 +73,9 @@ void DirEntryCopy(struct fileXioDirEntry* dirEntry, iox_dirent_t* internalDirEnt
 int _start( int argc, char **argv)
 {
 	struct _iop_thread param;
-	int th;
+	int th, result;
 
-	param.attr         = 0x02000000;
+	param.attr         = TH_C;
 	param.thread       = (void*)fileXio_Thread;
 	param.priority 	  = 40;
 	param.stacksize    = 0x8000;
@@ -83,13 +85,12 @@ int _start( int argc, char **argv)
 
 	if (th > 0)
 	{
-		StartThread(th,0);
-		return 0;
+		StartThread(th, NULL);
+		result=MODULE_RESIDENT_END;
 	}
-	else
-		return 1;
+	else result=MODULE_NO_RESIDENT_END;
 
-	return 0;
+	return result;
 }
 
 int fileXio_GetDeviceList_RPC(struct fileXioDevice* ee_devices, int eecount)
@@ -143,10 +144,10 @@ int fileXio_CopyFile_RPC(const char *src, const char *dest, int mode)
   if (!size)
     return retval;
 
-  remain = size % RWSIZE;
-  for (i = 0; i < (size / RWSIZE); i++) {
-    read(infd, rwbuf, RWSIZE);
-    write(outfd, rwbuf, RWSIZE);
+  remain = size % RWBufferSize;
+  for (i = 0; i < (size / RWBufferSize); i++) {
+    read(infd, rwbuf, RWBufferSize);
+    write(outfd, rwbuf, RWBufferSize);
   }
   read(infd, rwbuf, remain);
   write(outfd, rwbuf, remain);
@@ -207,7 +208,7 @@ int fileXio_Read_RPC(int infd, char *read_buf, int read_size, void *intr_data)
 	status=0;
 	while (asize>0)
 	{
-		readlen=MIN(RWSIZE, asize);
+		readlen=MIN(RWBufferSize, asize);
 
 		while(SifDmaStat(status)>=0);		
 
@@ -282,7 +283,7 @@ int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size, int mis,
 	left-=mis;
 	pos=(int)write_buf+mis;
 	while(left){
-		writelen = MIN(RWSIZE, left);
+		writelen = MIN(RWBufferSize, left);
 		SifRpcGetOtherData(&rdata, (void *)pos, rwbuf, writelen, 0);
 		wlen=write(outfd, rwbuf, writelen);	
 		if (wlen != writelen){
@@ -942,6 +943,8 @@ void* fileXioRpc_Dclose(unsigned int* sbuff)
 
 void fileXio_Thread(void* param)
 {
+	int OldState;
+
 	printf("fileXio: fileXio RPC Server v1.00\nCopyright (c) 2003 adresd\n");
 	#ifdef DEBUG
 		printf("fileXio: RPC Initialize\n");
@@ -951,7 +954,9 @@ void fileXio_Thread(void* param)
 
 	// 0x4800 bytes for DirEntry structures 
 	// 0x400 bytes for the filename string
-	buffer = AllocSysMemory(0, 0x4C00, NULL);
+	CpuSuspendIntr(&OldState);
+	buffer = AllocSysMemory(ALLOC_FIRST, 0x4C00, NULL);
+	CpuResumeIntr(OldState);
 	if(buffer == NULL)
 	{
 		#ifdef DEBUG
@@ -961,7 +966,10 @@ void fileXio_Thread(void* param)
 		SleepThread();
 	}
 
-	rwbuf = AllocSysMemory(0, RWSIZE, NULL);
+	RWBufferSize=DEFAULT_RWSIZE;
+	CpuSuspendIntr(&OldState);
+	rwbuf = AllocSysMemory(ALLOC_FIRST, RWBufferSize, NULL);
+	CpuResumeIntr(OldState);
 	if (rwbuf == NULL)
 	{
 		#ifdef DEBUG
@@ -974,6 +982,25 @@ void fileXio_Thread(void* param)
 	SifSetRpcQueue(&qd, GetThreadId());
 	SifRegisterRpc(&sd0, FILEXIO_IRX,fileXio_rpc_server,(void *)buffer,0,0,&qd);
 	SifRpcLoop(&qd);
+}
+
+void* filexioRpc_SetRWBufferSize(void *sbuff)
+{
+	int OldState;
+
+	if(rwbuf!=NULL){
+		CpuSuspendIntr(&OldState);
+		FreeSysMemory(rwbuf);
+		CpuResumeIntr(OldState);
+	}
+
+	RWBufferSize=((struct fxio_rwbuff*)sbuff)->size;
+	CpuSuspendIntr(&OldState);
+	rwbuf=AllocSysMemory(ALLOC_FIRST, RWBufferSize, NULL);
+	CpuResumeIntr(OldState);
+
+	((int*)sbuff)[0] = rwbuf!=NULL?0:-ENOMEM;
+	return sbuff;
 }
 
 void* fileXio_rpc_server(int fno, void *data, int size)
@@ -1042,6 +1069,8 @@ void* fileXio_rpc_server(int fno, void *data, int size)
 			return fileXioRpc_Lseek64((unsigned*)data);
 		case FILEXIO_GETDEVICELIST:
 			return fileXioRpc_GetDeviceList((unsigned*)data);
+		case FILEXIO_SETRWBUFFSIZE:
+			return filexioRpc_SetRWBufferSize(data);
 	}
 	return NULL;
 }

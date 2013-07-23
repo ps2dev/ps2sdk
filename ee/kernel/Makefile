@@ -27,7 +27,7 @@ SIFRPC_OBJS = SifBindRpc.o SifCallRpc.o SifRpcGetOtherData.o \
 	_rpc_get_fpacket.o SifCheckStatRpc.o
 SIFRPC_OBJS := $(SIFRPC_OBJS:%=$(EE_OBJS_DIR)%)
 
-FILEIO_OBJS = __fio_internals.o fio_init.o _fio_intr.o fio_sync.o fio_setblockmode.o \
+FILEIO_OBJS = __fio_internals.o fio_init.o _fio_version.o _fio_intr.o fio_sync.o fio_setblockmode.o \
 	fio_exit.o fio_open.o fio_close.o fio_read.o \
 	fio_write.o fio_lseek.o fio_mkdir.o _fio_read_intr.o fio_getc.o fio_putc.o \
 	fio_ioctl.o fio_dopen.o fio_dclose.o fio_dread.o fio_getstat.o fio_chstat.o \
