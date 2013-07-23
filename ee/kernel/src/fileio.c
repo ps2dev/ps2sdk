@@ -58,11 +58,9 @@ extern int _fio_init;
 extern int _fio_block_mode;
 extern int _fio_io_sema;
 extern int _fio_completion_sema;
-extern int _fio_fs_version_new_flag;
 extern int _fio_recv_data[512];
 extern int _fio_intr_data[32];
 
-int _fio_version(void);
 void _fio_read_intr(struct _fio_read_data *);
 void _fio_intr();
 
@@ -74,7 +72,6 @@ int _fio_init = 0;
 int _fio_block_mode;
 int _fio_io_sema;
 int _fio_completion_sema = -1;
-int _fio_fs_version_new_flag = 0;
 #endif
 
 #ifdef F_fio_init
@@ -83,7 +80,6 @@ int fioInit(void)
 	int res;
 	ee_sema_t sema;
 	static int _rb_count = 0;
-	static void *rcv_adr_45;	//Don't know how it got its name, but Sony named it like this.
 
 	if(_rb_count != _iop_reboot_count)
 	{
@@ -118,29 +114,10 @@ int fioInit(void)
 	if (_fio_io_sema < 0)
 		return -E_LIB_SEMA_CREATE;
 
-	//The original FILEIO EE RPC client for the ROM OSDs don't do this, as nobody from Sony would ever use an obsolete EE client to connect to a newer IOP FILEIO server. But since the homebrew SDK may do that, better protect ourselves..
-	rcv_adr_45=_fio_intr_data;
-	if (SifCallRpc(&_fio_cd, 0xFF, 0, &rcv_adr_45, 4,
-					_fio_recv_data, 4, NULL, NULL) >= 0)
-	{
-		_fio_fs_version_new_flag=1;	//The OSD FILEIO server doesn't have the init function.
-	}
-	else
-	{
-		_fio_fs_version_new_flag=0;
-	}
-
 	_fio_init = 1;
 	_fio_block_mode = FIO_WAIT;
 
 	return 0;
-}
-#endif
-
-#ifdef F__fio_version
-int _fio_version(void)
-{
-	return _fio_fs_version_new_flag;
 }
 #endif
 
@@ -231,8 +208,6 @@ int fioOpen(const char *name, int mode)
 
 	if ((res = fioInit()) < 0)
 		return res;
-	if(_fio_version())
-		return -E_RPC_MISMATCHED_VER;	//Library mismatch.
 
 	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
