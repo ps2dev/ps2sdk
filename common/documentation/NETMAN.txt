@@ -1,0 +1,57 @@
+PlayStation 2 Network Manager (NETMAN)	- 2013/07/29
+----------------------------------------------------
+
+For "end-user" developers who want to bring network support to their software:
+
+1. Load NETMAN.IRX.
+2. Load and initialize the network stack:
+	1. If it's an IOP-side stack like the LWIP v1.4.1 stack (tcpip141) or LWIP v1.1.1 (tcpip-dma), load PS2IP141.IRX or PS2IP-DMA.IRX
+	2. If it's an EE-side stack like the LWIP v1.4.1 stack, invoke InitPS2IP().
+
+For developers who want to develop their own network adaptor drivers:
+	At startup, your driver should register itself with NETMAN using NetManRegisterNetIF().
+	The driver should have the following functions implemented:
+		SMAPStart		-> Called when the interface is to be brought up.
+		SMAPStop		-> Called when the interface is to be brought down.
+		SMAPSendPacket		-> Called when a frame is to be sent out of the interface.
+		SMAPIoctl		-> Invoked for IOCTL calls (e.g. for retrieving the MAC address etc). Refer to common/include/netman.h for a list of IOCTL calls to implement.
+
+	When a frame is to be received, the process would be something like this:
+		1. Frame is received by the driver.
+		2. Driver allocates a frame buffer with NetManRpcNetProtStackAllocRxPacket() and transfers the frame into the allocated buffer.
+		3. Driver enqueues the frame with NetManRpcProtStackEnQRxPacket().
+		4. Driver does 2 and 3 until there are either no more frames to process or no more frame buffers can be allocated.
+		5. Driver sends the enqueued frames to the network stack with NetmanRpcFlushInputQueue().
+		6. If there are more frames received, repeat from step 1.
+
+	Note: As this frame allocation mechanism was designed with the idea that the network stack may reside on the other side of the SIF, the frame buffers allocated may belong to a single, large buffer. This buffer may get sent across the SIF as one large transfer for performance. As a result freeing an allocated buffer with NetManRpcNetProtStackFreeRxPacket() may not actually free up space.
+	The only way to free up all allocated space would be to flush the Rx frame queue with NetmanRpcFlushInputQueue().
+
+	More than one network adaptor driver can be registered, but only the first one that has a link up state will be used. To toggle the link state, use NetManToggleNetIFLinkState().
+
+	On shutdown, the driver should be unregistered with NetManUnregisterNetIF().
+
+	For a working example, please refer to iop/network/smap.
+
+For developers who want to develop their own network protocol stack:
+	1. Initialize NETMAN and register itself with NetManInit().
+	2. Initialize itself after doing that if it needs access to the network adaptor (e.g. for its MAC address). Access to the network adaptor can only take place after NETMAN has been initialized.
+
+	Unlike network adaptor drivers, only one network protocol stack may be registered simultaneously (Regardless of whether it's on the EE or IOP).
+
+	The network protocol stack should have the following functions implemented:
+		LinkStateUp	-> A callback for handling a link up state by the network adaptor.
+		LinkStateDown	-> A callback for handling a link down state by the network adaptor.
+		AllocRxPacket	-> Buffer allocation function for an incoming packet.
+		FreeRxPacket	-> Buffer freeing function for an incoming packet.
+		EnQRxPacket	-> Frame queuing function for incoming packets.
+		FlushInputQueue	-> Frame queue flushing/processing function. The frames in the queue should be processed and freed.
+
+	Network protocol stacks can use these two functions provided by NETMAN during their runtime:
+		NetManNetIFSendPacket	-> Send a single frame out of the network adaptor.
+		NetManIoctl		-> Issue IOCTL call to the network adaptor. Used for obtaining statistics, statuses and the MAC address (For Ethernet adaptors) from the network adaptor.
+
+
+	On shutdown, NetManDeinit() should be invoked.
+
+	For a working example, please refer to ee/network/tcpip141.

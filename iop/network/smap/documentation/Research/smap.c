@@ -983,7 +983,7 @@ static int smap_init(int argc, char *argv[]){
 			CmdString=&((unsigned char*)*argv)[6];
 			if(look_ctype_table(CmdString[0])&4){
 				ThreadPriority=strtoul(&((unsigned char*)*argv)[6], NULL, 10);
-				if(ThreadPriority-8>=0x73){
+				if(ThreadPriority-9>=0x73){
 					return DisplayHelpMessage();
 				}
 				
