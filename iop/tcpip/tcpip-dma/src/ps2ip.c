@@ -181,8 +181,7 @@ AddLoopIF(void)
 
 err_t ps2ip_input(struct pbuf* pInput, struct netif* pNetIF)
 {
-	switch(htons(((struct eth_hdr*)(pInput->payload))->type))	// Don't know why, but using htons will cause this function to not work in the SMS LWIP stack.
-//	switch(((struct eth_hdr*)(pInput -> payload))->type)
+	switch(htons(((struct eth_hdr*)(pInput->payload))->type))
 	{
 	case	ETHTYPE_IP:
 		//IP-packet. Update ARP table, obtain first queued packet.

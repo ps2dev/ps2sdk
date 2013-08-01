@@ -222,12 +222,9 @@ error:
 	return	ERR_OK;
 }
 
-
-void
-ps2ip_Stub(void)
+void ps2ip_Stub(void)
 {
 }
-
 
 int _exit(int argc, char** argv)
 {
@@ -397,8 +394,7 @@ static inline int InitializeLWIP(void){
 	return 0;
 }
 
-static inline int InitLWIPStack(const unsigned char *ip_address, const unsigned char *subnet, const unsigned char *gateway){
-	struct ip_addr IP, NM, GW;
+static inline int InitLWIPStack(struct ip_addr *IP, struct ip_addr *NM, struct ip_addr *GW){
 	static struct NetManNetProtStack stack={
 		&LinkStateUp,
 		&LinkStateDown,
@@ -411,11 +407,7 @@ static inline int InitLWIPStack(const unsigned char *ip_address, const unsigned 
 	InitializeLWIP();
 	NetManInit(&stack);
 
-	IP4_ADDR(&IP, ip_address[0],ip_address[1],ip_address[2],ip_address[3]);
-	IP4_ADDR(&NM, subnet[0],subnet[1],subnet[2],subnet[3]);
-	IP4_ADDR(&GW, gateway[0],gateway[1],gateway[2],gateway[3]);
-
-	netif_add(&NIF, &IP, &NM, &GW, &NIF, &SMapIFInit, tcpip_input);
+	netif_add(&NIF, IP, NM, GW, &NIF, &SMapIFInit, tcpip_input);
 	netif_set_default(&NIF);
 	netif_set_up(&NIF);	// For LWIP v1.3.0 and later.
 
@@ -423,25 +415,23 @@ static inline int InitLWIPStack(const unsigned char *ip_address, const unsigned 
 }
 
 int _start(int argc, char *argv[]){
-	int i;
-	unsigned char ip_address[4], subnet_mask[4], gateway[4];
+	struct ip_addr IP, NM, GW;
 
-	for(i=1; i<argc; i++){
-//		printf("%u: %s\n", i, argv[i]);
-		if(strncmp("-ip=", argv[i], 4)==0){
-			ParseNetAddr(&argv[i][4], ip_address);
-		}
-		else if(strncmp("-netmask=", argv[i], 9)==0){
-			ParseNetAddr(&argv[i][9], subnet_mask);
-		}
-		else if(strncmp("-gateway=", argv[i], 9)==0){
-			ParseNetAddr(&argv[i][9], gateway);
-		}
-		else break;
+	//Parse IP address arguments.
+	if(argc>=4)
+	{
+		dbgprintf("SMAP: %s %s %s\n", argv[1],argv[2],argv[3]);
+		IP.addr=inet_addr(argv[1]);
+		NM.addr=inet_addr(argv[2]);
+		GW.addr=inet_addr(argv[3]);
+	}
+	else
+	{
+		//Set some defaults.
+		IP4_ADDR(&IP,192,168,0,80);
+		IP4_ADDR(&NM,255,255,255,0);
+		IP4_ADDR(&GW,192,168,0,1);
 	}
 
-	InitLWIPStack(ip_address, subnet_mask, gateway);
-
-	return MODULE_RESIDENT_END;
+	return InitLWIPStack(&IP, &NM, &GW)==0?MODULE_RESIDENT_END:MODULE_NO_RESIDENT_END;
 }
-

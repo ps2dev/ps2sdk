@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <stdio.h>
+#include <dmacman.h>
 #include <dev9.h>
 #include <intrman.h>
 #include <loadcore.h>
@@ -43,7 +44,7 @@ static inline void CopyFromFIFO(volatile u8 *smap_regbase, void *buffer, unsigne
 
 	SMAP_REG16(SMAP_R_RXFIFO_RD_PTR)=RxBdPtr;
 
-	if((result=SmapDmaTransfer(smap_regbase, buffer, length, 0))<0){
+	if((result=SmapDmaTransfer(smap_regbase, buffer, length, DMAC_TO_MEM))<0){
 		result=0;
 	}
 
@@ -123,7 +124,7 @@ int SMAPSendPacket(const void *data, unsigned int length){
 		BD_data_ptr=SMAP_REG16(SMAP_R_TXFIFO_WR_PTR);
 		BD_ptr=&tx_bd[SmapDriverData.TxBDIndex&0x3F];
 
-		if((i=SmapDmaTransfer(SmapDriverData.smap_regbase, (void*)data, length, 1))<0){
+		if((i=SmapDmaTransfer(SmapDriverData.smap_regbase, (void*)data, length, DMAC_FROM_MEM))<0){
 			i=0;
 		}
 

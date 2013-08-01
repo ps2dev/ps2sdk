@@ -11,6 +11,11 @@ So why the change in the SMAP driver? I've changed the design so that the LWIP p
 
 This network protocol stack has been written to work with the NETMAN Network Manager.
 
+Note that because of the design of NETMAN, the module load order should be like this instead:
+1. NETMAN.IRX
+2. Network adaptor driver (SMAP.IRX from this PS2SDK, or something compatible which uses NETMAN).
+3. LWIP network protocol stack. IP address configuration gets passed to this module instead!
+
 How to install this into your PS2SDK:
 -------------------------------------
 1. Download the correct version of LWIP from the LWIP homepage and extract the downloaded archive into the tcpip folder of your PS2SDKSRC folder (E.g. ps2sdksrc/common/tcpip/).

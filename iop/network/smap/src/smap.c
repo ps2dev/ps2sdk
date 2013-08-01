@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <stdio.h>
+#include <dmacman.h>
 #include <dev9.h>
 #include <intrman.h>
 #include <loadcore.h>
@@ -364,7 +365,7 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData){
 		WaitEventFlag(SmapDrivPrivData->Dev9IntrEventFlag, SMAP_EVENT_START|SMAP_EVENT_STOP|SMAP_EVENT_INTR|SMAP_EVENT_XMIT|SMAP_EVENT_LINK_CHECK, WEF_OR|WEF_CLEAR, &EFBits);
 
 		if(EFBits&SMAP_EVENT_STOP){
-			if(!SmapDrivPrivData->SmapIsInitialized){
+			if(SmapDrivPrivData->SmapIsInitialized){
 				dev9IntrDisable(DEV9_SMAP_INTR_MASK);
 				SMAP_EMAC3_SET(SMAP_R_EMAC3_MODE0, 0);
 				SmapDrivPrivData->NetDevStopFlag=0;
@@ -443,7 +444,7 @@ static void Dev9PreDmaCbHandler(int bcr, int dir){
 
 	smap_regbase=SmapDriverData.smap_regbase;
 	SliceCount=bcr>>16;
-	if(dir!=0){
+	if(dir!=DMAC_TO_MEM){
 		SMAP_REG16(SMAP_R_TXFIFO_SIZE)=SliceCount;
 		SMAP_REG8(SMAP_R_TXFIFO_CTRL)=SMAP_TXFIFO_DMAEN;
 	}
@@ -457,7 +458,7 @@ static void Dev9PostDmaCbHandler(int bcr, int dir){
 	volatile u8 *smap_regbase;
 
 	smap_regbase=SmapDriverData.smap_regbase;
-	if(dir!=0){
+	if(dir!=DMAC_TO_MEM){
 		while(SMAP_REG8(SMAP_R_TXFIFO_CTRL)&SMAP_TXFIFO_DMAEN){};
 	}
 	else{
@@ -857,4 +858,3 @@ int SMAPGetMACAddress(unsigned char *buffer){
 
 	return 0;
 }
-

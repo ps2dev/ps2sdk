@@ -618,7 +618,7 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData){
 		}
 
 		if(EFBits&NETDEV_EVENT_STOP){	/* 0x0000131c */
-			if(!SmapDrivPrivData->SmapIsInitialized){
+			if(SmapDrivPrivData->SmapIsInitialized){
 				dev9IntrDisable(DEV9_SMAP_INTR_MASK2);
 				SMAP_EMAC3_SET(SMAP_R_EMAC3_MODE0, 0);
 				SmapDrivPrivData->NetDevStopFlag=0;
