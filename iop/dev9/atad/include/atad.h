@@ -17,7 +17,7 @@
 #include <types.h>
 #include <irx.h>
 
-/* These are used with the dir parameter of ata_device_dma_transfer().  */
+/* These are used with the dir parameter of ata_device_sector_io().  */
 #define ATA_DIR_READ	0
 #define ATA_DIR_WRITE	1
 
@@ -49,8 +49,8 @@ int ata_io_finish(void);
 int ata_get_error(void);
 #define I_ata_get_error DECLARE_IMPORT(8, ata_get_error)
 
-int ata_device_dma_transfer(int device, void *buf, unsigned int lba, unsigned int nsectors, int dir);
-#define I_ata_device_dma_transfer DECLARE_IMPORT(9, ata_device_dma_transfer)
+int ata_device_sector_io(int device, void *buf, unsigned int lba, unsigned int nsectors, int dir);
+#define I_ata_device_sector_io DECLARE_IMPORT(9, ata_device_sector_io)
 
 //DRM functions that were meant to keep users from sharing disks (and hence the contained content). Supported by only Sony-modified HDDs (e.g. the SCPH-20400).
 int ata_device_sec_set_password(int device, void *password);

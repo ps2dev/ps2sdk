@@ -424,7 +424,7 @@ static inline int ata_dma_complete(void *buf, int blkcount, int dir)
 
 		dev9IntrEnable(SPD_INTR_ATA);
 		/* Wait for the previous transfer to complete or a timeout.  */
-		WaitEventFlag(ata_evflg, 0x03, 0x11, &bits);
+		WaitEventFlag(ata_evflg, 0x03, WEF_CLEAR|WEF_OR, &bits);
 
 		if (bits & 0x01) {	/* Timeout.  */
 			M_PRINTF("Error: DMA timeout.\n");
@@ -469,7 +469,7 @@ int ata_io_finish(void)
 	unsigned short int stat;
 
 	if (type == 1 || type == 6) {	/* Non-data commands.  */
-		WaitEventFlag(ata_evflg, 0x03, 0x11, &bits);
+		WaitEventFlag(ata_evflg, 0x03, WEF_CLEAR|WEF_OR, &bits);
 		if (bits & 0x01) {	/* Timeout.  */
 			M_PRINTF("Error: ATA timeout on a non-data command.\n");
 			return -502;
@@ -484,7 +484,7 @@ int ata_io_finish(void)
 				break;
 		if (!stat) {
 			dev9IntrEnable(SPD_INTR_ATA0);
-			WaitEventFlag(ata_evflg, 0x03, 0x11, &bits);
+			WaitEventFlag(ata_evflg, 0x03, WEF_CLEAR|WEF_OR, &bits);
 			if (bits & 0x01) {
 				M_PRINTF("Error: ATA timeout on DMA completion.\n");
 				res = -502;
@@ -518,7 +518,7 @@ int ata_io_finish(void)
 
 finish:
 	/* The command has completed (with an error or not), so clean things up.  */
-	CancelAlarm((void *)ata_alarm_cb, NULL);
+	CancelAlarm((void *)&ata_alarm_cb, NULL);
 	/* Turn off the LED.  */
 	dev9LEDCtl(0);
 
@@ -537,7 +537,6 @@ static inline int ata_bus_reset(void)
 }
 
 /* Export 5 */
-/* Not sure if it's reset, but it disables ATA interrupts.  */
 int ata_reset_devices(void)
 {
 	USE_ATA_REGS;
@@ -545,7 +544,7 @@ int ata_reset_devices(void)
 	if (ata_hwport->r_control & 0x80)
 		return -501;
 
-	/* Dunno what this does.  */
+	/* Disables device interrupt assertion and asserts SRST. */
 	ata_hwport->r_control = 6;
 	DelayThread(100);
 
@@ -632,8 +631,7 @@ int ata_device_smart_get_status(int device)
 	USE_ATA_REGS;
 	int res;
 
-	res = ata_io_start(NULL, 1, ATA_C_SMART_GET_STATUS, 0, 0, 0x4f, 0xc2,
-			(device << 4) & 0xffff, ATA_C_SMART);
+	res = ata_io_start(NULL, 1, ATA_C_SMART_GET_STATUS, 0, 0, 0x4f, 0xc2, (device << 4) & 0xffff, ATA_C_SMART);
 	if (res)
 		return res;
 
@@ -642,7 +640,7 @@ int ata_device_smart_get_status(int device)
 		return res;
 
 	/* Check to see if the report exceeded the threshold.  */
-	if ((ata_hwport->r_lcyl != 0x4f) || (ata_hwport->r_hcyl != 0xc2)) {
+	if (((ata_hwport->r_lcyl&0xFF) != 0x4f) || ((ata_hwport->r_hcyl&0xFF) != 0xc2)) {
 		M_PRINTF("Error: SMART report exceeded threshold.\n");
 		return 1;
 	}
@@ -655,8 +653,7 @@ static int ata_device_set_transfer_mode(int device, int type, int mode)
 {
 	int res;
 
-	res = ata_io_start(NULL, 1, 3, (type|mode) & 0xff, 0, 0, 0,
-			(device << 4) & 0xffff, ATA_C_SET_FEATURES);
+	res = ata_io_start(NULL, 1, 3, (type|mode) & 0xff, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SET_FEATURES);
 	if (res)
 		return res;
 
@@ -680,7 +677,7 @@ static int ata_device_set_transfer_mode(int device, int type, int mode)
 }
 
 /* Export 9 */
-int ata_device_dma_transfer(int device, void *buf, unsigned int lba, unsigned int nsectors, int dir)
+int ata_device_sector_io(int device, void *buf, unsigned int lba, unsigned int nsectors, int dir)
 {
 	int res = 0;
 	unsigned short int sector, lcyl, hcyl, select, command, len;
@@ -710,8 +707,7 @@ int ata_device_dma_transfer(int device, void *buf, unsigned int lba, unsigned in
 			command = (dir == 1) ? ATA_C_WRITE_DMA : ATA_C_READ_DMA;
 		}
 
-		if ((res = ata_io_start(buf, len, 0, len, sector, lcyl,
-					hcyl, select, command)) != 0)
+		if ((res = ata_io_start(buf, len, 0, len, sector, lcyl, hcyl, select, command)) != 0)
 			return res;
 		if ((res = ata_io_finish()) != 0)
 			return res;
@@ -899,16 +895,11 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 /* Export 4 */
 ata_devinfo_t * ata_get_devinfo(int device)
 {
-	if (ata_devinfo_init)
-		return &atad_devinfo[device];
+	if(!ata_devinfo_init){
+		if(ata_bus_reset() || ata_init_devices(atad_devinfo)) return NULL;
+		ata_devinfo_init = 1;
+	}
 
-	if (ata_bus_reset() != 0)
-		return NULL;
-
-	if (ata_init_devices(atad_devinfo) != 0)
-		return NULL;
-
-	ata_devinfo_init = 1;
 	return &atad_devinfo[device];
 }
 
@@ -1004,4 +995,3 @@ int ata_device_idle_immediate(int device){
 
 	return res;
 }
-

@@ -1,7 +1,7 @@
 
 atad_IMPORTS_start
 I_ata_get_devinfo
-I_ata_device_dma_transfer
+I_ata_device_sector_io
 I_ata_device_sec_unlock
 I_ata_device_idle
 I_ata_device_sce_security_init

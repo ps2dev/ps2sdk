@@ -76,13 +76,7 @@ int fileXioInit(void)
 	{
 		_rb_count = _iop_reboot_count;
 
-		if(fileXioInited)
-		{
-			if(_lock_sema_id >= 0) DeleteSema(_lock_sema_id);
-			if(fileXioCompletionSema >= 0) DeleteSema(fileXioCompletionSema);
-
-			fileXioInited = 0;
-		}
+		fileXioExit();
 	}
 
 	if(fileXioInited)

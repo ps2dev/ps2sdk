@@ -102,7 +102,7 @@
 /**
  * PBUF_POOL_SIZE: the number of buffers in the pbuf pool. 
  */
-#define PBUF_POOL_SIZE		25//((TCP_WND/PBUF_POOL_BUFSIZE)+1)
+#define PBUF_POOL_SIZE		60//((TCP_WND/PBUF_POOL_BUFSIZE)+1)
 
 /** SYS_LIGHTWEIGHT_PROT
  * define SYS_LIGHTWEIGHT_PROT in lwipopts.h if you want inter-task protection
@@ -123,7 +123,7 @@
 #define TCP_SND_BUF             (TCP_MSS*4)
 
 /* TCP receive window. */
-#define TCP_WND                 32768
+#define TCP_WND                 65535
 
 /* ---------- ARP options ---------- */
 /**

@@ -13,13 +13,13 @@
 #ifndef _HELPER_H
 #define _HELPER_H
 
-#define ATAD_MODE_READ 0x00
-#define ATAD_MODE_WRITE 0x01
+#define ATAD_MODE_READ ATA_DIR_READ
+#define ATAD_MODE_WRITE ATA_DIR_WRITE
 
 #define t_shddInfo ata_devinfo_t
 
 #define atadInit ata_get_devinfo
-#define atadDmaTransfer ata_device_dma_transfer
+#define atadDmaTransfer ata_device_sector_io
 #define atadSceUnlock ata_device_sec_unlock
 #define atadIdle ata_device_idle
 #define atadSceIdentifyDrive ata_device_sce_security_init
