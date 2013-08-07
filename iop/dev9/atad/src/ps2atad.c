@@ -324,7 +324,7 @@ int ata_io_start(void *buf, unsigned int blkcount, unsigned short int feature, u
 		if (command == ATA_C_SCE_SEC_CONTROL && feature == ATA_C_SEC_ERASE_UNIT)
 			USec2SysClock(180000000, &cmd_timeout);
 
-		if ((res = SetAlarm(&cmd_timeout, (void *)ata_alarm_cb, NULL)) < 0)
+		if ((res = SetAlarm(&cmd_timeout, &ata_alarm_cb, NULL)) < 0)
 			return res;
 	}
 
@@ -368,8 +368,7 @@ static inline int ata_pio_transfer(ata_cmd_state_t *cmd_state)
 	unsigned short int status = ata_hwport->r_status & 0xff;
 
 	if (status & ATA_STAT_ERR) {
-		M_PRINTF("Error: Command error: status 0x%02x, error 0x%02x.\n",
-				status, ata_get_error());
+		M_PRINTF("Error: Command error: status 0x%02x, error 0x%02x.\n", status, ata_get_error());
 		return -503;
 	}
 
@@ -434,8 +433,7 @@ static inline int ata_dma_complete(void *buf, int blkcount, int dir)
 		if (!(SPD_REG16(SPD_R_INTR_STAT) & 0x02)) {
 			if (ata_hwport->r_control & 0x01) {
 				M_PRINTF("Error: Command error while doing DMA.\n");
-				M_PRINTF("Error: Command error status 0x%02x, error 0x%02x.\n",
-						ata_hwport->r_status, ata_get_error());
+				M_PRINTF("Error: Command error status 0x%02x, error 0x%02x.\n", ata_hwport->r_status, ata_get_error());
 				return -503;
 			} else {
 				M_PRINTF("Warning: Got command interrupt, but not an error.\n");
@@ -511,14 +509,13 @@ int ata_io_finish(void)
 	if (ata_hwport->r_status & ATA_STAT_BUSY)
 		res = ata_wait_busy(0x80);
 	if ((stat = ata_hwport->r_status) & ATA_STAT_ERR) {
-		M_PRINTF("Error: Command error: status 0x%02x, error 0x%02x.\n",
-				stat, ata_get_error());
+		M_PRINTF("Error: Command error: status 0x%02x, error 0x%02x.\n", stat, ata_get_error());
 		res = -503;
 	}
 
 finish:
 	/* The command has completed (with an error or not), so clean things up.  */
-	CancelAlarm((void *)&ata_alarm_cb, NULL);
+	CancelAlarm(&ata_alarm_cb, NULL);
 	/* Turn off the LED.  */
 	dev9LEDCtl(0);
 
@@ -588,8 +585,7 @@ static int ata_device_pkt_identify(int device, void *info)
 {
 	int res;
 
-	res = ata_io_start(info, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff,
-			ATA_C_IDENTIFY_PKT_DEVICE);
+	res = ata_io_start(info, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_IDENTIFY_PKT_DEVICE);
 	if (!res)
 		return ata_io_finish();
 	return res;
@@ -738,8 +734,7 @@ int ata_device_sec_set_password(int device, void *password)
 	memset(param, 0, 512);
 	memcpy(param + 1, password, 32);
 
-	res = ata_io_start(param, 1, ATA_C_SEC_SET_PASSWORD, 0, 0, 0, 0,
-			(device << 4) & 0xffff, ATA_C_SCE_SEC_CONTROL);
+	res = ata_io_start(param, 1, ATA_C_SEC_SET_PASSWORD, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SCE_SEC_CONTROL);
 	if (res == 0)
 		res = ata_io_finish();
 
