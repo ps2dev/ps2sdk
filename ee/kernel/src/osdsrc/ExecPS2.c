@@ -73,8 +73,8 @@ void *ExecPS2Patch(void *EntryPoint, void *gp, int argc, char *argv[]){
 	p_CancelWakeupThread(CurrentThreadID);
 	p_ChangeThreadPriority(CurrentThreadID, 0);
 
-	//Assuming that the EE kernel was really modeled after an early IOP kernel, the first thread is the "idle" thread.
-	for(i=1,tcb=p_TCBs; i<256; i++,tcb++){
+	//Like IOP kernels, the first thread is the idle thread.
+	for(i=1,tcb=&p_TCBs[1]; i<256; i++,tcb++){
 		if(tcb->status!=0 && i!=CurrentThreadID){
 			if(tcb->status!=THS_DORMANT) p_TerminateThread(i);
 
