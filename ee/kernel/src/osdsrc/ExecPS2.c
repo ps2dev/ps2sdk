@@ -53,7 +53,7 @@ struct TCB { //internal struct
 
 static inline void SoftPeripheralEEReset(void){
 	*(volatile unsigned int *)0x1000f000=4;
-	while(*(volatile unsigned int *)0x1000f000&4){};
+	while((*(volatile unsigned int *)0x1000f000&4)==0){};
 	*(volatile unsigned int *)0x1000f000=4;
 
 	p_InitializeGS();
