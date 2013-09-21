@@ -61,7 +61,7 @@ extern int __stdio_initialised;
 */
 void clearerr(FILE *stream)
 {
-  stream->flag &= (~_IOERR);
+  stream->flag &= ~(_IOERR|_IOEOF);
 }
 #endif
 
@@ -225,6 +225,7 @@ int fflush(FILE *stream)
         mcSync(0, NULL, &ret);
         if (ret != 0) {
           errno = (ret * -1);
+		  stream->flag |= _IOERR;
           ret = EOF;
         }
       }
@@ -300,10 +301,17 @@ int fgetc(FILE *stream)
     case STD_IOBUF_TYPE_STDOUTHOST:
       /* cannot read from stdout or stderr. */
       errno = EINVAL;
+	  stream->flag |= _IOERR;
       ret = EOF;
       break;
     default:
-      ret = ((fread(&c, 1, 1, stream) == 1) ? (int)c : EOF);
+	  if(fread(&c, 1, 1, stream) == 1){
+		  ret = (int)c;
+	  }
+	  else{
+		  stream->flag |= _IOEOF;
+		  ret = EOF;
+	  }
   }
   return (ret);
 }
@@ -816,6 +824,7 @@ int fseek(FILE *stream, long offset, int origin)
   int ret;
 
   stream->has_putback = 0;
+  stream->flag &= ~_IOEOF;
 
   switch(stream->type) {
     case STD_IOBUF_TYPE_NONE:

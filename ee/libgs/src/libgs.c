@@ -10,6 +10,7 @@
 */
 
 #include <errno.h>
+#include <stdio.h>
 #include <kernel.h>
 #include <libgs.h>
 
@@ -291,7 +292,7 @@ int GsSetDefaultDisplayEnv(GS_DISPENV *dispenv, unsigned short int w, unsigned s
 	dispenv->disp.pad1=dispenv->disp.pad2=0;
 
 	switch(VideoMode){
-		case GS_MODE_NTSC:	// NTSC
+		case GS_MODE_NTSC:
 			dispenv->disp.display_w	= 2560-1;
 			dispenv->disp.display_h	= h-1;
 			dispenv->disp.display_x	= 636+x*(2560/w);
@@ -300,7 +301,7 @@ int GsSetDefaultDisplayEnv(GS_DISPENV *dispenv, unsigned short int w, unsigned s
 			dispenv->disp.magnify_v	= 0;
 			result=0;
 			break;
-		case GS_MODE_PAL:	// PAL
+		case GS_MODE_PAL:
 			dispenv->disp.display_w	= 2560-1;
 			dispenv->disp.display_h	= h-1;
 			dispenv->disp.display_x	= 656+x*(2560/w);
@@ -309,7 +310,17 @@ int GsSetDefaultDisplayEnv(GS_DISPENV *dispenv, unsigned short int w, unsigned s
 			dispenv->disp.magnify_v	= 0;
 			result=0;
 			break;
+		case GS_MODE_DTV_480P:
+			dispenv->disp.display_w	= (w<<1)-1;
+			dispenv->disp.display_h	= h-1;
+			dispenv->disp.display_x = ((((((720-w)>>31)+(720-w))>>1<<1)+((x<<1)+232))&0xFFF)|0x00800000;
+			dispenv->disp.display_y = (y+35)&0xFFF;
+			dispenv->disp.magnify_h	= 0;
+			dispenv->disp.magnify_v	= 0;
+			result=0;
+			break;
 		default:
+			printf("GsSetDefaultDisplayEnv: Unsupported video mode: 0x%x\n", VideoMode);
 			result=-EINVAL;
 	}
 
@@ -780,9 +791,6 @@ int GsLoadImage(void *source_addr, GS_IMAGE *dest)
 	break;
 	}
 
-	//flush buffer to be safe
-	GsTextureFlush();
-
 	gs_setGIF_TAG(((GS_GIF_TAG				*)&prim_work[0]), 4,1,0,0,0,0,1,0x0e);
 	gs_setR_BITBLTBUF(((GS_R_BITBLTBUF		*)&prim_work[1]),0,0,0,dest->vram_addr,dest->vram_width,dest->psm);
 	gs_setR_TRXPOS(((GS_R_TRXPOS			*)&prim_work[2]), 0,0,dest->x,dest->y,0);
@@ -833,9 +841,6 @@ int GsLoadImage(void *source_addr, GS_IMAGE *dest)
 		//dont wait
 		gs_dma_wait();
 	}
-
-	//do a final flush
-	GsTextureFlush();
 
 	return 1;
 }
