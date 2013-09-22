@@ -513,7 +513,7 @@ int fileXioWrite(int fd, const void *buf, int size)
 	sbuff[8/4] = size;
 	sbuff[12/4] = miss;
 
-	memcpy((void *)&sbuff[16/4], UNCACHED_SEG(buf), miss);
+	memcpy((void *)&sbuff[16/4], buf, miss);
 
 	if(!IS_UNCACHED_SEG(buf))
 		SifWriteBackDCache((void*)buf, size);

@@ -48,7 +48,7 @@ WSTRING_C_OBJS := $(WSTRING_C_OBJS:%=$(EE_OBJS_DIR)%)
 
 XPRINTF_OBJS = vxprintf.o xprintf.o __sout.o vsnprintf.o snprintf.o vsprintf.o sprintf.o \
 	__mout.o mprintf.o vmprintf.o __fout.o fprintf.o vfprintf.o printf.o vprintf.o putchar.o \
-	npmPuts.o nprintf.o vnprintf.o asprintf.o vasprintf.o sio_printf.o
+	asprintf.o vasprintf.o sio_printf.o
 XPRINTF_OBJS := $(XPRINTF_OBJS:%=$(EE_OBJS_DIR)%)
 
 WXPRINTF_OBJS = vxwprintf.o __swout.o vsnwprintf.o snwprintf.o vswprintf.o swprintf.o
