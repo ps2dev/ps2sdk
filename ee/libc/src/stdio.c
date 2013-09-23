@@ -509,7 +509,7 @@ FILE *fopen(const char *fname, const char *mode)
           break;
         case 'a':
           flag = _IORW;
-          iomode = O_APPEND;
+          iomode = O_APPEND|O_WRONLY;
           break;
       } // switch
       /* test the extended file mode. */

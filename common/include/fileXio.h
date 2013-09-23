@@ -15,6 +15,7 @@
 #define _FILEXIO_H
 
 #include <errno.h>
+#include <sys/stat.h>
 
 // This header contains the common definitions for fileXio
 // that are used by both IOP and EE sides
@@ -55,6 +56,16 @@ enum FILEXIO_CMDS{
 	FILEXIO_SETRWBUFFSIZE
 };
 
+//Used for buffer alignment correction when reading data.
+typedef struct {
+	int  ssize;
+	int  esize;
+	void *sbuf;
+	void *ebuf;
+	u8 sbuffer[64];
+	u8 ebuffer[64];
+} rests_pkt; // sizeof = 144
+
 #define FILEXIO_MOUNTFLAG_NORMAL	0
 #define FILEXIO_MOUNTFLAG_READONLY	1
 #define FILEXIO_MOUNTFLAG_ROBUST	2
@@ -89,7 +100,119 @@ struct fileXioDevice
 	char desc[128];
 } __attribute__((aligned(64)));
 
-struct devctl_packet {
+struct fxio_devlist_packet {
+	struct fileXioDevice* deviceEntry;
+	unsigned int reqEntries;
+};
+
+struct fxio_getdir_packet {
+	char pathname[512];
+	struct fileXioDirEntry* dirEntry;
+	unsigned int reqEntries;
+};
+
+struct fxio_mount_packet {
+	char blockdevice[512];
+	char mountpoint[512];
+	int flags;
+};
+
+struct fxio_unmount_packet {
+	char mountpoint[512];
+};
+
+struct fxio_copyfile_packet {
+	char source[512];
+	char dest[512];
+	int mode;
+};
+
+struct fxio_mkdir_packet {
+	char pathname[512];
+	int mode;
+};
+
+struct fxio_pathsel_packet {	//Also used for rmdir, chdir and dopen.
+	char pathname[512];
+};
+
+struct fxio_rename_packet {	//Also used for symlink.
+	char source[512];
+	char dest[512];
+};
+
+struct fxio_readlink_packet {
+	char source[512];
+	void *buffer;
+	unsigned int buflen;
+};
+
+struct fxio_open_packet {
+	char pathname[512];
+	int flags, mode;
+};
+
+struct fxio_close_packet {	//Also used by dclose.
+	int fd;
+};
+
+struct fxio_read_packet {
+	int fd;
+	void *buffer;
+	int size;
+	void *intrData;
+};
+
+struct fxio_write_packet {
+	int fd;
+	const void *buffer;
+	int size;
+	unsigned int unalignedDataLen;
+	unsigned char unalignedData[64];
+};
+
+struct fxio_lseek_packet {
+	int fd;
+	u32 offset;
+	int whence;
+};
+
+struct fxio_lseek64_packet {
+	int fd;
+	u32 offset_lo;
+	u32 offset_hi;
+	int whence;
+};
+
+struct fxio_chstat_packet {
+	char pathname[512];
+	iox_stat_t *stat;
+	int mask;
+};
+
+struct fxio_getstat_packet {
+	char pathname[512];
+	iox_stat_t *stat;
+};
+
+struct fxio_format_packet {
+	char device[128];
+	char blockDevice[512];
+	char args[512];
+	int arglen;
+};
+
+struct fxio_sync_packet {
+	char device[512];
+	int flags;
+};
+
+struct fxio_dread_packet {
+	int fd;
+	iox_dirent_t *dirent;
+};
+
+struct fxio_devctl_packet {
 	char name[CTL_BUF_SIZE];
 	u8 arg[CTL_BUF_SIZE];
 	int cmd;
@@ -99,13 +222,13 @@ struct devctl_packet {
 	void *intr_data;
 };
 
-struct ioctl_packet {
+struct fxio_ioctl_packet {
 	int fd;
 	u8 arg[IOCTL_BUF_SIZE];
 	int cmd;
 };
 
-struct ioctl2_packet {
+struct fxio_ioctl2_packet {
 	int fd;
 	u8 arg[CTL_BUF_SIZE];
 	int cmd;
