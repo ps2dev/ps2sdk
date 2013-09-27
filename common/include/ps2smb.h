@@ -73,6 +73,11 @@ typedef struct {		// size = 512
 	char ShareComment[256];
 } ShareEntry_t;
 
+// Error codes for some DEVCTL operations.
+#define	SMB_DEVCTL_LOGON_ERR_CONN	0x1001
+#define	SMB_DEVCTL_LOGON_ERR_PROT	0x1002
+#define	SMB_DEVCTL_LOGON_ERR_LOGON	0x1003
+
 #ifdef __cplusplus
 }
 #endif

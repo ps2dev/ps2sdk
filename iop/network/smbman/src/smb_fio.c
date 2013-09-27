@@ -883,26 +883,27 @@ static void smb_GetPasswordHashes(smbGetPasswordHashes_in_t *in, smbGetPasswordH
 }
 
 //-------------------------------------------------------------- 
+static int smb_LogOff(void);
+
 static int smb_LogOn(smbLogOn_in_t *logon)
 {
 	register int r;
 
 	if (UID != -1) {
-		smb_LogOffAndX(UID);
-		UID = -1;
+		smb_LogOff();
 	}
 
 	r = smb_Connect(logon->serverIP, logon->serverPort);
 	if (r < 0)
-		return r;
+		return -SMB_DEVCTL_LOGON_ERR_CONN;
 
 	r = smb_NegociateProtocol();
 	if (r < 0)
-		return r;
+		return -SMB_DEVCTL_LOGON_ERR_PROT;
 
 	r = smb_SessionSetupAndX(logon->User, logon->Password, logon->PasswordType);
 	if (r < 0)
-		return r;
+		return -SMB_DEVCTL_LOGON_ERR_LOGON;
 
 	UID = r;
 
@@ -1074,8 +1075,6 @@ int smb_devctl(iop_file_t *f, const char *devname, int cmd, void *arg, u32 argle
 
 		case SMB_DEVCTL_LOGON:
 			r = smb_LogOn((smbLogOn_in_t *)arg);
-			if (r < 0)
-				r = -EIO;
 			break;
 
 		case SMB_DEVCTL_LOGOFF:
@@ -1139,4 +1138,3 @@ int smb_devctl(iop_file_t *f, const char *devname, int cmd, void *arg, u32 argle
 
 	return r;
 }
-
