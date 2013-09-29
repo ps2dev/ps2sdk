@@ -23,10 +23,15 @@ EE_LDFLAGS := -L$(PS2SDK)/ee/lib $(EE_LDFLAGS)
 # Assembler flags
 EE_ASFLAGS := -G0 $(EE_ASFLAGS)
 
-# Link with following libraries.  This is a special case, and instead of
-# allowing the user to override the library order, we always make sure
-# libkernel is the last library to be linked.
-EE_LIBS += -lstdc++ -lc -lkernel
+# Link to standard C++ library.
+# Ensure that entire ps2sdk libc is included prior to newlib's libc.
+# This should prevent newlib from overriding ps2sdk.
+# Then link to newlib's libc.
+# Then ensure that entire libkernel is included.
+EE_LIBS += -lstdc++ \
+	-Wl,--whole-archive $(PS2SDK)/ee/lib/libc.a -Wl,--no-whole-archive \
+	$(PS2DEV)/ee/ee/lib/libc.a \
+	-Wl,--whole-archive -lkernel -Wl,--no-whole-archive
 
 # Externally defined variables: EE_BIN, EE_OBJS, EE_LIB
 
@@ -47,8 +52,8 @@ EE_CXX_COMPILE = $(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS)
 	$(EE_AS) $(EE_ASFLAGS) $< -o $@
 
 $(EE_BIN) : $(EE_OBJS) $(PS2SDK)/ee/startup/crt0.o
-	$(EE_CC) -mno-crt0 -T$(PS2SDK)/ee/startup/linkfile $(EE_CXXFLAGS) \
-		-o $(EE_BIN) $(PS2SDK)/ee/startup/crt0.o $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS)
+	$(EE_CXX) -mno-crt0 -T$(PS2SDK)/ee/startup/linkfile $(EE_CXXFLAGS) \
+	-o $(EE_BIN) $(PS2SDK)/ee/startup/crt0.o $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS)
 
 $(EE_LIB) : $(EE_OBJS)
 	$(EE_AR) cru $(EE_LIB) $(EE_OBJS)

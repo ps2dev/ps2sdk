@@ -553,6 +553,7 @@ long long fileXioLseek64(int fd, long long offset, int whence)
 {
 	long long rv;
 	struct fxio_lseek64_packet *packet=(struct fxio_lseek64_packet*)sbuff;
+	struct fxio_lseek64_return_pkt *ret_packet=(struct fxio_lseek64_return_pkt*)sbuff;
 
 	if(fileXioInit() < 0)
 		return -ENOPKG;
@@ -569,9 +570,9 @@ long long fileXioLseek64(int fd, long long offset, int whence)
 
 	if(fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 	else { 
-		long long rvHI = sbuff[4/4];
+		long long rvHI = ret_packet->pos_hi;
 		rvHI = rvHI << 32;
-		rv = rvHI | sbuff[0/4];
+		rv = rvHI | ret_packet->pos_lo;
 	}
 	_unlock();
 

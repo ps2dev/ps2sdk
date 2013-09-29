@@ -47,7 +47,7 @@ static unsigned char fileXio_rpc_buffer[0x4C00]; // RPC send/receive buffer
 struct t_SifRpcDataQueue qd;
 struct t_SifRpcServerData sd0;
 
-static rests_pkt rests __attribute((aligned(64)));
+static rests_pkt rests;
 
 /* RPC exported functions */
 int fileXio_stop(void);
@@ -730,6 +730,7 @@ void* fileXioRpc_Lseek64(unsigned int* sbuff)
 {
 	long long ret;
 	struct fxio_lseek64_packet *packet=(struct fxio_lseek64_packet*)sbuff;
+	struct fxio_lseek64_return_pkt *ret_packet=(struct fxio_lseek64_return_pkt*)sbuff;
 
 	#ifdef DEBUG
 		printf("RPC Lseek64 Request\n");
@@ -740,8 +741,8 @@ void* fileXioRpc_Lseek64(unsigned int* sbuff)
 	long long offset = offsetHI | packet->offset_lo;
 
 	ret=lseek64(packet->fd, offset, packet->whence);
-	sbuff[0/4] = (int)(ret & 0xffffffff);
-	sbuff[4/4] = (int)((ret >> 32) & 0xffffffff);
+	ret_packet->pos_lo = (u32)(ret & 0xffffffff);
+	ret_packet->pos_hi = (u32)((ret >> 32) & 0xffffffff);
 
 	return sbuff;
 }

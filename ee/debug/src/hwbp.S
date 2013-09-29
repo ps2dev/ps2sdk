@@ -259,7 +259,7 @@ GetDVBM:
 	jr		$ra
 	nop
 
-	.end GetDVB
+	.end GetDVBM
 
 # Set the current value of the Instruction address register
 	.global SetIAB
@@ -289,7 +289,7 @@ SetDAB:
 	jr		$ra
 	nop
 
-	.end GetDAB
+	.end SetDAB
 
 # Set the current value of the data address mask register
 	.global SetDABM
@@ -319,4 +319,4 @@ SetDVBM:
 	jr		$ra
 	nop
 
-	.end SetDVB
+	.end SetDVBM

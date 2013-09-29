@@ -245,6 +245,10 @@ struct fxio_ctl_return_pkt {
 	int padding[2];
 };
 
+struct fxio_lseek64_return_pkt {
+	u32 pos_lo, pos_hi;
+};
+
 struct fxio_rwbuff{
 	int size;
 };
