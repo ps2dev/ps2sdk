@@ -9,7 +9,7 @@
 # $Id: Makefile 577 2004-09-14 14:41:46Z pixel $
 
 
-SUBDIRS = smbman netman smap
+SUBDIRS = smbman netman smap udptty
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make

@@ -17,10 +17,10 @@
 #include "irx.h"
 
 /* Please keep these in alphabetical order!  */
-#include "dev9.h"
-#include "iomanX.h"
-#include "sysclib.h"
-#include "thbase.h"
-#include "thsemap.h"
+#include <dev9.h>
+#include <ioman.h>
+#include <sysclib.h>
+#include <thbase.h>
+#include <thsemap.h>
 
 #endif /* IOP_IRX_IMPORTS_H */

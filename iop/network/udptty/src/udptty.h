@@ -14,21 +14,21 @@
 #ifndef UDPTTY_H
 #define UDPTTY_H
 
-#include "types.h"
-#include "defs.h"
-#include "irx.h"
+#include <types.h>
+#include <defs.h>
+#include <irx.h>
 
-#include "thbase.h"
-#include "thsemap.h"
-#define IOMAN_NO_EXTENDED
-#include "iomanX.h"
-#include "dev9.h"
-#include "errno.h"
+#include <dev9.h>
+#include <errno.h>
+#include <ioman.h>
+#include <loadcore.h>
+#include <thbase.h>
+#include <thsemap.h>
 
-#include "sys/fcntl.h"
+#include <sys/fcntl.h>
 
-#include "speedregs.h"
-#include "smapregs.h"
+#include <speedregs.h>
+#include <smapregs.h>
 
 #define MODNAME "udptty"
 
@@ -41,14 +41,13 @@
 
 typedef struct {
 	u8 eth_addr_dst[6];
-	u8 eth_addr_src[6];
 	u32 ip_addr_dst;
 	u32 ip_addr_src;
 	u16 ip_port_dst;
 	u16 ip_port_src;
 } udptty_param_t;
 
-extern udptty_param_t udptty_param;
+extern const udptty_param_t udptty_param;
 extern iop_device_t tty_device;
 
 int smap_init(void);

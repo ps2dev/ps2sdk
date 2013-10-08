@@ -12,16 +12,13 @@
 */
 
 #include "udptty.h"
-#include "sysclib.h"
+#include <sysclib.h>
 
 typedef struct {
-	u16	txfree;		/* Number of bytes free in the TX FIFO.  */
-	u16	txbwp;
-	int	txbdsi;		/* Saved index into TX BD.  */
-	int	txbdi;		/* Index into current TX BD.  */
-	int	txbd_used;	/* Keeps track of how many TX BD's have been used.  */
-
-	int	has_link;
+	unsigned short int txfree;		/* Number of bytes free in the TX FIFO.  */
+	unsigned short int txbdsi;		/* Saved index into TX BD.  */
+	unsigned short int txbdi;		/* Index into current TX BD.  */
+	unsigned short int txbd_used;	/* Keeps track of how many TX BD's have been used.  */
 } smap_tx_state_t;
 
 static smap_tx_state_t tx_state;
@@ -69,7 +66,7 @@ static int smap_phy_write(int reg, u16 data)
 	return (i == 100);
 }
 
-static int smap_phy_init()
+static int smap_phy_init(void)
 {
 	USE_SMAP_EMAC3_REGS;
 	u32 val;
@@ -105,7 +102,6 @@ static int smap_phy_init()
 					return 4;
 
 				if (phydata & SMAP_PHY_BMSR_LINK) {
-					/*state->has_link = 1;*/
 					goto auto_done;
 				}
 			}
@@ -159,13 +155,14 @@ auto_done:
 	return 0;
 }
 
-int smap_init()
+int smap_init(void)
 {
 	USE_SPD_REGS;
 	USE_SMAP_REGS;
 	USE_SMAP_EMAC3_REGS;
 	USE_SMAP_TX_BD; USE_SMAP_RX_BD;
-	u8 hwaddr[6];
+	u8 *hwaddr;
+	u16 EEPROM_data[5];
 	u32 val;
 	int i;
 
@@ -241,7 +238,10 @@ int smap_init()
 		SMAP_E3_RX_BCAST|SMAP_E3_RX_MCAST;
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_RxMODE, val);
 
-	memcpy(hwaddr, udptty_param.eth_addr_src, 6);
+	//Retrieve the console's MAC address.
+	dev9GetEEPROM(EEPROM_data);
+	hwaddr=(u8*)&EEPROM_data[1];
+
 	val = (u16)((hwaddr[0] >> 8)|(hwaddr[0] << 8));
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_ADDR_HI, val);
 	val = (((hwaddr[1] >> 8)|(hwaddr[1] << 8)) << 16)|(u16)((hwaddr[2] >> 8)|
@@ -268,15 +268,12 @@ int smap_init()
 		return -i;
 
 	tx_state.txfree = SMAP_TX_BUFSIZE;
-	tx_state.txbwp = SMAP_TX_BASE;
 	tx_state.txbdsi = tx_state.txbdi = tx_state.txbd_used = 0;
 
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_MODE0, SMAP_E3_TXMAC_ENABLE);
-	DelayThread(10000);
 
 	return 0;
 }
-
 
 /* Quick and dirty transmit.  */
 static int smap_tx(void *buf, size_t size)
@@ -285,39 +282,35 @@ static int smap_tx(void *buf, size_t size)
 	USE_SMAP_TX_BD;
 	u32 *payload;
 	int txbdi, i, transmitted = 0;
-	u16 asize;
+	u16 SizeRounded, BD_data_ptr;
 
-	if (tx_state.txbd_used >= SMAP_BD_MAX_ENTRY)
+	SizeRounded = (size + 3) & ~3;
+	if (tx_state.txbd_used >= SMAP_BD_MAX_ENTRY || tx_state.txfree < SizeRounded)
 		goto out;
 
-	asize = (size + 3) & 0xfffc;
-	if (asize > tx_state.txfree)
-		goto out;
+	BD_data_ptr = SMAP_REG16(SMAP_R_TXFIFO_WR_PTR);
 
-	SMAP_REG16(SMAP_R_TXFIFO_WR_PTR) = tx_state.txbwp & 0xffc;
-
-	for (i = 0, payload = (u32 *)buf; i < asize; i += 4)
+	//DMA could be used here too, but it won't be useful now because the TTY will cause characters to be written one at a time. A queuing system is required to take advantage of it.
+	for (i = 0, payload = (u32 *)buf; i < SizeRounded; i += 4)
 		SMAP_REG32(SMAP_R_TXFIFO_DATA) = *payload++;
 
 	txbdi = tx_state.txbdi & 0x3f;
 	tx_bd[txbdi].length = size;
-	tx_bd[txbdi].pointer = tx_state.txbwp;
+	tx_bd[txbdi].pointer = BD_data_ptr;
 	SMAP_REG8(SMAP_R_TXFIFO_FRAME_INC) = 1;
-	tx_bd[txbdi].ctrl_stat = SMAP_BD_TX_READY| \
-		SMAP_BD_TX_GENFCS|SMAP_BD_TX_GENPAD;
+	tx_bd[txbdi].ctrl_stat = SMAP_BD_TX_READY|SMAP_BD_TX_GENFCS|SMAP_BD_TX_GENPAD;
 
-	tx_state.txbwp = SMAP_TX_BASE + ((tx_state.txbwp + asize) % SMAP_TX_BASE);
 	tx_state.txbdi++;
 	tx_state.txbd_used++;
-	tx_state.txfree -= asize;
+	tx_state.txfree -= SizeRounded;
 
-	transmitted = asize;
+	transmitted = SizeRounded;
 
 out:
 	return transmitted;
 }
 
-int smap_txbd_check()
+int smap_txbd_check(void)
 {
 	USE_SMAP_TX_BD;
 	u16 len;
