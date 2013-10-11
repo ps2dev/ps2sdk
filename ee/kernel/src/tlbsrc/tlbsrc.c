@@ -53,16 +53,16 @@ static int PutTLBEntry(unsigned int PageMask, unsigned int EntryHi, unsigned int
 		case 0x30:
 		case 0x20:
 		case 0x00:
-			__asm volatile(	"mtc0 %0, $5\n"
-					"mtc0 %1, $10\n"
-					"mtc0 %2, $2\n"
-					"mtc0 %3, $3\n"
+			__asm volatile(	"mtc0 %1, $5\n"
+					"mtc0 %2, $10\n"
+					"mtc0 %3, $2\n"
+					"mtc0 %4, $3\n"
 					"sync.p\n"
 					"tlbwr\n"
 					"sync.p\n"
 					"tlbp\n"
 					"sync.p\n"
-					"mfc0 %4, $0\n" ::"r"(PageMask),"r"(EntryHi),"r"(EntryLo0),"r"(EntryLo1),"r"(result));
+					"mfc0 %0, $0\n" :"=r"(result):"r"(PageMask),"r"(EntryHi),"r"(EntryLo0),"r"(EntryLo1));
 			break;
 		case 0x50:
 		case 0x10:
@@ -122,11 +122,11 @@ static int GetTLBEntry(unsigned int index, unsigned int *PageMask, unsigned int 
 static int ProbeTLBEntry(unsigned int EntryHi, unsigned int *PageMask, unsigned int *EntryLo0, unsigned int *EntryLo1){
 	int result, index;
 
-	__asm volatile(	"mtc0 %0, $10\n"
+	__asm volatile(	"mtc0 %1, $10\n"
 			"sync.p\n"
 			"tlbp\n"
 			"sync.p\n"
-			"mfc0 %0, $0\n" ::"r"(EntryHi),"r"(index));
+			"mfc0 %0, $0\n" :"=r"(index):"r"(EntryHi));
 
 	if(index>=0){
 		__asm volatile(	"tlbr\n"
