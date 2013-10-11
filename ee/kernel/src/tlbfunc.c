@@ -163,7 +163,7 @@ static int InitTLB32MB(void){
 			"sync.p\n" ::"r"(NumTlbEntries));
 
 	if(TLBInfo.NumExtendedTLBEntries>0){
-		if(TLBInfo.NumExtendedTLBEntries+i<0x31){
+		if(TLBInfo.NumExtendedTLBEntries+i>=0x31){
 			kprintf("# TLB over flow (3)");
 			Exit(1);
 		}

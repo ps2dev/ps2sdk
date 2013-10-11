@@ -134,9 +134,9 @@ void InitTLB(void){
 	if(GetMemorySize()==0x2000000){
 		InitTLB32MB();
 	}
-/*	else{
+	else{
 		_InitTLB();
-	} */
+	}
 }
 
 struct TLBEntry{
@@ -238,7 +238,7 @@ static int InitTLB32MB(void){
 			"sync.p\n" ::"r"(NumTlbEntries));
 
 	if(TLBInfo.NumExtendedTLBEntries>0){
-		if(TLBInfo.NumExtendedTLBEntries+i<0x31){
+		if(TLBInfo.NumExtendedTLBEntries+i>=0x31){
 			kprintf("# TLB over flow (3)");
 			Exit(1);
 		}
