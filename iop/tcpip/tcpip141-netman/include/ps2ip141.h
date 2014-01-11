@@ -19,7 +19,7 @@
 
 #include "tcpip141.h"
 
-#define ps2ip_IMPORTS_start	DECLARE_IMPORT_TABLE(ps2ip, 2, 1)
+#define ps2ip_IMPORTS_start	DECLARE_IMPORT_TABLE(ps2ip, 2, 2)
 #define ps2ip_IMPORTS_end	END_IMPORT_TABLE
 
 /* From include/lwip/sockets.h:  */
@@ -71,10 +71,6 @@ void	ps2ip_input(struct pbuf *p, struct netif *inp);
 err_t	etharp_output(struct netif *netif, struct pbuf *q, ip_addr_t *ipaddr);
 #define I_etharp_output DECLARE_IMPORT(23, etharp_output)
 
-/* From include/ipv4/lwip/inet.h:  */
-u32        inet_addr(const char *cp);
-#define  I_inet_addr DECLARE_IMPORT(24, inet_addr)
-
 /* From include/lwip/tcpip.h:  */
 err_t     tcpip_input(struct pbuf *p, struct netif *inp);
 #define I_tcpip_input DECLARE_IMPORT(25, tcpip_input)
@@ -122,6 +118,23 @@ struct pbuf*     pbuf_dechain(struct pbuf *p);
 #define        I_pbuf_dechain DECLARE_IMPORT(41, pbuf_dechain)
 struct pbuf*     pbuf_take(struct pbuf *f);
 #define        I_pbuf_take DECLARE_IMPORT(42, pbuf_take)
+
+/* From include/ipv4/lwip/inet.h:  */
+/* directly map this to the lwip internal functions */
+#define inet_addr(cp)         ipaddr_addr(cp)
+#define inet_aton(cp, addr)   ipaddr_aton(cp, (ip_addr_t*)addr)
+#define inet_ntoa(addr)       ipaddr_ntoa((ip_addr_t*)&(addr))
+#define inet_ntoa_r(addr, buf, buflen) ipaddr_ntoa_r((ip_addr_t*)&(addr), buf, buflen)
+
+u32        ipaddr_addr(const char *cp);
+#define  I_ipaddr_addr DECLARE_IMPORT(24, ipaddr_addr)
+int        ipaddr_aton(const char *cp, ip_addr_t *addr);
+#define  I_ipaddr_aton DECLARE_IMPORT(43, ipaddr_aton)
+/** returns ptr to static buffer; not reentrant! */
+char       *ipaddr_ntoa(const ip_addr_t *addr);
+#define  I_ipaddr_ntoa DECLARE_IMPORT(44, ipaddr_ntoa)
+char       *ipaddr_ntoa_r(const ip_addr_t *addr, char *buf, int buflen);
+#define  I_ipaddr_ntoa_r DECLARE_IMPORT(45, ipaddr_ntoa_r)
 
 /* Compatibility macros.  */
 

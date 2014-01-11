@@ -29,7 +29,6 @@ int _start(int argc, const char **argv)
 {
 	iop_thread_t thread_param;
 	register int thread_id;	
-	iop_library_table_t *libtable;
 	iop_library_t *libptr;
 	int i, mcman_loaded;
 	void **export_tab;
@@ -43,8 +42,7 @@ int _start(int argc, const char **argv)
 	
 	// Get mcman lib ptr
 	mcman_loaded = 0;
-	libtable = GetLibraryEntryTable();
-	libptr = libtable->tail;
+	libptr = GetLoadcoreInternalData()->let_next;
 	while (libptr != 0) {
 		for (i=0; i<8; i++) {
 			if (libptr->name[i] != mcman_modname[i])

@@ -31,7 +31,7 @@
  */
 iop_device_t *iopmgr_get_iomandev(char *device)
 {
-  smod_mod_info_t *info = 0;
+  ModuleInfo_t *info = 0;
   iop_device_t **devinfo_table;
   int i;
   int len = strlen(device) + 1;
@@ -64,7 +64,7 @@ iop_device_t *iopmgr_get_iomandev(char *device)
  */
 iop_device_t *iopmgr_get_iomanxdev(char *device)
 {
-  smod_mod_info_t *info;
+  ModuleInfo_t *info;
   iop_device_t **devinfo_table;
   int i;
   int len = strlen(device) + 1;
@@ -99,7 +99,7 @@ iop_device_t *iopmgr_get_iomanxdev(char *device)
  */
 int iopmgr_get_devicelist(int man,int devtype,char *buffer)
 {
-  smod_mod_info_t *info;
+  ModuleInfo_t *info;
   iop_device_t **devinfo_table;
   int i;
   char *bufptr = buffer;

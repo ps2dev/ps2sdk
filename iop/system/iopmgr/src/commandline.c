@@ -27,12 +27,10 @@ extern int shutdown();
 void list_all_libraries()
 {
   char name[9];
-  iop_library_table_t *libtable;
   iop_library_t *libptr;
 
   printf("Registered Libraries:\n");
-  libtable = GetLibraryEntryTable();
-  libptr = libtable->tail;
+  libptr = GetLoadcoreInternalData()->let_next;
   while (libptr)
   {
     /* We only have a 8-char buffer for the name, so we need to convert it into a C
@@ -53,7 +51,7 @@ void list_all_libraries()
  */
 void list_all_modules()
 {
-  smod_mod_info_t *info;
+  ModuleInfo_t *info;
   printf("Loaded Modules:\n");
   info = smod_get_next_mod(0);
   while (info != 0)
@@ -71,7 +69,7 @@ void list_all_modules()
  */
 void list_devices_ioman()
 {
-	smod_mod_info_t *info;
+	ModuleInfo_t *info;
 	iop_device_t **devinfo_table;
 	int i;
 
@@ -102,7 +100,7 @@ void list_devices_ioman()
  */
 void list_devices_iomanx()
 {
-	smod_mod_info_t *info;
+	ModuleInfo_t *info;
 	iop_device_t **devinfo_table;
 	int i;
 

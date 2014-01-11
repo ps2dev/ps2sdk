@@ -48,12 +48,12 @@ static dev_table_t dev_info_list[DEVSCAN_MAX+1]; /* one for padding */
  *   0 if not found.
  *   pointer to module structure for loaded module if found.
  */
-smod_mod_info_t *devscan_getmodule(const char *name)
+ModuleInfo_t *devscan_getmodule(const char *name)
 {
-  smod_mod_info_t *modptr;
+  ModuleInfo_t *modptr;
   int len = strlen(name)+1;
 
-  modptr = (smod_mod_info_t *)0x800;
+  modptr = GetLoadcoreInternalData()->image_info;
   while (modptr != 0)
   {
     if (!memcmp(modptr->name, name, len))
@@ -76,7 +76,7 @@ smod_mod_info_t *devscan_getmodule(const char *name)
  */
 int devscan_setup(int devtype)
 {
-  smod_mod_info_t *info;
+  ModuleInfo_t *info;
   iop_device_t **devinfo_table;
   int i;
   int  count = 0;

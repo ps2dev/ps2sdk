@@ -41,7 +41,7 @@ ifdef PS2IP_DHCP
 IOP_CFLAGS += -DPS2IP_DHCP
 endif
 
-IOP_BIN = bin/ps2ip141.irx
+IOP_BIN = bin/ps2ip141-nm.irx
 IOP_OBJS = $(ps2ip_OBJECTS) $(ps2api_OBJECTS) $(ps2api_IPV4)
 IOP_INCS += -I$(LWIP)/src/include -I$(LWIP)/src/include/ipv4 -Isrc/include
 IOP_CFLAGS += -Wall -fno-builtin -DLWIP_NOASSERT -DLWIP_COMPAT_MUTEX $(DEBUG_FLAGS)

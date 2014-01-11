@@ -20,6 +20,7 @@
 /* Please keep these in alphabetical order!  */
 #include "ioman_mod.h"
 #include "iomanX.h"
+#include "loadcore.h"
 #include "ps2ip.h"
 #include "stdio.h"
 #include "sysclib.h"

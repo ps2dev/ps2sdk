@@ -113,7 +113,6 @@ int mcman_chrpos(char *str, int chr)
 //-------------------------------------------------------------- 
 int _start(int argc, const char **argv)
 {
-	iop_library_table_t *libtable;
 	iop_library_t *libptr;
 	register int i, sio2man_loaded;
 	void **export_tab;
@@ -127,8 +126,7 @@ int _start(int argc, const char **argv)
 		
 	// Get sio2man lib ptr
 	sio2man_loaded = 0;
-	libtable = GetLibraryEntryTable();
-	libptr = libtable->tail;
+	libptr = GetLoadcoreInternalData()->let_next;
 	while (libptr != 0) {
 		for (i=0; i<8; i++) {
 			if (libptr->name[i] != sio2man_modname[i])

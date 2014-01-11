@@ -20,7 +20,7 @@
 #define modload_IMPORTS_start DECLARE_IMPORT_TABLE(modload, 1, 1)
 #define modload_IMPORTS_end END_IMPORT_TABLE
 
-int ReBootStart(int);
+int ReBootStart(const char *command, unsigned int flags);
 #define I_ReBootStart DECLARE_IMPORT(4, ReBootStart)
 
 int LoadModuleAddress(const char *name, int, int);

@@ -19,7 +19,7 @@
 
 #include "tcpip.h"
 
-#define ps2ip_IMPORTS_start	DECLARE_IMPORT_TABLE(ps2ip, 1, 3)
+#define ps2ip_IMPORTS_start	DECLARE_IMPORT_TABLE(ps2ip, 1, 4)
 #define ps2ip_IMPORTS_end		END_IMPORT_TABLE
 
 struct pbuf*     pbuf_alloc(pbuf_layer l, u16 size, pbuf_flag flag);
@@ -77,12 +77,6 @@ struct pbuf*     etharp_output(struct netif *netif, struct ip_addr *ipaddr, stru
 #define        I_etharp_output DECLARE_IMPORT(23, etharp_output)
 
 
-/* From include/ipv4/lwip/inet.h:  */
-
-u32        inet_addr(const char *cp);
-#define  I_inet_addr DECLARE_IMPORT(24, inet_addr)
-
-
 /* From include/lwip/sockets.h:  */
 
 int       lwip_accept(int s, struct sockaddr *addr, socklen_t *addrlen);
@@ -120,6 +114,15 @@ int       lwip_getsockopt (int s, int level, int optname, void *optval, socklen_
 #define I_lwip_getsockopt DECLARE_IMPORT(18, lwip_getsockopt)
 int       lwip_setsockopt (int s, int level, int optname, const void *optval, socklen_t optlen);
 #define I_lwip_setsockopt DECLARE_IMPORT(19, lwip_setsockopt)
+
+/* From include/ipv4/lwip/inet.h:  */
+
+u32        inet_addr(const char *cp);
+#define  I_inet_addr DECLARE_IMPORT(24, inet_addr)
+s8         inet_aton(const char *cp, struct in_addr *addr);
+#define  I_inet_aton DECLARE_IMPORT(43, inet_aton)
+char       *inet_ntoa(struct in_addr addr); /* returns ptr to static buffer; not reentrant! */
+#define  I_inet_ntoa DECLARE_IMPORT(44, inet_ntoa)
 
 /* Compatibility macros.  */
 

@@ -67,7 +67,17 @@ err_t	ps2ip_input(struct pbuf *p, struct netif *inp);
 err_t	etharp_output(struct netif *netif, struct pbuf *q, ip_addr_t *ipaddr);
 
 /* From include/ipv4/lwip/inet.h:  */
-u32        inet_addr(const char *cp);
+/* directly map this to the lwip internal functions */
+#define inet_addr(cp)         ipaddr_addr(cp)
+#define inet_aton(cp, addr)   ipaddr_aton(cp, (ip_addr_t*)addr)
+#define inet_ntoa(addr)       ipaddr_ntoa((ip_addr_t*)&(addr))
+#define inet_ntoa_r(addr, buf, buflen) ipaddr_ntoa_r((ip_addr_t*)&(addr), buf, buflen)
+
+u32        ipaddr_addr(const char *cp);
+int        ipaddr_aton(const char *cp, ip_addr_t *addr);
+/** returns ptr to static buffer; not reentrant! */
+char       *ipaddr_ntoa(const ip_addr_t *addr);
+char       *ipaddr_ntoa_r(const ip_addr_t *addr, char *buf, int buflen);
 
 /* From include/lwip/tcpip.h:  */
 err_t     tcpip_input(struct pbuf *p, struct netif *inp);

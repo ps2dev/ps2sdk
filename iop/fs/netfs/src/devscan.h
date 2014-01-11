@@ -35,4 +35,4 @@ typedef struct {
 int devscan_gettype(char *name);
 int devscan_setup(int devtype);
 int devscan_getdevlist(char *buffer);
-smod_mod_info_t *devscan_getmodule(const char *name);
+ModuleInfo_t *devscan_getmodule(const char *name);

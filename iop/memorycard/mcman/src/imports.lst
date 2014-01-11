@@ -12,7 +12,7 @@ sior_IMPORTS_end
 
 loadcore_IMPORTS_start
 I_RegisterLibraryEntries
-I_GetLibraryEntryTable
+I_GetLoadcoreInternalData
 loadcore_IMPORTS_end
 
 intrman_IMPORTS_start

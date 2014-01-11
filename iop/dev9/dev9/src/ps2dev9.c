@@ -94,13 +94,11 @@ int _start(int argc, char **argv)
 	int idx, res = 1;
 	u16 dev9hw;
 
-	iop_library_table_t *libtable;
 	iop_library_t *libptr;
 
 	printf(BANNER, VERSION);
 
-	libtable = GetLibraryEntryTable();
-	libptr = libtable->tail;
+	libptr = GetLoadcoreInternalData()->let_next;
 	while ((libptr != 0))
 	{
 		int i;

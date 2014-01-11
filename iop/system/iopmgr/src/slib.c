@@ -34,12 +34,10 @@
  */
 iop_library_t *slib_get_lib_by_name(const char *name)
 {
-  iop_library_table_t *libtable;
   iop_library_t *libptr;
   int len = strlen(name) + 1;
 
-  libtable = GetLibraryEntryTable();
-  libptr = libtable->tail;
+  libptr = GetLoadcoreInternalData()->let_next;
   while ((libptr != 0))
   {
     if (!memcmp(libptr->name, name, len))

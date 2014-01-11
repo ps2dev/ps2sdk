@@ -1,6 +1,6 @@
 void _retonly(void){}
 
-DECLARE_EXPORT_TABLE(ps2ip, 2, 1)
+DECLARE_EXPORT_TABLE(ps2ip, 2, 2)
 	DECLARE_EXPORT(_start)
 	DECLARE_EXPORT(_retonly)
 	DECLARE_EXPORT(_exit)
@@ -45,4 +45,7 @@ DECLARE_EXPORT_TABLE(ps2ip, 2, 1)
 	DECLARE_EXPORT(pbuf_chain)		//40
 	DECLARE_EXPORT(pbuf_dechain)
 	DECLARE_EXPORT(pbuf_take)
+	DECLARE_EXPORT(ipaddr_aton)
+	DECLARE_EXPORT(ipaddr_ntoa)
+	DECLARE_EXPORT(ipaddr_ntoa_r)
 END_EXPORT_TABLE

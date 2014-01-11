@@ -34,11 +34,11 @@
  *   pointer to head of module list if cur_mod=0.
  *   pointer to next module, if cur_mod!=0.
  */
-smod_mod_info_t *smod_get_next_mod(smod_mod_info_t *cur_mod)
+ModuleInfo_t *smod_get_next_mod(ModuleInfo_t *cur_mod)
 {
-  /* If cur_mod is 0, return the head of the list (IOP address 0x800).  */
+  /* If cur_mod is 0, return the head of the list.  */
   if (!cur_mod) {
-    return (smod_mod_info_t *)0x800;
+    return GetLoadcoreInternalData()->image_info;
   } else {
     if (!cur_mod->next)
       return 0;
@@ -58,9 +58,9 @@ smod_mod_info_t *smod_get_next_mod(smod_mod_info_t *cur_mod)
  *   0 if not found.
  *   pointer to module structure for loaded module if found.
  */
-smod_mod_info_t *smod_get_mod_by_name(const char *name)
+ModuleInfo_t *smod_get_mod_by_name(const char *name)
 {
-  smod_mod_info_t *modptr;
+  ModuleInfo_t *modptr;
   int len = strlen(name)+1;
 
   modptr = smod_get_next_mod(0);
@@ -85,7 +85,7 @@ smod_mod_info_t *smod_get_mod_by_name(const char *name)
  */
 int smod_get_modcount_by_name(const char *name)
 {
-  smod_mod_info_t *modptr = 0;
+  ModuleInfo_t *modptr = 0;
   int len = strlen(name)+1;
   int count = 0;
 
@@ -112,7 +112,7 @@ int smod_get_modcount_by_name(const char *name)
  */
 int smod_get_modversion_by_name(const char *name)
 {
-  smod_mod_info_t *modptr = 0;
+  ModuleInfo_t *modptr = 0;
   modptr = smod_get_mod_by_name(name);
   if (modptr != 0)
     return (int)modptr->version;

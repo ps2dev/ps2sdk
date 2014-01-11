@@ -19,30 +19,15 @@
 #include "loadcore.h"
 
 /* Module info entry.  */
-typedef struct _smod_mod_info {
-	struct _smod_mod_info *next;
-	u8	*name;
-	u16	version;
-	u16	newflags;	/* For modload shipped with games.  */
-	u16	id;
-	u16	flags;		/* I believe this is where flags are kept for BIOS versions.  */
-	u32	entry;		/* _start */
-	u32	gp;
-	u32	text_start;
-	u32	text_size;
-	u32	data_size;
-	u32	bss_size;
-	u32	unused1;
-	u32	unused2;
-} smod_mod_info_t;
+typedef ModuleInfo_t smod_mod_info_t __attribute__ ((deprecated));	//For backward-compatibility with older projects.
 
 #define iopmgr_IMPORTS_start DECLARE_IMPORT_TABLE(iopmgr, 1, 1)
 #define iopmgr_IMPORTS_end END_IMPORT_TABLE
 
 /* from smod.c */
-smod_mod_info_t *smod_get_next_mod(smod_mod_info_t *cur_mod);
+ModuleInfo_t *smod_get_next_mod(ModuleInfo_t *cur_mod);
 #define I_smod_get_next_mod DECLARE_IMPORT(4, smod_get_next_mod)
-smod_mod_info_t *smod_get_mod_by_name(const char *name);
+ModuleInfo_t *smod_get_mod_by_name(const char *name);
 #define I_smod_get_mod_by_name DECLARE_IMPORT(5, smod_get_mod_by_name)
 int smod_get_modcount_by_name(const char *name);
 #define I_smod_get_modcount_by_name DECLARE_IMPORT(6, smod_get_modcount_by_name)
