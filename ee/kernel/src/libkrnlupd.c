@@ -67,7 +67,7 @@ static int kCopy(unsigned int *dest, const unsigned int *src, int size){
 	unsigned int i;
 
 	if(size>>2){
-		for(i=0; i<size; i+=4,dest++,src++){		
+		for(i=0; i<size; i+=4,dest++,src++){
 			*dest=*src;
 		}
 	}

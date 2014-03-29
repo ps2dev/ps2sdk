@@ -80,17 +80,17 @@ unsigned int sleep(unsigned int seconds)
 {
     ee_sema_t sema;
     struct sleep_data sd;
-    
+
 	sema.init_count = 0;
 	sema.max_count  = 1;
 	sema.option     = 0;
-    
+
     sd.wait = clock() + seconds * CLOCKS_PER_SEC;
     sd.s = CreateSema(&sema);
     SetAlarm(HSYNC_COUNT, _sleep_waker, &sd);
     WaitSema(sd.s);
     DeleteSema(sd.s);
-    
+
 	return 0;
 }
 #endif

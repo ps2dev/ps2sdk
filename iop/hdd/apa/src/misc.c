@@ -32,7 +32,7 @@ int getPs2Time(ps2time *tm)
 	cd_clock_t	cdtime;
 	s32		tmp;
 	ps2time timeBuf={
-		0, 0x0D, 0x0E, 0x0A, 0x0D, 1, 2003// used if can not get time... 
+		0, 0x0D, 0x0E, 0x0A, 0x0D, 1, 2003// used if can not get time...
 	};
 
 	if(CdReadClock(&cdtime)!=0 && cdtime.stat==0)

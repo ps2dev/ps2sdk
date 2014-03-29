@@ -1,4 +1,4 @@
-/*      
+/*
 # _____     ___ ____     ___ ____
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
@@ -29,12 +29,12 @@ enum _lf_val_types {
 	LF_VAL_LONG
 };
 
-typedef struct 
+typedef struct
 {
 	u32 epc;
 	u32 gp;
 	u32 sp;
-	u32 dummy;  
+	u32 dummy;
 } t_ExecData;
 
 int SifLoadFileInit(void);

@@ -85,7 +85,7 @@ static const short up_8000_lut[512] =
 	0x50, 0x50, 0x50, 0x50, 0x50, 0x50, 0x51, 0x51,
 	0x51, 0x51, 0x51, 0x51, 0x52, 0x52, 0x52, 0x52,
 	0x52, 0x52, 0x53, 0x53, 0x53, 0x53, 0x53, 0x53,
-	0x54, 0x54, 0x54, 0x54, 0x54, 0x54, 0x55, 0x55, 
+	0x54, 0x54, 0x54, 0x54, 0x54, 0x54, 0x55, 0x55,
 };
 
 /** lut for converting 11025 -> 48000 */
@@ -154,7 +154,7 @@ static const short up_11025_lut[512] =
 	0x6e, 0x6e, 0x6e, 0x6e, 0x6f, 0x6f, 0x6f, 0x6f,
 	0x70, 0x70, 0x70, 0x70, 0x71, 0x71, 0x71, 0x71,
 	0x71, 0x72, 0x72, 0x72, 0x72, 0x73, 0x73, 0x73,
-	0x73, 0x73, 0x74, 0x74, 0x74, 0x74, 0x75, 0x75, 
+	0x73, 0x73, 0x74, 0x74, 0x74, 0x74, 0x75, 0x75,
 };
 
 /** lut for converting 22050 -> 48000 */
@@ -223,7 +223,7 @@ static const short up_22050_lut[512] =
 	0xdc, 0xdc, 0xdd, 0xdd, 0xde, 0xde, 0xdf, 0xdf,
 	0xe0, 0xe0, 0xe1, 0xe1, 0xe2, 0xe2, 0xe2, 0xe3,
 	0xe3, 0xe4, 0xe4, 0xe5, 0xe5, 0xe6, 0xe6, 0xe7,
-	0xe7, 0xe7, 0xe8, 0xe8, 0xe9, 0xe9, 0xea, 0xea, 
+	0xe7, 0xe7, 0xe8, 0xe8, 0xe9, 0xe9, 0xea, 0xea,
 };
 
 /** lut for converting 44100 -> 48000 */
@@ -292,7 +292,7 @@ static const short up_44100_lut[512] =
 	0x01b9, 0x01b9, 0x01ba, 0x01bb, 0x01bc, 0x01bd, 0x01be, 0x01bf,
 	0x01c0, 0x01c1, 0x01c2, 0x01c3, 0x01c4, 0x01c4, 0x01c5, 0x01c6,
 	0x01c7, 0x01c8, 0x01c9, 0x01ca, 0x01cb, 0x01cc, 0x01cd, 0x01ce,
-	0x01cf, 0x01cf, 0x01d0, 0x01d1, 0x01d2, 0x01d3, 0x01d4, 0x01d5, 
+	0x01cf, 0x01cf, 0x01d0, 0x01d1, 0x01d2, 0x01d3, 0x01d4, 0x01d5,
 };
 
 /** Demux, split interleaved audio to left and right
@@ -328,7 +328,7 @@ static int up_12000_16_stereo(struct upsample_t *up)
 		*right++ = src[1];
 		*left++ = *src++;
 		*right++ = *src++;
-	}	
+	}
 
 	return 512;
 }
@@ -363,7 +363,7 @@ static void up_generic_16_stereo(struct upsample_t *up, const unsigned short *lu
 		q = lut[p] << 1;
 		*left++ = src[q + 0];
 		*right++ = src[q + 1];
-	}	
+	}
 }
 
 static void up_generic_16_mono(struct upsample_t *up, const unsigned short *lut)
@@ -377,7 +377,7 @@ static void up_generic_16_mono(struct upsample_t *up, const unsigned short *lut)
 	{
 		q = lut[p];
 		*left++ = *right++ = src[q];
-	}	
+	}
 }
 
 static void up_generic_8_mono(struct upsample_t *up, const unsigned short *lut)
@@ -393,7 +393,7 @@ static void up_generic_8_mono(struct upsample_t *up, const unsigned short *lut)
 		q = lut[p];
 		b = src[q];
 		*left++ = *right++ = (short)((b + (b << 8)) - 32768);
-	}	
+	}
 }
 
 static void up_generic_8_stereo(struct upsample_t *up, const unsigned short *lut)
@@ -411,7 +411,7 @@ static void up_generic_8_stereo(struct upsample_t *up, const unsigned short *lut
 		*left++ = (short)((b + (b << 8)) - 32768);
 		b = src[q + 1];
 		*right++ = (short)((b + (b << 8)) - 32768);
-	}	
+	}
 }
 
 static int up_11025_8_mono(struct upsample_t *up)
@@ -505,7 +505,7 @@ typedef struct entry_t
 } entry_t;
 
 /** supported upsamplers */
-static entry_t upsamplers[] = 
+static entry_t upsamplers[] =
 {
 	{11025,  8, 1, up_11025_8_mono},
 	{11025,  8, 2, up_11025_8_stereo},
@@ -527,11 +527,11 @@ static entry_t upsamplers[] =
 /** Returns an upsampler from a specified format to SPU2's native
     @param freq      frequency used
     @param bits      bits per sample
-    @param channels  number of audio channels 
+    @param channels  number of audio channels
     @returns a function to be used for upsampling, null if not found
 
     Will return a function to convert source audio to Playstation's native.
-    Note a very limited selection of upsamplers are available, only the most 
+    Note a very limited selection of upsamplers are available, only the most
     commonly used.
 */
 upsampler_t find_upsampler(int freq, int bits, int channels)

@@ -145,7 +145,7 @@ int gethostbyname(char *name, struct in_addr *ip)
 	while(pktSize)
 	{
 		int sent = lwip_send(sockFd, &packetBuffer[pos], pktSize, 0);
-		
+
 		if(sent < 0)
 		{
 			lwip_close(sockFd);
@@ -155,7 +155,7 @@ int gethostbyname(char *name, struct in_addr *ip)
 		pos += sent;
 		pktSize -= sent;
 	}
-	
+
 #ifdef DEBUG
 	printf("packet sent!\n");
 #endif
@@ -280,7 +280,7 @@ int getResourceRecordLength(u8 *buffer)
 	memcpy(&rdLen, &buffer[len], 2);
 	rdLen = ntohs(rdLen);
 	len += 2 + rdLen;
-		
+
 	return len;
 }
 
@@ -339,7 +339,7 @@ int dnsParseResponsePacket(u8 *packetBuf, int pktSize, struct in_addr *ip)
 void dnsCacheAdd(t_dnsCache *entry)
 {
 	t_dnsCache *last = &cacheHead;
-	
+
 	while(last->next != NULL)
 		last = last->next;
 

@@ -22,7 +22,7 @@
 #include <string.h>
 
 //
-// TODO: Update comments to reflect recent modifications to libmc (ie: support for 
+// TODO: Update comments to reflect recent modifications to libmc (ie: support for
 //       MCMAN/MCSERV or XMCMAN/XMCSERV, asynchronous support etc.
 //
 
@@ -61,10 +61,10 @@ int main() {
 
 	// int mcGetInfo(int port, int slot, int* type, int* free, int* format);
 	//
-	// mcGetInfo retrieves memcard state info, such as the memcard type, free blocks and 
+	// mcGetInfo retrieves memcard state info, such as the memcard type, free blocks and
 	// the format status.
 	//
-	// mcGetInfo is passed pointers to three variables, which are filled upon completion 
+	// mcGetInfo is passed pointers to three variables, which are filled upon completion
 	// of the getinfo rpc command. The mcGetInfo return values are as follows:
 	//
 	//  0 : The same memory card has been connected since the last mcGetInfo call.
@@ -76,7 +76,7 @@ int main() {
 	//       if the memcard is formatted or not.
 
 	// Since this is the first call, -1 should be returned.
-	mcGetInfo(0, 0, &mc_Type, &mc_Free, &mc_Format); 
+	mcGetInfo(0, 0, &mc_Type, &mc_Free, &mc_Format);
 	mcSync(0, NULL, &ret);
 	printf("mcGetInfo returned %d\n",ret);
 	printf("Type: %d Free: %d Format: %d\n\n", mc_Type, mc_Free, mc_Format);
@@ -92,7 +92,7 @@ int main() {
 	// mcGetDir retrieves the directory structure of a specific path on the memory card.
 	//
 	// The filename is relative to the root of the memory card. Wildcards such as '*' and '?'
-	// may be used. "maxent" is the maximum number of mcTable elements your array specified 
+	// may be used. "maxent" is the maximum number of mcTable elements your array specified
 	// by "table" can hold. The mc_getdir return values are as follows:
 	//
 	// 0 or more : The number of file entries that were obtained.
@@ -130,7 +130,7 @@ int main() {
 
 		ret = mcGetDir(0, 0, "/PS2DEV/*", 0, ARRAY_ENTRIES, mcDir);
 		printf("mcGetDir returned %d\n\n", ret);
-	
+
 		for(i=0; i < ret; i++)
 		{
 			if(mcDir[i].attrFile & MC_ATTR_SUBDIR)

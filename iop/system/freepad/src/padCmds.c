@@ -45,11 +45,11 @@ u32 PadIsSupported(padState_t *pstate)
 	res = pdGetInSize(0);
 
 	pdSetInSize(pstate->port, pstate->slot, res);
-	
+
 	res = pdGetOutSize(0);
 
 	pdSetOutSize(pstate->port, pstate->slot, res);
-	
+
 	sio2CmdSetReadData(0, pstate->inbuffer);
 
 	pdSetInBuffer(pstate->port, pstate->slot, 0, pstate->inbuffer);
@@ -63,14 +63,14 @@ u32 PadIsSupported(padState_t *pstate)
 	if(res == 0)
 	{
 		pdGetOutBuffer(pstate->port, pstate->slot, 0, pstate->outbuffer);
-		
+
 		if(pstate->stat70bit == 1) shiftarray(pstate->outbuffer);
 
 		if(pstate->outbuffer[1] != 0)
 		{
 			if(sio2cmdCheckId(pstate->outbuffer[1]) == 1)
 			{
-				
+
 				pstate->modeCurId = pstate->outbuffer[1];
 				ret = 1;
 			}
@@ -88,7 +88,7 @@ u32 VrefParam(u32 val, padState_t *pstate)
 	u32 ret = 0;
 
 	res = sio2CmdGetPortCtrl1(PAD_ID_CONFIG, pstate->stat70bit, pstate->model);
-	
+
 	pdSetCtrl1(pstate->port, pstate->slot, res);
 
 	res = sio2CmdGetPortCtrl2(PAD_ID_CONFIG, pstate->stat70bit);
@@ -108,10 +108,10 @@ u32 VrefParam(u32 val, padState_t *pstate)
 	pdSetOutSize(pstate->port, pstate->slot, res);
 
 	sio2CmdSetSetVrefParam(PAD_ID_CONFIG, pstate->inbuffer);
-	
+
 	pstate->inbuffer[3] = val;
 	pstate->inbuffer[4] = pstate->vrefParam[val];
-	
+
 	pdSetInBuffer(pstate->port, pstate->slot, 0, pstate->inbuffer);
 
 	SetEventFlag(pstate->eventflag, EF_PAD_TRANSFER_START);
@@ -121,13 +121,13 @@ u32 VrefParam(u32 val, padState_t *pstate)
 	if( pdGetError(pstate->port, pstate->slot) == 0)
 	{
 		pdGetOutBuffer(pstate->port, pstate->slot, 0, pstate->outbuffer);
-		
+
 		if(pstate->stat70bit == 1) shiftarray(pstate->outbuffer);
 
 		if(pstate->outbuffer[1] == PAD_ID_CONFIG) ret = 1;
-	}	
+	}
 
-	SetEventFlag(pstate->eventflag, EF_TASK_DONE);	
+	SetEventFlag(pstate->eventflag, EF_TASK_DONE);
 
 	return ret;
 }
@@ -138,7 +138,7 @@ u32 ReadData(padState_t *pstate)
 	u32 ret = 0;
 
 	res = sio2CmdGetPortCtrl1(pstate->modeCurId, pstate->stat70bit, pstate->model);
-	
+
 	pdSetCtrl1(pstate->port, pstate->slot, res);
 
 	res = sio2CmdGetPortCtrl2(pstate->modeCurId, pstate->stat70bit);
@@ -148,7 +148,7 @@ u32 ReadData(padState_t *pstate)
 	res = pdGetRegData( pstate->modeCurId );
 
 	pdSetRegData( pstate->port, pstate->slot, res);
-	
+
 	res = pdGetInSize( pstate->modeCurId );
 
 	pdSetInSize( pstate->port, pstate->slot, res);
@@ -162,7 +162,7 @@ u32 ReadData(padState_t *pstate)
 		pstate->inbuffer[i] = 0;
 		pstate->outbuffer[i] = 0;
 	}
-	
+
 	sio2CmdSetReadData(pstate->modeCurId, pstate->inbuffer);
 
 	if( pstate->ee_actDirectSize > 0)
@@ -174,7 +174,7 @@ u32 ReadData(padState_t *pstate)
 			else
 				pstate->inbuffer[i+3] = pstate->ee_actDirectData[i];
 		}
-	}	
+	}
 
 	pdSetInBuffer(pstate->port, pstate->slot, 0, pstate->inbuffer);
 
@@ -204,7 +204,7 @@ u32 EnterConfigMode(u8 val, padState_t *pstate)
 	u32 ret = 0;
 
 	res = sio2CmdGetPortCtrl1(val, pstate->stat70bit, pstate->model);
-	
+
 	pdSetCtrl1(pstate->port, pstate->slot, res);
 
 	res = sio2CmdGetPortCtrl2(val, pstate->stat70bit);
@@ -222,7 +222,7 @@ u32 EnterConfigMode(u8 val, padState_t *pstate)
 	res = pdGetOutSize(val);
 
 	pdSetOutSize(pstate->port, pstate->slot, res);
-	
+
 	sio2CmdSetEnterConfigMode(val, pstate->inbuffer);
 
 	pdSetInBuffer(pstate->port, pstate->slot, 0, pstate->inbuffer);
@@ -239,9 +239,9 @@ u32 EnterConfigMode(u8 val, padState_t *pstate)
 		{
 			shiftarray(pstate->outbuffer);
 		}
-		
-		ret = 1;	
-	}	
+
+		ret = 1;
+	}
 
 	SetEventFlag(pstate->eventflag, EF_TASK_DONE);
 
@@ -263,7 +263,7 @@ u32 QueryModel(padState_t *pstate)
 	pdSetCtrl2(pstate->port, pstate->slot, res);
 
 	res = pdGetRegData(PAD_ID_CONFIG);
-	
+
 	pdSetRegData(pstate->port, pstate->slot, res);
 
 	res = pdGetInSize(PAD_ID_CONFIG);
@@ -275,7 +275,7 @@ u32 QueryModel(padState_t *pstate)
 	pdSetOutSize(pstate->port, pstate->slot, res);
 
 	sio2CmdSetQueryModel(PAD_ID_CONFIG, pstate->inbuffer);
-	
+
 	pdSetInBuffer(pstate->port, pstate->slot, 0, pstate->inbuffer);
 
 	SetEventFlag(pstate->eventflag, EF_PAD_TRANSFER_START);
@@ -299,10 +299,10 @@ u32 QueryModel(padState_t *pstate)
 			if( pstate->numActuators > 4) pstate->numActuators = 4;
 			if( pstate->numActComb > 4 ) pstate->numActComb = 4;
 			if( pstate->numModes > 4) pstate->numModes = 4;
-	
+
 			ret = 1;
 		}
-	}	
+	}
 
 	SetEventFlag(pstate->eventflag, EF_TASK_DONE);
 
@@ -327,7 +327,7 @@ u32 SetMainMode(padState_t *pstate)
 	pdSetRegData(pstate->port, pstate->slot, res);
 
 	res = pdGetInSize(PAD_ID_CONFIG);
-	
+
 	pdSetInSize(pstate->port, pstate->slot, res);
 
 	res = pdGetOutSize(PAD_ID_CONFIG);
@@ -409,14 +409,14 @@ u32 QueryAct(u32 actuator, padState_t *pstate)
 			actData[1] = pstate->outbuffer[6];
 			actData[2] = pstate->outbuffer[7];
 			actData[3] = pstate->outbuffer[8];
-		
+
 			ret = 1;
 		}
 	}
 
-	SetEventFlag(pstate->eventflag, EF_TASK_DONE);	
+	SetEventFlag(pstate->eventflag, EF_TASK_DONE);
 
-	return ret;	
+	return ret;
 }
 
 u32 QueryComb(u32 val, padState_t *pstate)
@@ -425,7 +425,7 @@ u32 QueryComb(u32 val, padState_t *pstate)
 	u32 res;
 
 	res = sio2CmdGetPortCtrl1(PAD_ID_CONFIG, pstate->stat70bit, pstate->model);
-	
+
 	pdSetCtrl1(pstate->port, pstate->slot, res);
 
 	res = sio2CmdGetPortCtrl2(PAD_ID_CONFIG, pstate->stat70bit);
@@ -457,13 +457,13 @@ u32 QueryComb(u32 val, padState_t *pstate)
 	if( pdGetError(pstate->port, pstate->slot) == 0)
 	{
 		pdGetOutBuffer(pstate->port, pstate->slot, 0, pstate->outbuffer);
-		
+
 		if(pstate->stat70bit == 1) shiftarray(pstate->outbuffer);
 
 		if(pstate->outbuffer[1] == PAD_ID_CONFIG)
 		{
 			u8 *data = (u8*)&pstate->combData[val];
-			
+
 			data[0] = pstate->outbuffer[5];
 			data[1] = pstate->outbuffer[6];
 			data[2] = pstate->outbuffer[7];
@@ -471,9 +471,9 @@ u32 QueryComb(u32 val, padState_t *pstate)
 
 			ret = 1;
 		}
-	}	
-	
-	SetEventFlag(pstate->eventflag, EF_TASK_DONE);	
+	}
+
+	SetEventFlag(pstate->eventflag, EF_TASK_DONE);
 
 
 	return ret;
@@ -485,7 +485,7 @@ u32 QueryMode(u32 val, padState_t *pstate)
 	u32 ret = 0;
 
 	res = sio2CmdGetPortCtrl1(PAD_ID_CONFIG, pstate->stat70bit, pstate->model);
-	
+
 	pdSetCtrl1(pstate->port, pstate->slot, res);
 
 	res = sio2CmdGetPortCtrl2(PAD_ID_CONFIG, pstate->stat70bit);
@@ -505,7 +505,7 @@ u32 QueryMode(u32 val, padState_t *pstate)
 	pdSetOutSize(pstate->port, pstate->slot, res);
 
 	sio2CmdSetQueryMode(PAD_ID_CONFIG, pstate->inbuffer);
-	
+
 	pstate->inbuffer[3] = val;
 
 	pdSetInBuffer(pstate->port, pstate->slot, 0, pstate->inbuffer);
@@ -517,7 +517,7 @@ u32 QueryMode(u32 val, padState_t *pstate)
 	if( pdGetError(pstate->port, pstate->slot) == 0)
 	{
 		pdGetOutBuffer(pstate->port, pstate->slot, 0, pstate->outbuffer);
-		
+
 		if(pstate->stat70bit == 1) shiftarray(pstate->outbuffer);
 
 		if(pstate->outbuffer[1] == PAD_ID_CONFIG)
@@ -528,9 +528,9 @@ u32 QueryMode(u32 val, padState_t *pstate)
 
 			ret = 1;
 		}
-	}	
+	}
 
-	SetEventFlag(pstate->eventflag, EF_TASK_DONE);	
+	SetEventFlag(pstate->eventflag, EF_TASK_DONE);
 
 	return ret;
 }
@@ -541,7 +541,7 @@ u32 ExitConfigMode(padState_t *pstate)
 	u32 ret = 0;
 
 	res = sio2CmdGetPortCtrl1(PAD_ID_CONFIG, pstate->stat70bit, pstate->model);
-	
+
 	pdSetCtrl1(pstate->port, pstate->slot, res);
 
 	res = sio2CmdGetPortCtrl2(PAD_ID_CONFIG, pstate->stat70bit);
@@ -561,7 +561,7 @@ u32 ExitConfigMode(padState_t *pstate)
 	pdSetOutSize(pstate->port, pstate->slot, res);
 
 	sio2CmdSetExitConfigMode(PAD_ID_CONFIG, pstate->inbuffer);
-	
+
 	pdSetInBuffer(pstate->port, pstate->slot, 0, pstate->inbuffer);
 
 	SetEventFlag(pstate->eventflag, EF_PAD_TRANSFER_START);
@@ -571,13 +571,13 @@ u32 ExitConfigMode(padState_t *pstate)
 	if( pdGetError(pstate->port, pstate->slot) == 0)
 	{
 		pdGetOutBuffer(pstate->port, pstate->slot, 0, pstate->outbuffer);
-		
+
 		if(pstate->stat70bit == 1) shiftarray(pstate->outbuffer);
 
 		ret = 1;
-	}	
+	}
 
-	SetEventFlag(pstate->eventflag, EF_TASK_DONE);	
+	SetEventFlag(pstate->eventflag, EF_TASK_DONE);
 
 	return ret;
 }
@@ -588,7 +588,7 @@ u32 SetActAlign(padState_t *pstate)
 	u32 ret = 0;
 
 	res = sio2CmdGetPortCtrl1(PAD_ID_CONFIG, pstate->stat70bit, pstate->model);
-	
+
 	pdSetCtrl1(pstate->port, pstate->slot, res);
 
 	res = sio2CmdGetPortCtrl2(PAD_ID_CONFIG, pstate->stat70bit);
@@ -609,7 +609,7 @@ u32 SetActAlign(padState_t *pstate)
 
 	sio2CmdSetSetActAlign(PAD_ID_CONFIG, pstate->inbuffer);
 
-	for(i=0; i < 6; i++) 
+	for(i=0; i < 6; i++)
 		pstate->inbuffer[3+i] = pstate->ee_actAlignData[i];
 
 	pdSetInBuffer(pstate->port, pstate->slot, 0, pstate->inbuffer);
@@ -621,14 +621,14 @@ u32 SetActAlign(padState_t *pstate)
 	if( pdGetError(pstate->port, pstate->slot) == 0)
 	{
 		pdGetOutBuffer(pstate->port, pstate->slot, 0, pstate->outbuffer);
-		
+
 		if(pstate->stat70bit == 1) shiftarray(pstate->outbuffer);
 
 		if(pstate->outbuffer[1] == PAD_ID_CONFIG) ret = 1;
-	}			
+	}
 
 
-	SetEventFlag(pstate->eventflag, EF_TASK_DONE);	
+	SetEventFlag(pstate->eventflag, EF_TASK_DONE);
 
 	return ret;
 }
@@ -639,7 +639,7 @@ u32 QueryButtonMask(padState_t *pstate)
 	u32 ret = 0;
 
 	res = sio2CmdGetPortCtrl1(PAD_ID_CONFIG, pstate->stat70bit, pstate->model);
-	
+
 	pdSetCtrl1(pstate->port, pstate->slot, res);
 
 	res = sio2CmdGetPortCtrl2(PAD_ID_CONFIG, pstate->stat70bit);
@@ -669,12 +669,12 @@ u32 QueryButtonMask(padState_t *pstate)
 	if( pdGetError(pstate->port, pstate->slot) == 0)
 	{
 		pdGetOutBuffer(pstate->port, pstate->slot, 0, pstate->outbuffer);
-		
+
 		if(pstate->stat70bit == 1) shiftarray(pstate->outbuffer);
 
 		if(pstate->outbuffer[8] == 0x5A)
 		{
-			pstate->buttonMask[0] = pstate->outbuffer[3];	
+			pstate->buttonMask[0] = pstate->outbuffer[3];
 			pstate->buttonMask[1] = pstate->outbuffer[4];
 			pstate->buttonMask[2] = pstate->outbuffer[5];
 			pstate->buttonMask[3] = pstate->outbuffer[6];
@@ -687,10 +687,10 @@ u32 QueryButtonMask(padState_t *pstate)
 			pstate->buttonMask[3] = 0;
 		}
 
-		ret = 1;		
-	}			
+		ret = 1;
+	}
 
-	SetEventFlag(pstate->eventflag, EF_TASK_DONE);	
+	SetEventFlag(pstate->eventflag, EF_TASK_DONE);
 
 	return ret;
 }
@@ -701,7 +701,7 @@ u32 SetButtonInfo(padState_t *pstate)
 	u32 ret = 0;
 
 	res = sio2CmdGetPortCtrl1(PAD_ID_CONFIG, pstate->stat70bit, pstate->model);
-	
+
 	pdSetCtrl1(pstate->port, pstate->slot, res);
 
 	res = sio2CmdGetPortCtrl2(PAD_ID_CONFIG, pstate->stat70bit);
@@ -721,7 +721,7 @@ u32 SetButtonInfo(padState_t *pstate)
 	pdSetOutSize(pstate->port, pstate->slot, res);
 
 	sio2CmdSetSetButtonInfo(PAD_ID_CONFIG, pstate->inbuffer);
-	
+
 	for(i=0; i < 4; i++)
 		pstate->inbuffer[3+i] = pstate->buttonInfo[i];
 
@@ -734,13 +734,13 @@ u32 SetButtonInfo(padState_t *pstate)
 	if( pdGetError(pstate->port, pstate->slot) == 0)
 	{
 		pdGetOutBuffer(pstate->port, pstate->slot, 0, pstate->outbuffer);
-		
+
 		if(pstate->stat70bit == 1) shiftarray(pstate->outbuffer);
 
 		if(pstate->outbuffer[1] == PAD_ID_CONFIG) ret = 1;
-	}	
+	}
 
-	SetEventFlag(pstate->eventflag, EF_TASK_DONE);	
+	SetEventFlag(pstate->eventflag, EF_TASK_DONE);
 
 	return ret;
 }

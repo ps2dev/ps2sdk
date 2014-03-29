@@ -159,7 +159,7 @@ static void TimerThread(void* pvArg)
 			iTimerARP-=ARP_TMR_INTERVAL;
 			etharp_tmr();
 		}
-	
+
 #if		defined(PS2IP_DHCP)
 
 		//DHCP timer.

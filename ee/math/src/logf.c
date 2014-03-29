@@ -40,7 +40,7 @@
  * logf singularity:  x = 0; returns MINLOG
  * logf domain:       x < 0; returns MINLOG
  */
-
+
 /*
 Cephes Math Library Release 2.2:  June, 1992
 Copyright 1984, 1987, 1988, 1992 by Stephen L. Moshier
@@ -90,7 +90,7 @@ if( x < SQRTHF )
 	{
 	e -= 1;
 	x = x + x - 1.0; /*  2x - 1  */
-	}	
+	}
 else
 	{
 	x = x - 1.0;

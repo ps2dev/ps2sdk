@@ -13,7 +13,7 @@ EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
 
-EE_INCS += -I../math/include 
+EE_INCS += -I../math/include
 
 
 

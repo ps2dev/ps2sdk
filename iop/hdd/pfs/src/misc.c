@@ -10,7 +10,7 @@
 # $Id$
 # Miscellaneous routines
 */
- 
+
 #include "pfs.h"
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -33,7 +33,7 @@ int getPs2Time(pfs_datetime *tm)
 	cd_clock_t	cdtime;
 	s32		tmp;
 	static pfs_datetime timeBuf={
-		0, 0x0D, 0x0E, 0x0A, 0x0D, 1, 2003	// used if can not get time... 
+		0, 0x0D, 0x0E, 0x0A, 0x0D, 1, 2003	// used if can not get time...
 	};
 
 	if(CdReadClock(&cdtime)!=0 && cdtime.stat==0)
@@ -56,7 +56,7 @@ int getPs2Time(pfs_datetime *tm)
 	return 0;
 }
 
-int fsckStat(pfs_mount_t *pfsMount, pfs_super_block *superblock, 
+int fsckStat(pfs_mount_t *pfsMount, pfs_super_block *superblock,
 	u32 stat, int mode)
 {	// mode 0=set flag, 1=remove flag, else check stat
 
@@ -100,7 +100,7 @@ void printBitmap(u32 *bitmap) {
 }
 
 int getScale(int num, int size)
-{ 
+{
 	int scale = 0;
 
 	while((size << scale) != num)
@@ -197,7 +197,7 @@ block_device deviceCallTable[NUM_SUPPORTED_DEVICES] = {
 };
 
 block_device *getDeviceTable(const char *name)
-{ 
+{
 	char *end;
 	char devname[32];
 	char *tmp;

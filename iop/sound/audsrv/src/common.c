@@ -44,7 +44,7 @@ int create_thread(void *func, int priority, void *param)
 	thr.stacksize = 4096;
 	thr.attr = 0x2000000;
 	tid = CreateThread(&thr);
-	if (tid < 0) 
+	if (tid < 0)
 	{
 		return 0;
 	}

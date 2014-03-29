@@ -17,9 +17,9 @@
 #include "types.h"
 #include "irx.h"
 
-#define CdSecS2048		0	
-#define CdSecS2328		1	
-#define CdSecS2340		2	
+#define CdSecS2048		0
+#define CdSecS2328		1
+#define CdSecS2340		2
 
 #define CdSpinMax		0
 #define CdSpinNom		1
@@ -29,35 +29,35 @@
 #define CdMmodeDvd		2
 
 typedef struct {
-	u8 stat;  			
-	u8 second; 			
-	u8 minute; 			
-	u8 hour; 			
-	u8 week; 			
-	u8 day; 			
-	u8 month; 			
-	u8 year; 			
+	u8 stat;
+	u8 second;
+	u8 minute;
+	u8 hour;
+	u8 week;
+	u8 day;
+	u8 month;
+	u8 year;
 } cd_clock_t;
 
 typedef struct {
-	u32 lsn; 			
-	u32 size; 			
-	char name[16]; 		
-	u8 date[8]; 		
+	u32 lsn;
+	u32 size;
+	char name[16];
+	u8 date[8];
 } cd_file_t;
 
 typedef struct {
-	u8 minute; 			
-	u8 second; 			
-	u8 sector; 			
-	u8 track; 			
+	u8 minute;
+	u8 second;
+	u8 sector;
+	u8 track;
 } cd_location_t;
 
 typedef struct {
-	u8 trycount; 		
-	u8 spindlctrl; 		
-	u8 datapattern; 	
-	u8 pad; 			
+	u8 trycount;
+	u8 spindlctrl;
+	u8 datapattern;
+	u8 pad;
 } cd_read_mode_t;
 
 #define cdvdman_IMPORTS_start DECLARE_IMPORT_TABLE(cdvdman, 1, 1)

@@ -6,7 +6,7 @@ Licensed under the Academic Free License version 2.0.
 
 FREESD is a LIBSD compatible sound driver for PS2.
 
-Some early Japanse PS2 models came without LIBSD 
+Some early Japanse PS2 models came without LIBSD
 in the BIOS, this will work as a free replacement.
 
 Credits:

@@ -89,7 +89,7 @@ int audsrv_set_format(struct audsrv_fmt_t *fmt);
 /** Blocks until there is enough space to enqueue chunk
     @param bytes size of chunk requested to be enqueued (in bytes)
     @returns error code
-    
+
     Blocks until there are enough space to store the upcoming chunk
     in audsrv's internal ring buffer.
 */
@@ -150,11 +150,11 @@ int audsrv_get_cdpos();
 /** Returns the current playing sector, relative to track
     @returns sector number
 
-    There are 75 sectors a second. To translate this position to mm:ss:ff 
+    There are 75 sectors a second. To translate this position to mm:ss:ff
     use the following:
     mm = sector / (75*60)
     ss = (sector / 75) % 60
-    ff = sector % 75 
+    ff = sector % 75
 
     where ff is the frame number, 1/75th of a second.
 */

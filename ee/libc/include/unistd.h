@@ -17,7 +17,7 @@
 #include <sys/stat.h>
 
 /** does file exist */
-#define	F_OK     0 
+#define	F_OK     0
 /** is it executable or searchable */
 #define X_OK     1
 /** is it writeable */

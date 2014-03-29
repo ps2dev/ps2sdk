@@ -11,7 +11,7 @@ static const char *test_init(void *arg)
     char cwd[256];
     if (getcwd(cwd, 256)[0] == '\0')
         return "failed to setup cwd";
-        
+
     return NULL;
 }
 

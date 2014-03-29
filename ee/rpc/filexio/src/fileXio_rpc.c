@@ -146,7 +146,7 @@ int fileXioGetDeviceList(struct fileXioDevice deviceEntry[], unsigned int req_en
 
 	// This will get the directory contents, and fill dirEntry via DMA
 	SifCallRpc(&cd0, FILEXIO_GETDEVICELIST, fileXioBlockMode, sbuff, sizeof(struct fxio_devlist_packet), sbuff, 4, (void *)&_fxio_intr, NULL);
-	
+
 	if(fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 	else { rv = sbuff[0]; }
 	_unlock();
@@ -174,7 +174,7 @@ int fileXioGetdir(const char* pathname, struct fileXioDirEntry dirEntry[], unsig
 
 	// This will get the directory contents, and fill dirEntry via DMA
 	SifCallRpc(&cd0, FILEXIO_GETDIR, fileXioBlockMode, sbuff, sizeof(struct fxio_getdir_packet), sbuff, 4, (void *)&_fxio_intr, NULL);
-	
+
 	if(fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 	else { rv = sbuff[0]; }
 	_unlock();
@@ -536,12 +536,12 @@ int fileXioLseek(int fd, long offset, int whence)
 	packet->fd = fd;
 	packet->offset = (u32)offset;
 	packet->whence = whence;
-    
+
 	SifCallRpc(&cd0, FILEXIO_LSEEK, fileXioBlockMode, sbuff, sizeof(struct fxio_lseek_packet), sbuff, 4, (void *)&_fxio_intr, NULL);
 
 	if(fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 	else { rv = sbuff[0]; }
-    
+
 	_unlock();
 	return(rv);
 }
@@ -569,7 +569,7 @@ long long fileXioLseek64(int fd, long long offset, int whence)
 	SifCallRpc(&cd0, FILEXIO_LSEEK64, fileXioBlockMode, sbuff, sizeof(struct fxio_lseek64_packet), sbuff, 8, (void *)&_fxio_intr, NULL);
 
 	if(fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
-	else { 
+	else {
 		long long rvHI = ret_packet->pos_hi;
 		rvHI = rvHI << 32;
 		rv = rvHI | ret_packet->pos_lo;

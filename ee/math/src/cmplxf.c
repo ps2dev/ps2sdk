@@ -40,7 +40,7 @@
  *    d    =  a.r * a.r  +  a.i * a.i
  *    c.r  = (b.r * a.r  + b.i * a.i)/d
  *    c.i  = (b.i * a.r  -  b.r * a.i)/d
- * ACCURACY:
+ * ACCURACY:
  *
  * In DEC arithmetic, the test (1/z) * z = 1 had peak relative
  * error 3.1e-17, rms 1.2e-17.  The test (y/z) * (z/y) = 1 had
@@ -54,7 +54,7 @@
  *    IEEE       cmul       30000       1.1e-7      3.7e-8
  *    IEEE       cdiv       30000       2.1e-7      5.7e-8
  */
-/*				cmplx.c
+/*				cmplx.c
  * complex number arithmetic
  */
 
@@ -203,7 +203,7 @@ a->i = -a->i;
  * then
  *
  *       a = sqrt( x**2 + y**2 ).
- * 
+ *
  * Overflow and underflow are avoided by testing the magnitudes
  * of x and y before squaring.  If either is outside half of
  * the floating point full scale range, both are rescaled.
@@ -215,7 +215,7 @@ a->i = -a->i;
  * arithmetic   domain     # trials      peak         rms
  *    IEEE      -10,+10     30000       1.2e-7      3.4e-8
  */
-
+
 
 /*
 Cephes Math Library Release 2.1:  January, 1989
@@ -276,7 +276,7 @@ e = (ex + ey) >> 1;
 /* Rescale so mean is about 1 */
 x = ldexpf( re, -e );
 y = ldexpf( im, -e );
-		
+
 /* Hypotenuse of the right triangle */
 b = sqrtf( x * x  +  y * y );
 
@@ -297,7 +297,7 @@ if( ey < -MAXEXPF )
 b = ldexpf( b, e );
 return( b );
 }
-/*							csqrtf()
+/*							csqrtf()
  *
  *	Complex square root
  *
@@ -339,7 +339,7 @@ return( b );
  *    IEEE      -10,+10    100000       1.8e-7       4.2e-8
  *
  */
-
+
 
 void csqrtf( z, w )
 cmplxf *z, *w;

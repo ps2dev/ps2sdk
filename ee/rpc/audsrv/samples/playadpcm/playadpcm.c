@@ -28,7 +28,7 @@ int main(int argc, char **argv)
 	int size;
 	u8* buffer;
 
-	SifInitRpc(0); 
+	SifInitRpc(0);
 
 	printf("sample: kicking IRXs\n");
 	ret = SifLoadModule("rom0:LIBSD", 0, NULL);

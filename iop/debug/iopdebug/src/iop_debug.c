@@ -147,12 +147,12 @@ int iop_dbg_install(void)
         return(-3);
     }
 
-    // register our "Hardware DeBug"(aka "Hardware BreakPoint") exception handler.    
+    // register our "Hardware DeBug"(aka "Hardware BreakPoint") exception handler.
     if(RegisterPriorityExceptionHandler(IOP_EXCEPTION_HDB, 0, (exception_handler_t) _iop_ex_dbg_handler) < 0)
     {
         RegisterDefaultExceptionHandler((exception_handler_t) orig_iop_def_ex_handler);
         orig_iop_def_ex_handler = NULL;
-        
+
         RegisterPriorityExceptionHandler(IOP_EXCEPTION_BP, 0, (exception_handler_t) orig_iop_break_ex_handler);
         orig_iop_break_ex_handler = NULL;
 
@@ -174,7 +174,7 @@ int iop_dbg_remove(void)
         RegisterDefaultExceptionHandler((exception_handler_t) orig_iop_def_ex_handler);
         orig_iop_def_ex_handler = NULL;
     }
-    
+
     if(orig_iop_break_ex_handler)
     {
         RegisterPriorityExceptionHandler(IOP_EXCEPTION_BP, 0, (exception_handler_t) orig_iop_break_ex_handler);

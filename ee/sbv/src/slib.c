@@ -65,7 +65,7 @@ slib_exp_lib_list_t *slib_exp_lib_list()
 	/* Back up so we position ourselves infront of where the export
 	   library will be.  */
 	smem_loc = smem_buf + core_end - gmt_ofs - 512;
-	
+
 	/* Search for LOADCORE's export library.  */
 	for (i = 0; i < 512; i += 4) {
 		/* SYSMEM's export library sits at 0x830, so it should appear in

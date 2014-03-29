@@ -109,14 +109,14 @@ int poweroffInit()
 	thread.stack = (void *)poffThreadStack;
 	powerOffThreadId = CreateThread(&thread);
 	StartThread(powerOffThreadId, NULL);
-	
+
 	DIntr();
 	SifAddCmdHandler(POFF_SIF_CMD, _poff_intr_callback, NULL);
 	EIntr();
 
 	int autoShutdown = 0;
 	SifCallRpc(&cd0, PWROFF_ENABLE_AUTO_SHUTOFF, 0, NULL, 0, &autoShutdown, sizeof(autoShutdown), 0, 0);
-	
+
 	return res;
 }
 
@@ -131,7 +131,7 @@ void poweroffSetCallback(poweroff_callback cb, void *arg)
 void poweroffShutdown()
 {
 	poweroffInit();
-	
+
 	SignalSema(PowerOffSema);
 
 	SifCallRpc(&cd0, PWROFF_SHUTDOWN, 0, NULL, 0, NULL, 0, 0, 0);

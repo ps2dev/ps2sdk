@@ -36,7 +36,7 @@
 #define SD_VOICE_TRANS_STOP			2
 #define	SD_VOICE_TRANS_MODE_DMA		0
 #define SD_VOICE_TRANS_MODE_IO		8
- 
+
 // Reverb
 #define SD_EFFECT_MODE_OFF  		0x0
 #define SD_EFFECT_MODE_ROOM			0x1
@@ -95,13 +95,13 @@
 #ifndef IOP_LIBSD_H
 
 typedef struct
-{	
+{
 	u32 mode;
 	void *data;
 } IntrData;
 
 
-typedef struct _SdEffectAttr 
+typedef struct _SdEffectAttr
 {
   s32 core; // not used.
   s32 mode;

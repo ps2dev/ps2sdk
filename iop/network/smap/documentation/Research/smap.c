@@ -840,7 +840,7 @@ static int SetupNetDev(void){
 	SmapDriverData.NetDevOps.device_name=NetDeviceName;
 	SmapDriverData.NetDevOps.bus_type=sceInetBus_NIC;	/* Type 5 */
 	SmapDriverData.NetDevOps.prot_ver=sceInetDevProtVer;	/* Protocol version 2 */
-	SmapDriverData.NetDevOps.flags=sceInetDevF_Multicast|sceInetDevF_NIC|sceInetDevF_ARP;	/* 0x490 */	
+	SmapDriverData.NetDevOps.flags=sceInetDevF_Multicast|sceInetDevF_NIC|sceInetDevF_ARP;	/* 0x490 */
 	SmapDriverData.NetDevOps.start=&NetDevStart;
 	SmapDriverData.NetDevOps.stop=&NetDevStop;
 	SmapDriverData.NetDevOps.xmit=&NetDevXmit;
@@ -986,7 +986,7 @@ static int smap_init(int argc, char *argv[]){
 				if(ThreadPriority-9>=0x73){
 					return DisplayHelpMessage();
 				}
-				
+
 				if(((unsigned char*)*argv)[6]!='\0'){	/* 0x0000226c */
 					while(look_ctype_table(*CmdString)&4){
 						CmdString++;
@@ -999,7 +999,7 @@ static int smap_init(int argc, char *argv[]){
 		else if(strncmp("thstack=", *argv, 8)==0){	/* 0x000022ac */
 			CmdString=&((unsigned char*)*argv)[8];
 			if(look_ctype_table(CmdString[0])&4){
-				ThreadStackSize=strtoul(&((unsigned char*)*argv)[8], NULL, 10);				
+				ThreadStackSize=strtoul(&((unsigned char*)*argv)[8], NULL, 10);
 				if(((unsigned char*)*argv)[8]!='\0'){	/* 0x000022f4 */
 					while(look_ctype_table(*CmdString)&4){
 						CmdString++;

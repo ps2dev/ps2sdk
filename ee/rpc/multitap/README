@@ -7,8 +7,8 @@ Introduction
 ------------
 
 libmtap is a simple library which allows you to poll controllers connected
-through a PS2 multi-tap. libmtap works alongside the standard pad library, 
-libpad. Steps for polling a controller connected to a multi-tap are as 
+through a PS2 multi-tap. libmtap works alongside the standard pad library,
+libpad. Steps for polling a controller connected to a multi-tap are as
 follows:
 
  1. Load required IRX files
@@ -26,13 +26,13 @@ Ports & Slots
 -------------
 
 The pad library requires two parameters when using a controller - port, and slot.
-Port relates to either of the two ports on the PS2. Slot relates to one of the 
+Port relates to either of the two ports on the PS2. Slot relates to one of the
 4 slots present on a multi-tap. The diagram below should give you a better idea
 of this system.
 
 				      _________[ Port 1, Slot 3 ]
                                      /    _____[ Port 1, Slot 2 ]
-  |------------|                     |   /     
+  |------------|                     |   /
   |            |                   |-------|
   |            |                   | C   D |
   |     PS2    |          |--------|       | <- Multi-tap
@@ -86,7 +86,7 @@ Example code
         printf("- No multitap exists on slot 1\n");
         mtapPortClose(1);
     }
-   
+
  4. Open the controllers
 
     padPortOpen(0, 0, padBuf1A);

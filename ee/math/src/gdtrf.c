@@ -44,7 +44,7 @@
  * gdtrf domain        x < 0            0.0
  *
  */
-/*							gdtrcf.c
+/*							gdtrcf.c
  *
  *	Complemented gamma distribution function
  *
@@ -90,7 +90,7 @@
  * gdtrcf domain        x < 0            0.0
  *
  */
-
+
 /*							gdtr()  */
 
 

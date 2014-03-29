@@ -63,9 +63,9 @@ static void free_all_samples()
 		FreeSysMemory(p);
 		p = q;
 	}
-		
+
 	adpcm_list_head = 0;
-	adpcm_list_tail = 0;	
+	adpcm_list_tail = 0;
 }
 
 /** Looks up the given identifier in list of loaded samples
@@ -120,7 +120,7 @@ void *audsrv_load_adpcm(u32 *buffer, int size, int id)
 			adpcm->id = id;
 			adpcm->spu2_addr = 0x5010; /* Need to change this so it considers to PCM streaming space usage :) */
 			adpcm->size = size - 16; /* header is 16 bytes */
-				
+
 			audsrv_read_adpcm_header(adpcm, buffer);
 
 			adpcm_list_head = adpcm;
@@ -138,9 +138,9 @@ void *audsrv_load_adpcm(u32 *buffer, int size, int id)
 			audsrv_read_adpcm_header(adpcm, buffer);
 
 			adpcm_list_tail->next = adpcm;
-			adpcm_list_tail = adpcm;			
-		}	
-		
+			adpcm_list_tail = adpcm;
+		}
+
 		/* DMA from IOP to SPU2 */
 		sceSdVoiceTrans(0, SD_VOICE_TRANS_WRITE | SD_VOICE_TRANS_MODE_DMA, ((u8*)buffer)+16, (u8*)adpcm->spu2_addr, adpcm->size);
 		sceSdVoiceTransStatus(0, 1);
@@ -176,8 +176,8 @@ int audsrv_play_adpcm(u32 id)
 
 	/* sample was loaded */
 	endx = sceSdGetSwitch(SD_CORE_1 | SD_S_ENDX);
-	if (endx == 0) 
-	{	
+	if (endx == 0)
+	{
 		/* all channels are occupied */
 		return -AUDSRV_ERR_NO_MORE_CHANNELS;
 	}
@@ -200,7 +200,7 @@ int audsrv_play_adpcm(u32 id)
 		/* cannot find a single channel free */
 		return -AUDSRV_ERR_NO_MORE_CHANNELS;
 	}
-	
+
 	sceSdSetParam(SD_CORE_1 | (channel << 1) | SD_VOICE_PITCH, a->pitch);
 	sceSdSetAddr(SD_CORE_1 | (channel << 1) | SD_VOICE_START, a->spu2_addr);
 	sceSdSetSwitch(SD_CORE_1 | SD_VOICE_KEYON, (1 << channel));

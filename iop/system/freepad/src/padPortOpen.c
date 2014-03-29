@@ -32,14 +32,14 @@ void UpdatePadThread(void *arg)
 		{
 			pstate->state = PAD_STATE_ERROR;
 			pstate->findPadRetries++;
-			
+
 			res += pdGetError( pstate->port, pstate->slot );
-			
+
 			if(res >= 10)
 			{
 				pstate->currentTask = TASK_QUERY_PAD;
 				StartThread(pstate->querypadTid, 0);
-			} 
+			}
 		}
 		else
 		{
@@ -48,9 +48,9 @@ void UpdatePadThread(void *arg)
 			if( (pstate->outbuffer[2] != 0x5a) || ( pstate->outbuffer[1] != pstate->modeCurId) || (pstate->outbuffer[1] == 0xf3) )
 			{
 				pstate->buttonDataReady = 0;
-				pstate->state = PAD_STATE_EXECCMD ;				
+				pstate->state = PAD_STATE_EXECCMD ;
 				pstate->currentTask = TASK_QUERY_PAD;
-				StartThread(pstate->querypadTid, 0);			
+				StartThread(pstate->querypadTid, 0);
 			}
 			else
 			{
@@ -62,14 +62,14 @@ void UpdatePadThread(void *arg)
 				pstate->buttonDataReady = 1;
 
 				if(pstate->modeConfig == MODE_CONFIG_QUERY_PAD)
-					pstate->state = PAD_STATE_FINDCTP1;	
+					pstate->state = PAD_STATE_FINDCTP1;
 				else
 					pstate->state = PAD_STATE_STABLE ;
 
-				if( (pstate->reqState == PAD_RSTAT_BUSY) && (pstate->runTask == 0)) 
+				if( (pstate->reqState == PAD_RSTAT_BUSY) && (pstate->runTask == 0))
 					pstate->reqState = PAD_RSTAT_COMPLETE;
 			}
-		}	
+		}
 	}
 }
 
@@ -103,7 +103,7 @@ void QueryPadThread(void *arg)
 	pstate->ee_actDirectSize = 0;
 	pstate->findPadRetries = 0;
 	pstate->modeCurId = 0;
-	
+
 
 	D_PRINTF("QueryPadThread: Checking for pad (%i,%i)\n", pstate->port, pstate->slot);
 
@@ -132,9 +132,9 @@ void QueryPadThread(void *arg)
 			pstate->state = PAD_STATE_DISCONN;
 			pstate->disconnected = 1;
 		}
-	} 
+	}
 	while( (res != 1) || (pstate->modeCurId == 0xFF) );
-	
+
 
 	if(pstate->disconnected != 0)
 	{
@@ -142,18 +142,18 @@ void QueryPadThread(void *arg)
 			pstate->ee_actAlignData[i] = 0xFF;
 	}
 
-	res = 0;	
+	res = 0;
 
 	D_PRINTF("Found pad (%i,%i) - modeCurId: 0x%x\n", (int)pstate->port, (int)pstate->slot, (int)modeCurId);
 
 	for(i=0; (i < 10) && (res != 1); i++)
 	{
-		WaitClearEvent( pstate->eventflag, EF_QUERY_PAD, 0x10, 0);	
-		
+		WaitClearEvent( pstate->eventflag, EF_QUERY_PAD, 0x10, 0);
+
 		res = EnterConfigMode(modeCurId, pstate);
 
 		if(res == 1) pstate->modeConfig = MODE_CONFIG_READY;
-	} 
+	}
 
 	if( res != 1 )
 	{
@@ -172,7 +172,7 @@ void QueryPadThread(void *arg)
 
 	for(i=0; (i < 10) && (res != 1); i++)
 	{
-		WaitClearEvent( pstate->eventflag, EF_QUERY_PAD, 0x10, 0);	
+		WaitClearEvent( pstate->eventflag, EF_QUERY_PAD, 0x10, 0);
 		res = QueryModel(pstate);
 	}
 
@@ -181,15 +181,15 @@ void QueryPadThread(void *arg)
 		D_PRINTF("QueryModel (%i, %i): Failed\n",(int)pstate->port, (int)pstate->slot);
 
 		pstate->modeConfig = 0;
-		pstate->currentTask = TASK_UPDATE_PAD; 
+		pstate->currentTask = TASK_UPDATE_PAD;
 		ExitThread();
 	}
-		
+
 
 	D_PRINTF("QueryModel (%i, %i): Success\n", (int)pstate->port, (int)pstate->slot);
 
 	res = 0;
-	
+
 
 	if( (pstate->disconnected == 1) && (pstate->modeCurOffs != 0))
 	{
@@ -197,8 +197,8 @@ void QueryPadThread(void *arg)
 		pstate->lock = 0;
 
 		for(i=0; (i < 10)  || (res != 1); i++)
-		{	
-			WaitClearEvent( pstate->eventflag, EF_QUERY_PAD, 0x10, 0);	
+		{
+			WaitClearEvent( pstate->eventflag, EF_QUERY_PAD, 0x10, 0);
 
 			res = SetMainMode(pstate);
 
@@ -220,7 +220,7 @@ void QueryPadThread(void *arg)
 			D_PRINTF("SetMainMode (%i, %i): Failed\n", (int)pstate->port, (int)pstate->slot);
 
 			pstate->reqState = PAD_RSTAT_FAILED;
-			pstate->currentTask = TASK_UPDATE_PAD;		
+			pstate->currentTask = TASK_UPDATE_PAD;
 			ExitThread();
 		}
 	}
@@ -236,8 +236,8 @@ void QueryPadThread(void *arg)
 			res = 0;
 
 			for(i=0; (i < 10) && (res != 1); i++)
-			{	
-				WaitClearEvent( pstate->eventflag, EF_QUERY_PAD, 0x10, 0);	
+			{
+				WaitClearEvent( pstate->eventflag, EF_QUERY_PAD, 0x10, 0);
 
 				res = QueryAct(count, pstate);
 			}
@@ -256,7 +256,7 @@ void QueryPadThread(void *arg)
 		while( count < pstate->numActuators );
 
 	}
-	
+
 	D_PRINTF("QueryAct (%i,%i): Success\n", (int)pstate->port, (int)pstate->slot);
 
 	res = 0;
@@ -270,8 +270,8 @@ void QueryPadThread(void *arg)
 			res = 0;
 
 			for(i=0; (i < 10)  && (res != 1); i++)
-			{	
-				WaitClearEvent( pstate->eventflag, EF_QUERY_PAD, 0x10, 0);	
+			{
+				WaitClearEvent( pstate->eventflag, EF_QUERY_PAD, 0x10, 0);
 
 				res = QueryComb(count, pstate);
 			}
@@ -305,8 +305,8 @@ void QueryPadThread(void *arg)
 			res = 0;
 
 			for(i=0; (i < 10)  && (res != 1); i++)
-			{	
-				WaitClearEvent( pstate->eventflag, EF_QUERY_PAD, 0x10, 0);	
+			{
+				WaitClearEvent( pstate->eventflag, EF_QUERY_PAD, 0x10, 0);
 
 				res = QueryMode(count, pstate);
 			}
@@ -324,15 +324,15 @@ void QueryPadThread(void *arg)
 		}
 		while( count < pstate->numModes );
 	}
-	
+
 	D_PRINTF("QueryMode (%i,%i): Success\n", (int)pstate->port, (int)pstate->slot);
-	
+
 	res = 0;
 
 	for(i=0; (i < 10)  && (res != 1); i++)
-	{	
-		WaitClearEvent( pstate->eventflag, EF_QUERY_PAD, 0x10, 0);	
-		
+	{
+		WaitClearEvent( pstate->eventflag, EF_QUERY_PAD, 0x10, 0);
+
 		res = SetActAlign(pstate);
 	}
 
@@ -343,16 +343,16 @@ void QueryPadThread(void *arg)
 		pstate->reqState = PAD_RSTAT_FAILED;
 		pstate->currentTask = TASK_UPDATE_PAD;
 		ExitThread();
-	}	
+	}
 
 	D_PRINTF("SetActAlign (%i,%i): Success\n", (int)pstate->port, (int)pstate->slot);
 
 	res = 0;
 
 	for(i=0; (i < 10) && (res != 1); i++)
-	{	
-		WaitClearEvent( pstate->eventflag, EF_QUERY_PAD, 0x10, 0);	
-		
+	{
+		WaitClearEvent( pstate->eventflag, EF_QUERY_PAD, 0x10, 0);
+
 		res = QueryButtonMask(pstate);
 	}
 
@@ -363,16 +363,16 @@ void QueryPadThread(void *arg)
 		pstate->modeCurId = 0;
 		pstate->currentTask = TASK_UPDATE_PAD;
 		ExitThread();
-	}	
+	}
 
 	D_PRINTF("QueryButtonMask (%i,%i): Success\n", (int)pstate->port, (int)pstate->slot);
 
 	res = 0;
 
 	for(i=0; (i < 10)  && (res != 1); i++)
-	{	
-		WaitClearEvent( pstate->eventflag, EF_QUERY_PAD, 0x10, 0);	
-		
+	{
+		WaitClearEvent( pstate->eventflag, EF_QUERY_PAD, 0x10, 0);
+
 		res = ExitConfigMode(pstate);
 	}
 
@@ -383,16 +383,16 @@ void QueryPadThread(void *arg)
 		pstate->modeCurId = 0;
 		pstate->currentTask = TASK_UPDATE_PAD;
 		ExitThread();
-	}	
+	}
 
 	D_PRINTF("ExitConfigMode (%i,%i): Success\n", (int)pstate->port, (int)pstate->slot);
 
-	res = 0;	
+	res = 0;
 
 	for(i=0; (i < 10) && (res != 1); i++)
-	{	
-		WaitClearEvent( pstate->eventflag, EF_QUERY_PAD, 0x10, 0);	
-		
+	{
+		WaitClearEvent( pstate->eventflag, EF_QUERY_PAD, 0x10, 0);
+
 		res = PadIsSupported(pstate);
 	}
 
@@ -403,7 +403,7 @@ void QueryPadThread(void *arg)
 		pstate->modeCurId = 0;
 		pstate->currentTask = TASK_UPDATE_PAD;
 		ExitThread();
-	}	
+	}
 
 	D_PRINTF("PadIsSupported (%i,%i): Success\n", (int)pstate->port, (int)pstate->slot);
 
@@ -412,17 +412,17 @@ void QueryPadThread(void *arg)
 	pstate->state = PAD_STATE_EXECCMD;
 	pstate->currentTask = TASK_UPDATE_PAD;
 	pstate->disconnected = 0;
-	
+
 	ExitThread();
 
 }
 
 void SetMainModeThread(void *arg)
 {
-	u32 i, res;	
+	u32 i, res;
 	iop_thread_info_t tinfo;
 	padState_t *pstate;
-	
+
 	ReferThreadStatus(0, &tinfo);
 
 	pstate = (padState_t*)tinfo.info[IOP_THINFO_OPTION];
@@ -434,8 +434,8 @@ void SetMainModeThread(void *arg)
 
 	for(i=0; (i < 10) && (res != 1); i++)
 	{
-		WaitClearEvent( pstate->eventflag, EF_SET_MAIN_MODE, 0x10, 0);	
-		
+		WaitClearEvent( pstate->eventflag, EF_SET_MAIN_MODE, 0x10, 0);
+
 		res = EnterConfigMode(pstate->modeCurId, pstate);
 	}
 
@@ -447,11 +447,11 @@ void SetMainModeThread(void *arg)
 	}
 
 	res = 0;
-	
+
 	for(i=0; (i < 10) && (res != 1); i++)
 	{
-		WaitClearEvent( pstate->eventflag, EF_SET_MAIN_MODE, 0x10, 0);	
-		
+		WaitClearEvent( pstate->eventflag, EF_SET_MAIN_MODE, 0x10, 0);
+
 		res = SetMainMode( pstate);
 	}
 
@@ -463,11 +463,11 @@ void SetMainModeThread(void *arg)
 	}
 
 	res = 0;
-	
+
 	for(i=0; (i < 10) && (res != 1); i++)
 	{
-		WaitClearEvent( pstate->eventflag, EF_SET_MAIN_MODE, 0x10, 0);	
-		
+		WaitClearEvent( pstate->eventflag, EF_SET_MAIN_MODE, 0x10, 0);
+
 		res = ExitConfigMode(pstate);
 	}
 
@@ -485,10 +485,10 @@ void SetMainModeThread(void *arg)
 
 void SetActAlignThread(void *arg)
 {
-	u32 i, res;	
+	u32 i, res;
 	iop_thread_info_t tinfo;
 	padState_t *pstate;
-	
+
 	ReferThreadStatus(0, &tinfo);
 
 	pstate = (padState_t*)tinfo.info[IOP_THINFO_OPTION];
@@ -500,7 +500,7 @@ void SetActAlignThread(void *arg)
 
 	for(i=0; (i < 10) && (res != 1); i++)
 	{
-		WaitClearEvent( pstate->eventflag, EF_SET_ACT_ALIGN, 0x10, 0);	
+		WaitClearEvent( pstate->eventflag, EF_SET_ACT_ALIGN, 0x10, 0);
 		res = EnterConfigMode(pstate->modeCurId, pstate);
 	}
 
@@ -515,8 +515,8 @@ void SetActAlignThread(void *arg)
 
 	for(i=0; (i < 10) && (res != 1); i++)
 	{
-		WaitClearEvent( pstate->eventflag, EF_SET_ACT_ALIGN, 0x10, 0);	
-		
+		WaitClearEvent( pstate->eventflag, EF_SET_ACT_ALIGN, 0x10, 0);
+
 		res = SetActAlign(pstate);
 	}
 
@@ -531,8 +531,8 @@ void SetActAlignThread(void *arg)
 
 	for(i=0; (i < 10) && (res != 1); i++)
 	{
-		WaitClearEvent( pstate->eventflag, EF_SET_ACT_ALIGN, 0x10, 0);	
-		
+		WaitClearEvent( pstate->eventflag, EF_SET_ACT_ALIGN, 0x10, 0);
+
 		res = ExitConfigMode(pstate);
 	}
 
@@ -550,10 +550,10 @@ void SetActAlignThread(void *arg)
 
 void SetButtonInfoThread(void *arg)
 {
-	u32 i, res;	
+	u32 i, res;
 	iop_thread_info_t tinfo;
 	padState_t *pstate;
-	
+
 	ReferThreadStatus(0, &tinfo);
 
 	pstate = (padState_t*)tinfo.info[IOP_THINFO_OPTION];
@@ -565,8 +565,8 @@ void SetButtonInfoThread(void *arg)
 
 	for(i=0; (i < 10) && (res != 1); i++)
 	{
-		WaitClearEvent( pstate->eventflag, EF_SET_SET_BUTTON_INFO, 0x10, 0);	
-		
+		WaitClearEvent( pstate->eventflag, EF_SET_SET_BUTTON_INFO, 0x10, 0);
+
 		res = EnterConfigMode(pstate->modeCurId, pstate);
 	}
 
@@ -581,8 +581,8 @@ void SetButtonInfoThread(void *arg)
 
 	for(i=0; (i < 10) && (res != 1); i++)
 	{
-		WaitClearEvent( pstate->eventflag, EF_SET_SET_BUTTON_INFO, 0x10, 0);	
-		
+		WaitClearEvent( pstate->eventflag, EF_SET_SET_BUTTON_INFO, 0x10, 0);
+
 		res = SetButtonInfo(pstate);
 	}
 
@@ -597,8 +597,8 @@ void SetButtonInfoThread(void *arg)
 
 	for(i=0; (i < 10) && (res != 1); i++)
 	{
-		WaitClearEvent( pstate->eventflag, EF_SET_SET_BUTTON_INFO, 0x10, 0);	
-		
+		WaitClearEvent( pstate->eventflag, EF_SET_SET_BUTTON_INFO, 0x10, 0);
+
 		res = VrefParam(0x10, pstate);
 	}
 
@@ -611,11 +611,11 @@ void SetButtonInfoThread(void *arg)
 
 	res = 0;
 
-	
+
 	for(i=0; (i < 10) && (res != 1); i++)
 	{
-		WaitClearEvent( pstate->eventflag, EF_SET_SET_BUTTON_INFO, 0x10, 0);	
-		
+		WaitClearEvent( pstate->eventflag, EF_SET_SET_BUTTON_INFO, 0x10, 0);
+
 		res = ExitConfigMode(pstate);
 	}
 
@@ -625,18 +625,18 @@ void SetButtonInfoThread(void *arg)
 		pstate->currentTask = TASK_UPDATE_PAD;
 		ExitThread();
 	}
-	
+
 
 	pstate->currentTask = TASK_UPDATE_PAD;
-	ExitThread();	
+	ExitThread();
 }
 
 void SetVrefParamThread(void *arg)
 {
-	u32 i, res;	
+	u32 i, res;
 	iop_thread_info_t tinfo;
 	padState_t *pstate;
-	
+
 	ReferThreadStatus(0, &tinfo);
 
 	pstate = (padState_t*)tinfo.info[IOP_THINFO_OPTION];
@@ -648,8 +648,8 @@ void SetVrefParamThread(void *arg)
 
 	for(i=0; (i < 10) && (res != 1); i++)
 	{
-		WaitClearEvent( pstate->eventflag, EF_SET_VREF_PARAM, 0x10, 0);	
-		
+		WaitClearEvent( pstate->eventflag, EF_SET_VREF_PARAM, 0x10, 0);
+
 		res = EnterConfigMode(pstate->modeCurId, pstate);
 	}
 
@@ -664,8 +664,8 @@ void SetVrefParamThread(void *arg)
 
 	for(i=0; (i < 10) && (res != 1); i++)
 	{
-		WaitClearEvent( pstate->eventflag, EF_SET_VREF_PARAM, 0x10, 0);	
-		
+		WaitClearEvent( pstate->eventflag, EF_SET_VREF_PARAM, 0x10, 0);
+
 		res = VrefParam(0, pstate);
 	}
 
@@ -680,8 +680,8 @@ void SetVrefParamThread(void *arg)
 
 	for(i=0; (i < 10) && (res != 1); i++)
 	{
-		WaitClearEvent( pstate->eventflag, EF_SET_VREF_PARAM, 0x10, 0);	
-		
+		WaitClearEvent( pstate->eventflag, EF_SET_VREF_PARAM, 0x10, 0);
+
 		res = ExitConfigMode( pstate);
 	}
 
@@ -775,7 +775,7 @@ s32 padPortOpen(s32 port, s32 slot, s32 pad_area_ee_addr, u32 *buf)
 		M_PRINTF("Port open failed (CreateThread QueryPadThread).\n");
 		return 0;
 	}
-	
+
 	// Create SetMainModeThread
 	thread.thread = SetMainModeThread;
 

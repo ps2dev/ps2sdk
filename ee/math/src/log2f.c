@@ -23,7 +23,7 @@
  *     log(1+x) = x - 0.5 x**2 + x**3 P(x)/Q(x).
  *
  * Otherwise, setting  z = 2(x-1)/x+1),
- * 
+ *
  *     log(x) = z + z**3 P(z)/Q(z).
  *
  *
@@ -43,7 +43,7 @@
  * log singularity:  x = 0; returns MINLOGF/log(2)
  * log domain:       x < 0; returns MINLOGF/log(2)
  */
-
+
 /*
 Cephes Math Library Release 2.2:  June, 1992
 Copyright 1984, 1992 by Stephen L. Moshier
@@ -108,7 +108,7 @@ if( x < SQRTH )
 	{
 	e -= 1;
 	x = 2.0*x - 1.0;
-	}	
+	}
 else
 	{
 	x = x - 1.0;

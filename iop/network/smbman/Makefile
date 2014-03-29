@@ -1,7 +1,7 @@
-#  _____     ___ ____ 
+#  _____     ___ ____
 #   ____|   |    ____|      PS2 Open Source Project
-#  |     ___|   |____       
-#  
+#  |     ___|   |____
+#
 #--------------------------------------------------------------------------
 #
 #    makefile
@@ -11,7 +11,7 @@
 IOP_OBJS_DIR = obj/
 IOP_BIN_DIR = bin/
 IOP_SRC_DIR = src/
-IOP_INC_DIR = 
+IOP_INC_DIR =
 
 IOP_BIN  = bin/smbman.irx
 IOP_OBJS = obj/smbman.o obj/smb_fio.o obj/smb.o obj/poll.o obj/auth.o \

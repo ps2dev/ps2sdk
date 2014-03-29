@@ -29,7 +29,7 @@ int PS2KbdInit(void)
       kbd_iop = _iop_reboot_count;
       kbd_fd = -1;
     }
-    
+
   if(kbd_fd >= 0) /* Already initialised */
     {
       return 2;

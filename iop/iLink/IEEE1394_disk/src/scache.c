@@ -161,7 +161,7 @@ int scache_readSector(cache_set* cache, unsigned int sector, void** buf) {
         printf("cache: devId cache not created = %i \n", cache->dev->nodeID);
         return -1;
     }
-    
+
 	cache->cacheAccess ++;
 	index = getIndexRead(cache, sector);
 	XPRINTF("cache: indexRead=%i \n", index);
@@ -203,7 +203,7 @@ int scache_allocSector(cache_set* cache, unsigned int sector, void** buf) {
 	unsigned int alignedSector;
 
 	XPRINTF("cache: allocSector devId = %i sector = %i \n", cache->dev->nodeID, sector);
-    
+
 	index = getIndexRead(cache, sector);
 	XPRINTF("cache: indexRead=%i \n", index);
 	if (index >= 0) { //sector found in cache
@@ -265,10 +265,10 @@ cache_set* scache_init(struct SBP2Device* dev, int sectSize)
 		printf("scache init! Sector cache: can't alloate cache!\n");
 		return NULL;
 	}
-    
+
     XPRINTF("scache init! \n");
     cache->dev = dev;
-    
+
     XPRINTF("sectorSize: 0x%x\n", cache->sectorSize);
     cache->sectorBuf = (unsigned char*) malloc(BLOCK_SIZE * CACHE_SIZE);
     if (cache->sectorBuf == NULL) {

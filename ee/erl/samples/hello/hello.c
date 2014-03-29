@@ -21,8 +21,8 @@ char * erl_dependancies[] = {
 };
 
 int main()
-{   
+{
     printf("Hello world!\n");
-    
+
     return 0;
 }

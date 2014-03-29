@@ -27,7 +27,7 @@
 #define RPC_NPM_USER 0x014d704e
 
 /*! \brief RPC handler function.
- *  \ingroup fakehost 
+ *  \ingroup fakehost
  *
  *  \param  cmd    Command.
  *  \param  buffer Pointer to buffer.
@@ -44,7 +44,7 @@ static SifRpcDataQueue_t  queue __attribute((aligned(16)));
 static unsigned char rpc_buffer[512] __attribute((aligned(16)));
 
 /*! \brief naplink compatbile RPC handler thread.
- *  \ingroup fakehost 
+ *  \ingroup fakehost
  *
  *  \param  arg Startup parameters.
  */
@@ -62,7 +62,7 @@ static void napThread(void *arg)
 }
 
 /*! \brief Setup naplink compatible RPC handler.
- *  \ingroup fakehost 
+ *  \ingroup fakehost
  *
  *  \return Status.
  *

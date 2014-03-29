@@ -1,10 +1,10 @@
 ps2adpcm - PlayStation2 compile time PCM to ADPCM convertor
- 
-  ___                    _            
+
+  ___                    _
  / _ \__  _____ _ ___  _(_)_____  __  __
 | (_) \ \/ / -_) '_\ \/ / / -_) \/  \/ /
- \___/ \__/\___|_|  \__/|_\___|\__/\__/ 
-========================================                                    
+ \___/ \__/\___|_|  \__/|_\___|\__/\__/
+========================================
 
 What it does:
 * Convert mono or stereo streams to ADPCM, for use with the ps2snd IRX.
@@ -15,11 +15,11 @@ What it does:
 This does more than the current adpenc, and has a much cleaner ADPCM encoder, and is designed to work with te ps2snd IRX.
 
 
- ___              
+ ___
 | _ )_  _ __ _ ___
 | _ \ || / _` (_-<
 |___/\_,_\__, /__/
-         |___/    
+         |___/
 ==================
 
 Probably hates big endian systems.
@@ -28,8 +28,8 @@ Raw PCM sucks!
 
 
 
- ___     _                
-| __|  _| |_ _  _ _ _ ___ 
+ ___     _
+| __|  _| |_ _  _ _ _ ___
 | _| || |  _| || | '_/ -_)
 |_| \_,_|\__|\_,_|_| \___|
 ==========================

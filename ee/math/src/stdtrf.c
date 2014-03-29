@@ -28,7 +28,7 @@
  *                                   | |
  *                                    -
  *                                   -inf.
- * 
+ *
  * Relation to incomplete beta integral:
  *
  *        1 - stdtr(k,t) = 0.5 * incbet( k/2, 1/2, z )
@@ -40,14 +40,14 @@
  * Since the function is symmetric about t=0, the area under the
  * right tail of the density is found by calling the function
  * with -t instead of t.
- * 
+ *
  * ACCURACY:
  *
  *                      Relative error:
  * arithmetic   domain     # trials      peak         rms
  *    IEEE      +/- 100      5000       2.3e-5      2.9e-6
  */
-
+
 
 /*
 Cephes Math Library Release 2.2:  July, 1992

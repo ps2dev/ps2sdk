@@ -239,5 +239,5 @@ _start(int argc,char** argv)
 
 	dbgprintf("PS2IP: System Initialised\n");
 
-	return	iRet; 
+	return	iRet;
 }

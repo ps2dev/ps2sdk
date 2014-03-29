@@ -30,7 +30,7 @@ $(IOP_OBJS_DIR)%.o : $(IOP_SRC_DIR)%.c
 
 $(IOP_OBJS_DIR)%.o : $(IOP_SRC_DIR)%.S
 	$(IOP_CC) $(IOP_CFLAGS) $(IOP_INCS) -c $< -o $@
-	
+
 $(IOP_OBJS_DIR)%.o : $(IOP_SRC_DIR)%.s
 	$(IOP_AS) $(IOP_ASFLAGS) $< -o $@
 

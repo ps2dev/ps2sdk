@@ -12,10 +12,10 @@ I_printf
 stdio_IMPORTS_end
 
 thbase_IMPORTS_start
-I_CreateThread 
-I_StartThread 
-I_SleepThread 
-I_GetThreadId 
+I_CreateThread
+I_StartThread
+I_SleepThread
+I_GetThreadId
 I_DeleteThread
 I_ExitDeleteThread
 thbase_IMPORTS_end
@@ -38,8 +38,8 @@ I_io_close
 ioman_mod_IMPORTS_end
 
 sifcmd_IMPORTS_start
-I_sceSifInitRpc 
-I_sceSifSetRpcQueue 
-I_sceSifRegisterRpc 
-I_sceSifRpcLoop 
+I_sceSifInitRpc
+I_sceSifSetRpcQueue
+I_sceSifRegisterRpc
+I_sceSifRpcLoop
 sifcmd_IMPORTS_end

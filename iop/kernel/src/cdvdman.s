@@ -140,7 +140,7 @@ CdGetReadPos:
 CdRC:
 	j	$31
 	li	$0, 51
-	
+
 	.globl	CdReadChain		# 066
 CdReadChain:
 	j	$31

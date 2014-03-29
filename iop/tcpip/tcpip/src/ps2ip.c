@@ -172,7 +172,7 @@ Timer(void* pvArg)
 		iTimerARP-=ARP_TMR_INTERVAL;
 		etharp_tmr();
 	}
-	
+
 #if		defined(PS2IP_DHCP)
 
 	//DHCP timer.
@@ -374,7 +374,7 @@ ps2ip_input(PBuf* pInput,NetIF* pNetIF)
 		dbgprintf("ps2ip_input: Failed to allocate memory for tcpip_msg, dropping packet\n");
 		pbuf_free(pInput);
 		free_msg(msg);
-		return	ERR_MEM;  
+		return	ERR_MEM;
 	}
 	pMSG->type=TCPIP_MSG_CALLBACK;
 	pMSG->msg.cb.f=InputCB;
@@ -455,5 +455,5 @@ _start(int argc,char** argv)
 
 	dbgprintf("PS2IP: System Initialised\n");
 
-	return	iRet; 
+	return	iRet;
 }

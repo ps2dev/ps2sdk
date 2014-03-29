@@ -11,14 +11,14 @@ What is it?
 The module provided works with ioman/X to provide a consistent interface for
 exporting device orientated files for access on the IOP or EE. It is analogous
 to a *nix style /dev heirarchy where each device can be read or written to and
-commands passed using the ioctl functions. 
+commands passed using the ioctl functions.
 
 Why?
 --
 
-The first question you will probably ask is, why with ioman/iomanX providing 
+The first question you will probably ask is, why with ioman/iomanX providing
 similar functionality is there a need for something else. Well what devfs
-provides (in no particular order) is: 
+provides (in no particular order) is:
 
 - Easy configuration for devices without going having to add a complete ioman
 driver.
@@ -43,7 +43,7 @@ Usage
 
 Well if you are still with me, how to use it.
 
-The devfs.irx should have been built along with the rest of ps2drv, to use it 
+The devfs.irx should have been built along with the rest of ps2drv, to use it
 just load the irx and then access the functions via the exported interface.
 
 A quick run down of how the file system is structured.
@@ -52,7 +52,7 @@ The ioman fs is under the devfs: device. A device consists of a root node and
 a number of sub devices. The root node itself is not represented in the fs
 but any sub devices are. The name you provide when registering the devices
 will be suffixed with the sub device number i.e. if you register the device
-'test' and add sub device 0 then you will see a 'test0' file in the fs. 
+'test' and add sub device 0 then you will see a 'test0' file in the fs.
 
 The root device holds references to a read, write and ioctl handler. If one or
 more are set to NULL then they will be ignored. Device seeking is done by devfs
@@ -60,9 +60,9 @@ itself, the current location being passed to the handler functions.
 
 A sub device can be assigned an extent (which is its size to the seek code). It
 can also be assigned certain access rights such as read/write or exclusive mode
-(where only one file can be opened on the device). 
+(where only one file can be opened on the device).
 
-For an example of use see the devfs sample. 
+For an example of use see the devfs sample.
 
 --
 

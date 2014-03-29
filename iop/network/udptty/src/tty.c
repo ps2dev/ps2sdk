@@ -54,8 +54,8 @@ static int tty_write(iop_file_t *file, void *buf, size_t size)
 
 static int tty_error(void) { return -EIO; }
 
-static iop_device_ops_t tty_ops = { tty_init, tty_deinit, (void *)tty_error, 
-	(void *)tty_stdout_fd, (void *)tty_stdout_fd, (void *)tty_error, 
+static iop_device_ops_t tty_ops = { tty_init, tty_deinit, (void *)tty_error,
+	(void *)tty_stdout_fd, (void *)tty_stdout_fd, (void *)tty_error,
 	(void *)tty_write, (void *)tty_error, (void *)tty_error,
 	(void *)tty_error, (void *)tty_error, (void *)tty_error,
 	(void *)tty_error, (void *)tty_error, (void *)tty_error,

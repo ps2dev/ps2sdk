@@ -42,7 +42,7 @@
  * The routine as implemented flags a TLOSS error
  * for x >= 2^24 and returns 0.0.
  */
-
+
 /*							cosf.c
  *
  *	Circular cosine
@@ -76,7 +76,7 @@
  * arithmetic	domain		# trials	  peak		   rms
  *	  IEEE	  -8192,+8192	100,000 	 3.0e-7 	3.0e-8
  */
-
+
 /*
 Cephes Math Library Release 2.2:  June, 1992
 Copyright 1985, 1987, 1988, 1992 by Stephen L. Moshier

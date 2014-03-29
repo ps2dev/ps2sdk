@@ -374,7 +374,7 @@ int fioWrite(int fd, const void *ptr, int size)
 	}
 
 	SignalSema(_fio_io_sema);
-	
+
 	return result;
 }
 #endif

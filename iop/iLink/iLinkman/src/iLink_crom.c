@@ -166,7 +166,7 @@ static inline int ParseUnitCROM(unsigned short NodeID, unsigned int *UnitSpec, u
 		}
 
 		if((*UnitSpec!=0)&&(*UnitSW_Version!=0)) return 1;
-	}	
+	}
 
 	return -1;
 }
@@ -355,7 +355,7 @@ static void BuildConfigurationROM(void){
 	BusInfoBlk->Max_Rec=Max_Rec<<4;
 	BusInfoBlk->misc=LinkSpeed;
 	BusInfoBlk->HardwareID=NodeUniqueID->HardwareID;
-	BusInfoBlk->Chip_ID_Low=NodeUniqueID->Chip_ID_Low;	
+	BusInfoBlk->Chip_ID_Low=NodeUniqueID->Chip_ID_Low;
 
 	/* Fill in the fields in the Bus Information Block Header. */
 	((struct BusInformationBlockHeader *)CROM_Buffer)->Bus_info_length=4;	/* According to the standard. */

@@ -11,17 +11,17 @@
 */
 
 /* Assembler version of memset using quadword instructions.
-	
+
    Jeff Johnston, Cygnus Solutions, Feb 10/1999.
 
    ============================================================
    Copyright (C) 1999 by Cygnus Solutions. All rights reserved.
- 
+
    Permission to use, copy, modify, and distribute this
    software is freely granted, provided that this notice
    is preserved.
    ============================================================  */
-	
+
 	.text
 	.align	2
 	.globl	memset
@@ -116,7 +116,7 @@ $L31:
 	move	$3,$7
 
 #else  /* __OPTIMIZE_SIZE__ */
- 
+
 	move	$3,$4
 
 #endif /* __OPTIMIZE_SIZE__ */

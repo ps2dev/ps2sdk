@@ -175,7 +175,7 @@ void* poweroff_rpc_server(int fno, void *data, int size)
 	case PWROFF_SHUTDOWN:
 		Shutdown(0);
 		break;
-		
+
 	case PWROFF_ENABLE_AUTO_SHUTOFF:
 		{
 			int* sbuff = data;
@@ -193,7 +193,7 @@ void* poweroff_rpc_server(int fno, void *data, int size)
 void poweroff_rpc_Thread(void* param)
 {
 	SifInitRpc(0);
-	
+
 	SifSetRpcQueue(&qd, GetThreadId());
 	SifRegisterRpc(&sd0, PWROFF_IRX, poweroff_rpc_server, cmdData, 0, 0, &qd);
 	SifRpcLoop(&qd);
@@ -210,7 +210,7 @@ int _start(int argc, char* argv[])
 		printf("Poweroff already registered\n");
 		return 1;
 	}
-	
+
 	SetPowerButtonHandler(Shutdown, 0);
 
 	FlushDcache();

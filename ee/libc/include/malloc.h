@@ -1,4 +1,4 @@
-/*      
+/*
 # _____     ___ ____     ___ ____
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
@@ -38,7 +38,7 @@ int __mem_walk_end(void * token);
 /* Example of use:
 
   void * i;
-  
+
   for (i = __mem_walk_begin(); !__mem_walk_end(i); i = __mem_walk_inc(i)) {
       u32 block_size;
       void * block_ptr;
@@ -51,7 +51,7 @@ int __mem_walk_end(void * token);
       }
       printf("Block at token %p points at a memory block of %i bytes at %p.\n", i, block_size, block_ptr);
   }
-  
+
   note that 'valid' will be always true if DEBUG_ALLOC was not defined when alloc.c got compiled.
 
 */

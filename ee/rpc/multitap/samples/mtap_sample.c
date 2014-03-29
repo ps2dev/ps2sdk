@@ -30,7 +30,7 @@ static u32 mtapConnected[2];
 static u32 maxslot[2];
 
 
- int wait_vsync(void) 
+ int wait_vsync(void)
  {
 
   // Enable the vsync interrupt.
@@ -58,7 +58,7 @@ void loadmodules(int free)
 	    if (ret < 0) {
 	        printf("SifLoadModule freesio2.irx failed: %d\n", ret);
 	        SleepThread();
-	    }    
+	    }
 
 		ret = SifLoadModule("host0:freemtap.irx", 0, NULL);
 
@@ -72,7 +72,7 @@ void loadmodules(int free)
 	    if (ret < 0) {
 	        printf("SifLoadModule freepad.irx failed: %d\n", ret);
 	        SleepThread();
-	    }	
+	    }
 
 	}
 	else
@@ -83,7 +83,7 @@ void loadmodules(int free)
 	    if (ret < 0) {
 	        printf("SifLoadModule XSIO2MAN failed: %d\n", ret);
 	        SleepThread();
-	    }    
+	    }
 
 		ret = SifLoadModule("rom0:XMTAPMAN", 0, NULL);
 
@@ -120,7 +120,7 @@ void find_controllers()
 
 		if((mtapcon == 1) && (mtapConnected[port] == 0))
 		{
-			printf("Multitap (%i) connected\n", (int)port);			
+			printf("Multitap (%i) connected\n", (int)port);
 		}
 
 		if((mtapcon == 0) && (mtapConnected[port] == 1))
@@ -131,7 +131,7 @@ void find_controllers()
 		mtapConnected[port] = mtapcon;
 
 		// Check for multitap
-		if(mtapConnected[port] == 1) 
+		if(mtapConnected[port] == 1)
 			maxslot[port] = 4;
 		else
 			maxslot[port] = 1;
@@ -143,9 +143,9 @@ void find_controllers()
 			{
 				padOpen[port][slot] = padPortOpen(port, slot, padBuf[port][slot]);
 				//if(padOpen[port][slot])
-				//	printf("padOpen(%i, %i) = %i\n", port, slot, padOpen[port][slot] );					
-			}		
-	
+				//	printf("padOpen(%i, %i) = %i\n", port, slot, padOpen[port][slot] );
+			}
+
 			if(padOpen[port][slot] == 1)
 			{
 
@@ -180,7 +180,7 @@ void find_controllers()
 				{
 					padPortClose(port, slot);
 					padOpen[port][slot] = 0;
-				}	
+				}
 			}
 		}
 	}
@@ -195,13 +195,13 @@ void find_controllers()
 int main(int argc, char **argv)
 {
 	u32 i;
-	
+
     struct padButtonStatus buttons;
     u32 paddata;
     u32 old_pad[2][4];
     u32 new_pad[2][4];
 	s32 ret;
-	
+
 	SifInitRpc(0);
 
     printf("libmtap sample");
@@ -209,7 +209,7 @@ int main(int argc, char **argv)
 	if((argc == 2) && (strncmp(argv[1], "free", 4) == 0))
 	{
 		printf(" - Using PS2SDK freesio2.irx, freemtap.irx and freepad.irx modules.\n");
-		loadmodules(1);	
+		loadmodules(1);
 	}
 	else
 	{
@@ -218,13 +218,13 @@ int main(int argc, char **argv)
 		printf("Example: ps2client execee host:mtap_sample.elf free\n");
 		loadmodules(0);
 	}
-	
 
-  
+
+
 
 	mtapInit();
     padInit(0);
-	
+
 	mtapConnected[0] = 0;
 	mtapConnected[1] = 0;
 
@@ -259,19 +259,19 @@ int main(int argc, char **argv)
 				if(padOpen[port][slot] && padConnected[port][slot])
 				{
 					ret = padRead(port, slot, &buttons);
-            
-   	 	    		if (ret != 0) 
+
+   	 	    		if (ret != 0)
 					{
             			paddata = 0xffff ^ buttons.btns;
-	
+
 						new_pad[port][slot] = paddata & ~old_pad[port][slot];
             			old_pad[port][slot] = paddata;
-                
+
 						if(new_pad[port][slot]) printf("Controller (%i,%i) button(s) pressed: ", (int)port, (int)slot);
 
             			if(new_pad[port][slot] & PAD_LEFT)		printf("LEFT ");
 						if(new_pad[port][slot] & PAD_RIGHT) 	printf("RIGHT ");
-						if(new_pad[port][slot] & PAD_UP) 		printf("UP ");		
+						if(new_pad[port][slot] & PAD_UP) 		printf("UP ");
 						if(new_pad[port][slot] & PAD_DOWN) 		printf("DOWN ");
 						if(new_pad[port][slot] & PAD_START) 	printf("START ");
 						if(new_pad[port][slot] & PAD_SELECT) 	printf("SELECT ");

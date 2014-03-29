@@ -207,7 +207,7 @@ typedef struct {
 #define USB_RC_STALL		0x004	// Endpoint Stalled
 #define USB_RC_NORESPONSE	0x005	// Device Is Not Responding
 #define USB_RC_BADPID		0x006	// PID Check Failed
-#define USB_RC_WRONGPID		0x007	// Unexpected PID 
+#define USB_RC_WRONGPID		0x007	// Unexpected PID
 #define USB_RC_DATAOVER		0x008	// Data Overrun
 #define USB_RC_DATAUNDER	0x009	// Data Underrun
 #define USB_RC_BUFFOVER		0x00C	// Buffer Overrun

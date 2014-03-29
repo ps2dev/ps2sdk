@@ -11,7 +11,7 @@
 # Remote Procedure Call server for ps2ip
 */
 
-/* 
+/*
 
 NOTES:
 
@@ -259,10 +259,10 @@ void do_recv( void * rpcBuffer, int size )
 				CpuResumeIntr(intr_stat);
 			}
 
-			goto recv_end;	
+			goto recv_end;
 
 		} else { // recv ok
-			
+
 			sifdma.src = lwip_buffer;
 			sifdma.dest = abuffer;
 			sifdma.size = rlen;
@@ -271,7 +271,7 @@ void do_recv( void * rpcBuffer, int size )
 			total += rlen;
 			asize -= rlen;
 			abuffer += rlen;
-			
+
 			CpuSuspendIntr(&intr_stat);
 			dma_id = SifSetDma(&sifdma, 1);
 			CpuResumeIntr(intr_stat);
@@ -550,7 +550,7 @@ void do_send( void * rpcBuffer, int size )
 		iter_len = MIN(BUFF_SIZE, left);
 		SifRpcGetOtherData(&rdata, ee_pos, lwip_buffer, iter_len, 0);
 		slen = send(pkt->socket, lwip_buffer, iter_len, pkt->flags);
-		
+
 //		printf("send ret = %d\n", slen);
 		lwip_buffer[slen] = '\0';
 //		printf("%s", lwip_buffer);
@@ -568,7 +568,7 @@ void do_send( void * rpcBuffer, int size )
 		ee_pos += slen;
 		total += slen;
 
-	}		
+	}
 
 send_end:
 	ptr[0] = total;
@@ -763,7 +763,7 @@ void do_getsockname( void *rpcBuffer, int size )
 	memcpy(&pkt->sockaddr, &addr, sizeof(struct sockaddr));
 	pkt->len = sizeof(struct sockaddr);
 }
-  
+
 void do_getpeername( void *rpcBuffer, int size )
 {
 	int *ptr = rpcBuffer;
@@ -897,7 +897,7 @@ void * rpcHandlerFunction(unsigned int command, void * rpcBuffer, int size)
         printf("PS2IPS: Unknown Function called!\n");
 
   }
-        
+
   return rpcBuffer;
 }
 
@@ -905,7 +905,7 @@ void * rpcHandlerFunction(unsigned int command, void * rpcBuffer, int size)
 void threadRpcFunction()
 {
    int threadId;
-  
+
    printf("PS2IPS: RPC Thread Started\n");
 
    // Allocate buffer for send/revc
@@ -939,9 +939,9 @@ int _start( int argc, char **argv)
    t.thread = threadRpcFunction;
    t.stacksize = 0x800;
    t.priority = 0x1e;
- 
+
    threadId = CreateThread( &t );
-   if ( threadId < 0 ) 
+   if ( threadId < 0 )
    {
        printf( "PS2IPS: CreateThread failed.  %i\n", threadId );
    }
@@ -949,7 +949,7 @@ int _start( int argc, char **argv)
    {
        StartThread( threadId, 0 );
    }
-  
+
    return 0;
-} 
+}
 

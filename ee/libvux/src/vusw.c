@@ -75,7 +75,7 @@ void VuxRotMatrix(VU_MATRIX *m, VU_VECTOR *r)
 void VuxRotMatrixX(VU_MATRIX *m, float x)
 {
 	float cs,sn;
-	
+
 	cs = cosf(x);
 	sn = sinf(x);
 
@@ -84,7 +84,7 @@ void VuxRotMatrixX(VU_MATRIX *m, float x)
 	m->m[1][2] = sn;
 	m->m[2][1] = -sn;
 	m->m[2][2] = cs;
-	
+
 
 /*  colum major(left hand)
 	m->m[1][1] = cs;
@@ -102,7 +102,7 @@ void VuxRotMatrixX(VU_MATRIX *m, float x)
 void VuxRotMatrixY(VU_MATRIX *m, float y)
 {
 	float cs,sn;
-	
+
 	cs = cosf(y);
 	sn = sinf(y);
 
@@ -117,8 +117,8 @@ void VuxRotMatrixY(VU_MATRIX *m, float y)
 	m->m[0][0] = cs;
 	m->m[0][2] = sn;
 	m->m[2][0] = -sn;
-	m->m[2][2] = cs;	
-	
+	m->m[2][2] = cs;
+
 	*/
 }
 
@@ -166,14 +166,14 @@ void VuxRotMatrixXYZ(VU_MATRIX *m, float x,float y, float z)
 	VuxRotMatrixY(&my, y);
 	VuxRotMatrixZ(&mz, z);
 
-	
+
 
 //	VuxMulMatrix(&mx, &my, &m0);
 //	VuxMulMatrix(&m0, &mz, m);
 
 //	VuxMulMatrix(&mz, &my, &m0);
 //	VuxMulMatrix(&mx, &m0, m);
-	
+
 	VuxMulMatrix(&mz, &mx, &m0);
 	VuxMulMatrix(&my, &m0, m);
 }
@@ -259,9 +259,9 @@ void VuxMulMatrix(VU_MATRIX *m0, VU_MATRIX *m1, VU_MATRIX *out)
 
     for(i=0;i<16;i++)pM[i]=0;
 
-    for(  i=0; i<4; i++ ) 
-        for(  j=0; j<4; j++ ) 
-            for(  k=0; k<4; k++ ) 
+    for(  i=0; i<4; i++ )
+        for(  j=0; j<4; j++ )
+            for(  k=0; k<4; k++ )
                 pM[4*i+j] += pA[4*k+j] * pB[4*i+k];
 
     for(i=0;i<16;i++)pQ[i] = pM[i];
@@ -284,7 +284,7 @@ void VuxInverseMatrix(VU_MATRIX *in, VU_MATRIX *mat)
 
 
 	/* transpose matrix */
-	for ( i = 0; i < 4; i++) 
+	for ( i = 0; i < 4; i++)
 	{
 		src[i] = m[i*4];
 		src[i + 4] = m[i*4 + 1];
@@ -328,7 +328,7 @@ void VuxInverseMatrix(VU_MATRIX *in, VU_MATRIX *mat)
 	tmp[3] = src[3]*src[5];
 	tmp[4] = src[1]*src[6];
 	tmp[5] = src[2]*src[5];
-	
+
 	tmp[6] = src[0]*src[7];
 	tmp[7] = src[3]*src[4];
 	tmp[8] = src[0]*src[6];
@@ -420,7 +420,7 @@ float VuxDotProduct(VU_VECTOR *v0, VU_VECTOR *v1)
 VU_VECTOR VuxCrossProduct(VU_VECTOR *v0, VU_VECTOR *v1)
 {
 	VU_VECTOR	ret;
-	
+
 	ret.x = v0->y*v1->z - v0->z*v1->y;
 	ret.y = v0->z*v1->x - v0->x*v1->z;
 	ret.z = v0->x*v1->y - v0->y*v1->x;
@@ -434,8 +434,8 @@ VU_VECTOR VuxCrossProduct(VU_VECTOR *v0, VU_VECTOR *v1)
 
 void VuxCrossProduct0(VU_VECTOR *v0, VU_VECTOR *v1, VU_VECTOR *out)
 {
-	
-	
+
+
 	out->x = v0->y*v1->z - v0->z*v1->y;
 	out->y = v0->z*v1->x - v0->x*v1->z;
 	out->z = v0->x*v1->y - v0->y*v1->x;
@@ -481,12 +481,12 @@ void VuxVectorNormal0(VU_VECTOR *in, VU_VECTOR *out)
 
 /**/
 
-	
+
 void VuxApplyMatrixLS(VU_VECTOR *v0, VU_VECTOR *out)
 {
 
 
-	
+
 //	Vu0ApplyMatrix(&VuLocalScreenMatrix, v0, out);
 	VuxApplyMatrix(&VuLocalScreenMatrix, v0, out);
 }
@@ -496,7 +496,7 @@ void VuxApplyMatrixLS(VU_VECTOR *v0, VU_VECTOR *out)
 
 void VuxApplyRotMatrixLS(VU_VECTOR *v0, VU_VECTOR *out)
 {
-	
+
 
 	VuxApplyRotMatrix(&VuLocalScreenMatrix, v0, out);
 
@@ -576,7 +576,7 @@ void VuxMakeLookAtViewMatrix(VU_MATRIX *out, VU_VECTOR *eye, VU_VECTOR *target, 
 	VuxVectorNormal(&xaxis);
 
 	yaxis = VuxCrossProduct(&zaxis, &xaxis);
-    
+
 	out->m[0][0] = xaxis.x;
 	out->m[0][1] = yaxis.x;
 	out->m[0][2] = zaxis.x;
@@ -601,7 +601,7 @@ void VuxMakeLookAtViewMatrix(VU_MATRIX *out, VU_VECTOR *eye, VU_VECTOR *target, 
 	/*******************************************
 	** the created matrix is already inverted **
 	*******************************************/
-	
+
 }
 
 
@@ -610,7 +610,7 @@ void VuxMakeLookAtViewMatrix(VU_MATRIX *out, VU_VECTOR *eye, VU_VECTOR *target, 
 
 
 
-void VuxMakeProjectionMatrix(VU_MATRIX *proj, float near_plane_w, float near_plane_h, float near_plane_z, float far_plane_z)                                      
+void VuxMakeProjectionMatrix(VU_MATRIX *proj, float near_plane_w, float near_plane_h, float near_plane_z, float far_plane_z)
 {
 
 	VuxIdMatrix(proj);
@@ -622,7 +622,7 @@ void VuxMakeProjectionMatrix(VU_MATRIX *proj, float near_plane_w, float near_pla
 	proj->m[2][2] = far_plane_z/(far_plane_z-near_plane_z);
 	proj->m[2][3] = 1.0f;
 	proj->m[3][2] = near_plane_z*far_plane_z/(near_plane_z-far_plane_z);
-	
+
 
 
 }
@@ -636,7 +636,7 @@ void VuxUpdateLocalScreenMatrix(void)
 {
 	VU_MATRIX lsm;
 
-	
+
 	if(vu_projection_type==0)		// use vu_projection
 	{
 		VuxMakeLocalScreenMatrix(&lsm, &VuWorldMatrix, &VuViewMatrix);
@@ -724,7 +724,7 @@ void VuxPers(VU_VECTOR *v0, VU_SXYZ *sxyz0)
 
 void VuxPers3(VU_VECTOR *v0, VU_VECTOR *v1, VU_VECTOR *v2, VU_SXYZ *sxyz0, VU_SXYZ *sxyz1, VU_SXYZ *sxyz2)
 {
-	
+
 
 
 	if(vu_projection_type==0)
@@ -783,7 +783,7 @@ void VuxPersN(VU_VECTOR *verts, VU_SXYZ *sxyz, unsigned int num_verts)
 
 int VuxPersClip3(VU_VECTOR *v0, VU_VECTOR *v1, VU_VECTOR *v2, VU_SXYZ *sxyz0, VU_SXYZ *sxyz1, VU_SXYZ *sxyz2)
 {
-	
+
 
 
 	if(vu_projection_type==0)
@@ -824,7 +824,7 @@ int VuxPersClip3(VU_VECTOR *v0, VU_VECTOR *v1, VU_VECTOR *v2, VU_SXYZ *sxyz0, VU
 
 
 
-	
+
 
 
 float VuxRotTransPers(VU_VECTOR *v0, VU_SXYZ *sxyz0)
@@ -859,7 +859,7 @@ float VuxRotTransPers3(VU_VECTOR *v0, VU_VECTOR *v1, VU_VECTOR *v2, VU_SXYZ *sxy
 void VuxRotTransPersN(VU_VECTOR *verts, VU_SXYZ *sxyz, unsigned int num_verts)
 {
 	unsigned int i;
-	
+
 
 
 	for(i=0;i<num_verts;i++)
@@ -929,7 +929,7 @@ int VuxLightNormal(VU_VECTOR *normal, VU_CVECTOR *col0, void *light, unsigned in
 	VU_FCVECTOR		c0;
 	VU_FLAT_LIGHT	*f_light;
 
-	
+
 	c0.r = col0->r * 0.0078125f;
 	c0.g = col0->g * 0.0078125f;
 	c0.b = col0->b * 0.0078125f;
@@ -942,7 +942,7 @@ int VuxLightNormal(VU_VECTOR *normal, VU_CVECTOR *col0, void *light, unsigned in
 		dot = -VuxDotProduct(normal, &f_light->direction);
 		if(dot <0.0f)dot = 0.0f;
 
-		
+
 
 		final.r = vu_light_ambient.r + (c0.r * dot * f_light->color.r);
 		final.g = vu_light_ambient.g + (c0.g * dot * f_light->color.g);

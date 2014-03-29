@@ -33,7 +33,7 @@
  *  Error is high only near the crossover point x = 9.55
  * between the two expansions used.
  */
-
+
 
 /*
 Cephes Math Library Release 2.2:  June, 1992
@@ -45,7 +45,7 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 
 /*
 Algorithm for Kn.
-                       n-1 
+                       n-1
                    -n   -  (n-k-1)!    2   k
 K (x)  =  0.5 (x/2)     >  -------- (-x /4)
  n                      -     k!
@@ -77,7 +77,7 @@ asymptotically, where
     u = 4 v .
 
 */
-
+
 #include "mconf.h"
 
 #define EUL 5.772156649015328606065e-1
@@ -167,7 +167,7 @@ if( n > 0 )
 			kf = kf * i;
 			zn *= z;
 			t = nk1f * zn / kf;
-			s += t;   
+			s += t;
 			if( (MAXNUMF - fabsf(t)) < fabsf(s) )
 				goto overf;
 			if( (tox > 1.0) && ((MAXNUMF/tox) < zmn) )

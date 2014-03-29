@@ -16,15 +16,15 @@
 	NOTE: These functions will work with the MCMAN/MCSERV or XMCMAN/XMCSERV
 	modules stored in rom0. To determine which one you are using, send the
 	appropriate arg to the mcInit() function (MC_TYPE_MC or MC_TYPE_XMC)
-        
+
         NOTE: These functions seem to work for both psx and ps2 memcards
-        
+
         to use memcards:
         1) first load modules (sio2man then mcman/mcserv)
         2) call mcInit(MC_TYPE)
         3) use mcGetInfo() to see if memcards are connected
         4) use mcSync to check that the function has finished
-        
+
         all mc* functions except mcInit() are asynchronous and require mcSync()
         usage to test when they are done
 */
@@ -52,7 +52,7 @@ extern "C" {
 #define MC_ATTR_WRITEABLE       0x0002
 #define MC_ATTR_EXECUTABLE      0x0004
 #define MC_ATTR_PROTECTED       0x0008
-#define MC_ATTR_FILE            0x0010 
+#define MC_ATTR_FILE            0x0010
 #define MC_ATTR_SUBDIR          0x0020
 #define MC_ATTR_OBJECT          0x0030	// File or directory
 #define MC_ATTR_CLOSED          0x0080
@@ -156,7 +156,7 @@ typedef struct
 
 
 // init memcard lib
-// 
+//
 // args:	MC_TYPE_MC  = use MCSERV/MCMAN
 //			MC_TYPE_XMC = use XMCSERV/XMCMAN
 // returns:	0   = successful
@@ -168,7 +168,7 @@ int mcInit(int type);
 //					-1 = formatted card inserted since last getInfo call
 //					-2 = unformatted card inserted since last getInfo call
 //					< -2 = memcard access error (could be due to accessing psx memcard)
-// 
+//
 // args:    port number
 //          slot number
 //          pointer to get memcard type
@@ -181,7 +181,7 @@ int mcGetInfo(int port, int slot, int* type, int* free, int* format);
 // open a file on memcard
 // mcSync returns:	0 or more = file descriptor (success)
 //					< 0 = error
-// 
+//
 // args:	port number
 //			slot number
 //			filename to open
@@ -193,7 +193,7 @@ int mcOpen(int port, int slot, const char *name, int mode);
 // close an open file on memcard
 // mcSync returns:	0 if closed successfully
 //					< 0 = error
-// 
+//
 // args:	file descriptor of open file
 // returns:	0   = successful
 //			< 0 = error
@@ -202,7 +202,7 @@ int mcClose(int fd);
 // move memcard file pointer
 // mcSync returns:	0 or more = offset of file pointer from start of file
 //					< 0 = error
-// 
+//
 // args:	file descriptor
 //			number of bytes from origin
 //			initial position for offset
@@ -213,7 +213,7 @@ int mcSeek(int fd, int offset, int origin);
 // read from file on memcard
 // mcSync returns:	0 or more = number of bytes read from memcard
 //					< 0 = error
-// 
+//
 // args:	file descriptor
 //			buffer to read to
 //			number of bytes to read
@@ -224,7 +224,7 @@ int mcRead(int fd, void *buffer, int size);
 // write to file on memcard
 // mcSync returns:	0 or more = number of bytes written to memcard
 //					< 0 = error
-// 
+//
 // args:	file descriptor
 //			buffer to write from write
 // returns:	0   = successful
@@ -234,7 +234,7 @@ int mcWrite(int fd, const void *buffer, int size);
 // flush file cache to memcard
 // mcSync returns:	0 if ok
 //					< 0 if error
-// 
+//
 // args:	file descriptor
 // returns:	0   = successful
 //			< 0 = error
@@ -243,7 +243,7 @@ int mcFlush(int fd);
 // create a dir
 // mcSync returns:	0 if ok
 //					< 0 if error
-// 
+//
 // args:	port number
 //			slot number
 //			directory name
@@ -255,7 +255,7 @@ int mcMkDir(int port, int slot, const char* name);
 // (can also get current dir)
 // mcSync returns:	0 if ok
 //					< 0 if error
-// 
+//
 // args:	port number
 //			slot number
 //			new dir to change to
@@ -268,7 +268,7 @@ int mcChdir(int port, int slot, const char* newDir, char* currentDir);
 // mcSync result:	 0 or more = number of file entries obtained (success)
 //					-2 = unformatted card
 //					-4 = dirname error
-// 
+//
 // args:    port number of memcard
 //          slot number of memcard
 //          filename to search for (can use wildcard and relative dirs)
@@ -282,7 +282,7 @@ int mcGetDir(int port, int slot, const char *name, unsigned mode, int maxent, mc
 // change file information
 // mcSync returns:	0 if ok
 //					< 0 if error
-// 
+//
 // args:	port number
 //			slot number
 //			filename to access
@@ -295,7 +295,7 @@ int mcSetFileInfo(int port, int slot, const char* name, const mcTable* info, uns
 // delete file
 // mcSync returns:	0 if deleted successfully
 //					< 0 if error
-// 
+//
 // args:	port number to delete from
 //			slot number to delete from
 //			filename to delete
@@ -306,7 +306,7 @@ int mcDelete(int port, int slot, const char *name);
 // format memory card
 // mcSync returns:	0 if ok
 //					< 0 if error
-// 
+//
 // args:    port number
 //          slot number
 // returns: 0  = success
@@ -316,7 +316,7 @@ int mcFormat(int port, int slot);
 // unformat memory card
 // mcSync returns:	0 if ok
 //					< 0 if error
-// 
+//
 // args:    port number
 //          slot number
 // returns: 0  = success
@@ -326,7 +326,7 @@ int mcUnformat(int port, int slot);
 // get free space info
 // mcSync returns:	0 or more = number of free entries (success)
 //					< 0 if error
-// 
+//
 // args:	port number
 //			slot number
 //			path to be checked
@@ -338,7 +338,7 @@ int mcGetEntSpace(int port, int slot, const char* path);
 // rename file or dir on memcard
 // mcSync returns:	0 if ok
 //					< 0 if error
-// 
+//
 // args:	port number
 //			slot number
 //			name of file/dir to rename
@@ -351,7 +351,7 @@ int mcRename(int port, int slot, const char* oldName, const char* newName);
 // Erases a block on the memory card.
 // mcSync returns:	0 if ok
 //					< 0 if error
-// 
+//
 // args:	port number
 //			slot number
 //			Block number of the block to be erased.
@@ -364,7 +364,7 @@ int mcEraseBlock(int port, int slot, int block, int mode);
 // Reads a page from the memory card.
 // mcSync returns:	0 if ok
 //					< 0 if error
-// 
+//
 // args:	port number
 //			slot number
 //			Page number of the page to be read.
@@ -377,7 +377,7 @@ int mcReadPage(int port, int slot, unsigned int page, void *buffer);
 // Writes a page to the memory card. (The block which the page resides on must be erased first!)
 // mcSync returns:	0 if ok
 //					< 0 if error
-// 
+//
 // args:	port number
 //			slot number
 //			Page number of the page to be written.
@@ -391,7 +391,7 @@ int mcWritePage(int port, int slot, int page, const void *buffer);
 // (i dont think this is implemented properly)
 // mcSync returns:	0 if ok
 //					< 0 if error
-// 
+//
 // args:	thread priority
 // returns:	0  = success
 //			-1 = error
@@ -399,7 +399,7 @@ int mcChangeThreadPriority(int level);
 
 // wait for mc functions to finish
 // or check if they have finished yet
-// 
+//
 // args:	mode 0=wait till function finishes, 1=check function status
 //			pointer for storing the number of the currenlty processing function
 //			pointer for storing result of function if it finishes
@@ -409,7 +409,7 @@ int mcChangeThreadPriority(int level);
 int mcSync(int mode, int *cmd, int *result);
 
 // Reset (force deinit) of library
-// 
+//
 // returns:	0  = success
 int mcReset(void);
 

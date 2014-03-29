@@ -2,12 +2,12 @@
   Copyright 2011, jimmikaelkael
   Licenced under Academic Free License version 3.0
 
-  ATA Driver for the HD Pro Kit, based on original ATAD form ps2sdk:	
+  ATA Driver for the HD Pro Kit, based on original ATAD form ps2sdk:
 
   Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
   Licenced under Academic Free License version 2.0
   Review ps2sdk README & LICENSE files for further details.
- 
+
   $Id: ps2atad.c 1455 2007-11-04 23:46:27Z roman_ps2dev $
   ATA device driver.
 */
@@ -37,7 +37,7 @@ IRX_ID(MODNAME, 1, 1);
 // HD Pro Kit is mapping the 1st word in ROM0 seg as a main ATA controller,
 // The pseudo ATA controller registers are accessed (input/ouput) by writing
 // an id to the main ATA controller (id specific to HDpro, see registers id below).
-#define HDPROreg_IO8	      (*(volatile unsigned char *)0xBFC00000) 
+#define HDPROreg_IO8	      (*(volatile unsigned char *)0xBFC00000)
 #define HDPROreg_IO32	      (*(volatile unsigned int  *)0xBFC00000)
 
 #define CDVDreg_STATUS        (*(volatile unsigned char *)0xBF40200A)
@@ -771,7 +771,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 		if (!devinfo[i].exists || devinfo[i].has_packet)
 			continue;
 
-		/* This section is to detect whether the HDD supports 48-bit LBA 
+		/* This section is to detect whether the HDD supports 48-bit LBA
 		   (IDENITFY DEVICE bit 10 word 83) and get the total sectors from
 		   either words(61:60) for 28-bit or words(103:100) for 48-bit.  */
 		if (ata_param[ATA_ID_COMMAND_SETS_SUPPORTED] & 0x0400) {
@@ -780,7 +780,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 			if (ata_param[ATA_ID_48BIT_SECTOTAL_HI]) {
 				devinfo[i].total_sectors = 0xffffffff;
 			} else {
-				devinfo[i].total_sectors = 
+				devinfo[i].total_sectors =
 					(ata_param[ATA_ID_48BIT_SECTOTAL_MI] << 16)|
 					ata_param[ATA_ID_48BIT_SECTOTAL_LO];
 			}

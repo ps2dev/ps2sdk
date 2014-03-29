@@ -39,7 +39,7 @@
  *                  a or b <0 integer        0.0
  *
  */
-
+
 /*							beta.c	*/
 
 

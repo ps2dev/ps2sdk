@@ -31,7 +31,7 @@
  *
  *
  *  Absolute error, except relative when y > 1:
- *                      
+ *
  * arithmetic   domain     # trials      peak         rms
  *    IEEE      0, 30       10000       2.3e-6      3.4e-7
  *
@@ -45,7 +45,7 @@
  * Spot checked against tables for x, n between 0 and 100.
  *
  */
-
+
 /*
 Cephes Math Library Release 2.2: June, 1992
 Copyright 1984, 1987, 1992 by Stephen L. Moshier

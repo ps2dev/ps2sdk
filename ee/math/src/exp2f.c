@@ -42,7 +42,7 @@
  *
  * For IEEE arithmetic, MAXL2 = 127.
  */
-
+
 
 /*
 Cephes Math Library Release 2.2:  June, 1992

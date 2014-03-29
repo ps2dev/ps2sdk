@@ -44,7 +44,7 @@
  * See also hyperg.c.
  *
  */
-/*							iv.c	*/
+/*							iv.c	*/
 /*	Modified Bessel function of noninteger order		*/
 /* If x < 0, then v must be an integer. */
 

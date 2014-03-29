@@ -1,4 +1,4 @@
-/*      
+/*
 # _____     ___ ____     ___ ____
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
@@ -47,20 +47,20 @@ extern "C" {
 #define ALIGNED(x) __attribute__((aligned((x))))
 
 // For use with AddIntcHandler/RemoveIntcHandler/etc...
-enum 
-{ 
-   kINTC_GS, 
-   kINTC_SBUS, 
-   kINTC_VBLANK_START, 
-   kINTC_VBLANK_END, 
-   kINTC_VIF0, 
-   kINTC_VIF1, 
-   kINTC_VU0, 
-   kINTC_VU1, 
-   kINTC_IPU, 
-   kINTC_TIMER0, 
-   kINTC_TIMER1 
-}; 
+enum
+{
+   kINTC_GS,
+   kINTC_SBUS,
+   kINTC_VBLANK_START,
+   kINTC_VBLANK_END,
+   kINTC_VIF0,
+   kINTC_VIF1,
+   kINTC_VU0,
+   kINTC_VU1,
+   kINTC_IPU,
+   kINTC_TIMER0,
+   kINTC_TIMER1
+};
 
 static inline void nopdelay(void)
 {

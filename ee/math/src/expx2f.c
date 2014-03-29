@@ -16,7 +16,7 @@
  *
  * Computes y = exp(x*x) while suppressing error amplification
  * that would ordinarily arise from the inexactness of the argument x*x.
- * 
+ *
  *
  * ACCURACY:
  *

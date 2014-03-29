@@ -28,14 +28,14 @@
  *						Relative error:
  * arithmetic	domain		# trials	  peak		 rms
  *	  IEEE		+-3600		100,000 	 1.2e-7 	3.0e-8
- * 
+ *
  * ERROR MESSAGES:
  *
  *	 message		   condition		value returned
  * sin total loss	   x > 2^24 			 0.0
  *
  */
-
+
 /*							cosdgf.c
  *
  *	Circular cosine of angle in degrees
@@ -67,7 +67,7 @@
  * arithmetic	domain		# trials	  peak		   rms
  *	  IEEE	  -8192,+8192	100,000 	 3.0e-7 	3.0e-8
  */
-
+
 /*
 Cephes Math Library Release 2.2:  June, 1992
 Copyright 1985, 1987, 1988, 1992 by Stephen L. Moshier

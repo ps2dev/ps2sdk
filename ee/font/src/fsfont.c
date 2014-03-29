@@ -6,7 +6,7 @@
 
 #include <font.h>
 
-static prim_t charprim = 
+static prim_t charprim =
 {
 	PRIM_SPRITE, PRIM_SHADE_FLAT, DRAW_ENABLE,
 	DRAW_DISABLE, DRAW_ENABLE, DRAW_DISABLE,

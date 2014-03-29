@@ -16,7 +16,7 @@ IOP_INC_DIR = include/
 
 IOP_BIN  = bin/sior.irx
 IOP_OBJS = obj/sior.o obj/xprintf.o obj/exports.o obj/imports.o
-IOP_INCS = 
+IOP_INCS =
 
 IOP_CFLAGS  += -Wall -fno-builtin-printf
 IOP_LDFLAGS += -s

@@ -29,7 +29,7 @@
 #define AHXOF_BOOST        0
 #define AHXOI_OVERSAMPLING 1
 
-int VibratoTable[] = { 
+int VibratoTable[] = {
 	0,24,49,74,97,120,141,161,180,197,212,224,235,244,250,253,255,
 	253,250,244,235,224,212,197,180,161,141,120,97,74,49,24,
 	0,-24,-49,-74,-97,-120,-141,-161,-180,-197,-212,-224,-235,-244,-250,-253,-255,
@@ -73,7 +73,7 @@ int PatternBreak;
 int MainVolume;
 int Playing, Tempo;
 int PosNr, PosJump;
-int NoteNr, PosJumpNote;	
+int NoteNr, PosJumpNote;
 int WNRandom;
 int PlayingTime;
 
@@ -149,7 +149,7 @@ void GenerateWhiteNoise(char* Buffer, int Len)
 		if(Seed&0x100) *Buffer = (char)(Seed&0xff);
 		else if(!(Seed&0xffff)) *Buffer = 0x80;
 		else *Buffer = 0x7f;
-		
+
 		Buffer++;
 		tmp = Seed;		// ror 5
 		Seed >>= 5;
@@ -213,14 +213,14 @@ void GenerateFilterWaveforms(char* Buffer, char* Low, char* High)
 		};
     int temp, freq, waves, i, freint, highint, midint, lowint;
 
-    for(temp = 0, freq = 8; temp < 31; temp++, freq += 3 ) 
+    for(temp = 0, freq = 8; temp < 31; temp++, freq += 3 )
 	{
 		int v125;
 		a0 = Buffer;
 		//fre = ((freq*1.25f)/100);
 		v125 = (1<<FIXEDPOINT)+((1<<FIXEDPOINT)/4);
-		freint = ((freq*v125)/100); // 0x14000 ~ 1.25 
-		for(waves = 0; waves < 6+6+0x20+1; waves++) 
+		freint = ((freq*v125)/100); // 0x14000 ~ 1.25
+		for(waves = 0; waves < 6+6+0x20+1; waves++)
 		{ // 0 - 44
 			char low_,high_;
 			//mid = 0.f;
@@ -228,7 +228,7 @@ void GenerateFilterWaveforms(char* Buffer, char* Low, char* High)
 			midint = 0;
 			lowint = 0;
 
-			for(i = 0; i <= LengthTable[waves]; i++) 
+			for(i = 0; i <= LengthTable[waves]; i++)
 			{
 				//high = a0[i] - mid - low; clip(&high);
 				//mid += high*fre; clip(&mid);
@@ -238,7 +238,7 @@ void GenerateFilterWaveforms(char* Buffer, char* Low, char* High)
 				midint += (highint*(freint>>(FIXEDPOINT/2))>>(FIXEDPOINT/2)); clipint(&midint);
 				lowint += (midint*(freint>>(FIXEDPOINT/2))>>(FIXEDPOINT/2)); clipint(&lowint);
 			}
-			for(i = 0; i <= LengthTable[waves]; i++) 
+			for(i = 0; i <= LengthTable[waves]; i++)
 			{
 				//high = a0[i] - mid - low; clip(&high);
 				//mid += high*fre; clip(&mid);
@@ -257,8 +257,8 @@ void GenerateFilterWaveforms(char* Buffer, char* Low, char* High)
 				*High++ = high_;
 			}
 			a0 += LengthTable[waves]+1;
-			//printf("start = %d, a0 = %d\n", start, a0); 
-		} 
+			//printf("start = %d, a0 = %d\n", start, a0);
+		}
 	}
 }
 
@@ -335,7 +335,7 @@ int AHXPlayer_LoadSongBuffer(void* Buffer, int Len)
     char* NamePtr;
 
 	AHXPlayer_FreeMem();
-    
+
 	if(SongLength < 14 || SongLength == 65536) return 0;
 
 	if(SongBuffer[0] != 'T' && SongBuffer[1] != 'H' && SongBuffer[2] != 'X') return 0;
@@ -364,7 +364,7 @@ int AHXPlayer_LoadSongBuffer(void* Buffer, int Len)
 		printf("subsongs = %d\n",Song.SubsongNr);
 		printf("Positions = %d\n",Song.PositionNr);
 		printf("Tracks = %d\n",(MaxTrack+1));
-	#endif	
+	#endif
 	for(i = 0; i < Song.SubsongNr; i++) {
 		if(SBPtr - SongBuffer > SongLength) return 0;
 		Song.Subsongs[i] = (SBPtr[0]<<8)|SBPtr[1];
@@ -372,7 +372,7 @@ int AHXPlayer_LoadSongBuffer(void* Buffer, int Len)
 	}
 
 	// Position List /////////////////////////////////////
-	Positions = (struct AHXPosition*) malloc(sizeof(struct AHXPosition)*Song.PositionNr);	
+	Positions = (struct AHXPosition*) malloc(sizeof(struct AHXPosition)*Song.PositionNr);
 	for(i = 0; i < Song.PositionNr; i++) {
 		for(j = 0; j < 4; j++) {
 			if(SBPtr - SongBuffer > SongLength) return 0;
@@ -383,7 +383,7 @@ int AHXPlayer_LoadSongBuffer(void* Buffer, int Len)
 
 	// Tracks ////////////////////////////////////////////
 	MaxTrack = Song.TrackNr;
-	Tracks = (struct AHXStep**) malloc(sizeof(struct AHXStep)*(MaxTrack+1));	
+	Tracks = (struct AHXStep**) malloc(sizeof(struct AHXStep)*(MaxTrack+1));
 	for(i = 0; i < MaxTrack+1; i++) {
 		Tracks[i] = (struct AHXStep*) malloc(sizeof(struct AHXStep)*Song.TrackLength);
 		if((SongBuffer[6]&0x80)==0x80 && i==0) {
@@ -478,7 +478,7 @@ int AHXPlayer_InitSubsong(int Nr)
 	SongEndReached = 0;
 	TimingValue = PlayingTime = 0;
 
-	for(v = 0; v < 4; v++) 
+	for(v = 0; v < 4; v++)
     {
         AHXVoice_Init(&Voices[v]);
     }
@@ -654,7 +654,7 @@ NoNote:
 			Voices[v].PeriodSlideWithLimit = 0;
 			break;
 		case 0xc: // Volume
-			if(FXParam <= 0x40) 
+			if(FXParam <= 0x40)
 				Voices[v].NoteMaxVolume = FXParam;
 			else {
 				FXParam -= 0x50;
@@ -696,7 +696,7 @@ NoNote:
 void AHXPlayer_PListCommandParse(int v, int FX, int FXParam)
 {
 	switch(FX) {
-		case 0: 
+		case 0:
 			if(Song.Revision > 0 && FXParam != 0) {
 				if(Voices[v].IgnoreFilter) {
 					Voices[v].FilterPos = Voices[v].IgnoreFilter;
@@ -742,8 +742,8 @@ void AHXPlayer_PListCommandParse(int v, int FX, int FXParam)
 			if(FXParam > 0x40) {
 				if((FXParam -= 0x50) >= 0) {
 					if(FXParam <= 0x40) Voices[v].PerfSubVolume = FXParam;
-					else 
-						if((FXParam -= 0xa0-0x50) >= 0) 
+					else
+						if((FXParam -= 0xa0-0x50) >= 0)
 							if(FXParam <= 0x40) Voices[v].TrackMasterVolume = FXParam;
 				}
 			} else Voices[v].NoteMaxVolume = FXParam;
@@ -868,7 +868,7 @@ void AHXPlayer_ProcessFrame(int v)
 			int d3 = Voices[v].SquarePos;
 			if(Voices[v].SquareInit) {
 				Voices[v].SquareInit = 0;
-				if(d3 <= d1) { 
+				if(d3 <= d1) {
 					Voices[v].SquareSlidingIn = 1;
 					Voices[v].SquareSign = 1;
 				} else if(d3 >= d2) {
@@ -1070,7 +1070,7 @@ void AHXOutput_MixChunk(int NrSamples, int** mb)
 {
     int v, delta, samples_to_mix, mixpos, *VolTab, i, offset, sample1, sample2, frac1, frac2, thiscount;
 	long freq;
-    
+
     for(v = 0; v < 4; v++) {
 		if(Voices[v].VoiceVolume == 0) continue;
 		 freq = Period2Freq(Voices[v].VoicePeriod);
@@ -1115,16 +1115,16 @@ void AHXOutput_MixBuffer(short* target)
 	int* mb = MixingBuffer;
 	int thissample;
     int s;
-	
+
 	memset(MixingBuffer, 0, MixLen*Frequency/Hz*sizeof(int));
 	for(f = 0; f < MixLen*Song.SpeedMultiplier /* MixLen = # frames */; f++) {
 		AHXPlayer_PlayIRQ();
 		AHXOutput_MixChunk(NrSamples, &mb);
 	} // frames
 
-	for(s = 0; s < BlockLen /(16/8); s++) 
+	for(s = 0; s < BlockLen /(16/8); s++)
 	{
-		thissample = *(MixingBuffer+s) << 6; // 16 bit		
+		thissample = *(MixingBuffer+s) << 6; // 16 bit
         target[s] = thissample < LOW_CLIP16 ? LOW_CLIP16 : thissample > HI_CLIP16 ? HI_CLIP16 : thissample;
     }
 }

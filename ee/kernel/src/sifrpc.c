@@ -73,7 +73,7 @@ void *_rpc_get_packet(struct rpc_data *rpc_data)
 			rpc_data->pid = pid + 2;
 			pid = 1;
 		}
-		
+
 		packet->rec_id = (rid << 16) | 0x04 | PACKET_F_ALLOC;
 		packet->rpc_id = pid;
 		packet->pkt_addr = packet;
@@ -404,7 +404,7 @@ void SifInitRpc(int mode)
 	_sif_rpc_data.pkt_table    = UNCACHED_SEG(_sif_rpc_data.pkt_table);
 	_sif_rpc_data.rdata_table  = UNCACHED_SEG(_sif_rpc_data.rdata_table);
 	_sif_rpc_data.client_table = UNCACHED_SEG(_sif_rpc_data.client_table);
-	
+
 	SifAddCmdHandler(0x80000008, (void *)_request_end, &_sif_rpc_data);
 	SifAddCmdHandler(0x80000009, (void *)_request_bind, &_sif_rpc_data);
 	SifAddCmdHandler(0x8000000a, (void *)_request_call, &_sif_rpc_data);
@@ -432,7 +432,7 @@ void SifExitRpc(void)
 
 #ifdef F_SifRegisterRpc
 SifRpcServerData_t *
-SifRegisterRpc(SifRpcServerData_t *sd, 
+SifRegisterRpc(SifRpcServerData_t *sd,
 		int sid, SifRpcFunc_t func, void *buff, SifRpcFunc_t cfunc,
 		void *cbuff, SifRpcDataQueue_t *qd)
 {

@@ -38,7 +38,7 @@ typedef struct t_mcTable {
 
 
 // modInfo struct returned by xmcman exports 42
-struct modInfo_t { 
+struct modInfo_t {
 	const char *name;
 	u16 version;
 };

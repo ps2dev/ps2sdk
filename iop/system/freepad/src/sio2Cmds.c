@@ -14,11 +14,11 @@
 
 typedef struct
 {
-	u8 id; 	
-	void (*readdata)(u8 *); 
+	u8 id;
+	void (*readdata)(u8 *);
 	u32 (*getportctrl1)(u32, u32);
 	u32 (*getportctrl2)(u32);
-	u32 (*reg_data)(void); 
+	u32 (*reg_data)(void);
 	u32 (*size1)(void);
 	u32 (*size2)(void);
 	u32 (*enterconfigmode)(u8 *);
@@ -32,9 +32,9 @@ typedef struct
 	u32 (*setvrefparam)(u8 *);
 	u32 (*setmainmode)(u8 *);
 	u32 (*setactalign)(u8 *);
-} sio2Cmds_t; 
+} sio2Cmds_t;
 
-sio2Cmds_t sio2Cmds[10]; 
+sio2Cmds_t sio2Cmds[10];
 
 u8 cmdsBuffer[16];
 s32 numControllers;
@@ -67,7 +67,7 @@ u32 SetupCmds(sio2Cmds_t *s)
 				i++;
 			} while(numControllers > i);
 		}
-		
+
 		u32 i = numControllers;
 
 		sio2Cmds[i].id = s->id;
@@ -90,7 +90,7 @@ u32 SetupCmds(sio2Cmds_t *s)
 		sio2Cmds[i].setmainmode = s->setmainmode;
 		sio2Cmds[i].setactalign = s->setactalign;
 
-		numControllers++;		
+		numControllers++;
 
 		return 1;
 	}
@@ -144,11 +144,11 @@ u32 FindPadsRegData()
 	u32 res1, res2;
 
 	res1 = FindPadsGetSize1();
-	
+
 	res1 = ((res1 & 0x1FF) << 8) | 0x40;
 
 	res2 = FindPadsGetSize2();
-	
+
 	res2 = (res2 & 0x1FF) << 18;
 
 	return (res1 | res2);
@@ -184,7 +184,7 @@ void sio2cmdInitFindPads()
 	s.setvrefparam = 0;
 	s.setmainmode = 0;
 	s.setactalign = 0;
-	
+
 	SetupCmds(&s);
 }
 
@@ -243,7 +243,7 @@ u32 MouseEnterConfigMode(u8 *a)
 	a[4] = 0;
 	a[5] = 0;
 	a[6] = 0;
-	
+
 	return 0x7;
 }
 
@@ -252,7 +252,7 @@ void sio2cmdInitMouse()
 	sio2Cmds_t s;
 
 	s.id = PAD_ID_HI(PAD_ID_MOUSE);
-	
+
 	s.readdata = MouseReadData;
 	s.getportctrl1 = MouseGetPortCtrl1;
 	s.getportctrl2 = MouseGetPortCtrl2;
@@ -336,7 +336,7 @@ u32 NegiconEnterConfigMode(u8 *a)
 	a[6] = 0;
 	a[7] = 0;
 	a[8] = 0;
-	
+
 	return 0x9;
 }
 
@@ -379,7 +379,7 @@ void KonamiGunReadData(u8* a)
 	a[2] = 0;
 	a[3] = 0;
 	a[4] = 0;
-} 
+}
 
 u32 KonamiGunGetPortCtrl1(u32 a, u32 b)
 {
@@ -419,7 +419,7 @@ u32 KonamiGunEnterConfigMode(u8 *a)
 	a[2] = 0;
 	a[3] = 0x1;
 	a[4] = 0;
-	
+
 	return 0x5;
 }
 
@@ -462,7 +462,7 @@ void DigitalReadData(u8* a)
 	a[2] = 0;
 	a[3] = 0;
 	a[4] = 0;
-} 
+}
 
 u32 DigitalGetPortCtrl1(u32 a, u32 b)
 {
@@ -502,7 +502,7 @@ u32 DigitalEnterConfigMode(u8 *a)
 	a[2] = 0;
 	a[3] = 0x1;
 	a[4] = 0;
-	
+
 	return 0x5;
 }
 
@@ -548,7 +548,7 @@ void JoystickReadData(u8* a)
 	a[6] = 0;
 	a[7] = 0;
 	a[8] = 0;
-} 
+}
 
 u32 JoystickGetPortCtrl1(u32 a, u32 b)
 {
@@ -591,7 +591,7 @@ u32 JoystickEnterConfigMode(u8 *a)
 	a[5] = 0;
 	a[6] = 0;
 	a[7] = 0;
-	a[8] = 0;	
+	a[8] = 0;
 
 	return 0x9;
 }
@@ -640,7 +640,7 @@ void NamcoGunReadData(u8* a)
 	a[6] = 0;
 	a[7] = 0;
 	a[8] = 0;
-} 
+}
 
 u32 NamcoGunGetPortCtrl1(u32 a, u32 b)
 {
@@ -683,7 +683,7 @@ u32 NamcoGunEnterConfigMode(u8 *a)
 	a[5] = 0;
 	a[6] = 0;
 	a[7] = 0;
-	a[8] = 0;	
+	a[8] = 0;
 
 	return 0x9;
 }
@@ -737,7 +737,7 @@ void AnalogReadData(u8* a)
 	a[12] = 0;
 	a[13] = 0;
 	a[14] = 0;
-} 
+}
 
 u32 AnalogGetPortCtrl1(u32 a, u32 b)
 {
@@ -746,19 +746,19 @@ u32 AnalogGetPortCtrl1(u32 a, u32 b)
 	else
 	{
 		u32 val1, val2, val3 ;
-	
+
 		if((b & 0x2) == 0)
 			val1 = 0x5;
 		else
 			val1 = 0xA;
-	
+
 		if((b & 0x2) == 0)
 			val2 = 0x5;
 		else
 			val2 = 0xA;
 
 		val1 &= 0xFFFF00FF;
-		
+
 		val3 = val2 | ( val2 << 8);
 
 
@@ -771,7 +771,7 @@ u32 AnalogGetPortCtrl1(u32 a, u32 b)
 		val3 = val3 | (val1 << 16) | 0xFF000000;
 
 		return val3;
-	}	
+	}
 }
 
 u32 AnalogGetPortCtrl2(u32 a)
@@ -853,7 +853,7 @@ void JogconReadData(u8* a)
 	a[10] = 0;
 	a[11] = 0;
 	a[12] = 0;
-} 
+}
 
 
 u32 JogconGetPortCtrl1(u32 a, u32 b)
@@ -899,7 +899,7 @@ u32 JogconEnterConfigMode(u8 *a)
 	a[7] = 0;
 	a[8] = 0;
 	a[9] = 0;
-	a[10] = 0;	
+	a[10] = 0;
 	a[11] = 0;
 	a[12] = 0;
 
@@ -948,7 +948,7 @@ static void ConfigReadData(u8* a)
 	a[6] = 0x5A;
 	a[7] = 0x5A;
 	a[8] = 0x5A;
-} 
+}
 
 u32 ConfigGetPortCtrl1(u32 a, u32 b)
 {
@@ -1174,7 +1174,7 @@ u32 sio2cmdCheckId(u8 id)
 		{
 			if( sio2Cmds[i].id == id )
 				return 1;
-		}	
+		}
 	}
 
 	return 0;
@@ -1373,7 +1373,7 @@ u32 sio2CmdSetQueryMode(u32 id, u8 *buf)
 			}
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -1394,7 +1394,7 @@ u32 sio2CmdSetExitConfigMode(u32 id, u8 *buf)
 			}
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -1415,7 +1415,7 @@ u32 sio2CmdSetSetActAlign(u32 id, u8 *buf)
 			}
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -1436,7 +1436,7 @@ u32 sio2CmdSetQueryButtonMask(u32 id, u8 *buf)
 			}
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -1457,7 +1457,7 @@ u32 sio2CmdSetSetVrefParam(u32 id, u8 *buf)
 			}
 		}
 	}
-	
+
 	return 0;
 
 }
@@ -1479,7 +1479,7 @@ u32 sio2CmdSetSetButtonInfo(u32 id, u8 *buf)
 			}
 		}
 	}
-	
+
 	return 0;
 
 }

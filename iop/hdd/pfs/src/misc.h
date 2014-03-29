@@ -32,7 +32,7 @@
 typedef struct
 {
 	u32		sub;		// main(0)/subs(1+) to read/write
-	u32		sector;		// 
+	u32		sector;		//
 	u32		size;		// in sectors
 	u32		mode;		// IOCTL2_TMODE_*
 	void	*buffer;	//

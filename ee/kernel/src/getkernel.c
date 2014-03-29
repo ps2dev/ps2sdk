@@ -28,7 +28,7 @@ static void InitSyscallTable(void)
     ee_set_opmode(oldop);
     if(oldintr) { EIntr(); }
 }
- 
+
 /** Get the address of an EE syscall handler function.
     @param syscall_no - The syscall number.
     @return - The address of the syscall handler function (or NULL)
@@ -82,7 +82,7 @@ void *GetExceptionHandler(int ex_cause_no)
     {
         return(NULL);
     }
-    
+
     // get address of the syscall "SetVTLBRefillHandler"
     addr = (u32)GetSyscallHandler(13);
 
@@ -94,7 +94,7 @@ void *GetExceptionHandler(int ex_cause_no)
     lo16 = ((vu32 *) addr)[0x20 / 4];
     hi16 = ((vu32 *) addr)[0x14 / 4];
     table_addr = ((u32) (hi16 << 16) | lo16);
-    
+
     addr = ((u32 *) table_addr)[ex_cause_no];
 
     // return to the old operating mode and resume interrupts.

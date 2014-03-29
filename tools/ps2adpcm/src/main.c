@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 	AdpcmSetup *set[2];
 	PcmBuffer pcm;
 
-	pcm.ChannelCount = 1; 
+	pcm.ChannelCount = 1;
 
 	if (argc<3)
 	{
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
 			dprintf("%s: unkown option '%s'\n", argv[0], argv[i]);
 			return(1);
 			break;
-		}		
+		}
 	}
 
 
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
 		}
 		if (i!=pcm.ChannelCount)
 			break;
-	} while(1);	
+	} while(1);
 
 	return(0);
 }

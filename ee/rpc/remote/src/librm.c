@@ -51,7 +51,7 @@ rmGetDmaStr(int port, int slot)
 {
    struct rm_data *pdata;
 
-   pdata = ports[port].rmData;    
+   pdata = ports[port].rmData;
    SyncDCache(pdata, (u8 *)pdata + 256);
 
    return pdata;

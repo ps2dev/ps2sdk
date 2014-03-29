@@ -78,7 +78,7 @@ void serverThread()
    sh = socket( AF_INET, SOCK_STREAM, IPPROTO_TCP );
    if ( sh < 0 )
    {
-      printf( "PS2ECHO: Socket failed to create.\n" );   
+      printf( "PS2ECHO: Socket failed to create.\n" );
       SleepThread();
    }
 
@@ -95,7 +95,7 @@ void serverThread()
    {
       printf( "PS2ECHO: Socket failed to bind.\n" );
       SleepThread();
-   } 
+   }
 
    printf( "PS2ECHO: bind returned %i\n",rc );
 
@@ -108,7 +108,7 @@ void serverThread()
    }
 
    printf(  "PS2ECHO: listen returned %i\n", rc );
- 
+
    FD_ZERO(&active_rd_set);
    FD_SET(sh, &active_rd_set);
    while(1)
@@ -147,7 +147,7 @@ void serverThread()
 			  }
 		  }
 	  }
-   } 
+   }
 
 	SleepThread();
 }

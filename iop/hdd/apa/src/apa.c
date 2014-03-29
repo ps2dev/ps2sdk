@@ -61,8 +61,8 @@ int getPartErrorName(u32 device, char *name)
 
 	while(clink)
 	{
-		if(clink->header->type!=APA_TYPE_FREE && 
-			!(clink->header->flags & CACHE_FLAG_DIRTY) && 
+		if(clink->header->type!=APA_TYPE_FREE &&
+			!(clink->header->flags & CACHE_FLAG_DIRTY) &&
 			clink->header->start==lba) {
 				if(name) {
 					strncpy(name, clink->header->id, APA_IDMAX - 1);
@@ -266,7 +266,7 @@ int apaOpen(u32 device, hdd_file_slot_t *fileSlot, input_param *params, int mode
 	apa_cache		*clink;
 	apa_cache		*clink2;
 	u32				sector=0;
-	
+
 
 	// walk all looking for any empty blocks & look for partition
 	clink=cacheGetHeader(device, 0, 0, &rv);

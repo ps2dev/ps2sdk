@@ -14,7 +14,7 @@
 #ifndef __PS2MOUSE_H__
 #define __PS2MOUSE_H__
 
-typedef struct _mouse_data 
+typedef struct _mouse_data
 
 {
   s32 x, y;

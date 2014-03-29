@@ -50,10 +50,10 @@ void sleeping_beauty()
 }
 
 int main()
-{   
+{
 	int i;
 
-	SifInitRpc(0); 
+	SifInitRpc(0);
 
 	for (i=0; i<10; i++)
 	{

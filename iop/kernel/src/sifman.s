@@ -45,12 +45,12 @@ sceSifSetDma:
 sceSifDmaStat:
 	j	$31
 	li	$0, 0x08
-	
+
 	.globl	sceSifGetSMFlag			# 0x17
 sceSifGetSMFlag:
 	j	$31
 	li	$0, 0x17
-	
+
 	.globl	sceSifSetSMFlag			# 0x18
 sceSifSetSMFlag:
 	j	$31

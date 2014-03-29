@@ -23,7 +23,7 @@
  *                |                   2
  * E(phi\m)  =    |    sqrt( 1 - m sin t ) dt
  *                |
- *              | |    
+ *              | |
  *               -
  *                0
  *
@@ -42,7 +42,7 @@
  *
  *
  */
-
+
 
 /*
 Cephes Math Library Release 2.2:  July, 1992

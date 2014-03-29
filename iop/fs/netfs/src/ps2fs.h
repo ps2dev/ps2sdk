@@ -11,7 +11,7 @@
 # Protocol and packet definitions for ps2netfs.
 */
 
-/** \defgroup ps2netfs ps2netfs - TCP fs driver*/ 
+/** \defgroup ps2netfs ps2netfs - TCP fs driver*/
 
 #ifndef _PS2FS_H_
 #define _PS2FS_H_

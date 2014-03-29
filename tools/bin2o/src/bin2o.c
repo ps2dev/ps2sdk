@@ -114,7 +114,7 @@ static void create_elf(FILE * dest, const unsigned char * source, u32 size, cons
     for (i = 0; i < sizeof(elf_header); i++) {
 	fputc(elf_header[i], dest);
     }
-    
+
     l_size = strlen(label);
 
     strtab[0] = 0;
@@ -129,13 +129,13 @@ static void create_elf(FILE * dest, const unsigned char * source, u32 size, cons
     } else {
         strtab_size = (l_size * 2 + 1 + 7 + 5);
     }
-    
+
     // section 0 (NULL)
     section.sh_name = section.sh_type = section.sh_flags = section.sh_addr = section.sh_offset = section.sh_size =
     section.sh_link = section.sh_info = section.sh_addralign = section.sh_entsize = 0;
-    
+
     fwrite(&section, 1, sizeof(section), dest);
-    
+
     // section 1 (.shstrtab)
     if(put_payload_in_SDATA || put_labels_in_SDATA){
 	pshstrtab_ptr=shstrtab_sdata;
@@ -154,10 +154,10 @@ static void create_elf(FILE * dest, const unsigned char * source, u32 size, cons
     section.sh_info = 0;
     section.sh_addralign = LE32(1);
     section.sh_entsize = 0;
-    
+
     fwrite(&section, 1, sizeof(section), dest);
-    
-    
+
+
     // section 2 (.symtab)
     section.sh_name = LE32(11);
     section.sh_type = LE32(2); // SYMTAB
@@ -169,7 +169,7 @@ static void create_elf(FILE * dest, const unsigned char * source, u32 size, cons
     section.sh_info = 0;
     section.sh_addralign = LE32(4);
     section.sh_entsize = LE32(0x10);
-    
+
     fwrite(&section, 1, sizeof(section), dest);
 
     // section 3 (.strtab)
@@ -183,7 +183,7 @@ static void create_elf(FILE * dest, const unsigned char * source, u32 size, cons
     section.sh_info = 0;
     section.sh_addralign = LE32(1);
     section.sh_entsize = 0;
-    
+
     fwrite(&section, 1, sizeof(section), dest);
 
     if(put_payload_in_SDATA || put_labels_in_SDATA){
@@ -197,7 +197,7 @@ static void create_elf(FILE * dest, const unsigned char * source, u32 size, cons
 	section.sh_link = 0;
 	section.sh_addralign = LE32(alignment);
 	section.sh_entsize = 0;
-    
+
 	fwrite(&section, 1, sizeof(section), dest);
     }
 
@@ -217,9 +217,9 @@ static void create_elf(FILE * dest, const unsigned char * source, u32 size, cons
     section.sh_link = 0;
     section.sh_addralign = LE32(alignment);
     section.sh_entsize = 0;
-    
+
     fwrite(&section, 1, sizeof(section), dest);
-    
+
     fwrite(pshstrtab_ptr, 1, shrtabSectionNameLength, dest);
 
     symbol.st_name = LE32(1);
@@ -249,7 +249,7 @@ static void create_elf(FILE * dest, const unsigned char * source, u32 size, cons
     }
 
     fwrite(strtab, 1, strtab_size, dest);
-    
+
     if (have_size) {
         data_size[0] = LE32(size);
         data_size[1] = 0;
@@ -375,7 +375,7 @@ int main(int argc, char *argv[])
 	    }
 	}
     }
-    
+
     if (!f_source || !f_dest || !f_label) {
 	usage();
 	printf("Not enough arguments.\n");
@@ -390,10 +390,10 @@ int main(int argc, char *argv[])
     fseek(source, 0, SEEK_END);
     fd_size = ftell(source);
     fseek(source, start, SEEK_SET);
-    
+
     if (fd_size < end)
 	end = fd_size;
-    
+
     if (end < (size - start))
 	size = end - start;
 
@@ -421,7 +421,7 @@ int main(int argc, char *argv[])
 	printf("Failed to open/create %s.\n", f_dest);
 	return 1;
     }
-    
+
     create_elf(dest, buffer, size, f_label);
 
     fclose(dest);

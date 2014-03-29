@@ -66,12 +66,12 @@ void packet_free(packet_t *packet)
 	if (packet->type == PACKET_SPR)
 	{
 
-		packet->data = NULL; 
+		packet->data = NULL;
 
 	}
 	else
 	{
-		if (packet->type == PACKET_UCAB) 
+		if (packet->type == PACKET_UCAB)
 		{
 
 			(u32)packet->data ^= 0x30000000;
@@ -91,7 +91,7 @@ void packet_reset(packet_t *packet)
 	// Reset the quadword counter.
 	packet->qwc = 0;
 
-	if (packet->type == PACKET_SPR) 
+	if (packet->type == PACKET_SPR)
 	{
 
 		(u8*)packet->data = (u8*)SPR_BEGIN;

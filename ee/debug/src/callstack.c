@@ -92,7 +92,7 @@ in this Software without prior written authorization from The Open Group.
 
 #define HASH_SIZE   256
 
-typedef struct _returnCache 
+typedef struct _returnCache
 {
     unsigned int   *returnAddress;
     int	    raOffset;
@@ -130,12 +130,12 @@ void ps2GetStackTrace(unsigned int* results,int max)
   Bool found_ra_offset, found_sp_adjust;
   Bool found_const_upper, found_const_lower;
   ReturnCachePtr  rc;
-  
+
   ra = ps2GetReturnAddress();
   sp = ps2GetStackPointer();
   mainCall = CALL(main);
-  
-  while (ra && max) 
+
+  while (ra && max)
   {
     rc = &returnCache[HASH(ra)];
     if (rc->returnAddress != ra)
@@ -150,7 +150,7 @@ void ps2GetStackTrace(unsigned int* results,int max)
       ra_limit = (unsigned int *) 0x200000;
       ra_offset = 0;
       sp_adjust = -1;
-      
+
       while ((!found_ra_offset || !found_sp_adjust) && ra < ra_limit)
       {
         inst = *ra;
@@ -201,22 +201,22 @@ void ps2GetStackTrace(unsigned int* results,int max)
           ra_limit = ra + 2;
           ra++;
       }
-      
+
       if (sp_adjust == 0 && (found_const_upper || found_const_lower))
         sp_adjust = (const_upper << 16) | const_lower;
         rc->raOffset = ra_offset;
         rc->spAdjust = sp_adjust;
       }
       /* if something went wrong, punt */
-      if (rc->spAdjust <= 0) 
+      if (rc->spAdjust <= 0)
       {
         *results++ = 0;
         break;
       }
-            
+
       ra = (unsigned int *) sp[rc->raOffset>>2];
       sp += rc->spAdjust >> 2;
-      
+
       if (ra == 0)
       {
         *results++ = 0;

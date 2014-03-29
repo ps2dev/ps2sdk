@@ -39,7 +39,7 @@ LOADFILE_OBJS = SifLoadFileInit.o SifLoadFileExit.o _SifLoadModule.o SifLoadModu
 	SifSearchModuleByName.o SifSearchModuleByAddress.o _SifLoadElfPart.o SifLoadElfPart.o \
 	SifLoadElf.o SifLoadElfEncrypted.o SifIopSetVal.o SifIopGetVal.o \
 	_SifLoadModuleBuffer.o SifLoadModuleBuffer.o SifLoadStartModuleBuffer.o \
-	SifExecModuleBuffer.o SifExecModuleFile.o 
+	SifExecModuleBuffer.o SifExecModuleFile.o
 LOADFILE_OBJS := $(LOADFILE_OBJS:%=$(EE_OBJS_DIR)%)
 
 IOPHEAP_OBJS = SifInitIopHeap.o SifExitIopHeap.o SifAllocIopHeap.o \

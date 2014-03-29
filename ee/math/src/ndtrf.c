@@ -44,7 +44,7 @@
  * See erfcf().
  *
  */
-/*							erff.c
+/*							erff.c
  *
  *	Error function
  *
@@ -62,7 +62,7 @@
  *
  * The integral is
  *
- *                           x 
+ *                           x
  *                            -
  *                 2         | |          2
  *   erf(x)  =  --------     |    exp( - t  ) dt.
@@ -85,7 +85,7 @@
  *    IEEE      -9.3,9.3    50000       1.7e-7      2.8e-8
  *
  */
-/*							erfcf.c
+/*							erfcf.c
  *
  *	Complementary error function
  *
@@ -104,7 +104,7 @@
  *
  *  1 - erf(x) =
  *
- *                           inf. 
+ *                           inf.
  *                             -
  *                  2         | |          2
  *   erfc(x)  =  --------     |    exp( - t  ) dt
@@ -132,7 +132,7 @@
  *
  *
  */
-
+
 
 /*
 Cephes Math Library Release 2.2:  June, 1992

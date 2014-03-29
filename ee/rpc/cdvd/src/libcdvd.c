@@ -15,7 +15,7 @@
 #
 # NOTE: These functions will work with the CDVDMAN/CDVDFSV or XCDVDMAN/XCDVDFSV
 # modules stored in rom0.
-#		
+#
 # NOTE: not all functions work with each set of modules!
 */
 
@@ -116,7 +116,7 @@ extern u32 searchFileRecvBuff;
 
 
 // init cdvd system
-// 
+//
 // args:        init mode (CDVD_INIT_???)
 // returns:     1 if successful
 //                      0 if error
@@ -188,7 +188,7 @@ s32 cdPosToInt(CdvdLocation_t * p)
 
 
 // search for a file on disc
-// 
+//
 // args:        file structure to get file info in
 //                      name of file to search for (no wildcard characters)
 //                              (should be in the form '\\SYSTEM.CNF;1')
@@ -257,7 +257,7 @@ s32 cdSearchFile(CdvdFileSpec_t * file, const char *name)
 #endif
 
 // checks if drive is ready
-// 
+//
 // args:         mode
 // returns:     CDVD_READY_READY if ready
 //                      CDVD_READY_NOTREADY if busy
@@ -343,7 +343,7 @@ void cdSemaExit(void)
 #endif
 
 // initialise callback thread
-// 
+//
 // args:        callback thread priority
 //                      callback thread stack address (16 byte aligned)
 //                      callback thread stack size
@@ -376,7 +376,7 @@ s32 cdInitCallbackThread(s32 priority, void *stackAddr, s32 stackSize)
 // sets the cd callback function
 // gets called when the following functions complete:
 //    cdSeek, cdStandby, cdStop, cdPause, cdRead
-// 
+//
 // args:        pointer to new callback function (or null)
 // returns:     pointer to old function
 #ifdef F_cdSetCallback
@@ -428,7 +428,7 @@ void cdCallback(void *funcNum)
 	// set the currently executing function num
 	cdCallbackNum = *(s32*) funcNum;
 	iSignalSema(nCmdSemaId);
-	
+
 	// check if user callback is registered
 	if (callbackThreadId)
 	{
@@ -438,7 +438,7 @@ void cdCallback(void *funcNum)
 			return;
 		}
 	}
-	
+
 	// clear the currently executing function num
 	cbSema = 0;
 	cdCallbackNum = 0;

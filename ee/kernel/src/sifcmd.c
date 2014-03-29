@@ -1,4 +1,4 @@
-/*      
+/*
 # _____     ___ ____     ___ ____
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
@@ -28,7 +28,7 @@
 #define   CHCR_STR		0x100
 #define   STAT_SIF0		0x20
 
-/* Even though I'm reluctant to do this, I've made this structure binary 
+/* Even though I'm reluctant to do this, I've made this structure binary
    compatible with the SCE libs and ps2lib.  In all implementations, a pointer
    to this data is stored in SIF register 0x80000001.  Each routine that
    relies on this data can then use the data referenced from that register, so
@@ -96,18 +96,18 @@ static u32 _SifSendCmd(int cid, int mode, void *pkt, u32 pktsize, void *src,
 }
 
 u32
-SifSendCmd( int command, void *send_data, int send_len, 
+SifSendCmd( int command, void *send_data, int send_len,
    		   void *extra_from, void *extra_dest, int extra_len)
 {
-   return _SifSendCmd( command, 0, send_data, send_len, 
+   return _SifSendCmd( command, 0, send_data, send_len,
       		extra_from, extra_dest, extra_len);
 }
 
-u32 
-iSifSendCmd( int command, void *send_data, int send_len, 
+u32
+iSifSendCmd( int command, void *send_data, int send_len,
    		   void *extra_from, void *extra_dest, int extra_len)
 {
-   return _SifSendCmd( command, 1, send_data, send_len, 
+   return _SifSendCmd( command, 1, send_data, send_len,
       		extra_from, extra_dest, extra_len);
 }
 #endif
@@ -268,7 +268,7 @@ void SifInitCmd()
 
 	sif0_id = AddDmacHandler(5, _SifCmdIntHandler, 0);
 	EnableDmac(5);
-	
+
 	init = 1;
 
 	_sif_cmd_data.iopbuf = (void *)SifGetReg(0x80000000);

@@ -15,6 +15,6 @@
 
 char * erl_id = "libgs";
 char * erl_dependancies[] = {
-    
+
     0
 };

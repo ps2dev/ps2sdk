@@ -56,7 +56,7 @@ s32 read_stat6c_bit(u32 bit, sio2_transfer_data_t *tdata)
 		case 15:	return (tdata->stat6c >> 31) & 1;
 		default: 	return 0;
 	}
-} 
+}
 
 void get_slot_number_setup_td(u32 port, u32 reg)
 {
@@ -76,7 +76,7 @@ void get_slot_number_setup_td(u32 port, u32 reg)
 		td.in[td.in_size + 1] = 0x12;
 	else
 		td.in[td.in_size + 1] = 0x13;
-	
+
 	td.in_size += 6;
 	td.out_size += 6;
 	td.in_dma.addr = 0;
@@ -94,7 +94,7 @@ s32 get_slot_number_check_td(u32 bit)
 			res = -2;
 		else
 			res = td.out[3];
-	}	
+	}
 	else
 	{
 		res = -1;
@@ -123,7 +123,7 @@ s32 get_slot_number(u32 port, u32 retries)
 
 		td.in_size = 0;
 		td.out_size = 0;
-	
+
 		for(j=0; j < 16; j++) td.regdata[j] = 0;
 
 		get_slot_number_setup_td(port, 0);
@@ -136,7 +136,7 @@ s32 get_slot_number(u32 port, u32 retries)
 
 		i++;
 		//M_PRINTF("get_slot_number retry %i.\n", (int)i);
-	} 
+	}
 
 	return -4;
 }
@@ -179,7 +179,7 @@ void update_slot_numbers_thread()
 			}
 		}
 
-		
+
 	}
 }
 
@@ -194,7 +194,7 @@ s32 change_slot_setup_td(u32 port, s32 slot, u32 reg)
 	td.regdata[reg] = (p & 0x3) | 0x1c0740;
 
 	for(i=0; i < 7; i++) td.in[td.in_size + i] = 0;
-		
+
 	td.in[td.in_size] = 0x21;
 
 	if(port < 2)
@@ -204,8 +204,8 @@ s32 change_slot_setup_td(u32 port, s32 slot, u32 reg)
 	else
 	{
 		td.in[td.in_size + 1] = 0x22;
-	}	
-	
+	}
+
 	td.in[td.in_size + 2] = (u8)slot;
 
 	td.in_size += 7;
@@ -228,7 +228,7 @@ s32 change_slot_check_td(u32 a)
 		{
 			if(td.out[5] == 0x66)
 				res = -2;
-			else			
+			else
 				res = td.out[5];
 
 		}
@@ -269,7 +269,7 @@ s32 change_slot(s32 *arg)
 
 		td.in_size = 0;
 		td.out_size = 0;
-	
+
 		for(i=0; i < 16; i++) td.regdata[i] = 0;
 
 		// Setup transfer data
@@ -284,7 +284,7 @@ s32 change_slot(s32 *arg)
 					if(state_slots[port] > arg[port])
 					{
 						change_slot_setup_td(port, arg[port], reg);
-						
+
 						data[port] = port;
 						reg++;
 					}
@@ -296,7 +296,7 @@ s32 change_slot(s32 *arg)
 				}
 				else
 				{
-					if(arg[port] == 0) 
+					if(arg[port] == 0)
 						arg[port+4] = 1;
 					else
 						arg[port+4] = -1;
@@ -312,14 +312,14 @@ s32 change_slot(s32 *arg)
 		// Send transfer data and check result
 		if(reg > 0)
 		{
-			sio2_transfer(&td);	
+			sio2_transfer(&td);
 
 			for(port=0; port < 4; port++)
 			{
 				if(data[port] >= 0)
 				{
 					s32 res = change_slot_check_td(data[port]);
-				
+
 					if(res == -2)
 					{
 						data[port+4] = -1;
@@ -378,15 +378,15 @@ s32 _start(char **argv, int argc)
 	iop_event_t event;
 	iop_thread_t thread;
 	u32 i;
-	
+
 	printf(BANNER,VERSION);
 
-	if(RegisterLibraryEntries(&_exp_mtapman) != 0) 
+	if(RegisterLibraryEntries(&_exp_mtapman) != 0)
 	{
 		M_PRINTF("RegisterLibraryEntries failed.\n");
-		return 1;	
+		return 1;
 	}
-	
+
 	if(InitRpcServers() == 0)
 	{
 		M_PRINTF("Failed to setup RPC Servers.\n");
@@ -420,7 +420,7 @@ s32 _start(char **argv, int argc)
 	StartThread(threadid_main, 0);
 
 	for(i=0; i < 4; i++)
-	{	
+	{
 		state_open[i] = 0;
 		state_getcon[i] = 0;
 		state_slots[i] = 0;
@@ -443,12 +443,12 @@ void shutdown()
 	u32 i;
 
 	sio2_mtap_change_slot_set(0);
-	sio2_mtap_get_slot_max_set(0); 
+	sio2_mtap_get_slot_max_set(0);
 	sio2_mtap_get_slot_max_set2(0);
 	sio2_mtap_update_slots_set(0);
 
 	for(i=0; i < 4; i++)
-	{	
+	{
 		state_open[i] = 0;
 		state_getcon[i] = 0;
 		state_slots[i] = 0;
@@ -500,13 +500,13 @@ s32 mtapGetSlotNumber(u32 port)
 	if(port > 4) return -1;
 
 	if(state_open[port] == 0) return 1;
-	
+
 	res = get_slot_number(port, 10);
 
 	if(res >= 0)
 		return res;
 	else
-		return 1; 	
+		return 1;
 }
 
 s32 mtapChangeSlot(u32 port, u32 slot)
@@ -528,7 +528,7 @@ s32 mtapChangeSlot(u32 port, u32 slot)
 	data[port] = slot;
 
 	sio2_mtap_transfer_init();
-	
+
 	change_slot(data);
 
 	sio2_transfer_reset();

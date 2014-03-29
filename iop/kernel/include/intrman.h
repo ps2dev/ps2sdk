@@ -76,7 +76,7 @@ int DisableIntr(int irq, int *res);
 #define I_DisableIntr DECLARE_IMPORT(7, DisableIntr)
 
 int CpuDisableIntr();
-#define I_CpuDisableIntr DECLARE_IMPORT(8, CpuDisableIntr) 
+#define I_CpuDisableIntr DECLARE_IMPORT(8, CpuDisableIntr)
 int CpuEnableIntr();
 #define I_CpuEnableIntr DECLARE_IMPORT(9, CpuEnableIntr)
 

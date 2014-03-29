@@ -245,8 +245,8 @@ int flash_page_erase(flash_info_t *info, u32 page)
  * read by setting the page_bytes member of the info struct. The default set
  * by the driver is 528 bytes:
  * Bytes 0 - 511: Data
- * Bytes 512 - 527: Metadata?  
- * 
+ * Bytes 512 - 527: Metadata?
+ *
  * You can also set page_bytes to 512 or 16 bytes.  */
 int flash_page_read(flash_info_t *info, u32 page, u32 count, void *buf)
 {

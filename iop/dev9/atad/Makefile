@@ -19,7 +19,7 @@ IOP_OBJS = obj/ps2atad.o obj/exports.o obj/imports.o
 
 IOP_CFLAGS  += -Wall -fno-builtin
 IOP_LDFLAGS += -s
-IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include 
+IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

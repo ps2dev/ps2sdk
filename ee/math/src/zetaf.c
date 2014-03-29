@@ -18,7 +18,7 @@
  *
  *                 inf.
  *                  -        -x
- *   zeta(x,q)  =   >   (k+q)  
+ *   zeta(x,q)  =   >   (k+q)
  *                  -
  *                 k=0
  *
@@ -26,11 +26,11 @@
  * The Euler-Maclaurin summation formula is used to obtain
  * the expansion
  *
- *                n         
+ *                n
  *                -       -x
- * zeta(x,q)  =   >  (k+q)  
- *                -         
- *               k=1        
+ * zeta(x,q)  =   >  (k+q)
+ *                -
+ *               k=1
  *
  *           1-x                 inf.  B   x(x+1)...(x+2j)
  *      (n+q)           1         -     2j
@@ -58,7 +58,7 @@
  * Series, and Products, p. 1073; Academic Press, 1980.
  *
  */
-
+
 /*
 Cephes Math Library Release 2.2:  July, 1992
 Copyright 1984, 1987, 1992 by Stephen L. Moshier

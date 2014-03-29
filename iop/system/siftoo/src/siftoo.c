@@ -80,7 +80,7 @@ int sif2_init()
 	 * - If it hasn't been initialized yet, set SIF SM flag 0x80000 and
 	 *   wait for an event signaling that the EE is ready.
 	 */
-	
+
 	return 0;
 }
 

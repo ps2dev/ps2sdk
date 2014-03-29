@@ -42,7 +42,7 @@
  * powf domain      x<0 and y noninteger  0.0
  *
  */
-
+
 /*
 Cephes Math Library Release 2.2:  June, 1992
 Copyright 1984, 1987, 1988 by Stephen L. Moshier
@@ -181,7 +181,7 @@ if( x <= 0.0F )
 		{
 		if( y == 0.0 )
 			return( 1.0 );  /*   0**0   */
-		else  
+		else
 			return( 0.0 );  /*   0**y   */
 		}
 	else

@@ -51,7 +51,7 @@
  * self-estimated relative error is greater than 1.0e-3.
  *
  */
-
+
 /*							hyperg.c */
 
 
@@ -86,7 +86,7 @@ float hypergf( aa, bb, xx)
 double aa, bb, xx;
 #endif
 {
-float a, b, x, asum, psum, acanc, pcanc, temp;
+float a, b, x, asum, psum, acanc, pcanc=0, temp;
 
 
 a = aa;
@@ -209,11 +209,11 @@ return( sum );
 /*							hy1f1a()	*/
 /* asymptotic formula for hypergeometric function:
  *
- *        (    -a                         
- *  --    ( |z|                           
+ *        (    -a
+ *  --    ( |z|
  * |  (b) ( -------- 2f0( a, 1+a-b, -1/x )
- *        (  --                           
- *        ( |  (b-a)                      
+ *        (  --
+ *        ( |  (b-a)
  *
  *
  *                                x    a-b                     )
@@ -297,7 +297,7 @@ adone:
 *err = acanc;
 return( asum );
 }
-
+
 /*							hyp2f0()	*/
 
 #ifdef ANSIC

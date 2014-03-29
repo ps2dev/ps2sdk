@@ -8,9 +8,15 @@
 #
 # $Id$
 
-SUBDIRS = cube debug/callstacktest graph hello rpc/memorycard rpc/pad tcpip/ee-echo teapot
+SUBDIRS = cube
+SUBDIRS += debug/callstacktest
+SUBDIRS += graph
+SUBDIRS += hello
+SUBDIRS += rpc/pad
+SUBDIRS += tcpip/ee-echo
+SUBDIRS += teapot
 
-all: $(patsubst %, _dir_%, $(SUBDIRS)) 
+all: $(patsubst %, _dir_%, $(SUBDIRS))
 
 $(patsubst %, _dir_%, $(SUBDIRS)):
 	@$(MAKE) -r -C $(patsubst _dir_%, %, $@)

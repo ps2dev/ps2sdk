@@ -105,7 +105,7 @@ typedef struct t_SifRpcClientData {
 	struct t_SifRpcHeader hdr;
 	u32	command;
 	void	*buff;
-	void	*cbuff;	
+	void	*cbuff;
 	SifRpcEndFunc_t end_function;
 	void	*end_param;
 	struct t_SifRpcServerData *server;
@@ -131,11 +131,11 @@ typedef struct t_SifRpcDataQueue {
 void sceSifRemoveCmdHandler(int cid);
 #define I_sceSifRemoveCmdHandler DECLARE_IMPORT(11, sceSifRemoveCmdHandler)
 
-unsigned int sceSifSendCmd(int cmd, void *packet, int packet_size, void *src_extra, 
+unsigned int sceSifSendCmd(int cmd, void *packet, int packet_size, void *src_extra,
 	void *dest_extra, int size_extra);
 #define I_sceSifSendCmd DECLARE_IMPORT(12, sceSifSendCmd)
 
-unsigned int isceSifSendCmd(int cmd, void *packet, int packet_size, void *src_extra, 
+unsigned int isceSifSendCmd(int cmd, void *packet, int packet_size, void *src_extra,
 	void *dest_extra, int size_extra);
 #define I_isceSifSendCmd DECLARE_IMPORT(13, isceSifSendCmd)
 

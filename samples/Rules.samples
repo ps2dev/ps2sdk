@@ -45,7 +45,7 @@ sample-dir:
 
 #
 # Any file in the include directory will be copied to the ee/include
-# directory.  This does not currently handle subdirectories. 
+# directory.  This does not currently handle subdirectories.
 #
 
 sample-files:

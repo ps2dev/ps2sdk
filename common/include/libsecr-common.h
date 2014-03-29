@@ -18,26 +18,26 @@
 
 // Encrypted file Data Block info struct
 typedef struct SecrBitBlockData{
-	u32 size;		// Size of data block 
+	u32 size;		// Size of data block
 	u32 flags;		// Flags : 0x01 = signed, 0x02 = encrypted.
 	u8 checksum[8];
 } SecrBitBlockData_t;
 
 typedef struct SecrBitTableHeader{
 	u32 headersize;	// KELF header size (same as SecrKELFHeader_t.KELF_header_size)
-	u8 block_count;	// Number of blocks in the KELF file 
+	u8 block_count;	// Number of blocks in the KELF file
 	u8 pad1;
 	u8 pad2;
 	u8 pad3;
 } SecrBitTableHeader_t;
 
-// Encrypted file BIT table struct 
+// Encrypted file BIT table struct
 typedef struct SecrBitTable {
 	SecrBitTableHeader_t header;
 	SecrBitBlockData_t blocks[63];	// KELF section information.
 } SecrBitTable_t;
 
-// Encrypted file header struct 
+// Encrypted file header struct
 typedef struct KELF_Header{
 	u8 UserHeader[16];
 	u32 ELF_size;		// Size of data blocks = Decrypted elf size
@@ -55,7 +55,7 @@ int SecrDiskBootHeader(void *buffer, SecrBitTable_t *BitTable, s32 *pSize);
 int SecrDiskBootBlock(void *src, void *dst, unsigned int size);
 void *SecrDiskBootFile(void *buffer);
 
-/* FOLLOWING EXPORTS ARE ONLY AVAILABLE IN SPECIAL SECRMAN OR FREESECR */ 
+/* FOLLOWING EXPORTS ARE ONLY AVAILABLE IN SPECIAL SECRMAN OR FREESECR */
 int SecrDownloadHeader(int port, int slot, void *buffer, SecrBitTable_t *BitTable, s32 *pSize);
 int SecrDownloadBlock(void *src, unsigned int size);
 void *SecrDownloadFile(int port, int slot, void *buffer);

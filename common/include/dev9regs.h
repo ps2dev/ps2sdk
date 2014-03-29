@@ -16,7 +16,7 @@
 
 #include <tamtypes.h>
 
-enum _dev9_regnames { 
+enum _dev9_regnames {
        DEV9_R_1460, DEV9_R_1462, DEV9_R_1464, DEV9_R_1466, DEV9_R_1468,
        DEV9_R_146A, DEV9_R_POWER,DEV9_R_REV,  DEV9_R_1470, DEV9_R_1472,
        DEV9_R_1474, DEV9_R_1476, DEV9_R_1478, DEV9_R_147A, DEV9_R_147C,

@@ -33,7 +33,7 @@
  * arithmetic   domain     # trials      peak         rms
  *    IEEE     -34,+34      100000      8.9e-7      1.1e-7
  */
-
+
 /*
 Cephes Math Library Release 2.2:  June, 1992
 Copyright 1985, 1987, 1992 by Stephen L. Moshier

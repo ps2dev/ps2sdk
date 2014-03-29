@@ -31,7 +31,7 @@
  *    IEEE      -10, 10     100000      1.9e-7      4.1e-8
  *
  */
-/*							atan2f()
+/*							atan2f()
  *
  *	Quadrant correct inverse circular tangent
  *
@@ -62,7 +62,7 @@
  * See atan.c.
  *
  */
-
+
 /*							atan.c */
 
 

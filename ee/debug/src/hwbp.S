@@ -1,4 +1,4 @@
-#      
+#
 # _____     ___ ____     ___ ____
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
@@ -54,7 +54,7 @@ InitBPC:
 # a2 = options
 SetInstructionBP:
 
-	sync.p	
+	sync.p
 
 	mfbpc	$t0
 # Jump if top bit not set
@@ -103,7 +103,7 @@ SetInstructionBP:
 	.global SetDataAddrBP
 	.ent	SetDataAddrBP
 SetDataAddrBP:
-	sync.l	
+	sync.l
 
 # Mask out any data address related bits
 	mfbpc	$t0
@@ -143,7 +143,7 @@ SetDataAddrBP:
 	.global SetDataValueBP
 	.ent	SetDataValueBP
 SetDataValueBP:
-	sync.l	
+	sync.l
 
 # Mask out any data address related bits
 	mfbpc	$t1

@@ -9,9 +9,9 @@
 #include "lwip/udp.h"
 
 /** period (in seconds) of the application calling dhcp_coarse_tmr() */
-#define DHCP_COARSE_TIMER_SECS 60 
+#define DHCP_COARSE_TIMER_SECS 60
 /** period (in milliseconds) of the application calling dhcp_fine_tmr() */
-#define DHCP_FINE_TIMER_MSECS 500 
+#define DHCP_FINE_TIMER_MSECS 500
 
 struct dhcp
 {
@@ -19,16 +19,16 @@ struct dhcp
   u8_t state;
   /** retries of current request */
   u8_t tries;
-  /** transaction identifier of last sent request */ 
+  /** transaction identifier of last sent request */
   u32_t xid;
-  /** our connection to the DHCP server */ 
+  /** our connection to the DHCP server */
   struct udp_pcb *pcb;
   /** (first) pbuf of incoming msg */
   struct pbuf *p;
   /** incoming msg */
   struct dhcp_msg *msg_in;
   /** incoming msg options */
-  struct dhcp_msg *options_in; 
+  struct dhcp_msg *options_in;
   /** ingoing msg options length */
   u16_t options_in_len;
 
@@ -112,9 +112,9 @@ void dhcp_arp_reply(struct netif *netif, struct ip_addr *addr);
 void dhcp_coarse_tmr(void);
 /** to be called every half second */
 void dhcp_fine_tmr(void);
- 
+
 /** DHCP message item offsets and length */
-#define DHCP_MSG_OFS (UDP_DATA_OFS)  
+#define DHCP_MSG_OFS (UDP_DATA_OFS)
   #define DHCP_OP_OFS (DHCP_MSG_OFS + 0)
   #define DHCP_HTYPE_OFS (DHCP_MSG_OFS + 1)
   #define DHCP_HLEN_OFS (DHCP_MSG_OFS + 2)
@@ -134,7 +134,7 @@ void dhcp_fine_tmr(void);
 #define DHCP_COOKIE_OFS (DHCP_MSG_OFS + DHCP_MSG_LEN)
 #define DHCP_OPTIONS_OFS (DHCP_MSG_OFS + DHCP_MSG_LEN + 4)
 
-#define DHCP_CLIENT_PORT 68  
+#define DHCP_CLIENT_PORT 68
 #define DHCP_SERVER_PORT 67
 
 /** DHCP client states */
@@ -151,7 +151,7 @@ void dhcp_fine_tmr(void);
 /** not yet implemented #define DHCP_RELEASING 11 */
 #define DHCP_BACKING_OFF 12
 #define DHCP_OFF 13
- 
+
 #define DHCP_BOOTREQUEST 1
 #define DHCP_BOOTREPLY 2
 
@@ -174,7 +174,7 @@ void dhcp_fine_tmr(void);
 /** BootP options */
 #define DHCP_OPTION_PAD 0
 #define DHCP_OPTION_SUBNET_MASK 1 /* RFC 2132 3.3 */
-#define DHCP_OPTION_ROUTER 3 
+#define DHCP_OPTION_ROUTER 3
 #define DHCP_OPTION_HOSTNAME 12
 #define DHCP_OPTION_IP_TTL 23
 #define DHCP_OPTION_MTU 26

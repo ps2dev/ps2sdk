@@ -4,7 +4,7 @@ stdio_IMPORTS_end
 
 libsd_IMPORTS_start
 I_sceSdInit
-I_sceSdSetIRQCallback 
+I_sceSdSetIRQCallback
 I_sceSdSetTransCallback
 I_sceSdSetParam
 I_sceSdGetParam

@@ -185,9 +185,9 @@ raw_send_to(struct raw_pcb *pcb, struct pbuf *p, struct ip_addr *ipaddr)
   struct netif *netif;
   struct ip_addr *src_ip;
   struct pbuf *q; /* q will be sent down the stack */
-  
+
   LWIP_DEBUGF(RAW_DEBUG | DBG_TRACE | 3, ("raw_send_to\n"));
-  
+
   /* not enough space to add an IP header to first pbuf in given p chain? */
   if (pbuf_header(p, IP_HLEN)) {
     /* allocate header in new pbuf */
@@ -206,7 +206,7 @@ raw_send_to(struct raw_pcb *pcb, struct pbuf *p, struct ip_addr *ipaddr)
     q = p;
     pbuf_header(q, -IP_HLEN);
   }
-  
+
   if ((netif = ip_route(ipaddr)) == NULL) {
     LWIP_DEBUGF(RAW_DEBUG | 1, ("raw_send_to: No route to 0x%lx\n", ipaddr->addr));
 #if RAW_STATS

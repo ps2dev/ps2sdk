@@ -17,6 +17,6 @@ int _start(int argc, char * argv[]) {
         return 1;
 
     hello();
-    
+
     return 0;
 }

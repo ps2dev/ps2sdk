@@ -21,9 +21,9 @@ Supported hardware:
       behaves inreliably - use supplied power cable)
 
 Supported features:
-  - fat12, fat16, fat32. First suitable partition is used. 
+  - fat12, fat16, fat32. First suitable partition is used.
   - basic support for long filenames (128 chars in the filename).
-  - read and write access. 
+  - read and write access.
     Note: write access is experimental - use at your own risks!
 
 Missing features:
@@ -31,14 +31,14 @@ Missing features:
   - real unicode decoding and conversion for long filenames
   - only one mass device connected is currently supported
   - file system error detection - if you plug in disk with corrupted
-    filesystem then the resluts are unspecified 
+    filesystem then the resluts are unspecified
   - and much more :-)  Driver is still in development so you may
     encounter many bugs.
 
 
 How to use:
 The usb_mass driver requires that usbd.irx is loaded. You can use either
-usbd.irx that can be found on some games and demo disks or you can use 
+usbd.irx that can be found on some games and demo disks or you can use
 npm_usbd.irx that is part of the naplink ps2 server side. Then load
 the mass_usb.irx and you are ready to acces the "mass:" device by calling
 fioOpen("mass:xxx/yyy.txt", O_RDONLY), fioRead etc. When you plug in
@@ -48,13 +48,13 @@ and ready to use. There is an example in the ee directory that lists
 directory content of the disk's root directory.
 
 Performance:
-My tests show that file transfer speed is about 500kbytes per second. 
+My tests show that file transfer speed is about 500kbytes per second.
 If large non fragmented files are accesed (several megabytes) then the
 speed jumps at 550kbytes/s. It's not much but when compared to maximum
 usb 1.1 tranfer speed it's not that bad (max is about 700kb/s).
 
 Compilation:
-Copy the content to ps2sdk/samples/usb_mass directory and run make 
+Copy the content to ps2sdk/samples/usb_mass directory and run make
 in ee and/or iop subdirectory to get example elf and driver irx.
 
 
@@ -84,7 +84,7 @@ ver 0.30
 
 ver 0.24
 --------
-- bugfix - scsi inquiry command asked more data than required 
+- bugfix - scsi inquiry command asked more data than required
 - removed device reset during configuration of the device (caused freeze for
   some devices, other devices were able to survive the reset )
 
@@ -109,13 +109,13 @@ ver 0.2
 -------
 - support for the fat32 filesystem
 
-ver 0.1 
+ver 0.1
 -------
 -initial version
 
 
 Credits: (alphabetical order :)
-BraveDog,Jonathan Fox (FAT system guide), Hermes, mrbrown, ole, oobles, 
+BraveDog,Jonathan Fox (FAT system guide), Hermes, mrbrown, ole, oobles,
 Gustvo Scotti, raipsu, TyRaNiD, and the ps2dev scene.
 
 Thanks:

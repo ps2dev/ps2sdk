@@ -9,7 +9,7 @@
 #define LWIP_PLATFORM_ASSERT(args...)
 #endif
 
-/** 
+/**
  * NO_SYS==1: Provides VERY minimal functionality. Otherwise,
  * use lwIP facilities.
  */
@@ -100,13 +100,13 @@
 /* ---------- Pbuf options ---------- */
 
 /**
- * PBUF_POOL_SIZE: the number of buffers in the pbuf pool. 
+ * PBUF_POOL_SIZE: the number of buffers in the pbuf pool.
  */
 #define PBUF_POOL_SIZE		60//((TCP_WND/PBUF_POOL_BUFSIZE)+1)
 
 /** SYS_LIGHTWEIGHT_PROT
  * define SYS_LIGHTWEIGHT_PROT in lwipopts.h if you want inter-task protection
- * for certain critical regions during buffer allocation, deallocation and 
+ * for certain critical regions during buffer allocation, deallocation and
  * memory allocation and deallocation.
  */
 #define SYS_LIGHTWEIGHT_PROT	1

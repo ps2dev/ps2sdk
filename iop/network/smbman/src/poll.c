@@ -22,7 +22,7 @@ int poll(struct pollfd *fds, unsigned long nfds, int timeout)
     struct timeval *tbuf = (struct timeval *)0;
     int n = 0;
     int count;
-    
+
     FD_ZERO(&ifd);
     FD_ZERO(&rfd);
     FD_ZERO(&wfd);
@@ -60,9 +60,9 @@ int poll(struct pollfd *fds, unsigned long nfds, int timeout)
 
     if (err < 0)
 		return err;
-  
+
    	count = 0;
-   	
+
    	for (i = 0; i < nfds; i++) {
 		int revents = (fds[i].events & POLL_EVENTS_MASK);
 		int fd = fds[i].fd;
@@ -86,7 +86,7 @@ int poll(struct pollfd *fds, unsigned long nfds, int timeout)
 		if ((fds[i].revents = revents) != 0)
 	   		count++;
     }
-    
-    return count; 
+
+    return count;
 }
 

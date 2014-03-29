@@ -124,8 +124,8 @@ struct twoarguments
 #define RELERR 1
 
 /* fundef.tstyp  test types: */
-#define POWER 1 
-#define ELLIP 2 
+#define POWER 1
+#define ELLIP 2
 #define GAMMA 3
 #define WRONK1 4
 #define WRONK2 5
@@ -175,7 +175,7 @@ static char *headrs[] = {
 "Wronksian of %s, %s: ",
 "Wronksian of %s, %s: "
 };
- 
+
 static float yy1;
 static float y2;
 static float y3;
@@ -313,7 +313,7 @@ switch( nargs )
 
 default:
 goto illegn;
-	
+
 case 2:
 drand( &doublea );
 a = arg2w *  ( doublea - 1.0 )  +  arg2l;
@@ -355,14 +355,14 @@ switch( nargs )
 			yy1 = (*fun2)( k, x ); /* jn */
 			y2 = (*fun2)( k+1, x );
 			y3 = (*ifun2)( k, x ); /* yn */
-			y4 = (*ifun2)( k+1, x );	
+			y4 = (*ifun2)( k+1, x );
 			break;
 
 			case WRONK2:
 			yy1 = (*fun2)( a, x ); /* iv */
 			y2 = (*fun2)( a+1.0F, x );
-			y3 = (*ifun2)( k, x ); /* kn */	
-			y4 = (*ifun2)( k+1, x );	
+			y3 = (*ifun2)( k, x ); /* kn */
+			y4 = (*ifun2)( k+1, x );
 			break;
 
 			default:
@@ -406,13 +406,13 @@ switch( nargs )
 		y = ( *(ifun1) )(z);
 		}
 	break;
-	
+
 
 	default:
 illegn:
 	printf( "Illegal nargs= %d", nargs );
 	exit(1);
-	}	
+	}
 
 switch( tstyp )
 	{
@@ -423,7 +423,7 @@ switch( tstyp )
 	case WRONK2:
 	e = (y2*y3 + yy1*y4) - 1.0F/x; /* In, Kn */
 	break;
-	
+
 	case ELLIP:
 	e = (yy1-y3)*y4 + y3*y2 - PIO2F;
 	break;

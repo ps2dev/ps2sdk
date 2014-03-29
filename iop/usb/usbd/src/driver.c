@@ -97,7 +97,7 @@ void disconnectDriver(Device *tree, UsbDriver *drv) {
 	if (tree->devDriver == drv) {
 		if (tree->endpointListStart) {
 			ep = tree->endpointListStart->next;
-			
+
 			while (ep) {
 				nextEp = ep->next;
 				removeEndpointFromDevice(tree, ep);
@@ -150,7 +150,7 @@ void signalCallbackThreadFunc(IoRequest *req) {
 	int intrStat;
 
 	CpuSuspendIntr(&intrStat);
-	
+
 	req->prev = cbListEnd;
 	req->next = NULL;
 	if (cbListEnd)

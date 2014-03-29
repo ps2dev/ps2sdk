@@ -18,10 +18,10 @@ all: $(EE_BIN) freesio2.irx freepad.irx
 clean:
 	rm -f *.elf *.o *.a freepad.irx freesio2.irx
 
-freesio2.irx: 
+freesio2.irx:
 	cp $(PS2SDK)/iop/irx/freesio2.irx $@
 
-freepad.irx: 
+freepad.irx:
 	cp $(PS2SDK)/iop/irx/freepad.irx $@
 
 

@@ -67,7 +67,7 @@ static char ps2netfs_fiobuffer[FIOTRAN_MAXSIZE+1];
 
 /*
  *  \brief File Descriptor Handler functions
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *        Handles upto FDH_MAXFD open files concurrently.
  */
@@ -81,7 +81,7 @@ typedef struct {
 static fd_table_t fd_info_list[FDH_MAX+1]; /* one for padding */
 
 /*! \brief Initialise the file descriptor table.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  This initialises the file descriptor table that we
  *  use to translate to numbers passed to client, and to
@@ -93,7 +93,7 @@ static inline void fdh_setup()
 }
 
 /*! \brief Get file descriptor for client.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param devtype Device Manager type.
  *  \param fd      PS2 file descriptor.
@@ -109,7 +109,7 @@ static inline int fdh_getfd(int devtype,int fd)
   while ((count < FDH_MAX))
   {
     if (fd_info_list[count].used == 0)
-    { 
+    {
       fd_info_list[count].used = 1;
       fd_info_list[count].realfd = fd;
       fd_info_list[count].devtype = devtype;
@@ -121,7 +121,7 @@ static inline int fdh_getfd(int devtype,int fd)
 }
 
 /*! \brief Free file descriptor from client table.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param fd      client file descriptor.
  *
@@ -154,9 +154,9 @@ static inline void fdh_freefd(int fd)
 static inline int convmode_to_iomanx(int stat)
 {
   int mode = 0;
-  
+
   if FIO_SO_ISLNK(stat) mode |= FIO_S_IFLNK; // Symbolic link
-  if FIO_SO_ISREG(stat) mode |= FIO_S_IFREG; // regular file 
+  if FIO_SO_ISREG(stat) mode |= FIO_S_IFREG; // regular file
   if FIO_SO_ISDIR(stat) mode |= FIO_S_IFDIR; // directory
 
   if (((stat) & FIO_SO_IROTH) == FIO_SO_IROTH) // read
@@ -179,7 +179,7 @@ static inline int convmode_from_iomanx(int stat)
 }
 
 /*! \brief Shortcut to close the socket and cleanup.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \return disconnect return value.
  */
@@ -188,14 +188,14 @@ int ps2netfs_close_socket(void)
   int ret;
 
   ret = disconnect(ps2netfs_sock);
-  if (ret < 0) 
+  if (ret < 0)
     printf("ps2netfs: disconnect returned error %d\n", ret);
   ps2netfs_sock = -1;
   return ret;
 }
 
 /*! \brief Shortcut to close the socket forcibly and set to exit (active=0).
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  This will close down the socket, and cause the server thread to exit.
  *
@@ -203,20 +203,20 @@ int ps2netfs_close_socket(void)
  */
 void ps2netfs_close_fsys(void)
 {
-  if (ps2netfs_sock > 0) 
+  if (ps2netfs_sock > 0)
     disconnect(ps2netfs_sock);
   ps2netfs_active = 0;
   return;
 }
 
-//---------------------------------------------------------------------- 
+//----------------------------------------------------------------------
 // XXX: Hm, this func should behave sorta like pko_recv_bytes imho..
 // i.e. check if it was able to send just a part of the packet etc..
 static inline int ps2netfs_lwip_send(int sock, void *buf, int len, int flag)
 {
   int ret;
   ret = send(sock, buf, len, flag);
-  if (ret < 0) 
+  if (ret < 0)
   {
     dbgprintf("ps2netfs: lwip_send() error %d\n", ret);
     ps2netfs_close_socket();
@@ -230,7 +230,7 @@ static inline int ps2netfs_lwip_send(int sock, void *buf, int len, int flag)
   else return ret;
 }
 
-//---------------------------------------------------------------------- 
+//----------------------------------------------------------------------
 // Do repetetive recv() calls until 'bytes' bytes are received
 // or error returned
 int ps2netfs_recv_bytes(int sock, char *buf, int bytes)
@@ -256,7 +256,7 @@ int ps2netfs_recv_bytes(int sock, char *buf, int bytes)
   return bytes;
 }
 
-//---------------------------------------------------------------------- 
+//----------------------------------------------------------------------
 // Receive a 'packet' of unknown type, max size 4096 bytes
 int ps2netfs_accept_pktunknown(int sock, char *buf)
 {
@@ -278,14 +278,14 @@ int ps2netfs_accept_pktunknown(int sock, char *buf)
               "Fix this! (%d)\n", length);
     return -1;
   }
-    
+
   hdr = (ps2netfs_pkt_hdr *)buf;
   hcmd = ntohl(hdr->cmd);
   hlen = ntohs(hdr->len);
 
   dbgprintf("ps2netfs: accept_pkt: got 0x%x , hlen: %d, length: %d\n", hcmd,hlen,length);
 
-  if ((length > PACKET_MAXSIZE) || (hlen > PACKET_MAXSIZE)) 
+  if ((length > PACKET_MAXSIZE) || (hlen > PACKET_MAXSIZE))
   {
     dbgprintf("ps2netfs: accept_pkt: hlen is too large!! "
               "(%d,%d can only receive %d)\n", length,hlen, PACKET_MAXSIZE);
@@ -293,7 +293,7 @@ int ps2netfs_accept_pktunknown(int sock, char *buf)
   }
 
   // get the actual packet data
-  length = ps2netfs_recv_bytes(sock, buf + sizeof(ps2netfs_pkt_hdr), 
+  length = ps2netfs_recv_bytes(sock, buf + sizeof(ps2netfs_pkt_hdr),
                                hlen - sizeof(ps2netfs_pkt_hdr));
 
   if (length < 0) {
@@ -310,7 +310,7 @@ int ps2netfs_accept_pktunknown(int sock, char *buf)
 }
 
 /*! \brief Handles a PS2NETFS_INFO_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -334,7 +334,7 @@ static int ps2netfs_op_info(char *buf, int len)
 
   dbgprintf("ps2netfs: info\n");
 
-  if (len != sizeof(ps2netfs_pkt_open_req)) 
+  if (len != sizeof(ps2netfs_pkt_open_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
@@ -352,7 +352,7 @@ static int ps2netfs_op_info(char *buf, int len)
   inforly->retval = htonl(count);
   inforly->count = htonl(count);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, inforly, sizeof(ps2netfs_pkt_info_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, inforly, sizeof(ps2netfs_pkt_info_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
     return -1;
@@ -361,7 +361,7 @@ static int ps2netfs_op_info(char *buf, int len)
 }
 
 /*! \brief Handles a PS2NETFS_FSTYPE_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -385,14 +385,14 @@ static int ps2netfs_op_fstype(char *buf, int len)
 
   dbgprintf("ps2netfs: fstype\n");
 
-  if (len != sizeof(ps2netfs_pkt_open_req)) 
+  if (len != sizeof(ps2netfs_pkt_open_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
   // do the stuff here
   devtype = devscan_gettype(cmd->path);
-    
+
   // now build the response
   openrly = (ps2netfs_pkt_file_rly *)&ps2netfs_send_packet[0];
 
@@ -401,7 +401,7 @@ static int ps2netfs_op_fstype(char *buf, int len)
   openrly->len = htons((unsigned short)sizeof(ps2netfs_pkt_file_rly));
   openrly->retval = htonl(devtype);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, openrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, openrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
     return -1;
@@ -410,7 +410,7 @@ static int ps2netfs_op_fstype(char *buf, int len)
 }
 
 /*! \brief Handles a PS2NETFS_DEVLIST_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -434,7 +434,7 @@ static int ps2netfs_op_devlist(char *buf, int len)
 
   dbgprintf("ps2netfs: devlist\n");
 
-  if (len != sizeof(ps2netfs_pkt_open_req)) 
+  if (len != sizeof(ps2netfs_pkt_open_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
@@ -448,7 +448,7 @@ static int ps2netfs_op_devlist(char *buf, int len)
   { // so fudge in the delimiters
     int cnt; char *ptr = &devlistrly->list[0]; int len;
     for(cnt=0;cnt<(count-1);cnt++)
-    {  
+    {
       len = strlen(ptr);
       // ok, got a string, so replace the final 0, with delimiter
       // move onto next string
@@ -465,7 +465,7 @@ static int ps2netfs_op_devlist(char *buf, int len)
   devlistrly->retval = htonl(count);
   devlistrly->count = htonl(count);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, devlistrly, sizeof(ps2netfs_pkt_devlist_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, devlistrly, sizeof(ps2netfs_pkt_devlist_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
     return -1;
@@ -475,7 +475,7 @@ static int ps2netfs_op_devlist(char *buf, int len)
 
 
 /*! \brief Handles a PS2NETFS_OPEN_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -502,7 +502,7 @@ static int ps2netfs_op_open(char *buf, int len)
 
   dbgprintf("ps2netfs: open\n");
 
-  if (len != sizeof(ps2netfs_pkt_open_req)) 
+  if (len != sizeof(ps2netfs_pkt_open_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
@@ -510,7 +510,7 @@ static int ps2netfs_op_open(char *buf, int len)
   // do the stuff here
   devtype = devscan_gettype(cmd->path);
   if (devtype != IOPMGR_DEVTYPE_INVALID)
-  { 
+  {
     if (devtype == IOPMGR_DEVTYPE_IOMAN)
       retval = io_open(cmd->path,ntohl(cmd->flags));
     else if (devtype == IOPMGR_DEVTYPE_IOMANX)
@@ -527,7 +527,7 @@ static int ps2netfs_op_open(char *buf, int len)
   openrly->len = htons((unsigned short)sizeof(ps2netfs_pkt_file_rly));
   openrly->retval = htonl(retval);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, openrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, openrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
     return -1;
@@ -536,7 +536,7 @@ static int ps2netfs_op_open(char *buf, int len)
 }
 
 /*! \brief Handles a PS2NETFS_CLOSE_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -562,7 +562,7 @@ static int ps2netfs_op_close(char *buf, int len)
 
   dbgprintf("ps2netfs: close\n");
 
-  if (len != sizeof(ps2netfs_pkt_close_req)) 
+  if (len != sizeof(ps2netfs_pkt_close_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
@@ -571,7 +571,7 @@ static int ps2netfs_op_close(char *buf, int len)
   // do the stuff here
   fdptr = fdh_get(ntohl(cmd->fd));
   if (fdptr != 0)
-  { 
+  {
     if (fdptr->devtype == IOPMGR_DEVTYPE_IOMAN)
       retval = io_close(fdptr->realfd);
     else if (fdptr->devtype == IOPMGR_DEVTYPE_IOMANX)
@@ -587,7 +587,7 @@ static int ps2netfs_op_close(char *buf, int len)
   closerly->len = htons((unsigned short)sizeof(ps2netfs_pkt_file_rly));
   closerly->retval = htonl(retval);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, closerly, sizeof(ps2netfs_pkt_file_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, closerly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
     return -1;
@@ -596,7 +596,7 @@ static int ps2netfs_op_close(char *buf, int len)
 }
 
 /*! \brief Handles a PS2NETFS_READ_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -623,7 +623,7 @@ static int ps2netfs_op_read(char *buf, int len)
 
   dbgprintf("ps2netfs: read\n");
 
-  if (len != sizeof(ps2netfs_pkt_read_req))  
+  if (len != sizeof(ps2netfs_pkt_read_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
@@ -635,7 +635,7 @@ static int ps2netfs_op_read(char *buf, int len)
   // do the stuff here
   fdptr = fdh_get(ntohl(cmd->fd));
   if (fdptr != 0)
-  { 
+  {
     if (fdptr->devtype == IOPMGR_DEVTYPE_IOMAN)
       retval = io_read(fdptr->realfd,ps2netfs_fiobuffer,nbytes);
     else if (fdptr->devtype == IOPMGR_DEVTYPE_IOMANX)
@@ -652,14 +652,14 @@ static int ps2netfs_op_read(char *buf, int len)
   readrly->nbytes = readrly->retval;
 
   // send the response
-  if (ps2netfs_lwip_send(ps2netfs_sock, readrly, sizeof(ps2netfs_pkt_read_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, readrly, sizeof(ps2netfs_pkt_read_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
     return -1;
   }
   // now send the data
   if (retval > 0)
-    if (ps2netfs_lwip_send(ps2netfs_sock, ps2netfs_fiobuffer, ntohl(readrly->retval), 0) < 0) 
+    if (ps2netfs_lwip_send(ps2netfs_sock, ps2netfs_fiobuffer, ntohl(readrly->retval), 0) < 0)
     {
       dbgprintf("ps2netfs: error sending data!\n");
       return -1;
@@ -668,7 +668,7 @@ static int ps2netfs_op_read(char *buf, int len)
 }
 
 /*! \brief Handles a PS2NETFS_WRITE_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -693,11 +693,11 @@ static int ps2netfs_op_write(char *buf, int len)
   cmd = (ps2netfs_pkt_write_req *)buf;
 
   dbgprintf("ps2netfs: write\n");
- 
+
   // do the stuff here
   fdptr = fdh_get(ntohl(cmd->fd));
   if (fdptr != 0)
-  { 
+  {
     int left = ntohl(cmd->nbytes);
     int towrite, written;
     written = retval = 0;
@@ -729,7 +729,7 @@ static int ps2netfs_op_write(char *buf, int len)
   writerly->len = htons((unsigned short)sizeof(ps2netfs_pkt_file_rly));
   writerly->retval = htonl(retval);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, writerly, sizeof(ps2netfs_pkt_file_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, writerly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
     return -1;
@@ -738,7 +738,7 @@ static int ps2netfs_op_write(char *buf, int len)
 }
 
 /*! \brief Handles a PS2NETFS_LSEEK_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -759,12 +759,12 @@ static int ps2netfs_op_lseek(char *buf, int len)
   ps2netfs_pkt_lseek_req *cmd;
   ps2netfs_pkt_file_rly *lseekrly;
   fd_table_t *fdptr;
-  int retval = -ENODEV; 
+  int retval = -ENODEV;
   cmd = (ps2netfs_pkt_lseek_req *)buf;
 
   dbgprintf("ps2netfs: lseek\n");
 
-  if (len != sizeof(ps2netfs_pkt_lseek_req)) 
+  if (len != sizeof(ps2netfs_pkt_lseek_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
@@ -772,7 +772,7 @@ static int ps2netfs_op_lseek(char *buf, int len)
   // do the stuff here
   fdptr = fdh_get(ntohl(cmd->fd));
   if (fdptr != 0)
-  { 
+  {
     if (fdptr->devtype == IOPMGR_DEVTYPE_IOMAN)
       retval = io_lseek(fdptr->realfd,ntohl(cmd->offset),ntohl(cmd->whence));
     else if (fdptr->devtype == IOPMGR_DEVTYPE_IOMANX)
@@ -787,7 +787,7 @@ static int ps2netfs_op_lseek(char *buf, int len)
   lseekrly->len = htons((unsigned short)sizeof(ps2netfs_pkt_file_rly));
   lseekrly->retval = htonl(retval);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, lseekrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, lseekrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
     return -1;
@@ -796,7 +796,7 @@ static int ps2netfs_op_lseek(char *buf, int len)
 }
 
 /*! \brief Handles a PS2NETFS_IOCTL_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -817,12 +817,12 @@ static int ps2netfs_op_ioctl(char *buf, int len)
   ps2netfs_pkt_ioctl_req *cmd;
   ps2netfs_pkt_ioctl_rly *ioctlrly;
   fd_table_t *fdptr;
-  int retval = -ENODEV; 
+  int retval = -ENODEV;
   cmd = (ps2netfs_pkt_ioctl_req *)buf;
 
   dbgprintf("ps2netfs: ioctl\n");
 
-  if (len != sizeof(ps2netfs_pkt_ioctl_req)) 
+  if (len != sizeof(ps2netfs_pkt_ioctl_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
@@ -833,7 +833,7 @@ static int ps2netfs_op_ioctl(char *buf, int len)
   // do the stuff here
   fdptr = fdh_get(ntohl(cmd->fd));
   if (fdptr != 0)
-  { 
+  {
     if (fdptr->devtype == IOPMGR_DEVTYPE_IOMAN)
       retval = io_ioctl(fdptr->realfd,ntohl(cmd->command),(void *)ioctlrly->buf);
     else if (fdptr->devtype == IOPMGR_DEVTYPE_IOMANX)
@@ -845,7 +845,7 @@ static int ps2netfs_op_ioctl(char *buf, int len)
   ioctlrly->len = htons((unsigned short)sizeof(ps2netfs_pkt_ioctl_rly));
   ioctlrly->retval = htonl(retval);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, ioctlrly, sizeof(ps2netfs_pkt_ioctl_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, ioctlrly, sizeof(ps2netfs_pkt_ioctl_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
     return -1;
@@ -854,7 +854,7 @@ static int ps2netfs_op_ioctl(char *buf, int len)
 }
 
 /*! \brief Handles a PS2NETFS_REMOVE_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -874,13 +874,13 @@ static int ps2netfs_op_remove(char *buf, int len)
 {
   ps2netfs_pkt_open_req *cmd;
   ps2netfs_pkt_file_rly *removerly;
-  int retval = -ENODEV; 
+  int retval = -ENODEV;
   int devtype;
   cmd = (ps2netfs_pkt_open_req *)buf;
 
   dbgprintf("ps2netfs: remove\n");
 
-  if (len != sizeof(ps2netfs_pkt_open_req)) 
+  if (len != sizeof(ps2netfs_pkt_open_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
@@ -889,7 +889,7 @@ static int ps2netfs_op_remove(char *buf, int len)
   // do the stuff here
   devtype = devscan_gettype(cmd->path);
   if (devtype != IOPMGR_DEVTYPE_INVALID)
-  { 
+  {
     if (devtype == IOPMGR_DEVTYPE_IOMAN)
       retval = io_remove(cmd->path);
     else if (devtype == IOPMGR_DEVTYPE_IOMANX)
@@ -904,7 +904,7 @@ static int ps2netfs_op_remove(char *buf, int len)
   removerly->len = htons((unsigned short)sizeof(ps2netfs_pkt_file_rly));
   removerly->retval = htonl(retval);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, removerly, sizeof(ps2netfs_pkt_file_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, removerly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
     return -1;
@@ -913,7 +913,7 @@ static int ps2netfs_op_remove(char *buf, int len)
 }
 
 /*! \brief Handles a PS2NETFS_MKDIR_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -933,13 +933,13 @@ static int ps2netfs_op_mkdir(char *buf, int len)
 {
   ps2netfs_pkt_open_req *cmd;
   ps2netfs_pkt_file_rly *mkdirrly;
-  int retval = -19; 
+  int retval = -19;
   int devtype;
   cmd = (ps2netfs_pkt_open_req *)buf;
 
   dbgprintf("ps2netfs: mkdir\n");
 
-  if (len != sizeof(ps2netfs_pkt_open_req)) 
+  if (len != sizeof(ps2netfs_pkt_open_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
@@ -948,7 +948,7 @@ static int ps2netfs_op_mkdir(char *buf, int len)
   // do the stuff here
   devtype = devscan_gettype(cmd->path);
   if (devtype != IOPMGR_DEVTYPE_INVALID)
-  { 
+  {
     if (devtype == IOPMGR_DEVTYPE_IOMAN)
       retval = io_mkdir(cmd->path);
     else if (devtype == IOPMGR_DEVTYPE_IOMANX)
@@ -963,7 +963,7 @@ static int ps2netfs_op_mkdir(char *buf, int len)
   mkdirrly->len = htons((unsigned short)sizeof(ps2netfs_pkt_file_rly));
   mkdirrly->retval = htonl(retval);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, mkdirrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, mkdirrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
     return -1;
@@ -972,7 +972,7 @@ static int ps2netfs_op_mkdir(char *buf, int len)
 }
 
 /*! \brief Handles a PS2NETFS_RMDIR_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -992,13 +992,13 @@ static int ps2netfs_op_rmdir(char *buf, int len)
 {
   ps2netfs_pkt_open_req *cmd;
   ps2netfs_pkt_file_rly *rmdirrly;
-  int retval = -ENODEV; 
+  int retval = -ENODEV;
   int devtype;
   cmd = (ps2netfs_pkt_open_req *)buf;
 
   dbgprintf("ps2netfs: remove\n");
 
-  if (len != sizeof(ps2netfs_pkt_open_req)) 
+  if (len != sizeof(ps2netfs_pkt_open_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
@@ -1007,7 +1007,7 @@ static int ps2netfs_op_rmdir(char *buf, int len)
   // do the stuff here
   devtype = devscan_gettype(cmd->path);
   if (devtype != IOPMGR_DEVTYPE_INVALID)
-  { 
+  {
     if (devtype == IOPMGR_DEVTYPE_IOMAN)
       retval = io_rmdir(cmd->path);
     else if (devtype == IOPMGR_DEVTYPE_IOMANX)
@@ -1022,7 +1022,7 @@ static int ps2netfs_op_rmdir(char *buf, int len)
   rmdirrly->len = htons((unsigned short)sizeof(ps2netfs_pkt_file_rly));
   rmdirrly->retval = htonl(retval);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, rmdirrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, rmdirrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
     return -1;
@@ -1031,7 +1031,7 @@ static int ps2netfs_op_rmdir(char *buf, int len)
 }
 
 /*! \brief Handles a PS2NETFS_DOPEN_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -1051,13 +1051,13 @@ static int ps2netfs_op_dopen(char *buf, int len)
 {
   ps2netfs_pkt_open_req *cmd;
   ps2netfs_pkt_file_rly *dopenrly;
-  int retval = -ENODEV; 
+  int retval = -ENODEV;
   int devtype;
   cmd = (ps2netfs_pkt_open_req *)buf;
 
   dbgprintf("ps2netfs: dopen\n");
 
-  if (len != sizeof(ps2netfs_pkt_open_req)) 
+  if (len != sizeof(ps2netfs_pkt_open_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
@@ -1066,7 +1066,7 @@ static int ps2netfs_op_dopen(char *buf, int len)
   // do the stuff here
   devtype = devscan_gettype(cmd->path);
   if (devtype != IOPMGR_DEVTYPE_INVALID)
-  { 
+  {
     if (devtype == IOPMGR_DEVTYPE_IOMAN)
       retval = io_dopen(cmd->path,0);
     else if (devtype == IOPMGR_DEVTYPE_IOMANX)
@@ -1083,7 +1083,7 @@ static int ps2netfs_op_dopen(char *buf, int len)
   dopenrly->len = htons((unsigned short)sizeof(ps2netfs_pkt_file_rly));
   dopenrly->retval = htonl(retval);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, dopenrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, dopenrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
     return -1;
@@ -1092,7 +1092,7 @@ static int ps2netfs_op_dopen(char *buf, int len)
 }
 
 /*! \brief Handles a PS2NETFS_DCLOSE_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -1118,7 +1118,7 @@ static int ps2netfs_op_dclose(char *buf, int len)
 
   dbgprintf("ps2netfs: dclose\n");
 
-  if (len != sizeof(ps2netfs_pkt_close_req)) 
+  if (len != sizeof(ps2netfs_pkt_close_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
@@ -1127,7 +1127,7 @@ static int ps2netfs_op_dclose(char *buf, int len)
   // do the stuff here
   fdptr = fdh_get(ntohl(cmd->fd));
   if (fdptr != 0)
-  { 
+  {
     if (fdptr->devtype == IOPMGR_DEVTYPE_IOMAN)
       retval = io_dclose(fdptr->realfd);
     else if (fdptr->devtype == IOPMGR_DEVTYPE_IOMANX)
@@ -1143,7 +1143,7 @@ static int ps2netfs_op_dclose(char *buf, int len)
   closerly->len = htons((unsigned short)sizeof(ps2netfs_pkt_file_rly));
   closerly->retval = htonl(retval);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, closerly, sizeof(ps2netfs_pkt_file_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, closerly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
     return -1;
@@ -1152,7 +1152,7 @@ static int ps2netfs_op_dclose(char *buf, int len)
 }
 
 /*! \brief Handles a PS2NETFS_DREAD_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -1178,7 +1178,7 @@ static int ps2netfs_op_dread(char *buf, int len)
 
   dbgprintf("ps2netfs: dread\n");
 
-  if (len != sizeof(ps2netfs_pkt_dread_req)) 
+  if (len != sizeof(ps2netfs_pkt_dread_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
@@ -1191,7 +1191,7 @@ static int ps2netfs_op_dread(char *buf, int len)
   // do the stuff here
   fdptr = fdh_get(ntohl(cmd->fd));
   if (fdptr != 0)
-  { 
+  {
     if (fdptr->devtype == IOPMGR_DEVTYPE_IOMAN)
     {
       io_dirent_t dirent;
@@ -1229,7 +1229,7 @@ static int ps2netfs_op_dread(char *buf, int len)
   dreadrly->len = htons((unsigned short)sizeof(ps2netfs_pkt_dread_rly));
   dreadrly->retval = htonl(retval);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, dreadrly, sizeof(ps2netfs_pkt_dread_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, dreadrly, sizeof(ps2netfs_pkt_dread_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
     return -1;
@@ -1238,7 +1238,7 @@ static int ps2netfs_op_dread(char *buf, int len)
 }
 
 /*! \brief Handles a PS2NETFS_GETSTAT_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -1260,7 +1260,7 @@ static int ps2netfs_op_getstat(char *buf, int len)
 }
 
 /*! \brief Handles a PS2NETFS_CHSTAT_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -1282,7 +1282,7 @@ static int ps2netfs_op_chstat(char *buf, int len)
 }
 
 /*! \brief Handles a PS2NETFS_FORMAT_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -1316,7 +1316,7 @@ static int ps2netfs_op_format(char *buf, int len)
 
   dbgprintf("ps2netfs: format\n");
 
-  if (len != sizeof(ps2netfs_pkt_format_req)) 
+  if (len != sizeof(ps2netfs_pkt_format_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
@@ -1341,7 +1341,7 @@ static int ps2netfs_op_format(char *buf, int len)
   formatrly->len = htons((unsigned short)sizeof(ps2netfs_pkt_file_rly));
   formatrly->retval = htonl(retval);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, formatrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, formatrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
     return -1;
@@ -1352,7 +1352,7 @@ static int ps2netfs_op_format(char *buf, int len)
 // EXTENDED CALLS FROM HERE ON IN
 
 /*! \brief Handles a PS2NETFS_RENAME_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -1372,13 +1372,13 @@ static int ps2netfs_op_rename(char *buf, int len)
 {
   ps2netfs_pkt_symlink_req *cmd;
   ps2netfs_pkt_file_rly *renamerly;
-  int retval = -ENODEV; 
+  int retval = -ENODEV;
   int devtype;
   cmd = (ps2netfs_pkt_symlink_req *)buf;
 
   dbgprintf("ps2netfs: rename\n");
 
-  if (len != sizeof(ps2netfs_pkt_symlink_req)) 
+  if (len != sizeof(ps2netfs_pkt_symlink_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
@@ -1401,16 +1401,16 @@ static int ps2netfs_op_rename(char *buf, int len)
   renamerly->len = htons((unsigned short)sizeof(ps2netfs_pkt_file_rly));
   renamerly->retval = htonl(retval);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, renamerly, sizeof(ps2netfs_pkt_file_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, renamerly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
-    return -1 ; 
+    return -1 ;
   }
   return 0;
 }
 
 /*! \brief Handles a PS2NETFS_CHDIR_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -1430,13 +1430,13 @@ static int ps2netfs_op_chdir(char *buf, int len)
 {
   ps2netfs_pkt_open_req *cmd;
   ps2netfs_pkt_file_rly *chdirrly;
-  int retval = -ENODEV; 
+  int retval = -ENODEV;
   int devtype;
   cmd = (ps2netfs_pkt_open_req *)buf;
 
   dbgprintf("ps2netfs: chdir\n");
 
-  if (len != sizeof(ps2netfs_pkt_open_req)) 
+  if (len != sizeof(ps2netfs_pkt_open_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
@@ -1455,7 +1455,7 @@ static int ps2netfs_op_chdir(char *buf, int len)
   chdirrly->len = htons((unsigned short)sizeof(ps2netfs_pkt_file_rly));
   chdirrly->retval = htonl(retval);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, chdirrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, chdirrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
     return -1;
@@ -1464,7 +1464,7 @@ static int ps2netfs_op_chdir(char *buf, int len)
 }
 
 /*! \brief Handles a PS2NETFS_SYNC_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -1484,13 +1484,13 @@ static int ps2netfs_op_sync(char *buf, int len)
 {
   ps2netfs_pkt_open_req *cmd;
   ps2netfs_pkt_file_rly *syncrly;
-  int retval = -ENODEV; 
+  int retval = -ENODEV;
   int devtype;
   cmd = (ps2netfs_pkt_open_req *)buf;
 
   dbgprintf("ps2netfs: sync\n");
 
-  if (len != sizeof(ps2netfs_pkt_open_req)) 
+  if (len != sizeof(ps2netfs_pkt_open_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
@@ -1509,7 +1509,7 @@ static int ps2netfs_op_sync(char *buf, int len)
   syncrly->len = htons((unsigned short)sizeof(ps2netfs_pkt_file_rly));
   syncrly->retval = htonl(retval);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, syncrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, syncrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
     return -1;
@@ -1518,7 +1518,7 @@ static int ps2netfs_op_sync(char *buf, int len)
 }
 
 /*! \brief Handles a PS2NETFS_MOUNT_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -1538,13 +1538,13 @@ static int ps2netfs_op_mount(char *buf, int len)
 {
   ps2netfs_pkt_mount_req *cmd;
   ps2netfs_pkt_file_rly *mountrly;
-  int retval = -ENODEV; 
+  int retval = -ENODEV;
   int devtype;
   cmd = (ps2netfs_pkt_mount_req *)buf;
 
   dbgprintf("ps2netfs: mount\n");
 
-  if (len != sizeof(ps2netfs_pkt_mount_req)) 
+  if (len != sizeof(ps2netfs_pkt_mount_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
@@ -1563,16 +1563,16 @@ static int ps2netfs_op_mount(char *buf, int len)
   mountrly->len = htons((unsigned short)sizeof(ps2netfs_pkt_file_rly));
   mountrly->retval = htonl(retval);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, mountrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, mountrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
-    return -1 ; 
+    return -1 ;
   }
   return 0;
 }
 
 /*! \brief Handles a PS2NETFS_UMOUNT_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -1592,13 +1592,13 @@ static int ps2netfs_op_umount(char *buf, int len)
 {
   ps2netfs_pkt_open_req *cmd;
   ps2netfs_pkt_file_rly *umountrly;
-  int retval = -ENODEV; 
+  int retval = -ENODEV;
   int devtype;
   cmd = (ps2netfs_pkt_open_req *)buf;
 
   dbgprintf("ps2netfs: umount\n");
 
-  if (len != sizeof(ps2netfs_pkt_open_req)) 
+  if (len != sizeof(ps2netfs_pkt_open_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
@@ -1617,16 +1617,16 @@ static int ps2netfs_op_umount(char *buf, int len)
   umountrly->len = htons((unsigned short)sizeof(ps2netfs_pkt_file_rly));
   umountrly->retval = htonl(retval);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, umountrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, umountrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
-    return -1 ; 
+    return -1 ;
   }
   return 0;
 }
 
 /*! \brief Handles a PS2NETFS_LSEEK64_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -1648,7 +1648,7 @@ static int ps2netfs_op_lseek64(char *buf, int len)
 }
 
 /*! \brief Handles a PS2NETFS_DEVCTL_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -1670,7 +1670,7 @@ static int ps2netfs_op_devctl(char *buf, int len)
 }
 
 /*! \brief Handles a PS2NETFS_SYMLINK_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -1690,13 +1690,13 @@ static int ps2netfs_op_symlink(char *buf, int len)
 {
   ps2netfs_pkt_symlink_req *cmd;
   ps2netfs_pkt_file_rly *symlinkrly;
-  int retval = -ENODEV; 
+  int retval = -ENODEV;
   int devtype;
   cmd = (ps2netfs_pkt_symlink_req *)buf;
 
   dbgprintf("ps2netfs: symlink\n");
 
-  if (len != sizeof(ps2netfs_pkt_symlink_req)) 
+  if (len != sizeof(ps2netfs_pkt_symlink_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
@@ -1719,16 +1719,16 @@ static int ps2netfs_op_symlink(char *buf, int len)
   symlinkrly->len = htons((unsigned short)sizeof(ps2netfs_pkt_file_rly));
   symlinkrly->retval = htonl(retval);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, symlinkrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, symlinkrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
-    return -1 ; 
+    return -1 ;
   }
   return 0;
 }
 
 /*! \brief Handles a PS2NETFS_READLINK_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -1748,13 +1748,13 @@ static int ps2netfs_op_readlink(char *buf, int len)
 {
   ps2netfs_pkt_open_req *cmd;
   ps2netfs_pkt_readlink_rly *readlinkrly;
-  int retval = -ENODEV; 
+  int retval = -ENODEV;
   int devtype;
   cmd = (ps2netfs_pkt_open_req *)buf;
 
   dbgprintf("ps2netfs: readlink\n");
 
-  if (len != sizeof(ps2netfs_pkt_open_req)) 
+  if (len != sizeof(ps2netfs_pkt_open_req))
   {
     dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
@@ -1774,16 +1774,16 @@ static int ps2netfs_op_readlink(char *buf, int len)
   readlinkrly->len = htons((unsigned short)sizeof(ps2netfs_pkt_readlink_rly));
   readlinkrly->retval = htonl(retval);
 
-  if (ps2netfs_lwip_send(ps2netfs_sock, readlinkrly, sizeof(ps2netfs_pkt_readlink_rly), 0) < 0) 
+  if (ps2netfs_lwip_send(ps2netfs_sock, readlinkrly, sizeof(ps2netfs_pkt_readlink_rly), 0) < 0)
   {
     dbgprintf("ps2netfs: error sending reply!\n");
-    return -1 ; 
+    return -1 ;
   }
   return 0;
 }
 
 /*! \brief Handles a PS2NETFS_IOCTL2_CMD request.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param buf Pointer to packet data.
  *  \param len Length of packet.
@@ -1806,7 +1806,7 @@ static int ps2netfs_op_ioctl2(char *buf, int len)
 
 
 /*! \brief Listen for packets and handle them.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param sock Socket to receive on.
  *
@@ -1834,11 +1834,11 @@ static void ps2netfs_Listener(int sock)
      dbgprintf("ps2netfs_Listener: recvfrom error (%d)\n", len);
      return;
    }
-   if (len >= sizeof(ps2netfs_pkt_hdr)) 
+   if (len >= sizeof(ps2netfs_pkt_hdr))
    {
      header = (ps2netfs_pkt_hdr *)ps2netfs_recv_packet;
      cmd = ntohl(header->cmd);
-     switch (cmd) 
+     switch (cmd)
      {
        case PS2NETFS_OPEN_CMD:
          retval = ps2netfs_op_open(ps2netfs_recv_packet, len);
@@ -1926,15 +1926,15 @@ static void ps2netfs_Listener(int sock)
          retval = ps2netfs_op_devlist(ps2netfs_recv_packet, len);
          break;
 
-       default: 
+       default:
          dbgprintf("ps2netfs: Unknown cmd received\n");
          retval = 0;
          break;
       }
       if (retval == -1)
         return;
-    } 
-    else 
+    }
+    else
     {
       dbgprintf("ps2netfs: packet too small (%d)\n", len);
       return;
@@ -1944,12 +1944,12 @@ static void ps2netfs_Listener(int sock)
 }
 
 /*! \brief Main ps2netfs Thread.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param argv Parameters to thread.
  *  \return Status.
  *
- *  This is the main thread function for ps2netfs. It runs until 
+ *  This is the main thread function for ps2netfs. It runs until
  *  'ps2netfs_active' is set to 0.
  *  Handles accepting connections and passing them onto the listener
  *  function to handle them.
@@ -1969,25 +1969,25 @@ ps2netfs_serv(void *argv)
  int ret;
 
  dbgprintf(" - ps2netfs TCP Server -\n");
-    
+
  devscan_setup(DEVSCAN_MASK);
  fdh_setup();
-  
+
  memset((void *)&server_addr, 0, sizeof(server_addr));
  // Should perhaps specify PC side ip..
  server_addr.sin_family = AF_INET;
  server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
  server_addr.sin_port = htons(PS2NETFS_LISTEN_PORT);
 
- while ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
+ while ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
  {
    dbgprintf("ps2netfs: socket creation error (%d)\n", sock);
    return -1;
  }
 
- ret = bind(sock, (struct sockaddr *)&server_addr, 
+ ret = bind(sock, (struct sockaddr *)&server_addr,
          sizeof(server_addr));
- if (ret < 0)  
+ if (ret < 0)
  {
    dbgprintf("ps2netfs: bind error (%d)\n", ret);
    ps2netfs_close_socket();
@@ -1996,7 +1996,7 @@ ps2netfs_serv(void *argv)
 
  ret = listen(sock, 5);
 
- if (ret < 0) 
+ if (ret < 0)
  {
    dbgprintf("ps2netfs: listen error (%d)\n", ret);
    disconnect(sock);
@@ -2013,18 +2013,18 @@ ps2netfs_serv(void *argv)
    dbgprintf("ps2netfs: Waiting for connection\n");
 
    client_len = sizeof(client_addr);
-   client_sock = accept(sock, (struct sockaddr *)&client_addr, 
+   client_sock = accept(sock, (struct sockaddr *)&client_addr,
                         &client_len);
-   if (client_sock < 0) 
+   if (client_sock < 0)
    {
      dbgprintf("ps2netfs: accept error (%d)", client_sock);
      continue;
    }
 
-   dbgprintf("Client connected from %x\n", 
+   dbgprintf("Client connected from %x\n",
              client_addr.sin_addr.s_addr);
 
-   if (ps2netfs_sock > 0) 
+   if (ps2netfs_sock > 0)
    {
      dbgprintf("ps2netfs: Client reconnected\n");
      ret = ps2netfs_close_socket();
@@ -2033,7 +2033,7 @@ ps2netfs_serv(void *argv)
    }
    ps2netfs_sock = client_sock;
 
-   if (ps2netfs_sock > 0) 
+   if (ps2netfs_sock > 0)
    {
      ps2netfs_Listener(ps2netfs_sock);
      ret = ps2netfs_close_socket();
@@ -2052,9 +2052,9 @@ ps2netfs_serv(void *argv)
 }
 
 /*! \brief Init ps2netfs.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
- *  \return Status (0=success, -1 = failure). 
+ *  \return Status (0=success, -1 = failure).
  *
  *  This handles setting up the Thread, and starting it running.
  *
@@ -2077,27 +2077,27 @@ int ps2netfs_Init(void)
 
   pid = CreateThread(&mythread);
 
-  if (pid > 0) 
+  if (pid > 0)
   {
-    if ((i=StartThread(pid, NULL)) < 0) 
+    if ((i=StartThread(pid, NULL)) < 0)
     {
       printf("StartThread failed (%d)\n", i);
       return -1;
     }
-  } 
-  else 
+  }
+  else
   {
     printf("ps2netfs: CreateThread failed (%d)\n", pid);
     return -1;
   }
-    
+
   ps2netfs_pid = pid;
   dbgprintf("ps2netfs: Thread id: %x\n", pid);
   return 0;
 }
 
 /*! \brief Shutdown ps2netfs.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  This handles Stopping the thread and disconnecting. All shutdown
  *  for ps2netfs.

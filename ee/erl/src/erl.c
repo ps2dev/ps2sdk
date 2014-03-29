@@ -578,7 +578,8 @@ static int read_erl(int elf_handle, u8 * elf_mem, u32 addr, struct erl_record_t 
     struct elf_section_t * sec = 0;
     struct elf_symbol_t * sym = 0;
     struct elf_reloc_t reloc;
-    int i, j, erx_compressed;
+    int i, j;
+    // int erx_compressed; // Not used
     char * names = 0, * strtab_names = 0, * reloc_section = 0;
     int symtab = 0, strtab = 0, linked_strtab = 0;
     u8 * magic;
@@ -617,7 +618,7 @@ return code
 	free_and_return(-1);
     }
 
-    erx_compressed = magic[3] == 'X';
+    // erx_compressed = magic[3] == 'X'; //not used
 
     dprintf("ELF Class    : %s\n", elf_classes[head.e_ident.cook.ei_class]);
     dprintf("Data encoding: %s\n", elf_encodings[head.e_ident.cook.ei_data]);

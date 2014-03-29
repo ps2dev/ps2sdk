@@ -34,12 +34,12 @@ I_DeleteSema
 thsemap_IMPORTS_end
 
 thbase_IMPORTS_start
-I_CreateThread 
-I_StartThread 
-I_SleepThread 
-I_GetThreadId 
+I_CreateThread
+I_StartThread
+I_SleepThread
+I_GetThreadId
 I_ExitDeleteThread
-I_DelayThread 
+I_DelayThread
 I_GetSystemTime
 I_SysClock2USec
 thbase_IMPORTS_end
@@ -61,9 +61,9 @@ ioman_IMPORTS_end
 
 
 sifcmd_IMPORTS_start
-I_sceSifInitRpc 
-I_sceSifSetRpcQueue 
-I_sceSifRegisterRpc 
+I_sceSifInitRpc
+I_sceSifSetRpcQueue
+I_sceSifRegisterRpc
 I_sceSifRpcLoop
 I_sceSifSendCmd
 sifcmd_IMPORTS_end

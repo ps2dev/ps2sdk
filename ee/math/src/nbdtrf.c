@@ -43,7 +43,7 @@
  *    IEEE       0,100       5000       1.5e-4      1.9e-5
  *
  */
-/*							nbdtrcf.c
+/*							nbdtrcf.c
  *
  *	Complemented negative binomial distribution
  *
@@ -85,7 +85,7 @@
  *    IEEE       0,100       5000       1.4e-4      2.0e-5
  *
  */
-
+
 /*
 Cephes Math Library Release 2.2:  July, 1992
 Copyright 1984, 1987 by Stephen L. Moshier

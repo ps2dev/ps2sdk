@@ -49,7 +49,7 @@
  * the same degree.
  *
  */
-/*							chbevl.c	*/
+/*							chbevl.c	*/
 
 /*
 Cephes Math Library Release 2.0:  April, 1987

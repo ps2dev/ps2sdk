@@ -10,11 +10,11 @@
 # $Id: secrman.s 577 2004-09-14 14:41:46Z pixel $
 # secrman Module Functions.
 */
-	
+
 	.text
 	.set	noreorder
 
-	
+
 /* ############################### SECRMAN STUB ###### */
 /* # Added by jimmikaelkael, 16th january 2009       # */
 
@@ -40,7 +40,7 @@ SetMcDevIDCallback:
 SecrAuthCard:
 	jr	$31
 	li	$0, 0x06
-	
+
 	.globl	SecrResetAuthCard			# 007
 SecrResetAuthCard:
 	jr	$31
@@ -105,7 +105,7 @@ SecrDownloadGetKc:
 SecrDownloadGetICVPS2:
 	jr	$31
 	li	$0, 0x13
-		
+
 	.word	0
 	.word	0
 

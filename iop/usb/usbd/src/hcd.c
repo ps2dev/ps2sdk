@@ -59,7 +59,7 @@ int cleanUpFunc(Device *dev, Endpoint *ep) {
 }
 
 Endpoint *openDeviceEndpoint(Device *dev, UsbEndpointDescriptor *endpDesc, uint32 alignFlag) {
-	
+
 	uint16 flags = 0;
 	uint16 hcMaxPktSize;
 	uint8  endpType = 0;
@@ -67,7 +67,7 @@ Endpoint *openDeviceEndpoint(Device *dev, UsbEndpointDescriptor *endpDesc, uint3
 	HcTD   *td = NULL;
 
 	Endpoint *newEp = allocEndpointForDevice(dev, alignFlag);
-	
+
 	if (!newEp) {
 		dbg_printf("ran out of endpoints\n");
 		return NULL;
@@ -84,7 +84,7 @@ Endpoint *openDeviceEndpoint(Device *dev, UsbEndpointDescriptor *endpDesc, uint3
 				cleanUpFunc(dev, newEp);
 				dbg_printf("Open ISOC EP: no TDs left\n");
 				return NULL;
-			}				
+			}
 		} else if (type == USB_ENDPOINT_XFER_CONTROL) {
 			endpType = TYPE_CONTROL;
 			if (!alignFlag)
@@ -163,7 +163,7 @@ Endpoint *doOpenEndpoint(Device *dev, UsbEndpointDescriptor *endpDesc, uint32 al
 	if (endpDesc == NULL)
 		return dev->endpointListStart; // default control EP was already opened
 	else
-		return openDeviceEndpoint(dev, endpDesc, alignFlag);		
+		return openDeviceEndpoint(dev, endpDesc, alignFlag);
 }
 
 int doCloseEndpoint(Endpoint *ep) {
@@ -208,7 +208,7 @@ void handleRhsc(void) {
 			if ((port->deviceStatus != DEVICE_NOTCONNECTED) && (status & BIT(C_PORT_CONNECTION)))
 				flushPort(port);
 
-			if (port->deviceStatus == DEVICE_NOTCONNECTED) { 
+			if (port->deviceStatus == DEVICE_NOTCONNECTED) {
 				port->deviceStatus = DEVICE_CONNECTED;
 				addTimerCallback(&port->timer, (TimerCallback)hubResetDevice, port, 500);
 			} else if (port->deviceStatus == DEVICE_RESETPENDING) {
@@ -229,7 +229,7 @@ void handleRhsc(void) {
 
 void hcdProcessIntr(void) {
 	uint32 intrFlags;
-	
+
 	intrFlags = memPool.ohciRegs->HcInterruptStatus & memPool.ohciRegs->HcInterruptEnable;
 
 	if (intrFlags & OHCI_INT_SO) {
@@ -437,7 +437,7 @@ int initHcdStructs(void) {
 		if (i == 0)
 			ed->next = NULL;
 		else
-			ed->next = memPool.hcEdBuf + ((i - 1) >> 1);			
+			ed->next = memPool.hcEdBuf + ((i - 1) >> 1);
 
 		int intrId = i - 31;
 		if (intrId >= 0) {
@@ -450,7 +450,7 @@ int initHcdStructs(void) {
 	ed->hcArea = HCED_SKIP;
 	memPool.ohciRegs->HcControlHeadEd = ed;
 	ed++;
-	
+
 	ed->hcArea = HCED_SKIP;
 	memPool.ohciRegs->HcBulkHeadEd = ed;
 	ed++;
@@ -499,7 +499,7 @@ int hcdInit(void) {
 
 	dbg_printf("HCD init...\n");
 	initHcdStructs();
-    
+
 	dbg_printf("Hub driver...\n");
 	initHubDriver();
 

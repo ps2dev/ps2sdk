@@ -24,7 +24,7 @@ usbd_stub:					# Module Import Information
 
 	/* initialize USBD.IRX
 	 * Note: UsbInit is automatically called first whenever USBD.IRX is loaded.
-	 * There should never be a need to reinitialize the driver.  In fact, it may 
+	 * There should never be a need to reinitialize the driver.  In fact, it may
 	 * not even work.  But I'm providing the function hook anyhow. <shrug>
 	 */
 	.globl	UsbInit
@@ -50,9 +50,9 @@ UsbUnregisterDriver:
 	li	$0, 0x05
 
 	/*
-	 * This function is used to get the static descriptors for the specific USB 
-	 * device.  These descriptors identify the device uniquely and help determine 
-	 * what type of device we are dealing with, and what its capabilities and 
+	 * This function is used to get the static descriptors for the specific USB
+	 * device.  These descriptors identify the device uniquely and help determine
+	 * what type of device we are dealing with, and what its capabilities and
 	 * features are.
 	 */
 	.globl	UsbGetDeviceStaticDescriptor
@@ -61,9 +61,9 @@ UsbGetDeviceStaticDescriptor:
 	li	$0, 0x06
 
 	/*
-	 * These two functions are used to assign relevant data to a specific device.  
-	 * The type of data is entirely up to the caller.  For example, a particular 
-	 * USB device driver may store configuration data for each specific device 
+	 * These two functions are used to assign relevant data to a specific device.
+	 * The type of data is entirely up to the caller.  For example, a particular
+	 * USB device driver may store configuration data for each specific device
 	 * under its control.
 	 */
 
@@ -79,16 +79,16 @@ UsbGetDevicePrivateData:
 	j	$31
 	li	$0, 0x08
 
-	/* 
-	 * This function returns an endpoint ID for the device ID and endpoint descriptor 
-	 * passed in.  This endpoint ID is then used when transfering data to the device, 
+	/*
+	 * This function returns an endpoint ID for the device ID and endpoint descriptor
+	 * passed in.  This endpoint ID is then used when transfering data to the device,
 	 * and to close the endpoint.
 	 */
 	.globl	UsbOpenEndpoint
 UsbOpenEndpoint:
 	j	$31
 	li	$0, 0x09
-	
+
 	# close an endpoint
 	.globl	UsbCloseEndpoint
 UsbCloseEndpoint:
@@ -96,9 +96,9 @@ UsbCloseEndpoint:
 	li	$0, 0x0A
 
 	/*
-	 * This function is used for all types of USB data transfers.  Which type of 
+	 * This function is used for all types of USB data transfers.  Which type of
 	 * transfer is determined by the parameters that are passed in.  The types are:
-	 * control, isochronous, interrupt, and bulk transfers.  More details can be 
+	 * control, isochronous, interrupt, and bulk transfers.  More details can be
 	 * found in usbd.h.
 	 */
 	.globl	UsbTransfer

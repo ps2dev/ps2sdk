@@ -43,7 +43,7 @@
 	.ent	setjmp
 setjmp:
 	.frame	$sp,0,$31
-	
+
 	sq	$s0, O_S0($a0)
 	sq	$s1, O_S1($a0)
 	sq	$s2, O_S2($a0)
@@ -55,7 +55,7 @@ setjmp:
 	sq	$fp, O_FP($a0)
 	sq	$sp, O_SP($a0)
 	sq	$ra, O_RA($a0)
-	
+
 	swc1    $f20, O_F20($a0)
 	swc1    $f21, O_F21($a0)
 	swc1    $f22, O_F22($a0)
@@ -93,7 +93,7 @@ longjmp:
 	lq	$fp, O_FP($a0)
 	lq	$sp, O_SP($a0)
 	lq	$ra, O_RA($a0)
-	
+
 	lwc1    $f20, O_F20($a0)
 	lwc1    $f21, O_F21($a0)
 	lwc1    $f22, O_F22($a0)

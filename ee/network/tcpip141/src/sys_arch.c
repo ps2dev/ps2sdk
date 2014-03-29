@@ -106,7 +106,7 @@ static void TimeoutHandler(s32 alarm_id, u16 time, void *pvArg){
 static inline u32_t ComputeTimeDiff(u32 start, u32 end)
 {
 	u32 NumTicksElasped=(end<start)?UINT_MAX-start+end:start-end;
-    
+
 	return(NumTicksElasped/295000);
 }
 

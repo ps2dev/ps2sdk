@@ -40,7 +40,7 @@
  *    IEEE       0,100       5000       6.9e-5      8.0e-6
  *
  */
-/*							pdtrcf()
+/*							pdtrcf()
  *
  *	Complemented poisson distribution
  *
@@ -82,7 +82,7 @@
  *    IEEE       0,100       5000       8.4e-5      1.2e-5
  *
  */
-/*							pdtrif()
+/*							pdtrif()
  *
  *	Inverse Poisson distribution
  *
@@ -125,7 +125,7 @@
  *                     k < 0
  *
  */
-
+
 /*
 Cephes Math Library Release 2.2:  July, 1992
 Copyright 1984, 1987, 1992 by Stephen L. Moshier

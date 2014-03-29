@@ -5,19 +5,19 @@ Copyright (c) 2003,2004  adresd <adresd_ps2dev@yahoo.com>
 Licensed under the Academic Free License version 2.0.
 --
 
-This includes libsmod (library for iop programs) which is based on "smod - Sub-CPU module 
+This includes libsmod (library for iop programs) which is based on "smod - Sub-CPU module
 interface" from Marcus R. Browns's sbv-lite, adapted for native IOP use.
 
-This has been expanded into a general framework for a IOP Manager, handling modules, 
+This has been expanded into a general framework for a IOP Manager, handling modules,
 devices and libraries.
 
-smod enables access to the loaded module list, which contains details of all 
+smod enables access to the loaded module list, which contains details of all
 currently loaded IRX files, including description and version number.
 
-slib allows easy functions to query registered libraries (exports) and also to 
+slib allows easy functions to query registered libraries (exports) and also to
 unregister any loaded ones, or find exported functions.
 
-IOP Manager contains functions for  handling access to devices and device drivers on 
+IOP Manager contains functions for  handling access to devices and device drivers on
 the IOP. Including testing if a certain filesystem driver is currently loaded and being
 handled, and if it is which ioman is handling that device (ioman or iomanx).
 
@@ -26,7 +26,7 @@ IOP Manager is very much a WIP, so expect it to expand.
 
 
 NOTES ON IOP:
-It is quite important to think of IRX's consisting of two parts: 
+It is quite important to think of IRX's consisting of two parts:
 
 One is the IRX as a module, and any associated threads.
 The other is any exports that it registers, as they create a library entry for the mod.
@@ -49,7 +49,7 @@ user think about it and make sure to use the right function.
 NOTES ON USAGE:
 
 This IRX will load and make itself resident if passed no parameters.
-If passed parameters it will run in command mode. 
+If passed parameters it will run in command mode.
 Try the param 'help' for a list of available commands.
 
 OTHER COMMENTS:

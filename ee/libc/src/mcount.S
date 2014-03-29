@@ -27,7 +27,7 @@ _mcount:
 	sd   $6,  32($29)
 	sd   $7,  40($29)
 
-	# make sure we're not recursively called when compiling __mcount() 
+	# make sure we're not recursively called when compiling __mcount()
 	# with -pg
 	la   $4, _busy
 	lw   $5, 0($4)

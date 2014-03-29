@@ -103,7 +103,7 @@ static void fillStat(fio_stat_t *stat, fat_dir *fatdir)
 	stat->mtime[5] = fatdir->mdate[1];
 	stat->mtime[6] = fatdir->mdate[2];
 	stat->mtime[7] = fatdir->mdate[3];
- 
+
 	//set modified Time: Hours, Minutes, Seconds
 	stat->mtime[3] = fatdir->mtime[0];
 	stat->mtime[2] = fatdir->mtime[1];
@@ -252,7 +252,7 @@ int fs_open(iop_file_t* fd, const char *name, int mode) {
 		rec->sfnOffset = 0;
 		ret = fat_createFile(fatd, name, 0, escapeNotExist, &cluster, &rec->sfnSector, &rec->sfnOffset);
 		if (ret < 0) {
-		    _fs_unlock(); 
+		    _fs_unlock();
 			return ret;
 		}
 		//the file already exist but mode is set to truncate
@@ -267,7 +267,7 @@ int fs_open(iop_file_t* fd, const char *name, int mode) {
 	XPRINTF("USBHDFSD: Calling fat_getFileStartCluster from fs_open\n");
 	ret = fat_getFileStartCluster(fatd, name, &cluster, &rec->fatdir);
 	if (ret < 0) {
-	    _fs_unlock(); 
+	    _fs_unlock();
 		return ret;
 	}
 	if ((rec->fatdir.attr & FAT_ATTR_DIRECTORY) == FAT_ATTR_DIRECTORY) {
@@ -400,7 +400,7 @@ int fs_write(iop_file_t* fd, void * buffer, int size )
 			}
 		}
 	}
-	
+
 	_fs_unlock();
 	return result;
 }
@@ -571,7 +571,7 @@ int fs_dopen  (iop_file_t *fd, const char *name)
 	fs_dir* rec;
 
 	_fs_lock();
-    
+
     XPRINTF("USBHDFSD: fs_dopen called: unit %d name %s\n", fd->unit, name);
 
 	fatd = fat_getData(fd->unit);
@@ -626,7 +626,7 @@ int fs_dread  (iop_file_t *fd, fio_dirent_t *buffer)
         return -EBADF;
 
 	_fs_lock();
-    
+
     XPRINTF("USBHDFSD: fs_dread called: unit %d\n", fd->unit);
 
 	fatd = fat_getData(fd->unit);
@@ -647,7 +647,7 @@ int fs_dread  (iop_file_t *fd, fio_dirent_t *buffer)
 
 	if (rec->status > 0)
 		rec->status = fat_getNextDirentry(fatd, &rec->fatdlist, &rec->fatdir);
-    
+
     _fs_unlock();
     return ret;
 }

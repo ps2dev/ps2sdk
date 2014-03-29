@@ -14,7 +14,7 @@
 # Creates the base ee directory structure in target directory.
 #
 
-RELEASE_EE_DIRS = ee/ ee/include/ ee/lib/ ee/bin/ ee/startup 
+RELEASE_EE_DIRS = ee/ ee/include/ ee/lib/ ee/bin/ ee/startup
 RELEASE_EE_DIRS := $(RELEASE_EE_DIRS:%=$(PS2SDK)/%)
 
 
@@ -27,7 +27,7 @@ release-dirs:
 # exists then copy it to the ee/lib directory.
 #
 
-release-lib: 
+release-lib:
 	@if test $(EE_LIB) ; then \
 	   $(ECHO) Installing $(EE_LIB) to $(PS2SDK)/ee/lib ; \
 	   cp -f $(EE_LIB) $(PS2SDK)/ee/lib ; \
@@ -40,7 +40,7 @@ release-lib:
 # Any elf files should go to ee/bin
 #
 
-release-bin: 
+release-bin:
 	@if test $(EE_BIN) ; then \
 	   $(ECHO) Installing $(EE_BIN) to $(PS2SDK)/ee/bin ; \
 	   cp -f $(EE_BIN) $(PS2SDK)/ee/bin ; \
@@ -49,7 +49,7 @@ release-bin:
 
 #
 # Any file in the include directory will be copied to the ee/include
-# directory.  This does not currently handle subdirectories. 
+# directory.  This does not currently handle subdirectories.
 #
 
 release-include:
@@ -62,7 +62,7 @@ release-include:
 	      fi \
 	   done; \
 	fi;
-	
+
 
 #
 # If there is a smples directory.  Call makefile.

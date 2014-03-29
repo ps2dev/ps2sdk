@@ -12,7 +12,7 @@
 #
 # NOTE: These functions will work with the CDVDMAN/CDVDFSV or XCDVDMAN/XCDVDFSV
 # modules stored in rom0.
-#		
+#
 # NOTE: not all functions work with each set of modules!
 */
 

@@ -70,6 +70,6 @@ SetSecrmanCallbacks:
 SetCheckKelfPathCallback:
 	jr      $31
 	li      $0, 0x0D
-		
+
 	.word	0
 	.word	0

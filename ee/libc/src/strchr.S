@@ -11,17 +11,17 @@
 */
 
 /* Assembler version of strchr that uses quadword instructions.
-	
+
    Jeff Johnston, Cygnus Solutions, Feb 10/1999.
 
    ============================================================
    Copyright (C) 1999 by Cygnus Solutions. All rights reserved.
- 
+
    Permission to use, copy, modify, and distribute this
    software is freely granted, provided that this notice
    is preserved.
    ============================================================  */
-	
+
 	.text
 	.align	2
 	.globl	strchr
@@ -34,7 +34,7 @@ strchr:
 	.fmask	0x00000000,0
 
 #ifndef __OPTIMIZE_SIZE__
-	
+
 	andi	$2,$4,0x7
 	.set	noreorder
 	.set	nomacro
@@ -61,8 +61,8 @@ strchr:
 /* src is quadword aligned.  Load a quadword at a time and check for either a null terminator
    or the desired character.  If either is found, check the last quadword loaded, a byte at a time,
    otherwise load the next quadword and check again. */
-	
-$L16:	
+
+$L16:
 	lq	$9,0($4)
 	pcpyld	$10,$6,$6
 	pnor	$3,$0,$9
@@ -104,9 +104,9 @@ $L16:
 	.set	reorder
 
 /* src is doubleword aligned.  Load a doubleword at a time and check for either a null terminator
-   or the desired character.  If either is found, check the last doubleword loaded, a byte at a 
+   or the desired character.  If either is found, check the last doubleword loaded, a byte at a
    time, otherwise continue by checking the next doubleword. */
-	
+
 $L6:
 	ld	$9,0($4)
 	nor	$3,$0,$9
@@ -153,7 +153,7 @@ $L26:
 	dsubu	$2,$2,$9
 	and	$2,$2,$3
 	and	$2,$2,$8
-	
+
 	.set	noreorder
 	.set	nomacro
 	beql	$2,$0,$L26
@@ -162,9 +162,9 @@ $L26:
 	.set	reorder
 
 #else /* __OPTIMIZE_SIZE__ */
-	
+
 	andi	$5,$5,0x00ff
-	
+
 #endif /* __OPTIMIZE_SIZE__ */
 
 	.set	noreorder
@@ -176,7 +176,7 @@ $L26:
 
 /* check a byte at a time until the desired character is found in which case return its
    address or else the null terminator is found in which case return null. */
-		
+
 $L17:
 	#nop
 	.set	noreorder

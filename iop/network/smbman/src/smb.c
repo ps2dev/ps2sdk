@@ -312,7 +312,7 @@ struct FindFirst2ResponseData_t {
 	u8	ShortFileName[24];
 	u8	FileName[0];
 } __attribute__((packed));
- 
+
 struct FindFirstNext2Response_t {
 	struct SMBHeader_t smbH;			// 0
 	u8	smbWordcount;				// 36
@@ -530,7 +530,7 @@ struct ReadAndXRequest_t smb_Read_Request = {
 		SMB_COM_READ_ANDX,
 		0, 0, 0, 0, "\0", 0, 0, 0, 0
 	},
-	12, 
+	12,
 	SMB_COM_NONE,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 };
@@ -541,7 +541,7 @@ struct WriteAndXRequest_t smb_Write_Request = {
 		SMB_COM_WRITE_ANDX,
 		0, 0, 0, 0, "\0", 0, 0, 0, 0
 	},
-	14, 
+	14,
 	SMB_COM_NONE,
 	0, 0, 0, 0, 0, 0x01, 0, 0, 0, 0x3f, 0 	// 0x01 is WriteThrough mode and 0x3f is DataOffset
 };
@@ -580,7 +580,7 @@ static int rawTCP_GetSessionHeader(void) // Read Session Service header: careful
 	size  = SMB_buf[3];
 	size |= SMB_buf[2] << 8;
 	size |= SMB_buf[1] << 16;
-		
+
 	return (int)size;
 }
 
@@ -856,7 +856,7 @@ lbl_session_setup:
 	offset += CF;					// null terminator
 
 	for (i = 0; i < (CF << 1); i++)
-		SSR->ByteField[offset++] = 0;		// NativeOS, NativeLanMan	
+		SSR->ByteField[offset++] = 0;		// NativeOS, NativeLanMan
 
 	SSR->ByteCount = offset;
 
@@ -977,7 +977,7 @@ int smb_NetShareEnum(int UID, int TID, ShareEntry_t *shareEntries, int index, in
 	NSER->smbH.UID = (u16)UID;
 	NSER->smbH.TID = (u16)TID;
 	NSER->smbWordcount = 14;
-	
+
 	NSER->smbTrans.TotalParamCount = NSER->smbTrans.ParamCount = 19;
 	NSER->smbTrans.MaxParamCount = 1024;
 	NSER->smbTrans.MaxDataCount = 8096;
@@ -1023,7 +1023,7 @@ int smb_NetShareEnum(int UID, int TID, ShareEntry_t *shareEntries, int index, in
 
 	for (i=0; i<AvailableEntries; i++) {
 
-		// calculate the padding after the Share name 
+		// calculate the padding after the Share name
 		int padding = (strlen(p)+1+2) % 16 ? 16-((strlen(p)+1) % 16) : 0;
 
 		if (*((u16 *)&p[strlen(p)+1+padding-2]) == 0) { // Directory Tree type
@@ -1103,7 +1103,7 @@ query:
 	QPIR->smbH.UID = (u16)UID;
 	QPIR->smbH.TID = (u16)TID;
 	QPIR->smbWordcount = 15;
-	
+
 	QPIR->smbTrans.SetupCount = 1;
 	QPIR->SubCommand = TRANS2_QUERY_PATH_INFORMATION;
 
@@ -1491,7 +1491,7 @@ int smb_ManageDirectory(int UID, int TID, char *Path, int cmd)
 	CF = server_specs.StringsCF;
 
 	MDR->smbH.Magic = SMB_MAGIC;
-	
+
 	MDR->smbH.Cmd = (u8)cmd;
 	MDR->smbH.Flags = SMB_FLAGS_CANONICAL_PATHNAMES; //| SMB_FLAGS_CASELESS_PATHNAMES;
 	MDR->smbH.Flags2 = SMB_FLAGS2_KNOWS_LONG_NAMES;
@@ -1549,7 +1549,7 @@ int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 	RR->smbWordcount = 1;
 
 	// NOTE: on samba seems it doesn't care of attribute to rename directories
-	// to be tested on windows 
+	// to be tested on windows
 	RR->SearchAttributes = 0; // coud be other attributes to find Hidden/System files /Directories
 
 	offset = 0;
@@ -1611,7 +1611,7 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 	FFNR->smbH.UID = (u16)UID;
 	FFNR->smbH.TID = (u16)TID;
 	FFNR->smbWordcount = 15;
-	
+
 	FFNR->smbTrans.SetupCount = 1;
 	FFNR->SubCommand = (u8)cmd;
 

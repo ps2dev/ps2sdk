@@ -44,10 +44,10 @@ HeapFree:
 	j	$31
 	li	$0, 7
 
-	.globl	HeapSize			# 008 
+	.globl	HeapSize			# 008
 HeapSize:
 	j	$31
-	li	$0, 8 
+	li	$0, 8
 
 	.word	0
 	.word	0

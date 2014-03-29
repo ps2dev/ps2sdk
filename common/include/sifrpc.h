@@ -1,4 +1,4 @@
-/*      
+/*
 # _____     ___ ____     ___ ____
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
@@ -41,7 +41,7 @@ typedef struct t_SifRpcRendPkt
    int				rec_id;		/* 04 */
    void				*pkt_addr;	/* 05 */
    int				rpc_id;		/* 06 */
-                                
+
    struct t_SifRpcClientData	*client;	/* 7 */
    u32                          cid;		/* 8 */
    struct t_SifRpcServerData	*server;	/* 9 */
@@ -55,7 +55,7 @@ typedef struct t_SifRpcOtherDataPkt
    int				rec_id;		/* 04 */
    void				*pkt_addr;	/* 05 */
    int				rpc_id;		/* 06 */
-                                
+
    struct t_SifRpcReceiveData	*receive;	/* 07 */
    void				*src;		/* 08 */
    void				*dest;		/* 09 */

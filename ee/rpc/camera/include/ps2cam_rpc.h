@@ -5,7 +5,7 @@
 ------------------------------------------------------------------------
   ps2cam_rpc.h
 					PS2Camera EE-IOP RPC CALLS
-			
+
 */
 #ifndef _PS2CAM_RPC_H
 #define _PS2CAM_RPC_H
@@ -16,8 +16,8 @@
 #define PS2CAM_RPC_GETIRXVERSION	40		// get irx version
 #define PS2CAM_RPC_INITIALIZE		41		// PS2CamInit
 #define PS2CAM_RPC_GETDEVCOUNT		42		// PS2CamGetDeviceCount
-#define PS2CAM_RPC_OPENDEVICE		43		// 
-#define PS2CAM_RPC_CLOSEDEVICE		44		// 
+#define PS2CAM_RPC_OPENDEVICE		43		//
+#define PS2CAM_RPC_CLOSEDEVICE		44		//
 #define PS2CAM_RPC_GETDEVSTATUS		45		// PS2CamGetStatus
 #define PS2CAM_RPC_GETDEVINFO		46		// PS2CamGetInfo
 #define PS2CAM_RPC_SETDEVBANDWIDTH	47		// PS2CamSetDeviceBandwidth
@@ -48,7 +48,7 @@
 // error codes
 #define CAM_ERROR_NONE				 (00)	// ok
 #define CAM_ERROR_NOTINIT			-(20)	//
-#define CAM_ERROR_INVALIDDEVICE		-(21)	// 
+#define CAM_ERROR_INVALIDDEVICE		-(21)	//
 #define CAM_ERROR_COMMUNKNOWN		-(22)	// unknown command
 #define CAM_ERROR_DEVNOTREADY		-(23)	// device not ready
 #define CAM_ERROR_NODEVICE			-(24)	// no compatible device connected
@@ -86,13 +86,13 @@ typedef struct
 
 typedef struct
 {
-	unsigned int	ssize;				// sizeof this struct		
+	unsigned int	ssize;				// sizeof this struct
 	unsigned short	vendor_id;			// vendor  id extracted from device
 	unsigned short	product_id;			// product id extracted from device
 	unsigned char	vendor_name[32];	// vender string
 	unsigned char	product_name[32];	// product string
 	unsigned char	model[16];			// device model
-	
+
 
 }PS2CAM_DEVICE_INFO;
 
@@ -117,7 +117,7 @@ typedef struct
 
 
 
-extern char		campacket[];		//data is stored here when PS2CamReadPacket(...) is called
+extern char		campacket[];		//data is stored here when PS2CamReadPacket(...) is called. Still not used anywhere
 
 
 #ifdef __cplusplus

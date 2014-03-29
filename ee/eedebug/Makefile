@@ -25,7 +25,7 @@ EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
 EE_CFLAGS = -O0
 
-all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBEEDEBUG_LIB) 
+all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBEEDEBUG_LIB)
 
 .c.o :
 	$(EE_CC) $(EE_CFLAGS) $(EE_INC) -c $< -o obj/$@

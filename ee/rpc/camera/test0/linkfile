@@ -105,7 +105,7 @@ SECTIONS
     SORT(CONSTRUCTORS)
   }
   .data1   : { *(.data1) }
-  .ctors   : 
+  .ctors   :
   {
     KEEP (*crtbegin.o(.ctors))
     KEEP (*(SORT(.ctors.*)))

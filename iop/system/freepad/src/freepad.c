@@ -27,13 +27,13 @@ u16 version = 0x300;
 s32 _start(char **argv, int argc)
 {
 	printf(BANNER, VERSION);
-	
+
 	D_PRINTF("Debug Version\n");
 
-	if(RegisterLibraryEntries(&_exp_padman) != 0) 
+	if(RegisterLibraryEntries(&_exp_padman) != 0)
 	{
 		M_PRINTF("RegisterLibraryEntries failed.\n");
-		return 1;	
+		return 1;
 	}
 
 	if(InitRpcServers() != 0)
@@ -63,14 +63,3 @@ void WaitClearEvent(u32 eventflag, u32 bits, u32 unused1, u32 unused2)
 
 	ClearEventFlag(eventflag, ~bits);
 }
-
-
-
-
-
-
-
-
-
-
-

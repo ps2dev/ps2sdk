@@ -80,7 +80,7 @@ void processDoneQueue_IsoTd(HcIsoTD *arg) {
 	IoRequest *req = memPool.hcIsoTdToIoReqLUT[arg - memPool.hcIsoTdBuf];
 	if (!req)
 		return;
-	
+
 	memPool.hcIsoTdToIoReqLUT[arg - memPool.hcIsoTdBuf] = NULL;
 	freeIsoTd(arg);
 	req->transferedBytes = 0;
@@ -151,12 +151,12 @@ void processDoneQueue_GenTd(HcTD *arg) {
 	IoRequest *firstElem = NULL, *lastElem = NULL;
 
 	uint32 hcRes;
-	
+
 	if ((req = memPool.hcTdToIoReqLUT[arg - memPool.hcTdBuf])) {
 		memPool.hcTdToIoReqLUT[arg - memPool.hcTdBuf] = NULL;
-		
+
 		uint32 tdHcArea = arg->HcArea;
-		
+
 		if (arg->bufferEnd && (tdHcArea & 0x180000)) { // dir != SETUP
 			if (arg->curBufPtr == 0) // transfer successful
 				req->transferedBytes = req->length;

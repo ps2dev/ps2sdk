@@ -21,7 +21,7 @@
  *             -
  *            | |                 2
  * E(m)  =    |    sqrt( 1 - m sin t ) dt
- *          | |    
+ *          | |
  *           -
  *            0
  *
@@ -48,7 +48,7 @@
  * ellpef domain     x<0, x>1            0.0
  *
  */
-
+
 /*							ellpe.c		*/
 
 /* Elliptic integral of second kind */

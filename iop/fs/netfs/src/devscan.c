@@ -8,7 +8,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 # $Id$
-# device driver scanner and handler 
+# device driver scanner and handler
 */
 
 #include <types.h>
@@ -34,12 +34,12 @@
 #endif
 
 /*! \brief Device type structure.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  */
 static dev_table_t dev_info_list[DEVSCAN_MAX+1]; /* one for padding */
 
 /*! \brief Get pointer to module structure for named module.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param name Stringname of module (eg "atad_driver").
  *  \return Pointer to module structure.
@@ -64,12 +64,12 @@ ModuleInfo_t *devscan_getmodule(const char *name)
 }
 
 /*! \brief Initialise the devices table
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param devtype Mask for device types to return (0x10 = FS drivers).
  *  \return Number of devices found.
  *
- *  This scans ioman and iomanx for devices, then adds them to the 
+ *  This scans ioman and iomanx for devices, then adds them to the
  *  internal list, with basename and the handler type.
  *
  *  Also used to re-init the devices table
@@ -86,13 +86,13 @@ int devscan_setup(int devtype)
   memset(&dev_info_list,0,sizeof(dev_info_list));
 
   /* do the ioman devices */
-  if ((info = devscan_getmodule(IOPMGR_IOMAN_IDENT))) 
+  if ((info = devscan_getmodule(IOPMGR_IOMAN_IDENT)))
   {
     /* Find the start of the device info array, in .bss.  */
     devinfo_table = (iop_device_t **)(info->text_start + info->text_size + info->data_size + 0x0c);
 
     /* The device info table had 16 entries, but some may be empty.  Just look at all of them.  */
-    for (i = 0; i < DEVSCAN_IOMAX; i++) 
+    for (i = 0; i < DEVSCAN_IOMAX; i++)
     {
       if (devinfo_table[i])
         if ((devinfo_table[i]->type & devtype))
@@ -108,13 +108,13 @@ int devscan_setup(int devtype)
   }
 
   /* do the iomanx devices */
-  if ((info = devscan_getmodule(IOPMGR_IOMANX_IDENT))) 
+  if ((info = devscan_getmodule(IOPMGR_IOMANX_IDENT)))
   {
     /* Find the start of the device info array, in .bss.  */
     devinfo_table = (iop_device_t **)(info->text_start + info->text_size + info->data_size);
 
     /* The device info table had 32 entries, but some may be empty.  Just look at all of them.  */
-    for (i = 0; i < DEVSCAN_IOXMAX; i++) 
+    for (i = 0; i < DEVSCAN_IOXMAX; i++)
     {
       if (devinfo_table[i])
         /* only add iomanx ones here, so must have extended flag set  else we get duplication with new iomanx */
@@ -133,7 +133,7 @@ int devscan_setup(int devtype)
 }
 
 /*! \brief Get device handler type for path.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param name Full pathname to check.
  *  \return Device handler type.
@@ -159,7 +159,7 @@ int devscan_gettype(char *name)
 }
 
 /*! \brief Get device list.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  \param  buffer    Pointer to dest buffer
  *  \return number of devices returned.

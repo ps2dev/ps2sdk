@@ -25,7 +25,7 @@ extern "C" {
 #define FS_GROUP_COMMON			0x01
 #define FS_GROUP_APPLICATION	0x02
 
-#define	FS_TYPE_EXT2			0x0083	
+#define	FS_TYPE_EXT2			0x0083
 #define	FS_TYPE_EXT2_SWAP		0x0082
 #define	FS_TYPE_PFS				0x0100
 #define	FS_TYPE_EMPTY			0x0000

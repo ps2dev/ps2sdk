@@ -38,7 +38,7 @@
 IRX_ID("audsrv", 1, 1);
 
 /* globals */
-static int core1_volume = MAX_VOLUME;   ///< core1 (sfx) volume 
+static int core1_volume = MAX_VOLUME;   ///< core1 (sfx) volume
 static int core1_freq = 0;              ///< frequency set by user
 static int core1_bits = 0;              ///< bits per sample, set by user
 static int core1_channels = 0;          ///< number of audio channels
@@ -190,7 +190,7 @@ int audsrv_set_format(int freq, int bits, int channels)
 
 	writepos = 0;
 	readpos = (feed_size * 5) & ~3;
-	
+
 	printf("audsrv: freq %d bits %d channels %d ringbuf_sz %d feed_size %d shift %d\n", freq, bits, channels, ringbuf_size, feed_size, core1_sample_shift);
 
 	format_changed = 1;
@@ -208,7 +208,7 @@ int audsrv_init()
 	}
 
 	/* initialize libsd */
-	if (sceSdInit(SD_INIT_COLD) < 0) 
+	if (sceSdInit(SD_INIT_COLD) < 0)
 	{
 		printf("audsrv: failed to initialize libsd\n");
 		return -1;
@@ -231,7 +231,7 @@ int audsrv_init()
 		return AUDSRV_ERR_OUT_OF_MEMORY;
 	}
 
-	/* audio is always playing in the background. trick is to 
+	/* audio is always playing in the background. trick is to
 	 * set the data input volume to zero
 	 */
 	audsrv_stop_audio();
@@ -254,7 +254,7 @@ int audsrv_init()
 
 /** Returns the number of bytes that can be queued
     @returns sample count
-    
+
     Returns the number of bytes that are available in the ring buffer. This
     is the total bytes that can be queued, without collision of the reading
     head with the writing head.
@@ -274,7 +274,7 @@ int audsrv_available()
 /** Blocks until there is enough space to enqueue chunk
     @param buflen   size of chunk requested to be enqueued (in bytes)
     @returns error status code
-    
+
     Blocks until there are enough space to store the upcoming chunk
     in audsrv's internal ring buffer.
 */
@@ -293,7 +293,7 @@ int audsrv_wait_audio(int buflen)
 			/* enough space! */
 			return AUDSRV_ERR_NOERROR;
 		}
-		
+
 		WaitSema(queue_sema);
 	}
 }
@@ -387,7 +387,7 @@ int audsrv_set_threshold(int amount)
     @param arg   not used
 
     This is the main playing thread. It feeds the SPU with upsampled, demux'd
-    audio data, from what has been queued beforehand. The stream is 
+    audio data, from what has been queued beforehand. The stream is
     constructed as a ring buffer. This thread only ends with TerminateThread,
     and is usually asleep, waiting for SPU to complete playing the current
     wave. SPU plays 2048 bytes blocks, which yields that this thread wakes
@@ -404,7 +404,7 @@ static void play_thread(void *arg)
 	upsampler_t upsampler = NULL;
 
 	printf("starting play thread\n");
-	while (1) 
+	while (1)
 	{
 		if (format_changed)
 		{
@@ -432,7 +432,7 @@ static void play_thread(void *arg)
 			memset(rendered_left, '\0', sizeof(rendered_left));
 			memset(rendered_right, '\0', sizeof(rendered_right));
 		}
-		
+
 		/* wait until it's safe to transmit another block */
 		WaitSema(transfer_sema);
 
@@ -507,7 +507,7 @@ int audsrv_quit()
 }
 
 __attribute__((weak))
-void unittest_start() 
+void unittest_start()
 {
 	/* override this from a unittest */
 }

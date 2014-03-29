@@ -41,7 +41,7 @@
  *    IEEE      0, 30       10000       5.6e-7      1.2e-7
  *
  */
-
+
 /*							expn.c	*/
 
 /* Cephes Math Library Release 2.2:  July, 1992
@@ -102,7 +102,7 @@ if( x == 0.0 )
 
 if( n == 0 )
 	return( expf(-x)/x );
-
+
 /*							expn.c	*/
 /*		Expansion for large n		*/
 
@@ -120,7 +120,7 @@ if( n > 5000 )
 
 if( x > 1.0 )
 	goto cfrac;
-
+
 /*							expn.c	*/
 
 /*		Power series expansion		*/
@@ -157,7 +157,7 @@ t = n;
 r = n - 1;
 ans = (powf(z, r) * psi / gammaf(t)) - ans;
 goto done;
-
+
 /*							expn.c	*/
 /*		continued fraction		*/
 cfrac:

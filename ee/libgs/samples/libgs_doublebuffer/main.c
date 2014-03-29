@@ -17,7 +17,7 @@
 // frame which speed things up. you dont have to wait on DMA to finish
 // transfering data to the GS
 
-#define	SCREEN_WIDTH			640	
+#define	SCREEN_WIDTH			640
 #define	SCREEN_HEIGHT			448
 
 static int ScreenOffsetX, ScreenOffsetY;
@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 	draw_env[1].bg_color.b = 255;
 	draw_env[1].bg_color.r = 255;
 	draw_env[1].bg_color.g = 255;
-*/	
+*/
 
 	while(1)
 	{
@@ -127,7 +127,7 @@ static int InitGraphics(void)
 	GsEnableAlphaTransparency1(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, 0x00);
 	// contex 2
 	GsEnableAlphaTransparency2(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, 0x00);
-	
+
 	GsEnableAlphaBlending1(GS_ENABLE, 0);
 	GsEnableAlphaBlending2(GS_ENABLE, 0);
 
@@ -136,7 +136,7 @@ static int InitGraphics(void)
 
 static void SelectDisplayContext(int context_id)
 {
-	// the CRTC is used to select which contex we see on our TV/VGA/HDTV 
+	// the CRTC is used to select which contex we see on our TV/VGA/HDTV
 
 	if(context_id==0)
 		GsSetCRTCSettings(CRTC_SETTINGS_DEFAULT1, 255);
@@ -148,7 +148,7 @@ static void SelectDisplayContext(int context_id)
 static void ClearDrawingContext(int context_id)
 {
 	if(context_id==0)
-		GsClearDrawEnv1(&draw_env[0]);		
+		GsClearDrawEnv1(&draw_env[0]);
 	else
 		GsClearDrawEnv2(&draw_env[1]);
 }

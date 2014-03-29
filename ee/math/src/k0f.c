@@ -37,7 +37,7 @@
  *  K0 domain          x <= 0          MAXNUM
  *
  */
-/*							k0ef()
+/*							k0ef()
  *
  *	Modified Bessel function, third kind, order zero,
  *	exponentially scaled
@@ -67,7 +67,7 @@
  * See k0().
  *
  */
-
+
 /*
 Cephes Math Library Release 2.0:  April, 1987
 Copyright 1984, 1987 by Stephen L. Moshier
@@ -79,7 +79,7 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 /* Chebyshev coefficients for K0(x) + log(x/2) I0(x)
  * in the interval [0,2].  The odd order coefficients are all
  * zero; only the even order coefficients are listed.
- * 
+ *
  * lim(x->0){ K0(x) + log(x/2) I0(x) } = -EUL.
  */
 
@@ -98,7 +98,7 @@ static float A[] =
 
 /* Chebyshev coefficients for exp(x) sqrt(x) K0(x)
  * in the inverted interval [2,infinity].
- * 
+ *
  * lim(x->inf){ exp(x) sqrt(x) K0(x) } = sqrt(pi/2).
  */
 
@@ -116,7 +116,7 @@ static float B[] = {
 };
 
 /*							k0.c	*/
- 
+
 extern float MAXNUMF;
 
 #ifdef ANSIC

@@ -56,14 +56,14 @@ static __inline__ size_t strxfrm(char *dest, const char *src, size_t n) { strncp
 char *  strerror(int);
 
 // copies ascii string to sjis string
-// 
+//
 // args:    dest sjis string buffer
 //          source ascii string buffer
 // returns: length of ascii string copied
 int strcpy_sjis(short* sjis_buff, const char* ascii_buff);
 
 // copies sjis string to ascii string
-// 
+//
 // args:    dest ascii string buffer
 //          source sjis string buffer
 // returns: length of sjis string copied

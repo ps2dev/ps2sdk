@@ -918,7 +918,7 @@ int separatePathAndName(const unsigned char* fname, unsigned char* path, unsigne
 		np = (char *)fname;                  //  name starts at start of fname string
 	else                           //else last path separator found
 		np = sp+1;                   //  name starts after separator
-	if(strlen(np) >= FAT_MAX_NAME) //if name is too long 
+	if(strlen(np) >= FAT_MAX_NAME) //if name is too long
 		return -ENAMETOOLONG;        //  return error code
 	strcpy(name, np);              //copy name from correct part of fname string
 	if((path_len = (np - fname)) >= FAT_MAX_PATH) //if path is too long
@@ -1116,7 +1116,7 @@ int fat_fillDirentryInfo(fat_driver* fatd, unsigned char* lname, unsigned char* 
 	int seq;
 	int mask_ix, mask_sh;
 	mass_dev* mass_device = fatd->dev;
-    
+
 	memset(fatd->dir_used_mask, 0, DIR_MASK_SIZE/8);
 	memset(fatd->seq_mask, 0, SEQ_MASK_SIZE/8);
 
@@ -1857,14 +1857,14 @@ int fat_createFile(fat_driver* fatd, const unsigned char* fname, char directory,
 		XPRINTF("USBHDFSD: E: directory not found! \n");
 		return ret;
 	}
-    
+
 	if (!(fatdir.attr & FAT_ATTR_DIRECTORY)) {
 		XPRINTF("USBHDFSD: E: directory not found! \n");
 		return -ENOENT;
 	}
-    
+
     XPRINTF("USBHDFSD: directory=%s name=%s cluster=%d \n", path, lname, startCluster);
-    
+
     if (fatdir.attr & FAT_ATTR_READONLY)
         return -EACCES;
 
@@ -1933,14 +1933,14 @@ int fat_deleteFile(fat_driver* fatd, const unsigned char* fname, char directory)
 		XPRINTF("USBHDFSD: E: directory not found! \n");
 		return ret;
 	}
-    
+
 	if (!(fatdir.attr & FAT_ATTR_DIRECTORY)) {
 		XPRINTF("USBHDFSD: E: directory not found! \n");
 		return -ENOENT;
 	}
-    
+
     XPRINTF("USBHDFSD: directory=%s name=%s cluster=%d \n", path, lname, startCluster);
-    
+
     if (fatdir.attr & FAT_ATTR_READONLY) {
 		XPRINTF("USBHDFSD: E: directory read only! \n");
 		return -EACCES;

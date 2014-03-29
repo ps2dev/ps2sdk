@@ -101,7 +101,7 @@ static __inline__ long atol(const char * x) { return strtol(x, NULL, 10); }
 
 
 void          qsort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *));
-		     
+
 
 /* Multibyte disabled, but prototyped for C++... */
 int           mblen(const char *, size_t);

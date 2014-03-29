@@ -9,7 +9,7 @@
 #define __FREEPAD_PADDATA_H__
 
 
-void pdReset(); 
+void pdReset();
 void pdTransfer();
 
 u32 pdSetCtrl1(u32 port, u32 slot, u32 ctrl);

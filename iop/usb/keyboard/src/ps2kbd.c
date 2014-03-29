@@ -138,7 +138,7 @@ int ps2kbd_probe(int devId)
   //printf("PS2Kbd_probe devId %d\n", devId);
 
   dev = UsbGetDeviceStaticDescriptor(devId, NULL, USB_DT_DEVICE); /* Get device descriptor */
-  if(!dev) 
+  if(!dev)
     {
       printf("ERROR: Couldn't get device descriptor\n");
       return 0;
@@ -165,7 +165,7 @@ int ps2kbd_probe(int devId)
       printf("ERROR: No interfaces available\n");
       return 0;
     }
-     
+
   intf = (UsbInterfaceDescriptor *) ((char *) conf + conf->bLength); /* Get first interface */
 /*   printf("Interface Length %d Endpoints %d Class %d Sub %d Proto %d\n", intf->bLength, */
 /* 	 intf->bNumEndpoints, intf->bInterfaceClass, intf->bInterfaceSubClass, */
@@ -183,7 +183,7 @@ int ps2kbd_probe(int devId)
   endp = (UsbEndpointDescriptor *) ((char *) endp + endp->bLength); /* Go to the data endpoint */
 
   //printf("Endpoint 1 Addr %d, Attr %d, MaxPacket %d\n", endp->bEndpointAddress, endp->bmAttributes, endp->wMaxPacketSizeLB);
-  
+
   if(((endp->bmAttributes & USB_ENDPOINT_XFERTYPE_MASK) != USB_ENDPOINT_XFER_INT) ||
      ((endp->bEndpointAddress & USB_ENDPOINT_DIR_MASK) != USB_DIR_IN))
     {
@@ -211,7 +211,7 @@ int ps2kbd_connect(int devId)
   //printf("PS2Kbd_connect devId %d\n", devId);
 
   dev = UsbGetDeviceStaticDescriptor(devId, NULL, USB_DT_DEVICE); /* Get device descriptor */
-  if(!dev) 
+  if(!dev)
     {
       printf("ERROR: Couldn't get device descriptor\n");
       return 1;
@@ -223,7 +223,7 @@ int ps2kbd_connect(int devId)
       printf("ERROR: Couldn't get configuration descriptor\n");
       return 1;
     }
-     
+
   intf = (UsbInterfaceDescriptor *) ((char *) conf + conf->bLength); /* Get first interface */
   endp = (UsbEndpointDescriptor *) ((char *) intf + intf->bLength);
   endp = (UsbEndpointDescriptor *) ((char *) endp + endp->bLength); /* Go to the data endpoint */
@@ -312,7 +312,7 @@ typedef struct _string_descriptor
 {
   u8 buf[200];
   char *desc;
-} string_descriptor; 
+} string_descriptor;
 
 void ps2kbd_getstring_set(int resultCode, int bytes, void *arg)
 
@@ -335,7 +335,7 @@ void ps2kbd_getstring_set(int resultCode, int bytes, void *arg)
 	}
       printf("PS2KBD %s: %s\n", strBuf->desc, string);
     }
-  
+
   FreeSysMemory(arg);
 }
 
@@ -344,7 +344,7 @@ void usb_getstring(int endp, int index, char *desc)
 {
   u8 *data;
   string_descriptor *str;
-  int ret; 
+  int ret;
 
   data = (u8 *) AllocSysMemory(0, sizeof(string_descriptor), NULL);
   str = (string_descriptor *) data;
@@ -352,7 +352,7 @@ void usb_getstring(int endp, int index, char *desc)
   if(data != NULL)
     {
       str->desc = desc;
-      ret = UsbControlTransfer(endp, 0x80, USB_REQ_GET_DESCRIPTOR, (USB_DT_STRING << 8) | index, 
+      ret = UsbControlTransfer(endp, 0x80, USB_REQ_GET_DESCRIPTOR, (USB_DT_STRING << 8) | index,
 			       0, sizeof(string_descriptor) - 4, data, ps2kbd_getstring_set, data);
       if(ret != USB_RC_OK)
 	{
@@ -381,7 +381,7 @@ void ps2kbd_config_set(int resultCode, int bytes, void *arg)
   if(dev != NULL)
     {
       int ret;
-      
+
       ret = UsbControlTransfer(dev->configEndp, 0x21, USB_REQ_SET_IDLE, 0, dev->interfaceNo, 0, NULL, ps2kbd_idlemode_set, arg);
     }
 }
@@ -398,12 +398,12 @@ void ps2kbd_idlemode_set(int resultCode, int bytes, void *arg)
       printf("PS2KBD: Idlemode set error res %d, bytes %d, arg %p\n", resultCode, bytes, arg);
       return;
     }
-  
+
   dev = (kbd_dev *) arg;
   if(dev != NULL)
     {
       int ret;
-      
+
       ret = UsbInterruptTransfer(dev->dataEndp, &dev->data, dev->packetSize, ps2kbd_data_recv, arg);
     }
 }
@@ -475,7 +475,7 @@ void ps2kbd_getkeys(u8 keyMods, u8 ledStatus, const u8 *keys, kbd_dev *dev)
     {
       tempPos = lineStartP;
     }
-  
+
   for(loopKey = 0; loopKey < PS2KBD_MAXKEYS; loopKey++)
     {
       u8 currKey = keys[loopKey];
@@ -582,7 +582,7 @@ void ps2kbd_getkeys(u8 keyMods, u8 ledStatus, const u8 *keys, kbd_dev *dev)
 	}
     }
 
-  if(byteCount > 0) 
+  if(byteCount > 0)
     {
       iop_sys_clock_t t;
       /* Set alarm to do repeat rate */
@@ -620,11 +620,11 @@ void ps2kbd_getkeys_raw(u8 newKeyMods, u8 oldKeyMods, u8 *new, const u8 *old)
     {
       tempPos = lineStartP;
     }
-  
+
   for(loopKey = 0; loopKey < 8; loopKey++)
     {
       int currMod = (1 << loopKey);
-      if(keyMods & currMod) 
+      if(keyMods & currMod)
 	{
 	  if(lineEndP == (tempPos - 2))
 	    {
@@ -709,7 +709,7 @@ void ps2kbd_data_recv(int resultCode, int bytes, void *arg)
       printf("PS2KEYBOARD: Data Recv set res %d, bytes %d, arg %p\n", resultCode, bytes, arg);
       return;
     }
-  
+
   //printf("PS2KBD: Data Recv set res %d, bytes %d, arg %p\n", resultCode, bytes, arg);
 
   dev = (kbd_dev *) arg;
@@ -718,7 +718,7 @@ void ps2kbd_data_recv(int resultCode, int bytes, void *arg)
       printf("PS2KBD: dev == NULL\n");
       return;
     }
-    
+
 /*       printf("PS2KBD Modifiers %02X, Keys ", dev->data.mod_keys); */
 /*       for(loop = 0; loop < PS2KBD_MAXKEYS; loop++) */
 /* 	{ */
@@ -738,7 +738,7 @@ void ps2kbd_data_recv(int resultCode, int bytes, void *arg)
 	  break;
 	}
     }
-  
+
   if(!phantom) /* If not in a phantom state */
     {
       u8 uniqueKeys[PS2KBD_MAXKEYS];
@@ -764,23 +764,23 @@ void ps2kbd_data_recv(int resultCode, int bytes, void *arg)
 /* 	  printf("%02X ", missingKeys[loopKey]); */
 /* 	} */
 /*       printf("\n"); */
-      
+
       if(kbd_readmode == PS2KBD_READMODE_NORMAL)
 	{
 	  u8 ledStatus;
 
 	  ledStatus = dev->ledStatus;
 	  //printf("ledStatus %02X\n", ledStatus);
-	  
+
 	  for(loopKey = 0; loopKey < PS2KBD_MAXKEYS; loopKey++) /* Process key codes */
 	    {
 	      switch(uniqueKeys[loopKey])
 		{
-		case USB_KEYB_NUMLOCK : 
+		case USB_KEYB_NUMLOCK :
 		  ledStatus ^= PS2KBD_LED_NUMLOCK;
 		  uniqueKeys[loopKey] = 0;
 		  break;
-		case USB_KEYB_CAPSLOCK : 
+		case USB_KEYB_CAPSLOCK :
 		  ledStatus ^= PS2KBD_LED_CAPSLOCK;
 		  uniqueKeys[loopKey] = 0;
 		  break;
@@ -790,16 +790,16 @@ void ps2kbd_data_recv(int resultCode, int bytes, void *arg)
 		  break;
 		}
 	    }
-	  
+
 	  if(ledStatus != dev->ledStatus)
 	    {
 	      dev->ledStatus = ledStatus & PS2KBD_LED_MASK;
 	      //printf("LEDS %02X\n", dev->ledStatus);
 	      /* Call Set LEDS */
-	      UsbControlTransfer(dev->configEndp, 0x21, USB_REQ_SET_REPORT, 0x200, 
+	      UsbControlTransfer(dev->configEndp, 0x21, USB_REQ_SET_REPORT, 0x200,
 				 dev->interfaceNo, 1, &dev->ledStatus, ps2kbd_led_set, arg);
 	    }
-	  
+
 	  WaitSema(lineSema); /* Make sure no other thread is going to manipulate the buffer */
 	  ps2kbd_getkeys(dev->data.mod_keys, dev->ledStatus, uniqueKeys, dev); /* read in remaining keys */
 	  SignalSema(lineSema);
@@ -813,7 +813,7 @@ void ps2kbd_data_recv(int resultCode, int bytes, void *arg)
 
       memcpy(&dev->oldData, &dev->data, sizeof(kbd_data_recv));
     }
-  
+
   ret = UsbInterruptTransfer(dev->dataEndp, &dev->data, dev->packetSize, ps2kbd_data_recv, arg);
 }
 
@@ -825,14 +825,14 @@ void flushbuffer()
   lineStartP = 0;
   lineEndP = 0;
   memset(lineBuffer, 0, lineSize);
-  
+
   DeleteSema(bufferSema);
   s.initial = 0;
   s.max = lineSize;
   s.option = 0;
   s.attr = 0;
   bufferSema = CreateSema(&s); /* Create a sema to maintain status of readable data */
-  
+
   if(bufferSema <= 0)
     {
       printf("PS2KBD: Error creating buffer sema\n");
@@ -844,7 +844,7 @@ void ps2kbd_ioctl_setreadmode(u32 readmode)
 {
   int devLoop;
 
-  if(readmode == kbd_readmode) return; 
+  if(readmode == kbd_readmode) return;
 
   if((readmode == PS2KBD_READMODE_NORMAL) || (readmode == PS2KBD_READMODE_RAW))
     {
@@ -1008,7 +1008,7 @@ int fio_read(iop_file_t *f, void *buf, int size)
     }
 
   ret = PollSema(bufferSema);
-  if(ret < 0) 
+  if(ret < 0)
     {
       if((ret == SEMA_ZERO) && (kbd_blocking == PS2KBD_BLOCKING))
 	{
@@ -1024,7 +1024,7 @@ int fio_read(iop_file_t *f, void *buf, int size)
 	  return 0;
 	}
     }
-  
+
   SignalSema(bufferSema);
   ret = WaitSema(lineSema);
   if(ret < 0) return 0;
@@ -1045,7 +1045,7 @@ int fio_read(iop_file_t *f, void *buf, int size)
 /*     ReferSemaStatus(bufferSema, &s); */
 /*     //printf("Sema count %d\n", s.curr_count); */
 /*   } */
-  
+
   return count;
 }
 
@@ -1053,7 +1053,7 @@ int fio_ioctl(iop_file_t *f, unsigned long arg, void *param)
 
 {
   //printf("fio_ioctl() %ld %d\n", arg, *((u32 *) param));
-  switch(arg) 
+  switch(arg)
     {
     case PS2KBD_IOCTL_SETREADMODE: ps2kbd_ioctl_setreadmode(*((u32 *) param));
       break;
@@ -1088,7 +1088,7 @@ int fio_close(iop_file_t *f)
   return 0;
 }
 
-iop_device_ops_t fio_ops = 
+iop_device_ops_t fio_ops =
 
   {
     fio_init,
@@ -1152,7 +1152,7 @@ void repeat_thread(void *arg)
 		  if(lineEndP != (tempPos - 2))
 		    {
 		      lineBuffer[lineEndP++] = devices[devLoop]->repeatkeys[0];
-		      lineEndP %= lineSize;	      
+		      lineEndP %= lineSize;
 		      lineBuffer[lineEndP++] = devices[devLoop]->repeatkeys[1];
 		      lineEndP %= lineSize;
 		      SignalSema(bufferSema);
@@ -1164,7 +1164,7 @@ void repeat_thread(void *arg)
 		  if(lineEndP != (tempPos - 1))
 		    {
 		      lineBuffer[lineEndP++] = devices[devLoop]->repeatkeys[0];
-		      lineEndP %= lineSize;	      
+		      lineEndP %= lineSize;
 		      SignalSema(bufferSema);
 		    }
 		}
@@ -1198,7 +1198,7 @@ int init_repeatthread()
     StartThread(repeat_tid, 0);
     return 0;
   }
-  else 
+  else
     {
       return 1;
     }
@@ -1242,7 +1242,7 @@ int ps2kbd_init()
   lineEndP = 0;
   lineSize = PS2KBD_DEFLINELEN;
   memset(lineBuffer, 0, PS2KBD_DEFLINELEN);
-  
+
   memset(devices, 0, sizeof(kbd_dev *) * PS2KBD_MAXDEV);
   dev_count = 0;
   kbd_blocking = PS2KBD_NONBLOCKING;

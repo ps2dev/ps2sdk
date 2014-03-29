@@ -32,7 +32,7 @@
  *    IEEE      0,30        100000      4.0e-7      7.9e-8
  *
  */
-/*							i0ef.c
+/*							i0ef.c
  *
  *	Modified Bessel function of order zero,
  *	exponentially scaled
@@ -64,7 +64,7 @@
  * See i0f().
  *
  */
-
+
 /*							i0.c		*/
 
 
@@ -122,7 +122,7 @@ static float B[] =
  8.04490411014108831608E-1f
 };
 
- 
+
 #ifdef ANSIC
 float chbevlf(float, float *, int), expf(float), sqrtf(float);
 

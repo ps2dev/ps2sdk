@@ -27,13 +27,13 @@ I_PollSema
 thsemap_IMPORTS_end
 
 thbase_IMPORTS_start
-I_CreateThread 
+I_CreateThread
 I_DeleteThread
-I_StartThread 
-I_SleepThread 
-I_GetThreadId 
+I_StartThread
+I_SleepThread
+I_GetThreadId
 I_ExitDeleteThread
-I_DelayThread 
+I_DelayThread
 thbase_IMPORTS_end
 
 sysmem_IMPORTS_start
@@ -53,10 +53,10 @@ ioman_IMPORTS_end
 
 
 sifcmd_IMPORTS_start
-I_sceSifInitRpc 
-I_sceSifSetRpcQueue 
-I_sceSifRegisterRpc 
-I_sceSifRpcLoop 
+I_sceSifInitRpc
+I_sceSifSetRpcQueue
+I_sceSifRegisterRpc
+I_sceSifRpcLoop
 sifcmd_IMPORTS_end
 
 

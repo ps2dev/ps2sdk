@@ -15,8 +15,8 @@ IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
 IOP_BIN  = bin/ioptrap.irx
-IOP_OBJS = obj/ioptrap.o obj/handler.o obj/breakpoint.o obj/exports.o obj/imports.o 
-IOP_INCS = 
+IOP_OBJS = obj/ioptrap.o obj/handler.o obj/breakpoint.o obj/exports.o obj/imports.o
+IOP_INCS =
 
 IOP_CFLAGS  += -Wall -fno-builtin-printf
 IOP_LDFLAGS += -s

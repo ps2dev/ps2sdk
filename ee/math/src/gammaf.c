@@ -25,7 +25,7 @@
  * function is approximated by a polynomial function covering
  * the interval (2,3).  Large arguments are handled by Stirling's
  * formula. Negative arguments are made positive using
- * a reflection formula.  
+ * a reflection formula.
  *
  *
  * ACCURACY:
@@ -36,7 +36,7 @@
  *    IEEE       -33,0      100,000     6.1e-7      1.2e-7
  *
  *
- */
+ */
 /*							lgamf()
  *
  *	Natural logarithm of gamma function
@@ -85,7 +85,7 @@
  *    IEEE    -2, +3              100000     4.0e-7      5.6e-8
  *
  */
-
+
 /*							gamma.c	*/
 /*	gamma function	*/
 

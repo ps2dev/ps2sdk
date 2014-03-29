@@ -56,7 +56,7 @@ typedef struct
   u32 mode;
   u32 open_refcount;
   devfs_loc_t extent;
-  struct _ioman_data *open_files[MAX_OPENFILES]; 
+  struct _ioman_data *open_files[MAX_OPENFILES];
 } subdev_t;
 
 typedef struct _devfs_device
@@ -68,11 +68,11 @@ typedef struct _devfs_device
   u32 subdev_count;
   u32 open_refcount;
 } devfs_device_t;
-   
+
 typedef struct _ioman_data
 {
    HDEV hDev;
-   devfs_device_t *dev;  /* Pointer to the main device, set to NULL if device closed */ 
+   devfs_device_t *dev;  /* Pointer to the main device, set to NULL if device closed */
    int subdev;
    u32 mode;
    devfs_loc_t loc;
@@ -91,10 +91,10 @@ typedef struct _directory_file
 
 directory_file_t open_dirfiles[MAX_OPEN_DIRFILES];
 
-/** Simple function to convert a number to a string 
-    
+/** Simple function to convert a number to a string
+
     @param subdev: The number to conver.
-    @returns A constant string containing the number. Returns an 
+    @returns A constant string containing the number. Returns an
     empty string if not possible to convert.
 */
 const char *devfs_subdev_to_str(int subdev)
@@ -108,7 +108,7 @@ const char *devfs_subdev_to_str(int subdev)
       name[0] = 0;
    }
    else
-   { 
+   {
       loop = 0;
       name[loop++] = ((subdev / 100) % 10) + '0';
       name[loop++] = ((subdev / 10) % 10) + '0';
@@ -124,7 +124,7 @@ const char *devfs_subdev_to_str(int subdev)
 }
 
 /** Scans the device list and fills in the corresponding directory entry
-    
+
     @param dirent: Pointer to a ::iox_dirent_t structure.
     @param devno: The sequential device number to read
 
@@ -137,11 +137,11 @@ int devfs_fill_dirent(iox_dirent_t *dirent, int devno)
    devfs_device_t *dev_scan;
    int curr_no = 0;
    u32 subdev_loop;
-   
+
    dev_scan = root_device;
-   
+
    while(dev_scan != NULL)
-   { 
+   {
      if((curr_no + dev_scan->subdev_count) > devno)
      {
         for(subdev_loop = 0; subdev_loop < DEVFS_MAX_SUBDEVS; subdev_loop++)
@@ -155,7 +155,7 @@ int devfs_fill_dirent(iox_dirent_t *dirent, int devno)
               curr_no++;
            }
         }
-   
+
         if(subdev_loop < DEVFS_MAX_SUBDEVS)
         {
            memset(dirent, 0, sizeof(iox_dirent_t));
@@ -173,23 +173,23 @@ int devfs_fill_dirent(iox_dirent_t *dirent, int devno)
            dirent->name[0] = 0;
            strcpy(dirent->name, dev_scan->node.name);
            strcat(dirent->name, devfs_subdev_to_str(subdev_loop));
-        
+
            return strlen(dirent->name);
         }
      }
-     
+
      curr_no += dev_scan->subdev_count;
 
      dev_scan = dev_scan->forw;
    }
-   
+
    return 0;
 }
 
-/** Creates a new device based on the node data supplied 
- 
+/** Creates a new device based on the node data supplied
+
     @param node: Pointer to a ::devfs_node_t structure
-    
+
     @returns A new device structure or NULL on error.
 */
 devfs_device_t *devfs_create_device(const devfs_node_t *node)
@@ -198,7 +198,7 @@ devfs_device_t *devfs_create_device(const devfs_node_t *node)
    devfs_device_t *dev;
 
    if((node == NULL) || (node->name == NULL))
-   { 
+   {
       return NULL;
    }
 
@@ -215,13 +215,13 @@ devfs_device_t *devfs_create_device(const devfs_node_t *node)
    {
       dev->node.name = AllocSysMemory(ALLOC_FIRST, strlen(node->name) + 1, NULL);
       if(dev->node.name == NULL)
-      { 
+      {
          FreeSysMemory(dev);
          return NULL;
       }
       memcpy(dev->node.name, node->name, strlen(node->name) + 1);
    }
- 
+
    if(dev->node.desc != NULL)
    {
       dev->node.desc = AllocSysMemory(ALLOC_FIRST, strlen(node->desc) + 1, NULL);
@@ -234,10 +234,10 @@ devfs_device_t *devfs_create_device(const devfs_node_t *node)
       memcpy(dev->node.desc, node->desc, strlen(node->desc) + 1);
    }
 
-   return dev; 
+   return dev;
 }
 
-/** Deletes a device 
+/** Deletes a device
     @param dev: Pointer to a previously allocated device structure
     @returns Always 0
 */
@@ -251,7 +251,7 @@ int devfs_delete_device(devfs_device_t *dev)
      {
         FreeSysMemory(dev->node.name);
      }
- 
+
      if(dev->node.desc)
      {
         FreeSysMemory(dev->node.desc);
@@ -263,7 +263,7 @@ int devfs_delete_device(devfs_device_t *dev)
   return 0;
 }
 
-/** Trys to find a device with a matching name. 
+/** Trys to find a device with a matching name.
 
     The name can be a full device name with subdev on the end, the function should
     still find the device.
@@ -290,7 +290,7 @@ devfs_device_t *devfs_find_devicename(const char *name)
         if(strncmp(dev_scan->node.name, name, strlen(dev_scan->node.name)) == 0)
         {
            return dev_scan;
-        } 
+        }
      }
      dev_scan = dev_scan->forw;
    }
@@ -322,7 +322,7 @@ devfs_device_t *devfs_find_deviceid(HDEV hDev)
    return NULL;
 }
 
-/** Dummy ioman handler 
+/** Dummy ioman handler
     @returns Always returns -1
 */
 int devfs_dummy(void)
@@ -366,7 +366,7 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
 {
    devfs_device_t *dev;
    int loop;
-   int fn_offset = 0; 
+   int fn_offset = 0;
 
    //printf("devfs_open file=%p name=%s mode=%d\n", file, name, mode);
    if(name == NULL)
@@ -374,11 +374,11 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
       M_PRINTF("open: Name is NULL\n");
       return -1;
    }
-  
+
    if((name[0] == '\\') || (name[0] == '/'))
    {
       fn_offset = 1;
-   } 
+   }
 
    dev = devfs_find_devicename(name + fn_offset);
 
@@ -387,7 +387,7 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
       char *endp;
       int subdev;
       int name_len;
-      
+
       name_len = strlen(dev->node.name);
 
       if(name_len == strlen(name)) /* If this is has not got a subnumber */
@@ -397,7 +397,7 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
       }
 
       subdev = strtoul(&name[name_len + fn_offset], &endp, 10);
-      if(((subdev == 0) && (name[name_len + fn_offset] != '0')) 
+      if(((subdev == 0) && (name[name_len + fn_offset] != '0'))
         || (subdev >= DEVFS_MAX_SUBDEVS))
          /* Invalid number */
       {
@@ -419,7 +419,7 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
         return -1;
       }
 
-      if((dev->subdevs[subdev].mode & DEVFS_MODE_EX) 
+      if((dev->subdevs[subdev].mode & DEVFS_MODE_EX)
         && (dev->subdevs[subdev].open_refcount > 0))
       /* Already opened in exclusive mode */
       {
@@ -433,14 +433,14 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
       }
 
       /* Tried to open read but not allowed */
-      if(((mode & O_RDONLY) || ((mode & O_RDWR) == O_RDWR)) 
+      if(((mode & O_RDONLY) || ((mode & O_RDWR) == O_RDWR))
         && !(dev->subdevs[subdev].mode & DEVFS_MODE_R))
       {
          M_PRINTF("open: Read mode requested but not permitted\n");
          return -1;
       }
 
-      if(((mode & O_WRONLY) || ((mode & O_RDWR) == O_RDWR)) 
+      if(((mode & O_WRONLY) || ((mode & O_RDWR) == O_RDWR))
         && !(dev->subdevs[subdev].mode & DEVFS_MODE_W))
       {
          M_PRINTF("open: Write mode requested but not permitted\n");
@@ -473,7 +473,7 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
          return -1;
       }
 
-      dev->subdevs[subdev].open_files[loop] = file->privdata;  
+      dev->subdevs[subdev].open_files[loop] = file->privdata;
       dev->open_refcount++;
       M_PRINTF("open: Opened device %s subdev %d\n", dev->node.name, subdev);
    }
@@ -482,12 +482,12 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
       M_PRINTF("open: Couldn't find the device\n");
       return -1;
    }
-   
+
    return 0;
 }
 
 /** ioman close handler
-  
+
     @param file: Pointer to an ioman file structure
     @returns 0 on success, else -1
 */
@@ -501,7 +501,7 @@ int devfs_close(iop_file_t *file)
    if((data) && (data->hDev != INVALID_HDEV)) /* Invalid HDEV is a dir listing */
    {
       dev = data->dev;
-   
+
       if(dev != NULL)
       {
          if(dev->subdevs[data->subdev].open_refcount > 0)
@@ -514,33 +514,33 @@ int devfs_close(iop_file_t *file)
          }
 
          loop = 0;
-         while((loop < MAX_OPENFILES) 
+         while((loop < MAX_OPENFILES)
                && (dev->subdevs[data->subdev].open_files[loop] != data))
          {
             loop++;
          }
- 
+
          if(loop != MAX_OPENFILES)
-         { 
+         {
             dev->subdevs[data->subdev].open_files[loop] = NULL;
-         }         
+         }
          else
-         { 
+         {
             M_PRINTF("close: Could not find opened file\n");
          }
- 
+
          M_PRINTF("close: Closing device %s subdev %d\n", dev->node.name, data->subdev);
          FreeSysMemory(data);
       }
       else
       {
          FreeSysMemory(data);
-         file->privdata = NULL; 
+         file->privdata = NULL;
          return -1;
       }
-   } 
+   }
    else
-   { 
+   {
       return -1;
    }
 
@@ -558,15 +558,15 @@ int devfs_ioctl(iop_file_t *file, unsigned long cmd, void *args)
 {
    devfs_device_t *dev;
    ioman_data_t *data = (ioman_data_t *) file->privdata;
-            
+
    if(cmd == DEVFS_IOCTL_GETDESC)
    {
       return -1; /* ioctl cannot support this call */
-   } 
+   }
 
    data = file->privdata;
    if((data) && (data->hDev != INVALID_HDEV))
-   {  
+   {
       dev = data->dev;
       if(dev == NULL) /* Device has been closed from under us */
       {
@@ -591,7 +591,7 @@ int devfs_ioctl(iop_file_t *file, unsigned long cmd, void *args)
 
    return -1;
 }
- 
+
 /** ioman ioctl2 handler
     @param file: Pointer to an ioman file structure
     @param cmd: ioctl command number
@@ -627,10 +627,10 @@ int devfs_ioctl2(iop_file_t *file, int cmd, void *args, unsigned int arglen, voi
             *((u8 *) (buf + buflen)) = 0;
             return strlen(buf);
          }
-         
+
          return 0;
       }
-            
+
       if(dev->node.ioctl != NULL)
       {
          devfs_info_t dev_info;
@@ -673,7 +673,7 @@ int devfs_read(iop_file_t *file, void *buf, int len)
          return -1;
       }
 
-      if((dev->node.read != NULL) 
+      if((dev->node.read != NULL)
         && (dev->subdevs[data->subdev].mode & DEVFS_MODE_R))
       {
          devfs_info_t dev_info;
@@ -683,15 +683,15 @@ int devfs_read(iop_file_t *file, void *buf, int len)
          dev_info.subdev = data->subdev;
          dev_info.mode = data->mode;
          dev_info.loc = data->loc;
-         bytes_read = dev->node.read(&dev_info, buf, len); 
+         bytes_read = dev->node.read(&dev_info, buf, len);
          if(bytes_read > 0)
-         { 
+         {
             data->loc.loc64 += (u64) bytes_read;
          }
          return bytes_read;
-      } 
+      }
    }
-  
+
    return -1;
 }
 
@@ -735,7 +735,7 @@ int devfs_write(iop_file_t *file, void *buf, int len)
          {
             data->loc.loc64 += (u64) bytes_written;
          }
-         return bytes_written; 
+         return bytes_written;
       }
    }
 
@@ -745,7 +745,7 @@ int devfs_write(iop_file_t *file, void *buf, int len)
 /** ioman lseek handler
     @param file: Pointer to a ioman file structure
     @param loc: Location to seek to
-    @param whence: Seek base. 
+    @param whence: Seek base.
     @returns location seeked to, -1 on error.
 */
 int devfs_lseek(iop_file_t *file, long loc, int whence)
@@ -765,7 +765,7 @@ int devfs_lseek(iop_file_t *file, long loc, int whence)
          file->privdata = NULL;
          return -1;
       }
-      
+
       switch(whence)
       {
         case SEEK_SET: if(loc > 0)
@@ -776,13 +776,13 @@ int devfs_lseek(iop_file_t *file, long loc, int whence)
                        else if(((s64) -loc) < data->loc.loc64)
                          data->loc.loc64 += (s64) loc;
                        break;
-        case SEEK_END: if((loc > 0) 
+        case SEEK_END: if((loc > 0)
                        && (dev->subdevs[data->subdev].extent.loc64 >= (u64) loc))
-                         data->loc.loc64 = dev->subdevs[data->subdev].extent.loc64 - (u64) loc; 
+                         data->loc.loc64 = dev->subdevs[data->subdev].extent.loc64 - (u64) loc;
                        break;
         default:       return -1;
       }
-   } 
+   }
    else
    {
       return -1;
@@ -792,7 +792,7 @@ int devfs_lseek(iop_file_t *file, long loc, int whence)
 }
 
 /** ioman lseek64 handler
-    @param file: Pointer to an ioman file structure 
+    @param file: Pointer to an ioman file structure
     @param loc: 64bit seek location
     @param whence: Seek base
 */
@@ -825,7 +825,7 @@ int devfs_lseek64(iop_file_t *file, long long loc, int whence)
                          data->loc.loc64 += (s64) loc;
                        break;
         case SEEK_END: if((loc > 0)                                                                                  && (dev->subdevs[data->subdev].extent.loc64 >= (u64) loc))
-                         data->loc.loc64 = dev->subdevs[data->subdev].extent.loc64 - (u64) loc; 
+                         data->loc.loc64 = dev->subdevs[data->subdev].extent.loc64 - (u64) loc;
                        break;
         default:       return -1;
       }
@@ -884,7 +884,7 @@ int devfs_dclose(iop_file_t *file)
    {
       dir->opened = 0;
       file->privdata = NULL;
-   } 
+   }
 
    return 0;
 }
@@ -904,11 +904,11 @@ int devfs_dread(iop_file_t *file, iox_dirent_t *buf)
    {
       ret = devfs_fill_dirent(buf, dir->devno);
       if(ret)
-      { 
+      {
          dir->devno++;
       }
    }
-  
+
    return ret;
 }
 
@@ -933,23 +933,23 @@ int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
    }
 
    if((name[0] == '\\') || (name[0] == '/'))
-   {  
+   {
       fn_offset = 1;
-   }    
-  
+   }
+
    if(stat == NULL)
    {
       return -1;
    }
-      
+
    dev = devfs_find_devicename(name + fn_offset);
 
    if(dev != NULL)
-   {    
+   {
       char *endp;
       int subdev;
       int name_len;
-         
+
       name_len = strlen(dev->node.name);
 
       if(name_len == strlen(name)) /* If this is has not got a subnumber */
@@ -957,19 +957,19 @@ int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
         M_PRINTF("getstat: No subdevice number in filename %s\n", name);
         return -1;
       }
-      
+
       subdev = strtoul(&name[name_len + fn_offset], &endp, 10);
       if(((subdev == 0) && (name[name_len + fn_offset] != '0'))
         || (subdev >= DEVFS_MAX_SUBDEVS))
          /* Invalid number */
-      {  
+      {
          M_PRINTF("getstat: Invalid subdev number %d\n", subdev);
          return -1;
       }
-        
+
       if(*endp)
       /* Extra charactes after filename */
-      {  
+      {
          M_PRINTF("getstat: Invalid filename\n");
          return -1;
       }
@@ -978,7 +978,7 @@ int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
       {
         M_PRINTF("getstat: No subdev registered\n");
         return -1;
-      } 
+      }
 
 #ifdef USE_IOMAN
       memset(stat, 0, sizeof(fio_stat_t));
@@ -997,7 +997,7 @@ int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
          stat->mode |= FIO_S_IWUSR;
       }
    }
-      
+
    return 0;
 }
 
@@ -1008,7 +1008,7 @@ int init_devfs(void)
 
 {
    int dummy_loop;
-   dummy_func *dummy; 
+   dummy_func *dummy;
 
    root_device = NULL;
    dev_count = 0;
@@ -1020,13 +1020,13 @@ int init_devfs(void)
       dummy[dummy_loop] = devfs_dummy;
    }
    memset(open_dirfiles, 0, sizeof(directory_file_t) * MAX_OPEN_DIRFILES);
- 
+
    devfs_device.name = "devfs";
    devfs_device.type = IOP_DT_FS | IOP_DT_FSEXT;
    devfs_device.version = 0x100;
    devfs_device.desc = "PS2 Device FS Driver";
    devfs_device.ops = &devfs_ops;
-   devfs_ops.init = devfs_init; 
+   devfs_ops.init = devfs_init;
    devfs_ops.deinit = devfs_deinit;
    devfs_ops.open = devfs_open;
    devfs_ops.read = devfs_read;
@@ -1082,7 +1082,7 @@ int devfs_check_devname(const char *name)
    {
       return 0;
    }
-  
+
    if(strlen(name) > DEVFS_MAX_DEVNAME_LENGTH)
    {
       return 0;
@@ -1090,7 +1090,7 @@ int devfs_check_devname(const char *name)
 
    str_loop = 0;
 
-   while(name[str_loop]) 
+   while(name[str_loop])
    {
       char ch;
 
@@ -1103,14 +1103,14 @@ int devfs_check_devname(const char *name)
       {
          return 0;
       }
-   } 
+   }
 
    return 1;
 }
 
 /** Adds a new device to the filing system
     @param node: Pointer to a ::devfs_node_t structure
-    @returns A device handle is returned if the device was added. 
+    @returns A device handle is returned if the device was added.
     On error INVALID_HDEV is returned
 */
 HDEV DevFSAddDevice(const devfs_node_t *node)
@@ -1147,7 +1147,7 @@ HDEV DevFSAddDevice(const devfs_node_t *node)
    if(root_device == NULL)
    {
       root_device = dev;
-   } 
+   }
    else
    {
       dev_scan = root_device;
@@ -1158,7 +1158,7 @@ HDEV DevFSAddDevice(const devfs_node_t *node)
       dev_scan->forw = dev;
       dev->back = dev_scan;
    }
- 
+
    dev->hDev = dev_count++;
    if(dev_count == INVALID_HDEV) dev_count++;
    M_PRINTF("AddDevice: Registered device (%s)\n", node->name);
@@ -1176,7 +1176,7 @@ int DevFSDelDevice(HDEV hDev)
    devfs_device_t *dev;
    int ret = -1;
    devfs_device_t *forw, *back;
- 
+
    //printf("DelDevice hDev=%d\n", hDev);
    dev = devfs_find_deviceid(hDev);
    if(dev)
@@ -1209,22 +1209,22 @@ int DevFSDelDevice(HDEV hDev)
       {
          root_device = NULL;
       }
-	  
+
       if(forw)
       {
-         forw->back = back; 
+         forw->back = back;
       }
-	  
+
       ret = 0;
    }
-   
+
    return ret;
 }
 
 /** Adds a sub device to a previously opened device
     @param hDev: Handle to an opened device
     @param subdev_no: The number of the subdevice. Can be 0 to DEVFS_MAX_SUBDEVS
-    @param extent: A 64bit extent which reflects the size of the underlying device 
+    @param extent: A 64bit extent which reflects the size of the underlying device
     @param data: Pointer to some private data to associate with this sub device
     @returns 0 if sub device added, else -1
 */
@@ -1232,7 +1232,7 @@ int DevFSAddSubDevice(HDEV hDev, u32 subdev_no, s32 mode, devfs_loc_t extent, vo
 
 {
    devfs_device_t *dev;
- 
+
    //M_PRINTF("AddSubDevice hDev=%d subdev_no=%d data=%p\n", hDev, subdev_no, data);
    dev = devfs_find_deviceid(hDev);
    if(dev != NULL)
@@ -1240,28 +1240,28 @@ int DevFSAddSubDevice(HDEV hDev, u32 subdev_no, s32 mode, devfs_loc_t extent, vo
       if(subdev_no >= DEVFS_MAX_SUBDEVS)
       {
          M_PRINTF("AddSubDevice: Sub device number too big\n");
-         return -1; 
+         return -1;
       }
-  
+
       if(dev->subdevs[subdev_no].valid)
       {
          M_PRINTF("AddSubDevice: Sub device already created\n");
          return -1;
-      } 
+      }
 
       dev->subdevs[subdev_no].data = data;
       dev->subdevs[subdev_no].valid = 1;
       dev->subdevs[subdev_no].mode = mode;
       dev->subdevs[subdev_no].open_refcount = 0;
       dev->subdevs[subdev_no].extent = extent;
-      memset(dev->subdevs[subdev_no].open_files, 0, sizeof(ioman_data_t *) * MAX_OPENFILES); 
+      memset(dev->subdevs[subdev_no].open_files, 0, sizeof(ioman_data_t *) * MAX_OPENFILES);
       dev->subdev_count++;
-   } 
+   }
    else
    {
       M_PRINTF("AddSubDevice: Couldn't find device ID\n");
       return -1;
-   }   
+   }
 
    return 0;
 }
@@ -1284,14 +1284,14 @@ int DevFSDelSubDevice(HDEV hDev, u32 subdev_no)
       if(subdev_no >= DEVFS_MAX_SUBDEVS)
       {
          M_PRINTF("DelSubDevice: Sub device number too big\n");
-         return -1; 
+         return -1;
       }
-  
+
       if(!dev->subdevs[subdev_no].valid)
       {
          M_PRINTF("DelSubDevice: Sub device not created\n");
          return -1;
-      } 
+      }
 
       dev->subdevs[subdev_no].data = NULL;
       dev->subdevs[subdev_no].valid = 0;
@@ -1305,7 +1305,7 @@ int DevFSDelSubDevice(HDEV hDev, u32 subdev_no)
            dev->subdevs[subdev_no].open_files[openfile_loop]->dev = NULL;
            dev->subdevs[subdev_no].open_files[openfile_loop] = NULL;
          }
-      } 
+      }
       dev->subdev_count--;
    }
 

@@ -116,7 +116,7 @@ int harvest_elf(const char *filename, int (*call_symbol)(void *user, int type, c
 
 	Elf32_Ehdr ehdr;
 	read(fdi, &ehdr, sizeof(Elf32_Ehdr));
-	if ((ehdr.e_ident[EI_MAG0] != ELFMAG0) || 
+	if ((ehdr.e_ident[EI_MAG0] != ELFMAG0) ||
 		(ehdr.e_ident[EI_MAG1] != ELFMAG1) ||
 		(ehdr.e_ident[EI_MAG2] != ELFMAG2) ||
 		(ehdr.e_ident[EI_MAG3] != ELFMAG3))
@@ -218,7 +218,7 @@ int elf_str_add(elf_str *s, const char *format, ...)
 		printf("Failed to add '%s'\n", buf);
 		return(0);
 	}
-	
+
 	strcpy(s->Cur, buf);
 	s->Cur[len] = '\0';
 	s->Cur += len+1;
@@ -404,7 +404,7 @@ int symtab_write(const char *filename, const char *name, symbol *s)
 	fwrite(&dat, 4, 1, file);
 	fwrite(prgstr.Buffer, elf_str_size(&prgstr), 1, file);
 
-	shdr[3].sh_size  = (8*(s->Count+1))+elf_str_size(&prgstr); 
+	shdr[3].sh_size  = (8*(s->Count+1))+elf_str_size(&prgstr);
 	cur = shdr[3].sh_offset + shdr[3].sh_size;
 
 
@@ -415,7 +415,7 @@ int symtab_write(const char *filename, const char *name, symbol *s)
 	shdr[4].sh_flags     = 0;
 	shdr[4].sh_addr      = 0;
 	shdr[4].sh_offset    = cur;
-	shdr[4].sh_size      = sizeof(Elf32_Rel)*(s->Count*2); 
+	shdr[4].sh_size      = sizeof(Elf32_Rel)*(s->Count*2);
 	shdr[4].sh_link      = 2;   // .symtab
 	shdr[4].sh_info      = 3;   // .data
 	shdr[4].sh_addralign = 16;
@@ -488,7 +488,7 @@ int main(int argc, char *argv[])
 		printf("usage:\n%s <name> output_symtab.o [input elfs]\n", argv[0]);
 		return(1);
 	}
-	symbol syms; 
+	symbol syms;
 	syms.First = NULL;
 	syms.Count = 0;
 

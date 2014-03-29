@@ -10,18 +10,18 @@
 # $Id$
 */
 
-/* Assembler version of strncat that uses quadword instructions. 
-	
+/* Assembler version of strncat that uses quadword instructions.
+
    Jeff Johnston, Cygnus Solutions, Feb 10/1999.
 
    ============================================================
    Copyright (C) 1999 by Cygnus Solutions. All rights reserved.
- 
+
    Permission to use, copy, modify, and distribute this
    software is freely granted, provided that this notice
    is preserved.
    ============================================================  */
-	
+
 	 .text
 	.p2align 3
 	.globl	strncat
@@ -33,12 +33,12 @@ strncat:
 	.mask	0x00000000,0
 	.fmask	0x00000000,0
 	move	$8,$4
-	
+
 #ifndef __OPTIMIZE_SIZE__
 
 /* check if string to concatenate to is doubleword aligned, quadword aligned,
    or neither in which case must search for null terminator one byte at a time. */
-	
+
 	andi	$2,$8,0x7
 	.set	noreorder
 	.set	nomacro
@@ -59,7 +59,7 @@ strncat:
    for the null terminator.  If the null terminator is found, go check the last
    quadword fetched a byte at a time to find the actual position, otherwise,
    continue looping and checking quadwords. */
-	
+
 $L37:
 	dli	$7,0x0101010101010101
 	lq	$2,0($8)
@@ -107,8 +107,8 @@ $L39:
    for the null terminator.  If the null terminator is found, go check the last
    doubleword fetched a byte at a time to find the actual position, otherwise,
    continue looping and checking doublewords. */
-	
-$L17:	
+
+$L17:
 	dli	$9,0x0101010101010101
 	dli	$4,0x8080808080808080
 	dsubu	$3,$2,$9
@@ -141,11 +141,11 @@ $L5:
 	move	$4,$7
 
 #endif /* !__OPTIMIZE_SIZE__ */
-	
+
 	lb	$2,0($4)
 
 /* find actual position of null terminator in string to be concatenated to */
-		
+
 $L18:
 	.set	noreorder
 	.set	nomacro
@@ -172,7 +172,7 @@ $L20:
 /* now start concatenating second string starting at null position.  Concatenation
    is a byte at a time until either the null terminator is reached or n is exhausted.
    A null terminator is added to the end of the result.	 */
-	
+
 $L9:
 	li	$2,4294901760			# 0xffff0000
 	ori	$2,$2,0xffff

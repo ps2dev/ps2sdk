@@ -163,8 +163,8 @@ ub4    keyl;  /* key length */
   ub4    y;
   for (h = t->table[y=(x&t->mask)]; h; h = h->next)
   {
-    if ((x == h->hval) && 
-        (keyl == h->keyl) && 
+    if ((x == h->hval) &&
+        (keyl == h->keyl) &&
         !memcmp(key, h->key, keyl))
     {
       t->apos = y;
@@ -191,8 +191,8 @@ void  *stuff;  /* stuff to associate with this key */
   /* make sure the key is not already there */
   for (h = t->table[(y=(x&t->mask))]; h; h = h->next)
   {
-    if ((x == h->hval) && 
-        (keyl == h->keyl) && 
+    if ((x == h->hval) &&
+        (keyl == h->keyl) &&
         !memcmp(key, h->key, keyl))
     {
       t->apos = y;

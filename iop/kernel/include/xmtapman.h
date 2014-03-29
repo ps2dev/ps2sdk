@@ -15,7 +15,7 @@ s32 mtapChangeSlot(u32 port, u32 slot);
 #define I_mtapPortClose				DECLARE_IMPORT(5, mtapPortClose)
 #define I_mtapPortGetSlotNumber		DECLARE_IMPORT(6, mtapGetSlotNumber)
 #define I_mtapChangeSlot			DECLARE_IMPORT(7, mtapChangeSlot)
-	
+
 
 #endif
 

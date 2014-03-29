@@ -43,7 +43,7 @@ const static GS_RGBAQ randcolor[10] ={	{28 ,200,200,0x80,0.0f},
 
 #define MAX_SPRITES		1000
 
-#define	SCREEN_WIDTH		640	
+#define	SCREEN_WIDTH		640
 #define	SCREEN_HEIGHT		448
 
 static short int ScreenOffsetX, ScreenOffsetY;

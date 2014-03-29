@@ -52,7 +52,7 @@ look_ctype_table:
 	li	$0, 0x08
 
 	.globl	get_ctype_table			# 0x09
-get_ctype_table:				
+get_ctype_table:
 	j	$31
 	li	$0, 0x09
 

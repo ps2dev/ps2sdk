@@ -14,7 +14,7 @@ struct CurrentDmaTransferData{
 
 struct IncomingPacketReqs{
 	unsigned int NumPackets, TotalLength;
-	struct PacketData PacketData[MAX_PACKETS];	
+	struct PacketData PacketData[MAX_PACKETS];
 	unsigned char buffer[MAX_PACKETS*1536];
 };
 

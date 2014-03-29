@@ -140,10 +140,10 @@ enum GsTexFilterMethods{
 
 #define GS_TEX_MIPMAP_DEFINE	0	//use values in MIPTBP1
 #define GS_TEX_MIPMAP_AUTO	1	//auto calculate mipmap address
-	
+
 //Texture Function (used in TEX0->tex_cc)
 enum GsTexFunctions{
-	GS_TEX_MODULATE		=0,	// brighten texture based on Pixel's Alpha 
+	GS_TEX_MODULATE		=0,	// brighten texture based on Pixel's Alpha
 	GS_TEX_DECAL,			// keep texture as is
 	GS_TEX_HIGHLIHGT1,		// used when highlighting translucent polygons
 	GS_TEX_HIGHLIHGT2		// used when highlighting opaque	  polygons
@@ -216,7 +216,7 @@ enum GsTexFunctions{
 #define gs_g_frame_2	0x4d	// Frame buffer settings (Context 2)
 #define gs_g_zbuf_1		0x4e	// Zbuffer configuration (Context 1)
 #define gs_g_zbuf_2		0x4f	// Zbuffer configuration (Context 2)
-#define gs_g_bitbltbuf	0x50	// Texture transmission address & format 
+#define gs_g_bitbltbuf	0x50	// Texture transmission address & format
 #define gs_g_trxpos		0x51	// Texture transmission coordinates
 #define gs_g_trxreg		0x52	// Texture transmission width & height
 #define gs_g_trxdir		0x53	// Texture transmission direction
@@ -316,8 +316,8 @@ typedef struct {
 
 /*EXTDATA*/
 typedef struct {
-	unsigned x            :12;	// X coord where image is written to 
-	unsigned y            :11;	// Y coord where image is written to 
+	unsigned x            :12;	// X coord where image is written to
+	unsigned y            :11;	// Y coord where image is written to
 	unsigned sample_r_h   :4;	// Horizontal Smaple Rate(VK units)
 	unsigned sample_r_v   :2;	// Vertical   Smaple Rate
 	unsigned pad1		  :3;	// Pad with zeros
@@ -577,7 +577,7 @@ typedef struct {
 }GS_FOGCOLOR;
 
 typedef struct {
-	unsigned long pad1;			// Pad With Zeros			
+	unsigned long pad1;			// Pad With Zeros
 } GS_TEXFLUSH;
 
 typedef struct {
@@ -860,8 +860,8 @@ typedef struct {
 }GS_R_FOGCOLOR;
 
 typedef struct {
-	GS_TEXFLUSH		data;			
-	unsigned long	reg;			
+	GS_TEXFLUSH		data;
+	unsigned long	reg;
 } GS_R_TEXFLUSH;
 
 typedef struct {
@@ -978,7 +978,7 @@ typedef struct {
 /* un-documented
 #define GS_SET_SMODE1(interlace, field_frame, vesta_dpms) \
 			*(volatile unsigned long *)gs_p_smode1=			\
-		
+
 */
 
 #define GS_SET_SMODE2(interlace, field_frame, vesta_dpms) \
@@ -1088,7 +1088,7 @@ typedef struct {
 /*
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 x These are use to SET the individual values		x
-x in each of the readable Privileged registers.		x 
+x in each of the readable Privileged registers.		x
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 */
 
@@ -1123,7 +1123,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 /*
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 x These are use to GET the individual values		x
-x in each of the readable Privileged registers.		x 
+x in each of the readable Privileged registers.		x
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 */
 
@@ -1185,42 +1185,42 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	(p)->g = _g,						\
 	(p)->b = _b,						\
 	(p)->a = _a,						\
-	(p)->q = _q				
+	(p)->q = _q
 
 //ST
 #define gs_setST(p, _s,_t)	\
 	(p)->s = _s,			\
-	(p)->t = _t						
-				
+	(p)->t = _t
+
 //UV
 #define gs_setUV(p, _u,_v)	\
 	(p)->u = _u,			\
-	(p)->v = _v						
-				
+	(p)->v = _v
+
 //XYZF2
 #define gs_setXYZF2(p, _x,_y,_z,_f)	\
 	(p)->x = _x,						\
 	(p)->y = _y,						\
 	(p)->z = _z,						\
-	(p)->f = _f						
-			
+	(p)->f = _f
+
 //XYZF3
 #define gs_setXYZF3(p, _x,_y,_z,_f)	\
 	(p)->x = _x,						\
 	(p)->y = _y,						\
 	(p)->z = _z,						\
-	(p)->f = _f						
-				
+	(p)->f = _f
+
 #define gs_setXYZ2(p, _x,_y,_z)	\
 	(p)->x = _x,					\
 	(p)->y = _y,					\
-	(p)->z = _z					
-				
+	(p)->z = _z
+
 #define gs_setXYZ3(p, _x,_y,_z)	\
 	(p)->x = _x,					\
 	(p)->y = _y,					\
-	(p)->z = _z	
-	
+	(p)->z = _z
+
 #define gs_setTEX0_1(p, _tb_addr, _tb_width, _psm, _tex_width, _tex_height, _tex_cc, _tex_funtion, _cb_addr, _clut_pixmode, _clut_smode, _clut_offset, _clut_loadmode)\
 	(p)->tb_addr		= _tb_addr,			\
 	(p)->tb_width		= _tb_width,		\
@@ -1233,8 +1233,8 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	(p)->clut_pixmode	= _clut_pixmode,	\
 	(p)->clut_smode		= _clut_smode,		\
 	(p)->clut_offset	= _clut_offset,		\
-	(p)->clut_loadmode	= _clut_loadmode				
-				
+	(p)->clut_loadmode	= _clut_loadmode
+
 #define gs_setTEX0_2			gs_setTEX0_1
 
 #define gs_setCLAMP_1(p, wms,wmt,minu,maxu,minv,maxv)	\
@@ -1244,9 +1244,9 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	(p)->maxu = maxu,		\
 	(p)->minv = minv,		\
 	(p)->maxv = maxv
-	
+
 #define gs_setCLAMP_2			gs_setCLAMP_1
-	
+
 #define gs_setFOG(p, _f)	\
 	(p)->f  = _f
 
@@ -1288,27 +1288,27 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	(p)->aa1	= _aa1,		\
 	(p)->fst	= _fst,		\
 	(p)->ctxt	= _ctxt,	\
-	(p)->fix	= _fix	
+	(p)->fix	= _fix
 
 #define gs_setTEXCLUT(p, _cbw,_cou,_cov)	\
 	(p)->cbw	= _cbw,						\
 	(p)->cou	= _cou,						\
-	(p)->cov	= _cov	
+	(p)->cov	= _cov
 
 #define gs_setSCANMSK(p, _msk)	\
-	(p)->msk	= _msk	
+	(p)->msk	= _msk
 
 /*
 #define gs_setMIPTBP1_1(p, _tbp1,_tbw1,_tbp2,_tbw2,_tbp3,_tbw3)	\
 	(p)->tbp1	= _tbp1,		\
 	(p)->tbw1	= _tbw1,		\
-	(p)->tbp2	= _tbp2,		\		
+	(p)->tbp2	= _tbp2,		\
 	(p)->tbw2	= _tbw2,		\
 	(p)->tbp3	= _tbp3,		\
-	(p)->tbw3	= _tbw3	
+	(p)->tbw3	= _tbw3
 
 #define gs_setMIPTBP1_2			gs_setMIPTBP1_1
-*/	
+*/
 
 #define gs_setMIPTBP2_1(p, _tbp4, _tbw4, _tbp5, _tbw5, _tbp6, _tbw6)	\
 	(p)->tbp4	= _tbp4,		\
@@ -1316,14 +1316,14 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	(p)->tbp5	= _tbp5,		\
 	(p)->tbw5	= _tbw5,		\
 	(p)->tbp6	= _tbp6,		\
-	(p)->tbw6	= _tbw6	
+	(p)->tbw6	= _tbw6
 
 #define gs_setMIPTBP2_2			gs_setMIPTBP2_1
 
 #define gs_setTEXA(p, _alpha_0, _alpha_method, _alpha_1)	\
 	(p)->alpha_0		= _alpha_0,						\
 	(p)->alpha_method	= _alpha_method,						\
-	(p)->alpha_1		= _alpha_1	
+	(p)->alpha_1		= _alpha_1
 
 #define gs_setFOGCOLOR(p, _r,_g,_b)		\
 	(p)->r	= _r,							\
@@ -1336,7 +1336,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	(p)->clip_x0	= _clip_x0,										\
 	(p)->clip_x1	= _clip_x1,										\
 	(p)->clip_y0	= _clip_y0,										\
-	(p)->clip_y1	= _clip_y1	
+	(p)->clip_y1	= _clip_y1
 
 #define gs_setSCISSOR_2			gs_setSCISSOR_1
 
@@ -1345,7 +1345,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	(p)->b		= _b,						\
 	(p)->c		= _c,						\
 	(p)->d		= _d,						\
-	(p)->alpha	= _alpha	
+	(p)->alpha	= _alpha
 
 #define gs_setALPHA_2				gs_setALPHA_1
 
@@ -1365,7 +1365,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	(p)->dimx30		= _dimx30,						\
 	(p)->dimx31		= _dimx31,						\
 	(p)->dimx32		= _dimx32,						\
-	(p)->dimx33		= _dimx33						
+	(p)->dimx33		= _dimx33
 
 #define gs_setDTHE(p, _enable)	\
 	(p)->enable	= _enable
@@ -1381,7 +1381,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	(p)->datest_enable		= _datest_enable,			\
 	(p)->datest_mode		= _datest_mode,				\
 	(p)->ztest_enable		= _ztest_enable,			\
-	(p)->ztest_method		= _ztest_method						
+	(p)->ztest_method		= _ztest_method
 
 #define gs_setTEST_2			gs_setTEST_1
 
@@ -1397,7 +1397,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	(p)->psm		= _psm,			\
 	(p)->draw_mask		= _draw_mask
 
-#define gs_setFRAME_2				gs_setFRAME_1	
+#define gs_setFRAME_2				gs_setFRAME_1
 
 #define gs_setZBUF_1(p, _fb_addr,_psm,_update_mask)	\
 	(p)->fb_addr		= _fb_addr,						\
@@ -1412,7 +1412,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	(p)->src_pixmode	= _src_pixmode,				\
 	(p)->dest_addr		= _dest_addr,				\
 	(p)->dest_width		= _dest_width,				\
-	(p)->dest_pixmode	= _dest_pixmode	
+	(p)->dest_pixmode	= _dest_pixmode
 
 #define gs_setTRXPOS(p, _src_x,_src_y,_dest_x,_dest_y,_direction)	\
 	(p)->src_x		= _src_x,				\
@@ -1423,17 +1423,17 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 #define gs_setTRXREG(p, _trans_w,_trans_h)	\
 	(p)->trans_w	= _trans_w,				\
-	(p)->trans_h	= _trans_h	
+	(p)->trans_h	= _trans_h
 
 #define gs_setTRXDIR(p, _trans_dir)	\
 	(p)->trans_dir	= _trans_dir
 
 #define gs_setHWREG(p, _data)	\
-	(p)->data	= _data		
+	(p)->data	= _data
 
 #define gs_setSIGNAL(p, _signal_id,_update_mask)	\
 	(p)->signal_id	= _signal_id,					\
-	(p)->update_mask= _update_mask	
+	(p)->update_mask= _update_mask
 
 #define gs_setFINISH(p) \
 	(p)->pad0 = 0
@@ -1477,7 +1477,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 #define gs_setR_XYZ2(p, _x,_y,_z)	\
 						gs_setXYZ2(&p->data, _x,_y,_z),\
-						(p)->reg = 	gs_g_xyz2		
+						(p)->reg = 	gs_g_xyz2
 
 #define gs_setR_XYZ3(p, _x,_y,_z)	\
 						gs_setXYZ3(&p->data, _x,_y,_z),\
@@ -1494,7 +1494,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #define gs_setR_CLAMP_1(p, wms,wmt,minu,maxu,minv,maxv)	\
 							gs_setCLAMP_1(&p->data, wms,wmt,minu,maxu,minv,maxv),\
 							(p)->reg = 	gs_g_clamp_1
-	
+
 #define gs_setR_CLAMP_2(p, wms,wmt,minu,maxu,minv,maxv)	\
 							gs_setCLAMP_2(&p->data, wms,wmt,minu,maxu,minv,maxv),\
 							(p)->reg = 	gs_g_clamp_2
@@ -1534,7 +1534,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #define gs_setR_PRMODE(p, _iip,_tme,_fge,_abe,_aa1,_fst,_ctxt,_fix)	\
 							gs_setPRMODE(&p->data, _iip,_tme,_fge,_abe,_aa1,_fst,_ctxt,_fix),\
 							(p)->reg = 	gs_g_prmode
-	
+
 #define gs_setR_TEXCLUT(p, _cbw,_cou,_cov)	\
 							gs_setTEXCLUT(&p->data, _cbw,_cou,_cov),\
 							(p)->reg = 	gs_g_texclut
@@ -1569,7 +1569,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 
 #define gs_setR_TEXFLUSH(p)\
 							(p)->reg = 	gs_g_texflush
-	
+
 #define gs_setR_SCISSOR_1(p, _clip_x0,_clip_x1,_clip_y0,_clip_y1)	\
 							gs_setSCISSOR_1(&p->data, _clip_x0,_clip_x1,_clip_y0,_clip_y1),\
 							(p)->reg = 	gs_g_scissor_1
@@ -1597,7 +1597,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #define gs_setR_COLCLAMP(p, _clamp)	\
 							gs_setCOLCLAMP(&p->data, _clamp),\
 							(p)->reg = gs_g_colclamp
-	
+
 #define gs_setR_TEST_1(p, _ATE,_ATST,_AREF,_AFAIL,_DATE,_DATM,_ZTE,_ZTST)	\
 							gs_setTEST_1(&p->data, _ATE,_ATST,_AREF,_AFAIL,_DATE,_DATM,_ZTE,_ZTST),\
 							(p)->reg = gs_g_test_1
@@ -1605,7 +1605,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #define gs_setR_TEST_2(p, _ATE,_ATST,_AREF,_AFAIL,_DATE,_DATM,_ZTE,_ZTST)	\
 							gs_setTEST_2(&p->data, _ATE,_ATST,_AREF,_AFAIL,_DATE,_DATM,_ZTE,_ZTST),\
 							(p)->reg = gs_g_test_2
-	
+
 #define gs_setR_PABE(p, _enable)	\
 							gs_setPABE(&p->data, _enable),\
 							(p)->reg = gs_g_pabe
@@ -1708,7 +1708,7 @@ typedef struct {
 	(p)->prim	= _prim,				\
 	(p)->flg	= _flg,					\
 	(p)->nreg	= _nreg,				\
-	(p)->reg	= _reg	
+	(p)->reg	= _reg
 
 /*----------------------------------------------------
 --	MID LEVEL DEFINES								--
@@ -1777,7 +1777,7 @@ typedef struct {
 	unsigned short	vram_x;		// X offset in vram;
 	unsigned short	vram_y;		// Y offset in vram;
 	unsigned int	draw_mask;	// Draw Mask (0=draw, 1=no draw)
-	unsigned char	auto_clear;	// Set To 1 If You Want The Draw Environment's Backgroud to Clear When GsPutDrawEnv() is called	
+	unsigned char	auto_clear;	// Set To 1 If You Want The Draw Environment's Backgroud to Clear When GsPutDrawEnv() is called
 	GS_RGBAQ		bg_color;	// Color to use to clear backgroud
 }GS_DRAWENV;
 
@@ -2002,7 +2002,7 @@ typedef struct
 
 typedef struct
 {
-	unsigned short	x;			// X Offset in Vram Address 
+	unsigned short	x;			// X Offset in Vram Address
 	unsigned short	y;			// X Offset in Vram Address
 	unsigned short	width;		// Height of image
 	unsigned short	height;		// Width  of image
@@ -2027,7 +2027,7 @@ typedef struct
 }GS_EE_IMAGE;
 
 typedef struct  {
-	unsigned short			qwc;	
+	unsigned short			qwc;
 	unsigned short			pad1:10;
 	unsigned short			pce	:2;
 	unsigned short			id	:3;
@@ -2130,5 +2130,5 @@ char   twh4(short wh);
 
 #if defined(__LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
 }
-#endif		
+#endif
 #endif /*_LIBGS_H_*/

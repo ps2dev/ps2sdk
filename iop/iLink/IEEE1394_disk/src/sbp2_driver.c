@@ -391,7 +391,7 @@ static int ieee1394_InitializeFetchAgent(struct SBP2Device *dev){
 	dummy_ORB=malloc(dev->ORB_size*4);
 	memset(dummy_ORB, 0, dev->ORB_size*4);
 
-	ieee1394_ResetFetchAgent(dev);	
+	ieee1394_ResetFetchAgent(dev);
 
 	/* Write the address of the dummy ORB to the fetch agent's ORB_POINTER register. */
 	address.low=(u32)dummy_ORB;

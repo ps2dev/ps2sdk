@@ -120,7 +120,7 @@ struct etharp_entry {
   struct eth_addr ethaddr;
   enum etharp_state state;
 #if ARP_QUEUEING
-  /** 
+  /**
    * Pointer to queue of pending outgoing packets on this ARP entry.
    * Must be at most a single packet for now. */
   struct pbuf *p;
@@ -182,7 +182,7 @@ etharp_tmr(void)
         (arp_table[i].ctime >= ARP_MAXPENDING)) {
       LWIP_DEBUGF(ETHARP_DEBUG, ("etharp_timer: expired pending entry %u.\n", i));
   empty:
-      /* empty old entry */      
+      /* empty old entry */
       arp_table[i].state = ETHARP_STATE_EMPTY;
 #if ARP_QUEUEING
       /* and empty packet queue */
@@ -252,17 +252,17 @@ find_arp_entry(void)
 #if ARP_QUEUEING
 /*
  * Enqueues a pbuf (chain) on an ARP entry.
- * 
+ *
  * Places the pbuf (chain) on the queue (if space allows). The
  * caller may safely free the pbuf (chain) afterwards, as the
  * pbufs will be referenced by the queue and copies are made of
  * pbufs referencing external payloads.
- * 
+ *
  * @ i the ARP entry index
  * @arg q the pbuf (chain) to be queued on the ARP entry
- * 
+ *
  * @return Returns the new head of queue of the ARP entry.
- * 
+ *
  */
 static struct pbuf *
 etharp_enqueue(s8_t i, struct pbuf *q)
@@ -291,9 +291,9 @@ etharp_enqueue(s8_t i, struct pbuf *q)
 
 /**
  * Dequeues any pbufs queued on an ARP entry
- * 
+ *
  * @return number of pbufs removed from the queue
- * 
+ *
  * TODO: decide what is a sensible return value?
  */
 static u8_t
@@ -316,7 +316,7 @@ etharp_dequeue(s8_t i)
  *
  * If a pending entry is resolved, any queued packets will be sent
  * at this point.
- * 
+ *
  * @param ipaddr IP address of the inserted ARP entry.
  * @param ethaddr Ethernet address of the inserted ARP entry.
  * @param flags Defines behaviour:
@@ -483,7 +483,7 @@ etharp_ip_input(struct netif *netif, struct pbuf *p)
 
 
 /**
- * Responds to ARP requests to us. Upon ARP replies to us, add entry to cache  
+ * Responds to ARP requests to us. Upon ARP replies to us, add entry to cache
  * send out queued IP packets. Updates cache with snooped address pairs.
  *
  * Should be called for incoming ARP packets. The pbuf in the argument
@@ -512,7 +512,7 @@ etharp_arp_input(struct netif *netif, struct eth_addr *ethaddr, struct pbuf *p)
   }
 
   hdr = p->payload;
- 
+
   /* this interface is not configured? */
   if (netif->ip_addr.addr == 0) {
     for_us = 0;

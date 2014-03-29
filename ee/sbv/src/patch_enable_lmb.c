@@ -83,7 +83,7 @@ int sbv_patch_enable_lmb()
 		return -1;
 
 	/* Locate the loadfile RPC dispatch code, where the first 4 instructions look like:
-	
+
 	   27bdffe8	addiu	$sp, -24
 	   2c820006	sltiu	$v0, $a0, 6
 	   14400003	bnez	$v0, +12

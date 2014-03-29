@@ -123,11 +123,11 @@ void trap(exception_type_t type, struct exception_frame *ex) {
         TRAP_PRINTF("r[%02d]=%08x r[%02d]=%08x r[%02d]=%08x r[%02d]=%08x",
                 i, ex->regs[i], i+1, ex->regs[i+1], i+2, ex->regs[i+2], i+3, ex->regs[i+3]);
     }
-    
+
     if (handlers[type]) {
 	handlers[type](type, ex);
     }
-    
+
     if(type == EXCEPTION_Bp) {
         ex->dcic = 0;
     } else {

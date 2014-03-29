@@ -42,7 +42,7 @@
  * IEEE        -10, 10    Bi'       50000       2.2e-6      3.5e-7
  *
  */
-/*							airy.c */
+/*							airy.c */
 
 /*
 Cephes Math Library Release 2.2: June, 1992

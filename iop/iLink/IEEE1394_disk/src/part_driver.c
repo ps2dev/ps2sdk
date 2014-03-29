@@ -91,7 +91,7 @@ int part_connect(struct SBP2Device* dev)
 
     if (part_getPartitionTable(dev, &partTable) < 0)
         return -1;
-    
+
     for ( i = 0; i < 4; i++)
     {
         if(

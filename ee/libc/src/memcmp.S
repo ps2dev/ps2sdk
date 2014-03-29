@@ -11,17 +11,17 @@
 */
 
 /* Assembler version of memcmp using quadword instructions.
-	
+
    Jeff Johnston, Cygnus Solutions, Feb 10/1999.
 
    ============================================================
    Copyright (C) 1999 by Cygnus Solutions. All rights reserved.
- 
+
    Permission to use, copy, modify, and distribute this
    software is freely granted, provided that this notice
    is preserved.
    ============================================================  */
-	
+
 	.text
 	.align	2
 	.globl	memcmp
@@ -47,7 +47,7 @@ memcmp:
 
 	andi	$2,$2,0xf
 	bne	$2,$0,$L2
-	
+
 /* while bytes to compare >= 16 perform quadword compares */
 
 $L5:
@@ -60,11 +60,11 @@ $L5:
 	pcpyud	$10,$8,$7
 	or	$9,$10,$8
 	movz	$5,$2,$9
-	
+
 /* when quadwords are not equal, compare a byte at a time */
 
 	.set	noreorder
-	.set	nomacro	
+	.set	nomacro
 	bnel	$9,$0,$L2
 	addu	$4,$4,-16
 	.set	macro

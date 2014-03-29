@@ -36,7 +36,7 @@
  * asinf domain        |x| > 1           0.0
  *
  */
-/*							acosf()
+/*							acosf()
  *
  *	Inverse circular cosine
  *
@@ -78,7 +78,7 @@
  *   message         condition      value returned
  * acosf domain        |x| > 1           0.0
  */
-
+
 /*							asin.c	*/
 
 /*
@@ -181,7 +181,7 @@ double x;
 if( x < -1.0 )
 	goto domerr;
 
-if( x < -0.5) 
+if( x < -0.5)
 	return( PIF - 2.0 * asinf( sqrtf(0.5*(1.0+x)) ) );
 
 if( x > 1.0 )

@@ -35,7 +35,7 @@
 #endif
 
 /** gmon.out file header */
-struct gmonhdr 
+struct gmonhdr
 {
 	int lpc;        /* lowest pc address */
 	int hpc;        /* highest pc address */
@@ -46,7 +46,7 @@ struct gmonhdr
 };
 
 /** frompc -> selfpc graph */
-struct rawarc 
+struct rawarc
 {
 	unsigned int frompc;
 	unsigned int selfpc;
@@ -54,7 +54,7 @@ struct rawarc
 };
 
 /** context */
-struct gmonparam 
+struct gmonparam
 {
 	int state;
 	unsigned int lowpc;
@@ -140,7 +140,7 @@ static void initialize()
 
 /** Writes gmon.out dump file and stops profiling
 
-    Called from atexit() handler; will dump out a host:gmon.out file 
+    Called from atexit() handler; will dump out a host:gmon.out file
     with all collected information.
 */
 static void cleanup()
@@ -194,11 +194,11 @@ static void cleanup()
 
     Called from mcount.S to make life a bit easier. __mcount is called
     right before a function starts. GCC generates a tiny stub at the very
-    beginning of each compiled routine, which eventually brings the 
-    control to here. 
+    beginning of each compiled routine, which eventually brings the
+    control to here.
 */
 void __mcount(unsigned int frompc, unsigned int selfpc)
-{ 
+{
 	int e;
 	struct rawarc *arc;
 

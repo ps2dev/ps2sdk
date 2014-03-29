@@ -11,17 +11,17 @@
 */
 
 /* Assembler version of strlen that uses quadword instructions.
-	
+
    Jeff Johnston, Cygnus Solutions, Feb 10/1999.
 
    ============================================================
    Copyright (C) 1999 by Cygnus Solutions. All rights reserved.
- 
+
    Permission to use, copy, modify, and distribute this
    software is freely granted, provided that this notice
    is preserved.
    ============================================================  */
-	
+
 	.text
 	.align	2
 	.globl	strlen
@@ -37,7 +37,7 @@ strlen:
 
 /* check if src is quadword aligned, doubleword aligned, or neither in which case
    perform checking for null terminator one byte at a time. */
-	
+
 	andi	$2,$4,0x7
 	.set	noreorder
 	.set	nomacro
@@ -58,7 +58,7 @@ strlen:
 /* src is quadword aligned.  Load a quadword at a time and check for null terminator.
    If null terminator is found, go and find exact position by looking at each byte
    of the last quadword.  Otherwise, continue to next quadword and keep searching. */
-	
+
 	lq	$3,0($5)
 	pcpyld	$8,$2,$2
 	dli	$4,0x8080808080808080
@@ -103,9 +103,9 @@ $L14:
 /* src is doubleword aligned.  Load a doubleword at a time and check for null terminator.
    If null terminator is found, go and find exact position by looking at each byte
    of the last doubleword.  Otherwise, continue to next doubleword and keep searching. */
-	
 
-$L12:	
+
+$L12:
 	ld	$3,0($5)
 	dli	$4,0x8080808080808080
 	dsubu	$2,$3,$2
@@ -136,16 +136,16 @@ $L16:
 	.set	reorder
 
 	move	$4,$5
-	
+
 #else /* __OPTIMIZE_SIZE__ */
-	
+
 	move	$7,$4
-	
+
 #endif /* __OPTIMIZE_SIZE__ */
 
 /* search a byte at a time for null terminator and then calculate length by subtracting
    original string address from null terminator address. */
-		
+
 $L9:
 $L15:
 	.set	noreorder

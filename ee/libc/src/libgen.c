@@ -48,7 +48,7 @@ char *basename(char *path)
 
     end++;
 
-    // if we're not at the end of a path, 
+    // if we're not at the end of a path,
     // then the path ended in a '/','\\', or ':'
     if (*end != '\0')
     {
@@ -141,7 +141,7 @@ char *dirname(char *path)
     if ((end = strrchr(path, '/')) != NULL);
     else if ((end = strrchr(path, '\\')) != NULL);
     else if ((end = strrchr(path, ':')) != NULL);
-    else return dir;    
+    else return dir;
 
     // Only a "device:" or "device:file" type path
     if ((*end == ':') && (end != path))

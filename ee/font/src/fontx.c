@@ -24,7 +24,7 @@ typedef struct {
 	} block[];
 } fontx_hdr;
 
-static prim_t charprim = 
+static prim_t charprim =
 {
 	PRIM_POINT, PRIM_SHADE_FLAT, DRAW_DISABLE,
 	DRAW_DISABLE, DRAW_ENABLE, DRAW_DISABLE,

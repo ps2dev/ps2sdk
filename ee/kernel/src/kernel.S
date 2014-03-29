@@ -1,4 +1,4 @@
-/*      
+/*
 # _____     ___ ____     ___ ____
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
@@ -31,7 +31,7 @@ name:	j	__syscall;	\
 	nop;			\
 	.end	name;		\
 	.size	name,.-name;	\
-	.set	pop;		
+	.set	pop;
 #else
 #define SYSCALL(name) 		\
 	.set	push;		\
@@ -47,7 +47,7 @@ name:	li	$3, __NR_##name;\
 	nop;			\
 	.end	name;		\
 	.size	name,.-name;	\
-	.set	pop;		
+	.set	pop;
 #endif
 
 #ifdef F___syscall
@@ -780,17 +780,17 @@ errno:
 
 #ifdef F_strlen
 /* Assembler version of strlen that uses quadword instructions.
-	
+
    Jeff Johnston, Cygnus Solutions, Feb 10/1999.
 
    ============================================================
    Copyright (C) 1999 by Cygnus Solutions. All rights reserved.
- 
+
    Permission to use, copy, modify, and distribute this
    software is freely granted, provided that this notice
    is preserved.
    ============================================================  */
-	
+
 	.text
 	.align	2
 	.globl	strlen
@@ -806,7 +806,7 @@ strlen:
 
 /* check if src is quadword aligned, doubleword aligned, or neither in which case
    perform checking for null terminator one byte at a time. */
-	
+
 	andi	$2,$4,0x7
 	.set	noreorder
 	.set	nomacro
@@ -827,7 +827,7 @@ strlen:
 /* src is quadword aligned.  Load a quadword at a time and check for null terminator.
    If null terminator is found, go and find exact position by looking at each byte
    of the last quadword.  Otherwise, continue to next quadword and keep searching. */
-	
+
 	lq	$3,0($5)
 	pcpyld	$8,$2,$2
 	dli	$4,0x8080808080808080
@@ -872,9 +872,9 @@ $L14:
 /* src is doubleword aligned.  Load a doubleword at a time and check for null terminator.
    If null terminator is found, go and find exact position by looking at each byte
    of the last doubleword.  Otherwise, continue to next doubleword and keep searching. */
-	
 
-$L12:	
+
+$L12:
 	ld	$3,0($5)
 	dli	$4,0x8080808080808080
 	dsubu	$2,$3,$2
@@ -905,16 +905,16 @@ $L16:
 	.set	reorder
 
 	move	$4,$5
-	
+
 #else /* __OPTIMIZE_SIZE__ */
-	
+
 	move	$7,$4
-	
+
 #endif /* __OPTIMIZE_SIZE__ */
 
 /* search a byte at a time for null terminator and then calculate length by subtracting
    original string address from null terminator address. */
-		
+
 $L9:
 $L15:
 	.set	noreorder
@@ -947,17 +947,17 @@ $L15:
 
 #ifdef F_strncpy
 /* Assembler version of strncpy using quadword instructions
-	
+
    Jeff Johnston, Cygnus Solutions, Feb 10/1999.
 
    ============================================================
    Copyright (C) 1999 by Cygnus Solutions. All rights reserved.
- 
+
    Permission to use, copy, modify, and distribute this
    software is freely granted, provided that this notice
    is preserved.
    ============================================================  */
-	
+
 	.text
 	.p2align 3
 	.globl	strncpy
@@ -970,12 +970,12 @@ strncpy:
 	.fmask	0x00000000,0
 
 	move	$8,$4
-	
+
 #ifndef __OPTIMIZE_SIZE__
 
 /* check if src and dest are doubleword aligned, quadword aligned, or neither in which
    case copy byte by byte */
-	
+
 	or	$7,$5,$4
 	li	$10,0x10
 	andi	$2,$7,0x7
@@ -998,8 +998,8 @@ strncpy:
    null terminator or until the nth byte is reached.  Otherwise, copy the
    quadword to dest and continue looping checking quadwords.   Once a null
    terminator is found or n is < 16 go copy a byte at a time. */
-	 
-$L31:	
+
+$L31:
 	bne	$2,$0,$L9
 	dli	$7,0x0101010101010101
 	lq	$3,0($5)
@@ -1020,7 +1020,7 @@ $L31:
 	.set	reorder
 	lq	$3,0($5)
 	.p2align 3
-$L39:		
+$L39:
 	addu	$6,$6,-16
 	addu	$5,$5,16
 	sltu	$2,$6,16
@@ -1048,13 +1048,13 @@ $L39:
 	move	$4,$7
 	.set	macro
 	.set	reorder
-					
+
 /* src and dest are quadword aligned.  Check a quadword at a time looking for a
    null terminator or until the nth byte is reached.  Otherwise, copy the
    quadword to dest and continue looping checking quadwords.   Once a null
    terminator is found or n is < 16 go copy a byte at a time. */
-	
-$L17:		
+
+$L17:
 	bne	$2,$0,$L9
 	ld	$3,0($5)
 	dli	$9,0x0101010101010101
@@ -1098,13 +1098,13 @@ $L19:
 
 $L5:
 	move	$4,$7
-	
+
 #endif /* !__OPTIMIZE_SIZE__ */
 
 /* check a byte at a time looking for either the null terminator or until n bytes are
    copied.  If the null terminator is found and n is not reached yet, copy null
    bytes until n is reached. */
-		
+
 	.p2align 3
 $L9:
 	.set	noreorder
@@ -1162,17 +1162,17 @@ $L18:
 
 #ifdef F_memcpy
 /* Assembler version of memcpy using quadword instructions.
-	
+
    Jeff Johnston, Cygnus Solutions, Feb 10/1999.
 
    ============================================================
    Copyright (C) 1999 by Cygnus Solutions. All rights reserved.
- 
+
    Permission to use, copy, modify, and distribute this
    software is freely granted, provided that this notice
    is preserved.
    ============================================================  */
-	
+
 	.text
 	.align	2
 	.globl	memcpy
@@ -1300,17 +1300,17 @@ $L12:
 
 #ifdef F_memset
 /* Assembler version of memset using quadword instructions.
-	
+
    Jeff Johnston, Cygnus Solutions, Feb 10/1999.
 
    ============================================================
    Copyright (C) 1999 by Cygnus Solutions. All rights reserved.
- 
+
    Permission to use, copy, modify, and distribute this
    software is freely granted, provided that this notice
    is preserved.
    ============================================================  */
-	
+
 	.text
 	.align	2
 	.globl	memset
@@ -1405,7 +1405,7 @@ $L31:
 	move	$3,$7
 
 #else  /* __OPTIMIZE_SIZE__ */
- 
+
 	move	$3,$4
 
 #endif /* __OPTIMIZE_SIZE__ */

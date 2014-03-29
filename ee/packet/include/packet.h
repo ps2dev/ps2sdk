@@ -3,21 +3,21 @@
 
 #include <tamtypes.h>
 
-/* 
+/*
  * Maximum number allowed, but each channel has its own limitations.
- * 
+ *
  */
 #define QWC_MAX 65535
 
 #define PACKET_NORMAL 0x00
 #define PACKET_UCAB   0x01
 #define PACKET_SPR    0x02
-/* 
+/*
  * Dmatags use qwc for the number of qwords for they handle.
- * 
+ *
  * The dma channel QWC register uses it as the total number of qwords that
  * are being sent at a time.
- * 
+ *
  */
 typedef struct {
 	u32 qwords;

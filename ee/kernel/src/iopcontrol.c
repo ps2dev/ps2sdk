@@ -43,7 +43,7 @@ int SifIopReset(const char *arg, int mode)
 	struct t_SifDmaTransfer dmat;
 
 	_iop_reboot_count++; // increment reboot counter to allow RPC clients to detect unbinding!
-	
+
 	SifStopDma();
 
 	memset(&reset_pkt, 0, sizeof reset_pkt);
@@ -66,7 +66,7 @@ int SifIopReset(const char *arg, int mode)
 	SifWriteBackDCache(&reset_pkt, sizeof(reset_pkt));
 
 	SifSetReg(SIF_REG_SMFLAG, 0x40000);
-	
+
 	if (!SifSetDma(&dmat, 1))
 		return 0;
 

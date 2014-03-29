@@ -1074,7 +1074,7 @@ _MPEG_add_block_frfr:
     lq      $t7,  48($a0)
     paddh   $t0, $t0, $t4
     paddh   $t1, $t1, $t5
-    paddh   $t2, $t2, $t6 
+    paddh   $t2, $t2, $t6
     paddh   $t3, $t3, $t7
     pmaxh   $t0, $zero, $t0
     pmaxh   $t1, $zero, $t1
@@ -2109,7 +2109,7 @@ _MPEG_avg_luma_XY:
     lq      $v0,   0($a1)
     lq      $t7, 384($a1)
     addu    $a1, $a1, $t3
-    qfsrv   $t8, $t7, $v0 
+    qfsrv   $t8, $t7, $v0
     qfsrv   $t9, $v0, $t7
     addiu   $v1, $v1, -1
     pextlb  $v0, $zero, $t8
@@ -2126,7 +2126,7 @@ _MPEG_avg_luma_XY:
     lq      $t5,   0($a1)
     lq      $t6, 384($a1)
     mtsab   $a3, 0
-    addu    $a1, $a1, $t3 
+    addu    $a1, $a1, $t3
     qfsrv   $t8, $t6, $t5
     qfsrv   $t9, $t5, $t6
     addiu   $v1, $v1, -1

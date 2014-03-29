@@ -1,11 +1,11 @@
 #ifndef __GS_PRIVILEGED_H__
 #define __GS_PRIVILEGED_H__
- 
+
  #include <tamtypes.h>
- 
+
  // These are the privileged GS registers mapped to main ram
  // These are modified directly without the use of dma
- 
+
  #define GS_REG_PMODE		(volatile u64 *)0x12000000	// PCRTC Mode Setting
  #define GS_REG_SMODE1		(volatile u64 *)0x12000010	// VHP,VCKSEL,SLCK2,NVCK,CLKSEL,PEVS,PEHS,PVS,PHS,GCONT,SPML,PCK2,XPCK,SINT,PRST,EX,CMOD,SLCK,T1248,LC,RC
  #define GS_REG_SMODE2		(volatile u64 *)0x12000020	// Setting For Modes Related to Video Synchronization
@@ -78,7 +78,7 @@
   (u64)((1)    & 0x00000007) <<  2 | (u64)((MMOD) & 0x00000001) <<  5 | \
   (u64)((AMOD) & 0x00000001) <<  6 | (u64)((SLBG) & 0x00000001) <<  7 | \
   (u64)((ALP)  & 0x000000FF) <<  8 | (u64)((0)    & 0x00000001) << 16
- 
+
  #define GS_SET_PMODE_EXT(EN1,EN2,MMOD,AMOD,SLBG,ALP,NFLD,EXVWINS,EXVWINE,EXSYNCMD) \
   (u64)((EN1)      & 0x00000001) <<  0 | (u64)((EN2)     & 0x00000001) <<  1 | \
   (u64)((1)        & 0x00000007) <<  2 | (u64)((MMOD)    & 0x00000001) <<  5 | \

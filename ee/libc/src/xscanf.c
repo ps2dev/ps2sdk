@@ -13,7 +13,7 @@
 
 /* This code is modified from avr libc.
    Original (C) text and license of this code follows */
-   
+
 
 /* Copyright (c) 2002,2004 Joerg Wunsch
    All rights reserved.

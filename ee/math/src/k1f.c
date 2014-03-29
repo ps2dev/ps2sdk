@@ -35,7 +35,7 @@
  * k1 domain          x <= 0          MAXNUM
  *
  */
-/*							k1ef.c
+/*							k1ef.c
  *
  *	Modified Bessel function, third kind, order one,
  *	exponentially scaled
@@ -67,7 +67,7 @@
  * See k1().
  *
  */
-
+
 /*
 Cephes Math Library Release 2.2: June, 1992
 Copyright 1984, 1987, 1992 by Stephen L. Moshier
@@ -78,7 +78,7 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 
 /* Chebyshev coefficients for x(K1(x) - log(x/2) I1(x))
  * in the interval [0,2].
- * 
+ *
  * lim(x->0){ x(K1(x) - log(x/2) I1(x)) } = 1.
  */
 
@@ -118,7 +118,7 @@ static float B[] =
 };
 
 
- 
+
 extern float MAXNUMF;
 #ifdef ANSIC
 float chbevlf(float, float *, int);

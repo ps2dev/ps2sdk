@@ -70,7 +70,7 @@ static inline void setloopflags(int id, u8 *buf, int len)
 	}
 }
 
-/* 
+/*
 	fillbuf - Fill a specific buffer
 
 	This kinda sucks at the moment, should make the IOP blocks smaller than the SPU2 blocks...
@@ -96,7 +96,7 @@ int fillbuf(int id, int chan)
 		return(0);   /* EOF */
 
 	/* If we're stereo and we've read less than a chunk, we're screwed  */
-	if ((stream_chans>1) && (size<stream_buflen)) 
+	if ((stream_chans>1) && (size<stream_buflen))
 	{
 		dprintf(OUT_ERROR, "Channel%d: failed to read entire chunk (read %d bytes)\n", chan, size);
 		return(-1);
@@ -226,7 +226,7 @@ int sndStreamOpen(char *file, u32 voices, u32 flags, u32 bufaddr, u32 bufsize)
 	}
 
 	/* Setup other SPU2 voice stuff... */
-	for (int i=0;i<stream_chans;i++) /* XXX */ 
+	for (int i=0;i<stream_chans;i++) /* XXX */
 	{
 		sceSdSetParam(stream_voice[i] | SD_VPARAM_PITCH, 0x1000); /* 0x1000 = normal pitch */
 		sceSdSetParam(stream_voice[i] | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0, 0xf, 0xf));
@@ -303,7 +303,7 @@ int sndStreamPlay(void)
 	else
 		sceSdSetSwitch((stream_voice[0]&1) | SD_SWITCH_KEYDOWN, 1<<(stream_voice[0]>>1));
 
-	sceSdSetCoreAttr(SD_CORE_IRQ_ENABLE, 1); 
+	sceSdSetCoreAttr(SD_CORE_IRQ_ENABLE, 1);
 
 	stream_status=STATUS_PLAYING;
 

@@ -8,7 +8,7 @@
 #
 # $Id$
 
- 
+
 # You can override the following options on the make command line, or manually
 # edit them below.  Please see the file INSTALL for details on building
 # ps2sdk.

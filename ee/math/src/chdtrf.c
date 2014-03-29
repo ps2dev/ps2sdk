@@ -50,7 +50,7 @@
  *   message         condition      value returned
  * chdtrf domain  x < 0 or v < 1        0.0
  */
-/*							chdtrcf()
+/*							chdtrcf()
  *
  *	Complemented Chi-square distribution
  *
@@ -102,7 +102,7 @@
  *   message         condition      value returned
  * chdtrc domain  x < 0 or v < 1        0.0
  */
-/*							chdtrif()
+/*							chdtrif()
  *
  *	Inverse of complemented Chi-square distribution
  *
@@ -144,7 +144,7 @@
  *                     v < 1
  *
  */
-
+
 /*								chdtr() */
 
 

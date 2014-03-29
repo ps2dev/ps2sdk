@@ -14,7 +14,7 @@ endif
 
 SUBDIRS = tools iop ee common samples
 
-all: build 
+all: build
 	@$(ECHO) .;
 	@$(ECHO) .PS2SDK Built.;
 	@$(ECHO) .;
@@ -53,7 +53,7 @@ $(PS2SDK)/ports:
 
 install: release
 
-release: build release_base $(PS2SDK)/common/include $(PS2SDK)/ports $(subdir_release) 
+release: build release_base $(PS2SDK)/common/include $(PS2SDK)/ports $(subdir_release)
 
 
 release_base: env_release_check
@@ -67,7 +67,7 @@ release_base: env_release_check
 	cp -f ID $(PS2SDK)
 	cp -f Defs.make $(PS2SDK)
 
-env_build_check: 
+env_build_check:
 	@if test -z $(PS2SDKSRC) ; \
 	then \
 	  $(ECHO) PS2SDKSRC environment variable should be defined. ; \

@@ -18,7 +18,7 @@
  *
  * This routine may be called to report one of the following
  * error conditions (in the include file mconf.h).
- *	
+ *
  *	 Mnemonic		 Value			Significance
  *
  *	  DOMAIN			1		argument domain error
@@ -47,7 +47,7 @@
  * mconf.h
  *
  */
-
+
 /*
 Cephes Math Library Release 2.0:  April, 1987
 Copyright 1984, 1987 by Stephen L. Moshier

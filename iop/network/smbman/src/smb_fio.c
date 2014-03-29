@@ -160,7 +160,7 @@ static void smb_io_lock(void)
 static void smb_io_unlock(void)
 {
 	SignalSema(smbman_io_sema);
-	
+
 	keepalive_init();
 }
 
@@ -199,13 +199,13 @@ static void keepalive_thread(void *args)
 	}
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int smb_dummy(void)
 {
 	return -EPERM;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int smb_init(iop_device_t *dev)
 {
 	iop_thread_t thread;
@@ -232,12 +232,12 @@ int smb_init(iop_device_t *dev)
 	return 0;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int smb_initdev(void)
 {
 	register int i;
 	FHANDLE *fh;
-	
+
 	DelDrv(smbdev.name);
 	if (AddDrv((iop_device_t *)&smbdev))
 		return 1;
@@ -254,7 +254,7 @@ int smb_initdev(void)
 	return 0;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int smb_deinit(iop_device_t *dev)
 {
 	keepalive_deinit();
@@ -268,7 +268,7 @@ int smb_deinit(iop_device_t *dev)
 	return 0;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 static FHANDLE *smbman_getfilefreeslot(void)
 {
 	register int i;
@@ -283,7 +283,7 @@ static FHANDLE *smbman_getfilefreeslot(void)
 	return 0;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 static char *prepare_path(char *path, char *full_path, int max_path)
 {
 	register int i;
@@ -315,7 +315,7 @@ static char *prepare_path(char *path, char *full_path, int max_path)
 	return (char *)full_path;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int smb_open(iop_file_t *f, const char *filename, int mode, int flags)
 {
 	register int r = 0;
@@ -368,7 +368,7 @@ int smb_open(iop_file_t *f, const char *filename, int mode, int flags)
 	return r;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int smb_close(iop_file_t *f)
 {
 	FHANDLE *fh = (FHANDLE *)f->privdata;
@@ -398,7 +398,7 @@ io_unlock:
 	return r;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 void smb_closeAll(void)
 {
 	register int i;
@@ -411,13 +411,13 @@ void smb_closeAll(void)
 	}
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int smb_lseek(iop_file_t *f, u32 pos, int where)
 {
 	return (int)smb_lseek64(f, pos, where);
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int smb_read(iop_file_t *f, void *buf, int size)
 {
 	FHANDLE *fh = (FHANDLE *)f->privdata;
@@ -456,7 +456,7 @@ io_unlock:
 	return rpos;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int smb_write(iop_file_t *f, void *buf, int size)
 {
 	FHANDLE *fh = (FHANDLE *)f->privdata;
@@ -497,7 +497,7 @@ io_unlock:
 	return wpos;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int smb_remove(iop_file_t *f, const char *filename)
 {
 	register int r;
@@ -523,7 +523,7 @@ int smb_remove(iop_file_t *f, const char *filename)
 	return r;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int smb_mkdir(iop_file_t *f, const char *dirname)
 {
 	register int r;
@@ -547,7 +547,7 @@ int smb_mkdir(iop_file_t *f, const char *dirname)
 	return r;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int smb_rmdir(iop_file_t *f, const char *dirname)
 {
 	register int r;
@@ -583,7 +583,7 @@ io_unlock:
 	return r;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int smb_dopen(iop_file_t *f, const char *dirname)
 {
 	register int r = 0;
@@ -625,7 +625,7 @@ int smb_dopen(iop_file_t *f, const char *dirname)
 			strcat(fh->name, "\\");
 		strcat(fh->name, "*");
 
-		r = 0;	
+		r = 0;
 	}
 	else
 		r = -EMFILE;
@@ -636,13 +636,13 @@ io_unlock:
 	return r;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int smb_dclose(iop_file_t *f)
 {
 	return smb_close(f);
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int smb_dread(iop_file_t *f, iox_dirent_t *dirent)
 {
 	FHANDLE *fh = (FHANDLE *)f->privdata;
@@ -686,7 +686,7 @@ int smb_dread(iop_file_t *f, iox_dirent_t *dirent)
 
 		if (info->fileInfo.FileAttributes & EXT_ATTR_DIRECTORY)
 			dirent->stat.mode |= FIO_S_IFDIR;
-		else 
+		else
 			dirent->stat.mode |= FIO_S_IFREG;
 
 		strncpy(dirent->name, info->FileName, 256);
@@ -698,7 +698,7 @@ io_unlock:
 	return r;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int smb_getstat(iop_file_t *f, const char *filename, iox_stat_t *stat)
 {
 	register int r;
@@ -731,7 +731,7 @@ int smb_getstat(iop_file_t *f, const char *filename, iox_stat_t *stat)
 
 	if (info.FileAttributes & EXT_ATTR_DIRECTORY)
 		stat->mode |= FIO_S_IFDIR;
-	else 
+	else
 		stat->mode |= FIO_S_IFREG;
 
 io_unlock:
@@ -740,7 +740,7 @@ io_unlock:
 	return r;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int smb_rename(iop_file_t *f, const char *oldname, const char *newname)
 {
 	register int r;
@@ -767,7 +767,7 @@ int smb_rename(iop_file_t *f, const char *oldname, const char *newname)
 	return r;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int smb_chdir(iop_file_t *f, const char *dirname)
 {
 	register int r = 0, i;
@@ -816,7 +816,7 @@ io_unlock:
 	return r;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 s64 smb_lseek64(iop_file_t *f, s64 pos, int where)
 {
 	s64 r;
@@ -855,7 +855,7 @@ io_unlock:
 	return r;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 void DMA_sendEE(void *buf, int size, void *EE_addr)
 {
 	SifDmaTransfer_t dmat;
@@ -875,14 +875,14 @@ void DMA_sendEE(void *buf, int size, void *EE_addr)
 	while (sceSifDmaStat(id) >= 0);
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 static void smb_GetPasswordHashes(smbGetPasswordHashes_in_t *in, smbGetPasswordHashes_out_t *out)
 {
 	LM_Password_Hash((const unsigned char *)in->password, (unsigned char *)out->LMhash);
 	NTLM_Password_Hash((const unsigned char *)in->password, (unsigned char *)out->NTLMhash);
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 static int smb_LogOff(void);
 
 static int smb_LogOn(smbLogOn_in_t *logon)
@@ -914,7 +914,7 @@ static int smb_LogOn(smbLogOn_in_t *logon)
 	return 0;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 static int smb_LogOff(void)
 {
 	register int r;
@@ -941,7 +941,7 @@ static int smb_LogOff(void)
 	return 0;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 static int smb_GetShareList(smbGetShareList_in_t *getsharelist)
 {
 	register int i, r, sharecount, shareindex;
@@ -974,7 +974,7 @@ static int smb_GetShareList(smbGetShareList_in_t *getsharelist)
 	sharecount = r;
 	shareindex = 0;
 
-	// now we list the following shares if any 
+	// now we list the following shares if any
 	for (i=0; i<sharecount; i++) {
 
 		r = smb_NetShareEnum(UID, TID, (ShareEntry_t *)&ShareList, i, 1);
@@ -995,11 +995,11 @@ static int smb_GetShareList(smbGetShareList_in_t *getsharelist)
 
 	TID = -1;
 
-	// return the number of shares	
+	// return the number of shares
 	return shareindex;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 static int smb_OpenShare(smbOpenShare_in_t *openshare)
 {
 	register int r;
@@ -1025,7 +1025,7 @@ static int smb_OpenShare(smbOpenShare_in_t *openshare)
 	return 0;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 static int smb_CloseShare(void)
 {
 	register int r;
@@ -1044,13 +1044,13 @@ static int smb_CloseShare(void)
 	return 0;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 static int smb_EchoServer(smbEcho_in_t *echo)
 {
 	return smb_Echo(echo->echo, echo->len);
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 static int smb_QueryDiskInfo(smbQueryDiskInfo_out_t *querydiskinfo)
 {
 	if ((UID == -1) || (TID == -1))
@@ -1059,7 +1059,7 @@ static int smb_QueryDiskInfo(smbQueryDiskInfo_out_t *querydiskinfo)
 	return smb_QueryInformationDisk(UID, TID, querydiskinfo);
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int smb_devctl(iop_file_t *f, const char *devname, int cmd, void *arg, u32 arglen, void *bufp, u32 buflen)
 {
 	register int r = 0;
@@ -1084,7 +1084,7 @@ int smb_devctl(iop_file_t *f, const char *devname, int cmd, void *arg, u32 argle
 					r = -EINVAL;
 				else
 					r = -EIO;
-			
+
 			}
 			break;
 
@@ -1095,7 +1095,7 @@ int smb_devctl(iop_file_t *f, const char *devname, int cmd, void *arg, u32 argle
 					r = -EINVAL;
 				else
 					r = -EIO;
-			}			
+			}
 			break;
 
 		case SMB_DEVCTL_OPENSHARE:

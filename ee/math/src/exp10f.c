@@ -38,7 +38,7 @@
  * IEEE single arithmetic: MAXL10 = 38.230809449325611792.
  *
  */
-
+
 /*
 Cephes Math Library Release 2.2:  June, 1992
 Copyright 1984, 1987, 1988, 1992 by Stephen L. Moshier

@@ -48,7 +48,7 @@ static int scsiTestUnitReady(struct SBP2Device* dev){
 	cdb.CDBs[10] = 0;		//reserved
 	cdb.CDBs[9] = 0;		//reserved
 	cdb.CDBs[8] = 0;		//reserved
- 
+
     	ieee1394_SendCommandBlockORB(dev, &cdb);
 	return(ieee1394_Sync());
 }
@@ -232,7 +232,7 @@ int scsiReadSector(struct SBP2Device *dev, unsigned long int lba, void *buffer, 
 		/* Save the current pointer to the buffer, so that the code above can byte-swap the payload of the request below that will be read in,
 			when this loop loops around.
 		*/
-		PreviousReqBufferPtr=bufferPtr; 
+		PreviousReqBufferPtr=bufferPtr;
 
 		for(i=0; i<nOrbs; i++){
 			sectorsToRead=(sectorsRemaining>SectorsPerBlock)?SectorsPerBlock:sectorsRemaining;
@@ -307,7 +307,7 @@ int scsiWriteSector(struct SBP2Device *dev, unsigned long int lba, void* buffer,
 
 		for(i=0; i<nOrbs; i++){
 			sectorsToRead=(sectorsRemaining>SectorsPerBlock)?SectorsPerBlock:sectorsRemaining;
-	    
+
 			cdb[i].misc=(ORB_NOTIFY | ORB_REQUEST_FORMAT(0) | CDB_MAX_PAYLOAD(max_payload) | CDB_DIRECTION(READ_TRANSACTION) | CDB_SPEED(dev->speed) | CDB_DATA_SIZE((dev->sectorSize * sectorsToRead)));
 
 			cdb[i].DataDescriptor.low=(u32)bufferPtr;
@@ -381,7 +381,7 @@ static inline int InitializeSCSIDevice(struct SBP2Device *dev) {
     while((stat = scsiTestUnitReady(dev)) != 0)
     {
         XPRINTF("IEEE1394_disk: Error - scsiTestUnitReady %d\n", stat);
-        
+
         stat = scsiRequestSense(dev, &sd, sizeof(sense_data));
         if (stat != 0)
             XPRINTF("IEEE1394_disk: Error - scsiRequestSense %d\n", stat);
@@ -389,7 +389,7 @@ static inline int InitializeSCSIDevice(struct SBP2Device *dev) {
         if ((sd.error_code == 0x70) && (sd.sense_key != 0x00))
         {
             XPRINTF("IEEE1394_disk: Sense Data key: %02X code: %02X qual: %02X\n", sd.sense_key, sd.add_sense_code, sd.add_sense_qual);
-            
+
             if ((sd.sense_key == 0x02) && (sd.add_sense_code == 0x04) && (sd.add_sense_qual == 0x02))
             {
                 XPRINTF("IEEE1394_disk: Error - Additional initalization is required for this device!\n");

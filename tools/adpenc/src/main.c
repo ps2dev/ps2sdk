@@ -30,9 +30,9 @@ static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_l
 	struct AdpcmHeader AdpcmHeader;
 
 	result=0;
-	if ( (fp = fopen(InputFile, "rb" )) != NULL ) 
-	{    
-		if (fread( s, 1, 4, fp )!=4 || strncmp( s, "RIFF", 4 ) ) 
+	if ( (fp = fopen(InputFile, "rb" )) != NULL )
+	{
+		if (fread( s, 1, 4, fp )!=4 || strncmp( s, "RIFF", 4 ) )
 		{
 			printf( "Error: Not a WAVE-file (\"RIFF\" identifier not found)\n" );
 			result=-3;
@@ -40,8 +40,8 @@ static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_l
 		}
 
 		fseek( fp, 8, SEEK_SET );
-  
-		if (fread( s, 1, 4, fp )!=4 || strncmp( s, "WAVE", 4 ) ) 
+
+		if (fread( s, 1, 4, fp )!=4 || strncmp( s, "WAVE", 4 ) )
 		{
 			printf( "Error: Not a WAVE-file (\"WAVE\" identifier not found)\n" );
 			result=-3;
@@ -49,19 +49,19 @@ static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_l
 		}
 
 		fseek( fp, 8 + 4, SEEK_SET );
-  
-		if (fread( s, 1, 4, fp )!=4 || strncmp( s, "fmt", 3 ) ) 
+
+		if (fread( s, 1, 4, fp )!=4 || strncmp( s, "fmt", 3 ) )
 		{
 			printf( "Error: Not a WAVE-file (\"fmt\" chunk not found)\n" );
 			result=-3;
  			goto InputFileIOEnd;
 		}
-    
+
 		if(fread( &chunk_data, 4, 1, fp )==1){
 			chunk_data += ftell( fp );
-      
-			if (fread( &e, 2, 1, fp )!=1 || e != 1 ) 
-			{	
+
+			if (fread( &e, 2, 1, fp )!=1 || e != 1 )
+			{
 				printf( "Error: No PCM data in WAVE-file\n" );
 				result=-4;
 	 			goto InputFileIOEnd;
@@ -72,7 +72,7 @@ static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_l
 			result=-4;
  			goto InputFileIOEnd;
 		}
-    
+
 		if (fread( &e, 2, 1, fp )!=1 || ((e != 1) && (e != 2)))
 		{
 			printf( "Error: WAVE file must be MONO or STEREO (max 2 channels)\n" );
@@ -84,7 +84,7 @@ static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_l
 
 		if(fread( &sample_freq, 4, 1, fp )==1){
 			fseek( fp, 4 + 2, SEEK_CUR );
-			if (fread( &e, 2, 1, fp )!=1 || e != 16 ) 
+			if (fread( &e, 2, 1, fp )!=1 || e != 16 )
 			{
 				printf( "Error: WAVE-file must 16 bit\n" );
 				result=-6;
@@ -96,12 +96,12 @@ static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_l
 			result=-6;
  			goto InputFileIOEnd;
 		}
-        
+
 		fseek( fp, chunk_data, SEEK_SET );
 		if(fread( s, 1, 4, fp )==4){
 			// Skip 'fact' and possibly other chunks
 			while(strncmp( s, "data", 4 ))
-			{	
+			{
 				if(fread( &chunk_data, 4, 1, fp )==1){
 					chunk_data += ftell( fp );
 					fseek( fp, chunk_data, SEEK_SET );
@@ -132,8 +132,8 @@ static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_l
 			result=-6;
  			goto InputFileIOEnd;
 		}
-    
-		if ( (sad = fopen(OutputFile, "wb" )) != NULL ) 
+
+		if ( (sad = fopen(OutputFile, "wb" )) != NULL )
 		{
 			strncpy(AdpcmHeader.id, "APCM", 4);
 			AdpcmHeader.version=1;
@@ -151,7 +151,7 @@ static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_l
 			else
 			{
 				int data_offset = ftell(fp);
-		
+
 				// Encode left
 				if((result=adpcm_encode(fp, sad, 2, sample_len, flag_loop))==0){
 					fseek(fp, SEEK_SET, data_offset+2);

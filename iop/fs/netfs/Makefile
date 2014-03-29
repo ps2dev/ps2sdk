@@ -18,7 +18,7 @@ IOP_BIN  = bin/ps2netfs.irx
 IOP_OBJS = obj/ps2netfs.o obj/ps2_fio.o obj/devscan.o obj/imports.o
 
 IOP_CFLAGS  += -Wall -fno-builtin-printf
-IOP_LDFLAGS +=  -s 
+IOP_LDFLAGS +=  -s
 IOP_INCS += -I$(PS2SDKSRC)/iop/system/iopmgr/include -I$(PS2SDKSRC)/iop/tcpip/tcpip/include
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)

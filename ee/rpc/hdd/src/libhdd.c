@@ -68,7 +68,7 @@ int hddCheckFormatted()
 	if((rv >= 1) || (rv < 0))
 		return -1;
 	else
-		return 0;	
+		return 0;
 }
 
 
@@ -121,7 +121,7 @@ int hddGetFilesystemList(t_hddFilesystem hddFs[], int maxEntries)
 		hddUpdateInfo();
 
 	hddFd = fileXioDopen("hdd0:");
-	
+
 	if(hddFd < 0)
 		return hddFd;
 
@@ -148,12 +148,12 @@ int hddGetFilesystemList(t_hddFilesystem hddFs[], int maxEntries)
 		{
 			hddFs[count].fileSystemGroup = FS_GROUP_SYSTEM;
 			strcpy(hddFs[count].name, &dirEnt.name[2]);
-		} 
+		}
 		else if(dirEnt.name[0] == FS_COMMON_PREFIX)
 		{
 			hddFs[count].fileSystemGroup = FS_GROUP_COMMON;
 			strcpy(hddFs[count].name, &dirEnt.name[1]);
-		} 
+		}
 		else
 		{
 			hddFs[count].fileSystemGroup = FS_GROUP_APPLICATION;
@@ -230,7 +230,7 @@ int hddGetFilesystemList(t_hddFilesystem hddFs[], int maxEntries)
 
 void hddGetInfo(t_hddInfo *info)
 {
-	hddUpdateInfo();	
+	hddUpdateInfo();
 
 	info->hddSize = hddSize;
 	info->hddFree = hddFree;
@@ -340,7 +340,7 @@ int hddMakeFilesystem(int fsSizeMB, char *name, int type)
 
 	// Get index of size we will use to create main partition
 	for(useIndex = maxIndex; sizesMB[useIndex] > fsSizeMB; useIndex--);
-		
+
 	partSize = sizesMB[useIndex];
 #ifdef DEBUG
 	printf(">>> Attempting to create main partition, size %d MB\n", partSize);
@@ -362,7 +362,7 @@ int hddMakeFilesystem(int fsSizeMB, char *name, int type)
 
 	while(fsSizeLeft)
 	{
-		
+
 		// Adjust size if necessary
 		if(fsSizeLeft < partSize)
 		{

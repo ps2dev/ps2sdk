@@ -218,7 +218,7 @@ int smap_init(void)
 			tx_bd->length    = 0;
 			tx_bd->pointer   = 0;
 	}
-	for (i = 0; i < SMAP_BD_MAX_ENTRY; i++, rx_bd++) { 
+	for (i = 0; i < SMAP_BD_MAX_ENTRY; i++, rx_bd++) {
 			rx_bd->ctrl_stat = SMAP_BD_RX_EMPTY;
 			rx_bd->reserved  = 0;
 			rx_bd->length    = 0;

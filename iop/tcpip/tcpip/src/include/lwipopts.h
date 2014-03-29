@@ -23,7 +23,7 @@ a lot of data that needs to be copied, this should be set high. */
 #define MEMP_NUM_UDP_PCB        15
 /* MEMP_NUM_TCP_PCB: the number of simulatenously active TCP
    connections. */
-#define MEMP_NUM_TCP_PCB        15 
+#define MEMP_NUM_TCP_PCB        15
 /* MEMP_NUM_TCP_PCB_LISTEN: the number of listening TCP
    connections. */
 #define MEMP_NUM_TCP_PCB_LISTEN 15
@@ -65,7 +65,7 @@ a lot of data that needs to be copied, this should be set high. */
 
 /** SYS_LIGHTWEIGHT_PROT
  * define SYS_LIGHTWEIGHT_PROT in lwipopts.h if you want inter-task protection
- * for certain critical regions during buffer allocation, deallocation and 
+ * for certain critical regions during buffer allocation, deallocation and
  * memory allocation and deallocation.
  */
 #define SYS_LIGHTWEIGHT_PROT 1

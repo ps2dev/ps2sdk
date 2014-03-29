@@ -717,7 +717,7 @@ int smap_init(int argc, char *argv[]){
 				if(ThreadPriority-9>=0x73){
 					return DisplayHelpMessage();
 				}
-				
+
 				if(((unsigned char*)*argv)[6]!='\0'){
 					while(look_ctype_table(*CmdString)&4){
 						CmdString++;
@@ -730,7 +730,7 @@ int smap_init(int argc, char *argv[]){
 		else if(strncmp("thstack=", *argv, 8)==0){
 			CmdString=&((unsigned char*)*argv)[8];
 			if(look_ctype_table(CmdString[0])&4){
-				ThreadStackSize=strtoul(&((unsigned char*)*argv)[8], NULL, 10);				
+				ThreadStackSize=strtoul(&((unsigned char*)*argv)[8], NULL, 10);
 				if(((unsigned char*)*argv)[8]!='\0'){
 					while(look_ctype_table(*CmdString)&4){
 						CmdString++;

@@ -50,7 +50,7 @@ static u8 pktbuf[1514];
 /* UDP */
 
 static inline u16 htons(u16 n)
-{ 
+{
 	return ((n & 0xff) << 8) | ((n & 0xff00) >> 8);
 }
 

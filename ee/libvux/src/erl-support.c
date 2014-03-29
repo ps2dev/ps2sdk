@@ -15,6 +15,6 @@
 
 char * erl_id = "libvux";
 char * erl_dependancies[] = {
-    
+
     0
 };

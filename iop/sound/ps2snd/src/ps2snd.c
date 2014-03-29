@@ -41,7 +41,7 @@ void *rpc_server(u32 func, void *data, u32 size)
 {
 	u32 *ru = rpc_buffer[1];
 	s32  *rs = rpc_buffer[1];
-	
+
 	switch(func)
 	{
 	case PS2SND_Init:             *rs = sceSdInit       (DS[0]); break;
@@ -115,7 +115,7 @@ int _start(int argc, char *argv[])
 		}
 		printf("debug_level = %d (%c)\n", debug_level, argv[1][0]);
 	}
-	
+
 	thread.attr      = TH_C;
 	thread.thread    = rpc_thread;
 	thread.priority  = 40;

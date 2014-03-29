@@ -24,7 +24,7 @@
 #include "iopmgr.h"
 
 /*! \brief Get pointer to head of module list, or next module in list.
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  *
  *  \param cur_mod Pointer to module structure, or 0 to return the head.
  *  \return Pointer to module structure.
@@ -49,7 +49,7 @@ ModuleInfo_t *smod_get_next_mod(ModuleInfo_t *cur_mod)
 }
 
 /*! \brief Get pointer to module structure for named module.
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  *
  *  \param name Stringname of module (eg "atad_driver").
  *  \return Pointer to module structure.
@@ -74,7 +74,7 @@ ModuleInfo_t *smod_get_mod_by_name(const char *name)
 }
 
 /*! \brief Get instance count for given module name.
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  *
  *  \param name Stringname of module (eg "atad_driver").
  *  \return Number of instances loaded.
@@ -101,7 +101,7 @@ int smod_get_modcount_by_name(const char *name)
 }
 
 /*! \brief Get version number for given module name.
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  *
  *  \param name Stringname of module (eg "atad_driver").
  *  \return Version number.
@@ -121,7 +121,7 @@ int smod_get_modversion_by_name(const char *name)
 }
 
 /*! \brief Unload the named module.
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  *
  *  \param name Stringname of module (eg "atad_driver").
  *  \return Status of operation.

@@ -28,7 +28,7 @@ static int gs_db_draw_buffer=0;
 
 /*-------------------------------------------
 -											-
-- LOW LEVEL FUNTIONS						-           
+- LOW LEVEL FUNTIONS						-
 -											-
 -------------------------------------------*/
 
@@ -36,7 +36,7 @@ int GsSetXYOffset1(unsigned short x, unsigned short y)
 {
 	gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
 	gs_setR_XYOFFSET_1(((GS_R_XYOFFSET *)&prim_work[1]), x,y);
-	
+
 	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
 
 	gs_dma_send((unsigned int *)&prim_work[0],2);
@@ -49,11 +49,11 @@ int GsSetXYOffset2(unsigned short x, unsigned short y)
 {
 	gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
 	gs_setR_XYOFFSET_2(((GS_R_XYOFFSET *)&prim_work[1]), x,y);
-	
+
 	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
 	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
-	
+
 	return 0;
 }
 
@@ -113,7 +113,7 @@ int GsTextureFlush(void)
 	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
 	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
-	
+
 	return 0;
 }
 
@@ -145,7 +145,7 @@ int GsSelectTexure1(unsigned short tex_addr, unsigned char addr_width, unsigned 
 {
 	gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
 	gs_setR_TEX0_1(((GS_R_TEX0 *)&prim_work[1]), tex_addr,addr_width,tex_pixmode, twh4(tex_width), twh4(tex_height),1,0,clut_addr,clut_pixmode,clut_storagemode,clut_offset,4); /*4 load contex 0*/
-	
+
 	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
 	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
@@ -170,7 +170,7 @@ void GsSetFogColor(unsigned char r, unsigned char g, unsigned char b)
 
 	gs_setGIF_TAG(((GS_GIF_TAG		 *)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
 	gs_setR_FOGCOLOR(((GS_R_FOGCOLOR *)&prim_work[1]), r,g,b);
-	
+
 	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
 	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
@@ -231,7 +231,7 @@ int GsInit(short int interlace, short int videomode, short int ffmd)
 	GS_SET_CSR_reset(1);
 
 	//wait for GS to finish reset
-	__asm__( 
+	__asm__(
 		"sync.p \n"
 		"nop	\n"
 		);
@@ -269,7 +269,7 @@ int GsSetDefaultDrawEnv(GS_DRAWENV *drawenv, unsigned short int w, unsigned shor
 	drawenv->bg_color.g	= 0x01;
 	drawenv->bg_color.b	= 0x01;
 	drawenv->bg_color.a	= 0x80;
-	drawenv->bg_color.q	= 0.0f;	
+	drawenv->bg_color.q	= 0.0f;
 
 	return 0;
 }
@@ -342,7 +342,7 @@ int GsSetDefaultDisplayEnvAddress(GS_DISPENV *dispenv, unsigned short vram_addr,
 int GsSetDefaultZBufferEnv(GS_ZENV *zenv, unsigned char update_mask)
 {
 	zenv->update_mask = update_mask;
-	
+
 	return 0;
 }
 
@@ -365,7 +365,7 @@ int GsPutDrawEnv1(GS_DRAWENV *drawenv)
 	{
 		GsClearDrawEnv1(drawenv);
 	}
-	
+
 	return 0;
 }
 
@@ -380,7 +380,7 @@ int GsPutDrawEnv2(GS_DRAWENV *drawenv)
 	{
 		GsClearDrawEnv2(drawenv);
 	}
-	
+
 	return 0;
 }
 
@@ -467,7 +467,7 @@ int GsPutZBufferEnv2(GS_ZENV *zenv)
 int GsOverridePrimAttributes(char override, char iip, char tme, char fge, char abe, char aa1, char fst, char ctxt, char fix)
 {
 	gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), 2,1,0,0,0,0,1,0x0e);
-	
+
 	//override. (0 = use PRIM)(1 = use PRMODE)
 	if(override)
 	{
@@ -483,7 +483,7 @@ int GsOverridePrimAttributes(char override, char iip, char tme, char fge, char a
 	SyncDCache(prim_work, prim_work+3*sizeof(QWORD));
 	gs_dma_send((unsigned int *)&prim_work[0],3);
 	gs_dma_wait();
-	
+
 	return 0;
 }
 
@@ -516,7 +516,7 @@ void GsEnableAlphaTransparency1(unsigned short enable,unsigned short method,unsi
 	GSGLOBAL_TEST1.atest_reference	 = alpha_ref;
 	GSGLOBAL_TEST1.atest_fail_method = fail_method;
 
-	
+
 	GsSetPixelTest1(GSGLOBAL_TEST1.atest_enable	, GSGLOBAL_TEST1.atest_method, GSGLOBAL_TEST1.atest_reference, GSGLOBAL_TEST1.atest_fail_method,
 					GSGLOBAL_TEST1.datest_enable, GSGLOBAL_TEST1.datest_mode,
 					GSGLOBAL_TEST1.ztest_enable,  GSGLOBAL_TEST1.ztest_method);
@@ -524,7 +524,7 @@ void GsEnableAlphaTransparency1(unsigned short enable,unsigned short method,unsi
 	// tell GS in 16bit texture 1=transparent,0=solid
 	gs_setGIF_TAG(((GS_GIF_TAG		*)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
 	gs_setR_TEXA(((GS_R_TEXA		*)&prim_work[1]), 0x80, 0, 0x00);
-	
+
 	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
 	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
@@ -544,7 +544,7 @@ void GsEnableAlphaTransparency2(unsigned short enable,unsigned short method,unsi
 	// tell GS in 16bit texture 1=transparent,0=solid
 	gs_setGIF_TAG(((GS_GIF_TAG		*)&prim_work[0]), 1,1,0,0,0,0,1,0x0e);
 	gs_setR_TEXA(((GS_R_TEXA		*)&prim_work[1]), 0x80, 0, 0x00);
-	
+
 	SyncDCache(prim_work, prim_work+2*sizeof(QWORD));
 	gs_dma_send((unsigned int *)&prim_work[0],2);
 	gs_dma_wait();
@@ -576,7 +576,7 @@ int GsGifPacketsClear(GS_PACKET_TABLE *table)
 {
 	table->packet_offset=0;
 	table->qword_offset=0;
-	
+
 	return 0;
 }
 
@@ -626,7 +626,7 @@ QWORD *GsGifPacketsAlloc(GS_PACKET_TABLE *table, unsigned int num_qwords)
 {
 	void	*pointer;
 	GS_GIF_PACKET *packet;
-	
+
 	if(num_qwords <= (GS_PACKET_DATA_QWORD_MAX-table->qword_offset))			//check if we can alloc in current packet
 	{
 		pointer=&table->packets[table->packet_offset].data[table->qword_offset];
@@ -668,7 +668,7 @@ QWORD *GsGifPacketsAlloc(GS_PACKET_TABLE *table, unsigned int num_qwords)
 			pointer=NULL;
 		}
 	}
-	
+
 	return pointer;
 }
 
@@ -696,7 +696,7 @@ int GsGifPacketsExecute(GS_PACKET_TABLE *table, unsigned short wait)
 	gs_dma_send_tag(0, 0, &table->packets[0].tag);
 	if(wait)
 		gs_dma_wait();
-	
+
 	return 0;
 }
 
@@ -706,7 +706,7 @@ int GsDrawSync(int mode)
 	{
 	case 0:
 	default:
-		gs_dma_wait();		
+		gs_dma_wait();
 	}
 
 	return 1;
@@ -728,7 +728,7 @@ int GsHSync(int mode)
 			for(i=0;i<mode;i++)
 			{
 				GS_SET_CSR_hsync_intrupt(1);
-				while(!GS_GET_CSR_hsync_intrupt);	
+				while(!GS_GET_CSR_hsync_intrupt);
 			}
 			return 0;
 		}
@@ -755,7 +755,7 @@ int GsVSync(int mode)
 			{
 				GS_SET_CSR_vsync_intrupt(1);
 				while(!GS_GET_CSR_vsync_intrupt);
-				
+
 			}
 			return 0;
 		}
@@ -768,7 +768,7 @@ int GsLoadImage(void *source_addr, GS_IMAGE *dest)
 {
 	int i;
 	static int	current,max,remainder,img_qwc;
-	
+
 	switch(dest->psm)
 	{
 	case GS_TEX_32:	//32 bit image
@@ -796,7 +796,7 @@ int GsLoadImage(void *source_addr, GS_IMAGE *dest)
 	gs_setR_TRXPOS(((GS_R_TRXPOS			*)&prim_work[2]), 0,0,dest->x,dest->y,0);
 	gs_setR_TRXREG(((GS_R_TRXREG			*)&prim_work[3]), dest->width,dest->height);
 	gs_setR_TRXDIR(((GS_R_TRXDIR			*)&prim_work[4]), 0);
-	
+
 	SyncDCache(prim_work, prim_work+5*sizeof(QWORD));
 	gs_dma_send((unsigned int *)&prim_work[0],5);
 	gs_dma_wait();
@@ -809,7 +809,7 @@ int GsLoadImage(void *source_addr, GS_IMAGE *dest)
 	{
 		//1st we signal gs we are about to send
 		//16384 qwords
-	
+
 		gs_setGIF_TAG(((GS_GIF_TAG *)&prim_work[0]), current,1,0,0,0,2,0,0x00);
 
 		SyncDCache(prim_work, prim_work+1*sizeof(QWORD));
@@ -834,7 +834,7 @@ int GsLoadImage(void *source_addr, GS_IMAGE *dest)
 		SyncDCache(prim_work, prim_work+1*sizeof(QWORD));
 		gs_dma_send((unsigned int *)&prim_work[0],1);
 		gs_dma_wait();
-	
+
 		//send data leftover
 		gs_dma_send((unsigned int *)source_addr,current);
 
@@ -861,7 +861,7 @@ int GsVramAllocFrameBuffer(short w, short h, short psm)
 
 	switch(psm)
 	{
-	case GS_PIXMODE_32:	
+	case GS_PIXMODE_32:
 	case GS_TEX_4HH:		// these are 32bit
 	case GS_TEX_4HL:		// ..
 	case GS_TEX_8H:			// ..
@@ -900,7 +900,7 @@ int GsVramAllocFrameBuffer(short w, short h, short psm)
 		vr_addr += ((2048)-remainder);
 
 	ret = vr_addr/(2048);
-	vr_addr += size;	
+	vr_addr += size;
 	vr_tex_start = vr_addr;
 
 	return ret;
@@ -914,7 +914,7 @@ int GsVramAllocTextureBuffer(short w, short h, short psm)
 	{
 	case GS_PIXMODE_32:
 	case GS_PIXMODE_24:		// also 24bit takes up 4 bytes
-	case GS_TEX_8H:			// ..	
+	case GS_TEX_8H:			// ..
 	case GS_TEX_4HH:		// these are 32bit
 	case GS_TEX_4HL:		// ..
 		byte_pp = 4;
@@ -948,7 +948,7 @@ int GsVramAllocTextureBuffer(short w, short h, short psm)
 	vr_2ndtolast_alloc = vr_addr;
 
 	if(remainder)
-		vr_addr += ((64)-remainder);	
+		vr_addr += ((64)-remainder);
 
 	ret = vr_addr/(64);
 	vr_addr += size;
@@ -979,7 +979,7 @@ void GsVramFreeAll(void)
 }
 
 /*****************************************************************
-*** 
+***
 ***
 *****************************************************************/
 
@@ -994,7 +994,7 @@ int GsDbGetDisplayBuffer(void)
 }
 
 void GsDbSwapBuffer(void)
-{	
+{
 	gs_db_draw_buffer = gs_db_draw_buffer? 0: 1;
 }
 

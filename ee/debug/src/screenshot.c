@@ -94,10 +94,10 @@ int ps2_screenshot_file( const char* pFilename,unsigned int VramAdress,
   static u32 in_buffer[1024*4];  // max 1024*32bit for a line, should be ok
   static u32 out_buffer[1024*4]; // max 1024*32bit for a line, should be ok
 
-  unsigned char header[18] = 
+  unsigned char header[18] =
   {
-     0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-     0, 0, // Width 
+     0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+     0, 0, // Width
      0, 0, // Heigth
     32, 8
   };
@@ -120,7 +120,7 @@ int ps2_screenshot_file( const char* pFilename,unsigned int VramAdress,
   fioWrite( file_handle, (void*)&header, 18 );
 
   /////////////////////////////////////////////////////////////////////////////
-  // Check if we have a tempbuffer, if we do we use it 
+  // Check if we have a tempbuffer, if we do we use it
 
   for( y = 0; y < Height; y++ )
   {
@@ -131,7 +131,7 @@ int ps2_screenshot_file( const char* pFilename,unsigned int VramAdress,
     {
       u32 x;
       u16* p_in  = (u16*)&in_buffer;
-        
+
       for( x = 0; x < Width; x++ )
       {
 	 u32 r = (p_in[x] & 31) << 3;
@@ -145,7 +145,7 @@ int ps2_screenshot_file( const char* pFilename,unsigned int VramAdress,
     {
       u32 x;
       u8* p_in  = (u8*)&in_buffer;
-        
+
       for( x = 0; x < Width; x++ )
       {
         u8 r =  *p_in++;
@@ -185,26 +185,26 @@ int ps2_screenshot_file( const char* pFilename,unsigned int VramAdress,
 //
 // pDest      - Temporary storeage for the screen (allocated by user)
 // VramAdress - pointer to where in vram to transfer from (wordaddress/64)
-// Width      - Width of Screen 
-// Height     - Width of Screen 
+// Width      - Width of Screen
+// Height     - Width of Screen
 // Psm        - Pixelformat of screen
 //
 
-int ps2_screenshot( void* pDest, unsigned int VramAdress, unsigned int x, 
-                    unsigned int y, unsigned int Width, unsigned int Height, 
+int ps2_screenshot( void* pDest, unsigned int VramAdress, unsigned int x,
+                    unsigned int y, unsigned int Width, unsigned int Height,
                     unsigned int Psm )
 {
-  static u32 enable_path3[4] ALIGNED(16) = 
-  { 
-    PS2SS_VIF1_MSKPATH3(0), PS2SS_VIF1_NOP, PS2SS_VIF1_NOP, PS2SS_VIF1_NOP, 
-  }; 
+  static u32 enable_path3[4] ALIGNED(16) =
+  {
+    PS2SS_VIF1_MSKPATH3(0), PS2SS_VIF1_NOP, PS2SS_VIF1_NOP, PS2SS_VIF1_NOP,
+  };
 
   u32  dma_chain[20*2] ALIGNED(16);
   u32* p_dma32 = (u32*)&dma_chain;
   u64* p_dma64 = (u64*)( p_dma32 + 4 );
   u32  uQSize;
   u32  prev_imr;
-  u32  prev_chcr; 
+  u32  prev_chcr;
 
   /////////////////////////////////////////////////////////////////////////////
   // Calc size depending on Psm
@@ -217,61 +217,61 @@ int ps2_screenshot( void* pDest, unsigned int VramAdress, unsigned int x,
     uQSize = (Width*Height*4)/16;
 
   /////////////////////////////////////////////////////////////////////////////
-  // Setup transfer texture back to memory 
+  // Setup transfer texture back to memory
 
-  p_dma32[0] = PS2SS_VIF1_NOP; 
-  p_dma32[1] = PS2SS_VIF1_MSKPATH3( 0x8000 ); 
-  p_dma32[2] = PS2SS_VIF1_FLUSHA; 
-  p_dma32[3] = PS2SS_VIF1_DIRECT( 6 ); 
+  p_dma32[0] = PS2SS_VIF1_NOP;
+  p_dma32[1] = PS2SS_VIF1_MSKPATH3( 0x8000 );
+  p_dma32[2] = PS2SS_VIF1_FLUSHA;
+  p_dma32[3] = PS2SS_VIF1_DIRECT( 6 );
 
   ////////////////////////////////////////////////////////////////////////////
   // Setup the blit
 
-  p_dma64[0]  = PS2SS_GIFTAG(5, 1, 0, 0, 0, 1); // GIFTAG(NLOOP, EOP, PRE, PRIM, FLG, NREG) 
-  p_dma64[1]  = PS2SS_GIF_AD; 
+  p_dma64[0]  = PS2SS_GIFTAG(5, 1, 0, 0, 0, 1); // GIFTAG(NLOOP, EOP, PRE, PRIM, FLG, NREG)
+  p_dma64[1]  = PS2SS_GIF_AD;
 
-  p_dma64[2]  = PS2SS_GSBITBLTBUF_SET( VramAdress, Width/64, Psm, 0, 0, Psm ); 
-  p_dma64[3]  = PS2SS_GSBITBLTBUF; 
+  p_dma64[2]  = PS2SS_GSBITBLTBUF_SET( VramAdress, Width/64, Psm, 0, 0, Psm );
+  p_dma64[3]  = PS2SS_GSBITBLTBUF;
 
-  p_dma64[4]  = PS2SS_GSTRXPOS_SET( x, y, 0, 0, 0 ); // SSAX, SSAY, DSAX, DSAY, DIR 
-  p_dma64[5]  = PS2SS_GSTRXPOS; 
+  p_dma64[4]  = PS2SS_GSTRXPOS_SET( x, y, 0, 0, 0 ); // SSAX, SSAY, DSAX, DSAY, DIR
+  p_dma64[5]  = PS2SS_GSTRXPOS;
 
-  p_dma64[6]  = PS2SS_GSTRXREG_SET( Width, Height ); // RRW, RRh 
-  p_dma64[7]  = PS2SS_GSTRXREG; 
+  p_dma64[6]  = PS2SS_GSTRXREG_SET( Width, Height ); // RRW, RRh
+  p_dma64[7]  = PS2SS_GSTRXREG;
 
-  p_dma64[8]  = 0; 
-  p_dma64[9]  = PS2SS_GSFINISH; 
+  p_dma64[8]  = 0;
+  p_dma64[9]  = PS2SS_GSFINISH;
 
-  p_dma64[10] = PS2SS_GSTRXDIR_SET( 1 ); // XDIR 
-  p_dma64[11] = PS2SS_GSTRXDIR; 
+  p_dma64[10] = PS2SS_GSTRXDIR_SET( 1 ); // XDIR
+  p_dma64[11] = PS2SS_GSTRXDIR;
 
-  prev_imr = GsPutIMR( GsGetIMR() | 0x0200 ); 
-  prev_chcr = *PS2SS_D1_CHCR; 
+  prev_imr = GsPutIMR( GsGetIMR() | 0x0200 );
+  prev_chcr = *PS2SS_D1_CHCR;
 
-  if( (*PS2SS_D1_CHCR & 0x0100) != 0 ) 
-    return 0; 
-
-  /////////////////////////////////////////////////////////////////////////////
-  // set the FINISH event 
-
-  *PS2SS_GS_CSR = PS2SS_CSR_FINISH; 
+  if( (*PS2SS_D1_CHCR & 0x0100) != 0 )
+    return 0;
 
   /////////////////////////////////////////////////////////////////////////////
-  // DMA from memory and start DMA transfer 
+  // set the FINISH event
 
-  FlushCache(0); 
-
-  *PS2SS_D1_QWC  = 0x7; 
-  *PS2SS_D1_MADR = (u32)p_dma32; 
-  *PS2SS_D1_CHCR = 0x101; 
-
-  asm __volatile__( " sync.l " ); 
+  *PS2SS_GS_CSR = PS2SS_CSR_FINISH;
 
   /////////////////////////////////////////////////////////////////////////////
-  // check if DMA is complete (STR=0) 
+  // DMA from memory and start DMA transfer
 
-  while( *PS2SS_D1_CHCR & 0x0100 ); 
-  while( ( *PS2SS_GS_CSR & PS2SS_CSR_FINISH ) == 0 ); 
+  FlushCache(0);
+
+  *PS2SS_D1_QWC  = 0x7;
+  *PS2SS_D1_MADR = (u32)p_dma32;
+  *PS2SS_D1_CHCR = 0x101;
+
+  asm __volatile__( " sync.l " );
+
+  /////////////////////////////////////////////////////////////////////////////
+  // check if DMA is complete (STR=0)
+
+  while( *PS2SS_D1_CHCR & 0x0100 );
+  while( ( *PS2SS_GS_CSR & PS2SS_CSR_FINISH ) == 0 );
 
   /////////////////////////////////////////////////////////////////////////////
   // Wait for viffifo to become empty
@@ -281,31 +281,31 @@ int ps2_screenshot( void* pDest, unsigned int VramAdress, unsigned int x,
   /////////////////////////////////////////////////////////////////////////////
   // Reverse busdir and transfer image to host
 
-  *PS2SS_VIF1_STAT = PS2SS_VIF1_STAT_FDR; 
-  *PS2SS_GS_BUSDIR = (u64)0x00000001; 
+  *PS2SS_VIF1_STAT = PS2SS_VIF1_STAT_FDR;
+  *PS2SS_GS_BUSDIR = (u64)0x00000001;
 
-  FlushCache(0); 
+  FlushCache(0);
 
-  *PS2SS_D1_QWC  = uQSize; 
-  *PS2SS_D1_MADR = (u32)pDest; 
-  *PS2SS_D1_CHCR = 0x100; 
+  *PS2SS_D1_QWC  = uQSize;
+  *PS2SS_D1_MADR = (u32)pDest;
+  *PS2SS_D1_CHCR = 0x100;
 
-  asm __volatile__( " sync.l " ); 
+  asm __volatile__( " sync.l " );
 
   /////////////////////////////////////////////////////////////////////////////
-  // check if DMA is complete (STR=0) 
+  // check if DMA is complete (STR=0)
 
-  while ( *PS2SS_D1_CHCR & 0x0100 ); 
-  *PS2SS_D1_CHCR = prev_chcr; 
-  asm __volatile__( " sync.l " ); 
-  *PS2SS_VIF1_STAT = 0; 
-  *PS2SS_GS_BUSDIR = (u64)0; 
+  while ( *PS2SS_D1_CHCR & 0x0100 );
+  *PS2SS_D1_CHCR = prev_chcr;
+  asm __volatile__( " sync.l " );
+  *PS2SS_VIF1_STAT = 0;
+  *PS2SS_GS_BUSDIR = (u64)0;
 
   /////////////////////////////////////////////////////////////////////////////
   // Put back prew imr and set finish event
 
-  GsPutIMR( prev_imr ); 
-  *PS2SS_GS_CSR = PS2SS_CSR_FINISH; 
+  GsPutIMR( prev_imr );
+  *PS2SS_GS_CSR = PS2SS_CSR_FINISH;
 
   /////////////////////////////////////////////////////////////////////////////
   // Enable path3 again

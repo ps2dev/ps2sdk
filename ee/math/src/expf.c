@@ -51,7 +51,7 @@
  * expf overflow     x > MAXLOGF         MAXNUMF
  *
  */
-
+
 /*
 Cephes Math Library Release 2.2:  June, 1992
 Copyright 1984, 1987, 1989 by Stephen L. Moshier

@@ -18,10 +18,10 @@
  *
  * The domain is divided into the intervals [0, 2] and
  * (2, infinity). In the first interval a polynomial approximation
- *        2 
+ *        2
  * (w - r  ) x P(w)
- *       1  
- *                     2 
+ *       1
+ *                     2
  * is used, where w = x  and r is the first zero of the function.
  *
  * In the second interval, the modulus and phase are approximated
@@ -41,7 +41,7 @@
  *
  *
  */
-/*							y1.c
+/*							y1.c
  *
  *	Bessel function of second kind of order one
  *
@@ -89,7 +89,7 @@
  * (error criterion relative when |y1| > 1).
  *
  */
-
+
 
 /*
 Cephes Math Library Release 2.2:  June, 1992
@@ -168,7 +168,7 @@ if( x < 0 )
 
 if( x <= 2.0f )
 	{
-	z = x * x;	
+	z = x * x;
 	p = (z-Z1) * x * polevlf( z, JP, 4 );
 	return( p );
 	}

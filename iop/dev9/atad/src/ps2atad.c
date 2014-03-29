@@ -625,7 +625,7 @@ int ata_reset_devices(void)
 	/* Disable ATA interrupts.  */
 	ata_hwport->r_control = 2;
 	DelayThread(3000);
-	
+
 	return ata_wait_busy(0x80);
 }
 
@@ -633,7 +633,7 @@ int ata_reset_devices(void)
 int ata_device_flush_cache(int device)
 {
 	int res;
-	
+
 	if(!(res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, lba_48bit[device]?ATA_C_FLUSH_CACHE_EXT:ATA_C_FLUSH_CACHE))) res=ata_io_finish();
 
 	return res;
@@ -934,7 +934,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 		if (!devinfo[i].exists || devinfo[i].has_packet)
 			continue;
 
-		/* This section is to detect whether the HDD supports 48-bit LBA 
+		/* This section is to detect whether the HDD supports 48-bit LBA
 		   (IDENITFY DEVICE bit 10 word 83) and get the total sectors from
 		   either words(61:60) for 28-bit or words(103:100) for 48-bit.  */
 		if (!Disable48bitLBA && (ata_param[ATA_ID_COMMAND_SETS_SUPPORTED] & 0x0400)) {
@@ -943,7 +943,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 			if (ata_param[ATA_ID_48BIT_SECTOTAL_HI]) {
 				devinfo[i].total_sectors = 0xffffffff;
 			} else {
-				devinfo[i].total_sectors = 
+				devinfo[i].total_sectors =
 					(ata_param[ATA_ID_48BIT_SECTOTAL_MI] << 16)|
 					ata_param[ATA_ID_48BIT_SECTOTAL_LO];
 			}

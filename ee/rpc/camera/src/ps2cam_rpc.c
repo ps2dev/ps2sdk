@@ -1,5 +1,5 @@
-/*      
-  _____     ___ ____ 
+/*
+  _____     ___ ____
    ____|   |    ____|      PSX2 OpenSource Project
   |     ___|   |____       (c) 2004-2005 Lion | (psxdever@hotmail.com)
   ------------------------------------------------------------------------
@@ -36,26 +36,24 @@ int sem;
 
 int PS2CamInit(int mode)
 {
-	// unsigned int	i;
 	int				ret=0;
 	int				*buf;
-	int				timeout;
+	// unsigned int i;
+	// int timeout = 100000;
 
 	if(CamInited)return 0;
-	
-	SifInitRpc(0);
 
-	timeout = 100000;
+	SifInitRpc(0);
 
 	while (((ret = SifBindRpc(&cdata, PS2_CAM_RPC_ID, 0)) >= 0) && (cdata.server == NULL))
 		nopdelay();
-	
+
 	nopdelay();
-		
-	
-	
+
+
+
 	if (ret < 0)return ret;
-		
+
 
 
 	buf		= (int *)&data[0];
@@ -67,7 +65,7 @@ int PS2CamInit(int mode)
 	nopdelay();
 
 	CamInited = 1;
-	
+
 printf("init done\n");
 
 
@@ -153,7 +151,7 @@ int PS2CamCloseDevice(int handle)
 int PS2CamGetDeviceStatus(int handle)
 {
 	int *ret;
-			
+
 
 	ret = (int *)&data[0];
 
@@ -180,7 +178,7 @@ int PS2CamGetDeviceInfo(int handle, PS2CAM_DEVICE_INFO *info)
 	ret[0] = handle;
 
 	memcpy(iop_info, info, info->ssize);
-	
+
 	SifCallRpc(&cdata, PS2CAM_RPC_GETDEVINFO, 0, (void*)(&data[0]),info->ssize+4,(void*)(&data[0]),info->ssize+4,0,0);
 	nopdelay();
 
@@ -202,7 +200,7 @@ int PS2CamSetDeviceBandwidth(int handle, char bandwidth)
 	ret[0] = handle;
 	ret[1] = bandwidth;
 
-	
+
 
 	SifCallRpc(&cdata, PS2CAM_RPC_SETDEVBANDWIDTH, 0, (void*)(&data[0]),4,(void*)(&data[0]),4,0,0);
 	nopdelay();
@@ -227,18 +225,18 @@ int PS2CamReadPacket(int handle)
 	ret[0] = handle;
 
 	SifCallRpc(&cdata, PS2CAM_RPC_READPACKET, 0, (void*)(&data[0]),4,(void*)(&data[0]),4*2,0,0);
-	
+
 
 	if(ret[0] < 0) return ret[0];
 
-	
+
 	DI();
 	ee_kmode_enter();
-	
+
 	iop_addr = (int *)(0xbc000000+ret[1]);
 
 	memcpy(&campacket[0],iop_addr, ret[0]);
-		
+
 	ee_kmode_exit();
 	EI();
 
@@ -273,7 +271,7 @@ int PS2CamSetDeviceConfig(int handle, PS2CAM_DEVICE_CONFIG *cfg)
 	ret = (int *)&data[0];
 
 	ret[0] = handle;
-	
+
 	memcpy(&ret[1], cfg, cfg->ssize);
 
 	SifCallRpc(&cdata, PS2CAM_RPC_SETDEVCONFIG, 0, (void*)(&data[0]), 4+cfg->ssize,(void*)(&data[0]),4+cfg->ssize,0,0);
@@ -290,7 +288,7 @@ int PS2CamExtractFrame(int handle, char *buffer, int bufsize)
 	static int			pos;
 	static int			ret;
 	static int			pic_size;
-	
+
 	pos					= 0;
 	capturing			= 0;
 
@@ -305,7 +303,7 @@ int PS2CamExtractFrame(int handle, char *buffer, int bufsize)
 		if(ret < 0) return ret;
 
 		head = (EYETOY_FRAME_HEAD *)&campacket[0];
-		
+
 		if(head->magic2==0xff && head->magic3==0xff && ret!=0)
 		{
 			if(head->type==0x50 && head->frame==0x00)
@@ -316,11 +314,11 @@ int PS2CamExtractFrame(int handle, char *buffer, int bufsize)
 				{
 					return 0;
 				}
-				
+
 				memcpy(&buffer[pos], &campacket[16], ret-16 );
 				pos += (ret-16);
 				capturing = 1;
-			
+
 			}
 			else if(head->type==0x50 && head->frame==0x01)
 			{
@@ -333,7 +331,7 @@ int PS2CamExtractFrame(int handle, char *buffer, int bufsize)
 				//end of frame
 			//	printf("EOF(%d)\n",ret);
 				pic_size = (int)(((head->Lo) + ((int)(head->Hi)<<8))<<3);
-				
+
 
 				if(pos != pic_size)
 				{
@@ -364,7 +362,7 @@ int PS2CamExtractFrame(int handle, char *buffer, int bufsize)
 			}
 		}
 	}
-	
+
 }
 
 

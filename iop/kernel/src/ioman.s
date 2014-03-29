@@ -8,7 +8,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 # $Id$
-# IOP Basic libraries. 
+# IOP Basic libraries.
 */
 
 	.text

@@ -58,7 +58,7 @@ void* RpcPadOpen(u32 *data)
 void* RpcPadSetMainMode(u32 *data)
 {
 	data[5] = padSetMainMode(data[1], data[2], data[3], data[4]);
-	
+
 	return data;
 }
 
@@ -124,14 +124,14 @@ void* RpcPadSetVrefParam(u32 *data)
 void* RpcPadGetPortMax(u32 *data)
 {
 	data[3] = padGetPortMax();
-	
+
 	return data;
 }
 
 void* RpcPadGetSlotMax(u32 *data)
 {
 	data[3] = padGetSlotMax(data[1]);
-	
+
 	return data;
 }
 
@@ -159,7 +159,7 @@ void* RpcPadInit(u32 *data)
 void* RpcGetModVersion(u32 *data)
 {
 	data[3] = padGetModVersion();
-	
+
 	return data;
 }
 
@@ -179,11 +179,11 @@ void* RpcServer(s32 fno, u32 *data, s32 size)
 		case PAD_RPCCMD_SET_VREF:		return RpcPadSetVrefParam(data);
 		case PAD_RPCCMD_GET_PORTMAX:	return RpcPadGetPortMax(data);
 		case PAD_RPCCMD_GET_SLOTMAX:	return RpcPadGetSlotMax(data);
-		case PAD_RPCCMD_CLOSE:			return RpcPadClose(data);	
+		case PAD_RPCCMD_CLOSE:			return RpcPadClose(data);
 		case PAD_RPCCMD_END:			return RpcPadEnd(data);
 		case PAD_RPCCMD_INIT:			return RpcPadInit(data);
-		case PAD_RPCCMD_GET_MODVER:		return RpcGetModVersion(data);	
-		
+		case PAD_RPCCMD_GET_MODVER:		return RpcGetModVersion(data);
+
 		default:
 			M_PRINTF("RpcServer, invalid function code (%i).\n", (int)fno);
 		break;
@@ -205,11 +205,11 @@ void RpcThread()
 	if( sceSifCheckInit() == 0)
 	{
 		M_PRINTF("Sif not initialized.\n");
-		sceSifInit();	
+		sceSifInit();
 	}
 
 	sceSifInitRpc(0);
-	sceSifSetRpcQueue(&qd, GetThreadId());	
+	sceSifSetRpcQueue(&qd, GetThreadId());
 	sceSifRegisterRpc(&sd, PAD_BIND_RPC_ID1, (void*)RpcServer, sb, 0, 0, &qd);
 	sceSifRpcLoop(&qd);
 }
@@ -219,11 +219,11 @@ void RpcThreadExt()
 	if( sceSifCheckInit() == 0)
 	{
 		M_PRINTF("Sif not initialized.\n");
-		sceSifInit();	
+		sceSifInit();
 	}
 
 	sceSifInitRpc(0);
-	sceSifSetRpcQueue(&qdext, GetThreadId());	
+	sceSifSetRpcQueue(&qdext, GetThreadId());
 	sceSifRegisterRpc(&sdext, PAD_BIND_RPC_ID2, (void*)RpcServerExt, sbext, 0, 0, &qdext);
 	sceSifRpcLoop(&qdext);
 }
@@ -242,7 +242,7 @@ u32 InitRpcServers()
 	rpc_thread.priority = 20;
 
 	ThreadIdRpcServer = CreateThread(&rpc_thread);
-	
+
 	if(ThreadIdRpcServer == 0) return 1;
 
 	StartThread(ThreadIdRpcServer, NULL);
@@ -259,6 +259,6 @@ u32 InitRpcServers()
 	if(ThreadIdRpcServerExt == 0) return 1;
 
 	StartThread(ThreadIdRpcServerExt, NULL);
-	
+
 	return 0;
 }

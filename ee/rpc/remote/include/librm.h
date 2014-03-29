@@ -14,7 +14,7 @@
 #ifndef __LIBRM_H__
 #define __LIBRM_H__
 
-struct remote_data 
+struct remote_data
 
 {
    u32 status;
@@ -22,7 +22,7 @@ struct remote_data
 };
 
 /* Status values (guess) */
-#define RM_READY      	0x005A12FF 
+#define RM_READY      	0x005A12FF
 #define RM_KEYPRESSED 	0x145A12FF
 #define RM_NOREMOTE   	0xFFFFFFFF
 

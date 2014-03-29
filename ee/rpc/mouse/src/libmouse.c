@@ -61,7 +61,7 @@ int PS2MouseRead(PS2MouseData *data)
 
   memcpy(data, uncached, sizeof(PS2MouseData));
   //  printf("MouseRead %d %d %d %d\n", data->x, data->y, data->wheel, data->buttons);
-  
+
   return 1;
 }
 
@@ -171,7 +171,7 @@ int PS2MouseSetPosition(int x, int y)
 
 {
   s32* data = (s32 *) buffer;
-  
+
   data[0] = x;
   data[1] = y;
 

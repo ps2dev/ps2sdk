@@ -262,7 +262,7 @@ int sndStreamSetPosition(int block)
 
 int sndStreamSetVolume(int left, int right)
 {
-	s32 buf[1] ALIGNED(64);
+	s32 buf[2] ALIGNED(64);
 	buf[0] = left;
 	buf[1] = right;
 	SifCallRpc(&sd_client, PS2SND_StreamSetVolume, 0, buf, 8, buf, 4, 0, 0);

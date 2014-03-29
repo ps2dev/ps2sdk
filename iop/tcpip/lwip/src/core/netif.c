@@ -68,7 +68,7 @@ netif_add(struct netif *netif, struct ip_addr *ipaddr, struct ip_addr *netmask,
 {
   static int netifnum = 0;
 
-  
+
 #if LWIP_DHCP
   /* netif not under DHCP control by default */
   netif->dhcp = NULL;

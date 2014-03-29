@@ -27,7 +27,7 @@ IRX_ID(MODNAME, 1, 1);
 #define M_PRINTF(format, args...)	printf(MODNAME ": " format, ## args)
 
 // block.c
-extern u32 BlockTransBuff[2]; 
+extern u32 BlockTransBuff[2];
 extern u32 BlockTransAddr[2];
 extern u32 BlockTransSize[2];
 
@@ -57,16 +57,16 @@ volatile u16 *ParamRegList[] =
 {
 	SD_VP_VOLL(0, 0),	SD_VP_VOLR(0, 0),	SD_VP_PITCH(0, 0),	SD_VP_ADSR1(0, 0),
 	SD_VP_ADSR2(0, 0),	SD_VP_ENVX(0, 0),	SD_VP_VOLXL(0, 0),	SD_VP_VOLXR(0, 0),
-	SD_P_MMIX(0),		SD_P_MVOLL(0),		SD_P_MVOLR(0),		SD_P_EVOLL(0), 
-	SD_P_EVOLR(0),		SD_P_AVOLL(0),		SD_P_AVOLR(0),		SD_P_BVOLL(0), 
+	SD_P_MMIX(0),		SD_P_MVOLL(0),		SD_P_MVOLR(0),		SD_P_EVOLL(0),
+	SD_P_EVOLR(0),		SD_P_AVOLL(0),		SD_P_AVOLR(0),		SD_P_BVOLL(0),
 	SD_P_BVOLR(0),		SD_P_MVOLXL(0),		SD_P_MVOLXR(0),		SD_S_PMON_HI(0),
 	SD_S_NON_HI(0),		SD_A_KON_HI(0),		SD_A_KOFF_HI(0),	SD_S_ENDX_HI(0),
-	SD_S_VMIXL_HI(0),	SD_S_VMIXEL_HI(0),	SD_S_VMIXR_HI(0),	SD_S_VMIXER_HI(0), 
+	SD_S_VMIXL_HI(0),	SD_S_VMIXEL_HI(0),	SD_S_VMIXR_HI(0),	SD_S_VMIXER_HI(0),
 	SD_A_ESA_HI(0),		SD_A_EEA_HI(0),		SD_A_TSA_HI(0),		SD_CORE_IRQA(0),
 	SD_VA_SSA_HI(0, 0),	SD_VA_LSAX(0,0),	SD_VA_NAX(0, 0),	SD_CORE_ATTR(0),
 	SD_A_TSA_HI(0),		SD_A_STD(0),
 	// 1AE & 1B0 are both related to core attr & dma somehow
-	U16_REGISTER(0x1AE),	U16_REGISTER(0x1B0), 
+	U16_REGISTER(0x1AE),	U16_REGISTER(0x1B0),
 	(u16*)0xBF900334
 
 };
@@ -116,9 +116,9 @@ void InitSpu2()
 
 
 s32 _start(char **argv, int argc)
-{	
+{
 	printf(BANNER, VERSION);
-	
+
 	if(RegisterLibraryEntries(&_exp_libsd) != 0) return 1;
 
 	InitSpu2();
@@ -132,25 +132,25 @@ int TransInterrupt(void *data)
 	s32 dir;
 	s32 core;
 
-	dir = ((intr->mode & 0x200) < 1); 
+	dir = ((intr->mode & 0x200) < 1);
 	core = intr->mode & 0xFF;
 
 	// Voice Transfer
 	if((intr->mode & 0x100) == 0)
-	{	
+	{
 		// SD_C_STATX(core)
 		// If done elsewise, it doesn't work, havn't figured out why yet.
 		volatile u16 *statx = U16_REGISTER(0x344 + (core * 1024));
 
 		if(!(*statx & 0x80))	while(!(*statx & 0x80));
-		
+
 		*SD_CORE_ATTR(core) &= ~SD_CORE_DMA;
 
 		if(*SD_CORE_ATTR(core) & 0x30)	while((*SD_CORE_ATTR(core) & 0x30));
-	
+
 		if(TransIntrHandlers[core])		goto intr_handler;
 		if(TransIntrCallbacks[core])	goto IntrCallback;
-	
+
 		VoiceTransComplete[core] = 1;
 	}
 	else
@@ -165,19 +165,19 @@ int TransInterrupt(void *data)
 			*SD_DMA_CHCR(core) = SD_DMA_START | SD_DMA_CS | dir;
 		}
 		else
-		{	
+		{
 			*SD_CORE_ATTR(core) &= ~SD_CORE_DMA;
 			*SD_P_MMIX(core)	&= 0xFF3F;
 			*U16_REGISTER(0x1B0 + (core * 1024)) = 0;
 		}
-	
-		if(TransIntrHandlers[core])		
-		{	
+
+		if(TransIntrHandlers[core])
+		{
 			intr_handler:
 			TransIntrHandlers[core](core, intr->data);
 		}
 		else
-		{	
+		{
 			if(TransIntrCallbacks[core])
 			{
 				IntrCallback:
@@ -185,9 +185,9 @@ int TransInterrupt(void *data)
 			}
 		}
 	}
-	
+
 	if(dir == SD_DMA_DIR_SPU2IOP)	FlushDcache();
-	
+
 	return 1;
 }
 
@@ -201,7 +201,7 @@ int Spu2Interrupt(void *data)
 
 	if (val&1)
 		*SD_CORE_ATTR(0) = *SD_CORE_ATTR(0) & 0xffbf;
-		
+
 	if (val&2)
 		*SD_CORE_ATTR(1) = *SD_CORE_ATTR(1) & 0xffbf;
 
@@ -224,7 +224,7 @@ void RegisterInterrupts()
 	DisableIntr(0x24, (int *)&ret);
 	DisableIntr(0x28, (int *)&ret);
 	DisableIntr(0x9, (int *)&ret);
-	
+
 	ReleaseIntrHandler(0x24);
 	ReleaseIntrHandler(0x28);
 
@@ -233,7 +233,7 @@ void RegisterInterrupts()
 
 	VoiceTransComplete[0] = 0;
 	VoiceTransComplete[1] = 0;
-	
+
 	ReleaseIntrHandler(0x9);
 	RegisterIntrHandler(0x9, 1, Spu2Interrupt, &Spu2IntrData);
 }
@@ -260,11 +260,11 @@ void ResetAll()
 
 		*SD_P_MVOLL(core)		= 0;
 		*SD_P_MVOLR(core)		= 0;
-		
+
 		statx = U16_REGISTER(0x344 + (core * 1024));
 
 		while(*statx & 0x7FF);
-		
+
 		*SD_A_KOFF_HI(core)		= 0xFFFF;
 		*SD_A_KOFF_LO(core)		= 0xFFFF; // Should probably only be 0xFF
 	}
@@ -280,7 +280,7 @@ void ResetAll()
 void Reset(s32 flag)
 {
 	s32 core;
-	
+
 	if(flag == 0) ResetAll();
 
 	VoiceTransStatus[0]	= 1;
@@ -300,7 +300,7 @@ void Reset(s32 flag)
 	Spu2IntrData			= NULL;
 
 	RegisterInterrupts();
-	
+
 	for(core = 0; core < 2; core++)
 	{
 		EffectAttr[core].core = core;
@@ -343,11 +343,11 @@ void InitVoices()
 	// Set Start Address of data to transfer.
 	*SD_A_TSA_HI(0) = 0;
 	*SD_A_TSA_LO(0) = 0x5000 >> 1;
-	
+
 	// Fill with data.
 	// First 16 bytes are reserved.
 	for(i = 0; i < 16; i++) *SD_A_STD(0) = VoiceDataInit[i];
-	
+
 	// Set Transfer mode to IO
 	*SD_CORE_ATTR(0) = (*SD_CORE_ATTR(0) & ~SD_CORE_DMA) | SD_DMA_IO;
 
@@ -358,9 +358,9 @@ void InitVoices()
 
 	// Reset DMA settings
 	*SD_CORE_ATTR(0) &= ~SD_CORE_DMA;
-	
+
 	// Init voices
-	for(voice = 0; voice < 24; voice++) 
+	for(voice = 0; voice < 24; voice++)
 	{
 		*SD_VP_VOLL(0, voice)	= 0;
 		*SD_VP_VOLR(0, voice)	= 0;
@@ -373,7 +373,7 @@ void InitVoices()
 		*SD_VP_PITCH(1, voice)	= 0x3FFF;
 		*SD_VP_ADSR1(1, voice)	= 0;
 		*SD_VP_ADSR2(1, voice)	= 0;
-		
+
 		// Top address of waveform data
 		*SD_VA_SSA_HI(0, voice)	= 0;
 		*SD_VA_SSA_LO(0, voice)	= 0x5000 >> 1;
@@ -386,7 +386,7 @@ void InitVoices()
 	*SD_A_KON_LO(0) = 0xFF;
 	*SD_A_KON_HI(1) = 0xFFFF;
 	*SD_A_KON_LO(1) = 0xFF;
-	
+
 	// There is no guarantee that voices will be turn on at once.
 	// So we wait to make sure.
 	nopdelay();
@@ -400,7 +400,7 @@ void InitVoices()
 	// There is no guarantee that voices will be turn off at once.
 	// So we wait to make sure.
 	nopdelay();
-	
+
 	*SD_S_ENDX_HI(0) = 0;
 	*SD_S_ENDX_LO(0) = 0;
 }
@@ -409,16 +409,16 @@ void InitVoices()
 void InitCoreVolume(s32 flag)
 {
 	*SD_C_SPDIF_OUT = 0xC032;
-	
+
 	if(flag)
 	{
 		*SD_CORE_ATTR(0) = SD_SPU2_ON | SD_ENABLE_EFFECTS | SD_MUTE;
-		*SD_CORE_ATTR(1) = SD_SPU2_ON | SD_ENABLE_EFFECTS | SD_MUTE | SD_ENABLE_EX_INPUT; 
+		*SD_CORE_ATTR(1) = SD_SPU2_ON | SD_ENABLE_EFFECTS | SD_MUTE | SD_ENABLE_EX_INPUT;
 	}
 	else
 	{
 		*SD_CORE_ATTR(0) = SD_SPU2_ON | SD_MUTE;
-		*SD_CORE_ATTR(1) = SD_SPU2_ON | SD_MUTE | SD_ENABLE_EX_INPUT;			
+		*SD_CORE_ATTR(1) = SD_SPU2_ON | SD_MUTE | SD_ENABLE_EX_INPUT;
 	}
 
 	// HIgh is voices 0-15, LOw is 16-23, representing voices 0..23 (24)
@@ -439,7 +439,7 @@ void InitCoreVolume(s32 flag)
 	*SD_S_VMIXEL_LO(1)	= 0xFF;
 	*SD_S_VMIXER_HI(1)	= 0xFFFF;
 	*SD_S_VMIXER_LO(1)	= 0xFF;
-	
+
 	*SD_P_MMIX(0) = 0xFF0;
 	*SD_P_MMIX(1) = 0xFFC;
 
@@ -452,10 +452,10 @@ void InitCoreVolume(s32 flag)
 
 		*SD_P_EVOLL(0) = 0;
 		*SD_P_EVOLL(1) = 0;
-		
+
 		*SD_P_EVOLR(0) = 0;
 		*SD_P_EVOLR(1) = 0;
-		
+
 		// Effect End Address, Upper part
 		*SD_A_EEA_HI(0) = 0xE;
 		*SD_A_EEA_HI(1) = 0xF;
@@ -487,13 +487,13 @@ s32 SdInit(s32 flag)
 
 	InitSpu2();
 	InitSpdif();
-	
+
 	Reset(flag);
-	
+
 	InitVoices();
 	InitCoreVolume(flag);
-	
-	EnableIntr(0x24); 
+
+	EnableIntr(0x24);
 	EnableIntr(0x28);
 	EnableIntr(9);
 
@@ -510,7 +510,7 @@ void SdSetParam(u16 reg, u16 val)
 
 	core = reg & 1;
 
-	// Determine the channel offset 
+	// Determine the channel offset
 	if(reg & 0x80)
 		offs = (40 * core) >> 1;
 	else
@@ -519,7 +519,7 @@ void SdSetParam(u16 reg, u16 val)
 	reg_index = (reg >> 8) & 0xFF;
 	voice = (reg & 0x3E) << 2;
 	reg_p = ParamRegList[reg_index] + offs + voice;
-	
+
 	*reg_p = val;
 }
 
@@ -533,7 +533,7 @@ u16 SdGetParam(u16 reg)
 
 	core = reg & 1;
 
-	// Determine the channel offset 
+	// Determine the channel offset
 	if(reg & 0x80)
 		offs = (40 * core) >> 1;
 	else
@@ -563,10 +563,10 @@ u32 SdGetSwitch(u16 reg)
 	u32 reg_index;
 	volatile u16 *reg_p;
 	u32 ret;
-	
+
 	reg_index = (reg >> 8) & 0xFF;
 	reg_p = ParamRegList[reg_index] + ((reg & 1) << 9);
-	
+
 	ret =  reg_p[0];
 	ret |= reg_p[1] << 16;
 
@@ -577,7 +577,7 @@ u32 SdGetSwitch(u16 reg)
 u32 DmaStop(u32 core)
 {
 	u32 retval;
-	
+
 	core &= 1;
 
 	if(*U16_REGISTER(0x1B0 + (core * 1024)) == 0)
@@ -589,7 +589,7 @@ u32 DmaStop(u32 core)
 	*U16_REGISTER(0x1B0 + (core * 1024)) = 0;
 
 	retval = (BlockTransBuff[core] << 24) | (retval & 0xFFFFFF);
-	
+
 	return retval;
 }
 
@@ -616,43 +616,43 @@ u16 SdNote2Pitch(s16 center_note, s16 center_fine, s16 note, s16 fine)
 	s32 val3;
 	s32 ret;
 
-	_fine = fine + (u16)center_fine;	
+	_fine = fine + (u16)center_fine;
 	_fine2 = _fine;
 
 	if(_fine < 0) _fine2 = _fine + 127;
 
-	_fine2 = _fine2 / 128;	
-	_note = note + _fine2 - center_note;	
-	val3 = _note / 6;	
-	
+	_fine2 = _fine2 / 128;
+	_note = note + _fine2 - center_note;
+	val3 = _note / 6;
+
 	if(_note < 0) val3--;
 
-	offset2 = _fine - _fine2 * 128;	
+	offset2 = _fine - _fine2 * 128;
 
 	if(_note < 0) val2 = -1; else val2 = 0;
 	if(val3 < 0) val3--;
 
-	val2 = (val3 / 2) - val2;	
-	val = val2 - 2;	
-	offset1 = _note - (val2 * 12);	
-		
-	if((offset1 < 0) || ((offset1 == 0) && (offset2 < 0))) 
+	val2 = (val3 / 2) - val2;
+	val = val2 - 2;
+	offset1 = _note - (val2 * 12);
+
+	if((offset1 < 0) || ((offset1 == 0) && (offset2 < 0)))
 	{
-		offset1 = offset1 + 12;	
-		val = val2 - 3;	
+		offset1 = offset1 + 12;
+		val = val2 - 3;
 	}
 
 	if(offset2 < 0)
 	{
-		offset1 = (offset1-1) + _fine2;	
-		offset2 += (_fine2+1) * 128;	
+		offset1 = (offset1-1) + _fine2;
+		offset2 += (_fine2+1) * 128;
 	}
-	
-	ret = (NotePitchTable[offset1] * NotePitchTable[offset2 + 12]) / 0x10000;	
 
-	if(val < 0)	ret = (ret + (1 << (-val -1))) >> -val;	
+	ret = (NotePitchTable[offset1] * NotePitchTable[offset2 + 12]) / 0x10000;
 
-	return (u16)ret;		
+	if(val < 0)	ret = (ret + (1 << (-val -1))) >> -val;
+
+	return (u16)ret;
 }
 
 
@@ -664,34 +664,34 @@ u16	SdPitch2Note(s16 center_note, s16 center_fine, s16 pitch)
 	s32 offset1 = 0;
 	s32 offset2 = 0;
 	s32 val;
-	s32 ret;	
+	s32 ret;
 
-	if(((u16)pitch) >= 0x4000) pitch = 0x3FFF; 
+	if(((u16)pitch) >= 0x4000) pitch = 0x3FFF;
 
-	_pitch = (u16)pitch; 
+	_pitch = (u16)pitch;
 
 	do
 	{
-		if((_pitch & 1) == 1) bit = i;  
+		if((_pitch & 1) == 1) bit = i;
 
 		_pitch >>= 1;
-		i++; 
+		i++;
 	} while(i < 14);
-	
+
 	val = (u16)pitch << (15 - bit);
-	i = 11; 
-	
+	i = 11;
+
 	do
 	{
-		if((u16)val >= NotePitchTable[i]) 
+		if((u16)val >= NotePitchTable[i])
 		{
 			offset1 = i;
 			break;
 		}
-	
-		i--;	
+
+		i--;
 	} while(i >= 0);
-	
+
 	val = ((u16)val * 0x8000) / NotePitchTable[(u16)offset1];
 	i = 127;
 
@@ -732,15 +732,15 @@ void SetSpdifMode(u16 val)
 			mode |= 2;
 			out = (out & 0xFFD7) | 0x100;
 			break;
-		case 2: 
+		case 2:
 			out &= 0xFED7;
 			break;
-		case 0xF:  
+		case 0xF:
 			out = (out & 0xFEDF) | 8;
 			break;
 		default: return;
 	}
-	
+
 	if(val & 0x80)
 		mode |= 0x8000;
 	else
@@ -777,10 +777,10 @@ void SdSetCoreAttr(u16 entry, u16 val)
 
 	switch(entry & ~1)
 	{
-		case SD_CORE_NOISE_CLK: // 0x8 
+		case SD_CORE_NOISE_CLK: // 0x8
 			*SD_CORE_ATTR(entry & 1) = (core_attr-0x3F01) | ((val & 0x3F) << 8);
 			break;
-		case SD_CORE_SPDIF_MODE: // 0xA 
+		case SD_CORE_SPDIF_MODE: // 0xA
 			SetSpdifMode(val); // sub1
 			break;
 		default:
@@ -798,7 +798,7 @@ void SdSetCoreAttr(u16 entry, u16 val)
 u16 SdGetCoreAttr(u16 entry)
 {
 	switch(entry & ~1)
-	{ 
+	{
 		case SD_CORE_NOISE_CLK:
 			return (*SD_CORE_ATTR(entry & 1) >> 8) & 0x3F;
 		case SD_CORE_SPDIF_MODE:
@@ -820,7 +820,7 @@ SdTransIntrHandler SdSetTransIntrHandler(s32 chan, SdTransIntrHandler func, void
 	old_handler = TransIntrHandlers[chan & 1];
 	TransIntrHandlers[chan & 1] = func;
 	TransIntrData[chan & 1].data = data;
-	
+
 	return 0;
 }
 
@@ -850,11 +850,11 @@ void SdSetAddr(u16 reg, u32 val)
 
 	reg1 = ParamRegList[(reg >> 8) & 0xFF] + ((reg & 1) << 9);
 	voice = reg & 0x3E;
-	
+
 	reg1 += ((voice << 1) + voice);
-	
+
 	*reg1++ = (val >> 17) & 0xFFFF;
-	
+
 	if((reg & 0xFF00) != 0x1D00)
 	{
 		*reg1 = (val >> 1) & 0xFFF8;
@@ -875,7 +875,7 @@ u32 SdGetAddr(u16 reg)
 	retlo = 0x1FFFF;
 
 	reg &= 0xFF00;
-	
+
 	if(reg != 0x1D00)
 	{
 		retlo = *(reg1 + 1) << 1;
@@ -883,10 +883,10 @@ u32 SdGetAddr(u16 reg)
 		if((reg == 0x2100) || (reg == 0x2200))
 		{
 			u32 lo, hi;
-		
+
 			hi = *reg1 << 17;
 			lo = *(reg1 + 1) << 1;
-		
+
 			if((rethi == hi) || (retlo != lo))
 			{
 				retlo = lo;
@@ -911,7 +911,7 @@ IntrCallback SdSetTransCallback(s32 core, IntrCallback cb)
 IntrCallback SdSetIRQCallback(IntrCallback cb)
 {
 	IntrCallback old_cb;
-	
+
 	old_cb = Spu2IrqCallback;
 	Spu2IrqCallback = cb;
 

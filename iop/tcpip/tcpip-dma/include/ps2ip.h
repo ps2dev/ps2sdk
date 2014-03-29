@@ -73,7 +73,7 @@ err_t     tcpip_input(struct pbuf *p, struct netif *inp);
 
 /* From include/netif/etharp.h:  */
 
-struct pbuf*     etharp_output(struct netif *netif, struct ip_addr *ipaddr, struct pbuf *q); 
+struct pbuf*     etharp_output(struct netif *netif, struct ip_addr *ipaddr, struct pbuf *q);
 #define        I_etharp_output DECLARE_IMPORT(23, etharp_output)
 
 

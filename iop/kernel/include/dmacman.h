@@ -28,7 +28,7 @@ typedef struct _iop_dmac_chan {
 #define DMAC_CHCR_TR (1<<24)		/* TRansfer */
 #define DMAC_CHCR_LI (1<<10)		/* LInked list (GPU, SPU and SIF0) */
 #define DMAC_CHCR_CO (1<<9)		/* COntinuous (?) */
-#define DMAC_CHCR_08 (1<<8)	
+#define DMAC_CHCR_08 (1<<8)
 #define DMAC_CHCR_DR (1<<0)		/* DiRection; 0 = to RAM, 1 = from RAM */
 
 #define DMAC_TO_MEM	0

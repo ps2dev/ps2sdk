@@ -177,8 +177,8 @@ inet_chksum_pbuf(struct pbuf *p)
 #define isxdigit(c)          (isdigit(c) || in_range(c, 'a', 'f') || in_range(c, 'A', 'F'))
 #define islower(c)           in_range(c, 'a', 'z')
 #define isspace(c)           (c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v')
-#endif		
-		
+#endif
+
 
  /*
   * Ascii internet address interpretation routine.

@@ -2,9 +2,9 @@
 
     PSX VAG-Packer, hacked by bITmASTER@bigfoot.com
     v0.1
-	
+
 	* Support for looping, better support for wave files,
-		support for stereo samples and some other minor 
+		support for stereo samples and some other minor
 		changes and fixes.
 	  Lukasz Bruun (mail@lukasz.dk) 2005
 
@@ -56,20 +56,20 @@ int adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop)
 	int predict_nr;
 	int shift_factor;
 	int flags;
-	int i, j, k;    
+	int i, j, k;
 	unsigned char d;
 	int size;
-    
+
 	flags = 0;
 	shift_factor = 0;
 	predict_nr = 0;
-	
+
 	// sample_len is number of 16 bit samples
-  while( sample_len > 0 ) 
-	{		
+  while( sample_len > 0 )
+	{
 		// Size is sample_len
-		size = ( sample_len >= BUFFER_SIZE ) ? BUFFER_SIZE : sample_len; 
-    
+		size = ( sample_len >= BUFFER_SIZE ) ? BUFFER_SIZE : sample_len;
+
 		if(offset)
 		{
 			for(i = 0; i < size; i++)
@@ -82,39 +82,39 @@ int adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop)
 					return EIO;
 				}
 			}
-		}  
+		}
 		else
 		{
 			if(fread(wave, sizeof( short ), size, fp)!=size){
 				printf("Error: Can't read SAMPLE DATA in WAVE-file.\n");
 				return EIO;
 			}
-		}	   
+		}
 
 		// i = num of samples with size 28
 		i = size / 28;
 
 		// Add blanks
-		if ( size % 28 ) 
+		if ( size % 28 )
 		{
 			for ( j = size % 28; j < 28; j++ ) wave[28*i+j] = 0;
 			i++;
 		}
-      
+
 		// pack 28 samples
-		for ( j = 0; j < i; j++ ) 
-		{                                     
+		for ( j = 0; j < i; j++ )
+		{
 			ptr = wave + j * 28;
-		
+
 			find_predict( ptr, d_samples, &predict_nr, &shift_factor );
-        
+
 			// pack samples
 			pack( d_samples, four_bit, predict_nr, shift_factor );
-        
+
 			// correctly format predict_nr and shift_factor and write to file
 			d = ( predict_nr << 4 ) | shift_factor;
       fputc( d, sad );
-			
+
 			if(flag_loop == 1)
 			{
 				fputc( 6, sad );; // loop value
@@ -124,17 +124,17 @@ int adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop)
 			{
 				fputc( flags, sad );
 			}
-				
+
 			// Write the 28 samples to file
-			for ( k = 0; k < 28; k += 2 ) 
+			for ( k = 0; k < 28; k += 2 )
 			{
 				d = ( ( four_bit[k+1] >> 8 ) & 0xf0 ) | ( ( four_bit[k] >> 12 ) & 0xf );
 				fputc( d, sad );
 			}
-			
+
 			// Decrease sample_len by 28 samples
 			sample_len -= 28;
-           
+
 			if ( sample_len < 28 )
 			{
 				if(flag_loop == 2)
@@ -144,12 +144,12 @@ int adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop)
 			}
 		}
 	}
-    
+
   fputc( ( predict_nr << 4 ) | shift_factor, sad );
   fputc( 7, sad );            // end flag
-  
+
 	for ( i = 0; i < 14; i++ )
-			fputc( 0, sad ); 
+			fputc( 0, sad );
 
 	return 0;
 }
@@ -160,7 +160,7 @@ static double f[5][2] = { { 0.0, 0.0 },
                             { -115.0 / 64.0, 52.0 / 64.0 },
                             {  -98.0 / 64.0, 55.0 / 64.0 },
                             { -122.0 / 64.0, 60.0 / 64.0 } };
-                  
+
 
 
 static void find_predict( short *samples, double *d_samples, int *predict_nr, int *shift_factor )
@@ -194,7 +194,7 @@ static void find_predict( short *samples, double *d_samples, int *predict_nr, in
                 s_2 = s_1;                                  // new s[t-2]
                 s_1 = s_0;                                  // new s[t-1]
         }
-        
+
         if ( max[i] < min ) {
             min = max[i];
             *predict_nr = i;
@@ -203,7 +203,7 @@ static void find_predict( short *samples, double *d_samples, int *predict_nr, in
             *predict_nr = 0;
             break;
         }
-        
+
     }
 
 // store s[t-2] and s[t-1] in a static variable
@@ -211,24 +211,24 @@ static void find_predict( short *samples, double *d_samples, int *predict_nr, in
 
     _s_1 = s_1;
     _s_2 = s_2;
-    
+
     for ( i = 0; i < 28; i++ )
         d_samples[i] = buffer[i][*predict_nr];
 
 //  if ( min > 32767.0 )
 //      min = 32767.0;
-        
+
     min2 = ( int ) min;
     shift_mask = 0x4000;
     *shift_factor = 0;
-    
+
     while( *shift_factor < 12 ) {
         if ( shift_mask  & ( min2 + ( shift_mask >> 3 ) ) )
             break;
         (*shift_factor)++;
         shift_mask = shift_mask >> 1;
     }
-      
+
 }
 
 static void pack( double *d_samples, short *four_bit, int predict_nr, int shift_factor )
@@ -250,7 +250,7 @@ static void pack( double *d_samples, short *four_bit, int predict_nr, int shift_
             di = 32767;
         if ( di < -32768 )
             di = -32768;
-            
+
         four_bit[i] = (short) di;
 
         di = di >> shift_factor;

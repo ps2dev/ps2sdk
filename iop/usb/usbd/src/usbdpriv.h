@@ -37,7 +37,7 @@ typedef struct {
 	int maxPortsPerHub;
 
 	int hcdThreadPrio;
-    int cbThreadPrio;	
+    int cbThreadPrio;
 } UsbdConfig;
 
 extern UsbdConfig usbConfig;
@@ -192,7 +192,7 @@ typedef struct _memPool {
 	volatile HcCA		*hcHCCA;
 
 	struct _hcEd		*hcEdBuf;
-	
+
 	struct _hcTd		*freeHcTdList;
 	struct _hcTd		*hcTdBuf;
 	struct _hcTd		*hcTdBufEnd;
@@ -200,18 +200,18 @@ typedef struct _memPool {
 	struct _hcIsoTd		*freeHcIsoTdList;
 	struct _hcIsoTd		*hcIsoTdBuf;
 	struct _hcIsoTd		*hcIsoTdBufEnd;
-	
+
 	struct _ioRequest	**hcTdToIoReqLUT;
 	struct _ioRequest	**hcIsoTdToIoReqLUT;
-	
+
 	struct _ioRequest	*ioReqBufPtr;
 	struct _ioRequest	*freeIoReqList;
 	struct _ioRequest	*freeIoReqListEnd;
-	
+
 	struct _device		*deviceTreeBuf;
 	struct _device		*freeDeviceListStart;
 	struct _device		*freeDeviceListEnd;
-	
+
 	struct _endpoint	*endpointBuf;
 	struct _endpoint	*freeEpListStart;
 	struct _endpoint	*freeEpListEnd;

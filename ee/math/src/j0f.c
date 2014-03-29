@@ -23,7 +23,7 @@
  *
  *        2         2         2
  * (w - r  ) (w - r  ) (w - r  ) P(w)
- *       1         2         3   
+ *       1         2         3
  *
  *            2
  * where w = x  and the three r's are zeros of the function.
@@ -44,7 +44,7 @@
  *    IEEE      2, 32       100000      1.9e-7      5.4e-8
  *
  */
-/*							y0f.c
+/*							y0f.c
  *
  *	Bessel function of the second kind, order zero
  *
@@ -69,7 +69,7 @@
  *
  *                  2         2         2
  * y0(x)  =  (w - r  ) (w - r  ) (w - r  ) R(x)  +  2/pi ln(x) j0(x).
- *                 1         2         3   
+ *                 1         2         3
  *
  * Thus a call to j0() is required.  The three zeros are removed
  * from R(x) to improve its numerical stability.
@@ -92,7 +92,7 @@
  *    IEEE      2, 32       100000      1.8e-7      5.3e-8
  *
  */
-
+
 /*
 Cephes Math Library Release 2.2:  June, 1992
 Copyright 1984, 1987, 1989, 1992 by Stephen L. Moshier
@@ -191,7 +191,7 @@ xn = q * polevlf( w, PH, 7) - PIO4F;
 p = p * cosf(xn + x);
 return(p);
 }
-
+
 /*							y0() 2	*/
 /* Bessel function of second kind, order zero	*/
 

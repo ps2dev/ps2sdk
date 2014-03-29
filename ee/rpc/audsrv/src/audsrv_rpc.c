@@ -137,7 +137,7 @@ int audsrv_set_format(struct audsrv_fmt_t *fmt)
 /** Blocks until there is enough space to enqueue chunk
     @param bytes size of chunk requested to be enqueued (in bytes)
     @returns error code
-    
+
     Blocks until there are enough space to store the upcoming chunk
     in audsrv's internal ring buffer.
 */
@@ -198,7 +198,7 @@ int audsrv_play_sectors(int start, int end)
 */
 int audsrv_stop_cd()
 {
-	int ret; 
+	int ret;
 	ret = call_rpc_1(AUDSRV_STOP_CD, 0);
 	return ret;
 }
@@ -217,11 +217,11 @@ int audsrv_get_cdpos()
 /** Returns the current playing sector, relative to track
     @returns sector number
 
-    There are 75 sectors a second. To translate this position to mm:ss:ff 
+    There are 75 sectors a second. To translate this position to mm:ss:ff
     use the following:
     mm = sector / (75*60)
     ss = (sector / 75) % 60
-    ff = sector % 75 
+    ff = sector % 75
 
     where ff is the frame number, 1/75th of a second.
 */
@@ -332,7 +332,7 @@ int audsrv_play_audio(const char *chunk, int bytes)
 */
 int audsrv_stop_audio()
 {
-	int ret; 
+	int ret;
 	ret = call_rpc_1(AUDSRV_STOP_AUDIO, 0);
 	return ret;
 }
@@ -360,7 +360,7 @@ int audsrv_init()
 			return -1;
 		}
 
- 		if (cd0.server != 0) 
+ 		if (cd0.server != 0)
 		{
 			break;
 		}
@@ -429,7 +429,7 @@ int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size)
 	{
 		return -AUDSRV_ERR_OUT_OF_MEMORY;
 	}
-	
+
 	sifdma.src = buffer;
 	sifdma.dest = iop_addr;
 	sifdma.size = size;
@@ -438,7 +438,7 @@ int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size)
 	/* send by dma */
 	id = SifSetDma(&sifdma, 1);
 	while(SifDmaStat(id) >= 0);
-	
+
 	sbuff[0] = (int)iop_addr;
 	sbuff[1] = size;
 	sbuff[2] = (int)adpcm; /* use as id */
@@ -446,15 +446,15 @@ int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size)
 	SifCallRpc(&cd0, AUDSRV_LOAD_ADPCM, 0, sbuff, 12, sbuff, 16, _audsrv_intr, 0);
 	SifFreeIopHeap(iop_addr);
 
-	if(sbuff[0] != 0) 
+	if(sbuff[0] != 0)
 	{
-		adpcm->buffer = 0;	
+		adpcm->buffer = 0;
 		return sbuff[0];
 	}
 	else
 	{
 		adpcm->buffer = buffer;
-		adpcm->size = size;	
+		adpcm->size = size;
 		adpcm->pitch = sbuff[1];
 		adpcm->loop = sbuff[2];
 		adpcm->channels = sbuff[3];
@@ -502,7 +502,7 @@ const char *audsrv_get_error_string()
 		return "No disc in drive";
 	}
 
-	return "Unknown error";	
+	return "Unknown error";
 }
 
 static audsrv_callback_t on_cdda_stop = 0;

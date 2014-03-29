@@ -48,7 +48,7 @@
 #define SD_TRANS_MODE_IO        8
 
 
- 
+
 // Reverb
 #define SD_EFFECT_MODE_OFF  		0x0
 #define SD_EFFECT_MODE_ROOM			0x1

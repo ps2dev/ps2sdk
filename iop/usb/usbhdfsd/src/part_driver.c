@@ -91,7 +91,7 @@ int part_connect(mass_dev* dev)
 
     if (part_getPartitionTable(dev, &partTable) < 0)
         return -1;
-    
+
     for ( i = 0; i < 4; i++)
     {
         if(

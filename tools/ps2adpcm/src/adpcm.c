@@ -15,7 +15,7 @@
 /*
 	Based on:
 	PSX VAG-Packer, hacked by bITmASTER@bigfoot.com, hacked by jbit :)
-	jbit's note: 
+	jbit's note:
 */
 
 #include <math.h>
@@ -30,7 +30,7 @@
 
 #define PACKED __attribute__((packed))
 
-typedef struct 
+typedef struct
 {
 	unsigned shift:      4  PACKED;
 	unsigned predict:    4  PACKED;
@@ -80,7 +80,7 @@ int AdpcmEncode(AdpcmSetup *set, int blocks)
 	AdpcmBlock adpcm;
 	double samples[28];
 	int procblocks;
- 
+
 	for (procblocks=0;procblocks<blocks;procblocks++)
 	{
 		int ret;
@@ -119,7 +119,7 @@ int AdpcmEncode(AdpcmSetup *set, int blocks)
 		if (ret<28)
 			break;
 	}
-    
+
 	if (set->loopstart<0 && procblocks<blocks)
 	{
 		/* this block essentialy loops to itself and contains no data */
@@ -151,8 +151,8 @@ int AdpcmEncode(AdpcmSetup *set, int blocks)
 			return(-1);
 			set->curblock++;
 		}
-	}	
-	
+	}
+
 	return(procblocks);
 }
 
@@ -178,13 +178,13 @@ static void find_predict(AdpcmSetup *set, AdpcmBlock *adpcm, double *samples)
 	int shift_mask;
 	double s_0, s_1, s_2;
 
-	for (int i=0;i<5;i++) 
+	for (int i=0;i<5;i++)
 	{
 		max[i] = 0.0;
 		s_1 = set->s_1;
 		s_2 = set->s_2;
 
-		for (int j=0;j<28;j++) 
+		for (int j=0;j<28;j++)
 		{
 			s_0 = CLAMP(samples[j],-30720.0,30719.0);
 
@@ -196,13 +196,13 @@ static void find_predict(AdpcmSetup *set, AdpcmBlock *adpcm, double *samples)
 			s_2 = s_1;
 			s_1 = s_0;
 		}
-    
-		if ( max[i] < min ) 
+
+		if ( max[i] < min )
 		{
 			min = max[i];
 			adpcm->predict = i;
 		}
-		if (min <= 7) 
+		if (min <= 7)
 		{
 			adpcm->predict = 0;
 			break;
@@ -211,15 +211,15 @@ static void find_predict(AdpcmSetup *set, AdpcmBlock *adpcm, double *samples)
 
 	set->s_1 = s_1;
 	set->s_2 = s_2;
-    
+
 	for (int  i=0;i<28;i++ )
 		samples[i] = buffer[i][adpcm->predict];
-      
+
 	min2 = (int)min;
 	shift_mask = 0x4000;
 	adpcm->shift = 0;
-    
-	while(adpcm->shift < 12) 
+
+	while(adpcm->shift < 12)
 	{
 		if (shift_mask & ( min2 + (shift_mask>>3) ))
 			break;
@@ -238,7 +238,7 @@ static void pack(AdpcmSetup *set, AdpcmBlock *adpcm, double *samples)
 	s_1 = set->ps_1;
 	s_2 = set->ps_2;
 
-	for (int i=0;i<28;i++) 
+	for (int i=0;i<28;i++)
 	{
 		s_0 = samples[i] + s_1 * f[adpcm->predict][0] + s_2 * f[adpcm->predict][1];
 		ds = s_0 * (double) (1<<adpcm->shift);
@@ -253,7 +253,7 @@ static void pack(AdpcmSetup *set, AdpcmBlock *adpcm, double *samples)
 		s_1 = (double) di - s_0;
 	}
 
-	for (int i=0;i<14;i++) 
+	for (int i=0;i<14;i++)
 		adpcm->sample[i] = ( ( four_bit[(i*2)+1] >> 8 ) & 0xf0 ) | ( ( four_bit[i*2] >> 12 ) & 0xf );
 
 	set->ps_1 = s_1;

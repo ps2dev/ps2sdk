@@ -89,6 +89,6 @@ void *ExecPS2Patch(void *EntryPoint, void *gp, int argc, char *argv[]){
 	SoftPeripheralEEReset();
 
 	//Unlike the Sony patch, why don't we just reuse the original function in the kernel?
-	return p_ExecPS2(EntryPoint, gp, argc, argv);	
+	return p_ExecPS2(EntryPoint, gp, argc, argv);
 }
 

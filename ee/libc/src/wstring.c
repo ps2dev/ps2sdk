@@ -19,7 +19,7 @@
 
 #ifdef F_wcsdup
 wchar_t *wcsdup(const wchar_t* wcs)
-{	
+{
 	return wcscpy(malloc((wcslen(wcs)+1)*sizeof(wchar_t)), wcs);
 }
 #endif
@@ -107,7 +107,7 @@ wchar_t* wcstok(wchar_t* wcs, const wchar_t* delimiters)
 			end++;
 			return start;
 		}
-		
+
 		end++;
 	}
 
@@ -148,7 +148,7 @@ wchar_t* wcswcs(const wchar_t* ws1, const wchar_t* ws2)
 
 	if (ws1 == 0)
 		return 0;
-	
+
 	if (wcslen(ws2)==0)
 		return (wchar_t*)ws1;
 
@@ -172,7 +172,7 @@ wchar_t* wcswcs(const wchar_t* ws1, const wchar_t* ws2)
 wchar_t* wcsupr(wchar_t* wcs)
 {
 	wchar_t* wcsptr = wcs;
-	
+
 	// loop thru each wchar_t in wcs
 	while (*wcsptr != '\0')
 	{
@@ -180,7 +180,7 @@ wchar_t* wcsupr(wchar_t* wcs)
 		if(iswlower(*wcsptr)) *wcsptr = towupper(*wcsptr);
 		wcsptr++;
 	}
-	
+
 	return wcs;
 }
 #endif
@@ -189,7 +189,7 @@ wchar_t* wcsupr(wchar_t* wcs)
 wchar_t* wcslwr(wchar_t* wcs)
 {
 	wchar_t* wcsptr = wcs;
-	
+
 	// loop thru each wchar_t in wcs
 	while (*wcsptr != '\0')
 	{
@@ -197,7 +197,7 @@ wchar_t* wcslwr(wchar_t* wcs)
 		if(iswupper(*wcsptr)) *wcsptr = towlower(*wcsptr);
 		wcsptr++;
 	}
-	
+
 	return wcs;
 }
 #endif
@@ -363,7 +363,7 @@ wchar_t* wcspbrk(const wchar_t* wcs1, const wchar_t* wcs2)
                 return (wchar_t *)wcs1;
         }
     }
-    
+
     return NULL;
 }
 #endif
@@ -386,12 +386,12 @@ size_t wcsspn(const wchar_t* ws1, const wchar_t* ws2)
 size_t wcscspn(const wchar_t* wcs1, const wchar_t* wcs2)
 {
     const wchar_t *c;
-    
+
     for (c = wcs1; *c; c++) {
         if (wcschr(wcs2, *c))
             return c - wcs1;
     }
-    
+
     return c - wcs1;
 }
 #endif

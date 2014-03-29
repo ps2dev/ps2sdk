@@ -37,7 +37,7 @@
  * two but tends to overcome the problems mentioned.
  *
  */
-
+
 
 
 #include "mconf.h"
@@ -62,7 +62,7 @@ static union {
 /* This function implements the three
  * congruential generators.
  */
- 
+
 static int ranwh()
 {
 int r, s;
@@ -91,7 +91,7 @@ if( sz < 0 )
 /* The results are in static sx, sy, sz. */
 return 0;
 }
-
+
 /*	drand.c
  *
  * Random double precision floating point number between 1 and 2.

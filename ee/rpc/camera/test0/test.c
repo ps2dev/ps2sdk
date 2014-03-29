@@ -20,7 +20,6 @@ int *iopval;
 
 int main (int argc, char *argv[])
 {
-	static int i;
 	static int ret;
 	static int devid;
 	static int fh;
@@ -39,21 +38,21 @@ int main (int argc, char *argv[])
 
 	PS2CamInit(0);
 
-	
 
-	
+
+
 	while(1)
 	{
-	
+
 		ret = PS2CamGetDeviceCount();
 		printf("there is %d camera connected\n",ret);
 		if(ret > 0)break;
 	}
-	
+
 	devid = PS2CamOpenDevice(0);
 	printf("device %d ID == %d\n",0,devid);
 
-	
+
 
 
 
@@ -62,11 +61,11 @@ int main (int argc, char *argv[])
 		ret = PS2CamGetDeviceStatus(devid);
 		if(ret==2)break;
 	}
-	
+
 
 
 	printf("status =%d\n",ret);
-	
+
 	ret = PS2CamSetDeviceBandwidth(devid, 4);
 	printf("set Bandwidth = %d\n",ret);
 
@@ -91,7 +90,7 @@ int main (int argc, char *argv[])
 
 	printf("info = %s (%d)\n",(char *)&caminfo.product_name[0],caminfo.ssize);
 
-	
+
 
 
 	// capture and save jpg to host
@@ -109,8 +108,8 @@ int main (int argc, char *argv[])
 
 
 
-	
-	
+
+
 	if(ret>0)
 	{
 		printf("frame captured\n");
@@ -119,7 +118,7 @@ int main (int argc, char *argv[])
 
 
 		fioWrite(fh, jpg_buffer, ret);
-	
+
 
 
 		fioClose(fh);
@@ -128,7 +127,7 @@ int main (int argc, char *argv[])
 	{
 		printf("error capturing image (%d)\n",ret);
 	}
-	
+
 
 
 

@@ -21,9 +21,9 @@
 #define SCE_CdCACHE           0x10000000
 #define SCE_CdSTREAM          0x40000000
 
-#define CdSecS2048              0       
-#define CdSecS2328              1       
-#define CdSecS2340              2       
+#define CdSecS2048              0
+#define CdSecS2328              1
+#define CdSecS2340              2
 
 #define CdSpinMax               0
 #define CdSpinNom               1
@@ -44,33 +44,33 @@ typedef struct {
 } cd_clock_t;
 
 typedef struct {
-	unsigned long int lsn;                        
-	unsigned long int size;                       
-	char name[16];          
+	unsigned long int lsn;
+	unsigned long int size;
+	char name[16];
 	unsigned char date[8];
 
-	unsigned long int flag;       /* Bits 0-7: ISO9660 file type flag, Bits 8-31 are reserved */          
+	unsigned long int flag;       /* Bits 0-7: ISO9660 file type flag, Bits 8-31 are reserved */
 } adv_cd_file_t;
 
 typedef struct {
-	unsigned long int lsn;                        
-	unsigned long int size;                       
-	char name[16];          
+	unsigned long int lsn;
+	unsigned long int size;
+	char name[16];
 	unsigned char date[8];
 } cd_file_t;
 
 typedef struct {
-	unsigned char minute;                      
-	unsigned char second;                      
-	unsigned char sector;                      
-	unsigned char track;                       
+	unsigned char minute;
+	unsigned char second;
+	unsigned char sector;
+	unsigned char track;
 } cd_location_t;
 
 typedef struct {
-	unsigned char trycount;            
-	unsigned char spindlctrl;          
-	unsigned char datapattern;         
-	unsigned char pad;                         
+	unsigned char trycount;
+	unsigned char spindlctrl;
+	unsigned char datapattern;
+	unsigned char pad;
 } cd_read_mode_t;
 
 /* SP193: Added structure for chain reading */

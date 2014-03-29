@@ -236,7 +236,7 @@ int audsrv_get_track_offset(int track)
     @returns total sectors read, negative on error
 */
 static int read_sectors(void *dest, int sector, int count)
-{               	
+{
 	cd_read_mode_t mode;
 	int max_retries = 32;
 	int tries = 0;
@@ -535,12 +535,12 @@ int audsrv_play_cd(int track)
 	/* core0 input (known as Evilo's patch #1) */
 	sceSdSetParam(SD_CORE_0 | SD_P_BVOLL, 0x7fff);
 	sceSdSetParam(SD_CORE_0 | SD_P_BVOLR, 0x7fff);
- 	
+
 	/* set master volume for core 0 */
 	sceSdSetParam(SD_CORE_0 | SD_P_MVOLL, MAX_VOLUME);
 	sceSdSetParam(SD_CORE_0 | SD_P_MVOLR, MAX_VOLUME);
 
-	return ret;	
+	return ret;
 }
 
 /** Stops CD play

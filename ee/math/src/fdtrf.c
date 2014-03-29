@@ -42,7 +42,7 @@
  * fdtrf domain    a<0, b<0, x<0         0.0
  *
  */
-/*							fdtrcf()
+/*							fdtrcf()
  *
  *	Complemented F distribution
  *
@@ -92,7 +92,7 @@
  * fdtrcf domain   a<0, b<0, x<0         0.0
  *
  */
-/*							fdtrif()
+/*							fdtrif()
  *
  *	Inverse of complemented F distribution
  *
@@ -142,7 +142,7 @@
  *                     v < 1
  *
  */
-
+
 
 /*
 Cephes Math Library Release 2.2:  July, 1992

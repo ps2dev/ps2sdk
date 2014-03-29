@@ -1,6 +1,6 @@
- _____     ___ ____     ___ ____ 
-  ____|   |    ____|   |        | |____|    
- |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project. 
+ _____     ___ ____     ___ ____
+  ____|   |    ____|   |        | |____|
+ |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
  -----------------------------------------------------------------------
  Copyright 2001-2004, ps2dev - http://www.ps2dev.org
  All rights reserved.
@@ -31,13 +31,13 @@ features, allowing:
  - HTTP client file system.
  - Network File System to load files from HOST pc.
 
-The SDK is not yet considered complete, with the largest gap being 
+The SDK is not yet considered complete, with the largest gap being
 that it does not currently contain a USB driver.
 
 The SDK does not contain a graphics library.  PS2 graphics is a
 complex area with a large number of solutions using EE, VU0, VU1.
-In the future a basic graphics library will be included.  
- 
+In the future a basic graphics library will be included.
+
 PS2SDK has been developed by a large number of individuals who have
 provided their time and effort.  The AUTHORS file includes this list.
 
@@ -52,10 +52,10 @@ More information can be found at ps2dev.org.
  -----------------------------------------------------------------------
 
 ps2sdk today provides a large number of the basic software libraries
-required to access the underlying PS2 system. As the PS2 has two 
+required to access the underlying PS2 system. As the PS2 has two
 independant CPUs - the Emotion Engine(EE) and the IO Processor (IOP)
 the source tree is split into two different major areas representing
-the functions available on each processor. 
+the functions available on each processor.
 
 A binary release of PS2SDK will include the following directories.
 
@@ -107,7 +107,7 @@ in the tree.
 28th of May 2004: (Lukasz Bruun)
  printf and family will not work with floats if used together with
  -fshort-double compiler option, this is a compiler issue.
-  
+
 
  History
  -----------------------------------------------------------------------
@@ -115,7 +115,7 @@ in the tree.
 ps2sdk brings together a number of open source projects developed for
 the Playstation 2.  These projects include ps2lib, ps2drv, libhdd,
 ps2ip and ps2hid.  These projects are now all closed and have been
-migrated to ps2sdk. 
+migrated to ps2sdk.
 
 ps2lib was the first library to be released.  Created by Gustavo Scotti,
 the library was released in Octover 2001.  Over the years a number of
@@ -134,7 +134,7 @@ TCP/IP stack for open source development. Over the last two years the
 stack has improved and matured.  boman666 provided the last big
 improvement to the design and his changes are used in PS2SDK.
 
-libhdd was started by Nick Van Veen(Sjeep) in 2003 to provide a 
+libhdd was started by Nick Van Veen(Sjeep) in 2003 to provide a
 Hard Disk Drive driver and file system that is compatible with the
 commercial Sony HDD and other non-Sony HDDs.  The work was sponsored
 by DMS3, and the resulting code kindly provided back to the ps2dev

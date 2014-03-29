@@ -27,7 +27,7 @@ CXXFLAGS_release := -O2 -ffast-math $(CXXFLAGS_release)
 DEFINES  := _EE=1 PS2=1 _PS2=1 $(DEFINES)
 
 SYSINCDIR := $(PS2SDKSRC)/ee/kernel/include $(PS2SDKSRC)/common/include $(PS2SDKSRC)/ee/libc/include
-SYSLIBDIR := 
+SYSLIBDIR :=
 
 ASFLAGS  := -c -xassembler-with-cpp $(ASFLAGS)
 SYSLIBS  := c kernel

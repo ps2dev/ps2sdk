@@ -25,7 +25,7 @@ static EE_ExceptionHandler *ee_level2_exception_handlers[4] = { 0 };
 
 void _def_ee_ex_handler(EE_RegFrame *frame)
 {
-    while(1);    
+    while(1);
 }
 
 void ee_level1_ex_dispatcher(EE_RegFrame *frame)
@@ -191,7 +191,7 @@ int ee_dbg_install(int levels)
         oldop = ee_set_opmode(0);
 
         ee_dbg_clr_bps();
-        
+
         // save the original level 2 debug exception vector.
         memcpy(&__saved_dbg_ex_vector, (void *) (0x80000100), 0x80);
 
@@ -253,7 +253,7 @@ int ee_dbg_remove(int levels)
 
         ee_set_opmode(oldop);
         if(oldintr) { EIntr(); }
-        
+
         FlushCache(0);
         FlushCache(2);
 
@@ -287,7 +287,7 @@ int ee_dbg_remove(int levels)
                 _old_l1_handlers[i] = NULL;
             }
         }
-        
+
         FlushCache(0);
         FlushCache(2);
 

@@ -23,7 +23,7 @@
 char *strdup(const char *s) {
 	size_t str_size = strlen(s);
 	char * r = (char *)malloc(str_size + 1);
-	
+
 	return strcpy(r, s);
 }
 #endif
@@ -112,7 +112,7 @@ char* strtok(char * strToken, const char * strDelimit)
 			end++;
 			return start;
 		}
-		
+
 		end++;
 	}
 
@@ -154,7 +154,7 @@ char *	strstr(const char * string, const char * substring)
 
 	if (string == 0)
 		return 0;
-	
+
 	if (strlen(substring)==0)
 		return (char*)string;
 
@@ -179,7 +179,7 @@ char *	strstr(const char * string, const char * substring)
 char * strupr(char *str)
 {
 	char * strptr = str;
-	
+
 	// loop thru each char in string
 	while (*strptr != '\0')
     {
@@ -188,7 +188,7 @@ char * strupr(char *str)
       	*strptr = toupper(*strptr);
       strptr++;
     }
-	
+
 	return str;
 }
 #endif
@@ -197,7 +197,7 @@ char * strupr(char *str)
 char * strlwr(char *str)
 {
 	char * strptr = str;
-	
+
 	// loop thru each char in string
 	while (*strptr != '\0')
     {
@@ -206,7 +206,7 @@ char * strlwr(char *str)
       	*strptr = tolower(*strptr);
       strptr++;
     }
-	
+
 	return str;
 }
 #endif
@@ -338,7 +338,7 @@ int ispunct(int c)
 {
 	if (iscntrl(c))
 		return 0;
-	
+
 	if (isalnum(c))
 		return 0;
 
@@ -391,37 +391,37 @@ struct charmap_t {
 
 #ifdef F__sjis_internals
 struct charmap_t sjis_conversion[] = {
-    { 0x4081, ' ' }, 
-    { 0x6d81, '[' }, 
-    { 0x6e81, ']' }, 
-    { 0x7c81, '-' }, 
-    { 0x5b81, '°' }, 
-    { 0x4581, '¥' }, 
-    { 0x4481, '.' }, 
-    { 0x7B81, '+' }, 
-    { 0x9681, '*' }, 
-    { 0x5E81, '/' }, 
-    { 0x4981, '!' }, 
-    { 0x6881, '"' }, 
-    { 0x9481, '#' }, 
-    { 0x9081, '$' }, 
-    { 0x9381, '%' }, 
-    { 0x9581, '&' }, 
-    { 0x6681, '\'' }, 
-    { 0x6981, '(' }, 
-    { 0x6a81, ')' }, 
-    { 0x8181, '=' }, 
-    { 0x6281, '|' }, 
-    { 0x8f81, '\\' }, 
-    { 0x4881, '?' }, 
-    { 0x5181, '_' }, 
-    { 0x6f81, '{' }, 
-    { 0x7081, '}' }, 
-    { 0x9781, '@' }, 
-    { 0x4781, ';' }, 
-    { 0x4681, ':' }, 
-    { 0x8381, '<' }, 
-    { 0x8481, '>' }, 
+    { 0x4081, ' ' },
+    { 0x6d81, '[' },
+    { 0x6e81, ']' },
+    { 0x7c81, '-' },
+    { 0x5b81, '°' },
+    { 0x4581, '¥' },
+    { 0x4481, '.' },
+    { 0x7B81, '+' },
+    { 0x9681, '*' },
+    { 0x5E81, '/' },
+    { 0x4981, '!' },
+    { 0x6881, '"' },
+    { 0x9481, '#' },
+    { 0x9081, '$' },
+    { 0x9381, '%' },
+    { 0x9581, '&' },
+    { 0x6681, '\'' },
+    { 0x6981, '(' },
+    { 0x6a81, ')' },
+    { 0x8181, '=' },
+    { 0x6281, '|' },
+    { 0x8f81, '\\' },
+    { 0x4881, '?' },
+    { 0x5181, '_' },
+    { 0x6f81, '{' },
+    { 0x7081, '}' },
+    { 0x9781, '@' },
+    { 0x4781, ';' },
+    { 0x4681, ':' },
+    { 0x8381, '<' },
+    { 0x8481, '>' },
     { 0x4d81, '`' },
     { 0, 0 }
 };
@@ -478,7 +478,7 @@ int strcpy_sjis(short* sjis_buff, const char* ascii_buff)
 {
     int i;
     short ascii, sjis;
-	
+
     int len = strlen(ascii_buff);
 
     for (i=0;i<len;i++)	{
@@ -505,7 +505,7 @@ char *strpbrk(const char *s, const char *accept)
                 return (char *) s;
         }
     }
-    
+
     return NULL;
 }
 #endif
@@ -526,12 +526,12 @@ size_t strspn(const char *s, const char *accept) {
 #ifdef F_strcspn
 size_t strcspn(const char *s, const char *reject) {
     const char *c;
-    
+
     for (c = s; *c; c++) {
         if (strchr(reject, *c))
             return c - s;
     }
-    
+
     return c - s;
 }
 #endif

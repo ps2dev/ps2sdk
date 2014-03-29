@@ -55,7 +55,7 @@
  *   message         condition      value returned
  * incbetf domain     x<0, x>1          0.0
  */
-
+
 
 /*
 Cephes Math Library, Release 2.2:  July, 1992
@@ -199,7 +199,7 @@ if( flag )
 
 return( t );
 }
-
+
 /* Continued fraction expansion #1
  * for incomplete beta integral
  */
@@ -238,7 +238,7 @@ r = 0.0;
 n = 0;
 do
 	{
-	
+
 	xk = -( x * k1 * k2 )/( k3 * k4 );
 	pk = pkm1 +  pkm2 * xk;
 	qk = qkm1 +  qkm2 * xk;
@@ -298,7 +298,7 @@ cdone:
 return(ans);
 }
 
-
+
 /* Continued fraction expansion #2
  * for incomplete beta integral
  */
@@ -338,7 +338,7 @@ r = 0.0;
 n = 0;
 do
 	{
-	
+
 	xk = -( z * k1 * k2 )/( k3 * k4 );
 	pk = pkm1 +  pkm2 * xk;
 	qk = qkm1 +  qkm2 * xk;

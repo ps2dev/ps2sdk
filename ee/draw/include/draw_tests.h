@@ -33,7 +33,7 @@ typedef struct {
 	unsigned char method;
 	unsigned char compval;
 	unsigned char keep;
-} atest_t; 
+} atest_t;
 
 typedef struct {
 	unsigned char enable;

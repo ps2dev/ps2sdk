@@ -60,7 +60,7 @@ static struct NetManNetProtStack RpcStack={
 	&AllocRxPacket,
 	&FreeRxPacket,
 	&EnQRxPacket,
-	&FlushInputQueue	
+	&FlushInputQueue
 };
 
 static void *NETMAN_rpc_handler(int fno, void *buffer, int size){

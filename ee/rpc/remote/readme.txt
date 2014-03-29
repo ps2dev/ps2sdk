@@ -1,9 +1,9 @@
 librm notes...
 
-This is the ee rpc code to access the module RMMAN in my PS2, I don't know if this is 
+This is the ee rpc code to access the module RMMAN in my PS2, I don't know if this is
 compatible across different versions of the PS2. For info mine is a 30003R or so :)
 
-RMMAN is in rom1 not rom0, to access it you must load the ADDDRV module, then you can 
+RMMAN is in rom1 not rom0, to access it you must load the ADDDRV module, then you can
 load it manually. If the rom0 SIO2MAN has been loaded you _MUST_ reboot the IOP
 and load rom1:SIO2MAN fresh else it will not work. The rom1 PADMAN looks to use the XPADMAN
 RPC interface so use the approrpiate library from PS2SDK.

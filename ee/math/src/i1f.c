@@ -33,7 +33,7 @@
  *
  *
  */
-/*							i1ef.c
+/*							i1ef.c
  *
  *	Modified Bessel function of order one,
  *	exponentially scaled
@@ -65,7 +65,7 @@
  * See i1().
  *
  */
-
+
 /*							i1.c 2		*/
 
 
@@ -121,7 +121,7 @@ static float B[] =
 -9.76109749136146840777E-3f,
  7.78576235018280120474E-1f
 };
-
+
 /*							i1.c	*/
 
 #define fabsf(x) ( (x) < 0 ? -(x) : (x) )
@@ -140,7 +140,7 @@ float i1f(float xx)
 float i1f(xx)
 double xx;
 #endif
-{ 
+{
 float x, y, z;
 
 x = xx;
@@ -158,7 +158,7 @@ if( x < 0.0f )
 	z = -z;
 return( z );
 }
-
+
 /*							i1e()	*/
 
 #ifdef ANSIC
@@ -167,7 +167,7 @@ float i1ef( float xx )
 float i1ef( xx )
 double xx;
 #endif
-{ 
+{
 float x, y, z;
 
 x = xx;

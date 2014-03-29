@@ -32,7 +32,7 @@ int _start( int argc, char **argv)
         return(1);
     }
 
-    // initialize the file system driver	    
+    // initialize the file system driver
     if(InitFS() != 0)
     {
         printf("Error initializing FS driver!\n");

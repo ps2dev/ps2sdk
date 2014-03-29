@@ -34,7 +34,7 @@
  * Returns MAXNUMF on overflow, zero on underflow.
  *
  */
-
+
 /*							powi.c	*/
 
 /*
@@ -136,7 +136,7 @@ if( s < (-MAXLOGF+2.0) )
 /* First bit of the power */
 if( n & 1 )
 	y = x;
-		
+
 else
 	{
 	y = 1.0;

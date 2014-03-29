@@ -27,7 +27,7 @@ EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
 EE_CFLAGS = -I $(EE_INC_DIR) -I $(EE_SRC_DIR)
 
-all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB) 
+all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
 
 .c.o :
 	$(EE_CC) $(EE_CFLAGS) $(EE_INC) -c $< -o obj/$@

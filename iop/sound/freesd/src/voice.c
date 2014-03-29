@@ -31,11 +31,11 @@ s32 VoiceTransDma(s16 chan, u16 mode, u8 *iop_addr, u32 *spu_addr, u32 size)
 		return -1;
 
 	if(*SD_DMA_CHCR(chan) & SD_DMA_START)
-		return -1;		
+		return -1;
 
 	*SD_A_TSA_HI(chan) = (u32)spu_addr >> 17;
 	*SD_A_TSA_LO(chan) = (u32)spu_addr >> 1;
-	
+
 	if(mode == SD_VOICE_TRANS_WRITE)
 	{
 		TransIntrData[chan].mode = chan;
@@ -59,7 +59,7 @@ s32 VoiceTransDma(s16 chan, u16 mode, u8 *iop_addr, u32 *spu_addr, u32 size)
 	}
 
 	*SD_DMA_ADDR(chan)	= (u32)iop_addr;
-	*SD_DMA_MSIZE(chan) = (((size+63)/64) << 16) | 0x10; 
+	*SD_DMA_MSIZE(chan) = (((size+63)/64) << 16) | 0x10;
 	*SD_DMA_CHCR(chan)	= SD_DMA_CS | SD_DMA_START | direction;
 
 	return size;
@@ -69,10 +69,10 @@ s32 VoiceTrans_Write_IOMode(u32 iopaddr, u32 spu_addr, s32 size, s16 chan)
 {
 	volatile u16 *statx;
 
-	if(*SD_CORE_ATTR(chan) & SD_DMA_IN_PROCESS) 
+	if(*SD_CORE_ATTR(chan) & SD_DMA_IN_PROCESS)
 		return -1;
-	
-	if(*SD_DMA_CHCR(chan) & SD_DMA_START) 
+
+	if(*SD_DMA_CHCR(chan) & SD_DMA_START)
 		return -1;
 
 	*SD_A_TSA_HI(chan) = (u16)spu_addr >> 17;
@@ -91,7 +91,7 @@ s32 VoiceTrans_Write_IOMode(u32 iopaddr, u32 spu_addr, s32 size, s16 chan)
 				count = 64;
 			else
 				count = size;
-		
+
 			if(count > 0)
 			{
 				for(loop = 0; loop < count; loop += 2)
@@ -117,7 +117,7 @@ s32 VoiceTrans_Write_IOMode(u32 iopaddr, u32 spu_addr, s32 size, s16 chan)
 }
 
 s32 SdVoiceTrans(s16 chan, u16 mode, u8 *iopaddr, u32 *spuaddr, u32 size)
-{	
+{
 	s32 res = size;
 
 	chan &= 1;
@@ -132,7 +132,7 @@ s32 SdVoiceTrans(s16 chan, u16 mode, u8 *iopaddr, u32 *spuaddr, u32 size)
 		res = VoiceTransDma(chan, mode & 3, iopaddr, spuaddr, size);
 	}
 	else
-	{	
+	{
 		if((mode & 3) == SD_VOICE_TRANS_WRITE)
 		{
 			res = VoiceTrans_Write_IOMode( (u32)iopaddr, (u32)spuaddr, size, chan);
@@ -148,16 +148,16 @@ u32 SdVoiceTransStatus(s16 chan, s16 flag)
 {
 	chan &= 1;
 	flag &= 1;
-	
+
 	if((VoiceTransIoMode[chan] == 1) || (VoiceTransStatus[chan] == 1))
 		return 1;
-	
-	if(flag) 
+
+	if(flag)
 	{
 		while(!VoiceTransComplete[chan]);
 		VoiceTransStatus[chan] = 1;
 		VoiceTransComplete[chan] = 0;
-		
+
 		return 1;
 	}
 	else

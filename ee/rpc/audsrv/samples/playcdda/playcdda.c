@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 	int track;
 	int lastpos;
 
-	SifInitRpc(0); 
+	SifInitRpc(0);
 
 	printf("sample: kicking IRXs\n");
 	ret = SifLoadModule("rom0:LIBSD", 0, NULL);
@@ -77,7 +77,7 @@ int main(int argc, char **argv)
 
 		if (lastpos != pos)
 		{
-			printf("\rTrack %02d: %02d:%02d:%02d", 
+			printf("\rTrack %02d: %02d:%02d:%02d",
 			track, pos / (75*60), (pos / 75) % 60, pos % 75);
 			lastpos = pos;
 		}

@@ -23,7 +23,7 @@
 #include "iopmgr.h"
 
 /*! \brief Get pointer to system library structure for named library.
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  *
  *  \param name Stringname of library (eg "ioman").
  *  \return Pointer to IOP library structure.
@@ -48,7 +48,7 @@ iop_library_t *slib_get_lib_by_name(const char *name)
 }
 
 /*! \brief Get pointer to export list for named library.
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  *
  *  \param name Stringname of library (eg "ioman").
  *  \return Pointer to export list.
@@ -68,7 +68,7 @@ void *slib_get_exportlist_by_name(const char *name)
 }
 
 /*! \brief Get version number for named library.
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  *
  *  \param name Stringname of library (eg "ioman").
  *  \return version number.
@@ -88,7 +88,7 @@ int slib_get_version_by_name(const char *name)
 }
 
 /*! \brief Release (Unregister) a given named registered library.
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  *
  *  \param name Stringname of library (eg "ioman").
  *  \return Status of operation.

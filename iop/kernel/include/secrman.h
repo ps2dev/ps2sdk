@@ -41,7 +41,7 @@ typedef int (*McDevIDHandler_t)(int port, int slot);
 #define I_SecrDiskBootBlock DECLARE_IMPORT(12, SecrDiskBootBlock)
 #define I_SecrDiskBootFile DECLARE_IMPORT(13, SecrDiskBootFile)
 
-/* FOLLOWING EXPORTS ARE ONLY AVAILABLE IN SPECIAL SECRMAN OR FREESECR */ 
+/* FOLLOWING EXPORTS ARE ONLY AVAILABLE IN SPECIAL SECRMAN OR FREESECR */
 #define I_SecrDownloadHeader DECLARE_IMPORT(14, SecrDownloadHeader)
 #define I_SecrDownloadBlock DECLARE_IMPORT(15, SecrDownloadBlock)
 #define I_SecrDownloadFile DECLARE_IMPORT(16, SecrDownloadFile)

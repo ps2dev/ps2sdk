@@ -4,7 +4,7 @@
 
 //   Base of SPU2 regs is 0x0xBF900000
 //  Cores are 0x400 bytes apart
- 
+
 #define U16_REGISTER(x)					((volatile u16 *) (0xBF900000 | (x)))
 #define U32_REGISTER(x)					((volatile u32 *) (0xBF800000 | (x)))
 
@@ -20,7 +20,7 @@
 #define SD_VP_VOLXL(core, voice)		SD_VP_REG((core), (voice), 0x0C)
 #define SD_VP_VOLXR(core, voice)		SD_VP_REG((core), (voice), 0x0E)
 
-#define SD_S_REG(core, reg)				SD_BASE_REG(0x180 + ((core) << 10) + (reg)) 
+#define SD_S_REG(core, reg)				SD_BASE_REG(0x180 + ((core) << 10) + (reg))
 #define SD_S_PMON_HI(core)				SD_S_REG((core), 0x00)
 #define SD_S_PMON_LO(core)				SD_S_REG((core), 0x02)
 #define SD_S_NON_HI(core)				SD_S_REG((core), 0x04)
@@ -37,13 +37,13 @@
 #define SD_CORE_ATTR(core)				SD_S_REG((core), 0x1A)
 #define SD_CORE_IRQA(core)				SD_S_REG((core), 0x1C)
 
-#define SD_A_REG(core, reg)				SD_BASE_REG(0x1A0 + ((core) << 10) + (reg)) 
+#define SD_A_REG(core, reg)				SD_BASE_REG(0x1A0 + ((core) << 10) + (reg))
 #define SD_A_KON_HI(core)				SD_A_REG((core), 0x00) // Key on (start sound generation)
 #define SD_A_KON_LO(core)				SD_A_REG((core), 0x02)
 #define SD_A_KOFF_HI(core)				SD_A_REG((core), 0x04) // Key off (end sound generation)
-#define SD_A_KOFF_LO(core)				SD_A_REG((core), 0x06) 
+#define SD_A_KOFF_LO(core)				SD_A_REG((core), 0x06)
 #define SD_A_TSA_HI(core)				SD_A_REG((core), 0x08) // Transfer start address
-#define SD_A_TSA_LO(core)				SD_A_REG((core), 0x0A) 
+#define SD_A_TSA_LO(core)				SD_A_REG((core), 0x0A)
 #define SD_A_STD(core)					SD_A_REG((core), 0x0C) // Sound Transfer Data
 
 #define SD_VA_REG(core, voice, reg)		SD_BASE_REG(0x1C0 + ((core) << 10) + ((voice) * 12) + (reg))

@@ -5,7 +5,7 @@
   ------------------------------------------------------------------------
   ps2cam.h
 					PS2Camera driver irx
-			
+
 */
 #ifndef __PS2CAM_H__
 #define __PS2CAM_H__
@@ -18,8 +18,8 @@
 #define PS2CAM_RPC_GETIRXVERSION	40		// get irx version
 #define PS2CAM_RPC_INITIALIZE		41		// PS2CamInit
 #define PS2CAM_RPC_GETDEVCOUNT		42		// PS2CamGetDeviceCount
-#define PS2CAM_RPC_OPENDEVICE		43		// 
-#define PS2CAM_RPC_CLOSEDEVICE		44		// 
+#define PS2CAM_RPC_OPENDEVICE		43		//
+#define PS2CAM_RPC_CLOSEDEVICE		44		//
 #define PS2CAM_RPC_GETDEVSTATUS		45		// PS2CamGetStatus
 #define PS2CAM_RPC_GETDEVINFO		46		// PS2CamGetInfo
 #define PS2CAM_RPC_SETDEVBANDWIDTH	47		// PS2CamSetDeviceBandwidth
@@ -40,7 +40,7 @@
 #define PS2CAM_PROD_EYETOY2			0x0155	// SLEH-00031
 #define PS2CAM_PROD_EYETOY3			0x0156	// SLEH-000??	rinco thinks its japan
 #define PS2CAM_PROD_EYETOY4			0x0157	// SLEH-000??   ,,  ,,  ,,
-		
+
 #define PS2CAM_PROD_VISUALSTREAM	0x8519	// D-Link VisualStream DSB-C310
 
 
@@ -109,7 +109,7 @@
 // error codes
 #define CAM_ERROR_NONE				 (00)	// ok
 #define CAM_ERROR_NOTINIT			-(20)	//
-#define CAM_ERROR_INVALIDDEVICE		-(21)	// 
+#define CAM_ERROR_INVALIDDEVICE		-(21)	//
 #define CAM_ERROR_COMMUNKNOWN		-(22)	// unknown command
 #define CAM_ERROR_DEVNOTREADY		-(23)	// device not ready
 #define CAM_ERROR_NODEVICE			-(24)	// no compatible device connected
@@ -124,13 +124,13 @@
 
 typedef struct
 {
-	unsigned int	ssize;				// sizeof this struct		
-	unsigned short	vendor_id;			// 
+	unsigned int	ssize;				// sizeof this struct
+	unsigned short	vendor_id;			//
 	unsigned short	product_id;			//
 	unsigned char	vendor_name[32];	//
 	unsigned char	product_name[32];	//
 	unsigned char	model[16];			//
-	
+
 
 }PS2CAM_DEVICE_INFO;
 
@@ -153,7 +153,7 @@ typedef struct
 	int			bytes;					//
 	void		*arg;					//
 
-	
+
 }CAMERA_DEVICE;
 
 
@@ -162,7 +162,7 @@ typedef struct
 typedef struct
 {
 	int				fd;
-	int				status;				
+	int				status;
 	CAMERA_DEVICE	*cam;
 
 }PS2CAM_DEVICE_HANDLE;
@@ -245,7 +245,7 @@ void PS2CamSetDeviceDefaults(CAMERA_DEVICE *dev);
 
 
 // low level camera funtions
-int  setReg8(CAMERA_DEVICE		*dev, unsigned char reg_id, unsigned char  value);			
+int  setReg8(CAMERA_DEVICE		*dev, unsigned char reg_id, unsigned char  value);
 int  getReg8(CAMERA_DEVICE		*dev, unsigned char reg_id, unsigned char *value);
 int  setReg8Mask(CAMERA_DEVICE	*dev, unsigned char reg_id, unsigned char  value,unsigned char mask);
 int  setReg16(CAMERA_DEVICE		*dev, unsigned char reg_id, unsigned short value);

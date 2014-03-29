@@ -42,7 +42,7 @@ typedef struct _iop_ext_device_ops {
 	int	(*symlink)(iop_file_t *, const char *, const char *);
 	int	(*readlink)(iop_file_t *, const char *, char *, unsigned int);
 	int	(*ioctl2)(iop_file_t *, int, void *, unsigned int, void *, unsigned int);
-	
+
 } iop_ext_device_ops_t;
 
 #endif

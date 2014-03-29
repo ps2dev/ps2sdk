@@ -82,7 +82,7 @@ void*      AHX_Quit(unsigned int* sbuff);
 //	AHX Entry Point
 //	-------------
 //		This function is called automatically when the IRX module
-//      is loaded. We simply set up the AHX Setup thread and 
+//      is loaded. We simply set up the AHX Setup thread and
 //		exit...
 //***************************************************************
 int _start ()
@@ -111,8 +111,8 @@ int _start ()
 //	-------------
 //		This inits the AHX output system (AHX->PCM decoder), sets
 //		up our semaphore so the SPU can flag when it wants more
-//		data. We also init the RPC server in here, as well as 
-//		creating buffers for the SPU to transfer PCM data from 
+//		data. We also init the RPC server in here, as well as
+//		creating buffers for the SPU to transfer PCM data from
 //		and also a buffer to decode AHX to PCM.
 //***************************************************************
 void AHX_Thread(void* param)
@@ -135,7 +135,7 @@ void AHX_Thread(void* param)
 	}
 
 	// allocate memory for SPU2 xfer buffer
-	spubuf = AllocSysMemory(0, 0x800, NULL); // 2048 bytes (enough for 2 SPU cycles at 512 bytes per channel) 
+	spubuf = AllocSysMemory(0, 0x800, NULL); // 2048 bytes (enough for 2 SPU cycles at 512 bytes per channel)
 	pcmbuf = AllocSysMemory(0, 0xF00*8, NULL); // enough to hold 8 full AHX-PCM decoded chunks (0xF00 per chunk)
 	if(spubuf == NULL) {
 		#ifndef COMPACT_CODE
@@ -147,8 +147,8 @@ void AHX_Thread(void* param)
 	// print version #
 	#ifndef COMPACT_CODE
 		M_PRINTF("AHXplayer %s Started\n", MODVERSION);
-	#endif	
-	
+	#endif
+
 	AHX_ClearSoundBuffers();
 
 	#ifndef COMPACT_CODE
@@ -167,13 +167,13 @@ void AHX_Thread(void* param)
 //	--------------
 //		This code is called repeatedly, in here we mix our AHX
 //		data into PCM format and store it in a buffer. We then
-//		move it to another buffer so the SPU can grab it and 
+//		move it to another buffer so the SPU can grab it and
 //		play it.
 //***************************************************************
 void AHX_PlayThread(void* param)
 {
 	int i;
-	int chunk; // we transfer to 2 blocks of SPU mem, are we working chunk 1 or 2? 	
+	int chunk; // we transfer to 2 blocks of SPU mem, are we working chunk 1 or 2?
 
 	// reset position and flags etc
 	AHX_ResetPlayThread();
@@ -182,15 +182,15 @@ void AHX_PlayThread(void* param)
 	while(1)
 	{
 		// backfill chunks that have already been passed to SPU. We do this before the WaitSema
-		// because we could be stuck there waiting for a while. If any spare time exists, we use 
+		// because we could be stuck there waiting for a while. If any spare time exists, we use
 		// it to mix the buffers...
 		if (playing)
-		{		
+		{
 			for (i=0; i<7; i++)
 			{
-				// check if we've just passed a section of data and refill it 
+				// check if we've just passed a section of data and refill it
 				if (readpos>=0xF00*(i+1) && readpos<=0xF00*(i+2) && !seg_done[i])
-				{				
+				{
 					if (playing)
 					{
 						AHXOutput_MixBuffer( (short*)(pcmbuf+(0xF00*i)) ); // remix
@@ -203,7 +203,7 @@ void AHX_PlayThread(void* param)
 
 		// wait for SPU2 to set sema to indicate it's ready for more data
 		WaitSema(transfer_sema);
-		
+
 		// suspend interrupts so our sema trigger doesn't get fired more than once
 		// while we work in here...
 		CpuSuspendIntr(&intr_state);
@@ -213,7 +213,7 @@ void AHX_PlayThread(void* param)
 			// get SPU transfer status to determine which area of SPU buffer to write PCM data to
 			chunk = 1 - (SdBlockTransStatus(1, 0 )>>24);
 
-			wmemcpy(spubuf+(1024*chunk),pcmbuf+readpos,512);		// left channel  
+			wmemcpy(spubuf+(1024*chunk),pcmbuf+readpos,512);		// left channel
 			wmemcpy(spubuf+(1024*chunk)+512,pcmbuf+readpos,512);	// right channel (same cos we're mono)
 
 			// SPU2 reads 512 bytes for each channel per frame, we're using the same PCM buffer for each
@@ -223,9 +223,9 @@ void AHX_PlayThread(void* param)
 
 			// check to see whether we've reached the end of our PCM buffer, if so, reset read position
 			// remix end chunk of AHX data in PCM buffer and mark segment as complete
-			if(readpos >= 0xF00 * 8) 
+			if(readpos >= 0xF00 * 8)
 			{
-				readpos = 0;			
+				readpos = 0;
 				AHXOutput_MixBuffer( (short*)(pcmbuf+(0xF00*7)) );
 				seg_done[7] = 1;
 				seg_done[6] = 0;
@@ -244,8 +244,8 @@ void AHX_PlayThread(void* param)
 //***************************************************************
 static int AHX_TransCallback(void* param)
 {
-	// signal our semaphore to indicate that SPU2 has finished 
-	// processing current sound data and that it's time to 
+	// signal our semaphore to indicate that SPU2 has finished
+	// processing current sound data and that it's time to
 	// xfer some more data across...
 	iSignalSema(transfer_sema);
 	return 1;
@@ -298,7 +298,7 @@ void AHX_ClearSoundBuffers()
 //	AHX RPC Server
 //	-------------
 //		This catches messages sent across from the EE interface
-//		and calls the appropriate function (according to the 
+//		and calls the appropriate function (according to the
 //      function code 'funcno'.
 //***************************************************************
 void* AHX_rpc_server(unsigned int funcno, void *data, int size)
@@ -327,7 +327,7 @@ void* AHX_rpc_server(unsigned int funcno, void *data, int size)
 }
 
 //***************************************************************
-//	AHX Main Init 
+//	AHX Main Init
 //	-------------
 //		Called via RPC interface. This inits the player, SPU and
 //		sets up the playing thread.
@@ -341,7 +341,7 @@ void* AHX_Init(unsigned int* sbuff)
 
 	#ifndef COMPACT_CODE
 		printf("AHX INIT DONE!\n");
-	#endif	
+	#endif
 
 	// Initialise SPU
 	SdInit(SD_INIT_COLD);
@@ -381,7 +381,7 @@ void* AHX_Init(unsigned int* sbuff)
 }
 
 //***************************************************************
-//	AHX Load Song 
+//	AHX Load Song
 //	-------------
 //		Loads a song via RPC
 //***************************************************************
@@ -398,11 +398,11 @@ void* AHX_LoadSong(unsigned int* sbuff)
 
 	#ifndef COMPACT_CODE
 		printf("Loading song - oversampling = %d, boost = %d\n", oversample_enabled, boost_val);
-	#endif	
+	#endif
 
 	// load song
 	sbuff[1] = (unsigned)AHXPlayer_LoadSongBuffer(mod_buffer, (int)sbuff[0]);
-	
+
 	// wait for SPU
 	WaitSema(transfer_sema);
 
@@ -460,7 +460,7 @@ void* AHX_SetVolume(unsigned int* sbuff)
 //	AHX Set Boost
 //	-------------
 //		Sets the AHX Output Boost value. Each increment increases
-//		output volume by 100%. Large numbers can cause 
+//		output volume by 100%. Large numbers can cause
 //		distortion. It's advisable not to boost above 1 or 2.
 //***************************************************************
 void* AHX_SetBoost(unsigned int* sbuff)

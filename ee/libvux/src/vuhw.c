@@ -71,9 +71,9 @@ void Vu0TransMatrix(VU_MATRIX *m, VU_VECTOR *t)
 	asm __volatile__ (
    "lqc2		vf1,  0(%1)	\n"		// load 1 qword from 't' to vu's vf1
    "sqc2		vf1, 48(%0)	\n"		// store vf1 data in 'm' with 48 bytes offset which is m[3][0]
-   
+
    : : "r" (m), "r" (t)
-   );	
+   );
 }
 
 
@@ -106,15 +106,15 @@ void Vu0ScaleMatrix(VU_MATRIX *m, VU_VECTOR *s)
  //  "lqc2		vf123,48(%0)	\n"		// load m[3][0]
 
 	"vmulx.x	vf10, vf10, vf1x	\n"	// multiply [0][0] by s->x and store in [0][0]
-	"vmuly.y	vf11, vf11, vf1y	\n"	
-	"vmulz.z	vf12, vf12, vf1z	\n"	
-	
+	"vmuly.y	vf11, vf11, vf1y	\n"
+	"vmulz.z	vf12, vf12, vf1z	\n"
+
 
 	"sqc2		vf10,  0(%0)	\n"		// store v m[0][0]
 	"sqc2		vf11, 16(%0)	\n"		// store v m[1][0]
 	"sqc2		vf12, 32(%0)	\n"		// store v m[2][0]
 //   "sqc2		vf1, 48(%0)	\n"		// store v m[3][0]
-   
+
    : : "r" (m), "r" (s)
    );
 
@@ -133,7 +133,7 @@ void Vu0ScaleMatrixXYZ(VU_MATRIX *m, float x, float y, float z)
 	s.y = y;
 	s.z = z;
 	s.w = 1.0f;
-	
+
 	Vu0ScaleMatrix(m, &s);
 
 }
@@ -143,7 +143,7 @@ void Vu0ScaleMatrixXYZ(VU_MATRIX *m, float x, float y, float z)
 
 void Vu0MulMatrix(VU_MATRIX *m0, VU_MATRIX *m1, VU_MATRIX *out)
 {
-	
+
 	asm __volatile__ (
    "lqc2		vf1, 0x00(%0)	\n"
    "lqc2		vf2, 0x10(%0)	\n"
@@ -206,7 +206,7 @@ void Vu0ApplyMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
 	out->y = m->m[0][1]*v0->x + m->m[1][1]*v0->y + m->m[2][1]*v0->z + m->m[3][1]*v0->w;
 	out->z = m->m[0][2]*v0->x + m->m[1][2]*v0->y + m->m[2][2]*v0->z + m->m[3][2]*v0->w;
 	out->w = m->m[0][3]*v0->x + m->m[1][3]*v0->y + m->m[2][3]*v0->z + m->m[3][3]*v0->w;
-	
+
 	*/
 
 	asm __volatile__(
@@ -220,7 +220,7 @@ void Vu0ApplyMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
         "vmaddaz.xyzw    ACC,   vf18,vf20	\n"
         "vmaddw.xyzw     vf20,  vf19,vf20	\n"
         "sqc2            vf20,0x00(%2)	\n"
-        
+
         : : "r"(m), "r"(v0), "r"(out)
     );
 
@@ -234,7 +234,7 @@ void Vu0ApplyMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
 
 void Vu0ApplyRotMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
 {
-	/*	
+	/*
 	out->x = m->m[0][0]*v0->x + m->m[1][0]*v0->y + m->m[2][0]*v0->z;
 	out->y = m->m[0][1]*v0->x + m->m[1][1]*v0->y + m->m[2][1]*v0->z;
 	out->z = m->m[0][2]*v0->x + m->m[1][2]*v0->y + m->m[2][2]*v0->z;
@@ -250,7 +250,7 @@ void Vu0ApplyRotMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
         "vmaddz.xyz		 vf20,  vf18,vf20	\n"
 		"vmulw.w		 vf20,	vf0, vf0	\n"	// out->w = 1.0f
         "sqc2            vf20,	0x00(%2)	\n" // copy result to out
-        
+
         : : "r"(m), "r"(v0), "r"(out)
     );
 
@@ -262,7 +262,7 @@ void Vu0ApplyRotMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
 
 void Vu0CopyMatrix(VU_MATRIX *dest, VU_MATRIX *src)
 {
-	
+
 	asm __volatile__ (
    "lqc2		vf1,   0(%1)	\n"		// load 1 qword from ee
    "lqc2		vf2,  16(%1)	\n"		// load 1 qword from ee
@@ -273,9 +273,9 @@ void Vu0CopyMatrix(VU_MATRIX *dest, VU_MATRIX *src)
    "sqc2		vf2,  16(%0)	\n"		// store 1 qword in ee
    "sqc2		vf3,  32(%0)	\n"		// store 1 qword in ee
    "sqc2		vf4,  48(%0)	\n"		// store 1 qword in ee
-   
+
    : : "r" (dest), "r" (src)
-   );	
+   );
 }
 
 
@@ -286,24 +286,24 @@ void Vu0CopyMatrix(VU_MATRIX *dest, VU_MATRIX *src)
 float Vu0DotProduct(VU_VECTOR *v0, VU_VECTOR *v1)
 {
 	float ret;
-   
+
 	/*	ret = (v0.x*v1.x + v0.y*v1.y + v0.z*v1.z);*/
 
 	asm __volatile__ (
    "lqc2		vf1, 0(%0)		\n"		// load 1 qword from ee
    "lqc2		vf2, 0(%1)		\n"		// load 1 qword from ee
-   
-   "vmul.xyz	vf3, vf1, vf2	\n"		// mul v0 by v1 
-   
+
+   "vmul.xyz	vf3, vf1, vf2	\n"		// mul v0 by v1
+
    "vaddy.x		vf3, vf3, vf3y	\n"		// add x+y and store in x
    "vaddz.x		vf3, vf3, vf3z	\n"		// add z+x and store in x
 
    "qmfc2		$2, vf3			\n"		// copy vector to ee reg
 
 	"sw			$2, 0(%2)		\n"		// copy reg to mem
-   
+
    : : "r" (v0), "r" (v1), "r" (&ret)
-   );	
+   );
 
 	return ret;
 }

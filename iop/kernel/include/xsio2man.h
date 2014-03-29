@@ -11,7 +11,7 @@ void sio2_mtap_transfer_init();
 void sio2_transfer_reset();
 
 void sio2_mtap_change_slot_set(int (*cb)(u32 *));
-void sio2_mtap_get_slot_max_set(int (*cb)(int)); 
+void sio2_mtap_get_slot_max_set(int (*cb)(int));
 void sio2_mtap_get_slot_max_set2(int (*cb)(int));
 void sio2_mtap_update_slots_set(void (*cb)(void));
 

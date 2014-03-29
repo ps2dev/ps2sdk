@@ -32,7 +32,7 @@ s32 padEnd()
 				if((openSlots[port] >> slot) & 0x1)
 					padPortClose(port, slot, 1);
 			}
-		
+
 		SetEventFlag(vblankData.eventflag, EF_EXIT_THREAD);
 
 		vblankData.padEnd = 1;
@@ -49,7 +49,7 @@ s32 padEnd()
 
 		freepad_init = 0;
 	}
-	
+
 	return 1;
 }
 
@@ -95,7 +95,7 @@ u32 padSetMainMode(u32 port, u32 slot, u32 mode, u32 lock)
 	{
 		padState[port][slot].mode = mode;
 		padState[port][slot].lock = lock;
-		padState[port][slot].runTask = TASK_SET_MAIN_MODE; 
+		padState[port][slot].runTask = TASK_SET_MAIN_MODE;
 		padState[port][slot].reqState = PAD_RSTAT_BUSY;
 		padState[port][slot].taskTid = padState[port][slot].setmainmodeTid;
 
@@ -180,7 +180,7 @@ s32 padInfoMode(u32 port, u32 slot, s32 val1, u32 val2)
 				return 0;
 			else
 				return padState[port][slot].modeCurOffs;
-		}		
+		}
 
 
 		if(val1 == 4)
@@ -217,7 +217,7 @@ s32 padInfoMode(u32 port, u32 slot, s32 val1, u32 val2)
 u32 SetActDirect3(u32 port, u32 slot)
 {
 	u32 ret = 0;
-	u32 p = 0, s = 0;	
+	u32 p = 0, s = 0;
 
 	while(p < padGetPortMax())
 	{
@@ -240,7 +240,7 @@ u32 SetActDirect3(u32 port, u32 slot)
 							{
 								u8 *act = (u8*)padState[port][slot].actData;
 								ret += act[3+i];
-							}	
+							}
 						}
 					}
 				}
@@ -291,14 +291,14 @@ u32 padSetActDirect(u32 port, u32 slot, u8 *actData)
 		}
 		else
 		{
-		
+
 			u32 i;
-	
+
 			for(i=0; i < 6; i++)
 				padState[port][slot].ee_actDirectData[i] = actData[i];
-		
+
 			padState[port][slot].ee_actDirectSize = 6;
-			
+
 			return 1;
 		}
 	}
@@ -335,7 +335,7 @@ u32 padGetButtonMask(u32 port, u32 slot)
 
 	if( (padState[port][slot].currentTask != TASK_UPDATE_PAD) || ( padState[port][slot].modeConfig < MODE_CONFIG_READY) )
 		return ret;
-	
+
 	if( padState[port][slot].model < 2)
 		return ret;
 
@@ -343,7 +343,7 @@ u32 padGetButtonMask(u32 port, u32 slot)
 	ret |= (u32)padState[port][slot].buttonMask[1] << 8;
 	ret |= (u32)padState[port][slot].buttonMask[2] << 16;
 	ret |= (u32)padState[port][slot].buttonMask[3] << 24;
-	
+
 	return ret;
 }
 
@@ -351,10 +351,10 @@ u32 padSetButtonInfo(u32 port, u32 slot, u32 info)
 {
 	if( (padState[port][slot].currentTask != TASK_UPDATE_PAD) || ( padState[port][slot].modeConfig < MODE_CONFIG_READY) )
 		return 0;
-	
+
 	if( padState[port][slot].model < 2)
 		return 0;
-	
+
 	if( padState[port][slot].reqState != PAD_RSTAT_BUSY)
 	{
 		u32 i;
@@ -373,7 +373,7 @@ u32 padSetButtonInfo(u32 port, u32 slot, u32 info)
 		padState[port][slot].runTask = TASK_SET_BUTTON_INFO;
 		padState[port][slot].taskTid = padState[port][slot].setbuttoninfoTid;
 
-		return 1;		
+		return 1;
 	}
 
 
@@ -384,13 +384,13 @@ u32 padSetVrefParam(u32 port, u32 slot, u8 *vparam)
 {
 	if( (padState[port][slot].currentTask != TASK_UPDATE_PAD) || ( padState[port][slot].modeConfig < MODE_CONFIG_READY) )
 		return 0;
-	
+
 	if( padState[port][slot].model < 2)
 		return 0;
 
 	if( padState[port][slot].reqState != PAD_RSTAT_BUSY)
 	{
-		u32 i;	
+		u32 i;
 
 		for(i=0; i < 11; i++)
 			padState[port][slot].vrefParam[i] = vparam[i];
@@ -401,7 +401,7 @@ u32 padSetVrefParam(u32 port, u32 slot, u8 *vparam)
 
 
 		return 1;
-	}	
+	}
 
 	return 0;
 }

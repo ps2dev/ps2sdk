@@ -23,7 +23,7 @@
 
 static unsigned sbuff[64] __attribute__((aligned (64)));
 static struct t_SifRpcClientData cd0;
-#define IOP_MEM	0xbc000000 // EE mapped IOP mem 
+#define IOP_MEM	0xbc000000 // EE mapped IOP mem
 char* songbuffer_addr;
 int ahx_init_done = 0;
 
@@ -50,7 +50,7 @@ void iop_readwrite(void *addr, void *buf, u32 size, u32 read)
 //***************************************************************
 int AHX_Init()
 {
-	int i;	
+	int i;
 	// struct t_SifDmaTransfer sdt;
 
 	// if already init'd, exit
@@ -172,7 +172,7 @@ int  AHX_SetBoost(int boostValue)
 {
 	int i;
 	while(1){
-		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1; 
+		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
  		if (cd0.server != 0) break;
     	i = 0x10000;
     	while(i--);
@@ -188,14 +188,14 @@ int  AHX_SetBoost(int boostValue)
 //	-------------
 //		Switches oversampling on/off.  Oversampling produces a
 //      smoother output sound but uses a lot more CPU power. It
-//      sounds nasty/slows down for a lot of songs - use with 
+//      sounds nasty/slows down for a lot of songs - use with
 //      caution (or not at all)
 //***************************************************************
 int  AHX_ToggleOversampling()
 {
 	int i;
 	while(1){
-		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1; 
+		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
  		if (cd0.server != 0) break;
     	i = 0x10000;
     	while(i--);
@@ -216,7 +216,7 @@ int AHX_Quit()
 {
 	int i;
 	while(1){
-		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1; 
+		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
  		if (cd0.server != 0) break;
     	i = 0x10000;
     	while(i--);
@@ -231,14 +231,14 @@ int AHX_Quit()
 //	-------------
 //		This loads a song from a buffer in memory. It copies
 //      [songsize] bytes from [songdata] to the IOP memory
-//      song buffer. 
+//      song buffer.
 //
 //      returns number of subsongs.
 //***************************************************************
 int AHX_LoadSongBuffer(char* songdata, int songsize)
 {
 	int i;
-	
+
 	// write song data to IOP song buffer
 	iop_readwrite(songbuffer_addr, songdata, songsize, 0);
 
@@ -248,7 +248,7 @@ int AHX_LoadSongBuffer(char* songdata, int songsize)
     	i = 0x10000;
     	while(i--);
 	}
-	
+
 	// set oversample and boost
 	sbuff[0] = (unsigned)songsize;
 
@@ -263,7 +263,7 @@ int AHX_LoadSongBuffer(char* songdata, int songsize)
 //***************************************************************
 //	AHX LongSongBuffer
 //	-------------
-//		This loads a song from disk etc. It loads the songdata 
+//		This loads a song from disk etc. It loads the songdata
 //      into memory and passes it to LongSongBuffer.
 //
 //      returns number of subsongs.
@@ -273,21 +273,21 @@ int AHX_LoadSong(char* filename)
 	int fd, fdSize;
 	char* buffer;
 
-	fd = fioOpen(filename, O_RDONLY);  
-	if(fd < 0) 
-	{ 
+	fd = fioOpen(filename, O_RDONLY);
+	if(fd < 0)
+	{
 		 printf("ERROR LOADING SONG\n");
 		 return -1;
 	}
-	fdSize = fioLseek(fd, 0, SEEK_END);  
-	fioLseek(fd, 0, SEEK_SET);  	  
-	buffer = malloc(fdSize);  
-	if(!buffer)  
-	{ 
-		 printf("ERROR ALLOCATING SONG MEMORY SONG\n"); 
+	fdSize = fioLseek(fd, 0, SEEK_END);
+	fioLseek(fd, 0, SEEK_SET);
+	buffer = malloc(fdSize);
+	if(!buffer)
+	{
+		 printf("ERROR ALLOCATING SONG MEMORY SONG\n");
 		 return -1;
-	} 	 
-	fioRead(fd, buffer, fdSize); 
+	}
+	fioRead(fd, buffer, fdSize);
 	fioClose(fd);
 	return AHX_LoadSongBuffer(buffer, fdSize);
 }

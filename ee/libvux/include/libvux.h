@@ -69,15 +69,15 @@ typedef struct
 
 	unsigned short	x;		// format is same as gs 0:12:4
 	unsigned short	y;		// format is same as gs 0:12:4
-	unsigned int	z;		
-	
+	unsigned int	z;
+
 }VU_SXYZ;
 
 
 
 
 /*2D Screen xy and z with fog coefficient (64 bit)*/
-typedef struct 
+typedef struct
 {
 
 	unsigned short	x;		// format is same as gs 0:12:4
@@ -285,9 +285,9 @@ extern int VuxLightNormal(VU_VECTOR *normal, VU_CVECTOR *col0, void *light, unsi
 
 /**/
 extern VU_MATRIX	VuWorldMatrix;
-extern VU_MATRIX	VuViewMatrix;		  
-extern VU_MATRIX	VuPrjectionMatrix;	
-extern VU_MATRIX	VuLocalScreenMatrix; 
+extern VU_MATRIX	VuViewMatrix;
+extern VU_MATRIX	VuPrjectionMatrix;
+extern VU_MATRIX	VuLocalScreenMatrix;
 
 
 

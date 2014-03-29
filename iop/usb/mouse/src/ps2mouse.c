@@ -147,7 +147,7 @@ int ps2mouse_probe(int devId)
   //printf("PS2Mouse_probe devId %d\n", devId);
 
   dev = UsbGetDeviceStaticDescriptor(devId, NULL, USB_DT_DEVICE); /* Get device descriptor */
-  if(!dev) 
+  if(!dev)
     {
       printf("ERROR: Couldn't get device descriptor\n");
       return 0;
@@ -174,7 +174,7 @@ int ps2mouse_probe(int devId)
       printf("ERROR: No interfaces available\n");
       return 0;
     }
-     
+
   intf = (UsbInterfaceDescriptor *) ((char *) conf + conf->bLength); /* Get first interface */
 /*   printf("Interface Length %d Endpoints %d Class %d Sub %d Proto %d\n", intf->bLength, */
 /* 	 intf->bNumEndpoints, intf->bInterfaceClass, intf->bInterfaceSubClass, */
@@ -191,7 +191,7 @@ int ps2mouse_probe(int devId)
   endp = (UsbEndpointDescriptor *) ((char *) endp + endp->bLength); /* Go to the data endpoint */
 
   //printf("Endpoint 1 Addr %d, Attr %d, MaxPacket %d\n", endp->bEndpointAddress, endp->bmAttributes, endp->wMaxPacketSizeLB);
-  
+
   if(((endp->bmAttributes & USB_ENDPOINT_XFERTYPE_MASK) != USB_ENDPOINT_XFER_INT) ||
      ((endp->bEndpointAddress & USB_ENDPOINT_DIR_MASK) != USB_DIR_IN))
     {
@@ -219,7 +219,7 @@ int ps2mouse_connect(int devId)
   //printf("PS2Mouse_connect devId %d\n", devId);
 
   dev = UsbGetDeviceStaticDescriptor(devId, NULL, USB_DT_DEVICE); /* Get device descriptor */
-  if(!dev) 
+  if(!dev)
     {
       printf("ERROR: Couldn't get device descriptor\n");
       return 1;
@@ -231,7 +231,7 @@ int ps2mouse_connect(int devId)
       printf("ERROR: Couldn't get configuration descriptor\n");
       return 1;
     }
-     
+
   intf = (UsbInterfaceDescriptor *) ((char *) conf + conf->bLength); /* Get first interface */
   endp = (UsbEndpointDescriptor *) ((char *) intf + intf->bLength);
   endp = (UsbEndpointDescriptor *) ((char *) endp + endp->bLength); /* Go to the data endpoint */
@@ -317,7 +317,7 @@ typedef struct _string_descriptor
 {
   u8 buf[200];
   char *desc;
-} string_descriptor; 
+} string_descriptor;
 
 void ps2mouse_getstring_set(int resultCode, int bytes, void *arg)
 
@@ -340,7 +340,7 @@ void ps2mouse_getstring_set(int resultCode, int bytes, void *arg)
 	}
       printf("%s: %s\n", strBuf->desc, string);
     }
-  
+
   FreeSysMemory(arg);
 }
 
@@ -349,7 +349,7 @@ void usb_getstring(int endp, int index, char *desc)
 {
   u8 *data;
   string_descriptor *str;
-  int ret; 
+  int ret;
 
   data = (u8 *) AllocSysMemory(0, sizeof(string_descriptor), NULL);
   str = (string_descriptor *) data;
@@ -357,7 +357,7 @@ void usb_getstring(int endp, int index, char *desc)
   if(data != NULL)
     {
       str->desc = desc;
-      ret = UsbControlTransfer(endp, 0x80, USB_REQ_GET_DESCRIPTOR, (USB_DT_STRING << 8) | index, 
+      ret = UsbControlTransfer(endp, 0x80, USB_REQ_GET_DESCRIPTOR, (USB_DT_STRING << 8) | index,
 			       0, sizeof(string_descriptor) - 4, data, ps2mouse_getstring_set, data);
       if(ret != USB_RC_OK)
 	{
@@ -386,7 +386,7 @@ void ps2mouse_config_set(int resultCode, int bytes, void *arg)
   if(dev != NULL)
     {
       int ret;
-      
+
       ret = UsbInterruptTransfer(dev->dataEndp, &dev->data, dev->packetSize, ps2mouse_data_recv, arg);
     }
 }
@@ -395,13 +395,13 @@ void ps2mouse_data_recv(int resultCode, int bytes, void *arg)
 
 {
   mouse_dev *dev;
-  
+
   if((resultCode != USB_RC_OK) && (resultCode != USB_RC_DATAOVER))
     {
       printf("PS2MOUSE: Data Recv set res %d, bytes %d, arg %p\n", resultCode, bytes, arg);
       return;
     }
-  
+
   //printf("PS2MOUSE: Data Recv set res %d, bytes %d, arg %p\n", resultCode, bytes, arg);
 
   dev = (mouse_dev *) arg;

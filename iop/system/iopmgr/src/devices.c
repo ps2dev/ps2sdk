@@ -1,4 +1,4 @@
-/* 
+/*
 # _____     ___ ____     ___ ____
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
@@ -20,7 +20,7 @@
 #include "iopmgr.h"
 
 /*! \brief Get a pointer to an ioman device handler.
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  *
  *  \param device Stringname of device (eg "host").
  *  \return Pointer to device structure.
@@ -53,7 +53,7 @@ iop_device_t *iopmgr_get_iomandev(char *device)
 }
 
 /*! \brief Get a pointer to an iomanx device handler.
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  *
  *  \param device Stringname of device (eg "hdd").
  *  \return Pointer to device structure.
@@ -86,7 +86,7 @@ iop_device_t *iopmgr_get_iomanxdev(char *device)
 }
 
 /*! \brief Get a list of devices of a certain type
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  *
  *  \param man Device manager mask (IOPMGR_DEVTYPE_IOMAN or IOPMGR_DEVTYPE_IOMANX).
  *  \param devtype Device type mask (0x10 for filesystems).
@@ -107,13 +107,13 @@ int iopmgr_get_devicelist(int man,int devtype,char *buffer)
 
   /* do the ioman devices */
   if ((man & IOPMGR_DEVTYPE_IOMAN))
-  if ((info = smod_get_mod_by_name(IOPMGR_IOMAN_IDENT))) 
+  if ((info = smod_get_mod_by_name(IOPMGR_IOMAN_IDENT)))
   {
     /* Find the start of the device info array, in .bss.  */
     devinfo_table = (iop_device_t **)(info->text_start + info->text_size + info->data_size + 0x0c);
 
     /* The device info table had 16 entries, but some may be empty.  Just look at all of them.  */
-    for (i = 0; i < 16; i++) 
+    for (i = 0; i < 16; i++)
     {
       if (devinfo_table[i])
         if ((devinfo_table[i]->type & devtype))
@@ -127,13 +127,13 @@ int iopmgr_get_devicelist(int man,int devtype,char *buffer)
 
   /* do the iomanx devices */
   if ((man & IOPMGR_DEVTYPE_IOMANX))
-  if ((info = smod_get_mod_by_name(IOPMGR_IOMANX_IDENT))) 
+  if ((info = smod_get_mod_by_name(IOPMGR_IOMANX_IDENT)))
   {
     /* Find the start of the device info array, in .bss.  */
     devinfo_table = (iop_device_t **)(info->text_start + info->text_size + info->data_size);
 
     /* The device info table had 32 entries, but some may be empty.  Just look at all of them.  */
-    for (i = 0; i < 32; i++) 
+    for (i = 0; i < 32; i++)
     {
       if (devinfo_table[i])
         /* only add iomanx ones here, so must have extended flag set  else we get duplication with new iomanx */
@@ -149,7 +149,7 @@ int iopmgr_get_devicelist(int man,int devtype,char *buffer)
 }
 
 /*! \brief Get a pointer to a device of either type
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  *
  *  \param device Stringname of device (eg "host).
  *  \Return Pointer to device structure.
@@ -169,13 +169,13 @@ iop_device_t *iopmgr_get_device(char *device)
 }
 
 /*! \brief Returns which i/o manager handles the given device.
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  *
  *  \param device Stringname of device (eg "host).
  *  \Return numeric value for i/o manager.
  *
  * return values:
- *   IOPMGR_DEVTYPE_INVALID if not found, 
+ *   IOPMGR_DEVTYPE_INVALID if not found,
  *   IOPMGR_DEVTYPE_IOMAN if found and ioman device,
  *   IOPMGR_DEVTYPE_IOMANX if found and iomanx device.
  */

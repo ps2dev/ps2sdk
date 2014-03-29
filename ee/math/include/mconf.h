@@ -19,7 +19,7 @@
  * The file also includes a conditional assembly definition
  * for the type of computer arithmetic (IEEE, DEC, Motorola
  * IEEE, or UNKnown).
- * 
+ *
  * For Digital Equipment PDP-11 and VAX computers, certain
  * IBM systems, and others that use numbers with a 56-bit
  * significand, the symbol DEC should be defined.  In this
@@ -56,7 +56,7 @@
  * may fail on many systems.  Verify that they are supposed
  * to work on your computer.
  */
-
+
 /*
 Cephes Math Library Release 2.3:  June, 1995
 Copyright 1984, 1987, 1989, 1995 by Stephen L. Moshier

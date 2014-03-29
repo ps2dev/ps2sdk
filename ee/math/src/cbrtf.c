@@ -31,7 +31,7 @@
  *    IEEE      0,1e38      100000      7.6e-8      2.7e-8
  *
  */
-/*							cbrt.c  */
+/*							cbrt.c  */
 
 /*
 Cephes Math Library Release 2.2:  June, 1992

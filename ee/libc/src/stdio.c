@@ -739,10 +739,7 @@ int fputs(const char *s, FILE *stream)
 
   len = ((fwrite(s, 1, temp, stream) == temp) ? temp : EOF);
 
-  if (len != EOF) {
-    fputc('\n', stream);
-  }
-  return len + 1;
+  return len;
 }
 #endif
 

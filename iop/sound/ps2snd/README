@@ -1,13 +1,13 @@
 PS2SND - PlayStation2 Sound Module
- 
-  ___                    _            
+
+  ___                    _
  / _ \__  _____ _ ___  _(_)_____  __  __
 | (_) \ \/ / -_) '_\ \/ / / -_) \/  \/ /
- \___/ \__/\___|_|  \__/|_\___|\__/\__/ 
-========================================                                    
+ \___/ \__/\___|_|  \__/|_\___|\__/\__/
+========================================
 
 What the IRX provides:
-* Remote (EE) usage of libsd (or freesd) functions 
+* Remote (EE) usage of libsd (or freesd) functions
 * ADPCM streaming from a file (no EE participation required!)
 * ADPCM streaming from EE ram
 * A way to sync to the ADPCM stream
@@ -16,7 +16,7 @@ What the IRX provides:
 What the IRX requires:
 * A sane version of libsd or freesd
 
- ___      _        _ _    
+ ___      _        _ _
 |   \ ___| |_ __ _(_) |___
 | |) / -_)  _/ _` | | (_-<
 |___/\___|\__\__,_|_|_/__/
@@ -32,7 +32,7 @@ File layout
 ------------------
 Stereo:
 ╒════════════╤════════════╤════════════╤════════════╤═══╤════════════╤════════════╕
-│ LeftChunk  │ RightChunk │ LeftChunk  │ RightChunk │...│ LeftChunk  │ RightChunk │ 
+│ LeftChunk  │ RightChunk │ LeftChunk  │ RightChunk │...│ LeftChunk  │ RightChunk │
 ╘════════════╧════════════╧════════════╧════════════╧═══╧════════════╧════════════╛
 
 Obviously the chunk size matters here, so make sure you give ps2adpcm (the ADPCM encoder) the same chunk size as ps2snd (the IOP module), otherwise the SPU2 will sound like it's been taking some rather fun drug.
@@ -47,7 +47,7 @@ SPU2 Buffer layout for streaming
     Interrupt points
     ▼        ▼
 ╒═══╤════════╤════════╤ ═ ═ ═ ═ ═ ═ ═ ═ ╤═══╕
-│...│ Left1  │ Left2  │ Right1 │ Right2 │...│ 
+│...│ Left1  │ Left2  │ Right1 │ Right2 │...│
 ╘═══╧════════╧════════╧ ═ ═ ═ ═ ═ ═ ═ ═ ╧═══╛
     ▲                 ▲                 ▲
     BufAddr           BufAddr+          BufAddr+
@@ -61,19 +61,19 @@ The SPU2 changes buffers automagicly using it's internal loop funcitonality, thi
 
 Sequence:
 
-1  buf1 and buf2 are initialy filled. 
+1  buf1 and buf2 are initialy filled.
 2  buf1 is refilled when the SPU2 hits buf2.
 3  buf2 is refilled when the SPU2 hits buf1.
 4  goto 2
-10 print "hello world ;)" 
+10 print "hello world ;)"
 
 NOTE: The stream must be at least two buflens big!!!
 
- ___             _   _             
+ ___             _   _
 | __|  _ _ _  __| |_(_)___ _ _  ___
 | _| || | ' \/ _|  _| / _ \ ' \(_-<
 |_| \_,_|_||_\__|\__|_\___/_||_/__/
-===================================                                   
+===================================
 
 
 sndStreamOpen
@@ -83,13 +83,13 @@ Description:
 
 Prototype:
 	int sndStreamOpen(char *file, uint32_t voices, uint32_t flags, uint32_t bufaddr, uint32_t chunk);
-	
+
 Arguments:
 	file    - Name of the stream file
 	voices  - lower 16bits specifies voice for ch0(left), upper 16bits specifies voice for ch1(right);
 	flags   - Various flags, bit0 means stereo
 	bufaddr - Address of buffer in spu2 ram
-	chunk   - Size of one chunk 
+	chunk   - Size of one chunk
 
 Returns:
 	0  - success
@@ -172,11 +172,11 @@ Retruns:
 	-1  - No stream!
 	>=0 - Block number
 
- ___              
+ ___
 | _ )_  _ __ _ ___
 | _ \ || / _` (_-<
 |___/\_,_\__, /__/
-         |___/    
+         |___/
 ==================
 
 This is quite untested in real life situations, i'm sure there are lots of interesting bugs.
@@ -185,8 +185,8 @@ If you find one report it to jbit on #ps2dev, or email jbit<at>jbit<dot>net, or 
 The only one i'm aware of at the moment is sometimes the IOP locks up when streaming from "host:" and you reset using "ps2client reset", this could be a ps2link problem however. To be safe (until the bug is fixed) make sure the stream is _CLOSED_ before reseting.
 
 
- ___     _                
-| __|  _| |_ _  _ _ _ ___ 
+ ___     _
+| __|  _| |_ _  _ _ _ ___
 | _| || |  _| || | '_/ -_)
 |_| \_,_|\__|\_,_|_| \___|
 ==========================

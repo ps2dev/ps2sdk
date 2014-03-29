@@ -41,7 +41,7 @@ enum _ps2lib_errors {
 	E_LIB_MATH_DOMAIN	= 33,		/* libc: Math arg out of domain of func */
 	E_LIB_MATH_RANGE	= 34,		/* libc: Math result not representable */
 
-	
+
 	/* Errors returned by the IOP kernel and system modules.  */
 	E_IOP_INTR_CONTEXT	= 100,		/* IOP is in exception context. */
 	E_IOP_DEPENDANCY	= 200,		/* inter IRX dependancy error. */

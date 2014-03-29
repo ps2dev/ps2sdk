@@ -38,7 +38,7 @@ int journalReset(u32 device)
 int journalWrite(apa_cache *clink)
 {
 	clink->header->checksum=journalCheckSum(clink->header);
-	if(atadDmaTransfer(clink->device, clink->header, 
+	if(atadDmaTransfer(clink->device, clink->header,
 		(journalBuf.num << 1)+APA_SECTOR_APAL_HEADERS, 2, ATAD_MODE_WRITE))
 			return -EIO;
 	journalBuf.sectors[journalBuf.num]=clink->sector;

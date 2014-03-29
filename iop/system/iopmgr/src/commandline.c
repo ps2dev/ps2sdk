@@ -22,7 +22,7 @@ extern int shutdown();
 
 /*! \brief Prints out a list of all currently registered libraries
  *         with their name and version.
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  */
 void list_all_libraries()
 {
@@ -37,7 +37,7 @@ void list_all_libraries()
        string just in case the name is 8 chars.  */
     memset(name, 0, sizeof(name));
     memcpy(name, libptr->name, 8);
-    printf("    %-20s v%d.%d\n",name, 
+    printf("    %-20s v%d.%d\n",name,
      (libptr->version&0xff00)>>8,libptr->version&0xff);
     libptr = libptr->prev;
   }
@@ -47,7 +47,7 @@ void list_all_libraries()
 
 /*! \brief Prints out a list of all currently loaded IRX modules
  *         with description and version number.
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  */
 void list_all_modules()
 {
@@ -65,7 +65,7 @@ void list_all_modules()
 
 /*! \brief Print out all devices for ONLY ioman
  *         and shows which one they belong to.
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  */
 void list_devices_ioman()
 {
@@ -96,7 +96,7 @@ void list_devices_ioman()
 
 /*! \brief Print out all devices for ONLY iomanx
  *         and shows which one they belong to.
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  */
 void list_devices_iomanx()
 {
@@ -116,7 +116,7 @@ void list_devices_iomanx()
 	/* The device info table had 32 entries, but some may be empty.  Just look at all of them.  */
 	for (i = 0; i < 32; i++) {
 		if (devinfo_table[i])
-			printf("    %-10s: %-28s v%d.%d type:%08X\n", 
+			printf("    %-10s: %-28s v%d.%d type:%08X\n",
 			devinfo_table[i]->name, devinfo_table[i]->desc,
 			(devinfo_table[i]->version&0xff00)>>8,
 			(devinfo_table[i]->version&0xff),
@@ -129,7 +129,7 @@ void list_devices_iomanx()
  *         and shows which one they belong to.
  *
  *  \param mgrtype Device manager type search mask (IOPMGR_DEVTYPE_XXXX).
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  */
 void list_fs_devices(int mgrtype)
 {
@@ -141,7 +141,7 @@ void list_fs_devices(int mgrtype)
 
   count = iopmgr_get_devicelist(mgrtype,IOP_DT_FS,bufptr);
   printf("filesystems found : %d\n",count);
-  
+
   for (i=0;i<count;i++)
   {
     printf(" %02d : %-10s - ",i,bufptr);
@@ -157,7 +157,7 @@ void list_fs_devices(int mgrtype)
 
 
 /*! \brief Handles basic parsing of commands, for command execution mode.
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  *
  *  \param command Pointer to command string.
  */
@@ -192,14 +192,14 @@ void cmdline_handle(char *command, char *arg1)
   else if (!strncmp("unreg",command,7))
   {
     if (arg1 != 0)
-    { 
+    {
       printf("unregistering : '%s' - ",arg1);
       switch(slib_release_library(arg1))
       {
         case 0: printf("UnRegistered\n"); break;
         case -1: printf("Failed to UnRegister\n"); break;
         case -2: printf("Library Not Present\n"); break;
-      } 
+      }
     }
     else printf("\nNo Library Specified\n");
   }

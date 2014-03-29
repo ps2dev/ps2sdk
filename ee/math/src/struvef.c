@@ -31,7 +31,7 @@
  *    IEEE      -10,10      100000      9.0e-5      4.0e-6
  *
  */
-
+
 
 /*
 Cephes Math Library Release 2.2:  July, 1992
@@ -324,7 +324,7 @@ return( y );
  * for Struve function
  *
  *	 v	 x
- * 
+ *
  *	 0	19.2
  *	 1	18.95
  *	 2	19.15

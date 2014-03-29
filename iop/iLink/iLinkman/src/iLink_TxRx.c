@@ -97,7 +97,7 @@ static unsigned int TimeoutCallbackFunction(void *argv){
 	return 0;
 }
 
-static int iLinkSync(unsigned int PayloadLength){ 
+static int iLinkSync(unsigned int PayloadLength){
 	u32 FlagBits;
 
 	DEBUG_PRINTF("Payload transmitted. Now awaiting response...\n");

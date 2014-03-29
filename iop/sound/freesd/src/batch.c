@@ -29,7 +29,7 @@ s32 SifDmaBatch(u32 ee_addr, void *iop_addr, u32 size)
 	CpuSuspendIntr((int *)&intr_stat);
 	dma_id = SifSetDma(&dma, SIF_DMA_TO_EE);
 	CpuResumeIntr(intr_stat);
-	
+
 	while(SifDmaStat(dma_id) >= 0);
 
 	if(dma_id == 0) return -1;
@@ -41,14 +41,14 @@ s32 SdProcBatch(SdBatch *batch, u32 *rets, u32 num)
 {
 	s32 loop;
 	s32 ret;
-	
+
 	for(loop = 0; loop < num; loop++)
 	{
 		ret = 0;
-		
+
 		switch(batch[loop].func)
 		{
-		case BATCH_SETPARAM: 
+		case BATCH_SETPARAM:
 			SdSetParam(batch[loop].entry, batch[loop].val);
 			break;
 		case BATCH_GETPARAM:
@@ -98,9 +98,9 @@ s32 SdProcBatchEx(SdBatch *batch, u32 *rets, u32 num, u32 voice)
 	s32 ret;
 	s32 voice_loop;
 	s32 cmd_count;
-	
+
 	cmd_count = 0;
-	
+
 	for(loop = 0; loop < num; loop++)
 	{
 		ret = 0;
@@ -125,7 +125,7 @@ s32 SdProcBatchEx(SdBatch *batch, u32 *rets, u32 num, u32 voice)
 					cmd_count--;
 				}
 			} break;
-		
+
 			case BATCH_GETPARAM:
 			{
 				if((batch[loop].entry & 0x3E) != 0x3E)
@@ -155,11 +155,11 @@ s32 SdProcBatchEx(SdBatch *batch, u32 *rets, u32 num, u32 voice)
 			case BATCH_SETSWITCH:
 				SdSetSwitch(batch[loop].entry, batch[loop].val);
 			break;
-		
+
 			case BATCH_GETSWITCH:
 				ret = SdGetSwitch(batch[loop].entry);
 			break;
-		
+
 			case BATCH_SETADDR:
 			{
 				if((batch[loop].entry & 0x3E) != 0x3E)
@@ -195,7 +195,7 @@ s32 SdProcBatchEx(SdBatch *batch, u32 *rets, u32 num, u32 voice)
 						ret = SdGetAddr((batch[loop].entry & 0xFFC1) | (1 << (voice_loop + 1)));
 						cmd_count++;
 						}
-				
+
 						if(rets)
 						{
 						rets[cmd_count] = ret;
@@ -204,24 +204,24 @@ s32 SdProcBatchEx(SdBatch *batch, u32 *rets, u32 num, u32 voice)
 				}
 				cmd_count--;
 			} break;
-		
+
 			case BATCH_SETCORE:
 				SdSetCoreAttr(batch[loop].entry, batch[loop].val);
 				break;
-		
+
 			case BATCH_GETCORE:
 				ret = SdGetCoreAttr(batch[loop].entry);
 				break;
-			
+
 			case BATCH_WRITEIOP:
 				*((u32 *) batch[loop].val) = batch[loop].entry;
 				break;
-		
+
 			case BATCH_WRITEEE:
 				BatchData = batch[loop].entry;
 				SifDmaBatch(batch[loop].val, &BatchData, 4);
 				break;
-		
+
 			case BATCH_EERETURN:
 				SifDmaBatch(batch[loop].val, rets, batch[loop].entry);
 				break;

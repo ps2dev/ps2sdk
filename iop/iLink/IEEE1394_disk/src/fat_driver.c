@@ -997,7 +997,7 @@ fat_driver * fat_getData(int device)
 {
     if (device >= NUM_DRIVES)
         return NULL;
-    
+
     if (g_fatd[device] == NULL || g_fatd[device]->dev == NULL)
         return NULL;
     else

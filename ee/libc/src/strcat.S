@@ -11,17 +11,17 @@
 */
 
 /* Assembler version of strcat that uses quadword instructions.
-	
+
    Jeff Johnston, Cygnus Solutions, Feb 10/1999.
 
    ============================================================
    Copyright (C) 1999 by Cygnus Solutions. All rights reserved.
- 
+
    Permission to use, copy, modify, and distribute this
    software is freely granted, provided that this notice
    is preserved.
    ============================================================  */
-	
+
 	.text
 	.align	2
 	.globl	strcat
@@ -40,7 +40,7 @@ strcat:
 
 /* check if dest string is doubleword aligned, quadword aligned or neither in which
    case check for null terminator a byte at a time */
-	
+
 	andi	$2,$16,0x7
 	.set	noreorder
 	.set	nomacro
@@ -62,7 +62,7 @@ strcat:
 /* dest string is quadword aligned, load a quadword at a time looking for a null terminator.
    Loop until null terminator is found and then search last quadword for actual position
    of null terminator. */
-		
+
 	lq	$2,0($16)
 	pcpyld	$7,$3,$3
 	pcpyld	$8,$4,$4
@@ -106,8 +106,8 @@ $L14:
 /* dest is doubleword aligned.  Load a doubleword at a time, looking for a null terminator.
    Loop until null terminator is found and then check last doubleword for actual position
    of null terminator. */
-	
-$L3:	
+
+$L3:
 	dsubu	$3,$6,$3
 	nor	$2,$0,$6
 	and	$3,$3,$2
@@ -137,17 +137,17 @@ $L16:
 
 $L4:
 	move	$4,$6
-	
+
 #else /* __OPTIMIZE_SIZE__ */
-	
+
 	sq	$31,16($sp)
 
 #endif /* __OPTIMIZE_SIZE__ */
 
 /* search a byte at a time for null terminator of dest string and then copy src string
    to this position using strcpy to complete concatenation. */
-	
-$L9:				
+
+$L9:
 $L15:
 	lb	$2,0($4)
 	.set	noreorder
@@ -173,12 +173,3 @@ $L15:
 	.set	reorder
 
 	.end	strcat
-
-
-
-
-
-
-
-
-

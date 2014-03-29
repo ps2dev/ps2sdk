@@ -176,9 +176,9 @@ tcp_input(struct pbuf *p, struct netif *inp)
 
 #ifdef SO_REUSE
   pcb_temp = tcp_active_pcbs;
-  
+
  again_1:
-  
+
   /* Iterate through the TCP pcb list for a fully matching pcb */
   for(pcb = pcb_temp; pcb != NULL; pcb = pcb->next) {
 #else  /* SO_REUSE */
@@ -202,13 +202,13 @@ tcp_input(struct pbuf *p, struct netif *inp)
           LWIP_DEBUGF(TCP_INPUT_DEBUG, ("tcp_input: first PCB and SOF_REUSEPORT set.\n"));
           reuse = 1;
         }
-        
-        reuse_port = 1; 
+
+        reuse_port = 1;
         p->ref++;
-        
+
         /* We want to search on next socket after receiving */
         pcb_temp = pcb->next;
-        
+
         LWIP_DEBUGF(TCP_INPUT_DEBUG, ("tcp_input: reference counter on PBUF set to %i\n", p->ref));
       } else  {
         if(reuse) {
@@ -367,7 +367,7 @@ tcp_input(struct pbuf *p, struct netif *inp)
     if(reuse_port) {
       LWIP_DEBUGF(TCP_INPUT_DEBUG, ("tcp_input: searching next PCB.\n"));
       reuse_port = 0;
-      
+
       /* We are searching connected sockets */
       goto again_1;
     }
@@ -819,7 +819,7 @@ tcp_receive(struct tcp_pcb *pcb)
 	      rationale is that lwIP puts all outstanding segments on the
 	      ->unsent list after a retransmission, so these segments may
 	      in fact have been sent once. */
-		while	(pcb->unsent != NULL && TCP_SEQ_LEQ(ntohl(pcb->unsent->tcphdr->seqno) + TCP_TCPLEN(pcb->unsent),ackno) && 
+		while	(pcb->unsent != NULL && TCP_SEQ_LEQ(ntohl(pcb->unsent->tcphdr->seqno) + TCP_TCPLEN(pcb->unsent),ackno) &&
 				 TCP_SEQ_LEQ(ackno, pcb->snd_max))
 		{
 			LWIP_DEBUGF(TCP_INPUT_DEBUG, ("tcp_receive: removing %lu:%lu from pcb->unsent\n",

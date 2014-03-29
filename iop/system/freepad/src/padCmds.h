@@ -16,7 +16,7 @@ u32 QueryAct(u32 actuator, padState_t *pstate);
 u32 QueryComb(u32 val, padState_t *pstate);
 u32 QueryMode(u32 val, padState_t *pstate);
 u32 EnterConfigMode(u8 val, padState_t *pstate);
-u32 ExitConfigMode(padState_t *pstate); 
+u32 ExitConfigMode(padState_t *pstate);
 u32 SetActAlign(padState_t *pstate);
 u32 QueryButtonMask(padState_t *pstate);
 u32 VrefParam(u32 val, padState_t *pstate);

@@ -18,9 +18,9 @@
 
 /*
  * Copyright (c) 2001-2003 Swedish Institute of Computer Science.
- * All rights reserved. 
- * 
- * Redistribution and use in source and binary forms, with or without modification, 
+ * All rights reserved.
+ *
+ * Redistribution and use in source and binary forms, with or without modification,
  * are permitted provided that the following conditions are met:
  *
  * 1. Redistributions of source code must retain the above copyright notice,
@@ -29,21 +29,21 @@
  *    this list of conditions and the following disclaimer in the documentation
  *    and/or other materials provided with the distribution.
  * 3. The name of the author may not be used to endorse or promote products
- *    derived from this software without specific prior written permission. 
+ *    derived from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED 
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
- * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT 
- * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, 
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT 
- * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS 
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN 
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING 
- * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY 
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR IMPLIED
+ * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+ * SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+ * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT
+ * OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+ * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+ * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY
  * OF SUCH DAMAGE.
  *
  * This file is part of the lwIP TCP/IP stack.
- * 
+ *
  * Author: Adam Dunkels <adam@sics.se>
  *
  */
@@ -82,19 +82,19 @@ struct pbuf {
 
   /** pointer to the actual data in the buffer */
   void *payload;
-  
+
   /**
    * total length of this buffer and all next buffers in chain
    * invariant: p->tot_len == p->len + (p->next? p->next->tot_len: 0)
    */
   u16 tot_len;
-  
+
   /* length of this buffer */
-  u16 len;  
+  u16 len;
 
   /* flags telling the type of pbuf */
   u16 flags;
-  
+
   /**
    * the reference count always equals the number of pointers
    * that refer to this pbuf. This can be pointers from an application,
@@ -127,7 +127,7 @@ struct ip_addr {
                                          ((addr1)->addr == 0x00000000))
 
 #define ip_addr_ismulticast(addr1) (((addr1)->addr & ntohl(0xf0000000)) == ntohl(0xe0000000))
-				   
+
 #define ip4_addr1(ipaddr) ((u8)(ntohl((ipaddr)->addr) >> 24) & 0xff)
 #define ip4_addr2(ipaddr) ((u8)(ntohl((ipaddr)->addr) >> 16) & 0xff)
 #define ip4_addr3(ipaddr) ((u8)(ntohl((ipaddr)->addr) >> 8) & 0xff)
@@ -162,7 +162,7 @@ struct netif {
   struct netif *next;
   /** The following fields should be filled in by the
       initialization function for the device driver. */
-  
+
   /** IP address configuration in network byte order */
   struct ip_addr ip_addr;
   struct ip_addr netmask;
@@ -293,7 +293,7 @@ struct sockaddr {
     long    tv_sec;         /* seconds */
     long    tv_usec;        /* and microseconds */
   };
-#endif 
+#endif
 
 #if		!defined(INVALID_SOCKET)
 #	define	INVALID_SOCKET -1

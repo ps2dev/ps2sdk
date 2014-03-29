@@ -1,4 +1,4 @@
-/*      
+/*
 # _____     ___ ____     ___ ____
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
@@ -58,7 +58,7 @@ struct t_setupchar
 static struct t_setupchar setupchar __attribute__ (( aligned (16) )) = {
   { 0x1000000000000004, 0xE, 0xA000000000000, 0x50 },
   { 0 },
-  100, 100, 
+  100, 100,
   { 0x51 },
   { 8, 8 },
   { 0x52, 0, 0x53, 0x800000000000010, 0}
@@ -83,7 +83,7 @@ static int debug_detect_signal()
 static void Init_GS( int a, int b, int c)
 {
    u64	*mem = (u64 *)0x12001000;
-   
+
    *mem = 0x200;
    GsPutIMR( 0xff00);
    SetGsCrt( a & 1, b & 0xff, c & 1);
@@ -171,10 +171,10 @@ static void DmaReset()
 		: "=&r" (dma_addr), "=&r" (temp) );
 }
 
-/* 
+/*
  * addr is the address of the data to be transfered.  addr must be 16
  * byte aligned.
- * 
+ *
  * size is the size (in 16 byte quads) of the data to be transfered.
  */
 
@@ -193,7 +193,7 @@ static inline void progdma( void *addr, int size)
                 "        .set pop                \n"
                 : "=&r" (dma_addr), "=&r" (temp)
                 : "r" (addr), "r" (size) );
-}                      
+}
 
 void scr_setbgcolor(u32 color)
 {
@@ -208,7 +208,7 @@ void init_scr()
 ///// EEUG: note that access to 0x1FC7FF52 causes
 /////       crash on SCPH-77004. Probably this code must be revised
 //   Init_GS( 0, ((*((char*)0x1FC7FF52))=='E')+2, 1);
-     
+
    if (debug_detect_signal() == 1)
        Init_GS( 0, 3, 1);
    else
@@ -229,7 +229,7 @@ _putchar( int x, int y, u32 color, u8 ch)
    int 	i,j, l;
    u8	*font;
    u32  pixel;
-   
+
    font = &msx[ (int)ch * 8];
    for (i=l=0; i < 8; i++, l+= 8, font++)
       for (j=0; j < 8; j++)
@@ -238,7 +238,7 @@ _putchar( int x, int y, u32 color, u8 ch)
               pixel = color;
           else
               pixel = bgcolor;
-          charmap[ l + j] = pixel; 
+          charmap[ l + j] = pixel;
           }
    setupchar.x = x;
    setupchar.y = y;
@@ -246,7 +246,7 @@ _putchar( int x, int y, u32 color, u8 ch)
    FlushCache(0);
    progdma( &setupchar, 6);
    Dma02Wait();
-   
+
    progdma( charmap, (8*8*4) / 16);
    Dma02Wait();
 
@@ -267,8 +267,8 @@ void scr_printf(const char *format, ...)
    va_list	opt;
    u8		buff[2048], c;
    int		i, bufsz, j;
-   
-   
+
+
    va_start(opt, format);
    bufsz = vsnprintf( buff, sizeof(buff), format, opt);
 

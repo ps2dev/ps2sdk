@@ -21,7 +21,7 @@
  * If z = x + iy, r = sqrt( x**2 + y**2 ),
  * then
  *		 w = log(r) + i arctan(y/x).
- * 
+ *
  * The arctangent ranges from -PI to +PI.
  *
  *
@@ -35,7 +35,7 @@
  * In IEEE arithmetic the peak absolute error is 3.1e-7.
  *
  */
-
+
 #include "mconf.h"
 extern float MAXNUMF, MACHEPF, PIF, PIO2F;
 #ifdef ANSIC
@@ -74,7 +74,7 @@ if( rr > PIF )
 w->i = rr;
 w->r = p;
 }
-/* 						cexpf()
+/* 						cexpf()
  *
  *	Complex exponential function
  *
@@ -110,7 +110,7 @@ w->r = p;
  *	  IEEE		-10,+10 	30000		1.4e-7		4.5e-8
  *
  */
-
+
 void cexpf( z, w )
 register cmplxf *z, *w;
 {
@@ -120,7 +120,7 @@ r = expf( z->r );
 w->r = r * cosf( z->i );
 w->i = r * sinf( z->i );
 }
-/* 						csinf()
+/* 						csinf()
  *
  *	Complex circular sine
  *
@@ -153,7 +153,7 @@ w->i = r * sinf( z->i );
  *	  IEEE		-10,+10 	30000		1.9e-7		5.5e-8
  *
  */
-
+
 void csinf( z, w )
 register cmplxf *z, *w;
 {
@@ -194,7 +194,7 @@ else
 	}
 }
 
-/* 						ccosf()
+/* 						ccosf()
  *
  *	Complex circular cosine
  *
@@ -226,7 +226,7 @@ else
  * arithmetic	domain	   # trials 	 peak		  rms
  *	  IEEE		-10,+10 	30000		1.8e-7		 5.5e-8
  */
-
+
 void ccosf( z, w )
 register cmplxf *z, *w;
 {
@@ -236,7 +236,7 @@ cchshf( z->i, &ch, &sh );
 w->r = cosf( z->r ) * ch;
 w->i = -sinf( z->r ) * sh;
 }
-/* 						ctanf()
+/* 						ctanf()
  *
  *	Complex circular tangent
  *
@@ -273,7 +273,7 @@ w->i = -sinf( z->r ) * sh;
  * arithmetic	domain	   # trials 	 peak		  rms
  *	  IEEE		-10,+10 	30000		3.3e-7		 5.1e-8
  */
-
+
 void ctanf( z, w )
 register cmplxf *z, *w;
 {
@@ -295,7 +295,7 @@ if( d == 0.0f )
 w->r = sinf( 2.0f * z->r ) / d;
 w->i = sinhf( 2.0f * z->i ) / d;
 }
-/* 						ccotf()
+/* 						ccotf()
  *
  *	Complex circular cotangent
  *
@@ -333,7 +333,7 @@ w->i = sinhf( 2.0f * z->i ) / d;
  *	  IEEE		-10,+10 	30000		3.6e-7		 5.7e-8
  * Also tested by ctan * ccot = 1 + i0.
  */
-
+
 void ccotf( z, w )
 register cmplxf *z, *w;
 {
@@ -357,7 +357,7 @@ d = 1.0f/d;
 w->r = sinf( 2.0f * z->r ) * d;
 w->i = -sinhf( 2.0f * z->i ) * d;
 }
-
+
 /* Program to subtract nearest integer multiple of PI */
 /* extended precision value of PI: */
 
@@ -388,7 +388,7 @@ t = i;
 t = ((x - t * DP1) - t * DP2) - t * DP3;
 return(t);
 }
-
+
 /*	Taylor series expansion for cosh(2y) - cos(2x)	*/
 
 float ctansf(z)
@@ -433,7 +433,7 @@ do
 while( fabsf(t/d) > MACHEPF );
 return(d);
 }
-/* 						casinf()
+/* 						casinf()
  *
  *	Complex circular arc sine
  *
@@ -464,7 +464,7 @@ return(d);
  * Larger relative error can be observed for z near zero.
  *
  */
-
+
 void casinf( z, w )
 cmplxf *z, *w;
 {
@@ -557,7 +557,7 @@ w->r = zz.i;	/* mult by 1/i = -i */
 w->i = -zz.r;
 return;
 }
-/* 						cacosf()
+/* 						cacosf()
  *
  *	Complex circular arc cosine
  *
@@ -587,7 +587,7 @@ return;
  *	  IEEE		-10,+10 	30000		9.2e-6		 1.2e-6
  *
  */
-
+
 void cacosf( z, w )
 cmplxf *z, *w;
 {
@@ -596,7 +596,7 @@ casinf( z, w );
 w->r = PIO2F  -  w->r;
 w->i = -w->i;
 }
-/* 						catan()
+/* 						catan()
  *
  *	Complex circular arc tangent
  *
@@ -639,7 +639,7 @@ w->i = -w->i;
  *	  IEEE		-10,+10 	30000		 2.3e-6 	 5.2e-8
  *
  */
-
+
 void catanf( z, w )
 cmplxf *z, *w;
 {

@@ -40,7 +40,7 @@
  * acoshf domain      |x| < 1            0.0
  *
  */
-
+
 /*							acosh.c	*/
 
 /*

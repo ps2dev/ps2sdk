@@ -46,7 +46,7 @@ extern int (*_ps2sdk_read)(int, void*, int);
 
 // gets the romname from the current ps2
 // 14 chars - doesnt set a null terminator
-// 
+//
 // args:	buffer to hold romname (14 chars long)
 // returns:	pointer to buffer containing romname
 #ifdef F_GetRomName
@@ -63,7 +63,7 @@ char* GetRomName(char *romname)
 
 
 // check whether ps2 is actually dev model T-10000
-// 
+//
 // returns: 1 if T-10000
 //			0 if not
 #ifdef F_IsT10K
@@ -78,7 +78,7 @@ int IsT10K(void)
 
 
 // check if ps2 has a 'Protokernel' (Really early Japanese models)
-// 
+//
 // args:	unsigned int config value from GetOsdConfigParam() syscall
 // returns:	1 if early jap model
 //			0 if not
@@ -90,16 +90,16 @@ int IsEarlyJap(ConfigParam config)
 #endif
 
 // get the language the ps2 is currently set to
-// 
+//
 // returns:		Language value (See OSD_LANGUAGES in header file)
 #ifdef F_configGetLanguage
 int  configGetLanguage(void)
 {
 	ConfigParam config;
-	
+
 	if(IsT10K())
 		return g_t10KConfig.language;
-	
+
 	GetOsdConfigParam(&config);
 	if(IsEarlyJap(config))
 		return config.japLanguage;
@@ -108,19 +108,19 @@ int  configGetLanguage(void)
 #endif
 
 // sets the default language of the ps2
-// 
+//
 // args:		Language value (See OSD_LANGUAGES in header file)
 #ifdef F_configSetLanguage
 void configSetLanguage(int language)
 {
 	ConfigParam config;
-	
+
 	// make sure language is valid
 	if(language < 0 || language > 7)
 		return;
 	if(IsT10K())
 		g_t10KConfig.language = language;
-	
+
 	// set language
 	GetOsdConfigParam(&config);
 	if(IsEarlyJap(config))
@@ -132,7 +132,7 @@ void configSetLanguage(int language)
 #endif
 
 // get the tv screen type the ps2 is setup for
-// 
+//
 // returns:	0 = 4:3
 //			1 = fullscreen
 //			2 = 16:9
@@ -143,7 +143,7 @@ int  configGetTvScreenType(void)
 
 	if(IsT10K())
 		return g_t10KConfig.screenType;
-	
+
 	GetOsdConfigParam(&config);
 	return config.screenType;
 }
@@ -151,7 +151,7 @@ int  configGetTvScreenType(void)
 
 #ifdef F_configSetTvScreenType
 // set the tv screen type
-// 
+//
 // args:	0 = 4:3
 //			1 = fullscreen
 //			2 = 16:9
@@ -164,7 +164,7 @@ void configSetTvScreenType(int screenType)
 		return;
 	if(IsT10K())
 		g_t10KConfig.screenType = screenType;
-	
+
 	// set screen type
 	GetOsdConfigParam(&config);
 	config.screenType = screenType;
@@ -173,7 +173,7 @@ void configSetTvScreenType(int screenType)
 #endif
 
 // gets the date display format
-// 
+//
 // returns:	0 = yyyy/mm/dd
 //			1 = mm/dd/yyyy
 //			2 = dd/mm/yyyy
@@ -182,10 +182,10 @@ int  configGetDateFormat(void)
 {
 	ConfigParam config;
 	Config2Param config2;
-	
+
 	if(IsT10K())
 		return g_t10KConfig.dateFormat;
-	
+
 	GetOsdConfigParam(&config);
 	if(IsEarlyJap(config))
 		return 0;
@@ -195,7 +195,7 @@ int  configGetDateFormat(void)
 #endif
 
 // sets the date display format
-// 
+//
 // args:	0 = yyyy/mm/dd
 //			1 = mm/dd/yyyy
 //			2 = dd/mm/yyyy
@@ -204,13 +204,13 @@ void configSetDateFormat(int dateFormat)
 {
 	ConfigParam config;
 	Config2Param config2;
-	
+
 	// make sure date format is valid
 	if(dateFormat < 0 || dateFormat > 2)
 		return;
 	if(IsT10K())
 		g_t10KConfig.dateFormat = dateFormat;
-	
+
 	// set date format
 	GetOsdConfigParam(&config);
 	if(IsEarlyJap(config))
@@ -223,7 +223,7 @@ void configSetDateFormat(int dateFormat)
 
 // gets the time display format
 // (whether 24hour time or not)
-// 
+//
 // returns:	0 = 24hour
 //			1 = 12hour
 #ifdef F_configGetTimeFormat
@@ -231,10 +231,10 @@ int  configGetTimeFormat(void)
 {
 	ConfigParam config;
 	Config2Param config2;
-	
+
 	if(IsT10K())
 		return g_t10KConfig.timeFormat;
-	
+
 	GetOsdConfigParam(&config);
 	if(IsEarlyJap(config))
 		return 0;
@@ -245,7 +245,7 @@ int  configGetTimeFormat(void)
 
 // sets the time display format
 // (whether 24hour time or not)
-// 
+//
 // args:	0 = 24hour
 //			1 = 12hour
 #ifdef F_configSetTimeFormat
@@ -253,13 +253,13 @@ void configSetTimeFormat(int timeFormat)
 {
 	ConfigParam config;
 	Config2Param config2;
-	
+
 	// make sure time format is valid
 	if(timeFormat < 0 || timeFormat > 1)
 		return;
 	if(IsT10K())
 		g_t10KConfig.timeFormat = timeFormat;
-	
+
 	// set time format
 	GetOsdConfigParam(&config);
 	if(IsEarlyJap(config))
@@ -271,7 +271,7 @@ void configSetTimeFormat(int timeFormat)
 #endif
 
 // get timezone
-// 
+//
 // returns: offset in minutes from GMT
 #ifdef F_configGetTimezone
 int  configGetTimezone(void)
@@ -280,7 +280,7 @@ int  configGetTimezone(void)
 
 	if(IsT10K())
 		return g_t10KConfig.timezoneOffset;
-	
+
 	GetOsdConfigParam(&config);
 	if(IsEarlyJap(config))
 		return 540;
@@ -289,7 +289,7 @@ int  configGetTimezone(void)
 #endif
 
 // set timezone
-// 
+//
 // args:	offset in minutes from GMT
 #ifdef F_configSetTimezone
 void configSetTimezone(int timezoneOffset)
@@ -299,7 +299,7 @@ void configSetTimezone(int timezoneOffset)
 	// set offset from GMT
 	if(IsT10K())
 		g_t10KConfig.timezoneOffset = timezoneOffset;
-	
+
 	GetOsdConfigParam(&config);
 	if(IsEarlyJap(config))
 		return;
@@ -309,34 +309,34 @@ void configSetTimezone(int timezoneOffset)
 #endif
 
 // checks whether the spdif is enabled or not
-// 
+//
 // returns:	1 = on
 //			0 = off
 #ifdef F_configIsSpdifEnabled
 int  configIsSpdifEnabled(void)
 {
 	ConfigParam config;
-	
+
 	if(IsT10K())
 		return g_t10KConfig.spdifMode ^ 1;
-	
+
 	GetOsdConfigParam(&config);
 	return config.spdifMode ^ 1;
 }
 #endif
 
 // sets whether the spdif is enabled or not
-// 
+//
 // args:	1 = on
 //			0 = off
 #ifdef F_configSetSpdifEnabled
 void configSetSpdifEnabled(int enabled)
 {
 	ConfigParam config;
-	
+
 	if(IsT10K())
 		g_t10KConfig.spdifMode = enabled ^ 1;
-	
+
 	GetOsdConfigParam(&config);
 	config.spdifMode = enabled ^ 1;
 	SetOsdConfigParam(&config);
@@ -344,7 +344,7 @@ void configSetSpdifEnabled(int enabled)
 #endif
 
 // checks whether daylight saving is currently set
-// 
+//
 // returns:	1 = on
 //			0 = off
 #ifdef F_configIsDaylightSavingEnabled
@@ -352,21 +352,21 @@ int  configIsDaylightSavingEnabled(void)
 {
 	ConfigParam config;
 	Config2Param config2;
-	
+
 	if(IsT10K())
 		return g_t10KConfig.daylightSaving;
-	
+
 	GetOsdConfigParam(&config);
 	if(IsEarlyJap(config))
 		return 0;
 	GetOsdConfigParam2(&config2, 1, 1);
-	
+
 	return config2.daylightSaving;
 }
 #endif
 
 // checks whether daylight saving is currently set
-// 
+//
 // returns:	1 = on
 //			0 = off
 #ifdef F_configSetDaylightSavingEnabled
@@ -374,10 +374,10 @@ void configSetDaylightSavingEnabled(int daylightSaving)
 {
 	ConfigParam config;
 	Config2Param config2;
-	
+
 	if(IsT10K())
 		g_t10KConfig.daylightSaving = daylightSaving;
-	
+
 	GetOsdConfigParam(&config);
 	if(IsEarlyJap(config))
 		return;
@@ -429,19 +429,19 @@ void adddate(CdvdClock_t* time)
 	memcpy(days_in_months, gDaysInMonths, 12);
 	if((time->year & 3) == 0)
 		days_in_months[1] = 29;
-	
+
 	// increment the day and check its within the "day of the month" bounds
 	time->day++;
 	if(time->day > days_in_months[time->month - 1])
 	{
 		time->day = 1;
-		
+
 		// increment the month and check its within the "months in a year" bounds
 		time->month++;
 		if(time->month == 13)
 		{
 			time->month = 1;
-			
+
 			// check the year and increment it
 			time->year++;
 			if(time->year == 100)
@@ -458,7 +458,7 @@ void subdate(CdvdClock_t* time)
 	memcpy(days_in_months, gDaysInMonths, 12);
 	if((time->year & 3) == 0)
 		days_in_months[1] = 29;
-	
+
 	// decrement the day and check its within the "day of the month" bounds
 	time->day--;
 	if(time->day == 0)
@@ -468,14 +468,14 @@ void subdate(CdvdClock_t* time)
 		if(time->month == 0)
 		{
 			time->month = 12;
-			
+
 			// check the year and decrement it
 			if(time->year == 0)
 				time->year = 99;
 			else
 				time->year--;
 		}
-		
+
 		time->day = days_in_months[time->month-1];
 	}
 }
@@ -504,7 +504,7 @@ void AdjustTime(CdvdClock_t* time, int offset)
 {
 	convertfrombcd(time);
 	offset += time->minute;
-	
+
 	if(offset >= 0)
 	{
 		while(offset >= 60)
@@ -523,7 +523,7 @@ void AdjustTime(CdvdClock_t* time, int offset)
 		}
 		time->minute = offset;
 	}
-	
+
 	converttobcd(time);
 }
 

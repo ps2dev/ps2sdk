@@ -16,7 +16,7 @@
 #ifdef F_cpu_ticks
 u32 cpu_ticks(void) {
     u32 out;
-    
+
     asm("mfc0\t%0, $9\n" : "=r"(out));
     return out;
 }

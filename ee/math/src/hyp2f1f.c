@@ -43,7 +43,7 @@
  * arithmetic   domain     # trials      peak         rms
  *    IEEE      0,3         30000       5.8e-4      4.3e-6
  */
-
+
 /*							hyp2f1	*/
 
 
@@ -294,7 +294,7 @@ if( fabsf(d-id) > EPS2 ) /* test for integer c-a-b */
 	if( err < ETHRESH )
 		goto done;
 /* If power series fails, then apply AMS55 #15.3.6 */
-	q = hys2f1f( a, b, 1.0-d, s, &err );	
+	q = hys2f1f( a, b, 1.0-d, s, &err );
 	q *= gammaf(d) /(gammaf(c-a) * gammaf(c-b));
 	r = powf(s,d) * hys2f1f( c-a, c-b, d+1.0, s, &err1 );
 	r *= gammaf(-d)/(gammaf(a) * gammaf(b));
@@ -308,7 +308,7 @@ if( fabsf(d-id) > EPS2 ) /* test for integer c-a-b */
 
 	y *= gammaf(c);
 	goto done;
-	}	
+	}
 else
 	{
 /* Psi function expansion, AMS55 #15.3.10, #15.3.11, #15.3.12 */

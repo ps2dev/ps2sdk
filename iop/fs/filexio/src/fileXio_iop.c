@@ -8,8 +8,8 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 # $Id$
-# fileXio RPC Server 
-# This module provides an RPC interface to the EE for all the functions 
+# fileXio RPC Server
+# This module provides an RPC interface to the EE for all the functions
 # of ioman/fileio.
 */
 
@@ -105,12 +105,12 @@ int fileXio_GetDeviceList_RPC(struct fileXioDevice* ee_devices, int eecount)
     {
         struct t_SifDmaTransfer dmaStruct;
         int intStatus;	// interrupt status - for dis/en-abling interrupts
-        
+
         dmaStruct.src = local_devices;
         dmaStruct.dest = ee_devices;
         dmaStruct.size = sizeof(struct fileXioDevice) * device_count;
         dmaStruct.attr = 0;
-        
+
         // Do the DMA transfer
         CpuSuspendIntr(&intStatus);
         SifSetDma(&dmaStruct, 1);
@@ -202,18 +202,18 @@ int fileXio_Read_RPC(int infd, char *read_buf, int read_size, void *intr_data)
 	{
 		readlen=MIN(RWBufferSize, asize);
 
-		while(SifDmaStat(status)>=0);		
+		while(SifDmaStat(status)>=0);
 
-		rlen=read(infd, rwbuf, readlen);		
+		rlen=read(infd, rwbuf, readlen);
 		if (readlen!=rlen){
 			if (rlen<=0)goto EXIT;
 			dmaStruct.dest=(void *)abuffer;
 			dmaStruct.size=rlen;
 			dmaStruct.attr=0;
 			dmaStruct.src =rwbuf;
-			CpuSuspendIntr(&intStatus);			
-			SifSetDma(&dmaStruct, 1);			
-			CpuResumeIntr(intStatus);			
+			CpuSuspendIntr(&intStatus);
+			SifSetDma(&dmaStruct, 1);
+			CpuResumeIntr(intStatus);
 			total	+=rlen;
 			goto EXIT;
 		}else{			//read ok
@@ -224,45 +224,45 @@ int fileXio_Read_RPC(int infd, char *read_buf, int read_size, void *intr_data)
 			dmaStruct.size=rlen;
 			dmaStruct.attr=0;
 			dmaStruct.src =rwbuf;
-			CpuSuspendIntr(&intStatus);			
-			status=SifSetDma(&dmaStruct, 1);		
+			CpuSuspendIntr(&intStatus);
+			status=SifSetDma(&dmaStruct, 1);
 			CpuResumeIntr(intStatus);
 		}
 	}
 	if (erest>0)
 	{
-		rlen = read(infd, rests.ebuffer, erest);	
+		rlen = read(infd, rests.ebuffer, erest);
 		total += (rlen>0 ? rlen : 0);
 	}
 EXIT:
-	rests.ssize=srest;           
-	rests.esize=erest;           
-	rests.sbuf =buffer;          
-	rests.ebuf =aebuffer;        
+	rests.ssize=srest;
+	rests.esize=erest;
+	rests.sbuf =buffer;
+	rests.ebuf =aebuffer;
       dmaStruct.src =&rests;
 	dmaStruct.size=sizeof(rests_pkt);
 	dmaStruct.attr=0;
 	dmaStruct.dest=intr_data;
-	CpuSuspendIntr(&intStatus);					
-	SifSetDma(&dmaStruct, 1);					
-	CpuResumeIntr(intStatus);					
+	CpuSuspendIntr(&intStatus);
+	SifSetDma(&dmaStruct, 1);
+	CpuResumeIntr(intStatus);
 	return (total);
 }
 
 int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size, int mis,char *misbuf)
 {
      SifRpcReceiveData_t rdata;
-     int left;			
-     int wlen;			
-     int writelen;		
+     int left;
+     int wlen;
+     int writelen;
      int pos;
      int total;
 
 	left  = write_size;
 	total = 0;
 	if (mis > 0)
-      {           
-		wlen=write(outfd, misbuf, mis);	
+      {
+		wlen=write(outfd, misbuf, mis);
 		if (wlen != mis)
             {
 			if (wlen > 0)
@@ -277,7 +277,7 @@ int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size, int mis,
 	while(left){
 		writelen = MIN(RWBufferSize, left);
 		SifRpcGetOtherData(&rdata, (void *)pos, rwbuf, writelen, 0);
-		wlen=write(outfd, rwbuf, writelen);	
+		wlen=write(outfd, rwbuf, writelen);
 		if (wlen != writelen){
 			if (wlen>0)
 				total+=wlen;
@@ -313,7 +313,7 @@ int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEntry[], 
 	matched_entries = 0;
 
       fd = dopen(pathname);
-      if (fd <= 0) 
+      if (fd <= 0)
       {
         return fd;
       }
@@ -336,7 +336,7 @@ int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEntry[], 
 	      // before over-writing localDirEntry
 	      while(SifDmaStat(dmaID)>=0);
             DirEntryCopy(&localDirEntry, &dirbuf);
-	      // DMA localDirEntry to the address specified by dirEntry[matched_entries]	
+	      // DMA localDirEntry to the address specified by dirEntry[matched_entries]
 	      // setup the dma struct
 	      dmaStruct.src = &localDirEntry;
 	      dmaStruct.dest = &dirEntry[matched_entries];
@@ -392,7 +392,7 @@ int fileXio_getstat_RPC(char *filename, void* eeptr)
 
 	if(res >= 0)
 	{
-		// DMA localStat to the address specified by eeptr	
+		// DMA localStat to the address specified by eeptr
 		// setup the dma struct
 		dmaStruct.src = &localStat;
 		dmaStruct.dest = eeptr;
@@ -417,7 +417,7 @@ int fileXio_dread_RPC(int fd, void* eeptr)
 	res = dread(fd, &localDir);
       if (res > 0)
       {
-	  // DMA localStat to the address specified by eeptr	
+	  // DMA localStat to the address specified by eeptr
 	  // setup the dma struct
 	  dmaStruct.src = &localDir;
 	  dmaStruct.dest = eeptr;
@@ -764,7 +764,7 @@ void* fileXioRpc_ChStat(unsigned int* sbuff)
 	return sbuff;
 }
 
-// Send:   Offset 0 = filename 
+// Send:   Offset 0 = filename
 // Send:   Offset 512 = pointer to EE mem
 // Return: Offset 0 = return status (int)
 void* fileXioRpc_GetStat(unsigned int* sbuff)
@@ -784,7 +784,7 @@ void* fileXioRpc_GetStat(unsigned int* sbuff)
 // Send:   Offset 128 = blockdevice
 // Send:   Offset 640 = args
 // Send:   Offset 1152 = arglen (int)
-// Return: Offset 0 = return status 
+// Return: Offset 0 = return status
 void* fileXioRpc_Format(unsigned int* sbuff)
 {
 	int ret;
@@ -810,7 +810,7 @@ void* fileXioRpc_AddDrv(unsigned int* sbuff)
 	return sbuff;
 }
 
-// Send:   Offset 0 = fsname 
+// Send:   Offset 0 = fsname
 // Return: Offset 0 = return status (int)
 void* fileXioRpc_DelDrv(unsigned int* sbuff)
 {
@@ -823,7 +823,7 @@ void* fileXioRpc_DelDrv(unsigned int* sbuff)
 	return sbuff;
 }
 
-// Send:   Offset 0 = devname 
+// Send:   Offset 0 = devname
 // Send:   Offset 512 = flag (int)
 // Return: Offset 0 = return status (int)
 void* fileXioRpc_Sync(unsigned int* sbuff)
@@ -856,7 +856,7 @@ void* fileXioRpc_Devctl(unsigned int* sbuff)
 	ret = devctl(packet->name, packet->cmd, packet->arg, packet->arglen, ret_buf->buf, packet->buflen);
 
 	// Transfer buffer back to EE
-	if(packet->buflen != 0) 
+	if(packet->buflen != 0)
 	{
 		dmatrans.src = ret_buf;
 		dmatrans.dest = packet->intr_data;
@@ -871,11 +871,11 @@ void* fileXioRpc_Devctl(unsigned int* sbuff)
 		else
 			ret_buf->len = 0;
 
-		CpuSuspendIntr(&intStatus);			
-		SifSetDma(&dmatrans, 1);			
-		CpuResumeIntr(intStatus);	
+		CpuSuspendIntr(&intStatus);
+		SifSetDma(&dmatrans, 1);
+		CpuResumeIntr(intStatus);
 	}
-	
+
 	sbuff[0] = ret;
 	return sbuff;
 }
@@ -911,7 +911,7 @@ void* fileXioRpc_Ioctl2(unsigned int* sbuff)
 	ret = ioctl2(packet->fd, packet->cmd, packet->arg, packet->arglen, ret_buf->buf, packet->buflen);
 
 	// Transfer buffer back to EE
-	if(packet->buflen != 0) 
+	if(packet->buflen != 0)
 	{
 		dmatrans.src = ret_buf;
 		dmatrans.dest = packet->intr_data;
@@ -926,11 +926,11 @@ void* fileXioRpc_Ioctl2(unsigned int* sbuff)
 		else
 			ret_buf->len = 0;
 
-		CpuSuspendIntr(&intStatus);			
-		SifSetDma(&dmatrans, 1);			
-		CpuResumeIntr(intStatus);	
+		CpuSuspendIntr(&intStatus);
+		SifSetDma(&dmatrans, 1);
+		CpuResumeIntr(intStatus);
 	}
-	
+
 	sbuff[0] = ret;
 	return sbuff;
 }

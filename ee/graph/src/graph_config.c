@@ -218,7 +218,7 @@ int graph_save_config(char *filename)
 
 	FILE *outfile; char config[512];
 
-	// Get the current mode config information.  
+	// Get the current mode config information.
 	graph_get_config(config);
 
 	// Open the config file.

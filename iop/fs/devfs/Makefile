@@ -17,7 +17,7 @@ IOP_INC_DIR = include/
 IOP_BIN  = bin/devfs.irx
 IOP_OBJS = obj/devfs.o obj/exports.o obj/imports.o
 
-IOP_CFLAGS  += -Wall -fno-builtin 
+IOP_CFLAGS  += -Wall -fno-builtin
 IOP_LDFLAGS += -s
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)

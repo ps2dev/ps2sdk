@@ -413,11 +413,11 @@ static void _ext_seq ( void ) {
  );
 
  if(  ( lProfLevel >> 7 ) & 1  ) {
-  
+
   if (  ( lProfLevel & 15 ) == 5  ) {
 
    s_MPEG12Ctx.m_SI.m_Profile = MPEG_PROFILE_422;
-   s_MPEG12Ctx.m_SI.m_Level   = MPEG_LEVEL_MAIN;  
+   s_MPEG12Ctx.m_SI.m_Level   = MPEG_LEVEL_MAIN;
 
   } else s_MPEG12Ctx.m_SI.m_Profile = s_MPEG12Ctx.m_SI.m_Level = -1;
 
@@ -957,7 +957,7 @@ static void _mpeg12_get_ref (
   ".set at\n\t"
   : "=r"( lMBX ), "=r"( lMBY ) : "r"( lMBX ), "r"( lMBY ), "m"( s_MPEG12Ctx.m_MBWidth ) : "at", "v0"
  );
- 
+
  lpMotion -> m_pSrc     = ( unsigned char* )(  apMBSrc + lMBX + lMBY * s_MPEG12Ctx.m_MBWidth  );
  lpMotion -> m_pDstY    = ( short* )(  s_MPEG12Ctx.m_pCurMotions -> m_pSPRRes       + ( aFDst << 5 )  );
  lpMotion -> m_pDstCbCr = ( short* )(  s_MPEG12Ctx.m_pCurMotions -> m_pSPRRes + 512 + ( aFDst << 3 )  );
@@ -1225,7 +1225,7 @@ static int _mpeg12_slice ( int aMBAMax ) {
 
   lMBAI                =
   s_MPEG12Ctx.m_fDCRst = 1;
-  
+
   lPMV[ 0 ][ 0 ][ 0 ] = lPMV[ 0 ][ 0 ][ 1 ] = lPMV[ 1 ][ 0 ][ 0 ] = lPMV[ 1 ][ 0 ][ 1 ] = 0;
   lPMV[ 0 ][ 1 ][ 0 ] = lPMV[ 0 ][ 1 ][ 1 ] = lPMV[ 1 ][ 1 ][ 0 ] = lPMV[ 1 ][ 1 ][ 1 ] = 0;
 
@@ -1290,7 +1290,7 @@ resync:
   --lMBAI;
 
   s_MPEG12Ctx.m_CurMC ^= 1;
- 
+
   if ( lMBA >= aMBAMax ) return -1;
 
  }  /* end while */

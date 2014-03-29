@@ -17,15 +17,15 @@
 
 typedef struct
 {
-	u32 active; 
+	u32 active;
 	u32 unused_4;
 	u32 unused_8;
 	u32 stat70bit;
 	u32 in_size;
-	u32 out_size; 
-	u8 in_buffer[32];	
+	u32 out_size;
+	u8 in_buffer[32];
 	u8 out_buffer[32];
-	u32 port_ctrl1; 
+	u32 port_ctrl1;
 	u32 port_ctrl2;
 	u32 reg_data;
 	u32 error;
@@ -83,7 +83,7 @@ u32 setupReadData(u32 port, u32 slot, u32 val)
 	u8 buf[32];
 
 	res = sio2CmdGetPortCtrl1(0, val, 0);
-	
+
 	pdSetCtrl1(port, slot, res);
 
 	res = sio2CmdGetPortCtrl2(0, val);
@@ -94,12 +94,12 @@ u32 setupReadData(u32 port, u32 slot, u32 val)
 	res = pdGetRegData(0);
 
 	pdSetRegData(port, slot, res);
-	
 
-	res = pdGetInSize(0);		
+
+	res = pdGetInSize(0);
 
 	pdSetInSize(port, slot, res);
-	
+
 	res = pdGetOutSize(0);
 
 	pdSetOutSize(port, slot, res);
@@ -107,7 +107,7 @@ u32 setupReadData(u32 port, u32 slot, u32 val)
 	sio2CmdSetReadData(0, buf);
 
 	pdSetInBuffer(port, slot, 0, buf);
-	
+
 	return 1;
 }
 
@@ -116,7 +116,7 @@ u32 pdSetActive(u32 port, u32 slot, u32 active)
 	u32 res = padData[port][slot].active;
 
 	padData[port][slot].active = active;
-	
+
 	return res;
 }
 
@@ -132,7 +132,7 @@ u32 mtapChangeSlot(u32 slot)
 	change_slot_buffer[1] = -1;
 	change_slot_buffer[2] = -1;
 	change_slot_buffer[3] = -1;
-	
+
 	if( (padData[0][slot].active != 1) && (padData[1][slot].active != 1) )
 		return 0;
 
@@ -150,9 +150,9 @@ u32 mtapChangeSlot(u32 slot)
 u32 pdSetStat70bit(u32 port, u32 slot, u32 val)
 {
 	u32 ret = padData[port][slot].stat70bit;
-	
+
 	padData[port][slot].stat70bit = val;
-	
+
 	return ret;
 }
 
@@ -164,7 +164,7 @@ u32 setupTransferData(u32 reg, u32 port, u32 slot)
 		u32 i;
 
 		for(i=0; i < padData[port][slot].in_size; i++)
-		{	
+		{
 			sio2_td.in[sio2_td.in_size] = padData[port][slot].in_buffer[i];
 			sio2_td.in_size++;
 		}
@@ -178,7 +178,7 @@ u32 setupTransferData(u32 reg, u32 port, u32 slot)
 	padData[port][slot].reg_data &= 0xFFFFFFFC;
 
 	sio2_td.regdata[reg] = padData[port][slot].reg_data | (port & 0x3);
-	
+
 	sio2_td.regdata[reg+1] = 0;
 
 	return (reg+1);
@@ -216,14 +216,14 @@ u32 readSio2OutBuffer(u32 bit, u32 port, u32 slot)
 
 				for(i=0; i < padData[port][slot].out_size; i++)
 				{
-					padData[port][slot].out_buffer[i] = sio2_td.out[sio2_td.out_size];	
-					sio2_td.out_size++; 
+					padData[port][slot].out_buffer[i] = sio2_td.out[sio2_td.out_size];
+					sio2_td.out_size++;
 				}
 			}
 
 			return 1;
 		}
-	}	
+	}
 }
 
 u32 padTransfer(u32 slot)
@@ -265,7 +265,7 @@ u32 padTransfer(u32 slot)
 	if(res1 != 0)
 	{
 		sio2_transfer( &sio2_td );
-	
+
 		sio2_td.out_size = 0;
 
 		if(val_port0 == 1)
@@ -292,7 +292,7 @@ u32 padTransfer(u32 slot)
 			if(change_slot_buffer[5] != 1)
 				padData[1][slot].error = 0xA;
 		}
-		
+
 		return 1;
 	}
 
@@ -304,7 +304,7 @@ void pdTransfer()
 	u32 slot;
 
 	sio2_pad_transfer_init();
-	
+
 	transferCount++;
 
 	for(slot=0; slot < 4; slot++)
@@ -312,12 +312,12 @@ void pdTransfer()
 		if( (padData[0][slot].active == 1) || (padData[1][slot].active == 1) )
 		{
 			if(slot > 0) mtapChangeSlot(slot);
-	
+
 			padTransfer(slot);
 		}
 	}
 
-	mtapChangeSlot(0);	
+	mtapChangeSlot(0);
 
 	sio2_transfer_reset();
 }
@@ -361,7 +361,7 @@ u32 SlotCheckConnection(u32 slot)
 	stat70 = sio2_stat70_get();
 
 	pdSetStat70bit(0, slot, (stat70 >> 4) & 0x1);
-	pdSetStat70bit(1, slot, (stat70 >> 5) & 0x1); 
+	pdSetStat70bit(1, slot, (stat70 >> 5) & 0x1);
 
 	if( change_slot_buffer[4] == 1)
 	{
@@ -452,7 +452,7 @@ u32 pdCheckConnection(u32 port, u32 slot)
 	change_slot_buffer[2] = -1;
 	change_slot_buffer[3] = -1;
 
-	sio2_mtap_change_slot(change_slot_buffer);	
+	sio2_mtap_change_slot(change_slot_buffer);
 
 	sio2_transfer_reset();
 
@@ -518,8 +518,8 @@ u32 pdSetInBuffer(u32 port, u32 slot, u32 size, u8 *buf)
 	if(port < 2)
 	{
 		if(size == 0) size = padData[port][slot].in_size;
-		
-		if(size > 0)	
+
+		if(size > 0)
 		{
 			u32 i;
 
@@ -546,7 +546,7 @@ u32 pdGetOutBuffer(u32 port, u32 slot, u32 size, u8 *buf)
 			for(i=0; i < size; i++)
 				buf[i] = padData[port][slot].out_buffer[i];
 
-		}		
+		}
 
 		return size;
 	}

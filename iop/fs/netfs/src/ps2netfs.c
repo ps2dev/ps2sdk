@@ -30,7 +30,7 @@
 IRX_ID(PS2NETFS_MODNAME, PS2NETFS_VERSION_HIGH, PS2NETFS_VERSION_LOW);
 
 /*! \brief Entry point for IRX.
- *  \ingroup ps2netfs 
+ *  \ingroup ps2netfs
  *
  *  argc and argv make no difference to runstate.
  *

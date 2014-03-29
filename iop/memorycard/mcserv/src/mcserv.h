@@ -26,7 +26,7 @@
 
 #define MODNAME "mcserv"
 #define MODVER  0x208
- 
+
 // internal function prototypes
 void *cb_rpc_S_0400(u32 fno, void *buf, int size);
 void thread_rpc_S_0400(void* param);
@@ -197,7 +197,7 @@ static SifRpcServerData_t mcserv_sdS_0400 __attribute__((aligned(64)));
 
 static u8 mcserv_rpc_buf[2048] __attribute__((aligned(64)));
 
-static struct {		
+static struct {
 	int rpc_func_ret;
 	int mcserv_version;
 	int mcman_version;

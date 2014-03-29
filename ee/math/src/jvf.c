@@ -37,7 +37,7 @@
  *    IEEE     -17,0    0,125   30000      1.1e-5      4.0e-7
  *    IEEE    -100,0    0,125    3000      1.5e-4      7.8e-6
  */
-
+
 
 /*
 Cephes Math Library Release 2.2: June, 1992
@@ -255,7 +255,7 @@ else
 
 done:	return( sign * y);
 }
-
+
 /* Reduce the order by backward recurrence.
  * AMS55 #9.1.27 and 9.1.73.
  */
@@ -269,10 +269,14 @@ double xx;
 float *newn;
 #endif
 {
-float x, pkm2, pkm1, pk, pkp1, qkm2, qkm1;
+float x, pkm2, pkm1, pk, qkm2, qkm1;
 float k, ans, qk, xk, yk, r, t, kf, xinv;
 static float big = BIG;
-int nflag, ctr;
+int nflag;
+#if 0
+	float pkp1;
+	int ctr=0;
+#endif
 
 x = xx;
 /* continued fraction for Jn(x)/Jn-1(x)  */
@@ -294,7 +298,6 @@ qkm1 = *n + *n;
 xk = -x * x;
 yk = qkm1;
 ans = 1.0;
-ctr = 0;
 do
 	{
 	yk += 2.0;
@@ -364,7 +367,9 @@ xinv = 1.0/x;
 do
 	{
 	pkm2 = (pkm1 * r  -  pk * x) * xinv;
+#if 0
 	pkp1 = pk;
+#endif
 	pk = pkm1;
 	pkm1 = pkm2;
 	r -= 2.0;
@@ -471,7 +476,7 @@ printf( "y = %.8e\n", y );
 #endif
 return(y);
 }
-
+
 /* Hankel's asymptotic expansion
  * for large x.
  * AMS55 #9.2.5.
@@ -533,14 +538,14 @@ while( t > MACHEPF )
 #endif
 		goto hank1;
 		}
-	}	
+	}
 
 hank1:
 u = x - (0.5*n + 0.25) * PIF;
 t = sqrtf( 2.0/(PIF*x) ) * ( pp * cosf(u) - qq * sinf(u) );
 return( t );
 }
-
+
 
 /* Asymptotic expansion for large n.
  * AMS55 #9.3.35.
@@ -776,7 +781,7 @@ t = sqrtf( sqrtf(t) );
 t *= ai*pp/cbrtf(n)  +  aip*qq/(n23*n);
 return(t);
 }
-
+
 /* Asymptotic expansion for transition region,
  * n large and x close to n.
  * AMS55 #9.3.23.

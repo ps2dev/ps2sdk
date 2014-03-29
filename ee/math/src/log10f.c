@@ -40,7 +40,7 @@
  * log10f domain:       x < 0; returns -MAXL10
  * MAXL10 = 38.230809449325611792
  */
-
+
 /*
 Cephes Math Library Release 2.1:  December, 1988
 Copyright 1984, 1987, 1988 by Stephen L. Moshier
@@ -109,7 +109,7 @@ if( x < SQRTH )
 	{
 	e -= 1;
 	x = 2.0*x - 1.0;
-	}	
+	}
 else
 	{
 	x = x - 1.0;

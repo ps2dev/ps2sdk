@@ -53,7 +53,7 @@
 #define PS2SND_StreamSetPosition      68
 #define PS2SND_StreamGetPosition      69
 #define PS2SND_StreamSetVolume        70
- 
+
 
 #define PS2SND_QueryMaxFreeMemSize    99 /* XXX: Hack until i can figure out how to do it right */
 

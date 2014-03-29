@@ -16,12 +16,12 @@
 
    ============================================================
    Copyright (C) 1999 by Cygnus Solutions. All rights reserved.
- 
+
    Permission to use, copy, modify, and distribute this
    software is freely granted, provided that this notice
    is preserved.
    ============================================================  */
-	
+
 	.text
 	.p2align 3
 	.globl	strncmp
@@ -34,27 +34,27 @@ strncmp:
 	.fmask	0x00000000,0
 
 /* if n is 0, simply return 0, otherwise must compare strings */
-		
+
 #ifdef __OPTIMIZE_SIZE__
-	
+
 	.set	noreorder
 	.set	nomacro
 	bne	$6,$0,$L30
 	lb	$3,0($4)
 	.set	macro
 	.set	reorder
-	
+
 #else /* __OPTIMIZE_SIZE__ */
-	
+
 	.set	noreorder
 	.set	nomacro
 	bne	$6,$0,$L3
 	or	$3,$4,$5
 	.set	macro
 	.set	reorder
-	
+
 #endif /* !_OPTIMIZE_SIZE__ */
-	
+
 $L20:
 	.set	noreorder
 	.set	nomacro
@@ -64,13 +64,13 @@ $L20:
 	.set	reorder
 
 	.p2align 2
-	
+
 #ifndef __OPTIMIZE_SIZE__
 
 /* check if src and dest are doubleword aligned, quadword aligned, or neither in which
    case go do a byte by byte comparison */
-	 
-$L3:	
+
+$L3:
 	andi	$2,$3,0x7
 	.set	noreorder
 	.set	nomacro
@@ -91,7 +91,7 @@ $L3:
 	.set	reorder
 
 /* data is quadword aligned, compare a quadword at a time while n >= 16 */
-		
+
 	lq	$3,0($4)
 	pcpyld	$10,$9,$9
 	lq	$2,0($5)
@@ -108,11 +108,11 @@ $L3:
 	.set	macro
 	.set	reorder
 	addu	$6,$6,-16
-	
+
 /* quadwords are equal, check for null terminator in string.  Otherwise, continue
    looping checking a quadword at a time until either a null terminator is found,
    the strings are unequal, or n < 16 in which case compare a byte at a time. */
-	
+
 $L34:
 	beq	$6,$0,$L20
 	lq	$2,0($7)
@@ -159,8 +159,8 @@ $L34:
 	.set	reorder
 
 /* data is doubleword aligned, compare a doubleword at a time while n >= 8 */
-		
-$L31:	
+
+$L31:
 	sltu	$2,$6,8
 	.set	noreorder
 	.set	nomacro
@@ -186,7 +186,7 @@ $L31:
 /* doublewords are equal, check for null terminator in string.  Otherwise, continue
    looping checking a doubleword at a time until either a null terminator is found,
    the strings are unequal, or n < 8 at which case compare a byte at a time. */
-	
+
 $L24:
 	beq	$6,$0,$L20
 	ld	$2,0($7)
@@ -244,7 +244,7 @@ $L22:
 
 /* compare a byte at a time until there are no more characters to compare, a null
    terminator is reached, or the bytes are unequal.  */
-	
+
 	.p2align 3
 $L14:
 	beq	$6,$0,$L20
@@ -258,8 +258,8 @@ $L14:
 	addu	$5,$5,1
 	lb	$3,0($4)
 
-	
-$L30:	
+
+$L30:
 	addu	$6,$6,-1
 $L21:
 	lb	$2,0($5)

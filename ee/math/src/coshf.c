@@ -35,7 +35,7 @@
  *
  *
  */
-
+
 /*							cosh.c */
 
 /*
@@ -67,7 +67,7 @@ if( x > MAXLOGF )
 	{
 	mtherr( "coshf", OVERFLOW );
 	return( MAXNUMF );
-	}	
+	}
 y = expf(x);
 y = y + 1.0/y;
 return( 0.5*y );

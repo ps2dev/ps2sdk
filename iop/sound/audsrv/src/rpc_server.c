@@ -34,7 +34,7 @@ static SifRpcServerData_t sd0;          ///< RPC thread variables
     @param size     size of data array (in bytes)
     @returns value depends on function invoked
 
-    This is a single rpc handler, it unpacks the data array and calls 
+    This is a single rpc handler, it unpacks the data array and calls
     local functions.
 */
 static void *rpc_command(int func, unsigned *data, int size)

@@ -104,19 +104,19 @@ void DmaSendEE()
 
 		/* This is where the 128*2 bytes of 'garbage' gets sent to EE.
 		   I believe that only 16 bytes should have been sent, used for checking
-           which ports/slots are open on the EE (padGetConnection). However 
-		   someone made a mistake and sent 128 bytes instead :-) Its the first 
-		   112 (128-16) bytes of padState[0][0] which gets sent along with the 
-		   sif_buffer, which I think clearly indicates that sending 128 bytes 
+           which ports/slots are open on the EE (padGetConnection). However
+		   someone made a mistake and sent 128 bytes instead :-) Its the first
+		   112 (128-16) bytes of padState[0][0] which gets sent along with the
+		   sif_buffer, which I think clearly indicates that sending 128 bytes
 		   is an error. - Lukasz
 		*/
 
 		sif_buffer[0]++;
 		sif_buffer[1] = pad_portdata[0];
 		sif_buffer[2] = pad_portdata[1];
-		
+
 		if( (sif_buffer[0] % 30) == 0)
-			sifdma_td[0].dest = pad_ee_addr + 128; 
+			sifdma_td[0].dest = pad_ee_addr + 128;
 		else
 			sifdma_td[0].dest = pad_ee_addr;
 
@@ -131,7 +131,7 @@ void DmaSendEE()
 				if( (openSlots[port] >> slot) & 1 )
 				{
 					padState_t *p = &padState[port][slot];
-	
+
 					// Setup EE pad data
 					p->ee_pdata.frame = p->frame;
 					p->ee_pdata.findPadRetries = p->findPadRetries;
@@ -188,25 +188,25 @@ void DmaSendEE()
 					else
 						sifdma_td[sifdma_count].dest = (void*)(p->padarea_ee_addr + 128);
 
-					sifdma_td[sifdma_count].src =  &p->ee_pdata;	
+					sifdma_td[sifdma_count].src =  &p->ee_pdata;
 					sifdma_td[sifdma_count].size = 128;
 					sifdma_td[sifdma_count].attr = 0;
-				
+
 					sifdma_count++;
 				}
 			}
 		}
-	
+
 		if(sifdma_count != 0)
 		{
 			int intr_state;
 
-			CpuSuspendIntr(&intr_state);			
-			
+			CpuSuspendIntr(&intr_state);
+
 			sifdma_id = sceSifSetDma( sifdma_td, sifdma_count);
 
 			CpuResumeIntr(intr_state);
-			
+
 		}
 	}
 }
@@ -264,16 +264,16 @@ void DeleteThreads(padState_t *state)
 
 void MainThread(void *arg)
 {
-	vblankData.stopTransfer = 0; 
-	
+	vblankData.stopTransfer = 0;
+
 	while(1)
 	{
 		u32 port, slot;
 
 		mainThreadCount = (mainThreadCount+1) % 30;
-	
+
 		if( mainThreadCount == 0) sio2_mtap_update_slots();
-	
+
 		for(port=0; port < 2; port++)
 		{
 			for(slot=0; slot < 4; slot++)
@@ -283,7 +283,7 @@ void MainThread(void *arg)
 					pdSetActive(port, slot, 0);
 
 					padState[port][slot].stat70bit = pdGetStat70bit(port, slot);
-					
+
 					if(padState[port][slot].runTask != 0)
 					{
 						if(padState[port][slot].runTask == TASK_PORT_CLOSE)
@@ -291,9 +291,9 @@ void MainThread(void *arg)
 							padState[port][slot].currentTask = 3;
 							padState[port][slot].runTask = 0;
 							padState[port][slot].reqState = PAD_RSTAT_BUSY;
-			
+
 							SetEventFlag(padState[port][slot].eventflag, EF_EXIT_THREAD);
-							
+
 						}
 						else
 						{
@@ -323,21 +323,21 @@ void MainThread(void *arg)
 							SetEventFlag(padState[port][slot].eventflag, EF_UPDATE_PAD);
 							WaitEventFlag(padState[port][slot].eventflag, EF_PAD_TRANSFER_START, 0x10, 0);
 							pdSetActive(port, slot, 1);
-						} break; 
+						} break;
 
 						case TASK_QUERY_PAD:
 						{
 							SetEventFlag(padState[port][slot].eventflag, EF_QUERY_PAD);
 							WaitEventFlag(padState[port][slot].eventflag, EF_PAD_TRANSFER_START, 0x10, 0);
 							pdSetActive(port, slot, 1);
-						} break; 	
-					
-						case TASK_PORT_CLOSE: 
+						} break;
+
+						case TASK_PORT_CLOSE:
 						{
 							padState[port][slot].buttonDataReady = 0;
-							
+
 							if(GetThreadsStatus( &padState[port][slot] ) == 1)
-							{	
+							{
 								padState[port][slot].currentTask = 0;
 								padState[port][slot].reqState = PAD_RSTAT_COMPLETE ;
 								openSlots[port] ^= (1 << slot);
@@ -348,39 +348,39 @@ void MainThread(void *arg)
 
 						} break;
 
-						case TASK_SET_MAIN_MODE: 
+						case TASK_SET_MAIN_MODE:
 						{
 							SetEventFlag(padState[port][slot].eventflag, EF_SET_MAIN_MODE);
 							WaitEventFlag(padState[port][slot].eventflag, EF_PAD_TRANSFER_START, 0x10, 0);
 							pdSetActive(port, slot, 1);
-						} break; 	
+						} break;
 
-						case TASK_SET_ACT_ALIGN: 
+						case TASK_SET_ACT_ALIGN:
 						{
 							SetEventFlag(padState[port][slot].eventflag, EF_SET_ACT_ALIGN);
 							WaitEventFlag(padState[port][slot].eventflag, EF_PAD_TRANSFER_START, 0x10, 0);
 							pdSetActive(port, slot, 1);
-						} break; 	
+						} break;
 
 						case TASK_SET_BUTTON_INFO:
 						{
 							SetEventFlag(padState[port][slot].eventflag, EF_SET_SET_BUTTON_INFO);
 							WaitEventFlag(padState[port][slot].eventflag, EF_PAD_TRANSFER_START, 0x10, 0);
 							pdSetActive(port, slot, 1);
-						} break; 	
+						} break;
 
-						case TASK_SET_VREF_PARAM: 
+						case TASK_SET_VREF_PARAM:
 						{
 							SetEventFlag(padState[port][slot].eventflag, EF_SET_VREF_PARAM);
 							WaitEventFlag(padState[port][slot].eventflag, EF_PAD_TRANSFER_START, 0x10, 0);
 							pdSetActive(port, slot, 1);
-						} break; 	
+						} break;
 
-					}		
+					}
 				}
 			}
 		}
-	
+
 		// Transfer is started in VblankStart
 		vblankData.stopTransfer = 0;
 		WaitClearEvent(vblankData.eventflag, EF_VB_TRANSFER_DONE, 0x10, 0);
@@ -394,11 +394,11 @@ void MainThread(void *arg)
 				{
 					if(pdIsActive(port, slot) == 1)
 					{
-						/* Signal transfer done and wait to task (reading 
+						/* Signal transfer done and wait to task (reading
 						   sio2 data) to be done. */
 						SetEventFlag(padState[port][slot].eventflag, EF_PAD_TRANSFER_DONE);
 						WaitEventFlag(padState[port][slot].eventflag, EF_TASK_DONE, 0x10, 0);
-	
+
 					}
 				}
 			}
@@ -417,7 +417,7 @@ void MainThread(void *arg)
 				if( pdIsActive(pad_port, pad_slot) == 1)
 				{
 					if( padState[pad_port][pad_slot].state == PAD_STATE_DISCONN)
-						pad_portdata[pad_port] &= ~(1 << pad_slot); // clear slot	
+						pad_portdata[pad_port] &= ~(1 << pad_slot); // clear slot
 					else
 						pad_portdata[pad_port] |= (1 << pad_slot);	// set slot
 				}
@@ -426,25 +426,25 @@ void MainThread(void *arg)
 					if( pdCheckConnection(pad_port, pad_slot) == 1)
 						pad_portdata[pad_port] |= (1 << pad_slot);	// set slot
 					else
-						pad_portdata[pad_port] &= ~(1 << pad_slot); // clear slot	
+						pad_portdata[pad_port] &= ~(1 << pad_slot); // clear slot
 				}
 
-				
+
 				pad_slot++;
 
-				if(pad_slot >= 4) 
+				if(pad_slot >= 4)
 				{
 					pad_slot = 0;
 
 					pad_port++;
-	
+
 					if(pad_port >= 2) pad_port = 0;
 				}
-				
+
 
 				mainThreadCount2 = 0;
 
-			}	
+			}
 		}
 
 	}
@@ -452,7 +452,7 @@ void MainThread(void *arg)
 
 s32 VbReferThreadStatus(vblankData_t *vData)
 {
-	iop_thread_info_t tinfo; 
+	iop_thread_info_t tinfo;
 	s32 ret = 0;
 
 	if( iReferThreadStatus(vData->tid_1, &tinfo) == 0)
@@ -483,7 +483,7 @@ int VblankStart(vblankData_t *vData)
 	/* Wait for threads to exit and signal event to padEnd */
 	if(vData->padEnd == 1)
 	{
-		if( VbReferThreadStatus(vData) == 0 ) 
+		if( VbReferThreadStatus(vData) == 0 )
 			iSetEventFlag(vData->eventflag, EF_VB_WAIT_THREAD_EXIT);
 	}
 
@@ -507,16 +507,16 @@ s32 padInit(void * ee_addr)
 		padEnd();
 	}
 
-	vblankData.padEnd = 0;	
-	vblankData.init = 0;	
+	vblankData.padEnd = 0;
+	vblankData.init = 0;
 	vblankData.stopTransfer = 0;
-	
+
 	pad_ee_addr = ee_addr;
 	pad_port = 0;
-	pad_slot = 0;	
-	mainThreadCount2 = 0;	
-	pad_portdata[0] = 0;	
-	pad_portdata[1] = 0;	
+	pad_slot = 0;
+	mainThreadCount2 = 0;
+	pad_portdata[0] = 0;
+	pad_portdata[1] = 0;
 	sif_buffer[0] = 0;
 
 	sio2cmdReset();
@@ -525,7 +525,7 @@ s32 padInit(void * ee_addr)
 	sio2cmdInitNegicon();
 	sio2cmdInitKonamiGun();
 	sio2cmdInitDigital();
-	sio2cmdInitJoystick();	
+	sio2cmdInitJoystick();
 	sio2cmdInitNamcoGun();
 	sio2cmdInitAnalog();
 	sio2cmdInitJogcon();
@@ -538,7 +538,7 @@ s32 padInit(void * ee_addr)
 
 	event.attr = 2;
 	event.bits = 0;
-	
+
 	vblankData.eventflag = CreateEventFlag(&event);
 
 	if( vblankData.eventflag == 0)
@@ -593,7 +593,7 @@ s32 padInit(void * ee_addr)
 
 		return 1;
 	}
-	
+
 	D_PRINTF("padInit: Failed\n");
 
 	return 0;

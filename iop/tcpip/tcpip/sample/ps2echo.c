@@ -20,7 +20,7 @@
 
 #include "ps2ip.h"
 
-#define BUFFER_SIZE  4024 
+#define BUFFER_SIZE  4024
 
 char buffer[ BUFFER_SIZE ];
 
@@ -73,7 +73,7 @@ void serverThread( void * arg )
    sh = socket( AF_INET, SOCK_STREAM, IPPROTO_TCP );
    if ( sh < 0 )
    {
-      printf( "PS2ECHO: Socket failed to create.\n" );   
+      printf( "PS2ECHO: Socket failed to create.\n" );
       SleepThread();
    }
 
@@ -90,7 +90,7 @@ void serverThread( void * arg )
    {
       printf( "PS2ECHO: Socket failed to bind.\n" );
       SleepThread();
-   } 
+   }
 
    printf( "PS2ECHO: bind returned %i\n",rc );
 
@@ -103,7 +103,7 @@ void serverThread( void * arg )
    }
 
    printf(  "PS2ECHO: listen returned %i\n", rc );
- 
+
    while(1)
    {
       clntLen = sizeof( echoClntAddr );
@@ -117,7 +117,7 @@ void serverThread( void * arg )
       printf( "PS2ECHO: accept returned %i.\n", cs );
 
       HandleClient( cs );
-   } 
+   }
 }
 
 
@@ -125,7 +125,7 @@ int _start( int argc, char **argv)
 {
    struct t_thread t;
    int tid;
-   
+
 
    printf("IOP-ECHO: Module Loaded\n");
 

@@ -17,7 +17,7 @@
 
    .extern   _heap_size
    .extern   _stack
-   .extern   _stack_size   
+   .extern   _stack_size
 
    .weakext _ps2sdk_args_parse_weak, _ps2sdk_args_parse
    .globl   _ps2sdk_args_parse_weak
@@ -116,7 +116,7 @@ libc_init:
    nop
    jalr   $8      # _ps2sdk_libc_init()
    nop
-1:   
+1:
 
 ctors:
    # call global constructors (weak)

@@ -69,7 +69,7 @@ unsigned char *LM_Response(const unsigned char *LMpasswordhash, unsigned char *c
 	unsigned char P21[21];
 	unsigned char K[7];
 	int i;
- 
+
 	/* padd the LM password hash with 5 nul bytes */
 	memcpy(&P21[0], LMpasswordhash, 16);
 	memset(&P21[16], 0, 5);
@@ -78,7 +78,7 @@ unsigned char *LM_Response(const unsigned char *LMpasswordhash, unsigned char *c
 	for (i=0; i<3; i++) {
 
 		/* get the 7bytes key */
-		memcpy(K, &P21[i*7], 7);		
+		memcpy(K, &P21[i*7], 7);
 
 		/* encrypt each the challenge with the keys */
 		DES(K, chal, &cipher[i*8]);

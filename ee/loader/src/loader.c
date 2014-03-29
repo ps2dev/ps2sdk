@@ -157,7 +157,7 @@ struct argData
 		if (eph[i].memsz > eph[i].filesz)
 			memset(eph[i].vaddr + eph[i].filesz, 0,
 					eph[i].memsz - eph[i].filesz);
-		}		
+		}
 
 	fileXioClose(fd);
 //	fileXioUmount("pfs0:");		We leave the filesystem mounted now for fakehost
@@ -167,7 +167,7 @@ struct argData
 //		dbgprintf("Not a recognised ELF.\n");	// doesn't do any harm
 //		goto error;
 //		}
-	
+
 	dbgprintf("entry=%x\n",eh->entry);
 	elfdata.epc=eh->entry;
 	return 0;
@@ -195,7 +195,7 @@ pkoLoadElf(char *path)
 //    if(!strncmp(path, "host", 4)) ret = SifLoadElf(path, &elfdata);
 //    else if(!strncmp(path, "mc", 2)) ret = SifLoadElf(path, &elfdata);
 //    else if(!strncmp(path, "cdfs", 4)) ret = SifLoadElf(path, &elfdata);
-    if(!strncmp(path, "pfs", 3)) 
+    if(!strncmp(path, "pfs", 3))
 	{
 		strncpy(dev, path, 7);
 		dev[7] = '\0';
@@ -209,7 +209,7 @@ pkoLoadElf(char *path)
 
     dbgprintf("EE: LoadElf returned %d\n", ret);
 
-    dbgprintf("EE: Creating user thread (ent: %x, gp: %x, st: %x)\n", 
+    dbgprintf("EE: Creating user thread (ent: %x, gp: %x, st: %x)\n",
               elfdata.epc, elfdata.gp, elfdata.sp);
 
     if (elfdata.epc == 0) {

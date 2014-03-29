@@ -130,7 +130,7 @@ void send_td(sio2_transfer_data_t *td)
 		dmac_request(IOP_DMAC_SIO2out, td->out_dma.addr, td->out_dma.size,
 				td->out_dma.count, DMAC_TO_MEM);
 		dmac_transfer(IOP_DMAC_SIO2out);
-	
+
 	#ifndef XSIO2MAN
 		log_dma(LOG_TRS_DMA_OUT, &td->out_dma);
 	#endif

@@ -14,10 +14,10 @@ I_printf
 stdio_IMPORTS_end
 
 thbase_IMPORTS_start
-I_CreateThread 
-I_StartThread 
-I_SleepThread 
-I_GetThreadId 
+I_CreateThread
+I_StartThread
+I_SleepThread
+I_GetThreadId
 thbase_IMPORTS_end
 
 intrman_IMPORTS_start
@@ -57,15 +57,15 @@ I_readlink
 iomanX_IMPORTS_end
 
 sifman_IMPORTS_start
-I_sceSifInit 
-I_sceSifSetDma 
-I_sceSifDmaStat 
+I_sceSifInit
+I_sceSifSetDma
+I_sceSifDmaStat
 sifman_IMPORTS_end
 
 sifcmd_IMPORTS_start
-I_sceSifInitRpc 
-I_sceSifGetOtherData 
-I_sceSifSetRpcQueue 
-I_sceSifRegisterRpc 
-I_sceSifRpcLoop 
+I_sceSifInitRpc
+I_sceSifGetOtherData
+I_sceSifSetRpcQueue
+I_sceSifRegisterRpc
+I_sceSifRpcLoop
 sifcmd_IMPORTS_end

@@ -33,7 +33,7 @@
  * tanf total loss	 x > 2^24			   0.0
  *
  */
-/* 						cotf.c
+/* 						cotf.c
  *
  *	Circular cotangent
  *
@@ -68,7 +68,7 @@
  * cot singularity	x = 0				   MAXNUMF
  *
  */
-
+
 /*
 Cephes Math Library Release 2.2:  June, 1992
 Copyright 1984, 1987, 1989 by Stephen L. Moshier

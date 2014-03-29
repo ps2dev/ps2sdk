@@ -18,7 +18,7 @@
 static int UsbControlTransfer(int epID, int reqtyp, int req, int val, int index, int leng, void *dataptr, void *doneCB, void* arg)
 
 {
-  UsbDeviceRequest devreq; 
+  UsbDeviceRequest devreq;
   devreq.requesttype = reqtyp;
   devreq.request = req;
   devreq.value = val;
@@ -32,15 +32,15 @@ static int UsbControlTransfer(int epID, int reqtyp, int req, int val, int index,
 
 /*
 #define UsbControlTransfer(epID, reqtyp, req, val, index, len, dataptr, doneCB, arg) \
- ({ \ 
-	UsbDeviceRequest devreq; \ 
-	devreq.requesttype = (reqtyp); \ 
-	devreq.request = (req); \ 
-	devreq.value = (val); \ 
-	devreq.index = (index); \ 
-	devreq.length = (len); \ 
-	UsbTransfer((epID), (dataptr), devreq.length, &devreq, (doneCB), (arg)); \ 
-	}) 
+ ({ \
+	UsbDeviceRequest devreq; \
+	devreq.requesttype = (reqtyp); \
+	devreq.request = (req); \
+	devreq.value = (val); \
+	devreq.index = (index); \
+	devreq.length = (len); \
+	UsbTransfer((epID), (dataptr), devreq.length, &devreq, (doneCB), (arg)); \
+	})
 */
 
 #define UsbIsochronousTransfer(epID, dataptr, len, delta, doneCB, arg) \

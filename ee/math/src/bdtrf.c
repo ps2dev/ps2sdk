@@ -47,7 +47,7 @@
  *                     x < 0, x > 1
  *
  */
-/*							bdtrcf()
+/*							bdtrcf()
  *
  *	Complemented binomial distribution
  *
@@ -93,7 +93,7 @@
  *   message         condition      value returned
  * bdtrcf domain     x<0, x>1, n<k       0.0
  */
-/*							bdtrif()
+/*							bdtrif()
  *
  *	Inverse binomial distribution
  *
@@ -135,7 +135,7 @@
  *                  x < 0, x > 1
  *
  */
-
+
 /*								bdtr() */
 
 

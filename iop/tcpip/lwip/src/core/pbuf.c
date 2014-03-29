@@ -536,7 +536,7 @@ pbuf_header(struct pbuf *p, s16_t header_size)
  *
  * Assuming existing chains a->b->c with the following reference
  * counts, calling pbuf_free(a) results in:
- * 
+ *
  * 1->2->3 becomes ...1->3
  * 3->3->3 becomes 2->3->3
  * 1->1->2 becomes ......1
@@ -650,10 +650,10 @@ pbuf_ref(struct pbuf *p)
 /**
  * Concatenate two pbufs (each may be a pbuf chain) and take over
  * the caller's reference of the tail pbuf.
- * 
+ *
  * @note The caller MAY NOT reference the tail pbuf afterwards.
  * Use pbuf_chain() for that purpose.
- * 
+ *
  * @see pbuf_chain()
  */
 
@@ -681,10 +681,10 @@ pbuf_cat(struct pbuf *h, struct pbuf *t)
 
 /**
  * Chain two pbufs (or pbuf chains) together.
- * 
+ *
  * The caller MUST call pbuf_free(t) once it has stopped
  * using it. Use pbuf_cat() instead if you no longer use t.
- * 
+ *
  * @param h head pbuf (chain)
  * @param t tail pbuf (chain)
  * @note The pbufs MUST belong to the same packet.

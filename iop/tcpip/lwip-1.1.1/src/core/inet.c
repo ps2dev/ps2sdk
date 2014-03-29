@@ -52,8 +52,8 @@
  * aim of being simple, correct and fully portable. Checksumming is the
  * first thing you would want to optimize for your platform. You will
  * need to port it to your architecture and in your sys_arch.h:
- * 
- * #define LWIP_CHKSUM <your_checksum_routine> 
+ *
+ * #define LWIP_CHKSUM <your_checksum_routine>
 */
 #ifndef LWIP_CHKSUM
 #define LWIP_CHKSUM lwip_standard_chksum
@@ -63,7 +63,7 @@
  *
  * @param dataptr points to start of data to be summed at any boundary
  * @param len length of data to be summed
- * @return host order (!) lwip checksum (non-inverted Internet sum) 
+ * @return host order (!) lwip checksum (non-inverted Internet sum)
  *
  * @note accumulator size limits summable lenght to 64k
  * @note host endianess is irrelevant (p3 RFC1071)
@@ -163,13 +163,13 @@ lwip_standard_chksum2(void *dataptr, int len)
 /**
  * An optimized checksum routine. Basically, it uses loop-unrolling on
  * the checksum loop, treating the head and tail bytes specially, whereas
- * the inner loop acts on 8 bytes at a time. 
+ * the inner loop acts on 8 bytes at a time.
  *
  * @arg start of buffer to be checksummed. May be an odd byte address.
  * @len number of bytes in the buffer to be checksummed.
- * 
+ *
  * @todo First argument type conflicts with generic checksum routine.
- * 
+ *
  * by Curt McDowell, Broadcom Corp. December 8th, 2005
  */
 
@@ -336,8 +336,8 @@ inet_chksum_pbuf(struct pbuf *p)
 #define isxdigit(c)          (isdigit(c) || in_range(c, 'a', 'f') || in_range(c, 'A', 'F'))
 #define islower(c)           in_range(c, 'a', 'z')
 #define isspace(c)           (c == ' ' || c == '\f' || c == '\n' || c == '\r' || c == '\t' || c == '\v')
-#endif		
-		
+#endif
+
 
  /*
   * Ascii internet address interpretation routine.

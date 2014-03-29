@@ -19,7 +19,7 @@
 
 #include "iopmgr.h"
 
-/** \defgroup iopmgr iopmgr - IOP Manager*/ 
+/** \defgroup iopmgr iopmgr - IOP Manager*/
 
 
 IRX_ID(IOPMGR_MODNAME, IOPMGR_VERSION_HIGH, IOPMGR_VERSION_LOW);
@@ -29,7 +29,7 @@ struct irx_export_table _exp_iopmgr;
 extern void cmdline_handle(char *command, char *arg1);
 
 /*! \brief Entry point for IRX.
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  *
  *  if argc <= 1 , install as library.
  *  if argc > 1 , run given command in argv[1].
@@ -64,8 +64,8 @@ int _start(int argc, char *argv[])
     {
       printf("Registered.\n");
       return MODULE_RESIDENT_END;
-    } 
-    else 
+    }
+    else
     {
       /* luckily the previously installed one will be higher up the list, so will
        *  be the first one found , so get the version
@@ -84,7 +84,7 @@ int _start(int argc, char *argv[])
 }
 
 /*! \brief shutdown the IRX.
- *  \ingroup iopmgr 
+ *  \ingroup iopmgr
  *
  *  This checks if the library is registered, if it is then
  *  it unregisters it.
@@ -95,8 +95,8 @@ int _start(int argc, char *argv[])
  *    MODULE_RESIDENT_END if loaded and registered as library.
  *    MODULE_NO_RESIDENT_END if just exiting normally.
  */
-int shutdown() 
-{ 
+int shutdown()
+{
   switch(slib_release_library(IOPMGR_LIBNAME))
   {
     case 0: printf("UnRegistered\n"); break;

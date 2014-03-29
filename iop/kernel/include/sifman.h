@@ -68,7 +68,7 @@ int sceSifDmaStat(int trid);
 #define SifSetDma sceSifSetDma
 #define SifDmaStat sceSifDmaStat
 
-/* 
+/*
  * All of these except sceSifCheckInit() & sceSifSetDmaIntr() have been
  * aribitrarily named.
  */

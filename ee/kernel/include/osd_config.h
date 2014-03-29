@@ -78,23 +78,23 @@ typedef struct {
 } Config2Param;
 
 // get the language the ps2 is currently set to
-// 
+//
 // returns:	Language value (See OSD_LANGUAGES above)
 int  configGetLanguage(void);
 // sets the default language of the ps2
-// 
+//
 // args:	Language value (See OSD_LANGUAGES above)
 void configSetLanguage(int language);
 
 
 // get the tv screen type the ps2 is setup for
-// 
+//
 // returns:	0 = 4:3
 //			1 = fullscreen
 //			2 = 16:9
 int  configGetTvScreenType(void);
 // set the tv screen type
-// 
+//
 // args:	0 = 4:3
 //			1 = fullscreen
 //			2 = 16:9
@@ -102,13 +102,13 @@ void configSetTvScreenType(int screenType);
 
 
 // gets the date display format
-// 
+//
 // returns:	0 = yyyy/mm/dd
 //			1 = mm/dd/yyyy
 //			2 = dd/mm/yyyy
 int  configGetDateFormat(void);
 // sets the date display format
-// 
+//
 // args:	0 = yyyy/mm/dd
 //			1 = mm/dd/yyyy
 //			2 = dd/mm/yyyy
@@ -117,44 +117,44 @@ void configSetDateFormat(int dateFormat);
 
 // gets the time display format
 // (whether 24hour time or not)
-// 
+//
 // returns:	0 = 24hour
 //			1 = 12hour
 int  configGetTimeFormat(void);
 // sets the time display format
 // (whether 24hour time or not)
-// 
+//
 // args:	0 = 24hour
 //			1 = 12hour
 void configSetTimeFormat(int timeFormat);
 
 // get timezone
-// 
+//
 // returns: offset in minutes from GMT
 int  configGetTimezone(void);
 // set timezone
-// 
+//
 // args:	offset in minutes from GMT
 void configSetTimezone(int offset);
 
 // checks whether the spdif is enabled or not
-// 
+//
 // returns:	1 = on
 //			0 = off
 int  configIsSpdifEnabled(void);
 // sets whether the spdif is enabled or not
-// 
+//
 // args:	1 = on
 //			0 = off
 void configSetSpdifEnabled(int enabled);
 
 // checks whether daylight saving is currently set
-// 
+//
 // returns:	1 = on
 //			0 = off
 int  configIsDaylightSavingEnabled(void);
 // checks whether daylight saving is currently set
-// 
+//
 // returns:	1 = on
 //			0 = off
 void configSetDaylightSavingEnabled(int enabled);

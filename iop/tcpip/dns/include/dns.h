@@ -10,7 +10,7 @@
 # $Id$
 # PS2 DNS resolver
 */
- 
+
 #ifndef _DNS_H
 #define	_DNS_H
 

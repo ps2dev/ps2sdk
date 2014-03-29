@@ -487,7 +487,7 @@ int chstat(const char *name, iox_stat_t *stat, unsigned int mask)
 	   variable to iomanX's extended format.  */
 	if ((file.device->type & 0xf0000000) != IOP_DT_FSEXT)
 		stat->mode = modex2mode(stat->mode);
-        
+
     return file.device->ops->chstat(&file, filename, stat, mask);
 }
 

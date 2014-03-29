@@ -39,7 +39,7 @@
  *    IEEE      0,30        20000       7.8e-6      5.9e-7
  *
  */
-/*							igamcf()
+/*							igamcf()
  *
  *	Complemented incomplete gamma integral
  *
@@ -83,7 +83,7 @@
  *    IEEE      0,30        30000       7.8e-6      5.9e-7
  *
  */
-
+
 /*
 Cephes Math Library Release 2.2: June, 1992
 Copyright 1985, 1987, 1992 by Stephen L. Moshier

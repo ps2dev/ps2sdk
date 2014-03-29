@@ -13,7 +13,7 @@ IOP_INC_DIR = include/
 
 IOP_BIN  = bin/freepad.irx
 IOP_OBJS = obj/freepad.o obj/rpcserver.o obj/exports.o obj/imports.o
-IOP_OBJS += obj/padInit.o obj/padPortOpen.o obj/padMiscFuncs.o obj/sio2Cmds.o 
+IOP_OBJS += obj/padInit.o obj/padPortOpen.o obj/padMiscFuncs.o obj/sio2Cmds.o
 IOP_OBJS += obj/padData.o obj/padCmds.o
 
 

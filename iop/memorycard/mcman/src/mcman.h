@@ -40,7 +40,7 @@
 #define MODVER  0x101
 
 // modInfo struct returned by xmcman exports 42
-struct modInfo_t { 
+struct modInfo_t {
 	const char *name;
 	u16 version;
 };
@@ -61,7 +61,7 @@ typedef struct _sceMcStDateTime {
 typedef struct _sceMcTblGetDir { //size = 64
 	sceMcStDateTime _Create; // 0
 	sceMcStDateTime _Modify; // 8
-	u32 FileSizeByte;		 // 16	
+	u32 FileSizeByte;		 // 16
 	u16 AttrFile;			 // 20
 	u16 Reserve1;			 // 22
 	u32 Reserve2;			 // 24
@@ -127,15 +127,15 @@ typedef struct {				// size = 128
 	u16 field_2e;				// 46
 	sceMcStDateTime modified;   // 48
 	int field_38;				// 56
-	u8  unused2[65];			// 60	
+	u8  unused2[65];			// 60
 	u8  field_7d;				// 125
 	u8  field_7e;				// 126
-	u8  edc;					// 127 
+	u8  edc;					// 127
 } McFsEntryPS1;
 
 typedef struct {				// size = 512
 	u16 mode;					// 0
-	u16 unused;					// 2	
+	u16 unused;					// 2
 	u32 length;					// 4
 	sceMcStDateTime created;	// 8
 	u32 cluster;				// 16
@@ -158,17 +158,17 @@ char *mcman_curdirname;
 int mcman_PS1curcluster;
 u8 mcman_PS1curdir[64];
 
-typedef struct {  // size = 48		
+typedef struct {  // size = 48
 	u8  status;   // 0
 	u8  wrflag;   // 1
 	u8  rdflag;   // 2
-	u8  unknown1; // 3 
+	u8  unknown1; // 3
 	u8  drdflag;  // 4
 	u8  unknown2; // 5
 	u16 port;     // 6
 	u16 slot;     // 8
-	u16 unknown3; // 10 
-	u32 position; // 12 
+	u16 unknown3; // 10
+	u32 position; // 12
 	u32 filesize; // 16
 	u32 freeclink; // 20 link to next free cluster
 	u32 clink;	  // 24  link to next cluster
@@ -367,7 +367,7 @@ typedef struct { 				// size = 384
     u32 ifc_list[32];			// List of indirect FAT clusters. On a standard 8M card there's only one indirect FAT cluster
     int bad_block_list[32];		// List of erase blocks that have errors and shouldn't be used
     u8  cardtype;				// Memory card type. Must be 2, indicating that this is a PS2 memory card
-    u8  cardflags;				// Physical characteristics of the memory card 
+    u8  cardflags;				// Physical characteristics of the memory card
     u16 unused3;
     u32 cluster_size;
     u32 FATentries_per_cluster;
@@ -422,12 +422,12 @@ sio2_transfer_data_t mcman_sio2packet;  // buffer for mcman sio2 packet
 u8 mcman_wdmabufs[0x0b * 0x90]; 		// buffer array for SIO2 DMA I/O (write)
 u8 mcman_rdmabufs[0x0b * 0x90]; 		// not sure here for size, buffer array for SIO2 DMA I/O (read)
 
-sio2_transfer_data_t mcman_sio2packet_PS1PDA; 
+sio2_transfer_data_t mcman_sio2packet_PS1PDA;
 u8 mcman_sio2inbufs_PS1PDA[0x90];
 u8 mcman_sio2outbufs_PS1PDA[0x90];
 
-u8 mcman_pagebuf[1056]; 
-void *mcman_pagedata[32]; 
+u8 mcman_pagebuf[1056];
+void *mcman_pagedata[32];
 u8 mcman_eccdata[512]; // size for 32 ecc
 
 u8 mcman_backupbuf[16384];

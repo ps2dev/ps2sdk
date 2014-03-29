@@ -8,7 +8,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 # $Id$
-# Pad externals 
+# Pad externals
 */
 
 #ifndef _PAD_H_
@@ -66,7 +66,7 @@ extern "C" {
 #define PAD_TYPE_DUALSHOCK	0x7
 #define PAD_TYPE_JOGCON     0xE
 #define PAD_TYPE_EX_TSURICON 0x100
-#define PAD_TYPE_EX_JOGCON  0x300 
+#define PAD_TYPE_EX_JOGCON  0x300
 /*
  * padInfoMode values
  */
@@ -197,8 +197,8 @@ int padGetModVersion();
 
 /*
  * Get pad info (digital (4), dualshock (7), etc..)
- * 
- * Returns ID: 
+ *
+ * Returns ID:
  *     3 - KONAMI GUN
  *     4 - DIGITAL PAD
  *     5 - JOYSTICK
@@ -208,7 +208,7 @@ int padGetModVersion();
 int padInfoMode(int port, int slot, int infoMode, int index);
 
 /*
- * mode = 1, -> Analog/dual shock enabled; mode = 0 -> Digital  
+ * mode = 1, -> Analog/dual shock enabled; mode = 0 -> Digital
  * lock = 3 -> Mode not changeable by user
  */
 int padSetMainMode(int port, int slot, int mode, int lock);
@@ -252,7 +252,7 @@ int padSetActAlign(int port, int slot, char act_align[6]);
 
 /*
  * Set actuator status
- * On dual shock controller, 
+ * On dual shock controller,
  * act_align[0] = 0/1 turns off/on 'small' engine
  * act_align[1] = 0-255 sets 'big' engine speed
  */

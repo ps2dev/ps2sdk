@@ -8,7 +8,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 # $Id$
-# fileXio RPC client/server shared includes 
+# fileXio RPC client/server shared includes
 */
 
 #ifndef _FILEXIO_H

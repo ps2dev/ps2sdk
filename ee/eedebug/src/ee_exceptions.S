@@ -228,7 +228,7 @@ __ee_level2_ex_vector:
                         nop
                         nop
                         nop
-                        j           __ee_level2_ex_handler      
+                        j           __ee_level2_ex_handler
                         nop
                         nop
                         nop

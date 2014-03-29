@@ -6,7 +6,7 @@
 
 #include <graph.h>
 #include <graph_config.h>
- 
+
 /* y offset is non-interlaced */
 GRAPH_MODE graph_mode[22] =
 {
@@ -82,7 +82,7 @@ unsigned long smode1_values[22] =
 
 static inline int __udelay(unsigned int usecs)
 {
- 
+
 	register unsigned int loops_total = 0;
 	register unsigned int loops_end   = usecs * 148;
 
@@ -210,7 +210,7 @@ int graph_set_screen(int x, int y, int width, int height)
 	dh = graph_mode[graph_crtmode].height;
 
 	// Double Y offset for interlacing in FIELD mode
-	// Double screen's height parameter 
+	// Double screen's height parameter
 	if ((graph_interlace) && (graph_ffmd == GRAPH_MODE_FIELD))
 	{
 

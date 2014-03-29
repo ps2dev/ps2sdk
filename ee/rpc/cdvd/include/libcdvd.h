@@ -34,7 +34,7 @@ typedef struct {
 // fioOpen() flag to open file for streaming
 #define CDVD_STREAM			0x40000000
 
-// Low Level File System for CdSearchFile() 
+// Low Level File System for CdSearchFile()
 #define CDVD_FILE_MAXFILES	64			// max number of files in a directory
 #define CDVD_FILE_MAXDIRS	128			// max number of directories
 #define CDVD_FILE_MAXLEVELS	8			// max levels of directories
@@ -209,7 +209,7 @@ extern "C" {
 
 // read data from disc
 // non-blocking, requires cdSync() call
-// 
+//
 // args:	sector location to start reading from
 //			number of sectors to read
 //			buffer to read to
@@ -221,7 +221,7 @@ s32  cdDvdRead(	u32 sectorLoc, u32 numSectors, void *buffer, CdvdReadMode_t *mod
 s32  cdCddaRead(u32 sectorLoc, u32 numSectors, void *buffer, CdvdReadMode_t *mode);
 
 // get toc from inserted disc
-// 
+//
 // args:	buffer to hold toc (1024 or 2064 bytes?)
 // returns:	1 if successful
 //			0 otherwise
@@ -229,7 +229,7 @@ s32  cdGetToc(u8 *toc);
 
 // seek to given sector on disc
 // non-blocking, requires cdSync() call
-// 
+//
 // args:	sector to seek to on disc
 // returns:	1 if successful
 //			0 if error
@@ -237,27 +237,27 @@ s32  cdSeek(u32 sectorLoc);
 
 // puts ps2 cd drive into standby mode
 // non-blocking, requires cdSync() call
-// 
+//
 // returns:	1 if successful
 //			0 if error
 s32  cdStandby(void);
 
 // stops ps2 cd drive from spinning
 // non-blocking, requires cdSync() call
-// 
+//
 // returns:	1 if successful
 //			0 if error
 s32  cdStop(void);
 
 // pauses ps2 cd drive
 // non-blocking, requires cdSync() call
-// 
+//
 // returns:	1 if successful
 //			0 if error
 s32  cdPause(void);
 
 // send an n-command by function number
-// 
+//
 // args:	command number
 //			input buffer  (can be null)
 //			size of input buffer  (0 - 16 byte)
@@ -268,7 +268,7 @@ s32  cdPause(void);
 s32  cdApplyNCmd(u8 cmdNum, const void* inBuff, u16 inBuffSize, void* outBuff, u16 outBuffSize);
 
 // read data to iop memory
-// 
+//
 // args:	sector location to read from
 //			number of sectors to read
 //			buffer to read to (in iop memory)
@@ -279,7 +279,7 @@ s32  cdReadIOPMem(u32 sectorLoc, u32 numSectors, void *buf, CdvdReadMode_t *mode
 
 // wait for disc to finish all n-commands
 // (shouldnt really need to call this yourself)
-// 
+//
 // returns:	6 if busy
 //			2 if ready
 //			0 if error
@@ -289,9 +289,9 @@ s32  cdNCmdDiskReady(void);
 // last chain value must be all 0xFFFFFFFF
 // (max of 64 reads can be set at once)
 // non-blocking, requires cdSync() call
-// 
+//
 // SUPPORTED IN XCDVDMAN/XCDVDFSV ONLY
-// 
+//
 // args:	pointer to an array of read chain data
 //			read mode
 // returns:	1 if successful
@@ -304,7 +304,7 @@ s32  cdReadChain(CdvdChain_t *readChain, CdvdReadMode_t *mode);
 
 // read clock value from ps2s clock
 // (time values seem to be in hex or BCD)
-// 
+//
 // args:	time/date struct
 // returns:	1 if successful
 //			0 if error
@@ -312,24 +312,24 @@ s32  cdReadClock(CdvdClock_t *clock);
 
 // write clock value to ps2s clock
 // (time values seem to be in hex or BCD)
-// 
+//
 // args:	time/date struct to set clocks time with
 // returns:	1 if successful
 //			0 if error
 s32  cdWriteClock(const CdvdClock_t *clock);
 
 // gets the type of the currently inserted disc
-// 
+//
 // returns:	disk type (CDVD_TYPE_???)
 CdvdDiscType_t cdGetDiscType(void);
 
 // gets the last error that occurred
-// 
+//
 // returns:	error type (CDVD_ERR_???)
 s32  cdGetError(void);
 
 // open/close/check disk tray
-// 
+//
 // args:	param (CDVD_TRAY_???)
 //			address for returning tray state change
 // returns:	1 if successful
@@ -337,7 +337,7 @@ s32  cdGetError(void);
 s32  cdTrayReq(s32 param, u32 *traychk);
 
 // send an s-command by function number
-// 
+//
 // args:	command number
 //			input buffer  (can be null)
 //			size of input buffer  (0 - 16 byte)
@@ -348,29 +348,29 @@ s32  cdTrayReq(s32 param, u32 *traychk);
 s32  cdApplySCmd(u8 cmdNum, const void* inBuff, u16 inBuffSize, void *outBuff, u16 outBuffSize);
 
 // gets the status of the cd system
-// 
+//
 // returns:	status (CDVD_STAT_???)
 s32  cdStatus(void);
 
 // 'breaks' the currently executing command
-// 
+//
 // returns:	1 if successful
 //			0 if error
 s32  cdBreak(void);
 
 // cancel power off
-// 
+//
 // SUPPORTED IN XCDVDMAN/XCDVDFSV ONLY
-// 
+//
 // args:	result
 // returns:	1 if successful
 //			0 if error
 s32  cdCancelPowerOff(u32* result);
 
 // blue led control
-// 
+//
 // SUPPORTED IN XCDVDMAN/XCDVDFSV ONLY
-// 
+//
 // args:	control value
 //			result
 // returns:	1 if successful
@@ -378,27 +378,27 @@ s32  cdCancelPowerOff(u32* result);
 s32  cdBlueLedCtrl(u8 control, u32 *result);
 
 // power off
-// 
+//
 // SUPPORTED IN XCDVDMAN/XCDVDFSV ONLY
-// 
+//
 // args:	result
 // returns:	1 if successful
 //			0 if error
 s32  cdPowerOff(u32 *result);
 
 // set media mode
-// 
+//
 // SUPPORTED IN XCDVDMAN/XCDVDFSV ONLY
-// 
+//
 // args:	media mode
 // returns:	1 if successful
 //			0 if error
 s32  cdSetMediaMode(u32 mode);
 
 // change cd thread priority
-// 
+//
 // SUPPORTED IN XCDVDMAN/XCDVDFSV ONLY
-// 
+//
 // args:	media mode
 // returns:	1 if successful
 //			0 if error
@@ -409,7 +409,7 @@ s32  cdChangeThreadPriority(u32 priority);
 
 
 // start streaming data
-// 
+//
 // args:	sector location to start streaming from
 //			mode to read in
 // returns:	1 if successful
@@ -417,7 +417,7 @@ s32  cdChangeThreadPriority(u32 priority);
 s32  cdStStart(u32 sectorLoc, CdvdReadMode_t *mode);
 
 // read stream data
-// 
+//
 // args:	number of sectors to read
 //			read buffer address
 //			data stream mode (CDVD_STREAM_BLOCK oo CDVD_STREAM_NONBLOCK)
@@ -427,20 +427,20 @@ s32  cdStStart(u32 sectorLoc, CdvdReadMode_t *mode);
 s32  cdStRead(u32 sectorSize, u32 *buffer, u32 mode, u32 *error);
 
 // stop streaming
-// 
+//
 // returns:	1 if successful
 //			0 otherwise
 s32  cdStStop(void);
 
 // seek to a new stream position
-// 
+//
 // args:	sector location to start streaming from
 // returns:	1 if successful
 //			0 otherwise
 s32  cdStSeek(u32 sectorLoc);
 
 // init streaming
-// 
+//
 // args:	stream buffer size
 //			number of ring buffers
 //			buffer address on iop
@@ -449,19 +449,19 @@ s32  cdStSeek(u32 sectorLoc);
 s32  cdStInit(u32 buffSize, u32 numBuffers, void *buf);
 
 // get stream read status
-// 
+//
 // returns:	number of sectors read if successful
 //			0 otherwise
 s32  cdStStat(void);
 
 // pause streaming
-// 
+//
 // returns:	1 if successful
 //			0 otherwise
 s32  cdStPause(void);
 
 // continue streaming
-// 
+//
 // returns:	1 if successful
 //			0 otherwise
 s32  cdStResume(void);
@@ -475,14 +475,14 @@ int cdCddaStream(u32 lbn, u32 nsectors, void *buf, CdvdStCmd_t cmd, CdvdReadMode
 
 
 // init cdvd system
-// 
+//
 // args:	init mode (CDVD_INIT_???)
 // returns:	1 if successful
 //			0 if error
 s32  cdInit(s32 mode);
 
 // waits/checks for completion of n-commands
-// 
+//
 // args:	0 = wait for completion of command (blocking)
 //			1 = check current status and return immediately
 // returns:	0 = completed
@@ -490,7 +490,7 @@ s32  cdInit(s32 mode);
 s32  cdSync(s32 mode);
 
 // search for a file on disc
-// 
+//
 // args:	file structure to get file info in
 //			name of file to search for (no wildcard characters)
 //				(should be in the form '\\SYSTEM.CNF;1')
@@ -499,7 +499,7 @@ s32  cdSync(s32 mode);
 s32  cdSearchFile(CdvdFileSpec_t *file, const char *name);
 
 // checks if drive is ready
-// 
+//
 // args:	 mode
 // returns:	2 if ready
 //			6 if busy
@@ -515,7 +515,7 @@ s32  cdPosToInt(CdvdLocation_t *p);
 u32  cdGetReadPos(void);
 
 // initialise callback thread
-// 
+//
 // args:	callback thread priority
 //			callback thread stack address
 //			callback thread stack size
@@ -524,7 +524,7 @@ u32  cdGetReadPos(void);
 s32 cdInitCallbackThread(s32 priority, void *stackAddr, s32 stackSize);
 
 // set cd callback function
-// 
+//
 // args:	pointer to new callback function
 // returns:	pointer to old function
 CdCBFunc cdSetCallback(CdCBFunc func);

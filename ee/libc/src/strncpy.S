@@ -11,17 +11,17 @@
 */
 
 /* Assembler version of strncpy using quadword instructions
-	
+
    Jeff Johnston, Cygnus Solutions, Feb 10/1999.
 
    ============================================================
    Copyright (C) 1999 by Cygnus Solutions. All rights reserved.
- 
+
    Permission to use, copy, modify, and distribute this
    software is freely granted, provided that this notice
    is preserved.
    ============================================================  */
-	
+
 	.text
 	.p2align 3
 	.globl	strncpy
@@ -34,12 +34,12 @@ strncpy:
 	.fmask	0x00000000,0
 
 	move	$8,$4
-	
+
 #ifndef __OPTIMIZE_SIZE__
 
 /* check if src and dest are doubleword aligned, quadword aligned, or neither in which
    case copy byte by byte */
-	
+
 	or	$7,$5,$4
 	li	$10,0x10
 	andi	$2,$7,0x7
@@ -62,8 +62,8 @@ strncpy:
    null terminator or until the nth byte is reached.  Otherwise, copy the
    quadword to dest and continue looping checking quadwords.   Once a null
    terminator is found or n is < 16 go copy a byte at a time. */
-	 
-$L31:	
+
+$L31:
 	bne	$2,$0,$L9
 	dli	$7,0x0101010101010101
 	lq	$3,0($5)
@@ -84,7 +84,7 @@ $L31:
 	.set	reorder
 	lq	$3,0($5)
 	.p2align 3
-$L39:		
+$L39:
 	addu	$6,$6,-16
 	addu	$5,$5,16
 	sltu	$2,$6,16
@@ -112,13 +112,13 @@ $L39:
 	move	$4,$7
 	.set	macro
 	.set	reorder
-					
+
 /* src and dest are quadword aligned.  Check a quadword at a time looking for a
    null terminator or until the nth byte is reached.  Otherwise, copy the
    quadword to dest and continue looping checking quadwords.   Once a null
    terminator is found or n is < 16 go copy a byte at a time. */
-	
-$L17:		
+
+$L17:
 	bne	$2,$0,$L9
 	ld	$3,0($5)
 	dli	$9,0x0101010101010101
@@ -162,13 +162,13 @@ $L19:
 
 $L5:
 	move	$4,$7
-	
+
 #endif /* !__OPTIMIZE_SIZE__ */
 
 /* check a byte at a time looking for either the null terminator or until n bytes are
    copied.  If the null terminator is found and n is not reached yet, copy null
    bytes until n is reached. */
-		
+
 	.p2align 3
 $L9:
 	.set	noreorder

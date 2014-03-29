@@ -59,20 +59,20 @@ void *mcman_mcops[17] = {
 
 // driver descriptor
 static iop_device_t mcman_mcdev = {
-	"mc", 
+	"mc",
 	IOP_DT_FS,
 	1,
 	"Memory Card",
 	(struct _iop_device_ops *)&mcman_mcops
 };
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int mc_init(iop_device_t *dev)
 {
 	return 0;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int mcman_ioerrcode(int errcode)
 {
 	register int r = errcode;
@@ -108,7 +108,7 @@ int mcman_ioerrcode(int errcode)
 	return r;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int mcman_modloadcb(char *filename, int *unit, u8 *arg3)
 {
 	register char *path = filename;
@@ -128,7 +128,7 @@ int mcman_modloadcb(char *filename, int *unit, u8 *arg3)
 	if ((u32)strlen(path) < 2) return 2;
 
 	upos = mcman_chrpos(path, ':');
-	
+
 	if (upos < 0)
 		upos = strlen(path);
 
@@ -147,7 +147,7 @@ int mcman_modloadcb(char *filename, int *unit, u8 *arg3)
 
 		*arg3 = 0;
 		for (m = 1; ((u8)path[upos --] - 0x30) < 10; m = v << 1) {
-			v = m << 2;   
+			v = m << 2;
 			*arg3 += m * (path[upos] - 0x30);
 			v += m;
 		}
@@ -156,12 +156,12 @@ int mcman_modloadcb(char *filename, int *unit, u8 *arg3)
 	return 1;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 void mcman_unit2card(u32 unit)
 {
  	mcman_mc_port = unit & 1;
- 	mcman_mc_slot = (unit >> 1) & (MCMAN_MAXSLOT - 1);	
-	
+ 	mcman_mc_slot = (unit >> 1) & (MCMAN_MAXSLOT - 1);
+
 	// original mcman/xmcman code below is silly and I doubt it
 	// can support more than 2 units anyway...
 	/*
@@ -175,8 +175,8 @@ void mcman_unit2card(u32 unit)
 
  	mcman_mc_port = unit & 0xf;
  	mcman_mc_slot = 0;
- 	
- 	if (mask < 0xf) {  
+
+ 	if (mask < 0xf) {
 		while (mask) {
 			mcman_mc_slot = ((u32)(unit & mask)) / ((u32)(mask & (mask >> 0x3))) \
 				+ (((mcman_mc_slot << 2) + mcman_mc_slot) << 1);
@@ -186,7 +186,7 @@ void mcman_unit2card(u32 unit)
 	*/
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int mcman_initdev(void)
 {
 	iop_sema_t smp;
@@ -208,23 +208,23 @@ int mcman_initdev(void)
 	return 0;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int mc_deinit(iop_device_t *dev)
 {
 	DeleteSema(mcman_io_sema);
 	McCloseAll();
- 
+
 	return 0;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int mc_open(iop_file_t *f, char *filename, int mode, int flags)
 {
 	register int r;
 
 	WaitSema(mcman_io_sema);
 	mcman_unit2card(f->unit);
-	
+
 	r = McDetectCard2(mcman_mc_port, mcman_mc_slot);
 	if (r >= -1) {
 		r = McOpen(mcman_mc_port, mcman_mc_slot, filename, mode);
@@ -232,11 +232,11 @@ int mc_open(iop_file_t *f, char *filename, int mode, int flags)
 			f->privdata = (void*)r;
 	}
 	SignalSema(mcman_io_sema);
-	
+
 	return mcman_ioerrcode(r);
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int mc_close(iop_file_t *f)
 {
 	register int r;
@@ -248,7 +248,7 @@ int mc_close(iop_file_t *f)
 	return mcman_ioerrcode(r);
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int mc_lseek(iop_file_t *f, int pos, int where)
 {
 	register int r;
@@ -256,11 +256,11 @@ int mc_lseek(iop_file_t *f, int pos, int where)
 	WaitSema(mcman_io_sema);
 	r = McSeek((int)f->privdata, pos, where);
 	SignalSema(mcman_io_sema);
-	
+
 	return mcman_ioerrcode(r);
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int mc_read(iop_file_t *f, void *buf, int size)
 {
 	register int r;
@@ -268,11 +268,11 @@ int mc_read(iop_file_t *f, void *buf, int size)
 	WaitSema(mcman_io_sema);
 	r = McRead((int)f->privdata, buf, size);
 	SignalSema(mcman_io_sema);
-	
+
 	return mcman_ioerrcode(r);
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int mc_write(iop_file_t *f, void *buf, int size)
 {
 	register int r;
@@ -280,28 +280,28 @@ int mc_write(iop_file_t *f, void *buf, int size)
 	WaitSema(mcman_io_sema);
 	r = McWrite((int)f->privdata, buf, size);
 	SignalSema(mcman_io_sema);
-	
+
 	return mcman_ioerrcode(r);
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int mc_format(iop_file_t *f, char *a1, char *a2, void *a3, int a4)
 {
 	register int r;
 
 	WaitSema(mcman_io_sema);
 	mcman_unit2card(f->unit);
-	
+
 	r = McDetectCard2(mcman_mc_port, mcman_mc_slot);
 	if (r >= -2) {
 		r = McFormat(mcman_mc_port, mcman_mc_slot);
 	}
 	SignalSema(mcman_io_sema);
-	
+
 	return mcman_ioerrcode(r);
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int mc_remove(iop_file_t *f, char *filename)
 {
 	register int r;
@@ -314,11 +314,11 @@ int mc_remove(iop_file_t *f, char *filename)
 		r = McDelete(mcman_mc_port, mcman_mc_slot, filename, 0);
 	}
 	SignalSema(mcman_io_sema);
-	
+
 	return mcman_ioerrcode(r);
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int mc_mkdir(iop_file_t *f, char *dirname)
 {
 	register int r;
@@ -331,48 +331,48 @@ int mc_mkdir(iop_file_t *f, char *dirname)
 		r = McOpen(mcman_mc_port, mcman_mc_slot, dirname, 0x40);
 	}
 	SignalSema(mcman_io_sema);
-	
+
 	return mcman_ioerrcode(r);
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int mc_rmdir(iop_file_t *f, char *dirname)
 {
 	register int r;
 
 	WaitSema(mcman_io_sema);
 	mcman_unit2card(f->unit);
-	
+
 	r = McDetectCard2(mcman_mc_port, mcman_mc_slot);
 	if (r >= -1) {
 		r = McDelete(mcman_mc_port, mcman_mc_slot, dirname, 0);
 	}
 	SignalSema(mcman_io_sema);
-	
+
 	return mcman_ioerrcode(r);
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int mc_dopen(iop_file_t *f, char *dirname)
 {
 	register int r;
 
 	WaitSema(mcman_io_sema);
 	mcman_unit2card(f->unit);
-	
+
 	r = McDetectCard2(mcman_mc_port, mcman_mc_slot);
 	if (r >= -1) {
 		r = McOpen(mcman_mc_port, mcman_mc_slot, dirname, 0);
 		if (r >= 0)
 			f->privdata = (void*)r;
 	}
-	
+
 	SignalSema(mcman_io_sema);
-	
+
 	return mcman_ioerrcode(r);
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int mc_dclose(iop_file_t *f)
 {
 	register int r;
@@ -380,11 +380,11 @@ int mc_dclose(iop_file_t *f)
 	WaitSema(mcman_io_sema);
 	r = McClose((int)f->privdata);
 	SignalSema(mcman_io_sema);
-	
+
 	return mcman_ioerrcode(r);
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int mc_dread(iop_file_t *f, fio_dirent_t *dirent)
 {
 	register int r;
@@ -392,29 +392,29 @@ int mc_dread(iop_file_t *f, fio_dirent_t *dirent)
 	WaitSema(mcman_io_sema);
 	r = mcman_dread((int)f->privdata, dirent);
 	SignalSema(mcman_io_sema);
-	
+
 	return mcman_ioerrcode(r);
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int mc_getstat(iop_file_t *f, char *filename, fio_stat_t *stat)
 {
 	register int r;
 
 	WaitSema(mcman_io_sema);
 	mcman_unit2card(f->unit);
-	
+
 	r = McDetectCard2(mcman_mc_port, mcman_mc_slot);
 	if (r >= -1) {
 		r = mcman_getstat(mcman_mc_port, mcman_mc_slot, filename, stat);
 	}
-	
+
 	SignalSema(mcman_io_sema);
-	
+
 	return mcman_ioerrcode(r);
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int mc_chstat(iop_file_t *f, char *filename, fio_stat_t *stat, u32 statmask)
 {
 	register int r, flags;
@@ -422,7 +422,7 @@ int mc_chstat(iop_file_t *f, char *filename, fio_stat_t *stat, u32 statmask)
 
 	WaitSema(mcman_io_sema);
 	mcman_unit2card(f->unit);
-	
+
 	r = McDetectCard2(mcman_mc_port, mcman_mc_slot);
 	if (r >= -1) {
 		if (statmask & SCE_CST_ATTR) {
@@ -461,20 +461,20 @@ int mc_chstat(iop_file_t *f, char *filename, fio_stat_t *stat, u32 statmask)
 			flags |= 0x002;
 			mctbl._Modify = *((sceMcStDateTime*)&stat->mtime[0]);
 		}
-	
+
 		r = McSetFileInfo(mcman_mc_port, mcman_mc_slot, filename, &mctbl, flags);
-	}	
+	}
 	SignalSema(mcman_io_sema);
 
 	return mcman_ioerrcode(r);
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 int mc_ioctl(iop_file_t *f, int a1, void* a2)
 {
 	WaitSema(mcman_io_sema);
 	return 0;
 }
 
-//-------------------------------------------------------------- 
+//--------------------------------------------------------------
 

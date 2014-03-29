@@ -88,15 +88,15 @@
 // Global Types
 typedef struct
 {
-	u32 padEnd; 
-	s32 eventflag; 
+	u32 padEnd;
+	s32 eventflag;
 	u32 init;
 	u32	stopTransfer;
 	s32 tid_1;
 	s32 tid_2;
 } vblankData_t;
 
-typedef struct 
+typedef struct
 {
     u8 data[32];
 	u32 actDirData[2];
@@ -104,65 +104,65 @@ typedef struct
     u32 actData[8];
     u32 modeTable[2];
     u32 frame;
-    u32 findPadRetries;  
-    u32 length; 
-    u8 modeConfig;   
+    u32 findPadRetries;
+    u32 length;
+    u8 modeConfig;
     u8 modeCurId;
-    u8 model; 
-    u8 buttonDataReady; 
-    u8 nrOfModes;   
+    u8 model;
+    u8 buttonDataReady;
+    u8 nrOfModes;
     u8 modeCurOffs;
-    u8 nrOfActuators;  
+    u8 nrOfActuators;
 	u8 numActComb;
 	u8 val_c6;
 	u8 mode;
     u8 lock;
 	u8 actDirSize;
-    u8 state;    
+    u8 state;
     u8 reqState;
-    u8 currentTask;      
+    u8 currentTask;
 	u8 runTask;
 	u8 stat70bit;
     u8 padding[11];
-} ee_paddata_t; 
+} ee_paddata_t;
 
 typedef struct
 {
 	ee_paddata_t ee_pdata __attribute__((aligned(4)));
-	u8 modeConfig; 
+	u8 modeConfig;
 	u8 modeCurId;
-	u8 model; 
-	u8 numModes; 
-	u8 modeCurOffs; 
-	u8 numActuators; 
+	u8 model;
+	u8 numModes;
+	u8 modeCurOffs;
+	u8 numActuators;
 	u8 numActComb;
-	u8 disconnected; 
-	u32 actData[4]; 
-	u32 combData[4]; 
-	u32 modeTable[2]; 
-	u8 buttonInfo[4]; 
+	u8 disconnected;
+	u32 actData[4];
+	u32 combData[4];
+	u32 modeTable[2];
+	u8 buttonInfo[4];
 	u8 buttonMask[4];
 	u8 vrefParam[12];
 	u16 val_c6; // unused
-	u8 inbuffer[32]; 
-	u8 outbuffer[32]; 
-	u8 buttonStatus[32]; 
-	u32 buttonDataReady; 
-	u8 mode; 
+	u8 inbuffer[32];
+	u8 outbuffer[32];
+	u8 buttonStatus[32];
+	u32 buttonDataReady;
+	u8 mode;
 	u8 lock;
-	u8 ee_actDirectData[8] __attribute__((aligned(4))); 
+	u8 ee_actDirectData[8] __attribute__((aligned(4)));
 	s16 ee_actDirectSize;
-	u8 ee_actAlignData[8] __attribute__((aligned(4))); 
+	u8 ee_actAlignData[8] __attribute__((aligned(4)));
 	u16 state;
-	u16 reqState; 
+	u16 reqState;
 	u32 frame;
-	u32 padarea_ee_addr; 
+	u32 padarea_ee_addr;
 	u32 findPadRetries;
 	s32 updatepadTid;
 	s32 querypadTid;
 	s32 unused158; // probably unused thread id
 	s32 setmainmodeTid;
-	s32 setactalignTid; 
+	s32 setactalignTid;
 	s32 setbuttoninfoTid;
 	s32 setvrefparamTid;
 	u32 eventflag;
@@ -170,7 +170,7 @@ typedef struct
 	u16 slot;
 	u32 currentTask;
 	u32 runTask;
-	u32 taskTid; 
+	u32 taskTid;
 	u32 stat70bit;
 	u32 val_184; // unused
 } padState_t;

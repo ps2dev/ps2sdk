@@ -26,7 +26,7 @@
  *  where
  *
  *  t = 1 - d - ndtri(y) sqrt(d)
- * 
+ *
  * and
  *
  *  d = 1/9a,
@@ -44,7 +44,7 @@
  *    IEEE      0,100         5000       1.0e-5      1.5e-6
  *
  */
-
+
 /*
 Cephes Math Library Release 2.2:  July, 1992
 Copyright 1984, 1987, 1992 by Stephen L. Moshier

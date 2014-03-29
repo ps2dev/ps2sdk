@@ -154,7 +154,7 @@ int UsbTransfer(int id, void *data, uint32 len, void *option, UsbCallbackProc ca
 
 	if ((res == 0) && data && len) {
 		if ((((uint32)(data + len - 1) >> 12) - ((uint32)data >> 12)) > 1)
-			res = USB_RC_BADLENGTH; 
+			res = USB_RC_BADLENGTH;
 		else if (ep->alignFlag && ((uint32)data & 3))
 			res = USB_RC_BADALIGN;
 		else if ((ep->endpointType == TYPE_ISOCHRON) && ((ep->hcEd.maxPacketSize & 0x7FF) < len))

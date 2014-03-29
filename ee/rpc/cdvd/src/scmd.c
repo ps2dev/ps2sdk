@@ -68,7 +68,7 @@ s32 cdCheckSCmd(s32 cmd);
 
 
 // read clock value from ps2s clock
-// 
+//
 // args:        time/date struct
 // returns:     1 if successful
 //                      0 if error
@@ -97,7 +97,7 @@ s32 cdReadClock(CdvdClock_t * clock)
 #endif
 
 // write clock value to ps2s clock
-// 
+//
 // args:        time/date struct to set clocks time with
 // returns:     1 if successful
 //                      0 if error
@@ -123,7 +123,7 @@ s32 cdWriteClock(const CdvdClock_t * clock)
 #endif
 
 // gets the type of the currently inserted disc
-// 
+//
 // returns:     disk type (CDVD_TYPE_???)
 #ifdef F_cdGetDiscType
 CdvdDiscType_t cdGetDiscType(void)
@@ -142,7 +142,7 @@ CdvdDiscType_t cdGetDiscType(void)
 #endif
 
 // gets the last error that occurred
-// 
+//
 // returns:     error type (CDVD_ERR_???)
 #ifdef F_cdGetError
 s32 cdGetError(void)
@@ -161,7 +161,7 @@ s32 cdGetError(void)
 #endif
 
 // open/close/check disk tray
-// 
+//
 // args:        param (CDVD_TRAY_???)
 //                      address for returning tray state change
 // returns:     1 if successful
@@ -189,7 +189,7 @@ s32 cdTrayReq(s32 param, u32 * traychk)
 #endif
 
 // send an s-command by function number
-// 
+//
 // args:        command number
 //                      input buffer  (can be null)
 //                      size of input buffer  (0 - 16 byte)
@@ -223,7 +223,7 @@ s32 cdApplySCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff, u1
 #endif
 
 // gets the status of the cd system
-// 
+//
 // returns:     status (CDVD_STAT_???)
 #ifdef F_cdStatus
 s32 cdStatus(void)
@@ -245,7 +245,7 @@ s32 cdStatus(void)
 #endif
 
 // 'breaks' the currently executing command
-// 
+//
 // returns:     1 if successful
 //                      0 if error
 #ifdef F_cdBreak
@@ -265,9 +265,9 @@ s32 cdBreak(void)
 #endif
 
 // cancel power off
-// 
+//
 // SUPPORTED IN XCDVDMAN/XCDVDFSV ONLY
-// 
+//
 // args:        result
 // returns:     1 if successful
 //                      0 if error
@@ -289,9 +289,9 @@ s32 cdCancelPowerOff(u32 * result)
 #endif
 
 // blue led control
-// 
+//
 // SUPPORTED IN XCDVDMAN/XCDVDFSV ONLY
-// 
+//
 // args:        control value
 //                      result
 // returns:     1 if successful
@@ -317,9 +317,9 @@ s32 cdBlueLedCtrl(u8 control, u32 * result)
 #endif
 
 // power off
-// 
+//
 // SUPPORTED IN XCDVDMAN/XCDVDFSV ONLY
-// 
+//
 // args:        result
 // returns:     1 if successful
 //                      0 if error
@@ -341,9 +341,9 @@ s32 cdPowerOff(u32 * result)
 #endif
 
 // set media mode
-// 
+//
 // SUPPORTED IN XCDVDMAN/XCDVDFSV ONLY
-// 
+//
 // args:        media mode
 // returns:     1 if successful
 //                      0 if error
@@ -367,9 +367,9 @@ s32 cdSetMediaMode(u32 mode)
 #endif
 
 // change cd thread priority
-// 
+//
 // SUPPORTED IN XCDVDMAN/XCDVDFSV ONLY
-// 
+//
 // args:        media mode
 // returns:     1 if successful
 //                      0 if error
@@ -393,7 +393,7 @@ s32 cdChangeThreadPriority(u32 priority)
 #endif
 
 // check whether ready to send an s-command
-// 
+//
 // args:        current command
 // returns:     1 if ready to send
 //                      0 if busy/error
@@ -437,7 +437,7 @@ s32 cdCheckSCmd(s32 cur_cmd)
 
 // s-command wait
 // (shouldnt really need to call this yourself)
-// 
+//
 // args:        0 = wait for completion of command (blocking)
 //                      1 = check current status and return immediately
 // returns:     0 = completed

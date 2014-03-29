@@ -404,7 +404,7 @@ static const unsigned int des_skb[8][64]={
 
 	The output has been subject to swaps of the form
 	0 1 -> 3 1 but the odd and even bits have been put into
-	2 3    2 0 
+	2 3    2 0
 	different words.  The main trick is to remember that
 	t=((l>>size)^r)&(mask);
 	r^=t;
@@ -489,8 +489,8 @@ static unsigned char *DES_createkeys(unsigned char *key)
 	c&=0x0fffffff;
 
 	for (i=0; i<ITERATIONS; i++) {
-		if (shifts[i]) { 
-			c = ((c >> 2)|(c << 26)); 
+		if (shifts[i]) {
+			c = ((c >> 2)|(c << 26));
 			d = ((d >> 2)|(d << 26));
 		}
 		else {
@@ -514,7 +514,7 @@ static unsigned char *DES_createkeys(unsigned char *key)
 		/* table contained 0213 4657 */
 		*(k++) = ((t << 16) | (s & 0x0000ffff)) & 0xffffffff;
 		s =      ((s >> 16) | (t & 0xffff0000));
-		
+
 		s = (s << 4) | (s >> 28);
 		*(k++) = s & 0xffffffff;
 	}
@@ -544,13 +544,13 @@ unsigned char *DES(unsigned char *key, unsigned char *message, unsigned char *ci
 	 * it in the next step */
 
 	/* Things have been modified so that the initial rotate is
-	 * done outside the loop.  This required the 
+	 * done outside the loop.  This required the
 	 * des_SPtrans values in sp.h to be rotated 1 bit to the right.
 	 * One perl script later and things have a 5% speed up on a sparc2.
 	 * Thanks to Richard Outerbridge <71755.204@CompuServe.COM>
 	 * for pointing this out. */
 	t = (r << 1) | (r >> 31);
-	r = (l << 1) | (l >> 31); 
+	r = (l << 1) | (l >> 31);
 	l = t;
 
 	s = (unsigned int *)keys;

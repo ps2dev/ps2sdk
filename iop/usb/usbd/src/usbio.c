@@ -157,7 +157,7 @@ int setupIsocronTransfer(Endpoint *ep) {
 			enqueueEndpoint(ep, ISOTD_QUEUE);
 			return 0;
 		}
-		
+
 		if (curIoReq->next)
 			curIoReq->next->prev = curIoReq->prev;
 		else

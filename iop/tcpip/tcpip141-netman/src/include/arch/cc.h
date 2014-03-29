@@ -25,7 +25,7 @@ typedef u32_t mem_ptr_t;
 #define PACK_STRUCT_FIELD(x) x __attribute((packed))
 #define PACK_STRUCT_STRUCT __attribute((packed))
 #define PACK_STRUCT_BEGIN
-#define PACK_STRUCT_END 
+#define PACK_STRUCT_END
 
 void *malloc(unsigned int size);
 void free(void *ptr);

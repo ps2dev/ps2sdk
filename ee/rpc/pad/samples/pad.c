@@ -9,7 +9,7 @@
 #
 # $Id$
 # Pad demo app
-# Quick and dirty, little or no error checks etc.. 
+# Quick and dirty, little or no error checks etc..
 # Distributed as is
 */
 
@@ -55,7 +55,7 @@ loadModules(void)
 {
     int ret;
 
-    
+
 #ifdef ROM_PADMAN
     ret = SifLoadModule("rom0:SIO2MAN", 0, NULL);
 #else
@@ -64,13 +64,13 @@ loadModules(void)
     if (ret < 0) {
         printf("sifLoadModule sio failed: %d\n", ret);
         SleepThread();
-    }    
+    }
 
 #ifdef ROM_PADMAN
     ret = SifLoadModule("rom0:PADMAN", 0, NULL);
 #else
     ret = SifLoadModule("rom0:XPADMAN", 0, NULL);
-#endif 
+#endif
     if (ret < 0) {
         printf("sifLoadModule pad failed: %d\n", ret);
         SleepThread();
@@ -91,7 +91,7 @@ int waitPadReady(int port, int slot)
     while((state != PAD_STATE_STABLE) && (state != PAD_STATE_FINDCTP1)) {
         if (state != lastState) {
             padStateInt2String(state, stateString);
-            printf("Please wait, pad(%d,%d) is in state %s\n", 
+            printf("Please wait, pad(%d,%d) is in state %s\n",
                        port, slot, stateString);
         }
         lastState = state;
@@ -131,10 +131,10 @@ initializePad(int port, int slot)
         printf(")");
     }
 
-    printf("It is currently using mode %d\n", 
+    printf("It is currently using mode %d\n",
                padInfoMode(port, slot, PAD_MODECURID, 0));
 
-    // If modes == 0, this is not a Dual shock controller 
+    // If modes == 0, this is not a Dual shock controller
     // (it has no actuator engines)
     if (modes == 0) {
         printf("This is a digital controller?\n");
@@ -169,7 +169,7 @@ initializePad(int port, int slot)
     waitPadReady(port, slot);
     printf("infoPressMode: %d\n", padInfoPressMode(port, slot));
 
-    waitPadReady(port, slot);        
+    waitPadReady(port, slot);
     printf("enterPressMode: %d\n", padEnterPressMode(port, slot));
 
     waitPadReady(port, slot);
@@ -185,7 +185,7 @@ initializePad(int port, int slot)
         actAlign[5] = 0xff;
 
         waitPadReady(port, slot);
-        printf("padSetActAlign: %d\n", 
+        printf("padSetActAlign: %d\n",
                    padSetActAlign(port, slot, actAlign));
     }
     else {
@@ -237,19 +237,19 @@ main()
     printf("PortMax: %d\n", padGetPortMax());
     printf("SlotMax: %d\n", padGetSlotMax(port));
 
-    
+
     if((ret = padPortOpen(port, slot, padBuf)) == 0) {
         printf("padOpenPort failed: %d\n", ret);
         SleepThread();
     }
-    
+
     if(!initializePad(port, slot)) {
         printf("pad initalization failed!\n");
         SleepThread();
     }
-    
+
     for (;;) {      // We are phorever people
-            
+
         i=0;
         ret=padGetState(port, slot);
         while((ret != PAD_STATE_STABLE) && (ret != PAD_STATE_FINDCTP1)) {
@@ -261,15 +261,15 @@ main()
         if(i==1) {
             printf("Pad: OK!\n");
         }
-            
+
         ret = padRead(port, slot, &buttons); // port, slot, buttons
-            
+
         if (ret != 0) {
             paddata = 0xffff ^ buttons.btns;
-                
+
             new_pad = paddata & ~old_pad;
             old_pad = paddata;
-                
+
             // Directions
             if(new_pad & PAD_LEFT) {
                 printf("LEFT\n");
@@ -280,7 +280,7 @@ main()
             if(new_pad & PAD_RIGHT) {
                 printf("RIGHT\n");
                 /*
-                       padSetMainMode(port, slot, 
+                       padSetMainMode(port, slot,
                                       PAD_MMODE_DIGITAL, PAD_MMODE_LOCK));
                 */
             }
@@ -321,7 +321,7 @@ main()
             }
             if(new_pad & PAD_L1) {
                 actAlign[0] = 0; // Stop engine 0
-                padSetActDirect(port, slot, actAlign);                
+                padSetActDirect(port, slot, actAlign);
                 printf("L1 - Stop little engine\n");
             }
             if(new_pad & PAD_R2) {
@@ -355,7 +355,7 @@ main()
                     padSetActDirect(port, slot, actAlign);
                 }
             }
-        } 
+        }
     } // for
 
     printf("Goto sleep!\n");

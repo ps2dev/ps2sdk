@@ -277,7 +277,7 @@ return 0;
 
 
 
- 
+
 /* c = b + a.
  */
 #ifdef ANSIC

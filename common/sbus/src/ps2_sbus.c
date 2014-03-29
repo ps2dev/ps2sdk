@@ -67,7 +67,7 @@ int __local_sbus_irq_handler(void)
             }
 
             SBUS_set_reg(PS2_SBUS_RL_FLAG, (1 << irq));
-            
+
             flag ^= (1 << irq);
         }
     }

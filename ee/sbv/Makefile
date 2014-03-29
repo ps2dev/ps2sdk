@@ -29,7 +29,7 @@ EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
 EE_INCS += -I$(PS2SDKSRC)/ee/rpc/cdvd/include
 
-all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBSBV_LIB) 
+all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBSBV_LIB)
 
 
 .c.o :

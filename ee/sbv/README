@@ -15,7 +15,7 @@ sbv is my abbreviation for _subversion_, meaning:
 
    1. The act or an instance of subverting.
    2. The condition of being subverted.
-      
+
 sbv was partly written to overcome certain limitations and restrictions imposed
 by Sony onto the Playstation 2's BIOS.  It consists of a library and runtime
 patches for code running on the Emotion Engine (EE).

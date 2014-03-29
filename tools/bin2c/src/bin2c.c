@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 		printf("Failed to open/create %s.\n",argv[2]);
 		return 1;
 	}
-	
+
 	fprintf(dest, "#ifndef __%s__\n", argv[3]);
 	fprintf(dest, "#define __%s__\n\n", argv[3]);
 	fprintf(dest, "unsigned int size_%s = %d;\n", argv[3], fd_size);
