@@ -634,7 +634,7 @@ SYSCALL(_InitTLB)
 	.ent	SifWriteBackDCache
 	.set	noreorder
 
-SifWriteBackDCache:
+SifWriteBackDCache:	/* DHWBIN: Data cache Hit WriteBack INvalidate.  */
 
 	lui	$25, 0xffff
 	ori	$25, $25, 0xffc0
@@ -688,8 +688,8 @@ last:
 	.end	SifWriteBackDCache
 #endif
 
-#define DXWBIN	0x14		/* Data cache: Index Writeback Invalidate.  */
-#define DXIN	0x16		/* Data cache: Index Invalidate.  */
+#define DXWBIN	0x14		/* Data cache: indeX WriteBack INvalidate.  */
+#define DXIN	0x16		/* Data cache: indeX INvalidate.  */
 
 #define opDCache(name, op)	\
 	.set	push;		\

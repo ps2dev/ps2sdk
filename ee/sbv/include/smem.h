@@ -26,7 +26,10 @@ extern "C" {
 
    I'm not exactly sure how the mapping looks to the bus, reads and writes to
    it are extremely fast, and data width hasn't been a problem for me yet (so
-   you can use memcpy(), and obviously 16-byte reads and writes work).  */
+   you can use memcpy(), and obviously 16-byte reads and writes work).
+
+   For writes to IOP address space, the data cache MUST be first written back with SyncDCache().
+   I don't why why it is required, but writes do not always seem to take place properly without it. */
 #define SUB_VIRT_MEM	0xbc000000
 
 u32 smem_read(void *addr, void *buf, u32 size);

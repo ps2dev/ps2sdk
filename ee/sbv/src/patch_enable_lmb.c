@@ -65,7 +65,7 @@ int sbv_patch_enable_lmb()
 	slib_exp_lib_t *modload_lib = (slib_exp_lib_t *)buf;
 	smod_mod_info_t *loadfile_info = (smod_mod_info_t *)buf;
 	void *pStartModule, *pLoadModuleBuffer, *lf_text_start, *patch_addr;
-	u32 lf_rpc_dispatch, lf_jump_table, result;
+	u32 lf_rpc_dispatch, lf_jump_table, result, value;
 	int nexps, id, i;
 
 	memset(&_slib_cur_exp_lib_list, 0, sizeof(slib_exp_lib_list_t));
@@ -129,10 +129,11 @@ int sbv_patch_enable_lmb()
 	/* Finally.  The last thing to do is to patch the loadfile RPC dispatch routine
 	   so that it will jump to entry #6 in it's jump table, and to patch the jump
 	   table itself.  */
-	ee_kmode_enter();
-	*(u32 *)(SUB_VIRT_MEM + lf_rpc_dispatch + 4) = 0x2c820007;
-	*(u32 *)(SUB_VIRT_MEM + lf_jump_table + 0x18) = (u32)patch_addr;
-	ee_kmode_exit();
+	value = 0x2c820007;
+	SyncDCache(&value, (void*)((unsigned char*)&value+sizeof(value)));
+	smem_write(lf_rpc_dispatch + 4, &value, sizeof(value));
+	SyncDCache(&patch_addr, (void*)((unsigned char*)&patch_addr+sizeof(patch_addr)));
+	smem_write(lf_jump_table + 0x18, &patch_addr, sizeof(patch_addr));
 
 	return 0;
 }

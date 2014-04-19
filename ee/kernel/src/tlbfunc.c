@@ -177,7 +177,7 @@ static int InitTLB32MB(void){
 			Exit(1);
 		}
 
-		for(TLBEntry=TLBInfo.extendedTLB,TlbEndIndex=TLBInfo.NumExtendedTLBEntries+i; i<TlbEndIndex; i++,TLBEntry++){
+		for(TLBEntry=TLBInfo.extendedTLB,TlbEndIndex=TLBInfo.NumExtendedTLBEntries+i; i<TlbEndIndex; i++,TLBEntry++,NumTlbEntries++){
 			_SetTLBEntry(i, TLBEntry->PageMask, TLBEntry->EntryHi, TLBEntry->EntryLo0, TLBEntry->EntryLo1);
 		}
 	}

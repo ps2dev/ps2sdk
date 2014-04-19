@@ -33,6 +33,7 @@ int sbv_patch_disable_prefix_check()
 	if (!slib_get_exp_lib("modload", modload_lib))
 		return -1;
 
+	SyncDCache(patch, (void*)((unsigned char*)patch+sizeof(patch)));
 	smem_write(modload_lib->exports[15], patch, sizeof patch);
 	return 0;
 }
