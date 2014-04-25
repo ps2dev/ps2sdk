@@ -1,11 +1,11 @@
-#include "tamtypes.h"
-#include "kernel.h"
-#include "string.h"
+#include <tamtypes.h>
+#include <kernel.h>
+#include <string.h>
 
 #include "smem.h"
 #include "smod.h"
 
-int sbv_patch_fioremove()
+int sbv_patch_fioremove(void)
 {
 	/* This patch is a fix for FILEIO on IOP: 				*/
 	/* the handler of rpc_fioremove doesn't exit just after file is		*/

@@ -19,11 +19,8 @@ extern "C" {
 #endif
 
 int sbv_patch_enable_lmb(void);
-
 int sbv_patch_disable_prefix_check(void);
-
-int sbv_patch_user_mem_clear(u32 start);
-
+int sbv_patch_user_mem_clear(void *start);
 int sbv_patch_fioremove(void);
 
 #ifdef __cplusplus

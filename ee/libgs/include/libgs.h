@@ -13,41 +13,43 @@
 #define _LIBGS_H_
 
 /**/
-#define GS_DISABLE	0
-#define GS_ENABLE	1
+typedef struct {
+	unsigned char interlace;	//Interlace/non-interlace mode.
+	unsigned char omode;		//Video mode.
+	unsigned char ffmode;		//FIELD/FRAME value.
+	unsigned char version;		//GS version.
+} GsGParam_t;
+
+#define GS_INIT_RESET		0	//Resets the GS and GIF.
+#define GS_INIT_DRAW_RESET	1	//Drawing operations are cancelled and primitive data will be discarded.
 
 #define GS_NONINTERLACED	0x00
 #define GS_INTERLACED		0x01
 
-#define GS_FFMD_INTERLACE	0x00
-#define GS_FFMD_FRAME		0x01
+#define GS_FFMD_INTERLACE	0x00	//Read every other line from the beginning with the start of FIELD.
+#define GS_FFMD_FRAME		0x01	//Read every line from the beginning with the start of FRAME.
 
+/*	About the supported video modes:
+		As GsSetDefaultDisplayEnv() has been modified to provide functionality that is similar to the Sony sceGsSetDefDispEnv() function,
+		it will now automatically in fill in the GS_DISPENV structure with values for the video mode that is specified for GsResetGraph().
+
+	However, as with the Sony function:
+		1. Only NTSC, PAL and 480P video modes are supported.
+		2. MAGV isn't automatically calculated.
+
+	It is possible to cover these limitations by setting the relevant values after calling GsSetDefaultDisplayEnv(), but I do not know how these values are to be calculated for other video modes.
+*/
 enum GsVideoModes{
 	GS_MODE_NTSC		= 0x02,
 	GS_MODE_PAL,
-	GS_MODE_VGA_640_60	= 0x1A,
-	GS_MODE_VGA_640_72,
-	GS_MODE_VGA_640_75,
-	GS_MODE_VGA_640_85,
-	GS_MODE_VGA_800_56	= 0x2A,
-	GS_MODE_VGA_800_60,
-	GS_MODE_VGA_800_72,
-	GS_MODE_VGA_800_75,
-	GS_MODE_VGA_800_85,
-	GS_MODE_VGA_1024_60	= 0x3B,
-	GS_MODE_VGA_1024_70,
-	GS_MODE_VGA_1024_75,
-	GS_MODE_VGA_1024_85,
-	GS_MODE_VGA_1280_60	= 0x4A,
-	GS_MODE_VGA_1280_75,
 
 	GS_MODE_DTV_480P 	= 0x50,
-	GS_MODE_DTV_1080I,
-	GS_MODE_DTV_720P,
-	GS_MODE_DTV_576P	//Available only on the SCPH-50000 and above.
 };
 
-//type of primitives
+#define GS_DISABLE	0
+#define GS_ENABLE	1
+
+//types of primitives
 enum GsPrimitiveTypes{
 	GS_PRIM_POINT		=0,
 	GS_PRIM_LINE,
@@ -55,22 +57,21 @@ enum GsPrimitiveTypes{
 	GS_PRIM_TRI,
 	GS_PRIM_TRI_STRIP,
 	GS_PRIM_TRI_FAN,
-	GS_PRIM_SPRITE,
-	GS_PRIM_PS2DEV
+	GS_PRIM_SPRITE
 };
 
-// regular pixmodes
+// regular Pixel Storage Modes (PSM)
 #define GS_PIXMODE_32		 0
 #define GS_PIXMODE_24		 1
 #define GS_PIXMODE_16		 2
 #define GS_PIXMODE_16S		10
 
-// clut pixmodes
+// clut Pixel Storage Modes (PSM)
 #define GS_CLUT_32			 0
 #define GS_CLUT_16			 2
 #define GS_CLUT_16S			10
 
-// texture/image pixmodes
+// texture/image Pixel Storage Modes (PSM)
 #define GS_TEX_32			 0
 #define GS_TEX_24			 1
 #define GS_TEX_16			 2
@@ -81,7 +82,7 @@ enum GsPrimitiveTypes{
 #define GS_TEX_4HL			36
 #define GS_TEX_4HH			44
 
-// Z-Buffer modes
+// Z-Buffer Pixel Storage Modes (PSM)
 #define GS_ZBUFF_32			48
 #define GS_ZBUFF_24			49
 #define GS_ZBUFF_16			50
@@ -342,7 +343,6 @@ typedef struct {
 	float			padq;	// 0x0
 }GS_BGCOLOR;
 
-
 /*CSR*/
 typedef struct {
 	unsigned signal_evnt    :1;	// Signal event control(write: 0=nothing,1=enable signal event,  read: 0=signal not generated, 1=signal generated)
@@ -365,7 +365,6 @@ typedef struct {
 	unsigned pad2			:32;// Pad with zeros
 }GS_CSR;
 
-
 /*IMR*/
 typedef struct {
 	unsigned pad1			:8;	// Pad with zeros
@@ -379,7 +378,6 @@ typedef struct {
 	unsigned pad2			:17;// Pad with zeros
     unsigned int pad3;			// Pad with zeros
 }GS_IMR;
-
 
 /*BUSDIR*/
 typedef struct {
@@ -2061,6 +2059,7 @@ int GsSetPixelTest2(unsigned char enable_alpha_test, unsigned char alpha_test_me
 int GsSelectTexure1(unsigned short tex_addr, unsigned char addr_width, unsigned char tex_pixmode, unsigned short tex_width, unsigned short tex_height, unsigned short clut_addr, unsigned char clut_pixmode, unsigned char clut_storagemode,unsigned char clut_offset);
 int GsSelectTexure2(unsigned short tex_addr, unsigned char addr_width, unsigned char tex_pixmode, unsigned short tex_width, unsigned short tex_height, unsigned short clut_addr, unsigned char clut_pixmode, unsigned char clut_storagemode,unsigned char clut_offset);
 void GsSetFogColor(unsigned char r, unsigned char g, unsigned char b);
+void GsEnableColorClamp(unsigned short enable);
 
 /*----------------------------------------------------
 --	NORMAL FUNTIONS									--
@@ -2068,38 +2067,39 @@ void GsSetFogColor(unsigned char r, unsigned char g, unsigned char b);
 --													--
 ------------------------------------------------------*/
 
-int GsInit(short int interlace, short int videomode, short int ffmd);
-int GsSetCRTCSettings(unsigned long settings, unsigned char alpha_value);
-int GsSetVideoMode(short int interlace, short int videomode, short int ffmd);
+GsGParam_t *GsGetGParam(void);
+void GsResetGraph(short int mode, short int interlace, short int omode, short int ffmode);
+void GsResetPath(void);
+void GsSetCRTCSettings(unsigned long settings, unsigned char alpha_value);
 
 /* Initialise structs with defaults Based On Input*/
-int GsSetDefaultDrawEnv(GS_DRAWENV *drawenv, unsigned short int w, unsigned short int h);
-int GsSetDefaultDrawEnvAddress(GS_DRAWENV *drawenv, unsigned short vram_addr, unsigned char fbw, unsigned char psm);
-int GsSetDefaultDisplayEnv(GS_DISPENV *dispenv, unsigned short int w, unsigned short int h, unsigned short int x, unsigned short int y);
-int GsSetDefaultDisplayEnvAddress(GS_DISPENV *dispenv, unsigned short vram_addr, unsigned char fbw, unsigned char psm);
-int GsSetDefaultZBufferEnv(GS_ZENV *zenv, unsigned char update_mask);
-int GsSetDefaultZBufferEnvAddress(GS_ZENV *zenv, unsigned short vram_addr, unsigned char psm);
+void GsSetDefaultDrawEnv(GS_DRAWENV *drawenv, unsigned short int psm, unsigned short int w, unsigned short int h);
+void GsSetDefaultDrawEnvAddress(GS_DRAWENV *drawenv, unsigned short vram_addr);
+void GsSetDefaultDisplayEnv(GS_DISPENV *dispenv, unsigned short int psm, unsigned short int w, unsigned short int h, unsigned short int dx, unsigned short int dy);
+void GsSetDefaultDisplayEnvAddress(GS_DISPENV *dispenv, unsigned short vram_addr);
+void GsSetDefaultZBufferEnv(GS_ZENV *zenv, unsigned char update_mask);
+void GsSetDefaultZBufferEnvAddress(GS_ZENV *zenv, unsigned short vram_addr, unsigned char psm);
 
-/* Execute struct's data(Env.ironments)*/
-int GsPutDrawEnv1(GS_DRAWENV		*drawenv);
-int GsPutDrawEnv2(GS_DRAWENV		*drawenv);
-int GsPutDisplayEnv1(GS_DISPENV	*dispenv);
-int GsPutDisplayEnv2(GS_DISPENV	*dispenv);
-int GsPutZBufferEnv1(GS_ZENV *zenv);
-int GsPutZBufferEnv2(GS_ZENV *zenv);
-int GsClearDrawEnv1(GS_DRAWENV	*drawenv);	// clear draw buffer with GS_DRAWENV->bg_color color (contex 1)
-int GsClearDrawEnv2(GS_DRAWENV	*drawenv);	// clear draw buffer with GS_DRAWENV->bg_color color (contex 2)
+/* Execute struct's data (Environments)*/
+void GsPutDrawEnv1(GS_DRAWENV		*drawenv);
+void GsPutDrawEnv2(GS_DRAWENV		*drawenv);
+void GsPutDisplayEnv1(GS_DISPENV	*dispenv);
+void GsPutDisplayEnv2(GS_DISPENV	*dispenv);
+void GsPutZBufferEnv1(GS_ZENV *zenv);
+void GsPutZBufferEnv2(GS_ZENV *zenv);
+void GsClearDrawEnv1(GS_DRAWENV	*drawenv);	// clear draw buffer with GS_DRAWENV->bg_color color (contex 1)
+void GsClearDrawEnv2(GS_DRAWENV	*drawenv);	// clear draw buffer with GS_DRAWENV->bg_color color (contex 2)
 
 /* Gif packet execution*/
 QWORD *GsGifPacketsAlloc(GS_PACKET_TABLE *table, unsigned int  num_qwords);
-int GsGifPacketsClear(GS_PACKET_TABLE *table);
+void GsGifPacketsClear(GS_PACKET_TABLE *table);
 int GsGifPacketsExecute(GS_PACKET_TABLE	*table, unsigned short wait);
 
 /* Texture/Image Funtions*/
-int GsLoadImage(void *source_addr, GS_IMAGE *dest);
+int GsLoadImage(const void *source_addr, GS_IMAGE *dest);
 
 /**/
-int GsOverridePrimAttributes(char override, char iip, char tme, char fge, char abe, char aa1, char fst, char ctxt, char fix);
+void GsOverridePrimAttributes(char override, char iip, char tme, char fge, char abe, char aa1, char fst, char ctxt, char fix);
 void GsEnableDithering(unsigned char enable, int mode);
 void GsEnableAlphaTransparency1(unsigned short enable,unsigned short method,unsigned char alpha_ref,unsigned short fail_method);
 void GsEnableAlphaTransparency2(unsigned short enable,unsigned short method,unsigned char alpha_ref,unsigned short fail_method);
@@ -2109,9 +2109,9 @@ void GsEnableAlphaBlending1(unsigned short enable, unsigned short mode);
 void GsEnableAlphaBlending2(unsigned short enable, unsigned short mode);
 
 /**/
-int GsDrawSync(int mode);
-int GsHSync(int mode);
-int GsVSync(int mode);
+void GsDrawSync(int mode);
+void GsHSync(int mode);
+void GsVSync(int mode);
 
 /* Vram Allocation*/
 int    GsVramAllocFrameBuffer(short w, short h, short psm);
@@ -2123,10 +2123,6 @@ void GsVramFreeAll(void);
 int    GsDbGetDrawBuffer(void);
 int    GsDbGetDisplayBuffer(void);
 void GsDbSwapBuffer(void);
-
-/* return a propper value for												 */
-/* GS_TEX0->tex_width/tex_height (ito)	(dont use it if you dont have to)*/
-char   twh4(short wh);
 
 #if defined(__LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
 }

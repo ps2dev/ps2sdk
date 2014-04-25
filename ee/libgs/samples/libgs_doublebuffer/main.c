@@ -89,28 +89,28 @@ static int InitGraphics(void)
 {
 	int env0_address, env1_address;
 
-	GsInit(GS_INTERLACED, GS_MODE_NTSC, GS_FFMD_FRAME);
+	GsResetGraph(GS_INIT_RESET, GS_INTERLACED, GS_MODE_NTSC, GS_FFMD_FRAME);
 
 	//alloc 2 buffers in vram
-	env0_address =  GsVramAllocFrameBuffer(SCREEN_WIDTH, SCREEN_HEIGHT,   GS_PIXMODE_32);
-	env1_address =  GsVramAllocFrameBuffer(SCREEN_WIDTH, SCREEN_HEIGHT,   GS_PIXMODE_32);
+	env0_address =  GsVramAllocFrameBuffer(SCREEN_WIDTH, SCREEN_HEIGHT, GS_PIXMODE_32);
+	env1_address =  GsVramAllocFrameBuffer(SCREEN_WIDTH, SCREEN_HEIGHT, GS_PIXMODE_32);
 
 	/*********SETUP CONTEX 1 ENVIRONMENT*************/
-	GsSetDefaultDrawEnv(&draw_env[0], SCREEN_WIDTH, SCREEN_HEIGHT);
+	GsSetDefaultDrawEnv(&draw_env[0], GS_PIXMODE_32, SCREEN_WIDTH, SCREEN_HEIGHT);
 	//Retrieve screen offset parameters.
 	ScreenOffsetX=draw_env[0].offset_x;
 	ScreenOffsetY=draw_env[0].offset_y;
-	GsSetDefaultDrawEnvAddress(&draw_env[0], env0_address, SCREEN_WIDTH/64, GS_PIXMODE_32);
+	GsSetDefaultDrawEnvAddress(&draw_env[0], env0_address);
 
-	GsSetDefaultDisplayEnv(&disp_env[0], SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0);
-	GsSetDefaultDisplayEnvAddress(&disp_env[0], env1_address, SCREEN_WIDTH/64, GS_PIXMODE_32);
+	GsSetDefaultDisplayEnv(&disp_env[0], GS_PIXMODE_32, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0);
+	GsSetDefaultDisplayEnvAddress(&disp_env[0], env1_address);
 
 	/*********SETUP CONTEX 2 ENVIRONMENT*************/
-	GsSetDefaultDrawEnv(&draw_env[1], SCREEN_WIDTH, SCREEN_HEIGHT);
-	GsSetDefaultDrawEnvAddress(&draw_env[1], env1_address, SCREEN_WIDTH/64, GS_PIXMODE_32);
+	GsSetDefaultDrawEnv(&draw_env[1], GS_PIXMODE_32, SCREEN_WIDTH, SCREEN_HEIGHT);
+	GsSetDefaultDrawEnvAddress(&draw_env[1], env1_address);
 
-	GsSetDefaultDisplayEnv(&disp_env[1], SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0);
-	GsSetDefaultDisplayEnvAddress(&disp_env[1], env0_address, SCREEN_WIDTH/64, GS_PIXMODE_32);
+	GsSetDefaultDisplayEnv(&disp_env[1], GS_PIXMODE_32, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0);
+	GsSetDefaultDisplayEnvAddress(&disp_env[1], env0_address);
 
 	//execute draw/display environment(s)  (contex 1)
 	GsPutDrawEnv1	(&draw_env[0]);
@@ -139,10 +139,10 @@ static void SelectDisplayContext(int context_id)
 	// the CRTC is used to select which contex we see on our TV/VGA/HDTV
 
 	if(context_id==0)
-		GsSetCRTCSettings(CRTC_SETTINGS_DEFAULT1, 255);
+		GsSetCRTCSettings(CRTC_SETTINGS_DEFAULT1, 0x80);
 
 	if(context_id==1)
-		GsSetCRTCSettings(CRTC_SETTINGS_DEFAULT2, 255);
+		GsSetCRTCSettings(CRTC_SETTINGS_DEFAULT2, 0x80);
 }
 
 static void ClearDrawingContext(int context_id)

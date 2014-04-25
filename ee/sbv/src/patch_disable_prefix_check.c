@@ -11,15 +11,16 @@
 # Disable the MODLOAD check for .elf's or .irx's on certain devices.
 */
 
-#include "tamtypes.h"
-#include "string.h"
+#include <kernel.h>
+#include <tamtypes.h>
+#include <string.h>
 
 #include "smem.h"
 #include "slib.h"
 
 extern slib_exp_lib_list_t _slib_cur_exp_lib_list;
 
-int sbv_patch_disable_prefix_check()
+int sbv_patch_disable_prefix_check(void)
 {
 	u8 buf[512];
 	u32 patch[2];

@@ -90,17 +90,17 @@ int InitGraphics(void)
 {
 	unsigned int FrameBufferVRAMAddress;
 
-	GsInit(GS_INTERLACED, GS_MODE_NTSC, GS_FFMD_INTERLACE);
+	GsResetGraph(GS_INIT_RESET, GS_INTERLACED, GS_MODE_NTSC, GS_FFMD_INTERLACE);
 
 	FrameBufferVRAMAddress=GsVramAllocFrameBuffer(SCREEN_WIDTH, SCREEN_HEIGHT, GS_PIXMODE_32);
-	GsSetDefaultDrawEnv(&draw_env, SCREEN_WIDTH, SCREEN_HEIGHT);
+	GsSetDefaultDrawEnv(&draw_env, GS_PIXMODE_32, SCREEN_WIDTH, SCREEN_HEIGHT);
 	//Retrieve screen offset parameters.
 	ScreenOffsetX=draw_env.offset_x;
 	ScreenOffsetY=draw_env.offset_y;
-	GsSetDefaultDrawEnvAddress(&draw_env, FrameBufferVRAMAddress, SCREEN_WIDTH/64, GS_PIXMODE_32);
+	GsSetDefaultDrawEnvAddress(&draw_env, FrameBufferVRAMAddress);
 
-	GsSetDefaultDisplayEnv(&disp_env, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0);
-	GsSetDefaultDisplayEnvAddress(&disp_env, FrameBufferVRAMAddress, SCREEN_WIDTH/64, GS_PIXMODE_32);
+	GsSetDefaultDisplayEnv(&disp_env, GS_PIXMODE_32, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0);
+	GsSetDefaultDisplayEnvAddress(&disp_env, FrameBufferVRAMAddress);
 
 	//execute draw/display environment(s)  (context 1)
 	GsPutDrawEnv1(&draw_env);

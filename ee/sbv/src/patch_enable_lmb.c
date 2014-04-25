@@ -11,10 +11,10 @@
 # SBV patch to enable LoadModuleBuffer() via RPC.
 */
 
-#include "tamtypes.h"
-#include "kernel.h"
-#include "iopheap.h"
-#include "string.h"
+#include <tamtypes.h>
+#include <kernel.h>
+#include <iopheap.h>
+#include <string.h>
 
 #include "smem.h"
 #include "smod.h"
@@ -131,9 +131,9 @@ int sbv_patch_enable_lmb()
 	   table itself.  */
 	value = 0x2c820007;
 	SyncDCache(&value, (void*)((unsigned char*)&value+sizeof(value)));
-	smem_write(lf_rpc_dispatch + 4, &value, sizeof(value));
+	smem_write((void*)(lf_rpc_dispatch + 4), &value, sizeof(value));
 	SyncDCache(&patch_addr, (void*)((unsigned char*)&patch_addr+sizeof(patch_addr)));
-	smem_write(lf_jump_table + 0x18, &patch_addr, sizeof(patch_addr));
+	smem_write((void*)(lf_jump_table + 0x18), &patch_addr, sizeof(patch_addr));
 
 	return 0;
 }
