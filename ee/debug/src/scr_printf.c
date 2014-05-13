@@ -21,10 +21,9 @@
 
 /* baseado nas libs do Duke... */
 
-static int X = 0, Y = 0;
-static int MX=80, MY=40;
+static short int X = 0, Y = 0;
+static short int MX=80, MY=40;
 static u32 bgcolor = 0;
-
 
 struct t_setupscr
 {
@@ -34,16 +33,6 @@ struct t_setupscr
    u16	   dh[4];
    u64	   dd2[21];
 };
-
-static struct t_setupscr setupscr __attribute__ (( aligned (16) )) = {
-  { 0x100000000000800E, 0xE, 0xA0000, 0x4C, 0x8C, 0x4E },
-  { 27648, 30976 },
-  { 0x18 },
-  { 0, 639, 0, 223 },
-  { 0x40, 1, 0x1a, 1, 0x46, 0, 0x45, 0x70000,
-    0x47, 0x30000, 0x47, 6, 0, 0x3F80000000000000, 1, 0x79006C00, 5,
-    0x87009400, 5, 0x70000, 0x47 }
-  };
 
 struct t_setupchar
 {
@@ -55,41 +44,22 @@ struct t_setupchar
    u64	   dd2[5];
 };
 
-static struct t_setupchar setupchar __attribute__ (( aligned (16) )) = {
-  { 0x1000000000000004, 0xE, 0xA000000000000, 0x50 },
-  { 0 },
-  100, 100,
-  { 0x51 },
-  { 8, 8 },
-  { 0x52, 0, 0x53, 0x800000000000010, 0}
-};
-
-/* charmap must be 16 byte aligned.  */
-static u32	charmap[64] __attribute__ (( aligned (16) ));
-
 // from gsKit
 static int debug_detect_signal()
 {
    char romname[14];
-   GetRomName((char *)romname);
-   if (romname[4] == 'E') {
-      return 1;
-   }
-   else {
-      return 0;
-   }
+   GetRomName(romname);
+   return((romname[4] == 'E') ? 1 : 0);
 }
 
 static void Init_GS( int a, int b, int c)
 {
-   u64	*mem = (u64 *)0x12001000;
-
-   *mem = 0x200;
-   GsPutIMR( 0xff00);
-   SetGsCrt( a & 1, b & 0xff, c & 1);
+   *(vu64 *)0x12001000 = 0x200;
+   GsPutIMR(0xff00);
+   SetGsCrt(a, b, c);
 }
 
-static void SetVideoMode()
+static void SetVideoMode(void)
 {
   unsigned dma_addr;
   unsigned val1;
@@ -98,14 +68,28 @@ static void SetVideoMode()
   unsigned val4;
   unsigned val4_lo;
 
+/*	DX = 0x27C (636)
+	DY = 0x032 (50)
+
+	MAGH = 0x03 (4x)
+	MAGV = 0x00 (1x)
+
+	DW = 0x9FF (2560)
+	DH = 0xDF (223)
+
+	SMODE2 = 3 (Interlaced, frame mode)
+
+	0x000df9ff
+	0x0183227c	*/
+
   asm volatile ("        .set push               \n"
                 "        .set noreorder          \n"
                 "        lui     %4, 0x000d      \n"
-                "        lui     %5, 0x0182      \n"
+                "        lui     %5, 0x0183      \n"
                 "        lui     %0, 0x1200      \n"
-                "        li      %2, 2           \n"
+                "        li      %2, 3           \n"
                 "        ori     %4, %4, 0xf9ff  \n"
-                "        ori     %5, %5, 0x4290  \n"
+                "        ori     %5, %5, 0x227c  \n"
                 "        li      %1, 0xff62      \n"
                 "        dsll32  %4, %4, 0       \n"
                 "        li      %3, 0x1400      \n"
@@ -119,7 +103,7 @@ static void SetVideoMode()
                 "=&r" (val3), "=&r" (val4), "=&r" (val4_lo) );
 }
 
-static inline void Dma02Wait()
+static inline void Dma02Wait(void)
 {
   unsigned dma_addr;
   unsigned status;
@@ -139,7 +123,7 @@ static inline void Dma02Wait()
                 : "=&r" (dma_addr), "=&r" (status) );
 }
 
-static void DmaReset()
+static void DmaReset(void)
 {
   unsigned dma_addr;
   unsigned temp;
@@ -200,32 +184,43 @@ void scr_setbgcolor(u32 color)
 	bgcolor = color;
 }
 
-void init_scr()
+void init_scr(void)
 {
-   X = Y = 0;
-   EI();
-   DmaReset();
-///// EEUG: note that access to 0x1FC7FF52 causes
-/////       crash on SCPH-77004. Probably this code must be revised
-//   Init_GS( 0, ((*((char*)0x1FC7FF52))=='E')+2, 1);
+  static struct t_setupscr setupscr __attribute__ (( aligned (16) )) = {
+	{ 0x100000000000800E, 0xE, 0xA0000, 0x4C, 0x8C, 0x4E },
+	{ 27648, 30976 },
+	{ 0x18 },
+	{ 0, 639, 0, 223 },
+	{ 0x40, 1, 0x1a, 1, 0x46, 0, 0x45, 0x70000,
+	0x47, 0x30000, 0x47, 6, 0, 0x3F80000000000000, 1, 0x79006C00, 5,
+	0x87009400, 5, 0x70000, 0x47 }
+   };
 
-   if (debug_detect_signal() == 1)
-       Init_GS( 0, 3, 1);
-   else
-       Init_GS( 0, 2, 1);
+   X = Y = 0;
+   DmaReset();
+
+   Init_GS( 1, debug_detect_signal() == 1 ? 3 : 2, 1);
 
    SetVideoMode();
    Dma02Wait();
    progdma( &setupscr, 15);
-   FlushCache(2);
 }
 
 extern u8 msx[];
 
-
 void
 _putchar( int x, int y, u32 color, u8 ch)
 {
+   static struct t_setupchar setupchar __attribute__((aligned(64))) = {
+	{ 0x1000000000000004, 0xE, 0xA000000000000, 0x50 },
+	{ 0 },
+	100, 100,
+	{ 0x51 },
+	{ 8, 8 },
+	{ 0x52, 0, 0x53, 0x800000000000010, 0}
+   };
+   /* charmap must be aligned to a 64-bye boundary.  */
+   static u32	charmap[64] __attribute__((aligned(64)));
    int 	i,j, l;
    u8	*font;
    u32  pixel;
@@ -243,23 +238,20 @@ _putchar( int x, int y, u32 color, u8 ch)
    setupchar.x = x;
    setupchar.y = y;
 
-   FlushCache(0);
-   progdma( &setupchar, 6);
+   SyncDCache(&setupchar, (u8*)&setupchar+sizeof(setupchar));
+   progdma(&setupchar, 6);
+   SyncDCache(charmap, (u8*)charmap+sizeof(charmap));
    Dma02Wait();
 
-   progdma( charmap, (8*8*4) / 16);
+   progdma(charmap, (8*8*4) / 16);
    Dma02Wait();
-
 }
-
 
 static void  clear_line( int Y)
 {
    int i;
    for (i=0; i < MX; i++)
     _putchar( i*8 , Y * 8, bgcolor, ' ');
-
-
 }
 
 void scr_printf(const char *format, ...)
@@ -305,7 +297,6 @@ void scr_printf(const char *format, ...)
        }
     _putchar( X*7 , Y * 8, 0xffffff, 219);
 }
-
 
 void scr_setXY(int x, int y)
 {

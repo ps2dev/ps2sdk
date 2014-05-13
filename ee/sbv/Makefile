@@ -23,11 +23,11 @@ EE_SAMPLE_DIR = samples/
 EE_LIB = $(LIBSBV_LIB)
 
 EE_OBJS = smem.o smod.o slib.o patch_enable_lmb.o patch_disable_prefix_check.o \
-	patch_user_mem_clear.o \
-	patch_fioremove.o erl-support.o
+	patch_user_mem_clear.o patch_fioremove.o \
+	common.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
-EE_INCS += -I$(PS2SDKSRC)/ee/rpc/cdvd/include
+EE_INCS += 
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBSBV_LIB)
 

@@ -29,7 +29,11 @@ extern "C" {
    you can use memcpy(), and obviously 16-byte reads and writes work).
 
    For writes to IOP address space, the data cache MUST be first written back with SyncDCache().
-   I don't why why it is required, but writes do not always seem to take place properly without it. */
+   I don't why why it is required, but writes do not always seem to take place properly without it.
+
+   For the PlayStation 3, this window does not seem to be correctly emulated.
+   Although its EE kernel appears to still uses it, homebrew software cannot seem to use this window properly.
+*/
 #define SUB_VIRT_MEM	0xbc000000
 
 u32 smem_read(void *addr, void *buf, u32 size);

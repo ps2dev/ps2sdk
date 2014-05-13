@@ -99,7 +99,8 @@ int InitGraphics(void)
 	ScreenOffsetY=draw_env.offset_y;
 	GsSetDefaultDrawEnvAddress(&draw_env, FrameBufferVRAMAddress);
 
-	GsSetDefaultDisplayEnv(&disp_env, GS_PIXMODE_32, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0);
+	//For NTSC and PAL modes, the height is halfed because they are interlaced modes.
+	GsSetDefaultDisplayEnv(&disp_env, GS_PIXMODE_32, SCREEN_WIDTH, SCREEN_HEIGHT/2, 0, 0);
 	GsSetDefaultDisplayEnvAddress(&disp_env, FrameBufferVRAMAddress);
 
 	//execute draw/display environment(s)  (context 1)

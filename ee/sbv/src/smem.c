@@ -11,8 +11,8 @@
 # Sub-CPU RAM direct access.
 */
 
-#include "kernel.h"
-#include "string.h"
+#include <kernel.h>
+#include <string.h>
 
 #include "smem.h"
 

@@ -26,9 +26,9 @@ typedef struct _smod_mod_info {
 	struct _smod_mod_info *next;
 	u8	*name;		/* A pointer to the name in IOP RAM, this must be smem_read().  */
 	u16	version;
-	u16	newflags;	/* For modload shipped with games.  */
+	u16	newflags;	/* For MODLOAD shipped with games. The old MODLOAD module from boot ROMs do not use a flags field.  */
 	u16	id;
-	u16	flags;		/* I believe this is where flags are kept for BIOS versions.  */
+	u16	unused;
 	u32	entry;		/* _start */
 	u32	gp;
 	u32	text_start;

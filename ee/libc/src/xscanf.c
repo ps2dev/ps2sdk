@@ -141,6 +141,7 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 	buf = 0;
 #endif
 
+	a.ul = 0;
 	while ((c = *(fmt++))) {
 #if SCANF_LEVEL >= SCANF_FLT
 		if (isspace(c))

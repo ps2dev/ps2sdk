@@ -11,13 +11,16 @@
 # Sub-CPU module interface.
 */
 
-#include "tamtypes.h"
-#include "string.h"
+#include <tamtypes.h>
+#include <kernel.h>
+#include <string.h>
+#include <sifrpc.h>
 
 #include "smem.h"
 #include "smod.h"
 
-/* from slib.c */
+/* from common.c */
+extern u8 smem_buf[];
 extern int __memcmp(const void *s1, const void *s2, unsigned int length);
 
 /**
@@ -25,6 +28,7 @@ extern int __memcmp(const void *s1, const void *s2, unsigned int length);
  */
 int smod_get_next_mod(smod_mod_info_t *cur_mod, smod_mod_info_t *next_mod)
 {
+	SifRpcReceiveData_t RData;
 	void *addr;
 
 	/* If cur_mod is 0, return the head of the list (IOP address 0x800).  */
@@ -37,8 +41,13 @@ int smod_get_next_mod(smod_mod_info_t *cur_mod, smod_mod_info_t *next_mod)
 			addr = cur_mod->next;
 	}
 
-	smem_read(addr, next_mod, sizeof(smod_mod_info_t));
-	return next_mod->id;
+	SyncDCache(smem_buf, smem_buf+sizeof(smod_mod_info_t));
+	if(SifRpcGetOtherData(&RData, addr, smem_buf, sizeof(smod_mod_info_t), 0)>=0){
+		memcpy(next_mod, smem_buf, sizeof(smod_mod_info_t));
+		return next_mod->id;
+	}
+
+	return 0;
 }
 
 /**
@@ -46,17 +55,19 @@ int smod_get_next_mod(smod_mod_info_t *cur_mod, smod_mod_info_t *next_mod)
  */
 int smod_get_mod_by_name(const char *name, smod_mod_info_t *info)
 {
-	u8 search_name[60];
+	SifRpcReceiveData_t RData;
 	int len = strlen(name);
 
-	if (!smod_get_next_mod(0, info))
+	if (!smod_get_next_mod(NULL, info))
 		return 0;
 
+	smem_buf[64]='\0';
 	do {
-		smem_read(info->name, search_name, sizeof search_name);
-
-		if (!__memcmp(search_name, name, len))
-			return info->id;
+		SyncDCache(smem_buf, smem_buf+64);
+		if(SifRpcGetOtherData(&RData, info->name, smem_buf, 64, 0)>=0){
+			if (!__memcmp(smem_buf, name, len))
+				return info->id;
+		}
 	} while (smod_get_next_mod(info, info) != 0);
 
 	return 0;

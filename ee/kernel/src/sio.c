@@ -191,8 +191,7 @@ char *sio_gets(char *str)
 // Flushes the input buffer.
 void sio_flush()
 {
-    u8 b;
     while (_lw(SIO_ISR) & 0xf00)
-	b = _lb(SIO_RXFIFO);
+	_lb(SIO_RXFIFO);
 }
 #endif

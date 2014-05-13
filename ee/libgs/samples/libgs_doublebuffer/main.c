@@ -102,14 +102,16 @@ static int InitGraphics(void)
 	ScreenOffsetY=draw_env[0].offset_y;
 	GsSetDefaultDrawEnvAddress(&draw_env[0], env0_address);
 
-	GsSetDefaultDisplayEnv(&disp_env[0], GS_PIXMODE_32, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0);
+	//For NTSC and PAL modes, the height is halfed because they are interlaced modes.
+	GsSetDefaultDisplayEnv(&disp_env[0], GS_PIXMODE_32, SCREEN_WIDTH, SCREEN_HEIGHT/2, 0, 0);
 	GsSetDefaultDisplayEnvAddress(&disp_env[0], env1_address);
 
 	/*********SETUP CONTEX 2 ENVIRONMENT*************/
 	GsSetDefaultDrawEnv(&draw_env[1], GS_PIXMODE_32, SCREEN_WIDTH, SCREEN_HEIGHT);
 	GsSetDefaultDrawEnvAddress(&draw_env[1], env1_address);
 
-	GsSetDefaultDisplayEnv(&disp_env[1], GS_PIXMODE_32, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0);
+	//For NTSC and PAL modes, the height is halfed because they are interlaced modes.
+	GsSetDefaultDisplayEnv(&disp_env[1], GS_PIXMODE_32, SCREEN_WIDTH, SCREEN_HEIGHT/2, 0, 0);
 	GsSetDefaultDisplayEnvAddress(&disp_env[1], env0_address);
 
 	//execute draw/display environment(s)  (contex 1)

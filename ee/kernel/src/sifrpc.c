@@ -57,7 +57,7 @@ void *_rpc_get_packet(struct rpc_data *rpc_data)
 	if (len > 0) {
 		packet = (SifRpcPktHeader_t *)rpc_data->pkt_table;
 
-		for (rid = 0; rid < len; rid++, (u8 *)packet += 64) {
+		for (rid = 0; rid < len; rid++, (u8 *)packet += RPC_PACKET_SIZE) {
 			if (!(packet->rec_id & PACKET_F_ALLOC))
 				break;
 		}
@@ -223,7 +223,7 @@ int SifRpcGetOtherData(SifRpcReceiveData_t *rd, void *src, void *dest,
 	other->receive    = rd;
 
 	if (mode & SIF_RPC_M_NOWAIT) {
-		if (!SifSendCmd(0x8000000c, other, 64, NULL, NULL, 0))
+		if (!SifSendCmd(0x8000000c, other, RPC_PACKET_SIZE, NULL, NULL, 0))
 			return -E_SIF_PKT_SEND;
 
 		return 0;
@@ -235,7 +235,7 @@ int SifRpcGetOtherData(SifRpcReceiveData_t *rd, void *src, void *dest,
 	if (rd->hdr.sema_id < 0)
 		return -E_LIB_SEMA_CREATE;
 
-	if (!SifSendCmd(0x8000000c, other, 64, NULL, NULL, 0))
+	if (!SifSendCmd(0x8000000c, other, RPC_PACKET_SIZE, NULL, NULL, 0))
 		return -E_SIF_PKT_SEND;
 
 	WaitSema(rd->hdr.sema_id);
@@ -250,8 +250,8 @@ int SifRpcGetOtherData(SifRpcReceiveData_t *rd, void *src, void *dest,
 /* The packets sent on EE RPC requests are allocated from this table.  */
 static u8 pkt_table[2048] __attribute__((aligned(64)));
 /* A ring buffer used to allocate packets sent on IOP requests.  */
-static u8 rdata_table[2048];
-static u8 client_table[2048];
+static u8 rdata_table[2048] __attribute__((aligned(64)));
+static u8 client_table[2048] __attribute__((aligned(64)));
 
 struct rpc_data _sif_rpc_data = {
 	pid:			1,
@@ -340,7 +340,7 @@ static void _request_bind(SifRpcBindPkt_t *bind, void *data)
 		rend->cbuff  = server->cbuff;
 	}
 
-	iSifSendCmd(0x80000008, rend, 64, NULL, NULL, 0);
+	iSifSendCmd(0x80000008, rend, RPC_PACKET_SIZE, NULL, NULL, 0);
 }
 
 /* Command 0x8000000a */
@@ -380,7 +380,7 @@ static void _request_rdata(SifRpcOtherDataPkt_t *rdata, void *data)
 	rend->client = (SifRpcClientData_t *)rdata->receive;
 	rend->cid = 0x8000000c;
 
-	iSifSendCmd(0x80000008, rend, 64, rdata->src, rdata->dest, rdata->size);
+	iSifSendCmd(0x80000008, rend, RPC_PACKET_SIZE, rdata->src, rdata->dest, rdata->size);
 }
 
 void SifInitRpc(int mode)
