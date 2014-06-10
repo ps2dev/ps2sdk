@@ -27,7 +27,7 @@
 #define	SMAP_INTR_TXDNV			(1<<2)	/* descriptor not valid */
 #define	SMAP_INTR_CLR_ALL		(SMAP_INTR_RXEND|SMAP_INTR_TXEND|SMAP_INTR_RXDNV)
 #define	SMAP_INTR_ENA_ALL		(SMAP_INTR_EMAC3|SMAP_INTR_CLR_ALL)
-#define	SMAP_INTR_BITMSK		0x7C
+#define	SMAP_INTR_BITMSK		(SMAP_INTR_EMAC3|SMAP_INTR_RXEND|SMAP_INTR_TXEND|SMAP_INTR_RXDNV|SMAP_INTR_TXDNV)
 
 /* SMAP Register Definitions.  */
 
@@ -85,10 +85,8 @@
 	(SMAP_EMAC3_REG((offset)+2)))
 
 #define SMAP_EMAC3_SET(offset, val)					\
-	do {								\
 		SMAP_EMAC3_REG((offset))   = ((val) >> 16) & 0xffff;	\
-		SMAP_EMAC3_REG((offset)+2) = (val) & 0xffff;		\
-	} while (0);
+		SMAP_EMAC3_REG((offset)+2) = (val) & 0xffff;
 
 #define	SMAP_R_EMAC3_MODE0		0x00
 #define	  SMAP_E3_RXMAC_IDLE		(1<<31)

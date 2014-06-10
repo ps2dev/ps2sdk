@@ -15,11 +15,12 @@
 #define DRV_ATAHW_H
 
 #include <tamtypes.h>
+#include <aifregs.h>
 #include <speedregs.h>
 
 #define ATA_DEV9_HDD_BASE		(SPD_REGBASE + 0x40)
-/* AIF on T10Ks - Not supported yet.  */
-#define ATA_AIF_HDD_BASE		(SPD_REGBASE + 0x4000000 + 0x60)
+/* AIF on T10Ks - supported with aifatad.  */
+#define ATA_AIF_HDD_BASE		(AIF_REGBASE + AIF_ATA)
 
 /* A port contains all of the ATA controller registers.  */
 typedef struct _ata_hwport {
@@ -37,11 +38,11 @@ typedef struct _ata_hwport {
 	u16	r_control;	/* 1c */
 } ata_hwport_t;
 
-/* This is set to either ATA_AIF_HDD_BASE or ATA_DEV9_HDD_BASE.  */
-u32 ata_active_port;
-
 #define USE_ATA_REGS		volatile ata_hwport_t *ata_hwport = \
 	(volatile ata_hwport_t *)ATA_DEV9_HDD_BASE
+
+#define USE_AIF_ATA_REGS	volatile ata_hwport_t *ata_hwport = \
+	(volatile ata_hwport_t *)ATA_AIF_HDD_BASE
 
 /* r_error bits.  */
 #define ATA_ERR_MARK		0x01
