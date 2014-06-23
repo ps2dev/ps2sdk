@@ -161,11 +161,11 @@ void configSetDaylightSavingEnabled(int enabled);
 
 // converts the time returned from the ps2's clock into GMT time
 // (ps2 clock is in JST time)
-void configConvertToGmtTime(CdvdClock_t* time);
+void configConvertToGmtTime(sceCdCLOCK* time);
 
 // converts the time returned from the ps2's clock into LOCAL time
 // (ps2 clock is in JST time)
-void configConvertToLocalTime(CdvdClock_t* time);
+void configConvertToLocalTime(sceCdCLOCK* time);
 
 // Internal functions.
 int  IsT10K(void);

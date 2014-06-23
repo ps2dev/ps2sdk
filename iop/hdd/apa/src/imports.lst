@@ -11,8 +11,8 @@ I_ata_device_flush_cache
 atad_IMPORTS_end
 
 cdvdman_IMPORTS_start
-DECLARE_IMPORT(0x16, CdReadIlinkID)
 I_sceCdReadClock
+I_sceCdRI
 cdvdman_IMPORTS_end
 
 dev9_IMPORTS_start
@@ -49,7 +49,6 @@ I_strncmp
 I_strncpy
 I_strrchr
 I_strtol
-//I_sprintf// not use but :P
 sysclib_IMPORTS_end
 
 sysmem_IMPORTS_start

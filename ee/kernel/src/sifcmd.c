@@ -47,7 +47,7 @@ struct cmd_data {
 
 extern int _iop_reboot_count;
 extern struct cmd_data _sif_cmd_data;
-int _SifCmdIntHandler();
+int _SifCmdIntHandler(int channel);
 
 #ifdef F_sif_cmd_send
 static u32 _SifSendCmd(int cid, int mode, void *pkt, u32 pktsize, void *src,
@@ -113,7 +113,7 @@ iSifSendCmd( int command, void *send_data, int send_len,
 #endif
 
 #ifdef F__sif_cmd_int_handler
-int _SifCmdIntHandler()
+int _SifCmdIntHandler(int channel)
 {
 	u128 packet[8];
 	u128 *pktbuf;
@@ -162,8 +162,7 @@ int _SifCmdIntHandler()
 		cmd_handlers[id].handler(packet, cmd_handlers[id].harg);
 
 out:
-	EE_SYNC();
-	EI();
+	ExitHandler();
 	return 0;
 }
 #endif
@@ -266,7 +265,7 @@ void SifInitCmd()
 	if (!(_lw(DMAC_SIF0_CHCR) & CHCR_STR))
 		SifSetDChain();
 
-	sif0_id = AddDmacHandler(5, _SifCmdIntHandler, 0);
+	sif0_id = AddDmacHandler(5, &_SifCmdIntHandler, 0);
 	EnableDmac(5);
 
 	init = 1;

@@ -8,7 +8,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 # $Id$
-# Common SifDma prototypes and structures
+# EE SIF control function prototypes and structures
 */
 
 #ifndef _SIFDMA_H

@@ -29,13 +29,13 @@ void *allocMem(int size)
 
 int getPs2Time(ps2time *tm)
 {
-	cd_clock_t	cdtime;
+	sceCdCLOCK	cdtime;
 	s32		tmp;
 	ps2time timeBuf={
 		0, 0x0D, 0x0E, 0x0A, 0x0D, 1, 2003// used if can not get time...
 	};
 
-	if(CdReadClock(&cdtime)!=0 && cdtime.stat==0)
+	if(sceCdReadClock(&cdtime)!=0 && cdtime.stat==0)
 	{
 		tmp=cdtime.second>>4;
 		timeBuf.sec=(u32)(((tmp<<2)+tmp)<<1)+(cdtime.second&0x0F);
@@ -43,7 +43,6 @@ int getPs2Time(ps2time *tm)
 		timeBuf.min=(((tmp<<2)+tmp)<<1)+(cdtime.minute&0x0F);
 		tmp=cdtime.hour>>4;
 		timeBuf.hour=(((tmp<<2)+tmp)<<1)+(cdtime.hour&0x0F);
-//		timeBuf.hour = (timeBuf.hour + 4) % 24; // TEMP FIX (need to deal with timezones?) ... aparently not
 		tmp=cdtime.day>>4;
 		timeBuf.day=(((tmp<<2)+tmp)<<1)+(cdtime.day&0x0F);
 		tmp=(cdtime.month&0x7F)>>4;
@@ -64,11 +63,11 @@ int passcmp(char *pw1, char *pw2)
 
 int getIlinkID(u8 *idbuf)
 {
-	int err=0;
+	u32 err=0;
 
 	memset(idbuf, 0, 32);
 
-	if(CdReadIlinkID(idbuf, &err))
+	if(sceCdRI(idbuf, &err))
 		if (err)
 			dprintf1("ps2hdd: Error when reading ilink id\n");
 

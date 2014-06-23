@@ -27,6 +27,8 @@ extern "C" {
 #define DI	DIntr
 #define EI	EIntr
 
+#define ExitHandler() asm volatile("sync\nei\n")
+
 // note: 'sync' is the same as 'sync.l'
 #define EE_SYNC()	__asm__ volatile ("sync")
 #define EE_SYNCL()	__asm__ volatile ("sync.l")
@@ -262,9 +264,6 @@ s32	 iResumeThread(s32 thread_id);
 
 u8 RFU059(void);
 
-s32  RFU060(s32 arg0, s32 arg1, s32 arg2, s32 arg3, s32 arg4, s32 arg5) __attribute__((deprecated));
-void RFU061(s32 arg0, s32 arg1) __attribute__((deprecated));
-
 void * SetupThread(void * gp, void * stack, s32 stack_size, void * args, void * root_func);
 void SetupHeap(void * heap_start, s32 heap_size);
 void *EndOfHeap(void);
@@ -356,13 +355,6 @@ void	_exit(int retval) __attribute__((noreturn));
 extern int errno;
 int *__errno(void);
 #endif
-
-/* Napalm/Naplink puts() and printf().  */
-int	npmPuts(const char *buf);
-int	nprintf(const char *format, ...) __attribute__((format(printf,1,2)));
-
-/* Legacy "GetSyscall".  Deprecated, use GetSyscallHandler. */
-void *GetSyscall(int syscall_no) __attribute__ ((deprecated));
 
 void *GetSyscallHandler(int syscall_no);
 void *GetExceptionHandler(int except_no);

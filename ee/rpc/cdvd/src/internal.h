@@ -12,28 +12,28 @@
 #
 # NOTE: These functions will work with the CDVDMAN/CDVDFSV or XCDVDMAN/XCDVDFSV
 # modules stored in rom0.
-#
+#		
 # NOTE: not all functions work with each set of modules!
 */
 
 #ifndef _LIBCDVD_INTERNAL_H_
 #define _LIBCDVD_INTERNAL_H_
 
-extern s32 cdDebug;
+extern int CdDebug;
 
-extern volatile s32 cdCallbackNum;
-extern volatile s32 cbSema;
+extern volatile int CdCallbackNum;
+extern volatile int cbSema;
 
-extern s32 cdThreadId;
-extern ee_thread_status_t cdThreadParam;
+extern int CdThreadId;
+extern ee_thread_status_t CdThreadParam;
 
-extern s32 bindNCmd;
-extern s32 bindSCmd;
+extern int bindNCmd;
+extern int bindSCmd;
 
-extern s32 nCmdSemaId;
-extern s32 sCmdSemaId;
+extern int nCmdSemaId;
+extern int sCmdSemaId;
 
-extern s32 nCmdNum;
+extern int nCmdNum;
 
 extern u8 sCmdRecvBuff[];
 extern u8 nCmdRecvBuff[];
@@ -42,11 +42,9 @@ extern u8 nCmdRecvBuff[];
 extern "C" {
 #endif
 
-void cdSemaInit(void);
-
-void cdCallback(void *funcNum);
-
-s32  cdSyncS(s32 mode);
+void _CdSemaInit(void);
+void _CdGenericCallbackFunction(void *funcNum);
+int  _CdSyncS(int mode);
 
 #ifdef __cplusplus
 }

@@ -8,7 +8,7 @@
 #
 # $Id$
 
-SUBDIRS = kernel libc rpc startup loader debug \
+SUBDIRS = kernel libc rpc startup debug \
 	  eedebug sbv dma graph math3d math \
 	  packet draw erl erl-loader mpeg libgs \
 	  libvux font input inputx network

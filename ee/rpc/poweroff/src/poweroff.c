@@ -12,22 +12,13 @@
 
 #include "libpwroff.h"
 
+#include <errno.h>
 #include <stdio.h>
 #include <tamtypes.h>
 #include <kernel.h>
 #include <string.h>
 #include <sifrpc.h>
-#include <loadfile.h>
-#include <iopheap.h>
-#include <malloc.h>
 #include <pwroff_rpc.h>
-
-// PS2DRV includes
-#include "sys/fcntl.h"
-#include "sys/stat.h"
-#include "sys/ioctl.h"
-#include "fileXio_rpc.h"
-#include "errno.h"
 
 extern void *_gp;
 
@@ -59,8 +50,10 @@ static void _poff_intr_callback(void *pkt, void *param)
 	iSignalSema(PowerOffSema);
 }
 
-int poweroffInit()
+int poweroffInit(void)
 {
+	ee_thread_t thread;
+	ee_sema_t sema;
 	int res;
 	static int _init_count = -1;
 
@@ -70,11 +63,6 @@ int poweroffInit()
 
 	while(((res = SifBindRpc(&cd0, PWROFF_IRX, 0)) >= 0) && (cd0.server == NULL))
 		nopdelay();
-
-	ee_thread_t thread;
-	ee_thread_status_t thisThread;
-
-	ee_sema_t sema;
 
 	// Terminate and delete any previously created threads
 	if (powerOffThreadId >= 0) {
@@ -95,27 +83,20 @@ int poweroffInit()
 	sema.option = 0;
 	PowerOffSema = CreateSema(&sema);
 
-	ReferThreadStatus(GetThreadId(), &thisThread);
-
-	if (thisThread.current_priority == 0) {
-		ChangeThreadPriority(GetThreadId(), 51);
-		thread.initial_priority = 50;
-	} else
-		thread.initial_priority = thisThread.current_priority - 1;
-
-	thread.stack_size = 512 * 16;
+	thread.initial_priority = POWEROFF_THREAD_PRIORITY;
+	thread.stack_size = sizeof(poffThreadStack);
 	thread.gp_reg = &_gp;
 	thread.func = PowerOffThread;
 	thread.stack = (void *)poffThreadStack;
 	powerOffThreadId = CreateThread(&thread);
 	StartThread(powerOffThreadId, NULL);
 
-	DIntr();
+	DI();
 	SifAddCmdHandler(POFF_SIF_CMD, _poff_intr_callback, NULL);
-	EIntr();
+	EI();
 
 	int autoShutdown = 0;
-	SifCallRpc(&cd0, PWROFF_ENABLE_AUTO_SHUTOFF, 0, NULL, 0, &autoShutdown, sizeof(autoShutdown), 0, 0);
+	SifCallRpc(&cd0, PWROFF_ENABLE_AUTO_SHUTOFF, 0, NULL, 0, &autoShutdown, sizeof(autoShutdown), NULL, NULL);
 
 	return res;
 }
@@ -128,11 +109,16 @@ void poweroffSetCallback(poweroff_callback cb, void *arg)
 	poweroff_data = arg;
 }
 
-void poweroffShutdown()
+void poweroffShutdown(void)
 {
 	poweroffInit();
 
 	SignalSema(PowerOffSema);
 
-	SifCallRpc(&cd0, PWROFF_SHUTDOWN, 0, NULL, 0, NULL, 0, 0, 0);
+	SifCallRpc(&cd0, PWROFF_SHUTDOWN, 0, NULL, 0, NULL, 0, NULL, NULL);
+}
+
+void poweroffChangeThreadPriority(int priority)
+{
+	ChangeThreadPriority(powerOffThreadId, priority);
 }

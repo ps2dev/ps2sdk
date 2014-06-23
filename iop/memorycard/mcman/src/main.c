@@ -1077,7 +1077,7 @@ int McUnformat(int port, int slot) // Export #36
 int mcman_getmcrtime(sceMcStDateTime *time)
 {
 	register int retries;
-	cd_clock_t cdtime;
+	sceCdCLOCK cdtime;
 
 	retries = 64;
 
@@ -1089,7 +1089,7 @@ int mcman_getmcrtime(sceMcStDateTime *time)
 	if (cdtime.stat & 128) {
 		*((u16 *)&cdtime.month) = 0x7d0;
 		cdtime.day = 3;
-		cdtime.week = 4;
+		cdtime.pad = 4;
 		cdtime.hour = 0;
 		cdtime.minute = 0;
 		cdtime.second = 0;
