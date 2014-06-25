@@ -17,7 +17,7 @@
 /* File open modes */
 #define SCE_CdSTREAM	0x40000000  /* Open file for streaming */
 
-enum SCECdvdSectorTypes{
+enum SCECdvdSectorType{
 	/* Game CD and DVD sector types.  */
 	SCECdSecS2048=0,
 	SCECdSecS2328,
@@ -29,7 +29,7 @@ enum SCECdvdSectorTypes{
 	SCECdSecS2448,
 };
 
-enum SCECdvdSpinValues{
+enum SCECdvdSpinValue{
 	SCECdSpinMax=0,		// Spin at maximum speed
 	SCECdSpinStm=0,		// Spins at the recommended speed for streaming data
 	SCECdSpinDvdDL0=0,	// Spins at the DVD layer 0 speed
@@ -45,12 +45,12 @@ enum SCECdvdSpinValues{
 	SCECdSpinMx=20,		// Spin at maximum speed (Not sure what's the difference between this and SCECdSpinMax)
 };
 
-enum SCECdvdMModeMediaTypes{
+enum SCECdvdMModeMediaType{
 	SCECdMmodeCd=1,
 	SCECdMmodeDvd
 };
 
-enum SCECdvdErrorCodes{
+enum SCECdvdErrorCode{
 	SCECdErFAIL	= -1,	// Can't get error code
 	SCECdErNO	= 0x00,	// No Error
 	SCECdErABRT,		// Aborted
@@ -74,7 +74,7 @@ enum SCECdvdErrorCodes{
 	SCECdErREADCFR		// Error setting command
 };
 
-enum SCECdvdMediaTypes{
+enum SCECdvdMediaType{
 	SCECdGDTFUNCFAIL	= -1,
 	SCECdNODISC		= 0x00,
 	SCECdDETCT,
@@ -94,7 +94,7 @@ enum SCECdvdMediaTypes{
 	SCECdIllegalMedia
 };
 
-enum SCECdvdInterruptCodes{
+enum SCECdvdInterruptCode{
 	CdlNoIntr	= 0x00,	// No interrupt
 	CdlDataReady,		// Data Ready
 	SCECdComplete,		// Command Complete
@@ -105,14 +105,14 @@ enum SCECdvdInterruptCodes{
 };
 
 //Tray request modes
-enum SCECdvdTrayReqModes{
+enum SCECdvdTrayReqMode{
 	SCECdTrayOpen=0,
 	SCECdTrayClose,
 	SCECdTrayCheck
 };
 
 //Drive states
-enum SCECdvdDriveStates{
+enum SCECdvdDriveState{
 	SCECdStatStop	= 0x00,
 	SCECdStatShellOpen,
 	SCECdStatSpin,
@@ -332,12 +332,12 @@ int sceCdGetDiskType(void);
 
 // gets the last error that occurred
 // 
-// returns:	error type (CDVD_ERR_???)
+// returns:	error type (SCECdvdErrorCode)
 int sceCdGetError(void);
 
 // open/close/check disk tray
 // 
-// arguments:	param (CDVD_TRAY_???)
+// arguments:	param (SCECdvdTrayReqMode)
 //			address for returning tray state change
 // returns:	1 if successful
 //			0 if error
