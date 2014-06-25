@@ -164,10 +164,7 @@ _exit:
    jal InitTLB
    nop
 
-   move $4, $16
-   addiu   $3, $0, 36
-   syscall         # ExitDeleteThread() (noreturn)
-
+   move    $4, $16
    addiu   $3, $0, 4
    syscall         # Exit(retval) (noreturn)
 

@@ -1512,9 +1512,6 @@ void _ps2sdk_stdio_init()
 
 void _ps2sdk_stdio_deinit()
 {
-//    _fflushall();  will require libmc...
-    _fcloseall();
-
     __stdio_initialised = 0;
 }
 #endif
