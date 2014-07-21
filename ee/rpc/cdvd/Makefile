@@ -33,7 +33,8 @@ SCMD_OBJS =	_scmd_internals.o sceCdReadClock.o sceCdWriteClock.o sceCdGetDiskTyp
 		sceCdGetError.o sceCdTrayReq.o sceCdApplySCmd.o sceCdStatus.o sceCdBreak.o \
 		_CdCheckSCmd.o sceCdCtrlADout.o sceCdMV.o sceCdReadSUBQ.o \
 		sceCdForbidDVDP.o sceCdAutoAdjustCtrl.o sceCdDecSet.o sceCdOpenConfig.o sceCdCloseConfig.o \
-		sceCdReadConfig.o sceCdWriteConfig.o sceCdReadNVM.o sceCdWriteNVM.o sceCdRI.o sceCdWI.o \
+		sceCdReadConfig.o sceCdWriteConfig.o \
+		sceCdReadNVM.o sceCdWriteNVM.o sceCdRI.o sceCdWI.o sceCdReadConsoleID.o sceCdWriteConsoleID.o \
 		_CdSyncS.o
 SCMD_OBJS := $(SCMD_OBJS:%=$(EE_OBJS_DIR)%)
 
