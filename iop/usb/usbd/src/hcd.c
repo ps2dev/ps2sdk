@@ -234,14 +234,14 @@ void hcdProcessIntr(void) {
 
 	if (intrFlags & OHCI_INT_SO) {
 		dbg_printf("HC: Scheduling overrun\n");
-		memPool.ohciRegs->HcInterruptStatus |= OHCI_INT_SO;
+		memPool.ohciRegs->HcInterruptStatus = OHCI_INT_SO;
 		intrFlags &= ~OHCI_INT_SO;
 	}
 
 	HcTD *doneQueue = (HcTD*)((uint32)memPool.hcHCCA->DoneHead & ~0xF);
 	if (doneQueue) {
 		memPool.hcHCCA->DoneHead = NULL;
-		memPool.ohciRegs->HcInterruptStatus |= OHCI_INT_WDH;
+		memPool.ohciRegs->HcInterruptStatus = OHCI_INT_WDH;
 
 		// reverse queue
 		HcTD *prev = NULL;
@@ -265,20 +265,20 @@ void hcdProcessIntr(void) {
 	}
 
 	if (intrFlags & OHCI_INT_SF) {
-		memPool.ohciRegs->HcInterruptStatus |= OHCI_INT_SF;
+		memPool.ohciRegs->HcInterruptStatus = OHCI_INT_SF;
 		handleTimerList();
 		intrFlags &= ~OHCI_INT_SF;
 	}
 
 	if (intrFlags & OHCI_INT_UE) {
 		printf("HC: Unrecoverable error\n");
-		memPool.ohciRegs->HcInterruptStatus |= OHCI_INT_UE;
+		memPool.ohciRegs->HcInterruptStatus = OHCI_INT_UE;
 		intrFlags &= ~OHCI_INT_UE;
 	}
 
 	if (intrFlags & OHCI_INT_RHSC) {
 		dbg_printf("RHSC\n");
-		memPool.ohciRegs->HcInterruptStatus |= OHCI_INT_RHSC;
+		memPool.ohciRegs->HcInterruptStatus = OHCI_INT_RHSC;
 		handleRhsc();
 		intrFlags &= ~OHCI_INT_RHSC;
 	}
@@ -290,6 +290,13 @@ void hcdProcessIntr(void) {
 	}
 }
 
+static void PostIntrEnableFunction(void)
+{
+	memPool.ohciRegs->HcInterruptDisable = OHCI_INT_MIE;
+	asm volatile("lw $zero, 0xffffffffbfc00000\n");
+	memPool.ohciRegs->HcInterruptEnable = OHCI_INT_MIE;
+}
+
 void hcdIrqThread(void *arg) {
 	u32 eventRes;
 	while (1) {
@@ -298,6 +305,7 @@ void hcdIrqThread(void *arg) {
 		usbdLock();
 		hcdProcessIntr();
 		EnableIntr(IOP_IRQ_USB);
+		PostIntrEnableFunction();
 		usbdUnlock();
 	}
 }
@@ -308,12 +316,17 @@ int usbdIntrHandler(void *arg) {
 }
 
 int initHardware(void) {
+	unsigned int i;
+
 	dbg_printf("Host Controller...\n");
 	memPool.ohciRegs->HcInterruptDisable = ~0;
 	memPool.ohciRegs->HcCommandStatus = OHCI_COM_HCR;
 	memPool.ohciRegs->HcControl = 0;
-	while (memPool.ohciRegs->HcCommandStatus & OHCI_COM_HCR) {
-		// add timeout stuff
+
+	for (i=0; memPool.ohciRegs->HcCommandStatus & OHCI_COM_HCR; i++) {
+		if(i==1000) return -1;
+
+		asm volatile("lw $zero, 0xffffffffbfc00000\n");
 	}
 	dbg_printf("HC reset done\n");
 	*(volatile uint32*)0xBF801570 |= 0x800 << 16;
