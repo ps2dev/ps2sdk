@@ -22,9 +22,9 @@
 #else
 #include <tamtypes.h>
 #include <sysmem.h>
-#define malloc(a)	AllocSysMemory(0,(a), NULL)
-#define free(a)		FreeSysMemory((a))
 #endif
+
+//#define SCACHE_RECORD_STATS	1
 
 #include "usbhd_common.h"
 #include "mass_stor.h"
@@ -54,23 +54,22 @@ typedef struct _cache_record
 
 struct _cache_set
 {
-    mass_dev* dev;
-    int sectorSize;
-    int indexLimit;
-    unsigned char* sectorBuf; // = NULL;		//sector content - the cache buffer
-    cache_record rec[CACHE_SIZE];	//cache info record
+	mass_dev* dev;
+	int sectorSize;
+	int indexLimit;
+	unsigned char* sectorBuf; // = NULL;		//sector content - the cache buffer
+	cache_record rec[CACHE_SIZE];	//cache info record
 
-    //statistical infos
-    unsigned int cacheAccess;
-    unsigned int cacheHits;
-    unsigned int writeFlag;
-    //unsigned int flushCounter;
-
-    //unsigned int cacheDumpCounter = 0;
+#ifdef SCACHE_RECORD_STATS
+	//statistical information
+	unsigned int cacheAccess;
+	unsigned int cacheHits;
+#endif
+	unsigned int writeFlag;
 };
 
 //---------------------------------------------------------------------------
-void initRecords(cache_set* cache)
+static void initRecords(cache_set* cache)
 {
 	int i;
 
@@ -82,14 +81,13 @@ void initRecords(cache_set* cache)
 	}
 
 	cache->writeFlag = 0;
-	//cache->flushCounter = 0;
 }
 
 //---------------------------------------------------------------------------
 /* search cache records for the sector number stored in cache
   returns cache record (slot) number
  */
-int getSlot(cache_set* cache, unsigned int sector) {
+static int getSlot(cache_set* cache, unsigned int sector) {
 	int i;
 
 	for (i = 0; i < CACHE_SIZE; i++) {
@@ -100,10 +98,9 @@ int getSlot(cache_set* cache, unsigned int sector) {
 	return -1;
 }
 
-
 //---------------------------------------------------------------------------
 /* search cache records for the sector number stored in cache */
-int getIndexRead(cache_set* cache, unsigned int sector) {
+static int getIndexRead(cache_set* cache, unsigned int sector) {
 	int i;
 	int index =-1;
 
@@ -123,7 +120,7 @@ int getIndexRead(cache_set* cache, unsigned int sector) {
 
 //---------------------------------------------------------------------------
 /* select the best record where to store new sector */
-int getIndexWrite(cache_set* cache, unsigned int sector) {
+static int getIndexWrite(cache_set* cache, unsigned int sector) {
 	int i, ret;
 	int minTax = 0x0FFFFFFF;
 	int index = 0;
@@ -152,8 +149,6 @@ int getIndexWrite(cache_set* cache, unsigned int sector) {
 	return index * cache->indexLimit;
 }
 
-
-
 //---------------------------------------------------------------------------
 /*
 	flush dirty sectors
@@ -163,8 +158,6 @@ int scache_flushSectors(cache_set* cache) {
 	int counter = 0;
 
 	XPRINTF("cache: flushSectors devId = %i \n", cache->dev->devId);
-
-	//cache->flushCounter = 0;
 
 	XPRINTF("scache: flushSectors writeFlag=%d\n", cache->writeFlag);
 	//no write operation occured since last flush
@@ -196,16 +189,20 @@ int scache_readSector(cache_set* cache, unsigned int sector, void** buf) {
 	unsigned int alignedSector;
 
 	XPRINTF("cache: readSector devId = %i %X sector = %i \n", cache->dev->devId, (int) cache, sector);
-    if (cache == NULL) {
-        printf("cache: devId cache not created = %i \n", cache->dev->devId);
-        return -1;
-    }
+	if (cache == NULL) {
+		printf("cache: devId cache not created = %i \n", cache->dev->devId);
+		return -1;
+	}
 
+#ifdef SCACHE_RECORD_STATS
 	cache->cacheAccess ++;
+#endif
 	index = getIndexRead(cache, sector);
 	XPRINTF("cache: indexRead=%i \n", index);
 	if (index >= 0) { //sector found in cache
+#ifdef SCACHE_RECORD_STATS
 		cache->cacheHits ++;
+#endif
 		*buf = cache->sectorBuf + (index * cache->sectorSize);
 		XPRINTF("cache: hit and done reading sector \n");
 
@@ -260,7 +257,6 @@ int scache_allocSector(cache_set* cache, unsigned int sector, void** buf) {
 	return cache->sectorSize;
 }
 
-
 //---------------------------------------------------------------------------
 int scache_writeSector(cache_set* cache, unsigned int sector) {
 	int index; //index is given in single sectors not octal sectors
@@ -305,32 +301,36 @@ cache_set* scache_init(mass_dev* dev, int sectSize)
 		return NULL;
 	}
 
-    XPRINTF("scache init! \n");
-    cache->dev = dev;
+	XPRINTF("scache init! \n");
+	cache->dev = dev;
 
-    XPRINTF("sectorSize: 0x%x\n", cache->sectorSize);
-    cache->sectorBuf = (unsigned char*) malloc(BLOCK_SIZE * CACHE_SIZE);
-    if (cache->sectorBuf == NULL) {
-        printf("Sector cache: can't alloate memory of size:%d \n", BLOCK_SIZE * CACHE_SIZE);
-        free(cache);
-        return NULL;
-    }
-    XPRINTF("Sector cache: allocated memory at:%p of size:%d \n", cache->sectorBuf, BLOCK_SIZE * CACHE_SIZE);
+	XPRINTF("sectorSize: 0x%x\n", cache->sectorSize);
+	cache->sectorBuf = (unsigned char*) malloc(BLOCK_SIZE * CACHE_SIZE);
+	if (cache->sectorBuf == NULL) {
+		printf("Sector cache: can't alloate memory of size:%d \n", BLOCK_SIZE * CACHE_SIZE);
+		free(cache);
+		return NULL;
+	}
+	XPRINTF("Sector cache: allocated memory at:%p of size:%d \n", cache->sectorBuf, BLOCK_SIZE * CACHE_SIZE);
 
-    //added by Hermes
-    cache->sectorSize = sectSize;
-    cache->indexLimit = BLOCK_SIZE/cache->sectorSize; //number of sectors per 1 cache slot
-    cache->cacheAccess = 0;
-    cache->cacheHits = 0;
-    initRecords(cache);
+	//added by Hermes
+	cache->sectorSize = sectSize;
+	cache->indexLimit = BLOCK_SIZE/cache->sectorSize; //number of sectors per 1 cache slot
+#ifdef SCACHE_RECORD_STATS
+	cache->cacheAccess = 0;
+	cache->cacheHits = 0;
+#endif
+	initRecords(cache);
 	return cache;
 }
 
+#ifdef SCACHE_RECORD_STATS
 //---------------------------------------------------------------------------
 void scache_getStat(cache_set* cache, unsigned int* access, unsigned int* hits) {
 	*access = cache->cacheAccess;
 	*hits = cache->cacheHits;
 }
+#endif
 
 //---------------------------------------------------------------------------
 void scache_kill(cache_set* cache) //dlanor: added for disconnection events (flush impossible)
@@ -341,7 +341,7 @@ void scache_kill(cache_set* cache) //dlanor: added for disconnection events (flu
 		free(cache->sectorBuf);
 		cache->sectorBuf = NULL;
 	}
-    free(cache);
+	free(cache);
 }
 //---------------------------------------------------------------------------
 void scache_close(cache_set* cache)

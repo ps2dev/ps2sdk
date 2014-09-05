@@ -79,9 +79,12 @@ typedef struct _fat_dir {
 	unsigned char atime[3]; //H:M:S
 	unsigned char mdate[4];	//D:M:Yl:Yh
 	unsigned char mtime[3]; //H:M:S
-	unsigned int  size;		//file size, 0 for directory
-	unsigned int  lastCluster;
-	fat_dir_chain_record  chain[DIR_CHAIN_SIZE];  //cluser/offset cache - for seeking purpose
+	unsigned int size;		//file size, 0 for directory
+	unsigned int parentDirCluster;	//The cluster number of the parent directory.
+	unsigned int startCluster;
+	//Stuff here are used for caching and might not be filled.
+	unsigned int lastCluster;
+	fat_dir_chain_record chain[DIR_CHAIN_SIZE];  //cluser/offset cache - for seeking purpose
 } fat_dir;
 
 int strEqual(const unsigned char *s1, const unsigned char* s2);

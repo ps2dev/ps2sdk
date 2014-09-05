@@ -29,38 +29,40 @@
 #include <thsemap.h>
 #include <thbase.h>
 #include <sysmem.h>
-#define malloc(a)	AllocSysMemory(0,(a), NULL)
-#define free(a)		FreeSysMemory((a))
 #endif
 
+#include "usbhdfsd.h"
 #include "usbhd_common.h"
 #include "fat_driver.h"
 #include "fat_write.h"
+#include "fat.h"
 
 //#define DEBUG  //comment out this line when not debugging
 
 #include "mass_debug.h"
 
-#define IOCTL_CKFREE 0xBABEC0DE  //dlanor: Ioctl request code => Check free space
-#define IOCTL_RENAME 0xFEEDC0DE  //dlanor: Ioctl request code => Rename
-
 #define FLUSH_SECTORS		fat_flushSectors
 
+enum FS_FILE_FLAG{
+	FS_FILE_FLAG_FOLDER	= 0,
+	FS_FILE_FLAG_FILE
+};
+
 typedef struct _fs_rec {
-	int           file_flag;
-  //This flag is always 1 for a file, and always 0 for a folder (different typedef)
-  //Routines that handle both must test it, and then typecast the privdata pointer
-  //to the type that is appropriate for the given case. (see also fs_dir typedef)
-	unsigned int  filePos;
-	int           mode;	//file open mode
-	unsigned int  sfnSector; //short filename sector  - write support
-	int           sfnOffset; //short filename offset  - write support
-	int           sizeChange; //flag
+	short int	file_flag;
+	short int	sizeChange; //flag
+	//This flag is always 1 for a file, and always 0 for a folder (different typedef)
+	//Routines that handle both must test it, and then typecast the privdata pointer
+	//to the type that is appropriate for the given case. (see also fs_dir typedef)
+	unsigned int	filePos;
+	int		mode;	//file open mode
+	unsigned int	sfnSector; //short filename sector  - write support
+	int		sfnOffset; //short filename offset  - write support
 	fat_dir fatdir;
 } fs_rec;
 
 typedef struct _fs_dir {
-	int           file_flag;
+	int	file_flag;
 	//This flag is always 1 for a file, and always 0 for a folder (different typedef)
 	//Routines that handle both must test it, and then typecast the privdata pointer
 	//to the type that is appropriate for the given case. (see also fs_rec typedef)
@@ -70,14 +72,9 @@ typedef struct _fs_dir {
 } fs_dir;
 
 #define MAX_FILES 16
-fs_rec  fsRec[MAX_FILES]; //file info record
+static fs_rec fsRec[MAX_FILES]; //file info record
 
-#ifndef WIN32
-static iop_device_t fs_driver;
-static iop_device_ops_t fs_functarray;
-#endif
-
-void fillStat(fio_stat_t *stat, fat_dir *fatdir)
+static void fillStat(fio_stat_t *stat, const fat_dir *fatdir)
 {
 	stat->mode = FIO_SO_IROTH | FIO_SO_IXOTH;
 	if (fatdir->attr & FAT_ATTR_DIRECTORY) {
@@ -125,10 +122,10 @@ void fillStat(fio_stat_t *stat, fat_dir *fatdir)
 /*************************************************************************************/
 
 //---------------------------------------------------------------------------
-fs_rec* fs_findFreeFileSlot(void) {
+static fs_rec* fs_findFreeFileSlot(void) {
 	int i;
 	for (i = 0; i < MAX_FILES; i++) {
-		if (fsRec[i].file_flag == -1) {
+		if (fsRec[i].file_flag < 0) {
 			return &fsRec[i];
 			break;
 		}
@@ -137,10 +134,11 @@ fs_rec* fs_findFreeFileSlot(void) {
 }
 
 //---------------------------------------------------------------------------
-fs_rec* fs_findFileSlotByName(const char* name) {
+static fs_rec* fs_findFileSlotByCluster(unsigned int startCluster) {
 	int i;
+
 	for (i = 0; i < MAX_FILES; i++) {
-		if (fsRec[i].file_flag >= 0 && strEqual(fsRec[i].fatdir.name, (unsigned char*) name) == 0) {
+		if (fsRec[i].file_flag >= 0 && fsRec[i].fatdir.startCluster == startCluster) {
 			return &fsRec[i];
 		}
 	}
@@ -148,10 +146,10 @@ fs_rec* fs_findFileSlotByName(const char* name) {
 }
 
 //---------------------------------------------------------------------------
-static int _lock_sema_id = 0;
+static int _lock_sema_id = -1;
 
 //---------------------------------------------------------------------------
-int _fs_init_lock(void)
+static int _fs_init_lock(void)
 {
 #ifndef WIN32
 	iop_sema_t sp;
@@ -167,7 +165,7 @@ int _fs_init_lock(void)
 }
 
 //---------------------------------------------------------------------------
-void _fs_lock(void)
+static void _fs_lock(void)
 {
 #ifndef WIN32
 	WaitSema(_lock_sema_id);
@@ -175,7 +173,7 @@ void _fs_lock(void)
 }
 
 //---------------------------------------------------------------------------
-void _fs_unlock(void)
+static void _fs_unlock(void)
 {
 #ifndef WIN32
 	SignalSema(_lock_sema_id);
@@ -183,7 +181,7 @@ void _fs_unlock(void)
 }
 
 //---------------------------------------------------------------------------
-void fs_reset(void)
+static void fs_reset(void)
 {
 	int i;
 	for (i = 0; i < MAX_FILES; i++) { fsRec[i].file_flag = -1; }
@@ -194,33 +192,34 @@ void fs_reset(void)
 }
 
 //---------------------------------------------------------------------------
-int fs_inited = 0;
+static int fs_inited = 0;
 
 //---------------------------------------------------------------------------
-int fs_dummy(void)
+static int fs_dummy(void)
 {
 	return -5;
 }
 
 //---------------------------------------------------------------------------
-int fs_init(iop_device_t *driver)
+static int fs_init(iop_device_t *driver)
 {
-	if(fs_inited) { return(1); }
+	if(!fs_inited) {
+		fs_reset();
+		fs_inited = 1;
+	}
 
-	fs_reset();
-
-	fs_inited = 1;
 	return 1;
 }
 
 //---------------------------------------------------------------------------
-int fs_open(iop_file_t* fd, const char *name, int mode) {
+static int fs_open(iop_file_t* fd, const char *name, int mode) {
 	fat_driver* fatd;
 	fs_rec* rec;
 	fs_rec* rec2;
 	int ret;
 	unsigned int cluster;
 	char escapeNotExist;
+	fat_dir fatdir;
 
 	_fs_lock();
 
@@ -229,13 +228,22 @@ int fs_open(iop_file_t* fd, const char *name, int mode) {
 	fatd = fat_getData(fd->unit);
 	if (fatd == NULL) { _fs_unlock(); return -ENODEV; }
 
-	//check if the file is already open
-	rec2 = fs_findFileSlotByName(name);
-	if (rec2 != NULL) {
-		if ((mode & O_WRONLY) || //current file is opened for write
-			(rec2->mode & O_WRONLY) ) {//other file is opened for write
-			_fs_unlock();
-			return 	-EACCES;
+	//find the file
+	cluster = 0; //allways start from root
+	XPRINTF("USBHDFSD: Calling fat_getFileStartCluster from fs_open\n");
+	ret = fat_getFileStartCluster(fatd, name, &cluster, &fatdir);
+	if (ret < 0 && ret != -ENOENT) {
+		_fs_unlock();
+		return ret;
+	}else{
+		//File exists. Check if the file is already open
+		rec2 = fs_findFileSlotByCluster(fatdir.startCluster);
+		if (rec2 != NULL) {
+			if ((mode & O_WRONLY) || //current file is opened for write
+				(rec2->mode & O_WRONLY) ) {//other file is opened for write
+				_fs_unlock();
+				return -EACCES;
+			}
 		}
 	}
 
@@ -256,7 +264,7 @@ int fs_open(iop_file_t* fd, const char *name, int mode) {
 		rec->sfnOffset = 0;
 		ret = fat_createFile(fatd, name, 0, escapeNotExist, &cluster, &rec->sfnSector, &rec->sfnOffset);
 		if (ret < 0) {
-			_fs_unlock(); 
+			_fs_unlock();
 			return ret;
 		}
 		//the file already exist but mode is set to truncate
@@ -266,21 +274,14 @@ int fs_open(iop_file_t* fd, const char *name, int mode) {
 		}
 	}
 
-	//find the file
-	cluster = 0; //allways start from root
-	XPRINTF("USBHDFSD: Calling fat_getFileStartCluster from fs_open\n");
-	ret = fat_getFileStartCluster(fatd, name, &cluster, &rec->fatdir);
-	if (ret < 0) {
-		_fs_unlock(); 
-		return ret;
-	}
+	memcpy(&rec->fatdir, &fatdir, sizeof(rec->fatdir));
 	if ((rec->fatdir.attr & FAT_ATTR_DIRECTORY) == FAT_ATTR_DIRECTORY) {
 		// Can't open a directory with fioOpen
 		_fs_unlock();
 		return -EISDIR;
 	}
 
-	rec->file_flag = 1;
+	rec->file_flag = FS_FILE_FLAG_FILE;
 	rec->mode = mode;
 	rec->filePos = 0;
 	rec->sizeChange  = 0;
@@ -298,17 +299,17 @@ int fs_open(iop_file_t* fd, const char *name, int mode) {
 }
 
 //---------------------------------------------------------------------------
-int fs_close(iop_file_t* fd) {
+static int fs_close(iop_file_t* fd) {
 	fat_driver* fatd;
 	fs_rec* rec = (fs_rec*)fd->privdata;
-	fd->privdata = 0;
 
-	if (rec == 0)
+	if (rec == NULL)
 		return -EBADF;
 
 	_fs_lock();
 
 	rec->file_flag = -1;
+	fd->privdata = NULL;
 
 	fatd = fat_getData(fd->unit);
 	if (fatd == NULL) { _fs_unlock(); return -ENODEV; }
@@ -327,11 +328,11 @@ int fs_close(iop_file_t* fd) {
 }
 
 //---------------------------------------------------------------------------
-int fs_lseek(iop_file_t* fd, unsigned long offset, int whence) {
+static int fs_lseek(iop_file_t* fd, unsigned long offset, int whence) {
 	fat_driver* fatd;
 	fs_rec* rec = (fs_rec*)fd->privdata;
 
-	if (rec == 0)
+	if (rec == NULL)
 		return -EBADF;
 
 	_fs_lock();
@@ -365,14 +366,14 @@ int fs_lseek(iop_file_t* fd, unsigned long offset, int whence) {
 }
 
 //---------------------------------------------------------------------------
-int fs_write(iop_file_t* fd, void * buffer, int size )
+static int fs_write(iop_file_t* fd, void * buffer, int size )
 {
 	fat_driver* fatd;
 	fs_rec* rec = (fs_rec*)fd->privdata;
 	int result;
 	int updateClusterIndices = 0;
 
-	if (rec == 0)
+	if (rec == NULL)
 		return -EBADF;
 
 	_fs_lock();
@@ -380,7 +381,7 @@ int fs_write(iop_file_t* fd, void * buffer, int size )
 	fatd = fat_getData(fd->unit);
 	if (fatd == NULL) { _fs_unlock(); return -ENODEV; }
 
-	if (rec->file_flag != 1) {
+	if (rec->file_flag != FS_FILE_FLAG_FILE) {
 		_fs_unlock();
 		return -EACCES;
 	}
@@ -404,18 +405,18 @@ int fs_write(iop_file_t* fd, void * buffer, int size )
 			}
 		}
 	}
-	
+
 	_fs_unlock();
 	return result;
 }
 
 //---------------------------------------------------------------------------
-int fs_read(iop_file_t* fd, void * buffer, int size ) {
+static int fs_read(iop_file_t* fd, void * buffer, int size ) {
 	fat_driver* fatd;
 	fs_rec* rec = (fs_rec*)fd->privdata;
 	int result;
 
-	if (rec == 0)
+	if (rec == NULL)
 		return -EBADF;
 
 	_fs_lock();
@@ -423,7 +424,7 @@ int fs_read(iop_file_t* fd, void * buffer, int size ) {
 	fatd = fat_getData(fd->unit);
 	if (fatd == NULL) { _fs_unlock(); return -ENODEV; }
 
-	if (rec->file_flag != 1) {
+	if (rec->file_flag != FS_FILE_FLAG_FILE) {
 		_fs_unlock();
 		return -EACCES;
 	}
@@ -452,10 +453,12 @@ int fs_read(iop_file_t* fd, void * buffer, int size ) {
 }
 
 //---------------------------------------------------------------------------
-int fs_remove (iop_file_t *fd, const char *name) {
+static int fs_remove(iop_file_t *fd, const char *name) {
 	fat_driver* fatd;
 	fs_rec* rec;
 	int result;
+	unsigned int cluster;
+	fat_dir fatdir;
 
 	_fs_lock();
 
@@ -467,7 +470,15 @@ int fs_remove (iop_file_t *fd, const char *name) {
  		return result;
 	}
 
-	rec = fs_findFileSlotByName(name);
+	cluster = 0; //allways start from root
+	XPRINTF("USBHDFSD: Calling fat_getFileStartCluster from fs_remove\n");
+	result = fat_getFileStartCluster(fatd, name, &cluster, &fatdir);
+	if (result < 0) {
+		_fs_unlock();
+		return result;
+	}
+
+	rec = fs_findFileSlotByCluster(fatdir.startCluster);
 
 	//file is opened - can't delete the file
 	if (rec != NULL) {
@@ -484,7 +495,7 @@ int fs_remove (iop_file_t *fd, const char *name) {
 }
 
 //---------------------------------------------------------------------------
-int fs_mkdir  (iop_file_t *fd, const char *name) {
+static int fs_mkdir(iop_file_t *fd, const char *name) {
 	fat_driver* fatd;
 	int ret;
 	int sfnOffset;
@@ -510,11 +521,7 @@ int fs_mkdir  (iop_file_t *fd, const char *name) {
 }
 
 //---------------------------------------------------------------------------
-// NOTE! you MUST call fioRmdir with device number in the name
-// or else this fs_rmdir function is never called.
-// example: fioRmdir("mass:/dir1");  //    <-- doesn't work (bug?)
-//          fioRmdir("mass0:/dir1"); //    <-- works fine
-int fs_rmdir  (iop_file_t *fd, const char *name) {
+static int fs_rmdir(iop_file_t *fd, const char *name) {
 	fat_driver* fatd;
 	int ret;
 
@@ -530,7 +537,7 @@ int fs_rmdir  (iop_file_t *fd, const char *name) {
 }
 
 //---------------------------------------------------------------------------
-int fs_dopen  (iop_file_t *fd, const char *name)
+static int fs_dopen(iop_file_t *fd, const char *name)
 {
 	fat_driver* fatd;
 	int is_root = 0;
@@ -551,7 +558,7 @@ int fs_dopen  (iop_file_t *fd, const char *name)
 	}
 
 	fd->privdata = (void*)malloc(sizeof(fs_dir));
-	memset(fd->privdata, 0, sizeof(fs_dir)); //NB: also implies "file_flag = 0;"
+	memset(fd->privdata, 0, sizeof(fs_dir)); //NB: also implies "file_flag = FS_FILE_FLAG_FOLDER;"
 	rec = (fs_dir *) fd->privdata;
 
 	rec->status = fat_getFirstDirentry(fatd, (char*)name, &rec->fatdlist, &rec->fatdir);
@@ -568,27 +575,27 @@ int fs_dopen  (iop_file_t *fd, const char *name)
 }
 
 //---------------------------------------------------------------------------
-int fs_dclose (iop_file_t *fd)
+static int fs_dclose(iop_file_t *fd)
 {
-	if (fd->privdata == 0)
+	if (fd->privdata == NULL)
 		return -EBADF;
 
 	_fs_lock();
 	XPRINTF("USBHDFSD: fs_dclose called: unit %d\n", fd->unit);
 	free(fd->privdata);
-	fd->privdata = 0;
+	fd->privdata = NULL;
 	_fs_unlock();
 	return 0;
 }
 
 //---------------------------------------------------------------------------
-int fs_dread  (iop_file_t *fd, fio_dirent_t *buffer)
+static int fs_dread(iop_file_t *fd, fio_dirent_t *buffer)
 {
 	fat_driver* fatd;
 	int ret;
 	fs_dir* rec = (fs_dir *) fd->privdata;
 
-	if (rec == 0)
+	if (rec == NULL)
 		return -EBADF;
 
 	_fs_lock();
@@ -597,6 +604,11 @@ int fs_dread  (iop_file_t *fd, fio_dirent_t *buffer)
 
 	fatd = fat_getData(fd->unit);
 	if (fatd == NULL) { _fs_unlock(); return -ENODEV; }
+
+	if (rec->file_flag != FS_FILE_FLAG_FOLDER) {
+		_fs_unlock();
+		return -EACCES;
+	}
 
 	while (rec->status > 0
 		&& (rec->fatdir.attr & FAT_ATTR_VOLUME_LABEL
@@ -608,7 +620,7 @@ int fs_dread  (iop_file_t *fd, fio_dirent_t *buffer)
 	{
 		memset(buffer, 0, sizeof(fio_dirent_t));
 		fillStat(&buffer->stat, &rec->fatdir);
-		strcpy(buffer->name, (const char*) rec->fatdir.name);
+		strcpy(buffer->name, rec->fatdir.name);
 	}
 
 	if (rec->status > 0)
@@ -619,7 +631,7 @@ int fs_dread  (iop_file_t *fd, fio_dirent_t *buffer)
 }
 
 //---------------------------------------------------------------------------
-int fs_getstat(iop_file_t *fd, const char *name, fio_stat_t *stat)
+static int fs_getstat(iop_file_t *fd, const char *name, fio_stat_t *stat)
 {
 	fat_driver* fatd;
 	int ret;
@@ -648,31 +660,13 @@ int fs_getstat(iop_file_t *fd, const char *name, fio_stat_t *stat)
 }
 
 //---------------------------------------------------------------------------
-int fs_chstat (iop_file_t *fd, const char *name, fio_stat_t *stat, unsigned int a)
-{
-	return fs_dummy();
-}
-
-//---------------------------------------------------------------------------
-int fs_deinit (iop_device_t *fd)
-{
-	return fs_dummy();
-}
-
-//---------------------------------------------------------------------------
-int fs_format (iop_file_t *fd)
-{
-	return fs_dummy();
-}
-
-//---------------------------------------------------------------------------
-int fs_ioctl(iop_file_t *fd, unsigned long request, void *data)
+int fs_ioctl(iop_file_t *fd, u32 request, void *data)
 {
 	fat_driver* fatd;
-	fs_dir* rec = (fs_dir *) fd->privdata;
+	fs_rec* rec = (fs_rec *) fd->privdata;
 	int ret;
 
-	if (rec == 0)
+	if (rec == NULL)
 		return -EBADF;
 
 	_fs_lock();
@@ -681,11 +675,9 @@ int fs_ioctl(iop_file_t *fd, unsigned long request, void *data)
 	if (fatd == NULL) { _fs_unlock(); return -ENODEV; }
 
 	switch (request) {
-		case IOCTL_CKFREE:  //Request to calculate free space (ignore file/folder selected)
-			ret = fs_dummy();
-			break;
-		case IOCTL_RENAME:  //Request to rename opened file/folder
-			ret = fs_dummy();
+		case USBHDFSD_IOCTL_RENAME:
+			ret = fat_renameFile(fatd, &rec->fatdir, data);
+			FLUSH_SECTORS(fatd);
 			break;
 		default:
 			ret = fs_dummy();
@@ -696,38 +688,38 @@ int fs_ioctl(iop_file_t *fd, unsigned long request, void *data)
 }
 
 #ifndef WIN32
+static iop_device_ops_t fs_functarray={
+	&fs_init,
+	(void*)&fs_dummy,
+	(void*)&fs_dummy,
+	&fs_open,
+	&fs_close,
+	&fs_read,
+	&fs_write,
+	&fs_lseek,
+	&fs_ioctl,
+	&fs_remove,
+	&fs_mkdir,
+	&fs_rmdir,
+	&fs_dopen,
+	&fs_dclose,
+	&fs_dread,
+	&fs_getstat,
+	(void*)&fs_dummy
+};
+static iop_device_t fs_driver={
+	"mass",
+	IOP_DT_FS,
+	2,
+	"USB mass storage driver",
+	&fs_functarray
+};
+
 /* init file system driver */
-int InitFS()
+int InitFS(void)
 {
-	fs_driver.name = "mass";
-	fs_driver.type = IOP_DT_FS;
-	fs_driver.version = 2;
-	fs_driver.desc = "Usb mass storage driver";
-	fs_driver.ops = &fs_functarray;
-
-	fs_functarray.init    = fs_init;
-	fs_functarray.deinit  = fs_deinit;
-	fs_functarray.format  = fs_format;
-	fs_functarray.open    = fs_open;
-	fs_functarray.close   = fs_close;
-	fs_functarray.read    = fs_read;
-	fs_functarray.write   = fs_write;
-	fs_functarray.lseek   = fs_lseek;
-	fs_functarray.ioctl   = fs_ioctl;
-	fs_functarray.remove  = fs_remove;
-	fs_functarray.mkdir   = fs_mkdir;
-	fs_functarray.rmdir   = fs_rmdir;
-	fs_functarray.dopen   = fs_dopen;
-	fs_functarray.dclose  = fs_dclose;
-	fs_functarray.dread   = fs_dread;
-	fs_functarray.getstat = fs_getstat;
-	fs_functarray.chstat  = fs_chstat;
-
 	DelDrv("mass");
-	AddDrv(&fs_driver);
-
-	// should return an error code if AddDrv fails...
-	return(0);
+	return(AddDrv(&fs_driver) == 0 ? 0 : -1);
 }
 #endif
 
