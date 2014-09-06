@@ -219,7 +219,6 @@ static int fs_open(iop_file_t* fd, const char *name, int mode) {
 	int ret;
 	unsigned int cluster;
 	char escapeNotExist;
-	fat_dir fatdir;
 
 	_fs_lock();
 
@@ -228,16 +227,20 @@ static int fs_open(iop_file_t* fd, const char *name, int mode) {
 	fatd = fat_getData(fd->unit);
 	if (fatd == NULL) { _fs_unlock(); return -ENODEV; }
 
+	//check if the slot is free
+	rec = fs_findFreeFileSlot();
+	if (rec == NULL) { _fs_unlock(); return -EMFILE; }
+
 	//find the file
 	cluster = 0; //allways start from root
 	XPRINTF("USBHDFSD: Calling fat_getFileStartCluster from fs_open\n");
-	ret = fat_getFileStartCluster(fatd, name, &cluster, &fatdir);
+	ret = fat_getFileStartCluster(fatd, name, &cluster, &rec->fatdir);
 	if (ret < 0 && ret != -ENOENT) {
 		_fs_unlock();
 		return ret;
 	}else{
 		//File exists. Check if the file is already open
-		rec2 = fs_findFileSlotByCluster(fatdir.startCluster);
+		rec2 = fs_findFileSlotByCluster(rec->fatdir.startCluster);
 		if (rec2 != NULL) {
 			if ((mode & O_WRONLY) || //current file is opened for write
 				(rec2->mode & O_WRONLY) ) {//other file is opened for write
@@ -247,11 +250,7 @@ static int fs_open(iop_file_t* fd, const char *name, int mode) {
 		}
 	}
 
-	//check if the slot is free
-	rec = fs_findFreeFileSlot();
-	if (rec == NULL) { _fs_unlock(); return -EMFILE; }
-
-	if((mode & O_WRONLY))  { //dlanor: corrected bad test condition
+	if(mode & O_WRONLY)  { //dlanor: corrected bad test condition
 		cluster = 0; //start from root
 
 		escapeNotExist = 1;
@@ -272,9 +271,18 @@ static int fs_open(iop_file_t* fd, const char *name, int mode) {
 			XPRINTF("USBHDFSD: FAT I: O_TRUNC detected!\n");
 			fat_truncateFile(fatd, cluster, rec->sfnSector, rec->sfnOffset);
 		}
+
+		//find the file
+		cluster = 0; //allways start from root
+		XPRINTF("USBHDFSD: Calling fat_getFileStartCluster from fs_open after file creation\n");
+		ret = fat_getFileStartCluster(fatd, name, &cluster, &rec->fatdir);
 	}
 
-	memcpy(&rec->fatdir, &fatdir, sizeof(rec->fatdir));
+	if (ret < 0) {	//At this point, the file should be locatable without any errors.
+		_fs_unlock();
+		return ret;
+	}
+
 	if ((rec->fatdir.attr & FAT_ATTR_DIRECTORY) == FAT_ATTR_DIRECTORY) {
 		// Can't open a directory with fioOpen
 		_fs_unlock();
