@@ -1464,13 +1464,9 @@ static int saveDirentry(fat_driver* fatd, unsigned int startCluster,
 */
 
 static int fat_modifyDirSpace(fat_driver* fatd, unsigned char* lname, char directory, char escapeNotExist, unsigned int* startCluster, unsigned int* retSector, int* retOffset, const fat_direntry_sfn *orig_dsfn) {
-	int ret;
 	unsigned char sname[12]; //short name 8+3 + terminator
-	unsigned int newCluster;
-	int entryCount;
-	int compressShortName;
-	int entryIndex;
-	int direntrySize;
+	unsigned int newCluster, parentDirCluster_tmp;
+	int ret, entryCount, compressShortName, entryIndex, direntrySize;
 
 	//dlanor: Since each filename may need up to 11 directory entries (MAX_FAT_NAME==128)
 	//dlanor: I've rewritten the methods of this function to use global bitmasks as this
@@ -1514,8 +1510,9 @@ static int fat_modifyDirSpace(fat_driver* fatd, unsigned char* lname, char direc
 
 	//get information about existing direntries (palcement of the empty/reusable direntries)
 	//and sequence numbers of the short filenames
+	parentDirCluster_tmp = *startCluster;
 	ret = fat_fillDirentryInfo(fatd, lname, sname, directory,
-		startCluster, retSector, retOffset);
+		&parentDirCluster_tmp, retSector, retOffset);
 	if (ret < 0) {
 		XPRINTF("USBHDFSD: E: direntry data invalid!\n");
 		return ret;

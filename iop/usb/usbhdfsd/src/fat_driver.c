@@ -911,16 +911,16 @@ int fat_getNextDirentry(fat_driver* fatd, fat_dir_list* fatdlist, fat_dir* fatDi
 }
 
 //---------------------------------------------------------------------------
-int fat_getFirstDirentry(fat_driver* fatd, const unsigned char* dirName, fat_dir_list* fatdlist, fat_dir* fatDir) {
+int fat_getFirstDirentry(fat_driver* fatd, const unsigned char* dirName, fat_dir_list* fatdlist, fat_dir *fatDir_host, fat_dir* fatDir) {
 	int ret;
 	unsigned int startCluster = 0;
 
-	ret = fat_getFileStartCluster(fatd, dirName, &startCluster, fatDir);
+	ret = fat_getFileStartCluster(fatd, dirName, &startCluster, fatDir_host);
 	if (ret < 0) { //dir name not found
 		return -ENOENT;
 	}
 	//check that direntry is directory
-	if (!(fatDir->attr & FAT_ATTR_DIRECTORY)) {
+	if (!(fatDir_host->attr & FAT_ATTR_DIRECTORY)) {
 		return -ENOTDIR; //it's a file - exit
 	}
 	fatdlist->direntryCluster = startCluster;
