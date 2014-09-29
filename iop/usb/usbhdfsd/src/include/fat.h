@@ -147,7 +147,7 @@ static USBHD_INLINE unsigned int fat_cluster2sector(fat_bpb* partBpb, unsigned i
 
 unsigned int fat_getClusterRecord12(unsigned char* buf, int type);
 int      fat_getDirentry(unsigned char fatType, fat_direntry* dir_entry, fat_direntry_summary* dir );
-int      fat_getDirentrySectorData(fat_driver* fatd, unsigned int* startCluster, unsigned int* startSector, int* dirSector);
+int      fat_getDirentrySectorData(fat_driver* fatd, unsigned int* startCluster, unsigned int* startSector, unsigned int* dirSector);
 void     fat_invalidateLastChainResult(fat_driver* fatd);
 void     fat_getClusterAtFilePos(fat_driver* fatd, fat_dir* fatDir, unsigned int filePos, unsigned int* cluster, unsigned int* clusterPos);
 

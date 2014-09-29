@@ -3,6 +3,7 @@
  * See usbmass-ufi10.pdf
  */
 
+#include <errno.h>
 #include <sysclib.h>
 #include <thsemap.h>
 #include <stdio.h>
@@ -636,7 +637,7 @@ static inline int cbw_scsi_read_capacity(mass_dev* dev, void *buffer, int size)
 	return ret;
 }
 
-static inline int cbw_scsi_read_sector(mass_dev* dev, unsigned int lba, void* buffer, short int sectorSize, short int sectorCount)
+static inline int cbw_scsi_read_sector(mass_dev* dev, unsigned int lba, void* buffer, unsigned short int sectorCount)
 {
 	int ret;
 	static cbw_packet cbw={
@@ -665,7 +666,7 @@ static inline int cbw_scsi_read_sector(mass_dev* dev, unsigned int lba, void* bu
 	};
 	XPRINTF("USBHDFSD: cbw_scsi_read_sector\n");
 
-	cbw.dataTransferLength = sectorSize * sectorCount;
+	cbw.dataTransferLength = dev->sectorSize * sectorCount;
 
 	//scsi command packet
 	cbw.comData[2] = (lba & 0xFF000000) >> 24;	//lba 1 (MSB)
@@ -677,7 +678,7 @@ static inline int cbw_scsi_read_sector(mass_dev* dev, unsigned int lba, void* bu
 
 	usb_bulk_command(dev, &cbw);
 
-	if ((ret = usb_bulk_transfer(dev->bulkEpI, buffer, sectorSize * sectorCount)) == USB_RC_OK)
+	if ((ret = usb_bulk_transfer(dev->bulkEpI, buffer, dev->sectorSize * sectorCount)) == USB_RC_OK)
 		ret = usb_bulk_manage_status(dev, -TAG_READ);
 	else
 		XPRINTF("USBHDFSD: cbw_scsi_read_sector error from usb_bulk_transfer %d\n", ret);
@@ -685,7 +686,7 @@ static inline int cbw_scsi_read_sector(mass_dev* dev, unsigned int lba, void* bu
 	return ret;
 }
 
-static inline int cbw_scsi_write_sector(mass_dev* dev, unsigned int lba, void* buffer, short int sectorSize, short int sectorCount)
+static inline int cbw_scsi_write_sector(mass_dev* dev, unsigned int lba, const void* buffer, unsigned short int sectorCount)
 {
 	int ret;
 	static cbw_packet cbw={
@@ -714,7 +715,7 @@ static inline int cbw_scsi_write_sector(mass_dev* dev, unsigned int lba, void* b
 	};
 	XPRINTF("USBHDFSD: cbw_scsi_write_sector\n");
 
-	cbw.dataTransferLength = sectorSize * sectorCount;
+	cbw.dataTransferLength = dev->sectorSize * sectorCount;
 
 	//scsi command packet
 	cbw.comData[2] = (lba & 0xFF000000) >> 24;	//lba 1 (MSB)
@@ -726,7 +727,7 @@ static inline int cbw_scsi_write_sector(mass_dev* dev, unsigned int lba, void* b
 
 	usb_bulk_command(dev, &cbw);
 
-	if ((ret = usb_bulk_transfer(dev->bulkEpO, buffer, sectorSize * sectorCount)) == USB_RC_OK)
+	if ((ret = usb_bulk_transfer(dev->bulkEpO, (void*)buffer, dev->sectorSize * sectorCount)) == USB_RC_OK)
 		ret = usb_bulk_manage_status(dev, -TAG_WRITE);
 	else
 		XPRINTF("USBHDFSD: cbw_scsi_write_sector error from usb_bulk_transfer %d\n", ret);
@@ -755,28 +756,31 @@ static mass_dev* mass_stor_findDevice(int devId, int create)
 }
 
 /* size should be a multiple of sector size */
-int mass_stor_readSector(mass_dev* mass_device, unsigned int sector, unsigned char* buffer, int size) {
+int mass_stor_readSector(mass_dev* mass_device, unsigned int sector, unsigned char* buffer, unsigned short int count) {
 	//assert(size % mass_device->sectorSize == 0);
 	//assert(sector <= mass_device->maxLBA);
-	int ret;
+	int i;
 
-	ret = 1;
-	do {
-		ret = cbw_scsi_read_sector(mass_device, sector, buffer, mass_device->sectorSize, size/mass_device->sectorSize);
-	} while (ret != USB_RC_OK);
-	return (size / mass_device->sectorSize) * mass_device->sectorSize;
+	for(i=0; i<32; i++){
+		if(cbw_scsi_read_sector(mass_device, sector, buffer, count) == USB_RC_OK){
+			return count;
+		}
+	}
+	return -EIO;
 }
 
 /* size should be a multiple of sector size */
-int mass_stor_writeSector(mass_dev* mass_device, unsigned int sector, unsigned char* buffer, int size) {
+int mass_stor_writeSector(mass_dev* mass_device, unsigned int sector, const unsigned char* buffer, unsigned short int count) {
 	//assert(size % mass_device->sectorSize == 0);
 	//assert(sector <= mass_device->maxLBA);
-	int ret;
+	int i;
 
-	do {
-		ret = cbw_scsi_write_sector(mass_device, sector, buffer, mass_device->sectorSize, size/mass_device->sectorSize);
-	} while (ret != USB_RC_OK) ;
-	return (size / mass_device->sectorSize) * mass_device->sectorSize;
+	for(i=0; i<32; i++){
+		if(cbw_scsi_write_sector(mass_device, sector, buffer, count) == USB_RC_OK){
+			return count;
+		}
+	}
+	return -EIO;
 }
 
 /* test that endpoint is bulk endpoint and if so, update device info */

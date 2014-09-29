@@ -60,6 +60,9 @@ release_base: env_release_check
 	@if test ! -d $(PS2SDK) ; then \
 	  $(MKDIR) -p $(PS2SDK) ; \
 	fi
+	rm -fr $(PS2SDK)/iop
+	rm -fr $(PS2SDK)/ee
+	rm -fr $(PS2SDK)/common
 	cp -f README $(PS2SDK)
 	cp -f CHANGELOG $(PS2SDK)
 	cp -f AUTHORS $(PS2SDK)

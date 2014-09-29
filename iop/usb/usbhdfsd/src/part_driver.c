@@ -51,7 +51,8 @@ static USBHD_INLINE void part_getPartitionRecord(part_raw_record* raw, part_reco
 static int part_getPartitionTable(mass_dev* dev, part_table* part)
 {
 	part_raw_record* part_raw;
-	int i, ret;
+	int ret;
+	unsigned int i;
 	unsigned char* sbuf;
 
 	ret = READ_SECTOR(dev, 0, sbuf);  // read sector 0 - Disk MBR or boot sector
@@ -85,7 +86,7 @@ static int part_getPartitionTable(mass_dev* dev, part_table* part)
 int part_connect(mass_dev* dev)
 {
 	part_table partTable;
-	int count = 0, i;
+	unsigned int count = 0, i;
 	XPRINTF("USBHDFSD: part_connect devId %i \n", dev->devId);
 
 	if (part_getPartitionTable(dev, &partTable) < 0)
