@@ -252,10 +252,123 @@ void handleTimerList(void) {
 		memPool.ohciRegs->HcInterruptDisable = OHCI_INT_SF;
 }
 
-int _start(int argc, char **argv) {
-	iop_sema_t sema;
+struct ArgOption{
+	const char *param;
+	int *value, *value2;
+};
 
-	// todo: parse args
+static inline void ParseOptionInput(const struct ArgOption *option, const char *arguments){
+	const char *p;
+	int value, NewValue;
+
+	p=arguments;
+	value=0;
+	while(*p!='\0'){
+		if(*p==',') break;
+
+		if((NewValue=*p-'0')>9){
+			return;
+		}else{
+			value=(((value<<2)+value)<<1)+NewValue;
+			p++;
+		}
+	}
+
+	if((option->value2!=NULL && *p == ',') || (option->value2==NULL && *p != ',')){
+		if(arguments<p++){
+			*option->value = value;
+		}
+
+		if(option->value2 != NULL){
+			value = 0;
+			while(*p != '\0'){
+				if((NewValue=*p-'0')>9){
+					return;
+				}else{
+					value=(((value<<2)+value)<<1)+NewValue;
+					p++;
+				}
+			}
+
+			*option->value2 = value;
+		}
+	}
+}
+
+int _start(int argc, char *argv[]) {
+	static const struct ArgOption SupportedArgs[]={
+		{
+			"dev=",
+			&usbConfig.maxDevices,
+			NULL
+		},
+		{
+			"ed=",
+			&usbConfig.maxEndpoints,
+			NULL
+		},
+		{
+			"gtd=",
+			&usbConfig.maxTransfDesc,
+			NULL
+		},
+		{
+			"itd=",
+			&usbConfig.maxIsoTransfDesc,
+			NULL
+		},
+		{
+			"ioreq=",
+			&usbConfig.maxIoReqs,
+			NULL
+		},
+		{
+			"conf=",
+			&usbConfig.maxStaticDescSize,
+			NULL
+		},
+		{
+			"hub=",
+			&usbConfig.maxHubDevices,
+			NULL
+		},
+		{
+			"port=",
+			&usbConfig.maxPortsPerHub,
+			NULL
+		},
+		{
+			"thpri=",
+			&usbConfig.hcdThreadPrio,
+			&usbConfig.cbThreadPrio
+		},
+		{
+			NULL,
+			NULL,
+			NULL
+		}
+	};
+	iop_sema_t sema;
+	const char *pArgs, *pParam;
+	int i, option;
+
+	for(i=1; i<argc; i++){
+		for(option=0; SupportedArgs[option].param!=NULL; option++){
+			pParam=SupportedArgs[option].param;
+			pArgs=argv[i];
+			while(*pParam!='\0'){
+				if(*pArgs!=*pParam) break;
+
+				pParam++;
+				pArgs++;
+			}
+
+			if(*pParam=='\0'){
+				ParseOptionInput(&SupportedArgs[option], pArgs);
+			}
+		}
+	}
+
 
 	printf(WELCOME_STR);
 
@@ -263,11 +376,10 @@ int _start(int argc, char **argv) {
 
 	if (RegisterLibraryEntries(&_exp_usbd) != 0) {
 		dbg_printf("RegisterLibraryEntries failed\n");
-		// todo: handle correctly...
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 	}
 
-    sema.attr = 1;
+	sema.attr = 1;
 	sema.option = 0;
 	sema.initial = 1;
 	sema.max = 1;
@@ -276,6 +388,6 @@ int _start(int argc, char **argv) {
 	hcdInit();
 
 	dbg_printf("Init done\n");
-    return 0;
+	return MODULE_RESIDENT_END;
 }
 

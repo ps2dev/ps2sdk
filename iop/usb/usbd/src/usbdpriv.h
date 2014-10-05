@@ -37,7 +37,7 @@ typedef struct {
 	int maxPortsPerHub;
 
 	int hcdThreadPrio;
-    int cbThreadPrio;
+	int cbThreadPrio;
 } UsbdConfig;
 
 extern UsbdConfig usbConfig;
