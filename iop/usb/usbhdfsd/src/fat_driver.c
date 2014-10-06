@@ -586,7 +586,9 @@ static int fat_getDirentryStartCluster(fat_driver* fatd, unsigned char* dirName,
 	unsigned int i, dirSector, startSector, dirPos;
 	unsigned char cont;
 	int ret;
+#ifdef DEBUG
 	mass_dev* mass_device = fatd->dev;
+#endif
 
 	cont = 1;
 	XPRINTF("USBHDFSD: getting cluster for dir entry: %s \n", dirName);
@@ -811,7 +813,9 @@ int fat_getNextDirentry(fat_driver* fatd, fat_dir_list* fatdlist, fat_dir* fatDi
 	int i, ret;
 	unsigned int startSector, dirSector, dirPos, dirCluster;
 	unsigned char cont, new_entry;
+#ifdef DEBUG
 	mass_dev* mass_device = fatd->dev;
+#endif
 
 	//the getFirst function was not called
 	if (fatdlist->direntryCluster == 0xFFFFFFFF || fatDir == NULL) {

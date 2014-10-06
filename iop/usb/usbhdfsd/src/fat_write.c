@@ -1123,7 +1123,9 @@ static int fat_fillDirentryInfo(fat_driver* fatd, const unsigned char* lname, un
 	unsigned int dirPos;
 	int seq;
 	int mask_ix, mask_sh;
+#ifdef DEBUG
 	mass_dev* mass_device = fatd->dev;
+#endif
 
 	memset(fatd->dir_used_mask, 0, DIR_MASK_SIZE/8);
 	memset(fatd->seq_mask, 0, SEQ_MASK_SIZE/8);
@@ -1374,7 +1376,9 @@ static int saveDirentry(fat_driver* fatd, unsigned int startCluster,
 	unsigned int dirPos;
 	int entryEndIndex;
 	int writeFlag;
+#ifdef DEBUG
 	mass_dev* mass_device = fatd->dev;
+#endif
 	int part = entrySize - 1;
 	int nameSize;
 	unsigned char chsum;
