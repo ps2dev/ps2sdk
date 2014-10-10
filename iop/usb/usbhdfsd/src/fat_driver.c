@@ -16,6 +16,7 @@
 #include <sysmem.h>
 #endif
 
+#include <usbhdfsd.h>
 #include "usbhd_common.h"
 #include "scache.h"
 #include "fat_driver.h"

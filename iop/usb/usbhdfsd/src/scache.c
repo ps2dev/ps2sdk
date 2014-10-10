@@ -26,6 +26,7 @@
 
 //#define SCACHE_RECORD_STATS	1
 
+#include <usbhdfsd.h>
 #include "usbhd_common.h"
 #include "mass_stor.h"
 

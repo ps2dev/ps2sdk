@@ -24,6 +24,7 @@
 #include <sysclib.h>
 #endif
 
+#include <usbhdfsd.h>
 #include "usbhd_common.h"
 #include "fat_driver.h"
 #include "fat.h"

@@ -16,7 +16,6 @@
 #include <stdio.h>
 #include <errno.h>
 #include <sys/stat.h>
-#include <io_common.h>
 #include <ioman.h>
 
 #ifdef WIN32
@@ -31,7 +30,7 @@
 #include <sysmem.h>
 #endif
 
-#include "usbhdfsd.h"
+#include <usbhdfsd.h>
 #include "usbhd_common.h"
 #include "fat_driver.h"
 #include "fat_write.h"
@@ -701,7 +700,7 @@ int fs_ioctl(iop_file_t *fd, u32 request, void *data)
 	if (fatd == NULL) { _fs_unlock(); return -ENODEV; }
 
 	switch (request) {
-		case USBHDFSD_IOCTL_RENAME:
+		case USBMASS_IOCTL_RENAME:
 			ret = fat_renameFile(fatd, &dirent->fatdir, data);	//No need to re-cast since this inner structure is a common one.
 			FLUSH_SECTORS(fatd);
 			break;
