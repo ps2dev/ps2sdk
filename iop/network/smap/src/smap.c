@@ -347,7 +347,10 @@ static int HandleTxIntr(struct SmapDriverData *SmapDrivPrivData){
 static void CheckLinkStatus(struct SmapDriverData *SmapDrivPrivData){
 	if(!(_smap_read_phy(SmapDrivPrivData->emac3_regbase, SMAP_DsPHYTER_BMSR)&SMAP_PHY_BMSR_LINK)){
 		SmapDrivPrivData->LinkStatus=0;
-		InitPHY(SmapDrivPrivData);
+		NetManToggleNetIFLinkState(SmapDrivPrivData->NetIFID, NETMAN_NETIF_ETH_LINK_STATE_DOWN);
+		if(InitPHY(SmapDrivPrivData)==0){
+			NetManToggleNetIFLinkState(SmapDrivPrivData->NetIFID, NETMAN_NETIF_ETH_LINK_STATE_UP);
+		}
 	}
 }
 
@@ -384,6 +387,8 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData){
 				SMAP_EMAC3_SET(SMAP_R_EMAC3_MODE0, SMAP_E3_TXMAC_ENABLE|SMAP_E3_RXMAC_ENABLE);
 				DelayThread(10000);
 				SmapDrivPrivData->SmapIsInitialized=1;
+
+				NetManToggleNetIFLinkState(SmapDrivPrivData->NetIFID, NETMAN_NETIF_ETH_LINK_STATE_UP);
 
 				if(!SmapDrivPrivData->EnableLinkCheckTimer){
 					USec2SysClock(1000000, &SmapDrivPrivData->LinkCheckTimer);
@@ -436,8 +441,6 @@ static int Dev9TXEndIntrHandler(int flag){
 	return 0;
 }
 
-/* Note: The GP register does not need to be loaded and restored in these two functions as DEV9 does not use the GP register.
-	But is it a good idea? Sony doesn't bother with the GP register within these two functions, but what if DEV9 gets modified to use the GP register? */
 static void Dev9PreDmaCbHandler(int bcr, int dir){
 	volatile u8 *smap_regbase;
 	unsigned short int SliceCount;
@@ -515,6 +518,49 @@ static inline int SMAPGetLinkMode(void){
 	return result;
 }
 
+static inline int SMAPSetLinkMode(int mode){
+	int result;
+
+	if(mode >= 0){
+		EnableAutoNegotiation = 0;
+
+		switch(mode){
+			case NETMAN_NETIF_ETH_LINK_MODE_10M_HDX:
+				SmapConfiguration = 0x020;
+				result = 0;
+				break;
+			case NETMAN_NETIF_ETH_LINK_MODE_10M_FDX:
+				SmapConfiguration = 0x040;
+				result = 0;
+				break;
+			case NETMAN_NETIF_ETH_LINK_MODE_100M_HDX:
+				SmapConfiguration = 0x080;
+				result = 0;
+				break;
+			case NETMAN_NETIF_ETH_LINK_MODE_100M_FDX:
+				SmapConfiguration = 0x0100;
+				result = 0;
+				break;
+			default:
+				result = -1;
+		}
+
+	}else{
+		SmapConfiguration = 0x5E0;
+		EnableAutoNegotiation = 1;
+		result = 0;
+	}
+
+	if(result == 0){
+		SetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_STOP);
+		SmapDriverData.NetDevStopFlag=1;
+		while(SmapDriverData.SmapIsInitialized) DelayThread(2000);
+		SetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_START);
+	}
+
+	return result;
+}
+
 static inline int SMAPGetLinkStatus(void){
 	return(SmapDriverData.LinkStatus?NETMAN_NETIF_ETH_LINK_STATE_UP:NETMAN_NETIF_ETH_LINK_STATE_DOWN);
 }
@@ -563,6 +609,9 @@ int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, void *out
 			break;
 		case NETMAN_NETIF_IOCTL_ETH_GET_TX_EUNDERRUN_CNT:
 			result=SmapDriverData.RuntimeStats.TxFrameUnderrunCount;
+			break;
+		case NETMAN_NETIF_IOCTL_ETH_SET_LINK_MODE:
+			result=SMAPSetLinkMode(*(int*)args);
 			break;
 		default:
 			result=-1;
@@ -627,7 +676,7 @@ static inline int SetupNetDev(void){
 	StartThread(SmapDriverData.IntrHandlerThreadID, &SmapDriverData);
 	StartThread(SmapDriverData.TxHandlerThreadID, &SmapDriverData);
 
-	NetManRegisterNetIF(&device);
+	SmapDriverData.NetIFID=NetManRegisterNetIF(&device);
 
 	return 0;
 }
@@ -845,11 +894,17 @@ int smap_init(int argc, char *argv[]){
 int SMAPGetMACAddress(unsigned char *buffer){
 	unsigned int mac_address_lo, mac_address_hi;
 	volatile u8 *emac3_regbase;
+	int OldState;
 
 	emac3_regbase=SmapDriverData.emac3_regbase;
 
+	CpuSuspendIntr(&OldState);
+
 	mac_address_hi=SMAP_EMAC3_GET(SMAP_R_EMAC3_ADDR_HI);
 	mac_address_lo=SMAP_EMAC3_GET(SMAP_R_EMAC3_ADDR_LO);
+
+	CpuResumeIntr(OldState);
+
 	buffer[0]=mac_address_hi>>8;
 	buffer[1]=mac_address_hi;
 	buffer[2]=mac_address_lo>>24;

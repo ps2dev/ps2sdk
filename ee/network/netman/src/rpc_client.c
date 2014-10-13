@@ -2,6 +2,7 @@
 #include <kernel.h>
 #include <sifrpc.h>
 #include <string.h>
+#include <netman.h>
 #include <netman_rpc.h>
 
 #include "rpc_client.h"
@@ -33,12 +34,8 @@ static void TxThread(void *arg);
 
 static unsigned char IsInitialized=0;
 
-/* static void RpcEndXferAlignmentFunc(void *AlignmentData){
-	memcpy(((struct AlignmentData *)UNCACHED_SEG(AlignmentData))->buffer1Address, ((struct AlignmentData *)UNCACHED_SEG(AlignmentData))->buffer1, ((struct AlignmentData *)UNCACHED_SEG(AlignmentData))->buffer1_len);
-	memcpy(((struct AlignmentData *)UNCACHED_SEG(AlignmentData))->buffer2Address, ((struct AlignmentData *)UNCACHED_SEG(AlignmentData))->buffer2, ((struct AlignmentData *)UNCACHED_SEG(AlignmentData))->buffer2_len);
-} */
-
 int NetManInitRPCClient(void){
+	static const char NetManID[]="NetMan";
 	int result;
 	ee_sema_t SemaData;
 	ee_thread_t ThreadData;
@@ -46,7 +43,8 @@ int NetManInitRPCClient(void){
 	if(!IsInitialized){
 		SemaData.max_count=1;
 		SemaData.init_count=1;
-		SemaData.option=SemaData.attr=0;
+		SemaData.option=(unsigned int)NetManID;
+		SemaData.attr=0;
 		NetManIOSemaID=CreateSema(&SemaData);
 
 		TxActiveBankID=0;
@@ -56,12 +54,14 @@ int NetManInitRPCClient(void){
 
 		SemaData.max_count=1;
 		SemaData.init_count=1;
-		SemaData.option=SemaData.attr=0;
+		SemaData.option=(unsigned int)NetManID;
+		SemaData.attr=0;
 		TxBankAccessSema=CreateSema(&SemaData);
 
 		SemaData.max_count=1;
 		SemaData.init_count=1;
-		SemaData.option=SemaData.attr=0;
+		SemaData.option=(unsigned int)NetManID;
+		SemaData.attr=0;
 		NetManTxSemaID=CreateSema(&SemaData);
 
 		ThreadData.func=&TxThread;
@@ -80,7 +80,6 @@ int NetManInitRPCClient(void){
 			nopdelay();
 		}
 
-//		((struct NetManInit*)TransmitBuffer)->AlignmentData=&AlignmentData;
 		if((result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_INIT, 0, TransmitBuffer, sizeof(struct NetManInit), ReceiveBuffer, sizeof(struct NetManInitResult), NULL, NULL))>=0){
 			result=((struct NetManInitResult*)ReceiveBuffer)->result;
 			TxFrameTagBuffer=((struct NetManInitResult*)ReceiveBuffer)->FrameTagBuffer;
@@ -107,27 +106,17 @@ void NetManDeinitRPCClient(void){
 
 int NetManRpcIoctl(unsigned int command, void *args, unsigned int args_len, void *output, unsigned int length){
 	int result;
-/*	void *AlignedOutput;
-	int AlignedSize; */
+	struct NetManIoctl *IoctlArgs=(struct NetManIoctl*)TransmitBuffer;
 
 	WaitSema(NetManIOSemaID);
 
-	((struct NetManIoctl*)UNCACHED_SEG(TransmitBuffer))->command=command;
-	memcpy(((struct NetManIoctl*)UNCACHED_SEG(TransmitBuffer))->args, args, args_len);
-	((struct NetManIoctl*)UNCACHED_SEG(TransmitBuffer))->args_len=args_len;
-	((struct NetManIoctl*)UNCACHED_SEG(TransmitBuffer))->output=output;
-	((struct NetManIoctl*)UNCACHED_SEG(TransmitBuffer))->length=length;
+	IoctlArgs->command=command;
+	memcpy(IoctlArgs->args, args, args_len);
+	IoctlArgs->args_len=args_len;
+	IoctlArgs->output=output;
+	IoctlArgs->length=length;
 
-/*	!!! This entire system is not working. And I don't know why.
-	AlignedOutput=(void*)(((unsigned int)output+0x3F)&~0x3F);
-	AlignedSize=length-((unsigned int)AlignedOutput-(unsigned int)output);
-	AlignedSize-=(AlignedSize&0x3F);
-
-	if(AlignedSize>0){
-		SifWriteBackDCache(AlignedOutput, AlignedSize);
-	} */
-
-	if((result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_IOCTL, SIF_RPC_M_NOWBDC, TransmitBuffer, sizeof(struct NetManIoctl), ReceiveBuffer, sizeof(struct NetManIoctlResult), NULL, NULL))>=0){
+	if((result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_IOCTL, 0, TransmitBuffer, sizeof(struct NetManIoctl), ReceiveBuffer, sizeof(struct NetManIoctlResult), NULL, NULL))>=0){
 		result=((struct NetManIoctlResult*)UNCACHED_SEG(ReceiveBuffer))->result;
 		memcpy(output, ((struct NetManIoctlResult*)UNCACHED_SEG(ReceiveBuffer))->output, length);
 	}
@@ -135,6 +124,10 @@ int NetManRpcIoctl(unsigned int command, void *args, unsigned int args_len, void
 	SignalSema(NetManIOSemaID);
 
 	return result;
+}
+
+int NetManNetIFSetLinkMode(int mode){
+	return NetManRpcIoctl(NETMAN_NETIF_IOCTL_ETH_SET_LINK_MODE, &mode, sizeof(mode), NULL, 0);
 }
 
 static volatile int NetmanTxWaitingThread=-1;

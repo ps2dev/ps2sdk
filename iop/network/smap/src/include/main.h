@@ -38,6 +38,7 @@ struct SmapDriverData{
 	int TxEndEventFlag;
 	int IntrHandlerThreadID;
 	int TxHandlerThreadID;
+	int NetIFID;
 	unsigned char SmapIsInitialized;
 	unsigned char NetDevStopFlag;
 	unsigned char EnableLinkCheckTimer;

@@ -235,11 +235,11 @@ int _exit(int argc, char** argv)
 static struct netif NIF;
 
 static void LinkStateUp(void){
-
+	tcpip_callback((void*)&netif_set_link_up, &NIF);
 }
 
 static void LinkStateDown(void){
-
+	tcpip_callback((void*)&netif_set_link_down, &NIF);
 }
 
 #define LWIP_STACK_MAX_RX_PBUFS	16

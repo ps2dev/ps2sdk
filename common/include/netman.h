@@ -31,7 +31,8 @@ enum NETMAN_NETIF_ETH_LINK_STATE{
 
 enum NETMAN_NETIF_IOCTL_CODES{
 	// Ethernet I/F-only IOCTL codes
-	NETMAN_NETIF_IOCTL_ETH_GET_MAC	= 0x1000,
+	NETMAN_NETIF_IOCTL_ETH_GET_MAC	= 0x1000,	//Output = 6 bytes of MAC address.
+	//Function codes with no input and no output; the result is in the return value.
 	NETMAN_NETIF_IOCTL_ETH_GET_LINK_MODE,
 	NETMAN_NETIF_IOCTL_ETH_GET_RX_EOVERRUN_CNT,
 	NETMAN_NETIF_IOCTL_ETH_GET_RX_EBADLEN_CNT,
@@ -42,6 +43,8 @@ enum NETMAN_NETIF_IOCTL_CODES{
 	NETMAN_NETIF_IOCTL_ETH_GET_TX_ECOLL_CNT,
 	NETMAN_NETIF_IOCTL_ETH_GET_TX_EUNDERRUN_CNT,
 
+	NETMAN_NETIF_IOCTL_ETH_SET_LINK_MODE,	//Input = struct NetManIFLinkModeParams, or use NetManNetIFSetLinkMode() that will set the link mode and speed for you.
+
 	// Dial-up I/F-only IOCTL codes
 	// 0x2000
 
@@ -51,14 +54,22 @@ enum NETMAN_NETIF_IOCTL_CODES{
 	NETMAN_NETIF_IOCTL_GET_RX_DROPPED_COUNT,
 };
 
+//*** Higher-level services, for the running user program ***
+//Network Interface (IF) control.
+int NetManNetIFSetLinkMode(int mode);	//Either -1 for auto-negotiation or a NETMAN_NETIF_ETH_LINK_MODE value for manual control.
+
+//*** System functions for either the Network IF driver or the network protocol stack ***
+//For the network protocol stack to initialize/deinitialize NETMAN.
 int NetManInit(const struct NetManNetProtStack *stack);
 void NetManDeinit(void);
 
-/* Network protocol stack management functions. Used by the user's program. */
-int NetManNetIFSendPacket(const void *packet, unsigned int length);
+/* Common network Interface (IF) management functions. Used by the user program and the protocol stack. */
 int NetManIoctl(unsigned int command, void *args, unsigned int args_len, void *output, unsigned int length);
 
-/* Network protocol stack management functions. Used by the Network InterFace (IF). */
+/* Network Interface (IF) management functions. Used by the protocol stack. */
+int NetManNetIFSendPacket(const void *packet, unsigned int length);
+
+/* Network protocol stack management functions. Used by the Network InterFace (IF) driver. */
 struct NetManPacketBuffer *NetManNetProtStackAllocRxPacket(unsigned int length);
 void NetManNetProtStackFreeRxPacket(struct NetManPacketBuffer *packet);
 int NetManNetProtStackEnQRxPacket(struct NetManPacketBuffer *packet);
@@ -82,7 +93,7 @@ struct NetManNetIF{
 
 #define NETMAN_MAX_NETIF_COUNT	4
 
-/* Network InterFace (IF) management functions. Used by the network protocol stack. */
+/* Network InterFace (IF) management functions. Used by the network InterFace (IF). */
 int NetManRegisterNetIF(const struct NetManNetIF *NetIF);
 void NetManUnregisterNetIF(const char *name);
 void NetManToggleNetIFLinkState(int NetIFID, unsigned char state);

@@ -97,6 +97,10 @@ int NetManIoctl(unsigned int command, void *args, unsigned int args_len, void *o
 	return result;
 }
 
+int NetManNetIFSetLinkMode(int mode){
+	return NetManIoctl(NETMAN_NETIF_IOCTL_ETH_SET_LINK_MODE, &mode, sizeof(mode), NULL, 0);
+}
+
 struct NetManPacketBuffer *NetManNetProtStackAllocRxPacket(unsigned int length){
 	return IsInitialized?MainNetProtStack.AllocRxPacket(length):NULL;
 }

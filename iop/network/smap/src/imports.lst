@@ -51,6 +51,7 @@ I_NetManNetProtStackEnQPacket
 I_NetManNetProtStackFlushInputQueue
 I_NetManRegisterNetIF
 I_NetManUnregisterNetIF
+I_NetManToggleNetIFLinkState
 netman_IMPORTS_end
 
 thsemap_IMPORTS_start

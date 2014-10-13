@@ -1,5 +1,3 @@
-#include <irx.h>
-
 #ifndef _USBHDFSD_H
 #define _USBHDFSD_H
 
@@ -18,13 +16,6 @@ typedef struct UsbMassDeviceInfo{
 	unsigned int MaxLBA;
 } UsbMassDeviceInfo_t;
 
-//Exported functions
-#define usbmass_IMPORTS_start DECLARE_IMPORT_TABLE(usbmass, 1, 1)
-#define usbmass_IMPORTS_end END_IMPORT_TABLE
-
-int UsbMassGetDeviceInfo(int device, UsbMassDeviceInfo_t *info);
-#define I_UsbMassGetDeviceInfo DECLARE_IMPORT(5, UsbMassGetDeviceInfo)
-
 enum USBMASS_DEV_EV{
 	USBMASS_DEV_EV_CONN	= 0,
 	USBMASS_DEV_EV_DISCONN
@@ -32,7 +23,18 @@ enum USBMASS_DEV_EV{
 
 typedef void (*usbmass_cb_t)(int cause);
 
+//Exported functions
+int UsbMassGetDeviceInfo(int device, UsbMassDeviceInfo_t *info);
 int UsbMassRegisterCallback(int device, usbmass_cb_t callback);
+
+#ifdef _IOP
+#include <irx.h>
+
+#define usbmass_IMPORTS_start DECLARE_IMPORT_TABLE(usbmass, 1, 1)
+#define usbmass_IMPORTS_end END_IMPORT_TABLE
+
+#define I_UsbMassGetDeviceInfo DECLARE_IMPORT(5, UsbMassGetDeviceInfo)
 #define I_UsbMassRegisterCallback DECLARE_IMPORT(5, UsbMassRegisterCallback)
+#endif
 
 #endif //_USBHDFSD_H

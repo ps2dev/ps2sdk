@@ -131,11 +131,11 @@ static err_t SMapLowLevelOutput(struct netif* pNetIF, struct pbuf* pOutput){
 }
 
 static void LinkStateUp(void){
-
+	tcpip_callback((void*)&netif_set_link_up, &NIF);
 }
 
 static void LinkStateDown(void){
-
+	tcpip_callback((void*)&netif_set_link_down, &NIF);
 }
 
 #define LWIP_STACK_MAX_RX_PBUFS	16
