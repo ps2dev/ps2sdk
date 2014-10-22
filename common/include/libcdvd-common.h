@@ -11,8 +11,8 @@
 # Common definitions for libcdvd on the EE and IOP
 */
 
-#ifndef _LIBCDVD_H_
-#define _LIBCDVD_H_
+#ifndef _LIBCDVD_COMMON_H_
+#define _LIBCDVD_COMMON_H_
 
 /* File open modes */
 #define SCE_CdSTREAM	0x40000000  /* Open file for streaming */
@@ -173,7 +173,7 @@ typedef struct {
 // max number of toc entries for sceCdGetToc()
 #define CdlMAXTOC	100
 
-enum SCECdvdCallbackReasons{
+enum SCECdvdCallbackReason{
 	SCECdFuncRead	= 1,
 	SCECdFuncReadCDDA,
 	SCECdFuncGetToc,
@@ -187,7 +187,7 @@ enum SCECdvdCallbackReasons{
 // sceCd callback function typedef for sceCdCallback()
 typedef void (*sceCdCBFunc)(int reason);
 
-enum SCECdvdInitModes{
+enum SCECdvdInitMode{
 	SCECdINIT	= 0x00,	// Initializes library and waits until commands can be sent.
 	SCECdINoD,		// Initialize only the library.
 	SCECdEXIT	= 0x05	// Deinitialize library.
@@ -199,7 +199,7 @@ enum SCECdvdInitModes{
 #define CdlMAXLEVEL	8	// Maximum levels of directories.
 
 // For streaming operations (Use with sceCdStRead())
-enum SCECdvdStreamModes{
+enum SCECdvdStreamMode{
 	STMNBLK	= 0,	// Stream without blocking.
 	STMBLK		// Stream, but block.
 };
@@ -263,35 +263,6 @@ int sceCdStop(void);
 //			0 if error
 int sceCdPause(void);
 
-// send an n-command by function number
-// 
-// arguments:	command number
-//			input buffer  (can be null)
-//			size of input buffer  (0 - 16 byte)
-//			output buffer (can be null)
-//			size of output buffer (0 - 16 bytes)
-// returns:	1 if successful
-//			0 if error
-int sceCdApplyNCmd(u8 cmdNum, const void* inBuff, u16 inBuffSize, void* outBuff, u16 outBuffSize);
-
-// read data to iop memory
-// 
-// arguments:	sector location to read from
-//			number of sectors to read
-//			buffer to read to (in iop memory)
-//			read mode
-// returns:	1 if successful
-//			0 if error
-int sceCdReadIOPMem(u32 lbn, u32 sectors, void *buf, sceCdRMode *mode);
-
-// wait for disc to finish all n-commands
-// (shouldnt really need to call this yourself)
-// 
-// returns:	6 if busy
-//			2 if ready
-//			0 if error
-int sceCdNCmdDiskReady(void);
-
 // do a 'chain' of reads with one command
 // last chain value must be all 0xFFFFFFFF
 // (max of 64 reads can be set at once)
@@ -343,17 +314,6 @@ int sceCdGetError(void);
 //			0 if error
 int sceCdTrayReq(int param, u32 *traychk);
 
-// send an s-command by function number
-// 
-// arguments:	command number
-//			input buffer  (can be null)
-//			size of input buffer  (0 - 16 byte)
-//			output buffer (can be null)
-//			size of output buffer (0 - 16 bytes)
-// returns:	1 if successful
-//			0 if error
-int sceCdApplySCmd(u8 cmdNum, const void* inBuff, u16 inBuffSize, void *outBuff, u16 outBuffSize);
-
 // gets the state of the drive
 // 
 // returns:	status (SCECdvdDriveStates)
@@ -382,7 +342,7 @@ int sceCdCancelPOffRdy(u32* result);
 //			result
 // returns:	1 if successful
 //			0 if error
-int sceCdBlueLedCtrl(u8 control, u32 *result);
+int sceCdBlueLEDCtl(u8 control, u32 *result);
 
 // power off
 // 
@@ -571,14 +531,11 @@ int sceCdDecSet(unsigned char arg1, unsigned char arg2, unsigned char shift);
 // returns:	1 on success, 0 on failure.
 int sceCdReadKey(unsigned char arg1, unsigned char arg2, unsigned int command, unsigned char *key);
 
-// Opens a specified configuration block, within NVRAM. Each block is 15 bytes long.
+// Sets the "HD mode", whatever that means.
 //
-// arguments:	Block number.
-//		Mode (0 = read, 1 = write).
-//		Number of blocks.
-//		Result code.
+// arguments:	mode
 // returns:	1 on success, 0 on failure.
-int sceCdOpenConfig(int block, int mode, int NumBlocks, u32 *status);
+int sceCdSetHDMode(u32 mode);
 
 // Closes the configuration block.
 //
@@ -673,7 +630,7 @@ int sceCdMV(u8 *buffer, u32 *status);
 //				romname[0]	- ROM major version number (In decimal).
 //				romname[1]	- ROM minor version number (In decimal).
 //				romname[2]	- ROM region.
-//				romname[3]	- Console type (E.g. C, X or T).
+//				romname[3]	- Console type (E.g. C, D or T).
 // returns:	1 on success, 0 on failure.
 int sceCdBootCertify(const u8 *romname);
 
@@ -694,8 +651,16 @@ int sceCdRM(char *buffer, u32 *status);
 // returns:	1 on success, 0 on failure.
 int sceCdWM(const char *buffer, u32 *status);
 
+// Disables (Forbids) the READ N-command, so that disc sectors cannot be read.
+// Support for the READ N-command is re-enabled when the disc is replaced.
+// SUPPORTED IN XCDVDMAN/XCDVDFSV ONLY
+//
+// arguments:	Result code.
+// returns:	1 on success, 0 on failure.
+int sceCdForbidRead(u32 *result);
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _LIBCDVD_H_
+#endif // _LIBCDVD_COMMON_H_

@@ -55,7 +55,9 @@ enum CD_SCMD_CMDS {
 	CD_SCMD_AUTO_ADJUST_CTRL,
 	CD_SCMD_READ_MODEL_NAME,
 	CD_SCMD_WRITE_MODEL_NAME,
-	CD_SCMD_BOOT_CERTIFY	=	0x1E,
+	CD_SCMD_FORBID_READ,
+	CD_SCMD_SPIN_CTRL,
+	CD_SCMD_BOOT_CERTIFY,
 	CD_SCMD_CANCELPOWEROFF,
 	CD_SCMD_BLUELEDCTRL,
 	CD_SCMD_POWEROFF,
@@ -411,6 +413,40 @@ int _CdCheckSCmd(int cur_cmd)
 }
 #endif
 
+#ifdef F_sceCdForbidRead
+int sceCdForbidRead(u32 *status)
+{
+	int result;
+
+	if(_CdCheckSCmd(CD_SCMD_FORBID_READ)==0) return 0;
+	if(SifCallRpc(&clientSCmd, CD_SCMD_FORBID_READ, 0, NULL, 0, sCmdRecvBuff, 8, NULL, NULL)>=0){
+		*status = ((u32 *)UNCACHED_SEG(sCmdRecvBuff))[1];
+		result = ((int *)UNCACHED_SEG(sCmdRecvBuff))[0];
+	}else{
+		result = 0;
+	}
+	SignalSema(sCmdSemaId);
+	return result;
+}
+#endif
+
+#ifdef F_sceCdSpinCtrlEE
+int sceCdSpinCtrlEE(u32 speed)
+{
+	int result;
+
+	if(_CdCheckSCmd(CD_SCMD_SPIN_CTRL)==0) return 0;
+	memcpy(sCmdSendBuff, &speed, 4);
+	if(SifCallRpc(&clientSCmd, CD_SCMD_SPIN_CTRL, 0, sCmdSendBuff, 4, sCmdRecvBuff, 8, NULL, NULL)>=0){
+		result = ((int *)UNCACHED_SEG(sCmdRecvBuff))[0];
+	}else{
+		result = 0;
+	}
+	SignalSema(sCmdSemaId);
+	return result;
+}
+#endif
+
 #ifdef F_sceCdBootCertify
 int sceCdBootCertify(const u8 *romname)
 {
@@ -507,6 +543,23 @@ int sceCdDecSet(unsigned char arg1, unsigned char arg2, unsigned char shift)
 		result = 0;
 	}
 
+	SignalSema(sCmdSemaId);
+	return result;
+}
+#endif
+
+#ifdef F_sceCdSetHDMode
+int sceCdSetHDMode(u32 mode)
+{
+	int result;
+
+	if(_CdCheckSCmd(CD_SCMD_SET_HD_MODE)==0) return 0;
+	memcpy(sCmdSendBuff, &mode, 4);
+	if(SifCallRpc(&clientSCmd, CD_SCMD_SET_HD_MODE, 0, sCmdSendBuff, 4, sCmdRecvBuff, 4, NULL, NULL)>=0){
+		result=*(int*)UNCACHED_SEG(sCmdRecvBuff);
+	}else{
+		result=0;
+	}
 	SignalSema(sCmdSemaId);
 	return result;
 }

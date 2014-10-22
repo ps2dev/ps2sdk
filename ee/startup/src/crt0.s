@@ -61,6 +61,7 @@ zerobss:
    nop
 2:
 
+setupthread:
    # setup current thread
 
    la   $4, _gp
@@ -86,6 +87,7 @@ zerobss:
    addiu   $3, $0, 100
    syscall         # FlushCache(0)
 
+parseargs:
    # call ps2sdk argument parsing (weak)
 
    la   $16, _args
@@ -97,6 +99,7 @@ zerobss:
    addiu   $5, $16, 4
 1:
 
+libc_init:
    # initialize ps2sdk libc (weak)
 
    la   $8, _ps2sdk_libc_init_weak
@@ -142,6 +145,8 @@ ctors:
    .ent   _exit
    .text
 _exit:
+
+dtors:
    # call global destructors (weak)
 
    la   $8, _fini
@@ -151,6 +156,7 @@ _exit:
    nop
 1:
 
+libc_uninit:
    # uninitialize ps2sdk libc (weak)
 
    la   $8, _ps2sdk_libc_deinit_weak

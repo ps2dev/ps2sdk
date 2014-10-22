@@ -17,11 +17,10 @@
 #include <types.h>
 #include <irx.h>
 
-#include <libcdvd.h>
+#include <libcdvd-common.h>
 
 //IOP-only libcdvd function prototypes.
 int sceCdCheckCmd(void);
-int sceCdSetHDMode(int arg);
 int sceCdNop(void);
 void *sceGetFsvRbuf(void);
 int sceCdstm0Cb(void (*p)(int));
@@ -32,7 +31,41 @@ int sceCdSC(int code, int *param);
 	while sceCdRC continued having its original behaviour of not changing the data.	*/
 int sceCdRC(sceCdCLOCK *clock);
 int sceCdRead0(u32 lsn, u32 sectors, void *buffer, sceCdRMode *mode, int csec, void *callback);
-int sceCdSpinCtrlIOP(int speed);
+
+// send an s-command by function number
+// 
+// arguments:	command number
+//			input buffer  (can be null)
+//			size of input buffer  (0 - 16 bytes)
+//			output buffer (can be null)
+// returns:	1 if successful
+//		0 if error
+int sceCdApplySCmd(u8 cmdNum, const void* inBuff, u16 inBuffSize, void *outBuff);
+
+// send an n-command by function number
+// 
+// arguments:	command number
+//			input buffer  (can be null)
+//			size of input buffer  (0 - 16 bytes)
+//			output buffer (can be null)
+// returns:	1 if successful
+//		0 if error
+int sceCdApplyNCmd(u8 cmdNum, const void* inBuff, u16 inBuffSize, void* outBuff);
+
+// Opens a specified configuration block, within NVRAM. Each block is 15 bytes long.
+//
+// arguments:	Block number.
+//		Mode (0 = read, 1 = write).
+//		Number of blocks.
+// returns:	1 on success, 0 on failure.
+int sceCdOpenConfig(int block, int mode, int NumBlocks);
+
+// Controls spindle speed? Not sure what it really does.
+// SUPPORTED IN XCDVDMAN ONLY
+//
+// arguments:	Speed mode.
+// returns:	1 on success, 0 on failure.
+int sceCdSpinCtrlIOP(u32 speed);
 
 //DNAS functions
 int sceCdReadDiskID(unsigned int *id);

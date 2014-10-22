@@ -32,7 +32,7 @@ NCMD_OBJS := $(NCMD_OBJS:%=$(EE_OBJS_DIR)%)
 SCMD_OBJS =	_scmd_internals.o sceCdReadClock.o sceCdWriteClock.o sceCdGetDiskType.o \
 		sceCdGetError.o sceCdTrayReq.o sceCdApplySCmd.o sceCdStatus.o sceCdBreak.o \
 		_CdCheckSCmd.o sceCdCtrlADout.o sceCdMV.o sceCdReadSUBQ.o \
-		sceCdForbidDVDP.o sceCdAutoAdjustCtrl.o sceCdDecSet.o sceCdOpenConfig.o sceCdCloseConfig.o \
+		sceCdForbidDVDP.o sceCdAutoAdjustCtrl.o sceCdDecSet.o sceCdSetHDMode.o sceCdOpenConfig.o sceCdCloseConfig.o \
 		sceCdReadConfig.o sceCdWriteConfig.o \
 		sceCdReadNVM.o sceCdWriteNVM.o sceCdRI.o sceCdWI.o sceCdReadConsoleID.o sceCdWriteConsoleID.o \
 		_CdSyncS.o
@@ -40,12 +40,8 @@ SCMD_OBJS := $(SCMD_OBJS:%=$(EE_OBJS_DIR)%)
 
 EE_LIB := $(EE_LIB:%=$(EE_LIB_DIR)%)
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%) $(EE_OBJS_DIR)erl-support.c
-EE_INCS += -I$(PS2SDKSRC)/common/include
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
-
-.c.o :
-	$(EE_CC) $(EE_CFLAGS) $(EE_INC) -c $< -o obj/$@
 
 $(LIBCDVD_OBJS): $(EE_SRC_DIR)libcdvd.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@

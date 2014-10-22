@@ -8,7 +8,7 @@
 #
 # $Id$
 
-EE_INCS := $(EE_INCS) -I$(PS2SDKSRC)/ee/kernel/include -I$(PS2SDKSRC)/common/include -I$(PS2SDKSRC)/ee/libc/include -I$(PS2SDKSRC)/ee/erl/include -Iinclude
+EE_INCS := $(EE_INCS) -I$(PS2SDKSRC)/ee/kernel/include -I$(PS2SDKSRC)/common/include -I$(PS2SDKSRC)/ee/libc/include -I$(PS2SDKSRC)/ee/erl/include -I$(EE_INC_DIR)
 
 # C compiler flags
 EE_CFLAGS := -D_EE -G0 -O2 -Wall $(EE_CFLAGS)
@@ -30,13 +30,13 @@ EE_CXX_COMPILE = $(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS)
 
 
 $(EE_OBJS_DIR)%.o : $(EE_SRC_DIR)%.c
-	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
+	$(EE_C_COMPILE) -c $< -o $@
 
 $(EE_OBJS_DIR)%.o : $(EE_SRC_DIR)%.cpp
-	$(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS) -c $< -o $@
+	$(EE_CXX_COMPILE) -c $< -o $@
 
 $(EE_OBJS_DIR)%.o : $(EE_SRC_DIR)%.S
-	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
+	$(EE_C_COMPILE) -c $< -o $@
 
 $(EE_OBJS_DIR)%.o : $(EE_SRC_DIR)%.s
 	$(EE_AS) $(EE_ASFLAGS) $< -o $@

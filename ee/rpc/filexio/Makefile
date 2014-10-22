@@ -19,7 +19,6 @@ EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
 EE_LIB = $(EE_LIB_DIR)libfileXio.a
 
-#EE_CFLAGS += -I$(PS2DRV)/ee/include -I$(PS2DRV)/common/include
 EE_LDFLAGS += -s
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
