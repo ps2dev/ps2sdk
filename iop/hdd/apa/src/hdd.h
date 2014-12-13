@@ -17,7 +17,7 @@
 #include <types.h>
 #include <defs.h>
 #include <irx.h>
-#include <atad.h>
+#include "atad.h"
 #include <dev9.h>
 #include <loadcore.h>
 #include <poweroff.h>
@@ -32,8 +32,6 @@
 #include <thsemap.h>
 #include <intrman.h>
 #include <cdvdman.h>
-
-#include "helper.h"// for old atad, dev9 names need..
 
 #define DEBUG_LEVEL1
 //#define DEBUG_LEVEL2
@@ -159,12 +157,10 @@ typedef struct
 	u16			nsub;
 	u16			type;
 	char		id[APA_IDMAX];
-	u32			start;			// <--- TODO move to subs ..., has not been moved to risk e of fucking it up ;)
-	u32			length;
-	struct {					// Sub-partition data
+	struct {					// Partition data (0 = main partition, 1+ = sub-partition)
 		u32		start;			// Sector address
 		u32		length;			// Sector count
-	} subs[APA_MAXSUB];
+	} parts[APA_MAXSUB+1];
 } hdd_file_slot_t;
 
 

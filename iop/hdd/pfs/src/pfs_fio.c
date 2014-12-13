@@ -197,7 +197,7 @@ int	openFile(pfs_mount_t *pfsMount, pfs_file_slot_t *freeSlot, const char *filen
 					cached->flags |= CACHE_FLAG_DIRTY;
 					cacheAdd(cached);
 				}
-				if ((result!=result2))
+				if (result2 == 0)
 				{
 					fileInode->u.inode->size = 0;
 					fileInode->u.inode->attr &= ~FIO_ATTR_CLOSED; //~0x80==0xFF7F
@@ -1171,7 +1171,7 @@ int pfsMount(iop_file_t *f, const char *fsname, const char *devname, int flag, v
 
 	WaitSema(pfsFioSema);
 
-	fd = open(devname, (flag & O_RDONLY) ? O_RDONLY : O_RDWR, 0644); // ps2hdd.irx fd
+	fd = open(devname, (flag & FIO_MT_RDONLY) ? O_RDONLY : O_RDWR, 0644); // ps2hdd.irx fd
 	if(fd < 0)
 		rv = fd;
 	else {

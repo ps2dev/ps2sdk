@@ -7,7 +7,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: irx_imports.h 1421 2007-07-07 01:56:53Z radad $
+# $Id: irx_imports.h 629 2004-10-11 00:45:00Z mrbrown $
 # Defines all IRX imports.
 */
 
@@ -17,7 +17,9 @@
 #include <irx.h>
 
 /* Please keep these in alphabetical order!  */
+#include <atad.h>
 #include <cdvdman.h>
+#include <dev9.h>
 #include <intrman.h>
 #include <iomanX.h>
 #include <poweroff.h>

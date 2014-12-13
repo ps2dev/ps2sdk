@@ -123,7 +123,7 @@ int fioDataTransfer(iop_file_t *f, void *buf, int size, int mode)
 		int rv=0;
 
 		WaitSema(fioSema);
-		if(atadDmaTransfer(f->unit, buf, fileSlot->post+fileSlot->start+8, size, mode))
+		if(ata_device_sector_io(f->unit, buf, fileSlot->post+fileSlot->parts[0].start+8, size, mode))
 			rv=-EIO;
 		SignalSema(fioSema);
 		if(rv==0)
@@ -137,24 +137,21 @@ int fioDataTransfer(iop_file_t *f, void *buf, int size, int mode)
 
 int ioctl2Transfer(u32 device, hdd_file_slot_t *fileSlot, hddIoctl2Transfer_t *arg)
 {
-	apa_subs *subs;
-
 	if(fileSlot->nsub<arg->sub)
-		return -ENODEV;//-EINVAL;
+		return -ENODEV;
 
-	// main partitions only can read 4MB on :P
+	// main partitions can only be read starting from the 4MB offset.
 	if(arg->sub==0 && (arg->sector < 0x2000))
 		return -EINVAL;
-	 // subs partitions only can read header on...
+	 // sub-partitions can only be read starting from after the header.
 	if(arg->sub!=0 && (arg->sector < 2))
 		return -EINVAL;
 
-	subs=((apa_subs *)(&fileSlot->start));	// !HACK!
-	if(subs[arg->sub].length<arg->sector+arg->size)
+	if(fileSlot->parts[arg->sub].length<arg->sector+arg->size)
 		return -ENXIO;
 
-	if(atadDmaTransfer(device, arg->buffer,
-		subs[arg->sub].start+arg->sector, arg->size, arg->mode))
+	if(ata_device_sector_io(device, arg->buffer,
+		fileSlot->parts[arg->sub].start+arg->sector, arg->size, arg->mode))
 		return -EIO;
 
 	return 0;
@@ -163,7 +160,7 @@ int ioctl2Transfer(u32 device, hdd_file_slot_t *fileSlot, hddIoctl2Transfer_t *a
 void hddPowerOffHandler(void* data)
 {
 	printf("hdd flush cache\n");
-	atadFlushCache(0);
+	ata_device_flush_cache(0);
 }
 
 int hddInit(iop_device_t *f)
@@ -176,7 +173,7 @@ int hddInit(iop_device_t *f)
 	sema.option=0;
 	fioSema=CreateSema(&sema);
 
-	AddPowerOffHandler(hddPowerOffHandler, 0);
+	AddPowerOffHandler(hddPowerOffHandler, NULL);
 	return 0;
 }
 
@@ -200,19 +197,19 @@ int hddFormat(iop_file_t *f, const char *dev, const char *blockdev, void *arg, s
 	// clear all errors on hdd
 	clink=cacheGetFree();
 	memset(clink->header, 0, sizeof(apa_header));
-	if(atadDmaTransfer(f->unit, clink->header, APA_SECTOR_SECTOR_ERROR, 1, ATAD_MODE_WRITE)){
+	if(ata_device_sector_io(f->unit, clink->header, APA_SECTOR_SECTOR_ERROR, 1, ATA_DIR_WRITE)){
 		cacheAdd(clink);
 		return -EIO;
 	}
-	if(atadDmaTransfer(f->unit, clink->header, APA_SECTOR_PART_ERROR, 1, ATAD_MODE_WRITE)){
+	if(ata_device_sector_io(f->unit, clink->header, APA_SECTOR_PART_ERROR, 1, ATA_DIR_WRITE)){
 		cacheAdd(clink);
 		return -EIO;
 	}
 	// clear apa headers
 	for(i=1024*8;i<hddDeviceBuf[f->unit].totalLBA;i+=(1024*256))
 	{
-		atadDmaTransfer(f->unit, clink->header, i, sizeof(apa_header)/512,
-			ATAD_MODE_WRITE);
+		ata_device_sector_io(f->unit, clink->header, i, sizeof(apa_header)/512,
+			ATA_DIR_WRITE);
 	}
 	cacheAdd(clink);
 	if((rv=journalReset(f->unit))!=0)
@@ -235,7 +232,7 @@ int hddFormat(iop_file_t *f, const char *dev, const char *blockdev, void *arg, s
 		header->checksum=apaCheckSum(header);
 		clink->flags|=CACHE_FLAG_DIRTY;
 		cacheFlushDirty(clink);
-		atadFlushCache(f->unit);
+		ata_device_flush_cache(f->unit);
 		cacheAdd(clink);
 		hddDeviceBuf[f->unit].status=0;
 		hddDeviceBuf[f->unit].format=APA_MBR_VERSION;
@@ -315,14 +312,14 @@ int hddClose(iop_file_t *f)
 
 int hddRead(iop_file_t *f, void *buf, int size)
 {
-	return fioDataTransfer(f, buf, size, ATAD_MODE_READ);
+	return fioDataTransfer(f, buf, size, ATA_DIR_READ);
 }
 
 int hddWrite(iop_file_t *f, void *buf, int size)
 {
 	if(!(f->mode & O_WRONLY))
 		return -EACCES;
-	return fioDataTransfer(f, buf, size, ATAD_MODE_WRITE);
+	return fioDataTransfer(f, buf, size, ATA_DIR_WRITE);
 }
 
 int hddLseek(iop_file_t *f, unsigned long post, int whence)
@@ -427,11 +424,11 @@ int hddDread(iop_file_t *f, iox_dirent_t *dirent)
 	if(!(f->mode & O_DIROPEN))
 		return -ENOTDIR;
 
-	if(fileSlot->start==-1)
+	if(fileSlot->parts[0].start==-1)
 		return 0;// end :)
 
 	WaitSema(fioSema);
-	if((clink=cacheGetHeader(f->unit, fileSlot->start, 0, &rv)) &&
+	if((clink=cacheGetHeader(f->unit, fileSlot->parts[0].start, 0, &rv)) &&
 		clink->header->length)
 	{
 		if(clink->header->flags & APA_FLAG_SUB) {
@@ -449,9 +446,9 @@ int hddDread(iop_file_t *f, iox_dirent_t *dirent)
 		}
 		fioGetStatFiller(clink, &dirent->stat);
 		if(clink->header->next==0)
-			fileSlot->start=-1;		// mark end
+			fileSlot->parts[0].start=-1;		// mark end
 		else
-			fileSlot->start=clink->header->next;// set next
+			fileSlot->parts[0].start=clink->header->next;// set next
 		cacheAdd(clink);
 	}
 	SignalSema(fioSema);
@@ -460,9 +457,8 @@ int hddDread(iop_file_t *f, iox_dirent_t *dirent)
 
 int hddReName(iop_file_t *f, const char *oldname, const char *newname)
 {
-	int rv;
-	int i;
-	apa_cache	*clink;
+	int i, rv;
+	apa_cache	*clink, *clink2;
 	char tmpBuf[APA_IDMAX];
 
 	if(f->unit >= 2 || hddDeviceBuf[f->unit].status!=0)
@@ -501,12 +497,24 @@ int hddReName(iop_file_t *f, const char *oldname, const char *newname)
 		return -ENOENT;
 	}
 
-	// do the renameing :) note: subs have no names!!
+	// do the renaming. Update all sub-partitions too.
 	memset(clink->header->id, 0, APA_IDMAX);		// all cmp are done with memcmp!
 	strncpy(clink->header->id, newname, APA_IDMAX - 1);
 	clink->header->id[APA_IDMAX - 1] = '\0';
-
 	clink->flags|=CACHE_FLAG_DIRTY;
+
+	for(i=clink->header->nsub-1;i>=0;i--)
+	{
+		if((clink2=cacheGetHeader(f->unit, clink->header->subs[i].start, 0, &rv))){
+			memset(clink2->header->id, 0, APA_IDMAX);		// all cmp are done with memcmp!
+			strncpy(clink2->header->id, newname, APA_IDMAX - 1);
+			clink2->header->id[APA_IDMAX - 1] = '\0';
+			clink2->flags|=CACHE_FLAG_DIRTY;
+			cacheFlushAllDirty(f->unit);
+			cacheAdd(clink2);
+		}
+	}
+
 	cacheFlushAllDirty(f->unit);
 	cacheAdd(clink);
 	SignalSema(fioSema);
@@ -537,7 +545,7 @@ int ioctl2AddSub(hdd_file_slot_t *fileSlot, char *argp)
 	params.size=rv;
 	params.flags=APA_FLAG_SUB;
 	params.type=fileSlot->type;
-	params.main=fileSlot->start;
+	params.main=fileSlot->parts[0].start;
 	params.number=fileSlot->nsub+1;
 	if((rv=apaCheckPartitionMax(device, params.size)) < 0)
 		return rv;
@@ -559,15 +567,15 @@ int ioctl2AddSub(hdd_file_slot_t *fileSlot, char *argp)
 	sector=clink->header->start;
 	length=clink->header->length;
 	cacheAdd(clink);
-	if(!(clink=cacheGetHeader(device, fileSlot->start, 0, &rv)))
+	if(!(clink=cacheGetHeader(device, fileSlot->parts[0].start, 0, &rv)))
 		return rv;
 
 	clink->header->subs[clink->header->nsub].start=sector;
 	clink->header->subs[clink->header->nsub].length=length;
 	clink->header->nsub++;
 	fileSlot->nsub++;
-	((apa_subs *)(&fileSlot->start))[fileSlot->nsub].start=sector;	// !HACK!
-	((apa_subs *)(&fileSlot->start))[fileSlot->nsub].length=length;	// !HACK!
+	fileSlot->parts[fileSlot->nsub].start=sector;
+	fileSlot->parts[fileSlot->nsub].length=length;
 	clink->flags|=CACHE_FLAG_DIRTY;
 	cacheFlushAllDirty(device);
 	cacheAdd(clink);
@@ -587,7 +595,7 @@ int ioctl2DeleteLastSub(hdd_file_slot_t *fileSlot)
 	if(fileSlot->nsub==0)
 		return -ENOENT;
 
-	if(!(mainPart=cacheGetHeader(device, fileSlot->start, 0, &rv)))
+	if(!(mainPart=cacheGetHeader(device, fileSlot->parts[0].start, 0, &rv)))
 		return rv;
 
 	if((subPart=cacheGetHeader(device,
@@ -625,7 +633,7 @@ int hddIoctl2(iop_file_t *f, int req, void *argp, unsigned int arglen,
 		break;
 
 	case APA_IOCTL2_FLUSH_CACHE:
-		atadFlushCache(f->unit);
+		ata_device_flush_cache(f->unit);
 		break;
 
 	// cmd set 2
@@ -634,17 +642,16 @@ int hddIoctl2(iop_file_t *f, int req, void *argp, unsigned int arglen,
 		break;
 
 	case APA_IOCTL2_GETSIZE:
-		//	rv=fileSlot->subs[*(u32 *)argp].length;
-		rv=((apa_subs *)(&fileSlot->start))[*(u32 *)argp].length;	// !HACK!
+		rv=fileSlot->parts[*(u32 *)argp].length;
 		break;
 
 	case APA_IOCTL2_SET_PART_ERROR:
-		setPartErrorSector(f->unit, fileSlot->start); rv=0;
+		setPartErrorSector(f->unit, fileSlot->parts[0].start); rv=0;
 		break;
 
 	case APA_IOCTL2_GET_PART_ERROR:
 		if((rv=getPartErrorSector(f->unit, APA_SECTOR_PART_ERROR, bufp)) > 0) {
-			if(*(u32 *)bufp==fileSlot->start) {
+			if(*(u32 *)bufp==fileSlot->parts[0].start) {
 				rv=0; setPartErrorSector(f->unit, 0);// clear last error :)
 			}
 		}
@@ -726,12 +733,12 @@ int hddDevctl(iop_file_t *f, const char *devname, int cmd, void *arg,
 	{
 	// cmd set 1
 	case APA_DEVCTL_DEV9_SHUTDOWN:
-		atadUpdateAttrib(f->unit);
+		ata_device_smart_save_attr(f->unit);
 		dev9Shutdown();
 		break;
 
 	case APA_DEVCTL_IDLE:
-		rv=atadIdle(f->unit, *(char *)arg);
+		rv=ata_device_idle(f->unit, *(char *)arg);
 		break;
 
 	case APA_DEVCTL_MAX_SECTORS:
@@ -743,7 +750,7 @@ int hddDevctl(iop_file_t *f, const char *devname, int cmd, void *arg,
 		break;
 
 	case APA_DEVCTL_FLUSH_CACHE:
-		if(atadFlushCache(f->unit))
+		if(ata_device_flush_cache(f->unit))
 			rv=-EIO;
 		break;
 
@@ -752,7 +759,7 @@ int hddDevctl(iop_file_t *f, const char *devname, int cmd, void *arg,
 		break;
 
 	case APA_DEVCTL_SMART_STAT:
-		rv=atadGetStatus(f->unit);
+		rv=ata_device_smart_get_status(f->unit);
 		break;
 
 	case APA_DEVCTL_STATUS:
@@ -787,18 +794,18 @@ int hddDevctl(iop_file_t *f, const char *devname, int cmd, void *arg,
 		break;
 
 	case APA_DEVCTL_ATA_READ:
-		rv=atadDmaTransfer(f->unit, (void *)bufp, ((hddAtaTransfer_t *)arg)->lba,
-			((hddAtaTransfer_t *)arg)->size, ATAD_MODE_READ);
+		rv=ata_device_sector_io(f->unit, (void *)bufp, ((hddAtaTransfer_t *)arg)->lba,
+			((hddAtaTransfer_t *)arg)->size, ATA_DIR_READ);
 		break;
 
 	case APA_DEVCTL_ATA_WRITE:
-		rv=atadDmaTransfer(f->unit, ((hddAtaTransfer_t *)arg)->data,
+		rv=ata_device_sector_io(f->unit, ((hddAtaTransfer_t *)arg)->data,
 			((hddAtaTransfer_t *)arg)->lba, ((hddAtaTransfer_t *)arg)->size,
-				ATAD_MODE_WRITE);
+				ATA_DIR_WRITE);
 		break;
 
 	case APA_DEVCTL_SCE_IDENTIFY_DRIVE:
-		rv=atadSceIdentifyDrive(f->unit, (u16 *)bufp);
+		rv=ata_device_sce_identify_drive(f->unit, (u16 *)bufp);
 		break;
 
 	default:

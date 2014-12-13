@@ -12,7 +12,6 @@
 */
 
 #include "hdd.h"
-#include "imports.lst"
 
 IRX_ID("hdd_driver", 1, 1);
 
@@ -85,7 +84,7 @@ int unlockDrive(u32 device)
 	u8 id[32];
 	int rv;
 	if((rv=getIlinkID(id))==0)
-		return atadSceUnlock(device, id);
+		return ata_device_sce_sec_unlock(device, id);
 	return rv;
 }
 
@@ -95,7 +94,7 @@ int _start(int argc, char **argv)
 	char	*input;
 	int		cacheSize=3;
 	ps2time tm;
-	t_shddInfo *hddInfo;
+	ata_devinfo_t *hddInfo;
 
 	printStartup();
 	// decode MBR Magic
@@ -137,7 +136,7 @@ int _start(int argc, char **argv)
 		tm.hour, tm.min, tm.sec, tm.month, tm.day, tm.year);
 	for(i=0;i < 2;i++)
 	{
-		if(!(hddInfo=atadInit((u16)i))){
+		if(!(hddInfo=ata_get_devinfo(i))){
 			printf("ps2hdd: Error: ata initialization failed.\n");
 			return 0;
 		}
