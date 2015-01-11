@@ -17,6 +17,10 @@ ifeq ($(IOP_CC_VERSION),3.2.2)
 ASFLAGS_TARGET = -march=r3000
 endif
 
+ifeq ($(IOP_CC_VERSION),3.2.3)
+ASFLAGS_TARGET = -march=r3000
+endif
+
 IOP_INCS := $(IOP_INCS) -I$(PS2SDKSRC)/iop/kernel/include -I$(PS2SDKSRC)/common/include -Iinclude
 
 IOP_CFLAGS  := -D_IOP -fno-builtin -O2 -G0 $(IOP_INCS) $(IOP_CFLAGS)
