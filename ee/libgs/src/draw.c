@@ -146,7 +146,7 @@ void GsSetDefaultDisplayEnv(GS_DISPENV *dispenv, unsigned short int psm, unsigne
 			}
 			break;
 		case GS_MODE_DTV_480P:
-			dispenv->disp.display_x = gs_DX+((0x2D0-w) + ((0x2D0-w)>>31))/2*2 + (dx<<1)+0xE8;	//FIXME: Check the part around the ">>31".
+			dispenv->disp.display_x = gs_DX+((0x2D0-w) + ((0x2D0-w)>>31))/2*2 + (dx<<1)+0xE8;
 			dispenv->disp.display_h	= h-1;
 			dispenv->disp.display_w	= (w<<1) - 1;
 			dispenv->disp.display_y = gs_DY+dy+0x23;

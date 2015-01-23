@@ -35,9 +35,10 @@ typedef struct {
 	u32 attr;
 	u32 option;
 	int initial;
-	int max;
 	int current;
-	int unknown[3];
+	int max;
+	int numWaitThreads;
+	int reserved[2];
 } iop_sema_info_t;
 
 #define thsemap_IMPORTS_start DECLARE_IMPORT_TABLE(thsemap, 1, 2)

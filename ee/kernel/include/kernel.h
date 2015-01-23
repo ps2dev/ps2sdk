@@ -173,9 +173,9 @@ typedef struct t_ee_thread_status
     int current_priority; // 0x18
     u32 attr; // 0x1C
     u32 option; // 0x20
-    u32 u32_24; // 0x24
-    u32 u32_28; // 0x28
-    u32 u32_2C; // 0x2C
+    u32 waitType; // 0x24
+    u32 waitId; // 0x28
+    u32 wakeupCount; // 0x2C
 } ee_thread_status_t;
 
 enum _sif_regs {
@@ -226,13 +226,13 @@ s32  _EnableIntc(s32 cause);
 s32  _DisableIntc(s32 cause);
 s32  _EnableDmac(s32 channel);
 s32  _DisableDmac(s32 channel);
-s32  SetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *arg2), void *arg2);
+s32  SetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *common), void *common);
 s32  ReleaseAlarm(s32 alarm_id);
 s32  _iEnableIntc(s32 cause);
 s32  _iDisableIntc(s32 cause);
 s32  _iEnableDmac(s32 channel);
 s32  _iDisableDmac(s32 channel);
-s32  iSetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *arg2), void *arg2);
+s32  iSetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *common), void *common);
 s32  iReleaseAlarm(s32 alarm_id);
 s32	 CreateThread(ee_thread_t *thread);
 s32	 DeleteThread(s32 thread_id);
@@ -293,14 +293,14 @@ int iGetTLBEntry(unsigned int index, unsigned int *PageMask, unsigned int *Entry
 int ProbeTLBEntry(unsigned int EntryHi, unsigned int *PageMask, unsigned int *EntryLo0, unsigned int *EntryLo1);
 int iProbeTLBEntry(unsigned int EntryHi, unsigned int *PageMask, unsigned int *EntryLo0, unsigned int *EntryLo1);
 int ExpandScratchPad(unsigned int page);
-void EnableIntcHandler(u32 arg1);
-void iEnableIntcHandler(u32 arg1);
-void DisableIntcHandler(u32 arg1);
-void iDisableIntcHandler(u32 arg1);
-void EnableDmacHandler(u32 arg1);
-void iEnableDmacHandler(u32 arg1);
-void DisableDmacHandler(u32 arg1);
-void iDisableDmacHandler(u32 arg1);
+void EnableIntcHandler(u32 cause);
+void iEnableIntcHandler(u32 cause);
+void DisableIntcHandler(u32 cause);
+void iDisableIntcHandler(u32 cause);
+void EnableDmacHandler(u32 channel);
+void iEnableDmacHandler(u32 channel);
+void DisableDmacHandler(u32 channel);
+void iDisableDmacHandler(u32 channel);
 void KSeg0(s32 arg1);
 s32  EnableCache(s32 cache);
 s32  DisableCache(s32 cache);

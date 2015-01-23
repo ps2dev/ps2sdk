@@ -21,6 +21,10 @@
 #define WEF_OR		1
 #define WEF_CLEAR	0x10
 
+//Attributes for event flags
+#define EA_SINGLE	0	//Only one thread can wait on the event flag.
+#define EA_MULTI	2	//Multiple threads can wait on the event flag.
+
 typedef struct {
 	u32	attr;
 	u32	option;
