@@ -424,18 +424,16 @@ int smb_read(iop_file_t *f, void *buf, int size)
 	rpos = 0;
 
 	while (size) {
-		nbytes = MAX_RD_BUF;
-		if (size < nbytes)
-			nbytes = size;
+		nbytes = size > 65535 ? 65535 : size;
 
 		r = smb_ReadAndX(UID, TID, fh->smb_fid, fh->position, (void *)(buf + rpos), (u16)nbytes);
 		if (r < 0) {
    			goto io_unlock;
 		}
 
-		rpos += nbytes;
-		size -= nbytes;
-		fh->position += nbytes;
+		rpos += r;
+		size -= r;
+		fh->position += r;
 	}
 
 io_unlock:
@@ -462,18 +460,16 @@ int smb_write(iop_file_t *f, void *buf, int size)
 	wpos = 0;
 
 	while (size) {
-		nbytes = MAX_WR_BUF;
-		if (size < nbytes)
-			nbytes = size;
+		nbytes = size > 65535 ? 65535 : size;
 
 		r = smb_WriteAndX(UID, TID, fh->smb_fid, fh->position, (void *)(buf + wpos), (u16)nbytes);
 		if (r < 0) {
    			goto io_unlock;
 		}
 
-		wpos += nbytes;
-		size -= nbytes;
-		fh->position += nbytes;
+		wpos += r;
+		size -= r;
+		fh->position += r;
 		if (fh->position > fh->filesize)
 			fh->filesize += fh->position - fh->filesize;
 	}
@@ -546,7 +542,7 @@ int smb_rmdir(iop_file_t *f, const char *dirname)
 
 	smb_io_lock();
 
-	r = smb_QueryPathInformation(UID, TID, (PathInformation_t *)&info, path);
+	r = smb_QueryPathInformation(UID, TID, &info, path);
 	if (r < 0) {
 		goto io_unlock;
 	}
@@ -581,7 +577,7 @@ int smb_dopen(iop_file_t *f, const char *dirname)
 	smb_io_lock();
 
 	// test if the dir exists
-	r = smb_QueryPathInformation(UID, TID, (PathInformation_t *)&info, path);
+	r = smb_QueryPathInformation(UID, TID, &info, path);
 	if (r < 0) {
 		goto io_unlock;
 	}
@@ -693,7 +689,7 @@ int smb_getstat(iop_file_t *f, const char *filename, iox_stat_t *stat)
 
 	memset((void *)stat, 0, sizeof(iox_stat_t));
 
-	r = smb_QueryPathInformation(UID, TID, (PathInformation_t *)&info, path);
+	r = smb_QueryPathInformation(UID, TID, &info, path);
 	if (r < 0) {
 		goto io_unlock;
 	}
@@ -770,7 +766,7 @@ int smb_chdir(iop_file_t *f, const char *dirname)
 		smb_curdir[0] = 0;
 	}
 	else {
-		r = smb_QueryPathInformation(UID, TID, (PathInformation_t *)&info, path);
+		r = smb_QueryPathInformation(UID, TID, &info, path);
 		if (r < 0) {
 			goto io_unlock;
 		}
@@ -860,6 +856,7 @@ static int smb_LogOff(void);
 
 static int smb_LogOn(smbLogOn_in_t *logon)
 {
+	u32 capabilities;
 	int r;
 
 	if (UID != -1) {
@@ -870,11 +867,11 @@ static int smb_LogOn(smbLogOn_in_t *logon)
 	if (r < 0)
 		return -SMB_DEVCTL_LOGON_ERR_CONN;
 
-	r = smb_NegociateProtocol();
+	r = smb_NegociateProtocol(&capabilities);
 	if (r < 0)
 		return -SMB_DEVCTL_LOGON_ERR_PROT;
 
-	r = smb_SessionSetupAndX(logon->User, logon->Password, logon->PasswordType);
+	r = smb_SessionSetupAndX(logon->User, logon->Password, logon->PasswordType, capabilities);
 	if (r < 0)
 		return -SMB_DEVCTL_LOGON_ERR_LOGON;
 

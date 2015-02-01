@@ -310,8 +310,8 @@ server_specs_t *getServerSpecs(void);
 int smb_Connect(char *SMBServerIP, int SMBServerPort);
 int smb_Disconnect(void);
 
-int smb_NegociateProtocol(void);
-int smb_SessionSetupAndX(char *User, char *Password, int PasswordType);
+int smb_NegociateProtocol(u32 *capabilities);
+int smb_SessionSetupAndX(char *User, char *Password, int PasswordType, u32 capabilities);
 int smb_TreeConnectAndX(int UID, char *ShareName, char *Password, int PasswordType);
 int smb_TreeDisconnect(int UID, int TID);
 int smb_NetShareEnum(int UID, int TID, ShareEntry_t *shareEntries, int index, int maxEntries);
@@ -329,8 +329,6 @@ int smb_Delete(int UID, int TID, char *Path);
 int smb_ManageDirectory(int UID, int TID, char *Path, int cmd);
 int smb_Rename(int UID, int TID, char *oldPath, char *newPath);
 
-#define MAX_SMB_BUF 	64511 // must fit on u16 !!!
-#define MAX_RD_BUF	4096
-#define MAX_WR_BUF	4096
+#define MAX_SMB_BUF 	(18*1024)
 
 #endif
