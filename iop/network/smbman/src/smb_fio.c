@@ -76,13 +76,13 @@ typedef struct {
 } FHANDLE;
 
 #define MAX_FDHANDLES		32
-FHANDLE smbman_fdhandles[MAX_FDHANDLES] __attribute__((aligned(64)));
+FHANDLE smbman_fdhandles[MAX_FDHANDLES];
 
-static ShareEntry_t ShareList __attribute__((aligned(64))); // Keep this aligned for DMA!
-static u8 SearchBuf[4096] __attribute__((aligned(64)));
-static char smb_curdir[4096] __attribute__((aligned(64)));
-static char smb_curpath[4096] __attribute__((aligned(64)));
-static char smb_secpath[4096] __attribute__((aligned(64)));
+static ShareEntry_t ShareList;
+static u8 SearchBuf[4096];
+static char smb_curdir[4096];
+static char smb_curpath[4096];
+static char smb_secpath[4096];
 
 static int keepalive_mutex = -1;
 static int keepalive_inited = 0;
@@ -223,7 +223,7 @@ int smb_init(iop_device_t *dev)
 	thread.attr = TH_C;
 	thread.option = 0;
 	thread.thread = (void *)keepalive_thread;
-	thread.stacksize = 0x2000;
+	thread.stacksize = 0x600;
 	thread.priority = 0x64;
 
 	keepalive_tid = CreateThread(&thread);

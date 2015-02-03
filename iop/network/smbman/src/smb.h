@@ -271,8 +271,10 @@ typedef struct {
 	u32	MaxBufferSize;
 	u32	MaxMpxCount;
 	u32	SessionKey;
-	u32	StringsCF;
-	u32	SupportsNTSMB;
+	u8	StringsCF;
+	u8	SupportsNTSMB;
+	u8	SupportsLargeReadX;
+	u8	SupportsLargeFiles;
 	u8	PrimaryDomainServerName[64];
 	u8	EncryptionKey[8];
 	int	SecurityMode;		// 0 = share level, 1 = user level

@@ -552,7 +552,7 @@ struct WriteAndXRequest_t smb_Write_Request = {
 
 static int main_socket = -1;
 
-static u8 SMB_buf[MAX_SMB_BUF+1024] __attribute__((aligned(64)));
+static u8 SMB_buf[MAX_SMB_BUF+1024];
 
 //-------------------------------------------------------------------------
 server_specs_t *getServerSpecs(void)
@@ -711,25 +711,13 @@ negociate_retry:
 		goto negociate_error;
 
 	*capabilities = NPRsp->Capabilities & (CLIENT_CAP_LARGE_READX | CLIENT_CAP_UNICODE | CLIENT_CAP_LARGE_FILES | CLIENT_CAP_STATUS32);
-	if (NPRsp->Capabilities & SERVER_CAP_UNICODE)
-		server_specs.StringsCF = 2;
-	else
-		server_specs.StringsCF = 1;
 
-	if (NPRsp->Capabilities & SERVER_CAP_NT_SMBS)
-		server_specs.SupportsNTSMB = 1;
-	else
-		server_specs.SupportsNTSMB = 0;
-
-	if (NPRsp->SecurityMode & NEGOCIATE_SECURITY_USER_LEVEL)
-		server_specs.SecurityMode = SERVER_USER_SECURITY_LEVEL;
-	else
-		server_specs.SecurityMode = SERVER_SHARE_SECURITY_LEVEL;
-
-	if (NPRsp->SecurityMode & NEGOCIATE_SECURITY_CHALLENGE_RESPONSE)
-		server_specs.PasswordType = SERVER_USE_ENCRYPTED_PASSWORD;
-	else
-		server_specs.PasswordType = SERVER_USE_PLAINTEXT_PASSWORD;
+	server_specs.StringsCF = (NPRsp->Capabilities & SERVER_CAP_UNICODE) ? 2 : 1;
+	server_specs.SupportsLargeReadX = (NPRsp->Capabilities & CLIENT_CAP_LARGE_READX);
+	server_specs.SupportsLargeFiles = (NPRsp->Capabilities & CLIENT_CAP_LARGE_FILES);
+	server_specs.SupportsNTSMB = (NPRsp->Capabilities & SERVER_CAP_NT_SMBS);
+	server_specs.SecurityMode = (NPRsp->SecurityMode & NEGOCIATE_SECURITY_USER_LEVEL)? SERVER_USER_SECURITY_LEVEL : SERVER_SHARE_SECURITY_LEVEL;
+	server_specs.PasswordType = (NPRsp->SecurityMode & NEGOCIATE_SECURITY_CHALLENGE_RESPONSE) ? SERVER_USE_ENCRYPTED_PASSWORD : SERVER_USE_PLAINTEXT_PASSWORD;
 
 	// copy to global struct to keep needed information for further communication
 	server_specs.MaxBufferSize = NPRsp->MaxBufferSize;
@@ -1370,6 +1358,9 @@ int smb_ReadAndX(int UID, int TID, int FID, s64 fileoffset, void *readbuf, u16 n
 	struct ReadAndXRequest_t *RR = &smb_Read_Request;
 	int r;
 
+	//Limit the transfer length, if necessary.
+	nbytes = (nbytes > server_specs.MaxBufferSize && !server_specs.SupportsLargeReadX) ? server_specs.MaxBufferSize : nbytes;
+
 	RR->smbH.UID = (u16)UID;
 	RR->smbH.TID = (u16)TID;
 	RR->FID = (u16)FID;
@@ -1423,7 +1414,7 @@ int smb_WriteAndX(int UID, int TID, int FID, s64 fileoffset, void *writebuf, u16
 	WR->ByteCount = nbytes;
 
 	rawTCP_SetSessionHeader(63+nbytes);
-	r = GetSMBServerReplyAndData(SMB_buf, 63 + 4, writebuf, nbytes);
+	r = GetSMBServerReplyAndData(SMB_buf, sizeof(struct WriteAndXRequest_t), writebuf, nbytes);
 	if (r <= 0)
 		return -EIO;
 
@@ -1890,6 +1881,10 @@ conn_retry:
 			goto conn_retry;
 		return -1;
 	}
+
+	//Disable Nagle's algorithm, as the delay introduced is unwanted.
+	r = 1;
+	setsockopt(main_socket, IPPROTO_TCP, TCP_NODELAY, &r, sizeof(r));
 
 	// We keep the server IP for SMB logon
 	strncpy(server_specs.ServerIP, SMBServerIP, 16);

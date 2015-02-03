@@ -377,5 +377,12 @@ struct hostent {
 #define INADDR_NONE		((u32) 0xffffffff)  /* 255.255.255.255 */
 #endif
 
+/* From include/lwip/sockets.h:  */
+/*
+ * User-settable options (used with setsockopt, IPPROTO_TCP level).
+ */
+#define	TCP_NODELAY	   0x01	   /* don't delay send to coalesce packets */
+#define TCP_KEEPALIVE	   0x02    /* send KEEPALIVE probes when idle for pcb->keepalive miliseconds */
+
 #endif
 
