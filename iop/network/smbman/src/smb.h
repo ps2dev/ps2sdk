@@ -157,10 +157,10 @@
 #define CLIENT_CAP_UNICODE			0x00000004
 
 // Security Modes
-#define NEGOCIATE_SECURITY_SIGNATURES_REQUIRED	0x08
-#define NEGOCIATE_SECURITY_SIGNATURES_ENABLED	0x04
-#define NEGOCIATE_SECURITY_CHALLENGE_RESPONSE	0x02
-#define NEGOCIATE_SECURITY_USER_LEVEL		0x01
+#define NEGOTIATE_SECURITY_SIGNATURES_REQUIRED	0x08
+#define NEGOTIATE_SECURITY_SIGNATURES_ENABLED	0x04
+#define NEGOTIATE_SECURITY_CHALLENGE_RESPONSE	0x02
+#define NEGOTIATE_SECURITY_USER_LEVEL		0x01
 
 // SMB Commands
 #define SMB_COM_CREATE_DIRECTORY		0x00
@@ -214,7 +214,7 @@
 #define SMB_COM_FIND_NOTIFY_CLOSE		0x35
 #define SMB_COM_TREE_CONNECT			0x70
 #define SMB_COM_TREE_DISCONNECT			0x71
-#define SMB_COM_NEGOCIATE			0x72
+#define SMB_COM_NEGOTIATE			0x72
 #define SMB_COM_SESSION_SETUP_ANDX		0x73
 #define SMB_COM_LOGOFF_ANDX			0x74
 #define SMB_COM_TREE_CONNECT_ANDX		0x75
@@ -271,10 +271,8 @@ typedef struct {
 	u32	MaxBufferSize;
 	u32	MaxMpxCount;
 	u32	SessionKey;
-	u8	StringsCF;
-	u8	SupportsNTSMB;
-	u8	SupportsLargeReadX;
-	u8	SupportsLargeFiles;
+	u32	StringsCF;
+	u32	SupportsNTSMB;
 	u8	PrimaryDomainServerName[64];
 	u8	EncryptionKey[8];
 	int	SecurityMode;		// 0 = share level, 1 = user level
@@ -312,7 +310,7 @@ server_specs_t *getServerSpecs(void);
 int smb_Connect(char *SMBServerIP, int SMBServerPort);
 int smb_Disconnect(void);
 
-int smb_NegociateProtocol(u32 *capabilities);
+int smb_NegotiateProtocol(u32 *capabilities);
 int smb_SessionSetupAndX(char *User, char *Password, int PasswordType, u32 capabilities);
 int smb_TreeConnectAndX(int UID, char *ShareName, char *Password, int PasswordType);
 int smb_TreeDisconnect(int UID, int TID);
@@ -331,6 +329,8 @@ int smb_Delete(int UID, int TID, char *Path);
 int smb_ManageDirectory(int UID, int TID, char *Path, int cmd);
 int smb_Rename(int UID, int TID, char *oldPath, char *newPath);
 
-#define MAX_SMB_BUF 	(18*1024)
+#define MAX_SMB_BUF 	64511 // must fit on u16 !!!
+#define MAX_RD_BUF	4096
+#define MAX_WR_BUF	4096
 
 #endif

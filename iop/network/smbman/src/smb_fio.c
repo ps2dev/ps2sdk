@@ -424,16 +424,18 @@ int smb_read(iop_file_t *f, void *buf, int size)
 	rpos = 0;
 
 	while (size) {
-		nbytes = size > 65535 ? 65535 : size;
+		nbytes = MAX_RD_BUF;
+		if (size < nbytes)
+			nbytes = size;
 
 		r = smb_ReadAndX(UID, TID, fh->smb_fid, fh->position, (void *)(buf + rpos), (u16)nbytes);
 		if (r < 0) {
    			goto io_unlock;
 		}
 
-		rpos += r;
-		size -= r;
-		fh->position += r;
+		rpos += nbytes;
+		size -= nbytes;
+		fh->position += nbytes;
 	}
 
 io_unlock:
@@ -460,16 +462,18 @@ int smb_write(iop_file_t *f, void *buf, int size)
 	wpos = 0;
 
 	while (size) {
-		nbytes = size > 65535 ? 65535 : size;
+		nbytes = MAX_WR_BUF;
+		if (size < nbytes)
+			nbytes = size;
 
 		r = smb_WriteAndX(UID, TID, fh->smb_fid, fh->position, (void *)(buf + wpos), (u16)nbytes);
 		if (r < 0) {
    			goto io_unlock;
 		}
 
-		wpos += r;
-		size -= r;
-		fh->position += r;
+		wpos += nbytes;
+		size -= nbytes;
+		fh->position += nbytes;
 		if (fh->position > fh->filesize)
 			fh->filesize += fh->position - fh->filesize;
 	}
@@ -867,7 +871,7 @@ static int smb_LogOn(smbLogOn_in_t *logon)
 	if (r < 0)
 		return -SMB_DEVCTL_LOGON_ERR_CONN;
 
-	r = smb_NegociateProtocol(&capabilities);
+	r = smb_NegotiateProtocol(&capabilities);
 	if (r < 0)
 		return -SMB_DEVCTL_LOGON_ERR_PROT;
 
