@@ -54,7 +54,9 @@ extern struct irx_export_table	_exp_ps2ip;
 static int		iTimerDHCP=0;
 #endif	//defined(PS2IP_DHCP)
 
-//static NetIF	LoopIF;
+#ifdef ADD_LOOPIF
+static NetIF	LoopIF;
+#endif
 
 int
 ps2ip_getconfig(char* pszName,t_ip_info* pInfo)
@@ -165,7 +167,8 @@ ps2ip_ShutDown(void)
 	return(1); // return "not resident"!
 }
 
-/* static void
+#ifdef ADD_LOOPIF
+static void
 AddLoopIF(void)
 {
 	IPAddr	IP;
@@ -177,7 +180,8 @@ AddLoopIF(void)
 	IP4_ADDR(&GW,127,0,0,1);
 
 	netif_add(&LoopIF,&IP,&NM,&GW,NULL,loopif_init,tcpip_input);
-} */
+}
+#endif
 
 err_t ps2ip_input(struct pbuf* pInput, struct netif* pNetIF)
 {
@@ -201,6 +205,49 @@ err_t ps2ip_input(struct pbuf* pInput, struct netif* pNetIF)
 
 	return	ERR_OK;
 }
+
+#if	defined(PS2IP_DHCP)
+static void
+DHCPTimer(void* pvArg)
+{
+	iTimerDHCP+=TCP_TMR_INTERVAL;
+	if ((iTimerDHCP-TCP_TMR_INTERVAL)/DHCP_FINE_TIMER_MSECS!=iTimerDHCP/DHCP_FINE_TIMER_MSECS)
+	{
+		dhcp_fine_tmr();
+	}
+
+	if (iTimerDHCP>=DHCP_COARSE_TIMER_SECS*1000)
+	{
+		iTimerDHCP-=DHCP_COARSE_TIMER_SECS*1000;
+		dhcp_coarse_tmr();
+	}
+}
+
+static void
+TimerThread(void* pvArg)
+{
+	while (1)
+	{
+		tcpip_callback(&DHCPTimer,NULL);
+		DelayThread(TCP_TMR_INTERVAL*1000);
+	}
+}
+
+static void
+InitDHCPTimer(void)
+{
+	iop_thread_t	Thread={TH_C,0,TimerThread,0x800,0x22};
+	int				iTimerThreadID=CreateThread(&Thread);
+
+	if (iTimerThreadID >= 0)
+	{
+		//Start timer-thread
+		StartThread(iTimerThreadID,NULL);
+	} else {
+		printf("InitDHCPTimer: Failed to create DHCP timer-thread: %d\n", iTimerThreadID);
+	}
+}
+#endif
 
 int
 _start(int argc,char** argv)
@@ -235,7 +282,12 @@ _start(int argc,char** argv)
 
 	dbgprintf("PS2IP: tcpip_init called\n");
 
-//	AddLoopIF();
+#ifdef ADD_LOOPIF
+	AddLoopIF();
+#endif
+#if	defined(PS2IP_DHCP)
+	InitDHCPTimer();
+#endif
 
 	dbgprintf("PS2IP: System Initialised\n");
 

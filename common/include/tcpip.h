@@ -14,7 +14,10 @@
 #define _TCPIP_H
 
 /* Some portions of this header fall under the following copyright.  The license
-   is compatible with that of ps2sdk.  */
+   is compatible with that of ps2sdk.
+
+   For compiling with DHCP support, any file that uses the netif structure
+   (e.g. interface driver, TCP/IP stack) must have LWIP_DHCP defined to 1. */
 
 /*
  * Copyright (c) 2001-2003 Swedish Institute of Computer Science.
@@ -156,12 +159,13 @@ struct ip_addr {
  *  (set by the interface) */
 #define NETIF_FLAG_LINK_UP			0x10U
 
-/** generic data structure used for all lwIP network interfaces */
+/** Generic data structure used for all lwIP network interfaces.
+ *  The following fields should be filled in by the initialization
+ *  function for the device driver: hwaddr_len, hwaddr[], mtu, flags */
+
 struct netif {
   /** pointer to next in linked list */
   struct netif *next;
-  /** The following fields should be filled in by the
-      initialization function for the device driver. */
 
   /** IP address configuration in network byte order */
   struct ip_addr ip_addr;
@@ -169,36 +173,38 @@ struct netif {
   struct ip_addr gw;
 
   /** This function is called by the network device driver
-      to pass a packet up the TCP/IP stack. */
+   *  to pass a packet up the TCP/IP stack. */
   err_t (* input)(struct pbuf *p, struct netif *inp);
   /** This function is called by the IP module when it wants
-      to send a packet on the interface. This function typically
-      first resolves the hardware address, then sends the packet. */
+   *  to send a packet on the interface. This function typically
+   *  first resolves the hardware address, then sends the packet. */
   err_t (* output)(struct netif *netif, struct pbuf *p,
-		   struct ip_addr *ipaddr);
+       struct ip_addr *ipaddr);
   /** This function is called by the ARP module when it wants
-      to send a packet on the interface. This function outputs
-      the pbuf as-is on the link medium. */
+   *  to send a packet on the interface. This function outputs
+   *  the pbuf as-is on the link medium. */
   err_t (* linkoutput)(struct netif *netif, struct pbuf *p);
   /** This field can be set by the device driver and could point
-      to state information for the device. */
+   *  to state information for the device. */
   void *state;
 #if LWIP_DHCP
   /** the DHCP client state information for this netif */
   struct dhcp *dhcp;
 #endif
   /** number of bytes used in hwaddr */
-  unsigned char hwaddr_len;
+  u8 hwaddr_len;
   /** link level hardware address of this interface */
-  unsigned char hwaddr[NETIF_MAX_HWADDR_LEN];
+  u8 hwaddr[NETIF_MAX_HWADDR_LEN];
   /** maximum transfer unit (in bytes) */
   u16 mtu;
+  /** flags (see NETIF_FLAG_ above) */
+  u8 flags;
+  /** link type */
+  u8 link_type;
   /** descriptive abbreviation */
   char name[2];
   /** number of this interface */
   u8 num;
-  /** NETIF_FLAG_* */
-  u8 flags;
 };
 
 /* From include/lwip/sockets.h:  */
@@ -351,14 +357,13 @@ struct sockaddr {
 
 typedef struct
 {
-	char				netif_name[4];
+	char			netif_name[4];
 	struct in_addr		ipaddr;
 	struct in_addr		netmask;
 	struct in_addr		gw;
-	struct in_addr		dns_server;
-	u32					dhcp_enabled;
-	u32					dhcp_status;
-	u8					hw_addr[8];
+	u32			dhcp_enabled;
+	u32			dhcp_status;
+	u8			hw_addr[8];
 } t_ip_info;
 
 #ifndef FAR

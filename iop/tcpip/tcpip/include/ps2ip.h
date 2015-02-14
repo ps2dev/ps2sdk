@@ -19,7 +19,7 @@
 
 #include "tcpip.h"
 
-#define ps2ip_IMPORTS_start	DECLARE_IMPORT_TABLE(ps2ip, 1, 4)
+#define ps2ip_IMPORTS_start	DECLARE_IMPORT_TABLE(ps2ip, 1, 5)
 #define ps2ip_IMPORTS_end		END_IMPORT_TABLE
 
 struct pbuf*     pbuf_alloc(pbuf_layer l, u16 size, pbuf_flag flag);
@@ -64,6 +64,12 @@ void             netif_set_netmask(struct netif *netif, struct ip_addr *netmast)
 void             netif_set_gw(struct netif *netif, struct ip_addr *gw);
 #define        I_netif_set_gw DECLARE_IMPORT(31, netif_set_gw)
 
+void netif_set_up(struct netif *netif);
+#define        I_netif_set_up DECLARE_IMPORT(45, netif_set_up)
+void netif_set_down(struct netif *netif);
+#define        I_netif_set_down DECLARE_IMPORT(46, netif_set_down)
+u8 netif_is_up(struct netif *netif);
+#define        I_netif_is_up DECLARE_IMPORT(47, netif_is_up)
 
 /* From include/lwip/tcpip.h:  */
 

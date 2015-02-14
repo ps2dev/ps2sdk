@@ -15,6 +15,7 @@ IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
 #PS2IP_DHCP=1
+#ADD_LOOPIF=1
 
 ifeq ($(DEBUG),1)
 DEBUG_FLAGS = -DDEBUG -DLWIP_DEBUG
@@ -33,7 +34,14 @@ ps2ip_OBJECTS := $(ps2ip_OBJECTS:%=$(IOP_OBJS_DIR)%)
 ps2api_OBJECTS = api_lib.o api_msg.o err.o sockets.o tcpip.o
 ps2api_OBJECTS := $(ps2api_OBJECTS:%=$(IOP_OBJS_DIR)%)
 
-ps2api_IPV4 = icmp.o ip.o ip_addr.o ip_frag.o #loopif.o
+ps2api_IPV4 = icmp.o ip.o ip_addr.o ip_frag.o
+
+# Adds the loop interface
+ifdef ADD_LOOPIF
+IOP_CFLAGS += -DADD_LOOPIF
+ps2api_IPV4 += loopif.o
+endif
+
 ps2api_IPV4 := $(ps2api_IPV4:%=$(IOP_OBJS_DIR)%)
 
 # Turns DHCP on.

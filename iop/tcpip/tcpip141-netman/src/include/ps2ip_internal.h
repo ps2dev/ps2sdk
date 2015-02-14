@@ -22,15 +22,16 @@
 #define	dbgprintf(args...)
 #endif
 
+//This structure is also found in common/tcpip.h, but that header file cannot be imported because it will conflict with the full LWIP header files.
 typedef struct
 {
-	char		netif_name[4];
-	struct in_addr	ipaddr;
-	struct in_addr	netmask;
-	struct in_addr	gw;
-	u32		dhcp_enabled;
-	u32		dhcp_status;
-	u8		hw_addr[8];
+	char			netif_name[4];
+	struct in_addr		ipaddr;
+	struct in_addr		netmask;
+	struct in_addr		gw;
+	u32			dhcp_enabled;
+	u32			dhcp_status;
+	u8			hw_addr[8];
 } t_ip_info;
 
 #endif	// !defined(IOP_PS2IP_INTERNAL_H)

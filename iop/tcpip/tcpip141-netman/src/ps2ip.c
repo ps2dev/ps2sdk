@@ -350,6 +350,7 @@ static err_t SMapIFInit(struct netif* pNetIF)
 	pNetIF->output=&etharp_output;	// For LWIP 1.3.0 and later.
 	pNetIF->linkoutput=&SMapLowLevelOutput;
 	pNetIF->hwaddr_len=NETIF_MAX_HWADDR_LEN;
+//	pNetIF->flags|=(NETIF_FLAG_LINK_UP|NETIF_FLAG_BROADCAST);			// For LWIP versions before v1.3.0.
 	pNetIF->flags|=(NETIF_FLAG_LINK_UP|NETIF_FLAG_ETHARP|NETIF_FLAG_BROADCAST);	// For LWIP v1.3.0 and later.
 	pNetIF->mtu=1500;
 

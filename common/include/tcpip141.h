@@ -14,7 +14,10 @@
 #define _TCPIP_H
 
 /* Some portions of this header fall under the following copyright.  The license
-   is compatible with that of ps2sdk.  */
+   is compatible with that of ps2sdk.
+
+   For compiling with DHCP support, any file that uses the netif structure
+   (e.g. interface driver, TCP/IP stack) must have LWIP_DHCP defined to 1. */
 
 /*
  * Copyright (c) 2001-2003 Swedish Institute of Computer Science.
@@ -208,24 +211,6 @@ typedef struct ip_addr {
 /** If set, the netif has IGMP capability.
  * Set by the netif driver in its init function. */
 #define NETIF_FLAG_IGMP         0x80U
-
-/*** Taken from opt.h. If changes were made to lwipopts.h, please update this section. ****/
-/**
- * MEMP_NUM_NETCONN: the number of struct netconns.
- * (only needed if you use the sequential API, like api_lib.c)
- */
-#define MEMP_NUM_NETCONN		4
-
-#define LWIP_NETIF_STATUS_CALLBACK	0
-#define LWIP_NETIF_LINK_CALLBACK	0
-#define	LWIP_DHCP			0
-#define LWIP_AUTOIP			0
-#define LWIP_NETIF_HOSTNAME		0
-#define LWIP_SNMP			0
-#define LWIP_IGMP			0
-#define LWIP_NETIF_HWADDRHINT		0
-#define ENABLE_LOOPBACK			1
-#define LWIP_LOOPBACK_MAX_PBUFS		0
 
 struct netif;
 
@@ -537,7 +522,6 @@ typedef struct
 	struct in_addr		ipaddr;
 	struct in_addr		netmask;
 	struct in_addr		gw;
-	struct in_addr		dns_server;
 	u32			dhcp_enabled;
 	u32			dhcp_status;
 	u8			hw_addr[8];
@@ -555,6 +539,16 @@ struct hostent {
 	char    FAR * FAR * h_addr_list;	/* list of addresses */
 #define h_addr  h_addr_list[0]				/* address, for backward compat */
 };
+
+/* From include/lwip/sockets.h:  */
+/*
+ * Options for level IPPROTO_TCP
+ */
+#define TCP_NODELAY    0x01    /* don't delay send to coalesce packets */
+#define TCP_KEEPALIVE  0x02    /* send KEEPALIVE probes when idle for pcb->keep_idle milliseconds */
+#define TCP_KEEPIDLE   0x03    /* set pcb->keep_idle  - Same as TCP_KEEPALIVE, but use seconds for get/setsockopt */
+#define TCP_KEEPINTVL  0x04    /* set pcb->keep_intvl - Use seconds for get/setsockopt */
+#define TCP_KEEPCNT    0x05    /* set pcb->keep_cnt   - Use number of probes sent for get/setsockopt */
 
 #endif
 
