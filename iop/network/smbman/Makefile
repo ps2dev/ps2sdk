@@ -14,7 +14,7 @@ IOP_SRC_DIR = src/
 IOP_INC_DIR =
 
 IOP_BIN  = bin/smbman.irx
-IOP_OBJS = obj/smbman.o obj/smb_fio.o obj/smb.o obj/auth.o \
+IOP_OBJS = obj/smbman.o obj/smb_fio.o obj/smb.o obj/poll.o obj/auth.o \
 	obj/des.o obj/md4.o obj/imports.o obj/exports.o
 
 IOP_CFLAGS  += -Wall -fno-builtin -D_IOP #-DDEBUG

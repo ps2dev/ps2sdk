@@ -13,6 +13,7 @@
 
 #include "smb.h"
 #include "auth.h"
+#include "poll.h"
 #include "debug.h"
 
 #define SMB_MAGIC	0x424d53ff
@@ -613,6 +614,42 @@ static int OpenTCPSession(struct in_addr dst_IP, u16 dst_port, int *sock)
 }
 
 //-------------------------------------------------------------------------
+static int RecvTimeout(int sock, void *buf, int bsize, int timeout_ms)
+{
+	int ret;
+	struct pollfd pollfd[1];
+
+	pollfd->fd = sock;
+	pollfd->events = POLLIN;
+	pollfd->revents = 0;
+
+	ret = poll(pollfd, 1, timeout_ms);
+
+	// a result less than 0 is an error
+	if (ret < 0)
+		return -1;
+
+	// 0 is a timeout
+	if (ret == 0)
+		return 0;
+
+	// receive the packet
+	ret = lwip_recv(sock, buf, bsize, 0);
+	if (ret < 0)
+		return -2;
+
+	return ret;
+}
+
+//-------------------------------------------------------------------------
+/*	RecvTimeout() is used instead of just recv(), in order to prevent
+	lockups in the event of a network failure in-between calls to socket functions.
+
+	TCP only protects against failures that occur during calls to socket functions.
+
+	Just to illustrate its importance here, imagine what would happen if recv() is called,
+	right before the server terminates the connection without the PlayStation 2 ever
+	receiving the TCP retransmission and the TCP RST packets.	*/
 static int GetSMBServerReply(void)
 {
 	int rcv_size, totalpkt_size, pkt_size;
@@ -622,7 +659,7 @@ static int GetSMBServerReply(void)
 		return -1;
 
 receive:
-	rcv_size = recv(main_socket, SMB_buf, sizeof(SMB_buf), 0);
+	rcv_size = RecvTimeout(main_socket, SMB_buf, sizeof(SMB_buf), 10000); // 10s before the packet is considered lost
 	if (rcv_size <= 0)
 		return -2;
 
@@ -633,7 +670,7 @@ receive:
 	totalpkt_size = rawTCP_GetSessionHeader() + 4;
 
 	while (rcv_size < totalpkt_size) {
-		pkt_size = recv(main_socket, &SMB_buf[rcv_size], sizeof(SMB_buf) - rcv_size, 0);
+		pkt_size = RecvTimeout(main_socket, &SMB_buf[rcv_size], sizeof(SMB_buf) - rcv_size, 3000); // 3s before the packet is considered lost
 		if (pkt_size <= 0)
 			return -2;
 		rcv_size += pkt_size;
@@ -1712,7 +1749,7 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 		info->fileInfo.IsDirectory = 1;
 	info->fileInfo.AllocationSize = FFRspData->AllocationSize;
 	info->fileInfo.EndOfFile = FFRspData->EndOfFile;
-	for (i = 0, j =0; i < FFRspData->FileNameLen; i++, j+=CF)
+	for (i = 0, j =0; j < FFRspData->FileNameLen; i++, j+=CF)
 		info->FileName[i] = FFRspData->FileName[j];
 	info->FileName[i]='\0';
 
