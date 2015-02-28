@@ -14,7 +14,7 @@
 #ifndef IOP_PS2IP_H
 #define IOP_PS2IP_H
 
-#include <tcpip141.h>
+#include <tcpip.h>
 
 int InitPS2IP(struct ip_addr *ip_address, struct ip_addr *subnet_mask, struct ip_addr *gateway);
 void DeinitPS2IP(void);
