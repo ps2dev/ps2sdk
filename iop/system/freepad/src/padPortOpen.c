@@ -20,8 +20,8 @@ void UpdatePadThread(void *arg)
 	padState_t *pstate;
 	u32 res = 0;
 
-	ReferThreadStatus(0, &tstatus);
-	pstate = (padState_t*)tstatus.info[IOP_THINFO_OPTION];
+	ReferThreadStatus(TH_SELF, &tstatus);
+	pstate = (padState_t*)tstatus.option;
 
 	while(1)
 	{
@@ -82,9 +82,9 @@ void QueryPadThread(void *arg)
 	u32 res;
 	u32 modeCurId = 0xFF;
 
-	ReferThreadStatus(0, &tinfo);
+	ReferThreadStatus(TH_SELF, &tinfo);
 
-	pstate = (padState_t*)tinfo.info[IOP_THINFO_OPTION];
+	pstate = (padState_t*)tinfo.option;
 
 	pstate->modeConfig = 0;
 	pstate->modeCurId = 0;
@@ -423,9 +423,9 @@ void SetMainModeThread(void *arg)
 	iop_thread_info_t tinfo;
 	padState_t *pstate;
 
-	ReferThreadStatus(0, &tinfo);
+	ReferThreadStatus(TH_SELF, &tinfo);
 
-	pstate = (padState_t*)tinfo.info[IOP_THINFO_OPTION];
+	pstate = (padState_t*)tinfo.option;
 
 	pstate->buttonDataReady = 0;
 	pstate->state = PAD_STATE_EXECCMD;
@@ -489,9 +489,9 @@ void SetActAlignThread(void *arg)
 	iop_thread_info_t tinfo;
 	padState_t *pstate;
 
-	ReferThreadStatus(0, &tinfo);
+	ReferThreadStatus(TH_SELF, &tinfo);
 
-	pstate = (padState_t*)tinfo.info[IOP_THINFO_OPTION];
+	pstate = (padState_t*)tinfo.option;
 
 	pstate->buttonDataReady = 0;
 	pstate->state = PAD_STATE_EXECCMD;
@@ -554,9 +554,9 @@ void SetButtonInfoThread(void *arg)
 	iop_thread_info_t tinfo;
 	padState_t *pstate;
 
-	ReferThreadStatus(0, &tinfo);
+	ReferThreadStatus(TH_SELF, &tinfo);
 
-	pstate = (padState_t*)tinfo.info[IOP_THINFO_OPTION];
+	pstate = (padState_t*)tinfo.option;
 
 	pstate->buttonDataReady = 0;
 	pstate->state = PAD_STATE_EXECCMD;
@@ -637,9 +637,9 @@ void SetVrefParamThread(void *arg)
 	iop_thread_info_t tinfo;
 	padState_t *pstate;
 
-	ReferThreadStatus(0, &tinfo);
+	ReferThreadStatus(TH_SELF, &tinfo);
 
-	pstate = (padState_t*)tinfo.info[IOP_THINFO_OPTION];
+	pstate = (padState_t*)tinfo.option;
 
 	pstate->buttonDataReady = 0;
 	pstate->state = PAD_STATE_EXECCMD;

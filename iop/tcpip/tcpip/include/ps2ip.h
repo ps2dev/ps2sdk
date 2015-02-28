@@ -7,7 +7,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: ps2ip.h 1423 2007-07-07 12:21:26Z radad $
+# $
 # Imports and definitions for ps2ip.
 */
 
@@ -19,7 +19,7 @@
 
 #include "tcpip.h"
 
-#define ps2ip_IMPORTS_start	DECLARE_IMPORT_TABLE(ps2ip, 2, 2)
+#define ps2ip_IMPORTS_start	DECLARE_IMPORT_TABLE(ps2ip, 2, 3)
 #define ps2ip_IMPORTS_end	END_IMPORT_TABLE
 
 /* From include/lwip/sockets.h:  */
@@ -66,6 +66,11 @@ int       ps2ip_getconfig(char* netif_name,t_ip_info* ip_info);
 #define I_ps2ip_getconfig DECLARE_IMPORT(21, ps2ip_getconfig)
 void	ps2ip_input(struct pbuf *p, struct netif *inp);
 #define I_ps2ip_input DECLARE_IMPORT(22, ps2ip_input)
+
+int lwip_shutdown(int s, int how);
+#define I_lwip_shutdown DECLARE_IMPORT(46, lwip_shutdown)
+int lwip_fcntl(int s, int cmd, int val);
+#define I_lwip_fcntl DECLARE_IMPORT(47, lwip_fcntl)
 
 /* From include/netif/etharp.h:  */
 err_t	etharp_output(struct netif *netif, struct pbuf *q, ip_addr_t *ipaddr);
@@ -145,6 +150,8 @@ char       *ipaddr_ntoa_r(const ip_addr_t *addr, char *buf, int buflen);
 #define	accept			lwip_accept
 #define	bind			lwip_bind
 #define	disconnect		lwip_close
+#define closesocket		lwip_close
+#define	shutdown		lwip_shutdown
 #define	connect			lwip_connect
 #define	listen			lwip_listen
 #define	recv			lwip_recv
@@ -154,6 +161,7 @@ char       *ipaddr_ntoa_r(const ip_addr_t *addr, char *buf, int buflen);
 #define	socket			lwip_socket
 #define	select			lwip_select
 #define	ioctlsocket		lwip_ioctl
+#define	fcntlsocket		lwip_fcntl
 
 // ntba2
 #define getsockname		lwip_getsockname

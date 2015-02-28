@@ -8,7 +8,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 # $Id$
-# Remote Procedure Call server for ps2ip
+# Remote Procedure Call server for ps2ip. Depends on ps2ip.irx and dns.irx.
 */
 
 /*

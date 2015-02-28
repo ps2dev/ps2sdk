@@ -7,7 +7,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: ps2ip.h 1423 2007-07-07 12:21:26Z radad $
+# $
 # Imports and definitions for ps2ip.
 */
 
@@ -16,6 +16,7 @@
 
 #include <tcpip.h>
 
+//Initializes PS2IP. Specify a dummy address like "169.254.0.1" if DHCP is to be used, before enabling DHCP via ps2ip_setconfig().
 int InitPS2IP(struct ip_addr *ip_address, struct ip_addr *subnet_mask, struct ip_addr *gateway);
 void DeinitPS2IP(void);
 
@@ -41,26 +42,27 @@ int lwip_select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptse
 int lwip_ioctl(int s, long cmd, void *argp);
 int lwip_fcntl(int s, int cmd, int val);
 
-#define accept(a,b,c)         lwip_accept(a,b,c)
-#define bind(a,b,c)           lwip_bind(a,b,c)
-#define shutdown(a,b)         lwip_shutdown(a,b)
-#define closesocket(s)        lwip_close(s)
-#define connect(a,b,c)        lwip_connect(a,b,c)
-#define getsockname(a,b,c)    lwip_getsockname(a,b,c)
-#define getpeername(a,b,c)    lwip_getpeername(a,b,c)
-#define setsockopt(a,b,c,d,e) lwip_setsockopt(a,b,c,d,e)
-#define getsockopt(a,b,c,d,e) lwip_getsockopt(a,b,c,d,e)
-#define listen(a,b)           lwip_listen(a,b)
-#define recv(a,b,c,d)         lwip_recv(a,b,c,d)
-#define recvfrom(a,b,c,d,e,f) lwip_recvfrom(a,b,c,d,e,f)
-#define send(a,b,c,d)         lwip_send(a,b,c,d)
-#define sendto(a,b,c,d,e,f)   lwip_sendto(a,b,c,d,e,f)
-#define socket(a,b,c)         lwip_socket(a,b,c)
-#define select(a,b,c,d,e)     lwip_select(a,b,c,d,e)
-#define ioctlsocket(a,b,c)    lwip_ioctl(a,b,c)
+#define accept(a,b,c)		lwip_accept(a,b,c)
+#define bind(a,b,c)		lwip_bind(a,b,c)
+#define shutdown(a,b)		lwip_shutdown(a,b)
+#define disconenct(s)		lwip_close(s)
+#define closesocket(s)		lwip_close(s)
+#define connect(a,b,c)		lwip_connect(a,b,c)
+#define getsockname(a,b,c)	lwip_getsockname(a,b,c)
+#define getpeername(a,b,c)	lwip_getpeername(a,b,c)
+#define setsockopt(a,b,c,d,e)	lwip_setsockopt(a,b,c,d,e)
+#define getsockopt(a,b,c,d,e)	lwip_getsockopt(a,b,c,d,e)
+#define listen(a,b)		lwip_listen(a,b)
+#define recv(a,b,c,d)		lwip_recv(a,b,c,d)
+#define recvfrom(a,b,c,d,e,f)	lwip_recvfrom(a,b,c,d,e,f)
+#define send(a,b,c,d)		lwip_send(a,b,c,d)
+#define sendto(a,b,c,d,e,f)	lwip_sendto(a,b,c,d,e,f)
+#define socket(a,b,c)		lwip_socket(a,b,c)
+#define select(a,b,c,d,e)	lwip_select(a,b,c,d,e)
+#define ioctlsocket(a,b,c)	lwip_ioctl(a,b,c)
 
-int       ps2ip_setconfig(t_ip_info* ip_info);
-int       ps2ip_getconfig(char* netif_name,t_ip_info* ip_info);
+int	ps2ip_setconfig(t_ip_info* ip_info);
+int	ps2ip_getconfig(char* netif_name,t_ip_info* ip_info);
 err_t	ps2ip_input(struct pbuf *p, struct netif *inp);
 
 /* From include/netif/etharp.h:  */

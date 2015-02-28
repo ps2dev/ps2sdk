@@ -11,7 +11,7 @@
 
 EE_BIN = ee-echo.elf
 EE_OBJS = echo.o
-EE_LIBS = -lps2ip -lc
+EE_LIBS = -lps2ips -lc
 
 all: $(EE_BIN)
 

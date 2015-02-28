@@ -17,7 +17,7 @@ EE_INC_DIR = include/
 EE_OBJS = ps2ipc.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
-EE_LIB = $(EE_LIB_DIR)libps2ipc.a
+EE_LIB = $(EE_LIB_DIR)libps2ips.a
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
 

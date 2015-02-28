@@ -218,32 +218,32 @@ u32 GetThreadsStatus(padState_t *state)
 
 	if( ReferThreadStatus(state->updatepadTid, &tinfo) == 0)
 	{
-		if( (tinfo.info[2] & 0x10) == 0) count++;
+		if( (tinfo.status & THS_DORMANT) == 0) count++;
 	}
 
 	if( ReferThreadStatus(state->querypadTid, &tinfo) == 0)
 	{
-		if( (tinfo.info[2] & 0x10) == 0) count++;
+		if( (tinfo.status & THS_DORMANT) == 0) count++;
 	}
 
 	if( ReferThreadStatus(state->setmainmodeTid, &tinfo) == 0)
 	{
-		if( (tinfo.info[2] & 0x10) == 0) count++;
+		if( (tinfo.status & THS_DORMANT) == 0) count++;
 	}
 
 	if( ReferThreadStatus(state->setactalignTid, &tinfo) == 0)
 	{
-		if( (tinfo.info[2] & 0x10) == 0) count++;
+		if( (tinfo.status & THS_DORMANT) == 0) count++;
 	}
 
 	if( ReferThreadStatus(state->setbuttoninfoTid, &tinfo) == 0)
 	{
-		if( (tinfo.info[2] & 0x10) == 0) count++;
+		if( (tinfo.status & THS_DORMANT) == 0) count++;
 	}
 
 	if( ReferThreadStatus(state->setvrefparamTid, &tinfo) == 0)
 	{
-		if( (tinfo.info[2] & 0x10) == 0) count++;
+		if( (tinfo.status & THS_DORMANT) == 0) count++;
 	}
 
 	if(count == 0)
@@ -457,13 +457,13 @@ s32 VbReferThreadStatus(vblankData_t *vData)
 
 	if( iReferThreadStatus(vData->tid_1, &tinfo) == 0)
 	{
-		if( (tinfo.info[2] & 0x10) == 0 )
+		if( (tinfo.status & THS_DORMANT) == 0 )
 			ret++;
 	}
 
 	if( iReferThreadStatus(vData->tid_2, &tinfo) == 0)
 	{
-		if( (tinfo.info[2] & 0x10) == 0 )
+		if( (tinfo.status & THS_DORMANT) == 0 )
 			ret++;
 	}
 

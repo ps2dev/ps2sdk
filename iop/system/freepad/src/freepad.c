@@ -50,13 +50,13 @@ void WaitClearEvent(u32 eventflag, u32 bits, u32 unused1, u32 unused2)
 {
 	u32 resbits;
 
-	WaitEventFlag(eventflag, bits | EF_EXIT_THREAD, 1, &resbits);
+	WaitEventFlag(eventflag, bits | EF_EXIT_THREAD, WEF_OR, &resbits);
 
 	if( resbits & EF_EXIT_THREAD )
 	{
 		iop_thread_info_t tinfo;
 
-		ReferThreadStatus(0, &tinfo);
+		ReferThreadStatus(TH_SELF, &tinfo);
 		SetEventFlag(eventflag, EF_EXIT_THREAD);
 		ExitThread();
 	}

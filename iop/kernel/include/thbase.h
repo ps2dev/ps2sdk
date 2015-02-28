@@ -17,6 +17,8 @@
 #include "types.h"
 #include "irx.h"
 
+//Thread attribute definitions
+#define TH_ASM		0x01000000
 #define TH_C		0x02000000
 
 typedef struct _iop_thread {
@@ -27,19 +29,38 @@ typedef struct _iop_thread {
 	u32	priority;
 } iop_thread_t;
 
-/* Items returned from i/ReferThreadStatus()  */
-enum _iop_thinfo {
-	IOP_THINFO_ATTR, IOP_THINFO_OPTION, IOP_THINFO_THREAD = 3,
-	IOP_THINFO_STACK, IOP_THINFO_STACKSIZE, IOP_THINFO_INITPRIORITY = 7,
-	IOP_THINFO_PRIORITY,
-	IOP_THINFO_MAX = 17
-};
+#define TH_SELF		0	//Special thread ID for referring to the running thread. Not supported by all functions.
 
-typedef struct
-{
+//Thread status definitions
+#define	THS_RUN	 	0x01
+#define THS_READY	0x02
+#define THS_WAIT	0x04
+#define THS_SUSPEND	0x08
+#define THS_WAITSUSPEND	0x0C
+#define THS_DORMANT	0x10
 
+//Thread wait status definitions
+#define TSW_SLEEP	1
+#define TSW_DELAY	2
+#define TSW_SEMA	3
+#define TSW_EVENTFLAG	4
+#define TSW_MBX		5
+#define TSW_VPL		6
+#define TSW_FPL		7
 
-	u32	info[IOP_THINFO_MAX];
+typedef struct _iop_thread_status {
+	unsigned int	attr;
+	unsigned int	option;
+	int		status;
+	void		*entry;
+	void		*stack;
+	int		stackSize;
+	int		initPriority;
+	int		currentPriority;
+	int		waitType;
+	int		waitId;
+	int		wakeupCount;
+	long int	*regContext;	//Only valid for use with iReferThreadStatus.
 } iop_thread_info_t;
 
 typedef struct _iop_sys_clock {
