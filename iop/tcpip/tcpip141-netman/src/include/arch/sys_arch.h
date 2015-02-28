@@ -15,4 +15,7 @@ typedef struct st_arch_message
     void *sys_msg;
 } arch_message;
 
+void *malloc(int size);
+void free(void *ptr);
+
 #endif /* __SYS_ARCH_H__ */

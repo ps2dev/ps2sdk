@@ -98,10 +98,6 @@
 #define MEM_ALIGNMENT		4
 
 /* ---------- Pbuf options ---------- */
-/* PBUF_POOL_BUFSIZE: the size of each pbuf in the pbuf pool. */
-//Boman666: Should be atleast 1518 to be compatible with ps2smap
-//#define PBUF_POOL_BUFSIZE       1540
-
 /**
  * PBUF_POOL_SIZE: the number of buffers in the pbuf pool.
  */
@@ -175,16 +171,6 @@
  * LWIP_RAW==1: Enable application layer to hook into the IP layer itself.
  */
 #define LWIP_RAW	0
-
-/*
-   ------------------------------------
-   ---------- LOOPIF options ----------
-   ------------------------------------
-*/
-/**
- * LWIP_HAVE_LOOPIF==1: Support loop interface (127.0.0.1) and loopif.c
- */
-#define LWIP_HAVE_LOOPIF	1
 
 /*
    --------------------------------------

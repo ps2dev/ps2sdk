@@ -381,7 +381,7 @@ void sys_arch_unprotect(sys_prot_t Flags)
 	CpuResumeIntr(Flags);
 }
 
-void *malloc(unsigned int size){
+void *malloc(int size){
 	int flags;
 	void *ptr;
 

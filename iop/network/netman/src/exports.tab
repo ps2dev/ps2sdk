@@ -1,13 +1,13 @@
 void _retonly(){};
 
-DECLARE_EXPORT_TABLE(netman, 1, 0)
+DECLARE_EXPORT_TABLE(netman, 1, 1)
 	DECLARE_EXPORT(_start)
 	DECLARE_EXPORT(_retonly)
 	DECLARE_EXPORT(_retonly)
 	DECLARE_EXPORT(_retonly)
 
-	DECLARE_EXPORT(NetManInit)
-	DECLARE_EXPORT(NetManDeinit)
+	DECLARE_EXPORT(NetManRegisterNetworkStack)
+	DECLARE_EXPORT(NetManUnregisterNetworkStack)
 	DECLARE_EXPORT(NetManNetIFSendPacket)
 	DECLARE_EXPORT(NetManIoctl)
 	DECLARE_EXPORT(NetManNetProtStackAllocRxPacket)
@@ -17,4 +17,7 @@ DECLARE_EXPORT_TABLE(netman, 1, 0)
 	DECLARE_EXPORT(NetManRegisterNetIF)
 	DECLARE_EXPORT(NetManUnregisterNetIF)
 	DECLARE_EXPORT(NetManToggleNetIFLinkState)
+	DECLARE_EXPORT(NetManGetGlobalNetIFLinkState)
+	DECLARE_EXPORT(NetManSetMainIF)
+	DECLARE_EXPORT(NetManQueryMainIF)
 END_EXPORT_TABLE

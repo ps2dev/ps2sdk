@@ -372,7 +372,9 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData){
 				dev9IntrDisable(DEV9_SMAP_INTR_MASK);
 				SMAP_EMAC3_SET(SMAP_R_EMAC3_MODE0, 0);
 				SmapDrivPrivData->NetDevStopFlag=0;
+				SmapDrivPrivData->LinkStatus=0;
 				SmapDrivPrivData->SmapIsInitialized=0;
+				NetManToggleNetIFLinkState(SmapDrivPrivData->NetIFID, NETMAN_NETIF_ETH_LINK_STATE_DOWN);
 			}
 		}
 		if(EFBits&SMAP_EVENT_START){
@@ -507,7 +509,7 @@ static inline int SMAPGetLinkMode(void){
 	int result;
 
 	result=-1;
-	if(SmapDriverData.LinkStatus){
+	if(SmapDriverData.SmapIsInitialized && SmapDriverData.LinkStatus){
 		value=SmapDriverData.LinkMode;
 		if(value&0x08) result=NETMAN_NETIF_ETH_LINK_MODE_100M_FDX;	/* 100Base-TX FDX */
 		if(value&0x04) result=NETMAN_NETIF_ETH_LINK_MODE_100M_HDX;	/* 100Base-TX HDX */
@@ -521,48 +523,49 @@ static inline int SMAPGetLinkMode(void){
 static inline int SMAPSetLinkMode(int mode){
 	int result;
 
-	if(mode >= 0){
-		EnableAutoNegotiation = 0;
+	if(SmapDriverData.SmapIsInitialized){
+		if(mode != NETMAN_NETIF_ETH_LINK_MODE_AUTO){
+			EnableAutoNegotiation = 0;
 
-		switch(mode){
-			case NETMAN_NETIF_ETH_LINK_MODE_10M_HDX:
-				SmapConfiguration = 0x020;
-				result = 0;
-				break;
-			case NETMAN_NETIF_ETH_LINK_MODE_10M_FDX:
-				SmapConfiguration = 0x040;
-				result = 0;
-				break;
-			case NETMAN_NETIF_ETH_LINK_MODE_100M_HDX:
-				SmapConfiguration = 0x080;
-				result = 0;
-				break;
-			case NETMAN_NETIF_ETH_LINK_MODE_100M_FDX:
-				SmapConfiguration = 0x0100;
-				result = 0;
-				break;
-			default:
-				result = -1;
+			switch(mode){
+				case NETMAN_NETIF_ETH_LINK_MODE_10M_HDX:
+					SmapConfiguration = 0x020;
+					result = 0;
+					break;
+				case NETMAN_NETIF_ETH_LINK_MODE_10M_FDX:
+					SmapConfiguration = 0x040;
+					result = 0;
+					break;
+				case NETMAN_NETIF_ETH_LINK_MODE_100M_HDX:
+					SmapConfiguration = 0x080;
+					result = 0;
+					break;
+				case NETMAN_NETIF_ETH_LINK_MODE_100M_FDX:
+					SmapConfiguration = 0x0100;
+					result = 0;
+					break;
+				default:
+					result = -1;
+			}
+
+		}else{
+			SmapConfiguration = 0x5E0;
+			EnableAutoNegotiation = 1;
+			result = 0;
 		}
 
-	}else{
-		SmapConfiguration = 0x5E0;
-		EnableAutoNegotiation = 1;
-		result = 0;
-	}
-
-	if(result == 0){
-		SetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_STOP);
-		SmapDriverData.NetDevStopFlag=1;
-		while(SmapDriverData.SmapIsInitialized) DelayThread(2000);
-		SetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_START);
-	}
+		if(result == 0){
+			SetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_STOP|SMAP_EVENT_START);
+			SmapDriverData.NetDevStopFlag=1;
+			DelayThread(1000000);	//Allow 1s for a change in status.
+		}
+	}else result = -ENXIO;
 
 	return result;
 }
 
 static inline int SMAPGetLinkStatus(void){
-	return(SmapDriverData.LinkStatus?NETMAN_NETIF_ETH_LINK_STATE_UP:NETMAN_NETIF_ETH_LINK_STATE_DOWN);
+	return((SmapDriverData.SmapIsInitialized && SmapDriverData.LinkStatus)?NETMAN_NETIF_ETH_LINK_STATE_UP:NETMAN_NETIF_ETH_LINK_STATE_DOWN);
 }
 
 int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, void *output, unsigned int length){
@@ -629,7 +632,7 @@ static inline int SetupNetDev(void){
 	volatile u8 *emac3_regbase;
 	static struct NetManNetIF device={
 		"SMAP",
-		NETMAN_NETIF_LINK_UP,
+		0,
 		0,
 		&SMAPStart,
 		&SMAPStop,

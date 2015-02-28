@@ -17,17 +17,15 @@
 
 /* Data used for registering the RPC server. */
 static SifRpcServerData_t rpc_sdata;
-static unsigned char rpc_buffer[MAX_FRAME_SIZE*NETMAN_RPC_BLOCK_SIZE];
+static unsigned char rpc_buffer[(sizeof(struct PacketReqs)+0xF)&~0xF];
 static SifRpcDataQueue_t rpc_qdata;
 
 static unsigned char SifRpcTxBuffer[80];
 
-static struct AlignmentData *EEAlignmentDataStructure;
-
 /* Packet transmission buffer. The EE will DMA transfer the packet to be transmitted directly into this buffer before invoking FUNC_SEND_PACKET. */
-static unsigned char TxPacketTagBuffer[(sizeof(struct PacketReqs)+0x3F)&~0x3F];
+static void *TxPacketBuffer = NULL;
 
-static int RpcThreadID;
+static int RpcThreadID = -1;
 static unsigned char IsInitialized=0;
 
 static void LinkStateUp(void){
@@ -63,6 +61,15 @@ static struct NetManNetProtStack RpcStack={
 	&FlushInputQueue
 };
 
+static void unregisterEENetworkStack(void){
+	NetManUnregisterNetworkStack();
+
+	if(TxPacketBuffer != NULL){
+		free(TxPacketBuffer);
+		TxPacketBuffer = NULL;
+	}
+}
+
 static void *NETMAN_rpc_handler(int fno, void *buffer, int size){
 	static int ResultValue;
 	void *result;
@@ -70,36 +77,57 @@ static void *NETMAN_rpc_handler(int fno, void *buffer, int size){
 
 	switch(fno){
 		case NETMAN_IOP_RPC_FUNC_INIT:
-			EEAlignmentDataStructure=((struct NetManInit*)buffer)->AlignmentData;
-
-			result=SifRpcTxBuffer;
-			((struct NetManInitResult *)SifRpcTxBuffer)->FrameTagBuffer=TxPacketTagBuffer;
-
-			if((ResultValue=NetManInitRPCClient())==0){
-				ResultValue=NetManInit(&RpcStack);
-			}
-
-			((struct NetManInitResult *)SifRpcTxBuffer)->result=ResultValue;
+			ResultValue=NetManInitRPCClient();
+			result=&ResultValue;
 			break;
 		case NETMAN_IOP_RPC_FUNC_DEINIT:
-			NetManDeinit();
+			unregisterEENetworkStack();
 			NetManDeinitRPCClient();
 			result=NULL;
 			break;
-		case NETMAN_IOP_RPC_FUNC_SEND_PACKETS:
-			for(i=0; i<((struct PacketReqs*)TxPacketTagBuffer)->NumPackets; i++){
-				NetManNetIFSendPacket(&((unsigned char*)buffer)[((struct PacketReqs*)TxPacketTagBuffer)->tags[i].offset], ((struct PacketReqs*)TxPacketTagBuffer)->tags[i].length);
+		case NETMAN_IOP_RPC_FUNC_REG_NETWORK_STACK:
+			result = SifRpcTxBuffer;
+
+			if(TxPacketBuffer == NULL) TxPacketBuffer = malloc((MAX_FRAME_SIZE*NETMAN_RPC_BLOCK_SIZE+0xF) & ~0xF);
+
+			if(TxPacketBuffer != NULL){
+				((struct NetManRegNetworkStackResult *)SifRpcTxBuffer)->FrameBuffer = TxPacketBuffer;
+				ResultValue = NetManRegisterNetworkStack(&RpcStack);
+			}else{
+				ResultValue = -ENOMEM;
 			}
 
-			ResultValue=0;
+			((struct NetManRegNetworkStackResult *)SifRpcTxBuffer)->result=ResultValue;
+			break;
+		case NETMAN_IOP_RPC_FUNC_UNREG_NETWORK_STACK:
+			unregisterEENetworkStack();
+			result=NULL;
+			break;
+		case NETMAN_IOP_RPC_FUNC_SEND_PACKETS:
+			if(TxPacketBuffer!=NULL){
+				for(i=0; i<((struct PacketReqs*)buffer)->NumPackets; i++){
+					NetManNetIFSendPacket(&((unsigned char*)TxPacketBuffer)[((struct PacketReqs*)buffer)->tags[i].offset], ((struct PacketReqs*)buffer)->tags[i].length);
+				}
+
+				ResultValue=0;
+			}else ResultValue=-1;
+
 			result=&ResultValue;
 			break;
 		case NETMAN_IOP_RPC_FUNC_IOCTL:
 			((struct NetManIoctlResult*)SifRpcTxBuffer)->result=NetManIoctl(((struct NetManIoctl*)buffer)->command, ((struct NetManIoctl*)buffer)->args, ((struct NetManIoctl*)buffer)->args_len, ((struct NetManIoctlResult*)SifRpcTxBuffer)->output, ((struct NetManIoctl*)buffer)->length);
 			result=SifRpcTxBuffer;
 			break;
+		case NETMAN_IOP_RPC_FUNC_SET_MAIN_NETIF:
+			*(int*)SifRpcTxBuffer=NetManSetMainIF(buffer);
+			result=SifRpcTxBuffer;
+			break;
+		case NETMAN_IOP_RPC_FUNC_QUERY_MAIN_NETIF:
+			((struct NetManQueryMainNetIFResult*)SifRpcTxBuffer)->result=NetManQueryMainIF(((struct NetManQueryMainNetIFResult*)SifRpcTxBuffer)->name);
+			result=SifRpcTxBuffer;
+			break;
 		default:
-			printf("NETMAN IOP RPC: Unrecognized command: 0x%x\n", fno);
+			printf("NETMAN [IOP]: Unrecognized command: 0x%x\n", fno);
 			ResultValue=-1;
 			result=&ResultValue;
 	}

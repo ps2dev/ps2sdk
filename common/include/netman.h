@@ -1,3 +1,6 @@
+//Common structures
+#define NETMAN_NETIF_NAME_MAX_LEN	4
+
 struct NetManPacketBuffer{
 	void *handle;
 	void *payload;
@@ -15,7 +18,8 @@ struct NetManNetProtStack{
 };
 
 enum NETMAN_NETIF_ETH_LINK_MODE{
-	NETMAN_NETIF_ETH_LINK_MODE_10M_HDX	= 0,	//10Mbit Half-DupleX
+	NETMAN_NETIF_ETH_LINK_MODE_AUTO		= 0,	//Auto negotiation cannot be reflected by NETMAN_NETIF_IOCTL_ETH_GET_LINK_MODE.
+	NETMAN_NETIF_ETH_LINK_MODE_10M_HDX,		//10Mbit Half-DupleX
 	NETMAN_NETIF_ETH_LINK_MODE_10M_FDX,		//10Mbit Full-DupleX
 	NETMAN_NETIF_ETH_LINK_MODE_100M_HDX,		//100Mbit Half-DupleX
 	NETMAN_NETIF_ETH_LINK_MODE_100M_FDX,		//100Mbit Full-DupleX
@@ -43,7 +47,7 @@ enum NETMAN_NETIF_IOCTL_CODES{
 	NETMAN_NETIF_IOCTL_ETH_GET_TX_ECOLL_CNT,
 	NETMAN_NETIF_IOCTL_ETH_GET_TX_EUNDERRUN_CNT,
 
-	NETMAN_NETIF_IOCTL_ETH_SET_LINK_MODE,	//Input = struct NetManIFLinkModeParams, or use NetManNetIFSetLinkMode() that will set the link mode and speed for you.
+	NETMAN_NETIF_IOCTL_ETH_SET_LINK_MODE,	//Input = struct NetManIFLinkModeParams
 
 	// Dial-up I/F-only IOCTL codes
 	// 0x2000
@@ -55,13 +59,23 @@ enum NETMAN_NETIF_IOCTL_CODES{
 };
 
 //*** Higher-level services, for the running user program ***
+//Initialization and deinitialization functions, for the EE side.
+#ifdef _EE
+
+int NetManInit(void);
+void NetManDeinit(void);
+
+#endif
+
 //Network Interface (IF) control.
-int NetManNetIFSetLinkMode(int mode);	//Either -1 for auto-negotiation or a NETMAN_NETIF_ETH_LINK_MODE value for manual control.
+int NetManGetGlobalNetIFLinkState(void);
+int NetManSetMainIF(const char *name);
+int NetManQueryMainIF(char *name);
 
 //*** System functions for either the Network IF driver or the network protocol stack ***
 //For the network protocol stack to initialize/deinitialize NETMAN.
-int NetManInit(const struct NetManNetProtStack *stack);
-void NetManDeinit(void);
+int NetManRegisterNetworkStack(const struct NetManNetProtStack *stack);
+void NetManUnregisterNetworkStack(void);
 
 /* Common network Interface (IF) management functions. Used by the user program and the protocol stack. */
 int NetManIoctl(unsigned int command, void *args, unsigned int args_len, void *output, unsigned int length);
@@ -82,16 +96,16 @@ int NetManNetProtStackFlushInputQueue(void);
 #define	NETMAN_NETIF_LINK_UP	4	// Set = network IF has a link up status.
 
 struct NetManNetIF{
-	char name[8];
-	unsigned int flags;
-	int id;	// Used internally by NETMAN. Do not use.
+	char name[NETMAN_NETIF_NAME_MAX_LEN];
+	unsigned short int flags;
+	short int id;	// Used internally by NETMAN. Do not use.
 	int (*init)(void);
 	void (*deinit)(void);
 	int (*xmit)(const void *packet, unsigned int size);
 	int (*ioctl)(unsigned int command, void *args, unsigned int args_len, void *output, unsigned int length);
 };
 
-#define NETMAN_MAX_NETIF_COUNT	4
+#define NETMAN_MAX_NETIF_COUNT	2
 
 /* Network InterFace (IF) management functions. Used by the network InterFace (IF). */
 int NetManRegisterNetIF(const struct NetManNetIF *NetIF);
@@ -100,11 +114,11 @@ void NetManToggleNetIFLinkState(int NetIFID, unsigned char state);
 
 #ifdef _IOP
 
-#define netman_IMPORTS_start DECLARE_IMPORT_TABLE(netman, 1, 0)
+#define netman_IMPORTS_start DECLARE_IMPORT_TABLE(netman, 1, 1)
 #define netman_IMPORTS_end END_IMPORT_TABLE
 
-#define I_NetManInit DECLARE_IMPORT(4, NetManInit)
-#define I_NetManDeinit DECLARE_IMPORT(5, NetManDeinit)
+#define I_NetManRegisterNetworkStack DECLARE_IMPORT(4, NetManRegisterNetworkStack)
+#define I_NetManUnregisterNetworkStack DECLARE_IMPORT(5, NetManUnregisterNetworkStack)
 
 #define I_NetManNetIFSendPacket DECLARE_IMPORT(6, NetManNetIFSendPacket)
 #define I_NetManIoctl DECLARE_IMPORT(7, NetManIoctl)
@@ -117,5 +131,9 @@ void NetManToggleNetIFLinkState(int NetIFID, unsigned char state);
 #define I_NetManRegisterNetIF DECLARE_IMPORT(12, NetManRegisterNetIF)
 #define I_NetManUnregisterNetIF DECLARE_IMPORT(13, NetManUnregisterNetIF)
 #define I_NetManToggleNetIFLinkState DECLARE_IMPORT(14, NetManToggleNetIFLinkState)
+#define I_NetManGetGlobalNetIFLinkState DECLARE_IMPORT(15, NetManGetGlobalNetIFLinkState)
+
+#define I_NetManSetMainIF DECLARE_IMPORT(16, NetManSetMainIF)
+#define I_NetManQueryMainIF DECLARE_IMPORT(17, NetManQueryMainIF)
 
 #endif

@@ -8,17 +8,18 @@ EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
+#DEBUG = 1
+PS2IP_DHCP=1
+
+ifeq ($(DEBUG),1)
+DEBUG_FLAGS = -DDEBUG -DLWIP_DEBUG
+endif
+
 # Change this to point to the version of LWIP this is being compiled with.
 LWIP=$(PS2SDKSRC)/common/tcpip/lwip-1.4.1
 
-#ps2ip_OBJECTS := $(ps2ip_OBJECTS:%=$(EE_OBJS_DIR)%)
-
 ps2api_OBJECTS = api_lib.o api_msg.o api_netbuf.o err.o sockets.o tcpip.o
-#ps2api_OBJECTS := $(ps2api_OBJECTS:%=$(EE_OBJS_DIR)%)
-
 ps2api_IPV4 = icmp.o ip.o ip_addr.o ip_frag.o inet.o inet_chksum.o
-#ps2api_IPV4 := $(ps2api_IPV4:%=$(EE_OBJS_DIR)%)
-
 ps2ip_OBJECTS = sys.o lwip_init.o mem.o netif.o pbuf.o stats.o tcp_in.o tcp_out.o udp.o memp.o tcp.o etharp.o raw.o def.o timers.o $(ps2api_IPV4) $(ps2api_OBJECTS)
 
 ifdef PS2IP_DHCP

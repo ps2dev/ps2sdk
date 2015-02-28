@@ -7,7 +7,7 @@
 #include "main.h"
 #include "xfer.h"
 
-IRX_ID("SMAP_ETH_driver", 0x00, 0x70);
+IRX_ID("SMAP_ETH_driver", 0x1, 0x1);
 
 extern struct irx_export_table _exp_smap;
 

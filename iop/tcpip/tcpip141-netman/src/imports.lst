@@ -10,8 +10,8 @@ I_QueryIntrContext
 intrman_IMPORTS_end
 
 netman_IMPORTS_start
-I_NetManInit
-I_NetManDeinit
+I_NetManRegisterNetworkStack
+I_NetManUnregisterNetworkStack
 I_NetManNetIFSendPacket
 I_NetManIoctl
 netman_IMPORTS_end

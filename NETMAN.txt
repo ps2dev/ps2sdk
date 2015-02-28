@@ -1,12 +1,13 @@
-PlayStation 2 Network Manager (NETMAN)	- 2013/07/29
+PlayStation 2 Network Manager (NETMAN)	- 2015/02/28
 ----------------------------------------------------
 
 For "end-user" developers who want to bring network support to their software:
 
 1. Load NETMAN.IRX.
-2. Load and initialize the network stack:
-	1. If it's an IOP-side stack like the LWIP v1.4.1 stack (tcpip141) or LWIP v1.1.1 (tcpip-dma), load PS2IP141.IRX or PS2IP-DMA.IRX
-	2. If it's an EE-side stack like the LWIP v1.4.1 stack, invoke InitPS2IP().
+2. Load the network InterFace (IF) driver (e.g. SMAP.IRX).
+3. Load and initialize the network stack:
+	1. If it's an IOP-side stack like the LWIP v1.4.1 stack (tcpip141-nm), load PS2IP141-nm.IRX. After which, call NetManInit() to initialize basic RPC functions, if required.
+	2. If it's an EE-side stack like the LWIP v1.4.1 stack, invoke InitPS2IP(). InitPS2IP() will fully initialize the NETMAN RPC service.
 
 For developers who want to develop their own network adaptor drivers:
 	At startup, your driver should register itself with NETMAN using NetManRegisterNetIF().

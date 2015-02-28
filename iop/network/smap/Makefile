@@ -14,7 +14,7 @@ IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
 # Uncomment the line below to build for use with a DHCP-enabled LWIP stack.
-#LWIP_DHCP=1
+LWIP_DHCP=1
 
 IOP_BIN  = bin/smap.irx
 IOP_OBJS = obj/main.o obj/smap.o obj/xfer.o obj/imports.o obj/exports.o

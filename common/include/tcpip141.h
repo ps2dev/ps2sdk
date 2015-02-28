@@ -16,8 +16,10 @@
 /* Some portions of this header fall under the following copyright.  The license
    is compatible with that of ps2sdk.
 
-   For compiling with DHCP support, any file that uses the netif structure
-   (e.g. interface driver, TCP/IP stack) must have LWIP_DHCP defined to 1. */
+   This port of LWIP has LWIP_DHCP defined by default.	*/
+
+#define PS2IP_DHCP	1
+#define LWIP_DHCP	PS2IP_DHCP
 
 /*
  * Copyright (c) 2001-2003 Swedish Institute of Computer Science.
@@ -212,6 +214,24 @@ typedef struct ip_addr {
  * Set by the netif driver in its init function. */
 #define NETIF_FLAG_IGMP         0x80U
 
+/*** Taken from opt.h. If changes were made to lwipopts.h, please update this section. ****/
+/**
+ * MEMP_NUM_NETCONN: the number of struct netconns.
+ * (only needed if you use the sequential API, like api_lib.c)
+ */
+#define MEMP_NUM_NETCONN	4
+
+#define LWIP_NETIF_STATUS_CALLBACK	0
+#define LWIP_NETIF_LINK_CALLBACK	0
+#define	LWIP_DHCP	0
+#define LWIP_AUTOIP	0
+#define LWIP_NETIF_HOSTNAME	0
+#define LWIP_SNMP	0
+#define LWIP_IGMP	0
+#define LWIP_NETIF_HWADDRHINT	0
+#define ENABLE_LOOPBACK	1
+#define LWIP_LOOPBACK_MAX_PBUFS	0
+
 struct netif;
 
 /** Function prototype for netif init functions. Set up flags and output/linkoutput
@@ -346,7 +366,23 @@ struct netif {
 #endif /* ENABLE_LOOPBACK */
 };
 
-/* From include/lwip/inet.h:  */
+/* From include/lwip/dhcp.h: */
+/** DHCP client states */
+#define DHCP_OFF          0
+#define DHCP_REQUESTING   1
+#define DHCP_INIT         2
+#define DHCP_REBOOTING    3
+#define DHCP_REBINDING    4
+#define DHCP_RENEWING     5
+#define DHCP_SELECTING    6
+#define DHCP_INFORMING    7
+#define DHCP_CHECKING     8
+#define DHCP_PERMANENT    9
+#define DHCP_BOUND        10
+/** not yet implemented #define DHCP_RELEASING 11 */
+#define DHCP_BACKING_OFF  12
+
+/* From include/lwip/inet.h: */
 
 struct in_addr {
   u32 s_addr;

@@ -2,6 +2,7 @@
 #include <kernel.h>
 #include <sifrpc.h>
 #include <string.h>
+#include <malloc.h>
 #include <netman.h>
 #include <netman_rpc.h>
 
@@ -12,13 +13,12 @@ extern void *_gp;
 
 static unsigned char TransmitBuffer[128] ALIGNED(64);
 static unsigned char ReceiveBuffer[128] ALIGNED(64);
-static int NetManIOSemaID, NetManTxSemaID;
-static void *TxFrameTagBuffer;	/* On the IOP side. */
-//static struct AlignmentData AlignmentData ALIGNED(64);
+static int NetManIOSemaID = -1, NetManTxSemaID = -1;
+static void *IOPFrameBuffer = NULL;	/* On the IOP side. */
 
 struct TxFIFOData{
-	unsigned char FrameBuffer[NETMAN_RPC_BLOCK_SIZE*MAX_FRAME_SIZE] ALIGNED(64);
-	struct PacketReqs PacketReqs;
+	struct PacketReqs PacketReqs ALIGNED(64);
+	unsigned char *FrameBuffer ALIGNED(64);
 };
 
 static struct TxFIFOData TxFIFOData1 ALIGNED(64);
@@ -26,13 +26,37 @@ static struct TxFIFOData TxFIFOData2 ALIGNED(64);
 static struct TxFIFOData *CurrentTxFIFOData;
 
 static unsigned char TxActiveBankID;
-static int TxBankAccessSema;
-static int TxThreadID;
+static int TxBankAccessSema = -1;
+static int TxThreadID = -1;
 
 static unsigned char TxThreadStack[0x1000] ALIGNED(128);
 static void TxThread(void *arg);
 
 static unsigned char IsInitialized=0;
+
+static void deinitCleanup(void){
+	if(TxThreadID >= 0){
+		TerminateThread(TxThreadID);
+		DeleteThread(TxThreadID);
+		TxThreadID = -1;
+	}
+	if(NetManIOSemaID >= 0){
+		DeleteSema(NetManIOSemaID);
+		NetManIOSemaID = -1;
+	}
+	if(NetManTxSemaID >= 0){
+		DeleteSema(NetManTxSemaID);
+		NetManTxSemaID = -1;
+	}
+	if(TxFIFOData1.FrameBuffer != NULL){
+		free(TxFIFOData1.FrameBuffer);
+		TxFIFOData1.FrameBuffer = NULL;
+	}
+	if(TxFIFOData2.FrameBuffer != NULL){
+		free(TxFIFOData2.FrameBuffer);
+		TxFIFOData2.FrameBuffer = NULL;
+	}
+}
 
 int NetManInitRPCClient(void){
 	static const char NetManID[]="NetMan";
@@ -41,28 +65,47 @@ int NetManInitRPCClient(void){
 	ee_thread_t ThreadData;
 
 	if(!IsInitialized){
+		memset(&TxFIFOData1, 0, sizeof(TxFIFOData1));
+		memset(&TxFIFOData2, 0, sizeof(TxFIFOData2));
+
+		TxFIFOData1.FrameBuffer = memalign(64, (MAX_FRAME_SIZE*NETMAN_RPC_BLOCK_SIZE+0x3F)&~0x3F);
+		TxFIFOData2.FrameBuffer = memalign(64, (MAX_FRAME_SIZE*NETMAN_RPC_BLOCK_SIZE+0x3F)&~0x3F);
+
+		if(TxFIFOData1.FrameBuffer == NULL) return -ENOMEM;
+		if(TxFIFOData2.FrameBuffer == NULL){
+			deinitCleanup();
+			return -ENOMEM;
+		}
+
 		SemaData.max_count=1;
 		SemaData.init_count=1;
 		SemaData.option=(unsigned int)NetManID;
 		SemaData.attr=0;
-		NetManIOSemaID=CreateSema(&SemaData);
+		if((NetManIOSemaID=CreateSema(&SemaData)) < 0){
+			deinitCleanup();
+			return NetManIOSemaID;
+		}
 
 		TxActiveBankID=0;
-		memset(&TxFIFOData1, 0, sizeof(TxFIFOData1));
-		memset(&TxFIFOData2, 0, sizeof(TxFIFOData2));
 		CurrentTxFIFOData=UNCACHED_SEG(&TxFIFOData1);
 
 		SemaData.max_count=1;
 		SemaData.init_count=1;
 		SemaData.option=(unsigned int)NetManID;
 		SemaData.attr=0;
-		TxBankAccessSema=CreateSema(&SemaData);
+		if((TxBankAccessSema=CreateSema(&SemaData)) < 0){
+			deinitCleanup();
+			return TxBankAccessSema;
+		}
 
 		SemaData.max_count=1;
 		SemaData.init_count=1;
 		SemaData.option=(unsigned int)NetManID;
 		SemaData.attr=0;
-		NetManTxSemaID=CreateSema(&SemaData);
+		if((NetManTxSemaID=CreateSema(&SemaData)) < 0){
+			deinitCleanup();
+			return NetManTxSemaID;
+		}
 
 		ThreadData.func=&TxThread;
 		ThreadData.stack=TxThreadStack;
@@ -71,7 +114,15 @@ int NetManInitRPCClient(void){
 		ThreadData.initial_priority=0x58;
 		ThreadData.attr=ThreadData.option=0;
 
-		StartThread(TxThreadID=CreateThread(&ThreadData), NULL);
+		if((TxThreadID=CreateThread(&ThreadData)) < 0){
+			deinitCleanup();
+			return TxThreadID;
+		}
+
+		if((result = StartThread(TxThreadID, NULL)) < 0){
+			deinitCleanup();
+			return result;
+		}
 
 		while((SifBindRpc(&NETMAN_rpc_cd, NETMAN_RPC_NUMBER, 0)<0)||(NETMAN_rpc_cd.server==NULL)){
 			nopdelay();
@@ -80,28 +131,58 @@ int NetManInitRPCClient(void){
 			nopdelay();
 		}
 
-		if((result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_INIT, 0, TransmitBuffer, sizeof(struct NetManInit), ReceiveBuffer, sizeof(struct NetManInitResult), NULL, NULL))>=0){
-			result=((struct NetManInitResult*)ReceiveBuffer)->result;
-			TxFrameTagBuffer=((struct NetManInitResult*)ReceiveBuffer)->FrameTagBuffer;
+		if((result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_INIT, 0, NULL, 0, ReceiveBuffer, sizeof(int), NULL, NULL))>=0){
+			if((result=*(int*)ReceiveBuffer) == 0)
+				IsInitialized=1;
+			else
+				deinitCleanup();
+		}else{
+			deinitCleanup();
 		}
-
-		IsInitialized=1;
 	}
 	else result=0;
 
 	return result;
 }
 
-void NetManDeinitRPCClient(void){
+int NetManRPCRegisterNetworkStack(void){
+	int result;
+
 	WaitSema(NetManIOSemaID);
 
-	SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_DEINIT, 0, NULL, 0, ReceiveBuffer, sizeof(struct NetManInitResult), NULL, NULL);
-	TerminateThread(TxThreadID);
-	DeleteThread(TxThreadID);
-	DeleteSema(NetManIOSemaID);
-	DeleteSema(NetManTxSemaID);
+	if((result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_REG_NETWORK_STACK, 0, NULL, 0, ReceiveBuffer, sizeof(struct NetManRegNetworkStackResult), NULL, NULL))>=0){
+		if((result=((struct NetManRegNetworkStackResult*)ReceiveBuffer)->result) == 0){
+			IOPFrameBuffer=((struct NetManRegNetworkStackResult*)ReceiveBuffer)->FrameBuffer;
+		}
+	}
 
-	IsInitialized=0;
+	SignalSema(NetManIOSemaID);
+
+	return result;
+}
+
+int NetManRPCUnregisterNetworkStack(void){
+	int result;
+
+	WaitSema(NetManIOSemaID);
+
+	result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_UNREG_NETWORK_STACK, 0, NULL, 0, NULL, 0, NULL, NULL);
+	IOPFrameBuffer = NULL;
+
+	SignalSema(NetManIOSemaID);
+
+	return result;
+}
+
+void NetManDeinitRPCClient(void){
+	if(IsInitialized){
+		WaitSema(NetManIOSemaID);
+
+		SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_DEINIT, 0, NULL, 0, NULL, 0, NULL, NULL);
+		deinitCleanup();
+
+		IsInitialized=0;
+	}
 }
 
 int NetManRpcIoctl(unsigned int command, void *args, unsigned int args_len, void *output, unsigned int length){
@@ -117,17 +198,13 @@ int NetManRpcIoctl(unsigned int command, void *args, unsigned int args_len, void
 	IoctlArgs->length=length;
 
 	if((result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_IOCTL, 0, TransmitBuffer, sizeof(struct NetManIoctl), ReceiveBuffer, sizeof(struct NetManIoctlResult), NULL, NULL))>=0){
-		result=((struct NetManIoctlResult*)UNCACHED_SEG(ReceiveBuffer))->result;
-		memcpy(output, ((struct NetManIoctlResult*)UNCACHED_SEG(ReceiveBuffer))->output, length);
+		result=((struct NetManIoctlResult*)ReceiveBuffer)->result;
+		memcpy(output, ((struct NetManIoctlResult*)ReceiveBuffer)->output, length);
 	}
 
 	SignalSema(NetManIOSemaID);
 
 	return result;
-}
-
-int NetManNetIFSetLinkMode(int mode){
-	return NetManRpcIoctl(NETMAN_NETIF_IOCTL_ETH_SET_LINK_MODE, &mode, sizeof(mode), NULL, 0);
 }
 
 static volatile int NetmanTxWaitingThread=-1;
@@ -146,27 +223,25 @@ static void TxThread(void *arg){
 			// Switch banks
 			TxFIFODataToTransmit=CurrentTxFIFOData;
 			if(TxActiveBankID==0){
-				CurrentTxFIFOData=&TxFIFOData2;
+				CurrentTxFIFOData=UNCACHED_SEG(&TxFIFOData2);
 				TxActiveBankID=1;
 			}
 			else{
-				CurrentTxFIFOData=&TxFIFOData1;
+				CurrentTxFIFOData=UNCACHED_SEG(&TxFIFOData1);
 				TxActiveBankID=0;
 			}
 
 			SignalSema(TxBankAccessSema);
 
-			SifWriteBackDCache(&TxFIFODataToTransmit->PacketReqs, sizeof(TxFIFODataToTransmit->PacketReqs));
-
-			dmat.src=&TxFIFODataToTransmit->PacketReqs;
-			dmat.dest=TxFrameTagBuffer;
-			dmat.size=8+sizeof(struct PacketTag)*TxFIFODataToTransmit->PacketReqs.NumPackets;
+			dmat.src=TxFIFODataToTransmit->FrameBuffer;
+			dmat.dest=IOPFrameBuffer;
+			dmat.size=TxFIFODataToTransmit->PacketReqs.TotalLength;
 			dmat.attr=0;
 
 			while((dmat_id=SifSetDma(&dmat, 1))==0){};
 
 			WaitSema(NetManIOSemaID);
-			SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_SEND_PACKETS, 0, TxFIFODataToTransmit->FrameBuffer, TxFIFODataToTransmit->PacketReqs.TotalLength, NULL, 0, NULL, NULL);
+			SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_SEND_PACKETS, SIF_RPC_M_NOWBDC, &TxFIFODataToTransmit->PacketReqs, 8+sizeof(struct PacketTag)*TxFIFODataToTransmit->PacketReqs.NumPackets, NULL, 0, NULL, NULL);
 			SignalSema(NetManIOSemaID);
 
 			TxFIFODataToTransmit->PacketReqs.NumPackets=0;
@@ -185,35 +260,72 @@ static void TxThread(void *arg){
 int NetManRpcNetIFSendPacket(const void *packet, unsigned int length){
 	struct PacketTag *PacketTag;
 
-	WaitSema(NetManTxSemaID);
+	if(IOPFrameBuffer != NULL){
+		WaitSema(NetManTxSemaID);
 
-	NetmanTxWaitingThread=GetThreadId();
+		NetmanTxWaitingThread=GetThreadId();
 
-	WaitSema(TxBankAccessSema);
-
-	//Check is there is space in the current Tx FIFO. If not, wait for the Tx thread to empty out the other FIFO. */
-	while(CurrentTxFIFOData->PacketReqs.NumPackets>=NETMAN_RPC_BLOCK_SIZE){
-		SignalSema(TxBankAccessSema);
-		WakeupThread(TxThreadID);
-		SleepThread();
 		WaitSema(TxBankAccessSema);
+
+		//Check is there is space in the current Tx FIFO. If not, wait for the Tx thread to empty out the other FIFO. */
+		while(CurrentTxFIFOData->PacketReqs.NumPackets+1>NETMAN_RPC_BLOCK_SIZE || (CurrentTxFIFOData->PacketReqs.TotalLength + length > MAX_FRAME_SIZE*NETMAN_RPC_BLOCK_SIZE)){
+			SignalSema(TxBankAccessSema);
+			WakeupThread(TxThreadID);
+			SleepThread();
+			WaitSema(TxBankAccessSema);
+		}
+
+		memcpy((void*)((unsigned int)&CurrentTxFIFOData->FrameBuffer[CurrentTxFIFOData->PacketReqs.TotalLength] | 0x30000000), packet, length);
+		PacketTag=&CurrentTxFIFOData->PacketReqs.tags[CurrentTxFIFOData->PacketReqs.NumPackets];
+		PacketTag->offset=CurrentTxFIFOData->PacketReqs.TotalLength;
+		PacketTag->length=length;
+
+		CurrentTxFIFOData->PacketReqs.TotalLength+=(length+3)&~3;
+		CurrentTxFIFOData->PacketReqs.NumPackets++;
+
+		WakeupThread(TxThreadID);
+
+		SignalSema(TxBankAccessSema);
+
+		NetmanTxWaitingThread=-1;
+
+		SignalSema(NetManTxSemaID);
+
+		return 0;
+	}else{
+		return -1;
+	}
+}
+
+int NetManSetMainIF(const char *name){
+	int result;
+
+	WaitSema(NetManIOSemaID);
+
+	strncpy(TransmitBuffer, name, NETMAN_NETIF_NAME_MAX_LEN);
+	TransmitBuffer[NETMAN_NETIF_NAME_MAX_LEN-1] = '\0';
+	if((result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_SET_MAIN_NETIF, 0, TransmitBuffer, NETMAN_NETIF_NAME_MAX_LEN, ReceiveBuffer, sizeof(int), NULL, NULL))>=0){
+		result=*(int*)ReceiveBuffer;
 	}
 
-	memcpy(&CurrentTxFIFOData->FrameBuffer[CurrentTxFIFOData->PacketReqs.TotalLength], packet, length);
-	PacketTag=&CurrentTxFIFOData->PacketReqs.tags[CurrentTxFIFOData->PacketReqs.NumPackets];
-	PacketTag->offset=CurrentTxFIFOData->PacketReqs.TotalLength;
-	PacketTag->length=length;
+	SignalSema(NetManIOSemaID);
 
-	CurrentTxFIFOData->PacketReqs.TotalLength+=(length+3)&~3;
-	CurrentTxFIFOData->PacketReqs.NumPackets++;
+	return result;
+}
 
-	WakeupThread(TxThreadID);
+int NetManQueryMainIF(char *name){
+	int result;
 
-	SignalSema(TxBankAccessSema);
+	WaitSema(NetManIOSemaID);
 
-	NetmanTxWaitingThread=-1;
+	if((result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_QUERY_MAIN_NETIF, 0, NULL, 0, ReceiveBuffer, sizeof(struct NetManQueryMainNetIFResult), NULL, NULL))>=0){
+		if((result=((struct NetManQueryMainNetIFResult*)ReceiveBuffer)->result) == 0){
+			strncpy(name, ((struct NetManQueryMainNetIFResult*)ReceiveBuffer)->name, NETMAN_NETIF_NAME_MAX_LEN);
+			name[NETMAN_NETIF_NAME_MAX_LEN-1] = '\0';
+		}
+	}
 
-	SignalSema(NetManTxSemaID);
+	SignalSema(NetManIOSemaID);
 
-	return 0;
+	return result;
 }

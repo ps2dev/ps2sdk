@@ -207,6 +207,22 @@ struct netif {
   u8 num;
 };
 
+/* From include/lwip/dhcp.h: */
+/** DHCP client states */
+#define DHCP_REQUESTING 1
+#define DHCP_INIT 2
+#define DHCP_REBOOTING 3
+#define DHCP_REBINDING 4
+#define DHCP_RENEWING 5
+#define DHCP_SELECTING 6
+#define DHCP_INFORMING 7
+#define DHCP_CHECKING 8
+#define DHCP_PERMANENT 9
+#define DHCP_BOUND 10
+/** not yet implemented #define DHCP_RELEASING 11 */
+#define DHCP_BACKING_OFF 12
+#define DHCP_OFF 13
+
 /* From include/lwip/sockets.h:  */
 
 struct in_addr {

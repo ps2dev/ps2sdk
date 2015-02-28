@@ -73,7 +73,7 @@ ps2ip_getconfig(char* pszName,t_ip_info* pInfo)
 
 #if		LWIP_DHCP
 
-	if (pNetIF->dhcp)
+	if ((pNetIF->dhcp != NULL) && (pNetIF->dhcp->state != DHCP_OFF))
 	{
 		pInfo->dhcp_enabled=1;
 		pInfo->dhcp_status=pNetIF->dhcp->state;
@@ -81,7 +81,7 @@ ps2ip_getconfig(char* pszName,t_ip_info* pInfo)
 	else
 	{
 		pInfo->dhcp_enabled=0;
-		pInfo->dhcp_status=0;
+		pInfo->dhcp_status=DHCP_OFF;
 	}
 
 #else
@@ -113,21 +113,17 @@ ps2ip_setconfig(t_ip_info* pInfo)
 
 	if (pInfo->dhcp_enabled)
 	{
-		if (!pNetIF->dhcp)
+		if ((pNetIF->dhcp == NULL) || (pNetIF->dhcp->state == DHCP_OFF))
 		{
-
 			//Start dhcp client
-
 			dhcp_start(pNetIF);
 		}
 	}
 	else
 	{
-		if (pNetIF->dhcp)
+		if ((pNetIF->dhcp != NULL) && (pNetIF->dhcp->state != DHCP_OFF))
 		{
-
 			//Stop dhcp client
-
 			dhcp_stop(pNetIF);
 		}
 	}
@@ -351,7 +347,7 @@ static err_t SMapIFInit(struct netif* pNetIF)
 	pNetIF->linkoutput=&SMapLowLevelOutput;
 	pNetIF->hwaddr_len=NETIF_MAX_HWADDR_LEN;
 //	pNetIF->flags|=(NETIF_FLAG_LINK_UP|NETIF_FLAG_BROADCAST);			// For LWIP versions before v1.3.0.
-	pNetIF->flags|=(NETIF_FLAG_LINK_UP|NETIF_FLAG_ETHARP|NETIF_FLAG_BROADCAST);	// For LWIP v1.3.0 and later.
+	pNetIF->flags|=(NETIF_FLAG_ETHARP|NETIF_FLAG_BROADCAST);	// For LWIP v1.3.0 and later.
 	pNetIF->mtu=1500;
 
 	//Get MAC address.
@@ -406,11 +402,12 @@ static inline int InitLWIPStack(struct ip_addr *IP, struct ip_addr *NM, struct i
 	};
 
 	InitializeLWIP();
-	NetManInit(&stack);
 
 	netif_add(&NIF, IP, NM, GW, &NIF, &SMapIFInit, tcpip_input);
 	netif_set_default(&NIF);
-	netif_set_up(&NIF);	// For LWIP v1.3.0 and later.
+
+	NetManRegisterNetworkStack(&stack);
+	netif_set_up(&NIF);
 
 	return 0;
 }

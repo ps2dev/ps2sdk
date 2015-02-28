@@ -10,8 +10,12 @@ enum NETMAN_EE_RPC_FUNC_NUMS{
 enum NETMAN_IOP_RPC_FUNC_NUMS{
 	NETMAN_IOP_RPC_FUNC_INIT=0x00,
 	NETMAN_IOP_RPC_FUNC_DEINIT,
+	NETMAN_IOP_RPC_FUNC_REG_NETWORK_STACK,
+	NETMAN_IOP_RPC_FUNC_UNREG_NETWORK_STACK,
 	NETMAN_IOP_RPC_FUNC_IOCTL,
 	NETMAN_IOP_RPC_FUNC_SEND_PACKETS,
+	NETMAN_IOP_RPC_FUNC_SET_MAIN_NETIF,
+	NETMAN_IOP_RPC_FUNC_QUERY_MAIN_NETIF,
 };
 
 struct AlignmentData{
@@ -24,17 +28,23 @@ struct AlignmentData{
 	unsigned char buffer2[64];
 };
 
-struct NetManInit{
-	struct AlignmentData *AlignmentData;
-};
-
-struct NetManInitResult{
+struct NetManEEInitResult{
 	int result;
-	void *FrameTagBuffer;
+	void *FrameBuffer;
 };
 
-#define MAX_FRAME_SIZE		1600	//Keep aligned to 64 bytes.
-#define NETMAN_RPC_BLOCK_SIZE	31	//Keep aligned to 64 bytes (Check structures below).
+struct NetManRegNetworkStackResult{
+	int result;
+	void *FrameBuffer;
+};
+
+struct NetManQueryMainNetIFResult{
+	int result;
+	char name[NETMAN_NETIF_NAME_MAX_LEN];
+};
+
+#define MAX_FRAME_SIZE		1518
+#define NETMAN_RPC_BLOCK_SIZE	31
 
 struct PacketTag{
 	unsigned int length;
@@ -59,4 +69,3 @@ struct NetManIoctlResult{
 	int result;
 	unsigned char output[64];
 };
-
