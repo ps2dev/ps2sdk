@@ -22,96 +22,34 @@ NOTES:
 */
 
 #include <types.h>
+#include <loadcore.h>
 #include <stdio.h>
 #include <sifman.h>
-#include <sifrpc.h>
-#include <sysmem.h>
+#include <sifcmd.h>
 #include <sysclib.h>
 #include <thbase.h>
 #include <intrman.h>
 #include <ps2ip.h>
+#include <ps2ip_rpc.h>
 
 #include "../../dns/include/dns.h"
 
-#define PS2IP_IRX 0xB0125F2
-
-#define ID_ACCEPT 1
-#define ID_BIND   2
-#define ID_DISCONNECT  3
-#define ID_CONNECT 4
-#define ID_LISTEN  5
-#define ID_RECV    6
-#define ID_RECVFROM 8
-#define ID_SEND   9
-#define ID_SENDTO  10
-#define ID_SOCKET  11
-#define ID_SETCONFIG  12
-#define ID_GETCONFIG  13
-#define ID_SELECT   14
-#define ID_IOCTL    15
-#define ID_GETSOCKNAME	16
-#define ID_GETPEERNAME	17
-#define ID_GETSOCKOPT	18
-#define ID_SETSOCKOPT	19
-#define ID_GETHOSTBYNAME	20
+#define MODNAME	"TCP/IP_Stack_RPC"
+IRX_ID(MODNAME, 1, 1);
 
 #define BUFF_SIZE	(1024)
 
 #define MIN(a, b)	(((a)<(b))?(a):(b))
 #define RDOWN_16(a)	(((a) >> 4) << 4)
 
-static SifRpcDataQueue_t ps2ips_queue __attribute__((aligned(64)));
-static SifRpcServerData_t ps2ips_server __attribute((aligned(64)));
-static int _rpc_buffer[512] __attribute((aligned(64)));
+static SifRpcDataQueue_t ps2ips_queue;
+static SifRpcServerData_t ps2ips_server;
+static int _rpc_buffer[512];
 
-static char *lwip_buffer;
+static char lwip_buffer[BUFF_SIZE + 32];
+static rests_pkt rests;
 
-typedef struct {
-	int  ssize;
-	int  esize;
-	void *sbuf;
-	void *ebuf;
-	u8 sbuffer[16];
-	u8 ebuffer[16];
-} rests_pkt; // sizeof = 48
-
-static rests_pkt rests __attribute((aligned(64)));
-
-typedef struct {
-	int socket;
-	int length;
-	int flags;
-	void *ee_addr;
-	struct sockaddr sockaddr; // sizeof = 16
-	int malign;
-	unsigned char malign_buff[16]; // buffer for sending misaligned portion
-} send_pkt;
-
-typedef struct {
-	int socket;
-	int length;
-	int flags;
-	void *ee_addr;
-	void *intr_data;
-} s_recv_pkt;
-
-typedef struct {
-	int ret;
-	struct sockaddr sockaddr;
-} r_recv_pkt;
-
-typedef struct {
-	int socket;
-	struct sockaddr sockaddr;
-	int len;
-} cmd_pkt;
-
-typedef struct {
-	int retval;
-	struct sockaddr sockaddr;
-} ret_pkt;
-
-void do_accept( void * rpcBuffer, int size )
+static void do_accept( void * rpcBuffer, int size )
 {
 	int *ptr = rpcBuffer;
 	cmd_pkt *pkt = (cmd_pkt *)ptr;
@@ -125,7 +63,7 @@ void do_accept( void * rpcBuffer, int size )
 	pkt->len = sizeof(struct sockaddr);
 }
 
-void do_bind( void * rpcBuffer, int size )
+static void do_bind( void * rpcBuffer, int size )
 {
 	int *ptr = rpcBuffer;
 	cmd_pkt *pkt = (cmd_pkt *)rpcBuffer;
@@ -136,7 +74,7 @@ void do_bind( void * rpcBuffer, int size )
 	ptr[0] = ret;
 }
 
-void do_disconnect( void * rpcBuffer, int size )
+static void do_disconnect( void * rpcBuffer, int size )
 {
 	int *ptr = rpcBuffer;
 	int ret;
@@ -146,7 +84,7 @@ void do_disconnect( void * rpcBuffer, int size )
 	ptr[0] = ret;
 }
 
-void do_connect( void * rpcBuffer, int size )
+static void do_connect( void * rpcBuffer, int size )
 {
 	int *ptr = rpcBuffer;
 	cmd_pkt *pkt = (cmd_pkt *)_rpc_buffer;
@@ -157,7 +95,7 @@ void do_connect( void * rpcBuffer, int size )
 	ptr[0] = ret;
 }
 
-void do_listen( void * rpcBuffer, int size )
+static void do_listen( void * rpcBuffer, int size )
 {
 	int *ptr = rpcBuffer;
 	int ret;
@@ -167,158 +105,7 @@ void do_listen( void * rpcBuffer, int size )
 	ptr[0] = ret;
 }
 
-/*
-void do_recv( void * rpcBuffer, int size )
-{
-	int srest, erest, asize; // size of unaligned portion, remainder portion, aligned portion
-	void *abuffer, *aebuffer; // aligned buffer start, aligned buffer end
-	int total = 0, rlen, iter_len;
-	int dma_id = 0;
-	int intr_stat;
-	s_recv_pkt *recv_pkt = (s_recv_pkt *)rpcBuffer;
-	r_recv_pkt *ret_pkt = (r_recv_pkt *)rpcBuffer;
-	struct t_SifDmaTransfer sifdma;
-
-	if(recv_pkt->length < 16)
-	{
-		srest = recv_pkt->length;
-		erest = asize = (int)abuffer = (int)aebuffer = 0;
-
-	} else {
-
-		if( ((int)recv_pkt->ee_addr & 0xF) == 0 ) // ee address is aligned
-			srest = 0;
-		else
-			srest = RDOWN_16((int)recv_pkt->ee_addr) - (int)recv_pkt->ee_addr + 16;
-
-		abuffer = recv_pkt->ee_addr + srest; // aligned buffer start (round up)
-		aebuffer = (void *)RDOWN_16((int)recv_pkt->ee_addr + recv_pkt->length); // aligned buffer end (round down)
-
-		asize = (int)aebuffer - (int)abuffer;
-
-		erest = recv_pkt->ee_addr + recv_pkt->length - aebuffer;
-	}
-
-	if(srest > 0)
-	{
-//		printf("PS2IPS: recv: srest = %d\n", srest);
-
-		rlen = recv(recv_pkt->socket, rests.sbuffer, srest, recv_pkt->flags);
-
-		if(rlen != srest)
-		{
-			if(rlen > 0)
-				total += rlen;
-			else total = rlen;
-
-			goto recv_end;
-		}
-
-		total += rlen;
-	}
-
-	while(asize > 0)
-	{
-		iter_len = MIN(BUFF_SIZE, asize);
-
-		while(SifDmaStat(dma_id) >= 0); // Wait for previous DMA transfer to complete
-
-		rlen = recv(recv_pkt->socket, lwip_buffer, iter_len, recv_pkt->flags);
-
-		if(rlen != iter_len) // incomplete recv
-		{
-			int align_size;
-
-			if(rlen <= 0)
-			{
-				total = rlen;
-				erest = 0;
-				goto recv_end;
-			}
-
-			// Now must dma back data what was received, then re-calculate erest info
-//			align_size = (rlen >> 4) << 4;
-			align_size = RDOWN_16(rlen);
-			erest = rlen - align_size;
-			aebuffer = abuffer + align_size;
-			memcpy((void *)rests.ebuffer, (void *)&lwip_buffer[align_size], erest);
-
-//			printf("PS2IPS: recv: NEW erest = %d\n", erest);
-
-			total += rlen;
-
-			if(align_size >= 16)
-			{
-				sifdma.src = lwip_buffer;
-				sifdma.dest = abuffer;
-				sifdma.size = rlen;
-				sifdma.attr = 0;
-
-				CpuSuspendIntr(&intr_stat);
-				dma_id = SifSetDma(&sifdma, 1);
-				CpuResumeIntr(intr_stat);
-			}
-
-			goto recv_end;
-
-		} else { // recv ok
-
-			sifdma.src = lwip_buffer;
-			sifdma.dest = abuffer;
-			sifdma.size = rlen;
-			sifdma.attr = 0;
-
-			total += rlen;
-			asize -= rlen;
-			abuffer += rlen;
-
-			CpuSuspendIntr(&intr_stat);
-			dma_id = SifSetDma(&sifdma, 1);
-			CpuResumeIntr(intr_stat);
-
-		}
-	}
-
-	if(erest > 0)
-	{
-//		printf("PS2IPS: recv: erest = %d\n", erest);
-
-		rlen = recv(recv_pkt->socket, rests.ebuffer, erest, recv_pkt->flags);
-
-		if(rlen != erest)
-		{
-			if(rlen > 0)
-				total += rlen;
-			else total = rlen;
-
-			goto recv_end;
-		}
-
-		total += rlen;
-	}
-
-recv_end:
-
-	while(SifDmaStat(dma_id) >= 0);
-
-	rests.ssize = srest;
-	rests.esize = erest;
-	rests.sbuf = recv_pkt->ee_addr;
-	rests.ebuf = aebuffer;
-
-	sifdma.src = &rests;
-	sifdma.dest = recv_pkt->intr_data;
-	sifdma.size = sizeof(rests_pkt);
-	sifdma.attr = 0;
-	CpuSuspendIntr(&intr_stat);
-	SifSetDma(&sifdma, 1);
-	CpuResumeIntr(intr_stat);
-
-	ret_pkt->ret = total;
-}
-*/
-
-void do_recv( void * rpcBuffer, int size )
+static void do_recv( void * rpcBuffer, int size )
 {
 	int srest, erest, asize; // size of unaligned portion, remainder portion, aligned portion
 	void *abuffer, *aebuffer; // aligned buffer start, aligned buffer end
@@ -409,8 +196,7 @@ recv_end:
 	ret_pkt->ret = rlen;
 }
 
-
-void do_recvfrom( void * rpcBuffer, int size )
+static void do_recvfrom( void * rpcBuffer, int size )
 {
 	int srest, erest, asize; // size of unaligned portion, remainder portion, aligned portion
 	void *abuffer, *aebuffer; // aligned buffer start, aligned buffer end
@@ -506,78 +292,7 @@ recv_end:
 	ret_pkt->ret = rlen;
 }
 
-/*
-void do_send( void * rpcBuffer, int size )
-{
-	int *ptr = rpcBuffer;
-	send_pkt *pkt = (send_pkt *)rpcBuffer;
-	int left, total = 0, slen, iter_len;
-	void *ee_pos;
-	struct t_rpc_receive_data rdata;
-
-//	printf("PS2IPS: Send called. size = %d\n", pkt->length);
-//	printf("PS2IPS: Send data:\n\n\n");
-
-	left = pkt->length;
-
-	if(pkt->malign) // send misaligned portion
-	{
-//		printf("PS2IPS: Send: Misaligned EE addr\n");
-
-		slen = send(pkt->socket, pkt->malign_buff, pkt->malign, pkt->flags);
-
-//		printf("send ret = %d\n", slen);
-		pkt->malign_buff[slen] = '\0';
-//		printf("%s", pkt->malign_buff);
-
-		if(slen != pkt->malign)
-		{
-			if(slen > 0)
-				total += slen;
-			else total = slen;
-
-			goto send_end;
-		}
-
-		total += slen;
-		left -= slen;
-	}
-
-	ee_pos = pkt->ee_addr + pkt->malign;
-
-	while(left)
-	{
-		iter_len = MIN(BUFF_SIZE, left);
-		SifRpcGetOtherData(&rdata, ee_pos, lwip_buffer, iter_len, 0);
-		slen = send(pkt->socket, lwip_buffer, iter_len, pkt->flags);
-
-//		printf("send ret = %d\n", slen);
-		lwip_buffer[slen] = '\0';
-//		printf("%s", lwip_buffer);
-
-		if(slen != iter_len)
-		{
-			if(slen > 0)
-				total += slen;
-			else total = slen;
-
-			goto send_end;
-		}
-
-		left -= slen;
-		ee_pos += slen;
-		total += slen;
-
-	}
-
-send_end:
-	ptr[0] = total;
-//	printf("\n\nPS2IPS: Send ret = %d\n", total);
-}
-*/
-
-
-void do_send( void * rpcBuffer, int size )
+static void do_send( void * rpcBuffer, int size )
 {
 	int *ptr = rpcBuffer;
 	send_pkt *pkt = (send_pkt *)rpcBuffer;
@@ -608,7 +323,7 @@ void do_send( void * rpcBuffer, int size )
 }
 
 
-void do_sendto( void * rpcBuffer, int size )
+static void do_sendto( void * rpcBuffer, int size )
 {
 	int *ptr = rpcBuffer;
 	send_pkt *pkt = (send_pkt *)rpcBuffer;
@@ -638,7 +353,7 @@ void do_sendto( void * rpcBuffer, int size )
 	ptr[0] = slen;
 }
 
-void do_socket( void * rpcBuffer, int size )
+static void do_socket( void * rpcBuffer, int size )
 {
 	int *ptr = rpcBuffer;
 	int ret;
@@ -648,17 +363,17 @@ void do_socket( void * rpcBuffer, int size )
 	ptr[0] = ret;
 }
 
-void do_getconfig(void *rpcBuffer, int size)
+static void do_getconfig(void *rpcBuffer, int size)
 {
-    ps2ip_getconfig((char *)rpcBuffer, (t_ip_info *)rpcBuffer);
+	ps2ip_getconfig((char *)rpcBuffer, (t_ip_info *)rpcBuffer);
 }
 
-void do_setconfig(void *rpcBuffer, int size)
+static void do_setconfig(void *rpcBuffer, int size)
 {
-    ps2ip_setconfig((t_ip_info *)rpcBuffer);
+	ps2ip_setconfig((t_ip_info *)rpcBuffer);
 }
 
-void do_select( void * rpcBuffer, int size )
+static void do_select( void * rpcBuffer, int size )
 {
 	struct timeval timeout;
 	struct fd_set readset;
@@ -725,12 +440,10 @@ void do_select( void * rpcBuffer, int size )
 		((char*)rpcBuffer)[44] = exceptset_p->fd_bits[0];
 		((char*)rpcBuffer)[45] = exceptset_p->fd_bits[1];
 	}
-
-
 }
 
 // cmd should be 64 bits wide; I think.
-void do_ioctlsocket( void *rpcBuffer, int size )
+static void do_ioctlsocket( void *rpcBuffer, int size )
 {
 	int *ptr = rpcBuffer, ret;
 	int s;
@@ -750,7 +463,7 @@ void do_ioctlsocket( void *rpcBuffer, int size )
 	ret = ioctlsocket( s, cmd, argp );
 	ptr[0] = ret;
 }
-void do_getsockname( void *rpcBuffer, int size )
+static void do_getsockname( void *rpcBuffer, int size )
 {
 	int *ptr = rpcBuffer;
 	cmd_pkt *pkt = (cmd_pkt *)ptr;
@@ -764,7 +477,7 @@ void do_getsockname( void *rpcBuffer, int size )
 	pkt->len = sizeof(struct sockaddr);
 }
 
-void do_getpeername( void *rpcBuffer, int size )
+static void do_getpeername( void *rpcBuffer, int size )
 {
 	int *ptr = rpcBuffer;
 	cmd_pkt *pkt = (cmd_pkt *)ptr;
@@ -778,30 +491,24 @@ void do_getpeername( void *rpcBuffer, int size )
 	pkt->len = sizeof(struct sockaddr);
 }
 
-void do_getsockopt( void *rpcBuffer, int size )
+static void do_getsockopt( void *rpcBuffer, int size )
 {
-	int *ptr = rpcBuffer, ret;
-	int s;
-	int level;
-	int optname;
+	int ret, s, level, optname, optlen;
 	unsigned char optval[128];
-	int optlen;
 
-	s		= ((int*)_rpc_buffer)[0];
-	level	= ((int*)_rpc_buffer)[1];
-	optname	= ((int*)_rpc_buffer)[2];
+	s	= ((getsockopt_pkt*)rpcBuffer)->s;
+	level	= ((getsockopt_pkt*)rpcBuffer)->level;
+	optname	= ((getsockopt_pkt*)rpcBuffer)->optname;
 	optlen	= sizeof(optval);
 
 	ret = getsockopt(s, level, optname, optval, &optlen);
 
-	ptr[0] = ret;						// 4
-	ptr[1] = optlen;					// 4
-	memcpy( &ptr[2], optval, 128 );		// 128
-
-	// 136 bytes returned
+	((getsockopt_res_pkt*)rpcBuffer)->result = ret;
+	((getsockopt_res_pkt*)rpcBuffer)->optlen = optlen;
+	memcpy( ((getsockopt_res_pkt*)rpcBuffer)->buffer, optval, 128 );
 }
 
-void do_setsockopt( void *rpcBuffer, int size )
+static void do_setsockopt( void *rpcBuffer, int size )
 {
 	int *ptr = rpcBuffer, ret;
 	int s;
@@ -810,17 +517,17 @@ void do_setsockopt( void *rpcBuffer, int size )
 	int optlen;
 	unsigned char optval[128];
 
-	s		= ((int*)_rpc_buffer)[0];
-	level	= ((int*)_rpc_buffer)[1];
-	optname	= ((int*)_rpc_buffer)[2];
-	optlen	= ((int*)_rpc_buffer)[3];
-	memcpy(optval, &_rpc_buffer[4], optlen);
+	s	= ((setsockopt_pkt*)rpcBuffer)->s;
+	level	= ((setsockopt_pkt*)rpcBuffer)->level;
+	optname	= ((setsockopt_pkt*)rpcBuffer)->optname;
+	optlen	= ((setsockopt_pkt*)rpcBuffer)->optlen;
+	memcpy(optval, ((setsockopt_pkt*)rpcBuffer)->buffer, optlen);
 
 	ret = setsockopt(s, level, optname, optval, optlen);
 	ptr[0] = ret;
 }
 
-void do_gethostbyname( void *rpcBuffer, int size )
+static void do_gethostbyname( void *rpcBuffer, int size )
 {
 	int *ptr = rpcBuffer, ret;
 	struct in_addr addr;
@@ -831,125 +538,106 @@ void do_gethostbyname( void *rpcBuffer, int size )
 	memcpy(&ptr[1], &addr, sizeof(struct in_addr));
 }
 
-void * rpcHandlerFunction(unsigned int command, void * rpcBuffer, int size)
+static void * rpcHandlerFunction(unsigned int command, void * rpcBuffer, int size)
 {
-
-  switch(command)
-  {
-  case ID_ACCEPT:
+	switch(command)
+	{
+	case PS2IPS_ID_ACCEPT:
 		do_accept(rpcBuffer, size);
-        break;
-  case ID_BIND:
+		break;
+	case PS2IPS_ID_BIND:
 		do_bind(rpcBuffer, size);
-        break;
-  case ID_DISCONNECT:
+		break;
+	case PS2IPS_ID_DISCONNECT:
 		do_disconnect(rpcBuffer, size);
-        break;
-  case ID_CONNECT:
+		break;
+	case PS2IPS_ID_CONNECT:
 		do_connect(rpcBuffer, size);
-        break;
-  case ID_LISTEN:
+		break;
+	case PS2IPS_ID_LISTEN:
 		do_listen(rpcBuffer, size);
-        break;
-  case ID_RECV:
+		break;
+	case PS2IPS_ID_RECV:
 		do_recv(rpcBuffer, size);
-        break;
-  case ID_RECVFROM:
+		break;
+	case PS2IPS_ID_RECVFROM:
 		do_recvfrom(rpcBuffer, size);
-        break;
-  case ID_SEND:
+		break;
+	case PS2IPS_ID_SEND:
 		do_send(rpcBuffer, size);
-        break;
-  case ID_SENDTO:
+		break;
+	case PS2IPS_ID_SENDTO:
 		do_sendto(rpcBuffer, size);
-        break;
-  case ID_SOCKET:
+		break;
+	case PS2IPS_ID_SOCKET:
 		do_socket(rpcBuffer, size);
-        break;
-  case ID_GETCONFIG:
-        do_getconfig(rpcBuffer, size);
-        break;
-  case ID_SETCONFIG:
-        do_setconfig(rpcBuffer, size);
-        break;
-  case ID_SELECT:
+		break;
+	case PS2IPS_ID_GETCONFIG:
+		do_getconfig(rpcBuffer, size);
+		break;
+	case PS2IPS_ID_SETCONFIG:
+		do_setconfig(rpcBuffer, size);
+		break;
+	case PS2IPS_ID_SELECT:
 		do_select(rpcBuffer, size);
-        break;
-  case ID_IOCTL:
+		break;
+	case PS2IPS_ID_IOCTL:
 		do_ioctlsocket(rpcBuffer, size);
 		break;
-  case ID_GETSOCKNAME:
+	case PS2IPS_ID_GETSOCKNAME:
 		do_getsockname(rpcBuffer, size);
 		break;
-  case ID_GETPEERNAME:
+	case PS2IPS_ID_GETPEERNAME:
 		do_getpeername(rpcBuffer, size);
 		break;
-  case ID_GETSOCKOPT:
+	case PS2IPS_ID_GETSOCKOPT:
 		do_getsockopt(rpcBuffer, size);
 		break;
-  case ID_SETSOCKOPT:
+	case PS2IPS_ID_SETSOCKOPT:
 		do_setsockopt(rpcBuffer, size);
 		break;
-  case ID_GETHOSTBYNAME:
+	case PS2IPS_ID_GETHOSTBYNAME:
 		do_gethostbyname(rpcBuffer, size);
 		break;
-  default:
-        printf("PS2IPS: Unknown Function called!\n");
+	default:
+		printf("PS2IPS: Unknown Function called!\n");
 
   }
 
   return rpcBuffer;
 }
 
-
-void threadRpcFunction()
+static void threadRpcFunction(void *arg)
 {
-   int threadId;
+	printf("PS2IPS: RPC Thread Started\n");
 
-   printf("PS2IPS: RPC Thread Started\n");
-
-   // Allocate buffer for send/revc
-   lwip_buffer = AllocSysMemory(0, BUFF_SIZE + 32, NULL);
-   if(!lwip_buffer)
-   {
-      printf( "PS2IPS: ERROR! Failed to allocate memory!\n");
-	  return;
-   }
-   memset((void *)lwip_buffer,0, BUFF_SIZE + 32);
-
-   SifInitRpc( 0 );
-   threadId = GetThreadId();
-
-   SifSetRpcQueue( &ps2ips_queue , threadId );
-   SifRegisterRpc( &ps2ips_server, PS2IP_IRX, (void *)rpcHandlerFunction,(u8 *)&_rpc_buffer,0,0, &ps2ips_queue );
-   SifRpcLoop( &ps2ips_queue );
-
+	SifSetRpcQueue( &ps2ips_queue , GetThreadId() );
+	SifRegisterRpc( &ps2ips_server, PS2IP_IRX, (void *)rpcHandlerFunction,(u8 *)&_rpc_buffer,NULL,NULL, &ps2ips_queue );
+	SifRpcLoop( &ps2ips_queue );
 }
 
-
-int _start( int argc, char **argv)
+int _start( int argc, char *argv[])
 {
-   int				threadId;
-   iop_thread_t	t;
+	int		threadId;
+	iop_thread_t	t;
 
-   printf( "PS2IPS: Module Loaded.\n" );
+	printf( "PS2IPS: Module Loaded.\n" );
 
-   t.attr = TH_C;
-   t.option = 0;
-   t.thread = threadRpcFunction;
-   t.stacksize = 0x800;
-   t.priority = 0x1e;
+	t.attr = TH_C;
+	t.option = 0;
+	t.thread = &threadRpcFunction;
+	t.stacksize = 0x800;
+	t.priority = 0x1e;
 
-   threadId = CreateThread( &t );
-   if ( threadId < 0 )
-   {
-       printf( "PS2IPS: CreateThread failed.  %i\n", threadId );
-   }
-   else
-   {
-       StartThread( threadId, 0 );
-   }
-
-   return 0;
+	threadId = CreateThread( &t );
+	if ( threadId < 0 )
+	{
+		printf( "PS2IPS: CreateThread failed.  %i\n", threadId );
+		return MODULE_NO_RESIDENT_END;
+	}
+	else
+	{
+		StartThread( threadId, NULL );
+		return MODULE_RESIDENT_END;
+	}
 }
-

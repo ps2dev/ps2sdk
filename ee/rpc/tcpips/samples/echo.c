@@ -18,16 +18,13 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "ps2ip.h"
+#include "ps2ips.h"
 
 
 void serverThread();
 
-int main()
+int main(int argc, char *argv[])
 {
-    // char args[LF_ARG_MAX];
-    // int argsLen;
-
 	SifInitRpc(0);
 
 	SifLoadModule("host:ps2ips.irx", 0, NULL);
