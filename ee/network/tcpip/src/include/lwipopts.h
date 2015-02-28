@@ -24,14 +24,14 @@
  * The stack size value itself is platform-dependent, but is passed to
  * sys_thread_new() when the thread is created.
  */
-#define DEFAULT_THREAD_STACKSIZE	0x600
+#define DEFAULT_THREAD_STACKSIZE	0x1000
 
 /**
  * DEFAULT_THREAD_PRIO: The priority assigned to any other lwIP thread.
  * The priority value itself is platform-dependent, but is passed to
  * sys_thread_new() when the thread is created.
  */
-#define DEFAULT_THREAD_PRIO		0x18
+#define DEFAULT_THREAD_PRIO		0x58
 
 /**
  * TCPIP_THREAD_STACKSIZE: The stack size used by the main tcpip thread.
@@ -101,14 +101,11 @@
 #define MEM_ALIGNMENT		4
 
 /* ---------- Pbuf options ---------- */
-/* PBUF_POOL_BUFSIZE: the size of each pbuf in the pbuf pool. */
-//Boman666: Should be atleast 1518 to be compatible with ps2smap
-//#define PBUF_POOL_BUFSIZE       1540
 
 /**
  * PBUF_POOL_SIZE: the number of buffers in the pbuf pool.
  */
-#define PBUF_POOL_SIZE		25//((TCP_WND/PBUF_POOL_BUFSIZE)+1)
+#define PBUF_POOL_SIZE		60//((TCP_WND/PBUF_POOL_BUFSIZE)+1)
 
 /** SYS_LIGHTWEIGHT_PROT
  * define SYS_LIGHTWEIGHT_PROT in lwipopts.h if you want inter-task protection
@@ -129,7 +126,7 @@
 #define TCP_SND_BUF             (TCP_MSS*4)
 
 /* TCP receive window. */
-#define TCP_WND                 32768
+#define TCP_WND                 65535
 
 /* ---------- ARP options ---------- */
 /**
@@ -149,7 +146,7 @@
  * without this padding e.g. addresses in the IP header will not be aligned
  * on a 32-bit boundary, so setting this to 2 can speed up 32-bit-platforms.
  */
-//#define ETH_PAD_SIZE	4
+//#define ETH_PAD_SIZE	2
 
 /* ---------- ICMP options ---------- */
 
@@ -178,16 +175,6 @@
  * LWIP_RAW==1: Enable application layer to hook into the IP layer itself.
  */
 #define LWIP_RAW	0
-
-/*
-   ------------------------------------
-   ---------- LOOPIF options ----------
-   ------------------------------------
-*/
-/**
- * LWIP_HAVE_LOOPIF==1: Support loop interface (127.0.0.1) and loopif.c
- */
-//#define LWIP_HAVE_LOOPIF	1
 
 /*
    --------------------------------------

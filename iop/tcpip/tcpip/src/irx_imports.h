@@ -7,23 +7,23 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
+# $Id: irx_imports.h 1680 2010-05-17 22:47:17Z jim $
 # Defines all IRX imports.
 */
 
 #ifndef IOP_IRX_IMPORTS_H
 #define IOP_IRX_IMPORTS_H
 
-#include "irx.h"
+#include <irx.h>
 
 /* Please keep these in alphabetical order!  */
-#include "intrman.h"
-#include "loadcore.h"
-#include "stdio.h"
-#include "sysclib.h"
-#include "sysmem.h"
-#include "thbase.h"
-#include "thsemap.h"
-#include "thmsgbx.h"
+#include <intrman.h>
+#include <loadcore.h>
+#include <stdio.h>
+#include <sysclib.h>
+#include <sysmem.h>
+#include <thbase.h>
+#include <thsemap.h>
+#include <thmsgbx.h>
 
 #endif /* IOP_IRX_IMPORTS_H */

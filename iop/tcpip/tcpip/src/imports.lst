@@ -46,6 +46,11 @@ sysclib_IMPORTS_start
 I_memset
 I_strcpy
 I_memcpy
+I_strlen
+I_strncmp
+I_strtok
+I_strtoul
+I_memcmp
 sysclib_IMPORTS_end
 
 sysmem_IMPORTS_start

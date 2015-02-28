@@ -7,7 +7,8 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
+# $
+# Common definitions file for the LWIP v1.4.1 port.
 */
 
 #ifndef _TCPIP_H
@@ -16,8 +17,14 @@
 /* Some portions of this header fall under the following copyright.  The license
    is compatible with that of ps2sdk.
 
-   For compiling with DHCP support, any file that uses the netif structure
-   (e.g. interface driver, TCP/IP stack) must have LWIP_DHCP defined to 1. */
+   This port of LWIP has LWIP_DHCP defined by default.	*/
+
+#ifndef PS2IP_DHCP
+#define PS2IP_DHCP	1
+#endif
+#ifndef LWIP_DHCP
+#define LWIP_DHCP	1
+#endif
 
 /*
  * Copyright (c) 2001-2003 Swedish Institute of Computer Science.
@@ -55,8 +62,8 @@ typedef signed char	err_t;	/* lwIP error type.  */
 
 /* From src/include/lwip/pbuf.h:  */
 
-#define PBUF_TRANSPORT_HLEN	20
-#define PBUF_IP_HLEN				20
+#define PBUF_TRANSPORT_HLEN 20
+#define PBUF_IP_HLEN        20
 
 typedef enum {
   PBUF_TRANSPORT,
@@ -66,18 +73,11 @@ typedef enum {
 } pbuf_layer;
 
 typedef enum {
-  PBUF_RAM,
-  PBUF_ROM,
-  PBUF_REF,
-  PBUF_POOL
-} pbuf_flag;
-
-/* Definitions for the pbuf flag field (these are not the flags that
-   are passed to pbuf_alloc()). */
-#define PBUF_FLAG_RAM	0x00    /* Flags that pbuf data is stored in RAM */
-#define PBUF_FLAG_ROM	0x01    /* Flags that pbuf data is stored in ROM */
-#define PBUF_FLAG_POOL	0x02    /* Flags that the pbuf comes from the pbuf pool */
-#define PBUF_FLAG_REF	0x04    /* Flags thet the pbuf payload refers to RAM */
+  PBUF_RAM, /* pbuf data is stored in RAM */
+  PBUF_ROM, /* pbuf data is stored in ROM */
+  PBUF_REF, /* pbuf comes from the pbuf pool */
+  PBUF_POOL /* pbuf payload refers to RAM */
+} pbuf_type;
 
 struct pbuf {
   /** next pbuf in singly linked pbuf chain */
@@ -88,15 +88,21 @@ struct pbuf {
 
   /**
    * total length of this buffer and all next buffers in chain
-   * invariant: p->tot_len == p->len + (p->next? p->next->tot_len: 0)
+   * belonging to the same packet.
+   *
+   * For non-queue packet chains this is the invariant:
+   * p->tot_len == p->len + (p->next? p->next->tot_len: 0)
    */
   u16 tot_len;
 
-  /* length of this buffer */
+  /** length of this buffer */
   u16 len;
 
-  /* flags telling the type of pbuf */
-  u16 flags;
+  /** pbuf_type as u8 instead of enum to save space */
+  u8 /*pbuf_type*/ type;
+
+  /** misc flags */
+  u8 flags;
 
   /**
    * the reference count always equals the number of pointers
@@ -108,125 +114,298 @@ struct pbuf {
 
 /* From include/ipv4/lwip/ip_addr.h:  */
 
-struct ip_addr {
+/* This is the aligned version of ip_addr_t,
+   used as local variable, on the stack, etc. */
+typedef struct ip_addr {
   u32 addr;
-};
+} ip_addr_t;
 
-#define IP4_ADDR(ipaddr, a,b,c,d) (ipaddr)->addr = htonl(((u32)(a & 0xff) << 24) | ((u32)(b & 0xff) << 16) | \
-                                                         ((u32)(c & 0xff) << 8) | (u32)(d & 0xff))
+/** IP_ADDR_ can be used as a fixed IP address
+ *  for the wildcard and the broadcast address
+ */
+#define IP_ADDR_ANY         ((ip_addr_t *)&ip_addr_any)
+#define IP_ADDR_BROADCAST   ((ip_addr_t *)&ip_addr_broadcast)
 
-#define ip_addr_set(dest, src) (dest)->addr = ((struct ip_addr *)src)->addr
-#define ip_addr_maskcmp(addr1, addr2, mask) (((addr1)->addr & \
+/** 255.255.255.255 */
+#define IPADDR_NONE         ((u32)0xffffffffUL)
+/** 127.0.0.1 */
+#define IPADDR_LOOPBACK     ((u32)0x7f000001UL)
+/** 0.0.0.0 */
+#define IPADDR_ANY          ((u32)0x00000000UL)
+/** 255.255.255.255 */
+#define IPADDR_BROADCAST    ((u32)0xffffffffUL)
+
+/** Set an IP address given by the four byte-parts.
+    Little-endian version that prevents the use of htonl. */
+#define IP4_ADDR(ipaddr, a,b,c,d) \
+        (ipaddr)->addr = ((u32)((d) & 0xff) << 24) | \
+                         ((u32)((c) & 0xff) << 16) | \
+                         ((u32)((b) & 0xff) << 8)  | \
+                          (u32)((a) & 0xff)
+
+/** Copy IP address - faster than ip_addr_set: no NULL check */
+#define ip_addr_copy(dest, src) ((dest).addr = (src).addr)
+/** Safely copy one IP address to another (src may be NULL) */
+#define ip_addr_set(dest, src) ((dest)->addr = \
+                                    ((src) == NULL ? 0 : \
+                                    (src)->addr))
+
+/**
+ * Determine if two address are on the same network.
+ *
+ * @arg addr1 IP address 1
+ * @arg addr2 IP address 2
+ * @arg mask network identifier mask
+ * @return !0 if the network identifiers of both address match
+ */
+#define ip_addr_netcmp(addr1, addr2, mask) (((addr1)->addr & \
                                               (mask)->addr) == \
                                              ((addr2)->addr & \
                                               (mask)->addr))
 #define ip_addr_cmp(addr1, addr2) ((addr1)->addr == (addr2)->addr)
 
-#define ip_addr_isany(addr1) ((addr1) == NULL || (addr1)->addr == 0)
+#define ip_addr_isany(addr1) ((addr1) == NULL || (addr1)->addr == IPADDR_ANY)
 
 #define ip_addr_isbroadcast(addr1, mask) (((((addr1)->addr) & ~((mask)->addr)) == \
-					 (0xffffffff & ~((mask)->addr))) || \
-                                         ((addr1)->addr == 0xffffffff) || \
+					 (IPADDR_BROADCAST & ~((mask)->addr))) || \
+                                         ((addr1)->addr == IPADDR_BROADCAST) || \
                                          ((addr1)->addr == 0x00000000))
 
-#define ip_addr_ismulticast(addr1) (((addr1)->addr & ntohl(0xf0000000)) == ntohl(0xe0000000))
+#define ip_addr_ismulticast(addr1) (((addr1)->addr & PP_HTONL(0xf0000000UL)) == PP_HTONL(0xe0000000UL))
 
-#define ip4_addr1(ipaddr) ((u8)(ntohl((ipaddr)->addr) >> 24) & 0xff)
-#define ip4_addr2(ipaddr) ((u8)(ntohl((ipaddr)->addr) >> 16) & 0xff)
-#define ip4_addr3(ipaddr) ((u8)(ntohl((ipaddr)->addr) >> 8) & 0xff)
-#define ip4_addr4(ipaddr) ((u8)(ntohl((ipaddr)->addr)) & 0xff)
-
+/* Get one byte from the 4-byte address */
+#define ip4_addr1(ipaddr) (((u8*)(ipaddr))[0])
+#define ip4_addr2(ipaddr) (((u8*)(ipaddr))[1])
+#define ip4_addr3(ipaddr) (((u8*)(ipaddr))[2])
+#define ip4_addr4(ipaddr) (((u8*)(ipaddr))[3])
 
 /* From include/lwip/netif.h:  */
 
 /** must be the maximum of all used hardware address lengths
     across all types of interfaces in use */
-#define NETIF_MAX_HWADDR_LEN	6U
+#define NETIF_MAX_HWADDR_LEN 6U
 
-/** TODO: define the use (where, when, whom) of netif flags */
-
-/** whether the network interface is 'up'. this is
+/** Whether the network interface is 'up'. This is
  * a software flag used to control whether this network
- * interface is enabled and processes traffic */
-#define NETIF_FLAG_UP				0x1U
-/** if set, the netif has broadcast capability */
-#define NETIF_FLAG_BROADCAST		0x2U
-/** if set, the netif is one end of a point-to-point connection */
-#define NETIF_FLAG_POINTTOPOINT	0x4U
-/** if set, the interface is configured using DHCP */
-#define NETIF_FLAG_DHCP				0x08U
-/** if set, the interface has an active link
- *  (set by the interface) */
-#define NETIF_FLAG_LINK_UP			0x10U
+ * interface is enabled and processes traffic.
+ * It is set by the startup code (for static IP configuration) or
+ * by dhcp/autoip when an address has been assigned.
+ */
+#define NETIF_FLAG_UP           0x01U
+/** If set, the netif has broadcast capability.
+ * Set by the netif driver in its init function. */
+#define NETIF_FLAG_BROADCAST    0x02U
+/** If set, the netif is one end of a point-to-point connection.
+ * Set by the netif driver in its init function. */
+#define NETIF_FLAG_POINTTOPOINT 0x04U
+/** If set, the interface is configured using DHCP.
+ * Set by the DHCP code when starting or stopping DHCP. */
+#define NETIF_FLAG_DHCP         0x08U
+/** If set, the interface has an active link
+ *  (set by the network interface driver).
+ * Either set by the netif driver in its init function (if the link
+ * is up at that time) or at a later point once the link comes up
+ * (if link detection is supported by the hardware). */
+#define NETIF_FLAG_LINK_UP      0x10U
+/** If set, the netif is an ethernet device using ARP.
+ * Set by the netif driver in its init function.
+ * Used to check input packet types and use of DHCP. */
+#define NETIF_FLAG_ETHARP       0x20U
+/** If set, the netif is an ethernet device. It might not use
+ * ARP or TCP/IP if it is used for PPPoE only.
+ */
+#define NETIF_FLAG_ETHERNET     0x40U
+/** If set, the netif has IGMP capability.
+ * Set by the netif driver in its init function. */
+#define NETIF_FLAG_IGMP         0x80U
+
+/*** Taken from opt.h. If changes were made to lwipopts.h, please update this section. ****/
+/**
+ * MEMP_NUM_NETCONN: the number of struct netconns.
+ * (only needed if you use the sequential API, like api_lib.c)
+ */
+#define MEMP_NUM_NETCONN	4
+
+#define LWIP_NETIF_STATUS_CALLBACK	0
+#define LWIP_NETIF_LINK_CALLBACK	0
+#define LWIP_AUTOIP	0
+#define LWIP_NETIF_HOSTNAME	0
+#define LWIP_SNMP	0
+#define LWIP_IGMP	0
+#define LWIP_NETIF_HWADDRHINT	0
+#define ENABLE_LOOPBACK	1
+#define LWIP_LOOPBACK_MAX_PBUFS	0
+
+struct netif;
+
+/** Function prototype for netif init functions. Set up flags and output/linkoutput
+ * callback functions in this function.
+ *
+ * @param netif The netif to initialize
+ */
+typedef err_t (*netif_init_fn)(struct netif *netif);
+/** Function prototype for netif->input functions. This function is saved as 'input'
+ * callback function in the netif struct. Call it when a packet has been received.
+ *
+ * @param p The received packet, copied into a pbuf
+ * @param inp The netif which received the packet
+ */
+typedef err_t (*netif_input_fn)(struct pbuf *p, struct netif *inp);
+/** Function prototype for netif->output functions. Called by lwIP when a packet
+ * shall be sent. For ethernet netif, set this to 'etharp_output' and set
+ * 'linkoutput'.
+ *
+ * @param netif The netif which shall send a packet
+ * @param p The packet to send (p->payload points to IP header)
+ * @param ipaddr The IP address to which the packet shall be sent
+ */
+typedef err_t (*netif_output_fn)(struct netif *netif, struct pbuf *p,
+       ip_addr_t *ipaddr);
+
+/** Function prototype for netif->linkoutput functions. Only used for ethernet
+ * netifs. This function is called by ARP when a packet shall be sent.
+ *
+ * @param netif The netif which shall send a packet
+ * @param p The packet to send (raw ethernet packet)
+ */
+typedef err_t (*netif_linkoutput_fn)(struct netif *netif, struct pbuf *p);
+/** Function prototype for netif status- or link-callback functions. */
+typedef void (*netif_status_callback_fn)(struct netif *netif);
+/** Function prototype for netif igmp_mac_filter functions */
+typedef err_t (*netif_igmp_mac_filter_fn)(struct netif *netif,
+       ip_addr_t *group, u8 action);
 
 /** Generic data structure used for all lwIP network interfaces.
  *  The following fields should be filled in by the initialization
  *  function for the device driver: hwaddr_len, hwaddr[], mtu, flags */
-
 struct netif {
   /** pointer to next in linked list */
   struct netif *next;
 
   /** IP address configuration in network byte order */
-  struct ip_addr ip_addr;
-  struct ip_addr netmask;
-  struct ip_addr gw;
+  ip_addr_t ip_addr;
+  ip_addr_t netmask;
+  ip_addr_t gw;
 
   /** This function is called by the network device driver
    *  to pass a packet up the TCP/IP stack. */
-  err_t (* input)(struct pbuf *p, struct netif *inp);
+  netif_input_fn input;
   /** This function is called by the IP module when it wants
    *  to send a packet on the interface. This function typically
    *  first resolves the hardware address, then sends the packet. */
-  err_t (* output)(struct netif *netif, struct pbuf *p,
-       struct ip_addr *ipaddr);
+  netif_output_fn output;
   /** This function is called by the ARP module when it wants
    *  to send a packet on the interface. This function outputs
    *  the pbuf as-is on the link medium. */
-  err_t (* linkoutput)(struct netif *netif, struct pbuf *p);
+  netif_linkoutput_fn linkoutput;
+#if LWIP_NETIF_STATUS_CALLBACK
+  /** This function is called when the netif state is set to up or down
+   */
+  netif_status_callback_fn status_callback;
+#endif /* LWIP_NETIF_STATUS_CALLBACK */
+#if LWIP_NETIF_LINK_CALLBACK
+  /** This function is called when the netif link is set to up or down
+   */
+  netif_status_callback_fn link_callback;
+#endif /* LWIP_NETIF_LINK_CALLBACK */
   /** This field can be set by the device driver and could point
    *  to state information for the device. */
   void *state;
 #if LWIP_DHCP
   /** the DHCP client state information for this netif */
   struct dhcp *dhcp;
+#endif /* LWIP_DHCP */
+#if LWIP_AUTOIP
+  /** the AutoIP client state information for this netif */
+  struct autoip *autoip;
 #endif
+#if LWIP_NETIF_HOSTNAME
+  /* the hostname for this netif, NULL is a valid value */
+  char*  hostname;
+#endif /* LWIP_NETIF_HOSTNAME */
+  /** maximum transfer unit (in bytes) */
+  u16 mtu;
   /** number of bytes used in hwaddr */
   u8 hwaddr_len;
   /** link level hardware address of this interface */
   u8 hwaddr[NETIF_MAX_HWADDR_LEN];
-  /** maximum transfer unit (in bytes) */
-  u16 mtu;
   /** flags (see NETIF_FLAG_ above) */
   u8 flags;
-  /** link type */
-  u8 link_type;
   /** descriptive abbreviation */
   char name[2];
   /** number of this interface */
   u8 num;
+#if LWIP_SNMP
+  /** link type (from "snmp_ifType" enum from snmp.h) */
+  u8 link_type;
+  /** (estimate) link speed */
+  u32 link_speed;
+  /** timestamp at last change made (up/down) */
+  u32 ts;
+  /** counters */
+  u32 ifinoctets;
+  u32 ifinucastpkts;
+  u32 ifinnucastpkts;
+  u32 ifindiscards;
+  u32 ifoutoctets;
+  u32 ifoutucastpkts;
+  u32 ifoutnucastpkts;
+  u32 ifoutdiscards;
+#endif /* LWIP_SNMP */
+#if LWIP_IGMP
+  /** This function could be called to add or delete a entry in the multicast
+      filter table of the ethernet MAC.*/
+  netif_igmp_mac_filter_fn igmp_mac_filter;
+#endif /* LWIP_IGMP */
+#if LWIP_NETIF_HWADDRHINT
+  u8 *addr_hint;
+#endif /* LWIP_NETIF_HWADDRHINT */
+#if ENABLE_LOOPBACK
+  /* List of packets to be queued for ourselves. */
+  struct pbuf *loop_first;
+  struct pbuf *loop_last;
+#if LWIP_LOOPBACK_MAX_PBUFS
+  u16 loop_cnt_current;
+#endif /* LWIP_LOOPBACK_MAX_PBUFS */
+#endif /* ENABLE_LOOPBACK */
 };
 
 /* From include/lwip/dhcp.h: */
 /** DHCP client states */
-#define DHCP_REQUESTING 1
-#define DHCP_INIT 2
-#define DHCP_REBOOTING 3
-#define DHCP_REBINDING 4
-#define DHCP_RENEWING 5
-#define DHCP_SELECTING 6
-#define DHCP_INFORMING 7
-#define DHCP_CHECKING 8
-#define DHCP_PERMANENT 9
-#define DHCP_BOUND 10
+#define DHCP_OFF          0
+#define DHCP_REQUESTING   1
+#define DHCP_INIT         2
+#define DHCP_REBOOTING    3
+#define DHCP_REBINDING    4
+#define DHCP_RENEWING     5
+#define DHCP_SELECTING    6
+#define DHCP_INFORMING    7
+#define DHCP_CHECKING     8
+#define DHCP_PERMANENT    9
+#define DHCP_BOUND        10
 /** not yet implemented #define DHCP_RELEASING 11 */
-#define DHCP_BACKING_OFF 12
-#define DHCP_OFF 13
+#define DHCP_BACKING_OFF  12
 
-/* From include/lwip/sockets.h:  */
+/* From include/lwip/inet.h: */
 
 struct in_addr {
   u32 s_addr;
+};
+
+/** 255.255.255.255 */
+#define INADDR_NONE         IPADDR_NONE
+/** 127.0.0.1 */
+#define INADDR_LOOPBACK     IPADDR_LOOPBACK
+/** 0.0.0.0 */
+#define INADDR_ANY          IPADDR_ANY
+/** 255.255.255.255 */
+#define INADDR_BROADCAST    IPADDR_BROADCAST
+
+/* From include/lwip/sockets.h:  */
+
+struct timeval {
+  long    tv_sec;         /* seconds */
+  long    tv_usec;        /* and microseconds */
 };
 
 struct sockaddr_in {
@@ -247,79 +426,85 @@ struct sockaddr {
 #  define socklen_t int
 #endif
 
+/* Socket protocol types (TCP/UDP/RAW) */
 #define	SOCK_STREAM     1
 #define	SOCK_DGRAM      2
 #define	SOCK_RAW        3
 
 /*
- * Option flags per-socket.
+ * Option flags per-socket. These must match the SOF_ flags in ip.h (checked in init.c)
  */
-#define	SO_DEBUG				0x0001		/* turn on debugging info recording */
-#define	SO_ACCEPTCONN		0x0002		/* socket has had listen() */
-#define	SO_REUSEADDR		0x0004		/* allow local address reuse */
-#define	SO_KEEPALIVE		0x0008		/* keep connections alive */
-#define	SO_DONTROUTE		0x0010		/* just use interface addresses */
-#define	SO_BROADCAST		0x0020		/* permit sending of broadcast msgs */
-#define	SO_USELOOPBACK		0x0040		/* bypass hardware when possible */
-#define	SO_LINGER			0x0080		/* linger on close if data present */
-#define	SO_OOBINLINE		0x0100		/* leave received OOB data in line */
+#define  SO_DEBUG       0x0001 /* Unimplemented: turn on debugging info recording */
+#define  SO_ACCEPTCONN  0x0002 /* socket has had listen() */
+#define  SO_REUSEADDR   0x0004 /* Allow local address reuse */
+#define  SO_KEEPALIVE   0x0008 /* keep connections alive */
+#define  SO_DONTROUTE   0x0010 /* Unimplemented: just use interface addresses */
+#define  SO_BROADCAST   0x0020 /* permit to send and to receive broadcast messages (see IP_SOF_BROADCAST option) */
+#define  SO_USELOOPBACK 0x0040 /* Unimplemented: bypass hardware when possible */
+#define  SO_LINGER      0x0080 /* linger on close if data present */
+#define  SO_OOBINLINE   0x0100 /* Unimplemented: leave received OOB data in line */
+#define  SO_REUSEPORT   0x0200 /* Unimplemented: allow local address & port reuse */
 
-#define	SO_DONTLINGER   (int)(~SO_LINGER)
+#define SO_DONTLINGER   ((int)(~SO_LINGER))
+
 
 /*
  * Additional options, not kept in so_options.
  */
-#define	SO_SNDBUF		0x1001		/* send buffer size */
-#define	SO_RCVBUF		0x1002		/* receive buffer size */
-#define	SO_SNDLOWAT		0x1003		/* send low-water mark */
-#define	SO_RCVLOWAT		0x1004		/* receive low-water mark */
-#define	SO_SNDTIMEO		0x1005		/* send timeout */
-#define	SO_RCVTIMEO		0x1006		/* receive timeout */
-#define	SO_ERROR			0x1007		/* get error status and clear */
-#define	SO_TYPE			0x1008		/* get socket type */
+#define SO_SNDBUF    0x1001    /* Unimplemented: send buffer size */
+#define SO_RCVBUF    0x1002    /* receive buffer size */
+#define SO_SNDLOWAT  0x1003    /* Unimplemented: send low-water mark */
+#define SO_RCVLOWAT  0x1004    /* Unimplemented: receive low-water mark */
+#define SO_SNDTIMEO  0x1005    /* Unimplemented: send timeout */
+#define SO_RCVTIMEO  0x1006    /* receive timeout */
+#define SO_ERROR     0x1007    /* get error status and clear */
+#define SO_TYPE      0x1008    /* get socket type */
+#define SO_CONTIMEO  0x1009    /* Unimplemented: connect timeout */
+#define SO_NO_CHECK  0x100a    /* don't create UDP checksum */
 
 /*
  * Level number for (get/set)sockopt() to apply to socket itself.
  */
-#define	SOL_SOCKET	0xfff		/* options for socket level */
+#define  SOL_SOCKET  0xfff    /* options for socket level */
 
-#define	AF_UNSPEC	0
-#define	AF_INET		2
-#define	PF_INET		AF_INET
+#define AF_UNSPEC       0
+#define AF_INET         2
+#define PF_INET         AF_INET
+#define PF_UNSPEC       AF_UNSPEC
 
-#define	IPPROTO_TCP		6
-#define	IPPROTO_UDP		17
-
-#define	INADDR_ANY			0
-#define	INADDR_BROADCAST	0xffffffff
+#define IPPROTO_IP      0
+#define IPPROTO_TCP     6
+#define IPPROTO_UDP     17
+#define IPPROTO_UDPLITE 136
 
 /* Flags we can use with send and recv. */
-#define	MSG_DONTWAIT	0x40            /* Nonblocking i/o for this operation only */
+#define MSG_PEEK       0x01    /* Peeks at an incoming message */
+#define MSG_WAITALL    0x02    /* Unimplemented: Requests that the function block until the full amount of data requested can be returned */
+#define MSG_OOB        0x04    /* Unimplemented: Requests out-of-band data. The significance and semantics of out-of-band data are protocol-specific */
+#define MSG_DONTWAIT   0x08    /* Nonblocking i/o for this operation only */
+#define MSG_MORE       0x10    /* Sender will send more */
 
+#ifndef SHUT_RD
+  #define SHUT_RD   0
+  #define SHUT_WR   1
+  #define SHUT_RDWR 2
+#endif
+
+/* FD_SET used for lwip_select */
 #ifndef FD_SET
-#	undef  FD_SETSIZE
-#	define FD_SETSIZE    16
-#	define FD_SET(n, p)  ((p)->fd_bits[(n)/8] |=  (1 << ((n) & 7)))
-#	define FD_CLR(n, p)  ((p)->fd_bits[(n)/8] &= ~(1 << ((n) & 7)))
-#	define FD_ISSET(n,p) ((p)->fd_bits[(n)/8] &   (1 << ((n) & 7)))
-#	define FD_ZERO(p)    memset((void*)(p),0,sizeof(*(p)))
+  #undef  FD_SETSIZE
+  /* Make FD_SETSIZE match NUM_SOCKETS in socket.c */
+  #define FD_SETSIZE    MEMP_NUM_NETCONN
+  #define FD_SET(n, p)  ((p)->fd_bits[(n)/8] |=  (1 << ((n) & 7)))
+  #define FD_CLR(n, p)  ((p)->fd_bits[(n)/8] &= ~(1 << ((n) & 7)))
+  #define FD_ISSET(n,p) ((p)->fd_bits[(n)/8] &   (1 << ((n) & 7)))
+  #define FD_ZERO(p)    memset((void*)(p),0,sizeof(*(p)))
 
   typedef struct fd_set {
           unsigned char fd_bits [(FD_SETSIZE+7)/8];
-  } fd_set;
-#endif
+        } fd_set;
 
-#ifndef TIMEVAL
-#	define TIMEVAL
-  struct timeval {
-    long    tv_sec;         /* seconds */
-    long    tv_usec;        /* and microseconds */
-  };
-#endif
-
-#if		!defined(INVALID_SOCKET)
-#	define	INVALID_SOCKET -1
-#endif
+#endif /* FD_SET */
 
 #if		!defined(htonl)
 #	define	htonl(x)		((((x)&0xff)<<24)|(((x)&0xff00)<<8)|(((x)&0xff0000)>>8)|(((x)&0xff000000)>>24))
@@ -385,6 +570,7 @@ typedef struct
 #ifndef FAR
 #define FAR
 #endif
+
 struct hostent {
 	char    FAR * h_name;				/* official name of host */
 	char    FAR * FAR * h_aliases;		/* alias list */
@@ -394,16 +580,15 @@ struct hostent {
 #define h_addr  h_addr_list[0]				/* address, for backward compat */
 };
 
-#if !defined(INADDR_NONE)
-#define INADDR_NONE		((u32) 0xffffffff)  /* 255.255.255.255 */
-#endif
-
 /* From include/lwip/sockets.h:  */
 /*
- * User-settable options (used with setsockopt, IPPROTO_TCP level).
+ * Options for level IPPROTO_TCP
  */
-#define	TCP_NODELAY	   0x01	   /* don't delay send to coalesce packets */
-#define TCP_KEEPALIVE	   0x02    /* send KEEPALIVE probes when idle for pcb->keepalive miliseconds */
+#define TCP_NODELAY    0x01    /* don't delay send to coalesce packets */
+#define TCP_KEEPALIVE  0x02    /* send KEEPALIVE probes when idle for pcb->keep_idle milliseconds */
+#define TCP_KEEPIDLE   0x03    /* set pcb->keep_idle  - Same as TCP_KEEPALIVE, but use seconds for get/setsockopt */
+#define TCP_KEEPINTVL  0x04    /* set pcb->keep_intvl - Use seconds for get/setsockopt */
+#define TCP_KEEPCNT    0x05    /* set pcb->keep_cnt   - Use number of probes sent for get/setsockopt */
 
 #endif
 
