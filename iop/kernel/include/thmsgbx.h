@@ -17,9 +17,15 @@
 #include "types.h"
 #include "irx.h"
 
+//Message box attributes
+#define MBA_THFIFO	0x000
+#define MBA_THPRI	0x001
+#define MBA_MSFIFO	0x000
+#define MBA_MSPRI	0x004
+
 typedef struct {
-	u32	attr;
-	u32	option;
+	unsigned int attr;
+	unsigned int option;
 } iop_mbx_t;
 
 /* Besides the next pointer, this struct is actually user-defined.  You can
@@ -32,8 +38,18 @@ typedef struct {
 */
 typedef struct _iop_message {
 	struct iop_message *next;
-	u8	unused[4];
+	unsigned char priority;
+	unsigned char unused[3];
 } iop_message_t;
+
+typedef struct _iop_mbx_status {
+	unsigned int attr;
+	unsigned int option;
+	int numWaitThreads;
+	int numMessage;
+	iop_message_t *topPacket;
+	int reserved[2];
+} iop_mbx_status_t;
 
 #define thmsgbx_IMPORTS_start DECLARE_IMPORT_TABLE(thmsgbx, 1, 1)
 #define thmsgbx_IMPORTS_end END_IMPORT_TABLE
@@ -52,9 +68,9 @@ int ReceiveMbx(void **msgvar, int mbxid);
 int PollMbx(void **msgvar, int mbxid);
 #define I_PollMbx DECLARE_IMPORT(9, PollMbx)
 
-int ReferMbxStatus(int mbxid, void *info);
+int ReferMbxStatus(int mbxid, iop_mbx_status_t *info);
 #define I_ReferMbxStatus DECLARE_IMPORT(11, ReferMbxStatus)
-int iReferMbxStatus(int mbxid, void *info);
+int iReferMbxStatus(int mbxid, iop_mbx_status_t *info);
 #define I_iReferMbxStatus DECLARE_IMPORT(12, iReferMbxStatus)
 
 #endif /* IOP_THMSGBX_H */

@@ -86,6 +86,9 @@ int NetmanRpcFlushInputQueue(void){
 	int result;
 
 	if(PacketReqs.NumPackets>0){
+		/*	It seems like a good idea if this could be modified to not block while the EE receives and processes data,
+			but I've tried that before and it actually worsened performance over TCP. Perhaps the IOP ends up spending too much
+			time receiving data that the PlayStation 2 can't send acks in a timely manner.	*/
 		DMATransferDataToEEAligned(FrameBuffer, EEFrameBuffer, PacketReqs.TotalLength);
 		if((result=sceSifCallRpc(&EEClient, NETMAN_EE_RPC_FUNC_HANDLE_PACKETS, 0, &PacketReqs, 8+sizeof(struct PacketTag)*PacketReqs.NumPackets, SifRpcRxBuffer, sizeof(int), NULL, NULL))>=0){
 			result=*(int*)SifRpcRxBuffer;

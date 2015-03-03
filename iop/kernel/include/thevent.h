@@ -32,11 +32,13 @@ typedef struct {
 } iop_event_t;
 
 typedef struct {
-	u32 attr;			// set by CreateEventFlag
-	u32 option;			// set by CreateEventFlag
+	u32 attr;		// set by CreateEventFlag
+	u32 option;		// set by CreateEventFlag
 	u32 initBits;		// initial 'bits' value set by CreateEventFlag
 	u32 currBits;		// current 'bits' value
-	u32 numThreads;		// number of threads waiting on this event
+	int numThreads;		// number of threads waiting on this event
+	int reserved1;
+	int reserved2;
 } iop_event_info_t;
 
 

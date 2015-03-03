@@ -25,11 +25,27 @@
 #define SYSTEM_CMD	0x80000000
 
 typedef struct t_SifCmdHeader {
-	u32	size;
-	void	*dest;
+	u32	size;	//Upper 8 bits: packet size, lower 24 bits: extra data length
+	void	*dest;	//Extra data destination address. May be NULL if there's no extra data.
 	int	cid;
-	u32	unknown;
+	u32	opt;
 } SifCmdHeader_t;
+
+/* System functions */
+#define	SIF_CMD_ID_SYSTEM	0x80000000
+
+#define SIF_CMD_CHANGE_SADDR	(SIF_CMD_ID_SYSTEM | 0)
+#define SIF_CMD_SET_SREG	(SIF_CMD_ID_SYSTEM | 1)
+#define SIF_CMD_INIT_CMD	(SIF_CMD_ID_SYSTEM | 2)
+#define SIF_CMD_RESET_CMD	(SIF_CMD_ID_SYSTEM | 3)
+
+//Structure for remotely (over the SIF) changing the value of a software register (SREG).
+//There are 32 software registers (0 - 31). Registers 0-7 are used by the system.
+typedef struct t_SifCmdSRegData {
+	SifCmdHeader_t	header;
+	int		index;
+	unsigned int	value;
+} SifCmdSRegData_t;
 
 typedef void (*SifCmdHandler_t)(void *, void *);
 

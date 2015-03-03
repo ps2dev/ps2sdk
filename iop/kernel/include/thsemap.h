@@ -24,6 +24,11 @@
 #include "types.h"
 #include "irx.h"
 
+//Semaphore attributes
+#define SA_THFIFO	0x000
+#define SA_THPRI	0x001
+#define SA_IHTHPRI	0x100
+
 typedef struct {
 	u32	attr;
 	u32	option;

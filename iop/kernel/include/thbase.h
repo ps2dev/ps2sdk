@@ -20,6 +20,9 @@
 //Thread attribute definitions
 #define TH_ASM		0x01000000
 #define TH_C		0x02000000
+#define TH_UMODE	0x00000008
+#define TH_NO_FILLSTACK	0x00100000
+#define TH_CLEAR_STACK	0x00200000
 
 typedef struct _iop_thread {
 	u32	attr;
@@ -55,12 +58,14 @@ typedef struct _iop_thread_status {
 	void		*entry;
 	void		*stack;
 	int		stackSize;
+	void		*gpReg;
 	int		initPriority;
 	int		currentPriority;
 	int		waitType;
 	int		waitId;
 	int		wakeupCount;
 	long int	*regContext;	//Only valid for use with iReferThreadStatus.
+	unsigned int	reserved[4];
 } iop_thread_info_t;
 
 typedef struct _iop_sys_clock {
