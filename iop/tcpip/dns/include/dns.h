@@ -25,7 +25,7 @@
 #define	DNS_ERROR_PARSE				-3
 
 
-#define dns_IMPORTS_start	DECLARE_IMPORT_TABLE(dns, 1, 0)
+#define dns_IMPORTS_start	DECLARE_IMPORT_TABLE(dns, 1, 1)
 #define dns_IMPORTS_end		END_IMPORT_TABLE
 
 int gethostbyname(char *name, struct in_addr *ip);

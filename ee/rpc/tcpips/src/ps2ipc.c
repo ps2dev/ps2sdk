@@ -32,7 +32,7 @@ int ps2ip_init(void)
 
 	while(1)
 	{
-		if(SifBindRpc(&_ps2ip, PS2IP_IRX, 0) < 0)
+		if(sceSifBindRpc(&_ps2ip, PS2IP_IRX, 0) < 0)
 			return -1;
 
 		if(_ps2ip.server != 0)
@@ -54,7 +54,7 @@ int accept(int s, struct sockaddr *addr, int *addrlen)
 
 	pkt->socket = s;
 
-	SifCallRpc(&_ps2ip, PS2IPS_ID_ACCEPT, 0, (void*)_rpc_buffer, 4, (void*)_rpc_buffer, sizeof(cmd_pkt), NULL, NULL);
+	sceSifCallRpc(&_ps2ip, PS2IPS_ID_ACCEPT, 0, (void*)_rpc_buffer, 4, (void*)_rpc_buffer, sizeof(cmd_pkt), NULL, NULL);
 
 	if(pkt->len < *addrlen) *addrlen = pkt->len;
 	memcpy((void *)addr, (void *)&pkt->sockaddr, *addrlen);
@@ -72,7 +72,7 @@ int bind(int s, struct sockaddr *name, int namelen)
 	pkt->len = namelen;
 	memcpy((void *)&pkt->sockaddr, (void *)name, sizeof(struct sockaddr));
 
-	SifCallRpc(&_ps2ip, PS2IPS_ID_BIND, 0, (void*)_rpc_buffer, sizeof(cmd_pkt), (void*)_rpc_buffer, 4, NULL, NULL);
+	sceSifCallRpc(&_ps2ip, PS2IPS_ID_BIND, 0, (void*)_rpc_buffer, sizeof(cmd_pkt), (void*)_rpc_buffer, 4, NULL, NULL);
 
 	return _rpc_buffer[0];
 }
@@ -83,7 +83,7 @@ int disconnect(int s)
 
 	_rpc_buffer[0] = s;
 
-	SifCallRpc(&_ps2ip, PS2IPS_ID_DISCONNECT, 0, (void*)_rpc_buffer, 4, (void*)_rpc_buffer, 4, NULL, NULL);
+	sceSifCallRpc(&_ps2ip, PS2IPS_ID_DISCONNECT, 0, (void*)_rpc_buffer, 4, (void*)_rpc_buffer, 4, NULL, NULL);
 
 	return _rpc_buffer[0];
 }
@@ -98,7 +98,7 @@ int connect(int s, struct sockaddr *name, int namelen)
 	pkt->len = namelen;
 	memcpy((void *)&pkt->sockaddr, (void *)name, sizeof(struct sockaddr));
 
-	SifCallRpc(&_ps2ip, PS2IPS_ID_CONNECT, 0, (void*)_rpc_buffer, sizeof(cmd_pkt), (void*)_rpc_buffer, 4, NULL, NULL);
+	sceSifCallRpc(&_ps2ip, PS2IPS_ID_CONNECT, 0, (void*)_rpc_buffer, sizeof(cmd_pkt), (void*)_rpc_buffer, 4, NULL, NULL);
 
 	return _rpc_buffer[0];
 }
@@ -110,7 +110,7 @@ int listen(int s, int backlog)
 	_rpc_buffer[0] = s;
 	_rpc_buffer[1] = backlog;
 
-	SifCallRpc(&_ps2ip, PS2IPS_ID_LISTEN, 0, (void*)_rpc_buffer, 8, (void*)_rpc_buffer, 4, NULL, NULL);
+	sceSifCallRpc(&_ps2ip, PS2IPS_ID_LISTEN, 0, (void*)_rpc_buffer, 8, (void*)_rpc_buffer, 4, NULL, NULL);
 
 	return _rpc_buffer[0];
 }
@@ -144,11 +144,11 @@ int recv(int s, void *mem, int len, unsigned int flags)
 	send_pkt->intr_data = _intr_data;
 
 	if( !IS_UNCACHED_SEG(mem))
-		SifWriteBackDCache(mem, len);
-	SifWriteBackDCache(_intr_data, 128);
-	SifWriteBackDCache(_rpc_buffer, sizeof(s_recv_pkt));
+		sceSifWriteBackDCache(mem, len);
+	sceSifWriteBackDCache(_intr_data, 128);
+	sceSifWriteBackDCache(_rpc_buffer, sizeof(s_recv_pkt));
 
-	SifCallRpc(&_ps2ip, PS2IPS_ID_RECV, 0, (void*)_rpc_buffer, sizeof(s_recv_pkt),
+	sceSifCallRpc(&_ps2ip, PS2IPS_ID_RECV, 0, (void*)_rpc_buffer, sizeof(s_recv_pkt),
 				(void*)_rpc_buffer, sizeof(r_recv_pkt), recv_intr, _intr_data);
 
 	return recv_pkt->ret;
@@ -169,11 +169,11 @@ int recvfrom(int s, void *mem, int len, unsigned int flags,
 	send_pkt->intr_data = _intr_data;
 
 	if( !IS_UNCACHED_SEG(mem))
-		SifWriteBackDCache(mem, len);
-	SifWriteBackDCache(_intr_data, 128);
-	SifWriteBackDCache(_rpc_buffer, sizeof(s_recv_pkt));
+		sceSifWriteBackDCache(mem, len);
+	sceSifWriteBackDCache(_intr_data, 128);
+	sceSifWriteBackDCache(_rpc_buffer, sizeof(s_recv_pkt));
 
-	SifCallRpc(&_ps2ip, PS2IPS_ID_RECVFROM, 0, (void*)_rpc_buffer, sizeof(s_recv_pkt),
+	sceSifCallRpc(&_ps2ip, PS2IPS_ID_RECVFROM, 0, (void*)_rpc_buffer, sizeof(s_recv_pkt),
 				(void*)_rpc_buffer, sizeof(r_recv_pkt), recv_intr, _intr_data);
 
 	memcpy((void *)from, (void *)&recv_pkt->sockaddr, sizeof(struct sockaddr));
@@ -205,11 +205,11 @@ int send(int s, void *dataptr, int size, unsigned int flags)
 	pkt->malign = miss;
 
 	if( !IS_UNCACHED_SEG(dataptr))
-		SifWriteBackDCache(dataptr, size);
+		sceSifWriteBackDCache(dataptr, size);
 
 	memcpy((void *)pkt->malign_buff, UNCACHED_SEG(dataptr), miss);
 
-	SifCallRpc(&_ps2ip, PS2IPS_ID_SEND, 0, (void*)_rpc_buffer, sizeof(send_pkt),
+	sceSifCallRpc(&_ps2ip, PS2IPS_ID_SEND, 0, (void*)_rpc_buffer, sizeof(send_pkt),
 				(void*)_rpc_buffer, 4, NULL, NULL);
 
 	return _rpc_buffer[0];
@@ -240,11 +240,11 @@ int sendto(int s, void *dataptr, int size, unsigned int flags,
 	pkt->malign = miss;
 
 	if( !IS_UNCACHED_SEG(dataptr))
-		SifWriteBackDCache(dataptr, size);
+		sceSifWriteBackDCache(dataptr, size);
 
 	memcpy((void *)pkt->malign_buff, UNCACHED_SEG(dataptr), miss);
 
-	SifCallRpc(&_ps2ip, PS2IPS_ID_SENDTO, 0, (void*)_rpc_buffer, sizeof(send_pkt),
+	sceSifCallRpc(&_ps2ip, PS2IPS_ID_SENDTO, 0, (void*)_rpc_buffer, sizeof(send_pkt),
 				(void*)_rpc_buffer, 4, NULL, NULL);
 
 	return _rpc_buffer[0];
@@ -258,7 +258,7 @@ int socket(int domain, int type, int protocol)
 	_rpc_buffer[1] = type;
 	_rpc_buffer[2] = protocol;
 
-	SifCallRpc(&_ps2ip, PS2IPS_ID_SOCKET, 0, (void*)_rpc_buffer, 12, (void*)_rpc_buffer, 4, NULL, NULL);
+	sceSifCallRpc(&_ps2ip, PS2IPS_ID_SOCKET, 0, (void*)_rpc_buffer, 12, (void*)_rpc_buffer, 4, NULL, NULL);
 
 	return _rpc_buffer[0];
 }
@@ -270,7 +270,7 @@ int ps2ip_setconfig(t_ip_info *ip_info)
 	// return config
 	memcpy(_rpc_buffer, ip_info, sizeof(t_ip_info));
 
-	SifCallRpc(&_ps2ip, PS2IPS_ID_SETCONFIG, 0, (void*)_rpc_buffer, sizeof(t_ip_info), (void*)_rpc_buffer, 4, NULL, NULL);
+	sceSifCallRpc(&_ps2ip, PS2IPS_ID_SETCONFIG, 0, (void*)_rpc_buffer, sizeof(t_ip_info), (void*)_rpc_buffer, 4, NULL, NULL);
 	return _rpc_buffer[0];
 }
 
@@ -281,7 +281,7 @@ int ps2ip_getconfig(char *netif_name, t_ip_info *ip_info)
 	// call with netif name
 	memcpy(_rpc_buffer, netif_name, 8);
 
-	SifCallRpc(&_ps2ip, PS2IPS_ID_GETCONFIG, 0, (void*)_rpc_buffer, 8, (void*)_rpc_buffer, sizeof(t_ip_info), NULL, NULL);
+	sceSifCallRpc(&_ps2ip, PS2IPS_ID_GETCONFIG, 0, (void*)_rpc_buffer, 8, (void*)_rpc_buffer, sizeof(t_ip_info), NULL, NULL);
 
 	// return config
 	memcpy(ip_info, _rpc_buffer, sizeof(t_ip_info));
@@ -321,7 +321,7 @@ int select(int maxfdp1, struct fd_set *readset, struct fd_set *writeset, struct 
 		((char*)_rpc_buffer)[45] = exceptset->fd_bits[1];
 	}
 
-	SifCallRpc(&_ps2ip, PS2IPS_ID_SELECT, 0, (void*)_rpc_buffer, 46, (void*)_rpc_buffer, 46, NULL, NULL);
+	sceSifCallRpc(&_ps2ip, PS2IPS_ID_SELECT, 0, (void*)_rpc_buffer, 46, (void*)_rpc_buffer, 46, NULL, NULL);
 
 	if( timeout )
 	{
@@ -357,7 +357,7 @@ int ioctlsocket(int s, long cmd, void *argp)
 	if( argp )
 		((int*)_rpc_buffer)[3] = *(int*)argp;
 
-	SifCallRpc(&_ps2ip, PS2IPS_ID_IOCTL, 0, (void*)_rpc_buffer, 16, (void*)_rpc_buffer, 4, NULL, NULL);
+	sceSifCallRpc(&_ps2ip, PS2IPS_ID_IOCTL, 0, (void*)_rpc_buffer, 16, (void*)_rpc_buffer, 4, NULL, NULL);
 
 	return _rpc_buffer[0];
 }
@@ -370,7 +370,7 @@ int getsockname(int s, struct sockaddr *name, int *namelen)
 
 	pkt->socket = s;
 
-	SifCallRpc(&_ps2ip, PS2IPS_ID_GETSOCKNAME, 0, (void*)_rpc_buffer, 4, (void*)_rpc_buffer, sizeof(cmd_pkt), NULL, NULL);
+	sceSifCallRpc(&_ps2ip, PS2IPS_ID_GETSOCKNAME, 0, (void*)_rpc_buffer, 4, (void*)_rpc_buffer, sizeof(cmd_pkt), NULL, NULL);
 
 	if(pkt->len < *namelen) *namelen = pkt->len;
 	memcpy((void *)name, (void *)&pkt->sockaddr, *namelen);
@@ -386,7 +386,7 @@ int getpeername(int s, struct sockaddr *name, int *namelen)
 
 	pkt->socket = s;
 
-	SifCallRpc(&_ps2ip, PS2IPS_ID_GETPEERNAME, 0, (void*)_rpc_buffer, 4, (void*)_rpc_buffer, sizeof(cmd_pkt), NULL, NULL);
+	sceSifCallRpc(&_ps2ip, PS2IPS_ID_GETPEERNAME, 0, (void*)_rpc_buffer, 4, (void*)_rpc_buffer, sizeof(cmd_pkt), NULL, NULL);
 
 	if(pkt->len < *namelen) *namelen = pkt->len;
 	memcpy((void *)name, (void *)&pkt->sockaddr, *namelen);
@@ -400,7 +400,7 @@ int getsockopt(int s, int level, int optname, void* optval, socklen_t* optlen)
 	((getsockopt_pkt*)_rpc_buffer)->level = level;
 	((getsockopt_pkt*)_rpc_buffer)->optname = optname;
 
-	SifCallRpc(&_ps2ip, PS2IPS_ID_GETSOCKOPT, 0, (void*)_rpc_buffer, sizeof(getsockopt_pkt), (void*)_rpc_buffer, sizeof(getsockopt_res_pkt), NULL, NULL);
+	sceSifCallRpc(&_ps2ip, PS2IPS_ID_GETSOCKOPT, 0, (void*)_rpc_buffer, sizeof(getsockopt_pkt), (void*)_rpc_buffer, sizeof(getsockopt_res_pkt), NULL, NULL);
 
 	if(((getsockopt_res_pkt*)_rpc_buffer)->optlen < *optlen) *optlen = ((getsockopt_res_pkt*)_rpc_buffer)->optlen;
 	memcpy((void*)optval, ((getsockopt_res_pkt*)_rpc_buffer)->buffer, *optlen);
@@ -417,7 +417,7 @@ int setsockopt(int s, int level, int optname, const void *optval, socklen_t optl
 
 	memcpy(((setsockopt_pkt*)_rpc_buffer)->buffer, optval, optlen);
 
-	SifCallRpc(&_ps2ip, PS2IPS_ID_SETSOCKOPT, 0, (void*)_rpc_buffer, sizeof(setsockopt_pkt), (void*)_rpc_buffer, sizeof(int), NULL, NULL);
+	sceSifCallRpc(&_ps2ip, PS2IPS_ID_SETSOCKOPT, 0, (void*)_rpc_buffer, sizeof(setsockopt_pkt), (void*)_rpc_buffer, sizeof(int), NULL, NULL);
 
 	return _rpc_buffer[0];
 }
@@ -427,7 +427,7 @@ int gethostbyname(char *name, struct in_addr *ip)
 	int ret;
 
 	memcpy(_rpc_buffer, name, 256);
-	SifCallRpc(&_ps2ip, PS2IPS_ID_GETHOSTBYNAME, 0, (void*)_rpc_buffer, 256, (void*)_rpc_buffer, 4 + sizeof(struct in_addr), NULL, NULL);
+	sceSifCallRpc(&_ps2ip, PS2IPS_ID_GETHOSTBYNAME, 0, (void*)_rpc_buffer, 256, (void*)_rpc_buffer, 4 + sizeof(struct in_addr), NULL, NULL);
 
 	ret = _rpc_buffer[0];
 	memcpy(ip, &_rpc_buffer[1], sizeof(struct in_addr));

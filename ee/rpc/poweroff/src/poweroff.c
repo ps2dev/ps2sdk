@@ -61,7 +61,7 @@ int poweroffInit(void)
 		return 0;
 	_init_count = _iop_reboot_count;
 
-	while(((res = SifBindRpc(&cd0, PWROFF_IRX, 0)) >= 0) && (cd0.server == NULL))
+	while(((res = sceSifBindRpc(&cd0, PWROFF_IRX, 0)) >= 0) && (cd0.server == NULL))
 		nopdelay();
 
 	// Terminate and delete any previously created threads
@@ -92,11 +92,11 @@ int poweroffInit(void)
 	StartThread(powerOffThreadId, NULL);
 
 	DI();
-	SifAddCmdHandler(POFF_SIF_CMD, _poff_intr_callback, NULL);
+	sceSifAddCmdHandler(POFF_SIF_CMD, _poff_intr_callback, NULL);
 	EI();
 
 	int autoShutdown = 0;
-	SifCallRpc(&cd0, PWROFF_ENABLE_AUTO_SHUTOFF, 0, NULL, 0, &autoShutdown, sizeof(autoShutdown), NULL, NULL);
+	sceSifCallRpc(&cd0, PWROFF_ENABLE_AUTO_SHUTOFF, 0, NULL, 0, &autoShutdown, sizeof(autoShutdown), NULL, NULL);
 
 	return res;
 }
@@ -115,7 +115,7 @@ void poweroffShutdown(void)
 
 	SignalSema(PowerOffSema);
 
-	SifCallRpc(&cd0, PWROFF_SHUTDOWN, 0, NULL, 0, NULL, 0, NULL, NULL);
+	sceSifCallRpc(&cd0, PWROFF_SHUTDOWN, 0, NULL, 0, NULL, 0, NULL, NULL);
 }
 
 void poweroffChangeThreadPriority(int priority)

@@ -50,11 +50,13 @@ int NetManInit(void){
 }
 
 void NetManDeinit(void){
-	NetManUnregisterNetworkStack();
+	if(IsInitialized){
+		NetManUnregisterNetworkStack();
 
-	NetManDeinitRPCClient();
-	NetManDeinitRPCServer();
-	IsInitialized = 0;
+		NetManDeinitRPCClient();
+		NetManDeinitRPCServer();
+		IsInitialized = 0;
+	}
 }
 
 int NetManRegisterNetworkStack(const struct NetManNetProtStack *stack){
@@ -75,10 +77,12 @@ int NetManRegisterNetworkStack(const struct NetManNetProtStack *stack){
 }
 
 void NetManUnregisterNetworkStack(void){
-	NetManRPCUnregisterNetworkStack();
-	memset(&MainNetProtStack, 0, sizeof(MainNetProtStack));
+	if(IsNetStackInitialized){
+		NetManRPCUnregisterNetworkStack();
+		memset(&MainNetProtStack, 0, sizeof(MainNetProtStack));
 
-	IsNetStackInitialized=0;
+		IsNetStackInitialized=0;
+	}
 }
 
 int NetManNetIFSendPacket(const void *packet, unsigned int length){

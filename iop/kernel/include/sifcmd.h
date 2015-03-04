@@ -47,7 +47,7 @@ typedef struct t_SifCmdSRegData {
 	unsigned int	value;
 } SifCmdSRegData_t;
 
-typedef void (*SifCmdHandler_t)(void *, void *);
+typedef void (*SifCmdHandler_t)(void *data, void *harg);
 
 typedef struct t_SifCmdHandlerData {
 	SifCmdHandler_t handler;
@@ -82,8 +82,8 @@ void sceSifAddCmdHandler(int cid, SifCmdHandler_t handler, void *harg);
 #define SIF_RPC_M_NOWAIT	0x01	/* Don't wait for end function */
 #define SIF_RPC_M_NOWBDC	0x02	/* Don't write back the D cache */
 
-typedef void * (*SifRpcFunc_t)(int, void *, int);
-typedef void (*SifRpcEndFunc_t)(void *);
+typedef void * (*SifRpcFunc_t)(int fno, void *buffer, int length);
+typedef void (*SifRpcEndFunc_t)(void *end_param);
 
 typedef struct t_SifRpcServerData {
 	int	sid;

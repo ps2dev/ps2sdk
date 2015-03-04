@@ -123,7 +123,7 @@ s32 sceCdInit(s32 mode)
 
 	if (_CdSyncS(1))
 		return 0;
-	SifInitRpc(0);
+	sceSifInitRpc(0);
 	CdThreadId = GetThreadId();
 	bindSearchFile = -1;
 	bindNCmd = -1;
@@ -132,7 +132,7 @@ s32 sceCdInit(s32 mode)
 	bindInit = -1;
 
 	while (1) {
-		if (SifBindRpc(&clientInit, CD_SERVER_INIT, 0) < 0) {
+		if (sceSifBindRpc(&clientInit, CD_SERVER_INIT, 0) < 0) {
 			if (CdDebug > 0)
 				printf("Libcdvd bind err CD_Init\n");
 		} else if (clientInit.server != 0)
@@ -144,7 +144,7 @@ s32 sceCdInit(s32 mode)
 
 	bindInit = 0;
 	initMode = mode;
-	if (SifCallRpc(&clientInit, 0, 0, &initMode, 4, 0, 0, 0, 0) < 0)
+	if (sceSifCallRpc(&clientInit, 0, 0, &initMode, 4, 0, 0, 0, 0) < 0)
 		return 0;
 	if (mode == SCECdEXIT) {
 		if (CdDebug > 0)
@@ -203,10 +203,10 @@ s32 sceCdSearchFile(sceCdlFILE * file, const char *name)
 		SignalSema(nCmdSemaId);
 		return 0;
 	}
-	SifInitRpc(0);
+	sceSifInitRpc(0);
 	if (bindSearchFile < 0) {
 		while (1) {
-			if (SifBindRpc(&clientSearchFile, CD_SERVER_SEARCHFILE, 0) < 0) {
+			if (sceSifBindRpc(&clientSearchFile, CD_SERVER_SEARCHFILE, 0) < 0) {
 				if (CdDebug > 0)
 					printf("libsceCdvd bind err sceCdSearchFile\n");
 			}
@@ -225,7 +225,7 @@ s32 sceCdSearchFile(sceCdlFILE * file, const char *name)
 
 	if (CdDebug > 0)
 		printf("ee call cmd search %s\n", searchFileSendBuff.name);
-	if (SifCallRpc(&clientSearchFile, 0, 0, &searchFileSendBuff, sizeof(SearchFilePkt), nCmdRecvBuff, 4, NULL, NULL) < 0) {
+	if (sceSifCallRpc(&clientSearchFile, 0, 0, &searchFileSendBuff, sizeof(SearchFilePkt), nCmdRecvBuff, 4, NULL, NULL) < 0) {
 		SignalSema(nCmdSemaId);
 		return 0;
 	}
@@ -270,10 +270,10 @@ s32 sceCdDiskReady(s32 mode)
 		return SCECdNotReady;
 	}
 
-	SifInitRpc(0);
+	sceSifInitRpc(0);
 	if (bindDiskReady < 0) {
 		while (1) {
-			if (SifBindRpc(&clientDiskReady, CD_SERVER_DISKREADY, 0) < 0) {
+			if (sceSifBindRpc(&clientDiskReady, CD_SERVER_DISKREADY, 0) < 0) {
 				if (CdDebug > 0)
 					printf("Libcdvd bind err CdDiskReady\n");
 			}
@@ -287,7 +287,7 @@ s32 sceCdDiskReady(s32 mode)
 	bindDiskReady = 0;
 	diskReadyMode = mode;
 
-	if (SifCallRpc(&clientDiskReady, 0, 0, &diskReadyMode, 4, sCmdRecvBuff, 4, NULL, NULL) < 0) {
+	if (sceSifCallRpc(&clientDiskReady, 0, 0, &diskReadyMode, 4, sCmdRecvBuff, 4, NULL, NULL) < 0) {
 		SignalSema(sCmdSemaId);
 		return 6;
 	}

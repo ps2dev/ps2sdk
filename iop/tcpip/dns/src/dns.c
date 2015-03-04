@@ -12,6 +12,7 @@
 */
 
 #include "types.h"
+#include "intrman.h"
 #include "stdio.h"
 #include "loadcore.h"
 #include "sysclib.h"
@@ -21,13 +22,10 @@
 #include "dns.h"
 #include "dns_types.h"
 
-
 //#define DEBUG
 
-
-IRX_ID("DNS Resolver", 1, 0);
+IRX_ID("DNS Resolver", 1, 1);
 extern struct irx_export_table	_exp_dns;
-
 
 typedef struct t_dns_cache
 {
@@ -37,38 +35,46 @@ typedef struct t_dns_cache
 	int rv;
 } t_dnsCache;
 
+static t_dnsCache cacheHead;
+static struct sockaddr_in nameServerAddr;
+static u8 packetBuffer[2048]; // should be plenty!
+static int currentId = 1;
 
-t_dnsCache cacheHead;
-struct sockaddr_in nameServerAddr;
-u8 packetBuffer[2048]; // should be plenty!
-int currentId = 1;
-
-
-void dnsResolveInit();
-int dnsPrepareQueryPacket(u8 *packetBuf, char *hostName); // returns size of packet
-int dnsParseResponsePacket(u8 *packetBuf, int pktSize, struct in_addr *ip);
-void dnsCacheAdd(t_dnsCache *entry);
-t_dnsCache *dnsCacheFind(char *hostName);
-int getLabelLength(u8 *buffer);
-int getResourceRecordLength(u8 *buffer);
+static int dnsPrepareQueryPacket(u8 *packetBuf, char *hostName); // returns size of packet
+static int dnsParseResponsePacket(u8 *packetBuf, int pktSize, struct in_addr *ip);
+static void dnsCacheAdd(t_dnsCache *entry);
+static t_dnsCache *dnsCacheFind(char *hostName);
+static int getLabelLength(u8 *buffer);
+static int getResourceRecordLength(u8 *buffer);
 
 static void *malloc(int size)
 {
-	return AllocSysMemory(ALLOC_FIRST, size, NULL);
+	void *result;
+	int OldState;
+
+	CpuSuspendIntr(&OldState);
+	result = AllocSysMemory(ALLOC_FIRST, size, NULL);
+	CpuResumeIntr(OldState);
+
+	return result;
 }
 
 static void free(void *ptr)
 {
+	int OldState;
+
+	CpuSuspendIntr(&OldState);
 	FreeSysMemory(ptr);
+	CpuResumeIntr(OldState);
 }
 
 static int strcasecmp(char *s1, char *s2)
 {
 	while (*s1 != '\0' && tolower(*s1) == tolower(*s2))
-    {
-      s1++;
-      s2++;
-    }
+	{
+		s1++;
+	      s2++;
+	}
 
 	return tolower(*(unsigned char *)s1) - tolower(*(unsigned char *)s2);
 }
@@ -124,7 +130,7 @@ int gethostbyname(char *name, struct in_addr *ip)
 	pktSize = dnsPrepareQueryPacket(&packetBuffer[2], name);
 
 	// connect to dns server via TCP (UDP is standard, but TCP is easier :))
-	sockFd = lwip_socket(AF_INET, SOCK_STREAM, 0);
+	sockFd = lwip_socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if(sockFd < 0)
 		return DNS_ERROR_CONNECT;
 
@@ -206,7 +212,7 @@ int gethostbyname(char *name, struct in_addr *ip)
 	return rv;
 }
 
-int dnsPrepareQueryPacket(u8 *packetBuf, char *hostName)
+static int dnsPrepareQueryPacket(u8 *packetBuf, char *hostName)
 {
 	t_dnsMessageHeader *hdr = (t_dnsMessageHeader *)packetBuf;
 	int currLen, pktSize = 0, left = strlen(hostName), i;
@@ -250,7 +256,7 @@ int dnsPrepareQueryPacket(u8 *packetBuf, char *hostName)
 	return pktSize;
 }
 
-int getLabelLength(u8 *buffer)
+static int getLabelLength(u8 *buffer)
 {
 	int len = 0;
 
@@ -269,7 +275,7 @@ int getLabelLength(u8 *buffer)
 	return len;
 }
 
-int getResourceRecordLength(u8 *buffer)
+static int getResourceRecordLength(u8 *buffer)
 {
 	int len = 0;
 	u32 rdLen;
@@ -284,7 +290,7 @@ int getResourceRecordLength(u8 *buffer)
 	return len;
 }
 
-int dnsParseResponsePacket(u8 *packetBuf, int pktSize, struct in_addr *ip)
+static int dnsParseResponsePacket(u8 *packetBuf, int pktSize, struct in_addr *ip)
 {
 	t_dnsMessageHeader *hdr = (t_dnsMessageHeader *)packetBuf;
 	t_dnsResourceRecordHostAddr rrBody;
@@ -336,7 +342,7 @@ int dnsParseResponsePacket(u8 *packetBuf, int pktSize, struct in_addr *ip)
 	return DNS_ERROR_PARSE;
 }
 
-void dnsCacheAdd(t_dnsCache *entry)
+static void dnsCacheAdd(t_dnsCache *entry)
 {
 	t_dnsCache *last = &cacheHead;
 
@@ -347,7 +353,7 @@ void dnsCacheAdd(t_dnsCache *entry)
 	entry->next = NULL;
 }
 
-t_dnsCache *dnsCacheFind(char *hostName)
+static t_dnsCache *dnsCacheFind(char *hostName)
 {
 	t_dnsCache *current;
 

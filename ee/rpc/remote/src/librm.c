@@ -77,7 +77,7 @@ int RMMan_Init(void)
    rmmanif.server = NULL;
 
    do {
-      if (SifBindRpc(&rmmanif, RMMAN_BIND_RPC_ID, 0) < 0) {
+      if (sceSifBindRpc(&rmmanif, RMMAN_BIND_RPC_ID, 0) < 0) {
 	 return -1;
       }
       nopdelay();
@@ -85,14 +85,13 @@ int RMMan_Init(void)
 
    data[0] = RMMAN_RPC_INIT;
 
-   if (SifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, 0, 0) < 0)
+   if (sceSifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
        return -1;
 
    ports[0].opened = 0;
    ports[0].rmData = NULL;
    ports[1].opened = 1;
    ports[1].rmData = NULL;
-   FlushCache(0);
 
    rmman_init = 1;
 
@@ -106,10 +105,8 @@ u32 RMMan_GetModuleVersion(void)
 
    data[0] = RMMAN_RPC_GETMODULEVER;
 
-   if (SifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, 0, 0) < 0)
+   if (sceSifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
        return 0;
-
-   FlushCache(0);
 
    return data[3];
 }
@@ -136,10 +133,8 @@ int RMMan_Open(int port, int slot, void *pData)
    data[2] = slot;
    data[4] = (u32) pData;
 
-   if (SifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, 0, 0) < 0)
+   if (sceSifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
        return 0;
-
-   FlushCache(0);
 
    ports[port].opened = 1;
    ports[port].rmData = pData;
@@ -154,10 +149,8 @@ int RMMan_End(void)
 
    data[0] = RMMAN_RPC_END;
 
-   if (SifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, 0, 0) < 0)
+   if (sceSifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
        return 0;
-
-   FlushCache(0);
 
    return data[3];
 }
@@ -182,10 +175,8 @@ int RMMan_Close(int port, int slot)
    data[1] = port;
    data[2] = slot;
 
-   if (SifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, 0, 0) < 0)
+   if (sceSifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
        return 0;
-
-   FlushCache(0);
 
    return data[3];
 }

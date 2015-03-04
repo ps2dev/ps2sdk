@@ -207,7 +207,6 @@ int sys_mbox_valid(sys_mbox_t *mbox){
 }
 
 void sys_mbox_set_invalid(sys_mbox_t *mbox){
-//	sys_mbox_free(mbox);
 	*mbox=SYS_MBOX_NULL;
 }
 
@@ -416,7 +415,6 @@ int sys_sem_valid(sys_sem_t *sem){
 }
 
 void sys_sem_set_invalid(sys_sem_t *sem){
-//	sys_sem_free(sem);
 	*sem=SYS_SEM_NULL;
 }
 

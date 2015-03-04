@@ -28,14 +28,19 @@ extern struct irx_export_table _exp_netman;
 int _start(int argc, char *argv[]){
 	iop_sema_t sema;
 
-	sema.attr = 0;
-	sema.option = 0;
-	sema.initial = 1;
-	sema.max = 1;
-	NetManIOSemaID = CreateSema(&sema);
+	if(RegisterLibraryEntries(&_exp_netman) == 0){
+		sema.attr = 0;
+		sema.option = 0;
+		sema.initial = 1;
+		sema.max = 1;
+		NetManIOSemaID = CreateSema(&sema);
 
-	NetmanInitRPCServer();
-	return(RegisterLibraryEntries(&_exp_netman)!=0)?MODULE_NO_RESIDENT_END:MODULE_RESIDENT_END;
+		NetmanInitRPCServer();
+
+		return MODULE_RESIDENT_END;
+	}
+
+	return MODULE_NO_RESIDENT_END;
 }
 
 void *malloc(int size){

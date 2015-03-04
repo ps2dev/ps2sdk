@@ -14,10 +14,6 @@ I_memcpy
 I_memset
 sysclib_IMPORTS_end
 
-sysmem_IMPORTS_start
-I_AllocSysMemory
-sysmem_IMPORTS_end
-
 intrman_IMPORTS_start
 I_CpuSuspendIntr
 I_CpuResumeIntr

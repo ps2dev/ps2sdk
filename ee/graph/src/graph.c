@@ -33,9 +33,9 @@ int graph_add_vsync_handler(int (*vsync_callback)())
 
 	DIntr();
 
-	callback_id = AddIntcHandler(2, vsync_callback, -1);
+	callback_id = AddIntcHandler(INTC_VBLANK_S, vsync_callback, -1);
 
-	EnableIntc(2);
+	EnableIntc(INTC_VBLANK_S);
 
 	EIntr();
 
@@ -48,9 +48,9 @@ void graph_remove_vsync_handler(int callback_id)
 
 	DIntr();
 
-	DisableIntc(2);
+	DisableIntc(INTC_VBLANK_S);
 
-	RemoveIntcHandler(2, callback_id);
+	RemoveIntcHandler(INTC_VBLANK_S, callback_id);
 
 	EIntr();
 

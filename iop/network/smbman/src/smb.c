@@ -1863,12 +1863,10 @@ int smb_Echo(void *echo, int len)
 //-------------------------------------------------------------------------
 int smb_Connect(char *SMBServerIP, int SMBServerPort)
 {
-	int r, retry_count = 0;
+	int r;
 	struct in_addr dst_addr;
 
 	dst_addr.s_addr = inet_addr(SMBServerIP);
-
-conn_retry:
 
 	// Close the connection if it was already opened
 	smb_Disconnect();
@@ -1876,9 +1874,6 @@ conn_retry:
 	// Opening TCP session
 	r = OpenTCPSession(dst_addr, SMBServerPort, &main_socket);
 	if (r < 0) {
-		retry_count++;
-		if (retry_count < 3)
-			goto conn_retry;
 		return -1;
 	}
 

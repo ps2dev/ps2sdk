@@ -48,21 +48,68 @@ extern "C" {
 
 #define ALIGNED(x) __attribute__((aligned((x))))
 
-// For use with AddIntcHandler/RemoveIntcHandler/etc...
+//Modes for FlushCache
+#define WRITEBACK_DCACHE	0
+#define INVALIDATE_DCACHE	1
+#define INVALIDATE_ICACHE	2
+#define INVALIDATE_CACHE	(INVALIDATE_DCACHE|INVALIDATE_ICACHE)
+
+// EE Interrupt Controller (INTC) interrupt numebrs
 enum
 {
-   kINTC_GS,
-   kINTC_SBUS,
-   kINTC_VBLANK_START,
-   kINTC_VBLANK_END,
-   kINTC_VIF0,
-   kINTC_VIF1,
-   kINTC_VU0,
-   kINTC_VU1,
-   kINTC_IPU,
-   kINTC_TIMER0,
-   kINTC_TIMER1
+	INTC_GS,
+	INTC_SBUS,
+	INTC_VBLANK_S,
+	INTC_VBLANK_E,
+	INTC_VIF0,
+	INTC_VIF1,
+	INTC_VU0,
+	INTC_VU1,
+	INTC_IPU,
+	INTC_TIM0,
+	INTC_TIM1,
 };
+
+//For backward-compatibility
+#define kINTC_GS		INTC_GS
+#define kINTC_SBUS		INTC_SBUS
+#define kINTC_VBLANK_START	INTC_VBLANK_S
+#define kINTC_VBLANK_END	INTC_VBLANK_E
+#define kINTC_VIF0		INTC_VIF0
+#define kINTC_VIF1		INTC_VIF1
+#define kINTC_VU0		INTC_VU0
+#define kINTC_VU1		INTC_VU1
+#define kINTC_IPU		INTC_IPU
+#define kINTC_TIMER0		INTC_TIM0
+#define kINTC_TIMER1		INTC_TIM1
+
+//EE Direct Memory Access Controller (DMAC) interrupt numbers
+enum
+{
+	DMAC_VIF0,
+	DMAC_VIF1,
+	DMAC_GIF,
+	DMAC_FROM_IPU,
+	DMAC_TO_IPU,
+	DMAC_SIF0,
+	DMAC_SIF1,
+	DMAC_SIF2,
+	DMAC_FROM_SPR,
+	DMAC_TO_SPR,
+
+	DMAC_CIS	= 13,	//Channel interrupt
+	DMAC_MEIS,		//MemFIFO empty interrupt
+	DMAC_BEIS,		//Bus error interrupt
+};
+
+//ResetEE argument bits
+#define INIT_DMAC               0x01
+#define INIT_VU1                0x02
+#define INIT_VIF1               0x04
+#define INIT_GIF                0x08
+#define INIT_VU0                0x10
+#define INIT_VIF0               0x20
+#define INIT_IPU                0x40
 
 static inline void nopdelay(void)
 {
@@ -161,6 +208,14 @@ typedef struct t_ee_thread
 
 } ee_thread_t;
 
+// Thread status
+#define THS_RUN		0x01
+#define THS_READY	0x02
+#define THS_WAIT	0x04
+#define THS_SUSPEND	0x08
+#define THS_WAITSUSPEND	0x0c
+#define THS_DORMANT	0x10
+
 // sizeof() == 0x30
 typedef struct t_ee_thread_status
 {
@@ -177,13 +232,6 @@ typedef struct t_ee_thread_status
     u32 waitId; // 0x28
     u32 wakeupCount; // 0x2C
 } ee_thread_status_t;
-
-enum _sif_regs {
-	SIF_REG_MAINADDR = 1,
-	SIF_REG_SUBADDR,
-	SIF_REG_MSFLAG,
-	SIF_REG_SMFLAG
-};
 
 /* Glue routines.  */
 int DIntr(void);
@@ -341,7 +389,6 @@ s32  GetMemorySize(void);
 
 int  _InitTLB(void);
 
-void SifWriteBackDCache(void *ptr, int size);
 void _SyncDCache(void *start, void *end);
 void _InvalidDCache(void *start, void *end);
 

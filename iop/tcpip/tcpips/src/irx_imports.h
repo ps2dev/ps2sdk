@@ -24,7 +24,6 @@
 #include "sifman.h"
 #include "stdio.h"
 #include "sysclib.h"
-#include "sysmem.h"
 #include "thbase.h"
 
 #endif /* IOP_IRX_IMPORTS_H */

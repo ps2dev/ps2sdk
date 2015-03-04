@@ -46,9 +46,9 @@ int SifInitIopHeap()
 	if (_ih_caps)
 		return 0;
 
-	SifInitRpc(0);
+	sceSifInitRpc(0);
 
-	while ((res = SifBindRpc(&_ih_cd, 0x80000003, 0)) >= 0 && !_ih_cd.server)
+	while ((res = sceSifBindRpc(&_ih_cd, 0x80000003, 0)) >= 0 && !_ih_cd.server)
 		nopdelay();
 
 	if (res < 0)
@@ -78,7 +78,7 @@ void * SifAllocIopHeap(int size)
 
 	arg.size = size;
 
-	if (SifCallRpc(&_ih_cd, 1, 0, &arg, 4, &arg, 4, NULL, NULL) < 0)
+	if (sceSifCallRpc(&_ih_cd, 1, 0, &arg, 4, &arg, 4, NULL, NULL) < 0)
 		return NULL;
 
 	return (void *)arg.addr;
@@ -95,7 +95,7 @@ int SifFreeIopHeap(void *addr)
 
 	arg.addr = addr;
 
-	if (SifCallRpc(&_ih_cd, 2, 0, &arg, 4, &arg, 4, NULL, NULL) < 0)
+	if (sceSifCallRpc(&_ih_cd, 2, 0, &arg, 4, &arg, 4, NULL, NULL) < 0)
 		return -E_SIF_RPC_CALL;
 
 	return arg.result;
@@ -126,7 +126,7 @@ int SifLoadIopHeap(const char *path, void *addr)
 	strncpy(arg.path, path, LIH_PATH_MAX - 1);
 	arg.path[LIH_PATH_MAX - 1] = 0;
 
-	if (SifCallRpc(&_ih_cd, 3, 0, &arg, sizeof arg, &arg, 4, NULL, NULL) < 0)
+	if (sceSifCallRpc(&_ih_cd, 3, 0, &arg, sizeof arg, &arg, 4, NULL, NULL) < 0)
 		return -E_SIF_RPC_CALL;
 
 	return arg.p.result;

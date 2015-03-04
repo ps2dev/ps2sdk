@@ -23,6 +23,15 @@ extern "C" {
 #define SIF_DMA_INT_I	0x2
 #define SIF_DMA_INT_O	0x4
 
+#define SIF_DMA_ERT	0x40
+
+enum _sif_regs {
+	SIF_REG_MAINADDR = 1,
+	SIF_REG_SUBADDR,
+	SIF_REG_MSFLAG,
+	SIF_REG_SMFLAG
+};
+
 typedef struct t_SifDmaTransfer
 {
    void				*src,
@@ -33,6 +42,10 @@ typedef struct t_SifDmaTransfer
 
 u32 SifSetDma(SifDmaTransfer_t *sdd, s32 len);
 s32 SifDmaStat(u32 id);
+
+//For compatibility
+#define sceSifSetDma SifSetDma
+#define sceSifDmaStat SifDmaStat
 
 #ifdef __cplusplus
 }

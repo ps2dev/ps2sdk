@@ -178,13 +178,7 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 void sys_mbox_free(sys_mbox_t *mbox)
 {
 	dbgprintf("sys_mbox_free: Free MBox (TID: %d)\n", GetThreadId());
-
-//	if(*mbox!=SYS_MBOX_NULL){
-		// should refer status and see if mbox is empty, if not should give an error...
-		DeleteMbx(*mbox);
-
-//		*mbox=SYS_MBOX_NULL;
-//	}
+	DeleteMbx(*mbox);
 }
 
 int sys_mbox_valid(sys_mbox_t *mbox){
@@ -214,7 +208,6 @@ void sys_mbox_post(sys_mbox_t *mbox, void *msg)
 }
 
 void sys_mbox_set_invalid(sys_mbox_t *mbox){
-//	sys_mbox_free(mbox);
 	*mbox=SYS_MBOX_NULL;
 }
 
@@ -292,7 +285,6 @@ int sys_sem_valid(sys_sem_t *sem){
 }
 
 void sys_sem_set_invalid(sys_sem_t *sem){
-//	sys_sem_free(sem);
 	*sem=SYS_SEM_NULL;
 }
 
@@ -347,12 +339,7 @@ void sys_sem_signal(sys_sem_t *sem)
 void sys_sem_free(sys_sem_t *sem)
 {
 	dbgprintf("sys_sem_free: (TID: %d)\n", GetThreadId());
-
-//	if(*sem!=SYS_SEM_NULL){
-		DeleteSema(*sem);
-
-//		*sem=SYS_SEM_NULL;
-//	}
+	DeleteSema(*sem);
 }
 
 void sys_init(void)

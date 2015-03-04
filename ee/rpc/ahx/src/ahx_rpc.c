@@ -58,14 +58,13 @@ int AHX_Init()
 
 	// bind rpc
 	while(1){
-		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1; // bind error
+		if (sceSifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1; // bind error
  		if (cd0.server != 0) break;
     	i = 0x10000;
     	while(i--);
 	}
 
-	SifCallRpc(&cd0,AHX_INIT,0,(void*)(&sbuff[0]),64,(void*)(&sbuff[0]),64,0,0);
-	FlushCache(0);
+	sceSifCallRpc(&cd0,AHX_INIT,0,(void*)(&sbuff[0]),64,(void*)(&sbuff[0]),64,NULL,NULL);
 
 	songbuffer_addr = (char*)sbuff[1];
 
@@ -84,13 +83,12 @@ int AHX_Play()
 {
 	int i;
 	while(1){
-		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
+		if (sceSifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
  		if (cd0.server != 0) break;
     	i = 0x10000;
     	while(i--);
 	}
-	SifCallRpc(&cd0,AHX_PLAY,0,(void*)(&sbuff[0]),64,(void*)(&sbuff[0]),64,0,0);
-	FlushCache(0);
+	sceSifCallRpc(&cd0,AHX_PLAY,0,(void*)(&sbuff[0]),64,(void*)(&sbuff[0]),64,NULL,NULL);
 	return 0;
 }
 
@@ -104,13 +102,12 @@ int AHX_Pause()
 {
 	int i;
 	while(1){
-		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
+		if (sceSifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
  		if (cd0.server != 0) break;
     	i = 0x10000;
     	while(i--);
 	}
-	SifCallRpc(&cd0,AHX_PAUSE,0,(void*)(&sbuff[0]),64,(void*)(&sbuff[0]),64,0,0);
-	FlushCache(0);
+	sceSifCallRpc(&cd0,AHX_PAUSE,0,(void*)(&sbuff[0]),64,(void*)(&sbuff[0]),64,NULL,NULL);
 	return 0;
 }
 
@@ -126,14 +123,13 @@ int AHX_SubSong(int songNo)
 {
 	int i;
 	while(1){
-		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
+		if (sceSifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
  		if (cd0.server != 0) break;
     	i = 0x10000;
     	while(i--);
 	}
 	sbuff[0] = (unsigned)songNo;
-	SifCallRpc(&cd0,AHX_PAUSE,0,(void*)(&sbuff[0]),64,(void*)(&sbuff[0]),64,0,0);
-	FlushCache(0);
+	sceSifCallRpc(&cd0,AHX_PAUSE,0,(void*)(&sbuff[0]),64,(void*)(&sbuff[0]),64,NULL,NULL);
 	return 0;
 }
 
@@ -148,14 +144,13 @@ int AHX_SetVolume(int volumePercentage)
 {
 	int i;
 	while(1){
-		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
+		if (sceSifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
  		if (cd0.server != 0) break;
     	i = 0x10000;
     	while(i--);
 	}
 	sbuff[0] = (unsigned)volumePercentage;
-	SifCallRpc(&cd0,AHX_QUIT,0,(void*)(&sbuff[0]),64,(void*)(&sbuff[0]),64,0,0);
-	FlushCache(0);
+	sceSifCallRpc(&cd0,AHX_QUIT,0,(void*)(&sbuff[0]),64,(void*)(&sbuff[0]),64,NULL,NULL);
 	return 0;
 }
 
@@ -172,14 +167,13 @@ int  AHX_SetBoost(int boostValue)
 {
 	int i;
 	while(1){
-		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
+		if (sceSifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
  		if (cd0.server != 0) break;
     	i = 0x10000;
     	while(i--);
 	}
 	sbuff[0] = (unsigned)boostValue;
-	SifCallRpc(&cd0,AHX_SETBOOST,0,(void*)(&sbuff[0]),64,(void*)(&sbuff[0]),64,0,0);
-	FlushCache(0);
+	sceSifCallRpc(&cd0,AHX_SETBOOST,0,(void*)(&sbuff[0]),64,(void*)(&sbuff[0]),64,NULL,NULL);
 	return 0;
 }
 
@@ -195,13 +189,12 @@ int  AHX_ToggleOversampling()
 {
 	int i;
 	while(1){
-		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
+		if (sceSifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
  		if (cd0.server != 0) break;
     	i = 0x10000;
     	while(i--);
 	}
-	SifCallRpc(&cd0,AHX_OVERSAMPLING,0,(void*)(&sbuff[0]),64,(void*)(&sbuff[0]),64,0,0);
-	FlushCache(0);
+	sceSifCallRpc(&cd0,AHX_OVERSAMPLING,0,(void*)(&sbuff[0]),64,(void*)(&sbuff[0]),64,NULL,NULL);
 	return 0;
 }
 
@@ -216,13 +209,12 @@ int AHX_Quit()
 {
 	int i;
 	while(1){
-		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
+		if (sceSifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
  		if (cd0.server != 0) break;
     	i = 0x10000;
     	while(i--);
 	}
-	SifCallRpc(&cd0,AHX_QUIT,0,(void*)(&sbuff[0]),64,(void*)(&sbuff[0]),64,0,0);
-	FlushCache(0);
+	sceSifCallRpc(&cd0,AHX_QUIT,0,(void*)(&sbuff[0]),64,(void*)(&sbuff[0]),64,NULL,NULL);
 	return 0;
 }
 
@@ -243,7 +235,7 @@ int AHX_LoadSongBuffer(char* songdata, int songsize)
 	iop_readwrite(songbuffer_addr, songdata, songsize, 0);
 
 	while(1){
-		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
+		if (sceSifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
  		if (cd0.server != 0) break;
     	i = 0x10000;
     	while(i--);
@@ -253,8 +245,7 @@ int AHX_LoadSongBuffer(char* songdata, int songsize)
 	sbuff[0] = (unsigned)songsize;
 
 	// call rpc
-	SifCallRpc(&cd0,AHX_LOADSONG,0,(void*)(&sbuff[0]),64,(void*)(&sbuff[0]),64,0,0);
-	FlushCache(0);
+	sceSifCallRpc(&cd0,AHX_LOADSONG,0,(void*)(&sbuff[0]),64,(void*)(&sbuff[0]),64,NULL,NULL);
 
 	// return number of sub-songs
 	return (int)sbuff[1];

@@ -630,11 +630,11 @@ SYSCALL(_InitTLB)
 
 #ifdef F_SifWriteBackDCache
 
-	.globl	SifWriteBackDCache
-	.ent	SifWriteBackDCache
+	.globl	sceSifWriteBackDCache
+	.ent	sceSifWriteBackDCache
 	.set	noreorder
 
-SifWriteBackDCache:	/* DHWBIN: Data cache Hit WriteBack INvalidate.  */
+sceSifWriteBackDCache:	/* DHWBIN: Data cache Hit WriteBack INvalidate.  */
 
 	lui	$25, 0xffff
 	ori	$25, $25, 0xffc0
@@ -685,7 +685,7 @@ last:
 	jr	$31
 	nop
 
-	.end	SifWriteBackDCache
+	.end	sceSifWriteBackDCache
 #endif
 
 #define DXWBIN	0x14		/* Data cache: indeX WriteBack INvalidate.  */

@@ -19,12 +19,12 @@ static int      s_intrOverflowID = -1;
 static clock_t  s_intrOverflowCount = 0;
 
 #ifdef TIME_USE_T0
-#define INTC_TIM       kINTC_TIMER0
+#define INTC_TIM       INTC_TIM0
 #define T_COUNT        T0_COUNT
 #define T_MODE         T0_MODE
 #define T_COMP         T0_COMP
 #else
-#define INTC_TIM       kINTC_TIMER1
+#define INTC_TIM       INTC_TIM1
 #define T_COUNT        T1_COUNT
 #define T_MODE         T1_MODE
 #define T_COMP         T1_COMP
@@ -47,8 +47,8 @@ void _ps2sdk_time_init(void)
 
    if (s_intrOverflowID == -1)
    {
-       s_intrOverflowID = AddIntcHandler(kINTC_TIMER1, intrOverflow, 0);
-       EnableIntc(kINTC_TIMER1);
+       s_intrOverflowID = AddIntcHandler(INTC_TIM, intrOverflow, 0);
+       EnableIntc(INTC_TIM);
    }
 
    // Initialize the timer registers
@@ -67,8 +67,8 @@ void _ps2sdk_time_deinit(void)
 
    if (s_intrOverflowID >= 0)
    {
-      DisableIntc(kINTC_TIMER1);
-      RemoveIntcHandler(kINTC_TIMER1, s_intrOverflowID);
+      DisableIntc(INTC_TIM);
+      RemoveIntcHandler(INTC_TIM, s_intrOverflowID);
       s_intrOverflowID = -1;
    }
 

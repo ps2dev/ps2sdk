@@ -23,12 +23,12 @@
 #define GMONVERSION	0x00051879
 
 #ifndef MCOUNT_USE_T1
-#define INTC_TIM       kINTC_TIMER0
+#define INTC_TIM       INTC_TIM0
 #define T_COUNT        T0_COUNT
 #define T_MODE         T0_MODE
 #define T_COMP         T0_COMP
 #else
-#define INTC_TIM       kINTC_TIMER1
+#define INTC_TIM       INTC_TIM1
 #define T_COUNT        T1_COUNT
 #define T_MODE         T1_MODE
 #define T_COMP         T1_COMP

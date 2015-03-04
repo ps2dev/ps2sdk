@@ -60,10 +60,10 @@ int SifIopReset(const char *arg, int mode)
 	}
 
 	dmat.src  = &reset_pkt;
-	dmat.dest = (void *)SifGetReg(0x80000000);
+	dmat.dest = (void *)SifGetReg(SIF_CMD_CHANGE_SADDR);
 	dmat.size = sizeof(reset_pkt);
 	dmat.attr = 0x40 | SIF_DMA_INT_O;
-	SifWriteBackDCache(&reset_pkt, sizeof(reset_pkt));
+	sceSifWriteBackDCache(&reset_pkt, sizeof(reset_pkt));
 
 	SifSetReg(SIF_REG_SMFLAG, 0x40000);
 
@@ -72,8 +72,8 @@ int SifIopReset(const char *arg, int mode)
 
 	SifSetReg(SIF_REG_SMFLAG, 0x10000);
 	SifSetReg(SIF_REG_SMFLAG, 0x20000);
-	SifSetReg(0x80000002, 0);
-	SifSetReg(0x80000000, 0);
+	SifSetReg(SIF_CMD_INIT_CMD, 0);
+	SifSetReg(SIF_CMD_CHANGE_SADDR, 0);
 
 	return 1;
 }
@@ -90,8 +90,8 @@ int SifIopReboot(const char* arg)
 		return 0;
 	}
 
-	SifInitRpc(0);
-	SifExitRpc();
+	sceSifInitRpc(0);
+	sceSifExitRpc();
 
 	strcpy(param_str, "rom0:UDNL ");
 	strcat(param_str, arg);
