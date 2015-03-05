@@ -24,7 +24,7 @@ int main (int argc, char *argv[])
 	static int devid;
 	static int fh;
 
-	sceSifInitRpc(0);
+	SifInitRpc(0);
 	fioInit();
 
 

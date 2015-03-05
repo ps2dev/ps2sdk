@@ -152,46 +152,33 @@ typedef struct t_SifRpcDataQueue
    struct t_SifRpcDataQueue	*next;  	/* 05 */
 } SifRpcDataQueue_t;
 
-void sceSifInitRpc(int mode);
-void sceSifExitRpc(void);
+void SifInitRpc(int mode);
+void SifExitRpc(void);
 
 /* SIF RPC client API */
-int sceSifBindRpc(SifRpcClientData_t *client, int rpc_number, int mode);
-int sceSifCallRpc(SifRpcClientData_t *client, int rpc_number, int mode,
+int SifBindRpc(SifRpcClientData_t *client, int rpc_number, int mode);
+int SifCallRpc(SifRpcClientData_t *client, int rpc_number, int mode,
 		void *send, int ssize, void *receive, int rsize,
 		SifRpcEndFunc_t end_function, void *end_param);
-int sceSifRpcGetOtherData(SifRpcReceiveData_t *rd, void *src, void *dest,
+int SifRpcGetOtherData(SifRpcReceiveData_t *rd, void *src, void *dest,
 		int size, int mode);
 
-int sceSifCheckStatRpc(SifRpcClientData_t *cd);
+int SifCheckStatRpc(SifRpcClientData_t *cd);
 
 /* SIF RPC server API */
 SifRpcDataQueue_t *
-sceSifSetRpcQueue(SifRpcDataQueue_t *q, int thread_id);
+SifSetRpcQueue(SifRpcDataQueue_t *q, int thread_id);
 
 SifRpcServerData_t *
-sceSifRegisterRpc(SifRpcServerData_t *srv,
+SifRegisterRpc(SifRpcServerData_t *srv,
 		int sid, SifRpcFunc_t func, void *buff, SifRpcFunc_t cfunc,
 		void *cbuff, SifRpcDataQueue_t *qd);
 
 SifRpcServerData_t *
-sceSifGetNextRequest(SifRpcDataQueue_t *qd);
+SifGetNextRequest(SifRpcDataQueue_t *qd);
 
-void sceSifExecRequest(SifRpcServerData_t *srv);
-void sceSifRpcLoop(SifRpcDataQueue_t *q);
-
-// For backward-compatibility
-#define SifInitRpc sceSifInitRpc
-#define SifExitRpc sceSifExitRpc
-#define SifBindRpc sceSifBindRpc
-#define SifCallRpc sceSifCallRpc
-#define SifRpcGetOtherData sceSifGetOtherData
-#define SifCheckStatRpc sceSifCheckStatRpc
-#define SifSetRpcQueue sceSifSetRpcQueue
-#define SifRegisterRpc sceSifRegisterRpc
-#define SifGetNextRequest sceSifGetNextRequest
-#define SifExecRequest sceSifExecRequest
-#define SifRpcLoop sceSifRpcLoop
+void SifExecRequest(SifRpcServerData_t *srv);
+void SifRpcLoop(SifRpcDataQueue_t *q);
 
 #ifdef __cplusplus
 }

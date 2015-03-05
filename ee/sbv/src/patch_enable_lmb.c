@@ -111,7 +111,7 @@ int sbv_patch_enable_lmb(void)
 
 	lf_rpc_dispatch = (void *)(loadfile_info.text_start + 0x4c4);
 	SyncDCache(smem_buf, smem_buf+128);
-	if(sceSifRpcGetOtherData(&RData, (void*)lf_rpc_dispatch, smem_buf, 128, 0)>=0){
+	if(SifRpcGetOtherData(&RData, (void*)lf_rpc_dispatch, smem_buf, 128, 0)>=0){
 		data=(u32*)smem_buf;
 		if(data[0]==0x27bdffe8 && data[1]==0x2c820006 && data[2]==0x14400003 && data[3]==0xafbf0010 && data[5]==0x00001021 && data[6]==0x00041080){
 			lf_fno_check = (void*)(lf_rpc_dispatch+4);

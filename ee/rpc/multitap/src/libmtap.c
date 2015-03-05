@@ -37,7 +37,7 @@ int mtapInit(void)
 
 	while(1)
 	{
-		if (sceSifBindRpc(&clientPortOpen, MTAPSERV_PORT_OPEN, 0) < 0) return -1;
+		if (SifBindRpc(&clientPortOpen, MTAPSERV_PORT_OPEN, 0) < 0) return -1;
  		if (clientPortOpen.server != 0) break;
 
     	i = 0x10000;
@@ -46,7 +46,7 @@ int mtapInit(void)
 
 	while(1)
 	{
-		if (sceSifBindRpc(&clientPortClose, MTAPSERV_PORT_CLOSE, 0) < 0) return -1;
+		if (SifBindRpc(&clientPortClose, MTAPSERV_PORT_CLOSE, 0) < 0) return -1;
  		if (clientPortClose.server != 0) break;
 
     	i = 0x10000;
@@ -55,7 +55,7 @@ int mtapInit(void)
 
 	while(1)
 	{
-		if (sceSifBindRpc(&clientGetConnection, MTAPSERV_GET_CONNECTION, 0) < 0) return -1;
+		if (SifBindRpc(&clientGetConnection, MTAPSERV_GET_CONNECTION, 0) < 0) return -1;
  		if (clientGetConnection.server != 0) break;
 
     	i = 0x10000;
@@ -72,7 +72,7 @@ int mtapPortOpen(int port)
 	if(!mtapInited) return -1;
 
 	mtapRpcBuffer[0] = port;
-	sceSifCallRpc(&clientPortOpen, 1, 0, mtapRpcBuffer, 4, mtapRpcBuffer, 8, NULL, NULL);
+	SifCallRpc(&clientPortOpen, 1, 0, mtapRpcBuffer, 4, mtapRpcBuffer, 8, NULL, NULL);
 
 	return mtapRpcBuffer[1];
 }
@@ -82,7 +82,7 @@ int mtapPortClose(int port)
 	if(!mtapInited) return -1;
 
 	mtapRpcBuffer[0] = port;
-	sceSifCallRpc(&clientPortClose, 1, 0, mtapRpcBuffer, 4, mtapRpcBuffer, 8, NULL, NULL);
+	SifCallRpc(&clientPortClose, 1, 0, mtapRpcBuffer, 4, mtapRpcBuffer, 8, NULL, NULL);
 
 	return mtapRpcBuffer[1];
 }
@@ -92,7 +92,7 @@ int mtapGetConnection(int port)
 	if(!mtapInited) return -1;
 
 	mtapRpcBuffer[0] = port;
-	sceSifCallRpc(&clientGetConnection, 1, 0, mtapRpcBuffer, 4, mtapRpcBuffer, 8, NULL, NULL);
+	SifCallRpc(&clientGetConnection, 1, 0, mtapRpcBuffer, 4, mtapRpcBuffer, 8, NULL, NULL);
 
 	return mtapRpcBuffer[1];
 }

@@ -43,7 +43,7 @@ int main() {
 	int i;
 
 	// Initialise
-	sceSifInitRpc(0);
+	SifInitRpc(0);
 	LoadModules();
 #ifdef TYPE_MC
 	if(mcInit(MC_TYPE_MC) < 0) {
@@ -141,7 +141,7 @@ int main() {
 	}
 
 	// Return to the browser, so you can see the PS2Dev icon :)
-	sceSifExitRpc();
+	SifExitRpc();
 	return 0;
 }
 

@@ -43,9 +43,9 @@ int PS2CamInit(int mode)
 
 	if(CamInited)return 0;
 
-	sceSifInitRpc(0);
+	SifInitRpc(0);
 
-	while (((ret = sceSifBindRpc(&cdata, PS2_CAM_RPC_ID, 0)) >= 0) && (cdata.server == NULL))
+	while (((ret = SifBindRpc(&cdata, PS2_CAM_RPC_ID, 0)) >= 0) && (cdata.server == NULL))
 		nopdelay();
 
 	nopdelay();
@@ -61,7 +61,7 @@ int PS2CamInit(int mode)
 
 	printf("bind done\n");
 
-	sceSifCallRpc(&cdata, PS2CAM_RPC_INITIALIZE, 0, (void*)(&data[0]),4,(void*)(&data[0]),4,0,0);
+	SifCallRpc(&cdata, PS2CAM_RPC_INITIALIZE, 0, (void*)(&data[0]),4,(void*)(&data[0]),4,0,0);
 	nopdelay();
 
 	CamInited = 1;
@@ -89,7 +89,7 @@ int PS2CamGetIRXVersion(void)
 
 	ret = (int *)&data[0];
 
-	sceSifCallRpc(&cdata, PS2CAM_RPC_GETIRXVERSION, 0, (void*)(&data[0]),4,(void*)(&data[0]),4,0,0);
+	SifCallRpc(&cdata, PS2CAM_RPC_GETIRXVERSION, 0, (void*)(&data[0]),4,(void*)(&data[0]),4,0,0);
 	nopdelay();
 
 	return ret[0];
@@ -105,7 +105,7 @@ int PS2CamGetDeviceCount(void)
 
 	ret = (int *)&data[0];
 
-	sceSifCallRpc(&cdata, PS2CAM_RPC_GETDEVCOUNT, 0, (void*)(&data[0]),4,(void*)(&data[0]),4,0,0);
+	SifCallRpc(&cdata, PS2CAM_RPC_GETDEVCOUNT, 0, (void*)(&data[0]),4,(void*)(&data[0]),4,0,0);
 	nopdelay();
 
 	return ret[0];
@@ -123,7 +123,7 @@ int PS2CamOpenDevice(int device_index)
 
 	ret[0] = device_index;
 
-	sceSifCallRpc(&cdata, PS2CAM_RPC_OPENDEVICE, 0, (void*)(&data[0]),4,(void*)(&data[0]),4,0,0);
+	SifCallRpc(&cdata, PS2CAM_RPC_OPENDEVICE, 0, (void*)(&data[0]),4,(void*)(&data[0]),4,0,0);
 
 	return ret[0];
 }
@@ -139,7 +139,7 @@ int PS2CamCloseDevice(int handle)
 
 	ret[0] = handle;
 
-	sceSifCallRpc(&cdata, PS2CAM_RPC_CLOSEDEVICE, 0, (void*)(&data[0]),4,(void*)(&data[0]),4,0,0);
+	SifCallRpc(&cdata, PS2CAM_RPC_CLOSEDEVICE, 0, (void*)(&data[0]),4,(void*)(&data[0]),4,0,0);
 
 	return ret[0];
 }
@@ -158,7 +158,7 @@ int PS2CamGetDeviceStatus(int handle)
 	ret[0] = handle;
 
 
-	sceSifCallRpc(&cdata, PS2CAM_RPC_GETDEVSTATUS, 0, (void*)(&data[0]),4,(void*)(&data[0]),4,0,0);
+	SifCallRpc(&cdata, PS2CAM_RPC_GETDEVSTATUS, 0, (void*)(&data[0]),4,(void*)(&data[0]),4,0,0);
 	nopdelay();
 
 	return ret[0];
@@ -179,7 +179,7 @@ int PS2CamGetDeviceInfo(int handle, PS2CAM_DEVICE_INFO *info)
 
 	memcpy(iop_info, info, info->ssize);
 
-	sceSifCallRpc(&cdata, PS2CAM_RPC_GETDEVINFO, 0, (void*)(&data[0]),info->ssize+4,(void*)(&data[0]),info->ssize+4,0,0);
+	SifCallRpc(&cdata, PS2CAM_RPC_GETDEVINFO, 0, (void*)(&data[0]),info->ssize+4,(void*)(&data[0]),info->ssize+4,0,0);
 	nopdelay();
 
 	memcpy(info, iop_info, iop_info->ssize);
@@ -202,7 +202,7 @@ int PS2CamSetDeviceBandwidth(int handle, char bandwidth)
 
 
 
-	sceSifCallRpc(&cdata, PS2CAM_RPC_SETDEVBANDWIDTH, 0, (void*)(&data[0]),4,(void*)(&data[0]),4,0,0);
+	SifCallRpc(&cdata, PS2CAM_RPC_SETDEVBANDWIDTH, 0, (void*)(&data[0]),4,(void*)(&data[0]),4,0,0);
 	nopdelay();
 
 	return ret[0];
@@ -224,7 +224,7 @@ int PS2CamReadPacket(int handle)
 
 	ret[0] = handle;
 
-	sceSifCallRpc(&cdata, PS2CAM_RPC_READPACKET, 0, (void*)(&data[0]),4,(void*)(&data[0]),4*2,0,0);
+	SifCallRpc(&cdata, PS2CAM_RPC_READPACKET, 0, (void*)(&data[0]),4,(void*)(&data[0]),4*2,0,0);
 
 
 	if(ret[0] < 0) return ret[0];
@@ -257,7 +257,7 @@ int PS2CamSetLEDMode(int handle, int mode)
 	ret[0] = handle;
 	ret[1] = mode;
 
-	sceSifCallRpc(&cdata, PS2CAM_RPC_SETLEDMODE, 0, (void*)(&data[0]),4,(void*)(&data[0]),4,0,0);
+	SifCallRpc(&cdata, PS2CAM_RPC_SETLEDMODE, 0, (void*)(&data[0]),4,(void*)(&data[0]),4,0,0);
 
 	return ret[0];
 }
@@ -274,7 +274,7 @@ int PS2CamSetDeviceConfig(int handle, PS2CAM_DEVICE_CONFIG *cfg)
 
 	memcpy(&ret[1], cfg, cfg->ssize);
 
-	sceSifCallRpc(&cdata, PS2CAM_RPC_SETDEVCONFIG, 0, (void*)(&data[0]), 4+cfg->ssize,(void*)(&data[0]),4+cfg->ssize,0,0);
+	SifCallRpc(&cdata, PS2CAM_RPC_SETDEVCONFIG, 0, (void*)(&data[0]), 4+cfg->ssize,(void*)(&data[0]),4+cfg->ssize,0,0);
 
 	return ret[0];
 }

@@ -42,7 +42,7 @@ int smod_get_next_mod(smod_mod_info_t *cur_mod, smod_mod_info_t *next_mod)
 	}
 
 	SyncDCache(smem_buf, smem_buf+sizeof(smod_mod_info_t));
-	if(sceSifRpcGetOtherData(&RData, addr, smem_buf, sizeof(smod_mod_info_t), 0)>=0){
+	if(SifRpcGetOtherData(&RData, addr, smem_buf, sizeof(smod_mod_info_t), 0)>=0){
 		memcpy(next_mod, smem_buf, sizeof(smod_mod_info_t));
 		return next_mod->id;
 	}
@@ -64,7 +64,7 @@ int smod_get_mod_by_name(const char *name, smod_mod_info_t *info)
 	smem_buf[64]='\0';
 	do {
 		SyncDCache(smem_buf, smem_buf+64);
-		if(sceSifRpcGetOtherData(&RData, info->name, smem_buf, 64, 0)>=0){
+		if(SifRpcGetOtherData(&RData, info->name, smem_buf, 64, 0)>=0){
 			if (!__memcmp(smem_buf, name, len))
 				return info->id;
 		}

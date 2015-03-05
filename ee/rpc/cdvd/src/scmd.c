@@ -102,7 +102,7 @@ int sceCdReadClock(sceCdCLOCK * clock)
 	if (CdDebug > 0)
 		printf("Libcdvd call Clock read 1\n");
 
-	if (sceSifCallRpc(&clientSCmd, CD_SCMD_READCLOCK, 0, NULL, 0, sCmdRecvBuff, 16, NULL, NULL) < 0) {
+	if (SifCallRpc(&clientSCmd, CD_SCMD_READCLOCK, 0, NULL, 0, sCmdRecvBuff, 16, NULL, NULL) < 0) {
 		SignalSema(sCmdSemaId);
 		return 0;
 	}
@@ -127,7 +127,7 @@ int sceCdWriteClock(const sceCdCLOCK * clock)
 
 	memcpy(sCmdSendBuff, clock, 8);
 
-	if (sceSifCallRpc(&clientSCmd, CD_SCMD_WRITECLOCK, 0, sCmdSendBuff, 8, sCmdRecvBuff, 16, NULL, NULL) < 0) {
+	if (SifCallRpc(&clientSCmd, CD_SCMD_WRITECLOCK, 0, sCmdSendBuff, 8, sCmdRecvBuff, 16, NULL, NULL) < 0) {
 		SignalSema(sCmdSemaId);
 		return 0;
 	}
@@ -148,7 +148,7 @@ int sceCdGetDiskType(void)
 	if (_CdCheckSCmd(CD_SCMD_GETDISKTYPE) == 0)
 		return 0;
 
-	if (sceSifCallRpc(&clientSCmd, CD_SCMD_GETDISKTYPE, 0, NULL, 0, sCmdRecvBuff, 4, NULL, NULL) < 0) {
+	if (SifCallRpc(&clientSCmd, CD_SCMD_GETDISKTYPE, 0, NULL, 0, sCmdRecvBuff, 4, NULL, NULL) < 0) {
 		SignalSema(sCmdSemaId);
 		return 0;
 	}
@@ -168,7 +168,7 @@ int sceCdGetError(void)
 	if (_CdCheckSCmd(CD_SCMD_GETERROR) == 0)
 		return -1;
 
-	if (sceSifCallRpc(&clientSCmd, CD_SCMD_GETERROR, 0, NULL, 0, sCmdRecvBuff, 4, NULL, NULL) < 0) {
+	if (SifCallRpc(&clientSCmd, CD_SCMD_GETERROR, 0, NULL, 0, sCmdRecvBuff, 4, NULL, NULL) < 0) {
 		SignalSema(sCmdSemaId);
 		return -1;
 	}
@@ -190,7 +190,7 @@ int sceCdTrayReq(int param, u32 * traychk)
 
 	memcpy(sCmdSendBuff, &param, 4);
 
-	if (sceSifCallRpc(&clientSCmd, CD_SCMD_TRAYREQ, 0, sCmdSendBuff, 4, sCmdRecvBuff, 8, NULL, NULL) < 0) {
+	if (SifCallRpc(&clientSCmd, CD_SCMD_TRAYREQ, 0, sCmdSendBuff, 4, sCmdRecvBuff, 8, NULL, NULL) < 0) {
 		SignalSema(sCmdSemaId);
 		return 0;
 	}
@@ -216,7 +216,7 @@ int sceCdApplySCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff,
 	if (inBuff)
 		memcpy(&sCmdSendBuff[4], inBuff, inBuffSize);
 
-	if (sceSifCallRpc(&clientSCmd, CD_SCMD_SCMD, 0, sCmdSendBuff, 20, sCmdRecvBuff, 16, NULL, NULL) < 0) {
+	if (SifCallRpc(&clientSCmd, CD_SCMD_SCMD, 0, sCmdSendBuff, 20, sCmdRecvBuff, 16, NULL, NULL) < 0) {
 		SignalSema(sCmdSemaId);
 		return 0;
 	}
@@ -236,7 +236,7 @@ int sceCdStatus(void)
 	if (_CdCheckSCmd(CD_SCMD_STATUS) == 0)
 		return -1;
 
-	if (sceSifCallRpc(&clientSCmd, CD_SCMD_STATUS, 0, NULL, 0, sCmdRecvBuff, 4, NULL, NULL) < 0) {
+	if (SifCallRpc(&clientSCmd, CD_SCMD_STATUS, 0, NULL, 0, sCmdRecvBuff, 4, NULL, NULL) < 0) {
 		SignalSema(sCmdSemaId);
 		return -1;
 	}
@@ -258,7 +258,7 @@ int sceCdBreak(void)
 	if (_CdCheckSCmd(CD_SCMD_BREAK) == 0)
 		return 0;
 
-	if (sceSifCallRpc(&clientSCmd, CD_SCMD_BREAK, 0, NULL, 0, sCmdRecvBuff, 4, NULL, NULL) < 0) {
+	if (SifCallRpc(&clientSCmd, CD_SCMD_BREAK, 0, NULL, 0, sCmdRecvBuff, 4, NULL, NULL) < 0) {
 		SignalSema(sCmdSemaId);
 		return 0;
 	}
@@ -277,7 +277,7 @@ int sceCdCancelPOffRdy(u32 * result)
 	if (_CdCheckSCmd(CD_SCMD_CANCELPOWEROFF) == 0)
 		return 0;
 
-	if (sceSifCallRpc(&clientSCmd, CD_SCMD_CANCELPOWEROFF, 0, NULL, 0, sCmdRecvBuff, 8, NULL, NULL) < 0) {
+	if (SifCallRpc(&clientSCmd, CD_SCMD_CANCELPOWEROFF, 0, NULL, 0, sCmdRecvBuff, 8, NULL, NULL) < 0) {
 		SignalSema(sCmdSemaId);
 		return 0;
 	}
@@ -299,7 +299,7 @@ int sceCdBlueLedCtrl(u8 control, u32 *result)
 		return 0;
 
 	*(u32 *) sCmdSendBuff = control;
-	if (sceSifCallRpc(&clientSCmd, CD_SCMD_BLUELEDCTRL, 0, sCmdSendBuff, 4, sCmdRecvBuff, 8, NULL, NULL) < 0) {
+	if (SifCallRpc(&clientSCmd, CD_SCMD_BLUELEDCTRL, 0, sCmdSendBuff, 4, sCmdRecvBuff, 8, NULL, NULL) < 0) {
 		SignalSema(sCmdSemaId);
 		return 0;
 	}
@@ -320,7 +320,7 @@ int sceCdPowerOff(u32 * result)
 	if (_CdCheckSCmd(CD_SCMD_POWEROFF) == 0)
 		return 0;
 
-	if (sceSifCallRpc(&clientSCmd, CD_SCMD_POWEROFF, 0, NULL, 0, sCmdRecvBuff, 8, NULL, NULL) < 0) {
+	if (SifCallRpc(&clientSCmd, CD_SCMD_POWEROFF, 0, NULL, 0, sCmdRecvBuff, 8, NULL, NULL) < 0) {
 		SignalSema(sCmdSemaId);
 		return 0;
 	}
@@ -342,7 +342,7 @@ int sceCdMmode(int media)
 		return 0;
 
 	memcpy(sCmdSendBuff, &media, 4);
-	if (sceSifCallRpc(&clientSCmd, CD_SCMD_MMODE, 0, sCmdSendBuff, 4, sCmdRecvBuff, 4, NULL, NULL) < 0) {
+	if (SifCallRpc(&clientSCmd, CD_SCMD_MMODE, 0, sCmdSendBuff, 4, sCmdRecvBuff, 4, NULL, NULL) < 0) {
 		SignalSema(sCmdSemaId);
 		return 0;
 	}
@@ -363,7 +363,7 @@ int sceCdChangeThreadPriority(int priority)
 		return 0;
 
 	memcpy(sCmdSendBuff, &priority, 4);
-	if (sceSifCallRpc(&clientSCmd, CD_SCMD_SETTHREADPRI, 0, sCmdSendBuff, 4, sCmdRecvBuff, 4, NULL, NULL) < 0) {
+	if (SifCallRpc(&clientSCmd, CD_SCMD_SETTHREADPRI, 0, sCmdSendBuff, 4, sCmdRecvBuff, 4, NULL, NULL) < 0) {
 		SignalSema(sCmdSemaId);
 		return 0;
 	}
@@ -392,11 +392,11 @@ int _CdCheckSCmd(int cur_cmd)
 		return 0;
 	}
 
-	sceSifInitRpc(0);
+	SifInitRpc(0);
 	if (bindSCmd >= 0)
 		return 1;
 	while (1) {
-		if (sceSifBindRpc(&clientSCmd, CD_SERVER_SCMD, 0) < 0) {
+		if (SifBindRpc(&clientSCmd, CD_SERVER_SCMD, 0) < 0) {
 			if (CdDebug > 0)
 				printf("Libcdvd bind err S cmd\n");
 		}
@@ -419,7 +419,7 @@ int sceCdForbidRead(u32 *status)
 	int result;
 
 	if(_CdCheckSCmd(CD_SCMD_FORBID_READ)==0) return 0;
-	if(sceSifCallRpc(&clientSCmd, CD_SCMD_FORBID_READ, 0, NULL, 0, sCmdRecvBuff, 8, NULL, NULL)>=0){
+	if(SifCallRpc(&clientSCmd, CD_SCMD_FORBID_READ, 0, NULL, 0, sCmdRecvBuff, 8, NULL, NULL)>=0){
 		*status = ((u32 *)UNCACHED_SEG(sCmdRecvBuff))[1];
 		result = ((int *)UNCACHED_SEG(sCmdRecvBuff))[0];
 	}else{
@@ -437,7 +437,7 @@ int sceCdSpinCtrlEE(u32 speed)
 
 	if(_CdCheckSCmd(CD_SCMD_SPIN_CTRL)==0) return 0;
 	memcpy(sCmdSendBuff, &speed, 4);
-	if(sceSifCallRpc(&clientSCmd, CD_SCMD_SPIN_CTRL, 0, sCmdSendBuff, 4, sCmdRecvBuff, 8, NULL, NULL)>=0){
+	if(SifCallRpc(&clientSCmd, CD_SCMD_SPIN_CTRL, 0, sCmdSendBuff, 4, sCmdRecvBuff, 8, NULL, NULL)>=0){
 		result = ((int *)UNCACHED_SEG(sCmdRecvBuff))[0];
 	}else{
 		result = 0;
@@ -455,7 +455,7 @@ int sceCdBootCertify(const u8 *romname)
 	if(_CdCheckSCmd(CD_SCMD_BOOT_CERTIFY)==0) return 0;
 
 	memcpy(sCmdSendBuff, romname, 4);
-	if(sceSifCallRpc(&clientSCmd, CD_SCMD_BOOT_CERTIFY, 0, sCmdSendBuff, 4, sCmdRecvBuff, 4, NULL, NULL)>=0){
+	if(SifCallRpc(&clientSCmd, CD_SCMD_BOOT_CERTIFY, 0, sCmdSendBuff, 4, sCmdRecvBuff, 4, NULL, NULL)>=0){
 		result=*(int*)UNCACHED_SEG(sCmdRecvBuff);
 	}else{
 		result=0;
@@ -473,7 +473,7 @@ int sceCdReadSUBQ(void *buffer, u32 *status)
 
 	if(_CdCheckSCmd(CD_SCMD_READ_SUBQ)==0) return 0;
 
-	if(sceSifCallRpc(&clientSCmd, CD_SCMD_READ_SUBQ, 0, NULL, 0, sCmdRecvBuff, 0x12, NULL, NULL)>=0){
+	if(SifCallRpc(&clientSCmd, CD_SCMD_READ_SUBQ, 0, NULL, 0, sCmdRecvBuff, 0x12, NULL, NULL)>=0){
 		memcpy(buffer, UNCACHED_SEG(&sCmdRecvBuff[8]), 0x12);
 		*status=*(u32 *)UNCACHED_SEG(&sCmdRecvBuff[4]);
 		result=*(int *)UNCACHED_SEG(sCmdRecvBuff);
@@ -494,7 +494,7 @@ int sceCdForbidDVDP(u32 *result)
 
 	if(_CdCheckSCmd(CD_SCMD_FORBID_DVDP) == 0) return 0;
 
-	if(sceSifCallRpc(&clientSCmd, CD_SCMD_FORBID_DVDP, 0, NULL, 0, sCmdRecvBuff, 8, NULL, NULL)>=0){
+	if(SifCallRpc(&clientSCmd, CD_SCMD_FORBID_DVDP, 0, NULL, 0, sCmdRecvBuff, 8, NULL, NULL)>=0){
 		*result = ((u32 *)UNCACHED_SEG(sCmdRecvBuff))[1];
 		status = *(int*)UNCACHED_SEG(sCmdRecvBuff);
 	}else{
@@ -514,7 +514,7 @@ int sceCdAutoAdjustCtrl(int mode, u32 *result)
 	if(_CdCheckSCmd(CD_SCMD_AUTO_ADJUST_CTRL) == 0) return 0;
 
 	memcpy(sCmdSendBuff, &mode, 4);
-	if(sceSifCallRpc(&clientSCmd, CD_SCMD_AUTO_ADJUST_CTRL, 0, sCmdSendBuff, 4, sCmdRecvBuff, 8, NULL, NULL)>=0){
+	if(SifCallRpc(&clientSCmd, CD_SCMD_AUTO_ADJUST_CTRL, 0, sCmdSendBuff, 4, sCmdRecvBuff, 8, NULL, NULL)>=0){
 		*result = ((u32 *)UNCACHED_SEG(sCmdRecvBuff))[1];
 		status = *(int*)UNCACHED_SEG(sCmdRecvBuff);
 	}else{
@@ -537,7 +537,7 @@ int sceCdDecSet(unsigned char arg1, unsigned char arg2, unsigned char shift)
 	sCmdSendBuff[1] = arg2;
 	sCmdSendBuff[2] = shift;
 
-	if(sceSifCallRpc(&clientSCmd, CD_SCMD_DEC_SET, 0, sCmdSendBuff, 4, sCmdRecvBuff, 16, NULL, NULL)>=0){
+	if(SifCallRpc(&clientSCmd, CD_SCMD_DEC_SET, 0, sCmdSendBuff, 4, sCmdRecvBuff, 16, NULL, NULL)>=0){
 		result = *(int*)UNCACHED_SEG(sCmdRecvBuff);
 	}else{
 		result = 0;
@@ -555,7 +555,7 @@ int sceCdSetHDMode(u32 mode)
 
 	if(_CdCheckSCmd(CD_SCMD_SET_HD_MODE)==0) return 0;
 	memcpy(sCmdSendBuff, &mode, 4);
-	if(sceSifCallRpc(&clientSCmd, CD_SCMD_SET_HD_MODE, 0, sCmdSendBuff, 4, sCmdRecvBuff, 4, NULL, NULL)>=0){
+	if(SifCallRpc(&clientSCmd, CD_SCMD_SET_HD_MODE, 0, sCmdSendBuff, 4, sCmdRecvBuff, 4, NULL, NULL)>=0){
 		result=*(int*)UNCACHED_SEG(sCmdRecvBuff);
 	}else{
 		result=0;
@@ -574,7 +574,7 @@ int sceCdOpenConfig(int block, int mode, int NumBlocks, u32 *status){
 
 		*(int *)sCmdSendBuff = ((NumBlocks&0xFF)<<16) | (mode&0xFF) | ((block&0xFF)<<8);
 		CdConfigRdWrNumBlocks = NumBlocks;
-		if(sceSifCallRpc(&clientSCmd, CD_SCMD_OPEN_CONFIG, 0, sCmdSendBuff, 4, sCmdRecvBuff, 8, NULL, NULL)>=0){
+		if(SifCallRpc(&clientSCmd, CD_SCMD_OPEN_CONFIG, 0, sCmdSendBuff, 4, sCmdRecvBuff, 8, NULL, NULL)>=0){
 			*status = ((u32 *)UNCACHED_SEG(sCmdRecvBuff))[1];
 			result = ((int *)UNCACHED_SEG(sCmdRecvBuff))[0];
 		}
@@ -594,7 +594,7 @@ int sceCdCloseConfig(u32 *result){
 
 	if(_CdCheckSCmd(CD_SCMD_CLOSE_CONFIG) == 0) return 0;
 
-	if(sceSifCallRpc(&clientSCmd, CD_SCMD_CLOSE_CONFIG, 0, NULL, 0, sCmdRecvBuff, 8, NULL, NULL)>=0){
+	if(SifCallRpc(&clientSCmd, CD_SCMD_CLOSE_CONFIG, 0, NULL, 0, sCmdRecvBuff, 8, NULL, NULL)>=0){
 		*result = ((u32 *)UNCACHED_SEG(sCmdRecvBuff))[1];
 		status = *(int*)UNCACHED_SEG(sCmdRecvBuff);
 	}else{
@@ -612,7 +612,7 @@ int sceCdReadConfig(void *buffer, u32 *result){
 
 	if(_CdCheckSCmd(CD_SCMD_READ_CONFIG) == 0) return 0;
 
-	if(sceSifCallRpc(&clientSCmd, CD_SCMD_READ_CONFIG, 0, NULL, 0, sCmdRecvBuff, 0x408, NULL, NULL)>=0){
+	if(SifCallRpc(&clientSCmd, CD_SCMD_READ_CONFIG, 0, NULL, 0, sCmdRecvBuff, 0x408, NULL, NULL)>=0){
 		*result = ((int *)UNCACHED_SEG(sCmdRecvBuff))[1];
 		memcpy(buffer, &((u32 *)UNCACHED_SEG(sCmdRecvBuff))[2], (CdConfigRdWrNumBlocks<<4)-CdConfigRdWrNumBlocks);
 		status = *(int*)UNCACHED_SEG(sCmdRecvBuff);
@@ -632,7 +632,7 @@ int sceCdWriteConfig(const void *buffer, u32 *result){
 	if(_CdCheckSCmd(CD_SCMD_WRITE_CONFIG) == 0) return 0;
 
 	memcpy(sCmdSendBuff, buffer, (CdConfigRdWrNumBlocks<<4)-CdConfigRdWrNumBlocks);
-	if(sceSifCallRpc(&clientSCmd, CD_SCMD_WRITE_CONFIG, 0, sCmdSendBuff, 0x400, sCmdRecvBuff, 8, NULL, NULL)>=0){
+	if(SifCallRpc(&clientSCmd, CD_SCMD_WRITE_CONFIG, 0, sCmdSendBuff, 0x400, sCmdRecvBuff, 8, NULL, NULL)>=0){
 		*result = ((int *)UNCACHED_SEG(sCmdRecvBuff))[1];
 		status = *(int*)UNCACHED_SEG(sCmdRecvBuff);
 	}else{
@@ -655,7 +655,7 @@ int sceCdReadNVM(u32 address, u16 *data, u8 *result){
 	*(u16 *)&sCmdSendBuff[4] = 0;
 	sCmdSendBuff[6] = 0;
 
-	if(sceSifCallRpc(&clientSCmd, CD_SCMD_READ_NVM, 0, sCmdSendBuff, 8, sCmdRecvBuff, 0x10, NULL, NULL)>=0){
+	if(SifCallRpc(&clientSCmd, CD_SCMD_READ_NVM, 0, sCmdSendBuff, 8, sCmdRecvBuff, 0x10, NULL, NULL)>=0){
 		*data = *(unsigned short int *)UNCACHED_SEG(&sCmdRecvBuff[8]);
 		*result = *(u8 *)UNCACHED_SEG(&sCmdRecvBuff[10]);
 		status = *(int *)UNCACHED_SEG(sCmdRecvBuff);
@@ -678,7 +678,7 @@ int sceCdWriteNVM(u32 address, u16 data, u8 *result){
 	*(u16 *)&sCmdSendBuff[4] = data;
 	sCmdSendBuff[6] = 0;
 
-	if(sceSifCallRpc(&clientSCmd, CD_SCMD_WRITE_NVM, 0, sCmdSendBuff, 8, sCmdRecvBuff, 0x10, NULL, NULL)>=0){
+	if(SifCallRpc(&clientSCmd, CD_SCMD_WRITE_NVM, 0, sCmdSendBuff, 8, sCmdRecvBuff, 0x10, NULL, NULL)>=0){
 		*result = *(u8 *)UNCACHED_SEG(&sCmdRecvBuff[10]);
 		status = *(int *)UNCACHED_SEG(sCmdRecvBuff);
 	}else{
@@ -696,7 +696,7 @@ int sceCdRI(unsigned char *buffer, u32 *result){
 
 	if(_CdCheckSCmd(CD_SCMD_READ_ILINK_ID) == 0) return 0;
 
-	if(sceSifCallRpc(&clientSCmd, CD_SCMD_READ_ILINK_ID, 0, NULL, 0, sCmdRecvBuff, 16, NULL, NULL)>=0){
+	if(SifCallRpc(&clientSCmd, CD_SCMD_READ_ILINK_ID, 0, NULL, 0, sCmdRecvBuff, 16, NULL, NULL)>=0){
 		memcpy(buffer, UNCACHED_SEG(&sCmdRecvBuff[8]), 8);
 		*result = *(u32 *)UNCACHED_SEG(&sCmdRecvBuff[4]);
 		status = *(int *)UNCACHED_SEG(sCmdRecvBuff);
@@ -716,7 +716,7 @@ int sceCdWI(const unsigned char *buffer, u32 *status){
 	if(_CdCheckSCmd(CD_SCMD_WRITE_ILINK_ID) == 0) return 0;
 
 	memcpy(sCmdSendBuff, buffer, 8);
-	if(sceSifCallRpc(&clientSCmd, CD_SCMD_WRITE_ILINK_ID, 0, sCmdSendBuff, 8, sCmdRecvBuff, 8, NULL, NULL)>=0){
+	if(SifCallRpc(&clientSCmd, CD_SCMD_WRITE_ILINK_ID, 0, sCmdSendBuff, 8, sCmdRecvBuff, 8, NULL, NULL)>=0){
 		*status = *(u32 *)UNCACHED_SEG(&sCmdRecvBuff[4]);
 		result = *(int *)UNCACHED_SEG(sCmdRecvBuff);
 	}else{
@@ -734,7 +734,7 @@ int sceCdReadConsoleID(unsigned char *buffer, u32 *result){
 
 	if(_CdCheckSCmd(CD_SCMD_READ_CONSOLE_ID) == 0) return 0;
 
-	if(sceSifCallRpc(&clientSCmd, CD_SCMD_READ_CONSOLE_ID, 0, NULL, 0, sCmdRecvBuff, 16, NULL, NULL)>=0){
+	if(SifCallRpc(&clientSCmd, CD_SCMD_READ_CONSOLE_ID, 0, NULL, 0, sCmdRecvBuff, 16, NULL, NULL)>=0){
 		memcpy(buffer, UNCACHED_SEG(&sCmdRecvBuff[8]), 8);
 		*result = *(u32 *)UNCACHED_SEG(&sCmdRecvBuff[4]);
 		status = *(int *)UNCACHED_SEG(sCmdRecvBuff);
@@ -754,7 +754,7 @@ int sceCdWriteConsoleID(const unsigned char *buffer, u32 *result){
 	if(_CdCheckSCmd(CD_SCMD_WRITE_CONSOLE_ID) == 0) return 0;
 
 	memcpy(sCmdSendBuff, buffer, 8);
-	if(sceSifCallRpc(&clientSCmd, CD_SCMD_WRITE_CONSOLE_ID, 0, sCmdSendBuff, 8, sCmdRecvBuff, 8, NULL, NULL)>=0){
+	if(SifCallRpc(&clientSCmd, CD_SCMD_WRITE_CONSOLE_ID, 0, sCmdSendBuff, 8, sCmdRecvBuff, 8, NULL, NULL)>=0){
 		*result = *(u32 *)UNCACHED_SEG(&sCmdRecvBuff[4]);
 		status = *(int *)UNCACHED_SEG(sCmdRecvBuff);
 	}else{
@@ -772,7 +772,7 @@ int sceCdMV(unsigned char *buffer, u32 *result){
 
 	if(_CdCheckSCmd(CD_SCMD_READ_MECHACON_VERSION) == 0) return 0;
 
-	if(sceSifCallRpc(&clientSCmd, CD_SCMD_READ_MECHACON_VERSION, 0, NULL, 0, sCmdRecvBuff, 16, NULL, NULL)>=0){
+	if(SifCallRpc(&clientSCmd, CD_SCMD_READ_MECHACON_VERSION, 0, NULL, 0, sCmdRecvBuff, 16, NULL, NULL)>=0){
 
 #ifdef _XCDVD
 		memcpy(buffer, UNCACHED_SEG(&sCmdRecvBuff[8]), 4);
@@ -797,7 +797,7 @@ int sceCdCtrlADout(int arg1, u32 *result){
 	if(_CdCheckSCmd(CD_SCMD_CTRL_AD_OUT) == 0) return 0;
 
 	*(int*)sCmdSendBuff = arg1;
-	if(sceSifCallRpc(&clientSCmd, CD_SCMD_CTRL_AD_OUT, 0, sCmdSendBuff, 4, sCmdRecvBuff, 8, NULL, NULL)>=0){
+	if(SifCallRpc(&clientSCmd, CD_SCMD_CTRL_AD_OUT, 0, sCmdSendBuff, 4, sCmdRecvBuff, 8, NULL, NULL)>=0){
 		*result = *(u32 *)UNCACHED_SEG(&sCmdRecvBuff[4]);
 		status = *(int *)UNCACHED_SEG(sCmdRecvBuff);
 	}else{
@@ -815,7 +815,7 @@ int sceCdRM(char *buffer, u32 *result){
 
 	if(_CdCheckSCmd(CD_SCMD_READ_MODEL_NAME) == 0) return 0;
 
-	if(sceSifCallRpc(&clientSCmd, CD_SCMD_READ_MODEL_NAME, 0, NULL, 0, sCmdRecvBuff, 0x18, NULL, NULL)>=0){
+	if(SifCallRpc(&clientSCmd, CD_SCMD_READ_MODEL_NAME, 0, NULL, 0, sCmdRecvBuff, 0x18, NULL, NULL)>=0){
 		memcpy(buffer, UNCACHED_SEG(&sCmdRecvBuff[8]), 16);
 		*result = *(u32 *)UNCACHED_SEG(&sCmdRecvBuff[4]);
 		status = *(int *)UNCACHED_SEG(sCmdRecvBuff);
@@ -835,7 +835,7 @@ int sceCdWM(const char *buffer, u32 *result){
 	if(_CdCheckSCmd(CD_SCMD_WRITE_MODEL_NAME) == 0) return 0;
 
 	memcpy(sCmdSendBuff, buffer, 16);
-	if(sceSifCallRpc(&clientSCmd, CD_SCMD_WRITE_MODEL_NAME, 0, sCmdSendBuff, 0x10, sCmdRecvBuff, 8, NULL, NULL)>=0){
+	if(SifCallRpc(&clientSCmd, CD_SCMD_WRITE_MODEL_NAME, 0, sCmdSendBuff, 0x10, sCmdRecvBuff, 8, NULL, NULL)>=0){
 		*result = *(u32 *)UNCACHED_SEG(&sCmdRecvBuff[4]);
 		status = *(int *)UNCACHED_SEG(sCmdRecvBuff);
 	}else{
@@ -853,11 +853,11 @@ int _CdSyncS(int mode)
 	if (mode == 0) {
 		if (CdDebug > 0)
 			printf("S cmd wait\n");
-		while (sceSifCheckStatRpc(&clientSCmd))
+		while (SifCheckStatRpc(&clientSCmd))
 			;
 		return 0;
 	}
 
-	return sceSifCheckStatRpc(&clientSCmd);
+	return SifCheckStatRpc(&clientSCmd);
 }
 #endif

@@ -17,8 +17,11 @@
 #include <tcpip.h>
 
 //Initializes PS2IP. Specify a dummy address like "169.254.0.1" if DHCP is to be used, before enabling DHCP via ps2ip_setconfig().
-int InitPS2IP(struct ip_addr *ip_address, struct ip_addr *subnet_mask, struct ip_addr *gateway);
-void DeinitPS2IP(void);
+int ps2ipInit(struct ip_addr *ip_address, struct ip_addr *subnet_mask, struct ip_addr *gateway);
+void ps2ipDeinit(void);
+/*	Use to specify the number of H-sync ticks per milisecond (Default: 16). Use this function
+	to keep timings accurate, if a mode like 480P (~31KHz H-sync) is used instead of NTSC/PAL (~16KHz H-sync).	*/
+void ps2ipSetHsyncTicksPerMSec(unsigned char ticks);
 
 /* From include/lwip/sockets.h:  */
 int lwip_accept(int s, struct sockaddr *addr, socklen_t *addrlen);

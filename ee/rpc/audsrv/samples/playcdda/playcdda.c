@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 	int track;
 	int lastpos;
 
-	sceSifInitRpc(0);
+	SifInitRpc(0);
 
 	printf("sample: kicking IRXs\n");
 	ret = SifLoadModule("rom0:LIBSD", 0, NULL);

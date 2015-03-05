@@ -210,8 +210,10 @@ void sys_mbox_set_invalid(sys_mbox_t *mbox){
 	*mbox=SYS_MBOX_NULL;
 }
 
+extern unsigned short int hsyncTicksPerMSec;
+
 static inline unsigned int mSec2HSyncTicks(unsigned int msec){
-	return msec*16;	/* 1 HSYNC tick = 1/15734*1000=~0.063 msec, where 15734 is the NTSC line frequency. */
+	return msec*hsyncTicksPerMSec;
 }
 
 static void RetrieveMbxInternal(sys_mbox_t mBox, arch_message **message){

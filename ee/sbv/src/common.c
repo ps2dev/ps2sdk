@@ -38,7 +38,7 @@ int smem_write_word(void *address, u32 value){
 
 	pDestRounded=(void*)(((unsigned int)address)&0xFFFFFFC0);
 	SyncDCache(smem_buf, smem_buf+64);
-	if((result=sceSifRpcGetOtherData(&RData, pDestRounded, smem_buf, 64, 0))>=0){
+	if((result=SifRpcGetOtherData(&RData, pDestRounded, smem_buf, 64, 0))>=0){
 		*(unsigned int*)UNCACHED_SEG((((unsigned int)address&0x3F)+smem_buf))=value;
 
 		dmat.src=smem_buf;

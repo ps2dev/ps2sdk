@@ -77,7 +77,7 @@ int RMMan_Init(void)
    rmmanif.server = NULL;
 
    do {
-      if (sceSifBindRpc(&rmmanif, RMMAN_BIND_RPC_ID, 0) < 0) {
+      if (SifBindRpc(&rmmanif, RMMAN_BIND_RPC_ID, 0) < 0) {
 	 return -1;
       }
       nopdelay();
@@ -85,7 +85,7 @@ int RMMan_Init(void)
 
    data[0] = RMMAN_RPC_INIT;
 
-   if (sceSifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+   if (SifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
        return -1;
 
    ports[0].opened = 0;
@@ -105,7 +105,7 @@ u32 RMMan_GetModuleVersion(void)
 
    data[0] = RMMAN_RPC_GETMODULEVER;
 
-   if (sceSifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+   if (SifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
        return 0;
 
    return data[3];
@@ -133,7 +133,7 @@ int RMMan_Open(int port, int slot, void *pData)
    data[2] = slot;
    data[4] = (u32) pData;
 
-   if (sceSifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+   if (SifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
        return 0;
 
    ports[port].opened = 1;
@@ -149,7 +149,7 @@ int RMMan_End(void)
 
    data[0] = RMMAN_RPC_END;
 
-   if (sceSifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+   if (SifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
        return 0;
 
    return data[3];
@@ -175,7 +175,7 @@ int RMMan_Close(int port, int slot)
    data[1] = port;
    data[2] = slot;
 
-   if (sceSifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+   if (SifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
        return 0;
 
    return data[3];

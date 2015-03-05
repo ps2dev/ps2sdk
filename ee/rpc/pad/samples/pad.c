@@ -213,7 +213,7 @@ main()
     u32 new_pad;
 
 
-    sceSifInitRpc(0);
+    SifInitRpc(0);
 
     printf("Hi!\n"
                "Very welcome to this small and stupid pad test application\n"

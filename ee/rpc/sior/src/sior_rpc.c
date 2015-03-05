@@ -122,10 +122,10 @@ static void * sior_rpc_server(u32 funcno, void * data, int size) {
 }
 
 static void sior_thread(void) {
-    sceSifInitRpc(0);
-    sceSifSetRpcQueue(&qd, GetThreadId());
-    sceSifRegisterRpc(&Sd0, SIOR_IRX, (SifRpcFunc_t)sior_rpc_server, buffer, NULL, NULL, &qd);
-    sceSifRpcLoop(&qd);
+    SifInitRpc(0);
+    SifSetRpcQueue(&qd, GetThreadId());
+    SifRegisterRpc(&Sd0, SIOR_IRX, (SifRpcFunc_t)sior_rpc_server, buffer, NULL, NULL, &qd);
+    SifRpcLoop(&qd);
 }
 
 int SIOR_Init(int priority)

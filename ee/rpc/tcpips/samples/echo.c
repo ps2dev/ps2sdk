@@ -25,7 +25,7 @@ void serverThread();
 
 int main(int argc, char *argv[])
 {
-	sceSifInitRpc(0);
+	SifInitRpc(0);
 
 	SifLoadModule("host:ps2ips.irx", 0, NULL);
 

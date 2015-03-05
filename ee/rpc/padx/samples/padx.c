@@ -100,7 +100,7 @@ int main(int argc, char **argv)
 	int dualshock[2];
 	int acts[2];
 
-	sceSifInitRpc(0);
+	SifInitRpc(0);
 
 	printf("libpadx sample");
 

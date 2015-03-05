@@ -39,7 +39,7 @@ int main(int argc, char **argv)
 	int fillbuffer_sema;
 	struct audsrv_fmt_t format;
 
-	sceSifInitRpc(0);
+	SifInitRpc(0);
 
 	printf("sample: kicking IRXs\n");
 	ret = SifLoadModule("rom0:LIBSD", 0, NULL);

@@ -72,7 +72,7 @@ static int call_rpc_1(int func, int arg)
 	WaitSema(completion_sema);
 
 	sbuff[0] = arg;
-	sceSifCallRpc(&cd0, func, 0, sbuff, 1*4, sbuff, 4, _audsrv_intr, NULL);
+	SifCallRpc(&cd0, func, 0, sbuff, 1*4, sbuff, 4, _audsrv_intr, NULL);
 
 	set_error(sbuff[0]);
 	return sbuff[0];
@@ -90,7 +90,7 @@ static int call_rpc_2(int func, int arg1, int arg2)
 
 	sbuff[0] = arg1;
 	sbuff[1] = arg2;
-	sceSifCallRpc(&cd0, func, 0, sbuff, 2*4, sbuff, 4, _audsrv_intr, NULL);
+	SifCallRpc(&cd0, func, 0, sbuff, 2*4, sbuff, 4, _audsrv_intr, NULL);
 
 	set_error(sbuff[0]);
 	return sbuff[0];
@@ -103,7 +103,7 @@ int audsrv_quit()
 {
 	WaitSema(completion_sema);
 
-	sceSifCallRpc(&cd0, AUDSRV_QUIT, 0, sbuff, 1*4, sbuff, 4, _audsrv_intr, NULL);
+	SifCallRpc(&cd0, AUDSRV_QUIT, 0, sbuff, 1*4, sbuff, 4, _audsrv_intr, NULL);
 	set_error(AUDSRV_ERR_NOERROR);
 
 	DeleteSema(completion_sema);
@@ -126,7 +126,7 @@ int audsrv_set_format(struct audsrv_fmt_t *fmt)
 	sbuff[0] = fmt->freq;
 	sbuff[1] = fmt->bits;
 	sbuff[2] = fmt->channels;
-	sceSifCallRpc(&cd0, AUDSRV_SET_FORMAT, 0, sbuff, 3*4, sbuff, 4, _audsrv_intr, NULL);
+	SifCallRpc(&cd0, AUDSRV_SET_FORMAT, 0, sbuff, 3*4, sbuff, 4, _audsrv_intr, NULL);
 	set_error(sbuff[0]);
 	return sbuff[0];
 }
@@ -306,7 +306,7 @@ int audsrv_play_audio(const char *chunk, int bytes)
 		sbuff[0] = copy;
 		memcpy(&sbuff[1], chunk, copy);
 		packet_size = copy + sizeof(int);
-		sceSifCallRpc(&cd0, AUDSRV_PLAY_AUDIO, 0, sbuff, packet_size, sbuff, 1*4, _audsrv_intr, NULL);
+		SifCallRpc(&cd0, AUDSRV_PLAY_AUDIO, 0, sbuff, packet_size, sbuff, 1*4, _audsrv_intr, NULL);
 
 		if (sbuff[0] < 0)
 		{
@@ -350,7 +350,7 @@ int audsrv_init()
 
 	while (1)
 	{
-		if (sceSifBindRpc(&cd0, AUDSRV_IRX, 0) < 0)
+		if (SifBindRpc(&cd0, AUDSRV_IRX, 0) < 0)
 		{
 			set_error(AUDSRV_ERR_RPC_FAILED);
 			return -1;
@@ -375,7 +375,7 @@ int audsrv_init()
 		return -1;
 	}
 
-	sceSifCallRpc(&cd0, AUDSRV_INIT, 0, sbuff, 64, sbuff, 64, NULL, NULL);
+	SifCallRpc(&cd0, AUDSRV_INIT, 0, sbuff, 64, sbuff, 64, NULL, NULL);
 	ret = sbuff[0];
 	if (ret != 0)
 	{
@@ -385,8 +385,8 @@ int audsrv_init()
 
 	/* register a callback handler */
 	DI();
-	sceSifAddCmdHandler(AUDSRV_CDDA_CALLBACK, cdda_stopped, NULL);
-	sceSifAddCmdHandler(AUDSRV_FILLBUF_CALLBACK, fillbuf_requested, NULL);
+	SifAddCmdHandler(AUDSRV_CDDA_CALLBACK, cdda_stopped, NULL);
+	SifAddCmdHandler(AUDSRV_FILLBUF_CALLBACK, fillbuf_requested, NULL);
 	EI();
 
 	/* initialize IOP heap (for adpcm samples) */
@@ -438,7 +438,7 @@ int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size)
 	sbuff[1] = size;
 	sbuff[2] = (int)adpcm; /* use as id */
 
-	sceSifCallRpc(&cd0, AUDSRV_LOAD_ADPCM, 0, sbuff, 12, sbuff, 16, _audsrv_intr, NULL);
+	SifCallRpc(&cd0, AUDSRV_LOAD_ADPCM, 0, sbuff, 12, sbuff, 16, _audsrv_intr, NULL);
 	SifFreeIopHeap(iop_addr);
 
 	if(sbuff[0] != 0)

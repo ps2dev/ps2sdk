@@ -32,6 +32,8 @@ typedef struct ip_addr	IPAddr;
 
 static struct netif NIF;
 
+unsigned short int hsyncTicksPerMSec	= 16;
+
 int ps2ip_getconfig(char* pszName, t_ip_info* pInfo)
 {
 	NetIF*	pNetIF=netif_find(pszName);
@@ -261,7 +263,7 @@ static inline int InitializeLWIP(void)
 	return 0;
 }
 
-int InitPS2IP(struct ip_addr *ip_address, struct ip_addr *subnet_mask, struct ip_addr *gateway){
+int ps2ipInit(struct ip_addr *ip_address, struct ip_addr *subnet_mask, struct ip_addr *gateway){
 	static struct NetManNetProtStack stack={
 		&LinkStateUp,
 		&LinkStateDown,
@@ -284,7 +286,10 @@ int InitPS2IP(struct ip_addr *ip_address, struct ip_addr *subnet_mask, struct ip
 	return 0;
 }
 
-void DeinitPS2IP(void){
+void ps2ipDeinit(void){
 	NetManUnregisterNetworkStack();
 }
 
+void ps2ipSetHsyncTicksPerMSec(unsigned char ticks){
+	hsyncTicksPerMSec = ticks;
+}

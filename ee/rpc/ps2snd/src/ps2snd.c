@@ -30,7 +30,7 @@ int SdInit(int flag)
 
 		while(1)
 		{
-			if (sceSifBindRpc(&sd_client, BINDID_PS2SND, 0) < 0)
+			if (SifBindRpc(&sd_client, BINDID_PS2SND, 0) < 0)
 			{
 				printf("%s: Failed to bind to rpc '0x%08x'\n", __FUNCTION__, BINDID_PS2SND);
 				return(-1);
@@ -45,7 +45,7 @@ int SdInit(int flag)
 	}
 
 	buf[0] = flag;
-	sceSifCallRpc(&sd_client, PS2SND_Init, 0, buf, 4, buf, 4, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_Init, 0, buf, 4, buf, 4, NULL, NULL);
 
 	return(buf[0]);
 }
@@ -55,14 +55,14 @@ void SdSetParam(u16 entry, u16 value)
 	u32 buf[2] ALIGNED(64);
 	buf[0] = entry;
 	buf[1] = value;
-	sceSifCallRpc(&sd_client, PS2SND_SetParam, 0, buf, 8, NULL, 0, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_SetParam, 0, buf, 8, NULL, 0, NULL, NULL);
 }
 
 u16 SdGetParam(u16 entry)
 {
 	u32 buf[1] ALIGNED(64);
 	buf[0] = entry;
-	sceSifCallRpc(&sd_client, PS2SND_GetParam, 0, buf, 4, buf, 4, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_GetParam, 0, buf, 4, buf, 4, NULL, NULL);
 	return(buf[0]);
 }
 
@@ -71,14 +71,14 @@ void SdSetSwitch(u16 entry, u32 value)
 	u32 buf[2] ALIGNED(64);
 	buf[0] = entry;
 	buf[1] = value;
-	sceSifCallRpc(&sd_client, PS2SND_SetSwitch, 0, buf, 8, NULL, 0, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_SetSwitch, 0, buf, 8, NULL, 0, NULL, NULL);
 }
 
 u32 SdGetSwitch(u16 entry)
 {
 	u32 buf[1] ALIGNED(64);
 	buf[0] = entry;
-	sceSifCallRpc(&sd_client, PS2SND_GetSwitch, 0, buf, 4, buf, 4, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_GetSwitch, 0, buf, 4, buf, 4, NULL, NULL);
 	return(buf[0]);
 }
 
@@ -87,14 +87,14 @@ void SdSetAddr(u16 entry, u32 value)
 	u32 buf[2] ALIGNED(64);
 	buf[0] = entry;
 	buf[1] = value;
-	sceSifCallRpc(&sd_client, PS2SND_SetAddr, 0, buf, 8, NULL, 0, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_SetAddr, 0, buf, 8, NULL, 0, NULL, NULL);
 }
 
 u32 SdGetAddr(u16 entry)
 {
 	u32 buf[1] ALIGNED(64);
 	buf[0] = entry;
-	sceSifCallRpc(&sd_client, PS2SND_GetAddr, 0, buf, 4, buf, 4, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_GetAddr, 0, buf, 4, buf, 4, NULL, NULL);
 	return(buf[0]);
 }
 
@@ -103,14 +103,14 @@ void SdSetCoreAttr(u16 entry, u16 value)
 	u32 buf[2] ALIGNED(64);
 	buf[0] = entry;
 	buf[1] = value;
-	sceSifCallRpc(&sd_client, PS2SND_SetCoreAttr, 0, buf, 8, NULL, 0, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_SetCoreAttr, 0, buf, 8, NULL, 0, NULL, NULL);
 }
 
 u16 SdGetCoreAttr(u16 entry)
 {
 	u32 buf[1] ALIGNED(64);
 	buf[0] = entry;
-	sceSifCallRpc(&sd_client, PS2SND_GetCoreAttr, 0, buf, 4, buf, 4, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_GetCoreAttr, 0, buf, 4, buf, 4, NULL, NULL);
 	return(buf[0]);
 }
 
@@ -148,7 +148,7 @@ int SdVoiceTrans(s16 channel, u16 mode, u8 *m_addr, u8 *s_addr, u32 size)
 	buf[3] = (u32)s_addr;
 	buf[4] = size;
 
-	sceSifCallRpc(&sd_client, PS2SND_VoiceTrans, 0, buf, 20, buf, 4, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_VoiceTrans, 0, buf, 20, buf, 4, NULL, NULL);
 	return(((s32 *)buf)[0]);
 }
 
@@ -163,7 +163,7 @@ u32 SdVoiceTransStatus (s16 channel, s16 flag)
 	buf[0] = channel;
 	buf[1] = flag;
 
-	sceSifCallRpc(&sd_client, PS2SND_VoiceTransStatus, 0, buf, 8, buf, 4, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_VoiceTransStatus, 0, buf, 8, buf, 4, NULL, NULL);
 	return(((u32 *)buf)[0]);
 }
 
@@ -173,7 +173,7 @@ u32 SdBlockTransStatus (s16 channel, s16 flag)
 	buf[0] = channel;
 	buf[1] = flag;
 
-	sceSifCallRpc(&sd_client, PS2SND_BlockTransStatus, 0, buf, 8, buf, 4, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_BlockTransStatus, 0, buf, 8, buf, 4, NULL, NULL);
 	return(((u32 *)buf)[0]);
 }
 
@@ -185,7 +185,7 @@ int SdSetEffectAttr (int core, SdEffectAttr *attr)
 	s32 buf[1+((sizeof(SdEffectAttr)+3)/4)] ALIGNED(64);
 	buf[0] = core;
 	memcpy(&buf[1], attr, sizeof(SdEffectAttr));
-	sceSifCallRpc(&sd_client, PS2SND_SetEffectAttr, 0, buf, 4+sizeof(SdEffectAttr), buf, 4, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_SetEffectAttr, 0, buf, 4+sizeof(SdEffectAttr), buf, 4, NULL, NULL);
 	return(buf[0]);
 }
 
@@ -193,7 +193,7 @@ void SdGetEffectAttr (int core, SdEffectAttr *attr)
 {
 	s32 buf[((sizeof(SdEffectAttr)+3)/4)] ALIGNED(64);
 	buf[0] = core;
-	sceSifCallRpc(&sd_client, PS2SND_GetEffectAttr, 0, buf, 4, buf, sizeof(SdEffectAttr), NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_GetEffectAttr, 0, buf, 4, buf, sizeof(SdEffectAttr), NULL, NULL);
 	memcpy(attr, buf, sizeof(SdEffectAttr));
 }
 
@@ -203,7 +203,7 @@ int SdClearEffectWorkArea (int core, int channel, int effect_mode)
 	buf[0] = core;
 	buf[1] = channel;
 	buf[2] = effect_mode;
-	sceSifCallRpc(&sd_client, PS2SND_ClearEffectWorkArea, 0, buf, 12, buf, 4, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_ClearEffectWorkArea, 0, buf, 12, buf, 4, NULL, NULL);
 	return(buf[0]);
 }
 
@@ -211,7 +211,7 @@ int SdClearEffectWorkArea (int core, int channel, int effect_mode)
 u32 sndQueryMaxFreeMemSize(void)
 {
 	u32 buf[1] ALIGNED(64);
-	sceSifCallRpc(&sd_client, PS2SND_QueryMaxFreeMemSize, 0, NULL, 0, buf, 4, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_QueryMaxFreeMemSize, 0, NULL, 0, buf, 4, NULL, NULL);
 	return(buf[0]);
 }
 
@@ -225,7 +225,7 @@ int sndStreamOpen(char *file, u32 voices, u32 flags, u32 bufaddr, u32 bufsize)
 	strncpy((char*)&buf[4], file, 27*4);
 	buf[31] = 0;
 
-	sceSifCallRpc(&sd_client, PS2SND_StreamOpen, 0, buf, 128, buf, 4, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_StreamOpen, 0, buf, 128, buf, 4, NULL, NULL);
 	return(((s32 *)buf)[0]);
 }
 
@@ -233,14 +233,14 @@ int sndStreamOpen(char *file, u32 voices, u32 flags, u32 bufaddr, u32 bufsize)
 int sndStreamClose(void)
 {
 	s32 buf[1] ALIGNED(64);
-	sceSifCallRpc(&sd_client, PS2SND_StreamClose, 0, NULL, 0, buf, 4, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_StreamClose, 0, NULL, 0, buf, 4, NULL, NULL);
 	return(buf[0]);
 }
 
 int sndStreamPlay(void)
 {
 	s32 buf[1] ALIGNED(64);
-	sceSifCallRpc(&sd_client, PS2SND_StreamPlay, 0, NULL, 0, buf, 4, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_StreamPlay, 0, NULL, 0, buf, 4, NULL, NULL);
 	return(buf[0]);
 }
 
@@ -248,7 +248,7 @@ int sndStreamPlay(void)
 int sndStreamPause(void)
 {
 	s32 buf[1] ALIGNED(64);
-	sceSifCallRpc(&sd_client, PS2SND_StreamPause, 0, NULL, 0, buf, 4, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_StreamPause, 0, NULL, 0, buf, 4, NULL, NULL);
 	return(buf[0]);
 }
 
@@ -256,7 +256,7 @@ int sndStreamSetPosition(int block)
 {
 	s32 buf[1] ALIGNED(64);
 	buf[0] = block;
-	sceSifCallRpc(&sd_client, PS2SND_StreamSetPosition, 0, buf, 4, buf, 4, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_StreamSetPosition, 0, buf, 4, buf, 4, NULL, NULL);
 	return(buf[0]);
 }
 
@@ -265,14 +265,14 @@ int sndStreamSetVolume(int left, int right)
 	s32 buf[2] ALIGNED(64);
 	buf[0] = left;
 	buf[1] = right;
-	sceSifCallRpc(&sd_client, PS2SND_StreamSetVolume, 0, buf, 8, buf, 4, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_StreamSetVolume, 0, buf, 8, buf, 4, NULL, NULL);
 	return(buf[0]);
 }
 
 int sndStreamGetPosition(void)
 {
 	s32 buf[1] ALIGNED(64);
-	sceSifCallRpc(&sd_client, PS2SND_StreamGetPosition, 0, NULL, 0, buf, 4, NULL, NULL);
+	SifCallRpc(&sd_client, PS2SND_StreamGetPosition, 0, NULL, 0, buf, 4, NULL, NULL);
 	return(buf[0]);
 }
 

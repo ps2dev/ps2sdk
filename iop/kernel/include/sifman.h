@@ -37,6 +37,20 @@ typedef struct t_SifDmaTransfer
 #define SIF_DMA_BSN		0x10 /* ? what is this? */
 #define SIF_DMA_TAG		0x20
 
+#define SIF_REG_ID_SYSTEM	0x80000000
+
+enum _sif_regs {
+	SIF_REG_MAINADDR = 1,	//Main -> sub-CPU command buffer (MSCOM)
+	SIF_REG_SUBADDR,	//Sub -> main-CPU command buffer (SMCOM)
+	SIF_REG_MSFLAG,		//Main -> sub-CPU flag (MSFLAG)
+	SIF_REG_SMFLAG,		//Sub -> main-CPU flag (SMFLAG)
+};
+
+//Status bits for the SM and MS SIF registers
+#define SIF_STAT_SIFINIT	0x10000	//SIF initialized
+#define SIF_STAT_CMDINIT	0x20000	//SIFCMD initialized
+#define SIF_STAT_BOOTEND	0x40000	//Bootup completed
+
 #define sifman_IMPORTS_start DECLARE_IMPORT_TABLE(sifman, 1, 1)
 #define sifman_IMPORTS_end END_IMPORT_TABLE
 

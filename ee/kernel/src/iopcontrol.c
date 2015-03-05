@@ -14,6 +14,7 @@
 
 #include <tamtypes.h>
 #include <kernel.h>
+#include <sifcmd.h>
 #include <sifrpc.h>
 #include <string.h>
 #include <stdio.h>
@@ -49,7 +50,7 @@ int SifIopReset(const char *arg, int mode)
 	memset(&reset_pkt, 0, sizeof reset_pkt);
 
 	reset_pkt.header.size = sizeof reset_pkt;
-	reset_pkt.header.cid  = 0x80000003;
+	reset_pkt.header.cid  = SIF_CMD_RESET_CMD;
 
 	reset_pkt.mode = mode;
 	if (arg != NULL) {
@@ -60,20 +61,20 @@ int SifIopReset(const char *arg, int mode)
 	}
 
 	dmat.src  = &reset_pkt;
-	dmat.dest = (void *)SifGetReg(SIF_CMD_CHANGE_SADDR);
+	dmat.dest = (void *)SifGetReg(SIF_SYSREG_SUBADDR);
 	dmat.size = sizeof(reset_pkt);
-	dmat.attr = 0x40 | SIF_DMA_INT_O;
-	sceSifWriteBackDCache(&reset_pkt, sizeof(reset_pkt));
+	dmat.attr = SIF_DMA_ERT | SIF_DMA_INT_O;
+	SifWriteBackDCache(&reset_pkt, sizeof(reset_pkt));
 
-	SifSetReg(SIF_REG_SMFLAG, 0x40000);
+	SifSetReg(SIF_REG_SMFLAG, SIF_STAT_BOOTEND);
 
 	if (!SifSetDma(&dmat, 1))
 		return 0;
 
-	SifSetReg(SIF_REG_SMFLAG, 0x10000);
-	SifSetReg(SIF_REG_SMFLAG, 0x20000);
-	SifSetReg(SIF_CMD_INIT_CMD, 0);
-	SifSetReg(SIF_CMD_CHANGE_SADDR, 0);
+	SifSetReg(SIF_REG_SMFLAG, SIF_STAT_SIFINIT);
+	SifSetReg(SIF_REG_SMFLAG, SIF_STAT_CMDINIT);
+	SifSetReg(SIF_SYSREG_RPCINIT, (int)NULL);
+	SifSetReg(SIF_SYSREG_SUBADDR, (int)NULL);
 
 	return 1;
 }
@@ -90,8 +91,8 @@ int SifIopReboot(const char* arg)
 		return 0;
 	}
 
-	sceSifInitRpc(0);
-	sceSifExitRpc();
+	SifInitRpc(0);
+	SifExitRpc();
 
 	strcpy(param_str, "rom0:UDNL ");
 	strcat(param_str, arg);
@@ -100,16 +101,16 @@ int SifIopReboot(const char* arg)
 }
 #endif
 
-#ifdef F_SifIopIsAlive
-int SifIopIsAlive()
+#ifdef F_SifCheckInit
+int SifCheckInit(void)
 {
-	return ((SifGetReg(SIF_REG_SMFLAG) & 0x10000) != 0);
+	return ((SifGetReg(SIF_REG_SMFLAG) & SIF_STAT_SIFINIT) != 0);
 }
 #endif
 
 #ifdef F_SifIopSync
 int SifIopSync()
 {
-	return((SifGetReg(SIF_REG_SMFLAG) & 0x40000) != 0);
+	return((SifGetReg(SIF_REG_SMFLAG) & SIF_STAT_BOOTEND) != 0);
 }
 #endif

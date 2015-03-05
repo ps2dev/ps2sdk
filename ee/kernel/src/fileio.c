@@ -91,9 +91,9 @@ int fioInit(void)
         if (_fio_init)
 		return 0;
 
-	sceSifInitRpc(0);
+	SifInitRpc(0);
 
-	while (((res = sceSifBindRpc(&_fio_cd, 0x80000001, 0)) >= 0) &&
+	while (((res = SifBindRpc(&_fio_cd, 0x80000001, 0)) >= 0) &&
 			(_fio_cd.server == NULL))
 		nopdelay();
 
@@ -218,7 +218,7 @@ int fioOpen(const char *name, int mode)
 
 	/* TODO: All of these can be cleaned up (get rid of res), and an
 	   appropiate error from errno.h be used instead.  */
-	if ((res = sceSifCallRpc(&_fio_cd, FIO_F_OPEN, _fio_block_mode, &arg, sizeof arg,
+	if ((res = SifCallRpc(&_fio_cd, FIO_F_OPEN, _fio_block_mode, &arg, sizeof arg,
 					_fio_recv_data, 4, (void *)_fio_intr, NULL)) >= 0)
 	{
 		result=(_fio_block_mode == FIO_NOWAIT)?0:_fio_recv_data[0];
@@ -248,7 +248,7 @@ int fioClose(int fd)
 
 	arg.fd = fd;
 
-	if ((res = sceSifCallRpc(&_fio_cd, FIO_F_CLOSE, 0, &arg, 4, &arg, 4,
+	if ((res = SifCallRpc(&_fio_cd, FIO_F_CLOSE, 0, &arg, 4, &arg, 4,
 					(void *)_fio_intr, NULL)) >= 0)
 	{
 		result=arg.result;
@@ -306,9 +306,9 @@ int fioRead(int fd, void *ptr, int size)
 	arg.read_data = (struct _fio_read_data *)_fio_intr_data;
 
 	if (!IS_UNCACHED_SEG(ptr))
-		sceSifWriteBackDCache(ptr, size);
+		SifWriteBackDCache(ptr, size);
 
-	if ((res = sceSifCallRpc(&_fio_cd, FIO_F_READ, _fio_block_mode, &arg, sizeof arg,
+	if ((res = SifCallRpc(&_fio_cd, FIO_F_READ, _fio_block_mode, &arg, sizeof arg,
 					_fio_recv_data, 4, (void *)_fio_read_intr, _fio_intr_data)) >= 0)
 	{
 		result=(_fio_block_mode == FIO_NOWAIT)?0:_fio_recv_data[0];
@@ -361,9 +361,9 @@ int fioWrite(int fd, const void *ptr, int size)
 		memcpy(arg.aligned, ptr, mis);
 
 	if (!IS_UNCACHED_SEG(ptr))
-		sceSifWriteBackDCache((void*)ptr, size);
+		SifWriteBackDCache((void*)ptr, size);
 
-	if ((res = sceSifCallRpc(&_fio_cd, FIO_F_WRITE, _fio_block_mode, &arg, sizeof arg,
+	if ((res = SifCallRpc(&_fio_cd, FIO_F_WRITE, _fio_block_mode, &arg, sizeof arg,
 					_fio_recv_data, 4, (void *)_fio_intr, NULL)) >= 0)
 	{
 		result=(_fio_block_mode == FIO_NOWAIT)?0:_fio_recv_data[0];
@@ -404,7 +404,7 @@ int fioLseek(int fd, int offset, int whence)
 	arg.offset = offset;
 	arg.whence = whence;
 
-	if ((res = sceSifCallRpc(&_fio_cd, FIO_F_LSEEK, 0, &arg, sizeof arg,
+	if ((res = SifCallRpc(&_fio_cd, FIO_F_LSEEK, 0, &arg, sizeof arg,
 					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
 	{
 		result=arg.p.result;
@@ -445,7 +445,7 @@ int fioIoctl(int fd, int request, void *data)
 	arg.request = request;
 	memcpy(arg.data, data, 1024);
 
-	if ((res = sceSifCallRpc(&_fio_cd, FIO_F_IOCTL, 0, &arg, sizeof arg,
+	if ((res = SifCallRpc(&_fio_cd, FIO_F_IOCTL, 0, &arg, sizeof arg,
 					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
 	{
 		result=arg.p.result;
@@ -479,7 +479,7 @@ int fioRemove(const char *name)
 	strncpy(arg.path, name, FIO_PATH_MAX - 1);
 	arg.path[FIO_PATH_MAX - 1] = 0;
 
-	if ((res = sceSifCallRpc(&_fio_cd, FIO_F_REMOVE, 0, &arg, sizeof arg,
+	if ((res = SifCallRpc(&_fio_cd, FIO_F_REMOVE, 0, &arg, sizeof arg,
 					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
 	{
 		result=arg.result;
@@ -513,7 +513,7 @@ int fioMkdir(const char* path)
 	strncpy(arg.path, path, FIO_PATH_MAX - 1);
 	arg.path[FIO_PATH_MAX - 1] = 0;
 
-	if ((res = sceSifCallRpc(&_fio_cd, FIO_F_MKDIR, 0, &arg, sizeof arg,
+	if ((res = SifCallRpc(&_fio_cd, FIO_F_MKDIR, 0, &arg, sizeof arg,
 					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
 	{
 		result=arg.result;
@@ -547,7 +547,7 @@ int fioRmdir(const char* dirname)
 	strncpy(arg.path, dirname, FIO_PATH_MAX - 1);
 	arg.path[FIO_PATH_MAX - 1] = 0;
 
-	if ((res = sceSifCallRpc(&_fio_cd, FIO_F_RMDIR, 0, &arg, sizeof arg,
+	if ((res = SifCallRpc(&_fio_cd, FIO_F_RMDIR, 0, &arg, sizeof arg,
 					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
 	{
 		result=arg.result;
@@ -628,7 +628,7 @@ int fioDopen(const char *name)
 	strncpy(arg.name, name, FIO_PATH_MAX - 1);
 	arg.name[FIO_PATH_MAX - 1] = 0;
 
-	if ((res = sceSifCallRpc(&_fio_cd, FIO_F_DOPEN, 0, &arg, sizeof arg,
+	if ((res = SifCallRpc(&_fio_cd, FIO_F_DOPEN, 0, &arg, sizeof arg,
 					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
 	{
 		result=arg.result;
@@ -661,7 +661,7 @@ int fioDclose(int fd)
 
 	arg.fd = fd;
 
-	if ((res = sceSifCallRpc(&_fio_cd, FIO_F_DCLOSE, 0, &arg, sizeof arg,
+	if ((res = SifCallRpc(&_fio_cd, FIO_F_DCLOSE, 0, &arg, sizeof arg,
 					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
 	{
 		result=arg.result;
@@ -701,9 +701,9 @@ int fioDread(int fd, fio_dirent_t *buf)
 	arg.buf = buf;
 
 	if (!IS_UNCACHED_SEG(buf))
-		sceSifWriteBackDCache(buf, sizeof(fio_dirent_t));
+		SifWriteBackDCache(buf, sizeof(fio_dirent_t));
 
-	if ((res = sceSifCallRpc(&_fio_cd, FIO_F_DREAD, 0, &arg, sizeof arg,
+	if ((res = SifCallRpc(&_fio_cd, FIO_F_DREAD, 0, &arg, sizeof arg,
 					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
 	{
 		result=arg.p.result;
@@ -744,9 +744,9 @@ int fioGetstat(const char *name, fio_stat_t *buf)
 	arg.name[FIO_PATH_MAX - 1] = 0;
 
 	if (!IS_UNCACHED_SEG(buf))
-		sceSifWriteBackDCache(buf, sizeof(fio_stat_t));
+		SifWriteBackDCache(buf, sizeof(fio_stat_t));
 
-	if ((res = sceSifCallRpc(&_fio_cd, FIO_F_GETSTAT, 0, &arg, sizeof arg,
+	if ((res = SifCallRpc(&_fio_cd, FIO_F_GETSTAT, 0, &arg, sizeof arg,
 					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
 	{
 		result=arg.p.result;
@@ -788,7 +788,7 @@ int fioChstat(const char *name, fio_stat_t *buf, u32 cbit)
 	strncpy(arg.name, name, FIO_PATH_MAX - 1);
 	arg.name[FIO_PATH_MAX - 1] = 0;
 
-	if ((res = sceSifCallRpc(&_fio_cd, FIO_F_CHSTAT, 0, &arg, sizeof arg,
+	if ((res = SifCallRpc(&_fio_cd, FIO_F_CHSTAT, 0, &arg, sizeof arg,
 					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
 	{
 		result=arg.p.result;
@@ -822,7 +822,7 @@ int fioFormat(const char *name)
 	strncpy(arg.path, name, FIO_PATH_MAX - 1);
 	arg.path[FIO_PATH_MAX - 1] = 0;
 
-	if ((res = sceSifCallRpc(&_fio_cd, FIO_F_FORMAT, 0, &arg, sizeof arg,
+	if ((res = SifCallRpc(&_fio_cd, FIO_F_FORMAT, 0, &arg, sizeof arg,
 					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
 	{
 		result=arg.result;
