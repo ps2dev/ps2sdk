@@ -274,8 +274,11 @@ s32  _EnableIntc(s32 cause);
 s32  _DisableIntc(s32 cause);
 s32  _EnableDmac(s32 channel);
 s32  _DisableDmac(s32 channel);
+
+//Alarm value is in H-SYNC ticks.
 s32  SetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *common), void *common);
 s32  ReleaseAlarm(s32 alarm_id);
+
 s32  _iEnableIntc(s32 cause);
 s32  _iDisableIntc(s32 cause);
 s32  _iEnableDmac(s32 channel);
@@ -332,6 +335,8 @@ void GetGsHParam(void* addr1, void* addr2, void* addr3);
 s32  GetGsVParam(void);
 void SetGsHParam(void* addr1, void* addr2, void* addr3, void* addr4);
 void SetGsVParam(s32 arg1);
+
+//TLB functions are only available if InitTLBFunctions() is run (Normally run by crt0).
 int PutTLBEntry(unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1);
 int iPutTLBEntry(unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1);
 int _SetTLBEntry(unsigned int index, unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1);
@@ -341,6 +346,7 @@ int iGetTLBEntry(unsigned int index, unsigned int *PageMask, unsigned int *Entry
 int ProbeTLBEntry(unsigned int EntryHi, unsigned int *PageMask, unsigned int *EntryLo0, unsigned int *EntryLo1);
 int iProbeTLBEntry(unsigned int EntryHi, unsigned int *PageMask, unsigned int *EntryLo0, unsigned int *EntryLo1);
 int ExpandScratchPad(unsigned int page);
+
 void EnableIntcHandler(u32 cause);
 void iEnableIntcHandler(u32 cause);
 void DisableIntcHandler(u32 cause);
@@ -360,8 +366,11 @@ void iFlushCache(s32 operation);
 u32  iCpuConfig(u32 config);
 void SetCPUTimerHandler(void (*handler)(void));
 void SetCPUTimer(s32 compval);
+
+//These two are not available in the unpatched Protokernel (Unpatched SCPH-10000 and SCPH-15000 kernels).
 void SetOsdConfigParam2(void* config, s32 size, s32 offset);
 void GetOsdConfigParam2(void* config, s32 size, s32 offset);
+
 u64  GsGetIMR(void);
 u64  iGsGetIMR(void);
 u64  GsPutIMR(u64 imr);
@@ -371,13 +380,18 @@ void SetVSyncFlag(u32 *, u64 *);
 void SetSyscall(s32 syscall_num, void* handler);
 //void _print(const char *fmt, ...);		// null function
 
-void SifStopDma(void);
+void SifStopDma(void); //Disables SIF0 (IOP -> EE).
+
 s32  SifDmaStat(u32 id);
 s32  iSifDmaStat(u32 id);
 u32  SifSetDma(SifDmaTransfer_t *sdd, s32 len);
 u32  iSifSetDma(SifDmaTransfer_t *sdd, s32 len);
+
+//Enables SIF0 (IOP -> EE). Sets channel 5 CHCR to 0x184 (CHAIN, TIE and STR).
 void SifSetDChain(void);
 void iSifSetDChain(void);
+
+//Sets/gets SIF register values (Refer to sifdma.h for a register list).
 int  SifSetReg(u32 register_num, int register_value);
 int  SifGetReg(u32 register_num);
 
@@ -387,6 +401,7 @@ void PSMode(void);
 s32  MachineType(void);
 s32  GetMemorySize(void);
 
+//Internal function for reinitializing the TLB, only present in later kernels. Please use InitTLB() instead to initialize the TLB with all kernels.
 int  _InitTLB(void);
 
 void _SyncDCache(void *start, void *end);

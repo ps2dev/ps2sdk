@@ -33,11 +33,11 @@ int SifIopReboot(const char *arg);
  */
 int SifIopReset(const char *arg, int mode);
 /*!
- @return 1 for success or 0 for failure.
+ @return 1 for SIF initialized or 0 for not initialized.
  */
 int SifIopIsAlive(void);
 /*!
- @return 1 for success or 0 for failure.
+ @return 1 for bootup complete or 0 for incomplete.
  */
 int SifIopSync(void);
 

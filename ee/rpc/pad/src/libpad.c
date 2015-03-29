@@ -21,27 +21,9 @@
 #include <sifcmd.h>
 #include "libpad.h"
 
-#define ROM_PADMAN 1
-/*
- * Slightly different behaviour if using "rom0:padman" or something newer
- * (such as "rom0:xpadman" on those machines that have it)
- * User must define which is used
- */
-#if defined(ROM_PADMAN) && defined(NEW_PADMAN)
-#error Only one of ROM_PADMAN & NEW_PADMAN should be defined!
-#endif
-
-#if !defined(ROM_PADMAN) && !defined(NEW_PADMAN)
-#error ROM_PADMAN or NEW_PADMAN must be defined!
-#endif
-
-
-
 /*
  * Defines
  */
-#ifdef ROM_PADMAN
-
 #define PAD_BIND_RPC_ID1 0x8000010f
 #define PAD_BIND_RPC_ID2 0x8000011f
 
@@ -60,34 +42,6 @@
 #define PAD_RPCCMD_CLOSE        0x8000010d
 #define PAD_RPCCMD_END          0x8000010e
 
-#define PAD_RPCCMD_INIT         0x00000000  /* not supported */
-#define PAD_RPCCMD_GET_CONNECT  0x00000000  /* not supported */
-#define PAD_RPCCMD_GET_MODVER   0x00000000  /* not supported */
-
-#else
-
-#define PAD_BIND_RPC_ID1 0x80000100
-#define PAD_BIND_RPC_ID2 0x80000101
-
-#define PAD_RPCCMD_OPEN         0x01
-#define PAD_RPCCMD_SET_MMODE    0x06
-#define PAD_RPCCMD_SET_ACTDIR   0x07
-#define PAD_RPCCMD_SET_ACTALIGN 0x08
-#define PAD_RPCCMD_GET_BTNMASK  0x09
-#define PAD_RPCCMD_SET_BTNINFO  0x0A
-#define PAD_RPCCMD_SET_VREF     0x0B
-#define PAD_RPCCMD_GET_PORTMAX  0x0C
-#define PAD_RPCCMD_GET_SLOTMAX  0x0D
-#define PAD_RPCCMD_CLOSE        0x0E
-#define PAD_RPCCMD_END          0x0F
-#define PAD_RPCCMD_INIT         0x10
-#define PAD_RPCCMD_GET_CONNECT  0x11
-#define PAD_RPCCMD_GET_MODVER   0x12
-
-#endif
-
-
-
 /*
  * Types
  */
@@ -101,7 +55,6 @@ struct pad_state
     unsigned char *padBuf;
 };
 
-#ifdef ROM_PADMAN
 // rom0:padman has only 64 byte of pad data
 struct pad_data
 {
@@ -119,34 +72,6 @@ struct pad_data
     unsigned char errorCount;
     unsigned char unk49[15];
 };
-#else
-struct pad_data
-{
-    unsigned char data[32]; // 0, length = 32 bytes
-    unsigned int unkn32;    // not used??
-    unsigned int unkn36;    // not used??
-    unsigned int unkn40;    // byte 40  not used??
-    unsigned int unkn44;    // not used?? 44
-    unsigned char actData[32]; // actuator (6x4?) 48
-    unsigned short modeTable[4];  // padInfo   80
-    unsigned int frame;     // byte 88, u32 22
-    unsigned int unkn92;    // not used ??
-    unsigned int length;    // 96
-    unsigned char modeOk;   // padInfo  100 Dunno about the name though...
-    unsigned char modeCurId; // padInfo    101
-    unsigned char unkn102;  // not used??
-    unsigned char unknown;  // unknown
-    unsigned char nrOfModes;   // padInfo   104
-    unsigned char modeCurOffs; // padInfo   105
-    unsigned char nrOfActuators;     // act  106
-    unsigned char unkn107[5];  // not used??
-    unsigned char state;    // byte 112
-    unsigned char reqState; // byte 113
-    unsigned char ok;       // padInfo  114
-    unsigned char unkn115[13];  // not used??
-};
-#endif
-
 
 extern int _iop_reboot_count;
 /*
@@ -269,11 +194,6 @@ padInit(int a)
         PadState[1][i].slot = 0;
     }
 
-#ifndef ROM_PADMAN
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_INIT;
-    if (SifCallRpc( &padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
-        return -1;
-#endif
     padInitialised = 1;
     return 0;
 
@@ -281,7 +201,7 @@ padInit(int a)
 
 
 /*
- * End all pad communication (not tested)
+ * Ends all pad communication
  */
 int
 padEnd()
@@ -331,9 +251,6 @@ padPortOpen(int port, int slot, void *padArea)
         dma_buf[i].reqState = PAD_RSTAT_BUSY;
         dma_buf[i].ok = 0;
         dma_buf[i].length = 0;
-#ifndef ROM_PADMAN
-        dma_buf[i].unknown = 0; // Should be cleared in newer padman
-#endif
     }
 
 
@@ -354,10 +271,6 @@ padPortOpen(int port, int slot, void *padArea)
     return *(u32 *)(&buffer[12]);
 }
 
-
-/*
- * not tested :/
- */
 int
 padPortClose(int port, int slot)
 {
@@ -452,7 +365,6 @@ padSetReqState(int port, int slot, int state)
 
 /*
  * Debug print functions
- * uh.. these are actually not tested :)
  */
 void
 padStateInt2String(int state, char buf[16])
@@ -512,19 +424,8 @@ padGetSlotMax(int port)
 int
 padGetModVersion()
 {
-#ifdef ROM_PADMAN
     return 1; // Well.. return a low version #
-#else
-
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_GET_MODVER;
-
-    if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
-        return -1;
-
-    return *(int *)(&buffer[12]);
-#endif
 }
-
 
 /*
  * Get pad info (digital (4), dualshock (7), etc..)
@@ -537,8 +438,6 @@ padGetModVersion()
 int
 padInfoMode(int port, int slot, int infoMode, int index)
 {
-
-#ifdef ROM_PADMAN
     *(u32 *)(&buffer[0])=PAD_RPCCMD_INFO_MODE;
     *(u32 *)(&buffer[4])=port;
     *(u32 *)(&buffer[8])=slot;
@@ -552,56 +451,6 @@ padInfoMode(int port, int slot, int infoMode, int index)
         padSetReqState(port, slot, PAD_RSTAT_BUSY);
     }
     return *(int *)(&buffer[20]);
-#else
-
-    struct pad_data *pdata;
-
-    pdata = padGetDmaStr(port, slot);
-
-    if (pdata->ok != 1)
-        return 0;
-    if (pdata->reqState == PAD_RSTAT_BUSY)
-        return 0;
-
-    switch(infoMode) {
-    case PAD_MODECURID:
-        if (pdata->modeCurId == 0xF3)
-            return 0;
-        else
-            return (pdata->modeCurId >> 4);
-        break;
-
-    case PAD_MODECUREXID:
-        if (pdata->modeOk == pdata->ok)
-            return 0;
-        return pdata->modeTable[pdata->modeCurOffs];
-        break;
-
-    case PAD_MODECUROFFS:
-        if (pdata->modeOk != 0)
-            return pdata->modeCurOffs;
-        else
-            return 0;
-        break;
-
-    case PAD_MODETABLE:
-        if (pdata->modeOk != 0) {
-            if(index == -1) {
-                return pdata->nrOfModes;
-            }
-            else if (index < pdata->nrOfModes) {
-                return pdata->modeTable[index];
-            }
-            else {
-                return 0;
-            }
-        }
-        else
-            return 0;
-        break;
-    }
-    return 0;
-#endif
 }
 
 
@@ -721,8 +570,6 @@ padSetButtonInfo(int port, int slot, int buttonInfo)
 unsigned char
 padInfoAct(int port, int slot, int actuator, int cmd)
 {
-
-#ifdef ROM_PADMAN
     *(u32 *)(&buffer[0])=PAD_RPCCMD_INFO_ACT;
     *(u32 *)(&buffer[4])=port;
     *(u32 *)(&buffer[8])=slot;
@@ -736,26 +583,6 @@ padInfoAct(int port, int slot, int actuator, int cmd)
         padSetReqState(port, slot, PAD_RSTAT_BUSY);
     }
     return *(int *)(&buffer[20]);
-#else
-    struct pad_data *pdata;
-
-    pdata = padGetDmaStr(port, slot);
-
-    if (pdata->ok != 1)
-        return 0;
-    if (pdata->modeOk < 2)
-        return 0;
-    if (actuator >= pdata->nrOfActuators)
-        return 0;
-
-    if (actuator == -1)
-        return pdata->nrOfActuators;   // # of acutators?
-
-    if (cmd >= 4)
-        return 0;
-
-    return pdata->actData[actuator*4+cmd];
-#endif
 }
 
 
@@ -825,17 +652,5 @@ padSetActDirect(int port, int slot, char actAlign[6])
 int
 padGetConnection(int port, int slot)
 {
-#ifdef ROM_PADMAN
     return 1;
-#else
-
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_GET_CONNECT;
-    *(u32 *)(&buffer[4])=port;
-    *(u32 *)(&buffer[8])=slot;
-
-    if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
-        return -1;
-
-    return *(int *)(&buffer[12]);
-#endif
 }

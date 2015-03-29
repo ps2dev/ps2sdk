@@ -262,6 +262,7 @@ void SifInitCmd(void)
 	if (_lw(DMAC_COMM_STAT) & STAT_SIF0)
 		_sw(STAT_SIF0, DMAC_COMM_STAT);
 
+	//If SIF0 (IOP -> EE) is not enabled, enable it.
 	if (!(_lw(DMAC_SIF0_CHCR) & CHCR_STR))
 		SifSetDChain();
 
@@ -277,8 +278,8 @@ void SifInitCmd(void)
 		((struct ca_pkt *)(packet))->buf = _sif_cmd_data.pktbuf;
 		SifSendCmd(SIF_CMD_CHANGE_SADDR, packet, sizeof packet, NULL, NULL, 0);
 	} else {
-		/* Sync */
-		while (!(SifGetReg(SIF_REG_SMFLAG) & 0x20000)) ;
+		/* Sync with the IOP side's SIFCMD implementation. */
+		while (!(SifGetReg(SIF_REG_SMFLAG) & SIF_STAT_CMDINIT)) ;
 
 		_sif_cmd_data.iopbuf = (void *)SifGetReg(SIF_REG_SUBADDR);
 		SifSetReg(SIF_SYSREG_SUBADDR, (u32)_sif_cmd_data.iopbuf);

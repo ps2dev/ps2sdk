@@ -21,17 +21,6 @@
 
 #include "libpad.h"
 
-#define ROM_PADMAN
-
-#if defined(ROM_PADMAN) && defined(NEW_PADMAN)
-#error Only one of ROM_PADMAN & NEW_PADMAN should be defined!
-#endif
-
-#if !defined(ROM_PADMAN) && !defined(NEW_PADMAN)
-#error ROM_PADMAN or NEW_PADMAN must be defined!
-#endif
-
-
 /*
  * Global var's
  */
@@ -50,27 +39,19 @@ static int actuators;
 /*
  * loadModules()
  */
-void
+static void
 loadModules(void)
 {
     int ret;
 
 
-#ifdef ROM_PADMAN
     ret = SifLoadModule("rom0:SIO2MAN", 0, NULL);
-#else
-    ret = SifLoadModule("rom0:XSIO2MAN", 0, NULL);
-#endif
     if (ret < 0) {
         printf("sifLoadModule sio failed: %d\n", ret);
         SleepThread();
     }
 
-#ifdef ROM_PADMAN
     ret = SifLoadModule("rom0:PADMAN", 0, NULL);
-#else
-    ret = SifLoadModule("rom0:XPADMAN", 0, NULL);
-#endif
     if (ret < 0) {
         printf("sifLoadModule pad failed: %d\n", ret);
         SleepThread();
@@ -80,7 +61,7 @@ loadModules(void)
 /*
  * waitPadReady()
  */
-int waitPadReady(int port, int slot)
+static int waitPadReady(int port, int slot)
 {
     int state;
     int lastState;
@@ -108,7 +89,7 @@ int waitPadReady(int port, int slot)
 /*
  * initializePad()
  */
-int
+static int
 initializePad(int port, int slot)
 {
 
@@ -196,10 +177,6 @@ initializePad(int port, int slot)
 
     return 1;
 }
-
-
-
-
 
 int
 main()

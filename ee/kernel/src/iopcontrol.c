@@ -45,7 +45,7 @@ int SifIopReset(const char *arg, int mode)
 
 	_iop_reboot_count++; // increment reboot counter to allow RPC clients to detect unbinding!
 
-	SifStopDma();
+	SifStopDma();	//Stop DMA transfers across SIF0 (IOP -> EE).
 
 	memset(&reset_pkt, 0, sizeof reset_pkt);
 
@@ -73,7 +73,7 @@ int SifIopReset(const char *arg, int mode)
 
 	SifSetReg(SIF_REG_SMFLAG, SIF_STAT_SIFINIT);
 	SifSetReg(SIF_REG_SMFLAG, SIF_STAT_CMDINIT);
-	SifSetReg(SIF_SYSREG_RPCINIT, (int)NULL);
+	SifSetReg(SIF_SYSREG_RPCINIT, 0);
 	SifSetReg(SIF_SYSREG_SUBADDR, (int)NULL);
 
 	return 1;
@@ -101,8 +101,8 @@ int SifIopReboot(const char* arg)
 }
 #endif
 
-#ifdef F_SifCheckInit
-int SifCheckInit(void)
+#ifdef F_SifIopIsAlive
+int SifIopIsAlive(void)
 {
 	return ((SifGetReg(SIF_REG_SMFLAG) & SIF_STAT_SIFINIT) != 0);
 }

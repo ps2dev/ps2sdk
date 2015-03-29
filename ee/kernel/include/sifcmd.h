@@ -62,6 +62,8 @@ unsigned int SifSendCmd(int cmd, void *packet, int packet_size, void *src_extra,
 	void *dest_extra, int size_extra);
 unsigned int iSifSendCmd(int cmd, void *packet, int packet_size, void *src_extra,
 	void *dest_extra, int size_extra);
+//Note: unlike the SCE implementation, only up to SIFCMD ID 32 can be registered (For both system and user IDs) because there is an internal limit of only 32 handler descriptors.
+//Registering an ID beyond 32 will result in undefined behaviour.
 void SifAddCmdHandler(int cid, SifCmdHandler_t handler, void *harg);
 void SifInitCmd(void);
 void SifExitCmd(void);

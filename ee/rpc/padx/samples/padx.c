@@ -9,18 +9,18 @@
 
 #define DEBUG_BGCOLOR(col) *((u64 *) 0x120000e0) = (u64) (col)
 
-char* padTypeStr[] = {	"Unsupported controller", "Mouse", "Nejicon",
+static char* padTypeStr[] = {	"Unsupported controller", "Mouse", "Nejicon",
 						"Konami Gun", "Digital", "Analog", "Namco Gun",
 						"DualShock"};
 
 static char *padBuf[2];
-u32 portConnected[2];
-u32 paddata[2];
-u32 old_pad[2];
-u32 new_pad[2];
-u8 actDirect[2][6] = { {0,0,0,0,0,0}, {0,0,0,0,0,0}};
+static u32 portConnected[2];
+static u32 paddata[2];
+static u32 old_pad[2];
+static u32 new_pad[2];
+static u8 actDirect[2][6] = { {0,0,0,0,0,0}, {0,0,0,0,0,0}};
 
-void wait_vsync()
+static void wait_vsync()
 {
 	// Enable the vsync interrupt.
 	*GS_REG_CSR |= GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
@@ -32,7 +32,7 @@ void wait_vsync()
 	*GS_REG_CSR &= ~GS_SET_CSR(0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0);
 }
 
-void loadmodules(int free)
+static void loadmodules(int free)
 {
 	s32 ret;
 
@@ -66,7 +66,7 @@ void loadmodules(int free)
 	}
 }
 
-void padWait(int port)
+static void padWait(int port)
 {
 	/* Wait for request to complete. */
 	while(padGetReqState(port, 0) != PAD_RSTAT_COMPLETE)
@@ -77,7 +77,7 @@ void padWait(int port)
 		wait_vsync();
 }
 
-void padStartAct(int port, int act, int speed)
+static void padStartAct(int port, int act, int speed)
 {
 	if(actDirect[port][act] != speed)
 	{
@@ -88,7 +88,7 @@ void padStartAct(int port, int act, int speed)
 	}
 }
 
-void padStopAct(int port, int act)
+static void padStopAct(int port, int act)
 {
 	padStartAct(port, act, 0);
 }

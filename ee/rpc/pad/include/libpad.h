@@ -131,7 +131,7 @@ struct padButtonStatus
 int padInit(int a);
 
 /*
- * End all pad communication (not tested)
+ * End all pad communication
  */
 int padEnd();
 
@@ -143,9 +143,6 @@ int padEnd();
  */
 int padPortOpen(int port, int slot, void *padArea);
 
-/*
- * not tested :/
- */
 int padPortClose(int port, int slot);
 
 /*
@@ -173,7 +170,6 @@ int padSetReqState(int port, int slot, int state);
 
 /*
  * Debug print functions
- * uh.. these are actually not tested :)
  */
 void padStateInt2String(int state, char buf[16]);
 void padReqStateInt2String(int state, char buf[16]);
@@ -267,10 +263,10 @@ int padSetActDirect(int port, int slot, char act_align[6]);
 int padGetConnection(int port, int slot);
 
 /*
- * Reset (deinit) EE library
+ * Resets EE library, to be used prior to reinitialization.
+ * Does not deinitialize PADMAN (Please use padEnd() before invoking this function).
  */
 int padReset();
-
 
 #ifdef __cplusplus
 }
