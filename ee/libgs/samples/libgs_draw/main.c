@@ -90,7 +90,7 @@ int InitGraphics(void)
 {
 	unsigned int FrameBufferVRAMAddress;
 
-	GsResetGraph(GS_INIT_RESET, GS_INTERLACED, GS_MODE_NTSC, GS_FFMD_INTERLACE);
+	GsResetGraph(GS_INIT_RESET, GS_INTERLACED, GS_MODE_NTSC, GS_FFMD_FIELD);
 
 	FrameBufferVRAMAddress=GsVramAllocFrameBuffer(SCREEN_WIDTH, SCREEN_HEIGHT, GS_PIXMODE_32);
 	GsSetDefaultDrawEnv(&draw_env, GS_PIXMODE_32, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -99,23 +99,22 @@ int InitGraphics(void)
 	ScreenOffsetY=draw_env.offset_y;
 	GsSetDefaultDrawEnvAddress(&draw_env, FrameBufferVRAMAddress);
 
-	//For NTSC and PAL modes, the height is halfed because they are interlaced modes.
-	GsSetDefaultDisplayEnv(&disp_env, GS_PIXMODE_32, SCREEN_WIDTH, SCREEN_HEIGHT/2, 0, 0);
+	GsSetDefaultDisplayEnv(&disp_env, GS_PIXMODE_32, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0);
 	GsSetDefaultDisplayEnvAddress(&disp_env, FrameBufferVRAMAddress);
 
 	//execute draw/display environment(s)  (context 1)
 	GsPutDrawEnv1(&draw_env);
 	GsPutDisplayEnv1(&disp_env);
 
-	//set some common stuff
+	//set common primitive-drawing settings (Refer to documentation on PRMODE and PRMODECONT registers).
 	GsOverridePrimAttributes(GS_DISABLE, 0, 0, 0, 0, 0, 0, 0, 0);
 
-	// contex 1
+	//set transparency settings for context 1 (Refer to documentation on TEST and TEXA registers).
 	GsEnableAlphaTransparency1(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, 0x00);
-	// contex 2
-	GsEnableAlphaTransparency2(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, 0x00);
-
 	GsEnableAlphaBlending1(GS_ENABLE, 0);
+
+	//set transparency settings for context 2 (Refer to documentation on TEST and TEXA registers).
+	GsEnableAlphaTransparency2(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, 0x00);
 	GsEnableAlphaBlending2(GS_ENABLE, 0);
 
 	return 0;

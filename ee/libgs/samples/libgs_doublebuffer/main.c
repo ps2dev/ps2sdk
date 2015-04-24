@@ -18,7 +18,7 @@
 // transfering data to the GS
 
 #define	SCREEN_WIDTH			640
-#define	SCREEN_HEIGHT			448
+#define	SCREEN_HEIGHT			224	//Half-height for frame mode (frame buffer will be drawn once for each set of scan lines).
 
 static int ScreenOffsetX, ScreenOffsetY;
 
@@ -102,16 +102,14 @@ static int InitGraphics(void)
 	ScreenOffsetY=draw_env[0].offset_y;
 	GsSetDefaultDrawEnvAddress(&draw_env[0], env0_address);
 
-	//For NTSC and PAL modes, the height is halfed because they are interlaced modes.
-	GsSetDefaultDisplayEnv(&disp_env[0], GS_PIXMODE_32, SCREEN_WIDTH, SCREEN_HEIGHT/2, 0, 0);
+	GsSetDefaultDisplayEnv(&disp_env[0], GS_PIXMODE_32, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0);
 	GsSetDefaultDisplayEnvAddress(&disp_env[0], env1_address);
 
 	/*********SETUP CONTEX 2 ENVIRONMENT*************/
 	GsSetDefaultDrawEnv(&draw_env[1], GS_PIXMODE_32, SCREEN_WIDTH, SCREEN_HEIGHT);
 	GsSetDefaultDrawEnvAddress(&draw_env[1], env1_address);
 
-	//For NTSC and PAL modes, the height is halfed because they are interlaced modes.
-	GsSetDefaultDisplayEnv(&disp_env[1], GS_PIXMODE_32, SCREEN_WIDTH, SCREEN_HEIGHT/2, 0, 0);
+	GsSetDefaultDisplayEnv(&disp_env[1], GS_PIXMODE_32, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 0);
 	GsSetDefaultDisplayEnvAddress(&disp_env[1], env0_address);
 
 	//execute draw/display environment(s)  (contex 1)
@@ -122,16 +120,16 @@ static int InitGraphics(void)
 	GsPutDrawEnv2	(&draw_env[1]);
 	GsPutDisplayEnv2(&disp_env[1]);
 
-	//set some common stuff
+	//set common primitive-drawing settings (Refer to documentation on PRMODE and PRMODECONT registers).
 	GsOverridePrimAttributes(GS_DISABLE, 0, 0, 0, 0, 0, 0, 0, 0);
 
-	// contex 1
+	//set transparency settings for context 1 (Refer to documentation on TEST and TEXA registers).
 	GsEnableAlphaTransparency1(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, 0x00);
-	// contex 2
-	GsEnableAlphaTransparency2(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, 0x00);
+	GsEnableAlphaBlending1(GS_ENABLE);
 
-	GsEnableAlphaBlending1(GS_ENABLE, 0);
-	GsEnableAlphaBlending2(GS_ENABLE, 0);
+	//set transparency settings for context 2 (Refer to documentation on TEST and TEXA registers).
+	GsEnableAlphaTransparency2(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, 0x00);
+	GsEnableAlphaBlending2(GS_ENABLE);
 
 	return 0;
 }

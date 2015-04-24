@@ -26,7 +26,7 @@ typedef struct {
 #define GS_NONINTERLACED	0x00
 #define GS_INTERLACED		0x01
 
-#define GS_FFMD_INTERLACE	0x00	//Read every other line from the beginning with the start of FIELD.
+#define GS_FFMD_FIELD		0x00	//Read every other line from the beginning with the start of FIELD.
 #define GS_FFMD_FRAME		0x01	//Read every line from the beginning with the start of FRAME.
 
 /*	About the supported video modes:
@@ -2105,8 +2105,8 @@ void GsEnableAlphaTransparency1(unsigned short enable,unsigned short method,unsi
 void GsEnableAlphaTransparency2(unsigned short enable,unsigned short method,unsigned char alpha_ref,unsigned short fail_method);
 void GsEnableZbuffer1(unsigned short enable,unsigned short test_method);
 void GsEnableZbuffer2(unsigned short enable,unsigned short test_method);
-void GsEnableAlphaBlending1(unsigned short enable, unsigned short mode);
-void GsEnableAlphaBlending2(unsigned short enable, unsigned short mode);
+void GsEnableAlphaBlending1(unsigned short enable);
+void GsEnableAlphaBlending2(unsigned short enable);
 
 /**/
 void GsDrawSync(int mode);

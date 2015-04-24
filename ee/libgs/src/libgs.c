@@ -40,6 +40,7 @@ void GsResetGraph(short int mode, short int interlace, short int omode, short in
 
 			pGParams=GsGetGParam();
 			GS_SET_CSR_reset(1);
+			pGParams->ffmode=ffmode;
 			pGParams->interlace=interlace;
 			pGParams->omode=omode;
 			pGParams->version=GS_GET_CSR_gs_rev_number>>16;

@@ -133,7 +133,7 @@ void GsEnableZbuffer2(unsigned short enable,unsigned short test_method)
 
 }
 
-void GsEnableAlphaBlending1(unsigned short enable, unsigned short mode)
+void GsEnableAlphaBlending1(unsigned short enable)
 {
 	QWORD *p;
 
@@ -156,7 +156,7 @@ void GsEnableAlphaBlending1(unsigned short enable, unsigned short mode)
 	GsDmaWait();
 }
 
-void GsEnableAlphaBlending2(unsigned short enable, unsigned short mode)
+void GsEnableAlphaBlending2(unsigned short enable)
 {
 	QWORD *p;
 
