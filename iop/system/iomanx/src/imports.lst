@@ -3,6 +3,7 @@ I_printf
 stdio_IMPORTS_end
 
 loadcore_IMPORTS_start
+I_GetLoadcoreInternalData
 I_RegisterLibraryEntries
 I_QueryLibraryEntryTable
 I_FlushDcache

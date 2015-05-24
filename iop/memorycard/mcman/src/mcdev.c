@@ -109,7 +109,7 @@ int mcman_ioerrcode(int errcode)
 }
 
 //--------------------------------------------------------------
-int mcman_modloadcb(char *filename, int *unit, u8 *arg3)
+int mcman_modloadcb(char *filename, int *port, int *slot)
 {
 	register char *path = filename;
 	register int   upos;
@@ -132,23 +132,23 @@ int mcman_modloadcb(char *filename, int *unit, u8 *arg3)
 	if (upos < 0)
 		upos = strlen(path);
 
-	if (unit) {
+	if (port) {
 		upos --;
 		if (((u8)path[upos] - 0x30) < 10)
-			*unit = (u8)path[upos] - 0x30;
-		else *unit = 0;
+			*port = (u8)path[upos] - 0x30;
+		else *port = 0;
 	}
 
 	upos--;
-	*unit += 2;
+	*port += 2;
 
-	if (arg3) {
+	if (slot) {
 		register int m, v;
 
-		*arg3 = 0;
+		*slot = 0;
 		for (m = 1; ((u8)path[upos --] - 0x30) < 10; m = v << 1) {
 			v = m << 2;
-			*arg3 += m * (path[upos] - 0x30);
+			*slot += m * (path[upos] - 0x30);
 			v += m;
 		}
 	}

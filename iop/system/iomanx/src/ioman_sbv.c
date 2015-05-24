@@ -32,33 +32,15 @@
 iop_device_t **dev_list;
 extern iop_file_t file_table[MAX_FILES];
 
-/* Module info entry.  */
-typedef struct _smod_mod_info {
-	struct _smod_mod_info *next;
-	u8	*name;
-	u16	version;
-	u16	newflags;	/* For modload shipped with games.  */
-	u16	id;
-	u16	flags;		/* I believe this is where flags are kept for BIOS versions.  */
-	u32	entry;		/* _start */
-	u32	gp;
-	u32	text_start;
-	u32	text_size;
-	u32	data_size;
-	u32	bss_size;
-	u32	unused1;
-	u32	unused2;
-} smod_mod_info_t;
-
 static const char *ioman_modname = "IO/File_Manager";
 
-static int smod_get_next_mod(smod_mod_info_t *cur_mod, smod_mod_info_t *next_mod)
+static int smod_get_next_mod(ModuleInfo_t *cur_mod, ModuleInfo_t *next_mod)
 {
 	void *addr;
 
 	/* If cur_mod is 0, return the head of the list (IOP address 0x800).  */
 	if (!cur_mod) {
-		addr = (void *)0x800;
+		addr = GetLoadcoreInternalData()->image_info;
 	} else {
 		if (!cur_mod->next)
 			return 0;
@@ -66,15 +48,15 @@ static int smod_get_next_mod(smod_mod_info_t *cur_mod, smod_mod_info_t *next_mod
 			addr = cur_mod->next;
 	}
 
-	memcpy(next_mod, addr, sizeof(smod_mod_info_t));
+	memcpy(next_mod, addr, sizeof(ModuleInfo_t));
 	return next_mod->id;
 }
 
-static int smod_get_mod_by_name(const char *name, smod_mod_info_t *info)
+static int smod_get_mod_by_name(const char *name, ModuleInfo_t *info)
 {
 	int len = strlen(name) + 1; /* Thanks to adresd for this fix.  */
 
-	if (!smod_get_next_mod(0, info))
+	if (!smod_get_next_mod(NULL, info))
 		return 0;
 
 	do {
@@ -255,7 +237,7 @@ int ioman_chstat(const char *name, io_stat_t *stat, unsigned int mask)
 int hook_ioman(void)
 {
 	iop_library_t ioman_library = { NULL, NULL, 0x102, 0, "ioman\0\0" };
-	smod_mod_info_t info;
+	ModuleInfo_t info;
 
     dev_list = GetDeviceList();
 

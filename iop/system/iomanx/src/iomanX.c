@@ -47,7 +47,7 @@ int _start(int argc, char **argv)
 {
 	if(RegisterLibraryEntries(&_exp_iomanx) != 0)
     {
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 	}
 
     memset(dev_list, 0, sizeof(dev_list));
@@ -55,16 +55,16 @@ int _start(int argc, char **argv)
 
     if(hook_ioman() != 0)
     {
-        return 1;
+        return MODULE_NO_RESIDENT_END;
     }
 
-	return 0;
+	return MODULE_RESIDENT_END;
 }
 
 int shutdown()
 {
     unhook_ioman();
-	return 1;
+	return MODULE_NO_RESIDENT_END;
 }
 
 int AddDrv(iop_device_t *device)
