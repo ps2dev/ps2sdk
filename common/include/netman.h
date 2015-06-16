@@ -17,6 +17,8 @@ struct NetManNetProtStack{
 	int (*FlushInputQueue)(void);
 };
 
+#define NETMAN_NETIF_ETH_LINK_MODE_PAUSE	0x40	//Flow-control
+
 enum NETMAN_NETIF_ETH_LINK_MODE{
 	NETMAN_NETIF_ETH_LINK_MODE_AUTO		= 0,	//Auto negotiation cannot be reflected by NETMAN_NETIF_IOCTL_ETH_GET_LINK_MODE.
 	NETMAN_NETIF_ETH_LINK_MODE_10M_HDX,		//10Mbit Half-DupleX
@@ -47,7 +49,7 @@ enum NETMAN_NETIF_IOCTL_CODES{
 	NETMAN_NETIF_IOCTL_ETH_GET_TX_ECOLL_CNT,
 	NETMAN_NETIF_IOCTL_ETH_GET_TX_EUNDERRUN_CNT,
 
-	NETMAN_NETIF_IOCTL_ETH_SET_LINK_MODE,	//Input = struct NetManIFLinkModeParams
+	NETMAN_NETIF_IOCTL_ETH_SET_LINK_MODE,	//Input = struct NetManIFLinkModeParams. Note: does not wait for the IF to finish. Use NetManSetLinkMode() instead.
 
 	// Dial-up I/F-only IOCTL codes
 	// 0x2000
@@ -79,6 +81,7 @@ void NetManUnregisterNetworkStack(void);
 
 /* Common network Interface (IF) management functions. Used by the user program and the protocol stack. */
 int NetManIoctl(unsigned int command, void *args, unsigned int args_len, void *output, unsigned int length);
+int NetManSetLinkMode(int mode);
 
 /* Network Interface (IF) management functions. Used by the protocol stack. */
 int NetManNetIFSendPacket(const void *packet, unsigned int length);
@@ -103,18 +106,23 @@ struct NetManNetIF{
 	void (*deinit)(void);
 	int (*xmit)(const void *packet, unsigned int size);
 	int (*ioctl)(unsigned int command, void *args, unsigned int args_len, void *output, unsigned int length);
+	int EventFlagID;
 };
+
+//IF event flag bits, set by NETMAN
+#define NETMAN_NETIF_EVF_UP	0x01
+#define NETMAN_NETIF_EVF_DOWN	0x02
 
 #define NETMAN_MAX_NETIF_COUNT	2
 
 /* Network InterFace (IF) management functions. Used by the network InterFace (IF). */
-int NetManRegisterNetIF(const struct NetManNetIF *NetIF);
+int NetManRegisterNetIF(struct NetManNetIF *NetIF);
 void NetManUnregisterNetIF(const char *name);
-void NetManToggleNetIFLinkState(int NetIFID, unsigned char state);
+void NetManToggleNetIFLinkState(int NetIFID, unsigned char state);	//Also toggles NETMAN_NETIF_EVF_UP and NETMAN_NETIF_EVF_DOWN
 
 #ifdef _IOP
 
-#define netman_IMPORTS_start DECLARE_IMPORT_TABLE(netman, 1, 1)
+#define netman_IMPORTS_start DECLARE_IMPORT_TABLE(netman, 1, 2)
 #define netman_IMPORTS_end END_IMPORT_TABLE
 
 #define I_NetManRegisterNetworkStack DECLARE_IMPORT(4, NetManRegisterNetworkStack)
@@ -135,5 +143,7 @@ void NetManToggleNetIFLinkState(int NetIFID, unsigned char state);
 
 #define I_NetManSetMainIF DECLARE_IMPORT(16, NetManSetMainIF)
 #define I_NetManQueryMainIF DECLARE_IMPORT(17, NetManQueryMainIF)
+
+#define I_NetManSetLinkMode DECLARE_IMPORT(18, NetManSetLinkMode)
 
 #endif

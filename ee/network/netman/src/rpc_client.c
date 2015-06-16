@@ -329,3 +329,18 @@ int NetManQueryMainIF(char *name){
 
 	return result;
 }
+
+int NetManSetLinkMode(int mode){
+	int result;
+
+	WaitSema(NetManIOSemaID);
+
+	*(int*)TransmitBuffer = mode;
+	if((result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_SET_LINK_MODE, 0, TransmitBuffer, sizeof(int), ReceiveBuffer, sizeof(int), NULL, NULL))>=0){
+		result=*(int*)ReceiveBuffer;
+	}
+
+	SignalSema(NetManIOSemaID);
+
+	return result;
+}

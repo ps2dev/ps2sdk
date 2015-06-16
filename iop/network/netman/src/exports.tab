@@ -1,6 +1,6 @@
 void _retonly(){};
 
-DECLARE_EXPORT_TABLE(netman, 1, 1)
+DECLARE_EXPORT_TABLE(netman, 1, 2)
 	DECLARE_EXPORT(_start)
 	DECLARE_EXPORT(_retonly)
 	DECLARE_EXPORT(_retonly)
@@ -20,4 +20,5 @@ DECLARE_EXPORT_TABLE(netman, 1, 1)
 	DECLARE_EXPORT(NetManGetGlobalNetIFLinkState)
 	DECLARE_EXPORT(NetManSetMainIF)
 	DECLARE_EXPORT(NetManQueryMainIF)
+	DECLARE_EXPORT(NetManSetLinkMode)
 END_EXPORT_TABLE

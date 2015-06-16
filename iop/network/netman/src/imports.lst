@@ -47,6 +47,14 @@ I_GetThreadId
 I_DelayThread
 thbase_IMPORTS_end
 
+thevent_IMPORTS_start
+I_CreateEventFlag
+I_DeleteEventFlag
+I_SetEventFlag
+I_ClearEventFlag
+I_WaitEventFlag
+thevent_IMPORTS_end
+
 thsemap_IMPORTS_start
 I_CreateSema
 I_DeleteSema
