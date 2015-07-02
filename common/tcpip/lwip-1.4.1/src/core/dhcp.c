@@ -70,7 +70,7 @@
 
 #if LWIP_DHCP /* don't build if not configured for use in lwipopts.h */
 
-#include "lwip/sys.h"	//SP193: added to inhibit compiler warnings about the implicit use of malloc() and free() by the IOP-side LWIP port.
+#include "lwip/sys.h"
 #include "lwip/stats.h"
 #include "lwip/mem.h"
 #include "lwip/udp.h"

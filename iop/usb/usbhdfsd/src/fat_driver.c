@@ -664,7 +664,7 @@ static int fat_getDirentryStartCluster(fat_driver* fatd, unsigned char* dirName,
 // otherwise the start cluster should be correct cluster of directory
 // to search directory - set fatDir as NULL
 int fat_getFileStartCluster(fat_driver* fatd, const unsigned char* fname, unsigned int* startCluster, fat_dir* fatDir) {
-	unsigned char tmpName[257];
+	unsigned char tmpName[FAT_MAX_NAME+1];
 	unsigned int i, offset;
 	unsigned char cont;
 	int ret;
@@ -713,7 +713,7 @@ int fat_getFileStartCluster(fat_driver* fatd, const unsigned char* fname, unsign
 		}
 		XPRINTF("USBHDFSD: file's startCluster found. Name=%s, cluster=%u \n", fname, *startCluster);
 	}
-	XPRINTF("USBHDFSD: Exiting from fat_getFileStartCluster with a file\n");
+	XPRINTF("USBHDFSD: Exiting from fat_getFileStartCluster with no error.\n");
 	return 1;
 }
 

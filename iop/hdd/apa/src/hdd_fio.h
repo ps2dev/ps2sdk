@@ -50,7 +50,7 @@ typedef struct
 #define APA_DEVCTL_STATUS			0x00004807
 #define APA_DEVCTL_FORMAT			0x00004808
 #define APA_DEVCTL_SMART_STAT		0x00004809
-//#define APA_DEVCTL_FREE_SECTORS	0x0000480A// REMOVED! is not true free...
+#define APA_DEVCTL_FREE_SECTORS	0x0000480A
 
 #define APA_DEVCTL_GETTIME				0x00006832
 #define APA_DEVCTL_SET_OSDMBR			0x00006833// arg = hddSetOsdMBR_t
@@ -59,7 +59,6 @@ typedef struct
 #define APA_DEVCTL_ATA_READ				0x00006836// arg  = hddAtaTransfer_t
 #define APA_DEVCTL_ATA_WRITE			0x00006837// arg  = hddAtaTransfer_t
 #define APA_DEVCTL_SCE_IDENTIFY_DRIVE	0x00006838// bufp = buffer for atadSceIdentifyDrive
-//#define APA_DEVCTL_FREE_SECTORS2		0x00006839
 
 // structs for DEVCTL commands
 
@@ -95,7 +94,7 @@ int devctlSwapTemp(u32 device, char *argp);
 int hddInit(iop_device_t *f);
 int hddDeinit(iop_device_t *f);
 int hddFormat(iop_file_t *f, const char *dev, const char *blockdev, void *arg, size_t arglen);
-int hddOpen(iop_file_t *f, const char *name, int mode, int other_mode);
+int hddOpen(iop_file_t *f, const char *name, int flags, int mode);
 int hddClose(iop_file_t *f);
 int hddRead(iop_file_t *f, void *buf, int size);
 int hddWrite(iop_file_t *f, void *buf, int size);

@@ -39,10 +39,10 @@ struct SmapDriverData{
 	int IntrHandlerThreadID;
 	int TxHandlerThreadID;
 	int NetIFID;
-	unsigned char SmapIsInitialized;
+	unsigned char SmapIsInitialized;	//SMAP driver is initialized (software)
 	unsigned char NetDevStopFlag;
 	unsigned char EnableLinkCheckTimer;
-	unsigned char LinkStatus;
+	unsigned char LinkStatus;		//Ethernet link is initialized (hardware)
 	unsigned char LinkMode;
 	iop_sys_clock_t LinkCheckTimer;
 };

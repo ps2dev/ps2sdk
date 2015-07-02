@@ -126,6 +126,10 @@ static void *NETMAN_rpc_handler(int fno, void *buffer, int size){
 			((struct NetManQueryMainNetIFResult*)SifRpcTxBuffer)->result=NetManQueryMainIF(((struct NetManQueryMainNetIFResult*)SifRpcTxBuffer)->name);
 			result=SifRpcTxBuffer;
 			break;
+		case NETMAN_IOP_RPC_FUNC_SET_LINK_MODE:
+			ResultValue=NetManSetLinkMode(*(int*)buffer);
+			result=&ResultValue;
+			break;
 		default:
 			printf("NETMAN [IOP]: Unrecognized command: 0x%x\n", fno);
 			ResultValue=-1;

@@ -515,6 +515,7 @@ static inline int SMAPGetLinkMode(void){
 		if(value&0x04) result=NETMAN_NETIF_ETH_LINK_MODE_100M_HDX;	/* 100Base-TX HDX */
 		if(value&0x02) result=NETMAN_NETIF_ETH_LINK_MODE_10M_FDX;	/* 10Base-TX FDX */
 		if(value&0x01) result=NETMAN_NETIF_ETH_LINK_MODE_10M_HDX;	/* 10Base-TX HDX */
+		if(value&0x40) result|=NETMAN_NETIF_ETH_LINK_MODE_PAUSE;
 	}
 
 	return result;
@@ -544,6 +545,14 @@ static inline int SMAPSetLinkMode(int mode){
 					SmapConfiguration = 0x0100;
 					result = 0;
 					break;
+				case (NETMAN_NETIF_ETH_LINK_MODE_10M_FDX|NETMAN_NETIF_ETH_LINK_MODE_PAUSE):
+					SmapConfiguration = 0x440;
+					result = 0;
+					break;
+				case (NETMAN_NETIF_ETH_LINK_MODE_100M_FDX|NETMAN_NETIF_ETH_LINK_MODE_PAUSE):
+					SmapConfiguration = 0x500;
+					result = 0;
+					break;
 				default:
 					result = -1;
 			}
@@ -557,7 +566,6 @@ static inline int SMAPSetLinkMode(int mode){
 		if(result == 0){
 			SetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_STOP|SMAP_EVENT_START);
 			SmapDriverData.NetDevStopFlag=1;
-			DelayThread(1000000);	//Allow 1s for a change in status.
 		}
 	}else result = -ENXIO;
 

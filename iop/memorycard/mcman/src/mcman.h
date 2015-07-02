@@ -318,7 +318,7 @@ int  mcman_replaceBackupBlock(int port, int slot, int block);
 int  mcman_fillbackupblock1(int port, int slot, int block, void **pagedata, void *eccdata);
 int  mcman_clearsuperblock(int port, int slot);
 int  mcman_ioerrcode(int errcode);
-int  mcman_modloadcb(char *filename, int *unit, u8 *arg3); // used as callback by modload
+int  mcman_modloadcb(char *filename, int *port, int *slot); // used as callback by modload
 void mcman_unit2card(u32 unit);
 int  mcman_initdev(void);
 

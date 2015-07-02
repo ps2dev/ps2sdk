@@ -176,6 +176,8 @@ static void event_callback(struct netconn *conn, enum netconn_evt evt, u16_t len
 static void lwip_getsockopt_internal(void *arg);
 static void lwip_setsockopt_internal(void *arg);
 
+static sys_sem_t sockets_sem;
+
 /**
  * Initialize this module. This function has to be called before any other
  * functions in this module!
@@ -183,6 +185,7 @@ static void lwip_setsockopt_internal(void *arg);
 void
 lwip_socket_init(void)
 {
+  sys_sem_new(&sockets_sem, 1);
 }
 
 /**
@@ -243,17 +246,16 @@ static int
 alloc_socket(struct netconn *newconn, int accepted)
 {
   int i;
-  SYS_ARCH_DECL_PROTECT(lev);
 
   /* allocate a new socket identifier */
   for (i = 0; i < NUM_SOCKETS; ++i) {
     /* Protect socket array */
-    SYS_ARCH_PROTECT(lev);
+    sys_sem_wait(&sockets_sem);
     if (!sockets[i].conn) {
       sockets[i].conn       = newconn;
       /* The socket is not yet known to anyone, so no need to protect
          after having marked it as used. */
-      SYS_ARCH_UNPROTECT(lev);
+      sys_sem_signal(&sockets_sem);
       sockets[i].lastdata   = NULL;
       sockets[i].lastoffset = 0;
       sockets[i].rcvevent   = 0;
@@ -265,7 +267,7 @@ alloc_socket(struct netconn *newconn, int accepted)
       sockets[i].select_waiting = 0;
       return i;
     }
-    SYS_ARCH_UNPROTECT(lev);
+    sys_sem_signal(&sockets_sem);
   }
   return -1;
 }
@@ -280,7 +282,6 @@ static void
 free_socket(struct lwip_sock *sock, int is_tcp)
 {
   void *lastdata;
-  SYS_ARCH_DECL_PROTECT(lev);
 
   lastdata         = sock->lastdata;
   sock->lastdata   = NULL;
@@ -288,9 +289,9 @@ free_socket(struct lwip_sock *sock, int is_tcp)
   sock->err        = 0;
 
   /* Protect socket array */
-  SYS_ARCH_PROTECT(lev);
+  sys_sem_wait(&sockets_sem);
   sock->conn       = NULL;
-  SYS_ARCH_UNPROTECT(lev);
+  sys_sem_signal(&sockets_sem);
   /* don't use 'sock' after this line, as another task might have allocated it */
 
   if (lastdata != NULL) {
@@ -318,7 +319,6 @@ lwip_accept(int s, struct sockaddr *addr, socklen_t *addrlen)
   int newsock;
   struct sockaddr_in sin;
   err_t err;
-  SYS_ARCH_DECL_PROTECT(lev);
 
   LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_accept(%d)...\n", s));
   sock = get_socket(s);
@@ -388,10 +388,10 @@ lwip_accept(int s, struct sockaddr *addr, socklen_t *addrlen)
    * In that case, newconn->socket is counted down (newconn->socket--),
    * so nsock->rcvevent is >= 1 here!
    */
-  SYS_ARCH_PROTECT(lev);
+  sys_sem_wait(&sockets_sem);
   nsock->rcvevent += (s16_t)(-1 - newconn->socket);
   newconn->socket = newsock;
-  SYS_ARCH_UNPROTECT(lev);
+  sys_sem_signal(&sockets_sem);
 
   LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_accept(%d) returning new sock=%d addr=", s, newsock));
   ip_addr_debug_print(SOCKETS_DEBUG, &naddr);
@@ -1029,7 +1029,6 @@ lwip_selscan(int maxfdp1, fd_set *readset_in, fd_set *writeset_in, fd_set *excep
   int i, nready = 0;
   fd_set lreadset, lwriteset, lexceptset;
   struct lwip_sock *sock;
-  SYS_ARCH_DECL_PROTECT(lev);
 
   FD_ZERO(&lreadset);
   FD_ZERO(&lwriteset);
@@ -1043,7 +1042,7 @@ lwip_selscan(int maxfdp1, fd_set *readset_in, fd_set *writeset_in, fd_set *excep
     u16_t sendevent = 0;
     u16_t errevent = 0;
     /* First get the socket's status (protected)... */
-    SYS_ARCH_PROTECT(lev);
+    sys_sem_wait(&sockets_sem);
     sock = tryget_socket(i);
     if (sock != NULL) {
       lastdata = sock->lastdata;
@@ -1051,7 +1050,7 @@ lwip_selscan(int maxfdp1, fd_set *readset_in, fd_set *writeset_in, fd_set *excep
       sendevent = sock->sendevent;
       errevent = sock->errevent;
     }
-    SYS_ARCH_UNPROTECT(lev);
+    sys_sem_signal(&sockets_sem);
     /* ... then examine it: */
     /* See if netconn of this socket is ready for read */
     if (readset_in && FD_ISSET(i, readset_in) && ((lastdata != NULL) || (rcvevent > 0))) {
@@ -1095,7 +1094,6 @@ lwip_select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptset,
   struct lwip_select_cb select_cb;
   err_t err;
   int i;
-  SYS_ARCH_DECL_PROTECT(lev);
 
   LWIP_DEBUGF(SOCKETS_DEBUG, ("lwip_select(%d, %p, %p, %p, tvsec=%"S32_F" tvusec=%"S32_F")\n",
                   maxfdp1, (void *)readset, (void *) writeset, (void *) exceptset,
@@ -1134,7 +1132,7 @@ lwip_select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptset,
     }
 
     /* Protect the select_cb_list */
-    SYS_ARCH_PROTECT(lev);
+    sys_sem_wait(&sockets_sem);
 
     /* Put this select_cb on top of list */
     select_cb.next = select_cb_list;
@@ -1146,7 +1144,7 @@ lwip_select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptset,
     select_cb_ctr++;
 
     /* Now we can safely unprotect */
-    SYS_ARCH_UNPROTECT(lev);
+    sys_sem_signal(&sockets_sem);
 
     /* Increase select_waiting for each socket we are interested in */
     for(i = 0; i < maxfdp1; i++) {
@@ -1155,10 +1153,10 @@ lwip_select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptset,
           (exceptset && FD_ISSET(i, exceptset))) {
         struct lwip_sock *sock = tryget_socket(i);
         LWIP_ASSERT("sock != NULL", sock != NULL);
-        SYS_ARCH_PROTECT(lev);
+        sys_sem_wait(&sockets_sem);
         sock->select_waiting++;
         LWIP_ASSERT("sock->select_waiting > 0", sock->select_waiting > 0);
-        SYS_ARCH_UNPROTECT(lev);
+        sys_sem_signal(&sockets_sem);
       }
     }
 
@@ -1187,14 +1185,14 @@ lwip_select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptset,
           (exceptset && FD_ISSET(i, exceptset))) {
         struct lwip_sock *sock = tryget_socket(i);
         LWIP_ASSERT("sock != NULL", sock != NULL);
-        SYS_ARCH_PROTECT(lev);
+        sys_sem_wait(&sockets_sem);
         sock->select_waiting--;
         LWIP_ASSERT("sock->select_waiting >= 0", sock->select_waiting >= 0);
-        SYS_ARCH_UNPROTECT(lev);
+        sys_sem_signal(&sockets_sem);
       }
     }
     /* Take us off the list */
-    SYS_ARCH_PROTECT(lev);
+    sys_sem_wait(&sockets_sem);
     if (select_cb.next != NULL) {
       select_cb.next->prev = select_cb.prev;
     }
@@ -1207,7 +1205,7 @@ lwip_select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptset,
     }
     /* Increasing this counter tells even_callback that the list has changed. */
     select_cb_ctr++;
-    SYS_ARCH_UNPROTECT(lev);
+    sys_sem_signal(&sockets_sem);
 
     sys_sem_free(&select_cb.sem);
     if (waitres == SYS_ARCH_TIMEOUT)  {
@@ -1250,7 +1248,6 @@ event_callback(struct netconn *conn, enum netconn_evt evt, u16_t len)
   struct lwip_sock *sock;
   struct lwip_select_cb *scb;
   int last_select_cb_ctr;
-  SYS_ARCH_DECL_PROTECT(lev);
 
   LWIP_UNUSED_ARG(len);
 
@@ -1263,16 +1260,16 @@ event_callback(struct netconn *conn, enum netconn_evt evt, u16_t len)
        * Just count down (or up) if that's the case and we
        * will use the data later. Note that only receive events
        * can happen before the new socket is set up. */
-      SYS_ARCH_PROTECT(lev);
+      sys_sem_wait(&sockets_sem);
       if (conn->socket < 0) {
         if (evt == NETCONN_EVT_RCVPLUS) {
           conn->socket--;
         }
-        SYS_ARCH_UNPROTECT(lev);
+        sys_sem_signal(&sockets_sem);
         return;
       }
       s = conn->socket;
-      SYS_ARCH_UNPROTECT(lev);
+      sys_sem_signal(&sockets_sem);
     }
 
     sock = get_socket(s);
@@ -1283,7 +1280,7 @@ event_callback(struct netconn *conn, enum netconn_evt evt, u16_t len)
     return;
   }
 
-  SYS_ARCH_PROTECT(lev);
+  sys_sem_wait(&sockets_sem);
   /* Set event as required */
   switch (evt) {
     case NETCONN_EVT_RCVPLUS:
@@ -1308,7 +1305,7 @@ event_callback(struct netconn *conn, enum netconn_evt evt, u16_t len)
 
   if (sock->select_waiting == 0) {
     /* noone is waiting for this socket, no need to check select_cb_list */
-    SYS_ARCH_UNPROTECT(lev);
+    sys_sem_signal(&sockets_sem);
     return;
   }
 
@@ -1348,15 +1345,15 @@ again:
     }
     /* unlock interrupts with each step */
     last_select_cb_ctr = select_cb_ctr;
-    SYS_ARCH_UNPROTECT(lev);
+    sys_sem_signal(&sockets_sem);
     /* this makes sure interrupt protection time is short */
-    SYS_ARCH_PROTECT(lev);
+    sys_sem_wait(&sockets_sem);
     if (last_select_cb_ctr != select_cb_ctr) {
       /* someone has changed select_cb_list, restart at the beginning */
       goto again;
     }
   }
-  SYS_ARCH_UNPROTECT(lev);
+  sys_sem_signal(&sockets_sem);
 }
 
 /**
