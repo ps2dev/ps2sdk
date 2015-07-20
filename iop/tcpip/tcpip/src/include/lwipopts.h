@@ -87,28 +87,26 @@
  */
 #define MEM_LIBC_MALLOC		1
 
-/**
- * MEMP_NUM_SYS_TIMEOUT: the number of simulateously active timeouts.
- * (requires NO_SYS==0)
- */
-#if PS2IP_DHCP
-#define MEMP_NUM_SYS_TIMEOUT	5	/* Declare a larger value than the defaults, since it will be required if DHCP is enabled. */
-#endif
-
 /* MEM_ALIGNMENT: should be set to the alignment of the CPU for which
    lwIP is compiled. 4 byte alignment -> define MEM_ALIGNMENT to 4, 2
    byte alignment -> define MEM_ALIGNMENT to 2. */
 #define MEM_ALIGNMENT		4
 
-/* ---------- Pbuf options ---------- */
-/* PBUF_POOL_BUFSIZE: the size of each pbuf in the pbuf pool. */
-//Boman666: Should be atleast 1518 to be compatible with ps2smap
-//#define PBUF_POOL_BUFSIZE       1540
+/*
+   ------------------------------------------------
+   ---------- Internal Memory Pool Sizes ----------
+   ------------------------------------------------
+*/
+/**
+ * MEMP_NUM_NETCONN: the number of struct netconns.
+ * (only needed if you use the sequential API, like api_lib.c)
+ */
+#define MEMP_NUM_NETCONN                8	//SP193: find it weird that the default is only 4, while the maximum number of simultaneous TCP and UDP connections in total is 9.
 
 /**
  * PBUF_POOL_SIZE: the number of buffers in the pbuf pool.
  */
-#define PBUF_POOL_SIZE		25//((TCP_WND/PBUF_POOL_BUFSIZE)+1)
+#define PBUF_POOL_SIZE		25	//SP193: should be at least ((TCP_WND/PBUF_POOL_BUFSIZE)+1). But that is too small to handle simultaneous connections.
 
 /** SYS_LIGHTWEIGHT_PROT
  * define SYS_LIGHTWEIGHT_PROT in lwipopts.h if you want inter-task protection
@@ -117,11 +115,11 @@
  */
 #define SYS_LIGHTWEIGHT_PROT	1
 
-/* ---------- TCP options ---------- */
-/* Controls if TCP should queue segments that arrive out of
-   order. Define to 0 if your device is low on memory. */
-#define TCP_QUEUE_OOSEQ         1
-
+/*
+   ---------------------------------
+   ---------- TCP options ----------
+   ---------------------------------
+*/
 /* TCP Maximum segment size. */
 #define TCP_MSS                 1460
 
@@ -149,9 +147,7 @@
  * without this padding e.g. addresses in the IP header will not be aligned
  * on a 32-bit boundary, so setting this to 2 can speed up 32-bit-platforms.
  */
-//#define ETH_PAD_SIZE	4
-
-/* ---------- ICMP options ---------- */
+//#define ETH_PAD_SIZE	2	//SP193: Why doesn't this work correctly?
 
 /* ---------- DHCP options ---------- */
 #ifdef PS2IP_DHCP
@@ -161,7 +157,18 @@
 #define LWIP_DHCP		1
 #endif
 
-/* ---------- UDP options ---------- */
+/*
+   ----------------------------------
+   ---------- DNS options -----------
+   ----------------------------------
+*/
+/**
+ * LWIP_DNS==1: Turn on DNS module. UDP must be available for DNS
+ * transport.
+ */
+#ifdef PS2IP_DNS
+#define LWIP_DNS	1
+#endif
 
 /* ---------- Statistics options ---------- */
 /**
@@ -178,16 +185,6 @@
  * LWIP_RAW==1: Enable application layer to hook into the IP layer itself.
  */
 #define LWIP_RAW	0
-
-/*
-   ------------------------------------
-   ---------- LOOPIF options ----------
-   ------------------------------------
-*/
-/**
- * LWIP_HAVE_LOOPIF==1: Support loop interface (127.0.0.1) and loopif.c
- */
-//#define LWIP_HAVE_LOOPIF	1
 
 /*
    --------------------------------------

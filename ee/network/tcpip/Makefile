@@ -10,6 +10,7 @@ EE_INC_DIR = include/
 
 #DEBUG = 1
 PS2IP_DHCP=1
+PS2IP_DNS=1
 
 ifeq ($(DEBUG),1)
 DEBUG_FLAGS = -DDEBUG -DLWIP_DEBUG
@@ -26,10 +27,19 @@ ifdef PS2IP_DHCP
 ps2ip_OBJECTS+= dhcp.o
 endif
 
+ifdef PS2IP_DNS
+ps2ip_OBJECTS+= dns.o netdb.o
+endif
+
 # Turns DHCP on.
 
 ifdef PS2IP_DHCP
 EE_CFLAGS += -DPS2IP_DHCP -DLWIP_DHCP
+endif
+
+# Turns DNS on.
+ifdef PS2IP_DNS
+EE_CFLAGS += -DPS2IP_DNS
 endif
 
 EE_INCS += -I$(LWIP)/src/include -I$(LWIP)/src/include/ipv4 -Isrc/include
@@ -132,6 +142,14 @@ obj/etharp.o: $(LWIP)/src/netif/etharp.c
 ifdef PS2IP_DHCP
 obj/dhcp.o: $(LWIP)/src/core/dhcp.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
+endif
+
+ifdef PS2IP_DNS
+obj/dns.o: $(LWIP)/src/core/dns.c
+	$(EE_CC) $(IOP_CFLAGS) $(EE_INCS) -c $< -o $@
+
+obj/netdb.o: $(LWIP)/src/api/netdb.c
+	$(EE_CC) $(IOP_CFLAGS) $(EE_INCS) -c $< -o $@
 endif
 
 obj/udp.o: $(LWIP)/src/core/udp.c

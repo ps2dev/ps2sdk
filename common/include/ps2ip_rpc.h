@@ -23,6 +23,15 @@ enum PS2IPS_RPC_ID{
 	PS2IPS_ID_GETSOCKOPT,
 	PS2IPS_ID_SETSOCKOPT,
 	PS2IPS_ID_GETHOSTBYNAME,
+#ifdef PS2IP_DNS
+	/*	Not implemented:
+			gethostbyname_r -> Redudant because it gets called over the RPC.
+			freeaddrinfo	-> too complicated and probably nobody uses it?
+			getaddrinfo	-> too complicated and probably nobody uses it?	*/
+
+	PS2IPS_ID_DNS_SETSERVER,
+	PS2IPS_ID_DNS_GETSERVER,
+#endif
 
 	PS2IPS_ID_COUNT
 };
@@ -89,5 +98,28 @@ typedef struct {
 	int optlen;
 	unsigned char buffer[128];
 } setsockopt_pkt;
+
+#ifdef PS2IP_DNS
+struct hostent_res{
+	short h_addrtype;
+	short h_length;
+	ip_addr_t h_addr;
+};
+
+typedef struct {
+	int result;
+	struct hostent_res hostent;
+} gethostbyname_res_pkt;
+
+typedef struct {
+	ip_addr_t dnsserver;
+	u8 numdns;
+} dns_setserver_pkt;
+
+typedef struct {
+	ip_addr_t dnsserver;
+} dns_getserver_res_pkt;
+
+#endif
 
 #endif	//_PS2IP_RPC_H

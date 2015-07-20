@@ -27,7 +27,6 @@ typedef u32_t mem_ptr_t;
 #define PACK_STRUCT_BEGIN
 #define PACK_STRUCT_END
 
-void *malloc(unsigned int size);
-void free(void *ptr);
+#define atoi(x) strtol(x, NULL, 10)
 
 #endif /* __CC_H__ */

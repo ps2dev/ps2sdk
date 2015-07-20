@@ -9,7 +9,7 @@
 # $Id$
 
 
-SUBDIRS = tcpip tcpip-netman tcpips dns
+SUBDIRS = tcpip tcpip-netman tcpips
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make

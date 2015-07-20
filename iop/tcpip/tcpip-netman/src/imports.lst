@@ -58,6 +58,8 @@ I_strncmp
 I_strtok
 I_strtoul
 I_memcmp
+I_strtol
+I_strcmp
 sysclib_IMPORTS_end
 
 sysmem_IMPORTS_start

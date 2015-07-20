@@ -18,7 +18,7 @@ IOP_OBJS = obj/smbman.o obj/smb_fio.o obj/smb.o obj/poll.o obj/auth.o \
 	obj/des.o obj/md4.o obj/imports.o obj/exports.o
 
 IOP_CFLAGS  += -Wall -fno-builtin -D_IOP #-DDEBUG
-IOP_LDFLAGS += -s
+IOP_LDFLAGS += -s -lgcc
 IOP_INCS += -I$(PS2SDKSRC)/iop/tcpip/tcpip/include
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)

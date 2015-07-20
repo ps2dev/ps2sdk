@@ -114,4 +114,19 @@ void             pbuf_chain(struct pbuf *h, struct pbuf *t);
 struct pbuf*     pbuf_dechain(struct pbuf *p);
 struct pbuf*     pbuf_take(struct pbuf *f);
 
+#ifdef PS2IP_DNS
+/* From include/ipv4/lwip/netdb.h:  */
+struct hostent *lwip_gethostbyname(const char *name);
+int lwip_gethostbyname_r(const char *name, struct hostent *ret, char *buf,
+                size_t buflen, struct hostent **result, int *h_errnop);
+void lwip_freeaddrinfo(struct addrinfo *ai);
+int lwip_getaddrinfo(const char *nodename,
+       const char *servname,
+       const struct addrinfo *hints,
+       struct addrinfo **res);
+
+void           dns_setserver(u8 numdns, ip_addr_t *dnsserver);
+ip_addr_t      dns_getserver(u8 numdns);
+#endif
+
 #endif /* IOP_PS2IP_H */

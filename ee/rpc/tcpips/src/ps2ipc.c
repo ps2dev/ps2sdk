@@ -56,8 +56,11 @@ int accept(int s, struct sockaddr *addr, int *addrlen)
 
 	SifCallRpc(&_ps2ip, PS2IPS_ID_ACCEPT, 0, (void*)_rpc_buffer, 4, (void*)_rpc_buffer, sizeof(cmd_pkt), NULL, NULL);
 
-	if(pkt->len < *addrlen) *addrlen = pkt->len;
-	memcpy((void *)addr, (void *)&pkt->sockaddr, *addrlen);
+	if(addr != NULL)
+	{
+		if(pkt->len < *addrlen) *addrlen = pkt->len;
+		memcpy((void *)addr, (void *)&pkt->sockaddr, *addrlen);
+	}
 
 	return pkt->socket;
 }
@@ -422,20 +425,53 @@ int setsockopt(int s, int level, int optname, const void *optval, socklen_t optl
 	return _rpc_buffer[0];
 }
 
-int gethostbyname(char *name, struct in_addr *ip)
+#ifdef PS2IP_DNS
+struct hostent *gethostbyname(const char *name)
 {
-	int ret;
+	struct hostent *result;
+	static ip_addr_t addr;
+	static ip_addr_t *addr_list[2];
+	static struct hostent hostent;
 
+	result = NULL;
 	memcpy(_rpc_buffer, name, 256);
-	SifCallRpc(&_ps2ip, PS2IPS_ID_GETHOSTBYNAME, 0, (void*)_rpc_buffer, 256, (void*)_rpc_buffer, 4 + sizeof(struct in_addr), NULL, NULL);
+	if(SifCallRpc(&_ps2ip, PS2IPS_ID_GETHOSTBYNAME, 0, (void*)_rpc_buffer, 256, (void*)_rpc_buffer, sizeof(gethostbyname_res_pkt), NULL, NULL) >=0)
+	{
+		if(((gethostbyname_res_pkt*)_rpc_buffer)->result == 0)
+		{
+			hostent.h_addrtype = ((gethostbyname_res_pkt*)_rpc_buffer)->hostent.h_addrtype;
+			hostent.h_length = ((gethostbyname_res_pkt*)_rpc_buffer)->hostent.h_length;
+			hostent.h_name = (char*)name;
+			hostent.h_aliases = NULL;
+			memcpy(&addr, &((gethostbyname_res_pkt*)_rpc_buffer)->hostent.h_addr, sizeof(addr));
+			addr_list[0] = &addr;
+			addr_list[1] = NULL;
+			hostent.h_addr_list = (char**)&addr_list;
+			result = &hostent;
+		}
+	}
 
-	ret = _rpc_buffer[0];
-	memcpy(ip, &_rpc_buffer[1], sizeof(struct in_addr));
-
-	return ret;
+	return result;
 }
 
-int ps2ip_dnslookup(char *name, struct in_addr *ip)
+void dns_setserver(u8 numdns, ip_addr_t *dnsserver)
 {
-	return gethostbyname(name, ip);
+	((dns_setserver_pkt*)_rpc_buffer)->numdns = numdns;
+	((dns_setserver_pkt*)_rpc_buffer)->dnsserver = *dnsserver;
+
+	SifCallRpc(&_ps2ip, PS2IPS_ID_DNS_SETSERVER, 0, (void*)_rpc_buffer, sizeof(dns_setserver_pkt), NULL, 0, NULL, NULL);
 }
+
+ip_addr_t dns_getserver(u8 numdns)
+{
+	ip_addr_t info;
+
+	info.addr = 0;
+	*(u8*)_rpc_buffer = numdns;
+
+	if(SifCallRpc(&_ps2ip, PS2IPS_ID_DNS_SETSERVER, 0, (void*)_rpc_buffer, sizeof(u8), (void*)_rpc_buffer, sizeof(dns_getserver_res_pkt), NULL, NULL) >=0)
+		info = ((dns_getserver_res_pkt*)_rpc_buffer)->dnsserver;
+
+	return info;
+}
+#endif

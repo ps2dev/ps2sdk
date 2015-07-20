@@ -14,11 +14,18 @@ IOP_BIN_DIR = bin/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
+#DEBUG=1
+PS2IP_DNS=1
+
 IOP_BIN = bin/ps2ips.irx
 IOP_OBJS = obj/ps2ips.o obj/imports.o
 
 ifeq ($(DEBUG),1)
 DEBUG_FLAGS = -DDEBUG
+endif
+
+ifeq ($(PS2IP_DNS),1)
+IOP_CFLAGS += -DPS2IP_DNS
 endif
 
 IOP_CFLAGS += -Wall -fno-builtin $(DEBUG_FLAGS)
