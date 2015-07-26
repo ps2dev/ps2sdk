@@ -98,7 +98,7 @@
  * MEMP_NUM_NETCONN: the number of struct netconns.
  * (only needed if you use the sequential API, like api_lib.c)
  */
-#define MEMP_NUM_NETCONN                8	//SP193: find it weird that the default is only 4, while the maximum number of simultaneous TCP and UDP connections in total is 9.
+#define MEMP_NUM_NETCONN                10	//SP193: find it weird that the default is only 4, while the maximum number of simultaneous TCP and UDP connections in total is 9.
 
 /**
  * PBUF_POOL_SIZE: the number of buffers in the pbuf pool.

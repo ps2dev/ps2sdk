@@ -22,7 +22,7 @@ SIFCMD_OBJS = sif_cmd_send.o _sif_cmd_int_handler.o sif_cmd_main.o \
 SIFCMD_OBJS := $(SIFCMD_OBJS:%=$(EE_OBJS_DIR)%)
 
 SIFRPC_OBJS = SifBindRpc.o SifCallRpc.o SifRpcGetOtherData.o \
-	SifRegisterRpc.o SifSetRpcQueue.o SifGetNextRequest.o \
+	SifRegisterRpc.o SifRemoveRpc.o SifSetRpcQueue.o SifRemoveRpcQueue.o SifGetNextRequest.o \
 	SifExecRequest.o SifRpcLoop.o SifRpcMain.o _rpc_get_packet.o \
 	_rpc_get_fpacket.o SifCheckStatRpc.o
 SIFRPC_OBJS := $(SIFRPC_OBJS:%=$(EE_OBJS_DIR)%)

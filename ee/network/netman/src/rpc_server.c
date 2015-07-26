@@ -79,9 +79,10 @@ static void *NETMAN_EE_RPC_Handler(int fnum, void *buffer, int NumBytes){
 	return result;
 }
 
+static struct t_SifRpcDataQueue cb_queue __attribute__((aligned(64)));
+static struct t_SifRpcServerData cb_srv __attribute__((aligned(64)));
+
 static void NETMAN_RPC_Thread(void *arg){
-	static struct t_SifRpcDataQueue cb_queue __attribute__((aligned(64)));
-	static struct t_SifRpcServerData cb_srv __attribute__((aligned(64)));
 	static unsigned char cb_rpc_buffer[(sizeof(struct PacketReqs)+0x3F)&~0x3F] __attribute__((aligned(64)));
 
 	SifSetRpcQueue(&cb_queue, GetThreadId());
@@ -115,6 +116,9 @@ int NetManInitRPCServer(void){
 
 void NetManDeinitRPCServer(void){
 	if(IsInitialized){
+		SifRemoveRpc(&cb_srv, &cb_queue);
+		SifRemoveRpcQueue(&cb_queue);
+
 		if(NETMAN_RpcSvr_threadID>=0){
 			TerminateThread(NETMAN_RpcSvr_threadID);
 			DeleteThread(NETMAN_RpcSvr_threadID);

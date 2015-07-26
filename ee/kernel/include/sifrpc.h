@@ -168,11 +168,15 @@ int SifCheckStatRpc(SifRpcClientData_t *cd);
 /* SIF RPC server API */
 SifRpcDataQueue_t *
 SifSetRpcQueue(SifRpcDataQueue_t *q, int thread_id);
+SifRpcDataQueue_t *
+SifRemoveRpcQueue(SifRpcDataQueue_t *qd);
 
 SifRpcServerData_t *
 SifRegisterRpc(SifRpcServerData_t *srv,
 		int sid, SifRpcFunc_t func, void *buff, SifRpcFunc_t cfunc,
 		void *cbuff, SifRpcDataQueue_t *qd);
+SifRpcServerData_t *
+SifRemoveRpc(SifRpcServerData_t *sd, SifRpcDataQueue_t *queue);
 
 SifRpcServerData_t *
 SifGetNextRequest(SifRpcDataQueue_t *qd);
