@@ -56,7 +56,6 @@ extern int _iop_reboot_count;
 extern SifRpcClientData_t _fio_cd;
 extern int _fio_init;
 extern int _fio_block_mode;
-extern int _fio_io_sema;
 extern int _fio_completion_sema;
 extern int _fio_recv_data[512];
 extern int _fio_intr_data[32];
@@ -70,7 +69,6 @@ int _fio_recv_data[512] __attribute__((aligned(64)));
 int _fio_intr_data[32] __attribute__((aligned(64)));
 int _fio_init = 0;
 int _fio_block_mode;
-int _fio_io_sema;
 int _fio_completion_sema = -1;
 #endif
 
@@ -105,13 +103,6 @@ int fioInit(void)
 	sema.option = 0;
 	_fio_completion_sema = CreateSema(&sema);
 	if (_fio_completion_sema < 0)
-		return -E_LIB_SEMA_CREATE;
-
-	sema.init_count = 1;
-	sema.max_count = 1;
-	sema.option = 0;
-	_fio_io_sema = CreateSema(&sema);
-	if (_fio_io_sema < 0)
 		return -E_LIB_SEMA_CREATE;
 
 	_fio_init = 1;
@@ -187,10 +178,6 @@ void fioExit(void)
 		{
 			DeleteSema(_fio_completion_sema);
         	}
-		if(_fio_io_sema >= 0)
-		{
-			DeleteSema(_fio_io_sema);
-		}
 	}
 }
 #endif
@@ -209,7 +196,6 @@ int fioOpen(const char *name, int mode)
 	if ((res = fioInit()) < 0)
 		return res;
 
-	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	arg.mode = mode;
@@ -228,7 +214,6 @@ int fioOpen(const char *name, int mode)
 		result=res;
 	}
 
-	SignalSema(_fio_io_sema);
 
 	return result;
 }
@@ -243,7 +228,6 @@ int fioClose(int fd)
 	if ((res = fioInit()) < 0)
 		return res;
 
-	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	arg.fd = fd;
@@ -257,8 +241,6 @@ int fioClose(int fd)
 	{
 		result=res;
 	}
-
-	SignalSema(_fio_io_sema);
 
 	return result;
 }
@@ -297,7 +279,6 @@ int fioRead(int fd, void *ptr, int size)
 	if ((res = fioInit()) < 0)
 		return res;
 
-	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	arg.fd      = fd;
@@ -317,8 +298,6 @@ int fioRead(int fd, void *ptr, int size)
 	{
 		result=res;
 	}
-
-	SignalSema(_fio_io_sema);
 
 	return result;
 }
@@ -341,7 +320,6 @@ int fioWrite(int fd, const void *ptr, int size)
 	if ((res = fioInit()) < 0)
 		return res;
 
-	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	arg.fd = fd;
@@ -373,8 +351,6 @@ int fioWrite(int fd, const void *ptr, int size)
 		result=res;
 	}
 
-	SignalSema(_fio_io_sema);
-
 	return result;
 }
 #endif
@@ -397,7 +373,6 @@ int fioLseek(int fd, int offset, int whence)
 	if ((res = fioInit()) < 0)
 		return res;
 
-	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	arg.p.fd   = fd;
@@ -413,8 +388,6 @@ int fioLseek(int fd, int offset, int whence)
 	{
 		result=res;
 	}
-
-	SignalSema(_fio_io_sema);
 
 	return result;
 }
@@ -438,7 +411,6 @@ int fioIoctl(int fd, int request, void *data)
 	if ((res = fioInit()) < 0)
 		return res;
 
-	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	arg.p.fd = fd;
@@ -454,8 +426,6 @@ int fioIoctl(int fd, int request, void *data)
 	{
 		result=res;
 	}
-
-	SignalSema(_fio_io_sema);
 
 	return result;
 }
@@ -473,7 +443,6 @@ int fioRemove(const char *name)
 	if ((res = fioInit()) < 0)
 		return res;
 
-	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	strncpy(arg.path, name, FIO_PATH_MAX - 1);
@@ -488,8 +457,6 @@ int fioRemove(const char *name)
 	{
 		result=res;
 	}
-
-	SignalSema(_fio_io_sema);
 
 	return result;
 }
@@ -507,7 +474,6 @@ int fioMkdir(const char* path)
  	if ((res = fioInit()) < 0)
 		return res;
 
-	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	strncpy(arg.path, path, FIO_PATH_MAX - 1);
@@ -522,8 +488,6 @@ int fioMkdir(const char* path)
 	{
 		result=res;
 	}
-
-	SignalSema(_fio_io_sema);
 
 	return result;
 }
@@ -541,7 +505,6 @@ int fioRmdir(const char* dirname)
 	if ((res = fioInit()) < 0)
 		return res;
 
-	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	strncpy(arg.path, dirname, FIO_PATH_MAX - 1);
@@ -556,8 +519,6 @@ int fioRmdir(const char* dirname)
 	{
 		result=res;
 	}
-
-	SignalSema(_fio_io_sema);
 
 	return result;
 }
@@ -622,7 +583,6 @@ int fioDopen(const char *name)
 	if ((res = fioInit()) < 0)
 		return res;
 
-	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	strncpy(arg.name, name, FIO_PATH_MAX - 1);
@@ -637,8 +597,6 @@ int fioDopen(const char *name)
 	{
 		result=res;
 	}
-
-	SignalSema(_fio_io_sema);
 
 	return result;
 }
@@ -656,7 +614,6 @@ int fioDclose(int fd)
 	if ((res = fioInit()) < 0)
 		return res;
 
-	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	arg.fd = fd;
@@ -670,8 +627,6 @@ int fioDclose(int fd)
 	{
 		result=res;
 	}
-
-	SignalSema(_fio_io_sema);
 
 	return result;
 }
@@ -694,7 +649,6 @@ int fioDread(int fd, fio_dirent_t *buf)
 	if ((res = fioInit()) < 0)
 		return res;
 
-	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	arg.p.fd = fd;
@@ -712,8 +666,6 @@ int fioDread(int fd, fio_dirent_t *buf)
 	{
 		result=res;
 	}
-
-	SignalSema(_fio_io_sema);
 
 	return result;
 }
@@ -736,7 +688,6 @@ int fioGetstat(const char *name, fio_stat_t *buf)
 	if ((res = fioInit()) < 0)
 		return res;
 
-	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	arg.p.buf = buf;
@@ -755,8 +706,6 @@ int fioGetstat(const char *name, fio_stat_t *buf)
 	{
 		result=res;
 	}
-
-	SignalSema(_fio_io_sema);
 
 	return result;
 }
@@ -780,7 +729,6 @@ int fioChstat(const char *name, fio_stat_t *buf, u32 cbit)
 	if ((res = fioInit()) < 0)
 		return res;
 
-	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	arg.p.cbit = cbit;
@@ -798,8 +746,6 @@ int fioChstat(const char *name, fio_stat_t *buf, u32 cbit)
 		result=res;
 	}
 
-	SignalSema(_fio_io_sema);
-
 	return result;
 }
 #endif
@@ -816,7 +762,6 @@ int fioFormat(const char *name)
 	if ((res = fioInit()) < 0)
 		return res;
 
-	WaitSema(_fio_io_sema);
 	WaitSema(_fio_completion_sema);
 
 	strncpy(arg.path, name, FIO_PATH_MAX - 1);
@@ -831,8 +776,6 @@ int fioFormat(const char *name)
 	{
 		result=res;
 	}
-
-	SignalSema(_fio_io_sema);
 
 	return result;
 }

@@ -31,7 +31,7 @@ int read(int fd, void *ptr, size_t size);
 #define I_read DECLARE_IMPORT(6, read)
 int write(int fd, void *ptr, size_t size);
 #define I_write DECLARE_IMPORT(7, write)
-int lseek(int fd, unsigned long pos, int mode);
+int lseek(int fd, int pos, int mode);
 #define I_lseek DECLARE_IMPORT(8, lseek)
 int ioctl(int fd, int command, void *arg);
 #define I_ioctl DECLARE_IMPORT(9, ioctl)
@@ -88,7 +88,7 @@ typedef struct _iop_device_ops {
 	int	(*close)(iop_file_t *);
 	int	(*read)(iop_file_t *, void *, int);
 	int	(*write)(iop_file_t *, void *, int);
-	int	(*lseek)(iop_file_t *, unsigned long, int);
+	int	(*lseek)(iop_file_t *, int, int);
 	int	(*ioctl)(iop_file_t *, unsigned long, void *);
 	int	(*remove)(iop_file_t *, const char *);
 	int	(*mkdir)(iop_file_t *, const char *);

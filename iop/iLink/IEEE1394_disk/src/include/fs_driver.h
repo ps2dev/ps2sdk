@@ -2,7 +2,7 @@ int fs_init(iop_device_t *driver);
 int fs_deinit(iop_device_t *driver);
 int fs_open(iop_file_t* fd, const char *name, int mode);
 int fs_close(iop_file_t* fd);
-int fs_lseek(iop_file_t* fd, unsigned long offset, int whence);
+int fs_lseek(iop_file_t* fd, int offset, int whence);
 int fs_write(iop_file_t* fd, void * buffer, int size );
 int fs_read(iop_file_t* fd, void * buffer, int size );
 int fs_remove(iop_file_t *fd, const char *name);

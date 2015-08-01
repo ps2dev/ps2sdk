@@ -483,7 +483,7 @@ int httpClose(iop_io_file_t *f)
 // does modify the filePos member, this does not have any effect on the read position
 // of the file in the current implimentation.
 //
-int httpLseek(iop_io_file_t *f, unsigned long offset, int mode)
+int httpLseek(iop_io_file_t *f, int offset, int mode)
 {
 	t_fioPrivData *privData = (t_fioPrivData *)f->privdata;
 

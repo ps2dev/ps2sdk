@@ -580,7 +580,6 @@ static void FileTimeToDate(u64 FileTime, u8 *datetime)
 	leapdays = (years / 4) - (years / 100) + (years / 400);
 	years += 1601; // add base year from FILETIME struct;
 
-	//days = leapdays + (u16)(time / (60 * 60 * 24));
 	days = (u16)(time / (60 * 60 * 24));
 	time -= (unsigned int)days * (60 * 60 * 24);
 	days -= leapdays;
