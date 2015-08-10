@@ -21,11 +21,8 @@ I_lwip_socket
 I_lwip_connect
 I_lwip_send
 I_lwip_close
+I_lwip_gethostbyname
 ps2ip_IMPORTS_end
-
-dns_IMPORTS_start
-I_gethostbyname
-dns_IMPORTS_end
 
 sysmem_IMPORTS_start
 I_AllocSysMemory

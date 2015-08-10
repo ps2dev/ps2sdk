@@ -51,8 +51,9 @@ I_lwip_select
 I_lwip_ioctl
 I_ps2ip_getconfig
 I_ps2ip_setconfig
+#ifdef PS2IP_DNS
+I_lwip_gethostbyname
+I_dns_setserver
+I_dns_getserver
+#endif
 ps2ip_IMPORTS_end
-
-dns_IMPORTS_start
-I_gethostbyname
-dns_IMPORTS_end

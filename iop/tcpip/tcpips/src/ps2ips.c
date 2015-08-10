@@ -32,8 +32,6 @@ NOTES:
 #include <ps2ip.h>
 #include <ps2ip_rpc.h>
 
-#include "../../dns/include/dns.h"
-
 #define MODNAME	"TCP/IP_Stack_RPC"
 IRX_ID(MODNAME, 1, 1);
 
@@ -527,16 +525,33 @@ static void do_setsockopt( void *rpcBuffer, int size )
 	ptr[0] = ret;
 }
 
+#ifdef PS2IP_DNS
 static void do_gethostbyname( void *rpcBuffer, int size )
 {
-	int *ptr = rpcBuffer, ret;
-	struct in_addr addr;
+	struct hostent *ret;
+	gethostbyname_res_pkt *resPtr = rpcBuffer;
 
-	ret = gethostbyname((char*)_rpc_buffer, &addr);
-
-	ptr[0] = ret;
-	memcpy(&ptr[1], &addr, sizeof(struct in_addr));
+	if((ret = gethostbyname((char*)_rpc_buffer)) != NULL)
+	{
+		resPtr->result = 0;
+		resPtr->hostent.h_addrtype = ret->h_addrtype;
+		resPtr->hostent.h_length = ret->h_length;
+		memcpy(&resPtr->hostent.h_addr, &ret->h_addr_list[0], sizeof(resPtr->hostent.h_addr));
+	}else{
+		resPtr->result = -1;
+	}
 }
+
+static void do_dns_setserver( void *rpcBuffer, int size )
+{
+	dns_setserver(((dns_setserver_pkt*)_rpc_buffer)->numdns, &((dns_setserver_pkt*)_rpc_buffer)->dnsserver);
+}
+
+static void do_dns_getserver( void *rpcBuffer, int size )
+{
+	((dns_getserver_res_pkt*)rpcBuffer)->dnsserver = dns_getserver(*(u8*)_rpc_buffer);
+}
+#endif
 
 static void * rpcHandlerFunction(unsigned int command, void * rpcBuffer, int size)
 {
@@ -596,9 +611,17 @@ static void * rpcHandlerFunction(unsigned int command, void * rpcBuffer, int siz
 	case PS2IPS_ID_SETSOCKOPT:
 		do_setsockopt(rpcBuffer, size);
 		break;
+#ifdef PS2IP_DNS
 	case PS2IPS_ID_GETHOSTBYNAME:
 		do_gethostbyname(rpcBuffer, size);
 		break;
+	case PS2IPS_ID_DNS_SETSERVER:
+		do_dns_setserver(rpcBuffer, size);
+		break;
+	case PS2IPS_ID_DNS_GETSERVER:
+		do_dns_getserver(rpcBuffer, size);
+		break;
+#endif
 	default:
 		printf("PS2IPS: Unknown Function called!\n");
 

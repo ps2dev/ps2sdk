@@ -19,7 +19,7 @@
 
 #include "tcpip.h"
 
-#define ps2ip_IMPORTS_start	DECLARE_IMPORT_TABLE(ps2ip, 2, 3)
+#define ps2ip_IMPORTS_start	DECLARE_IMPORT_TABLE(ps2ip, 2, 4)
 #define ps2ip_IMPORTS_end	END_IMPORT_TABLE
 
 /* From include/lwip/sockets.h:  */
@@ -145,6 +145,27 @@ char       *ipaddr_ntoa_r(const ip_addr_t *addr, char *buf, int buflen);
 #define  I_ipaddr_ntoa_r DECLARE_IMPORT(45, ipaddr_ntoa_r)
 #define  I_inet_ntoa_r DECLARE_IMPORT(45, ipaddr_ntoa_r)
 
+#ifdef PS2IP_DNS
+/* From include/ipv4/lwip/netdb.h:  */
+struct hostent *lwip_gethostbyname(const char *name);
+#define  I_lwip_gethostbyname DECLARE_IMPORT(48, lwip_gethostbyname)
+int lwip_gethostbyname_r(const char *name, struct hostent *ret, char *buf,
+                size_t buflen, struct hostent **result, int *h_errnop);
+#define  I_lwip_gethostbyname_r DECLARE_IMPORT(49, lwip_gethostbyname_r)
+void lwip_freeaddrinfo(struct addrinfo *ai);
+#define  I_lwip_freeaddrinfo DECLARE_IMPORT(50, lwip_freeaddrinfo)
+int lwip_getaddrinfo(const char *nodename,
+       const char *servname,
+       const struct addrinfo *hints,
+       struct addrinfo **res);
+#define  I_lwip_getaddrinfo DECLARE_IMPORT(51, lwip_getaddrinfo)
+
+void           dns_setserver(u8 numdns, ip_addr_t *dnsserver);
+#define  I_dns_setserver DECLARE_IMPORT(52, dns_setserver)
+ip_addr_t      dns_getserver(u8 numdns);
+#define  I_dns_getserver DECLARE_IMPORT(53, dns_getserver)
+#endif
+
 /* Compatibility macros.  */
 
 #define	accept			lwip_accept
@@ -162,6 +183,10 @@ char       *ipaddr_ntoa_r(const ip_addr_t *addr, char *buf, int buflen);
 #define	select			lwip_select
 #define	ioctlsocket		lwip_ioctl
 #define	fcntlsocket		lwip_fcntl
+#define	gethostbyname		lwip_gethostbyname
+#define	gethostbyname_r		lwip_gethostbyname_r
+#define	freeaddrinfo		lwip_freeaddrinfo
+#define	getaddrinfo		lwip_getaddrinfo
 
 // ntba2
 #define getsockname		lwip_getsockname

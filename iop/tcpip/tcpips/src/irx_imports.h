@@ -17,7 +17,6 @@
 #include "irx.h"
 
 /* Please keep these in alphabetical order!  */
-#include "../../dns/include/dns.h"
 #include "intrman.h"
 #include "ps2ip.h"
 #include "sifcmd.h"

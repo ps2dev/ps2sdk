@@ -47,12 +47,17 @@ int fioSync(int mode, int *retVal);
 int fioIoctl(int fd, int request, void *data);
 int fioDopen(const char *name);
 int fioDclose(int fd);
-int fioDread(int fd, fio_dirent_t *buf);
-int fioGetstat(const char *name, fio_stat_t *buf);
+int fioDread(int fd, fio_dirent_t *buf);		//Warning! (*)
+int fioGetstat(const char *name, fio_stat_t *buf);	//Warning! (*)
 int fioChstat(const char *name, fio_stat_t *buf, unsigned int cbit);
-int fioRemove(const char *name);
+int fioRemove(const char *name);			//Warning! (**)
 int fioFormat(const char *name);
 int fioRmdir(const char* dirname);
+
+/*	* Function is unstable; does not suspend interrupts prior to performing DMA transfers on the IOP side.
+	** Function is broken; falls through to the next case (mkdir) upon completion.
+
+	Patches are available to fix these issues. Otherwise, please use fileXio instead.	*/
 
 #ifdef __cplusplus
 }

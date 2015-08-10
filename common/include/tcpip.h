@@ -19,6 +19,9 @@
 
    This port of LWIP has LWIP_DHCP defined by default.	*/
 
+#ifndef PS2IP_DNS
+#define PS2IP_DNS
+#endif
 #ifndef PS2IP_DHCP
 #define PS2IP_DHCP	1
 #endif
@@ -567,19 +570,6 @@ typedef struct
 	u8			hw_addr[8];
 } t_ip_info;
 
-#ifndef FAR
-#define FAR
-#endif
-
-struct hostent {
-	char    FAR * h_name;				/* official name of host */
-	char    FAR * FAR * h_aliases;		/* alias list */
-	short   h_addrtype;					/* host address type */
-	short   h_length;					/* length of address */
-	char    FAR * FAR * h_addr_list;	/* list of addresses */
-#define h_addr  h_addr_list[0]				/* address, for backward compat */
-};
-
 /* From include/lwip/sockets.h:  */
 /*
  * Options for level IPPROTO_TCP
@@ -589,6 +579,64 @@ struct hostent {
 #define TCP_KEEPIDLE   0x03    /* set pcb->keep_idle  - Same as TCP_KEEPALIVE, but use seconds for get/setsockopt */
 #define TCP_KEEPINTVL  0x04    /* set pcb->keep_intvl - Use seconds for get/setsockopt */
 #define TCP_KEEPCNT    0x05    /* set pcb->keep_cnt   - Use number of probes sent for get/setsockopt */
+
+#ifdef PS2IP_DNS
+/* From include/lwip/netdb.h:  */
+/* some rarely used options */
+#ifndef LWIP_DNS_API_DECLARE_H_ERRNO
+#define LWIP_DNS_API_DECLARE_H_ERRNO 1
+#endif
+
+#ifndef LWIP_DNS_API_DEFINE_ERRORS
+#define LWIP_DNS_API_DEFINE_ERRORS 1
+#endif
+
+#ifndef LWIP_DNS_API_DECLARE_STRUCTS
+#define LWIP_DNS_API_DECLARE_STRUCTS 1
+#endif
+
+#if LWIP_DNS_API_DEFINE_ERRORS
+/** Errors used by the DNS API functions, h_errno can be one of them */
+#define EAI_NONAME      200
+#define EAI_SERVICE     201
+#define EAI_FAIL        202
+#define EAI_MEMORY      203
+
+#define HOST_NOT_FOUND  210
+#define NO_DATA         211
+#define NO_RECOVERY     212
+#define TRY_AGAIN       213
+#endif /* LWIP_DNS_API_DEFINE_ERRORS */
+
+#if LWIP_DNS_API_DECLARE_STRUCTS
+struct hostent {
+    char  *h_name;      /* Official name of the host. */
+    char **h_aliases;   /* A pointer to an array of pointers to alternative host names,
+                           terminated by a null pointer. */
+    int    h_addrtype;  /* Address type. */
+    int    h_length;    /* The length, in bytes, of the address. */
+    char **h_addr_list; /* A pointer to an array of pointers to network addresses (in
+                           network byte order) for the host, terminated by a null pointer. */
+#define h_addr h_addr_list[0] /* for backward compatibility */
+};
+
+struct addrinfo {
+    int               ai_flags;      /* Input flags. */
+    int               ai_family;     /* Address family of socket. */
+    int               ai_socktype;   /* Socket type. */
+    int               ai_protocol;   /* Protocol of socket. */
+    socklen_t         ai_addrlen;    /* Length of socket address. */
+    struct sockaddr  *ai_addr;       /* Socket address of socket. */
+    char             *ai_canonname;  /* Canonical name of service location. */
+    struct addrinfo  *ai_next;       /* Pointer to next in list. */
+};
+#endif /* LWIP_DNS_API_DECLARE_STRUCTS */
+
+#if LWIP_DNS_API_DECLARE_H_ERRNO
+/* application accessable error code set by the DNS API functions */
+extern int h_errno;
+#endif /* LWIP_DNS_API_DECLARE_H_ERRNO*/
+#endif
 
 #endif
 

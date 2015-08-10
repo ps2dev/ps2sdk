@@ -15,6 +15,7 @@ IOP_INC_DIR = include/
 
 #DEBUG = 1
 PS2IP_DHCP=1
+PS2IP_DNS=1
 
 ifeq ($(DEBUG),1)
 DEBUG_FLAGS = -DDEBUG -DLWIP_DEBUG
@@ -28,6 +29,10 @@ ifdef PS2IP_DHCP
 ps2ip_OBJECTS+= dhcp.o
 endif
 
+ifdef PS2IP_DNS
+ps2ip_OBJECTS+= dns.o netdb.o
+endif
+
 ps2ip_OBJECTS := $(ps2ip_OBJECTS:%=$(IOP_OBJS_DIR)%)
 
 ps2api_OBJECTS = api_lib.o api_msg.o err.o sockets.o tcpip.o netbuf.o
@@ -39,6 +44,11 @@ ps2api_IPV4 := $(ps2api_IPV4:%=$(IOP_OBJS_DIR)%)
 # Turns DHCP on.
 ifdef PS2IP_DHCP
 IOP_CFLAGS += -DPS2IP_DHCP
+endif
+
+# Turns DNS on.
+ifdef PS2IP_DNS
+IOP_CFLAGS += -DPS2IP_DNS
 endif
 
 IOP_BIN = bin/ps2ip.irx
@@ -136,6 +146,14 @@ obj/etharp.o: $(LWIP)/src/netif/etharp.c
 
 ifdef PS2IP_DHCP
 obj/dhcp.o: $(LWIP)/src/core/dhcp.c
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
+endif
+
+ifdef PS2IP_DNS
+obj/dns.o: $(LWIP)/src/core/dns.c
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
+
+obj/netdb.o: $(LWIP)/src/api/netdb.c
 	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 endif
 

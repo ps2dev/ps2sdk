@@ -564,6 +564,77 @@ io_unlock:
 }
 
 //--------------------------------------------------------------
+static void FileTimeToDate(u64 FileTime, u8 *datetime)
+{
+	u8 daysPerMonth[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
+	int i;
+	u64 time;
+	u16 years, days;
+	u8 leapdays, months, hours, minutes, seconds;
+
+	time = FileTime / 10000000;	// convert to seconds from 100-nanosecond intervals
+
+	years = (u16)(time / ((u64)60 * 60 * 24 * 365));	// hurray for interger division
+	time -= years *	((u64)60 * 60 * 24 *365);	// truncate off the years
+
+	leapdays = (years / 4) - (years / 100) + (years / 400);
+	years += 1601; // add base year from FILETIME struct;
+
+	days = (u16)(time / (60 * 60 * 24));
+	time -= (unsigned int)days * (60 * 60 * 24);
+	days -= leapdays;
+
+	if( (years % 4) == 0 && ((years % 100) != 0 || (years % 400) == 0) )
+		daysPerMonth[1]++;
+
+	months = 0;
+	for( i=0; i<12; i++ )
+	{
+		if( days > daysPerMonth[i] )
+		{
+			days -= daysPerMonth[i];
+			months++;
+		}
+		else
+			break;
+	}
+
+	if( months >= 12 )
+	{
+		months -= 12;
+		years++;
+	}
+	hours = (u8)(time / (60 * 60));
+	time -= (u16)hours * (60 * 60);
+
+	minutes = (u8)(time / 60);
+	time -= minutes * 60;
+
+	seconds = (u8)(time);
+
+	datetime[0] = 0;
+	datetime[1] = seconds;
+	datetime[2] = minutes;
+	datetime[3] = hours;
+	datetime[4] = days + 1;
+	datetime[5] = months + 1;
+	datetime[6] = (u8)(years & 0xFF);
+	datetime[7] = (u8)((years >> 8) & 0xFF);
+}
+
+static void smb_statFiller(const PathInformation_t *info, iox_stat_t *stat)
+{
+	FileTimeToDate(info->Created, stat->ctime);
+	FileTimeToDate(info->LastAccess, stat->atime);
+	FileTimeToDate(info->Change, stat->mtime);
+
+	stat->size = (int)(info->EndOfFile & 0xffffffff);
+	stat->hisize = (int)((info->EndOfFile >> 32) & 0xffffffff);
+
+	stat->mode = (info->FileAttributes & EXT_ATTR_DIRECTORY) ? FIO_S_IFDIR : FIO_S_IFREG;
+}
+
+//--------------------------------------------------------------
 int smb_dopen(iop_file_t *f, const char *dirname)
 {
 	int r = 0;
@@ -654,18 +725,7 @@ int smb_dread(iop_file_t *f, iox_dirent_t *dirent)
 	}
 
 	if (r == 1) {
-		memcpy(dirent->stat.ctime, &info->fileInfo.Created, 8);
-		memcpy(dirent->stat.atime, &info->fileInfo.LastAccess, 8);
-		memcpy(dirent->stat.mtime, &info->fileInfo.Change, 8);
-
-		dirent->stat.size = (int)(info->fileInfo.EndOfFile & 0xffffffff);
-		dirent->stat.hisize = (int)((info->fileInfo.EndOfFile >> 32) & 0xffffffff);
-
-		if (info->fileInfo.FileAttributes & EXT_ATTR_DIRECTORY)
-			dirent->stat.mode |= FIO_S_IFDIR;
-		else
-			dirent->stat.mode |= FIO_S_IFREG;
-
+		smb_statFiller(&info->fileInfo, &dirent->stat);
 		strncpy(dirent->name, info->FileName, 256);
 	}
 
@@ -698,17 +758,7 @@ int smb_getstat(iop_file_t *f, const char *filename, iox_stat_t *stat)
 		goto io_unlock;
 	}
 
-	memcpy(stat->ctime, &info.Created, 8);
-	memcpy(stat->atime, &info.LastAccess, 8);
-	memcpy(stat->mtime, &info.Change, 8);
-
-	stat->size = (int)(info.EndOfFile & 0xffffffff);
-	stat->hisize = (int)((info.EndOfFile >> 32) & 0xffffffff);
-
-	if (info.FileAttributes & EXT_ATTR_DIRECTORY)
-		stat->mode |= FIO_S_IFDIR;
-	else
-		stat->mode |= FIO_S_IFREG;
+	smb_statFiller(&info, stat);
 
 io_unlock:
 	smb_io_unlock();

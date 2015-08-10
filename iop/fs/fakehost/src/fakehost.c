@@ -196,7 +196,7 @@ int fd_write( iop_io_file_t *fd, void *buffer, int size )
  *  \return Status (as for fileio lseek).
  *
  */
-int fd_lseek( iop_io_file_t *fd, unsigned long offset, int whence)
+int fd_lseek( iop_io_file_t *fd, int offset, int whence)
 {
 	return lseek( realfd(fd), offset, whence );
 }

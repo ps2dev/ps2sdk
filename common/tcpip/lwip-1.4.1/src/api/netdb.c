@@ -45,7 +45,7 @@
 #include "lwip/dns.h"
 
 #include <string.h>
-#include <stdlib.h>
+//#include <stdlib.h>
 
 /** helper struct for gethostbyname_r to access the char* buffer */
 struct gethostbyname_r_helper {

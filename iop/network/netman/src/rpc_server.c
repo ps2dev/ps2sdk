@@ -26,7 +26,7 @@ static unsigned char SifRpcTxBuffer[80];
 static void *TxPacketBuffer = NULL;
 
 static int RpcThreadID = -1;
-static unsigned char IsInitialized=0;
+static unsigned char IsInitialized=0, IsRpcStackInitialized=0;
 
 static void LinkStateUp(void){
 	NetManRpcToggleGlobalNetIFLinkState(1);
@@ -62,11 +62,14 @@ static struct NetManNetProtStack RpcStack={
 };
 
 static void unregisterEENetworkStack(void){
-	NetManUnregisterNetworkStack();
+	if(IsRpcStackInitialized){
+		IsRpcStackInitialized=0;
+		NetManUnregisterNetworkStack();
 
-	if(TxPacketBuffer != NULL){
-		free(TxPacketBuffer);
-		TxPacketBuffer = NULL;
+		if(TxPacketBuffer != NULL){
+			free(TxPacketBuffer);
+			TxPacketBuffer = NULL;
+		}
 	}
 }
 
@@ -97,6 +100,7 @@ static void *NETMAN_rpc_handler(int fno, void *buffer, int size){
 				ResultValue = -ENOMEM;
 			}
 
+			IsRpcStackInitialized=1;
 			((struct NetManRegNetworkStackResult *)SifRpcTxBuffer)->result=ResultValue;
 			break;
 		case NETMAN_IOP_RPC_FUNC_UNREG_NETWORK_STACK:

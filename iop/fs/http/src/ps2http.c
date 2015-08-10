@@ -40,7 +40,6 @@
 #include <sysmem.h>
 
 #include "ps2ip.h"
-#include "dns.h"
 
 //#define DEBUG
 
@@ -241,6 +240,23 @@ char *strnchr(char *str, char ch, int max) {
     return(NULL);
 }
 
+static int _ResolveHostname(const char *hostname , struct in_addr* ip)
+{
+	struct hostent *HostEntry;
+	struct in_addr **addr_list;
+
+	if((HostEntry = gethostbyname(hostname)) == NULL)
+		return 1;
+
+	for(addr_list = (struct in_addr **) HostEntry->h_addr_list; addr_list != NULL; addr_list++) 
+	{
+		ip->s_addr = (*addr_list)->s_addr;
+		return 0;
+	}
+
+	return 1;
+}
+
 //
 // Before we can connect we need to parse the server address and optional
 // port from the url provided.  the format of "url" as passed to this function
@@ -289,7 +305,7 @@ const char *resolveAddress( struct sockaddr_in *server, const char * url, char *
 
     if(isDomain) {
 		// resolve the host name.
-		rv = gethostbyname(addr, &server->sin_addr);
+		rv = _ResolveHostname(addr, &server->sin_addr);
 		if(rv != 0) {
 		    printf("HTTP: failed to resolve domain '%s'\n", addr);
 			return NULL;
@@ -467,7 +483,7 @@ int httpClose(iop_io_file_t *f)
 // does modify the filePos member, this does not have any effect on the read position
 // of the file in the current implimentation.
 //
-int httpLseek(iop_io_file_t *f, unsigned long offset, int mode)
+int httpLseek(iop_io_file_t *f, int offset, int mode)
 {
 	t_fioPrivData *privData = (t_fioPrivData *)f->privdata;
 

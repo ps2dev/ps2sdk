@@ -464,6 +464,36 @@ SifRegisterRpc(SifRpcServerData_t *sd,
 }
 #endif
 
+#ifdef F_SifRemoveRpc
+SifRpcServerData_t *
+SifRemoveRpc(SifRpcServerData_t *sd, SifRpcDataQueue_t *queue)
+{
+	SifRpcServerData_t *server;
+
+	DI();
+
+	if((server = queue->link) == sd)
+	{
+		queue->link = server->link;
+	} else {
+		while(server != NULL)
+		{
+			if(server->link == sd)
+			{
+				server->link = sd->link;
+				break;
+			}
+
+			server = server->link;
+		}
+	}
+
+	EI();
+
+	return server;
+}
+#endif
+
 #ifdef F_SifSetRpcQueue
 SifRpcDataQueue_t *
 SifSetRpcQueue(SifRpcDataQueue_t *qd, int thread_id)
@@ -487,6 +517,36 @@ SifSetRpcQueue(SifRpcDataQueue_t *qd, int thread_id)
 		while (queue->next!=NULL) queue = queue->next;
 
 		queue->next = qd;
+	}
+
+	EI();
+
+	return queue;
+}
+#endif
+
+#ifdef F_SifRemoveRpcQueue
+SifRpcDataQueue_t *
+SifRemoveRpcQueue(SifRpcDataQueue_t *qd)
+{
+	SifRpcDataQueue_t *queue;
+
+	DI();
+
+	if((queue = _sif_rpc_data.active_queue) == qd)
+	{
+		_sif_rpc_data.active_queue = queue->next;
+	} else {
+		while(queue != NULL)
+		{
+			if(queue->next == qd)
+			{
+				queue->next = qd->next;
+				break;
+			}
+
+			queue = queue->next;
+		}
 	}
 
 	EI();
