@@ -55,7 +55,7 @@ typedef void (*SifCmdHandler_t)(void *data, void *harg);
 
 typedef struct t_SifCmdHandlerData {
 	SifCmdHandler_t handler;
-	void	*harg;
+	void		*harg;
 } SifCmdHandlerData_t;
 
 void sceSifInitCmd(void);

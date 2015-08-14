@@ -20,7 +20,7 @@
 
 #define CMD_PACKET_MAX		128
 #define CMD_PACKET_DATA_MAX 	112
-#define CMD_HANDLER_MAX		32
+#define SYS_CMD_HANDLER_MAX	32
 
 /* EE DMAC registers.  */
 #define DMAC_COMM_STAT	0x1000e010
@@ -36,7 +36,7 @@
    work exactly as expected.  */
 struct cmd_data {
 	void	*pktbuf;	/* Command packet received from the IOP */
-	void	*unused;	/* Called "cmdbuf", but unused. */
+	void	*unused;
 	void	*iopbuf;	/* Address of IOP SIF DMA receive address */
 	SifCmdHandlerData_t *sys_cmd_handlers;
 	u32	nr_sys_handlers;
@@ -129,7 +129,6 @@ int _SifCmdIntHandler(int channel)
 	if (!(size = (header->size & 0xff)))
 		goto out;
 
-	/* TODO: Don't copy anything extra */
 	pktquads = (size + 30) >> 4;
 	header->size = 0;
 	if (pktquads) {
@@ -147,15 +146,17 @@ int _SifCmdIntHandler(int channel)
 	   dispatch from.  */
 	id = header->cid & ~SIF_CMD_ID_SYSTEM;
 
-	if (id < CMD_HANDLER_MAX) {
-		if (header->cid & SIF_CMD_ID_SYSTEM) {
+	if (header->cid & SIF_CMD_ID_SYSTEM) {
+		if (id < cmd_data->nr_sys_handlers)
 			cmd_handlers = cmd_data->sys_cmd_handlers;
-		}
-		else {
+		else
+			goto out;
+	}
+	else {
+		if (id < cmd_data->nr_usr_handlers)
 			cmd_handlers = cmd_data->usr_cmd_handlers;
-		}
-	} else {
-		goto out;
+		else
+			goto out;
 	}
 
 	if (cmd_handlers[id].handler)
@@ -168,27 +169,15 @@ out:
 #endif
 
 #ifdef F_sif_cmd_main
-static u8 pktbuf[128] __attribute__((aligned(64)));
+static u8 pktbuf[CMD_PACKET_MAX] __attribute__((aligned(64)));
 /* Define this so that in the unlikely case another SIF implementation decides
    to use it, it won't crash.  Otherwise unused.  */
-static u8 cmdbuf[64] __attribute__((aligned(64)));
+static u8 sif_unused[64] __attribute__((aligned(64)));
 
-static SifCmdHandlerData_t sys_cmd_handlers[CMD_HANDLER_MAX];
-static SifCmdHandlerData_t usr_cmd_handlers[CMD_HANDLER_MAX];
+static SifCmdHandlerData_t sys_cmd_handlers[SYS_CMD_HANDLER_MAX];
 static int sregs[32];
 
-/* I'd rather do this statically than to fill this in with code.  It's both
-   smaller and faster to do it this way.  */
-struct cmd_data _sif_cmd_data = {
-	pktbuf:		pktbuf,
-	unused:		cmdbuf,
-	sys_cmd_handlers: sys_cmd_handlers,
-	nr_sys_handlers: CMD_HANDLER_MAX,
-	usr_cmd_handlers: usr_cmd_handlers,
-	nr_usr_handlers: CMD_HANDLER_MAX,
-	sregs:		sregs
-};
-
+struct cmd_data _sif_cmd_data;
 static int init = 0;
 static int sif0_id = -1;
 
@@ -240,10 +229,15 @@ void SifInitCmd(void)
 
 	DI();
 
-	_sif_cmd_data.pktbuf = UNCACHED_SEG(_sif_cmd_data.pktbuf);
-	_sif_cmd_data.unused = UNCACHED_SEG(_sif_cmd_data.unused);
+	_sif_cmd_data.pktbuf = UNCACHED_SEG(pktbuf);
+	_sif_cmd_data.unused = UNCACHED_SEG(sif_unused);
+	_sif_cmd_data.sys_cmd_handlers = sys_cmd_handlers;
+	_sif_cmd_data.nr_sys_handlers = SYS_CMD_HANDLER_MAX;
+	_sif_cmd_data.usr_cmd_handlers = NULL;
+	_sif_cmd_data.nr_usr_handlers = 0;
+	_sif_cmd_data.sregs = sregs;
 
-	for (i = 0; i < CMD_HANDLER_MAX; i++) {
+	for (i = 0; i < SYS_CMD_HANDLER_MAX; i++) {
 		_sif_cmd_data.sys_cmd_handlers[i].handler = NULL;
 		_sif_cmd_data.sys_cmd_handlers[i].harg = NULL;
 	}
@@ -300,28 +294,45 @@ void SifExitCmd(void)
 }
 #endif
 
-#ifdef F_sif_cmd_addhandler
-void SifAddCmdHandler(int cid, SifCmdHandler_t handler, void *harg)
+#ifdef F_sif_cmd_client
+SifCmdHandlerData_t *SifSetCmdBuffer(SifCmdHandlerData_t *db, int size)
 {
-	struct cmd_data *cmd_data = &_sif_cmd_data;
-	SifCmdHandlerData_t *cmd_handlers;
-	u32 id = cid & ~SIF_CMD_ID_SYSTEM;
+	SifCmdHandlerData_t *old;
 
-	if (cid & SIF_CMD_ID_SYSTEM)
-		cmd_handlers = cmd_data->sys_cmd_handlers;
-	else
-		cmd_handlers = cmd_data->usr_cmd_handlers;
+	old = _sif_cmd_data.usr_cmd_handlers;
+	_sif_cmd_data.usr_cmd_handlers = db;
+	_sif_cmd_data.nr_usr_handlers = size;
+
+	return old;
+}
+
+void SifAddCmdHandler(int pos, SifCmdHandler_t handler, void *harg)
+{
+	SifCmdHandlerData_t *cmd_handlers;
+	u32 id = pos & ~SIF_CMD_ID_SYSTEM;
+
+	cmd_handlers = (pos & SIF_CMD_ID_SYSTEM) ? _sif_cmd_data.sys_cmd_handlers : _sif_cmd_data.usr_cmd_handlers;
 
 	cmd_handlers[id].handler = handler;
 	cmd_handlers[id].harg    = harg;
 }
 #endif
 
+#ifdef F_sif_cmd_remove_cmdhandler
+void SifRemoveCmdHandler(int pos)
+{
+	u32 id = pos & ~SIF_CMD_ID_SYSTEM;
+
+	if (pos & SIF_CMD_ID_SYSTEM)
+		_sif_cmd_data.sys_cmd_handlers[id].handler = NULL;
+	else
+		_sif_cmd_data.usr_cmd_handlers[id].handler = NULL;
+}
+#endif
+
 #ifdef F_sif_sreg_get
 int SifGetSreg(int sreg)
 {
-	struct cmd_data *cmd_data = &_sif_cmd_data;
-
-	return cmd_data->sregs[sreg];
+	return _sif_cmd_data.sregs[sreg];
 }
 #endif

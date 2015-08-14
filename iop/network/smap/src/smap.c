@@ -236,7 +236,6 @@ RepeatAutoNegoProcess:
 
 	if(EnableVerboseOutput) DEBUG_PRINTF("smap: PHY: %04x %04x %04x %04x %04x %04x\n", RegDump[SMAP_DsPHYTER_BMCR], RegDump[SMAP_DsPHYTER_BMSR], RegDump[SMAP_DsPHYTER_PHYIDR1], RegDump[SMAP_DsPHYTER_PHYIDR2], RegDump[SMAP_DsPHYTER_ANAR], RegDump[SMAP_DsPHYTER_ANLPAR]);
 
-	/* if SMAP_DsPHYTER_PHYIDR1 == SMAP_PHY_IDR1_VAL && SMAP_DsPHYTER_PHYIDR2 == SMAP_PHY_IDR2_VAL */
 	if(RegDump[SMAP_DsPHYTER_PHYIDR1]==SMAP_PHY_IDR1_VAL && (RegDump[SMAP_DsPHYTER_PHYIDR2]&SMAP_PHY_IDR2_MSK)==SMAP_PHY_IDR2_VAL){
 		if(EnableAutoNegotiation){
 			_smap_read_phy(SmapDrivPrivData->emac3_regbase, SMAP_DsPHYTER_FCSCR);
@@ -741,10 +740,10 @@ int smap_init(int argc, char *argv[]){
 	int result, i;
 	const char *CmdString;
 	unsigned short int eeprom_data[4], checksum16;
-	volatile u8 *emac3_regbase;
 	unsigned int mac_address;
 	USE_SPD_REGS;
 	USE_SMAP_REGS;
+	USE_SMAP_EMAC3_REGS;
 	USE_SMAP_TX_BD;
 	USE_SMAP_RX_BD;
 
@@ -811,8 +810,8 @@ int smap_init(int argc, char *argv[]){
 
 	if(argc!=0) return DisplayHelpMessage();
 
-	SmapDriverData.smap_regbase=(volatile u8 *)SMAP_REGBASE;
-	emac3_regbase=SmapDriverData.emac3_regbase=(volatile u8 *)(SMAP_REGBASE + SMAP_EMAC3_REGBASE);
+	SmapDriverData.smap_regbase=smap_regbase;
+	SmapDriverData.emac3_regbase=emac3_regbase;
 	if(!SPD_REG16(SPD_R_REV_3)&SPD_CAPS_SMAP) return -1;
 	if(SPD_REG16(SPD_R_REV_1)<0x11) return -6;	// Minimum: revision 17, ES2.
 

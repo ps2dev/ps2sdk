@@ -18,7 +18,7 @@ EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
 SIFCMD_OBJS = sif_cmd_send.o _sif_cmd_int_handler.o sif_cmd_main.o \
-	sif_cmd_addhandler.o sif_sreg_get.o
+	sif_cmd_client.o sif_cmd_remove_cmdhandler.o sif_sreg_get.o
 SIFCMD_OBJS := $(SIFCMD_OBJS:%=$(EE_OBJS_DIR)%)
 
 SIFRPC_OBJS = SifBindRpc.o SifCallRpc.o SifRpcGetOtherData.o \

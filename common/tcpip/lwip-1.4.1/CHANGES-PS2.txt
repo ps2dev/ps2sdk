@@ -35,4 +35,4 @@ As much as I'll like to make a clean port of LWIP, it was clearly not made to su
 	Added to inhibit compiler warnings about the implicit use of malloc() and free() by the IOP-side LWIP port,
 	as the IOP-side libraries and header files do not provide standard malloc() and free() functions.
 
-4. Removed include directive for stdlib.h, in api/netdb.c.
+4. stdlib.h will not be included in api/netdb.c, when built for the IOP.

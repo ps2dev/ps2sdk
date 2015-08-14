@@ -146,10 +146,10 @@ endif
 
 ifdef PS2IP_DNS
 obj/dns.o: $(LWIP)/src/core/dns.c
-	$(EE_CC) $(IOP_CFLAGS) $(EE_INCS) -c $< -o $@
+	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
 obj/netdb.o: $(LWIP)/src/api/netdb.c
-	$(EE_CC) $(IOP_CFLAGS) $(EE_INCS) -c $< -o $@
+	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 endif
 
 obj/udp.o: $(LWIP)/src/core/udp.c
