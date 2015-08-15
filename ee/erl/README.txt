@@ -109,7 +109,7 @@
   called, and during unloading, the _fini function is called. These two
   functions are not to be exported by you. The code here is introduced by gcc
   and ld "automagically" from the various crt*.o files that are in the gcc
-  directory: /usr/local/ps2dev/ee/lib/gcc-lib/ee/3.2.2
+  directory: /usr/local/ps2dev/ee/lib/gcc-lib/ee/3.2.3
 
   Even if some basic test code was run, there might be some problems linked to
   the usage of non-ps2dev specific code. And don't even think about not having

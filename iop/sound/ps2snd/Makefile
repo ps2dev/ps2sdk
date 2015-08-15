@@ -24,6 +24,12 @@ IOP_OBJS2 = ps2snd.o adpcm-stream.o imports.o
 IOP_OBJS  = $(IOP_OBJS2:%=$(IOP_OBJS_DIR)%)
 endif
 
+ifeq ($(IOP_CC_VERSION),3.2.3)
+IOP_BIN  = bin/ps2snd.irx
+IOP_OBJS2 = ps2snd.o adpcm-stream.o imports.o
+IOP_OBJS  = $(IOP_OBJS2:%=$(IOP_OBJS_DIR)%)
+endif
+
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 
 clean:

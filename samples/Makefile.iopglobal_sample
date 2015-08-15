@@ -18,6 +18,12 @@ ASFLAGS_TARGET = -march=r3000
 LDFLAGS_TARGET = -miop
 endif
 
+ifeq ($(IOP_CC_VERSION),3.2.3)
+CFLAGS_TARGET  = -miop
+ASFLAGS_TARGET = -march=r3000
+LDFLAGS_TARGET = -miop
+endif
+
 # include dir
 IOP_INCS := -I$(PS2SDK)/iop/include -I$(PS2SDK)/common/include \
 	-I. $(IOP_INCS)
