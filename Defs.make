@@ -17,7 +17,7 @@
 # Definitions for the EE toolchain.
 #
 
-EE_TOOL_PREFIX = ee-
+EE_TOOL_PREFIX ?= ee-
 EE_CC = $(EE_TOOL_PREFIX)gcc
 EE_CXX = $(EE_TOOL_PREFIX)g++
 EE_AS = $(EE_TOOL_PREFIX)as
@@ -31,7 +31,7 @@ EE_STRIP = $(EE_TOOL_PREFIX)strip
 # Defintions for the IOP toolchain.
 #
 
-IOP_TOOL_PREFIX = iop-
+IOP_TOOL_PREFIX ?= iop-
 IOP_CC = $(IOP_TOOL_PREFIX)gcc
 IOP_AS = $(IOP_TOOL_PREFIX)as
 IOP_LD = $(IOP_TOOL_PREFIX)ld

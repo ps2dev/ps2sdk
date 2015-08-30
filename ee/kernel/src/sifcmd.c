@@ -221,9 +221,12 @@ static void set_sreg(void *packet, void *harg)
 
 void SifInitCmd(void)
 {
-	u32 packet[5];	/* Implicitly aligned to 16 bytes */
+	unsigned char buffer[5 * 32 + DMA_ALIGN_SIZE];
+	u32 *packet;
 	int i;
 	static int _rb_count = 0;
+
+	packet = DMA_ALIGN(buffer);
 	if(_rb_count != _iop_reboot_count)
 	{
 	    _rb_count = _iop_reboot_count;

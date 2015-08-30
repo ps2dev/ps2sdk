@@ -13,7 +13,6 @@
 #include <string.h>
 #include <kernel.h>
 #include <sifrpc.h>
-#include <fcntl.h>
 #include <iopheap.h>
 #include <stdio.h>
 #include <ps2snd.h>

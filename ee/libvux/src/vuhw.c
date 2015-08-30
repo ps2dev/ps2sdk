@@ -285,7 +285,7 @@ void Vu0CopyMatrix(VU_MATRIX *dest, VU_MATRIX *src)
 
 float Vu0DotProduct(VU_VECTOR *v0, VU_VECTOR *v1)
 {
-	float ret;
+	float ret=0;
 
 	/*	ret = (v0.x*v1.x + v0.y*v1.y + v0.z*v1.z);*/
 

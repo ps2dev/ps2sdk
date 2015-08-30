@@ -131,30 +131,33 @@ struct _lf_module_load_arg {
 int _SifLoadModule(const char *path, int arg_len, const char *args, int *modres,
 		int fno, int dontwait)
 {
-	struct _lf_module_load_arg arg;
+	struct _lf_module_load_arg *arg;
+	unsigned char buffer[sizeof(*arg) + DMA_ALIGN_SIZE];
+
+	arg = DMA_ALIGN(buffer);
 
 	if (SifLoadFileInit() < 0)
 		return -E_LIB_API_INIT;
 
-	memset(&arg, 0, sizeof arg);
+	memset(arg, 0, sizeof *arg);
 
-	strncpy(arg.path, path, LF_PATH_MAX - 1);
-	arg.path[LF_PATH_MAX - 1] = 0;
+	strncpy(arg->path, path, LF_PATH_MAX - 1);
+	arg->path[LF_PATH_MAX - 1] = 0;
 
 	if (args && arg_len) {
-		arg.p.arg_len = arg_len > LF_ARG_MAX ? LF_ARG_MAX : arg_len;
-		memcpy(arg.args, args, arg.p.arg_len);
+		arg->p.arg_len = arg_len > LF_ARG_MAX ? LF_ARG_MAX : arg_len;
+		memcpy(arg->args, args, arg->p.arg_len);
 	} else {
-		arg.p.arg_len = 0;
+		arg->p.arg_len = 0;
 	}
 
-	if (SifCallRpc(&_lf_cd, fno, 0, &arg, sizeof arg, &arg, 8, NULL, NULL) < 0)
+	if (SifCallRpc(&_lf_cd, fno, 0, arg, sizeof *arg, arg, 8, NULL, NULL) < 0)
 		return -E_SIF_RPC_CALL;
 
 	if (modres)
-		*modres = arg.modres;
+		*modres = arg->modres;
 
-	return arg.p.result;
+	return arg->p.result;
 }
 #endif
 
@@ -251,27 +254,30 @@ struct _lf_module_stop_arg {
 
 int SifStopModule(int id, int arg_len, const char *args, int *mod_res)
 {
-	struct _lf_module_stop_arg arg;
+	struct _lf_module_stop_arg *arg;
+	unsigned char buffer[sizeof(*arg) + DMA_ALIGN_SIZE];
+
+	arg = DMA_ALIGN(buffer);
 
 	if (SifLoadFileInit() < 0)
 		return -E_LIB_API_INIT;
 
-	arg.p.id = id;
+	arg->p.id = id;
 
 	if (args && arg_len) {
-		arg.q.arg_len = arg_len > LF_ARG_MAX ? LF_ARG_MAX : arg_len;
-		memcpy(arg.args, args, arg.q.arg_len);
+		arg->q.arg_len = arg_len > LF_ARG_MAX ? LF_ARG_MAX : arg_len;
+		memcpy(arg->args, args, arg->q.arg_len);
 	} else {
-		arg.q.arg_len = 0;
+		arg->q.arg_len = 0;
 	}
 
-	if (SifCallRpc(&_lf_cd, LF_F_MOD_STOP, 0, &arg, sizeof arg, &arg, 8, NULL, NULL) < 0)
+	if (SifCallRpc(&_lf_cd, LF_F_MOD_STOP, 0, arg, sizeof *arg, arg, 8, NULL, NULL) < 0)
 		return -E_SIF_RPC_CALL;
 
 	if (mod_res)
-		*mod_res = arg.q.modres;
+		*mod_res = arg->q.modres;
 
-	return arg.p.result;
+	return arg->p.result;
 }
 #endif
 
@@ -283,17 +289,20 @@ union _lf_module_unload_arg {
 
 int SifUnloadModule(int id)
 {
-	union _lf_module_unload_arg arg;
+	union _lf_module_unload_arg *arg;
+	unsigned char buffer[sizeof(*arg) + DMA_ALIGN_SIZE];
+
+	arg = DMA_ALIGN(buffer);
 
 	if (SifLoadFileInit() < 0)
 		return -E_LIB_API_INIT;
 
-	arg.id = id;
+	arg->id = id;
 
-	if (SifCallRpc(&_lf_cd, LF_F_MOD_UNLOAD, 0, &arg, sizeof arg, &arg, 4, NULL, NULL) < 0)
+	if (SifCallRpc(&_lf_cd, LF_F_MOD_UNLOAD, 0, arg, sizeof *arg, arg, 4, NULL, NULL) < 0)
 		return -E_SIF_RPC_CALL;
 
-	return arg.result;
+	return arg->result;
 }
 #endif
 
@@ -307,17 +316,20 @@ struct _lf_search_module_by_name_arg {
 
 int SifSearchModuleByName(const char * name)
 {
-	struct _lf_search_module_by_name_arg arg;
+	struct _lf_search_module_by_name_arg *arg;
+	unsigned char buffer[sizeof(*arg) + DMA_ALIGN_SIZE];
+
+	arg = DMA_ALIGN(buffer);
 	if (SifLoadFileInit() < 0)
 		return -E_LIB_API_INIT;
 
-	strncpy(arg.name, name, LF_PATH_MAX - 1);
-	arg.name[LF_PATH_MAX - 1] = 0;
+	strncpy(arg->name, name, LF_PATH_MAX - 1);
+	arg->name[LF_PATH_MAX - 1] = 0;
 
-	if (SifCallRpc(&_lf_cd, LF_F_SEARCH_MOD_BY_NAME, 0, &arg, sizeof arg, &arg, 4, NULL, NULL) < 0)
+	if (SifCallRpc(&_lf_cd, LF_F_SEARCH_MOD_BY_NAME, 0, arg, sizeof *arg, arg, 4, NULL, NULL) < 0)
 		return -E_SIF_RPC_CALL;
 
-	return arg.id;
+	return arg->id;
 }
 #endif
 
@@ -331,16 +343,19 @@ struct _lf_search_module_by_address_arg {
 
 int SifSearchModuleByAddress(const void *ptr)
 {
-	struct _lf_search_module_by_address_arg arg;
+	struct _lf_search_module_by_address_arg *arg;
+	unsigned char buffer[sizeof(*arg) + DMA_ALIGN_SIZE];
+
+	arg = DMA_ALIGN(buffer);
 	if (SifLoadFileInit() < 0)
 		return -E_LIB_API_INIT;
 
-	arg.p.ptr = ptr;
+	arg->p.ptr = ptr;
 
-	if (SifCallRpc(&_lf_cd, LF_F_SEARCH_MOD_BY_ADDRESS, 0, &arg, sizeof arg, &arg, 4, NULL, NULL) < 0)
+	if (SifCallRpc(&_lf_cd, LF_F_SEARCH_MOD_BY_ADDRESS, 0, arg, sizeof *arg, arg, 4, NULL, NULL) < 0)
 		return -E_SIF_RPC_CALL;
 
-	return arg.p.id;
+	return arg->p.id;
 }
 #endif
 
@@ -357,26 +372,29 @@ struct _lf_elf_load_arg {
 
 int _SifLoadElfPart(const char *path, const char *secname, t_ExecData *data, int fno)
 {
-	struct _lf_elf_load_arg arg;
+	struct _lf_elf_load_arg *arg;
+	unsigned char buffer[sizeof(*arg) + DMA_ALIGN_SIZE];
+
+	arg = DMA_ALIGN(buffer);
 
 	if (SifLoadFileInit() < 0)
 		return -E_LIB_API_INIT;
 
-	strncpy(arg.path, path, LF_PATH_MAX - 1);
-	strncpy(arg.secname, secname, LF_ARG_MAX - 1);
-	arg.path[LF_PATH_MAX - 1] = 0;
-	arg.secname[LF_ARG_MAX - 1] = 0;
+	strncpy(arg->path, path, LF_PATH_MAX - 1);
+	strncpy(arg->secname, secname, LF_ARG_MAX - 1);
+	arg->path[LF_PATH_MAX - 1] = 0;
+	arg->secname[LF_ARG_MAX - 1] = 0;
 
-	if (SifCallRpc(&_lf_cd, fno, 0, &arg, sizeof arg, &arg,
+	if (SifCallRpc(&_lf_cd, fno, 0, arg, sizeof *arg, arg,
 				sizeof(t_ExecData), NULL, NULL) < 0)
 		return -E_SIF_RPC_CALL;
 
-	if (arg.p.result < 0)
-		return arg.p.result;
+	if (arg->p.result < 0)
+		return arg->p.result;
 
 	if (data) {
-		data->epc = arg.p.epc;
-		data->gp  = arg.gp;
+		data->epc = arg->p.epc;
+		data->gp  = arg->gp;
 	}
 
 	return 0;
@@ -478,33 +496,36 @@ int SifLoadElfEncrypted(const char *path, t_ExecData *data)
 */
 int SifIopSetVal(u32 iop_addr, int val, int type)
 {
-	struct _lf_iop_val_arg arg;
+	struct _lf_iop_val_arg *arg;
+	unsigned char buffer[sizeof(*arg) + DMA_ALIGN_SIZE];
+
+	arg = DMA_ALIGN(buffer);
 
 	if (SifLoadFileInit() < 0)
 		return -E_LIB_API_INIT;
 
 	switch (type) {
 		case LF_VAL_BYTE:
-			arg.val.b = (u8)(val & 0xff);
+			arg->val.b = (u8)(val & 0xff);
 			break;
 		case LF_VAL_SHORT:
-			arg.val.s = (u16)(val & 0xffff);
+			arg->val.s = (u16)(val & 0xffff);
 			break;
 		case LF_VAL_LONG:
-			arg.val.l = val;
+			arg->val.l = val;
 			break;
 		default:
 			return -E_LIB_INVALID_ARG;
 	}
 
-	arg.p.iop_addr = iop_addr;
-	arg.type = type;
+	arg->p.iop_addr = iop_addr;
+	arg->type = type;
 
-	if (SifCallRpc(&_lf_cd, LF_F_SET_ADDR, 0, &arg, sizeof arg, &arg, 4,
+	if (SifCallRpc(&_lf_cd, LF_F_SET_ADDR, 0, arg, sizeof *arg, arg, 4,
 				NULL, NULL) < 0)
 		return -E_SIF_RPC_CALL;
 
-	return arg.p.result;
+	return arg->p.result;
 }
 #endif
 
@@ -532,28 +553,31 @@ int SifIopSetVal(u32 iop_addr, int val, int type)
 */
 int SifIopGetVal(u32 iop_addr, void *val, int type)
 {
-	struct _lf_iop_val_arg arg;
+	struct _lf_iop_val_arg *arg;
+	unsigned char buffer[sizeof(*arg) + DMA_ALIGN_SIZE];
+
+	arg = DMA_ALIGN(buffer);
 
 	if (SifLoadFileInit() < 0)
 		return -E_LIB_API_INIT;
 
-	arg.p.iop_addr = iop_addr;
-	arg.type = type;
+	arg->p.iop_addr = iop_addr;
+	arg->type = type;
 
-	if (SifCallRpc(&_lf_cd, LF_F_GET_ADDR, 0, &arg, sizeof arg, &arg, 4,
+	if (SifCallRpc(&_lf_cd, LF_F_GET_ADDR, 0, arg, sizeof *arg, arg, 4,
 				NULL, NULL) < 0)
 		return -E_SIF_RPC_CALL;
 
 	if (val) {
 		switch (type) {
 			case LF_VAL_BYTE:
-				*(u8 *)val  = (u8)arg.p.result & 0xff;
+				*(u8 *)val  = (u8)arg->p.result & 0xff;
 				break;
 			case LF_VAL_SHORT:
-				*(u16 *)val = (u16)arg.p.result & 0xffff;
+				*(u16 *)val = (u16)arg->p.result & 0xffff;
 				break;
 			case LF_VAL_LONG:
-				*(u32 *)val = arg.p.result;
+				*(u32 *)val = arg->p.result;
 				break;
 		}
 	}
@@ -578,29 +602,32 @@ struct _lf_module_buffer_load_arg {
 
 int _SifLoadModuleBuffer(void *ptr, int arg_len, const char *args, int *modres)
 {
-	struct _lf_module_buffer_load_arg arg;
+	struct _lf_module_buffer_load_arg *arg;
+	unsigned char buffer[sizeof(*arg) + DMA_ALIGN_SIZE];
+
+	arg = DMA_ALIGN(buffer);
 
 	if (SifLoadFileInit() < 0)
 		return -E_LIB_API_INIT;
 
-	memset(&arg, 0, sizeof arg);
+	memset(arg, 0, sizeof *arg);
 
-	arg.p.ptr = ptr;
+	arg->p.ptr = ptr;
 	if (args && arg_len) {
-		arg.q.arg_len = arg_len > LF_ARG_MAX ? LF_ARG_MAX : arg_len;
-		memcpy(arg.args, args, arg.q.arg_len);
+		arg->q.arg_len = arg_len > LF_ARG_MAX ? LF_ARG_MAX : arg_len;
+		memcpy(arg->args, args, arg->q.arg_len);
 	} else {
-		arg.q.arg_len = 0;
+		arg->q.arg_len = 0;
 	}
 
-	if (SifCallRpc(&_lf_cd, LF_F_MOD_BUF_LOAD, 0, &arg, sizeof arg, &arg, 8,
+	if (SifCallRpc(&_lf_cd, LF_F_MOD_BUF_LOAD, 0, arg, sizeof *arg, arg, 8,
 				NULL, NULL) < 0)
 		return -E_SIF_RPC_CALL;
 
 	if (modres)
-		*modres = arg.q.modres;
+		*modres = arg->q.modres;
 
-	return arg.p.result;
+	return arg->p.result;
 }
 #endif
 

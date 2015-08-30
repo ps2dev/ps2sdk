@@ -56,6 +56,10 @@ int poweroffInit(void)
 	ee_sema_t sema;
 	int res;
 	static int _init_count = -1;
+	int *autoShutdown;
+	unsigned char buffer[sizeof(*autoShutdown) + DMA_ALIGN_SIZE];
+
+	autoShutdown = DMA_ALIGN(buffer);
 
 	if(_init_count == _iop_reboot_count)
 		return 0;
@@ -95,8 +99,8 @@ int poweroffInit(void)
 	SifAddCmdHandler(POFF_SIF_CMD, _poff_intr_callback, NULL);
 	EI();
 
-	int autoShutdown = 0;
-	SifCallRpc(&cd0, PWROFF_ENABLE_AUTO_SHUTOFF, 0, NULL, 0, &autoShutdown, sizeof(autoShutdown), NULL, NULL);
+	*autoShutdown = 0;
+	SifCallRpc(&cd0, PWROFF_ENABLE_AUTO_SHUTOFF, 0, NULL, 0, autoShutdown, sizeof(*autoShutdown), NULL, NULL);
 
 	return res;
 }
