@@ -71,34 +71,40 @@ void SifExitIopHeap()
 #ifdef F_SifAllocIopHeap
 void * SifAllocIopHeap(int size)
 {
-	union { int size; u32 addr; } arg;
+	union { int size; u32 addr; } *arg;
+	unsigned char buffer[sizeof(*arg) + DMA_ALIGN_SIZE];
+
+	arg = DMA_ALIGN(buffer);
 
 	if (SifInitIopHeap() < 0)
 		return NULL;
 
-	arg.size = size;
+	arg->size = size;
 
-	if (SifCallRpc(&_ih_cd, 1, 0, &arg, 4, &arg, 4, NULL, NULL) < 0)
+	if (SifCallRpc(&_ih_cd, 1, 0, arg, 4, arg, 4, NULL, NULL) < 0)
 		return NULL;
 
-	return (void *)arg.addr;
+	return (void *)arg->addr;
 }
 #endif
 
 #ifdef F_SifFreeIopHeap
 int SifFreeIopHeap(void *addr)
 {
-	union { void *addr; int result; } arg;
+	union { void *addr; int result; } *arg;
+	unsigned char buffer[sizeof(*arg) + DMA_ALIGN_SIZE];
+
+	arg = DMA_ALIGN(buffer);
 
 	if (SifInitIopHeap() < 0)
 		return -E_LIB_API_INIT;
 
-	arg.addr = addr;
+	arg->addr = addr;
 
-	if (SifCallRpc(&_ih_cd, 2, 0, &arg, 4, &arg, 4, NULL, NULL) < 0)
+	if (SifCallRpc(&_ih_cd, 2, 0, arg, 4, arg, 4, NULL, NULL) < 0)
 		return -E_SIF_RPC_CALL;
 
-	return arg.result;
+	return arg->result;
 }
 #endif
 
@@ -117,18 +123,21 @@ struct _iop_load_heap_arg {
 /* TODO: I think this needs a version check...  */
 int SifLoadIopHeap(const char *path, void *addr)
 {
-	struct _iop_load_heap_arg arg;
+	struct _iop_load_heap_arg *arg;
+	unsigned char buffer[sizeof(*arg) + DMA_ALIGN_SIZE];
+
+	arg = DMA_ALIGN(buffer);
 
 	if (SifInitIopHeap() < 0)
 		return -E_LIB_API_INIT;
 
-	arg.p.addr = addr;
-	strncpy(arg.path, path, LIH_PATH_MAX - 1);
-	arg.path[LIH_PATH_MAX - 1] = 0;
+	arg->p.addr = addr;
+	strncpy(arg->path, path, LIH_PATH_MAX - 1);
+	arg->path[LIH_PATH_MAX - 1] = 0;
 
-	if (SifCallRpc(&_ih_cd, 3, 0, &arg, sizeof arg, &arg, 4, NULL, NULL) < 0)
+	if (SifCallRpc(&_ih_cd, 3, 0, arg, sizeof arg, arg, 4, NULL, NULL) < 0)
 		return -E_SIF_RPC_CALL;
 
-	return arg.p.result;
+	return arg->p.result;
 }
 #endif

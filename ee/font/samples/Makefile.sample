@@ -9,10 +9,10 @@
 
 EE_BIN = font.elf
 EE_OBJS = font.o impress.o
-EE_LIBS = -lfont -lpacket -ldma -lgraph -ldraw -lc -lm
+EE_LIBS = -lfont -lpacket -ldma -lgraph -ldraw -lc -lmf
 
 all: $(EE_BIN)
-	ee-strip --strip-all $(EE_BIN)
+	$(EE_TOOL_PREFIX)strip --strip-all $(EE_BIN)
 
 clean:
 	rm -f *.elf *.o *.a

@@ -398,7 +398,7 @@ char *_itoa(int n, char *buf, int radix)
       /* calculate the current digit. */
       r = (int)((unsigned int)n % radix);
       tmp[i++] = ((r < 10) ? (r + '0') : (r - 10 + 'a'));
-    } while (((unsigned int)n /= radix) != 0);
+    } while ((n = ((unsigned int)n) / radix) != 0);
     /* reverse the buffer string. */
     for (--i, j = 0; (i >= 0); --i, ++j) buf[j] = tmp[i];
     buf[j] = 0;
@@ -521,7 +521,7 @@ char *_lltoa(long long n, char *buf, int radix)
       /* calculate the current digit. */
       r = (long long)((unsigned long long)n % radix);
       tmp[i++] = ((r < 10) ? (r + '0') : (r - 10 + 'a'));
-    } while (((unsigned long long)n /= radix) != 0);
+    } while ((n = ((unsigned long long)n / radix)) != 0);
     /* reverse the buffer string. */
     for (--i, j = 0; (i >= 0); --i, ++j) buf[j] = tmp[i];
     buf[j] = 0;
@@ -562,7 +562,7 @@ char *_ltoa(long n, char *buf, int radix)
       /* calculate the current digit. */
       r = (long)((unsigned long)n % radix);
       tmp[i++] = ((r < 10) ? (r + '0') : (r - 10 + 'a'));
-    } while (((unsigned long)n /= radix) != 0);
+    } while ((n = ((unsigned long)n / radix)) != 0);
     /* reverse the buffer string. */
     for (--i, j = 0; (i >= 0); --i, ++j) buf[j] = tmp[i];
     buf[j] = 0;
