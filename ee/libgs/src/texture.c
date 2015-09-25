@@ -74,7 +74,7 @@ int GsLoadImage(const void *source_addr, GS_IMAGE *dest)
 		GsDmaSend(source_addr, current);
 		GsDmaWait();
 
-		(unsigned char *)source_addr += current*16;
+		source_addr += current*16; //Check if it is correct
 	}
 
 	//transfer the rest if we have left overs

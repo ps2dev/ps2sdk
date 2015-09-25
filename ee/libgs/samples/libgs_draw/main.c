@@ -111,11 +111,11 @@ int InitGraphics(void)
 
 	//set transparency settings for context 1 (Refer to documentation on TEST and TEXA registers).
 	GsEnableAlphaTransparency1(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, 0x00);
-	GsEnableAlphaBlending1(GS_ENABLE, 0);
+	GsEnableAlphaBlending1(GS_ENABLE);
 
 	//set transparency settings for context 2 (Refer to documentation on TEST and TEXA registers).
 	GsEnableAlphaTransparency2(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, 0x00);
-	GsEnableAlphaBlending2(GS_ENABLE, 0);
+	GsEnableAlphaBlending2(GS_ENABLE);
 
 	return 0;
 }

@@ -95,7 +95,6 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 static float FOPI = 1.27323954473516;
 
 extern float PIO4F;
-extern int fptosi(float);
 /* Note, these constants are for a 32-bit significand: */
 /*
 static float DP1 =	0.7853851318359375;
@@ -146,7 +145,7 @@ if( x > T24M1 )
 	mtherr( "sinf", TLOSS );
 	return(0.0);
 	}
-j = fptosi(FOPI * x); /* integer part of x/(PI/4) */
+j = (int)(FOPI * x); /* integer part of x/(PI/4) */
 y = j;
 /* map zeros to origin */
 if( j & 1 )

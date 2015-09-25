@@ -149,8 +149,8 @@ static void DmaReset(void)
                 "        lw    %1, -0x2000(%0)   \n"
                 "        ori   %1, %1, 1         \n"
                 "        sw    %1, -0x2000(%0)   \n"
-		"        .set pop                \n"
-		: "=&r" (dma_addr), "=&r" (temp) );
+                "        .set pop                \n"
+                : "=&r" (dma_addr), "=&r" (temp) );
 }
 
 /*

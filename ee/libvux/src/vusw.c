@@ -714,7 +714,7 @@ void VuxPers(VU_VECTOR *v0, VU_SXYZ *sxyz0)
 		sxyz0->x = ftoi4( (((v0->x)/(v0->w))*vu_near_plane_w)	+vu_offset_x);
 		sxyz0->y = ftoi4(-(((v0->y)/(v0->w))*vu_near_plane_h)	+vu_offset_y);
 
-		(int)sxyz0->z =  (int)(-(v0->z/v0->w) * 0xffff);
+		sxyz0->z =  (int)(-(v0->z/v0->w) * 0xffff);
 	}
 }
 
@@ -748,15 +748,15 @@ void VuxPers3(VU_VECTOR *v0, VU_VECTOR *v1, VU_VECTOR *v2, VU_SXYZ *sxyz0, VU_SX
 	{
 		sxyz0->x = ftoi4( (((v0->x)/(v0->w))*vu_near_plane_w)	+vu_offset_x);
 		sxyz0->y = ftoi4(-(((v0->y)/(v0->w))*vu_near_plane_h)	+vu_offset_y);
-		(int)sxyz0->z =  (int)(-(v0->z/v0->w) * 0xffff);
+		sxyz0->z =  (int)(-(v0->z/v0->w) * 0xffff);
 
 		sxyz1->x = ftoi4( (((v1->x)/(v1->w))*vu_near_plane_w)	+vu_offset_x);
 		sxyz1->y = ftoi4(-(((v1->y)/(v1->w))*vu_near_plane_h)	+vu_offset_y);
-		(int)sxyz1->z =  (int)(-(v1->z/v1->w) * 0xffff);
+		sxyz1->z =  (int)(-(v1->z/v1->w) * 0xffff);
 
 		sxyz2->x = ftoi4( (((v2->x)/(v2->w))*vu_near_plane_w)	+vu_offset_x);
 		sxyz2->y = ftoi4(-(((v2->y)/(v2->w))*vu_near_plane_h)	+vu_offset_y);
-		(int)sxyz2->z =  (int)(-(v2->z/v2->w) * 0xffff);
+		sxyz2->z =  (int)(-(v2->z/v2->w) * 0xffff);
 	}
 }
 
@@ -807,15 +807,15 @@ int VuxPersClip3(VU_VECTOR *v0, VU_VECTOR *v1, VU_VECTOR *v2, VU_SXYZ *sxyz0, VU
 	{
 		sxyz0->x = ftoi4( (((v0->x)/(v0->w))*vu_near_plane_w)	+vu_offset_x);
 		sxyz0->y = ftoi4(-(((v0->y)/(v0->w))*vu_near_plane_h)	+vu_offset_y);
-		(int)sxyz0->z =  (int)(-(v0->z/v0->w) * 0xffff);
+		sxyz0->z =  (int)(-(v0->z/v0->w) * 0xffff);
 
 		sxyz1->x = ftoi4( (((v1->x)/(v1->w))*vu_near_plane_w)	+vu_offset_x);
 		sxyz1->y = ftoi4(-(((v1->y)/(v1->w))*vu_near_plane_h)	+vu_offset_y);
-		(int)sxyz1->z =  (int)(-(v1->z/v1->w) * 0xffff);
+		sxyz1->z =  (int)(-(v1->z/v1->w) * 0xffff);
 
 		sxyz2->x = ftoi4( (((v2->x)/(v2->w))*vu_near_plane_w)	+vu_offset_x);
 		sxyz2->y = ftoi4(-(((v2->y)/(v2->w))*vu_near_plane_h)	+vu_offset_y);
-		(int)sxyz2->z =  (int)(-(v2->z/v2->w) * 0xffff);
+		sxyz2->z =  (int)(-(v2->z/v2->w) * 0xffff);
 	}
 
 

@@ -11,8 +11,11 @@ EE_BIN = texture.elf
 EE_OBJS = texture.o
 EE_LIBS = -ldraw -lgraph -lmath3d -lmf -lpacket -ldma
 
+include $(PS2SDK)/samples/Makefile.pref
+include $(PS2SDK)/samples/Makefile.eeglobal
+
 all: flower.c $(EE_BIN)
-	ee-strip --strip-all $(EE_BIN)
+	$(EE_TOOL_PREFIX)strip --strip-all $(EE_BIN)
 
 flower.c:
 	bin2c texture.raw flower.c flower
@@ -25,7 +28,4 @@ run: $(EE_BIN)
 
 reset:
 	ps2client reset
-
-include $(PS2SDK)/samples/Makefile.pref
-include $(PS2SDK)/samples/Makefile.eeglobal
 

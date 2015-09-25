@@ -79,7 +79,8 @@ int graph_set_config(char *config)
 {
 	char *temp0, *temp1;
 	int mode, interlace, ffmd;
-	int flicker_filter, x, y;
+	//int x, y; //Not used
+	int flicker_filter;
 
 	// Extract the mode config value.
 	temp0 = config; temp1 = strtok(temp0, ":"); temp0 += strlen(temp1) + 1;
@@ -165,13 +166,13 @@ int graph_set_config(char *config)
 	temp1 = strtok(temp0, ":"); temp0 += strlen(temp1) + 1;
 
 	// Parse the x config value.
-	x = (int)strtol(temp1,NULL,10);
+	// x = (int)strtol(temp1,NULL,10); //Not used
 
 	// Read the y config value.
 	temp1 = strtok(temp0, ":"); temp0 += strlen(temp1) + 1;
 
 	// Parse the y config value.
-	y = (int)strtol(temp1,NULL,10);
+	// y = (int)strtol(temp1,NULL,10); //Not used
 
 	graph_set_mode(interlace,mode,ffmd,flicker_filter);
 	// End function.

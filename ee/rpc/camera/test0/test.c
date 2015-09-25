@@ -1,7 +1,10 @@
 #include "../include/ps2cam_rpc.h"
 #include "libjpg.h"
 #include "fileio.h"
-#include "Kernel.h"
+#include "kernel.h"
+#include "sifrpc.h"
+#include "loadfile.h"
+#include "stdio.h"
 
 
 char jpg_buffer[500512] __attribute__((aligned(64)));
@@ -145,12 +148,3 @@ int main (int argc, char *argv[])
 	return 0;
 }
 
-
-
-int __iob;
-
-
-int fprintf(int f, const char *s)
-{
-
-}
