@@ -308,6 +308,20 @@ int fontstudio_parse_ini(fsfont_t *font, char *ini, float tex_width, float tex_h
 
 }
 
+void fontstudio_unload_ini(fsfont_t *font)
+{
+	if(font->charmap != NULL)
+	{
+		free(font->charmap);
+		font->charmap = NULL;
+	}
+	if(font->chardata != NULL)
+	{
+		free(font->chardata);
+		font->chardata = NULL;
+	}
+}
+
 // Decode unicode byte sequences into unicode a single numerical character U+XXXX
 // Returns the number of actual unicode characters
 int decode_unicode(const unsigned char *in, unsigned short *out)

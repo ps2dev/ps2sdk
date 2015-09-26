@@ -107,7 +107,7 @@ static void * sior_rpc_server(u32 funcno, void * data, int size) {
 	p = *((char **) data) + IOP_MEM;
 	DI();
 	ee_kmode_enter();
-	(char*)res = sio_gets(p);
+	res = (int)sio_gets(p);
 	ee_kmode_exit();
 	EI();
 	break;

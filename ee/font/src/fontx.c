@@ -11,8 +11,8 @@
 
 // Single byte fonts have only a single table whose offset starts after type.
 typedef struct {
-	char id[6];						// "FONTX2" id Identifier
-	char name[8];					// Name of the font
+	char id[7];						// "FONTX2" id Identifier
+	char name[9];					// Name of the font
 	unsigned char width;			// Font Width XSize
 	unsigned char height;			// Font Height YSize
 	unsigned char type;				// Type of Font

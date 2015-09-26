@@ -8,16 +8,15 @@
 #
 # $Id$
 
-
 EE_BIN = mc_example.elf
 EE_OBJS = mc_example.o
 EE_LIBS = -lmc -lc
+
+include $(PS2SDK)/samples/Makefile.pref
+include $(PS2SDK)/samples/Makefile.eeglobal
 
 all: $(EE_BIN)
 
 clean:
 	rm -f *.elf *.o *.a
-
-include $(PS2SDK)/samples/Makefile.pref
-include $(PS2SDK)/samples/Makefile.eeglobal
 

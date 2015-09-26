@@ -9,7 +9,7 @@
 # $Id$
 
 
-SAMPLE_DIR = tcpip/ee-echo
+SAMPLE_DIR = rpc/tcpips/ee-echo
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/samples/Rules.samples

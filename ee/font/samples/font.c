@@ -8,6 +8,7 @@
 #include <graph.h>
 #include <gs_psm.h>
 #include <draw.h>
+#include <kernel.h>
 
 #include <font.h>
 
@@ -67,8 +68,8 @@ void init_texture()
 
 	q = packet->data;
 
-	q = draw_texture_transfer(q,image_pixel,512*256/2,512,256,GS_PSM_4,myaddress,512);
-	q = draw_texture_transfer(q,image_clut32,8*2*4,8,2,GS_PSM_32,clutaddress,64);
+	q = draw_texture_transfer(q,image_pixel,512,256,GS_PSM_4,myaddress,512);
+	q = draw_texture_transfer(q,image_clut32,8,2,GS_PSM_32,clutaddress,64);
 	q = draw_texture_flush(q);
 
 	dma_channel_send_chain(DMA_CHANNEL_GIF,packet->data, q - packet->data, 0,0);
@@ -78,7 +79,7 @@ void init_texture()
 
 }
 
-void test_something(packet_t *packet)
+void run_demo(packet_t *packet)
 {
 
 	int context = 0;
@@ -145,6 +146,8 @@ void test_something(packet_t *packet)
 	unsigned char str1[] = {0x81, 0xBC, 0x93, 0xF1, 0x93, 0xF1, 0x93, 0xF1, 0x81, 0x69, 0x81, 0x40, 0x81,
 							0x4F, 0x83, 0xD6, 0x81, 0x4F, 0x81, 0x6A, 0x93, 0xF1, 0x81, 0xBD, 0x0D, '\0' };
 
+	qword_t *q = packet->data;
+
 	while(1)
 	{
 
@@ -174,12 +177,13 @@ void test_something(packet_t *packet)
 
 	}
 
-	free(packets[0])
+	free(packets[0]);
 	free(packets[1]);
 }
 
 int main(void)
 {
+	char *ini;
 
 	dma_channel_initialize(DMA_CHANNEL_GIF,NULL,0);
 	dma_channel_fast_waits(DMA_CHANNEL_GIF);
@@ -187,18 +191,24 @@ int main(void)
 	fontx_load("rom0:KROM", &krom_u, SINGLE_BYTE, 2, 1, 1);
 	fontx_load("rom0:KROM", &krom_k, DOUBLE_BYTE, 2, 1, 1);
 
-	fontstudio_load_ini(&impress,"host:impress.ini", 512, 256,20);
+	if((ini = fontstudio_load_ini("host:impress.ini")) != NULL)
+	{
+		fontstudio_parse_ini(&impress, ini, 512, 256);
+		free(ini);
 
-	draw_init_env();
+		draw_init_env();
 
-	init_texture();
+		init_texture();
 
-	test_something();
+		run_demo();
 
-	fontstudio_unload_ini(&impress);
+		fontstudio_unload_ini(&impress);
 
-	fontx_unload(&krom_u);
-	fontx_unload(&krom_k);
+		fontx_unload(&krom_u);
+		fontx_unload(&krom_k);
+	} else {
+		printf("Error: cannot load ini file.\n");
+	}
 
 	SleepThread();
 

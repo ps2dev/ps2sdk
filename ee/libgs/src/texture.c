@@ -21,6 +21,7 @@ extern QWORD GsPrimWorkArea[];
 int GsLoadImage(const void *source_addr, GS_IMAGE *dest)
 {
 	int i;
+	const unsigned char *pTexSrc;
 	unsigned int current, max, remainder, img_qwc;
 	QWORD *p;
 
@@ -60,6 +61,7 @@ int GsLoadImage(const void *source_addr, GS_IMAGE *dest)
 	max		= img_qwc / 16384;
 	remainder	= img_qwc % 16384;
 	current		= 16384;
+	pTexSrc = (const unsigned char *)source_addr;
 	for(i=0;i<max;i++)
 	{
 		//1st we signal gs we are about to send
@@ -71,10 +73,10 @@ int GsLoadImage(const void *source_addr, GS_IMAGE *dest)
 		GsDmaWait();
 
 		//we now send 16384 more qwords
-		GsDmaSend(source_addr, current);
+		GsDmaSend(pTexSrc, current);
 		GsDmaWait();
 
-		(unsigned char *)source_addr += current*16;
+		pTexSrc += current*16;
 	}
 
 	//transfer the rest if we have left overs

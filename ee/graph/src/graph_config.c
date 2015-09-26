@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <errno.h>
 #include <string.h>
 
 #include <graph.h>
@@ -40,9 +41,9 @@ int graph_make_config(int mode, int interlace, int ffmd, int x, int y, int flick
 	switch (interlace)
 	{
 
-		case GRAPH_MODE_INTERLACED:		sprintf(config, "GRAPH_MODE_NONINTERLACED:");	break;
-		case GRAPH_MODE_NONINTERLACED:	sprintf(config, "GRAPH_MODE_INTERLACED:");		break;
-		default:						sprintf(config, "GRAPH_MODE_INTERLACED:");		break;
+		case GRAPH_MODE_NONINTERLACED:	sprintf(config, "GRAPH_MODE_NONINTERLACED:");		break;
+		case GRAPH_MODE_INTERLACED:	//Fall through
+		default:			sprintf(config, "GRAPH_MODE_INTERLACED:");		break;
 
 	}
 
@@ -50,9 +51,9 @@ int graph_make_config(int mode, int interlace, int ffmd, int x, int y, int flick
 	switch (ffmd)
 	{
 
-		case GRAPH_MODE_FIELD:	sprintf(config, "GRAPH_MODE_FIELD:");		break;
 		case GRAPH_MODE_FRAME:	sprintf(config, "GRAPH_MODE_FRAME:");		break;
-		default:					sprintf(config, "GRAPH_MODE_FIELD:");	break;
+		case GRAPH_MODE_FIELD:	//Fall through
+		default:		sprintf(config, "GRAPH_MODE_FIELD:");	break;
 
 	}
 
@@ -60,9 +61,9 @@ int graph_make_config(int mode, int interlace, int ffmd, int x, int y, int flick
 	switch (flicker_filter)
 	{
 
-		case GRAPH_DISABLE:	sprintf(config, "GRAPH_DISABLE:");		break;
 		case GRAPH_ENABLE:	sprintf(config, "GRAPH_ENABLE:");		break;
-		default:				sprintf(config, "GRAPH_DISABLE:");	break;
+		case GRAPH_DISABLE:	//Fall through
+		default:		sprintf(config, "GRAPH_DISABLE:");	break;
 
 	}
 
@@ -79,7 +80,8 @@ int graph_set_config(char *config)
 {
 	char *temp0, *temp1;
 	int mode, interlace, ffmd;
-	int flicker_filter, x, y;
+	//int x, y; //Not used
+	int flicker_filter;
 
 	// Extract the mode config value.
 	temp0 = config; temp1 = strtok(temp0, ":"); temp0 += strlen(temp1) + 1;
@@ -165,13 +167,13 @@ int graph_set_config(char *config)
 	temp1 = strtok(temp0, ":"); temp0 += strlen(temp1) + 1;
 
 	// Parse the x config value.
-	x = (int)strtol(temp1,NULL,10);
+	// x = (int)strtol(temp1,NULL,10); //Not used
 
 	// Read the y config value.
 	temp1 = strtok(temp0, ":"); temp0 += strlen(temp1) + 1;
 
 	// Parse the y config value.
-	y = (int)strtol(temp1,NULL,10);
+	// y = (int)strtol(temp1,NULL,10); //Not used
 
 	graph_set_mode(interlace,mode,ffmd,flicker_filter);
 	// End function.
@@ -188,7 +190,7 @@ int graph_load_config(char *filename)
 	if ((infile = fopen(filename, "r")) < 0)
 	{
 
-		return -1;
+		return -ENOENT;
 
 	}
 
@@ -196,7 +198,7 @@ int graph_load_config(char *filename)
 	if (fread(config, 1, sizeof(config), infile) < 0)
 	{
 
-		return -1;
+		return -EIO;
 
 	}
 
@@ -225,7 +227,7 @@ int graph_save_config(char *filename)
 	if ((outfile = fopen(filename, "w")) < 0)
 	{
 
-		return -1;
+		return -ENOENT;
 
 	}
 
@@ -233,7 +235,7 @@ int graph_save_config(char *filename)
 	if (fwrite(config, 1, strlen(config), outfile) < 0)
 	{
 
-		return -1;
+		return -EIO;
 
 	}
 

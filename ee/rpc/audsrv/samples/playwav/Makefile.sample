@@ -12,10 +12,11 @@ EE_BIN = playwav.elf
 EE_OBJS = playwav.o
 EE_LIBS = -laudsrv -lc
 
+include $(PS2SDK)/samples/Makefile.pref
+include $(PS2SDK)/samples/Makefile.eeglobal
+
 all: $(EE_BIN)
 
 clean:
 	rm -f *.elf *.o
 
-include $(PS2SDK)/samples/Makefile.pref
-include $(PS2SDK)/samples/Makefile.eeglobal

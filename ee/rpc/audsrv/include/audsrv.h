@@ -237,6 +237,14 @@ int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size);
 */
 int audsrv_play_adpcm(audsrv_adpcm_t *adpcm);
 
+/** Installs a callback function upon completion of a cdda track
+    @param cb your callback
+    @param arg extra parameter to pass to callback function later
+    @returns status code
+*/
+int audsrv_on_cdda_stop(audsrv_callback_t cb, void *arg);
+
+
 #ifdef __cplusplus
 }
 #endif

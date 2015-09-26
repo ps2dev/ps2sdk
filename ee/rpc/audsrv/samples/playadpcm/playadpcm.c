@@ -22,7 +22,10 @@
 
 int main(int argc, char **argv)
 {
-	int i, ret;
+	/* Uncomment to hear two samples played simultaenously
+	int i;
+	*/
+	int ret;
 	FILE* adpcm;
 	audsrv_adpcm_t sample;
 	int size;

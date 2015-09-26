@@ -81,11 +81,14 @@ extern "C" {
 
 	void fontstudio_free(fsfont_t *font);
 
-	// Parses a font's ini for the font
+	// Parses a font's ini for the font. The content of ini is no longer required afterwards and can be discarded.
 	int fontstudio_parse_ini(fsfont_t *font, char *ini, float tex_width, float tex_height);
 
 	// Loads an ini file into memory and returns pointer to it
 	char *fontstudio_load_ini(const char *path);
+
+	// Unloads a parsed font's ini file.
+	void fontstudio_unload_ini(fsfont_t *font);
 
 	// Prints a unicode formatted string (UTF+8)
 	qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *string, int alignment, vertex_t *v0, color_t *c0, fsfont_t *font);

@@ -22,7 +22,7 @@
    is preserved.
    ============================================================  */
 
-	 .text
+	.text
 	.p2align 3
 	.globl	strncat
 	.text

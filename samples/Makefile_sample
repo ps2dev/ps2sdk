@@ -8,13 +8,29 @@
 #
 # $Id$
 
-SUBDIRS = cube
+SUBDIRS = cpp-hello
 SUBDIRS += debug/callstacktest
+SUBDIRS += draw/cube
+SUBDIRS += draw/teapot
+#there is no flower.c
+#SUBDIRS += draw/texture
+SUBDIRS += font
 SUBDIRS += graph
 SUBDIRS += hello
+SUBDIRS += libgs/doublebuffer
+SUBDIRS += libgs/draw
+SUBDIRS += mpeg
+SUBDIRS += rpc/audsrv/playadpcm
+SUBDIRS += rpc/audsrv/playcdda
+SUBDIRS += rpc/audsrv/playwav
+SUBDIRS += rpc/audsrv/playwav2
+SUBDIRS += rpc/audsrv/testcd
+SUBDIRS += rpc/memorycard
+SUBDIRS += rpc/mtap
 SUBDIRS += rpc/pad
-SUBDIRS += tcpip/ee-echo
-SUBDIRS += teapot
+SUBDIRS += rpc/padx
+SUBDIRS += rpc/ps2snd
+SUBDIRS += rpc/tcpips/ee-echo
 
 all: $(patsubst %, _dir_%, $(SUBDIRS))
 
