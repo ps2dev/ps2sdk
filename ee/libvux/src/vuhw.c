@@ -290,15 +290,15 @@ float Vu0DotProduct(VU_VECTOR *v0, VU_VECTOR *v1)
 	/*	ret = (v0.x*v1.x + v0.y*v1.y + v0.z*v1.z);*/
 
 	asm __volatile__ (
-   "lqc2		vf1, 0(%0)		\n"		// load 1 qword from ee
-   "lqc2		vf2, 0(%1)		\n"		// load 1 qword from ee
+   "lqc2		vf1, 0(%1)		\n"		// load 1 qword from ee
+   "lqc2		vf2, 0(%2)		\n"		// load 1 qword from ee
 
    "vmul.xyz	vf3, vf1, vf2	\n"		// mul v0 by v1
 
    "vaddy.x		vf3, vf3, vf3y	\n"		// add x+y and store in x
    "vaddz.x		vf3, vf3, vf3z	\n"		// add z+x and store in x
 
-   "qmfc2		$2, vf3			\n"		// copy vector to ee reg
+   "qmfc2		$0, vf3			\n"		// copy vector to ee reg
    : "=r" (ret) : "r" (v0), "r" (v1)
    );
 
