@@ -298,7 +298,7 @@ float Vu0DotProduct(VU_VECTOR *v0, VU_VECTOR *v1)
    "vaddy.x		vf3, vf3, vf3y	\n"		// add x+y and store in x
    "vaddz.x		vf3, vf3, vf3z	\n"		// add z+x and store in x
 
-   "qmfc2		$0, vf3			\n"		// copy vector to ee reg
+   "qmfc2		%0, vf3			\n"		// copy vector to ee reg
    : "=r" (ret) : "r" (v0), "r" (v1)
    );
 
