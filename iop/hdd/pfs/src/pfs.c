@@ -11,41 +11,54 @@
 # PFS startup and misc code
 */
 
-#include "pfs.h"
+#include <stdio.h>
+#include <sysclib.h>
+#include <errno.h>
+#include <iomanX.h>
+#include <thsemap.h>
+#include <poweroff.h>
+#include <irx.h>
+#include <loadcore.h>
 
-IRX_ID("pfs_driver", 1, 1);
+#include "pfs-opt.h"
+#include "libpfs.h"
+#include "pfs.h"
+#include "pfs_fio.h"
+#include "pfs_fioctl.h"
+
+IRX_ID("pfs_driver", PFS_MAJOR, PFS_MINOR);
 
 ///////////////////////////////////////////////////////////////////////////////
-//   Globals
+//	Globals
 
 iop_device_ops_t pfsOps = {
-	pfsInit,
-	pfsDeinit,
-	pfsFormat,
-	pfsOpen,
-	pfsClose,
-	pfsRead,
-	pfsWrite,
-	pfsLseek,
-	pfsIoctl,
-	pfsRemove,
-	pfsMkdir,
-	pfsRmdir,
-	pfsDopen,
-	pfsClose,
-	pfsDread,
-	pfsGetstat,
-	pfsChstat,
-	pfsRename,
-	pfsChdir,
-	pfsSync,
-	pfsMount,
-	pfsUmount,
-	(void*)fioUnsupported /*pfsLseek64*/,
-	pfsDevctl,
-	fioUnsupported /*pfsSymlink*/,
-	fioUnsupported /*pfsReadlink*/,
-	pfsIoctl2
+	pfsFioInit,
+	pfsFioDeinit,
+	pfsFioFormat,
+	pfsFioOpen,
+	pfsFioClose,
+	pfsFioRead,
+	pfsFioWrite,
+	pfsFioLseek,
+	pfsFioIoctl,
+	pfsFioRemove,
+	pfsFioMkdir,
+	pfsFioRmdir,
+	pfsFioDopen,
+	pfsFioClose,
+	pfsFioDread,
+	pfsFioGetstat,
+	pfsFioChstat,
+	pfsFioRename,
+	pfsFioChdir,
+	pfsFioSync,
+	pfsFioMount,
+	pfsFioUmount,
+	(void*)pfsFioUnsupported /*pfsFioLseek64*/,
+	pfsFioDevctl,
+	(void*)pfsFioUnsupported /*pfsFioSymlink*/,
+	(void*)pfsFioUnsupported /*pfsFioReadlink*/,
+	pfsFioIoctl2
 };
 
 iop_device_t pfsFioDev = {
@@ -59,37 +72,32 @@ iop_device_t pfsFioDev = {
 pfs_config_t pfsConfig = { 1, 2 };
 pfs_mount_t *pfsMountBuf;
 char *pfsFilename = NULL;
-u32 metaSize = 1024; // size of each metadata structure
-int pfsDebug = 0;
+
+extern u32 pfsMetaSize;
+extern pfs_file_slot_t *pfsFileSlots;
+extern pfs_config_t pfsConfig;
 
 ///////////////////////////////////////////////////////////////////////////////
 //   Local function declerations
 
-void printInfo();
-int printPfsArgError();
-int allocateMountBuffer(int size);
-int allocateBuffers(u32 numBuf, u32 bufSize);
+static int printPfsArgError(void);
+static int allocateMountBuffer(int size);
 
 ///////////////////////////////////////////////////////////////////////////////
 //   Function defenitions
 
-void printInfo()
+static int printPfsArgError(void)
 {
-	printf("ps2fs: Playstation Filesystem Driver v%d.%d\nps2fs: (c) 2003 Sjeep, Vector and Florin Sasu\n", PFS_MAJOR, PFS_MINOR);
-}
-
-int printPfsArgError()
-{
-	printf("ps2fs: ERROR: Usage: %s [-m <maxmount>] [-o <maxopen>] [-n <numbuffer>]\n", pfsFilename);
+	PFS_PRINTF(PFS_DRV_NAME" ERROR: Usage: %s [-m <maxmount>] [-o <maxopen>] [-n <numbuffer>]\n", pfsFilename);
 
 	return MODULE_NO_RESIDENT_END;
 }
 
-int allocateMountBuffer(int size)
+static int allocateMountBuffer(int size)
 {
 	int tsize = size * sizeof(pfs_mount_t);
 
-	pfsMountBuf = allocMem(tsize);
+	pfsMountBuf = pfsAllocMem(tsize);
 	if(!pfsMountBuf)
 		return -ENOMEM;
 
@@ -98,18 +106,17 @@ int allocateMountBuffer(int size)
 	return 0;
 }
 
-
-void clearMount(pfs_mount_t *pfsMount)
+void pfsClearMount(pfs_mount_t *pfsMount)
 {
 	memset(pfsMount, 0, sizeof(pfs_mount_t));
 }
 
-pfs_mount_t * getMountedUnit(u32 unit)
+pfs_mount_t *pfsGetMountedUnit(u32 unit)
 {	// get mounted unit
 	if(unit>=pfsConfig.maxMount)
 		return NULL;
 
-	if(!(pfsMountBuf[unit].flags & MOUNT_BUSY))
+	if(!(pfsMountBuf[unit].flags & PFS_MOUNT_BUSY))
 		return NULL;
 
 	return &pfsMountBuf[unit];
@@ -123,7 +130,7 @@ int _start(int argc, char *argv[])
 	int reqBuf;
 	int size;
 
-	printInfo();
+	PFS_PRINTF(PFS_DRV_NAME" Playstation Filesystem Driver v%d.%d\nps2fs: (c) 2003 Sjeep, Vector and Florin Sasu\n", PFS_MAJOR, PFS_MINOR);
 
 	// Get filename of IRX
 	filename = strrchr(argv[0], '/');
@@ -158,7 +165,7 @@ int _start(int argc, char *argv[])
 				return printPfsArgError();
 			argv++;
 
-			number = strtol(argv[0], 0, 10);
+			number = strtol(argv[0], NULL, 10);
 
 			if(number <= 32)
 				pfsConfig.maxOpen = number;
@@ -169,18 +176,16 @@ int _start(int argc, char *argv[])
 				return printPfsArgError();
 			argv++;
 
-			number = strtol(argv[0], 0, 10);
+			number = strtol(argv[0], NULL, 10);
 
 			if(number > numBuf)
 				numBuf = number;
 
 			if(numBuf > 127) {
-				printf("ps2fs: ERROR: Number of buffers is larger than 127!\n");
+				PFS_PRINTF(PFS_DRV_NAME" ERROR: Number of buffers is larger than 127!\n");
 				return -EINVAL;
 			}
 		}
-		else if(!strcmp(argv[0], "-debug"))
-			pfsDebug = 1;
 		else
 			return printPfsArgError();
 
@@ -188,34 +193,34 @@ int _start(int argc, char *argv[])
 		argv++;
 	}
 
-	printf("ps2fs: Max mount: %ld, Max open: %ld, Number of buffers: %d\n", pfsConfig.maxMount,
+	PFS_PRINTF(PFS_DRV_NAME" Max mount: %ld, Max open: %ld, Number of buffers: %d\n", pfsConfig.maxMount,
 			pfsConfig.maxOpen, numBuf);
 
 	// Do we have enough buffers ?
 	reqBuf = (pfsConfig.maxOpen * 2) + 8;
 	if(numBuf < reqBuf)
-		printf("ps2fs: Warning: %d buffers may be needed, but only %d buffers are allocated\n", reqBuf, numBuf);
+		PFS_PRINTF(PFS_DRV_NAME" Warning: %d buffers may be needed, but only %d buffers are allocated\n", reqBuf, numBuf);
 
 	if(allocateMountBuffer(pfsConfig.maxMount) < 0)
 		return MODULE_NO_RESIDENT_END;
 
 	// Allocate and zero memory for file slots
 	size = pfsConfig.maxOpen * sizeof(pfs_file_slot_t);
-	fileSlots = allocMem(size);
-	if(!fileSlots) {
-		printf("ps2fs: Error: Failed to allocate memory!\n");
+	pfsFileSlots = pfsAllocMem(size);
+	if(!pfsFileSlots) {
+		PFS_PRINTF(PFS_DRV_NAME" Error: Failed to allocate memory!\n");
 		return MODULE_NO_RESIDENT_END;
 	}
 
-	memset(fileSlots, 0, size);
+	memset(pfsFileSlots, 0, size);
 
-	if(cacheInit(numBuf, metaSize) < 0)
+	if(pfsCacheInit(numBuf, pfsMetaSize) < 0)
 		return MODULE_NO_RESIDENT_END;
 
 	DelDrv("pfs");
 	AddDrv(&pfsFioDev);
 
-	printf("ps2fs: Driver start.\n");
+	PFS_PRINTF(PFS_DRV_NAME" Driver start.\n");
 
 	return MODULE_RESIDENT_END;
 }

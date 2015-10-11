@@ -11,13 +11,20 @@
 # APA journal related routines
 */
 
-#include "hdd.h"
+#include <errno.h>
+#include <iomanX.h>
+#include <atad.h>
+#include <sysclib.h>
+#include <stdio.h>
+#include <hdd-ioctl.h>
+
+#include "apa-opt.h"
+#include "libapa.h"
 
 //  Globals
-apa_journal_t journalBuf;
+static apa_journal_t journalBuf;
 
-
-int journalFlush(u32 device)
+int apaJournalFlush(s32 device)
 {// this write any thing that in are journal buffer :)
 	if(ata_device_flush_cache(device))
 		return -EIO;
@@ -28,14 +35,14 @@ int journalFlush(u32 device)
 	return 0;
 }
 
-int journalReset(u32 device)
+int apaJournalReset(s32 device)
 {
 	memset(&journalBuf, 0, sizeof(apa_journal_t));
 	journalBuf.magic=APAL_MAGIC;
-	return journalFlush(device);
+	return apaJournalFlush(device);
 }
 
-int journalWrite(apa_cache *clink)
+int apaJournalWrite(apa_cache_t *clink)
 {
 	clink->header->checksum=journalCheckSum(clink->header);
 	if(ata_device_sector_io(clink->device, clink->header,
@@ -46,22 +53,22 @@ int journalWrite(apa_cache *clink)
 	return 0;
 }
 
-int journalResetore(u32 device)
+int apaJournalRestore(s32 device)
 {	// copys apa headers from apal to apa system
 	int i;
 	u32 sector;
-	apa_cache *clink;
+	apa_cache_t *clink;
 
-	dprintf1("ps2hdd: checking log...\n");
+	APA_PRINTF(APA_DRV_NAME": checking log...\n");
 	if(ata_device_sector_io(device, &journalBuf, APA_SECTOR_APAL, sizeof(apa_journal_t)/512, ATA_DIR_READ)){
-		journalReset(device);
+		apaJournalReset(device);
 		return -EIO;
 	}
 	if(journalBuf.magic==APAL_MAGIC)
 	{
 		if(journalBuf.num==0)
 			return 0;
-		clink=cacheGetFree();
+		clink=apaCacheAlloc();
 		for(i=0, sector=APA_SECTOR_APAL_HEADERS;i<journalBuf.num;i++, sector+=2)
 		{
 			if(ata_device_sector_io(device, clink->header, sector, 2, ATA_DIR_READ))
@@ -69,8 +76,8 @@ int journalResetore(u32 device)
 			if(ata_device_sector_io(device, clink->header, journalBuf.sectors[i], 2, ATA_DIR_WRITE))
 				break;
 		}
-		cacheAdd(clink);
-		return journalReset(device);// only do if journal..
+		apaCacheFree(clink);
+		return apaJournalReset(device);// only do if journal..
 	}
 	memset(&journalBuf, 0, sizeof(apa_journal_t));// safe e
 	journalBuf.magic=APAL_MAGIC;

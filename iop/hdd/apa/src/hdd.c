@@ -11,11 +11,23 @@
 # Start Up routines
 */
 
+#include <stdio.h>
+#include <irx.h>
+#include <atad.h>
+#include <loadcore.h>
+#include <sysclib.h>
+#include <errno.h>
+#include <iomanX.h>
+#include <hdd-ioctl.h>
+
+#include "apa-opt.h"
+#include <libapa.h>
 #include "hdd.h"
+#include "hdd_fio.h"
 
-IRX_ID("hdd_driver", 1, 1);
+IRX_ID("hdd_driver", APA_MODVER_MAJOR, APA_MODVER_MINOR);
 
-iop_device_ops_t hddOps={
+static iop_device_ops_t hddOps={
 	hddInit,
 	hddDeinit,
 	hddFormat,
@@ -24,27 +36,27 @@ iop_device_ops_t hddOps={
 	hddRead,
 	hddWrite,
 	hddLseek,
-	(void*)fioUnsupported,
+	(void*)hddUnsupported,
 	hddRemove,
-	(void*)fioUnsupported,
-	(void*)fioUnsupported,
+	(void*)hddUnsupported,
+	(void*)hddUnsupported,
 	hddDopen,
 	hddClose,
 	hddDread,
 	hddGetStat,
-	(void*)fioUnsupported,
+	(void*)hddUnsupported,
 	hddReName,
-	(void*)fioUnsupported,
-	(void*)fioUnsupported,
-	(void*)fioUnsupported,
-	(void*)fioUnsupported,
-	(void*)fioUnsupported,
+	(void*)hddUnsupported,
+	(void*)hddUnsupported,
+	(void*)hddUnsupported,
+	(void*)hddUnsupported,
+	(void*)hddUnsupported,
 	hddDevctl,
-	(void*)fioUnsupported,
-	(void*)fioUnsupported,
+	(void*)hddUnsupported,
+	(void*)hddUnsupported,
 	hddIoctl2,
 };
-iop_device_t hddFioDev={
+static iop_device_t hddFioDev={
 	"hdd",
 	IOP_DT_BLOCK | IOP_DT_FSEXT,
 	1,
@@ -52,38 +64,159 @@ iop_device_t hddFioDev={
 	(struct _iop_device_ops *)&hddOps,
 };
 
-u32 maxOpen=1;
-hdd_device_t hddDeviceBuf[2]={
+hdd_device_t hddDevices[2]={
 	{0, 0, 0, 3},
 	{0, 0, 0, 3}
 };
 
-char mbrMagic[0x20]={
-	0x2B, 0x17, 0x16, 0x01, 0x58, 0x3B, 0x17, 0x15,
-	0x08, 0x0D, 0x0C, 0x1D, 0x0A, 0x58, 0x3D, 0x16,
-	0x0C, 0x1D, 0x0A, 0x0C, 0x19, 0x11, 0x16, 0x15,
-	0x1D, 0x16, 0x0C, 0x58, 0x31, 0x16, 0x1B, 0x56
-};
+extern u32 apaMaxOpen;
+extern hdd_file_slot_t *hddFileSlots;
 
+static int inputError(char *input);
+static int unlockDrive(u32 device);
 
-
-int inputError(char *input)
+int hddCheckPartitionMax(s32 device, s32 size)
 {
-	printf("ps2hdd: Error: Usage: %s [-o <maxOpen>] [-n <maxcache>]\n", input);
+	return (hddDevices[device].partitionMaxSize >= size) ? 0 : -EINVAL;
+}
+
+apa_cache_t *hddAddPartitionHere(s32 device, apa_params_t *params, u32 *emptyBlocks,
+				u32 sector, int *err)
+{
+	apa_cache_t	*clink_this;
+	apa_cache_t	*clink_next;
+	apa_cache_t	*clink_new;
+	apa_header_t	*header;
+	u32			i;
+	u32			tmp, some_size, part_end;
+	u32			tempSize;
+
+	// walk empty blocks in case can use one :)
+	for(i=0;i< 32;i++)
+	{
+		if((1 << i) >= params->size && emptyBlocks[i]!=0)
+			return apaInsertPartition(device, params, emptyBlocks[i], err);
+	}
+	clink_this=apaCacheGetHeader(device, sector, APA_IO_MODE_READ, err);
+	header=clink_this->header;
+	part_end=header->start+header->length;
+	some_size=(part_end%params->size);
+	tmp = some_size ? params->size - some_size : 0;
+
+	if(hddDevices[device].totalLBA < (part_end+params->size+tmp))
+	{
+		*err=-ENOSPC;
+		apaCacheFree(clink_this);
+		return NULL;
+	}
+
+	if((clink_next=apaCacheGetHeader(device, 0, APA_IO_MODE_READ, err))==NULL){
+		apaCacheFree(clink_this);
+		return NULL;
+	}
+
+	tempSize=params->size;
+	while(part_end%params->size){
+		tempSize=params->size>>1;
+		while(0x3FFFF<tempSize){
+			if(!(part_end%tempSize)) {
+				clink_new=apaRemovePartition(device, part_end, 0,
+					clink_this->header->start, tempSize);
+				clink_this->header->next=part_end;
+				clink_this->flags|=APA_CACHE_FLAG_DIRTY;
+				clink_next->header->prev=clink_new->header->start;
+				part_end+=tempSize;
+				clink_next->flags|=APA_CACHE_FLAG_DIRTY;
+				apaCacheFlushAllDirty(device);
+				apaCacheFree(clink_this);
+				clink_this=clink_new;
+				break;
+			}
+			tempSize>>=1;
+		}
+	}
+	if((clink_new=apaFillHeader(device, params, part_end, 0, clink_this->header->start,
+		params->size, err))!=NULL) {
+			clink_this->header->next=part_end;
+			clink_this->flags|=APA_CACHE_FLAG_DIRTY;
+			clink_next->header->prev=clink_new->header->start;
+			clink_next->flags|=APA_CACHE_FLAG_DIRTY;
+			apaCacheFlushAllDirty(device);
+		}
+		apaCacheFree(clink_this);
+		apaCacheFree(clink_next);
+		return clink_new;
+}
+
+static void hddCalculateFreeSpace(u32 *free, u32 sectors)
+{
+	if(0x1FFFFF < sectors)
+	{
+		*free += sectors;
+		return;
+	}
+
+	if((*free & sectors) == 0)
+	{
+		*free |= sectors;
+		return;
+	}
+
+	for(sectors >>= 1; 0x3FFFF < sectors; sectors >>= 1)
+		*free |= sectors;
+}
+
+int hddGetFreeSectors(s32 device, u32 *free, hdd_device_t *deviceinfo)
+{
+	u32 sectors, partMax;
+	int rv;
+	apa_cache_t *clink;
+
+	sectors = 0;
+	if((clink = apaCacheGetHeader(device, 0, APA_IO_MODE_READ, &rv)) != NULL)
+	{
+		do{
+			if(clink->header->type == 0)
+				hddCalculateFreeSpace(free, clink->header->length);
+			sectors += clink->header->length;
+		}while((clink = apaGetNextHeader(clink, &rv)) != NULL);
+	}
+
+	if(rv == 0)
+	{
+		for(partMax = deviceinfo[device].partitionMaxSize; 0x0003FFFF < partMax; partMax >>= 1)
+		{
+			if((sectors % deviceinfo[device].partitionMaxSize == 0) && (sectors + deviceinfo[device].partitionMaxSize < deviceinfo[device].totalLBA))
+			{
+				hddCalculateFreeSpace(free, deviceinfo[device].partitionMaxSize);
+				sectors += deviceinfo[device].partitionMaxSize;
+				break;
+			}
+		}
+
+		APA_PRINTF(APA_DRV_NAME": total = %08lx sectors, installable = %08lx sectors.\n", sectors, *free);
+	}
+
+	return rv;
+}
+
+static int inputError(char *input)
+{
+	APA_PRINTF(APA_DRV_NAME": Error: Usage: %s [-o <apaMaxOpen>] [-n <maxcache>]\n", input);
 	return 1;
 }
 
-void printStartup(void)
+static void printStartup(void)
 {
-	printf("ps2hdd: PS2 APA Driver v1.1 (c) 2003 Vector\n");
+	APA_PRINTF(APA_DRV_NAME": PS2 APA Driver v%d.%d (c) 2003 Vector\n", APA_MODVER_MAJOR, APA_MODVER_MINOR);
 	return;
 }
 
-int unlockDrive(u32 device)
+static int unlockDrive(u32 device)
 {
 	u8 id[32];
 	int rv;
-	if((rv=getIlinkID(id))==0)
+	if((rv=apaGetIlinkID(id))==0)
 		return ata_device_sce_sec_unlock(device, id);
 	return rv;
 }
@@ -93,13 +226,10 @@ int _start(int argc, char **argv)
 	int 	i;
 	char	*input;
 	int		cacheSize=3;
-	ps2time tm;
+	apa_ps2time_t tm;
 	ata_devinfo_t *hddInfo;
 
 	printStartup();
-	// decode MBR Magic
-	for(i=0;i!=0x20;i++)
-		mbrMagic[i]^='x';
 
 	if((input=strrchr(argv[0], '/')))
 		input++;
@@ -117,7 +247,7 @@ int _start(int argc, char **argv)
 				return inputError(input);
 			i=strtol(argv[0], 0, 10);
 			if(i-1<32)
-				maxOpen=i;
+				apaMaxOpen=i;
 		}
 		else if(strcmp("-n", argv[0])==0){
 			argc--; argv++;
@@ -130,47 +260,47 @@ int _start(int argc, char **argv)
 		argc--; argv++;
 	}
 
-	printf("ps2hdd: max open = %ld, %d buffers\n", maxOpen, cacheSize);
-	getPs2Time(&tm);
-	printf("ps2hdd: %02d:%02d:%02d %02d/%02d/%d\n",
+	APA_PRINTF(APA_DRV_NAME": max open = %ld, %d buffers\n", apaMaxOpen, cacheSize);
+	apaGetTime(&tm);
+	APA_PRINTF(APA_DRV_NAME": %02d:%02d:%02d %02d/%02d/%d\n",
 		tm.hour, tm.min, tm.sec, tm.month, tm.day, tm.year);
 	for(i=0;i < 2;i++)
 	{
 		if(!(hddInfo=ata_get_devinfo(i))){
-			printf("ps2hdd: Error: ata initialization failed.\n");
+			APA_PRINTF(APA_DRV_NAME": Error: ata initialization failed.\n");
 			return 0;
 		}
 		if(hddInfo->exists!=0 && hddInfo->has_packet==0){
-				hddDeviceBuf[i].status--;
-				hddDeviceBuf[i].totalLBA=hddInfo->total_sectors;
-				hddDeviceBuf[i].partitionMaxSize=apaGetPartitionMax(hddInfo->total_sectors);
+				hddDevices[i].status--;
+				hddDevices[i].totalLBA=hddInfo->total_sectors;
+				hddDevices[i].partitionMaxSize=apaGetPartitionMax(hddInfo->total_sectors);
 				if(unlockDrive(i)==0)
-					hddDeviceBuf[i].status--;
-				printf("ps2hdd: disk%d: 0x%08lx sectors, max 0x%08lx\n", i,
-					hddDeviceBuf[i].totalLBA, hddDeviceBuf[i].partitionMaxSize);
+					hddDevices[i].status--;
+				APA_PRINTF(APA_DRV_NAME": disk%d: 0x%08lx sectors, max 0x%08lx\n", i,
+					hddDevices[i].totalLBA, hddDevices[i].partitionMaxSize);
 		}
 	}
-	fileSlots=allocMem(maxOpen*sizeof(hdd_file_slot_t));
-	if(fileSlots)
-		memset(fileSlots, 0, maxOpen*sizeof(hdd_file_slot_t));
+	hddFileSlots=apaAllocMem(apaMaxOpen*sizeof(hdd_file_slot_t));
+	if(hddFileSlots)
+		memset(hddFileSlots, 0, apaMaxOpen*sizeof(hdd_file_slot_t));
 
-	cacheInit(cacheSize);
+	apaCacheInit(cacheSize);
 	for(i=0;i < 2;i++)
 	{
-		if(hddDeviceBuf[i].status<2){
-			if(journalResetore(i)!=0)
+		if(hddDevices[i].status<2){
+			if(apaJournalRestore(i)!=0)
 				return 1;
-			if(apaGetFormat(i, (int *)&hddDeviceBuf[i].format))
-				hddDeviceBuf[i].status--;
-			printf("ps2hdd: drive status %ld, format version %08lx\n",
-				hddDeviceBuf[i].status, hddDeviceBuf[i].format);
+			if(apaGetFormat(i, (int *)&hddDevices[i].format))
+				hddDevices[i].status--;
+			APA_PRINTF(APA_DRV_NAME": drive status %ld, format version %08lx\n",
+				hddDevices[i].status, hddDevices[i].format);
 		}
 	}
 	DelDrv("hdd");
 	if(AddDrv(&hddFioDev)==0)
 	{
-		printf("ps2hdd: driver start.\n");
-		return 0;
+		APA_PRINTF(APA_DRV_NAME": driver start.\n");
+		return MODULE_RESIDENT_END;
 	}
-	return 1;
+	return MODULE_NO_RESIDENT_END;
 }

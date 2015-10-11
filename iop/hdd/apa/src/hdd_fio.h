@@ -13,84 +13,7 @@
 #ifndef _HDD_FIO_H
 #define _HDD_FIO_H
 
-
-//
-// IOCTL2 commands
-//
-#define APA_IOCTL2_ADD_SUB				0x00006801
-#define APA_IOCTL2_DELETE_LAST_SUB		0x00006802
-#define APA_IOCTL2_NUMBER_OF_SUBS		0x00006803
-#define APA_IOCTL2_FLUSH_CACHE			0x00006804
-
-#define APA_IOCTL2_TRANSFER_DATA		0x00006832	// used by pfs to read/write data :P
-#define APA_IOCTL2_GETSIZE				0x00006833	// for main(0)/subs(1+)
-#define APA_IOCTL2_SET_PART_ERROR		0x00006834	// set(sector of a apa header) that has a error :)
-#define APA_IOCTL2_GET_PART_ERROR		0x00006835	// get(sector of a apa header) that has a error
-
-
-// structs for IOCTL2 commands
-typedef struct
-{
-	u32		sub;		// main(0)/subs(1+) to read/write
-	u32		sector;
-	u32		size;		// in sectors
-	u32		mode;		// ATAD_MODE_READ/ATAD_MODE_WRITE.....
-	void	*buffer;
-} hddIoctl2Transfer_t;
-
-//
-// DEVCTL commands
-//
-#define APA_DEVCTL_MAX_SECTORS		0x00004801	// max partition size(in sectors)
-#define APA_DEVCTL_TOTAL_SECTORS	0x00004802
-#define APA_DEVCTL_IDLE				0x00004803
-#define APA_DEVCTL_FLUSH_CACHE		0x00004804
-#define APA_DEVCTL_SWAP_TMP			0x00004805
-#define APA_DEVCTL_DEV9_SHUTDOWN	0x00004806
-#define APA_DEVCTL_STATUS			0x00004807
-#define APA_DEVCTL_FORMAT			0x00004808
-#define APA_DEVCTL_SMART_STAT		0x00004809
-#define APA_DEVCTL_FREE_SECTORS	0x0000480A
-
-#define APA_DEVCTL_GETTIME				0x00006832
-#define APA_DEVCTL_SET_OSDMBR			0x00006833// arg = hddSetOsdMBR_t
-#define APA_DEVCTL_GET_SECTOR_ERROR		0x00006834
-#define APA_DEVCTL_GET_ERROR_PART_NAME	0x00006835// bufp = namebuffer[0x20]
-#define APA_DEVCTL_ATA_READ				0x00006836// arg  = hddAtaTransfer_t
-#define APA_DEVCTL_ATA_WRITE			0x00006837// arg  = hddAtaTransfer_t
-#define APA_DEVCTL_SCE_IDENTIFY_DRIVE	0x00006838// bufp = buffer for atadSceIdentifyDrive
-
-// structs for DEVCTL commands
-
-typedef struct
-{
-	u32 lba;
-	u32 size;
-	u8 data[0];
-} hddAtaTransfer_t;
-
-typedef struct
-{
-	u32 start;
-	u32 size;
-} hddSetOsdMBR_t;
-
-
-///////////////////////////////////////////////////////////////////////////////
-//   Function declerations
-int fioPartitionSizeLookUp(char *str);
-int fioInputBreaker(char const **arg, char *outBuf, int maxout);
-int fioDataTransfer(iop_file_t *f, void *buf, int size, int mode);
-int getFileSlot(input_param *params, hdd_file_slot_t **fileSlot);
-
-int ioctl2Transfer(u32 device, hdd_file_slot_t *fileSlot, hddIoctl2Transfer_t *arg);
-void fioGetStatFiller(apa_cache *clink1, iox_stat_t *stat);
-int ioctl2AddSub(hdd_file_slot_t *fileSlot, char *argp);
-int ioctl2DeleteLastSub(hdd_file_slot_t *fileSlot);
-
-int devctlSwapTemp(u32 device, char *argp);
-
-// Functions which hook into IOMAN
+// I/O functions
 int hddInit(iop_device_t *f);
 int hddDeinit(iop_device_t *f);
 int hddFormat(iop_file_t *f, const char *dev, const char *blockdev, void *arg, size_t arglen);
@@ -107,6 +30,6 @@ int hddGetStat(iop_file_t *f, const char *name, iox_stat_t *stat);
 int hddReName(iop_file_t *f, const char *oldname, const char *newname);
 int hddDevctl(iop_file_t *f, const char *devname, int cmd, void *arg, unsigned int arglen, void *bufp, unsigned int buflen);
 
-int fioUnsupported(iop_file_t *f);
+int hddUnsupported(iop_file_t *f);
 
 #endif /* _HDD_FIO_H */

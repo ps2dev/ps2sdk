@@ -11,12 +11,22 @@
 # Miscellaneous routines
 */
 
-#include "pfs.h"
+#include <errno.h>
+#include <stdio.h>
+#include <iomanX.h>
+#include <intrman.h>
+#include <sysmem.h>
+#include <sysclib.h>
+#include <cdvdman.h>
+#include <hdd-ioctl.h>
+
+#include "pfs-opt.h"
+#include "libpfs.h"
 
 ///////////////////////////////////////////////////////////////////////////////
-//   Function defenitions
+//   Function definitions
 
-void *allocMem(int size)
+void *pfsAllocMem(int size)
 {
 	int intrStat;
 	void *mem;
@@ -28,7 +38,16 @@ void *allocMem(int size)
 	return mem;
 }
 
-int getPs2Time(pfs_datetime *tm)
+void pfsFreeMem(void *buffer)
+{
+	int OldState;
+
+	CpuSuspendIntr(&OldState);
+	FreeSysMemory(buffer);
+	CpuResumeIntr(OldState);
+}
+
+int pfsGetTime(pfs_datetime *tm)
 {
 	sceCdCLOCK	cdtime;
 	static pfs_datetime timeBuf={
@@ -48,32 +67,32 @@ int getPs2Time(pfs_datetime *tm)
 	return 0;
 }
 
-int fsckStat(pfs_mount_t *pfsMount, pfs_super_block *superblock,
+int pfsFsckStat(pfs_mount_t *pfsMount, pfs_super_block *superblock,
 	u32 stat, int mode)
 {	// mode 0=set flag, 1=remove flag, else check stat
 
 	if(pfsMount->blockDev->transfer(pfsMount->fd, superblock, 0, PFS_BLOCKSIZE, 1,
-		IOCTL2_TMODE_READ)==0)
+		PFS_IO_MODE_READ)==0)
 	{
 		switch(mode)
 		{
-			case MODE_SET_FLAG:	// set flag
-				superblock->fsckStat|=stat;
+			case PFS_MODE_SET_FLAG:
+				superblock->pfsFsckStat|=stat;
 				break;
-			case MODE_REMOVE_FLAG:	// remove flag
-				superblock->fsckStat&=~stat;
+			case PFS_MODE_REMOVE_FLAG:
+				superblock->pfsFsckStat&=~stat;
 				break;
-			default/*MODE_CHECK_FLAG*/:// check flag
-				return 0 < (superblock->fsckStat & stat);
+			default/*PFS_MODE_CHECK_FLAG*/:
+				return 0 < (superblock->pfsFsckStat & stat);
 		}
 		pfsMount->blockDev->transfer(pfsMount->fd, superblock, 0, PFS_BLOCKSIZE, 1,
-			IOCTL2_TMODE_WRITE);
+			PFS_IO_MODE_WRITE);
 		pfsMount->blockDev->flushCache(pfsMount->fd);
 	}
 	return 0;
 }
 
-void printBitmap(u32 *bitmap) {
+void pfsPrintBitmap(u32 *bitmap) {
 	u32 i, j;
 	char a[48+1], b[16+1];
 
@@ -87,11 +106,11 @@ void printBitmap(u32 *bitmap) {
 			b[j] = ((*c>=0) && (look_ctype_table(*c) & 0x17)) ?
 				*c : '.';
 		}
-		printf("%s%s\n", a, b);
+		PFS_PRINTF("%s%s\n", a, b);
 	}
 }
 
-int getScale(int num, int size)
+int pfsGetScale(int num, int size)
 {
 	int scale = 0;
 
@@ -101,7 +120,7 @@ int getScale(int num, int size)
 	return scale;
 }
 
-u32 fixIndex(u32 index)
+u32 pfsFixIndex(u32 index)
 {
 	if(index < 114)
 		return index;
@@ -110,85 +129,22 @@ u32 fixIndex(u32 index)
 	return index % 123;
 }
 
-
-int checkAccess(pfs_cache_t *clink, int flags)
-{
-	int mode;
-
-	// Bail if trying to write to read-only mount
-	if ((clink->pfsMount->flags & FIO_MT_RDONLY) && (flags & O_WRONLY))
-		return -EROFS;
-
-	if (((clink->u.inode->mode & FIO_S_IFMT) != FIO_S_IFDIR) &&
-		((clink->u.inode->mode & 0111) == 0))
-		mode=6;
-	else
-		mode=7;
-	return ((mode & flags) & 7) == flags ? 0 : -EACCES;
-}
-
-char* splitPath(char *filename, char *path, int *result)
-{
-	int i=0;
-	int j=0;
-
-	for (i=0; filename[i] == '/'; i++)
-		;
-
-	for (; i<1024 && filename[i] != '/'; i++){
-		if (filename[i] == 0)	break;
-		if (j < 255)
-			path[j++] = filename[i];
-	}
-
-	if (j<256)
-		path[j]=0;
-
-	while (filename[i] == '/')
-		if (i<1024)
-			i++;
-		else
-			break;
-	if (i<1024)
-		return &filename[i];
-
-	*result=-ENAMETOOLONG;
-	return 0;
-}
-
-u16 getMaxthIndex(pfs_mount_t *pfsMount)
-{
-	u32 max=0, maxI=0, i, v;
-
-	for (i=0; i < pfsMount->num_subs + 1; i++)  //enumerate all subs
-	{
-		v =	(pfsMount->free_zone[i] * (u64)100) /
-			(pfsMount->blockDev->getSize(pfsMount->fd, i) >> pfsMount->sector_scale);
-		if (max < v)
-		{
-			max=v;
-			maxI=i;
-		}
-	}
-	return maxI;
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 //   Functions to work with hdd.irx
 
 #define NUM_SUPPORTED_DEVICES	1
-block_device deviceCallTable[NUM_SUPPORTED_DEVICES] = {
+pfs_block_device_t pfsBlockDeviceCallTable[NUM_SUPPORTED_DEVICES] = {
 	{
 		"hdd",
-		hddTransfer,
-		hddGetSubNumber,
-		hddGetSize,
-		hddSetPartError,
-		hddFlushCache,
+		pfsHddTransfer,
+		pfsHddGetSubCount,
+		pfsHddGetPartSize,
+		pfsHddSetPartError,
+		pfsHddFlushCache,
 	}
 };
 
-block_device *getDeviceTable(const char *name)
+pfs_block_device_t *pfsGetBlockDeviceTable(const char *name)
 {
 	char *end;
 	char devname[32];
@@ -201,7 +157,7 @@ block_device *getDeviceTable(const char *name)
 
 	end = strchr(name, ':');
 	if(!end) {
-		printf("ps2fs: Error: Unknown block device '%s'\n", name);
+		PFS_PRINTF(PFS_DRV_NAME": Error: Unknown block device '%s'\n", name);
 		return NULL;
 	}
 
@@ -217,16 +173,16 @@ block_device *getDeviceTable(const char *name)
 	tmp[0] = '\0';
 
 	for(i = 0; i < NUM_SUPPORTED_DEVICES; i++)
-		if(!strcmp(deviceCallTable[i].devName, devname))
-			return &deviceCallTable[i];
+		if(!strcmp(pfsBlockDeviceCallTable[i].devName, devname))
+			return &pfsBlockDeviceCallTable[i];
 
 	return NULL;
 }
 
-int hddTransfer(int fd, void *buffer, u32 sub/*0=main 1+=subs*/, u32 sector,
+int pfsHddTransfer(int fd, void *buffer, u32 sub/*0=main 1+=subs*/, u32 sector,
 				u32 size/* in sectors*/, u32 mode)
 {
-	hdd_ioctl2_transfer_t t;
+	hddIoctl2Transfer_t t;
 
 	t.sub=sub;
 	t.sector=sector;
@@ -237,22 +193,22 @@ int hddTransfer(int fd, void *buffer, u32 sub/*0=main 1+=subs*/, u32 sector,
 	return ioctl2(fd, APA_IOCTL2_TRANSFER_DATA, &t, 0, NULL, 0);
 }
 
-u32 hddGetSubNumber(int fd)
+u32 pfsHddGetSubCount(int fd)
 {
 	return ioctl2(fd, APA_IOCTL2_NUMBER_OF_SUBS, NULL, 0, NULL, 0);
 }
 
-u32 hddGetSize(int fd, u32 sub/*0=main 1+=subs*/)
+u32 pfsHddGetPartSize(int fd, u32 sub/*0=main 1+=subs*/)
 {	// of a partition
 	return ioctl2(fd, APA_IOCTL2_GETSIZE, &sub, 0, NULL, 0);
 }
 
-void hddSetPartError(int fd)
+void pfsHddSetPartError(int fd)
 {
 	ioctl2(fd, APA_IOCTL2_SET_PART_ERROR, NULL, 0, NULL, 0);
 }
 
-int hddFlushCache(int fd)
+int pfsHddFlushCache(int fd)
 {
 	return ioctl2(fd, APA_IOCTL2_FLUSH_CACHE, NULL, 0, NULL, 0);
 }

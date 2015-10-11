@@ -11,38 +11,45 @@
 # APA cache manipulation routines
 */
 
-#include "hdd.h"
+#include <errno.h>
+#include <iomanX.h>
+#include <sysclib.h>
+#include <stdio.h>
+#include <hdd-ioctl.h>
+
+#include "apa-opt.h"
+#include "libapa.h"
 
 //  Globals
-apa_cache		*cacheBuf;
-int				cacheSize;
+static apa_cache_t *cacheBuf;
+static int cacheSize;
 
-int cacheInit(u32 size)
+int apaCacheInit(u32 size)
 {
-	apa_header *header;
+	apa_header_t *header;
 	int i;
 
 	cacheSize=size;	// save size ;)
-	if((header=(apa_header *)allocMem(size*sizeof(apa_header)))){
-		cacheBuf=allocMem((size+1)*sizeof(apa_cache));
+	if((header=(apa_header_t *)apaAllocMem(size*sizeof(apa_header_t)))){
+		cacheBuf=apaAllocMem((size+1)*sizeof(apa_cache_t));
 		if(cacheBuf==NULL)
 			return -ENOMEM;
 	}
 	else
 		return -ENOMEM;
 	// setup cache header...
-	memset(cacheBuf, 0, (size+1)*sizeof(apa_cache));
+	memset(cacheBuf, 0, (size+1)*sizeof(apa_cache_t));
 	cacheBuf->next=cacheBuf;
 	cacheBuf->tail=cacheBuf;
 	for(i=1; i<size+1;i++, header++){
 		cacheBuf[i].header=header;
 		cacheBuf[i].device=-1;
-		cacheLink(cacheBuf->tail, &cacheBuf[i]);
+		apaCacheLink(cacheBuf->tail, &cacheBuf[i]);
 	}
 	return 0;
 }
 
-void cacheLink(apa_cache *clink, apa_cache *cnew)
+void apaCacheLink(apa_cache_t *clink, apa_cache_t *cnew)
 {
 	cnew->tail=clink;
 	cnew->next=clink->next;
@@ -50,14 +57,14 @@ void cacheLink(apa_cache *clink, apa_cache *cnew)
 	clink->next=cnew;
 }
 
-apa_cache *cacheUnLink(apa_cache *clink)
+apa_cache_t *apaCacheUnLink(apa_cache_t *clink)
 {
 	clink->tail->next=clink->next;
 	clink->next->tail=clink->tail;
 	return clink;
 }
 
-int cacheTransfer(apa_cache *clink, int type)
+int apaCacheTransfer(apa_cache_t *clink, int type)
 {
 	int err;
 	if(type)
@@ -67,41 +74,41 @@ int cacheTransfer(apa_cache *clink, int type)
 
 	if(err)
 	{
-		dprintf1("ps2hdd: Error: disk err %d on device %ld, sector %ld, type %d\n",
+		APA_PRINTF(APA_DRV_NAME": error: disk err %d on device %ld, sector %ld, type %d\n",
 			err, clink->device, clink->sector, type);
 		if(type==0)// save any read error's..
 			apaSaveError(clink->device, clink->header, APA_SECTOR_SECTOR_ERROR, clink->sector);
 	}
-	clink->flags&=~CACHE_FLAG_DIRTY;
+	clink->flags&=~APA_CACHE_FLAG_DIRTY;
 	return err;
 }
 
-void cacheFlushDirty(apa_cache *clink)
+void apaCacheFlushDirty(apa_cache_t *clink)
 {
-	if(clink->flags&CACHE_FLAG_DIRTY)
-		cacheTransfer(clink, THEADER_MODE_WRITE);
+	if(clink->flags&APA_CACHE_FLAG_DIRTY)
+		apaCacheTransfer(clink, APA_IO_MODE_WRITE);
 }
 
-int cacheFlushAllDirty(u32 device)
+int apaCacheFlushAllDirty(s32 device)
 {
 	u32 i;
 	// flush apal
 	for(i=1;i<cacheSize+1;i++){
-		if((cacheBuf[i].flags & CACHE_FLAG_DIRTY) && cacheBuf[i].device==device)
-			journalWrite(&cacheBuf[i]);
+		if((cacheBuf[i].flags & APA_CACHE_FLAG_DIRTY) && cacheBuf[i].device==device)
+			apaJournalWrite(&cacheBuf[i]);
 	}
-	journalFlush(device);
+	apaJournalFlush(device);
 	// flush apa
 	for(i=1;i<cacheSize+1;i++){
-		if((cacheBuf[i].flags & CACHE_FLAG_DIRTY) && cacheBuf[i].device==device)
-			cacheTransfer(&cacheBuf[i], THEADER_MODE_WRITE);
+		if((cacheBuf[i].flags & APA_CACHE_FLAG_DIRTY) && cacheBuf[i].device==device)
+			apaCacheTransfer(&cacheBuf[i], APA_IO_MODE_WRITE);
 	}
-	return journalReset(device);
+	return apaJournalReset(device);
 }
 
-apa_cache *cacheGetHeader(u32 device, u32 sector, u32 mode, int *result)
+apa_cache_t *apaCacheGetHeader(s32 device, u32 sector, u32 mode, int *result)
 {
-	apa_cache *clink=NULL;
+	apa_cache_t *clink=NULL;
 	int i;
 
 	*result=0;
@@ -115,24 +122,24 @@ apa_cache *cacheGetHeader(u32 device, u32 sector, u32 mode, int *result)
 	if(clink!=NULL) {
 		// cached ver was found :)
 		if(clink->nused==0)
-			clink=cacheUnLink(clink);
+			clink=apaCacheUnLink(clink);
 		clink->nused++;
 		return clink;
 	}
 	if((cacheBuf->tail==cacheBuf) &&
 		(cacheBuf->tail==cacheBuf->tail->next)){
-			dprintf1("ps2hdd: error: free buffer empty\n");
+			APA_PRINTF(APA_DRV_NAME": error: free buffer empty\n");
 		}
 	else
 	{
 		clink=cacheBuf->next;
-		if(clink->flags & CACHE_FLAG_DIRTY)
-			dprintf1("ps2hdd: error: dirty buffer allocated\n");
+		if(clink->flags & APA_CACHE_FLAG_DIRTY)
+			APA_PRINTF(APA_DRV_NAME": error: dirty buffer allocated\n");
 		clink->flags=0;
 		clink->nused=1;
 		clink->device=device;
 		clink->sector=sector;
-		clink=cacheUnLink(clink);
+		clink=apaCacheUnLink(clink);
 	}
 	if(clink==NULL)
 	{
@@ -141,49 +148,49 @@ apa_cache *cacheGetHeader(u32 device, u32 sector, u32 mode, int *result)
 	}
 	if(!mode)
 	{
-		if((*result=cacheTransfer(clink, THEADER_MODE_READ))<0){
+		if((*result=apaCacheTransfer(clink, APA_IO_MODE_READ))<0){
 			clink->nused=0;
 			clink->device=-1;
-			cacheLink(cacheBuf, clink);
+			apaCacheLink(cacheBuf, clink);
 			clink=NULL;
 		}
 	}
 	return clink;
 }
 
-void cacheAdd(apa_cache *clink)
+void apaCacheFree(apa_cache_t *clink)
 {
 	if(clink==NULL){
-		dprintf1("ps2hdd: Error: null buffer returned\n");
+		APA_PRINTF(APA_DRV_NAME": error: null buffer returned\n");
 		return;
 	}
 	if(clink->nused==0){
-		dprintf1("ps2hdd: Error: unused cache returned\n");
+		APA_PRINTF(APA_DRV_NAME": error: unused cache returned\n");
 		return;
 	}
-	if(clink->flags & CACHE_FLAG_DIRTY)
-		dprintf1("ps2hdd: Error: dirty buffer returned\n");
+	if(clink->flags & APA_CACHE_FLAG_DIRTY)
+		APA_PRINTF(APA_DRV_NAME": error: dirty buffer returned\n");
 	clink->nused--;
 	if(clink->nused==0)
-		cacheLink(cacheBuf->tail, clink);
+		apaCacheLink(cacheBuf->tail, clink);
 	return;
 }
 
-apa_cache *cacheGetFree()
+apa_cache_t *apaCacheAlloc(void)
 {
-	apa_cache *cnext;
+	apa_cache_t *cnext;
 
 	if((cacheBuf->tail==cacheBuf) &&
 		(cacheBuf->tail==cacheBuf->tail->next)){
-			dprintf1("ps2hdd: Error: free buffer empty\n");
+			APA_PRINTF(APA_DRV_NAME": error: free buffer empty\n");
 			return NULL;
 		}
 	cnext=cacheBuf->next;
-	if(cnext->flags & CACHE_FLAG_DIRTY)
-		dprintf1("ps2hdd: Error: dirty buffer allocated\n");
+	if(cnext->flags & APA_CACHE_FLAG_DIRTY)
+		APA_PRINTF(APA_DRV_NAME": error: dirty buffer allocated\n");
 	cnext->nused=1;
 	cnext->flags=0;
-	cnext->device=(u32)-1;
+	cnext->device=-1;
 	cnext->sector=-1;
-	return cacheUnLink(cnext);
+	return apaCacheUnLink(cnext);
 }
