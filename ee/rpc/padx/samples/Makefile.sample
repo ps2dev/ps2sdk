@@ -12,9 +12,6 @@ EE_BIN = padx_sample.elf
 EE_OBJS = padx.o
 EE_LIBS = -lpadx
 
-include $(PS2SDK)/samples/Makefile.pref
-include $(PS2SDK)/samples/Makefile.eeglobal
-
 all: $(EE_BIN) freesio2.irx freepad.irx
 
 clean:
@@ -25,4 +22,7 @@ freesio2.irx:
 
 freepad.irx:
 	cp $(PS2SDK)/iop/irx/freepad.irx $@
+
+include $(PS2SDK)/samples/Makefile.pref
+include $(PS2SDK)/samples/Makefile.eeglobal
 

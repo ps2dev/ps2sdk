@@ -11,11 +11,11 @@
 EE_ERL = cpp-hello.erl
 EE_OBJS = cpp-hello.o
 
-include $(PS2SDK)/samples/Makefile.pref
-include $(PS2SDK)/samples/Makefile.eeglobal
-
 all: $(EE_ERL)
 
 clean:
 	rm -f *.erl *.o *.a
+
+include $(PS2SDK)/samples/Makefile.pref
+include $(PS2SDK)/samples/Makefile.eeglobal
 

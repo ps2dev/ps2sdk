@@ -12,9 +12,6 @@ EE_BIN = mtap_sample.elf
 EE_OBJS = mtap_sample.o
 EE_LIBS = -lpadx -lc -lmtap
 
-include $(PS2SDK)/samples/Makefile.pref
-include $(PS2SDK)/samples/Makefile.eeglobal
-
 all: $(EE_BIN) freesio2.irx freemtap.irx freepad.irx
 
 clean:
@@ -29,4 +26,7 @@ freemtap.irx:
 
 freepad.irx:
 	cp $(PS2SDK)/iop/irx/freepad.irx $@
+
+include $(PS2SDK)/samples/Makefile.pref
+include $(PS2SDK)/samples/Makefile.eeglobal
 

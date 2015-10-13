@@ -12,11 +12,11 @@ EE_BIN = testcd.elf
 EE_OBJS = testcd.o
 EE_LIBS = -laudsrv -lc
 
-include $(PS2SDK)/samples/Makefile.pref
-include $(PS2SDK)/samples/Makefile.eeglobal
-
 all: $(BINS)
 
 clean:
 	rm -f *.o *.elf
+
+include $(PS2SDK)/samples/Makefile.pref
+include $(PS2SDK)/samples/Makefile.eeglobal
 
