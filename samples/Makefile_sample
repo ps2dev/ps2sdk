@@ -12,8 +12,7 @@ SUBDIRS = cpp-hello
 SUBDIRS += debug/callstacktest
 SUBDIRS += draw/cube
 SUBDIRS += draw/teapot
-#there is no flower.c
-#SUBDIRS += draw/texture
+SUBDIRS += draw/texture
 SUBDIRS += font
 SUBDIRS += graph
 SUBDIRS += hello

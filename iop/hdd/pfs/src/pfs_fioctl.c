@@ -119,7 +119,7 @@ int pfsFioIoctl2(iop_file_t *f, int cmd, void *arg, size_t arglen,	void *buf, si
 
 	switch(cmd)
 	{
-	case PFS_IOCTL2_MALLOC:
+	case PFS_IOCTL2_ALLOC:
 		rv=pfsFioIoctl2Alloc(fileSlot->clink, *(int *)(arg), 1);
 		break;
 
@@ -299,7 +299,7 @@ static int ioctl2AttrAdd(pfs_cache_t *clink, pfs_ioctl2attr_t *attr)
 		tmp=aentry->aLen-((aentry->kLen+(aentry->vLen + 7)) & ~3);
 
 	aentry->aLen-=tmp;
-	(char *)aentry+=aentry->aLen;
+	aentry = (pfs_aentry_t*)((u8 *)aentry + aentry->aLen);
 	aentry->kLen=kLen;
 	aentry->vLen=vLen;
 	aentry->aLen=tmp;

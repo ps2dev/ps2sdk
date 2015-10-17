@@ -20,7 +20,7 @@ packet_t *packet_init(int qwords, int type)
 	if (type == PACKET_SPR)
 	{
 
-		(u32*)packet->data = (u32*)SPR_BEGIN;
+		packet->data = (qword_t *)SPR_BEGIN;
 		packet->qwc = 0x1000;
 
 	}
@@ -42,7 +42,7 @@ packet_t *packet_init(int qwords, int type)
 	if (type == PACKET_UCAB)
 	{
 
-		(u32)packet->data |= (u32)0x30000000;
+		packet->data = (qword_t *)((u32)packet->data | 0x30000000);
 
 	}
 
@@ -74,7 +74,7 @@ void packet_free(packet_t *packet)
 		if (packet->type == PACKET_UCAB)
 		{
 
-			(u32)packet->data ^= 0x30000000;
+			packet->data = (qword_t *)((u32)packet->data ^ 0x30000000);
 
 		}
 
@@ -94,7 +94,7 @@ void packet_reset(packet_t *packet)
 	if (packet->type == PACKET_SPR)
 	{
 
-		(u8*)packet->data = (u8*)SPR_BEGIN;
+		packet->data = (qword_t *)SPR_BEGIN;
 		return;
 
 	}

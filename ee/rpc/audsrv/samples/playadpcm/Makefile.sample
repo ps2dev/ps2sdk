@@ -12,9 +12,6 @@ EE_BIN = playadpcm.elf
 EE_OBJS = playadpcm.o
 EE_LIBS = -laudsrv -lc
 
-include $(PS2SDK)/samples/Makefile.pref
-include $(PS2SDK)/samples/Makefile.eeglobal
-
 all: $(EE_BIN)  evillaugh.adp
 
 %.adp : %.wav
@@ -22,4 +19,7 @@ all: $(EE_BIN)  evillaugh.adp
 
 clean:
 	rm -f *.elf *.o *.adp
+
+include $(PS2SDK)/samples/Makefile.pref
+include $(PS2SDK)/samples/Makefile.eeglobal
 

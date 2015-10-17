@@ -120,7 +120,7 @@ typedef struct
 //	PFS.IRX
 
 // IOCTL2 commands
-#define PFS_IOCTL2_MALLOC		0x7001
+#define PFS_IOCTL2_ALLOC		0x7001
 #define PFS_IOCTL2_FREE			0x7002
 #define PFS_IOCTL2_ATTR_ADD		0x7003
 #define PFS_IOCTL2_ATTR_DEL		0x7004
@@ -145,7 +145,7 @@ typedef struct
 
 //For backward-compatibility
 // ioctl2 commands for ps2fs.irx
-#define PFSIO_ALLOC			PFS_IOCTL2_MALLOC
+#define PFSIO_ALLOC			PFS_IOCTL2_ALLOC
 #define PFSIO_FREE			PFS_IOCTL2_FREE
 #define PFSIO_ATTR_ADD			PFS_IOCTL2_ATTR_ADD
 #define PFSIO_ATTR_DEL			PFS_IOCTL2_ATTR_DEL

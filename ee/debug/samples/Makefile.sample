@@ -12,11 +12,11 @@ EE_BIN = callstacktest.elf
 EE_OBJS = callstacktest.o
 EE_LIBS = -ldebug -lc
 
-include $(PS2SDK)/samples/Makefile.pref
-include $(PS2SDK)/samples/Makefile.eeglobal
-
 all: $(EE_BIN)
 
 clean:
 	rm -f *.elf *.o *.a
+
+include $(PS2SDK)/samples/Makefile.pref
+include $(PS2SDK)/samples/Makefile.eeglobal
 
