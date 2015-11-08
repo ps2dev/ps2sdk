@@ -13,4 +13,3 @@ SUBDIRS = sbus
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
 include $(PS2SDKSRC)/common/Rules.release
-

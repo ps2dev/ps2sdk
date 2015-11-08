@@ -6,16 +6,15 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
-
 
 IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = bin/
+IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN = bin/udptty.irx
-IOP_OBJS = obj/main.o obj/smap.o obj/udp.o obj/tty.o obj/imports.o
+IOP_BIN = $(IOP_BIN_DIR)udptty.irx
+IOP_OBJS = main.o smap.o udp.o tty.o imports.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 IOP_INCS += -I. -I$(PS2SDKSRC)/iop/dev9/dev9/include
 
 IOP_CFLAGS = -Wall -O2 -G0

@@ -28,6 +28,7 @@ release-samples:
 	cp -f Makefile.eeglobal_cpp_sample $(SAMPLES_TARGET)/Makefile.eeglobal_cpp
 	cp -f Makefile.iopglobal_sample $(SAMPLES_TARGET)/Makefile.iopglobal
 
+release-clean:
+	rm -f -r $(SAMPLES_TARGET)
 
 include $(PS2SDKSRC)/Defs.make
-

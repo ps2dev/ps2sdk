@@ -6,19 +6,15 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
-
 
 IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = bin/
+IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = bin/alloc.irx
-IOP_OBJS = obj/alloc.o obj/exports.o obj/imports.o
-
-IOP_CFLAGS  += -Wall -fno-builtin
-IOP_LDFLAGS += -s
+IOP_BIN  = $(IOP_BIN_DIR)alloc.irx
+IOP_OBJS = alloc.o exports.o imports.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

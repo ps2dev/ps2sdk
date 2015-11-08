@@ -6,8 +6,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
-
 
 IOP_CC_VERSION := $(shell $(IOP_CC) --version 2>&1 | sed -n 's/^.*(GCC) //p')
 
@@ -21,11 +19,16 @@ ifeq ($(IOP_CC_VERSION),3.2.3)
 ASFLAGS_TARGET = -march=r3000
 endif
 
+# include dir
 IOP_INCS := $(IOP_INCS) -I$(PS2SDKSRC)/iop/kernel/include -I$(PS2SDKSRC)/common/include -Iinclude
 
-IOP_CFLAGS  := -D_IOP -fno-builtin -O2 -G0 $(IOP_INCS) $(IOP_CFLAGS)
+# C compiler flags
+IOP_CFLAGS  := -D_IOP -fno-builtin -O2 -G0 -Wall $(IOP_INCS) $(IOP_CFLAGS)
+# Linker flags
+IOP_LDFLAGS := -nostdlib -s $(IOP_LDFLAGS)
+
+# Assembler flags
 IOP_ASFLAGS := $(ASFLAGS_TARGET) -EL -G0 $(IOP_ASFLAGS)
-IOP_LDFLAGS := -nostdlib $(IOP_LDFLAGS)
 
 # Externally defined variables: IOP_BIN, IOP_OBJS, IOP_LIB
 

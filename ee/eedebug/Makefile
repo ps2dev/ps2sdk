@@ -6,18 +6,15 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
-
-LIBEEDEBUG_LIB  = lib/libeedebug.a
 
 EE_OBJS_DIR = obj/
 EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
-EE_INCS =
+LIBEEDEBUG_LIB = $(EE_LIB_DIR)libeedebug.a
 
-EE_LIB = $(LIBEEDEBUG_LIB)
+EE_INCS =
 
 EE_OBJS  = ee_debug.o ee_exceptions.o ee_dbg_low.o
 EE_OBJS += erl-support.o
@@ -25,7 +22,9 @@ EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
 EE_CFLAGS = -O0
 
-all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBEEDEBUG_LIB)
+EE_LIB = $(LIBEEDEBUG_LIB)
+
+all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
 
 .c.o :
 	$(EE_CC) $(EE_CFLAGS) $(EE_INC) -c $< -o obj/$@
@@ -36,4 +35,3 @@ clean:
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make
 include $(PS2SDKSRC)/ee/Rules.release
-

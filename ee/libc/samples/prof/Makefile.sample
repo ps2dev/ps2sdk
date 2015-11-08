@@ -6,7 +6,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 
 EE_BIN = prof.elf
 EE_OBJS = prof.o
@@ -16,8 +15,13 @@ EE_LIBS = -lc
 all: $(EE_BIN)
 
 clean:
-	rm -f *.elf *.o *.a
+	rm -f $(EE_BIN) $(EE_OBJS)
+
+run: $(EE_BIN)
+	ps2client execee host:$(EE_BIN)
+
+reset:
+	ps2client reset
 
 include $(PS2SDK)/samples/Makefile.pref
 include $(PS2SDK)/samples/Makefile.eeglobal
-

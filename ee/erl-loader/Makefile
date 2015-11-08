@@ -6,7 +6,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 
 
 EE_OBJS_DIR = obj/
@@ -44,6 +43,11 @@ $(LOADER_BIN) : $(EE_OBJS) $(PS2SDKSRC)/ee/startup/obj/crt0.o
 
 clean:
 	rm -f -r $(EE_OBJS_DIR) $(EE_BIN_DIR) $(EE_SRC_DIR)exports.c
+
+release:
+	$(ECHO) Installing $(LOADER_BIN) to $(PS2SDK)/ee/bin/ ;
+	cp -f $(LOADER_BIN) $(PS2SDK)/ee/bin/
+	chmod 644 $(PS2SDK)/ee/bin/erl-loader.elf
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make

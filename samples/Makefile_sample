@@ -6,16 +6,19 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 
-SUBDIRS = cpp-hello
+SUBDIRS =
+SUBDIRS += cpp-hello
+SUBDIRS += hello
 SUBDIRS += debug/callstacktest
 SUBDIRS += draw/cube
 SUBDIRS += draw/teapot
 SUBDIRS += draw/texture
 SUBDIRS += font
 SUBDIRS += graph
-SUBDIRS += hello
+SUBDIRS += libc/hello
+SUBDIRS += libc/prof
+SUBDIRS += regress
 SUBDIRS += libgs/doublebuffer
 SUBDIRS += libgs/draw
 SUBDIRS += mpeg
@@ -24,6 +27,7 @@ SUBDIRS += rpc/audsrv/playcdda
 SUBDIRS += rpc/audsrv/playwav
 SUBDIRS += rpc/audsrv/playwav2
 SUBDIRS += rpc/audsrv/testcd
+SUBDIRS += rpc/camera
 SUBDIRS += rpc/memorycard
 SUBDIRS += rpc/mtap
 SUBDIRS += rpc/pad

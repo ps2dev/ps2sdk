@@ -6,11 +6,10 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 
-
-SUBDIRS = bin2s bin2c bin2o adpenc ps2adpcm
+SUBDIRS = bin2s bin2c bin2o adpenc ps2adpcm \
+#	  gensymtab
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
-
+include $(PS2SDKSRC)/tools/Rules.release

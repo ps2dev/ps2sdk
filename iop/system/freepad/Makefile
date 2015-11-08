@@ -2,25 +2,22 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright 2001-2004.
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
+#
 
 IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = bin/
+IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = bin/freepad.irx
-IOP_OBJS = obj/freepad.o obj/rpcserver.o obj/exports.o obj/imports.o
-IOP_OBJS += obj/padInit.o obj/padPortOpen.o obj/padMiscFuncs.o obj/sio2Cmds.o
-IOP_OBJS += obj/padData.o obj/padCmds.o
+IOP_BIN  = $(IOP_BIN_DIR)freepad.irx
+IOP_OBJS = freepad.o rpcserver.o exports.o imports.o padInit.o padPortOpen.o padMiscFuncs.o sio2Cmds.o padData.o padCmds.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
-
-IOP_CFLAGS  += -Wall -fno-builtin-printf -fno-builtin-memcpy # -DDEBUG
-IOP_LDFLAGS += -s
+IOP_CFLAGS  += -fno-builtin-printf -fno-builtin-memcpy # -DDEBUG
 IOP_INCS = -I$(PS2SDKSRC)/iop/system/sio2log/include/
-
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

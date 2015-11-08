@@ -6,19 +6,17 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
-
 
 IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = bin/
+IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = bin/ps2netfs.irx
-IOP_OBJS = obj/ps2netfs.o obj/ps2_fio.o obj/devscan.o obj/imports.o
+IOP_BIN  = $(IOP_BIN_DIR)ps2netfs.irx
+IOP_OBJS = ps2netfs.o ps2_fio.o devscan.o imports.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
-IOP_CFLAGS  += -Wall -fno-builtin-printf
-IOP_LDFLAGS +=  -s
+IOP_CFLAGS  += -fno-builtin-printf
 IOP_INCS += -I$(PS2SDKSRC)/iop/system/iopmgr/include -I$(PS2SDKSRC)/iop/tcpip/tcpip/include
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)

@@ -7,20 +7,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 
-IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = irx/
-IOP_SRC_DIR = src/
-IOP_INC_DIR = include/
-
-IOP_BIN  = $(IOP_BIN_DIR)iomanX.irx
-IOP_OBJS = iomanX.o ioman_sbv.o exports.o imports.o
-IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
-
-all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
-
-clean:
-	rm -f -r $(IOP_OBJS_DIR) $(IOP_BIN_DIR)
+SAMPLE_DIR = rpc/camera
 
 include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/iop/Rules.make
-include $(PS2SDKSRC)/iop/Rules.release
+include $(PS2SDKSRC)/samples/Rules.samples

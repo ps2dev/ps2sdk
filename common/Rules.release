@@ -6,29 +6,40 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 
+
+#
+# Creates the base common directory structure in target directory.
+#
 
 RELEASE_COMMON_DIRS = common/ common/include/ common/include/sys
 RELEASE_COMMON_DIRS := $(RELEASE_COMMON_DIRS:%=$(PS2SDK)/%)
 
-$(RELEASE_COMMON_DIRS):
+release-dirs:
 	$(MKDIR) -p $(RELEASE_COMMON_DIRS)
 
-release: all $(RELEASE_COMMON_DIRS)
+#
+# Any file in the include directory will be copied to the common/include
+# directory.
+#
+
+release-include:
 	@for file in include/* ; do \
 	   if test -f $$file ; then \
 	     $(ECHO) Installing $$file to $(PS2SDK)/common/include ; \
 	     cp -f $$file $(PS2SDK)/common/include ; \
+	     chmod 644 $(PS2SDK)/common/$$file ; \
 	   fi \
 	done;
 	@for file in include/sys/* ; do \
 	   if test -f $$file ; then \
 	     $(ECHO) Installing $$file to $(PS2SDK)/common/include/sys ; \
 	     cp -f $$file $(PS2SDK)/common/include/sys ; \
+	     chmod 644 $(PS2SDK)/common/$$file ; \
 	   fi \
 	done;
 
+release: release-dirs release-include
+
 release-clean:
 	rm -f -r $(PS2SDK)/common
-

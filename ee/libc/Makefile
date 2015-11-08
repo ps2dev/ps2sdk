@@ -6,12 +6,9 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 
 .SUFFIXES:.c
 VPATH = src:obj
-
-LIBC_LIB  = lib/libc.a
 
 EE_OBJS_DIR = obj/
 EE_LIB_DIR = lib/
@@ -19,9 +16,11 @@ EE_SRC_DIR = src/
 EE_INC_DIR = include/
 EE_SAMPLE_DIR = samples/
 
-EE_LIB = $(LIBC_LIB)
-EE_SAMPLES = hello
+LIBC_LIB  = $(EE_LIB_DIR)libc.a
 
+EE_LIB = $(LIBC_LIB)
+
+EE_SAMPLES = hello prof regress
 EE_SAMPLES := $(EE_SAMPLES:%=$(EE_SAMPLE_DIR)%)
 
 CORE_OBJS = sbrk.o memchr.o memcpy.o memset.o strcat.o \
@@ -102,7 +101,6 @@ EE_OBJS = $(CORE_OBJS) $(MULT_OBJS)
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBC_LIB)
 
-
 .c.o :
 	$(EE_CC) $(EE_CFLAGS) $(EE_INC) -c $< -o obj/$@
 
@@ -150,7 +148,6 @@ $(INIT_OBJS): src/init.c
 
 clean:
 	rm -f -r $(EE_OBJS_DIR) $(EE_LIB_DIR)
-
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make

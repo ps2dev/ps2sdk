@@ -6,7 +6,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 
 SUBDIRS = kernel libc rpc startup debug \
 	  eedebug sbv dma graph math3d math \
@@ -15,3 +14,4 @@ SUBDIRS = kernel libc rpc startup debug \
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
+include $(PS2SDKSRC)/ee/Rules.release

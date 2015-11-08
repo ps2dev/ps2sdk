@@ -6,13 +6,9 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
-
 
 .SUFFIXES:.c
 VPATH = src:obj
-
-LIBSBV_LIB  = lib/libpatches.a
 
 EE_OBJS_DIR = obj/
 EE_LIB_DIR = lib/
@@ -20,14 +16,14 @@ EE_SRC_DIR = src/
 EE_INC_DIR = include/
 EE_SAMPLE_DIR = samples/
 
+LIBSBV_LIB  = $(EE_LIB_DIR)libpatches.a
+
 EE_LIB = $(LIBSBV_LIB)
 
 EE_OBJS = smem.o smod.o slib.o patch_enable_lmb.o patch_disable_prefix_check.o \
 	patch_user_mem_clear.o patch_fioremove.o \
 	common.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
-
-EE_INCS += 
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBSBV_LIB)
 
@@ -38,10 +34,8 @@ all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBSBV_LIB)
 .s.o :
 	$(EE_AS) $(EE_ASFLAGS) $< -o obj/$@
 
-
 clean:
 	rm -f -r $(EE_OBJS_DIR) $(EE_LIB_DIR)
-
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make

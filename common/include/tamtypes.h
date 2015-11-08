@@ -76,15 +76,15 @@ typedef union {
 static inline u8  _lb(u32 addr) { return *(vu8 *)addr; }
 static inline u16 _lh(u32 addr) { return *(vu16 *)addr; }
 static inline u32 _lw(u32 addr) { return *(vu32 *)addr; }
-static inline u64 _ld(u32 addr) { return *(vu64 *)addr; }
 
 static inline void _sb(u8 val, u32 addr) { *(vu8 *)addr = val; }
 static inline void _sh(u16 val, u32 addr) { *(vu16 *)addr = val; }
 static inline void _sw(u32 val, u32 addr) { *(vu32 *)addr = val; }
-static inline void _sd(u64 val, u32 addr) { *(vu64 *)addr = val; }
 
 #ifdef _EE
+static inline u64 _ld(u32 addr) { return *(vu64 *)addr; }
 static inline u128 _lq(u32 addr) { return *(vu128 *)addr; }
+static inline void _sd(u64 val, u32 addr) { *(vu64 *)addr = val; }
 static inline void _sq(u128 val, u32 addr) { *(vu128 *)addr = val; }
 #endif
 

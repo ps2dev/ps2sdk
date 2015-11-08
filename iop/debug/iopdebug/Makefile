@@ -6,19 +6,15 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 
 IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = bin/
+IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = bin/iopdebug.irx
+IOP_BIN  = $(IOP_BIN_DIR)iopdebug.irx
 IOP_OBJS = main.o iop_debug.o iop_exceptions.o iop_dbg_low.o imports.o exports.o
-IOP_OBJS := $(IOP_OBJS:%=obj/%)
-
-IOP_CFLAGS  += -Wall
-IOP_LDFLAGS += -s
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 
@@ -28,4 +24,3 @@ clean:
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.make
 include $(PS2SDKSRC)/iop/Rules.release
-
