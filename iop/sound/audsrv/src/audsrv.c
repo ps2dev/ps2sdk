@@ -21,9 +21,10 @@
 #include <sysclib.h>
 
 #include <audsrv.h>
-#include "audsrv.c.h"
+#include "audsrv.h"
 #include "common.h"
 #include "rpc_server.h"
+#include "rpc_client.h"
 #include "upsamplers.h"
 #include "hw.h"
 #include "spu.h"
@@ -34,8 +35,8 @@
  * \date 04-24-05
  */
 
-#define VERSION "0.90"
-IRX_ID("audsrv", 1, 1);
+#define VERSION "0.91"
+IRX_ID("audsrv", 1, 2);
 
 /* globals */
 static int core1_volume = MAX_VOLUME;   ///< core1 (sfx) volume
@@ -94,25 +95,25 @@ static void update_volume()
 	int vol;
 
 	/* external input */
-	sceSdSetParam(SD_CORE_1 | SD_P_AVOLL, 0x7fff);
-	sceSdSetParam(SD_CORE_1 | SD_P_AVOLR, 0x7fff);
+	sceSdSetParam(SD_CORE_1 | SD_PARAM_AVOLL, 0x7fff);
+	sceSdSetParam(SD_CORE_1 | SD_PARAM_AVOLR, 0x7fff);
 
 	/* core0 input */
-	sceSdSetParam(SD_CORE_0 | SD_P_BVOLL, 0);
-	sceSdSetParam(SD_CORE_0 | SD_P_BVOLR, 0);
+	sceSdSetParam(SD_CORE_0 | SD_PARAM_BVOLL, 0);
+	sceSdSetParam(SD_CORE_0 | SD_PARAM_BVOLR, 0);
 
 	/* core1 input */
 	vol = playing ? core1_volume : 0;
-	sceSdSetParam(SD_CORE_1 | SD_P_BVOLL, vol);
-	sceSdSetParam(SD_CORE_1 | SD_P_BVOLR, vol);
+	sceSdSetParam(SD_CORE_1 | SD_PARAM_BVOLL, vol);
+	sceSdSetParam(SD_CORE_1 | SD_PARAM_BVOLR, vol);
 
 	/* set master volume for core 0 */
-	sceSdSetParam(SD_CORE_0 | SD_P_MVOLL, 0);
-	sceSdSetParam(SD_CORE_0 | SD_P_MVOLR, 0);
+	sceSdSetParam(SD_CORE_0 | SD_PARAM_MVOLL, 0);
+	sceSdSetParam(SD_CORE_0 | SD_PARAM_MVOLR, 0);
 
 	/* set master volume for core 1 */
-	sceSdSetParam(SD_CORE_1 | SD_P_MVOLL, MAX_VOLUME);
-	sceSdSetParam(SD_CORE_1 | SD_P_MVOLR, MAX_VOLUME);
+	sceSdSetParam(SD_CORE_1 | SD_PARAM_MVOLL, MAX_VOLUME);
+	sceSdSetParam(SD_CORE_1 | SD_PARAM_MVOLR, MAX_VOLUME);
 }
 
 /** Stops all audio playing
@@ -238,7 +239,7 @@ int audsrv_init()
 
 	/* initialize transfer-complete callback */
 	sceSdSetTransCallback(SD_CORE_1, (void *)transfer_complete);
-	sceSdBlockTrans(SD_CORE_1, SD_BLOCK_LOOP, core1_buf, sizeof(core1_buf));
+	sceSdBlockTrans(SD_CORE_1, SD_TRANS_LOOP, core1_buf, sizeof(core1_buf));
 
 	/* default to SPU's native */
 	audsrv_set_format(48000, 16, 2);
@@ -463,7 +464,7 @@ static void play_thread(void *arg)
 		if (fillbuf_threshold > 0 && available >= fillbuf_threshold)
 		{
 			/* EE client requested a callback */
-			sif_send_cmd(AUDSRV_FILLBUF_CALLBACK, 0);
+			call_client_callback(AUDSRV_FILLBUF_CALLBACK);
 		}
 
 		//printf("avaiable: %d, queued: %d\n", available, ringbuf_size - available);
@@ -475,13 +476,17 @@ static void play_thread(void *arg)
 */
 int audsrv_quit()
 {
+#ifndef NO_RPC_THREAD
+	deinitialize_rpc_client();
+#endif
+
 	/* silence! */
 	audsrv_stop_audio();
 	audsrv_stop_cd();
 
 	/* stop transmission */
 	sceSdSetTransCallback(SD_CORE_1, NULL);
-	sceSdBlockTrans(SD_CORE_1, SD_BLOCK_TRANS_STOP, 0, 0, 0);
+	sceSdBlockTrans(SD_CORE_1, SD_TRANS_STOP, 0, 0, 0);
 
 	/* stop playing thread */
 	if (play_tid > 0)
@@ -517,7 +522,7 @@ void unittest_start()
 
     Initializes interrupts and the RPC thread. Oh, and greets the user.
 */
-int _start()
+int _start(int argc, char *argv[])
 {
 	int err;
 
@@ -527,15 +532,8 @@ int _start()
 	if (err != 0)
 	{
 		printf("audsrv: couldn't register library entries. Error %d\n", err);
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 	}
-
-	/* enable SPU2 DMA interrupts */
-	FlushDcache();
-	CpuEnableIntr(0);
-	EnableIntr(SPU_DMA_CHN0_IRQ);
-	EnableIntr(SPU_DMA_CHN1_IRQ);
-	EnableIntr(SPU_IRQ);
 
 	audsrv_adpcm_init();
 
@@ -547,6 +545,5 @@ int _start()
 	/* call unittest, if available */
 	unittest_start();
 
-	return 0;
+	return MODULE_RESIDENT_END;
 }
-

@@ -6,19 +6,18 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 
 IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = bin/
+IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = bin/iLinkman.irx
-IOP_OBJS = obj/imports.o obj/exports.o obj/iLink.o obj/iLink_PHY.o obj/iLink_internal.o obj/iLink_crom.o obj/iLink_intr.o obj/iLink_TxRx.o obj/iLink_DMA.o
+IOP_BIN  = $(IOP_BIN_DIR)iLinkman.irx
+IOP_OBJS = imports.o exports.o iLink.o iLink_PHY.o iLink_internal.o iLink_crom.o iLink_intr.o iLink_TxRx.o iLink_DMA.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/kernel/include -I$(PS2SDKSRC)/common/include -I$(IOP_SRC_DIR)/include
-IOP_CFLAGS += -Wall -fno-builtin -O2 -G0 -mno-check-zero-division
-IOP_LDFLAGS += -s
+IOP_CFLAGS += -mno-check-zero-division
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

@@ -19,9 +19,9 @@
 #include <sifcmd.h>
 
 #include <audsrv.h>
+#include "audsrv.h"
 #include "common.h"
-
-#define	AUDSRV_IRX            0x870884d
+#include "rpc_client.h"
 
 /* rpc server variables */
 static int rpc_buffer[18000/4];         ///< buffer for RPC DMA
@@ -46,6 +46,7 @@ static void *rpc_command(int func, unsigned *data, int size)
 	{
 		case AUDSRV_INIT:
 		ret = audsrv_init();
+		initialize_rpc_client();
 		break;
 
 		case AUDSRV_FORMAT_OK:
@@ -156,7 +157,7 @@ static void rpc_server_thread(void *arg)
 	printf("audsrv: creating rpc server\n");
 
 	SifSetRpcQueue(&qd, GetThreadId());
-	SifRegisterRpc(&sd0, AUDSRV_IRX, (void *)rpc_command, rpc_buffer, 0, 0, &qd);
+	SifRegisterRpc(&sd0, AUDSRV_IRX, (void *)rpc_command, rpc_buffer, NULL, NULL, &qd);
 	SifRpcLoop(&qd);
 }
 

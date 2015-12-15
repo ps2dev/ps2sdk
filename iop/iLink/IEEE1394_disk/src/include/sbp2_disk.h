@@ -127,5 +127,3 @@ void init_ieee1394DiskDriver(void);
 int ieee1394_SendCommandBlockORB(struct SBP2Device *dev, struct CommandDescriptorBlock *firstCDB);
 int ieee1394_Sync(void);
 void DeinitIEEE1394(void);
-void *malloc(unsigned int NumBytes);
-void free(void *buffer);

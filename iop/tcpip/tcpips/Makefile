@@ -6,19 +6,18 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
-
 
 IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = bin/
+IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
 #DEBUG=1
 PS2IP_DNS=1
 
-IOP_BIN = bin/ps2ips.irx
-IOP_OBJS = obj/ps2ips.o obj/imports.o
+IOP_BIN = $(IOP_BIN_DIR)ps2ips.irx
+IOP_OBJS = ps2ips.o imports.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 ifeq ($(DEBUG),1)
 DEBUG_FLAGS = -DDEBUG
@@ -28,8 +27,7 @@ ifeq ($(PS2IP_DNS),1)
 IOP_CFLAGS += -DPS2IP_DNS
 endif
 
-IOP_CFLAGS += -Wall -fno-builtin $(DEBUG_FLAGS)
-IOP_LDFLAGS += -s
+IOP_CFLAGS += $(DEBUG_FLAGS)
 IOP_INCS += -I$(PS2SDKSRC)/iop/tcpip/tcpip/include
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)

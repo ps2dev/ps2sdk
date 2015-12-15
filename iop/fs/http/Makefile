@@ -6,19 +6,15 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
-
 
 IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = bin/
+IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN = bin/ps2http.irx
-IOP_OBJS = obj/ps2http.o obj/imports.o
-
-IOP_CFLAGS += -Wall -fno-builtin
-IOP_LDFLAGS += -s
+IOP_BIN = $(IOP_BIN_DIR)ps2http.irx
+IOP_OBJS = ps2http.o imports.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 IOP_INCS += -I$(PS2SDKSRC)/iop/tcpip/tcpip/include -I$(PS2SDKSRC)/iop/tcpip/dns/include
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)

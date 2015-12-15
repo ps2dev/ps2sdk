@@ -6,8 +6,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
-
 
 TOOLS_OBJS_DIR = obj/
 TOOLS_BIN_DIR = bin/
@@ -26,7 +24,6 @@ all: $(TOOLS_OBJS_DIR) $(TOOLS_BIN_DIR) $(TOOLS_BIN)
 
 clean:
 	rm -f -r $(TOOLS_OBJS_DIR) $(TOOLS_BIN_DIR)
-
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/tools/Rules.make

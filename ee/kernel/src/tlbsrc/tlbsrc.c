@@ -1,7 +1,8 @@
 #include <kernel.h>
 #include <ee_cop0_defs.h>
 
-/* #define Index	$0
+/* Doesn't work, but here are the COP0 register definitions:
+#define Index		$0
 #define EntryLo0	$2
 #define EntryLo1	$3
 #define PageMask	$5
@@ -16,11 +17,11 @@ struct SyscallPatchData{
 static unsigned int unknown;	/* 0x80075330 */
 
 //Function prototypes:
-static int PutTLBEntry(unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1);
-static int SetTLBEntry(unsigned int index, unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1);
-static int GetTLBEntry(unsigned int index, unsigned int *PageMask, unsigned int *EntryHi, unsigned int *EntryLo0, unsigned int *EntryLo1);
-static int ProbeTLBEntry(unsigned int EntryHi, unsigned int *PageMask, unsigned int *EntryLo0, unsigned int *EntryLo1);
-static int ExpandScratchPad(unsigned int page);
+int PutTLBEntry(unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1);
+int SetTLBEntry(unsigned int index, unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1);
+int GetTLBEntry(unsigned int index, unsigned int *PageMask, unsigned int *EntryHi, unsigned int *EntryLo0, unsigned int *EntryLo1);
+int ProbeTLBEntry(unsigned int EntryHi, unsigned int *PageMask, unsigned int *EntryLo0, unsigned int *EntryLo1);
+int ExpandScratchPad(unsigned int page);
 
 static const struct SyscallPatchData SyscallPatchData[]={
 	{ 0x55, &PutTLBEntry},
@@ -45,7 +46,7 @@ int _start(int syscall){
 }
 
 /* 0x80075038 */
-static int PutTLBEntry(unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1){
+int PutTLBEntry(unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1){
 	int result;
 
 	switch(EntryHi>>24){
@@ -66,6 +67,7 @@ static int PutTLBEntry(unsigned int PageMask, unsigned int EntryHi, unsigned int
 			break;
 		case 0x50:
 		case 0x10:
+		default:	//SP193: I don't remember seeing a default case. Anyway... Keeping Compilers Happy (TM).
 			result=-1;
 	}
 
@@ -73,7 +75,7 @@ static int PutTLBEntry(unsigned int PageMask, unsigned int EntryHi, unsigned int
 }
 
 /* 0x800750c8 */
-static int SetTLBEntry(unsigned int index, unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1){
+int SetTLBEntry(unsigned int index, unsigned int PageMask, unsigned int EntryHi, unsigned int EntryLo0, unsigned int EntryLo1){
 	int result;
 
 	if(index<0x30){
@@ -94,7 +96,7 @@ static int SetTLBEntry(unsigned int index, unsigned int PageMask, unsigned int E
 }
 
 /* 0x80075108 */
-static int GetTLBEntry(unsigned int index, unsigned int *PageMask, unsigned int *EntryHi, unsigned int *EntryLo0, unsigned int *EntryLo1){
+int GetTLBEntry(unsigned int index, unsigned int *PageMask, unsigned int *EntryHi, unsigned int *EntryLo0, unsigned int *EntryLo1){
 	int result;
 
 	if(index<0x30){
@@ -119,7 +121,7 @@ static int GetTLBEntry(unsigned int index, unsigned int *PageMask, unsigned int 
 }
 
 /* 0x80075158 */
-static int ProbeTLBEntry(unsigned int EntryHi, unsigned int *PageMask, unsigned int *EntryLo0, unsigned int *EntryLo1){
+int ProbeTLBEntry(unsigned int EntryHi, unsigned int *PageMask, unsigned int *EntryLo0, unsigned int *EntryLo1){
 	int result, index;
 
 	__asm volatile(	"mtc0 %1, $10\n"
@@ -146,7 +148,7 @@ static int ProbeTLBEntry(unsigned int EntryHi, unsigned int *PageMask, unsigned 
 }
 
 /* 0x800751a8 */
-static int ExpandScratchPad(unsigned int page){
+int ExpandScratchPad(unsigned int page){
 	int result, index;
 	unsigned int PageMask, EntryHi, EntryLo0, EntryLo1;
 

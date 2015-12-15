@@ -6,7 +6,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 
 # This file must be included after the CPU-specific Rules.mak.
 

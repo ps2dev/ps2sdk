@@ -21,6 +21,7 @@ int clutaddress = 0;
 fsfont_t impress;
 fontx_t krom_u;
 fontx_t krom_k;
+packet_t packet;
 
 void draw_init_env()
 {
@@ -200,7 +201,7 @@ int main(void)
 
 		init_texture();
 
-		run_demo();
+		run_demo(&packet);
 
 		fontstudio_unload_ini(&impress);
 

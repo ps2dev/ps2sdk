@@ -1,27 +1,23 @@
-#  _____     ___ ____
-#   ____|   |    ____|      PS2 Open Source Project
-#  |     ___|   |____
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2009, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
 #
-#--------------------------------------------------------------------------
-#
-#    makefile
-#
-#--------------------------------------------------------------------------
 
 IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = bin/
+IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = bin/mcman.irx
-IOP_OBJS = \
-obj/main.o obj/mcdev.o obj/mcsio2.o \
-obj/ps2mc_fio.o obj/ps1mc_fio.o\
-obj/imports.o obj/exports.o
+IOP_BIN  = $(IOP_BIN_DIR)mcman.irx
+IOP_OBJS = main.o mcdev.o mcsio2.o ps2mc_fio.o ps1mc_fio.o imports.o exports.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/system/sio2log/include
-IOP_CFLAGS  += -Wall -fno-builtin -D_IOP #-DSIO_DEBUG #-DDEBUG
-IOP_LDFLAGS += -s
+IOP_CFLAGS += #-DSIO_DEBUG #-DDEBUG
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

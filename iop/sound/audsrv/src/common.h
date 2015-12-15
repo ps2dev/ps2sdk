@@ -24,15 +24,6 @@
 */
 int create_thread(void *func, int priority, void *param);
 
-/** Helper function to send command via SIF channel
-    @param id     command id [0 .. 31]
-    @param arg    optional argument
-    @returns identifier for this request
-
-    Notes: MT-unsafe
-*/
-int sif_send_cmd(int id, int arg);
-
 /** Helper to print buffer in hex. Useful for debugging.
     @param ptr   pointer to buffer
     @param len   buffer length

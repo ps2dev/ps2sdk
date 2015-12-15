@@ -6,20 +6,17 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
-
 
 IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = bin/
+IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = bin/iopmgr.irx
-IOP_OBJS = obj/main.o obj/smod.o obj/slib.o obj/devices.o \
-	   obj/commandline.o obj/imports.o obj/exports.o
+IOP_BIN  = $(IOP_BIN_DIR)iopmgr.irx
+IOP_OBJS = main.o smod.o slib.o devices.o commandline.o imports.o exports.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
-IOP_CFLAGS  += -Wall -fno-builtin-printf
-IOP_LDFLAGS += -s
+IOP_CFLAGS += -fno-builtin-printf
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

@@ -114,7 +114,6 @@ struct _iop_load_heap_arg {
 	char	path[LIH_PATH_MAX];
 };
 
-/* TODO: I think this needs a version check...  */
 int SifLoadIopHeap(const char *path, void *addr)
 {
 	struct _iop_load_heap_arg arg;

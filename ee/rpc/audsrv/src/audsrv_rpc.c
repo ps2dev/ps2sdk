@@ -25,21 +25,29 @@
 #include <iopheap.h>
 
 #include <audsrv.h>
-#include "audsrv_rpc.c.h"
+#include "audsrv_rpc.h"
 
 #define MIN(a,b) ((a) <= (b)) ? (a) : (b)
 
 /* rpc mambo jambo */
 static struct t_SifRpcClientData cd0;
 static unsigned int sbuff[4096] __attribute__((aligned (64)));
+static struct t_SifRpcDataQueue cb_queue __attribute__((aligned(64)));
+static struct t_SifRpcServerData cb_srv __attribute__((aligned(64)));
+static unsigned char rpc_server_stack[0x1800] __attribute__((aligned (16)));
+
+extern void *_gp;
 
 static int initialized = 0;
+static int rpc_server_thread_id;
 static int audsrv_error = AUDSRV_ERR_NOERROR;
 static int completion_sema;
 
-/* nasty forwards */
-static void fillbuf_requested(void *pkt, void *arg);
-static void cdda_stopped(void *pkt, void *arg);
+static audsrv_callback_t on_cdda_stop = NULL;
+static void *on_cdda_stop_arg = NULL;
+
+static audsrv_callback_t on_fillbuf = NULL;
+static void *on_fillbuf_arg = NULL;
 
 /** Internal function to set last error
     @param err
@@ -105,6 +113,11 @@ int audsrv_quit()
 
 	SifCallRpc(&cd0, AUDSRV_QUIT, 0, sbuff, 1*4, sbuff, 4, _audsrv_intr, NULL);
 	set_error(AUDSRV_ERR_NOERROR);
+
+	SifRemoveRpc(&cb_srv, &cb_queue);
+	SifRemoveRpcQueue(&cb_queue);
+	TerminateThread(rpc_server_thread_id);
+	DeleteThread(rpc_server_thread_id);
 
 	DeleteSema(completion_sema);
 	return 0;
@@ -333,11 +346,38 @@ int audsrv_stop_audio()
 	return ret;
 }
 
+static void *audsrv_ee_rpc_handler(int fnum, void *buffer, int len)
+{
+	switch(fnum){
+		case AUDSRV_FILLBUF_CALLBACK:
+			if (on_fillbuf != NULL)
+				on_fillbuf(on_fillbuf_arg);
+			break;
+		case AUDSRV_CDDA_CALLBACK:
+			if (on_cdda_stop != NULL)
+				on_cdda_stop(on_cdda_stop_arg);
+			break;
+	}
+
+	return buffer;
+}
+
+static void rpc_server_thread(void *arg)
+{
+	static unsigned char cb_rpc_buffer[64] __attribute__((aligned(64)));
+
+	SifSetRpcQueue(&cb_queue, GetThreadId());
+	SifRegisterRpc(&cb_srv, AUDSRV_IRX, &audsrv_ee_rpc_handler, cb_rpc_buffer, NULL, NULL, &cb_queue);
+	SifRpcLoop(&cb_queue);
+}
+
 /** Initializes audsrv library
     @returns error code
 */
 int audsrv_init()
 {
+	ee_sema_t compSema;
+	ee_thread_t rpcThread;
 	int ret;
 
 	if (initialized)
@@ -364,7 +404,6 @@ int audsrv_init()
 		nopdelay();
 	}
 
-	ee_sema_t compSema;
 	compSema.init_count = 1;
 	compSema.max_count = 1;
 	compSema.option = 0;
@@ -375,6 +414,17 @@ int audsrv_init()
 		return -1;
 	}
 
+	/* Create RPC server */
+	rpcThread.attr = 0;
+	rpcThread.option = AUDSRV_IRX;
+	rpcThread.func = &rpc_server_thread;
+	rpcThread.stack = rpc_server_stack;
+	rpcThread.stack_size = sizeof(rpc_server_stack);
+	rpcThread.gp_reg = &_gp;
+	rpcThread.initial_priority = 0x60;
+	rpc_server_thread_id = CreateThread(&rpcThread);
+	StartThread(rpc_server_thread_id, NULL);
+
 	SifCallRpc(&cd0, AUDSRV_INIT, 0, sbuff, 64, sbuff, 64, NULL, NULL);
 	ret = sbuff[0];
 	if (ret != 0)
@@ -382,12 +432,6 @@ int audsrv_init()
 		set_error(ret);
 		return ret;
 	}
-
-	/* register a callback handler */
-	DI();
-	SifAddCmdHandler(AUDSRV_CDDA_CALLBACK, cdda_stopped, NULL);
-	SifAddCmdHandler(AUDSRV_FILLBUF_CALLBACK, fillbuf_requested, NULL);
-	EI();
 
 	/* initialize IOP heap (for adpcm samples) */
 	SifInitIopHeap();
@@ -500,12 +544,6 @@ const char *audsrv_get_error_string()
 	return "Unknown error";
 }
 
-static audsrv_callback_t on_cdda_stop = 0;
-static void *on_cdda_stop_arg = 0;
-
-static audsrv_callback_t on_fillbuf = 0;
-static void *on_fillbuf_arg = 0;
-
 /** Installs a callback function upon completion of a cdda track
     @param cb your callback
     @param arg extra parameter to pass to callback function later
@@ -541,22 +579,4 @@ int audsrv_on_fillbuf(int amount, audsrv_callback_t cb, void *arg)
 	on_fillbuf = cb;
 	on_fillbuf_arg = arg;
 	return AUDSRV_ERR_NOERROR;
-}
-
-/** SIF command handler */
-static void cdda_stopped(void *pkt, void *arg)
-{
-	if (on_cdda_stop != 0)
-	{
-		on_cdda_stop(on_cdda_stop_arg);
-	}
-}
-
-/** SIF command handler */
-static void fillbuf_requested(void *pkt, void *arg)
-{
-	if (on_fillbuf != 0)
-	{
-		on_fillbuf(on_fillbuf_arg);
-	}
 }

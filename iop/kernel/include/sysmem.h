@@ -20,7 +20,7 @@
 // Allocation strategies
 #define ALLOC_FIRST	0
 #define ALLOC_LAST	1
-#define ALLOC_LATER	2
+#define ALLOC_ADDRESS	2
 
 // see QueryBlockTopAddress, QueryBlockSize
 #define USED	0x00000000

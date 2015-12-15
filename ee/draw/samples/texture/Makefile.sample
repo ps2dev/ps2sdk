@@ -18,7 +18,7 @@ flower.c:
 	bin2c texture.raw flower.c flower
 
 clean:
-	rm -f *.elf *.o *.a flower.c
+	rm -f $(EE_BIN) $(EE_OBJS) flower.c
 
 run: $(EE_BIN)
 	ps2client execee host:$(EE_BIN)
@@ -28,4 +28,3 @@ reset:
 
 include $(PS2SDK)/samples/Makefile.pref
 include $(PS2SDK)/samples/Makefile.eeglobal
-

@@ -6,18 +6,17 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 
 .SUFFIXES:.c
 VPATH = src:obj
-
-LIBDEBUG_LIB  = lib/libdebug.a
 
 EE_OBJS_DIR = obj/
 EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 EE_SAMPLE_DIR = samples/
+
+LIBDEBUG_LIB  = $(EE_LIB_DIR)libdebug.a
 
 EE_INCS = -I../graph/include -I../rpc/cdvd/include
 
@@ -27,15 +26,13 @@ EE_OBJS  = scr_printf.o font.o screenshot.o callstack.o callstackget.o
 EE_OBJS += hwbp.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
-all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBDEBUG_LIB)
-
+all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
 
 .c.o :
 	$(EE_CC) $(EE_CFLAGS) $(EE_INC) -c $< -o obj/$@
 
 clean:
 	rm -f -r $(EE_OBJS_DIR) $(EE_LIB_DIR)
-
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make

@@ -18,6 +18,6 @@
 #define PWROFF_SHUTDOWN 			0x01
 #define PWROFF_ENABLE_AUTO_SHUTOFF	0x02
 
-#define POFF_SIF_CMD	20
+#define POFF_RPC_BUTTON	1
 
 #endif /* PWROFF_RPC_H */

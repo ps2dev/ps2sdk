@@ -493,9 +493,9 @@ s32 SdInit(s32 flag)
 	InitVoices();
 	InitCoreVolume(flag);
 
-	EnableIntr(0x24);
-	EnableIntr(0x28);
-	EnableIntr(9);
+	EnableIntr(IOP_IRQ_DMA_SPU);
+	EnableIntr(IOP_IRQ_DMA_SPU2);
+	EnableIntr(IOP_IRQ_SPU);
 
 	return 0;
 }

@@ -28,9 +28,10 @@
 #include <sysclib.h>
 
 #include <audsrv.h>
-#include "cdrom.c.h"
+#include "cdrom.h"
 #include "common.h"
 #include "rpc_server.h"
+#include "rpc_client.h"
 #include "upsamplers.h"
 #include "spu.h"
 #include "hw.h"
@@ -278,7 +279,7 @@ static void audsrv_stop_cd_stream()
 
 	/* disable streaming callbacks */
 	sceSdSetTransCallback(SD_CORE_0, NULL);
-	sceSdBlockTrans(SD_CORE_0, SD_BLOCK_TRANS_STOP, 0, 0, 0);
+	sceSdBlockTrans(SD_CORE_0, SD_TRANS_STOP, 0, 0, 0);
 }
 
 /** Pauses CD playing
@@ -342,7 +343,7 @@ static void cdda_procedure(void *arg)
 
 	/* kick cd streaming */
 	sceSdSetTransCallback(SD_CORE_0, (void *)cd_transfer_complete);
-	sceSdBlockTrans(SD_CORE_0, SD_BLOCK_LOOP, core0_buf, sizeof(core0_buf));
+	sceSdBlockTrans(SD_CORE_0, SD_TRANS_LOOP, core0_buf, sizeof(core0_buf));
 
 	printf("callbacks kicked, starting loop\n");
 	last_read = 0;
@@ -414,7 +415,7 @@ static void cdda_procedure(void *arg)
 	audsrv_stop_cd();
 
 	/* notify cdda ended */
-	sif_send_cmd(AUDSRV_CDDA_CALLBACK, 0);
+	call_client_callback(AUDSRV_CDDA_CALLBACK);
 }
 
 /** Returns the current sector being played
@@ -530,12 +531,12 @@ int audsrv_play_cd(int track)
 	ret = audsrv_cd_play_sectors(start, end);
 
 	/* core0 input (known as Evilo's patch #1) */
-	sceSdSetParam(SD_CORE_0 | SD_P_BVOLL, 0x7fff);
-	sceSdSetParam(SD_CORE_0 | SD_P_BVOLR, 0x7fff);
+	sceSdSetParam(SD_CORE_0 | SD_PARAM_BVOLL, 0x7fff);
+	sceSdSetParam(SD_CORE_0 | SD_PARAM_BVOLR, 0x7fff);
 
 	/* set master volume for core 0 */
-	sceSdSetParam(SD_CORE_0 | SD_P_MVOLL, MAX_VOLUME);
-	sceSdSetParam(SD_CORE_0 | SD_P_MVOLR, MAX_VOLUME);
+	sceSdSetParam(SD_CORE_0 | SD_PARAM_MVOLL, MAX_VOLUME);
+	sceSdSetParam(SD_CORE_0 | SD_PARAM_MVOLR, MAX_VOLUME);
 
 	return ret;
 }

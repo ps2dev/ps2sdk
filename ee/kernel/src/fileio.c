@@ -202,8 +202,6 @@ int fioOpen(const char *name, int mode)
 	strncpy(arg.name, name, FIO_PATH_MAX - 1);
 	arg.name[FIO_PATH_MAX - 1] = 0;
 
-	/* TODO: All of these can be cleaned up (get rid of res), and an
-	   appropiate error from errno.h be used instead.  */
 	if ((res = SifCallRpc(&_fio_cd, FIO_F_OPEN, _fio_block_mode, &arg, sizeof arg,
 					_fio_recv_data, 4, (void *)_fio_intr, NULL)) >= 0)
 	{
@@ -546,12 +544,11 @@ int fioGets(int fd, char* buff, int n)
 {
 	// Rather than doing a slow byte-at-a-time read
 	// read upto the max langth, then re-position file afterwards
-	int read;
-	int i;
+	int read, i;
 
 	read = fioRead(fd, buff, n);
 
-    for (i=0; i<(read-1); i++)
+	for (i=0; i<(read-1); i++)
 	{
 		switch (buff[i])
 		{
@@ -562,7 +559,7 @@ int fioGets(int fd, char* buff, int n)
 
 		case 0:
 			fioLseek(fd, i-read, SEEK_CUR);
-            return i;
+			return i;
 		}
 	}
 

@@ -6,20 +6,17 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
-
 
 IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = bin/
+IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = bin/sio2log.irx
-IOP_OBJS = obj/sio2man.o obj/log.o
-#IOP_INCS =
+IOP_BIN  = $(IOP_BIN_DIR)sio2log.irx
+IOP_OBJS = sio2man.o log.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
-IOP_CFLAGS  += -Wall -fno-builtin-printf
-IOP_LDFLAGS += -s
+IOP_CFLAGS  += -fno-builtin-printf
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

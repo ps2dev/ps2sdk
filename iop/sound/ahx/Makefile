@@ -6,19 +6,17 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
-
 
 IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = bin/
+IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = bin/ahx.irx
-IOP_OBJS = obj/hw.o obj/ahx_irx.o obj/spu2.o obj/imports.o obj/AHX.o
+IOP_BIN  = $(IOP_BIN_DIR)ahx.irx
+IOP_OBJS = hw.o ahx_irx.o spu2.o imports.o AHX.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
-IOP_CFLAGS  += -Wall -fno-builtin-printf -I$(PS2SDKSRC)/iop/sound/freesd/include/
-IOP_LDFLAGS += -s
+IOP_CFLAGS  += -fno-builtin-printf -I$(PS2SDKSRC)/iop/sound/freesd/include/
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

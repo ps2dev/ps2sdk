@@ -16,11 +16,9 @@
 #include <loadcore.h>
 #include <sysmem.h>
 #include <intrman.h>
-#include <sifcmd.h>
 #include <sysclib.h>
 
-/** used for callbacks, sif requires a buffer of atleast 16 bytes */
-static int cmdData[4]  __attribute__((aligned (64)));
+#include "common.h"
 
 /** Helper function to easily create threads
     @param func       thread procedure
@@ -36,13 +34,11 @@ int create_thread(void *func, int priority, void *param)
 	int tid;
 	iop_thread_t thr;
 
-	memset(&thr, '\0', sizeof(thr));
 	thr.attr = TH_C;
 	thr.thread = func;
 	thr.option = 0;
 	thr.priority = priority;
 	thr.stacksize = 4096;
-	thr.attr = 0x2000000;
 	tid = CreateThread(&thr);
 	if (tid < 0)
 	{
@@ -51,21 +47,6 @@ int create_thread(void *func, int priority, void *param)
 
 	StartThread(tid, param);
 	return tid;
-}
-
-/** Helper function to send command via SIF channel
-    @param id     command id [0 .. 31]
-    @param arg    optional argument
-    @returns identifier for this request
-
-    Notes: MT-unsafe
-*/
-int sif_send_cmd(int id, int arg)
-{
-	/* first three ints are reserved */
-	/* not MT-safe! */
-	cmdData[3] = arg;
-	return sceSifSendCmd(id, cmdData, 16, NULL, NULL, 0);
 }
 
 /** Helper to print buffer in hex. Useful for debugging.

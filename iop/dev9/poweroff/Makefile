@@ -6,19 +6,15 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
-
 
 IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = bin/
+IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = bin/poweroff.irx
-IOP_OBJS = obj/poweroff.o obj/imports.o obj/exports.o
-
-IOP_CFLAGS  += -Wall
-IOP_LDFLAGS += -s
+IOP_BIN  = $(IOP_BIN_DIR)poweroff.irx
+IOP_OBJS = poweroff.o imports.o exports.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

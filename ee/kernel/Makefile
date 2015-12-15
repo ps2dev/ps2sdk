@@ -6,16 +6,14 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
-
-
-LIBSYSCALL_LIB = lib/libsyscall.a
-EE_LIB = lib/libkernel.a
 
 EE_OBJS_DIR = obj/
 EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
+
+LIBSYSCALL_LIB = $(EE_LIB_DIR)libsyscall.a
+EE_LIB = $(EE_LIB_DIR)libkernel.a
 
 SIFCMD_OBJS = sif_cmd_send.o _sif_cmd_int_handler.o sif_cmd_main.o \
 	sif_cmd_client.o sif_cmd_remove_cmdhandler.o sif_sreg_get.o
@@ -174,13 +172,16 @@ $(EE_OBJS_DIR)tibfunc.o: $(EE_SRC_DIR)tlbfunc.c $(EE_SRC_DIR)tlbsrc_bin.c
 	$(EE_C_COMPILE) $< -c -o $@
 
 clean:
-	rm -fr $(EE_OBJS_DIR) $(EE_LIB_DIR)
+	rm -r -f $(EE_OBJS_DIR) $(EE_LIB_DIR)
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make
 include $(PS2SDKSRC)/ee/Rules.release
 
-release: release-dirs release-include
+release:
+	$(ECHO) Installing $(LIBSYSCALL_LIB) into $(PS2SDK)/ee/lib
+	$(ECHO) Installing $(EE_LIB) into $(PS2SDK)/ee/lib
+	$(ECHO) Installing *.erl into $(PS2SDK)/ee/lib
 	cp -f $(LIBSYSCALL_LIB) $(PS2SDK)/ee/lib
 	cp -f $(EE_LIB) $(PS2SDK)/ee/lib
 	cp -f $(EE_LIB:%.a=%.erl) $(PS2SDK)/ee/lib

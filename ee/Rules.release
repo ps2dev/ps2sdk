@@ -65,7 +65,7 @@ release-include:
 
 
 #
-# If there is a smples directory.  Call makefile.
+# If there is a samples directory.  Call makefile.
 # Samples use their own release target based on the samples/Rules.sample
 # makefile.
 #
@@ -79,5 +79,7 @@ release-samples:
 release: release-dirs release-lib release-bin release-include release-samples
 
 release-clean:
-	rm -f $(PS2SDK)/ee/include/*.*
-	rm -f $(PS2SDK)/ee/lib/*.*
+	rm -f $(PS2SDK)/ee/include/*
+	rm -f $(PS2SDK)/ee/bin/*
+	rm -f $(PS2SDK)/ee/startup/*
+	rm -f $(PS2SDK)/ee/lib/*

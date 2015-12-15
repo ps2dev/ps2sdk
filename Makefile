@@ -41,6 +41,13 @@ build: env_build_check $(subdir_list)
 
 clean: env_build_check $(subdir_clean)
 
+release-clean:
+	make -C common release-clean
+	make -C iop release-clean
+	make -C ee release-clean
+	make -C samples release-clean
+	make -C tools release-clean
+	
 rebuild: env_build_check $(subdir_clean) $(subdir_list)
 
 $(PS2SDK)/common/include:
@@ -53,16 +60,12 @@ $(PS2SDK)/ports:
 
 install: release
 
-release: build release_base $(PS2SDK)/common/include $(PS2SDK)/ports $(subdir_release)
-
+release: build release_base release-clean $(PS2SDK)/common/include $(PS2SDK)/ports $(subdir_release)
 
 release_base: env_release_check
 	@if test ! -d $(PS2SDK) ; then \
 	  $(MKDIR) -p $(PS2SDK) ; \
 	fi
-	rm -fr $(PS2SDK)/iop
-	rm -fr $(PS2SDK)/ee
-	rm -fr $(PS2SDK)/common
 	cp -f README $(PS2SDK)
 	cp -f CHANGELOG $(PS2SDK)
 	cp -f AUTHORS $(PS2SDK)

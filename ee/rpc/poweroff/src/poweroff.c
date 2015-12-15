@@ -26,34 +26,39 @@ static poweroff_callback poweroff_cb = NULL;
 static void *poweroff_data = NULL;
 
 static u8 poffThreadStack[512 * 16] __attribute__ ((aligned(16)));
-static int PowerOffSema = -1;
 
 extern int _iop_reboot_count;
 static SifRpcClientData_t cd0;
+static struct t_SifRpcDataQueue cb_queue __attribute__((aligned(64)));
+static struct t_SifRpcServerData cb_srv __attribute__((aligned(64)));
 static int powerOffThreadId = -1;
+
+static void *PowerOff_ee_rpc_handler(int fnum, void *buffer, int len)
+{
+	switch(fnum){
+		case POFF_RPC_BUTTON:
+			printf("EE: power button pressed\n");
+
+			if (poweroff_cb)
+				poweroff_cb(poweroff_data);
+			break;
+	}
+
+	return buffer;
+}
 
 static void PowerOffThread(void *dat)
 {
-	while(1)
-	{
-		WaitSema(PowerOffSema);
+	static unsigned char cb_rpc_buffer[64] __attribute__((aligned(64)));
 
-		printf("EE: poweroff thread woken up\n");
-
-		if (poweroff_cb)
-			poweroff_cb(poweroff_data);
-	}
-}
-
-static void _poff_intr_callback(void *pkt, void *param)
-{
-	iSignalSema(PowerOffSema);
+	SifSetRpcQueue(&cb_queue, GetThreadId());
+	SifRegisterRpc(&cb_srv, PWROFF_IRX, &PowerOff_ee_rpc_handler, cb_rpc_buffer, NULL, NULL, &cb_queue);
+	SifRpcLoop(&cb_queue);
 }
 
 int poweroffInit(void)
 {
 	ee_thread_t thread;
-	ee_sema_t sema;
 	int res;
 	static int _init_count = -1;
 
@@ -71,29 +76,15 @@ int poweroffInit(void)
 		powerOffThreadId = -1;
 	}
 
-	// Delete any previously created semaphores
-	if (PowerOffSema >= 0)
-	{
-		DeleteSema(PowerOffSema);
-		PowerOffSema = -1;
-	}
-
-	sema.init_count = 0;
-	sema.max_count = 1;
-	sema.option = 0;
-	PowerOffSema = CreateSema(&sema);
-
 	thread.initial_priority = POWEROFF_THREAD_PRIORITY;
 	thread.stack_size = sizeof(poffThreadStack);
 	thread.gp_reg = &_gp;
 	thread.func = PowerOffThread;
 	thread.stack = (void *)poffThreadStack;
+	thread.option = PWROFF_IRX;
+	thread.attr = 0;
 	powerOffThreadId = CreateThread(&thread);
 	StartThread(powerOffThreadId, NULL);
-
-	DI();
-	SifAddCmdHandler(POFF_SIF_CMD, _poff_intr_callback, NULL);
-	EI();
 
 	int autoShutdown = 0;
 	SifCallRpc(&cd0, PWROFF_ENABLE_AUTO_SHUTOFF, 0, NULL, 0, &autoShutdown, sizeof(autoShutdown), NULL, NULL);
@@ -112,8 +103,6 @@ void poweroffSetCallback(poweroff_callback cb, void *arg)
 void poweroffShutdown(void)
 {
 	poweroffInit();
-
-	SignalSema(PowerOffSema);
 
 	SifCallRpc(&cd0, PWROFF_SHUTDOWN, 0, NULL, 0, NULL, 0, NULL, NULL);
 }

@@ -2,9 +2,6 @@
 #include <thbase.h>
 #include <thevent.h>
 #include <loadcore.h>
-#ifdef SIF_CALLBACKS_12_13
-#include <sifcmd.h>
-#endif
 #include <stdio.h>
 #include <sysclib.h>
 #include <sysmem.h>
@@ -15,6 +12,7 @@
 #include "sbp2_disk.h"
 #include "scsi.h"
 #include "mass_debug.h"
+#include "usbhd_common.h"
 
 #define MAX_DEVICES 5
 static struct SBP2Device SBP2Devices[MAX_DEVICES];
@@ -240,9 +238,6 @@ static inline int initSBP2Disk(struct SBP2Device *dev){
 
 /* Hardware event handling threads. */
 static void iLinkIntrCBHandlingThread(void *arg){
-#ifdef SIF_CALLBACKS_12_13
-	SifCmdHeader_t SifCmdData;
-#endif
 	int nNodes, i, targetDeviceID, nodeID, result;
 	static const unsigned char PayloadSizeLookupTable[]={
 		7, /* S100; 2^(7+2)=512 */
@@ -260,15 +255,6 @@ static void iLinkIntrCBHandlingThread(void *arg){
 
 			iLinkTrFree(SBP2Devices[i].trContext);
 			SBP2Devices[i].trContext = -1;
-
-#ifdef SIF_CALLBACKS_12_13
-			if(SBP2Devices[i].IsConnected){
-				SifCmdData.size=sizeof(SifCmdData);
-				SifCmdData.dest=NULL;
-				SifCmdData.cid=13;
-				sceSifSendCmd(SifCmdData.cid, &SifCmdData, sizeof(SifCmdData), NULL, NULL, 0);
-			}
-#endif
 		}
 	}
 
@@ -340,13 +326,6 @@ static void iLinkIntrCBHandlingThread(void *arg){
 			if(initConfigureSBP2Device(&SBP2Devices[targetDeviceID])>=0){
 				SBP2Devices[targetDeviceID].IsConnected=1;
 				targetDeviceID++;
-
-#ifdef SIF_CALLBACKS_12_13
-				SifCmdData.size=sizeof(SifCmdData);
-				SifCmdData.dest=NULL;
-				SifCmdData.cid=12;
-				sceSifSendCmd(SifCmdData.cid, &SifCmdData, sizeof(SifCmdData), NULL, NULL, 0);
-#endif
 			}
 		}
 		else XPRINTF("Error allocating a transaction.\n");
@@ -612,7 +591,7 @@ void DeinitIEEE1394(void){
 	DeleteEventFlag(sbp2_event_flag);
 }
 
-void *malloc(unsigned int NumBytes){
+void *malloc(int NumBytes){
 	int OldState;
 	void *buffer;
 

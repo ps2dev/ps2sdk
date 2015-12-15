@@ -6,19 +6,18 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
-
 
 IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = bin/
+IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN=bin/ps2cam.irx
-IOP_OBJS=obj/ps2cam.o obj/imports.o
+IOP_BIN  = $(IOP_BIN_DIR)ps2cam.irx
+IOP_OBJS = ps2cam.o imports.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
-IOP_CFLAGS=-Wall
-IOP_LDFLAGS=-s
+IOP_CFLAGS  = -Wall
+IOP_LDFLAGS = -s
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/usb/usbd/include
 

@@ -1,3 +1,12 @@
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2005, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+
 include $(PS2SDKSRC)/Defs.make
 
 BIN_DIR=bin
@@ -64,7 +73,7 @@ $(EE_LIB): $(EE_OBJS)
 	$(EE_AR) rc $(EE_LIB) $(EE_OBJS)
 
 clean:
-	rm -rf $(OBJ_DIR) $(LIB_DIR) $(BIN_DIR) $(IOP_OBJ_DIR)
+	rm -f -r $(OBJ_DIR) $(LIB_DIR) $(BIN_DIR) $(IOP_OBJ_DIR)
 
 obj/%.o: src/%.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INC) -c $< -o $@
@@ -74,6 +83,9 @@ obj/%.o: src/%.S
 
 release: all
 	mkdir -p $(PS2SDK)/ee/include
+	$(ECHO) Installing $(IOP_BIN) into $(PS2SDK)/iop/irx
 	cp -f $(IOP_BIN) $(PS2SDK)/iop/irx
+	$(ECHO) Installing $(EE_LIB) into $(PS2SDK)/ee/lib
 	cp -f $(EE_LIB) $(PS2SDK)/ee/lib
+	$(ECHO) Installing include/*.h into $(PS2SDK)/common/include
 	cp -f include/*.h $(PS2SDK)/common/include

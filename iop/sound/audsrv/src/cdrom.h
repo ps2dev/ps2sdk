@@ -7,19 +7,24 @@
 # Licenced under GNU Library General Public License version 2
 #
 # $Id$
-# audsrv IOP server.
+# cdsrv IOP server.
 */
 
-#ifndef __AUDSRV_C_H__
-#define __AUDSRV_C_H__
+#ifndef __CDROM_C_H__
+#define __CDROM_C_H__
 
 /**
- * \file audsrv.c.h
+ * \file cdrom.h
  * \author gawd (Gil Megidish)
- * \date 04-24-05
+ * \date 05-09-05
  */
 
-/** Find the minimum value between A and B */
-#define MIN(a,b) ((a) <= (b)) ? (a) : (b)
+#define SECTOR_SIZE                2352
+
+typedef struct cdda_toc
+{
+	int num_tracks;
+	sceCdlLOCCD tracks[100];
+} cdda_toc;
 
 #endif

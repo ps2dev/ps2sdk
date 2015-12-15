@@ -7,26 +7,22 @@
 # Licenced under GNU Library General Public License version 2
 #
 # $Id$
-# cdsrv IOP server.
+# audsrv IOP server.
 */
 
-#ifndef __CDROM_C_H__
-#define __CDROM_C_H__
+#ifndef __AUDSRV_C_H__
+#define __AUDSRV_C_H__
 
 /**
- * \file cdrom.c.h
+ * \file audsrv.h
  * \author gawd (Gil Megidish)
- * \date 05-09-05
+ * \date 04-24-05
  */
 
-#define SECTOR_SIZE                2352
+/** Find the minimum value between A and B */
+#define MIN(a,b) ((a) <= (b)) ? (a) : (b)
 
-#define SD_CORE_0               0
-
-typedef struct cdda_toc
-{
-	int num_tracks;
-	sceCdlLOCCD tracks[100];
-} cdda_toc;
+//RPC service ID
+#define	AUDSRV_IRX            0x870884d
 
 #endif

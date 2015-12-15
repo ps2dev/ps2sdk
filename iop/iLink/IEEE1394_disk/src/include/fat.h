@@ -20,7 +20,7 @@
 #define FAT16 0x10
 #define FAT32 0x20
 
-#define FAT_MAX_PATH 1024
+#define FAT_MAX_PATH 260
 
 /* bios parameter block - bpb - fat12, fat16  */
 typedef struct _fat_raw_bpb {
@@ -140,14 +140,14 @@ typedef struct _fat_direntry_summary {
 } fat_direntry_summary;
 
 //---------------------------------------------------------------------------
-static inline unsigned int fat_cluster2sector(fat_bpb* partBpb, unsigned int cluster)
+static USBHD_INLINE unsigned int fat_cluster2sector(fat_bpb* partBpb, unsigned int cluster)
 {
 	return  partBpb->dataStart + (partBpb->clusterSize * (cluster-2));
 }
 
 unsigned int fat_getClusterRecord12(unsigned char* buf, int type);
 int      fat_getDirentry(unsigned char fatType, fat_direntry* dir_entry, fat_direntry_summary* dir );
-int      fat_getDirentrySectorData(fat_driver* fatd, unsigned int* startCluster, unsigned int* startSector, int* dirSector);
+int      fat_getDirentrySectorData(fat_driver* fatd, unsigned int* startCluster, unsigned int* startSector, unsigned int* dirSector);
 void     fat_invalidateLastChainResult(fat_driver* fatd);
 void     fat_getClusterAtFilePos(fat_driver* fatd, fat_dir* fatDir, unsigned int filePos, unsigned int* cluster, unsigned int* clusterPos);
 

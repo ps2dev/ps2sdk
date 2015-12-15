@@ -6,11 +6,8 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
-
 
 SAMPLE_DIR = rpc/ps2snd
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/samples/Rules.samples
-

@@ -47,8 +47,8 @@ extern "C" {
 #define AUDSRV_LOAD_ADPCM           0x0017
 #define AUDSRV_PLAY_ADPCM           0x0018
 
-#define AUDSRV_FILLBUF_CALLBACK     0x0010
-#define AUDSRV_CDDA_CALLBACK        0x0011
+#define AUDSRV_FILLBUF_CALLBACK     0x0001
+#define AUDSRV_CDDA_CALLBACK        0x0002
 
 /* error codes */
 #define AUDSRV_ERR_NOERROR                 0x0000

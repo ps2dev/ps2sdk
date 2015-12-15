@@ -6,10 +6,9 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: Makefile 1522 2009-01-22 09:48:56Z radad $
 
 IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = bin/
+IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
@@ -51,16 +50,15 @@ ifdef PS2IP_DNS
 IOP_CFLAGS += -DPS2IP_DNS
 endif
 
-IOP_BIN = bin/ps2ip-nm.irx
+IOP_BIN = $(IOP_BIN_DIR)ps2ip-nm.irx
 IOP_OBJS = $(ps2ip_OBJECTS) $(ps2api_OBJECTS) $(ps2api_IPV4)
 IOP_INCS += -I$(LWIP)/src/include -I$(LWIP)/src/include/ipv4 -Isrc/include
-IOP_CFLAGS += -Wall -fno-builtin -DLWIP_NOASSERT -DLWIP_COMPAT_MUTEX $(DEBUG_FLAGS)
-IOP_LDFLAGS += -s
+IOP_CFLAGS += -DLWIP_NOASSERT -DLWIP_COMPAT_MUTEX $(DEBUG_FLAGS)
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 
 clean:
-	rm -fr $(IOP_OBJS_DIR) $(IOP_BIN_DIR)
+	rm -f -r $(IOP_OBJS_DIR) $(IOP_BIN_DIR)
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.make

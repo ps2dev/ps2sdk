@@ -6,18 +6,17 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: $
 
 IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = bin/
+IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = bin/usbhdfsd.irx
-IOP_OBJS = obj/usb_driver.o obj/fs_driver.o obj/part_driver.o obj/fat_driver.o obj/fat_write.o obj/scache.o obj/usbhdfsd.o obj/imports.o obj/exports.o
+IOP_BIN  = $(IOP_BIN_DIR)usbhdfsd.irx
+IOP_OBJS = usb_driver.o fs_driver.o part_driver.o fat_driver.o fat_write.o scache.o usbhdfsd.o imports.o exports.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
-IOP_CFLAGS  += -Wall -I$(PS2SDKSRC)/iop/usb/usbd/include/ -I$(IOP_SRC_DIR)/include
-IOP_LDFLAGS += -s
+IOP_CFLAGS  += -I$(PS2SDKSRC)/iop/usb/usbd/include/ -I$(IOP_SRC_DIR)/include
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

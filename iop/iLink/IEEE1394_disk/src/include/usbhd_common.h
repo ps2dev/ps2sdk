@@ -1,6 +1,15 @@
 #ifndef _USBHD_COMMON_H
 #define _USBHD_COMMON_H
 
+#ifdef WIN32
+#define USBHD_INLINE
+typedef unsigned char u8;
+#else
+#define USBHD_INLINE inline
+void *malloc(int size);
+void free(void *ptr);
+#endif
+
 struct _cache_set;
 typedef struct _cache_set cache_set;
 

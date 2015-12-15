@@ -6,23 +6,22 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 
 LIBAPA_PATH = ../libapa
 
 IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = bin/
+IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 LIBAPA_SRC_DIR = $(LIBAPA_PATH)/src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = bin/ps2hdd.irx
-APA_OBJS = obj/misc.o obj/cache.o obj/apa.o obj/journal.o
-IOP_OBJS = obj/hdd_fio.o obj/hdd.o obj/imports.o $(APA_OBJS)
+IOP_BIN  = $(IOP_BIN_DIR)ps2hdd.irx
+APA_OBJS = misc.o cache.o apa.o journal.o
+IOP_OBJS = hdd_fio.o hdd.o imports.o $(APA_OBJS)
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 IOP_INCS += -I$(CURDIR)/$(IOP_SRC_DIR) -I$(PS2SDKSRC)/iop/dev9/poweroff/include/ -I$(PS2SDKSRC)/iop/dev9/dev9/include/ -I$(PS2SDKSRC)/iop/dev9/atad/include/ -I$(LIBAPA_PATH)/include
-IOP_CFLAGS  += -Wall -fno-builtin-printf
-IOP_LDFLAGS += -s
+IOP_CFLAGS  += -fno-builtin-printf
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

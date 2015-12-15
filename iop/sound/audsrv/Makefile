@@ -6,22 +6,17 @@
 # Licenced under GNU Library General Public License version 2
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 
 IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = bin/
+IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = bin/audsrv.irx
-IOP_OBJS = \
-obj/audsrv.o obj/upsamplers.o obj/hw.o obj/rpc_server.o \
-obj/common.o obj/cdrom.o \
-obj/imports.o obj/exports.o \
-obj/adpcm.o
+IOP_BIN  = $(IOP_BIN_DIR)audsrv.irx
+IOP_OBJS = audsrv.o upsamplers.o hw.o rpc_server.o rpc_client.o common.o cdrom.o imports.o exports.o adpcm.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
-IOP_CFLAGS  += -Wall -fno-builtin-printf -fno-builtin-memcpy -D_IOP
-IOP_LDFLAGS += -s
+IOP_CFLAGS  += -fno-builtin-printf -fno-builtin-memcpy
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

@@ -6,23 +6,31 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 
+
+#
+# Creates the base tools directory structure in target directory.
+#
 
 RELEASE_TOOLS_DIRS = bin/
 RELEASE_TOOLS_DIRS := $(RELEASE_TOOLS_DIRS:%=$(PS2SDK)/%)
 
-$(RELEASE_TOOLS_DIRS):
+
+release-dirs:
 	$(MKDIR) -p $(RELEASE_TOOLS_DIRS)
 
-release: all $(RELEASE_TOOLS_DIRS)
-	@if test -d $(TOOLS_BIN_DIR) ; then \
-	   for file in $(TOOLS_BIN_DIR)* ; do \
-	      $(ECHO) Installing $$file to $(PS2SDK)/bin ; \
-	      cp -f $$file $(PS2SDK)/bin ; \
-	   done; \
-	fi; \
+#
+# Any executable files should go to bin
+#
+
+release-bin:
+	 @if test $(TOOLS_BIN) ; then \
+	    $(ECHO) Installing $(TOOLS_BIN) to $(PS2SDK) ; \
+	    cp -f $(TOOLS_BIN) $(RELEASE_TOOLS_DIRS) ; \
+	 fi;
+
+release: release-dirs release-bin
+	chmod -R 755 $(RELEASE_TOOLS_DIRS)
 
 release-clean:
-	rm -f $(PS2SDK)/bin/*.*
-
+	rm -f $(RELEASE_TOOLS_DIRS)*

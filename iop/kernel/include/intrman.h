@@ -17,7 +17,6 @@
 #include <types.h>
 #include <irx.h>
 
-//I don't know where the PCSX2 development team for their interrupt numbers and names from for their intrman.h file, but I saw the same names and numbers as debug strings within the LED module of a System 246's boot ROM.
 enum iop_irq_list {
 	IOP_IRQ_VBLANK = 0,
 	IOP_IRQ_SBUS,	//INUM_GM
@@ -42,9 +41,10 @@ enum iop_irq_list {
 	IOP_IRQ_HTR2,
 	IOP_IRQ_HTR3,
 	IOP_IRQ_USB,
-	IOP_IRQ_EXTR,
+	IOP_IRQ_EXTR,	/*	Expansion interface on the mainboard. Unused (and unpopulated) on most retail mainboards, but used by DECI2 in the TOOL unit as the MRP interface.
+				In PS mode, INUM_PIO seems to be triggered instead.	*/
 	IOP_IRQ_ILINK,	//INUM_FWRE
-	IOP_IRQ_FDMA,
+	IOP_IRQ_FDMA,	//Firewire DMA
 	//There's a gap in interrupt numbers here.
 	IOP_IRQ_DMA_MDEC_IN = 0x20,	//INUM_DMA_0
 	IOP_IRQ_DMA_MDEC_OUT,	//INUM_DMA_1

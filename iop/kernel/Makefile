@@ -6,20 +6,16 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: Makefile 1097 2005-05-18 15:15:59Z linuz $
-
 
 IOP_OBJS_DIR = obj/
 IOP_LIB_DIR = lib/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_LIB  = lib/libkernel.a
+IOP_LIB  = $(IOP_LIB_DIR)libkernel.a
 
-IOP_OBJS = obj/cdvdman.o obj/heaplib.o obj/intrman.o obj/ioman.o obj/libsd.o obj/loadcore.o obj/modload.o obj/secrman.o obj/sifcmd.o obj/sifman.o obj/sio2man.o obj/stdio.o obj/sysclib.o obj/sysmem.o obj/thbase.o obj/thevent.o obj/thsemap.o obj/timrman.o obj/usbd.o obj/vblank.o
-
-IOP_CFLAGS  += -Wall -fno-builtin
-IOP_LDFLAGS += -s
+IOP_OBJS = cdvdman.o heaplib.o intrman.o ioman.o libsd.o loadcore.o modload.o secrman.o sifcmd.o sifman.o sio2man.o stdio.o sysclib.o sysmem.o thbase.o thevent.o thsemap.o timrman.o usbd.o vblank.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 all: $(IOP_OBJS_DIR) $(IOP_LIB_DIR) $(IOP_LIB)
 

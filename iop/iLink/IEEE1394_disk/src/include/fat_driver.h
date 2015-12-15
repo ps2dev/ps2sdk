@@ -3,7 +3,7 @@
 
 #define DIR_CHAIN_SIZE 32
 
-#define FAT_MAX_NAME 128
+#define FAT_MAX_NAME 256
 
 //attributes (bits:5-Archive 4-Directory 3-Volume Label 2-System 1-Hidden 0-Read Only)
 #define FAT_ATTR_READONLY     0x01
@@ -79,9 +79,12 @@ typedef struct _fat_dir {
 	unsigned char atime[3]; //H:M:S
 	unsigned char mdate[4];	//D:M:Yl:Yh
 	unsigned char mtime[3]; //H:M:S
-	unsigned int  size;		//file size, 0 for directory
-	unsigned int  lastCluster;
-	fat_dir_chain_record  chain[DIR_CHAIN_SIZE];  //cluser/offset cache - for seeking purpose
+	unsigned int size;		//file size, 0 for directory
+	unsigned int parentDirCluster;	//The cluster number of the parent directory.
+	unsigned int startCluster;
+	//Stuff here are used for caching and might not be filled.
+	unsigned int lastCluster;
+	fat_dir_chain_record chain[DIR_CHAIN_SIZE];  //cluser/offset cache - for seeking purpose
 } fat_dir;
 
 int InitFAT(void);
@@ -91,12 +94,12 @@ int fat_mount(struct SBP2Device* dev, unsigned int start, unsigned int count);
 void fat_forceUnmount(struct SBP2Device* dev);
 void fat_setFatDirChain(fat_driver* fatd, fat_dir* fatDir);
 int fat_readFile(fat_driver* fatd, fat_dir* fatDir, unsigned int filePos, unsigned char* buffer, unsigned int size);
-int fat_getFirstDirentry(fat_driver* fatd, const unsigned char* dirName, fat_dir_list* fatdlist, fat_dir* fatDir);
+int fat_getFirstDirentry(fat_driver* fatd, const unsigned char* dirName, fat_dir_list* fatdlist, fat_dir *fatDir_host, fat_dir* fatDir);
 int fat_getNextDirentry(fat_driver* fatd, fat_dir_list* fatdlist, fat_dir* fatDir);
 
 fat_driver * fat_getData(int device);
 int      fat_getFileStartCluster(fat_driver* fatd, const unsigned char* fname, unsigned int* startCluster, fat_dir* fatDir);
-int      fat_getClusterChain(fat_driver* fatd, unsigned int cluster, unsigned int* buf, int bufSize, int start);
+int      fat_getClusterChain(fat_driver* fatd, unsigned int cluster, unsigned int* buf, unsigned int bufSize, int startFlag);
 
 #endif
 

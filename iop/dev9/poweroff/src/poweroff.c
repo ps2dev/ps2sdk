@@ -27,7 +27,6 @@
 
 //#define DEBUG
 
-#define INT_CDROM	0x02
 #define TYPE_C		1
 #define CDVDreg_PWOFF	(*(volatile unsigned char*)0xBF402008)
 
@@ -66,6 +65,8 @@ static pwoffcb poweroff_button_cb = 0;
 static void *poweroff_button_data = 0;
 static struct t_SifRpcDataQueue qd;
 static struct t_SifRpcServerData sd0;
+static int PowerOffThreadID;
+static SifRpcClientData_t client;
 
 static int myCdHandler(void *param)
 {
@@ -106,7 +107,32 @@ static void Shutdown(void* data)
 
 static void SendCmd(void* data)
 {
-	isceSifSendCmd(POFF_SIF_CMD, cmdData, 16, NULL, NULL, 0);
+	iWakeupThread(PowerOffThreadID);
+}
+
+static void PowerOffThread(void *arg)
+{
+	while(1)
+	{
+		SleepThread();
+		sceSifCallRpc(&client, POFF_RPC_BUTTON, 0, NULL, 0, NULL, 0, NULL, NULL);
+	}
+}
+
+static void InitPowerOffThread(void)
+{
+	iop_thread_t thread;
+
+	thread.thread = &PowerOffThread;
+	thread.attr = TH_C;
+	thread.option = PWROFF_IRX;
+	thread.stacksize = 0x400;
+	thread.priority = 0x27;
+	PowerOffThreadID = CreateThread(&thread);
+	StartThread(PowerOffThreadID, NULL);
+
+	client.server = NULL;
+	while(sceSifBindRpc(&client, PWROFF_IRX, 0) < 0 || client.server == NULL) DelayThread(500);
 }
 
 //---------------------------------------------------------------------
@@ -177,15 +203,15 @@ void* poweroff_rpc_server(int fno, void *data, int size)
 		break;
 
 	case PWROFF_ENABLE_AUTO_SHUTOFF:
-		{
-			int* sbuff = data;
-			if (sbuff[0])
-				SetPowerButtonHandler(Shutdown, 0);
-			else
-				SetPowerButtonHandler(SendCmd, 0);
-			sbuff[0] = 1;
-			return sbuff;
-		}
+		InitPowerOffThread();
+
+		int* sbuff = data;
+		if (sbuff[0])
+			SetPowerButtonHandler(Shutdown, 0);
+		else
+			SetPowerButtonHandler(SendCmd, 0);
+		sbuff[0] = 1;
+		return sbuff;
 	}
 	return NULL;
 }
@@ -195,7 +221,7 @@ void poweroff_rpc_Thread(void* param)
 	SifInitRpc(0);
 
 	SifSetRpcQueue(&qd, GetThreadId());
-	SifRegisterRpc(&sd0, PWROFF_IRX, poweroff_rpc_server, cmdData, 0, 0, &qd);
+	SifRegisterRpc(&sd0, PWROFF_IRX, poweroff_rpc_server, cmdData, NULL, NULL, &qd);
 	SifRpcLoop(&qd);
 }
 
@@ -213,26 +239,23 @@ int _start(int argc, char* argv[])
 
 	SetPowerButtonHandler(Shutdown, 0);
 
-	FlushDcache();
-	CpuEnableIntr(0);
-
-	if (handlers[INT_CDROM].handler==0) {
+	if (handlers[IOP_IRQ_CDVD].handler==0) {
 		printf("No CDROM handler. Run CDVDMAN first\n");
 		return 1;
 	}
 
-	if (((int)handlers[INT_CDROM].handler & 3) != TYPE_C){
+	if (((int)handlers[IOP_IRQ_CDVD].handler & 3) != TYPE_C){
 		printf("Cannot chain to non-C handler\n");
 		return 1;
 	}
 
-	oldCdHandler=(intrhandler)((int)handlers[INT_CDROM].handler & ~3);
-	handlers[INT_CDROM].handler=(intrhandler)((int)myCdHandler | TYPE_C);
+	oldCdHandler=(intrhandler)((int)handlers[IOP_IRQ_CDVD].handler & ~3);
+	handlers[IOP_IRQ_CDVD].handler=(intrhandler)((int)myCdHandler | TYPE_C);
 
 	memset(CallbackTable, 0, sizeof(struct CallbackEntry) * MAX_CALLBACKS);
 
-	mythread.attr = 0x02000000;
-	mythread.option = 0;
+	mythread.attr = TH_C;
+	mythread.option = PWROFF_IRX;
 	mythread.thread = poweroff_rpc_Thread;
 	mythread.stacksize = 0x1000;
 	mythread.priority = 0x27;
@@ -242,14 +265,14 @@ int _start(int argc, char* argv[])
 	if (pid > 0) {
 		if ((i=StartThread(pid, NULL)) < 0) {
 			printf("StartThread failed (%d)\n", i);
-			return 1;
+			return MODULE_NO_RESIDENT_END;
 		}
 	}
 	else {
 		printf("CreateThread failed (%d)\n", pid);
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 	}
 
 	printf("Poweroff installed\n");
-	return 0;
+	return MODULE_RESIDENT_END;
 }
