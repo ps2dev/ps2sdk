@@ -87,11 +87,26 @@ static int fioInputBreaker(char const **arg, char *outBuf, int maxout)
 	return 0;
 }
 
+struct apaFsType
+{
+	const char *desc;
+	u16 type;
+};
+
 // NOTE: Changed so format = partitionID,size (used to be partitionID,fpswd,rpswd,size,filesystem)
 static int fioGetInput(const char *arg, apa_params_t *params)
 {
-	char	szBuf[32];
+	char	argBuf[32];
 	int		rv=0;
+#ifdef APA_FULL_INPUT_ARGS
+	int i;
+	static const struct apaFsType fsTypes[]={
+		{"PFS", APA_TYPE_PFS},
+		{"CFS", APA_TYPE_CFS},
+		{"EXT2", APA_TYPE_EXT2},
+		{"EXT2SWAP", APA_TYPE_EXT2SWAP}
+	};
+#endif
 
 	if(params==NULL)
 		return -EINVAL;
@@ -105,17 +120,45 @@ static int fioGetInput(const char *arg, apa_params_t *params)
 		return rv;
 	if((params->id[0]==0) || (arg[0]==0))
 		return 0;
-
-	memset(szBuf, 0, sizeof(szBuf));
-	if((rv=fioInputBreaker(&arg, szBuf, sizeof(szBuf)))!=0)
+#ifdef APA_FULL_INPUT_ARGS
+	if((rv=fioInputBreaker(&arg, params->fpswd, APA_PASSMAX))!=0)
 		return rv;
 
-	if((rv=fioPartitionSizeLookUp(szBuf))<0)
+	if((rv=fioInputBreaker(&arg, params->rpswd, APA_PASSMAX))!=0)
+		return rv;
+#endif
+
+	memset(argBuf, 0, sizeof(argBuf));
+	if((rv=fioInputBreaker(&arg, argBuf, sizeof(argBuf)))!=0)
+		return rv;
+
+	if((rv=fioPartitionSizeLookUp(argBuf))<0)
 		return rv;
 	params->size=rv;
 
+#ifdef APA_FULL_INPUT_ARGS
+	memset(argBuf, 0, sizeof(argBuf));
+	if((rv=fioInputBreaker(&arg, argBuf, sizeof(argBuf)))!=0)
+		return rv;
+
+	for(i = 0; i < 4; i++)
+	{
+		if(!strcmp(argBuf, fsTypes[i].desc))
+		{
+			params->type = fsTypes[i].type;
+			break;
+		}
+	}
+
+	if(i == 4)
+	{
+		printf("hdd: error: Invalid fstype, %s.\n", argBuf);
+		return -EINVAL;
+	}
+#else
 	// Filesystem type is fixed to PFS!
 	params->type = APA_TYPE_PFS;
+#endif
 	return rv;
 }
 
@@ -339,12 +382,16 @@ static int apaOpen(u32 device, hdd_file_slot_t *fileSlot, apa_params_t *params, 
 	fileSlot->nsub=clink->header->nsub;
 	memcpy(&fileSlot->id, &clink->header->id, APA_IDMAX);
 	apaCacheFree(clink);
-	rv=0; if(apaPassCmp(clink->header->fpwd, NULL)!=0)
-		rv=-EACCES;
+	if(apaPassCmp(clink->header->fpwd, params->fpswd)!=0)
+	{
+		rv = (!(mode & O_WRONLY)) ? apaPassCmp(clink->header->rpwd, params->rpswd) : -EACCES;
+	} else
+		rv = 0;
+
 	return rv;
 }
 
-static int apaRemove(u32 device, char *id)
+static int apaRemove(u32 device, char *id, const char *fpwd)
 {
 	int			i;
 	u32			nsub;
@@ -363,7 +410,7 @@ static int apaRemove(u32 device, char *id)
 		return -EACCES;
 	if((clink=apaFindPartition(device, id, &rv))==NULL)
 		return rv;
-	if(apaPassCmp(clink->header->fpwd, NULL))
+	if(apaPassCmp(clink->header->fpwd, fpwd))
 	{
 		apaCacheFree(clink);
 		return -EACCES;
@@ -398,7 +445,7 @@ int hddRemove(iop_file_t *f, const char *name)
 		return rv;
 
 	WaitSema(fioSema);
-	rv = apaRemove(f->unit, params.id);
+	rv = apaRemove(f->unit, params.id, params.fpswd);
 	SignalSema(fioSema);
 
 	return rv;
@@ -535,7 +582,7 @@ int hddGetStat(iop_file_t *f, const char *name, iox_stat_t *stat)
 
 	WaitSema(fioSema);
 	if((clink=apaFindPartition(f->unit, params.id, &rv))){
-		if((rv=apaPassCmp(clink->header->rpwd, NULL))==0)
+		if((rv=apaPassCmp(clink->header->fpwd, params.fpswd))==0 || (rv=apaPassCmp(clink->header->rpwd, params.rpswd))==0)
 				fioGetStatFiller(clink, stat);
 		apaCacheFree(clink);
 	}
@@ -807,7 +854,7 @@ static int devctlSwapTemp(u32 device, char *argp)
 		return rv;
 
 	if((partNew=apaFindPartition(device, params.id, &rv))) {
-		if((rv=apaPassCmp(partNew->header->fpwd, NULL))==0) {
+		if((rv=apaPassCmp(partNew->header->fpwd, params.fpswd))==0) {
 			memcpy(partTemp->header->id, partNew->header->id, APA_IDMAX);
 			memcpy(partTemp->header->rpwd, partNew->header->rpwd, APA_PASSMAX);
 			memcpy(partTemp->header->fpwd, partNew->header->fpwd, APA_PASSMAX);

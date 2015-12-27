@@ -287,6 +287,9 @@ int pfsCheckAccess(pfs_cache_t *clink, int flags);
 char* pfsSplitPath(char *filename, char *path, int *result);
 u16 pfsGetMaxIndex(pfs_mount_t *pfsMount);
 
+int pfsAllocZones(pfs_cache_t *clink, int msize, int mode);
+void pfsFreeZones(pfs_cache_t *pfree);
+
 ///////////////////////////////////////////////////////////////////////////////
 //	Inode functions
 
@@ -321,12 +324,5 @@ void pfsPrintBitmap(u32 *bitmap);
 pfs_block_device_t *pfsGetBlockDeviceTable(const char *name);
 int pfsGetScale(int num, int size);
 u32 pfsFixIndex(u32 index);
-
-int pfsHddTransfer(int fd, void *buffer, u32 sub/*0=main 1+=subs*/, u32 sector,
-		u32 size/* in sectors*/, u32 mode);
-u32 pfsHddGetSubCount(int fd);
-u32 pfsHddGetPartSize(int fd, u32 sub/*0=main 1+=subs*/);
-void pfsHddSetPartError(int fd);
-int pfsHddFlushCache(int fd);
 
 #endif /* _LIBPFS_H */

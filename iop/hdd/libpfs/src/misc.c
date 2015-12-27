@@ -132,15 +132,22 @@ u32 pfsFixIndex(u32 index)
 ///////////////////////////////////////////////////////////////////////////////
 //   Functions to work with hdd.irx
 
+static int pfsHddTransfer(int fd, void *buffer, u32 sub/*0=main 1+=subs*/, u32 sector,
+		u32 size/* in sectors*/, u32 mode);
+static u32 pfsHddGetSubCount(int fd);
+static u32 pfsHddGetPartSize(int fd, u32 sub/*0=main 1+=subs*/);
+static void pfsHddSetPartError(int fd);
+static int pfsHddFlushCache(int fd);
+
 #define NUM_SUPPORTED_DEVICES	1
 pfs_block_device_t pfsBlockDeviceCallTable[NUM_SUPPORTED_DEVICES] = {
 	{
 		"hdd",
-		pfsHddTransfer,
-		pfsHddGetSubCount,
-		pfsHddGetPartSize,
-		pfsHddSetPartError,
-		pfsHddFlushCache,
+		&pfsHddTransfer,
+		&pfsHddGetSubCount,
+		&pfsHddGetPartSize,
+		&pfsHddSetPartError,
+		&pfsHddFlushCache,
 	}
 };
 
@@ -179,7 +186,7 @@ pfs_block_device_t *pfsGetBlockDeviceTable(const char *name)
 	return NULL;
 }
 
-int pfsHddTransfer(int fd, void *buffer, u32 sub/*0=main 1+=subs*/, u32 sector,
+static int pfsHddTransfer(int fd, void *buffer, u32 sub/*0=main 1+=subs*/, u32 sector,
 				u32 size/* in sectors*/, u32 mode)
 {
 	hddIoctl2Transfer_t t;
@@ -193,22 +200,22 @@ int pfsHddTransfer(int fd, void *buffer, u32 sub/*0=main 1+=subs*/, u32 sector,
 	return ioctl2(fd, APA_IOCTL2_TRANSFER_DATA, &t, 0, NULL, 0);
 }
 
-u32 pfsHddGetSubCount(int fd)
+static u32 pfsHddGetSubCount(int fd)
 {
 	return ioctl2(fd, APA_IOCTL2_NUMBER_OF_SUBS, NULL, 0, NULL, 0);
 }
 
-u32 pfsHddGetPartSize(int fd, u32 sub/*0=main 1+=subs*/)
+static u32 pfsHddGetPartSize(int fd, u32 sub/*0=main 1+=subs*/)
 {	// of a partition
 	return ioctl2(fd, APA_IOCTL2_GETSIZE, &sub, 0, NULL, 0);
 }
 
-void pfsHddSetPartError(int fd)
+static void pfsHddSetPartError(int fd)
 {
 	ioctl2(fd, APA_IOCTL2_SET_PART_ERROR, NULL, 0, NULL, 0);
 }
 
-int pfsHddFlushCache(int fd)
+static int pfsHddFlushCache(int fd)
 {
 	return ioctl2(fd, APA_IOCTL2_FLUSH_CACHE, NULL, 0, NULL, 0);
 }

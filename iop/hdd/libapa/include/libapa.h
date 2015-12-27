@@ -92,6 +92,8 @@ typedef struct sapa_cache
 
 typedef struct
 {
+	char	fpswd[APA_PASSMAX];
+	char	rpswd[APA_PASSMAX];
 	char	id[APA_IDMAX];
 	u32		size;
 	u16		type;
@@ -154,7 +156,7 @@ int apaJournalRestore(s32 device);
 void *apaAllocMem(int size);
 void apaFreeMem(void *ptr);
 int apaGetTime(apa_ps2time_t *tm);
-int apaPassCmp(char *password1, char *password2);
+int apaPassCmp(const char *password1, const char *password2);
 int apaGetIlinkID(u8 *idbuf);
 
 #endif /* _LIBAPA_H */

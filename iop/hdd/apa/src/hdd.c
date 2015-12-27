@@ -290,9 +290,9 @@ int _start(int argc, char **argv)
 		if(hddDevices[i].status<2){
 			if(apaJournalRestore(i)!=0)
 				return 1;
-			if(apaGetFormat(i, (int *)&hddDevices[i].format))
+			if(apaGetFormat(i, &hddDevices[i].format))
 				hddDevices[i].status--;
-			APA_PRINTF(APA_DRV_NAME": drive status %ld, format version %08lx\n",
+			APA_PRINTF(APA_DRV_NAME": drive status %d, format version %08x\n",
 				hddDevices[i].status, hddDevices[i].format);
 		}
 	}

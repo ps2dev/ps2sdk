@@ -21,8 +21,6 @@
 #include "apa-opt.h"
 #include "libapa.h"
 
-char apaDefaultPassword[APA_PASSMAX]={0};
-
 const char apaMBRMagic[]="Sony Computer Entertainment Inc.";
 
 void apaSaveError(s32 device, void *buffer, u32 lba, u32 err_lba)
@@ -116,8 +114,8 @@ apa_cache_t *apaFillHeader(s32 device, apa_params_t *params, int start, int next
 	else
 	{
 		if(strncmp(clink->header->id, "_tmp", APA_IDMAX)!=0) {
-			memcpy(clink->header->rpwd, apaDefaultPassword, APA_PASSMAX);
-			memcpy(clink->header->fpwd, apaDefaultPassword, APA_PASSMAX);
+			memcpy(clink->header->rpwd, params->rpswd, APA_PASSMAX);
+			memcpy(clink->header->fpwd, params->fpswd, APA_PASSMAX);
 		}
 	}
 	apaGetTime(&clink->header->created);

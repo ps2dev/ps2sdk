@@ -213,7 +213,7 @@ static int openFile(pfs_mount_t *pfsMount, pfs_file_slot_t *freeSlot, const char
 					fileInode->u.inode->size = 0;
 					fileInode->u.inode->attr &= ~PFS_FIO_ATTR_CLOSED; //~0x80==0xFF7F
 					fileInode->flags |= PFS_CACHE_FLAG_DIRTY;
-					pfsFioIoctl2Free(fileInode);
+					pfsFreeZones(fileInode);
 				}
 			}
 		}
@@ -1140,7 +1140,6 @@ int pfsFioSync(iop_file_t *f, const char *dev, int flag)
 
 	_sync();
 	pfsCacheFlushAllDirty(pfsMount);
-	pfsHddFlushCache(pfsMount->fd);
 
 	SignalSema(pfsFioSema);
 	return pfsFioCheckForLastError(pfsMount, 0);

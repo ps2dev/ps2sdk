@@ -11,6 +11,7 @@
 # Miscellaneous routines
 */
 
+#include <errno.h>
 #include <intrman.h>
 #include <iomanX.h>
 #include <cdvdman.h>
@@ -21,8 +22,6 @@
 
 #include "apa-opt.h"
 #include "libapa.h"
-
-extern char apaDefaultPassword[APA_PASSMAX];
 
 void *apaAllocMem(int size)
 {
@@ -63,11 +62,14 @@ int apaGetTime(apa_ps2time_t *tm)
 	return 0;
 }
 
-int apaPassCmp(char *pw1, char *pw2)
+int apaPassCmp(const char *pw1, const char *pw2)
 {
+#ifdef APA_ENABLE_PASSWORDS
+	 return memcmp(pw1, pw2, APA_PASSMAX) ? -EACCES : 0;
+#else
 	//Passwords are not supported, hence this check should always pass.
-	/* return memcmp(pw1, (pw2==NULL)?apaDefaultPassword:pw2, APA_PASSMAX) ? -EACCES : 0; */
 	return 0;
+#endif
 }
 
 int apaGetIlinkID(u8 *idbuf)
@@ -75,11 +77,9 @@ int apaGetIlinkID(u8 *idbuf)
 	u32 err=0;
 
 	memset(idbuf, 0, 32);
-
 	if(sceCdRI(idbuf, &err))
-		if (err)
-			APA_PRINTF(APA_DRV_NAME": Error when reading ilink id\n");
-
-	// Return all ok for compatibility
-	return 0;
+		if(err==0)
+			return 0;
+	APA_PRINTF(APA_DRV_NAME": Error: cannot get ilink id\n");
+	return -EIO;
 }

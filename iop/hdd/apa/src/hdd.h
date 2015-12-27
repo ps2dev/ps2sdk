@@ -18,8 +18,8 @@ typedef struct
 {
 	u32 totalLBA;
 	u32 partitionMaxSize;
-	u32 format;
-	u32 status;
+	int format;
+	int status;
 } hdd_device_t;
 
 typedef struct

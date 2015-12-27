@@ -65,7 +65,6 @@ int pfsFioDevctl(iop_file_t *f, const char *name, int cmd, void *arg, size_t arg
 
 	case PFS_DEVCTL_CLOSE_ALL:
 		pfsFioDevctlCloseAll();
-		pfsHddFlushCache(pfsMount->fd);
 		break;
 
 	case PFS_DEVCTL_CLEAR_STAT:
@@ -120,11 +119,11 @@ int pfsFioIoctl2(iop_file_t *f, int cmd, void *arg, size_t arglen,	void *buf, si
 	switch(cmd)
 	{
 	case PFS_IOCTL2_ALLOC:
-		rv=pfsFioIoctl2Alloc(fileSlot->clink, *(int *)(arg), 1);
+		rv=pfsAllocZones(fileSlot->clink, *(int *)(arg), 1);
 		break;
 
 	case PFS_IOCTL2_FREE:
-		pfsFioIoctl2Free(fileSlot->clink);
+		pfsFreeZones(fileSlot->clink);
 		break;
 
 	case PFS_IOCTL2_ATTR_ADD:
@@ -351,105 +350,3 @@ static int ioctl2AttrRead(pfs_cache_t *clink, pfs_ioctl2attr_t *attr, u32 *offse
 
 	return aentry->kLen;
 }
-
-int pfsFioIoctl2Alloc(pfs_cache_t *clink, int msize, int mode)
-{
-	pfs_blockpos_t blockpos;
-	int result=0;
-	u32 val;
-	int zsize;
-
-	zsize=clink->pfsMount->zsize;
-	val=((msize-1 + zsize) & (-zsize)) / zsize;
-
-	if(mode==0)
-		if (((clink->u.inode->number_blocks-clink->u.inode->number_segdesg) *(u64)zsize)
-			>= (clink->u.inode->size + msize))
-			return 0;
-
-	if((blockpos.inode = pfsBlockGetLastSegmentDescriptorInode(clink, &result)))
-	{
-		blockpos.block_offset=blockpos.byte_offset=0;
-		blockpos.block_segment=clink->u.inode->number_data-1;
-		val-=pfsBlockExpandSegment(clink, &blockpos, val);
-		while (val && ((result=pfsBlockAllocNewSegment(clink, &blockpos, val))>=0)){
-			val-=result;
-			result=0;
-		}
-		pfsCacheFree(blockpos.inode);
-	}
-	return result;
-}
-
-void pfsFioIoctl2Free(pfs_cache_t *pfree)
-{
-	pfs_blockinfo b;
-	int result;
-	pfs_mount_t *pfsMount = pfree->pfsMount;
-	pfs_inode *inode = pfree->u.inode;
-	u32 nextsegdesc = 1, limit = inode->number_data, i, j = 0, zones;
-	pfs_blockinfo *bi;
-	pfs_cache_t *clink;
-
-	zones = (u32)(inode->size / pfsMount->zsize);
-	if(inode->size % pfsMount->zsize)
-		zones++;
-	if(inode->number_segdesg + zones == inode->number_blocks)
-		return;
-
-	j = zones;
-	b.number = 0;
-	clink = pfsCacheUsedAdd(pfree);
-
-	// iterate through each of the block segments used by the inode
-	for (i = 1; i < limit && j; i++)
-	{
-		if(pfsFixIndex(i) == 0)
-		{
-			if ((clink = pfsBlockGetNextSegment(clink, &result)) == 0)
-				return;
-
-			nextsegdesc++;
-		}
-		else
-			if(j < clink->u.inode->data[pfsFixIndex(i)].count)
-			{
-				clink->u.inode->data[pfsFixIndex(i)].count -= j;
-				b.subpart = clink->u.inode->data[pfsFixIndex(i)].subpart;
-				b.count = j;
-				b.number = clink->u.inode->data[pfsFixIndex(i)].number +
-					clink->u.inode->data[pfsFixIndex(i)].count;
-				j = 0;
-				clink->flags |= PFS_CACHE_FLAG_DIRTY;
-			}
-			else
-				j -= clink->u.inode->data[pfsFixIndex(i)].count;
-	}
-
-	pfree->u.inode->number_data = i;
-	pfree->u.inode->number_blocks = zones + nextsegdesc;
-	pfree->u.inode->number_segdesg = nextsegdesc;
-	pfree->u.inode->last_segment.number = clink->u.inode->data[0].number;
-	pfree->u.inode->last_segment.subpart= clink->u.inode->data[0].subpart;
-	pfree->u.inode->last_segment.count  = clink->u.inode->data[0].count;
-	pfree->flags |= PFS_CACHE_FLAG_DIRTY;
-
-	if (b.number)
-		pfsBitmapFreeBlockSegment(pfsMount, &b);
-
-	while(i < limit)
-	{
-		if (pfsFixIndex(i) == 0)
-		{
-			if((clink = pfsBlockGetNextSegment(clink, &result)) == 0)
-				return;
-		}
-		bi = &clink->u.inode->data[pfsFixIndex(i++)];
-		pfsBitmapFreeBlockSegment(pfsMount, bi);
-		pfsCacheMarkClean(pfsMount, bi->subpart, bi->number<<pfsMount->inode_scale,
-			(bi->number+bi->count)<<pfsMount->inode_scale);
-	}
-
-	pfsCacheFree(clink);
-}
-

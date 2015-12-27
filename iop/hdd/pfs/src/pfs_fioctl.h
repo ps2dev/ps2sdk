@@ -21,7 +21,5 @@ int pfsFioIoctl2(iop_file_t *f, int cmd, void *arg, size_t arglen, void *buf, si
 int pfsFioDevctl(iop_file_t *f, const char *name, int cmd, void *arg, size_t arglen, void *buf, size_t buflen);
 
 void pfsFioDevctlCloseAll(void);
-int pfsFioIoctl2Alloc(pfs_cache_t *clink, int msize, int mode);
-void pfsFioIoctl2Free(pfs_cache_t *pfree);
 
 #endif /* _PFS_FIOCTL_H */

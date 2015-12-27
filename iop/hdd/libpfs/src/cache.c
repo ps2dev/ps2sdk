@@ -121,8 +121,9 @@ void pfsCacheFlushAllDirty(pfs_mount_t *pfsMount)
 				pfsCacheBuf[i].flags & PFS_CACHE_FLAG_DIRTY)
 					pfsCacheTransfer(&pfsCacheBuf[i], 1);
 		}
-		pfsJournalReset(pfsMount);
 	}
+
+	pfsJournalReset(pfsMount);
 }
 
 pfs_cache_t *pfsCacheAlloc(pfs_mount_t *pfsMount, u16 sub, u32 scale,
@@ -237,9 +238,6 @@ void pfsCacheClose(pfs_mount_t *pfsMount)
 		if(pfsCacheBuf[i].pfsMount==pfsMount)
 			pfsCacheBuf[i].pfsMount=NULL;
 	}
-
-	//Not done for FSCK.
-	pfsHddFlushCache(pfsMount->fd);
 }
 
 void pfsCacheMarkClean(pfs_mount_t *pfsMount, u32 subpart, u32 sectorStart, u32 sectorEnd)
