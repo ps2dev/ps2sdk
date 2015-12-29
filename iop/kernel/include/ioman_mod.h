@@ -34,7 +34,7 @@ int io_write(int fd, void *ptr, size_t size);
 #define I_io_write DECLARE_IMPORT(7, io_write)
 int io_lseek(int fd, int pos, int mode);
 #define I_io_lseek DECLARE_IMPORT(8, io_lseek)
-int io_ioctl(int fd, unsigned long arg, void *param);
+int io_ioctl(int fd, unsigned int arg, void *param);
 #define I_io_ioctl DECLARE_IMPORT(9, io_ioctl)
 int io_remove(const char *name);
 #define I_io_remove DECLARE_IMPORT(10, io_remove)
@@ -88,7 +88,7 @@ typedef struct _iop_io_device_ops {
 	int	(*io_read)(iop_io_file_t *, void *, int);
 	int	(*io_write)(iop_io_file_t *, void *, int);
 	int	(*io_lseek)(iop_io_file_t *, int, int);
-	int	(*io_ioctl)(iop_io_file_t *, unsigned long, void *);
+	int	(*io_ioctl)(iop_io_file_t *, unsigned int, void *);
 	int	(*io_remove)(iop_io_file_t *, const char *);
 	int	(*io_mkdir)(iop_io_file_t *, const char *);
 	int	(*io_rmdir)(iop_io_file_t *, const char *);

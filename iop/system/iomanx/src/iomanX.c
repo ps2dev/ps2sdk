@@ -286,7 +286,7 @@ int lseek(int fd, int offset, int whence)
 	return f->device->ops->lseek(f, offset, whence);
 }
 
-int ioctl(int fd, unsigned long cmd, void *arg)
+int ioctl(int fd, unsigned int cmd, void *arg)
 {
 	iop_file_t *f = get_file(fd);
 

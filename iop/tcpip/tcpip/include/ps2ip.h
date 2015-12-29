@@ -49,7 +49,7 @@ int       lwip_socket(int domain, int type, int protocol);
 int       lwip_select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptset,
                       struct timeval *timeout);
 #define I_lwip_select DECLARE_IMPORT(14, lwip_select)
-int       lwip_ioctl(int s, long cmd, void *argp);
+int       lwip_ioctl(int s, int cmd, void *argp);
 #define I_lwip_ioctl DECLARE_IMPORT(15, lwip_ioctl)
 int       lwip_getpeername (int s, struct sockaddr *name, socklen_t *namelen);
 #define I_lwip_getpeername DECLARE_IMPORT(16, lwip_getpeername)

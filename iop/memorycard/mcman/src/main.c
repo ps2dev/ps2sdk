@@ -74,8 +74,8 @@ u8 mcman_xortable[256] = {
 //--------------------------------------------------------------
 void long_multiply(u32 v1, u32 v2, u32 *HI, u32 *LO)
 {
-	register long a, b, c, d;
-	register long x, y;
+	register int a, b, c, d;
+	register int x, y;
 
 	a = (v1 >> 16) & 0xffff;
 	b = v1 & 0xffff;

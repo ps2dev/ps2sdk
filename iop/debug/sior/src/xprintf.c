@@ -204,7 +204,7 @@ int vxprintf(func,arg,format,ap)
   int flag_zeropad;         /* True if field width constant starts with zero */
   int flag_long;            /* True if "l" flag is present */
   int flag_center;          /* True if "=" flag is present */
-  unsigned long longvalue;  /* Value for integer types */
+  u32 longvalue;  /* Value for integer types */
 
   long double realvalue;    /* Value for real types */
   info *infop;              /* Pointer to the appropriate info structure */
@@ -343,16 +343,16 @@ int vxprintf(func,arg,format,ap)
       case ORDINAL:
       case RADIX:
         if(( flag_long )&&( infop->flag_signed )){
-	    signed long t = va_arg(ap,signed long);
+	    s32 t = va_arg(ap,s32);
 	    longvalue = t;
 	}else if(( flag_long )&&( !infop->flag_signed )){
-	    unsigned long t = va_arg(ap,unsigned long);
+	    u32 t = va_arg(ap,u32);
 	    longvalue = t;
 	}else if(( !flag_long )&&( infop->flag_signed )){
-	    signed int t = va_arg(ap,signed int) & ((unsigned long) 0xffffffff);
+	    signed int t = va_arg(ap,signed int) & ((u32) 0xffffffff);
 	    longvalue = t;
 	}else{
-	    unsigned int t = va_arg(ap,unsigned int) & ((unsigned long) 0xffffffff);
+	    unsigned int t = va_arg(ap,unsigned int) & ((u32) 0xffffffff);
 	    longvalue = t;
 	}
 #ifdef COMPATIBILITY
@@ -365,8 +365,8 @@ int vxprintf(func,arg,format,ap)
         if( longvalue==0 && infop->base==8 ) flag_alternateform = 0;
 #endif
         if( infop->flag_signed ){
-          if( *(long*)&longvalue<0 ){
-	    longvalue = -*(long*)&longvalue;
+          if( *(s32*)&longvalue<0 ){
+	    longvalue = -*(s32*)&longvalue;
             prefix = '-';
           }else if( flag_plussign )  prefix = '+';
           else if( flag_blanksign )  prefix = ' ';
@@ -377,7 +377,7 @@ int vxprintf(func,arg,format,ap)
 	}
         bufpt = &buf[BUFSIZE];
         if( xtype==ORDINAL ){
-          long a,b;
+          s32 a,b;
           a = longvalue%10;
           b = longvalue%100;
           bufpt -= 2;

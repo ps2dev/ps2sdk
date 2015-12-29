@@ -553,7 +553,7 @@ int devfs_close(iop_file_t *file)
     @param args: Pointer to a buffer containing any arguments
     @returns >= 0 Defined by the type of command, -1 on error
 */
-int devfs_ioctl(iop_file_t *file, unsigned long cmd, void *args)
+int devfs_ioctl(iop_file_t *file, unsigned int cmd, void *args)
 
 {
    devfs_device_t *dev;
@@ -748,7 +748,7 @@ int devfs_write(iop_file_t *file, void *buf, int len)
     @param whence: Seek base.
     @returns location seeked to, -1 on error.
 */
-int devfs_lseek(iop_file_t *file, long loc, int whence)
+int devfs_lseek(iop_file_t *file, int loc, int whence)
 {
    devfs_device_t *dev;
    ioman_data_t *data = (ioman_data_t *) file->privdata;

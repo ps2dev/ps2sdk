@@ -26,10 +26,10 @@ static iop_thread_t threadData={
   0x30			/* priority */
 };
 
-//static unsigned long int iLinkBufferOffset, iLinkTransferSize;
+//static u32 iLinkBufferOffset, iLinkTransferSize;
 static int sbp2_event_flag;
 
-static void ieee1394_callback(int reason, unsigned long int offset, unsigned long int size);
+static void ieee1394_callback(int reason, u32 offset, u32 size);
 static void iLinkIntrCBHandlingThread(void *arg);
 static int ieee1394_SendManagementORB(int mode, struct SBP2Device *dev);
 static int ieee1394_InitializeFetchAgent(struct SBP2Device *dev);
@@ -37,7 +37,7 @@ static inline int ieee1394_Sync_withTimeout(u32 n500mSecUnits);
 
 static volatile unsigned char statusFIFO[32]; /* Maximum 32 bytes. */
 
-static void ieee1394_callback(int reason, unsigned long int offset, unsigned long int size){
+static void ieee1394_callback(int reason, u32 offset, u32 size){
 #if 0
 	iLinkBufferOffset=offset;
 	iLinkTransferSize=size;
@@ -336,7 +336,7 @@ static void iLinkIntrCBHandlingThread(void *arg){
 }
 
 static void ieee1394_ResetFetchAgent(struct SBP2Device *dev){
-	unsigned long int dummy;
+	u32 dummy;
 	int result;
 
 	/* Reset the Fetch Agent. */
@@ -346,7 +346,7 @@ static void ieee1394_ResetFetchAgent(struct SBP2Device *dev){
 }
 
 static int ieee1394_GetFetchAgentState(struct SBP2Device *dev){
-	unsigned long int FetchAgentState;
+	u32 FetchAgentState;
 	int result;
 
 	if((result=iLinkTrRead(dev->trContext, dev->CommandBlockAgent_high, dev->CommandBlockAgent_low, &FetchAgentState, 4))<0){

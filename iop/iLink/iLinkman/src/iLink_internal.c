@@ -59,7 +59,7 @@ inline int GetConsoleIDs(u64 *guid, unsigned char *ModelName){
 	}
 	else{
 		*guid=(ilink_id&0xFFFFFFFF00000000) | ((*(u8*)&ilink_id)|0x08004600);
-		if(sceCdRM(ModelName, (unsigned long int *)&stat)<0 || stat!=0){
+		if(sceCdRM(ModelName, (unsigned int *)&stat)<0 || stat!=0){
 			result=-1;
 			DEBUG_PRINTF("Error reading console model name.\n");
 		}

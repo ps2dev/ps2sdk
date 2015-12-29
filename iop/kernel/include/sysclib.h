@@ -87,9 +87,9 @@ char *strstr(const char *haystack, const char *needle);
 #define I_strstr DECLARE_IMPORT(34, strstr)
 char *strtok(char *s, const char *delim);
 #define I_strtok DECLARE_IMPORT(35, strtok)
-long strtol(const char *s, char **endptr, int base);
+int strtol(const char *s, char **endptr, int base);
 #define I_strtol DECLARE_IMPORT(36, strtol)
-unsigned long strtoul(const char *s, char **endptr, int base);
+unsigned int strtoul(const char *s, char **endptr, int base);
 #define I_strtoul DECLARE_IMPORT(38, strtoul)
 
 int vsprintf(char *, const char *, va_list);

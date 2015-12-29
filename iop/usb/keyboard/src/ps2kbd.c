@@ -1049,7 +1049,7 @@ int fio_read(iop_file_t *f, void *buf, int size)
   return count;
 }
 
-int fio_ioctl(iop_file_t *f, unsigned long arg, void *param)
+int fio_ioctl(iop_file_t *f, unsigned int arg, void *param)
 
 {
   //printf("fio_ioctl() %ld %d\n", arg, *((u32 *) param));

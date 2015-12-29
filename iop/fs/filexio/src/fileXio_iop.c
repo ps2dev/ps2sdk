@@ -717,7 +717,7 @@ void* fileXioRpc_Lseek(unsigned int* sbuff)
 	#ifdef DEBUG
 		printf("RPC Lseek Request\n");
 	#endif
-	ret=lseek(packet->fd, (long int)packet->offset, packet->whence);
+	ret=lseek(packet->fd, (int)packet->offset, packet->whence);
 	sbuff[0] = ret;
 	return sbuff;
 }
