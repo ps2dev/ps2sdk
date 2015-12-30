@@ -407,8 +407,8 @@ struct in_addr {
 /* From include/lwip/sockets.h:  */
 
 struct timeval {
-  long    tv_sec;         /* seconds */
-  long    tv_usec;        /* and microseconds */
+  int    tv_sec;         /* seconds */
+  int    tv_usec;        /* and microseconds */
 };
 
 struct sockaddr_in {
@@ -546,9 +546,9 @@ struct sockaddr {
                                            old ioctl's */
 #	define _IO(x,y)        (IOC_VOID|((x)<<8)|(y))
 
-#	define _IOR(x,y,t)     (IOC_OUT|(((long)sizeof(t)&IOCPARM_MASK)<<16)|((x)<<8)|(y))
+#	define _IOR(x,y,t)     (IOC_OUT|(((int)sizeof(t)&IOCPARM_MASK)<<16)|((x)<<8)|(y))
 
-#	define _IOW(x,y,t)     (IOC_IN|(((long)sizeof(t)&IOCPARM_MASK)<<16)|((x)<<8)|(y))
+#	define _IOW(x,y,t)     (IOC_IN|(((int)sizeof(t)&IOCPARM_MASK)<<16)|((x)<<8)|(y))
 #endif
 
 #ifndef FIONREAD

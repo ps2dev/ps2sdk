@@ -20,7 +20,7 @@ typedef unsigned long long clock_t;
 #endif
 
 #ifndef __time_t_defined
-typedef unsigned long time_t;
+typedef unsigned long long time_t;
 #define __time_t_defined
 #endif
 
