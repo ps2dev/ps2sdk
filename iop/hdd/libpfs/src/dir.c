@@ -63,7 +63,7 @@ pfs_cache_t *pfsGetDentry(pfs_cache_t *clink, char *path, pfs_dentry **dentry, u
 				d=dentCache->u.dentry;
 			}
 
-			for (d2=(pfs_dentry*)((int)d+512); d < d2; (int)d+=aLen)
+			for (d2=(pfs_dentry*)((int)d+512); d < d2; d=(pfs_dentry *)((int)d + aLen))
 			{
 				aLen=(d->aLen & 0xFFF);
 
@@ -173,7 +173,7 @@ pfs_cache_t *pfsDirAddEntry(pfs_cache_t *dir, char *filename, pfs_blockinfo *bi,
 		if (dentry->pLen)
 			len-=(dentry->pLen + 11) & 0x1FC;
 		dentry->aLen=(dentry->aLen & FIO_S_IFMT) | ((dentry->aLen & 0xFFF) - len);
-		(u32)dentry+=dentry->aLen & 0xFFF;
+		dentry=(pfs_dentry *)((u32)dentry + (dentry->aLen & 0xFFF));
 	}else{
 		int offset;
 
@@ -221,7 +221,7 @@ pfs_cache_t *pfsDirRemoveEntry(pfs_cache_t *clink, char *path)
 			}
 			i+=dnext->aLen & 0xFFF;
 			dlast=dnext;
-			(u32)dnext+=dnext->aLen & 0xFFF;
+			dnext=(pfs_dentry *)((u32)dnext + (dnext->aLen & 0xFFF));
 		}while (i<512);
 	}
 	return NULL;
@@ -251,7 +251,7 @@ void pfsFillSelfAndParentDentries(pfs_cache_t *clink, pfs_blockinfo *self, pfs_b
 	dentry->pLen=1;
 	dentry->aLen=12 | FIO_S_IFDIR;
 
-	(u32)dentry+=12;
+	dentry=(pfs_dentry *)((u32)dentry + 12);
 
 	dentry->inode=parent->number;
 	*(u32*)dentry->path=('.'<<8) + '.';
