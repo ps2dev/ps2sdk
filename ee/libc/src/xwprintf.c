@@ -175,7 +175,7 @@ int vxwprintf(void (*func)(wchar_t*,int,void*), void *arg, const wchar_t *format
   int flag_zeropad;         /* True if field width constant starts with zero */
   int flag_long;            /* True if "l" flag is present */
   int flag_center;          /* True if "=" flag is present */
-  unsigned long longvalue;  /* Value for integer types */
+  unsigned long long longvalue;  /* Value for integer types */
 
   long double realvalue;    /* Value for real types */
   info *infop;              /* Pointer to the appropriate info structure */
@@ -314,16 +314,16 @@ int vxwprintf(void (*func)(wchar_t*,int,void*), void *arg, const wchar_t *format
       case ORDINAL:
       case RADIX:
         if(( flag_long )&&( infop->flag_signed )){
-	    signed long t = va_arg(ap,signed long);
+	    signed long long t = va_arg(ap,signed long long);
 	    longvalue = t;
 	}else if(( flag_long )&&( !infop->flag_signed )){
-	    unsigned long t = va_arg(ap,unsigned long);
+	    unsigned long long t = va_arg(ap,unsigned long long);
 	    longvalue = t;
 	}else if(( !flag_long )&&( infop->flag_signed )){
-	    signed int t = va_arg(ap,signed int) & ((unsigned long) 0xffffffff);
+	    signed int t = va_arg(ap,signed int) & ((unsigned long long) 0xffffffff);
 	    longvalue = t;
 	}else{
-	    unsigned int t = va_arg(ap,unsigned int) & ((unsigned long) 0xffffffff);
+	    unsigned int t = va_arg(ap,unsigned int) & ((unsigned long long) 0xffffffff);
 	    longvalue = t;
 	}
 #ifdef COMPATIBILITY

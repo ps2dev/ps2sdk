@@ -98,7 +98,7 @@ static __inline__ int rmdir(const char *path) { return fioRmdir(path); }
 /* ensure fpos_t is defined. */
 #ifndef __FPOS_T_DEFINED
 #define __FPOS_T_DEFINED
-typedef long fpos_t;
+typedef long long fpos_t;
 #endif // __FPOS_T_DEFINED
 
 
@@ -141,9 +141,9 @@ int    fputs(const char *, FILE *);
 size_t fread(void *, size_t, size_t, FILE *);
 FILE   *freopen(const char *, const char *, FILE *);
 int    fscanf(FILE *, const char *, ...);
-int    fseek(FILE *, long, int);
+int    fseek(FILE *, long long, int);
 int    fsetpos(FILE *, const fpos_t *);
-long   ftell(FILE *);
+long long   ftell(FILE *);
 size_t fwrite(const void *, size_t, size_t, FILE *);
 int    getc(FILE *);
 int    getchar(void);

@@ -38,8 +38,8 @@ typedef s8  sb1;
 #else
 typedef  unsigned long long  ub8;
 typedef    signed long long  sb8;
-typedef  unsigned long  int  ub4;   /* unsigned 4-byte quantities */
-typedef    signed long  int  sb4;
+typedef  unsigned       int  ub4;   /* unsigned 4-byte quantities */
+typedef    signed       int  sb4;
 typedef  unsigned short int  ub2;
 typedef    signed short int  sb2;
 typedef  unsigned       char ub1;

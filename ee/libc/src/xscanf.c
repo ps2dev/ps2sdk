@@ -117,8 +117,8 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 #if SCANF_LEVEL >= SCANF_FLT
 		float	d;
 #endif
-		unsigned long ul;
-		long	l;
+		unsigned long long ul;
+		long long	l;
 		char	*cp;
 	} a;
 	char	c;	/* holds a char from the format string */
@@ -466,13 +466,13 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 				if (!(flags & FLSTAR)) {
 #endif /* SCANF_LEVEL > SCANF_MIN */
 					if ((flags & (FLLONG | FLUNSIGNED)) == (FLLONG | FLUNSIGNED))
-						*(va_arg(ap, unsigned long *)) = a.ul;
+						*(va_arg(ap, unsigned long long *)) = a.ul;
 					else if ((flags & (FLSHORT | FLUNSIGNED)) == (FLSHORT | FLUNSIGNED))
 						*(va_arg(ap, unsigned short *)) = (unsigned short)a.ul;
 					else if (flags & (FLUNSIGNED))
 						*(va_arg(ap, unsigned *)) = (unsigned)a.ul;
 					else if (flags & FLLONG)
-						*(va_arg(ap, long *)) = a.l;
+						*(va_arg(ap, long long *)) = a.l;
 					else if (flags & FLSHORT)
 						*(va_arg(ap, short *)) = (short)a.l;
 					else

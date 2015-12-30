@@ -252,7 +252,7 @@ int fontx_load(const char *path, fontx_t* fontx, int type, int wmargin, int hmar
 	FILE *file = NULL;
 
 	int ret = -1;
-	long size = 0;
+	long long size = 0;
 
 	fontx_hdr *fontx_header = NULL;
 

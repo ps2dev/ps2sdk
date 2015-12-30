@@ -23,7 +23,7 @@
 extern int (*_ps2sdk_close)(int);
 extern int (*_ps2sdk_open)(const char*, int);
 extern int (*_ps2sdk_read)(int, void*, int);
-extern int (*_ps2sdk_lseek)(int, long, int); // assume long = int
+extern int (*_ps2sdk_lseek)(int, int, int);
 extern int (*_ps2sdk_write)(int, const void*, int);
 extern int (*_ps2sdk_remove)(const char*);
 extern int (*_ps2sdk_rename)(const char*,const char*);
@@ -522,7 +522,7 @@ int fileXioWrite(int fd, const void *buf, int size)
 	return(rv);
 }
 
-int fileXioLseek(int fd, long offset, int whence)
+int fileXioLseek(int fd, int offset, int whence)
 {
 	int rv;
 	struct fxio_lseek_packet *packet=(struct fxio_lseek_packet*)sbuff;

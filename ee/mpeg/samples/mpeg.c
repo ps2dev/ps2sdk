@@ -60,8 +60,8 @@ int main ( void ) {
  zbuffer_t z;
  InitCBParam lInfo;
  int         lFD = fioOpen ( MPEG_BITSTREAM_FILE, O_RDONLY );
- long        lSize;
- long        lPTS, lCurPTS;
+ long long        lSize;
+ long long        lPTS, lCurPTS;
 
  frame.width = 640;
  frame.height = 512;

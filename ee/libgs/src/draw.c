@@ -197,8 +197,8 @@ void GsClearDrawEnv1(GS_DRAWENV *drawenv)
 
 void GsPutDisplayEnv1(GS_DISPENV *dispenv)
 {
-	*((volatile unsigned long *)(gs_p_display1)) =  *(unsigned long *)(&dispenv->disp);
-	*((volatile unsigned long *)(gs_p_dispfb1)) =  *(unsigned long *)(&dispenv->dispfb);
+	*((volatile unsigned long long *)(gs_p_display1)) =  *(unsigned long long *)(&dispenv->disp);
+	*((volatile unsigned long long *)(gs_p_dispfb1)) =  *(unsigned long long *)(&dispenv->dispfb);
 }
 
 void GsPutDrawEnv2(GS_DRAWENV *drawenv)
@@ -234,6 +234,6 @@ void GsClearDrawEnv2(GS_DRAWENV *drawenv)
 
 void GsPutDisplayEnv2(GS_DISPENV *dispenv)
 {
-	*((volatile unsigned long *)(gs_p_display2)) =  *(unsigned long *)(&dispenv->disp);
-	*((volatile unsigned long *)(gs_p_dispfb2)) =  *(unsigned long *)(&dispenv->dispfb);
+	*((volatile unsigned long long *)(gs_p_display2)) =  *(unsigned long long *)(&dispenv->disp);
+	*((volatile unsigned long long *)(gs_p_dispfb2)) =  *(unsigned long long *)(&dispenv->dispfb);
 }

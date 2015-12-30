@@ -333,7 +333,7 @@ int fgetc(FILE *stream)
 */
 int fgetpos(FILE *stream, fpos_t *pos)
 {
-  long n;
+  long long n;
 
   n = (ftell(stream) - (stream->has_putback ? 1 : 0));
   if (n >= 0) *pos = (fpos_t)n;
@@ -813,7 +813,7 @@ size_t fread(void *buf, size_t r, size_t n, FILE *stream)
 **  [post] - the stream file pointer position is modified.
 **
 */
-int fseek(FILE *stream, long offset, int origin)
+int fseek(FILE *stream, long long offset, int origin)
 {
   int ret;
 
@@ -859,7 +859,7 @@ int fseek(FILE *stream, long offset, int origin)
 int fsetpos(FILE *stream, const fpos_t *pos)
 {
   stream->has_putback = 0;
-  return (fseek(stream, (long)*pos, SEEK_SET));
+  return (fseek(stream, (long long)*pos, SEEK_SET));
 }
 #endif
 
@@ -877,9 +877,9 @@ int fsetpos(FILE *stream, const fpos_t *pos)
 **  [post] - none.
 **
 */
-long ftell(FILE *stream)
+long long ftell(FILE *stream)
 {
-  long n, ret = -1L;
+  long long n, ret = -1L;
 
   switch(stream->type) {
     case STD_IOBUF_TYPE_NONE:
@@ -898,7 +898,7 @@ long ftell(FILE *stream)
       }
       else {
         if ((n = _ps2sdk_lseek(stream->fd, 0, SEEK_CUR)) >= 0)
-             ret = (long)n;
+             ret = (long long)n;
         else if (n < 0) {
               errno = (n * -1);
               ret = -1L;

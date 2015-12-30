@@ -91,12 +91,12 @@ double wcstod(const wchar_t *s, wchar_t **eptr)
 **  [post] - the memory pointed to by eptr is modified.
 **
 */
-long int wcstol(const wchar_t *nptr, wchar_t **endptr, int base)
+long long wcstol(const wchar_t *nptr, wchar_t **endptr, int base)
 {
          register const wchar_t *s = nptr;
-         register unsigned long acc;
+         register unsigned long long acc;
          register int c;
-         register unsigned long cutoff;
+         register unsigned long long cutoff;
          register int neg = 0, any, cutlim;
 
          /*
@@ -144,9 +144,9 @@ long int wcstol(const wchar_t *nptr, wchar_t **endptr, int base)
           * Set any if any `digits' consumed; make it negative to indicate
           * overflow.
           */
-         cutoff = neg ? -(unsigned long)LONG_MIN : LONG_MAX;
-         cutlim = cutoff % (unsigned long)base;
-         cutoff /= (unsigned long)base;
+         cutoff = neg ? -(unsigned long long)LONG_MIN : LONG_MAX;
+         cutlim = cutoff % (unsigned long long)base;
+         cutoff /= (unsigned long long)base;
 
          for (acc = 0, any = 0;; c = *s++)
          {
@@ -201,12 +201,12 @@ long int wcstol(const wchar_t *nptr, wchar_t **endptr, int base)
 **  [post] - the memory pointed to by eptr is modified.
 **
 */
-unsigned long int wcstoul(const wchar_t *nptr, wchar_t **endptr, int base)
+unsigned long long wcstoul(const wchar_t *nptr, wchar_t **endptr, int base)
 {
          register const wchar_t *s = nptr;
-         register unsigned long acc;
+         register unsigned long long acc;
          register int c;
-         register unsigned long cutoff;
+         register unsigned long long cutoff;
          register int any, cutlim;
 
          /*
@@ -237,8 +237,8 @@ unsigned long int wcstoul(const wchar_t *nptr, wchar_t **endptr, int base)
                  base = c == '0' ? 8 : 10;
 
          cutoff = ULONG_MAX;
-         cutlim = cutoff % (unsigned long)base;
-         cutoff /= (unsigned long)base;
+         cutlim = cutoff % (unsigned long long)base;
+         cutoff /= (unsigned long long)base;
 
          for (acc = 0, any = 0;; c = *s++)
          {

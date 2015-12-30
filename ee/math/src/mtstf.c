@@ -90,10 +90,10 @@ struct oneargument
     float (*inv )();
 #endif
     int tstyp;		/* type code of the function */
-    long ctrl;		/* relative error flag */
+    long long ctrl;		/* relative error flag */
     float arg1w;	/* width of domain for 1st arg */
     float arg1l;	/* lower bound domain 1st arg */
-    long arg1f;		/* flags, e.g. integer arg */
+    long long arg1f;		/* flags, e.g. integer arg */
   };
 
 struct twoarguments
@@ -111,13 +111,13 @@ struct twoarguments
     float (*inv )();
 #endif
     int tstyp;		/* type code of the function */
-    long ctrl;		/* relative error flag */
+    long long ctrl;		/* relative error flag */
     float arg1w;	/* width of domain for 1st arg */
     float arg1l;	/* lower bound domain 1st arg */
-    long arg1f;		/* flags, e.g. integer arg */
+    long long arg1f;		/* flags, e.g. integer arg */
     float arg2w;	/* same info for args 2, 3, 4 */
     float arg2l;
-    long arg2f;
+    long long arg2f;
   };
 
 /* def.ctrl bits: */
@@ -206,7 +206,7 @@ float (*ifun2 )();
 #endif
 char *nam1, *nam2;
 int tstyp, nargs;
-long arg1f, arg2f, ctrl;
+long long arg1f, arg2f, ctrl;
 float arg1l, arg2l, arg1w, arg2w;
 int i, k, itst, ntsts, iargs;
 int m, ntr;
