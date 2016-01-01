@@ -106,15 +106,19 @@ int InitGraphics(void)
 	GsPutDrawEnv1(&draw_env);
 	GsPutDisplayEnv1(&disp_env);
 
-	//set common primitive-drawing settings (Refer to documentation on PRMODE and PRMODECONT registers).
+	//Set common primitive-drawing settings (Refer to documentation on PRMODE and PRMODECONT registers).
 	GsOverridePrimAttributes(GS_DISABLE, 0, 0, 0, 0, 0, 0, 0, 0);
 
-	//set transparency settings for context 1 (Refer to documentation on TEST and TEXA registers).
-	GsEnableAlphaTransparency1(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, 0x00);
+	//Set transparency settings for context 1 (Refer to documentation on TEST and TEXA registers).
+	//Alpha test = enabled, pass if >= alpha reference, alpha reference = 1, fail method = no update
+	GsEnableAlphaTransparency1(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, GS_ALPHA_NO_UPDATE);
+	//Enable global alpha blending
 	GsEnableAlphaBlending1(GS_ENABLE);
 
 	//set transparency settings for context 2 (Refer to documentation on TEST and TEXA registers).
-	GsEnableAlphaTransparency2(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, 0x00);
+	//Alpha test = enabled, pass if >= alpha reference, alpha reference = 1, fail method = no update
+	GsEnableAlphaTransparency2(GS_ENABLE, GS_ALPHA_GEQUAL, 0x01, GS_ALPHA_NO_UPDATE);
+	//Enable global alpha blending
 	GsEnableAlphaBlending2(GS_ENABLE);
 
 	return 0;
@@ -217,6 +221,11 @@ static int DrawSprites(GS_PACKET_TABLE *table)
 		//Use the uncached segment, to avoid needing to flush the data cache.
 		p = (QWORD*)UNCACHED_SEG(GsGifPacketsAlloc(table, 5)); //Allocate 5 qword for 1 untextured strite
 
+		/*	For this GIF packet, the EOP flag is set to 1.
+			Rightfully, it should only be set for only the final packet so that the GIF knows when it can safely switch paths,
+			but to keep things simple, it's set to 1 for every packet.
+
+			The packets are all in the PACKED format.	*/
 		gs_setGIF_TAG(((GS_GIF_TAG	*)&p[0]), 4,1,0,0,0,0,1,0x0e);
 		gs_setR_PRIM(((GS_R_PRIM	*)&p[1]), GS_PRIM_SPRITE,0, 0, 0, 1, 0, 0, 0, 0);
 		gs_setR_RGBAQ(((GS_R_RGBAQ	*)&p[2]), sprites[i].color.r, sprites[i].color.g, sprites[i].color.b, sprites[i].color.a, sprites[i].color.q);

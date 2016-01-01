@@ -173,6 +173,7 @@ int hddGetFreeSectors(s32 device, u32 *free, hdd_device_t *deviceinfo)
 	apa_cache_t *clink;
 
 	sectors = 0;
+	*free = 0;
 	if((clink = apaCacheGetHeader(device, 0, APA_IO_MODE_READ, &rv)) != NULL)
 	{
 		do{
@@ -184,14 +185,20 @@ int hddGetFreeSectors(s32 device, u32 *free, hdd_device_t *deviceinfo)
 
 	if(rv == 0)
 	{
-		for(partMax = deviceinfo[device].partitionMaxSize; 0x0003FFFF < partMax; partMax >>= 1)
-		{
-			if((sectors % deviceinfo[device].partitionMaxSize == 0) && (sectors + deviceinfo[device].partitionMaxSize < deviceinfo[device].totalLBA))
+		for(partMax = deviceinfo[device].partitionMaxSize; 0x0003FFFF < partMax; partMax = deviceinfo[device].partitionMaxSize)
+		{	//As weird as it looks, this was how it was done in the original HDD.IRX.
+			for( ; 0x0003FFFF < partMax; partMax /= 2)
 			{
-				hddCalculateFreeSpace(free, deviceinfo[device].partitionMaxSize);
-				sectors += deviceinfo[device].partitionMaxSize;
-				break;
+				if((sectors % partMax == 0) && (sectors + partMax < deviceinfo[device].totalLBA))
+				{
+					hddCalculateFreeSpace(free, partMax);
+					sectors += partMax;
+					break;
+				}
 			}
+
+			if(0x0003FFFF >= partMax)
+				break;
 		}
 
 		APA_PRINTF(APA_DRV_NAME": total = %08lx sectors, installable = %08lx sectors.\n", sectors, *free);

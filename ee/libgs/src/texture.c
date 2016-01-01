@@ -91,7 +91,7 @@ int GsLoadImage(const void *source_addr, GS_IMAGE *dest)
 		GsDmaWait();
 
 		//send data leftover
-		GsDmaSend(source_addr, current);
+		GsDmaSend(pTexSrc, current);
 		GsDmaWait();
 	}
 

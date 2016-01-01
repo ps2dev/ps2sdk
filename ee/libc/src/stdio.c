@@ -374,32 +374,31 @@ char *fgets(char *buf, int n, FILE *stream)
       ret = NULL;
       break;
     default:
-      for (done = 0; (!done); ) {
+      for (done = 0; (!done) && (n >= 2); ) {	//Read until either a newline character is encountered or n-1 characters are read.
         switch(c = fgetc(stream)) {
-          case '\r':
+          case '\r':	//Newline character translation: do nothing
+		break;
           case '\n':
-            if (n > 1) {
-              /* newline terminates fgets. */
-              *buf++ = (char)c;
-              *buf++ = '\0';
-              n -= 2;
-              done = 1;
-              break;
-            }
+            /* newline terminates fgets. */
+            *buf++ = (char)c;
+            n --;
+            done = 1;
             break;
           case EOF:
             /* end of file or error. */
-            ret = NULL;
+            if(buf == ret)
+              ret = NULL;	//If no characters could be read, then return NULL.
             done = 1;
             break;
           default:
-            if (n > 0) {
-              /* store the current character to buf. */
-              *buf++ = (char)c;
-              --n;
-            }
+            /* store the current character to buf. */
+            *buf++ = (char)c;
+            --n;
         }
       }
+
+      if(ret != NULL && n == 1)
+        *buf = '\0';	//Only if there was at least one character read and if there is enough space.
   }
   return (ret);
 }

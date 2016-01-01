@@ -160,6 +160,12 @@ static int DrawTriangles(GS_PACKET_TABLE *table, int context_index)
 {
 	QWORD	*p;
 
+	/*	For the GIF packets in this example, the EOP flags are set to 1.
+		Rightfully, it should only be set for only the final packet so that the GIF knows when it can safely switch paths,
+		but to keep things simple, it's set to 1 for every packet.
+
+		The packets are all in the PACKED format.	*/
+
 	// top left
 	//Use the uncached segment, to avoid needing to flush the data cache.
 	p = (QWORD*)(UNCACHED_SEG(GsGifPacketsAlloc(table, 6)));
