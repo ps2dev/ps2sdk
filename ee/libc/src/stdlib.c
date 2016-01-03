@@ -33,7 +33,6 @@ typedef struct {
 #endif // __ENVIRONVARIABLE_T_DEFINED
 
 extern environvariable_t __stdlib_env[32];
-extern int __stdlib_mb_shift;
 extern unsigned int __stdlib_rand_seed;
 
 
@@ -577,7 +576,7 @@ char *_ltoa(long n, char *buf, int radix)
 **
 **  [func] - mblen.
 **  [desc] - if s is a valid multibyte character then returns the length
-**           of the multibyte character s. else returns 0.
+**           of the multibyte character s. else returns -1.
 **  [entr] - const char *s;
 **           size_t n; the length of the multibyte character s. else 0.
 **  [exit] - int;
@@ -588,6 +587,44 @@ char *_ltoa(long n, char *buf, int radix)
 int mblen(const char *s, size_t n)
 {
   return (mbtowc((wchar_t *)NULL, s, n));
+}
+#endif
+
+
+#ifdef F_mbslen
+/*
+**
+**  [func] - mbslen.
+**  [desc] - if s is a valid multibyte character string then returns the length
+**           of the multibyte character string s. else returns -1.
+**  [entr] - const char *s;
+**  [exit] - int;
+**  [prec] - s is a valid string pointer.
+**  [post] - none.
+**
+*/
+int mbslen(const char *s)
+{
+  int    len;
+  size_t ret;
+
+  if (s != NULL) {
+    for (ret = 0; *s != '\0'; s+=len,ret++) {
+      if ((s[0]&0x80) == 0)
+        len = 1;
+      else if ((s[0]&0xE0) == 0xC0)
+        len = 2;
+      else if ((s[0]&0xF0) == 0xE0)
+        len = 3;
+      else if ((s[0]&0xF8) == 0xF0)
+        len = 4;
+      else {	//Anything longer is unsupported (Refer to RFC3629)
+        ret = -1;
+        break;
+      }
+   }
+  } ret = 0;
+  return (ret);
 }
 #endif
 
@@ -610,33 +647,34 @@ int mblen(const char *s, size_t n)
 */
 size_t mbstowcs(wchar_t *ws, const char *s, size_t n)
 {
-  int    len, shift;
-  size_t ret = -1;
+  int    len;
+  size_t ret;
 
   /* convert the multibyte string to wide-character string. */
-  for (shift = __stdlib_mb_shift; *s != '\0'; ) {
-    if (__isascii(*s) != 0) {
-      /* multibyte character is ascii. */
-      *ws = (wchar_t)*s;
+  for (ret = 0; *s != '\0'; n--,ws++,s+=len,ret++) {
+    if ((s[0]&0x80) == 0) {
+      *ws = s[0];
       len = 1;
     }
-    else len = mbtowc(ws, s, n);
-    if (len < 1) {
-      /* multibyte character converted. */
-      ++ws;
-      ++ret;
-      s += len;
-      n -= len;
+    else if ((s[0]&0xE0) == 0xC0) {
+      *ws = (s[0]&0x1F)<<6 | (s[1]&0x3F);
+      len = 2;
     }
-    else {
-      /* error occured. */
+    else if ((s[0]&0xF0) == 0xE0) {
+      *ws = ((wchar_t)s[0]&0x0F)<<12 | ((wchar_t)s[1]&0x3F)<<6 | (s[2]&0x3F);
+      len = 3;
+    }
+    else if ((s[0]&0xF8) == 0xF0) {
+      *ws = ((wchar_t)s[0]&0x07)<<18 | ((wchar_t)s[1]&0x3F)<<12 | (s[2]&0x3F)<<6 | (s[3]&0x3F);
+      len = 4;
+    }
+    else {	//Anything longer is unsupported (Refer to RFC3629)
       ret = -1;
       break;
     }
   }
   /* append NULL terminator. */
   if (n > 0) *ws = (wchar_t)'\0';
-  __stdlib_mb_shift = shift;
   return (ret);
 }
 #endif
@@ -662,42 +700,41 @@ size_t mbstowcs(wchar_t *ws, const char *s, size_t n)
 */
 int mbtowc(wchar_t *wc, const char *s, size_t n)
 {
-  int            ret = -1;
-  const mbchar_t *mb;
-  wchar_t        i;
+  int ret;
 
-  /* test for NULL source string pointer. */
-  if (s != NULL) {
-    if (*s != '\0') {
-      /* test if the multi-byte conversion table has initialized. */
-      if ((_ctype_info->mbchar == NULL) || (_ctype_info->mbchar->chars == NULL)) {
-        if (wc != NULL) {
-          *wc = (wchar_t)*s;
-          ret = 1;
-        }
-      }
-      else {
-        /* search only up to maximum current multi-byte bytes. */
-        if (n > MB_CUR_MAX) n = MB_CUR_MAX;
-        for (i = 0; i < WCHAR_MAX; ++i) {
-          /* process the curent multi-byte character. */
-          mb = &_ctype_info->mbchar->chars[i];
-          if ((i == (wchar_t)EOF) || (i == (wchar_t)'\0')) continue;
-          else if (__isascii(i)) continue;
-          else if ((mb->string == NULL) || (mb->len == 0)) continue;
-          else if (mb->len > n) continue;
-          else if (strncmp(mb->string, s, mb->len) == 0) {
-            if (wc != NULL) *wc = i;
-            __stdlib_mb_shift += mb->shift;
-            ret = mb->len;
-            break;
-          }
-        }
-      }
-    }
-    else ret = 0;
+  /* test for NULL source string pointer or NULL character. */
+  if ((s[0]&0x80) == 0) {
+    if (n >= 1) { //ASCII charcters
+      if (wc != NULL)
+        *wc = s[0];
+      ret = 1;
+    } else ret = -1;
   }
-  else ret = (__stdlib_mb_shift != 0);
+  else if ((s[0]&0xE0) == 0xC0) {
+    if (n >= 2) {
+      if (wc != NULL)
+        *wc = (s[0]&0x1F)<<6 | (s[1]&0x3F);
+      ret = 2;
+    } else ret = -1;
+  }
+  else if ((s[0]&0xF0) == 0xE0) {
+    if (n >= 3) {
+      if (wc != NULL)
+        *wc = ((wchar_t)s[0]&0x0F)<<12 | ((wchar_t)s[1]&0x3F)<<6 | (s[2]&0x3F);
+      ret = 3;
+    } else ret = -1;
+  }
+  else if ((s[0]&0xF8) == 0xF0) {
+    if (n >= 4) {
+      if (wc != NULL)
+        *wc = ((wchar_t)s[0]&0x07)<<18 | ((wchar_t)s[1]&0x3F)<<12 | (s[2]&0x3F)<<6 | (s[3]&0x3F);
+      ret = 4;
+    } else ret = -1;
+  }
+  else {	//Anything longer is unsupported (Refer to RFC3629)
+      ret = -1;
+  }
+
   return (ret);
 }
 #endif
@@ -1192,31 +1229,44 @@ unsigned long strtoul(const char *nptr, char **endptr, int base)
 */
 size_t wcstombs(char *s, const wchar_t *ws, size_t n)
 {
-  int            shift = 0;
+  int            len;
   size_t         ret = 0;
   wchar_t        wc;
-  const mbchar_t *mb;
 
-  for (; ((wc = *ws++) != (wchar_t)'\0'); ) {
-    if (__isascii(wc)) {
-      *s++ = (char)(unsigned char)wc;
-      --n;
-      ++ret;
+  for (; ((wc = *ws++) != (wchar_t)'\0'); s+=len,ret+=len) {
+    if (wc <= 0x7F) {
+      if (n >= 1) {
+        s[0] = (char)wc;
+        len = 1;
+      } else break;
     }
-    else {
-      mb = &_ctype_info->mbchar->chars[wc + shift];
-      if ((mb->string == NULL) || (mb->len == 0)) {
-        ret = (size_t)-1;
-        break;
-      }
-      else if (mb->len > n) break;
-      else {
-        memcpy (s, mb->string, mb->len);
-        shift += mb->shift;
-        s += mb->len;
-        n -= mb->len;
-        ret += mb->len;
-      }
+    else if (wc <= 0x7FF) {
+      if (n >= 2) {
+        s[0] = 0xC0|(wc>>6&0x1F);
+        s[1] = 0x80|(wc&0x3F);
+        len = 2;
+      } else break;
+    }
+    else if (wc <= 0xFFFF) {
+      if (n >= 3) {
+        s[0] = 0xE0|(wc>>12&0x0F);
+        s[1] = 0x80|(wc>>6&0x3F);
+        s[2] = 0x80|(wc&0x3F);
+        len = 3;
+      } else break;
+    }
+    else if (wc <= 0x1FFFFF) {
+      if (n >= 4) {
+        s[0] = 0xF0|(wc>>18&0x07);
+        s[1] = 0x80|(wc>>12&0x3F);
+        s[2] = 0x80|(wc>>6&0x3F);
+        s[3] = 0x80|(wc&0x3F);
+        len = 4;
+      } else break;
+    }
+    else {	// Anything else is unsupported (Refer to RFC3629)
+      ret = -1;
+      break;
     }
   }
   if (n > 0) *s = '\0';
@@ -1242,44 +1292,37 @@ size_t wcstombs(char *s, const wchar_t *ws, size_t n)
 */
 int wctomb(char *s, wchar_t wc)
 {
-  int            ret;
-  const mbchar_t *mb;
+  int ret;
 
-  /* test if the multi-byte conversion table has initialized. */
-  if (_ctype_info->mbchar == NULL) mb = NULL;
-  else mb = _ctype_info->mbchar->chars;
   /* test for NULL string pointer. */
   if (s != NULL) {
-    if (wc != (wchar_t)'\0') {
-      /* ensure multi-byte character is not NULL. */
-      if (mb == NULL) {
-        if ((unsigned char) wc == wc) {
-          /* copy wide-character. */
-          *s = wc;
-          ret = 1;
-	}
-        else ret = -1;
-      }
-      else {
-        /* retrieve the corresponding multi-byte character. */
-        mb += (wc + __stdlib_mb_shift);
-        if ((mb->string != NULL) || (mb->len == 0)) {
-          /* copy the multi-byte string. */
-          memcpy(s, mb->string, mb->len + 1);
-          __stdlib_mb_shift += mb->shift;
-          ret = mb->len;
-        }
-        else ret = -1;
-      }
-    }
-    else {
-      /* NULL string terminator. */
-      __stdlib_mb_shift = 0;
-      if (s != NULL) *s = '\0';
+    if (wc <= 0x7F) {
+      s[0] = (char)wc;
       ret = 1;
     }
+    else if (wc <= 0x7FF) {
+      s[0] = 0xC0|(wc>>6&0x1F);
+      s[1] = 0x80|(wc&0x3F);
+      ret = 2;
+    }
+    else if (wc <= 0xFFFF) {
+      s[0] = 0xE0|(wc>>12&0x0F);
+      s[1] = 0x80|(wc>>6&0x3F);
+      s[2] = 0x80|(wc&0x3F);
+      ret = 3;
+    }
+    else if (wc <= 0x1FFFFF) {
+      s[0] = 0xF0|(wc>>18&0x07);
+      s[1] = 0x80|(wc>>12&0x3F);
+      s[2] = 0x80|(wc>>6&0x3F);
+      s[3] = 0x80|(wc&0x3F);
+      ret = 4;
+    }
+    else {	// Anything else is unsupported (Refer to RFC3629)
+      ret = -1;
+    }
   }
-  else ret = (__stdlib_mb_shift != 0);
+  else ret = 0;
   return (ret);
 }
 #endif

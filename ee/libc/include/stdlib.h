@@ -35,7 +35,7 @@ extern "C" {
 
 
 /* multibyte maximum character constant. */
-#define MB_CUR_MAX                     1
+#define MB_CUR_MAX                     4
 
 /* ensure div_t is defined. */
 #ifndef __DIV_T_DEFINED
@@ -103,8 +103,9 @@ static __inline__ long atol(const char * x) { return strtol(x, NULL, 10); }
 void          qsort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *));
 
 
-/* Multibyte disabled, but prototyped for C++... */
+/* UTF-8 multi-byte string functions */
 int           mblen(const char *, size_t);
+int           mbslen(const char *s);
 size_t        mbstowcs(wchar_t *, const char *, size_t);
 int           mbtowc(wchar_t *, const char *, size_t);
 size_t        wcstombs(char *, const wchar_t *, size_t);
