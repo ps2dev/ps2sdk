@@ -50,7 +50,7 @@ int fileXioOpen(const char* source, int flags, int modes);
 int fileXioClose(int fd);
 int fileXioRead(int fd, void *buf, int size);
 int fileXioWrite(int fd, const void *buf, int size);
-int fileXioLseek(int fd, long offset, int whence);
+int fileXioLseek(int fd, int offset, int whence);
 long long fileXioLseek64(int fd, long long offset, int whence);
 int fileXioChStat(const char *name, iox_stat_t *stat, int mask);
 int fileXioGetStat(const char *name, iox_stat_t *stat);

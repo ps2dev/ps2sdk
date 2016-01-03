@@ -305,8 +305,8 @@ int select(int maxfdp1, struct fd_set *readset, struct fd_set *writeset, struct 
 	_rpc_buffer[4] = (int)timeout;
 	if( timeout )
 	{
-		((long*)_rpc_buffer)[3] = timeout->tv_sec;
-		((long*)_rpc_buffer)[4] = timeout->tv_usec;
+		((long long*)_rpc_buffer)[3] = timeout->tv_sec;
+		((long long*)_rpc_buffer)[4] = timeout->tv_usec;
 	}
 	if( readset )
 	{
@@ -328,8 +328,8 @@ int select(int maxfdp1, struct fd_set *readset, struct fd_set *writeset, struct 
 
 	if( timeout )
 	{
-		timeout->tv_sec = ((long*)uncached_buf)[3];
-		timeout->tv_usec = ((long*)uncached_buf)[4];
+		timeout->tv_sec = ((long long*)uncached_buf)[3];
+		timeout->tv_usec = ((long long*)uncached_buf)[4];
 	}
 	if( readset )
 	{
@@ -352,7 +352,7 @@ int select(int maxfdp1, struct fd_set *readset, struct fd_set *writeset, struct 
 	return _rpc_buffer[0];
 }
 
-int ioctlsocket(int s, long cmd, void *argp)
+int ioctlsocket(int s, long long cmd, void *argp)
 {
 	((int*)_rpc_buffer)[0] = s;
 	((int*)_rpc_buffer)[1] = (int)cmd;

@@ -40,7 +40,7 @@ static int ioctl2AttrDelete(pfs_cache_t *clink, void *arg);
 static int ioctl2AttrLoopUp(pfs_cache_t *clink, char *key, char *value);
 static int ioctl2AttrRead(pfs_cache_t *clink, pfs_ioctl2attr_t *attr, u32 *unkbuf);
 
-int pfsFioIoctl(iop_file_t *f, unsigned long arg, void *param)
+int pfsFioIoctl(iop_file_t *f, unsigned int arg, void *param)
 {
 	return -1;
 }

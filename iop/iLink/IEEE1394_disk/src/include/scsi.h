@@ -38,12 +38,12 @@ typedef struct _sense_data {
 } sense_data __attribute__((packed));
 
 typedef struct _read_capacity_data {
-    unsigned long int last_lba;		/* Big endian data. */
-    unsigned long int block_length;	/* Big endian data. */
+    unsigned int last_lba;		/* Big endian data. */
+    unsigned int block_length;	/* Big endian data. */
 } read_capacity_data __attribute__((packed));
 
 /* Function prototypes. */
-int scsiReadSector(struct SBP2Device *dev, unsigned long int lba, void *buffer, int sectorCount);
-int scsiWriteSector(struct SBP2Device *dev, unsigned long int lba, void* buffer, int sectorCount);
+int scsiReadSector(struct SBP2Device *dev, unsigned int lba, void *buffer, int sectorCount);
+int scsiWriteSector(struct SBP2Device *dev, unsigned int lba, void* buffer, int sectorCount);
 inline void releaseSBP2Device(struct SBP2Device *dev);
 int ConfigureSBP2Device(struct SBP2Device *dev);

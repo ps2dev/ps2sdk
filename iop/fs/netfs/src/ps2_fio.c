@@ -811,7 +811,7 @@ static int ps2netfs_op_lseek(char *buf, int len)
  *    >=0 if handled ok.
  *    -X if error.
  */
-// int ioctl(int fd, unsigned long cmd, void *param);
+// int ioctl(int fd, unsigned int cmd, void *param);
 static int ps2netfs_op_ioctl(char *buf, int len)
 {
   ps2netfs_pkt_ioctl_req *cmd;

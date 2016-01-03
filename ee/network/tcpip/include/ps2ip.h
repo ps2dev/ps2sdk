@@ -42,7 +42,7 @@ int lwip_sendto(int s, const void *dataptr, size_t size, int flags, const struct
 int lwip_socket(int domain, int type, int protocol);
 int lwip_write(int s, const void *dataptr, size_t size);
 int lwip_select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptset, struct timeval *timeout);
-int lwip_ioctl(int s, long cmd, void *argp);
+int lwip_ioctl(int s, long long cmd, void *argp);
 int lwip_fcntl(int s, int cmd, int val);
 
 #define accept(a,b,c)		lwip_accept(a,b,c)

@@ -71,7 +71,7 @@ int vswprintf(wchar_t *buf, const wchar_t *fmt, va_list ap);
 int swprintf(wchar_t *str, size_t n, const wchar_t *format, ...);
 
 double wcstod(const wchar_t *s, wchar_t **eptr);
-long int wcstol(const wchar_t *nptr, wchar_t **endptr, int base);
-unsigned long int wcstoul(const wchar_t *nptr, wchar_t **endptr, int base);
+long long int wcstol(const wchar_t *nptr, wchar_t **endptr, int base);
+unsigned long long int wcstoul(const wchar_t *nptr, wchar_t **endptr, int base);
 
 #endif /* _WCHAR_H_ */

@@ -57,7 +57,7 @@ void GsResetGraph(short int mode, short int interlace, short int omode, short in
 	}
 }
 
-void GsSetCRTCSettings(unsigned long settings, unsigned char alpha_value)
+void GsSetCRTCSettings(unsigned long long settings, unsigned char alpha_value)
 {
-	*((volatile unsigned long *)(gs_p_pmode)) =  (settings|((unsigned long)(0x001) << 2)|((unsigned long)(alpha_value) 	<< 8));
+	*((volatile unsigned long long *)(gs_p_pmode)) =  (settings|((unsigned long long)(0x001) << 2)|((unsigned long long)(alpha_value) 	<< 8));
 }

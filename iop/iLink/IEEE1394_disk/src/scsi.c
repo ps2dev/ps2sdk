@@ -202,10 +202,10 @@ static int scsiReadCapacity(struct SBP2Device* dev, void *buffer, int size)
 
 static struct CommandDescriptorBlock cdb[MAX_ORBS];
 
-int scsiReadSector(struct SBP2Device *dev, unsigned long int lba, void *buffer, int sectorCount)
+int scsiReadSector(struct SBP2Device *dev, u32 lba, void *buffer, int sectorCount)
 {
 	unsigned int nOrbs, OrbsRemaining, i, sectorsToRead, sectorsRemaining, SectorsPerBlock, BlockNum;
-	unsigned long int startingLBA;
+	u32 startingLBA;
 	void *bufferPtr, *PreviousReqBufferPtr;
 	int result;
 
@@ -284,10 +284,10 @@ int scsiReadSector(struct SBP2Device *dev, unsigned long int lba, void *buffer, 
 	return result;
 }
 
-int scsiWriteSector(struct SBP2Device *dev, unsigned long int lba, void* buffer, int sectorCount)
+int scsiWriteSector(struct SBP2Device *dev, u32 lba, void* buffer, int sectorCount)
 {
 	unsigned int nOrbs, OrbsRemaining, i, sectorsToRead, sectorsRemaining, SectorsPerBlock;
-	unsigned long int startingLBA;
+	u32 startingLBA;
 	void *bufferPtr;
 	int result, max_payload;
 

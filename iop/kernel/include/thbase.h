@@ -64,7 +64,7 @@ typedef struct _iop_thread_status {
 	int		waitType;
 	int		waitId;
 	int		wakeupCount;
-	long int	*regContext;	//Only valid for use with iReferThreadStatus.
+	int	*regContext;	//Only valid for use with iReferThreadStatus.
 	unsigned int	reserved[4];
 } iop_thread_info_t;
 

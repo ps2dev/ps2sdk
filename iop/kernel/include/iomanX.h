@@ -58,7 +58,7 @@ typedef struct _iop_device_ops {
 	int	(*read)(iop_file_t *, void *, int);
 	int	(*write)(iop_file_t *, void *, int);
 	int	(*lseek)(iop_file_t *, int, int);
-	int	(*ioctl)(iop_file_t *, unsigned long, void *);
+	int	(*ioctl)(iop_file_t *, unsigned int, void *);
 	int	(*remove)(iop_file_t *, const char *);
 	int	(*mkdir)(iop_file_t *, const char *, int);
 	int	(*rmdir)(iop_file_t *, const char *);
@@ -100,7 +100,7 @@ int write(int fd, void *ptr, size_t size);
 int lseek(int fd, int offset, int mode);
 #define I_lseek DECLARE_IMPORT(8, lseek)
 
-int ioctl(int fd, unsigned long cmd, void *param);
+int ioctl(int fd, unsigned int cmd, void *param);
 #define I_ioctl DECLARE_IMPORT(9, ioctl)
 int remove(const char *name);
 #define I_remove DECLARE_IMPORT(10, remove)

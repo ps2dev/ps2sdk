@@ -19,7 +19,7 @@ typedef struct pollfd {
 #define	POLLHUP		0x0010
 #define	POLLNVAL	0x0020
 
-int poll(struct pollfd *fds, unsigned long nfds, int timeout);
+int poll(struct pollfd *fds, unsigned int nfds, int timeout);
 
 #endif
 

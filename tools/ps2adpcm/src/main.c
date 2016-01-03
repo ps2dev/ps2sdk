@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 
 	for (int i=3;i<argc;i++)
 	{
-		long int num;
+		int num;
 		if (argv[i][0] != '-' || argv[i][1] == '\0')
 		{
 			dprintf("%s: invalid option '%s'\n", argv[0], argv[i]);

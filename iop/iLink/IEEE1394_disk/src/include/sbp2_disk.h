@@ -111,14 +111,14 @@ struct SBP2Device
 	unsigned char	ORB_size;
 	unsigned char	speed;
 
-	unsigned long int	ManagementAgent_high;
-	unsigned long int	ManagementAgent_low;
+	unsigned int	ManagementAgent_high;
+	unsigned int	ManagementAgent_low;
 
-	unsigned long int	CommandBlockAgent_high;
-	unsigned long int	CommandBlockAgent_low;
+	unsigned int	CommandBlockAgent_high;
+	unsigned int	CommandBlockAgent_low;
 
-	unsigned long int sectorSize;
-	unsigned long int maxLBA;
+	unsigned int sectorSize;
+	unsigned int maxLBA;
 	void *cache;
 };
 

@@ -1069,7 +1069,7 @@ void AHXPlayer_SetOversampling(int enable)
 void AHXOutput_MixChunk(int NrSamples, int** mb)
 {
     int v, delta, samples_to_mix, mixpos, *VolTab, i, offset, sample1, sample2, frac1, frac2, thiscount;
-	long freq;
+	int freq;
 
     for(v = 0; v < 4; v++) {
 		if(Voices[v].VoiceVolume == 0) continue;
