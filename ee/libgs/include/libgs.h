@@ -150,9 +150,16 @@ enum GsTexFunctions{
 	GS_TEX_HIGHLIHGT2		// used when highlighting opaque	  polygons
 };
 
+enum GsGifDataFormat{
+	GS_GIF_PACKED	=0,
+	GS_GIF_REGLIST,
+	GS_GIF_IMAGE,
+	GS_GIF_DISABLE		//Same operation with the IMAGE mode
+};
+
 /*GS Privileged Regs*/
 #define gs_p_pmode			0x12000000	// Setup CRT Controller
-#define gs_p_smode1			0x12000010	// ??
+#define gs_p_smode1			0x12000010	// Video signal settings, undocumented (don't set!)
 #define gs_p_smode2			0x12000020	// CRTC Video Settings: PAL/NTCS, Interlace, etc.
 #define gs_p_dispfb1		0x12000070	// Setup the CRTC's Read Circuit 1 data source settings
 #define gs_p_display1		0x12000080	// RC1 display output settings
@@ -181,9 +188,6 @@ enum GsTexFunctions{
 #define gs_g_fog		0x0a	// Set fog attributes
 #define gs_g_xyzf3		0x0c	// Set vertex position and fog coefflcient (no draw kick)
 #define gs_g_xyz3		0x0d	// Set vertex position (no draw kick)
-//#define gs_g_rgbaq2	0x11	// Vertex color
-//#define gs_g_st2		0x12	// ...
-//#define gs_g_uv2		0x13	// ...
 #define gs_g_tex1_1		0x14	// ...
 #define gs_g_tex1_2		0x15	// ...
 #define gs_g_tex2_1		0x16	// Set texture filtering\sampling style in context 1
@@ -227,6 +231,10 @@ enum GsTexFunctions{
 #define gs_g_label		0x62	// ...
 #define gs_g_nop		0x7f	// no operation\does nothing\can be used as padding
 
+/*GIF Register Descriptors (non-registers) */
+#define gif_rd_ad		0x0e	// A+D
+#define gif_rd_nop		0x0f	// NOP (Not OutPut)
+
 /*----------------------------------------------------
 --	MISC											--
 --													--
@@ -239,7 +247,7 @@ typedef struct {
 	unsigned long lo;
 	unsigned long hi;
 
-}QWORD			__attribute__((aligned(16)));/*aligne 128bits*/
+}QWORD			__attribute__((aligned(16)));/*aligned 128bits*/
 
 #endif/*QWORD*/
 
@@ -265,6 +273,32 @@ typedef struct {
 	unsigned exsyncmd	:1;		// ??
 	unsigned pad2		:11;	// Pad with zeros
 }GS_PMODE;
+
+/*SMODE1*/
+typedef struct {
+	unsigned long rc	:3;
+	unsigned long lc	:7;
+	unsigned long t1248	:2;
+	unsigned long slck	:1;
+	unsigned long cmod	:2;
+	unsigned long ex	:1;
+	unsigned long prst	:1;
+	unsigned long sint	:1;
+	unsigned long xpck	:1;
+	unsigned long pck2	:2;
+	unsigned long spml	:4;
+	unsigned long gcont	:1;
+	unsigned long phs	:1;
+	unsigned long pvs	:1;
+	unsigned long pehs	:1;
+	unsigned long pevs	:1;
+	unsigned long clksel	:2;
+	unsigned long nvck	:1;
+	unsigned long slck2	:1;
+	unsigned long vcksel	:2;
+	unsigned long vhp	:2;
+	unsigned long pad	:26;
+}GS_SMODE1;
 
 /*SMODE2*/
 typedef struct {
@@ -297,23 +331,19 @@ typedef struct {
 	unsigned pad2     :9;	// Pad with zeros
 }GS_DISPLAY;
 
-/*
+/*EXTBUF*/
 typedef struct {
-	unsigned en1     : 1;	//
-	unsigned en2     : 1;	//
-	unsigned crtmd   : 3;	//
-	unsigned mmod    : 1;	//
-	unsigned amod    : 1;	//
-	unsigned slbg    : 1;	//
-	unsigned alp     : 8;	//
-	unsigned nfld    : 1;	//
-	unsigned p0      :15;	//
-	unsigned exvwins :10;	//
-	unsigned exvwine :10;	//
-	unsigned exsyncmd: 1;	//
-	unsigned p1      :11;	//
+	unsigned long exbp	: 14;
+	unsigned long exbw	: 6;
+	unsigned long fbin	: 2;
+	unsigned long wffmd	: 1;
+	unsigned long emoda	: 2;
+	unsigned long emodc	: 2;
+	unsigned long pad1	: 5;
+	unsigned long wdx	: 11;
+	unsigned long wdy	: 11;
+	unsigned long pad2	: 10;
 }GS_EXTBUF;
-*/
 
 /*EXTDATA*/
 typedef struct {
@@ -973,11 +1003,32 @@ typedef struct {
 		(unsigned long)((blend_style) & 0x00000001) <<  7 | \
 		(unsigned long)((blend_value) & 0x000000FF) <<  8
 
-/* un-documented
-#define GS_SET_SMODE1(interlace, field_frame, vesta_dpms) \
-			*(volatile unsigned long *)gs_p_smode1=			\
-
-*/
+//Set by SetGsCrt(). DO NOT SET MANUALLY!!
+#define GS_SET_SMODE1(rc, lc, t1248, slck, cmod, ex, prst, sint, xpck,		\
+			pck2, spml, gcont, phs, pvs, pehs, pevs, clksel,	\
+			nvck, slck2, vcksel, vhp) \
+			*(volatile unsigned long *)gs_p_smode1 =		\
+		(unsigned long)((rc	) & 0x00000007) <<  0 | \
+		(unsigned long)((lc	) & 0x0000007F) <<  3 | \
+		(unsigned long)((t1248	) & 0x00000003) << 10 | \
+		(unsigned long)((slck	) & 0x00000001) << 12 | \
+		(unsigned long)((cmod	) & 0x00000003) << 13 | \
+		(unsigned long)((ex	) & 0x00000001) << 15 | \
+		(unsigned long)((prst	) & 0x00000001) << 16 | \
+		(unsigned long)((sint	) & 0x00000001) << 17 | \
+		(unsigned long)((xpck	) & 0x00000001) << 18 | \
+		(unsigned long)((pck2	) & 0x00000003) << 19 | \
+		(unsigned long)((spml	) & 0x0000000F) << 21 | \
+		(unsigned long)((gcont	) & 0x00000001) << 25 | \
+		(unsigned long)((phs	) & 0x00000001) << 26 | \
+		(unsigned long)((pvs	) & 0x00000001) << 27 | \
+		(unsigned long)((pehs	) & 0x00000001) << 28 | \
+		(unsigned long)((pevs	) & 0x00000001) << 29 | \
+		(unsigned long)((clksel	) & 0x00000003) << 30 | \
+		(unsigned long)((nvck	) & 0x00000001) << 32 | \
+		(unsigned long)((slck2	) & 0x00000001) << 33 | \
+		(unsigned long)((vcksel	) & 0x00000003) << 34 | \
+		(unsigned long)((vhp	) & 0x00000003) << 36
 
 #define GS_SET_SMODE2(interlace, field_frame, vesta_dpms) \
 			*(volatile unsigned long *)gs_p_smode2 =		\
@@ -1296,7 +1347,6 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #define gs_setSCANMSK(p, _msk)	\
 	(p)->msk	= _msk
 
-/*
 #define gs_setMIPTBP1_1(p, _tbp1,_tbw1,_tbp2,_tbw2,_tbp3,_tbw3)	\
 	(p)->tbp1	= _tbp1,		\
 	(p)->tbw1	= _tbw1,		\
@@ -1306,7 +1356,6 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	(p)->tbw3	= _tbw3
 
 #define gs_setMIPTBP1_2			gs_setMIPTBP1_1
-*/
 
 #define gs_setMIPTBP2_1(p, _tbp4, _tbw4, _tbp5, _tbw5, _tbp6, _tbw6)	\
 	(p)->tbp4	= _tbp4,		\
@@ -1683,14 +1732,13 @@ typedef struct _GS_GIF_DMACHAIN_TAG{
 	unsigned long	addr	:31;
 	unsigned long	spr	:1;
 	unsigned long	pad2	:64;
-}GS_GIF_DMACHAIN_TAG		__attribute__ ((aligned(16)));/*aligne 128bits*/
+}GS_GIF_DMACHAIN_TAG		__attribute__ ((aligned(16)));/*aligned 128bits*/
 
 /*GIFTAG*/
 typedef struct {
 	unsigned long nloop	:15;
 	unsigned long eop	:1;
-	unsigned long pad1	:16;
-	unsigned long id	:14;
+	unsigned long pad1	:30;
 	unsigned long pre	:1;
 	unsigned long prim	:11;
 	unsigned long flg	:2;
@@ -1698,10 +1746,9 @@ typedef struct {
 	unsigned long reg	:64;
 }GS_GIF_TAG;
 
-#define gs_setGIF_TAG(p, _nloop,_eop,_id,_pre,_prim,_flg,_nreg,_reg)\
+#define gs_setGIF_TAG(p, _nloop,_eop,_pre,_prim,_flg,_nreg,_reg)\
 	(p)->nloop	= _nloop,				\
 	(p)->eop	= _eop,					\
-	(p)->id		= _id,					\
 	(p)->pre	= _pre,					\
 	(p)->prim	= _prim,				\
 	(p)->flg	= _flg,					\
@@ -1783,7 +1830,7 @@ typedef struct {
 typedef struct {
 	GS_DISPLAY	disp;
 	GS_DISPFB	dispfb;
-}GS_DISPENV;
+}GS_DISPENV __attribute__ ((aligned(8)));/* Aligned, 64bits*/
 
 /*a pixel  */
 typedef struct
@@ -2022,19 +2069,7 @@ typedef struct
 	unsigned short	 clt_width;
 	unsigned short	 clt_height;
 	unsigned int	*clt_addr;
-}GS_EE_IMAGE;
-
-typedef struct  {
-	unsigned short			qwc;
-	unsigned short			pad1:10;
-	unsigned short			pce	:2;
-	unsigned short			id	:3;
-	unsigned short			irq	:1;
-	unsigned int			addr:31;
-	unsigned short			spr	:1;
-	unsigned long			pad2;
-}sDMA_CHAIN __attribute__((aligned(16)));;
-*/
+}GS_EE_IMAGE;	*/
 
 #if defined(__LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
 extern "C" {

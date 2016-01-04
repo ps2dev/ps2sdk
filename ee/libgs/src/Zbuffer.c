@@ -33,7 +33,7 @@ void GsPutZBufferEnv1(GS_ZENV *zenv)
 {
 	QWORD *p;
 	p=UNCACHED_SEG(GsPrimWorkArea);
-	gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 1,1,0,0,0,0,1,0x0e);
+	gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 1,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
 	gs_setR_ZBUF_1(((GS_R_ZBUF *)&p[1]), zenv->vram_addr, zenv->psm, zenv->update_mask);
 
 	GsDmaSend(GsPrimWorkArea, 2);
@@ -44,7 +44,7 @@ void GsPutZBufferEnv2(GS_ZENV *zenv)
 {
 	QWORD *p;
 	p=UNCACHED_SEG(GsPrimWorkArea);
-	gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 4,1,0,0,0,0,1,0x0e);
+	gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 4,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
 	gs_setR_ZBUF_2(((GS_R_ZBUF *)&p[1]), zenv->vram_addr, zenv->psm, zenv->update_mask);
 
 	GsDmaSend(GsPrimWorkArea, 2);

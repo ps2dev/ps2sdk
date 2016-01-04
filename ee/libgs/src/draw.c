@@ -185,7 +185,7 @@ void GsClearDrawEnv1(GS_DRAWENV *drawenv)
 	context =0; // contex 1
 
 	p=UNCACHED_SEG(GsPrimWorkArea);
-	gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 4,1,0,0,0,0,1,0x0e);
+	gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 4,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
 	gs_setR_PRIM(((GS_R_PRIM *)&p[1]), GS_PRIM_SPRITE,0, 0, 0, 1, 0, 1, context, 0);
 	gs_setR_RGBAQ(((GS_R_RGBAQ *)&p[2]), drawenv->bg_color.r, drawenv->bg_color.g, drawenv->bg_color.b, drawenv->bg_color.a, drawenv->bg_color.q);
 	gs_setR_XYZ2(((GS_R_XYZ *)&p[3]), (drawenv->offset_x+drawenv->clip.x)<<4, (drawenv->offset_y+drawenv->clip.y)<<4, 0x00000000);
@@ -222,7 +222,7 @@ void GsClearDrawEnv2(GS_DRAWENV *drawenv)
 	context =1; // contex 2
 
 	p=UNCACHED_SEG(GsPrimWorkArea);
-	gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 4,1,0,0,0,0,1,0x0e);
+	gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 4,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
 	gs_setR_PRIM(((GS_R_PRIM *)&p[1]), GS_PRIM_SPRITE,0, 0, 0, 1, 0, 1, context, 0);
 	gs_setR_RGBAQ(((GS_R_RGBAQ *)&p[2]), drawenv->bg_color.r, drawenv->bg_color.g, drawenv->bg_color.b, drawenv->bg_color.a, drawenv->bg_color.q);
 	gs_setR_XYZ2(((GS_R_XYZ *)&p[3]), (drawenv->offset_x+drawenv->clip.x)<<4, (drawenv->offset_y+drawenv->clip.y)<<4, 0x00000000);

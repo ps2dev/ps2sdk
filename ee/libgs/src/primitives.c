@@ -26,7 +26,7 @@ void GsOverridePrimAttributes(char override, char iip, char tme, char fge, char 
 	QWORD *p;
 
 	p=UNCACHED_SEG(GsPrimWorkArea);
-	gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 2,1,0,0,0,0,1,0x0e);
+	gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 2,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
 
 	//override. (0 = use PRIM)(1 = use PRMODE)
 	if(override)
@@ -51,20 +51,22 @@ void GsEnableDithering(unsigned char enable, int mode)
 	p=UNCACHED_SEG(GsPrimWorkArea);
 	if(enable)
 	{
-		gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 3,1,0,0,0,0,1,0x0e);
+		gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 3,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
 		gs_setR_DTHE(((GS_R_DTHE *)&p[1]), 1);
 		gs_setR_DIMX(((GS_R_DIMX *)&p[2]), 4,2,5,3,0,6,1,7,5,3,4,2,1,7,0,6); //thanks to:"Maximus32" on ps2dev.org
 		gs_setR_COLCLAMP(((GS_R_COLCLAMP *)&p[3]), 1);
+
+		GsDmaSend(GsPrimWorkArea, 4);
 	}
 	else
 	{
-		gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 3,1,0,0,0,0,1,0x0e);
+		gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 2,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
 		gs_setR_DTHE(((GS_R_DTHE *)&p[1]), 0);
 		gs_setR_DIMX(((GS_R_DIMX *)&p[2]), 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
-		gs_setR_NOP (((GS_R_NOP *)&p[3])); // NOP to replace clamp
+
+		GsDmaSend(GsPrimWorkArea, 3);
 	}
 
-	GsDmaSend(GsPrimWorkArea, 4);
 	GsDmaWait();
 }
 
@@ -83,7 +85,7 @@ void GsEnableAlphaTransparency1(unsigned short enable,unsigned short method,unsi
 					GSGLOBAL_TEST1.ztest_enable,  GSGLOBAL_TEST1.ztest_method);
 
 	// tell GS in 16bit texture 1=transparent,0=solid
-	gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 1,1,0,0,0,0,1,0x0e);
+	gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 1,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
 	gs_setR_TEXA(((GS_R_TEXA *)&p[1]), 0x80, 0, 0x00);
 
 	GsDmaSend(GsPrimWorkArea, 2);
@@ -105,7 +107,7 @@ void GsEnableAlphaTransparency2(unsigned short enable,unsigned short method,unsi
 					GSGLOBAL_TEST2.ztest_enable,  GSGLOBAL_TEST2.ztest_method);
 
 	// tell GS in 16bit texture 1=transparent,0=solid
-	gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 1,1,0,0,0,0,1,0x0e);
+	gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 1,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
 	gs_setR_TEXA(((GS_R_TEXA *)&p[1]), 0x80, 0, 0x00);
 
 	GsDmaSend(GsPrimWorkArea, 2);
@@ -138,7 +140,7 @@ void GsEnableAlphaBlending1(unsigned short enable)
 	QWORD *p;
 
 	p=UNCACHED_SEG(GsPrimWorkArea);
-	gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 4,1,0,0,0,0,1,0x0e);
+	gs_setGIF_TAG(((GS_GIF_TAG *)&p[0]), 4,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
 
 	if(enable)
 	{
@@ -161,7 +163,7 @@ void GsEnableAlphaBlending2(unsigned short enable)
 	QWORD *p;
 
 	p=UNCACHED_SEG(GsPrimWorkArea);
-	gs_setGIF_TAG(((GS_GIF_TAG*)&p[0]), 4,1,0,0,0,0,1,0x0e);
+	gs_setGIF_TAG(((GS_GIF_TAG*)&p[0]), 4,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
 
 	if(enable)
 	{

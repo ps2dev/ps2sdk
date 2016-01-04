@@ -226,7 +226,7 @@ static int DrawSprites(GS_PACKET_TABLE *table)
 			but to keep things simple, it's set to 1 for every packet.
 
 			The packets are all in the PACKED format.	*/
-		gs_setGIF_TAG(((GS_GIF_TAG	*)&p[0]), 4,1,0,0,0,0,1,0x0e);
+		gs_setGIF_TAG(((GS_GIF_TAG	*)&p[0]), 4,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
 		gs_setR_PRIM(((GS_R_PRIM	*)&p[1]), GS_PRIM_SPRITE,0, 0, 0, 1, 0, 0, 0, 0);
 		gs_setR_RGBAQ(((GS_R_RGBAQ	*)&p[2]), sprites[i].color.r, sprites[i].color.g, sprites[i].color.b, sprites[i].color.a, sprites[i].color.q);
 		gs_setR_XYZ2(((GS_R_XYZ		*)&p[3]), (ScreenOffsetX+sprites[i].x_pos)<<4,	(ScreenOffsetY+sprites[i].y_pos)<<4, 0x00000000);

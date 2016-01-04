@@ -170,7 +170,7 @@ static int DrawTriangles(GS_PACKET_TABLE *table, int context_index)
 	//Use the uncached segment, to avoid needing to flush the data cache.
 	p = (QWORD*)(UNCACHED_SEG(GsGifPacketsAlloc(table, 6)));
 
-	gs_setGIF_TAG(((GS_GIF_TAG	*)&p[0]), 5,1,0,0,0,0,1,0x0e);
+	gs_setGIF_TAG(((GS_GIF_TAG	*)&p[0]), 5,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
 	gs_setR_PRIM(((GS_R_PRIM	*)&p[1]), GS_PRIM_TRI,0, 0, 0, 1, 0, 0, context_index, 0);
 	gs_setR_RGBAQ(((GS_R_RGBAQ	*)&p[2]), 200, 100, 100, 0x80, 0.0f);
 	gs_setR_XYZ2(((GS_R_XYZ		*)&p[3]), (ScreenOffsetX+0)<<4,		(ScreenOffsetY+0)<<4, 0x00000000);
@@ -181,7 +181,7 @@ static int DrawTriangles(GS_PACKET_TABLE *table, int context_index)
 	//Use the uncached segment, to avoid needing to flush the data cache.
 	p = (QWORD*)(UNCACHED_SEG(GsGifPacketsAlloc(table, 6)));
 
-	gs_setGIF_TAG(((GS_GIF_TAG	*)&p[0]), 5,1,0,0,0,0,1,0x0e);
+	gs_setGIF_TAG(((GS_GIF_TAG	*)&p[0]), 5,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
 	gs_setR_PRIM(((GS_R_PRIM	*)&p[1]), GS_PRIM_TRI,0, 0, 0, 1, 0, 0, context_index, 0);
 	gs_setR_RGBAQ(((GS_R_RGBAQ	*)&p[2]), 100, 200, 100, 0x80, 0.0f);
 	gs_setR_XYZ2(((GS_R_XYZ		*)&p[3]), (ScreenOffsetX+SCREEN_WIDTH-200)<<4,		(ScreenOffsetY+0)<<4, 0x00000000);
@@ -192,7 +192,7 @@ static int DrawTriangles(GS_PACKET_TABLE *table, int context_index)
 	//Use the uncached segment, to avoid needing to flush the data cache.
 	p = (QWORD*)(UNCACHED_SEG(GsGifPacketsAlloc(table, 6)));
 
-	gs_setGIF_TAG(((GS_GIF_TAG	*)&p[0]), 5,1,0,0,0,0,1,0x0e);
+	gs_setGIF_TAG(((GS_GIF_TAG	*)&p[0]), 5,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
 	gs_setR_PRIM(((GS_R_PRIM	*)&p[1]), GS_PRIM_TRI,0, 0, 0, 1, 0, 0, context_index, 0);
 	gs_setR_RGBAQ(((GS_R_RGBAQ	*)&p[2]), 100, 100, 200, 0x80, 0.0f);
 	gs_setR_XYZ2(((GS_R_XYZ		*)&p[3]), (ScreenOffsetX+SCREEN_WIDTH-200)<<4,		(ScreenOffsetY+SCREEN_HEIGHT)<<4, 0x00000000);
@@ -203,7 +203,7 @@ static int DrawTriangles(GS_PACKET_TABLE *table, int context_index)
 	//Use the uncached segment, to avoid needing to flush the data cache.
 	p = (QWORD*)(UNCACHED_SEG(GsGifPacketsAlloc(table, 6)));
 
-	gs_setGIF_TAG(((GS_GIF_TAG	*)&p[0]), 5,1,0,0,0,0,1,0x0e);
+	gs_setGIF_TAG(((GS_GIF_TAG	*)&p[0]), 5,1,0,0,GS_GIF_PACKED,1,gif_rd_ad);
 	gs_setR_PRIM(((GS_R_PRIM	*)&p[1]), GS_PRIM_TRI,0, 0, 0, 1, 0, 0, context_index, 0);
 	gs_setR_RGBAQ(((GS_R_RGBAQ	*)&p[2]), 100, 200, 200, 0x80, 0.0f);
 	gs_setR_XYZ2(((GS_R_XYZ		*)&p[3]), (ScreenOffsetX+0)<<4,		(ScreenOffsetY+SCREEN_HEIGHT)<<4, 0x00000000);
