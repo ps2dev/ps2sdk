@@ -56,9 +56,51 @@ ecvt    - missing
 fcvt    - missing
 gcvt    - won't compile
 
-Multibyte function disabled... I don't trust them. Somebody please advice.
-mblen, mbtowc, wctomb, mbstowcs, wcstombs
+Multi-byte (UTF-8) functions
+mblen     - ok
+mbslen    - ok
+mbtowc    - ok
+wctomb    - ok
+mbstowcs  - ok
+wcstombs  - ok
 
+wchar:
+------
+
+Wide-character functions - most of them were based on their ASCII counterparts
+wcsdup		- ok
+wcsncasecmp	- ok
+wcstok		- ok
+wcsrchr		- ok
+wcswcs		- ok
+wcsupr		- ok
+wcslwr		- ok
+
+towlower	- ok
+towupper	- ok
+iswupper	- ok
+iswlower	- ok
+iswalpha	- ok
+iswdigit	- ok
+iswalnum	- ok
+iswcntrl	- ok
+iswgraph	- ok
+iswprint	- ok
+iswpunct	- ok
+iswspace	- ok
+iswxdigit	- ok
+
+wcscpy		- ok
+wcsncpy		- ok
+wcspbrk		- ok
+wcsspn		- ok
+wcscspn		- ok
+wcscmp		- ok
+wcsncmp		- ok
+wcslen		- ok
+wcschr		- ok
+wcscat		- ok
+wcsncat		- ok
 
 Stdio/Unistd:
 ------------

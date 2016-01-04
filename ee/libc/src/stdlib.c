@@ -623,7 +623,7 @@ int mbslen(const char *s)
         break;
       }
    }
-  } ret = 0;
+  } else ret = 0;
   return (ret);
 }
 #endif
