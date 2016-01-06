@@ -397,7 +397,7 @@ char *fgets(char *buf, int n, FILE *stream)
         }
       }
 
-      if(ret != NULL && n == 1)
+      if(ret != NULL && n >= 1)
         *buf = '\0';	//Only if there was at least one character read and if there is enough space.
   }
   return (ret);
