@@ -16,6 +16,10 @@
 
 #include "internal.h"
 
+extern int (*_ps2sdk_close)(int);
+extern int (*_ps2sdk_open)(const char*, int);
+extern int (*_ps2sdk_read)(int, void*, int);
+
 extern QWORD GsPrimWorkArea[];
 
 void GsSetDefaultDrawEnv(GS_DRAWENV *drawenv, unsigned short int psm, unsigned short int w, unsigned short int h)
@@ -47,18 +51,21 @@ void GsSetDefaultDrawEnvAddress(GS_DRAWENV *drawenv, unsigned short vram_addr)
 	drawenv->vram_addr=vram_addr;
 }
 
-int checkModelVersion(void){
+int checkModelVersion(void)
+{
 	int fd, result, i;
 	char data[256], *pData;
 
-	if((fd=open("rom0:ROMVER", O_RDONLY))>=0){
-		for(pData=data,i=0; i<sizeof(data); i++){
-			read(fd, pData, 1);
-			if(*pData++!='\0') break;
+	if((fd=_ps2sdk_open("rom0:ROMVER", O_RDONLY))>=0)
+	{
+		for(pData=data,i=0; i<sizeof(data); i++)
+		{
+			_ps2sdk_read(fd, pData, 1);
+			if(*pData++=='\0') break;
 		}
-		close(fd);
+		_ps2sdk_close(fd);
 
-		//ROMVER string format: VVVVRTYYYYMMDD
+		//ROMVER string format: VVVVRTYYYYMMDD\n
 		result=(20010608<atoi(data+i-9));
 	}
 	else result=-1;
@@ -69,24 +76,23 @@ int checkModelVersion(void){
 void GsSetDefaultDisplayEnv(GS_DISPENV *dispenv, unsigned short int psm, unsigned short int w, unsigned short int h, unsigned short int dx, unsigned short int dy)
 {
 	GsGParam_t *pGParams;
-	unsigned int var_84, var_88, gs_DY, gs_DX;
+	int gs_DH, gs_DW, gs_DY, gs_DX;
 
 	pGParams=GsGetGParam();
 	dispenv->disp.pad1=dispenv->disp.pad2=0;
 
-	if(pGParams->omode>3){
-		var_84=0;
-		var_88=0;
+	if(pGParams->omode >= GS_MODE_NTSC && pGParams->omode <= GS_MODE_PAL)
+	{
+		gs_DH=0;
+		gs_DW=0;
 		gs_DY=0;
 		gs_DX=0;
-	}
-	else{
-		if(checkModelVersion()){
-			_GetGsDxDyOffset(pGParams->omode, &gs_DX, &gs_DY, &var_88, &var_84);
-		}
+	} else {
+		if(checkModelVersion())
+			_GetGsDxDyOffset(pGParams->omode, &gs_DX, &gs_DY, &gs_DW, &gs_DH);
 		else{
-			var_84=0;
-			var_88=0;
+			gs_DH=0;
+			gs_DW=0;
 			gs_DY=0;
 			gs_DX=0;
 		}
@@ -98,22 +104,22 @@ void GsSetDefaultDisplayEnv(GS_DISPENV *dispenv, unsigned short int psm, unsigne
 	dispenv->dispfb.address=0;
 	dispenv->dispfb.fbw=(w+63)/64;
 	dispenv->dispfb.psm=psm;
-	switch(pGParams->omode){
+	switch(pGParams->omode)
+	{
 		case GS_MODE_NTSC:
-			if(pGParams->interlace){
+			if(pGParams->interlace)
+			{
 				dispenv->disp.display_y	= dy+gs_DY+0x32;
 				dispenv->disp.display_x	= (gs_DX+0x27C) + dx*((w+0x9FF)/w);
 				dispenv->disp.magnify_h	= (w+0x9FF)/w - 1;
 				dispenv->disp.magnify_v	= 0;
 				dispenv->disp.display_w	= (w+0x9FF)/w*w - 1;
 
-				if(pGParams->ffmode){
+				if(pGParams->ffmode)
 					dispenv->disp.display_h = (h<<1) - 1;
-				}
-				else{
+				else
 					dispenv->disp.display_h = h - 1;
-				}
-			}else{
+			} else {
 				dispenv->disp.display_h = h-1;
 				dispenv->disp.display_x = gs_DX+0x27C + dx*((w+0x9FF)/w);
 				dispenv->disp.display_y = gs_DY+dy+0x19;
@@ -123,20 +129,19 @@ void GsSetDefaultDisplayEnv(GS_DISPENV *dispenv, unsigned short int psm, unsigne
 			}
 			break;
 		case GS_MODE_PAL:
-			if(pGParams->interlace){
+			if(pGParams->interlace)
+			{
 				dispenv->disp.display_y	= gs_DY+dy+0x48;
 				dispenv->disp.display_x	= gs_DX+0x290 + dx*((w+0x9FF)/w);
 				dispenv->disp.magnify_h	= (w+0x9FF)/w - 1;
 				dispenv->disp.magnify_v	= 0;
 				dispenv->disp.display_w	= (w+0x9FF)/w*w - 1;
 
-				if(pGParams->ffmode){
+				if(pGParams->ffmode)
 					dispenv->disp.display_h = (h<<1) - 1;
-				}
-				else{
+				else
 					dispenv->disp.display_h = h - 1;
-				}
-			}else{
+			} else {
 				dispenv->disp.display_h = h-1;
 				dispenv->disp.display_x = gs_DX+0x290 + dx*((w+0x9FF)/w);
 				dispenv->disp.display_y = dy+gs_DY+0x48;

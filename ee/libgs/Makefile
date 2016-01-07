@@ -12,7 +12,7 @@ EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
-EE_OBJS = libgs.o DxDyOffset.o ResetPath.o dma.o DoubleBuff.o draw.o Zbuffer.o lowlevel.o packets.o primitives.o sync.o texture.o erl-support.o
+EE_OBJS = libgs.o ResetPath.o dma.o DoubleBuff.o draw.o Zbuffer.o lowlevel.o packets.o primitives.o sync.o texture.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
 EE_LIB = $(EE_LIB_DIR)libgs.a

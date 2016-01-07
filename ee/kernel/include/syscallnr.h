@@ -139,6 +139,7 @@
 #define __NR_PSMode			0x7d
 #define __NR_MachineType		0x7e
 #define __NR_GetMemorySize		0x7f
+#define __NR__GetGsDxDyOffset		0x80
 #define __NR__InitTLB			0x82
 
 #endif /* _SYSCALLNR_H_ */

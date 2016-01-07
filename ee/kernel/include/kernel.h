@@ -401,6 +401,9 @@ void PSMode(void);
 s32  MachineType(void);
 s32  GetMemorySize(void);
 
+//Internal function for getting board-specific offsets, only present in later kernels (ROMVER > 20010608).
+void _GetGsDxDyOffset(int mode, int *dx, int *dy, int *dw, int *dh);
+
 //Internal function for reinitializing the TLB, only present in later kernels. Please use InitTLB() instead to initialize the TLB with all kernels.
 int  _InitTLB(void);
 

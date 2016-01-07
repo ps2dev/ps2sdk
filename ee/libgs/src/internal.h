@@ -1,5 +1,4 @@
 int checkModelVersion(void);
-void _GetGsDxDyOffset(int mode, int *arg1, int *arg2, int *arg3, int *arg4);
 
 //DMA management
 void GsDmaInit(void);

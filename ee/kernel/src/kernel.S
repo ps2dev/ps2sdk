@@ -624,7 +624,11 @@ SYSCALL(MachineType)
 SYSCALL(GetMemorySize)
 #endif
 
-#ifdef F_GetMemorySize
+#ifdef F__GetGsDxDyOffset
+SYSCALL(_GetGsDxDyOffset)
+#endif
+
+#ifdef F__InitTLB
 SYSCALL(_InitTLB)
 #endif
 
