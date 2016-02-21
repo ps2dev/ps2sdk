@@ -104,7 +104,7 @@ int FreeVpl(int vplId, void *memory);
 #define I_FreeVpl DECLARE_IMPORT(9, FreeVpl)
 int ReferVplStatus(int vplId, iop_vpl_info_t *info);
 #define I_ReferVplStatus DECLARE_IMPORT(11, ReferVplStatus)
-int iReferVplStatus int vplId, iop_vpl_info_t *info);
+int iReferVplStatus(int vplId, iop_vpl_info_t *info);
 #define I_iReferVplStatus DECLARE_IMPORT(12, iReferVplStatus)
 
 #endif
