@@ -154,7 +154,7 @@ static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_l
 
 				// Encode left
 				if((result=adpcm_encode(fp, sad, 2, sample_len, flag_loop))==0){
-					fseek(fp, SEEK_SET, data_offset+2);
+					fseek(fp, data_offset+2, SEEK_SET);
 					// Encode right
 					result=adpcm_encode(fp, sad, 2, sample_len, flag_loop);
 				}
