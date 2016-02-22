@@ -125,7 +125,7 @@ static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_l
 		}
 
 		if(fread( &sample_len, 4, 1, fp )==1){
-			sample_len /= (channels+1);
+			sample_len /= (channels*2);
 		}
 		else{
 			printf("Error: Can't read SAMPLE LENGTH in WAVE-file\n");
