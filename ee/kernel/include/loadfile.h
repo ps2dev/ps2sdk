@@ -37,6 +37,11 @@ typedef struct
 	u32 dummy;
 } t_ExecData;
 
+/* Extended error codes */
+#define SCE_EBINDMISS 0x10000	/* Could not bind with RPC server */
+#define SCE_ECALLMISS 0x10001	/* Could not call the RPC function */
+#define SCE_ELOADMISS 0x10003	/* ELF/Module load failed */
+
 int SifLoadFileInit(void);
 void SifLoadFileExit(void);
 

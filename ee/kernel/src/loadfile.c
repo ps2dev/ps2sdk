@@ -134,7 +134,7 @@ int _SifLoadModule(const char *path, int arg_len, const char *args, int *modres,
 	struct _lf_module_load_arg arg;
 
 	if (SifLoadFileInit() < 0)
-		return -E_LIB_API_INIT;
+		return -SCE_EBINDMISS;
 
 	memset(&arg, 0, sizeof arg);
 
@@ -149,7 +149,7 @@ int _SifLoadModule(const char *path, int arg_len, const char *args, int *modres,
 	}
 
 	if (SifCallRpc(&_lf_cd, fno, 0, &arg, sizeof arg, &arg, 8, NULL, NULL) < 0)
-		return -E_SIF_RPC_CALL;
+		return -SCE_ECALLMISS;
 
 	if (modres)
 		*modres = arg.modres;
@@ -254,7 +254,7 @@ int SifStopModule(int id, int arg_len, const char *args, int *mod_res)
 	struct _lf_module_stop_arg arg;
 
 	if (SifLoadFileInit() < 0)
-		return -E_LIB_API_INIT;
+		return -SCE_EBINDMISS;
 
 	arg.p.id = id;
 
@@ -266,7 +266,7 @@ int SifStopModule(int id, int arg_len, const char *args, int *mod_res)
 	}
 
 	if (SifCallRpc(&_lf_cd, LF_F_MOD_STOP, 0, &arg, sizeof arg, &arg, 8, NULL, NULL) < 0)
-		return -E_SIF_RPC_CALL;
+		return -SCE_ECALLMISS;
 
 	if (mod_res)
 		*mod_res = arg.q.modres;
@@ -286,12 +286,12 @@ int SifUnloadModule(int id)
 	union _lf_module_unload_arg arg;
 
 	if (SifLoadFileInit() < 0)
-		return -E_LIB_API_INIT;
+		return -SCE_EBINDMISS;
 
 	arg.id = id;
 
 	if (SifCallRpc(&_lf_cd, LF_F_MOD_UNLOAD, 0, &arg, sizeof arg, &arg, 4, NULL, NULL) < 0)
-		return -E_SIF_RPC_CALL;
+		return -SCE_ECALLMISS;
 
 	return arg.result;
 }
@@ -309,13 +309,13 @@ int SifSearchModuleByName(const char * name)
 {
 	struct _lf_search_module_by_name_arg arg;
 	if (SifLoadFileInit() < 0)
-		return -E_LIB_API_INIT;
+		return -SCE_EBINDMISS;
 
 	strncpy(arg.name, name, LF_PATH_MAX - 1);
 	arg.name[LF_PATH_MAX - 1] = 0;
 
 	if (SifCallRpc(&_lf_cd, LF_F_SEARCH_MOD_BY_NAME, 0, &arg, sizeof arg, &arg, 4, NULL, NULL) < 0)
-		return -E_SIF_RPC_CALL;
+		return -SCE_ECALLMISS;
 
 	return arg.id;
 }
@@ -333,12 +333,12 @@ int SifSearchModuleByAddress(const void *ptr)
 {
 	struct _lf_search_module_by_address_arg arg;
 	if (SifLoadFileInit() < 0)
-		return -E_LIB_API_INIT;
+		return -SCE_EBINDMISS;
 
 	arg.p.ptr = ptr;
 
 	if (SifCallRpc(&_lf_cd, LF_F_SEARCH_MOD_BY_ADDRESS, 0, &arg, sizeof arg, &arg, 4, NULL, NULL) < 0)
-		return -E_SIF_RPC_CALL;
+		return -SCE_ECALLMISS;
 
 	return arg.p.id;
 }
@@ -360,7 +360,7 @@ int _SifLoadElfPart(const char *path, const char *secname, t_ExecData *data, int
 	struct _lf_elf_load_arg arg;
 
 	if (SifLoadFileInit() < 0)
-		return -E_LIB_API_INIT;
+		return -SCE_EBINDMISS;
 
 	strncpy(arg.path, path, LF_PATH_MAX - 1);
 	strncpy(arg.secname, secname, LF_ARG_MAX - 1);
@@ -369,17 +369,16 @@ int _SifLoadElfPart(const char *path, const char *secname, t_ExecData *data, int
 
 	if (SifCallRpc(&_lf_cd, fno, 0, &arg, sizeof arg, &arg,
 				sizeof(t_ExecData), NULL, NULL) < 0)
-		return -E_SIF_RPC_CALL;
+		return -SCE_ECALLMISS;
 
-	if (arg.p.result < 0)
-		return arg.p.result;
-
-	if (data) {
+	if (arg.p.result > 0)
+	{
 		data->epc = arg.p.epc;
 		data->gp  = arg.gp;
-	}
 
-	return 0;
+		return 0;
+	} else
+		return -SCE_ELOADMISS;
 }
 #endif
 
@@ -481,7 +480,7 @@ int SifIopSetVal(u32 iop_addr, int val, int type)
 	struct _lf_iop_val_arg arg;
 
 	if (SifLoadFileInit() < 0)
-		return -E_LIB_API_INIT;
+		return -SCE_EBINDMISS;
 
 	switch (type) {
 		case LF_VAL_BYTE:
@@ -502,7 +501,7 @@ int SifIopSetVal(u32 iop_addr, int val, int type)
 
 	if (SifCallRpc(&_lf_cd, LF_F_SET_ADDR, 0, &arg, sizeof arg, &arg, 4,
 				NULL, NULL) < 0)
-		return -E_SIF_RPC_CALL;
+		return -SCE_ECALLMISS;
 
 	return arg.p.result;
 }
@@ -535,14 +534,14 @@ int SifIopGetVal(u32 iop_addr, void *val, int type)
 	struct _lf_iop_val_arg arg;
 
 	if (SifLoadFileInit() < 0)
-		return -E_LIB_API_INIT;
+		return -SCE_EBINDMISS;
 
 	arg.p.iop_addr = iop_addr;
 	arg.type = type;
 
 	if (SifCallRpc(&_lf_cd, LF_F_GET_ADDR, 0, &arg, sizeof arg, &arg, 4,
 				NULL, NULL) < 0)
-		return -E_SIF_RPC_CALL;
+		return -SCE_ECALLMISS;
 
 	if (val) {
 		switch (type) {
@@ -581,7 +580,7 @@ int _SifLoadModuleBuffer(void *ptr, int arg_len, const char *args, int *modres)
 	struct _lf_module_buffer_load_arg arg;
 
 	if (SifLoadFileInit() < 0)
-		return -E_LIB_API_INIT;
+		return -SCE_EBINDMISS;
 
 	memset(&arg, 0, sizeof arg);
 
@@ -595,7 +594,7 @@ int _SifLoadModuleBuffer(void *ptr, int arg_len, const char *args, int *modres)
 
 	if (SifCallRpc(&_lf_cd, LF_F_MOD_BUF_LOAD, 0, &arg, sizeof arg, &arg, 8,
 				NULL, NULL) < 0)
-		return -E_SIF_RPC_CALL;
+		return -SCE_ECALLMISS;
 
 	if (modres)
 		*modres = arg.q.modres;
