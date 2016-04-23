@@ -346,10 +346,7 @@ int SifSearchModuleByAddress(const void *ptr)
 
 #ifdef F__SifLoadElfPart
 struct _lf_elf_load_arg {
-	union {
-		u32	epc;
-		int	result;
-	} p;
+	u32	epc;
 	u32	gp;
 	char	path[LF_PATH_MAX];
 	char	secname[LF_ARG_MAX];
@@ -371,9 +368,9 @@ int _SifLoadElfPart(const char *path, const char *secname, t_ExecData *data, int
 				sizeof(t_ExecData), NULL, NULL) < 0)
 		return -SCE_ECALLMISS;
 
-	if (arg.p.result > 0)
+	if (arg.epc != 0)
 	{
-		data->epc = arg.p.epc;
+		data->epc = arg.epc;
 		data->gp  = arg.gp;
 
 		return 0;
