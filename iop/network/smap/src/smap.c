@@ -874,11 +874,10 @@ int smap_init(int argc, char *argv[]){
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_INTR_STAT, SMAP_E3_INTR_TX_ERR_0|SMAP_E3_INTR_SQE_ERR_0|SMAP_E3_INTR_DEAD_0);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_INTR_ENABLE, 0);
 
-	mac_address=eeprom_data[0]>>8 | eeprom_data[0]<<8;
+	mac_address=(u16)(eeprom_data[0]>>8 | eeprom_data[0]<<8);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_ADDR_HI, mac_address);
 
-	mac_address=eeprom_data[1]>>8|eeprom_data[1]<<8;
-	mac_address=mac_address<<16|eeprom_data[2]>>8|eeprom_data[2]<<8;
+	mac_address=((u16)(eeprom_data[1]>>8 | eeprom_data[1]<<8) << 16) | (u16)(eeprom_data[2]>>8 | eeprom_data[2]<<8);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_ADDR_LO, mac_address);
 
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_PAUSE_TIMER, 0xFFFF);
