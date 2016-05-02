@@ -21,7 +21,7 @@ extern "C" {
 int sbv_patch_enable_lmb(void);
 int sbv_patch_disable_prefix_check(void);
 int sbv_patch_user_mem_clear(void *start);
-int sbv_patch_fioremove(void);
+int sbv_patch_fileio(void);
 
 #ifdef __cplusplus
 }

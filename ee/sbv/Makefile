@@ -21,7 +21,7 @@ LIBSBV_LIB  = $(EE_LIB_DIR)libpatches.a
 EE_LIB = $(LIBSBV_LIB)
 
 EE_OBJS = smem.o smod.o slib.o patch_enable_lmb.o patch_disable_prefix_check.o \
-	patch_user_mem_clear.o patch_fioremove.o \
+	patch_user_mem_clear.o patch_fileio.o \
 	common.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
