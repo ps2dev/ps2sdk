@@ -105,7 +105,6 @@ int SMAPSendPacket(const void *data, unsigned int length){
 	int result, i, OldState;
 	USE_SMAP_TX_BD;
 	volatile u8 *smap_regbase;
-	volatile u8 *emac3_regbase;
 	volatile smap_bd_t *BD_ptr;
 	u16 BD_data_ptr;
 	unsigned int SizeRounded;
@@ -146,9 +145,7 @@ int SMAPSendPacket(const void *data, unsigned int length){
 		SmapDriverData.TxBufferSpaceAvailable-=SizeRounded;
 		CpuResumeIntr(OldState);
 
-		//This used to be done in the XMIT event handler, in the SONY original.
-		emac3_regbase=SmapDriverData.emac3_regbase;
-		SMAP_EMAC3_SET(SMAP_R_EMAC3_TxMODE0, SMAP_E3_TX_GNP_0);
+		SetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_XMIT);
 
 		result=1;
 	}
