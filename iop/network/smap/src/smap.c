@@ -20,14 +20,45 @@
 #include "main.h"
 #include "xfer.h"
 
+/*	There is a difference in how the transmissions are made,
+	between this driver and the SONY original.
+
+	SONY:
+		1. NETDEV calls SMAP's xmit callback.
+		2. SMAP's xmit event handler issues that XMIT event (for the main thread).
+		3. XMIT event copies the frames to the Tx buffer and sets up the BDs.
+		4. Tx DNV handler is called (always, regardless of what event it is being handled!).
+		5. Interrupts are re-enabled, except for TXDNV.
+		6. If there are frames to transmit, write to TX_GNP_0
+		7. Enable TXDNV interrupt.
+
+		The TXDNV interrupt is hence always disabled, but only enabled when a frame(s) is sent.
+		Perhaps there is a lack of a check on the TXEND interrupt because it is polling on the TX BDs before every transmission.
+
+		I don't know how to test this, but it seems like the TXDNV interrupt is asserted for as long as
+		there is no valid frame to transmit, hence this design by SONY.
+
+	Homebrew:
+		1. TXEND interrupt is enabled.
+		2. Network stack calls SMAPSendPacket().
+		3. If there is either insufficient space or no BD available, wait.
+		4. Frame is copied into the Tx buffer and a BD is set up.
+		5. TX_GNP_0 is written to.
+
+		TXDNV is never used and TXEND remains active since the activation of the interface (with SMAPStart). */
+
 #define DEV9_SMAP_ALL_INTR_MASK	(SMAP_INTR_EMAC3|SMAP_INTR_RXEND|SMAP_INTR_TXEND|SMAP_INTR_RXDNV|SMAP_INTR_TXDNV)
+/*	Unlike the SONY original, the EMAC3 and RXDNV interrupts are not handled. They didn't even do anything useful in the SONY original.
+	The SONY original didn't use TXEND. */
 #define DEV9_SMAP_INTR_MASK	(SMAP_INTR_RXEND|SMAP_INTR_TXEND)
+//The Tx interrupt events are handled separately
+#define DEV9_SMAP_INTR_MASK2	(SMAP_INTR_RXEND)
 
 /* Event flag bits */
 #define SMAP_EVENT_START	0x01
 #define SMAP_EVENT_STOP		0x02
 #define SMAP_EVENT_INTR		0x04
-#define SMAP_EVENT_XMIT		0x08
+#define SMAP_EVENT_XMIT		0x08	//In the SONY original, this is set to kickstart the transmission of a frame. Not used in this driver.
 #define SMAP_EVENT_LINK_CHECK	0x10
 
 struct SmapDriverData SmapDriverData;
@@ -303,6 +334,7 @@ RepeatAutoNegoProcess:
 	return 0;
 }
 
+//This timer callback starts the Ethernet link check event.
 static unsigned int LinkCheckTimerCB(struct SmapDriverData *SmapDrivPrivData){
 	iSetEventFlag(SmapDrivPrivData->Dev9IntrEventFlag, SMAP_EVENT_LINK_CHECK);
 	return SmapDrivPrivData->LinkCheckTimer.lo;
@@ -338,13 +370,16 @@ static int HandleTxIntr(struct SmapDriverData *SmapDrivPrivData){
 		}while(SmapDrivPrivData->NumPacketsInTx>0);
 	}
 
+	//Not done in the SONY original (see SMAPSendPacket for more details).
 	SetEventFlag(SmapDrivPrivData->TxEndEventFlag, 1);
 
 	return result;
 }
 
+//Checks the status of the Ethernet link
 static void CheckLinkStatus(struct SmapDriverData *SmapDrivPrivData){
 	if(!(_smap_read_phy(SmapDrivPrivData->emac3_regbase, SMAP_DsPHYTER_BMSR)&SMAP_PHY_BMSR_LINK)){
+		//Link lost
 		SmapDrivPrivData->LinkStatus=0;
 		NetManToggleNetIFLinkState(SmapDrivPrivData->NetIFID, NETMAN_NETIF_ETH_LINK_STATE_DOWN);
 		if(InitPHY(SmapDrivPrivData)==0){
@@ -402,20 +437,42 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData){
 		if(SmapDrivPrivData->SmapIsInitialized){
 			ResetCounterFlag=0;
 			if(EFBits&SMAP_EVENT_INTR){
-				while((IntrReg=SPD_REG16(SPD_R_INTR_STAT)&SMAP_INTR_RXEND)!=0){
-					SMAP_REG16(SMAP_R_INTR_CLR)=SMAP_INTR_RXEND;
-					ResetCounterFlag=HandleRxIntr(SmapDrivPrivData);
+				while((IntrReg=SPD_REG16(SPD_R_INTR_STAT)&DEV9_SMAP_INTR_MASK2)!=0){
+					/*	Other interrupts that were handled in the SONY original:
+							1. EMAC3: nothing useful was done, other than just acknowledging the events.
+							2. RXDNV: nothing useful was done, other than logging the event (same field as the BD_RX_OVERRUN event).
+							3. TXDNV: as this is done in its own thread, don't handle it here.
+						Original order/priority:
+							1. EMAC3
+							2. RXEND
+							3. RXDNV
+							4. TXDNV */
+					if(IntrReg&SMAP_INTR_RXEND){
+						SMAP_REG16(SMAP_R_INTR_CLR)=SMAP_INTR_RXEND;
+						ResetCounterFlag=HandleRxIntr(SmapDrivPrivData);
+					}
 				}
 
-				dev9IntrEnable(SMAP_INTR_RXEND);
+				//In the SONY original, this was outside of the interrupt event check.
+				dev9IntrEnable(DEV9_SMAP_INTR_MASK2);
 			}
 
-			if(ResetCounterFlag) counter=3;
+			/*	In the SONY original, the XMIT event handler was here.
+				But for performance, it is moved into SMAPSendPacket() instead.
+				It used to copy the frames into the Tx buffer and set up the BDs.
+				Immediately after that, there was also a call to the TXDNV handler function too.
+
+				After which, the interrupts were re-enabled (see above).
+				If there were frames to send out, TX_GNP_0 was set before the TXDNV event was enabled. */
+
+			if(ResetCounterFlag){
+				counter=3;
+				continue;
+			}
 
 			if(EFBits&SMAP_EVENT_LINK_CHECK){
-				if(--counter<=0){
+				if(--counter<=0)
 					CheckLinkStatus(SmapDrivPrivData);
-				}
 			}
 		}
 	}
@@ -424,7 +481,9 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData){
 static int Dev9IntrCb(int flag){
 	SaveGP();
 
-	dev9IntrDisable(SMAP_INTR_RXEND);
+	/*	This used to disable all interrupts (DEV9_SMAP_ALL_INTR_MASK).
+		In this driver, the Tx DNV event has its own thread, so do not disable that event here. */
+	dev9IntrDisable(DEV9_SMAP_INTR_MASK2);
 	iSetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_INTR);
 
 	RestoreGP();
@@ -432,7 +491,9 @@ static int Dev9IntrCb(int flag){
 	return 0;
 }
 
-static int Dev9TXEndIntrHandler(int flag){
+/*	The SONY original had this even handled within the interrupt-handling thread.
+	For performance, this is split off into its own thread (and hence interrupt handler). */
+static int Dev9TxEndIntrHandler(int flag){
 	SaveGP();
 
 	dev9IntrDisable(SMAP_INTR_TXEND);
@@ -657,6 +718,7 @@ static inline int SetupNetDev(void){
 		DEBUG_PRINTF("smap: CreateEventFlag -> %d\n", result);
 		return -6;
 	}
+	//Not done in the SONY original (refer to SMAPSendPacket for more details).
 	if((result=SmapDriverData.TxEndEventFlag=CreateEventFlag(&EventFlagData))<0){
 		DEBUG_PRINTF("smap: CreateEventFlag -> %d\n", result);
 		DeleteEventFlag(SmapDriverData.Dev9IntrEventFlag);
@@ -674,6 +736,7 @@ static inline int SetupNetDev(void){
 		return result;
 	}
 
+	// Unlike the SONY implementation, the Tx event stuff is moved into a separate thread for performance.
 	ThreadData.priority=ThreadPriority;
 	ThreadData.thread=(void*)&TxHandlerThread;
 	if((result=SmapDriverData.TxHandlerThreadID=CreateThread(&ThreadData))<0){
@@ -869,9 +932,10 @@ int smap_init(int argc, char *argv[]){
 	if(checksum16!=eeprom_data[3]) return -5;
 
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_MODE1, SMAP_E3_FDX_ENABLE|SMAP_E3_IGNORE_SQE|SMAP_E3_MEDIA_100M|SMAP_E3_RXFIFO_2K|SMAP_E3_TXFIFO_1K|SMAP_E3_TXREQ0_MULTI|SMAP_E3_TXREQ1_SINGLE);
-	SMAP_EMAC3_SET(SMAP_R_EMAC3_TxMODE1, 7<<SMAP_E3_TX_LOW_REQ_BITSFT | 0xF<<SMAP_E3_TX_URG_REQ_BITSFT);
+	SMAP_EMAC3_SET(SMAP_R_EMAC3_TxMODE1, 7<<SMAP_E3_TX_LOW_REQ_BITSFT | 15<<SMAP_E3_TX_URG_REQ_BITSFT);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_RxMODE, SMAP_E3_RX_STRIP_PAD|SMAP_E3_RX_STRIP_FCS|SMAP_E3_RX_INDIVID_ADDR|SMAP_E3_RX_BCAST|SMAP_E3_RX_MCAST);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_INTR_STAT, SMAP_E3_INTR_TX_ERR_0|SMAP_E3_INTR_SQE_ERR_0|SMAP_E3_INTR_DEAD_0);
+	//Do not handle the EMAC3 interrupts because the SONY original didn't do anything useful with them either.
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_INTR_ENABLE, 0);
 
 	mac_address=(u16)(eeprom_data[0]>>8 | eeprom_data[0]<<8);
@@ -891,7 +955,8 @@ int smap_init(int argc, char *argv[]){
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_TX_THRESHOLD, 12<<SMAP_E3_TX_THRESHLD_BITSFT);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_RX_WATERMARK, 16<<SMAP_E3_RX_LO_WATER_BITSFT|128<<SMAP_E3_RX_HI_WATER_BITSFT);
 
-	dev9RegisterIntrCb(4, &Dev9TXEndIntrHandler);	/* TXEND */
+	//In the SONY original, Dev9IntrCb was installed for all events (2-7).
+	dev9RegisterIntrCb(4, &Dev9TxEndIntrHandler);	/* TXEND */
 	dev9RegisterIntrCb(5, &Dev9IntrCb);		/* RXEND */
 
 	dev9RegisterPreDmaCb(1, &Dev9PreDmaCbHandler);
