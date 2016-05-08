@@ -95,24 +95,7 @@ int _start(int argc, char **argv)
 	int idx, res = 1;
 	u16 dev9hw;
 
-	iop_library_t *libptr;
-
 	printf(BANNER, VERSION);
-
-	libptr = GetLoadcoreInternalData()->let_next;
-	while ((libptr != 0))
-	{
-		int i;
-		for (i = 0; i <= sizeof(DRIVERNAME); i++) {
-			if (libptr->name[i] != DRIVERNAME[i])
-				break;
-		}
-		if (i > sizeof(DRIVERNAME)) {
-			M_PRINTF("Driver already loaded.\n");
-			return 1;
-		}
-		libptr = libptr->prev;
-        }
 
 	for (idx = 0; idx < 16; idx++)
 		dev9_shutdown_cbs[idx] = NULL;
@@ -130,7 +113,7 @@ int _start(int argc, char **argv)
 		return res;
 
 	if (RegisterLibraryEntries(&_exp_dev9) != 0) {
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 	}
 
 	AddPowerOffHandler(&dev9x_on_shutdown, NULL);
@@ -270,6 +253,7 @@ void dev9IntrDisable(int mask)
 int dev9DmaTransfer(int ctrl, void *buf, int bcr, int dir)
 {
 	USE_SPD_REGS;
+	volatile iop_dmac_chan_t *dev9_chan = (iop_dmac_chan_t *)DEV9_DMAC_BASE;
 	int res = 0, dmactrl;
 
 	switch(ctrl){
@@ -296,11 +280,12 @@ int dev9DmaTransfer(int ctrl, void *buf, int bcr, int dir)
 	if (dev9_predma_cbs[ctrl])
 		dev9_predma_cbs[ctrl](bcr, dir);
 
-	dmac_request(IOP_DMAC_DEV9, buf, bcr&0xFFFF, bcr>>16, dir);
-	dmac_transfer(IOP_DMAC_DEV9);
+	dev9_chan->madr = (u32)buf;
+	dev9_chan->bcr  = bcr;
+	dev9_chan->chcr = DMAC_CHCR_30|DMAC_CHCR_TR|DMAC_CHCR_CO|(dir & DMAC_CHCR_DR);
 
 	/* Wait for DMA to complete. Do not use a semaphore as thread switching hurts throughput greatly.  */
-	while(dmac_ch_get_chcr(IOP_DMAC_DEV9)&DMAC_CHCR_TR){}
+	while(dev9_chan->chcr & DMAC_CHCR_TR){}
 	res = 0;
 
 	if (dev9_postdma_cbs[ctrl])
@@ -413,13 +398,15 @@ int dev9RegisterShutdownCb(int idx, dev9_shutdown_cb_t cb){
 
 static int dev9_init(void)
 {
-	int i;
+	int i, flags;
 
 	if ((dma_lock_sem = CreateMutex(IOP_MUTEX_UNLOCKED)) < 0)
 		return -1;
 
+	CpuSuspendIntr(&flags);
 	/* Enable the DEV9 DMAC channel.  */
-	dmac_enable(IOP_DMAC_DEV9);
+	dmac_set_dpcr2(dmac_get_dpcr2() | 0x80);
+	CpuResumeIntr(flags);
 
 	/* Not quite sure what this enables yet.  */
 	dev9_set_stat(0x103);
@@ -504,8 +491,8 @@ static int dev9_smap_init(void)
 	USE_SMAP_RX_BD;
 	int i;
 
-	//Do not perform SMAP initialization if the SPEED device does not have such an interface. Also, skip it if the Chinese SATA network adaptor is detected.
-	if ((!(SPD_REG16(SPD_R_REV_3)&SPD_CAPS_SMAP)) || (SPD_REG16(SPD_R_REV_1) == 0xFF)) return 0;
+	//Do not perform SMAP initialization if the SPEED device does not have such an interface
+	if (!(SPD_REG16(SPD_R_REV_3)&SPD_CAPS_SMAP)) return 0;
 
 	SMAP_REG8(SMAP_R_TXFIFO_CTRL) = SMAP_TXFIFO_RESET;
 	for(i = 9; SMAP_REG8(SMAP_R_TXFIFO_CTRL)&SMAP_TXFIFO_RESET; i--)
@@ -528,6 +515,7 @@ static int dev9_smap_init(void)
 		DelayThread(1000);
 	}
 
+	//Unlike the SMAP driver, this reset operation is done in big-endian.
 	if (SPD_REG16(SPD_R_REV_1) >= 0x11) SMAP_REG8(SMAP_R_BD_MODE) = SMAP_BD_SWAP;
 
 	for(i = 0; i < SMAP_BD_MAX_ENTRY; i++)
@@ -550,7 +538,7 @@ static int dev9_smap_init(void)
 	if (SPD_REG16(SPD_R_REV_1) < 0x11) SPD_REG8(0x100) = 1;
 
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_MODE1, SMAP_E3_FDX_ENABLE|SMAP_E3_IGNORE_SQE|SMAP_E3_MEDIA_100M|SMAP_E3_RXFIFO_2K|SMAP_E3_TXFIFO_1K|SMAP_E3_TXREQ0_MULTI|SMAP_E3_TXREQ1_SINGLE);
-	SMAP_EMAC3_SET(SMAP_R_EMAC3_TxMODE1, 7<<SMAP_E3_TX_LOW_REQ_BITSFT | 0xF<<SMAP_E3_TX_URG_REQ_BITSFT);
+	SMAP_EMAC3_SET(SMAP_R_EMAC3_TxMODE1, 7<<SMAP_E3_TX_LOW_REQ_BITSFT | 15<<SMAP_E3_TX_URG_REQ_BITSFT);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_RxMODE, SMAP_E3_RX_RX_RUNT_FRAME|SMAP_E3_RX_RX_FCS_ERR|SMAP_E3_RX_RX_TOO_LONG_ERR|SMAP_E3_RX_RX_IN_RANGE_ERR|SMAP_E3_RX_PROP_PF|SMAP_E3_RX_PROMISC);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_INTR_STAT, SMAP_E3_INTR_TX_ERR_0|SMAP_E3_INTR_SQE_ERR_0|SMAP_E3_INTR_DEAD_0);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_INTR_ENABLE, SMAP_E3_INTR_TX_ERR_0|SMAP_E3_INTR_SQE_ERR_0|SMAP_E3_INTR_DEAD_0);
@@ -558,8 +546,8 @@ static int dev9_smap_init(void)
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_ADDR_LO, 0);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_PAUSE_TIMER, 0xFFFF);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_INTER_FRAME_GAP, 4);
-	SMAP_EMAC3_SET(SMAP_R_EMAC3_TX_THRESHOLD, 0xC<<SMAP_E3_TX_THRESHLD_BITSFT);
-	SMAP_EMAC3_SET(SMAP_R_EMAC3_RX_WATERMARK, 0x8<<SMAP_E3_RX_LO_WATER_BITSFT|0x40<<SMAP_E3_RX_HI_WATER_BITSFT);
+	SMAP_EMAC3_SET(SMAP_R_EMAC3_TX_THRESHOLD, 12<<SMAP_E3_TX_THRESHLD_BITSFT);
+	SMAP_EMAC3_SET(SMAP_R_EMAC3_RX_WATERMARK, 16<<SMAP_E3_RX_LO_WATER_BITSFT|128<<SMAP_E3_RX_HI_WATER_BITSFT);
 
 	dev9_smap_write_phy(emac3_regbase, SMAP_DsPHYTER_BMCR, SMAP_PHY_BMCR_RST);
 	for (i = 9;; i--)
@@ -902,6 +890,7 @@ static int pcmcia_init(void)
 	USE_DEV9_REGS;
 	USE_AIF_REGS;
 	int *mode;
+	int flags;
 	u16 cstc1, cstc2;
 
 	_sw(0x51011, SSBUS_R_1420);
@@ -947,8 +936,10 @@ static int pcmcia_init(void)
 	if (dev9_init() != 0)
 		return 1;
 
+	CpuSuspendIntr(&flags);
 	RegisterIntrHandler(IOP_IRQ_DEV9, 1, &pcmcia_intr, NULL);
 	EnableIntr(IOP_IRQ_DEV9);
+	CpuResumeIntr(flags);
 
 	DEV9_REG(DEV9_R_147E) = 0;
 	M_PRINTF("CXD9566 (PCMCIA type) initialized.\n");
@@ -998,6 +989,7 @@ static int expbay_intr(void *unused)
 static int expbay_init(void)
 {
 	USE_DEV9_REGS;
+	int flags;
 
 	_sw(0x51011, SSBUS_R_1420);
 	_sw(0xe01a3043, SSBUS_R_1418);
@@ -1015,8 +1007,10 @@ static int expbay_init(void)
 	if (dev9_init() != 0)
 		return 1;
 
+	CpuSuspendIntr(&flags);
 	RegisterIntrHandler(IOP_IRQ_DEV9, 1, &expbay_intr, NULL);
 	EnableIntr(IOP_IRQ_DEV9);
+	CpuResumeIntr(flags);
 
 	DEV9_REG(DEV9_R_1466) = 0;
 	M_PRINTF("CXD9611 (Expansion Bay type) initialized.\n");

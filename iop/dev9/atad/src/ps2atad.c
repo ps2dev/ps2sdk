@@ -159,12 +159,7 @@ static void ata_ultra_dma_mode(int mode);
 
 struct irx_export_table _exp_atad;
 
-/*	In a modern ATAD.IRX module, the DMA ENabled bit should be set and unset from the pre and post DMA callbacks.
-	However, some of the clone adaptors don't support this properly. Since some users out there cannot tell the difference
-	between such a clone adaptor and a genuine Sony adaptor, it's probably just best to go with the design of the older ATAD modules.
-
-	Older ATAD modules have this bit set within ata_set_dir() instead.	*/
-/* static void AtadPreDmaCb(int bcr, int dir){
+static void AtadPreDmaCb(int bcr, int dir){
 	USE_SPD_REGS;
 
 	SPD_REG16(SPD_R_XFR_CTRL)|=0x80;
@@ -174,7 +169,7 @@ static void AtadPostDmaCb(int bcr, int dir){
 	USE_SPD_REGS;
 
 	SPD_REG16(SPD_R_XFR_CTRL)&=~0x80;
-} */
+}
 
 int _start(int argc, char *argv[])
 {
@@ -189,8 +184,7 @@ int _start(int argc, char *argv[])
 		goto out;
 	}
 
-	/*
-		The PSX (Not the PlayStation or PSOne, but a PS2 with a DVR unit) has got an extra processor (Fujitsu MB91302A, aka the "DVRP") that seems to be emulating the console's PS2 ATA interface.
+	/*	The PSX (Not the PlayStation or PSOne, but a PS2 with a DVR unit) has got an extra processor (Fujitsu MB91302A, aka the "DVRP") that seems to be emulating the console's PS2 ATA interface.
 		The stock disks of all PSX units are definitely 48-bit LBA compliant because of their capacities, but the DVRP's emulation seems to have a design problem:
 			1. It indicates that 48-bit LBA is supported.
 			2. The 48-bit LBA capacity fields show the true capacity of the disk.
@@ -200,9 +194,8 @@ int _start(int argc, char *argv[])
 		The problem is obviously in the DVRP's firmware, but we currently have no way to fix these bugs because the DVRP is even more heavily secured that the IOP.
 		In the eyes of Sony, there isn't a problem because none of their retail PlayStation 2 software ever supported 48-bit LBA.
 
-		The obvious workaround here would be to totally kill 48-bit LBA support when ATAD is loaded on a PSX.
-	*/
-	Disable48bitLBA = ((SPD_REG16(SPD_R_REV_3) & SPD_CAPS_DVR) && (SPD_REG16(SPD_R_REV_1) != 0xFF))?1:0;	//The check for revision 0xFF is to workaround the problem that the Chinese SATA network adaptor has: it reports 0xFF for a lot of fields (including the capabilities field), which unfortunately triggers off the workaround for the PSX. It reports 0xFF as its revision too, which can be used to identify it.
+		The obvious workaround here would be to disable 48-bit LBA support when ATAD is loaded on a PSX. */
+	Disable48bitLBA = (SPD_REG16(SPD_R_REV_3) & SPD_CAPS_DVR)?1:0;
 
 	if ((res = RegisterLibraryEntries(&_exp_atad)) != 0) {
 		M_PRINTF("Library is already registered, exiting.\n");
@@ -219,9 +212,8 @@ int _start(int argc, char *argv[])
 
 	dev9RegisterIntrCb(1, &ata_intr_cb);
 	dev9RegisterIntrCb(0, &ata_intr_cb);
-	//Read the comment above about these callbacks.
-/*	dev9RegisterPreDmaCb(0, &AtadPreDmaCb);
-	dev9RegisterPostDmaCb(0, &AtadPostDmaCb); */
+	dev9RegisterPreDmaCb(0, &AtadPreDmaCb);
+	dev9RegisterPostDmaCb(0, &AtadPostDmaCb);
 
 	res = 0;
 	M_PRINTF("Driver loaded.\n");
@@ -991,7 +983,7 @@ static void ata_set_dir(int dir)
 	val = SPD_REG16(SPD_R_IF_CTRL) & 1;
 	val |= (dir == ATA_DIR_WRITE) ? 0x4c : 0x4e;
 	SPD_REG16(SPD_R_IF_CTRL) = val;
-	SPD_REG16(SPD_R_XFR_CTRL) = dir | 0x86;	//In a modern ATAD module, the DMA EN bit (0x80) is set and cleared from the pre and post DMA callbacks instead. Read the comment above about this.
+	SPD_REG16(SPD_R_XFR_CTRL) = dir | 0x6;
 }
 
 static void ata_pio_mode(int mode)
