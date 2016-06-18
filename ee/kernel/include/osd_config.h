@@ -12,8 +12,11 @@
 # Note: the 'set' methods are only valid till the ps2 gets
 # turned off or reset!
 #
-# Note 2: Early Japanese consoles (The SCPH-10000 and SCPH-15000) have kernels ("Protokernels") based on older specifications. The SCPH-18000 has the same kernel as the first expansion bay model (SCPH-30000).
-# 	The Protokernels can be "modernized" if patched. Newer games will automatically patch ExecPS2 of a Protokernel when they detect one, although only HDDOSDs will fully patch a Protokernel completely (causes the Protokernel to appear as a newer kernel to everything).
+# Note 2: Early Japanese consoles (The SCPH-10000 and SCPH-15000) have kernels based on older specifications.
+# 	The SCPH-18000 has the same kernel as the first expansion bay model (SCPH-30000).
+# 	The early kernels can be modernized if patched.
+#	Newer games will automatically patch ExecPS2 of such a kernel when they detect one,
+#	although only HDDOSDs will fully patch kernel completely (causes the kernel to appear as a newer kernel to everything).
 */
 
 #ifndef _CONFIG_H_
@@ -35,7 +38,12 @@ enum OSD_LANGUAGES{
 	LANGUAGE_ITALIAN,
 	LANGUAGE_DUTCH,
 	LANGUAGE_PORTUGUESE,
-	//Language values after here are not officially documented. Are supported by neither this library nor the original Sony libscf library, but can be found in the MECHACON's NVRAM and are used exclusively by the OSDs of consoles that support these languages.
+	/*	Language values after here are not officially documented.
+		Are supported by neither this library nor the original Sony libscf library,
+		but can be found in the MECHACON's NVRAM and are used exclusively by the OSDs of consoles that support these languages.
+		However, these consoles will always specify English within ConfigParam.
+
+		When ConfigParam.version is 2, the true language can be found in Config2Param.language. */
 	LANGUAGE_RUSSIAN,
 	LANGUAGE_KOREAN,
 	LANGUAGE_TRAD_CHINESE,
@@ -56,25 +64,35 @@ enum DATE_FORMAT_TYPES{
 	DATE_DDMMYYYY
 };
 
+// Time format values returned by: int getTimeFormat(void)
+enum TIME_FORMAT_TYPES{
+	TIME_24H	= 0,
+	TIME_12H,
+};
+
 // parameter struct as used by GetOsdConfigParam/SetOsdConfigParam
 typedef struct {
-/*00*/unsigned int spdifMode:1;		// 0=enabled, 1=disabled
-/*01*/unsigned int screenType:2;	// 0=4:3, 1=fullscreen, 2=16:9
-/*03*/unsigned int videoOutput:1;	// 0=rgb(scart), 1=component
-/*04*/unsigned int japLanguage:1;	// 0=japanese, 1=english(non-japanese)
-/*05*/unsigned int ps1drvConfig:8;	// Playstation driver settings.
-/*13*/unsigned int region:3;		// 0 = Protokernel consoles, 1 = NTSC-U/C/J, 2 = PAL. Protokernels cannot retain the value set in this field (Hence always 0).
-/*16*/unsigned int language:5;		// LANGUAGE_??? value
-/*21*/unsigned int timezoneOffset:11;// timezone minutes offset from gmt
+/*00*/u32 spdifMode:1;		// 0=enabled, 1=disabled
+/*01*/u32 screenType:2;		// 0=4:3, 1=fullscreen, 2=16:9
+/*03*/u32 videoOutput:1;	// 0=rgb(scart), 1=component
+/*04*/u32 japLanguage:1;	// 0=japanese, 1=english(non-japanese)
+/*05*/u32 ps1drvConfig:8;	// Playstation driver settings.
+/*13*/u32 version:3;		// 0 = early Japanese OSD, 1 = OSD2, 2 = OSD2 with extended languages. Early kernels cannot retain the value set in this field (Hence always 0).
+/*16*/u32 language:5;		// LANGUAGE_??? value
+/*21*/u32 timezoneOffset:11;	// timezone minutes offset from gmt
 } ConfigParam;
 
 // parameter struct as used by GetOsdConfigParam2/SetOsdConfigParam2
-// (Not supported by unpatched Protokernels. Do NOT invoke GetOsdConfigParam2 or SetOsdConfigParam2 on one!)
+// (Not supported by unpatched, early kernels. Do NOT invoke GetOsdConfigParam2 or SetOsdConfigParam2 on one!)
 typedef struct {
-/*00*/unsigned short int reserved:4;
-/*04*/unsigned short int daylightSaving:1;	// 0=standard(winter), 1=daylight savings(summer)
-/*05*/unsigned short int timeFormat:1;		// 0=24 hour, 1=12 hour
-/*06*/unsigned short int dateFormat:2;		// 0=YYYYMMDD, 1=MMDDYYYY, 2=DDMMYYYY
+/*00*/u16 reserved:4;
+/*04*/u16 daylightSaving:1;	// 0=standard(winter), 1=daylight savings(summer)
+/*05*/u16 timeFormat:1;		// 0=24 hour, 1=12 hour
+/*06*/u16 dateFormat:2;		// 0=YYYYMMDD, 1=MMDDYYYY, 2=DDMMYYYY
+
+//Only used if ConfigParam.version = 2
+/*08*/u8 version;		//Set to 2
+/*16*/u8 language;		//The true language, unlike the one from ConfigParam
 } Config2Param;
 
 // get the language the ps2 is currently set to

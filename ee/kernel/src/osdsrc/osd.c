@@ -3,15 +3,15 @@
 
 #include "osd.h"
 
-extern unsigned char SystemConfiguration[];
+extern u8 SystemConfiguration[];
 
-void InitSystemConfig(unsigned char *SysConf, int SysConfLen){
+void InitSystemConfig(void *SysConf, int SysConfLen){
 	unsigned int SysConfRegAddr, i;
-	volatile unsigned char *ptr;
+	vu8 *ptr;
 	u64 *config;
 
-	if((SysConfRegAddr=*(volatile unsigned int*)0xbc0003c0)!=0){
-		ptr=(unsigned char *)(0xbc000000+SysConfRegAddr+0xF);
+	if((SysConfRegAddr=*(vu32*)0xbc0003c0)!=0){
+		ptr=(vu8 *)(0xbc000000+SysConfRegAddr+0xF);
 
 		for(i=0; i<SysConfLen; i++) SystemConfiguration[i]=ptr[i];
 	}
@@ -30,7 +30,7 @@ void SetOsdConfigParam(ConfigParam* config){
 	OSDConfig.videoOutput=config->videoOutput;
 	OSDConfig.japLanguage=config->japLanguage;
 	OSDConfig.ps1drvConfig=config->ps1drvConfig;
-	OSDConfig.region=config->region;
+	OSDConfig.version=config->version;
 	OSDConfig.language=config->language;
 	OSDConfig.timezoneOffset=config->timezoneOffset;
 }
@@ -41,7 +41,7 @@ void GetOsdConfigParam(ConfigParam* config){
 	config->videoOutput=OSDConfig.videoOutput;
 	config->japLanguage=OSDConfig.japLanguage;
 	config->ps1drvConfig=OSDConfig.ps1drvConfig;
-	config->region=OSDConfig.region;
+	config->version=OSDConfig.version;
 	config->language=OSDConfig.language;
 	config->timezoneOffset=OSDConfig.timezoneOffset;
 }
@@ -72,7 +72,7 @@ void SetOsdConfigParam2(void* config, int size, int offset){
 
 int GetOsdConfigParam2(void* config, int size, int offset){
 	unsigned int AmountToRead, ReadEnd, i;
-	unsigned char *ptr;
+	u8 *ptr;
 
 	ptr=config;
 	if((ReadEnd=offset+size)>=0x81){

@@ -19,15 +19,15 @@
 #include <string.h>
 #include <osd_config.h>
 
-// config param data as stored on T-10000 (TOOLs)
+// config param data as stored on a DTL-T10000(H) TOOL
 typedef struct {
-	unsigned short int timezoneOffset;
-	unsigned char  screenType;
-	unsigned char  dateFormat;
-	unsigned char  language;
-	unsigned char  spdifMode;
-	unsigned char  daylightSaving;
-	unsigned char  timeFormat;
+	u16 timezoneOffset;
+	u8  screenType;
+	u8  dateFormat;
+	u8  language;
+	u8  spdifMode;
+	u8  daylightSaving;
+	u8  timeFormat;
 } ConfigParamT10K;
 
 extern ConfigParamT10K g_t10KConfig;
@@ -61,10 +61,10 @@ char* GetRomName(char *romname)
 }
 #endif
 
-// check whether ps2 is actually dev model T-10000
+// check whether the PlayStation 2 is actually a TOOL DTL-T10000(H)
 //
-// returns: 1 if T-10000
-//			0 if not
+// returns:	1 if DTL-T10000(H)
+//		0 if not
 #ifdef F_IsT10K
 int IsT10K(void)
 {
@@ -83,7 +83,7 @@ int IsT10K(void)
 #ifdef F_IsEarlyJap
 int IsEarlyJap(ConfigParam config)
 {
-	return config.region == 0;	//Unpatched protokernels will always have 0 set to this field.
+	return config.version == 0;
 }
 #endif
 
@@ -107,14 +107,14 @@ int  configGetLanguage(void)
 
 // sets the default language of the ps2
 //
-// args:		Language value (See OSD_LANGUAGES in header file)
+// args:	Language value (See OSD_LANGUAGES in header file)
 #ifdef F_configSetLanguage
 void configSetLanguage(int language)
 {
 	ConfigParam config;
 
 	// make sure language is valid
-	if(language < 0 || language > 7)
+	if(language < LANGUAGE_JAPANESE || language > LANGUAGE_PORTUGUESE)
 		return;
 	if(IsT10K())
 		g_t10KConfig.language = language;
@@ -132,8 +132,8 @@ void configSetLanguage(int language)
 // get the tv screen type the ps2 is setup for
 //
 // returns:	0 = 4:3
-//			1 = fullscreen
-//			2 = 16:9
+//		1 = fullscreen
+//		2 = 16:9
 #ifdef F_configGetTvScreenType
 int  configGetTvScreenType(void)
 {
@@ -158,7 +158,7 @@ void configSetTvScreenType(int screenType)
 	ConfigParam config;
 
 	// make sure screen type is valid
-	if(screenType < 0 || screenType > 2)
+	if(screenType < TV_SCREEN_43 || screenType > TV_SCREEN_169)
 		return;
 	if(IsT10K())
 		g_t10KConfig.screenType = screenType;
@@ -204,7 +204,7 @@ void configSetDateFormat(int dateFormat)
 	Config2Param config2;
 
 	// make sure date format is valid
-	if(dateFormat < 0 || dateFormat > 2)
+	if(dateFormat < DATE_YYYYMMDD || dateFormat > DATE_DDMMYYYY)
 		return;
 	if(IsT10K())
 		g_t10KConfig.dateFormat = dateFormat;
@@ -245,7 +245,7 @@ int  configGetTimeFormat(void)
 // (whether 24hour time or not)
 //
 // args:	0 = 24hour
-//			1 = 12hour
+//		1 = 12hour
 #ifdef F_configSetTimeFormat
 void configSetTimeFormat(int timeFormat)
 {
@@ -253,7 +253,7 @@ void configSetTimeFormat(int timeFormat)
 	Config2Param config2;
 
 	// make sure time format is valid
-	if(timeFormat < 0 || timeFormat > 1)
+	if(timeFormat < TIME_24H || timeFormat > TIME_12H)
 		return;
 	if(IsT10K())
 		g_t10KConfig.timeFormat = timeFormat;

@@ -80,12 +80,12 @@ static inline int PatchIsNeeded(void){
 
 	GetOsdConfigParam(&original_config);
 	config=original_config;
-	config.region=1;	//Protokernels cannot retain values set in this field.
+	config.version=1;	//Protokernels cannot retain values set in this field.
 	SetOsdConfigParam(&config);
 	GetOsdConfigParam(&config);
 	SetOsdConfigParam(&original_config);
 
-	return(config.region<1);
+	return(config.version<1);
 }
 
 void InitKernel(void){
