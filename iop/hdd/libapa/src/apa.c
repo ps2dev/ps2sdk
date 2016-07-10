@@ -39,7 +39,7 @@ void apaSetPartErrorSector(s32 device, u32 lba)
 	apaCacheFree(clink);
 }
 
-int apaGetPartErrorSector(s32 device, u32 lba, int *lba_out)
+int apaGetPartErrorSector(s32 device, u32 lba, u32 *lba_out)
 {
 	apa_cache_t	*clink;
 	int			rv=0;
@@ -51,8 +51,8 @@ int apaGetPartErrorSector(s32 device, u32 lba, int *lba_out)
 		return -EIO;
 
 	if(lba_out)
-		*lba_out=((u32 *)(clink->header))[0];
-	if(((u32 *)(clink->header))[0])
+		*lba_out=*clink->error_lba;
+	if(*clink->error_lba)
 		rv=1;// error is set ;)
 	apaCacheFree(clink);
 	return rv;
@@ -60,7 +60,7 @@ int apaGetPartErrorSector(s32 device, u32 lba, int *lba_out)
 
 int apaGetPartErrorName(s32 device, char *name)
 {
-	int lba;
+	u32 lba;
 	int rv=0;
 	apa_cache_t *clink;
 
@@ -90,8 +90,8 @@ int apaGetPartErrorName(s32 device, char *name)
 	return rv;
 }
 
-apa_cache_t *apaFillHeader(s32 device, apa_params_t *params, int start, int next,
-						 int prev, int length, int *err)
+apa_cache_t *apaFillHeader(s32 device, apa_params_t *params, u32 start, u32 next,
+						 u32 prev, u32 length, int *err)
 {	// used for making a new partition
 	apa_cache_t *clink;
 
@@ -179,7 +179,7 @@ apa_cache_t *apaFindPartition(s32 device, char *id, int *err)
 
 void addEmptyBlock(apa_header_t *header, u32 *emptyBlocks)
 {	// small helper.... to track empty blocks..
-	int i;
+	u32 i;
 
 	if(header->type==APA_TYPE_FREE) {
 		for(i=0;i<32;i++)
@@ -198,9 +198,9 @@ apa_cache_t *apaRemovePartition(s32 device, u32 start, u32 next, u32 prev,
 							  u32 length)
 {
 	apa_cache_t *clink;
-	u32 err;
+	int err;
 
-	if((clink=apaCacheGetHeader(device, start, APA_IO_MODE_WRITE, (int *)&err))==NULL)
+	if((clink=apaCacheGetHeader(device, start, APA_IO_MODE_WRITE, &err))==NULL)
 		return NULL;
 	memset(clink->header, 0, sizeof(apa_header_t));
 	clink->header->magic=APA_MAGIC;
@@ -382,10 +382,9 @@ int apaDelete(apa_cache_t *clink)
 int apaCheckSum(apa_header_t *header)
 {
 	u32 *ptr=(u32 *)header;
-	u32 sum=0;
-	int i;
+	u32 sum, i;
 
-	for(i=1; i < 256; i++)	//sizeof(header)/4 = 256, start at offset +4 to omit the checksum field.
+	for(sum=0,i=1; i < 256; i++)	//sizeof(header)/4 = 256, start at offset +4 to omit the checksum field.
 		sum+=ptr[i];
 	return sum;
 }
@@ -419,8 +418,7 @@ int apaGetFormat(s32 device, int *format)
 {
 	apa_cache_t *clink;
 	int rv=0;
-	u32 *pDW;
-	int i;
+	u32 *pDW, i;
 
 	clink=apaCacheAlloc();
 	*format=0;
@@ -442,10 +440,9 @@ int apaGetFormat(s32 device, int *format)
 	return rv==0;
 }
 
-int apaGetPartitionMax(int totalLBA)
+u32 apaGetPartitionMax(u32 totalLBA)
 {
-	int i;
-	int size;
+	u32 i, size;
 
 	totalLBA>>=6; // totalLBA/64
 	size=(1<<0x1F);

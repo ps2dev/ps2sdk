@@ -87,7 +87,11 @@ typedef struct sapa_cache
 	u16 nused;
 	s32 device;
 	u32 sector;
-	apa_header_t *header;
+	union
+	{
+		apa_header_t *header;
+		u32 *error_lba;
+	};
 } apa_cache_t;
 
 typedef struct
@@ -104,10 +108,10 @@ typedef struct
 
 void apaSaveError(s32 device, void *buffer, u32 lba, u32 err_lba);
 void apaSetPartErrorSector(s32 device, u32 lba);
-int apaGetPartErrorSector(s32 device, u32 lba, int *lba_out);
+int apaGetPartErrorSector(s32 device, u32 lba, u32 *lba_out);
 int apaGetPartErrorName(s32 device, char *name);
 
-apa_cache_t *apaFillHeader(s32 device, apa_params_t *params, int start, int next, int prev, int length, int *err);
+apa_cache_t *apaFillHeader(s32 device, apa_params_t *params, u32 start, u32 next, u32 prev, u32 length, int *err);
 apa_cache_t *apaInsertPartition(s32 device, apa_params_t *params, u32 sector, int *err);
 apa_cache_t *apaFindPartition(s32 device, char *id, int *err);
 void addEmptyBlock(apa_header_t *header, u32 *EmptyBlocks);
@@ -120,7 +124,7 @@ int apaCheckSum(apa_header_t *header);
 int apaReadHeader(s32 device, apa_header_t *header, u32 lba);
 int apaWriteHeader(s32 device, apa_header_t *header, u32 lba);
 int apaGetFormat(s32 device, int *format);
-int apaGetPartitionMax(int totalLBA);
+u32 apaGetPartitionMax(u32 totalLBA);
 apa_cache_t *apaGetNextHeader(apa_cache_t *clink, int *err);
 
 ///////////////////////////////////////////////////////////////////////////////

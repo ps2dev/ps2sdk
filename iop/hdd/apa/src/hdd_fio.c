@@ -261,9 +261,8 @@ int hddFormat(iop_file_t *f, const char *dev, const char *blockdev, void *arg, s
 {
 	int				rv=0;
 	apa_cache_t		*clink;
-	int				i;
 	apa_params_t		params;
-	u32				emptyBlocks[32];
+	u32				emptyBlocks[32], i;
 
 	if(f->unit >= 2)
 		return -ENXIO;
@@ -393,8 +392,7 @@ static int apaOpen(u32 device, hdd_file_slot_t *fileSlot, apa_params_t *params, 
 
 static int apaRemove(u32 device, char *id, const char *fpwd)
 {
-	int			i;
-	u32			nsub;
+	u32			nsub, i;
 	apa_cache_t	*clink;
 	apa_cache_t	*clink2;
 	int			rv;
@@ -630,6 +628,7 @@ int hddDread(iop_file_t *f, iox_dirent_t *dirent)
 	return rv;
 }
 
+// Originally, SONY provided no function for renaming partitions.
 int hddReName(iop_file_t *f, const char *oldname, const char *newname)
 {
 	int i, rv;

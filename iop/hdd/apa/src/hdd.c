@@ -75,7 +75,7 @@ extern hdd_file_slot_t *hddFileSlots;
 static int inputError(char *input);
 static int unlockDrive(u32 device);
 
-int hddCheckPartitionMax(s32 device, s32 size)
+int hddCheckPartitionMax(s32 device, u32 size)
 {
 	return (hddDevices[device].partitionMaxSize >= size) ? 0 : -EINVAL;
 }
@@ -103,7 +103,7 @@ apa_cache_t *hddAddPartitionHere(s32 device, apa_params_t *params, u32 *emptyBlo
 	some_size=(part_end%params->size);
 	tmp = some_size ? params->size - some_size : 0;
 
-	if(hddDevices[device].totalLBA < (part_end+params->size+tmp))
+	if(hddDevices[device].totalLBA < ((u64)part_end+params->size+tmp))
 	{
 		*err=-ENOSPC;
 		apaCacheFree(clink_this);
