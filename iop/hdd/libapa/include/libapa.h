@@ -96,9 +96,9 @@ typedef struct sapa_cache
 
 typedef struct
 {
+	char	id[APA_IDMAX];
 	char	fpswd[APA_PASSMAX];
 	char	rpswd[APA_PASSMAX];
-	char	id[APA_IDMAX];
 	u32		size;
 	u16		type;
 	u16		flags;
@@ -111,10 +111,10 @@ void apaSetPartErrorSector(s32 device, u32 lba);
 int apaGetPartErrorSector(s32 device, u32 lba, u32 *lba_out);
 int apaGetPartErrorName(s32 device, char *name);
 
-apa_cache_t *apaFillHeader(s32 device, apa_params_t *params, u32 start, u32 next, u32 prev, u32 length, int *err);
-apa_cache_t *apaInsertPartition(s32 device, apa_params_t *params, u32 sector, int *err);
+apa_cache_t *apaFillHeader(s32 device, const apa_params_t *params, u32 start, u32 next, u32 prev, u32 length, int *err);
+apa_cache_t *apaInsertPartition(s32 device, const apa_params_t *params, u32 sector, int *err);
 apa_cache_t *apaFindPartition(s32 device, char *id, int *err);
-void addEmptyBlock(apa_header_t *header, u32 *EmptyBlocks);
+void apaAddEmptyBlock(apa_header_t *header, u32 *emptyBlocks);
 apa_cache_t *apaRemovePartition(s32 device, u32 start, u32 next, u32 prev, u32 length);
 void apaMakeEmpty(apa_cache_t *clink);
 apa_cache_t *apaDeleteFixPrev(apa_cache_t *clink1, int *err);

@@ -118,9 +118,11 @@ static int fioGetInput(const char *arg, apa_params_t *params)
 		return -EINVAL;
 	if((rv=fioInputBreaker(&arg, params->id, APA_IDMAX))!=0)
 		return rv;
-	if((params->id[0]==0) || (arg[0]==0))
+	if(arg[0]==0)	// Return if there is no password specified (can be used with the mount function).
 		return 0;
 #ifdef APA_FULL_INPUT_ARGS
+	/* FIXME:	I believe that the SONY HDD.IRX uses a hashing function here,
+			which would mean that the passwords are stored obfuscated on the disk. */
 	if((rv=fioInputBreaker(&arg, params->fpswd, APA_PASSMAX))!=0)
 		return rv;
 
@@ -350,7 +352,7 @@ static int apaOpen(u32 device, hdd_file_slot_t *fileSlot, apa_params_t *params, 
 			if(memcmp(clink->header->id, params->id, APA_IDMAX) == 0)
 				break;	// found :)
 		}
-		addEmptyBlock(clink->header, emptyBlocks);
+		apaAddEmptyBlock(clink->header, emptyBlocks);
 		clink=apaGetNextHeader(clink, &rv);
 	}
 
@@ -717,7 +719,7 @@ static int ioctl2AddSub(hdd_file_slot_t *fileSlot, char *argp)
 	clink=apaCacheGetHeader(device, 0, APA_IO_MODE_READ, &rv);
 	while(clink){
 		sector=clink->sector;
-		addEmptyBlock(clink->header, emptyBlocks);
+		apaAddEmptyBlock(clink->header, emptyBlocks);
 		clink=apaGetNextHeader(clink, &rv);
 	}
 	if(rv!=0)

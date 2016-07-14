@@ -80,7 +80,7 @@ int hddCheckPartitionMax(s32 device, u32 size)
 	return (hddDevices[device].partitionMaxSize >= size) ? 0 : -EINVAL;
 }
 
-apa_cache_t *hddAddPartitionHere(s32 device, apa_params_t *params, u32 *emptyBlocks,
+apa_cache_t *hddAddPartitionHere(s32 device, const apa_params_t *params, u32 *emptyBlocks,
 				u32 sector, int *err)
 {
 	apa_cache_t	*clink_this;
@@ -88,8 +88,10 @@ apa_cache_t *hddAddPartitionHere(s32 device, apa_params_t *params, u32 *emptyBlo
 	apa_cache_t	*clink_new;
 	apa_header_t	*header;
 	u32			i;
-	u32			tmp, some_size, part_end;
+	u32			tmp, some_size;
 	u32			tempSize;
+	//Unlike SONY, use 64-bit arithmetic to prevent overflows when dealing with 2TB disks.
+	u64		part_end;
 
 	// walk empty blocks in case can use one :)
 	for(i=0;i< 32;i++)
@@ -103,23 +105,27 @@ apa_cache_t *hddAddPartitionHere(s32 device, apa_params_t *params, u32 *emptyBlo
 	some_size=(part_end%params->size);
 	tmp = some_size ? params->size - some_size : 0;
 
-	if(hddDevices[device].totalLBA < ((u64)part_end+params->size+tmp))
+	if(hddDevices[device].totalLBA < (part_end + params->size + tmp))
 	{
 		*err=-ENOSPC;
 		apaCacheFree(clink_this);
 		return NULL;
 	}
 
-	if((clink_next=apaCacheGetHeader(device, 0, APA_IO_MODE_READ, err))==NULL){
+	if((clink_next=apaCacheGetHeader(device, 0, APA_IO_MODE_READ, err))==NULL)
+	{
 		apaCacheFree(clink_this);
 		return NULL;
 	}
 
 	tempSize=params->size;
-	while(part_end%params->size){
+	while(part_end%params->size)
+	{
 		tempSize=params->size>>1;
-		while(0x3FFFF<tempSize){
-			if(!(part_end%tempSize)) {
+		while(0x3FFFF<tempSize)
+		{
+			if(!(part_end%tempSize))
+			{
 				clink_new=apaRemovePartition(device, part_end, 0,
 					clink_this->header->start, tempSize);
 				clink_this->header->next=part_end;
@@ -136,16 +142,17 @@ apa_cache_t *hddAddPartitionHere(s32 device, apa_params_t *params, u32 *emptyBlo
 		}
 	}
 	if((clink_new=apaFillHeader(device, params, part_end, 0, clink_this->header->start,
-		params->size, err))!=NULL) {
-			clink_this->header->next=part_end;
-			clink_this->flags|=APA_CACHE_FLAG_DIRTY;
-			clink_next->header->prev=clink_new->header->start;
-			clink_next->flags|=APA_CACHE_FLAG_DIRTY;
-			apaCacheFlushAllDirty(device);
-		}
-		apaCacheFree(clink_this);
-		apaCacheFree(clink_next);
-		return clink_new;
+		params->size, err))!=NULL)
+	{
+		clink_this->header->next=part_end;
+		clink_this->flags|=APA_CACHE_FLAG_DIRTY;
+		clink_next->header->prev=clink_new->header->start;
+		clink_next->flags|=APA_CACHE_FLAG_DIRTY;
+		apaCacheFlushAllDirty(device);
+	}
+	apaCacheFree(clink_this);
+	apaCacheFree(clink_next);
+	return clink_new;
 }
 
 static void hddCalculateFreeSpace(u32 *free, u32 sectors)
@@ -248,7 +255,8 @@ int _start(int argc, char **argv)
 	{
 		if(argv[0][0] != '-')
 			break;
-		if(strcmp("-o", argv[0])==0){
+		if(strcmp("-o", argv[0])==0)
+		{
 			argc--; argv++;
 			if(!argc)
 				return inputError(input);
@@ -256,7 +264,8 @@ int _start(int argc, char **argv)
 			if(i-1<32)
 				apaMaxOpen=i;
 		}
-		else if(strcmp("-n", argv[0])==0){
+		else if(strcmp("-n", argv[0])==0)
+		{
 			argc--; argv++;
 			if(!argc)
 				return inputError(input);
@@ -273,11 +282,13 @@ int _start(int argc, char **argv)
 		tm.hour, tm.min, tm.sec, tm.month, tm.day, tm.year);
 	for(i=0;i < 2;i++)
 	{
-		if(!(hddInfo=ata_get_devinfo(i))){
+		if(!(hddInfo=ata_get_devinfo(i)))
+		{
 			APA_PRINTF(APA_DRV_NAME": Error: ata initialization failed.\n");
 			return 0;
 		}
-		if(hddInfo->exists!=0 && hddInfo->has_packet==0){
+		if(hddInfo->exists!=0 && hddInfo->has_packet==0)
+		{
 				hddDevices[i].status--;
 				hddDevices[i].totalLBA=hddInfo->total_sectors;
 				hddDevices[i].partitionMaxSize=apaGetPartitionMax(hddInfo->total_sectors);
@@ -294,7 +305,8 @@ int _start(int argc, char **argv)
 	apaCacheInit(cacheSize);
 	for(i=0;i < 2;i++)
 	{
-		if(hddDevices[i].status<2){
+		if(hddDevices[i].status<2)
+		{
 			if(apaJournalRestore(i)!=0)
 				return 1;
 			if(apaGetFormat(i, &hddDevices[i].format))

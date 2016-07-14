@@ -73,8 +73,10 @@ int apaGetPartErrorName(s32 device, char *name)
 	{
 		if(clink->header->type!=APA_TYPE_FREE &&
 			!(clink->header->flags & APA_CACHE_FLAG_DIRTY) &&
-			clink->header->start==lba) {
-				if(name) {
+			clink->header->start==lba)
+		{
+				if(name)
+				{
 					strncpy(name, clink->header->id, APA_IDMAX - 1);
 					name[APA_IDMAX - 1] = '\0';
 				}
@@ -90,7 +92,7 @@ int apaGetPartErrorName(s32 device, char *name)
 	return rv;
 }
 
-apa_cache_t *apaFillHeader(s32 device, apa_params_t *params, u32 start, u32 next,
+apa_cache_t *apaFillHeader(s32 device, const apa_params_t *params, u32 start, u32 next,
 						 u32 prev, u32 length, int *err)
 {	// used for making a new partition
 	apa_cache_t *clink;
@@ -106,14 +108,16 @@ apa_cache_t *apaFillHeader(s32 device, apa_params_t *params, u32 start, u32 next
 	clink->header->type=params->type;
 	clink->header->flags=params->flags;
 	clink->header->modver=APA_MODVER;
-	memcpy(&clink->header->id, &params->id, APA_IDMAX);
-	if(params->flags & APA_FLAG_SUB) {
+	memcpy(clink->header->id, params->id, APA_IDMAX);
+	if(params->flags & APA_FLAG_SUB)
+	{
 		clink->header->main=params->main;
 		clink->header->number=params->number;
 	}
 	else
 	{
-		if(strncmp(clink->header->id, "_tmp", APA_IDMAX)!=0) {
+		if(strncmp(clink->header->id, "_tmp", APA_IDMAX)!=0)
+		{
 			memcpy(clink->header->rpwd, params->rpswd, APA_PASSMAX);
 			memcpy(clink->header->fpwd, params->fpswd, APA_PASSMAX);
 		}
@@ -123,16 +127,19 @@ apa_cache_t *apaFillHeader(s32 device, apa_params_t *params, u32 start, u32 next
 	return clink;
 }
 
-apa_cache_t *apaInsertPartition(s32 device, apa_params_t *params, u32 sector, int *err)
-{	// add's a new partition useing a empty block...
+apa_cache_t *apaInsertPartition(s32 device, const apa_params_t *params, u32 sector, int *err)
+{	// Adds a new partition using an empty block.
 	apa_cache_t *clink_empty;
 	apa_cache_t *clink_this;
 	apa_cache_t *clink_next;
 
 	if((clink_this=apaCacheGetHeader(device, sector, APA_IO_MODE_READ, err))==0)
 		return 0;
-	while(clink_this->header->length!=params->size) {
-		if((clink_next=apaCacheGetHeader(device, clink_this->header->next, APA_IO_MODE_READ, err))==NULL) { // get next
+
+	while(clink_this->header->length!=params->size)
+	{
+		if((clink_next=apaCacheGetHeader(device, clink_this->header->next, APA_IO_MODE_READ, err))==NULL)
+		{	// Get next partition
 			apaCacheFree(clink_this);
 			return 0;
 		}
@@ -177,7 +184,7 @@ apa_cache_t *apaFindPartition(s32 device, char *id, int *err)
 	return NULL;
 }
 
-void addEmptyBlock(apa_header_t *header, u32 *emptyBlocks)
+void apaAddEmptyBlock(apa_header_t *header, u32 *emptyBlocks)
 {	// small helper.... to track empty blocks..
 	u32 i;
 
@@ -246,9 +253,10 @@ apa_cache_t *apaDeleteFixPrev(apa_cache_t *clink, int *err)
 	u32				saved_length=clink->header->length;
 	u32				tmp;
 
-
-	while(header->start) {
-		if(!(clink2=apaCacheGetHeader(device, header->prev, APA_IO_MODE_READ, err))) {
+	while(header->start)
+	{
+		if(!(clink2=apaCacheGetHeader(device, header->prev, APA_IO_MODE_READ, err)))
+		{
 			apaCacheFree(clink);
 			return NULL;
 		}
@@ -266,8 +274,10 @@ apa_cache_t *apaDeleteFixPrev(apa_cache_t *clink, int *err)
 		apaCacheFree(clink);
 		clink=clink2;
 	}
-	if(length!=saved_length) {
-		if(!(clink2=apaCacheGetHeader(device, saved_next, APA_IO_MODE_READ, err))) {
+	if(length!=saved_length)
+	{
+		if(!(clink2=apaCacheGetHeader(device, saved_next, APA_IO_MODE_READ, err)))
+		{
 			apaCacheFree(clink);
 			return NULL;
 		}
@@ -296,17 +306,20 @@ apa_cache_t *apaDeleteFixNext(apa_cache_t *clink, int *err)
 
 	while(lnext!=0)
 	{
-		if(!(clink1=apaCacheGetHeader(device, lnext, APA_IO_MODE_READ, err))) {
+		if(!(clink1=apaCacheGetHeader(device, lnext, APA_IO_MODE_READ, err)))
+		{
 			apaCacheFree(clink);
 			return 0;
 		}
 		header=clink1->header;
 		tmp=header->length+length;
-		if(header->type!=0) {
+		if(header->type!=0)
+		{
 			apaCacheFree(clink1);
 			break;
 		}
-		if((clink->header->start%tmp)!=0 || ((tmp-1) & tmp)) {
+		if((clink->header->start%tmp)!=0 || ((tmp-1) & tmp))
+		{
 			apaCacheFree(clink1);
 			break;
 		}
@@ -314,8 +327,10 @@ apa_cache_t *apaDeleteFixNext(apa_cache_t *clink, int *err)
 		apaCacheFree(clink1);
 		lnext=header->next;
 	}
-	if(length!=saved_length) {
-		if(!(clink2=apaCacheGetHeader(device, lnext, APA_IO_MODE_READ, err))) {
+	if(length!=saved_length)
+	{
+		if(!(clink2=apaCacheGetHeader(device, lnext, APA_IO_MODE_READ, err)))
+		{
 			apaCacheFree(clink);
 			return NULL;
 		}
@@ -344,7 +359,8 @@ int apaDelete(apa_cache_t *clink)
 		return -EACCES;
 	}
 
-	if(clink->header->next==0) {
+	if(clink->header->next==0)
+	{
 		if((clink_mbr=apaCacheGetHeader(device, 0, APA_IO_MODE_READ, &rv))==NULL)
 		{
 			apaCacheFree(clink);
@@ -370,7 +386,8 @@ int apaDelete(apa_cache_t *clink)
 			if((clink=apaDeleteFixNext(clink, &rv))==NULL)
 				return 0;
 		}
-		if(clink->header->start==start && clink->header->length==length) {
+		if(clink->header->start==start && clink->header->length==length)
+		{
 			apaMakeEmpty(clink);
 			apaCacheFlushAllDirty(clink->device);
 		}
