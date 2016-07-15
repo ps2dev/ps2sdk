@@ -98,10 +98,6 @@ int hddFormat()
 	if(retVal < 0)
 		return retVal;
 
-	retVal = hddMakeFilesystem(512, "boot", FS_GROUP_SYSTEM);
-	if(retVal < 0)
-		return retVal;
-
 	hddUpdateInfo();
 
 	return 0;
@@ -159,8 +155,7 @@ int hddGetFilesystemList(t_hddFilesystem hddFs[], int maxEntries)
 		}
 
 #ifdef	_OMIT_SYSTEM_PARTITION
-		if((hddFs[count].fileSystemGroup == FS_GROUP_SYSTEM) &&
-			strcmp(hddFs[count].name, "boot"))
+		if(hddFs[count].fileSystemGroup == FS_GROUP_SYSTEM)
 		{
 			rv = fileXioDread(hddFd, &dirEnt);
 			continue;
