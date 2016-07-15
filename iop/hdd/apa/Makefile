@@ -22,7 +22,6 @@ IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 IOP_INCS += -I$(CURDIR)/$(IOP_SRC_DIR) -I$(PS2SDKSRC)/iop/dev9/poweroff/include/ -I$(PS2SDKSRC)/iop/dev9/dev9/include/ -I$(PS2SDKSRC)/iop/dev9/atad/include/ -I$(LIBAPA_PATH)/include
 IOP_CFLAGS  += -fno-builtin-printf
-IOP_LDFLAGS += -lgcc
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

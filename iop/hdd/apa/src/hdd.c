@@ -88,10 +88,8 @@ apa_cache_t *hddAddPartitionHere(s32 device, const apa_params_t *params, u32 *em
 	apa_cache_t	*clink_new;
 	apa_header_t	*header;
 	u32			i;
-	u32			tmp, some_size;
+	u32			tmp, some_size, part_end;
 	u32			tempSize;
-	//Unlike SONY, use 64-bit arithmetic to prevent overflows when dealing with 2TB disks.
-	u64		part_end;
 
 	// walk empty blocks in case can use one :)
 	for(i=0;i< 32;i++)
@@ -105,7 +103,9 @@ apa_cache_t *hddAddPartitionHere(s32 device, const apa_params_t *params, u32 *em
 	some_size=(part_end%params->size);
 	tmp = some_size ? params->size - some_size : 0;
 
-	if(hddDevices[device].totalLBA < (part_end + params->size + tmp))
+	if(hddDevices[device].totalLBA < (part_end + params->size + tmp)
+		//Non-SONY: when dealing with large disks, this check may overflow (therefore, check for overflows!).
+		|| (part_end < sector))
 	{
 		*err=-ENOSPC;
 		apaCacheFree(clink_this);
@@ -196,7 +196,8 @@ int hddGetFreeSectors(s32 device, u32 *free, hdd_device_t *deviceinfo)
 		{	//As weird as it looks, this was how it was done in the original HDD.IRX.
 			for( ; 0x0003FFFF < partMax; partMax /= 2)
 			{
-				if((sectors % partMax == 0) && (sectors + partMax < deviceinfo[device].totalLBA))
+				//Non-SONY: Perform 64-bit arithmetic here to avoid overflows when dealing with large disks.
+				if((sectors % partMax == 0) && ((u64)sectors + partMax < deviceinfo[device].totalLBA))
 				{
 					hddCalculateFreeSpace(free, partMax);
 					sectors += partMax;
