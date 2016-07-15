@@ -38,9 +38,7 @@
 static void hddUpdateInfo();
 
 static int hddStatusCurrent = 0;
-static int hddSize;
-static int hddFree;
-static int hddMaxPartitionSize;
+static u32 hddSize, hddFree, hddMaxPartitionSize;
 
 int hddCheckPresent()
 {
@@ -161,12 +159,12 @@ int hddGetFilesystemList(t_hddFilesystem hddFs[], int maxEntries)
 		}
 
 #ifdef	_OMIT_SYSTEM_PARTITION
-			if((hddFs[count].fileSystemGroup == FS_GROUP_SYSTEM) &&
-				strcmp(hddFs[count].name, "boot"))
-			{
-				rv = fileXioDread(hddFd, &dirEnt);
-				continue;
-			}
+		if((hddFs[count].fileSystemGroup == FS_GROUP_SYSTEM) &&
+			strcmp(hddFs[count].name, "boot"))
+		{
+			rv = fileXioDread(hddFd, &dirEnt);
+			continue;
+		}
 #endif
 
 #ifdef DEBUG
@@ -188,7 +186,7 @@ int hddGetFilesystemList(t_hddFilesystem hddFs[], int maxEntries)
 		for(i = 0, size = 0; i < dirEnt.stat.private_0 + 1; i++)
 		{
 			rv = fileXioIoctl2(partitionFd, APA_IOCTL2_GETSIZE, &i, 4, NULL, 0);
-			size += rv * 512 / 1024 / 1024;
+			size += (u32)rv / 2048; //Equal to, but avoids overflows of: rv * 512 / 1024 / 1024;
 		}
 
 		fileXioClose(partitionFd);
@@ -241,11 +239,12 @@ static void hddUpdateInfo()
 {
 	iox_dirent_t infoDirEnt;
 	int rv;
-	int hddFd, hddUsed = 0;
+	int hddFd;
+	u32 hddUsed = 0;
 
-	hddSize = fileXioDevctl("hdd0:", APA_DEVCTL_TOTAL_SECTORS, NULL, 0, NULL, 0) * 512 / 1024 / 1024;
+	hddSize = (u32)fileXioDevctl("hdd0:", APA_DEVCTL_TOTAL_SECTORS, NULL, 0, NULL, 0) * 512 / 1024 / 1024;
 
-/* This seems to give in-accurate results
+/* This gives inaccurate results, due to it being an approximation.
 	fileXioDevctl("hdd0:", APA_DEVCTL_FREE_SECTORS, NULL, 0, &rv, 4);
 	hddFree = rv * 512 / 1024 / 1024;
 */
@@ -257,14 +256,14 @@ static void hddUpdateInfo()
 	while(rv > 0)
 	{
 		if(infoDirEnt.stat.mode != FS_TYPE_EMPTY)
-			hddUsed += infoDirEnt.stat.size * 512 / 1024 / 1024;
+			hddUsed += infoDirEnt.stat.size / 2048; //Equal to, but avoids overflows of: infoDirEnt.stat.size * 512 / 1024 / 1024;
 
 		rv = fileXioDread(hddFd, &infoDirEnt);
 	}
 	fileXioDclose(hddFd);
 	hddFree = hddSize - hddUsed;
 
-	hddMaxPartitionSize = fileXioDevctl("hdd0:", APA_DEVCTL_MAX_SECTORS, NULL, 0, NULL, 0) * 512 / 1024 / 1024;
+	hddMaxPartitionSize = (u32)fileXioDevctl("hdd0:", APA_DEVCTL_MAX_SECTORS, NULL, 0, NULL, 0) / 2048; //Equal to, but avoids overflows of: sectors * 512 / 1024 / 1024;
 
 	hddStatusCurrent = 1;
 }

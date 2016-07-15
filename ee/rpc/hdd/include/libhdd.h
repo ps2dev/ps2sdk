@@ -46,9 +46,9 @@ typedef struct {
 } t_hddFilesystem;
 
 typedef struct {
-	int hddSize;			// Total size of the HDD in mega-bytes
-	int hddFree;			// Free space on the HDD in mega-bytes
-	int hddMaxPartitionSize;// The maximum size allowed for a single partition, in mega-bytes
+	u32 hddSize;			// Total size of the HDD in mega-bytes
+	u32 hddFree;			// Free space on the HDD in mega-bytes
+	u32 hddMaxPartitionSize;// The maximum size allowed for a single partition, in mega-bytes
 } t_hddInfo;
 
 int hddCheckPresent();
