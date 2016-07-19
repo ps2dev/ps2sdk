@@ -62,16 +62,6 @@ int apaGetTime(apa_ps2time_t *tm)
 	return 0;
 }
 
-int apaPassCmp(const char *pw1, const char *pw2)
-{
-#ifdef APA_ENABLE_PASSWORDS
-	 return memcmp(pw1, pw2, APA_PASSMAX) ? -EACCES : 0;
-#else
-	//Passwords are not supported, hence this check should always pass.
-	return 0;
-#endif
-}
-
 int apaGetIlinkID(u8 *idbuf)
 {
 	u32 err=0;

@@ -12,6 +12,7 @@
 
 #include <stdio.h>
 #include <tamtypes.h>
+#include <errno.h>
 #include <kernel.h>
 #include <string.h>
 #include <sifrpc.h>
@@ -321,7 +322,7 @@ int hddMakeFilesystem(int fsSizeMB, char *name, int type)
 	// Check if filesystem already exists
 	sprintf(openString, "hdd0:%s", fsName);
 	partFd = fileXioOpen(openString, O_RDONLY, 0);
-	if(partFd > 0)	// Filesystem already exists
+	if(partFd > 0 || partFd == -EACCES)	// Filesystem already exists
 	{
 		fileXioClose(partFd);
 		return -1;
@@ -340,7 +341,7 @@ int hddMakeFilesystem(int fsSizeMB, char *name, int type)
 	printf(">>> Attempting to create main partition, size %d MB\n", partSize);
 #endif
 
-	sprintf(openString, "hdd0:%s,%s", fsName, sizesString[useIndex]);
+	sprintf(openString, "hdd0:%s,,,%s,PFS", fsName, sizesString[useIndex]);
 #ifdef DEBUG
 	printf(">>> openString = %s\n", openString);
 #endif

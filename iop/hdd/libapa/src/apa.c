@@ -118,8 +118,8 @@ apa_cache_t *apaFillHeader(s32 device, const apa_params_t *params, u32 start, u3
 	{
 		if(strncmp(clink->header->id, "_tmp", APA_IDMAX)!=0)
 		{
-			memcpy(clink->header->rpwd, params->rpswd, APA_PASSMAX);
-			memcpy(clink->header->fpwd, params->fpswd, APA_PASSMAX);
+			memcpy(clink->header->rpwd, params->rpwd, APA_PASSMAX);
+			memcpy(clink->header->fpwd, params->fpwd, APA_PASSMAX);
 		}
 	}
 	apaGetTime(&clink->header->created);

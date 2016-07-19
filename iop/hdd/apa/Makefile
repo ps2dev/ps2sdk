@@ -16,7 +16,7 @@ LIBAPA_SRC_DIR = $(LIBAPA_PATH)/src/
 IOP_INC_DIR = include/
 
 IOP_BIN  = $(IOP_BIN_DIR)ps2hdd.irx
-APA_OBJS = misc.o cache.o apa.o journal.o
+APA_OBJS = password.o misc.o cache.o apa.o journal.o
 IOP_OBJS = hdd_fio.o hdd.o imports.o $(APA_OBJS)
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 

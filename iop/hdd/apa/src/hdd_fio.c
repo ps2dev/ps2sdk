@@ -35,9 +35,11 @@ u32 apaMaxOpen=1;
 extern const char apaMBRMagic[];
 extern hdd_device_t hddDevices[];
 
+#ifdef APA_FORMAT_MAKE_PARTITIONS
 static const char *formatPartList[]={
 	"__net", "__system", "__sysconf", "__common", NULL
 };
+#endif
 
 #define APA_NUMBER_OF_SIZES 9
 static const char *sizeList[APA_NUMBER_OF_SIZES]={
@@ -93,20 +95,16 @@ struct apaFsType
 	u16 type;
 };
 
-// NOTE: Changed so format = partitionID,size (used to be partitionID,fpswd,rpswd,size,filesystem)
 static int fioGetInput(const char *arg, apa_params_t *params)
 {
 	char	argBuf[32];
-	int		rv=0;
-#ifdef APA_FULL_INPUT_ARGS
-	int i;
+	int		rv=0, i;
 	static const struct apaFsType fsTypes[]={
 		{"PFS", APA_TYPE_PFS},
 		{"CFS", APA_TYPE_CFS},
 		{"EXT2", APA_TYPE_EXT2},
 		{"EXT2SWAP", APA_TYPE_EXT2SWAP}
 	};
-#endif
 
 	if(params==NULL)
 		return -EINVAL;
@@ -118,17 +116,26 @@ static int fioGetInput(const char *arg, apa_params_t *params)
 		return -EINVAL;
 	if((rv=fioInputBreaker(&arg, params->id, APA_IDMAX))!=0)
 		return rv;
-	if(arg[0]==0)	// Return if there is no password specified (can be used with the mount function).
+	if(arg[0] == '\0')	// Return if there are no further parameters.
 		return 0;
-#ifdef APA_FULL_INPUT_ARGS
-	/* FIXME:	I believe that the SONY HDD.IRX uses a hashing function here,
-			which would mean that the passwords are stored obfuscated on the disk. */
-	if((rv=fioInputBreaker(&arg, params->fpswd, APA_PASSMAX))!=0)
+
+	if((rv=fioInputBreaker(&arg, params->fpwd, APA_PASSMAX))!=0)
 		return rv;
 
-	if((rv=fioInputBreaker(&arg, params->rpswd, APA_PASSMAX))!=0)
+	if(params->fpwd[0] != '\0')
+		apaEncryptPassword(params->id, params->fpwd, params->fpwd);
+
+	if(arg[0] == '\0')	// Return if there are no further parameters.
+		return 0;
+
+	if((rv=fioInputBreaker(&arg, params->rpwd, APA_PASSMAX))!=0)
 		return rv;
-#endif
+
+	if(params->rpwd[0] != '\0')
+		apaEncryptPassword(params->id, params->rpwd, params->rpwd);
+
+	if(arg[0] == '\0')	// Return if there are no further parameters.
+		return 0;
 
 	memset(argBuf, 0, sizeof(argBuf));
 	if((rv=fioInputBreaker(&arg, argBuf, sizeof(argBuf)))!=0)
@@ -138,7 +145,6 @@ static int fioGetInput(const char *arg, apa_params_t *params)
 		return rv;
 	params->size=rv;
 
-#ifdef APA_FULL_INPUT_ARGS
 	memset(argBuf, 0, sizeof(argBuf));
 	if((rv=fioInputBreaker(&arg, argBuf, sizeof(argBuf)))!=0)
 		return rv;
@@ -157,10 +163,7 @@ static int fioGetInput(const char *arg, apa_params_t *params)
 		printf("hdd: error: Invalid fstype, %s.\n", argBuf);
 		return -EINVAL;
 	}
-#else
-	// Filesystem type is fixed to PFS!
-	params->type = APA_TYPE_PFS;
-#endif
+
 	return rv;
 }
 
@@ -263,8 +266,11 @@ int hddFormat(iop_file_t *f, const char *dev, const char *blockdev, void *arg, s
 {
 	int				rv=0;
 	apa_cache_t		*clink;
+	u32			i;
+#ifdef APA_FORMAT_MAKE_PARTITIONS
 	apa_params_t		params;
-	u32				emptyBlocks[32], i;
+	u32				emptyBlocks[32];
+#endif
 
 	if(f->unit >= 2)
 		return -ENXIO;
@@ -298,6 +304,10 @@ int hddFormat(iop_file_t *f, const char *dev, const char *blockdev, void *arg, s
 		header->length=(1024*256);	// 128MB
 		header->type=APA_TYPE_MBR;
 		strcpy(header->id,"__mbr");
+#ifdef APA_OSD_VER
+		apaEncryptPassword(header->id, header->fpwd, "sce_mbr");
+		apaEncryptPassword(header->id, header->rpwd, "sce_mbr");
+#endif
 		memcpy(header->mbr.magic, apaMBRMagic, sizeof(header->mbr.magic));
 
 		header->mbr.version=APA_MBR_VERSION;
@@ -312,6 +322,7 @@ int hddFormat(iop_file_t *f, const char *dev, const char *blockdev, void *arg, s
 		hddDevices[f->unit].status=0;
 		hddDevices[f->unit].format=APA_MBR_VERSION;
 	}
+#ifdef APA_FORMAT_MAKE_PARTITIONS
 	memset(&emptyBlocks, 0, sizeof(emptyBlocks));
 	memset(&params, 0, sizeof(apa_params_t));
 	params.size=(1024*256);
@@ -330,6 +341,7 @@ int hddFormat(iop_file_t *f, const char *dev, const char *blockdev, void *arg, s
 		if(hddDevices[f->unit].partitionMaxSize < params.size)
 			params.size=hddDevices[f->unit].partitionMaxSize;
 	}
+#endif
 	return rv;
 }
 
@@ -383,9 +395,9 @@ static int apaOpen(u32 device, hdd_file_slot_t *fileSlot, apa_params_t *params, 
 	fileSlot->nsub=clink->header->nsub;
 	memcpy(&fileSlot->id, &clink->header->id, APA_IDMAX);
 	apaCacheFree(clink);
-	if(apaPassCmp(clink->header->fpwd, params->fpswd)!=0)
+	if(apaPassCmp(clink->header->fpwd, params->fpwd)!=0)
 	{
-		rv = (!(mode & O_WRONLY)) ? apaPassCmp(clink->header->rpwd, params->rpswd) : -EACCES;
+		rv = (!(mode & O_WRONLY)) ? apaPassCmp(clink->header->rpwd, params->rpwd) : -EACCES;
 	} else
 		rv = 0;
 
@@ -445,7 +457,7 @@ int hddRemove(iop_file_t *f, const char *name)
 		return rv;
 
 	WaitSema(fioSema);
-	rv = apaRemove(f->unit, params.id, params.fpswd);
+	rv = apaRemove(f->unit, params.id, params.fpwd);
 	SignalSema(fioSema);
 
 	return rv;
@@ -577,7 +589,7 @@ int hddGetStat(iop_file_t *f, const char *name, iox_stat_t *stat)
 
 	WaitSema(fioSema);
 	if((clink=apaFindPartition(f->unit, params.id, &rv))){
-		if((rv=apaPassCmp(clink->header->fpwd, params.fpswd))==0 || (rv=apaPassCmp(clink->header->rpwd, params.rpswd))==0)
+		if((rv=apaPassCmp(clink->header->fpwd, params.fpwd))==0 || (rv=apaPassCmp(clink->header->rpwd, params.rpwd))==0)
 				fioGetStatFiller(clink, stat);
 		apaCacheFree(clink);
 	}
@@ -850,7 +862,7 @@ static int devctlSwapTemp(u32 device, char *argp)
 		return rv;
 
 	if((partNew=apaFindPartition(device, params.id, &rv))) {
-		if((rv=apaPassCmp(partNew->header->fpwd, params.fpswd))==0) {
+		if((rv=apaPassCmp(partNew->header->fpwd, params.fpwd))==0) {
 			memcpy(partTemp->header->id, partNew->header->id, APA_IDMAX);
 			memcpy(partTemp->header->rpwd, partNew->header->rpwd, APA_PASSMAX);
 			memcpy(partTemp->header->fpwd, partNew->header->fpwd, APA_PASSMAX);
