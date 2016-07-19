@@ -16,10 +16,6 @@ I_AddDrv
 I_DelDrv
 iomanX_IMPORTS_end
 
-poweroff_IMPORTS_start
-I_AddPowerOffHandler
-poweroff_IMPORTS_end
-
 stdio_IMPORTS_start
 I_printf
 stdio_IMPORTS_end

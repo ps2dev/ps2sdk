@@ -20,7 +20,6 @@
 #include <cdvdman.h>
 #include <intrman.h>
 #include <iomanX.h>
-#include <poweroff.h>
 #include <stdio.h>
 #include <sysclib.h>
 #include <sysmem.h>

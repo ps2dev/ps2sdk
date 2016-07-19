@@ -15,7 +15,6 @@
 #include <irx.h>
 #include <atad.h>
 #include <dev9.h>
-#include <poweroff.h>
 #include <loadcore.h>
 #include <sysclib.h>
 #include <errno.h>
@@ -236,12 +235,6 @@ static int ioctl2Transfer(u32 device, hdd_file_slot_t *fileSlot, hddIoctl2Transf
 	return 0;
 }
 
-static void hddPowerOffHandler(void* data)
-{
-	APA_PRINTF("hdd flush cache\n");
-	ata_device_flush_cache(0);
-}
-
 int hddInit(iop_device_t *f)
 {
 	iop_sema_t sema;
@@ -252,7 +245,6 @@ int hddInit(iop_device_t *f)
 	sema.option=0;
 	fioSema=CreateSema(&sema);
 
-	AddPowerOffHandler(&hddPowerOffHandler, NULL);
 	return 0;
 }
 

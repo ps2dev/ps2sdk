@@ -16,7 +16,6 @@
 #include <errno.h>
 #include <iomanX.h>
 #include <thsemap.h>
-#include <poweroff.h>
 #include <hdd-ioctl.h>
 
 #include "pfs-opt.h"
@@ -463,12 +462,6 @@ static int fileTransfer(pfs_file_slot_t *fileSlot, u8 *buf, int size, int operat
 	return result < 0 ? result : total;
 }
 
-static void pfsPowerOffHandler(void* data)
-{
-	PFS_PRINTF("pfs close all\n");
-	pfsFioDevctlCloseAll();
-}
-
 int	pfsFioInit(iop_device_t *f)
 {
 	iop_sema_t sema;
@@ -480,7 +473,6 @@ int	pfsFioInit(iop_device_t *f)
 
 	pfsFioSema = CreateSema(&sema);
 
-	AddPowerOffHandler(&pfsPowerOffHandler, NULL);
 	return 0;
 }
 
