@@ -238,7 +238,7 @@ static void hddUpdateInfo()
 	int hddFd;
 	u32 hddUsed = 0;
 
-	hddSize = (u32)fileXioDevctl("hdd0:", HDIOC_TOTALSECTOR, NULL, 0, NULL, 0) * 512 / 1024 / 1024;
+	hddSize = (u32)fileXioDevctl("hdd0:", HDIOC_TOTALSECTOR, NULL, 0, NULL, 0) / 2048; //sectors * 512 / 1024 / 1024;
 
 /* This gives inaccurate results, due to it being an approximation.
 	fileXioDevctl("hdd0:", HDIOC_FREESECTOR, NULL, 0, &rv, 4);
