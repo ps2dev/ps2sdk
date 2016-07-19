@@ -55,35 +55,35 @@ int pfsFioDevctl(iop_file_t *f, const char *name, int cmd, void *arg, size_t arg
 
 	switch(cmd)
 	{
-	case PFS_DEVCTL_GET_ZONE_SIZE:
+	case PDIOC_ZONESZ:
 		rv=pfsMount->zsize;
 		break;
 
-	case PFS_DEVCTL_GET_ZONE_FREE:
+	case PDIOC_ZONEFREE:
 		rv=pfsMount->zfree;
 		break;
 
-	case PFS_DEVCTL_CLOSE_ALL:
+	case PDIOC_CLOSEALL:
 		pfsFioDevctlCloseAll();
 		break;
 
-	case PFS_DEVCTL_CLEAR_STAT:
+	case PDIOC_CLRFSCKSTAT:
 		rv=devctlFsckStat(pfsMount, PFS_MODE_REMOVE_FLAG);
 		break;
 
-	case PFS_DEVCTL_GET_STAT:
+	case PDIOC_GETFSCKSTAT:
 		rv=devctlFsckStat(pfsMount, PFS_MODE_CHECK_FLAG);
 		break;
 
-	case PFS_DEVCTL_SET_UID:
+	case PDIOC_SETUID:
 		pfsMount->uid=*(u16 *)(arg);
 		break;
 
-	case PFS_DEVCTL_SET_GID:
+	case PDIOC_SETGID:
 		pfsMount->gid=*(u16 *)(arg);
 		break;
 
-	case PFS_DEVCTL_SHOW_BITMAP:
+	case PDIOC_SHOWBITMAP:
 		pfsBitmapShow(pfsMount);
 		break;
 
@@ -104,12 +104,12 @@ int pfsFioIoctl2(iop_file_t *f, int cmd, void *arg, size_t arglen,	void *buf, si
 	pfs_mount_t *pfsMount;
 
 	if(f->mode & O_DIROPEN)
-		if(cmd==PFS_IOCTL2_ATTR_READ)
+		if(cmd==PIOCATTRREAD)
 			return -EISDIR;
 
 	if(!(f->mode & O_WRONLY)) {
-		if(cmd!=PFS_IOCTL2_ATTR_LOOKUP)
-			if(cmd!=PFS_IOCTL2_ATTR_READ)
+		if(cmd!=PIOCATTRLOOKUP)
+			if(cmd!=PIOCATTRREAD)
 				return -EACCES;
 	}
 	if((rv=pfsFioCheckFileSlot(fileSlot))<0)
@@ -118,18 +118,18 @@ int pfsFioIoctl2(iop_file_t *f, int cmd, void *arg, size_t arglen,	void *buf, si
 
 	switch(cmd)
 	{
-	case PFS_IOCTL2_ALLOC:
+	case PIOCALLOC:
 		rv=pfsAllocZones(fileSlot->clink, *(int *)(arg), 1);
 		break;
 
-	case PFS_IOCTL2_FREE:
+	case PIOCFREE:
 		pfsFreeZones(fileSlot->clink);
 		break;
 
-	case PFS_IOCTL2_ATTR_ADD:
-	case PFS_IOCTL2_ATTR_DEL:
-	case PFS_IOCTL2_ATTR_LOOKUP:
-	case PFS_IOCTL2_ATTR_READ:
+	case PIOCATTRADD:
+	case PIOCATTRDEL:
+	case PIOCATTRLOOKUP:
+	case PIOCATTRREAD:
 		rv=ioctl2Attr(fileSlot->clink, cmd, arg, buf, &fileSlot->aentryOffset);
 		break;
 
@@ -157,19 +157,19 @@ static int ioctl2Attr(pfs_cache_t *clink, int cmd, void *arg, void *outbuf, u32 
 
 	switch(cmd)
 	{
-	case PFS_IOCTL2_ATTR_ADD:
+	case PIOCATTRADD:
 		rv=ioctl2AttrAdd(flink, arg);
 		break;
 
-	case PFS_IOCTL2_ATTR_DEL:
+	case PIOCATTRDEL:
 		rv=ioctl2AttrDelete(flink, arg);
 		break;
 
-	case PFS_IOCTL2_ATTR_LOOKUP:
+	case PIOCATTRLOOKUP:
 		rv=ioctl2AttrLoopUp(flink, arg, outbuf);
 		break;
 
-	case PFS_IOCTL2_ATTR_READ:
+	case PIOCATTRREAD:
 		rv=ioctl2AttrRead(flink, outbuf, offset);
 		break;
 

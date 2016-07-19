@@ -197,25 +197,25 @@ static int pfsHddTransfer(int fd, void *buffer, u32 sub/*0=main 1+=subs*/, u32 s
 	t.mode=mode;
 	t.buffer=buffer;
 
-	return ioctl2(fd, APA_IOCTL2_TRANSFER_DATA, &t, 0, NULL, 0);
+	return ioctl2(fd, HIOCTRANSFER, &t, 0, NULL, 0);
 }
 
 static u32 pfsHddGetSubCount(int fd)
 {
-	return ioctl2(fd, APA_IOCTL2_NUMBER_OF_SUBS, NULL, 0, NULL, 0);
+	return ioctl2(fd, HIOCNSUB, NULL, 0, NULL, 0);
 }
 
 static u32 pfsHddGetPartSize(int fd, u32 sub/*0=main 1+=subs*/)
 {	// of a partition
-	return ioctl2(fd, APA_IOCTL2_GETSIZE, &sub, 0, NULL, 0);
+	return ioctl2(fd, HIOCGETSIZE, &sub, 0, NULL, 0);
 }
 
 static void pfsHddSetPartError(int fd)
 {
-	ioctl2(fd, APA_IOCTL2_SET_PART_ERROR, NULL, 0, NULL, 0);
+	ioctl2(fd, HIOCSETPARTERROR, NULL, 0, NULL, 0);
 }
 
 static int pfsHddFlushCache(int fd)
 {
-	return ioctl2(fd, APA_IOCTL2_FLUSH_CACHE, NULL, 0, NULL, 0);
+	return ioctl2(fd,HIOCFLUSH, NULL, 0, NULL, 0);
 }

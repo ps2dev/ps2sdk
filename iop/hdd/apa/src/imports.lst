@@ -8,6 +8,7 @@ I_ata_device_sce_identify_drive
 I_ata_device_smart_get_status
 I_ata_device_smart_save_attr
 I_ata_device_flush_cache
+I_ata_device_idle_immediate
 atad_IMPORTS_end
 
 cdvdman_IMPORTS_start

@@ -796,36 +796,36 @@ int hddIoctl2(iop_file_t *f, int req, void *argp, unsigned int arglen,
 	switch(req)
 	{
 	// cmd set 1
-	case APA_IOCTL2_ADD_SUB:
+	case HIOCADDSUB:
 		rv=ioctl2AddSub(fileSlot, (char *)argp);
 		break;
 
-	case APA_IOCTL2_DELETE_LAST_SUB:
+	case HIOCDELSUB:
 		rv=ioctl2DeleteLastSub(fileSlot);
 		break;
 
-	case APA_IOCTL2_NUMBER_OF_SUBS:
+	case HIOCNSUB:
 		rv=fileSlot->nsub;
 		break;
 
-	case APA_IOCTL2_FLUSH_CACHE:
+	case HIOCFLUSH:
 		ata_device_flush_cache(f->unit);
 		break;
 
 	// cmd set 2
-	case APA_IOCTL2_TRANSFER_DATA:
+	case HIOCTRANSFER:
 		rv=ioctl2Transfer(f->unit, fileSlot, argp);
 		break;
 
-	case APA_IOCTL2_GETSIZE:
+	case HIOCGETSIZE:
 		rv=fileSlot->parts[*(u32 *)argp].length;
 		break;
 
-	case APA_IOCTL2_SET_PART_ERROR:
+	case HIOCSETPARTERROR:
 		apaSetPartErrorSector(f->unit, fileSlot->parts[0].start); rv=0;
 		break;
 
-	case APA_IOCTL2_GET_PART_ERROR:
+	case HIOCGETPARTERROR:
 		if((rv=apaGetPartErrorSector(f->unit, APA_SECTOR_PART_ERROR, bufp)) > 0) {
 			if(*(u32 *)bufp==fileSlot->parts[0].start) {
 				rv=0; apaSetPartErrorSector(f->unit, 0);// clear last error :)
@@ -907,78 +907,82 @@ int hddDevctl(iop_file_t *f, const char *devname, int cmd, void *arg,
 	WaitSema(fioSema);
 	switch(cmd)
 	{
-	// cmd set 1
-	case APA_DEVCTL_DEV9_SHUTDOWN:
+	// Command set 1 ('H')
+	case HDIOC_DEV9OFF:
 		ata_device_smart_save_attr(f->unit);
 		dev9Shutdown();
 		break;
 
-	case APA_DEVCTL_IDLE:
+	case HDIOC_IDLE:
 		rv=ata_device_idle(f->unit, *(char *)arg);
 		break;
 
-	case APA_DEVCTL_MAX_SECTORS:
+	case HDIOC_MAXSECTOR:
 		rv=hddDevices[f->unit].partitionMaxSize;
 		break;
 
-	case APA_DEVCTL_TOTAL_SECTORS:
+	case HDIOC_TOTALSECTOR:
 		rv=hddDevices[f->unit].totalLBA;
 		break;
 
-	case APA_DEVCTL_FLUSH_CACHE:
+	case HDIOC_FLUSH:
 		if(ata_device_flush_cache(f->unit))
 			rv=-EIO;
 		break;
 
-	case APA_DEVCTL_SWAP_TMP:
+	case HDIOC_SWAPTMP:
 		rv=devctlSwapTemp(f->unit, (char *)arg);
 		break;
 
-	case APA_DEVCTL_SMART_STAT:
+	case HDIOC_SMARTSTAT:
 		rv=ata_device_smart_get_status(f->unit);
 		break;
 
-	case APA_DEVCTL_STATUS:
+	case HDIOC_STATUS:
 		rv=hddDevices[f->unit].status;
 		break;
 
-	case APA_DEVCTL_FORMAT:
+	case HDIOC_FORMATVER:
 		rv=hddDevices[f->unit].format;
 		break;
 
-	case APA_DEVCTL_FREE_SECTORS:
+	case HDIOC_FREESECTOR:
 		rv=hddGetFreeSectors(f->unit, bufp, hddDevices);
 		break;
 
-	// cmd set 2 :)
-	case APA_DEVCTL_GETTIME:
+	case HDIOC_IDLEIMM:
+		rv=ata_device_idle_immediate(f->unit);
+		break;
+
+	// Command set 2 ('h')
+	case HDIOC_GETTIME:
 		rv=apaGetTime((apa_ps2time_t *)bufp);
 		break;
 
-	case APA_DEVCTL_SET_OSDMBR:
+	case HDIOC_SETOSDMBR:
 		rv=devctlSetOsdMBR(f->unit, (hddSetOsdMBR_t *)arg);
 		break;
 
-	case APA_DEVCTL_GET_SECTOR_ERROR:
+	case HDIOC_GETSECTORERROR:
 		rv=apaGetPartErrorSector(f->unit, APA_SECTOR_SECTOR_ERROR, 0);
 		break;
 
-	case APA_DEVCTL_GET_ERROR_PART_NAME:
+	case HDIOC_GETERRORPARTNAME:
 		rv=apaGetPartErrorName(f->unit, (char *)bufp);
 		break;
 
-	case APA_DEVCTL_ATA_READ:
+	case HDIOC_READSECTOR:
 		rv=ata_device_sector_io(f->unit, (void *)bufp, ((hddAtaTransfer_t *)arg)->lba,
 			((hddAtaTransfer_t *)arg)->size, ATA_DIR_READ);
 		break;
 
-	case APA_DEVCTL_ATA_WRITE:
+	case HDIOC_WRITESECTOR:
 		rv=ata_device_sector_io(f->unit, ((hddAtaTransfer_t *)arg)->data,
 			((hddAtaTransfer_t *)arg)->lba, ((hddAtaTransfer_t *)arg)->size,
 				ATA_DIR_WRITE);
 		break;
 
-	case APA_DEVCTL_SCE_IDENTIFY_DRIVE:
+	case HDIOC_SCEIDENTIFY:
 		rv=ata_device_sce_identify_drive(f->unit, (u16 *)bufp);
 		break;
 
