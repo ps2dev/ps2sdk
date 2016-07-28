@@ -71,7 +71,7 @@ int pfsFormat(pfs_block_device_t *blockDev, int fd, int zonesize, int fragment)
 {
 	int result, result2;
 	pfs_cache_t *clink, *cache;
-	pfs_super_block *sb;
+	pfs_super_block_t *sb;
 	int scale;
 	u32 i, mainsize, subnumber = blockDev->getSubNumber(fd);
 
@@ -140,7 +140,7 @@ int pfsFormat(pfs_block_device_t *blockDev, int fd, int zonesize, int fragment)
 
 // Formats sub partitions which are added to the main partition after it is initially
 // formatted with PFS
-int pfsUpdateSuperBlock(pfs_mount_t *pfsMount, pfs_super_block *superblock, u32 sub)
+int pfsUpdateSuperBlock(pfs_mount_t *pfsMount, pfs_super_block_t *superblock, u32 sub)
 {
 	u32 scale;
 	u32 i;
@@ -173,7 +173,7 @@ int pfsMountSuperBlock(pfs_mount_t *pfsMount)
 {
 	int result;
 	pfs_cache_t *clink;
-	pfs_super_block *superblock;
+	pfs_super_block_t *superblock;
 	u32 sub;
 	u32 i;
 
@@ -226,9 +226,9 @@ int pfsMountSuperBlock(pfs_mount_t *pfsMount)
 	pfsMount->sector_scale = pfsGetScale(pfsMount->zsize, 512);
 	pfsMount->inode_scale = pfsGetScale(pfsMount->zsize, pfsMetaSize);
 	pfsMount->num_subs = superblock->num_subs;
-	memcpy(&pfsMount->root_dir, &superblock->root, sizeof(pfs_blockinfo));
-	memcpy(&pfsMount->log, &superblock->log, sizeof(pfs_blockinfo));
-	memcpy(&pfsMount->current_dir, &superblock->root, sizeof(pfs_blockinfo));
+	memcpy(&pfsMount->root_dir, &superblock->root, sizeof(pfs_blockinfo_t));
+	memcpy(&pfsMount->log, &superblock->log, sizeof(pfs_blockinfo_t));
+	memcpy(&pfsMount->current_dir, &superblock->root, sizeof(pfs_blockinfo_t));
 	pfsMount->total_sector = 0;
 	pfsMount->uid = 0;
 	pfsMount->gid = 0;

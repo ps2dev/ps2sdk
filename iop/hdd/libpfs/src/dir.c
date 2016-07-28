@@ -22,12 +22,12 @@
 extern u32 pfsMetaSize;
 
 // Gets a dir entry from the inode specified by clink
-pfs_cache_t *pfsGetDentry(pfs_cache_t *clink, char *path, pfs_dentry **dentry, u32 *size, int option)
+pfs_cache_t *pfsGetDentry(pfs_cache_t *clink, char *path, pfs_dentry_t **dentry, u32 *size, int option)
 {
 	pfs_blockpos_t block_pos;
-	pfs_dentry *d;
+	pfs_dentry_t *d;
 	u16 aLen;
-	pfs_dentry *d2;
+	pfs_dentry_t *d2;
 	pfs_cache_t *dentCache;
 	u32 new_dentryLen=0,dentryLen;
 	int len=0, result;
@@ -62,7 +62,7 @@ pfs_cache_t *pfsGetDentry(pfs_cache_t *clink, char *path, pfs_dentry **dentry, u
 				d=dentCache->u.dentry;
 			}
 
-			for (d2=(pfs_dentry*)((int)d+512); d < d2; d=(pfs_dentry *)((int)d + aLen))
+			for (d2=(pfs_dentry_t*)((int)d+512); d < d2; d=(pfs_dentry_t *)((int)d + aLen))
 			{
 				aLen=(d->aLen & 0xFFF);
 
@@ -112,11 +112,11 @@ _exit:		pfsCacheFree(dentCache);
 	return NULL;
 }
 
-int pfsGetNextDentry(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 *position, char *name, pfs_blockinfo *bi)
+int pfsGetNextDentry(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 *position, char *name, pfs_blockinfo_t *bi)
 {
 	int result;
 	pfs_cache_t *dcache;
-	pfs_dentry *dentry;
+	pfs_dentry_t *dentry;
 	u32 len=0;
 
 	// loop until a non-empty entry is found or until the end of the dentry chunk is reached
@@ -129,7 +129,7 @@ int pfsGetNextDentry(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 *position
 			break;
 		}
 
-		dentry = (pfs_dentry*)((u32)dcache->u.data + (blockpos->byte_offset % pfsMetaSize));
+		dentry = (pfs_dentry_t*)((u32)dcache->u.data + (blockpos->byte_offset % pfsMetaSize));
 
 		len = dentry->pLen;
 		memcpy(name, dentry->path, len);
@@ -149,7 +149,7 @@ int pfsGetNextDentry(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 *position
 	return len;
 }
 
-pfs_cache_t *pfsFillDentry(pfs_cache_t *clink, pfs_dentry *dentry, char *path1, pfs_blockinfo *bi, u32 len, u16 mode)
+pfs_cache_t *pfsFillDentry(pfs_cache_t *clink, pfs_dentry_t *dentry, char *path1, pfs_blockinfo_t *bi, u32 len, u16 mode)
 {
 	dentry->inode=bi->number;
 	dentry->sub=(u8)bi->subpart;
@@ -160,9 +160,9 @@ pfs_cache_t *pfsFillDentry(pfs_cache_t *clink, pfs_dentry *dentry, char *path1, 
 	return clink;
 }
 
-pfs_cache_t *pfsDirAddEntry(pfs_cache_t *dir, char *filename, pfs_blockinfo *bi, u16 mode, int *result)
+pfs_cache_t *pfsDirAddEntry(pfs_cache_t *dir, char *filename, pfs_blockinfo_t *bi, u16 mode, int *result)
 {
-	pfs_dentry *dentry;
+	pfs_dentry_t *dentry;
 	u32 size;
 	u32 len;
 	pfs_cache_t *dcache;
@@ -173,38 +173,38 @@ pfs_cache_t *pfsDirAddEntry(pfs_cache_t *dir, char *filename, pfs_blockinfo *bi,
 		if (dentry->pLen)
 			len-=(dentry->pLen + 11) & 0x1FC;
 		dentry->aLen=(dentry->aLen & FIO_S_IFMT) | ((dentry->aLen & 0xFFF) - len);
-		dentry=(pfs_dentry *)((u32)dentry + (dentry->aLen & 0xFFF));
+		dentry=(pfs_dentry_t *)((u32)dentry + (dentry->aLen & 0xFFF));
 	}else{
 		int offset;
 
-		if ((*result=pfsAllocZones(dir, sizeof(pfs_dentry), 0))<0)
+		if ((*result=pfsAllocZones(dir, sizeof(pfs_dentry_t), 0))<0)
 			return NULL;
 		dcache=pfsGetDentriesAtPos(dir, dir->u.inode->size, &offset, result);
 		if (dcache==NULL)
 			return NULL;
 
-		dir->u.inode->size += sizeof(pfs_dentry);
+		dir->u.inode->size += sizeof(pfs_dentry_t);
 
-		dentry=(pfs_dentry*)((u32)dcache->u.dentry+offset);
-		len=sizeof(pfs_dentry);
+		dentry=(pfs_dentry_t*)((u32)dcache->u.dentry+offset);
+		len=sizeof(pfs_dentry_t);
 	}
 	return pfsFillDentry(dcache, dentry, filename, bi, len, mode);
 }
 
 pfs_cache_t *pfsDirRemoveEntry(pfs_cache_t *clink, char *path)
 {
-	pfs_dentry *dentry;
+	pfs_dentry_t *dentry;
 	u32 size;
 	u16 aLen;
 	int i=0, val;
-	pfs_dentry *dlast=NULL, *dnext;
+	pfs_dentry_t *dlast=NULL, *dnext;
 	pfs_cache_t *c;
 
 	if ((c=pfsGetDentry(clink, path, &dentry, &size, 0))){
 		val=(int)dentry-(int)c->u.dentry;
 		if (val<0)	val +=511;
 		val /=512;	val *=512;
-		dnext=(pfs_dentry*)((int)c->u.dentry+val);
+		dnext=(pfs_dentry_t*)((int)c->u.dentry+val);
 		do{
 			aLen = dnext->aLen & 0xFFF;
 
@@ -221,7 +221,7 @@ pfs_cache_t *pfsDirRemoveEntry(pfs_cache_t *clink, char *path)
 			}
 			i+=aLen;
 			dlast=dnext;
-			dnext=(pfs_dentry *)((u32)dnext + aLen);
+			dnext=(pfs_dentry_t *)((u32)dnext + aLen);
 		}while (i<512);
 	}
 	return NULL;
@@ -229,7 +229,7 @@ pfs_cache_t *pfsDirRemoveEntry(pfs_cache_t *clink, char *path)
 
 int pfsCheckDirForFiles(pfs_cache_t *clink)
 {
-	pfs_dentry *dentry;
+	pfs_dentry_t *dentry;
 	pfs_cache_t *dcache;
 	u32 size;
 
@@ -240,9 +240,9 @@ int pfsCheckDirForFiles(pfs_cache_t *clink)
 	return 1;
 }
 
-void pfsFillSelfAndParentDentries(pfs_cache_t *clink, pfs_blockinfo *self, pfs_blockinfo *parent)
+void pfsFillSelfAndParentDentries(pfs_cache_t *clink, pfs_blockinfo_t *self, pfs_blockinfo_t *parent)
 {
-	pfs_dentry *dentry=clink->u.dentry;
+	pfs_dentry_t *dentry=clink->u.dentry;
 
 	memset(dentry, 0, pfsMetaSize);
 	dentry->inode=self->number;
@@ -251,7 +251,7 @@ void pfsFillSelfAndParentDentries(pfs_cache_t *clink, pfs_blockinfo *self, pfs_b
 	dentry->pLen=1;
 	dentry->aLen=12 | FIO_S_IFDIR;
 
-	dentry=(pfs_dentry *)((u32)dentry + 12);
+	dentry=(pfs_dentry_t *)((u32)dentry + 12);
 
 	dentry->inode=parent->number;
 	*(u32*)dentry->path=('.'<<8) + '.';
@@ -260,14 +260,14 @@ void pfsFillSelfAndParentDentries(pfs_cache_t *clink, pfs_blockinfo *self, pfs_b
 	dentry->aLen=500 | FIO_S_IFDIR;
 }
 
-pfs_cache_t* pfsSetDentryParent(pfs_cache_t *clink, pfs_blockinfo *bi, int *result)
+pfs_cache_t* pfsSetDentryParent(pfs_cache_t *clink, pfs_blockinfo_t *bi, int *result)
 {
 	int offset;
 	pfs_cache_t *dcache;
 
 	dcache=pfsGetDentriesAtPos(clink, 0, &offset, result);
 	if (dcache){
-		pfs_dentry *d=(pfs_dentry*)(12+(u32)dcache->u.data);
+		pfs_dentry_t *d=(pfs_dentry_t*)(12+(u32)dcache->u.data);
 		d->inode=bi->number;
 		d->sub	=(u8)bi->subpart;
 	}
@@ -278,7 +278,7 @@ pfs_cache_t* pfsSetDentryParent(pfs_cache_t *clink, pfs_blockinfo *bi, int *resu
 // to by the dir inode.
 pfs_cache_t *pfsInodeGetFileInDir(pfs_cache_t *dirInode, char *path, int *result)
 {
-	pfs_dentry *dentry;
+	pfs_dentry_t *dentry;
 	u32	size;
 	pfs_cache_t *clink;
 
@@ -321,7 +321,7 @@ pfs_cache_t *pfsInodeGetFile(pfs_mount_t *pfsMount, pfs_cache_t *clink,
 	return NULL;
 }
 
-void pfsInodeFill(pfs_cache_t *ci, pfs_blockinfo *bi, u16 mode, u16 uid, u16 gid)
+void pfsInodeFill(pfs_cache_t *ci, pfs_blockinfo_t *bi, u16 mode, u16 uid, u16 gid)
 {
 	u32 val;
 
@@ -343,7 +343,7 @@ void pfsInodeFill(pfs_cache_t *ci, pfs_blockinfo *bi, u16 mode, u16 uid, u16 gid
 
 	if ((mode & FIO_S_IFMT) == FIO_S_IFDIR){
 		ci->u.inode->attr=0xA0;
-		ci->u.inode->size=sizeof(pfs_dentry);
+		ci->u.inode->size=sizeof(pfs_dentry_t);
 		val=2;
 	}else{
 		ci->u.inode->size=0;
@@ -353,8 +353,8 @@ void pfsInodeFill(pfs_cache_t *ci, pfs_blockinfo *bi, u16 mode, u16 uid, u16 gid
 
 
 	pfsGetTime(&ci->u.inode->ctime);
-	memcpy(&ci->u.inode->atime, &ci->u.inode->ctime, sizeof(pfs_datetime));
-	memcpy(&ci->u.inode->mtime, &ci->u.inode->ctime, sizeof(pfs_datetime));
+	memcpy(&ci->u.inode->atime, &ci->u.inode->ctime, sizeof(pfs_datetime_t));
+	memcpy(&ci->u.inode->mtime, &ci->u.inode->ctime, sizeof(pfs_datetime_t));
 
 	ci->u.inode->number_segdesg=1;
 	ci->u.inode->data[0].number =bi->number;
@@ -483,7 +483,7 @@ int pfsInodeRemove(pfs_cache_t *parent, pfs_cache_t *inode, char *path)
 
 pfs_cache_t *pfsInodeCreate(pfs_cache_t *clink, u16 mode, u16 uid, u16 gid, int *result)
 {
-	pfs_blockinfo a, b;
+	pfs_blockinfo_t a, b;
 
 	pfs_mount_t *pfsMount=clink->pfsMount;
 	u32 j;
@@ -519,7 +519,7 @@ pfs_cache_t *pfsInodeCreate(pfs_cache_t *clink, u16 mode, u16 uid, u16 gid, int 
 		return NULL;
 
 	// Initialise the inode (which has been allocate blocks specified by a)
-	pfsInodeFill(inode, (pfs_blockinfo*)&a, mode, uid, gid);
+	pfsInodeFill(inode, (pfs_blockinfo_t*)&a, mode, uid, gid);
 	if ((mode & FIO_S_IFMT) != FIO_S_IFDIR)
 		return inode;
 
@@ -527,10 +527,10 @@ pfs_cache_t *pfsInodeCreate(pfs_cache_t *clink, u16 mode, u16 uid, u16 gid, int 
 	b.subpart=a.subpart;
 	b.count=a.count;
 
-	*result=pfsBitmapSearchFreeZone(pfsMount, (pfs_blockinfo*)&a, 0);
+	*result=pfsBitmapSearchFreeZone(pfsMount, (pfs_blockinfo_t*)&a, 0);
 	if (*result<0){
 		pfsCacheFree(inode);
-		pfsBitmapFreeBlockSegment(pfsMount, (pfs_blockinfo*)&b);
+		pfsBitmapFreeBlockSegment(pfsMount, (pfs_blockinfo_t*)&b);
 		return NULL;
 	}
 
@@ -634,12 +634,12 @@ int pfsAllocZones(pfs_cache_t *clink, int msize, int mode)
 
 void pfsFreeZones(pfs_cache_t *pfree)
 {
-	pfs_blockinfo b;
+	pfs_blockinfo_t b;
 	int result;
 	pfs_mount_t *pfsMount = pfree->pfsMount;
-	pfs_inode *inode = pfree->u.inode;
+	pfs_inode_t *inode = pfree->u.inode;
 	u32 nextsegdesc = 1, limit = inode->number_data, i, j = 0, zones;
-	pfs_blockinfo *bi;
+	pfs_blockinfo_t *bi;
 	pfs_cache_t *clink;
 
 	zones = (u32)(inode->size / pfsMount->zsize);

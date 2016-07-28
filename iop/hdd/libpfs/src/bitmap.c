@@ -82,7 +82,7 @@ void pfsBitmapAllocFree(pfs_cache_t *clink, u32 operation, u32 subpart, u32 chun
 }
 
 // Attempts to allocate 'count' more continuous zones for 'bi'
-int pfsBitmapAllocateAdditionalZones(pfs_mount_t *pfsMount, pfs_blockinfo *bi, u32 count)
+int pfsBitmapAllocateAdditionalZones(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi, u32 count)
 {
 	int result;
 	pfs_bitmapInfo_t info;
@@ -150,7 +150,7 @@ exit:
 
 // Searches for 'amount' free zones, starting from the position specified in 'bi'.
 // Returns 1 if allocation was successful, otherwise 0.
-int pfsBitmapAllocZones(pfs_mount_t *pfsMount, pfs_blockinfo *bi, u32 amount)
+int pfsBitmapAllocZones(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi, u32 amount)
 {
 	pfs_bitmapInfo_t info;
 	int result;
@@ -223,7 +223,7 @@ int pfsBitmapAllocZones(pfs_mount_t *pfsMount, pfs_blockinfo *bi, u32 amount)
 // Searches for 'max_count' free zones over all the partitions, and
 // allocates them. Returns 0 on success, -ENOSPC if the zones could
 // not be allocated.
-int pfsBitmapSearchFreeZone(pfs_mount_t *pfsMount, pfs_blockinfo *bi, u32 max_count)
+int pfsBitmapSearchFreeZone(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi, u32 max_count)
 {
 	u32 num, count, n;
 
@@ -260,7 +260,7 @@ int pfsBitmapSearchFreeZone(pfs_mount_t *pfsMount, pfs_blockinfo *bi, u32 max_co
 }
 
 // De-allocates the block segment 'bi' in the bitmaps
-void pfsBitmapFreeBlockSegment(pfs_mount_t *pfsMount, pfs_blockinfo *bi)
+void pfsBitmapFreeBlockSegment(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi)
 {
 	pfs_bitmapInfo_t info;
 	pfs_cache_t *clink;
@@ -365,7 +365,7 @@ void pfsBitmapFreeInodeBlocks(pfs_cache_t *clink)
 	for(i=0;i < clink->u.inode->number_data; i++)
 	{
 		u32 index = pfsFixIndex(i);
-		pfs_blockinfo *bi=&clink->u.inode->data[index];
+		pfs_blockinfo_t *bi=&clink->u.inode->data[index];
 		int err;
 
 		if(i!=0) {

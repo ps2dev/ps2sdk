@@ -202,8 +202,8 @@ static int openFile(pfs_mount_t *pfsMount, pfs_file_slot_t *freeSlot, const char
 				cached=pfsCacheGetData(fileInode->pfsMount, fileInode->sub, fileInode->sector+1, PFS_CACHE_FLAG_NOLOAD | PFS_CACHE_FLAG_NOTHING, &result2);
 				if (cached)
 				{
-					memset(cached->u.aentry, 0, sizeof(pfs_inode)); //1024
-					cached->u.aentry->aLen=sizeof(pfs_inode);
+					memset(cached->u.aentry, 0, sizeof(pfs_inode_t)); //1024
+					cached->u.aentry->aLen=sizeof(pfs_inode_t);
 					cached->flags |= PFS_CACHE_FLAG_DIRTY;
 					pfsCacheFree(cached);
 				}
@@ -251,8 +251,8 @@ static int openFile(pfs_mount_t *pfsMount, pfs_file_slot_t *freeSlot, const char
 						PFS_CACHE_FLAG_NOLOAD | PFS_CACHE_FLAG_NOTHING, &result4);
 				if (cached)
 				{
-					memset(cached->u.aentry, 0, sizeof(pfs_inode));
-					cached->u.aentry->aLen=sizeof(pfs_inode);
+					memset(cached->u.aentry, 0, sizeof(pfs_inode_t));
+					cached->u.aentry->aLen=sizeof(pfs_inode_t);
 					cached->flags |= PFS_CACHE_FLAG_DIRTY;
 					pfsCacheFree(cached);
 				}
@@ -308,7 +308,7 @@ static int fileTransferRemainder(pfs_file_slot_t *fileSlot, void *buf, int size,
 	pfs_blockpos_t *blockpos = &fileSlot->block_pos;
 	pfs_mount_t *pfsMount = fileSlot->clink->pfsMount;
 	pfs_restsInfo_t *info = &fileSlot->restsInfo;
-	pfs_blockinfo *bi = pfsBlockGetCurrent(blockpos);
+	pfs_blockinfo_t *bi = pfsBlockGetCurrent(blockpos);
 
 	sector = ((bi->number+blockpos->block_offset) << pfsMount->sector_scale) +
 	   (blockpos->byte_offset >> 9);
@@ -379,7 +379,7 @@ static int fileTransfer(pfs_file_slot_t *fileSlot, u8 *buf, int size, int operat
 
 	while (size)
 	{
-		pfs_blockinfo *bi;
+		pfs_blockinfo_t *bi;
 		u32 sectors;
 
 		// Get block info for current file position
@@ -806,7 +806,7 @@ int	pfsFioDread(iop_file_t *f, iox_dirent_t *dirent)
 	pfs_file_slot_t *fileSlot = (pfs_file_slot_t *)f->privdata;
 	pfs_mount_t *pfsMount;
 	pfs_cache_t *clink;
-	pfs_blockinfo bi;
+	pfs_blockinfo_t bi;
 	int result;
 	int rv;
 
@@ -848,9 +848,9 @@ static void fioStatFiller(pfs_cache_t *clink, iox_stat_t *stat)
 	stat->attr = clink->u.inode->attr;
 	stat->size = (u32)clink->u.inode->size;
 	stat->hisize = (u32)(clink->u.inode->size >> 32);
-	memcpy(&stat->ctime, &clink->u.inode->ctime, sizeof(pfs_datetime));
-	memcpy(&stat->atime, &clink->u.inode->atime, sizeof(pfs_datetime));
-	memcpy(&stat->mtime, &clink->u.inode->mtime, sizeof(pfs_datetime));
+	memcpy(&stat->ctime, &clink->u.inode->ctime, sizeof(pfs_datetime_t));
+	memcpy(&stat->atime, &clink->u.inode->atime, sizeof(pfs_datetime_t));
+	memcpy(&stat->mtime, &clink->u.inode->mtime, sizeof(pfs_datetime_t));
 	stat->private_0 = clink->u.inode->uid;
 	stat->private_1 = clink->u.inode->gid;
 	stat->private_2 = clink->u.inode->number_blocks;
@@ -903,11 +903,11 @@ int	pfsFioChstat(iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int
 			if(statmask & FIO_CST_SIZE)
 				rv = -EACCES;
 			if(statmask & FIO_CST_CT)
-				memcpy(&clink->u.inode->ctime, stat->ctime, sizeof(pfs_datetime));
+				memcpy(&clink->u.inode->ctime, stat->ctime, sizeof(pfs_datetime_t));
 			if(statmask & FIO_CST_AT)
-				memcpy(&clink->u.inode->atime, stat->atime, sizeof(pfs_datetime));
+				memcpy(&clink->u.inode->atime, stat->atime, sizeof(pfs_datetime_t));
 			if(statmask & FIO_CST_MT)
-				memcpy(&clink->u.inode->mtime, stat->mtime, sizeof(pfs_datetime));
+				memcpy(&clink->u.inode->mtime, stat->mtime, sizeof(pfs_datetime_t));
 			if(statmask & FIO_CST_PRVT) {
 				clink->u.inode->uid = stat->private_0;
 				clink->u.inode->gid = stat->private_1;
@@ -1098,7 +1098,7 @@ int pfsFioChdir(iop_file_t *f, const char *name)
 			result = pfsCheckAccess(clink, 0x01);
 
 			if(result == 0)
-				memcpy(&pfsMount->current_dir, &clink->u.inode->inode_block, sizeof(pfs_blockinfo));
+				memcpy(&pfsMount->current_dir, &clink->u.inode->inode_block, sizeof(pfs_blockinfo_t));
 		}
 
 		pfsCacheFree(clink);

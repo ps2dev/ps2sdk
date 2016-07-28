@@ -88,14 +88,14 @@ typedef struct {
 	u8	pLen;		// path length
 	u16	aLen;		// allocated length == ((pLen+8+3) & ~3)
 	char	path[512-8];
-} pfs_dentry;
+} pfs_dentry_t;
 
 // Block number/count pair (used in inodes)
 typedef struct {
     u32 number;		//
     u16 subpart;	//
     u16 count;		//
-} pfs_blockinfo;
+} pfs_blockinfo_t;
 
 // Date/time descriptor
 typedef struct {
@@ -106,7 +106,7 @@ typedef struct {
     u8 day;		//
     u8 month;	//
     u16 year;	//
-} pfs_datetime;
+} pfs_datetime_t;
 
 // Superblock structure
 typedef struct {
@@ -116,33 +116,33 @@ typedef struct {
 	u32 pfsFsckStat;		//
     u32 zone_size;		//
     u32 num_subs;		// number of subs attached to filesystem
-	pfs_blockinfo log;	// block info for metadata log
-	pfs_blockinfo root;	// block info for root directory
-} pfs_super_block;
+	pfs_blockinfo_t log;	// block info for metadata log
+	pfs_blockinfo_t root;	// block info for root directory
+} pfs_super_block_t;
 
 // Inode structure
 typedef struct {
 	u32 checksum;				// Sum of all other words in the inode
 	u32 magic;					//
-	pfs_blockinfo inode_block;	// start block of inode
-	pfs_blockinfo next_segment;	// next segment descriptor inode
-	pfs_blockinfo last_segment;	// last segment descriptor inode
-	pfs_blockinfo unused;		//
-	pfs_blockinfo data[114];	//
+	pfs_blockinfo_t inode_block;	// start block of inode
+	pfs_blockinfo_t next_segment;	// next segment descriptor inode
+	pfs_blockinfo_t last_segment;	// last segment descriptor inode
+	pfs_blockinfo_t unused;		//
+	pfs_blockinfo_t data[114];	//
 	u16 mode;					// file mode
 	u16 attr;					// file attributes
 	u16 uid;					//
 	u16 gid;					//
-	pfs_datetime atime;			//
-	pfs_datetime ctime;			//
-	pfs_datetime mtime;			//
+	pfs_datetime_t atime;			//
+	pfs_datetime_t ctime;			//
+	pfs_datetime_t mtime;			//
 	u64 size;					//
 	u32 number_blocks;			// number of blocks/zones used by file
 	u32 number_data;			// number of used entries in data array
 	u32 number_segdesg;			// number of "indirect blocks"/next segment descriptor's
 	u32 subpart;				// subpart of inode
 	u32 reserved[4];			//
-} pfs_inode;
+} pfs_inode_t;
 
 typedef struct {
 	char *devName;
@@ -163,9 +163,9 @@ typedef struct {
 	u32 inode_scale;			//
 	u32 zsize;					// zone size
 	u32 num_subs;				// number of sub partitions in the filesystem
-	pfs_blockinfo root_dir;		// block info for root directory
-	pfs_blockinfo log;			// block info for the log
-	pfs_blockinfo current_dir;	// block info for current directory
+	pfs_blockinfo_t root_dir;		// block info for root directory
+	pfs_blockinfo_t log;			// block info for the log
+	pfs_blockinfo_t current_dir;	// block info for current directory
 	u32 lastError;				// 0 if no error :)
 	u16 uid;					//
 	u16 gid;					//
@@ -182,10 +182,10 @@ typedef struct pfs_cache_s {
 	u32 sector;					// block/sector for partition
 	union{						//
 		void *data;
-		pfs_inode *inode;
+		pfs_inode_t *inode;
 		pfs_aentry_t *aentry;
-		pfs_dentry *dentry;
-		pfs_super_block *superblock;
+		pfs_dentry_t *dentry;
+		pfs_super_block_t *superblock;
 		u32	*bitmap;
 	} u;
 } pfs_cache_t;
@@ -209,7 +209,7 @@ u32 pfsGetBitmapSizeSectors(int zoneScale, u32 partSize);
 u32 pfsGetBitmapSizeBlocks(int scale, u32 mainsize);
 int pfsFormatSub(pfs_block_device_t *blockDev, int fd, u32 sub, u32 reserved, u32 scale, u32 fragment);
 int pfsFormat(pfs_block_device_t *blockDev, int fd, int zonesize, int fragment);
-int pfsUpdateSuperBlock(pfs_mount_t *pfsMount, pfs_super_block *superblock, u32 sub);
+int pfsUpdateSuperBlock(pfs_mount_t *pfsMount, pfs_super_block_t *superblock, u32 sub);
 int pfsMountSuperBlock(pfs_mount_t *pfsMount);
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -224,7 +224,7 @@ void pfsCacheFlushAllDirty(pfs_mount_t *pfsMount);
 pfs_cache_t *pfsCacheAlloc(pfs_mount_t *pfsMount, u16 sub, u32 scale, int flags, int *result);
 pfs_cache_t *pfsCacheGetData(pfs_mount_t *pfsMount, u16 sub, u32 scale, int flags, int *result);
 pfs_cache_t *pfsCacheAllocClean(int *result);
-int pfsCacheIsFull();
+int pfsCacheIsFull(void);
 int pfsCacheInit(u32 numBuf, u32 bufSize);
 void pfsCacheClose(pfs_mount_t *pfsMount);
 void pfsCacheMarkClean(pfs_mount_t *pfsMount, u32 subpart, u32 sectorStart, u32 sectorEnd);
@@ -246,10 +246,10 @@ typedef struct
 
 void pfsBitmapSetupInfo(pfs_mount_t *pfsMount, pfs_bitmapInfo_t *info, u32 subpart, u32 number);
 void pfsBitmapAllocFree(pfs_cache_t *clink, u32 operation, u32 subpart, u32 chunk, u32 index, u32 _bit, u32 count);
-int pfsBitmapAllocateAdditionalZones(pfs_mount_t *pfsMount, pfs_blockinfo *bi, u32 count);
-int pfsBitmapAllocZones(pfs_mount_t *pfsMount, pfs_blockinfo *bi, u32 amount);
-int pfsBitmapSearchFreeZone(pfs_mount_t *pfsMount, pfs_blockinfo *bi, u32 max_count);
-void pfsBitmapFreeBlockSegment(pfs_mount_t *pfsMount, pfs_blockinfo *bi);
+int pfsBitmapAllocateAdditionalZones(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi, u32 count);
+int pfsBitmapAllocZones(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi, u32 amount);
+int pfsBitmapSearchFreeZone(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi, u32 max_count);
+void pfsBitmapFreeBlockSegment(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi);
 int pfsBitmapCalcFreeZones(pfs_mount_t *pfsMount, int sub);
 void pfsBitmapShow(pfs_mount_t *pfsMount);
 void pfsBitmapFreeInodeBlocks(pfs_cache_t *clink);
@@ -262,24 +262,24 @@ u32 pfsBlockSyncPos(pfs_blockpos_t *blockpos, u64 size);
 int pfsBlockInitPos(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u64 position);
 int pfsBlockExpandSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 count);
 int pfsBlockAllocNewSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 blocks);
-pfs_blockinfo* pfsBlockGetCurrent(pfs_blockpos_t *blockpos);
+pfs_blockinfo_t* pfsBlockGetCurrent(pfs_blockpos_t *blockpos);
 pfs_cache_t *pfsBlockGetNextSegment(pfs_cache_t *clink, int *result);
 pfs_cache_t *pfsBlockGetLastSegmentDescriptorInode(pfs_cache_t *clink, int *result);
 
 ///////////////////////////////////////////////////////////////////////////////
 //	Directory-Entry (DEntry) inode functions
 
-pfs_cache_t *pfsGetDentry(pfs_cache_t *clink, char *path, pfs_dentry **dentry, u32 *size, int option);
-int pfsGetNextDentry(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 *position, char *name, pfs_blockinfo *bi);
-pfs_cache_t *pfsFillDentry(pfs_cache_t *clink, pfs_dentry *dentry, char *path1, pfs_blockinfo *bi, u32 len, u16 mode);
-pfs_cache_t *pfsDirAddEntry(pfs_cache_t *dir, char *filename, pfs_blockinfo *bi, u16 mode, int *result);
+pfs_cache_t *pfsGetDentry(pfs_cache_t *clink, char *path, pfs_dentry_t **dentry, u32 *size, int option);
+int pfsGetNextDentry(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 *position, char *name, pfs_blockinfo_t *bi);
+pfs_cache_t *pfsFillDentry(pfs_cache_t *clink, pfs_dentry_t *dentry, char *path1, pfs_blockinfo_t *bi, u32 len, u16 mode);
+pfs_cache_t *pfsDirAddEntry(pfs_cache_t *dir, char *filename, pfs_blockinfo_t *bi, u16 mode, int *result);
 pfs_cache_t *pfsDirRemoveEntry(pfs_cache_t *clink, char *path);
 int pfsCheckDirForFiles(pfs_cache_t *clink);
-void pfsFillSelfAndParentDentries(pfs_cache_t *clink, pfs_blockinfo *self, pfs_blockinfo *parent);
-pfs_cache_t* pfsSetDentryParent(pfs_cache_t *clink, pfs_blockinfo *bi, int *result);
+void pfsFillSelfAndParentDentries(pfs_cache_t *clink, pfs_blockinfo_t *self, pfs_blockinfo_t *parent);
+pfs_cache_t* pfsSetDentryParent(pfs_cache_t *clink, pfs_blockinfo_t *bi, int *result);
 pfs_cache_t *pfsInodeGetFileInDir(pfs_cache_t *dirInode, char *path, int *result);
 pfs_cache_t *pfsInodeGetFile(pfs_mount_t *pfsMount, pfs_cache_t *clink, const char *name, int *result);
-void pfsInodeFill(pfs_cache_t *ci, pfs_blockinfo *bi, u16 mode, u16 uid, u16 gid);
+void pfsInodeFill(pfs_cache_t *ci, pfs_blockinfo_t *bi, u16 mode, u16 uid, u16 gid);
 int pfsInodeRemove(pfs_cache_t *parent, pfs_cache_t *inode, char *path);
 pfs_cache_t *pfsInodeGetParent(pfs_mount_t *pfsMount, pfs_cache_t *clink, const char *filename, char *path, int *result);
 pfs_cache_t *pfsInodeCreate(pfs_cache_t *clink, u16 mode, u16 uid, u16 gid, int *result);
@@ -293,8 +293,8 @@ void pfsFreeZones(pfs_cache_t *pfree);
 ///////////////////////////////////////////////////////////////////////////////
 //	Inode functions
 
-void pfsInodePrint(pfs_inode *inode);
-int pfsInodeCheckSum(pfs_inode *inode);
+void pfsInodePrint(pfs_inode_t *inode);
+int pfsInodeCheckSum(pfs_inode_t *inode);
 void pfsInodeSetTime(pfs_cache_t *clink);
 pfs_cache_t *pfsInodeGetData(pfs_mount_t *pfsMount, u16 sub, u32 inode, int *result);
 int pfsInodeSync(pfs_blockpos_t *blockpos, u64 size, u32 used_segments);
@@ -314,11 +314,11 @@ int pfsJournalResetThis(pfs_block_device_t *blockDev, int fd, u32 sector);
 ///////////////////////////////////////////////////////////////////////////////
 //	Function declerations
 
-int pfsFsckStat(pfs_mount_t *pfsMount, pfs_super_block *superblock, u32 stat, int mode);
+int pfsFsckStat(pfs_mount_t *pfsMount, pfs_super_block_t *superblock, u32 stat, int mode);
 
 void *pfsAllocMem(int size);
 void pfsFreeMem(void *buffer);
-int pfsGetTime(pfs_datetime *tm);
+int pfsGetTime(pfs_datetime_t *tm);
 void pfsPrintBitmap(u32 *bitmap);
 
 pfs_block_device_t *pfsGetBlockDeviceTable(const char *name);

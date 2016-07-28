@@ -47,10 +47,10 @@ void pfsFreeMem(void *buffer)
 	CpuResumeIntr(OldState);
 }
 
-int pfsGetTime(pfs_datetime *tm)
+int pfsGetTime(pfs_datetime_t *tm)
 {
 	sceCdCLOCK	cdtime;
-	static pfs_datetime timeBuf={
+	static pfs_datetime_t timeBuf={
 		0, 0x0D, 0x0E, 0x0A, 0x0D, 1, 2003	// used if can not get time...
 	};
 
@@ -63,11 +63,11 @@ int pfsGetTime(pfs_datetime *tm)
 		timeBuf.month=btoi(cdtime.month & 0x7F);	//The old CDVDMAN sceCdReadClock() function does not automatically file off the highest bit.
 		timeBuf.year=btoi(cdtime.year) + 2000;
 	}
-	memcpy(tm, &timeBuf, sizeof(pfs_datetime));
+	memcpy(tm, &timeBuf, sizeof(pfs_datetime_t));
 	return 0;
 }
 
-int pfsFsckStat(pfs_mount_t *pfsMount, pfs_super_block *superblock,
+int pfsFsckStat(pfs_mount_t *pfsMount, pfs_super_block_t *superblock,
 	u32 stat, int mode)
 {	// mode 0=set flag, 1=remove flag, else check stat
 

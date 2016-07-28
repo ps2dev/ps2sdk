@@ -22,7 +22,7 @@
 int pfsBlockExpandSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 count)
 {
 	int ret;
-	pfs_blockinfo *bi;
+	pfs_blockinfo_t *bi;
 
 	if(pfsFixIndex(blockpos->block_segment)==0)
 		return 0;
@@ -43,7 +43,7 @@ int pfsBlockExpandSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 coun
 // Attempts to allocate 'blocks' new blocks for an inode
 int pfsBlockAllocNewSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 blocks)
 {
-	pfs_blockinfo bi, *bi2;
+	pfs_blockinfo_t bi, *bi2;
 	int result=0;
 	pfs_mount_t *pfsMount=clink->pfsMount;
 	u32 i, old_blocks = blocks;
@@ -69,19 +69,19 @@ int pfsBlockAllocNewSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 bl
 
 		clink2=pfsCacheGetData(pfsMount, bi.subpart, bi.number << pfsMount->inode_scale,
 								PFS_CACHE_FLAG_SEGI | PFS_CACHE_FLAG_NOLOAD, &result);
-		memset(clink2->u.inode, 0, sizeof(pfs_inode));
+		memset(clink2->u.inode, 0, sizeof(pfs_inode_t));
 		clink2->u.inode->magic=PFS_SEGI_MAGIC;
 
-		memcpy(&clink2->u.inode->inode_block, &clink->u.inode->inode_block, sizeof(pfs_blockinfo));
-		memcpy(&clink2->u.inode->last_segment, &blockpos->inode->u.inode->data[0], sizeof(pfs_blockinfo));
-		memcpy(&clink2->u.inode->data[0], &bi, sizeof(pfs_blockinfo));
+		memcpy(&clink2->u.inode->inode_block, &clink->u.inode->inode_block, sizeof(pfs_blockinfo_t));
+		memcpy(&clink2->u.inode->last_segment, blockpos->inode->u.inode->data, sizeof(pfs_blockinfo_t));
+		memcpy(clink2->u.inode->data, &bi, sizeof(pfs_blockinfo_t));
 
 		clink2->flags |= PFS_CACHE_FLAG_DIRTY;
 
 		clink->u.inode->number_blocks+=bi.count;
 		clink->u.inode->number_data++;
 
-		memcpy(&clink->u.inode->last_segment, &bi, sizeof(pfs_blockinfo));
+		memcpy(&clink->u.inode->last_segment, &bi, sizeof(pfs_blockinfo_t));
 
 		clink->u.inode->number_segdesg++;
 
@@ -89,7 +89,7 @@ int pfsBlockAllocNewSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 bl
 		blockpos->block_segment++;
 		blockpos->block_offset=0;
 
-		memcpy(&blockpos->inode->u.inode->next_segment, &bi, sizeof(pfs_blockinfo));
+		memcpy(&blockpos->inode->u.inode->next_segment, &bi, sizeof(pfs_blockinfo_t));
 
 		blockpos->inode->flags |= PFS_CACHE_FLAG_DIRTY;
 		pfsCacheFree(blockpos->inode);
@@ -115,7 +115,7 @@ int pfsBlockAllocNewSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 bl
 	blockpos->block_segment++;
 
 	i = pfsFixIndex(clink->u.inode->number_data-1);
-	memcpy(&blockpos->inode->u.inode->data[i], &bi, sizeof(pfs_blockinfo));
+	memcpy(&blockpos->inode->u.inode->data[i], &bi, sizeof(pfs_blockinfo_t));
 
 	blockpos->inode->flags |= PFS_CACHE_FLAG_DIRTY;
 	blocks -= bi.count;
@@ -127,7 +127,7 @@ int pfsBlockAllocNewSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 bl
 
 // Returns the block info for the block segment corresponding to the
 // files current position.
-pfs_blockinfo* pfsBlockGetCurrent(pfs_blockpos_t *blockpos)
+pfs_blockinfo_t* pfsBlockGetCurrent(pfs_blockpos_t *blockpos)
 {
 	return &blockpos->inode->u.inode->data[pfsFixIndex(blockpos->block_segment)];
 }

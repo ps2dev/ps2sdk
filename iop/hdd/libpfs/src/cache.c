@@ -80,12 +80,12 @@ int pfsCacheTransfer(pfs_cache_t* clink, int mode)
 		if((err=pfsMount->blockDev->transfer(pfsMount->fd, clink->u.inode, clink->sub,
 			clink->sector << pfsBlockSize, 1 << pfsBlockSize, mode))==0) {
 			if(mode==PFS_IO_MODE_READ) {
-				if(clink->flags & PFS_CACHE_FLAG_SEGD && ((pfs_inode *)clink->u.inode)->magic!=PFS_SEGD_MAGIC)
+				if(clink->flags & PFS_CACHE_FLAG_SEGD && ((pfs_inode_t *)clink->u.inode)->magic!=PFS_SEGD_MAGIC)
 					err=-EIO;
-				if(clink->flags & PFS_CACHE_FLAG_SEGI && ((pfs_inode *)clink->u.inode)->magic!=PFS_SEGI_MAGIC)
+				if(clink->flags & PFS_CACHE_FLAG_SEGI && ((pfs_inode_t *)clink->u.inode)->magic!=PFS_SEGI_MAGIC)
 					err=-EIO;
 				if(clink->flags & (PFS_CACHE_FLAG_SEGD|PFS_CACHE_FLAG_SEGI)) {
-					if(((pfs_inode *)clink->u.inode)->checksum!=pfsInodeCheckSum(clink->u.inode))
+					if(((pfs_inode_t *)clink->u.inode)->checksum!=pfsInodeCheckSum(clink->u.inode))
 						err=-EIO;
 				}
 			}

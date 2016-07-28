@@ -296,7 +296,7 @@ int hddFormat(iop_file_t *f, const char *dev, const char *blockdev, void *arg, s
 		header->length=(1024*256);	// 128MB
 		header->type=APA_TYPE_MBR;
 		strcpy(header->id,"__mbr");
-#ifdef APA_OSD_VER
+#ifdef APA_FORMAT_LOCK_MBR
 		apaEncryptPassword(header->id, header->fpwd, "sce_mbr");
 		apaEncryptPassword(header->id, header->rpwd, "sce_mbr");
 #endif
@@ -546,7 +546,7 @@ int hddLseek(iop_file_t *f, int post, int whence)
 	return rv;
 }
 
-void fioGetStatFiller(apa_cache_t *clink, iox_stat_t *stat)
+static void fioGetStatFiller(apa_cache_t *clink, iox_stat_t *stat)
 {
 	apa_header_t *header;
 
@@ -566,8 +566,11 @@ void fioGetStatFiller(apa_cache_t *clink, iox_stat_t *stat)
 	stat->private_2=0;
 	stat->private_3=0;
 	stat->private_4=0;
-	//stat->private_5=0;// game ver
-	stat->private_5=clink->header->start;// sony ver
+#ifndef APA_STAT_RETURN_PART_LBA
+	stat->private_5=0;// game ver
+#else
+	stat->private_5=clink->header->start;// SONY ver (return start LBA of the partition)
+#endif
 }
 
 int hddGetStat(iop_file_t *f, const char *name, iox_stat_t *stat)
