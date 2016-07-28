@@ -25,18 +25,17 @@ extern u32 pfsMetaSize;
 pfs_cache_t *pfsGetDentry(pfs_cache_t *clink, char *path, pfs_dentry **dentry, u32 *size, int option)
 {
 	pfs_blockpos_t block_pos;
-	u32	result;
 	pfs_dentry *d;
 	u16 aLen;
 	pfs_dentry *d2;
 	pfs_cache_t *dentCache;
-	u32 dentryLen=0;
-	int len=0;
+	u32 new_dentryLen=0,dentryLen;
+	int len=0, result;
 
 	if (path)
 	{
 		len = strlen(path);
-		dentryLen = (len+8+3) &~4;
+		new_dentryLen = (len+8+3) &~3;
 	}
 	*size = 0;
 
@@ -44,21 +43,21 @@ pfs_cache_t *pfsGetDentry(pfs_cache_t *clink, char *path, pfs_dentry **dentry, u
 	block_pos.block_segment = 1;
 	block_pos.block_offset = 0;
 	block_pos.byte_offset = 0;
-	dentCache = pfsGetDentriesChunk(&block_pos, (int *)&result);
+	dentCache = pfsGetDentriesChunk(&block_pos, &result);
 
-	if (dentCache)
+	if (dentCache != NULL)
 	{
 		d2=d=dentCache->u.dentry;
 		while(*size < clink->u.inode->size)
 		{
 			// Read another dentry chunk if we need to
-			if ((int)d2 >= ((int)dentCache->u.inode + pfsMetaSize))
+			if ((u32)d2 >= ((u32)dentCache->u.inode + pfsMetaSize))
 			{
 				if (pfsInodeSync(&block_pos, pfsMetaSize, clink->u.inode->number_data))
 					break;
 				pfsCacheFree(dentCache);
 
-				if ((dentCache=pfsGetDentriesChunk(&block_pos, (int *)&result))==0)
+				if ((dentCache=pfsGetDentriesChunk(&block_pos, &result))==0)
 					break;
 				d=dentCache->u.dentry;
 			}
@@ -71,7 +70,8 @@ pfs_cache_t *pfsGetDentry(pfs_cache_t *clink, char *path, pfs_dentry **dentry, u
 					PFS_PRINTF(PFS_DRV_NAME": Error: dir-entry allocated length/4 != 0\n");
 					goto _exit;
 				}
-				if (aLen < ((d->pLen + 8 + 3) & 0x1FC)){
+				dentryLen = (d->pLen + 8 + 3) & 0x1FC;
+				if (aLen < dentryLen){
 					PFS_PRINTF(PFS_DRV_NAME": Error: dir-entry is too small\n");
 					goto _exit;
 				}
@@ -86,9 +86,9 @@ pfs_cache_t *pfsGetDentry(pfs_cache_t *clink, char *path, pfs_dentry **dentry, u
 					case 0: // result = 1 when paths are equal
 						result = (len==d->pLen) && (memcmp(path, d->path, d->pLen)==0);
 						break;
-					case 1: // hrm..
-						result = ((d->inode) || (aLen < dentryLen)) ? ((aLen - ((d->pLen + 8 + 3) & 0x1FC))
-								> dentryLen) : 1;
+					case 1:	// result = 1 when either there is no inode or if there is enough space remaining in the inode.
+						result = ((d->inode) || (aLen < new_dentryLen)) ? (aLen - dentryLen
+								>= new_dentryLen) : 1;
 						break;
 					case 2: // result = 1 when dir path is not empty, "." or ".."
 						result = d->pLen && strcmp(d->path, ".") && strcmp(d->path, "..");
@@ -195,6 +195,7 @@ pfs_cache_t *pfsDirRemoveEntry(pfs_cache_t *clink, char *path)
 {
 	pfs_dentry *dentry;
 	u32 size;
+	u16 aLen;
 	int i=0, val;
 	pfs_dentry *dlast=NULL, *dnext;
 	pfs_cache_t *c;
@@ -205,23 +206,22 @@ pfs_cache_t *pfsDirRemoveEntry(pfs_cache_t *clink, char *path)
 		val /=512;	val *=512;
 		dnext=(pfs_dentry*)((int)c->u.dentry+val);
 		do{
+			aLen = dnext->aLen & 0xFFF;
+
 			if (dnext==dentry){
 				if (dlast)
-					dlast->aLen=(dlast->aLen & FIO_S_IFMT) | ((dlast->aLen & 0xFFF) + (dnext->aLen & 0xFFF));
+					dlast->aLen=(dlast->aLen & FIO_S_IFMT) | ((dlast->aLen & 0xFFF) + aLen);
 				else{
 					dnext->pLen=dnext->inode=0;
 
-					if ((clink->u.inode->size) &&
-					    (0>=dnext) && ((dnext==0) ||//strange?!?;
-					    (size+(dnext->aLen & 0xFFF)>=clink->u.inode->size))) {
-							clink->u.inode->size -= dnext->aLen & 0xFFF;
-					}
+					if (size+aLen >= clink->u.inode->size)
+							clink->u.inode->size -= aLen;
 				}
 				return c;
 			}
-			i+=dnext->aLen & 0xFFF;
+			i+=aLen;
 			dlast=dnext;
-			dnext=(pfs_dentry *)((u32)dnext + (dnext->aLen & 0xFFF));
+			dnext=(pfs_dentry *)((u32)dnext + aLen);
 		}while (i<512);
 	}
 	return NULL;
