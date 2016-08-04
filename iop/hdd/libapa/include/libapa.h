@@ -113,7 +113,7 @@ int apaGetPartErrorName(s32 device, char *name);
 
 apa_cache_t *apaFillHeader(s32 device, const apa_params_t *params, u32 start, u32 next, u32 prev, u32 length, int *err);
 apa_cache_t *apaInsertPartition(s32 device, const apa_params_t *params, u32 sector, int *err);
-apa_cache_t *apaFindPartition(s32 device, char *id, int *err);
+apa_cache_t *apaFindPartition(s32 device, const char *id, int *err);
 void apaAddEmptyBlock(apa_header_t *header, u32 *emptyBlocks);
 apa_cache_t *apaRemovePartition(s32 device, u32 start, u32 next, u32 prev, u32 length);
 void apaMakeEmpty(apa_cache_t *clink);

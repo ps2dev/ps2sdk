@@ -319,7 +319,7 @@ int pfsFsckStat(pfs_mount_t *pfsMount, pfs_super_block_t *superblock, u32 stat, 
 void *pfsAllocMem(int size);
 void pfsFreeMem(void *buffer);
 int pfsGetTime(pfs_datetime_t *tm);
-void pfsPrintBitmap(u32 *bitmap);
+void pfsPrintBitmap(const u32 *bitmap);
 
 pfs_block_device_t *pfsGetBlockDeviceTable(const char *name);
 int pfsGetScale(int num, int size);

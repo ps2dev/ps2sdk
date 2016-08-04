@@ -73,7 +73,7 @@ extern u32 apaMaxOpen;
 extern hdd_file_slot_t *hddFileSlots;
 
 static int inputError(char *input);
-static int unlockDrive(u32 device);
+static int unlockDrive(s32 device);
 
 int hddCheckPartitionMax(s32 device, u32 size)
 {
@@ -227,7 +227,7 @@ static void printStartup(void)
 	return;
 }
 
-static int unlockDrive(u32 device)
+static int unlockDrive(s32 device)
 {
 	u8 id[32];
 	int rv;

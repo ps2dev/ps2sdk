@@ -60,7 +60,7 @@ typedef struct {
 ///////////////////////////////////////////////////////////////////////////////
 //	Function declarations
 
-pfs_mount_t *pfsGetMountedUnit(u32 unit);
+pfs_mount_t *pfsGetMountedUnit(s32 unit);
 void pfsClearMount(pfs_mount_t *pfsMount);
 
 #endif /* _PFS_H */

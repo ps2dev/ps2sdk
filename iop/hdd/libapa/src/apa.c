@@ -162,7 +162,7 @@ apa_cache_t *apaInsertPartition(s32 device, const apa_params_t *params, u32 sect
 	return clink_this;
 }
 
-apa_cache_t *apaFindPartition(s32 device, char *id, int *err)
+apa_cache_t *apaFindPartition(s32 device, const char *id, int *err)
 {
 	apa_cache_t *clink;
 

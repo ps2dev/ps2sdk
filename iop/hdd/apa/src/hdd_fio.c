@@ -51,11 +51,11 @@ static int fioPartitionSizeLookUp(char *str);
 static int fioInputBreaker(char const **arg, char *outBuf, int maxout);
 static int fioDataTransfer(iop_file_t *f, void *buf, int size, int mode);
 static int getFileSlot(apa_params_t *params, hdd_file_slot_t **fileSlot);
-static int ioctl2Transfer(u32 device, hdd_file_slot_t *fileSlot, hddIoctl2Transfer_t *arg);
+static int ioctl2Transfer(s32 device, hdd_file_slot_t *fileSlot, hddIoctl2Transfer_t *arg);
 static void fioGetStatFiller(apa_cache_t *clink1, iox_stat_t *stat);
 static int ioctl2AddSub(hdd_file_slot_t *fileSlot, char *argp);
 static int ioctl2DeleteLastSub(hdd_file_slot_t *fileSlot);
-static int devctlSwapTemp(u32 device, char *argp);
+static int devctlSwapTemp(s32 device, char *argp);
 
 static int fioPartitionSizeLookUp(char *str)
 {
@@ -213,7 +213,7 @@ static int fioDataTransfer(iop_file_t *f, void *buf, int size, int mode)
 	return 0;
 }
 
-static int ioctl2Transfer(u32 device, hdd_file_slot_t *fileSlot, hddIoctl2Transfer_t *arg)
+static int ioctl2Transfer(s32 device, hdd_file_slot_t *fileSlot, hddIoctl2Transfer_t *arg)
 {
 	if(fileSlot->nsub<arg->sub)
 		return -ENODEV;
@@ -337,7 +337,7 @@ int hddFormat(iop_file_t *f, const char *dev, const char *blockdev, void *arg, s
 	return rv;
 }
 
-static int apaOpen(u32 device, hdd_file_slot_t *fileSlot, apa_params_t *params, int mode)
+static int apaOpen(s32 device, hdd_file_slot_t *fileSlot, apa_params_t *params, int mode)
 {
 	int				rv=0;
 	u32				emptyBlocks[32];
@@ -395,7 +395,7 @@ static int apaOpen(u32 device, hdd_file_slot_t *fileSlot, apa_params_t *params, 
 	return rv;
 }
 
-static int apaRemove(u32 device, char *id, const char *fpwd)
+static int apaRemove(s32 device, const char *id, const char *fpwd)
 {
 	u32			nsub, i;
 	apa_cache_t	*clink;
@@ -440,7 +440,7 @@ static int apaRemove(u32 device, char *id, const char *fpwd)
 }
 
 // Unofficial helper for renaming APA partitions.
-static int apaRename(s32 device, apa_params_t *oldParams, apa_params_t *newParams)
+static int apaRename(s32 device, const apa_params_t *oldParams, const apa_params_t *newParams)
 {
 	apa_cache_t *clink;
 	int i, rv;
@@ -863,7 +863,7 @@ int hddIoctl2(iop_file_t *f, int req, void *argp, unsigned int arglen,
 	return rv;
 }
 
-static int devctlSwapTemp(u32 device, char *argp)
+static int devctlSwapTemp(s32 device, char *argp)
 {
 	int			rv;
 	apa_params_t	params;
@@ -875,7 +875,7 @@ static int devctlSwapTemp(u32 device, char *argp)
 	if((rv=fioGetInput(argp, &params)) < 0)
 		return rv;
 
-	if(*(u16 *)(params.id)==(u16)0x5F5F)// test for '__' system partition
+	if(params.id[0] == '_' && params.id[1] == '_')// test for '__' system partition
 		return -EINVAL;
 
 	memset(szBuf, 0, APA_IDMAX);
@@ -903,7 +903,7 @@ static int devctlSwapTemp(u32 device, char *argp)
 	return rv;
 }
 
-int devctlSetOsdMBR(u32 device, hddSetOsdMBR_t *mbrInfo)
+int devctlSetOsdMBR(s32 device, hddSetOsdMBR_t *mbrInfo)
 {
 	int rv;
 	apa_cache_t *clink;

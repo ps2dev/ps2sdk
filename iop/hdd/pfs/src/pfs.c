@@ -111,7 +111,7 @@ void pfsClearMount(pfs_mount_t *pfsMount)
 	memset(pfsMount, 0, sizeof(pfs_mount_t));
 }
 
-pfs_mount_t *pfsGetMountedUnit(u32 unit)
+pfs_mount_t *pfsGetMountedUnit(s32 unit)
 {	// get mounted unit
 	if(unit>=pfsConfig.maxMount)
 		return NULL;

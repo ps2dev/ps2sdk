@@ -92,7 +92,7 @@ int pfsFsckStat(pfs_mount_t *pfsMount, pfs_super_block_t *superblock,
 	return 0;
 }
 
-void pfsPrintBitmap(u32 *bitmap) {
+void pfsPrintBitmap(const u32 *bitmap) {
 	u32 i, j;
 	char a[48+1], b[16+1];
 
@@ -100,7 +100,7 @@ void pfsPrintBitmap(u32 *bitmap) {
 	for (i=0; i < 32; i++){
 		memset(a, 0, 49);
 		for (j=0; j < 16; j++){
-			char *c=(char*)bitmap+j+i*16;
+			const char *c=(const char*)bitmap+j+i*16;
 
 			sprintf(a+j*3, "%02x ", *c);
 			b[j] = ((*c>=0) && (look_ctype_table(*c) & 0x17)) ?
