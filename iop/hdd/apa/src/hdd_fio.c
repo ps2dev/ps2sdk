@@ -345,7 +345,6 @@ static int apaOpen(u32 device, hdd_file_slot_t *fileSlot, apa_params_t *params, 
 	apa_cache_t		*clink2;
 	u32				sector=0;
 
-
 	// walk all looking for any empty blocks & look for partition
 	clink=apaCacheGetHeader(device, 0, APA_IO_MODE_READ, &rv);
 	memset(&emptyBlocks, 0, sizeof(emptyBlocks));
@@ -438,6 +437,66 @@ static int apaRemove(u32 device, char *id, const char *fpwd)
 
 	apaCacheFree(clink);
 	return rv;
+}
+
+// Unofficial helper for renaming APA partitions.
+static int apaRename(s32 device, apa_params_t *oldParams, apa_params_t *newParams)
+{
+	apa_cache_t *clink;
+	int i, rv;
+
+	// look to see if can make(newname) or not...
+	if((clink = apaFindPartition(device, newParams->id, &rv)) != NULL)
+	{
+		apaCacheFree(clink);
+		SignalSema(fioSema);
+		return -EEXIST;	// File exists
+	}
+
+	// look to see if open(oldname)
+	for(i=0;i<apaMaxOpen;i++)
+	{
+		if(hddFileSlots[i].f!=NULL)
+		{
+			if(memcmp(hddFileSlots[i].id, oldParams->id, APA_IDMAX)==0)
+			{
+				SignalSema(fioSema);
+				return -EBUSY;
+			}
+		}
+	}
+
+	// Do not allow system partitions (__*) to be renamed.
+	if(oldParams->id[0]=='_' && oldParams->id[1]=='_')
+		return -EACCES;
+
+	// find :)
+	if((clink = apaFindPartition(device, oldParams->id, &rv)) == NULL)
+	{
+		SignalSema(fioSema);
+		return rv;
+	}
+
+	// Check for access rights.
+	if(apaPassCmp(clink->header->fpwd, oldParams->fpwd) != 0)
+	{
+		apaCacheFree(clink);
+		return -EACCES;
+	}
+
+	// do the renaming :) note: subs have no names!!
+	memcpy(clink->header->id, newParams->id, APA_IDMAX);
+
+	// Update passwords
+	memcpy(clink->header->rpwd, newParams->rpwd, APA_PASSMAX);
+	memcpy(clink->header->fpwd, newParams->fpwd, APA_PASSMAX);
+
+	clink->flags|=APA_CACHE_FLAG_DIRTY;
+
+	apaCacheFlushAllDirty(device);
+	apaCacheFree(clink);
+
+	return 0;
 }
 
 int hddRemove(iop_file_t *f, const char *name)
@@ -637,59 +696,27 @@ int hddDread(iop_file_t *f, iox_dirent_t *dirent)
 	return rv;
 }
 
-// Originally, SONY provided no function for renaming partitions.
+/*	Originally, SONY provided no function for renaming partitions.
+	Syntax:	rename <Old ID>,<fpwd> <New ID>,<fpwd>
+
+	The full-access password (fpwd) is required.
+	System partitions (__*) cannot be renamed.	*/
 int hddReName(iop_file_t *f, const char *oldname, const char *newname)
 {
-	int i, rv;
-	apa_cache_t *clink;
-	char tmpBuf[APA_IDMAX];
+	apa_params_t oldParams;
+	apa_params_t newParams;
+	int rv;
 
-	if(f->unit >= 2 || hddDevices[f->unit].status!=0)
-		return -ENODEV;// No such device
+	if((rv=fioGetInput(oldname, &oldParams))<0)
+		return rv;
+	if((rv=fioGetInput(newname, &newParams))<0)
+		return rv;
 
 	WaitSema(fioSema);
-	// look to see if can make(newname) or not...
-	memset(tmpBuf, 0, APA_IDMAX);
-	strncpy(tmpBuf, newname, APA_IDMAX - 1);
-	tmpBuf[APA_IDMAX - 1] = '\0';
-	if((clink=apaFindPartition(f->unit, tmpBuf, &rv))){
-		apaCacheFree(clink);
-		SignalSema(fioSema);
-		return -EEXIST;	// File exists
-	}
-
-	// look to see if open(oldname)
-	memset(tmpBuf, 0, APA_IDMAX);
-	strncpy(tmpBuf, oldname, APA_IDMAX - 1);
-	tmpBuf[APA_IDMAX - 1] = '\0';
-	for(i=0;i<apaMaxOpen;i++)
-	{
-		if(hddFileSlots[i].f!=0)
-			if(hddFileSlots[i].f->unit==f->unit)
-				if(memcmp(hddFileSlots[i].id, oldname, APA_IDMAX)==0)
-				{
-					SignalSema(fioSema);
-					return -EBUSY;
-				}
-	}
-
-	// find :)
-	if(!(clink=apaFindPartition(f->unit, tmpBuf, &rv)))
-	{
-		SignalSema(fioSema);
-		return -ENOENT;
-	}
-
-	// do the renaming :) note: subs have no names!!
-	memset(clink->header->id, 0, APA_IDMAX);		// all cmp are done with memcmp!
-	strncpy(clink->header->id, newname, APA_IDMAX - 1);
-	clink->header->id[APA_IDMAX - 1] = '\0';
-	clink->flags|=APA_CACHE_FLAG_DIRTY;
-
-	apaCacheFlushAllDirty(f->unit);
-	apaCacheFree(clink);
+	rv = apaRename(f->unit, &oldParams, &newParams);
 	SignalSema(fioSema);
-	return 0;
+
+	return rv;
 }
 
 static int ioctl2AddSub(hdd_file_slot_t *fileSlot, char *argp)
