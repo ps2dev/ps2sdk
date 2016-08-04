@@ -676,14 +676,23 @@ int hddDread(iop_file_t *f, iox_dirent_t *dirent)
 			// if sub get id from main header...
 			apa_cache_t *cmain=apaCacheGetHeader(f->unit, clink->header->main, APA_IO_MODE_READ, &rv);
 			if(cmain!=NULL){
+			/*	This was the SONY original, which didn't do bounds-checking:
 				rv=strlen(cmain->header->id);
-				strcpy(dirent->name, cmain->header->id);
+				strcpy(dirent->name, cmain->header->id); */
+				strncpy(dirent->name, cmain->header->id, APA_IDMAX);
+				dirent->name[APA_IDMAX] = '\0';
+				rv=strlen(dirent->name);
+
 				apaCacheFree(cmain);
 			}
 		}
 		else {
+		/*	This was the SONY original, which didn't do bounds-checking:
 			rv=strlen(clink->header->id);
-			strcpy(dirent->name, clink->header->id);
+			strcpy(dirent->name, clink->header->id); */
+			strncpy(dirent->name, clink->header->id, APA_IDMAX);
+			dirent->name[APA_IDMAX] = '\0';
+			rv=strlen(dirent->name);
 		}
 		fioGetStatFiller(clink, &dirent->stat);
 		if(clink->header->next==0)
