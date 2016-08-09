@@ -56,7 +56,7 @@
 // fsck stats
 #define PFS_FSCK_STAT_OK			0x00
 #define PFS_FSCK_STAT_WRITE_ERROR	0x01
-#define PFS_FSCK_STAT_ERROR_0x02	0x02
+#define PFS_FSCK_STAT_ERRORS_FIXED	0x02
 
 // odd and end
 #define PFS_MODE_SET_FLAG			0x00

@@ -22,15 +22,13 @@
 int printf(const char *format, ...);
 #define I_printf DECLARE_IMPORT(4, printf)
 
+int putchar(int ch);
+#define I_putchar DECLARE_IMPORT(6, putchar)
+
 int puts(const char *s);
 #define I_puts DECLARE_IMPORT(7, puts)
 
-#define stdio_IMPORTS \
-	stdio_IMPORTS_start \
- \
- 	I_printf \
-	I_puts \
- \
-	stdio_IMPORTS_end
+char *gets(char *s);
+#define I_gets DECLARE_IMPORT(8, gets)
 
 #endif /* IOP_STDIO_H */

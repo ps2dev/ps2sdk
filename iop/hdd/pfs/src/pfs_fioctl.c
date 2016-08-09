@@ -203,7 +203,7 @@ static int devctlFsckStat(pfs_mount_t *pfsMount, int mode)
 	pfs_cache_t *clink;
 
 	if((clink=pfsCacheAllocClean(&rv))!=NULL){
-		rv=pfsFsckStat(pfsMount, clink->u.superblock, PFS_FSCK_STAT_ERROR_0x02, mode);
+		rv=pfsFsckStat(pfsMount, clink->u.superblock, PFS_FSCK_STAT_ERRORS_FIXED, mode);
 		pfsCacheFree(clink);
 	}
 	return rv;
