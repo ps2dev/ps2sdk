@@ -336,19 +336,34 @@ int hddMakeFilesystem(int fsSizeMB, char *name, int type)
 	// Get index of size we will use to create main partition
 	for(useIndex = maxIndex; sizesMB[useIndex] > fsSizeMB; useIndex--);
 
-	partSize = sizesMB[useIndex];
+	for(partSize = sizesMB[useIndex]; useIndex >= 0; useIndex--,partSize = sizesMB[useIndex])
+	{
 #ifdef DEBUG
-	printf(">>> Attempting to create main partition, size %d MB\n", partSize);
+		printf(">>> Attempting to create main partition, size %d MB\n", partSize);
 #endif
 
-	sprintf(openString, "hdd0:%s,,,%s,PFS", fsName, sizesString[useIndex]);
+		sprintf(openString, "hdd0:%s,,,%s,PFS", fsName, sizesString[useIndex]);
 #ifdef DEBUG
-	printf(">>> openString = %s\n", openString);
+		printf(">>> openString = %s\n", openString);
 #endif
 
-	partFd = fileXioOpen(openString, O_RDWR | O_CREAT, 0);
-	if(partFd < 0)
-		return partFd;
+		partFd = fileXioOpen(openString, O_RDWR | O_CREAT, 0);
+		if((partFd < 0) && (partFd != -ENOSPC))
+		{
+#ifdef DEBUG
+			printf(">>> Could not create Main Partition (error %d)!\n", partFd);
+#endif
+			return partFd;
+		}
+	}
+
+	if(useIndex < 0)
+	{
+#ifdef DEBUG
+		printf(">>> Could not create Main Partition (no space)!\n");
+#endif
+		return -ENOSPC;
+	}
 
 	fsSizeLeft -= partSize;
 #ifdef DEBUG

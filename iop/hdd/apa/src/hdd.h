@@ -8,19 +8,11 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 # $Id$
-# Main APA Header file
+# HDD.IRX APA Header file
 */
 
 #ifndef _HDD_H
 #define _HDD_H
-
-typedef struct
-{
-	u32 totalLBA;
-	u32 partitionMaxSize;
-	int format;
-	int status;
-} hdd_device_t;
 
 typedef struct
 {
@@ -33,9 +25,8 @@ typedef struct
 } hdd_file_slot_t;
 
 ///////////////////////////////////////////////////////////////////////////////
-//	Function declerations
+//	Function declarations
 int hddCheckPartitionMax(s32 device, u32 size);
 apa_cache_t *hddAddPartitionHere(s32 device, const apa_params_t *params, u32 *EmptyBlocks, u32 sector, int *err);
-int hddGetFreeSectors(s32 device, u32 *free, hdd_device_t *deviceinfo);
 
 #endif

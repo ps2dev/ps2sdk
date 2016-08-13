@@ -14,7 +14,6 @@
 #include <errno.h>
 #include <stdio.h>
 #include <sysclib.h>
-#include <iomanX.h>
 
 #include "pfs-opt.h"
 #include "libpfs.h"

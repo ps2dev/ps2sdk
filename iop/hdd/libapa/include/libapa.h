@@ -166,4 +166,15 @@ int apaGetIlinkID(u8 *idbuf);
 int apaPassCmp(const char *password1, const char *password2);
 void apaEncryptPassword(const char *id, char *password_out, const char *password_in);
 
+///////////////////////////////////////////////////////////////////////////////
+typedef struct
+{
+	u32 totalLBA;
+	u32 partitionMaxSize;
+	int format;
+	int status;
+} apa_device_t;
+
+int apaGetFreeSectors(s32 device, u32 *free, apa_device_t *deviceinfo);
+
 #endif /* _LIBAPA_H */

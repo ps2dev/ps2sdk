@@ -32,7 +32,7 @@ int				fioSema;
 u32 apaMaxOpen=1;
 
 extern const char apaMBRMagic[];
-extern hdd_device_t hddDevices[];
+extern apa_device_t hddDevices[];
 
 #ifdef APA_FORMAT_MAKE_PARTITIONS
 static const char *formatPartList[]={
@@ -912,7 +912,7 @@ static int devctlSwapTemp(s32 device, char *argp)
 	return rv;
 }
 
-int devctlSetOsdMBR(s32 device, hddSetOsdMBR_t *mbrInfo)
+static int devctlSetOsdMBR(s32 device, hddSetOsdMBR_t *mbrInfo)
 {
 	int rv;
 	apa_cache_t *clink;
@@ -978,7 +978,7 @@ int hddDevctl(iop_file_t *f, const char *devname, int cmd, void *arg,
 		break;
 
 	case HDIOC_FREESECTOR:
-		rv=hddGetFreeSectors(f->unit, bufp, hddDevices);
+		rv=apaGetFreeSectors(f->unit, bufp, hddDevices);
 		break;
 
 	case HDIOC_IDLEIMM:

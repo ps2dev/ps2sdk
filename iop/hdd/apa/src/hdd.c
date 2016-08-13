@@ -64,7 +64,7 @@ static iop_device_t hddFioDev={
 	(struct _iop_device_ops *)&hddOps,
 };
 
-hdd_device_t hddDevices[2]={
+apa_device_t hddDevices[2]={
 	{0, 0, 0, 3},
 	{0, 0, 0, 3}
 };
@@ -153,66 +153,6 @@ apa_cache_t *hddAddPartitionHere(s32 device, const apa_params_t *params, u32 *em
 	apaCacheFree(clink_this);
 	apaCacheFree(clink_next);
 	return clink_new;
-}
-
-static void hddCalculateFreeSpace(u32 *free, u32 sectors)
-{
-	if(0x1FFFFF < sectors)
-	{
-		*free += sectors;
-		return;
-	}
-
-	if((*free & sectors) == 0)
-	{
-		*free |= sectors;
-		return;
-	}
-
-	for(sectors >>= 1; 0x3FFFF < sectors; sectors >>= 1)
-		*free |= sectors;
-}
-
-int hddGetFreeSectors(s32 device, u32 *free, hdd_device_t *deviceinfo)
-{
-	u32 sectors, partMax;
-	int rv;
-	apa_cache_t *clink;
-
-	sectors = 0;
-	*free = 0;
-	if((clink = apaCacheGetHeader(device, 0, APA_IO_MODE_READ, &rv)) != NULL)
-	{
-		do{
-			if(clink->header->type == 0)
-				hddCalculateFreeSpace(free, clink->header->length);
-			sectors += clink->header->length;
-		}while((clink = apaGetNextHeader(clink, &rv)) != NULL);
-	}
-
-	if(rv == 0)
-	{
-		for(partMax = deviceinfo[device].partitionMaxSize; 0x0003FFFF < partMax; partMax = deviceinfo[device].partitionMaxSize)
-		{	//As weird as it looks, this was how it was done in the original HDD.IRX.
-			for( ; 0x0003FFFF < partMax; partMax /= 2)
-			{
-				//Non-SONY: Perform 64-bit arithmetic here to avoid overflows when dealing with large disks.
-				if((sectors % partMax == 0) && ((u64)sectors + partMax < deviceinfo[device].totalLBA))
-				{
-					hddCalculateFreeSpace(free, partMax);
-					sectors += partMax;
-					break;
-				}
-			}
-
-			if(0x0003FFFF >= partMax)
-				break;
-		}
-
-		APA_PRINTF(APA_DRV_NAME": total = %08lx sectors, installable = %08lx sectors.\n", sectors, *free);
-	}
-
-	return rv;
 }
 
 static int inputError(char *input)

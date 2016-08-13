@@ -111,6 +111,8 @@ int iReleaseWaitThread(int thid);
 
 int GetThreadId(void);
 #define I_GetThreadId DECLARE_IMPORT(20, GetThreadId)
+int CheckThreadStack(void);
+#define I_CheckThreadStack DECLARE_IMPORT(21, CheckThreadStack)
 int ReferThreadStatus(int thid, iop_thread_info_t *info);
 #define I_ReferThreadStatus DECLARE_IMPORT(22, ReferThreadStatus)
 int iReferThreadStatus(int thid, iop_thread_info_t *info);
