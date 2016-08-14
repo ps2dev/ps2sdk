@@ -1058,7 +1058,10 @@ int InitUSB(void)
 	int i;
 	int ret = 0;
 	for (i = 0; i < NUM_DEVICES; ++i)
+	{
+		g_mass_device[i].status = 0;
 		g_mass_device[i].devId = -1;
+	}
 
 	driver.next 		= NULL;
 	driver.prev		= NULL;
