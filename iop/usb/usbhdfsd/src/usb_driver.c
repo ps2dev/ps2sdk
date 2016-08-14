@@ -1103,6 +1103,11 @@ int UsbMassRegisterCallback(int device, usbmass_cb_t callback)
 	if(device >=0 && device < NUM_DEVICES){
 		g_mass_device[device].callback = callback;
 		result = 0;
+
+		if(g_mass_device[device].status & USBMASS_DEV_STAT_CONN)
+		{	//If the device is already connected, let the callback know.
+			if(callback != NULL) callback(USBMASS_DEV_EV_CONN);
+		}
 	} else result = -ENODEV;
 
 	return result;
