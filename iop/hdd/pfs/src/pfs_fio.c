@@ -494,7 +494,7 @@ int	pfsFioFormat(iop_file_t *t, const char *dev, const char *blockdev, void *arg
 	int rv;
 
 	// Has a fragment bit pattern been specified ?
-	if((arglen == (3 * sizeof(int))) && (arg[1] == 0x2D66))
+	if((arglen == (3 * sizeof(int))) && (arg[1] == 0x2D66))	//arg[1] == "-f"
 		fragment = arg[2];
 
 	if((blockDev = pfsGetBlockDeviceTable(blockdev)) == 0)

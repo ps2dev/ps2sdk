@@ -29,8 +29,15 @@
 
 #include "libhdd.h"
 
-#define PFS_ZONE_SIZE	8192
-#define PFS_FRAGMENT	0x00000000
+#define PFS_ZONE_SIZE		8192
+#define PFS_FRAGMENT_OPT	0x00002d66	//"-f"
+#define PFS_FRAGMENT		0x00000000
+
+#if (PFS_FRAGMENT != 0)
+int pfsFormatArg[3] = { PFS_ZONE_SIZE, PFS_FRAGMENT_OPT, PFS_FRAGMENT };
+#else
+static int pfsFormatArg[1] = { PFS_ZONE_SIZE };
+#endif
 
 #define _OMIT_SYSTEM_PARTITION
 //#define DEBUG
@@ -73,7 +80,6 @@ int hddCheckFormatted()
 
 int hddFormat()
 {
-	int formatArg[3] = { PFS_ZONE_SIZE, 0x2d66, PFS_FRAGMENT };
 	int retVal;
 
 	if(!hddStatusCurrent)
@@ -83,19 +89,19 @@ int hddFormat()
 	if(retVal < 0)
 		return retVal;
 
-	retVal = fileXioFormat("pfs:", "hdd0:__net", (const char*)&formatArg, sizeof(formatArg));
+	retVal = fileXioFormat("pfs:", "hdd0:__net", (const char*)&pfsFormatArg, sizeof(pfsFormatArg));
 	if(retVal < 0)
 		return retVal;
 
-	retVal = fileXioFormat("pfs:", "hdd0:__system", (const char*)&formatArg, sizeof(formatArg));
+	retVal = fileXioFormat("pfs:", "hdd0:__system", (const char*)&pfsFormatArg, sizeof(pfsFormatArg));
 	if(retVal < 0)
 		return retVal;
 
-	retVal = fileXioFormat("pfs:", "hdd0:__common", (const char*)&formatArg, sizeof(formatArg));
+	retVal = fileXioFormat("pfs:", "hdd0:__common", (const char*)&pfsFormatArg, sizeof(pfsFormatArg));
 	if(retVal < 0)
 		return retVal;
 
-	retVal = fileXioFormat("pfs:", "hdd0:__sysconf", (const char*)&formatArg, sizeof(formatArg));
+	retVal = fileXioFormat("pfs:", "hdd0:__sysconf", (const char*)&pfsFormatArg, sizeof(pfsFormatArg));
 	if(retVal < 0)
 		return retVal;
 
@@ -290,7 +296,6 @@ static int sizesMB[9] = {
 
 int hddMakeFilesystem(int fsSizeMB, char *name, int type)
 {
-	int formatArg[3] = { PFS_ZONE_SIZE, 0x2d66, PFS_FRAGMENT };
 	int maxIndex;
 	int useIndex;
 	int partSize;
@@ -348,12 +353,16 @@ int hddMakeFilesystem(int fsSizeMB, char *name, int type)
 #endif
 
 		partFd = fileXioOpen(openString, O_RDWR | O_CREAT, 0);
-		if((partFd < 0) && (partFd != -ENOSPC))
-		{
+		if(partFd >= 0)
+			break;
+		else {
+			if(partFd != -ENOSPC)
+			{
 #ifdef DEBUG
-			printf(">>> Could not create Main Partition (error %d)!\n", partFd);
+				printf(">>> Could not create Main Partition (error %d)!\n", partFd);
 #endif
-			return partFd;
+				return partFd;
+			}
 		}
 	}
 
@@ -435,7 +444,7 @@ int hddMakeFilesystem(int fsSizeMB, char *name, int type)
 	fileXioClose(partFd);
 
 	sprintf(openString, "hdd0:%s", fsName);
-	retVal = fileXioFormat("pfs:", openString, (const char*)&formatArg, sizeof(formatArg));
+	retVal = fileXioFormat("pfs:", openString, (const char*)&pfsFormatArg, sizeof(pfsFormatArg));
 	if(retVal < 0)
 	{
 #ifdef DEBUG
