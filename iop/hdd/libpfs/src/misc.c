@@ -71,7 +71,7 @@ int pfsFsckStat(pfs_mount_t *pfsMount, pfs_super_block_t *superblock,
 	u32 stat, int mode)
 {	// mode 0=set flag, 1=remove flag, else check stat
 
-	if(pfsMount->blockDev->transfer(pfsMount->fd, superblock, 0, PFS_BLOCKSIZE, 1,
+	if(pfsMount->blockDev->transfer(pfsMount->fd, superblock, 0, PFS_SUPER_SECTOR, 1,
 		PFS_IO_MODE_READ)==0)
 	{
 		switch(mode)
@@ -85,7 +85,7 @@ int pfsFsckStat(pfs_mount_t *pfsMount, pfs_super_block_t *superblock,
 			default/*PFS_MODE_CHECK_FLAG*/:
 				return 0 < (superblock->pfsFsckStat & stat);
 		}
-		pfsMount->blockDev->transfer(pfsMount->fd, superblock, 0, PFS_BLOCKSIZE, 1,
+		pfsMount->blockDev->transfer(pfsMount->fd, superblock, 0, PFS_SUPER_SECTOR, 1,
 			PFS_IO_MODE_WRITE);
 		pfsMount->blockDev->flushCache(pfsMount->fd);
 	}

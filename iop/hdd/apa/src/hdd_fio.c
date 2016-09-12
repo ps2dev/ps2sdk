@@ -820,7 +820,7 @@ static int ioctl2DeleteLastSub(hdd_file_slot_t *fileSlot)
 int hddIoctl2(iop_file_t *f, int req, void *argp, unsigned int arglen,
 			  void *bufp, unsigned int buflen)
 {
-	u32 rv=0;
+	u32 rv=0, err_lba;
 	hdd_file_slot_t *fileSlot=f->privdata;
 
 	WaitSema(fioSema);
@@ -857,8 +857,8 @@ int hddIoctl2(iop_file_t *f, int req, void *argp, unsigned int arglen,
 		break;
 
 	case HIOCGETPARTERROR:
-		if((rv=apaGetPartErrorSector(f->unit, APA_SECTOR_PART_ERROR, bufp)) > 0) {
-			if(*(u32 *)bufp==fileSlot->parts[0].start) {
+		if((rv=apaGetPartErrorSector(f->unit, APA_SECTOR_PART_ERROR, &err_lba)) > 0) {
+			if(err_lba==fileSlot->parts[0].start) {
 				rv=0; apaSetPartErrorSector(f->unit, 0);// clear last error :)
 			}
 		}
