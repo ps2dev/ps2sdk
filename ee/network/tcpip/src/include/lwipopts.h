@@ -85,12 +85,12 @@
  * instead of the lwip internal allocator. Can save code size if you
  * already use it.
  */
-#define MEM_LIBC_MALLOC		1
+#define MEM_LIBC_MALLOC		1	//SP193: This makes PBUFs aligned to 16-byte boundaries, as a side-effect.
 
 /* MEM_ALIGNMENT: should be set to the alignment of the CPU for which
    lwIP is compiled. 4 byte alignment -> define MEM_ALIGNMENT to 4, 2
    byte alignment -> define MEM_ALIGNMENT to 2. */
-#define MEM_ALIGNMENT		4
+#define MEM_ALIGNMENT		4	//SP193: this should be 16 in order to support the R5900's DMAC. But 16 is not supported.
 
 /*
    ------------------------------------------------
@@ -141,13 +141,6 @@
  * Also notice that this slows down input processing of every IP packet!
  */
 #define ETHARP_TRUST_IP_MAC	1
-
-/** ETH_PAD_SIZE: number of bytes added before the ethernet header to ensure
- * alignment of payload after that header. Since the header is 14 bytes long,
- * without this padding e.g. addresses in the IP header will not be aligned
- * on a 32-bit boundary, so setting this to 2 can speed up 32-bit-platforms.
- */
-//#define ETH_PAD_SIZE	2	//SP193: Why doesn't this work correctly?
 
 /* ---------- DHCP options ---------- */
 #ifdef PS2IP_DHCP

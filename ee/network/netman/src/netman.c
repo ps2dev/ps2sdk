@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <string.h>
+#include <kernel.h>
 #include <netman.h>
 #include <netman_rpc.h>
 
@@ -16,32 +17,37 @@ static char NIFLinkState = 0;
 	which would prevent the stack from performing some actions like sending Gratuitous Arp packets.
 
 	The NIF status updated will be sent again when the RPC is fully initialized, as shown in NetManRegisterNetworkStack().	*/
-void NetManToggleGlobalNetIFLinkState(unsigned char state){
+void NetManToggleGlobalNetIFLinkState(unsigned char state)
+{
 	NIFLinkState = state;
 
 	NetManUpdateStackNIFLinkState();
 }
 
-int NetManGetGlobalNetIFLinkState(void){
+int NetManGetGlobalNetIFLinkState(void)
+{
 	return NIFLinkState;
 }
 
-void NetManUpdateStackNIFLinkState(void){
-	if(IsNetStackInitialized){
-		if(NIFLinkState){
+void NetManUpdateStackNIFLinkState(void)
+{
+	if(IsNetStackInitialized)
+	{
+		if(NIFLinkState)
 			MainNetProtStack.LinkStateUp();
-		}
-		else{
+		else
 			MainNetProtStack.LinkStateDown();
-		}
 	}
 }
 
-int NetManInit(void){
+int NetManInit(void)
+{
 	int result;
 
-	if(!IsInitialized){
-		if((result=NetManInitRPCServer())==0){
+	if(!IsInitialized)
+	{
+		if((result=NetManInitRPCServer())==0)
+		{
 			if((result=NetManInitRPCClient())==0) IsInitialized = 1;
 		}
 	}else result = 0;
@@ -49,8 +55,10 @@ int NetManInit(void){
 	return result;
 }
 
-void NetManDeinit(void){
-	if(IsInitialized){
+void NetManDeinit(void)
+{
+	if(IsInitialized)
+	{
 		NetManUnregisterNetworkStack();
 
 		NetManDeinitRPCClient();
@@ -59,12 +67,16 @@ void NetManDeinit(void){
 	}
 }
 
-int NetManRegisterNetworkStack(const struct NetManNetProtStack *stack){
+int NetManRegisterNetworkStack(const struct NetManNetProtStack *stack)
+{
 	int result;
 
-	if((result=NetManInit())==0){
-		if(!IsNetStackInitialized){
-			if((result=NetManRPCRegisterNetworkStack())==0){
+	if((result=NetManInit())==0)
+	{
+		if(!IsNetStackInitialized)
+		{
+			if((result=NetManRPCRegisterNetworkStack())==0)
+			{
 				memcpy(&MainNetProtStack, stack, sizeof(MainNetProtStack));
 				IsNetStackInitialized=1;
 				NetManUpdateStackNIFLinkState();
@@ -76,8 +88,10 @@ int NetManRegisterNetworkStack(const struct NetManNetProtStack *stack){
 	return result;
 }
 
-void NetManUnregisterNetworkStack(void){
-	if(IsNetStackInitialized){
+void NetManUnregisterNetworkStack(void)
+{
+	if(IsNetStackInitialized)
+	{
 		NetManRPCUnregisterNetworkStack();
 		memset(&MainNetProtStack, 0, sizeof(MainNetProtStack));
 
@@ -85,11 +99,13 @@ void NetManUnregisterNetworkStack(void){
 	}
 }
 
-int NetManNetIFSendPacket(const void *packet, unsigned int length){
+int NetManNetIFSendPacket(const void *packet, unsigned int length)
+{
 	return IsInitialized?NetManRpcNetIFSendPacket(packet, length):-1;
 }
 
-int NetManIoctl(unsigned int command, void *arg, unsigned int arg_len, void *output, unsigned int length){
+int NetManIoctl(unsigned int command, void *arg, unsigned int arg_len, void *output, unsigned int length)
+{
 	return IsInitialized?NetManRpcIoctl(command, arg, arg_len, output, length):-1;
 }
 
@@ -97,14 +113,17 @@ struct NetManPacketBuffer *NetManNetProtStackAllocRxPacket(unsigned int length){
 	return IsNetStackInitialized?MainNetProtStack.AllocRxPacket(length):NULL;
 }
 
-void NetManNetProtStackFreeRxPacket(struct NetManPacketBuffer *packet){
+void NetManNetProtStackFreeRxPacket(struct NetManPacketBuffer *packet)
+{
 	if(IsNetStackInitialized) MainNetProtStack.FreeRxPacket(packet);
 }
 
-int NetManNetProtStackEnQRxPacket(struct NetManPacketBuffer *packet){
+int NetManNetProtStackEnQRxPacket(struct NetManPacketBuffer *packet)
+{
 	return IsNetStackInitialized?MainNetProtStack.EnQRxPacket(packet):-1;
 }
 
-int NetManNetProtStackFlushInputQueue(void){
+int NetManNetProtStackFlushInputQueue(void)
+{
 	return IsNetStackInitialized?MainNetProtStack.FlushInputQueue():-1;
 }

@@ -1,4 +1,5 @@
-#define NETMAN_RPC_NUMBER 0x00004239
+#define NETMAN_RPC_NUMBER	0x00004239
+#define NETMAN_RPC_BUFF_SIZE	128
 
 enum NETMAN_EE_RPC_FUNC_NUMS{
 	NETMAN_EE_RPC_FUNC_INIT=0x00,
@@ -19,54 +20,38 @@ enum NETMAN_IOP_RPC_FUNC_NUMS{
 	NETMAN_IOP_RPC_FUNC_SET_LINK_MODE,
 };
 
-struct AlignmentData{
-	void *buffer1Address;
-	void *buffer2Address;
-	unsigned int buffer1_len;
-	unsigned int buffer2_len;
-
-	unsigned char buffer1[64];
-	unsigned char buffer2[64];
-};
-
 struct NetManEEInitResult{
-	int result;
+	s32 result;
 	void *FrameBuffer;
 };
 
 struct NetManRegNetworkStackResult{
-	int result;
+	s32 result;
 	void *FrameBuffer;
 };
 
 struct NetManQueryMainNetIFResult{
-	int result;
-	char name[NETMAN_NETIF_NAME_MAX_LEN];
+	s32 result;
+	s8 name[NETMAN_NETIF_NAME_MAX_LEN];
 };
 
-#define MAX_FRAME_SIZE		1518
-#define NETMAN_RPC_BLOCK_SIZE	31
-
-struct PacketTag{
-	unsigned int length;
-	unsigned int offset;
-};
+#define NETMAN_MAX_FRAME_SIZE	1520
+#define NETMAN_RPC_BLOCK_SIZE	63
 
 struct PacketReqs{
-	unsigned int NumPackets;
-	unsigned int TotalLength;
-	struct PacketTag tags[NETMAN_RPC_BLOCK_SIZE];
+	u16 count;
+	u16 length[NETMAN_RPC_BLOCK_SIZE];
 };
 
 struct NetManIoctl{
-	unsigned int command;
-	unsigned char args[64];
-	unsigned char args_len;
+	u32 command;
+	u8 args[64];
+	u8 args_len;
 	void *output;
-	unsigned int length;
+	u32 length;
 };
 
 struct NetManIoctlResult{
-	int result;
-	unsigned char output[64];
+	s32 result;
+	u8 output[64];
 };

@@ -17,38 +17,45 @@
 
 /* Data used for registering the RPC server. */
 static SifRpcServerData_t rpc_sdata;
-static unsigned char rpc_buffer[(sizeof(struct PacketReqs)+0xF)&~0xF];
+static unsigned char rpc_buffer[NETMAN_RPC_BUFF_SIZE];
 static SifRpcDataQueue_t rpc_qdata;
 
 static unsigned char SifRpcTxBuffer[80];
 
 /* Packet transmission buffer. The EE will DMA transfer the packet to be transmitted directly into this buffer before invoking FUNC_SEND_PACKET. */
-static void *TxPacketBuffer = NULL;
+static u8 *TxFrameBuffer = NULL;
+static unsigned short int IOPFrameBufferRdPtr;
 
 static int RpcThreadID = -1;
 static unsigned char IsInitialized=0, IsRpcStackInitialized=0;
 
-static void LinkStateUp(void){
+static void LinkStateUp(void)
+{
 	NetManRpcToggleGlobalNetIFLinkState(1);
 }
 
-static void LinkStateDown(void){
+static void LinkStateDown(void)
+{
 	NetManRpcToggleGlobalNetIFLinkState(0);
 }
 
-static struct NetManPacketBuffer *AllocRxPacket(unsigned int length){
+static struct NetManPacketBuffer *AllocRxPacket(unsigned int length)
+{
 	return NetManRpcNetProtStackAllocRxPacket(length);
 }
 
-static void FreeRxPacket(struct NetManPacketBuffer *packet){
+static void FreeRxPacket(struct NetManPacketBuffer *packet)
+{
 	NetManRpcNetProtStackFreeRxPacket(packet);
 }
 
-static int EnQRxPacket(struct NetManPacketBuffer *packet){
+static int EnQRxPacket(struct NetManPacketBuffer *packet)
+{
 	return NetManRpcProtStackEnQRxPacket(packet);
 }
 
-static int FlushInputQueue(void){
+static int FlushInputQueue(void)
+{
 	return NetmanRpcFlushInputQueue();
 }
 
@@ -61,25 +68,33 @@ static struct NetManNetProtStack RpcStack={
 	&FlushInputQueue
 };
 
-static void unregisterEENetworkStack(void){
-	if(IsRpcStackInitialized){
+static void unregisterEENetworkStack(void)
+{
+	if(IsRpcStackInitialized)
+	{
 		IsRpcStackInitialized=0;
 		NetManUnregisterNetworkStack();
 
-		if(TxPacketBuffer != NULL){
-			free(TxPacketBuffer);
-			TxPacketBuffer = NULL;
+		if(TxFrameBuffer != NULL)
+		{
+			free(TxFrameBuffer);
+			TxFrameBuffer = NULL;
 		}
+
+		IOPFrameBufferRdPtr = 0;
 	}
 }
 
-static void *NETMAN_rpc_handler(int fno, void *buffer, int size){
+static void *NETMAN_rpc_handler(int fno, void *buffer, int size)
+{
 	static int ResultValue;
 	void *result;
 	unsigned int i;
 
-	switch(fno){
+	switch(fno)
+	{
 		case NETMAN_IOP_RPC_FUNC_INIT:
+			IOPFrameBufferRdPtr = 0;
 			ResultValue=NetManInitRPCClient();
 			result=&ResultValue;
 			break;
@@ -91,10 +106,11 @@ static void *NETMAN_rpc_handler(int fno, void *buffer, int size){
 		case NETMAN_IOP_RPC_FUNC_REG_NETWORK_STACK:
 			result = SifRpcTxBuffer;
 
-			if(TxPacketBuffer == NULL) TxPacketBuffer = malloc((MAX_FRAME_SIZE*NETMAN_RPC_BLOCK_SIZE+0xF) & ~0xF);
+			if(TxFrameBuffer == NULL) TxFrameBuffer = malloc(NETMAN_MAX_FRAME_SIZE*NETMAN_RPC_BLOCK_SIZE);
 
-			if(TxPacketBuffer != NULL){
-				((struct NetManRegNetworkStackResult *)SifRpcTxBuffer)->FrameBuffer = TxPacketBuffer;
+			if(TxFrameBuffer != NULL)
+			{
+				((struct NetManRegNetworkStackResult *)SifRpcTxBuffer)->FrameBuffer = TxFrameBuffer;
 				ResultValue = NetManRegisterNetworkStack(&RpcStack);
 			}else{
 				ResultValue = -ENOMEM;
@@ -108,13 +124,17 @@ static void *NETMAN_rpc_handler(int fno, void *buffer, int size){
 			result=NULL;
 			break;
 		case NETMAN_IOP_RPC_FUNC_SEND_PACKETS:
-			if(TxPacketBuffer!=NULL){
-				for(i=0; i<((struct PacketReqs*)buffer)->NumPackets; i++){
-					NetManNetIFSendPacket(&((unsigned char*)TxPacketBuffer)[((struct PacketReqs*)buffer)->tags[i].offset], ((struct PacketReqs*)buffer)->tags[i].length);
+			if(TxFrameBuffer!=NULL)
+			{
+				for(i=0; i<((struct PacketReqs*)buffer)->count; i++)
+				{
+					NetManNetIFSendPacket(&TxFrameBuffer[IOPFrameBufferRdPtr * NETMAN_MAX_FRAME_SIZE], ((struct PacketReqs*)buffer)->length[IOPFrameBufferRdPtr]);
+					//Increment read pointer by one place.
+					IOPFrameBufferRdPtr = (IOPFrameBufferRdPtr + 1) % NETMAN_RPC_BLOCK_SIZE;
 				}
 
-				ResultValue=0;
-			}else ResultValue=-1;
+				ResultValue = i;
+			}else ResultValue = 0;
 
 			result=&ResultValue;
 			break;
@@ -123,7 +143,7 @@ static void *NETMAN_rpc_handler(int fno, void *buffer, int size){
 			result=SifRpcTxBuffer;
 			break;
 		case NETMAN_IOP_RPC_FUNC_SET_MAIN_NETIF:
-			*(int*)SifRpcTxBuffer=NetManSetMainIF(buffer);
+			*(s32*)SifRpcTxBuffer=NetManSetMainIF(buffer);
 			result=SifRpcTxBuffer;
 			break;
 		case NETMAN_IOP_RPC_FUNC_QUERY_MAIN_NETIF:
@@ -131,7 +151,7 @@ static void *NETMAN_rpc_handler(int fno, void *buffer, int size){
 			result=SifRpcTxBuffer;
 			break;
 		case NETMAN_IOP_RPC_FUNC_SET_LINK_MODE:
-			ResultValue=NetManSetLinkMode(*(int*)buffer);
+			ResultValue=NetManSetLinkMode(*(s32*)buffer);
 			result=&ResultValue;
 			break;
 		default:
@@ -143,22 +163,25 @@ static void *NETMAN_rpc_handler(int fno, void *buffer, int size){
 	return result;
 }
 
-static void NETMAN_RPC_srv(void *args){
-	sceSifSetRpcQueue(&rpc_qdata, GetThreadId());
+static void NETMAN_RPC_srv(void *args)
+{
+	sceSifSetRpcQueue(&rpc_qdata, RpcThreadID);
 
 	sceSifRegisterRpc(&rpc_sdata, NETMAN_RPC_NUMBER, &NETMAN_rpc_handler, rpc_buffer, NULL, NULL, &rpc_qdata);
 	sceSifRpcLoop(&rpc_qdata);
 }
 
-int NetmanInitRPCServer(void){
+int NetmanInitRPCServer(void)
+{
 	iop_thread_t ThreadData;
 
-	if(!IsInitialized){
+	if(!IsInitialized)
+	{
 		ThreadData.attr=TH_C;
 		ThreadData.option=0;
 		ThreadData.thread=&NETMAN_RPC_srv;
-		ThreadData.stacksize=0x800;
-		ThreadData.priority=0x27;
+		ThreadData.stacksize=0x600;
+		ThreadData.priority=0x27;	//Should have higher priority than the IF driver thread, but lower priority than the receive thread.
 
 		StartThread(RpcThreadID=CreateThread(&ThreadData), NULL);
 		IsInitialized=1;
@@ -167,29 +190,12 @@ int NetmanInitRPCServer(void){
 	return 0;
 }
 
-void NetmanDeinitRPCServer(void){
-	if(IsInitialized){
+void NetmanDeinitRPCServer(void)
+{
+	if(IsInitialized)
+	{
 		TerminateThread(RpcThreadID);
 		DeleteThread(RpcThreadID);
 		IsInitialized=0;
 	}
 }
-
-int DMATransferDataToEEAligned(const void *src, void *dest, unsigned int size){
-	SifDmaTransfer_t dmat;
-	int DMATransferID, oldstate;
-
-	dmat.src=(void *)src;
-	dmat.dest=dest;
-	dmat.size=size;
-	dmat.attr=0;
-
-	do{
-		CpuSuspendIntr(&oldstate);
-		DMATransferID=sceSifSetDma(&dmat, 1);
-		CpuResumeIntr(oldstate);
-	}while(DMATransferID==0);
-
-	return DMATransferID;
-}
-
