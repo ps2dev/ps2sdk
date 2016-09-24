@@ -12,11 +12,12 @@
 		the private_5 field of the stat structure (returned by getstat and dread). */
 //#define APA_OSD_VER	1
 
-#ifndef APA_OSD_VER
-#define APA_ENABLE_PASSWORDS		1
-#define APA_FORMAT_LOCK_MBR		1
-#define APA_FORMAT_MAKE_PARTITIONS	1
+#ifdef APA_OSD_VER
 #define APA_STAT_RETURN_PART_LBA	1
+#define APA_FORMAT_LOCK_MBR		1
+#else
+#define APA_ENABLE_PASSWORDS		1
+#define APA_FORMAT_MAKE_PARTITIONS	1
 #endif
 
 #endif
