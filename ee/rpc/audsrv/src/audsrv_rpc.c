@@ -32,8 +32,8 @@
 /* rpc mambo jambo */
 static struct t_SifRpcClientData cd0;
 static unsigned int sbuff[4096] __attribute__((aligned (64)));
-static struct t_SifRpcDataQueue cb_queue __attribute__((aligned(64)));
-static struct t_SifRpcServerData cb_srv __attribute__((aligned(64)));
+static struct t_SifRpcDataQueue cb_queue;
+static struct t_SifRpcServerData cb_srv;
 static unsigned char rpc_server_stack[0x1800] __attribute__((aligned (16)));
 
 extern void *_gp;
