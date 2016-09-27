@@ -85,7 +85,7 @@
  * instead of the lwip internal allocator. Can save code size if you
  * already use it.
  */
-#define MEM_LIBC_MALLOC		1	//SP193: This makes PBUFs aligned to 16-byte boundaries, as a side-effect.
+#define MEM_LIBC_MALLOC		1
 
 /* MEM_ALIGNMENT: should be set to the alignment of the CPU for which
    lwIP is compiled. 4 byte alignment -> define MEM_ALIGNMENT to 4, 2
@@ -106,7 +106,7 @@
 /**
  * PBUF_POOL_SIZE: the number of buffers in the pbuf pool.
  */
-#define PBUF_POOL_SIZE		60	//SP193: should be at least ((TCP_WND/PBUF_POOL_BUFSIZE)+1). But that is too small to handle simultaneous connections.
+#define PBUF_POOL_SIZE		16	//SP193: should be at least ((TCP_WND/PBUF_POOL_BUFSIZE)+1). But that is too small to handle simultaneous connections.
 
 /** SYS_LIGHTWEIGHT_PROT
  * define SYS_LIGHTWEIGHT_PROT in lwipopts.h if you want inter-task protection
@@ -127,7 +127,7 @@
 #define TCP_SND_BUF             (TCP_MSS*4)
 
 /* TCP receive window. */
-#define TCP_WND                 65535
+#define TCP_WND                 16384	//The SMAP Rx buffer is 16384 bytes in size.
 
 /* ---------- ARP options ---------- */
 /**

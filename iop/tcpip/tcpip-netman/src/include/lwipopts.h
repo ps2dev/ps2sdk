@@ -1,3 +1,6 @@
+/*	If changes are made to this file, please update the defined
+	values at the bottom of common/include/tcpip.h too.	*/
+
 #ifndef __LWIPOPTS_H__
 #define __LWIPOPTS_H__
 
@@ -103,7 +106,7 @@
 /**
  * PBUF_POOL_SIZE: the number of buffers in the pbuf pool.
  */
-#define PBUF_POOL_SIZE		25	//SP193: should be at least ((TCP_WND/PBUF_POOL_BUFSIZE)+1). But that is too small to handle simultaneous connections.
+#define PBUF_POOL_SIZE		16	//SP193: should be at least ((TCP_WND/PBUF_POOL_BUFSIZE)+1). But that is too small to handle simultaneous connections.
 
 /** SYS_LIGHTWEIGHT_PROT
  * define SYS_LIGHTWEIGHT_PROT in lwipopts.h if you want inter-task protection
@@ -124,7 +127,7 @@
 #define TCP_SND_BUF             (TCP_MSS*4)
 
 /* TCP receive window. */
-#define TCP_WND                 32768
+#define TCP_WND                 16384	//The SMAP Rx buffer is 16384 bytes in size.
 
 /* ---------- ARP options ---------- */
 /**
@@ -138,13 +141,6 @@
  * Also notice that this slows down input processing of every IP packet!
  */
 #define ETHARP_TRUST_IP_MAC	1
-
-/** ETH_PAD_SIZE: number of bytes added before the ethernet header to ensure
- * alignment of payload after that header. Since the header is 14 bytes long,
- * without this padding e.g. addresses in the IP header will not be aligned
- * on a 32-bit boundary, so setting this to 2 can speed up 32-bit-platforms.
- */
-//#define ETH_PAD_SIZE	2	//SP193: Why doesn't this work correctly?
 
 /* ---------- DHCP options ---------- */
 #ifdef PS2IP_DHCP

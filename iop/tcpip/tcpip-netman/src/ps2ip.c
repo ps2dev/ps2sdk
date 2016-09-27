@@ -173,7 +173,7 @@ static void TimerThread(void* pvArg)
 		}
 #endif
 
-		DelayThread(TCP_TMR_INTERVAL*250);	/* Note: The IOP's DelayThread() function isn't accurate, and the actual timming accuracy is about 25% of the specified value. */
+		DelayThread(TCP_TMR_INTERVAL*250);
 	}
 }
 
@@ -241,17 +241,18 @@ static void LinkStateDown(void){
 #define LWIP_STACK_MAX_RX_PBUFS	16
 
 struct NetManPacketBuffer pbufs[LWIP_STACK_MAX_RX_PBUFS];
-static unsigned short int NetManRxPacketBufferPoolFreeStart;
+static unsigned short int NetManRxPacketBufferPoolFreeStart, RxPBufsFree;
 static struct NetManPacketBuffer *recv_pbuf_queue_start, *recv_pbuf_queue_end;
-static unsigned int RxPBufsFree;
 
-static struct NetManPacketBuffer *AllocRxPacket(unsigned int size){
+static struct NetManPacketBuffer *AllocRxPacket(unsigned int size)
+{
 	struct pbuf* pBuf;
 	struct NetManPacketBuffer *result;
 
-	if(RxPBufsFree>0 && ((pBuf=pbuf_alloc(PBUF_RAW, size, PBUF_POOL))!=NULL)){
-		result=&pbufs[NetManRxPacketBufferPoolFreeStart++];
-		if(NetManRxPacketBufferPoolFreeStart>=LWIP_STACK_MAX_RX_PBUFS) NetManRxPacketBufferPoolFreeStart=0;
+	if(RxPBufsFree>0 && ((pBuf=pbuf_alloc(PBUF_RAW, size, PBUF_POOL))!=NULL))
+	{
+		result=&pbufs[NetManRxPacketBufferPoolFreeStart];
+		NetManRxPacketBufferPoolFreeStart = (NetManRxPacketBufferPoolFreeStart + 1) % LWIP_STACK_MAX_RX_PBUFS;
 
 		result->payload=pBuf->payload;
 		result->handle=pBuf;
@@ -264,44 +265,29 @@ static struct NetManPacketBuffer *AllocRxPacket(unsigned int size){
 	return result;
 }
 
-static void FreeRxPacket(struct NetManPacketBuffer *packet){
+static void FreeRxPacket(struct NetManPacketBuffer *packet)
+{
 	pbuf_free(packet->handle);
 }
 
-static int EnQRxPacket(struct NetManPacketBuffer *packet){
-	if(recv_pbuf_queue_start==NULL){	//If there are currently no packets in the queue.
-		recv_pbuf_queue_start=packet;
-	}
-	else{
-		recv_pbuf_queue_end->next=packet;	//If there is currently a packet in the queue, this packet shall go after it.
-	}
-
-	packet->next=NULL;
-	recv_pbuf_queue_end=packet;	//Add the packet to the queue.
+static int EnQRxPacket(struct NetManPacketBuffer *packet)
+{
+	ps2ip_input(packet->handle, &NIF);
+	RxPBufsFree++;
 
 	return 0;
 }
 
-static int FlushInputQueue(void){
-	struct NetManPacketBuffer* pbuf;
-
-	if((pbuf=recv_pbuf_queue_start)!=NULL){
-		do{
-			ps2ip_input(pbuf->handle, &NIF);
-		}while((pbuf=pbuf->next)!=NULL);
-
-		recv_pbuf_queue_start=recv_pbuf_queue_end=NULL;
-
-		RxPBufsFree=LWIP_STACK_MAX_RX_PBUFS;
-	}
-
+static int FlushInputQueue(void)
+{
+	RxPBufsFree = LWIP_STACK_MAX_RX_PBUFS;
 	return 0;
 }
 
 static err_t
 SMapLowLevelOutput(struct netif *pNetIF, struct pbuf* pOutput)
 {
-	static unsigned char buffer[1600];
+	static u8 buffer[1518];
 	struct pbuf* pbuf;
 	unsigned char *buffer_ptr;
 	unsigned short int TotalLength;
@@ -309,14 +295,14 @@ SMapLowLevelOutput(struct netif *pNetIF, struct pbuf* pOutput)
 	pbuf=pOutput;
 	buffer_ptr=buffer;
 	TotalLength=0;
-	while(pbuf!=NULL){
+	while(pbuf!=NULL)
+	{
 		memcpy(buffer_ptr, pbuf->payload, pbuf->len);
 		TotalLength+=pbuf->len;
 		buffer_ptr+=pbuf->len;
 		pbuf=pbuf->next;
 	}
 
-	//return NetManNetIFSendPacket(buffer, TotalLength)>0?ERR_OK:ERR_IF;
 	NetManNetIFSendPacket(buffer, TotalLength);
 
 	return ERR_OK;
@@ -327,13 +313,15 @@ SMapLowLevelOutput(struct netif *pNetIF, struct pbuf* pOutput)
 //This function is called by the TCP/IP stack when an IP packet should be sent. It'll be invoked in the context of the
 //tcpip-thread, hence no synchronization is required.
 // For LWIP versions before v1.3.0.
-/* static err_t
+#ifdef PRE_LWIP_130_COMPAT
+static err_t
 SMapOutput(struct netif *pNetIF, struct pbuf *pOutput, IPAddr* pIPAddr)
 {
 	struct pbuf *pBuf=etharp_output(pNetIF,pIPAddr,pOutput);
 
 	return	pBuf!=NULL ? SMapLowLevelOutput(pNetIF, pBuf):ERR_OK;
-} */
+}
+#endif
 
 //Should be called at the beginning of the program to set up the network interface.
 static err_t SMapIFInit(struct netif* pNetIF)
@@ -342,12 +330,18 @@ static err_t SMapIFInit(struct netif* pNetIF)
 
 	pNetIF->name[0]='s';
 	pNetIF->name[1]='m';
-//	pNetIF->output=&SMapOutput;	// For LWIP versions before v1.3.0.
+#ifdef PRE_LWIP_130_COMPAT
+	pNetIF->output=&SMapOutput;	// For LWIP versions before v1.3.0.
+#else
 	pNetIF->output=&etharp_output;	// For LWIP 1.3.0 and later.
+#endif
 	pNetIF->linkoutput=&SMapLowLevelOutput;
 	pNetIF->hwaddr_len=NETIF_MAX_HWADDR_LEN;
-//	pNetIF->flags|=(NETIF_FLAG_LINK_UP|NETIF_FLAG_BROADCAST);			// For LWIP versions before v1.3.0.
+#ifdef PRE_LWIP_130_COMPAT
+	pNetIF->flags|=(NETIF_FLAG_LINK_UP|NETIF_FLAG_BROADCAST);	// For LWIP versions before v1.3.0.
+#else
 	pNetIF->flags|=(NETIF_FLAG_ETHARP|NETIF_FLAG_BROADCAST);	// For LWIP v1.3.0 and later.
+#endif
 	pNetIF->mtu=1500;
 
 	//Get MAC address.

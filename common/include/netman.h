@@ -4,8 +4,7 @@
 struct NetManPacketBuffer{
 	void *handle;
 	void *payload;
-	unsigned int length;
-	struct NetManPacketBuffer *next;
+	u32 length;
 };
 
 struct NetManNetProtStack{

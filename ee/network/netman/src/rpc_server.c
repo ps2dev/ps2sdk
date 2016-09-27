@@ -141,6 +141,7 @@ void NetManDeinitRPCServer(void)
 		{
 			TerminateThread(NETMAN_RpcSvr_threadID);
 			DeleteThread(NETMAN_RpcSvr_threadID);
+			NETMAN_RpcSvr_threadID = -1;
 		}
 
 		IsInitialized=0;
