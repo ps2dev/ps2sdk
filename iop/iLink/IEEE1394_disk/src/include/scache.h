@@ -11,18 +11,18 @@
 
 typedef struct _cache_record
 {
-	unsigned int sector;
-	int tax;
-	char writeDirty;
+    unsigned int sector;
+    int tax;
+    char writeDirty;
 } cache_record;
 
 struct _cache_set
 {
-    struct SBP2Device* dev;
+    struct SBP2Device *dev;
     int sectorSize;
     int indexLimit;
-    unsigned char* sectorBuf; // = NULL;		//sector content - the cache buffer
-    cache_record rec[CACHE_SIZE];	//cache info record
+    unsigned char *sectorBuf;      // = NULL;		//sector content - the cache buffer
+    cache_record rec[CACHE_SIZE];  //cache info record
 
     //statistical infos
     unsigned int cacheAccess;
@@ -33,14 +33,14 @@ struct _cache_set
     //unsigned int cacheDumpCounter = 0;
 };
 
-cache_set* scache_init(struct SBP2Device* dev, int sectorSize);
-void scache_close(cache_set* cache);
-void scache_kill(cache_set* cache); //dlanor: added for disconnection events (flush impossible)
-int  scache_allocSector(cache_set* cache, unsigned int sector, void** buf);
-int  scache_readSector(cache_set* cache, unsigned int sector, void** buf);
-int  scache_writeSector(cache_set* cache, unsigned int sector);
-int  scache_flushSectors(cache_set* cache);
+cache_set *scache_init(struct SBP2Device *dev, int sectorSize);
+void scache_close(cache_set *cache);
+void scache_kill(cache_set *cache);  //dlanor: added for disconnection events (flush impossible)
+int scache_allocSector(cache_set *cache, unsigned int sector, void **buf);
+int scache_readSector(cache_set *cache, unsigned int sector, void **buf);
+int scache_writeSector(cache_set *cache, unsigned int sector);
+int scache_flushSectors(cache_set *cache);
 
-void scache_getStat(cache_set* cache, unsigned int* access, unsigned int* hits);
+void scache_getStat(cache_set *cache, unsigned int *access, unsigned int *hits);
 
 #endif

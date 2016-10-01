@@ -26,4 +26,3 @@
 #include "excepman.h"
 
 #endif /* IOP_IRX_IMPORTS_H */
-

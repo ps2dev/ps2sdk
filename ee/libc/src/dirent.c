@@ -8,8 +8,8 @@
 */
 DIR *opendir(const char *path)
 {
-	printf("opendir not implemented\n");
-	return 0;
+    printf("opendir not implemented\n");
+    return 0;
 }
 #endif
 
@@ -20,8 +20,8 @@ DIR *opendir(const char *path)
 */
 struct dirent *readdir(DIR *dir)
 {
-	printf("readdir not implemented\n");
-	return 0;
+    printf("readdir not implemented\n");
+    return 0;
 }
 #endif
 
@@ -31,7 +31,7 @@ struct dirent *readdir(DIR *dir)
 */
 void rewinddir(DIR *dir)
 {
-	printf("rewinddir not implemented\n");
+    printf("rewinddir not implemented\n");
 }
 #endif
 
@@ -42,7 +42,7 @@ void rewinddir(DIR *dir)
 */
 int closedir(DIR *dir)
 {
-	printf("closedir not implemented\n");
-	return 0;
+    printf("closedir not implemented\n");
+    return 0;
 }
 #endif

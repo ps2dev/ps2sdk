@@ -97,102 +97,84 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 extern float PIF, PIO2F;
 
 #ifdef ANSIC
-float sqrtf( float );
+float sqrtf(float);
 
-float asinf( float xx )
+float asinf(float xx)
 #else
 float sqrtf();
 
-float asinf(xx)
-double xx;
+float asinf(xx) double xx;
 #endif
 {
-float a, x, z;
-int sign, flag;
+    float a, x, z;
+    int sign, flag;
 
-x = xx;
+    x = xx;
 
-if( x > 0 )
-	{
-	sign = 1;
-	a = x;
-	}
-else
-	{
-	sign = -1;
-	a = -x;
-	}
+    if (x > 0) {
+        sign = 1;
+        a = x;
+    } else {
+        sign = -1;
+        a = -x;
+    }
 
-if( a > 1.0 )
-	{
-	mtherr( "asinf", DOMAIN );
-	return( 0.0 );
-	}
+    if (a > 1.0) {
+        mtherr("asinf", DOMAIN);
+        return (0.0);
+    }
 
-if( a < 1.0e-4 )
-	{
-	z = a;
-	goto done;
-	}
+    if (a < 1.0e-4) {
+        z = a;
+        goto done;
+    }
 
-if( a > 0.5 )
-	{
-	z = 0.5 * (1.0 - a);
-	x = sqrtf( z );
-	flag = 1;
-	}
-else
-	{
-	x = a;
-	z = x * x;
-	flag = 0;
-	}
+    if (a > 0.5) {
+        z = 0.5 * (1.0 - a);
+        x = sqrtf(z);
+        flag = 1;
+    } else {
+        x = a;
+        z = x * x;
+        flag = 0;
+    }
 
-z =
-(((( 4.2163199048E-2 * z
-  + 2.4181311049E-2) * z
-  + 4.5470025998E-2) * z
-  + 7.4953002686E-2) * z
-  + 1.6666752422E-1) * z * x
-  + x;
+    z =
+        ((((4.2163199048E-2 * z + 2.4181311049E-2) * z + 4.5470025998E-2) * z + 7.4953002686E-2) * z + 1.6666752422E-1) * z * x + x;
 
-if( flag != 0 )
-	{
-	z = z + z;
-	z = PIO2F - z;
-	}
+    if (flag != 0) {
+        z = z + z;
+        z = PIO2F - z;
+    }
 done:
-if( sign < 0 )
-	z = -z;
-return( z );
+    if (sign < 0)
+        z = -z;
+    return (z);
 }
-
 
 
 
 #ifdef ANSIC
-float acosf( float x )
+float acosf(float x)
 #else
-float acosf(x)
-double x;
+float acosf(x) double x;
 #endif
 {
 
-if( x < -1.0 )
-	goto domerr;
+    if (x < -1.0)
+        goto domerr;
 
-if( x < -0.5)
-	return( PIF - 2.0 * asinf( sqrtf(0.5*(1.0+x)) ) );
+    if (x < -0.5)
+        return (PIF - 2.0 * asinf(sqrtf(0.5 * (1.0 + x))));
 
-if( x > 1.0 )
-	{
-domerr:	mtherr( "acosf", DOMAIN );
-	return( 0.0 );
-	}
+    if (x > 1.0) {
+    domerr:
+        mtherr("acosf", DOMAIN);
+        return (0.0);
+    }
 
-if( x > 0.5 )
-	return( 2.0 * asinf(  sqrtf(0.5*(1.0-x) ) ) );
+    if (x > 0.5)
+        return (2.0 * asinf(sqrtf(0.5 * (1.0 - x))));
 
-return( PIO2F - asinf(x) );
+    return (PIO2F - asinf(x));
 }
-

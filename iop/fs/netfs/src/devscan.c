@@ -30,13 +30,15 @@
 #ifdef DEBUG
 #define dbgprintf(args...) printf(args)
 #else
-#define dbgprintf(args...) do { } while(0)
+#define dbgprintf(args...) \
+    do {                   \
+    } while (0)
 #endif
 
 /*! \brief Device type structure.
  *  \ingroup ps2netfs
  */
-static dev_table_t dev_info_list[DEVSCAN_MAX+1]; /* one for padding */
+static dev_table_t dev_info_list[DEVSCAN_MAX + 1]; /* one for padding */
 
 /*! \brief Get pointer to module structure for named module.
  *  \ingroup ps2netfs
@@ -50,17 +52,16 @@ static dev_table_t dev_info_list[DEVSCAN_MAX+1]; /* one for padding */
  */
 ModuleInfo_t *devscan_getmodule(const char *name)
 {
-  ModuleInfo_t *modptr;
-  int len = strlen(name)+1;
+    ModuleInfo_t *modptr;
+    int len = strlen(name) + 1;
 
-  modptr = GetLoadcoreInternalData()->image_info;
-  while (modptr != 0)
-  {
-    if (!memcmp(modptr->name, name, len))
-      return modptr;
-    modptr = modptr->next;
-  }
-  return 0;
+    modptr = GetLoadcoreInternalData()->image_info;
+    while (modptr != 0) {
+        if (!memcmp(modptr->name, name, len))
+            return modptr;
+        modptr = modptr->next;
+    }
+    return 0;
 }
 
 /*! \brief Initialise the devices table
@@ -76,60 +77,54 @@ ModuleInfo_t *devscan_getmodule(const char *name)
  */
 int devscan_setup(int devtype)
 {
-  ModuleInfo_t *info;
-  iop_device_t **devinfo_table;
-  int i;
-  int  count = 0;
+    ModuleInfo_t *info;
+    iop_device_t **devinfo_table;
+    int i;
+    int count = 0;
 
-  dbgprintf("devscan: setup\n");
-  // clear device list
-  memset(&dev_info_list,0,sizeof(dev_info_list));
+    dbgprintf("devscan: setup\n");
+    // clear device list
+    memset(&dev_info_list, 0, sizeof(dev_info_list));
 
-  /* do the ioman devices */
-  if ((info = devscan_getmodule(IOPMGR_IOMAN_IDENT)))
-  {
-    /* Find the start of the device info array, in .bss.  */
-    devinfo_table = (iop_device_t **)(info->text_start + info->text_size + info->data_size + 0x0c);
+    /* do the ioman devices */
+    if ((info = devscan_getmodule(IOPMGR_IOMAN_IDENT))) {
+        /* Find the start of the device info array, in .bss.  */
+        devinfo_table = (iop_device_t **)(info->text_start + info->text_size + info->data_size + 0x0c);
 
-    /* The device info table had 16 entries, but some may be empty.  Just look at all of them.  */
-    for (i = 0; i < DEVSCAN_IOMAX; i++)
-    {
-      if (devinfo_table[i])
-        if ((devinfo_table[i]->type & devtype))
-        {
-          dev_info_list[count].devtype = IOPMGR_DEVTYPE_IOMAN;
-          strncpy(dev_info_list[count].name,devinfo_table[i]->name,255);
-          dev_info_list[count].name[255] = '\0';
-          dev_info_list[count].len = strlen(dev_info_list[count].name);
-          dbgprintf("devscan: ioman '%s'\n",dev_info_list[count].name);
-          count++;
+        /* The device info table had 16 entries, but some may be empty.  Just look at all of them.  */
+        for (i = 0; i < DEVSCAN_IOMAX; i++) {
+            if (devinfo_table[i])
+                if ((devinfo_table[i]->type & devtype)) {
+                    dev_info_list[count].devtype = IOPMGR_DEVTYPE_IOMAN;
+                    strncpy(dev_info_list[count].name, devinfo_table[i]->name, 255);
+                    dev_info_list[count].name[255] = '\0';
+                    dev_info_list[count].len = strlen(dev_info_list[count].name);
+                    dbgprintf("devscan: ioman '%s'\n", dev_info_list[count].name);
+                    count++;
+                }
         }
     }
-  }
 
-  /* do the iomanx devices */
-  if ((info = devscan_getmodule(IOPMGR_IOMANX_IDENT)))
-  {
-    /* Find the start of the device info array, in .bss.  */
-    devinfo_table = (iop_device_t **)(info->text_start + info->text_size + info->data_size);
+    /* do the iomanx devices */
+    if ((info = devscan_getmodule(IOPMGR_IOMANX_IDENT))) {
+        /* Find the start of the device info array, in .bss.  */
+        devinfo_table = (iop_device_t **)(info->text_start + info->text_size + info->data_size);
 
-    /* The device info table had 32 entries, but some may be empty.  Just look at all of them.  */
-    for (i = 0; i < DEVSCAN_IOXMAX; i++)
-    {
-      if (devinfo_table[i])
-        /* only add iomanx ones here, so must have extended flag set  else we get duplication with new iomanx */
-        if ((devinfo_table[i]->type & IOP_DT_FSEXT) && (devinfo_table[i]->type & devtype))
-        {
-          dev_info_list[count].devtype = IOPMGR_DEVTYPE_IOMANX;
-          strncpy(dev_info_list[count].name,devinfo_table[i]->name,255);
-          dev_info_list[count].name[255] = '\0';
-          dev_info_list[count].len = strlen(dev_info_list[count].name);
-          dbgprintf("devscan: iomanx '%s'\n",dev_info_list[count].name);
-          count++;
+        /* The device info table had 32 entries, but some may be empty.  Just look at all of them.  */
+        for (i = 0; i < DEVSCAN_IOXMAX; i++) {
+            if (devinfo_table[i])
+                /* only add iomanx ones here, so must have extended flag set  else we get duplication with new iomanx */
+                if ((devinfo_table[i]->type & IOP_DT_FSEXT) && (devinfo_table[i]->type & devtype)) {
+                    dev_info_list[count].devtype = IOPMGR_DEVTYPE_IOMANX;
+                    strncpy(dev_info_list[count].name, devinfo_table[i]->name, 255);
+                    dev_info_list[count].name[255] = '\0';
+                    dev_info_list[count].len = strlen(dev_info_list[count].name);
+                    dbgprintf("devscan: iomanx '%s'\n", dev_info_list[count].name);
+                    count++;
+                }
         }
     }
-  }
-  return count;
+    return count;
 }
 
 /*! \brief Get device handler type for path.
@@ -144,18 +139,17 @@ int devscan_setup(int devtype)
  */
 int devscan_gettype(char *name)
 {
-  int count = 0;
-  int ret = 0;
-  dbgprintf("devscan: gettype '%s'\n",name);
-  while (dev_info_list[count].name[0] != 0)
-  {
-    ret = strncmp(dev_info_list[count].name,name,dev_info_list[count].len );
-    dbgprintf("'%s'",dev_info_list[count].name);
-    if (!ret)
-      return dev_info_list[count].devtype;
-    count++;
-  }
-  return IOPMGR_DEVTYPE_INVALID;
+    int count = 0;
+    int ret = 0;
+    dbgprintf("devscan: gettype '%s'\n", name);
+    while (dev_info_list[count].name[0] != 0) {
+        ret = strncmp(dev_info_list[count].name, name, dev_info_list[count].len);
+        dbgprintf("'%s'", dev_info_list[count].name);
+        if (!ret)
+            return dev_info_list[count].devtype;
+        count++;
+    }
+    return IOPMGR_DEVTYPE_INVALID;
 }
 
 /*! \brief Get device list.
@@ -166,21 +160,19 @@ int devscan_gettype(char *name)
  */
 int devscan_getdevlist(char *buffer)
 {
-  int count;
-  int i;
-  char *bufptr = buffer;
+    int count;
+    int i;
+    char *bufptr = buffer;
 
-  dbgprintf("devscan: getdevlist\n");
-  /* rescan for devices, before returning list */
-  count = devscan_setup(DEVSCAN_MASK);
+    dbgprintf("devscan: getdevlist\n");
+    /* rescan for devices, before returning list */
+    count = devscan_setup(DEVSCAN_MASK);
 
-  /* now convert this list into the right format */
-  for (i=0;i<count;i++)
-  {
-    strcpy(bufptr,dev_info_list[i].name);
-    dbgprintf("devscan: '%s'\n",bufptr);
-    bufptr += strlen(bufptr)+1;
-  }
-  return count;
+    /* now convert this list into the right format */
+    for (i = 0; i < count; i++) {
+        strcpy(bufptr, dev_info_list[i].name);
+        dbgprintf("devscan: '%s'\n", bufptr);
+        bufptr += strlen(bufptr) + 1;
+    }
+    return count;
 }
-

@@ -18,27 +18,27 @@
 #include "siftoo.h"
 
 int sif2_pipe_create(u32 id, void *buf, u32 size, u32 flags,
-		sif2_pipe_handler_t phandler)
+                     sif2_pipe_handler_t phandler)
 {
-	return 0;
+    return 0;
 }
 
 int sif2_pipe_open(u32 id)
 {
-	return 0;
+    return 0;
 }
 
 int sif2_pipe_close(int pd)
 {
-	return 0;
+    return 0;
 }
 
 int sif2_pipe_read(int pd, void *buf, u32 size)
 {
-	return 0;
+    return 0;
 }
 
 int sif2_pipe_write(int pd, void *buf, u32 size)
 {
-	return 0;
+    return 0;
 }

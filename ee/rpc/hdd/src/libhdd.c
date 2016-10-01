@@ -29,14 +29,14 @@
 
 #include "libhdd.h"
 
-#define PFS_ZONE_SIZE		8192
-#define PFS_FRAGMENT_OPT	0x00002d66	//"-f"
-#define PFS_FRAGMENT		0x00000000
+#define PFS_ZONE_SIZE 8192
+#define PFS_FRAGMENT_OPT 0x00002d66  //"-f"
+#define PFS_FRAGMENT 0x00000000
 
 #if (PFS_FRAGMENT != 0)
-int pfsFormatArg[3] = { PFS_ZONE_SIZE, PFS_FRAGMENT_OPT, PFS_FRAGMENT };
+int pfsFormatArg[3] = {PFS_ZONE_SIZE, PFS_FRAGMENT_OPT, PFS_FRAGMENT};
 #else
-static int pfsFormatArg[1] = { PFS_ZONE_SIZE };
+static int pfsFormatArg[1] = {PFS_ZONE_SIZE};
 #endif
 
 #define _OMIT_SYSTEM_PARTITION
@@ -50,522 +50,492 @@ static u32 hddSize, hddFree, hddMaxPartitionSize;
 
 int hddCheckPresent()
 {
-	int rv;
+    int rv;
 
-	if(!hddStatusCurrent)
-		hddUpdateInfo();
+    if (!hddStatusCurrent)
+        hddUpdateInfo();
 
-	rv = fileXioDevctl("hdd0:", HDIOC_STATUS, NULL, 0, NULL, 0);
+    rv = fileXioDevctl("hdd0:", HDIOC_STATUS, NULL, 0, NULL, 0);
 
-	if((rv >= 3) || (rv < 0))
-		return -1;
-	else
-		return 0;
+    if ((rv >= 3) || (rv < 0))
+        return -1;
+    else
+        return 0;
 }
 
 int hddCheckFormatted()
 {
-	int rv;
+    int rv;
 
-	if(!hddStatusCurrent)
-		hddUpdateInfo();
+    if (!hddStatusCurrent)
+        hddUpdateInfo();
 
-	rv = fileXioDevctl("hdd0:", HDIOC_STATUS, NULL, 0, NULL, 0);
-	if((rv >= 1) || (rv < 0))
-		return -1;
-	else
-		return 0;
+    rv = fileXioDevctl("hdd0:", HDIOC_STATUS, NULL, 0, NULL, 0);
+    if ((rv >= 1) || (rv < 0))
+        return -1;
+    else
+        return 0;
 }
 
 
 int hddFormat()
 {
-	int retVal;
+    int retVal;
 
-	if(!hddStatusCurrent)
-		hddUpdateInfo();
+    if (!hddStatusCurrent)
+        hddUpdateInfo();
 
-	retVal = fileXioFormat("hdd0:", NULL, NULL, 0);
-	if(retVal < 0)
-		return retVal;
+    retVal = fileXioFormat("hdd0:", NULL, NULL, 0);
+    if (retVal < 0)
+        return retVal;
 
-	retVal = fileXioFormat("pfs:", "hdd0:__net", (const char*)&pfsFormatArg, sizeof(pfsFormatArg));
-	if(retVal < 0)
-		return retVal;
+    retVal = fileXioFormat("pfs:", "hdd0:__net", (const char *)&pfsFormatArg, sizeof(pfsFormatArg));
+    if (retVal < 0)
+        return retVal;
 
-	retVal = fileXioFormat("pfs:", "hdd0:__system", (const char*)&pfsFormatArg, sizeof(pfsFormatArg));
-	if(retVal < 0)
-		return retVal;
+    retVal = fileXioFormat("pfs:", "hdd0:__system", (const char *)&pfsFormatArg, sizeof(pfsFormatArg));
+    if (retVal < 0)
+        return retVal;
 
-	retVal = fileXioFormat("pfs:", "hdd0:__common", (const char*)&pfsFormatArg, sizeof(pfsFormatArg));
-	if(retVal < 0)
-		return retVal;
+    retVal = fileXioFormat("pfs:", "hdd0:__common", (const char *)&pfsFormatArg, sizeof(pfsFormatArg));
+    if (retVal < 0)
+        return retVal;
 
-	retVal = fileXioFormat("pfs:", "hdd0:__sysconf", (const char*)&pfsFormatArg, sizeof(pfsFormatArg));
-	if(retVal < 0)
-		return retVal;
+    retVal = fileXioFormat("pfs:", "hdd0:__sysconf", (const char *)&pfsFormatArg, sizeof(pfsFormatArg));
+    if (retVal < 0)
+        return retVal;
 
-	hddUpdateInfo();
+    hddUpdateInfo();
 
-	return 0;
+    return 0;
 }
 
 int hddGetFilesystemList(t_hddFilesystem hddFs[], int maxEntries)
 {
-	iox_dirent_t dirEnt;
-	int count = 0;
-	u32 size = 0;
-	int hddFd;
-	int rv;
+    iox_dirent_t dirEnt;
+    int count = 0;
+    u32 size = 0;
+    int hddFd;
+    int rv;
 
-	if(!hddStatusCurrent)
-		hddUpdateInfo();
+    if (!hddStatusCurrent)
+        hddUpdateInfo();
 
-	hddFd = fileXioDopen("hdd0:");
+    hddFd = fileXioDopen("hdd0:");
 
-	if(hddFd < 0)
-		return hddFd;
+    if (hddFd < 0)
+        return hddFd;
 
-	rv = fileXioDread(hddFd, &dirEnt);
+    rv = fileXioDread(hddFd, &dirEnt);
 
-	while((rv > 0) && (count < maxEntries))
-	{
-		int i;
-		int partitionFd;
-		u32 zoneFree, zoneSize;
+    while ((rv > 0) && (count < maxEntries)) {
+        int i;
+        int partitionFd;
+        u32 zoneFree, zoneSize;
 
-		// We only want to know about main partitions (non-empty ones at that :P)
-		if((dirEnt.stat.attr & ATTR_SUB_PARTITION) || (dirEnt.stat.mode == FS_TYPE_EMPTY))
-		{
-			rv = fileXioDread(hddFd, &dirEnt);
-			continue;
-		}
+        // We only want to know about main partitions (non-empty ones at that :P)
+        if ((dirEnt.stat.attr & ATTR_SUB_PARTITION) || (dirEnt.stat.mode == FS_TYPE_EMPTY)) {
+            rv = fileXioDread(hddFd, &dirEnt);
+            continue;
+        }
 
-		memset(&hddFs[count], 0, sizeof(t_hddFilesystem));
-		sprintf(hddFs[count].filename, "hdd0:%s", dirEnt.name);
+        memset(&hddFs[count], 0, sizeof(t_hddFilesystem));
+        sprintf(hddFs[count].filename, "hdd0:%s", dirEnt.name);
 
-		// Work out filesystem type
-		if((dirEnt.name[0] == '_') && (dirEnt.name[1] == '_'))
-		{
-			hddFs[count].fileSystemGroup = FS_GROUP_SYSTEM;
-			strcpy(hddFs[count].name, &dirEnt.name[2]);
-		}
-		else if(dirEnt.name[0] == FS_COMMON_PREFIX)
-		{
-			hddFs[count].fileSystemGroup = FS_GROUP_COMMON;
-			strcpy(hddFs[count].name, &dirEnt.name[1]);
-		}
-		else
-		{
-			hddFs[count].fileSystemGroup = FS_GROUP_APPLICATION;
-			strcpy(hddFs[count].name, dirEnt.name);
-		}
+        // Work out filesystem type
+        if ((dirEnt.name[0] == '_') && (dirEnt.name[1] == '_')) {
+            hddFs[count].fileSystemGroup = FS_GROUP_SYSTEM;
+            strcpy(hddFs[count].name, &dirEnt.name[2]);
+        } else if (dirEnt.name[0] == FS_COMMON_PREFIX) {
+            hddFs[count].fileSystemGroup = FS_GROUP_COMMON;
+            strcpy(hddFs[count].name, &dirEnt.name[1]);
+        } else {
+            hddFs[count].fileSystemGroup = FS_GROUP_APPLICATION;
+            strcpy(hddFs[count].name, dirEnt.name);
+        }
 
-#ifdef	_OMIT_SYSTEM_PARTITION
-		if(hddFs[count].fileSystemGroup == FS_GROUP_SYSTEM)
-		{
-			rv = fileXioDread(hddFd, &dirEnt);
-			continue;
-		}
+#ifdef _OMIT_SYSTEM_PARTITION
+        if (hddFs[count].fileSystemGroup == FS_GROUP_SYSTEM) {
+            rv = fileXioDread(hddFd, &dirEnt);
+            continue;
+        }
 #endif
 
 #ifdef DEBUG
-		printf("> Filename: %s\n> Name: %s\n> Type: %d\n", hddFs[count].filename, hddFs[count].name, hddFs[count].fileSystemGroup);
+        printf("> Filename: %s\n> Name: %s\n> Type: %d\n", hddFs[count].filename, hddFs[count].name, hddFs[count].fileSystemGroup);
 #endif
 
-		// Calculate filesystem size
-		partitionFd = fileXioOpen(hddFs[count].filename, O_RDONLY, 0);
+        // Calculate filesystem size
+        partitionFd = fileXioOpen(hddFs[count].filename, O_RDONLY, 0);
 
-		// If we failed to open the partition, then a password is probably set
-		// (usually this means we have tried to access a game partition). We
-		// dont want to return un-accessible game partitions in the filesystem list..
-		if(partitionFd < 0)
-		{
-			rv = fileXioDread(hddFd, &dirEnt);
-			continue;
-		}
+        // If we failed to open the partition, then a password is probably set
+        // (usually this means we have tried to access a game partition). We
+        // dont want to return un-accessible game partitions in the filesystem list..
+        if (partitionFd < 0) {
+            rv = fileXioDread(hddFd, &dirEnt);
+            continue;
+        }
 
-		for(i = 0, size = 0; i < dirEnt.stat.private_0 + 1; i++)
-		{
-			rv = fileXioIoctl2(partitionFd, HIOCGETSIZE, &i, 4, NULL, 0);
-			size += (u32)rv / 2048; //Equal to, but avoids overflows of: rv * 512 / 1024 / 1024;
-		}
+        for (i = 0, size = 0; i < dirEnt.stat.private_0 + 1; i++) {
+            rv = fileXioIoctl2(partitionFd, HIOCGETSIZE, &i, 4, NULL, 0);
+            size += (u32)rv / 2048;  //Equal to, but avoids overflows of: rv * 512 / 1024 / 1024;
+        }
 
-		fileXioClose(partitionFd);
+        fileXioClose(partitionFd);
 
-		hddFs[count].size = size;
+        hddFs[count].size = size;
 
-		// Get filesystem free space & format status
-		hddFs[count].freeSpace = 0;
-		hddFs[count].formatted = 0;
+        // Get filesystem free space & format status
+        hddFs[count].freeSpace = 0;
+        hddFs[count].formatted = 0;
 
-		if(dirEnt.stat.mode == FS_TYPE_PFS)
-		{
-			rv = fileXioMount("pfs0:", hddFs[count].filename, FIO_MT_RDONLY);
-			if(rv == 0)
-			{
+        if (dirEnt.stat.mode == FS_TYPE_PFS) {
+            rv = fileXioMount("pfs0:", hddFs[count].filename, FIO_MT_RDONLY);
+            if (rv == 0) {
 
-				zoneFree = fileXioDevctl("pfs0:", PDIOC_ZONEFREE, NULL, 0, NULL, 0);
-				zoneSize = fileXioDevctl("pfs0:", PDIOC_ZONESZ, NULL, 0, NULL, 0);
+                zoneFree = fileXioDevctl("pfs0:", PDIOC_ZONEFREE, NULL, 0, NULL, 0);
+                zoneSize = fileXioDevctl("pfs0:", PDIOC_ZONESZ, NULL, 0, NULL, 0);
 
-				hddFs[count].freeSpace = zoneFree * zoneSize / 1024 / 1024;
-				hddFs[count].formatted = 1;
+                hddFs[count].freeSpace = zoneFree * zoneSize / 1024 / 1024;
+                hddFs[count].formatted = 1;
 
-				fileXioUmount("pfs0:");
-			}
-		}
+                fileXioUmount("pfs0:");
+            }
+        }
 
 #ifdef DEBUG
-		printf("> Formatted: %d\n> Size: %d\n> Free: %d\n", hddFs[count].formatted, (int)hddFs[count].size, (int)hddFs[count].freeSpace);
+        printf("> Formatted: %d\n> Size: %d\n> Free: %d\n", hddFs[count].formatted, (int)hddFs[count].size, (int)hddFs[count].freeSpace);
 #endif
 
-		count++;
-		rv = fileXioDread(hddFd, &dirEnt);
-	}
+        count++;
+        rv = fileXioDread(hddFd, &dirEnt);
+    }
 
-	rv = fileXioDclose(hddFd);
+    rv = fileXioDclose(hddFd);
 
-	return count;
+    return count;
 }
 
 void hddGetInfo(t_hddInfo *info)
 {
-	hddUpdateInfo();
+    hddUpdateInfo();
 
-	info->hddSize = hddSize;
-	info->hddFree = hddFree;
-	info->hddMaxPartitionSize = hddMaxPartitionSize;
+    info->hddSize = hddSize;
+    info->hddFree = hddFree;
+    info->hddMaxPartitionSize = hddMaxPartitionSize;
 }
 
 static void hddUpdateInfo()
 {
-	iox_dirent_t infoDirEnt;
-	int rv;
-	int hddFd;
-	u32 hddUsed = 0;
+    iox_dirent_t infoDirEnt;
+    int rv;
+    int hddFd;
+    u32 hddUsed = 0;
 
-	hddSize = (u32)fileXioDevctl("hdd0:", HDIOC_TOTALSECTOR, NULL, 0, NULL, 0) / 2048; //sectors * 512 / 1024 / 1024;
+    hddSize = (u32)fileXioDevctl("hdd0:", HDIOC_TOTALSECTOR, NULL, 0, NULL, 0) / 2048;  //sectors * 512 / 1024 / 1024;
 
-/* This gives inaccurate results, due to it being an approximation.
+    /* This gives inaccurate results, due to it being an approximation.
 	fileXioDevctl("hdd0:", HDIOC_FREESECTOR, NULL, 0, &rv, 4);
 	hddFree = rv * 512 / 1024 / 1024;
 */
-	hddFd = fileXioDopen("hdd0:");
-	if(hddFd < 0) // For when a HDD is not connected!
-		return;
+    hddFd = fileXioDopen("hdd0:");
+    if (hddFd < 0)  // For when a HDD is not connected!
+        return;
 
-	rv = fileXioDread(hddFd, &infoDirEnt);
-	while(rv > 0)
-	{
-		if(infoDirEnt.stat.mode != FS_TYPE_EMPTY)
-			hddUsed += infoDirEnt.stat.size / 2048; //Equal to, but avoids overflows of: infoDirEnt.stat.size * 512 / 1024 / 1024;
+    rv = fileXioDread(hddFd, &infoDirEnt);
+    while (rv > 0) {
+        if (infoDirEnt.stat.mode != FS_TYPE_EMPTY)
+            hddUsed += infoDirEnt.stat.size / 2048;  //Equal to, but avoids overflows of: infoDirEnt.stat.size * 512 / 1024 / 1024;
 
-		rv = fileXioDread(hddFd, &infoDirEnt);
-	}
-	fileXioDclose(hddFd);
-	hddFree = hddSize - hddUsed;
+        rv = fileXioDread(hddFd, &infoDirEnt);
+    }
+    fileXioDclose(hddFd);
+    hddFree = hddSize - hddUsed;
 
-	hddMaxPartitionSize = (u32)fileXioDevctl("hdd0:", HDIOC_MAXSECTOR, NULL, 0, NULL, 0) / 2048; //Equal to, but avoids overflows of: sectors * 512 / 1024 / 1024;
+    hddMaxPartitionSize = (u32)fileXioDevctl("hdd0:", HDIOC_MAXSECTOR, NULL, 0, NULL, 0) / 2048;  //Equal to, but avoids overflows of: sectors * 512 / 1024 / 1024;
 
-	hddStatusCurrent = 1;
+    hddStatusCurrent = 1;
 }
 
 static char *sizesString[9] = {
-		"128M",
-		"256M",
-		"512M",
-		"1G",
-		"2G",
-		"4G",
-		"8G",
-		"16G",
-		"32G"
-};
+    "128M",
+    "256M",
+    "512M",
+    "1G",
+    "2G",
+    "4G",
+    "8G",
+    "16G",
+    "32G"};
 
 static int sizesMB[9] = {
-		128,
-		256,
-		512,
-		1024,
-		2048,
-		4096,
-		8192,
-		16384,
-		32768
-};
+    128,
+    256,
+    512,
+    1024,
+    2048,
+    4096,
+    8192,
+    16384,
+    32768};
 
 int hddMakeFilesystem(int fsSizeMB, char *name, int type)
 {
-	int maxIndex;
-	int useIndex;
-	int partSize;
-	int fsSizeLeft = fsSizeMB;
-	int partFd;
-	char openString[256];
-	char fsName[256];
-	int retVal;
+    int maxIndex;
+    int useIndex;
+    int partSize;
+    int fsSizeLeft = fsSizeMB;
+    int partFd;
+    char openString[256];
+    char fsName[256];
+    int retVal;
 
-	if(!hddStatusCurrent)
-		hddUpdateInfo();
+    if (!hddStatusCurrent)
+        hddUpdateInfo();
 
-	if(fsSizeMB % 128)
-		return -EINVAL;
+    if (fsSizeMB % 128)
+        return -EINVAL;
 
-	switch(type)
-	{
-		case FS_GROUP_SYSTEM:
-			sprintf(fsName, "__%s", name);
-			break;
-		case FS_GROUP_COMMON:
-			sprintf(fsName, "+%s", name);
-			break;
-		default:
-			strcpy(fsName, name);
-			break;
-	}
+    switch (type) {
+        case FS_GROUP_SYSTEM:
+            sprintf(fsName, "__%s", name);
+            break;
+        case FS_GROUP_COMMON:
+            sprintf(fsName, "+%s", name);
+            break;
+        default:
+            strcpy(fsName, name);
+            break;
+    }
 
-	// Check if filesystem already exists
-	sprintf(openString, "hdd0:%s", fsName);
-	partFd = fileXioOpen(openString, O_RDONLY, 0);
-	if(partFd > 0 || partFd == -EACCES)	// Filesystem already exists
-	{
-		fileXioClose(partFd);
-		return -1;
-	}
+    // Check if filesystem already exists
+    sprintf(openString, "hdd0:%s", fsName);
+    partFd = fileXioOpen(openString, O_RDONLY, 0);
+    if (partFd > 0 || partFd == -EACCES)  // Filesystem already exists
+    {
+        fileXioClose(partFd);
+        return -1;
+    }
 
-	// Get index for max partition size
-	for(maxIndex = 0; maxIndex < 9; maxIndex++)
-		if(sizesMB[maxIndex] == hddMaxPartitionSize)
-			break;
+    // Get index for max partition size
+    for (maxIndex = 0; maxIndex < 9; maxIndex++)
+        if (sizesMB[maxIndex] == hddMaxPartitionSize)
+            break;
 
-	// Get index of size we will use to create main partition
-	for(useIndex = maxIndex; sizesMB[useIndex] > fsSizeMB; useIndex--);
+    // Get index of size we will use to create main partition
+    for (useIndex = maxIndex; sizesMB[useIndex] > fsSizeMB; useIndex--)
+        ;
 
-	for(partSize = sizesMB[useIndex]; useIndex >= 0; useIndex--,partSize = sizesMB[useIndex])
-	{
+    for (partSize = sizesMB[useIndex]; useIndex >= 0; useIndex--, partSize = sizesMB[useIndex]) {
 #ifdef DEBUG
-		printf(">>> Attempting to create main partition, size %d MB\n", partSize);
+        printf(">>> Attempting to create main partition, size %d MB\n", partSize);
 #endif
 
-		sprintf(openString, "hdd0:%s,,,%s,PFS", fsName, sizesString[useIndex]);
+        sprintf(openString, "hdd0:%s,,,%s,PFS", fsName, sizesString[useIndex]);
 #ifdef DEBUG
-		printf(">>> openString = %s\n", openString);
+        printf(">>> openString = %s\n", openString);
 #endif
 
-		partFd = fileXioOpen(openString, O_RDWR | O_CREAT, 0);
-		if(partFd >= 0)
-			break;
-		else {
-			if(partFd != -ENOSPC)
-			{
+        partFd = fileXioOpen(openString, O_RDWR | O_CREAT, 0);
+        if (partFd >= 0)
+            break;
+        else {
+            if (partFd != -ENOSPC) {
 #ifdef DEBUG
-				printf(">>> Could not create Main Partition (error %d)!\n", partFd);
+                printf(">>> Could not create Main Partition (error %d)!\n", partFd);
 #endif
-				return partFd;
-			}
-		}
-	}
+                return partFd;
+            }
+        }
+    }
 
-	if(useIndex < 0)
-	{
+    if (useIndex < 0) {
 #ifdef DEBUG
-		printf(">>> Could not create Main Partition (no space)!\n");
+        printf(">>> Could not create Main Partition (no space)!\n");
 #endif
-		return -ENOSPC;
-	}
+        return -ENOSPC;
+    }
 
-	fsSizeLeft -= partSize;
+    fsSizeLeft -= partSize;
 #ifdef DEBUG
-	printf(">>> Main partition of %d MB created!\n", partSize);
+    printf(">>> Main partition of %d MB created!\n", partSize);
 #endif
 
-	while(fsSizeLeft)
-	{
+    while (fsSizeLeft) {
 
-		// Adjust size if necessary
-		if(fsSizeLeft < partSize)
-		{
+        // Adjust size if necessary
+        if (fsSizeLeft < partSize) {
 #ifdef DEBUG
-			printf(">>> Adjusting sub size: %d MB to ", sizesMB[useIndex]);
+            printf(">>> Adjusting sub size: %d MB to ", sizesMB[useIndex]);
 #endif
-			for(useIndex = maxIndex; sizesMB[useIndex] > fsSizeLeft; useIndex--);
-			partSize = sizesMB[useIndex];
-			maxIndex = useIndex;
+            for (useIndex = maxIndex; sizesMB[useIndex] > fsSizeLeft; useIndex--)
+                ;
+            partSize = sizesMB[useIndex];
+            maxIndex = useIndex;
 #ifdef DEBUG
-			printf("%d MB\n", sizesMB[useIndex]);
+            printf("%d MB\n", sizesMB[useIndex]);
 #endif
-		}
+        }
 
-		// Try and allocate sub
+// Try and allocate sub
 #ifdef DEBUG
-		printf(">>> Attempting to create sub partition of size %d MB\n", sizesMB[useIndex]);
+        printf(">>> Attempting to create sub partition of size %d MB\n", sizesMB[useIndex]);
 #endif
-		retVal = fileXioIoctl2(partFd, HIOCADDSUB, sizesString[useIndex], strlen(sizesString[useIndex]) + 1, NULL, 0);
-		if(retVal == -ENOSPC)
-		{
-			// If sub alloc fails due to size, we decrease size and try again.
-			// If we've run out of sizes, break the loop (give up)
-			useIndex--;
-			partSize = sizesMB[useIndex];
-			maxIndex = useIndex;
+        retVal = fileXioIoctl2(partFd, HIOCADDSUB, sizesString[useIndex], strlen(sizesString[useIndex]) + 1, NULL, 0);
+        if (retVal == -ENOSPC) {
+            // If sub alloc fails due to size, we decrease size and try again.
+            // If we've run out of sizes, break the loop (give up)
+            useIndex--;
+            partSize = sizesMB[useIndex];
+            maxIndex = useIndex;
 
-			if(useIndex < 0)
-			{
+            if (useIndex < 0) {
 #ifdef DEBUG
-				printf(">>> Out of sizes to try. Giving up.\n");
+                printf(">>> Out of sizes to try. Giving up.\n");
 #endif
-				break;
-			}
+                break;
+            }
 #ifdef DEBUG
-			printf(">>> Subpartition alloc FAILED! Trying with size of %d MB\n", partSize);
+            printf(">>> Subpartition alloc FAILED! Trying with size of %d MB\n", partSize);
 #endif
 
-			continue;
-		}
-		// If we've reached the max number of subs, bail.
-		else if(retVal == -EFBIG)
-			break;
-		else if(retVal >= 0)
-		{
+            continue;
+        }
+        // If we've reached the max number of subs, bail.
+        else if (retVal == -EFBIG)
+            break;
+        else if (retVal >= 0) {
 #ifdef DEBUG
-			printf(">>> Sub creation successfull!\n");
+            printf(">>> Sub creation successfull!\n");
 #endif
-		}
-		else
-		{
+        } else {
 #ifdef DEBUG
-			printf(">>> Unknown error while creating sub: %d\n", retVal);
+            printf(">>> Unknown error while creating sub: %d\n", retVal);
 #endif
-		}
+        }
 
-		fsSizeLeft -= sizesMB[useIndex];
-	}
+        fsSizeLeft -= sizesMB[useIndex];
+    }
 
-	fileXioClose(partFd);
+    fileXioClose(partFd);
 
-	sprintf(openString, "hdd0:%s", fsName);
-	retVal = fileXioFormat("pfs:", openString, (const char*)&pfsFormatArg, sizeof(pfsFormatArg));
-	if(retVal < 0)
-	{
+    sprintf(openString, "hdd0:%s", fsName);
+    retVal = fileXioFormat("pfs:", openString, (const char *)&pfsFormatArg, sizeof(pfsFormatArg));
+    if (retVal < 0) {
 #ifdef DEBUG
-		printf(">>> Failed to format new partition: %d\n", retVal);
+        printf(">>> Failed to format new partition: %d\n", retVal);
 #endif
-		return retVal;
-	}
+        return retVal;
+    }
 
-	hddUpdateInfo();
+    hddUpdateInfo();
 
-	return fsSizeMB - fsSizeLeft;
+    return fsSizeMB - fsSizeLeft;
 }
 
 int hddRemoveFilesystem(t_hddFilesystem *fs)
 {
-	int rv;
+    int rv;
 
-	if(!hddStatusCurrent)
-		hddUpdateInfo();
+    if (!hddStatusCurrent)
+        hddUpdateInfo();
 
-	rv = fileXioRemove(fs->filename);
+    rv = fileXioRemove(fs->filename);
 
-	hddUpdateInfo();
+    hddUpdateInfo();
 
-	return rv;
+    return rv;
 }
 
 int hddExpandFilesystem(t_hddFilesystem *fs, int extraMB)
 {
-	int maxIndex;
-	int useIndex;
-	int partSize;
-	int fsSizeLeft = extraMB;
-	int partFd;
-	int retVal;
+    int maxIndex;
+    int useIndex;
+    int partSize;
+    int fsSizeLeft = extraMB;
+    int partFd;
+    int retVal;
 
-	if(!hddStatusCurrent)
-		hddUpdateInfo();
+    if (!hddStatusCurrent)
+        hddUpdateInfo();
 
-	if(extraMB % 128)
-		return -EINVAL;
+    if (extraMB % 128)
+        return -EINVAL;
 
-	// Get index for max partition size
-	for(maxIndex = 0; maxIndex < 9; maxIndex++)
-		if(sizesMB[maxIndex] == hddMaxPartitionSize)
-			break;
+    // Get index for max partition size
+    for (maxIndex = 0; maxIndex < 9; maxIndex++)
+        if (sizesMB[maxIndex] == hddMaxPartitionSize)
+            break;
 
-	// Get index of size we will use to create new subs
-	for(useIndex = maxIndex; sizesMB[useIndex] > extraMB; useIndex--);
+    // Get index of size we will use to create new subs
+    for (useIndex = maxIndex; sizesMB[useIndex] > extraMB; useIndex--)
+        ;
 
-	partSize = sizesMB[useIndex];
+    partSize = sizesMB[useIndex];
 
-	// Open partition
-	partFd = fileXioOpen(fs->filename, O_RDWR, 0);
-	if(partFd < 0)
-		return partFd;
+    // Open partition
+    partFd = fileXioOpen(fs->filename, O_RDWR, 0);
+    if (partFd < 0)
+        return partFd;
 
-	while(fsSizeLeft)
-	{
-		// Adjust size if necessary
-		if(fsSizeLeft < partSize)
-		{
+    while (fsSizeLeft) {
+        // Adjust size if necessary
+        if (fsSizeLeft < partSize) {
 #ifdef DEBUG
-			printf(">>> Adjusting sub size: %d MB to ", sizesMB[useIndex]);
+            printf(">>> Adjusting sub size: %d MB to ", sizesMB[useIndex]);
 #endif
-			for(useIndex = maxIndex; sizesMB[useIndex] > fsSizeLeft; useIndex--);
-			partSize = sizesMB[useIndex];
-			maxIndex = useIndex;
+            for (useIndex = maxIndex; sizesMB[useIndex] > fsSizeLeft; useIndex--)
+                ;
+            partSize = sizesMB[useIndex];
+            maxIndex = useIndex;
 #ifdef DEBUG
-			printf("%d MB\n", sizesMB[useIndex]);
+            printf("%d MB\n", sizesMB[useIndex]);
 #endif
-		}
+        }
 
-		// Try and allocate new sub
+// Try and allocate new sub
 #ifdef DEBUG
-		printf(">>> Attempting to create sub partition of size %d MB\n", sizesMB[useIndex]);
+        printf(">>> Attempting to create sub partition of size %d MB\n", sizesMB[useIndex]);
 #endif
-		retVal = fileXioIoctl2(partFd, HIOCADDSUB, sizesString[useIndex], strlen(sizesString[useIndex]) + 1, NULL, 0);
-		if(retVal == -ENOSPC)
-		{
-			// If sub alloc fails due to size, we decrease size and try again.
-			// If we've run out of sizes, break the loop (give up)
-			useIndex--;
-			partSize = sizesMB[useIndex];
-			maxIndex = useIndex;
+        retVal = fileXioIoctl2(partFd, HIOCADDSUB, sizesString[useIndex], strlen(sizesString[useIndex]) + 1, NULL, 0);
+        if (retVal == -ENOSPC) {
+            // If sub alloc fails due to size, we decrease size and try again.
+            // If we've run out of sizes, break the loop (give up)
+            useIndex--;
+            partSize = sizesMB[useIndex];
+            maxIndex = useIndex;
 
-			if(useIndex < 0)
-			{
+            if (useIndex < 0) {
 #ifdef DEBUG
-				printf(">>> Out of sizes to try. Giving up.\n");
+                printf(">>> Out of sizes to try. Giving up.\n");
 #endif
-				break;
-			}
+                break;
+            }
 #ifdef DEBUG
-			printf(">>> Subpartition alloc FAILED! Trying with size of %d MB\n", partSize);
+            printf(">>> Subpartition alloc FAILED! Trying with size of %d MB\n", partSize);
 #endif
 
-			continue;
-		}
-		// If we've reached the max number of subs, bail.
-		else if(retVal == -EFBIG)
-			break;
-		else if(retVal >= 0)
-		{
+            continue;
+        }
+        // If we've reached the max number of subs, bail.
+        else if (retVal == -EFBIG)
+            break;
+        else if (retVal >= 0) {
 #ifdef DEBUG
-			printf(">>> Sub creation successfull!\n");
+            printf(">>> Sub creation successfull!\n");
 #endif
-		}
-		else
-		{
+        } else {
 #ifdef DEBUG
-			printf(">>> Unknown error while creating sub: %d\n", retVal);
+            printf(">>> Unknown error while creating sub: %d\n", retVal);
 #endif
-		}
+        }
 
-		fsSizeLeft -= sizesMB[useIndex];
-	}
+        fsSizeLeft -= sizesMB[useIndex];
+    }
 
-	fileXioClose(partFd);
+    fileXioClose(partFd);
 
-	hddUpdateInfo();
+    hddUpdateInfo();
 
-	return extraMB - fsSizeLeft;
+    return extraMB - fsSizeLeft;
 }

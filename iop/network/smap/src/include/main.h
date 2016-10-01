@@ -1,60 +1,66 @@
 //In the SONY original, all the calls to DEBUG_PRINTF() were to sceInetPrintf().
 #define DEBUG_PRINTF(args...) printf(args)
 
-#define MAX_FRAME_SIZE	1518
+#define MAX_FRAME_SIZE 1518
 
 /*
 	Sorry, but even I can't explain the syntax used here. :(
 	I know that _ori_gp has to be "early-clobbered" and the GP register will get clobbered... but I don't really know why GCC can't determine which registers it can and can't use automatically. And I don't really understand what "clobbering" registers is.
 */
-#define SaveGP() \
-	void *_ori_gp;	\
-	__asm volatile("move %0, $gp\n"	\
-	"move $gp, %1" :"=&r"(_ori_gp): "r"(&_gp) : "gp")
+#define SaveGP()                    \
+    void *_ori_gp;                  \
+    __asm volatile("move %0, $gp\n" \
+                   "move $gp, %1"   \
+                   : "=&r"(_ori_gp) \
+                   : "r"(&_gp)      \
+                   : "gp")
 
-#define RestoreGP() \
-	__asm volatile("move $gp, %0" :: "r"(_ori_gp) : "gp")
+#define RestoreGP()                              \
+    __asm volatile("move $gp, %0" ::"r"(_ori_gp) \
+                   : "gp")
 
-struct RuntimeStats{
-	u32 RxDroppedFrameCount;
-	u16 RxFrameOverrunCount;
-	u16 RxFrameBadLengthCount;
-	u16 RxFrameBadFCSCount;
-	u16 RxFrameBadAlignmentCount;
-	u32 TxDroppedFrameCount;
-	u16 TxFrameLOSSCRCount;
-	u16 TxFrameEDEFERCount;
-	u16 TxFrameCollisionCount;
-	u16 TxFrameUnderrunCount;
+struct RuntimeStats
+{
+    u32 RxDroppedFrameCount;
+    u16 RxFrameOverrunCount;
+    u16 RxFrameBadLengthCount;
+    u16 RxFrameBadFCSCount;
+    u16 RxFrameBadAlignmentCount;
+    u32 TxDroppedFrameCount;
+    u16 TxFrameLOSSCRCount;
+    u16 TxFrameEDEFERCount;
+    u16 TxFrameCollisionCount;
+    u16 TxFrameUnderrunCount;
 };
 
-struct SmapDriverData{
-	volatile u8 *smap_regbase;
-	volatile u8 *emac3_regbase;
-	unsigned int TxBufferSpaceAvailable;
-	struct RuntimeStats RuntimeStats;
-	unsigned char NumPacketsInTx;
-	unsigned char TxBDIndex;
-	unsigned char RxBDIndex;
-	unsigned char TxDNVBDIndex;
-	int Dev9IntrEventFlag;
-	int TxEndEventFlag;
-	int IntrHandlerThreadID;
-	int NetIFID;
-	unsigned char SmapIsInitialized;	//SMAP driver is initialized (software)
-	unsigned char NetDevStopFlag;
-	unsigned char EnableLinkCheckTimer;
-	unsigned char LinkStatus;		//Ethernet link is initialized (hardware)
-	unsigned char LinkMode;
-	iop_sys_clock_t LinkCheckTimer;
+struct SmapDriverData
+{
+    volatile u8 *smap_regbase;
+    volatile u8 *emac3_regbase;
+    unsigned int TxBufferSpaceAvailable;
+    struct RuntimeStats RuntimeStats;
+    unsigned char NumPacketsInTx;
+    unsigned char TxBDIndex;
+    unsigned char RxBDIndex;
+    unsigned char TxDNVBDIndex;
+    int Dev9IntrEventFlag;
+    int TxEndEventFlag;
+    int IntrHandlerThreadID;
+    int NetIFID;
+    unsigned char SmapIsInitialized;  //SMAP driver is initialized (software)
+    unsigned char NetDevStopFlag;
+    unsigned char EnableLinkCheckTimer;
+    unsigned char LinkStatus;  //Ethernet link is initialized (hardware)
+    unsigned char LinkMode;
+    iop_sys_clock_t LinkCheckTimer;
 };
 
 /* Event flag bits */
-#define SMAP_EVENT_START	0x01
-#define SMAP_EVENT_STOP		0x02
-#define SMAP_EVENT_INTR		0x04
-#define SMAP_EVENT_XMIT		0x08
-#define SMAP_EVENT_LINK_CHECK	0x10
+#define SMAP_EVENT_START 0x01
+#define SMAP_EVENT_STOP 0x02
+#define SMAP_EVENT_INTR 0x04
+#define SMAP_EVENT_XMIT 0x08
+#define SMAP_EVENT_LINK_CHECK 0x10
 
 /* Function prototypes */
 int smap_init(int argc, char *argv[]);

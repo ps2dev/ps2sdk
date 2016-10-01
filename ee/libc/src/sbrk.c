@@ -15,22 +15,22 @@
 
 #include <kernel.h>
 
-extern void * _end;
+extern void *_end;
 
 void *ps2_sbrk(size_t increment)
 {
-	static void * _heap_ptr = &_end;
-	void *mp, *ret = (void *)-1;
+    static void *_heap_ptr = &_end;
+    void *mp, *ret = (void *)-1;
 
-	if (increment == 0)
-		return _heap_ptr;
+    if (increment == 0)
+        return _heap_ptr;
 
-	/* If the area we want to allocated is past the end of our heap, we have a problem. */
-	mp = _heap_ptr + increment;
-	if (mp <= EndOfHeap()) {
-		ret = _heap_ptr;
-		_heap_ptr = mp;
-	}
+    /* If the area we want to allocated is past the end of our heap, we have a problem. */
+    mp = _heap_ptr + increment;
+    if (mp <= EndOfHeap()) {
+        ret = _heap_ptr;
+        _heap_ptr = mp;
+    }
 
-	return ret;
+    return ret;
 }

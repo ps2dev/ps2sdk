@@ -21,9 +21,9 @@
 
 typedef struct upsample_t
 {
-	short *left;
-	short *right;
-	const unsigned char *src;
+    short *left;
+    short *right;
+    const unsigned char *src;
 } upsample_t;
 
 typedef int (*upsampler_t)(struct upsample_t *);

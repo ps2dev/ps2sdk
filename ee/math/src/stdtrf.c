@@ -68,93 +68,85 @@ float sqrtf(), atanf(), incbetf();
 
 
 #ifdef ANSIC
-float stdtrf( int k, float tt )
+float stdtrf(int k, float tt)
 #else
-float stdtrf( k, tt )
-int k;
+float stdtrf(k, tt) int k;
 double tt;
 #endif
 {
-float t, x, rk, z, f, tz, p, xsqk;
-int j;
+    float t, x, rk, z, f, tz, p, xsqk;
+    int j;
 
-t = tt;
-if( k <= 0 )
-	{
-	mtherr( "stdtrf", DOMAIN );
-	return(0.0);
-	}
+    t = tt;
+    if (k <= 0) {
+        mtherr("stdtrf", DOMAIN);
+        return (0.0);
+    }
 
-if( t == 0 )
-	return( 0.5 );
+    if (t == 0)
+        return (0.5);
 
-if( t < -1.0 )
-	{
-	rk = k;
-	z = rk / (rk + t * t);
-	p = 0.5 * incbetf( 0.5*rk, 0.5, z );
-	return( p );
-	}
+    if (t < -1.0) {
+        rk = k;
+        z = rk / (rk + t * t);
+        p = 0.5 * incbetf(0.5 * rk, 0.5, z);
+        return (p);
+    }
 
-/*	compute integral from -t to + t */
+    /*	compute integral from -t to + t */
 
-if( t < 0 )
-	x = -t;
-else
-	x = t;
+    if (t < 0)
+        x = -t;
+    else
+        x = t;
 
-rk = k;	/* degrees of freedom */
-z = 1.0 + ( x * x )/rk;
+    rk = k; /* degrees of freedom */
+    z = 1.0 + (x * x) / rk;
 
-/* test if k is odd or even */
-if( (k & 1) != 0)
-	{
+    /* test if k is odd or even */
+    if ((k & 1) != 0) {
 
-	/*	computation for odd k	*/
+        /*	computation for odd k	*/
 
-	xsqk = x/sqrtf(rk);
-	p = atanf( xsqk );
-	if( k > 1 )
-		{
-		f = 1.0;
-		tz = 1.0;
-		j = 3;
-		while(  (j<=(k-2)) && ( (tz/f) > MACHEPF )  )
-			{
-			tz *= (j-1)/( z * j );
-			f += tz;
-			j += 2;
-			}
-		p += f * xsqk/z;
-		}
-	p *= 2.0/PIF;
-	}
+        xsqk = x / sqrtf(rk);
+        p = atanf(xsqk);
+        if (k > 1) {
+            f = 1.0;
+            tz = 1.0;
+            j = 3;
+            while ((j <= (k - 2)) && ((tz / f) > MACHEPF)) {
+                tz *= (j - 1) / (z * j);
+                f += tz;
+                j += 2;
+            }
+            p += f * xsqk / z;
+        }
+        p *= 2.0 / PIF;
+    }
 
 
-else
-	{
+    else {
 
-	/*	computation for even k	*/
+        /*	computation for even k	*/
 
-	f = 1.0;
-	tz = 1.0;
-	j = 2;
+        f = 1.0;
+        tz = 1.0;
+        j = 2;
 
-	while(  ( j <= (k-2) ) && ( (tz/f) > MACHEPF )  )
-		{
-		tz *= (j - 1)/( z * j );
-		f += tz;
-		j += 2;
-		}
-	p = f * x/sqrtf(z*rk);
-	}
+        while ((j <= (k - 2)) && ((tz / f) > MACHEPF)) {
+            tz *= (j - 1) / (z * j);
+            f += tz;
+            j += 2;
+        }
+        p = f * x / sqrtf(z * rk);
+    }
 
-/*	common exit	*/
+    /*	common exit	*/
 
 
-if( t < 0 )
-	p = -p;	/* note destruction of relative accuracy */
+    if (t < 0)
+        p = -p; /* note destruction of relative accuracy */
 
-	p = 0.5 + 0.5 * p;
-return(p);
+    p = 0.5 + 0.5 * p;
+    return (p);
 }

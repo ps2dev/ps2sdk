@@ -66,7 +66,7 @@
  */
 void magicInit()
 {
-  return;
+    return;
 }
 
 /*
@@ -74,7 +74,7 @@ void magicInit()
  */
 u32_t magic()
 {
-  return avRandom();
+    return avRandom();
 }
 
 #endif /* PPP_SUPPORT */

@@ -48,14 +48,14 @@ extern "C" {
 
 
 /* IGMP timer */
-#define IGMP_TMR_INTERVAL              100 /* Milliseconds */
-#define IGMP_V1_DELAYING_MEMBER_TMR   (1000/IGMP_TMR_INTERVAL)
-#define IGMP_JOIN_DELAYING_MEMBER_TMR (500 /IGMP_TMR_INTERVAL)
+#define IGMP_TMR_INTERVAL 100 /* Milliseconds */
+#define IGMP_V1_DELAYING_MEMBER_TMR (1000 / IGMP_TMR_INTERVAL)
+#define IGMP_JOIN_DELAYING_MEMBER_TMR (500 / IGMP_TMR_INTERVAL)
 
 /* MAC Filter Actions, these are passed to a netif's
  * igmp_mac_filter callback function. */
-#define IGMP_DEL_MAC_FILTER            0
-#define IGMP_ADD_MAC_FILTER            1
+#define IGMP_DEL_MAC_FILTER 0
+#define IGMP_ADD_MAC_FILTER 1
 
 
 /**
@@ -69,33 +69,34 @@ extern "C" {
  * will not run the state machine as it is used to kick off reports
  * from all the other groups
  */
-struct igmp_group {
-  /** next link */
-  struct igmp_group *next;
-  /** interface on which the group is active */
-  struct netif      *netif;
-  /** multicast address */
-  ip_addr_t          group_address;
-  /** signifies we were the last person to report */
-  u8_t               last_reporter_flag;
-  /** current state of the group */
-  u8_t               group_state;
-  /** timer for reporting, negative is OFF */
-  u16_t              timer;
-  /** counter of simultaneous uses */
-  u8_t               use;
+struct igmp_group
+{
+    /** next link */
+    struct igmp_group *next;
+    /** interface on which the group is active */
+    struct netif *netif;
+    /** multicast address */
+    ip_addr_t group_address;
+    /** signifies we were the last person to report */
+    u8_t last_reporter_flag;
+    /** current state of the group */
+    u8_t group_state;
+    /** timer for reporting, negative is OFF */
+    u16_t timer;
+    /** counter of simultaneous uses */
+    u8_t use;
 };
 
 /*  Prototypes */
-void   igmp_init(void);
-err_t  igmp_start(struct netif *netif);
-err_t  igmp_stop(struct netif *netif);
-void   igmp_report_groups(struct netif *netif);
+void igmp_init(void);
+err_t igmp_start(struct netif *netif);
+err_t igmp_stop(struct netif *netif);
+void igmp_report_groups(struct netif *netif);
 struct igmp_group *igmp_lookfor_group(struct netif *ifp, ip_addr_t *addr);
-void   igmp_input(struct pbuf *p, struct netif *inp, ip_addr_t *dest);
-err_t  igmp_joingroup(ip_addr_t *ifaddr, ip_addr_t *groupaddr);
-err_t  igmp_leavegroup(ip_addr_t *ifaddr, ip_addr_t *groupaddr);
-void   igmp_tmr(void);
+void igmp_input(struct pbuf *p, struct netif *inp, ip_addr_t *dest);
+err_t igmp_joingroup(ip_addr_t *ifaddr, ip_addr_t *groupaddr);
+err_t igmp_leavegroup(ip_addr_t *ifaddr, ip_addr_t *groupaddr);
+void igmp_tmr(void);
 
 #ifdef __cplusplus
 }

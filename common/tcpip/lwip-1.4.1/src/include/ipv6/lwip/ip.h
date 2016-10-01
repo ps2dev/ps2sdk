@@ -45,10 +45,10 @@ extern "C" {
 
 #define IP_HLEN 40
 
-#define IP_PROTO_ICMP    58
-#define IP_PROTO_UDP     17
+#define IP_PROTO_ICMP 58
+#define IP_PROTO_UDP 17
 #define IP_PROTO_UDPLITE 136
-#define IP_PROTO_TCP     6
+#define IP_PROTO_TCP 6
 
 /* This is passed as the destination address to ip_output_if (not
    to ip_output), meaning that an IP header already is constructed
@@ -56,10 +56,12 @@ extern "C" {
 #ifdef IP_HDRINCL
 #undef IP_HDRINCL
 #endif /* IP_HDRINCL */
-#define IP_HDRINCL  NULL
+#define IP_HDRINCL NULL
 
 #if LWIP_NETIF_HWADDRHINT
-#define IP_PCB_ADDRHINT ;u8_t addr_hint
+#define IP_PCB_ADDRHINT \
+    ;                   \
+    u8_t addr_hint
 #else
 #define IP_PCB_ADDRHINT
 #endif /* LWIP_NETIF_HWADDRHINT */
@@ -68,32 +70,34 @@ extern "C" {
    beginning of a PCB type definition. It is located here so that
    changes to this common part are made in one location instead of
    having to change all PCB structs. */
-#define IP_PCB struct ip_addr local_ip; \
-  struct ip_addr remote_ip; \
-   /* Socket options */  \
-  u16_t so_options;      \
-   /* Type Of Service */ \
-  u8_t tos;              \
-  /* Time To Live */     \
-  u8_t ttl;              \
-  /* link layer address resolution hint */ \
-  IP_PCB_ADDRHINT
+#define IP_PCB                               \
+    struct ip_addr local_ip;                 \
+    struct ip_addr remote_ip;                \
+    /* Socket options */                     \
+    u16_t so_options;                        \
+    /* Type Of Service */                    \
+    u8_t tos;                                \
+    /* Time To Live */                       \
+    u8_t ttl;                                \
+    /* link layer address resolution hint */ \
+    IP_PCB_ADDRHINT
 
 
 /* The IPv6 header. */
-struct ip_hdr {
+struct ip_hdr
+{
 #if BYTE_ORDER == LITTLE_ENDIAN
-  u8_t tclass1:4, v:4;
-  u8_t flow1:4, tclass2:4;
+    u8_t tclass1 : 4, v : 4;
+    u8_t flow1 : 4, tclass2 : 4;
 #else
-  u8_t v:4, tclass1:4;
-  u8_t tclass2:8, flow1:4;
+    u8_t v : 4, tclass1 : 4;
+    u8_t tclass2 : 8, flow1 : 4;
 #endif
-  u16_t flow2;
-  u16_t len;                /* payload length */
-  u8_t nexthdr;             /* next header */
-  u8_t hoplim;              /* hop limit (TTL) */
-  struct ip_addr src, dest;          /* source and destination IP addresses */
+    u16_t flow2;
+    u16_t len;                /* payload length */
+    u8_t nexthdr;             /* next header */
+    u8_t hoplim;              /* hop limit (TTL) */
+    struct ip_addr src, dest; /* source and destination IP addresses */
 };
 
 #define IPH_PROTO(hdr) (iphdr->nexthdr)
@@ -108,11 +112,11 @@ void ip_input(struct pbuf *p, struct netif *inp);
 
 /* source and destination addresses in network byte order, please */
 err_t ip_output(struct pbuf *p, struct ip_addr *src, struct ip_addr *dest,
-         u8_t ttl, u8_t proto);
+                u8_t ttl, u8_t proto);
 
 err_t ip_output_if(struct pbuf *p, struct ip_addr *src, struct ip_addr *dest,
-      u8_t ttl, u8_t proto,
-      struct netif *netif);
+                   u8_t ttl, u8_t proto,
+                   struct netif *netif);
 
 #define ip_current_netif() NULL
 #define ip_current_header() NULL
@@ -126,5 +130,3 @@ void ip_debug_print(struct pbuf *p);
 #endif
 
 #endif /* __LWIP_IP_H__ */
-
-

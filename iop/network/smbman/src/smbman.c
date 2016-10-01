@@ -14,31 +14,30 @@
 #include "smb.h"
 #include "debug.h"
 
-#define MODNAME 	"smbman"
-#define VER_MAJOR	2
-#define VER_MINOR	1
+#define MODNAME "smbman"
+#define VER_MAJOR 2
+#define VER_MINOR 1
 
 IRX_ID(MODNAME, VER_MAJOR, VER_MINOR);
 
 struct irx_export_table _exp_smbman;
 
 //-------------------------------------------------------------------------
-int _start(int argc, char** argv)
+int _start(int argc, char **argv)
 {
-	DPRINTF("%s version 0x%01x%02x start!\n", MODNAME, VER_MAJOR, VER_MINOR);
+    DPRINTF("%s version 0x%01x%02x start!\n", MODNAME, VER_MAJOR, VER_MINOR);
 
-	RegisterLibraryEntries(&_exp_smbman);
+    RegisterLibraryEntries(&_exp_smbman);
 
-	smb_initdev();
+    smb_initdev();
 
-	return MODULE_RESIDENT_END;
+    return MODULE_RESIDENT_END;
 }
 
 //-------------------------------------------------------------------------
 int _shutdown(void)
 {
-	smb_Disconnect();
+    smb_Disconnect();
 
-	return 0;
+    return 0;
 }
-

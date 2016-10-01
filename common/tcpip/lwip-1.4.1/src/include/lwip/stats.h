@@ -48,101 +48,107 @@ extern "C" {
 #endif
 
 #if LWIP_STATS_LARGE
-#define STAT_COUNTER     u32_t
-#define STAT_COUNTER_F   U32_F
+#define STAT_COUNTER u32_t
+#define STAT_COUNTER_F U32_F
 #else
-#define STAT_COUNTER     u16_t
-#define STAT_COUNTER_F   U16_F
+#define STAT_COUNTER u16_t
+#define STAT_COUNTER_F U16_F
 #endif
 
-struct stats_proto {
-  STAT_COUNTER xmit;             /* Transmitted packets. */
-  STAT_COUNTER recv;             /* Received packets. */
-  STAT_COUNTER fw;               /* Forwarded packets. */
-  STAT_COUNTER drop;             /* Dropped packets. */
-  STAT_COUNTER chkerr;           /* Checksum error. */
-  STAT_COUNTER lenerr;           /* Invalid length error. */
-  STAT_COUNTER memerr;           /* Out of memory error. */
-  STAT_COUNTER rterr;            /* Routing error. */
-  STAT_COUNTER proterr;          /* Protocol error. */
-  STAT_COUNTER opterr;           /* Error in options. */
-  STAT_COUNTER err;              /* Misc error. */
-  STAT_COUNTER cachehit;
+struct stats_proto
+{
+    STAT_COUNTER xmit;    /* Transmitted packets. */
+    STAT_COUNTER recv;    /* Received packets. */
+    STAT_COUNTER fw;      /* Forwarded packets. */
+    STAT_COUNTER drop;    /* Dropped packets. */
+    STAT_COUNTER chkerr;  /* Checksum error. */
+    STAT_COUNTER lenerr;  /* Invalid length error. */
+    STAT_COUNTER memerr;  /* Out of memory error. */
+    STAT_COUNTER rterr;   /* Routing error. */
+    STAT_COUNTER proterr; /* Protocol error. */
+    STAT_COUNTER opterr;  /* Error in options. */
+    STAT_COUNTER err;     /* Misc error. */
+    STAT_COUNTER cachehit;
 };
 
-struct stats_igmp {
-  STAT_COUNTER xmit;             /* Transmitted packets. */
-  STAT_COUNTER recv;             /* Received packets. */
-  STAT_COUNTER drop;             /* Dropped packets. */
-  STAT_COUNTER chkerr;           /* Checksum error. */
-  STAT_COUNTER lenerr;           /* Invalid length error. */
-  STAT_COUNTER memerr;           /* Out of memory error. */
-  STAT_COUNTER proterr;          /* Protocol error. */
-  STAT_COUNTER rx_v1;            /* Received v1 frames. */
-  STAT_COUNTER rx_group;         /* Received group-specific queries. */
-  STAT_COUNTER rx_general;       /* Received general queries. */
-  STAT_COUNTER rx_report;        /* Received reports. */
-  STAT_COUNTER tx_join;          /* Sent joins. */
-  STAT_COUNTER tx_leave;         /* Sent leaves. */
-  STAT_COUNTER tx_report;        /* Sent reports. */
+struct stats_igmp
+{
+    STAT_COUNTER xmit;       /* Transmitted packets. */
+    STAT_COUNTER recv;       /* Received packets. */
+    STAT_COUNTER drop;       /* Dropped packets. */
+    STAT_COUNTER chkerr;     /* Checksum error. */
+    STAT_COUNTER lenerr;     /* Invalid length error. */
+    STAT_COUNTER memerr;     /* Out of memory error. */
+    STAT_COUNTER proterr;    /* Protocol error. */
+    STAT_COUNTER rx_v1;      /* Received v1 frames. */
+    STAT_COUNTER rx_group;   /* Received group-specific queries. */
+    STAT_COUNTER rx_general; /* Received general queries. */
+    STAT_COUNTER rx_report;  /* Received reports. */
+    STAT_COUNTER tx_join;    /* Sent joins. */
+    STAT_COUNTER tx_leave;   /* Sent leaves. */
+    STAT_COUNTER tx_report;  /* Sent reports. */
 };
 
-struct stats_mem {
+struct stats_mem
+{
 #ifdef LWIP_DEBUG
-  const char *name;
+    const char *name;
 #endif /* LWIP_DEBUG */
-  mem_size_t avail;
-  mem_size_t used;
-  mem_size_t max;
-  STAT_COUNTER err;
-  STAT_COUNTER illegal;
+    mem_size_t avail;
+    mem_size_t used;
+    mem_size_t max;
+    STAT_COUNTER err;
+    STAT_COUNTER illegal;
 };
 
-struct stats_syselem {
-  STAT_COUNTER used;
-  STAT_COUNTER max;
-  STAT_COUNTER err;
+struct stats_syselem
+{
+    STAT_COUNTER used;
+    STAT_COUNTER max;
+    STAT_COUNTER err;
 };
 
-struct stats_sys {
-  struct stats_syselem sem;
-  struct stats_syselem mutex;
-  struct stats_syselem mbox;
+struct stats_sys
+{
+    struct stats_syselem sem;
+    struct stats_syselem mutex;
+    struct stats_syselem mbox;
 };
 
-struct stats_ {
+struct stats_
+{
 #if LINK_STATS
-  struct stats_proto link;
+    struct stats_proto link;
 #endif
 #if ETHARP_STATS
-  struct stats_proto etharp;
+    struct stats_proto etharp;
 #endif
 #if IPFRAG_STATS
-  struct stats_proto ip_frag;
+    struct stats_proto ip_frag;
 #endif
 #if IP_STATS
-  struct stats_proto ip;
+    struct stats_proto ip;
 #endif
 #if ICMP_STATS
-  struct stats_proto icmp;
+    struct stats_proto icmp;
 #endif
 #if IGMP_STATS
-  struct stats_igmp igmp;
+    struct stats_igmp igmp;
 #endif
 #if UDP_STATS
-  struct stats_proto udp;
+    struct stats_proto udp;
 #endif
 #if TCP_STATS
-  struct stats_proto tcp;
+    struct stats_proto tcp;
 #endif
 #if MEM_STATS
-  struct stats_mem mem;
+    struct stats_mem mem;
 #endif
 #if MEMP_STATS
-  struct stats_mem memp[MEMP_MAX];
+    struct stats_mem memp[MEMP_MAX];
 #endif
 #if SYS_STATS
-  struct stats_sys sys;
+    struct stats_sys sys;
 #endif
 };
 
@@ -152,11 +158,13 @@ void stats_init(void);
 
 #define STATS_INC(x) ++lwip_stats.x
 #define STATS_DEC(x) --lwip_stats.x
-#define STATS_INC_USED(x, y) do { lwip_stats.x.used += y; \
-                                if (lwip_stats.x.max < lwip_stats.x.used) { \
-                                    lwip_stats.x.max = lwip_stats.x.used; \
-                                } \
-                             } while(0)
+#define STATS_INC_USED(x, y)                        \
+    do {                                            \
+        lwip_stats.x.used += y;                     \
+        if (lwip_stats.x.max < lwip_stats.x.used) { \
+            lwip_stats.x.max = lwip_stats.x.used;   \
+        }                                           \
+    } while (0)
 #else /* LWIP_STATS */
 #define stats_init()
 #define STATS_INC(x)

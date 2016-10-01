@@ -25,126 +25,113 @@ void serverThread();
 
 int main(int argc, char *argv[])
 {
-	SifInitRpc(0);
+    SifInitRpc(0);
 
-	SifLoadModule("host:ps2ips.irx", 0, NULL);
+    SifLoadModule("host:ps2ips.irx", 0, NULL);
 
-	if(ps2ip_init() < 0) {
-		printf("ERROR: ps2ip_init falied!\n");
-		SleepThread();
-	}
+    if (ps2ip_init() < 0) {
+        printf("ERROR: ps2ip_init falied!\n");
+        SleepThread();
+    }
 
-	serverThread();
-	return 0;
+    serverThread();
+    return 0;
 }
 
 char buffer[100];
 
 
-int HandleClient( int cs )
+int HandleClient(int cs)
 {
-   int rcvSize,sntSize;
-   // fd_set rd_set;
+    int rcvSize, sntSize;
+    // fd_set rd_set;
 
-   rcvSize = recv( cs, buffer, 100, 0);
-   if ( rcvSize <= 0 )
-   {
-      printf( "PS2ECHO: recv returned %i\n", rcvSize );
-      return -1;
-   }
-   sntSize = send( cs, buffer, rcvSize, 0 );
+    rcvSize = recv(cs, buffer, 100, 0);
+    if (rcvSize <= 0) {
+        printf("PS2ECHO: recv returned %i\n", rcvSize);
+        return -1;
+    }
+    sntSize = send(cs, buffer, rcvSize, 0);
 
-   return 0;
+    return 0;
 }
 
 
 void serverThread()
 {
-   int sh;
-   int cs;
-   struct sockaddr_in echoServAddr;
-   struct sockaddr_in echoClntAddr;
-   int clntLen;
-   int rc;
-   fd_set active_rd_set;
-   fd_set rd_set;
+    int sh;
+    int cs;
+    struct sockaddr_in echoServAddr;
+    struct sockaddr_in echoClntAddr;
+    int clntLen;
+    int rc;
+    fd_set active_rd_set;
+    fd_set rd_set;
 
-   printf( "PS2ECHO: Server Thread Started.\n" );
-
-
-   sh = socket( AF_INET, SOCK_STREAM, IPPROTO_TCP );
-   if ( sh < 0 )
-   {
-      printf( "PS2ECHO: Socket failed to create.\n" );
-      SleepThread();
-   }
-
-   printf( "PS2ECHO: Got socket.. %i\n" , sh );
+    printf("PS2ECHO: Server Thread Started.\n");
 
 
-   memset( &echoServAddr, 0 , sizeof(echoServAddr ));
-   echoServAddr.sin_family = AF_INET;
-   echoServAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-   echoServAddr.sin_port = htons(12);
+    sh = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    if (sh < 0) {
+        printf("PS2ECHO: Socket failed to create.\n");
+        SleepThread();
+    }
 
-   rc = bind( sh, (struct sockaddr *) &echoServAddr, sizeof( echoServAddr) );
-   if ( rc < 0 )
-   {
-      printf( "PS2ECHO: Socket failed to bind.\n" );
-      SleepThread();
-   }
-
-   printf( "PS2ECHO: bind returned %i\n",rc );
+    printf("PS2ECHO: Got socket.. %i\n", sh);
 
 
-   rc = listen( sh, 2 );
-   if ( rc < 0 )
-   {
-      printf( "PS2ECHO: listen failed.\n" );
-      SleepThread();
-   }
+    memset(&echoServAddr, 0, sizeof(echoServAddr));
+    echoServAddr.sin_family = AF_INET;
+    echoServAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    echoServAddr.sin_port = htons(12);
 
-   printf(  "PS2ECHO: listen returned %i\n", rc );
+    rc = bind(sh, (struct sockaddr *)&echoServAddr, sizeof(echoServAddr));
+    if (rc < 0) {
+        printf("PS2ECHO: Socket failed to bind.\n");
+        SleepThread();
+    }
 
-   FD_ZERO(&active_rd_set);
-   FD_SET(sh, &active_rd_set);
-   while(1)
-   {
-	   int i;
-      clntLen = sizeof( echoClntAddr );
-	  rd_set = active_rd_set;
-	  if(select(FD_SETSIZE, &rd_set, NULL, NULL, NULL) < 0)
-	  {
-		  printf("PS2ECHO: Select failed.\n");
-		  SleepThread();
-	  }
+    printf("PS2ECHO: bind returned %i\n", rc);
 
-	  for(i = 0; i < FD_SETSIZE; i++)
-	  {
-		  if(FD_ISSET(i, &rd_set))
-		  {
-			  if(i == sh)
-			  {
-				  cs = accept( sh, (struct sockaddr *)&echoClntAddr, &clntLen );
-				  if ( cs < 0 )
-				  {
-					 printf( "PS2ECHO: accept failed.\n" );
-					 SleepThread();
-				  }
-				  FD_SET(cs, &active_rd_set);
-				  printf( "PS2ECHO: accept returned %i.\n", cs );
-			  }
-			  else
-			  {
-				  if(HandleClient( i ) < 0)
-				  {
-					  FD_CLR(i, &active_rd_set);
-					  disconnect(i);
-				  }
-			  }
-		  }
-	  }
-   }
 
-	SleepThread();
+    rc = listen(sh, 2);
+    if (rc < 0) {
+        printf("PS2ECHO: listen failed.\n");
+        SleepThread();
+    }
+
+    printf("PS2ECHO: listen returned %i\n", rc);
+
+    FD_ZERO(&active_rd_set);
+    FD_SET(sh, &active_rd_set);
+    while (1) {
+        int i;
+        clntLen = sizeof(echoClntAddr);
+        rd_set = active_rd_set;
+        if (select(FD_SETSIZE, &rd_set, NULL, NULL, NULL) < 0) {
+            printf("PS2ECHO: Select failed.\n");
+            SleepThread();
+        }
+
+        for (i = 0; i < FD_SETSIZE; i++) {
+            if (FD_ISSET(i, &rd_set)) {
+                if (i == sh) {
+                    cs = accept(sh, (struct sockaddr *)&echoClntAddr, &clntLen);
+                    if (cs < 0) {
+                        printf("PS2ECHO: accept failed.\n");
+                        SleepThread();
+                    }
+                    FD_SET(cs, &active_rd_set);
+                    printf("PS2ECHO: accept returned %i.\n", cs);
+                } else {
+                    if (HandleClient(i) < 0) {
+                        FD_CLR(i, &active_rd_set);
+                        disconnect(i);
+                    }
+                }
+            }
+        }
+    }
+
+    SleepThread();
 }

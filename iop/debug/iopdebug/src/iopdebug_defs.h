@@ -24,5 +24,4 @@
 // size of the IOP "debug" exception handler stack, in bytes.
 #define _EX_DBG_STACK_SIZE (4 * 1024)
 
-#endif // #ifndef _IOPDEBUG_DEFS_H_
-
+#endif  // #ifndef _IOPDEBUG_DEFS_H_

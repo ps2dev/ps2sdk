@@ -13,4 +13,4 @@
 
 #include <erl.h>
 
-char * erl_id = "libkernel";
+char *erl_id = "libkernel";

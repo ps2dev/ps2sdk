@@ -13,9 +13,8 @@
 
 #include <erl.h>
 
-char * erl_id = "libinput";
-char * erl_dependancies[] = {
+char *erl_id = "libinput";
+char *erl_dependancies[] = {
     "libc",
     "libpad",
-    0
-};
+    0};

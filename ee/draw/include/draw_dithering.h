@@ -9,11 +9,11 @@ typedef signed char dithermx_t[16];
 extern "C" {
 #endif
 
-	// Dithering Switch
-	qword_t *draw_dithering(qword_t *q, int enable);
+// Dithering Switch
+qword_t *draw_dithering(qword_t *q, int enable);
 
-	// Dithering Matrix
-	qword_t *draw_dither_matrix(qword_t *q,char *dm);
+// Dithering Matrix
+qword_t *draw_dither_matrix(qword_t *q, char *dm);
 
 #ifdef __cplusplus
 }

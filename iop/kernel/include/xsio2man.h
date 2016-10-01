@@ -26,7 +26,7 @@ void sio2_mtap_update_slots();
 #define I_sio2_stat70_get DECLARE_IMPORT(11, sio2_stat70_get)
 #define I_sio2_pad_transfer_init DECLARE_IMPORT(23, sio2_pad_transfer_init)
 #define I_sio2_transfer DECLARE_IMPORT(25, sio2_transfer)
-#define I_sio2_mtap_transfer_init	DECLARE_IMPORT(48, sio2_mtap_transfer_init)
+#define I_sio2_mtap_transfer_init DECLARE_IMPORT(48, sio2_mtap_transfer_init)
 //#define I_sio2_transfer DECLARE_IMPORT(49, sio2_transfer)
 #define I_sio2_transfer_reset DECLARE_IMPORT(50, sio2_transfer_reset)
 #define I_sio2_mtap_change_slot_set DECLARE_IMPORT(51, sio2_mtap_change_slot_set)
@@ -38,4 +38,3 @@ void sio2_mtap_update_slots();
 #define I_sio2_mtap_update_slots DECLARE_IMPORT(58, sio2_mtap_update_slots)
 
 #endif
-

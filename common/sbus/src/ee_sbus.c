@@ -16,8 +16,7 @@ extern int __local_sbus_irq_handler(void);
 
 void SBUS_check_intr(void)
 {
-    if(*R_EE_I_STAT & EE_I_STAT_SBUS)
-    {
+    if (*R_EE_I_STAT & EE_I_STAT_SBUS) {
         __local_sbus_irq_handler();
         *R_EE_I_STAT |= EE_I_STAT_SBUS;
     }
@@ -72,12 +71,15 @@ int SBUS_interrupt_remote(int irq)
 {
     int oldi;
 
-    if(irq >= 32) { return(-1); }
+    if (irq >= 32) {
+        return (-1);
+    }
 
     M_SuspendIntr(&oldi);
 
     // wait for remote to clear irq bit
-    while(SBUS_get_reg(PS2_SBUS_MS_FLAG) & (1 << irq));
+    while (SBUS_get_reg(PS2_SBUS_MS_FLAG) & (1 << irq))
+        ;
 
     // set the "irq" bit for the SBUS interrupt.
     SBUS_set_reg(PS2_SBUS_MS_FLAG, (1 << irq));
@@ -87,7 +89,7 @@ int SBUS_interrupt_remote(int irq)
 
     M_ResumeIntr(oldi);
 
-    return(irq);
+    return (irq);
 }
 #endif
 
@@ -99,8 +101,12 @@ void _SetIntcHandler(int irq, void *handler)
     i_state = DI();
     u_state = (ee_kmode_enter() >> 3) & 3;
 
-    ((void (*)(int, void *)) (0x80000700))(irq, handler);
+    ((void (*)(int, void *))(0x80000700))(irq, handler);
 
-    if(u_state) { ee_kmode_exit(); }
-    if(i_state) { EI(); }
+    if (u_state) {
+        ee_kmode_exit();
+    }
+    if (i_state) {
+        EI();
+    }
 }

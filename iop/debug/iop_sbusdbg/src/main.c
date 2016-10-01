@@ -20,12 +20,9 @@ void _iop_ex_handler(IOP_RegFrame *frame)
 {
     int excode = M_IOP_GET_CAUSE_EXCODE(frame->cause);
 
-    if(excode == IOP_EXCEPTION_HDB)
-    {
+    if (excode == IOP_EXCEPTION_HDB) {
         _iop_exception_state = 2;
-    }
-    else
-    {
+    } else {
         _iop_exception_state = 1;
     }
 
@@ -35,8 +32,7 @@ void _iop_ex_handler(IOP_RegFrame *frame)
     signal_iop_exception(frame);
 
     // wait for EE to send a "IOP control" command and release the IOP.
-    while(_iop_controlled)
-    {
+    while (_iop_controlled) {
         // since we're spinning in an interrupt-disabled state, we have to manually
         //  poll for SBUS interrupts from EE, otherwise we'll never get released!
         SBUS_check_intr();
@@ -49,27 +45,26 @@ extern void soft_break(void);
 
 void _controller_thread(void)
 {
-    while(1)
-    {
-//        printf("IOP: Controller thread going to sleep(%d)...\n", _iop_exception_state);
+    while (1) {
+        //        printf("IOP: Controller thread going to sleep(%d)...\n", _iop_exception_state);
         SleepThread();
-//        printf("IOP: Controller thread woke up!\n");
+        //        printf("IOP: Controller thread woke up!\n");
         soft_break();
     }
 }
 
 void create_th(void)
 {
-	iop_thread_t param;
+    iop_thread_t param;
 
-	param.attr = TH_C;
-	param.thread = (void *) _controller_thread;
-	param.priority = 9; // highest possible priority
-	param.stacksize = 512; // tiny stack, not much is needed!
-	param.option = 0;
+    param.attr = TH_C;
+    param.thread = (void *)_controller_thread;
+    param.priority = 9;     // highest possible priority
+    param.stacksize = 512;  // tiny stack, not much is needed!
+    param.option = 0;
 
-	tid = CreateThread(&param);
-	StartThread(tid, 0);
+    tid = CreateThread(&param);
+    StartThread(tid, 0);
 }
 
 extern void SBUS_dbg_init(void);
@@ -78,22 +73,19 @@ int _start(int argc, char *argv[])
 {
     int i;
 
-    for(i = 2; i <= 7; i++)
-    {
-        iop_dbg_set_handler(i, (IOP_ExceptionHandler *) _iop_ex_handler);
+    for (i = 2; i <= 7; i++) {
+        iop_dbg_set_handler(i, (IOP_ExceptionHandler *)_iop_ex_handler);
     }
 
-    for(i = 9; i <= 15; i++)
-    {
-        iop_dbg_set_handler(i, (IOP_ExceptionHandler *) _iop_ex_handler);
+    for (i = 9; i <= 15; i++) {
+        iop_dbg_set_handler(i, (IOP_ExceptionHandler *)_iop_ex_handler);
     }
 
     create_th();
 
-    if(sbus_tty_init() != 0)
-    {
+    if (sbus_tty_init() != 0) {
         printf("Failed initializing SBUS TTY system!\n");
-        return(1);
+        return (1);
     }
 
     SBUS_dbg_init();
@@ -103,5 +95,5 @@ int _start(int argc, char *argv[])
 
     printf("IOP SBUS Debug installed!\n");
 
-    return(0); // return resident!
+    return (0);  // return resident!
 }

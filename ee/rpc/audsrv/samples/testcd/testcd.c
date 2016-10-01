@@ -23,48 +23,45 @@
 
 int main(int argc, char **argv)
 {
-	int ret;
-	int n, track;
-	int lastpos;
+    int ret;
+    int n, track;
+    int lastpos;
 
-	SifInitRpc(0);
+    SifInitRpc(0);
 
-	printf("sample: kicking IRXs\n");
-	ret = SifLoadModule("rom0:LIBSD", 0, NULL);
-	printf("libsd loadmodule %d\n", ret);
+    printf("sample: kicking IRXs\n");
+    ret = SifLoadModule("rom0:LIBSD", 0, NULL);
+    printf("libsd loadmodule %d\n", ret);
 
-	printf("sample: loading audsrv\n");
-	ret = SifLoadModule("host:audsrv.irx", 0, NULL);
-	printf("audsrv loadmodule %d\n", ret);
+    printf("sample: loading audsrv\n");
+    ret = SifLoadModule("host:audsrv.irx", 0, NULL);
+    printf("audsrv loadmodule %d\n", ret);
 
-	ret = audsrv_init();
-	if (ret != 0)
-	{
-		printf("sample: failed to initialize audsrv\n");
-		printf("audsrv returned error string: %s\n", audsrv_get_error_string());
-		return 1;
-	}
+    ret = audsrv_init();
+    if (ret != 0) {
+        printf("sample: failed to initialize audsrv\n");
+        printf("audsrv returned error string: %s\n", audsrv_get_error_string());
+        return 1;
+    }
 
-	n = audsrv_get_numtracks();
-	printf("There are %d tracks on this disc\n", n);
+    n = audsrv_get_numtracks();
+    printf("There are %d tracks on this disc\n", n);
 
-	lastpos = 0;
-	for (track=0; track<=n; track++)
-	{
-		int pos = audsrv_get_track_offset(track);
+    lastpos = 0;
+    for (track = 0; track <= n; track++) {
+        int pos = audsrv_get_track_offset(track);
 
-		if (track > 0)
-		{
-			int length = pos - lastpos;
+        if (track > 0) {
+            int length = pos - lastpos;
 
-			printf("Track %02d: sector 0x%x, length: %02d:%02d:%02d\n",
-			track, pos, length / (75*60), (length / 75) % 60, length % 75);
-		}
+            printf("Track %02d: sector 0x%x, length: %02d:%02d:%02d\n",
+                   track, pos, length / (75 * 60), (length / 75) % 60, length % 75);
+        }
 
-		lastpos = pos;
-	}
+        lastpos = pos;
+    }
 
-	audsrv_quit();
-	printf("sample: ended\n");
-	return 0;
+    audsrv_quit();
+    printf("sample: ended\n");
+    return 0;
 }

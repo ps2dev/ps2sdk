@@ -44,11 +44,10 @@ extern "C" {
 
 void _CdSemaInit(void);
 void _CdGenericCallbackFunction(void *funcNum);
-int  _CdSyncS(int mode);
+int _CdSyncS(int mode);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif	// _LIBCDVD_INTERNAL_H_
-
+#endif  // _LIBCDVD_INTERNAL_H_

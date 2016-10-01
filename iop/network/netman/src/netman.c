@@ -16,303 +16,325 @@
 
 static struct NetManNetProtStack MainNetProtStack;
 static struct NetManNetIF NetIFs[NETMAN_MAX_NETIF_COUNT];
-static struct NetManNetIF *MainNetIF=NULL;
-static unsigned char IsInitialized=0;
-static char NIFLinkState=0;
-static unsigned char NextNetIFID=0;
+static struct NetManNetIF *MainNetIF = NULL;
+static unsigned char IsInitialized = 0;
+static char NIFLinkState = 0;
+static unsigned char NextNetIFID = 0;
 static int NetManIOSemaID;
 
 IRX_ID("Network_Manager", 1, 2);
 
 extern struct irx_export_table _exp_netman;
 
-int _start(int argc, char *argv[]){
-	iop_sema_t sema;
+int _start(int argc, char *argv[])
+{
+    iop_sema_t sema;
 
-	if(RegisterLibraryEntries(&_exp_netman) == 0){
-		sema.attr = 0;
-		sema.option = 0;
-		sema.initial = 1;
-		sema.max = 1;
-		NetManIOSemaID = CreateSema(&sema);
+    if (RegisterLibraryEntries(&_exp_netman) == 0) {
+        sema.attr = 0;
+        sema.option = 0;
+        sema.initial = 1;
+        sema.max = 1;
+        NetManIOSemaID = CreateSema(&sema);
 
-		NetmanInitRPCServer();
+        NetmanInitRPCServer();
 
-		return MODULE_RESIDENT_END;
-	}
+        return MODULE_RESIDENT_END;
+    }
 
-	return MODULE_NO_RESIDENT_END;
+    return MODULE_NO_RESIDENT_END;
 }
 
-void *malloc(int size){
-	int OldState;
-	void *result;
+void *malloc(int size)
+{
+    int OldState;
+    void *result;
 
-	CpuSuspendIntr(&OldState);
-	result = AllocSysMemory(ALLOC_FIRST, size, NULL);
-	CpuResumeIntr(OldState);
+    CpuSuspendIntr(&OldState);
+    result = AllocSysMemory(ALLOC_FIRST, size, NULL);
+    CpuResumeIntr(OldState);
 
-	return result;
+    return result;
 }
 
-void free(void *buffer){
-	int OldState;
+void free(void *buffer)
+{
+    int OldState;
 
-	CpuSuspendIntr(&OldState);
-	FreeSysMemory(buffer);
-	CpuResumeIntr(OldState);
+    CpuSuspendIntr(&OldState);
+    FreeSysMemory(buffer);
+    CpuResumeIntr(OldState);
 }
 
-void NetManToggleGlobalNetIFLinkState(unsigned char state){
-	NIFLinkState = state;
+void NetManToggleGlobalNetIFLinkState(unsigned char state)
+{
+    NIFLinkState = state;
 
-	NetManUpdateStackNIFLinkState();
+    NetManUpdateStackNIFLinkState();
 }
 
-int NetManGetGlobalNetIFLinkState(void){
-	return NIFLinkState;
+int NetManGetGlobalNetIFLinkState(void)
+{
+    return NIFLinkState;
 }
 
-void NetManUpdateStackNIFLinkState(void){
-	if(IsInitialized){
-		if(NIFLinkState){
-			MainNetProtStack.LinkStateUp();
-		}
-		else{
-			MainNetProtStack.LinkStateDown();
-		}
-	}
+void NetManUpdateStackNIFLinkState(void)
+{
+    if (IsInitialized) {
+        if (NIFLinkState) {
+            MainNetProtStack.LinkStateUp();
+        } else {
+            MainNetProtStack.LinkStateDown();
+        }
+    }
 }
 
-static void UpdateNetIFStatus(void){
-	unsigned char i;
+static void UpdateNetIFStatus(void)
+{
+    unsigned char i;
 
-	if(!(MainNetIF->flags&NETMAN_NETIF_IN_USE)) MainNetIF = NULL;
+    if (!(MainNetIF->flags & NETMAN_NETIF_IN_USE))
+        MainNetIF = NULL;
 
-	if(MainNetIF == NULL){
-		for(i=0; i<NETMAN_MAX_NETIF_COUNT; i++){
-			if(NetIFs[i].flags&NETMAN_NETIF_IN_USE){
-				MainNetIF=&NetIFs[i];
-				break;
-			}
-		}
-	}
+    if (MainNetIF == NULL) {
+        for (i = 0; i < NETMAN_MAX_NETIF_COUNT; i++) {
+            if (NetIFs[i].flags & NETMAN_NETIF_IN_USE) {
+                MainNetIF = &NetIFs[i];
+                break;
+            }
+        }
+    }
 
-	NetManToggleGlobalNetIFLinkState((MainNetIF!=NULL && (MainNetIF->flags&NETMAN_NETIF_LINK_UP)) ? 1 : 0);
+    NetManToggleGlobalNetIFLinkState((MainNetIF != NULL && (MainNetIF->flags & NETMAN_NETIF_LINK_UP)) ? 1 : 0);
 }
 
-int NetManRegisterNetworkStack(const struct NetManNetProtStack *stack){
-	WaitSema(NetManIOSemaID);
+int NetManRegisterNetworkStack(const struct NetManNetProtStack *stack)
+{
+    WaitSema(NetManIOSemaID);
 
-	if(!IsInitialized){
-		memcpy(&MainNetProtStack, stack, sizeof(MainNetProtStack));
-		IsInitialized=1;
+    if (!IsInitialized) {
+        memcpy(&MainNetProtStack, stack, sizeof(MainNetProtStack));
+        IsInitialized = 1;
 
-		NetManUpdateStackNIFLinkState();
-	}
+        NetManUpdateStackNIFLinkState();
+    }
 
-	SignalSema(NetManIOSemaID);
+    SignalSema(NetManIOSemaID);
 
-	return 0;
+    return 0;
 }
 
-void NetManUnregisterNetworkStack(void){
-	unsigned int i;
+void NetManUnregisterNetworkStack(void)
+{
+    unsigned int i;
 
-	WaitSema(NetManIOSemaID);
+    WaitSema(NetManIOSemaID);
 
-	for(i=0; i<NETMAN_MAX_NETIF_COUNT; i++){
-		if(NetIFs[i].flags&NETMAN_NETIF_IN_USE){
-			NetIFs[i].flags=0;
-			NetIFs[i].deinit();
-		}
-	}
+    for (i = 0; i < NETMAN_MAX_NETIF_COUNT; i++) {
+        if (NetIFs[i].flags & NETMAN_NETIF_IN_USE) {
+            NetIFs[i].flags = 0;
+            NetIFs[i].deinit();
+        }
+    }
 
-	UpdateNetIFStatus();
-	memset(&MainNetProtStack, 0, sizeof(MainNetProtStack));
-	IsInitialized=0;
+    UpdateNetIFStatus();
+    memset(&MainNetProtStack, 0, sizeof(MainNetProtStack));
+    IsInitialized = 0;
 
-	SignalSema(NetManIOSemaID);
+    SignalSema(NetManIOSemaID);
 }
 
-int NetManNetIFSendPacket(const void *packet, unsigned int length){
-	int result;
+int NetManNetIFSendPacket(const void *packet, unsigned int length)
+{
+    int result;
 
-	WaitSema(NetManIOSemaID);
+    WaitSema(NetManIOSemaID);
 
-	if(MainNetIF!=NULL){
-		result=MainNetIF->xmit(packet, length);
-	}
-	else result=-1;
+    if (MainNetIF != NULL) {
+        result = MainNetIF->xmit(packet, length);
+    } else
+        result = -1;
 
-	SignalSema(NetManIOSemaID);
+    SignalSema(NetManIOSemaID);
 
-	return result;
+    return result;
 }
 
-int NetManIoctl(unsigned int command, void *args, unsigned int args_len, void *output, unsigned int length){
-	int result;
+int NetManIoctl(unsigned int command, void *args, unsigned int args_len, void *output, unsigned int length)
+{
+    int result;
 
-	WaitSema(NetManIOSemaID);
+    WaitSema(NetManIOSemaID);
 
-	if(MainNetIF!=NULL){
-		result=MainNetIF->ioctl(command, args, args_len, output, length);
-	}
-	else result=-1;
+    if (MainNetIF != NULL) {
+        result = MainNetIF->ioctl(command, args, args_len, output, length);
+    } else
+        result = -1;
 
-	SignalSema(NetManIOSemaID);
+    SignalSema(NetManIOSemaID);
 
-	return result;
+    return result;
 }
 
-int NetManNetIFSetLinkMode(int mode){
-	return NetManIoctl(NETMAN_NETIF_IOCTL_ETH_SET_LINK_MODE, &mode, sizeof(mode), NULL, 0);
+int NetManNetIFSetLinkMode(int mode)
+{
+    return NetManIoctl(NETMAN_NETIF_IOCTL_ETH_SET_LINK_MODE, &mode, sizeof(mode), NULL, 0);
 }
 
-struct NetManPacketBuffer *NetManNetProtStackAllocRxPacket(unsigned int length){
-	return IsInitialized?MainNetProtStack.AllocRxPacket(length):NULL;
+struct NetManPacketBuffer *NetManNetProtStackAllocRxPacket(unsigned int length)
+{
+    return IsInitialized ? MainNetProtStack.AllocRxPacket(length) : NULL;
 }
 
-void NetManNetProtStackFreeRxPacket(struct NetManPacketBuffer *packet){
-	if(IsInitialized) MainNetProtStack.FreeRxPacket(packet);
+void NetManNetProtStackFreeRxPacket(struct NetManPacketBuffer *packet)
+{
+    if (IsInitialized)
+        MainNetProtStack.FreeRxPacket(packet);
 }
 
-int NetManNetProtStackEnQRxPacket(struct NetManPacketBuffer *packet){
-	return IsInitialized?MainNetProtStack.EnQRxPacket(packet):-1;
+int NetManNetProtStackEnQRxPacket(struct NetManPacketBuffer *packet)
+{
+    return IsInitialized ? MainNetProtStack.EnQRxPacket(packet) : -1;
 }
 
-int NetManNetProtStackFlushInputQueue(void){
-	return IsInitialized?MainNetProtStack.FlushInputQueue():-1;
+int NetManNetProtStackFlushInputQueue(void)
+{
+    return IsInitialized ? MainNetProtStack.FlushInputQueue() : -1;
 }
 
-int NetManRegisterNetIF(struct NetManNetIF *NetIF){
-	unsigned int i;
-	int result;
-	iop_event_t EventFlag;
+int NetManRegisterNetIF(struct NetManNetIF *NetIF)
+{
+    unsigned int i;
+    int result;
+    iop_event_t EventFlag;
 
-	WaitSema(NetManIOSemaID);
+    WaitSema(NetManIOSemaID);
 
-	for(i=0, result=-ENOMEM; i<NETMAN_MAX_NETIF_COUNT; i++){
-		if(!(NetIFs[i].flags&NETMAN_NETIF_IN_USE)){
-			if(NetIF->init()==0){
-				EventFlag.attr = 0;
-				EventFlag.option = 0;
-				EventFlag.bits = 0;
-				if((result = NetIF->EventFlagID = CreateEventFlag(&EventFlag)) >= 0){
-					memcpy(&NetIFs[i], NetIF, sizeof(NetIFs[i]));
-					NetIFs[i].flags|=NETMAN_NETIF_IN_USE;
-					result=NetIFs[i].id=((unsigned int)NextNetIFID)<<8|i;
+    for (i = 0, result = -ENOMEM; i < NETMAN_MAX_NETIF_COUNT; i++) {
+        if (!(NetIFs[i].flags & NETMAN_NETIF_IN_USE)) {
+            if (NetIF->init() == 0) {
+                EventFlag.attr = 0;
+                EventFlag.option = 0;
+                EventFlag.bits = 0;
+                if ((result = NetIF->EventFlagID = CreateEventFlag(&EventFlag)) >= 0) {
+                    memcpy(&NetIFs[i], NetIF, sizeof(NetIFs[i]));
+                    NetIFs[i].flags |= NETMAN_NETIF_IN_USE;
+                    result = NetIFs[i].id = ((unsigned int)NextNetIFID) << 8 | i;
 
-					UpdateNetIFStatus();
-					NextNetIFID++;
-				}
-			}
-			else result=-EIO;
-			break;
-		}
-	}
+                    UpdateNetIFStatus();
+                    NextNetIFID++;
+                }
+            } else
+                result = -EIO;
+            break;
+        }
+    }
 
-	SignalSema(NetManIOSemaID);
+    SignalSema(NetManIOSemaID);
 
-	return result;
+    return result;
 }
 
-void NetManUnregisterNetIF(const char *name){
-	unsigned int i;
+void NetManUnregisterNetIF(const char *name)
+{
+    unsigned int i;
 
-	WaitSema(NetManIOSemaID);
+    WaitSema(NetManIOSemaID);
 
-	for(i=0; i<NETMAN_MAX_NETIF_COUNT; i++){
-		if((NetIFs[i].flags&NETMAN_NETIF_IN_USE) && strcmp(name, NetIFs[i].name)==0){
-			NetIFs[i].flags=0;
-			NetIFs[i].deinit();
-			DeleteEventFlag(NetIFs[i].EventFlagID);
-			UpdateNetIFStatus();
-			break;
-		}
-	}
+    for (i = 0; i < NETMAN_MAX_NETIF_COUNT; i++) {
+        if ((NetIFs[i].flags & NETMAN_NETIF_IN_USE) && strcmp(name, NetIFs[i].name) == 0) {
+            NetIFs[i].flags = 0;
+            NetIFs[i].deinit();
+            DeleteEventFlag(NetIFs[i].EventFlagID);
+            UpdateNetIFStatus();
+            break;
+        }
+    }
 
-	SignalSema(NetManIOSemaID);
+    SignalSema(NetManIOSemaID);
 }
 
-void NetManToggleNetIFLinkState(int NetIFID, unsigned char state){
-	struct NetManNetIF *pNetIF;
+void NetManToggleNetIFLinkState(int NetIFID, unsigned char state)
+{
+    struct NetManNetIF *pNetIF;
 
-	WaitSema(NetManIOSemaID);
+    WaitSema(NetManIOSemaID);
 
-	if((NetIFID&0xFF)<NETMAN_MAX_NETIF_COUNT && NetIFID==NetIFs[NetIFID&0xFF].id && (NetIFs[NetIFID&0xFF].flags&NETMAN_NETIF_IN_USE)){
-		pNetIF = &NetIFs[NetIFID&0xFF];
+    if ((NetIFID & 0xFF) < NETMAN_MAX_NETIF_COUNT && NetIFID == NetIFs[NetIFID & 0xFF].id && (NetIFs[NetIFID & 0xFF].flags & NETMAN_NETIF_IN_USE)) {
+        pNetIF = &NetIFs[NetIFID & 0xFF];
 
-		ClearEventFlag(pNetIF->EventFlagID, ~(NETMAN_NETIF_EVF_UP|NETMAN_NETIF_EVF_DOWN));
+        ClearEventFlag(pNetIF->EventFlagID, ~(NETMAN_NETIF_EVF_UP | NETMAN_NETIF_EVF_DOWN));
 
-		if(state){
-			pNetIF->flags|=NETMAN_NETIF_LINK_UP;
-			SetEventFlag(pNetIF->EventFlagID, NETMAN_NETIF_EVF_UP);
-		}
-		else{
-			pNetIF->flags&=~NETMAN_NETIF_LINK_UP;
-			SetEventFlag(pNetIF->EventFlagID, NETMAN_NETIF_EVF_DOWN);
-		}
+        if (state) {
+            pNetIF->flags |= NETMAN_NETIF_LINK_UP;
+            SetEventFlag(pNetIF->EventFlagID, NETMAN_NETIF_EVF_UP);
+        } else {
+            pNetIF->flags &= ~NETMAN_NETIF_LINK_UP;
+            SetEventFlag(pNetIF->EventFlagID, NETMAN_NETIF_EVF_DOWN);
+        }
 
-		UpdateNetIFStatus();
-	}
+        UpdateNetIFStatus();
+    }
 
-	SignalSema(NetManIOSemaID);
+    SignalSema(NetManIOSemaID);
 }
 
-int NetManSetMainIF(const char *name){
-	int result, i;
+int NetManSetMainIF(const char *name)
+{
+    int result, i;
 
-	WaitSema(NetManIOSemaID);
+    WaitSema(NetManIOSemaID);
 
-	for(i=0,result=-ENXIO; i<NETMAN_MAX_NETIF_COUNT; i++){
-		if((NetIFs[i].flags&NETMAN_NETIF_IN_USE) && strcmp(name, NetIFs[i].name)==0){
-			MainNetIF=&NetIFs[i];
-			result = 0;
-			break;
-		}
-	}
+    for (i = 0, result = -ENXIO; i < NETMAN_MAX_NETIF_COUNT; i++) {
+        if ((NetIFs[i].flags & NETMAN_NETIF_IN_USE) && strcmp(name, NetIFs[i].name) == 0) {
+            MainNetIF = &NetIFs[i];
+            result = 0;
+            break;
+        }
+    }
 
-	SignalSema(NetManIOSemaID);
+    SignalSema(NetManIOSemaID);
 
-	return result;
+    return result;
 }
 
-int NetManQueryMainIF(char *name){
-	int result;
+int NetManQueryMainIF(char *name)
+{
+    int result;
 
-	WaitSema(NetManIOSemaID);
+    WaitSema(NetManIOSemaID);
 
-	if(MainNetIF!=NULL && (MainNetIF->flags&NETMAN_NETIF_IN_USE)){
-		strcpy(name, MainNetIF->name);
-		result = 0;
-	}else result = -ENXIO;
+    if (MainNetIF != NULL && (MainNetIF->flags & NETMAN_NETIF_IN_USE)) {
+        strcpy(name, MainNetIF->name);
+        result = 0;
+    } else
+        result = -ENXIO;
 
-	SignalSema(NetManIOSemaID);
+    SignalSema(NetManIOSemaID);
 
-	return result;
+    return result;
 }
 
-int NetManSetLinkMode(int mode){
-	int result, evfid;
+int NetManSetLinkMode(int mode)
+{
+    int result, evfid;
 
-	WaitSema(NetManIOSemaID);
+    WaitSema(NetManIOSemaID);
 
-	if(MainNetIF!=NULL){
-		evfid = MainNetIF->EventFlagID;
+    if (MainNetIF != NULL) {
+        evfid = MainNetIF->EventFlagID;
 
-		ClearEventFlag(evfid, ~NETMAN_NETIF_EVF_DOWN);
-		result = MainNetIF->ioctl(NETMAN_NETIF_IOCTL_ETH_SET_LINK_MODE, &mode, sizeof(mode), NULL, 0);
-	}
-	else{
-		evfid = -1;
-		result = -1;
-	}
+        ClearEventFlag(evfid, ~NETMAN_NETIF_EVF_DOWN);
+        result = MainNetIF->ioctl(NETMAN_NETIF_IOCTL_ETH_SET_LINK_MODE, &mode, sizeof(mode), NULL, 0);
+    } else {
+        evfid = -1;
+        result = -1;
+    }
 
-	SignalSema(NetManIOSemaID);
+    SignalSema(NetManIOSemaID);
 
-	if(result == 0  && evfid >= 0)
-		WaitEventFlag(evfid, NETMAN_NETIF_EVF_DOWN, WEF_OR, NULL);	//Wait for the IF to go down.
+    if (result == 0 && evfid >= 0)
+        WaitEventFlag(evfid, NETMAN_NETIF_EVF_DOWN, WEF_OR, NULL);  //Wait for the IF to go down.
 
-	return result;
+    return result;
 }

@@ -21,47 +21,48 @@ extern "C" {
 
 typedef struct t_SifCmdHeader
 {
-   u32				size;
-   void				*dest;
-   int				cid;
-   u32				opt;
+    u32 size;
+    void *dest;
+    int cid;
+    u32 opt;
 } SifCmdHeader_t;
 
 /* System functions */
-#define	SIF_CMD_ID_SYSTEM	0x80000000
+#define SIF_CMD_ID_SYSTEM 0x80000000
 
-#define SIF_CMD_CHANGE_SADDR	(SIF_CMD_ID_SYSTEM | 0)
-#define SIF_CMD_SET_SREG	(SIF_CMD_ID_SYSTEM | 1)
-#define SIF_CMD_INIT_CMD	(SIF_CMD_ID_SYSTEM | 2)
-#define SIF_CMD_RESET_CMD	(SIF_CMD_ID_SYSTEM | 3)
-#define SIF_CMD_RPC_END		(SIF_CMD_ID_SYSTEM | 8)
-#define SIF_CMD_RPC_BIND	(SIF_CMD_ID_SYSTEM | 9)
-#define SIF_CMD_RPC_CALL	(SIF_CMD_ID_SYSTEM | 10)
-#define SIF_CMD_RPC_RDATA	(SIF_CMD_ID_SYSTEM | 12)
+#define SIF_CMD_CHANGE_SADDR (SIF_CMD_ID_SYSTEM | 0)
+#define SIF_CMD_SET_SREG (SIF_CMD_ID_SYSTEM | 1)
+#define SIF_CMD_INIT_CMD (SIF_CMD_ID_SYSTEM | 2)
+#define SIF_CMD_RESET_CMD (SIF_CMD_ID_SYSTEM | 3)
+#define SIF_CMD_RPC_END (SIF_CMD_ID_SYSTEM | 8)
+#define SIF_CMD_RPC_BIND (SIF_CMD_ID_SYSTEM | 9)
+#define SIF_CMD_RPC_CALL (SIF_CMD_ID_SYSTEM | 10)
+#define SIF_CMD_RPC_RDATA (SIF_CMD_ID_SYSTEM | 12)
 
 //System SREG
-#define SIF_SREG_RPCINIT	0
+#define SIF_SREG_RPCINIT 0
 
 //Structure for remotely (over the SIF) changing the value of a software register (SREG).
 //There are 32 software registers (0 - 31). Registers 0-7 are used by the system.
-typedef struct t_SifCmdSRegData {
-	SifCmdHeader_t	header;
-	int		index;
-	unsigned int	value;
+typedef struct t_SifCmdSRegData
+{
+    SifCmdHeader_t header;
+    int index;
+    unsigned int value;
 } SifCmdSRegData_t;
 
 typedef void (*SifCmdHandler_t)(void *data, void *harg);
 
 typedef struct t_SifCmdHandlerData
 {
-	SifCmdHandler_t	handler;
-	void	 	*harg;
+    SifCmdHandler_t handler;
+    void *harg;
 } SifCmdHandlerData_t;
 
 unsigned int SifSendCmd(int cmd, void *packet, int packet_size, void *src_extra,
-	void *dest_extra, int size_extra);
+                        void *dest_extra, int size_extra);
 unsigned int iSifSendCmd(int cmd, void *packet, int packet_size, void *src_extra,
-	void *dest_extra, int size_extra);
+                         void *dest_extra, int size_extra);
 void SifAddCmdHandler(int pos, SifCmdHandler_t handler, void *harg);
 void SifRemoveCmdHandler(int pos);
 void SifInitCmd(void);
@@ -69,11 +70,11 @@ void SifExitCmd(void);
 SifCmdHandlerData_t *SifSetCmdBuffer(SifCmdHandlerData_t *db, int size);
 int SifGetSreg(int index);
 
-void SifWriteBackDCache(void *ptr, int size);	//EE only
+void SifWriteBackDCache(void *ptr, int size);  //EE only
 
 //Send mode bits
-#define SIF_CMD_M_INTR	0x01	//Called within an interrupt context
-#define SIF_CMD_M_WBDC	0x04 	//Write back D-cache for extended data
+#define SIF_CMD_M_INTR 0x01  //Called within an interrupt context
+#define SIF_CMD_M_WBDC 0x04  //Write back D-cache for extended data
 
 #ifdef __cplusplus
 }

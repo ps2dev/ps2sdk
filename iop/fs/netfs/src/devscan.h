@@ -11,12 +11,12 @@
 # device driver scanner and handler headers
 */
 
-#define DEVSCAN_IOMAX  16
+#define DEVSCAN_IOMAX 16
 #define DEVSCAN_IOXMAX 32
 /*! \brief Maximum number of devices handled.
  *  \ingroup ps2netfs
  */
-#define DEVSCAN_MAX (DEVSCAN_IOMAX+DEVSCAN_IOXMAX+1)
+#define DEVSCAN_MAX (DEVSCAN_IOMAX + DEVSCAN_IOXMAX + 1)
 
 /*! \brief Device scan mask.
  *  \ingroup ps2netfs
@@ -26,10 +26,11 @@
 /*! \brief Device type structure.
  *  \ingroup ps2netfs
  */
-typedef struct {
-  char name[256];
-  int  devtype;
-  int  len;
+typedef struct
+{
+    char name[256];
+    int devtype;
+    int len;
 } dev_table_t;
 
 int devscan_gettype(char *name);

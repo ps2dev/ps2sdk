@@ -44,13 +44,13 @@
 #define SWAP_BYTES_IN_WORD(w) LWIP_PLATFORM_HTONS(w)
 #else /* LWIP_PLATFORM_BYTESWAP && (BYTE_ORDER == LITTLE_ENDIAN) */
 /* can't use htons on big endian (or PLATFORM_BYTESWAP not defined)... */
-#define SWAP_BYTES_IN_WORD(w) (((w) & 0xff) << 8) | (((w) & 0xff00) >> 8)
+#define SWAP_BYTES_IN_WORD(w) (((w)&0xff) << 8) | (((w)&0xff00) >> 8)
 #endif /* LWIP_PLATFORM_BYTESWAP && (BYTE_ORDER == LITTLE_ENDIAN)*/
 #endif /* SWAP_BYTES_IN_WORD */
 
 /** Split an u32_t in two u16_ts and add them up */
 #ifndef FOLD_U32T
-#define FOLD_U32T(u)          (((u) >> 16) + ((u) & 0x0000ffffUL))
+#define FOLD_U32T(u) (((u) >> 16) + ((u)&0x0000ffffUL))
 #endif
 
 #if LWIP_CHECKSUM_ON_COPY
@@ -62,7 +62,7 @@
 #define LWIP_CHKSUM_COPY_ALGORITHM 1
 #endif /* LWIP_CHKSUM_COPY_ALGORITHM */
 #endif /* LWIP_CHKSUM_COPY */
-#else /* LWIP_CHECKSUM_ON_COPY */
+#else  /* LWIP_CHECKSUM_ON_COPY */
 #define LWIP_CHKSUM_COPY_ALGORITHM 0
 #endif /* LWIP_CHECKSUM_ON_COPY */
 
@@ -73,11 +73,11 @@ extern "C" {
 u16_t inet_chksum(void *dataptr, u16_t len);
 u16_t inet_chksum_pbuf(struct pbuf *p);
 u16_t inet_chksum_pseudo(struct pbuf *p,
-       ip_addr_t *src, ip_addr_t *dest,
-       u8_t proto, u16_t proto_len);
+                         ip_addr_t *src, ip_addr_t *dest,
+                         u8_t proto, u16_t proto_len);
 u16_t inet_chksum_pseudo_partial(struct pbuf *p,
-       ip_addr_t *src, ip_addr_t *dest,
-       u8_t proto, u16_t proto_len, u16_t chksum_len);
+                                 ip_addr_t *src, ip_addr_t *dest,
+                                 u8_t proto, u16_t proto_len, u16_t chksum_len);
 #if LWIP_CHKSUM_COPY_ALGORITHM
 u16_t lwip_chksum_copy(void *dst, const void *src, u16_t len);
 #endif /* LWIP_CHKSUM_COPY_ALGORITHM */
@@ -87,4 +87,3 @@ u16_t lwip_chksum_copy(void *dst, const void *src, u16_t len);
 #endif
 
 #endif /* __LWIP_INET_H__ */
-

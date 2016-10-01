@@ -22,5 +22,4 @@ void *doGetDeviceStaticDescriptor(int devId, void *data, uint8 type);
 int doCloseEndpoint(Endpoint *ep);
 int hcdInit(void);
 
-#endif // __HCD_H__
-
+#endif  // __HCD_H__

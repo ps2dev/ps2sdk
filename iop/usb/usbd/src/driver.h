@@ -23,5 +23,4 @@ void callbackThreadFunc(void *arg);
 void connectNewDevice(Device *dev);
 int initCallbackThread(void);
 
-#endif //__DRIVER_H__
-
+#endif  //__DRIVER_H__

@@ -11,5 +11,4 @@ int hubResetDevice(Device *dev);
 int hubTimedSetFuncAddress(Device *dev);
 
 
-#endif // __HUB_H__
-
+#endif  // __HUB_H__

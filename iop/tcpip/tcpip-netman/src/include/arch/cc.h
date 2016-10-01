@@ -5,12 +5,12 @@
 
 #define BYTE_ORDER LITTLE_ENDIAN
 
-typedef unsigned char		u8_t;
-typedef signed char		s8_t;
-typedef unsigned short int	u16_t;
-typedef signed short		s16_t;
-typedef unsigned int		u32_t;
-typedef signed int		s32_t;
+typedef unsigned char u8_t;
+typedef signed char s8_t;
+typedef unsigned short int u16_t;
+typedef signed short s16_t;
+typedef unsigned int u32_t;
+typedef signed int s32_t;
 
 typedef u32_t mem_ptr_t;
 

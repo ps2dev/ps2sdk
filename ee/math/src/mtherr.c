@@ -100,5 +100,5 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 
 int mtherr(char *name, int code)
 {
-	return 0;
+    return 0;
 }

@@ -38,4 +38,4 @@ int mtapGetConnection(int port);
 }
 #endif
 
-#endif // _LIBMTAP_H
+#endif  // _LIBMTAP_H

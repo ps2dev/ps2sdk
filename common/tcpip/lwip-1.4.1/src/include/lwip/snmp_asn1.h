@@ -46,7 +46,7 @@
 extern "C" {
 #endif
 
-#define SNMP_ASN1_UNIV   (0)    /* (!0x80 | !0x40) */
+#define SNMP_ASN1_UNIV (0)      /* (!0x80 | !0x40) */
 #define SNMP_ASN1_APPLIC (0x40) /* (!0x80 |  0x40) */
 #define SNMP_ASN1_CONTXT (0x80) /* ( 0x80 | !0x40) */
 
@@ -54,11 +54,11 @@ extern "C" {
 #define SNMP_ASN1_PRIMIT (0)    /* (!0x20) */
 
 /* universal tags */
-#define SNMP_ASN1_INTEG  2
+#define SNMP_ASN1_INTEG 2
 #define SNMP_ASN1_OC_STR 4
-#define SNMP_ASN1_NUL    5
+#define SNMP_ASN1_NUL 5
 #define SNMP_ASN1_OBJ_ID 6
-#define SNMP_ASN1_SEQ    16
+#define SNMP_ASN1_SEQ 16
 
 /* application specific (SNMP) tags */
 #define SNMP_ASN1_IPADDR 0    /* octet string size(4) */

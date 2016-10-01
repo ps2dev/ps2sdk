@@ -83,14 +83,14 @@ typedef u16_t mem_size_t;
 /** mem_trim is not used when using pools instead of a heap:
     we can't free part of a pool element and don't want to copy the rest */
 #define mem_trim(mem, size) (mem)
-#else /* MEM_USE_POOLS */
+#else  /* MEM_USE_POOLS */
 /* lwIP alternative malloc */
-void  mem_init(void);
+void mem_init(void);
 void *mem_trim(void *mem, mem_size_t size);
 #endif /* MEM_USE_POOLS */
 void *mem_malloc(mem_size_t size);
 void *mem_calloc(mem_size_t count, mem_size_t size);
-void  mem_free(void *mem);
+void mem_free(void *mem);
 #endif /* MEM_LIBC_MALLOC */
 
 /** Calculate memory size for an aligned buffer - returns the next highest
@@ -98,7 +98,7 @@ void  mem_free(void *mem);
  * LWIP_MEM_ALIGN_SIZE(4) will both yield 4 for MEM_ALIGNMENT == 4).
  */
 #ifndef LWIP_MEM_ALIGN_SIZE
-#define LWIP_MEM_ALIGN_SIZE(size) (((size) + MEM_ALIGNMENT - 1) & ~(MEM_ALIGNMENT-1))
+#define LWIP_MEM_ALIGN_SIZE(size) (((size) + MEM_ALIGNMENT - 1) & ~(MEM_ALIGNMENT - 1))
 #endif
 
 /** Calculate safe memory size for an aligned buffer when using an unaligned
@@ -113,7 +113,7 @@ void  mem_free(void *mem);
  * so that ADDR % MEM_ALIGNMENT == 0
  */
 #ifndef LWIP_MEM_ALIGN
-#define LWIP_MEM_ALIGN(addr) ((void *)(((mem_ptr_t)(addr) + MEM_ALIGNMENT - 1) & ~(mem_ptr_t)(MEM_ALIGNMENT-1)))
+#define LWIP_MEM_ALIGN(addr) ((void *)(((mem_ptr_t)(addr) + MEM_ALIGNMENT - 1) & ~(mem_ptr_t)(MEM_ALIGNMENT - 1)))
 #endif
 
 #ifdef __cplusplus

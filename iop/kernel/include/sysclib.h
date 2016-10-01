@@ -20,7 +20,7 @@
 #include "irx.h"
 #include "setjmp.h"
 
-typedef void (*print_callback_t)(void * opaque, u8 char_to_print);
+typedef void (*print_callback_t)(void *opaque, u8 char_to_print);
 
 #define sysclib_IMPORTS_start DECLARE_IMPORT_TABLE(sysclib, 1, 1)
 #define sysclib_IMPORTS_end END_IMPORT_TABLE
@@ -39,11 +39,11 @@ void *memchr(const void *s, int c, size_t n);
 #define I_memchr DECLARE_IMPORT(10, memchr)
 int memcmp(const void *p, const void *q, size_t size);
 #define I_memcmp DECLARE_IMPORT(11, memcmp)
-void * memcpy(void *dest, const void *src, size_t size);
+void *memcpy(void *dest, const void *src, size_t size);
 #define I_memcpy DECLARE_IMPORT(12, memcpy)
 void *memmove(void *dest, const void *src, size_t size);
 #define I_memmove DECLARE_IMPORT(13, memmove)
-void * memset(void *ptr, int c, size_t size);
+void *memset(void *ptr, int c, size_t size);
 #define I_memset DECLARE_IMPORT(14, memset)
 int bcmp(const void *, const void *, size_t);
 #define I_bcmp DECLARE_IMPORT(15, bcmp);
@@ -51,7 +51,7 @@ void bcopy(const void *, void *, size_t);
 #define I_bcopy DECLARE_IMPORT(16, bcopy);
 void bzero(void *, size_t);
 #define I_bzero DECLARE_IMPORT(17, bzero);
-int prnt(print_callback_t, void * opaque, const char * format, va_list ap);
+int prnt(print_callback_t, void *opaque, const char *format, va_list ap);
 #define I_prnt DECLARE_IMPORT(18, prnt)
 int sprintf(char *str, const char *format, ...);
 #define I_sprintf DECLARE_IMPORT(19, sprintf)
@@ -95,42 +95,42 @@ unsigned long strtoul(const char *s, char **endptr, int base);
 int vsprintf(char *, const char *, va_list);
 #define I_vsprintf DECLARE_IMPORT(42, vsprintf)
 
-#define sysclib_IMPORTS \
-	sysclib_IMPORTS_start \
- \
- 	I_setjmp \
-	I_longjmp \
- \
-	I_toupper \
-	I_tolower \
-	I_look_ctype_table \
-	I_memchr \
-	I_memcmp \
-	I_memcpy \
-	I_memmove \
-	I_memset \
- \
-	I_sprintf \
- \
-	I_strcat \
-	I_strchr \
-	I_strcmp \
-	I_strcpy \
-	I_strcspn \
-	I_index \
-	I_rindex \
-	I_strlen \
-	I_strncat \
-	I_strncmp \
-	I_strncpy \
-	I_strpbrk \
-	I_strrchr \
-	I_strspn \
-	I_strstr \
-	I_strtok \
-	I_strtol \
-	I_strtoul \
- \
-	sysclib_IMPORTS_end
+#define sysclib_IMPORTS                                                                                                           \
+    sysclib_IMPORTS_start                                                                                                         \
+                                                                                                                                  \
+        I_setjmp                                                                                                                  \
+            I_longjmp                                                                                                             \
+                                                                                                                                  \
+                I_toupper                                                                                                         \
+                    I_tolower                                                                                                     \
+                        I_look_ctype_table                                                                                        \
+                            I_memchr                                                                                              \
+                                I_memcmp                                                                                          \
+                                    I_memcpy                                                                                      \
+                                        I_memmove                                                                                 \
+                                            I_memset                                                                              \
+                                                                                                                                  \
+                                                I_sprintf                                                                         \
+                                                                                                                                  \
+                                                    I_strcat                                                                      \
+                                                        I_strchr                                                                  \
+                                                            I_strcmp                                                              \
+                                                                I_strcpy                                                          \
+                                                                    I_strcspn                                                     \
+                                                                        I_index                                                   \
+                                                                            I_rindex                                              \
+                                                                                I_strlen                                          \
+                                                                                    I_strncat                                     \
+                                                                                        I_strncmp                                 \
+                                                                                            I_strncpy                             \
+                                                                                                I_strpbrk                         \
+                                                                                                    I_strrchr                     \
+                                                                                                        I_strspn                  \
+                                                                                                            I_strstr              \
+                                                                                                                I_strtok          \
+                                                                                                                    I_strtol      \
+                                                                                                                        I_strtoul \
+                                                                                                                                  \
+                                                                                                                            sysclib_IMPORTS_end
 
 #endif /* IOP_SYSCLIB_H */

@@ -13,10 +13,9 @@
 
 #include <erl.h>
 
-char * erl_id = "libgraph";
-char * erl_dependancies[] =
-{
-    "libkernel",
-	"libc",
-    0
-};
+char *erl_id = "libgraph";
+char *erl_dependancies[] =
+    {
+        "libkernel",
+        "libc",
+        0};

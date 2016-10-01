@@ -13,11 +13,10 @@
 
 #include <erl.h>
 
-char * erl_id = "libpoweroff";
+char *erl_id = "libpoweroff";
 
-char * erl_dependancies[] = {
+char *erl_dependancies[] = {
     "libkernel",
     "libc",
     "libfileXio",
-    0
-};
+    0};

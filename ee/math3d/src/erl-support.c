@@ -13,9 +13,8 @@
 
 #include <erl.h>
 
-char * erl_id = "libmath3d";
-char * erl_dependancies[] = {
+char *erl_id = "libmath3d";
+char *erl_dependancies[] = {
     "libmath",
     "libc",
-    0
-};
+    0};
