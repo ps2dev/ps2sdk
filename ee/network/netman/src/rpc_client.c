@@ -95,12 +95,7 @@ int NetManInitRPCClient(void){
 		}
 
 		while((SifBindRpc(&NETMAN_rpc_cd, NETMAN_RPC_NUMBER, 0)<0)||(NETMAN_rpc_cd.server==NULL))
-		{
 			nopdelay();
-			nopdelay();
-			nopdelay();
-			nopdelay();
-		}
 
 		if((result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_INIT, 0, NULL, 0, ReceiveBuffer, sizeof(int), NULL, NULL))>=0)
 		{

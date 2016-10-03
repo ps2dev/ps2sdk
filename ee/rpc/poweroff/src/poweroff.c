@@ -29,8 +29,8 @@ static u8 poffThreadStack[512 * 16] __attribute__ ((aligned(16)));
 
 extern int _iop_reboot_count;
 static SifRpcClientData_t cd0;
-static struct t_SifRpcDataQueue cb_queue __attribute__((aligned(64)));
-static struct t_SifRpcServerData cb_srv __attribute__((aligned(64)));
+static struct t_SifRpcDataQueue cb_queue;
+static struct t_SifRpcServerData cb_srv;
 static int powerOffThreadId = -1;
 
 static void *PowerOff_ee_rpc_handler(int fnum, void *buffer, int len)
@@ -51,7 +51,7 @@ static void PowerOffThread(void *dat)
 {
 	static unsigned char cb_rpc_buffer[64] __attribute__((aligned(64)));
 
-	SifSetRpcQueue(&cb_queue, GetThreadId());
+	SifSetRpcQueue(&cb_queue, powerOffThreadId);
 	SifRegisterRpc(&cb_srv, PWROFF_IRX, &PowerOff_ee_rpc_handler, cb_rpc_buffer, NULL, NULL, &cb_queue);
 	SifRpcLoop(&cb_queue);
 }
@@ -66,13 +66,15 @@ int poweroffInit(void)
 		return 0;
 	_init_count = _iop_reboot_count;
 
-	while(((res = SifBindRpc(&cd0, PWROFF_IRX, 0)) >= 0) && (cd0.server == NULL))
+	while(((res = SifBindRpc(&cd0, PWROFF_IRX, 0)) < 0) || (cd0.server == NULL))
 		nopdelay();
 
 	// Terminate and delete any previously created threads
 	if (powerOffThreadId >= 0) {
 		TerminateThread(powerOffThreadId);
 		DeleteThread(powerOffThreadId);
+		SifRemoveRpc(&cb_srv, &cb_queue);
+		SifRemoveRpcQueue(&cb_queue);
 		powerOffThreadId = -1;
 	}
 
@@ -86,8 +88,8 @@ int poweroffInit(void)
 	powerOffThreadId = CreateThread(&thread);
 	StartThread(powerOffThreadId, NULL);
 
-	int autoShutdown = 0;
-	SifCallRpc(&cd0, PWROFF_ENABLE_AUTO_SHUTOFF, 0, NULL, 0, &autoShutdown, sizeof(autoShutdown), NULL, NULL);
+	int autoShutdown[4] = {0};
+	SifCallRpc(&cd0, PWROFF_ENABLE_AUTO_SHUTOFF, 0, NULL, 0, autoShutdown, sizeof(autoShutdown), NULL, NULL);
 
 	return res;
 }

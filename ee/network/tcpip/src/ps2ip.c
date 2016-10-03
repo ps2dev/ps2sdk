@@ -109,8 +109,9 @@ int ps2ip_setconfig(t_ip_info* pInfo)
 	return	1;
 }
 
-static err_t SMapLowLevelOutput(struct netif* pNetIF, struct pbuf* pOutput){
-	static unsigned char buffer[1600];
+static err_t SMapLowLevelOutput(struct netif* pNetIF, struct pbuf* pOutput)
+{
+	static u8 buffer[1518] __attribute__((aligned((64))));
 	struct pbuf* pbuf;
 	unsigned char *buffer_ptr;
 	unsigned short int TotalLength;
@@ -118,38 +119,44 @@ static err_t SMapLowLevelOutput(struct netif* pNetIF, struct pbuf* pOutput){
 	pbuf=pOutput;
 	buffer_ptr=buffer;
 	TotalLength=0;
-	while(pbuf!=NULL){
+	while(pbuf!=NULL)
+	{
 		memcpy(buffer_ptr, pbuf->payload, pbuf->len);
 		TotalLength+=pbuf->len;
 		buffer_ptr+=pbuf->len;
 		pbuf=pbuf->next;
 	}
 
-	return NetManNetIFSendPacket(buffer, TotalLength)==0?ERR_OK:ERR_IF;
+	NetManNetIFSendPacket(buffer, TotalLength);
+
+	return ERR_OK;
 }
 
-static void LinkStateUp(void){
+static void LinkStateUp(void)
+{
 	tcpip_callback((void*)&netif_set_link_up, &NIF);
 }
 
-static void LinkStateDown(void){
+static void LinkStateDown(void)
+{
 	tcpip_callback((void*)&netif_set_link_down, &NIF);
 }
 
 #define LWIP_STACK_MAX_RX_PBUFS	16
 
 struct NetManPacketBuffer pbufs[LWIP_STACK_MAX_RX_PBUFS];
-static unsigned short int NetManRxPacketBufferPoolFreeStart;
+static unsigned short int NetManRxPacketBufferPoolFreeStart, RxPBufsFree;
 static struct NetManPacketBuffer *recv_pbuf_queue_start, *recv_pbuf_queue_end;
-static unsigned int RxPBufsFree;
 
-static struct NetManPacketBuffer *AllocRxPacket(unsigned int size){
+static struct NetManPacketBuffer *AllocRxPacket(unsigned int size)
+{
 	struct pbuf* pBuf;
 	struct NetManPacketBuffer *result;
 
-	if(RxPBufsFree>0 && ((pBuf=pbuf_alloc(PBUF_RAW, size, PBUF_POOL))!=NULL)){
-		result=&pbufs[NetManRxPacketBufferPoolFreeStart++];
-		if(NetManRxPacketBufferPoolFreeStart>=LWIP_STACK_MAX_RX_PBUFS) NetManRxPacketBufferPoolFreeStart=0;
+	if(RxPBufsFree>0 && ((pBuf=pbuf_alloc(PBUF_RAW, size, PBUF_POOL))!=NULL))
+	{
+		result=&pbufs[NetManRxPacketBufferPoolFreeStart];
+		NetManRxPacketBufferPoolFreeStart = (NetManRxPacketBufferPoolFreeStart + 1) % LWIP_STACK_MAX_RX_PBUFS;
 
 		result->payload=pBuf->payload;
 		result->handle=pBuf;
@@ -162,36 +169,22 @@ static struct NetManPacketBuffer *AllocRxPacket(unsigned int size){
 	return result;
 }
 
-static void FreeRxPacket(struct NetManPacketBuffer *packet){
+static void FreeRxPacket(struct NetManPacketBuffer *packet)
+{
 	pbuf_free(packet->handle);
 }
 
-static int EnQRxPacket(struct NetManPacketBuffer *packet){
-	if(recv_pbuf_queue_start==NULL){	//If there are currently no packets in the queue.
-		recv_pbuf_queue_start=packet;
-	}
-	else{
-		recv_pbuf_queue_end->next=packet;	//If there is currently a packet in the queue, this packet shall go after it.
-	}
-
-	packet->next=NULL;
-	recv_pbuf_queue_end=packet;	//Add the packet to the queue.
+static int EnQRxPacket(struct NetManPacketBuffer *packet)
+{
+	ps2ip_input(packet->handle, &NIF);
+	RxPBufsFree++;
 
 	return 0;
 }
 
-static int FlushInputQueue(void){
-	struct NetManPacketBuffer* pbuf;
-
-	if((pbuf=recv_pbuf_queue_start)!=NULL){
-		do{
-			ps2ip_input(pbuf->handle, &NIF);
-		}while((pbuf=pbuf->next)!=NULL);
-
-		recv_pbuf_queue_start=recv_pbuf_queue_end=NULL;
-
-		RxPBufsFree=LWIP_STACK_MAX_RX_PBUFS;
-	}
+static int FlushInputQueue(void)
+{
+	RxPBufsFree = LWIP_STACK_MAX_RX_PBUFS;
 
 	return 0;
 }
