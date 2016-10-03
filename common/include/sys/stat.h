@@ -130,6 +130,8 @@ typedef struct {
 #define	S_ISLNK(m)  (((m)&S_IFMT) == S_IFLNK)
 
 struct stat {
+	dev_t st_dev;
+	ino_t st_ino;
 	unsigned st_mode;  /* mode */
 	unsigned st_size;  /* file size */
 

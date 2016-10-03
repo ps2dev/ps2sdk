@@ -12,13 +12,13 @@
 */
 #ifndef __TYPES_H__
 #define __TYPES_H__
-#if defined(_EE) || defined(_R5900)
+
 #include <stddef.h>
 
+typedef int dev_t;
+typedef int ino_t;
 typedef int mode_t;
 typedef long off_t;
 typedef long ssize_t;
-
-#endif /* _EE || _R5900 */
 
 #endif /*__TYPES_H__*/

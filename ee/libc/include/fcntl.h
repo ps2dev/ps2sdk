@@ -8,7 +8,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 # $Id$
-# EE file control definitions.
+# EE file control declarations.
 */
 #ifndef __FCTNL_H__
 #define __FCNTL_H__
