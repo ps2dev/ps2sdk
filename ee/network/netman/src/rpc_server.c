@@ -1,3 +1,4 @@
+#include <errno.h>
 #include <kernel.h>
 #include <malloc.h>
 #include <sifcmd.h>

@@ -119,6 +119,8 @@ double atof(const char *s)
 */
 int atoi(const char *s)
 {
+  return (int)strtol(s, NULL, 10);
+#if 0
   int neg = 0, ret = 1;
 
   for (;ret;++s) {
@@ -138,6 +140,7 @@ int atoi(const char *s)
   /* calculate the integer value. */
   for (; ((*s >= '0') && (*s <= '9')); ) ret = ((ret * 10) + (int)(*s++ - '0'));
   return ((neg == 0) ? ret : -ret);
+#endif /* if 0 */
 }
 #endif
 
@@ -156,6 +159,8 @@ int atoi(const char *s)
 */
 long atol(const char *s)
 {
+  return strtol(s, NULL, 10);
+#if 0
   int  neg = 0;
   long ret = 1;
 
@@ -176,6 +181,7 @@ long atol(const char *s)
   /* calculate the integer value. */
   for (; ((*s >= '0') && (*s <= '9')); ) ret = ((ret * 10) + (long)(*s++ - '0'));
   return ((neg == 0) ? ret : -ret);
+#endif /* if 0 */
 }
 #endif
 
@@ -1062,7 +1068,7 @@ long strtol(const char *s, char **eptr, int b)
          if (any < 0)
          {
                  acc = neg ? LONG_MIN : LONG_MAX;
-                 errno = E_LIB_MATH_RANGE;
+                 errno = ERANGE;
          } else if (neg)
                  acc = -acc;
 
@@ -1202,7 +1208,7 @@ unsigned long strtoul(const char *nptr, char **endptr, int base)
          if (any < 0)
          {
                  acc = ULONG_MAX;
-                 errno = E_LIB_MATH_RANGE;
+                 errno = ERANGE;
          }
 
          if (endptr != 0)

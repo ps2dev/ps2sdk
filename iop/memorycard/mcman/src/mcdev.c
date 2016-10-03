@@ -31,9 +31,9 @@ int mc_mkdir(iop_file_t *f, char *dirname);
 int mc_rmdir(iop_file_t *f, char *dirname);
 int mc_dopen(iop_file_t *f, char *dirname);
 int mc_dclose(iop_file_t *f);
-int mc_dread(iop_file_t *f, fio_dirent_t *dirent);
-int mc_getstat(iop_file_t *f, char *filename, fio_stat_t *stat);
-int mc_chstat(iop_file_t *f, char *filename, fio_stat_t *stat, u32 statmask);
+int mc_dread(iop_file_t *f, io_dirent_t *dirent);
+int mc_getstat(iop_file_t *f, char *filename, io_stat_t *stat);
+int mc_chstat(iop_file_t *f, char *filename, io_stat_t *stat, u32 statmask);
 int mc_ioctl(iop_file_t *f, int a1, void* a2);
 
 // driver ops func tab
@@ -385,7 +385,7 @@ int mc_dclose(iop_file_t *f)
 }
 
 //--------------------------------------------------------------
-int mc_dread(iop_file_t *f, fio_dirent_t *dirent)
+int mc_dread(iop_file_t *f, io_dirent_t *dirent)
 {
 	register int r;
 
@@ -397,7 +397,7 @@ int mc_dread(iop_file_t *f, fio_dirent_t *dirent)
 }
 
 //--------------------------------------------------------------
-int mc_getstat(iop_file_t *f, char *filename, fio_stat_t *stat)
+int mc_getstat(iop_file_t *f, char *filename, io_stat_t *stat)
 {
 	register int r;
 
@@ -415,7 +415,7 @@ int mc_getstat(iop_file_t *f, char *filename, fio_stat_t *stat)
 }
 
 //--------------------------------------------------------------
-int mc_chstat(iop_file_t *f, char *filename, fio_stat_t *stat, u32 statmask)
+int mc_chstat(iop_file_t *f, char *filename, io_stat_t *stat, u32 statmask)
 {
 	register int r, flags;
 	sceMcTblGetDir mctbl;

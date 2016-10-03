@@ -15,8 +15,8 @@
 #include <kernel.h>
 #include <sifrpc.h>
 #include <string.h>
-#include <sys/fcntl.h>
-#include <sys/stat.h>
+#include <fcntl.h>
+
 #include <fileXio_rpc.h>
 
 // from stdio.c
@@ -27,6 +27,8 @@ extern int (*_ps2sdk_lseek)(int, long, int); // assume long = int
 extern int (*_ps2sdk_write)(int, const void*, int);
 extern int (*_ps2sdk_remove)(const char*);
 extern int (*_ps2sdk_rename)(const char*,const char*);
+extern int (*_ps2sdk_mkdir)(const char*, int);
+extern int (*_ps2sdk_rmdir)(const char*);
 
 static int fileXioOpenHelper(const char* source, int flags)
 {
@@ -96,13 +98,15 @@ int fileXioInit(void)
 	fileXioInited = 1;
 	fileXioBlockMode = FXIO_WAIT;
 
-	_ps2sdk_close = fileXioClose;
-	_ps2sdk_open = fileXioOpenHelper;
-	_ps2sdk_read = fileXioRead;
-	_ps2sdk_lseek = fileXioLseek;
-	_ps2sdk_write = fileXioWrite;
-	_ps2sdk_remove= fileXioRemove;
-	_ps2sdk_rename= fileXioRename;
+	_ps2sdk_close  = fileXioClose;
+	_ps2sdk_open   = fileXioOpenHelper;
+	_ps2sdk_read   = fileXioRead;
+	_ps2sdk_lseek  = fileXioLseek;
+	_ps2sdk_write  = fileXioWrite;
+	_ps2sdk_remove = fileXioRemove;
+	_ps2sdk_rename = fileXioRename;
+	_ps2sdk_mkdir  = fileXioMkdir;
+	_ps2sdk_rmdir  = fileXioRmdir;
 
 	return 0;
 }
