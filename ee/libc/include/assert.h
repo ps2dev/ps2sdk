@@ -15,9 +15,6 @@
 #ifndef __ASSERT_H__
 #define __ASSERT_H__
 
-#include <stdio.h>
-#include <kernel.h>
-
 #ifdef NDEBUG
 #define assert(cond)
 #else

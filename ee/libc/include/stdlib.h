@@ -14,20 +14,14 @@
 #ifndef __STDLIB_H__
 #define __STDLIB_H__
 
+#define __need_size_t
+#define __need_wchar_t
+#define __need_NULL
 #include <stddef.h>
-#include <ps2lib_err.h>
-#include <malloc.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-
-/* ensure NULL is defined. */
-#ifndef NULL
-#define NULL                           (void *)0
-#endif
-
 
 /* exit status constants. */
 #define EXIT_SUCCESS                   0
@@ -70,8 +64,14 @@ typedef struct {
 /* we don't check for any previously defined value. This HAS to be that. */
 #define        RAND_MAX        2147483647
 
-
 /* function declarations. */
+
+void          *malloc(size_t size);
+void          *realloc(void *ptr, size_t size);
+void          *calloc(size_t n, size_t size);
+void          *memalign(size_t align, size_t size);
+void          free(void * ptr);
+
 void          abort(void) __attribute__ ((noreturn));
 int           abs(int);
 int           atexit(void (*)(void));
@@ -96,9 +96,17 @@ void          srand(unsigned int);
 double        strtod(const char *, char **);
 long          strtol(const char *, char **, int);
 unsigned long strtoul(const char *, char **, int);
-static __inline__ int atoi(const char * x) { return strtol(x, NULL, 10); }
-static __inline__ long atol(const char * x) { return strtol(x, NULL, 10); }
 
+#ifndef INLINE
+# if __GNUC__ && !__GNUC_STDC_INLINE__
+#  define INLINE extern __inline__
+# else
+#  define INLINE inline
+# endif
+#endif
+INLINE int atoi(const char * x) { return strtol(x, NULL, 10); }
+INLINE long atol(const char * x) { return strtol(x, NULL, 10); }
+#undef INLINE
 
 void          qsort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *));
 
