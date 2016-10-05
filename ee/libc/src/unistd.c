@@ -10,9 +10,67 @@
 # $Id$
 # unistd implementation
 */
-#include <unistd.h>
+
 #include <sys/stat.h>
+#include <unistd.h>
 #include <string.h>
+#include <fileio.h>
+
+#ifdef F_open
+extern int (*_ps2sdk_open)(const char*, int);
+int open(const char *fname, int flags, ...)
+{
+  return _ps2sdk_open(fname, flags);
+}
+#endif
+
+#ifdef F_close
+extern int (*_ps2sdk_close)(int);
+int close(int handle) 
+{
+  return _ps2sdk_close(handle);
+}
+#endif
+
+#ifdef F_read
+extern int (*_ps2sdk_read)(int, void*, int);
+ssize_t read(int handle, void * buffer, size_t size)
+{
+  return _ps2sdk_read(handle, buffer, size);
+}
+#endif
+
+#ifdef F_write
+extern int (*_ps2sdk_write)(int, const void*, int);
+ssize_t write(int handle, const void * buffer, size_t size)
+{
+  return _ps2sdk_write(handle, buffer, size);
+}
+#endif
+
+#ifdef F_lseek
+extern int (*_ps2sdk_lseek)(int, int, int);
+off_t lseek(int handle, off_t position, int wheel)
+{
+  return _ps2sdk_lseek(handle, position, wheel);
+}
+#endif
+
+#ifdef F_mkdir
+extern int (*_ps2sdk_mkdir)(const char*, int mode);
+int mkdir(const char *path, mode_t mode)
+{
+  return _ps2sdk_mkdir(path, mode);
+}
+#endif
+
+#ifdef F_rmdir
+extern int (*_ps2sdk_rmdir)(const char*);
+int rmdir(const char *path)
+{
+  return _ps2sdk_rmdir(path);
+}
+#endif
 
 #ifdef F_getcwd
 extern char __direct_pwd[256];
@@ -49,9 +107,10 @@ int fstat(int filedes, struct stat *buf)
 #endif
 
 #ifdef F_unlink
+extern int (*_ps2sdk_remove)(const char*);
 int unlink(const char *path)
 {
-	return fioRemove(path);
+	return _ps2sdk_remove(path);
 }
 #endif
 

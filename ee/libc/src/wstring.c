@@ -11,10 +11,8 @@
 # Standard wide-character string functions.
 */
 
-#include <tamtypes.h>
-#include <kernel.h>
 #include <limits.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <wchar.h>
 
 #ifdef F_wcsdup

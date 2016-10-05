@@ -11,6 +11,7 @@
 # __mcount implementation
 */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <kernel.h>
 #include <timer.h>

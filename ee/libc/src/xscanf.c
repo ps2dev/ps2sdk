@@ -46,7 +46,6 @@
   POSSIBILITY OF SUCH DAMAGE.
 */
 
-#include <tamtypes.h>
 #include <ctype.h>
 #include <limits.h>
 #include <stdarg.h>
@@ -121,13 +120,13 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 		long	l;
 		char	*cp;
 	} a;
-	char	c;	/* holds a char from the format string */
-	u8	base = 0;
+	char		c;	/* holds a char from the format string */
+	unsigned char	base = 0;
 	int	nconvs, i, j = 0, olen, clen;
 #if SCANF_LEVEL > SCANF_MIN
-	s8	width = 0;
+	signed char	width = 0;
 #endif
-	u8 flags;
+	unsigned char	flags;
 #if SCANF_LEVEL >= SCANF_FLT
 	char	*buf, *bp;
 	char	fltchars[] = "0123456789Ee.";

@@ -15,18 +15,17 @@
 /* This xprintf.c file on which this one is based is in public domain. */
 
 #include <stdio.h>
-#include <tamtypes.h>
-#include <ps2lib_err.h>
-#include <kernel.h>
-#include <sifrpc.h>
-#include <fileio.h>
+#include <stdlib.h>
 #include <string.h>
-#include <malloc.h>
 
 #include <stdarg.h>
 #include <stddef.h>
 
 #include "sio.h"
+
+#ifndef PS2LIB_STR_MAX
+#define PS2LIB_STR_MAX 4096
+#endif
 
 /*
 ** The maximum number of digits of accuracy in a floating-point conversion.

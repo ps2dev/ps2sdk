@@ -11,6 +11,8 @@
 # USB Keyboard Driver for PS2
 */
 
+#include <fcntl.h>
+
 #include <tamtypes.h>
 #include <fileio.h>
 #include "libkbd.h"

@@ -13,12 +13,13 @@
 
 #ifdef F_strerror
 #define E_USE_NAMES
-#include "errno.h"
 #endif
 
+#include "errno.h"
+
+#include <fcntl.h>
+
 #include <stdio.h>
-#include <tamtypes.h>
-#include <kernel.h>
 #include <sio.h>
 #include <fileio.h>
 #include <string.h>
@@ -44,6 +45,15 @@ void _ps2sdk_stdio_init();
 #define STD_IOBUF_TYPE_STDOUTHOST     32
 #define STD_IOBUF_TYPE_MASS           64
 #define STD_IOBUF_TYPE_PFS           128
+
+/* Internal I/O flags. */
+#define _IOEOF                         0x0020
+#define _IOERR                         0x0040
+
+#define _IOREAD                        0x0001
+#define _IOWRT                         0x0002
+#define _IORW                          0x0200
+#define _IOMYBUF                       0x0010
 
 extern char __direct_pwd[256];
 extern int __stdio_initialised;
@@ -237,7 +247,7 @@ int fflush(FILE *stream)
       break;
     default:
       /* unknown/invalid I/O buffer type. */
-      errno = EBADFD;
+      errno = EBADF;
       ret = EOF;
   }
   return (ret);
@@ -1431,14 +1441,13 @@ char *tmpnam(char *name)
 */
 int ungetc(int c, FILE *stream)
 {
-  // int ret = EOF;
 
   if (c == EOF || stream->has_putback) {
     /* invalid input, or putback queue full */
     return EOF;
   }
 
-  stream->putback = (u8)c;
+  stream->putback = c;
   stream->has_putback = 1;
   return c;
 }
@@ -1484,6 +1493,14 @@ int (*_ps2sdk_read)(int, void*, int) = fioRead;
 int (*_ps2sdk_lseek)(int, int, int) = fioLseek;
 int (*_ps2sdk_write)(int, const void*, int) = fioWrite;
 int (*_ps2sdk_remove)(const char*) = fioRemove;
+int (*_ps2sdk_rmdir)(const char*) = fioRmdir;
+
+int fioMkdirHelper(const char *path, int mode)
+{
+  return fioMkdir(path);
+}
+
+int (*_ps2sdk_mkdir)(const char*, int) = fioMkdirHelper;
 
 int fioRename(const char *old, const char *new)
 {

@@ -15,7 +15,7 @@
 /* This xprintf.c file on which this one is based is in public domain. */
 
 #include <stdio.h>
-#include <tamtypes.h>
+#include <stdlib.h>
 #include <string.h>
 #include <wchar.h>
 

@@ -1,3 +1,6 @@
+#include <fcntl.h>
+#include <fileio.h>
+
 #include <draw.h>
 #include <draw3d.h>
 
@@ -5,6 +8,7 @@
 #include <gs_gp.h>
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <font.h>

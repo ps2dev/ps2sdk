@@ -59,10 +59,12 @@
  *
  */
 
-#ifndef NULL
-#define NULL 0
-#endif
 #include "mconf.h"
+
+#ifdef ANSIC
+ #define __need_NULL
+ #include <stddef.h>
+#endif
 
 #ifdef ANSIC
 void printf(), sprintf(), exit();
