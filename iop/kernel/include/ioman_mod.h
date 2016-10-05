@@ -18,8 +18,7 @@
 #include "types.h"
 #include "irx.h"
 
-#include "sys/fcntl.h"
-#include "sys/stat.h"
+#include "fcntl.h"
 
 #define ioman_mod_IMPORTS_start DECLARE_IMPORT_TABLE(ioman, 1, 1)
 #define ioman_mod_IMPORTS_end END_IMPORT_TABLE

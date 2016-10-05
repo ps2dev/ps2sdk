@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <sysclib.h>
 #include <iomanX.h>
+#include <fileXio.h>
 
 #include "pfs-opt.h"
 #include "libpfs.h"
@@ -546,7 +547,7 @@ int pfsCheckAccess(pfs_cache_t *clink, int flags)
 	int mode;
 
 	// Bail if trying to write to read-only mount
-	if ((clink->pfsMount->flags & FIO_MT_RDONLY) && (flags & O_WRONLY))
+	if ((clink->pfsMount->flags & FILEXIO_MOUNTFLAG_READONLY) && (flags & O_WRONLY))
 		return -EROFS;
 
 	if (((clink->u.inode->mode & FIO_S_IFMT) != FIO_S_IFDIR) &&

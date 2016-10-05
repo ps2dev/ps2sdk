@@ -44,6 +44,10 @@
 
 #include "xprintf.h"
 
+#ifndef PS2LIB_STR_MAX
+#define PS2LIB_STR_MAX 4096
+#endif
+
 /*
 ** The maximum number of digits of accuracy in a floating-point conversion.
 */
