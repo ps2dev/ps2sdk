@@ -12,6 +12,7 @@
 */
 
 #include <stdio.h>
+#include <tamtypes.h>
 
 static int dummy = 0;
 static int dummy2 = 0;

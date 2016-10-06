@@ -5,7 +5,7 @@
 #include "sifrpc.h"
 #include "loadfile.h"
 #include "stdio.h"
-
+#include "fcntl.h"
 
 char jpg_buffer[500512] __attribute__((aligned(64)));
 

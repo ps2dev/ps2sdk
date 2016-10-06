@@ -30,6 +30,7 @@
 #include <graph.h>
 #include <packet.h>
 #include <stdio.h>
+#include <fcntl.h>
 
 #define MPEG_BITSTREAM_FILE "host:test.bin"
 /* get the whole file (or first 24MB) into memory for simplicity */

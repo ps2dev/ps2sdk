@@ -15,6 +15,8 @@
 #ifndef _SIFCMD_H
 #define _SIFCMD_H
 
+#include <tamtypes.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
