@@ -41,26 +41,32 @@ build: env_build_check $(subdir_list)
 
 clean: env_build_check $(subdir_clean)
 
-release-clean:
+clean_base: env_release_check
+	  rm -f $(PS2SDK)/README.md
+	  rm -f $(PS2SDK)/CHANGELOG 
+	  rm -f $(PS2SDK)/AUTHORS
+	  rm -f $(PS2SDK)/LICENSE
+	  rm -f $(PS2SDK)/ID
+	  rm -f $(PS2SDK)/Defs.make
+
+release-clean: env_release_check clean_base
 	make -C common release-clean
 	make -C iop release-clean
 	make -C ee release-clean
 	make -C samples release-clean
 	make -C tools release-clean
-	
-rebuild: env_build_check $(subdir_clean) $(subdir_list)
 
-$(PS2SDK)/common/include:
-	$(MKDIR) -p $(PS2SDK)/common
-	$(MKDIR) -p $(PS2SDK)/common/include
-	cp -f $(PS2SDKSRC)/common/include/*.h $(PS2SDK)/common/include/
+rebuild: env_build_check $(subdir_clean) $(subdir_list)
 
 $(PS2SDK)/ports:
 	$(MKDIR) -p $(PS2SDK)/ports
 
 install: release
 
-release: build release_base release-clean $(PS2SDK)/common/include $(PS2SDK)/ports $(subdir_release)
+release: build release_base release-clean $(PS2SDK)/ports $(subdir_release)
+	@$(ECHO) .;
+	@$(ECHO) .PS2SDK Installed.;
+	@$(ECHO) .;
 
 release_base: env_release_check
 	@if test ! -d $(PS2SDK) ; then \
@@ -85,6 +91,17 @@ env_release_check:
 	  $(ECHO) PS2SDK environment variable must be defined. ; \
 	  exit 1; \
 	fi
+
+install-libc: env_release_check
+	$(MAKEREC) common release-dirs
+	$(MAKEREC) common release-include
+	$(MAKEREC) ee/libc release-dirs
+	$(MAKEREC) ee/libc release-include
+
+install-headers: env_release_check release_base release-clean install-libc
+	@$(ECHO) .;
+	@$(ECHO) PS2SDK headers installed.;
+	@$(ECHO) .;
 
 docs:
 	doxygen doxy.conf

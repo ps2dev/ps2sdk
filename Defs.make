@@ -58,6 +58,7 @@ MKDIR = mkdir
 RMDIR = rmdir
 ECHO  = echo
 GNUMAKE = make
+LN = ln
 
 SYSTEM = $(shell uname)
 

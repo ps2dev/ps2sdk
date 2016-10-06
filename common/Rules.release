@@ -22,8 +22,7 @@ release-dirs:
 # Any file in the include directory will be copied to the common/include
 # directory.
 #
-
-release-include:
+install-include:
 	@for file in include/* ; do \
 	   if test -f $$file ; then \
 	     $(ECHO) Installing $$file to $(PS2SDK)/common/include ; \
@@ -38,6 +37,22 @@ release-include:
 	     chmod 644 $(PS2SDK)/common/$$file ; \
 	   fi \
 	done;
+
+link-include:
+	@for file in include/* ; do \
+	   if test -f $$file ; then \
+	     $(ECHO) Linking $$file to $(PS2SDK)/ee/include ; \
+	     $(LN) -s $(PS2SDK)/common/$$file $(PS2SDK)/ee/$$file ; \
+	     $(ECHO) Linking $$file to $(PS2SDK)/iop/include ; \
+	     $(LN) -s $(PS2SDK)/common/$$file $(PS2SDK)/iop/$$file ; \
+	   fi \
+	done;
+	@$(ECHO) Linking $(PS2SDK)/common/include/sys to $(PS2SDK)/ee/include/sys
+	@$(LN) -s $(PS2SDK)/common/include/sys $(PS2SDK)/ee/include/sys
+	@$(ECHO) Linking $(PS2SDK)/common/include/sys to $(PS2SDK)/iop/include/sys
+	@$(LN) -s $(PS2SDK)/common/include/sys $(PS2SDK)/iop/include/sys
+
+release-include: install-include link-include
 
 release: release-dirs release-include
 
