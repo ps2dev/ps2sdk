@@ -22,21 +22,22 @@ extern "C" {
 
 /* Module info entry.  Most of the fields are self-explanatory.  I don't know
    what the *flags fields do, and they don't seem to be important.  */
-typedef struct _smod_mod_info {
-	struct _smod_mod_info *next;
-	u8	*name;		/* A pointer to the name in IOP RAM, this must be smem_read().  */
-	u16	version;
-	u16	newflags;	/* For MODLOAD shipped with games. The old MODLOAD module from boot ROMs do not use a flags field.  */
-	u16	id;
-	u16	unused;
-	u32	entry;		/* _start */
-	u32	gp;
-	u32	text_start;
-	u32	text_size;
-	u32	data_size;
-	u32	bss_size;
-	u32	unused1;
-	u32	unused2;
+typedef struct _smod_mod_info
+{
+    struct _smod_mod_info *next;
+    u8 *name; /* A pointer to the name in IOP RAM, this must be smem_read().  */
+    u16 version;
+    u16 newflags; /* For MODLOAD shipped with games. The old MODLOAD module from boot ROMs do not use a flags field.  */
+    u16 id;
+    u16 unused;
+    u32 entry; /* _start */
+    u32 gp;
+    u32 text_start;
+    u32 text_size;
+    u32 data_size;
+    u32 bss_size;
+    u32 unused1;
+    u32 unused2;
 } smod_mod_info_t;
 
 /* Return the next module referenced in the global module list.  */

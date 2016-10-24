@@ -69,14 +69,14 @@ static int waitPadReady(int port, int slot)
 
     state = padGetState(port, slot);
     lastState = -1;
-    while((state != PAD_STATE_STABLE) && (state != PAD_STATE_FINDCTP1)) {
+    while ((state != PAD_STATE_STABLE) && (state != PAD_STATE_FINDCTP1)) {
         if (state != lastState) {
             padStateInt2String(state, stateString);
             printf("Please wait, pad(%d,%d) is in state %s\n",
-                       port, slot, stateString);
+                   port, slot, stateString);
         }
         lastState = state;
-        state=padGetState(port, slot);
+        state = padGetState(port, slot);
     }
     // Were the pad ever 'out of sync'?
     if (lastState != -1) {
@@ -113,7 +113,7 @@ initializePad(int port, int slot)
     }
 
     printf("It is currently using mode %d\n",
-               padInfoMode(port, slot, PAD_MODECURID, 0));
+           padInfoMode(port, slot, PAD_MODECURID, 0));
 
     // If modes == 0, this is not a Dual shock controller
     // (it has no actuator engines)
@@ -155,11 +155,11 @@ initializePad(int port, int slot)
 
     waitPadReady(port, slot);
     actuators = padInfoAct(port, slot, -1, 0);
-    printf("# of actuators: %d\n",actuators);
+    printf("# of actuators: %d\n", actuators);
 
     if (actuators != 0) {
-        actAlign[0] = 0;   // Enable small engine
-        actAlign[1] = 1;   // Enable big engine
+        actAlign[0] = 0;  // Enable small engine
+        actAlign[1] = 1;  // Enable big engine
         actAlign[2] = 0xff;
         actAlign[3] = 0xff;
         actAlign[4] = 0xff;
@@ -167,9 +167,8 @@ initializePad(int port, int slot)
 
         waitPadReady(port, slot);
         printf("padSetActAlign: %d\n",
-                   padSetActAlign(port, slot, actAlign));
-    }
-    else {
+               padSetActAlign(port, slot, actAlign));
+    } else {
         printf("Did not find any actuators.\n");
     }
 
@@ -178,8 +177,7 @@ initializePad(int port, int slot)
     return 1;
 }
 
-int
-main()
+int main()
 {
     int ret;
     int port, slot;
@@ -193,13 +191,13 @@ main()
     SifInitRpc(0);
 
     printf("Hi!\n"
-               "Very welcome to this small and stupid pad test application\n"
-               "Hope you will find the source useful though =)\n"
-               "Please, use & abuse the code, but I would not mind \n"
-               "a small greeting when you do :)\n"
-               "I myself would like to leave a special thanks to Gustavo "
-               "S:\nWithout your psx2lib this would've been impossible\n\n"
-               "                                                 - pukko\n\n");
+           "Very welcome to this small and stupid pad test application\n"
+           "Hope you will find the source useful though =)\n"
+           "Please, use & abuse the code, but I would not mind \n"
+           "a small greeting when you do :)\n"
+           "I myself would like to leave a special thanks to Gustavo "
+           "S:\nWithout your psx2lib this would've been impossible\n\n"
+           "                                                 - pukko\n\n");
 
 
     loadModules();
@@ -208,38 +206,38 @@ main()
 
 
 
-    port = 0; // 0 -> Connector 1, 1 -> Connector 2
-    slot = 0; // Always zero if not using multitap
+    port = 0;  // 0 -> Connector 1, 1 -> Connector 2
+    slot = 0;  // Always zero if not using multitap
 
     printf("PortMax: %d\n", padGetPortMax());
     printf("SlotMax: %d\n", padGetSlotMax(port));
 
 
-    if((ret = padPortOpen(port, slot, padBuf)) == 0) {
+    if ((ret = padPortOpen(port, slot, padBuf)) == 0) {
         printf("padOpenPort failed: %d\n", ret);
         SleepThread();
     }
 
-    if(!initializePad(port, slot)) {
+    if (!initializePad(port, slot)) {
         printf("pad initalization failed!\n");
         SleepThread();
     }
 
-    for (;;) {      // We are phorever people
+    for (;;) {  // We are phorever people
 
-        i=0;
-        ret=padGetState(port, slot);
-        while((ret != PAD_STATE_STABLE) && (ret != PAD_STATE_FINDCTP1)) {
-            if(ret==PAD_STATE_DISCONN) {
+        i = 0;
+        ret = padGetState(port, slot);
+        while ((ret != PAD_STATE_STABLE) && (ret != PAD_STATE_FINDCTP1)) {
+            if (ret == PAD_STATE_DISCONN) {
                 printf("Pad(%d, %d) is disconnected\n", port, slot);
             }
-            ret=padGetState(port, slot);
+            ret = padGetState(port, slot);
         }
-        if(i==1) {
+        if (i == 1) {
             printf("Pad: OK!\n");
         }
 
-        ret = padRead(port, slot, &buttons); // port, slot, buttons
+        ret = padRead(port, slot, &buttons);  // port, slot, buttons
 
         if (ret != 0) {
             paddata = 0xffff ^ buttons.btns;
@@ -248,63 +246,63 @@ main()
             old_pad = paddata;
 
             // Directions
-            if(new_pad & PAD_LEFT) {
+            if (new_pad & PAD_LEFT) {
                 printf("LEFT\n");
             }
-            if(new_pad & PAD_DOWN) {
+            if (new_pad & PAD_DOWN) {
                 printf("DOWN\n");
             }
-            if(new_pad & PAD_RIGHT) {
+            if (new_pad & PAD_RIGHT) {
                 printf("RIGHT\n");
                 /*
                        padSetMainMode(port, slot,
                                       PAD_MMODE_DIGITAL, PAD_MMODE_LOCK));
                 */
             }
-            if(new_pad & PAD_UP) {
+            if (new_pad & PAD_UP) {
                 printf("UP\n");
             }
-            if(new_pad & PAD_START) {
+            if (new_pad & PAD_START) {
                 printf("START\n");
             }
-            if(new_pad & PAD_R3) {
+            if (new_pad & PAD_R3) {
                 printf("R3\n");
             }
-            if(new_pad & PAD_L3) {
+            if (new_pad & PAD_L3) {
                 printf("L3\n");
             }
-            if(new_pad & PAD_SELECT) {
+            if (new_pad & PAD_SELECT) {
                 printf("SELECT\n");
             }
-            if(new_pad & PAD_SQUARE) {
+            if (new_pad & PAD_SQUARE) {
                 printf("SQUARE\n");
             }
-            if(new_pad & PAD_CROSS) {
+            if (new_pad & PAD_CROSS) {
                 padEnterPressMode(port, slot);
                 printf("CROSS - Enter press mode\n");
             }
-            if(new_pad & PAD_CIRCLE) {
+            if (new_pad & PAD_CIRCLE) {
                 padExitPressMode(port, slot);
                 printf("CIRCLE - Exit press mode\n");
             }
-            if(new_pad & PAD_TRIANGLE) {
+            if (new_pad & PAD_TRIANGLE) {
                 // Check for the reason below..
                 printf("TRIANGLE (press mode disabled, see code)\n");
             }
-            if(new_pad & PAD_R1) {
-                actAlign[0] = 1; // Start small engine
+            if (new_pad & PAD_R1) {
+                actAlign[0] = 1;  // Start small engine
                 padSetActDirect(port, slot, actAlign);
                 printf("R1 - Start little engine\n");
             }
-            if(new_pad & PAD_L1) {
-                actAlign[0] = 0; // Stop engine 0
+            if (new_pad & PAD_L1) {
+                actAlign[0] = 0;  // Stop engine 0
                 padSetActDirect(port, slot, actAlign);
                 printf("L1 - Stop little engine\n");
             }
-            if(new_pad & PAD_R2) {
+            if (new_pad & PAD_R2) {
                 printf("R2\n");
             }
-            if(new_pad & PAD_L2) {
+            if (new_pad & PAD_L2) {
                 printf("L2\n");
             }
 
@@ -314,7 +312,7 @@ main()
              * So I'd recommend to change the actuator values only once per
              * vblank or so..
              */
-            if(buttons.triangle_p) {
+            if (buttons.triangle_p) {
 #if 0
                 actAlign[1] = (i >> 3); buttons.triangle_p;  // Big engine
                 padSetActDirect(port, slot, actAlign);
@@ -323,8 +321,7 @@ main()
 #endif
             }
             // Start little engine if we move right analogue stick right
-            if(buttons.rjoy_h > 0xf0)
-            {
+            if (buttons.rjoy_h > 0xf0) {
                 // Stupid check to see if engine is already running,
                 // just to prevent overloading the IOP with requests
                 if (actAlign[0] == 0) {
@@ -333,7 +330,7 @@ main()
                 }
             }
         }
-    } // for
+    }  // for
 
     printf("Goto sleep!\n");
     SleepThread();

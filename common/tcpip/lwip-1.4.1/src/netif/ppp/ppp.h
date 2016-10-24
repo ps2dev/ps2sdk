@@ -50,10 +50,10 @@
 #ifndef __u_char_defined
 
 /* Type definitions for BSD code. */
-typedef unsigned long  u_long;
-typedef unsigned int   u_int;
+typedef unsigned long u_long;
+typedef unsigned int u_int;
 typedef unsigned short u_short;
-typedef unsigned char  u_char;
+typedef unsigned char u_char;
 
 #endif
 
@@ -63,13 +63,13 @@ typedef unsigned char  u_char;
 *************************/
 
 /* Error codes. */
-#define PPPERR_NONE      0 /* No error. */
-#define PPPERR_PARAM    -1 /* Invalid parameter. */
-#define PPPERR_OPEN     -2 /* Unable to open PPP session. */
-#define PPPERR_DEVICE   -3 /* Invalid I/O device for PPP. */
-#define PPPERR_ALLOC    -4 /* Unable to allocate resources. */
-#define PPPERR_USER     -5 /* User interrupt. */
-#define PPPERR_CONNECT  -6 /* Connection lost. */
+#define PPPERR_NONE 0      /* No error. */
+#define PPPERR_PARAM -1    /* Invalid parameter. */
+#define PPPERR_OPEN -2     /* Unable to open PPP session. */
+#define PPPERR_DEVICE -3   /* Invalid I/O device for PPP. */
+#define PPPERR_ALLOC -4    /* Unable to allocate resources. */
+#define PPPERR_USER -5     /* User interrupt. */
+#define PPPERR_CONNECT -6  /* Connection lost. */
 #define PPPERR_AUTHFAIL -7 /* Failed authentication challenge. */
 #define PPPERR_PROTOCOL -8 /* Failed to meet protocol. */
 
@@ -81,16 +81,17 @@ typedef unsigned char  u_char;
  * point to an int.
  */
 #define PPPCTLG_UPSTATUS 100 /* Get the up status - 0 down else up */
-#define PPPCTLS_ERRCODE  101 /* Set the error code */
-#define PPPCTLG_ERRCODE  102 /* Get the error code */
-#define PPPCTLG_FD       103 /* Get the fd associated with the ppp */
+#define PPPCTLS_ERRCODE 101  /* Set the error code */
+#define PPPCTLG_ERRCODE 102  /* Get the error code */
+#define PPPCTLG_FD 103       /* Get the fd associated with the ppp */
 
 /************************
 *** PUBLIC DATA TYPES ***
 ************************/
 
-struct ppp_addrs {
-  ip_addr_t our_ipaddr, his_ipaddr, netmask, dns1, dns2;
+struct ppp_addrs
+{
+    ip_addr_t our_ipaddr, his_ipaddr, netmask, dns1, dns2;
 };
 
 
@@ -152,7 +153,7 @@ int pppOverEthernetOpen(struct netif *ethif, const char *service_name, const cha
 #endif /* PPPOE_SUPPORT */
 
 /* for source code compatibility */
-#define pppOpen(fd,cb,ls) pppOverSerialOpen(fd,cb,ls)
+#define pppOpen(fd, cb, ls) pppOverSerialOpen(fd, cb, ls)
 
 /*
  * Close a PPP connection and release the descriptor.
@@ -170,7 +171,7 @@ void pppSigHUP(int pd);
  * Get and set parameters for the given connection.
  * Return 0 on success, an error code on failure.
  */
-int  pppIOCtl(int pd, int cmd, void *arg);
+int pppIOCtl(int pd, int cmd, void *arg);
 
 /*
  * Return the Maximum Transmission Unit for the given PPP connection.
@@ -183,7 +184,7 @@ u_short pppMTU(int pd);
  * If PPP_INPROC_OWNTHREAD==1, a seperate input thread using the blocking
  * sio_read() is used, so this is deactivated.
  */
-void pppos_input(int pd, u_char* data, int len);
+void pppos_input(int pd, u_char *data, int len);
 #endif /* PPPOS_SUPPORT && !PPP_INPROC_OWNTHREAD */
 
 

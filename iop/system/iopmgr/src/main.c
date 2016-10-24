@@ -44,43 +44,34 @@ extern void cmdline_handle(char *command, char *arg1);
  */
 int _start(int argc, char *argv[])
 {
-  printf("%s - Version %d.%d\nCopyright (c) 2003,2004 adresd\n\n",
-    IOPMGR_MODNAME, IOPMGR_VERSION_HIGH, IOPMGR_VERSION_LOW);
+    printf("%s - Version %d.%d\nCopyright (c) 2003,2004 adresd\n\n",
+           IOPMGR_MODNAME, IOPMGR_VERSION_HIGH, IOPMGR_VERSION_LOW);
 
-  if (argc > 1)
-  { /* Execute in command line mode, so parse command */
-    if(argc>2)
-    {
-      cmdline_handle(argv[1],argv[2]);
-    }
-    else
-    {
-      cmdline_handle(argv[1],NULL);
-    }
-  }
-  else
-  { /* no params, so set into resident mode */
-    if (RegisterLibraryEntries(&_exp_iopmgr) == 0)
-    {
-      printf("Registered.\n");
-      return MODULE_RESIDENT_END;
-    }
-    else
-    {
-      /* luckily the previously installed one will be higher up the list, so will
+    if (argc > 1) { /* Execute in command line mode, so parse command */
+        if (argc > 2) {
+            cmdline_handle(argv[1], argv[2]);
+        } else {
+            cmdline_handle(argv[1], NULL);
+        }
+    } else { /* no params, so set into resident mode */
+        if (RegisterLibraryEntries(&_exp_iopmgr) == 0) {
+            printf("Registered.\n");
+            return MODULE_RESIDENT_END;
+        } else {
+            /* luckily the previously installed one will be higher up the list, so will
        *  be the first one found , so get the version
        */
-      int version = smod_get_modversion_by_name(IOPMGR_MODNAME);
-      printf ("Error Registering - ");
-      if (version >= 0)
-        printf("Already Registered , version : %d.%d\n",
-                (version&0xff00)>>8,version&0xff);
-      else
-        printf("Error : %d\n",version);
+            int version = smod_get_modversion_by_name(IOPMGR_MODNAME);
+            printf("Error Registering - ");
+            if (version >= 0)
+                printf("Already Registered , version : %d.%d\n",
+                       (version & 0xff00) >> 8, version & 0xff);
+            else
+                printf("Error : %d\n", version);
+        }
     }
-  }
-  printf("\nExiting.\n");
-  return MODULE_NO_RESIDENT_END;
+    printf("\nExiting.\n");
+    return MODULE_NO_RESIDENT_END;
 }
 
 /*! \brief shutdown the IRX.
@@ -97,12 +88,17 @@ int _start(int argc, char *argv[])
  */
 int shutdown()
 {
-  switch(slib_release_library(IOPMGR_LIBNAME))
-  {
-    case 0: printf("UnRegistered\n"); break;
-    case -1: printf("Failed to UnRegister\n"); return MODULE_RESIDENT_END; break;
-    case -2: printf("Library Not Present\n"); break;
-  }
-  return MODULE_NO_RESIDENT_END;
+    switch (slib_release_library(IOPMGR_LIBNAME)) {
+        case 0:
+            printf("UnRegistered\n");
+            break;
+        case -1:
+            printf("Failed to UnRegister\n");
+            return MODULE_RESIDENT_END;
+            break;
+        case -2:
+            printf("Library Not Present\n");
+            break;
+    }
+    return MODULE_NO_RESIDENT_END;
 }
-

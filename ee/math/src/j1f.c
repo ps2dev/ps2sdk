@@ -102,48 +102,44 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 
 
 static float JP[5] = {
--4.878788132172128E-009f,
- 6.009061827883699E-007f,
--4.541343896997497E-005f,
- 1.937383947804541E-003f,
--3.405537384615824E-002f
-};
+    -4.878788132172128E-009f,
+    6.009061827883699E-007f,
+    -4.541343896997497E-005f,
+    1.937383947804541E-003f,
+    -3.405537384615824E-002f};
 
 static float YP[5] = {
- 8.061978323326852E-009f,
--9.496460629917016E-007f,
- 6.719543806674249E-005f,
--2.641785726447862E-003f,
- 4.202369946500099E-002f
-};
+    8.061978323326852E-009f,
+    -9.496460629917016E-007f,
+    6.719543806674249E-005f,
+    -2.641785726447862E-003f,
+    4.202369946500099E-002f};
 
 static float MO1[8] = {
- 6.913942741265801E-002f,
--2.284801500053359E-001f,
- 3.138238455499697E-001f,
--2.102302420403875E-001f,
- 5.435364690523026E-003f,
- 1.493389585089498E-001f,
- 4.976029650847191E-006f,
- 7.978845453073848E-001f
-};
+    6.913942741265801E-002f,
+    -2.284801500053359E-001f,
+    3.138238455499697E-001f,
+    -2.102302420403875E-001f,
+    5.435364690523026E-003f,
+    1.493389585089498E-001f,
+    4.976029650847191E-006f,
+    7.978845453073848E-001f};
 
 static float PH1[8] = {
--4.497014141919556E+001f,
- 5.073465654089319E+001f,
--2.485774108720340E+001f,
- 7.222973196770240E+000f,
--1.544842782180211E+000f,
- 3.503787691653334E-001f,
--1.637986776941202E-001f,
- 3.749989509080821E-001f
-};
+    -4.497014141919556E+001f,
+    5.073465654089319E+001f,
+    -2.485774108720340E+001f,
+    7.222973196770240E+000f,
+    -1.544842782180211E+000f,
+    3.503787691653334E-001f,
+    -1.637986776941202E-001f,
+    3.749989509080821E-001f};
 
-static float YO1 =  4.66539330185668857532f;
+static float YO1 = 4.66539330185668857532f;
 static float Z1 = 1.46819706421238932572E1f;
 
-static float THPIO4F =  2.35619449019234492885f;    /* 3*pi/4 */
-static float TWOOPI =  0.636619772367581343075535f; /* 2/pi */
+static float THPIO4F = 2.35619449019234492885f;    /* 3*pi/4 */
+static float TWOOPI = 0.636619772367581343075535f; /* 2/pi */
 extern float PIO4;
 
 
@@ -151,73 +147,67 @@ extern float PIO4;
 float polevlf(float, float *, int);
 float logf(float), sinf(float), cosf(float), sqrtf(float);
 
-float j1f( float xx )
+float j1f(float xx)
 #else
 float polevlf(), logf(), sinf(), cosf(), sqrtf();
 
-float j1f(xx)
-double xx;
+float j1f(xx) double xx;
 #endif
 {
-float x, w, z, p, q, xn;
+    float x, w, z, p, q, xn;
 
 
-x = xx;
-if( x < 0 )
-	x = -xx;
+    x = xx;
+    if (x < 0)
+        x = -xx;
 
-if( x <= 2.0f )
-	{
-	z = x * x;
-	p = (z-Z1) * x * polevlf( z, JP, 4 );
-	return( p );
-	}
+    if (x <= 2.0f) {
+        z = x * x;
+        p = (z - Z1) * x * polevlf(z, JP, 4);
+        return (p);
+    }
 
-q = 1.0f/x;
-w = sqrtf(q);
+    q = 1.0f / x;
+    w = sqrtf(q);
 
-p = w * polevlf( q, MO1, 7);
-w = q*q;
-xn = q * polevlf( w, PH1, 7) - THPIO4F;
-p = p * cosf(xn + x);
-return(p);
+    p = w * polevlf(q, MO1, 7);
+    w = q * q;
+    xn = q * polevlf(w, PH1, 7) - THPIO4F;
+    p = p * cosf(xn + x);
+    return (p);
 }
-
 
 
 
 extern float MAXNUMF;
 
 #ifdef ANSIC
-float y1f( float xx )
+float y1f(float xx)
 #else
-float y1f(xx)
-double xx;
+float y1f(xx) double xx;
 #endif
 {
-float x, w, z, p, q, xn;
+    float x, w, z, p, q, xn;
 
 
-x = xx;
-if( x <= 2.0f )
-	{
-	if( x <= 0.0f )
-		{
-		mtherr( "y1f", DOMAIN );
-		return( -MAXNUMF );
-		}
-	z = x * x;
-	w = (z - YO1) * x * polevlf( z, YP, 4 );
-	w += TWOOPI * ( j1f(x) * logf(x)  -  1.0f/x );
-	return( w );
-	}
+    x = xx;
+    if (x <= 2.0f) {
+        if (x <= 0.0f) {
+            mtherr("y1f", DOMAIN);
+            return (-MAXNUMF);
+        }
+        z = x * x;
+        w = (z - YO1) * x * polevlf(z, YP, 4);
+        w += TWOOPI * (j1f(x) * logf(x) - 1.0f / x);
+        return (w);
+    }
 
-q = 1.0f/x;
-w = sqrtf(q);
+    q = 1.0f / x;
+    w = sqrtf(q);
 
-p = w * polevlf( q, MO1, 7);
-w = q*q;
-xn = q * polevlf( w, PH1, 7) - THPIO4F;
-p = p * sinf(xn + x);
-return(p);
+    p = w * polevlf(q, MO1, 7);
+    w = q * q;
+    xn = q * polevlf(w, PH1, 7) - THPIO4F;
+    p = p * sinf(xn + x);
+    return (p);
 }

@@ -24,4 +24,4 @@ typedef unsigned long time_t;
 #define __time_t_defined
 #endif
 
-#endif //SYS_TIME_H
+#endif  //SYS_TIME_H

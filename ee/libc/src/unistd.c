@@ -19,39 +19,39 @@ extern char __direct_pwd[256];
 
 char *getcwd(char *buf, int len)
 {
-	strncpy(buf, __direct_pwd, len);
-	return buf;
+    strncpy(buf, __direct_pwd, len);
+    return buf;
 }
 #endif
 
 #ifdef F_access
 int access(const char *path, int mode)
 {
-	printf("access() unimplemented\n");
-	return -1;
+    printf("access() unimplemented\n");
+    return -1;
 }
 #endif
 
 #ifdef F_stat
 int stat(const char *path, struct stat *sbuf)
 {
-	printf("stat() unimplemented\n");
-	return -1;
+    printf("stat() unimplemented\n");
+    return -1;
 }
 #endif
 
 #ifdef F_fstat
 int fstat(int filedes, struct stat *buf)
 {
-	printf("fstat() unimplemented\n");
-	return -1;
+    printf("fstat() unimplemented\n");
+    return -1;
 }
 #endif
 
 #ifdef F_unlink
 int unlink(const char *path)
 {
-	return fioRemove(path);
+    return fioRemove(path);
 }
 #endif
 
@@ -63,13 +63,13 @@ int unlink(const char *path)
 
 struct sleep_data
 {
-    s32	 s;
+    s32 s;
     clock_t wait;
 };
 
 static void _sleep_waker(s32 alarm_id, u16 time, void *arg2)
 {
-    struct sleep_data *sd = (struct sleep_data *) arg2;
+    struct sleep_data *sd = (struct sleep_data *)arg2;
     if (clock() >= sd->wait)
         iSignalSema(sd->s);
     else
@@ -81,9 +81,9 @@ unsigned int sleep(unsigned int seconds)
     ee_sema_t sema;
     struct sleep_data sd;
 
-	sema.init_count = 0;
-	sema.max_count  = 1;
-	sema.option     = 0;
+    sema.init_count = 0;
+    sema.max_count = 1;
+    sema.option = 0;
 
     sd.wait = clock() + seconds * CLOCKS_PER_SEC;
     sd.s = CreateSema(&sema);
@@ -91,6 +91,6 @@ unsigned int sleep(unsigned int seconds)
     WaitSema(sd.s);
     DeleteSema(sd.s);
 
-	return 0;
+    return 0;
 }
 #endif

@@ -68,7 +68,7 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 
 #include "mconf.h"
 extern float MAXNUMF, MACHEPF, PIF, PIO2F;
-#define fabsf(x) ( (x) < 0 ? -(x) : (x) )
+#define fabsf(x) ((x) < 0 ? -(x) : (x))
 #ifdef ANSIC
 float sqrtf(float), frexpf(float, int *);
 float ldexpf(float, int);
@@ -91,92 +91,84 @@ extern cmplxf conef;
 
 /*	c = b + a	*/
 
-void caddf( a, b, c )
-register cmplxf *a, *b;
+void caddf(a, b, c) register cmplxf *a, *b;
 cmplxf *c;
 {
 
-c->r = b->r + a->r;
-c->i = b->i + a->i;
+    c->r = b->r + a->r;
+    c->i = b->i + a->i;
 }
 
 
 /*	c = b - a	*/
 
-void csubf( a, b, c )
-register cmplxf *a, *b;
+void csubf(a, b, c) register cmplxf *a, *b;
 cmplxf *c;
 {
 
-c->r = b->r - a->r;
-c->i = b->i - a->i;
+    c->r = b->r - a->r;
+    c->i = b->i - a->i;
 }
 
 /*	c = b * a */
 
-void cmulf( a, b, c )
-register cmplxf *a, *b;
+void cmulf(a, b, c) register cmplxf *a, *b;
 cmplxf *c;
 {
-register float y;
+    register float y;
 
-y    = b->r * a->r  -  b->i * a->i;
-c->i = b->r * a->i  +  b->i * a->r;
-c->r = y;
+    y = b->r * a->r - b->i * a->i;
+    c->i = b->r * a->i + b->i * a->r;
+    c->r = y;
 }
 
 
 
 /*	c = b / a */
 
-void cdivf( a, b, c )
-register cmplxf *a, *b;
+void cdivf(a, b, c) register cmplxf *a, *b;
 cmplxf *c;
 {
-float y, p, q, w;
+    float y, p, q, w;
 
 
-y = a->r * a->r  +  a->i * a->i;
-p = b->r * a->r  +  b->i * a->i;
-q = b->i * a->r  -  b->r * a->i;
+    y = a->r * a->r + a->i * a->i;
+    p = b->r * a->r + b->i * a->i;
+    q = b->i * a->r - b->r * a->i;
 
-if( y < 1.0f )
-	{
-	w = MAXNUMF * y;
-	if( (fabsf(p) > w) || (fabsf(q) > w) || (y == 0.0f) )
-		{
-		c->r = MAXNUMF;
-		c->i = MAXNUMF;
-		mtherr( "cdivf", OVERFLOW );
-		return;
-		}
-	}
-c->r = p/y;
-c->i = q/y;
+    if (y < 1.0f) {
+        w = MAXNUMF * y;
+        if ((fabsf(p) > w) || (fabsf(q) > w) || (y == 0.0f)) {
+            c->r = MAXNUMF;
+            c->i = MAXNUMF;
+            mtherr("cdivf", OVERFLOW);
+            return;
+        }
+    }
+    c->r = p / y;
+    c->i = q / y;
 }
 
 
 /*	b = a	*/
 
-void cmovf( a, b )
-register short *a, *b;
+void cmovf(a, b) register short *a, *b;
 {
-int i;
+    int i;
 
 
-i = 8;
-do
-	*b++ = *a++;
-while( --i );
+    i = 8;
+    do
+        *b++ = *a++;
+    while (--i);
 }
 
 
-void cnegf( a )
-register cmplxf *a;
+void cnegf(a) register cmplxf *a;
 {
 
-a->r = -a->r;
-a->i = -a->i;
+    a->r = -a->r;
+    a->i = -a->i;
 }
 
 /*							cabsf()
@@ -232,8 +224,8 @@ typedef struct
 	}cmplxf;
 */
 /* square root of max and min numbers */
-#define SMAX  1.3043817825332782216E+19
-#define SMIN  7.6664670834168704053E-20
+#define SMAX 1.3043817825332782216E+19
+#define SMIN 7.6664670834168704053E-20
 #define PREC 12
 #define MAXEXPF 128
 
@@ -241,61 +233,57 @@ typedef struct
 #define SMAXT (2.0f * SMAX)
 #define SMINT (0.5f * SMIN)
 
-float cabsf( z )
-register cmplxf *z;
+float cabsf(z) register cmplxf *z;
 {
-float x, y, b, re, im;
-int ex, ey, e;
+    float x, y, b, re, im;
+    int ex, ey, e;
 
-re = fabsf( z->r );
-im = fabsf( z->i );
+    re = fabsf(z->r);
+    im = fabsf(z->i);
 
-if( re == 0.0f )
-	{
-	return( im );
-	}
-if( im == 0.0f )
-	{
-	return( re );
-	}
+    if (re == 0.0f) {
+        return (im);
+    }
+    if (im == 0.0f) {
+        return (re);
+    }
 
-/* Get the exponents of the numbers */
-x = frexpf( re, &ex );
-y = frexpf( im, &ey );
+    /* Get the exponents of the numbers */
+    x = frexpf(re, &ex);
+    y = frexpf(im, &ey);
 
-/* Check if one number is tiny compared to the other */
-e = ex - ey;
-if( e > PREC )
-	return( re );
-if( e < -PREC )
-	return( im );
+    /* Check if one number is tiny compared to the other */
+    e = ex - ey;
+    if (e > PREC)
+        return (re);
+    if (e < -PREC)
+        return (im);
 
-/* Find approximate exponent e of the geometric mean. */
-e = (ex + ey) >> 1;
+    /* Find approximate exponent e of the geometric mean. */
+    e = (ex + ey) >> 1;
 
-/* Rescale so mean is about 1 */
-x = ldexpf( re, -e );
-y = ldexpf( im, -e );
+    /* Rescale so mean is about 1 */
+    x = ldexpf(re, -e);
+    y = ldexpf(im, -e);
 
-/* Hypotenuse of the right triangle */
-b = sqrtf( x * x  +  y * y );
+    /* Hypotenuse of the right triangle */
+    b = sqrtf(x * x + y * y);
 
-/* Compute the exponent of the answer. */
-y = frexpf( b, &ey );
-ey = e + ey;
+    /* Compute the exponent of the answer. */
+    y = frexpf(b, &ey);
+    ey = e + ey;
 
-/* Check it for overflow and underflow. */
-if( ey > MAXEXPF )
-	{
-	mtherr( "cabsf", OVERFLOW );
-	return( MAXNUMF );
-	}
-if( ey < -MAXEXPF )
-	return(0.0f);
+    /* Check it for overflow and underflow. */
+    if (ey > MAXEXPF) {
+        mtherr("cabsf", OVERFLOW);
+        return (MAXNUMF);
+    }
+    if (ey < -MAXEXPF)
+        return (0.0f);
 
-/* Undo the scaling */
-b = ldexpf( b, e );
-return( b );
+    /* Undo the scaling */
+    b = ldexpf(b, e);
+    return (b);
 }
 /*							csqrtf()
  *
@@ -341,67 +329,58 @@ return( b );
  */
 
 
-void csqrtf( z, w )
-cmplxf *z, *w;
+void csqrtf(z, w)
+    cmplxf *z,
+    *w;
 {
-cmplxf q, s;
-float x, y, r, t;
+    cmplxf q, s;
+    float x, y, r, t;
 
-x = z->r;
-y = z->i;
+    x = z->r;
+    y = z->i;
 
-if( y == 0.0f )
-	{
-	if( x < 0.0f )
-		{
-		w->r = 0.0f;
-		w->i = sqrtf(-x);
-		return;
-		}
-	else
-		{
-		w->r = sqrtf(x);
-		w->i = 0.0f;
-		return;
-		}
-	}
+    if (y == 0.0f) {
+        if (x < 0.0f) {
+            w->r = 0.0f;
+            w->i = sqrtf(-x);
+            return;
+        } else {
+            w->r = sqrtf(x);
+            w->i = 0.0f;
+            return;
+        }
+    }
 
-if( x == 0.0f )
-	{
-	r = fabsf(y);
-	r = sqrtf(0.5f*r);
-	if( y > 0 )
-		w->r = r;
-	else
-		w->r = -r;
-	w->i = r;
-	return;
-	}
+    if (x == 0.0f) {
+        r = fabsf(y);
+        r = sqrtf(0.5f * r);
+        if (y > 0)
+            w->r = r;
+        else
+            w->r = -r;
+        w->i = r;
+        return;
+    }
 
-/* Approximate  sqrt(x^2+y^2) - x  =  y^2/2x - y^4/24x^3 + ... .
+    /* Approximate  sqrt(x^2+y^2) - x  =  y^2/2x - y^4/24x^3 + ... .
  * The relative error in the first term is approximately y^2/12x^2 .
  */
-if( (fabsf(y) < fabsf(0.015f*x))
-   && (x > 0) )
-	{
-	t = 0.25f*y*(y/x);
-	}
-else
-	{
-	r = cabsf(z);
-	t = 0.5f*(r - x);
-	}
+    if ((fabsf(y) < fabsf(0.015f * x)) && (x > 0)) {
+        t = 0.25f * y * (y / x);
+    } else {
+        r = cabsf(z);
+        t = 0.5f * (r - x);
+    }
 
-r = sqrtf(t);
-q.i = r;
-q.r = 0.5f*y/r;
+    r = sqrtf(t);
+    q.i = r;
+    q.r = 0.5f * y / r;
 
-/* Heron iteration in complex arithmetic:
+    /* Heron iteration in complex arithmetic:
  * q = (q + z/q)/2
  */
-cdivf( &q, z, &s );
-caddf( &q, &s, w );
-w->r *= 0.5f;
-w->i *= 0.5f;
+    cdivf(&q, z, &s);
+    caddf(&q, &s, w);
+    w->r *= 0.5f;
+    w->i *= 0.5f;
 }
-

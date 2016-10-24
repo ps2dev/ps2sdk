@@ -18,14 +18,15 @@
 #include "irx.h"
 
 //Message box attributes
-#define MBA_THFIFO	0x000
-#define MBA_THPRI	0x001
-#define MBA_MSFIFO	0x000
-#define MBA_MSPRI	0x004
+#define MBA_THFIFO 0x000
+#define MBA_THPRI 0x001
+#define MBA_MSFIFO 0x000
+#define MBA_MSPRI 0x004
 
-typedef struct {
-	unsigned int attr;
-	unsigned int option;
+typedef struct
+{
+    unsigned int attr;
+    unsigned int option;
 } iop_mbx_t;
 
 /* Besides the next pointer, this struct is actually user-defined.  You can
@@ -36,19 +37,21 @@ typedef struct {
 	   ...
        } my_message_t;
 */
-typedef struct _iop_message {
-	struct iop_message *next;
-	unsigned char priority;
-	unsigned char unused[3];
+typedef struct _iop_message
+{
+    struct iop_message *next;
+    unsigned char priority;
+    unsigned char unused[3];
 } iop_message_t;
 
-typedef struct _iop_mbx_status {
-	unsigned int attr;
-	unsigned int option;
-	int numWaitThreads;
-	int numMessage;
-	iop_message_t *topPacket;
-	int reserved[2];
+typedef struct _iop_mbx_status
+{
+    unsigned int attr;
+    unsigned int option;
+    int numWaitThreads;
+    int numMessage;
+    iop_message_t *topPacket;
+    int reserved[2];
 } iop_mbx_status_t;
 
 #define thmsgbx_IMPORTS_start DECLARE_IMPORT_TABLE(thmsgbx, 1, 1)

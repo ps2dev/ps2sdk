@@ -17,4 +17,4 @@
 #include <fileXio.h>
 #include <sys/stat.h>
 
-#endif // _FILEXIO_H
+#endif  // _FILEXIO_H

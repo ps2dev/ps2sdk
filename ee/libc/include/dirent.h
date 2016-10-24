@@ -15,17 +15,17 @@
 
 struct dirent
 {
-	/** relative filename */
-	char d_name[256];
+    /** relative filename */
+    char d_name[256];
 };
 
 typedef struct DIR
 {
-	/** handle used against fio */
-	int  d_fd;
+    /** handle used against fio */
+    int d_fd;
 
-	/** entry returned at readdir */
-	struct dirent *d_entry;
+    /** entry returned at readdir */
+    struct dirent *d_entry;
 } DIR;
 
 #ifdef __cplusplus
@@ -36,27 +36,27 @@ extern "C" {
     @param path
     @return DIR struct to be used for rest of dirent functions
 */
-DIR *opendir (const char *path);
+DIR *opendir(const char *path);
 
 /** Reads an entry from handle opened previously by opendir
     @param d
     @return
 */
-struct dirent *readdir (DIR *d);
+struct dirent *readdir(DIR *d);
 
 /** Rewinds
     @param d
 */
-void rewinddir (DIR *d);
+void rewinddir(DIR *d);
 
 /** Release DIR handle
     @param d
     @return Zero on sucess
 */
-int closedir (DIR *d);
+int closedir(DIR *d);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif //DIRENT
+#endif  //DIRENT

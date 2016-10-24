@@ -19,16 +19,16 @@ extern "C" {
 #endif
 
 void init_scr(void);
-void scr_printf(const char *, ...) __attribute__((format(printf,1,2)));
+void scr_printf(const char *, ...) __attribute__((format(printf, 1, 2)));
 void _putchar(int x, int y, u32 color, u8 ch);
-void ps2GetStackTrace(unsigned int* results,int max);
+void ps2GetStackTrace(unsigned int *results, int max);
 void scr_setXY(int x, int y);
 int scr_getX(void);
 int scr_getY(void);
 void scr_clear(void);
 void scr_setbgcolor(u32 color);
 
-#define DEBUG_BGCOLOR(col) *((u64 *) 0x120000e0) = (u64) (col)
+#define DEBUG_BGCOLOR(col) *((u64 *)0x120000e0) = (u64)(col)
 
 #ifdef __cplusplus
 }

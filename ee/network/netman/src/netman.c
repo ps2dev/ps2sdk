@@ -9,7 +9,7 @@
 #include "rpc_server.h"
 
 static struct NetManNetProtStack MainNetProtStack;
-static unsigned char IsInitialized=0, IsNetStackInitialized=0;
+static unsigned char IsInitialized = 0, IsNetStackInitialized = 0;
 static char NIFLinkState = 0;
 
 /*	Upon stack registration on the IOP side, this function will be called.
@@ -19,111 +19,107 @@ static char NIFLinkState = 0;
 	The NIF status updated will be sent again when the RPC is fully initialized, as shown in NetManRegisterNetworkStack().	*/
 void NetManToggleGlobalNetIFLinkState(unsigned char state)
 {
-	NIFLinkState = state;
+    NIFLinkState = state;
 
-	NetManUpdateStackNIFLinkState();
+    NetManUpdateStackNIFLinkState();
 }
 
 int NetManGetGlobalNetIFLinkState(void)
 {
-	return NIFLinkState;
+    return NIFLinkState;
 }
 
 void NetManUpdateStackNIFLinkState(void)
 {
-	if(IsNetStackInitialized)
-	{
-		if(NIFLinkState)
-			MainNetProtStack.LinkStateUp();
-		else
-			MainNetProtStack.LinkStateDown();
-	}
+    if (IsNetStackInitialized) {
+        if (NIFLinkState)
+            MainNetProtStack.LinkStateUp();
+        else
+            MainNetProtStack.LinkStateDown();
+    }
 }
 
 int NetManInit(void)
 {
-	int result;
+    int result;
 
-	if(!IsInitialized)
-	{
-		if((result=NetManInitRPCServer())==0)
-		{
-			if((result=NetManInitRPCClient())==0) IsInitialized = 1;
-		}
-	}else result = 0;
+    if (!IsInitialized) {
+        if ((result = NetManInitRPCServer()) == 0) {
+            if ((result = NetManInitRPCClient()) == 0)
+                IsInitialized = 1;
+        }
+    } else
+        result = 0;
 
-	return result;
+    return result;
 }
 
 void NetManDeinit(void)
 {
-	if(IsInitialized)
-	{
-		NetManUnregisterNetworkStack();
+    if (IsInitialized) {
+        NetManUnregisterNetworkStack();
 
-		NetManDeinitRPCClient();
-		NetManDeinitRPCServer();
-		IsInitialized = 0;
-	}
+        NetManDeinitRPCClient();
+        NetManDeinitRPCServer();
+        IsInitialized = 0;
+    }
 }
 
 int NetManRegisterNetworkStack(const struct NetManNetProtStack *stack)
 {
-	int result;
+    int result;
 
-	if((result=NetManInit())==0)
-	{
-		if(!IsNetStackInitialized)
-		{
-			if((result=NetManRPCRegisterNetworkStack())==0)
-			{
-				memcpy(&MainNetProtStack, stack, sizeof(MainNetProtStack));
-				IsNetStackInitialized=1;
-				NetManUpdateStackNIFLinkState();
-			}
-		}
-		else result=0;
-	}
+    if ((result = NetManInit()) == 0) {
+        if (!IsNetStackInitialized) {
+            if ((result = NetManRPCRegisterNetworkStack()) == 0) {
+                memcpy(&MainNetProtStack, stack, sizeof(MainNetProtStack));
+                IsNetStackInitialized = 1;
+                NetManUpdateStackNIFLinkState();
+            }
+        } else
+            result = 0;
+    }
 
-	return result;
+    return result;
 }
 
 void NetManUnregisterNetworkStack(void)
 {
-	if(IsNetStackInitialized)
-	{
-		NetManRPCUnregisterNetworkStack();
-		memset(&MainNetProtStack, 0, sizeof(MainNetProtStack));
+    if (IsNetStackInitialized) {
+        NetManRPCUnregisterNetworkStack();
+        memset(&MainNetProtStack, 0, sizeof(MainNetProtStack));
 
-		IsNetStackInitialized=0;
-	}
+        IsNetStackInitialized = 0;
+    }
 }
 
 int NetManNetIFSendPacket(const void *packet, unsigned int length)
 {
-	return IsInitialized?NetManRpcNetIFSendPacket(packet, length):-1;
+    return IsInitialized ? NetManRpcNetIFSendPacket(packet, length) : -1;
 }
 
 int NetManIoctl(unsigned int command, void *arg, unsigned int arg_len, void *output, unsigned int length)
 {
-	return IsInitialized?NetManRpcIoctl(command, arg, arg_len, output, length):-1;
+    return IsInitialized ? NetManRpcIoctl(command, arg, arg_len, output, length) : -1;
 }
 
-struct NetManPacketBuffer *NetManNetProtStackAllocRxPacket(unsigned int length){
-	return IsNetStackInitialized?MainNetProtStack.AllocRxPacket(length):NULL;
+struct NetManPacketBuffer *NetManNetProtStackAllocRxPacket(unsigned int length)
+{
+    return IsNetStackInitialized ? MainNetProtStack.AllocRxPacket(length) : NULL;
 }
 
 void NetManNetProtStackFreeRxPacket(struct NetManPacketBuffer *packet)
 {
-	if(IsNetStackInitialized) MainNetProtStack.FreeRxPacket(packet);
+    if (IsNetStackInitialized)
+        MainNetProtStack.FreeRxPacket(packet);
 }
 
 int NetManNetProtStackEnQRxPacket(struct NetManPacketBuffer *packet)
 {
-	return IsNetStackInitialized?MainNetProtStack.EnQRxPacket(packet):-1;
+    return IsNetStackInitialized ? MainNetProtStack.EnQRxPacket(packet) : -1;
 }
 
 int NetManNetProtStackFlushInputQueue(void)
 {
-	return IsNetStackInitialized?MainNetProtStack.FlushInputQueue():-1;
+    return IsNetStackInitialized ? MainNetProtStack.FlushInputQueue() : -1;
 }

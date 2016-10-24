@@ -18,58 +18,61 @@
 #include "irx.h"
 
 //Thread attribute definitions
-#define TH_ASM		0x01000000
-#define TH_C		0x02000000
-#define TH_UMODE	0x00000008
-#define TH_NO_FILLSTACK	0x00100000
-#define TH_CLEAR_STACK	0x00200000
+#define TH_ASM 0x01000000
+#define TH_C 0x02000000
+#define TH_UMODE 0x00000008
+#define TH_NO_FILLSTACK 0x00100000
+#define TH_CLEAR_STACK 0x00200000
 
-typedef struct _iop_thread {
-	u32	attr;
-	u32	option;
-	void	(*thread)(void *);
-	u32	stacksize;
-	u32	priority;
+typedef struct _iop_thread
+{
+    u32 attr;
+    u32 option;
+    void (*thread)(void *);
+    u32 stacksize;
+    u32 priority;
 } iop_thread_t;
 
-#define TH_SELF		0	//Special thread ID for referring to the running thread. Not supported by all functions.
+#define TH_SELF 0  //Special thread ID for referring to the running thread. Not supported by all functions.
 
 //Thread status definitions
-#define	THS_RUN	 	0x01
-#define THS_READY	0x02
-#define THS_WAIT	0x04
-#define THS_SUSPEND	0x08
-#define THS_WAITSUSPEND	0x0C
-#define THS_DORMANT	0x10
+#define THS_RUN 0x01
+#define THS_READY 0x02
+#define THS_WAIT 0x04
+#define THS_SUSPEND 0x08
+#define THS_WAITSUSPEND 0x0C
+#define THS_DORMANT 0x10
 
 //Thread wait status definitions
-#define TSW_SLEEP	1
-#define TSW_DELAY	2
-#define TSW_SEMA	3
-#define TSW_EVENTFLAG	4
-#define TSW_MBX		5
-#define TSW_VPL		6
-#define TSW_FPL		7
+#define TSW_SLEEP 1
+#define TSW_DELAY 2
+#define TSW_SEMA 3
+#define TSW_EVENTFLAG 4
+#define TSW_MBX 5
+#define TSW_VPL 6
+#define TSW_FPL 7
 
-typedef struct _iop_thread_status {
-	unsigned int	attr;
-	unsigned int	option;
-	int		status;
-	void		*entry;
-	void		*stack;
-	int		stackSize;
-	void		*gpReg;
-	int		initPriority;
-	int		currentPriority;
-	int		waitType;
-	int		waitId;
-	int		wakeupCount;
-	long int	*regContext;	//Only valid for use with iReferThreadStatus.
-	unsigned int	reserved[4];
+typedef struct _iop_thread_status
+{
+    unsigned int attr;
+    unsigned int option;
+    int status;
+    void *entry;
+    void *stack;
+    int stackSize;
+    void *gpReg;
+    int initPriority;
+    int currentPriority;
+    int waitType;
+    int waitId;
+    int wakeupCount;
+    long int *regContext;  //Only valid for use with iReferThreadStatus.
+    unsigned int reserved[4];
 } iop_thread_info_t;
 
-typedef struct _iop_sys_clock {
-	u32	lo, hi;
+typedef struct _iop_sys_clock
+{
+    u32 lo, hi;
 } iop_sys_clock_t;
 
 #define thbase_IMPORTS_start DECLARE_IMPORT_TABLE(thbase, 1, 1)
@@ -147,50 +150,50 @@ int GetSystemStatusFlag();
 #define I_GetSystemStatusFlag DECLARE_IMPORT(41, GetSystemStatusFlag)
 
 
-#define thbase_IMPORTS \
-	thbase_IMPORTS_start \
- \
- 	I_CreateThread \
-	I_DeleteThread \
- \
- 	I_StartThread \
-	I_StartThreadArgs \
- \
- 	I_ExitThread \
-	I_ExitDeleteThread \
-	I_TerminateThread \
-	I_iTerminateThread \
- \
- 	I_ChangeThreadPriority \
-	I_iChangeThreadPriority \
- \
- 	I_RotateThreadReadyQueue \
-	I_iRotateThreadReadyQueue \
- \
- 	I_ReleaseWaitThread \
-	I_iReleaseWaitThread \
- \
- 	I_GetThreadId \
-	I_ReferThreadStatus \
-	I_iReferThreadStatus \
- \
- 	I_SleepThread \
-	I_WakeupThread \
-	I_iWakeupThread \
- \
- 	I_DelayThread \
- \
- 	I_GetSystemTime \
-	I_SetAlarm \
-	I_iSetAlarm \
-	I_CancelAlarm \
-	I_iCancelAlarm \
-	I_USec2SysClock \
-	I_SysClock2USec \
- \
- 	I_GetSystemStatusFlag \
- \
-	thbase_IMPORTS_end
+#define thbase_IMPORTS                                                                                                                        \
+    thbase_IMPORTS_start                                                                                                                      \
+                                                                                                                                              \
+        I_CreateThread                                                                                                                        \
+            I_DeleteThread                                                                                                                    \
+                                                                                                                                              \
+                I_StartThread                                                                                                                 \
+                    I_StartThreadArgs                                                                                                         \
+                                                                                                                                              \
+                        I_ExitThread                                                                                                          \
+                            I_ExitDeleteThread                                                                                                \
+                                I_TerminateThread                                                                                             \
+                                    I_iTerminateThread                                                                                        \
+                                                                                                                                              \
+                                        I_ChangeThreadPriority                                                                                \
+                                            I_iChangeThreadPriority                                                                           \
+                                                                                                                                              \
+                                                I_RotateThreadReadyQueue                                                                      \
+                                                    I_iRotateThreadReadyQueue                                                                 \
+                                                                                                                                              \
+                                                        I_ReleaseWaitThread                                                                   \
+                                                            I_iReleaseWaitThread                                                              \
+                                                                                                                                              \
+                                                                I_GetThreadId                                                                 \
+                                                                    I_ReferThreadStatus                                                       \
+                                                                        I_iReferThreadStatus                                                  \
+                                                                                                                                              \
+                                                                            I_SleepThread                                                     \
+                                                                                I_WakeupThread                                                \
+                                                                                    I_iWakeupThread                                           \
+                                                                                                                                              \
+                                                                                        I_DelayThread                                         \
+                                                                                                                                              \
+                                                                                            I_GetSystemTime                                   \
+                                                                                                I_SetAlarm                                    \
+                                                                                                    I_iSetAlarm                               \
+                                                                                                        I_CancelAlarm                         \
+                                                                                                            I_iCancelAlarm                    \
+                                                                                                                I_USec2SysClock               \
+                                                                                                                    I_SysClock2USec           \
+                                                                                                                                              \
+                                                                                                                        I_GetSystemStatusFlag \
+                                                                                                                                              \
+                                                                                                                            thbase_IMPORTS_end
 
 
 #endif /* IOP_THBASE_H */

@@ -26,7 +26,7 @@
 extern "C" {
 #endif
 
-typedef int (EE_ExceptionHandler)(struct st_EE_RegFrame *);
+typedef int(EE_ExceptionHandler)(struct st_EE_RegFrame *);
 
 int ee_dbg_install(int levels);
 int ee_dbg_remove(int levels);
@@ -72,5 +72,4 @@ void ee_dbg_clr_bpx(void);
 }
 #endif
 
-#endif // #ifndef _EE_DEBUG_H
-
+#endif  // #ifndef _EE_DEBUG_H

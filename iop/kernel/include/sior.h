@@ -17,7 +17,7 @@
 #include "irx.h"
 #include <stdarg.h>
 
-#define	SIOR_IRX              0xC001510
+#define SIOR_IRX 0xC001510
 
 enum {
     SIOR_INIT = 1,
@@ -51,7 +51,7 @@ size_t sio_read(void *buf, size_t size);
 
 int sio_puts(const char *str);
 #define I_sio_puts DECLARE_IMPORT(10, sio_puts)
-int sio_putsn(const char *str); // no newline for this one
+int sio_putsn(const char *str);  // no newline for this one
 #define I_sio_putsn DECLARE_IMPORT(11, sio_putsn)
 char *sio_gets(char *str);
 #define I_sio_gets DECLARE_IMPORT(12, sio_gets)

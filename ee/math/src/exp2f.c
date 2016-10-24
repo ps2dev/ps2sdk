@@ -56,13 +56,12 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 static char fname[] = {"exp2f"};
 
 static float P[] = {
- 1.535336188319500E-004,
- 1.339887440266574E-003,
- 9.618437357674640E-003,
- 5.550332471162809E-002,
- 2.402264791363012E-001,
- 6.931472028550421E-001
-};
+    1.535336188319500E-004,
+    1.339887440266574E-003,
+    9.618437357674640E-003,
+    5.550332471162809E-002,
+    2.402264791363012E-001,
+    6.931472028550421E-001};
 #define MAXL2 127.0
 #define MINL2 -127.0
 
@@ -73,51 +72,47 @@ extern float MAXNUMF;
 #ifdef ANSIC
 float polevlf(float, float *, int), floorf(float), ldexpf(float, int);
 
-float exp2f( float xx )
+float exp2f(float xx)
 #else
 float polevlf(), floorf(), ldexpf();
 
-float exp2f(xx)
-double xx;
+float exp2f(xx) double xx;
 #endif
 {
-float x, px;
-int i0;
+    float x, px;
+    int i0;
 
-x = xx;
-if( x > MAXL2)
-	{
-	mtherr( fname, OVERFLOW );
-	return( MAXNUMF );
-	}
+    x = xx;
+    if (x > MAXL2) {
+        mtherr(fname, OVERFLOW);
+        return (MAXNUMF);
+    }
 
-if( x < MINL2 )
-	{
-	mtherr( fname, UNDERFLOW );
-	return(0.0);
-	}
+    if (x < MINL2) {
+        mtherr(fname, UNDERFLOW);
+        return (0.0);
+    }
 
-/* The following is necessary because range reduction blows up: */
-if( x == 0 )
-	return(1.0);
+    /* The following is necessary because range reduction blows up: */
+    if (x == 0)
+        return (1.0);
 
-/* separate into integer and fractional parts */
-px = floorf(x);
-i0 = px;
-x = x - px;
+    /* separate into integer and fractional parts */
+    px = floorf(x);
+    i0 = px;
+    x = x - px;
 
-if( x > 0.5 )
-	{
-	i0 += 1;
-	x -= 1.0;
-	}
+    if (x > 0.5) {
+        i0 += 1;
+        x -= 1.0;
+    }
 
-/* rational approximation
+    /* rational approximation
  * exp2(x) = 1.0 +  xP(x)
  */
-px = 1.0 + x * polevlf( x, P, 5 );
+    px = 1.0 + x * polevlf(x, P, 5);
 
-/* scale by power of 2 */
-px = ldexpf( px, i0 );
-return(px);
+    /* scale by power of 2 */
+    px = ldexpf(px, i0);
+    return (px);
 }

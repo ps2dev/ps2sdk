@@ -24,8 +24,8 @@
 #define PS2LIB_STR_MAX 4096
 #endif
 
-#define CPUCLK		294912000	/* Use this to determine the baud divide value.  */
-#define LCR_SCS_VAL	(1<<5)		/* Baud rate generator output that divided CPUCLK.  */
+#define CPUCLK 294912000     /* Use this to determine the baud divide value.  */
+#define LCR_SCS_VAL (1 << 5) /* Baud rate generator output that divided CPUCLK.  */
 
 #ifdef F_sio_init
 /* Initialize the SIO. The lcr_* parameters are passed as is, so
@@ -35,26 +35,27 @@
    base the baud rate on the CPU clock.  */
 void sio_init(u32 baudrate, u8 lcr_ueps, u8 lcr_upen, u8 lcr_usbl, u8 lcr_umode)
 {
-	u32 brd;		/* Baud rate divisor.  */
-	u8 bclk = 0;		/* Baud rate generator clock.  */
+    u32 brd;     /* Baud rate divisor.  */
+    u8 bclk = 0; /* Baud rate generator clock.  */
 
-	_sw(LCR_SCS_VAL|((lcr_ueps & 1) << 4)|((lcr_upen & 1) << 3)|
-			((lcr_usbl & 1) << 2)|(lcr_umode & 1), SIO_LCR);
+    _sw(LCR_SCS_VAL | ((lcr_ueps & 1) << 4) | ((lcr_upen & 1) << 3) |
+            ((lcr_usbl & 1) << 2) | (lcr_umode & 1),
+        SIO_LCR);
 
-	/* Disable all interrupts.  */
-	_sw(0, SIO_IER);
+    /* Disable all interrupts.  */
+    _sw(0, SIO_IER);
 
-	/* Reset the FIFOs.  */
-	_sw(SIO_FCR_FRSTE|SIO_FCR_RFRST|SIO_FCR_TFRST, SIO_FCR);
-	/* Enable them.  */
-	_sw(0, SIO_FCR);
+    /* Reset the FIFOs.  */
+    _sw(SIO_FCR_FRSTE | SIO_FCR_RFRST | SIO_FCR_TFRST, SIO_FCR);
+    /* Enable them.  */
+    _sw(0, SIO_FCR);
 
-	brd = CPUCLK / (baudrate * 256);
+    brd = CPUCLK / (baudrate * 256);
 
-	while ((brd >= 256) && (++bclk < 4))
-		brd /= 4;
+    while ((brd >= 256) && (++bclk < 4))
+        brd /= 4;
 
-	_sw((bclk << 8) | brd, SIO_BGR);
+    _sw((bclk << 8) | brd, SIO_BGR);
 }
 #endif
 
@@ -62,8 +63,7 @@ void sio_init(u32 baudrate, u8 lcr_ueps, u8 lcr_upen, u8 lcr_usbl, u8 lcr_umode)
 static u8 ___last_sio_putc = 0;
 int sio_putc(int c)
 {
-    if((c == '\n') && (___last_sio_putc != '\r'))
-    {
+    if ((c == '\n') && (___last_sio_putc != '\r')) {
         // hack: if the character to be outputted is a '\n'
         //  and the previously-outputted character is not a '\r',
         //  output a '\r' first.
@@ -71,7 +71,8 @@ int sio_putc(int c)
     }
 
     /* Block until we're ready to transmit.  */
-    while ((_lw(SIO_ISR) & 0xf000) == 0x8000);
+    while ((_lw(SIO_ISR) & 0xf000) == 0x8000)
+        ;
 
     _sb(c, SIO_TXFIFO);
     ___last_sio_putc = c;
@@ -82,15 +83,15 @@ int sio_putc(int c)
 #ifdef F_sio_getc
 int sio_getc()
 {
-	/* Do we have something in the RX FIFO?  */
-	if (_lw(SIO_ISR) & 0xf00) {
-		u8 b = _lb(SIO_RXFIFO);
-		_sw(7, SIO_ISR);
-		return b;
-	}
+    /* Do we have something in the RX FIFO?  */
+    if (_lw(SIO_ISR) & 0xf00) {
+        u8 b = _lb(SIO_RXFIFO);
+        _sw(7, SIO_ISR);
+        return b;
+    }
 
-	/* Return EOF.  */
-	return -1;
+    /* Return EOF.  */
+    return -1;
 }
 #endif
 
@@ -99,9 +100,10 @@ int sio_getc()
 // Note that getc should be blocking by default. Ho well.
 int sio_getc_block()
 {
-	/* Do we have something in the RX FIFO?  */
-	while (!(_lw(SIO_ISR) & 0xf00));
-	return sio_getc();
+    /* Do we have something in the RX FIFO?  */
+    while (!(_lw(SIO_ISR) & 0xf00))
+        ;
+    return sio_getc();
 }
 #endif
 
@@ -111,13 +113,13 @@ int sio_getc_block()
    hardware flow control.  */
 size_t sio_write(void *buf, size_t size)
 {
-	u8 *p = (u8 *)buf;
-	size_t i;
+    u8 *p = (u8 *)buf;
+    size_t i;
 
-	for (i = 0; i < size; i++)
-		sio_putc(p[i]);
+    for (i = 0; i < size; i++)
+        sio_putc(p[i]);
 
-	return size;
+    return size;
 }
 #endif
 
@@ -126,43 +128,43 @@ size_t sio_write(void *buf, size_t size)
    EOF (RX FIFO is empty).  */
 size_t sio_read(void *buf, size_t size)
 {
-	u8 *p = (u8 *)buf;
-	size_t i;
-	int c;
+    u8 *p = (u8 *)buf;
+    size_t i;
+    int c;
 
-	for (i = 0; i < size; i++) {
-		if ((c = sio_getc()) == -1)
-			break;
+    for (i = 0; i < size; i++) {
+        if ((c = sio_getc()) == -1)
+            break;
 
-		p[i] = (u8)c;
-	}
+        p[i] = (u8)c;
+    }
 
-	return i;
+    return i;
 }
 #endif
 
 #ifdef F_sio_puts
 int sio_puts(const char *str)
 {
-	int res;
+    int res;
 
-	res = sio_putsn(str);
+    res = sio_putsn(str);
 
-	sio_putc('\r');
-	sio_putc('\n');
-	return res + 2;
+    sio_putc('\r');
+    sio_putc('\n');
+    return res + 2;
 }
 #endif
 
 #ifdef F_sio_putsn
 int sio_putsn(const char *str)
 {
-	int res;
+    int res;
 
-	for (res = 0; *str; res++, str++)
-	    sio_putc(*str);
+    for (res = 0; *str; res++, str++)
+        sio_putc(*str);
 
-	return res;
+    return res;
 }
 #endif
 
@@ -170,20 +172,20 @@ int sio_putsn(const char *str)
 // Will block until it recieves \n or \r.
 char *sio_gets(char *str)
 {
-	char *s = str;
-	int c;
+    char *s = str;
+    int c;
 
-	while (0) {
-		c = sio_getc_block();
-		/* Check for newline.  */
-		if (c == '\n' || c == '\r')
-			break;
+    while (0) {
+        c = sio_getc_block();
+        /* Check for newline.  */
+        if (c == '\n' || c == '\r')
+            break;
 
-		*s++ = c;
-	}
+        *s++ = c;
+    }
 
-	*s = '\0';
-	return str;
+    *s = '\0';
+    return str;
 }
 #endif
 
@@ -192,6 +194,6 @@ char *sio_gets(char *str)
 void sio_flush()
 {
     while (_lw(SIO_ISR) & 0xf00)
-	_lb(SIO_RXFIFO);
+        _lb(SIO_RXFIFO);
 }
 #endif

@@ -41,129 +41,118 @@ flags:
 #include <ctype.h>
 #include <math.h>
 
-#define BUFFER_SIZE 128*28
+#define BUFFER_SIZE 128 * 28
 
 static short wave[BUFFER_SIZE];
 
-static void find_predict( short *samples, double *d_samples, int *predict_nr, int *shift_factor );
-static void pack( double *d_samples, short *four_bit, int predict_nr, int shift_factor );
+static void find_predict(short *samples, double *d_samples, int *predict_nr, int *shift_factor);
+static void pack(double *d_samples, short *four_bit, int predict_nr, int shift_factor);
 
-int adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop)
+int adpcm_encode(FILE *fp, FILE *sad, int offset, int sample_len, int flag_loop)
 {
-	short *ptr;
-	double d_samples[28];
-	short four_bit[28];
-	int predict_nr;
-	int shift_factor;
-	int flags;
-	int i, j, k;
-	unsigned char d;
-	int size;
+    short *ptr;
+    double d_samples[28];
+    short four_bit[28];
+    int predict_nr;
+    int shift_factor;
+    int flags;
+    int i, j, k;
+    unsigned char d;
+    int size;
 
-	flags = 0;
-	shift_factor = 0;
-	predict_nr = 0;
+    flags = 0;
+    shift_factor = 0;
+    predict_nr = 0;
 
-	// sample_len is number of 16 bit samples
-  while( sample_len > 0 )
-	{
-		// Size is sample_len
-		size = ( sample_len >= BUFFER_SIZE ) ? BUFFER_SIZE : sample_len;
+    // sample_len is number of 16 bit samples
+    while (sample_len > 0) {
+        // Size is sample_len
+        size = (sample_len >= BUFFER_SIZE) ? BUFFER_SIZE : sample_len;
 
-		if(offset)
-		{
-			for(i = 0; i < size; i++)
-			{
-				if(fread( wave+i, sizeof( short ), 1, fp )==1){
-					fseek(fp, offset, SEEK_CUR);
-				}
-				else{
-					printf("Error: Can't read SAMPLE DATA in WAVE-file.\n");
-					return EIO;
-				}
-			}
-		}
-		else
-		{
-			if(fread(wave, sizeof( short ), size, fp)!=size){
-				printf("Error: Can't read SAMPLE DATA in WAVE-file.\n");
-				return EIO;
-			}
-		}
+        if (offset) {
+            for (i = 0; i < size; i++) {
+                if (fread(wave + i, sizeof(short), 1, fp) == 1) {
+                    fseek(fp, offset, SEEK_CUR);
+                } else {
+                    printf("Error: Can't read SAMPLE DATA in WAVE-file.\n");
+                    return EIO;
+                }
+            }
+        } else {
+            if (fread(wave, sizeof(short), size, fp) != size) {
+                printf("Error: Can't read SAMPLE DATA in WAVE-file.\n");
+                return EIO;
+            }
+        }
 
-		// i = num of samples with size 28
-		i = size / 28;
+        // i = num of samples with size 28
+        i = size / 28;
 
-		// Add blanks
-		if ( size % 28 )
-		{
-			for ( j = size % 28; j < 28; j++ ) wave[28*i+j] = 0;
-			i++;
-		}
+        // Add blanks
+        if (size % 28) {
+            for (j = size % 28; j < 28; j++)
+                wave[28 * i + j] = 0;
+            i++;
+        }
 
-		// pack 28 samples
-		for ( j = 0; j < i; j++ )
-		{
-			ptr = wave + j * 28;
+        // pack 28 samples
+        for (j = 0; j < i; j++) {
+            ptr = wave + j * 28;
 
-			find_predict( ptr, d_samples, &predict_nr, &shift_factor );
+            find_predict(ptr, d_samples, &predict_nr, &shift_factor);
 
-			// pack samples
-			pack( d_samples, four_bit, predict_nr, shift_factor );
+            // pack samples
+            pack(d_samples, four_bit, predict_nr, shift_factor);
 
-			// correctly format predict_nr and shift_factor and write to file
-			d = ( predict_nr << 4 ) | shift_factor;
-      fputc( d, sad );
+            // correctly format predict_nr and shift_factor and write to file
+            d = (predict_nr << 4) | shift_factor;
+            fputc(d, sad);
 
-			if(flag_loop == 1)
-			{
-				fputc( 6, sad );; // loop value
-				flag_loop = 2;
-			}
-			else
-			{
-				fputc( flags, sad );
-			}
+            if (flag_loop == 1) {
+                fputc(6, sad);
+                ;  // loop value
+                flag_loop = 2;
+            } else {
+                fputc(flags, sad);
+            }
 
-			// Write the 28 samples to file
-			for ( k = 0; k < 28; k += 2 )
-			{
-				d = ( ( four_bit[k+1] >> 8 ) & 0xf0 ) | ( ( four_bit[k] >> 12 ) & 0xf );
-				fputc( d, sad );
-			}
+            // Write the 28 samples to file
+            for (k = 0; k < 28; k += 2) {
+                d = ((four_bit[k + 1] >> 8) & 0xf0) | ((four_bit[k] >> 12) & 0xf);
+                fputc(d, sad);
+            }
 
-			// Decrease sample_len by 28 samples
-			sample_len -= 28;
+            // Decrease sample_len by 28 samples
+            sample_len -= 28;
 
-			if ( sample_len < 28 )
-			{
-				if(flag_loop == 2)
-					flags = 3;
-				else
-					flags = 1;
-			}
-		}
-	}
+            if (sample_len < 28) {
+                if (flag_loop == 2)
+                    flags = 3;
+                else
+                    flags = 1;
+            }
+        }
+    }
 
-  fputc( ( predict_nr << 4 ) | shift_factor, sad );
-  fputc( 7, sad );            // end flag
+    fputc((predict_nr << 4) | shift_factor, sad);
+    fputc(7, sad);  // end flag
 
-	for ( i = 0; i < 14; i++ )
-			fputc( 0, sad );
+    for (i = 0; i < 14; i++)
+        fputc(0, sad);
 
-	return 0;
+    return 0;
 }
 
 
-static double f[5][2] = { { 0.0, 0.0 },
-                            {  -60.0 / 64.0, 0.0 },
-                            { -115.0 / 64.0, 52.0 / 64.0 },
-                            {  -98.0 / 64.0, 55.0 / 64.0 },
-                            { -122.0 / 64.0, 60.0 / 64.0 } };
+static double f[5][2] = {{0.0, 0.0},
+                         {-60.0 / 64.0, 0.0},
+                         {-115.0 / 64.0, 52.0 / 64.0},
+                         {-98.0 / 64.0, 55.0 / 64.0},
+                         {-122.0 / 64.0, 60.0 / 64.0}};
 
 
 
-static void find_predict( short *samples, double *d_samples, int *predict_nr, int *shift_factor )
+static void find_predict(short *samples, double *d_samples, int *predict_nr, int *shift_factor)
 {
     int i, j;
     double buffer[28][5];
@@ -172,66 +161,64 @@ static void find_predict( short *samples, double *d_samples, int *predict_nr, in
     double ds;
     int min2;
     int shift_mask;
-    static double _s_1 = 0.0;                            // s[t-1]
-    static double _s_2 = 0.0;                            // s[t-2]
+    static double _s_1 = 0.0;  // s[t-1]
+    static double _s_2 = 0.0;  // s[t-2]
     double s_0, s_1, s_2;
 
-    for ( i = 0; i < 5; i++ ) {
+    for (i = 0; i < 5; i++) {
         max[i] = 0.0;
         s_1 = _s_1;
         s_2 = _s_2;
-        for ( j = 0; j < 28; j ++ ) {
-            s_0 = (double) samples[j];                      // s[t-0]
-            if ( s_0 > 30719.0 )
+        for (j = 0; j < 28; j++) {
+            s_0 = (double)samples[j];  // s[t-0]
+            if (s_0 > 30719.0)
                 s_0 = 30719.0;
-            if ( s_0 < - 30720.0 )
+            if (s_0 < -30720.0)
                 s_0 = -30720.0;
             ds = s_0 + s_1 * f[i][0] + s_2 * f[i][1];
             buffer[j][i] = ds;
-            if ( fabs( ds ) > max[i] )
-                max[i] = fabs( ds );
-//                printf( "%+5.2f\n", s2 );
-                s_2 = s_1;                                  // new s[t-2]
-                s_1 = s_0;                                  // new s[t-1]
+            if (fabs(ds) > max[i])
+                max[i] = fabs(ds);
+            //                printf( "%+5.2f\n", s2 );
+            s_2 = s_1;  // new s[t-2]
+            s_1 = s_0;  // new s[t-1]
         }
 
-        if ( max[i] < min ) {
+        if (max[i] < min) {
             min = max[i];
             *predict_nr = i;
         }
-        if ( min <= 7 ) {
+        if (min <= 7) {
             *predict_nr = 0;
             break;
         }
-
     }
 
-// store s[t-2] and s[t-1] in a static variable
-// these than used in the next function call
+    // store s[t-2] and s[t-1] in a static variable
+    // these than used in the next function call
 
     _s_1 = s_1;
     _s_2 = s_2;
 
-    for ( i = 0; i < 28; i++ )
+    for (i = 0; i < 28; i++)
         d_samples[i] = buffer[i][*predict_nr];
 
-//  if ( min > 32767.0 )
-//      min = 32767.0;
+    //  if ( min > 32767.0 )
+    //      min = 32767.0;
 
-    min2 = ( int ) min;
+    min2 = (int)min;
     shift_mask = 0x4000;
     *shift_factor = 0;
 
-    while( *shift_factor < 12 ) {
-        if ( shift_mask  & ( min2 + ( shift_mask >> 3 ) ) )
+    while (*shift_factor < 12) {
+        if (shift_mask & (min2 + (shift_mask >> 3)))
             break;
         (*shift_factor)++;
         shift_mask = shift_mask >> 1;
     }
-
 }
 
-static void pack( double *d_samples, short *four_bit, int predict_nr, int shift_factor )
+static void pack(double *d_samples, short *four_bit, int predict_nr, int shift_factor)
 {
     double ds;
     int di;
@@ -240,23 +227,21 @@ static void pack( double *d_samples, short *four_bit, int predict_nr, int shift_
     static double s_2 = 0.0;
     int i;
 
-    for ( i = 0; i < 28; i++ ) {
+    for (i = 0; i < 28; i++) {
         s_0 = d_samples[i] + s_1 * f[predict_nr][0] + s_2 * f[predict_nr][1];
-        ds = s_0 * (double) ( 1 << shift_factor );
+        ds = s_0 * (double)(1 << shift_factor);
 
-        di = ( (int) ds + 0x800 ) & 0xfffff000;
+        di = ((int)ds + 0x800) & 0xfffff000;
 
-        if ( di > 32767 )
+        if (di > 32767)
             di = 32767;
-        if ( di < -32768 )
+        if (di < -32768)
             di = -32768;
 
-        four_bit[i] = (short) di;
+        four_bit[i] = (short)di;
 
         di = di >> shift_factor;
         s_2 = s_1;
-        s_1 = (double) di - s_0;
-
+        s_1 = (double)di - s_0;
     }
 }
-

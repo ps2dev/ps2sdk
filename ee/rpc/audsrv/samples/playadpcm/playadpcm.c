@@ -22,59 +22,57 @@
 
 int main(int argc, char **argv)
 {
-	/* Uncomment to hear two samples played simultaenously
+    /* Uncomment to hear two samples played simultaenously
 	int i;
 	*/
-	int ret;
-	FILE* adpcm;
-	audsrv_adpcm_t sample;
-	int size;
-	u8* buffer;
+    int ret;
+    FILE *adpcm;
+    audsrv_adpcm_t sample;
+    int size;
+    u8 *buffer;
 
-	SifInitRpc(0);
+    SifInitRpc(0);
 
-	printf("sample: kicking IRXs\n");
-	ret = SifLoadModule("rom0:LIBSD", 0, NULL);
-	printf("libsd loadmodule %d\n", ret);
+    printf("sample: kicking IRXs\n");
+    ret = SifLoadModule("rom0:LIBSD", 0, NULL);
+    printf("libsd loadmodule %d\n", ret);
 
-	printf("sample: loading audsrv\n");
-	ret = SifLoadModule("host:audsrv.irx", 0, NULL);
-	printf("audsrv loadmodule %d\n", ret);
+    printf("sample: loading audsrv\n");
+    ret = SifLoadModule("host:audsrv.irx", 0, NULL);
+    printf("audsrv loadmodule %d\n", ret);
 
-	ret = audsrv_init();
-	if (ret != 0)
-	{
-		printf("sample: failed to initialize audsrv\n");
-		printf("audsrv returned error string: %s\n", audsrv_get_error_string());
-		return 1;
-	}
+    ret = audsrv_init();
+    if (ret != 0) {
+        printf("sample: failed to initialize audsrv\n");
+        printf("audsrv returned error string: %s\n", audsrv_get_error_string());
+        return 1;
+    }
 
-	adpcm = fopen("host:evillaugh.adp", "rb");
+    adpcm = fopen("host:evillaugh.adp", "rb");
 
-	if (adpcm == NULL)
-	{
-		printf("failed to open adpcm file\n");
-		audsrv_quit();
-		return 1;
-	}
+    if (adpcm == NULL) {
+        printf("failed to open adpcm file\n");
+        audsrv_quit();
+        return 1;
+    }
 
-	fseek(adpcm, 0, SEEK_END);
-	size = ftell(adpcm);
-	fseek(adpcm, 0, SEEK_SET);
+    fseek(adpcm, 0, SEEK_END);
+    size = ftell(adpcm);
+    fseek(adpcm, 0, SEEK_SET);
 
-	buffer = malloc(size);
+    buffer = malloc(size);
 
-	fread(buffer, 1, size, adpcm);
-	fclose(adpcm);
+    fread(buffer, 1, size, adpcm);
+    fclose(adpcm);
 
-	printf("playing sample..\n");
+    printf("playing sample..\n");
 
-	audsrv_adpcm_init();
-	audsrv_set_volume(MAX_VOLUME);
-	audsrv_load_adpcm(&sample, buffer, size);
-	audsrv_play_adpcm(&sample);
+    audsrv_adpcm_init();
+    audsrv_set_volume(MAX_VOLUME);
+    audsrv_load_adpcm(&sample, buffer, size);
+    audsrv_play_adpcm(&sample);
 
-	/* Uncomment to hear two samples played simultaenously
+    /* Uncomment to hear two samples played simultaenously
 	for (i=0; i<100; i++)
 	{
 		nopdelay();
@@ -83,10 +81,11 @@ int main(int argc, char **argv)
 	audsrv_play_adpcm(&sample);
 	*/
 
-	printf("sample played..\n");
+    printf("sample played..\n");
 
-	free(buffer);
+    free(buffer);
 
-	while (1);
-	return 0;
+    while (1)
+        ;
+    return 0;
 }

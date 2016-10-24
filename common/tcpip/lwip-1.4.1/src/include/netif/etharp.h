@@ -49,37 +49,39 @@ extern "C" {
 #endif
 
 #ifndef ETHARP_HWADDR_LEN
-#define ETHARP_HWADDR_LEN     6
+#define ETHARP_HWADDR_LEN 6
 #endif
 
 #ifdef PACK_STRUCT_USE_INCLUDES
-#  include "arch/bpstruct.h"
+#include "arch/bpstruct.h"
 #endif
 PACK_STRUCT_BEGIN
-struct eth_addr {
-  PACK_STRUCT_FIELD(u8_t addr[ETHARP_HWADDR_LEN]);
+struct eth_addr
+{
+    PACK_STRUCT_FIELD(u8_t addr[ETHARP_HWADDR_LEN]);
 } PACK_STRUCT_STRUCT;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
-#  include "arch/epstruct.h"
+#include "arch/epstruct.h"
 #endif
 
 #ifdef PACK_STRUCT_USE_INCLUDES
-#  include "arch/bpstruct.h"
+#include "arch/bpstruct.h"
 #endif
 PACK_STRUCT_BEGIN
 /** Ethernet header */
-struct eth_hdr {
+struct eth_hdr
+{
 #if ETH_PAD_SIZE
-  PACK_STRUCT_FIELD(u8_t padding[ETH_PAD_SIZE]);
+    PACK_STRUCT_FIELD(u8_t padding[ETH_PAD_SIZE]);
 #endif
-  PACK_STRUCT_FIELD(struct eth_addr dest);
-  PACK_STRUCT_FIELD(struct eth_addr src);
-  PACK_STRUCT_FIELD(u16_t type);
+    PACK_STRUCT_FIELD(struct eth_addr dest);
+    PACK_STRUCT_FIELD(struct eth_addr src);
+    PACK_STRUCT_FIELD(u16_t type);
 } PACK_STRUCT_STRUCT;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
-#  include "arch/epstruct.h"
+#include "arch/epstruct.h"
 #endif
 
 #define SIZEOF_ETH_HDR (14 + ETH_PAD_SIZE)
@@ -87,19 +89,20 @@ PACK_STRUCT_END
 #if ETHARP_SUPPORT_VLAN
 
 #ifdef PACK_STRUCT_USE_INCLUDES
-#  include "arch/bpstruct.h"
+#include "arch/bpstruct.h"
 #endif
 PACK_STRUCT_BEGIN
 /** VLAN header inserted between ethernet header and payload
  * if 'type' in ethernet header is ETHTYPE_VLAN.
  * See IEEE802.Q */
-struct eth_vlan_hdr {
-  PACK_STRUCT_FIELD(u16_t prio_vid);
-  PACK_STRUCT_FIELD(u16_t tpid);
+struct eth_vlan_hdr
+{
+    PACK_STRUCT_FIELD(u16_t prio_vid);
+    PACK_STRUCT_FIELD(u16_t tpid);
 } PACK_STRUCT_STRUCT;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
-#  include "arch/epstruct.h"
+#include "arch/epstruct.h"
 #endif
 
 #define SIZEOF_VLAN_HDR 4
@@ -108,24 +111,25 @@ PACK_STRUCT_END
 #endif /* ETHARP_SUPPORT_VLAN */
 
 #ifdef PACK_STRUCT_USE_INCLUDES
-#  include "arch/bpstruct.h"
+#include "arch/bpstruct.h"
 #endif
 PACK_STRUCT_BEGIN
 /** the ARP message, see RFC 826 ("Packet format") */
-struct etharp_hdr {
-  PACK_STRUCT_FIELD(u16_t hwtype);
-  PACK_STRUCT_FIELD(u16_t proto);
-  PACK_STRUCT_FIELD(u8_t  hwlen);
-  PACK_STRUCT_FIELD(u8_t  protolen);
-  PACK_STRUCT_FIELD(u16_t opcode);
-  PACK_STRUCT_FIELD(struct eth_addr shwaddr);
-  PACK_STRUCT_FIELD(struct ip_addr2 sipaddr);
-  PACK_STRUCT_FIELD(struct eth_addr dhwaddr);
-  PACK_STRUCT_FIELD(struct ip_addr2 dipaddr);
+struct etharp_hdr
+{
+    PACK_STRUCT_FIELD(u16_t hwtype);
+    PACK_STRUCT_FIELD(u16_t proto);
+    PACK_STRUCT_FIELD(u8_t hwlen);
+    PACK_STRUCT_FIELD(u8_t protolen);
+    PACK_STRUCT_FIELD(u16_t opcode);
+    PACK_STRUCT_FIELD(struct eth_addr shwaddr);
+    PACK_STRUCT_FIELD(struct ip_addr2 sipaddr);
+    PACK_STRUCT_FIELD(struct eth_addr dhwaddr);
+    PACK_STRUCT_FIELD(struct ip_addr2 dipaddr);
 } PACK_STRUCT_STRUCT;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
-#  include "arch/epstruct.h"
+#include "arch/epstruct.h"
 #endif
 
 #define SIZEOF_ETHARP_HDR 28
@@ -134,29 +138,29 @@ PACK_STRUCT_END
 /** 5 seconds period */
 #define ARP_TMR_INTERVAL 5000
 
-#define ETHTYPE_ARP       0x0806U
-#define ETHTYPE_IP        0x0800U
-#define ETHTYPE_VLAN      0x8100U
-#define ETHTYPE_PPPOEDISC 0x8863U  /* PPP Over Ethernet Discovery Stage */
-#define ETHTYPE_PPPOE     0x8864U  /* PPP Over Ethernet Session Stage */
+#define ETHTYPE_ARP 0x0806U
+#define ETHTYPE_IP 0x0800U
+#define ETHTYPE_VLAN 0x8100U
+#define ETHTYPE_PPPOEDISC 0x8863U /* PPP Over Ethernet Discovery Stage */
+#define ETHTYPE_PPPOE 0x8864U     /* PPP Over Ethernet Session Stage */
 
 /** MEMCPY-like macro to copy to/from struct eth_addr's that are local variables
  * or known to be 32-bit aligned within the protocol header. */
 #ifndef ETHADDR32_COPY
-#define ETHADDR32_COPY(src, dst)  SMEMCPY(src, dst, ETHARP_HWADDR_LEN)
+#define ETHADDR32_COPY(src, dst) SMEMCPY(src, dst, ETHARP_HWADDR_LEN)
 #endif
 
 /** MEMCPY-like macro to copy to/from struct eth_addr's that are no local
  * variables and known to be 16-bit aligned within the protocol header. */
 #ifndef ETHADDR16_COPY
-#define ETHADDR16_COPY(src, dst)  SMEMCPY(src, dst, ETHARP_HWADDR_LEN)
+#define ETHADDR16_COPY(src, dst) SMEMCPY(src, dst, ETHARP_HWADDR_LEN)
 #endif
 
 #if LWIP_ARP /* don't build if not configured for use in lwipopts.h */
 
 /** ARP message types (opcodes) */
 #define ARP_REQUEST 1
-#define ARP_REPLY   2
+#define ARP_REPLY 2
 
 /** Define this to 1 and define LWIP_ARP_FILTER_NETIF_FN(pbuf, netif, type)
  * to a filter function that returns the correct netif when using multiple
@@ -172,16 +176,17 @@ PACK_STRUCT_END
 /** struct for queueing outgoing packets for unknown address
   * defined here to be accessed by memp.h
   */
-struct etharp_q_entry {
-  struct etharp_q_entry *next;
-  struct pbuf *p;
+struct etharp_q_entry
+{
+    struct etharp_q_entry *next;
+    struct pbuf *p;
 };
 #endif /* ARP_QUEUEING */
 
 #define etharp_init() /* Compatibility define, not init needed. */
 void etharp_tmr(void);
 s8_t etharp_find_addr(struct netif *netif, ip_addr_t *ipaddr,
-         struct eth_addr **eth_ret, ip_addr_t **ip_ret);
+                      struct eth_addr **eth_ret, ip_addr_t **ip_ret);
 err_t etharp_output(struct netif *netif, struct pbuf *q, ip_addr_t *ipaddr);
 err_t etharp_query(struct netif *netif, ip_addr_t *ipaddr, struct pbuf *q);
 err_t etharp_request(struct netif *netif, ip_addr_t *ipaddr);

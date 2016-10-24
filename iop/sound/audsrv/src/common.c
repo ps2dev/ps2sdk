@@ -31,22 +31,21 @@
 */
 int create_thread(void *func, int priority, void *param)
 {
-	int tid;
-	iop_thread_t thr;
+    int tid;
+    iop_thread_t thr;
 
-	thr.attr = TH_C;
-	thr.thread = func;
-	thr.option = 0;
-	thr.priority = priority;
-	thr.stacksize = 4096;
-	tid = CreateThread(&thr);
-	if (tid < 0)
-	{
-		return 0;
-	}
+    thr.attr = TH_C;
+    thr.thread = func;
+    thr.option = 0;
+    thr.priority = priority;
+    thr.stacksize = 4096;
+    tid = CreateThread(&thr);
+    if (tid < 0) {
+        return 0;
+    }
 
-	StartThread(tid, param);
-	return tid;
+    StartThread(tid, param);
+    return tid;
 }
 
 /** Helper to print buffer in hex. Useful for debugging.
@@ -55,15 +54,13 @@ int create_thread(void *func, int priority, void *param)
 */
 void print_hex_buffer(unsigned char *ptr, int len)
 {
-	int p;
+    int p;
 
-	for (p=0; p<len; p++)
-	{
-		if (p > 0 && (p & 0x0f) == 0)
-		{
-			printf("\n");
-		}
+    for (p = 0; p < len; p++) {
+        if (p > 0 && (p & 0x0f) == 0) {
+            printf("\n");
+        }
 
-		printf("%02x ", ptr[p]);
-	}
+        printf("%02x ", ptr[p]);
+    }
 }

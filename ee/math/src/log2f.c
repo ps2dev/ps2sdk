@@ -58,16 +58,15 @@ static char fname[] = {"log2"};
  */
 
 static float P[] = {
- 7.0376836292E-2,
--1.1514610310E-1,
- 1.1676998740E-1,
--1.2420140846E-1,
- 1.4249322787E-1,
--1.6668057665E-1,
- 2.0000714765E-1,
--2.4999993993E-1,
- 3.3333331174E-1
-};
+    7.0376836292E-2,
+    -1.1514610310E-1,
+    1.1676998740E-1,
+    -1.2420140846E-1,
+    1.4249322787E-1,
+    -1.6668057665E-1,
+    2.0000714765E-1,
+    -2.4999993993E-1,
+    3.3333331174E-1};
 
 #define LOG2EA 0.44269504088896340735992
 #define SQRTH 0.70710678118654752440
@@ -80,46 +79,41 @@ float log2f(float xx)
 #else
 float frexpf(), polevlf();
 
-float log2f(xx)
-double xx;
+float log2f(xx) double xx;
 #endif
 {
-float x, y, z;
-int e;
+    float x, y, z;
+    int e;
 
-x = xx;
-/* Test for domain */
-if( x <= 0.0 )
-	{
-	if( x == 0.0 )
-		mtherr( fname, SING );
-	else
-		mtherr( fname, DOMAIN );
-	return( MINLOGF/LOGE2F );
-	}
+    x = xx;
+    /* Test for domain */
+    if (x <= 0.0) {
+        if (x == 0.0)
+            mtherr(fname, SING);
+        else
+            mtherr(fname, DOMAIN);
+        return (MINLOGF / LOGE2F);
+    }
 
-/* separate mantissa from exponent */
-x = frexpf( x, &e );
-
-
-/* logarithm using log(1+x) = x - .5x**2 + x**3 P(x)/Q(x) */
-
-if( x < SQRTH )
-	{
-	e -= 1;
-	x = 2.0*x - 1.0;
-	}
-else
-	{
-	x = x - 1.0;
-	}
-
-z = x*x;
-y = x * ( z * polevlf( x, P, 8 ) );
-y = y - 0.5 * z;   /*  y - 0.5 * x**2  */
+    /* separate mantissa from exponent */
+    x = frexpf(x, &e);
 
 
-/* Multiply log of fraction by log2(e)
+    /* logarithm using log(1+x) = x - .5x**2 + x**3 P(x)/Q(x) */
+
+    if (x < SQRTH) {
+        e -= 1;
+        x = 2.0 * x - 1.0;
+    } else {
+        x = x - 1.0;
+    }
+
+    z = x * x;
+    y = x * (z * polevlf(x, P, 8));
+    y = y - 0.5 * z; /*  y - 0.5 * x**2  */
+
+
+    /* Multiply log of fraction by log2(e)
  * and base 2 exponent by 1
  *
  * ***CAUTION***
@@ -127,10 +121,10 @@ y = y - 0.5 * z;   /*  y - 0.5 * x**2  */
  * This sequence of operations is critical and it may
  * be horribly defeated by some compiler optimizers.
  */
-z = y * LOG2EA;
-z += x * LOG2EA;
-z += y;
-z += x;
-z += (float )e;
-return( z );
+    z = y * LOG2EA;
+    z += x * LOG2EA;
+    z += y;
+    z += x;
+    z += (float)e;
+    return (z);
 }

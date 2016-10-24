@@ -22,9 +22,9 @@
 
 /* From any r3000's cop0 documentation */
 // External Interrupt
-#define IOP_EXCEPTION_INT	0
+#define IOP_EXCEPTION_INT 0
 // TLB Modification Exception
-#define IOP_EXCEPTION_MOD	1
+#define IOP_EXCEPTION_MOD 1
 // TLB miss Exception (Load or instruction fetch)
 #define IOP_EXCEPTION_TLBL 2
 // TLB miss exception (Store)
@@ -34,15 +34,15 @@
 // Address Error Exception (Store)
 #define IOP_EXCEPTION_ADES 5
 // Bus Error Exception (for Instruction Fetch)
-#define IOP_EXCEPTION_IBE  6
+#define IOP_EXCEPTION_IBE 6
 // Bus Error Exception (for data Load or Store)
-#define IOP_EXCEPTION_DBE  7
+#define IOP_EXCEPTION_DBE 7
 // SYSCALL Exception
-#define IOP_EXCEPTION_SYS  8
+#define IOP_EXCEPTION_SYS 8
 // Breakpoint Exception
-#define IOP_EXCEPTION_BP   9
+#define IOP_EXCEPTION_BP 9
 // Reserved Instruction Exception
-#define IOP_EXCEPTION_RI  10
+#define IOP_EXCEPTION_RI 10
 // Co-Processor Unusable Exception
 #define IOP_EXCEPTION_CPU 11
 // Arithmetic Overflow Exception
@@ -70,4 +70,3 @@ int ReleaseDefaultExceptionHandler(exception_handler_t);
 #define I_ReleaseDefaultExceptionHandler DECLARE_IMPORT(4, ReleaseDefaultExceptionHandler)
 
 #endif /* IOP_EXCEPMAN_H */
-

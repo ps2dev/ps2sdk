@@ -161,72 +161,66 @@ float incbetf(), incbif();
 #endif
 
 #ifdef ANSIC
-float fdtrcf( int ia, int ib, float xx )
+float fdtrcf(int ia, int ib, float xx)
 #else
-float fdtrcf( ia, ib, xx )
-int ia, ib;
+float fdtrcf(ia, ib, xx) int ia, ib;
 double xx;
 #endif
 {
-float x, a, b, w;
+    float x, a, b, w;
 
-x = xx;
-if( (ia < 1) || (ib < 1) || (x < 0.0) )
-	{
-	mtherr( "fdtrcf", DOMAIN );
-	return( 0.0 );
-	}
-a = ia;
-b = ib;
-w = b / (b + a * x);
-return( incbetf( 0.5*b, 0.5*a, w ) );
+    x = xx;
+    if ((ia < 1) || (ib < 1) || (x < 0.0)) {
+        mtherr("fdtrcf", DOMAIN);
+        return (0.0);
+    }
+    a = ia;
+    b = ib;
+    w = b / (b + a * x);
+    return (incbetf(0.5 * b, 0.5 * a, w));
 }
 
 
 
 #ifdef ANSIC
-float fdtrf( int ia, int ib, int xx )
+float fdtrf(int ia, int ib, int xx)
 #else
-float fdtrf( ia, ib, xx )
-int ia, ib;
+float fdtrf(ia, ib, xx) int ia, ib;
 double xx;
 #endif
 {
-float x, a, b, w;
+    float x, a, b, w;
 
-x = xx;
-if( (ia < 1) || (ib < 1) || (x < 0.0) )
-	{
-	mtherr( "fdtrf", DOMAIN );
-	return( 0.0 );
-	}
-a = ia;
-b = ib;
-w = a * x;
-w = w / (b + w);
-return( incbetf( 0.5*a, 0.5*b, w) );
+    x = xx;
+    if ((ia < 1) || (ib < 1) || (x < 0.0)) {
+        mtherr("fdtrf", DOMAIN);
+        return (0.0);
+    }
+    a = ia;
+    b = ib;
+    w = a * x;
+    w = w / (b + w);
+    return (incbetf(0.5 * a, 0.5 * b, w));
 }
 
 
 #ifdef ANSIC
-float fdtrif( int ia, int ib, float yy )
+float fdtrif(int ia, int ib, float yy)
 #else
-float fdtrif( ia, ib, yy )
-int ia, ib;
+float fdtrif(ia, ib, yy) int ia, ib;
 double yy;
 #endif
 {
-float y, a, b, w, x;
+    float y, a, b, w, x;
 
-y = yy;
-if( (ia < 1) || (ib < 1) || (y <= 0.0) || (y > 1.0) )
-	{
-	mtherr( "fdtrif", DOMAIN );
-	return( 0.0 );
-	}
-a = ia;
-b = ib;
-w = incbif( 0.5*b, 0.5*a, y );
-x = (b - b*w)/(a*w);
-return(x);
+    y = yy;
+    if ((ia < 1) || (ib < 1) || (y <= 0.0) || (y > 1.0)) {
+        mtherr("fdtrif", DOMAIN);
+        return (0.0);
+    }
+    a = ia;
+    b = ib;
+    w = incbif(0.5 * b, 0.5 * a, y);
+    x = (b - b * w) / (a * w);
+    return (x);
 }

@@ -43,9 +43,9 @@ float cabsf(cmplxf *), sqrtf(float), logf(float), atan2f(float, float);
 float expf(float), sinf(float), cosf(float);
 float coshf(float), sinhf(float), asinf(float);
 float ctansf(cmplxf *), redupif(float);
-void cchshf( float, float *, float * );
-void caddf( cmplxf *, cmplxf *, cmplxf * );
-void csqrtf( cmplxf *, cmplxf * );
+void cchshf(float, float *, float *);
+void caddf(cmplxf *, cmplxf *, cmplxf *);
+void csqrtf(cmplxf *, cmplxf *);
 #else
 float cabsf(), sqrtf(), logf(), atan2f();
 float expf(), sinf(), cosf();
@@ -54,25 +54,24 @@ float ctansf(), redupif();
 void cchshf(), csqrtf(), caddf();
 #endif
 
-#define fabsf(x) ( (x) < 0 ? -(x) : (x) )
+#define fabsf(x) ((x) < 0 ? -(x) : (x))
 
-void clogf( z, w )
-register cmplxf *z, *w;
+void clogf(z, w) register cmplxf *z, *w;
 {
-float p, rr;
+    float p, rr;
 
-/*rr = sqrtf( z->r * z->r  +  z->i * z->i );*/
-rr = cabsf(z);
-p = logf(rr);
+    /*rr = sqrtf( z->r * z->r  +  z->i * z->i );*/
+    rr = cabsf(z);
+    p = logf(rr);
 #if ANSIC
-rr = atan2f( z->i, z->r );
+    rr = atan2f(z->i, z->r);
 #else
-rr = atan2f( z->r, z->i );
-if( rr > PIF )
-	rr -= PIF + PIF;
+    rr = atan2f(z->r, z->i);
+    if (rr > PIF)
+        rr -= PIF + PIF;
 #endif
-w->i = rr;
-w->r = p;
+    w->i = rr;
+    w->r = p;
 }
 /* 						cexpf()
  *
@@ -111,14 +110,13 @@ w->r = p;
  *
  */
 
-void cexpf( z, w )
-register cmplxf *z, *w;
+void cexpf(z, w) register cmplxf *z, *w;
 {
-float r;
+    float r;
 
-r = expf( z->r );
-w->r = r * cosf( z->i );
-w->i = r * sinf( z->i );
+    r = expf(z->r);
+    w->r = r * cosf(z->i);
+    w->i = r * sinf(z->i);
 }
 /* 						csinf()
  *
@@ -154,14 +152,13 @@ w->i = r * sinf( z->i );
  *
  */
 
-void csinf( z, w )
-register cmplxf *z, *w;
+void csinf(z, w) register cmplxf *z, *w;
 {
-float ch, sh;
+    float ch, sh;
 
-cchshf( z->i, &ch, &sh );
-w->r = sinf( z->r ) * ch;
-w->i = cosf( z->r ) * sh;
+    cchshf(z->i, &ch, &sh);
+    w->r = sinf(z->r) * ch;
+    w->i = cosf(z->r) * sh;
 }
 
 
@@ -169,29 +166,25 @@ w->i = cosf( z->r ) * sh;
 /* calculate cosh and sinh */
 
 #ifdef ANSIC
-void cchshf( float xx, float *c, float *s )
+void cchshf(float xx, float *c, float *s)
 #else
-void cchshf( xx, c, s )
-double xx;
+void cchshf(xx, c, s) double xx;
 float *c, *s;
 #endif
 {
-float x, e, ei;
+    float x, e, ei;
 
-x = xx;
-if( fabsf(x) <= 0.5f )
-	{
-	*c = coshf(x);
-	*s = sinhf(x);
-	}
-else
-	{
-	e = expf(x);
-	ei = 0.5f/e;
-	e = 0.5f * e;
-	*s = e - ei;
-	*c = e + ei;
-	}
+    x = xx;
+    if (fabsf(x) <= 0.5f) {
+        *c = coshf(x);
+        *s = sinhf(x);
+    } else {
+        e = expf(x);
+        ei = 0.5f / e;
+        e = 0.5f * e;
+        *s = e - ei;
+        *c = e + ei;
+    }
 }
 
 /* 						ccosf()
@@ -227,14 +220,13 @@ else
  *	  IEEE		-10,+10 	30000		1.8e-7		 5.5e-8
  */
 
-void ccosf( z, w )
-register cmplxf *z, *w;
+void ccosf(z, w) register cmplxf *z, *w;
 {
-float ch, sh;
+    float ch, sh;
 
-cchshf( z->i, &ch, &sh );
-w->r = cosf( z->r ) * ch;
-w->i = -sinf( z->r ) * sh;
+    cchshf(z->i, &ch, &sh);
+    w->r = cosf(z->r) * ch;
+    w->i = -sinf(z->r) * sh;
 }
 /* 						ctanf()
  *
@@ -274,26 +266,24 @@ w->i = -sinf( z->r ) * sh;
  *	  IEEE		-10,+10 	30000		3.3e-7		 5.1e-8
  */
 
-void ctanf( z, w )
-register cmplxf *z, *w;
+void ctanf(z, w) register cmplxf *z, *w;
 {
-float d;
+    float d;
 
-d = cosf( 2.0f * z->r ) + coshf( 2.0f * z->i );
+    d = cosf(2.0f * z->r) + coshf(2.0f * z->i);
 
-if( fabsf(d) < 0.25f )
-	d = ctansf(z);
+    if (fabsf(d) < 0.25f)
+        d = ctansf(z);
 
-if( d == 0.0f )
-	{
-	mtherr( "ctanf", OVERFLOW );
-	w->r = MAXNUMF;
-	w->i = MAXNUMF;
-	return;
-	}
+    if (d == 0.0f) {
+        mtherr("ctanf", OVERFLOW);
+        w->r = MAXNUMF;
+        w->i = MAXNUMF;
+        return;
+    }
 
-w->r = sinf( 2.0f * z->r ) / d;
-w->i = sinhf( 2.0f * z->i ) / d;
+    w->r = sinf(2.0f * z->r) / d;
+    w->i = sinhf(2.0f * z->i) / d;
 }
 /* 						ccotf()
  *
@@ -334,104 +324,99 @@ w->i = sinhf( 2.0f * z->i ) / d;
  * Also tested by ctan * ccot = 1 + i0.
  */
 
-void ccotf( z, w )
-register cmplxf *z, *w;
+void ccotf(z, w) register cmplxf *z, *w;
 {
-float d;
+    float d;
 
 
-d = coshf(2.0f * z->i) - cosf(2.0f * z->r);
+    d = coshf(2.0f * z->i) - cosf(2.0f * z->r);
 
-if( fabsf(d) < 0.25f )
-	d = ctansf(z);
+    if (fabsf(d) < 0.25f)
+        d = ctansf(z);
 
-if( d == 0.0f )
-	{
-	mtherr( "ccotf", OVERFLOW );
-	w->r = MAXNUMF;
-	w->i = MAXNUMF;
-	return;
-	}
+    if (d == 0.0f) {
+        mtherr("ccotf", OVERFLOW);
+        w->r = MAXNUMF;
+        w->i = MAXNUMF;
+        return;
+    }
 
-d = 1.0f/d;
-w->r = sinf( 2.0f * z->r ) * d;
-w->i = -sinhf( 2.0f * z->i ) * d;
+    d = 1.0f / d;
+    w->r = sinf(2.0f * z->r) * d;
+    w->i = -sinhf(2.0f * z->i) * d;
 }
 
 /* Program to subtract nearest integer multiple of PI */
 /* extended precision value of PI: */
 
-static double DP1 =  3.140625;
-static double DP2 =  9.67502593994140625E-4;
-static double DP3 =  1.509957990978376432E-7;
+static double DP1 = 3.140625;
+static double DP2 = 9.67502593994140625E-4;
+static double DP3 = 1.509957990978376432E-7;
 
 
 #ifdef ANSIC
 float redupif(float xx)
 #else
-float redupif(xx)
-double xx;
+float redupif(xx) double xx;
 #endif
 {
-float x, t;
-int i;
+    float x, t;
+    int i;
 
-x = xx;
-t = x/PIF;
-if( t >= 0.0f )
-	t += 0.5f;
-else
-	t -= 0.5f;
+    x = xx;
+    t = x / PIF;
+    if (t >= 0.0f)
+        t += 0.5f;
+    else
+        t -= 0.5f;
 
-i = t;	/* the multiple */
-t = i;
-t = ((x - t * DP1) - t * DP2) - t * DP3;
-return(t);
+    i = t; /* the multiple */
+    t = i;
+    t = ((x - t * DP1) - t * DP2) - t * DP3;
+    return (t);
 }
 
 /*	Taylor series expansion for cosh(2y) - cos(2x)	*/
 
 float ctansf(z)
-cmplxf *z;
+    cmplxf *z;
 {
-float f, x, x2, y, y2, rn, t, d;
+    float f, x, x2, y, y2, rn, t, d;
 
-x = fabsf( 2.0f * z->r );
-y = fabsf( 2.0f * z->i );
+    x = fabsf(2.0f * z->r);
+    y = fabsf(2.0f * z->i);
 
-x = redupif(x);
+    x = redupif(x);
 
-x = x * x;
-y = y * y;
-x2 = 1.0f;
-y2 = 1.0f;
-f = 1.0f;
-rn = 0.0f;
-d = 0.0f;
-do
-	{
-	rn += 1.0f;
-	f *= rn;
-	rn += 1.0f;
-	f *= rn;
-	x2 *= x;
-	y2 *= y;
-	t = y2 + x2;
-	t /= f;
-	d += t;
+    x = x * x;
+    y = y * y;
+    x2 = 1.0f;
+    y2 = 1.0f;
+    f = 1.0f;
+    rn = 0.0f;
+    d = 0.0f;
+    do {
+        rn += 1.0f;
+        f *= rn;
+        rn += 1.0f;
+        f *= rn;
+        x2 *= x;
+        y2 *= y;
+        t = y2 + x2;
+        t /= f;
+        d += t;
 
-	rn += 1.0f;
-	f *= rn;
-	rn += 1.0f;
-	f *= rn;
-	x2 *= x;
-	y2 *= y;
-	t = y2 - x2;
-	t /= f;
-	d += t;
-	}
-while( fabsf(t/d) > MACHEPF );
-return(d);
+        rn += 1.0f;
+        f *= rn;
+        rn += 1.0f;
+        f *= rn;
+        x2 *= x;
+        y2 *= y;
+        t = y2 - x2;
+        t /= f;
+        d += t;
+    } while (fabsf(t / d) > MACHEPF);
+    return (d);
 }
 /* 						casinf()
  *
@@ -465,38 +450,35 @@ return(d);
  *
  */
 
-void casinf( z, w )
-cmplxf *z, *w;
+void casinf(z, w)
+    cmplxf *z,
+    *w;
 {
-float x, y;
-static cmplxf ca, ct, zz, z2;
-/*
+    float x, y;
+    static cmplxf ca, ct, zz, z2;
+    /*
 float cn, n;
 static float a, b, s, t, u, v, y2;
 static cmplxf sum;
 */
 
-x = z->r;
-y = z->i;
+    x = z->r;
+    y = z->i;
 
-if( y == 0.0f )
-	{
-	if( fabsf(x) > 1.0f )
-		{
-		w->r = PIO2F;
-		w->i = 0.0f;
-		mtherr( "casinf", DOMAIN );
-		}
-	else
-		{
-		w->r = asinf(x);
-		w->i = 0.0f;
-		}
-	return;
-	}
+    if (y == 0.0f) {
+        if (fabsf(x) > 1.0f) {
+            w->r = PIO2F;
+            w->i = 0.0f;
+            mtherr("casinf", DOMAIN);
+        } else {
+            w->r = asinf(x);
+            w->i = 0.0f;
+        }
+        return;
+    }
 
-/* Power series expansion */
-/*
+    /* Power series expansion */
+    /*
 b = cabsf(z);
 if( b < 0.125 )
 {
@@ -536,26 +518,26 @@ return;
 */
 
 
-ca.r = x;
-ca.i = y;
+    ca.r = x;
+    ca.i = y;
 
-ct.r = -ca.i;	/* iz */
-ct.i = ca.r;
+    ct.r = -ca.i; /* iz */
+    ct.i = ca.r;
 
-	/* sqrt( 1 - z*z) */
-/* cmul( &ca, &ca, &zz ) */
-zz.r = (ca.r - ca.i) * (ca.r + ca.i);	/*x * x  -	y * y */
-zz.i = 2.0f * ca.r * ca.i;
+    /* sqrt( 1 - z*z) */
+    /* cmul( &ca, &ca, &zz ) */
+    zz.r = (ca.r - ca.i) * (ca.r + ca.i); /*x * x  -	y * y */
+    zz.i = 2.0f * ca.r * ca.i;
 
-zz.r = 1.0f - zz.r;
-zz.i = -zz.i;
-csqrtf( &zz, &z2 );
+    zz.r = 1.0f - zz.r;
+    zz.i = -zz.i;
+    csqrtf(&zz, &z2);
 
-caddf( &z2, &ct, &zz );
-clogf( &zz, &zz );
-w->r = zz.i;	/* mult by 1/i = -i */
-w->i = -zz.r;
-return;
+    caddf(&z2, &ct, &zz);
+    clogf(&zz, &zz);
+    w->r = zz.i; /* mult by 1/i = -i */
+    w->i = -zz.r;
+    return;
 }
 /* 						cacosf()
  *
@@ -588,13 +570,14 @@ return;
  *
  */
 
-void cacosf( z, w )
-cmplxf *z, *w;
+void cacosf(z, w)
+    cmplxf *z,
+    *w;
 {
 
-casinf( z, w );
-w->r = PIO2F  -  w->r;
-w->i = -w->i;
+    casinf(z, w);
+    w->r = PIO2F - w->r;
+    w->i = -w->i;
 }
 /* 						catan()
  *
@@ -640,41 +623,42 @@ w->i = -w->i;
  *
  */
 
-void catanf( z, w )
-cmplxf *z, *w;
+void catanf(z, w)
+    cmplxf *z,
+    *w;
 {
-float a, t, x, x2, y;
+    float a, t, x, x2, y;
 
-x = z->r;
-y = z->i;
+    x = z->r;
+    y = z->i;
 
-if( (x == 0.0f) && (y > 1.0f) )
-	goto ovrf;
+    if ((x == 0.0f) && (y > 1.0f))
+        goto ovrf;
 
-x2 = x * x;
-a = 1.0f - x2 - (y * y);
-if( a == 0.0f )
-	goto ovrf;
+    x2 = x * x;
+    a = 1.0f - x2 - (y * y);
+    if (a == 0.0f)
+        goto ovrf;
 
 #if ANSIC
-t = 0.5f * atan2f( 2.0f * x, a );
+    t = 0.5f * atan2f(2.0f * x, a);
 #else
-t = 0.5f * atan2f( a, 2.0f * x );
+    t = 0.5f * atan2f(a, 2.0f * x);
 #endif
-w->r = redupif( t );
+    w->r = redupif(t);
 
-t = y - 1.0f;
-a = x2 + (t * t);
-if( a == 0.0f )
-	goto ovrf;
+    t = y - 1.0f;
+    a = x2 + (t * t);
+    if (a == 0.0f)
+        goto ovrf;
 
-t = y + 1.0f;
-a = (x2 + (t * t))/a;
-w->i = 0.25f*logf(a);
-return;
+    t = y + 1.0f;
+    a = (x2 + (t * t)) / a;
+    w->i = 0.25f * logf(a);
+    return;
 
 ovrf:
-mtherr( "catanf", OVERFLOW );
-w->r = MAXNUMF;
-w->i = MAXNUMF;
+    mtherr("catanf", OVERFLOW);
+    w->r = MAXNUMF;
+    w->i = MAXNUMF;
 }

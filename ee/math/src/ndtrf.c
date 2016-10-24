@@ -148,45 +148,42 @@ extern float MAXLOGF, SQRTHF;
 
 /* erfc(x) = exp(-x^2) P(1/x), 1 < x < 2 */
 static float P[] = {
- 2.326819970068386E-002,
--1.387039388740657E-001,
- 3.687424674597105E-001,
--5.824733027278666E-001,
- 6.210004621745983E-001,
--4.944515323274145E-001,
- 3.404879937665872E-001,
--2.741127028184656E-001,
- 5.638259427386472E-001
-};
+    2.326819970068386E-002,
+    -1.387039388740657E-001,
+    3.687424674597105E-001,
+    -5.824733027278666E-001,
+    6.210004621745983E-001,
+    -4.944515323274145E-001,
+    3.404879937665872E-001,
+    -2.741127028184656E-001,
+    5.638259427386472E-001};
 
 /* erfc(x) = exp(-x^2) 1/x P(1/x^2), 2 < x < 14 */
 static float R[] = {
--1.047766399936249E+001,
- 1.297719955372516E+001,
--7.495518717768503E+000,
- 2.921019019210786E+000,
--1.015265279202700E+000,
- 4.218463358204948E-001,
--2.820767439740514E-001,
- 5.641895067754075E-001
-};
+    -1.047766399936249E+001,
+    1.297719955372516E+001,
+    -7.495518717768503E+000,
+    2.921019019210786E+000,
+    -1.015265279202700E+000,
+    4.218463358204948E-001,
+    -2.820767439740514E-001,
+    5.641895067754075E-001};
 
 /* erf(x) = x P(x^2), 0 < x < 1 */
 static float T[] = {
- 7.853861353153693E-005,
--8.010193625184903E-004,
- 5.188327685732524E-003,
--2.685381193529856E-002,
- 1.128358514861418E-001,
--3.761262582423300E-001,
- 1.128379165726710E+000
-};
+    7.853861353153693E-005,
+    -8.010193625184903E-004,
+    5.188327685732524E-003,
+    -2.685381193529856E-002,
+    1.128358514861418E-001,
+    -3.761262582423300E-001,
+    1.128379165726710E+000};
 
 /*#define UTHRESH 37.519379347*/
 
 #define UTHRESH 14.0
 
-#define fabsf(x) ( (x) < 0 ? -(x) : (x) )
+#define fabsf(x) ((x) < 0 ? -(x) : (x))
 
 #ifdef ANSIC
 float polevlf(float, float *, int);
@@ -200,97 +197,88 @@ float polevlf(), expf(), logf(), erff(), erfcf();
 #ifdef ANSIC
 float ndtrf(float aa)
 #else
-float ndtrf(aa)
-double aa;
+float ndtrf(aa) double aa;
 #endif
 {
-float x, y, z;
+    float x, y, z;
 
-x = aa;
-x *= SQRTHF;
-z = fabsf(x);
+    x = aa;
+    x *= SQRTHF;
+    z = fabsf(x);
 
-if( z < SQRTHF )
-	y = 0.5 + 0.5 * erff(x);
-else
-	{
-	y = 0.5 * erfcf(z);
+    if (z < SQRTHF)
+        y = 0.5 + 0.5 * erff(x);
+    else {
+        y = 0.5 * erfcf(z);
 
-	if( x > 0 )
-		y = 1.0 - y;
-	}
+        if (x > 0)
+            y = 1.0 - y;
+    }
 
-return(y);
+    return (y);
 }
 
 
 #ifdef ANSIC
 float erfcf(float aa)
 #else
-float erfcf(aa)
-double aa;
+float erfcf(aa) double aa;
 #endif
 {
-float a, p,q,x,y,z;
+    float a, p, q, x, y, z;
 
 
-a = aa;
-x = fabsf(a);
+    a = aa;
+    x = fabsf(a);
 
-if( x < 1.0 )
-	return( 1.0 - erff(a) );
+    if (x < 1.0)
+        return (1.0 - erff(a));
 
-z = -a * a;
+    z = -a * a;
 
-if( z < -MAXLOGF )
-	{
-under:
-	mtherr( "erfcf", UNDERFLOW );
-	if( a < 0 )
-		return( 2.0 );
-	else
-		return( 0.0 );
-	}
+    if (z < -MAXLOGF) {
+    under:
+        mtherr("erfcf", UNDERFLOW);
+        if (a < 0)
+            return (2.0);
+        else
+            return (0.0);
+    }
 
-z = expf(z);
-q = 1.0/x;
-y = q * q;
-if( x < 2.0 )
-	{
-	p = polevlf( y, P, 8 );
-	}
-else
-	{
-	p = polevlf( y, R, 7 );
-	}
+    z = expf(z);
+    q = 1.0 / x;
+    y = q * q;
+    if (x < 2.0) {
+        p = polevlf(y, P, 8);
+    } else {
+        p = polevlf(y, R, 7);
+    }
 
-y = z * q * p;
+    y = z * q * p;
 
-if( a < 0 )
-	y = 2.0 - y;
+    if (a < 0)
+        y = 2.0 - y;
 
-if( y == 0.0 )
-	goto under;
+    if (y == 0.0)
+        goto under;
 
-return(y);
+    return (y);
 }
 
 
 #ifdef ANSIC
 float erff(float xx)
 #else
-float erff(xx)
-double xx;
+float erff(xx) double xx;
 #endif
 {
-float x, y, z;
+    float x, y, z;
 
-x = xx;
-if( fabsf(x) > 1.0 )
-	return( 1.0 - erfcf(x) );
+    x = xx;
+    if (fabsf(x) > 1.0)
+        return (1.0 - erfcf(x));
 
-z = x * x;
-y = x * polevlf( z, T, 6 );
-return( y );
-
+    z = x * x;
+    y = x * polevlf(z, T, 6);
+    return (y);
 }

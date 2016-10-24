@@ -59,45 +59,40 @@ extern float MINLOGF, SQRTHF;
 
 
 #if ANSIC
-float frexpf( float, int * );
+float frexpf(float, int *);
 
-float logf( float xx )
+float logf(float xx)
 #else
 float frexpf();
 
-float logf( xx )
-double xx;
+float logf(xx) double xx;
 #endif
 {
-register float y;
-float x, z, fe;
-int e;
+    register float y;
+    float x, z, fe;
+    int e;
 
-x = xx;
-fe = 0.0;
-/* Test for domain */
-if( x <= 0.0 )
-	{
-	if( x == 0.0 )
-		mtherr( "logf", SING );
-	else
-		mtherr( "logf", DOMAIN );
-	return( MINLOGF );
-	}
+    x = xx;
+    fe = 0.0;
+    /* Test for domain */
+    if (x <= 0.0) {
+        if (x == 0.0)
+            mtherr("logf", SING);
+        else
+            mtherr("logf", DOMAIN);
+        return (MINLOGF);
+    }
 
-x = frexpf( x, &e );
-if( x < SQRTHF )
-	{
-	e -= 1;
-	x = x + x - 1.0; /*  2x - 1  */
-	}
-else
-	{
-	x = x - 1.0;
-	}
-z = x * x;
-/* 3.4e-9 */
-/*
+    x = frexpf(x, &e);
+    if (x < SQRTHF) {
+        e -= 1;
+        x = x + x - 1.0; /*  2x - 1  */
+    } else {
+        x = x - 1.0;
+    }
+    z = x * x;
+    /* 3.4e-9 */
+    /*
 p = logfcof;
 y = *p++ * x;
 for( i=0; i<8; i++ )
@@ -108,28 +103,19 @@ for( i=0; i<8; i++ )
 y *= z;
 */
 
-y =
-(((((((( 7.0376836292E-2 * x
-- 1.1514610310E-1) * x
-+ 1.1676998740E-1) * x
-- 1.2420140846E-1) * x
-+ 1.4249322787E-1) * x
-- 1.6668057665E-1) * x
-+ 2.0000714765E-1) * x
-- 2.4999993993E-1) * x
-+ 3.3333331174E-1) * x * z;
+    y =
+        ((((((((7.0376836292E-2 * x - 1.1514610310E-1) * x + 1.1676998740E-1) * x - 1.2420140846E-1) * x + 1.4249322787E-1) * x - 1.6668057665E-1) * x + 2.0000714765E-1) * x - 2.4999993993E-1) * x + 3.3333331174E-1) * x * z;
 
-if( e )
-	{
-	fe = e;
-	y += -2.12194440e-4 * fe;
-	}
+    if (e) {
+        fe = e;
+        y += -2.12194440e-4 * fe;
+    }
 
-y +=  -0.5 * z;  /* y - 0.5 x^2 */
-z = x + y;   /* ... + x  */
+    y += -0.5 * z; /* y - 0.5 x^2 */
+    z = x + y;     /* ... + x  */
 
-if( e )
-	z += 0.693359375 * fe;
+    if (e)
+        z += 0.693359375 * fe;
 
-return( z );
+    return (z);
 }

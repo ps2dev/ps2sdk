@@ -17,23 +17,23 @@
 #include <sys/stat.h>
 
 /** does file exist */
-#define	F_OK     0
+#define F_OK 0
 /** is it executable or searchable */
-#define X_OK     1
+#define X_OK 1
 /** is it writeable */
-#define	W_OK     2
+#define W_OK 2
 /** is it readable */
-#define	R_OK     4
+#define R_OK 4
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int    stat(const char *path, struct stat *sbuf);
-int    fstat(int filedes, struct stat *sbuf);
-int    access(const char *path, int mode);
-char  *getcwd(char *buf, int len);
-int    unlink(const char *path);
+int stat(const char *path, struct stat *sbuf);
+int fstat(int filedes, struct stat *sbuf);
+int access(const char *path, int mode);
+char *getcwd(char *buf, int len);
+int unlink(const char *path);
 
 unsigned int sleep(unsigned int seconds);
 

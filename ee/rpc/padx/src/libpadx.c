@@ -24,20 +24,20 @@
 #define PAD_BIND_RPC_ID1 0x80000100
 #define PAD_BIND_RPC_ID2 0x80000101
 
-#define PAD_RPCCMD_OPEN         0x01
-#define PAD_RPCCMD_SET_MMODE    0x06
-#define PAD_RPCCMD_SET_ACTDIR   0x07
+#define PAD_RPCCMD_OPEN 0x01
+#define PAD_RPCCMD_SET_MMODE 0x06
+#define PAD_RPCCMD_SET_ACTDIR 0x07
 #define PAD_RPCCMD_SET_ACTALIGN 0x08
-#define PAD_RPCCMD_GET_BTNMASK  0x09
-#define PAD_RPCCMD_SET_BTNINFO  0x0A
-#define PAD_RPCCMD_SET_VREF     0x0B
-#define PAD_RPCCMD_GET_PORTMAX  0x0C
-#define PAD_RPCCMD_GET_SLOTMAX  0x0D
-#define PAD_RPCCMD_CLOSE        0x0E
-#define PAD_RPCCMD_END          0x0F
-#define PAD_RPCCMD_INIT         0x10
-#define PAD_RPCCMD_GET_CONNECT  0x11
-#define PAD_RPCCMD_GET_MODVER   0x12
+#define PAD_RPCCMD_GET_BTNMASK 0x09
+#define PAD_RPCCMD_SET_BTNINFO 0x0A
+#define PAD_RPCCMD_SET_VREF 0x0B
+#define PAD_RPCCMD_GET_PORTMAX 0x0C
+#define PAD_RPCCMD_GET_SLOTMAX 0x0D
+#define PAD_RPCCMD_CLOSE 0x0E
+#define PAD_RPCCMD_END 0x0F
+#define PAD_RPCCMD_INIT 0x10
+#define PAD_RPCCMD_GET_CONNECT 0x11
+#define PAD_RPCCMD_GET_MODVER 0x12
 
 /*
  * Types
@@ -55,9 +55,9 @@ struct pad_state
 struct pad_data
 {
     u8 data[32];
-	u32 actDirData[2];
-	u32 actAlignData[2];
-    u8  actData[32];
+    u32 actDirData[2];
+    u32 actAlignData[2];
+    u8 actData[32];
     u16 modeTable[4];
     u32 frame;
     u32 findPadRetries;
@@ -69,24 +69,24 @@ struct pad_data
     u8 nrOfModes;
     u8 modeCurOffs;
     u8 nrOfActuators;
-	u8 numActComb;
-	u8 val_c6;
-	u8 mode;
+    u8 numActComb;
+    u8 val_c6;
+    u8 mode;
     u8 lock;
-	u8 actDirSize;
+    u8 actDirSize;
     u8 state;
     u8 reqState;
     u8 currentTask;
-	u8 runTask;
-	u8 stat70bit;
+    u8 runTask;
+    u8 stat70bit;
     u8 padding[11];
 };
 
 struct open_slot
 {
-	u32 frame;
-	u32 openSlots[2];
-	u8  padding[116];
+    u32 frame;
+    u32 openSlots[2];
+    u8 padding[116];
 };
 
 extern int _iop_reboot_count;
@@ -118,7 +118,7 @@ static struct pad_state PadState[2][8];
 /*
  * Common helper
  */
-static struct pad_data*
+static struct pad_data *
 padGetDmaStr(int port, int slot)
 {
     struct pad_data *pdata;
@@ -126,10 +126,9 @@ padGetDmaStr(int port, int slot)
     pdata = PadState[port][slot].padData;
     SyncDCache(pdata, (u8 *)pdata + 256);
 
-    if(pdata[0].frame < pdata[1].frame) {
+    if (pdata[0].frame < pdata[1].frame) {
         return &pdata[1];
-    }
-    else {
+    } else {
         return &pdata[0];
     }
 }
@@ -146,8 +145,7 @@ padGetDmaStr(int port, int slot)
  * padSetVrefParam() <- dunno
  */
 
-int
-padReset()
+int padReset()
 {
     padInitialised = 0;
     padsif[0].server = NULL;
@@ -160,21 +158,19 @@ padReset()
  * Initialise padman
  * a = 0 should work..
  */
-int
-padInit(int a)
+int padInit(int a)
 {
     // Version check isn't used by default
     // int ver;
     int i;
     static int _rb_count = 0;
 
-    if (_rb_count != _iop_reboot_count)
-    {
+    if (_rb_count != _iop_reboot_count) {
         _rb_count = _iop_reboot_count;
         padReset();
     }
 
-    if(padInitialised)
+    if (padInitialised)
         return 0;
 
     padsif[0].server = NULL;
@@ -185,20 +181,19 @@ padInit(int a)
             return -1;
         }
         nopdelay();
-    } while(!padsif[0].server);
+    } while (!padsif[0].server);
 
     do {
         if (SifBindRpc(&padsif[1], PAD_BIND_RPC_ID2, 0) < 0) {
             return -3;
         }
         nopdelay();
-    } while(!padsif[1].server);
+    } while (!padsif[1].server);
 
     // If you require a special version of the padman, check for that here (uncomment)
     // ver = padGetModVersion();
 
-    for(i = 0; i<8; i++)
-    {
+    for (i = 0; i < 8; i++) {
         PadState[0][i].open = 0;
         PadState[0][i].port = 0;
         PadState[0][i].slot = 0;
@@ -207,28 +202,26 @@ padInit(int a)
         PadState[1][i].slot = 0;
     }
 
-    ((u32 *)(&buffer[0]))[0]=PAD_RPCCMD_INIT;
-    ((u32 *)(&buffer[0]))[4]=(u32)openSlot;
-    if (SifCallRpc( &padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+    ((u32 *)(&buffer[0]))[0] = PAD_RPCCMD_INIT;
+    ((u32 *)(&buffer[0]))[4] = (u32)openSlot;
+    if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
         return -1;
 
     padInitialised = 1;
     return 0;
-
 }
 
 
 /*
  * Ends all pad communication.
  */
-int
-padEnd()
+int padEnd()
 {
 
     int ret;
 
 
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_END;
+    *(u32 *)(&buffer[0]) = PAD_RPCCMD_END;
 
     if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
         return -1;
@@ -248,28 +241,27 @@ padEnd()
  *
  * return != 0 => OK
  */
-int
-padPortOpen(int port, int slot, void *padArea)
+int padPortOpen(int port, int slot, void *padArea)
 {
 
     int i;
     struct pad_data *dma_buf = (struct pad_data *)padArea;
 
     // Check 64 byte alignment
-    if((u32)padArea & 0x3f) {
+    if ((u32)padArea & 0x3f) {
         //        scr_printf("dmabuf misaligned (%x)!!\n", dma_buf);
         return 0;
     }
 
-    for (i=0; i<2; i++) {                // Pad data is double buffered
-        memset(dma_buf[i].data, 0xff, 32); // 'Clear' data area
+    for (i = 0; i < 2; i++) {               // Pad data is double buffered
+        memset(dma_buf[i].data, 0xff, 32);  // 'Clear' data area
         dma_buf[i].frame = 0;
         dma_buf[i].length = 0;
         dma_buf[i].state = PAD_STATE_EXECCMD;
         dma_buf[i].reqState = PAD_RSTAT_BUSY;
         dma_buf[i].currentTask = 0;
         dma_buf[i].length = 0;
-        dma_buf[i].buttonDataReady = 0; // Should be cleared in newer padman
+        dma_buf[i].buttonDataReady = 0;  // Should be cleared in newer padman
     }
 
 
@@ -278,8 +270,7 @@ padPortOpen(int port, int slot, void *padArea)
     *(u32 *)(&buffer[8]) = slot;
     *(u32 *)(&buffer[16]) = (u32)padArea;
 
-    if(SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
-    {
+    if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0) {
         return 0;
     }
 
@@ -290,8 +281,7 @@ padPortOpen(int port, int slot, void *padArea)
     return *(u32 *)(&buffer[12]);
 }
 
-int
-padPortClose(int port, int slot)
+int padPortClose(int port, int slot)
 {
 
     int ret;
@@ -303,7 +293,7 @@ padPortClose(int port, int slot)
 
     ret = SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL);
 
-    if(ret < 0)
+    if (ret < 0)
         return ret;
     else {
         PadState[port][slot].open = 0;
@@ -333,8 +323,7 @@ padRead(int port, int slot, struct padButtonStatus *data)
  * Get current pad state
  * Wait until state == 6 (Ready) before trying to access the pad
  */
-int
-padGetState(int port, int slot)
+int padGetState(int port, int slot)
 {
     struct pad_data *pdata;
     unsigned char state;
@@ -344,15 +333,13 @@ padGetState(int port, int slot)
 
     state = pdata->state;
 
-    if (state == PAD_STATE_ERROR)
-    {
-        if (pdata->findPadRetries)
-        {
+    if (state == PAD_STATE_ERROR) {
+        if (pdata->findPadRetries) {
             return PAD_STATE_FINDPAD;
         }
     }
 
-    if (state == PAD_STATE_STABLE) { // Ok
+    if (state == PAD_STATE_STABLE) {  // Ok
         if (padGetReqState(port, slot) == PAD_RSTAT_BUSY) {
             return PAD_STATE_EXECCMD;
         }
@@ -378,8 +365,7 @@ padGetReqState(int port, int slot)
 /*
  * Set pad request state (after a param setting)
  */
-int
-padSetReqState(int port, int slot, int state)
+int padSetReqState(int port, int slot, int state)
 {
 
     struct pad_data *pdata;
@@ -393,19 +379,17 @@ padSetReqState(int port, int slot, int state)
 /*
  * Debug print functions
  */
-void
-padStateInt2String(int state, char buf[16])
+void padStateInt2String(int state, char buf[16])
 {
 
-    if(state < 8) {
+    if (state < 8) {
         strcpy(buf, padStateString[state]);
     }
 }
 
-void
-padReqStateInt2String(int state, char buf[16])
+void padReqStateInt2String(int state, char buf[16])
 {
-    if(state < 4)
+    if (state < 4)
         strcpy(buf, padReqStateString[state]);
 }
 
@@ -413,11 +397,10 @@ padReqStateInt2String(int state, char buf[16])
 /*
  * Returns # slots on the PS2 (usally 2)
  */
-int
-padGetPortMax(void)
+int padGetPortMax(void)
 {
 
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_GET_PORTMAX;
+    *(u32 *)(&buffer[0]) = PAD_RPCCMD_GET_PORTMAX;
 
     if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
         return -1;
@@ -430,12 +413,11 @@ padGetPortMax(void)
  * Returns # slots the port has (usually 1)
  * probably 4 if using a multi tap (not tested)
  */
-int
-padGetSlotMax(int port)
+int padGetSlotMax(int port)
 {
 
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_GET_SLOTMAX;
-    *(u32 *)(&buffer[4])=port;
+    *(u32 *)(&buffer[0]) = PAD_RPCCMD_GET_SLOTMAX;
+    *(u32 *)(&buffer[4]) = port;
 
     if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
         return -1;
@@ -447,10 +429,9 @@ padGetSlotMax(int port)
 /*
  * Returns the padman version
  */
-int
-padGetModVersion()
+int padGetModVersion()
 {
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_GET_MODVER;
+    *(u32 *)(&buffer[0]) = PAD_RPCCMD_GET_MODVER;
 
     if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
         return -1;
@@ -467,8 +448,7 @@ padGetModVersion()
  *     6 - NAMCO GUN
  *     7 - DUAL SHOCK
  */
-int
-padInfoMode(int port, int slot, int infoMode, int index)
+int padInfoMode(int port, int slot, int infoMode, int index)
 {
     struct pad_data *pdata;
 
@@ -479,42 +459,39 @@ padInfoMode(int port, int slot, int infoMode, int index)
     if (pdata->reqState == PAD_RSTAT_BUSY)
         return 0;
 
-    switch(infoMode) {
-    case PAD_MODECURID:
-        if (pdata->modeCurId == 0xF3)
-            return 0;
-        else
-            return (pdata->modeCurId >> 4);
-        break;
-
-    case PAD_MODECUREXID:
-        if (pdata->modeConfig == pdata->currentTask)
-            return 0;
-        return pdata->modeTable[pdata->modeCurOffs];
-        break;
-
-    case PAD_MODECUROFFS:
-        if (pdata->modeConfig != 0)
-            return pdata->modeCurOffs;
-        else
-            return 0;
-        break;
-
-    case PAD_MODETABLE:
-        if (pdata->modeConfig != 0) {
-            if(index == -1) {
-                return pdata->nrOfModes;
-            }
-            else if (index < pdata->nrOfModes) {
-                return pdata->modeTable[index];
-            }
-            else {
+    switch (infoMode) {
+        case PAD_MODECURID:
+            if (pdata->modeCurId == 0xF3)
                 return 0;
-            }
-        }
-        else
-            return 0;
-        break;
+            else
+                return (pdata->modeCurId >> 4);
+            break;
+
+        case PAD_MODECUREXID:
+            if (pdata->modeConfig == pdata->currentTask)
+                return 0;
+            return pdata->modeTable[pdata->modeCurOffs];
+            break;
+
+        case PAD_MODECUROFFS:
+            if (pdata->modeConfig != 0)
+                return pdata->modeCurOffs;
+            else
+                return 0;
+            break;
+
+        case PAD_MODETABLE:
+            if (pdata->modeConfig != 0) {
+                if (index == -1) {
+                    return pdata->nrOfModes;
+                } else if (index < pdata->nrOfModes) {
+                    return pdata->modeTable[index];
+                } else {
+                    return 0;
+                }
+            } else
+                return 0;
+            break;
     }
     return 0;
 }
@@ -524,15 +501,14 @@ padInfoMode(int port, int slot, int infoMode, int index)
  * mode = 1, -> Analog/dual shock enabled; mode = 0 -> Digital
  * lock = 3 -> Mode not changeable by user
  */
-int
-padSetMainMode(int port, int slot, int mode, int lock)
+int padSetMainMode(int port, int slot, int mode, int lock)
 {
 
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_SET_MMODE;
-    *(u32 *)(&buffer[4])=port;
-    *(u32 *)(&buffer[8])=slot;
-    *(u32 *)(&buffer[12])=mode;
-    *(u32 *)(&buffer[16])=lock;
+    *(u32 *)(&buffer[0]) = PAD_RPCCMD_SET_MMODE;
+    *(u32 *)(&buffer[4]) = port;
+    *(u32 *)(&buffer[8]) = slot;
+    *(u32 *)(&buffer[12]) = mode;
+    *(u32 *)(&buffer[16]) = lock;
 
     if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
         return 0;
@@ -547,17 +523,15 @@ padSetMainMode(int port, int slot, int mode, int lock)
 /*
  * Check if the pad has pressure sensitive buttons
  */
-int
-padInfoPressMode(int port, int slot)
+int padInfoPressMode(int port, int slot)
 {
     int mask;
 
     mask = padGetButtonMask(port, slot);
 
-    if (mask^0x3ffff) {
+    if (mask ^ 0x3ffff) {
         return 0;
-    }
-    else {
+    } else {
         return 1;
     }
 }
@@ -566,8 +540,7 @@ padInfoPressMode(int port, int slot)
 /*
  * Pressure sensitive mode ON
  */
-int
-padEnterPressMode(int port, int slot)
+int padEnterPressMode(int port, int slot)
 {
     return padSetButtonInfo(port, slot, 0xFFF);
 }
@@ -577,24 +550,21 @@ padEnterPressMode(int port, int slot)
  * Check for newer version
  * Pressure sensitive mode OFF
  */
-int
-padExitPressMode(int port, int slot)
+int padExitPressMode(int port, int slot)
 {
     return padSetButtonInfo(port, slot, 0);
-
 }
 
 
 /*
  *
  */
-int
-padGetButtonMask(int port, int slot)
+int padGetButtonMask(int port, int slot)
 {
 
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_GET_BTNMASK;
-    *(u32 *)(&buffer[4])=port;
-    *(u32 *)(&buffer[8])=slot;
+    *(u32 *)(&buffer[0]) = PAD_RPCCMD_GET_BTNMASK;
+    *(u32 *)(&buffer[4]) = port;
+    *(u32 *)(&buffer[8]) = slot;
 
     if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
         return 0;
@@ -606,15 +576,14 @@ padGetButtonMask(int port, int slot)
 /*
  *
  */
-int
-padSetButtonInfo(int port, int slot, int buttonInfo)
+int padSetButtonInfo(int port, int slot, int buttonInfo)
 {
     int val;
 
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_SET_BTNINFO;
-    *(u32 *)(&buffer[4])=port;
-    *(u32 *)(&buffer[8])=slot;
-    *(u32 *)(&buffer[12])=buttonInfo;
+    *(u32 *)(&buffer[0]) = PAD_RPCCMD_SET_BTNINFO;
+    *(u32 *)(&buffer[4]) = port;
+    *(u32 *)(&buffer[8]) = slot;
+    *(u32 *)(&buffer[12]) = buttonInfo;
 
     if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
         return 0;
@@ -648,12 +617,12 @@ padInfoAct(int port, int slot, int actuator, int cmd)
         return 0;
 
     if (actuator == -1)
-        return pdata->nrOfActuators;   // # of acutators?
+        return pdata->nrOfActuators;  // # of acutators?
 
     if (cmd >= 4)
         return 0;
 
-    return pdata->actData[actuator*4+cmd];
+    return pdata->actData[actuator * 4 + cmd];
 }
 
 
@@ -663,19 +632,18 @@ padInfoAct(int port, int slot, int actuator, int cmd)
  * actAlign[1] = 1 enables 'big' engine
  * set actAlign[2-5] to 0xff (disable)
  */
-int
-padSetActAlign(int port, int slot, char actAlign[6])
+int padSetActAlign(int port, int slot, char actAlign[6])
 {
     int i;
     char *ptr;
 
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_SET_ACTALIGN;
-    *(u32 *)(&buffer[4])=port;
-    *(u32 *)(&buffer[8])=slot;
+    *(u32 *)(&buffer[0]) = PAD_RPCCMD_SET_ACTALIGN;
+    *(u32 *)(&buffer[4]) = port;
+    *(u32 *)(&buffer[8]) = slot;
 
     ptr = (char *)(&buffer[12]);
-    for (i=0; i<6; i++)
-        ptr[i]=actAlign[i];
+    for (i = 0; i < 6; i++)
+        ptr[i] = actAlign[i];
 
     if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
         return 0;
@@ -693,19 +661,18 @@ padSetActAlign(int port, int slot, char actAlign[6])
  * actAlign[0] = 0/1 turns off/on 'small' engine
  * actAlign[1] = 0-255 sets 'big' engine speed
  */
-int
-padSetActDirect(int port, int slot, char actAlign[6])
+int padSetActDirect(int port, int slot, char actAlign[6])
 {
     int i;
     char *ptr;
 
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_SET_ACTDIR;
-    *(u32 *)(&buffer[4])=port;
-    *(u32 *)(&buffer[8])=slot;
+    *(u32 *)(&buffer[0]) = PAD_RPCCMD_SET_ACTDIR;
+    *(u32 *)(&buffer[4]) = port;
+    *(u32 *)(&buffer[8]) = slot;
 
     ptr = (char *)(&buffer[12]);
-    for (i=0; i<6; i++)
-        ptr[i]=actAlign[i];
+    for (i = 0; i < 6; i++)
+        ptr[i] = actAlign[i];
 
     if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
         return 0;
@@ -713,15 +680,14 @@ padSetActDirect(int port, int slot, char actAlign[6])
     return *(int *)(&buffer[20]);
 }
 
-int
-padGetConnection(int port, int slot)
+int padGetConnection(int port, int slot)
 {
-	struct open_slot *oslot;
+    struct open_slot *oslot;
 
-	if(openSlot[0].frame < openSlot[1].frame)
-		oslot = &openSlot[1];
-	else
-		oslot = &openSlot[0];
+    if (openSlot[0].frame < openSlot[1].frame)
+        oslot = &openSlot[1];
+    else
+        oslot = &openSlot[0];
 
-	return ((oslot->openSlots[port] >> slot) & 0x1);
+    return ((oslot->openSlots[port] >> slot) & 0x1);
 }

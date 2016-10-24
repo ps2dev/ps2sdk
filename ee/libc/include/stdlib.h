@@ -25,101 +25,104 @@ extern "C" {
 
 /* ensure NULL is defined. */
 #ifndef NULL
-#define NULL                           (void *)0
+#define NULL (void *)0
 #endif
 
 
 /* exit status constants. */
-#define EXIT_SUCCESS                   0
-#define EXIT_FAILURE                   1
+#define EXIT_SUCCESS 0
+#define EXIT_FAILURE 1
 
 
 /* multibyte maximum character constant. */
-#define MB_CUR_MAX                     4
+#define MB_CUR_MAX 4
 
 /* ensure div_t is defined. */
 #ifndef __DIV_T_DEFINED
 #define __DIV_T_DEFINED
-typedef struct {
-  int quot;
-  int rem;
+typedef struct
+{
+    int quot;
+    int rem;
 } div_t;
-#endif // __DIV_T_DEFINED
+#endif  // __DIV_T_DEFINED
 
 
 /* ensure ldiv_t is defined. */
 #ifndef __LDIV_T_DEFINED
 #define __LDIV_T_DEFINED
-typedef struct {
-  long quot;
-  long rem;
+typedef struct
+{
+    long quot;
+    long rem;
 } ldiv_t;
-#endif // __LDIV_T_DEFINED
+#endif  // __LDIV_T_DEFINED
 
 
 #ifndef __STRICT_ANSI__
 #ifndef __LLDIV_T_DEFINED
 #define __LLDIV_T_DEFINED
-typedef struct {
-  long long quot;
-  long long rem;
+typedef struct
+{
+    long long quot;
+    long long rem;
 } lldiv_t;
-#endif // __LLDIV_T_DEFINED
-#endif // __STRICT_ANSI__
+#endif  // __LLDIV_T_DEFINED
+#endif  // __STRICT_ANSI__
 
 /* we don't check for any previously defined value. This HAS to be that. */
-#define        RAND_MAX        2147483647
+#define RAND_MAX 2147483647
 
 
 /* function declarations. */
-void          abort(void) __attribute__ ((noreturn));
-int           abs(int);
-int           atexit(void (*)(void));
-double        atof(const char *);
-void          exit(int);
+void abort(void) __attribute__((noreturn));
+int abs(int);
+int atexit(void (*)(void));
+double atof(const char *);
+void exit(int);
 //int           atoi(const char *);
 //long          atol(const char *);
 //#define       atoi(x) strtol(x, NULL, 10)
 //#define       atol atoi
-void          *bsearch(const void *, const void *, size_t, size_t, int (*)(const void *, const void *));
-div_t         div(int, int);
-char          *getenv(const char *);
-long          labs(long);
-ldiv_t        ldiv(long, long);
+void *bsearch(const void *, const void *, size_t, size_t, int (*)(const void *, const void *));
+div_t div(int, int);
+char *getenv(const char *);
+long labs(long);
+ldiv_t ldiv(long, long);
 #ifndef __STRICT_ANSI__
-long long     llabs(long long);
-lldiv_t       lldiv(long long, long long);
+long long llabs(long long);
+lldiv_t lldiv(long long, long long);
 #endif
-int           rand(void);
-int           setenv(const char *, const char *, int);
-void          srand(unsigned int);
-double        strtod(const char *, char **);
-long          strtol(const char *, char **, int);
+int rand(void);
+int setenv(const char *, const char *, int);
+void srand(unsigned int);
+double strtod(const char *, char **);
+long strtol(const char *, char **, int);
 unsigned long strtoul(const char *, char **, int);
-static __inline__ int atoi(const char * x) { return strtol(x, NULL, 10); }
-static __inline__ long atol(const char * x) { return strtol(x, NULL, 10); }
+static __inline__ int atoi(const char *x) { return strtol(x, NULL, 10); }
+static __inline__ long atol(const char *x) { return strtol(x, NULL, 10); }
 
 
-void          qsort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *));
+void qsort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *));
 
 
 /* UTF-8 multi-byte string functions */
-int           mblen(const char *, size_t);
-int           mbslen(const char *s);
-size_t        mbstowcs(wchar_t *, const char *, size_t);
-int           mbtowc(wchar_t *, const char *, size_t);
-size_t        wcstombs(char *, const wchar_t *, size_t);
-int           wctomb(char *, wchar_t);
+int mblen(const char *, size_t);
+int mbslen(const char *s);
+size_t mbstowcs(wchar_t *, const char *, size_t);
+int mbtowc(wchar_t *, const char *, size_t);
+size_t wcstombs(char *, const wchar_t *, size_t);
+int wctomb(char *, wchar_t);
 
 //char          *_gcvt(double, size_t, char *);
-char          *_itoa(int, char *, int);
-char          *_ltoa(long, char *, int);
+char *_itoa(int, char *, int);
+char *_ltoa(long, char *, int);
 #ifndef __STRICT_ANSI__
-char          *_lltoa(long long, char *, int);
+char *_lltoa(long long, char *, int);
 #endif
 
 // blah! C++ is evil.
-int system (const char * string);
+int system(const char *string);
 
 #ifdef __cplusplus
 }
@@ -130,4 +133,4 @@ int system (const char * string);
 #endif
 
 
-#endif // __STDLIB_H__
+#endif  // __STDLIB_H__

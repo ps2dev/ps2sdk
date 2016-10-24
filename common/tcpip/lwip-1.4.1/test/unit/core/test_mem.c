@@ -28,36 +28,36 @@ mem_teardown(void)
 /** Call mem_malloc, mem_free and mem_trim and check stats */
 START_TEST(test_mem_one)
 {
-#define SIZE1   16
+#define SIZE1 16
 #define SIZE1_2 12
-#define SIZE2   16
-  void *p1, *p2;
-  mem_size_t s1, s2;
-  LWIP_UNUSED_ARG(_i);
+#define SIZE2 16
+    void *p1, *p2;
+    mem_size_t s1, s2;
+    LWIP_UNUSED_ARG(_i);
 
 #if LWIP_DNS
-  fail("This test needs DNS turned off (as it mallocs on init)");
+    fail("This test needs DNS turned off (as it mallocs on init)");
 #endif
 
-  fail_unless(lwip_stats.mem.used == 0);
+    fail_unless(lwip_stats.mem.used == 0);
 
-  p1 = mem_malloc(SIZE1);
-  fail_unless(p1 != NULL);
-  fail_unless(lwip_stats.mem.used >= SIZE1);
-  s1 = lwip_stats.mem.used;
+    p1 = mem_malloc(SIZE1);
+    fail_unless(p1 != NULL);
+    fail_unless(lwip_stats.mem.used >= SIZE1);
+    s1 = lwip_stats.mem.used;
 
-  p2 = mem_malloc(SIZE2);
-  fail_unless(p2 != NULL);
-  fail_unless(lwip_stats.mem.used >= SIZE2 + s1);
-  s2 = lwip_stats.mem.used;
+    p2 = mem_malloc(SIZE2);
+    fail_unless(p2 != NULL);
+    fail_unless(lwip_stats.mem.used >= SIZE2 + s1);
+    s2 = lwip_stats.mem.used;
 
-  mem_trim(p1, SIZE1_2);
+    mem_trim(p1, SIZE1_2);
 
-  mem_free(p2);
-  fail_unless(lwip_stats.mem.used <= s2 - SIZE2);
+    mem_free(p2);
+    fail_unless(lwip_stats.mem.used <= s2 - SIZE2);
 
-  mem_free(p1);
-  fail_unless(lwip_stats.mem.used == 0);
+    mem_free(p1);
+    fail_unless(lwip_stats.mem.used == 0);
 }
 END_TEST
 
@@ -66,8 +66,7 @@ END_TEST
 Suite *
 mem_suite(void)
 {
-  TFun tests[] = {
-    test_mem_one
-  };
-  return create_suite("MEM", tests, sizeof(tests)/sizeof(TFun), mem_setup, mem_teardown);
+    TFun tests[] = {
+        test_mem_one};
+    return create_suite("MEM", tests, sizeof(tests) / sizeof(TFun), mem_setup, mem_teardown);
 }

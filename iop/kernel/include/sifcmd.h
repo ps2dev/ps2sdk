@@ -22,40 +22,43 @@
 
 /* SIF command.  */
 
-typedef struct t_SifCmdHeader {
-	u32	size;	//Upper 8 bits: packet size, lower 24 bits: extra data length
-	void	*dest;	//Extra data destination address. May be NULL if there's no extra data.
-	int	cid;
-	u32	opt;
+typedef struct t_SifCmdHeader
+{
+    u32 size;    //Upper 8 bits: packet size, lower 24 bits: extra data length
+    void *dest;  //Extra data destination address. May be NULL if there's no extra data.
+    int cid;
+    u32 opt;
 } SifCmdHeader_t;
 
 /* System functions */
-#define	SIF_CMD_ID_SYSTEM	0x80000000
+#define SIF_CMD_ID_SYSTEM 0x80000000
 
-#define SIF_CMD_SET_SREG	(SIF_CMD_ID_SYSTEM | 1)
-#define SIF_CMD_INIT_CMD	(SIF_CMD_ID_SYSTEM | 2)
-#define SIF_CMD_RESET_CMD	(SIF_CMD_ID_SYSTEM | 3)
-#define SIF_CMD_RPC_END		(SIF_CMD_ID_SYSTEM | 8)
-#define SIF_CMD_RPC_BIND	(SIF_CMD_ID_SYSTEM | 9)
-#define SIF_CMD_RPC_CALL	(SIF_CMD_ID_SYSTEM | 10)
-#define SIF_CMD_RPC_RDATA	(SIF_CMD_ID_SYSTEM | 12)
+#define SIF_CMD_SET_SREG (SIF_CMD_ID_SYSTEM | 1)
+#define SIF_CMD_INIT_CMD (SIF_CMD_ID_SYSTEM | 2)
+#define SIF_CMD_RESET_CMD (SIF_CMD_ID_SYSTEM | 3)
+#define SIF_CMD_RPC_END (SIF_CMD_ID_SYSTEM | 8)
+#define SIF_CMD_RPC_BIND (SIF_CMD_ID_SYSTEM | 9)
+#define SIF_CMD_RPC_CALL (SIF_CMD_ID_SYSTEM | 10)
+#define SIF_CMD_RPC_RDATA (SIF_CMD_ID_SYSTEM | 12)
 
 //System SREG
-#define SIF_SREG_RPCINIT	0
+#define SIF_SREG_RPCINIT 0
 
 //Structure for remotely (over the SIF) changing the value of a software register (SREG).
 //There are 32 software registers (0 - 31). Registers 0-7 are used by the system.
-typedef struct t_SifCmdSRegData {
-	SifCmdHeader_t	header;
-	int		index;
-	unsigned int	value;
+typedef struct t_SifCmdSRegData
+{
+    SifCmdHeader_t header;
+    int index;
+    unsigned int value;
 } SifCmdSRegData_t;
 
 typedef void (*SifCmdHandler_t)(void *data, void *harg);
 
-typedef struct t_SifCmdHandlerData {
-	SifCmdHandler_t handler;
-	void		*harg;
+typedef struct t_SifCmdHandlerData
+{
+    SifCmdHandler_t handler;
+    void *harg;
 } SifCmdHandlerData_t;
 
 void sceSifInitCmd(void);
@@ -83,68 +86,73 @@ void sceSifAddCmdHandler(int cid, SifCmdHandler_t handler, void *harg);
 /* SIF RPC.  */
 
 /* Modes for bind() and call() */
-#define SIF_RPC_M_NOWAIT	0x01	/* Don't wait for end function */
-#define SIF_RPC_M_NOWBDC	0x02	/* Don't write back the D cache */
+#define SIF_RPC_M_NOWAIT 0x01 /* Don't wait for end function */
+#define SIF_RPC_M_NOWBDC 0x02 /* Don't write back the D cache */
 
-typedef void * (*SifRpcFunc_t)(int fno, void *buffer, int length);
+typedef void *(*SifRpcFunc_t)(int fno, void *buffer, int length);
 typedef void (*SifRpcEndFunc_t)(void *end_param);
 
-typedef struct t_SifRpcServerData {
-	int	sid;
+typedef struct t_SifRpcServerData
+{
+    int sid;
 
-	SifRpcFunc_t func;
-	void	*buff;
-	int	size;
+    SifRpcFunc_t func;
+    void *buff;
+    int size;
 
-	SifRpcFunc_t cfunc;
-	void	*cbuff;
-	int	size2;
+    SifRpcFunc_t cfunc;
+    void *cbuff;
+    int size2;
 
-	struct t_SifRpcClientData *client;
-	void	*pkt_addr;
-	int	rpc_number;
+    struct t_SifRpcClientData *client;
+    void *pkt_addr;
+    int rpc_number;
 
-	void	*receive;
-	int	rsize;
-	int	rmode;
-	int	rid;
+    void *receive;
+    int rsize;
+    int rmode;
+    int rid;
 
-	struct t_SifRpcServerData *link;
-	struct t_SifRpcServerData *next;
-	struct t_SifRpcDataQueue *base;
+    struct t_SifRpcServerData *link;
+    struct t_SifRpcServerData *next;
+    struct t_SifRpcDataQueue *base;
 } SifRpcServerData_t;
 
-typedef struct t_SifRpcHeader {
-	void	*pkt_addr;
-	u32	rpc_id;
-	int	sema_id;
-	u32	mode;
+typedef struct t_SifRpcHeader
+{
+    void *pkt_addr;
+    u32 rpc_id;
+    int sema_id;
+    u32 mode;
 } SifRpcHeader_t;
 
-typedef struct t_SifRpcClientData {
-	struct t_SifRpcHeader hdr;
-	u32	command;
-	void	*buff;
-	void	*cbuff;
-	SifRpcEndFunc_t end_function;
-	void	*end_param;
-	struct t_SifRpcServerData *server;
+typedef struct t_SifRpcClientData
+{
+    struct t_SifRpcHeader hdr;
+    u32 command;
+    void *buff;
+    void *cbuff;
+    SifRpcEndFunc_t end_function;
+    void *end_param;
+    struct t_SifRpcServerData *server;
 } SifRpcClientData_t;
 
-typedef struct t_SifRpcReceiveData {
-	struct t_SifRpcHeader hdr;
-	void	*src;
-	void	*dest;
-	int	size;
+typedef struct t_SifRpcReceiveData
+{
+    struct t_SifRpcHeader hdr;
+    void *src;
+    void *dest;
+    int size;
 } SifRpcReceiveData_t;
 
-typedef struct t_SifRpcDataQueue {
-	int	thread_id;
-	int	active;
-	struct t_SifRpcServerData *link;
-	struct t_SifRpcServerData *start;
-	struct t_SifRpcServerData *end;
-	struct t_SifRpcDataQueue *next;
+typedef struct t_SifRpcDataQueue
+{
+    int thread_id;
+    int active;
+    struct t_SifRpcServerData *link;
+    struct t_SifRpcServerData *start;
+    struct t_SifRpcServerData *end;
+    struct t_SifRpcDataQueue *next;
 } SifRpcDataQueue_t;
 
 
@@ -152,37 +160,37 @@ void sceSifRemoveCmdHandler(int cid);
 #define I_sceSifRemoveCmdHandler DECLARE_IMPORT(11, sceSifRemoveCmdHandler)
 
 unsigned int sceSifSendCmd(int cmd, void *packet, int packet_size, void *src_extra,
-	void *dest_extra, int size_extra);
+                           void *dest_extra, int size_extra);
 #define I_sceSifSendCmd DECLARE_IMPORT(12, sceSifSendCmd)
 
 unsigned int isceSifSendCmd(int cmd, void *packet, int packet_size, void *src_extra,
-	void *dest_extra, int size_extra);
+                            void *dest_extra, int size_extra);
 #define I_isceSifSendCmd DECLARE_IMPORT(13, isceSifSendCmd)
 
 void sceSifInitRpc(int mode);
 #define I_sceSifInitRpc DECLARE_IMPORT(14, sceSifInitRpc)
 
-int sceSifBindRpc(SifRpcClientData_t * client, int rpc_number, int mode);
+int sceSifBindRpc(SifRpcClientData_t *client, int rpc_number, int mode);
 #define I_sceSifBindRpc DECLARE_IMPORT(15, sceSifBindRpc)
 
-int sceSifCallRpc(SifRpcClientData_t * client, int rpc_number, int mode, void *send,
-	int ssize, void *receive, int rsize, SifRpcEndFunc_t end_function, void *end_param);
+int sceSifCallRpc(SifRpcClientData_t *client, int rpc_number, int mode, void *send,
+                  int ssize, void *receive, int rsize, SifRpcEndFunc_t end_function, void *end_param);
 #define I_sceSifCallRpc DECLARE_IMPORT(16, sceSifCallRpc)
 
 void sceSifRegisterRpc(SifRpcServerData_t *sd, int sid, SifRpcFunc_t func, void *buf,
-	SifRpcFunc_t cfunc, void *cbuf, SifRpcDataQueue_t *qd);
+                       SifRpcFunc_t cfunc, void *cbuf, SifRpcDataQueue_t *qd);
 #define I_sceSifRegisterRpc DECLARE_IMPORT(17, sceSifRegisterRpc)
 
-int sceSifCheckStatRpc(SifRpcClientData_t * cd);
+int sceSifCheckStatRpc(SifRpcClientData_t *cd);
 #define I_sceSifCheckStatRpc DECLARE_IMPORT(18, sceSifCheckStatRpc)
 
-SifRpcDataQueue_t * sceSifSetRpcQueue(SifRpcDataQueue_t *q, int thread_id);
+SifRpcDataQueue_t *sceSifSetRpcQueue(SifRpcDataQueue_t *q, int thread_id);
 #define I_sceSifSetRpcQueue DECLARE_IMPORT(19, sceSifSetRpcQueue)
 
-SifRpcServerData_t *sceSifGetNextRequest(SifRpcDataQueue_t * qd);
+SifRpcServerData_t *sceSifGetNextRequest(SifRpcDataQueue_t *qd);
 #define I_sceSifGetNextRequest DECLARE_IMPORT(20, sceSifGetNextRequest)
 
-void sceSifExecRequest(SifRpcServerData_t * srv);
+void sceSifExecRequest(SifRpcServerData_t *srv);
 #define I_sceSifExecRequest DECLARE_IMPORT(21, sceSifExecRequest)
 
 void sceSifRpcLoop(SifRpcDataQueue_t *qd);
@@ -220,4 +228,4 @@ void sceSifClearSif1CB(void);
 
 #define SifRpcGetOtherData sceSifGetOtherData
 
-#endif	/* IOP_SIFCMD_H */
+#endif /* IOP_SIFCMD_H */

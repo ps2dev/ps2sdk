@@ -23,7 +23,7 @@
 #include "sifcmd.h"
 
 ////////////////////////////////////////////////////////////////////////
-#define NPM_PUTS     0x01
+#define NPM_PUTS 0x01
 #define RPC_NPM_USER 0x014d704e
 
 /*! \brief RPC handler function.
@@ -40,7 +40,7 @@ static void *naplinkRpcHandler(int cmd, void *buffer, int size)
 
 ////////////////////////////////////////////////////////////////////////
 static SifRpcServerData_t server __attribute((aligned(16)));
-static SifRpcDataQueue_t  queue __attribute((aligned(16)));
+static SifRpcDataQueue_t queue __attribute((aligned(16)));
 static unsigned char rpc_buffer[512] __attribute((aligned(16)));
 
 /*! \brief naplink compatbile RPC handler thread.

@@ -21,10 +21,10 @@ typedef struct st_SBUS_IrqHandler
 
 typedef struct st_SIF2_CmdPkt
 {
-    u32 cid; // 32-bit command id
-    u32 size; // 32-bit size of command packet.
-    u32 extra; // 32-bit remote address of parameters
-    u32 extra_size; // 32-bit size of remote parameters
+    u32 cid;         // 32-bit command id
+    u32 size;        // 32-bit size of command packet.
+    u32 extra;       // 32-bit remote address of parameters
+    u32 extra_size;  // 32-bit size of remote parameters
 } SIF2_CmdPkt;
 
 typedef void (*SIF2_CmdHandlerFunc)(SIF2_CmdPkt *pkt, void *param);
@@ -79,4 +79,4 @@ void SBUS_check_intr(void);
 #define I_SIF2_rem_cmd_handler DECLARE_IMPORT(18, SIF2_rem_cmd_handler)
 #define I_SIF2_send_cmd DECLARE_IMPORT(19, SIF2_send_cmd)
 
-#endif // #ifndef _PS2_SBUS_H
+#endif  // #ifndef _PS2_SBUS_H

@@ -23,4 +23,3 @@ u32 VrefParam(u32 val, padState_t *pstate);
 u32 SetButtonInfo(padState_t *pstate);
 
 #endif
-

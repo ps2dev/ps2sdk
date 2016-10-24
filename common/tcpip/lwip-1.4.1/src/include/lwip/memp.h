@@ -41,9 +41,9 @@ extern "C" {
 
 /* Create the list of all memory pools managed by memp. MEMP_MAX represents a NULL pool at the end */
 typedef enum {
-#define LWIP_MEMPOOL(name,num,size,desc)  MEMP_##name,
+#define LWIP_MEMPOOL(name, num, size, desc) MEMP_##name,
 #include "lwip/memp_std.h"
-  MEMP_MAX
+    MEMP_MAX
 } memp_t;
 
 #if MEM_USE_POOLS
@@ -52,27 +52,27 @@ typedef enum {
     /* Get the first (via:
        MEMP_POOL_HELPER_START = ((u8_t) 1*MEMP_POOL_A + 0*MEMP_POOL_B + 0*MEMP_POOL_C + 0)*/
     MEMP_POOL_HELPER_FIRST = ((u8_t)
-#define LWIP_MEMPOOL(name,num,size,desc)
+#define LWIP_MEMPOOL(name, num, size, desc)
 #define LWIP_MALLOC_MEMPOOL_START 1
-#define LWIP_MALLOC_MEMPOOL(num, size) * MEMP_POOL_##size + 0
+#define LWIP_MALLOC_MEMPOOL(num, size) *MEMP_POOL_##size + 0
 #define LWIP_MALLOC_MEMPOOL_END
 #include "lwip/memp_std.h"
-    ) ,
+                                  ),
     /* Get the last (via:
        MEMP_POOL_HELPER_END = ((u8_t) 0 + MEMP_POOL_A*0 + MEMP_POOL_B*0 + MEMP_POOL_C*1) */
     MEMP_POOL_HELPER_LAST = ((u8_t)
-#define LWIP_MEMPOOL(name,num,size,desc)
+#define LWIP_MEMPOOL(name, num, size, desc)
 #define LWIP_MALLOC_MEMPOOL_START
 #define LWIP_MALLOC_MEMPOOL(num, size) 0 + MEMP_POOL_##size *
 #define LWIP_MALLOC_MEMPOOL_END 1
 #include "lwip/memp_std.h"
-    )
+                                 )
 } memp_pool_helper_t;
 
 /* The actual start and stop values are here (cast them over)
    We use this helper type and these defines so we can avoid using const memp_t values */
-#define MEMP_POOL_FIRST ((memp_t) MEMP_POOL_HELPER_FIRST)
-#define MEMP_POOL_LAST   ((memp_t) MEMP_POOL_HELPER_LAST)
+#define MEMP_POOL_FIRST ((memp_t)MEMP_POOL_HELPER_FIRST)
+#define MEMP_POOL_LAST ((memp_t)MEMP_POOL_HELPER_LAST)
 #endif /* MEM_USE_POOLS */
 
 #if MEMP_MEM_MALLOC || MEM_USE_POOLS
@@ -84,8 +84,8 @@ extern const u16_t memp_sizes[MEMP_MAX];
 #include "mem.h"
 
 #define memp_init()
-#define memp_malloc(type)     mem_malloc(memp_sizes[type])
-#define memp_free(type, mem)  mem_free(mem)
+#define memp_malloc(type) mem_malloc(memp_sizes[type])
+#define memp_free(type, mem) mem_free(mem)
 
 #else /* MEMP_MEM_MALLOC */
 
@@ -93,19 +93,19 @@ extern const u16_t memp_sizes[MEMP_MAX];
 /** This structure is used to save the pool one element came from. */
 struct memp_malloc_helper
 {
-   memp_t poolnr;
+    memp_t poolnr;
 };
 #endif /* MEM_USE_POOLS */
 
-void  memp_init(void);
+void memp_init(void);
 
 #if MEMP_OVERFLOW_CHECK
-void *memp_malloc_fn(memp_t type, const char* file, const int line);
+void *memp_malloc_fn(memp_t type, const char *file, const int line);
 #define memp_malloc(t) memp_malloc_fn((t), __FILE__, __LINE__)
 #else
 void *memp_malloc(memp_t type);
 #endif
-void  memp_free(memp_t type, void *mem);
+void memp_free(memp_t type, void *mem);
 
 #endif /* MEMP_MEM_MALLOC */
 

@@ -57,18 +57,18 @@ extern "C" {
 #if LWIP_TCPIP_CORE_LOCKING
 /** The global semaphore to lock the stack. */
 extern sys_mutex_t lock_tcpip_core;
-#define LOCK_TCPIP_CORE()     sys_mutex_lock(&lock_tcpip_core)
-#define UNLOCK_TCPIP_CORE()   sys_mutex_unlock(&lock_tcpip_core)
-#define TCPIP_APIMSG(m)       tcpip_apimsg_lock(m)
+#define LOCK_TCPIP_CORE() sys_mutex_lock(&lock_tcpip_core)
+#define UNLOCK_TCPIP_CORE() sys_mutex_unlock(&lock_tcpip_core)
+#define TCPIP_APIMSG(m) tcpip_apimsg_lock(m)
 #define TCPIP_APIMSG_ACK(m)
-#define TCPIP_NETIFAPI(m)     tcpip_netifapi_lock(m)
+#define TCPIP_NETIFAPI(m) tcpip_netifapi_lock(m)
 #define TCPIP_NETIFAPI_ACK(m)
 #else /* LWIP_TCPIP_CORE_LOCKING */
 #define LOCK_TCPIP_CORE()
 #define UNLOCK_TCPIP_CORE()
-#define TCPIP_APIMSG(m)       tcpip_apimsg(m)
-#define TCPIP_APIMSG_ACK(m)   sys_sem_signal(&m->conn->op_completed)
-#define TCPIP_NETIFAPI(m)     tcpip_netifapi(m)
+#define TCPIP_APIMSG(m) tcpip_apimsg(m)
+#define TCPIP_APIMSG_ACK(m) sys_sem_signal(&m->conn->op_completed)
+#define TCPIP_NETIFAPI(m) tcpip_netifapi(m)
 #define TCPIP_NETIFAPI_ACK(m) sys_sem_signal(&m->sem)
 #endif /* LWIP_TCPIP_CORE_LOCKING */
 
@@ -99,11 +99,11 @@ err_t tcpip_netifapi_lock(struct netifapi_msg *netifapimsg);
 #endif /* LWIP_NETIF_API */
 
 err_t tcpip_callback_with_block(tcpip_callback_fn function, void *ctx, u8_t block);
-#define tcpip_callback(f, ctx)              tcpip_callback_with_block(f, ctx, 1)
+#define tcpip_callback(f, ctx) tcpip_callback_with_block(f, ctx, 1)
 
-struct tcpip_callback_msg* tcpip_callbackmsg_new(tcpip_callback_fn function, void *ctx);
-void   tcpip_callbackmsg_delete(struct tcpip_callback_msg* msg);
-err_t  tcpip_trycallback(struct tcpip_callback_msg* msg);
+struct tcpip_callback_msg *tcpip_callbackmsg_new(tcpip_callback_fn function, void *ctx);
+void tcpip_callbackmsg_delete(struct tcpip_callback_msg *msg);
+err_t tcpip_trycallback(struct tcpip_callback_msg *msg);
 
 /* free pbufs or heap memory from another context without blocking */
 err_t pbuf_free_callback(struct pbuf *p);
@@ -116,46 +116,51 @@ err_t tcpip_untimeout(sys_timeout_handler h, void *arg);
 
 enum tcpip_msg_type {
 #if LWIP_NETCONN
-  TCPIP_MSG_API,
+    TCPIP_MSG_API,
 #endif /* LWIP_NETCONN */
-  TCPIP_MSG_INPKT,
+    TCPIP_MSG_INPKT,
 #if LWIP_NETIF_API
-  TCPIP_MSG_NETIFAPI,
+    TCPIP_MSG_NETIFAPI,
 #endif /* LWIP_NETIF_API */
 #if LWIP_TCPIP_TIMEOUT
-  TCPIP_MSG_TIMEOUT,
-  TCPIP_MSG_UNTIMEOUT,
+    TCPIP_MSG_TIMEOUT,
+    TCPIP_MSG_UNTIMEOUT,
 #endif /* LWIP_TCPIP_TIMEOUT */
-  TCPIP_MSG_CALLBACK,
-  TCPIP_MSG_CALLBACK_STATIC
+    TCPIP_MSG_CALLBACK,
+    TCPIP_MSG_CALLBACK_STATIC
 };
 
-struct tcpip_msg {
-  enum tcpip_msg_type type;
-  sys_sem_t *sem;
-  union {
+struct tcpip_msg
+{
+    enum tcpip_msg_type type;
+    sys_sem_t *sem;
+    union
+    {
 #if LWIP_NETCONN
-    struct api_msg *apimsg;
+        struct api_msg *apimsg;
 #endif /* LWIP_NETCONN */
 #if LWIP_NETIF_API
-    struct netifapi_msg *netifapimsg;
+        struct netifapi_msg *netifapimsg;
 #endif /* LWIP_NETIF_API */
-    struct {
-      struct pbuf *p;
-      struct netif *netif;
-    } inp;
-    struct {
-      tcpip_callback_fn function;
-      void *ctx;
-    } cb;
+        struct
+        {
+            struct pbuf *p;
+            struct netif *netif;
+        } inp;
+        struct
+        {
+            tcpip_callback_fn function;
+            void *ctx;
+        } cb;
 #if LWIP_TCPIP_TIMEOUT
-    struct {
-      u32_t msecs;
-      sys_timeout_handler h;
-      void *arg;
-    } tmo;
+        struct
+        {
+            u32_t msecs;
+            sys_timeout_handler h;
+            void *arg;
+        } tmo;
 #endif /* LWIP_TCPIP_TIMEOUT */
-  } msg;
+    } msg;
 };
 
 #ifdef __cplusplus

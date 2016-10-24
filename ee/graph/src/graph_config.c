@@ -8,246 +8,305 @@
 int graph_make_config(int mode, int interlace, int ffmd, int x, int y, int flicker_filter, char *config)
 {
 
-	// Save the current mode value.
-	switch (mode)
-	{
+    // Save the current mode value.
+    switch (mode) {
 
-		case GRAPH_MODE_NTSC:			sprintf(config, "GRAPH_MODE_NTSC:");		break;
-		case GRAPH_MODE_PAL:			sprintf(config, "GRAPH_MODE_PAL:");			break;
-		case GRAPH_MODE_HDTV_480P:		sprintf(config, "GRAPH_MODE_HDTV_480P:");	break;
-		case GRAPH_MODE_HDTV_576P:		sprintf(config, "GRAPH_MODE_HDTV_576P:");	break;
-		case GRAPH_MODE_HDTV_720P:		sprintf(config, "GRAPH_MODE_HDTV_720P:");	break;
-		case GRAPH_MODE_HDTV_1080I:		sprintf(config, "GRAPH_MODE_HDTV_1080I:");	break;
-		case GRAPH_MODE_VGA_640_60:		sprintf(config, "GRAPH_MODE_VGA_640_60:");	break;
-		case GRAPH_MODE_VGA_640_72:		sprintf(config, "GRAPH_MODE_VGA_640_72:");	break;
-		case GRAPH_MODE_VGA_640_75:		sprintf(config, "GRAPH_MODE_VGA_640_75:");	break;
-		case GRAPH_MODE_VGA_640_85:		sprintf(config, "GRAPH_MODE_VGA_640_85:");	break;
-		case GRAPH_MODE_VGA_800_56:		sprintf(config, "GRAPH_MODE_VGA_800_56:");	break;
-		case GRAPH_MODE_VGA_800_60:		sprintf(config, "GRAPH_MODE_VGA_800_60:");	break;
-		case GRAPH_MODE_VGA_800_72:		sprintf(config, "GRAPH_MODE_VGA_800_72:");	break;
-		case GRAPH_MODE_VGA_800_75:		sprintf(config, "GRAPH_MODE_VGA_800_75:");	break;
-		case GRAPH_MODE_VGA_800_85:		sprintf(config, "GRAPH_MODE_VGA_800_85:");	break;
-		case GRAPH_MODE_VGA_1024_60:	sprintf(config, "GRAPH_MODE_VGA_1024_60:");	break;
-		case GRAPH_MODE_VGA_1024_70:	sprintf(config, "GRAPH_MODE_VGA_1024_70:");	break;
-		case GRAPH_MODE_VGA_1024_75:	sprintf(config, "GRAPH_MODE_VGA_1024_75:");	break;
-		case GRAPH_MODE_VGA_1024_85:	sprintf(config, "GRAPH_MODE_VGA_1024_85:");	break;
-		case GRAPH_MODE_VGA_1280_60:	sprintf(config, "GRAPH_MODE_VGA_1280_60:");	break;
-		case GRAPH_MODE_VGA_1280_75:	sprintf(config, "GRAPH_MODE_VGA_1280_75:");	break;
-		default:						sprintf(config, "GRAPH_MODE_AUTO:");		break;
+        case GRAPH_MODE_NTSC:
+            sprintf(config, "GRAPH_MODE_NTSC:");
+            break;
+        case GRAPH_MODE_PAL:
+            sprintf(config, "GRAPH_MODE_PAL:");
+            break;
+        case GRAPH_MODE_HDTV_480P:
+            sprintf(config, "GRAPH_MODE_HDTV_480P:");
+            break;
+        case GRAPH_MODE_HDTV_576P:
+            sprintf(config, "GRAPH_MODE_HDTV_576P:");
+            break;
+        case GRAPH_MODE_HDTV_720P:
+            sprintf(config, "GRAPH_MODE_HDTV_720P:");
+            break;
+        case GRAPH_MODE_HDTV_1080I:
+            sprintf(config, "GRAPH_MODE_HDTV_1080I:");
+            break;
+        case GRAPH_MODE_VGA_640_60:
+            sprintf(config, "GRAPH_MODE_VGA_640_60:");
+            break;
+        case GRAPH_MODE_VGA_640_72:
+            sprintf(config, "GRAPH_MODE_VGA_640_72:");
+            break;
+        case GRAPH_MODE_VGA_640_75:
+            sprintf(config, "GRAPH_MODE_VGA_640_75:");
+            break;
+        case GRAPH_MODE_VGA_640_85:
+            sprintf(config, "GRAPH_MODE_VGA_640_85:");
+            break;
+        case GRAPH_MODE_VGA_800_56:
+            sprintf(config, "GRAPH_MODE_VGA_800_56:");
+            break;
+        case GRAPH_MODE_VGA_800_60:
+            sprintf(config, "GRAPH_MODE_VGA_800_60:");
+            break;
+        case GRAPH_MODE_VGA_800_72:
+            sprintf(config, "GRAPH_MODE_VGA_800_72:");
+            break;
+        case GRAPH_MODE_VGA_800_75:
+            sprintf(config, "GRAPH_MODE_VGA_800_75:");
+            break;
+        case GRAPH_MODE_VGA_800_85:
+            sprintf(config, "GRAPH_MODE_VGA_800_85:");
+            break;
+        case GRAPH_MODE_VGA_1024_60:
+            sprintf(config, "GRAPH_MODE_VGA_1024_60:");
+            break;
+        case GRAPH_MODE_VGA_1024_70:
+            sprintf(config, "GRAPH_MODE_VGA_1024_70:");
+            break;
+        case GRAPH_MODE_VGA_1024_75:
+            sprintf(config, "GRAPH_MODE_VGA_1024_75:");
+            break;
+        case GRAPH_MODE_VGA_1024_85:
+            sprintf(config, "GRAPH_MODE_VGA_1024_85:");
+            break;
+        case GRAPH_MODE_VGA_1280_60:
+            sprintf(config, "GRAPH_MODE_VGA_1280_60:");
+            break;
+        case GRAPH_MODE_VGA_1280_75:
+            sprintf(config, "GRAPH_MODE_VGA_1280_75:");
+            break;
+        default:
+            sprintf(config, "GRAPH_MODE_AUTO:");
+            break;
+    }
 
-	}
+    // Save the current interlacing mode.
+    switch (interlace) {
 
-	// Save the current interlacing mode.
-	switch (interlace)
-	{
+        case GRAPH_MODE_NONINTERLACED:
+            sprintf(config, "GRAPH_MODE_NONINTERLACED:");
+            break;
+        case GRAPH_MODE_INTERLACED:  //Fall through
+        default:
+            sprintf(config, "GRAPH_MODE_INTERLACED:");
+            break;
+    }
 
-		case GRAPH_MODE_NONINTERLACED:	sprintf(config, "GRAPH_MODE_NONINTERLACED:");		break;
-		case GRAPH_MODE_INTERLACED:	//Fall through
-		default:			sprintf(config, "GRAPH_MODE_INTERLACED:");		break;
+    // Save the current field mode.
+    switch (ffmd) {
 
-	}
+        case GRAPH_MODE_FRAME:
+            sprintf(config, "GRAPH_MODE_FRAME:");
+            break;
+        case GRAPH_MODE_FIELD:  //Fall through
+        default:
+            sprintf(config, "GRAPH_MODE_FIELD:");
+            break;
+    }
 
-	// Save the current field mode.
-	switch (ffmd)
-	{
+    // Save status of flicker filter.
+    switch (flicker_filter) {
 
-		case GRAPH_MODE_FRAME:	sprintf(config, "GRAPH_MODE_FRAME:");		break;
-		case GRAPH_MODE_FIELD:	//Fall through
-		default:		sprintf(config, "GRAPH_MODE_FIELD:");	break;
+        case GRAPH_ENABLE:
+            sprintf(config, "GRAPH_ENABLE:");
+            break;
+        case GRAPH_DISABLE:  //Fall through
+        default:
+            sprintf(config, "GRAPH_DISABLE:");
+            break;
+    }
 
-	}
+    // Save the current screen offset.
+    sprintf(config, "%d:", x);
+    sprintf(config, "%d:", y);
 
-	// Save status of flicker filter.
-	switch (flicker_filter)
-	{
-
-		case GRAPH_ENABLE:	sprintf(config, "GRAPH_ENABLE:");		break;
-		case GRAPH_DISABLE:	//Fall through
-		default:		sprintf(config, "GRAPH_DISABLE:");	break;
-
-	}
-
-	// Save the current screen offset.
-	sprintf(config, "%d:",x);
-	sprintf(config, "%d:",y);
-
-	// End function.
-	return 0;
-
+    // End function.
+    return 0;
 }
 
 int graph_set_config(char *config)
 {
-	char *temp0, *temp1;
-	int mode, interlace, ffmd;
-	//int x, y; //Not used
-	int flicker_filter;
+    char *temp0, *temp1;
+    int mode, interlace, ffmd;
+    //int x, y; //Not used
+    int flicker_filter;
 
-	// Extract the mode config value.
-	temp0 = config; temp1 = strtok(temp0, ":"); temp0 += strlen(temp1) + 1;
+    // Extract the mode config value.
+    temp0 = config;
+    temp1 = strtok(temp0, ":");
+    temp0 += strlen(temp1) + 1;
 
-	// Parse the mode config value.
-	if (strcmp(temp1, "GRAPH_MODE_AUTO"        ) == 0) { mode = GRAPH_MODE_AUTO;        } else
-	if (strcmp(temp1, "GRAPH_MODE_NTSC"        ) == 0) { mode = GRAPH_MODE_NTSC;        } else
-	if (strcmp(temp1, "GRAPH_MODE_PAL"         ) == 0) { mode = GRAPH_MODE_PAL;         } else
-	if (strcmp(temp1, "GRAPH_MODE_HDTV_480P"   ) == 0) { mode = GRAPH_MODE_HDTV_480P;   } else
-	if (strcmp(temp1, "GRAPH_MODE_HDTV_576P"   ) == 0) { mode = GRAPH_MODE_HDTV_576P;   } else
-	if (strcmp(temp1, "GRAPH_MODE_HDTV_720P"   ) == 0) { mode = GRAPH_MODE_HDTV_720P;   } else
-	if (strcmp(temp1, "GRAPH_MODE_HDTV_1080I"  ) == 0) { mode = GRAPH_MODE_HDTV_1080I;  } else
-	if (strcmp(temp1, "GRAPH_MODE_VGA_640_60"  ) == 0) { mode = GRAPH_MODE_VGA_640_60;  } else
-	if (strcmp(temp1, "GRAPH_MODE_VGA_640_72"  ) == 0) { mode = GRAPH_MODE_VGA_640_72;  } else
-	if (strcmp(temp1, "GRAPH_MODE_VGA_640_75"  ) == 0) { mode = GRAPH_MODE_VGA_640_75;  } else
-	if (strcmp(temp1, "GRAPH_MODE_VGA_640_85"  ) == 0) { mode = GRAPH_MODE_VGA_640_85;  } else
-	if (strcmp(temp1, "GRAPH_MODE_VGA_800_56"  ) == 0) { mode = GRAPH_MODE_VGA_800_56;  } else
-	if (strcmp(temp1, "GRAPH_MODE_VGA_800_60"  ) == 0) { mode = GRAPH_MODE_VGA_800_60;  } else
-	if (strcmp(temp1, "GRAPH_MODE_VGA_800_72"  ) == 0) { mode = GRAPH_MODE_VGA_800_72;  } else
-	if (strcmp(temp1, "GRAPH_MODE_VGA_800_75"  ) == 0) { mode = GRAPH_MODE_VGA_800_75;  } else
-	if (strcmp(temp1, "GRAPH_MODE_VGA_800_85"  ) == 0) { mode = GRAPH_MODE_VGA_800_85;  } else
-	if (strcmp(temp1, "GRAPH_MODE_VGA_1024_60" ) == 0) { mode = GRAPH_MODE_VGA_1024_60; } else
-	if (strcmp(temp1, "GRAPH_MODE_VGA_1024_70" ) == 0) { mode = GRAPH_MODE_VGA_1024_70; } else
-	if (strcmp(temp1, "GRAPH_MODE_VGA_1024_75" ) == 0) { mode = GRAPH_MODE_VGA_1024_75; } else
-	if (strcmp(temp1, "GRAPH_MODE_VGA_1024_85" ) == 0) { mode = GRAPH_MODE_VGA_1024_85; } else
-	if (strcmp(temp1, "GRAPH_MODE_VGA_1280_60" ) == 0) { mode = GRAPH_MODE_VGA_1280_60; } else
-	if (strcmp(temp1, "GRAPH_MODE_VGA_1280_75" ) == 0) { mode = GRAPH_MODE_VGA_1280_75; }
-	else
-	{
+    // Parse the mode config value.
+    if (strcmp(temp1, "GRAPH_MODE_AUTO") == 0) {
+        mode = GRAPH_MODE_AUTO;
+    } else if (strcmp(temp1, "GRAPH_MODE_NTSC") == 0) {
+        mode = GRAPH_MODE_NTSC;
+    } else if (strcmp(temp1, "GRAPH_MODE_PAL") == 0) {
+        mode = GRAPH_MODE_PAL;
+    } else if (strcmp(temp1, "GRAPH_MODE_HDTV_480P") == 0) {
+        mode = GRAPH_MODE_HDTV_480P;
+    } else if (strcmp(temp1, "GRAPH_MODE_HDTV_576P") == 0) {
+        mode = GRAPH_MODE_HDTV_576P;
+    } else if (strcmp(temp1, "GRAPH_MODE_HDTV_720P") == 0) {
+        mode = GRAPH_MODE_HDTV_720P;
+    } else if (strcmp(temp1, "GRAPH_MODE_HDTV_1080I") == 0) {
+        mode = GRAPH_MODE_HDTV_1080I;
+    } else if (strcmp(temp1, "GRAPH_MODE_VGA_640_60") == 0) {
+        mode = GRAPH_MODE_VGA_640_60;
+    } else if (strcmp(temp1, "GRAPH_MODE_VGA_640_72") == 0) {
+        mode = GRAPH_MODE_VGA_640_72;
+    } else if (strcmp(temp1, "GRAPH_MODE_VGA_640_75") == 0) {
+        mode = GRAPH_MODE_VGA_640_75;
+    } else if (strcmp(temp1, "GRAPH_MODE_VGA_640_85") == 0) {
+        mode = GRAPH_MODE_VGA_640_85;
+    } else if (strcmp(temp1, "GRAPH_MODE_VGA_800_56") == 0) {
+        mode = GRAPH_MODE_VGA_800_56;
+    } else if (strcmp(temp1, "GRAPH_MODE_VGA_800_60") == 0) {
+        mode = GRAPH_MODE_VGA_800_60;
+    } else if (strcmp(temp1, "GRAPH_MODE_VGA_800_72") == 0) {
+        mode = GRAPH_MODE_VGA_800_72;
+    } else if (strcmp(temp1, "GRAPH_MODE_VGA_800_75") == 0) {
+        mode = GRAPH_MODE_VGA_800_75;
+    } else if (strcmp(temp1, "GRAPH_MODE_VGA_800_85") == 0) {
+        mode = GRAPH_MODE_VGA_800_85;
+    } else if (strcmp(temp1, "GRAPH_MODE_VGA_1024_60") == 0) {
+        mode = GRAPH_MODE_VGA_1024_60;
+    } else if (strcmp(temp1, "GRAPH_MODE_VGA_1024_70") == 0) {
+        mode = GRAPH_MODE_VGA_1024_70;
+    } else if (strcmp(temp1, "GRAPH_MODE_VGA_1024_75") == 0) {
+        mode = GRAPH_MODE_VGA_1024_75;
+    } else if (strcmp(temp1, "GRAPH_MODE_VGA_1024_85") == 0) {
+        mode = GRAPH_MODE_VGA_1024_85;
+    } else if (strcmp(temp1, "GRAPH_MODE_VGA_1280_60") == 0) {
+        mode = GRAPH_MODE_VGA_1280_60;
+    } else if (strcmp(temp1, "GRAPH_MODE_VGA_1280_75") == 0) {
+        mode = GRAPH_MODE_VGA_1280_75;
+    } else {
 
-		mode = GRAPH_MODE_AUTO;
+        mode = GRAPH_MODE_AUTO;
+    }
 
-	}
+    // Read the interlace config value.
+    temp1 = strtok(temp0, ":");
+    temp0 += strlen(temp1) + 1;
 
-	// Read the interlace config value.
-	temp1 = strtok(temp0, ":"); temp0 += strlen(temp1) + 1;
+    // Parse the interlace config value.
+    if (strcmp(temp1, "GRAPH_MODE_NONINTERLACED") == 0) {
+        interlace = GRAPH_MODE_NONINTERLACED;
+    } else if (strcmp(temp1, "GRAPH_MODE_INTERLACED") == 0) {
+        interlace = GRAPH_MODE_INTERLACED;
+    } else {
 
-	// Parse the interlace config value.
-	if (strcmp(temp1, "GRAPH_MODE_NONINTERLACED" ) == 0) { interlace = GRAPH_MODE_NONINTERLACED; } else
-	if (strcmp(temp1, "GRAPH_MODE_INTERLACED" ) == 0) { interlace = GRAPH_MODE_INTERLACED; }
-	else
-	{
+        interlace = GRAPH_MODE_INTERLACED;
+    }
 
-		interlace = GRAPH_MODE_INTERLACED;
+    // Read the field mode config value.
+    temp1 = strtok(temp0, ":");
+    temp0 += strlen(temp1) + 1;
 
-	}
+    // Parse the field mode config value.
+    if (strcmp(temp1, "GRAPH_MODE_FRAME") == 0) {
+        ffmd = GRAPH_MODE_FRAME;
+    } else if (strcmp(temp1, "GRAPH_MODE_FIELD") == 0) {
+        ffmd = GRAPH_MODE_FIELD;
+    } else {
 
-	// Read the field mode config value.
-	temp1 = strtok(temp0, ":"); temp0 += strlen(temp1) + 1;
+        ffmd = GRAPH_MODE_FIELD;
+    }
 
-	// Parse the field mode config value.
-	if (strcmp(temp1, "GRAPH_MODE_FRAME" ) == 0) { ffmd = GRAPH_MODE_FRAME; } else
-	if (strcmp(temp1, "GRAPH_MODE_FIELD" ) == 0) { ffmd = GRAPH_MODE_FIELD; }
-	else
-	{
+    // Read the flicker_filter config value.
+    temp1 = strtok(temp0, ":");
+    temp0 += strlen(temp1) + 1;
 
-		ffmd = GRAPH_MODE_FIELD;
+    // Parse the flicker_filter config value.
+    if (strcmp(temp1, "GRAPH_DISABLE") == 0) {
+        flicker_filter = GRAPH_DISABLE;
+    } else if (strcmp(temp1, "GRAPH_ENABLE") == 0) {
+        flicker_filter = GRAPH_ENABLE;
+    } else {
 
-	}
+        flicker_filter = GRAPH_ENABLE;
+    }
 
-	// Read the flicker_filter config value.
-	temp1 = strtok(temp0, ":"); temp0 += strlen(temp1) + 1;
+    // Disable flicker filter if the mode is noninterlaced.
+    if (interlace == GRAPH_MODE_NONINTERLACED) {
 
-	// Parse the flicker_filter config value.
-	if (strcmp(temp1, "GRAPH_DISABLE" ) == 0) { flicker_filter = GRAPH_DISABLE; } else
-	if (strcmp(temp1, "GRAPH_ENABLE"  ) == 0) { flicker_filter = GRAPH_ENABLE;  }
-	else
-	{
+        flicker_filter = GRAPH_DISABLE;
+    }
 
-		flicker_filter = GRAPH_ENABLE;
+    // Read the x config value.
+    temp1 = strtok(temp0, ":");
+    temp0 += strlen(temp1) + 1;
 
-	}
+    // Parse the x config value.
+    // x = (int)strtol(temp1,NULL,10); //Not used
 
-	// Disable flicker filter if the mode is noninterlaced.
-	if (interlace == GRAPH_MODE_NONINTERLACED)
-	{
+    // Read the y config value.
+    temp1 = strtok(temp0, ":");
+    temp0 += strlen(temp1) + 1;
 
-		flicker_filter = GRAPH_DISABLE;
+    // Parse the y config value.
+    // y = (int)strtol(temp1,NULL,10); //Not used
 
-	}
-
-	// Read the x config value.
-	temp1 = strtok(temp0, ":"); temp0 += strlen(temp1) + 1;
-
-	// Parse the x config value.
-	// x = (int)strtol(temp1,NULL,10); //Not used
-
-	// Read the y config value.
-	temp1 = strtok(temp0, ":"); temp0 += strlen(temp1) + 1;
-
-	// Parse the y config value.
-	// y = (int)strtol(temp1,NULL,10); //Not used
-
-	graph_set_mode(interlace,mode,ffmd,flicker_filter);
-	// End function.
-	return 0;
-
+    graph_set_mode(interlace, mode, ffmd, flicker_filter);
+    // End function.
+    return 0;
 }
 
 int graph_load_config(char *filename)
 {
 
-	FILE *infile; char config[512];
+    FILE *infile;
+    char config[512];
 
-	// Open the config file.
-	if ((infile = fopen(filename, "r")) < 0)
-	{
+    // Open the config file.
+    if ((infile = fopen(filename, "r")) < 0) {
 
-		return -ENOENT;
+        return -ENOENT;
+    }
 
-	}
+    // Read the config file contents.
+    if (fread(config, 1, sizeof(config), infile) < 0) {
 
-	// Read the config file contents.
-	if (fread(config, 1, sizeof(config), infile) < 0)
-	{
+        return -EIO;
+    }
 
-		return -EIO;
+    // Close the config file.
+    if (fclose(infile) < 0) {
 
-	}
+        return -1;
+    }
 
-	// Close the config file.
-	if (fclose(infile) < 0)
-	{
-
-		return -1;
-
-	}
-
-	// Set the current mode config information.
-	return graph_set_config(config);
-
+    // Set the current mode config information.
+    return graph_set_config(config);
 }
 
 int graph_save_config(char *filename)
 {
 
-	FILE *outfile; char config[512];
+    FILE *outfile;
+    char config[512];
 
-	// Get the current mode config information.
-	graph_get_config(config);
+    // Get the current mode config information.
+    graph_get_config(config);
 
-	// Open the config file.
-	if ((outfile = fopen(filename, "w")) < 0)
-	{
+    // Open the config file.
+    if ((outfile = fopen(filename, "w")) < 0) {
 
-		return -ENOENT;
+        return -ENOENT;
+    }
 
-	}
+    // Write the config file contents.
+    if (fwrite(config, 1, strlen(config), outfile) < 0) {
 
-	// Write the config file contents.
-	if (fwrite(config, 1, strlen(config), outfile) < 0)
-	{
+        return -EIO;
+    }
 
-		return -EIO;
+    // Close the config file.
+    if (fclose(outfile) < 0) {
 
-	}
+        return -1;
+    }
 
-	// Close the config file.
-	if (fclose(outfile) < 0)
-	{
-
-		return -1;
-
-	}
-
-	// End function.
-	return 0;
-
+    // End function.
+    return 0;
 }

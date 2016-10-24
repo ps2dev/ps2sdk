@@ -142,65 +142,59 @@ float igamf(), igamcf(), igamif();
 
 
 #ifdef ANSIC
-float pdtrcf( int k, float mm )
+float pdtrcf(int k, float mm)
 #else
-float pdtrcf( k, mm )
-int k;
+float pdtrcf(k, mm) int k;
 double mm;
 #endif
 {
-float v, m;
+    float v, m;
 
-m = mm;
-if( (k < 0) || (m <= 0.0) )
-	{
-	mtherr( "pdtrcf", DOMAIN );
-	return( 0.0 );
-	}
-v = k+1;
-return( igamf( v, m ) );
+    m = mm;
+    if ((k < 0) || (m <= 0.0)) {
+        mtherr("pdtrcf", DOMAIN);
+        return (0.0);
+    }
+    v = k + 1;
+    return (igamf(v, m));
 }
 
 
 
 #ifdef ANSIC
-float pdtrf( int k, float mm )
+float pdtrf(int k, float mm)
 #else
-float pdtrf( k, mm )
-int k;
+float pdtrf(k, mm) int k;
 double mm;
 #endif
 {
-float v, m;
+    float v, m;
 
-m = mm;
-if( (k < 0) || (m <= 0.0) )
-	{
-	mtherr( "pdtr", DOMAIN );
-	return( 0.0 );
-	}
-v = k+1;
-return( igamcf( v, m ) );
+    m = mm;
+    if ((k < 0) || (m <= 0.0)) {
+        mtherr("pdtr", DOMAIN);
+        return (0.0);
+    }
+    v = k + 1;
+    return (igamcf(v, m));
 }
 
 
 #ifdef ANSIC
-float pdtrif( int k, float yy )
+float pdtrif(int k, float yy)
 #else
-float pdtrif( k, yy )
-int k;
+float pdtrif(k, yy) int k;
 double yy;
 #endif
 {
-float v, y;
+    float v, y;
 
-y = yy;
-if( (k < 0) || (y < 0.0) || (y >= 1.0) )
-	{
-	mtherr( "pdtrif", DOMAIN );
-	return( 0.0 );
-	}
-v = k+1;
-v = igamif( v, y );
-return( v );
+    y = yy;
+    if ((k < 0) || (y < 0.0) || (y >= 1.0)) {
+        mtherr("pdtrif", DOMAIN);
+        return (0.0);
+    }
+    v = k + 1;
+    v = igamif(v, y);
+    return (v);
 }
