@@ -124,6 +124,10 @@ int WakeupThread(int thid);
 #define I_WakeupThread DECLARE_IMPORT(25, WakeupThread)
 int iWakeupThread(int thid);
 #define I_iWakeupThread DECLARE_IMPORT(26, iWakeupThread)
+int CancelWakeupThread(int thid);
+#define I_CancelWakeupThread DECLARE_IMPORT(27, CancelWakeupThread)
+int iCancelWakeupThread(int thid);
+#define I_iCancelWakeupThread DECLARE_IMPORT(28, iCancelWakeupThread)
 
 int DelayThread(int usec);
 #define I_DelayThread DECLARE_IMPORT(33, DelayThread)
@@ -177,6 +181,8 @@ int GetSystemStatusFlag();
  	I_SleepThread \
 	I_WakeupThread \
 	I_iWakeupThread \
+	I_CancelWakeupThread \
+	I_iCancelWakeupThread \
  \
  	I_DelayThread \
  \
