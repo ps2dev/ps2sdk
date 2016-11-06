@@ -12,7 +12,7 @@ EE_OBJS = teapot.o
 EE_LIBS = -ldraw -lgraph -lmath3d -lmf -lpacket -ldma
 
 all: $(EE_BIN)
-	ee-strip --strip-all $(EE_BIN)
+	$(EE_STRIP) --strip-all $(EE_BIN)
 
 clean:
 	rm -f $(EE_BIN) $(EE_OBJS)

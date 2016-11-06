@@ -966,7 +966,7 @@ int fat_mount(struct SBP2Device* dev, unsigned int start, unsigned int count)
 void fat_forceUnmount(struct SBP2Device* dev)
 {
 	unsigned int i;
-	XPRINTF("USBHDFSD: usb fat: forceUnmount devId %i \n", dev->devId);
+	XPRINTF("USBHDFSD: usb fat: forceUnmount devId %i \n", dev->nodeId);
 
 	for (i = 0; i < NUM_DRIVES; ++i)
 	{

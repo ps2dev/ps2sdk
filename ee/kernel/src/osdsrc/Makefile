@@ -18,7 +18,7 @@ EE_LDFLAGS = -nostartfiles -mno-crt0 -Tlinkfile -s
 $(EE_ELF) : $(EE_OBJS)
 	$(EE_CC) $(EE_LDFLAGS) \
 		-o $(EE_ELF) $(EE_OBJS) $(EE_LIBS)
-	ee-objcopy -Obinary $(EE_ELF) $(EE_BIN)
+	$(EE_OBJCOPY) -Obinary $(EE_ELF) $(EE_BIN)
 
 %.o : %.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
