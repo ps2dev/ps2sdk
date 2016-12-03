@@ -209,6 +209,8 @@ static int fioDataTransfer(iop_file_t *f, void *buf, int size, int mode)
 			fileSlot->post+=size;
 			return size<<9;
 		}
+
+		return rv;
 	}
 	return 0;
 }

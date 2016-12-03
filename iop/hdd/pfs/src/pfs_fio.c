@@ -894,7 +894,7 @@ int	pfsFioChstat(iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int
 		rv = pfsCheckAccess(clink, 0x02);
 		if(rv == 0) {
 
-			clink->flags |= 0x01;
+			clink->flags |= PFS_CACHE_FLAG_DIRTY;
 
 			if((statmask & FIO_CST_MODE) && ((clink->u.inode->mode & FIO_S_IFMT) != FIO_S_IFLNK))
 				clink->u.inode->mode = (clink->u.inode->mode & FIO_S_IFMT) | (stat->mode & 0xfff);
