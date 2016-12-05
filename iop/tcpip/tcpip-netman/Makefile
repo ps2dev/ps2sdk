@@ -21,6 +21,7 @@ DEBUG_FLAGS = -DDEBUG -DLWIP_DEBUG
 endif
 
 LWIP=$(PS2SDKSRC)/common/tcpip/lwip-1.4.1
+PS2IP_BASE=../tcpip-base
 
 ps2ip_OBJECTS = ps2ip.o ipconfig.o sys.o sys_arch.o init.o exports.o imports.o mem.o netif.o pbuf.o stats.o tcp_in.o tcp_out.o udp.o memp.o tcp.o etharp.o raw.o def.o timers.o
 
@@ -52,7 +53,7 @@ endif
 
 IOP_BIN = $(IOP_BIN_DIR)ps2ip-nm.irx
 IOP_OBJS = $(ps2ip_OBJECTS) $(ps2api_OBJECTS) $(ps2api_IPV4)
-IOP_INCS += -I$(LWIP)/src/include -I$(LWIP)/src/include/ipv4 -Isrc/include
+IOP_INCS += -I$(LWIP)/src/include -I$(LWIP)/src/include/ipv4 -I$(PS2IP_BASE)/include -I$(IOP_SRC_DIR)/include
 IOP_CFLAGS += -DLWIP_NOASSERT -DLWIP_COMPAT_MUTEX $(DEBUG_FLAGS)
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
@@ -156,4 +157,7 @@ obj/netdb.o: $(LWIP)/src/api/netdb.c
 endif
 
 obj/udp.o: $(LWIP)/src/core/udp.c
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
+
+obj/sys_arch.o: $(PS2IP_BASE)/sys_arch.c
 	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
