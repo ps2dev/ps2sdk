@@ -12,7 +12,7 @@ EE_ELF = osdsrc.elf
 EE_OBJS = osdsrc.o osd.o ExecPS2.o
 
 EE_INCS := -I$(PS2SDKSRC)/common/include -I$(PS2SDKSRC)/ee/kernel/include -I$(PS2SDKSRC)/ee/rpc/cdvd/include -I.
-EE_CFLAGS = -D_EE -G0 -mno-gpopt -Wall -Os
+EE_CFLAGS = -D_EE -G0 -mno-gpopt -Wall -Os -DREUSE_EXECPS2=1
 EE_LDFLAGS = -nostartfiles -mno-crt0 -Tlinkfile -s
 
 $(EE_ELF) : $(EE_OBJS)

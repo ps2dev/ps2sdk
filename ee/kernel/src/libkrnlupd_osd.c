@@ -5,8 +5,14 @@
 
 	The only known consoles to have a "Protokernel" are the SCPH-10000 and SCPH-15000. Both contain either boot ROM v1.00 or v1.01.
 
-	Note that these kernels are not necessarily buggy, but were based on an older set of specifications. This file contains patches that will "modernize" these kernels until a hard reset.
-	(Code was based on the official Sony "libosd" patch)
+	Note that these kernels are not necessarily buggy, but were based on an older set of specifications.
+	This file contains patches that will "modernize" these kernels until a hard reset.
+	The code within this file was based on the code from the HDD Browser, not libosd.
+		Originally, this was the version that I linked crt0 to,
+			but I realized that SONY had a reason for only fully patching the protokernels within the HDD Browser:
+			Only the HDD browser can change the new language setting, while the protokernel browser is not aware of the new language field.
+			By fully patching the kernel, then new software will use the new language setting.
+			However, if the user is not using the HDD Browser, then the user becomes unable to change the language setting.
 */
 
 #include <kernel.h>
@@ -37,9 +43,25 @@ static struct SyscallData SyscallPatchEntries[]={
 		0xFFFFC402,	// 0x80011F80+(-15358*4)=0x80002F88, where 0x80011F80 is the start of the syscall table.
 		NULL
 	},
+	{
+		__NR_SetOsdConfigParam,
+		NULL
+	},
+	{
+		__NR_GetOsdConfigParam,
+		NULL
+	},
+	{
+		__NR_SetOsdConfigParam2,
+		NULL
+	},
+	{
+		__NR_GetOsdConfigParam2,
+		NULL
+	},
 };
 
-void InitKernel(void){
+void InitKernelFull(void){
 	unsigned int i;
 
 	if(PatchIsNeeded()){
@@ -50,9 +72,8 @@ void InitKernel(void){
 		FlushCache(2);
 		setup(SyscallPatchEntries[1].syscall_num, SyscallPatchEntries[1].function);
 
-		for(i=2; i<3; i++){
+		for(i=2; i<7; i++){
 			setup(SyscallPatchEntries[i].syscall_num, GetEntryAddress(SyscallPatchEntries[i].syscall_num));
 		}
 	}
 }
-
