@@ -6,7 +6,7 @@
 #include <draw.h>
 
 // Starting position of primitive
-static qword_t *__prim_start = NULL;
+static qword_t *__prim_start;
 
 // Amount of vertex loops
 static int __vertex_loops = 0;

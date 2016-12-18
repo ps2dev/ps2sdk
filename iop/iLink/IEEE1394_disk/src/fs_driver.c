@@ -15,7 +15,7 @@
 //---------------------------------------------------------------------------
 #include <stdio.h>
 #include <errno.h>
-#include <sys/stat.h>
+#include <fcntl.h>
 #include <ioman.h>
 
 #ifdef WIN32
@@ -76,7 +76,7 @@ typedef struct _fs_dir {
 #define MAX_FILES 16
 static fs_rec fsRec[MAX_FILES]; //file info record
 
-static void fillStat(fio_stat_t *stat, const fat_dir *fatdir)
+static void fillStat(io_stat_t *stat, const fat_dir *fatdir)
 {
 	stat->mode = FIO_SO_IROTH | FIO_SO_IXOTH;
 	if (fatdir->attr & FAT_ATTR_DIRECTORY) {
@@ -615,7 +615,7 @@ static int fs_dclose(iop_file_t *fd)
 }
 
 //---------------------------------------------------------------------------
-static int fs_dread(iop_file_t *fd, fio_dirent_t *buffer)
+static int fs_dread(iop_file_t *fd, io_dirent_t *buffer)
 {
 	fat_driver* fatd;
 	int ret;
@@ -644,7 +644,7 @@ static int fs_dread(iop_file_t *fd, fio_dirent_t *buffer)
 	ret = rec->status;
 	if (rec->status >= 0)
 	{
-		memset(buffer, 0, sizeof(fio_dirent_t));
+		memset(buffer, 0, sizeof(io_dirent_t));
 		fillStat(&buffer->stat, &rec->current_fatdir);
 		strcpy(buffer->name, rec->current_fatdir.name);
 	}
@@ -657,7 +657,7 @@ static int fs_dread(iop_file_t *fd, fio_dirent_t *buffer)
 }
 
 //---------------------------------------------------------------------------
-static int fs_getstat(iop_file_t *fd, const char *name, fio_stat_t *stat)
+static int fs_getstat(iop_file_t *fd, const char *name, io_stat_t *stat)
 {
 	fat_driver* fatd;
 	int ret;
@@ -678,7 +678,7 @@ static int fs_getstat(iop_file_t *fd, const char *name, fio_stat_t *stat)
 		return ret;
 	}
 
-	memset(stat, 0, sizeof(fio_stat_t));
+	memset(stat, 0, sizeof(io_stat_t));
 	fillStat(stat, &fatdir);
 
 	_fs_unlock();

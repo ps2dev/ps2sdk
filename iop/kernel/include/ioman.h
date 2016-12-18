@@ -16,9 +16,8 @@
 
 #include "types.h"
 #include "irx.h"
-#include <io_common.h>
 
-#include "sys/fcntl.h"
+#include "fcntl.h"
 
 #define ioman_IMPORTS_start DECLARE_IMPORT_TABLE(ioman, 1, 1)
 #define ioman_IMPORTS_end END_IMPORT_TABLE
@@ -45,11 +44,11 @@ int dopen(const char *path, int mode);
 #define I_dopen DECLARE_IMPORT(13, dopen)
 int dclose(int fd);
 #define I_dclose DECLARE_IMPORT(14, dclose)
-int dread(int fd, fio_dirent_t *buf);
+int dread(int fd, io_dirent_t *buf);
 #define I_dread DECLARE_IMPORT(15, dread)
-int getstat(const char *name, fio_stat_t *stat);
+int getstat(const char *name, io_stat_t *stat);
 #define I_getstat DECLARE_IMPORT(16, getstat)
-int chstat(const char *name, fio_stat_t *stat, unsigned int statmask);
+int chstat(const char *name, io_stat_t *stat, unsigned int statmask);
 #define I_chstat DECLARE_IMPORT(17, chstat)
 int format(const char *dev);
 #define I_format DECLARE_IMPORT(18, format)
@@ -95,9 +94,9 @@ typedef struct _iop_device_ops {
 	int	(*rmdir)(iop_file_t *, const char *);
 	int	(*dopen)(iop_file_t *, const char *);
 	int	(*dclose)(iop_file_t *);
-	int	(*dread)(iop_file_t *, fio_dirent_t *);
-	int	(*getstat)(iop_file_t *, const char *, fio_stat_t *);
-	int	(*chstat)(iop_file_t *, const char *, fio_stat_t *, unsigned int);
+	int	(*dread)(iop_file_t *, io_dirent_t *);
+	int	(*getstat)(iop_file_t *, const char *, io_stat_t *);
+	int	(*chstat)(iop_file_t *, const char *, io_stat_t *, unsigned int);
 } iop_device_ops_t;
 
 int AddDrv(iop_device_t *device);

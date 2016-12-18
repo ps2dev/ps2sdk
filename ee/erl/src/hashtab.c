@@ -28,6 +28,7 @@ This implements a hash table.
 --------------------------------------------------------------------
 */
 
+#include <stdlib.h>
 #include <string.h>
 
 #ifndef STANDARD

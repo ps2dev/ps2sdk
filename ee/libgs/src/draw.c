@@ -9,8 +9,11 @@
 #
 */
 
+#include <fcntl.h>
+
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <kernel.h>
 #include <libgs.h>
 

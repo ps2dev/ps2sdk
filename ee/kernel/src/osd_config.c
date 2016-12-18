@@ -13,6 +13,8 @@
 # turned off or reset!
 */
 
+#include <fcntl.h>
+
 #include <tamtypes.h>
 #include <kernel.h>
 #include <stdio.h>

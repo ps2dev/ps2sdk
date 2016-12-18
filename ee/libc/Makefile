@@ -35,10 +35,10 @@ INIT_OBJS := $(INIT_OBJS:%=$(EE_OBJS_DIR)%)
 ALLOC_OBJS = malloc.o realloc.o calloc.o memalign.o free.o __builtin_alloc.o __alloc_internals.o __mem_walk.o
 ALLOC_OBJS := $(ALLOC_OBJS:%=$(EE_OBJS_DIR)%)
 
-STRING_C_OBJS = strdup.o strcasecmp.o strncasecmp.o strtok.o strrchr.o strstr.o \
-	strupr.o strlwr.o _sjis_internals.o strcpy_ascii.o strcpy_sjis.o \
-	strpbrk.o strspn.o strcspn.o \
-	tolower.o toupper.o isupper.o islower.o isalpha.o isdigit.o isalnum.o iscntrl.o \
+STRING_C_OBJS = strcoll.o strxfrm.o strdup.o strcasecmp.o strncasecmp.o \
+	strtok.o strrchr.o strstr.o strupr.o strlwr.o _sjis_internals.o \
+	strcpy_ascii.o strcpy_sjis.o strpbrk.o strspn.o strcspn.o tolower.o \
+	toupper.o isupper.o islower.o isalpha.o isdigit.o isalnum.o iscntrl.o \
 	isgraph.o isprint.o ispunct.o isspace.o isxdigit.o
 STRING_C_OBJS := $(STRING_C_OBJS:%=$(EE_OBJS_DIR)%)
 
@@ -63,17 +63,18 @@ STDIO_OBJS = clearerr.o fclose.o fcloseall.o feof.o ferror.o fflush.o fflushall.
 	__stdio_internals.o chdir.o
 STDIO_OBJS := $(STDIO_OBJS:%=$(EE_OBJS_DIR)%)
 
-STDLIB_OBJS = abs.o atexit.o atof.o bsearch.o div.o getenv.o _itoa.o labs.o \
-	ldiv.o llabs.o lldiv.o _lltoa.o _ltoa.o rand.o setenv.o srand.o \
-	strtod.o strtol.o strtoul.o __assert_fail.o \
-	__stdlib_internals.o \
-	mblen.o mbslen.o mbstowcs.o mbtowc.o wcstombs.o wctomb.o
+STDLIB_OBJS = abs.o atexit.o atof.o atoi.o atol.o bsearch.o div.o getenv.o \
+	_itoa.o labs.o ldiv.o llabs.o lldiv.o _lltoa.o _ltoa.o rand.o setenv.o \
+	srand.o strtod.o strtol.o strtoul.o __assert_fail.o \
+	__stdlib_internals.o mblen.o mbslen.o mbstowcs.o mbtowc.o wcstombs.o \
+	wctomb.o
 STDLIB_OBJS := $(STDLIB_OBJS:%=$(EE_OBJS_DIR)%)
 
 WSTDLIB_OBJS = wcstod.o wcstol.o wcstoul.o
 WSTDLIB_OBJS := $(WSTDLIB_OBJS:%=$(EE_OBJS_DIR)%)
 
-UNISTD_OBJS = stat.o fstat.o access.o unlink.o getcwd.o sleep.o
+UNISTD_OBJS = open.o close.o read.o write.o lseek.o mkdir.o rmdir.o stat.o \
+	fstat.o access.o unlink.o getcwd.o sleep.o
 UNISTD_OBJS := $(UNISTD_OBJS:%=$(EE_OBJS_DIR)%)
 
 LIBGEN_OBJS = basename.o dirname.o
