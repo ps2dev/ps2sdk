@@ -25,7 +25,7 @@
 #include <thbase.h>
 #include <thsemap.h>
 
-#include <sys/fcntl.h>
+#include <fcntl.h>
 
 #include <speedregs.h>
 #include <smapregs.h>

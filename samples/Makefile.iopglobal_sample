@@ -25,7 +25,7 @@ LDFLAGS_TARGET = -miop
 endif
 
 # include dir
-IOP_INCS := -I$(PS2SDK)/iop/include -I$(PS2SDK)/common/include \
+IOP_INCS := -I$(PS2SDK)/iop/include \
 	-I. $(IOP_INCS)
 
 # C compiler flags

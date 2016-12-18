@@ -57,6 +57,8 @@
 #ifdef _EE
 #include <tamtypes.h>
 #include <kernel.h>
+#include <fcntl.h>
+#include <unistd.h>
 #else
 typedef unsigned char u8;
 typedef unsigned short u16;

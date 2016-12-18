@@ -12,6 +12,9 @@
 # EE FILE IO handling
 */
 
+#include <stdarg.h>
+#include <fcntl.h>
+
 #include <tamtypes.h>
 #include <ps2lib_err.h>
 #include <kernel.h>

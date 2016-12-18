@@ -10,9 +10,11 @@
 #define __need___va_list
 #include <stdarg.h>
 
-#ifndef NULL
-#define NULL	0
-#endif
+/* POSIX.1-2008 extension includes these. */
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifndef WEOF
 # define WEOF ((wint_t)-1)

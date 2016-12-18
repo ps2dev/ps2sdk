@@ -11,6 +11,8 @@
 # AHX EE-side RPC code.
 */
 
+#include <fcntl.h>
+
 #include <tamtypes.h>
 #include <kernel.h>
 #include <sifrpc.h>

@@ -23,7 +23,7 @@
 #include "sysclib.h"
 #include "devfs.h"
 #include "sysmem.h"
-#include "sys/stat.h"
+#include "fcntl.h"
 #include "stdio.h"
 
 #ifdef USE_IOMAN
@@ -890,7 +890,7 @@ int devfs_dclose(iop_file_t *file)
 }
 
 #ifdef USE_IOMAN
-int devfs_dread(iop_file_t *file, fio_dirent_t *buf)
+int devfs_dread(iop_file_t *file, io_dirent_t *buf)
 #else
 int devfs_dread(iop_file_t *file, iox_dirent_t *buf)
 #endif
@@ -919,7 +919,7 @@ int devfs_dread(iop_file_t *file, iox_dirent_t *buf)
     @returns 0 on success, -1 on error
 */
 #ifdef USE_IOMAN
-int devfs_getstat(iop_file_t *file, const char *name, fio_stat_t *stat)
+int devfs_getstat(iop_file_t *file, const char *name, io_stat_t *stat)
 #else
 int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
 #endif
@@ -981,7 +981,7 @@ int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
       }
 
 #ifdef USE_IOMAN
-      memset(stat, 0, sizeof(fio_stat_t));
+      memset(stat, 0, sizeof(io_stat_t));
 #else
       memset(stat, 0, sizeof(iox_stat_t));
 #endif

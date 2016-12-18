@@ -10,6 +10,7 @@
 # $Id$
 */
 
+#include <fcntl.h>
 #include <stdio.h>
 #include <tamtypes.h>
 #include <errno.h>
@@ -21,8 +22,6 @@
 #include <malloc.h>
 
 // PS2DRV includes
-#include "sys/fcntl.h"
-#include "sys/stat.h"
 #include "sys/ioctl.h"
 #include "fileXio_rpc.h"
 #include "errno.h"
@@ -201,7 +200,7 @@ int hddGetFilesystemList(t_hddFilesystem hddFs[], int maxEntries)
 
 		if(dirEnt.stat.mode == FS_TYPE_PFS)
 		{
-			rv = fileXioMount("pfs0:", hddFs[count].filename, FIO_MT_RDONLY);
+			rv = fileXioMount("pfs0:", hddFs[count].filename, FILEXIO_MOUNTFLAG_READONLY);
 			if(rv == 0)
 			{
 

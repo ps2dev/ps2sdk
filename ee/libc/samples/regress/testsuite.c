@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include "testsuite.h"
 
 void init_testsuite(test_suite *p)

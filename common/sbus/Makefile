@@ -82,10 +82,15 @@ obj/%.o: src/%.S
 	$(EE_CC) $(EE_CFLAGS) $(EE_INC) -c $< -o $@
 
 release: all
-	mkdir -p $(PS2SDK)/ee/include
-	$(ECHO) Installing $(IOP_BIN) into $(PS2SDK)/iop/irx
-	cp -f $(IOP_BIN) $(PS2SDK)/iop/irx
-	$(ECHO) Installing $(EE_LIB) into $(PS2SDK)/ee/lib
-	cp -f $(EE_LIB) $(PS2SDK)/ee/lib
-	$(ECHO) Installing include/*.h into $(PS2SDK)/common/include
-	cp -f include/*.h $(PS2SDK)/common/include
+	mkdir -p $(PS2SDK)/ee/include $(PS2SDK)/common $(PS2SDK)/common/include
+	mkdir -p $(PS2SDK)/iop $(PS2SDK)/iop/irx
+	@$(ECHO) Installing $(IOP_BIN) into $(PS2SDK)/iop/irx
+	@cp -f $(IOP_BIN) $(PS2SDK)/iop/irx
+	@$(ECHO) Installing $(EE_LIB) into $(PS2SDK)/ee/lib
+	@cp -f $(EE_LIB) $(PS2SDK)/ee/lib
+	@$(ECHO) Installing include/ps2_sbus.h into $(PS2SDK)/common/include
+	@cp -f include/ps2_sbus.h $(PS2SDK)/common/include
+	@$(ECHO) Linking $(PS2SDK)/common/include/ps2_sbus.h to $(PS2SDK)/ee/include
+	@$(LN) -s $(PS2SDK)/common/include/ps2_sbus.h $(PS2SDK)/ee/include/ps2_sbus.h
+	@$(ECHO) Linking $(PS2SDK)/common/include/ps2_sbus.h to $(PS2SDK)/iop/include
+	@$(LN) -s $(PS2SDK)/common/include/ps2_sbus.h $(PS2SDK)/iop/include/ps2_sbus.h

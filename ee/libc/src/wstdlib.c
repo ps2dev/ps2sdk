@@ -1,7 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <errno.h>
-#include <kernel.h>
 #include <limits.h>
 #include <wchar.h>
 
@@ -173,7 +172,7 @@ long int wcstol(const wchar_t *nptr, wchar_t **endptr, int base)
          if (any < 0)
          {
                  acc = neg ? LONG_MIN : LONG_MAX;
-                 errno = E_LIB_MATH_RANGE;
+                 errno = ERANGE;
          } else if (neg)
                  acc = -acc;
 
@@ -265,7 +264,7 @@ unsigned long int wcstoul(const wchar_t *nptr, wchar_t **endptr, int base)
          if (any < 0)
          {
                  acc = ULONG_MAX;
-                 errno = E_LIB_MATH_RANGE;
+                 errno = ERANGE;
          }
 
          if (endptr != 0)

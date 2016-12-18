@@ -254,7 +254,9 @@ static const char *test_stat_dir(void *arg)
 
 static const char *test_mkdir(void *arg)
 {
-	if (mkdir(arg) != 0)
+	mode_t mode = 0666;
+
+	if (mkdir(arg,mode) != 0)
 	{
 		return "failed to create directory";
 	}

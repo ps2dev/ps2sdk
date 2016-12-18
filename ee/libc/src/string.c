@@ -11,13 +11,24 @@
 # Standard ANSI string functions to complement the ASM funcs
 */
 
-#include <tamtypes.h>
-#include <kernel.h>
-#include <sifrpc.h>
-#include <ps2lib_err.h>
 #include <limits.h>
 #include <string.h>
-#include <malloc.h>
+#include <stdlib.h>
+
+#ifdef F_strcoll
+int strcoll(const char *s1, const char *s2)
+{
+	return strcmp(s1, s2);
+}
+#endif
+
+#ifdef F_strxfrm
+size_t strxfrm(char *dest, const char *src, size_t n)
+{
+	strncpy(dest, src, n); 
+	return n;
+}
+#endif
 
 #ifdef F_strdup
 char *strdup(const char *s) {
@@ -382,7 +393,7 @@ int isxdigit(int c)
 #endif
 
 
-// sjis<->ascii conversion routines by Peter Sandström
+// sjis<->ascii conversion routines by Peter SandstrÃ¶m
 
 struct charmap_t {
 	unsigned short sjis;
@@ -390,39 +401,41 @@ struct charmap_t {
 };
 
 #ifdef F__sjis_internals
+/* What was the original encoding?
+   Assuming ISO-8859-1 or ISO-8859-15. */
 struct charmap_t sjis_conversion[] = {
-    { 0x4081, ' ' },
-    { 0x6d81, '[' },
-    { 0x6e81, ']' },
-    { 0x7c81, '-' },
-    { 0x5b81, '°' },
-    { 0x4581, '¥' },
-    { 0x4481, '.' },
-    { 0x7B81, '+' },
-    { 0x9681, '*' },
-    { 0x5E81, '/' },
-    { 0x4981, '!' },
-    { 0x6881, '"' },
-    { 0x9481, '#' },
-    { 0x9081, '$' },
-    { 0x9381, '%' },
-    { 0x9581, '&' },
-    { 0x6681, '\'' },
-    { 0x6981, '(' },
-    { 0x6a81, ')' },
-    { 0x8181, '=' },
-    { 0x6281, '|' },
-    { 0x8f81, '\\' },
-    { 0x4881, '?' },
-    { 0x5181, '_' },
-    { 0x6f81, '{' },
-    { 0x7081, '}' },
-    { 0x9781, '@' },
-    { 0x4781, ';' },
-    { 0x4681, ':' },
-    { 0x8381, '<' },
-    { 0x8481, '>' },
-    { 0x4d81, '`' },
+    { 0x4081, 0x20 }, // ' '
+    { 0x6d81, 0x5B }, // '['
+    { 0x6e81, 0x5D }, // ']'
+    { 0x7c81, 0x2D }, // '-'
+    { 0x5b81, 0xB0 }, // 'Â°'
+    { 0x4581, 0xA5 }, // 'Â¥'
+    { 0x4481, 0x2E }, // '.'
+    { 0x7B81, 0x2B }, // '+'
+    { 0x9681, 0x2A }, // '*'
+    { 0x5E81, 0x2F }, // '/'
+    { 0x4981, 0x21 }, // '!'
+    { 0x6881, 0x22 }, // '"'
+    { 0x9481, 0x23 }, // '#'
+    { 0x9081, 0x24 }, // '$'
+    { 0x9381, 0x25 }, // '%'
+    { 0x9581, 0x26 }, // '&'
+    { 0x6681, 0x27 }, // '''
+    { 0x6981, 0x28 }, // '('
+    { 0x6a81, 0x29 }, // ')'
+    { 0x8181, 0x3D }, // '='
+    { 0x6281, 0x7C }, // '|'
+    { 0x8f81, 0x5C }, // '\'
+    { 0x4881, 0x3F }, // '?'
+    { 0x5181, 0x5F }, // '_'
+    { 0x6f81, 0x7B }, // '{'
+    { 0x7081, 0x7D }, // '}'
+    { 0x9781, 0x40 }, // '@'
+    { 0x4781, 0x3B }, // ';'
+    { 0x4681, 0x3A }, // ':'
+    { 0x8381, 0x3C }, // '<'
+    { 0x8481, 0x3E }, // '>'
+    { 0x4d81, 0x60 }, // '`'
     { 0, 0 }
 };
 
@@ -537,7 +550,7 @@ size_t strcspn(const char *s, const char *reject) {
 #endif
 
 #ifdef F_ctype
-const u8 ctype[256] = {
+const unsigned char ctype[256] = {
     _C,     _C,    _C,    _C,    _C,    _C,    _C,    _C,
     _C,     _C|_S, _C|_S, _C|_S, _C|_S, _C|_S, _C,    _C,
     _C,     _C,    _C,    _C,    _C,    _C,    _C,    _C,

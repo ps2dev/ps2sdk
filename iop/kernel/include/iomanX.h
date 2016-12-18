@@ -17,8 +17,7 @@
 #include "types.h"
 #include "irx.h"
 
-#include "sys/fcntl.h"
-#include "sys/stat.h"
+#include "fcntl.h"
 
 /* Device drivers.  */
 

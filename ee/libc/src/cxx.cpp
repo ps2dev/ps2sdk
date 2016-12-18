@@ -12,7 +12,6 @@
 */
 
 #include <stdlib.h>
-#include <malloc.h>
 
 __attribute__((weak))
 void operator delete(void *ptr)

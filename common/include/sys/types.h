@@ -8,24 +8,17 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 # $Id$
-# Small, compatibility-useful assert.
+# Miscellaneous data types
 */
+#ifndef __TYPES_H__
+#define __TYPES_H__
 
+#include <stddef.h>
 
-#ifndef __ASSERT_H__
-#define __ASSERT_H__
+typedef int dev_t;
+typedef int ino_t;
+typedef int mode_t;
+typedef long off_t;
+typedef long ssize_t;
 
-#ifdef NDEBUG
-#define assert(cond)
-#else
-#ifdef __cplusplus
-extern "C" {
-#endif
-    int __assert_fail (const char *assertion, const char *file, unsigned int line) __attribute__((noreturn));
-#ifdef __cplusplus
-}
-#endif
-#define assert(cond) (void)((cond)?0:__assert_fail(#cond, __FILE__, __LINE__))
-#endif
-
-#endif
+#endif /*__TYPES_H__*/

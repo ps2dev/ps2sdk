@@ -17,6 +17,7 @@
 #include <iomanX.h>
 #include <thsemap.h>
 #include <hdd-ioctl.h>
+#include <fileXio.h>
 
 #include "pfs-opt.h"
 #include "libpfs.h"
@@ -1148,7 +1149,7 @@ int pfsFioMount(iop_file_t *f, const char *fsname, const char *devname, int flag
 
 	WaitSema(pfsFioSema);
 
-	fd = open(devname, (flag & FIO_MT_RDONLY) ? O_RDONLY : O_RDWR, 0644); // ps2hdd.irx fd
+	fd = open(devname, (flag & FILEXIO_MOUNTFLAG_READONLY) ? O_RDONLY : O_RDWR, 0644); // ps2hdd.irx fd
 	if(fd < 0)
 		rv = fd;
 	else {

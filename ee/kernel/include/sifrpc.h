@@ -20,6 +20,7 @@ extern "C" {
 #endif
 
 #include <sifcmd.h>
+#include <tamtypes.h>
 
 /* Modes for bind() and call() */
 #define SIF_RPC_M_NOWAIT	0x01 /* Don't wait for end function */

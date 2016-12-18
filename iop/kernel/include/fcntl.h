@@ -8,24 +8,12 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 # $Id$
-# Small, compatibility-useful assert.
+# IOP file control definitions.
 */
+#ifndef IOP_FCNTL_H
+#define IOP_FCNTL_H
 
+#include <sys/fcntl.h>
+#include <sys/stat.h>
 
-#ifndef __ASSERT_H__
-#define __ASSERT_H__
-
-#ifdef NDEBUG
-#define assert(cond)
-#else
-#ifdef __cplusplus
-extern "C" {
-#endif
-    int __assert_fail (const char *assertion, const char *file, unsigned int line) __attribute__((noreturn));
-#ifdef __cplusplus
-}
-#endif
-#define assert(cond) (void)((cond)?0:__assert_fail(#cond, __FILE__, __LINE__))
-#endif
-
-#endif
+#endif /*IOP_FCNTL_H*/

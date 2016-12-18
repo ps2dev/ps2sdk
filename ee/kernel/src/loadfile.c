@@ -14,6 +14,8 @@
 
 /** @defgroup loadfile EE LOADFILE: ELF and IRX loader client library. */
 
+#include <fcntl.h>
+
 #include <tamtypes.h>
 #include <ps2lib_err.h>
 #include <kernel.h>

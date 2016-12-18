@@ -8,24 +8,24 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 # $Id$
-# Small, compatibility-useful assert.
+# EE file control declarations.
 */
+#ifndef __FCTNL_H__
+#define __FCNTL_H__
 
+#include <sys/fcntl.h>
+#include <sys/stat.h>
 
-#ifndef __ASSERT_H__
-#define __ASSERT_H__
+#include <unistd.h>
 
-#ifdef NDEBUG
-#define assert(cond)
-#else
 #ifdef __cplusplus
 extern "C" {
 #endif
-    int __assert_fail (const char *assertion, const char *file, unsigned int line) __attribute__((noreturn));
+
+int open(const char *fname, int flags, ...);
+
 #ifdef __cplusplus
 }
 #endif
-#define assert(cond) (void)((cond)?0:__assert_fail(#cond, __FILE__, __LINE__))
-#endif
 
-#endif
+#endif /*__FCNTL_H__*/

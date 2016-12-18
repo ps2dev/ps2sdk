@@ -20,6 +20,8 @@
 #include <libmc.h>
 #include <stdio.h>
 #include <string.h>
+#include <fcntl.h>
+#include <strings.h>
 
 //
 // TODO: Update comments to reflect recent modifications to libmc (ie: support for

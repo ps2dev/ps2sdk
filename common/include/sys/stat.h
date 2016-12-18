@@ -14,15 +14,16 @@
 #ifndef SYS_STAT_H
 #define SYS_STAT_H
 
+#include <sys/types.h>
 #include <sys/time.h>
 
 // Flags for chstat 'statmask'
 #define FIO_CST_MODE	0x0001
 #define FIO_CST_ATTR	0x0002
 #define FIO_CST_SIZE	0x0004
-#define FIO_CST_CT		0x0008
-#define FIO_CST_AT		0x0010
-#define FIO_CST_MT		0x0020
+#define FIO_CST_CT	0x0008
+#define FIO_CST_AT	0x0010
+#define FIO_CST_MT	0x0020
 #define FIO_CST_PRVT	0x0040
 
 // File mode flags
@@ -129,6 +130,8 @@ typedef struct {
 #define	S_ISLNK(m)  (((m)&S_IFMT) == S_IFLNK)
 
 struct stat {
+	dev_t st_dev;
+	ino_t st_ino;
 	unsigned st_mode;  /* mode */
 	unsigned st_size;  /* file size */
 
@@ -136,5 +139,11 @@ struct stat {
 	time_t st_atime;   /* access time */
 	time_t st_ctime;   /* creation time */
 };
+
+#if defined(_EE) || defined(_R5900)
+int    fstat(int filedes, struct stat *sbuf);
+int    mkdir(const char *path, mode_t mode);
+int    stat(const char *path, struct stat *sbuf);
+#endif
 
 #endif /* SYS_STAT_H */
