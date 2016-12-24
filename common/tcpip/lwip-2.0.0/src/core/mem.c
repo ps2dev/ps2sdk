@@ -315,6 +315,8 @@ static volatile u8_t mem_free_count;
 
 #else /* LWIP_ALLOW_MEM_FREE_FROM_OTHER_CONTEXT */
 
+#if (!defined(_IOP) && !defined(_EE))
+
 /* Protect the heap only by using a semaphore */
 #define LWIP_MEM_FREE_DECL_PROTECT()
 #define LWIP_MEM_FREE_PROTECT()    sys_mutex_lock(&mem_mutex)
@@ -323,6 +325,19 @@ static volatile u8_t mem_free_count;
 #define LWIP_MEM_ALLOC_DECL_PROTECT()
 #define LWIP_MEM_ALLOC_PROTECT()
 #define LWIP_MEM_ALLOC_UNPROTECT()
+
+#else
+
+/* For the EE/IOP: disable interrupts to protect critical regions, so that calling code that run from interrupt-inhibited states won't
+	have their critical sections violated. */
+#define LWIP_MEM_FREE_DECL_PROTECT()  SYS_ARCH_DECL_PROTECT(lev_free)
+#define LWIP_MEM_FREE_PROTECT()       SYS_ARCH_PROTECT(lev_free)
+#define LWIP_MEM_FREE_UNPROTECT()     SYS_ARCH_UNPROTECT(lev_free)
+#define LWIP_MEM_ALLOC_DECL_PROTECT() SYS_ARCH_DECL_PROTECT(lev_alloc)
+#define LWIP_MEM_ALLOC_PROTECT()      SYS_ARCH_PROTECT(lev_alloc)
+#define LWIP_MEM_ALLOC_UNPROTECT()    SYS_ARCH_UNPROTECT(lev_alloc)
+
+#endif
 
 #endif /* LWIP_ALLOW_MEM_FREE_FROM_OTHER_CONTEXT */
 

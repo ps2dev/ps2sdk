@@ -20,3 +20,12 @@ As much as I'll like to make a clean port of LWIP, it was clearly not made to su
 3. Moved the code that "keeps interrupt protection time short" within event_callback() of api/sockets.c, as part of (2).
 	As the IOP uses non-preemptive multitasking, re-enabling interrupts for a short period of time probably doesn't do much... except for wasting CPU time.
 	The EE kernel allows threads to be preempted after interrupts, but definitely uses FCFS scheduling too. So if no interrupt occurs, then there will be no preemption either.
+
+4. Critical-section protection within core/mem.c now disables interrupts:
+	There's this part in pbuf_free() of core/pbuf.c:
+	      /* p->flags == PBUF_FLAG_RAM */
+	      } else {
+	        mem_free(p);
+	      }
+	...that might cause a race conditions because that fragment of code is run with interrupts disabled,
+	while mem_free() will use Semaphores to ensure access control.
