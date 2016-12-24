@@ -64,7 +64,7 @@ CONFIG_OBJS = _config_internals.o GetRomName.o IsT10K.o IsEarlyJap.o configGetLa
 	configIsDaylightSavingEnabled.o configSetDaylightSavingEnabled.o
 CONFIG_OBJS := $(CONFIG_OBJS:%=$(EE_OBJS_DIR)%)
 
-LIBKRNLUPD_OBJS = libkrnlupd.o libkrnlupd_syscalls.o osdsrc_bin.o
+LIBKRNLUPD_OBJS = libkrnlupd.o libkrnlupd_osd.o libkrnlupd_common.o libkrnlupd_syscalls.o osdsrc_bin.o
 LIBKRNLUPD_OBJS := $(LIBKRNLUPD_OBJS:%=$(EE_OBJS_DIR)%)
 
 TLBFUNC_OBJS = tlbfunc.o tlbsrc_bin.o
@@ -165,8 +165,21 @@ $(GLUE_OBJS): $(EE_SRC_DIR)glue.c
 $(SIO_OBJS): $(EE_SRC_DIR)sio.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(EE_OBJS_DIR)libkrnlupd.o: $(EE_SRC_DIR)libkrnlupd.c $(EE_SRC_DIR)osdsrc_bin.c $(EE_SRC_DIR)libkrnlupd_syscalls.S
+$(EE_OBJS_DIR)libkrnlupd.o: $(EE_SRC_DIR)libkrnlupd.c
 	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
+
+$(EE_OBJS_DIR)libkrnlupd_osd.o: $(EE_SRC_DIR)libkrnlupd_osd.c
+	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
+
+$(EE_OBJS_DIR)libkrnlupd_common.o: $(EE_SRC_DIR)libkrnlupd_common.c
+	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
+
+$(EE_OBJS_DIR)osdsrc_bin.o: $(EE_SRC_DIR)osdsrc_bin.c
+	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
+
+$(EE_OBJS_DIR)libkrnlupd_syscalls.o: $(EE_SRC_DIR)libkrnlupd_syscalls.S
+	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
+
 
 $(EE_OBJS_DIR)tibfunc.o: $(EE_SRC_DIR)tlbfunc.c $(EE_SRC_DIR)tlbsrc_bin.c
 	$(EE_C_COMPILE) $< -c -o $@

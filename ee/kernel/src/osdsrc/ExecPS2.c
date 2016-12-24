@@ -1,3 +1,4 @@
+#include <kernel.h>
 
 #include "ExecPS2.h"
 
@@ -17,16 +18,20 @@ static void (*p_InitializeScratchPad)(void)=(void*)0x8000b840;
 static int (*p_ResetEE)(int flags)=(void*)0x8000ad68;
 static void (*p_InitializeGS)(void)=(void*)0x8000aa60;
 static void (*p_SetGSCrt)(unsigned short int interlace, unsigned short int mode, unsigned short int ffmd)=(void*)0x8000a060;
-static void* (*p_ExecPS2)(void *entry, void *gp, int argc, char *argv[])=(void*)0x800057E8;
 
-//Taken from eekernel.h of the PCSX2 FPS2BIOS.
-enum {
-	THS_RUN     = 0x01,
-	THS_READY   = 0x02,
-	THS_WAIT    = 0x04,
-	THS_SUSPEND = 0x08,
-	THS_DORMANT = 0x10,
-};
+#ifndef REUSE_EXECPS2
+
+static void (*p_FlushDCache)(void)=(void*)0x80002a80;
+static void (*p_FlushICache)(void)=(void*)0x80002ac0;
+static char *(*p_eestrcpy)(char* dst, const char* src)=(void*)0x80005560;
+//static void *p_unk80012600=(void*)0x80012600;	//Not sure what this is, as it isn't used by the patch.
+static char *p_ArgsBuffer=(char*)0x80012608;
+
+#else
+
+static void* (*p_ExecPS2)(void *entry, void *gp, int argc, char *argv[])=(void*)0x800057E8;	//Not part of the SONY patch. See below.
+
+#endif
 
 struct TCB { //internal struct
 	struct TCB	*next; //+00
@@ -68,6 +73,9 @@ static inline void SoftPeripheralEEReset(void){
 void *ExecPS2Patch(void *EntryPoint, void *gp, int argc, char *argv[]){
 	int i, CurrentThreadID;
 	struct TCB *tcb;
+#ifndef REUSE_EXECPS2
+	char *ArgsPtr;
+#endif
 
 	CurrentThreadID=*p_ThreadID;
 	p_CancelWakeupThread(CurrentThreadID);
@@ -88,7 +96,32 @@ void *ExecPS2Patch(void *EntryPoint, void *gp, int argc, char *argv[]){
 	*p_ThreadStatus=0;
 	SoftPeripheralEEReset();
 
+#ifdef REUSE_EXECPS2
 	//Unlike the Sony patch, why don't we just reuse the original function in the kernel?
 	return p_ExecPS2(EntryPoint, gp, argc, argv);
+#else
+	for(i=0,ArgsPtr=p_ArgsBuffer; i<argc; i++){
+		ArgsPtr=p_eestrcpy(ArgsPtr, argv[i]);
+	}
+
+	p_FlushICache();
+
+	tcb=&p_TCBs[CurrentThreadID];
+	tcb->argstring=p_ArgsBuffer;
+	tcb->argc=argc;
+	tcb->entry=EntryPoint;
+	tcb->entry_=EntryPoint;
+	tcb->gpReg=gp;
+	tcb->initPriority=0;
+	tcb->currentPriority=0;
+	tcb->wakeupCount=0;
+	tcb->waitSema=0;
+	tcb->semaId=0;
+
+	p_FlushICache();
+	p_FlushDCache();
+
+	return EntryPoint;
+#endif
 }
 
