@@ -33,9 +33,6 @@
 #include "byteorder.h"
 #include "devscan.h"
 
-#define ntohl(x) htonl(x)
-#define ntohs(x) htons(x)
-
 //#define DEBUG
 //#define DEBUG
 #ifdef DEBUG

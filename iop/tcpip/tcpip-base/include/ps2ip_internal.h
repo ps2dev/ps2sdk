@@ -22,6 +22,8 @@
 #define	dbgprintf(args...)
 #endif
 
+#define netif_dhcp_data(netif) ((struct dhcp*)(netif)->client_data[LWIP_NETIF_CLIENT_DATA_INDEX_DHCP])
+
 //This structure is also found in common/tcpip.h, but that header file cannot be imported because it will conflict with the full LWIP header files.
 typedef struct
 {

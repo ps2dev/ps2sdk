@@ -45,6 +45,7 @@ thmsgbx_IMPORTS_end
 sysclib_IMPORTS_start
 I_memset
 I_strcpy
+I_strncpy
 I_memcpy
 I_strlen
 I_strncmp

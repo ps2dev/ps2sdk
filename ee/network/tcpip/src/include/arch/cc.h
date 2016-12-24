@@ -2,6 +2,7 @@
 #define __CC_H__
 
 #include <errno.h>
+#include <stddef.h>
 
 #define BYTE_ORDER LITTLE_ENDIAN
 
@@ -34,5 +35,11 @@ typedef u32_t mem_ptr_t;
 #define U32_F "u"
 #define S32_F "d"
 #define X32_F "x"
+
+#define LWIP_NO_STDINT_H	1	//stdint.h does not exist.
+#define LWIP_NO_INTTYPES_H	1	//inttypes.h does not exist.
+
+#define lwip_htons(x) PP_HTONS(x)
+#define lwip_htonl(x) PP_HTONL(x)
 
 #endif /* __CC_H__ */

@@ -60,7 +60,7 @@ int       lwip_getsockopt (int s, int level, int optname, void *optval, socklen_
 int       lwip_setsockopt (int s, int level, int optname, const void *optval, socklen_t optlen);
 #define I_lwip_setsockopt DECLARE_IMPORT(19, lwip_setsockopt)
 
-int       ps2ip_setconfig(t_ip_info* ip_info);
+int       ps2ip_setconfig(const t_ip_info* ip_info);
 #define I_ps2ip_setconfig DECLARE_IMPORT(20, ps2ip_setconfig)
 int       ps2ip_getconfig(char* netif_name,t_ip_info* ip_info);
 #define I_ps2ip_getconfig DECLARE_IMPORT(21, ps2ip_getconfig)
@@ -73,7 +73,7 @@ int lwip_fcntl(int s, int cmd, int val);
 #define I_lwip_fcntl DECLARE_IMPORT(47, lwip_fcntl)
 
 /* From include/netif/etharp.h:  */
-err_t	etharp_output(struct netif *netif, struct pbuf *q, ip_addr_t *ipaddr);
+err_t	etharp_output(struct netif *netif, struct pbuf *q, const ip_addr_t *ipaddr);
 #define I_etharp_output DECLARE_IMPORT(23, etharp_output)
 
 /* From include/lwip/tcpip.h:  */
@@ -81,24 +81,26 @@ err_t     tcpip_input(struct pbuf *p, struct netif *inp);
 #define I_tcpip_input DECLARE_IMPORT(25, tcpip_input)
 
 /* From include/lwip/netif.h:  */
-struct netif*    netif_add(struct netif *netif, struct ip_addr *ipaddr, struct ip_addr *netmask,
-                           struct ip_addr *gw,void *state,err_t (* init)(struct netif *netif),
-                           err_t (* input)(struct pbuf *p, struct netif *netif));
+struct netif *netif_add(struct netif *netif,
+#if LWIP_IPV4
+                        const ip4_addr_t *ipaddr, const ip4_addr_t *netmask, const ip4_addr_t *gw,
+#endif /* LWIP_IPV4 */
+                        void *state, netif_init_fn init, netif_input_fn input);
 #define        I_netif_add DECLARE_IMPORT(26, netif_add)
 
 /* Returns a network interface given its name. The name is of the form
    "et0", where the first two letters are the "name" field in the
    netif structure, and the digit is in the num field in the same
    structure. */
-struct netif*    netif_find(char *name);
+struct netif*    netif_find(const char *name);
 #define        I_netif_find DECLARE_IMPORT(27, netif_find)
 void             netif_set_default(struct netif *netif);
 #define        I_netif_set_default DECLARE_IMPORT(28, netif_set_default)
-void             netif_set_ipaddr(struct netif *netif, struct ip_addr *ipaddr);
+void             netif_set_ipaddr(struct netif *netif, const ip4_addr_t *ipaddr);
 #define        I_netif_set_ipaddr DECLARE_IMPORT(29, netif_set_ipaddr)
-void             netif_set_netmask(struct netif *netif, struct ip_addr *netmast);
+void             netif_set_netmask(struct netif *netif, const ip4_addr_t *netmask);
 #define        I_netif_set_netmask DECLARE_IMPORT(30, netif_set_netmask)
-void             netif_set_gw(struct netif *netif, struct ip_addr *gw);
+void             netif_set_gw(struct netif *netif, const ip4_addr_t *gw);
 #define        I_netif_set_gw DECLARE_IMPORT(31, netif_set_gw)
 void		netif_set_up(struct netif *netif);
 #define        I_netif_set_up DECLARE_IMPORT(32, netif_set_up)
@@ -124,12 +126,12 @@ struct pbuf*     pbuf_dechain(struct pbuf *p);
 struct pbuf*     pbuf_take(struct pbuf *f);
 #define        I_pbuf_take DECLARE_IMPORT(42, pbuf_take)
 
-/* From include/ipv4/lwip/inet.h:  */
+/* From include/lwip/inet.h:  */
 /* directly map this to the lwip internal functions */
-#define inet_addr(cp)         ipaddr_addr(cp)
-#define inet_aton(cp, addr)   ipaddr_aton(cp, (ip_addr_t*)addr)
-#define inet_ntoa(addr)       ipaddr_ntoa((ip_addr_t*)&(addr))
-#define inet_ntoa_r(addr, buf, buflen) ipaddr_ntoa_r((ip_addr_t*)&(addr), buf, buflen)
+#define inet_addr(cp)                   ipaddr_addr(cp)
+#define inet_aton(cp, addr)             ip4addr_aton(cp, (ip4_addr_t*)addr)
+#define inet_ntoa(addr)                 ip4addr_ntoa((const ip4_addr_t*)&(addr))
+#define inet_ntoa_r(addr, buf, buflen)  ip4addr_ntoa_r((const ip4_addr_t*)&(addr), buf, buflen)
 
 u32        ipaddr_addr(const char *cp);
 #define  I_ipaddr_addr DECLARE_IMPORT(24, ipaddr_addr)
@@ -146,7 +148,7 @@ char       *ipaddr_ntoa_r(const ip_addr_t *addr, char *buf, int buflen);
 #define  I_inet_ntoa_r DECLARE_IMPORT(45, ipaddr_ntoa_r)
 
 #ifdef PS2IP_DNS
-/* From include/ipv4/lwip/netdb.h:  */
+/* From include/lwip/netdb.h:  */
 struct hostent *lwip_gethostbyname(const char *name);
 #define  I_lwip_gethostbyname DECLARE_IMPORT(48, lwip_gethostbyname)
 int lwip_gethostbyname_r(const char *name, struct hostent *ret, char *buf,
@@ -160,7 +162,8 @@ int lwip_getaddrinfo(const char *nodename,
        struct addrinfo **res);
 #define  I_lwip_getaddrinfo DECLARE_IMPORT(51, lwip_getaddrinfo)
 
-void           dns_setserver(u8 numdns, ip_addr_t *dnsserver);
+/* From include/lwip/dns.h:  */
+void           dns_setserver(u8 numdns, const ip_addr_t *dnsserver);
 #define  I_dns_setserver DECLARE_IMPORT(52, dns_setserver)
 ip_addr_t      dns_getserver(u8 numdns);
 #define  I_dns_getserver DECLARE_IMPORT(53, dns_getserver)

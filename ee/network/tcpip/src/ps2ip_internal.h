@@ -15,6 +15,8 @@
 
 #include "lwip/sockets.h"
 
+#define netif_dhcp_data(netif) ((struct dhcp*)(netif)->client_data[LWIP_NETIF_CLIENT_DATA_INDEX_DHCP])
+
 typedef struct
 {
 	char		netif_name[4];

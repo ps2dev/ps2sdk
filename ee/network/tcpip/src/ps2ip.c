@@ -21,6 +21,7 @@
 #include "lwip/tcpip.h"
 #include "lwip/netif.h"
 #include "lwip/dhcp.h"
+#include "lwip/prot/dhcp.h"
 #include "lwip/inet.h"
 #include "netif/etharp.h"
 
@@ -28,7 +29,7 @@
 
 typedef struct pbuf	PBuf;
 typedef struct netif	NetIF;
-typedef struct ip_addr	IPAddr;
+typedef struct ip4_addr	IPAddr;
 
 static struct netif NIF;
 
@@ -52,16 +53,17 @@ int ps2ip_getconfig(char* pszName, t_ip_info* pInfo)
 	memcpy(pInfo->hw_addr,pNetIF->hwaddr,sizeof(pInfo->hw_addr));
 
 #if LWIP_DHCP
+	struct dhcp *dhcp = netif_dhcp_data(pNetIF);
 
-	if ((pNetIF->dhcp != NULL) && (pNetIF->dhcp->state != DHCP_OFF))
+	if ((dhcp != NULL) && (dhcp->state != DHCP_STATE_OFF))
 	{
 		pInfo->dhcp_enabled=1;
-		pInfo->dhcp_status=pNetIF->dhcp->state;
+		pInfo->dhcp_status=dhcp->state;
 	}
 	else
 	{
 		pInfo->dhcp_enabled=0;
-		pInfo->dhcp_status=DHCP_OFF;
+		pInfo->dhcp_status=DHCP_STATE_OFF;
 	}
 
 #else
@@ -71,7 +73,7 @@ int ps2ip_getconfig(char* pszName, t_ip_info* pInfo)
 	return	1;
 }
 
-int ps2ip_setconfig(t_ip_info* pInfo)
+int ps2ip_setconfig(const t_ip_info* pInfo)
 {
 	NetIF*	pNetIF=netif_find(pInfo->netif_name);
 
@@ -84,12 +86,13 @@ int ps2ip_setconfig(t_ip_info* pInfo)
 	netif_set_gw(pNetIF,(IPAddr*)&pInfo->gw);
 
 #if	LWIP_DHCP
+	struct dhcp *dhcp = netif_dhcp_data(pNetIF);
 
 	//Enable dhcp here
 
 	if (pInfo->dhcp_enabled)
 	{
-		if ((pNetIF->dhcp == NULL) || (pNetIF->dhcp->state == DHCP_OFF))
+		if ((dhcp == NULL) || (dhcp->state == DHCP_STATE_OFF))
 		{
 			//Start dhcp client
 			dhcp_start(pNetIF);
@@ -97,7 +100,7 @@ int ps2ip_setconfig(t_ip_info* pInfo)
 	}
 	else
 	{
-		if ((pNetIF->dhcp != NULL) && (pNetIF->dhcp->state != DHCP_OFF))
+		if ((dhcp != NULL) && (dhcp->state != DHCP_STATE_OFF))
 		{
 			//Stop dhcp client
 			dhcp_stop(pNetIF);
@@ -256,7 +259,7 @@ static inline int InitializeLWIP(void)
 	return 0;
 }
 
-int ps2ipInit(struct ip_addr *ip_address, struct ip_addr *subnet_mask, struct ip_addr *gateway){
+int ps2ipInit(struct ip4_addr *ip_address, struct ip4_addr *subnet_mask, struct ip4_addr *gateway){
 	static struct NetManNetProtStack stack={
 		&LinkStateUp,
 		&LinkStateDown,

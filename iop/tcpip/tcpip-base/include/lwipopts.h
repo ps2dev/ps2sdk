@@ -85,7 +85,7 @@
  * instead of the lwip internal allocator. Can save code size if you
  * already use it.
  */
-#define MEM_LIBC_MALLOC		1
+//#define MEM_LIBC_MALLOC		1	//FIXME: Missing calloc() function
 
 /* MEM_ALIGNMENT: should be set to the alignment of the CPU for which
    lwIP is compiled. 4 byte alignment -> define MEM_ALIGNMENT to 4, 2
@@ -195,11 +195,26 @@
    ---------- Socket options ----------
    ------------------------------------
 */
+/* LWIP_SOCKET_SET_ERRNO==1: Set errno when socket functions cannot complete
+ * successfully, as required by POSIX. Default is POSIX-compliant.
+ */
+#define LWIP_SOCKET_SET_ERRNO	0
 /**
  * LWIP_POSIX_SOCKETS_IO_NAMES==1: Enable POSIX-style sockets functions names.
  * Disable this option if you use a POSIX operating system that uses the same
  * names (read, write & close). (only used if you use sockets.c)
  */
 #define LWIP_POSIX_SOCKETS_IO_NAMES	0
+
+/*
+   ----------------------------------
+   ---------- DNS options -----------
+   ----------------------------------
+*/
+/** LWIP_DNS_SECURE: controls the security level of the DNS implementation
+ * Use all DNS security features by default.
+ * This is overridable but should only be needed by very small targets
+ * or when using against non standard DNS servers. */
+#define LWIP_DNS_SECURE	0
 
 #endif /* __LWIPOPTS_H__ */

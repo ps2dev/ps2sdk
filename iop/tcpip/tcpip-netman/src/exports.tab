@@ -45,9 +45,9 @@ DECLARE_EXPORT_TABLE(ps2ip, 2, 4)
 	DECLARE_EXPORT(pbuf_chain)		//40
 	DECLARE_EXPORT(pbuf_dechain)
 	DECLARE_EXPORT(pbuf_take)
-	DECLARE_EXPORT(ipaddr_aton)
-	DECLARE_EXPORT(ipaddr_ntoa)
-	DECLARE_EXPORT(ipaddr_ntoa_r)		//45
+	DECLARE_EXPORT(ip4addr_aton)
+	DECLARE_EXPORT(ip4addr_ntoa)
+	DECLARE_EXPORT(ip4addr_ntoa_r)		//45
 	DECLARE_EXPORT(lwip_shutdown)
 	DECLARE_EXPORT(lwip_fcntl)
 #ifdef PS2IP_DNS

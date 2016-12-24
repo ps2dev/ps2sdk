@@ -23,7 +23,7 @@
 #include "lwip/opt.h"
 #include "lwip/stats.h"
 #include "lwip/debug.h"
-#include "lwip/timers.h"
+#include "lwip/timeouts.h"
 #include "lwip/pbuf.h"
 #include "arch/sys_arch.h"
 
@@ -367,7 +367,8 @@ void sys_arch_unprotect(sys_prot_t Flags)
 	CpuResumeIntr(Flags);
 }
 
-void *malloc(unsigned int size){
+void *malloc(unsigned int size)
+{
 	int flags;
 	void *ptr;
 
@@ -378,7 +379,8 @@ void *malloc(unsigned int size){
 	return ptr;
 }
 
-void free(void *ptr){
+void free(void *ptr)
+{
 	int flags;
 
 	CpuSuspendIntr(&flags);
@@ -386,3 +388,13 @@ void free(void *ptr){
 	CpuResumeIntr(flags);
 }
 
+u32_t sys_now(void)
+{
+	iop_sys_clock_t	timenow;
+	u32 seconds, usecs;
+
+	GetSystemTime(&timenow);
+	SysClock2USec(&timenow, &seconds, &usecs);
+
+	return(seconds*1000 + usecs / 1000);
+}

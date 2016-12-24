@@ -1,0 +1,7 @@
+Changes to LWIP v2.0.0:
+-----------------------
+
+Please keep this file updated, whenever fixes are added or removed. Or if the version of LWIP ported is changed.
+As much as I'll like to make a clean port of LWIP, it was clearly not made to support a kernels like our EE and IOP kernels.
+
+1. stdlib.h will not be included in api/netdb.c and core/mem.c, when built for the IOP.

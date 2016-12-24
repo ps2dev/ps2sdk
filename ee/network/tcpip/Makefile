@@ -21,11 +21,11 @@ DEBUG_FLAGS = -DDEBUG -DLWIP_DEBUG
 endif
 
 # Change this to point to the version of LWIP this is being compiled with.
-LWIP=$(PS2SDKSRC)/common/tcpip/lwip-1.4.1
+LWIP=$(PS2SDKSRC)/common/tcpip/lwip-2.0.0
 
 ps2api_OBJECTS = api_lib.o api_msg.o api_netbuf.o err.o sockets.o tcpip.o
-ps2api_IPV4 = icmp.o ip.o ip_addr.o ip_frag.o inet.o inet_chksum.o
-ps2ip_OBJECTS = sys.o lwip_init.o mem.o netif.o pbuf.o stats.o tcp_in.o tcp_out.o udp.o memp.o tcp.o etharp.o raw.o def.o timers.o $(ps2api_IPV4) $(ps2api_OBJECTS)
+ps2api_IPV4 = icmp.o ip.o ip4.o ip4_addr.o ip4_frag.o inet_chksum.o
+ps2ip_OBJECTS = sys.o lwip_init.o mem.o netif.o pbuf.o stats.o tcp_in.o tcp_out.o udp.o memp.o tcp.o ethernet.o etharp.o raw.o def.o timeouts.o $(ps2api_IPV4) $(ps2api_OBJECTS)
 
 ifdef PS2IP_DHCP
 ps2ip_OBJECTS+= dhcp.o
@@ -47,7 +47,7 @@ EE_CFLAGS += -DPS2IP_DNS
 endif
 
 EE_INCS += -I$(LWIP)/src/include -I$(LWIP)/src/include/ipv4 -Isrc/include
-EE_CFLAGS += -Wall -fno-builtin -DLWIP_NOASSERT -DLWIP_COMPAT_MUTEX $(DEBUG_FLAGS) -mno-gpopt -O2 -G0 -mno-check-zero-division
+EE_CFLAGS += -Wall -fno-builtin -DLWIP_NOASSERT -DLWIP_COMPAT_MUTEX -DLWIP_COMPAT_MUTEX_ALLOWED $(DEBUG_FLAGS) -mno-gpopt -O2 -G0 -mno-check-zero-division
 
 EE_LIB = $(EE_LIB_DIR)libps2ip.a
 EE_OBJS  = ps2ip.o sys_arch.o $(ps2ip_OBJECTS) erl-support.o
@@ -68,9 +68,6 @@ $(EE_OBJS_DIR)def.o: $(LWIP)/src/core/def.c
 $(EE_OBJS_DIR)lwip_init.o: $(LWIP)/src/core/init.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
-$(EE_OBJS_DIR)loopif.o: $(LWIP)/src/netif/loopif.c
-	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
-
 $(EE_OBJS_DIR)api_lib.o: $(LWIP)/src/api/api_lib.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
@@ -83,13 +80,16 @@ $(EE_OBJS_DIR)api_netbuf.o: $(LWIP)/src/api/netbuf.c
 $(EE_OBJS_DIR)icmp.o: $(LWIP)/src/core/ipv4/icmp.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
-$(EE_OBJS_DIR)ip.o: $(LWIP)/src/core/ipv4/ip.c
+$(EE_OBJS_DIR)ip.o: $(LWIP)/src/core/ip.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
-$(EE_OBJS_DIR)ip_addr.o: $(LWIP)/src/core/ipv4/ip_addr.c
+$(EE_OBJS_DIR)ip4.o: $(LWIP)/src/core/ipv4/ip4.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
-$(EE_OBJS_DIR)ip_frag.o: $(LWIP)/src/core/ipv4/ip_frag.c
+$(EE_OBJS_DIR)ip4_addr.o: $(LWIP)/src/core/ipv4/ip4_addr.c
+	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
+
+$(EE_OBJS_DIR)ip4_frag.o: $(LWIP)/src/core/ipv4/ip4_frag.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
 $(EE_OBJS_DIR)err.o: $(LWIP)/src/api/err.c
@@ -101,10 +101,7 @@ $(EE_OBJS_DIR)sockets.o: $(LWIP)/src/api/sockets.c
 $(EE_OBJS_DIR)tcpip.o: $(LWIP)/src/api/tcpip.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
-$(EE_OBJS_DIR)inet.o: $(LWIP)/src/core/ipv4/inet.c
-	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
-
-$(EE_OBJS_DIR)inet_chksum.o: $(LWIP)/src/core/ipv4/inet_chksum.c
+$(EE_OBJS_DIR)inet_chksum.o: $(LWIP)/src/core/inet_chksum.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
 $(EE_OBJS_DIR)mem.o: $(LWIP)/src/core/mem.c
@@ -137,14 +134,17 @@ $(EE_OBJS_DIR)sys.o: $(LWIP)/src/core/sys.c
 $(EE_OBJS_DIR)raw.o: $(LWIP)/src/core/raw.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
-$(EE_OBJS_DIR)timers.o: $(LWIP)/src/core/timers.c
+$(EE_OBJS_DIR)timeouts.o: $(LWIP)/src/core/timeouts.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
-$(EE_OBJS_DIR)etharp.o: $(LWIP)/src/netif/etharp.c
+$(EE_OBJS_DIR)etharp.o: $(LWIP)/src/core/ipv4/etharp.c
+	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
+
+$(EE_OBJS_DIR)ethernet.o: $(LWIP)/src/netif/ethernet.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
 ifdef PS2IP_DHCP
-$(EE_OBJS_DIR)dhcp.o: $(LWIP)/src/core/dhcp.c
+$(EE_OBJS_DIR)dhcp.o: $(LWIP)/src/core/ipv4/dhcp.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 endif
 

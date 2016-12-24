@@ -24,10 +24,10 @@
 #include "lwip/sys.h"
 #include "lwip/tcp.h"
 #include "lwip/tcpip.h"
+#include "lwip/prot/dhcp.h"
 #include "lwip/netif.h"
 #include "lwip/dhcp.h"
 #include "lwip/inet.h"
-#include "lwip/tcp_impl.h"
 #include "netif/etharp.h"
 
 #include "ps2ip_internal.h"
@@ -37,7 +37,7 @@ typedef struct netif	NetIF;
 typedef struct ip_addr	IPAddr;
 
 #define MODNAME	"TCP/IP Stack"
-IRX_ID(MODNAME, 2, 1);
+IRX_ID(MODNAME, 2, 2);
 
 extern struct irx_export_table	_exp_ps2ip;
 
@@ -70,16 +70,17 @@ ps2ip_getconfig(char* pszName,t_ip_info* pInfo)
 	memcpy(pInfo->hw_addr,pNetIF->hwaddr,sizeof(pInfo->hw_addr));
 
 #if		LWIP_DHCP
+	struct dhcp *dhcp = netif_dhcp_data(pNetIF);
 
-	if (pNetIF->dhcp)
+	if ((dhcp != NULL) && (dhcp->state != DHCP_STATE_OFF))
 	{
 		pInfo->dhcp_enabled=1;
-		pInfo->dhcp_status=pNetIF->dhcp->state;
+		pInfo->dhcp_status=dhcp->state;
 	}
 	else
 	{
 		pInfo->dhcp_enabled=0;
-		pInfo->dhcp_status=0;
+		pInfo->dhcp_status=DHCP_STATE_OFF;
 	}
 
 #else
@@ -93,7 +94,7 @@ ps2ip_getconfig(char* pszName,t_ip_info* pInfo)
 
 
 int
-ps2ip_setconfig(t_ip_info* pInfo)
+ps2ip_setconfig(const t_ip_info* pInfo)
 {
 	NetIF*	pNetIF=netif_find(pInfo->netif_name);
 
@@ -101,31 +102,31 @@ ps2ip_setconfig(t_ip_info* pInfo)
 	{
 		return	0;
 	}
-	netif_set_ipaddr(pNetIF,(IPAddr*)&pInfo->ipaddr);
-	netif_set_netmask(pNetIF,(IPAddr*)&pInfo->netmask);
-	netif_set_gw(pNetIF,(IPAddr*)&pInfo->gw);
+	netif_set_ipaddr(pNetIF,(const struct ip4_addr*)&pInfo->ipaddr);
+	netif_set_netmask(pNetIF,(const struct ip4_addr*)&pInfo->netmask);
+	netif_set_gw(pNetIF,(const struct ip4_addr*)&pInfo->gw);
 
 #if	LWIP_DHCP
+	struct dhcp *dhcp = netif_dhcp_data(pNetIF);
 
 	//Enable dhcp here
 
 	if (pInfo->dhcp_enabled)
 	{
-		if (!pNetIF->dhcp)
+		if ((dhcp == NULL) || (dhcp->state == DHCP_STATE_OFF))
 		{
-
 			//Start dhcp client
-
 			dhcp_start(pNetIF);
 		}
 	}
 	else
 	{
-		if (pNetIF->dhcp)
+		if ((dhcp != NULL) && (dhcp->state != DHCP_STATE_OFF))
 		{
+			//Release DHCP lease
+			dhcp_release(pNetIF);
 
 			//Stop dhcp client
-
 			dhcp_stop(pNetIF);
 		}
 	}
@@ -134,7 +135,6 @@ ps2ip_setconfig(t_ip_info* pInfo)
 
 	return	1;
 }
-
 
 static void InitDone(void* pvArg)
 {
@@ -230,7 +230,7 @@ int _exit(int argc, char** argv)
 	return MODULE_NO_RESIDENT_END; // return "not resident"!
 }
 
-static inline int InitLWIPStack(struct ip_addr *IP, struct ip_addr *NM, struct ip_addr *GW){
+static inline int InitLWIPStack(struct ip4_addr *IP, struct ip4_addr *NM, struct ip4_addr *GW){
 	sys_sem_t	Sema;
 	int		iRet;
 
@@ -259,7 +259,7 @@ static inline int InitLWIPStack(struct ip_addr *IP, struct ip_addr *NM, struct i
 }
 
 int _start(int argc, char *argv[]){
-	struct ip_addr IP, NM, GW;
+	struct ip4_addr IP, NM, GW;
 
 	//Parse IP address arguments.
 	if(argc>=4)

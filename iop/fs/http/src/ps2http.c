@@ -336,7 +336,7 @@ const char *resolveAddress( struct sockaddr_in *server, const char * url, char *
 		z = (int)strtol(&addr[i],NULL, 10);
 		i += (strlen(&addr[i]) + 1);
 
-		IP4_ADDR( (struct ip_addr *)&(server->sin_addr) ,w,x,y,z );
+		IP4_ADDR( (struct ip4_addr *)&(server->sin_addr) ,w,x,y,z );
 	}
 
     i = (int) strtol(port, NULL, 10); // set the port
