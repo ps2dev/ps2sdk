@@ -102,6 +102,9 @@ int ps2ip_setconfig(const t_ip_info* pInfo)
 	{
 		if ((dhcp != NULL) && (dhcp->state != DHCP_STATE_OFF))
 		{
+			//Release DHCP lease
+			dhcp_release(pNetIF);
+
 			//Stop dhcp client
 			dhcp_stop(pNetIF);
 		}
