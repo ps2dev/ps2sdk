@@ -5,3 +5,18 @@ Please keep this file updated, whenever fixes are added or removed. Or if the ve
 As much as I'll like to make a clean port of LWIP, it was clearly not made to support a kernels like our EE and IOP kernels.
 
 1. stdlib.h will not be included in api/netdb.c and core/mem.c, when built for the IOP.
+
+2. Changed code that signals the callback-thread within event_callback() of api/sockets.c to not signal the semaphore while interrupts are disabled:
+	Originally, the event_callback function	would attempt to signal a semaphore when interrupts are disabled,
+		which could violate the critical section (and hence resulting in race conditions) due to the design of the IOP/EE kernel.
+	By design, SCE designed the EE and IOP kernels to do these actions, if a semaphore is signalled while interrupts are disabled/inhibited:
+		Inhibit the interrupt-disabled state, allow the woken-up thread to run, before finally resuming the interrupt-inhibited state.
+	
+	The faulting location is here, within event_callback itself:
+		    if (scb->sem_signalled == 0) {
+	... as scb becomes some invalid value because select_cb_list got modified by another thread when the
+		interrupt-inhibited state got interrupted.
+
+3. Moved the code that "keeps interrupt protection time short" within event_callback() of api/sockets.c, as part of (2).
+	As the IOP uses non-preemptive multitasking, re-enabling interrupts for a short period of time probably doesn't do much... except for wasting CPU time.
+	The EE kernel allows threads to be preempted after interrupts, but definitely uses FCFS scheduling too. So if no interrupt occurs, then there will be no preemption either.

@@ -1633,11 +1633,23 @@ again:
       }
       if (do_signal) {
         scb->sem_signalled = 1;
-        /* Don't call SYS_ARCH_UNPROTECT() before signaling the semaphore, as this might
-           lead to the select thread taking itself off the list, invalidating the semaphore. */
+
+#if (defined(_IOP) || defined(_EE))
+        /* EE/IOP: Resume interrupts before signalling the semaphore, otherwise the critical section will be violated. */
+        SYS_ARCH_UNPROTECT(lev);
         sys_sem_signal(SELECT_SEM_PTR(scb->sem));
+        SYS_ARCH_PROTECT(lev);
+
+        if (last_select_cb_ctr != select_cb_ctr) {
+          /* someone has changed select_cb_list, restart at the beginning */
+          goto again;
+        }
+#else
+        sys_sem_signal(SELECT_SEM_PTR(scb->sem));
+#endif
       }
     }
+#if (!defined(_IOP) && !defined(_EE))
     /* unlock interrupts with each step */
     SYS_ARCH_UNPROTECT(lev);
     /* this makes sure interrupt protection time is short */
@@ -1646,6 +1658,7 @@ again:
       /* someone has changed select_cb_list, restart at the beginning */
       goto again;
     }
+#endif
   }
   SYS_ARCH_UNPROTECT(lev);
 }
