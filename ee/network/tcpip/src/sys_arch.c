@@ -26,11 +26,6 @@
 
 #include "ps2ip_internal.h"
 
-// this is probably excessive but since each "message" is only 8 bytes...
-// I have no idea how many messages would be queued at once...
-#define SYS_MAX_MESSAGES	512
-
-// 4096 bytes
 static arch_message msg_pool[SYS_MAX_MESSAGES];
 
 /* Function prototypes */

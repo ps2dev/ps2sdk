@@ -9,6 +9,8 @@ typedef int	sys_thread_t;
 #define	SYS_MBOX_NULL	-1
 #define	SYS_SEM_NULL	-1
 
+#define SYS_MAX_MESSAGES	(MEMP_NUM_TCPIP_MSG_API+MEMP_NUM_TCPIP_MSG_INPKT)
+
 typedef struct st_arch_message
 {
     struct st_arch_message *next;
