@@ -106,7 +106,7 @@
 /**
  * PBUF_POOL_SIZE: the number of buffers in the pbuf pool.
  */
-#define PBUF_POOL_SIZE		16	//SP193: should be at least ((TCP_WND/PBUF_POOL_BUFSIZE)+1). But that is too small to handle simultaneous connections.
+#define PBUF_POOL_SIZE		60	//SP193: should be at least ((TCP_WND/PBUF_POOL_BUFSIZE)+1). But that is too small to handle simultaneous connections.
 
 /** SYS_LIGHTWEIGHT_PROT
  * define SYS_LIGHTWEIGHT_PROT in lwipopts.h if you want inter-task protection
@@ -127,7 +127,7 @@
 #define TCP_SND_BUF             (TCP_MSS*4)
 
 /* TCP receive window. */
-#define TCP_WND                 16384	//The SMAP Rx buffer is 16384 bytes in size.
+#define TCP_WND                 65535
 
 /* ---------- ARP options ---------- */
 /**

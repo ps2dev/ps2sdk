@@ -11,7 +11,7 @@
 #include "rpc_server.h"
 
 static int NETMAN_RpcSvr_threadID=-1;
-static unsigned char NETMAN_RpcSvr_ThreadStack[0x1000] ALIGNED(128);
+static unsigned char NETMAN_RpcSvr_ThreadStack[0x1000] ALIGNED(16);
 static unsigned char IsInitialized=0;
 
 static u8 *FrameBuffer;
