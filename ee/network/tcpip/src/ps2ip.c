@@ -148,51 +148,24 @@ static void LinkStateDown(void)
 	tcpip_callback((void*)&netif_set_link_down, &NIF);
 }
 
-#define LWIP_STACK_MAX_RX_PBUFS	16
-
-struct NetManPacketBuffer pbufs[LWIP_STACK_MAX_RX_PBUFS];
-static unsigned short int NetManRxPacketBufferPoolFreeStart, RxPBufsFree;
-static struct NetManPacketBuffer *recv_pbuf_queue_start, *recv_pbuf_queue_end;
-
-static struct NetManPacketBuffer *AllocRxPacket(unsigned int size)
+static void *AllocRxPacket(unsigned int size, void **payload)
 {
-	struct pbuf* pBuf;
-	struct NetManPacketBuffer *result;
+	struct pbuf* pbuf;
 
-	if(RxPBufsFree>0 && ((pBuf=pbuf_alloc(PBUF_RAW, size, PBUF_POOL))!=NULL))
-	{
-		result=&pbufs[NetManRxPacketBufferPoolFreeStart];
-		NetManRxPacketBufferPoolFreeStart = (NetManRxPacketBufferPoolFreeStart + 1) % LWIP_STACK_MAX_RX_PBUFS;
+	if((pbuf = pbuf_alloc(PBUF_RAW, size, PBUF_POOL)) != NULL)
+		*payload = pbuf->payload;	
 
-		result->payload=pBuf->payload;
-		result->handle=pBuf;
-		result->length=size;
-
-		RxPBufsFree--;
-	}
-	else result=NULL;
-
-	return result;
+	return pbuf;
 }
 
-static void FreeRxPacket(struct NetManPacketBuffer *packet)
+static void FreeRxPacket(void *packet)
 {
-	pbuf_free(packet->handle);
+	pbuf_free(packet);
 }
 
-static int EnQRxPacket(struct NetManPacketBuffer *packet)
+static void EnQRxPacket(void *packet)
 {
-	ps2ip_input(packet->handle, &NIF);
-	RxPBufsFree++;
-
-	return 0;
-}
-
-static int FlushInputQueue(void)
-{
-	RxPBufsFree = LWIP_STACK_MAX_RX_PBUFS;
-
-	return 0;
+	ps2ip_input(packet, &NIF);
 }
 
 static void InitDone(void* pvArg)
@@ -246,10 +219,6 @@ static inline int InitializeLWIP(void)
 
 	dbgprintf("PS2IP: Module Loaded.\n");
 
-	RxPBufsFree=LWIP_STACK_MAX_RX_PBUFS;
-	NetManRxPacketBufferPoolFreeStart=0;
-	recv_pbuf_queue_start=recv_pbuf_queue_end=NULL;
-
 	sys_sem_new(&Sema, 0);
 	dbgprintf("PS2IP: Calling tcpip_init\n");
 	tcpip_init(InitDone,&Sema);
@@ -268,8 +237,7 @@ int ps2ipInit(struct ip4_addr *ip_address, struct ip4_addr *subnet_mask, struct 
 		&LinkStateDown,
 		&AllocRxPacket,
 		&FreeRxPacket,
-		&EnQRxPacket,
-		&FlushInputQueue
+		&EnQRxPacket
 	};
 
 	NetManInit();

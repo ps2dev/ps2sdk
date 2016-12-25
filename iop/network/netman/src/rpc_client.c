@@ -24,6 +24,12 @@ static int NetManRxThreadEvfID = -1, NetManRxDoneEvfID = -1, NetManIOSemaID = -1
 
 static struct PacketReqs PacketReqs;
 
+struct NetManPacketBuffer{
+	void *handle;
+	void *payload;
+	u32 length;
+};
+
 //Data for SPEED -> IOP transfers
 static struct NetManPacketBuffer pbufs[NETMAN_RPC_BLOCK_SIZE];
 static int DMATransferID[NETMAN_RPC_BLOCK_SIZE];
@@ -122,7 +128,8 @@ void NetManRpcToggleGlobalNetIFLinkState(unsigned int state)
 	SignalSema(NetManIOSemaID);
 }
 
-struct NetManPacketBuffer *NetManRpcNetProtStackAllocRxPacket(unsigned int length)
+//For this implementation, a packet buffer is only taken if it is enqueued.
+void *NetManRpcNetProtStackAllocRxPacket(unsigned int length, void **payload)
 {
 	struct NetManPacketBuffer *result;
 
@@ -147,12 +154,14 @@ struct NetManPacketBuffer *NetManRpcNetProtStackAllocRxPacket(unsigned int lengt
 		DMATransferID[EEFrameBufferWrPtr] = 0;
 	}
 
+	*payload = result->payload;
+
 	return result;
 }
 
-void NetManRpcNetProtStackFreeRxPacket(struct NetManPacketBuffer *packet)
+void NetManRpcNetProtStackFreeRxPacket(void *packet)
 {
-	*(u16*)packet->handle = 0;
+	((struct NetManPacketBuffer*)packet)->handle = NULL;
 }
 
 static void EERxThread(void *arg)
@@ -219,13 +228,7 @@ static void EnQFrame(const void *frame, unsigned int length)
 }
 
 //Frames will be enqueued in the order that they were allocated.
-int NetManRpcProtStackEnQRxPacket(struct NetManPacketBuffer *packet)
+void NetManRpcProtStackEnQRxPacket(void *packet)
 {
-	EnQFrame(packet->payload, packet->length);
-	return 0;
-}
-
-int NetmanRpcFlushInputQueue(void)
-{
-	return 0;
+	EnQFrame(((struct NetManPacketBuffer*)packet)->payload, ((struct NetManPacketBuffer*)packet)->length);
 }

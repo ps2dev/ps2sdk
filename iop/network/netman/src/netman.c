@@ -169,20 +169,18 @@ int NetManNetIFSetLinkMode(int mode){
 	return NetManIoctl(NETMAN_NETIF_IOCTL_ETH_SET_LINK_MODE, &mode, sizeof(mode), NULL, 0);
 }
 
-struct NetManPacketBuffer *NetManNetProtStackAllocRxPacket(unsigned int length){
-	return IsInitialized?MainNetProtStack.AllocRxPacket(length):NULL;
+void *NetManNetProtStackAllocRxPacket(unsigned int length, void **payload){
+	return IsInitialized?MainNetProtStack.AllocRxPacket(length, payload):NULL;
 }
 
-void NetManNetProtStackFreeRxPacket(struct NetManPacketBuffer *packet){
-	if(IsInitialized) MainNetProtStack.FreeRxPacket(packet);
+void NetManNetProtStackFreeRxPacket(void *packet){
+	if(IsInitialized)
+		MainNetProtStack.FreeRxPacket(packet);
 }
 
-int NetManNetProtStackEnQRxPacket(struct NetManPacketBuffer *packet){
-	return IsInitialized?MainNetProtStack.EnQRxPacket(packet):-1;
-}
-
-int NetManNetProtStackFlushInputQueue(void){
-	return IsInitialized?MainNetProtStack.FlushInputQueue():-1;
+void NetManNetProtStackEnQRxPacket(void *packet){
+	if(IsInitialized)
+		MainNetProtStack.EnQRxPacket(packet);
 }
 
 int NetManRegisterNetIF(struct NetManNetIF *NetIF){

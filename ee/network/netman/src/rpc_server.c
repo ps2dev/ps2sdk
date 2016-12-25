@@ -23,9 +23,9 @@ extern void *_gp;
 static void *NETMAN_EE_RPC_Handler(int fnum, void *buffer, int NumBytes)
 {
 	unsigned int PacketNum;
-	void *data, *result;
-	unsigned short int PacketLength;
-	struct NetManPacketBuffer *pbuf;
+	void *data, *result, *payload;
+	u16 PacketLength;
+	void *packet;
 
 	switch(fnum)
 	{
@@ -59,19 +59,15 @@ static void *NETMAN_EE_RPC_Handler(int fnum, void *buffer, int NumBytes)
 					PacketLength=((struct PacketReqs*)buffer)->length[RxBufferRdPtr];
 
 					// Need to be careful here. With some packets in the waiting queue (Occupying packet buffers), packet buffer exhaustion can occur.
-					if((pbuf=NetManNetProtStackAllocRxPacket(PacketLength))==NULL)
-					{
-						NetManNetProtStackFlushInputQueue();
-						if((pbuf=NetManNetProtStackAllocRxPacket(PacketLength))==NULL) break;	// Can't continue.
-					}
+					if((packet = NetManNetProtStackAllocRxPacket(PacketLength, &payload)) == NULL)
+						break;	// Can't continue.
 
-					memcpy(pbuf->payload, data, PacketLength);
-					NetManNetProtStackEnQRxPacket(pbuf);
+					memcpy(payload, data, PacketLength);
+					NetManNetProtStackEnQRxPacket(packet);
 
 					//Increment read pointer by one place.
 					RxBufferRdPtr = (RxBufferRdPtr + 1) % NETMAN_RPC_BLOCK_SIZE;
 				}
-				NetManNetProtStackFlushInputQueue();
 
 				*(u32 *)buffer=PacketNum;
 			}else *(u32 *)buffer=0;

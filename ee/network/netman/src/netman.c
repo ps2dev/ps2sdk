@@ -109,21 +109,18 @@ int NetManIoctl(unsigned int command, void *arg, unsigned int arg_len, void *out
 	return IsInitialized?NetManRpcIoctl(command, arg, arg_len, output, length):-1;
 }
 
-struct NetManPacketBuffer *NetManNetProtStackAllocRxPacket(unsigned int length){
-	return IsNetStackInitialized?MainNetProtStack.AllocRxPacket(length):NULL;
+void *NetManNetProtStackAllocRxPacket(unsigned int length, void **payload)
+{
+	return IsNetStackInitialized?MainNetProtStack.AllocRxPacket(length, payload):NULL;
 }
 
-void NetManNetProtStackFreeRxPacket(struct NetManPacketBuffer *packet)
+void NetManNetProtStackFreeRxPacket(void *packet)
 {
 	if(IsNetStackInitialized) MainNetProtStack.FreeRxPacket(packet);
 }
 
-int NetManNetProtStackEnQRxPacket(struct NetManPacketBuffer *packet)
+void NetManNetProtStackEnQRxPacket(void *packet)
 {
-	return IsNetStackInitialized?MainNetProtStack.EnQRxPacket(packet):-1;
-}
-
-int NetManNetProtStackFlushInputQueue(void)
-{
-	return IsNetStackInitialized?MainNetProtStack.FlushInputQueue():-1;
+	if(IsNetStackInitialized)
+		MainNetProtStack.EnQRxPacket(packet);
 }

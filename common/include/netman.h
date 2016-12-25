@@ -1,19 +1,12 @@
 //Common structures
 #define NETMAN_NETIF_NAME_MAX_LEN	4
 
-struct NetManPacketBuffer{
-	void *handle;
-	void *payload;
-	u32 length;
-};
-
 struct NetManNetProtStack{
 	void (*LinkStateUp)(void);
 	void (*LinkStateDown)(void);
-	struct NetManPacketBuffer *(*AllocRxPacket)(unsigned int size);
-	void (*FreeRxPacket)(struct NetManPacketBuffer *packet);
-	int (*EnQRxPacket)(struct NetManPacketBuffer *packet);
-	int (*FlushInputQueue)(void);
+	void *(*AllocRxPacket)(unsigned int size, void **payload);
+	void (*FreeRxPacket)(void *packet);
+	void (*EnQRxPacket)(void *packet);
 };
 
 #define NETMAN_NETIF_ETH_LINK_MODE_PAUSE	0x40	//Flow-control
@@ -86,10 +79,9 @@ int NetManSetLinkMode(int mode);
 int NetManNetIFSendPacket(const void *packet, unsigned int length);
 
 /* Network protocol stack management functions. Used by the Network InterFace (IF) driver. */
-struct NetManPacketBuffer *NetManNetProtStackAllocRxPacket(unsigned int length);
-void NetManNetProtStackFreeRxPacket(struct NetManPacketBuffer *packet);
-int NetManNetProtStackEnQRxPacket(struct NetManPacketBuffer *packet);
-int NetManNetProtStackFlushInputQueue(void);
+void *NetManNetProtStackAllocRxPacket(unsigned int length, void **payload);
+void NetManNetProtStackFreeRxPacket(void *packet);
+void NetManNetProtStackEnQRxPacket(void *packet);
 
 /* NETIF flags. */
 #define	NETMAN_NETIF_IN_USE	0x80	// Set internally by NETMAN. Do not set externally.
@@ -121,7 +113,7 @@ void NetManToggleNetIFLinkState(int NetIFID, unsigned char state);	//Also toggle
 
 #ifdef _IOP
 
-#define netman_IMPORTS_start DECLARE_IMPORT_TABLE(netman, 1, 2)
+#define netman_IMPORTS_start DECLARE_IMPORT_TABLE(netman, 2, 1)
 #define netman_IMPORTS_end END_IMPORT_TABLE
 
 #define I_NetManRegisterNetworkStack DECLARE_IMPORT(4, NetManRegisterNetworkStack)
@@ -133,16 +125,15 @@ void NetManToggleNetIFLinkState(int NetIFID, unsigned char state);	//Also toggle
 #define I_NetManNetProtStackAllocPacket DECLARE_IMPORT(8, NetManNetProtStackAllocRxPacket)
 #define I_NetManNetProtStackFreePacket DECLARE_IMPORT(9, NetManNetProtStackFreeRxPacket)
 #define I_NetManNetProtStackEnQPacket DECLARE_IMPORT(10, NetManNetProtStackEnQRxPacket)
-#define I_NetManNetProtStackFlushInputQueue DECLARE_IMPORT(11, NetManNetProtStackFlushInputQueue)
 
-#define I_NetManRegisterNetIF DECLARE_IMPORT(12, NetManRegisterNetIF)
-#define I_NetManUnregisterNetIF DECLARE_IMPORT(13, NetManUnregisterNetIF)
-#define I_NetManToggleNetIFLinkState DECLARE_IMPORT(14, NetManToggleNetIFLinkState)
-#define I_NetManGetGlobalNetIFLinkState DECLARE_IMPORT(15, NetManGetGlobalNetIFLinkState)
+#define I_NetManRegisterNetIF DECLARE_IMPORT(11, NetManRegisterNetIF)
+#define I_NetManUnregisterNetIF DECLARE_IMPORT(12, NetManUnregisterNetIF)
+#define I_NetManToggleNetIFLinkState DECLARE_IMPORT(13, NetManToggleNetIFLinkState)
+#define I_NetManGetGlobalNetIFLinkState DECLARE_IMPORT(14, NetManGetGlobalNetIFLinkState)
 
-#define I_NetManSetMainIF DECLARE_IMPORT(16, NetManSetMainIF)
-#define I_NetManQueryMainIF DECLARE_IMPORT(17, NetManQueryMainIF)
+#define I_NetManSetMainIF DECLARE_IMPORT(15, NetManSetMainIF)
+#define I_NetManQueryMainIF DECLARE_IMPORT(16, NetManQueryMainIF)
 
-#define I_NetManSetLinkMode DECLARE_IMPORT(18, NetManSetLinkMode)
+#define I_NetManSetLinkMode DECLARE_IMPORT(17, NetManSetLinkMode)
 
 #endif

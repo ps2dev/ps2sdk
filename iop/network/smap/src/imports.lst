@@ -48,7 +48,6 @@ netman_IMPORTS_start
 I_NetManNetProtStackAllocPacket
 I_NetManNetProtStackFreePacket
 I_NetManNetProtStackEnQPacket
-I_NetManNetProtStackFlushInputQueue
 I_NetManRegisterNetIF
 I_NetManUnregisterNetIF
 I_NetManToggleNetIFLinkState

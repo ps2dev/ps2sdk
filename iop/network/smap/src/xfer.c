@@ -60,8 +60,8 @@ inline int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData){
 	int NumPacketsReceived;
 	volatile smap_bd_t *PktBdPtr;
 	volatile u8 *smap_regbase;
-	struct NetManPacketBuffer *pbuf;
-	unsigned short int ctrl_stat;
+	void *pbuf, *payload;
+	u16 ctrl_stat, length;
 
 	smap_regbase=SmapDrivPrivData->smap_regbase;
 
@@ -79,12 +79,13 @@ inline int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData){
 				if(ctrl_stat&SMAP_BD_RX_ALIGNERR) SmapDrivPrivData->RuntimeStats.RxFrameBadAlignmentCount++;
 			}
 			else{
-				if((pbuf=NetManNetProtStackAllocRxPacket(PktBdPtr->length))==NULL){
-					NetManNetProtStackFlushInputQueue();
-					if((pbuf=NetManNetProtStackAllocRxPacket(PktBdPtr->length))==NULL) break;	// Cannot continue. Stop.
+				length = PktBdPtr->length;
+
+				if((pbuf=NetManNetProtStackAllocRxPacket(length, &payload))==NULL){
+					break;	// Cannot continue. Stop.
 				}
 
-				CopyFromFIFO(SmapDrivPrivData->smap_regbase, pbuf->payload, pbuf->length, PktBdPtr->pointer);
+				CopyFromFIFO(SmapDrivPrivData->smap_regbase, payload, length, PktBdPtr->pointer);
 				NetManNetProtStackEnQRxPacket(pbuf);
 				NumPacketsReceived++;
 			}
@@ -95,8 +96,6 @@ inline int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData){
 		}
 		else break;
 	}
-
-	NetManNetProtStackFlushInputQueue();
 
 	return NumPacketsReceived;
 }

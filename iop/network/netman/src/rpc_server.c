@@ -39,24 +39,19 @@ static void LinkStateDown(void)
 	NetManRpcToggleGlobalNetIFLinkState(0);
 }
 
-static struct NetManPacketBuffer *AllocRxPacket(unsigned int length)
+static void *AllocRxPacket(unsigned int length, void **payload)
 {
-	return NetManRpcNetProtStackAllocRxPacket(length);
+	return NetManRpcNetProtStackAllocRxPacket(length, payload);
 }
 
-static void FreeRxPacket(struct NetManPacketBuffer *packet)
+static void FreeRxPacket(void *packet)
 {
 	NetManRpcNetProtStackFreeRxPacket(packet);
 }
 
-static int EnQRxPacket(struct NetManPacketBuffer *packet)
+static void EnQRxPacket(void *packet)
 {
-	return NetManRpcProtStackEnQRxPacket(packet);
-}
-
-static int FlushInputQueue(void)
-{
-	return NetmanRpcFlushInputQueue();
+	NetManRpcProtStackEnQRxPacket(packet);
 }
 
 static struct NetManNetProtStack RpcStack={
@@ -64,8 +59,7 @@ static struct NetManNetProtStack RpcStack={
 	&LinkStateDown,
 	&AllocRxPacket,
 	&FreeRxPacket,
-	&EnQRxPacket,
-	&FlushInputQueue
+	&EnQRxPacket
 };
 
 static void unregisterEENetworkStack(void)
