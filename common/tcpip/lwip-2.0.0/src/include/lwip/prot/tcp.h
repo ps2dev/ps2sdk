@@ -68,6 +68,22 @@ PACK_STRUCT_END
 #  include "arch/epstruct.h"
 #endif
 
+/*
+ * struct tcp_opt is used by tcp_out.c to set the TCP packet options,
+ * which may be stored at an unaligned address.
+ */
+#ifdef PACK_STRUCT_USE_INCLUDES
+#  include "arch/bpstruct.h"
+#endif
+PACK_STRUCT_BEGIN
+struct tcp_opt {
+	PACK_STRUCT_FIELD(u32_t value);
+} PACK_STRUCT_STRUCT;
+PACK_STRUCT_END
+#ifdef PACK_STRUCT_USE_INCLUDES
+#  include "arch/epstruct.h"
+#endif
+
 /* TCP header flags bits */
 #define TCP_FIN 0x01U
 #define TCP_SYN 0x02U

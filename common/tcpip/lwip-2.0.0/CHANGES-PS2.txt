@@ -29,3 +29,9 @@ As much as I'll like to make a clean port of LWIP, it was clearly not made to su
 	      }
 	...that might cause a race conditions because that fragment of code is run with interrupts disabled,
 	while mem_free() will use Semaphores to ensure access control.
+
+5. pbuf_alloc() will no longer align the payload field, for PBUF_RAM allocations.
+	This is so that frames being output will not be unaligned.
+
+6. tcp_out.c now uses struct tcp_opt to set TCP packet options, so that GCC is aware that the 32-bit options may reside at unaligned addresses.
+	struct tcp_opt is defined within include/lwip/prot/tcp.h.

@@ -351,18 +351,28 @@ pbuf_alloc(pbuf_layer layer, u16_t length, pbuf_type type)
     break;
   case PBUF_RAM:
     /* If pbuf is to be allocated in RAM, allocate memory for it. */
+#if (!defined(_IOP) && !defined(_EE))
     p = (struct pbuf*)mem_malloc(LWIP_MEM_ALIGN_SIZE(SIZEOF_STRUCT_PBUF + offset) + LWIP_MEM_ALIGN_SIZE(length));
+#else
+    p = (struct pbuf*)mem_malloc(LWIP_MEM_ALIGN_SIZE(SIZEOF_STRUCT_PBUF) + offset + LWIP_MEM_ALIGN_SIZE(length));
+#endif
     if (p == NULL) {
       return NULL;
     }
     /* Set up internal structure of the pbuf. */
+#if (!defined(_IOP) && !defined(_EE))
     p->payload = LWIP_MEM_ALIGN((void *)((u8_t *)p + SIZEOF_STRUCT_PBUF + offset));
+#else
+    p->payload = (void *)((u8_t *)p + SIZEOF_STRUCT_PBUF + offset);
+#endif
     p->len = p->tot_len = length;
     p->next = NULL;
     p->type = type;
 
+#if (!defined(_IOP) && !defined(_EE))
     LWIP_ASSERT("pbuf_alloc: pbuf->payload properly aligned",
            ((mem_ptr_t)p->payload % MEM_ALIGNMENT) == 0);
+#endif
     break;
   /* pbuf references existing (non-volatile static constant) ROM payload? */
   case PBUF_ROM:

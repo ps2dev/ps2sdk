@@ -297,18 +297,23 @@ SMapLowLevelOutput(struct netif *pNetIF, struct pbuf* pOutput)
 	unsigned char *buffer_ptr;
 	unsigned short int TotalLength;
 
-	pbuf=pOutput;
-	buffer_ptr=buffer;
-	TotalLength=0;
-	while(pbuf!=NULL)
+	if(pOutput->next != NULL)
 	{
-		memcpy(buffer_ptr, pbuf->payload, pbuf->len);
-		TotalLength+=pbuf->len;
-		buffer_ptr+=pbuf->len;
-		pbuf=pbuf->next;
-	}
+		pbuf=pOutput;
+		buffer_ptr=buffer;
+		TotalLength=0;
+		while(pbuf!=NULL)
+		{
+			memcpy(buffer_ptr, pbuf->payload, pbuf->len);
+			TotalLength+=pbuf->len;
+			buffer_ptr+=pbuf->len;
+			pbuf=pbuf->next;
+		}
 
-	NetManNetIFSendPacket(buffer, TotalLength);
+		NetManNetIFSendPacket(buffer, TotalLength);
+	} else {
+		NetManNetIFSendPacket(pOutput->payload, pOutput->len);
+	}
 
 	return ERR_OK;
 }

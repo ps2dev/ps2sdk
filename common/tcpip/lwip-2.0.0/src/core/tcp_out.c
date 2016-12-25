@@ -851,12 +851,12 @@ tcp_enqueue_flags(struct tcp_pcb *pcb, u8_t flags)
  * @param opts option pointer where to store the timestamp option
  */
 static void
-tcp_build_timestamp_option(struct tcp_pcb *pcb, u32_t *opts)
+tcp_build_timestamp_option(struct tcp_pcb *pcb, struct tcp_opt *opts)
 {
   /* Pad with two NOP options to make everything nicely aligned */
-  opts[0] = PP_HTONL(0x0101080A);
-  opts[1] = lwip_htonl(sys_now());
-  opts[2] = lwip_htonl(pcb->ts_recent);
+  opts[0].value = PP_HTONL(0x0101080A);
+  opts[1].value = lwip_htonl(sys_now());
+  opts[2].value = lwip_htonl(pcb->ts_recent);
 }
 #endif
 
@@ -866,10 +866,10 @@ tcp_build_timestamp_option(struct tcp_pcb *pcb, u32_t *opts)
  * @param opts option pointer where to store the window scale option
  */
 static void
-tcp_build_wnd_scale_option(u32_t *opts)
+tcp_build_wnd_scale_option(struct tcp_opt *opts)
 {
   /* Pad with one NOP option to make everything nicely aligned */
-  opts[0] = PP_HTONL(0x01030300 | TCP_RCV_SCALE);
+  opts[0].value = PP_HTONL(0x01030300 | TCP_RCV_SCALE);
 }
 #endif
 
@@ -1135,7 +1135,7 @@ tcp_output_segment(struct tcp_seg *seg, struct tcp_pcb *pcb, struct netif *netif
 {
   err_t err;
   u16_t len;
-  u32_t *opts;
+  struct tcp_opt *opts;
 
   if (seg->p->ref != 1) {
     /* This can happen if the pbuf of this segment is still referenced by the
@@ -1165,7 +1165,7 @@ tcp_output_segment(struct tcp_seg *seg, struct tcp_pcb *pcb, struct netif *netif
   /* Add any requested options.  NB MSS option is only set on SYN
      packets, so ignore it here */
   /* cast through void* to get rid of alignment warnings */
-  opts = (u32_t *)(void *)(seg->tcphdr + 1);
+  opts = (struct tcp_opt *)(void *)(seg->tcphdr + 1);
   if (seg->flags & TF_SEG_OPTS_MSS) {
     u16_t mss;
 #if TCP_CALCULATE_EFF_SEND_MSS
@@ -1173,7 +1173,7 @@ tcp_output_segment(struct tcp_seg *seg, struct tcp_pcb *pcb, struct netif *netif
 #else /* TCP_CALCULATE_EFF_SEND_MSS */
     mss = TCP_MSS;
 #endif /* TCP_CALCULATE_EFF_SEND_MSS */
-    *opts = TCP_BUILD_MSS_OPTION(mss);
+    opts->value = TCP_BUILD_MSS_OPTION(mss);
     opts += 1;
   }
 #if LWIP_TCP_TIMESTAMPS
