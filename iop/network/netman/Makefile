@@ -16,7 +16,7 @@ IOP_BIN  = $(IOP_BIN_DIR)netman.irx
 IOP_OBJS = netman.o rpc_server.o rpc_client.o imports.o exports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
-IOP_INCS += -I$(PS2SDKSRC)/iop/kernel/include -I$(PS2SDKSRC)/common/include -I$(IOP_SRC_DIR)/include
+IOP_INCS += -I$(IOP_SRC_DIR)/include
 IOP_CFLAGS += -mno-check-zero-division
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)

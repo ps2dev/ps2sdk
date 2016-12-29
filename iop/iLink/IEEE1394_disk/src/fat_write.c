@@ -1125,7 +1125,7 @@ static int fat_fillDirentryInfo(fat_driver* fatd, const unsigned char* lname, un
 	int seq;
 	int mask_ix, mask_sh;
 #ifdef DEBUG
-	mass_dev* mass_device = fatd->dev;
+	struct SBP2Device* mass_device = fatd->dev;
 #endif
 
 	memset(fatd->dir_used_mask, 0, DIR_MASK_SIZE/8);

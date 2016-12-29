@@ -16,7 +16,7 @@ IOP_BIN  = $(IOP_BIN_DIR)IEEE1394_disk.irx
 IOP_OBJS = sbp2_driver.o imports.o main.o scsi.o fat_write.o fs_driver.o scache.o fat_driver.o part_driver.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
-IOP_INCS += -I$(PS2SDKSRC)/iop/kernel/include -I$(PS2SDKSRC)/common/include -I$(IOP_SRC_DIR)/include
+IOP_INCS += -I$(IOP_SRC_DIR)/include
 IOP_CFLAGS += -mno-check-zero-division #-DSIF_CALLBACKS_12_13
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
