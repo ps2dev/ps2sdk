@@ -12,7 +12,7 @@ EE_OBJS = main.o
 EE_LIBS = -lgs
 
 all: $(EE_BIN)
-	ee-strip --strip-all $(EE_BIN)
+	$(EE_STRIP) --strip-all $(EE_BIN)
 
 clean:
 	rm -f $(EE_BIN) $(EE_OBJS)
