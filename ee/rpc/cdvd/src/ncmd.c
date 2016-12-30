@@ -22,6 +22,7 @@
 #include <kernel.h>
 #include <sifrpc.h>
 #include <libcdvd.h>
+#include <libcdvd-rpc.h>
 #include <string.h>
 
 #include "internal.h"
@@ -64,6 +65,12 @@ enum CD_NCMD_CMDS {
 
 int _CdCheckNCmd(int cmd);
 
+typedef union {
+	struct cdvdNcmdParam ncmd;
+	struct cdvdReadKeyParam readKey;
+	u8 data[48];
+} nCmdSendParams_t;
+
 #ifdef F__ncmd_internals
 int bindNCmd = -1;
 
@@ -81,11 +88,11 @@ u32 _rd_intr_data[64] __attribute__ ((aligned(64)));
 u32 curReadPos __attribute__ ((aligned(64)));
 u8 tocBuff[2064] __attribute__ ((aligned(64)));	// toc buffer (for sceCdGetToc())
 u8 nCmdRecvBuff[48] __attribute__ ((aligned(64)));
-u8 nCmdSendBuff[48] __attribute__ ((aligned(64)));
+nCmdSendParams_t nCmdSendBuff __attribute__ ((aligned(64)));
 int streamStatus = 0;
 sceCdRMode dummyMode;
 u32 seekSector __attribute__ ((aligned(64)));
-u8 cdda_st_buf[64] ALIGNED(64);
+u32 cdda_st_buf[64/sizeof(u32)] ALIGNED(64);
 #endif
 
 extern int bindNcmd;
@@ -100,11 +107,11 @@ extern u32 _rd_intr_data[64];
 extern u32 curReadPos;
 extern u8 tocBuff[2064];
 extern u8 nCmdRecvBuff[48];
-extern u8 nCmdSendBuff[48];
+extern nCmdSendParams_t nCmdSendBuff;
 extern int streamStatus;
 extern sceCdRMode dummyMode;
 extern u32 seekSector;
-extern u8 cdda_st_buf[64];
+extern u32 cdda_st_buf[64/sizeof(u32)];
 
 int sceCdNCmdDiskReady(void);
 
@@ -461,13 +468,13 @@ int sceCdApplyNCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff,
 	if (_CdCheckNCmd(CD_NCMD_NCMD) == 0)
 		return 0;
 
-	*(u16 *) & nCmdRecvBuff[0] = cmdNum;
-	*(u16 *) & nCmdRecvBuff[2] = inBuffSize;
-	memset(&nCmdRecvBuff[4], 0, 16);
+	nCmdSendBuff.ncmd.cmdNum = cmdNum;
+	nCmdSendBuff.ncmd.inBuffSize = inBuffSize;
+	memset(nCmdSendBuff.ncmd.inBuff, 0, 16);
 	if (inBuff)
-		memcpy(&nCmdRecvBuff[4], inBuff, inBuffSize);
+		memcpy(nCmdSendBuff.ncmd.inBuff, inBuff, inBuffSize);
 
-	if (SifCallRpc(&clientNCmd, CD_NCMD_NCMD, 0, nCmdRecvBuff, 20, nCmdRecvBuff, 16, NULL, NULL) < 0) {
+	if (SifCallRpc(&clientNCmd, CD_NCMD_NCMD, 0, &nCmdSendBuff, 20, nCmdRecvBuff, 16, NULL, NULL) < 0) {
 		SignalSema(nCmdSemaId);
 		return 0;
 	}
@@ -834,7 +841,7 @@ int sceCdCddaStream(u32 lbn, u32 nsectors, void *buf, CdvdStCmd_t cmd, sceCdRMod
 	if (cmd == CDVD_ST_CMD_INIT)
 		readStreamData[2] = (u32)cdda_st_buf;
 
-	*(u32 *)cdda_st_buf = 0;
+	*cdda_st_buf = 0;
 
 	if (SifCallRpc(&clientNCmd, CD_NCMD_CDDASTREAM, 0, readStreamData, 20, nCmdRecvBuff, 4, NULL, NULL) < 0) {
 		SignalSema(nCmdSemaId);
@@ -936,11 +943,11 @@ int sceCdReadKey(unsigned char arg1, unsigned char arg2, unsigned int command, u
 
 	if(_CdCheckNCmd(CD_NCMD_READ_KEY)==0) return 0;
 
-	((unsigned int *)nCmdSendBuff)[0]=arg1;
-	((unsigned int *)nCmdSendBuff)[1]=arg2;
-	((unsigned int *)nCmdSendBuff)[2]=command;
+	nCmdSendBuff.readKey.arg1 = arg1;
+	nCmdSendBuff.readKey.arg2 = arg2;
+	nCmdSendBuff.readKey.command = command;
 
-	if(SifCallRpc(&clientNCmd, CD_NCMD_READ_KEY, 0, nCmdSendBuff, 0xC, nCmdRecvBuff, 0x18, NULL, NULL)>=0){
+	if(SifCallRpc(&clientNCmd, CD_NCMD_READ_KEY, 0, &nCmdSendBuff, 0xC, nCmdRecvBuff, 0x18, NULL, NULL)>=0){
 		memcpy(key, UNCACHED_SEG(&nCmdRecvBuff[4]), 16);
 		result=1;
 	}
