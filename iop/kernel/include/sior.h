@@ -17,20 +17,7 @@
 #include "irx.h"
 #include <stdarg.h>
 
-#define	SIOR_IRX              0xC001510
-
-enum {
-    SIOR_INIT = 1,
-    SIOR_PUTC,
-    SIOR_GETC,
-    SIOR_GETCBLOCK,
-    SIOR_WRITE,
-    SIOR_READ,
-    SIOR_PUTS,
-    SIOR_PUTSN,
-    SIOR_GETS,
-    SIOR_FLUSH
-};
+#include <sior-common.h>
 
 #define sior_IMPORTS_start DECLARE_IMPORT_TABLE(sior, 1, 1)
 #define sior_IMPORTS_end END_IMPORT_TABLE
@@ -44,9 +31,9 @@ int sio_getc(void);
 int sio_getc_block(void);
 #define I_sio_getc_block DECLARE_IMPORT(7, sio_getc_block)
 
-size_t sio_write(void *buf, size_t size);
+size_t sio_write(const char *buf, size_t size);
 #define I_sio_write DECLARE_IMPORT(8, sio_write)
-size_t sio_read(void *buf, size_t size);
+size_t sio_read(char *buf, size_t size);
 #define I_sio_read DECLARE_IMPORT(9, sio_read)
 
 int sio_puts(const char *str);

@@ -37,8 +37,8 @@ enum PS2IPS_RPC_ID{
 };
 
 typedef struct {
-	int  ssize;
-	int  esize;
+	s32  ssize;
+	s32  esize;
 	u8 *sbuf;
 	u8 *ebuf;
 	u8 sbuffer[16];
@@ -46,58 +46,83 @@ typedef struct {
 } rests_pkt; // sizeof = 48
 
 typedef struct {
-	int socket;
-	int length;
-	int flags;
+	s32 socket;
+	s32 length;
+	s32 flags;
 	void *ee_addr;
 	struct sockaddr sockaddr; // sizeof = 16
-	int malign;
-	unsigned char malign_buff[16]; // buffer for sending misaligned portion
+	s32 malign;
+	u8 malign_buff[16]; // buffer for sending misaligned portion
 } send_pkt;
 
 typedef struct {
-	int socket;
-	int length;
-	int flags;
+	s32 socket;
+	s32 length;
+	s32 flags;
 	void *ee_addr;
 	void *intr_data;
 } s_recv_pkt;
 
 typedef struct {
-	int ret;
+	s32 ret;
 	struct sockaddr sockaddr;
 } r_recv_pkt;
 
 typedef struct {
-	int socket;
+	s32 socket;
 	struct sockaddr sockaddr;
-	int len;
+	s32 len;
 } cmd_pkt;
 
 typedef struct {
-	int retval;
+	s32 retval;
 	struct sockaddr sockaddr;
 } ret_pkt;
 
 typedef struct {
-	int s;
-	int level;
-	int optname;
+	s32 s;
+	s32 level;
+	s32 optname;
 } getsockopt_pkt;
 
 typedef struct {
-	int result;
-	int optlen;
+	s32 result;
+	s32 optlen;
 	u8 buffer[128];
 } getsockopt_res_pkt;
 
 typedef struct {
-	int s;
-	int level;
-	int optname;
-	int optlen;
-	unsigned char buffer[128];
+	s32 s;
+	s32 level;
+	s32 optname;
+	s32 optlen;
+	u8 buffer[128];
 } setsockopt_pkt;
+
+typedef struct {
+	union {
+		s32 maxfdp1;
+		s32 result;
+	};
+	struct timeval *timeout_p;
+	struct timeval timeout;
+	struct fd_set *readset_p;
+	struct fd_set *writeset_p;
+	struct fd_set *exceptset_p;
+	struct fd_set readset;
+	struct fd_set writeset;
+	struct fd_set exceptset;
+} select_pkt;
+
+typedef struct {
+	union {
+		s32 s;
+		s32 result;
+	};
+	u32 cmd;
+	void *argp;
+	u32 value;
+} ioctl_pkt;
 
 #ifdef PS2IP_DNS
 struct hostent_res{
@@ -107,7 +132,7 @@ struct hostent_res{
 };
 
 typedef struct {
-	int result;
+	s32 result;
 	struct hostent_res hostent;
 } gethostbyname_res_pkt;
 

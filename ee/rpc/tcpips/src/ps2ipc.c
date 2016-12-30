@@ -294,75 +294,59 @@ int ps2ip_getconfig(char *netif_name, t_ip_info *ip_info)
 
 int select(int maxfdp1, struct fd_set *readset, struct fd_set *writeset, struct fd_set *exceptset, struct timeval *timeout)
 {
-	char *uncached_buf = UNCACHED_SEG(_rpc_buffer);
+	select_pkt *pkt = (select_pkt*)_rpc_buffer;
 
 	if(!_init_check) return -1;
 
-	_rpc_buffer[0] = (int)maxfdp1;
-	_rpc_buffer[1] = (int)readset;
-	_rpc_buffer[2] = (int)writeset;
-	_rpc_buffer[3] = (int)exceptset;
-	_rpc_buffer[4] = (int)timeout;
+	pkt->maxfdp1 = maxfdp1;
+	pkt->readset_p = readset;
+	pkt->writeset_p = writeset;
+	pkt->exceptset_p = exceptset;
+	pkt->timeout_p = timeout;
 	if( timeout )
-	{
-		((long*)_rpc_buffer)[3] = timeout->tv_sec;
-		((long*)_rpc_buffer)[4] = timeout->tv_usec;
-	}
-	if( readset )
-	{
-		((char*)_rpc_buffer)[40] = readset->fd_bits[0];
-		((char*)_rpc_buffer)[41] = readset->fd_bits[1];
-	}
-	if( writeset )
-	{
-		((char*)_rpc_buffer)[42] = writeset->fd_bits[0];
-		((char*)_rpc_buffer)[43] = writeset->fd_bits[1];
-	}
-	if( exceptset )
- 	{
-		((char*)_rpc_buffer)[44] = exceptset->fd_bits[0];
-		((char*)_rpc_buffer)[45] = exceptset->fd_bits[1];
-	}
+		pkt->timeout = *timeout;
 
-	SifCallRpc(&_ps2ip, PS2IPS_ID_SELECT, 0, (void*)_rpc_buffer, 46, (void*)_rpc_buffer, 46, NULL, NULL);
+	if( readset )
+		pkt->readset = *readset;
+
+	if( writeset )
+		pkt->writeset = *writeset;
+
+	if( exceptset )
+		pkt->exceptset = *exceptset;
+
+	SifCallRpc(&_ps2ip, PS2IPS_ID_SELECT, 0, (void*)_rpc_buffer, sizeof(select_pkt), (void*)_rpc_buffer, sizeof(select_pkt), NULL, NULL);
 
 	if( timeout )
-	{
-		timeout->tv_sec = ((long*)uncached_buf)[3];
-		timeout->tv_usec = ((long*)uncached_buf)[4];
-	}
+		*timeout = pkt->timeout;
+
 	if( readset )
-	{
-		readset->fd_bits[0] = ((char*)uncached_buf)[40];
-		readset->fd_bits[1] = ((char*)uncached_buf)[41];
-	}
+		*readset = pkt->readset;
+
 	if( writeset )
-	{
-		writeset->fd_bits[0] = ((char*)uncached_buf)[42];
-		writeset->fd_bits[1] = ((char*)uncached_buf)[43];
-	}
+		*writeset = pkt->writeset;
+
 	if( exceptset )
- 	{
-		exceptset->fd_bits[0] = ((char*)uncached_buf)[44];
-		exceptset->fd_bits[1] = ((char*)uncached_buf)[45];
-	}
+		*exceptset = pkt->exceptset;
 
-
-
-	return _rpc_buffer[0];
+	return pkt->result;
 }
 
 int ioctlsocket(int s, long cmd, void *argp)
 {
-	((int*)_rpc_buffer)[0] = s;
-	((int*)_rpc_buffer)[1] = (int)cmd;
-	((int*)_rpc_buffer)[2] = (int)argp;
+	ioctl_pkt *pkt = (ioctl_pkt*)_rpc_buffer;
+	pkt->s = s;
+	pkt->cmd = (s32)cmd;
+	pkt->argp = argp;
 	if( argp )
-		((int*)_rpc_buffer)[3] = *(int*)argp;
+		pkt->value = *(s32*)argp;
 
 	SifCallRpc(&_ps2ip, PS2IPS_ID_IOCTL, 0, (void*)_rpc_buffer, 16, (void*)_rpc_buffer, 4, NULL, NULL);
 
-	return _rpc_buffer[0];
+	if( argp )
+		*(s32*)argp = pkt->value;
+
+	return pkt->result;
 }
 
 int getsockname(int s, struct sockaddr *name, int *namelen)

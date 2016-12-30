@@ -156,7 +156,8 @@ static void do_recv( void * rpcBuffer, int size )
 
 	} else {
 
-		erest = asize = (int)abuffer = (int)aebuffer = 0;
+		abuffer = aebuffer = NULL;
+		erest = asize =  0;
 
 	}
 
@@ -252,7 +253,8 @@ static void do_recvfrom( void * rpcBuffer, int size )
 
 	} else {
 
-		erest = asize = (int)abuffer = (int)aebuffer = 0;
+		abuffer = aebuffer = NULL;
+		erest = asize = 0;
 
 	}
 
@@ -373,93 +375,22 @@ static void do_setconfig(void *rpcBuffer, int size)
 
 static void do_select( void * rpcBuffer, int size )
 {
-	struct timeval timeout;
-	struct fd_set readset;
-	struct fd_set writeset;
-	struct fd_set exceptset;
-	struct fd_set *readset_p = NULL;
-	struct fd_set *writeset_p = NULL;
-	struct fd_set *exceptset_p = NULL;
-	struct timeval *timeout_p = NULL;
-	int *ptr = rpcBuffer;
-	int ret;
-	int maxfdp1;
+	select_pkt *pkt = (select_pkt*)_rpc_buffer;
 
-	maxfdp1 = ((int*)rpcBuffer)[0];
-	readset_p = (struct fd_set *)((int*)rpcBuffer)[1];
-	writeset_p = (struct fd_set *)((int*)rpcBuffer)[2];
-	exceptset_p = (struct fd_set *)((int*)rpcBuffer)[3];
-	timeout_p = (struct timeval *)((int*)rpcBuffer)[4];
-	if( timeout_p )
-	{
-		timeout_p = &timeout;
-		timeout_p->tv_sec = ((long long*)rpcBuffer)[3];
-		timeout_p->tv_usec = ((long long*)rpcBuffer)[4];
-	}
-	if( readset_p )
-	{
-		readset_p = &readset;
-		readset_p->fd_bits[0] = ((char*)rpcBuffer)[40];
-		readset_p->fd_bits[1] = ((char*)rpcBuffer)[41];
-	}
-	if( writeset_p )
-	{
-		writeset_p = &writeset;
-		writeset_p->fd_bits[0] = ((char*)rpcBuffer)[42];
-		writeset_p->fd_bits[1] = ((char*)rpcBuffer)[43];
-	}
-	if( exceptset_p )
-	{
-		exceptset_p = &exceptset;
-		exceptset_p->fd_bits[0] = ((char*)rpcBuffer)[44];
-		exceptset_p->fd_bits[1] = ((char*)rpcBuffer)[45];
-	}
-
-	ret = select( maxfdp1, readset_p, writeset_p, exceptset_p, timeout_p );
-	ptr[0] = ret;
-
-	if( timeout_p )
-	{
-		((long long*)rpcBuffer)[3] = timeout_p->tv_sec;
-		((long long*)rpcBuffer)[4] = timeout_p->tv_usec;
-	}
-	if( readset_p )
-	{
-		((char*)rpcBuffer)[40] = readset_p->fd_bits[0];
-		((char*)rpcBuffer)[41] = readset_p->fd_bits[1];
-	}
-	if( writeset_p )
-	{
-		((char*)rpcBuffer)[42] = writeset_p->fd_bits[0];
-		((char*)rpcBuffer)[43] = writeset_p->fd_bits[1];
-	}
-	if( exceptset_p )
-	{
-		((char*)rpcBuffer)[44] = exceptset_p->fd_bits[0];
-		((char*)rpcBuffer)[45] = exceptset_p->fd_bits[1];
-	}
+	pkt->result = select(	pkt->maxfdp1,
+				pkt->readset_p != NULL ? &pkt->readset : NULL,
+				pkt->writeset_p != NULL ? &pkt->writeset : NULL,
+				pkt->exceptset_p != NULL ? &pkt->exceptset : NULL,
+				pkt->timeout_p != NULL ? &pkt->timeout : NULL );
 }
 
-// cmd should be 64 bits wide; I think.
 static void do_ioctlsocket( void *rpcBuffer, int size )
 {
-	int *ptr = rpcBuffer, ret;
-	int s;
-	unsigned int cmd;
-	unsigned int argpv;
-	void *argp;
+	ioctl_pkt *pkt = (ioctl_pkt*)_rpc_buffer;
 
-	s = ((int*)_rpc_buffer)[0];
-	cmd = ((unsigned int*)_rpc_buffer)[1];
-	argp = (void*)(((int*)_rpc_buffer)[2]);
-	if( argp )
-	{
-		argpv = ((int*)_rpc_buffer)[3];
-		argp = &argpv;
-	}
-
-	ret = ioctlsocket( s, cmd, argp );
-	ptr[0] = ret;
+	pkt->result = ioctlsocket(	pkt->s,
+					pkt->cmd,
+					pkt->argp != NULL ? &pkt->value : NULL );
 }
 static void do_getsockname( void *rpcBuffer, int size )
 {

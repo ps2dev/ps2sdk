@@ -206,7 +206,9 @@ int vxprintf(func,arg,format,ap)
   int flag_center;          /* True if "=" flag is present */
   unsigned long longvalue;  /* Value for integer types */
 
+#ifndef NOFLOATINGPOINT
   long double realvalue;    /* Value for real types */
+#endif
   info *infop;              /* Pointer to the appropriate info structure */
   char buf[BUFSIZE];        /* Conversion buffer */
   char prefix;              /* Prefix character.  "+" or "-" or " " or '\0'. */
@@ -429,8 +431,10 @@ int vxprintf(func,arg,format,ap)
       case FLOAT:
       case EXP:
       case GENERIC:
+#ifdef NOFLOATINGPOINT
+        va_arg(ap,double);
+#else
         realvalue = va_arg(ap,double);
-#ifndef NOFLOATINGPOINT
         if( precision<0 ) precision = 6;         /* Set default precision */
         if( precision>BUFSIZE-10 ) precision = BUFSIZE-10;
         if( realvalue<0.0 ){
