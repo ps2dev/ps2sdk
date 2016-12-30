@@ -32,7 +32,7 @@ struct NetManRegNetworkStackResult{
 
 struct NetManQueryMainNetIFResult{
 	s32 result;
-	s8 name[NETMAN_NETIF_NAME_MAX_LEN];
+	char name[NETMAN_NETIF_NAME_MAX_LEN];
 };
 
 #define NETMAN_MAX_FRAME_SIZE	1520

@@ -13,8 +13,15 @@
 #include "rpc_client.h"
 
 static SifRpcClientData_t EEClient;
-static unsigned char SifRpcRxBuffer[64];
-static unsigned char SifRpcTxBuffer[64];
+static union{
+	s32 result;
+	struct NetManEEInitResult EEInitResult;
+	u8 buffer[64];
+} SifRpcRxBuffer;
+static union{
+	s32 state;
+	u8 buffer[64];
+} SifRpcTxBuffer;
 
 //Data for IOP -> EE transfers
 static unsigned short int EEFrameBufferWrPtr;
@@ -52,11 +59,11 @@ int NetManInitRPCClient(void)
 	{
 		while((result=sceSifBindRpc(&EEClient, NETMAN_RPC_NUMBER, 0))<0 || EEClient.server==NULL) DelayThread(500);
 
-		if((result=sceSifCallRpc(&EEClient, NETMAN_EE_RPC_FUNC_INIT, 0, NULL, 0, SifRpcRxBuffer, sizeof(struct NetManEEInitResult), NULL, NULL))>=0)
+		if((result=sceSifCallRpc(&EEClient, NETMAN_EE_RPC_FUNC_INIT, 0, NULL, 0, &SifRpcRxBuffer, sizeof(struct NetManEEInitResult), NULL, NULL))>=0)
 		{
-			if((result=((struct NetManEEInitResult*)SifRpcRxBuffer)->result) == 0)
+			if((result=SifRpcRxBuffer.EEInitResult.result) == 0)
 			{
-				EEFrameBuffer=((struct NetManEEInitResult*)SifRpcRxBuffer)->FrameBuffer;
+				EEFrameBuffer=SifRpcRxBuffer.EEInitResult.FrameBuffer;
 				EEFrameBufferWrPtr = 0;
 
 				event.attr = EA_SINGLE;
@@ -120,11 +127,11 @@ void NetManDeinitRPCClient(void)
 	memset(&EEClient, 0, sizeof(EEClient));
 }
 
-void NetManRpcToggleGlobalNetIFLinkState(unsigned int state)
+void NetManRpcToggleGlobalNetIFLinkState(int state)
 {
 	WaitSema(NetManIOSemaID);
-	*(u32 *)SifRpcTxBuffer=state;
-	sceSifCallRpc(&EEClient, NETMAN_EE_RPC_FUNC_HANDLE_LINK_STATUS_CHANGE, 0, SifRpcTxBuffer, sizeof(unsigned int), NULL, 0, NULL, NULL);
+	SifRpcTxBuffer.state=state;
+	sceSifCallRpc(&EEClient, NETMAN_EE_RPC_FUNC_HANDLE_LINK_STATUS_CHANGE, 0, &SifRpcTxBuffer, sizeof(s32), NULL, 0, NULL, NULL);
 	SignalSema(NetManIOSemaID);
 }
 
@@ -166,8 +173,7 @@ void NetManRpcNetProtStackFreeRxPacket(void *packet)
 
 static void EERxThread(void *arg)
 {
-	int OldState;
-	unsigned short int sent;
+	int OldState, sent;
 
 	while(1)
 	{
@@ -177,8 +183,8 @@ static void EERxThread(void *arg)
 		if(PacketReqs.count > 0)
 		{
 			WaitSema(NetManIOSemaID);
-			if(sceSifCallRpc(&EEClient, NETMAN_EE_RPC_FUNC_HANDLE_PACKETS, 0, &PacketReqs, sizeof(PacketReqs), SifRpcRxBuffer, sizeof(u32), NULL, NULL) >= 0)
-				sent = *(u32*)SifRpcRxBuffer;
+			if(sceSifCallRpc(&EEClient, NETMAN_EE_RPC_FUNC_HANDLE_PACKETS, 0, &PacketReqs, sizeof(PacketReqs), &SifRpcRxBuffer, sizeof(s32), NULL, NULL) >= 0)
+				sent = SifRpcRxBuffer.result;
 			else
 				sent = 0;
 			SignalSema(NetManIOSemaID);

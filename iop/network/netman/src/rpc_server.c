@@ -20,7 +20,13 @@ static SifRpcServerData_t rpc_sdata;
 static unsigned char rpc_buffer[NETMAN_RPC_BUFF_SIZE];
 static SifRpcDataQueue_t rpc_qdata;
 
-static unsigned char SifRpcTxBuffer[80];
+static union{
+	s32 result;
+	struct NetManIoctlResult IoctlResult;
+	struct NetManQueryMainNetIFResult QueryMainNetIFResult;
+	struct NetManRegNetworkStackResult RegNetworkStackResult;
+	u8 buffer[80];
+} SifRpcTxBuffer;
 
 /* Packet transmission buffer. The EE will DMA transfer the packet to be transmitted directly into this buffer before invoking FUNC_SEND_PACKET. */
 static u8 *TxFrameBuffer = NULL;
@@ -98,20 +104,20 @@ static void *NETMAN_rpc_handler(int fno, void *buffer, int size)
 			result=NULL;
 			break;
 		case NETMAN_IOP_RPC_FUNC_REG_NETWORK_STACK:
-			result = SifRpcTxBuffer;
+			result = &SifRpcTxBuffer;
 
 			if(TxFrameBuffer == NULL) TxFrameBuffer = malloc(NETMAN_MAX_FRAME_SIZE*NETMAN_RPC_BLOCK_SIZE);
 
 			if(TxFrameBuffer != NULL)
 			{
-				((struct NetManRegNetworkStackResult *)SifRpcTxBuffer)->FrameBuffer = TxFrameBuffer;
+				SifRpcTxBuffer.RegNetworkStackResult.FrameBuffer = TxFrameBuffer;
 				ResultValue = NetManRegisterNetworkStack(&RpcStack);
 			}else{
 				ResultValue = -ENOMEM;
 			}
 
 			IsRpcStackInitialized=1;
-			((struct NetManRegNetworkStackResult *)SifRpcTxBuffer)->result=ResultValue;
+			SifRpcTxBuffer.RegNetworkStackResult.result=ResultValue;
 			break;
 		case NETMAN_IOP_RPC_FUNC_UNREG_NETWORK_STACK:
 			unregisterEENetworkStack();
@@ -133,16 +139,16 @@ static void *NETMAN_rpc_handler(int fno, void *buffer, int size)
 			result=&ResultValue;
 			break;
 		case NETMAN_IOP_RPC_FUNC_IOCTL:
-			((struct NetManIoctlResult*)SifRpcTxBuffer)->result=NetManIoctl(((struct NetManIoctl*)buffer)->command, ((struct NetManIoctl*)buffer)->args, ((struct NetManIoctl*)buffer)->args_len, ((struct NetManIoctlResult*)SifRpcTxBuffer)->output, ((struct NetManIoctl*)buffer)->length);
-			result=SifRpcTxBuffer;
+			SifRpcTxBuffer.IoctlResult.result=NetManIoctl(((struct NetManIoctl*)buffer)->command, ((struct NetManIoctl*)buffer)->args, ((struct NetManIoctl*)buffer)->args_len, SifRpcTxBuffer.IoctlResult.output, ((struct NetManIoctl*)buffer)->length);
+			result=&SifRpcTxBuffer;
 			break;
 		case NETMAN_IOP_RPC_FUNC_SET_MAIN_NETIF:
-			*(s32*)SifRpcTxBuffer=NetManSetMainIF(buffer);
-			result=SifRpcTxBuffer;
+			SifRpcTxBuffer.result=NetManSetMainIF(buffer);
+			result=&SifRpcTxBuffer;
 			break;
 		case NETMAN_IOP_RPC_FUNC_QUERY_MAIN_NETIF:
-			((struct NetManQueryMainNetIFResult*)SifRpcTxBuffer)->result=NetManQueryMainIF(((struct NetManQueryMainNetIFResult*)SifRpcTxBuffer)->name);
-			result=SifRpcTxBuffer;
+			SifRpcTxBuffer.QueryMainNetIFResult.result=NetManQueryMainIF(SifRpcTxBuffer.QueryMainNetIFResult.name);
+			result=&SifRpcTxBuffer;
 			break;
 		case NETMAN_IOP_RPC_FUNC_SET_LINK_MODE:
 			ResultValue=NetManSetLinkMode(*(s32*)buffer);
