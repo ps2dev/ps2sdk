@@ -21,7 +21,6 @@
 #include "intrman.h"
 #include "ioman.h"
 #include "libsd.h"
-#include "loadcore.h"
 #include "sifcmd.h"
 #include "stdio.h"
 #include "sysclib.h"

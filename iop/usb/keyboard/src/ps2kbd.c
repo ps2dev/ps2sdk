@@ -108,16 +108,13 @@ u8 keyModValue[8] = { 0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7 };
 int repeat_tid;
 int eventid;   /* Id of the repeat event */
 
-int _start ()
+int _start (int argc, char *argv[])
 {
-  FlushDcache();
-
   ps2kbd_init();
 
   printf("PS2KBD - USB Keyboard Library\n");
 
-  return 0;
-
+  return MODULE_RESIDENT_END;
 }
 
 int ps2kbd_probe(int devId)

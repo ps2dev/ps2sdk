@@ -12,10 +12,10 @@ IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN=irx/ps2kbd.irx
-IOP_OBJS=obj/ps2kbd.o obj/imports.o
+IOP_BIN  = $(IOP_BIN_DIR)ps2kbd.irx
+IOP_OBJS = ps2kbd.o imports.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
-IOP_CFLAGS=-Wall
 IOP_INCS += -I$(PS2SDKSRC)/iop/usb/usbd/include
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)

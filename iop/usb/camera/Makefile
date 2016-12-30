@@ -16,9 +16,6 @@ IOP_BIN  = $(IOP_BIN_DIR)ps2cam.irx
 IOP_OBJS = ps2cam.o imports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
-IOP_CFLAGS  = -Wall
-IOP_LDFLAGS = -s
-
 IOP_INCS += -I$(PS2SDKSRC)/iop/usb/usbd/include
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)

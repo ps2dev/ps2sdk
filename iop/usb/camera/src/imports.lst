@@ -2,10 +2,6 @@ stdio_IMPORTS_start
 I_printf
 stdio_IMPORTS_end
 
-loadcore_IMPORTS_start
-I_FlushDcache
-loadcore_IMPORTS_end
-
 sysclib_IMPORTS_start
 I_memset
 I_memcmp

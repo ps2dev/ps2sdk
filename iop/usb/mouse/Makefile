@@ -16,7 +16,6 @@ IOP_BIN  = $(IOP_BIN_DIR)ps2mouse.irx
 IOP_OBJS = ps2mouse.o imports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
-IOP_CFLAGS=-Wall
 IOP_INCS += -I$(PS2SDKSRC)/iop/usb/usbd/include
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)

@@ -65,9 +65,6 @@ int _start( int argc, char **argv)
 	iop_thread_t	param;
 	int				th;
 
-
-	FlushDcache();
-
 	PS2CamInitDriver();
 
 
@@ -83,12 +80,12 @@ int _start( int argc, char **argv)
 
 	if (th > 0)
 	{
-		StartThread(th,0);
-		return 0;
+		StartThread(th,NULL);
+		return MODULE_RESIDENT_END;
 	}
 	else
 	{
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 	}
 }
 
@@ -130,10 +127,7 @@ int PS2CamInitDriver(void)
 
 
 	//connect to usb.irx
-
-	UsbRegisterDriver(&cam_driver);
-
-	return 0;
+	return UsbRegisterDriver(&cam_driver);
 }
 
 
@@ -594,8 +588,6 @@ void PS2CamSetDeviceDefaults(CAMERA_DEVICE *dev)
 /*-----------------------------------------------*/
 void PS2CamCallback(int resultCode, int bytes, void *arg)
 {
-	//unsigned char	*val;
-
 	if(resultCode !=0)
 		printf("callback: result= %d, bytes= %d, arg= %p \n", resultCode, bytes, arg);
 
@@ -948,8 +940,6 @@ int read_byts;
 
 void PS2CamReadDataCallback(int resultCode, int bytes, void *arg)
 {
-	//unsigned char	*val;
-
 	//printf("read_data_callback: result= %d, bytes= %d, arg= %p \n", resultCode, bytes, arg);
 
 	read_rslt = resultCode;

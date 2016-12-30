@@ -17,10 +17,8 @@
 #include "irx.h"
 
 /* Please keep these in alphabetical order!  */
-#include "dmacman.h"
 #include "intrman.h"
 #include "iomanX.h"
-#include "libsd.h"
 #include "loadcore.h"
 #include "sifcmd.h"
 #include "stdio.h"
@@ -31,6 +29,5 @@
 #include "thmsgbx.h"
 #include "thsemap.h"
 #include "usbd.h"
-#include "vblank.h"
 
 #endif /* IOP_IRX_IMPORTS_H */
