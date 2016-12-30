@@ -151,9 +151,15 @@ typedef struct
 	u32 buttonDataReady;
 	u8 mode;
 	u8 lock;
-	u8 ee_actDirectData[8] __attribute__((aligned(4)));
+	union {
+		u8 data[8];
+		u32 data32[8 / sizeof(u32)];
+	} ee_actDirectData __attribute__((aligned(4)));
 	s16 ee_actDirectSize;
-	u8 ee_actAlignData[8] __attribute__((aligned(4)));
+	union {
+		u8 data[8];
+		u32 data32[8 / sizeof(u32)];
+	} ee_actAlignData __attribute__((aligned(4)));
 	u16 state;
 	u16 reqState;
 	u32 frame;

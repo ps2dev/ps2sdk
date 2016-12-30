@@ -139,7 +139,7 @@ void QueryPadThread(void *arg)
 	if(pstate->disconnected != 0)
 	{
 		for(i=0; i < 5; i++);
-			pstate->ee_actAlignData[i] = 0xFF;
+			pstate->ee_actAlignData.data[i] = 0xFF;
 	}
 
 	res = 0;

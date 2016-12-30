@@ -10,12 +10,12 @@ int sio2_transfer(sio2_transfer_data_t *td);
 void sio2_mtap_transfer_init();
 void sio2_transfer_reset();
 
-void sio2_mtap_change_slot_set(int (*cb)(u32 *));
+void sio2_mtap_change_slot_set(int (*cb)(s32 *));
 void sio2_mtap_get_slot_max_set(int (*cb)(int));
 void sio2_mtap_get_slot_max_set2(int (*cb)(int));
 void sio2_mtap_update_slots_set(void (*cb)(void));
 
-int sio2_mtap_change_slot(u32 *arg);
+int sio2_mtap_change_slot(s32 *arg);
 int sio2_mtap_get_slot_max(u32 port);
 void sio2_mtap_update_slots();
 

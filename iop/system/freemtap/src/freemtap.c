@@ -254,7 +254,7 @@ s32 change_slot_check_td(u32 a)
 	return res;
 }
 
-s32 change_slot(s32 *arg)
+int change_slot(s32 *arg)
 {
 	u32 loop = 0;
 	u32 count = 4;
@@ -426,7 +426,7 @@ s32 _start(char **argv, int argc)
 		state_slots[i] = 0;
 	}
 
-	sio2_mtap_change_slot_set((void*)change_slot);
+	sio2_mtap_change_slot_set(change_slot);
 	sio2_mtap_get_slot_max_set(get_slots1);
 	sio2_mtap_get_slot_max_set2(get_slots2);
 	sio2_mtap_update_slots_set(update_slot_numbers);
@@ -442,10 +442,10 @@ void shutdown()
 {
 	u32 i;
 
-	sio2_mtap_change_slot_set(0);
-	sio2_mtap_get_slot_max_set(0);
-	sio2_mtap_get_slot_max_set2(0);
-	sio2_mtap_update_slots_set(0);
+	sio2_mtap_change_slot_set(NULL);
+	sio2_mtap_get_slot_max_set(NULL);
+	sio2_mtap_get_slot_max_set2(NULL);
+	sio2_mtap_update_slots_set(NULL);
 
 	for(i=0; i < 4; i++)
 	{

@@ -66,7 +66,7 @@ int init = 0;
 int event_flag = -1;
 int thid = -1;
 sio2_transfer_data_t *transfer_data = NULL;
-int (*cb1)(u32 *) = NULL;
+int (*cb1)(s32 *) = NULL;
 int (*cb2)(int) = NULL;
 int (*cb3)(int) = NULL;
 void (*cb4)(void) = NULL;
@@ -347,7 +347,7 @@ void sio2_transfer_reset()
 }
 
 /* 55 */
-int sio2_func1(u32 *arg)
+int sio2_func1(s32 *arg)
 {
 	int i, ret = 1;
 
@@ -391,7 +391,7 @@ void sio2_func4()
 		cb4();
 }
 
-/* 51 */ void sio2_cb1_set(int (*cb)(u32 *)) { cb1 = cb; }
+/* 51 */ void sio2_cb1_set(int (*cb)(s32 *)) { cb1 = cb; }
 /* 52 */ void sio2_cb2_set(int (*cb)(int)) { cb2 = cb; }
 /* 53 */ void sio2_cb3_set(int (*cb)(int)) { cb3 = cb; }
 /* 54 */ void sio2_cb4_set(void (*cb)(void)) { cb4 = cb; }

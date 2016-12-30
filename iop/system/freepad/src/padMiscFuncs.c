@@ -235,8 +235,8 @@ u32 SetActDirect3(u32 port, u32 slot)
 
 						for(i=0; i < padState[port][slot].ee_actDirectSize; i++)
 						{
-							if((padState[port][slot].ee_actAlignData[i] != 0xFF)
-								&& (padState[port][slot].ee_actDirectData[i] != 0))
+							if((padState[port][slot].ee_actAlignData.data[i] != 0xFF)
+								&& (padState[port][slot].ee_actDirectData.data[i] != 0))
 							{
 								u8 *act = (u8*)padState[port][slot].actData;
 								ret += act[3+i];
@@ -262,7 +262,7 @@ u32 SetActDirect2(u32 port, u32 slot, u8 *actData)
 
 	for(i=0; i < 6; i++)
 	{
-		u32 a = padState[port][slot].ee_actAlignData[i];
+		u32 a = padState[port][slot].ee_actAlignData.data[i];
 
 		if(a != 0xFF)
 		{
@@ -295,7 +295,7 @@ u32 padSetActDirect(u32 port, u32 slot, u8 *actData)
 			u32 i;
 
 			for(i=0; i < 6; i++)
-				padState[port][slot].ee_actDirectData[i] = actData[i];
+				padState[port][slot].ee_actDirectData.data[i] = actData[i];
 
 			padState[port][slot].ee_actDirectSize = 6;
 
@@ -317,7 +317,7 @@ u32 padSetActAlign(u32 port, u32 slot, u8 *actData)
 		u32 i;
 
 		for(i=0; i < 6; i++)
-			padState[port][slot].ee_actAlignData[i] = actData[i];
+			padState[port][slot].ee_actAlignData.data[i] = actData[i];
 
 		padState[port][slot].reqState = PAD_RSTAT_BUSY;
 		padState[port][slot].runTask = TASK_SET_ACT_ALIGN;

@@ -169,10 +169,10 @@ u32 ReadData(padState_t *pstate)
 	{
 		for(i=0; i < pstate->ee_actDirectSize; i++)
 		{
-			if(pstate->ee_actAlignData[i] == 0xFF)
-				pstate->inbuffer[i+3] = pstate->ee_actAlignData[i];
+			if(pstate->ee_actAlignData.data[i] == 0xFF)
+				pstate->inbuffer[i+3] = pstate->ee_actAlignData.data[i];
 			else
-				pstate->inbuffer[i+3] = pstate->ee_actDirectData[i];
+				pstate->inbuffer[i+3] = pstate->ee_actDirectData.data[i];
 		}
 	}
 
@@ -610,7 +610,7 @@ u32 SetActAlign(padState_t *pstate)
 	sio2CmdSetSetActAlign(PAD_ID_CONFIG, pstate->inbuffer);
 
 	for(i=0; i < 6; i++)
-		pstate->inbuffer[3+i] = pstate->ee_actAlignData[i];
+		pstate->inbuffer[3+i] = pstate->ee_actAlignData.data[i];
 
 	pdSetInBuffer(pstate->port, pstate->slot, 0, pstate->inbuffer);
 

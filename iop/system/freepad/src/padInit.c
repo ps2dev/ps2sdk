@@ -155,10 +155,10 @@ void DmaSendEE()
 
 					p->ee_pdata.runTask = p->runTask;
 
-					p->ee_pdata.actDirData[0] = *(u32*)&p->ee_actDirectData[0];
-					p->ee_pdata.actDirData[1] = *(u32*)&p->ee_actDirectData[4];
-					p->ee_pdata.actAlignData[0] = *(u32*)&p->ee_actAlignData[0];
-					p->ee_pdata.actAlignData[1] = *(u32*)&p->ee_actAlignData[4];
+					p->ee_pdata.actDirData[0] = p->ee_actDirectData.data32[0];
+					p->ee_pdata.actDirData[1] = p->ee_actDirectData.data32[1];
+					p->ee_pdata.actAlignData[0] = p->ee_actAlignData.data32[0];
+					p->ee_pdata.actAlignData[1] = p->ee_actAlignData.data32[1];
 
 					p->ee_pdata.actData[0] = p->actData[0];
 					p->ee_pdata.actData[1] = p->actData[1];
