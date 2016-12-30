@@ -217,7 +217,7 @@ sceMcStDateTime mcman_fsmodtime;
 /* 24 */ int  mcman_replacebadblock(void);
 /* 25 */ int  McCloseAll(void);
 /* 42 */ struct modInfo_t *McGetModuleInfo(void);
-/* 43 */ int  McGetCardSpec(int port, int slot, u16 *pagesize, u16 *blocksize, int *cardsize, u8 *flags);
+/* 43 */ int  McGetCardSpec(int port, int slot, s16 *pagesize, u16 *blocksize, int *cardsize, u8 *flags);
 /* 44 */ int  mcman_getFATentry(int port, int slot, int fat_index, int *fat_entry);
 /* 45 */ int  McCheckBlock(int port, int slot, int block);
 /* 46 */ int  mcman_setFATentry(int port, int slot, int fat_index, int fat_entry);
@@ -353,7 +353,7 @@ int  mcman_initdev(void);
 typedef struct { 				// size = 384
     char  magic[28];				// Superblock magic, on PS2 MC : "Sony PS2 Memory Card Format "
     u8  version[12];  			// Version number of the format used, 1.2 indicates full support for bad_block_list
-    u16 pagesize;				// size in bytes of a memory card page
+    s16 pagesize;				// size in bytes of a memory card page
     u16 pages_per_cluster;		// number of pages in a cluster
     u16 blocksize;				// number of pages in an erase block
     u16 unused;					// unused

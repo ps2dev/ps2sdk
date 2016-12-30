@@ -581,7 +581,7 @@ int mcman_readpage(int port, int slot, int page, void *buf, void *eccbuf)
 }
 
 //--------------------------------------------------------------
-int McGetCardSpec(int port, int slot, u16 *pagesize, u16 *blocksize, int *cardsize, u8 *flags)
+int McGetCardSpec(int port, int slot, s16 *pagesize, u16 *blocksize, int *cardsize, u8 *flags)
 {
 	register int retries, r;
 	u8 *p = mcman_sio2packet.out_dma.addr;
@@ -616,7 +616,7 @@ int McGetCardSpec(int port, int slot, u16 *pagesize, u16 *blocksize, int *cardsi
 	*flags = p[2];
 
 #ifdef DEBUG
-	DPRINTF("mcman: McGetCardSpec sio2cmd pagesize=%d blocksize=%d cardsize=%d flags%x\n", *pagesize, *blocksize, *cardsize, *flags);
+	DPRINTF("mcman: McGetCardSpec sio2cmd pagesize=%d blocksize=%u cardsize=%d flags%x\n", *pagesize, *blocksize, *cardsize, *flags);
 #endif
 
 	return sceMcResSucceed;
