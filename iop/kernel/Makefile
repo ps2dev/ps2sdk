@@ -14,7 +14,8 @@ IOP_INC_DIR = include/
 
 IOP_LIB  = $(IOP_LIB_DIR)libkernel.a
 
-IOP_OBJS = cdvdman.o heaplib.o intrman.o ioman.o libsd.o loadcore.o modload.o secrman.o sifcmd.o sifman.o sio2man.o stdio.o sysclib.o sysmem.o thbase.o thevent.o thsemap.o timrman.o usbd.o vblank.o
+#TODO: remove the library because it's deprecated.
+IOP_OBJS = #cdvdman.o heaplib.o intrman.o ioman.o libsd.o loadcore.o modload.o secrman.o sifcmd.o sifman.o sio2man.o stdio.o sysclib.o sysmem.o thbase.o thevent.o thsemap.o timrman.o usbd.o vblank.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 all: $(IOP_OBJS_DIR) $(IOP_LIB_DIR) $(IOP_LIB)
