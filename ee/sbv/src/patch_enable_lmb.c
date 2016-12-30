@@ -21,9 +21,10 @@
 #include "smod.h"
 #include "slib.h"
 
+#include "common.h"
+
 /* from common.c */
-extern u8 smem_buf[];
-extern int smem_write_word(void *address, u32 value);
+extern struct smem_buf smem_buf;
 
 /* from slib.c */
 extern slib_exp_lib_list_t _slib_cur_exp_lib_list;
@@ -110,9 +111,9 @@ int sbv_patch_enable_lmb(void)
 		return -1;
 
 	lf_rpc_dispatch = (void *)(loadfile_info.text_start + 0x4c4);
-	SyncDCache(smem_buf, smem_buf+128);
-	if(SifRpcGetOtherData(&RData, (void*)lf_rpc_dispatch, smem_buf, 128, 0)>=0){
-		data=(u32*)smem_buf;
+	SyncDCache(&smem_buf, smem_buf.bytes+128);
+	if(SifRpcGetOtherData(&RData, (void*)lf_rpc_dispatch, &smem_buf, 128, 0)>=0){
+		data=smem_buf.words;
 		if(data[0]==0x27bdffe8 && data[1]==0x2c820006 && data[2]==0x14400003 && data[3]==0xafbf0010 && data[5]==0x00001021 && data[6]==0x00041080){
 			lf_fno_check = (void*)(lf_rpc_dispatch+4);
 

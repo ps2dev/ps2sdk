@@ -17,11 +17,13 @@
 #include <sifrpc.h>
 
 #include "smem.h"
+#include "slib.h"
 #include "smod.h"
 
+#include "common.h"
+
 /* from common.c */
-extern u8 smem_buf[];
-extern int __memcmp(const void *s1, const void *s2, unsigned int length);
+extern struct smem_buf smem_buf;
 
 /**
  * smod_get_next_mod - Return the next module referenced in the global module list.
@@ -41,9 +43,9 @@ int smod_get_next_mod(smod_mod_info_t *cur_mod, smod_mod_info_t *next_mod)
 			addr = cur_mod->next;
 	}
 
-	SyncDCache(smem_buf, smem_buf+sizeof(smod_mod_info_t));
-	if(SifRpcGetOtherData(&RData, addr, smem_buf, sizeof(smod_mod_info_t), 0)>=0){
-		memcpy(next_mod, smem_buf, sizeof(smod_mod_info_t));
+	SyncDCache(&smem_buf, smem_buf.bytes+sizeof(smod_mod_info_t));
+	if(SifRpcGetOtherData(&RData, addr, &smem_buf, sizeof(smod_mod_info_t), 0)>=0){
+		memcpy(next_mod, &smem_buf.mod_info, sizeof(smod_mod_info_t));
 		return next_mod->id;
 	}
 
@@ -61,11 +63,11 @@ int smod_get_mod_by_name(const char *name, smod_mod_info_t *info)
 	if (!smod_get_next_mod(NULL, info))
 		return 0;
 
-	smem_buf[64]='\0';
+	smem_buf.bytes[64]='\0';
 	do {
-		SyncDCache(smem_buf, smem_buf+64);
-		if(SifRpcGetOtherData(&RData, info->name, smem_buf, 64, 0)>=0){
-			if (!__memcmp(smem_buf, name, len))
+		SyncDCache(&smem_buf, smem_buf.bytes+64);
+		if(SifRpcGetOtherData(&RData, info->name, &smem_buf, 64, 0)>=0){
+			if (!__memcmp(smem_buf.bytes, name, len))
 				return info->id;
 		}
 	} while (smod_get_next_mod(info, info) != 0);

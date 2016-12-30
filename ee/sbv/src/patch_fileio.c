@@ -4,11 +4,10 @@
 #include <iopheap.h>
 #include <string.h>
 
+#include "slib.h"
 #include "smod.h"
 
-/* from common.c */
-extern u8 smem_buf[];
-extern int smem_write_word(void *address, u32 value);
+#include "common.h"
 
 #define JMP(addr)	(0x08000000|(0x3ffffff&((addr)>>2)))
 #define JAL(addr)	(0x0c000000 | (0x3ffffff & ((addr) >> 2)))

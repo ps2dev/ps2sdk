@@ -14,7 +14,12 @@
 #include <kernel.h>
 #include <sifrpc.h>
 
-u8 smem_buf[0x300] ALIGNED(64);	//Must be large enough to accommodate all operations.
+#include "slib.h"
+#include "smod.h"
+
+#include "common.h"
+
+struct smem_buf smem_buf ALIGNED(64);
 
 /* Do not link to memcmp() from libc, so we only depend on libkernel. */
 int __memcmp(const void *s1, const void *s2, unsigned int length)
@@ -30,18 +35,20 @@ int __memcmp(const void *s1, const void *s2, unsigned int length)
 	return 0;
 }
 
-int smem_write_word(void *address, u32 value){
+int smem_write_word(void *address, u32 value)
+{
 	SifRpcReceiveData_t RData;
 	void *pDestRounded;
 	int result;
 	SifDmaTransfer_t dmat;
 
-	pDestRounded=(void*)(((unsigned int)address)&0xFFFFFFC0);
-	SyncDCache(smem_buf, smem_buf+64);
-	if((result=SifRpcGetOtherData(&RData, pDestRounded, smem_buf, 64, 0))>=0){
-		*(unsigned int*)UNCACHED_SEG((((unsigned int)address&0x3F)+smem_buf))=value;
+	pDestRounded=(void*)(((u32)address)&0xFFFFFFC0);
+	SyncDCache(&smem_buf, smem_buf.bytes+64);
+	if((result=SifRpcGetOtherData(&RData, pDestRounded, &smem_buf, 64, 0))>=0)
+	{
+		*(u32*)UNCACHED_SEG((&smem_buf.bytes[((u32)address&0x3F)]))=value;
 
-		dmat.src=smem_buf;
+		dmat.src=&smem_buf;
 		dmat.dest=pDestRounded;
 		dmat.size=64;
 		dmat.attr=0;
