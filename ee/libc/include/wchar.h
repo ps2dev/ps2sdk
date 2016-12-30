@@ -1,5 +1,29 @@
+/*
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# $Id$
+# Wide-character type, constant and function declarations for LIBC.
+*/
+
 #ifndef _WCHAR_H_
 #define _WCHAR_H_
+
+/* include file. */
+#include <stdlib.h>
+#include <stdarg.h>
+#include <stddef.h>
+#include <tamtypes.h>
+#include <errno.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define __need_size_t
 #define __need_wchar_t
@@ -38,8 +62,8 @@ wchar_t* wcsrchr(const wchar_t* ws, wint_t wc);
 wchar_t* wcswcs(const wchar_t* ws1, const wchar_t* ws2);
 wchar_t* wcsupr(wchar_t* wcs);
 wchar_t* wcslwr(wchar_t* wcs);
-int towlower(wint_t wc);
-int towupper(wint_t wc);
+wint_t towlower(wint_t wc);
+wint_t towupper(wint_t wc);
 int iswupper(wint_t wc);
 int iswlower(wint_t wc);
 int iswalpha(wint_t wc);
@@ -73,5 +97,9 @@ int swprintf(wchar_t *str, size_t n, const wchar_t *format, ...);
 double wcstod(const wchar_t *s, wchar_t **eptr);
 long int wcstol(const wchar_t *nptr, wchar_t **endptr, int base);
 unsigned long int wcstoul(const wchar_t *nptr, wchar_t **endptr, int base);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* _WCHAR_H_ */

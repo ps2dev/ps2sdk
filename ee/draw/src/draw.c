@@ -150,13 +150,18 @@ qword_t *draw_clear(qword_t *q, int context, float x, float y, float width, floa
 
 	rect_t rect;
 
-	float q0 = 1.0f;
+	union{
+		float	fvalue;
+		u32	ivalue;
+	} q0 = {
+		1.0f
+	};
 
 	rect.v0.x = x;
 	rect.v0.y = y;
 	rect.v0.z = 0x00000000;
 
-	rect.color.rgbaq = GS_SET_RGBAQ(r,g,b,0x80,*(unsigned int*)&q0);
+	rect.color.rgbaq = GS_SET_RGBAQ(r,g,b,0x80,q0.ivalue);
 
 	rect.v1.x = x + width - 0.9375f;
 	rect.v1.y = y + height - 0.9375f;

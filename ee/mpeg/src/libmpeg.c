@@ -8,16 +8,17 @@
 # Review ps2sdk README & LICENSE files for further details.
 # Based on refernce software of MSSG
 */
-#include "libmpeg.h"
-#include "libmpeg_internal.h"
 
 #include <malloc.h>
 #include <stdio.h>
 #include <string.h>
 #include <kernel.h>
 
+#include "libmpeg.h"
+#include "libmpeg_internal.h"
+
 static _MPEGContext s_MPEG12Ctx;
-static long*        s_pCurPTS;
+static s64*        s_pCurPTS;
 
 static void ( *LumaOp[ 8 ] ) ( _MPEGMotion* ) = {
  _MPEG_put_luma, _MPEG_put_luma_X, _MPEG_put_luma_Y, _MPEG_put_luma_XY,
@@ -69,10 +70,10 @@ static void _ext_pic_ssc ( void );
 static void _ext_pic_tsc ( void );
 static void _xtra_bitinf ( void );
 
-static int _get_next_picture  ( void*, long* );
-static int _get_first_picture ( void*, long* );
+static int _get_next_picture  ( void*, s64* );
+static int _get_first_picture ( void*, s64* );
 
-int ( *MPEG_Picture ) ( void*, long* );
+int ( *MPEG_Picture ) ( void*, s64* );
 
 static void ( *DoMC ) ( void );
 
@@ -83,7 +84,7 @@ static int  _mpeg12_dec_mb       ( int*, int*, int[ 2 ][ 2 ][ 2 ], int [ 2 ][ 2 
 void MPEG_Initialize (
       int   ( *apDataCB ) ( void*                    ), void* apDataCBParam,
       void* ( *apInitCB ) ( void*, MPEGSequenceInfo* ), void* apInitCBParam,
-      long* apCurPTS
+      s64* apCurPTS
      ) {
 
  memset (  &s_MPEG12Ctx, 0, sizeof ( s_MPEG12Ctx )  );
@@ -565,7 +566,7 @@ static void _xtra_bitinf ( void ) {
 
 }  /* end _xtra_bitinf */
 
-static int _get_first_picture ( void* apData, long* apPTS ) {
+static int _get_first_picture ( void* apData, s64* apPTS ) {
 
  int retVal = _get_hdr ();
 
@@ -590,7 +591,7 @@ static int _get_first_picture ( void* apData, long* apPTS ) {
 
 }  /* end _get_first_picture */
 
-static int _get_next_picture ( void* apData, long* apPTS ) {
+static int _get_next_picture ( void* apData, s64* apPTS ) {
 
  int retVal;
 
@@ -658,7 +659,7 @@ static void _mpeg12_picture_data ( void ) {
 
  int               lMBAMax = s_MPEG12Ctx.m_MBWidth * s_MPEG12Ctx.m_MBHeight;
  _MPEGMacroBlock8* lpMB;
- long              lPTS;
+ s64              lPTS;
 
  if ( s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME && s_MPEG12Ctx.m_fSecField ) s_MPEG12Ctx.m_fSecField = 0;
 

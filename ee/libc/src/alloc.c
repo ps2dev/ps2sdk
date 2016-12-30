@@ -311,6 +311,7 @@ void * calloc(size_t n, size_t size)
 	if ((ptr = malloc(sz)) == NULL)
 		return ptr;
 
+	asm ("":"+r"(ptr));	//SP193: FIXME: temporary workaround for the GCC calloc optimization bug (results in recursive call to calloc)
 	memset(ptr, 0, sz);
 	return ptr;
 }

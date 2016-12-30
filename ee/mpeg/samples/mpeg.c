@@ -61,7 +61,7 @@ int main ( void ) {
  InitCBParam lInfo;
  int         lFD = fioOpen ( MPEG_BITSTREAM_FILE, O_RDONLY );
  long        lSize;
- long        lPTS, lCurPTS;
+ s64         lPTS, lCurPTS;
 
  frame.width = 640;
  frame.height = 512;

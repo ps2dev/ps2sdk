@@ -234,7 +234,7 @@ union
     unsigned short i[2];
   } u;
 int i; // , k;
-short *q;
+unsigned short *q;
 
 u.y = x;
 
@@ -305,7 +305,7 @@ union
     float y;
     unsigned short i[2];
   } u;
-short *q;
+unsigned short *q;
 int e;
 
 #ifdef UNK

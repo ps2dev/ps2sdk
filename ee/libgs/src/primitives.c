@@ -21,7 +21,7 @@ extern QWORD GsPrimWorkArea[];
 static GS_TEST GSGLOBAL_TEST1;
 static GS_TEST GSGLOBAL_TEST2;
 
-void GsOverridePrimAttributes(char override, char iip, char tme, char fge, char abe, char aa1, char fst, char ctxt, char fix)
+void GsOverridePrimAttributes(s8 override, s8 iip, s8 tme, s8 fge, s8 abe, s8 aa1, s8 fst, s8 ctxt, s8 fix)
 {
 	QWORD *p;
 
@@ -44,7 +44,7 @@ void GsOverridePrimAttributes(char override, char iip, char tme, char fge, char 
 	GsDmaWait();
 }
 
-void GsEnableDithering(unsigned char enable, int mode)
+void GsEnableDithering(u8 enable, int mode)
 {
 	QWORD *p;
 
@@ -70,7 +70,7 @@ void GsEnableDithering(unsigned char enable, int mode)
 	GsDmaWait();
 }
 
-void GsEnableAlphaTransparency1(unsigned short enable,unsigned short method,unsigned char alpha_ref,unsigned short fail_method)
+void GsEnableAlphaTransparency1(u16 enable,u16 method,u8 alpha_ref,u16 fail_method)
 {
 	QWORD *p;
 
@@ -92,7 +92,7 @@ void GsEnableAlphaTransparency1(unsigned short enable,unsigned short method,unsi
 	GsDmaWait();
 }
 
-void GsEnableAlphaTransparency2(unsigned short enable,unsigned short method,unsigned char alpha_ref,unsigned short fail_method)
+void GsEnableAlphaTransparency2(u16 enable,u16 method,u8 alpha_ref,u16 fail_method)
 {
 	QWORD *p;
 
@@ -114,7 +114,7 @@ void GsEnableAlphaTransparency2(unsigned short enable,unsigned short method,unsi
 	GsDmaWait();
 }
 
-void GsEnableZbuffer1(unsigned short enable,unsigned short test_method)
+void GsEnableZbuffer1(u16 enable,u16 test_method)
 {
 	GSGLOBAL_TEST1.ztest_enable = enable;
 	GSGLOBAL_TEST1.ztest_method = test_method;
@@ -124,7 +124,7 @@ void GsEnableZbuffer1(unsigned short enable,unsigned short test_method)
 					GSGLOBAL_TEST1.ztest_enable,  GSGLOBAL_TEST1.ztest_method);
 }
 
-void GsEnableZbuffer2(unsigned short enable,unsigned short test_method)
+void GsEnableZbuffer2(u16 enable,u16 test_method)
 {
 	GSGLOBAL_TEST2.ztest_enable = enable;
 	GSGLOBAL_TEST2.ztest_method = test_method;
@@ -135,7 +135,7 @@ void GsEnableZbuffer2(unsigned short enable,unsigned short test_method)
 
 }
 
-void GsEnableAlphaBlending1(unsigned short enable)
+void GsEnableAlphaBlending1(u16 enable)
 {
 	QWORD *p;
 
@@ -158,7 +158,7 @@ void GsEnableAlphaBlending1(unsigned short enable)
 	GsDmaWait();
 }
 
-void GsEnableAlphaBlending2(unsigned short enable)
+void GsEnableAlphaBlending2(u16 enable)
 {
 	QWORD *p;
 

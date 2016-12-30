@@ -203,7 +203,7 @@ wchar_t* wcslwr(wchar_t* wcs)
 #endif
 
 #ifdef F_towlower
-int towlower(wint_t wc)
+wint_t towlower(wint_t wc)
 {
 	if (iswupper(wc)) wc+=32;
 
@@ -212,7 +212,7 @@ int towlower(wint_t wc)
 #endif
 
 #ifdef F_towupper
-int towupper(wint_t wc)
+wint_t towupper(wint_t wc)
 {
 	if (iswlower(wc)) wc-=32;
 

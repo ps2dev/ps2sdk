@@ -18,7 +18,7 @@
 
 QWORD GsPrimWorkArea[64] __attribute__((aligned(64))); // Align to a 64-byte boundary.
 
-QWORD *GsGifPacketsAlloc(GS_PACKET_TABLE *table, unsigned int num_qwords)
+QWORD *GsGifPacketsAlloc(GS_PACKET_TABLE *table, u32 num_qwords)
 {
 	void *pointer;
 	GS_GIF_PACKET *packet;
@@ -74,7 +74,7 @@ void GsGifPacketsClear(GS_PACKET_TABLE *table)
 	table->qword_offset=0;
 }
 
-int GsGifPacketsExecute(GS_PACKET_TABLE *table, unsigned short wait)
+int GsGifPacketsExecute(GS_PACKET_TABLE *table, u16 wait)
 {
 	GS_GIF_PACKET *packet;
 
@@ -91,7 +91,7 @@ int GsGifPacketsExecute(GS_PACKET_TABLE *table, unsigned short wait)
 	packet->tag.pce		=0;
 	packet->tag.id		=0x07; //end
 	packet->tag.irq		=0;
-	packet->tag.addr	=(unsigned int)0;
+	packet->tag.addr	=(u32)0;
 	packet->tag.spr		=0;
 	packet->tag.pad2	=0;
 

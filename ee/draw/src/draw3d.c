@@ -35,7 +35,7 @@ qword_t *draw_prim_start(qword_t *q, int context, prim_t *prim, color_t *color)
 
 }
 
-qword_t *draw_prim_end(qword_t *q,int nreg, unsigned long reglist)
+qword_t *draw_prim_end(qword_t *q,int nreg, u64 reglist)
 {
 
 	float lpq = 2.0f / (float)nreg;

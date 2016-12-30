@@ -506,7 +506,7 @@ static void add_loosy(struct erl_record_t * erl, u8 * reloc, int type, const cha
 	l->next = hstuff(loosy_relocs);
 	hstuff(loosy_relocs) = l;
     } else {
-	hkey(loosy_relocs) = strdup(symbol);
+	hkey(loosy_relocs) = (ub1 *)strdup(symbol);
     }
 }
 
@@ -780,7 +780,7 @@ return code
    // Loading strtab.
     // **TODO** handle compession
     if (elf_mem) {
-	strtab_names = elf_mem + sec[strtab].sh_offset;
+	strtab_names = (char *) (elf_mem + sec[strtab].sh_offset);
     } else {
         if (!(strtab_names = (char *) malloc(sec[strtab].sh_size))) {
     	    dprintf("Not enough memory.\n");
@@ -819,7 +819,7 @@ return code
        // Loading relocation section.
         // **TODO** handle compession
         if (elf_mem) {
-  	    reloc_section = elf_mem + sec[i].sh_offset;
+          reloc_section = (char *)(elf_mem + sec[i].sh_offset);
         } else {
 	    lseek(elf_handle, sec[i].sh_offset, SEEK_SET);
 	    if (!(reloc_section = (char *) malloc(sec[i].sh_size))) {

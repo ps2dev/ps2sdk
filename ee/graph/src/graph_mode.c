@@ -49,10 +49,10 @@ static int graph_y = 0;
 static int graph_magh = 0;
 static int graph_magv = 0;
 
-static unsigned long graph_pmode = 0;
+static u64 graph_pmode = 0;
 
 // old bios has GCONT enabled
-unsigned long smode1_values[22] =
+u64 smode1_values[22] =
 {
 
 	0,
@@ -130,7 +130,7 @@ int graph_set_mode(int interlace, int mode, int ffmd, int flicker_filter)
 	char romname[14];
 
 	// Reset GS.
-	*GS_REG_CSR = (unsigned long)1<<9;
+	*GS_REG_CSR = (u64)1<<9;
 
 	// Clear GS CSR.
 	*GS_REG_CSR = GS_SET_CSR(0,0,0,0,0,0,0,0,0,0,0,0);
@@ -355,7 +355,7 @@ void graph_set_smode1(char cmod, char gcont)
 	if ((graph_crtmode < 0x04) || (graph_crtmode > 0x50))
 	{
 
-		smode1_val |= (unsigned long)(gcont & 1) << 25;
+		smode1_val |= (u64)(gcont & 1) << 25;
 
 	}
 
@@ -363,7 +363,7 @@ void graph_set_smode1(char cmod, char gcont)
 	if ((graph_crtmode < 0x04) && (cmod > 0x01) && (cmod < 0x04))
 	{
 
-		smode1_val |= (unsigned long)(cmod & 3) << 13;
+		smode1_val |= (u64)(cmod & 3) << 13;
 
 	}
 
@@ -371,7 +371,7 @@ void graph_set_smode1(char cmod, char gcont)
 	*GS_REG_PMODE  = graph_pmode & ~3;
 
 	// Disable PRST for TV modes and enable for all other modes.
-	*GS_REG_SMODE1 = smode1_val | (unsigned long)1 << 16;
+	*GS_REG_SMODE1 = smode1_val | (u64)1 << 16;
 
 	asm volatile ("sync.l; sync.p;");
 
@@ -379,13 +379,13 @@ void graph_set_smode1(char cmod, char gcont)
 	if ((graph_crtmode >= 0x1A) && (graph_crtmode != 0x50) && (graph_crtmode != 0x53))
 	{
 
-		*GS_REG_SMODE1 = smode1_val & ~((unsigned long)1 << 16);
+		*GS_REG_SMODE1 = smode1_val & ~((u64)1 << 16);
 		__udelay(2500);
 
 	}
 
 	// Now disable both bits PRST & SINT.
-	*GS_REG_SMODE1 = smode1_val & ~((unsigned long)1 << 16) & ~((unsigned long)1 << 17);
+	*GS_REG_SMODE1 = smode1_val & ~((u64)1 << 16) & ~((u64)1 << 17);
 
 	// Now enable read circuits.
 	*GS_REG_PMODE  = pmode_val;
@@ -431,7 +431,7 @@ int graph_shutdown(void)
 	graph_disable_output();
 
 	// Reset GS.
-	*GS_REG_CSR = (unsigned long)1<<9;
+	*GS_REG_CSR = (u64)1<<9;
 
 	// Clear GS CSR.
 	*GS_REG_CSR = GS_SET_CSR(0,0,0,0,0,0,0,0,0,0,0,0);

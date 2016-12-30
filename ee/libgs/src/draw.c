@@ -22,7 +22,7 @@ extern int (*_ps2sdk_read)(int, void*, int);
 
 extern QWORD GsPrimWorkArea[];
 
-void GsSetDefaultDrawEnv(GS_DRAWENV *drawenv, unsigned short int psm, unsigned short int w, unsigned short int h)
+void GsSetDefaultDrawEnv(GS_DRAWENV *drawenv, u16 psm, u16 w, u16 h)
 {
 	drawenv->offset_x	= 2048-w/2;
 	drawenv->offset_y	= 2048-h/2;
@@ -46,7 +46,7 @@ void GsSetDefaultDrawEnv(GS_DRAWENV *drawenv, unsigned short int psm, unsigned s
 	drawenv->vram_y = 0;
 }
 
-void GsSetDefaultDrawEnvAddress(GS_DRAWENV *drawenv, unsigned short vram_addr)
+void GsSetDefaultDrawEnvAddress(GS_DRAWENV *drawenv, u16 vram_addr)
 {
 	drawenv->vram_addr=vram_addr;
 }
@@ -73,7 +73,7 @@ int checkModelVersion(void)
 	return result;
 }
 
-void GsSetDefaultDisplayEnv(GS_DISPENV *dispenv, unsigned short int psm, unsigned short int w, unsigned short int h, unsigned short int dx, unsigned short int dy)
+void GsSetDefaultDisplayEnv(GS_DISPENV *dispenv, u16 psm, u16 w, u16 h, u16 dx, u16 dy)
 {
 	GsGParam_t *pGParams;
 	int gs_DH, gs_DW, gs_DY, gs_DX;
@@ -202,8 +202,8 @@ void GsClearDrawEnv1(GS_DRAWENV *drawenv)
 
 void GsPutDisplayEnv1(GS_DISPENV *dispenv)
 {
-	*((volatile unsigned long *)(gs_p_display1)) =  *(unsigned long *)(&dispenv->disp);
-	*((volatile unsigned long *)(gs_p_dispfb1)) =  *(unsigned long *)(&dispenv->dispfb);
+	*((volatile GS_DISPLAY *)(gs_p_display1)) =  dispenv->disp;
+	*((volatile GS_DISPFB *)(gs_p_dispfb1)) =  dispenv->dispfb;
 }
 
 void GsPutDrawEnv2(GS_DRAWENV *drawenv)
@@ -239,6 +239,6 @@ void GsClearDrawEnv2(GS_DRAWENV *drawenv)
 
 void GsPutDisplayEnv2(GS_DISPENV *dispenv)
 {
-	*((volatile unsigned long *)(gs_p_display2)) =  *(unsigned long *)(&dispenv->disp);
-	*((volatile unsigned long *)(gs_p_dispfb2)) =  *(unsigned long *)(&dispenv->dispfb);
+	*((volatile GS_DISPLAY *)(gs_p_display2)) =  dispenv->disp;
+	*((volatile GS_DISPFB *)(gs_p_dispfb2)) =  dispenv->dispfb;
 }

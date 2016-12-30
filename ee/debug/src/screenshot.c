@@ -26,12 +26,12 @@
 #define PS2SS_GIF_AD    0x0e
 
 #define PS2SS_GIFTAG(NLOOP,EOP,PRE,PRIM,FLG,NREG) \
-    ((unsigned long)(NLOOP) << 0)   | \
-    ((unsigned long)(EOP)   << 15)  | \
-    ((unsigned long)(PRE)   << 46)  | \
-    ((unsigned long)(PRIM)  << 47)  | \
-    ((unsigned long)(FLG)   << 58)  | \
-    ((unsigned long)(NREG)  << 60)
+    ((u64)(NLOOP) << 0)   | \
+    ((u64)(EOP)   << 15)  | \
+    ((u64)(PRE)   << 46)  | \
+    ((u64)(PRIM)  << 47)  | \
+    ((u64)(FLG)   << 58)  | \
+    ((u64)(NREG)  << 60)
 
 #define PS2SS_GSBITBLTBUF_SET(sbp, sbw, spsm, dbp, dbw, dpsm) \
   ((u64)(sbp)         | ((u64)(sbw) << 16) | \
@@ -194,9 +194,11 @@ int ps2_screenshot( void *pDest, unsigned int VramAdress, unsigned int x,
                     unsigned int y, unsigned int Width, unsigned int Height,
                     unsigned int Psm )
 {
-  static u32 enable_path3[4] ALIGNED(16) =
-  {
-    PS2SS_VIF1_MSKPATH3(0), PS2SS_VIF1_NOP, PS2SS_VIF1_NOP, PS2SS_VIF1_NOP,
+  static union {
+	u32 value_u32[4];
+	u128 value;
+  } enable_path3 ALIGNED(16) = {
+    {PS2SS_VIF1_MSKPATH3(0), PS2SS_VIF1_NOP, PS2SS_VIF1_NOP, PS2SS_VIF1_NOP}
   };
 
   u32  dma_chain[20*2] ALIGNED(16);
@@ -311,7 +313,7 @@ int ps2_screenshot( void *pDest, unsigned int VramAdress, unsigned int x,
   // Enable path3 again
 
 
-  *PS2SS_VIF1_FIFO = *(u128*) enable_path3;
+  *PS2SS_VIF1_FIFO = enable_path3.value;
 
   return 1;
 }

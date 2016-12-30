@@ -1,6 +1,6 @@
   As unusual, let's have some bits of documentation here.
 
-  An ERL file is a relocatable ELF. It can be directly generated from ee-ld
+  An ERL file is a relocatable ELF. It can be directly generated from $(EE_LD)
   using some switches. The ERL file isn't loadable directly, from the PS2
   kernel. It acts as a DLL file, for those who are used to windows API. To be
   exact, a .erl file is just the same as a .o file. Think of it as a "merged"
@@ -25,14 +25,14 @@
 
   In order to compile your code into an erl file, you simply have to do:
 
-    ee-gcc -Wl,-r -G0 -nostartfiles -o my_lib.erl file1.o file2.o ...
+    $(EE_CC) -Wl,-r -G0 -nostartfiles -o my_lib.erl file1.o file2.o ...
 
   That will create an elf file which is readable thru the functions in the erl
-  system. The -Wl,-r is to tell ee-ld to do "incremental linking".
+  system. The -Wl,-r is to tell $(EE_LD) to do "incremental linking".
 
   If you want to strip it, the best way to do it without breaking it is:
 
-    ee-strip --strip-unneeded -R .mdebug.eabi64 -R .reginfo -R .comment my.erl
+    $(EE_STRIP) --strip-unneeded -R .mdebug.eabi64 -R .reginfo -R .comment my.erl
 
 
   When loading an erl, the loader will parse the headers of the file, malloc()

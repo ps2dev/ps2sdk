@@ -108,7 +108,7 @@ static unsigned int vr_addr=0;
 static unsigned int vr_tex_start=0;
 static unsigned int vr_2ndtolast_alloc=0;	//address before last alloc so we can Free the last alloc
 
-int GsVramAllocFrameBuffer(short w, short h, short psm)
+int GsVramAllocFrameBuffer(s16 w, s16 h, s16 psm)
 {
 	int size, remainder, ret, byte_pp;	// byte per pixel
 
@@ -159,7 +159,7 @@ int GsVramAllocFrameBuffer(short w, short h, short psm)
 	return ret;
 }
 
-int GsVramAllocTextureBuffer(short w, short h, short psm)
+int GsVramAllocTextureBuffer(s16 w, s16 h, s16 psm)
 {
 	int size, remainder, ret, byte_pp;	// byte per pixel
 

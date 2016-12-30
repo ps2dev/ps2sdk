@@ -80,12 +80,12 @@ void GsDmaInit(void)
 	);
 }
 
-void GsDmaSend(const void *addr, unsigned int qwords)
+void GsDmaSend(const void *addr, u32 qwords)
 {
 	DMA_CHCR		chcr;
 	static char		spr;
 
-	if((unsigned int)addr >= 0x70000000 && (unsigned int)addr <= 0x70003fff)
+	if((u32)addr >= 0x70000000 && (u32)addr <= 0x70003fff)
 	{
 		spr = 1;
 	}
@@ -94,9 +94,9 @@ void GsDmaSend(const void *addr, unsigned int qwords)
 		spr = 0;
 	}
 
-	*((volatile unsigned int *)(gif_madr)) = ( unsigned int )((( unsigned int )addr) & 0x7FFFFFFF) << 0 | (unsigned int)((spr) & 0x00000001) << 31;;
+	*((vu32 *)(gif_madr)) = ( u32 )((( u32 )addr) & 0x7FFFFFFF) << 0 | (u32)((spr) & 0x00000001) << 31;;
 
-	*((volatile unsigned int *)(gif_qwc)) = qwords;
+	*((vu32 *)(gif_qwc)) = qwords;
 
 	chcr.direction	=1;
 	chcr.mode		=0;
@@ -107,15 +107,15 @@ void GsDmaSend(const void *addr, unsigned int qwords)
 	chcr.tag		=0;
 	chcr.pad1		=0;
 	chcr.pad2		=0;
-	*((volatile unsigned int *)(gif_chcr)) = *(unsigned int *)&chcr;
+	*((volatile DMA_CHCR *)(gif_chcr)) = chcr;
 }
 
-void GsDmaSend_tag(const void *addr, unsigned int qwords, const GS_GIF_DMACHAIN_TAG *tag)
+void GsDmaSend_tag(const void *addr, u32 qwords, const GS_GIF_DMACHAIN_TAG *tag)
 {
 	DMA_CHCR		chcr;
 	static char		spr;
 
-	if((unsigned int)addr >= 0x70000000 && (unsigned int)addr <= 0x70003fff)
+	if((u32)addr >= 0x70000000 && (u32)addr <= 0x70003fff)
 	{
 		spr = 1;
 	}
@@ -124,9 +124,9 @@ void GsDmaSend_tag(const void *addr, unsigned int qwords, const GS_GIF_DMACHAIN_
 		spr = 0;
 	}
 
-	*((volatile unsigned int *)(gif_madr)) = ( unsigned int )((( unsigned int )addr) & 0x7FFFFFFF) << 0 | (unsigned int)((spr) & 0x00000001) << 31;
-	*((volatile unsigned int *)(gif_qwc)) = qwords;
-	*((volatile unsigned int *)(gif_tadr)) = ( unsigned int )((( unsigned int )tag) & 0x7FFFFFFF) << 0 | (unsigned int)((0) & 0x00000001) << 31;
+	*((vu32 *)(gif_madr)) = ( u32 )((( u32 )addr) & 0x7FFFFFFF) << 0 | (u32)((spr) & 0x00000001) << 31;
+	*((vu32 *)(gif_qwc)) = qwords;
+	*((vu32 *)(gif_tadr)) = ( u32 )((( u32 )tag) & 0x7FFFFFFF) << 0 | (u32)((0) & 0x00000001) << 31;
 
 	chcr.direction	=1;
 	chcr.mode		=1; //chain
@@ -137,10 +137,10 @@ void GsDmaSend_tag(const void *addr, unsigned int qwords, const GS_GIF_DMACHAIN_
 	chcr.tag		=0;
 	chcr.pad1		=0;
 	chcr.pad2		=0;
-	*((volatile unsigned int *)(gif_chcr)) = *(unsigned int *)&chcr;
+	*((volatile DMA_CHCR *)(gif_chcr)) = chcr;
 }
 
 void GsDmaWait(void)
 {
-	while(*((volatile unsigned int *)(0x1000a000)) & ((unsigned int)1<<8));
+	while(*((vu32 *)(0x1000a000)) & ((u32)1<<8));
 }

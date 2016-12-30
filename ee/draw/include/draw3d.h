@@ -39,7 +39,7 @@ extern "C" {
 
 	// Ends a primitive by calculating the number of qwords used, the number of registers,
 	// the register list
-	qword_t *draw_prim_end(qword_t *q,int nreg, unsigned long reglist);
+	qword_t *draw_prim_end(qword_t *q,int nreg, u64 reglist);
 
 	// Converts floating point color, replacing alpha with constant value, and calculates q
 	int draw_convert_rgbq(color_t *output, int count, vertex_f_t *vertices, color_f_t *colours, unsigned char alpha);

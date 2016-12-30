@@ -18,7 +18,7 @@
 
 extern QWORD GsPrimWorkArea[];
 
-void GsSetDefaultZBufferEnv(GS_ZENV *zenv, unsigned char update_mask)
+void GsSetDefaultZBufferEnv(GS_ZENV *zenv, u8 update_mask)
 {
 	zenv->update_mask = update_mask;
 }

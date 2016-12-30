@@ -26,11 +26,12 @@ extern QWORD GsPrimWorkArea[];
 
 static GsGParam_t gp_15={GS_INTERLACED, GS_MODE_NTSC, GS_FFMD_FRAME, 3};
 
-GsGParam_t *GsGetGParam(void){
+GsGParam_t *GsGetGParam(void)
+{
 	return &gp_15;
 }
 
-void GsResetGraph(short int mode, short int interlace, short int omode, short int ffmode)
+void GsResetGraph(s16 mode, s16 interlace, s16 omode, s16 ffmode)
 {
 	GsGParam_t *pGParams;
 
@@ -57,7 +58,7 @@ void GsResetGraph(short int mode, short int interlace, short int omode, short in
 	}
 }
 
-void GsSetCRTCSettings(unsigned long settings, unsigned char alpha_value)
+void GsSetCRTCSettings(u64 settings, u8 alpha_value)
 {
-	*((volatile unsigned long *)(gs_p_pmode)) =  (settings|((unsigned long)(0x001) << 2)|((unsigned long)(alpha_value) 	<< 8));
+	*((vu64 *)(gs_p_pmode)) =  (settings|((u64)(0x001) << 2)|((u64)(alpha_value) 	<< 8));
 }
