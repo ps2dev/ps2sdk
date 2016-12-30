@@ -527,7 +527,7 @@ int ata_io_start(void *buf, unsigned int blkcount, unsigned short int feature, u
 	suspend_intr();
 	HDPROreg_IO8 = 0x21;
 	CDVDreg_STATUS = 0;
-	unsigned int dummy = HDPROreg_IO8;
+	unsigned int dummy __attribute__((unused)) = HDPROreg_IO8;
 	CDVDreg_STATUS = 0;
 	resume_intr();
 	dummy = 0;

@@ -10,11 +10,11 @@
 IOP_CC_VERSION := $(shell $(IOP_CC) --version 2>&1 | sed -n 's/^.*(GCC) //p')
 
 ifeq ($(IOP_CC_VERSION),3.2.2)
-ASFLAGS_TARGET = -march=r3000 -mcpu=r3000
+ASFLAGS_TARGET = -march=r3000
 endif
 
 ifeq ($(IOP_CC_VERSION),3.2.3)
-ASFLAGS_TARGET = -march=r3000 -mcpu=r3000
+ASFLAGS_TARGET = -march=r3000
 endif
 
 # include dir
