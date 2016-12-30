@@ -454,12 +454,12 @@ int mc_chstat(iop_file_t *f, char *filename, fio_stat_t *stat, u32 statmask)
 
 		if (statmask & SCE_CST_CT) {
 			flags |= 0x001;
-			mctbl._Create = *((sceMcStDateTime*)&stat->ctime[0]);
+			memcpy(&mctbl._Create, stat->ctime, sizeof(sceMcStDateTime));
 		}
 
 		if (statmask & SCE_CST_MT) {
 			flags |= 0x002;
-			mctbl._Modify = *((sceMcStDateTime*)&stat->mtime[0]);
+			memcpy(&mctbl._Modify, stat->mtime, sizeof(sceMcStDateTime));
 		}
 
 		r = McSetFileInfo(mcman_mc_port, mcman_mc_slot, filename, &mctbl, flags);

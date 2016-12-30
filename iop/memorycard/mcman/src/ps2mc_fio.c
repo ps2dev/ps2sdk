@@ -21,9 +21,6 @@ extern int mcman_wr_block;
 extern int mcman_wr_flag3;
 extern int mcman_curdircluster;
 
-extern u32 DOT;
-extern u32 DOTDOT;
-
 extern int PS1CardFlag;
 
 //--------------------------------------------------------------
@@ -59,16 +56,8 @@ int mcman_format2(int port, int slot)
 lbl1:
 	// set superblock magic & version
 	memset((void *)&mcdi->magic, 0, sizeof (mcdi->magic) + sizeof (mcdi->version));
-	*((u32 *)&mcdi->magic    ) = *((u32 *)&SUPERBLOCK_MAGIC    );
-	*((u32 *)&mcdi->magic + 1) = *((u32 *)&SUPERBLOCK_MAGIC + 1);
-	*((u32 *)&mcdi->magic + 2) = *((u32 *)&SUPERBLOCK_MAGIC + 2);
-	*((u32 *)&mcdi->magic + 3) = *((u32 *)&SUPERBLOCK_MAGIC + 3);
-	*((u32 *)&mcdi->magic + 4) = *((u32 *)&SUPERBLOCK_MAGIC + 4);
-	*((u32 *)&mcdi->magic + 5) = *((u32 *)&SUPERBLOCK_MAGIC + 5);
-	*((u32 *)&mcdi->magic + 6) = *((u32 *)&SUPERBLOCK_MAGIC + 6);
-	*((u8 *)&mcdi->magic + 28) = *((u8 *)&SUPERBLOCK_MAGIC + 28);
-
-	strcat((char *)&mcdi->magic, SUPERBLOCK_VERSION);
+	strcpy(mcdi->magic, SUPERBLOCK_MAGIC);
+	strcat(mcdi->magic, SUPERBLOCK_VERSION);
 
 	//size = 8192 / mcdi->cluster_size; // get blocksize in cluster a better way must be found
 	size = mcdi->blocksize;
@@ -322,10 +311,8 @@ int mcman_dread2(int fd, fio_dirent_t *dirent)
 
 	dirent->stat.attr = fse->attr;
 	dirent->stat.size = fse->length;
-	*((u32 *)&dirent->stat.ctime  ) = *((u32 *)&fse->created  );
-	*((u32 *)&dirent->stat.ctime+1) = *((u32 *)&fse->created+1);
-	*((u32 *)&dirent->stat.mtime  ) = *((u32 *)&fse->modified  );
-	*((u32 *)&dirent->stat.mtime+1) = *((u32 *)&fse->modified+1);
+	memcpy(dirent->stat.ctime, &fse->created, sizeof(sceMcStDateTime));
+	memcpy(dirent->stat.mtime, &fse->modified, sizeof(sceMcStDateTime));
 
 	return 1;
 }
@@ -368,10 +355,8 @@ int mcman_getstat2(int port, int slot, char *filename, fio_stat_t *stat)
 	if (!(fse->mode & sceMcFileAttrSubdir))
 		stat->size = fse->length;
 
-	*((u32 *)&stat->ctime  ) = *((u32 *)&fse->created  );
-	*((u32 *)&stat->ctime+1) = *((u32 *)&fse->created+1);
-	*((u32 *)&stat->mtime  ) = *((u32 *)&fse->modified  );
-	*((u32 *)&stat->mtime+1) = *((u32 *)&fse->modified+1);
+	memcpy(stat->ctime, &fse->created, sizeof(sceMcStDateTime));
+	memcpy(stat->mtime, &fse->modified, sizeof(sceMcStDateTime));
 
 	return sceMcResSucceed;
 }
@@ -675,7 +660,8 @@ int mcman_open2(int port, int slot, char *filename, int flags)
 	McCacheDir cacheDir;
 	McFsEntry *fse1, *fse2;
 	McCacheEntry *mce;
-	u8 *p, *pfsentry, *pcache, *pfseend;
+	u8 *pfsentry, *pcache, *pfseend;
+	char *p;
 	int fat_entry;
 
 #ifdef DEBUG
@@ -926,7 +912,7 @@ int mcman_open2(int port, int slot, char *filename, int flags)
 	}
 
 	do {
-		p = (u8 *)(filename + i + 1);
+		p = filename + i + 1;
 		pos = i + 1;
 		r = mcman_chrpos(p, '/');
 		if (r < 0)
@@ -934,7 +920,7 @@ int mcman_open2(int port, int slot, char *filename, int flags)
 		i = pos + r;
 	} while (1);
 
-	p = (char *)(filename + pos);
+	p = filename + pos;
 
 	mcfree = 0;
 
@@ -955,7 +941,7 @@ int mcman_open2(int port, int slot, char *filename, int flags)
 
 	mcman_wmemset((void *)fse2, sizeof (McFsEntry), 0);
 
-	strncpy((void *)fse2->name, p, 32);
+	strncpy(fse2->name, p, 32);
 
 	fse2->created = mcman_dircache[2].modified;
 	fse2->modified = mcman_dircache[2].modified;
@@ -1155,7 +1141,7 @@ int mcman_getdir2(int port, int slot, char *dirname, int flags, int maxent, sceM
 
 	if (!flags) {
 
-		p = (char *)mcman_curdirpath;
+		p = mcman_curdirpath;
 		strncpy(p, dirname, 1023);
 		mcman_curdirpath[1023] = 0;
 
@@ -1238,8 +1224,9 @@ int mcman_getdir2(int port, int slot, char *dirname, int flags, int maxent, sceM
 				if (r != sceMcResSucceed)
 					return r;
 
-				*(u16 *)&info->EntryName = *(u16 *)&DOTDOT;
-				*(u8 *)&info->EntryName[2] = *((u8 *)&DOTDOT+2);
+				info->EntryName[0] = '.';
+				info->EntryName[1] = '.';
+				info->EntryName[2] = '\0';
 			}
 			else if (mcman_curdirmaxent == 1) {
 
@@ -1251,7 +1238,8 @@ int mcman_getdir2(int port, int slot, char *dirname, int flags, int maxent, sceM
 				if (r != sceMcResSucceed)
 					return r;
 
-				*(u16 *)&info->EntryName = *(u16 *)&DOT;
+				info->EntryName[0] = '.';
+				info->EntryName[1] = '\0';
 			}
 			else {
 				strncpy(info->EntryName, fse->name, 32);
@@ -1357,7 +1345,7 @@ int mcman_unformat2(int port, int slot)
 		erase_value = 0x00000000;
 
 	for (i = 0; i < pageword_cnt; i++)
-		*((u32 *)&mcman_pagebuf + i) = erase_value;
+		mcman_pagebuf.word[i] = erase_value;
 
 	for (i = 0; i < 128; i++)
 		*((u32 *)&mcman_eccdata + i) = erase_value;
@@ -1384,7 +1372,7 @@ int mcman_unformat2(int port, int slot)
 				z = 0;
 				if (mcdi->blocksize > 0) {
 					do {
-						r = McReadPage(port, slot, page + z, mcman_pagebuf);
+						r = McReadPage(port, slot, page + z, &mcman_pagebuf);
 						if (r == sceMcResNoFormat) {
 							j = -2;
 							break;
@@ -1394,7 +1382,7 @@ int mcman_unformat2(int port, int slot)
 
 						if ((mcdi->cardflags & CF_USE_ECC) == 0)	{
 							for (l = 0; l < mcdi->pagesize; l++) {
-								if (mcman_pagebuf[l] != erase_byte)
+								if (mcman_pagebuf.byte[l] != erase_byte)
 									err_cnt++;
 								if (err_cnt >= (mcdi->clusters_per_block << 6)) {
 									j = 16;
@@ -1418,12 +1406,12 @@ lbl1:
 			}
 			else {
 				for (l = 0; l < pageword_cnt; l++)
-					*((u32 *)&mcman_pagebuf + l) = erase_value;
+					mcman_pagebuf.word[l] = erase_value;
 
 				if (mcdi->blocksize > 0) {
 					z = 0;
 					do {
-						r = McWritePage(port, slot, page + z, mcman_pagebuf, mcman_eccdata);
+						r = McWritePage(port, slot, page + z, &mcman_pagebuf, mcman_eccdata);
 						if (r != sceMcResSucceed)
 							return -44;
 					} while (++z < mcdi->blocksize);

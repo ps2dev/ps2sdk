@@ -66,7 +66,7 @@ typedef struct _sceMcTblGetDir { //size = 64
 	u16 Reserve1;			 // 22
 	u32 Reserve2;			 // 24
 	u32 PdaAplNo;			 // 28
-	u8  EntryName[32];		 // 32
+	char  EntryName[32];		 // 32
 } sceMcTblGetDir;
 
 typedef struct _MCCacheEntry {
@@ -118,7 +118,7 @@ typedef struct {				// size = 128
 	int mode;					// 0
 	int length;					// 4
 	s16 linked_block;			// 8
-	u8  name[20];				// 10
+	char  name[20];				// 10
 	u8  field_1e;				// 30
 	u8  field_1f;				// 31
 	sceMcStDateTime created;	// 32
@@ -143,7 +143,7 @@ typedef struct {				// size = 512
 	sceMcStDateTime modified;	// 24
 	u32 attr;					// 32
 	u32 unused2[7];				// 36
-	u8  name[32];				// 64
+	char  name[32];				// 64
 	u8  unused3[416];			// 96
 } McFsEntry;
 
@@ -156,7 +156,7 @@ char mcman_curdirpath[1024];
 char *mcman_curdirname;
 
 int mcman_PS1curcluster;
-u8 mcman_PS1curdir[64];
+char mcman_PS1curdir[64];
 
 typedef struct {  // size = 48
 	u8  status;   // 0
@@ -351,9 +351,9 @@ int  mcman_initdev(void);
 
 
 typedef struct { 				// size = 384
-	u8  magic[28];				// Superblock magic, on PS2 MC : "Sony PS2 Memory Card Format "
+    char  magic[28];				// Superblock magic, on PS2 MC : "Sony PS2 Memory Card Format "
     u8  version[12];  			// Version number of the format used, 1.2 indicates full support for bad_block_list
-    s16 pagesize;				// size in bytes of a memory card page
+    u16 pagesize;				// size in bytes of a memory card page
     u16 pages_per_cluster;		// number of pages in a cluster
     u16 blocksize;				// number of pages in an erase block
     u16 unused;					// unused
@@ -426,13 +426,21 @@ sio2_transfer_data_t mcman_sio2packet_PS1PDA;
 u8 mcman_sio2inbufs_PS1PDA[0x90];
 u8 mcman_sio2outbufs_PS1PDA[0x90];
 
-u8 mcman_pagebuf[1056];
+union {
+	u32 word[1056/sizeof(u32)];
+	u8 byte[1056/sizeof(u8)];
+	char magic[1056/sizeof(char)];
+} mcman_pagebuf;
 void *mcman_pagedata[32];
 u8 mcman_eccdata[512]; // size for 32 ecc
 
 u8 mcman_backupbuf[16384];
 
-u8 mcman_PS1PDApagebuf[128];
+union {
+	u32 word[128/sizeof(u32)];
+	u16 half[128/sizeof(u16)];
+	u8 byte[128/sizeof(u8)];
+} mcman_PS1PDApagebuf;
 
 u32 mcman_timercount;
 int mcman_timerthick;

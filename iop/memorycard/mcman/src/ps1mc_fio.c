@@ -34,39 +34,39 @@ int mcman_format1(int port, int slot)
 			return -41;
 	}
 
-	memset(mcman_PS1PDApagebuf, 0, 128);
+	memset(&mcman_PS1PDApagebuf, 0, 128);
 
-	*((u32 *)&mcman_PS1PDApagebuf) = 0xa0;
-	*((u16 *)&mcman_PS1PDApagebuf+4) = 0xffff;
+	mcman_PS1PDApagebuf.word[0] = 0xa0;
+	mcman_PS1PDApagebuf.half[2] = 0xffff;
 
-	mcman_PS1PDApagebuf[127] = mcman_calcEDC(mcman_PS1PDApagebuf, 127);
+	mcman_PS1PDApagebuf.byte[127] = mcman_calcEDC(&mcman_PS1PDApagebuf, 127);
 
 	for (i = 1; i < 15; i++) {
-		r = McWritePS1PDACard(port, slot, i, mcman_PS1PDApagebuf);
+		r = McWritePS1PDACard(port, slot, i, &mcman_PS1PDApagebuf);
 		if (r != sceMcResSucceed)
 			return -42;
 	}
 
-	memset(mcman_PS1PDApagebuf, 0, 128);
+	memset(&mcman_PS1PDApagebuf, 0, 128);
 
-	*((u32 *)&mcman_PS1PDApagebuf) = 0xffffffff;
+	mcman_PS1PDApagebuf.word[0] = 0xffffffff;
 
 	for (i = 0; i < 20; i++) {
-		*((u32 *)&mcman_PS1PDApagebuf) = mcdi->bad_block_list[i];
-		mcman_PS1PDApagebuf[127] = mcman_calcEDC(mcman_PS1PDApagebuf, 127);
+		mcman_PS1PDApagebuf.word[0] = mcdi->bad_block_list[i];
+		mcman_PS1PDApagebuf.byte[127] = mcman_calcEDC(&mcman_PS1PDApagebuf, 127);
 
-		r = McWritePS1PDACard(port, slot, i + 16, mcman_PS1PDApagebuf);
+		r = McWritePS1PDACard(port, slot, i + 16, &mcman_PS1PDApagebuf);
 		if (r != sceMcResSucceed)
 			return -43;
 	}
 
-	mcman_wmemset(mcman_PS1PDApagebuf, 128, 0);
+	mcman_wmemset(&mcman_PS1PDApagebuf, 128, 0);
 
-	mcman_PS1PDApagebuf[0] = 0x4d;
-	mcman_PS1PDApagebuf[1] = 0x43;
-	mcman_PS1PDApagebuf[127] = 0x0e;
+	mcman_PS1PDApagebuf.byte[0] = 0x4d;
+	mcman_PS1PDApagebuf.byte[1] = 0x43;
+	mcman_PS1PDApagebuf.byte[127] = 0x0e;
 
-	r = McWritePS1PDACard(port, slot, 0, mcman_PS1PDApagebuf);
+	r = McWritePS1PDACard(port, slot, 0, &mcman_PS1PDApagebuf);
 	if (r != sceMcResSucceed)
 		return -44;
 
@@ -78,11 +78,11 @@ int mcman_format1(int port, int slot)
 //--------------------------------------------------------------
 int mcman_open1(int port, int slot, char *filename, int flags)
 {
-	register int r, i, fd, cluster, temp;
+	register int r, i, fd = 0, cluster, temp;
 	register MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
 	McFsEntryPS1 *fse; //sp18
 	McCacheEntry *mce;
-	char *p = (char *)filename;
+	char *p = filename;
 
 #ifdef DEBUG
 	DPRINTF("mcman: mcman_open1 port%d slot%d filename %s flags %x\n", port, slot, filename, flags);
@@ -386,10 +386,8 @@ int mcman_dread1(int fd, fio_dirent_t *dirent)
 		dirent->stat.mode = 0x181f;
 
 	if (fse->field_7d == 1) {
-		*((u32 *)&dirent->stat.ctime) = *((u32 *)&fse->created);
-		*((u32 *)&dirent->stat.ctime + 1) = *((u32 *)&fse->created + 1);
-		*((u32 *)&dirent->stat.mtime) = *((u32 *)&fse->modified);
-		*((u32 *)&dirent->stat.mtime + 1) = *((u32 *)&fse->modified + 1);
+		memcpy(dirent->stat.ctime, &fse->created, sizeof(sceMcStDateTime));
+		memcpy(dirent->stat.mtime, &fse->modified, sizeof(sceMcStDateTime));
 		dirent->stat.size = fse->field_38;
 		dirent->stat.attr = fse->field_28;
 	}
@@ -427,10 +425,8 @@ int mcman_getstat1(int port, int slot, char *filename, fio_stat_t *stat)
 		if ((fse->field_2c & sceMcFileAttrClosed) != 0)
 			stat->mode = 0x9f;
 
-		*((u32 *)&stat->ctime) = *((u32 *)&fse->created);
-		*((u32 *)&stat->ctime+1) = *((u32 *)&fse->created+1);
-		*((u32 *)&stat->mtime) = *((u32 *)&fse->modified);
-		*((u32 *)&stat->mtime+1) = *((u32 *)&fse->modified+1);
+		memcpy(stat->ctime, &fse->created, sizeof(sceMcStDateTime));
+		memcpy(stat->mtime, &fse->modified, sizeof(sceMcStDateTime));
 
 		stat->size = fse->field_38;
 		stat->attr = fse->field_28;
@@ -707,12 +703,12 @@ int mcman_unformat1(int port, int slot)
 	DPRINTF("mcman: mcman_unformat1 port%d slot%d\n", port, slot);
 #endif
 
-	p = (u32 *)&mcman_PS1PDApagebuf;
+	p = mcman_PS1PDApagebuf.word;
 	for (i = 0; i < 32; i++)
 		*p++ = 0;
 
 	for (i = 0; i < 1024; i++) {
-		r = McWritePS1PDACard(port, slot, i, mcman_PS1PDApagebuf);
+		r = McWritePS1PDACard(port, slot, i, &mcman_PS1PDApagebuf);
 		if (r != sceMcResSucceed)
 			return -41;
 	}

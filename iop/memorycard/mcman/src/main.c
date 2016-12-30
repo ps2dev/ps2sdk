@@ -28,9 +28,6 @@ int mcman_wr_block = -1;
 int mcman_wr_flag3 = -10;
 int mcman_curdircluster = -1;
 
-u32 DOT    = 0x0000002e;
-u32 DOTDOT = 0x00002e2e;
-
 int timer_ID;
 int PS1CardFlag = 1;
 
@@ -364,8 +361,8 @@ int mcman_checkpath(char *str) // check that a string do not contain special cha
 int mcman_checkdirpath(char *str1, char *str2)
 {
 	register int r, pos1, pos2, pos;
-	u8 *p1 = (u8 *)str1;
-	u8 *p2 = (u8 *)str2;
+	char *p1 = str1;
+	char *p2 = str2;
 
 	do {
 		pos1 = mcman_chrpos(p2, '?');
@@ -1305,25 +1302,25 @@ int mcman_setdevinfos(int port, int slot)
 	if (r != sceMcResSucceed)
 		return -49;
 
-	r = McReadPage(port, slot, 0, mcman_pagebuf);
+	r = McReadPage(port, slot, 0, &mcman_pagebuf);
 	if (r == sceMcResNoFormat)
 		return sceMcResNoFormat; // should rebuild a valid superblock here
 	if (r != sceMcResSucceed)
 		return -48;
 
-	if (strncmp(SUPERBLOCK_MAGIC, mcman_pagebuf, 28) != 0) {
+	if (strncmp(SUPERBLOCK_MAGIC, mcman_pagebuf.magic, 28) != 0) {
 #ifdef DEBUG
 		DPRINTF("mcman: mcman_setdevinfos No card format !!!\n");
 #endif
 		return sceMcResNoFormat;
 	}
 
-	if (((mcman_pagebuf[28] - 48) == 1) && ((mcman_pagebuf[30] - 48) == 0))  // check ver major & minor
+	if (((mcman_pagebuf.byte[28] - 48) == 1) && ((mcman_pagebuf.byte[30] - 48) == 0))  // check ver major & minor
 		return sceMcResNoFormat;
 
 	u8 *p = (u8 *)mcdi;
 	for (r=0; r<0x150; r++)
-		p[r] = mcman_pagebuf[r];
+		p[r] = mcman_pagebuf.byte[r];
 
 	mcdi->cardtype = sceMcTypePS2; // <--
 
@@ -1347,7 +1344,7 @@ int mcman_setdevinfos(int port, int slot)
 	mcdi->cardform = 1;
 //	mcdi->cardtype = sceMcTypePS2;
 
-	if (((mcman_pagebuf[28] - 48) == 1) && ((mcman_pagebuf[30] - 48) == 1)) {  // check ver major & minor
+	if (((mcman_pagebuf.byte[28] - 48) == 1) && ((mcman_pagebuf.byte[30] - 48) == 1)) {  // check ver major & minor
 		if ((mcdi->clusters_per_block * mcdi->backup_block2) == mcdi->alloc_end)
 			mcdi->alloc_end = (mcdi->clusters_per_block * mcdi->backup_block2) - mcdi->alloc_offset;
 	}
@@ -1419,7 +1416,7 @@ int mcman_reportBadBlocks(int port, int slot)
 			page = 0; //s3
 			do {
 
-				r = McReadPage(port, slot, (block * mcdi->blocksize) + page, mcman_pagebuf);
+				r = McReadPage(port, slot, (block * mcdi->blocksize) + page, &mcman_pagebuf);
 				if (r == sceMcResNoFormat) {
 					mcdi->bad_block_list[bad_blocks] = block;
 					bad_blocks++;
@@ -1429,7 +1426,7 @@ int mcman_reportBadBlocks(int port, int slot)
 					return r;
 
 				if ((mcdi->cardflags & CF_USE_ECC) == 0) {
-					p = (u8 *)&mcman_pagebuf;
+					p = mcman_pagebuf.byte;
 					for (i = 0; i < mcdi->pagesize; i++) {
 						// check if the content of page is clean
 						if (*p++ != erase_byte)
@@ -1484,7 +1481,8 @@ int mcman_createDirentry(int port, int slot, int parent_cluster, int num_entries
 	mfe->length = 0;
 	mfe->dir_entry = num_entries;
 	mfe->cluster = parent_cluster;
-	*(u16 *)&mfe->name = *((u16 *)&DOT);
+	mfe->name[0] = '.';
+	mfe->name[1] = '\0';
 
 	if ((parent_cluster == 0) && (num_entries == 0)) {
 		// entry is root directory
@@ -1514,8 +1512,9 @@ int mcman_createDirentry(int port, int slot, int parent_cluster, int num_entries
 	mfe->modified = mfe->created;
 	mfe->length = 0;
 
-	*(u16 *)&mfe->name = *(u16 *)&DOTDOT;
-	*(u8 *)&mfe->name[2] = *((u8 *)&DOTDOT+2);
+	mfe->name[0] = '.';
+	mfe->name[1] = '.';
+	mfe->name[2] = '\0';
 
 	mce->wr_flag = 1;
 
@@ -1747,7 +1746,8 @@ int mcman_cachedirentry(int port, int slot, char *filename, McCacheDir *pcacheDi
 	register MCDevInfo *mcdi = &mcman_devinfos[port][slot];
 	McFsEntry *fse;
 	McCacheDir cacheDir;
-	u8 *p, *pfsentry, *pcache, *pfseend;
+	u8 *pfsentry, *pcache, *pfseend;
+	char *p;
 
 #ifdef DEBUG
 	DPRINTF("mcman: mcman_cachedirentry port%d slot%d name %s\n", port, slot, filename);
@@ -1758,7 +1758,7 @@ int mcman_cachedirentry(int port, int slot, char *filename, McCacheDir *pcacheDi
 		pcacheDir->maxent = -1;
 	}
 
-	p = (u8 *)filename;
+	p = filename;
 	if (*p == '/') {
 		p++;
 		cluster = 0;
@@ -2048,7 +2048,7 @@ int mcman_writecluster(int port, int slot, int cluster, int flag)
 		for (i = 1; i < mcdi->blocksize; i++)
 			mcman_pagedata[i] = 0;
 
-		mcman_pagedata[0] = &mcman_pagebuf;
+		mcman_pagedata[0] = mcman_pagebuf.byte;
 
 		pageword_cnt = mcdi->pagesize >> 2;
 		page = block * mcdi->blocksize;
@@ -2059,7 +2059,7 @@ int mcman_writecluster(int port, int slot, int cluster, int flag)
 			erase_value = 0x00000000;
 
 		for (i = 0; i < pageword_cnt; i++)
-			*((u32 *)&mcman_pagebuf + i) = erase_value;
+			mcman_pagebuf.word[i] = erase_value;
 
 		r = mcman_eraseblock(port, slot, block, (void **)mcman_pagedata, (void *)mcman_eccdata);
 		if (r == sceMcResFailReplace)
@@ -2068,7 +2068,7 @@ int mcman_writecluster(int port, int slot, int cluster, int flag)
 			return sceMcResChangedCard;
 
 		for (i = 1; i < mcdi->blocksize; i++) {
-			r = McWritePage(port, slot, page + i, mcman_pagebuf, mcman_eccdata);
+			r = McWritePage(port, slot, page + i, &mcman_pagebuf, mcman_eccdata);
 			if (r == sceMcResFailReplace)
 				return sceMcResSucceed;
 			if (r != sceMcResSucceed)
@@ -2076,14 +2076,14 @@ int mcman_writecluster(int port, int slot, int cluster, int flag)
 		}
 
 		for (i = 1; i < mcdi->blocksize; i++) {
-			r = McReadPage(port, slot, page + i, mcman_pagebuf);
+			r = McReadPage(port, slot, page + i, &mcman_pagebuf);
 			if (r == sceMcResNoFormat)
 				return sceMcResSucceed;
 			if (r != sceMcResSucceed)
 				return sceMcResFullDevice;
 
 			for (j = 0; j < pageword_cnt; j++) {
-				if (*((u32 *)&mcman_pagebuf + j) != erase_value) {
+				if (mcman_pagebuf.word[j] != erase_value) {
 					mcman_wr_flag3 = 0;
 					return sceMcResSucceed;
 				}
@@ -2094,20 +2094,20 @@ int mcman_writecluster(int port, int slot, int cluster, int flag)
 		if (r != sceMcResSucceed)
 			return sceMcResChangedCard;
 
-		r = McWritePage(port, slot, page, mcman_pagebuf, mcman_eccdata);
+		r = McWritePage(port, slot, page, &mcman_pagebuf, mcman_eccdata);
 		if (r == sceMcResFailReplace)
 			return sceMcResSucceed;
 		if (r != sceMcResSucceed)
 			return sceMcResNoFormat;
 
-		r = McReadPage(port, slot, page, mcman_pagebuf);
+		r = McReadPage(port, slot, page, &mcman_pagebuf);
 		if (r == sceMcResNoFormat)
 			return sceMcResSucceed;
 		if (r != sceMcResSucceed)
 			return sceMcResFullDevice;
 
 		for (j = 0; j < pageword_cnt; j++) {
-			if (*((u32 *)&mcman_pagebuf + j) != erase_value) {
+			if (mcman_pagebuf.word[j] != erase_value) {
 				mcman_wr_flag3 = 0;
 				return sceMcResSucceed;
 			}
@@ -2122,12 +2122,12 @@ int mcman_writecluster(int port, int slot, int cluster, int flag)
 		erase_value = ~erase_value;
 
 		for (i = 0; i < mcdi->blocksize; i++) {
-			r = McReadPage(port, slot, page + i, mcman_pagebuf);
+			r = McReadPage(port, slot, page + i, &mcman_pagebuf);
 			if (r != sceMcResSucceed)
 				return sceMcResDeniedPermit;
 
 			for (j = 0; j < pageword_cnt; j++) {
-				if (*((u32 *)&mcman_pagebuf + j) != erase_value) {
+				if (mcman_pagebuf.word[j] != erase_value) {
 					mcman_wr_flag3 = 0;
 					return sceMcResSucceed;
 				}
@@ -2214,34 +2214,35 @@ int mcman_setdirentrystate(int port, int slot, int cluster, int fsindex, int fla
 //--------------------------------------------------------------
 int mcman_checkBackupBlocks(int port, int slot)
 {
-	register int r1, r2, r, value1, value2, eccsize;
+	register int r1, r2, r, eccsize;
 	register MCDevInfo *mcdi = &mcman_devinfos[port][slot];
 	McCacheEntry *mce;
-	int *pagebuf = (int *)&mcman_pagebuf;
+	u32 *pagebuf = mcman_pagebuf.word;
+	u32 value1, value2;
 
 	// First check backup block2 to see if it's in erased state
-	r1 = McReadPage(port, slot, mcdi->backup_block2 * mcdi->blocksize, mcman_pagebuf); //s1
+	r1 = McReadPage(port, slot, mcdi->backup_block2 * mcdi->blocksize, &mcman_pagebuf); //s1
 
 	value1 = *pagebuf; //s3
 	if (((mcdi->cardflags & CF_ERASE_ZEROES) != 0) && (value1 == 0))
-		value1 = -1;
-	if (value1 != -1)
+		value1 = 0xffffffff;
+	if (value1 != 0xffffffff)
 		value1 = value1 & 0x7fffffff;
 
-	r2 = McReadPage(port, slot, (mcdi->backup_block2 * mcdi->blocksize) + 1, mcman_pagebuf); //a0
+	r2 = McReadPage(port, slot, (mcdi->backup_block2 * mcdi->blocksize) + 1, &mcman_pagebuf); //a0
 
 	value2 = *pagebuf; //s0
 	if (((mcdi->cardflags & CF_ERASE_ZEROES) != 0) && (value2 == 0))
-		value2 = -1;
-	if (value2 != -1)
+		value2 = 0xffffffff;
+	if (value2 != 0xffffffff)
 		value2 = value2 & 0x7fffffff;
 
-	if ((value1 != -1) && (value2 == -1))
+	if ((value1 != 0xffffffff) && (value2 == 0xffffffff))
 		goto check_done;
 	if ((r1 < 0) || (r2 < 0))
 		goto check_done;
 
-	if ((value1 == -1) && (value1 == value2))
+	if ((value1 == 0xffffffff) && (value1 == value2))
 		return sceMcResSucceed;
 
 	// bachup block2 is not erased, so programming is assumed to have not been completed
@@ -2319,13 +2320,13 @@ int McCheckBlock(int port, int slot, int block)
 	flag = 16; // s4
 
 	for (i = 0; i < mcdi->blocksize; i++) {
-		r = mcman_readpage(port, slot, page + i, mcman_pagebuf, mcman_eccdata);
+		r = mcman_readpage(port, slot, page + i, &mcman_pagebuf, mcman_eccdata);
 		if (r != sceMcResSucceed)
 			return -45;
 
 		if ((mcdi->cardflags & CF_USE_ECC) != 0) {
 			if (mcman_eccdata[mcman_sparesize(port, slot) - 1] != 0xff) {
-				p_page = (void *)mcman_pagebuf; //s1
+				p_page = mcman_pagebuf.byte; //s1
 				p_ecc = (void *)mcman_eccdata; //s2
 
 				for (j = 0; j < ecc_count; j++) {
@@ -2342,7 +2343,7 @@ int McCheckBlock(int port, int slot, int block)
 	}
 
 	for (j = 0; j < pageword_cnt; j++)
-		*((u32 *)&mcman_pagebuf + j) = 0x5a5aa5a5;
+		mcman_pagebuf.word[j] = 0x5a5aa5a5;
 
 	for (j = 0; j < 128; j++)
 		*((u32 *)&mcman_eccdata + j) = 0x5a5aa5a5;
@@ -2357,7 +2358,7 @@ int McCheckBlock(int port, int slot, int block)
 	}
 
 	for (i = 0; i < mcdi->blocksize; i++) {
-		r = McWritePage(port, slot, page + i, mcman_pagebuf, mcman_eccdata);
+		r = McWritePage(port, slot, page + i, &mcman_pagebuf, mcman_eccdata);
 		if (r != sceMcResSucceed) {
 			r = mcman_probePS2Card2(port, slot);
 			if (r != sceMcResSucceed)
@@ -2368,12 +2369,12 @@ int McCheckBlock(int port, int slot, int block)
 	}
 
 	for (i = 0; i < mcdi->blocksize; i++) {
-		r = mcman_readpage(port, slot, page + i, mcman_pagebuf, mcman_eccdata);
+		r = mcman_readpage(port, slot, page + i, &mcman_pagebuf, mcman_eccdata);
 		if (r != sceMcResSucceed)
 			return -45;
 
 		for (j = 0; j < pageword_cnt; j++) {
-			if (*((u32 *)&mcman_pagebuf + j) != 0x5a5aa5a5) {
+			if (mcman_pagebuf.word[j] != 0x5a5aa5a5) {
 				flag = -1;
 				goto lbl_8764;
 			}
@@ -2388,7 +2389,7 @@ int McCheckBlock(int port, int slot, int block)
 	}
 
 	for (j = 0; j < pageword_cnt; j++)
-		*((u32 *)&mcman_pagebuf + j) = 0x05a55a5a;
+		mcman_pagebuf.word[j] = 0x05a55a5a;
 
 	for (j = 0; j < 128; j++)
 		*((u32 *)&mcman_eccdata + j) = 0x05a55a5a;
@@ -2403,7 +2404,7 @@ int McCheckBlock(int port, int slot, int block)
 	}
 
 	for (i = 0; i < mcdi->blocksize; i++) {
-		r = McWritePage(port, slot, page + i, mcman_pagebuf, mcman_eccdata);
+		r = McWritePage(port, slot, page + i, &mcman_pagebuf, mcman_eccdata);
 		if (r != sceMcResSucceed) {
 			r = mcman_probePS2Card2(port, slot);
 			if (r != sceMcResSucceed)
@@ -2414,12 +2415,12 @@ int McCheckBlock(int port, int slot, int block)
 	}
 
 	for (i = 0; i < mcdi->blocksize; i++) {
-		r = mcman_readpage(port, slot, page + i, mcman_pagebuf, mcman_eccdata);
+		r = mcman_readpage(port, slot, page + i, &mcman_pagebuf, mcman_eccdata);
 		if (r != sceMcResSucceed)
 			return -45;
 
 		for (j = 0; j < pageword_cnt; j++) {
-			if (*((u32 *)&mcman_pagebuf + j) != 0x05a55a5a) {
+			if (mcman_pagebuf.word[j] != 0x05a55a5a) {
 				flag = -1;
 				goto lbl_8764;
 			}
@@ -2444,13 +2445,13 @@ lbl_8764:
 		erase_value = 0xffffffff;
 
 	for (j = 0; j < pageword_cnt; j++)
-		*((u32 *)&mcman_pagebuf + j) = erase_value;
+		mcman_pagebuf.word[j] = erase_value;
 
 	for (j = 0; j < 128; j++)
 		*((u32 *)&mcman_eccdata + j) = erase_value;
 
 	for (i = 0; i < mcdi->blocksize; i++) {
-		r = McWritePage(port, slot, page + i, mcman_pagebuf, mcman_eccdata);
+		r = McWritePage(port, slot, page + i, &mcman_pagebuf, mcman_eccdata);
 		if (r != sceMcResSucceed) {
 			r = mcman_probePS2Card2(port, slot);
 			if (r != sceMcResSucceed)
@@ -2485,26 +2486,26 @@ int mcman_setPS1devinfos(int port, int slot)
 	mcdi->cardform = 0;
 	mcdi->cardtype = 1;
 
-	r = McReadPS1PDACard(port, slot, 0, mcman_PS1PDApagebuf);
+	r = McReadPS1PDACard(port, slot, 0, &mcman_PS1PDApagebuf);
 	if (r < 0)
 		return -14;
 
 	if (mcman_sio2outbufs_PS1PDA[1] != 0)
 		return -15;
 
-	if (mcman_PS1PDApagebuf[0] != 0x4d)
+	if (mcman_PS1PDApagebuf.byte[0] != 0x4d)
 		return sceMcResNoFormat;
 
-	if (mcman_PS1PDApagebuf[1] != 0x43)
+	if (mcman_PS1PDApagebuf.byte[1] != 0x43)
 		return sceMcResNoFormat;
 
 	for (i = 0; i < 20; i++) {
-		r = McReadPS1PDACard(port, slot, i + 16, mcman_PS1PDApagebuf);
+		r = McReadPS1PDACard(port, slot, i + 16, &mcman_PS1PDApagebuf);
 		if (r != sceMcResSucceed)
 			return -43;
 
-		if (mcman_PS1PDApagebuf[127] == (mcman_calcEDC(mcman_PS1PDApagebuf, 127) & 0xff)) {
-			mcdi->bad_block_list[i] = *((u32 *)mcman_PS1PDApagebuf);
+		if (mcman_PS1PDApagebuf.byte[127] == (mcman_calcEDC(&mcman_PS1PDApagebuf, 127) & 0xff)) {
+			mcdi->bad_block_list[i] = mcman_PS1PDApagebuf.word[0];
 		}
 	}
 
@@ -2904,35 +2905,35 @@ int mcman_PS1pagetest(int port, int slot, int page)
 	register int r, i;
 
 	for (i = 0; i < 32; i++)
-		*((u32 *)&mcman_PS1PDApagebuf+i) = 0xffffffff;
+		mcman_PS1PDApagebuf.word[i] = 0xffffffff;
 
-	r = McWritePS1PDACard(port, slot, page, mcman_PS1PDApagebuf);
+	r = McWritePS1PDACard(port, slot, page, &mcman_PS1PDApagebuf);
 	if (r != sceMcResSucceed)
 		return sceMcResDeniedPermit;
 
-	r = McReadPS1PDACard(port, slot, page, mcman_PS1PDApagebuf);
+	r = McReadPS1PDACard(port, slot, page, &mcman_PS1PDApagebuf);
 	if (r != sceMcResSucceed)
 		return sceMcResNotEmpty;
 
 	for (i = 0; i < 32; i++) {
-		if (*((u32 *)&mcman_PS1PDApagebuf + i) != 0xffffffff) {
+		if (mcman_PS1PDApagebuf.word[i] != 0xffffffff) {
 			return 0;
 		}
 	}
 
 	for (i = 0; i < 32; i++)
-		*((u32 *)&mcman_PS1PDApagebuf + i) = 0;
+		mcman_PS1PDApagebuf.word[i] = 0;
 
-	r = McWritePS1PDACard(port, slot, page, mcman_PS1PDApagebuf);
+	r = McWritePS1PDACard(port, slot, page, &mcman_PS1PDApagebuf);
 	if (r != sceMcResSucceed)
 		return sceMcResDeniedPermit;
 
-	r = McReadPS1PDACard(port, slot, page, mcman_PS1PDApagebuf);
+	r = McReadPS1PDACard(port, slot, page, &mcman_PS1PDApagebuf);
 	if (r != sceMcResSucceed)
 		return sceMcResNotEmpty;
 
 	for (i = 0; i < 32; i++) {
-		if (*((u32 *)&mcman_PS1PDApagebuf + i) != 0) {
+		if (mcman_PS1PDApagebuf.word[i] != 0) {
 			return 0;
 		}
 	}
@@ -3070,24 +3071,24 @@ int mcman_fillPS1backuparea(int port, int slot, int block)
 	register int r, i, curpage;
 	register MCDevInfo *mcdi = &mcman_devinfos[port][slot];
 
-	memset(mcman_PS1PDApagebuf, 0, 128);
+	memset(&mcman_PS1PDApagebuf, 0, 128);
 
 	curpage = 16;
 	i = 0;
 	do {
 		if (mcdi->bad_block_list[i] == block) {
 			mcdi->bad_block_list[i] = block | 0x01000000;
-			*((u32 *)&mcman_PS1PDApagebuf) = block | 0x01000000;
-			mcman_PS1PDApagebuf[127] = mcman_calcEDC(mcman_PS1PDApagebuf, 127);
-			r = McWritePS1PDACard(port, slot, curpage, mcman_PS1PDApagebuf);
+			mcman_PS1PDApagebuf.word[0] = block | 0x01000000;
+			mcman_PS1PDApagebuf.byte[127] = mcman_calcEDC(&mcman_PS1PDApagebuf, 127);
+			r = McWritePS1PDACard(port, slot, curpage, &mcman_PS1PDApagebuf);
 			if (r != sceMcResSucceed)
 				return -43;
 		}
 		else {
 			if (mcdi->bad_block_list[i] < 0) {
-				*((u32 *)&mcman_PS1PDApagebuf) = block;
-				mcman_PS1PDApagebuf[127] = mcman_calcEDC(mcman_PS1PDApagebuf, 127);
-				r = McWritePS1PDACard(port, slot, curpage, mcman_PS1PDApagebuf);
+				mcman_PS1PDApagebuf.word[0] = block;
+				mcman_PS1PDApagebuf.byte[127] = mcman_calcEDC(&mcman_PS1PDApagebuf, 127);
+				r = McWritePS1PDACard(port, slot, curpage, &mcman_PS1PDApagebuf);
 				if (r != sceMcResSucceed)
 					return -43;
 				mcdi->bad_block_list[i] = block;
@@ -3408,7 +3409,7 @@ lbl0:
 	if (MAX_CACHEENTRY > 0) {
 		mcee = (McCacheEntry *)pmcman_entrycache;
 		do {
-			if ((*((u32 *)&mcee->mc_slot) & 0xff00ffff) == (*((u32 *)&mce->mc_slot) & 0xff00ffff)) {
+			if ((mcee->mc_slot == mce->mc_slot) && (mcee->mc_port == mce->mc_port)) {
 				temp1 = mcee->cluster / clusters_per_block;
 				temp2 = mcee->cluster % clusters_per_block;
 
@@ -3469,8 +3470,8 @@ lbl2:
 		if (r != sceMcResSucceed)
 			return -52;
 
-		*((u32 *)&mcman_pagebuf) = block | 0x80000000;
-		p_page = (void *)mcman_pagebuf; //s0
+		mcman_pagebuf.word[0] = block | 0x80000000;
+		p_page = (void *)&mcman_pagebuf; //s0
 		p_ecc = (void *)eccbuf; //s2 = sp58
 
 		i = 0;	//s1
@@ -3491,7 +3492,7 @@ lbl2:
 		} while (1);
 
 
-		r = McWritePage(mce->mc_port, mce->mc_slot, mcdi->backup_block2 * blocksize, mcman_pagebuf, eccbuf);
+		r = McWritePage(mce->mc_port, mce->mc_slot, mcdi->backup_block2 * blocksize, &mcman_pagebuf, eccbuf);
 		if (r == sceMcResFailReplace)
 			goto lbl3;
 		if (r != sceMcResSucceed)
@@ -3511,7 +3512,7 @@ lbl2:
 			} while (++i < mcdi->blocksize);
 		}
 
-		r = McWritePage(mce->mc_port, mce->mc_slot, (mcdi->backup_block2 * blocksize) + 1, mcman_pagebuf, eccbuf);
+		r = McWritePage(mce->mc_port, mce->mc_slot, (mcdi->backup_block2 * blocksize) + 1, &mcman_pagebuf, eccbuf);
 		if (r == sceMcResFailReplace)
 			goto lbl3;
 		if (r != sceMcResSucceed)
@@ -4261,17 +4262,9 @@ int mcman_clearsuperblock(int port, int slot)
 	McCacheEntry *mce;
 
 	// set superblock magic & version
-	memset((void *)&mcdi->magic, 0, sizeof (mcdi->magic) + sizeof (mcdi->version));
-	*((u32 *)&mcdi->magic    ) = *((u32 *)&SUPERBLOCK_MAGIC    );
-	*((u32 *)&mcdi->magic + 1) = *((u32 *)&SUPERBLOCK_MAGIC + 1);
-	*((u32 *)&mcdi->magic + 2) = *((u32 *)&SUPERBLOCK_MAGIC + 2);
-	*((u32 *)&mcdi->magic + 3) = *((u32 *)&SUPERBLOCK_MAGIC + 3);
-	*((u32 *)&mcdi->magic + 4) = *((u32 *)&SUPERBLOCK_MAGIC + 4);
-	*((u32 *)&mcdi->magic + 5) = *((u32 *)&SUPERBLOCK_MAGIC + 5);
-	*((u32 *)&mcdi->magic + 6) = *((u32 *)&SUPERBLOCK_MAGIC + 6);
-	*((u8 *)&mcdi->magic + 28) = *((u8 *)&SUPERBLOCK_MAGIC + 28);
-
-	strcat((char *)&mcdi->magic, SUPERBLOCK_VERSION);
+	memset((void *)mcdi->magic, 0, sizeof (mcdi->magic) + sizeof (mcdi->version));
+	strcpy(mcdi->magic, SUPERBLOCK_MAGIC);
+	strcat(mcdi->magic, SUPERBLOCK_VERSION);
 
 	for (i = 0; (u32)(i < sizeof(MCDevInfo)); i += 1024) {
 		temp = i;
