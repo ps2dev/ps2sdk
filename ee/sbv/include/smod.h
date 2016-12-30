@@ -24,7 +24,7 @@ extern "C" {
    what the *flags fields do, and they don't seem to be important.  */
 typedef struct _smod_mod_info {
 	struct _smod_mod_info *next;
-	u8	*name;		/* A pointer to the name in IOP RAM, this must be smem_read().  */
+	char	*name;		/* A pointer to the name in IOP RAM, this must be smem_read().  */
 	u16	version;
 	u16	newflags;	/* For MODLOAD shipped with games. The old MODLOAD module from boot ROMs do not use a flags field.  */
 	u16	id;

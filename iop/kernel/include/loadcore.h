@@ -23,7 +23,7 @@
 /* Module info entry. Taken from iopmgr. */
 typedef struct _ModuleInfo {
 	struct _ModuleInfo *next;
-	u8	*name;
+	char	*name;
 	u16	version;
 	u16	newflags;        /* For modload shipped with games. */
 	u16	id;
@@ -43,7 +43,7 @@ typedef struct _iop_library {
 	struct	irx_import_table *caller;
 	u16	version;
 	u16	flags;
-	u8	name[8];
+	char	name[8];
 	void	*exports[0];
 } iop_library_t;
 
