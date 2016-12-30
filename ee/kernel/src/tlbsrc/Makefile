@@ -7,13 +7,23 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 
+EE_CC_VERSION := $(shell $(EE_CC) '--version' 2>&1 | sed -n 's/^.*(GCC) //p')
+
 EE_BIN = tlbsrc.bin
 EE_ELF = tlbsrc.elf
 EE_OBJS = tlbsrc.o
 
+# Extra macros for disabling the automatic inclusion of the built-in CRT object(s)
+ifeq ($(IOP_CC_VERSION),3.2.2)
+EE_NO_CRT = -mno-crt0
+endif
+ifeq ($(IOP_CC_VERSION),3.2.3)
+EE_NO_CRT = -mno-crt0
+endif
+
 EE_INCS := -I$(PS2SDKSRC)/common/include -I$(PS2SDKSRC)/ee/kernel/include -I$(PS2SDKSRC)/ee/rpc/cdvd/include -I.
 EE_CFLAGS = -D_EE -G0 -mno-gpopt -Wall -Os
-EE_LDFLAGS = -nostartfiles -mno-crt0 -Tlinkfile -s
+EE_LDFLAGS = -nostartfiles $(EE_NO_CRT) -Tlinkfile -s
 
 $(EE_ELF) : $(EE_OBJS)
 	$(EE_CC) $(EE_LDFLAGS) \

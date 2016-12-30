@@ -3,7 +3,7 @@
 
 #include "osd.h"
 
-extern u8 SystemConfiguration[];
+extern SystemConfiguration_t SystemConfiguration;
 
 void InitSystemConfig(void *SysConf, int SysConfLen){
 	unsigned int SysConfRegAddr, i;
@@ -13,7 +13,7 @@ void InitSystemConfig(void *SysConf, int SysConfLen){
 	if((SysConfRegAddr=*(vu32*)0xbc0003c0)!=0){
 		ptr=(vu8 *)(0xbc000000+SysConfRegAddr+0xF);
 
-		for(i=0; i<SysConfLen; i++) SystemConfiguration[i]=ptr[i];
+		for(i=0; i<SysConfLen; i++) SystemConfiguration.data[i]=ptr[i];
 	}
 
 	config=(u64*)SysConf;
@@ -46,11 +46,11 @@ void GetOsdConfigParam(ConfigParam* config){
 	config->timezoneOffset=OSDConfig.timezoneOffset;
 }
 
-static unsigned char OSDConfig2[128];
+static u8 OSDConfig2[128];
 
 void SetOsdConfigParam2(void* config, int size, int offset){
 	unsigned int AmountToWrite, WriteEnd, i;
-	unsigned char *ptr;
+	u8 *ptr;
 
 	ptr=config;
 	if((WriteEnd=offset+size)>=0x81){
@@ -91,6 +91,6 @@ int GetOsdConfigParam2(void* config, int size, int offset){
 		ptr[i]=OSDConfig2[offset];
 	}
 
-	return(((*(u64*)SystemConfiguration>>6&7)!=0)?*(u64*)SystemConfiguration>>44&0xF:0);
+	return(((SystemConfiguration.EEGS>>6&7)!=0)?(SystemConfiguration.EEGS>>44&0xF):0);
 }
 

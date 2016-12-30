@@ -17,13 +17,13 @@ static const struct SyscallPatchData SyscallPatchData[]={
 	{ 0xFFFFC402, &ExecPS2Patch},
 };
 
-u8 SystemConfiguration[40]={0x40};
+SystemConfiguration_t SystemConfiguration = { .EEGS=0x40};
 
 int _start(int syscall){
 	unsigned int i;
 	int result;
 
-	InitSystemConfig(SystemConfiguration, 0x26);
+	InitSystemConfig(&SystemConfiguration, 0x26);
 
 	for(i=0; i<5; i++){
 		if(SyscallPatchData[i].syscall==syscall){
