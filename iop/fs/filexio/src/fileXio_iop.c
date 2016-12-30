@@ -50,17 +50,55 @@ struct t_SifRpcServerData sd0;
 static rests_pkt rests;
 
 /* RPC exported functions */
-int fileXio_stop(void);
-int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEntry[], unsigned int req_entries);
+static int fileXio_GetDeviceList_RPC(struct fileXioDevice* ee_devices, int eecount);
+static int fileXio_CopyFile_RPC(const char *src, const char *dest, int mode);
+static int fileXio_Read_RPC(int infd, char *read_buf, int read_size, void *intr_data);
+static int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size, int mis,u8 *misbuf);
+static int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEntry[], unsigned int req_entries);
+static int fileXio_Mount_RPC(const char* mountstring, const char* mountpoint, int flag);
+static int fileXio_chstat_RPC(char *filename, void* eeptr, int mask);
+static int fileXio_getstat_RPC(char *filename, void* eeptr);
+static int fileXio_dread_RPC(int fd, void* eeptr);
 
 // Functions called by the RPC server
-void* fileXioRpc_Stop();
-void* fileXioRpc_Getdir(unsigned int* sbuff);
+static void* fileXioRpc_Stop();
+static void* fileXioRpc_GetDeviceList(unsigned int* sbuff);
+static void* fileXioRpc_Getdir(unsigned int* sbuff);
+static void* fileXioRpc_Mount(unsigned int* sbuff);
+static void* fileXioRpc_uMount(unsigned int* sbuff);
+static void* fileXioRpc_CopyFile(unsigned int* sbuff);
+static void* fileXioRpc_MkDir(unsigned int* sbuff);
+static void* fileXioRpc_RmDir(unsigned int* sbuff);
+static void* fileXioRpc_Remove(unsigned int* sbuff);
+static void* fileXioRpc_Rename(unsigned int* sbuff);
+static void* fileXioRpc_SymLink(unsigned int* sbuff);
+static void* fileXioRpc_ReadLink(unsigned int* sbuff);
+static void* fileXioRpc_ChDir(unsigned int* sbuff);
+static void* fileXioRpc_Open(unsigned int* sbuff);
+static void* fileXioRpc_Close(unsigned int* sbuff);
+static void* fileXioRpc_Read(unsigned int* sbuff);
+static void* fileXioRpc_Write(unsigned int* sbuff);
+static void* fileXioRpc_Lseek(unsigned int* sbuff);
+static void* fileXioRpc_Lseek64(unsigned int* sbuff);
+static void* fileXioRpc_ChStat(unsigned int* sbuff);
+static void* fileXioRpc_GetStat(unsigned int* sbuff);
+static void* fileXioRpc_Format(unsigned int* sbuff);
+static void* fileXioRpc_AddDrv(unsigned int* sbuff);
+static void* fileXioRpc_DelDrv(unsigned int* sbuff);
+static void* fileXioRpc_Sync(unsigned int* sbuff);
+static void* fileXioRpc_Devctl(unsigned int* sbuff);
+static void* fileXioRpc_Ioctl(unsigned int* sbuff);
+static void* fileXioRpc_Ioctl2(unsigned int* sbuff);
+static void* fileXioRpc_Dopen(unsigned int* sbuff);
+static void* fileXioRpc_Dread(unsigned int* sbuff);
+static void* fileXioRpc_Dclose(unsigned int* sbuff);
+static void* filexioRpc_SetRWBufferSize(void *sbuff);
+static void* fileXioRpc_Getdir(unsigned int* sbuff);
+static void DirEntryCopy(struct fileXioDirEntry* dirEntry, iox_dirent_t* internalDirEntry);
 
-void* fileXio_rpc_server(int fno, void *data, int size);
-void fileXio_Thread(void* param);
-
-void DirEntryCopy(struct fileXioDirEntry* dirEntry, iox_dirent_t* internalDirEntry);
+// RPC server
+static void* fileXio_rpc_server(int fno, void *data, int size);
+static void fileXio_Thread(void* param);
 
 int _start( int argc, char **argv)
 {
@@ -85,7 +123,7 @@ int _start( int argc, char **argv)
 	return result;
 }
 
-int fileXio_GetDeviceList_RPC(struct fileXioDevice* ee_devices, int eecount)
+static int fileXio_GetDeviceList_RPC(struct fileXioDevice* ee_devices, int eecount)
 {
     int device_count = 0;
     iop_device_t **devices = GetDeviceList();
@@ -119,7 +157,7 @@ int fileXio_GetDeviceList_RPC(struct fileXioDevice* ee_devices, int eecount)
     return device_count;
 }
 
-int fileXio_CopyFile_RPC(const char *src, const char *dest, int mode)
+static int fileXio_CopyFile_RPC(const char *src, const char *dest, int mode)
 {
   iox_stat_t stat;
   int infd, outfd, size, remain, i, retval = 0;
@@ -151,7 +189,8 @@ int fileXio_CopyFile_RPC(const char *src, const char *dest, int mode)
 
   return size;
 }
-int fileXio_Read_RPC(int infd, char *read_buf, int read_size, void *intr_data)
+
+static int fileXio_Read_RPC(int infd, char *read_buf, int read_size, void *intr_data)
 {
      int srest;
      int erest;
@@ -249,7 +288,7 @@ EXIT:
 	return (total);
 }
 
-int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size, int mis,char *misbuf)
+static int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size, int mis,u8 *misbuf)
 {
      SifRpcReceiveData_t rdata;
      int left;
@@ -293,7 +332,7 @@ int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size, int mis,
 
 // This is the getdir for use by the EE RPC client
 // It DMA's entries to the specified buffer in EE memory
-int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEntry[], unsigned int req_entries)
+static int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEntry[], unsigned int req_entries)
 {
 	int matched_entries;
       int fd, res;
@@ -358,7 +397,7 @@ int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEntry[], 
 }
 
 // This is the mount for use by the EE RPC client
-int fileXio_Mount_RPC(const char* mountstring, const char* mountpoint, int flag)
+static int fileXio_Mount_RPC(const char* mountstring, const char* mountpoint, int flag)
 {
 	int res=0;
 	#ifdef DEBUG
@@ -369,7 +408,7 @@ int fileXio_Mount_RPC(const char* mountstring, const char* mountpoint, int flag)
 	return(res);
 }
 
-int fileXio_chstat_RPC(char *filename, void* eeptr, int mask)
+static int fileXio_chstat_RPC(char *filename, void* eeptr, int mask)
 {
       int res=0;
 	iox_stat_t localStat;
@@ -381,7 +420,7 @@ int fileXio_chstat_RPC(char *filename, void* eeptr, int mask)
       return(res);
 }
 
-int fileXio_getstat_RPC(char *filename, void* eeptr)
+static int fileXio_getstat_RPC(char *filename, void* eeptr)
 {
 	iox_stat_t localStat;
 	int res = 0;
@@ -407,7 +446,7 @@ int fileXio_getstat_RPC(char *filename, void* eeptr)
 	return(res);
 }
 
-int fileXio_dread_RPC(int fd, void* eeptr)
+static int fileXio_dread_RPC(int fd, void* eeptr)
 {
       int res=0;
 	iox_dirent_t localDir;
@@ -432,7 +471,7 @@ int fileXio_dread_RPC(int fd, void* eeptr)
       return(res);
 }
 
-void* fileXioRpc_Stop()
+static void* fileXioRpc_Stop(void)
 {
 	#ifdef DEBUG
 		printf("RPC Stop Request\n");
@@ -443,7 +482,7 @@ void* fileXioRpc_Stop()
 // Send:   Offset 0 = pointer to array of fileXioDevice structures in EE mem
 // Send:   Offset 4 = requested number of entries
 // Return: Offset 0 = ret val (number of entries). Size = int
-void* fileXioRpc_GetDeviceList(unsigned int* sbuff)
+static void* fileXioRpc_GetDeviceList(unsigned int* sbuff)
 {
 	int ret;
 	struct fxio_devlist_packet *packet=(struct fxio_devlist_packet*)sbuff;
@@ -460,7 +499,7 @@ void* fileXioRpc_GetDeviceList(unsigned int* sbuff)
 // Send:   Offset 512 = pointer to array of DirEntry structures in EE mem
 // Send:   Offset 516 = requested number of entries
 // Return: Offset 0 = ret val (number of matched entries). Size = int
-void* fileXioRpc_Getdir(unsigned int* sbuff)
+static void* fileXioRpc_Getdir(unsigned int* sbuff)
 {
 	int ret;
 	struct fxio_getdir_packet *packet=(struct fxio_getdir_packet*)sbuff;
@@ -477,7 +516,7 @@ void* fileXioRpc_Getdir(unsigned int* sbuff)
 // Send:   Offset 0 = mount format string (512 bytes)
 // Send:   Offset 512 = mount point (512 bytes)
 // Return: Offset 0 = return status (int)
-void* fileXioRpc_Mount(unsigned int* sbuff)
+static void* fileXioRpc_Mount(unsigned int* sbuff)
 {
 	struct fxio_mount_packet *packet=(struct fxio_mount_packet*)sbuff;
 	int ret;
@@ -498,7 +537,7 @@ void* fileXioRpc_Mount(unsigned int* sbuff)
 // Send:   Offset 0 = mount format string (512 bytes)
 // Send:   Offset 512 = mount point (512 bytes)
 // Return: Offset 0 = return status (int)
-void* fileXioRpc_uMount(unsigned int* sbuff)
+static void* fileXioRpc_uMount(unsigned int* sbuff)
 {
 	int ret;
 	struct fxio_unmount_packet *packet=(struct fxio_unmount_packet*)sbuff;
@@ -514,7 +553,7 @@ void* fileXioRpc_uMount(unsigned int* sbuff)
 // Send:   Offset 0 = source filename (512 bytes)
 // Send:   Offset 512 = destination filename (512 bytes)
 // Return: Offset 0 = return status (int)
-void* fileXioRpc_CopyFile(unsigned int* sbuff)
+static void* fileXioRpc_CopyFile(unsigned int* sbuff)
 {
 	int ret;
 	struct fxio_copyfile_packet *packet=(struct fxio_copyfile_packet*)sbuff;
@@ -532,7 +571,7 @@ void* fileXioRpc_CopyFile(unsigned int* sbuff)
 // Send:   Offset 0 = filenames (512 bytes)
 // Send:   Offset 512 = mode (int)
 // Return: Offset 0 = return status (int)
-void* fileXioRpc_MkDir(unsigned int* sbuff)
+static void* fileXioRpc_MkDir(unsigned int* sbuff)
 {
 	int ret;
 	struct fxio_mkdir_packet *packet=(struct fxio_mkdir_packet*)sbuff;
@@ -547,7 +586,7 @@ void* fileXioRpc_MkDir(unsigned int* sbuff)
 
 // Send:   Offset 0 = filenames (512 bytes)
 // Return: Offset 0 = return status (int)
-void* fileXioRpc_RmDir(unsigned int* sbuff)
+static void* fileXioRpc_RmDir(unsigned int* sbuff)
 {
 	int ret;
 	struct fxio_pathsel_packet *packet=(struct fxio_pathsel_packet*)sbuff;
@@ -562,7 +601,7 @@ void* fileXioRpc_RmDir(unsigned int* sbuff)
 
 // Send:   Offset 0 = filenames (512 bytes)
 // Return: Offset 0 = return status (int)
-void* fileXioRpc_Remove(unsigned int* sbuff)
+static void* fileXioRpc_Remove(unsigned int* sbuff)
 {
 	int ret;
 	struct fxio_pathsel_packet *packet=(struct fxio_pathsel_packet*)sbuff;
@@ -578,7 +617,7 @@ void* fileXioRpc_Remove(unsigned int* sbuff)
 // Send:   Offset 0 = source filename (512 bytes)
 // Send:   Offset 512 = destination filename (512 bytes)
 // Return: Offset 0 = return status (int)
-void* fileXioRpc_Rename(unsigned int* sbuff)
+static void* fileXioRpc_Rename(unsigned int* sbuff)
 {
 	int ret;
 	struct fxio_rename_packet *packet=(struct fxio_rename_packet*)sbuff;
@@ -594,7 +633,7 @@ void* fileXioRpc_Rename(unsigned int* sbuff)
 // Send:   Offset 0 = source filename (512 bytes)
 // Send:   Offset 512 = destination filename (512 bytes)
 // Return: Offset 0 = return status (int)
-void* fileXioRpc_SymLink(unsigned int* sbuff)
+static void* fileXioRpc_SymLink(unsigned int* sbuff)
 {
 	int ret;
 	struct fxio_rename_packet *packet=(struct fxio_rename_packet*)sbuff;
@@ -611,7 +650,7 @@ void* fileXioRpc_SymLink(unsigned int* sbuff)
 // Send:   Offset 512 = buffer (512 bytes)
 // Send:   Offset 1024 = buflen (int)
 // Return: Offset 0 = return status (int)
-void* fileXioRpc_ReadLink(unsigned int* sbuff)
+static void* fileXioRpc_ReadLink(unsigned int* sbuff)
 {
 	int ret;
 	struct fxio_readlink_packet *packet=(struct fxio_readlink_packet*)sbuff;
@@ -632,7 +671,7 @@ void* fileXioRpc_ChDir(unsigned int* sbuff)
 	#ifdef DEBUG
 		printf("RPC ChDir Request\n");
 	#endif
-	ret=chdir((char*)&sbuff[0/4]);
+	ret=chdir((char*)sbuff);
 	sbuff[0] = ret;
 	return sbuff;
 }
@@ -641,7 +680,7 @@ void* fileXioRpc_ChDir(unsigned int* sbuff)
 // Send:   Offset 512 = flags (int)
 // Send:   Offset 516 = modes (int)
 // Return: Offset 0 = return status (int) / fd
-void* fileXioRpc_Open(unsigned int* sbuff)
+static void* fileXioRpc_Open(unsigned int* sbuff)
 {
 	int ret;
 	struct fxio_open_packet *packet=(struct fxio_open_packet*)sbuff;
@@ -656,7 +695,7 @@ void* fileXioRpc_Open(unsigned int* sbuff)
 
 // Send:   Offset 0 = fd (int)
 // Return: Offset 0 = return status (int)
-void* fileXioRpc_Close(unsigned int* sbuff)
+static void* fileXioRpc_Close(unsigned int* sbuff)
 {
 	int ret;
 	struct fxio_close_packet *packet=(struct fxio_close_packet*)sbuff;
@@ -673,7 +712,7 @@ void* fileXioRpc_Close(unsigned int* sbuff)
 // Send:   Offset 4 = pointer to buffer in EE mem
 // Send:   Offset 8 = buffer size (int)
 // Send:   Offset 12 = pointer to intr_data in EE mem
-void* fileXioRpc_Read(unsigned int* sbuff)
+static void* fileXioRpc_Read(unsigned int* sbuff)
 {
 	int ret;
 	struct fxio_read_packet *packet=(struct fxio_read_packet*)sbuff;
@@ -691,7 +730,7 @@ void* fileXioRpc_Read(unsigned int* sbuff)
 // Send:   Offset 8 = buffer size (int)
 // Send:   Offset 12 = misaligned buffer size (int)
 // Send:   Offset 16 = misaligned buffer (16)
-void* fileXioRpc_Write(unsigned int* sbuff)
+static void* fileXioRpc_Write(unsigned int* sbuff)
 {
 	int ret;
 	struct fxio_write_packet *packet=(struct fxio_write_packet*)sbuff;
@@ -709,7 +748,7 @@ void* fileXioRpc_Write(unsigned int* sbuff)
 // Send:   Offset 4 = offset (long)
 // Send:   Offset 8 = whence (int)
 // Return: Offset 0 = return status (int)
-void* fileXioRpc_Lseek(unsigned int* sbuff)
+static void* fileXioRpc_Lseek(unsigned int* sbuff)
 {
 	int ret;
 	struct fxio_lseek_packet *packet=(struct fxio_lseek_packet*)sbuff;
@@ -726,7 +765,7 @@ void* fileXioRpc_Lseek(unsigned int* sbuff)
 // Send:   Offset 4 = offset (long long)
 // Send:   Offset 12 = whence (int)
 // Return: Offset 0 = return status (long long)
-void* fileXioRpc_Lseek64(unsigned int* sbuff)
+static void* fileXioRpc_Lseek64(unsigned int* sbuff)
 {
 	long long ret;
 	struct fxio_lseek64_packet *packet=(struct fxio_lseek64_packet*)sbuff;
@@ -751,7 +790,7 @@ void* fileXioRpc_Lseek64(unsigned int* sbuff)
 // Send:   Offset 512 = pointer to EE mem
 // Send:   Offset 516 = mask (int)
 // Return: Offset 0 = return status (int)
-void* fileXioRpc_ChStat(unsigned int* sbuff)
+static void* fileXioRpc_ChStat(unsigned int* sbuff)
 {
 	int ret=-1;
 	struct fxio_chstat_packet *packet=(struct fxio_chstat_packet*)sbuff;
@@ -767,7 +806,7 @@ void* fileXioRpc_ChStat(unsigned int* sbuff)
 // Send:   Offset 0 = filename
 // Send:   Offset 512 = pointer to EE mem
 // Return: Offset 0 = return status (int)
-void* fileXioRpc_GetStat(unsigned int* sbuff)
+static void* fileXioRpc_GetStat(unsigned int* sbuff)
 {
 	int ret=-1;
 	struct fxio_getstat_packet *packet=(struct fxio_getstat_packet*)sbuff;
@@ -785,7 +824,7 @@ void* fileXioRpc_GetStat(unsigned int* sbuff)
 // Send:   Offset 640 = args
 // Send:   Offset 1152 = arglen (int)
 // Return: Offset 0 = return status
-void* fileXioRpc_Format(unsigned int* sbuff)
+static void* fileXioRpc_Format(unsigned int* sbuff)
 {
 	int ret;
 	struct fxio_format_packet *packet=(struct fxio_format_packet*)sbuff;
@@ -799,7 +838,7 @@ void* fileXioRpc_Format(unsigned int* sbuff)
 }
 
 //int io_AddDrv(iop_device_t *device);
-void* fileXioRpc_AddDrv(unsigned int* sbuff)
+static void* fileXioRpc_AddDrv(unsigned int* sbuff)
 {
 	int ret=-1;
 	#ifdef DEBUG
@@ -812,7 +851,7 @@ void* fileXioRpc_AddDrv(unsigned int* sbuff)
 
 // Send:   Offset 0 = fsname
 // Return: Offset 0 = return status (int)
-void* fileXioRpc_DelDrv(unsigned int* sbuff)
+static void* fileXioRpc_DelDrv(unsigned int* sbuff)
 {
 	int ret=-1;
 	#ifdef DEBUG
@@ -826,7 +865,7 @@ void* fileXioRpc_DelDrv(unsigned int* sbuff)
 // Send:   Offset 0 = devname
 // Send:   Offset 512 = flag (int)
 // Return: Offset 0 = return status (int)
-void* fileXioRpc_Sync(unsigned int* sbuff)
+static void* fileXioRpc_Sync(unsigned int* sbuff)
 {
 	int ret;
 	struct fxio_sync_packet *packet=(struct fxio_sync_packet*)sbuff;
@@ -841,7 +880,7 @@ void* fileXioRpc_Sync(unsigned int* sbuff)
 
 //int io_devctl(const char *name, int cmd, void *arg, unsigned int arglen, void *bufp,
 //		unsigned int buflen);
-void* fileXioRpc_Devctl(unsigned int* sbuff)
+static void* fileXioRpc_Devctl(unsigned int* sbuff)
 {
 	struct fxio_devctl_packet *packet = (struct fxio_devctl_packet *)sbuff;
 	struct fxio_ctl_return_pkt *ret_buf = (struct fxio_ctl_return_pkt *)rwbuf;
@@ -881,7 +920,7 @@ void* fileXioRpc_Devctl(unsigned int* sbuff)
 }
 
 //int io_ioctl(int fd, int cmd, void *arg);
-void* fileXioRpc_Ioctl(unsigned int* sbuff)
+static void* fileXioRpc_Ioctl(unsigned int* sbuff)
 {
 	struct fxio_ioctl_packet *packet = (struct fxio_ioctl_packet *)sbuff;
 	int ret;
@@ -896,7 +935,7 @@ void* fileXioRpc_Ioctl(unsigned int* sbuff)
 }
 //int io_ioctl2(int fd, int cmd, void *arg, unsigned int arglen, void *bufp,
 //		unsigned int buflen);
-void* fileXioRpc_Ioctl2(unsigned int* sbuff)
+static void* fileXioRpc_Ioctl2(unsigned int* sbuff)
 {
 	struct fxio_ioctl2_packet *packet = (struct fxio_ioctl2_packet *)sbuff;
 	struct fxio_ctl_return_pkt *ret_buf = (struct fxio_ctl_return_pkt *)rwbuf;
@@ -935,7 +974,7 @@ void* fileXioRpc_Ioctl2(unsigned int* sbuff)
 	return sbuff;
 }
 
-void* fileXioRpc_Dopen(unsigned int* sbuff)
+static void* fileXioRpc_Dopen(unsigned int* sbuff)
 {
 	int ret;
 	struct fxio_pathsel_packet *packet=(struct fxio_pathsel_packet*)sbuff;
@@ -948,7 +987,7 @@ void* fileXioRpc_Dopen(unsigned int* sbuff)
 	return sbuff;
 }
 
-void* fileXioRpc_Dread(unsigned int* sbuff)
+static void* fileXioRpc_Dread(unsigned int* sbuff)
 {
 	int ret=-1;
 	struct fxio_dread_packet *packet=(struct fxio_dread_packet*)sbuff;
@@ -961,7 +1000,7 @@ void* fileXioRpc_Dread(unsigned int* sbuff)
 	return sbuff;
 }
 
-void* fileXioRpc_Dclose(unsigned int* sbuff)
+static void* fileXioRpc_Dclose(unsigned int* sbuff)
 {
 	int ret;
 	struct fxio_close_packet *packet=(struct fxio_close_packet*)sbuff;
@@ -979,7 +1018,7 @@ void* fileXioRpc_Dclose(unsigned int* sbuff)
 * and are not to be exported                     *
 *************************************************/
 
-void fileXio_Thread(void* param)
+static void fileXio_Thread(void* param)
 {
 	int OldState;
 
@@ -1008,7 +1047,7 @@ void fileXio_Thread(void* param)
 	SifRpcLoop(&qd);
 }
 
-void* filexioRpc_SetRWBufferSize(void *sbuff)
+static void* filexioRpc_SetRWBufferSize(void *sbuff)
 {
 	int OldState;
 
@@ -1027,7 +1066,7 @@ void* filexioRpc_SetRWBufferSize(void *sbuff)
 	return sbuff;
 }
 
-void* fileXio_rpc_server(int fno, void *data, int size)
+static void* fileXio_rpc_server(int fno, void *data, int size)
 {
 
 	switch(fno) {
@@ -1101,7 +1140,7 @@ void* fileXio_rpc_server(int fno, void *data, int size)
 
 
 // Copy a DIR Entry from the native format to our format
-void DirEntryCopy(struct fileXioDirEntry* dirEntry, iox_dirent_t* internalDirEntry)
+static void DirEntryCopy(struct fileXioDirEntry* dirEntry, iox_dirent_t* internalDirEntry)
 {
 	dirEntry->fileSize = internalDirEntry->stat.size;
 	dirEntry->fileProperties = internalDirEntry->stat.attr;

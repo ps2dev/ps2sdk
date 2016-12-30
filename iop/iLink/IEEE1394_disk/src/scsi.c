@@ -404,7 +404,7 @@ static inline int InitializeSCSIDevice(struct SBP2Device *dev) {
     return 0;
 }
 
-inline void releaseSBP2Device(struct SBP2Device *dev){
+void releaseSBP2Device(struct SBP2Device *dev){
 	part_disconnect(dev);
 	scache_kill(dev->cache);
 }

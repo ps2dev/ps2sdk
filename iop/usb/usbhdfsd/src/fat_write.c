@@ -75,11 +75,9 @@ static void swapClStack(fat_driver* fatd, int startIndex, int endIndex) {
 
 static int fat_readEmptyClusters12(fat_driver* fatd) {
 	int ret;
-	int i;
 	int recordOffset;
 	int sectorSpan;
 	int fatSector;
-	int cont;
 	int lastFatSector;
 	unsigned int cluster;
 	unsigned int clusterValue;
@@ -89,9 +87,7 @@ static int fat_readEmptyClusters12(fat_driver* fatd) {
 
 	oldClStackIndex = fatd->clStackIndex;
 
-	cont = 1;
 	lastFatSector = -1;
-	i = 0;
 	cluster = fatd->clStackLast;
 
 	while(fatd->clStackIndex < MAX_CLUSTER_STACK ) {
@@ -622,21 +618,10 @@ static unsigned int fat_getFreeCluster(fat_driver* fatd, unsigned int currentClu
 
 //---------------------------------------------------------------------------
 /*
- simple conversion of the char from lower case to upper case
-*/
-USBHD_INLINE unsigned char toUpperChar(unsigned char c) {
-	if (c >96  && c < 123) {
-		return (c - 32);
-	}
-	return c;
-}
-
-//---------------------------------------------------------------------------
-/*
 returns number of direntry positions that the name takes
 //dlanor: Note that this only includes the long_name entries
 */
-static int getDirentrySize(const unsigned char* lname) {
+static int getDirentrySize(const char* lname) {
 	int len;
 	int result;
 	len = strlen(lname);
@@ -649,7 +634,7 @@ static int getDirentrySize(const unsigned char* lname) {
 /*
 compute checksum of the short filename
 */
-static unsigned char computeNameChecksum(const unsigned char* sname) {
+static unsigned char computeNameChecksum(const char* sname) {
 	unsigned char result;
 	int i;
 
@@ -665,7 +650,7 @@ static unsigned char computeNameChecksum(const unsigned char* sname) {
 /*
   fill the LFN (long filename) direntry
 */
-static void setLfnEntry(const unsigned char* lname, int nameSize, unsigned char chsum, fat_direntry_lfn* dlfn, int part, int maxPart){
+static void setLfnEntry(const char* lname, int nameSize, unsigned char chsum, fat_direntry_lfn* dlfn, int part, int maxPart){
 	int i,j;
 	unsigned char name[26]; //unicode name buffer = 13 characters per 2 bytes
 	int nameStart;
@@ -678,7 +663,7 @@ static void setLfnEntry(const unsigned char* lname, int nameSize, unsigned char 
 
 	//fake unicode conversion
 	for (i = 0; i < j; i++) {
-		name[i*2]   = lname[nameStart + i];
+		name[i*2]   = (unsigned char)lname[nameStart + i];
 		name[i*2+1] = 0;
 	}
 
@@ -792,7 +777,7 @@ static void setSfnDate(fat_direntry_sfn* dsfn, int mode) {
 /*
   fill the SFN (short filename) direntry
 */
-static void setSfnEntry(const unsigned char* shortName, char directory, fat_direntry_sfn* dsfn, unsigned int cluster) {
+static void setSfnEntry(const char* shortName, char directory, fat_direntry_sfn* dsfn, unsigned int cluster) {
 	int i;
 
 	//name + ext
@@ -816,7 +801,7 @@ static void setSfnEntry(const unsigned char* shortName, char directory, fat_dire
 	setSfnDate(dsfn, DATE_CREATE | DATE_MODIFY);
 }
 
-static void setSfnEntryFromOld(const unsigned char* shortName, fat_direntry_sfn* dsfn, const fat_direntry_sfn* orig_dsfn) {
+static void setSfnEntryFromOld(const char* shortName, fat_direntry_sfn* dsfn, const fat_direntry_sfn* orig_dsfn) {
 	int i;
 
 	memcpy(dsfn, orig_dsfn, sizeof(fat_direntry_sfn));
@@ -836,7 +821,7 @@ static void setSfnEntryFromOld(const unsigned char* shortName, fat_direntry_sfn*
           1  if long name have to be truncated (ie. INFORM~1.TXT)
 	 <0  if invalid long name detected
 */
-static int createShortNameMask(unsigned char* lname, unsigned char* sname) {
+static int createShortNameMask(char* lname, char* sname) {
 	int i;
 	int size;
 	int j;
@@ -869,7 +854,7 @@ static int createShortNameMask(unsigned char* lname, unsigned char* sname) {
 
 	//store name
 	for (i = 0; lname[i] !=0 && lname[i] != '.' && i < 8; i++) {
-		sname[i] = toUpperChar(lname[i]);
+		sname[i] = toupper(lname[i]);
 		//short name must not contain spaces - replace space by underscore
 		if (sname[i] == ' ') sname[i]='_';
 	}
@@ -887,7 +872,7 @@ static int createShortNameMask(unsigned char* lname, unsigned char* sname) {
 	if (lname[i] == '.') {
 		i++;
 		for (j=0; lname[i] != 0 && j < 3; i++, j++) {
-			sname[j+8] = toUpperChar(lname[i]);
+			sname[j+8] = toupper(lname[i]);
 		}
 		//no more than 3 characters of the extension
 		if (lname[i] == 0) fit++;
@@ -919,12 +904,12 @@ static int createShortNameMask(unsigned char* lname, unsigned char* sname) {
   path  - separated path (output)
   name  - separated filename (output)
 */
-static int separatePathAndName(const unsigned char* fname, unsigned char* path, unsigned char* name) {
+static int separatePathAndName(const char* fname, char* path, char* name) {
 	int path_len;
-	unsigned char *sp, *np;
+	const char *sp, *np;
 
 	if(!(sp=strrchr(fname, '/')))			//if last path separator missing ?
-		np = (char *)fname;			//  name starts at start of fname string
+		np = fname;				//  name starts at start of fname string
 	else						//else last path separator found
 		np = sp+1;				//  name starts after separator
 	if(strlen(np) >= FAT_MAX_NAME)			//if name is too long
@@ -941,10 +926,10 @@ static int separatePathAndName(const unsigned char* fname, unsigned char* path, 
 /*
  get the sequence number from existing direntry name
 */
-static int getShortNameSequence(unsigned char* name, unsigned char* ext, const unsigned char* sname) {
+static int getShortNameSequence(char* name, char* ext, const char* sname) {
 	int i,j;
-	const unsigned char* tmp;
-	unsigned char buf[8];
+	const char* tmp;
+	char buf[8];
 
 	//at first: compare extensions
 	//if extensions differ then filenames are diffrerent and seq is 0
@@ -977,9 +962,9 @@ static int getShortNameSequence(unsigned char* name, unsigned char* ext, const u
 /*
   set the short name sequence number
 */
-static int setShortNameSequence(fat_driver* fatd, unsigned char* sname) {
+static int setShortNameSequence(fat_driver* fatd, char* sname) {
 	char number[8];
-	unsigned char *buf;
+	char *buf;
 	int i,j;
 	int seq;
 	unsigned char mask;
@@ -1111,14 +1096,12 @@ static int getDirentryStoreOffset(fat_driver* fatd, int entryCount, int direntry
   the reason is to speed up modification of the SFN (size of the file)
 //dlanor: This function has been rewritten to use global bitmask arrays for output
 */
-static int fat_fillDirentryInfo(fat_driver* fatd, const unsigned char* lname, unsigned char* sname,
+static int fat_fillDirentryInfo(fat_driver* fatd, const char* lname, char* sname,
 			char directory, unsigned int* startCluster,
 			unsigned int* retSector, int* retOffset) {
 	fat_direntry_summary dir;
 	int i, j;
-	int dirSector;
-	unsigned int startSector;
-	unsigned int theSector;
+	unsigned int startSector, dirSector, theSector;
 	int cont;
 	int ret;
 	unsigned int dirPos;
@@ -1187,7 +1170,7 @@ static int fat_fillDirentryInfo(fat_driver* fatd, const unsigned char* lname, un
 							fatd->deIdx++;
 							return 0;
 						}//ends "if" clause for matching name
-						seq = getShortNameSequence(dir_entry->sfn.name, dir_entry->sfn.ext, sname);
+						seq = getShortNameSequence((char*)dir_entry->sfn.name, (char*)dir_entry->sfn.ext, sname);
 						if(seq < SEQ_MASK_SIZE)
 							fatd->seq_mask[seq>>3] |= (1<<(seq & 7));
 						fatd->deIdx = 0;
@@ -1235,8 +1218,7 @@ static int fat_fillDirentryInfo(fat_driver* fatd, const unsigned char* lname, un
 static int enlargeDirentryClusterSpace(fat_driver* fatd, unsigned int startCluster, int entryCount, int entryIndex, int direntrySize)
 {
 	int ret;
-	int dirSector;
-	unsigned int startSector;
+	unsigned int startSector, dirSector;
 	int i;
 	int maxSector;
 	int entriesPerSector;
@@ -1328,7 +1310,7 @@ static int createDirectorySpace(fat_driver* fatd, unsigned int dirCluster, unsig
 		memset(sbuf, 0, fatd->partBpb.sectorSize); //clean the sector
 		if (i == 0) {
 			fat_direntry_sfn* dsfn = (fat_direntry_sfn*) sbuf;
-			unsigned char name[11];
+			char name[11];
 			for (j = 1; j< 11; j++) name[j] = ' ';
 			name[0] = '.';
 			setSfnEntry(name, 1, dsfn + 0, dirCluster);
@@ -1366,10 +1348,10 @@ static int createDirectorySpace(fat_driver* fatd, unsigned int dirCluster, unsig
   note: the filesize set in the direntry is 0 (for both directory and file)
 */
 static int saveDirentry(fat_driver* fatd, unsigned int startCluster,
-	const unsigned char* lname, const unsigned char* sname, char directory, unsigned int cluster,
+	const char* lname, const char* sname, char directory, unsigned int cluster,
 	int entrySize, int entryIndex, unsigned int* retSector, int* retOffset, const fat_direntry_sfn *orig_dsfn) {
 	int i, j;
-	int dirSector;
+	unsigned int dirSector;
 	unsigned int startSector;
 	unsigned int theSector;
 	int cont;
@@ -1468,8 +1450,8 @@ static int saveDirentry(fat_driver* fatd, unsigned int startCluster,
   retOffset     - byte offset of the SFN direntry counting from the start of the sector (output)
 */
 
-static int fat_modifyDirSpace(fat_driver* fatd, unsigned char* lname, char directory, char escapeNotExist, unsigned int* startCluster, unsigned int* retSector, int* retOffset, const fat_direntry_sfn *orig_dsfn) {
-	unsigned char sname[12]; //short name 8+3 + terminator
+static int fat_modifyDirSpace(fat_driver* fatd, char* lname, char directory, char escapeNotExist, unsigned int* startCluster, unsigned int* retSector, int* retOffset, const fat_direntry_sfn *orig_dsfn) {
+	char sname[12]; //short name 8+3 + terminator
 	unsigned int newCluster, parentDirCluster_tmp;
 	int ret, entryCount, compressShortName, entryIndex, direntrySize;
 
@@ -1604,7 +1586,7 @@ static int fat_modifyDirSpace(fat_driver* fatd, unsigned char* lname, char direc
 static int checkDirspaceEmpty(fat_driver* fatd, unsigned int startCluster) {
 	int ret;
 	int i;
-	unsigned char sname[12]; //short name 8+3 + terminator
+	char sname[12]; //short name 8+3 + terminator
 	int entryCount;
 
 	unsigned int retSector;
@@ -1688,9 +1670,9 @@ static int fat_wipeDirEntries(fat_driver *fatd){
    startCluster - start cluster of the directory space
 */
 
-static int fat_clearDirSpace(fat_driver* fatd, unsigned char* lname, char directory, unsigned int* startCluster) {
+static int fat_clearDirSpace(fat_driver* fatd, char* lname, char directory, unsigned int* startCluster) {
 	int ret;
-	unsigned char sname[12]; //short name 8+3 + terminator
+	char sname[12]; //short name 8+3 + terminator
 	unsigned int dirCluster;
 	unsigned int sfnSector;
 	int sfnOffset;
@@ -1856,11 +1838,11 @@ int fat_updateSfn(fat_driver* fatd, int size, unsigned int sfnSector, int sfnOff
  sfnOffset      - offset (in bytes) of the SFN entry (output)
 */
 
-int fat_createFile(fat_driver* fatd, const unsigned char* fname, char directory, char escapeNotExist, unsigned int* cluster, unsigned int* sfnSector, int* sfnOffset) {
+int fat_createFile(fat_driver* fatd, const char* fname, char directory, char escapeNotExist, unsigned int* cluster, unsigned int* sfnSector, int* sfnOffset) {
 	int ret;
 	unsigned int startCluster;
 	unsigned int directoryCluster;
-	unsigned char lname[FAT_MAX_NAME], pathToDirent[FAT_MAX_PATH];
+	char lname[FAT_MAX_NAME], pathToDirent[FAT_MAX_PATH];
 	fat_dir fatdir;
 
 	ret = separatePathAndName(fname, pathToDirent, lname);
@@ -1931,11 +1913,11 @@ int fat_createFile(fat_driver* fatd, const unsigned char* fname, char directory,
 
 
 //---------------------------------------------------------------------------
-int fat_deleteFile(fat_driver* fatd, const unsigned char* fname, char directory) {
+int fat_deleteFile(fat_driver* fatd, const char* fname, char directory) {
 	int ret;
 	unsigned int startCluster;
 	unsigned int directoryCluster;
-	unsigned char lname[FAT_MAX_NAME], pathToDirent[FAT_MAX_PATH];
+	char lname[FAT_MAX_NAME], pathToDirent[FAT_MAX_PATH];
 	fat_dir fatdir;
 
 	ret = separatePathAndName(fname, pathToDirent, lname);
@@ -1996,10 +1978,10 @@ int fat_renameFile(fat_driver* fatd, fat_dir *fatdir, const char* fname) {
 	int ret;
 	unsigned int sDirCluster;
 	unsigned int dDirCluster, dParentDirCluster;
-	unsigned char lname[FAT_MAX_NAME], pathToDirent[FAT_MAX_PATH];
-	unsigned int sfnSector, sfnOffset, new_sfnSector, new_sfnOffset;
-	int directory;
-	unsigned char sname[12]; //short name 8+3 + terminator
+	char lname[FAT_MAX_NAME], pathToDirent[FAT_MAX_PATH];
+	unsigned int sfnSector, new_sfnSector;
+	int directory, sfnOffset, new_sfnOffset;
+	char sname[12]; //short name 8+3 + terminator
 	unsigned char* sbuf = NULL;
 	fat_direntry_sfn OriginalSFN;
 

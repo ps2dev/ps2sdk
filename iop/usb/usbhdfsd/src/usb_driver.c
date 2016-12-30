@@ -57,14 +57,14 @@ typedef struct _cbw_packet {
 	unsigned char lun;
 	unsigned char comLength;		//command data length
 	unsigned char comData[16];		//command data
-} cbw_packet __attribute__((packed));
+} cbw_packet;
 
 typedef struct _csw_packet {
 	unsigned int signature;
 	unsigned int tag;
 	unsigned int dataResidue;
 	unsigned char status;
-} csw_packet __attribute__((packed));
+} csw_packet;
 
 typedef struct _inquiry_data {
 	u8 peripheral_device_type;	// 00h - Direct access (Floppy), 1Fh none (no FDD connected)
@@ -76,7 +76,7 @@ typedef struct _inquiry_data {
 	u8 vendor[8];
 	u8 product[16];
 	u8 revision[4];
-} inquiry_data __attribute__((packed));
+} inquiry_data;
 
 typedef struct _sense_data {
 	u8 error_code;
@@ -88,12 +88,12 @@ typedef struct _sense_data {
 	u8 add_sense_code;
 	u8 add_sense_qual;
 	u8 res4[4];
-} sense_data __attribute__((packed));
+} sense_data;
 
 typedef struct _read_capacity_data {
 	u8 last_lba[4];
 	u8 block_length[4];
-} read_capacity_data __attribute__((packed));
+} read_capacity_data;
 
 static UsbDriver driver;
 

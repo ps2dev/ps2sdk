@@ -32,12 +32,16 @@ unsigned char IsBusRoot=1;	/* Assume that the console is the root, in case this 
 
 static void NoResponseHandler(unsigned int header, volatile unsigned int *buffer, unsigned int nQuads){
 	unsigned int i;
+#ifdef DEBUG_TTY_FEEDBACK
 	unsigned int data;
+#endif
 
 	DEBUG_PRINTF("NULL response handler called.\n");
 
 	for(i=0; i<nQuads; i++){	/* Flush the buffer. */
+#ifdef DEBUG_TTY_FEEDBACK
 		data=*buffer;
+#endif
 		DEBUG_PRINTF("Unhandled data: 0x%08x.\n", data);
 	}
 }
@@ -95,7 +99,7 @@ static void ResponseHandler(unsigned int header, volatile unsigned int *buffer, 
 	unsigned int i, HeaderLength;
 	struct ieee1394_TrResponsePacketHdr ResponseData;
 	unsigned char tCode;
-	unsigned int data;
+	unsigned int data __attribute__((unused));
 
 	tCode=(header>>4)&0xF;
 

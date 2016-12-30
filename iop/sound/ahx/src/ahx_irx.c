@@ -26,7 +26,7 @@
 #define SD_CORE_1			1
 #define SD_INIT_COLD		0
 
-char *spubuf = NULL; // buffer for storing data, SPU2 grabs it from here
+u8 *spubuf = NULL; // buffer for storing data, SPU2 grabs it from here
 char *pcmbuf = NULL; // ahx data is mixed to PCM straight into this buffer
 int transfer_sema = 0; // semaphore to indicate when a transfer has completed
 int play_tid = 0; // play_thread ID

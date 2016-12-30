@@ -16,10 +16,6 @@ IOP_BIN  = $(IOP_BIN_DIR)usbd.irx
 IOP_OBJS = hcd.o hub.o interface.o mem.o usbd.o usbio.o driver.o imports.o exports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
-IOP_CFLAGS  = -Wall
-# -DDEBUG
-IOP_LDFLAGS = -Wl,-s
-
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 
 clean:

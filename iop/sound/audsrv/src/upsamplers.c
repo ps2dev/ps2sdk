@@ -20,7 +20,8 @@
  */
 
 /** lut for converting 8000 -> 48000 */
-static const short up_8000_lut[512] =
+/* UNUSED!
+static const short int up_8000_lut[512] =
 {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01,
 	0x01, 0x01, 0x01, 0x01, 0x02, 0x02, 0x02, 0x02,
@@ -86,10 +87,10 @@ static const short up_8000_lut[512] =
 	0x51, 0x51, 0x51, 0x51, 0x52, 0x52, 0x52, 0x52,
 	0x52, 0x52, 0x53, 0x53, 0x53, 0x53, 0x53, 0x53,
 	0x54, 0x54, 0x54, 0x54, 0x54, 0x54, 0x55, 0x55,
-};
+}; */
 
 /** lut for converting 11025 -> 48000 */
-static const short up_11025_lut[512] =
+static const short int up_11025_lut[512] =
 {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01, 0x01,
 	0x01, 0x02, 0x02, 0x02, 0x02, 0x02, 0x03, 0x03,
@@ -351,7 +352,7 @@ static int up_24000_16_stereo(struct upsample_t *up)
 	return 1024;
 }
 
-static void up_generic_16_stereo(struct upsample_t *up, const unsigned short *lut)
+static void up_generic_16_stereo(struct upsample_t *up, const short *lut)
 {
 	int q, p;
 	short *left = up->left;
@@ -366,7 +367,7 @@ static void up_generic_16_stereo(struct upsample_t *up, const unsigned short *lu
 	}
 }
 
-static void up_generic_16_mono(struct upsample_t *up, const unsigned short *lut)
+static void up_generic_16_mono(struct upsample_t *up, const short *lut)
 {
 	int q, p;
 	short *left = up->left;
@@ -380,7 +381,7 @@ static void up_generic_16_mono(struct upsample_t *up, const unsigned short *lut)
 	}
 }
 
-static void up_generic_8_mono(struct upsample_t *up, const unsigned short *lut)
+static void up_generic_8_mono(struct upsample_t *up, const short *lut)
 {
 	int q, p;
 	signed char b;
@@ -396,7 +397,7 @@ static void up_generic_8_mono(struct upsample_t *up, const unsigned short *lut)
 	}
 }
 
-static void up_generic_8_stereo(struct upsample_t *up, const unsigned short *lut)
+static void up_generic_8_stereo(struct upsample_t *up, const short *lut)
 {
 	int q, p;
 	signed char b;

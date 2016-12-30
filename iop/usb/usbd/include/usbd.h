@@ -31,7 +31,7 @@ typedef struct {
 	uint16 value;
 	uint16 index;
 	uint16 length;
-} UsbDeviceRequest __attribute__ ((packed));
+} UsbDeviceRequest;
 
 typedef void (*UsbCallbackProc)(int result, int count, void *arg);
 
@@ -44,7 +44,7 @@ typedef struct {
 	uint8 bPwrOn2PwrGood;
 	uint8 bHubContrCurrent;
 	uint8 deviceRemovable[8]; // arbitrary number, depends on number of ports
-} UsbHubDescriptor __attribute__ ((packed));
+} UsbHubDescriptor;
 
 
 /* USB driver bus event listener structure */
@@ -65,7 +65,7 @@ typedef struct _UsbDriver {
 	uint32 reserved4;
 	uint32 reserved5;
 	void *gp;
-} UsbDriver __attribute__ ((packed));
+} UsbDriver;
 
 typedef struct {
 	uint8 bLength;
@@ -82,7 +82,7 @@ typedef struct {
 	uint8 iProduct;
 	uint8 iSerialNumber;
 	uint8 bNumConfigurations;
-} UsbDeviceDescriptor __attribute__ ((packed));
+} UsbDeviceDescriptor;
 
 typedef struct {
 	uint8 bLength;
@@ -95,7 +95,7 @@ typedef struct {
 	uint8 iConfiguration;
 	uint8 bmAttributes;
 	uint8 maxPower;
-} UsbConfigDescriptor __attribute__ ((packed));
+} UsbConfigDescriptor;
 
 typedef struct {
 	uint8 bLength;
@@ -107,7 +107,7 @@ typedef struct {
 	uint8 bInterfaceSubClass;
 	uint8 bInterfaceProtocol;
 	uint8 iInterface;
-} UsbInterfaceDescriptor __attribute__ ((packed));
+} UsbInterfaceDescriptor;
 
 typedef struct {
 	uint8 bLength;
@@ -117,13 +117,13 @@ typedef struct {
 	uint8 wMaxPacketSizeLB;
 	uint8 wMaxPacketSizeHB;
 	uint8 bInterval;
-} UsbEndpointDescriptor __attribute__ ((packed));
+} UsbEndpointDescriptor;
 
 typedef struct {
 	uint8  bLength;
 	uint8  bDescriptorType;
 	uint16 wData[1];
-} UsbStringDescriptor __attribute__ ((packed));
+} UsbStringDescriptor;
 
 /*
  * Device and/or Interface Class codes

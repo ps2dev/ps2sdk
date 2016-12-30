@@ -44,8 +44,8 @@ int InitFAT(void)
 }
 
 //---------------------------------------------------------------------------
-int strEqual(const unsigned char *s1, const unsigned char* s2) {
-    unsigned char u1, u2;
+int strEqual(const char *s1, const char* s2) {
+    char u1, u2;
     for (;;) {
 		u1 = *s1++;
 		u2 = *s2++;
@@ -509,7 +509,7 @@ void fat_setFatDirChain(fat_driver* fatd, fat_dir* fatDir) {
 /* Set base attributes of direntry */
 static void fat_setFatDir(fat_driver* fatd, fat_dir* fatDir, unsigned int parentDirCluster, fat_direntry_sfn* dsfn, fat_direntry_summary* dir, int getClusterInfo ) {
 	unsigned int i;
-	unsigned char* srcName;
+	char* srcName;
 
 	XPRINTF("USBHDFSD: setting fat dir...\n");
 	srcName = dir->sname;
@@ -593,7 +593,7 @@ int fat_getDirentrySectorData(fat_driver* fatd, unsigned int* startCluster, unsi
 }
 
 //---------------------------------------------------------------------------
-static int fat_getDirentryStartCluster(fat_driver* fatd, unsigned char* dirName, unsigned int* startCluster, fat_dir* fatDir) {
+static int fat_getDirentryStartCluster(fat_driver* fatd, char* dirName, unsigned int* startCluster, fat_dir* fatDir) {
 	fat_direntry_summary dir;
 	unsigned int i, dirSector, startSector, dirPos;
 	unsigned char cont;
@@ -664,15 +664,13 @@ static int fat_getDirentryStartCluster(fat_driver* fatd, unsigned char* dirName,
 // start cluster should be 0 - if we want to search from root directory
 // otherwise the start cluster should be correct cluster of directory
 // to search directory - set fatDir as NULL
-int fat_getFileStartCluster(fat_driver* fatd, const unsigned char* fname, unsigned int* startCluster, fat_dir* fatDir) {
-	unsigned char tmpName[FAT_MAX_NAME+1];
+int fat_getFileStartCluster(fat_driver* fatd, const char* fname, unsigned int* startCluster, fat_dir* fatDir) {
+	char tmpName[FAT_MAX_NAME+1];
 	unsigned int i, offset;
-	unsigned char cont;
 	int ret;
 
 	XPRINTF("USBHDFSD: Entering fat_getFileStartCluster\n");
 
-	cont = 1;
 	offset = 0;
 	i=0;
 
@@ -898,7 +896,7 @@ int fat_getNextDirentry(fat_driver* fatd, fat_dir_list* fatdlist, fat_dir* fatDi
 }
 
 //---------------------------------------------------------------------------
-int fat_getFirstDirentry(fat_driver* fatd, const unsigned char* dirName, fat_dir_list* fatdlist, fat_dir *fatDir_host, fat_dir* fatDir) {
+int fat_getFirstDirentry(fat_driver* fatd, const char* dirName, fat_dir_list* fatdlist, fat_dir *fatDir_host, fat_dir* fatDir) {
 	int ret;
 	unsigned int startCluster = 0;
 

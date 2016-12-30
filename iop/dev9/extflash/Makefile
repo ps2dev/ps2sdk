@@ -17,6 +17,7 @@ IOP_OBJS = extflash.o exports.o imports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include
+IOP_CFLAGS += -Wno-unused-but-set-variable
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

@@ -10,10 +10,12 @@
 IOP_OBJS_DIR = obj/
 IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
+IOP_INC_DIR = include/
 
 IOP_BIN  = $(IOP_BIN_DIR)hdproatad.irx
 IOP_OBJS = hdproatad.o exports.o imports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
+IOP_CFLAGS += -Wno-unused-but-set-variable
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

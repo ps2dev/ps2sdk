@@ -259,7 +259,9 @@ int ps2netfs_accept_pktunknown(int sock, char *buf)
 {
   int length;
   ps2netfs_pkt_hdr *hdr;
+#ifdef DEBUG
   unsigned int hcmd;
+#endif
   unsigned short hlen;
 
   dbgprintf("ps2netfs: accept_pkt\n");
@@ -277,7 +279,9 @@ int ps2netfs_accept_pktunknown(int sock, char *buf)
   }
 
   hdr = (ps2netfs_pkt_hdr *)buf;
+#ifdef DEBUG
   hcmd = ntohl(hdr->cmd);
+#endif
   hlen = ntohs(hdr->len);
 
   dbgprintf("ps2netfs: accept_pkt: got 0x%x , hlen: %d, length: %d\n", hcmd,hlen,length);
@@ -323,11 +327,11 @@ int ps2netfs_accept_pktunknown(int sock, char *buf)
  */
 static int ps2netfs_op_info(char *buf, int len)
 {
-  ps2netfs_pkt_open_req *cmd;
+//  ps2netfs_pkt_open_req *cmd;
   ps2netfs_pkt_info_rly *inforly;
   int count;
 
-  cmd = (ps2netfs_pkt_open_req *)buf;
+//  cmd = (ps2netfs_pkt_open_req *)buf;
 
   dbgprintf("ps2netfs: info\n");
 

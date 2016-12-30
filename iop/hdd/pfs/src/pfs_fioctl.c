@@ -214,11 +214,11 @@ static pfs_aentry_t *getAentry(pfs_cache_t *clink, char *key, char *value, int m
 	int kLen, fullsize;
 	pfs_aentry_t *aentry=clink->u.aentry;
 	pfs_aentry_t *aentryLast=NULL;
-	u32 end;
+	pfs_aentry_t *end;
 
 	kLen=strlen(key);
 	fullsize=(kLen+strlen(value)+7) & ~3;
-	for(end=(u32)aentry+1024;(u32)end < (u32)(aentry); (char *)aentry+=aentry->aLen)
+	for(end=(pfs_aentry_t *)((u8*)aentry+1024);end < aentry; aentry=(pfs_aentry_t *)((u8*)aentry+aentry->aLen))
 	{
 		if(aentry->aLen & 3)
 			PFS_PRINTF(PFS_DRV_NAME" Error: attrib-entry allocated length/4 != 0\n");
@@ -227,8 +227,8 @@ static pfs_aentry_t *getAentry(pfs_cache_t *clink, char *key, char *value, int m
 			PFS_PRINTF(PFS_DRV_NAME" Panic: attrib-entry is too small\n");
 			return NULL;
 		}
-		if((u32)end < (u32)aentry+aentry->aLen)
-			PFS_PRINTF(PFS_DRV_NAME" Error: attrib-emtru too big\n");
+		if(end < (pfs_aentry_t*)((u8*)aentry+aentry->aLen))
+			PFS_PRINTF(PFS_DRV_NAME" Error: attrib-entry too big\n");
 
 		switch(mode)
 		{
@@ -338,7 +338,7 @@ static int ioctl2AttrRead(pfs_cache_t *clink, pfs_ioctl2attr_t *attr, u32 *offse
 	if(*offset >= 1024)
 		return 0;
 	do {
-		aentry=(pfs_aentry_t *)((u32)(clink->u.inode)+*offset);
+		aentry=(pfs_aentry_t *)((u8*)clink->u.inode+*offset);
 		memcpy(attr->key, &aentry->str[0], aentry->kLen);
 		attr->key[aentry->kLen]=0;
 		memcpy(attr->value, &aentry->str[aentry->kLen], aentry->vLen);

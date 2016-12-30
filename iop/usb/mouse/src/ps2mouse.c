@@ -62,7 +62,7 @@ typedef struct _mouse_data_recv
 {
   unsigned char buttons;
   char x, y, wheel;
-} mouse_data_recv __attribute__ ((packed));
+} mouse_data_recv;
 
 typedef struct _mouse_dev
 
@@ -385,9 +385,7 @@ void ps2mouse_config_set(int resultCode, int bytes, void *arg)
   dev = (mouse_dev *) arg;
   if(dev != NULL)
     {
-      int ret;
-
-      ret = UsbInterruptTransfer(dev->dataEndp, &dev->data, dev->packetSize, ps2mouse_data_recv, arg);
+      UsbInterruptTransfer(dev->dataEndp, &dev->data, dev->packetSize, ps2mouse_data_recv, arg);
     }
 }
 
@@ -407,7 +405,6 @@ void ps2mouse_data_recv(int resultCode, int bytes, void *arg)
   dev = (mouse_dev *) arg;
   if(dev != NULL)
     {
-      int ret;
       int buttonLoop;
       int buttonData;
       int mx, my;
@@ -483,14 +480,14 @@ void ps2mouse_data_recv(int resultCode, int bytes, void *arg)
       SignalSema(mouse_sema);
       //printf("X = %d, Y = %d, Wheel = %d, Buttons = %x\n", mouse.x, mouse.y, mouse.wheel, mouse.buttons);
 
-      ret = UsbInterruptTransfer(dev->dataEndp, &dev->data, dev->packetSize, ps2mouse_data_recv, arg);
+      UsbInterruptTransfer(dev->dataEndp, &dev->data, dev->packetSize, ps2mouse_data_recv, arg);
     }
 }
 
 int ps2mouse_init()
 
 {
-  int ret;
+  //int ret;
   iop_sema_t s;
 
   s.initial = 1;
@@ -504,7 +501,8 @@ int ps2mouse_init()
       return 1;
     }
 
-  ret = UsbRegisterDriver(&mouse_driver);
+  //ret =
+  UsbRegisterDriver(&mouse_driver);
   memset(&mouse, 0, sizeof(mouse_data));
   memset(devices, 0, sizeof(mouse_dev *) * PS2MOUSE_MAXDEV);
   dev_count = 0;

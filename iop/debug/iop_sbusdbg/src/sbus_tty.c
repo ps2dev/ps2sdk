@@ -148,6 +148,7 @@ void sprintf_putchar(char **opaque, int c)
 extern int _vsprintf(char * str, const char * format, va_list ap);
 
 // I don't really understand why this works but it does!
+// SP193 - FIXME: fix the kprintf() stuff, so that this ugly hack can RIP. :(
 int __vsprintf(char * str, const char * format, va_list ap)
 {
     int arg1, arg2, arg3, arg4, arg5;

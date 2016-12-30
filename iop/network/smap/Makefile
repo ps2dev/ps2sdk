@@ -20,7 +20,7 @@ IOP_OBJS = main.o smap.o xfer.o imports.o exports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include -I$(IOP_SRC_DIR)/include
-IOP_CFLAGS += -mgpopt -G19 -mno-check-zero-division
+IOP_CFLAGS += -mgpopt -G19 -mno-check-zero-division -Wno-unused-value
 
 ifdef LWIP_DHCP
 IOP_CFLAGS += -DLWIP_DHCP=1

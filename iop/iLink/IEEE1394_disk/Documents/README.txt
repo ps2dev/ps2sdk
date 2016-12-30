@@ -25,6 +25,8 @@ Additional notes:
 
 Credits:
 ========
+USBHDFSD project developers.
+
 Special thanks go to:
 	*EEUG, for providing a partially completed SBP-2 device driver for the PS2.
 	*Mark K., for volunteering to be a beta tester for the early IEEE1394_disk versions.

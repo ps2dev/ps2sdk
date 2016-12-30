@@ -49,9 +49,9 @@ static unsigned char raw_toc[3000];     ///< unparsed toc data
 
 static int cd_transfer_sema = -1;       ///< SPU2 cd transfer complete semaphore
 
-static char cd_ringbuf[SECTOR_SIZE*8] __attribute__((aligned (64)));  ///< cdda ring buffer
-static char cd_sparebuf[1880] __attribute__((aligned (64)));          ///< used upon overflow
-static char core0_buf[0x1000] __attribute__((aligned (64)));
+static u8 cd_ringbuf[SECTOR_SIZE*8] __attribute__((aligned (64)));  ///< cdda ring buffer
+static u8 cd_sparebuf[1880] __attribute__((aligned (64)));          ///< used upon overflow
+static u8 core0_buf[0x1000] __attribute__((aligned (64)));
 
 static short cd_rendered_left[512];
 static short cd_rendered_right[512];
@@ -306,7 +306,7 @@ int audsrv_cd_resume()
 static void cdda_procedure(void *arg)
 {
 	int block, sz;
-	char *bufptr;
+	u8 *bufptr;
 	int nsectors;
 	int intr_state;
 	int offset, last_read;

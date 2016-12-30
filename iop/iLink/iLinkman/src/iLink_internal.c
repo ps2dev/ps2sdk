@@ -12,7 +12,7 @@
 #include <sysmem.h>
 #include <thbase.h>
 #include <thevent.h>
-#include "new_cdvdman.h"
+#include <cdvdman.h>
 
 #include "iLinkman.h"
 #include "iLink_internal.h"
@@ -49,17 +49,18 @@ void UBUFThread(void *arg){
 	}
 }
 
-inline int GetConsoleIDs(u64 *guid, unsigned char *ModelName){
+int GetConsoleIDs(u64 *guid, char *ModelName){
 	u64 ilink_id;
-	int stat, result;
+	u32 stat;
+	int result;
 
-	if(sceCdRI((unsigned char *)&ilink_id, &stat)<0 || stat!=0){
+	if(sceCdRI((u8*)&ilink_id, &stat)<0 || stat!=0){
 		result=-1;
 		DEBUG_PRINTF("Error reading console/ILINK ID.\n");
 	}
 	else{
 		*guid=(ilink_id&0xFFFFFFFF00000000) | ((*(u8*)&ilink_id)|0x08004600);
-		if(sceCdRM(ModelName, (unsigned long int *)&stat)<0 || stat!=0){
+		if(sceCdRM(ModelName, &stat)<0 || stat!=0){
 			result=-1;
 			DEBUG_PRINTF("Error reading console model name.\n");
 		}

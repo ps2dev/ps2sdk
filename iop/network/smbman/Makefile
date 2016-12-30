@@ -10,6 +10,7 @@
 IOP_OBJS_DIR = obj/
 IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
+IOP_INC_DIR = include/
 
 IOP_BIN  = $(IOP_BIN_DIR)smbman.irx
 IOP_OBJS = smbman.o smb_fio.o smb.o poll.o auth.o \

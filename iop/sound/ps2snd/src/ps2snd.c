@@ -20,7 +20,6 @@
 #include <thbase.h>
 #include <intrman.h>
 #include <sysmem.h>
-#include <iomanX.h>
 #include <thsemap.h>
 #include <ps2snd.h>
 #include "mod.h"
@@ -40,7 +39,7 @@ static u32 rpc_buffer[2][32] ALIGNED(16); /* XXX: how big should this be? */
 void *rpc_server(u32 func, void *data, u32 size)
 {
 	u32 *ru = rpc_buffer[1];
-	s32  *rs = rpc_buffer[1];
+	s32 *rs = (s32*)rpc_buffer[1];
 
 	switch(func)
 	{

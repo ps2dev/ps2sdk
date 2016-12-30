@@ -17,7 +17,7 @@
 #include <irx.h>
 
 /* Please keep these in alphabetical order!  */
-#include "new_cdvdman.h"
+#include <cdvdman.h>
 #include <dmacman.h>
 #include "iLinkman.h"
 #include <intrman.h>

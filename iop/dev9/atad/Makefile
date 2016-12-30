@@ -13,7 +13,8 @@ IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
 IOP_BIN  = $(IOP_BIN_DIR)ps2atad.irx
-IOP_OBJS = $(IOP_OBJS_DIR)ps2atad.o $(IOP_OBJS_DIR)exports.o $(IOP_OBJS_DIR)imports.o
+IOP_OBJS = ps2atad.o imports.o exports.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include
 

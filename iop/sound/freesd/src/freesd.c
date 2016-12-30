@@ -821,7 +821,7 @@ SdTransIntrHandler SdSetTransIntrHandler(s32 chan, SdTransIntrHandler func, void
 	TransIntrHandlers[chan & 1] = func;
 	TransIntrData[chan & 1].data = data;
 
-	return 0;
+	return old_handler;
 }
 
 

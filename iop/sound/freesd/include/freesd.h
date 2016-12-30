@@ -109,7 +109,7 @@ typedef struct _SdEffectAttr
   s16 depth_r;
   s32 delay;
   s32 feedback;
-} SdEffectAttr __attribute__((packed));
+} SdEffectAttr;
 
 typedef struct _SdBatch
 
@@ -117,7 +117,7 @@ typedef struct _SdBatch
   u16 func;
   u16 entry;
   u32 val;
-} SdBatch __attribute__((packed));
+} SdBatch;
 
 typedef int (*SdSpu2IntrHandler)(int core, void *data);
 typedef int (*SdTransIntrHandler)(int channel, void *data);

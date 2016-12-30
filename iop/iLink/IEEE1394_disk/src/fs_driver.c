@@ -412,7 +412,7 @@ static int fs_write(iop_file_t* fd, void * buffer, int size )
 
 	if (size <= 0) { _fs_unlock(); return 0; }
 
-	result = fat_writeFile(fatd, &rec->dirent.fatdir, &updateClusterIndices, rec->filePos, (unsigned char*) buffer, size);
+	result = fat_writeFile(fatd, &rec->dirent.fatdir, &updateClusterIndices, rec->filePos, buffer, size);
 	if (result > 0) { //write succesful
 		rec->filePos += result;
 		if (rec->filePos > rec->dirent.fatdir.size) {
@@ -462,7 +462,7 @@ static int fs_read(iop_file_t* fd, void * buffer, int size ) {
 		size = rec->dirent.fatdir.size - rec->filePos;
 	}
 
-	result = fat_readFile(fatd, &rec->dirent.fatdir, rec->filePos, (unsigned char*) buffer, size);
+	result = fat_readFile(fatd, &rec->dirent.fatdir, rec->filePos, buffer, size);
 	if (result > 0) { //read succesful
 		rec->filePos += result;
 	}
@@ -580,7 +580,7 @@ static int fs_dopen(iop_file_t *fd, const char *name)
 	memset(fd->privdata, 0, sizeof(fs_dir)); //NB: also implies "file_flag = FS_FILE_FLAG_FOLDER;"
 	rec = (fs_dir *) fd->privdata;
 
-	rec->status = fat_getFirstDirentry(fatd, (char*)name, &rec->fatdlist, &rec->dirent.fatdir, &rec->current_fatdir);
+	rec->status = fat_getFirstDirentry(fatd, name, &rec->fatdlist, &rec->dirent.fatdir, &rec->current_fatdir);
 
 	// root directory may have no entries, nothing else may.
 	if(rec->status == 0 && !is_root)
@@ -646,7 +646,7 @@ static int fs_dread(iop_file_t *fd, fio_dirent_t *buffer)
 	{
 		memset(buffer, 0, sizeof(fio_dirent_t));
 		fillStat(&buffer->stat, &rec->current_fatdir);
-		strcpy(buffer->name, rec->current_fatdir.name);
+		strcpy(buffer->name, (const char*)rec->current_fatdir.name);
 	}
 
 	if (rec->status > 0)

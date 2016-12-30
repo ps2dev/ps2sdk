@@ -69,22 +69,18 @@ struct sbp2_login_response {
 }__attribute__((packed));
 
 struct management_ORB{
-	u32 function_data[4];
-
+	union {
+		u32 function_data[4];
+		struct {
+			struct sbp2_pointer password;
+			struct sbp2_pointer response;
+		} login;
+	};
 	u32 flags;
-
-	u32 function_data2;
-
-	struct sbp2_pointer status_FIFO;
-}__attribute__((packed));
-
-struct login_req{
-	struct sbp2_pointer password;
-	struct sbp2_pointer login_response;
-
-	u32 flags;
-	u32 length;
-
+	union {
+		u32 function_data2;
+		u32 length;
+	};
 	struct sbp2_pointer status_FIFO;
 }__attribute__((packed));
 

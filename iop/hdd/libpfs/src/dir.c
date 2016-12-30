@@ -51,7 +51,7 @@ pfs_cache_t *pfsGetDentry(pfs_cache_t *clink, char *path, pfs_dentry_t **dentry,
 		while(*size < clink->u.inode->size)
 		{
 			// Read another dentry chunk if we need to
-			if ((u32)d2 >= ((u32)dentCache->u.inode + pfsMetaSize))
+			if (d2 >= (pfs_dentry_t*)((u8*)dentCache->u.inode + pfsMetaSize))
 			{
 				if (pfsInodeSync(&block_pos, pfsMetaSize, clink->u.inode->number_data))
 					break;
@@ -75,7 +75,7 @@ pfs_cache_t *pfsGetDentry(pfs_cache_t *clink, char *path, pfs_dentry_t **dentry,
 					PFS_PRINTF(PFS_DRV_NAME": Error: dir-entry is too small\n");
 					goto _exit;
 				}
-				if ((u32)d2 < ((u32)d + aLen)){
+				if (d2 < (pfs_dentry_t*)((u8*)d + aLen)){
 					PFS_PRINTF(PFS_DRV_NAME": Error: dir-entry across sectors\n");
 					goto _exit;
 				}
@@ -129,7 +129,7 @@ int pfsGetNextDentry(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 *position
 			break;
 		}
 
-		dentry = (pfs_dentry_t*)((u32)dcache->u.data + (blockpos->byte_offset % pfsMetaSize));
+		dentry = (pfs_dentry_t*)((u8*)dcache->u.data + (blockpos->byte_offset % pfsMetaSize));
 
 		len = dentry->pLen;
 		memcpy(name, dentry->path, len);
@@ -173,7 +173,7 @@ pfs_cache_t *pfsDirAddEntry(pfs_cache_t *dir, char *filename, pfs_blockinfo_t *b
 		if (dentry->pLen)
 			len-=(dentry->pLen + 11) & 0x1FC;
 		dentry->aLen=(dentry->aLen & FIO_S_IFMT) | ((dentry->aLen & 0xFFF) - len);
-		dentry=(pfs_dentry_t *)((u32)dentry + (dentry->aLen & 0xFFF));
+		dentry=(pfs_dentry_t *)((u8*)dentry + (dentry->aLen & 0xFFF));
 	}else{
 		int offset;
 
@@ -185,7 +185,7 @@ pfs_cache_t *pfsDirAddEntry(pfs_cache_t *dir, char *filename, pfs_blockinfo_t *b
 
 		dir->u.inode->size += sizeof(pfs_dentry_t);
 
-		dentry=(pfs_dentry_t*)((u32)dcache->u.dentry+offset);
+		dentry=(pfs_dentry_t*)((u8*)dcache->u.dentry+offset);
 		len=sizeof(pfs_dentry_t);
 	}
 	return pfsFillDentry(dcache, dentry, filename, bi, len, mode);
@@ -221,7 +221,7 @@ pfs_cache_t *pfsDirRemoveEntry(pfs_cache_t *clink, char *path)
 			}
 			i+=aLen;
 			dlast=dnext;
-			dnext=(pfs_dentry_t *)((u32)dnext + aLen);
+			dnext=(pfs_dentry_t *)((u8*)dnext + aLen);
 		}while (i<512);
 	}
 	return NULL;
@@ -246,15 +246,18 @@ void pfsFillSelfAndParentDentries(pfs_cache_t *clink, pfs_blockinfo_t *self, pfs
 
 	memset(dentry, 0, pfsMetaSize);
 	dentry->inode=self->number;
-	*(u32*)dentry->path='.';
+	dentry->path[0]='.';
+	dentry->path[1]='\0';
 	dentry->sub=(u8)self->subpart;
 	dentry->pLen=1;
 	dentry->aLen=12 | FIO_S_IFDIR;
 
-	dentry=(pfs_dentry_t *)((u32)dentry + 12);
+	dentry=(pfs_dentry_t *)((u8*)dentry + 12);
 
 	dentry->inode=parent->number;
-	*(u32*)dentry->path=('.'<<8) + '.';
+	dentry->path[0]='.';
+	dentry->path[1]='.';
+	dentry->path[2]='\0';
 	dentry->sub=(u8)parent->subpart;
 	dentry->pLen=2;
 	dentry->aLen=500 | FIO_S_IFDIR;
@@ -267,7 +270,7 @@ pfs_cache_t* pfsSetDentryParent(pfs_cache_t *clink, pfs_blockinfo_t *bi, int *re
 
 	dcache=pfsGetDentriesAtPos(clink, 0, &offset, result);
 	if (dcache){
-		pfs_dentry_t *d=(pfs_dentry_t*)(12+(u32)dcache->u.data);
+		pfs_dentry_t *d=(pfs_dentry_t*)(12+(u8*)dcache->u.data);
 		d->inode=bi->number;
 		d->sub	=(u8)bi->subpart;
 	}

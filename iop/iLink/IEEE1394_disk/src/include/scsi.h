@@ -23,7 +23,7 @@ typedef struct _inquiry_data {
     u8 vendor[8];
     u8 product[16];
     u8 revision[4];
-} inquiry_data __attribute__((packed));
+} inquiry_data;
 
 typedef struct _sense_data {
     u8 error_code;
@@ -35,15 +35,15 @@ typedef struct _sense_data {
     u8 add_sense_code;
     u8 add_sense_qual;
     u8 res4[4];
-} sense_data __attribute__((packed));
+} sense_data;
 
 typedef struct _read_capacity_data {
-    unsigned long int last_lba;		/* Big endian data. */
-    unsigned long int block_length;	/* Big endian data. */
-} read_capacity_data __attribute__((packed));
+    u32 last_lba;	/* Big endian data. */
+    u32 block_length;	/* Big endian data. */
+} read_capacity_data;
 
 /* Function prototypes. */
 int scsiReadSector(struct SBP2Device *dev, unsigned long int lba, void *buffer, int sectorCount);
 int scsiWriteSector(struct SBP2Device *dev, unsigned long int lba, void* buffer, int sectorCount);
-inline void releaseSBP2Device(struct SBP2Device *dev);
+void releaseSBP2Device(struct SBP2Device *dev);
 int ConfigureSBP2Device(struct SBP2Device *dev);

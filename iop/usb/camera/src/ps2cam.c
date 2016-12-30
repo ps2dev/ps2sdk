@@ -106,7 +106,6 @@ int _start( int argc, char **argv)
 int PS2CamInitDriver(void)
 {
 	int				i;
-	int				ret;
 	iop_sema_t		sema;
 
 	printf("PS2 USB Camera Driver v.%d.%d  ((C) www.ps2dev.org)\n",DRIVER_VERSON_MAJOR,DRIVER_VERSON_MINOR);
@@ -132,7 +131,7 @@ int PS2CamInitDriver(void)
 
 	//connect to usb.irx
 
-	ret = UsbRegisterDriver(&cam_driver);
+	UsbRegisterDriver(&cam_driver);
 
 	return 0;
 }
@@ -221,7 +220,6 @@ int PS2CamConnect(int devId)
 
 	int						i;
 	UsbDeviceDescriptor		*dev;
-	UsbConfigDescriptor		*conf;
 
 	UsbInterfaceDescriptor	*intf0,*intf1;
 	UsbEndpointDescriptor   *endp1;
@@ -234,7 +232,6 @@ int PS2CamConnect(int devId)
 
 
 	dev   = UsbGetDeviceStaticDescriptor(devId, NULL, USB_DT_DEVICE);
-	conf  = UsbGetDeviceStaticDescriptor(devId, dev,  USB_DT_CONFIG);
 
 	intf0 = UsbGetDeviceStaticDescriptor(devId, dev,  USB_DT_INTERFACE);
 	intf1 = UsbGetDeviceStaticDescriptor(devId, intf0,  USB_DT_INTERFACE);
@@ -598,9 +595,6 @@ void PS2CamSetDeviceDefaults(CAMERA_DEVICE *dev)
 void PS2CamCallback(int resultCode, int bytes, void *arg)
 {
 	//unsigned char	*val;
-	int				semh;
-
-	semh = (int)arg;
 
 	if(resultCode !=0)
 		printf("callback: result= %d, bytes= %d, arg= %p \n", resultCode, bytes, arg);
@@ -955,9 +949,6 @@ int read_byts;
 void PS2CamReadDataCallback(int resultCode, int bytes, void *arg)
 {
 	//unsigned char	*val;
-	int				semh;
-
-	semh = (int)arg;
 
 	//printf("read_data_callback: result= %d, bytes= %d, arg= %p \n", resultCode, bytes, arg);
 
@@ -1216,8 +1207,6 @@ int PS2CamGetDeviceInfo(int handle,int *info)
 {
 	static unsigned int		size;
 	UsbDeviceDescriptor		*dev;
-	UsbConfigDescriptor		*conf;
-	UsbInterfaceDescriptor	*intf;
 	PS2CAM_DEVICE_INFO		inf;
 	PS2CAM_DEVICE_INFO		*ptr;
 	CAMERA_DEVICE			*cam;
@@ -1247,8 +1236,6 @@ int PS2CamGetDeviceInfo(int handle,int *info)
 
 	//get descripters
 	dev  = UsbGetDeviceStaticDescriptor(cam->device_id, NULL, USB_DT_DEVICE);
-	conf = UsbGetDeviceStaticDescriptor(cam->device_id, dev, USB_DT_CONFIG);
-	intf = (UsbInterfaceDescriptor *) ((char *) conf + conf->bLength);
 
 
 	// now collect inf

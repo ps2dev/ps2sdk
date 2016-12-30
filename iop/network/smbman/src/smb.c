@@ -553,7 +553,11 @@ struct WriteAndXRequest_t smb_Write_Request = {
 
 static int main_socket = -1;
 
-static u8 SMB_buf[MAX_SMB_BUF+1024];
+static union {
+	u8 u8buff[MAX_SMB_BUF+1024];
+	u16 u16buff[(MAX_SMB_BUF+1024) / sizeof(u16)];
+	s16 s16buff[(MAX_SMB_BUF+1024) / sizeof(s16)];
+} SMB_buf;
 
 //-------------------------------------------------------------------------
 server_specs_t *getServerSpecs(void)
@@ -565,10 +569,10 @@ server_specs_t *getServerSpecs(void)
 static int rawTCP_SetSessionHeader(u32 size) // Write Session Service header: careful it's raw TCP transport here and not NBT transport
 {
 	// maximum for raw TCP transport (24 bits) !!!
-	SMB_buf[0] = 0;
-	SMB_buf[1] = (size >> 16) & 0xff;
-	SMB_buf[2] = (size >> 8) & 0xff;
-	SMB_buf[3] = size;
+	SMB_buf.u8buff[0] = 0;
+	SMB_buf.u8buff[1] = (size >> 16) & 0xff;
+	SMB_buf.u8buff[2] = (size >> 8) & 0xff;
+	SMB_buf.u8buff[3] = size;
 
 	return (int)size;
 }
@@ -579,9 +583,9 @@ static int rawTCP_GetSessionHeader(void) // Read Session Service header: careful
 	u32 size;
 
 	// maximum for raw TCP transport (24 bits) !!!
-	size  = SMB_buf[3];
-	size |= SMB_buf[2] << 8;
-	size |= SMB_buf[1] << 16;
+	size  = SMB_buf.u8buff[3];
+	size |= SMB_buf.u8buff[2] << 8;
+	size |= SMB_buf.u8buff[1] << 16;
 
 	return (int)size;
 }
@@ -654,23 +658,23 @@ static int GetSMBServerReply(void)
 {
 	int rcv_size, totalpkt_size, pkt_size;
 
-	rcv_size = lwip_send(main_socket, SMB_buf, rawTCP_GetSessionHeader() + 4, 0);
+	rcv_size = lwip_send(main_socket, SMB_buf.u8buff, rawTCP_GetSessionHeader() + 4, 0);
 	if (rcv_size <= 0)
 		return -1;
 
 receive:
-	rcv_size = RecvTimeout(main_socket, SMB_buf, sizeof(SMB_buf), 10000); // 10s before the packet is considered lost
+	rcv_size = RecvTimeout(main_socket, SMB_buf.u8buff, sizeof(SMB_buf.u8buff), 10000); // 10s before the packet is considered lost
 	if (rcv_size <= 0)
 		return -2;
 
-	if (SMB_buf[0] != 0)	// dropping NBSS Session Keep alive
+	if (SMB_buf.u8buff[0] != 0)	// dropping NBSS Session Keep alive
 		goto receive;
 
 	// Handle fragmented packets
 	totalpkt_size = rawTCP_GetSessionHeader() + 4;
 
 	while (rcv_size < totalpkt_size) {
-		pkt_size = RecvTimeout(main_socket, &SMB_buf[rcv_size], sizeof(SMB_buf) - rcv_size, 3000); // 3s before the packet is considered lost
+		pkt_size = RecvTimeout(main_socket, &SMB_buf.u8buff[rcv_size], sizeof(SMB_buf.u8buff) - rcv_size, 3000); // 3s before the packet is considered lost
 		if (pkt_size <= 0)
 			return -2;
 		rcv_size += pkt_size;
@@ -684,13 +688,13 @@ int smb_NegotiateProtocol(u32 *capabilities)
 {
 	static char *dialect = "NT LM 0.12";
 	int r, length, retry_count;
-	struct NegotiateProtocolRequest_t *NPR = (struct NegotiateProtocolRequest_t *)SMB_buf;
+	struct NegotiateProtocolRequest_t *NPR = (struct NegotiateProtocolRequest_t *)SMB_buf.u8buff;
 
 	retry_count = 0;
 
 negotiate_retry:
 
-	memset(SMB_buf, 0, sizeof(SMB_buf));
+	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
 
 	NPR->smbH.Magic = SMB_MAGIC;
 	NPR->smbH.Cmd = SMB_COM_NEGOTIATE;
@@ -706,7 +710,7 @@ negotiate_retry:
 	if (r <= 0)
 		goto negotiate_error;
 
-	struct NegotiateProtocolResponse_t *NPRsp = (struct NegotiateProtocolResponse_t *)SMB_buf;
+	struct NegotiateProtocolResponse_t *NPRsp = (struct NegotiateProtocolResponse_t *)SMB_buf.u8buff;
 
 	// check sanity of SMB header
 	if (NPRsp->smbH.Magic != SMB_MAGIC)
@@ -768,11 +772,11 @@ static int AddPassword(char *Password, int PasswordType, int AuthType, u16 *Ansi
 
 				default:
 					if (AuthType == LM_AUTH) {
-						LM_Password_Hash(Password, passwordhash);
+						LM_Password_Hash((const unsigned char*)Password, passwordhash);
 						memcpy(AnsiPassLen, &passwordlen, 2);
 					}
 					else if (AuthType == NTLM_AUTH) {
-						NTLM_Password_Hash(Password, passwordhash);
+						NTLM_Password_Hash((const unsigned char*)Password, passwordhash);
 						memcpy(UnicodePassLen, &passwordlen, 2);
 					}
 			}
@@ -804,14 +808,14 @@ static int AddPassword(char *Password, int PasswordType, int AuthType, u16 *Ansi
 //-------------------------------------------------------------------------
 int smb_SessionSetupAndX(char *User, char *Password, int PasswordType, u32 capabilities)
 {
-	struct SessionSetupAndXRequest_t *SSR = (struct SessionSetupAndXRequest_t *)SMB_buf;
+	struct SessionSetupAndXRequest_t *SSR = (struct SessionSetupAndXRequest_t *)SMB_buf.u8buff;
 	int r, i, offset, CF;
 	int passwordlen = 0;
 	int AuthType = NTLM_AUTH;
 
 lbl_session_setup:
 
-	memset(SMB_buf, 0, sizeof(SMB_buf));
+	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
 
 	CF = server_specs.StringsCF;
 
@@ -862,7 +866,7 @@ lbl_session_setup:
 	if (r <= 0)
 		return -EIO;
 
-	struct SessionSetupAndXResponse_t *SSRsp = (struct SessionSetupAndXResponse_t *)SMB_buf;
+	struct SessionSetupAndXResponse_t *SSRsp = (struct SessionSetupAndXResponse_t *)SMB_buf.u8buff;
 
 	// check sanity of SMB header
 	if (SSRsp->smbH.Magic != SMB_MAGIC)
@@ -891,14 +895,14 @@ lbl_session_setup:
 //-------------------------------------------------------------------------
 int smb_TreeConnectAndX(int UID, char *ShareName, char *Password, int PasswordType) // PasswordType: 0 = PlainText, 1 = Hash
 {
-	struct TreeConnectAndXRequest_t *TCR = (struct TreeConnectAndXRequest_t *)SMB_buf;
+	struct TreeConnectAndXRequest_t *TCR = (struct TreeConnectAndXRequest_t *)SMB_buf.u8buff;
 	int r, i, offset, CF;
 	int passwordlen = 0;
 	int AuthType = NTLM_AUTH;
 
 lbl_tree_connect:
 
-	memset(SMB_buf, 0, sizeof(SMB_buf));
+	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
 
 	CF = server_specs.StringsCF;
 
@@ -942,7 +946,7 @@ lbl_tree_connect:
 	if (r <= 0)
 		return -EIO;
 
-	struct TreeConnectAndXResponse_t *TCRsp = (struct TreeConnectAndXResponse_t *)SMB_buf;
+	struct TreeConnectAndXResponse_t *TCRsp = (struct TreeConnectAndXResponse_t *)SMB_buf.u8buff;
 
 	// check sanity of SMB header
 	if (TCRsp->smbH.Magic != SMB_MAGIC)
@@ -973,9 +977,9 @@ int smb_NetShareEnum(int UID, int TID, ShareEntry_t *shareEntries, int index, in
 {
 	int r, i;
 	int count = 0;
-	struct NetShareEnumRequest_t *NSER = (struct NetShareEnumRequest_t *)SMB_buf;
+	struct NetShareEnumRequest_t *NSER = (struct NetShareEnumRequest_t *)SMB_buf.u8buff;
 
-	memset(SMB_buf, 0, sizeof(SMB_buf));
+	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
 
 	NSER->smbH.Magic = SMB_MAGIC;
 	NSER->smbH.Cmd = SMB_COM_TRANSACTION;
@@ -1005,7 +1009,7 @@ int smb_NetShareEnum(int UID, int TID, ShareEntry_t *shareEntries, int index, in
 	if (r <= 0)
 		return -EIO;
 
-	struct NetShareEnumResponse_t *NSERsp = (struct NetShareEnumResponse_t *)SMB_buf;
+	struct NetShareEnumResponse_t *NSERsp = (struct NetShareEnumResponse_t *)SMB_buf.u8buff;
 
 	// check sanity of SMB header
 	if (NSERsp->smbH.Magic != SMB_MAGIC)
@@ -1023,15 +1027,15 @@ int smb_NetShareEnum(int UID, int TID, ShareEntry_t *shareEntries, int index, in
 	}
 
 	// API status must be 0
-	if (*((u16 *)&SMB_buf[NSERsp->smbTrans.ParamOffset+4]) != 0)
+	if (SMB_buf.u16buff[(NSERsp->smbTrans.ParamOffset+4) / sizeof(u16)] != 0)
 		return -EIO;
 
 	// available entries
-	int AvailableEntries = (int)*((u16 *)&SMB_buf[NSERsp->smbTrans.ParamOffset+4+6]);
+	int AvailableEntries = SMB_buf.s16buff[(NSERsp->smbTrans.ParamOffset+4+6) / sizeof(s16)];
 
 	// data start
-	u8 *data = (u8 *)&SMB_buf[NSERsp->smbTrans.DataOffset+4];
-	u8 *p = (u8 *)data;
+	char *data = (char *)&SMB_buf.u8buff[NSERsp->smbTrans.DataOffset+4];
+	char *p = data;
 
 	for (i=0; i<AvailableEntries; i++) {
 
@@ -1060,9 +1064,9 @@ int smb_NetShareEnum(int UID, int TID, ShareEntry_t *shareEntries, int index, in
 int smb_QueryInformationDisk(int UID, int TID, smbQueryDiskInfo_out_t *QueryInformationDisk)
 {
 	int r;
-	struct QueryInformationDiskRequest_t *QIDR = (struct QueryInformationDiskRequest_t *)SMB_buf;
+	struct QueryInformationDiskRequest_t *QIDR = (struct QueryInformationDiskRequest_t *)SMB_buf.u8buff;
 
-	memset(SMB_buf, 0, sizeof(SMB_buf));
+	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
 
 	QIDR->smbH.Magic = SMB_MAGIC;
 	QIDR->smbH.Cmd = SMB_COM_QUERY_INFORMATION_DISK;
@@ -1074,7 +1078,7 @@ int smb_QueryInformationDisk(int UID, int TID, smbQueryDiskInfo_out_t *QueryInfo
 	if (r <= 0)
 		return -EIO;
 
-	struct QueryInformationDiskResponse_t *QIDRsp = (struct QueryInformationDiskResponse_t *)SMB_buf;
+	struct QueryInformationDiskResponse_t *QIDRsp = (struct QueryInformationDiskResponse_t *)SMB_buf.u8buff;
 
 	// check sanity of SMB header
 	if (QIDRsp->smbH.Magic != SMB_MAGIC)
@@ -1103,13 +1107,13 @@ int smb_QueryInformationDisk(int UID, int TID, smbQueryDiskInfo_out_t *QueryInfo
 int smb_QueryPathInformation(int UID, int TID, PathInformation_t *Info, char *Path)
 {
 	int r, PathLen, CF, i, queryType;
-	struct QueryPathInformationRequest_t *QPIR = (struct QueryPathInformationRequest_t *)SMB_buf;
+	struct QueryPathInformationRequest_t *QPIR = (struct QueryPathInformationRequest_t *)SMB_buf.u8buff;
 
 	queryType = SMB_QUERY_FILE_BASIC_INFO;
 
 query:
 
-	memset(SMB_buf, 0, sizeof(SMB_buf));
+	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
 
 	CF = server_specs.StringsCF;
 
@@ -1130,7 +1134,7 @@ query:
 	QPIR->smbTrans.MaxParamCount = 256; 		// Max Parameters len in reply
 	QPIR->smbTrans.MaxDataCount = 16384;		// Max Data len in reply
 
-	struct QueryPathInformationRequestParam_t *QPIRParam = (struct QueryPathInformationRequestParam_t *)&SMB_buf[QPIR->smbTrans.ParamOffset+4];
+	struct QueryPathInformationRequestParam_t *QPIRParam = (struct QueryPathInformationRequestParam_t *)&SMB_buf.u8buff[QPIR->smbTrans.ParamOffset+4];
 
 	QPIRParam->LevelOfInterest = queryType;
 
@@ -1152,7 +1156,7 @@ query:
 	if (r <= 0)
 		return -EIO;
 
-	struct QueryPathInformationResponse_t *QPIRsp = (struct QueryPathInformationResponse_t *)SMB_buf;
+	struct QueryPathInformationResponse_t *QPIRsp = (struct QueryPathInformationResponse_t *)SMB_buf.u8buff;
 
 	// check sanity of SMB header
 	if (QPIRsp->smbH.Magic != SMB_MAGIC)
@@ -1172,7 +1176,7 @@ query:
 
 	if (queryType == SMB_QUERY_FILE_BASIC_INFO) {
 
-		struct BasicFileInfo_t *BFI = (struct BasicFileInfo_t *)&SMB_buf[QPIRsp->smbTrans.DataOffset+4];
+		struct BasicFileInfo_t *BFI = (struct BasicFileInfo_t *)&SMB_buf.u8buff[QPIRsp->smbTrans.DataOffset+4];
 
 		Info->Created = BFI->Created;
 		Info->LastAccess = BFI->LastAccess;
@@ -1186,7 +1190,7 @@ query:
 	}
 	else if (queryType == SMB_QUERY_FILE_STANDARD_INFO) {
 
-		struct StandardFileInfo_t *SFI = (struct StandardFileInfo_t *)&SMB_buf[QPIRsp->smbTrans.DataOffset+4];
+		struct StandardFileInfo_t *SFI = (struct StandardFileInfo_t *)&SMB_buf.u8buff[QPIRsp->smbTrans.DataOffset+4];
 
 		Info->AllocationSize = SFI->AllocationSize;
 		Info->EndOfFile = SFI->EndOfFile;
@@ -1201,10 +1205,10 @@ query:
 //-------------------------------------------------------------------------
 int smb_NTCreateAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 {
-	struct NTCreateAndXRequest_t *NTCR = (struct NTCreateAndXRequest_t *)SMB_buf;
+	struct NTCreateAndXRequest_t *NTCR = (struct NTCreateAndXRequest_t *)SMB_buf.u8buff;
 	int r, i, offset, length, CF;
 
-	memset(SMB_buf, 0, sizeof(SMB_buf));
+	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
 
 	CF = server_specs.StringsCF;
 
@@ -1253,7 +1257,7 @@ int smb_NTCreateAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	if (r <= 0)
 		return -EIO;
 
-	struct NTCreateAndXResponse_t *NTCRsp = (struct NTCreateAndXResponse_t *)SMB_buf;
+	struct NTCreateAndXResponse_t *NTCRsp = (struct NTCreateAndXResponse_t *)SMB_buf.u8buff;
 
 	// check sanity of SMB header
 	if (NTCRsp->smbH.Magic != SMB_MAGIC)
@@ -1284,13 +1288,13 @@ int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	// NT SMB commands set.
 
 	PathInformation_t info;
-	struct OpenAndXRequest_t *OR = (struct OpenAndXRequest_t *)SMB_buf;
+	struct OpenAndXRequest_t *OR = (struct OpenAndXRequest_t *)SMB_buf.u8buff;
 	int r, i, offset, CF;
 
 	if (server_specs.SupportsNTSMB)
 		return smb_NTCreateAndX(UID, TID, filename, filesize, mode);
 
-	memset(SMB_buf, 0, sizeof(SMB_buf));
+	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
 
 	CF = server_specs.StringsCF;
 
@@ -1330,7 +1334,7 @@ int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	if (r <= 0)
 		return -EIO;
 
-	struct OpenAndXResponse_t *ORsp = (struct OpenAndXResponse_t *)SMB_buf;
+	struct OpenAndXResponse_t *ORsp = (struct OpenAndXResponse_t *)SMB_buf.u8buff;
 
 	// check sanity of SMB header
 	if (ORsp->smbH.Magic != SMB_MAGIC)
@@ -1360,7 +1364,7 @@ int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 //-------------------------------------------------------------------------
 int smb_ReadAndX(int UID, int TID, int FID, s64 fileoffset, void *readbuf, u16 nbytes)
 {
-	struct ReadAndXRequest_t *RR = (struct ReadAndXRequest_t *)SMB_buf;
+	struct ReadAndXRequest_t *RR = (struct ReadAndXRequest_t *)SMB_buf.u8buff;
 	int r;
 
 	memcpy(RR, &smb_Read_Request, sizeof(struct ReadAndXRequest_t));
@@ -1376,7 +1380,7 @@ int smb_ReadAndX(int UID, int TID, int FID, s64 fileoffset, void *readbuf, u16 n
 	if (r <= 0)
 		return -EIO;
 
-	struct ReadAndXResponse_t *RRsp = (struct ReadAndXResponse_t *)SMB_buf;
+	struct ReadAndXResponse_t *RRsp = (struct ReadAndXResponse_t *)SMB_buf.u8buff;
 
 	// check sanity of SMB header
 	if (RRsp->smbH.Magic != SMB_MAGIC)
@@ -1389,7 +1393,7 @@ int smb_ReadAndX(int UID, int TID, int FID, s64 fileoffset, void *readbuf, u16 n
 	r = RRsp->DataLengthLow;
 
 	if (RRsp->DataOffset > 0)
-		memcpy(readbuf, &SMB_buf[4 + RRsp->DataOffset], r);
+		memcpy(readbuf, &SMB_buf.u8buff[4 + RRsp->DataOffset], r);
 
 	return r;
 }
@@ -1398,7 +1402,7 @@ int smb_ReadAndX(int UID, int TID, int FID, s64 fileoffset, void *readbuf, u16 n
 int smb_WriteAndX(int UID, int TID, int FID, s64 fileoffset, void *writebuf, u16 nbytes)
 {
 	int r;
-	struct WriteAndXRequest_t *WR = (struct WriteAndXRequest_t *)SMB_buf;
+	struct WriteAndXRequest_t *WR = (struct WriteAndXRequest_t *)SMB_buf.u8buff;
 
 	memcpy(WR, &smb_Write_Request, sizeof(struct WriteAndXRequest_t));
 
@@ -1411,14 +1415,14 @@ int smb_WriteAndX(int UID, int TID, int FID, s64 fileoffset, void *writebuf, u16
 	WR->DataLengthLow = nbytes;
 	WR->ByteCount = nbytes;
 
-	memcpy((void *)(&SMB_buf[4 + WR->DataOffset]), writebuf, nbytes);
+	memcpy((void *)(&SMB_buf.u8buff[4 + WR->DataOffset]), writebuf, nbytes);
 
 	rawTCP_SetSessionHeader(63+nbytes);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
 
-	struct WriteAndXResponse_t *WRsp = (struct WriteAndXResponse_t *)SMB_buf;
+	struct WriteAndXResponse_t *WRsp = (struct WriteAndXResponse_t *)SMB_buf.u8buff;
 
 	// check sanity of SMB header
 	if (WRsp->smbH.Magic != SMB_MAGIC)
@@ -1435,9 +1439,9 @@ int smb_WriteAndX(int UID, int TID, int FID, s64 fileoffset, void *writebuf, u16
 int smb_Close(int UID, int TID, int FID)
 {
 	int r;
-	struct CloseRequest_t *CR = (struct CloseRequest_t *)SMB_buf;
+	struct CloseRequest_t *CR = (struct CloseRequest_t *)SMB_buf.u8buff;
 
-	memset(SMB_buf, 0, sizeof(SMB_buf));
+	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
 
 	CR->smbH.Magic = SMB_MAGIC;
 	CR->smbH.Cmd = SMB_COM_CLOSE;
@@ -1453,7 +1457,7 @@ int smb_Close(int UID, int TID, int FID)
 	if (r <= 0)
 		return -EIO;
 
-	struct CloseResponse_t *CRsp = (struct CloseResponse_t *)SMB_buf;
+	struct CloseResponse_t *CRsp = (struct CloseResponse_t *)SMB_buf.u8buff;
 
 	// check sanity of SMB header
 	if (CRsp->smbH.Magic != SMB_MAGIC)
@@ -1470,9 +1474,9 @@ int smb_Close(int UID, int TID, int FID)
 int smb_Delete(int UID, int TID, char *Path)
 {
 	int r, CF, PathLen, i;
-	struct DeleteRequest_t *DR = (struct DeleteRequest_t *)SMB_buf;
+	struct DeleteRequest_t *DR = (struct DeleteRequest_t *)SMB_buf.u8buff;
 
-	memset(SMB_buf, 0, sizeof(SMB_buf));
+	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
 
 	CF = server_specs.StringsCF;
 
@@ -1502,7 +1506,7 @@ int smb_Delete(int UID, int TID, char *Path)
 	if (r <= 0)
 		return -EIO;
 
-	struct DeleteResponse_t *DRsp = (struct DeleteResponse_t *)SMB_buf;
+	struct DeleteResponse_t *DRsp = (struct DeleteResponse_t *)SMB_buf.u8buff;
 
 	// check sanity of SMB header
 	if (DRsp->smbH.Magic != SMB_MAGIC)
@@ -1519,9 +1523,9 @@ int smb_Delete(int UID, int TID, char *Path)
 int smb_ManageDirectory(int UID, int TID, char *Path, int cmd)
 {
 	int r, CF, PathLen, i;
-	struct ManageDirectoryRequest_t *MDR = (struct ManageDirectoryRequest_t *)SMB_buf;
+	struct ManageDirectoryRequest_t *MDR = (struct ManageDirectoryRequest_t *)SMB_buf.u8buff;
 
-	memset(SMB_buf, 0, sizeof(SMB_buf));
+	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
 
 	CF = server_specs.StringsCF;
 
@@ -1550,7 +1554,7 @@ int smb_ManageDirectory(int UID, int TID, char *Path, int cmd)
 	if (r <= 0)
 		return -EIO;
 
-	struct ManageDirectoryResponse_t *MDRsp = (struct ManageDirectoryResponse_t *)SMB_buf;
+	struct ManageDirectoryResponse_t *MDRsp = (struct ManageDirectoryResponse_t *)SMB_buf.u8buff;
 
 	// check sanity of SMB header
 	if (MDRsp->smbH.Magic != SMB_MAGIC)
@@ -1574,9 +1578,9 @@ int smb_ManageDirectory(int UID, int TID, char *Path, int cmd)
 int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 {
 	int r, CF, offset, i;
-	struct RenameRequest_t *RR = (struct RenameRequest_t *)SMB_buf;
+	struct RenameRequest_t *RR = (struct RenameRequest_t *)SMB_buf.u8buff;
 
-	memset(SMB_buf, 0, sizeof(SMB_buf));
+	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
 
 	CF = server_specs.StringsCF;
 
@@ -1621,7 +1625,7 @@ int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 	if (r <= 0)
 		return -EIO;
 
-	struct RenameResponse_t *RRsp = (struct RenameResponse_t *)SMB_buf;
+	struct RenameResponse_t *RRsp = (struct RenameResponse_t *)SMB_buf.u8buff;
 
 	// check sanity of SMB header
 	if (RRsp->smbH.Magic != SMB_MAGIC)
@@ -1646,9 +1650,9 @@ int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info)
 {
 	int r, CF, PathLen, i, j;
-	struct FindFirstNext2Request_t *FFNR = (struct FindFirstNext2Request_t *)SMB_buf;
+	struct FindFirstNext2Request_t *FFNR = (struct FindFirstNext2Request_t *)SMB_buf.u8buff;
 
-	memset(SMB_buf, 0, sizeof(SMB_buf));
+	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
 
 	CF = server_specs.StringsCF;
 
@@ -1670,7 +1674,7 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 	FFNR->smbTrans.MaxDataCount = 16384;		// Max Data len in reply
 
 	if (cmd == TRANS2_FIND_FIRST2) {
-		struct FindFirst2RequestParam_t *FFRParam = (struct FindFirst2RequestParam_t *)&SMB_buf[FFNR->smbTrans.ParamOffset+4];
+		struct FindFirst2RequestParam_t *FFRParam = (struct FindFirst2RequestParam_t *)&SMB_buf.u8buff[FFNR->smbTrans.ParamOffset+4];
 
 		FFRParam->SearchAttributes = ATTR_READONLY | ATTR_HIDDEN | ATTR_SYSTEM | ATTR_DIRECTORY | ATTR_ARCHIVE;
 		FFRParam->SearchCount = 1;
@@ -1687,7 +1691,7 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 		FFNR->smbTrans.TotalParamCount = FFNR->smbTrans.ParamCount = 2+2+2+2+4+PathLen;
 	}
 	else {
-		struct FindNext2RequestParam_t *FNRParam = (struct FindNext2RequestParam_t *)&SMB_buf[FFNR->smbTrans.ParamOffset+4];
+		struct FindNext2RequestParam_t *FNRParam = (struct FindNext2RequestParam_t *)&SMB_buf.u8buff[FFNR->smbTrans.ParamOffset+4];
 
 		FNRParam->SearchID = (u16)info->SID;
 		FNRParam->SearchCount = 1;
@@ -1706,7 +1710,7 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 	if (r <= 0)
 		return -EIO;
 
-	struct FindFirstNext2Response_t *FFNRsp = (struct FindFirstNext2Response_t *)SMB_buf;
+	struct FindFirstNext2Response_t *FFNRsp = (struct FindFirstNext2Response_t *)SMB_buf.u8buff;
 
 	// check sanity of SMB header
 	if (FFNRsp->smbH.Magic != SMB_MAGIC)
@@ -1727,13 +1731,13 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 	struct FindFirstNext2ResponseParam_t *FFNRspParam;
 
 	if (cmd == TRANS2_FIND_FIRST2) {
-		FFNRspParam = (struct FindFirstNext2ResponseParam_t *)&SMB_buf[FFNRsp->smbTrans.ParamOffset+4];
+		FFNRspParam = (struct FindFirstNext2ResponseParam_t *)&SMB_buf.u8buff[FFNRsp->smbTrans.ParamOffset+4];
 		info->SID = FFNRspParam->SearchID;
 	}
 	else
-		FFNRspParam = (struct FindFirstNext2ResponseParam_t *)&SMB_buf[FFNRsp->smbTrans.ParamOffset+4-2];
+		FFNRspParam = (struct FindFirstNext2ResponseParam_t *)&SMB_buf.u8buff[FFNRsp->smbTrans.ParamOffset+4-2];
 
-	struct FindFirst2ResponseData_t *FFRspData = (struct FindFirst2ResponseData_t *)&SMB_buf[FFNRsp->smbTrans.DataOffset+4];
+	struct FindFirst2ResponseData_t *FFRspData = (struct FindFirst2ResponseData_t *)&SMB_buf.u8buff[FFNRsp->smbTrans.DataOffset+4];
 
 	info->EOS = FFNRspParam->EndOfSearch;
 
@@ -1760,9 +1764,9 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 int smb_TreeDisconnect(int UID, int TID)
 {
 	int r;
-	struct TreeDisconnectRequest_t *TDR = (struct TreeDisconnectRequest_t *)SMB_buf;
+	struct TreeDisconnectRequest_t *TDR = (struct TreeDisconnectRequest_t *)SMB_buf.u8buff;
 
-	memset(SMB_buf, 0, sizeof(SMB_buf));
+	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
 
 	TDR->smbH.Magic = SMB_MAGIC;
 	TDR->smbH.Cmd = SMB_COM_TREE_DISCONNECT;
@@ -1774,7 +1778,7 @@ int smb_TreeDisconnect(int UID, int TID)
 	if (r <= 0)
 		return -EIO;
 
-	struct TreeDisconnectResponse_t *TDRsp = (struct TreeDisconnectResponse_t *)SMB_buf;
+	struct TreeDisconnectResponse_t *TDRsp = (struct TreeDisconnectResponse_t *)SMB_buf.u8buff;
 
 	// check sanity of SMB header
 	if (TDRsp->smbH.Magic != SMB_MAGIC)
@@ -1793,9 +1797,9 @@ int smb_TreeDisconnect(int UID, int TID)
 int smb_LogOffAndX(int UID)
 {
 	int r;
-	struct LogOffAndXRequest_t *LR = (struct LogOffAndXRequest_t *)SMB_buf;
+	struct LogOffAndXRequest_t *LR = (struct LogOffAndXRequest_t *)SMB_buf.u8buff;
 
-	memset(SMB_buf, 0, sizeof(SMB_buf));
+	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
 
 	LR->smbH.Magic = SMB_MAGIC;
 	LR->smbH.Cmd = SMB_COM_LOGOFF_ANDX;
@@ -1808,7 +1812,7 @@ int smb_LogOffAndX(int UID)
 	if (r <= 0)
 		return -EIO;
 
-	struct LogOffAndXResponse_t *LRsp = (struct LogOffAndXResponse_t *)SMB_buf;
+	struct LogOffAndXResponse_t *LRsp = (struct LogOffAndXResponse_t *)SMB_buf.u8buff;
 
 	// check sanity of SMB header
 	if (LRsp->smbH.Magic != SMB_MAGIC)
@@ -1827,9 +1831,9 @@ int smb_LogOffAndX(int UID)
 int smb_Echo(void *echo, int len)
 {
 	int r;
-	struct EchoRequest_t *ER = (struct EchoRequest_t *)SMB_buf;
+	struct EchoRequest_t *ER = (struct EchoRequest_t *)SMB_buf.u8buff;
 
-	memset(SMB_buf, 0, sizeof(SMB_buf));
+	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
 
 	ER->smbH.Magic = SMB_MAGIC;
 	ER->smbH.Cmd = SMB_COM_ECHO;
@@ -1844,7 +1848,7 @@ int smb_Echo(void *echo, int len)
 	if (r <= 0)
 		return -EIO;
 
-	struct EchoResponse_t *ERsp = (struct EchoResponse_t *)SMB_buf;
+	struct EchoResponse_t *ERsp = (struct EchoResponse_t *)SMB_buf.u8buff;
 
 	// check sanity of SMB header
 	if (ERsp->smbH.Magic != SMB_MAGIC)

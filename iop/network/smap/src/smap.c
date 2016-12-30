@@ -333,11 +333,9 @@ static unsigned int LinkCheckTimerCB(struct SmapDriverData *SmapDrivPrivData){
 
 static int HandleTxIntr(struct SmapDriverData *SmapDrivPrivData){
 	int result, OldState;
-	volatile u8 *smap_regbase;
 	USE_SMAP_TX_BD;
 	unsigned short int ctrl_stat;
 
-	smap_regbase=SmapDrivPrivData->smap_regbase;
 	result=0;
 	if(SmapDrivPrivData->NumPacketsInTx>0){
 		do{
@@ -672,7 +670,6 @@ static inline int SetupNetDev(void){
 	int result;
 	iop_event_t EventFlagData;
 	iop_thread_t ThreadData;
-	volatile u8 *emac3_regbase;
 	static struct NetManNetIF device={
 		"SMAP",
 		0,
@@ -682,8 +679,6 @@ static inline int SetupNetDev(void){
 		&SMAPSendPacket,
 		&SMAPIoctl
 	};
-
-	emac3_regbase=SmapDriverData.emac3_regbase;
 
 	EventFlagData.attr=0;
 	EventFlagData.option=0;
@@ -810,14 +805,14 @@ int smap_init(int argc, char *argv[]){
 			EnablePinStrapConfig=0;
 		}
 		else if(strncmp("thpri=", *argv, 6)==0){
-			CmdString=&((unsigned char*)*argv)[6];
+			CmdString=&((char*)*argv)[6];
 			if(look_ctype_table(CmdString[0])&4){
-				ThreadPriority=strtoul(&((unsigned char*)*argv)[6], NULL, 10);
+				ThreadPriority=strtoul(&((char*)*argv)[6], NULL, 10);
 				if(ThreadPriority-9>=0x73){
 					return DisplayHelpMessage();
 				}
 
-				if(((unsigned char*)*argv)[6]!='\0'){
+				if(((char*)*argv)[6]!='\0'){
 					while(look_ctype_table(*CmdString)&4){
 						CmdString++;
 					}
@@ -827,10 +822,10 @@ int smap_init(int argc, char *argv[]){
 			else return DisplayHelpMessage();
 		}
 		else if(strncmp("thstack=", *argv, 8)==0){
-			CmdString=&((unsigned char*)*argv)[8];
+			CmdString=&((char*)*argv)[8];
 			if(look_ctype_table(CmdString[0])&4){
-				ThreadStackSize=strtoul(&((unsigned char*)*argv)[8], NULL, 10);
-				if(((unsigned char*)*argv)[8]!='\0'){
+				ThreadStackSize=strtoul(&((char*)*argv)[8], NULL, 10);
+				if(((char*)*argv)[8]!='\0'){
 					while(look_ctype_table(*CmdString)&4){
 						CmdString++;
 					}

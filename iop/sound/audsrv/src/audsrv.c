@@ -64,7 +64,7 @@ static int fillbuf_threshold = 0;       ///< threshold to initiate a callback
 static int format_changed = 0;          ///< boolean to notify when format has changed
 
 /** double buffer for streaming */
-static char core1_buf[0x1000] __attribute__((aligned (64)));
+static u8 core1_buf[0x1000] __attribute__((aligned (64)));
 
 static short rendered_left [ 512 ];
 static short rendered_right[ 512 ];
@@ -397,7 +397,7 @@ int audsrv_set_threshold(int amount)
 static void play_thread(void *arg)
 {
 	int block;
-	char *bufptr;
+	u8 *bufptr;
 	int intr_state;
 	int step;
 	int available;

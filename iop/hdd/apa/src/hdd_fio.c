@@ -609,13 +609,10 @@ int hddLseek(iop_file_t *f, int post, int whence)
 
 static void fioGetStatFiller(apa_cache_t *clink, iox_stat_t *stat)
 {
-	apa_header_t *header;
-
 	stat->mode=clink->header->type;
 	stat->attr=clink->header->flags;
 	stat->hisize=0;
 	stat->size=clink->header->length;
-	header=clink->header;
 	memcpy(&stat->ctime, &clink->header->created, sizeof(apa_ps2time_t));
 	memcpy(&stat->atime, &clink->header->created, sizeof(apa_ps2time_t));
 	memcpy(&stat->mtime, &clink->header->created, sizeof(apa_ps2time_t));

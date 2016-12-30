@@ -380,9 +380,7 @@ void ps2kbd_config_set(int resultCode, int bytes, void *arg)
   dev = (kbd_dev *) arg;
   if(dev != NULL)
     {
-      int ret;
-
-      ret = UsbControlTransfer(dev->configEndp, 0x21, USB_REQ_SET_IDLE, 0, dev->interfaceNo, 0, NULL, ps2kbd_idlemode_set, arg);
+      UsbControlTransfer(dev->configEndp, 0x21, USB_REQ_SET_IDLE, 0, dev->interfaceNo, 0, NULL, ps2kbd_idlemode_set, arg);
     }
 }
 
@@ -402,9 +400,7 @@ void ps2kbd_idlemode_set(int resultCode, int bytes, void *arg)
   dev = (kbd_dev *) arg;
   if(dev != NULL)
     {
-      int ret;
-
-      ret = UsbInterruptTransfer(dev->dataEndp, &dev->data, dev->packetSize, ps2kbd_data_recv, arg);
+      UsbInterruptTransfer(dev->dataEndp, &dev->data, dev->packetSize, ps2kbd_data_recv, arg);
     }
 }
 
@@ -700,7 +696,6 @@ void ps2kbd_data_recv(int resultCode, int bytes, void *arg)
 
 {
   kbd_dev *dev;
-  int ret;
   int phantom;
   int loop;
 
@@ -814,7 +809,7 @@ void ps2kbd_data_recv(int resultCode, int bytes, void *arg)
       memcpy(&dev->oldData, &dev->data, sizeof(kbd_data_recv));
     }
 
-  ret = UsbInterruptTransfer(dev->dataEndp, &dev->data, dev->packetSize, ps2kbd_data_recv, arg);
+  UsbInterruptTransfer(dev->dataEndp, &dev->data, dev->packetSize, ps2kbd_data_recv, arg);
 }
 
 void flushbuffer()

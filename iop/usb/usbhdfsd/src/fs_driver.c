@@ -579,7 +579,7 @@ static int fs_dopen(iop_file_t *fd, const char *name)
 	memset(fd->privdata, 0, sizeof(fs_dir)); //NB: also implies "file_flag = FS_FILE_FLAG_FOLDER;"
 	rec = (fs_dir *) fd->privdata;
 
-	rec->status = fat_getFirstDirentry(fatd, (char*)name, &rec->fatdlist, &rec->dirent.fatdir, &rec->current_fatdir);
+	rec->status = fat_getFirstDirentry(fatd, name, &rec->fatdlist, &rec->dirent.fatdir, &rec->current_fatdir);
 
 	// root directory may have no entries, nothing else may.
 	if(rec->status == 0 && !is_root)
@@ -645,7 +645,7 @@ static int fs_dread(iop_file_t *fd, fio_dirent_t *buffer)
 	{
 		memset(buffer, 0, sizeof(fio_dirent_t));
 		fillStat(&buffer->stat, &rec->current_fatdir);
-		strcpy(buffer->name, rec->current_fatdir.name);
+		strcpy(buffer->name, (const char*)rec->current_fatdir.name);
 	}
 
 	if (rec->status > 0)

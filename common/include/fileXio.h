@@ -89,7 +89,7 @@ struct fileXioDirEntry
 {
 	u32   fileSize;
 	u8	fileProperties;
-	u8	filename[128+1];
+	char	filename[128+1];
 } __attribute__((aligned(64)));
 
 struct fileXioDevice

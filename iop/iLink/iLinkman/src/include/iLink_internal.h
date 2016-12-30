@@ -281,7 +281,7 @@ struct TransactionContextData{
 
 /* Function prototypes. */
 void UBUFThread(void *arg);
-inline int GetConsoleIDs(u64 *guid, unsigned char *ModelName);
+int GetConsoleIDs(u64 *guid, char *ModelName);
 void iLinkDisableIntr(void);
 int iLinkResetHW(void);
 void iLinkShutdownHW(void);

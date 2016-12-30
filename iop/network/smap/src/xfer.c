@@ -55,7 +55,7 @@ static inline void CopyFromFIFO(volatile u8 *smap_regbase, void *buffer, unsigne
 	}
 }
 
-inline int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData){
+int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData){
 	USE_SMAP_RX_BD;
 	int NumPacketsReceived;
 	volatile smap_bd_t *PktBdPtr;

@@ -60,7 +60,7 @@ typedef struct _timerCbStruct {
 	TimerCallback callbackProc;
 	void   *callbackArg;
 	uint32 delayCount;
-} TimerCbStruct __attribute__ ((packed));
+} TimerCbStruct;
 
 typedef struct _ioRequest {
 	uint32 busyFlag;
@@ -76,7 +76,7 @@ typedef struct _ioRequest {
 	UsbCallbackProc userCallbackProc;
 	void   *userCallbackArg;
     void   *gpSeg;
-} IoRequest __attribute__ ((packed));
+} IoRequest;
 
 typedef struct _device {
 	uint32 id;
@@ -98,14 +98,14 @@ typedef struct _device {
 	void   *staticDeviceDescPtr;
 	void   *staticDeviceDescEndPtr;
 	uint32 fetchDescriptorCounter;
-} Device __attribute__ ((packed));
+} Device;
 
 typedef struct _hcTd {
 	uint32 HcArea;
 	void   *curBufPtr;
 	struct _hcTd *next;
 	void   *bufferEnd;
-} HcTD __attribute__ ((packed));
+} HcTD;
 
 typedef struct _hcIsoTd {
 	uint32 hcArea;
@@ -113,7 +113,7 @@ typedef struct _hcIsoTd {
 	struct _hcIsoTd *next;
 	void   *bufferEnd;
 	uint16 psw[8];
-} HcIsoTD __attribute__ ((packed));
+} HcIsoTD;
 
 typedef struct _hcEd {
 	uint16 hcArea;
@@ -121,7 +121,7 @@ typedef struct _hcEd {
 	HcTD   *tdTail;
 	HcTD   *tdHead;
 	struct _hcEd *next;
-} HcED __attribute__ ((packed));
+} HcED;
 
 typedef struct _endpoint {
 	uint32			id;
@@ -137,7 +137,7 @@ typedef struct _endpoint {
 	uint32		isochronLastFrameNum; // 40
 	TimerCbStruct timer;	// sizeof(TimerCbStruct) => 24 bytes
 	HcED		hcEd;		// HcED has to be aligned to 0x10 bytes!
-} Endpoint __attribute__ ((packed));
+} Endpoint;
 
 typedef struct _usbHub {
 	struct _usbHub  *next;
@@ -151,7 +151,7 @@ typedef struct _usbHub {
 	uint16 hubStatusChange;		// unite to uint32 to make it match portStatusChange
 	uint32 portStatusChange;
 	uint8 statusChangeInfo[8]; // depends on number of ports
-} UsbHub __attribute__ ((packed));
+} UsbHub;
 
 typedef struct {
 	volatile HcED   *InterruptTable[32];
@@ -160,7 +160,7 @@ typedef struct {
 	volatile HcTD   *DoneHead;
 	volatile uint8  reserved[116];
 	volatile uint32 pad2; // expand struct to 256 bytes for alignment
-} HcCA __attribute__ ((packed));
+} HcCA;
 
 typedef struct {
 	volatile uint32 HcRevision;
@@ -185,7 +185,7 @@ typedef struct {
 	volatile uint32 HcRhDescriptorB;
 	volatile uint32 HcRhStatus;
 	volatile uint32 HcRhPortStatus[2];
-} OhciRegs __attribute__ ((packed));
+} OhciRegs;
 
 typedef struct _memPool {
 	volatile OhciRegs	*ohciRegs;
