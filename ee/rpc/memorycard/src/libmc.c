@@ -888,7 +888,7 @@ int mcRename(int port, int slot, const char* oldName, const char* newName)
 	g_nameParam.table = (int)&g_fileInfoBuff;
 	strncpy(g_nameParam.name, oldName, 1023);
 	g_nameParam.name[1023] = 0;
-	strncpy(g_fileInfoBuff.name, newName, 31);
+	strncpy((char *)g_fileInfoBuff.name, newName, 31);
 	g_fileInfoBuff.name[31] = 0;
 	FlushCache(0);
 

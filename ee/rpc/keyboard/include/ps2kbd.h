@@ -51,7 +51,7 @@ typedef struct _kbd_rawkey
 {
   u8 state;
   u8 key;
-} kbd_rawkey __attribute__ ((packed));
+} kbd_rawkey;
 
 #define PS2KBD_READMODE_NORMAL 1
 #define PS2KBD_READMODE_RAW    2

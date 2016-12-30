@@ -87,7 +87,76 @@ static int padInitialised = 0;
 
 // pad rpc call
 static SifRpcClientData_t padsif[2] __attribute__((aligned(64)));
-static char buffer[128] __attribute__((aligned(16)));
+static union {
+	s32 command;
+	struct {
+		s32 unknown[3];
+		s32 result;
+		s32 unknown2;
+		void *padBuf;
+	} padOpenResult;
+	struct {
+		s32 unknown[3];
+		s32 result;
+	} padResult;
+	struct {
+		s32 command;
+		s32 port, slot;
+		s32 unknown;
+		void *padArea;
+	} padOpenArgs;
+	struct {
+		s32 command;
+		s32 port, slot;
+		s32 unknown;
+		s32 mode;
+	} padCloseArgs;
+	struct {
+		s32 command;
+		s32 port;
+	} padSlotMaxArgs;
+	struct {
+		s32 command;
+		s32 port, slot;
+		s32 infoMode;
+		s32 index;
+	} padInfoModeArgs;
+	struct {
+		s32 command;
+		s32 port, slot;
+		s32 mode;
+		s32 lock;
+	} padSetMainModeArgs;
+	struct {
+		s32 unknown[5];
+		s32 result;
+	} padModeResult;
+	struct {
+		s32 command;
+		s32 port, slot;
+	} padGetButtonMaskArgs;
+	struct {
+		s32 command;
+		s32 port, slot;
+		s32 buttonInfo;
+	} padSetButtonInfoArgs;
+	struct {
+		s32 unknown[4];
+		s32 result;
+	} padSetButtonInfoResult;
+	struct {
+		s32 command;
+		s32 port, slot;
+		s32 actuator;
+		s32 act_cmd;
+	} padInfoActArgs;
+	struct {
+		s32 command;
+		s32 port, slot;
+		s8 align[6];
+	} padActDirAlignArgs;
+	char buffer[128];
+} buffer __attribute__((aligned(16)));
 
 /* Port state data */
 static struct pad_state PadState[2][8];
@@ -210,12 +279,12 @@ padEnd()
     int ret;
 
 
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_END;
+    buffer.command=PAD_RPCCMD_END;
 
-    if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+    if (SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return -1;
 
-    ret = *(int *)(&buffer[12]);
+    ret = buffer.padResult.result;
     if (ret == 1) {
         padInitialised = 0;
     }
@@ -254,21 +323,21 @@ padPortOpen(int port, int slot, void *padArea)
     }
 
 
-    *(u32 *)(&buffer[0]) = PAD_RPCCMD_OPEN;
-    *(u32 *)(&buffer[4]) = port;
-    *(u32 *)(&buffer[8]) = slot;
-    *(u32 *)(&buffer[16]) = (u32)padArea;
+	buffer.padOpenArgs.command = PAD_RPCCMD_OPEN;
+	buffer.padOpenArgs.port = port;
+    buffer.padOpenArgs.slot = slot;
+    buffer.padOpenArgs.padArea = padArea;
 
-    if(SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+    if(SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     {
         return 0;
     }
 
     PadState[port][slot].open = 1;
     PadState[port][slot].padData = padArea;
-    PadState[port][slot].padBuf = *(char **)(&buffer[20]);
+    PadState[port][slot].padBuf = buffer.padOpenResult.padBuf;
 
-    return *(u32 *)(&buffer[12]);
+    return buffer.padOpenResult.result;
 }
 
 int
@@ -277,18 +346,18 @@ padPortClose(int port, int slot)
 
     int ret;
 
-    *(u32 *)(&buffer[0]) = PAD_RPCCMD_CLOSE;
-    *(u32 *)(&buffer[4]) = port;
-    *(u32 *)(&buffer[8]) = slot;
-    *(u32 *)(&buffer[16]) = 1;
+	buffer.padCloseArgs.command = PAD_RPCCMD_CLOSE;
+	buffer.padCloseArgs.port = port;
+	buffer.padCloseArgs.slot = slot;
+	buffer.padCloseArgs.mode = 1;
 
-    ret = SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL);
+    ret = SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL);
 
     if(ret < 0)
         return ret;
     else {
         PadState[port][slot].open = 0;
-        return *(int *)(&buffer[12]);
+        return buffer.padResult.result;
     }
 }
 
@@ -390,12 +459,12 @@ int
 padGetPortMax(void)
 {
 
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_GET_PORTMAX;
+	buffer.command = PAD_RPCCMD_GET_PORTMAX;
 
-    if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+    if (SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return -1;
 
-    return *(int *)(&buffer[12]);
+    return buffer.padResult.result;
 }
 
 
@@ -407,13 +476,13 @@ int
 padGetSlotMax(int port)
 {
 
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_GET_SLOTMAX;
-    *(u32 *)(&buffer[4])=port;
+    buffer.padSlotMaxArgs.command = PAD_RPCCMD_GET_SLOTMAX;
+    buffer.padSlotMaxArgs.port = port;
 
-    if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+    if (SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return -1;
 
-    return *(int *)(&buffer[12]);
+    return buffer.padResult.result;
 }
 
 
@@ -438,19 +507,19 @@ padGetModVersion()
 int
 padInfoMode(int port, int slot, int infoMode, int index)
 {
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_INFO_MODE;
-    *(u32 *)(&buffer[4])=port;
-    *(u32 *)(&buffer[8])=slot;
-    *(u32 *)(&buffer[12])=infoMode;
-    *(u32 *)(&buffer[16])=index;
+	buffer.padInfoModeArgs.command = PAD_RPCCMD_INFO_MODE;
+	buffer.padInfoModeArgs.port = port;
+	buffer.padInfoModeArgs.slot = slot;
+	buffer.padInfoModeArgs.infoMode = infoMode;
+	buffer.padInfoModeArgs.index = index;
 
-    if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+    if (SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return 0;
 
-    if (*(int *)(&buffer[20]) == 1) {
+    if (buffer.padModeResult.result == 1) {
         padSetReqState(port, slot, PAD_RSTAT_BUSY);
     }
-    return *(int *)(&buffer[20]);
+    return buffer.padModeResult.result;
 }
 
 
@@ -462,19 +531,19 @@ int
 padSetMainMode(int port, int slot, int mode, int lock)
 {
 
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_SET_MMODE;
-    *(u32 *)(&buffer[4])=port;
-    *(u32 *)(&buffer[8])=slot;
-    *(u32 *)(&buffer[12])=mode;
-    *(u32 *)(&buffer[16])=lock;
+	buffer.padSetMainModeArgs.command = PAD_RPCCMD_SET_MMODE;
+	buffer.padSetMainModeArgs.port = port;
+	buffer.padSetMainModeArgs.slot = slot;
+	buffer.padSetMainModeArgs.mode = mode;
+	buffer.padSetMainModeArgs.lock = lock;
 
-    if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+    if (SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return 0;
 
-    if (*(int *)(&buffer[20]) == 1) {
+    if (buffer.padModeResult.result == 1) {
         padSetReqState(port, slot, PAD_RSTAT_BUSY);
     }
-    return *(int *)(&buffer[20]);
+    return buffer.padModeResult.result;
 }
 
 
@@ -526,14 +595,14 @@ int
 padGetButtonMask(int port, int slot)
 {
 
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_GET_BTNMASK;
-    *(u32 *)(&buffer[4])=port;
-    *(u32 *)(&buffer[8])=slot;
+	buffer.padGetButtonMaskArgs.command = PAD_RPCCMD_GET_BTNMASK;
+	buffer.padGetButtonMaskArgs.port = port;
+	buffer.padGetButtonMaskArgs.slot = slot;
 
-    if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+    if (SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return 0;
 
-    return *(int *)(&buffer[12]);
+    return buffer.padResult.result;
 }
 
 
@@ -545,20 +614,20 @@ padSetButtonInfo(int port, int slot, int buttonInfo)
 {
     int val;
 
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_SET_BTNINFO;
-    *(u32 *)(&buffer[4])=port;
-    *(u32 *)(&buffer[8])=slot;
-    *(u32 *)(&buffer[12])=buttonInfo;
+	buffer.padSetButtonInfoArgs.command = PAD_RPCCMD_SET_BTNINFO;
+	buffer.padSetButtonInfoArgs.port = port;
+	buffer.padSetButtonInfoArgs.slot = slot;
+	buffer.padSetButtonInfoArgs.buttonInfo = buttonInfo;
 
-    if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+    if (SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return 0;
 
-    val = *(int *)(&buffer[16]);
+    val = buffer.padSetButtonInfoResult.result;
 
     if (val == 1) {
         padSetReqState(port, slot, PAD_RSTAT_BUSY);
     }
-    return *(int *)(&buffer[16]);
+    return buffer.padSetButtonInfoResult.result;
 }
 
 
@@ -570,19 +639,19 @@ padSetButtonInfo(int port, int slot, int buttonInfo)
 unsigned char
 padInfoAct(int port, int slot, int actuator, int cmd)
 {
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_INFO_ACT;
-    *(u32 *)(&buffer[4])=port;
-    *(u32 *)(&buffer[8])=slot;
-    *(u32 *)(&buffer[12])=actuator;
-    *(u32 *)(&buffer[16])=cmd;
+	buffer.padInfoActArgs.command = PAD_RPCCMD_INFO_ACT;
+	buffer.padInfoActArgs.port = port;
+	buffer.padInfoActArgs.slot = slot;
+	buffer.padInfoActArgs.actuator = actuator;
+	buffer.padInfoActArgs.act_cmd = cmd;
 
-    if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+    if (SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return 0;
 
-    if (*(int *)(&buffer[20]) == 1) {
+    if (buffer.padModeResult.result == 1) {
         padSetReqState(port, slot, PAD_RSTAT_BUSY);
     }
-    return *(int *)(&buffer[20]);
+    return buffer.padModeResult.result;
 }
 
 
@@ -596,23 +665,23 @@ int
 padSetActAlign(int port, int slot, char actAlign[6])
 {
     int i;
-    char *ptr;
+    s8 *ptr;
 
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_SET_ACTALIGN;
-    *(u32 *)(&buffer[4])=port;
-    *(u32 *)(&buffer[8])=slot;
+	buffer.padActDirAlignArgs.command = PAD_RPCCMD_SET_ACTALIGN;
+	buffer.padActDirAlignArgs.port = port;
+	buffer.padActDirAlignArgs.slot = slot;
 
-    ptr = (char *)(&buffer[12]);
+	ptr = buffer.padActDirAlignArgs.align;
     for (i=0; i<6; i++)
         ptr[i]=actAlign[i];
 
-    if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+    if (SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return 0;
 
-    if (*(int *)(&buffer[20]) == 1) {
+    if (buffer.padModeResult.result == 1) {
         padSetReqState(port, slot, PAD_RSTAT_BUSY);
     }
-    return *(int *)(&buffer[20]);
+    return buffer.padModeResult.result;
 }
 
 
@@ -626,20 +695,20 @@ int
 padSetActDirect(int port, int slot, char actAlign[6])
 {
     int i;
-    char *ptr;
+    s8 *ptr;
 
-    *(u32 *)(&buffer[0])=PAD_RPCCMD_SET_ACTDIR;
-    *(u32 *)(&buffer[4])=port;
-    *(u32 *)(&buffer[8])=slot;
+	buffer.padActDirAlignArgs.command = PAD_RPCCMD_SET_ACTDIR;
+	buffer.padActDirAlignArgs.port = port;
+	buffer.padActDirAlignArgs.slot = slot;
 
-    ptr = (char *)(&buffer[12]);
+    ptr = buffer.padActDirAlignArgs.align;
     for (i=0; i<6; i++)
         ptr[i]=actAlign[i];
 
-    if (SifCallRpc(&padsif[0], 1, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+    if (SifCallRpc(&padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return 0;
 
-    return *(int *)(&buffer[20]);
+    return buffer.padModeResult.result;
 }
 
 
