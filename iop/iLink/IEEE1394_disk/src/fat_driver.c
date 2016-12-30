@@ -533,7 +533,7 @@ static void fat_setFatDir(fat_driver* fatd, fat_dir* fatDir, unsigned int parent
 	//created Time: Hours, Minutes, Seconds
 	fatDir->ctime[0] = ((dsfn->timeCreate[1] & 0xF8) >> 3);
 	fatDir->ctime[1] = ((dsfn->timeCreate[1] & 0x07) << 3) + ((dsfn->timeCreate[0] & 0xE0) >> 5);
-	fatDir->ctime[6] = ((dsfn->timeCreate[0] & 0x1F) << 1);
+	fatDir->ctime[2] = ((dsfn->timeCreate[0] & 0x1F) << 1);
 
 	//accessed Date: Day, Month, Year-low, Year-high
 	fatDir->adate[0] = (dsfn->dateAccess[0] & 0x1F);
