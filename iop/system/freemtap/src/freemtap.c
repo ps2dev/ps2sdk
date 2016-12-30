@@ -322,7 +322,7 @@ s32 change_slot(s32 *arg)
 
 					if(res == -2)
 					{
-						data[port+4] = -1;
+						pad[port+4] = -1;
 						count--;
 					}
 					else

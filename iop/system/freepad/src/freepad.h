@@ -101,7 +101,8 @@ typedef struct
     u8 data[32];
 	u32 actDirData[2];
 	u32 actAlignData[2];
-    u32 actData[8];
+    u32 actData[4];
+    u32 combData[4];
     u32 modeTable[2];
     u32 frame;
     u32 findPadRetries;

@@ -164,10 +164,10 @@ void DmaSendEE()
 					p->ee_pdata.actData[1] = p->actData[1];
 					p->ee_pdata.actData[2] = p->actData[2];
 					p->ee_pdata.actData[3] = p->actData[3];
-					p->ee_pdata.actData[4] = p->actData[4];
-					p->ee_pdata.actData[5] = p->actData[5];
-					p->ee_pdata.actData[6] = p->actData[6];
-					p->ee_pdata.actData[7] = p->actData[7];
+					p->ee_pdata.combData[0] = p->combData[0];
+					p->ee_pdata.combData[1] = p->combData[1];
+					p->ee_pdata.combData[2] = p->combData[2];
+					p->ee_pdata.combData[3] = p->combData[3];
 
 					p->ee_pdata.modeTable[0] = p->modeTable[0];
 					p->ee_pdata.modeTable[1] = p->modeTable[1];
