@@ -14,6 +14,8 @@
 #ifndef _LIBMC_COMMON_H_
 #define _LIBMC_COMMON_H_
 
+#include <tamtypes.h>
+
 typedef struct _sceMcStDateTime {
 	u8  Resv2;
 	u8  Sec;
@@ -116,5 +118,64 @@ typedef struct {
 	s32 mcserv_version;
 	s32 mcman_version;
 } mcRpcStat_t;
+
+// in addition to errno
+#define EFORMAT				140
+
+// MCMAN basic error codes
+#define sceMcResSucceed			0
+#define sceMcResChangedCard		-1
+#define sceMcResNoFormat		-2
+#define sceMcResFullDevice		-3
+#define sceMcResNoEntry			-4
+#define sceMcResDeniedPermit		-5
+#define sceMcResNotEmpty		-6
+#define sceMcResUpLimitHandle		-7
+#define sceMcResFailReplace		-8
+#define sceMcResFailResetAuth		-11
+#define sceMcResFailDetect		-12
+#define sceMcResFailDetect2		-13
+#define sceMcResDeniedPS1Permit		-51
+#define sceMcResFailAuth		-90
+
+// Memory Card device types
+#define sceMcTypeNoCard			0
+#define sceMcTypePS1			1
+#define sceMcTypePS2			2
+#define sceMcTypePDA			3
+
+/* High-Level File I/O */
+// Used with the statmask field of chstat() to indicate which field(s) to change.
+#define SCE_CST_MODE			0x01
+#define SCE_CST_ATTR			0x02
+#define SCE_CST_SIZE			0x04
+#define SCE_CST_CT			0x08
+#define SCE_CST_AT			0x10
+#define SCE_CST_MT			0x20
+#define SCE_CST_PRVT			0x40
+
+// Used with the mode field of chstat() to indicate what to change.
+#define SCE_STM_R			0x01
+#define SCE_STM_W			0x02
+#define SCE_STM_X			0x04
+#define SCE_STM_C			0x08
+#define SCE_STM_F			0x10
+#define SCE_STM_D			0x20
+
+/* file attributes */
+#define sceMcFileAttrReadable		SCE_STM_R
+#define sceMcFileAttrWriteable		SCE_STM_W
+#define sceMcFileAttrExecutable		SCE_STM_X
+#define sceMcFileAttrDupProhibit	SCE_STM_C
+#define sceMcFileAttrFile		SCE_STM_F
+#define sceMcFileAttrSubdir		SCE_STM_D
+#define sceMcFileCreateDir		0x0040
+#define sceMcFileAttrClosed		0x0080
+#define sceMcFileCreateFile		0x0200
+#define sceMcFile0400			0x0400
+#define sceMcFileAttrPDAExec		0x0800
+#define sceMcFileAttrPS1		0x1000
+#define sceMcFileAttrHidden		0x2000
+#define sceMcFileAttrExists		0x8000
 
 #endif // _LIBMC_COMMON_H_

@@ -10,7 +10,8 @@
 # $Id: ps2mc_fio.c 1410 2009-01-18 15:24:54Z jimmikaelkael $
 */
 
-#include "mcman.h"
+#include <mcman.h>
+#include "mcman-internal.h"
 
 extern char SUPERBLOCK_MAGIC[];
 extern char SUPERBLOCK_VERSION[];

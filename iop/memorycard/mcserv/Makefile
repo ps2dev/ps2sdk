@@ -17,6 +17,7 @@ IOP_OBJS = mcserv.o imports.o exports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 IOP_CFLAGS  += #-DSIO_DEBUG #-DDEBUG
+IOP_INCS += -I$(PS2SDKSRC)/iop/memorycard/mcman/include/
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

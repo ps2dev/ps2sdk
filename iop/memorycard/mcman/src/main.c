@@ -10,7 +10,8 @@
 # $Id: main.c 1410 2009-01-18 15:24:54Z jimmikaelkael $
 */
 
-#include "mcman.h"
+#include <mcman.h>
+#include "mcman-internal.h"
 
 IRX_ID(MODNAME, 1, 1);
 

@@ -7,11 +7,11 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: mcman.h 1410 2009-01-18 15:24:54Z jimmikaelkael $
+# $Id: mcman-internal.h 1410 2009-01-18 15:24:54Z jimmikaelkael $
 */
 
-#ifndef __MCMAN_H__
-#define __MCMAN_H__
+#ifndef __MCMAN_INTERNAL_H__
+#define __MCMAN_INTERNAL_H__
 
 #include <loadcore.h>
 #include <intrman.h>
@@ -28,8 +28,6 @@
 #include <io_common.h>
 #include "sio2man_imports.h"
 
-#include <libmc-common.h>
-
 #ifdef SIO_DEBUG
 	#include <sior.h>
 	#define DEBUG
@@ -40,26 +38,6 @@
 
 #define MODNAME "mcman"
 #define MODVER  0x101
-
-// modInfo struct returned by xmcman exports 42
-struct modInfo_t {
-	const char *name;
-	u16 version;
-};
-
-struct irx_export_table _exp_mcman;
-
-/* MCMAN public structure */
-typedef struct _sceMcTblGetDir {	// size = 64
-	sceMcStDateTime _Create;	// 0
-	sceMcStDateTime _Modify;	// 8
-	u32 FileSizeByte;		// 16
-	u16 AttrFile;			// 20
-	u16 Reserve1;			// 22
-	u32 Reserve2;			// 24
-	u32 PdaAplNo;			// 28
-	unsigned char EntryName[32];	// 32
-} sceMcTblGetDir;
 
 typedef struct _MCCacheEntry {
 	int  cluster;   // 0
@@ -142,47 +120,6 @@ typedef struct {  // size = 48
 MC_FHANDLE mcman_fdhandles[MAX_FDHANDLES];
 
 sceMcStDateTime mcman_fsmodtime;
-
-/* MCMAN EXPORTS */
-/* 05 */ int  McDetectCard(int port, int slot);
-/* 06 */ int  McOpen(int port, int slot, char *filename, int flags);
-/* 07 */ int  McClose(int fd);
-/* 08 */ int  McRead(int fd, void *buf, int length);
-/* 09 */ int  McWrite(int fd, void *buf, int length);
-/* 10 */ int  McSeek(int fd, int offset, int origin);
-/* 11 */ int  McFormat(int port, int slot);
-/* 12 */ int  McGetDir(int port, int slot, char *dirname, int flags, int maxent, sceMcTblGetDir *info);
-/* 13 */ int  McDelete(int port, int slot, char *filename, int flags);
-/* 14 */ int  McFlush(int fd);
-/* 15 */ int  McChDir(int port, int slot, char *newdir, char *currentdir);
-/* 16 */ int  McSetFileInfo(int port, int slot, char *filename, sceMcTblGetDir *info, int flags);
-/* 17 */ int  McEraseBlock(int port, int block, void **pagebuf, void *eccbuf);
-/* 18 */ int  McReadPage(int port, int slot, int page, void *buf);
-/* 19 */ int  McWritePage(int port, int slot, int page, void *pagebuf, void *eccbuf);
-/* 20 */ void McDataChecksum(void *buf, void *ecc);
-/* 29 */ int  McReadPS1PDACard(int port, int slot, int page, void *buf);
-/* 30 */ int  McWritePS1PDACard(int port, int slot, int page, void *buf);
-/* 36 */ int  McUnformat(int port, int slot);
-/* 37 */ int  McRetOnly(int fd);
-/* 38 */ int  McGetFreeClusters(int port, int slot);
-/* 39 */ int  McGetMcType(int port, int slot);
-/* 40 */ void McSetPS1CardFlag(int flag);
-
-/* Available in XMCMAN only */
-/* 17 */ int  McEraseBlock2(int port, int slot, int block, void **pagebuf, void *eccbuf);
-/* 21 */ int  McDetectCard2(int port, int slot);
-/* 22 */ int  McGetFormat(int port, int slot);
-/* 23 */ int  McGetEntSpace(int port, int slot, char *dirname);
-/* 24 */ int  mcman_replacebadblock(void);
-/* 25 */ int  McCloseAll(void);
-/* 42 */ struct modInfo_t *McGetModuleInfo(void);
-/* 43 */ int  McGetCardSpec(int port, int slot, s16 *pagesize, u16 *blocksize, int *cardsize, u8 *flags);
-/* 44 */ int  mcman_getFATentry(int port, int slot, int fat_index, int *fat_entry);
-/* 45 */ int  McCheckBlock(int port, int slot, int block);
-/* 46 */ int  mcman_setFATentry(int port, int slot, int fat_index, int fat_entry);
-/* 47 */ int  mcman_readdirentry(int port, int slot, int cluster, int fsindex, McFsEntry **pfse);
-/* 48 */ void mcman_1stcacheEntsetwrflagoff(void);
-
 
 // internal functions prototypes
 int  mcsio2_transfer(int port, int slot, sio2_transfer_data_t *sio2data);
@@ -281,34 +218,6 @@ int  mcman_modloadcb(char *filename, int *port, int *slot); // used as callback 
 void mcman_unit2card(u32 unit);
 int  mcman_initdev(void);
 
-
-// in addition to errno
-#define EFORMAT						  140
-
-// MCMAN basic error codes
-#define sceMcResSucceed               0
-#define sceMcResChangedCard          -1
-#define sceMcResNoFormat             -2
-#define sceMcResFullDevice           -3
-#define sceMcResNoEntry              -4
-#define sceMcResDeniedPermit         -5
-#define sceMcResNotEmpty             -6
-#define sceMcResUpLimitHandle        -7
-#define sceMcResFailReplace          -8
-#define sceMcResFailResetAuth        -11
-#define sceMcResFailDetect        	 -12
-#define sceMcResFailDetect2        	 -13
-#define sceMcResDeniedPS1Permit    	 -51
-#define sceMcResFailAuth        	 -90
-
-
-// Memory Card device types
-#define sceMcTypeNoCard               0
-#define sceMcTypePS1                  1
-#define sceMcTypePS2                  2
-#define sceMcTypePDA                  3
-
-
 typedef struct { 				// size = 384
     char  magic[28];				// Superblock magic, on PS2 MC : "Sony PS2 Memory Card Format "
     u8  version[12];  			// Version number of the format used, 1.2 indicates full support for bad_block_list
@@ -342,40 +251,6 @@ typedef struct { 				// size = 384
 } MCDevInfo;
 
 MCDevInfo mcman_devinfos[4][MCMAN_MAXSLOT];
-
-
-/* High-Level File I/O */
-#define SCE_CST_MODE                  0x01
-#define SCE_CST_ATTR                  0x02
-#define SCE_CST_SIZE                  0x04
-#define SCE_CST_CT                    0x08
-#define SCE_CST_AT                    0x10
-#define SCE_CST_MT                    0x20
-#define SCE_CST_PRVT                  0x40
-
-#define SCE_STM_R                     0x01
-#define SCE_STM_W                     0x02
-#define SCE_STM_X                     0x04
-#define SCE_STM_C                     0x08
-#define SCE_STM_F                     0x10
-#define SCE_STM_D                     0x20
-
-/* file attributes */
-#define sceMcFileAttrReadable         SCE_STM_R
-#define sceMcFileAttrWriteable        SCE_STM_W
-#define sceMcFileAttrExecutable       SCE_STM_X
-#define sceMcFileAttrDupProhibit      SCE_STM_C
-#define sceMcFileAttrFile             SCE_STM_F
-#define sceMcFileAttrSubdir           SCE_STM_D
-#define sceMcFileCreateDir            0x0040
-#define sceMcFileAttrClosed           0x0080
-#define sceMcFileCreateFile           0x0200
-#define sceMcFile0400		          0x0400
-#define sceMcFileAttrPDAExec          0x0800
-#define sceMcFileAttrPS1              0x1000
-#define sceMcFileAttrHidden           0x2000
-#define sceMcFileAttrExists           0x8000
-
 
 sio2_transfer_data_t mcman_sio2packet;  // buffer for mcman sio2 packet
 u8 mcman_wdmabufs[0x0b * 0x90]; 		// buffer array for SIO2 DMA I/O (write)
@@ -412,4 +287,4 @@ int mcman_replacementcluster[16];
 int (*mcman_sio2transfer)(int port, int slot, sio2_transfer_data_t *sio2data);
 int (*mc_detectcard)(int port, int slot);
 
-#endif
+#endif	// __MCMAN_INTERNAL_H__

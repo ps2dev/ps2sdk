@@ -20,7 +20,7 @@
 #include <sifcmd.h>
 #include <thbase.h>
 #include <stdio.h>
-#include <libmc-common.h>
+#include <mcman.h>
 #include "mcman_imports.h"
 
 //#define DEBUG
@@ -152,5 +152,19 @@ static mcRpcStat_t rpc_stat __attribute__((aligned(64)));
 
 #define MCSERV_BUFSIZE 8192
 static u8 mcserv_buf[MCSERV_BUFSIZE] __attribute__((aligned(64)));
+
+// filename related mc command
+// used by: mcOpen, mcGetDir, mcChdir, mcDelete, mcSetFileInfo, mcRename, mcGetEntSpace
+typedef struct {			// size = 1044
+	int port;			// 0
+	int slot;			// 4
+	int flags;			// 8
+	int maxent;			// 12
+	union {
+		sceMcTblGetDir *mcT;	// 16
+		char *curdir;
+	};
+	char name[1024];		// 20
+} mcNameParam_t;
 
 #endif
