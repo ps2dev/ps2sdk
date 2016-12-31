@@ -185,16 +185,16 @@ int _start(int argc, const char **argv)
 	export_tab = (void **)(((struct irx_export_table *)libptr)->fptrs);
 
 	// Set functions pointers to match SIO2MAN exports
-	sio2_mc_transfer_init = export_tab[24];
-	sio2_transfer = export_tab[25];
+	psio2_mc_transfer_init = export_tab[24];
+	psio2_transfer = export_tab[25];
 	// set internals function pointers for MCMAN
 	mcman_sio2transfer = (void *)mcsio2_transfer;
 	mc_detectcard = (void *)McDetectCard2;
 
 	if (sio2man_type == XSIO2MAN) {
 		// Set functions pointers to match XSIO2MAN exports
-		sio2_transfer_reset = export_tab[26];
-		sio2_func1 = export_tab[55];
+		psio2_transfer_reset = export_tab[26];
+		psio2_mtap_change_slot = export_tab[55];
 
 		// set internals function pointers for XMCMAN
 		mcman_sio2transfer = (void *)mcsio2_transfer2;

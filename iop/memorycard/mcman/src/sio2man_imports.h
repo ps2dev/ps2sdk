@@ -9,11 +9,11 @@
 #define XSIO2MAN 	1
 
 // sio2man exports
-/* 24 */ void (*sio2_mc_transfer_init)(void);
-/* 25 */ int  (*sio2_transfer)(sio2_transfer_data_t *sio2data);
+/* 24 */ void (*psio2_mc_transfer_init)(void);
+/* 25 */ int  (*psio2_transfer)(sio2_transfer_data_t *sio2data);
 
 // xsio2man exports
-/* 26 */ void (*sio2_transfer_reset)(void);
-/* 55 */ int  (*sio2_func1)(void *arg);
+/* 26 */ void (*psio2_transfer_reset)(void);
+/* 55 */ int  (*psio2_mtap_change_slot)(s32 *arg);
 
 #endif

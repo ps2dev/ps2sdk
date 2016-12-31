@@ -59,5 +59,7 @@ typedef struct {
 /* 20 */ u8   sio2_data_in(void);
 /* 21 */ void sio2_stat_set(u32 val);
 /* 22 */ u32  sio2_stat_get(void);
+/* 24 */ void sio2_mc_transfer_init(void);
+/* 25 */ int  sio2_transfer(sio2_transfer_data_t *sio2data);
 
 #endif /* SIO2MAN_H */

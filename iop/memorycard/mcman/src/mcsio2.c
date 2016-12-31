@@ -241,8 +241,8 @@ int mcsio2_transfer(int port, int slot, sio2_transfer_data_t *sio2data)
 #endif
 
 	// SIO2 transfer for MCMAN
-	sio2_mc_transfer_init();
-	r = sio2_transfer(sio2data);
+	psio2_mc_transfer_init();
+	r = psio2_transfer(sio2data);
 
 #ifdef DEBUG
 	DPRINTF("returns %d\n", r);
@@ -256,7 +256,7 @@ int mcsio2_transfer2(int port, int slot, sio2_transfer_data_t *sio2data)
 {
 	// SIO2 transfer for XMCMAN
 	register int r;
-	int port_ctrl[8];
+	s32 port_ctrl[8];
 
 #ifdef DEBUG
 	DPRINTF("mcman: mcsio2_transfer2 port%d slot%d\n", port, slot);
@@ -269,10 +269,10 @@ int mcsio2_transfer2(int port, int slot, sio2_transfer_data_t *sio2data)
 
 	port_ctrl[(port & 1) + 2] = slot;
 
-	sio2_mc_transfer_init();
-	sio2_func1(&port_ctrl);
-	r = sio2_transfer(sio2data);
-	sio2_transfer_reset();
+	psio2_mc_transfer_init();
+	psio2_mtap_change_slot(&port_ctrl);
+	r = psio2_transfer(sio2data);
+	psio2_transfer_reset();
 
 #ifdef DEBUG
 	DPRINTF("mcman: mcsio2_transfer2 returns %d\n", r);
