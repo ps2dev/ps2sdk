@@ -181,7 +181,7 @@ void *cb_rpc_S_0400(u32 fno, void *buf, int size)
 	rpc_func = (void *)rpc_funcs_array[fno];
 
 	// Call needed rpc func
-	rpc_stat.rpc_func_ret = rpc_func();
+	rpc_stat.result = rpc_func();
 
 	McReplaceBadBlock();
 
@@ -328,7 +328,7 @@ int sceMcCheckBlock(void)
 //--------------------------------------------------------------
 int _McInit(void *rpc_buf)
 {
-	g_descParam_t *dP = (g_descParam_t *)rpc_buf;
+	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
 	int ps1flag = 0;
 
 #ifdef DEBUG
@@ -348,7 +348,7 @@ int _McInit(void *rpc_buf)
 //--------------------------------------------------------------
 int _McOpen(void *rpc_buf)
 {
-	g_nameParam_t *nP = (g_nameParam_t *)rpc_buf;
+	mcNameParam_t *nP = (mcNameParam_t *)rpc_buf;
 
 #ifdef DEBUG
 	DPRINTF("mcserv: _McOpen port%d slot%d file %s flags %d\n", nP->port, nP->slot, nP->name, nP->flags);
@@ -360,7 +360,7 @@ int _McOpen(void *rpc_buf)
 //--------------------------------------------------------------
 int _McClose(void *rpc_buf)
 {
-	g_descParam_t *dP = (g_descParam_t *)rpc_buf;
+	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
 
 #ifdef DEBUG
 	DPRINTF("mcserv: _McClose fd %d\n", dP->fd);
@@ -372,7 +372,7 @@ int _McClose(void *rpc_buf)
 //--------------------------------------------------------------
 int _McSeek(void *rpc_buf)
 {
-	g_descParam_t *dP = (g_descParam_t *)rpc_buf;
+	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
 
 #ifdef DEBUG
 	DPRINTF("mcserv: _McSeek fd %d offset %d origin %d\n", dP->fd, dP->offset, dP->origin);
@@ -384,10 +384,10 @@ int _McSeek(void *rpc_buf)
 //--------------------------------------------------------------
 int _McRead(void *rpc_buf)
 {
-	g_descParam_t *dP = (g_descParam_t *)rpc_buf;
+	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
 	register int file_offset, status;
 	register int left_to_read, size_readed, size_to_read;
-	g_endParam_t eP;
+	mcEndParam_t eP;
 	SifDmaTransfer_t dmaStruct;
 	int intStatus;
 	void *eedata;
@@ -396,43 +396,43 @@ int _McRead(void *rpc_buf)
 	DPRINTF("mcserv: _McRead fd %d ee buffer addr %x size %d\n", dP->fd, (int)dP->buffer, dP->size);
 #endif
 
-	eP.fastIO1_size = 0;
-	eP.fastIO2_size = 0;
-	eP.fastIO1_eeaddr = NULL;
-	eP.fastIO2_eeaddr = NULL;
+	eP.size1 = 0;
+	eP.size2 = 0;
+	eP.dest1 = NULL;
+	eP.dest2 = NULL;
 
 	size_readed = 0;
 	file_offset = 0;
 
 	eedata = dP->buffer;
 
-	eP.fastIO1_size = dP->size;
+	eP.size1 = dP->size;
 
 	if (dP->size > 16)
-		eP.fastIO1_size = (((int)(eedata)-1) & 0xfffffff0) - ((int)(eedata) - 16);
+		eP.size1 = (((int)(eedata)-1) & 0xfffffff0) - ((int)(eedata) - 16);
 
-	eP.fastIO2_size = (dP->size - eP.fastIO1_size) & 0x0f;
-	left_to_read = (dP->size - eP.fastIO1_size) - eP.fastIO2_size;
+	eP.size2 = (dP->size - eP.size1) & 0x0f;
+	left_to_read = (dP->size - eP.size1) - eP.size2;
 
-	if (eP.fastIO2_size != 0)
-		eP.fastIO2_eeaddr = (void *)(eedata + eP.fastIO1_size + left_to_read);
+	if (eP.size2 != 0)
+		eP.dest2 = (void *)(eedata + eP.size1 + left_to_read);
 
-	if (eP.fastIO1_size != 0) {
-		size_readed = McRead(dP->fd, eP.fastIO1_data, eP.fastIO1_size);
+	if (eP.size1 != 0) {
+		size_readed = McRead(dP->fd, eP.src1, eP.size1);
 
 		if (size_readed < 0) {
-			eP.fastIO1_size = 0;
-			eP.fastIO2_size = 0;
+			eP.size1 = 0;
+			eP.size2 = 0;
 			goto dma_transfer2;
 		}
 		else {
 			file_offset = size_readed;
-			eP.fastIO1_eeaddr = eedata;
+			eP.dest1 = eedata;
 			eedata += size_readed;
 
-			if (size_readed != eP.fastIO1_size) {
-				eP.fastIO1_size = size_readed;
-				eP.fastIO2_size = 0;
+			if (size_readed != eP.size1) {
+				eP.size1 = size_readed;
+				eP.size2 = 0;
 				size_readed = 0;
 				goto dma_transfer2;
 			}
@@ -451,7 +451,7 @@ int _McRead(void *rpc_buf)
 		size_readed = McRead(dP->fd, mcserv_buf, size_to_read);
 
 		if (size_readed < 0) {
-			eP.fastIO2_size = 0;
+			eP.size2 = 0;
 			goto dma_transfer2;
 		}
 
@@ -471,31 +471,31 @@ int _McRead(void *rpc_buf)
 		eedata += size_readed;
 
 		if (size_to_read != size_readed) {
-			eP.fastIO2_size = 0;
+			eP.size2 = 0;
 			size_readed = 0;
 			goto dma_transfer2;
 		}
 		size_readed = 0;
 	}
 
-	if (eP.fastIO2_size == 0)
+	if (eP.size2 == 0)
 		goto dma_transfer2;
 
-	size_readed = McRead(dP->fd, eP.fastIO2_data, eP.fastIO2_size);
+	size_readed = McRead(dP->fd, eP.src2, eP.size2);
 
 	if (size_readed < 0) {
-		eP.fastIO2_size = 0;
+		eP.size2 = 0;
 		goto dma_transfer2;
 	}
 
 	file_offset += size_readed;
-	eP.fastIO2_size = size_readed;
+	eP.size2 = size_readed;
 	size_readed = 0;
 
 dma_transfer2:
 	dmaStruct.src = (void *)&eP;
 	dmaStruct.dest = (void *)dP->param;
-	dmaStruct.size = sizeof (g_endParam_t);
+	dmaStruct.size = sizeof (mcEndParam_t);
 	dmaStruct.attr = 0;
 
 	CpuSuspendIntr(&intStatus);
@@ -514,10 +514,10 @@ dma_transfer2:
 //--------------------------------------------------------------
 int _McRead2(void *rpc_buf)
 {
-	g_descParam_t *dP = (g_descParam_t *)rpc_buf;
+	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
 	register int file_offset, status;
 	register int left_to_read, size_readed, size_to_read;
-	g_endParam2_t eP;
+	mcEndParam2_t eP;
 	SifDmaTransfer_t dmaStruct;
 	int intStatus;
 	void *eedata;
@@ -526,43 +526,43 @@ int _McRead2(void *rpc_buf)
 	DPRINTF("mcserv: _McRead2 fd %d ee buffer addr %x size %d\n", dP->fd, (int)dP->buffer, dP->size);
 #endif
 
-	eP.fastIO1_size = 0;
-	eP.fastIO2_size = 0;
-	eP.fastIO1_eeaddr = NULL;
-	eP.fastIO2_eeaddr = NULL;
+	eP.size1 = 0;
+	eP.size2 = 0;
+	eP.dest1 = NULL;
+	eP.dest2 = NULL;
 
 	size_readed = 0;
 	file_offset = 0;
 
 	eedata = dP->buffer;
 
-	eP.fastIO1_size = dP->size;
+	eP.size1 = dP->size;
 
 	if (dP->size > 64)
-		eP.fastIO1_size = (((u32)(eedata)-1) & 0xffffffc0) - ((u32)(eedata) - 64);
+		eP.size1 = (((u32)(eedata)-1) & 0xffffffc0) - ((u32)(eedata) - 64);
 
-	eP.fastIO2_size = (dP->size - eP.fastIO1_size) & 0x3f;
-	left_to_read = (dP->size - eP.fastIO1_size) - eP.fastIO2_size;
+	eP.size2 = (dP->size - eP.size1) & 0x3f;
+	left_to_read = (dP->size - eP.size1) - eP.size2;
 
-	if (eP.fastIO2_size != 0)
-		eP.fastIO2_eeaddr = (void *)(eedata + eP.fastIO1_size + left_to_read);
+	if (eP.size2 != 0)
+		eP.dest2 = (void *)(eedata + eP.size1 + left_to_read);
 
-	if (eP.fastIO1_size != 0) {
-		size_readed = McRead(dP->fd, eP.fastIO1_data, eP.fastIO1_size);
+	if (eP.size1 != 0) {
+		size_readed = McRead(dP->fd, eP.src1, eP.size1);
 
 		if (size_readed < 0) {
-			eP.fastIO1_size = 0;
-			eP.fastIO2_size = 0;
+			eP.size1 = 0;
+			eP.size2 = 0;
 			goto dma_transfer2;
 		}
 		else {
 			file_offset = size_readed;
-			eP.fastIO1_eeaddr = eedata;
+			eP.dest1 = eedata;
 			eedata += size_readed;
 
-			if (size_readed != eP.fastIO1_size) {
-				eP.fastIO1_size = size_readed;
-				eP.fastIO2_size = 0;
+			if (size_readed != eP.size1) {
+				eP.size1 = size_readed;
+				eP.size2 = 0;
 				size_readed = 0;
 				goto dma_transfer2;
 			}
@@ -581,7 +581,7 @@ int _McRead2(void *rpc_buf)
 		size_readed = McRead(dP->fd, mcserv_buf, size_to_read);
 
 		if (size_readed < 0) {
-			eP.fastIO2_size = 0;
+			eP.size2 = 0;
 			goto dma_transfer2;
 		}
 
@@ -590,16 +590,16 @@ int _McRead2(void *rpc_buf)
 			goto dma_transfer;
 		}
 
-		eP.fastIO2_size = size_readed & 0x3f;
+		eP.size2 = size_readed & 0x3f;
 		if ((size_readed & 0x3f) != 0) {
-			eP.fastIO2_eeaddr = (void *)(eedata + (size_readed & 0xffffffc0));
-			memcpy(eP.fastIO2_data, (void *)(mcserv_buf + (size_readed & 0xffffffc0)), size_readed & 0x3f);
+			eP.dest2 = (void *)(eedata + (size_readed & 0xffffffc0));
+			memcpy(eP.src2, (void *)(mcserv_buf + (size_readed & 0xffffffc0)), size_readed & 0x3f);
 		}
 
-		if (eP.fastIO2_size == size_readed)
+		if (eP.size2 == size_readed)
 			goto skip_dma_transfer;
 
-		dmaStruct.size = size_readed - eP.fastIO2_size;
+		dmaStruct.size = size_readed - eP.size2;
 
 dma_transfer:
 		dmaStruct.src = (void *)mcserv_buf;
@@ -622,24 +622,24 @@ skip_dma_transfer:
 		size_readed = 0;
 	}
 
-	if (eP.fastIO2_size == 0)
+	if (eP.size2 == 0)
 		goto dma_transfer2;
 
-	size_readed = McRead(dP->fd, eP.fastIO2_data, eP.fastIO2_size);
+	size_readed = McRead(dP->fd, eP.src2, eP.size2);
 
 	if (size_readed < 0) {
-		eP.fastIO2_size = 0;
+		eP.size2 = 0;
 		goto dma_transfer2;
 	}
 
 	file_offset += size_readed;
-	eP.fastIO2_size = size_readed;
+	eP.size2 = size_readed;
 	size_readed = 0;
 
 dma_transfer2:
 	dmaStruct.src = (void *)&eP;
 	dmaStruct.dest = (void *)dP->param;
-	dmaStruct.size = sizeof (g_endParam2_t);
+	dmaStruct.size = sizeof (mcEndParam2_t);
 	dmaStruct.attr = 0;
 
 	CpuSuspendIntr(&intStatus);
@@ -658,7 +658,7 @@ dma_transfer2:
 //--------------------------------------------------------------
 int _McWrite(void *rpc_buf)
 {
-	g_descParam_t *dP = (g_descParam_t *)rpc_buf;
+	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
 	SifRpcReceiveData_t	rD;
 	register int size_to_write, size_written, r;
 
@@ -703,7 +703,7 @@ int _McWrite(void *rpc_buf)
 //--------------------------------------------------------------
 int _McGetDir(void *rpc_buf)
 {
-	g_nameParam_t *nP = (g_nameParam_t *)rpc_buf;
+	mcNameParam_t *nP = (mcNameParam_t *)rpc_buf;
 	register int status, file_entries, flags, r;
 	SifDmaTransfer_t dmaStruct;
 	int intStatus;
@@ -720,7 +720,7 @@ int _McGetDir(void *rpc_buf)
 
 	while (nP->maxent > -1) {
 
-		r = McGetDir(nP->port, nP->slot, nP->name, flags & 0xffff, 1, (mcTable_t *)mcserv_buf);
+		r = McGetDir(nP->port, nP->slot, nP->name, flags & 0xffff, 1, (sceMcTblGetDir *)mcserv_buf);
 		if (r < 0)
 			return r;
 		if (r == 0)
@@ -730,7 +730,7 @@ int _McGetDir(void *rpc_buf)
 
 		dmaStruct.src = (void *)mcserv_buf;
 		dmaStruct.dest = (void *)nP->mcT;
-		dmaStruct.size = sizeof (mcTable_t);
+		dmaStruct.size = sizeof (sceMcTblGetDir);
 		dmaStruct.attr = 0;
 
 		CpuSuspendIntr(&intStatus);
@@ -755,7 +755,7 @@ dma_wait:
 //--------------------------------------------------------------
 int _McChDir(void *rpc_buf)
 {
-	g_nameParam_t *nP = (g_nameParam_t *)rpc_buf;
+	mcNameParam_t *nP = (mcNameParam_t *)rpc_buf;
 	register int status, r;
 	SifDmaTransfer_t dmaStruct;
 	int intStatus;
@@ -767,7 +767,7 @@ int _McChDir(void *rpc_buf)
 	r = McChDir(nP->port, nP->slot, nP->name, (char *)mcserv_buf);
 
 	dmaStruct.src = (void *)mcserv_buf;
-	dmaStruct.dest = (void *)nP->mcT;
+	dmaStruct.dest = (void *)nP->curdir;
 	dmaStruct.size = 1024;
 	dmaStruct.attr = 0;
 
@@ -784,7 +784,7 @@ int _McChDir(void *rpc_buf)
 //--------------------------------------------------------------
 int _McFormat(void *rpc_buf)
 {
-	g_descParam_t *dP = (g_descParam_t *)rpc_buf;
+	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
 
 #ifdef DEBUG
 	DPRINTF("mcserv: _McFormat port%d slot%d\n", dP->port, dP->slot);
@@ -796,7 +796,7 @@ int _McFormat(void *rpc_buf)
 //--------------------------------------------------------------
 int _McUnformat(void *rpc_buf)
 {
-	g_descParam_t *dP = (g_descParam_t *)rpc_buf;
+	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
 
 #ifdef DEBUG
 	DPRINTF("mcserv: _McUnformat port%d slot%d\n", dP->port, dP->slot);
@@ -808,9 +808,9 @@ int _McUnformat(void *rpc_buf)
 //--------------------------------------------------------------
 int _McGetInfo(void *rpc_buf)
 {
-	g_descParam_t *dP = (g_descParam_t *)rpc_buf;
+	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
 	register int status, mc_free, r;
-	g_endParam_t eP;
+	mcEndParam_t eP;
 	SifDmaTransfer_t dmaStruct;
 	int intStatus;
 
@@ -823,23 +823,23 @@ int _McGetInfo(void *rpc_buf)
 	r = McDetectCard(dP->port, dP->slot);
 
 	if (dP->size > 0)
-		eP.fastIO1_size = McGetMcType(dP->port, dP->slot);
+		eP.type = McGetMcType(dP->port, dP->slot);
 
-	eP.fastIO2_size = 0;
+	eP.free = 0;
 	if (r >= -1) {
 		if (dP->offset == 0)
 			goto dma_transfer;
 
 		mc_free = McGetFreeClusters(dP->port, dP->slot);
 		if (mc_free >= 0)
-			eP.fastIO2_size = mc_free;
+			eP.free = mc_free;
 	}
 
 dma_transfer:
 
 	dmaStruct.src = (void *)&eP;
 	dmaStruct.dest = (void *)dP->param;
-	dmaStruct.size = sizeof (g_endParam_t);
+	dmaStruct.size = sizeof (mcEndParam_t);
 	dmaStruct.attr = 0;
 
 	CpuSuspendIntr(&intStatus);
@@ -858,9 +858,9 @@ dma_transfer:
 //--------------------------------------------------------------
 int _McGetInfo2(void *rpc_buf)
 {
-	g_descParam_t *dP = (g_descParam_t *)rpc_buf;
+	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
 	register int status, mc_free, r;
-	g_endParam2_t eP;
+	mcEndParam2_t eP;
 	SifDmaTransfer_t dmaStruct;
 	int intStatus;
 
@@ -873,11 +873,11 @@ int _McGetInfo2(void *rpc_buf)
 	r = McDetectCard2(dP->port, dP->slot);
 
 	if (dP->origin > 0)
-		eP.fastIO1_size = McGetMcType(dP->port, dP->slot);
+		eP.type = McGetMcType(dP->port, dP->slot);
 
 	if (r < -1) {
-		eP.fastIO2_size = 0;
-		eP.flag = 0;
+		eP.free = 0;
+		eP.formatted = 0;
 		goto dma_transfer;
 	}
 
@@ -885,22 +885,22 @@ int _McGetInfo2(void *rpc_buf)
 		mc_free = McGetFreeClusters(dP->port, dP->slot);
 
 		if (mc_free < 0)
-			eP.fastIO2_size = 0;
+			eP.free = 0;
 		else
-			eP.fastIO2_size = mc_free;
+			eP.free = mc_free;
 	}
 
 	if (dP->size > 0) {
-		eP.flag = 0;
+		eP.formatted = 0;
 		if (McGetFormat(dP->port, dP->slot) > 0)
-			eP.flag = 1;
+			eP.formatted = 1;
 	}
 
 dma_transfer:
 
 	dmaStruct.src = (void *)&eP;
 	dmaStruct.dest = (void *)dP->param;
-	dmaStruct.size = sizeof (g_endParam2_t);
+	dmaStruct.size = sizeof (mcEndParam2_t);
 	dmaStruct.attr = 0;
 
 	CpuSuspendIntr(&intStatus);
@@ -919,7 +919,7 @@ dma_transfer:
 //--------------------------------------------------------------
 int _McGetEntSpace(void *rpc_buf)
 {
-	g_nameParam_t *nP = (g_nameParam_t *)rpc_buf;
+	mcNameParam_t *nP = (mcNameParam_t *)rpc_buf;
 
 #ifdef DEBUG
 	DPRINTF("mcserv: _McGetEntSpace port%d slot%d dirname %s\n", nP->port, nP->slot, nP->name);
@@ -931,7 +931,7 @@ int _McGetEntSpace(void *rpc_buf)
 //--------------------------------------------------------------
 int _McDelete(void *rpc_buf)
 {
-	g_nameParam_t *nP = (g_nameParam_t *)rpc_buf;
+	mcNameParam_t *nP = (mcNameParam_t *)rpc_buf;
 
 #ifdef DEBUG
 	DPRINTF("mcserv: _McDelete port%d slot%d file %s flags %d\n", nP->port, nP->slot, nP->name, nP->flags);
@@ -943,7 +943,7 @@ int _McDelete(void *rpc_buf)
 //--------------------------------------------------------------
 int _McFlush(void *rpc_buf)
 {
-	g_descParam_t *dP = (g_descParam_t *)rpc_buf;
+	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
 
 #ifdef DEBUG
 	DPRINTF("mcserv: _McFlush fd %d\n", dP->fd);
@@ -955,7 +955,7 @@ int _McFlush(void *rpc_buf)
 //--------------------------------------------------------------
 int _McEraseBlock(void *rpc_buf)
 {
-	g_descParam_t *dP = (g_descParam_t *)rpc_buf;
+	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
 	register int pagenum, r;
 	u8 eccbuf[16];
 
@@ -1001,8 +1001,8 @@ int _McEraseBlock(void *rpc_buf)
 //--------------------------------------------------------------
 int _McReadPage(void *rpc_buf)
 {
-	g_descParam_t *dP = (g_descParam_t *)rpc_buf;
-	g_endParam_t eP;
+	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
+	mcEndParam_t eP;
 	register int status, fastsize, r, i, j;
 	SifDmaTransfer_t dmaStruct;
 	int intStatus;
@@ -1011,7 +1011,7 @@ int _McReadPage(void *rpc_buf)
 	DPRINTF("mcserv: _McReadPage port%d slot%d page %d\n", dP->port, dP->slot, dP->fd);
 #endif
 
-	eP.fastIO1_eeaddr = dP->buffer;
+	eP.dest1 = dP->buffer;
 
 	fastsize = ((u32)dP->buffer) & 0xf;
 	dP->port = (dP->port & 1) + 2;
@@ -1031,7 +1031,7 @@ int _McReadPage(void *rpc_buf)
 	i = 0;
 	j = fastsize;
 	while (j < 16) {
-		eP.fastIO1_data[i] = mcserv_buf[j];
+		eP.src1[i] = mcserv_buf[j];
 		j++;
 		i++;
 	}
@@ -1039,7 +1039,7 @@ int _McReadPage(void *rpc_buf)
 	j = 0;
 	if (fastsize > 0) {
 		while (j < 16) {
-			eP.fastIO1_data[i] = mcserv_buf[512 + j];
+			eP.src1[i] = mcserv_buf[512 + j];
 			j++;
 			i++;
 		}
@@ -1064,7 +1064,7 @@ dma_transfer:
 
 	dmaStruct.src = (void *)&eP;
 	dmaStruct.dest = (void *)dP->param;
-	dmaStruct.size = sizeof (g_endParam_t);
+	dmaStruct.size = sizeof (mcEndParam_t);
 	dmaStruct.attr = 0;
 
 	CpuSuspendIntr(&intStatus);
@@ -1080,7 +1080,7 @@ dma_transfer:
 //--------------------------------------------------------------
 int _McWritePage(void *rpc_buf)
 {
-	g_descParam_t *dP = (g_descParam_t *)rpc_buf;
+	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
 	register int fastsize, i, j;
 	SifRpcReceiveData_t	rD;
 	u8 eccbuf[16];
@@ -1132,22 +1132,22 @@ ecc_calc:
 //--------------------------------------------------------------
 int _McSetFileInfo(void *rpc_buf)
 {
-	g_nameParam_t *nP = (g_nameParam_t *)rpc_buf;
+	mcNameParam_t *nP = (mcNameParam_t *)rpc_buf;
 	SifRpcReceiveData_t	rD;
 
 #ifdef DEBUG
 	DPRINTF("mcserv: _McSetFileInfo port%d slot%d file %s flags %d\n", nP->port, nP->slot, nP->name, nP->flags);
 #endif
 
-	sceSifGetOtherData(&rD, (void *)nP->mcT, &mcserv_buf, sizeof (mcTable_t), 0);
+	sceSifGetOtherData(&rD, (void *)nP->mcT, &mcserv_buf, sizeof (sceMcTblGetDir), 0);
 
-	return McSetFileInfo(nP->port, nP->slot, nP->name, (mcTable_t *)mcserv_buf, nP->flags);
+	return McSetFileInfo(nP->port, nP->slot, nP->name, (sceMcTblGetDir *)mcserv_buf, nP->flags);
 }
 
 //--------------------------------------------------------------
 int _McCheckBlock(void *rpc_buf)
 {
-	g_descParam_t *dP = (g_descParam_t *)rpc_buf;
+	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
 
 #ifdef DEBUG
 	DPRINTF("mcserv: _McCheckBlock port%d slot%d block %d\n", dP->port, dP->slot, dP->offset);

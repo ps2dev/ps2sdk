@@ -10,32 +10,30 @@
 char mcman_modname[8] = "mcman\0\0\0";
 int mcman_type = MCMAN;
 
-typedef struct t_mcTable {
-    struct {
-        u8 unknown1;
-        u8 sec;      // Entry creation date/time (second)
-        u8 min;      // Entry creation date/time (minute)
-        u8 hour;     // Entry creation date/time (hour)
-        u8 day;      // Entry creation date/time (day)
-        u8 month;    // Entry creation date/time (month)
-        u16 year;    // Entry creation date/time (year)
-    } _create;
-    struct {
-        u8 unknown2;
-        u8 sec;      // Entry modification date/time (second)
-        u8 min;      // Entry modification date/time (minute)
-        u8 hour;     // Entry modification date/time (hour)
-        u8 day;      // Entry modification date/time (day)
-        u8 month;    // Entry modification date/time (month)
-        u16 year;    // Entry modification date/time (year)
-    } _modify;
-    u32 fileSizeByte;// File size (bytes). For a directory entry: 0
-    u16 attrFile;    // File attribute
-    u16 unknown3;
-    u32 unknown4[2];
-    u8  name[32];    //Entry name
-} mcTable_t __attribute__((aligned (64)));
+typedef struct _sceMcTblGetDir {	// size = 64
+	sceMcStDateTime _Create;	// 0
+	sceMcStDateTime _Modify;	// 8
+	u32 FileSizeByte;		// 16
+	u16 AttrFile;			// 20
+	u16 Reserve1;			// 22
+	u32 Reserve2;			// 24
+	u32 PdaAplNo;			// 28
+	unsigned char EntryName[32];	// 32
+} sceMcTblGetDir;
 
+// filename related mc command
+// used by: mcOpen, mcGetDir, mcChdir, mcDelete, mcSetFileInfo, mcRename, mcGetEntSpace
+typedef struct {			// size = 1044
+	int port;			// 0
+	int slot;			// 4
+	int flags;			// 8
+	int maxent;			// 12
+	union {
+		sceMcTblGetDir *mcT;	// 16
+		char *curdir;
+	};
+	char name[1024];		// 20
+} mcNameParam_t;
 
 // modInfo struct returned by xmcman exports 42
 struct modInfo_t {
@@ -50,11 +48,11 @@ struct modInfo_t {
 /* 09 */ int  (*McWrite)(int fd, void *buf, int length);
 /* 10 */ int  (*McSeek)(int fd, int offset, int origin);
 /* 11 */ int  (*McFormat)(int port, int slot);
-/* 12 */ int  (*McGetDir)(int port, int slot, char *dirname, int flags, int nument, mcTable_t *info);
+/* 12 */ int  (*McGetDir)(int port, int slot, char *dirname, int flags, int nument, sceMcTblGetDir *info);
 /* 13 */ int  (*McDelete)(int port, int slot, char *filename, int flags);
 /* 14 */ int  (*McFlush)(int fd);
 /* 15 */ int  (*McChDir)(int port, int slot, char *newdir, char *currentdir);
-/* 16 */ int  (*McSetFileInfo)(int port, int slot, char *filename, mcTable_t *info, int flags);
+/* 16 */ int  (*McSetFileInfo)(int port, int slot, char *filename, sceMcTblGetDir *info, int flags);
 /* 17 */ int  (*McEraseBlock)(int port, int block, void **pagebuf, void *eccbuf);
 /* 18 */ int  (*McReadPage)(int port, int slot, int page, void *buf);
 /* 19 */ int  (*McWritePage)(int port, int slot, int page, void *pagebuf, void *eccbuf);

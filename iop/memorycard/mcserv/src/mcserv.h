@@ -20,6 +20,7 @@
 #include <sifcmd.h>
 #include <thbase.h>
 #include <stdio.h>
+#include <libmc-common.h>
 #include "mcman_imports.h"
 
 //#define DEBUG
@@ -139,56 +140,6 @@ void *rpc_funcs_array[21] = {
     (void *)sceMcCheckBlock
 };
 
-// filename related mc command
-// used by: McOpen, McGetDir, McChdir, McDelete, McSetFileInfo
-typedef struct g_nameParam { // size = 1044
-	int port;		// 0
-	int slot;		// 4
-	int flags;		// 8
-	int maxent;		// 12
-	mcTable_t *mcT;	// 16
-	char name[1024];// 20
-} g_nameParam_t;
-
-// file descriptor related mc command
-// used by: McInit, McClose, McSeek, McRead, McWrite, McGetinfo, McFormat, McFlush, McUnformat
-typedef struct g_descParam { // size = 48
-	int fd;			// 0
-	int port;		// 4
-	int slot;		// 8
-	int size;		// 12
-	int offset;		// 16
-	int origin;		// 20
-	void *buffer;	// 24
-	void *param;	// 28
-	u8  data[16];	// 32
-} g_descParam_t;
-
-// endParamenter struct
-// used by: McRead, McGetInfo, McReadPage
-typedef struct g_endParam { // size = 64
-	int   fastIO1_size; 	// 0
-	int   fastIO2_size; 	// 4
-	void *fastIO1_eeaddr;	// 8
-	void *fastIO2_eeaddr;	// 12
-	u8    fastIO1_data[16];	// 16
-	u8    fastIO2_data[32];	// 32
-} g_endParam_t;
-
-// endParamenter2 struct
-// used by: McRead2, McGetInfo2
-typedef struct g_endParam2 {// size = 192
-	int   fastIO1_size; 	// 0
-	int   fastIO2_size; 	// 4
-	void *fastIO1_eeaddr;	// 8
-	void *fastIO2_eeaddr;	// 12
-	u8    fastIO1_data[64]; // 16
-	u8    fastIO2_data[64];	// 80
-	int   flag;				// 144
-	u8    unused[44];		// 148
-} g_endParam2_t;
-
-
 #define TH_C 0x02000000
 static int mcserv_tidS_0400;
 
@@ -197,14 +148,9 @@ static SifRpcServerData_t mcserv_sdS_0400 __attribute__((aligned(64)));
 
 static u8 mcserv_rpc_buf[2048] __attribute__((aligned(64)));
 
-static struct {
-	int rpc_func_ret;
-	int mcserv_version;
-	int mcman_version;
-} rpc_stat __attribute__((aligned(64)));
+static mcRpcStat_t rpc_stat __attribute__((aligned(64)));
 
 #define MCSERV_BUFSIZE 8192
 static u8 mcserv_buf[MCSERV_BUFSIZE] __attribute__((aligned(64)));
-
 
 #endif

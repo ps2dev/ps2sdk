@@ -28,6 +28,8 @@
 #include <io_common.h>
 #include "sio2man_imports.h"
 
+#include <libmc-common.h>
+
 #ifdef SIO_DEBUG
 	#include <sior.h>
 	#define DEBUG
@@ -47,26 +49,16 @@ struct modInfo_t {
 
 struct irx_export_table _exp_mcman;
 
-typedef struct _sceMcStDateTime {
-	u8  Resv2;
-	u8  Sec;
-	u8  Min;
-	u8  Hour;
-	u8  Day;
-	u8  Month;
-	u16 Year;
-} sceMcStDateTime;
-
 /* MCMAN public structure */
-typedef struct _sceMcTblGetDir { //size = 64
-	sceMcStDateTime _Create; // 0
-	sceMcStDateTime _Modify; // 8
-	u32 FileSizeByte;		 // 16
-	u16 AttrFile;			 // 20
-	u16 Reserve1;			 // 22
-	u32 Reserve2;			 // 24
-	u32 PdaAplNo;			 // 28
-	char  EntryName[32];		 // 32
+typedef struct _sceMcTblGetDir {	// size = 64
+	sceMcStDateTime _Create;	// 0
+	sceMcStDateTime _Modify;	// 8
+	u32 FileSizeByte;		// 16
+	u16 AttrFile;			// 20
+	u16 Reserve1;			// 22
+	u32 Reserve2;			// 24
+	u32 PdaAplNo;			// 28
+	unsigned char EntryName[32];	// 32
 } sceMcTblGetDir;
 
 typedef struct _MCCacheEntry {
@@ -113,39 +105,6 @@ typedef struct {
 } McFatCache;
 
 McFatCache mcman_fatcache[2][MCMAN_MAXSLOT];
-
-typedef struct {				// size = 128
-	int mode;					// 0
-	int length;					// 4
-	s16 linked_block;			// 8
-	char  name[20];				// 10
-	u8  field_1e;				// 30
-	u8  field_1f;				// 31
-	sceMcStDateTime created;	// 32
-	int field_28;				// 40
-	u16 field_2c;				// 44
-	u16 field_2e;				// 46
-	sceMcStDateTime modified;   // 48
-	int field_38;				// 56
-	u8  unused2[65];			// 60
-	u8  field_7d;				// 125
-	u8  field_7e;				// 126
-	u8  edc;					// 127
-} McFsEntryPS1;
-
-typedef struct {				// size = 512
-	u16 mode;					// 0
-	u16 unused;					// 2
-	u32 length;					// 4
-	sceMcStDateTime created;	// 8
-	u32 cluster;				// 16
-	u32 dir_entry;				// 20
-	sceMcStDateTime modified;	// 24
-	u32 attr;					// 32
-	u32 unused2[7];				// 36
-	char  name[32];				// 64
-	u8  unused3[416];			// 96
-} McFsEntry;
 
 #define MAX_CACHEDIRENTRY 		0x3
 McFsEntry mcman_dircache[MAX_CACHEDIRENTRY];

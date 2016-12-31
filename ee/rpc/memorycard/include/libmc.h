@@ -11,6 +11,7 @@
 # Macro's, structures & function prototypes for mclib.
 */
 
+#include <libmc-common.h>
 
 /*
 	NOTE: These functions will work with the MCMAN/MCSERV or XMCMAN/XMCSERV
@@ -117,6 +118,16 @@ typedef struct
     unsigned char unknown3[512];// unknown
 } mcIcon;
 
+typedef struct _sceMcTblGetDir {	// size = 64
+	sceMcStDateTime _Create;	// 0
+	sceMcStDateTime _Modify;	// 8
+	u32 FileSizeByte;		// 16
+	u16 AttrFile;			// 20
+	u16 Reserve1;			// 22
+	u32 Reserve2;			// 24
+	u32 PdaAplNo;			// 28
+	unsigned char EntryName[32];	// 32
+} sceMcTblGetDir __attribute__((aligned(64)));
 
 typedef struct
 {
@@ -147,8 +158,7 @@ typedef struct
     unsigned short unknown3;
     unsigned unknown4[2];
     unsigned char name[32];         //Entry name
-} mcTable __attribute__((aligned (64)));
-
+} mcTable __attribute__((deprecated, aligned (64)));
 
 // values to send to mcInit() to use either mcserv or xmcserv
 #define MC_TYPE_MC	0
@@ -277,7 +287,7 @@ int mcChdir(int port, int slot, const char* newDir, char* currentDir);
 //          mc table array
 // returns:	0   = successful
 //			< 0 = error
-int mcGetDir(int port, int slot, const char *name, unsigned mode, int maxent, mcTable* table);
+int mcGetDir(int port, int slot, const char *name, unsigned mode, int maxent, sceMcTblGetDir* table);
 
 // change file information
 // mcSync returns:	0 if ok
@@ -290,7 +300,7 @@ int mcGetDir(int port, int slot, const char *name, unsigned mode, int maxent, mc
 //			flags to show which data is valid
 // returns:	0   = successful
 //			< 0 = error
-int mcSetFileInfo(int port, int slot, const char* name, const mcTable* info, unsigned flags);
+int mcSetFileInfo(int port, int slot, const char* name, const sceMcTblGetDir* info, unsigned flags);
 
 // delete file
 // mcSync returns:	0 if deleted successfully
