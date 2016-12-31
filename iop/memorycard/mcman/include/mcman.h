@@ -21,8 +21,6 @@ struct modInfo_t {
 	u16 version;
 };
 
-struct irx_export_table _exp_mcman;
-
 /* MCMAN public structure */
 typedef struct _sceMcTblGetDir {	// size = 64
 	sceMcStDateTime _Create;	// 0

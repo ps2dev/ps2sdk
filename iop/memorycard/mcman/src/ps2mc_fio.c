@@ -16,6 +16,8 @@
 extern char SUPERBLOCK_MAGIC[];
 extern char SUPERBLOCK_VERSION[];
 
+extern union mcman_pagebuf mcman_pagebuf;
+
 extern int mcman_wr_port;
 extern int mcman_wr_slot;
 extern int mcman_wr_block;
@@ -23,6 +25,18 @@ extern int mcman_wr_flag3;
 extern int mcman_curdircluster;
 
 extern int PS1CardFlag;
+
+extern McFsEntry mcman_dircache[MAX_CACHEDIRENTRY];
+extern MC_FHANDLE mcman_fdhandles[MAX_FDHANDLES];
+extern MCDevInfo mcman_devinfos[4][MCMAN_MAXSLOT];
+
+extern u8 mcman_eccdata[512]; // size for 32 ecc
+
+static int mcman_curdirmaxent;
+static int mcman_curdirlength;
+static char mcman_curdirpath[1024];
+static char *mcman_curdirname;
+static sceMcStDateTime mcman_fsmodtime;
 
 //--------------------------------------------------------------
 int mcman_format2(int port, int slot)

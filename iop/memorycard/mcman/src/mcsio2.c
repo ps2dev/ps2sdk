@@ -15,8 +15,21 @@
 
 extern int timer_ID;
 
+extern MCDevInfo mcman_devinfos[4][MCMAN_MAXSLOT];
+
+static sio2_transfer_data_t mcman_sio2packet;	// buffer for mcman sio2 packet
+static u8 mcman_wdmabufs[0x0b * 0x90];		// buffer array for SIO2 DMA I/O (write)
+static u8 mcman_rdmabufs[0x0b * 0x90];		// not sure here for size, buffer array for SIO2 DMA I/O (read)
+
+static sio2_transfer_data_t mcman_sio2packet_PS1PDA;
+static u8 mcman_sio2inbufs_PS1PDA[0x90];
+u8 mcman_sio2outbufs_PS1PDA[0x90];
+
+static u32 mcman_timercount;
+static int mcman_timerthick;
+
 // mcman cmd table used by sio2packet_add fnc
-u8 mcman_cmdtable[36] = {
+static const u8 mcman_cmdtable[36] = {
 	0x11, 0x04, 0x12, 0x04, 0x21, 0x09, 0x22, 0x09,
 	0x23, 0x09, 0x24, 0x86, 0x25, 0x04, 0x26, 0x0d,
 	0x27, 0x05, 0x28, 0x05, 0x42, 0x86, 0x43, 0x86,
@@ -24,20 +37,22 @@ u8 mcman_cmdtable[36] = {
 	0xbf, 0x05, 0xf3, 0x05
 };
 
+extern int (*mcman_sio2transfer)(int port, int slot, sio2_transfer_data_t *sio2data);
+
 // sio2packet_add child functions
-void (*sio2packet_add_func)(int port, int slot, int cmd, u8 *buf, int pos);
-void sio2packet_add_wdma_u32(int port, int slot, int cmd, u8 *buf, int pos);
-void sio2packet_add_pagedata_out(int port, int slot, int cmd, u8 *buf, int pos);
-void sio2packet_add_pagedata_in(int port, int slot, int cmd, u8 *buf, int pos);
-void sio2packet_add_ecc_in(int port, int slot, int cmd, u8 *buf, int pos);
-void sio2packet_add_ecc_out(int port, int slot, int cmd, u8 *buf, int pos);
-void sio2packet_add_wdma_5a(int port, int slot, int cmd, u8 *buf, int pos);
-void sio2packet_add_wdma_00(int port, int slot, int cmd, u8 *buf, int pos);
-void sio2packet_add_wdma_u8(int port, int slot, int cmd, u8 *buf, int pos);
-void sio2packet_add_do_nothing(int port, int slot, int cmd, u8 *buf, int pos);
+static void (*sio2packet_add_func)(int port, int slot, int cmd, u8 *buf, int pos);
+static void sio2packet_add_wdma_u32(int port, int slot, int cmd, u8 *buf, int pos);
+static void sio2packet_add_pagedata_out(int port, int slot, int cmd, u8 *buf, int pos);
+static void sio2packet_add_pagedata_in(int port, int slot, int cmd, u8 *buf, int pos);
+static void sio2packet_add_ecc_in(int port, int slot, int cmd, u8 *buf, int pos);
+static void sio2packet_add_ecc_out(int port, int slot, int cmd, u8 *buf, int pos);
+static void sio2packet_add_wdma_5a(int port, int slot, int cmd, u8 *buf, int pos);
+static void sio2packet_add_wdma_00(int port, int slot, int cmd, u8 *buf, int pos);
+static void sio2packet_add_wdma_u8(int port, int slot, int cmd, u8 *buf, int pos);
+static void sio2packet_add_do_nothing(int port, int slot, int cmd, u8 *buf, int pos);
 
 // functions pointer array to handle sio2packet_add inner functions calls
-void *sio2packet_add_funcs_array[16] = {
+static void *sio2packet_add_funcs_array[16] = {
     (void *)sio2packet_add_wdma_00,		// commands that needs to clear in_dma.addr[2]
     (void *)sio2packet_add_wdma_u32,	// commands that needs to copy an int to in_dma.addr[2..5] (an int* can be passed as arg into buf)
     (void *)sio2packet_add_wdma_u32,	// ...
@@ -101,7 +116,7 @@ void sio2packet_add(int port, int slot, int cmd, u8 *buf)
 //----
 // sio2packet child funcs
 
-void sio2packet_add_wdma_u32(int port, int slot, int cmd, u8 *buf, int pos)
+static void sio2packet_add_wdma_u32(int port, int slot, int cmd, u8 *buf, int pos)
 {
 	u8 *p = mcman_sio2packet.in_dma.addr + pos;
 	p[2] = buf[0];
@@ -113,7 +128,7 @@ void sio2packet_add_wdma_u32(int port, int slot, int cmd, u8 *buf, int pos)
 
 //--
 
-void sio2packet_add_pagedata_out(int port, int slot, int cmd, u8 *buf, int pos)
+static void sio2packet_add_pagedata_out(int port, int slot, int cmd, u8 *buf, int pos)
 {
 	// used for sio2 command 0x81 0x43 to read page data
 	u8 *p = mcman_sio2packet.in_dma.addr + pos;
@@ -122,7 +137,7 @@ void sio2packet_add_pagedata_out(int port, int slot, int cmd, u8 *buf, int pos)
 
 //--
 
-void sio2packet_add_pagedata_in(int port, int slot, int cmd, u8 *buf, int pos)
+static void sio2packet_add_pagedata_in(int port, int slot, int cmd, u8 *buf, int pos)
 {
 	// used for sio2 command 0x81 0x42 to write page data
 	register int i;
@@ -137,7 +152,7 @@ void sio2packet_add_pagedata_in(int port, int slot, int cmd, u8 *buf, int pos)
 
 //--
 
-void sio2packet_add_ecc_in(int port, int slot, int cmd, u8 *buf, int pos)
+static void sio2packet_add_ecc_in(int port, int slot, int cmd, u8 *buf, int pos)
 {
 	// used for sio2 command 0x81 0x42 to write page ecc
 	register u32 regdata;
@@ -161,7 +176,7 @@ void sio2packet_add_ecc_in(int port, int slot, int cmd, u8 *buf, int pos)
 
 //--
 
-void sio2packet_add_ecc_out(int port, int slot, int cmd, u8 *buf, int pos)
+static void sio2packet_add_ecc_out(int port, int slot, int cmd, u8 *buf, int pos)
 {
 	// used for sio2 command 0x81 0x43 to read page ecc
 	register u32 regdata;
@@ -179,7 +194,7 @@ void sio2packet_add_ecc_out(int port, int slot, int cmd, u8 *buf, int pos)
 
 //--
 
-void sio2packet_add_wdma_5a(int port, int slot, int cmd, u8 *buf, int pos)
+static void sio2packet_add_wdma_5a(int port, int slot, int cmd, u8 *buf, int pos)
 {
 	// used for sio2 command 0x81 0x27 to set a termination code
 	u8 *p = mcman_sio2packet.in_dma.addr + pos;
@@ -188,7 +203,7 @@ void sio2packet_add_wdma_5a(int port, int slot, int cmd, u8 *buf, int pos)
 
 //--
 
-void sio2packet_add_wdma_00(int port, int slot, int cmd, u8 *buf, int pos)
+static void sio2packet_add_wdma_00(int port, int slot, int cmd, u8 *buf, int pos)
 {
 	u8 *p = mcman_sio2packet.in_dma.addr + pos;
 	p[2] = 0x00;
@@ -197,7 +212,7 @@ void sio2packet_add_wdma_00(int port, int slot, int cmd, u8 *buf, int pos)
 
 //--
 
-void sio2packet_add_wdma_u8(int port, int slot, int cmd, u8 *buf, int pos)
+static void sio2packet_add_wdma_u8(int port, int slot, int cmd, u8 *buf, int pos)
 {
 	u8 *p = mcman_sio2packet.in_dma.addr + pos;
 	p[2] = buf[0];
@@ -205,7 +220,7 @@ void sio2packet_add_wdma_u8(int port, int slot, int cmd, u8 *buf, int pos)
 
 //--
 
-void sio2packet_add_do_nothing(int port, int slot, int cmd, u8 *buf, int pos)
+static void sio2packet_add_do_nothing(int port, int slot, int cmd, u8 *buf, int pos)
 {
 	// do nothing
 }

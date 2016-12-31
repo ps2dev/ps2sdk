@@ -69,31 +69,13 @@ typedef struct _McFatCluster {
 	int entry[MCMAN_CLUSTERFATENTRIES];
 } McFatCluster;
 
-
 #define MAX_CACHEENTRY 			0x24
-u8 mcman_cachebuf[MAX_CACHEENTRY * MCMAN_CLUSTERSIZE];
-McCacheEntry mcman_entrycache[MAX_CACHEENTRY];
-McCacheEntry *mcman_mccache[MAX_CACHEENTRY];
-
-McCacheEntry *pmcman_entrycache;
-McCacheEntry **pmcman_mccache;
 
 typedef struct {
 	int entry[1 + (MCMAN_CLUSTERFATENTRIES * 2)];
 } McFatCache;
 
-McFatCache mcman_fatcache[2][MCMAN_MAXSLOT];
-
 #define MAX_CACHEDIRENTRY 		0x3
-McFsEntry mcman_dircache[MAX_CACHEDIRENTRY];
-
-int mcman_curdirmaxent;
-int mcman_curdirlength;
-char mcman_curdirpath[1024];
-char *mcman_curdirname;
-
-int mcman_PS1curcluster;
-char mcman_PS1curdir[64];
 
 typedef struct {  // size = 48
 	u8  status;   // 0
@@ -117,9 +99,6 @@ typedef struct {  // size = 48
 } MC_FHANDLE;
 
 #define MAX_FDHANDLES 		3
-MC_FHANDLE mcman_fdhandles[MAX_FDHANDLES];
-
-sceMcStDateTime mcman_fsmodtime;
 
 // internal functions prototypes
 int  mcsio2_transfer(int port, int slot, sio2_transfer_data_t *sio2data);
@@ -250,41 +229,16 @@ typedef struct { 				// size = 384
     int unknown5;
 } MCDevInfo;
 
-MCDevInfo mcman_devinfos[4][MCMAN_MAXSLOT];
-
-sio2_transfer_data_t mcman_sio2packet;  // buffer for mcman sio2 packet
-u8 mcman_wdmabufs[0x0b * 0x90]; 		// buffer array for SIO2 DMA I/O (write)
-u8 mcman_rdmabufs[0x0b * 0x90]; 		// not sure here for size, buffer array for SIO2 DMA I/O (read)
-
-sio2_transfer_data_t mcman_sio2packet_PS1PDA;
-u8 mcman_sio2inbufs_PS1PDA[0x90];
-u8 mcman_sio2outbufs_PS1PDA[0x90];
-
-union {
+union mcman_pagebuf {
 	u32 word[1056/sizeof(u32)];
 	u8 byte[1056/sizeof(u8)];
 	char magic[1056/sizeof(char)];
-} mcman_pagebuf;
-void *mcman_pagedata[32];
-u8 mcman_eccdata[512]; // size for 32 ecc
+};
 
-u8 mcman_backupbuf[16384];
-
-union {
+union mcman_PS1PDApagebuf {
 	u32 word[128/sizeof(u32)];
 	u16 half[128/sizeof(u16)];
 	u8 byte[128/sizeof(u8)];
-} mcman_PS1PDApagebuf;
-
-u32 mcman_timercount;
-int mcman_timerthick;
-
-int mcman_badblock_port;
-int mcman_badblock_slot;
-int mcman_badblock;
-int mcman_replacementcluster[16];
-
-int (*mcman_sio2transfer)(int port, int slot, sio2_transfer_data_t *sio2data);
-int (*mc_detectcard)(int port, int slot);
+};
 
 #endif	// __MCMAN_INTERNAL_H__

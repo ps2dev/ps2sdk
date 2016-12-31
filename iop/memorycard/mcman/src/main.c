@@ -32,9 +32,40 @@ int mcman_curdircluster = -1;
 int timer_ID;
 int PS1CardFlag = 1;
 
+union mcman_pagebuf mcman_pagebuf;
+union mcman_PS1PDApagebuf mcman_PS1PDApagebuf;
+
+extern struct irx_export_table _exp_mcman;
+extern u8 mcman_sio2outbufs_PS1PDA[0x90];
+
+static u8 mcman_cachebuf[MAX_CACHEENTRY * MCMAN_CLUSTERSIZE];
+static McCacheEntry mcman_entrycache[MAX_CACHEENTRY];
+static McCacheEntry *mcman_mccache[MAX_CACHEENTRY];
+
+static McCacheEntry *pmcman_entrycache;
+static McCacheEntry **pmcman_mccache;
+
+static void *mcman_pagedata[32];
+static u8 mcman_backupbuf[16384];
+
+static int mcman_badblock_port;
+static int mcman_badblock_slot;
+static int mcman_badblock;
+static int mcman_replacementcluster[16];
+
+static McFatCache mcman_fatcache[2][MCMAN_MAXSLOT];
+McFsEntry mcman_dircache[MAX_CACHEDIRENTRY];
+
+MC_FHANDLE mcman_fdhandles[MAX_FDHANDLES];
+MCDevInfo mcman_devinfos[4][MCMAN_MAXSLOT];
+
+u8 mcman_eccdata[512]; // size for 32 ecc
+
+int (*mcman_sio2transfer)(int port, int slot, sio2_transfer_data_t *sio2data);
+int (*mc_detectcard)(int port, int slot);
 
 // mcman xor table
-u8 mcman_xortable[256] = {
+static const u8 mcman_xortable[256] = {
 	0x00, 0x87, 0x96, 0x11, 0xA5, 0x22, 0x33, 0xB4,
 	0xB4, 0x33, 0x22, 0xA5, 0x11, 0x96, 0x87, 0x00,
 	0xC3, 0x44, 0x55, 0xD2, 0x66, 0xE1, 0xF0, 0x77,
