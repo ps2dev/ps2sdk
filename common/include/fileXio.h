@@ -94,7 +94,7 @@ struct fileXioDirEntry
 
 struct fileXioDevice
 {
-	char name[15];
+	char name[16];
 	unsigned int type;
 	unsigned int version;	/* Not so sure about this one.  */
 	char desc[128];

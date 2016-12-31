@@ -132,7 +132,7 @@ static int fileXio_GetDeviceList_RPC(struct fileXioDevice* ee_devices, int eecou
     {
         iop_device_t *device = devices[device_count];
         strncpy(local_devices[device_count].name, device->name, 128);
-        local_devices[device_count].name[127] = '\0';
+        local_devices[device_count].name[15] = '\0';
         local_devices[device_count].type = device->type;
         local_devices[device_count].version = device->version;
         strncpy(local_devices[device_count].desc, device->desc, 128);
