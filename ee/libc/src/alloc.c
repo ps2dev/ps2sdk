@@ -237,8 +237,8 @@ static void * do_realloc(void *ptr, size_t size, size_t align )
 	if (ptr == NULL)
 		return memalign(align, size);
 
-	if ((size & (DEFAULT_ALIGNMENT - 1)) != 0)
-		size = ALIGN(size, DEFAULT_ALIGNMENT);
+	if ((size & (align - 1)) != 0)
+		size = ALIGN(size, align);
 
 	_ps2sdk_alloc_lock();
 	prev_mem = (heap_mem_header_t *)((u32)ptr - sizeof(heap_mem_header_t));
