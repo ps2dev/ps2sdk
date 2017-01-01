@@ -224,8 +224,7 @@ void * malloc(size_t size)
 #endif
 
 #ifdef F_realloc
-__attribute__((weak))
-void * realloc(void *ptr, size_t size)
+static void * do_realloc(void *ptr, size_t size, size_t align )
 {
 	heap_mem_header_t *prev_mem;
 	void *new_ptr = NULL;
@@ -236,7 +235,7 @@ void * realloc(void *ptr, size_t size)
 	}
 
 	if (ptr == NULL)
-		return malloc(size);
+		return memalign(align, size);
 
 	if ((size & (DEFAULT_ALIGNMENT - 1)) != 0)
 		size = ALIGN(size, DEFAULT_ALIGNMENT);
@@ -290,7 +289,7 @@ void * realloc(void *ptr, size_t size)
 	_ps2sdk_alloc_unlock();
 
 	/* We got out of luck, let's allocate a new block of memory. */
-	if ((new_ptr = malloc(size)) == NULL)
+	if ((new_ptr = memalign(align, size)) == NULL)
 		return new_ptr;
 
         /* New block is larger, we only copy the old data. */
@@ -298,6 +297,18 @@ void * realloc(void *ptr, size_t size)
 
 	free(ptr);
 	return new_ptr;
+}
+
+__attribute__((weak))
+void *realloc(void *ptr, size_t size)
+{
+	return do_realloc(ptr, size, DEFAULT_ALIGNMENT);
+}
+
+__attribute__((weak))
+void *realloc64(void *ptr, size_t size)
+{
+	return do_realloc(ptr, size, 64);
 }
 #endif
 

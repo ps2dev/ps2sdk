@@ -269,6 +269,7 @@ s32  AddIntcHandler(s32 cause, s32(*handler_func)(s32 cause), s32 next);
 s32  AddIntcHandler2(s32 cause, s32(*handler_func)(s32 cause, void* arg, void* addr), s32 next, void* arg);
 s32  RemoveIntcHandler(s32 cause, s32 handler_id);
 s32	 AddDmacHandler(s32 channel, s32 (*handler)(s32 channel), s32 next);
+s32	 AddDmacHandler2(s32 channel, s32 (*handler)(s32 channel, void *arg, void *addr), s32 next, void* arg);
 s32	 RemoveDmacHandler(s32 channel, s32 handler_id);
 s32  _EnableIntc(s32 cause);
 s32  _DisableIntc(s32 cause);

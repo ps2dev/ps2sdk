@@ -413,7 +413,9 @@ int fioIoctl(int fd, int request, void *data)
 
 	arg.p.fd = fd;
 	arg.request = request;
-	memcpy(arg.data, data, 1024);
+	
+	if(data != NULL)
+		memcpy(arg.data, data, 1024);
 
 	if ((res = SifCallRpc(&_fio_cd, FIO_F_IOCTL, 0, &arg, sizeof arg,
 					&arg, 4, (void *)_fio_intr, NULL)) >= 0)

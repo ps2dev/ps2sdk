@@ -20,6 +20,7 @@
 #define __NR_AddIntcHandler2		__NR_AddIntcHandler
 #define __NR_RemoveIntcHandler		0x11
 #define __NR_AddDmacHandler		0x12
+#define __NR_AddDmacHandler2		__NR_AddDmacHandler
 #define __NR_RemoveDmacHandler		0x13
 #define __NR__EnableIntc		0x14
 #define __NR__DisableIntc		0x15
