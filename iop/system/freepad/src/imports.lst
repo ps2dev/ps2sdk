@@ -51,7 +51,11 @@ I_RegisterVblankHandler
 I_ReleaseVblankHandler
 vblank_IMPORTS_end
 
+#ifndef SIO2MAN_V2
 xsio2man_IMPORTS_start
+#else
+rsio2man_IMPORTS_start
+#endif
 I_sio2_stat70_get
 I_sio2_pad_transfer_init
 I_sio2_transfer2
@@ -59,5 +63,8 @@ I_sio2_transfer_reset2
 I_sio2_mtap_change_slot
 I_sio2_mtap_get_slot_max
 I_sio2_mtap_update_slots
+#ifndef SIO2MAN_V2
 xsio2man_IMPORTS_end
-
+#else
+rsio2man_IMPORTS_end
+#endif

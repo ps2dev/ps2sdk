@@ -32,7 +32,11 @@ I_sceSifSetRpcQueue
 I_sceSifRpcLoop
 sifcmd_IMPORTS_end
 
+#ifndef SIO2MAN_V2
 xsio2man_IMPORTS_start
+#else
+rsio2man_IMPORTS_start
+#endif
 I_sio2_mtap_transfer_init
 I_sio2_transfer2
 I_sio2_transfer_reset2
@@ -40,5 +44,8 @@ I_sio2_mtap_change_slot_set
 I_sio2_mtap_get_slot_max_set
 I_sio2_mtap_get_slot_max2_set
 I_sio2_mtap_update_slots_set
+#ifndef SIO2MAN_V2
 xsio2man_IMPORTS_end
-
+#else
+rsio2man_IMPORTS_end
+#endif
