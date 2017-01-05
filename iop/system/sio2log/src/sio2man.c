@@ -32,7 +32,11 @@
 #ifndef XSIO2MAN
 	IRX_ID("sio2man_logger", 2, 1);
 #else
+#ifndef SIO2MAN_V2
 	IRX_ID("sio2man", 2, 1);
+#else
+	IRX_ID("sio2man", 2, 4);
+#endif
 #endif
 
 extern struct irx_export_table _exp_sio2man;
@@ -57,10 +61,21 @@ extern struct irx_export_table _exp_sio2man;
 #define EF_MC_TRANSFER_READY	0x00000008
 #define EF_MTAP_TRANSFER_INIT	0x00000010
 #define EF_MTAP_TRANSFER_READY	0x00000020
-#define EF_TRANSFER_START	0x00000040
-#define EF_TRANSFER_FINISH	0x00000080
-#define EF_TRANSFER_RESET	0x00000100
-#define EF_SIO2_INTR_COMPLETE	0x00000200
+#ifndef SIO2MAN_V2
+	#define EF_TRANSFER_START	0x00000040
+	#define EF_TRANSFER_FINISH	0x00000080
+	#define EF_TRANSFER_RESET	0x00000100
+	#define EF_SIO2_INTR_COMPLETE	0x00000200
+#else
+	#define EF_RM_TRANSFER_INIT	0x00000040
+	#define EF_RM_TRANSFER_READY	0x00000080
+	#define EF_UNK_TRANSFER_INIT	0x00000100
+	#define EF_UNK_TRANSFER_READY	0x00000200
+	#define EF_TRANSFER_START	0x00000400
+	#define EF_TRANSFER_FINISH	0x00000800
+	#define EF_TRANSFER_RESET	0x00001000
+	#define EF_SIO2_INTR_COMPLETE	0x00002000
+#endif
 
 #define EPRINTF(format, args...) printf("%s: " format, _irx_id.n , ## args)
 
@@ -167,8 +182,11 @@ void main_thread(void *unused)
 		log_flush(0);
 	#endif
 		WaitEventFlag(event_flag, EF_PAD_TRANSFER_INIT |
-				EF_MC_TRANSFER_INIT | EF_MTAP_TRANSFER_INIT,
-				1, resbits);
+				EF_MC_TRANSFER_INIT | EF_MTAP_TRANSFER_INIT
+#ifdef SIO2MAN_V2
+				| EF_RM_TRANSFER_INIT | EF_UNK_TRANSFER_INIT
+#endif
+				, 1, resbits);
 
 		if (resbits[0] & EF_PAD_TRANSFER_INIT) {
 			ClearEventFlag(event_flag, ~EF_PAD_TRANSFER_INIT);
@@ -187,6 +205,20 @@ void main_thread(void *unused)
 			SetEventFlag(event_flag, EF_MTAP_TRANSFER_READY);
 #ifndef XSIO2MAN
 			log_default(LOG_MTAP_READY);
+#endif
+#ifdef SIO2MAN_V2
+		} else if (resbits[0] & EF_RM_TRANSFER_INIT) {
+			ClearEventFlag(event_flag, ~EF_RM_TRANSFER_INIT);
+			SetEventFlag(event_flag, EF_RM_TRANSFER_READY);
+#ifndef XSIO2MAN
+			log_default(LOG_RM_READY);
+#endif
+		} else if (resbits[0] & EF_UNK_TRANSFER_INIT) {
+			ClearEventFlag(event_flag, ~EF_UNK_TRANSFER_INIT);
+			SetEventFlag(event_flag, EF_UNK_TRANSFER_READY);
+#ifndef XSIO2MAN
+			log_default(LOG_UNK_READY);
+#endif
 #endif
 		} else {
 			EPRINTF("Unknown event %08lx. Exiting.\n", resbits[0]);
@@ -335,6 +367,24 @@ int sio2_transfer(sio2_transfer_data_t *td)
 	ClearEventFlag(event_flag, ~EF_TRANSFER_FINISH);
 	return 1;
 }
+
+#ifdef SIO2MAN_V2
+void sio2_rm_transfer_init(void)
+{
+	SetEventFlag(event_flag, EF_RM_TRANSFER_INIT);
+
+	WaitEventFlag(event_flag, EF_RM_TRANSFER_READY, 0, NULL);
+	ClearEventFlag(event_flag, ~EF_RM_TRANSFER_READY);
+}
+
+void sio2_unk_transfer_init(void)
+{
+	SetEventFlag(event_flag, EF_UNK_TRANSFER_INIT);
+
+	WaitEventFlag(event_flag, EF_UNK_TRANSFER_READY, 0, NULL);
+	ClearEventFlag(event_flag, ~EF_UNK_TRANSFER_READY);
+}
+#endif
 
 void sio2_transfer_reset(void)
 {

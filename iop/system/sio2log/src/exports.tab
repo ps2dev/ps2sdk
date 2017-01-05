@@ -1,4 +1,8 @@
+#ifndef SIO2MAN_V2
 DECLARE_EXPORT_TABLE(sio2man, 1, 2)
+#else
+DECLARE_EXPORT_TABLE(sio2man, 2, 3)
+#endif
 	DECLARE_EXPORT(_start)
 	DECLARE_EXPORT(_retonly)
 	DECLARE_EXPORT(shutdown)
@@ -56,15 +60,19 @@ DECLARE_EXPORT_TABLE(sio2man, 1, 2)
 	DECLARE_EXPORT(sio2_pad_transfer_init)
 	DECLARE_EXPORT(sio2_mc_transfer_init)
 	DECLARE_EXPORT(sio2_mtap_transfer_init)
+#ifdef SIO2MAN_V2
+	DECLARE_EXPORT(sio2_rm_transfer_init)
+	DECLARE_EXPORT(sio2_unk_transfer_init)	//50
+#endif
 	DECLARE_EXPORT(sio2_transfer)
-	DECLARE_EXPORT(sio2_transfer_reset) // 50
+	DECLARE_EXPORT(sio2_transfer_reset) // 50 / 52
 
-	/* Callbacks 51 - 58 */
+	/* Callbacks 51 - 58 / 53 - 60 */
 	DECLARE_EXPORT(sio2_mtap_change_slot_set)
 	DECLARE_EXPORT(sio2_mtap_get_slot_max_set)
 	DECLARE_EXPORT(sio2_mtap_get_slot_max2_set)
 	DECLARE_EXPORT(sio2_mtap_update_slots_set)
-	DECLARE_EXPORT(sio2_mtap_change_slot) // 55
+	DECLARE_EXPORT(sio2_mtap_change_slot) // 55 / 57
 	DECLARE_EXPORT(sio2_mtap_get_slot_max)
 	DECLARE_EXPORT(sio2_mtap_get_slot_max2)
 	DECLARE_EXPORT(sio2_mtap_update_slots)
