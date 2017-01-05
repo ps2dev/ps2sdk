@@ -1,0 +1,12 @@
+DECLARE_EXPORT_TABLE(rmman, 1, 1)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(rmmanInit)
+	DECLARE_EXPORT(rmmanOpen)
+	DECLARE_EXPORT(rmmanClose)
+	DECLARE_EXPORT(rmmanEnd)
+END_EXPORT_TABLE
+
+void _retonly() {}

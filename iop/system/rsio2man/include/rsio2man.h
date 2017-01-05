@@ -25,8 +25,8 @@ typedef int (*sio2_mtap_get_slot_max2_cb_t)(int port);
 typedef void (*sio2_mtap_update_slots_t)(void);
 
 // IRX Imports
-#define xsio2man_IMPORTS_start DECLARE_IMPORT_TABLE(sio2man, 1, 2)
-#define xsio2man_IMPORTS_end END_IMPORT_TABLE
+#define rsio2man_IMPORTS_start DECLARE_IMPORT_TABLE(sio2man, 2, 3)
+#define rsio2man_IMPORTS_end END_IMPORT_TABLE
 
 void sio2_transfer_reset(void);
 #define I_sio2_transfer_reset DECLARE_IMPORT(26, sio2_transfer_reset)
