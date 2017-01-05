@@ -35,6 +35,8 @@
 	IRX_ID("freesio2", 1, 1);
 #endif
 
+extern struct irx_export_table _exp_sio2man;
+
 #define SIO2_REG_BASE		0xbf808200
 #define SIO2_REG_PORT0_CTRL1	0xbf808240
 #define SIO2_REG_PORT0_CTRL2	0xbf808244
@@ -70,8 +72,6 @@ int (*mtap_change_slot_cb)(s32 *) = NULL;
 int (*mtap_get_slot_max_cb)(int) = NULL;
 int (*mtap_get_slot_max2_cb)(int) = NULL;
 void (*mtap_update_slots_cb)(void) = NULL;
-
-struct irx_export_table _exp_sio2man;
 
 int sio2_intr_handler(void *arg)
 {
@@ -302,7 +302,6 @@ int _start(int argc, const char **argv)
 	return 0;
 }
 
-/* 23 */
 void sio2_pad_transfer_init(void)
 {
 	SetEventFlag(event_flag, EF_PAD_TRANSFER_INIT);
@@ -311,7 +310,6 @@ void sio2_pad_transfer_init(void)
 	ClearEventFlag(event_flag, ~EF_PAD_TRANSFER_READY);
 }
 
-/* 24 */
 void sio2_mc_transfer_init(void)
 {
 	SetEventFlag(event_flag, EF_MC_TRANSFER_INIT);
@@ -320,7 +318,6 @@ void sio2_mc_transfer_init(void)
 	ClearEventFlag(event_flag, ~EF_MC_TRANSFER_READY);
 }
 
-/* 48 */
 void sio2_mtap_transfer_init(void)
 {
 	SetEventFlag(event_flag, EF_MTAP_TRANSFER_INIT);
@@ -329,7 +326,6 @@ void sio2_mtap_transfer_init(void)
 	ClearEventFlag(event_flag, ~EF_MTAP_TRANSFER_READY);
 }
 
-/* 25 */
 int sio2_transfer(sio2_transfer_data_t *td)
 {
 	transfer_data = td;
@@ -340,13 +336,11 @@ int sio2_transfer(sio2_transfer_data_t *td)
 	return 1;
 }
 
-/* 26 */
 void sio2_transfer_reset(void)
 {
 	SetEventFlag(event_flag, EF_TRANSFER_RESET);
 }
 
-/* 55 */
 int sio2_mtap_change_slot(s32 *status)
 {
 	int i, ret = 1;
@@ -366,7 +360,6 @@ int sio2_mtap_change_slot(s32 *status)
 	return ret;
 }
 
-/* 56 */
 int sio2_mtap_get_slot_max(int port)
 {
 	if (mtap_get_slot_max_cb)
@@ -375,7 +368,6 @@ int sio2_mtap_get_slot_max(int port)
 	return 1;
 }
 
-/* 57 */
 int sio2_mtap_get_slot_max2(int port)
 {
 	if (mtap_get_slot_max2_cb)
@@ -384,153 +376,33 @@ int sio2_mtap_get_slot_max2(int port)
 	return 1;
 }
 
-/* 58 */
 void sio2_mtap_update_slots(void)
 {
 	if (mtap_update_slots_cb)
 		mtap_update_slots_cb();
 }
 
-/* 51 */ void sio2_mtap_change_slot_set(sio2_mtap_change_slot_cb_t cb) { mtap_change_slot_cb = cb; }
-/* 52 */ void sio2_mtap_get_slot_max_set(sio2_mtap_get_slot_max_cb_t cb) { mtap_get_slot_max_cb = cb; }
-/* 53 */ void sio2_mtap_get_slot_max2_set(sio2_mtap_get_slot_max2_cb_t cb) { mtap_get_slot_max2_cb = cb; }
-/* 54 */ void sio2_mtap_update_slots_set(sio2_mtap_update_slots_t cb) { mtap_update_slots_cb = cb; }
+void sio2_mtap_change_slot_set(sio2_mtap_change_slot_cb_t cb) { mtap_change_slot_cb = cb; }
+void sio2_mtap_get_slot_max_set(sio2_mtap_get_slot_max_cb_t cb) { mtap_get_slot_max_cb = cb; }
+void sio2_mtap_get_slot_max2_set(sio2_mtap_get_slot_max2_cb_t cb) { mtap_get_slot_max2_cb = cb; }
+void sio2_mtap_update_slots_set(sio2_mtap_update_slots_t cb) { mtap_update_slots_cb = cb; }
 
-/* 04 */ void sio2_ctrl_set(u32 val) { _sw(val, SIO2_REG_CTRL); }
-/* 05 */ u32  sio2_ctrl_get() { return _lw(SIO2_REG_CTRL); }
-/* 06 */ u32  sio2_stat6c_get() { return _lw(SIO2_REG_STAT6C); }
-/* 07 */ void sio2_portN_ctrl1_set(int N, u32 val) { _sw(val, SIO2_REG_PORT0_CTRL1 + (N * 8)); }
-/* 08 */ u32  sio2_portN_ctrl1_get(int N) { return _lw(SIO2_REG_PORT0_CTRL1 + (N * 8)); }
-/* 09 */ void sio2_portN_ctrl2_set(int N, u32 val) { _sw(val, SIO2_REG_PORT0_CTRL2 + (N * 8)); }
-/* 10 */ u32  sio2_portN_ctrl2_get(int N) { return _lw(SIO2_REG_PORT0_CTRL2 + (N * 8)); }
-/* 11 */ u32  sio2_stat70_get() { return _lw(SIO2_REG_STAT70); }
-/* 12 */ void sio2_regN_set(int N, u32 val) { _sw(val, SIO2_REG_BASE + (N * 4)); }
-/* 13 */ u32  sio2_regN_get(int N) { return _lw(SIO2_REG_BASE + (N * 4)); }
-/* 14 */ u32  sio2_stat74_get() { return _lw(SIO2_REG_STAT74); }
-/* 15 */ void sio2_unkn78_set(u32 val) { _sw(val, SIO2_REG_UNKN78); }
-/* 16 */ u32  sio2_unkn78_get() { return _lw(SIO2_REG_UNKN78); }
-/* 17 */ void sio2_unkn7c_set(u32 val) { _sw(val, SIO2_REG_UNKN7C); }
-/* 18 */ u32  sio2_unkn7c_get() { return _lw(SIO2_REG_UNKN7C); }
-/* 19 */ void sio2_data_out(u8 val) { _sb(val, SIO2_REG_DATA_OUT); }
-/* 20 */ u8   sio2_data_in() { return _lb(SIO2_REG_DATA_IN); }
-/* 21 */ void sio2_stat_set(u32 val) { _sw(val, SIO2_REG_STAT); }
-/* 22 */ u32  sio2_stat_get() { return _lw(SIO2_REG_STAT); }
-
-DECLARE_EXPORT_TABLE(sio2man, 1, 2)
-	DECLARE_EXPORT(_start)
-	DECLARE_EXPORT(_retonly)
-	DECLARE_EXPORT(shutdown)
-	DECLARE_EXPORT(_retonly)
-
-	/* Register manipulation 04 - 22 */
-	DECLARE_EXPORT(sio2_ctrl_set)
-	DECLARE_EXPORT(sio2_ctrl_get) // 5
-	DECLARE_EXPORT(sio2_stat6c_get)
-	DECLARE_EXPORT(sio2_portN_ctrl1_set)
-	DECLARE_EXPORT(sio2_portN_ctrl1_get)
-	DECLARE_EXPORT(sio2_portN_ctrl2_set)
-	DECLARE_EXPORT(sio2_portN_ctrl2_get) // 10
-	DECLARE_EXPORT(sio2_stat70_get)
-	DECLARE_EXPORT(sio2_regN_set)
-	DECLARE_EXPORT(sio2_regN_get)
-	DECLARE_EXPORT(sio2_stat74_get)
-	DECLARE_EXPORT(sio2_unkn78_set) // 15
-	DECLARE_EXPORT(sio2_unkn78_get)
-	DECLARE_EXPORT(sio2_unkn7c_set)
-	DECLARE_EXPORT(sio2_unkn7c_get)
-	DECLARE_EXPORT(sio2_data_out)
-	DECLARE_EXPORT(sio2_data_in) // 20
-	DECLARE_EXPORT(sio2_stat_set)
-	DECLARE_EXPORT(sio2_stat_get)
-
-	/* Transfer events 23 - 26 */
-	DECLARE_EXPORT(sio2_pad_transfer_init)
-	DECLARE_EXPORT(sio2_mc_transfer_init)
-	DECLARE_EXPORT(sio2_transfer) // 25
-	DECLARE_EXPORT(sio2_transfer_reset)
-
-	/* Repeat of register routines 27 - 45 */
-	DECLARE_EXPORT(sio2_ctrl_set)
-	DECLARE_EXPORT(sio2_ctrl_get)
-	DECLARE_EXPORT(sio2_stat6c_get)
-	DECLARE_EXPORT(sio2_portN_ctrl1_set)
-	DECLARE_EXPORT(sio2_portN_ctrl1_get)
-	DECLARE_EXPORT(sio2_portN_ctrl2_set)
-	DECLARE_EXPORT(sio2_portN_ctrl2_get)
-	DECLARE_EXPORT(sio2_stat70_get)
-	DECLARE_EXPORT(sio2_regN_set)
-	DECLARE_EXPORT(sio2_regN_get)
-	DECLARE_EXPORT(sio2_stat74_get)
-	DECLARE_EXPORT(sio2_unkn78_set)
-	DECLARE_EXPORT(sio2_unkn78_get)
-	DECLARE_EXPORT(sio2_unkn7c_set)
-	DECLARE_EXPORT(sio2_unkn7c_get)
-	DECLARE_EXPORT(sio2_data_out)
-	DECLARE_EXPORT(sio2_data_in)
-	DECLARE_EXPORT(sio2_stat_set)
-	DECLARE_EXPORT(sio2_stat_get)
-
-	/* Repeat of transfers + mtap 46 - 50 */
-	DECLARE_EXPORT(sio2_pad_transfer_init)
-	DECLARE_EXPORT(sio2_mc_transfer_init)
-	DECLARE_EXPORT(sio2_mtap_transfer_init)
-	DECLARE_EXPORT(sio2_transfer)
-	DECLARE_EXPORT(sio2_transfer_reset) // 50
-
-	/* Callbacks 51 - 58 */
-	DECLARE_EXPORT(sio2_mtap_change_slot_set)
-	DECLARE_EXPORT(sio2_mtap_get_slot_max_set)
-	DECLARE_EXPORT(sio2_mtap_get_slot_max2_set)
-	DECLARE_EXPORT(sio2_mtap_update_slots_set)
-	DECLARE_EXPORT(sio2_mtap_change_slot) // 55
-	DECLARE_EXPORT(sio2_mtap_get_slot_max)
-	DECLARE_EXPORT(sio2_mtap_get_slot_max2)
-	DECLARE_EXPORT(sio2_mtap_update_slots)
-
-END_EXPORT_TABLE
-
-void _retonly() {}
-
-loadcore_IMPORTS_start
-I_RegisterLibraryEntries
-loadcore_IMPORTS_end
-
-intrman_IMPORTS_start
-I_RegisterIntrHandler
-I_ReleaseIntrHandler
-I_EnableIntr
-I_DisableIntr
-I_CpuSuspendIntr
-I_CpuResumeIntr
-intrman_IMPORTS_end
-
-dmacman_IMPORTS_start
-I_dmac_request
-I_dmac_transfer
-I_dmac_ch_set_dpcr
-I_dmac_enable
-I_dmac_disable
-dmacman_IMPORTS_end
-
-stdio_IMPORTS_start
-I_printf
-stdio_IMPORTS_end
-
-thbase_IMPORTS_start
-I_CreateThread
-I_StartThread
-thbase_IMPORTS_end
-
-thevent_IMPORTS_start
-I_CreateEventFlag
-I_SetEventFlag
-I_iSetEventFlag
-I_ClearEventFlag
-I_WaitEventFlag
-thevent_IMPORTS_end
-
-ioman_IMPORTS_start
-I_open
-I_write
-I_close
-ioman_IMPORTS_end
+void sio2_ctrl_set(u32 val) { _sw(val, SIO2_REG_CTRL); }
+u32  sio2_ctrl_get() { return _lw(SIO2_REG_CTRL); }
+u32  sio2_stat6c_get() { return _lw(SIO2_REG_STAT6C); }
+void sio2_portN_ctrl1_set(int N, u32 val) { _sw(val, SIO2_REG_PORT0_CTRL1 + (N * 8)); }
+u32  sio2_portN_ctrl1_get(int N) { return _lw(SIO2_REG_PORT0_CTRL1 + (N * 8)); }
+void sio2_portN_ctrl2_set(int N, u32 val) { _sw(val, SIO2_REG_PORT0_CTRL2 + (N * 8)); }
+u32  sio2_portN_ctrl2_get(int N) { return _lw(SIO2_REG_PORT0_CTRL2 + (N * 8)); }
+u32  sio2_stat70_get() { return _lw(SIO2_REG_STAT70); }
+void sio2_regN_set(int N, u32 val) { _sw(val, SIO2_REG_BASE + (N * 4)); }
+u32  sio2_regN_get(int N) { return _lw(SIO2_REG_BASE + (N * 4)); }
+u32  sio2_stat74_get() { return _lw(SIO2_REG_STAT74); }
+void sio2_unkn78_set(u32 val) { _sw(val, SIO2_REG_UNKN78); }
+u32  sio2_unkn78_get() { return _lw(SIO2_REG_UNKN78); }
+void sio2_unkn7c_set(u32 val) { _sw(val, SIO2_REG_UNKN7C); }
+u32  sio2_unkn7c_get() { return _lw(SIO2_REG_UNKN7C); }
+void sio2_data_out(u8 val) { _sb(val, SIO2_REG_DATA_OUT); }
+u8   sio2_data_in() { return _lb(SIO2_REG_DATA_IN); }
+void sio2_stat_set(u32 val) { _sw(val, SIO2_REG_STAT); }
+u32  sio2_stat_get() { return _lw(SIO2_REG_STAT); }
