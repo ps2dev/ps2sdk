@@ -32,7 +32,7 @@
 #ifndef XSIO2MAN
 	IRX_ID("sio2man_logger", 2, 1);
 #else
-	IRX_ID("freesio2", 1, 1);
+	IRX_ID("sio2man", 2, 1);
 #endif
 
 extern struct irx_export_table _exp_sio2man;

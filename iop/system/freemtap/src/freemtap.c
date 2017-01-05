@@ -22,7 +22,7 @@ struct irx_export_table _exp_mtapman;
 #define EF_UPDATE_SLOTS		0x1
 #define EF_EXIT_THREAD		0x2
 
-IRX_ID(MODNAME, 1, 2);
+IRX_ID("multitap_manager", 2, 2);
 
 static s32 event_flag;
 static s32 threadid_main;

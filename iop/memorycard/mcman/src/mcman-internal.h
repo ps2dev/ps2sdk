@@ -36,8 +36,8 @@
 	#define DPRINTF(args...)	printf(args)
 #endif
 
-#define MODNAME "mcman"
-#define MODVER  0x101
+#define MODNAME "mcman_cex"
+#define MODVER  0x20b
 
 typedef struct _MCCacheEntry {
 	int  cluster;   // 0

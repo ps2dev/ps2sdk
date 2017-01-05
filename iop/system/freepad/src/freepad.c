@@ -19,7 +19,7 @@ struct irx_export_table _exp_padman;
 #define BANNER "FREEPAD %s\n"
 #define VERSION "v1.0"
 
-IRX_ID(MODNAME, 1, 2);
+IRX_ID("padman", 3, 6);
 
 // Global variables
 u16 version = 0x300;

@@ -13,7 +13,7 @@
 #include <mcman.h>
 #include "mcman-internal.h"
 
-IRX_ID(MODNAME, 1, 1);
+IRX_ID(MODNAME, 2, 11);
 
 struct modInfo_t mcman_modInfo = { "mcman_cex", 0x20b };
 
