@@ -24,11 +24,13 @@ struct remote_data
 };
 
 /* Status values (guess) */
+#define RM_INIT     	0x000012FF
 #define RM_READY      	0x005A12FF
 #define RM_KEYPRESSED 	0x145A12FF
 #define RM_NOREMOTE   	0xFFFFFFFF
 
 /* Button Values */
+#define RM_NONE		0x00000000
 #define RM_AUDIO 	0x0040D649
 #define RM_SHUFFLE	0x0050D349
 #define RM_ANGLE	0x0050D649
