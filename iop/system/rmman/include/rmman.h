@@ -11,11 +11,11 @@
 # RMMAN definitions
 */
 
+#include <types.h>
+#include <librm-common.h>
+
 #ifndef _IOP_RMMAN_H
 #define _IOP_RMMAN_H
-
-#include <types.h>
-#include <irx.h>
 
 #define rmman_IMPORTS_start DECLARE_IMPORT_TABLE(rmman, 1, 1)
 #define rmman_IMPORTS_end END_IMPORT_TABLE

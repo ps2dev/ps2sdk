@@ -11,6 +11,8 @@
 # RPC Interface for PS2 Remote Control Driver (RMMAN)
 */
 
+#include <librm-common.h>
+
 #ifndef __LIBRM_H__
 #define __LIBRM_H__
 

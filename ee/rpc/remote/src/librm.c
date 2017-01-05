@@ -19,37 +19,22 @@
 #include "librm.h"
 
 static SifRpcClientData_t rmmanif __attribute__((aligned(64)));
-static char buffer[128] __attribute__((aligned(64)));
+static struct rmRpcPacket buffer __attribute__((aligned(64)));
 static int rmman_init = 0;
-
-#define RMMAN_BIND_RPC_ID 	0x80000C00
-#define RMMAN_RPC_END     	1
-#define RMMAN_RPC_INIT 	  	3
-#define RMMAN_RPC_CLOSE   	4
-#define RMMAN_RPC_OPEN    	5
-#define RMMAN_RPC_GETMODULEVER 	7
-
-struct rm_data
-{
-   /* Not sure what is in here yet */
-   unsigned char data[32];
-   unsigned int frame;
-   unsigned char pad[92];
-};
 
 struct port_state
 {
    int opened;
-   struct rm_data *rmData;
+   struct rmEEData *rmData;
 };
 
 static struct port_state ports[2];
 
-static struct rm_data*
+static struct rmEEData*
 rmGetDmaStr(int port, int slot)
 
 {
-   struct rm_data *pdata;
+   struct rmEEData *pdata;
 
    pdata = ports[port].rmData;
    SyncDCache(pdata, (u8 *)pdata + 256);
@@ -67,7 +52,6 @@ rmGetDmaStr(int port, int slot)
 int RMMan_Init(void)
 
 {
-   u32 *data = (u32 *) buffer;
    if(rmman_init)
     {
       printf("RMMan Library already initialised\n");
@@ -77,15 +61,15 @@ int RMMan_Init(void)
    rmmanif.server = NULL;
 
    do {
-      if (SifBindRpc(&rmmanif, RMMAN_BIND_RPC_ID, 0) < 0) {
+      if (SifBindRpc(&rmmanif, RMMAN_RPC_ID, 0) < 0) {
 	 return -1;
       }
       nopdelay();
    } while(!rmmanif.server);
 
-   data[0] = RMMAN_RPC_INIT;
+   buffer.cmd.command = RMMAN_RPCFUNC_INIT;
 
-   if (SifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+   if (SifCallRpc(&rmmanif, 0, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
        return -1;
 
    ports[0].opened = 0;
@@ -95,27 +79,23 @@ int RMMan_Init(void)
 
    rmman_init = 1;
 
-   return data[3];
+   return buffer.cmd.result;
 }
 
 u32 RMMan_GetModuleVersion(void)
 
 {
-   u32 *data = (u32 *) buffer;
+   buffer.cmd.command = RMMAN_RPCFUNC_VERSION;
 
-   data[0] = RMMAN_RPC_GETMODULEVER;
-
-   if (SifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+   if (SifCallRpc(&rmmanif, 0, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
        return 0;
 
-   return data[3];
+   return buffer.cmd.result;
 }
 
 int RMMan_Open(int port, int slot, void *pData)
 
 {
-   u32 *data = (u32 *) buffer;
-
    if((port < 0) || (port > 1) || (slot != 0))
    {
       printf("Error, port must be 0 or 1 and slot set to 0\n");
@@ -128,38 +108,34 @@ int RMMan_Open(int port, int slot, void *pData)
       return 0;
    }
 
-   data[0] = RMMAN_RPC_OPEN;
-   data[1] = port;
-   data[2] = slot;
-   data[4] = (u32) pData;
+   buffer.cmd.command = RMMAN_RPCFUNC_OPEN;
+   buffer.cmd.port = port;
+   buffer.cmd.slot = slot;
+   buffer.cmd.data = pData;
 
-   if (SifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+   if (SifCallRpc(&rmmanif, 0, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
        return 0;
 
    ports[port].opened = 1;
    ports[port].rmData = pData;
 
-   return data[3];
+   return buffer.cmd.result;
 }
 
 int RMMan_End(void)
 
 {
-   u32 *data = (u32 *) buffer;
+   buffer.cmd.command = RMMAN_RPCFUNC_END;
 
-   data[0] = RMMAN_RPC_END;
-
-   if (SifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+   if (SifCallRpc(&rmmanif, 0, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
        return 0;
 
-   return data[3];
+   return buffer.cmd.result;
 }
 
 int RMMan_Close(int port, int slot)
 
 {
-   u32 *data = (u32 *) buffer;
-
    if((port < 0) || (port > 1) || (slot != 0))
    {
       printf("Error, port must be 0 or 1 and slot set to 0\n");
@@ -171,19 +147,19 @@ int RMMan_Close(int port, int slot)
       return 0;
    }
 
-   data[0] = RMMAN_RPC_CLOSE;
-   data[1] = port;
-   data[2] = slot;
+   buffer.cmd.command = RMMAN_RPCFUNC_CLOSE;
+   buffer.cmd.port = port;
+   buffer.cmd.slot = slot;
 
-   if (SifCallRpc(&rmmanif, 0, 0, buffer, 128, buffer, 128, NULL, NULL) < 0)
+   if (SifCallRpc(&rmmanif, 0, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
        return 0;
 
-   return data[3];
+   return buffer.cmd.result;
 }
 
 void RMMan_Read(int port, int slot, struct remote_data *data)
 {
-   struct rm_data *pdata;
+   struct rmEEData *pdata;
 
    if((port < 0) || (port > 1) || (slot != 0))
    {

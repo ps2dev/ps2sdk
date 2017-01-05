@@ -37,6 +37,8 @@ struct rmEEData
 	u32 state;
 };
 
+#define RMMAN_RPC_ID 	0x80000C00
+
 enum RMMAN_RPCFUNC {
 	RMMAN_RPCFUNC_END	= 1,
 	RMMAN_RPCFUNC_INIT	= 3,

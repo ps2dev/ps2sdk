@@ -9,8 +9,6 @@
 #include <rsio2man.h>
 #include <irx.h>
 
-#include "librm-common.h"
-
 #include "rmman.h"
 
 IRX_ID("rmman", 1, 16);
@@ -516,7 +514,7 @@ static void *RpcHandler(int fno, void *buffer, int len)
 			retBuff = RmmanRpc_version((struct rmRpcPacket *)buffer);
 			break;
 		default:
-			printf("invalid function code (%03x)\n", ((struct rmRpcPacket *)buffer)->cmd.command);
+			printf("invalid function code (%03x)\n", (unsigned int)((struct rmRpcPacket *)buffer)->cmd.command);
 			retBuff = buffer;
 	}
 
@@ -534,7 +532,7 @@ static void RpcThread(void *arg)
 	sceSifInitRpc(0);
 
 	sceSifSetRpcQueue(&RpcDataQueue, GetThreadId());
-	sceSifRegisterRpc(&RpcServerData, 0x80000c00, &RpcHandler, &RpcDataBuffer, NULL, NULL, &RpcDataQueue);
+	sceSifRegisterRpc(&RpcServerData, RMMAN_RPC_ID, &RpcHandler, &RpcDataBuffer, NULL, NULL, &RpcDataQueue);
 	sceSifRpcLoop(&RpcDataQueue);
 }
 
