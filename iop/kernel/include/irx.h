@@ -18,8 +18,13 @@
 
 #define IRX_VER(major, minor)	((((major) & 0xff) << 8) + ((minor) & 0xff))
 
+struct irx_id {
+	const char *n;
+	u16 v;
+};
+
 #define IRX_ID(name, major, minor) \
-struct { const char *n; u16 v;} _irx_id = { \
+struct irx_id _irx_id = { \
 	name, IRX_VER(major, minor) \
 };
 
