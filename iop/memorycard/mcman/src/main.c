@@ -176,7 +176,9 @@ int _start(int argc, const char **argv)
 #ifdef DEBUG
 	DPRINTF("mcman: sio2man version=0x%03x\n", libptr->version);
 #endif
-	if (libptr->version > 0x101)
+	if (libptr->version >= 0x201)
+		sio2man_type = XSIO2MAN_V2;
+	else if (libptr->version > 0x101)
 		sio2man_type = XSIO2MAN;
 
 	// Get sio2man export table
@@ -189,10 +191,13 @@ int _start(int argc, const char **argv)
 	mcman_sio2transfer = (void *)mcsio2_transfer;
 	mc_detectcard = (void *)McDetectCard2;
 
-	if (sio2man_type == XSIO2MAN) {
+	if (sio2man_type >= XSIO2MAN) {
 		// Set functions pointers to match XSIO2MAN exports
 		psio2_transfer_reset = export_tab[26];
-		psio2_mtap_change_slot = export_tab[55];
+		if(sio2man_type == XSIO2MAN)
+			psio2_mtap_change_slot = export_tab[55];
+		else
+			psio2_mtap_change_slot = export_tab[57];
 
 		// set internals function pointers for XMCMAN
 		mcman_sio2transfer = (void *)mcsio2_transfer2;
@@ -3782,7 +3787,7 @@ int mcman_readdirentryPS1(int port, int slot, int cluster, McFsEntryPS1 **pfse)
 
 	*pfse = (void *)&mce->cl_data[offset << 7];
 
-	if (sio2man_type == XSIO2MAN) {
+	if (sio2man_type >= XSIO2MAN) {
 		McFsEntryPS1 *fse = (McFsEntryPS1 *)*pfse; // <--- XMCMAN seems to work with this
 		fse->field_7d = 0;						   //
 	}

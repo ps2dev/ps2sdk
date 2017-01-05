@@ -460,7 +460,7 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 #endif
 
 	ret = 0;
-	if (sio2man_type == XSIO2MAN) {
+	if (sio2man_type >= XSIO2MAN) {
 		if ((flags & sceMcFileAttrFile) != 0) {
 			r = mcman_getPS1direntry(port, slot, (char*)info->EntryName, &fse1, 1);
 			if (r < 0) {
@@ -483,7 +483,7 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 	if (r < 0)
 		return r;
 
-	if (sio2man_type == XSIO2MAN) {
+	if (sio2man_type >= XSIO2MAN) {
 		if (ret != sceMcResSucceed)
 			return sceMcResNoEntry;
 	}
@@ -496,7 +496,7 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 
 	mce->wr_flag |= 1 << ((r + 1) - ((temp >> 3) << 3));
 
-	if (sio2man_type == XSIO2MAN) {
+	if (sio2man_type >= XSIO2MAN) {
 		fse2->field_7d = 0;
 		fse2->field_2c = 0;
 		flags &= -12;
@@ -680,7 +680,7 @@ int mcman_close1(int fd)
 		fse->length = temp << 13;
 	}
 
-	if (sio2man_type == XSIO2MAN) {
+	if (sio2man_type >= XSIO2MAN) {
 		fse->field_7d = 0; // <--- To preserve for XMCMAN
 		fse->field_2c = 0; //
 		fse->field_38 = 0; //
