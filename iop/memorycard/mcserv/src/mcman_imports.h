@@ -39,7 +39,7 @@ int mcman_type = MCMAN;
 /* 22 */ int  (*pMcGetFormat)(int port, int slot);
 /* 23 */ int  (*pMcGetEntSpace)(int port, int slot, char *dirname);
 /* 24 */ int  (*pMcReplaceBadBlock)(void);
-/* 42 */ struct modInfo_t *(*pMcGetModuleInfo)(void);
+/* 42 */ struct irx_id *(*pMcGetModuleInfo)(void);
 /* 45 */ int  (*pMcCheckBlock)(int port, int slot, int block);
 
 #endif

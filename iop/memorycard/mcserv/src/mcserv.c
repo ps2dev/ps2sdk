@@ -267,14 +267,14 @@ void *cb_rpc_S_0400(u32 fno, void *buf, int size)
 int sceMcInit(void)
 {
 	register int r;
-	struct modInfo_t *ModuleInfo;
+	struct irx_id *ModuleInfo;
 
 	r = _McInit(&mcserv_rpc_buf);
 
 	if (mcman_type == XMCMAN) {
 		ModuleInfo = pMcGetModuleInfo();
 		rpc_stat.mcserv_version = MODVER;
-		rpc_stat.mcman_version = ModuleInfo->version;
+		rpc_stat.mcman_version = ModuleInfo->v;
 	}
 
 	return r;

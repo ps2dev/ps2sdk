@@ -15,12 +15,6 @@
 
 #include <libmc-common.h>
 
-// modInfo struct returned by xmcman exports 42
-struct modInfo_t {
-	const char *name;
-	u16 version;
-};
-
 /* MCMAN public structure */
 typedef struct _sceMcTblGetDir {	// size = 64
 	sceMcStDateTime _Create;	// 0
@@ -65,7 +59,7 @@ typedef struct _sceMcTblGetDir {	// size = 64
 /* 23 */ int  McGetEntSpace(int port, int slot, char *dirname);
 /* 24 */ int  mcman_replacebadblock(void);
 /* 25 */ int  McCloseAll(void);
-/* 42 */ struct modInfo_t *McGetModuleInfo(void);
+/* 42 */ struct irx_id *McGetModuleInfo(void);
 /* 43 */ int  McGetCardSpec(int port, int slot, s16 *pagesize, u16 *blocksize, int *cardsize, u8 *flags);
 /* 44 */ int  mcman_getFATentry(int port, int slot, int fat_index, int *fat_entry);
 /* 45 */ int  McCheckBlock(int port, int slot, int block);

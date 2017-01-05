@@ -115,8 +115,8 @@ typedef struct {			// size = 192
 
 typedef struct {
 	s32 result;
-	s32 mcserv_version;
-	s32 mcman_version;
+	u32 mcserv_version;
+	u32 mcman_version;
 } mcRpcStat_t;
 
 // in addition to errno

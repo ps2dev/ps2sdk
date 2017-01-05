@@ -15,8 +15,6 @@
 
 IRX_ID(MODNAME, 2, 11);
 
-struct modInfo_t mcman_modInfo = { "mcman_cex", 0x20b };
-
 char sio2man_modname[8] = "sio2man\0";
 int sio2man_type = SIO2MAN;
 
@@ -287,12 +285,12 @@ int McGetMcType(int port, int slot) // Export #39
 }
 
 //--------------------------------------------------------------
-struct modInfo_t *McGetModuleInfo(void) // Export #42 XMCMAN only
+struct irx_id *McGetModuleInfo(void) // Export #42 XMCMAN only
 {
 #ifdef DEBUG
 	DPRINTF("mcman: McGetModuleInfo\n");
 #endif
-	return (struct modInfo_t *)&mcman_modInfo;
+	return &_irx_id;
 }
 
 //--------------------------------------------------------------
