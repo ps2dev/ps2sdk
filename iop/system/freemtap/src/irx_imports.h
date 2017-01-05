@@ -22,6 +22,10 @@
 #include <stdio.h>
 #include <thbase.h>
 #include <thevent.h>
+#ifndef SIO2MAN_V2
 #include <xsio2man.h>
+#else
+#include <rsio2man.h>
+#endif
 
 #endif /* IOP_IRX_IMPORTS_H */

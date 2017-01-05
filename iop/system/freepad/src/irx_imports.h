@@ -23,6 +23,10 @@
 #include <thbase.h>
 #include <thevent.h>
 #include <vblank.h>
+#ifndef SIO2MAN_V2
 #include <xsio2man.h>
+#else
+#include <rsio2man.h>
+#endif
 
 #endif
