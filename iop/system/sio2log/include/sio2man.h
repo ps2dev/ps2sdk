@@ -8,6 +8,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 # $Id$
+# rom0:SIO2MAN module definitions
 */
 
 #ifndef SIO2MAN_H
@@ -40,26 +41,73 @@ typedef struct {
 	struct _sio2_dma_arg out_dma;
 } sio2_transfer_data_t;
 
-/* 04 */ void sio2_ctrl_set(u32 val);
-/* 05 */ u32  sio2_ctrl_get(void);
-/* 06 */ u32  sio2_stat6c_get(void);
-/* 07 */ void sio2_portN_ctrl1_set(int N, u32 val);
-/* 08 */ u32  sio2_portN_ctrl1_get(int N);
-/* 09 */ void sio2_portN_ctrl2_set(int N, u32 val);
-/* 10 */ u32  sio2_portN_ctrl2_get(int N);
-/* 11 */ u32  sio2_stat70_get(void);
-/* 12 */ void sio2_regN_set(int N, u32 val);
-/* 13 */ u32  sio2_regN_get(int N);
-/* 14 */ u32  sio2_stat74_get(void);
-/* 15 */ void sio2_unkn78_set(u32 val);
-/* 16 */ u32  sio2_unkn78_get(void);
-/* 17 */ void sio2_unkn7c_set(u32 val);
-/* 18 */ u32  sio2_unkn7c_get(void);
-/* 19 */ void sio2_data_out(u8 val);
-/* 20 */ u8   sio2_data_in(void);
-/* 21 */ void sio2_stat_set(u32 val);
-/* 22 */ u32  sio2_stat_get(void);
-/* 24 */ void sio2_mc_transfer_init(void);
-/* 25 */ int  sio2_transfer(sio2_transfer_data_t *sio2data);
+#define sio2man_IMPORTS_start DECLARE_IMPORT_TABLE(sio2man, 1, 1)
+#define sio2man_IMPORTS_end END_IMPORT_TABLE
+
+void sio2_ctrl_set(u32 val);
+#define I_sio2_ctrl_set DECLARE_IMPORT(4, sio2_ctrl_set)
+
+u32 sio2_ctrl_get(void);
+#define I_sio2_ctrl_get DECLARE_IMPORT(5, sio2_ctrl_get)
+
+u32 sio2_stat6c_get(void);
+#define I_sio2_stat6c_get DECLARE_IMPORT(6, sio2_stat6c_get)
+
+void sio2_portN_ctrl1_set(int N, u32 val);
+#define I_sio2_portN_ctrl1_set DECLARE_IMPORT(7, sio2_portN_ctrl1_set)
+
+u32 sio2_portN_ctrl1_get(int N);
+#define I_sio2_portN_ctrl1_get DECLARE_IMPORT(8, sio2_portN_ctrl1_get)
+
+void sio2_portN_ctrl2_set(int N, u32 val);
+#define I_sio2_portN_ctrl2_set DECLARE_IMPORT(9, sio2_portN_ctrl2_set)
+
+u32 sio2_portN_ctrl2_get(int N);
+#define I_sio2_portN_ctrl2_get DECLARE_IMPORT(10, sio2_portN_ctrl2_get)
+
+u32 sio2_stat70_get(void);
+#define I_sio2_stat70_get DECLARE_IMPORT(11, sio2_stat70_get)
+
+void sio2_regN_set(int N, u32 val);
+#define I_sio2_regN_set DECLARE_IMPORT(12, sio2_regN_set)
+
+u32 sio2_regN_get(int N);
+#define I_sio2_regN_get DECLARE_IMPORT(13, sio2_regN_get)
+
+u32 sio2_stat74_get(void);
+#define I_sio2_stat74_get DECLARE_IMPORT(14, sio2_stat74_get)
+
+void sio2_unkn78_set(u32 val);
+#define I_sio2_unkn78_set DECLARE_IMPORT(15, sio2_unkn78_set)
+
+u32 sio2_unkn78_get(void);
+#define I_sio2_unkn78_get DECLARE_IMPORT(16, sio2_unkn78_get)
+
+void sio2_unkn7c_set(u32 val);
+#define I_sio2_unkn7c_set DECLARE_IMPORT(17, sio2_unkn7c_set)
+
+u32 sio2_unkn7c_get(void);
+#define I_sio2_unkn7c_get DECLARE_IMPORT(18, sio2_unkn7c_get)
+
+void sio2_data_out(u8 val);
+#define I_sio2_data_out DECLARE_IMPORT(19, sio2_data_out)
+
+u8 sio2_data_in(void);
+#define I_sio2_data_in DECLARE_IMPORT(20, sio2_data_in)
+
+void sio2_stat_set(u32 val);
+#define I_sio2_stat_set DECLARE_IMPORT(21, sio2_stat_set)
+
+u32 sio2_stat_get(void);
+#define I_sio2_stat_get DECLARE_IMPORT(22, sio2_stat_get)
+
+void sio2_pad_transfer_init(void);
+#define I_sio2_pad_transfer_init DECLARE_IMPORT(23, sio2_pad_transfer_init)
+
+void sio2_mc_transfer_init(void);
+#define I_sio2_mc_transfer_init DECLARE_IMPORT(24, sio2_mc_transfer_init)
+
+int sio2_transfer(sio2_transfer_data_t *td);
+#define I_sio2_transfer DECLARE_IMPORT(25, sio2_transfer)
 
 #endif /* SIO2MAN_H */
