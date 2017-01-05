@@ -24,7 +24,7 @@
 #define MODNAME "alloc"
 IRX_ID("Basic alloc library", 1, 1);
 
-struct irx_export_table _exp_alloc;
+extern struct irx_export_table _exp_alloc;
 
 static vs32 alloc_sema = -1;
 

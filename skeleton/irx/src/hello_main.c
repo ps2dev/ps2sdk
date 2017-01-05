@@ -4,7 +4,7 @@
 #define MODNAME "alloc"
 IRX_ID("Basic alloc library", 1, 1);
 
-struct irx_export_table _exp_alloc;
+extern struct irx_export_table _exp_alloc;
 
 
 // This contain our prototype for our export, and we need it to call it inside our _start

@@ -24,7 +24,7 @@
 
 IRX_ID(IOPMGR_MODNAME, IOPMGR_VERSION_HIGH, IOPMGR_VERSION_LOW);
 
-struct irx_export_table _exp_iopmgr;
+extern struct irx_export_table _exp_iopmgr;
 
 extern void cmdline_handle(char *command, char *arg1);
 

@@ -71,7 +71,7 @@ int flash_detect(void);
 int flash_call5(void);
 int flash_get_info(flash_info_t *info);
 
-struct irx_export_table _exp_fls;
+extern struct irx_export_table _exp_fls;
 
 int _start(int argc, char *argv[])
 {

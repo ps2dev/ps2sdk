@@ -27,7 +27,7 @@ static struct {
 	void	*arg;
 } sbus_handler_table[32];
 
-struct irx_export_table _exp_sbusintr;
+extern struct irx_export_table _exp_sbusintr;
 
 int _start(int argc, const char **argv)
 {

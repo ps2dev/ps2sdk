@@ -42,7 +42,7 @@ IRX_ID(MODNAME, 1, 1);
 #define MAX_OPENFILES 32
 #define MAX_OPEN_DIRFILES 16
 
-struct irx_export_table _exp_devfs;
+extern struct irx_export_table _exp_devfs;
 
 iop_device_t devfs_device;
 iop_device_ops_t devfs_ops;

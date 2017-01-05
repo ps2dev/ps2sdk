@@ -161,7 +161,7 @@ static void ata_pio_mode(int mode);
 static void ata_multiword_dma_mode(int mode);
 static void ata_ultra_dma_mode(int mode);
 
-struct irx_export_table _exp_atad;
+extern struct irx_export_table _exp_atad;
 
 static void AtadPreDmaCb(int bcr, int dir){
 	USE_SPD_REGS;

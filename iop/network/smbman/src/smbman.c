@@ -20,7 +20,7 @@
 
 IRX_ID(MODNAME, VER_MAJOR, VER_MINOR);
 
-struct irx_export_table _exp_smbman;
+extern struct irx_export_table _exp_smbman;
 
 //-------------------------------------------------------------------------
 int _start(int argc, char** argv)

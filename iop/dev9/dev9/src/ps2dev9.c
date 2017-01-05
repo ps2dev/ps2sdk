@@ -87,7 +87,7 @@ static int expbay_device_probe(void);
 static int expbay_device_reset(void);
 static int expbay_init(void);
 
-struct irx_export_table _exp_dev9;
+extern struct irx_export_table _exp_dev9;
 
 int _start(int argc, char **argv)
 {

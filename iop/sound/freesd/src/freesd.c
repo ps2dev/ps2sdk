@@ -15,7 +15,7 @@
 #include "freesd.h"
 #include "spu2regs.h"
 
-struct irx_export_table _exp_libsd;
+extern struct irx_export_table _exp_libsd;
 
 #define BANNER "FREESD %s\n"
 #define VERSION "v1.01"

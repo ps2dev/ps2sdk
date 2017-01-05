@@ -40,7 +40,7 @@ IRX_ID("SIFToo_driver", 1, 1);
 
 int sif2_control(u32 intr, void *unused);
 
-struct irx_export_table _exp_siftoo;
+extern struct irx_export_table _exp_siftoo;
 
 int _start(int argc, char **argv)
 {

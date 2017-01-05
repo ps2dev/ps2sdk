@@ -33,7 +33,7 @@ iop_file_t file_table[MAX_FILES];
 
 #define isnum(c) ((c) >= '0' && (c) <= '9')
 
-struct irx_export_table _exp_iomanx;
+extern struct irx_export_table _exp_iomanx;
 
 extern int hook_ioman();
 extern int unhook_ioman();

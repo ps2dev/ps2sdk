@@ -70,7 +70,7 @@ static short rendered_left [ 512 ];
 static short rendered_right[ 512 ];
 
 /** exports table */
-struct irx_export_table _exp_audsrv;
+extern struct irx_export_table _exp_audsrv;
 
 /* forward declarations */
 static void play_thread(void *arg);

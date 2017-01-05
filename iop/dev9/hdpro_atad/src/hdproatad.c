@@ -181,7 +181,7 @@ static int ata_wait_busy(int bits);
 int ata_io_finish(void);
 int ata_device_flush_cache(int device);
 
-struct irx_export_table _exp_atad;
+extern struct irx_export_table _exp_atad;
 
 static unsigned int ata_alarm_cb(void *unused)
 {

@@ -14,7 +14,7 @@
 #include "xsio2man.h"
 #include "freemtap.h"
 
-struct irx_export_table _exp_mtapman;
+extern struct irx_export_table _exp_mtapman;
 
 #define BANNER "FREEMTAP %s\n"
 #define VERSION "v1.0"
