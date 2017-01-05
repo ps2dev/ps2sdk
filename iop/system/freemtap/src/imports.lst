@@ -34,8 +34,8 @@ sifcmd_IMPORTS_end
 
 xsio2man_IMPORTS_start
 I_sio2_mtap_transfer_init
-I_sio2_transfer
-I_sio2_transfer_reset
+I_sio2_transfer2
+I_sio2_transfer_reset2
 I_sio2_mtap_change_slot_set
 I_sio2_mtap_get_slot_max_set
 I_sio2_mtap_get_slot_max_set2

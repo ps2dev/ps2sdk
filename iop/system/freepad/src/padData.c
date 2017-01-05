@@ -264,7 +264,7 @@ u32 padTransfer(u32 slot)
 
 	if(res1 != 0)
 	{
-		sio2_transfer( &sio2_td );
+		sio2_transfer2( &sio2_td );
 
 		sio2_td.out_size = 0;
 
@@ -319,7 +319,7 @@ void pdTransfer()
 
 	mtapChangeSlot(0);
 
-	sio2_transfer_reset();
+	sio2_transfer_reset2();
 }
 
 u32 pdGetStat70bit(u32 port, u32 slot)
@@ -388,7 +388,7 @@ u32 SlotCheckConnection(u32 slot)
 
 	if( val != 0)
 	{
-		sio2_transfer( &sio2_td );
+		sio2_transfer2( &sio2_td );
 
 		sio2_td.out_size = 0;
 
@@ -454,7 +454,7 @@ u32 pdCheckConnection(u32 port, u32 slot)
 
 	sio2_mtap_change_slot(change_slot_buffer);
 
-	sio2_transfer_reset();
+	sio2_transfer_reset2();
 
 	return ret;
 }

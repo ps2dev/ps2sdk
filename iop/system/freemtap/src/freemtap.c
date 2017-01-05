@@ -127,10 +127,10 @@ s32 get_slot_number(u32 port, u32 retries)
 		for(j=0; j < 16; j++) td.regdata[j] = 0;
 
 		get_slot_number_setup_td(port, 0);
-		sio2_transfer(&td);
+		sio2_transfer2(&td);
 		slots = get_slot_number_check_td(0);
 
-		sio2_transfer_reset();
+		sio2_transfer_reset2();
 
 		if((slots == -2) || (slots >= 0)) return slots;
 
@@ -312,7 +312,7 @@ int change_slot(s32 *arg)
 		// Send transfer data and check result
 		if(reg > 0)
 		{
-			sio2_transfer(&td);
+			sio2_transfer2(&td);
 
 			for(port=0; port < 4; port++)
 			{
@@ -531,7 +531,7 @@ s32 mtapChangeSlot(u32 port, u32 slot)
 
 	change_slot(data);
 
-	sio2_transfer_reset();
+	sio2_transfer_reset2();
 
 	if(data[port] < 0)
 	{

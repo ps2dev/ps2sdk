@@ -9,7 +9,8 @@ void sio2_pad_transfer_init();
 int sio2_transfer(sio2_transfer_data_t *td);
 void sio2_transfer_reset(void);
 void sio2_mtap_transfer_init();
-void sio2_transfer_reset();
+int sio2_transfer2(sio2_transfer_data_t *td);
+void sio2_transfer_reset2();
 
 void sio2_mtap_change_slot_set(int (*cb)(s32 *));
 void sio2_mtap_get_slot_max_set(int (*cb)(int));
@@ -29,8 +30,8 @@ void sio2_mtap_update_slots();
 #define I_sio2_transfer DECLARE_IMPORT(25, sio2_transfer)
 #define I_sio2_transfer_reset DECLARE_IMPORT(26, sio2_transfer_reset)
 #define I_sio2_mtap_transfer_init	DECLARE_IMPORT(48, sio2_mtap_transfer_init)
-//#define I_sio2_transfer DECLARE_IMPORT(49, sio2_transfer)
-#define I_sio2_transfer_reset DECLARE_IMPORT(50, sio2_transfer_reset)
+#define I_sio2_transfer2 DECLARE_IMPORT(49, sio2_transfer2)
+#define I_sio2_transfer_reset2 DECLARE_IMPORT(50, sio2_transfer_reset2)
 #define I_sio2_mtap_change_slot_set DECLARE_IMPORT(51, sio2_mtap_change_slot_set)
 #define I_sio2_mtap_get_slot_max_set DECLARE_IMPORT(52, sio2_mtap_get_slot_max_set)
 #define I_sio2_mtap_get_slot_max_set2 DECLARE_IMPORT(53, sio2_mtap_get_slot_max_set2)
