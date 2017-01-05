@@ -148,6 +148,10 @@ SYSCALL(RemoveIntcHandler)
 SYSCALL(AddDmacHandler)
 #endif
 
+#ifdef F_AddDmacHandler2
+SYSCALL(AddDmacHandler2)
+#endif
+
 #ifdef F_RemoveDmacHandler
 SYSCALL(RemoveDmacHandler)
 #endif
