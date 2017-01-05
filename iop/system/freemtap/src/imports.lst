@@ -38,7 +38,7 @@ I_sio2_transfer2
 I_sio2_transfer_reset2
 I_sio2_mtap_change_slot_set
 I_sio2_mtap_get_slot_max_set
-I_sio2_mtap_get_slot_max_set2
+I_sio2_mtap_get_slot_max2_set
 I_sio2_mtap_update_slots_set
 xsio2man_IMPORTS_end
 

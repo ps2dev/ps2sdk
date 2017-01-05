@@ -428,7 +428,7 @@ s32 _start(char **argv, int argc)
 
 	sio2_mtap_change_slot_set(change_slot);
 	sio2_mtap_get_slot_max_set(get_slots1);
-	sio2_mtap_get_slot_max_set2(get_slots2);
+	sio2_mtap_get_slot_max2_set(get_slots2);
 	sio2_mtap_update_slots_set(update_slot_numbers);
 
 	td.in = in_buffer;
@@ -444,7 +444,7 @@ void shutdown()
 
 	sio2_mtap_change_slot_set(NULL);
 	sio2_mtap_get_slot_max_set(NULL);
-	sio2_mtap_get_slot_max_set2(NULL);
+	sio2_mtap_get_slot_max2_set(NULL);
 	sio2_mtap_update_slots_set(NULL);
 
 	for(i=0; i < 4; i++)

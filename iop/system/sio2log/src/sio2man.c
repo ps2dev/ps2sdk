@@ -23,7 +23,7 @@
 #include <thevent.h>
 #include <ioman.h>
 
-#include "sio2man.h"
+#include "xsio2man.h"
 
 #ifndef XSIO2MAN
 	#include "log.h"
@@ -66,10 +66,10 @@ int init = 0;
 int event_flag = -1;
 int thid = -1;
 sio2_transfer_data_t *transfer_data = NULL;
-int (*cb1)(s32 *) = NULL;
-int (*cb2)(int) = NULL;
-int (*cb3)(int) = NULL;
-void (*cb4)(void) = NULL;
+int (*mtap_change_slot_cb)(s32 *) = NULL;
+int (*mtap_get_slot_max_cb)(int) = NULL;
+int (*mtap_get_slot_max2_cb)(int) = NULL;
+void (*mtap_update_slots_cb)(void) = NULL;
 
 struct irx_export_table _exp_sio2man;
 
@@ -281,7 +281,7 @@ int _start(int argc, const char **argv)
 
 	sio2_ctrl_set(0x3bc);
 
-	cb1 = NULL;  cb2 = NULL;  cb3 = NULL; cb4 = NULL;
+	mtap_change_slot_cb = NULL;  mtap_get_slot_max_cb = NULL;  mtap_get_slot_max2_cb = NULL; mtap_update_slots_cb = NULL;
 	event_flag = create_event_flag();
 	thid = create_main_thread();
 
@@ -303,7 +303,7 @@ int _start(int argc, const char **argv)
 }
 
 /* 23 */
-void sio2_pad_transfer_init()
+void sio2_pad_transfer_init(void)
 {
 	SetEventFlag(event_flag, EF_PAD_TRANSFER_INIT);
 
@@ -312,7 +312,7 @@ void sio2_pad_transfer_init()
 }
 
 /* 24 */
-void sio2_mc_transfer_init()
+void sio2_mc_transfer_init(void)
 {
 	SetEventFlag(event_flag, EF_MC_TRANSFER_INIT);
 
@@ -321,7 +321,7 @@ void sio2_mc_transfer_init()
 }
 
 /* 48 */
-void sio2_mtap_transfer_init()
+void sio2_mtap_transfer_init(void)
 {
 	SetEventFlag(event_flag, EF_MTAP_TRANSFER_INIT);
 
@@ -341,24 +341,24 @@ int sio2_transfer(sio2_transfer_data_t *td)
 }
 
 /* 26 */
-void sio2_transfer_reset()
+void sio2_transfer_reset(void)
 {
 	SetEventFlag(event_flag, EF_TRANSFER_RESET);
 }
 
 /* 55 */
-int sio2_func1(s32 *arg)
+int sio2_mtap_change_slot(s32 *status)
 {
 	int i, ret = 1;
 
-	if (cb1)
-		return cb1(arg);
+	if (mtap_change_slot_cb)
+		return mtap_change_slot_cb(status);
 
-	for (i = 0; i < 4; i++, arg++) {
-		if ((*arg + 1) < 2)
-			arg[4] = 1;
+	for (i = 0; i < 4; i++, status++) {
+		if ((*status + 1) < 2)
+			status[4] = 1;
 		else {
-			arg[4] = 0;
+			status[4] = 0;
 			ret = 0;
 		}
 	}
@@ -367,34 +367,34 @@ int sio2_func1(s32 *arg)
 }
 
 /* 56 */
-int sio2_func2(int arg)
+int sio2_mtap_get_slot_max(int port)
 {
-	if (cb2)
-		return cb2(arg);
+	if (mtap_get_slot_max_cb)
+		return mtap_get_slot_max_cb(port);
 
 	return 1;
 }
 
 /* 57 */
-int sio2_func3(int arg)
+int sio2_mtap_get_slot_max2(int port)
 {
-	if (cb3)
-		return cb3(arg);
+	if (mtap_get_slot_max2_cb)
+		return mtap_get_slot_max2_cb(port);
 
 	return 1;
 }
 
 /* 58 */
-void sio2_func4()
+void sio2_mtap_update_slots(void)
 {
-	if (cb4)
-		cb4();
+	if (mtap_update_slots_cb)
+		mtap_update_slots_cb();
 }
 
-/* 51 */ void sio2_cb1_set(int (*cb)(s32 *)) { cb1 = cb; }
-/* 52 */ void sio2_cb2_set(int (*cb)(int)) { cb2 = cb; }
-/* 53 */ void sio2_cb3_set(int (*cb)(int)) { cb3 = cb; }
-/* 54 */ void sio2_cb4_set(void (*cb)(void)) { cb4 = cb; }
+/* 51 */ void sio2_mtap_change_slot_set(sio2_mtap_change_slot_cb_t cb) { mtap_change_slot_cb = cb; }
+/* 52 */ void sio2_mtap_get_slot_max_set(sio2_mtap_get_slot_max_cb_t cb) { mtap_get_slot_max_cb = cb; }
+/* 53 */ void sio2_mtap_get_slot_max2_set(sio2_mtap_get_slot_max2_cb_t cb) { mtap_get_slot_max2_cb = cb; }
+/* 54 */ void sio2_mtap_update_slots_set(sio2_mtap_update_slots_t cb) { mtap_update_slots_cb = cb; }
 
 /* 04 */ void sio2_ctrl_set(u32 val) { _sw(val, SIO2_REG_CTRL); }
 /* 05 */ u32  sio2_ctrl_get() { return _lw(SIO2_REG_CTRL); }
@@ -478,14 +478,14 @@ DECLARE_EXPORT_TABLE(sio2man, 1, 2)
 	DECLARE_EXPORT(sio2_transfer_reset) // 50
 
 	/* Callbacks 51 - 58 */
-	DECLARE_EXPORT(sio2_cb1_set)
-	DECLARE_EXPORT(sio2_cb2_set)
-	DECLARE_EXPORT(sio2_cb3_set)
-	DECLARE_EXPORT(sio2_cb4_set)
-	DECLARE_EXPORT(sio2_func1) // 55
-	DECLARE_EXPORT(sio2_func2)
-	DECLARE_EXPORT(sio2_func3)
-	DECLARE_EXPORT(sio2_func4)
+	DECLARE_EXPORT(sio2_mtap_change_slot_set)
+	DECLARE_EXPORT(sio2_mtap_get_slot_max_set)
+	DECLARE_EXPORT(sio2_mtap_get_slot_max2_set)
+	DECLARE_EXPORT(sio2_mtap_update_slots_set)
+	DECLARE_EXPORT(sio2_mtap_change_slot) // 55
+	DECLARE_EXPORT(sio2_mtap_get_slot_max)
+	DECLARE_EXPORT(sio2_mtap_get_slot_max2)
+	DECLARE_EXPORT(sio2_mtap_update_slots)
 
 END_EXPORT_TABLE
 
