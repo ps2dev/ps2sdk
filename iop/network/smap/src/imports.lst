@@ -26,7 +26,6 @@ I_strcmp
 I_strtoul
 I_strncmp
 I_bzero
-I_look_ctype_table
 I_strtok
 I_strcpy
 I_strlen
