@@ -12,12 +12,14 @@ IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = $(IOP_BIN_DIR)iop_sbusdbg.irx
+IOP_BIN = $(IOP_BIN_DIR)iop_sbusdbg.irx
+
+IOP_CFLAGS += -fno-builtin-printf
+
+IOP_INCS += -I$(PS2SDKSRC)/common/sbus/include -I$(PS2SDKSRC)/iop/debug/iopdebug/include
+
 IOP_OBJS = main.o sbus_dbg_low.o sbus_tty.o sbus_dbg.o imports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
-IOP_INCS = -I$(PS2SDKSRC)/common/sbus/include -I$(PS2SDKSRC)/iop/debug/iopdebug/include
-
-IOP_CFLAGS  += -fno-builtin-printf
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

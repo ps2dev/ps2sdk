@@ -12,7 +12,8 @@ IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = $(IOP_BIN_DIR)iomanX.irx
+IOP_BIN = $(IOP_BIN_DIR)iomanX.irx
+
 IOP_OBJS = iomanX.o ioman_sbv.o exports.o imports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 

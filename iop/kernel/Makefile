@@ -12,7 +12,7 @@ IOP_LIB_DIR = lib/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_LIB  = $(IOP_LIB_DIR)libkernel.a
+IOP_LIB = $(IOP_LIB_DIR)libkernel.a
 
 #TODO: remove the library because it's deprecated.
 IOP_OBJS = #cdvdman.o heaplib.o intrman.o ioman.o libsd.o loadcore.o modload.o secrman.o sifcmd.o sifman.o sio2man.o stdio.o sysclib.o sysmem.o thbase.o thevent.o thsemap.o timrman.o usbd.o vblank.o

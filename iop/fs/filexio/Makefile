@@ -12,7 +12,8 @@ IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = $(IOP_BIN_DIR)fileXio.irx
+IOP_BIN = $(IOP_BIN_DIR)fileXio.irx
+
 IOP_OBJS = fileXio_iop.o imports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 

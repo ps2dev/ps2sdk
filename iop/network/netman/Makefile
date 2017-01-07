@@ -12,12 +12,14 @@ IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = $(IOP_BIN_DIR)netman.irx
-IOP_OBJS = netman.o rpc_server.o rpc_client.o imports.o exports.o
-IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
+IOP_BIN = $(IOP_BIN_DIR)netman.irx
+
+IOP_CFLAGS += -mno-check-zero-division
 
 IOP_INCS += -I$(IOP_SRC_DIR)/include
-IOP_CFLAGS += -mno-check-zero-division
+
+IOP_OBJS = netman.o rpc_server.o rpc_client.o imports.o exports.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

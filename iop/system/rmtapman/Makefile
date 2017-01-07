@@ -12,12 +12,14 @@ IOP_BIN_DIR = irx/
 IOP_SRC_DIR = $(PS2SDKSRC)/iop/system/freemtap/src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = $(IOP_BIN_DIR)rmtapman.irx
-IOP_OBJS = freemtap.o rpcservers.o exports.o imports.o
-IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
+IOP_BIN = $(IOP_BIN_DIR)rmtapman.irx
 
 IOP_CFLAGS += -DSIO2MAN_V2=1
-IOP_INCS = -I$(PS2SDKSRC)/iop/system/sio2log/include/ -I$(PS2SDKSRC)/iop/system/rsio2man/include/
+
+IOP_INCS += -I$(PS2SDKSRC)/iop/system/sio2log/include/ -I$(PS2SDKSRC)/iop/system/rsio2man/include/
+
+IOP_OBJS = freemtap.o rpcservers.o exports.o imports.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

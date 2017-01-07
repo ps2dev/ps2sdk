@@ -12,12 +12,14 @@ IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = $(IOP_BIN_DIR)siftoo.irx
-IOP_OBJS = siftoo.o pipe.o exports.o imports.o
-IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
+IOP_BIN = $(IOP_BIN_DIR)siftoo.irx
+
+IOP_CFLAGS += -fno-builtin-printf
+
 IOP_INCS += -I$(PS2SDKSRC)/iop/system/sbusintr/include
 
-IOP_CFLAGS  += -fno-builtin-printf
+IOP_OBJS = siftoo.o pipe.o exports.o imports.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

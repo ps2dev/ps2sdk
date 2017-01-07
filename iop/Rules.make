@@ -23,7 +23,7 @@ IOP_INCS := $(IOP_INCS) -I$(PS2SDKSRC)/iop/kernel/include -I$(PS2SDKSRC)/common/
 # C compiler flags
 # -fno-builtin is required to prevent the GCC built-in functions from being included,
 #   for finer-grained control over what goes into each IRX.
-IOP_CFLAGS  := -D_IOP -fno-builtin -O2 -G0 -Wall $(IOP_INCS) $(IOP_CFLAGS)
+IOP_CFLAGS := -D_IOP -fno-builtin -O2 -G0 -Wall $(IOP_INCS) $(IOP_CFLAGS)
 # Linker flags
 IOP_LDFLAGS := -nostdlib -s $(IOP_LDFLAGS)
 
@@ -35,7 +35,7 @@ IOP_LDFLAGS := -nostdlib -s $(IOP_LDFLAGS)
 # -fno-toplevel-reorder (for IOP import and export tables only) disables toplevel reordering by GCC v4.2 and later.
 #   Without it, the import and export tables can be broken apart by GCC's optimizations.
 ifeq ($(IOP_CC_VERSION),5.3.0)
-IOP_CFLAGS  += -msoft-float -mno-explicit-relocs
+IOP_CFLAGS += -msoft-float -mno-explicit-relocs
 IOP_IETABLE_CFLAGS := -fno-toplevel-reorder
 endif
 

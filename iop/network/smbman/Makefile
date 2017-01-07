@@ -12,14 +12,16 @@ IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = $(IOP_BIN_DIR)smbman.irx
-IOP_OBJS = smbman.o smb_fio.o smb.o poll.o auth.o \
-	des.o md4.o imports.o exports.o
-IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
+IOP_BIN = $(IOP_BIN_DIR)smbman.irx
 
-IOP_CFLAGS  += #-DDEBUG
-IOP_LDFLAGS += -lgcc
+IOP_CFLAGS += #-DDEBUG
+
 IOP_INCS += -I$(PS2SDKSRC)/iop/tcpip/tcpip/include
+
+IOP_LDFLAGS += -lgcc
+
+IOP_OBJS = smbman.o smb_fio.o smb.o poll.o auth.o des.o md4.o imports.o exports.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 
