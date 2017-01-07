@@ -38,16 +38,16 @@ ifeq ($(IOP_CC_VERSION),3.2.3)
 EE_NO_CRT = -mno-crt0
 endif
 
-$(EE_OBJS_DIR)%.o : $(EE_SRC_DIR)%.c
+$(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.c
 	$(EE_C_COMPILE) -c $< -o $@
 
-$(EE_OBJS_DIR)%.o : $(EE_SRC_DIR)%.cpp
+$(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.cpp
 	$(EE_CXX_COMPILE) -c $< -o $@
 
-$(EE_OBJS_DIR)%.o : $(EE_SRC_DIR)%.S
+$(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.S
 	$(EE_C_COMPILE) -c $< -o $@
 
-$(EE_OBJS_DIR)%.o : $(EE_SRC_DIR)%.s
+$(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.s
 	$(EE_AS) $(EE_ASFLAGS) $< -o $@
 
 $(EE_LIB_DIR):
@@ -59,13 +59,13 @@ $(EE_BIN_DIR):
 $(EE_OBJS_DIR):
 	$(MKDIR) -p $(EE_OBJS_DIR)
 
-$(EE_BIN) : $(EE_OBJS) $(PS2SDKSRC)/ee/startup/obj/crt0.o
+$(EE_BIN): $(EE_OBJS) $(PS2SDKSRC)/ee/startup/obj/crt0.o
 	$(EE_CC) $(EE_NO_CRT) -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_CFLAGS) \
 		-o $(EE_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS)
 
-$(EE_LIB) : $(EE_OBJS) $(EE_LIB:%.a=%.erl)
+$(EE_LIB): $(EE_OBJS) $(EE_LIB:%.a=%.erl)
 	$(EE_AR) cru $(EE_LIB) $(EE_OBJS)
 
-$(EE_LIB:%.a=%.erl) : $(EE_OBJS)
+$(EE_LIB:%.a=%.erl): $(EE_OBJS)
 	$(EE_CC) $(EE_NO_CRT) -Wl,-r -Wl,-d -o $(EE_LIB:%.a=%.erl) $(EE_OBJS)
 	$(EE_STRIP) --strip-unneeded -R .mdebug.eabi64 -R .reginfo -R .comment $(EE_LIB:%.a=%.erl)
