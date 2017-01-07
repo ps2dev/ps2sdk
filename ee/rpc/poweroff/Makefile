@@ -12,11 +12,12 @@ EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
+EE_LIB = $(EE_LIB_DIR)libpoweroff.a
+
+EE_INCS += -I$(PS2SDKSRC)/ee/rpc/hdd/include -I$(PS2SDKSRC)/ee/rpc/filexio/include
+
 EE_OBJS = poweroff.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
-
-EE_INCS = -I$(PS2SDKSRC)/ee/rpc/hdd/include -I$(PS2SDKSRC)/ee/rpc/filexio/include
-EE_LIB = $(EE_LIB_DIR)libpoweroff.a
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
 

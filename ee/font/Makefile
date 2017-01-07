@@ -12,12 +12,12 @@ EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
+EE_LIB = $(EE_LIB_DIR)libfont.a
+
 EE_INCS += -I../draw/include -I../math3d/include
 
 EE_OBJS = fontx.o fsfont.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
-
-EE_LIB = $(EE_LIB_DIR)libfont.a
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
 

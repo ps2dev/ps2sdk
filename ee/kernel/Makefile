@@ -12,7 +12,6 @@ EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
-LIBSYSCALL_LIB = $(EE_LIB_DIR)libsyscall.a
 EE_LIB = $(EE_LIB_DIR)libkernel.a
 
 SIFCMD_OBJS = sif_cmd_send.o _sif_cmd_int_handler.o sif_cmd_main.o \
@@ -76,7 +75,6 @@ TIMER_OBJS := $(TIMER_OBJS:%=$(EE_OBJS_DIR)%)
 GETKERNEL_OBJS = GetSyscallHandler.o GetSyscall.o GetExceptionHandler.o GetInterruptHandler.o
 GETKERNEL_OBJS := $(GETKERNEL_OBJS:%=$(EE_OBJS_DIR)%)
 
-
 ### SYSCALL OBJECTS
 
 KERNEL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
@@ -114,20 +112,12 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
 
 KERNEL_OBJS := $(KERNEL_OBJS:%=$(EE_OBJS_DIR)%)
 
-LIBSYSCALL_OBJS = $(EE_OBJS_DIR)dummy.o
-
 EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(CONFIG_OBJS) \
 	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(GETKERNEL_OBJS) $(LIBKRNLUPD_OBJS)	\
 	$(TLBFUNC_OBJS) $(EE_OBJS_DIR)erl-support.o
 
-all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBSYSCALL_LIB) $(EE_LIB)
-
-$(LIBSYSCALL_LIB): $(LIBSYSCALL_OBJS)
-	$(EE_AR) cru $(LIBSYSCALL_LIB) $(LIBSYSCALL_OBJS)
-
-$(EE_OBJS_DIR)dummy.o: $(EE_SRC_DIR)kernel.S
-	$(EE_C_COMPILE) $< -c -o $@
+all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
 
 $(KERNEL_OBJS): $(EE_SRC_DIR)kernel.S
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
@@ -180,7 +170,6 @@ $(EE_OBJS_DIR)osdsrc_bin.o: $(EE_SRC_DIR)osdsrc_bin.c
 $(EE_OBJS_DIR)libkrnlupd_syscalls.o: $(EE_SRC_DIR)libkrnlupd_syscalls.S
 	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
 
-
 $(EE_OBJS_DIR)tibfunc.o: $(EE_SRC_DIR)tlbfunc.c $(EE_SRC_DIR)tlbsrc_bin.c
 	$(EE_C_COMPILE) $< -c -o $@
 
@@ -192,10 +181,8 @@ include $(PS2SDKSRC)/ee/Rules.make
 include $(PS2SDKSRC)/ee/Rules.release
 
 release:
-	$(ECHO) Installing $(LIBSYSCALL_LIB) into $(PS2SDK)/ee/lib
 	$(ECHO) Installing $(EE_LIB) into $(PS2SDK)/ee/lib
 	$(ECHO) Installing *.erl into $(PS2SDK)/ee/lib
-	cp -f $(LIBSYSCALL_LIB) $(PS2SDK)/ee/lib
 	cp -f $(EE_LIB) $(PS2SDK)/ee/lib
 	cp -f $(EE_LIB:%.a=%.erl) $(PS2SDK)/ee/lib
-	chmod 644 $(PS2SDK)/ee/$(LIBSYSCALL_LIB) $(PS2SDK)/ee/$(EE_LIB) $(PS2SDK)/ee/$(EE_LIB:%.a=%.erl)
+	chmod 644 $(PS2SDK)/ee/$(EE_LIB) $(PS2SDK)/ee/$(EE_LIB:%.a=%.erl)

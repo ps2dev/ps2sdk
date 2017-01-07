@@ -7,18 +7,16 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 
-.SUFFIXES:.c
-VPATH = src:obj
-
 EE_OBJS_DIR = obj/
 EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 EE_SAMPLE_DIR = samples/
 
-LIBC_LIB  = $(EE_LIB_DIR)libc.a
+EE_LIB = $(EE_LIB_DIR)libc.a
 
-EE_LIB = $(LIBC_LIB)
+# uncomment the following line to enable profile on libc
+# EE_CFLAGS += -pg
 
 EE_SAMPLES = hello prof regress
 EE_SAMPLES := $(EE_SAMPLES:%=$(EE_SAMPLE_DIR)%)
@@ -92,15 +90,9 @@ MULT_OBJS = $(XPRINTF_OBJS) $(WXPRINTF_OBJS) $(XSCANF_OBJS) $(ALLOC_OBJS) $(STRI
 	$(WSTRING_C_OBJS) $(STDIO_OBJS) $(STDLIB_OBJS) $(WSTDLIB_OBJS) $(UNISTD_OBJS) $(TIME_OBJS) \
 	$(GPROF_OBJS) $(LIBGEN_OBJS) $(DIRENT_OBJS) $(INIT_OBJS)
 
-# uncomment the following line to enable profile on libc
-# EE_CFLAGS += -pg
-
 EE_OBJS = $(CORE_OBJS) $(MULT_OBJS)
 
-all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBC_LIB)
-
-.c.o :
-	$(EE_CC) $(EE_CFLAGS) $(EE_INC) -c $< -o obj/$@
+all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
 
 $(XPRINTF_OBJS): src/xprintf.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@

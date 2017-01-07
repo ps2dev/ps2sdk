@@ -12,32 +12,31 @@ EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
-EE_LIB = libcdvd.a
+EE_LIB = $(EE_LIB_DIR)libcdvd.a
 
 LIBCDVD_OBJS =	_libcdvd_internals.o sceCdInit.o sceCdIntToPos.o sceCdPosToInt.o \
-		sceCdSearchFile.o sceCdDiskReady.o _CdSemaInit.o _CdSemaExit.o \
-		sceCdInitEeCB.o sceCdCallback.o _CdGenericCallbackFunction.o
+	sceCdSearchFile.o sceCdDiskReady.o _CdSemaInit.o _CdSemaExit.o \
+	sceCdInitEeCB.o sceCdCallback.o _CdGenericCallbackFunction.o
 LIBCDVD_OBJS := $(LIBCDVD_OBJS:%=$(EE_OBJS_DIR)%)
 
 NCMD_OBJS =	_ncmd_internals.o _CdAlignReadBuffer.o sceCdRead.o sceCdReadDVDV.o \
-		sceCdReadCDDA.o sceCdGetToc.o sceCdSeek.o sceCdStandby.o sceCdStop.o sceCdPause.o \
-		sceCdApplyNCmd.o sceCdReadIOPMem.o sceCdNCmdDiskReady.o \
-		sceCdGetReadPos.o sceCdStStart.o sceCdStRead.o sceCdStStop.o sceCdStSeek.o sceCdStInit.o \
-		sceCdStStat.o sceCdStPause.o sceCdStResume.o sceCdStream.o sceCdCddaStream.o sceCdSync.o \
-		_CdCheckNCmd.o sceCdReadKey.o
+	sceCdReadCDDA.o sceCdGetToc.o sceCdSeek.o sceCdStandby.o sceCdStop.o sceCdPause.o \
+	sceCdApplyNCmd.o sceCdReadIOPMem.o sceCdNCmdDiskReady.o \
+	sceCdGetReadPos.o sceCdStStart.o sceCdStRead.o sceCdStStop.o sceCdStSeek.o sceCdStInit.o \
+	sceCdStStat.o sceCdStPause.o sceCdStResume.o sceCdStream.o sceCdCddaStream.o sceCdSync.o \
+	_CdCheckNCmd.o sceCdReadKey.o
 NCMD_OBJS := $(NCMD_OBJS:%=$(EE_OBJS_DIR)%)
 
 SCMD_OBJS =	_scmd_internals.o sceCdReadClock.o sceCdWriteClock.o sceCdGetDiskType.o \
-		sceCdGetError.o sceCdTrayReq.o sceCdApplySCmd.o sceCdStatus.o sceCdBreak.o \
-		_CdCheckSCmd.o sceCdCtrlADout.o sceCdMV.o sceCdReadSUBQ.o \
-		sceCdForbidDVDP.o sceCdAutoAdjustCtrl.o sceCdDecSet.o sceCdSetHDMode.o sceCdOpenConfig.o sceCdCloseConfig.o \
-		sceCdReadConfig.o sceCdWriteConfig.o \
-		sceCdReadNVM.o sceCdWriteNVM.o sceCdRI.o sceCdWI.o sceCdReadConsoleID.o sceCdWriteConsoleID.o \
-		_CdSyncS.o
+	sceCdGetError.o sceCdTrayReq.o sceCdApplySCmd.o sceCdStatus.o sceCdBreak.o \
+	_CdCheckSCmd.o sceCdCtrlADout.o sceCdMV.o sceCdReadSUBQ.o \
+	sceCdForbidDVDP.o sceCdAutoAdjustCtrl.o sceCdDecSet.o sceCdSetHDMode.o sceCdOpenConfig.o sceCdCloseConfig.o \
+	sceCdReadConfig.o sceCdWriteConfig.o \
+	sceCdReadNVM.o sceCdWriteNVM.o sceCdRI.o sceCdWI.o sceCdReadConsoleID.o sceCdWriteConsoleID.o \
+	_CdSyncS.o
 SCMD_OBJS := $(SCMD_OBJS:%=$(EE_OBJS_DIR)%)
 
-EE_LIB := $(EE_LIB:%=$(EE_LIB_DIR)%)
-EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%) $(EE_OBJS_DIR)erl-support.c
+EE_OBJS = $(LIBCDVD_OBJS) $(NCMD_OBJS) $(SCMD_OBJS) $(EE_OBJS_DIR)erl-support.o
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
 
@@ -49,8 +48,6 @@ $(NCMD_OBJS): $(EE_SRC_DIR)ncmd.c
 
 $(SCMD_OBJS): $(EE_SRC_DIR)scmd.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
-
-EE_OBJS = $(LIBCDVD_OBJS) $(NCMD_OBJS) $(SCMD_OBJS)
 
 clean:
 	rm -f -r $(EE_OBJS_DIR) $(EE_LIB_DIR)
