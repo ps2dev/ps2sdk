@@ -12,11 +12,12 @@ IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = $(IOP_BIN_DIR)usbhdfsd.irx
+IOP_BIN = $(IOP_BIN_DIR)usbhdfsd.irx
+
+IOP_INCS += -I$(PS2SDKSRC)/iop/usb/usbd/include/ -I$(IOP_SRC_DIR)/include
+
 IOP_OBJS = usb_driver.o fs_driver.o part_driver.o fat_driver.o fat_write.o scache.o usbhdfsd.o imports.o exports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
-
-IOP_CFLAGS  += -I$(PS2SDKSRC)/iop/usb/usbd/include/ -I$(IOP_SRC_DIR)/include
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

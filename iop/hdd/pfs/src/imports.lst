@@ -33,7 +33,6 @@ I_strrchr
 I_strcmp
 I_strtol
 I_strchr
-I_look_ctype_table
 sysclib_IMPORTS_end
 
 sysmem_IMPORTS_start

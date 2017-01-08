@@ -23,7 +23,7 @@ IOP_INCS := $(IOP_INCS) -I$(PS2SDKSRC)/iop/kernel/include -I$(PS2SDKSRC)/common/
 # C compiler flags
 # -fno-builtin is required to prevent the GCC built-in functions from being included,
 #   for finer-grained control over what goes into each IRX.
-IOP_CFLAGS  := -D_IOP -fno-builtin -O2 -G0 -Wall $(IOP_INCS) $(IOP_CFLAGS)
+IOP_CFLAGS := -D_IOP -fno-builtin -O2 -G0 -Wall $(IOP_INCS) $(IOP_CFLAGS)
 # Linker flags
 IOP_LDFLAGS := -nostdlib -s $(IOP_LDFLAGS)
 
@@ -35,7 +35,7 @@ IOP_LDFLAGS := -nostdlib -s $(IOP_LDFLAGS)
 # -fno-toplevel-reorder (for IOP import and export tables only) disables toplevel reordering by GCC v4.2 and later.
 #   Without it, the import and export tables can be broken apart by GCC's optimizations.
 ifeq ($(IOP_CC_VERSION),5.3.0)
-IOP_CFLAGS  += -msoft-float -mno-explicit-relocs
+IOP_CFLAGS += -msoft-float -mno-explicit-relocs
 IOP_IETABLE_CFLAGS := -fno-toplevel-reorder
 endif
 
@@ -44,28 +44,32 @@ IOP_ASFLAGS := $(ASFLAGS_TARGET) -EL -G0 $(IOP_ASFLAGS)
 
 # Externally defined variables: IOP_BIN, IOP_OBJS, IOP_LIB
 
-$(IOP_OBJS_DIR)%.o : $(IOP_SRC_DIR)%.c
+$(IOP_OBJS_DIR)%.o: $(IOP_SRC_DIR)%.c
 	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
-$(IOP_OBJS_DIR)%.o : $(IOP_SRC_DIR)%.S
+$(IOP_OBJS_DIR)%.o: $(IOP_SRC_DIR)%.S
 	$(IOP_CC) $(IOP_CFLAGS) $(IOP_INCS) -c $< -o $@
 
-$(IOP_OBJS_DIR)%.o : $(IOP_SRC_DIR)%.s
+$(IOP_OBJS_DIR)%.o: $(IOP_SRC_DIR)%.s
 	$(IOP_AS) $(IOP_ASFLAGS) $< -o $@
 
-# A rule to build imports.lst.
-$(IOP_OBJS_DIR)%.o : $(IOP_SRC_DIR)%.lst
-	$(ECHO) "#include \"irx_imports.h\"" > $(IOP_OBJS_DIR)build-imports.c
-	cat $< >> $(IOP_OBJS_DIR)build-imports.c
-	$(IOP_CC) $(IOP_CFLAGS) $(IOP_IETABLE_CFLAGS) -I$(IOP_SRC_DIR) -c $(IOP_OBJS_DIR)build-imports.c -o $@
-	-rm -f $(IOP_OBJS_DIR)build-imports.c
+.INTERMEDIATE: $(IOP_OBJS_DIR)build-imports.c $(IOP_OBJS_DIR)build-exports.c
 
-# A rule to build exports.tab.
-$(IOP_OBJS_DIR)%.o : $(IOP_SRC_DIR)%.tab
-	$(ECHO) "#include \"irx.h\"" > $(IOP_OBJS_DIR)build-exports.c
-	cat $< >> $(IOP_OBJS_DIR)build-exports.c
-	$(IOP_CC) $(IOP_CFLAGS) $(IOP_IETABLE_CFLAGS) -I$(IOP_SRC_DIR) -c $(IOP_OBJS_DIR)build-exports.c -o $@
-	-rm -f $(IOP_OBJS_DIR)build-exports.c
+# Rules to build imports.lst.
+$(IOP_OBJS_DIR)build-imports.c: $(IOP_SRC_DIR)imports.lst
+	$(ECHO) "#include \"irx_imports.h\"" > $@
+	cat $< >> $@
+
+$(IOP_OBJS_DIR)imports.o: $(IOP_OBJS_DIR)build-imports.c
+	$(IOP_CC) $(IOP_CFLAGS) $(IOP_IETABLE_CFLAGS) -I$(IOP_SRC_DIR) -c $< -o $@
+
+# Rules to build exports.tab.
+$(IOP_OBJS_DIR)build-exports.c: $(IOP_SRC_DIR)exports.tab
+	$(ECHO) "#include \"irx.h\"" > $@
+	cat $< >> $@
+
+$(IOP_OBJS_DIR)exports.o: $(IOP_OBJS_DIR)build-exports.c
+	$(IOP_CC) $(IOP_CFLAGS) $(IOP_IETABLE_CFLAGS) -I$(IOP_SRC_DIR) -c $< -o $@
 
 $(IOP_OBJS_DIR):
 	$(MKDIR) -p $(IOP_OBJS_DIR)
@@ -76,9 +80,9 @@ $(IOP_BIN_DIR):
 $(IOP_LIB_DIR):
 	$(MKDIR) -p $(IOP_LIB_DIR)
 
-$(IOP_BIN) : $(IOP_OBJS)
+$(IOP_BIN): $(IOP_OBJS)
 	$(IOP_CC) $(IOP_CFLAGS) -o $(IOP_BIN) $(IOP_OBJS) $(IOP_LDFLAGS) $(IOP_LIBS)
 
-$(IOP_LIB) : $(IOP_OBJS)
+$(IOP_LIB): $(IOP_OBJS)
 	$(IOP_AR) cru $(IOP_LIB) $(IOP_OBJS)
 

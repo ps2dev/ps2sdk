@@ -12,11 +12,12 @@ IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = $(IOP_BIN_DIR)ahx.irx
+IOP_BIN = $(IOP_BIN_DIR)ahx.irx
+
+IOP_CFLAGS += -fno-builtin-printf -I$(PS2SDKSRC)/iop/sound/freesd/include/
+
 IOP_OBJS = hw.o ahx_irx.o spu2.o imports.o AHX.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
-
-IOP_CFLAGS  += -fno-builtin-printf -I$(PS2SDKSRC)/iop/sound/freesd/include/
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

@@ -7,24 +7,26 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 
+# Build for use with a DHCP-enabled LWIP stack.
+LWIP_DHCP = 1
+
 IOP_OBJS_DIR = obj/
 IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-# Uncomment the line below to build for use with a DHCP-enabled LWIP stack.
-LWIP_DHCP=1
+IOP_BIN = $(IOP_BIN_DIR)smap.irx
 
-IOP_BIN  = $(IOP_BIN_DIR)smap.irx
-IOP_OBJS = main.o smap.o xfer.o imports.o exports.o
-IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
-
-IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include -I$(IOP_SRC_DIR)/include
 IOP_CFLAGS += -mgpopt -G19 -mno-check-zero-division -Wno-unused-value
 
 ifdef LWIP_DHCP
 IOP_CFLAGS += -DLWIP_DHCP=1
 endif
+
+IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include -I$(IOP_SRC_DIR)/include
+
+IOP_OBJS = main.o smap.o xfer.o imports.o exports.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

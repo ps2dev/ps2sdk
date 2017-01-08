@@ -12,13 +12,14 @@ IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = $(IOP_BIN_DIR)freemtap.irx
+IOP_BIN = $(IOP_BIN_DIR)freemtap.irx
+
+IOP_CFLAGS += -fno-builtin-printf -fno-builtin-memcpy
+
+IOP_INCS += -I$(PS2SDKSRC)/iop/system/sio2log/include/
+
 IOP_OBJS = freemtap.o rpcservers.o exports.o imports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
-
-IOP_CFLAGS  += -fno-builtin-printf -fno-builtin-memcpy
-IOP_INCS = -I$(PS2SDKSRC)/iop/system/sio2log/include/
-
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

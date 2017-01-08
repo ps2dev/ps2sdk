@@ -7,39 +7,25 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 
+#DEBUG = 1
+PS2IP_DHCP = 1
+PS2IP_DNS = 1
+
+LWIP = $(PS2SDKSRC)/common/tcpip/lwip-2.0.0
+PS2IP_BASE = ../tcpip-base
+
 IOP_OBJS_DIR = obj/
 IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-#DEBUG = 1
-PS2IP_DHCP=1
-PS2IP_DNS=1
+IOP_BIN = $(IOP_BIN_DIR)ps2ip-nm.irx
+
+IOP_CFLAGS += -DLWIP_NOASSERT -DLWIP_COMPAT_MUTEX -DLWIP_COMPAT_MUTEX_ALLOWED
 
 ifeq ($(DEBUG),1)
-DEBUG_FLAGS = -DDEBUG -DLWIP_DEBUG
+IOP_CFLAGS += -DDEBUG -DLWIP_DEBUG
 endif
-
-LWIP=$(PS2SDKSRC)/common/tcpip/lwip-2.0.0
-PS2IP_BASE=../tcpip-base
-
-ps2ip_OBJECTS = ps2ip.o ipconfig.o sys.o sys_arch.o init.o exports.o imports.o mem.o netif.o pbuf.o stats.o tcp_in.o tcp_out.o udp.o memp.o tcp.o etharp.o ethernet.o raw.o def.o timeouts.o
-
-ifdef PS2IP_DHCP
-ps2ip_OBJECTS+= dhcp.o
-endif
-
-ifdef PS2IP_DNS
-ps2ip_OBJECTS+= dns.o netdb.o
-endif
-
-ps2ip_OBJECTS := $(ps2ip_OBJECTS:%=$(IOP_OBJS_DIR)%)
-
-ps2api_OBJECTS = api_lib.o api_msg.o err.o sockets.o tcpip.o netbuf.o
-ps2api_OBJECTS := $(ps2api_OBJECTS:%=$(IOP_OBJS_DIR)%)
-
-ps2api_IPV4 = icmp.o ip.o ip4.o ip4_addr.o ip4_frag.o inet_chksum.o
-ps2api_IPV4 := $(ps2api_IPV4:%=$(IOP_OBJS_DIR)%)
 
 # Turns DHCP on.
 ifdef PS2IP_DHCP
@@ -51,10 +37,27 @@ ifdef PS2IP_DNS
 IOP_CFLAGS += -DPS2IP_DNS
 endif
 
-IOP_BIN = $(IOP_BIN_DIR)ps2ip-nm.irx
+IOP_INCS += -I$(LWIP)/src/include -I$(LWIP)/src/include/ipv4 -I$(PS2IP_BASE)/include -I$(IOP_SRC_DIR)include
+
+ps2ip_OBJECTS = ps2ip.o ipconfig.o sys.o sys_arch.o init.o exports.o imports.o mem.o netif.o pbuf.o stats.o tcp_in.o tcp_out.o udp.o memp.o tcp.o etharp.o ethernet.o raw.o def.o timeouts.o
+
+ifdef PS2IP_DHCP
+ps2ip_OBJECTS += dhcp.o
+endif
+
+ifdef PS2IP_DNS
+ps2ip_OBJECTS += dns.o netdb.o
+endif
+
+ps2ip_OBJECTS := $(ps2ip_OBJECTS:%=$(IOP_OBJS_DIR)%)
+
+ps2api_OBJECTS = api_lib.o api_msg.o err.o sockets.o tcpip.o netbuf.o
+ps2api_OBJECTS := $(ps2api_OBJECTS:%=$(IOP_OBJS_DIR)%)
+
+ps2api_IPV4 = icmp.o ip.o ip4.o ip4_addr.o ip4_frag.o inet_chksum.o
+ps2api_IPV4 := $(ps2api_IPV4:%=$(IOP_OBJS_DIR)%)
+
 IOP_OBJS = $(ps2ip_OBJECTS) $(ps2api_OBJECTS) $(ps2api_IPV4)
-IOP_INCS += -I$(LWIP)/src/include -I$(LWIP)/src/include/ipv4 -I$(PS2IP_BASE)/include -I$(IOP_SRC_DIR)/include
-IOP_CFLAGS += -DLWIP_NOASSERT -DLWIP_COMPAT_MUTEX -DLWIP_COMPAT_MUTEX_ALLOWED $(DEBUG_FLAGS)
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

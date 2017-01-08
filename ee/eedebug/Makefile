@@ -12,22 +12,14 @@ EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
-LIBEEDEBUG_LIB = $(EE_LIB_DIR)libeedebug.a
+EE_LIB = $(EE_LIB_DIR)libeedebug.a
 
-EE_INCS =
+EE_CFLAGS += -O0
 
-EE_OBJS  = ee_debug.o ee_exceptions.o ee_dbg_low.o
-EE_OBJS += erl-support.o
+EE_OBJS = ee_debug.o ee_exceptions.o ee_dbg_low.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
-EE_CFLAGS = -O0
-
-EE_LIB = $(LIBEEDEBUG_LIB)
-
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
-
-.c.o :
-	$(EE_CC) $(EE_CFLAGS) $(EE_INC) -c $< -o obj/$@
 
 clean:
 	rm -f -r $(EE_OBJS_DIR) $(EE_LIB_DIR)

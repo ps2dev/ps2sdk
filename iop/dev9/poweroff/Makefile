@@ -12,7 +12,8 @@ IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = $(IOP_BIN_DIR)poweroff.irx
+IOP_BIN = $(IOP_BIN_DIR)poweroff.irx
+
 IOP_OBJS = poweroff.o imports.o exports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 

@@ -34,28 +34,28 @@ EE_LIBS += -lc -lkernel
 EE_C_COMPILE = $(EE_CC) $(EE_CFLAGS) $(EE_INCS)
 EE_CXX_COMPILE = $(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS)
 
-%.o : %.c
+%.o: %.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
-%.o : %.cc
+%.o: %.cc
 	$(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS) -c $< -o $@
 
-%.o : %.cpp
+%.o: %.cpp
 	$(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS) -c $< -o $@
 
-%.o : %.S
+%.o: %.S
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
-%.o : %.s
+%.o: %.s
 	$(EE_AS) $(EE_ASFLAGS) $< -o $@
 
-$(EE_BIN) : $(EE_OBJS) $(PS2SDK)/ee/startup/crt0.o
+$(EE_BIN): $(EE_OBJS) $(PS2SDK)/ee/startup/crt0.o
 	$(EE_CC) -mno-crt0 -T$(PS2SDK)/ee/startup/linkfile $(EE_CFLAGS) \
 		-o $(EE_BIN) $(PS2SDK)/ee/startup/crt0.o $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS)
 
-$(EE_ERL) : $(EE_OBJS)
+$(EE_ERL): $(EE_OBJS)
 	$(EE_CC) -mno-crt0 -o $(EE_ERL) $(EE_OBJS) $(EE_CFLAGS) $(EE_LDFLAGS) -Wl,-r -Wl,-d
 	$(EE_STRIP) --strip-unneeded -R .mdebug.eabi64 -R .reginfo -R .comment $(EE_ERL)
 
-$(EE_LIB) : $(EE_OBJS)
+$(EE_LIB): $(EE_OBJS)
 	$(EE_AR) cru $(EE_LIB) $(EE_OBJS)

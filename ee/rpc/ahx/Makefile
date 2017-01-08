@@ -12,10 +12,9 @@ EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
-EE_OBJS = ahx_rpc.o erl-support.o
-EE_LIB = libahx.a
+EE_LIB = $(EE_LIB_DIR)libahx.a
 
-EE_LIB := $(EE_LIB:%=$(EE_LIB_DIR)%)
+EE_OBJS = ahx_rpc.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)

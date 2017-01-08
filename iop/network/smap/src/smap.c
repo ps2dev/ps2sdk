@@ -7,6 +7,7 @@
 #include <modload.h>
 #include <stdio.h>
 #include <sysclib.h>
+#include <ctype.h>
 #include <thbase.h>
 #include <thevent.h>
 #include <thsemap.h>
@@ -806,14 +807,14 @@ int smap_init(int argc, char *argv[]){
 		}
 		else if(strncmp("thpri=", *argv, 6)==0){
 			CmdString=&((char*)*argv)[6];
-			if(look_ctype_table(CmdString[0])&4){
+			if(isdigit(CmdString[0])){
 				ThreadPriority=strtoul(&((char*)*argv)[6], NULL, 10);
 				if(ThreadPriority-9>=0x73){
 					return DisplayHelpMessage();
 				}
 
 				if(((char*)*argv)[6]!='\0'){
-					while(look_ctype_table(*CmdString)&4){
+					while(isdigit(*CmdString)){
 						CmdString++;
 					}
 					if(*CmdString!='\0') return DisplayHelpMessage();
@@ -823,10 +824,10 @@ int smap_init(int argc, char *argv[]){
 		}
 		else if(strncmp("thstack=", *argv, 8)==0){
 			CmdString=&((char*)*argv)[8];
-			if(look_ctype_table(CmdString[0])&4){
+			if(isdigit(CmdString[0])){
 				ThreadStackSize=strtoul(&((char*)*argv)[8], NULL, 10);
 				if(((char*)*argv)[8]!='\0'){
-					while(look_ctype_table(*CmdString)&4){
+					while(isdigit(*CmdString)){
 						CmdString++;
 					}
 				}

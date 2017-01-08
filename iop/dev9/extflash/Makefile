@@ -12,11 +12,12 @@ IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = $(IOP_BIN_DIR)extflash.irx
-IOP_OBJS = extflash.o exports.o imports.o
-IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
+IOP_BIN = $(IOP_BIN_DIR)extflash.irx
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include
+
+IOP_OBJS = extflash.o exports.o imports.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

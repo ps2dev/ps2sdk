@@ -12,7 +12,8 @@ IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = $(IOP_BIN_DIR)fakehost.irx
+IOP_BIN = $(IOP_BIN_DIR)fakehost.irx
+
 IOP_OBJS = fakehost.o nprintf.o imports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 

@@ -13,9 +13,11 @@ IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
 IOP_BIN = $(IOP_BIN_DIR)ps2http.irx
+
+IOP_INCS += -I$(PS2SDKSRC)/iop/tcpip/tcpip/include -I$(PS2SDKSRC)/iop/tcpip/dns/include
+
 IOP_OBJS = ps2http.o imports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
-IOP_INCS += -I$(PS2SDKSRC)/iop/tcpip/tcpip/include -I$(PS2SDKSRC)/iop/tcpip/dns/include
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

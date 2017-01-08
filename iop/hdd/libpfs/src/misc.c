@@ -17,6 +17,7 @@
 #include <intrman.h>
 #include <sysmem.h>
 #include <sysclib.h>
+#include <ctype.h>
 #include <cdvdman.h>
 #include <hdd-ioctl.h>
 
@@ -103,7 +104,7 @@ void pfsPrintBitmap(const u32 *bitmap) {
 			const char *c=(const char*)bitmap+j+i*16;
 
 			sprintf(a+j*3, "%02x ", *c);
-			b[j] = ((*c>=0) && (look_ctype_table(*c) & 0x17)) ?
+			b[j] = ((*c>=0) && (isgraph(*c))) ?
 				*c : '.';
 		}
 		PFS_PRINTF("%s%s\n", a, b);
@@ -175,7 +176,7 @@ pfs_block_device_t *pfsGetBlockDeviceTable(const char *name)
 	// Loop until digit is found, then terminate string at that digit.
 	// Should then have just the device name left, minus any front spaces or trailing digits.
 	tmp = devname;
-	while(!(look_ctype_table(tmp[0]) & 0x04))
+	while(!(isdigit(tmp[0])))
 		tmp++;
 	tmp[0] = '\0';
 

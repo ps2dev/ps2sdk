@@ -12,11 +12,12 @@ IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = $(IOP_BIN_DIR)freesd.irx
+IOP_BIN = $(IOP_BIN_DIR)freesd.irx
+
+IOP_CFLAGS += -fno-builtin-printf -fno-builtin-memcpy
+
 IOP_OBJS = freesd.o batch.o block.o effect.o voice.o exports.o imports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
-
-IOP_CFLAGS  += -fno-builtin-printf -fno-builtin-memcpy
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

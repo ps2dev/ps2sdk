@@ -12,12 +12,14 @@ IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = $(IOP_BIN_DIR)mcserv.irx
+IOP_BIN = $(IOP_BIN_DIR)mcserv.irx
+
+IOP_CFLAGS += #-DSIO_DEBUG #-DDEBUG
+
+IOP_INCS += -I$(PS2SDKSRC)/iop/memorycard/mcman/include/
+
 IOP_OBJS = mcserv.o imports.o exports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
-
-IOP_CFLAGS  += #-DSIO_DEBUG #-DDEBUG
-IOP_INCS += -I$(PS2SDKSRC)/iop/memorycard/mcman/include/
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 
