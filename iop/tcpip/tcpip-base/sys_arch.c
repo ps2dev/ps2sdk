@@ -364,7 +364,7 @@ void sys_arch_unprotect(sys_prot_t Flags)
 	CpuResumeIntr(Flags);
 }
 
-void *malloc(unsigned int size)
+void *malloc(size_t size)
 {
 	int flags;
 	void *ptr;
@@ -383,6 +383,21 @@ void free(void *ptr)
 	CpuSuspendIntr(&flags);
 	FreeSysMemory(ptr);
 	CpuResumeIntr(flags);
+}
+
+void *calloc(size_t n, size_t size)
+{
+	int flags;
+	void *ptr;
+
+	CpuSuspendIntr(&flags);
+	ptr=AllocSysMemory(ALLOC_LAST, n * size, NULL);
+	CpuResumeIntr(flags);
+
+	if(ptr != NULL)
+		memset(ptr, 0, n * size);
+
+	return ptr;
 }
 
 u32_t sys_now(void)

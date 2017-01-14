@@ -17,7 +17,8 @@ typedef struct st_arch_message
     void *sys_msg;
 } arch_message;
 
-void *malloc(unsigned int size);
+void *malloc(size_t size);
 void free(void *ptr);
+void *calloc(size_t n, size_t size);
 
 #endif /* __SYS_ARCH_H__ */
