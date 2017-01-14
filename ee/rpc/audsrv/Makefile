@@ -13,10 +13,9 @@ EE_SRC_DIR = src/
 EE_INC_DIR = include/
 EE_SAMPLE_DIR = samples/
 
-EE_OBJS = audsrv_rpc.o erl-support.o
-EE_LIB = libaudsrv.a
+EE_LIB = $(EE_LIB_DIR)libaudsrv.a
 
-EE_LIB := $(EE_LIB:%=$(EE_LIB_DIR)%)
+EE_OBJS = audsrv_rpc.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)

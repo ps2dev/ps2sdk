@@ -7,28 +7,25 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 
-
 EE_OBJS_DIR = obj/
 EE_BIN_DIR = bin/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
-EE_INCS = -I$(PS2SDKSRC)/ee/erl/include -I$(PS2SDKSRC)/ee/libc/include -I$(PS2SDKSRC)/ee/erl-loader/src
+LOADER_BIN = $(EE_BIN_DIR)erl-loader.elf
 
-EE_OBJS = erl-loader.o
-EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
+# Since we are using non-builtin symbols
+NO_BUILTIN = memcmp memcpy memset printf strcat strchr strcmp strcpy strlen strncpy strrchr strncmp
+EE_CFLAGS += $(NO_BUILTIN:%=-fno-builtin-%)
+
+EE_INCS += -I$(PS2SDKSRC)/ee/erl/include -I$(PS2SDKSRC)/ee/libc/include -I$(PS2SDKSRC)/ee/erl-loader/src
 
 EE_LDFLAGS = -L$(PS2SDKSRC)/ee/kernel/lib -L$(PS2SDKSRC)/ee/libc/lib -L$(PS2SDKSRC)/ee/erl/lib
 
-# Since we are using non-builtin symbols
-EE_CFLAGS = -fno-builtin-memcmp -fno-builtin-memcpy -fno-builtin-memset
-EE_CFLAGS += -fno-builtin-printf -fno-builtin-strcat -fno-builtin-strchr
-EE_CFLAGS += -fno-builtin-strcmp -fno-builtin-strcpy -fno-builtin-strlen
-EE_CFLAGS += -fno-builtin-strncpy -fno-builtin-strrchr -fno-builtin-strncmp
-
 EE_LIBS = -lerl -lc -lkernel
 
-LOADER_BIN = $(EE_BIN_DIR)erl-loader.elf
+EE_OBJS = erl-loader.o
+EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
 all: $(EE_OBJS_DIR) $(EE_BIN_DIR) $(LOADER_BIN)
 
@@ -39,7 +36,6 @@ $(LOADER_BIN) : $(EE_OBJS) $(PS2SDKSRC)/ee/startup/obj/crt0.o
 	rm $(EE_BIN_DIR)tmp.elf
 	$(EE_CC) -mno-crt0 -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_CFLAGS) \
 	-o $(LOADER_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS) $(EE_SRC_DIR)exports.c
-#	rm $(EE_SRC_DIR)exports.c
 
 clean:
 	rm -f -r $(EE_OBJS_DIR) $(EE_BIN_DIR) $(EE_SRC_DIR)exports.c

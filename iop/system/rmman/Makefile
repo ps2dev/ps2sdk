@@ -12,11 +12,12 @@ IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = $(IOP_BIN_DIR)rmman.irx
+IOP_BIN = $(IOP_BIN_DIR)rmman.irx
+
+IOP_INCS += -I$(PS2SDKSRC)/iop/system/sio2log/include/ -I$(PS2SDKSRC)/iop/system/rsio2man/include/
+
 IOP_OBJS = rmman.o exports.o imports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
-
-IOP_INCS = -I$(PS2SDKSRC)/iop/system/sio2log/include/ -I$(PS2SDKSRC)/iop/system/rsio2man/include/
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

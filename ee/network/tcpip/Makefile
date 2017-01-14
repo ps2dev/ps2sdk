@@ -7,36 +7,27 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 
+#DEBUG = 1
+PS2IP_DHCP = 1
+PS2IP_DNS = 1
+
+# Change this to point to the version of LWIP this is being compiled with.
+LWIP = $(PS2SDKSRC)/common/tcpip/lwip-2.0.0
+
 EE_OBJS_DIR = obj/
 EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
-#DEBUG = 1
-PS2IP_DHCP=1
-PS2IP_DNS=1
+EE_LIB = $(EE_LIB_DIR)libps2ip.a
+
+EE_CFLAGS += -Wall -fno-builtin -DLWIP_NOASSERT -DLWIP_COMPAT_MUTEX -DLWIP_COMPAT_MUTEX_ALLOWED -mno-gpopt -O2 -G0 -mno-check-zero-division
 
 ifeq ($(DEBUG),1)
-DEBUG_FLAGS = -DDEBUG -DLWIP_DEBUG
-endif
-
-# Change this to point to the version of LWIP this is being compiled with.
-LWIP=$(PS2SDKSRC)/common/tcpip/lwip-2.0.0
-
-ps2api_OBJECTS = api_lib.o api_msg.o api_netbuf.o err.o sockets.o tcpip.o
-ps2api_IPV4 = icmp.o ip.o ip4.o ip4_addr.o ip4_frag.o inet_chksum.o
-ps2ip_OBJECTS = sys.o lwip_init.o mem.o netif.o pbuf.o stats.o tcp_in.o tcp_out.o udp.o memp.o tcp.o ethernet.o etharp.o raw.o def.o timeouts.o $(ps2api_IPV4) $(ps2api_OBJECTS)
-
-ifdef PS2IP_DHCP
-ps2ip_OBJECTS+= dhcp.o
-endif
-
-ifdef PS2IP_DNS
-ps2ip_OBJECTS+= dns.o netdb.o
+EE_CFLAGS += -DDEBUG -DLWIP_DEBUG
 endif
 
 # Turns DHCP on.
-
 ifdef PS2IP_DHCP
 EE_CFLAGS += -DPS2IP_DHCP -DLWIP_DHCP
 endif
@@ -47,10 +38,20 @@ EE_CFLAGS += -DPS2IP_DNS
 endif
 
 EE_INCS += -I$(LWIP)/src/include -I$(LWIP)/src/include/ipv4 -Isrc/include
-EE_CFLAGS += -Wall -fno-builtin -DLWIP_NOASSERT -DLWIP_COMPAT_MUTEX -DLWIP_COMPAT_MUTEX_ALLOWED $(DEBUG_FLAGS) -mno-gpopt -O2 -G0 -mno-check-zero-division
 
-EE_LIB = $(EE_LIB_DIR)libps2ip.a
-EE_OBJS  = ps2ip.o sys_arch.o $(ps2ip_OBJECTS) erl-support.o
+ps2api_OBJECTS = api_lib.o api_msg.o api_netbuf.o err.o sockets.o tcpip.o
+ps2api_IPV4 = icmp.o ip.o ip4.o ip4_addr.o ip4_frag.o inet_chksum.o
+ps2ip_OBJECTS = sys.o lwip_init.o mem.o netif.o pbuf.o stats.o tcp_in.o tcp_out.o udp.o memp.o tcp.o ethernet.o etharp.o raw.o def.o timeouts.o $(ps2api_IPV4) $(ps2api_OBJECTS)
+
+ifdef PS2IP_DHCP
+ps2ip_OBJECTS += dhcp.o
+endif
+
+ifdef PS2IP_DNS
+ps2ip_OBJECTS += dns.o netdb.o
+endif
+
+EE_OBJS = ps2ip.o sys_arch.o $(ps2ip_OBJECTS) erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)

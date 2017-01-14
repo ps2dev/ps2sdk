@@ -10,7 +10,7 @@
 EE_OBJS_DIR = obj/
 EE_SRC_DIR = src/
 
-all:  $(EE_OBJS_DIR) $(EE_OBJS_DIR)crt0.o
+all: $(EE_OBJS_DIR) $(EE_OBJS_DIR)crt0.o
 
 clean:
 	rm -f -r $(EE_OBJS_DIR)

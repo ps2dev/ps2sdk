@@ -12,11 +12,12 @@ IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = $(IOP_BIN_DIR)ps2snd.irx
+IOP_BIN = $(IOP_BIN_DIR)ps2snd.irx
+
+IOP_CFLAGS += -fno-builtin-printf -fno-builtin-memcpy -std=c99
+
 IOP_OBJS = ps2snd.o adpcm-stream.o imports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
-
-IOP_CFLAGS  += -fno-builtin-printf -fno-builtin-memcpy -std=c99
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

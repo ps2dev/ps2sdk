@@ -7,32 +7,20 @@
 # Review ps2sdk README & LICENSE files for further details.
 #
 
-.SUFFIXES:.c
-VPATH = src:obj
-
 EE_OBJS_DIR = obj/
 EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 EE_SAMPLE_DIR = samples/
 
-LIBSBV_LIB  = $(EE_LIB_DIR)libpatches.a
-
-EE_LIB = $(LIBSBV_LIB)
+EE_LIB = $(EE_LIB_DIR)libpatches.a
 
 EE_OBJS = smem.o smod.o slib.o patch_enable_lmb.o patch_disable_prefix_check.o \
 	patch_user_mem_clear.o patch_fileio.o \
 	common.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
-all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(LIBSBV_LIB)
-
-
-.c.o :
-	$(EE_CC) $(EE_CFLAGS) $(EE_INC) -c $< -o obj/$@
-
-.s.o :
-	$(EE_AS) $(EE_ASFLAGS) $< -o obj/$@
+all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
 
 clean:
 	rm -f -r $(EE_OBJS_DIR) $(EE_LIB_DIR)

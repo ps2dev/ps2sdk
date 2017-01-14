@@ -12,10 +12,10 @@ EE_LIB_DIR = lib/
 EE_SRC_DIR = src/
 EE_INC_DIR = include/
 
+EE_LIB = $(EE_LIB_DIR)libmouse.a
+
 EE_OBJS = libmouse.o erl-support.o
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
-
-EE_LIB = $(EE_LIB_DIR)libmouse.a
 
 all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
 

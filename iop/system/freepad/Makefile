@@ -12,12 +12,14 @@ IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = $(IOP_BIN_DIR)freepad.irx
+IOP_BIN = $(IOP_BIN_DIR)freepad.irx
+
+IOP_CFLAGS += -fno-builtin-printf -fno-builtin-memcpy # -DDEBUG
+
+IOP_INCS += -I$(PS2SDKSRC)/iop/system/sio2log/include/
+
 IOP_OBJS = freepad.o rpcserver.o exports.o imports.o padInit.o padPortOpen.o padMiscFuncs.o sio2Cmds.o padData.o padCmds.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
-
-IOP_CFLAGS  += -fno-builtin-printf -fno-builtin-memcpy # -DDEBUG
-IOP_INCS = -I$(PS2SDKSRC)/iop/system/sio2log/include/
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 

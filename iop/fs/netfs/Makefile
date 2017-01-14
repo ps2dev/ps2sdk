@@ -12,12 +12,14 @@ IOP_BIN_DIR = irx/
 IOP_SRC_DIR = src/
 IOP_INC_DIR = include/
 
-IOP_BIN  = $(IOP_BIN_DIR)ps2netfs.irx
+IOP_BIN = $(IOP_BIN_DIR)ps2netfs.irx
+
+IOP_CFLAGS += -fno-builtin-printf
+
+IOP_INCS += -I$(PS2SDKSRC)/iop/system/iopmgr/include -I$(PS2SDKSRC)/iop/tcpip/tcpip/include
+
 IOP_OBJS = ps2netfs.o ps2_fio.o devscan.o imports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
-
-IOP_CFLAGS  += -fno-builtin-printf
-IOP_INCS += -I$(PS2SDKSRC)/iop/system/iopmgr/include -I$(PS2SDKSRC)/iop/tcpip/tcpip/include
 
 all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 
