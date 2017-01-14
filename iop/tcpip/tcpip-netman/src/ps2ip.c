@@ -39,7 +39,7 @@ typedef struct netif	NetIF;
 typedef struct ip4_addr	IPAddr;
 
 #define MODNAME	"TCP/IP Stack"
-IRX_ID(MODNAME, 2, 2);
+IRX_ID(MODNAME, 2, 3);
 
 extern struct irx_export_table	_exp_ps2ip;
 
@@ -137,7 +137,6 @@ ps2ip_setconfig(const t_ip_info* pInfo)
 
 	return	1;
 }
-
 
 static void InitDone(void* pvArg)
 {
@@ -341,33 +340,35 @@ static err_t SMapIFInit(struct netif* pNetIF)
 
 static inline int InitializeLWIP(void){
 	sys_sem_t	Sema;
-	int		iRet;
+	int		result;
 
 	dbgprintf("PS2IP: Module Loaded.\n");
 
-	if ((iRet=RegisterLibraryEntries(&_exp_ps2ip))!=0)
+	if ((result = RegisterLibraryEntries(&_exp_ps2ip))!=0)
 	{
-		printf("PS2IP: RegisterLibraryEntries returned: %d\n", iRet);
-	}
+		printf("PS2IP: RegisterLibraryEntries returned: %d\n", result);
+	} else {
+		sys_sem_new(&Sema, 0);
+		dbgprintf("PS2IP: Calling tcpip_init\n");
+		tcpip_init(InitDone,&Sema);
 
-	sys_sem_new(&Sema, 0);
-	dbgprintf("PS2IP: Calling tcpip_init\n");
-	tcpip_init(InitDone,&Sema);
+		sys_arch_sem_wait(&Sema, 0);
+		sys_sem_free(&Sema);
 
-	sys_arch_sem_wait(&Sema, 0);
-	sys_sem_free(&Sema);
-
-	dbgprintf("PS2IP: tcpip_init called\n");
+		dbgprintf("PS2IP: tcpip_init called\n");
 #if NOSYS
-	InitTimer();
+		InitTimer();
 #endif
 
-	dbgprintf("PS2IP: System Initialised\n");
+		dbgprintf("PS2IP: System Initialised\n");
 
-	return 0;
+		result = 0;
+	}
+
+	return result;
 }
 
-static inline int InitLWIPStack(struct ip4_addr *IP, struct ip4_addr *NM, struct ip4_addr *GW){
+static inline int InitLWIPStack(IPAddr *IP, IPAddr *NM, IPAddr *GW){
 	static struct NetManNetProtStack stack={
 		&LinkStateUp,
 		&LinkStateDown,
@@ -388,7 +389,7 @@ static inline int InitLWIPStack(struct ip4_addr *IP, struct ip4_addr *NM, struct
 }
 
 int _start(int argc, char *argv[]){
-	struct ip4_addr IP, NM, GW;
+	IPAddr IP, NM, GW;
 
 	//Parse IP address arguments.
 	if(argc>=4)

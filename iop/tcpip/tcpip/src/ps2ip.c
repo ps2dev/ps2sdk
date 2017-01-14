@@ -34,10 +34,10 @@
 
 typedef struct pbuf	PBuf;
 typedef struct netif	NetIF;
-typedef struct ip_addr	IPAddr;
+typedef struct ip4_addr	IPAddr;
 
 #define MODNAME	"TCP/IP Stack"
-IRX_ID(MODNAME, 2, 2);
+IRX_ID(MODNAME, 2, 3);
 
 extern struct irx_export_table	_exp_ps2ip;
 
@@ -102,9 +102,9 @@ ps2ip_setconfig(const t_ip_info* pInfo)
 	{
 		return	0;
 	}
-	netif_set_ipaddr(pNetIF,(const struct ip4_addr*)&pInfo->ipaddr);
-	netif_set_netmask(pNetIF,(const struct ip4_addr*)&pInfo->netmask);
-	netif_set_gw(pNetIF,(const struct ip4_addr*)&pInfo->gw);
+	netif_set_ipaddr(pNetIF,(const IPAddr*)&pInfo->ipaddr);
+	netif_set_netmask(pNetIF,(const IPAddr*)&pInfo->netmask);
+	netif_set_gw(pNetIF,(const IPAddr*)&pInfo->gw);
 
 #if	LWIP_DHCP
 	struct dhcp *dhcp = netif_dhcp_data(pNetIF);
@@ -175,7 +175,7 @@ static void TimerThread(void* pvArg)
 		}
 #endif
 
-		DelayThread(TCP_TMR_INTERVAL*250);	/* Note: The IOP's DelayThread() function isn't accurate, and the actual timming accuracy is about 25% of the specified value. */
+		DelayThread(TCP_TMR_INTERVAL*250);
 	}
 }
 
@@ -230,7 +230,7 @@ int _exit(int argc, char** argv)
 	return MODULE_NO_RESIDENT_END; // return "not resident"!
 }
 
-static inline int InitLWIPStack(struct ip4_addr *IP, struct ip4_addr *NM, struct ip4_addr *GW){
+static inline int InitLWIPStack(IPAddr *IP, IPAddr *NM, IPAddr *GW){
 	sys_sem_t	Sema;
 	int		iRet;
 
@@ -259,7 +259,7 @@ static inline int InitLWIPStack(struct ip4_addr *IP, struct ip4_addr *NM, struct
 }
 
 int _start(int argc, char *argv[]){
-	struct ip4_addr IP, NM, GW;
+	IPAddr IP, NM, GW;
 
 	//Parse IP address arguments.
 	if(argc>=4)

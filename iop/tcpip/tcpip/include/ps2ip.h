@@ -19,7 +19,7 @@
 
 #include "tcpip.h"
 
-#define ps2ip_IMPORTS_start	DECLARE_IMPORT_TABLE(ps2ip, 2, 4)
+#define ps2ip_IMPORTS_start	DECLARE_IMPORT_TABLE(ps2ip, 2, 5)
 #define ps2ip_IMPORTS_end	END_IMPORT_TABLE
 
 /* From include/lwip/sockets.h:  */
@@ -80,6 +80,18 @@ err_t	etharp_output(struct netif *netif, struct pbuf *q, const ip_addr_t *ipaddr
 err_t     tcpip_input(struct pbuf *p, struct netif *inp);
 #define I_tcpip_input DECLARE_IMPORT(25, tcpip_input)
 
+/** Function prototype for functions passed to tcpip_callback() */
+typedef void (*tcpip_callback_fn)(void *ctx);
+
+err_t  tcpip_callback_with_block(tcpip_callback_fn function, void *ctx, u8 block);
+#define        I_tcpip_callback_with_block DECLARE_IMPORT(56, tcpip_callback_with_block)
+
+/**
+ * @ingroup lwip_os
+ * @see tcpip_callback_with_block
+ */
+#define tcpip_callback(f, ctx)  tcpip_callback_with_block(f, ctx, 1)
+
 /* From include/lwip/netif.h:  */
 struct netif *netif_add(struct netif *netif,
 #if LWIP_IPV4
@@ -107,6 +119,12 @@ void		netif_set_up(struct netif *netif);
 void		netif_set_down(struct netif *netif);
 #define        I_netif_set_down DECLARE_IMPORT(33, netif_set_down)
 
+void netif_set_link_up(struct netif *netif);
+#define        I_netif_set_link_up DECLARE_IMPORT(54, netif_set_link_up)
+void netif_set_link_down(struct netif *netif);
+#define        I_netif_set_link_down DECLARE_IMPORT(55, netif_set_link_down)
+
+/* From include/lwip/pbuf.h:  */
 struct pbuf*     pbuf_alloc(pbuf_layer l, u16 size, pbuf_type type);
 #define        I_pbuf_alloc DECLARE_IMPORT(34, pbuf_alloc)
 void             pbuf_realloc(struct pbuf *p, u16 size);
