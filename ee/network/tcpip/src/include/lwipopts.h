@@ -92,6 +92,13 @@
    byte alignment -> define MEM_ALIGNMENT to 2. */
 #define MEM_ALIGNMENT		4	//SP193: this should be 16 in order to support the R5900's DMAC. But 16 is not supported.
 
+/**
+ * MEM_SIZE: the size of the heap memory. If the application will send
+ * a lot of data that needs to be copied, this should be set high.
+ */
+//SP193: setting this too low may cause tcp_write() to fail when it tries to allocate from PBUF_RAM!
+#define MEM_SIZE		(TCP_MSS * 8)
+
 /*
    ------------------------------------------------
    ---------- Internal Memory Pool Sizes ----------
