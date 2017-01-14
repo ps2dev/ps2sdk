@@ -32,7 +32,7 @@ static arch_message msg_pool[SYS_MAX_MESSAGES];
 static inline arch_message *alloc_msg(void);
 static void free_msg(arch_message *msg);
 
-static int MsgAllocSema, MsgCountSema, TimeoutsSema;
+static int MsgCountSema;
 
 extern void *_gp;
 
@@ -42,11 +42,11 @@ static inline arch_message *try_alloc_msg(void)
 	arch_message *message;
 
 	if(PollSema(MsgCountSema)==MsgCountSema){
-		WaitSema(MsgAllocSema);
+		DI();
 
 		for(i=0,message=NULL; i<SYS_MAX_MESSAGES; i++)
 		{
-		if((msg_pool[i].next == NULL) && (msg_pool[i].sys_msg == NULL))
+			if((msg_pool[i].next == NULL) && (msg_pool[i].sys_msg == NULL))
 			{
 				msg_pool[i].next = (arch_message *) 0xFFFFFFFF;
 				msg_pool[i].sys_msg = (void *) 0xFFFFFFFF;
@@ -55,7 +55,7 @@ static inline arch_message *try_alloc_msg(void)
 			}
 		}
 
-		SignalSema(MsgAllocSema);
+		EI();
 	}else message=NULL;
 
 	return message;
@@ -67,7 +67,7 @@ static inline arch_message *alloc_msg(void)
 	arch_message *message;
 
 	WaitSema(MsgCountSema);
-	WaitSema(MsgAllocSema);
+	DI();
 
 	for(i=0,message=NULL; i<SYS_MAX_MESSAGES; i++)
 	{
@@ -80,17 +80,17 @@ static inline arch_message *alloc_msg(void)
 		}
 	}
 
-	SignalSema(MsgAllocSema);
+	EI();
 
 	return message;
 }
 
 static void free_msg(arch_message *msg)
 {
-	WaitSema(MsgAllocSema);
+	DI();
 	msg->next = NULL;
 	msg->sys_msg = NULL;
-	SignalSema(MsgAllocSema);
+	EI();
 	SignalSema(MsgCountSema);
 }
 
@@ -111,10 +111,11 @@ sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, 
 	ee_thread_t thp;
 	int tid, rv;
 
-	thp.attr=thp.option=0;
+	thp.attr = 0;
+	thp.option = (u32)"PS2IP";
 	thp.func = thread;
 	thp.stack_size = stacksize;
-	thp.stack = memalign(128, stacksize);
+	thp.stack = memalign(64, stacksize);
 	thp.initial_priority = prio;
 	thp.gp_reg = &_gp;
 
@@ -145,11 +146,13 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 
 	*mbox=SYS_MBOX_NULL;
 
-	if((MBox=malloc(sizeof(struct MboxData)))!=NULL){
+	if((MBox=malloc(sizeof(struct MboxData)))!=NULL)
+	{
 		MBox->LastMessage=MBox->FirstMessage=NULL;
 		sema.attr=sema.option=0;
 		sema.init_count=sema.max_count=1;
-		if((MBox->SemaID=CreateSema(&sema))<0){
+		if((MBox->SemaID=CreateSema(&sema))<0)
+		{
 			printf("sys_mbox_new: CreateMbx failed. Code: %d\n", MBox->SemaID);
 			free(MBox);
 			return ERR_MEM;
@@ -157,7 +160,8 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 
 		sema.attr=sema.option=sema.init_count=0;
 		sema.max_count=SYS_MAX_MESSAGES;
-		if((MBox->MessageCountSema=CreateSema(&sema))<0){
+		if((MBox->MessageCountSema=CreateSema(&sema))<0)
+		{
 			printf("sys_mbox_new: CreateMbx failed. Code: %d\n", MBox->MessageCountSema);
 			DeleteSema(MBox->SemaID);
 			free(MBox);
@@ -184,7 +188,8 @@ void sys_mbox_free(sys_mbox_t *pMBox)
 
 	/* Free all messages that were not freed yet. */
 	Message=(*pMBox)->FirstMessage;
-	while(Message!=NULL){
+	while(Message!=NULL)
+	{
 		NextMessage=Message->next;
 		free_msg(Message);
 		Message=NextMessage;
@@ -197,45 +202,51 @@ void sys_mbox_free(sys_mbox_t *pMBox)
 	(*pMBox)=SYS_MBOX_NULL;
 }
 
-int sys_mbox_valid(sys_mbox_t *mbox){
+int sys_mbox_valid(sys_mbox_t *mbox)
+{
 	return((*mbox)!=SYS_MBOX_NULL);
 }
 
-void sys_mbox_set_invalid(sys_mbox_t *mbox){
+void sys_mbox_set_invalid(sys_mbox_t *mbox)
+{
 	*mbox=SYS_MBOX_NULL;
 }
 
 extern unsigned short int hsyncTicksPerMSec;
 
-static inline unsigned int mSec2HSyncTicks(unsigned int msec){
+static inline unsigned int mSec2HSyncTicks(unsigned int msec)
+{
 	return msec*hsyncTicksPerMSec;
 }
 
-static void RetrieveMbxInternal(sys_mbox_t mBox, arch_message **message){
+static void RetrieveMbxInternal(sys_mbox_t mBox, arch_message **message)
+{
 	arch_message *NextMessage;
 
 	WaitSema(mBox->SemaID);
 
 	*message=mBox->FirstMessage;
 	NextMessage=(unsigned int)(*message)->next!=0xFFFFFFFF?(*message)->next:NULL;
-	if(mBox->FirstMessage==mBox->LastMessage){
+	if(mBox->FirstMessage==mBox->LastMessage)
 		mBox->LastMessage=NextMessage;
-	}
 	mBox->FirstMessage=NextMessage;
 
 	SignalSema(mBox->SemaID);
 }
 
-static int ReceiveMbx(arch_message **message, sys_mbox_t mBox, u32_t timeout){
+static int ReceiveMbx(arch_message **message, sys_mbox_t mBox, u32_t timeout)
+{
 	int result, AlarmID, ThreadID;
 
-	if(timeout > 0){
+	if(timeout > 0)
+	{
 		ThreadID=GetThreadId();
     		AlarmID=SetAlarm(mSec2HSyncTicks(timeout), &TimeoutHandler, &ThreadID);
 	}
 	else AlarmID=-1;
 
-	if(WaitSema(mBox->MessageCountSema)==mBox->MessageCountSema){
+	if(WaitSema(mBox->MessageCountSema)==mBox->MessageCountSema)
+	{
 		if(AlarmID>=0) ReleaseAlarm(AlarmID);
 
 		RetrieveMbxInternal(mBox, message);
@@ -246,10 +257,12 @@ static int ReceiveMbx(arch_message **message, sys_mbox_t mBox, u32_t timeout){
 	return result;
 }
 
-static int PollMbx(arch_message **message, sys_mbox_t mBox){
+static int PollMbx(arch_message **message, sys_mbox_t mBox)
+{
 	int result;
 
-	if(PollSema(mBox->MessageCountSema)==mBox->MessageCountSema){
+	if(PollSema(mBox->MessageCountSema)==mBox->MessageCountSema)
+	{
 		RetrieveMbxInternal(mBox, message);
 		result=0;
 	}
@@ -339,9 +352,10 @@ err_t sys_sem_new(sys_sem_t *sem, u8_t count)
 
 	dbgprintf("sys_sem_new: CreateSema (CNT: %d)\n", u8Count);
 
-	sema.init_count=count;
-	sema.max_count=1;
-	sema.attr=sema.option=0;
+	sema.init_count = count;
+	sema.max_count = 1;
+	sema.attr = 0;
+	sema.option = (u32)"PS2IP";
 
 	if((*sem=CreateSema(&sema))<0)
 	{
@@ -422,14 +436,9 @@ void sys_init(void)
 
 	dbgprintf("sys_init: Initializing...\n");
 
-	sema.attr=sema.option=0;
-	sema.init_count=sema.max_count=1;
-	MsgAllocSema=CreateSema(&sema);
-	sema.attr=sema.option=0;
-	sema.init_count=sema.max_count=1;
-	TimeoutsSema=CreateSema(&sema);
-	sema.attr=sema.option=0;
-	sema.init_count=sema.max_count=SYS_MAX_MESSAGES;
+	sema.attr = 0;
+	sema.option = (u32)"PS2IP";
+	sema.init_count = sema.max_count = SYS_MAX_MESSAGES;
 	MsgCountSema=CreateSema(&sema);
 
 	for(i = 0; i < SYS_MAX_MESSAGES; i++)

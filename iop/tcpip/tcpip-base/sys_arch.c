@@ -129,7 +129,7 @@ sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, 
 	int tid, rv;
 
 	thp.attr = TH_C;
-	thp.option = 0;
+	thp.option = (u32)"PS2IP";
 	thp.thread = thread;
 	thp.stacksize = stacksize;
 	thp.priority = prio;
@@ -158,7 +158,8 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 
 	dbgprintf("sys_mbox_new: Create MBox (TID: %d)\n", GetThreadId());
 
-	mbp.attr = mbp.option = 0;
+	mbp.attr = MBA_THFIFO;
+	mbp.option = (u32)"PS2IP";
 
 	if((*mbox = CreateMbx(&mbp)) < 0)
 	{
@@ -202,7 +203,8 @@ void sys_mbox_post(sys_mbox_t *mbox, void *msg)
 	SendMbx(*mbox, (iop_message_t *)MsgPkt);
 }
 
-void sys_mbox_set_invalid(sys_mbox_t *mbox){
+void sys_mbox_set_invalid(sys_mbox_t *mbox)
+{
 	*mbox=SYS_MBOX_NULL;
 }
 
@@ -260,7 +262,7 @@ u32_t sys_arch_mbox_tryfetch(sys_mbox_t *mbox, void **msg){
 err_t sys_sem_new(sys_sem_t *sem, u8_t count)
 {
 	//Create a new semaphore.
-	iop_sema_t Sema={1, 1, count, 1};
+	iop_sema_t Sema={SA_THPRI, (u32)"PS2IP", count, 1};
 	err_t result;
 
 	dbgprintf("sys_sem_new: CreateSema (TID: %d, CNT: %d)\n", GetThreadId(), count);
