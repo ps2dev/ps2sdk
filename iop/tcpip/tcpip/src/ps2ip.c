@@ -220,25 +220,21 @@ error:
 	return	ERR_OK;
 }
 
-void ps2ip_Stub(void)
-{
-}
-
 int _exit(int argc, char** argv)
 {
-//	printf("ps2ip_ShutDown: Shutting down ps2ip-module\n");
 	return MODULE_NO_RESIDENT_END; // return "not resident"!
 }
 
-static inline int InitLWIPStack(IPAddr *IP, IPAddr *NM, IPAddr *GW){
+int _start(int argc, char *argv[]){
 	sys_sem_t	Sema;
-	int		iRet;
+	int		result;
 
 	dbgprintf("PS2IP: Module Loaded.\n");
 
-	if ((iRet=RegisterLibraryEntries(&_exp_ps2ip))!=0)
+	if ((result = RegisterLibraryEntries(&_exp_ps2ip)) != 0)
 	{
-		printf("PS2IP: RegisterLibraryEntries returned: %d\n", iRet);
+		printf("PS2IP: RegisterLibraryEntries returned: %d\n", result);
+		return MODULE_NO_RESIDENT_END;
 	} else {
 		sys_sem_new(&Sema, 0);
 		dbgprintf("PS2IP: Calling tcpip_init\n");
@@ -255,27 +251,5 @@ static inline int InitLWIPStack(IPAddr *IP, IPAddr *NM, IPAddr *GW){
 		dbgprintf("PS2IP: System Initialised\n");
 	}
 
-	return iRet;
-}
-
-int _start(int argc, char *argv[]){
-	IPAddr IP, NM, GW;
-
-	//Parse IP address arguments.
-	if(argc>=4)
-	{
-		dbgprintf("SMAP: %s %s %s\n", argv[1],argv[2],argv[3]);
-		IP.addr=inet_addr(argv[1]);
-		NM.addr=inet_addr(argv[2]);
-		GW.addr=inet_addr(argv[3]);
-	}
-	else
-	{
-		//Set some defaults.
-		IP4_ADDR(&IP,192,168,0,80);
-		IP4_ADDR(&NM,255,255,255,0);
-		IP4_ADDR(&GW,192,168,0,1);
-	}
-
-	return InitLWIPStack(&IP, &NM, &GW)==0?MODULE_RESIDENT_END:MODULE_NO_RESIDENT_END;
+	return MODULE_RESIDENT_END;
 }

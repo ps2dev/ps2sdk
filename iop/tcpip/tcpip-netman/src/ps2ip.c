@@ -31,7 +31,6 @@
 #include "lwip/inet.h"
 #include "netif/etharp.h"
 
-#include "ipconfig.h"
 #include "ps2ip_internal.h"
 
 typedef struct pbuf	PBuf;
@@ -222,13 +221,8 @@ error:
 	return	ERR_OK;
 }
 
-void ps2ip_Stub(void)
-{
-}
-
 int _exit(int argc, char** argv)
 {
-//	printf("ps2ip_ShutDown: Shutting down ps2ip-module\n");
 	return MODULE_NO_RESIDENT_END; // return "not resident"!
 }
 
@@ -369,6 +363,7 @@ static inline int InitializeLWIP(void){
 }
 
 static inline int InitLWIPStack(IPAddr *IP, IPAddr *NM, IPAddr *GW){
+	int result;
 	static struct NetManNetProtStack stack={
 		&LinkStateUp,
 		&LinkStateDown,
@@ -377,7 +372,8 @@ static inline int InitLWIPStack(IPAddr *IP, IPAddr *NM, IPAddr *GW){
 		&EnQRxPacket
 	};
 
-	InitializeLWIP();
+	if((result = InitializeLWIP()) != 0)
+		return result;
 
 	netif_add(&NIF, IP, NM, GW, &NIF, &SMapIFInit, tcpip_input);
 	netif_set_default(&NIF);

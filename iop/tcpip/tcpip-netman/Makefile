@@ -39,7 +39,7 @@ endif
 
 IOP_INCS += -I$(LWIP)/src/include -I$(LWIP)/src/include/ipv4 -I$(PS2IP_BASE)/include -I$(IOP_SRC_DIR)include
 
-ps2ip_OBJECTS = ps2ip.o ipconfig.o sys.o sys_arch.o init.o exports.o imports.o mem.o netif.o pbuf.o stats.o tcp_in.o tcp_out.o udp.o memp.o tcp.o etharp.o ethernet.o raw.o def.o timeouts.o
+ps2ip_OBJECTS = ps2ip.o sys.o sys_arch.o init.o exports.o imports.o mem.o netif.o pbuf.o stats.o tcp_in.o tcp_out.o udp.o memp.o tcp.o etharp.o ethernet.o raw.o def.o timeouts.o
 
 ifdef PS2IP_DHCP
 ps2ip_OBJECTS += dhcp.o
