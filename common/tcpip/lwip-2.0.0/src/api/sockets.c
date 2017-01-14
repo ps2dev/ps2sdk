@@ -1637,7 +1637,7 @@ again:
 #if (defined(_IOP) || defined(_EE))
 	/* Preserve the semaphore ID before resuming interrupts, in case the select thread takes itself off the list
 		and invalidating scb. */
-	SELECT_SEM_T sem = SELECT_SEM_PTR(scb->sem);
+	sys_sem_t* sem = SELECT_SEM_PTR(scb->sem);
 
         /* EE/IOP: Resume interrupts before signalling the semaphore, otherwise the critical section will be violated. */
         SYS_ARCH_UNPROTECT(lev);
