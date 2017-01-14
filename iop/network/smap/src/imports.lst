@@ -29,6 +29,7 @@ I_bzero
 I_strtok
 I_strcpy
 I_strlen
+I_look_ctype_table
 sysclib_IMPORTS_end
 
 intrman_IMPORTS_start
