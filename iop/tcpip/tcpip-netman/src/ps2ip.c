@@ -305,8 +305,6 @@ SMapOutput(struct netif *pNetIF, struct pbuf *pOutput, IPAddr* pIPAddr)
 //Should be called at the beginning of the program to set up the network interface.
 static err_t SMapIFInit(struct netif* pNetIF)
 {
-	static unsigned char MAC_buffer[64];
-
 	pNetIF->name[0]='s';
 	pNetIF->name[1]='m';
 #ifdef PRE_LWIP_130_COMPAT
@@ -324,9 +322,8 @@ static err_t SMapIFInit(struct netif* pNetIF)
 	pNetIF->mtu=1500;
 
 	//Get MAC address.
-	NetManIoctl(NETMAN_NETIF_IOCTL_ETH_GET_MAC, NULL, 0, MAC_buffer, sizeof(pNetIF->hwaddr));
-	memcpy(pNetIF->hwaddr, MAC_buffer, sizeof(pNetIF->hwaddr));
-//	DEBUG_PRINTF("MAC address : %02d:%02d:%02d:%02d:%02d:%02d\n",pNetIF->hwaddr[0],pNetIF->hwaddr[1],pNetIF->hwaddr[2],
+	NetManIoctl(NETMAN_NETIF_IOCTL_ETH_GET_MAC, NULL, 0, pNetIF->hwaddr, sizeof(pNetIF->hwaddr));
+//	DEBUG_PRINTF("MAC address : %02x:%02x:%02x:%02x:%02x:%02x\n",pNetIF->hwaddr[0],pNetIF->hwaddr[1],pNetIF->hwaddr[2],
 //				 pNetIF->hwaddr[3],pNetIF->hwaddr[4],pNetIF->hwaddr[5]);
 
 	return	ERR_OK;
