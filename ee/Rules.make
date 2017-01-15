@@ -17,7 +17,7 @@ EE_CFLAGS := -D_EE -G0 -O2 -Wall $(EE_CFLAGS)
 EE_CXXFLAGS := -D_EE -G0 -O2 -Wall $(EE_CXXFLAGS)
 
 # Linker flags
-#EE_LDFLAGS := $(EE_LDFLAGS)
+# EE_LDFLAGS := $(EE_LDFLAGS)
 
 # Assembler flags
 EE_ASFLAGS := $(EE_ASFLAGS)

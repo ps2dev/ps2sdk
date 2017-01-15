@@ -5,87 +5,38 @@
 # Copyright 2001-2005, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
 
-include $(PS2SDKSRC)/Defs.make
+EE_OBJS_DIR = ee_obj/
+EE_LIB_DIR = lib/
+EE_SRC_DIR = src/
+EE_INC_DIR = include/
 
-BIN_DIR=bin
-OBJ_DIR=obj
-LIB_DIR=lib
+EE_LIB = $(EE_LIB_DIR)libsbus.a
 
-## IOP IRX
-IOP_OBJ_DIR=iop_obj
-IRX_NAME = sbus
-IOP_BIN = bin/$(IRX_NAME).irx
-IOP_CPPFLAGS = -D_IOP -miop -O2 -G0 -I$(PS2SDKSRC)/iop/kernel/include -I$(PS2SDKSRC)/common/include -I./include -I./src -Wall -fno-builtin-printf -DIRX_NAME=$(IRX_NAME)
-IOP_OBJS = ps2_sbus.o iop_sbus.o ps2_sif.o iop_sif2.o sif2cmd.o imports.o exports.o
-IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJ_DIR)/%)
+EE_CFLAGS += -fno-builtin-printf
 
-## EE Library
 EE_OBJS = ps2_sbus.o ee_sbus.o ps2_sif.o ee_sif2.o sif2cmd.o ee_low.o
-EE_OBJS := $(EE_OBJS:%=obj/%)
-EE_LIB = $(LIB_DIR)/libsbus.a
-EE_CFLAGS = -D_EE -O2 -G0 -fno-builtin-printf
-EE_INC = -I. -I./include -I $(PS2SDKSRC)/common/include -I $(PS2SDKSRC)/ee/include -I $(PS2SDKSRC)/ee/kernel/include
+EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
-all: $(IOP_OBJ_DIR) $(OBJ_DIR) $(BIN_DIR) $(LIB_DIR) $(IOP_BIN) $(EE_LIB)
+IOP_OBJS_DIR = iop_obj/
+IOP_BIN_DIR = irx/
+IOP_SRC_DIR = src/
+IOP_INC_DIR = include/
 
-$(IOP_OBJ_DIR):
-	mkdir -p $(IOP_OBJ_DIR)
+IOP_BIN = $(IOP_BIN_DIR)sbus.irx
 
-$(OBJ_DIR):
-	mkdir -p $(OBJ_DIR)
+IOP_INCS += -I$(IOP_SRC_DIR)
 
-$(BIN_DIR):
-	mkdir -p $(BIN_DIR)
+IOP_OBJS = ps2_sbus.o iop_sbus.o ps2_sif.o iop_sif2.o sif2cmd.o imports.o exports.o
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
 
-$(LIB_DIR):
-	mkdir -p $(LIB_DIR)
-
-$(IOP_OBJ_DIR)/%.o: src/%.c
-	$(IOP_CC) $(IOP_CFLAGS) $(IOP_CPPFLAGS) -c $< -o $@
-
-$(IOP_OBJ_DIR)/%.o: src/%.cpp
-	$(IOP_CXX) $(IOP_CXXFLAGS) $(IOP_CPPFLAGS) -c $< -o $@
-
-$(IOP_OBJ_DIR)/%.o: src/%.S
-	$(IOP_CC) $(IOP_CPPFLAGS) -c $< -o $@
-
-$(IOP_OBJ_DIR)/%.o: src/%.s
-	$(IOP_AS) $(IOP_ASFLAGS) -c $< -o $@
-
-$(IOP_BIN): $(IOP_OBJS) src/imports.lst src/irx_imports.h
-	$(IOP_CC) $(IOP_LDFLAGS) -miop -nostdlib -s -o $(IOP_BIN) $(IOP_OBJS)
-
-$(IOP_OBJ_DIR)/%.o: src/%.lst
-	echo "#include \"irx_imports.h\"" > src/build-imports.c
-	cat $< >> src/build-imports.c
-	$(IOP_CC) $(IOP_CFLAGS) $(IOP_CPPFLAGS) -c src/build-imports.c -o $@
-	rm -f src/build-imports.c
-
-$(IOP_OBJ_DIR)/%.o: src/%.tab
-	$(ECHO) "#include \"irx.h\"" > src/build-exports.c
-	cat $< >> src/build-exports.c
-	$(IOP_CC) $(IOP_CFLAGS) $(IOP_CPPFLAGS) -Isrc -c src/build-exports.c -o $@
-	rm -f src/build-exports.c
-
-$(EE_LIB): $(EE_OBJS)
-	$(EE_AR) rc $(EE_LIB) $(EE_OBJS)
+all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB) $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
 
 clean:
-	rm -f -r $(OBJ_DIR) $(LIB_DIR) $(BIN_DIR) $(IOP_OBJ_DIR)
+	rm -f -r $(EE_OBJS_DIR) $(EE_LIB_DIR) $(IOP_OBJS_DIR) $(IOP_BIN_DIR)
 
-obj/%.o: src/%.c
-	$(EE_CC) $(EE_CFLAGS) $(EE_INC) -c $< -o $@
-
-obj/%.o: src/%.S
-	$(EE_CC) $(EE_CFLAGS) $(EE_INC) -c $< -o $@
-
-release: all
-	mkdir -p $(PS2SDK)/ee/include
-	$(ECHO) Installing $(IOP_BIN) into $(PS2SDK)/iop/irx
-	cp -f $(IOP_BIN) $(PS2SDK)/iop/irx
-	$(ECHO) Installing $(EE_LIB) into $(PS2SDK)/ee/lib
-	cp -f $(EE_LIB) $(PS2SDK)/ee/lib
-	$(ECHO) Installing include/*.h into $(PS2SDK)/common/include
-	cp -f include/*.h $(PS2SDK)/common/include
+include $(PS2SDKSRC)/Defs.make
+include $(PS2SDKSRC)/ee/Rules.make
+include $(PS2SDKSRC)/ee/Rules.release
+include $(PS2SDKSRC)/iop/Rules.make
+include $(PS2SDKSRC)/iop/Rules.release

@@ -5,17 +5,15 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
 
 IOP_OBJS_DIR = obj/
 IOP_BIN_DIR = irx/
 IOP_SRC_DIR = $(PS2SDKSRC)/iop/system/sio2log/src/
+IOP_INC_DIR = $(PS2SDKSRC)/iop/system/sio2log/include/
 
 IOP_BIN = $(IOP_BIN_DIR)freesio2.irx
 
 IOP_CFLAGS += -DXSIO2MAN
-
-IOP_INCS += -I$(PS2SDKSRC)/iop/system/sio2log/include/
 
 IOP_OBJS = sio2man.o imports.o exports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)

@@ -41,8 +41,8 @@ clean: env_build_check $(subdir_clean)
 
 release-clean:
 	make -C common release-clean
-	make -C iop release-clean
-	make -C ee release-clean
+	make -C iop release-iop-clean
+	make -C ee release-ee-clean
 	make -C samples release-clean
 	make -C tools release-clean
 	
