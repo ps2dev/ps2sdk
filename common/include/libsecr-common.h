@@ -7,7 +7,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: secrman.h 1410 2009-01-18 15:24:54Z jimmikaelkael $
 # Definitions and imports for secrman module.
 */
 

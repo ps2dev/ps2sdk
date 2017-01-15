@@ -8,7 +8,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 # EE SIF RPC commands
 # MRB: This file now contains the SIF routines included
 # with libpsware.  Bug reports welcome.

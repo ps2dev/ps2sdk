@@ -7,7 +7,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 # Disable the MODLOAD check for .elf's or .irx's on certain devices.
 */
 

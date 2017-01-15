@@ -7,7 +7,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 # fileXio RPC Server
 # This module provides an RPC interface to the EE for all the functions
 # of ioman/fileio.

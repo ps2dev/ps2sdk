@@ -6,8 +6,6 @@
 # Copyright 2005, James Lee (jbit<at>jbit<dot>net)
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# $Id$
 */
 
 #include <stdio.h>

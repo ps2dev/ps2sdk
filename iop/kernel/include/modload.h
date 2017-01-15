@@ -7,7 +7,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: modload.h 817 2005-02-11 17:56:12Z herben $
 # Kernel module loader.
 */
 

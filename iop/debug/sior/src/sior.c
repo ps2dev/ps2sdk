@@ -7,7 +7,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: sior.c 1491 2009-01-04 23:46:22Z oopo $
 # IOP exception handling.
 */
 

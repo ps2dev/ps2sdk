@@ -6,7 +6,6 @@
 # Copyright 2005, ps2dev - http://www.ps2dev.org
 # Licenced under GNU Library General Public License version 2
 #
-# $Id$
 # audsrv helpers.
 */
 

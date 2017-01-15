@@ -6,8 +6,6 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# $Id: sys_arch.c 1680 2010-05-17 22:47:17Z jim $
 */
 
 #include <stdlib.h>

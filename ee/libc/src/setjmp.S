@@ -7,7 +7,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 # This is a simple version of setjmp and longjmp.
 # Floating point support in.
 */

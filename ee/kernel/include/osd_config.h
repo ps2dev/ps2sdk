@@ -7,7 +7,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 # PS2 Configuration settings
 # Note: the 'set' methods are only valid till the ps2 gets
 # turned off or reset!

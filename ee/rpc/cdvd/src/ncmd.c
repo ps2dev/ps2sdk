@@ -8,7 +8,6 @@
 # (c) 2004 Marcus R. Brown <mrbrown@0xd6.org> Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 #
 # Function definitions for libsceCdvd (EE side calls to the iop module sceCdvdfsv).
 #

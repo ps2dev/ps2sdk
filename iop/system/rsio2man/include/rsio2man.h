@@ -7,7 +7,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 # rom1:SIO2MAN module definitions
 # rom1:SIO2MAN is a newer version of SIO2MAN than rom0:SIO2MAN.
 */
