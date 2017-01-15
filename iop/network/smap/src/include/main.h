@@ -60,6 +60,6 @@ struct SmapDriverData{
 int smap_init(int argc, char *argv[]);
 int SMAPStart(void);
 void SMAPStop(void);
-int SMAPGetMACAddress(unsigned char *buffer);
+int SMAPGetMACAddress(u8 *buffer);
 
 #include "xfer.h"

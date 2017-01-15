@@ -39,7 +39,7 @@ static int SmapDmaTransfer(volatile u8 *smap_regbase, void *buffer, unsigned int
 	return result;
 }
 
-static inline void CopyFromFIFO(volatile u8 *smap_regbase, void *buffer, unsigned int length, unsigned short int RxBdPtr){
+static inline void CopyFromFIFO(volatile u8 *smap_regbase, void *buffer, unsigned int length, u16 RxBdPtr){
 	int i, result;
 
 	SMAP_REG16(SMAP_R_RXFIFO_RD_PTR)=RxBdPtr;
@@ -50,7 +50,7 @@ static inline void CopyFromFIFO(volatile u8 *smap_regbase, void *buffer, unsigne
 
 	if(result<length){
 		for(i=result; i<length; i+=4){
-			((unsigned int *)buffer)[i/4]=SMAP_REG32(SMAP_R_RXFIFO_DATA);
+			((u32*)buffer)[i/4]=SMAP_REG32(SMAP_R_RXFIFO_DATA);
 		}
 	}
 }
@@ -130,7 +130,7 @@ int SMAPSendPacket(const void *data, unsigned int length){
 		}
 
 		for(; i<length; i+=4){
-			SMAP_REG32(SMAP_R_TXFIFO_DATA)=((unsigned int *)data)[i/4];
+			SMAP_REG32(SMAP_R_TXFIFO_DATA)=((u32*)data)[i/4];
 		}
 
 		BD_ptr->length=length;
