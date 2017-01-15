@@ -17,7 +17,7 @@ LIB_DIR=lib
 IOP_OBJ_DIR=iop_obj
 IRX_NAME = sbus
 IOP_BIN = bin/$(IRX_NAME).irx
-IOP_CPPFLAGS = -miop -O2 -G0 -I$(PS2SDKSRC)/iop/kernel/include -I$(PS2SDKSRC)/common/include -I./include -I./src -Wall -fno-builtin-printf -DIRX_NAME=$(IRX_NAME)
+IOP_CPPFLAGS = -D_IOP -miop -O2 -G0 -I$(PS2SDKSRC)/iop/kernel/include -I$(PS2SDKSRC)/common/include -I./include -I./src -Wall -fno-builtin-printf -DIRX_NAME=$(IRX_NAME)
 IOP_OBJS = ps2_sbus.o iop_sbus.o ps2_sif.o iop_sif2.o sif2cmd.o imports.o exports.o
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJ_DIR)/%)
 
