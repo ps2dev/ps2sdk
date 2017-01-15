@@ -134,8 +134,6 @@ sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, 
 	thp.stacksize = stacksize;
 	thp.priority = prio;
 
-	dbgprintf("sys_thread_new: Thread new (TID: %d)\n", GetThreadId());
-
 	if((tid = CreateThread(&thp)) < 0)
 	{
 		dbgprintf("sys_thread_new: CreateThread failed, EC: %d\n", tid);
@@ -149,14 +147,14 @@ sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, 
 		return ERR_MEM;
 	}
 
+	dbgprintf("sys_thread_new: thread %d\n", tid);
+
 	return((sys_thread_t) tid);
 }
 
 err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 {
 	iop_mbx_t mbp;
-
-	dbgprintf("sys_mbox_new: Create MBox (TID: %d)\n", GetThreadId());
 
 	mbp.attr = MBA_THFIFO;
 	mbp.option = (u32)"PS2IP";
@@ -167,13 +165,14 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 		return ERR_MEM;
 	}
 
+	dbgprintf("sys_mbox_new: mbox %d\n", *mbox);
+
 	return ERR_OK;
 }
 
 //Delete the messagebox, pMBox.
 void sys_mbox_free(sys_mbox_t *mbox)
 {
-	dbgprintf("sys_mbox_free: Free MBox (TID: %d)\n", GetThreadId());
 	DeleteMbx(*mbox);
 }
 
@@ -265,14 +264,14 @@ err_t sys_sem_new(sys_sem_t *sem, u8_t count)
 	iop_sema_t Sema={SA_THPRI, (u32)"PS2IP", count, 1};
 	err_t result;
 
-	dbgprintf("sys_sem_new: CreateSema (TID: %d, CNT: %d)\n", GetThreadId(), count);
-
 	if((*sem=CreateSema(&Sema))<0)
 	{
 		printf("sys_sem_new: CreateSema failed, EC: %d\n", *sem);
 		result=ERR_MEM;
 	}
 	else result=ERR_OK;
+
+	dbgprintf("sys_sem_new: CreateSema cnt %d sema %d\n", count, *sem);
 
 	return result;
 }
@@ -287,10 +286,9 @@ void sys_sem_set_invalid(sys_sem_t *sem){
 
 u32_t sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout)
 {
-	//Wait TimeElaspedout msec for the Sema to receive a signal.
-	dbgprintf("sys_arch_sem_wait: Sema: %d, Timeout: %x (TID: %d)\n", *sem, timeout, GetThreadId());
 	u32_t result;
 
+	//Wait TimeElaspedout msec for the Sema to receive a signal.
 	if(timeout==0)
 	{
 		//Wait with no timeouts.
@@ -328,21 +326,17 @@ u32_t sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout)
 
 void sys_sem_signal(sys_sem_t *sem)
 {
-	dbgprintf("sys_sem_signal: Sema: %d (TID: %d)\n", *sem, GetThreadId());
 	SignalSema(*sem);
 }
 
 void sys_sem_free(sys_sem_t *sem)
 {
-	dbgprintf("sys_sem_free: (TID: %d)\n", GetThreadId());
 	DeleteSema(*sem);
 }
 
 void sys_init(void)
 {
 	iop_sema_t sema;
-
-	dbgprintf("sys_init: Initializing (TID: %d)\n", GetThreadId());
 
 	memset(msg_pool, 0, sizeof(msg_pool));
 

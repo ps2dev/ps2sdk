@@ -182,7 +182,7 @@ static void TimerThread(void* pvArg)
 
 static inline void InitTimer(void)
 {
-	iop_thread_t	Thread={TH_C, 0, TimerThread, 0x300, 0x16};
+	iop_thread_t	Thread={TH_C, (u32)"PS2IP-timer", TimerThread, 0x300, 0x16};
 	int		iTimerThreadID=CreateThread(&Thread);
 
 	if (iTimerThreadID<0)

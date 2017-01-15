@@ -16,12 +16,16 @@ typedef signed int		s32_t;
 typedef u32_t			mem_ptr_t;
 
 /* Define (sn)printf formatters for these lwIP types */
+#define U8_F "hu"
+#define S8_F "hd"
+#define X8_F "hx"
 #define U16_F "hu"
 #define S16_F "hd"
 #define X16_F "hx"
 #define U32_F "lu"
 #define S32_F "ld"
 #define X32_F "lx"
+#define SZT_F "uz"
 
 #define PACK_STRUCT_FIELD(x) x __attribute((packed))
 #define PACK_STRUCT_STRUCT __attribute((packed))

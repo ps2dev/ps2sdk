@@ -32,7 +32,8 @@
 	#define LWIP_IPV4	1
 #endif
 
-/*** Taken from src/include/lwip/opt.h. If changes were made to lwipopts.h, please update this section. ****/
+/*** Taken from src/include/lwip/opt.h. If changes were made to lwipopts.h, please update this section.
+	Some settings affect the fields present in structures like struct netif! ****/
 #define MEMP_NUM_NETCONN		4
 #define LWIP_NETIF_STATUS_CALLBACK	0
 #define LWIP_NETIF_LINK_CALLBACK	0
@@ -44,6 +45,7 @@
 #define LWIP_LOOPBACK_MAX_PBUFS		0
 #define LWIP_NUM_NETIF_CLIENT_DATA	0
 #define LWIP_SOCKET_OFFSET		0
+#define LWIP_IPV6_SEND_ROUTER_SOLICIT	1
 
 /*
  * Copyright (c) 2001-2003 Swedish Institute of Computer Science.

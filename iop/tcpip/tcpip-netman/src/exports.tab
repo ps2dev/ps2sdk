@@ -60,7 +60,7 @@ DECLARE_EXPORT_TABLE(ps2ip, 2, 5)
 #else
 	DECLARE_EXPORT(_retonly)
 	DECLARE_EXPORT(_retonly)
-	DECLARE_EXPORT(_retonly)	//50
+	DECLARE_EXPORT(_retonly)		//50
 	DECLARE_EXPORT(_retonly)
 	DECLARE_EXPORT(_retonly)
 	DECLARE_EXPORT(_retonly)

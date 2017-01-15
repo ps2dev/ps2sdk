@@ -119,8 +119,6 @@ sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, 
 	thp.initial_priority = prio;
 	thp.gp_reg = &_gp;
 
-	dbgprintf("sys_thread_new()\n");
-
 	if((tid = CreateThread(&thp)) < 0)
 	{
 		dbgprintf("sys_thread_new: CreateThread failed, EC: %d\n", tid);
@@ -134,6 +132,8 @@ sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, 
 		return ERR_MEM;
 	}
 
+	dbgprintf("sys_thread_new(): %d\n", tid);
+
 	return((sys_thread_t)tid);
 }
 
@@ -142,14 +142,13 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 	struct MboxData *MBox;
 	ee_sema_t sema;
 
-	dbgprintf("sys_mbox_new()\n");
-
 	*mbox=SYS_MBOX_NULL;
 
 	if((MBox=malloc(sizeof(struct MboxData)))!=NULL)
 	{
 		MBox->LastMessage=MBox->FirstMessage=NULL;
-		sema.attr=sema.option=0;
+		sema.attr = 0;
+		sema.option = (u32)"PS2IP-msgsema";
 		sema.init_count=sema.max_count=1;
 		if((MBox->SemaID=CreateSema(&sema))<0)
 		{
@@ -158,7 +157,9 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 			return ERR_MEM;
 		}
 
-		sema.attr=sema.option=sema.init_count=0;
+		sema.attr = 0;
+		sema.option = (u32)"PS2IP-msgcount";
+		sema.init_count=0;
 		sema.max_count=SYS_MAX_MESSAGES;
 		if((MBox->MessageCountSema=CreateSema(&sema))<0)
 		{
@@ -173,6 +174,8 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 		return ERR_MEM;
 	}
 
+	dbgprintf("sys_mbox_new(): sema %d, %d\n", MBox->SemaID, MBox->MessageCountSema);
+
 	*mbox=MBox;
 
 	return ERR_OK;
@@ -183,7 +186,6 @@ void sys_mbox_free(sys_mbox_t *pMBox)
 {
 	arch_message *Message, *NextMessage;
 
-	dbgprintf("sys_mbox_free()\n");
 	WaitSema((*pMBox)->SemaID);
 
 	/* Free all messages that were not freed yet. */
@@ -350,8 +352,6 @@ err_t sys_sem_new(sys_sem_t *sem, u8_t count)
 	//Create a new semaphore.
 	ee_sema_t sema;
 
-	dbgprintf("sys_sem_new: CreateSema (CNT: %d)\n", u8Count);
-
 	sema.init_count = count;
 	sema.max_count = 1;
 	sema.attr = 0;
@@ -363,6 +363,8 @@ err_t sys_sem_new(sys_sem_t *sem, u8_t count)
 		return ERR_MEM;
 	}
 
+	dbgprintf("sys_sem_new: CreateSema (CNT: %d) %d\n", count, *sem);
+
 	return ERR_OK;
 }
 
@@ -372,8 +374,6 @@ u32_t sys_arch_sem_wait(sys_sem_t *Sema, u32_t u32Timeout)
 	int ThreadID;
 
 	//Wait u32Timeout msec for the Sema to receive a signal.
-	dbgprintf("sys_arch_sem_wait: Sema: %d, Timeout: %x (TID: %d)\n", *Sema, u32Timeout, GetThreadId());
-
 	if(u32Timeout==0)
 	{
 		//Wait with no timeouts.
@@ -410,14 +410,11 @@ u32_t sys_arch_sem_wait(sys_sem_t *Sema, u32_t u32Timeout)
 
 void sys_sem_signal(sys_sem_t *Sema)
 {
-	dbgprintf("sys_sem_signal: Sema: %d (TID: %d)\n", *Sema, GetThreadId());
 	SignalSema(*Sema);
 }
 
 void sys_sem_free(sys_sem_t *Sema)
 {
-	dbgprintf("sys_sem_free: Sema: %d (TID: %d)\n", *Sema, GetThreadId());
-
 	DeleteSema(*Sema);
 }
 
