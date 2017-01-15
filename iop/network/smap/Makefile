@@ -17,7 +17,7 @@ IOP_INC_DIR = include/
 
 IOP_BIN = $(IOP_BIN_DIR)smap.irx
 
-IOP_CFLAGS += -mgpopt -G19 -mno-check-zero-division -Wno-unused-value
+IOP_CFLAGS += -mgpopt -G19 -mno-check-zero-division
 
 ifdef LWIP_DHCP
 IOP_CFLAGS += -DLWIP_DHCP=1
