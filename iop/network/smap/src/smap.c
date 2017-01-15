@@ -133,6 +133,7 @@ static inline void RestartAutoNegotiation(volatile u8 *emac3_regbase, u16 bmsr){
 static int InitPHY(struct SmapDriverData *SmapDrivPrivData){
 	int i, result;
 	unsigned int LinkSpeed100M, LinkFDX, FlowControlEnabled, AutoNegoRetries;
+	u32 emac3_value;
 	u16 RegDump[6], value, value2;
 	volatile u8 *emac3_regbase;
 
@@ -320,10 +321,10 @@ RepeatAutoNegoProcess:
 	DEBUG_PRINTF("smap: %s %s Duplex Mode %s Flow Control\n", LinkSpeed100M?"100BaseTX":"10BaseT", LinkFDX?"Full":"Half", FlowControlEnabled?"with":"without");
 
 	emac3_regbase=SmapDrivPrivData->emac3_regbase;
-	value=SMAP_EMAC3_GET(SMAP_R_EMAC3_MODE1)&0x67FFFFFF;
-	if(LinkFDX) value|=SMAP_E3_FDX_ENABLE;
-	if(FlowControlEnabled) value|=SMAP_E3_FLOWCTRL_ENABLE|SMAP_E3_ALLOW_PF;
-	SMAP_EMAC3_SET(SMAP_R_EMAC3_MODE1, value);
+	emac3_value=SMAP_EMAC3_GET(SMAP_R_EMAC3_MODE1)&0x67FFFFFF;
+	if(LinkFDX) emac3_value|=SMAP_E3_FDX_ENABLE;
+	if(FlowControlEnabled) emac3_value|=SMAP_E3_FLOWCTRL_ENABLE|SMAP_E3_ALLOW_PF;
+	SMAP_EMAC3_SET(SMAP_R_EMAC3_MODE1, emac3_value);
 
 	return 0;
 }
