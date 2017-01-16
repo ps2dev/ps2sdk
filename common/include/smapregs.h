@@ -7,7 +7,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 # SMAP (PS2 Network Adapter) register definitions.
 # Contains register definitions for the Ethernet MAC (EMAC).
 # The EMAC is similar to the EMAC from the IBM PowerPC 405gp.

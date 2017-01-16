@@ -8,7 +8,6 @@
   Licenced under Academic Free License version 2.0
   Review ps2sdk README & LICENSE files for further details.
 
-  $Id: ps2atad.c 1455 2007-11-04 23:46:27Z roman_ps2dev $
   ATA device driver.
 */
 

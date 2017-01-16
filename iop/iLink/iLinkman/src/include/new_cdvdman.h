@@ -7,7 +7,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: cdvdman.h 1224 2005-10-14 16:37:42Z eeug $
 # Definitions and imports for cdvdman
 */
 

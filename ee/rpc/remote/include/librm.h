@@ -7,7 +7,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 # RPC Interface for PS2 Remote Control Driver (RMMAN)
 */
 

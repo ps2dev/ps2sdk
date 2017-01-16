@@ -7,7 +7,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 # IOP naplink RPC server v1.0
 # This installs a naplink compatible RPC handler, to service the nprintf functions
 # given via naplink for printing from ee.

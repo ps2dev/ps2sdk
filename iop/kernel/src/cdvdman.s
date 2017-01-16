@@ -7,7 +7,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: cdvdman.s 577 2004-09-14 14:41:46Z pixel $
 # CDVD Manager Functions.
 */
 

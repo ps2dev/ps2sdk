@@ -6,8 +6,6 @@
 # Copyright (c) 2009 jimmikaelkael
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# $Id: mcserv.c 1410 2009-01-18 15:24:54Z jimmikaelkael $
 */
 
 #include "mcserv.h"

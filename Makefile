@@ -5,8 +5,6 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# $Id$
 
 ifeq (x$(PS2SDKSRC), x)
   export PS2SDKSRC=$(shell pwd)
@@ -43,8 +41,8 @@ clean: env_build_check $(subdir_clean)
 
 release-clean:
 	make -C common release-clean
-	make -C iop release-clean
-	make -C ee release-clean
+	make -C iop release-iop-clean
+	make -C ee release-ee-clean
 	make -C samples release-clean
 	make -C tools release-clean
 	

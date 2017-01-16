@@ -7,7 +7,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 # Standard C Library subset.
 */
 
@@ -29,10 +28,20 @@ typedef void (*print_callback_t)(void * opaque, u8 char_to_print);
 #define I_setjmp DECLARE_IMPORT(4, setjmp)
 #define I_longjmp DECLARE_IMPORT(5, longjmp)
 
-char toupper(char c);
-#define I_toupper DECLARE_IMPORT(6, toupper)
-char tolower(char c);
-#define I_tolower DECLARE_IMPORT(7, tolower)
+/* These functions are non-standardized (char instead of int) */
+char _toupper(char c);
+#define I_toupper DECLARE_IMPORT(6, _toupper)
+char _tolower(char c);
+#define I_tolower DECLARE_IMPORT(7, _tolower)
+
+#ifndef toupper
+#define toupper(c) _toupper(c)
+#endif
+
+#ifndef tolower
+#define tolower(c) _tolower(c)
+#endif
+
 unsigned char look_ctype_table(char character);
 #define I_look_ctype_table DECLARE_IMPORT(8, look_ctype_table)
 void *memchr(const void *s, int c, size_t n);

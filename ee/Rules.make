@@ -5,8 +5,6 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# $Id$
 
 EE_CC_VERSION := $(shell $(EE_CC) --version 2>&1 | sed -n 's/^.*(GCC) //p')
 
@@ -19,7 +17,7 @@ EE_CFLAGS := -D_EE -G0 -O2 -Wall $(EE_CFLAGS)
 EE_CXXFLAGS := -D_EE -G0 -O2 -Wall $(EE_CXXFLAGS)
 
 # Linker flags
-#EE_LDFLAGS := $(EE_LDFLAGS)
+# EE_LDFLAGS := $(EE_LDFLAGS)
 
 # Assembler flags
 EE_ASFLAGS := $(EE_ASFLAGS)

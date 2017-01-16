@@ -7,7 +7,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id$
 # IOP filesystem driver v1.0
 # This redirects an iomanx device (eg a pfs mount point) the ioman device called 'host'
 # it also installs a naplink RPC driver.

@@ -6,8 +6,6 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# $Id: ps2ip_internal.h 577 2004-09-14 14:41:46Z pixel $
 */
 
 #ifndef IOP_PS2IP_INTERNAL_H

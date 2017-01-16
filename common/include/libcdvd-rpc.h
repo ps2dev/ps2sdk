@@ -7,7 +7,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# $Id: libcdvd-rpc.h  $
 # Common definitions for the libcdvd RPC on the EE and IOP
 */
 
