@@ -224,19 +224,4 @@
  * or when using against non standard DNS servers. */
 #define LWIP_DNS_SECURE	0
 
-/*
-   ------------------------------------
-   ----------- Core locking -----------
-   ------------------------------------
-*/
-/**
- * LWIP_TCPIP_CORE_LOCKING_INPUT: when LWIP_TCPIP_CORE_LOCKING is enabled,
- * this lets tcpip_input() grab the mutex for input packets as well,
- * instead of allocating a message and passing it to tcpip_thread.
- *
- * ATTENTION: this does not work when tcpip_input() is called from
- * interrupt context!
- */
-#define LWIP_TCPIP_CORE_LOCKING_INPUT	1
-
 #endif /* __LWIPOPTS_H__ */
