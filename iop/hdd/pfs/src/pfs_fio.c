@@ -484,7 +484,7 @@ int	pfsFioDeinit(iop_device_t *f)
 	return 0;
 }
 
-int	pfsFioFormat(iop_file_t *t, const char *dev, const char *blockdev, void *args, size_t arglen)
+int	pfsFioFormat(iop_file_t *t, const char *dev, const char *blockdev, void *args, int arglen)
 {
 	int *arg = (int *)args;
 	int fragment = 0;
@@ -1136,7 +1136,7 @@ int pfsFioSync(iop_file_t *f, const char *dev, int flag)
 	return pfsFioCheckForLastError(pfsMount, 0);
 }
 
-int pfsFioMount(iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, size_t arglen)
+int pfsFioMount(iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, int arglen)
 {
 	int rv;
 	int fd;

@@ -23,7 +23,7 @@
 extern int (*_ps2sdk_close)(int);
 extern int (*_ps2sdk_open)(const char*, int);
 extern int (*_ps2sdk_read)(int, void*, int);
-extern int (*_ps2sdk_lseek)(int, long, int); // assume long = int
+extern int (*_ps2sdk_lseek)(int, int, int); // assume long = int
 extern int (*_ps2sdk_write)(int, const void*, int);
 extern int (*_ps2sdk_remove)(const char*);
 extern int (*_ps2sdk_rename)(const char*,const char*);
@@ -526,7 +526,7 @@ int fileXioWrite(int fd, const void *buf, int size)
 	return(rv);
 }
 
-int fileXioLseek(int fd, long offset, int whence)
+int fileXioLseek(int fd, int offset, int whence)
 {
 	int rv;
 	struct fxio_lseek_packet *packet=(struct fxio_lseek_packet*)sbuff;
@@ -553,9 +553,9 @@ int fileXioLseek(int fd, long offset, int whence)
 //
 // NOTE: 64-bit
 //
-long long fileXioLseek64(int fd, long long offset, int whence)
+s64 fileXioLseek64(int fd, s64 offset, int whence)
 {
-	long long rv;
+	s64 rv;
 	struct fxio_lseek64_packet *packet=(struct fxio_lseek64_packet*)sbuff;
 	struct fxio_lseek64_return_pkt *ret_packet=(struct fxio_lseek64_return_pkt*)sbuff;
 
@@ -574,7 +574,7 @@ long long fileXioLseek64(int fd, long long offset, int whence)
 
 	if(fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
 	else {
-		long long rvHI = ret_packet->pos_hi;
+		s64 rvHI = ret_packet->pos_hi;
 		rvHI = rvHI << 32;
 		rv = rvHI | ret_packet->pos_lo;
 	}

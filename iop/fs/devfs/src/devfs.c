@@ -552,7 +552,7 @@ int devfs_close(iop_file_t *file)
     @param args: Pointer to a buffer containing any arguments
     @returns >= 0 Defined by the type of command, -1 on error
 */
-int devfs_ioctl(iop_file_t *file, unsigned long cmd, void *args)
+int devfs_ioctl(iop_file_t *file, int cmd, void *args)
 
 {
    devfs_device_t *dev;

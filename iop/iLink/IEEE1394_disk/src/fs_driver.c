@@ -686,7 +686,7 @@ static int fs_getstat(iop_file_t *fd, const char *name, fio_stat_t *stat)
 }
 
 //---------------------------------------------------------------------------
-int fs_ioctl(iop_file_t *fd, u32 request, void *data)
+int fs_ioctl(iop_file_t *fd, int cmd, void *data)
 {
 	fat_driver* fatd;
 	struct fs_dirent* dirent = (struct fs_dirent *) fd->privdata;	//Remember to re-cast this to the right structure (either fs_rec or fs_dir)!
@@ -700,7 +700,7 @@ int fs_ioctl(iop_file_t *fd, u32 request, void *data)
 	fatd = fat_getData(fd->unit);
 	if (fatd == NULL) { _fs_unlock(); return -ENODEV; }
 
-	switch (request) {
+	switch (cmd) {
 		case USBMASS_IOCTL_RENAME:
 			ret = fat_renameFile(fatd, &dirent->fatdir, data);	//No need to re-cast since this inner structure is a common one.
 			FLUSH_SECTORS(fatd);

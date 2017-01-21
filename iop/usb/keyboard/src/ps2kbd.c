@@ -1040,11 +1040,11 @@ int fio_read(iop_file_t *f, void *buf, int size)
   return count;
 }
 
-int fio_ioctl(iop_file_t *f, unsigned long arg, void *param)
+int fio_ioctl(iop_file_t *f, int cmd, void *param)
 
 {
-  //printf("fio_ioctl() %ld %d\n", arg, *((u32 *) param));
-  switch(arg)
+  //printf("fio_ioctl() %ld %d\n", cmd, *((u32 *) param));
+  switch(cmd)
     {
     case PS2KBD_IOCTL_SETREADMODE: ps2kbd_ioctl_setreadmode(*((u32 *) param));
       break;

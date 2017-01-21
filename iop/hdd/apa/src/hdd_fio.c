@@ -255,7 +255,7 @@ int hddDeinit(iop_device_t *f)
 	return 0;
 }
 
-int hddFormat(iop_file_t *f, const char *dev, const char *blockdev, void *arg, size_t arglen)
+int hddFormat(iop_file_t *f, const char *dev, const char *blockdev, void *arg, int arglen)
 {
 	int				rv=0;
 	apa_cache_t		*clink;

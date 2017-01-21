@@ -51,13 +51,13 @@ typedef struct _iop_device {
 typedef struct _iop_device_ops {
 	int	(*init)(iop_device_t *);
 	int	(*deinit)(iop_device_t *);
-	int	(*format)(iop_file_t *, const char *, const char *, void *, size_t);
+	int	(*format)(iop_file_t *, const char *, const char *, void *, int);
 	int	(*open)(iop_file_t *, const char *, int, int);
 	int	(*close)(iop_file_t *);
 	int	(*read)(iop_file_t *, void *, int);
 	int	(*write)(iop_file_t *, void *, int);
 	int	(*lseek)(iop_file_t *, int, int);
-	int	(*ioctl)(iop_file_t *, unsigned long, void *);
+	int	(*ioctl)(iop_file_t *, int, void *);
 	int	(*remove)(iop_file_t *, const char *);
 	int	(*mkdir)(iop_file_t *, const char *, int);
 	int	(*rmdir)(iop_file_t *, const char *);
@@ -72,9 +72,9 @@ typedef struct _iop_device_ops {
 	int	(*rename)(iop_file_t *, const char *, const char *);
 	int	(*chdir)(iop_file_t *, const char *);
 	int	(*sync)(iop_file_t *, const char *, int);
-	int	(*mount)(iop_file_t *, const char *, const char *, int, void *, unsigned int);
+	int	(*mount)(iop_file_t *, const char *, const char *, int, void *, int);
 	int	(*umount)(iop_file_t *, const char *);
-	long long (*lseek64)(iop_file_t *, long long, int);
+	s64	(*lseek64)(iop_file_t *, s64, int);
 	int	(*devctl)(iop_file_t *, const char *, int, void *, unsigned int, void *, unsigned int);
 	int	(*symlink)(iop_file_t *, const char *, const char *);
 	int	(*readlink)(iop_file_t *, const char *, char *, unsigned int);
@@ -92,14 +92,14 @@ int open(const char *name, int flags, ...);
 #define I_open DECLARE_IMPORT(4, open)
 int close(int fd);
 #define I_close DECLARE_IMPORT(5, close)
-int read(int fd, void *ptr, size_t size);
+int read(int fd, void *ptr, int size);
 #define I_read DECLARE_IMPORT(6, read)
-int write(int fd, void *ptr, size_t size);
+int write(int fd, void *ptr, int size);
 #define I_write DECLARE_IMPORT(7, write)
 int lseek(int fd, int offset, int mode);
 #define I_lseek DECLARE_IMPORT(8, lseek)
 
-int ioctl(int fd, unsigned long cmd, void *param);
+int ioctl(int fd, int cmd, void *param);
 #define I_ioctl DECLARE_IMPORT(9, ioctl)
 int remove(const char *name);
 #define I_remove DECLARE_IMPORT(10, remove)
@@ -121,7 +121,7 @@ int chstat(const char *name, iox_stat_t *stat, unsigned int statmask);
 #define I_chstat DECLARE_IMPORT(17, chstat)
 
 /* This can take take more than one form.  */
-int format(const char *dev, const char *blockdev, void *arg, size_t arglen);
+int format(const char *dev, const char *blockdev, void *arg, int arglen);
 #define I_format DECLARE_IMPORT(18, format)
 
 #ifndef IOMAN_NO_EXTENDED
@@ -132,19 +132,19 @@ int chdir(const char *name);
 #define I_chdir DECLARE_IMPORT(26, chdir)
 int sync(const char *dev, int flag);
 #define I_sync DECLARE_IMPORT(27, sync)
-int mount(const char *fsname, const char *devname, int flag, void *arg, size_t arglen);
+int mount(const char *fsname, const char *devname, int flag, void *arg, int arglen);
 #define I_mount DECLARE_IMPORT(28, mount)
 int umount(const char *fsname);
 #define I_umount DECLARE_IMPORT(29, umount)
-long long lseek64(int fd, long long offset, int whence);
+s64 lseek64(int fd, s64 offset, int whence);
 #define I_lseek64 DECLARE_IMPORT(30, lseek64)
-int devctl(const char *name, int cmd, void *arg, size_t arglen, void *buf, size_t buflen);
+int devctl(const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 #define I_devctl DECLARE_IMPORT(31, devctl)
 int symlink(const char *old, const char *new);
 #define I_symlink DECLARE_IMPORT(32, symlink)
-int readlink(const char *path, char *buf, size_t buflen);
+int readlink(const char *path, char *buf, unsigned int buflen);
 #define I_readlink DECLARE_IMPORT(33, readlink)
-int ioctl2(int fd, int cmd, void *arg, size_t arglen, void *buf, size_t buflen);
+int ioctl2(int fd, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 #define I_ioctl2 DECLARE_IMPORT(34, ioctl2)
 #endif /* IOMAN_NO_EXTENDED */
 

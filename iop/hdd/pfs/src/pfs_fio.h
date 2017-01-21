@@ -26,7 +26,7 @@ void pfsFioCloseFileSlot(pfs_file_slot_t *fileSlot);
 
 int	pfsFioInit(iop_device_t *f);
 int	pfsFioDeinit(iop_device_t *f);
-int	pfsFioFormat(iop_file_t *, const char *dev, const char *blockdev, void *arg, size_t arglen);
+int	pfsFioFormat(iop_file_t *, const char *dev, const char *blockdev, void *arg, int arglen);
 int	pfsFioOpen(iop_file_t *f, const char *name, int flags, int mode);
 int	pfsFioClose(iop_file_t *f);
 int	pfsFioRead(iop_file_t *f, void *buf, int size);
@@ -43,7 +43,7 @@ int	pfsFioChstat(iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int
 int pfsFioRename(iop_file_t *f, const char *old, const char *new);
 int pfsFioChdir(iop_file_t *f, const char *name);
 int pfsFioSync(iop_file_t *f, const char *dev, int flag);
-int pfsFioMount(iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, size_t arglen);
+int pfsFioMount(iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, int arglen);
 int pfsFioUmount(iop_file_t *f, const char *fsname);
 s64 pfsFioLseek64(iop_file_t *f, s64 offset, int whence);
 int pfsFioSymlink(iop_file_t *f, const char *old, const char *new);
