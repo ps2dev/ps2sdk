@@ -13,6 +13,10 @@
 #ifndef _TAMTYPES_H_
 #define _TAMTYPES_H_ 1
 
+#if !defined(_EE) && !defined(_IOP)
+#error Either _EE or _IOP must be defined!
+#endif
+
 typedef	unsigned char u8;
 typedef unsigned short u16;
 
