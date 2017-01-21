@@ -45,7 +45,7 @@ int fileXioRename(const char* source, const char* dest);
 int fileXioSymlink(const char* source, const char* dest);
 int fileXioReadlink(const char* source, char* buf, int buflen);
 int fileXioChdir(const char* pathname);
-int fileXioOpen(const char* source, int flags, int modes);
+int fileXioOpen(const char* source, int flags, ...);
 int fileXioClose(int fd);
 int fileXioRead(int fd, void *buf, int size);
 int fileXioWrite(int fd, const void *buf, int size);

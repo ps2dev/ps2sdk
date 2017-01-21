@@ -16,6 +16,7 @@
 #include "loadcore.h"
 #include "iomanX.h"
 #include "sysclib.h"
+#include "stdarg.h"
 #include "intrman.h"
 #include "sys/stat.h"
 
@@ -197,11 +198,16 @@ iop_file_t *get_new_file(void)
 	return fd;
 }
 
-int open(const char *name, int flags, int mode)
+int open(const char *name, int flags, ...)
 {
 	iop_file_t *f = get_new_file();
 	char *filename;
-	int res = -ENOSYS;
+	va_list alist;
+	int res = -ENOSYS, mode;
+
+	va_start(alist, flags);
+	mode = va_arg(alist, int);
+	va_end(alist);
 
 	if (!f)
 	{

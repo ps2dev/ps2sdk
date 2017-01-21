@@ -88,7 +88,7 @@ typedef struct _iop_device_ops {
 iop_device_t **GetDeviceList(void);
 #define I_GetDeviceList DECLARE_IMPORT(3, GetDeviceList)
 
-int open(const char *name, int flags, int mode);
+int open(const char *name, int flags, ...);
 #define I_open DECLARE_IMPORT(4, open)
 int close(int fd);
 #define I_close DECLARE_IMPORT(5, close)

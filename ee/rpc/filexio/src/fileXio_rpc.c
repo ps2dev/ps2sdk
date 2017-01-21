@@ -14,6 +14,7 @@
 #include <kernel.h>
 #include <sifrpc.h>
 #include <string.h>
+#include <stdarg.h>
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <fileXio_rpc.h>
@@ -29,7 +30,7 @@ extern int (*_ps2sdk_rename)(const char*,const char*);
 
 static int fileXioOpenHelper(const char* source, int flags)
 {
-	return fileXioOpen(source, flags, 0666);
+	return fileXioOpen(source, flags);
 }
 
 extern int _iop_reboot_count;
@@ -402,10 +403,15 @@ int fileXioChdir(const char* pathname)
 	return(rv);
 }
 
-int fileXioOpen(const char* source, int flags, int modes)
+int fileXioOpen(const char* source, int flags, ...)
 {
-	int rv;
+	int rv, mode;
 	struct fxio_open_packet *packet=(struct fxio_open_packet*)sbuff;
+	va_list alist;
+
+	va_start(alist, flags);
+	mode = va_arg(alist, int);	//Retrieve the mode argument, regardless of whether it is expected or not.
+	va_end(alist);
 
 	if(fileXioInit() < 0)
 		return -ENOPKG;
@@ -415,8 +421,7 @@ int fileXioOpen(const char* source, int flags, int modes)
 
 	strncpy(packet->pathname, source, sizeof(packet->pathname));
 	packet->flags = flags;
-	packet->mode = modes;
-
+	packet->mode = mode;
 	SifCallRpc(&cd0, FILEXIO_OPEN, fileXioBlockMode, sbuff, sizeof(struct fxio_open_packet), sbuff, 4, (void *)&_fxio_intr, NULL);
 
 	if(fileXioBlockMode == FXIO_NOWAIT) { rv = 0; }
