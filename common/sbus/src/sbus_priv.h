@@ -23,6 +23,8 @@ definitions for use inside the PS2 sbus project.
 #ifdef _EE
 
 #include <kernel.h>
+#include <string.h>
+#include <stdio.h>
 
 #ifdef _KMODE
 #define M_SuspendIntr(__stat_ptr) { }
@@ -38,7 +40,7 @@ definitions for use inside the PS2 sbus project.
 // TODO: FIX ME!!!
 #define M_ReleaseIrqHandler(__irq) if(0) { }
 
-#define M_RegisterIrqHandler(__irq, __handler, __param) _SetIntcHandler((__irq), (__handler))
+#define M_RegisterIrqHandler(__irq, __handler, __param) AddIntcHandler((__irq), (__handler), 0)
 
 #else
 // #_IOP

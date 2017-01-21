@@ -18,7 +18,7 @@ static u32 _sif2_xfer_size = 0;
 static u32 _sif2_xfer_attr = 0;
 static u32 _sif2_xfer_chunk_size = 0;
 
-int SIF2_RestartDma(void);
+void SIF2_RestartDma(void);
 
 void SIF2_sync_dma(void)
 {
@@ -52,7 +52,7 @@ void SIF2_sync_dma(void)
     M_ResumeIntr(oldi);
 }
 
-int SIF2_RestartDma(void)
+void SIF2_RestartDma(void)
 {
     int oldi;
 

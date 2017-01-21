@@ -13,6 +13,7 @@ EE_INC_DIR = include/
 
 EE_LIB = $(EE_LIB_DIR)libsbus.a
 
+EE_INCS += -I$(PS2SDKSRC)/ee/rpc/sior/include/
 EE_CFLAGS += -fno-builtin-printf
 
 EE_OBJS = ps2_sbus.o ee_sbus.o ps2_sif.o ee_sif2.o sif2cmd.o ee_low.o
