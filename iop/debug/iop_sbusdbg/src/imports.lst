@@ -5,7 +5,7 @@ loadcore_IMPORTS_end
 
 sysmem_IMPORTS_start
 I_Kprintf
-I_Kprintf_set
+I_KprintfSet
 sysmem_IMPORTS_end
 
 stdio_IMPORTS_start

@@ -13,8 +13,9 @@
 #ifndef IOP_SYSMEM_H
 #define IOP_SYSMEM_H
 
-#include "types.h"
-#include "irx.h"
+#include <types.h>
+#include <stdarg.h>
+#include <irx.h>
 
 // Allocation strategies
 #define ALLOC_FIRST	0
@@ -45,12 +46,12 @@ void * QueryBlockTopAddress(void *address);
 int QueryBlockSize(void *address);
 #define I_QueryBlockSize DECLARE_IMPORT(10, QueryBlockSize)
 
-typedef char *(kprintf_handler_func_t)(unsigned int unk, const char *, ...);
+typedef int (KprintfHandler_t)(void *context, const char *format, va_list ap);
 
-char * Kprintf(const char *format,...);
+int Kprintf(const char *format,...);
 #define I_Kprintf DECLARE_IMPORT(14, Kprintf)
-void Kprintf_set(kprintf_handler_func_t *, unsigned int newunk);
-#define I_Kprintf_set DECLARE_IMPORT(15, Kprintf_set)
+void KprintfSet(KprintfHandler_t *, void *context);
+#define I_KprintfSet DECLARE_IMPORT(15, KprintfSet)
 
 #define sysmem_IMPORTS \
 	sysmem_IMPORTS_start \

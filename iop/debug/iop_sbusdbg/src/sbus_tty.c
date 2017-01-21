@@ -139,37 +139,20 @@ iop_device_t tty_fsd =
 	(iop_device_ops_t *) &fsd_ops
 };
 
-void sprintf_putchar(char **opaque, int c)
+void sprintf_putchar(char **string, int c)
 {
-    if(c < 0x100) { ((*opaque)++)[0] = c; }
-    else { (*opaque)[0] = 0; }
+    if(c < 0x100) { ((*string)++)[0] = c; }
+    else { (*string)[0] = 0; }
 }
 
 extern int _vsprintf(char * str, const char * format, va_list ap);
 
-// I don't really understand why this works but it does!
-// SP193 - FIXME: fix the kprintf() stuff, so that this ugly hack can RIP. :(
-int __vsprintf(char * str, const char * format, va_list ap)
-{
-    int arg1, arg2, arg3, arg4, arg5;
-    arg1 = va_arg(ap,int);
-    arg2 = va_arg(ap,int);
-    arg3 = va_arg(ap,int);
-    arg4 = va_arg(ap,int);
-    arg5 = va_arg(ap,int);
-
-    return prnt((print_callback_t) sprintf_putchar, &str, format, ap);
-}
-
 static char kprint_buffer[1024];
 
-int _kPrintf(u32 arg0, const char * format, ...)
+int _kPrintf(void *context, const char * format, va_list ap)
 {
-    va_list ap;
-    va_start(ap, format);
-    int r = __vsprintf(kprint_buffer, format, ap);
+    int r = prnt(&sprintf_putchar, &format, format, ap);
     sbus_tty_puts(kprint_buffer);
-    va_end(ap);
     return r;
 }
 
@@ -185,7 +168,7 @@ int sbus_tty_init(void)
     open("tty:", O_RDONLY);
     open("tty:", O_WRONLY);
 
-    Kprintf_set((kprintf_handler_func_t *) &_kPrintf, 0);
+    KprintfSet(&_kPrintf, NULL);
 
     return(0);
 }

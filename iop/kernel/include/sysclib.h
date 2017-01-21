@@ -19,7 +19,7 @@
 #include "irx.h"
 #include "setjmp.h"
 
-typedef void (*print_callback_t)(void * opaque, u8 char_to_print);
+typedef void (*print_callback_t)(char **string, int c);
 
 #define sysclib_IMPORTS_start DECLARE_IMPORT_TABLE(sysclib, 1, 1)
 #define sysclib_IMPORTS_end END_IMPORT_TABLE
