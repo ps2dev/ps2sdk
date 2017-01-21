@@ -27,9 +27,9 @@
 #include <speedregs.h>
 #include <smapregs.h>
 
-#define MODNAME "dev9_driver"
+#define MODNAME "dev9"
 #define DRIVERNAME "dev9"
-IRX_ID(MODNAME, 1, 1);
+IRX_ID(MODNAME, 2, 8);
 
 #define M_PRINTF(format, args...)	\
 	printf(MODNAME ": " format, ## args)
@@ -159,10 +159,14 @@ int _start(int argc, char **argv)
 	dev9hw = DEV9_REG(DEV9_R_REV) & 0xf0;
 	if (dev9hw == 0x20) {		/* CXD9566 (PCMCIA) */
 		dev9type = DEV9_TYPE_PCMCIA;
+		M_PRINTF("CXD9566 detected.\n");
 		res = pcmcia_init();
 	} else if (dev9hw == 0x30) {	/* CXD9611 (Expansion Bay) */
 		dev9type = DEV9_TYPE_EXPBAY;
+		M_PRINTF("CXD9611 detected.\n");
 		res = expbay_init();
+	} else {
+		M_PRINTF("unknown dev9 hardware.\n");
 	}
 
 	if (res)
@@ -174,9 +178,6 @@ int _start(int argc, char **argv)
 	}
 
 	AddPowerOffHandler(&dev9x_on_shutdown, NULL);
-
-	/* Normal termination.  */
-	M_PRINTF("Dev9 loaded.\n");
 
 	return MODULE_RESIDENT_END;
 }

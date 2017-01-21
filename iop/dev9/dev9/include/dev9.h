@@ -22,7 +22,7 @@ typedef int (*dev9_intr_cb_t)(int flag);
 typedef void (*dev9_shutdown_cb_t)(void);
 typedef void (*dev9_dma_cb_t)(int bcr, int dir);
 
-#define dev9_IMPORTS_start DECLARE_IMPORT_TABLE(dev9, 1, 1)
+#define dev9_IMPORTS_start DECLARE_IMPORT_TABLE(dev9, 1, 9)
 #define dev9_IMPORTS_end END_IMPORT_TABLE
 
 void dev9RegisterIntrCb(int intr, dev9_intr_cb_t cb);
