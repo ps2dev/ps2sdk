@@ -14,6 +14,7 @@
 #include <defs.h>
 #include <loadcore.h>
 #include <intrman.h>
+#include <iomanX.h>
 #include <dmacman.h>
 #include <thbase.h>
 #include <thsemap.h>
@@ -88,6 +89,62 @@ static int expbay_init(void);
 
 extern struct irx_export_table _exp_dev9;
 
+static int dev9x_dummy(void)
+{
+	return 0;
+}
+
+static int dev9x_devctl(iop_file_t *f, const char *name, int cmd, void *args, unsigned int arglen, void *buf, unsigned int buflen)
+{
+	switch(cmd)
+	{
+		case DDIOC_MODEL:
+	        	return dev9type;
+		case DDIOC_OFF:
+			dev9Shutdown();
+			return 0;
+		default:
+			return 0;
+	}
+}
+
+static iop_device_ops_t dev9x_ops =
+{
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	(void *)&dev9x_dummy,
+	&dev9x_devctl
+};
+
+static iop_device_t dev9x_device =
+{
+	"dev9x",
+	IOP_DT_FS | IOP_DT_FSEXT,
+	1,
+	"DEV9",
+	&dev9x_ops
+};
+
 int _start(int argc, char **argv)
 {
 	USE_DEV9_REGS;
@@ -101,17 +158,18 @@ int _start(int argc, char **argv)
 
 	dev9hw = DEV9_REG(DEV9_R_REV) & 0xf0;
 	if (dev9hw == 0x20) {		/* CXD9566 (PCMCIA) */
-		dev9type = 0;
+		dev9type = DEV9_TYPE_PCMCIA;
 		res = pcmcia_init();
 	} else if (dev9hw == 0x30) {	/* CXD9611 (Expansion Bay) */
-		dev9type = 1;
+		dev9type = DEV9_TYPE_EXPBAY;
 		res = expbay_init();
 	}
 
 	if (res)
 		return res;
 
-	if (RegisterLibraryEntries(&_exp_dev9) != 0) {
+	DelDrv("dev9x");
+	if (AddDrv(&dev9x_device) != 0) {
 		return MODULE_NO_RESIDENT_END;
 	}
 
@@ -170,10 +228,10 @@ static int dev9_intr_dispatch(int flag)
 static void dev9_set_stat(int stat)
 {
 	switch(dev9type){
-		case 0:
+		case DEV9_TYPE_PCMCIA:
 			pcmcia_set_stat(stat);
 			break;
-		case 1:
+		case DEV9_TYPE_EXPBAY:
 			expbay_set_stat(stat);
 			break;
 	}
@@ -182,9 +240,9 @@ static void dev9_set_stat(int stat)
 static int dev9_device_probe(void)
 {
 	switch(dev9type){
-		case 0:
+		case DEV9_TYPE_PCMCIA:
 			return pcmcia_device_probe();
-		case 1:
+		case DEV9_TYPE_EXPBAY:
 			return expbay_device_probe();
 	}
 
@@ -194,9 +252,9 @@ static int dev9_device_probe(void)
 static int dev9_device_reset(void)
 {
 	switch(dev9type){
-		case 0:
+		case DEV9_TYPE_PCMCIA:
 			return pcmcia_device_reset();
-		case 1:
+		case DEV9_TYPE_EXPBAY:
 			return expbay_device_reset();
 	}
 
@@ -213,10 +271,10 @@ void dev9Shutdown(void)
 		if (dev9_shutdown_cbs[idx])
 			dev9_shutdown_cbs[idx]();
 
-	if (dev9type == 0) {	/* PCMCIA */
+	if (dev9type == DEV9_TYPE_PCMCIA) {	/* PCMCIA */
 		DEV9_REG(DEV9_R_POWER) = 0;
 		DEV9_REG(DEV9_R_1474) = 0;
-	} else if (dev9type == 1) {
+	} else if (dev9type == DEV9_TYPE_EXPBAY) {
 		DEV9_REG(DEV9_R_1466) = 1;
 		DEV9_REG(DEV9_R_1464) = 0;
 		DEV9_REG(DEV9_R_1460) = DEV9_REG(DEV9_R_1464);
@@ -601,7 +659,7 @@ static int speed_device_init(void)
 
 		/* Locate the SPEED Lite chip and get the bus ready for the
 		   PCMCIA device.  */
-		if (dev9type == 0) {
+		if (dev9type == DEV9_TYPE_PCMCIA) {
 			if ((res = card_find_manfid(0xf15300)))
 				M_PRINTF("SPEED Lite not found.\n");
 
@@ -941,6 +999,10 @@ static int pcmcia_init(void)
 	CpuResumeIntr(flags);
 
 	DEV9_REG(DEV9_R_147E) = 0;
+
+	if (RegisterLibraryEntries(&_exp_dev9) != 0)
+		return 1;
+
 	M_PRINTF("CXD9566 (PCMCIA type) initialized.\n");
 	return 0;
 }
@@ -1012,6 +1074,10 @@ static int expbay_init(void)
 	CpuResumeIntr(flags);
 
 	DEV9_REG(DEV9_R_1466) = 0;
+
+	if (RegisterLibraryEntries(&_exp_dev9) != 0)
+		return 1;
+
 	M_PRINTF("CXD9611 (Expansion Bay type) initialized.\n");
 	return 0;
 }

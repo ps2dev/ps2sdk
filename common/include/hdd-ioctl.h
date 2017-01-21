@@ -14,6 +14,15 @@
 #define _HDD_IOCTL_H
 
 ///////////////////////////////////////////////////////////////////////////////
+//	DEV9.IRX
+
+#define DEV9_TYPE_PCMCIA	0
+#define DEV9_TYPE_EXPBAY	1
+
+#define DDIOC_MODEL		0x4401
+#define DDIOC_OFF		0x4402
+
+///////////////////////////////////////////////////////////////////////////////
 //	HDD.IRX
 
 // Partition format/types (as returned via the mode field for getstat/dread)
