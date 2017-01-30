@@ -116,23 +116,28 @@ int ps2ip_setconfig(const t_ip_info* pInfo)
 
 static err_t SMapLowLevelOutput(struct netif* pNetIF, struct pbuf* pOutput)
 {
-	static u8 buffer[1518] __attribute__((aligned((64))));
+	static u8 buffer[1536] __attribute__((aligned((64))));
 	struct pbuf* pbuf;
 	unsigned char *buffer_ptr;
 	unsigned short int TotalLength;
 
-	pbuf=pOutput;
-	buffer_ptr=buffer;
-	TotalLength=0;
-	while(pbuf!=NULL)
+	if(pOutput->next != NULL)
 	{
-		memcpy(buffer_ptr, pbuf->payload, pbuf->len);
-		TotalLength+=pbuf->len;
-		buffer_ptr+=pbuf->len;
-		pbuf=pbuf->next;
-	}
+		pbuf=pOutput;
+		buffer_ptr=buffer;
+		TotalLength=0;
+		while(pbuf!=NULL)
+		{
+			memcpy(buffer_ptr, pbuf->payload, pbuf->len);
+			TotalLength+=pbuf->len;
+			buffer_ptr+=pbuf->len;
+			pbuf=pbuf->next;
+		}
 
-	NetManNetIFSendPacket(buffer, TotalLength);
+		NetManNetIFSendPacket(buffer, TotalLength);
+	} else {
+		NetManNetIFSendPacket(pOutput->payload, pOutput->len);
+	}
 
 	return ERR_OK;
 }

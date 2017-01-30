@@ -85,12 +85,12 @@
  * instead of the lwip internal allocator. Can save code size if you
  * already use it.
  */
-#define MEM_LIBC_MALLOC		1
+//#define MEM_LIBC_MALLOC		1	//SP193: don't use because malloc() only gives buffers aligned to 16-byte boundaries.
 
 /* MEM_ALIGNMENT: should be set to the alignment of the CPU for which
    lwIP is compiled. 4 byte alignment -> define MEM_ALIGNMENT to 4, 2
    byte alignment -> define MEM_ALIGNMENT to 2. */
-#define MEM_ALIGNMENT		4	//SP193: this should be 16 in order to support the R5900's DMAC. But 16 is not supported.
+#define MEM_ALIGNMENT		64		//SP193: must be 64, to deal with the EE cache design.
 
 /**
  * MEM_SIZE: the size of the heap memory. If the application will send
