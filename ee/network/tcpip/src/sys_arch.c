@@ -31,6 +31,7 @@ static inline arch_message *alloc_msg(void);
 static void free_msg(arch_message *msg);
 
 static int MsgCountSema;
+static int ProtLevel;
 
 extern void *_gp;
 
@@ -441,9 +442,31 @@ void sys_init(void)
 		msg_pool[i].next = NULL;
 		msg_pool[i].sys_msg = NULL;
 	}
+
+	ProtLevel = 0;
 }
 
 u32_t sys_now(void)
 {
 	return(cpu_ticks()/295000);
+}
+
+sys_prot_t sys_arch_protect(void)
+{
+	sys_prot_t OldLevel;
+
+	if(ProtLevel < 1)
+		DI();
+
+	OldLevel = ProtLevel;
+	ProtLevel++;
+
+	return OldLevel;
+}
+
+void sys_arch_unprotect(sys_prot_t level)
+{
+	ProtLevel = level;
+	if(ProtLevel == 0)
+		EI();
 }
