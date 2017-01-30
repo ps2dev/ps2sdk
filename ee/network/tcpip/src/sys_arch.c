@@ -146,15 +146,6 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 	if((MBox=malloc(sizeof(struct MboxData)))!=NULL)
 	{
 		MBox->LastMessage=MBox->FirstMessage=NULL;
-		sema.attr = 0;
-		sema.option = (u32)"PS2IP-msgsema";
-		sema.init_count=sema.max_count=1;
-		if((MBox->SemaID=CreateSema(&sema))<0)
-		{
-			printf("sys_mbox_new: CreateMbx failed. Code: %d\n", MBox->SemaID);
-			free(MBox);
-			return ERR_MEM;
-		}
 
 		sema.attr = 0;
 		sema.option = (u32)"PS2IP-msgcount";
@@ -163,7 +154,6 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 		if((MBox->MessageCountSema=CreateSema(&sema))<0)
 		{
 			printf("sys_mbox_new: CreateMbx failed. Code: %d\n", MBox->MessageCountSema);
-			DeleteSema(MBox->SemaID);
 			free(MBox);
 			return ERR_MEM;
 		}
@@ -173,7 +163,7 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 		return ERR_MEM;
 	}
 
-	dbgprintf("sys_mbox_new(): sema %d, %d\n", MBox->SemaID, MBox->MessageCountSema);
+	dbgprintf("sys_mbox_new(): sema %d\n", MBox->MessageCountSema);
 
 	*mbox=MBox;
 
@@ -185,8 +175,6 @@ void sys_mbox_free(sys_mbox_t *pMBox)
 {
 	arch_message *Message, *NextMessage;
 
-	WaitSema((*pMBox)->SemaID);
-
 	/* Free all messages that were not freed yet. */
 	Message=(*pMBox)->FirstMessage;
 	while(Message!=NULL)
@@ -197,7 +185,6 @@ void sys_mbox_free(sys_mbox_t *pMBox)
 	}
 
 	/* Delete all allocated resources for this message box and mark the message box as invalid. */
-	DeleteSema((*pMBox)->SemaID);
 	DeleteSema((*pMBox)->MessageCountSema);
 	free((*pMBox));
 	(*pMBox)=SYS_MBOX_NULL;
@@ -224,7 +211,7 @@ static void RetrieveMbxInternal(sys_mbox_t mBox, arch_message **message)
 {
 	arch_message *NextMessage;
 
-	WaitSema(mBox->SemaID);
+	DI();
 
 	*message=mBox->FirstMessage;
 	NextMessage=(unsigned int)(*message)->next!=0xFFFFFFFF?(*message)->next:NULL;
@@ -232,7 +219,7 @@ static void RetrieveMbxInternal(sys_mbox_t mBox, arch_message **message)
 		mBox->LastMessage=NextMessage;
 	mBox->FirstMessage=NextMessage;
 
-	SignalSema(mBox->SemaID);
+	EI();
 }
 
 static int ReceiveMbx(arch_message **message, sys_mbox_t mBox, u32_t timeout)
@@ -313,7 +300,7 @@ u32_t sys_arch_mbox_tryfetch(sys_mbox_t *pMBox, void** ppvMSG)
 }
 
 static void SendMbx(sys_mbox_t *mbox, arch_message *msg, void *sys_msg){
-	WaitSema((*mbox)->SemaID);
+	DI();
 
 	/* Store the message and update the message chain for this message box. */
 	msg->sys_msg = sys_msg;
@@ -321,7 +308,7 @@ static void SendMbx(sys_mbox_t *mbox, arch_message *msg, void *sys_msg){
 	if((*mbox)->LastMessage!=NULL) (*mbox)->LastMessage->next=msg;
 	(*mbox)->LastMessage=msg;
 
-	SignalSema((*mbox)->SemaID);
+	EI();
 	SignalSema((*mbox)->MessageCountSema);
 }
 

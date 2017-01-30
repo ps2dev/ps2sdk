@@ -16,7 +16,7 @@ typedef struct st_arch_message
 } arch_message;
 
 struct MboxData{
-	int SemaID, MessageCountSema;
+	int MessageCountSema;
 	arch_message *FirstMessage;
 	arch_message *LastMessage;
 };
