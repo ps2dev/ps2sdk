@@ -113,7 +113,7 @@ sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, 
 	thp.option = (u32)"PS2IP";
 	thp.func = thread;
 	thp.stack_size = stacksize;
-	thp.stack = memalign(64, stacksize);
+	thp.stack = malloc(stacksize);
 	thp.initial_priority = prio;
 	thp.gp_reg = &_gp;
 

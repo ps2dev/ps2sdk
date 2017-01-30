@@ -35,7 +35,7 @@ static struct PacketReqs PacketReqs ALIGNED(64);
 
 static int TxThreadID = -1;
 
-static unsigned char TxThreadStack[0x1000] ALIGNED(128);
+static unsigned char TxThreadStack[0x1000] ALIGNED(16);
 static void TxThread(void *arg);
 
 static unsigned char IsInitialized=0;
