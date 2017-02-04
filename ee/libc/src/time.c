@@ -37,6 +37,7 @@ static int intrOverflow(int ca)
    // ---------------------------------------------------------
    *T_MODE |= (1 << 11);
 
+   ExitHandler();
    return -1;
 }
 

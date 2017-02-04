@@ -203,7 +203,7 @@ typedef struct t_ee_thread
     int initial_priority; // 0x14
     int current_priority; // 0x18
     u32 attr; // 0x1C
-    u32 option; // 0x20
+    u32 option; // 0x20 Do not use - officially documented to not work.
 
 } ee_thread_t;
 

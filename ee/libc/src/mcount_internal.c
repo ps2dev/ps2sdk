@@ -128,7 +128,7 @@ static void initialize()
 	memset((void *)gp.arcs, '\0', gp.narcs * (sizeof(struct rawarc)));
 	memset((void *)gp.samples, '\0', gp.nsamples * (sizeof(unsigned int )));
 
-	gp.timer = AddIntcHandler2(INTC_TIM, profil, 0, 0);
+	gp.timer = AddIntcHandler2(INTC_TIM, profil, 0, NULL);
 	EnableIntc(INTC_TIM);
 
 	/* fire up timer, every 1 ms */
@@ -251,6 +251,6 @@ static int profil(int ca, void *arg, void *addr)
 	*T_COUNT = 0;
 	/* reset interrupt */
 	*T_MODE |= (1 << 10);
-	__asm__ volatile("sync.l; ei");
+	ExitHandler();
 	return 0;
 }
