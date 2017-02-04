@@ -2,7 +2,7 @@ This project is based directly off the original "USB_MASS" project.  I've remove
 and some of the debugging things.  I've also removed the RPC server.  In addition I split some files up into
 more files and renamed other files.
 
-I don't take credit for this project, see the documents in "docs/usb_mass" for the original readme.txt though some
+I don't take credit for this project, see the documents in "doc/usb_mass" for the original readme.txt though some
 information in it is no longer valid. The credits have been stripped from the source files, see the bottom of this
 document for a list of known contributors if you have contributed to this project, feel free to add to the list.
 
