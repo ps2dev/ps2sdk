@@ -363,7 +363,7 @@ static void _request_call(SifRpcCallPkt_t *request, void *data)
 	server->rmode      = request->rmode;
 	server->rid        = request->rec_id;
 
-	if (base->thread_id < 0 || base->active == 0)
+	if (base->thread_id < 0 || base->active != 0)
 		return;
 
 	iWakeupThread(base->thread_id);
@@ -563,11 +563,11 @@ SifGetNextRequest(SifRpcDataQueue_t *qd)
 	DI();
 
 	server = qd->start;
-	qd->active = 1;
-
-	if (server) {
-		qd->active = 0;
+	if (server != NULL) {	
+		qd->active = 1;
 		qd->start  = server->next;
+	} else {
+		qd->active = 0;
 	}
 
 	EI();
