@@ -8,7 +8,7 @@ s32 padEnd();
 s32 padPortClose(s32 port, s32 slot, s32 wait);
 s32 padPortOpen(s32 port, s32 slot, s32 pad_area_ee_addr, u32 *buf);
 u32 padGetInBuffer(u32 port, u32 slot, u8 *buf);
-u32 padSetupEEButtonData(u32 port, u32 slot, void *pstate)
+u32 padSetupEEButtonData(u32 port, u32 slot, void *pstate);
 u32 padGetModeConfig(u32 port, u32 slot);
 u32 padSetMainMode(u32 port, u32 slot, u32 mode, u32 lock);
 u32 padSetActDirect(u32 port, u32 slot, u8 *actData);
