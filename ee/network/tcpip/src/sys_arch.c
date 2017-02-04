@@ -94,7 +94,7 @@ static void free_msg(arch_message *msg)
 }
 
 static void TimeoutHandler(s32 alarm_id, u16 time, void *pvArg){
-	iReleaseWaitThread(*(int*)pvArg);
+	iReleaseWaitThread((int)pvArg);
 }
 
 static inline u32_t ComputeTimeDiff(u32 start, u32 end)
@@ -224,14 +224,12 @@ static void RetrieveMbxInternal(sys_mbox_t mBox, arch_message **message)
 
 static int ReceiveMbx(arch_message **message, sys_mbox_t mBox, u32_t timeout)
 {
-	int result, AlarmID, ThreadID;
+	int result, AlarmID;
 
 	if(timeout > 0)
-	{
-		ThreadID=GetThreadId();
-    		AlarmID=SetAlarm(mSec2HSyncTicks(timeout), &TimeoutHandler, &ThreadID);
-	}
-	else AlarmID=-1;
+    		AlarmID=SetAlarm(mSec2HSyncTicks(timeout), &TimeoutHandler, (void*)GetThreadId());
+	else
+		AlarmID=-1;
 
 	if(WaitSema(mBox->MessageCountSema)==mBox->MessageCountSema)
 	{
