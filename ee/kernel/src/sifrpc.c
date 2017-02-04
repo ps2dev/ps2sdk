@@ -612,7 +612,6 @@ void SifExecRequest(SifRpcServerData_t *sd)
 
 	rend->client = sd->client;
 	rend->cid    = SIF_CMD_RPC_CALL;
-	rend->rpc_id = 0;  /* XXX: is this correct? */
 
 	if (sd->rmode) {
 		if (!SifSendCmd(SIF_CMD_RPC_END, rend, RPC_PACKET_SIZE, rec, sd->receive,
@@ -620,6 +619,7 @@ void SifExecRequest(SifRpcServerData_t *sd)
 			return;
 	}
 
+	rend->rpc_id = 0;
 	rend->rec_id = 0;
 
 	if (sd->rsize) {
