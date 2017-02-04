@@ -111,7 +111,7 @@ sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, 
 	int tid, rv;
 
 	thp.attr = 0;
-	thp.option = (u32)"PS2IP";
+	thp.option = 0;
 	thp.func = thread;
 	thp.stack_size = stacksize;
 	thp.stack = malloc(stacksize);

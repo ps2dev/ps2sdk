@@ -81,7 +81,7 @@ int poweroffInit(void)
 	thread.gp_reg = &_gp;
 	thread.func = PowerOffThread;
 	thread.stack = (void *)poffThreadStack;
-	thread.option = PWROFF_IRX;
+	thread.option = 0;
 	thread.attr = 0;
 	powerOffThreadId = CreateThread(&thread);
 	StartThread(powerOffThreadId, NULL);

@@ -70,7 +70,7 @@ int NetManInitRPCClient(void){
 	{
 		SemaData.max_count=1;
 		SemaData.init_count=1;
-		SemaData.option=(unsigned int)NetManID;
+		SemaData.option=(u32)NetManID;
 		SemaData.attr=0;
 		if((NetManIOSemaID=CreateSema(&SemaData)) < 0)
 		{
@@ -80,7 +80,7 @@ int NetManInitRPCClient(void){
 
 		SemaData.max_count=1;
 		SemaData.init_count=1;
-		SemaData.option=(unsigned int)NetManID;
+		SemaData.option=(u32)NetManID;
 		SemaData.attr=0;
 		if((NetManTxSemaID=CreateSema(&SemaData)) < 0)
 		{

@@ -415,7 +415,7 @@ int audsrv_init()
 
 	/* Create RPC server */
 	rpcThread.attr = 0;
-	rpcThread.option = AUDSRV_IRX;
+	rpcThread.option = 0;
 	rpcThread.func = &rpc_server_thread;
 	rpcThread.stack = rpc_server_stack;
 	rpcThread.stack_size = sizeof(rpc_server_stack);
