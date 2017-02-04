@@ -236,6 +236,8 @@ typedef struct t_ee_thread_status
 int DIntr(void);
 int EIntr(void);
 
+s32 iWakeupThread(s32 thread_id);
+
 int EnableIntc(int intc);
 int DisableIntc(int intc);
 int EnableDmac(int dmac);
@@ -301,11 +303,12 @@ s32  iRotateThreadReadyQueue(s32 priority);
 s32  ReleaseWaitThread(s32 thread_id);
 s32  iReleaseWaitThread(s32 thread_id);
 s32	 GetThreadId(void);
+s32  _iGetThreadId(void);		//This is used for a hack by SCE, to work around the iWakeupThread design flaw
 s32  ReferThreadStatus(s32 thread_id, ee_thread_status_t *info);
 s32  iReferThreadStatus(s32 thread_id, ee_thread_status_t *info);
 s32  SleepThread(void);
 s32	 WakeupThread(s32 thread_id);
-s32	 iWakeupThread(s32 thread_id);
+s32	 _iWakeupThread(s32 thread_id);
 s32	 CancelWakeupThread(s32 thread_id);
 s32	 iCancelWakeupThread(s32 thread_id);
 s32	 SuspendThread(s32 thread_id);

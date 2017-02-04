@@ -50,11 +50,12 @@
 #define __NR_ReleaseWaitThread		0x2d
 #define __NR_iReleaseWaitThread		(-0x2e)
 #define __NR_GetThreadId		0x2f
+#define __NR__iGetThreadId		(-0x2f)	//Used for a hack by SCE to workaround iWakeupThread
 #define __NR_ReferThreadStatus		0x30
 #define __NR_iReferThreadStatus		(-0x31)
 #define __NR_SleepThread		0x32
 #define __NR_WakeupThread		0x33
-#define __NR_iWakeupThread		(-0x34)
+#define __NR__iWakeupThread		(-0x34)
 #define __NR_CancelWakeupThread		0x35
 #define __NR_iCancelWakeupThread	(-0x36)
 #define __NR_SuspendThread		0x37

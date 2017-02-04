@@ -12,6 +12,35 @@
 
 #include "kernel.h"
 
+#ifdef F_iWakeupThread
+s32 iWakeupThread(s32 thread_id)
+{
+	ee_thread_status_t info;
+	int prio, result;
+
+	if(_iGetThreadId() == thread_id)
+	{
+		iReferThreadStatus(thread_id, &info);
+		prio = info.current_priority;
+
+		/*	Now the hack: suspend the thread to make its state THS_SUSPEND,
+			which will allow the real iWakeupThread to increment its wakeup request count field. */
+		iSuspendThread(thread_id);
+		_iWakeupThread(thread_id);
+		iResumeThread(thread_id);
+
+		/*	If there are multiple threads with the same priority, another thread may get preempted.
+			Therefore rotate the priority queue until the specified thread becomes the running thread. */
+		while((result = _iGetThreadId()) != thread_id)
+			iRotateThreadReadyQueue(prio);
+
+		return result;
+	} else {
+		return _iWakeupThread(thread_id);
+	}
+}
+#endif
+
 #ifdef F_DIntr
 int DIntr()
 {

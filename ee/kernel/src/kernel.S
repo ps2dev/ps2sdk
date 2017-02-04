@@ -267,6 +267,10 @@ SYSCALL(iReleaseWaitThread)
 SYSCALL(GetThreadId)
 #endif
 
+#ifdef F__iGetThreadId
+SYSCALL(_iGetThreadId)
+#endif
+
 #ifdef F_ReferThreadStatus
 SYSCALL(ReferThreadStatus)
 #endif
@@ -283,8 +287,8 @@ SYSCALL(SleepThread)
 SYSCALL(WakeupThread)
 #endif
 
-#ifdef F_iWakeupThread
-SYSCALL(iWakeupThread)
+#ifdef F__iWakeupThread
+SYSCALL(_iWakeupThread)
 #endif
 
 #ifdef F_CancelWakeupThread
