@@ -13,30 +13,18 @@ UDPTTY_IP_ADDR_SRC = IP_ADDR(192, 168, 0, 10)
 UDPTTY_IP_PORT_DST = IP_PORT(0x4712)
 UDPTTY_IP_PORT_SRC = IP_PORT(0x4712)
 
-IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = irx/
-IOP_SRC_DIR = src/
-IOP_INC_DIR = include/
-
-IOP_BIN = $(IOP_BIN_DIR)udptty.irx
-
 UDPTTY_PARAM = -DUDPTTY_ETH_DST='$(UDPTTY_ETH_DST)' \
 	-DUDPTTY_IP_ADDR_DST='$(UDPTTY_IP_ADDR_DST)' -DUDPTTY_IP_ADDR_SRC='$(UDPTTY_IP_ADDR_SRC)' \
 	-DUDPTTY_IP_PORT_DST='$(UDPTTY_IP_PORT_DST)' -DUDPTTY_IP_PORT_SRC='$(UDPTTY_IP_PORT_SRC)'
-IOP_CFLAGS += -Wall -O2 -G0 $(UDPTTY_PARAM)
+IOP_CFLAGS += $(UDPTTY_PARAM)
 
-IOP_INCS += -I. -I$(PS2SDKSRC)/iop/dev9/dev9/include
+IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include
 
 IOP_LDFLAGS = -s
 
 IOP_OBJS = main.o smap.o udp.o tty.o imports.o
-IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
-
-all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
-
-clean:
-	rm -f -r $(IOP_OBJS_DIR) $(IOP_BIN_DIR)
 
 include $(PS2SDKSRC)/Defs.make
+include $(PS2SDKSRC)/iop/Rules.bin.make
 include $(PS2SDKSRC)/iop/Rules.make
 include $(PS2SDKSRC)/iop/Rules.release

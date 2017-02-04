@@ -25,22 +25,22 @@ EE_NO_CRT = -nostartfiles
 endif
 endif
 
-EE_INCS := -I$(PS2SDKSRC)/common/include -I$(PS2SDKSRC)/ee/kernel/include -I$(PS2SDKSRC)/ee/rpc/cdvd/include -I.
+EE_INCS += -I$(PS2SDKSRC)/common/include -I$(PS2SDKSRC)/ee/kernel/include -I$(PS2SDKSRC)/ee/rpc/cdvd/include -I.
 EE_CFLAGS = -D_EE -G0 -mno-gpopt -Wall -Os -DREUSE_EXECPS2=1
 EE_LDFLAGS = -nostartfiles $(EE_NO_CRT) -Tlinkfile -s
 
-$(EE_ELF) : $(EE_OBJS)
+$(EE_ELF): $(EE_OBJS)
 	$(EE_CC) $(EE_LDFLAGS) \
 		-o $(EE_ELF) $(EE_OBJS) $(EE_LIBS)
 	$(EE_OBJCOPY) -Obinary $(EE_ELF) $(EE_BIN)
 
-%.o : %.c
+%.o: %.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
-%.o : %.s
+%.o: %.s
 	$(EE_AS) $(EE_ASFLAGS) $< -o $@
 
-%.o : %.S
+%.o: %.S
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
 clean:

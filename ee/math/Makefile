@@ -6,12 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-EE_OBJS_DIR = obj/
-EE_LIB_DIR = lib/
-EE_SRC_DIR = src/
-EE_INC_DIR = include/
-
-EE_LIB = $(EE_LIB_DIR)libmf.a
+EE_LIB = libmf.a
 
 EE_CFLAGS += -fshort-double -mlong64 -mhard-float -fno-builtin
 
@@ -28,13 +23,8 @@ EE_OBJS = acoshf.o airyf.o asinf.o asinhf.o atanf.o \
 	sindgf.o sinf.o sinhf.o spencef.o sqrtf.o stdtrf.o \
 	struvef.o tandgf.o tanf.o tanhf.o ynf.o zetaf.o \
 	zetacf.o polevlf.o setprec.o mtherr.o erl-support.o
-EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
-
-all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
-
-clean:
-	rm -f -r $(EE_OBJS_DIR) $(EE_LIB_DIR)
 
 include $(PS2SDKSRC)/Defs.make
+include $(PS2SDKSRC)/ee/Rules.lib.make
 include $(PS2SDKSRC)/ee/Rules.make
 include $(PS2SDKSRC)/ee/Rules.release

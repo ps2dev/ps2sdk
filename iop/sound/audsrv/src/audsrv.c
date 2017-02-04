@@ -20,7 +20,7 @@
 #include <sysclib.h>
 
 #include <audsrv.h>
-#include "audsrv.h"
+#include "audsrv_internal.h"
 #include "common.h"
 #include "rpc_server.h"
 #include "rpc_client.h"

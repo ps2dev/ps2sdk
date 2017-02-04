@@ -6,6 +6,12 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_CFLAGS += -DSIO2MAN_V2
+IOP_BIN_DIR ?= irx/
 
-include $(PS2SDKSRC)/iop/system/freesio2/Makefile
+IOP_BIN ?= $(shell basename $(CURDIR)).irx
+IOP_BIN := $(IOP_BIN:%=$(IOP_BIN_DIR)%)
+
+all:: $(IOP_BIN)
+
+clean::
+	rm -f -r $(IOP_OBJS_DIR) $(IOP_BIN_DIR)

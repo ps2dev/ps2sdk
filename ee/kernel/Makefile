@@ -6,29 +6,19 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-EE_OBJS_DIR = obj/
-EE_LIB_DIR = lib/
-EE_SRC_DIR = src/
-EE_INC_DIR = include/
-
-EE_LIB = $(EE_LIB_DIR)libkernel.a
-
 SIFCMD_OBJS = sif_cmd_send.o _sif_cmd_int_handler.o sif_cmd_main.o \
 	sif_cmd_client.o sif_cmd_remove_cmdhandler.o sif_sreg_get.o
-SIFCMD_OBJS := $(SIFCMD_OBJS:%=$(EE_OBJS_DIR)%)
 
 SIFRPC_OBJS = SifBindRpc.o SifCallRpc.o SifRpcGetOtherData.o \
 	SifRegisterRpc.o SifRemoveRpc.o SifSetRpcQueue.o SifRemoveRpcQueue.o SifGetNextRequest.o \
 	SifExecRequest.o SifRpcLoop.o SifRpcMain.o _rpc_get_packet.o \
 	_rpc_get_fpacket.o SifCheckStatRpc.o
-SIFRPC_OBJS := $(SIFRPC_OBJS:%=$(EE_OBJS_DIR)%)
 
 FILEIO_OBJS = __fio_internals.o fio_init.o _fio_intr.o fio_sync.o fio_setblockmode.o \
 	fio_exit.o fio_open.o fio_close.o fio_read.o \
 	fio_write.o fio_lseek.o fio_mkdir.o _fio_read_intr.o fio_getc.o fio_putc.o \
 	fio_ioctl.o fio_dopen.o fio_dclose.o fio_dread.o fio_getstat.o fio_chstat.o \
 	fio_remove.o fio_format.o fio_rmdir.o fio_gets.o
-FILEIO_OBJS := $(FILEIO_OBJS:%=$(EE_OBJS_DIR)%)
 
 LOADFILE_OBJS = SifLoadFileInit.o SifLoadFileExit.o _SifLoadModule.o SifLoadModule.o \
 	SifLoadStartModule.o SifLoadModuleEncrypted.o SifStopModule.o SifUnloadModule.o \
@@ -36,23 +26,18 @@ LOADFILE_OBJS = SifLoadFileInit.o SifLoadFileExit.o _SifLoadModule.o SifLoadModu
 	SifLoadElf.o SifLoadElfEncrypted.o SifIopSetVal.o SifIopGetVal.o \
 	_SifLoadModuleBuffer.o SifLoadModuleBuffer.o SifLoadStartModuleBuffer.o \
 	SifExecModuleBuffer.o SifExecModuleFile.o
-LOADFILE_OBJS := $(LOADFILE_OBJS:%=$(EE_OBJS_DIR)%)
 
 IOPHEAP_OBJS = SifInitIopHeap.o SifExitIopHeap.o SifAllocIopHeap.o \
 	SifFreeIopHeap.o SifLoadIopHeap.o
-IOPHEAP_OBJS := $(IOPHEAP_OBJS:%=$(EE_OBJS_DIR)%)
 
 IOPCONTROL_OBJS = SifIopReboot.o SifIopReset.o SifIopIsAlive.o SifIopSync.o __iop_control_internals.o
-IOPCONTROL_OBJS := $(IOPCONTROL_OBJS:%=$(EE_OBJS_DIR)%)
 
 GLUE_OBJS = DIntr.o EIntr.o iWakeupThread.o EnableIntc.o DisableIntc.o EnableDmac.o DisableDmac.o \
 	iEnableIntc.o iDisableIntc.o iEnableDmac.o iDisableDmac.o SyncDCache.o \
 	iSyncDCache.o InvalidDCache.o iInvalidDCache.o
-GLUE_OBJS := $(GLUE_OBJS:%=$(EE_OBJS_DIR)%)
 
 SIO_OBJS = sio_init.o sio_putc.o sio_getc.o sio_write.o sio_read.o sio_puts.o \
 	sio_gets.o sio_getc_block.o sio_flush.o sio_putsn.o
-SIO_OBJS := $(SIO_OBJS:%=$(EE_OBJS_DIR)%)
 
 CONFIG_OBJS = _config_internals.o GetRomName.o IsT10K.o IsEarlyJap.o configGetLanguage.o \
 	configSetLanguage.o configGetTvScreenType.o configSetTvScreenType.o \
@@ -60,19 +45,14 @@ CONFIG_OBJS = _config_internals.o GetRomName.o IsT10K.o IsEarlyJap.o configGetLa
 	configSetTimeFormat.o configGetTimezone.o configSetTimezone.o \
 	configIsSpdifEnabled.o configSetSpdifEnabled.o configGetTime.o \
 	configIsDaylightSavingEnabled.o configSetDaylightSavingEnabled.o
-CONFIG_OBJS := $(CONFIG_OBJS:%=$(EE_OBJS_DIR)%)
 
 LIBKRNLUPD_OBJS = libkrnlupd.o libkrnlupd_osd.o libkrnlupd_common.o libkrnlupd_syscalls.o osdsrc_bin.o
-LIBKRNLUPD_OBJS := $(LIBKRNLUPD_OBJS:%=$(EE_OBJS_DIR)%)
 
 TLBFUNC_OBJS = tlbfunc.o tlbsrc_bin.o
-TLBFUNC_OBJS := $(TLBFUNC_OBJS:%=$(EE_OBJS_DIR)%)
 
 TIMER_OBJS = cpu_ticks.o
-TIMER_OBJS := $(TIMER_OBJS:%=$(EE_OBJS_DIR)%)
 
 GETKERNEL_OBJS = GetSyscallHandler.o GetSyscall.o GetExceptionHandler.o GetInterruptHandler.o
-GETKERNEL_OBJS := $(GETKERNEL_OBJS:%=$(EE_OBJS_DIR)%)
 
 ### SYSCALL OBJECTS
 
@@ -109,49 +89,50 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
 	SifWriteBackDCache.o _SyncDCache.o _InvalidDCache.o __errno.o errno.o \
 	strncpy.o strlen.o memcpy.o memset.o __syscall.o
 
-KERNEL_OBJS := $(KERNEL_OBJS:%=$(EE_OBJS_DIR)%)
-
 EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(CONFIG_OBJS) \
 	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(GETKERNEL_OBJS) $(LIBKRNLUPD_OBJS)	\
-	$(TLBFUNC_OBJS) $(EE_OBJS_DIR)erl-support.o
+	$(TLBFUNC_OBJS) erl-support.o
 
-all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
+include $(PS2SDKSRC)/Defs.make
+include $(PS2SDKSRC)/ee/Rules.lib.make
+include $(PS2SDKSRC)/ee/Rules.make
+include $(PS2SDKSRC)/ee/Rules.release
 
-$(KERNEL_OBJS): $(EE_SRC_DIR)kernel.S
+$(KERNEL_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)kernel.S
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(SIFCMD_OBJS): $(EE_SRC_DIR)sifcmd.c
+$(SIFCMD_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)sifcmd.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(SIFRPC_OBJS): $(EE_SRC_DIR)sifrpc.c
+$(SIFRPC_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)sifrpc.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(FILEIO_OBJS): $(EE_SRC_DIR)fileio.c
+$(FILEIO_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)fileio.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(LOADFILE_OBJS): $(EE_SRC_DIR)loadfile.c
+$(LOADFILE_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)loadfile.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(CONFIG_OBJS): $(EE_SRC_DIR)osd_config.c
+$(CONFIG_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)osd_config.c
 	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(TIMER_OBJS): $(EE_SRC_DIR)timer.c
+$(TIMER_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)timer.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(GETKERNEL_OBJS): $(EE_SRC_DIR)getkernel.c
+$(GETKERNEL_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)getkernel.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(IOPHEAP_OBJS): $(EE_SRC_DIR)iopheap.c
+$(IOPHEAP_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)iopheap.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(IOPCONTROL_OBJS): $(EE_SRC_DIR)iopcontrol.c
+$(IOPCONTROL_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)iopcontrol.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(GLUE_OBJS): $(EE_SRC_DIR)glue.c
+$(GLUE_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)glue.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(SIO_OBJS): $(EE_SRC_DIR)sio.c
+$(SIO_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)sio.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(EE_OBJS_DIR)libkrnlupd.o: $(EE_SRC_DIR)libkrnlupd.c
@@ -172,16 +153,3 @@ $(EE_OBJS_DIR)libkrnlupd_syscalls.o: $(EE_SRC_DIR)libkrnlupd_syscalls.S
 $(EE_OBJS_DIR)tibfunc.o: $(EE_SRC_DIR)tlbfunc.c $(EE_SRC_DIR)tlbsrc_bin.c
 	$(EE_C_COMPILE) $< -c -o $@
 
-clean:
-	rm -r -f $(EE_OBJS_DIR) $(EE_LIB_DIR)
-
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/ee/Rules.make
-include $(PS2SDKSRC)/ee/Rules.release
-
-release:
-	$(ECHO) Installing $(EE_LIB) into $(PS2SDK)/ee/lib
-	$(ECHO) Installing *.erl into $(PS2SDK)/ee/lib
-	cp -f $(EE_LIB) $(PS2SDK)/ee/lib
-	cp -f $(EE_LIB:%.a=%.erl) $(PS2SDK)/ee/lib
-	chmod 644 $(PS2SDK)/ee/$(EE_LIB) $(PS2SDK)/ee/$(EE_LIB:%.a=%.erl)

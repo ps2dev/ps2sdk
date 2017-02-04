@@ -13,12 +13,7 @@ PS2IP_DNS = 1
 # Change this to point to the version of LWIP this is being compiled with.
 LWIP = $(PS2SDKSRC)/common/tcpip/lwip-2.0.0
 
-EE_OBJS_DIR = obj/
-EE_LIB_DIR = lib/
-EE_SRC_DIR = src/
-EE_INC_DIR = include/
-
-EE_LIB = $(EE_LIB_DIR)libps2ip.a
+EE_LIB = libps2ip.a
 
 EE_CFLAGS += -Wall -fno-builtin -DLWIP_NOASSERT -DLWIP_COMPAT_MUTEX -DLWIP_COMPAT_MUTEX_ALLOWED -mno-gpopt -O2 -G0 -mno-check-zero-division
 
@@ -36,7 +31,7 @@ ifdef PS2IP_DNS
 EE_CFLAGS += -DPS2IP_DNS
 endif
 
-EE_INCS += -I$(LWIP)/src/include -I$(LWIP)/src/include/ipv4 -Isrc/include
+EE_INCS += -I$(LWIP)/src/include -I$(LWIP)/src/include/ipv4
 
 ps2api_OBJECTS = api_lib.o api_msg.o api_netbuf.o err.o sockets.o tcpip.o
 ps2api_IPV4 = icmp.o ip.o ip4.o ip4_addr.o ip4_frag.o inet_chksum.o
@@ -51,14 +46,9 @@ ps2ip_OBJECTS += dns.o netdb.o
 endif
 
 EE_OBJS = ps2ip.o sys_arch.o $(ps2ip_OBJECTS) erl-support.o
-EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
-
-all: $(EE_OBJS_DIR) $(EE_LIB_DIR) $(EE_LIB)
-
-clean:
-	rm -f -r $(EE_OBJS_DIR) $(EE_LIB_DIR)
 
 include $(PS2SDKSRC)/Defs.make
+include $(PS2SDKSRC)/ee/Rules.lib.make
 include $(PS2SDKSRC)/ee/Rules.make
 include $(PS2SDKSRC)/ee/Rules.release
 

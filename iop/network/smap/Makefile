@@ -9,29 +9,17 @@
 # Build for use with a DHCP-enabled LWIP stack.
 LWIP_DHCP = 1
 
-IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = irx/
-IOP_SRC_DIR = src/
-IOP_INC_DIR = include/
-
-IOP_BIN = $(IOP_BIN_DIR)smap.irx
-
 IOP_CFLAGS += -mgpopt -G19 -mno-check-zero-division
 
 ifdef LWIP_DHCP
 IOP_CFLAGS += -DLWIP_DHCP=1
 endif
 
-IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include -I$(IOP_SRC_DIR)/include
+IOP_INCS = -I$(PS2SDKSRC)/iop/dev9/dev9/include
 
 IOP_OBJS = main.o smap.o xfer.o imports.o exports.o
-IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
-
-all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
-
-clean:
-	rm -f -r $(IOP_OBJS_DIR) $(IOP_BIN_DIR)
 
 include $(PS2SDKSRC)/Defs.make
+include $(PS2SDKSRC)/iop/Rules.bin.make
 include $(PS2SDKSRC)/iop/Rules.make
 include $(PS2SDKSRC)/iop/Rules.release

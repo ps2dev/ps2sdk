@@ -6,6 +6,12 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_CFLAGS += -DSIO2MAN_V2
+EE_LIB_DIR ?= lib/
 
-include $(PS2SDKSRC)/iop/system/freesio2/Makefile
+EE_LIB ?= lib$(shell basename $(CURDIR)).a
+EE_LIB := $(EE_LIB:%=$(EE_LIB_DIR)%)
+
+all:: $(EE_LIB)
+
+clean::
+	rm -f -r $(EE_OBJS_DIR) $(EE_LIB_DIR)
