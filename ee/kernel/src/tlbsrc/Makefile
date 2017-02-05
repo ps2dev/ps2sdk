@@ -6,45 +6,26 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-EE_CC_VERSION := $(shell $(EE_CC) '--version' 2>&1 | sed -n 's/^.*(GCC) //p')
+EE_BIN_DIR = bin/
+EE_OBJS_DIR = obj/
 
-EE_BIN = tlbsrc.bin
-EE_ELF = tlbsrc.elf
+EE_TLBSRC_BIN = tlbsrc.bin
+EE_TLBSRC_BIN := $(EE_TLBSRC_BIN:%=$(EE_BIN_DIR)%)
+EE_TLBSRC_ELF = tlbsrc.elf
+EE_TLBSRC_ELF := $(EE_TLBSRC_ELF:%=$(EE_BIN_DIR)%)
 EE_OBJS = tlbsrc.o
 
-# Extra macros for disabling the automatic inclusion of the built-in CRT object(s)
-ifeq ($(EE_CC_VERSION),3.2.2)
-EE_NO_CRT = -mno-crt0
-endif
-ifeq ($(EE_CC_VERSION),3.2.3)
-EE_NO_CRT = -mno-crt0
-endif
-ifneq ($(EE_CC_VERSION),3.2.2)
-ifneq ($(EE_CC_VERSION),3.2.3)
-EE_NO_CRT = -nostartfiles
-endif
-endif
+EE_INCS += -I$(PS2SDKSRC)/ee/rpc/cdvd/include
+EE_CFLAGS += -mno-gpopt
 
-EE_INCS += -I$(PS2SDKSRC)/common/include -I$(PS2SDKSRC)/ee/kernel/include -I$(PS2SDKSRC)/ee/rpc/cdvd/include -I.
-EE_CFLAGS = -D_EE -G0 -mno-gpopt -Wall -Os
-EE_LDFLAGS = -nostartfiles $(EE_NO_CRT) -Tlinkfile -s
-
-$(EE_ELF): $(EE_OBJS)
-	$(EE_CC) $(EE_LDFLAGS) \
-		-o $(EE_ELF) $(EE_OBJS) $(EE_LIBS)
-	$(EE_OBJCOPY) -Obinary $(EE_ELF) $(EE_BIN)
-
-%.o: %.c
-	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
-
-%.o: %.s
-	$(EE_AS) $(EE_ASFLAGS) $< -o $@
-
-%.o: %.S
-	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
+$(EE_TLBSRC_BIN): $(EE_TLBSRC_ELF)
+	$(EE_OBJCOPY) -Obinary $< $@
 
 clean:
-	rm -f $(EE_OBJS) $(EE_ELF) $(EE_BIN)
+	rm -f -r $(EE_OBJS_DIR) $(EE_BIN_DIR)
 
 include $(PS2SDKSRC)/Defs.make
+include $(PS2SDKSRC)/ee/Rules.make
 
+$(EE_TLBSRC_ELF): $(EE_OBJS) | $(EE_BIN_DIR)
+	$(EE_CC) $(EE_CFLAGS) -o $@ $^ $(EE_NO_CRT) -Tlinkfile -s $(EE_LIBS)

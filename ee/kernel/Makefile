@@ -144,12 +144,30 @@ $(EE_OBJS_DIR)libkrnlupd_osd.o: $(EE_SRC_DIR)libkrnlupd_osd.c
 $(EE_OBJS_DIR)libkrnlupd_common.o: $(EE_SRC_DIR)libkrnlupd_common.c
 	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
 
-$(EE_OBJS_DIR)osdsrc_bin.o: $(EE_SRC_DIR)osdsrc_bin.c
+$(EE_OBJS_DIR)osdsrc_bin.o: $(EE_OBJS_DIR)osdsrc_bin.c
 	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
 
 $(EE_OBJS_DIR)libkrnlupd_syscalls.o: $(EE_SRC_DIR)libkrnlupd_syscalls.S
 	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
 
-$(EE_OBJS_DIR)tibfunc.o: $(EE_SRC_DIR)tlbfunc.c $(EE_SRC_DIR)tlbsrc_bin.c
+$(EE_OBJS_DIR)tibfunc.o: $(EE_SRC_DIR)tlbfunc.c 
 	$(EE_C_COMPILE) $< -c -o $@
 
+$(EE_OBJS_DIR)tlbsrc_bin.o: $(EE_OBJS_DIR)tlbsrc_bin.c
+	$(EE_C_COMPILE) $< -c -o $@
+
+$(EE_SRC_DIR)osdsrc/bin/osdsrc.bin: $(EE_SRC_DIR)osdsrc
+	make -C $(EE_SRC_DIR)osdsrc
+
+$(EE_OBJS_DIR)osdsrc_bin.c: $(EE_SRC_DIR)osdsrc/bin/osdsrc.bin
+	bin2c $< $@ osdsrc
+
+$(EE_SRC_DIR)tlbsrc/bin/tlbsrc.bin: $(EE_SRC_DIR)tlbsrc
+	make -C $(EE_SRC_DIR)tlbsrc
+
+$(EE_OBJS_DIR)tlbsrc_bin.c: $(EE_SRC_DIR)tlbsrc/bin/tlbsrc.bin
+	bin2c $< $@ tlbsrc
+
+clean::
+	make -C $(EE_SRC_DIR)osdsrc clean
+	make -C $(EE_SRC_DIR)tlbsrc clean
