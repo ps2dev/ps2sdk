@@ -9,7 +9,7 @@
 */
 
 #include "irx_imports.h"
-#include "freesd.h"
+#include "libsd.h"
 #include "ahx.h"
 
 // if this is defined the irx will be compiled without PRINTF output
@@ -209,7 +209,7 @@ void AHX_PlayThread(void* param)
 		if (playing)
 		{
 			// get SPU transfer status to determine which area of SPU buffer to write PCM data to
-			chunk = 1 - (SdBlockTransStatus(1, 0 )>>24);
+			chunk = 1 - (sceSdBlockTransStatus(1, 0 )>>24);
 
 			wmemcpy(spubuf+(1024*chunk),pcmbuf+readpos,512);		// left channel
 			wmemcpy(spubuf+(1024*chunk)+512,pcmbuf+readpos,512);	// right channel (same cos we're mono)
@@ -257,8 +257,8 @@ static int AHX_TransCallback(void* param)
 
 void AHX_SetVol(u16 vol)
 {
-	SdSetParam(SD_CORE_1|SD_PARAM_BVOLL,vol);
-	SdSetParam(SD_CORE_1|SD_PARAM_BVOLR,vol);
+	sceSdSetParam(SD_CORE_1|SD_PARAM_BVOLL,vol);
+	sceSdSetParam(SD_CORE_1|SD_PARAM_BVOLR,vol);
 }
 
 //***************************************************************
@@ -342,17 +342,17 @@ void* AHX_Init(unsigned int* sbuff)
 	#endif
 
 	// Initialise SPU
-	SdInit(SD_INIT_COLD);
+	sceSdInit(SD_INIT_COLD);
 
 	// set left and right channel volumes
-	SdSetParam(SD_CORE_1|SD_PARAM_MVOLL,0x3fff);
-	SdSetParam(SD_CORE_1|SD_PARAM_MVOLR,0x3fff);
+	sceSdSetParam(SD_CORE_1|SD_PARAM_MVOLL,0x3fff);
+	sceSdSetParam(SD_CORE_1|SD_PARAM_MVOLR,0x3fff);
 
 	// Start audio streaming
-	SdBlockTrans(1,SD_BLOCK_TRANS_LOOP,spubuf, 0x800, 0);
+	sceSdBlockTrans(1,SD_TRANS_LOOP,spubuf, 0x800, 0);
 
 	// set SPU2 callback function pointer
-	SdSetTransCallback(1, (void *)AHX_TransCallback);
+	sceSdSetTransCallback(1, (void *)AHX_TransCallback);
 
 	// Start playing thread
 	play_thread.attr         = TH_C;
@@ -502,8 +502,8 @@ void* AHX_SubSong(unsigned int* sbuff)
 //***************************************************************
 void* AHX_Quit(unsigned int* sbuff)
 {
-	SdSetTransCallback(1,NULL);
-	SdBlockTrans(1,SD_BLOCK_TRANS_STOP,0,0,0);
+	sceSdSetTransCallback(1,NULL);
+	sceSdBlockTrans(1,SD_TRANS_STOP,0,0,0);
 
 	TerminateThread(play_tid);
 	DeleteThread(play_tid);

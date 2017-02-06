@@ -238,7 +238,7 @@ int audsrv_init()
 
 	/* initialize transfer-complete callback */
 	sceSdSetTransCallback(SD_CORE_1, (void *)transfer_complete);
-	sceSdBlockTrans(SD_CORE_1, SD_TRANS_LOOP, core1_buf, sizeof(core1_buf));
+	sceSdBlockTrans(SD_CORE_1, SD_TRANS_LOOP, core1_buf, sizeof(core1_buf), 0);
 
 	/* default to SPU's native */
 	audsrv_set_format(48000, 16, 2);

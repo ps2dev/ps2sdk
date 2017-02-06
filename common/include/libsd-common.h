@@ -127,7 +127,7 @@ typedef struct
 	u16 func;
 	u16 entry;
 	u32 value;
-} SdBatch;
+} sceSdBatch;
 
 typedef struct
 {
@@ -137,9 +137,42 @@ typedef struct
      short   depth_R;
      int     delay;
      int     feedback;
-} SdEffectAttr;
+} sceSdEffectAttr;
 
-typedef int (*SdIntrHandler)(int, void *);
+typedef int (*sceSdSpu2IntrHandler)(int, void *);
+typedef int (*sceSdTransIntrHandler)(int, void *);
+typedef int (*SdIntrCallback)(void *data);
+
+//Backwards compatibility definitions
+#define BATCH_SETPARAM SD_BATCH_SETPARAM
+#define BATCH_SETSWITCH SD_BATCH_SETSWITCH
+#define BATCH_SETADDR SD_BATCH_SETADDR
+#define BATCH_SETCORE SD_BATCH_SETCORE
+#define BATCH_WRITEIOP SD_BATCH_WRITEIOP
+#define BATCH_WRITEEE SD_BATCH_WRITEEE
+#define BATCH_EERETURN SD_BATCH_EERETURN
+#define BATCH_GETPARAM SD_BATCH_GETPARAM
+#define BATCH_GETSWITCH SD_BATCH_GETSWITCH
+#define BATCH_GETADDR SD_BATCH_GETADDR
+#define BATCH_GETCORE SD_BATCH_GETCORE
+
+#define SD_BLOCK_TRANS_WRITE SD_TRANS_WRITE
+#define SD_BLOCK_TRANS_READ SD_TRANS_READ
+#define SD_BLOCK_TRANS_STOP SD_TRANS_STOP
+#define SD_BLOCK_TRANS_WRITE_FROM SD_TRANS_WRITE_FROM
+#define SD_BLOCK_TRANS_LOOP SD_TRANS_LOOP
+
+#define SD_VOICE_TRANS_WRITE SD_TRANS_WRITE
+#define SD_VOICE_TRANS_READ SD_TRANS_READ
+#define SD_VOICE_TRANS_STOP SD_TRANS_STOP
+#define	SD_VOICE_TRANS_MODE_DMA SD_TRANS_MODE_DMA
+#define SD_VOICE_TRANS_MODE_IO SD_TRANS_MODE_IO
+
+#define SdBatch sceSdBatch
+#define SdEffectAttr sceSdEffectAttr
+#define SdSpu2IntrHandler sceSdSpu2IntrHandler
+#define SdTransIntrHandler sceSdTransIntrHandler
+#define IntrCallback SdIntrCallback
 
 #endif /* __LIBSD_H */
 

@@ -10,7 +10,7 @@
 #include "types.h"
 #include "sifman.h"
 #include "intrman.h"
-#include "freesd.h"
+#include "libsd.h"
 #include "spu2regs.h"
 
 u32 BatchData __attribute__((aligned(16)));
@@ -37,7 +37,7 @@ s32 SifDmaBatch(u32 ee_addr, void *iop_addr, u32 size)
 	return 0;
 }
 
-s32 SdProcBatch(SdBatch *batch, u32 *rets, u32 num)
+int sceSdProcBatch(sceSdBatch *batch, u32 *rets, u32 num)
 {
 	s32 loop;
 	s32 ret;
@@ -48,39 +48,39 @@ s32 SdProcBatch(SdBatch *batch, u32 *rets, u32 num)
 
 		switch(batch[loop].func)
 		{
-		case BATCH_SETPARAM:
-			SdSetParam(batch[loop].entry, batch[loop].val);
+		case SD_BATCH_SETPARAM:
+			sceSdSetParam(batch[loop].entry, batch[loop].value);
 			break;
-		case BATCH_GETPARAM:
-			ret = SdGetParam(batch[loop].entry);
+		case SD_BATCH_GETPARAM:
+			ret = sceSdGetParam(batch[loop].entry);
 			break;
-		case BATCH_SETSWITCH:
-			SdSetSwitch(batch[loop].entry, batch[loop].val);
+		case SD_BATCH_SETSWITCH:
+			sceSdSetSwitch(batch[loop].entry, batch[loop].value);
 			break;
-		case BATCH_GETSWITCH:
-			ret = SdGetSwitch(batch[loop].entry);
+		case SD_BATCH_GETSWITCH:
+			ret = sceSdGetSwitch(batch[loop].entry);
 			break;
-		case BATCH_SETADDR:
-			SdSetAddr(batch[loop].entry, batch[loop].val);
+		case SD_BATCH_SETADDR:
+			sceSdSetAddr(batch[loop].entry, batch[loop].value);
 			break;
-		case BATCH_GETADDR:
-			ret = SdGetAddr(batch[loop].entry);
+		case SD_BATCH_GETADDR:
+			ret = sceSdGetAddr(batch[loop].entry);
 			break;
-		case BATCH_SETCORE:
-			SdSetCoreAttr(batch[loop].entry, batch[loop].val);
+		case SD_BATCH_SETCORE:
+			sceSdSetCoreAttr(batch[loop].entry, batch[loop].value);
 			break;
-		case BATCH_GETCORE:
-			ret = SdGetCoreAttr(batch[loop].entry);
+		case SD_BATCH_GETCORE:
+			ret = sceSdGetCoreAttr(batch[loop].entry);
 			break;
-		case BATCH_WRITEIOP:
-			*((u32 *) batch[loop].val) = batch[loop].entry;
+		case SD_BATCH_WRITEIOP:
+			*((u32 *) batch[loop].value) = batch[loop].entry;
 			break;
-		case BATCH_WRITEEE:
+		case SD_BATCH_WRITEEE:
 			BatchData = batch[loop].entry;
-			SifDmaBatch(batch[loop].val, &BatchData, 4);
+			SifDmaBatch(batch[loop].value, &BatchData, 4);
 			break;
-		case BATCH_EERETURN:
-			SifDmaBatch(batch[loop].val, rets, batch[loop].entry);
+		case SD_BATCH_EERETURN:
+			SifDmaBatch(batch[loop].value, rets, batch[loop].entry);
 			break;
 		default:
 			return -1 - loop;
@@ -92,7 +92,7 @@ s32 SdProcBatch(SdBatch *batch, u32 *rets, u32 num)
 	return loop;
 }
 
-s32 SdProcBatchEx(SdBatch *batch, u32 *rets, u32 num, u32 voice)
+int sceSdProcBatchEx(sceSdBatch *batch, u32 *rets, u32 num, u32 voice)
 {
 	s32 loop;
 	s32 ret;
@@ -106,11 +106,11 @@ s32 SdProcBatchEx(SdBatch *batch, u32 *rets, u32 num, u32 voice)
 		ret = 0;
 		switch(batch[loop].func)
 		{
-			case BATCH_SETPARAM:
+			case SD_BATCH_SETPARAM:
 			{
 				if((batch[loop].entry & 0x3E) != 0x3E)
 				{
-					SdSetParam(batch[loop].entry, batch[loop].val);
+					sceSdSetParam(batch[loop].entry, batch[loop].value);
 				}
 				else
 				{
@@ -118,7 +118,7 @@ s32 SdProcBatchEx(SdBatch *batch, u32 *rets, u32 num, u32 voice)
 					{
 						if(voice & (1 << voice_loop))
 						{
-							SdSetParam((batch[loop].entry & 0xFFC1) | (1 << (voice_loop + 1)), batch[loop].val);
+							sceSdSetParam((batch[loop].entry & 0xFFC1) | (1 << (voice_loop + 1)), batch[loop].value);
 							cmd_count++;
 						}
 					}
@@ -126,11 +126,11 @@ s32 SdProcBatchEx(SdBatch *batch, u32 *rets, u32 num, u32 voice)
 				}
 			} break;
 
-			case BATCH_GETPARAM:
+			case SD_BATCH_GETPARAM:
 			{
 				if((batch[loop].entry & 0x3E) != 0x3E)
 				{
-					ret = SdGetParam(batch[loop].entry);
+					ret = sceSdGetParam(batch[loop].entry);
 				}
 				else
 				{
@@ -138,7 +138,7 @@ s32 SdProcBatchEx(SdBatch *batch, u32 *rets, u32 num, u32 voice)
 					{
 						if(voice & (1 << voice_loop))
 						{
-							ret = SdGetParam((batch[loop].entry & 0xFFC1) | (1 << (voice_loop + 1)));
+							ret = sceSdGetParam((batch[loop].entry & 0xFFC1) | (1 << (voice_loop + 1)));
 							cmd_count++;
 						}
 
@@ -152,19 +152,19 @@ s32 SdProcBatchEx(SdBatch *batch, u32 *rets, u32 num, u32 voice)
 				}
 			} break;
 
-			case BATCH_SETSWITCH:
-				SdSetSwitch(batch[loop].entry, batch[loop].val);
+			case SD_BATCH_SETSWITCH:
+				sceSdSetSwitch(batch[loop].entry, batch[loop].value);
 			break;
 
-			case BATCH_GETSWITCH:
-				ret = SdGetSwitch(batch[loop].entry);
+			case SD_BATCH_GETSWITCH:
+				ret = sceSdGetSwitch(batch[loop].entry);
 			break;
 
-			case BATCH_SETADDR:
+			case SD_BATCH_SETADDR:
 			{
 				if((batch[loop].entry & 0x3E) != 0x3E)
 				{
-					SdSetAddr(batch[loop].entry, batch[loop].val);
+					sceSdSetAddr(batch[loop].entry, batch[loop].value);
 				}
 				else
 				{
@@ -172,7 +172,7 @@ s32 SdProcBatchEx(SdBatch *batch, u32 *rets, u32 num, u32 voice)
 					{
 						if(voice & (1 << voice_loop))
 						{
-							SdSetAddr((batch[loop].entry & 0xFFC1) | (1 << (voice_loop + 1)), batch[loop].val);
+							sceSdSetAddr((batch[loop].entry & 0xFFC1) | (1 << (voice_loop + 1)), batch[loop].value);
 							cmd_count++;
 						}
 					}
@@ -180,11 +180,11 @@ s32 SdProcBatchEx(SdBatch *batch, u32 *rets, u32 num, u32 voice)
 				cmd_count--;
 			} break;
 
-			case BATCH_GETADDR:
+			case SD_BATCH_GETADDR:
 			{
 				if((batch[loop].entry & 0x3E) != 0x3E)
 				{
-					ret = SdGetAddr(batch[loop].entry);
+					ret = sceSdGetAddr(batch[loop].entry);
 				}
 				else
 				{
@@ -192,7 +192,7 @@ s32 SdProcBatchEx(SdBatch *batch, u32 *rets, u32 num, u32 voice)
 					{
 						if(voice & (1 << voice_loop))
 						{
-						ret = SdGetAddr((batch[loop].entry & 0xFFC1) | (1 << (voice_loop + 1)));
+						ret = sceSdGetAddr((batch[loop].entry & 0xFFC1) | (1 << (voice_loop + 1)));
 						cmd_count++;
 						}
 
@@ -205,25 +205,25 @@ s32 SdProcBatchEx(SdBatch *batch, u32 *rets, u32 num, u32 voice)
 				cmd_count--;
 			} break;
 
-			case BATCH_SETCORE:
-				SdSetCoreAttr(batch[loop].entry, batch[loop].val);
+			case SD_BATCH_SETCORE:
+				sceSdSetCoreAttr(batch[loop].entry, batch[loop].value);
 				break;
 
-			case BATCH_GETCORE:
-				ret = SdGetCoreAttr(batch[loop].entry);
+			case SD_BATCH_GETCORE:
+				ret = sceSdGetCoreAttr(batch[loop].entry);
 				break;
 
-			case BATCH_WRITEIOP:
-				*((u32 *) batch[loop].val) = batch[loop].entry;
+			case SD_BATCH_WRITEIOP:
+				*((u32 *) batch[loop].value) = batch[loop].entry;
 				break;
 
-			case BATCH_WRITEEE:
+			case SD_BATCH_WRITEEE:
 				BatchData = batch[loop].entry;
-				SifDmaBatch(batch[loop].val, &BatchData, 4);
+				SifDmaBatch(batch[loop].value, &BatchData, 4);
 				break;
 
-			case BATCH_EERETURN:
-				SifDmaBatch(batch[loop].val, rets, batch[loop].entry);
+			case SD_BATCH_EERETURN:
+				SifDmaBatch(batch[loop].value, rets, batch[loop].entry);
 				break;
 			default:
 				return -1 - cmd_count;

@@ -36,7 +36,7 @@ s32 VoiceTransDma(s16 chan, u16 mode, u8 *iop_addr, u32 *spu_addr, u32 size)
 	*SD_A_TSA_HI(chan) = (u32)spu_addr >> 17;
 	*SD_A_TSA_LO(chan) = (u32)spu_addr >> 1;
 
-	if(mode == SD_VOICE_TRANS_WRITE)
+	if(mode == SD_TRANS_WRITE)
 	{
 		TransIntrData[chan].mode = chan;
 		direction = SD_DMA_DIR_IOP2SPU;
@@ -45,7 +45,7 @@ s32 VoiceTransDma(s16 chan, u16 mode, u8 *iop_addr, u32 *spu_addr, u32 size)
 	}
 	else
 	{
-		if(mode == SD_VOICE_TRANS_READ)
+		if(mode == SD_TRANS_READ)
 		{
 			TransIntrData[chan].mode = (chan << 2) | 0x200;
 			direction = SD_DMA_DIR_SPU2IOP;
@@ -116,13 +116,13 @@ s32 VoiceTrans_Write_IOMode(u32 iopaddr, u32 spu_addr, s32 size, s16 chan)
 	return 0;
 }
 
-s32 SdVoiceTrans(s16 chan, u16 mode, u8 *iopaddr, u32 *spuaddr, u32 size)
+int sceSdVoiceTrans(s16 chan, u16 mode, u8 *iopaddr, u32 *spuaddr, u32 size)
 {
 	s32 res = size;
 
 	chan &= 1;
 
-	if(mode & SD_VOICE_TRANS_MODE_IO)
+	if(mode & SD_TRANS_MODE_IO)
 		VoiceTransIoMode[chan] = 1;
 	else
 		VoiceTransIoMode[chan] = 0;
@@ -133,7 +133,7 @@ s32 SdVoiceTrans(s16 chan, u16 mode, u8 *iopaddr, u32 *spuaddr, u32 size)
 	}
 	else
 	{
-		if((mode & 3) == SD_VOICE_TRANS_WRITE)
+		if((mode & 3) == SD_TRANS_WRITE)
 		{
 			res = VoiceTrans_Write_IOMode( (u32)iopaddr, (u32)spuaddr, size, chan);
 		}
@@ -144,7 +144,7 @@ s32 SdVoiceTrans(s16 chan, u16 mode, u8 *iopaddr, u32 *spuaddr, u32 size)
 	return res;
 }
 
-u32 SdVoiceTransStatus(s16 chan, s16 flag)
+int sceSdVoiceTransStatus(s16 chan, s16 flag)
 {
 	chan &= 1;
 	flag &= 1;

@@ -154,7 +154,7 @@ void *audsrv_load_adpcm(u32 *buffer, int size, int id)
 		}
 
 		/* DMA from IOP to SPU2 */
-		sceSdVoiceTrans(0, SD_TRANS_WRITE | SD_TRANS_MODE_DMA, ((u8*)buffer)+16, (u8*)adpcm->spu2_addr, adpcm->size);
+		sceSdVoiceTrans(0, SD_TRANS_WRITE | SD_TRANS_MODE_DMA, ((u8*)buffer)+16, (u32*)adpcm->spu2_addr, adpcm->size);
 		sceSdVoiceTransStatus(0, 1);
 	}
 
