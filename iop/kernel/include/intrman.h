@@ -90,6 +90,9 @@ int QueryIntrContext(void);
 int QueryIntrStack(void);
 #define I_QueryIntrStack DECLARE_IMPORT(24, QueryIntrStack)
 
+int iCatchMultiIntr(void);
+#define I_iCatchMultiIntr DECLARE_IMPORT(25, iCatchMultiIntr)
+
 #define intrman_IMPORTS \
 	intrman_IMPORTS_start \
  \

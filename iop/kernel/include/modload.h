@@ -31,7 +31,7 @@ int LoadModule(const char *name);
 int LoadStartModule(const char *name, int arglen, const char *args, int *result);
 #define I_LoadStartModule DECLARE_IMPORT(7, LoadStartModule)
 
-int StartModule(int, const char *name, int arg_len, const char *args, int *result);
+int StartModule(int, const char *name, int arglen, const char *args, int *result);
 #define I_StartModule DECLARE_IMPORT(8, StartModule)
 
 int LoadModuleBufferAddress(void *buffer, int, int);

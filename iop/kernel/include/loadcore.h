@@ -55,6 +55,13 @@ typedef struct tag_LC_internals {
 	int	module_index;
 } lc_internals_t;
 
+struct bootmode {
+	short	unk0;
+	char	id;
+	char	len;
+	int	data[0];
+};
+
 typedef struct {	//For backward-compatibility with older projects. Read the comment on GetLibraryEntryTable(). This structure is incomplete.
 	struct	_iop_library *tail;
 	struct	_iop_library *head;
@@ -76,12 +83,17 @@ void FlushDcache(void);
 int RegisterLibraryEntries(struct irx_export_table *exports);
 #define I_RegisterLibraryEntries DECLARE_IMPORT(6, RegisterLibraryEntries)
 int ReleaseLibraryEntries(struct irx_export_table *exports);
-#define I_ReleaseLibraryEntries DECLARE_IMPORT(7, ReleaseLibraryEntries);
+#define I_ReleaseLibraryEntries DECLARE_IMPORT(7, ReleaseLibraryEntries)
+
+int RegisterNonAutoLinkEntries(struct irx_export_table *exports);
+#define I_RegisterNonAutoLinkEntries DECLARE_IMPORT(10, RegisterNonAutoLinkEntries)
 
 void *QueryLibraryEntryTable(iop_library_t *library);
-#define I_QueryLibraryEntryTable DECLARE_IMPORT(11, QueryLibraryEntryTable);
+#define I_QueryLibraryEntryTable DECLARE_IMPORT(11, QueryLibraryEntryTable)
 int * QueryBootMode(int mode);
 #define I_QueryBootMode DECLARE_IMPORT(12, QueryBootMode)
+void RegisterBootMode(struct bootmode *b);
+#define I_RegisterBootMode DECLARE_IMPORT(13, RegisterBootMode)
 
 #define loadcore_IMPORTS \
 	loadcore_IMPORTS_start \

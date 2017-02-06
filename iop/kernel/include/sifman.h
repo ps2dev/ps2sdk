@@ -153,4 +153,7 @@ void sceSifSetDmaIntrHandler(void (*handler)(void *), void *arg);
 void sceSifResetDmaIntrHandler();
 #define I_sceSifResetDmaIntrHandler DECLARE_IMPORT(31, sceSifResetDmaIntrHandler)
 
+unsigned int sceSifSetDmaIntr(SifDmaTransfer_t *dmat, int len, void (*func)(), void *data);
+#define I_sceSifSetDmaIntr DECLARE_IMPORT(32, sceSifSetDmaIntr)
+
 #endif /* IOP_SIFMAN_H */

@@ -23,14 +23,14 @@
 typedef int (*McCommandHandler_t)(int port, int slot, sio2_transfer_data_t *sio2_trans_data);
 typedef int (*McDevIDHandler_t)(int port, int slot);
 
-/* 04 */ void SecrSetMcCommandHandler(McCommandHandler_t handler);
+void SecrSetMcCommandHandler(McCommandHandler_t handler);
 #define I_SecrSetMcCommandHandler DECLARE_IMPORT(4, SecrSetMcCommandHandler)
-/* 05 */ void SecrSetMcDevIDHandler(McDevIDHandler_t handler);
+void SecrSetMcDevIDHandler(McDevIDHandler_t handler);
 #define I_SecrSetMcDevIDHandler DECLARE_IMPORT(5, SecrSetMcDevIDHandler)
 
-/* 06 */ int SecrAuthCard(int port, int slot, int cnum);
+int SecrAuthCard(int port, int slot, int cnum);
 #define I_SecrAuthCard DECLARE_IMPORT(6, SecrAuthCard)
-/* 07 */ void SecrResetAuthCard(int port, int slot, int cnum);
+void SecrResetAuthCard(int port, int slot, int cnum);
 #define I_SecrResetAuthCard DECLARE_IMPORT(7, SecrResetAuthCard)
 
 #define I_SecrCardBootHeader DECLARE_IMPORT(8, SecrCardBootHeader)

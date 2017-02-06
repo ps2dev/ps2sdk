@@ -124,6 +124,23 @@ typedef struct {
 	uint16 wData[1];
 } UsbStringDescriptor;
 
+typedef struct {
+	uint16 bLength:11;
+	uint16 reserved:1;
+	uint16 PSW:4;
+} UsbIsochronousPswLen;
+
+#define USB_MAX_ISOCH_PACKETS 8
+
+typedef struct {
+	void *bBufStart;
+	uint32 bRelStartFrame;
+	uint32 bNumPackets;
+	UsbIsochronousPswLen Packets[USB_MAX_ISOCH_PACKETS];
+} UsbMultiIsochronousRequest;
+
+typedef	void (*UsbMultiIsochronousDoneCallback)(int result, UsbMultiIsochronousRequest *req, void *arg);
+
 /*
  * Device and/or Interface Class codes
  */
@@ -247,6 +264,8 @@ int UsbOpenEndpointAligned(int devId, UsbEndpointDescriptor *desc);
 int UsbRegisterAutoloader(UsbDriver *drv);
 int UsbUnregisterAutoloader(UsbDriver *drv);
 int UsbChangeThreadPriority(void);
+int UsbGetReportDescriptor(int devId, int cfgNum, int ifNum, void **desc, uint32 *len);
+int UsbMultiIsochronousTransfer(int pipeId, UsbMultiIsochronousRequest *request, UsbMultiIsochronousDoneCallback callback, void *cbArg);
 
 
 #define I_UsbRegisterDriver DECLARE_IMPORT(4,UsbRegisterDriver)
@@ -258,6 +277,12 @@ int UsbChangeThreadPriority(void);
 #define I_UsbCloseEndpoint DECLARE_IMPORT(10, UsbCloseEndpoint)
 #define I_UsbTransfer DECLARE_IMPORT(11,UsbTransfer)
 #define I_UsbOpenEndpointAligned DECLARE_IMPORT(12,UsbOpenEndpointAligned)
+#define I_UsbGetDeviceLocation DECLARE_IMPORT(13,UsbGetDeviceLocation)
+#define I_UsbRegisterAutoloader DECLARE_IMPORT(14,UsbRegisterAutoloader)
+#define I_UsbUnregisterAutoloader DECLARE_IMPORT(15,UsbUnregisterAutoloader)
+#define I_UsbChangeThreadPriority DECLARE_IMPORT(16,UsbChangeThreadPriority)
+#define I_UsbGetReportDescriptor DECLARE_IMPORT(17,UsbGetReportDescriptor)
+#define I_UsbMultiIsochronousTransfer DECLARE_IMPORT(18,UsbMultiIsochronousTransfer)
 
 #endif // __USBD_H__
 

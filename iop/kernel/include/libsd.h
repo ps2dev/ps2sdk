@@ -20,8 +20,8 @@
 #define libsd_IMPORTS_start DECLARE_IMPORT_TABLE(libsd, 1, 4)
 #define libsd_IMPORTS_end END_IMPORT_TABLE
 
-
-
+int sceSdQuit();
+#define I_sceSdQuit DECLARE_IMPORT(2, sceSdQuit);
 int sceSdInit(int flag);
 #define I_sceSdInit DECLARE_IMPORT(4, sceSdInit);
 void* sceSdSetIRQCallback ( void SD_IRQ_CBProc(void *) );
@@ -79,5 +79,18 @@ SdIntrHandler sceSdSetTransIntrHandler(int channel, SdIntrHandler func, void *ar
 #define I_sceSdSetTransIntrHandler DECLARE_IMPORT(26, sceSdSetTransIntrHandler);
 SdIntrHandler sceSdSetSpu2IntrHandler(SdIntrHandler func, void *arg);
 #define I_sceSdSetSpu2IntrHandler DECLARE_IMPORT(27, sceSdSetSpu2IntrHandler);
+
+void *sceSdGetTransIntrHandlerArgument(int arg);
+#define I_sceSdGetTransIntrHandlerArgument DECLARE_IMPORT(28, sceSdGetTransIntrHandlerArgument);
+void *sceSdGetSpu2IntrHandlerArgument();
+#define I_sceSdGetSpu2IntrHandlerArgument DECLARE_IMPORT(29, sceSdGetSpu2IntrHandlerArgument);
+int sceSdStopTrans(int channel);
+#define I_sceSdStopTrans DECLARE_IMPORT(30, sceSdStopTrans);
+int sceSdCleanEffectWorkArea(int core, int channel, int effect_mode );
+#define I_sceSdCleanEffectWorkArea DECLARE_IMPORT(31, sceSdCleanEffectWorkArea);
+int sceSdSetEffectMode(int core, SdEffectAttr *param);
+#define I_sceSdSetEffectMode DECLARE_IMPORT(32, sceSdSetEffectMode);
+int sceSdSetEffectModeParams(int core, SdEffectAttr *attr);
+#define I_sceSdSetEffectModeParams DECLARE_IMPORT(33, sceSdSetEffectModeParams);
 
 #endif

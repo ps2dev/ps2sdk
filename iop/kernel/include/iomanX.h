@@ -153,4 +153,7 @@ int AddDrv(iop_device_t *device);
 int DelDrv(const char *name);
 #define I_DelDrv DECLARE_IMPORT(21, DelDrv);
 
+void StdioInit(int mode);
+#define I_StdioInit DECLARE_IMPORT(23, StdioInit);
+
 #endif /* IOP_IOMANX_H */
