@@ -13,11 +13,16 @@ EE_ELF = tlbsrc.elf
 EE_OBJS = tlbsrc.o
 
 # Extra macros for disabling the automatic inclusion of the built-in CRT object(s)
-ifeq ($(IOP_CC_VERSION),3.2.2)
+ifeq ($(EE_CC_VERSION),3.2.2)
 EE_NO_CRT = -mno-crt0
 endif
-ifeq ($(IOP_CC_VERSION),3.2.3)
+ifeq ($(EE_CC_VERSION),3.2.3)
 EE_NO_CRT = -mno-crt0
+endif
+ifneq ($(EE_CC_VERSION),3.2.2)
+ifneq ($(EE_CC_VERSION),3.2.3)
+EE_NO_CRT = -nostartfiles
+endif
 endif
 
 EE_INCS := -I$(PS2SDKSRC)/common/include -I$(PS2SDKSRC)/ee/kernel/include -I$(PS2SDKSRC)/ee/rpc/cdvd/include -I.

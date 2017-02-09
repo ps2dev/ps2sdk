@@ -29,11 +29,16 @@ EE_C_COMPILE = $(EE_CC) $(EE_CFLAGS) $(EE_INCS)
 EE_CXX_COMPILE = $(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS)
 
 # Extra macro for disabling the automatic inclusion of the built-in CRT object(s)
-ifeq ($(IOP_CC_VERSION),3.2.2)
+ifeq ($(EE_CC_VERSION),3.2.2)
 EE_NO_CRT = -mno-crt0
 endif
-ifeq ($(IOP_CC_VERSION),3.2.3)
+ifeq ($(EE_CC_VERSION),3.2.3)
 EE_NO_CRT = -mno-crt0
+endif
+ifneq ($(EE_CC_VERSION),3.2.2)
+ifneq ($(EE_CC_VERSION),3.2.3)
+EE_NO_CRT = -nostartfiles
+endif
 endif
 
 $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.c
