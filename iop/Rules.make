@@ -26,16 +26,18 @@ IOP_CFLAGS := -D_IOP -fno-builtin -O2 -G0 -Wall $(IOP_INCS) $(IOP_CFLAGS)
 # Linker flags
 IOP_LDFLAGS := -nostdlib -s $(IOP_LDFLAGS)
 
-# Additional C compiler flags for GCC v5.3.0
+# Additional C compiler flags for GCC >=v5.3.0
 # -msoft-float is to "remind" GCC/Binutils that the soft-float ABI is to be used. This is due to a bug, which
 #   results in the ABI not being passed correctly to binutils and iop-as defaults to the hard-float ABI instead.
 # -mno-explicit-relocs is required to work around the fact that GCC is now known to
 #   output multiple LO relocs after one HI reloc (which the IOP kernel cannot deal with).
 # -fno-toplevel-reorder (for IOP import and export tables only) disables toplevel reordering by GCC v4.2 and later.
 #   Without it, the import and export tables can be broken apart by GCC's optimizations.
-ifeq ($(IOP_CC_VERSION),5.3.0)
+ifneq ($(IOP_CC_VERSION),3.2.2)
+ifneq ($(IOP_CC_VERSION),3.2.3)
 IOP_CFLAGS += -msoft-float -mno-explicit-relocs
 IOP_IETABLE_CFLAGS := -fno-toplevel-reorder
+endif
 endif
 
 # Assembler flags
@@ -84,4 +86,3 @@ $(IOP_BIN): $(IOP_OBJS)
 
 $(IOP_LIB): $(IOP_OBJS)
 	$(IOP_AR) cru $(IOP_LIB) $(IOP_OBJS)
-

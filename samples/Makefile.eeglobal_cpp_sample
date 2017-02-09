@@ -37,6 +37,19 @@ EE_LIBS += -lstdc++ \
 EE_C_COMPILE = $(EE_CC) $(EE_CFLAGS) $(EE_INCS)
 EE_CXX_COMPILE = $(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS)
 
+# Extra macro for disabling the automatic inclusion of the built-in CRT object(s)
+ifeq ($(EE_CC_VERSION),3.2.2)
+EE_NO_CRT = -mno-crt0
+endif
+ifeq ($(EE_CC_VERSION),3.2.3)
+EE_NO_CRT = -mno-crt0
+endif
+ifneq ($(EE_CC_VERSION),3.2.2)
+ifneq ($(EE_CC_VERSION),3.2.3)
+EE_NO_CRT = -nostartfiles
+endif
+endif
+
 %.o : %.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
@@ -50,7 +63,7 @@ EE_CXX_COMPILE = $(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS)
 	$(EE_AS) $(EE_ASFLAGS) $< -o $@
 
 $(EE_BIN) : $(EE_OBJS) $(PS2SDK)/ee/startup/crt0.o
-	$(EE_CXX) -mno-crt0 -T$(PS2SDK)/ee/startup/linkfile $(EE_CXXFLAGS) \
+	$(EE_CXX) $(EE_NO_CRT) -T$(PS2SDK)/ee/startup/linkfile $(EE_CXXFLAGS) \
 	-o $(EE_BIN) $(PS2SDK)/ee/startup/crt0.o $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS)
 
 $(EE_LIB) : $(EE_OBJS)
