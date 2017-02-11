@@ -31,6 +31,12 @@
 #if (!defined(LWIP_IPV4) && !defined(LWIP_IPV6))
 	#define LWIP_IPV4	1
 #endif
+#ifndef LWIP_TCP
+#define LWIP_TCP	1
+#endif
+#ifndef LWIP_UDP
+#define LWIP_UDP	1
+#endif
 
 /*** Taken from src/include/lwip/opt.h. If changes were made to lwipopts.h, please update this section.
 	Some settings affect the fields present in structures like struct netif! ****/

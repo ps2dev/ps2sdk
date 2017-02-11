@@ -355,7 +355,6 @@ err_t sys_sem_new(sys_sem_t *sem, u8_t count)
 u32_t sys_arch_sem_wait(sys_sem_t *Sema, u32_t u32Timeout)
 {
 	u32_t result;
-	int ThreadID;
 
 	//Wait u32Timeout msec for the Sema to receive a signal.
 	if(u32Timeout==0)
@@ -375,9 +374,8 @@ u32_t sys_arch_sem_wait(sys_sem_t *Sema, u32_t u32Timeout)
 		int	AlarmID;
 		u32_t	WaitTime;
 
-		ThreadID=GetThreadId();
 		start=cpu_ticks();
-		AlarmID=SetAlarm(mSec2HSyncTicks(u32Timeout), &TimeoutHandler, &ThreadID);
+		AlarmID=SetAlarm(mSec2HSyncTicks(u32Timeout), &TimeoutHandler, (void*)GetThreadId());
 
 		if(WaitSema(*Sema)==*Sema)
 		{
