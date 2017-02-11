@@ -37,7 +37,7 @@ s32 BlockTransWriteFrom(u8 *iopaddr, u32 size, s32 chan, u16 mode, u8 *startaddr
 
 	if(offset > size)
 	{
-		if(mode & SD_BLOCK_TRANS_LOOP)
+		if(mode & SD_TRANS_LOOP)
 		{
 			offset -= size;
 			BlockTransBuff[core] = 1;
@@ -139,7 +139,7 @@ s32 BlockTransRead(u8 *iopaddr, u32 size, s32 chan, s16 mode)
 }
 
 
-s32 SdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, u8 *startaddr)
+int sceSdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, u8 *startaddr)
 {
 	int transfer_dir = mode & 3;
 	int core = chan & 1;
@@ -147,13 +147,13 @@ s32 SdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, u8 *startaddr)
 
 	switch(transfer_dir)
 	{
-		case SD_BLOCK_TRANS_WRITE:
+		case SD_TRANS_WRITE:
 		{
 			TransIntrData[core].mode = 0x100 | core;
 
-			if(mode & SD_BLOCK_TRANS_LOOP)
+			if(mode & SD_TRANS_LOOP)
 			{
-				TransIntrData[core].mode |= SD_BLOCK_TRANS_LOOP << 8;
+				TransIntrData[core].mode |= SD_TRANS_LOOP << 8;
 				_size /= 2;
 			}
 
@@ -162,13 +162,13 @@ s32 SdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, u8 *startaddr)
 
 		} break;
 
-		case SD_BLOCK_TRANS_READ:
+		case SD_TRANS_READ:
 		{
 			TransIntrData[core].mode = 0x300 | core;
 
-			if(mode & SD_BLOCK_TRANS_LOOP)
+			if(mode & SD_TRANS_LOOP)
 			{
-				TransIntrData[core].mode |= SD_BLOCK_TRANS_LOOP << 8;
+				TransIntrData[core].mode |= SD_TRANS_LOOP << 8;
 				_size /= 2;
 			}
 
@@ -177,19 +177,19 @@ s32 SdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, u8 *startaddr)
 
 		} break;
 
-		case SD_BLOCK_TRANS_STOP:
+		case SD_TRANS_STOP:
 		{
 			return DmaStop(core);
 
 		} break;
 
-		case SD_BLOCK_TRANS_WRITE_FROM:
+		case SD_TRANS_WRITE_FROM:
 		{
 			TransIntrData[core].mode = 0x100 | core;
 
-			if(mode & SD_BLOCK_TRANS_LOOP)
+			if(mode & SD_TRANS_LOOP)
 			{
-				TransIntrData[core].mode |= SD_BLOCK_TRANS_LOOP << 8;
+				TransIntrData[core].mode |= SD_TRANS_LOOP << 8;
 				_size /= 2;
 			}
 
@@ -203,7 +203,7 @@ s32 SdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, u8 *startaddr)
 	return -1;
 }
 
-u32 SdBlockTransStatus(s16 chan, s16 flag)
+u32 sceSdBlockTransStatus(s16 chan, s16 flag)
 {
 	u32 retval;
 

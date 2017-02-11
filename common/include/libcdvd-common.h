@@ -658,6 +658,91 @@ int sceCdWM(const char *buffer, u32 *status);
 // returns:	1 on success, 0 on failure.
 int sceCdForbidRead(u32 *result);
 
+// **** Extra Functions ****
+
+// Reads sectors to a buffer
+// SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
+//
+// arguments:	sector location to start from
+//			amount to sectors to read
+//			pointer to a buffer
+//			mode to read in
+// returns:	1 on success, 0 on failure.
+int sceCdReadFull(unsigned long int lsn, unsigned long int sectors, void *buf, sceCdRMode *mode);
+
+// Seeks to a given position
+// SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
+//
+// arguments:	sector location to seek to
+// returns:	1 on success, 0 on failure.
+int sceCdStSeekF(unsigned long int lsn);
+
+// Sets a handler for the power-off event which will be called before the console switches off.
+// SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
+//
+// arguments:	pointer of callback function to be called when power-off processing is activated
+//			an argument which will be passed to the callback function
+// returns:	a pointer to the previous handler function, or a null pointer if nothing has been set eariler
+void *sceCdPOffCallback(void(*func)(void *),void *addr);
+
+// Sets the timeout lengths for the certain CDVDMAN's operations.
+// SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
+//
+// arguments:	the timeout type to set
+//			a timeout value
+// returns:	1 on success, 0 on failure.
+int sceCdSetTimeout(int param, int timeout);
+
+// Reads the Model ID.
+// SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN DNAS IOPRP ONLY
+//
+// arguments:	integer where the Model ID is stored.
+// returns:	1 on success, 0 on failure.
+int sceCdReadModelID(unsigned long int *id);
+
+// Reads the information about DVD disk.
+// SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
+//
+// arguments:	pointer to variable where type of DVD disc is returned
+//			pointer to variable where the address of the second layer of a dual-layer DVD disc is returned.
+// returns:	1 on success, 0 on failure.
+int sceCdReadDvdDualInfo(int *on_dual, unsigned long int *layer1_start);
+
+// Retrieves basic information about a file on CD or the specified layer of DVD media.
+// SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
+//
+// arguments:	file structure to get file info in
+//			name of file to search for (no wildcard characters)
+//				(should be in the form '\\SYSTEM.CNF;1')
+//			layer to search (0 for the first layer, 1 for the second layer)
+// returns:	1 on success, 0 on failure.
+int sceCdLayerSearchFile(sceCdlFILE *fp, const char *path, int layer);
+
+// Returns the C/DVD drive status.
+// SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
+//
+// arguments:	none
+// returns:	status
+int sceCdStatus2(void);
+
+// Reads sectors from CD or DVD disc.
+// SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
+//
+// arguments:	sector location to start from
+//			amount to sectors to read
+//			pointer to a buffer
+//			mode to read in
+// returns:	1 on success, 0 on failure.
+int sceCdRE(unsigned long int lsn,unsigned long int sectors,void *buf,sceCdRMode *mode);
+
+// It is unknown what this function does.
+// SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
+//
+// arguments:	Unknown
+//		Unknown
+// returns:	Unknown
+int sceCdRcBypassCtl(int param, int *stat);
+
 #ifdef __cplusplus
 }
 #endif

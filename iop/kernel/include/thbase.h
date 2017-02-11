@@ -51,25 +51,48 @@ typedef struct _iop_thread {
 #define TSW_FPL		7
 
 typedef struct _iop_thread_status {
-	unsigned int	attr;
-	unsigned int	option;
-	int		status;
-	void		*entry;
-	void		*stack;
-	int		stackSize;
-	void		*gpReg;
-	int		initPriority;
-	int		currentPriority;
-	int		waitType;
-	int		waitId;
-	int		wakeupCount;
-	long int	*regContext;	//Only valid for use with iReferThreadStatus.
-	unsigned int	reserved[4];
+	unsigned int attr;
+	unsigned int option;
+	int status;
+	void *entry;
+	void *stack;
+	int stackSize;
+	void *gpReg;
+	int initPriority;
+	int currentPriority;
+	int waitType;
+	int waitId;
+	int wakeupCount;
+	long int *regContext;	//Only valid for use with iReferThreadStatus.
+	unsigned int reserved[4];
 } iop_thread_info_t;
 
 typedef struct _iop_sys_clock {
 	u32	lo, hi;
 } iop_sys_clock_t;
+
+typedef struct _iop_thread_run_status {
+	int status;
+	int currentPriority;
+	int waitType;
+	int waitId;
+	int wakeupCount;
+	long int *regContext;
+	iop_sys_clock_t runClocks;
+	unsigned int intrPreemptCount;
+	unsigned int threadPreemptCount;
+	unsigned int releaseCount;
+} iop_thread_run_status_t;
+
+typedef struct _iop_sys_status {
+	unsigned int status;
+	int systemLowTimerWidth;
+	iop_sys_clock_t idleClocks;
+	iop_sys_clock_t kernelClocks;
+	unsigned int comesOutOfIdleCount;
+	unsigned int threadSwitchCount;
+	unsigned int reserved[8];
+} iop_sys_status_t;
 
 #define thbase_IMPORTS_start DECLARE_IMPORT_TABLE(thbase, 1, 1)
 #define thbase_IMPORTS_end END_IMPORT_TABLE
@@ -81,7 +104,7 @@ int DeleteThread(int thid);
 
 int StartThread(int thid, void *arg);
 #define I_StartThread DECLARE_IMPORT(6, StartThread)
-/*int StartThreadArgs(int thid, ...) */
+int StartThreadArgs(int thid, int args, void *argp);
 #define I_StartThreadArgs DECLARE_IMPORT(7, StartThreadArgs)
 
 int ExitThread();
@@ -148,7 +171,6 @@ void SysClock2USec(iop_sys_clock_t *sys_clock, u32 *sec, u32 *usec);
 
 int GetSystemStatusFlag();
 #define I_GetSystemStatusFlag DECLARE_IMPORT(41, GetSystemStatusFlag)
-
 
 #define thbase_IMPORTS \
 	thbase_IMPORTS_start \

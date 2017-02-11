@@ -2,32 +2,32 @@
 DECLARE_EXPORT_TABLE(libsd, 1, 4)
 	DECLARE_EXPORT(_start)
 	DECLARE_EXPORT(_retonly)
-	DECLARE_EXPORT(SdQuit)
+	DECLARE_EXPORT(sceSdQuit)
 	DECLARE_EXPORT(_retonly)
-	DECLARE_EXPORT(SdInit)
-	DECLARE_EXPORT(SdSetParam) // 5
-	DECLARE_EXPORT(SdGetParam)
-	DECLARE_EXPORT(SdSetSwitch)
-	DECLARE_EXPORT(SdGetSwitch)
-	DECLARE_EXPORT(SdSetAddr)
-	DECLARE_EXPORT(SdGetAddr) // 10
-	DECLARE_EXPORT(SdSetCoreAttr)
-	DECLARE_EXPORT(SdGetCoreAttr)
-	DECLARE_EXPORT(SdNote2Pitch)
-	DECLARE_EXPORT(SdPitch2Note)
-	DECLARE_EXPORT(SdProcBatch) // 15
-	DECLARE_EXPORT(SdProcBatchEx)
-	DECLARE_EXPORT(SdVoiceTrans)
-	DECLARE_EXPORT(SdBlockTrans)
-	DECLARE_EXPORT(SdVoiceTransStatus)
-	DECLARE_EXPORT(SdBlockTransStatus) // 20
-	DECLARE_EXPORT(SdSetTransCallback)
-	DECLARE_EXPORT(SdSetIRQCallback)
-	DECLARE_EXPORT(SdSetEffectAttr)
-	DECLARE_EXPORT(SdGetEffectAttr)
-	DECLARE_EXPORT(SdClearEffectWorkArea) // 25
-	DECLARE_EXPORT(SdSetTransIntrHandler)
-	DECLARE_EXPORT(SdSetSpu2IntrHandler)
+	DECLARE_EXPORT(sceSdInit)
+	DECLARE_EXPORT(sceSdSetParam) // 5
+	DECLARE_EXPORT(sceSdGetParam)
+	DECLARE_EXPORT(sceSdSetSwitch)
+	DECLARE_EXPORT(sceSdGetSwitch)
+	DECLARE_EXPORT(sceSdSetAddr)
+	DECLARE_EXPORT(sceSdGetAddr) // 10
+	DECLARE_EXPORT(sceSdSetCoreAttr)
+	DECLARE_EXPORT(sceSdGetCoreAttr)
+	DECLARE_EXPORT(sceSdNote2Pitch)
+	DECLARE_EXPORT(sceSdPitch2Note)
+	DECLARE_EXPORT(sceSdProcBatch) // 15
+	DECLARE_EXPORT(sceSdProcBatchEx)
+	DECLARE_EXPORT(sceSdVoiceTrans)
+	DECLARE_EXPORT(sceSdBlockTrans)
+	DECLARE_EXPORT(sceSdVoiceTransStatus)
+	DECLARE_EXPORT(sceSdBlockTransStatus) // 20
+	DECLARE_EXPORT(sceSdSetTransCallback)
+	DECLARE_EXPORT(sceSdSetIRQCallback)
+	DECLARE_EXPORT(sceSdSetEffectAttr)
+	DECLARE_EXPORT(sceSdGetEffectAttr)
+	DECLARE_EXPORT(sceSdClearEffectWorkArea) // 25
+	DECLARE_EXPORT(sceSdSetTransIntrHandler)
+	DECLARE_EXPORT(sceSdSetSpu2IntrHandler)
 END_EXPORT_TABLE
 
 void _retonly() {}

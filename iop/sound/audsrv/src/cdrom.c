@@ -342,7 +342,7 @@ static void cdda_procedure(void *arg)
 
 	/* kick cd streaming */
 	sceSdSetTransCallback(SD_CORE_0, (void *)cd_transfer_complete);
-	sceSdBlockTrans(SD_CORE_0, SD_TRANS_LOOP, core0_buf, sizeof(core0_buf));
+	sceSdBlockTrans(SD_CORE_0, SD_TRANS_LOOP, core0_buf, sizeof(core0_buf), 0);
 
 	printf("callbacks kicked, starting loop\n");
 	last_read = 0;

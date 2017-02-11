@@ -11,14 +11,9 @@ PS2IP_DHCP = 1
 PS2IP_DNS = 1
 
 LWIP = $(PS2SDKSRC)/common/tcpip/lwip-2.0.0
-PS2IP_BASE = ../tcpip-base
+PS2IP_BASE = $(PS2SDKSRC)/iop/tcpip/tcpip-base
 
-IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = irx/
-IOP_SRC_DIR = src/
-IOP_INC_DIR = include/
-
-IOP_BIN = $(IOP_BIN_DIR)ps2ip.irx
+IOP_BIN ?= ps2ip.irx
 
 IOP_CFLAGS += -DLWIP_NOASSERT -DLWIP_COMPAT_MUTEX -DLWIP_COMPAT_MUTEX_ALLOWED
 
@@ -36,7 +31,7 @@ ifdef PS2IP_DNS
 IOP_CFLAGS += -DPS2IP_DNS
 endif
 
-IOP_INCS += -I$(LWIP)/src/include -I$(LWIP)/src/include/ipv4 -I$(PS2IP_BASE)/include -I$(IOP_SRC_DIR)include
+IOP_INCS += -I$(LWIP)/src/include -I$(LWIP)/src/include/ipv4 -I$(PS2IP_BASE)/include
 
 ps2ip_OBJECTS = ps2ip.o sys.o sys_arch.o init.o exports.o imports.o mem.o netif.o pbuf.o stats.o tcp_in.o tcp_out.o udp.o memp.o tcp.o etharp.o ethernet.o raw.o def.o timeouts.o
 
@@ -48,22 +43,14 @@ ifdef PS2IP_DNS
 ps2ip_OBJECTS += dns.o netdb.o
 endif
 
-ps2ip_OBJECTS := $(ps2ip_OBJECTS:%=$(IOP_OBJS_DIR)%)
-
 ps2api_OBJECTS = api_lib.o api_msg.o err.o sockets.o tcpip.o netbuf.o
-ps2api_OBJECTS := $(ps2api_OBJECTS:%=$(IOP_OBJS_DIR)%)
 
 ps2api_IPV4 = icmp.o ip.o ip4.o ip4_addr.o ip4_frag.o inet_chksum.o
-ps2api_IPV4 := $(ps2api_IPV4:%=$(IOP_OBJS_DIR)%)
 
 IOP_OBJS = $(ps2ip_OBJECTS) $(ps2api_OBJECTS) $(ps2api_IPV4)
 
-all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
-
-clean:
-	rm -f -r $(IOP_OBJS_DIR) $(IOP_BIN_DIR)
-
 include $(PS2SDKSRC)/Defs.make
+include $(PS2SDKSRC)/iop/Rules.bin.make
 include $(PS2SDKSRC)/iop/Rules.make
 include $(PS2SDKSRC)/iop/Rules.release
 

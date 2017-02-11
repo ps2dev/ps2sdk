@@ -44,6 +44,8 @@ char _tolower(char c);
 
 unsigned char look_ctype_table(char character);
 #define I_look_ctype_table DECLARE_IMPORT(8, look_ctype_table)
+void *get_ctype_table();
+#define I_get_ctype_table DECLARE_IMPORT(9, get_ctype_table)
 void *memchr(const void *s, int c, size_t n);
 #define I_memchr DECLARE_IMPORT(10, memchr)
 int memcmp(const void *p, const void *q, size_t size);
@@ -98,11 +100,18 @@ char *strtok(char *s, const char *delim);
 #define I_strtok DECLARE_IMPORT(35, strtok)
 long strtol(const char *s, char **endptr, int base);
 #define I_strtol DECLARE_IMPORT(36, strtol)
+char *atob(char *s, int *i);
+#define I_atob DECLARE_IMPORT(37, atob)
 unsigned long strtoul(const char *s, char **endptr, int base);
 #define I_strtoul DECLARE_IMPORT(38, strtoul)
-
+void *wmemcopy(u32 *dest, const u32 *src, size_t size);
+#define I_wmemcopy DECLARE_IMPORT(40, wmemcopy)
+void *wmemset(u32 *dest, u32 c, size_t size);
+#define I_wmemset DECLARE_IMPORT(41, wmemset)
 int vsprintf(char *, const char *, va_list);
 #define I_vsprintf DECLARE_IMPORT(42, vsprintf)
+char *strtok_r(char *s, const char *delim, char **lasts);
+#define I_strtok_r DECLARE_IMPORT(43, strtok_r)
 
 #define sysclib_IMPORTS \
 	sysclib_IMPORTS_start \

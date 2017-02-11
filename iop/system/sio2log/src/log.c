@@ -10,6 +10,8 @@
 # Logging code used by sio2log.
 */
 
+#ifndef XSIO2MAN
+
 #include <types.h>
 #include <defs.h>
 #include <stdio.h>
@@ -161,3 +163,5 @@ void log_flush(int now)
 	if (flushcount >= FLUSH_COUNT_MAX)
 		flushcount = 0;
 }
+
+#endif

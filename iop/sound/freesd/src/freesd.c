@@ -35,7 +35,7 @@ extern u32 BlockTransSize[2];
 extern u32 EffectSizes[10];
 extern void SetESA(s32 core, u32 value);
 extern u32 GetEEA(int chan);
-extern SdEffectAttr EffectAttr[2];
+extern sceSdEffectAttr EffectAttr[2];
 extern u32 EffectAddr[2];
 
 // voice.c
@@ -46,10 +46,10 @@ extern u32 VoiceTransIoMode[2];
 // Global
 u16 SpdifSettings;
 void *Spu2IntrData;
-SdTransIntrHandler	TransIntrHandlers[2];
-IntrCallback		TransIntrCallbacks[2];
-SdSpu2IntrHandler	Spu2IntrHandler;
-IntrCallback		Spu2IrqCallback;
+sceSdTransIntrHandler	TransIntrHandlers[2];
+SdIntrCallback		TransIntrCallbacks[2];
+sceSdSpu2IntrHandler	Spu2IntrHandler;
+SdIntrCallback		Spu2IrqCallback;
 IntrData			TransIntrData[2];
 
 
@@ -149,13 +149,13 @@ int TransInterrupt(void *data)
 		if(*SD_CORE_ATTR(core) & 0x30)	while((*SD_CORE_ATTR(core) & 0x30));
 
 		if(TransIntrHandlers[core])		goto intr_handler;
-		if(TransIntrCallbacks[core])	goto IntrCallback;
+		if(TransIntrCallbacks[core])	goto SdIntrCallback;
 
 		VoiceTransComplete[core] = 1;
 	}
 	else
 	{	// Block Transfer
-		if(intr->mode & (SD_BLOCK_TRANS_LOOP << 8))
+		if(intr->mode & (SD_TRANS_LOOP << 8))
 		{
 			// Switch buffers
 			BlockTransBuff[core] = 1 - BlockTransBuff[core];
@@ -180,7 +180,7 @@ int TransInterrupt(void *data)
 		{
 			if(TransIntrCallbacks[core])
 			{
-				IntrCallback:
+				SdIntrCallback:
 				TransIntrCallbacks[core](0);
 			}
 		}
@@ -305,8 +305,8 @@ void Reset(s32 flag)
 	{
 		EffectAttr[core].core = core;
 		EffectAttr[core].mode = 0;
-		EffectAttr[core].depth_l = 0;
-		EffectAttr[core].depth_r = 0;
+		EffectAttr[core].depth_L = 0;
+		EffectAttr[core].depth_R = 0;
 		EffectAttr[core].delay = 0;
 		EffectAttr[core].feedback = 0;
 	}
@@ -321,9 +321,9 @@ void Reset(s32 flag)
 	}
 }
 
-SdSpu2IntrHandler SdSetSpu2IntrHandler(SdSpu2IntrHandler handler, void *data)
+sceSdSpu2IntrHandler sceSdSetSpu2IntrHandler(sceSdSpu2IntrHandler handler, void *data)
 {
-	SdSpu2IntrHandler old_handler;
+	sceSdSpu2IntrHandler old_handler;
 
 	old_handler = Spu2IntrHandler;
 	Spu2IntrHandler = handler;
@@ -481,7 +481,7 @@ void InitSpdif()
 	*U16_REGISTER(0x7CA) = 8;
 }
 
-s32 SdInit(s32 flag)
+int sceSdInit(int flag)
 {
 	flag &= 1;
 
@@ -500,7 +500,7 @@ s32 SdInit(s32 flag)
 	return 0;
 }
 
-void SdSetParam(u16 reg, u16 val)
+void sceSdSetParam(u16 reg, u16 val)
 {
 	u32 offs;
 	u32 voice;
@@ -523,7 +523,7 @@ void SdSetParam(u16 reg, u16 val)
 	*reg_p = val;
 }
 
-u16 SdGetParam(u16 reg)
+u16 sceSdGetParam(u16 reg)
 {
 	u32 offs;
 	u32 voice;
@@ -546,7 +546,7 @@ u16 SdGetParam(u16 reg)
 	return *reg_p;
 }
 
-void SdSetSwitch(u16 reg, u32 val)
+void sceSdSetSwitch(u16 reg, u32 val)
 {
 	u32 reg_index;
 	volatile u16 *reg_p;
@@ -558,7 +558,7 @@ void SdSetSwitch(u16 reg, u32 val)
 	reg_p[1] = (u16)((val >> 16) & 0xFF);
 }
 
-u32 SdGetSwitch(u16 reg)
+u32 sceSdGetSwitch(u16 reg)
 {
 	u32 reg_index;
 	volatile u16 *reg_p;
@@ -605,7 +605,7 @@ void SetDmaRead(s32 chan)
 	*reg = (*reg & 0xF0FFFFFF) | 0x22000000;
 }
 
-u16 SdNote2Pitch(s16 center_note, s16 center_fine, s16 note, s16 fine)
+u16 sceSdNote2Pitch (u16 center_note, u16 center_fine, u16 note, short fine)
 {
 	s32 _fine;
 	s32 _fine2;
@@ -655,8 +655,7 @@ u16 SdNote2Pitch(s16 center_note, s16 center_fine, s16 note, s16 fine)
 	return (u16)ret;
 }
 
-
-u16	SdPitch2Note(s16 center_note, s16 center_fine, s16 pitch)
+u16 sceSdPitch2Note(u16 center_note, u16 center_fine, u16 pitch)
 {
 	s32 _pitch;
 	s32 i = 0;
@@ -771,7 +770,7 @@ void SetSpdifMode(u16 val)
 // Enable/disable bits in SD_CORE_ATTR
 u8 CoreAttrShifts[4] = {7, 6, 14, 8};
 
-void SdSetCoreAttr(u16 entry, u16 val)
+void sceSdSetCoreAttr(u16 entry, u16 val)
 {
 	u16 core_attr = *SD_CORE_ATTR(entry & 1);
 
@@ -795,7 +794,7 @@ void SdSetCoreAttr(u16 entry, u16 val)
 	}
 }
 
-u16 SdGetCoreAttr(u16 entry)
+u16 sceSdGetCoreAttr(u16 entry)
 {
 	switch(entry & ~1)
 	{
@@ -813,9 +812,9 @@ u16 SdGetCoreAttr(u16 entry)
 }
 
 
-SdTransIntrHandler SdSetTransIntrHandler(s32 chan, SdTransIntrHandler func, void *data)
+sceSdTransIntrHandler sceSdSetTransIntrHandler(int chan, sceSdTransIntrHandler func, void *data)
 {
-	SdTransIntrHandler old_handler;
+	sceSdTransIntrHandler old_handler;
 
 	old_handler = TransIntrHandlers[chan & 1];
 	TransIntrHandlers[chan & 1] = func;
@@ -826,7 +825,7 @@ SdTransIntrHandler SdSetTransIntrHandler(s32 chan, SdTransIntrHandler func, void
 
 
 
-s32 SdQuit()
+int sceSdQuit()
 {
 	s32 ret;
 
@@ -843,7 +842,7 @@ s32 SdQuit()
 	return 0;
 }
 
-void SdSetAddr(u16 reg, u32 val)
+void sceSdSetAddr(u16 reg, u32 val)
 {
 	volatile u16 *reg1;
 	u16 voice;
@@ -861,7 +860,7 @@ void SdSetAddr(u16 reg, u32 val)
 	}
 }
 
-u32 SdGetAddr(u16 reg)
+u32 sceSdGetAddr(u16 reg)
 
 {
 	volatile u16 *reg1;
@@ -898,9 +897,9 @@ u32 SdGetAddr(u16 reg)
 	return rethi | retlo;
 }
 
-IntrCallback SdSetTransCallback(s32 core, IntrCallback cb)
+SdIntrCallback sceSdSetTransCallback(s32 core, SdIntrCallback cb)
 {
-	IntrCallback old_cb;
+	SdIntrCallback old_cb;
 
 	old_cb = TransIntrCallbacks[core & 1];
 	TransIntrCallbacks[core & 1] = cb;
@@ -908,9 +907,9 @@ IntrCallback SdSetTransCallback(s32 core, IntrCallback cb)
 	return old_cb;
 }
 
-IntrCallback SdSetIRQCallback(IntrCallback cb)
+SdIntrCallback sceSdSetIRQCallback(SdIntrCallback cb)
 {
-	IntrCallback old_cb;
+	SdIntrCallback old_cb;
 
 	old_cb = Spu2IrqCallback;
 	Spu2IrqCallback = cb;

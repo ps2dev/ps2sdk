@@ -202,6 +202,14 @@ void sceSifSetSif1CB(void *func, int param);
 void sceSifClearSif1CB(void);
 #define I_sceSifClearSif1CB DECLARE_IMPORT(27, sceSifClearSif1CB)
 
+unsigned int sceSifSendCmdIntr(unsigned int, void *, int, void *, void *, int,
+	void (*func)(), void *);
+#define I_sceSifSendCmdIntr DECLARE_IMPORT(28, sceSifSendCmdIntr)
+
+unsigned int isceSifSendCmdIntr(unsigned int, void *, int, void *, void *, int,
+	void (*func)(), void *);
+#define I_isceSifSendCmdIntr DECLARE_IMPORT(29, isceSifSendCmdIntr)
+
 
 /* Compatibility names for use with ps2lib.  */
 #define SifInitRpc sceSifInitRpc

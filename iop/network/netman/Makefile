@@ -6,25 +6,11 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_OBJS_DIR = obj/
-IOP_BIN_DIR = irx/
-IOP_SRC_DIR = src/
-IOP_INC_DIR = include/
-
-IOP_BIN = $(IOP_BIN_DIR)netman.irx
-
 IOP_CFLAGS += -mno-check-zero-division
 
-IOP_INCS += -I$(IOP_SRC_DIR)/include
-
 IOP_OBJS = netman.o rpc_server.o rpc_client.o imports.o exports.o
-IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
-
-all: $(IOP_OBJS_DIR) $(IOP_BIN_DIR) $(IOP_BIN)
-
-clean:
-	rm -f -r $(IOP_OBJS_DIR) $(IOP_BIN_DIR)
 
 include $(PS2SDKSRC)/Defs.make
+include $(PS2SDKSRC)/iop/Rules.bin.make
 include $(PS2SDKSRC)/iop/Rules.make
 include $(PS2SDKSRC)/iop/Rules.release

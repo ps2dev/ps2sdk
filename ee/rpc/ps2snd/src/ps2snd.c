@@ -123,13 +123,13 @@ u16 SdPitch2Note(u16 center_note, u16 center_fine, u16 pitch)
 	return(0);
 }
 
-int SdProcBatch(SdBatch* batch, u32 returns[], u32 num)
+int SdProcBatch(sceSdBatch* batch, u32 returns[], u32 num)
 {
 	/* TODO */
 	return(-1);
 }
 
-int SdProcBatchEx(SdBatch* batch, u32 returns[], u32 num, u32 voice)
+int SdProcBatchEx(sceSdBatch* batch, u32 returns[], u32 num, u32 voice)
 {
 	/* TODO */
 	return(-1);
@@ -177,21 +177,21 @@ u32 SdBlockTransStatus (s16 channel, s16 flag)
 //void* sceSdSetTransCallback (u16 channel, void SD_TRANS_CBProc(void *) );
 //void *sceSdSetIRQCallback( void SD_IRQ_CBProc(void *) );
 
-int SdSetEffectAttr (int core, SdEffectAttr *attr)
+int SdSetEffectAttr (int core, sceSdEffectAttr *attr)
 {
-	s32 buf[1+((sizeof(SdEffectAttr)+3)/4)] ALIGNED(64);
+	s32 buf[1+((sizeof(sceSdEffectAttr)+3)/4)] ALIGNED(64);
 	buf[0] = core;
-	memcpy(&buf[1], attr, sizeof(SdEffectAttr));
-	SifCallRpc(&sd_client, PS2SND_SetEffectAttr, 0, buf, 4+sizeof(SdEffectAttr), buf, 4, NULL, NULL);
+	memcpy(&buf[1], attr, sizeof(sceSdEffectAttr));
+	SifCallRpc(&sd_client, PS2SND_SetEffectAttr, 0, buf, 4+sizeof(sceSdEffectAttr), buf, 4, NULL, NULL);
 	return(buf[0]);
 }
 
-void SdGetEffectAttr (int core, SdEffectAttr *attr)
+void SdGetEffectAttr (int core, sceSdEffectAttr *attr)
 {
-	s32 buf[((sizeof(SdEffectAttr)+3)/4)] ALIGNED(64);
+	s32 buf[((sizeof(sceSdEffectAttr)+3)/4)] ALIGNED(64);
 	buf[0] = core;
-	SifCallRpc(&sd_client, PS2SND_GetEffectAttr, 0, buf, 4, buf, sizeof(SdEffectAttr), NULL, NULL);
-	memcpy(attr, buf, sizeof(SdEffectAttr));
+	SifCallRpc(&sd_client, PS2SND_GetEffectAttr, 0, buf, 4, buf, sizeof(sceSdEffectAttr), NULL, NULL);
+	memcpy(attr, buf, sizeof(sceSdEffectAttr));
 }
 
 int SdClearEffectWorkArea (int core, int channel, int effect_mode)
@@ -307,12 +307,3 @@ int sndLoadSample(void *buf, u32 spuaddr, int size)
 
 	return(size);
 }
-
-
-#if 0
-int sceSdClearEffectWorkArea (int core, int channel, int effect_mode );
-
-SdIntrHandler sceSdSetTransIntrHandler(int channel, SdIntrHandler func, void *arg);
-SdIntrHandler sceSdSetSpu2IntrHandler(SdIntrHandler func, void *arg);
-
-#endif

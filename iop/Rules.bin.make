@@ -1,4 +1,3 @@
-/*
 # _____     ___ ____     ___ ____
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
@@ -6,18 +5,13 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-*/
 
-#ifndef _SPU2_H_
-#define _SPU2_H_
+IOP_BIN_DIR ?= irx/
 
-#include "freesd.h"
+IOP_BIN ?= $(shell basename $(CURDIR)).irx
+IOP_BIN := $(IOP_BIN:%=$(IOP_BIN_DIR)%)
 
-s32 SdInit(s32 flag);
-void SdSetParam(u16 reg, u16 val);
-void SdSetCoreAttr(u16 entry, u16 val);
-IntrCallback SdSetTransCallback(int core, IntrCallback cb);
-int SdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, u8 *startaddr);
-u32 SdBlockTransStatus(s16 chan, s16 flag);
+all:: $(IOP_BIN)
 
-#endif
+clean::
+	rm -f -r $(IOP_OBJS_DIR) $(IOP_BIN_DIR)

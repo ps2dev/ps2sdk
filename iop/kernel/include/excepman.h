@@ -66,7 +66,7 @@ int RegisterDefaultExceptionHandler(exception_handler_t);
 int ReleaseExceptionHandler(int exception, exception_handler_t);
 #define I_ReleaseExceptionHandler DECLARE_IMPORT(7, ReleaseExceptionHandler)
 int ReleaseDefaultExceptionHandler(exception_handler_t);
-#define I_ReleaseDefaultExceptionHandler DECLARE_IMPORT(4, ReleaseDefaultExceptionHandler)
+#define I_ReleaseDefaultExceptionHandler DECLARE_IMPORT(8, ReleaseDefaultExceptionHandler)
 
 #endif /* IOP_EXCEPMAN_H */
 

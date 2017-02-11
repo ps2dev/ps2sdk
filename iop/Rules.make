@@ -8,6 +8,10 @@
 
 IOP_CC_VERSION := $(shell $(IOP_CC) --version 2>&1 | sed -n 's/^.*(GCC) //p')
 
+IOP_OBJS_DIR ?= obj/
+IOP_SRC_DIR ?= src/
+IOP_INC_DIR ?= include/
+
 ifeq ($(IOP_CC_VERSION),3.2.2)
 ASFLAGS_TARGET = -march=r3000
 endif
@@ -17,7 +21,7 @@ ASFLAGS_TARGET = -march=r3000
 endif
 
 # include dir
-IOP_INCS := $(IOP_INCS) -I$(PS2SDKSRC)/iop/kernel/include -I$(PS2SDKSRC)/common/include -I$(IOP_INC_DIR)
+IOP_INCS := $(IOP_INCS) -I$(IOP_SRC_DIR) -I$(IOP_SRC_DIR)include -I$(IOP_INC_DIR) -I$(PS2SDKSRC)/iop/kernel/include -I$(PS2SDKSRC)/common/include
 
 # C compiler flags
 # -fno-builtin is required to prevent the GCC built-in functions from being included,
@@ -43,13 +47,18 @@ endif
 # Assembler flags
 IOP_ASFLAGS := $(ASFLAGS_TARGET) -EL -G0 $(IOP_ASFLAGS)
 
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
+
 # Externally defined variables: IOP_BIN, IOP_OBJS, IOP_LIB
 
+# These macros can be used to simplify certain build rules.
+IOP_C_COMPILE = $(IOP_CC) $(IOP_CFLAGS)
+
 $(IOP_OBJS_DIR)%.o: $(IOP_SRC_DIR)%.c
-	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
+	$(IOP_C_COMPILE) -c $< -o $@
 
 $(IOP_OBJS_DIR)%.o: $(IOP_SRC_DIR)%.S
-	$(IOP_CC) $(IOP_CFLAGS) $(IOP_INCS) -c $< -o $@
+	$(IOP_C_COMPILE) -c $< -o $@
 
 $(IOP_OBJS_DIR)%.o: $(IOP_SRC_DIR)%.s
 	$(IOP_AS) $(IOP_ASFLAGS) $< -o $@
@@ -62,7 +71,7 @@ $(IOP_OBJS_DIR)build-imports.c: $(IOP_SRC_DIR)imports.lst
 	cat $< >> $@
 
 $(IOP_OBJS_DIR)imports.o: $(IOP_OBJS_DIR)build-imports.c
-	$(IOP_CC) $(IOP_CFLAGS) $(IOP_IETABLE_CFLAGS) -I$(IOP_SRC_DIR) -c $< -o $@
+	$(IOP_C_COMPILE) $(IOP_IETABLE_CFLAGS) -c $< -o $@
 
 # Rules to build exports.tab.
 $(IOP_OBJS_DIR)build-exports.c: $(IOP_SRC_DIR)exports.tab
@@ -70,7 +79,7 @@ $(IOP_OBJS_DIR)build-exports.c: $(IOP_SRC_DIR)exports.tab
 	cat $< >> $@
 
 $(IOP_OBJS_DIR)exports.o: $(IOP_OBJS_DIR)build-exports.c
-	$(IOP_CC) $(IOP_CFLAGS) $(IOP_IETABLE_CFLAGS) -I$(IOP_SRC_DIR) -c $< -o $@
+	$(IOP_C_COMPILE) $(IOP_IETABLE_CFLAGS) -c $< -o $@
 
 $(IOP_OBJS_DIR):
 	$(MKDIR) -p $(IOP_OBJS_DIR)
@@ -81,8 +90,10 @@ $(IOP_BIN_DIR):
 $(IOP_LIB_DIR):
 	$(MKDIR) -p $(IOP_LIB_DIR)
 
-$(IOP_BIN): $(IOP_OBJS)
-	$(IOP_CC) $(IOP_CFLAGS) -o $(IOP_BIN) $(IOP_OBJS) $(IOP_LDFLAGS) $(IOP_LIBS)
+$(IOP_OBJS): | $(IOP_OBJS_DIR)
 
-$(IOP_LIB): $(IOP_OBJS)
+$(IOP_BIN): $(IOP_OBJS) | $(IOP_BIN_DIR)
+	$(IOP_C_COMPILE) -o $(IOP_BIN) $(IOP_OBJS) $(IOP_LDFLAGS) $(IOP_LIBS)
+
+$(IOP_LIB): $(IOP_OBJS) | $(IOP_LIB_DIR)
 	$(IOP_AR) cru $(IOP_LIB) $(IOP_OBJS)

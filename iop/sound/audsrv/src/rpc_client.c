@@ -9,7 +9,7 @@
 #include <sysclib.h>
 
 #include <audsrv.h>
-#include "audsrv.h"
+#include "audsrv_internal.h"
 #include "rpc_client.h"
 
 static SifRpcClientData_t client;

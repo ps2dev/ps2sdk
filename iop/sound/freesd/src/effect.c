@@ -8,16 +8,16 @@
  */
 
 #include "types.h"
-#include "freesd.h"
+#include "libsd.h"
 #include "spu2regs.h"
 #include "sysclib.h"
 
 
 extern u32 VoiceTransIoMode[2];
-extern SdTransIntrHandler TransIntrHandlers[2];
-extern IntrCallback TransIntrCallbacks[2];
+extern sceSdTransIntrHandler TransIntrHandlers[2];
+extern SdIntrCallback TransIntrCallbacks[2];
 
-SdEffectAttr EffectAttr[2];
+sceSdEffectAttr EffectAttr[2];
 u32 EffectAddr[2];
 
 // The values are more or less the same as on PSX (SPU)
@@ -103,7 +103,7 @@ void SetEffectData(u16 *mode_data, u32 core)
 	*SD_R_IN_COEF_R(core) = mode_data[31];
 }
 
-s32 SdSetEffectAttr(s32 core, SdEffectAttr *attr)
+int sceSdSetEffectAttr(int core, sceSdEffectAttr *attr)
 {
 	u32 mode = attr->mode;
 	u32 clearram = 0;
@@ -127,7 +127,7 @@ s32 SdSetEffectAttr(s32 core, SdEffectAttr *attr)
 
 	memcpy(mode_data, &EffectParams[mode * 16], 64);
 
-	memcpy(&EffectAttr[core], attr, sizeof(SdEffectAttr));
+	memcpy(&EffectAttr[core], attr, sizeof(sceSdEffectAttr));
 	EffectAttr[core].core = core;
 
 	switch(mode)
@@ -170,11 +170,11 @@ s32 SdSetEffectAttr(s32 core, SdEffectAttr *attr)
 
 	// Clean up after last mode
 	if((effects_disabled) && (clearram))
-		SdClearEffectWorkArea(core, 0, last_mode);
+		sceSdClearEffectWorkArea(core, 0, last_mode);
 
 	// Depth / Volume
-	*SD_P_EVOLL(core) = attr->depth_l;
-	*SD_P_EVOLR(core) = attr->depth_r;
+	*SD_P_EVOLL(core) = attr->depth_L;
+	*SD_P_EVOLR(core) = attr->depth_R;
 
 	SetEffectData(mode_data, core);
 
@@ -183,7 +183,7 @@ s32 SdSetEffectAttr(s32 core, SdEffectAttr *attr)
 
 
 	if(clearram)
-		SdClearEffectWorkArea(core, 0, mode);
+		sceSdClearEffectWorkArea(core, 0, mode);
 
 	// Enable effects
 	if(effects_disabled)
@@ -192,12 +192,12 @@ s32 SdSetEffectAttr(s32 core, SdEffectAttr *attr)
 	return 0;
 }
 
-void SdGetEffectAttr(s32 core, SdEffectAttr *attr)
+void sceSdGetEffectAttr(int core, sceSdEffectAttr *attr)
 {
 	*attr = EffectAttr[core & 1];
 }
 
-s32 SdClearEffectWorkArea(s32 core, s32 chan, s32 effect_type)
+int sceSdClearEffectWorkArea(int core, int chan, int effect_type)
 {
 	if(effect_type > 9) return -1;
 
@@ -207,8 +207,8 @@ s32 SdClearEffectWorkArea(s32 core, s32 chan, s32 effect_type)
 		u32 effect_addr;
 		s32 effect_size;
 		s32 old_iomode;
-		SdTransIntrHandler old_handler = NULL;
-		IntrCallback old_callback = NULL;
+		sceSdTransIntrHandler old_handler = NULL;
+		SdIntrCallback old_callback = NULL;
 
 		effect_size = EffectSizes[effect_type] << 4;
 
@@ -239,8 +239,8 @@ s32 SdClearEffectWorkArea(s32 core, s32 chan, s32 effect_type)
 
 		if(aligned_addr)
 		{
-			SdVoiceTrans(chan, 0, (u8*)ClearEffectData, (u32*)effect_addr, 64);
-			SdVoiceTransStatus(chan, 1);
+			sceSdVoiceTrans(chan, 0, (u8*)ClearEffectData, (u32*)effect_addr, 64);
+			sceSdVoiceTransStatus(chan, 1);
 			effect_addr = aligned_addr;
 		}
 
@@ -254,8 +254,8 @@ s32 SdClearEffectWorkArea(s32 core, s32 chan, s32 effect_type)
 			else
 				size = 1024;
 
-			SdVoiceTrans(chan, 0, (u8*)ClearEffectData, (u32*)effect_addr, size);
-			SdVoiceTransStatus(chan, 1); // Wait for completion
+			sceSdVoiceTrans(chan, 0, (u8*)ClearEffectData, (u32*)effect_addr, size);
+			sceSdVoiceTransStatus(chan, 1); // Wait for completion
 
 			effect_size -= 1024;
 			effect_addr += 1024;
