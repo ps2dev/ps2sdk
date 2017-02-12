@@ -17,13 +17,14 @@ qword_t *draw_prim_start(qword_t *q, int context, prim_t *prim, color_t *color)
 {
 
 	// Set the primitive register in packed mode, but don't end the packet
-	PACK_GIFTAG(q,GIF_SET_TAG(2,0,0,0,GIF_FLG_PACKED,1),GIF_REG_AD);
+	PACK_GIFTAG(q, GIF_SET_TAG(2, 0, 0, 0, GIF_FLG_PACKED, 1), GIF_REG_AD);
 	q++;
-	PACK_GIFTAG(q,GS_SET_PRIM(prim->type,prim->shading,prim->mapping,prim->fogging,
-							  prim->blending,prim->antialiasing,prim->mapping_type,
-							  context,prim->colorfix),GS_REG_PRIM);
+	PACK_GIFTAG(q, GS_SET_PRIM(prim->type, prim->shading, prim->mapping, prim->fogging,
+	                           prim->blending, prim->antialiasing, prim->mapping_type,
+	                           context, prim->colorfix),
+	            GS_REG_PRIM);
 	q++;
-	PACK_GIFTAG(q,color->rgbaq,GIF_REG_RGBAQ);
+	PACK_GIFTAG(q, color->rgbaq, GIF_REG_RGBAQ);
 	q++;
 
 	// Save the position for the reglist giftag that draw_primitive_end will add
@@ -32,10 +33,9 @@ qword_t *draw_prim_start(qword_t *q, int context, prim_t *prim, color_t *color)
 
 	// Return the current qword pointer
 	return q;
-
 }
 
-qword_t *draw_prim_end(qword_t *q,int nreg, u64 reglist)
+qword_t *draw_prim_end(qword_t *q, int nreg, u64 reglist)
 {
 
 	float lpq = 2.0f / (float)nreg;
@@ -47,14 +47,13 @@ qword_t *draw_prim_end(qword_t *q,int nreg, u64 reglist)
 	__vertex_loops = (int)(__vertex_qwords * lpq);
 
 	// Now set the giftag of the vertex reglist chain
-	__prim_start->dw[0] = GIF_SET_TAG(__vertex_loops,1,0,0,GIF_FLG_REGLIST,nreg);
+	__prim_start->dw[0] = GIF_SET_TAG(__vertex_loops, 1, 0, 0, GIF_FLG_REGLIST, nreg);
 
 	// Set the higher 64bits to the reglist
 	__prim_start->dw[1] = reglist;
 
 	// Return the current qword pointer
 	return q;
-
 }
 
 int draw_convert_rgbq(color_t *output, int count, vertex_f_t *vertices, color_f_t *colours, unsigned char alpha)
@@ -64,15 +63,12 @@ int draw_convert_rgbq(color_t *output, int count, vertex_f_t *vertices, color_f_
 	float q = 1.00f;
 
 	// For each colour...
-	for (i=0;i<count;i++)
-	{
+	for (i = 0; i < count; i++) {
 
 		// Calculate the Q value.
-		if (vertices[i].w != 0)
-		{
+		if (vertices[i].w != 0) {
 
 			q = 1 / vertices[i].w;
-
 		}
 
 		// Calculate the RGBA values.
@@ -81,12 +77,10 @@ int draw_convert_rgbq(color_t *output, int count, vertex_f_t *vertices, color_f_
 		output[i].b = (int)(colours[i].b * 128.0f);
 		output[i].a = alpha;
 		output[i].q = q;
-
 	}
 
 	// End function.
 	return 0;
-
 }
 
 int draw_convert_rgbaq(color_t *output, int count, vertex_f_t *vertices, color_f_t *colours)
@@ -96,15 +90,12 @@ int draw_convert_rgbaq(color_t *output, int count, vertex_f_t *vertices, color_f
 	float q = 1.00f;
 
 	// For each colour...
-	for (i=0;i<count;i++)
-	{
+	for (i = 0; i < count; i++) {
 
 		// Calculate the Q value.
-		if (vertices[i].w != 0)
-		{
+		if (vertices[i].w != 0) {
 
 			q = 1 / vertices[i].w;
-
 		}
 
 		// Calculate the RGBA values.
@@ -113,12 +104,10 @@ int draw_convert_rgbaq(color_t *output, int count, vertex_f_t *vertices, color_f
 		output[i].b = (int)(colours[i].b * 128.0f);
 		output[i].a = (int)(colours[i].a * 128.0f);
 		output[i].q = q;
-
 	}
 
 	// End function.
 	return 0;
-
 }
 
 int draw_convert_st(texel_t *output, int count, vertex_f_t *vertices, texel_f_t *coords)
@@ -128,24 +117,20 @@ int draw_convert_st(texel_t *output, int count, vertex_f_t *vertices, texel_f_t 
 	float q = 1.00f;
 
 	// For each coordinate...
-	for (i=0;i<count;i++)
-	{
+	for (i = 0; i < count; i++) {
 
 		// Calculate the Q value.
-		if (vertices[i].w != 0)
-		{
+		if (vertices[i].w != 0) {
 			q = 1 / vertices[i].w;
 		}
 
 		// Calculate the S and T values.
 		output[i].s = coords[i].s * q;
 		output[i].t = coords[i].t * q;
-
 	}
 
 	// End function.
 	return 0;
-
 }
 
 int draw_convert_xyz(xyz_t *output, float x, float y, int z, int count, vertex_f_t *vertices)
@@ -164,17 +149,14 @@ int draw_convert_xyz(xyz_t *output, float x, float y, int z, int count, vertex_f
 	max_z = 1 << (z - 1);
 
 	// For each colour...
-	for (i=0;i<count;i++)
-	{
+	for (i = 0; i < count; i++) {
 
 		// Calculate the XYZ values.
 		output[i].x = (short)((vertices[i].x + 1.0f) * center_x);
 		output[i].y = (short)((vertices[i].y + 1.0f) * -center_y);
 		output[i].z = (unsigned int)((vertices[i].z + 1.0f) * max_z);
-
 	}
 
 	// End function.
 	return 0;
-
 }

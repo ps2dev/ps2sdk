@@ -23,9 +23,9 @@
 #include "rpc_client.h"
 
 /* rpc server variables */
-static int rpc_buffer[18000/4];         ///< buffer for RPC DMA
-static SifRpcDataQueue_t qd;            ///< RPC thread variables
-static SifRpcServerData_t sd0;          ///< RPC thread variables
+static int rpc_buffer[18000 / 4]; ///< buffer for RPC DMA
+static SifRpcDataQueue_t qd;      ///< RPC thread variables
+static SifRpcServerData_t sd0;    ///< RPC thread variables
 
 /** RPC command handler.
     @param func     command (one of AUDSRV_x)
@@ -41,103 +41,102 @@ static void *rpc_command(int func, unsigned *data, int size)
 	int ret;
 
 	/* printf("audsrv: rpc command %d\n", func); */
-	switch(func)
-	{
+	switch (func) {
 		case AUDSRV_INIT:
-		ret = audsrv_init();
-		initialize_rpc_client();
-		break;
+			ret = audsrv_init();
+			initialize_rpc_client();
+			break;
 
 		case AUDSRV_FORMAT_OK:
-		ret = audsrv_format_ok(data[0], data[1], data[2]);
-		break;
+			ret = audsrv_format_ok(data[0], data[1], data[2]);
+			break;
 
 		case AUDSRV_SET_FORMAT:
-		ret = audsrv_set_format(data[0], data[1], data[2]);
-		break;
+			ret = audsrv_set_format(data[0], data[1], data[2]);
+			break;
 
 		case AUDSRV_WAIT_AUDIO:
-		ret = audsrv_wait_audio(data[0]);
-		break;
+			ret = audsrv_wait_audio(data[0]);
+			break;
 
 		case AUDSRV_PLAY_AUDIO:
-		ret = audsrv_play_audio((const char *)&data[1], data[0]);
-		break;
+			ret = audsrv_play_audio((const char *)&data[1], data[0]);
+			break;
 
 		case AUDSRV_STOP_AUDIO:
-		ret = audsrv_stop_audio();
-		break;
+			ret = audsrv_stop_audio();
+			break;
 
 		case AUDSRV_SET_VOLUME:
-		ret = audsrv_set_volume(data[0]);
-		break;
+			ret = audsrv_set_volume(data[0]);
+			break;
 
 		case AUDSRV_QUIT:
-		ret = audsrv_quit();
-		break;
+			ret = audsrv_quit();
+			break;
 
 		case AUDSRV_PLAY_CD:
-		ret = audsrv_play_cd(data[0]);
-		break;
+			ret = audsrv_play_cd(data[0]);
+			break;
 
 		case AUDSRV_STOP_CD:
-		ret = audsrv_stop_cd();
-		break;
+			ret = audsrv_stop_cd();
+			break;
 
 		case AUDSRV_GET_CDPOS:
-		ret = audsrv_get_cdpos();
-		break;
+			ret = audsrv_get_cdpos();
+			break;
 
 		case AUDSRV_GET_TRACKPOS:
-		ret = audsrv_get_trackpos();
-		break;
+			ret = audsrv_get_trackpos();
+			break;
 
 		case AUDSRV_SET_THRESHOLD:
-		ret = audsrv_set_threshold(data[0]);
-		break;
+			ret = audsrv_set_threshold(data[0]);
+			break;
 
 		case AUDSRV_GET_NUMTRACKS:
-		ret = audsrv_get_numtracks();
-		break;
+			ret = audsrv_get_numtracks();
+			break;
 
 		case AUDSRV_GET_TRACKOFFSET:
-		ret = audsrv_get_track_offset(data[0]);
-		break;
+			ret = audsrv_get_track_offset(data[0]);
+			break;
 
 		case AUDSRV_PLAY_SECTORS:
-		ret = audsrv_cd_play_sectors(data[0], data[1]);
-		break;
+			ret = audsrv_cd_play_sectors(data[0], data[1]);
+			break;
 
 		case AUDSRV_GET_CD_STATUS:
-		ret = audsrv_get_cd_status();
-		break;
+			ret = audsrv_get_cd_status();
+			break;
 
 		case AUDSRV_GET_CD_TYPE:
-		ret = audsrv_get_cd_type();
-		break;
+			ret = audsrv_get_cd_type();
+			break;
 
 		case AUDSRV_PAUSE_CD:
-		ret = audsrv_cd_pause();
-		break;
+			ret = audsrv_cd_pause();
+			break;
 
 		case AUDSRV_RESUME_CD:
-		ret = audsrv_cd_resume();
-		break;
+			ret = audsrv_cd_resume();
+			break;
 
 		case AUDSRV_INIT_ADPCM:
-		ret = audsrv_adpcm_init();
-		break;
+			ret = audsrv_adpcm_init();
+			break;
 
 		case AUDSRV_LOAD_ADPCM:
-		return audsrv_load_adpcm((u32*)data[0], data[1], data[2]);
+			return audsrv_load_adpcm((u32 *)data[0], data[1], data[2]);
 
 		case AUDSRV_PLAY_ADPCM:
-		ret = audsrv_play_adpcm(data[0]);
-		break;
+			ret = audsrv_play_adpcm(data[0]);
+			break;
 
 		default:
-		ret = -1;
-		break;
+			ret = -1;
+			break;
 	}
 
 	data[0] = ret;

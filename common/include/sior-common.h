@@ -13,40 +13,44 @@
 #ifndef _SIOR_COMMON_H_
 #define _SIOR_COMMON_H_
 
-#define	SIOR_IRX              0xC001510
+#define SIOR_IRX 0xC001510
 
 enum {
-    SIOR_INIT = 1,
-    SIOR_PUTC,
-    SIOR_GETC,
-    SIOR_GETCBLOCK,
-    SIOR_WRITE,
-    SIOR_READ,
-    SIOR_PUTS,
-    SIOR_PUTSN,
-    SIOR_GETS,
-    SIOR_FLUSH
+	SIOR_INIT = 1,
+	SIOR_PUTC,
+	SIOR_GETC,
+	SIOR_GETCBLOCK,
+	SIOR_WRITE,
+	SIOR_READ,
+	SIOR_PUTS,
+	SIOR_PUTSN,
+	SIOR_GETS,
+	SIOR_FLUSH
 };
 
-struct siorInitArgs {
-    u32 baudrate;
-    u8 lcr_ueps;
-    u8 lcr_upen;
-    u8 lcr_usbl;
-    u8 lcr_umode;
+struct siorInitArgs
+{
+	u32 baudrate;
+	u8 lcr_ueps;
+	u8 lcr_upen;
+	u8 lcr_usbl;
+	u8 lcr_umode;
 };
 
-struct siorReadArgs {
+struct siorReadArgs
+{
 	char *buf;
 	s32 len;
 };
 
-struct siorWriteArgs {
+struct siorWriteArgs
+{
 	const char *buf;
 	s32 len;
 };
 
-union siorCommsData {
+union siorCommsData
+{
 	u8 data[64];
 	int result;
 	struct siorInitArgs init;

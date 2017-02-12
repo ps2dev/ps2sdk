@@ -25,10 +25,11 @@ IoRequest *cbListStart = NULL, *cbListEnd = NULL;
 
 int callbackEvent;
 
-int callUsbDriverFunc(int (*func)(int devId), int devId, void *gp) {
+int callUsbDriverFunc(int (*func)(int devId), int devId, void *gp)
+{
 	int res;
 	if (func) {
-	    usbdUnlock();
+		usbdUnlock();
 		// move gp..
 		res = func(devId);
 		// restore gp...
@@ -38,7 +39,8 @@ int callUsbDriverFunc(int (*func)(int devId), int devId, void *gp) {
 		return 0;
 }
 
-void probeDeviceTree(Device *tree, UsbDriver *drv) {
+void probeDeviceTree(Device *tree, UsbDriver *drv)
+{
 	Device *curDevice;
 	for (curDevice = tree->childListStart; curDevice != NULL; curDevice = curDevice->next)
 		if (curDevice->deviceStatus == DEVICE_READY) {
@@ -52,7 +54,8 @@ void probeDeviceTree(Device *tree, UsbDriver *drv) {
 		}
 }
 
-void probeDeviceConnectList(UsbDriver *drv) {
+void probeDeviceConnectList(UsbDriver *drv)
+{
 	Device *curDevice;
 	for (curDevice = memPool.deviceConnectedListStart; curDevice != NULL; curDevice = curDevice->nextConnected)
 		if (curDevice->deviceStatus == DEVICE_READY) {
@@ -65,7 +68,8 @@ void probeDeviceConnectList(UsbDriver *drv) {
 		}
 }
 
-int doRegisterDriver(UsbDriver *drv, void *drvGpSeg) {
+int doRegisterDriver(UsbDriver *drv, void *drvGpSeg)
+{
 	if (drv->next || drv->prev)
 		return USB_RC_BUSY;
 	if (drvListStart == drv)
@@ -79,7 +83,7 @@ int doRegisterDriver(UsbDriver *drv, void *drvGpSeg) {
 	drv->gp = drvGpSeg;
 
 	drv->prev = drvListEnd;
-    if (drvListEnd)
+	if (drvListEnd)
 		drvListEnd->next = drv;
 	else
 		drvListStart = drv;
@@ -91,7 +95,8 @@ int doRegisterDriver(UsbDriver *drv, void *drvGpSeg) {
 	return 0;
 }
 
-void disconnectDriver(Device *tree, UsbDriver *drv) {
+void disconnectDriver(Device *tree, UsbDriver *drv)
+{
 	Endpoint *ep, *nextEp;
 	if (tree->devDriver == drv) {
 		if (tree->endpointListStart) {
@@ -111,7 +116,8 @@ void disconnectDriver(Device *tree, UsbDriver *drv) {
 		disconnectDriver(tree, drv);
 }
 
-int doUnregisterDriver(UsbDriver *drv) {
+int doUnregisterDriver(UsbDriver *drv)
+{
 	UsbDriver *pos;
 	for (pos = drvListStart; pos != NULL; pos = pos->next)
 		if (pos == drv) {
@@ -131,7 +137,8 @@ int doUnregisterDriver(UsbDriver *drv) {
 	return USB_RC_BADDRIVER;
 }
 
-void connectNewDevice(Device *dev) {
+void connectNewDevice(Device *dev)
+{
 	UsbDriver *drv;
 	dbg_printf("searching driver for dev %d, FA %02X\n", dev->id, dev->functionAddress);
 	for (drv = drvListStart; drv != NULL; drv = drv->next)
@@ -145,7 +152,8 @@ void connectNewDevice(Device *dev) {
 	// todo: call autoloader here
 }
 
-void signalCallbackThreadFunc(IoRequest *req) {
+void signalCallbackThreadFunc(IoRequest *req)
+{
 	int intrStat;
 
 	CpuSuspendIntr(&intrStat);
@@ -163,7 +171,8 @@ void signalCallbackThreadFunc(IoRequest *req) {
 	SetEventFlag(callbackEvent, 1);
 }
 
-void callbackThreadFunc(void *arg) {
+void callbackThreadFunc(void *arg)
+{
 	u32 eventRes;
 	int intrStat;
 	IoRequest *req;
@@ -201,7 +210,8 @@ void callbackThreadFunc(void *arg) {
 	}
 }
 
-int initCallbackThread(void) {
+int initCallbackThread(void)
+{
 	iop_event_t event;
 	iop_thread_t thread;
 	int callbackTid;
@@ -219,5 +229,3 @@ int initCallbackThread(void) {
 
 	return 0;
 }
-
-

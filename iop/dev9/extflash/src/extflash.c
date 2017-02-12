@@ -23,45 +23,45 @@
 #include "speedregs.h"
 
 #define MODNAME "flash"
-#define M_PRINTF(format, args...)	\
-	printf(MODNAME ": " format, ## args)
+#define M_PRINTF(format, args...) \
+	printf(MODNAME ": " format, ##args)
 
 IRX_ID(MODNAME, 1, 1);
 
-#define FLASH_ID_64MBIT		0xe6
-#define FLASH_ID_128MBIT	0x73
-#define FLASH_ID_256MBIT	0x75
-#define FLASH_ID_512MBIT	0x76
-#define FLASH_ID_1024MBIT	0x79
+#define FLASH_ID_64MBIT 0xe6
+#define FLASH_ID_128MBIT 0x73
+#define FLASH_ID_256MBIT 0x75
+#define FLASH_ID_512MBIT 0x76
+#define FLASH_ID_1024MBIT 0x79
 
 /* SmartMedia commands.  */
-#define SM_CMD_READ1		0x00
-#define SM_CMD_READ2		0x01
-#define SM_CMD_READ3		0x50
-#define SM_CMD_RESET		0xff
-#define SM_CMD_WRITEDATA	0x80
-#define SM_CMD_PROGRAMPAGE	0x10
-#define SM_CMD_ERASEBLOCK	0x60
-#define SM_CMD_ERASECONFIRM	0xd0
-#define SM_CMD_GETSTATUS	0x70
-#define SM_CMD_READID		0x90
+#define SM_CMD_READ1 0x00
+#define SM_CMD_READ2 0x01
+#define SM_CMD_READ3 0x50
+#define SM_CMD_RESET 0xff
+#define SM_CMD_WRITEDATA 0x80
+#define SM_CMD_PROGRAMPAGE 0x10
+#define SM_CMD_ERASEBLOCK 0x60
+#define SM_CMD_ERASECONFIRM 0xd0
+#define SM_CMD_GETSTATUS 0x70
+#define SM_CMD_READID 0x90
 
-typedef struct {
-	u32	id;
-	u32	mbits;
-	u32	page_bytes;	/* bytes/page */
-	u32	block_pages;	/* pages/block */
-	u32	blocks;
+typedef struct
+{
+	u32 id;
+	u32 mbits;
+	u32 page_bytes;  /* bytes/page */
+	u32 block_pages; /* pages/block */
+	u32 blocks;
 } flash_info_t;
 
 static flash_info_t devices[] = {
-	{ FLASH_ID_64MBIT, 64, 528, 16, 1024 },
-	{ FLASH_ID_128MBIT, 128, 528, 32, 1024 },
-	{ FLASH_ID_256MBIT, 256, 528, 32, 2048 },
-	{ FLASH_ID_512MBIT, 512, 528, 32, 4096 },
-	{ FLASH_ID_1024MBIT, 1024, 528, 32, 8192 }
-};
-#define NUM_DEVICES	(sizeof(devices)/sizeof(flash_info_t))
+    {FLASH_ID_64MBIT, 64, 528, 16, 1024},
+    {FLASH_ID_128MBIT, 128, 528, 32, 1024},
+    {FLASH_ID_256MBIT, 256, 528, 32, 2048},
+    {FLASH_ID_512MBIT, 512, 528, 32, 4096},
+    {FLASH_ID_1024MBIT, 1024, 528, 32, 8192}};
+#define NUM_DEVICES (sizeof(devices) / sizeof(flash_info_t))
 
 static iop_sys_clock_t timeout;
 static u32 timeout_cb(void *);
@@ -161,7 +161,7 @@ int flash_get_info(flash_info_t *info)
 
 		memcpy(info, &devices[i], sizeof(flash_info_t));
 		M_PRINTF("Device: ID 0x%02x, %ld Mbit, %ld bytes/page, %ld pages/block, %ld blocks total.\n",
-				id, info->mbits, info->page_bytes, info->block_pages, info->blocks);
+		         id, info->mbits, info->page_bytes, info->block_pages, info->blocks);
 		return 0;
 	}
 

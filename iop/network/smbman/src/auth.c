@@ -24,10 +24,10 @@ unsigned char *LM_Password_Hash(const unsigned char *password, unsigned char *ci
 	int i;
 
 	/* keep only 14 bytes of the password (padded with nul bytes) */
-	strncpy((char*)tmp_pass, (const char*)password, 14);
+	strncpy((char *)tmp_pass, (const char *)password, 14);
 
 	/* turn the password to uppercase */
-	for (i=0; i<14; i++) {
+	for (i = 0; i < 14; i++) {
 		tmp_pass[i] = toupper(tmp_pass[i]);
 	}
 
@@ -36,8 +36,8 @@ unsigned char *LM_Password_Hash(const unsigned char *password, unsigned char *ci
 	memcpy(K2, &tmp_pass[7], 7);
 
 	/* encrypt the magic string with the keys */
-	DES(K1, (const unsigned char*)"KGS!@#$%", &cipher[0]);
-	DES(K2, (const unsigned char*)"KGS!@#$%", &cipher[8]);
+	DES(K1, (const unsigned char *)"KGS!@#$%", &cipher[0]);
+	DES(K2, (const unsigned char *)"KGS!@#$%", &cipher[8]);
 
 	return cipher;
 }
@@ -52,7 +52,7 @@ unsigned char *NTLM_Password_Hash(const unsigned char *password, unsigned char *
 	memset(passwd_buf, 0, sizeof(passwd_buf));
 
 	/* turn the password to unicode */
-	for (i=0, j=0; i<strlen((const char*)password); i++, j+=2)
+	for (i = 0, j = 0; i < strlen((const char *)password); i++, j += 2)
 		passwd_buf[j] = password[i];
 
 	/* get the message digest */
@@ -75,15 +75,14 @@ unsigned char *LM_Response(const unsigned char *LMpasswordhash, unsigned char *c
 	memset(&P21[16], 0, 5);
 
 	/* encrypt the challenge 3 times, using 7 bytes splitted keys */
-	for (i=0; i<3; i++) {
+	for (i = 0; i < 3; i++) {
 
 		/* get the 7bytes key */
-		memcpy(K, &P21[i*7], 7);
+		memcpy(K, &P21[i * 7], 7);
 
 		/* encrypt each the challenge with the keys */
-		DES(K, chal, &cipher[i*8]);
+		DES(K, chal, &cipher[i * 8]);
 	}
 
 	return (unsigned char *)cipher;
 }
-

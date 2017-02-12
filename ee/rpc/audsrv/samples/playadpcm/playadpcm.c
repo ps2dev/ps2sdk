@@ -25,10 +25,10 @@ int main(int argc, char **argv)
 	int i;
 	*/
 	int ret;
-	FILE* adpcm;
+	FILE *adpcm;
 	audsrv_adpcm_t sample;
 	int size;
-	u8* buffer;
+	u8 *buffer;
 
 	SifInitRpc(0);
 
@@ -41,8 +41,7 @@ int main(int argc, char **argv)
 	printf("audsrv loadmodule %d\n", ret);
 
 	ret = audsrv_init();
-	if (ret != 0)
-	{
+	if (ret != 0) {
 		printf("sample: failed to initialize audsrv\n");
 		printf("audsrv returned error string: %s\n", audsrv_get_error_string());
 		return 1;
@@ -50,8 +49,7 @@ int main(int argc, char **argv)
 
 	adpcm = fopen("host:evillaugh.adp", "rb");
 
-	if (adpcm == NULL)
-	{
+	if (adpcm == NULL) {
 		printf("failed to open adpcm file\n");
 		audsrv_quit();
 		return 1;
@@ -86,6 +84,7 @@ int main(int argc, char **argv)
 
 	free(buffer);
 
-	while (1);
+	while (1)
+		;
 	return 0;
 }

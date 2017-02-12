@@ -24,7 +24,7 @@
  */
 
 #include "netif/ppp/ppp_opts.h"
-#if PPP_SUPPORT && MPPE_SUPPORT  /* don't build if not configured for use in lwipopts.h */
+#if PPP_SUPPORT && MPPE_SUPPORT /* don't build if not configured for use in lwipopts.h */
 
 #include <string.h>
 
@@ -39,26 +39,26 @@
 #define SHA1_SIGNATURE_SIZE 20
 
 /* ppp_mppe_state.bits definitions */
-#define MPPE_BIT_A	0x80	/* Encryption table were (re)inititalized */
-#define MPPE_BIT_B	0x40	/* MPPC only (not implemented) */
-#define MPPE_BIT_C	0x20	/* MPPC only (not implemented) */
-#define MPPE_BIT_D	0x10	/* This is an encrypted frame */
+#define MPPE_BIT_A 0x80 /* Encryption table were (re)inititalized */
+#define MPPE_BIT_B 0x40 /* MPPC only (not implemented) */
+#define MPPE_BIT_C 0x20 /* MPPC only (not implemented) */
+#define MPPE_BIT_D 0x10 /* This is an encrypted frame */
 
-#define MPPE_BIT_FLUSHED	MPPE_BIT_A
-#define MPPE_BIT_ENCRYPTED	MPPE_BIT_D
+#define MPPE_BIT_FLUSHED MPPE_BIT_A
+#define MPPE_BIT_ENCRYPTED MPPE_BIT_D
 
 #define MPPE_BITS(p) ((p)[0] & 0xf0)
 #define MPPE_CCOUNT(p) ((((p)[0] & 0x0f) << 8) + (p)[1])
-#define MPPE_CCOUNT_SPACE 0x1000	/* The size of the ccount space */
+#define MPPE_CCOUNT_SPACE 0x1000 /* The size of the ccount space */
 
-#define MPPE_OVHD	2	/* MPPE overhead/packet */
-#define SANITY_MAX	1600	/* Max bogon factor we will tolerate */
+#define MPPE_OVHD 2     /* MPPE overhead/packet */
+#define SANITY_MAX 1600 /* Max bogon factor we will tolerate */
 
 /*
  * Perform the MPPE rekey algorithm, from RFC 3078, sec. 7.3.
  * Well, not what's written there, but rather what they meant.
  */
-static void mppe_rekey(ppp_mppe_state * state, int initial_key)
+static void mppe_rekey(ppp_mppe_state *state, int initial_key)
 {
 	lwip_sha1_context sha1_ctx;
 	u8_t sha1_digest[SHA1_SIGNATURE_SIZE];
@@ -97,7 +97,8 @@ static void mppe_rekey(ppp_mppe_state * state, int initial_key)
  * Set key, used by MSCHAP before mppe_init() is actually called by CCP so we
  * don't have to keep multiple copies of keys.
  */
-void mppe_set_key(ppp_pcb *pcb, ppp_mppe_state *state, u8_t *key) {
+void mppe_set_key(ppp_pcb *pcb, ppp_mppe_state *state, u8_t *key)
+{
 	LWIP_UNUSED_ARG(pcb);
 	MEMCPY(state->master_key, key, MPPE_MAX_KEY_LEN);
 }
@@ -105,13 +106,12 @@ void mppe_set_key(ppp_pcb *pcb, ppp_mppe_state *state, u8_t *key) {
 /*
  * Initialize (de)compressor state.
  */
-void
-mppe_init(ppp_pcb *pcb, ppp_mppe_state *state, u8_t options)
+void mppe_init(ppp_pcb *pcb, ppp_mppe_state *state, u8_t options)
 {
 #if PPP_DEBUG
-	const u8_t *debugstr = (const u8_t*)"mppe_comp_init";
+	const u8_t *debugstr = (const u8_t *)"mppe_comp_init";
 	if (&pcb->mppe_decomp == state) {
-	    debugstr = (const u8_t*)"mppe_decomp_init";
+		debugstr = (const u8_t *)"mppe_decomp_init";
 	}
 #endif /* PPP_DEBUG */
 
@@ -124,7 +124,7 @@ mppe_init(ppp_pcb *pcb, ppp_mppe_state *state, u8_t options)
 		state->keylen = 8;
 	else {
 		PPPDEBUG(LOG_DEBUG, ("%s[%d]: unknown key length\n", debugstr,
-			pcb->netif->num));
+		                     pcb->netif->num));
 		lcp_close(pcb, "MPPE required but peer negotiation failed");
 		return;
 	}
@@ -141,16 +141,16 @@ mppe_init(ppp_pcb *pcb, ppp_mppe_state *state, u8_t options)
 		char skey[sizeof(state->session_key) * 2 + 1];
 
 		PPPDEBUG(LOG_DEBUG, ("%s[%d]: initialized with %d-bit %s mode\n",
-		       debugstr, pcb->netif->num, (state->keylen == 16) ? 128 : 40,
-		       (state->stateful) ? "stateful" : "stateless"));
+		                     debugstr, pcb->netif->num, (state->keylen == 16) ? 128 : 40,
+		                     (state->stateful) ? "stateful" : "stateless"));
 
 		for (i = 0; i < (int)sizeof(state->master_key); i++)
 			sprintf(mkey + i * 2, "%02x", state->master_key[i]);
 		for (i = 0; i < (int)sizeof(state->session_key); i++)
 			sprintf(skey + i * 2, "%02x", state->session_key[i]);
 		PPPDEBUG(LOG_DEBUG,
-		       ("%s[%d]: keys: master: %s initial session: %s\n",
-		       debugstr, pcb->netif->num, mkey, skey));
+		         ("%s[%d]: keys: master: %s initial session: %s\n",
+		          debugstr, pcb->netif->num, mkey, skey));
 	}
 #endif /* PPP_DEBUG */
 
@@ -189,8 +189,7 @@ void mppe_comp_reset(ppp_pcb *pcb, ppp_mppe_state *state)
  * It's strange to call this a compressor, since the output is always
  * MPPE_OVHD + 2 bytes larger than the input.
  */
-err_t
-mppe_compress(ppp_pcb *pcb, ppp_mppe_state *state, struct pbuf **pb, u16_t protocol)
+err_t mppe_compress(ppp_pcb *pcb, ppp_mppe_state *state, struct pbuf **pb, u16_t protocol)
 {
 	struct pbuf *n, *np;
 	u8_t *pl;
@@ -218,17 +217,17 @@ mppe_compress(ppp_pcb *pcb, ppp_mppe_state *state, struct pbuf **pb, u16_t proto
 	pbuf_header(np, (s16_t)(MPPE_OVHD + sizeof(protocol)));
 
 	*pb = np;
-	pl = (u8_t*)np->payload;
+	pl = (u8_t *)np->payload;
 
 	state->ccount = (state->ccount + 1) % MPPE_CCOUNT_SPACE;
 	PPPDEBUG(LOG_DEBUG, ("mppe_compress[%d]: ccount %d\n", pcb->netif->num, state->ccount));
 	/* FIXME: use PUT* macros */
-	pl[0] = state->ccount>>8;
+	pl[0] = state->ccount >> 8;
 	pl[1] = state->ccount;
 
-	if (!state->stateful ||	/* stateless mode     */
-	    ((state->ccount & 0xff) == 0xff) ||	/* "flag" packet      */
-	    (state->bits & MPPE_BIT_FLUSHED)) {	/* CCP Reset-Request  */
+	if (!state->stateful ||                 /* stateless mode     */
+	    ((state->ccount & 0xff) == 0xff) || /* "flag" packet      */
+	    (state->bits & MPPE_BIT_FLUSHED)) { /* CCP Reset-Request  */
 		/* We must rekey */
 		if (state->stateful) {
 			PPPDEBUG(LOG_DEBUG, ("mppe_compress[%d]: rekeying\n", pcb->netif->num));
@@ -237,7 +236,7 @@ mppe_compress(ppp_pcb *pcb, ppp_mppe_state *state, struct pbuf **pb, u16_t proto
 		state->bits |= MPPE_BIT_FLUSHED;
 	}
 	pl[0] |= state->bits;
-	state->bits &= ~MPPE_BIT_FLUSHED;	/* reset for next xmit */
+	state->bits &= ~MPPE_BIT_FLUSHED; /* reset for next xmit */
 	pl += MPPE_OVHD;
 
 	/* Add protocol */
@@ -250,7 +249,7 @@ mppe_compress(ppp_pcb *pcb, ppp_mppe_state *state, struct pbuf **pb, u16_t proto
 
 	/* Encrypt packet */
 	for (n = np; n != NULL; n = n->next) {
-		lwip_arc4_crypt(&state->arc4, (u8_t*)n->payload, n->len);
+		lwip_arc4_crypt(&state->arc4, (u8_t *)n->payload, n->len);
 		if (n->tot_len == n->len) {
 			break;
 		}
@@ -275,8 +274,7 @@ void mppe_decomp_reset(ppp_pcb *pcb, ppp_mppe_state *state)
 /*
  * Decompress (decrypt) an MPPE packet.
  */
-err_t
-mppe_decompress(ppp_pcb *pcb, ppp_mppe_state *state, struct pbuf **pb)
+err_t mppe_decompress(ppp_pcb *pcb, ppp_mppe_state *state, struct pbuf **pb)
 {
 	struct pbuf *n0 = *pb, *n;
 	u8_t *pl;
@@ -286,35 +284,37 @@ mppe_decompress(ppp_pcb *pcb, ppp_mppe_state *state, struct pbuf **pb)
 	/* MPPE Header */
 	if (n0->len < MPPE_OVHD) {
 		PPPDEBUG(LOG_DEBUG,
-		       ("mppe_decompress[%d]: short pkt (%d)\n",
-		       pcb->netif->num, n0->len));
+		         ("mppe_decompress[%d]: short pkt (%d)\n",
+		          pcb->netif->num, n0->len));
 		state->sanity_errors += 100;
 		goto sanity_error;
 	}
 
-	pl = (u8_t*)n0->payload;
+	pl = (u8_t *)n0->payload;
 	flushed = MPPE_BITS(pl) & MPPE_BIT_FLUSHED;
 	ccount = MPPE_CCOUNT(pl);
 	PPPDEBUG(LOG_DEBUG, ("mppe_decompress[%d]: ccount %d\n",
-	       pcb->netif->num, ccount));
+	                     pcb->netif->num, ccount));
 
 	/* sanity checks -- terminate with extreme prejudice */
 	if (!(MPPE_BITS(pl) & MPPE_BIT_ENCRYPTED)) {
 		PPPDEBUG(LOG_DEBUG,
-		       ("mppe_decompress[%d]: ENCRYPTED bit not set!\n",
-		       pcb->netif->num));
+		         ("mppe_decompress[%d]: ENCRYPTED bit not set!\n",
+		          pcb->netif->num));
 		state->sanity_errors += 100;
 		goto sanity_error;
 	}
 	if (!state->stateful && !flushed) {
 		PPPDEBUG(LOG_DEBUG, ("mppe_decompress[%d]: FLUSHED bit not set in "
-		       "stateless mode!\n", pcb->netif->num));
+		                     "stateless mode!\n",
+		                     pcb->netif->num));
 		state->sanity_errors += 100;
 		goto sanity_error;
 	}
 	if (state->stateful && ((ccount & 0xff) == 0xff) && !flushed) {
 		PPPDEBUG(LOG_DEBUG, ("mppe_decompress[%d]: FLUSHED bit not set on "
-		       "flag packet!\n", pcb->netif->num));
+		                     "flag packet!\n",
+		                     pcb->netif->num));
 		state->sanity_errors += 100;
 		goto sanity_error;
 	}
@@ -362,7 +362,8 @@ mppe_decompress(ppp_pcb *pcb, ppp_mppe_state *state, struct pbuf **pb)
 					mppe_rekey(state, 0);
 					state->ccount =
 					    (state->ccount +
-					     256) % MPPE_CCOUNT_SPACE;
+					     256) %
+					    MPPE_CCOUNT_SPACE;
 				}
 
 				/* reset */
@@ -386,7 +387,7 @@ mppe_decompress(ppp_pcb *pcb, ppp_mppe_state *state, struct pbuf **pb)
 
 	/* Decrypt the packet. */
 	for (n = n0; n != NULL; n = n->next) {
-		lwip_arc4_crypt(&state->arc4, (u8_t*)n->payload, n->len);
+		lwip_arc4_crypt(&state->arc4, (u8_t *)n->payload, n->len);
 		if (n->tot_len == n->len) {
 			break;
 		}

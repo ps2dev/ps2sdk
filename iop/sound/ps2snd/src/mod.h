@@ -12,26 +12,24 @@
 #define __PS2SND_MOD_H 1
 
 #define MODNAME "ps2snd"
-#define BANNER  MODNAME " %d.%d\n"
+#define BANNER MODNAME " %d.%d\n"
 #define VER_MAJOR 0
 #define VER_MINOR 1
 
-#define OUT_ERROR    0
-#define OUT_WARNING  1
-#define OUT_INFO     2
-#define OUT_DEBUG    3
+#define OUT_ERROR 0
+#define OUT_WARNING 1
+#define OUT_INFO 2
+#define OUT_DEBUG 3
 
 extern int debug_level;
 
 #define ALIGNED(x) __attribute__((aligned((x))))
 
 
-#define dprintf(level, format, args...) \
-do \
-{ \
-	if (level<=debug_level)  \
-		printf(MODNAME "(%s): " format, __FUNCTION__, ## args); \
-} while(0)
+#define dprintf(level, format, args...)                            \
+	do {                                                           \
+		if (level <= debug_level)                                  \
+			printf(MODNAME "(%s): " format, __FUNCTION__, ##args); \
+	} while (0)
 
 #endif /* __PS2SND_MOD_H */
-

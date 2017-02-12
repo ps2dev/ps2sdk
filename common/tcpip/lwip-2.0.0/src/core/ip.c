@@ -76,30 +76,29 @@ const ip_addr_t ip_addr_any_type = IPADDR_ANY_TYPE_INIT;
  * @param addr conversion result is stored here
  * @return 1 on success, 0 on error
  */
-int
-ipaddr_aton(const char *cp, ip_addr_t *addr)
+int ipaddr_aton(const char *cp, ip_addr_t *addr)
 {
-  if (cp != NULL) {
-    const char* c;
-    for (c = cp; *c != 0; c++) {
-      if (*c == ':') {
-        /* contains a colon: IPv6 address */
-        if (addr) {
-          IP_SET_TYPE_VAL(*addr, IPADDR_TYPE_V6);
-        }
-        return ip6addr_aton(cp, ip_2_ip6(addr));
-      } else if (*c == '.') {
-        /* contains a dot: IPv4 address */
-        break;
-      }
-    }
-    /* call ip4addr_aton as fallback or if IPv4 was found */
-    if (addr) {
-      IP_SET_TYPE_VAL(*addr, IPADDR_TYPE_V4);
-    }
-    return ip4addr_aton(cp, ip_2_ip4(addr));
-  }
-  return 0;
+	if (cp != NULL) {
+		const char *c;
+		for (c = cp; *c != 0; c++) {
+			if (*c == ':') {
+				/* contains a colon: IPv6 address */
+				if (addr) {
+					IP_SET_TYPE_VAL(*addr, IPADDR_TYPE_V6);
+				}
+				return ip6addr_aton(cp, ip_2_ip6(addr));
+			} else if (*c == '.') {
+				/* contains a dot: IPv4 address */
+				break;
+			}
+		}
+		/* call ip4addr_aton as fallback or if IPv4 was found */
+		if (addr) {
+			IP_SET_TYPE_VAL(*addr, IPADDR_TYPE_V4);
+		}
+		return ip4addr_aton(cp, ip_2_ip4(addr));
+	}
+	return 0;
 }
 
 /**
@@ -107,16 +106,15 @@ ipaddr_aton(const char *cp, ip_addr_t *addr)
  * If both IP versions are enabled, this function can dispatch packets to the correct one.
  * Don't call directly, pass to netif_add() and call netif->input().
  */
-err_t
-ip_input(struct pbuf *p, struct netif *inp)
+err_t ip_input(struct pbuf *p, struct netif *inp)
 {
-  if (p != NULL) {
-    if (IP_HDR_GET_VERSION(p->payload) == 6) {
-      return ip6_input(p, inp);
-    }
-    return ip4_input(p, inp);
-  }
-  return ERR_VAL;
+	if (p != NULL) {
+		if (IP_HDR_GET_VERSION(p->payload) == 6) {
+			return ip6_input(p, inp);
+		}
+		return ip4_input(p, inp);
+	}
+	return ERR_VAL;
 }
 
 #endif /* LWIP_IPV4 && LWIP_IPV6 */

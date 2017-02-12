@@ -15,10 +15,10 @@
 
 #include "timrman.h"
 
-int SetTimerHandler(int timid, unsigned long comparevalue, unsigned int (*timeuphandler)(void*), void *common);
+int SetTimerHandler(int timid, unsigned long comparevalue, unsigned int (*timeuphandler)(void *), void *common);
 #define I_SetTimerHandler DECLARE_IMPORT(20, SetTimerHandler)
 
-int SetOverflowHandler(int timid, unsigned int (*handler)(void*), void *common);
+int SetOverflowHandler(int timid, unsigned int (*handler)(void *), void *common);
 #define I_SetOverflowHandler DECLARE_IMPORT(21, SetOverflowHandler)
 
 int SetupHardTimer(int timid, int source, int mode, int prescale);

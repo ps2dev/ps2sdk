@@ -43,22 +43,22 @@
 extern "C" {
 #endif
 
-#define ICMP_ER   0    /* echo reply */
-#define ICMP_DUR  3    /* destination unreachable */
-#define ICMP_SQ   4    /* source quench */
-#define ICMP_RD   5    /* redirect */
-#define ICMP_ECHO 8    /* echo */
-#define ICMP_TE  11    /* time exceeded */
-#define ICMP_PP  12    /* parameter problem */
-#define ICMP_TS  13    /* timestamp */
-#define ICMP_TSR 14    /* timestamp reply */
-#define ICMP_IRQ 15    /* information request */
-#define ICMP_IR  16    /* information reply */
-#define ICMP_AM  17    /* address mask request */
-#define ICMP_AMR 18    /* address mask reply */
+#define ICMP_ER 0   /* echo reply */
+#define ICMP_DUR 3  /* destination unreachable */
+#define ICMP_SQ 4   /* source quench */
+#define ICMP_RD 5   /* redirect */
+#define ICMP_ECHO 8 /* echo */
+#define ICMP_TE 11  /* time exceeded */
+#define ICMP_PP 12  /* parameter problem */
+#define ICMP_TS 13  /* timestamp */
+#define ICMP_TSR 14 /* timestamp reply */
+#define ICMP_IRQ 15 /* information request */
+#define ICMP_IR 16  /* information reply */
+#define ICMP_AM 17  /* address mask request */
+#define ICMP_AMR 18 /* address mask reply */
 
 #ifdef PACK_STRUCT_USE_INCLUDES
-#  include "arch/bpstruct.h"
+#include "arch/bpstruct.h"
 #endif
 /** This is the standard ICMP header only that the u32_t data
  *  is split to two u16_t like ICMP echo needs it.
@@ -66,16 +66,17 @@ extern "C" {
  *  use the data part.
  */
 PACK_STRUCT_BEGIN
-struct icmp_echo_hdr {
-  PACK_STRUCT_FLD_8(u8_t type);
-  PACK_STRUCT_FLD_8(u8_t code);
-  PACK_STRUCT_FIELD(u16_t chksum);
-  PACK_STRUCT_FIELD(u16_t id);
-  PACK_STRUCT_FIELD(u16_t seqno);
+struct icmp_echo_hdr
+{
+	PACK_STRUCT_FLD_8(u8_t type);
+	PACK_STRUCT_FLD_8(u8_t code);
+	PACK_STRUCT_FIELD(u16_t chksum);
+	PACK_STRUCT_FIELD(u16_t id);
+	PACK_STRUCT_FIELD(u16_t seqno);
 } PACK_STRUCT_STRUCT;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
-#  include "arch/epstruct.h"
+#include "arch/epstruct.h"
 #endif
 
 /* Compatibility defines, old versions used to combine type and code to an u16_t */

@@ -23,33 +23,33 @@
 extern "C" {
 #endif
 
-#define	AUDSRV_IRX              0x870884d
+#define AUDSRV_IRX 0x870884d
 
 /** minmum volume */
-#define MIN_VOLUME                 0x0000
+#define MIN_VOLUME 0x0000
 
 /** maximum volume */
-#define MAX_VOLUME                 0x3fff
+#define MAX_VOLUME 0x3fff
 
 /** error codes */
-#define AUDSRV_ERR_NOERROR                 0x0000
-#define AUDSRV_ERR_NOT_INITIALIZED         0x0001
-#define AUDSRV_ERR_RPC_FAILED              0x0002
-#define AUDSRV_ERR_FORMAT_NOT_SUPPORTED    0x0003
-#define AUDSRV_ERR_OUT_OF_MEMORY           0x0004
-#define AUDSRV_ERR_ARGS                    0x0005
-#define AUDSRV_ERR_NO_DISC                 0x0006
-#define AUDSRV_ERR_NO_MORE_CHANNELS        0x0007
+#define AUDSRV_ERR_NOERROR 0x0000
+#define AUDSRV_ERR_NOT_INITIALIZED 0x0001
+#define AUDSRV_ERR_RPC_FAILED 0x0002
+#define AUDSRV_ERR_FORMAT_NOT_SUPPORTED 0x0003
+#define AUDSRV_ERR_OUT_OF_MEMORY 0x0004
+#define AUDSRV_ERR_ARGS 0x0005
+#define AUDSRV_ERR_NO_DISC 0x0006
+#define AUDSRV_ERR_NO_MORE_CHANNELS 0x0007
 
-#define AUDSRV_ERR_FAILED_TO_LOAD_ADPCM    0x0010
-#define AUDSRV_ERR_FAILED_TO_CREATE_SEMA    0x0011
+#define AUDSRV_ERR_FAILED_TO_LOAD_ADPCM 0x0010
+#define AUDSRV_ERR_FAILED_TO_CREATE_SEMA 0x0011
 
 /** structure used to set new format */
 typedef struct audsrv_fmt_t
 {
-	int freq;	                ///< output frequency in hz
-	int bits;                       ///< bits per sample (8, 16)
-	int channels;                   ///< output channels (1, 2)
+	int freq;     ///< output frequency in hz
+	int bits;     ///< bits per sample (8, 16)
+	int channels; ///< output channels (1, 2)
 } audsrv_fmt_t;
 
 /** adpcm sample definition */

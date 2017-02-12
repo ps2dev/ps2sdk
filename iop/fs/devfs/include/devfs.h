@@ -42,54 +42,52 @@ typedef s32 HDEV;
 #define DEVFS_MAX_DESC_LENGTH 256
 
 /** Enumeration of sub device access modes */
-enum devfs_subdev_modes
-{
-    /** Indicates a sub device can only be opened by one application at a time
+enum devfs_subdev_modes {
+	/** Indicates a sub device can only be opened by one application at a time
         @ingroup devfs
     */
-    DEVFS_MODE_EX = (1 << 0),
-    /** Indicates a sub device can be opened for reading
+	DEVFS_MODE_EX = (1 << 0),
+	/** Indicates a sub device can be opened for reading
         @ingroup devfs
     */
-    DEVFS_MODE_W  = (1 << 1),
-    /** Indicates a sub device can be opened for writing
+	DEVFS_MODE_W = (1 << 1),
+	/** Indicates a sub device can be opened for writing
         @ingroup devfs
     */
-    DEVFS_MODE_R  = (1 << 2),
-    /** Indicates a sub device can be opened for reading and writing
+	DEVFS_MODE_R = (1 << 2),
+	/** Indicates a sub device can be opened for reading and writing
         @ingroup devfs
     */
-    DEVFS_MODE_RW = (DEVFS_MODE_R | DEVFS_MODE_W)
+	DEVFS_MODE_RW = (DEVFS_MODE_R | DEVFS_MODE_W)
 };
 
 /** Enumeration of device type.
     @note These are currently not used
     @ingroup devfs
 */
-enum devfs_devtypes
-{
-    /** Indicates a device is character device
+enum devfs_devtypes {
+	/** Indicates a device is character device
         @ingroup devfs
     */
-    DEVFS_DEVTYPE_CHAR = 1,
-    /** Indicates a device is a block device
+	DEVFS_DEVTYPE_CHAR = 1,
+	/** Indicates a device is a block device
         @ingroup devfs
     */
-    DEVFS_DEVTYPE_BLOCK = 2,
-    /** Indicates a device is a stream device (no seek)
+	DEVFS_DEVTYPE_BLOCK = 2,
+	/** Indicates a device is a stream device (no seek)
         @ingroup devfs
     */
-    DEVFS_DEVTYPE_STREAM = 3
+	DEVFS_DEVTYPE_STREAM = 3
 };
 
 /** Specifies ioctl was called. No return value and the lengths are invalid
     @ingroup devfs
 */
-#define DEVFS_IOCTL_TYPE_1  1
+#define DEVFS_IOCTL_TYPE_1 1
 /** ioctl2 was called. Parameters should all be valid
     @ingroup devfs
 */
-#define DEVFS_IOCTL_TYPE_2  2
+#define DEVFS_IOCTL_TYPE_2 2
 
 /** ioctl command to return the description associated with a device
     @ingroup devfs
@@ -102,14 +100,14 @@ enum devfs_devtypes
 typedef union
 
 {
-  /** Array of two 32bit values
+	/** Array of two 32bit values
       @ingroup devfs
   */
-  u32 loc32[2];
-  /** The 64bit integer
+	u32 loc32[2];
+	/** The 64bit integer
       @ingroup devfs
   */
-  u64 loc64;
+	u64 loc64;
 } devfs_loc_t;
 
 /** Structure passed to the application when an event occurs
@@ -118,23 +116,23 @@ typedef union
 typedef struct
 
 {
-  /** The sub devices data pointer as set by DevFSAddSubDevice
+	/** The sub devices data pointer as set by DevFSAddSubDevice
       @ingroup devfs
    */
-  void *data;
-  /** The sub device number
+	void *data;
+	/** The sub device number
       @ingroup devfs
   */
-  s32 subdev;
-  /** The open mode.
+	s32 subdev;
+	/** The open mode.
       @note This is actually the posix mode bit fields as passed to open
       @ingroup devfs
   */
-  u32 mode;
-  /** The current seek location
+	u32 mode;
+	/** The current seek location
       @ingroup devfs
   */
-  devfs_loc_t loc;
+	devfs_loc_t loc;
 } devfs_info_t;
 
 /** Typedef of the read event handler
@@ -148,41 +146,41 @@ typedef s32 (*write_handler)(const devfs_info_t *dev, u8 *buf, s32 len);
     @ingroup devfs
 */
 typedef s32 (*ioctl_handler)(const devfs_info_t *dev, int ioctl_type, int cmd, void *arg,
-                            size_t arglen, void *buf, size_t buflen);
+                             size_t arglen, void *buf, size_t buflen);
 
 /** Structure defining a device node for passing to DevFSAddDevice()
     @ingroup devfs
 */
 typedef struct
 {
-   /** Name of the device
+	/** Name of the device
        @ingroup devfs
    */
-   char *name;
-   /** A textual description
+	char *name;
+	/** A textual description
        @ingroup devfs
    */
-   char *desc;
-   /** The type of device, possible values in ::devfs_devtypes
+	char *desc;
+	/** The type of device, possible values in ::devfs_devtypes
        @ingroup devfs
    */
-   s32  devtype;
-   /** The block size of the device. Not currently used
+	s32 devtype;
+	/** The block size of the device. Not currently used
        @ingroup devfs
    */
-   u32  blocksize;
-   /** Pointer to a read handler. Can be NULL
+	u32 blocksize;
+	/** Pointer to a read handler. Can be NULL
        @ingroup devfs
    */
-   read_handler read;
-   /** Pointer to a write handler. Can be NULL
+	read_handler read;
+	/** Pointer to a write handler. Can be NULL
        @ingroup devfs
    */
-   write_handler write;
-   /** Pointer to a ioctl handler. Can be NULL
+	write_handler write;
+	/** Pointer to a ioctl handler. Can be NULL
        @ingroup devfs
    */
-   ioctl_handler ioctl;
+	ioctl_handler ioctl;
 } devfs_node_t;
 
 /** Adds a new device to the filing system

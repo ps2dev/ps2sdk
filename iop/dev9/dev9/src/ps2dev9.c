@@ -31,27 +31,27 @@
 #define DRIVERNAME "dev9"
 IRX_ID(MODNAME, 2, 8);
 
-#define M_PRINTF(format, args...)	\
-	printf(MODNAME ": " format, ## args)
+#define M_PRINTF(format, args...) \
+	printf(MODNAME ": " format, ##args)
 
 #define VERSION "1.0"
 #define BANNER "\nDEV9 device driver v%s - Copyright (c) 2003 Marcus R. Brown\n\n"
 
 /* SSBUS registers.  */
-#define SSBUS_R_1418		0xbf801418
-#define SSBUS_R_141c		0xbf80141c
-#define SSBUS_R_1420		0xbf801420
+#define SSBUS_R_1418 0xbf801418
+#define SSBUS_R_141c 0xbf80141c
+#define SSBUS_R_1420 0xbf801420
 
-static int dev9type = -1;	/* 0 for PCMCIA, 1 for expansion bay */
-static int using_aif = 0;	/* 1 if using AIF on a T10K */
+static int dev9type = -1; /* 0 for PCMCIA, 1 for expansion bay */
+static int using_aif = 0; /* 1 if using AIF on a T10K */
 
 static void (*p_dev9_intr_cb)(int flag) = NULL;
-static int dma_lock_sem = -1;	/* used to arbitrate DMA */
+static int dma_lock_sem = -1; /* used to arbitrate DMA */
 
-static int pcic_cardtype;	/* Translated value of bits 0-1 of 0xbf801462 */
-static int pcic_voltage;	/* Translated value of bits 2-3 of 0xbf801462 */
+static int pcic_cardtype; /* Translated value of bits 0-1 of 0xbf801462 */
+static int pcic_voltage;  /* Translated value of bits 2-3 of 0xbf801462 */
 
-static s16 eeprom_data[5];	/* 2-byte EEPROM status (0/-1 = invalid, 1 = valid),
+static s16 eeprom_data[5]; /* 2-byte EEPROM status (0/-1 = invalid, 1 = valid),
 				   6-byte MAC address,
 				   2-byte MAC address checksum.  */
 
@@ -65,7 +65,7 @@ static dev9_dma_cb_t dev9_predma_cbs[4], dev9_postdma_cbs[4];
 
 static int dev9_intr_dispatch(int flag);
 
-static void dev9x_on_shutdown(void*);
+static void dev9x_on_shutdown(void *);
 
 static void dev9_set_stat(int stat);
 static int dev9_device_probe(void);
@@ -96,10 +96,9 @@ static int dev9x_dummy(void)
 
 static int dev9x_devctl(iop_file_t *f, const char *name, int cmd, void *args, unsigned int arglen, void *buf, unsigned int buflen)
 {
-	switch(cmd)
-	{
+	switch (cmd) {
 		case DDIOC_MODEL:
-	        	return dev9type;
+			return dev9type;
 		case DDIOC_OFF:
 			dev9Shutdown();
 			return 0;
@@ -109,41 +108,39 @@ static int dev9x_devctl(iop_file_t *f, const char *name, int cmd, void *args, un
 }
 
 static iop_device_ops_t dev9x_ops =
-{
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	(void *)&dev9x_dummy,
-	&dev9x_devctl
-};
+    {
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        &dev9x_devctl};
 
 static iop_device_t dev9x_device =
-{
-	"dev9x",
-	IOP_DT_FS | IOP_DT_FSEXT,
-	1,
-	"DEV9",
-	&dev9x_ops
-};
+    {
+        "dev9x",
+        IOP_DT_FS | IOP_DT_FSEXT,
+        1,
+        "DEV9",
+        &dev9x_ops};
 
 int _start(int argc, char **argv)
 {
@@ -157,11 +154,11 @@ int _start(int argc, char **argv)
 		dev9_shutdown_cbs[idx] = NULL;
 
 	dev9hw = DEV9_REG(DEV9_R_REV) & 0xf0;
-	if (dev9hw == 0x20) {		/* CXD9566 (PCMCIA) */
+	if (dev9hw == 0x20) { /* CXD9566 (PCMCIA) */
 		dev9type = DEV9_TYPE_PCMCIA;
 		M_PRINTF("CXD9566 detected.\n");
 		res = pcmcia_init();
-	} else if (dev9hw == 0x30) {	/* CXD9611 (Expansion Bay) */
+	} else if (dev9hw == 0x30) { /* CXD9611 (Expansion Bay) */
 		dev9type = DEV9_TYPE_EXPBAY;
 		M_PRINTF("CXD9611 detected.\n");
 		res = expbay_init();
@@ -191,12 +188,14 @@ void dev9RegisterIntrCb(int intr, dev9_intr_cb_t cb)
 }
 
 /* Export 12 */
-void dev9RegisterPreDmaCb(int ctrl, dev9_dma_cb_t cb){
+void dev9RegisterPreDmaCb(int ctrl, dev9_dma_cb_t cb)
+{
 	dev9_predma_cbs[ctrl] = cb;
 }
 
 /* Export 13 */
-void dev9RegisterPostDmaCb(int ctrl, dev9_dma_cb_t cb){
+void dev9RegisterPostDmaCb(int ctrl, dev9_dma_cb_t cb)
+{
 	dev9_postdma_cbs[ctrl] = cb;
 }
 
@@ -216,7 +215,8 @@ static int dev9_intr_dispatch(int flag)
 		for (i = 0; i < 16; i++) {
 			if (dev9_intr_cbs[i] != NULL) {
 				bit = (SPD_REG16(SPD_R_INTR_STAT) &
-					SPD_REG16(SPD_R_INTR_MASK)) >> i;
+				       SPD_REG16(SPD_R_INTR_MASK)) >>
+				      i;
 				if (bit & 0x01)
 					dev9_intr_cbs[i](flag);
 			}
@@ -228,7 +228,7 @@ static int dev9_intr_dispatch(int flag)
 
 static void dev9_set_stat(int stat)
 {
-	switch(dev9type){
+	switch (dev9type) {
 		case DEV9_TYPE_PCMCIA:
 			pcmcia_set_stat(stat);
 			break;
@@ -240,7 +240,7 @@ static void dev9_set_stat(int stat)
 
 static int dev9_device_probe(void)
 {
-	switch(dev9type){
+	switch (dev9type) {
 		case DEV9_TYPE_PCMCIA:
 			return pcmcia_device_probe();
 		case DEV9_TYPE_EXPBAY:
@@ -252,7 +252,7 @@ static int dev9_device_probe(void)
 
 static int dev9_device_reset(void)
 {
-	switch(dev9type){
+	switch (dev9type) {
 		case DEV9_TYPE_PCMCIA:
 			return pcmcia_device_reset();
 		case DEV9_TYPE_EXPBAY:
@@ -272,7 +272,7 @@ void dev9Shutdown(void)
 		if (dev9_shutdown_cbs[idx])
 			dev9_shutdown_cbs[idx]();
 
-	if (dev9type == DEV9_TYPE_PCMCIA) {	/* PCMCIA */
+	if (dev9type == DEV9_TYPE_PCMCIA) { /* PCMCIA */
 		DEV9_REG(DEV9_R_POWER) = 0;
 		DEV9_REG(DEV9_R_1474) = 0;
 	} else if (dev9type == DEV9_TYPE_EXPBAY) {
@@ -314,36 +314,40 @@ int dev9DmaTransfer(int ctrl, void *buf, int bcr, int dir)
 	volatile iop_dmac_chan_t *dev9_chan = (iop_dmac_chan_t *)DEV9_DMAC_BASE;
 	int res = 0, dmactrl;
 
-	switch(ctrl){
-	case 0:
-	case 1:	dmactrl = ctrl;
-		break;
+	switch (ctrl) {
+		case 0:
+		case 1:
+			dmactrl = ctrl;
+			break;
 
-	case 2:
-	case 3:
-		if (dev9_predma_cbs[ctrl] == NULL)	return -1;
-		if (dev9_postdma_cbs[ctrl] == NULL)	return -1;
-		dmactrl = (4 << ctrl);
-		break;
+		case 2:
+		case 3:
+			if (dev9_predma_cbs[ctrl] == NULL)
+				return -1;
+			if (dev9_postdma_cbs[ctrl] == NULL)
+				return -1;
+			dmactrl = (4 << ctrl);
+			break;
 
-	default:
-		return -1;
+		default:
+			return -1;
 	}
 
 	if ((res = WaitSema(dma_lock_sem)) < 0)
 		return res;
 
-	SPD_REG16(SPD_R_DMA_CTRL) = (SPD_REG16(SPD_R_REV_1)<17)?(dmactrl&0x03)|0x04:(dmactrl&0x01)|0x06;
+	SPD_REG16(SPD_R_DMA_CTRL) = (SPD_REG16(SPD_R_REV_1) < 17) ? (dmactrl & 0x03) | 0x04 : (dmactrl & 0x01) | 0x06;
 
 	if (dev9_predma_cbs[ctrl])
 		dev9_predma_cbs[ctrl](bcr, dir);
 
 	dev9_chan->madr = (u32)buf;
-	dev9_chan->bcr  = bcr;
-	dev9_chan->chcr = DMAC_CHCR_30|DMAC_CHCR_TR|DMAC_CHCR_CO|(dir & DMAC_CHCR_DR);
+	dev9_chan->bcr = bcr;
+	dev9_chan->chcr = DMAC_CHCR_30 | DMAC_CHCR_TR | DMAC_CHCR_CO | (dir & DMAC_CHCR_DR);
 
 	/* Wait for DMA to complete. Do not use a semaphore as thread switching hurts throughput greatly.  */
-	while(dev9_chan->chcr & DMAC_CHCR_TR){}
+	while (dev9_chan->chcr & DMAC_CHCR_TR) {
+	}
 	res = 0;
 
 	if (dev9_postdma_cbs[ctrl])
@@ -362,7 +366,7 @@ static int read_eeprom_data(void)
 	if (eeprom_data[0] < 0)
 		goto out;
 
-	SPD_REG8(SPD_R_PIO_DIR)  = 0xe1;
+	SPD_REG8(SPD_R_PIO_DIR) = 0xe1;
 	DelayThread(1);
 	SPD_REG8(SPD_R_PIO_DATA) = 0x80;
 	DelayThread(1);
@@ -384,7 +388,7 @@ static int read_eeprom_data(void)
 
 	val = SPD_REG8(SPD_R_PIO_DATA);
 	DelayThread(1);
-	if (val & 0x10) {	/* Error.  */
+	if (val & 0x10) { /* Error.  */
 		SPD_REG8(SPD_R_PIO_DATA) = 0;
 		DelayThread(1);
 		res = -1;
@@ -397,14 +401,14 @@ static int read_eeprom_data(void)
 
 	/* Read the MAC address and checksum from the EEPROM.  */
 	for (i = 0; i < 4; i++) {
-		eeprom_data[i+1] = 0;
+		eeprom_data[i + 1] = 0;
 
 		for (j = 15; j >= 0; j--) {
 			SPD_REG8(SPD_R_PIO_DATA) = 0xc0;
 			DelayThread(1);
 			val = SPD_REG8(SPD_R_PIO_DATA);
 			if (val & 0x10)
-				eeprom_data[i+1] |= (1<<j);
+				eeprom_data[i + 1] |= (1 << j);
 			SPD_REG8(SPD_R_PIO_DATA) = 0x80;
 			DelayThread(1);
 		}
@@ -412,7 +416,7 @@ static int read_eeprom_data(void)
 
 	SPD_REG8(SPD_R_PIO_DATA) = 0;
 	DelayThread(1);
-	eeprom_data[0] = 1;	/* The EEPROM data is valid.  */
+	eeprom_data[0] = 1; /* The EEPROM data is valid.  */
 	res = 0;
 
 out:
@@ -432,7 +436,7 @@ int dev9GetEEPROM(u16 *buf)
 
 	/* We only return the MAC address and checksum.  */
 	for (i = 0; i < 4; i++)
-		buf[i] = eeprom_data[i+1];
+		buf[i] = eeprom_data[i + 1];
 
 	return 0;
 }
@@ -445,9 +449,9 @@ void dev9LEDCtl(int ctl)
 }
 
 /* Export 11 */
-int dev9RegisterShutdownCb(int idx, dev9_shutdown_cb_t cb){
-	if (idx < 16)
-	{
+int dev9RegisterShutdownCb(int idx, dev9_shutdown_cb_t cb)
+{
+	if (idx < 16) {
 		dev9_shutdown_cbs[idx] = cb;
 		return 0;
 	}
@@ -478,7 +482,7 @@ static int dev9_init(void)
 	for (i = 0; i < 16; i++)
 		dev9_intr_cbs[i] = NULL;
 
-	for (i = 0; i < 4; i++){
+	for (i = 0; i < 4; i++) {
 		dev9_predma_cbs[i] = NULL;
 		dev9_postdma_cbs[i] = NULL;
 	}
@@ -490,21 +494,22 @@ static int dev9_init(void)
 	return 0;
 }
 
-static int dev9_smap_read_phy(volatile u8 *emac3_regbase, unsigned int address, unsigned int *data){
+static int dev9_smap_read_phy(volatile u8 *emac3_regbase, unsigned int address, unsigned int *data)
+{
 	unsigned int i, PHYRegisterValue;
 	int result;
 
-	PHYRegisterValue=(address&SMAP_E3_PHY_REG_ADDR_MSK)|SMAP_E3_PHY_READ|((SMAP_DsPHYTER_ADDRESS&SMAP_E3_PHY_ADDR_MSK)<<SMAP_E3_PHY_ADDR_BITSFT);
+	PHYRegisterValue = (address & SMAP_E3_PHY_REG_ADDR_MSK) | SMAP_E3_PHY_READ | ((SMAP_DsPHYTER_ADDRESS & SMAP_E3_PHY_ADDR_MSK) << SMAP_E3_PHY_ADDR_BITSFT);
 
-	i=0;
-	result=0;
+	i = 0;
+	result = 0;
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_STA_CTRL, PHYRegisterValue);
 
-	do{
-		if(SMAP_EMAC3_GET(SMAP_R_EMAC3_STA_CTRL)&SMAP_E3_PHY_OP_COMP){
-			if(SMAP_EMAC3_GET(SMAP_R_EMAC3_STA_CTRL)&SMAP_E3_PHY_OP_COMP){
-				if((result=SMAP_EMAC3_GET(SMAP_R_EMAC3_STA_CTRL))&SMAP_E3_PHY_OP_COMP){
-					result>>=SMAP_E3_PHY_DATA_BITSFT;
+	do {
+		if (SMAP_EMAC3_GET(SMAP_R_EMAC3_STA_CTRL) & SMAP_E3_PHY_OP_COMP) {
+			if (SMAP_EMAC3_GET(SMAP_R_EMAC3_STA_CTRL) & SMAP_E3_PHY_OP_COMP) {
+				if ((result = SMAP_EMAC3_GET(SMAP_R_EMAC3_STA_CTRL)) & SMAP_E3_PHY_OP_COMP) {
+					result >>= SMAP_E3_PHY_DATA_BITSFT;
 					break;
 				}
 			}
@@ -512,31 +517,33 @@ static int dev9_smap_read_phy(volatile u8 *emac3_regbase, unsigned int address, 
 
 		DelayThread(1000);
 		i++;
-	}while(i<100);
+	} while (i < 100);
 
-	if(i>=100){
+	if (i >= 100) {
 		return 1;
-	}else{
+	} else {
 		*data = result;
 		return 0;
 	}
 }
 
-static int dev9_smap_write_phy(volatile u8 *emac3_regbase, unsigned char address, unsigned short int value){
+static int dev9_smap_write_phy(volatile u8 *emac3_regbase, unsigned char address, unsigned short int value)
+{
 	unsigned int i, PHYRegisterValue;
 
-	PHYRegisterValue=(address&SMAP_E3_PHY_REG_ADDR_MSK)|SMAP_E3_PHY_WRITE|((SMAP_DsPHYTER_ADDRESS&SMAP_E3_PHY_ADDR_MSK)<<SMAP_E3_PHY_ADDR_BITSFT);
-	PHYRegisterValue|=((unsigned int)value)<<SMAP_E3_PHY_DATA_BITSFT;
+	PHYRegisterValue = (address & SMAP_E3_PHY_REG_ADDR_MSK) | SMAP_E3_PHY_WRITE | ((SMAP_DsPHYTER_ADDRESS & SMAP_E3_PHY_ADDR_MSK) << SMAP_E3_PHY_ADDR_BITSFT);
+	PHYRegisterValue |= ((unsigned int)value) << SMAP_E3_PHY_DATA_BITSFT;
 
-	i=0;
+	i = 0;
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_STA_CTRL, PHYRegisterValue);
 
-	for(; !(SMAP_EMAC3_GET(SMAP_R_EMAC3_STA_CTRL)&SMAP_E3_PHY_OP_COMP); i++){
+	for (; !(SMAP_EMAC3_GET(SMAP_R_EMAC3_STA_CTRL) & SMAP_E3_PHY_OP_COMP); i++) {
 		DelayThread(1000);
-		if(i>=100) break;
+		if (i >= 100)
+			break;
 	}
 
-	return((i>=100)?1:0);
+	return ((i >= 100) ? 1 : 0);
 }
 
 static int dev9_smap_init(void)
@@ -550,90 +557,95 @@ static int dev9_smap_init(void)
 	int i;
 
 	//Do not perform SMAP initialization if the SPEED device does not have such an interface
-	if (!(SPD_REG16(SPD_R_REV_3)&SPD_CAPS_SMAP)) return 0;
+	if (!(SPD_REG16(SPD_R_REV_3) & SPD_CAPS_SMAP))
+		return 0;
 
 	SMAP_REG8(SMAP_R_TXFIFO_CTRL) = SMAP_TXFIFO_RESET;
-	for(i = 9; SMAP_REG8(SMAP_R_TXFIFO_CTRL)&SMAP_TXFIFO_RESET; i--)
-	{
-		if (i <= 0) return 1;
+	for (i = 9; SMAP_REG8(SMAP_R_TXFIFO_CTRL) & SMAP_TXFIFO_RESET; i--) {
+		if (i <= 0)
+			return 1;
 		DelayThread(1000);
 	}
 
 	SMAP_REG8(SMAP_R_RXFIFO_CTRL) = SMAP_RXFIFO_RESET;
-	for(i = 9; SMAP_REG8(SMAP_R_RXFIFO_CTRL)&SMAP_RXFIFO_RESET; i--)
-	{
-		if (i <= 0) return 1;
+	for (i = 9; SMAP_REG8(SMAP_R_RXFIFO_CTRL) & SMAP_RXFIFO_RESET; i--) {
+		if (i <= 0)
+			return 1;
 		DelayThread(1000);
 	}
 
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_MODE0, SMAP_E3_SOFT_RESET);
-	for (i = 9; SMAP_EMAC3_GET(SMAP_R_EMAC3_MODE0)&SMAP_E3_SOFT_RESET; i--)
-	{
-		if (i <= 0) return 3;
+	for (i = 9; SMAP_EMAC3_GET(SMAP_R_EMAC3_MODE0) & SMAP_E3_SOFT_RESET; i--) {
+		if (i <= 0)
+			return 3;
 		DelayThread(1000);
 	}
 
 	//Unlike the SMAP driver, this reset operation is done in big-endian.
-	if (SPD_REG16(SPD_R_REV_1) >= 0x11) SMAP_REG8(SMAP_R_BD_MODE) = SMAP_BD_SWAP;
+	if (SPD_REG16(SPD_R_REV_1) >= 0x11)
+		SMAP_REG8(SMAP_R_BD_MODE) = SMAP_BD_SWAP;
 
-	for(i = 0; i < SMAP_BD_MAX_ENTRY; i++)
-	{
+	for (i = 0; i < SMAP_BD_MAX_ENTRY; i++) {
 		tx_bd[i].ctrl_stat = 0;
 		tx_bd[i].reserved = 0;
 		tx_bd[i].length = 0;
 		tx_bd[i].pointer = 0;
 	}
 
-	for(i = 0; i < SMAP_BD_MAX_ENTRY; i++)
-	{
-		rx_bd[i].ctrl_stat = 0x80;	//SMAP_BD_RX_EMPTY
+	for (i = 0; i < SMAP_BD_MAX_ENTRY; i++) {
+		rx_bd[i].ctrl_stat = 0x80; //SMAP_BD_RX_EMPTY
 		rx_bd[i].reserved = 0;
 		rx_bd[i].length = 0;
 		rx_bd[i].pointer = 0;
 	}
 
 	SMAP_REG16(SMAP_R_INTR_CLR) = SMAP_INTR_BITMSK;
-	if (SPD_REG16(SPD_R_REV_1) < 0x11) SPD_REG8(0x100) = 1;
+	if (SPD_REG16(SPD_R_REV_1) < 0x11)
+		SPD_REG8(0x100) = 1;
 
-	SMAP_EMAC3_SET(SMAP_R_EMAC3_MODE1, SMAP_E3_FDX_ENABLE|SMAP_E3_IGNORE_SQE|SMAP_E3_MEDIA_100M|SMAP_E3_RXFIFO_2K|SMAP_E3_TXFIFO_1K|SMAP_E3_TXREQ0_MULTI|SMAP_E3_TXREQ1_SINGLE);
-	SMAP_EMAC3_SET(SMAP_R_EMAC3_TxMODE1, 7<<SMAP_E3_TX_LOW_REQ_BITSFT | 15<<SMAP_E3_TX_URG_REQ_BITSFT);
-	SMAP_EMAC3_SET(SMAP_R_EMAC3_RxMODE, SMAP_E3_RX_RX_RUNT_FRAME|SMAP_E3_RX_RX_FCS_ERR|SMAP_E3_RX_RX_TOO_LONG_ERR|SMAP_E3_RX_RX_IN_RANGE_ERR|SMAP_E3_RX_PROP_PF|SMAP_E3_RX_PROMISC);
-	SMAP_EMAC3_SET(SMAP_R_EMAC3_INTR_STAT, SMAP_E3_INTR_TX_ERR_0|SMAP_E3_INTR_SQE_ERR_0|SMAP_E3_INTR_DEAD_0);
-	SMAP_EMAC3_SET(SMAP_R_EMAC3_INTR_ENABLE, SMAP_E3_INTR_TX_ERR_0|SMAP_E3_INTR_SQE_ERR_0|SMAP_E3_INTR_DEAD_0);
+	SMAP_EMAC3_SET(SMAP_R_EMAC3_MODE1, SMAP_E3_FDX_ENABLE | SMAP_E3_IGNORE_SQE | SMAP_E3_MEDIA_100M | SMAP_E3_RXFIFO_2K | SMAP_E3_TXFIFO_1K | SMAP_E3_TXREQ0_MULTI | SMAP_E3_TXREQ1_SINGLE);
+	SMAP_EMAC3_SET(SMAP_R_EMAC3_TxMODE1, 7 << SMAP_E3_TX_LOW_REQ_BITSFT | 15 << SMAP_E3_TX_URG_REQ_BITSFT);
+	SMAP_EMAC3_SET(SMAP_R_EMAC3_RxMODE, SMAP_E3_RX_RX_RUNT_FRAME | SMAP_E3_RX_RX_FCS_ERR | SMAP_E3_RX_RX_TOO_LONG_ERR | SMAP_E3_RX_RX_IN_RANGE_ERR | SMAP_E3_RX_PROP_PF | SMAP_E3_RX_PROMISC);
+	SMAP_EMAC3_SET(SMAP_R_EMAC3_INTR_STAT, SMAP_E3_INTR_TX_ERR_0 | SMAP_E3_INTR_SQE_ERR_0 | SMAP_E3_INTR_DEAD_0);
+	SMAP_EMAC3_SET(SMAP_R_EMAC3_INTR_ENABLE, SMAP_E3_INTR_TX_ERR_0 | SMAP_E3_INTR_SQE_ERR_0 | SMAP_E3_INTR_DEAD_0);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_ADDR_HI, 0);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_ADDR_LO, 0);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_PAUSE_TIMER, 0xFFFF);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_INTER_FRAME_GAP, 4);
-	SMAP_EMAC3_SET(SMAP_R_EMAC3_TX_THRESHOLD, 12<<SMAP_E3_TX_THRESHLD_BITSFT);
-	SMAP_EMAC3_SET(SMAP_R_EMAC3_RX_WATERMARK, 16<<SMAP_E3_RX_LO_WATER_BITSFT|128<<SMAP_E3_RX_HI_WATER_BITSFT);
+	SMAP_EMAC3_SET(SMAP_R_EMAC3_TX_THRESHOLD, 12 << SMAP_E3_TX_THRESHLD_BITSFT);
+	SMAP_EMAC3_SET(SMAP_R_EMAC3_RX_WATERMARK, 16 << SMAP_E3_RX_LO_WATER_BITSFT | 128 << SMAP_E3_RX_HI_WATER_BITSFT);
 
 	dev9_smap_write_phy(emac3_regbase, SMAP_DsPHYTER_BMCR, SMAP_PHY_BMCR_RST);
-	for (i = 9;; i--)
-	{
-		if (dev9_smap_read_phy(emac3_regbase, SMAP_DsPHYTER_BMCR, &value)) return 4;
-		if (!(value & SMAP_PHY_BMCR_RST)) break;
-		if (i <= 0) return 5;
+	for (i = 9;; i--) {
+		if (dev9_smap_read_phy(emac3_regbase, SMAP_DsPHYTER_BMCR, &value))
+			return 4;
+		if (!(value & SMAP_PHY_BMCR_RST))
+			break;
+		if (i <= 0)
+			return 5;
 	}
 
-	dev9_smap_write_phy(emac3_regbase, SMAP_DsPHYTER_BMCR, SMAP_PHY_BMCR_LPBK|SMAP_PHY_BMCR_100M|SMAP_PHY_BMCR_DUPM);
+	dev9_smap_write_phy(emac3_regbase, SMAP_DsPHYTER_BMCR, SMAP_PHY_BMCR_LPBK | SMAP_PHY_BMCR_100M | SMAP_PHY_BMCR_DUPM);
 	DelayThread(10000);
-	SMAP_EMAC3_SET(SMAP_R_EMAC3_MODE0, SMAP_E3_TXMAC_ENABLE|SMAP_E3_RXMAC_ENABLE);
+	SMAP_EMAC3_SET(SMAP_R_EMAC3_MODE0, SMAP_E3_TXMAC_ENABLE | SMAP_E3_RXMAC_ENABLE);
 	value = SMAP_REG16(SMAP_R_TXFIFO_WR_PTR) + SMAP_TX_BASE;
 
-	for(i=0; i<0x5EA; i+=4) SMAP_REG32(SMAP_R_TXFIFO_DATA) = i;
+	for (i = 0; i < 0x5EA; i += 4)
+		SMAP_REG32(SMAP_R_TXFIFO_DATA) = i;
 
 	tx_bd[0].length = 0xEA05;
 	tx_bd[0].pointer = (value >> 8) | (value << 8);
 	SMAP_REG8(SMAP_R_TXFIFO_FRAME_INC) = 0;
-	tx_bd[0].ctrl_stat = 0x83;	//SMAP_BD_TX_READY|SMAP_BD_TX_GENFCS|SMAP_BD_TX_GENPAD
+	tx_bd[0].ctrl_stat = 0x83; //SMAP_BD_TX_READY|SMAP_BD_TX_GENFCS|SMAP_BD_TX_GENPAD
 
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_TxMODE0, SMAP_E3_TX_GNP_0);
-	for (i = 9;; i--)
-	{
+	for (i = 9;; i--) {
 		value = SPD_REG16(SPD_R_INTR_STAT);
 
-		if ((value & (SMAP_INTR_RXEND|SMAP_INTR_TXEND|SMAP_INTR_TXDNV)) == (SMAP_INTR_RXEND|SMAP_INTR_TXEND|SMAP_INTR_TXDNV)) break;
-		if (i <= 0) return 6;
+		if ((value & (SMAP_INTR_RXEND | SMAP_INTR_TXEND | SMAP_INTR_TXDNV)) == (SMAP_INTR_RXEND | SMAP_INTR_TXEND | SMAP_INTR_TXDNV))
+			break;
+		if (i <= 0)
+			return 6;
 		DelayThread(1000);
 	}
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_MODE0, SMAP_E3_SOFT_RESET);
@@ -644,13 +656,13 @@ static int dev9_smap_init(void)
 static int speed_device_init(void)
 {
 	USE_SPD_REGS;
-	const char *spdnames[] = { "(unknown)", "TS", "ES1", "ES2" };
+	const char *spdnames[] = {"(unknown)", "TS", "ES1", "ES2"};
 	int idx, res, InitCount;
 	u16 spdrev;
 
 	eeprom_data[0] = 0;
 
-	for(InitCount=0; InitCount<8; InitCount++){
+	for (InitCount = 0; InitCount < 8; InitCount++) {
 		if (dev9_device_probe() < 0) {
 			M_PRINTF("PC card or expansion device isn't connected.\n");
 			return -1;
@@ -673,7 +685,7 @@ static int speed_device_init(void)
 			}
 		}
 
-		if((res = dev9_smap_init()) == 0){
+		if ((res = dev9_smap_init()) == 0) {
 			break;
 		}
 
@@ -688,11 +700,11 @@ static int speed_device_init(void)
 
 	/* Print out the SPEED chip revision.  */
 	spdrev = SPD_REG16(SPD_R_REV_1);
-	idx    = (spdrev & 0xffff) - 14;
+	idx = (spdrev & 0xffff) - 14;
 	if (spdrev == 9)
-		idx = 1;	/* TS */
+		idx = 1; /* TS */
 	else if (spdrev < 9 || (spdrev < 16 || spdrev > 17))
-		idx = 0;	/* Unknown revision */
+		idx = 0; /* Unknown revision */
 
 	M_PRINTF("SPEED chip '%s', revision 0x%0X\n", spdnames[idx], spdrev);
 	return 0;
@@ -704,10 +716,9 @@ static int pcic_get_cardtype(void)
 	u16 val = DEV9_REG(DEV9_R_1462) & 0x03;
 
 	if (val == 0)
-		return 1;	/* 16-bit */
-	else
-	if (val < 3)
-		return 2;	/* CardBus */
+		return 1; /* 16-bit */
+	else if (val < 3)
+		return 2; /* CardBus */
 	return 0;
 }
 
@@ -809,7 +820,7 @@ static int pcic_ssbus_mode(int mode)
 
 static int pcmcia_device_probe(void)
 {
-	const char *pcic_ct_names[] = { "No", "16-bit", "CardBus" };
+	const char *pcic_ct_names[] = {"No", "16-bit", "CardBus"};
 	int voltage;
 
 	pcic_voltage = pcic_get_voltage();
@@ -817,7 +828,7 @@ static int pcmcia_device_probe(void)
 	voltage = (pcic_voltage == 2 ? 5 : (pcic_voltage == 1 ? 3 : 0));
 
 	M_PRINTF("%s PCMCIA card detected. Vcc = %dV\n",
-			pcic_ct_names[pcic_cardtype], voltage);
+	         pcic_ct_names[pcic_cardtype], voltage);
 
 	if (pcic_voltage == 3 || pcic_cardtype != 1)
 		return -1;
@@ -859,7 +870,7 @@ static int card_find_manfid(u32 manfid)
 
 	/* Scan the card for the MANFID tuple.  */
 	spdaddr = 0;
-	spdend =  0x1000;
+	spdend = 0x1000;
 	/* I hate this code, and it hates me.  */
 	while (spdaddr < spdend) {
 		hdr = SPD_REG8(spdaddr) & 0xff;
@@ -884,14 +895,14 @@ static int card_find_manfid(u32 manfid)
 			if ((spdaddr + 8) >= spdend)
 				goto error;
 
-			tuple = (SPD_REG8(spdaddr + 2) << 24)|
-				(SPD_REG8(spdaddr) << 16)|
-				(SPD_REG8(spdaddr + 6) << 8)|
-				 SPD_REG8(spdaddr + 4);
+			tuple = (SPD_REG8(spdaddr + 2) << 24) |
+			        (SPD_REG8(spdaddr) << 16) |
+			        (SPD_REG8(spdaddr + 6) << 8) |
+			        SPD_REG8(spdaddr + 4);
 			if (manfid == tuple)
 				return 0;
 			M_PRINTF("MANFID 0x%08lx doesn't match expected 0x%08lx\n",
-					tuple, manfid);
+			         tuple, manfid);
 			return -1;
 		}
 		spdaddr = next;
@@ -917,13 +928,13 @@ static int pcmcia_intr(void *unused)
 		if (aif_regs[AIF_INTSR] & AIF_INTR_PCMCIA)
 			aif_regs[AIF_INTCL] = AIF_INTR_PCMCIA;
 		else
-			return 0;		/* Unknown interrupt.  */
+			return 0; /* Unknown interrupt.  */
 	}
 
 	/* Acknowledge the interrupt.  */
 	DEV9_REG(DEV9_R_1464) = cstc1;
 	DEV9_REG(DEV9_R_1466) = cstc2;
-	if (cstc1 & 0x03 || cstc2 & 0x03) {	/* Card removed or added? */
+	if (cstc1 & 0x03 || cstc2 & 0x03) { /* Card removed or added? */
 		if (p_dev9_intr_cb)
 			p_dev9_intr_cb(1);
 
@@ -1027,7 +1038,7 @@ static int expbay_device_reset(void)
 	if (expbay_device_probe() < 0)
 		return -1;
 
-	DEV9_REG(DEV9_R_POWER) = (DEV9_REG(DEV9_R_POWER) & ~1) | 0x04;	// power on
+	DEV9_REG(DEV9_R_POWER) = (DEV9_REG(DEV9_R_POWER) & ~1) | 0x04; // power on
 	DelayThread(500000);
 
 	DEV9_REG(DEV9_R_1460) = DEV9_REG(DEV9_R_1460) | 0x01;
@@ -1083,7 +1094,7 @@ static int expbay_init(void)
 	return 0;
 }
 
-static void dev9x_on_shutdown(void*p)
+static void dev9x_on_shutdown(void *p)
 {
 	M_PRINTF("shutdown\n");
 	dev9IntrDisable(-1);

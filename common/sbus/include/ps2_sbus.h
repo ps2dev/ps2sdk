@@ -15,24 +15,24 @@ typedef void (*SBUS_IrqHandlerFunc)(int irq, void *param);
 
 typedef struct st_SBUS_IrqHandler
 {
-    SBUS_IrqHandlerFunc func;
-    void *param;
+	SBUS_IrqHandlerFunc func;
+	void *param;
 } SBUS_IrqHandler;
 
 typedef struct st_SIF2_CmdPkt
 {
-    u32 cid; // 32-bit command id
-    u32 size; // 32-bit size of command packet.
-    u32 extra; // 32-bit remote address of parameters
-    u32 extra_size; // 32-bit size of remote parameters
+	u32 cid;        // 32-bit command id
+	u32 size;       // 32-bit size of command packet.
+	u32 extra;      // 32-bit remote address of parameters
+	u32 extra_size; // 32-bit size of remote parameters
 } SIF2_CmdPkt;
 
 typedef void (*SIF2_CmdHandlerFunc)(SIF2_CmdPkt *pkt, void *param);
 
 typedef struct st_SIF2_CmdHandler
 {
-    SIF2_CmdHandlerFunc func;
-    void *param;
+	SIF2_CmdHandlerFunc func;
+	void *param;
 } SIF2_CmdHandler;
 
 // SBUS

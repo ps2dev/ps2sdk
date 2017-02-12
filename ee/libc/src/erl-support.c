@@ -17,9 +17,8 @@
 /* however, I decided to not put it here */
 /* add manual loading of libmc if you need fflush */
 
-char * erl_id = "libc";
+char *erl_id = "libc";
 
-char * erl_dependancies[] = {
+char *erl_dependancies[] = {
     "libkernel",
-    0
-};
+    0};

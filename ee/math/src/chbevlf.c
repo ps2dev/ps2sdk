@@ -58,29 +58,26 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 */
 
 #ifdef ANSIC
-float chbevlf( float x, float *array, int n )
+float chbevlf(float x, float *array, int n)
 #else
-float chbevlf( x, array, n )
-float x;
+float chbevlf(x, array, n) float x;
 float *array;
 int n;
 #endif
 {
-float b0, b1, b2, *p;
-int i;
+	float b0, b1, b2, *p;
+	int i;
 
-p = array;
-b0 = *p++;
-b1 = 0.0;
-i = n - 1;
+	p = array;
+	b0 = *p++;
+	b1 = 0.0;
+	i = n - 1;
 
-do
-	{
-	b2 = b1;
-	b1 = b0;
-	b0 = x * b1  -  b2  + *p++;
-	}
-while( --i );
+	do {
+		b2 = b1;
+		b1 = b0;
+		b0 = x * b1 - b2 + *p++;
+	} while (--i);
 
-return( 0.5*(b0-b2) );
+	return (0.5 * (b0 - b2));
 }

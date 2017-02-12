@@ -55,40 +55,41 @@
 #include "netif/ppp/lcp.h"
 #include "netif/ppp/tdb.h"
 
-bool endpoint_specified;	/* user gave explicit endpoint discriminator */
-char *bundle_id;		/* identifier for our bundle */
-char *blinks_id;		/* key for the list of links */
-bool doing_multilink;		/* multilink was enabled and agreed to */
-bool multilink_master;		/* we own the multilink bundle */
+bool endpoint_specified; /* user gave explicit endpoint discriminator */
+char *bundle_id;         /* identifier for our bundle */
+char *blinks_id;         /* key for the list of links */
+bool doing_multilink;    /* multilink was enabled and agreed to */
+bool multilink_master;   /* we own the multilink bundle */
 
 extern TDB_CONTEXT *pppdb;
 extern char db_key[];
 
-static void make_bundle_links (int append);
-static void remove_bundle_link (void);
-static void iterate_bundle_links (void (*func) (char *));
+static void make_bundle_links(int append);
+static void remove_bundle_link(void);
+static void iterate_bundle_links(void (*func)(char *));
 
-static int get_default_epdisc (struct epdisc *);
-static int parse_num (char *str, const char *key, int *valp);
-static int owns_unit (TDB_DATA pid, int unit);
+static int get_default_epdisc(struct epdisc *);
+static int parse_num(char *str, const char *key, int *valp);
+static int owns_unit(TDB_DATA pid, int unit);
 
-#define set_ip_epdisc(ep, addr) do {	\
-	ep->length = 4;			\
-	ep->value[0] = addr >> 24;	\
-	ep->value[1] = addr >> 16;	\
-	ep->value[2] = addr >> 8;	\
-	ep->value[3] = addr;		\
+#define set_ip_epdisc(ep, addr)    \
+	do {                           \
+		ep->length = 4;            \
+		ep->value[0] = addr >> 24; \
+		ep->value[1] = addr >> 16; \
+		ep->value[2] = addr >> 8;  \
+		ep->value[3] = addr;       \
+	\
 } while (0)
 
-#define LOCAL_IP_ADDR(addr)						  \
-	(((addr) & 0xff000000) == 0x0a000000		/* 10.x.x.x */	  \
-	 || ((addr) & 0xfff00000) == 0xac100000		/* 172.16.x.x */  \
-	 || ((addr) & 0xffff0000) == 0xc0a80000)	/* 192.168.x.x */
+#define LOCAL_IP_ADDR(addr)                                 \
+	(((addr)&0xff000000) == 0x0a000000     /* 10.x.x.x */   \
+	 || ((addr)&0xfff00000) == 0xac100000  /* 172.16.x.x */ \
+	 || ((addr)&0xffff0000) == 0xc0a80000) /* 192.168.x.x */
 
-#define process_exists(n)	(kill((n), 0) == 0 || errno != ESRCH)
+#define process_exists(n) (kill((n), 0) == 0 || errno != ESRCH)
 
-void
-mp_check_options()
+void mp_check_options()
 {
 	lcp_options *wo = &lcp_wantoptions[0];
 	lcp_options *ao = &lcp_allowoptions[0];
@@ -115,8 +116,7 @@ mp_check_options()
  * Make a new bundle or join us to an existing bundle
  * if we are doing multilink.
  */
-int
-mp_join_bundle()
+int mp_join_bundle()
 {
 	lcp_options *go = &lcp_gotoptions[0];
 	lcp_options *ho = &lcp_hisoptions[0];
@@ -142,7 +142,7 @@ mp_join_bundle()
 		/* not doing multilink */
 		if (go->neg_mrru)
 			notice("oops, multilink negotiated only for receive");
-		mtu = ho->neg_mru? ho->mru: PPP_MRU;
+		mtu = ho->neg_mru ? ho->mru : PPP_MRU;
 		if (mtu > ao->mru)
 			mtu = ao->mru;
 		if (demand) {
@@ -175,14 +175,14 @@ mp_join_bundle()
 		novm("bundle identifier");
 
 	p = bundle_id;
-	p += slprintf(p, l-1, "BUNDLE=\"%q\"", peer_authname);
+	p += slprintf(p, l - 1, "BUNDLE=\"%q\"", peer_authname);
 	if (ho->neg_endpoint || bundle_name)
 		*p++ = '/';
 	if (ho->neg_endpoint)
-		p += slprintf(p, bundle_id+l-p, "%s",
-			      epdisc_to_str(&ho->endpoint));
+		p += slprintf(p, bundle_id + l - p, "%s",
+		              epdisc_to_str(&ho->endpoint));
 	if (bundle_name)
-		p += slprintf(p, bundle_id+l-p, "/%v", bundle_name);
+		p += slprintf(p, bundle_id + l - p, "/%v", bundle_name);
 
 	/* Make the key for the list of links belonging to the bundle */
 	l = p - bundle_id;
@@ -216,13 +216,11 @@ mp_join_bundle()
 		rec = tdb_fetch(pppdb, pid);
 		if (rec.dptr != NULL && rec.dsize > 0) {
 			/* make sure the string is null-terminated */
-			rec.dptr[rec.dsize-1] = 0;
+			rec.dptr[rec.dsize - 1] = 0;
 			/* parse the interface number */
 			parse_num(rec.dptr, "IFNAME=ppp", &unit);
 			/* check the pid value */
-			if (!parse_num(rec.dptr, "PPPD_PID=", &pppd_pid)
-			    || !process_exists(pppd_pid)
-			    || !owns_unit(pid, unit))
+			if (!parse_num(rec.dptr, "PPPD_PID=", &pppd_pid) || !process_exists(pppd_pid) || !owns_unit(pid, unit))
 				unit = -1;
 			free(rec.dptr);
 		}
@@ -315,7 +313,7 @@ static void make_bundle_links(int append)
 	if (append) {
 		rec = tdb_fetch(pppdb, key);
 		if (rec.dptr != NULL && rec.dsize > 0) {
-			rec.dptr[rec.dsize-1] = 0;
+			rec.dptr[rec.dsize - 1] = 0;
 			if (strstr(rec.dptr, db_key) != NULL) {
 				/* already in there? strange */
 				warn("link entry already exists in tdb");
@@ -336,7 +334,7 @@ static void make_bundle_links(int append)
 	rec.dsize = strlen(p) + 1;
 	if (tdb_store(pppdb, key, rec, TDB_REPLACE))
 		error("couldn't %s bundle link list",
-		      append? "update": "create");
+		      append ? "update" : "create");
 	if (p != entry)
 		free(p);
 }
@@ -358,7 +356,7 @@ static void remove_bundle_link()
 			free(rec.dptr);
 		return;
 	}
-	rec.dptr[rec.dsize-1] = 0;
+	rec.dptr[rec.dsize - 1] = 0;
 	p = strstr(rec.dptr, entry);
 	if (p != NULL) {
 		q = p + strlen(entry);
@@ -386,14 +384,14 @@ static void iterate_bundle_links(void (*func)(char *))
 		return;
 	}
 	p = rec.dptr;
-	p[rec.dsize-1] = 0;
+	p[rec.dsize - 1] = 0;
 	while ((q = strchr(p, ';')) != NULL) {
 		*q = 0;
 		key.dptr = p;
 		key.dsize = q - p;
 		pp = tdb_fetch(pppdb, key);
 		if (pp.dptr != NULL && pp.dsize > 0) {
-			pp.dptr[pp.dsize-1] = 0;
+			pp.dptr[pp.dsize - 1] = 0;
 			func(pp.dptr);
 		}
 		if (pp.dptr != NULL)
@@ -404,10 +402,9 @@ static void iterate_bundle_links(void (*func)(char *))
 }
 
 static int
-parse_num(str, key, valp)
-     char *str;
-     const char *key;
-     int *valp;
+    parse_num(str, key, valp) char *str;
+const char *key;
+int *valp;
 {
 	char *p, *endp;
 	int i;
@@ -428,9 +425,9 @@ parse_num(str, key, valp)
  * Check whether the pppd identified by `key' still owns ppp unit `unit'.
  */
 static int
-owns_unit(key, unit)
-     TDB_DATA key;
-     int unit;
+    owns_unit(key, unit)
+        TDB_DATA key;
+int unit;
 {
 	char ifkey[32];
 	TDB_DATA kd, vd;
@@ -441,16 +438,14 @@ owns_unit(key, unit)
 	kd.dsize = strlen(ifkey);
 	vd = tdb_fetch(pppdb, kd);
 	if (vd.dptr != NULL) {
-		ret = vd.dsize == key.dsize
-			&& memcmp(vd.dptr, key.dptr, vd.dsize) == 0;
+		ret = vd.dsize == key.dsize && memcmp(vd.dptr, key.dptr, vd.dsize) == 0;
 		free(vd.dptr);
 	}
 	return ret;
 }
 
 static int
-get_default_epdisc(ep)
-     struct epdisc *ep;
+    get_default_epdisc(ep) struct epdisc *ep;
 {
 	char *p;
 	struct hostent *hp;
@@ -486,14 +481,12 @@ get_default_epdisc(ep)
  */
 
 static char *endp_class_names[] = {
-    "null", "local", "IP", "MAC", "magic", "phone"
-};
+    "null", "local", "IP", "MAC", "magic", "phone"};
 
 char *
-epdisc_to_str(ep)
-     struct epdisc *ep;
+    epdisc_to_str(ep) struct epdisc *ep;
 {
-	static char str[MAX_ENDP_LEN*3+8];
+	static char str[MAX_ENDP_LEN * 3 + 8];
 	u_char *p = ep->value;
 	int i, mask = 0;
 	char *q, c, c2;
@@ -516,10 +509,10 @@ epdisc_to_str(ep)
 		mask = 3;
 	q = str;
 	if (ep->class <= EPD_PHONENUM)
-		q += slprintf(q, sizeof(str)-1, "%s",
-			      endp_class_names[ep->class]);
+		q += slprintf(q, sizeof(str) - 1, "%s",
+		              endp_class_names[ep->class]);
 	else
-		q += slprintf(q, sizeof(str)-1, "%d", ep->class);
+		q += slprintf(q, sizeof(str) - 1, "%d", ep->class);
 	c = ':';
 	for (i = 0; i < ep->length && i < MAX_ENDP_LEN; ++i) {
 		if ((i & mask) == 0) {
@@ -541,9 +534,8 @@ static int hexc_val(int c)
 }
 
 int
-str_to_epdisc(ep, str)
-     struct epdisc *ep;
-     char *str;
+    str_to_epdisc(ep, str) struct epdisc *ep;
+char *str;
 {
 	int i, l;
 	char *p, *endp;
@@ -559,7 +551,7 @@ str_to_epdisc(ep, str)
 		/* not a class name, try a decimal class number */
 		i = strtol(str, &endp, 10);
 		if (endp == str)
-			return 0;	/* can't parse class number */
+			return 0; /* can't parse class number */
 		str = endp;
 	}
 	ep->class = i;

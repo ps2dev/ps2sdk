@@ -76,73 +76,66 @@ float incbpsf();
 static float incbcff(), incbdf();
 #endif
 
-#define fabsf(x) ( (x) < 0 ? -(x) : (x) )
+#define fabsf(x) ((x) < 0 ? -(x) : (x))
 
 /* BIG = 1/MACHEPF */
-#define BIG   16777216.
+#define BIG 16777216.
 extern float MACHEPF, MAXLOGF;
 #define MINLOGF (-MAXLOGF)
 
 #ifdef ANSIC
-float incbetf( float aaa, float bbb, float xxx )
+float incbetf(float aaa, float bbb, float xxx)
 #else
-float incbetf( aaa, bbb, xxx )
-double aaa, bbb, xxx;
+float incbetf(aaa, bbb, xxx) double aaa, bbb, xxx;
 #endif
 {
-float aa, bb, xx, ans, a, b, t, x, onemx;
-int flag;
+	float aa, bb, xx, ans, a, b, t, x, onemx;
+	int flag;
 
-aa = aaa;
-bb = bbb;
-xx = xxx;
-if( (xx <= 0.0) || ( xx >= 1.0) )
-	{
-	if( xx == 0.0 )
-		return(0.0);
-	if( xx == 1.0 )
-		return( 1.0 );
-	mtherr( "incbetf", DOMAIN );
-	return( 0.0 );
+	aa = aaa;
+	bb = bbb;
+	xx = xxx;
+	if ((xx <= 0.0) || (xx >= 1.0)) {
+		if (xx == 0.0)
+			return (0.0);
+		if (xx == 1.0)
+			return (1.0);
+		mtherr("incbetf", DOMAIN);
+		return (0.0);
 	}
 
-onemx = 1.0 - xx;
+	onemx = 1.0 - xx;
 
 
-/* transformation for small aa */
+	/* transformation for small aa */
 
-if( aa <= 1.0 )
-	{
-	ans = incbetf( aa+1.0, bb, xx );
-	t = aa*logf(xx) + bb*logf( 1.0-xx )
-		+ lgamf(aa+bb) - lgamf(aa+1.0) - lgamf(bb);
-	if( t > MINLOGF )
-		ans += expf(t);
-	return( ans );
+	if (aa <= 1.0) {
+		ans = incbetf(aa + 1.0, bb, xx);
+		t = aa * logf(xx) + bb * logf(1.0 - xx) + lgamf(aa + bb) - lgamf(aa + 1.0) - lgamf(bb);
+		if (t > MINLOGF)
+			ans += expf(t);
+		return (ans);
 	}
 
 
-/* see if x is greater than the mean */
+	/* see if x is greater than the mean */
 
-if( xx > (aa/(aa+bb)) )
-	{
-	flag = 1;
-	a = bb;
-	b = aa;
-	t = xx;
-	x = onemx;
-	}
-else
-	{
-	flag = 0;
-	a = aa;
-	b = bb;
-	t = onemx;
-	x = xx;
+	if (xx > (aa / (aa + bb))) {
+		flag = 1;
+		a = bb;
+		b = aa;
+		t = xx;
+		x = onemx;
+	} else {
+		flag = 0;
+		a = aa;
+		b = bb;
+		t = onemx;
+		x = xx;
 	}
 
-/* transformation for small aa */
-/*
+	/* transformation for small aa */
+	/*
 if( a <= 1.0 )
 	{
 	ans = a*logf(x) + b*logf( onemx )
@@ -153,51 +146,42 @@ if( a <= 1.0 )
 	goto bdone;
 	}
 */
-/* Choose expansion for optimal convergence */
+	/* Choose expansion for optimal convergence */
 
 
-if( b > 10.0 )
-	{
-if( fabsf(b*x/a) < 0.3 )
-	{
-	t = incbpsf( a, b, x );
-	goto bdone;
-	}
-	}
-
-ans = x * (a+b-2.0)/(a-1.0);
-if( ans < 1.0 )
-	{
-	ans = incbcff( a, b, x );
-	t = b * logf( t );
-	}
-else
-	{
-	ans = incbdf( a, b, x );
-	t = (b-1.0) * logf(t);
-	}
-
-t += a*logf(x) + lgamf(a+b) - lgamf(a) - lgamf(b);
-t += logf( ans/a );
-
-if( t < MINLOGF )
-	{
-	t = 0.0;
-	if( flag == 0 )
-		{
-		mtherr( "incbetf", UNDERFLOW );
+	if (b > 10.0) {
+		if (fabsf(b * x / a) < 0.3) {
+			t = incbpsf(a, b, x);
+			goto bdone;
 		}
 	}
-else
-	{
-	t = expf(t);
+
+	ans = x * (a + b - 2.0) / (a - 1.0);
+	if (ans < 1.0) {
+		ans = incbcff(a, b, x);
+		t = b * logf(t);
+	} else {
+		ans = incbdf(a, b, x);
+		t = (b - 1.0) * logf(t);
+	}
+
+	t += a * logf(x) + lgamf(a + b) - lgamf(a) - lgamf(b);
+	t += logf(ans / a);
+
+	if (t < MINLOGF) {
+		t = 0.0;
+		if (flag == 0) {
+			mtherr("incbetf", UNDERFLOW);
+		}
+	} else {
+		t = expf(t);
 	}
 bdone:
 
-if( flag )
-	t = 1.0 - t;
+	if (flag)
+		t = 1.0 - t;
 
-return( t );
+	return (t);
 }
 
 /* Continued fraction expansion #1
@@ -205,97 +189,90 @@ return( t );
  */
 
 #ifdef ANSIC
-static float incbcff( float aa, float bb, float xx )
+static float incbcff(float aa, float bb, float xx)
 #else
-static float incbcff( aa, bb, xx )
-double aa, bb, xx;
+static float incbcff(aa, bb, xx) double aa, bb, xx;
 #endif
 {
-float a, b, x, xk, pk, pkm1, pkm2, qk, qkm1, qkm2;
-float k1, k2, k3, k4, k5, k6, k7, k8;
-float r, t, ans;
-static float big = BIG;
-int n;
+	float a, b, x, xk, pk, pkm1, pkm2, qk, qkm1, qkm2;
+	float k1, k2, k3, k4, k5, k6, k7, k8;
+	float r, t, ans;
+	static float big = BIG;
+	int n;
 
-a = aa;
-b = bb;
-x = xx;
-k1 = a;
-k2 = a + b;
-k3 = a;
-k4 = a + 1.0;
-k5 = 1.0;
-k6 = b - 1.0;
-k7 = k4;
-k8 = a + 2.0;
+	a = aa;
+	b = bb;
+	x = xx;
+	k1 = a;
+	k2 = a + b;
+	k3 = a;
+	k4 = a + 1.0;
+	k5 = 1.0;
+	k6 = b - 1.0;
+	k7 = k4;
+	k8 = a + 2.0;
 
-pkm2 = 0.0;
-qkm2 = 1.0;
-pkm1 = 1.0;
-qkm1 = 1.0;
-ans = 1.0;
-r = 0.0;
-n = 0;
-do
-	{
+	pkm2 = 0.0;
+	qkm2 = 1.0;
+	pkm1 = 1.0;
+	qkm1 = 1.0;
+	ans = 1.0;
+	r = 0.0;
+	n = 0;
+	do {
 
-	xk = -( x * k1 * k2 )/( k3 * k4 );
-	pk = pkm1 +  pkm2 * xk;
-	qk = qkm1 +  qkm2 * xk;
-	pkm2 = pkm1;
-	pkm1 = pk;
-	qkm2 = qkm1;
-	qkm1 = qk;
+		xk = -(x * k1 * k2) / (k3 * k4);
+		pk = pkm1 + pkm2 * xk;
+		qk = qkm1 + qkm2 * xk;
+		pkm2 = pkm1;
+		pkm1 = pk;
+		qkm2 = qkm1;
+		qkm1 = qk;
 
-	xk = ( x * k5 * k6 )/( k7 * k8 );
-	pk = pkm1 +  pkm2 * xk;
-	qk = qkm1 +  qkm2 * xk;
-	pkm2 = pkm1;
-	pkm1 = pk;
-	qkm2 = qkm1;
-	qkm1 = qk;
+		xk = (x * k5 * k6) / (k7 * k8);
+		pk = pkm1 + pkm2 * xk;
+		qk = qkm1 + qkm2 * xk;
+		pkm2 = pkm1;
+		pkm1 = pk;
+		qkm2 = qkm1;
+		qkm1 = qk;
 
-	if( qk != 0 )
-		r = pk/qk;
-	if( r != 0 )
-		{
-		t = fabsf( (ans - r)/r );
-		ans = r;
+		if (qk != 0)
+			r = pk / qk;
+		if (r != 0) {
+			t = fabsf((ans - r) / r);
+			ans = r;
+		} else
+			t = 1.0;
+
+		if (t < MACHEPF)
+			goto cdone;
+
+		k1 += 1.0;
+		k2 += 1.0;
+		k3 += 2.0;
+		k4 += 2.0;
+		k5 += 1.0;
+		k6 -= 1.0;
+		k7 += 2.0;
+		k8 += 2.0;
+
+		if ((fabsf(qk) + fabsf(pk)) > big) {
+			pkm2 *= MACHEPF;
+			pkm1 *= MACHEPF;
+			qkm2 *= MACHEPF;
+			qkm1 *= MACHEPF;
 		}
-	else
-		t = 1.0;
-
-	if( t < MACHEPF )
-		goto cdone;
-
-	k1 += 1.0;
-	k2 += 1.0;
-	k3 += 2.0;
-	k4 += 2.0;
-	k5 += 1.0;
-	k6 -= 1.0;
-	k7 += 2.0;
-	k8 += 2.0;
-
-	if( (fabsf(qk) + fabsf(pk)) > big )
-		{
-		pkm2 *= MACHEPF;
-		pkm1 *= MACHEPF;
-		qkm2 *= MACHEPF;
-		qkm1 *= MACHEPF;
+		if ((fabsf(qk) < MACHEPF) || (fabsf(pk) < MACHEPF)) {
+			pkm2 *= big;
+			pkm1 *= big;
+			qkm2 *= big;
+			qkm1 *= big;
 		}
-	if( (fabsf(qk) < MACHEPF) || (fabsf(pk) < MACHEPF) )
-		{
-		pkm2 *= big;
-		pkm1 *= big;
-		qkm2 *= big;
-		qkm1 *= big;
-		}
-	}
-while( ++n < 100 );
+	} while (++n < 100);
 
 cdone:
-return(ans);
+	return (ans);
 }
 
 
@@ -304,141 +281,130 @@ return(ans);
  */
 
 #ifdef ANSIC
-static float incbdf( float aa, float bb, float xx )
+static float incbdf(float aa, float bb, float xx)
 #else
-static float incbdf( aa, bb, xx )
-double aa, bb, xx;
+static float incbdf(aa, bb, xx) double aa, bb, xx;
 #endif
 {
-float a, b, x, xk, pk, pkm1, pkm2, qk, qkm1, qkm2;
-float k1, k2, k3, k4, k5, k6, k7, k8;
-float r, t, ans, z;
-static float big = BIG;
-int n;
+	float a, b, x, xk, pk, pkm1, pkm2, qk, qkm1, qkm2;
+	float k1, k2, k3, k4, k5, k6, k7, k8;
+	float r, t, ans, z;
+	static float big = BIG;
+	int n;
 
-a = aa;
-b = bb;
-x = xx;
-k1 = a;
-k2 = b - 1.0;
-k3 = a;
-k4 = a + 1.0;
-k5 = 1.0;
-k6 = a + b;
-k7 = a + 1.0;;
-k8 = a + 2.0;
+	a = aa;
+	b = bb;
+	x = xx;
+	k1 = a;
+	k2 = b - 1.0;
+	k3 = a;
+	k4 = a + 1.0;
+	k5 = 1.0;
+	k6 = a + b;
+	k7 = a + 1.0;
+	;
+	k8 = a + 2.0;
 
-pkm2 = 0.0;
-qkm2 = 1.0;
-pkm1 = 1.0;
-qkm1 = 1.0;
-z = x / (1.0-x);
-ans = 1.0;
-r = 0.0;
-n = 0;
-do
-	{
+	pkm2 = 0.0;
+	qkm2 = 1.0;
+	pkm1 = 1.0;
+	qkm1 = 1.0;
+	z = x / (1.0 - x);
+	ans = 1.0;
+	r = 0.0;
+	n = 0;
+	do {
 
-	xk = -( z * k1 * k2 )/( k3 * k4 );
-	pk = pkm1 +  pkm2 * xk;
-	qk = qkm1 +  qkm2 * xk;
-	pkm2 = pkm1;
-	pkm1 = pk;
-	qkm2 = qkm1;
-	qkm1 = qk;
+		xk = -(z * k1 * k2) / (k3 * k4);
+		pk = pkm1 + pkm2 * xk;
+		qk = qkm1 + qkm2 * xk;
+		pkm2 = pkm1;
+		pkm1 = pk;
+		qkm2 = qkm1;
+		qkm1 = qk;
 
-	xk = ( z * k5 * k6 )/( k7 * k8 );
-	pk = pkm1 +  pkm2 * xk;
-	qk = qkm1 +  qkm2 * xk;
-	pkm2 = pkm1;
-	pkm1 = pk;
-	qkm2 = qkm1;
-	qkm1 = qk;
+		xk = (z * k5 * k6) / (k7 * k8);
+		pk = pkm1 + pkm2 * xk;
+		qk = qkm1 + qkm2 * xk;
+		pkm2 = pkm1;
+		pkm1 = pk;
+		qkm2 = qkm1;
+		qkm1 = qk;
 
-	if( qk != 0 )
-		r = pk/qk;
-	if( r != 0 )
-		{
-		t = fabsf( (ans - r)/r );
-		ans = r;
+		if (qk != 0)
+			r = pk / qk;
+		if (r != 0) {
+			t = fabsf((ans - r) / r);
+			ans = r;
+		} else
+			t = 1.0;
+
+		if (t < MACHEPF)
+			goto cdone;
+
+		k1 += 1.0;
+		k2 -= 1.0;
+		k3 += 2.0;
+		k4 += 2.0;
+		k5 += 1.0;
+		k6 += 1.0;
+		k7 += 2.0;
+		k8 += 2.0;
+
+		if ((fabsf(qk) + fabsf(pk)) > big) {
+			pkm2 *= MACHEPF;
+			pkm1 *= MACHEPF;
+			qkm2 *= MACHEPF;
+			qkm1 *= MACHEPF;
 		}
-	else
-		t = 1.0;
-
-	if( t < MACHEPF )
-		goto cdone;
-
-	k1 += 1.0;
-	k2 -= 1.0;
-	k3 += 2.0;
-	k4 += 2.0;
-	k5 += 1.0;
-	k6 += 1.0;
-	k7 += 2.0;
-	k8 += 2.0;
-
-	if( (fabsf(qk) + fabsf(pk)) > big )
-		{
-		pkm2 *= MACHEPF;
-		pkm1 *= MACHEPF;
-		qkm2 *= MACHEPF;
-		qkm1 *= MACHEPF;
+		if ((fabsf(qk) < MACHEPF) || (fabsf(pk) < MACHEPF)) {
+			pkm2 *= big;
+			pkm1 *= big;
+			qkm2 *= big;
+			qkm1 *= big;
 		}
-	if( (fabsf(qk) < MACHEPF) || (fabsf(pk) < MACHEPF) )
-		{
-		pkm2 *= big;
-		pkm1 *= big;
-		qkm2 *= big;
-		qkm1 *= big;
-		}
-	}
-while( ++n < 100 );
+	} while (++n < 100);
 
 cdone:
-return(ans);
+	return (ans);
 }
 
 
 /* power series */
 #ifdef ANSIC
-float incbpsf( float aa, float bb, float xx )
+float incbpsf(float aa, float bb, float xx)
 #else
-float incbpsf( aa, bb, xx )
-double aa, bb, xx;
+float incbpsf(aa, bb, xx) double aa, bb, xx;
 #endif
 {
-float a, b, x, t, u, y, s;
+	float a, b, x, t, u, y, s;
 
-a = aa;
-b = bb;
-x = xx;
+	a = aa;
+	b = bb;
+	x = xx;
 
-y = a * logf(x) + (b-1.0)*logf(1.0-x) - logf(a);
-y -= lgamf(a) + lgamf(b);
-y += lgamf(a+b);
+	y = a * logf(x) + (b - 1.0) * logf(1.0 - x) - logf(a);
+	y -= lgamf(a) + lgamf(b);
+	y += lgamf(a + b);
 
 
-t = x / (1.0 - x);
-s = 0.0;
-u = 1.0;
-do
-	{
-	b -= 1.0;
-	if( b == 0.0 )
-		break;
-	a += 1.0;
-	u *= t*b/a;
-	s += u;
-	}
-while( fabsf(u) > MACHEPF );
-
-if( y < MINLOGF )
-	{
-	mtherr( "incbetf", UNDERFLOW );
+	t = x / (1.0 - x);
 	s = 0.0;
-	}
-else
-	s = expf(y) * (1.0 + s);
-/*printf( "incbpsf: %.4e\n", s );*/
-return(s);
+	u = 1.0;
+	do {
+		b -= 1.0;
+		if (b == 0.0)
+			break;
+		a += 1.0;
+		u *= t * b / a;
+		s += u;
+	} while (fabsf(u) > MACHEPF);
+
+	if (y < MINLOGF) {
+		mtherr("incbetf", UNDERFLOW);
+		s = 0.0;
+	} else
+		s = expf(y) * (1.0 + s);
+	/*printf( "incbpsf: %.4e\n", s );*/
+	return (s);
 }

@@ -17,22 +17,24 @@
 #include "irx.h"
 
 //Fixed-length pool attributes
-#define FA_THFIFO	0x000
-#define FA_THPRI	0x001
-#define FA_MEMBTM	0x200
+#define FA_THFIFO 0x000
+#define FA_THPRI 0x001
+#define FA_MEMBTM 0x200
 
 /*
  * Fixed length memory pool
 */
 
-typedef struct _iop_fpl_param {
+typedef struct _iop_fpl_param
+{
 	unsigned int attr;
 	unsigned int option;
 	int block_size;
 	int blocks;
 } iop_fpl_param;
 
-typedef struct _iop_fpl_info {
+typedef struct _iop_fpl_info
+{
 	unsigned int attr;
 	unsigned int option;
 	int blockSize;
@@ -67,17 +69,19 @@ int iReferFplStatus(int fplId, iop_fpl_info_t *info);
 */
 
 //Variable-length pool attributes
-#define VA_THFIFO	0x000
-#define VA_THPRI	0x001
-#define VA_MEMBTM	0x200
+#define VA_THFIFO 0x000
+#define VA_THPRI 0x001
+#define VA_MEMBTM 0x200
 
-typedef struct _iop_vpl_param {
+typedef struct _iop_vpl_param
+{
 	unsigned int attr;
 	unsigned int option;
 	int size;
 } iop_vpl_param;
 
-typedef struct _iop_vpl_info {
+typedef struct _iop_vpl_info
+{
 	unsigned int attr;
 	unsigned int option;
 	int size;

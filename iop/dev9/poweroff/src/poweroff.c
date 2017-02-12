@@ -25,10 +25,10 @@
 
 //#define DEBUG
 
-#define TYPE_C		1
-#define CDVDreg_PWOFF	(*(volatile unsigned char*)0xBF402008)
+#define TYPE_C 1
+#define CDVDreg_PWOFF (*(volatile unsigned char *)0xBF402008)
 
-#define MAX_CALLBACKS	8
+#define MAX_CALLBACKS 8
 
 IRX_ID("Poweroff_Handler", 1, 1);
 
@@ -36,18 +36,19 @@ extern struct irx_export_table _exp_poweroff;
 
 //---------------------------------------------------------------------
 
-int  _start(int, char**);
+int _start(int, char **);
 static void Shutdown();
-static void SendCmd(void* data);
+static void SendCmd(void *data);
 
 //---------------------------------------------------------------------
-typedef int (*intrhandler)(void*);
+typedef int (*intrhandler)(void *);
 
-static intrhandler	oldCdHandler=0;
+static intrhandler oldCdHandler = 0;
 
-struct handlerTableEntry{
-	intrhandler	handler;
-	void		*param;
+struct handlerTableEntry
+{
+	intrhandler handler;
+	void *param;
 };
 
 struct CallbackEntry
@@ -68,8 +69,7 @@ static SifRpcClientData_t client;
 
 static int myCdHandler(void *param)
 {
-	if (((CDVDreg_PWOFF & 1)==0) && (CDVDreg_PWOFF & 4))
-	{
+	if (((CDVDreg_PWOFF & 1) == 0) && (CDVDreg_PWOFF & 4)) {
 		/* can't seem to register a sif cmd callback in ps2link so... */
 		/* Clear interrupt bit */
 		CDVDreg_PWOFF = 4;
@@ -83,17 +83,15 @@ static int myCdHandler(void *param)
 	return oldCdHandler(param);
 }
 
-static void Shutdown(void* data)
+static void Shutdown(void *data)
 {
 #ifdef DEBUG
 	printf("Shutdown\n");
 #endif
 	int i;
 	/* Do callbacks in reverse order */
-	for(i = MAX_CALLBACKS-1; i >= 0; i--)
-	{
-		if(CallbackTable[i].cb)
-		{
+	for (i = MAX_CALLBACKS - 1; i >= 0; i--) {
+		if (CallbackTable[i].cb) {
 			CallbackTable[i].cb(CallbackTable[i].data);
 		}
 	}
@@ -103,7 +101,7 @@ static void Shutdown(void* data)
 	*((unsigned char *)0xBF402016) = 0xF;
 }
 
-static void SendCmd(void* data)
+static void SendCmd(void *data)
 {
 	iWakeupThread(PowerOffThreadID);
 }
@@ -118,8 +116,7 @@ static void InitPowerOffThread(void)
 {
 	iop_thread_t thread;
 
-	if(PowerOffThreadID < 0)
-	{
+	if (PowerOffThreadID < 0) {
 		thread.thread = &PowerOffThread;
 		thread.attr = TH_C;
 		thread.option = PWROFF_IRX;
@@ -129,7 +126,8 @@ static void InitPowerOffThread(void)
 		StartThread(PowerOffThreadID, NULL);
 
 		client.server = NULL;
-		while(sceSifBindRpc(&client, PWROFF_IRX, 0) < 0 || client.server == NULL) DelayThread(500);
+		while (sceSifBindRpc(&client, PWROFF_IRX, 0) < 0 || client.server == NULL)
+			DelayThread(500);
 	}
 }
 
@@ -137,20 +135,18 @@ static void InitPowerOffThread(void)
 //-----------------------------------------------------------entrypoint
 //---------------------------------------------------------------------
 
-void SetPowerButtonHandler(pwoffcb func, void* param)
+void SetPowerButtonHandler(pwoffcb func, void *param)
 {
 	poweroff_button_cb = func;
 	poweroff_button_data = param;
 }
 
-void AddPowerOffHandler(pwoffcb func, void* param)
+void AddPowerOffHandler(pwoffcb func, void *param)
 {
 	int i;
 
-	for(i = 0; i < MAX_CALLBACKS; i++)
-	{
-		if(CallbackTable[i].cb == 0)
-		{
+	for (i = 0; i < MAX_CALLBACKS; i++) {
+		if (CallbackTable[i].cb == 0) {
 			CallbackTable[i].cb = func;
 			CallbackTable[i].data = param;
 #ifdef DEBUG
@@ -160,8 +156,7 @@ void AddPowerOffHandler(pwoffcb func, void* param)
 		}
 	}
 
-	if(i == MAX_CALLBACKS)
-	{
+	if (i == MAX_CALLBACKS) {
 		printf("Could not add poweroff callback\n");
 	}
 }
@@ -170,19 +165,15 @@ void RemovePowerOffHandler(pwoffcb func)
 {
 	int i;
 
-	for(i = 0; i < MAX_CALLBACKS; i++)
-	{
-		if(CallbackTable[i].cb == func)
-		{
+	for (i = 0; i < MAX_CALLBACKS; i++) {
+		if (CallbackTable[i].cb == func) {
 			break;
 		}
 	}
 
-	if(i < MAX_CALLBACKS)
-	{
-		for(; i < (MAX_CALLBACKS-1); i++)
-		{
-			CallbackTable[i] = CallbackTable[i+1];
+	if (i < MAX_CALLBACKS) {
+		for (; i < (MAX_CALLBACKS - 1); i++) {
+			CallbackTable[i] = CallbackTable[i + 1];
 		}
 		memset(&CallbackTable[i], 0, sizeof(struct CallbackEntry));
 	}
@@ -193,28 +184,28 @@ void PoweroffShutdown()
 	Shutdown(0);
 }
 
-void* poweroff_rpc_server(int fno, void *data, int size)
+void *poweroff_rpc_server(int fno, void *data, int size)
 {
-	switch(fno) {
-	case PWROFF_SHUTDOWN:
-		Shutdown(0);
-		break;
+	switch (fno) {
+		case PWROFF_SHUTDOWN:
+			Shutdown(0);
+			break;
 
-	case PWROFF_ENABLE_AUTO_SHUTOFF:
-		InitPowerOffThread();
+		case PWROFF_ENABLE_AUTO_SHUTOFF:
+			InitPowerOffThread();
 
-		int* sbuff = data;
-		if (sbuff[0])
-			SetPowerButtonHandler(Shutdown, 0);
-		else
-			SetPowerButtonHandler(SendCmd, 0);
-		sbuff[0] = 1;
-		return sbuff;
+			int *sbuff = data;
+			if (sbuff[0])
+				SetPowerButtonHandler(Shutdown, 0);
+			else
+				SetPowerButtonHandler(SendCmd, 0);
+			sbuff[0] = 1;
+			return sbuff;
 	}
 	return NULL;
 }
 
-void poweroff_rpc_Thread(void* param)
+void poweroff_rpc_Thread(void *param)
 {
 	SifInitRpc(0);
 
@@ -223,32 +214,31 @@ void poweroff_rpc_Thread(void* param)
 	SifRpcLoop(&qd);
 }
 
-int _start(int argc, char* argv[])
+int _start(int argc, char *argv[])
 {
-	register struct handlerTableEntry *handlers=(struct handlerTableEntry*)0x480;//iopmem
+	register struct handlerTableEntry *handlers = (struct handlerTableEntry *)0x480; //iopmem
 	iop_thread_t mythread;
 	int i;
 
-	if(RegisterLibraryEntries(&_exp_poweroff) != 0)
-	{
+	if (RegisterLibraryEntries(&_exp_poweroff) != 0) {
 		printf("Poweroff already registered\n");
 		return 1;
 	}
 
 	SetPowerButtonHandler(Shutdown, 0);
 
-	if (handlers[IOP_IRQ_CDVD].handler==0) {
+	if (handlers[IOP_IRQ_CDVD].handler == 0) {
 		printf("No CDROM handler. Run CDVDMAN first\n");
 		return 1;
 	}
 
-	if (((int)handlers[IOP_IRQ_CDVD].handler & 3) != TYPE_C){
+	if (((int)handlers[IOP_IRQ_CDVD].handler & 3) != TYPE_C) {
 		printf("Cannot chain to non-C handler\n");
 		return 1;
 	}
 
-	oldCdHandler=(intrhandler)((int)handlers[IOP_IRQ_CDVD].handler & ~3);
-	handlers[IOP_IRQ_CDVD].handler=(intrhandler)((int)myCdHandler | TYPE_C);
+	oldCdHandler = (intrhandler)((int)handlers[IOP_IRQ_CDVD].handler & ~3);
+	handlers[IOP_IRQ_CDVD].handler = (intrhandler)((int)myCdHandler | TYPE_C);
 
 	memset(CallbackTable, 0, sizeof(struct CallbackEntry) * MAX_CALLBACKS);
 
@@ -261,12 +251,11 @@ int _start(int argc, char* argv[])
 	int pid = CreateThread(&mythread);
 
 	if (pid > 0) {
-		if ((i=StartThread(pid, NULL)) < 0) {
+		if ((i = StartThread(pid, NULL)) < 0) {
 			printf("StartThread failed (%d)\n", i);
 			return MODULE_NO_RESIDENT_END;
 		}
-	}
-	else {
+	} else {
 		printf("CreateThread failed (%d)\n", pid);
 		return MODULE_NO_RESIDENT_END;
 	}

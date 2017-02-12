@@ -36,40 +36,40 @@
 extern "C" {
 #endif
 
-#define MC_WAIT					0
-#define MC_NOWAIT				1
+#define MC_WAIT 0
+#define MC_NOWAIT 1
 
-#define MC_TYPE_PSX				1
-#define MC_TYPE_PS2				2
-#define MC_TYPE_POCKET			3
-#define MC_TYPE_NONE			0
+#define MC_TYPE_PSX 1
+#define MC_TYPE_PS2 2
+#define MC_TYPE_POCKET 3
+#define MC_TYPE_NONE 0
 
-#define MC_FORMATTED		1
-#define MC_UNFORMATTED		0
+#define MC_FORMATTED 1
+#define MC_UNFORMATTED 0
 
 // Valid bits in memcard file attributes (mctable.AttrFile)
-#define MC_ATTR_READABLE        0x0001
-#define MC_ATTR_WRITEABLE       0x0002
-#define MC_ATTR_EXECUTABLE      0x0004
-#define MC_ATTR_PROTECTED       0x0008
-#define MC_ATTR_FILE            0x0010
-#define MC_ATTR_SUBDIR          0x0020
-#define MC_ATTR_OBJECT          0x0030	// File or directory
-#define MC_ATTR_CLOSED          0x0080
-#define MC_ATTR_PDAEXEC         0x0800
-#define MC_ATTR_PSX             0x1000
-#define MC_ATTR_HIDDEN          0x2000	// not hidden in osdsys, but it is to games
+#define MC_ATTR_READABLE 0x0001
+#define MC_ATTR_WRITEABLE 0x0002
+#define MC_ATTR_EXECUTABLE 0x0004
+#define MC_ATTR_PROTECTED 0x0008
+#define MC_ATTR_FILE 0x0010
+#define MC_ATTR_SUBDIR 0x0020
+#define MC_ATTR_OBJECT 0x0030 // File or directory
+#define MC_ATTR_CLOSED 0x0080
+#define MC_ATTR_PDAEXEC 0x0800
+#define MC_ATTR_PSX 0x1000
+#define MC_ATTR_HIDDEN 0x2000 // not hidden in osdsys, but it is to games
 
 // function numbers returned by mcSync in the 'cmd' pointer
-enum MC_FUNC_NUMBERS{
-	MC_FUNC_NONE		= 0x00,
+enum MC_FUNC_NUMBERS {
+	MC_FUNC_NONE = 0x00,
 	MC_FUNC_GET_INFO,
 	MC_FUNC_OPEN,
 	MC_FUNC_CLOSE,
 	MC_FUNC_SEEK,
 	MC_FUNC_READ,
 	MC_FUNC_WRITE,
-	MC_FUNC_FLUSH		= 0x0A,
+	MC_FUNC_FLUSH = 0x0A,
 	MC_FUNC_MK_DIR,
 	MC_FUNC_CH_DIR,
 	MC_FUNC_GET_DIR,
@@ -80,7 +80,7 @@ enum MC_FUNC_NUMBERS{
 	MC_FUNC_GET_ENT,
 	MC_FUNC_RENAME,
 	MC_FUNC_CHG_PRITY,
-	MC_FUNC_ERASE_BLOCK	= 0x5A,
+	MC_FUNC_ERASE_BLOCK = 0x5A,
 	MC_FUNC_READ_PAGE,
 	MC_FUNC_WRITE_PAGE,
 };
@@ -89,11 +89,11 @@ enum MC_FUNC_NUMBERS{
 // If the OSD doesn't know the number it'll display "Unrecognizable Data" or so.
 // AFAIK these have no other effects.
 // Known type IDs for icon.sys file:
-enum MCICON_TYPES{
-	MCICON_TYPE_SAVED_DATA		= 0,	// "Saved Data (PlayStation(r)2)"
-	MCICON_TYPE_SOFTWARE_PS2,		// "Software (PlayStation(r)2)"
-	MCICON_TYPE_SOFTWARE_PKT,		// "Software (PocketStation(r))"
-	MCICON_TYPE_SETTINGS_DATA		// "Settings File (PlayStation(r)2)"
+enum MCICON_TYPES {
+	MCICON_TYPE_SAVED_DATA = 0, // "Saved Data (PlayStation(r)2)"
+	MCICON_TYPE_SOFTWARE_PS2,   // "Software (PlayStation(r)2)"
+	MCICON_TYPE_SOFTWARE_PKT,   // "Software (PocketStation(r))"
+	MCICON_TYPE_SETTINGS_DATA   // "Settings File (PlayStation(r)2)"
 };
 
 typedef int iconIVECTOR[4];
@@ -101,67 +101,68 @@ typedef float iconFVECTOR[4];
 
 typedef struct
 {
-    unsigned char  head[4];     // header = "PS2D"
-    unsigned short type;        // filetype, used to be "unknown1" (see MCICON_TYPE_* above)
-    unsigned short nlOffset;    // new line pos within title name
-    unsigned unknown2;          // unknown
-    unsigned trans;             // transparency
-    iconIVECTOR bgCol[4];       // background color for each of the four points
-    iconFVECTOR lightDir[3];    // directions of three light sources
-    iconFVECTOR lightCol[3];    // colors of each of these sources
-    iconFVECTOR lightAmbient;   // ambient light
-    unsigned short title[34];   // application title - NOTE: stored in sjis, NOT normal ascii
-    unsigned char view[64];     // list icon filename
-    unsigned char copy[64];     // copy icon filename
-    unsigned char del[64];      // delete icon filename
-    unsigned char unknown3[512];// unknown
+	unsigned char head[4];       // header = "PS2D"
+	unsigned short type;         // filetype, used to be "unknown1" (see MCICON_TYPE_* above)
+	unsigned short nlOffset;     // new line pos within title name
+	unsigned unknown2;           // unknown
+	unsigned trans;              // transparency
+	iconIVECTOR bgCol[4];        // background color for each of the four points
+	iconFVECTOR lightDir[3];     // directions of three light sources
+	iconFVECTOR lightCol[3];     // colors of each of these sources
+	iconFVECTOR lightAmbient;    // ambient light
+	unsigned short title[34];    // application title - NOTE: stored in sjis, NOT normal ascii
+	unsigned char view[64];      // list icon filename
+	unsigned char copy[64];      // copy icon filename
+	unsigned char del[64];       // delete icon filename
+	unsigned char unknown3[512]; // unknown
 } mcIcon;
 
-typedef struct _sceMcTblGetDir {	// size = 64
-	sceMcStDateTime _Create;	// 0
-	sceMcStDateTime _Modify;	// 8
-	u32 FileSizeByte;		// 16
-	u16 AttrFile;			// 20
-	u16 Reserve1;			// 22
-	u32 Reserve2;			// 24
-	u32 PdaAplNo;			// 28
-	unsigned char EntryName[32];	// 32
+typedef struct _sceMcTblGetDir
+{                                // size = 64
+	sceMcStDateTime _Create;     // 0
+	sceMcStDateTime _Modify;     // 8
+	u32 FileSizeByte;            // 16
+	u16 AttrFile;                // 20
+	u16 Reserve1;                // 22
+	u32 Reserve2;                // 24
+	u32 PdaAplNo;                // 28
+	unsigned char EntryName[32]; // 32
 } sceMcTblGetDir __attribute__((aligned(64)));
 
 typedef struct
 {
-    struct
-    {
-        unsigned char unknown1;
-        unsigned char sec;      // Entry creation date/time (second)
-        unsigned char min;      // Entry creation date/time (minute)
-        unsigned char hour;     // Entry creation date/time (hour)
-        unsigned char day;      // Entry creation date/time (day)
-        unsigned char month;    // Entry creation date/time (month)
-        unsigned short year;    // Entry creation date/time (year)
-    } _create;
+	struct
+	{
+		unsigned char unknown1;
+		unsigned char sec;   // Entry creation date/time (second)
+		unsigned char min;   // Entry creation date/time (minute)
+		unsigned char hour;  // Entry creation date/time (hour)
+		unsigned char day;   // Entry creation date/time (day)
+		unsigned char month; // Entry creation date/time (month)
+		unsigned short year; // Entry creation date/time (year)
+	} _create;
 
-    struct
-    {
-        unsigned char unknown2;
-        unsigned char sec;      // Entry modification date/time (second)
-        unsigned char min;      // Entry modification date/time (minute)
-        unsigned char hour;     // Entry modification date/time (hour)
-        unsigned char day;      // Entry modification date/time (day)
-        unsigned char month;    // Entry modification date/time (month)
-        unsigned short year;    // Entry modification date/time (year)
-    } _modify;
+	struct
+	{
+		unsigned char unknown2;
+		unsigned char sec;   // Entry modification date/time (second)
+		unsigned char min;   // Entry modification date/time (minute)
+		unsigned char hour;  // Entry modification date/time (hour)
+		unsigned char day;   // Entry modification date/time (day)
+		unsigned char month; // Entry modification date/time (month)
+		unsigned short year; // Entry modification date/time (year)
+	} _modify;
 
-    unsigned fileSizeByte;      // File size (bytes). For a directory entry: 0
-    unsigned short attrFile;    // File attribute
-    unsigned short unknown3;
-    unsigned unknown4[2];
-    unsigned char name[32];         //Entry name
-} mcTable __attribute__((deprecated, aligned (64)));
+	unsigned fileSizeByte;   // File size (bytes). For a directory entry: 0
+	unsigned short attrFile; // File attribute
+	unsigned short unknown3;
+	unsigned unknown4[2];
+	unsigned char name[32]; //Entry name
+} mcTable __attribute__((deprecated, aligned(64)));
 
 // values to send to mcInit() to use either mcserv or xmcserv
-#define MC_TYPE_MC	0
-#define MC_TYPE_XMC	1
+#define MC_TYPE_MC 0
+#define MC_TYPE_XMC 1
 
 
 // init memcard lib
@@ -185,7 +186,7 @@ int mcInit(int type);
 //          pointer to get whether or not the card is formatted	(Note: Originally, sceMcGetInfo didn't have a 5th argument for returning the format status. As this is emulated based on the return value of sceMcSync() when rom0:MCSERV is used, please keep track of the return value from sceMcSync instead!)
 // returns:	0   = successful
 //			< 0 = error
-int mcGetInfo(int port, int slot, int* type, int* free, int* format);
+int mcGetInfo(int port, int slot, int *type, int *free, int *format);
 
 // open a file on memcard
 // mcSync returns:	0 or more = file descriptor (success)
@@ -258,7 +259,7 @@ int mcFlush(int fd);
 //			directory name
 // returns:	0   = successful
 //			< 0 = error
-int mcMkDir(int port, int slot, const char* name);
+int mcMkDir(int port, int slot, const char *name);
 
 // change current dir
 // (can also get current dir)
@@ -271,7 +272,7 @@ int mcMkDir(int port, int slot, const char* name);
 //			buffer to get current dir (use 0 if not needed)
 // returns:	0   = successful
 //			< 0 = error
-int mcChdir(int port, int slot, const char* newDir, char* currentDir);
+int mcChdir(int port, int slot, const char *newDir, char *currentDir);
 
 // get memcard filelist
 // mcSync result:	 0 or more = number of file entries obtained (success)
@@ -286,7 +287,7 @@ int mcChdir(int port, int slot, const char* newDir, char* currentDir);
 //          mc table array
 // returns:	0   = successful
 //			< 0 = error
-int mcGetDir(int port, int slot, const char *name, unsigned mode, int maxent, sceMcTblGetDir* table);
+int mcGetDir(int port, int slot, const char *name, unsigned mode, int maxent, sceMcTblGetDir *table);
 
 // change file information
 // mcSync returns:	0 if ok
@@ -299,7 +300,7 @@ int mcGetDir(int port, int slot, const char *name, unsigned mode, int maxent, sc
 //			flags to show which data is valid
 // returns:	0   = successful
 //			< 0 = error
-int mcSetFileInfo(int port, int slot, const char* name, const sceMcTblGetDir* info, unsigned flags);
+int mcSetFileInfo(int port, int slot, const char *name, const sceMcTblGetDir *info, unsigned flags);
 
 // delete file
 // mcSync returns:	0 if deleted successfully
@@ -341,7 +342,7 @@ int mcUnformat(int port, int slot);
 //			path to be checked
 // returns:	0 or more = number of empty entries
 //			-1 = error
-int mcGetEntSpace(int port, int slot, const char* path);
+int mcGetEntSpace(int port, int slot, const char *path);
 
 // Note: rom0:MCSERV does not support this.
 // rename file or dir on memcard
@@ -354,7 +355,7 @@ int mcGetEntSpace(int port, int slot, const char* path);
 //			new name to give to file/dir
 // returns:	1  = success
 //			<0 = error
-int mcRename(int port, int slot, const char* oldName, const char* newName);
+int mcRename(int port, int slot, const char *oldName, const char *newName);
 
 // Note: rom0:XMCSERV does not support this.
 // Erases a block on the memory card.

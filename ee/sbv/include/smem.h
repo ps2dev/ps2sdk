@@ -33,7 +33,7 @@ extern "C" {
    For the PlayStation 3, this window does not seem to be correctly emulated.
    Although its EE kernel appears to still uses it, homebrew software cannot seem to use this window properly.
 */
-#define SUB_VIRT_MEM	0xbc000000
+#define SUB_VIRT_MEM 0xbc000000
 
 u32 smem_read(void *addr, void *buf, u32 size);
 u32 smem_write(void *addr, void *buf, u32 size);

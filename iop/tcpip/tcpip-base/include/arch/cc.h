@@ -6,14 +6,14 @@
 
 #define BYTE_ORDER LITTLE_ENDIAN
 
-typedef unsigned char		u8_t;
-typedef signed char		s8_t;
-typedef unsigned short int	u16_t;
-typedef signed short		s16_t;
-typedef unsigned int		u32_t;
-typedef signed int		s32_t;
+typedef unsigned char u8_t;
+typedef signed char s8_t;
+typedef unsigned short int u16_t;
+typedef signed short s16_t;
+typedef unsigned int u32_t;
+typedef signed int s32_t;
 
-typedef u32_t			mem_ptr_t;
+typedef u32_t mem_ptr_t;
 
 /* Define (sn)printf formatters for these lwIP types */
 #define U8_F "hu"
@@ -40,8 +40,8 @@ typedef u32_t			mem_ptr_t;
 
 #define atoi(x) strtol(x, NULL, 10)
 
-#define LWIP_NO_STDINT_H	1	//stdint.h does not exist.
-#define LWIP_NO_INTTYPES_H	1	//inttypes.h does not exist.
+#define LWIP_NO_STDINT_H 1   //stdint.h does not exist.
+#define LWIP_NO_INTTYPES_H 1 //inttypes.h does not exist.
 
 #define lwip_htons(x) PP_HTONS(x)
 #define lwip_htonl(x) PP_HTONL(x)

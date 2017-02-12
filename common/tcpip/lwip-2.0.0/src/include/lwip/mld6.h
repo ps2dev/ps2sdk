@@ -45,7 +45,7 @@
 
 #include "lwip/opt.h"
 
-#if LWIP_IPV6_MLD && LWIP_IPV6  /* don't build if not configured for use in lwipopts.h */
+#if LWIP_IPV6_MLD && LWIP_IPV6 /* don't build if not configured for use in lwipopts.h */
 
 #include "lwip/pbuf.h"
 #include "lwip/netif.h"
@@ -55,32 +55,33 @@ extern "C" {
 #endif
 
 /** MLD group */
-struct mld_group {
-  /** next link */
-  struct mld_group *next;
-  /** multicast address */
-  ip6_addr_t         group_address;
-  /** signifies we were the last person to report */
-  u8_t               last_reporter_flag;
-  /** current state of the group */
-  u8_t               group_state;
-  /** timer for reporting */
-  u16_t              timer;
-  /** counter of simultaneous uses */
-  u8_t               use;
+struct mld_group
+{
+	/** next link */
+	struct mld_group *next;
+	/** multicast address */
+	ip6_addr_t group_address;
+	/** signifies we were the last person to report */
+	u8_t last_reporter_flag;
+	/** current state of the group */
+	u8_t group_state;
+	/** timer for reporting */
+	u16_t timer;
+	/** counter of simultaneous uses */
+	u8_t use;
 };
 
-#define MLD6_TMR_INTERVAL              100 /* Milliseconds */
+#define MLD6_TMR_INTERVAL 100 /* Milliseconds */
 
-err_t  mld6_stop(struct netif *netif);
-void   mld6_report_groups(struct netif *netif);
-void   mld6_tmr(void);
+err_t mld6_stop(struct netif *netif);
+void mld6_report_groups(struct netif *netif);
+void mld6_tmr(void);
 struct mld_group *mld6_lookfor_group(struct netif *ifp, const ip6_addr_t *addr);
-void   mld6_input(struct pbuf *p, struct netif *inp);
-err_t  mld6_joingroup(const ip6_addr_t *srcaddr, const ip6_addr_t *groupaddr);
-err_t  mld6_joingroup_netif(struct netif *netif, const ip6_addr_t *groupaddr);
-err_t  mld6_leavegroup(const ip6_addr_t *srcaddr, const ip6_addr_t *groupaddr);
-err_t  mld6_leavegroup_netif(struct netif *netif, const ip6_addr_t *groupaddr);
+void mld6_input(struct pbuf *p, struct netif *inp);
+err_t mld6_joingroup(const ip6_addr_t *srcaddr, const ip6_addr_t *groupaddr);
+err_t mld6_joingroup_netif(struct netif *netif, const ip6_addr_t *groupaddr);
+err_t mld6_leavegroup(const ip6_addr_t *srcaddr, const ip6_addr_t *groupaddr);
+err_t mld6_leavegroup_netif(struct netif *netif, const ip6_addr_t *groupaddr);
 
 /** @ingroup mld6
  * Get list head of MLD6 groups for netif.

@@ -22,50 +22,46 @@ void _ps2sdk_time_deinit();
 int chdir(const char *path);
 
 #ifdef F_init_libc
-__attribute__((weak))
-void _ps2sdk_libc_init()
+__attribute__((weak)) void _ps2sdk_libc_init()
 {
-    _ps2sdk_alloc_init();
-    _ps2sdk_stdio_init();
-    _ps2sdk_stdlib_init();
-    _ps2sdk_time_init();
+	_ps2sdk_alloc_init();
+	_ps2sdk_stdio_init();
+	_ps2sdk_stdlib_init();
+	_ps2sdk_time_init();
 }
 
-__attribute__((weak))
-void _ps2sdk_libc_deinit()
+__attribute__((weak)) void _ps2sdk_libc_deinit()
 {
-    _ps2sdk_time_deinit();
-    _ps2sdk_stdlib_deinit();
-    _ps2sdk_stdio_deinit();
-    _ps2sdk_alloc_deinit();
+	_ps2sdk_time_deinit();
+	_ps2sdk_stdlib_deinit();
+	_ps2sdk_stdio_deinit();
+	_ps2sdk_alloc_deinit();
 }
 #endif
 
 #ifdef F_init_args
-__attribute__((weak))
-void _ps2sdk_args_parse(int argc, char ** argv)
+__attribute__((weak)) void _ps2sdk_args_parse(int argc, char **argv)
 {
-    if (argc == 0) // naplink!
-    {
-	chdir("host:");
-    } else {
-	char * p, * s = 0;
-	// let's find the last slash, or at worst, the :
-	for (p = argv[0]; *p; p++) {
-	    if ((*p == '/') || (*p == '\\') || (*p == ':')) {
-		s = p;
-	    }
-	}
-	// Nothing?! strange, let's use host.
-	if (!s) {
-	    chdir("host:");
+	if (argc == 0) // naplink!
+	{
+		chdir("host:");
 	} else {
-	    char backup = *(++s);
-	    *s = 0;
-	    chdir(argv[0]);
-	    *s = backup;
+		char *p, *s = 0;
+		// let's find the last slash, or at worst, the :
+		for (p = argv[0]; *p; p++) {
+			if ((*p == '/') || (*p == '\\') || (*p == ':')) {
+				s = p;
+			}
+		}
+		// Nothing?! strange, let's use host.
+		if (!s) {
+			chdir("host:");
+		} else {
+			char backup = *(++s);
+			*s = 0;
+			chdir(argv[0]);
+			*s = backup;
+		}
 	}
-    }
 }
 #endif
-

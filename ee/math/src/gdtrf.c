@@ -110,45 +110,41 @@ float igamf(), igamcf();
 
 
 #ifdef ANSIC
-float gdtrf( float aa, float bb, float xx )
+float gdtrf(float aa, float bb, float xx)
 #else
-float gdtrf( aa, bb, xx )
-double aa, bb, xx;
+float gdtrf(aa, bb, xx) double aa, bb, xx;
 #endif
 {
-float a, b, x;
+	float a, b, x;
 
-a = aa;
-b = bb;
-x = xx;
+	a = aa;
+	b = bb;
+	x = xx;
 
 
-if( x < 0.0 )
-	{
-	mtherr( "gdtrf", DOMAIN );
-	return( 0.0 );
+	if (x < 0.0) {
+		mtherr("gdtrf", DOMAIN);
+		return (0.0);
 	}
-return(  igamf( b, a * x )  );
+	return (igamf(b, a * x));
 }
 
 
 
 #ifdef ANSIC
-float gdtrcf( float aa, float bb, float xx )
+float gdtrcf(float aa, float bb, float xx)
 #else
-float gdtrcf( aa, bb, xx )
-double aa, bb, xx;
+float gdtrcf(aa, bb, xx) double aa, bb, xx;
 #endif
 {
-float a, b, x;
+	float a, b, x;
 
-a = aa;
-b = bb;
-x = xx;
-if( x < 0.0 )
-	{
-	mtherr( "gdtrcf", DOMAIN );
-	return( 0.0 );
+	a = aa;
+	b = bb;
+	x = xx;
+	if (x < 0.0) {
+		mtherr("gdtrcf", DOMAIN);
+		return (0.0);
 	}
-return(  igamcf( b, a * x )  );
+	return (igamcf(b, a * x));
 }

@@ -102,52 +102,48 @@ float incbetf();
 
 
 #ifdef ANSIC
-float nbdtrcf( int k, int n, float pp )
+float nbdtrcf(int k, int n, float pp)
 #else
-float nbdtrcf( k, n, pp )
-int k, n;
+float nbdtrcf(k, n, pp) int k, n;
 double pp;
 #endif
 {
-float dk, dn, p;
+	float dk, dn, p;
 
-p = pp;
-if( (p < 0.0) || (p > 1.0) )
-	goto domerr;
-if( k < 0 )
-	{
-domerr:
-	mtherr( "nbdtrf", DOMAIN );
-	return( 0.0 );
+	p = pp;
+	if ((p < 0.0) || (p > 1.0))
+		goto domerr;
+	if (k < 0) {
+	domerr:
+		mtherr("nbdtrf", DOMAIN);
+		return (0.0);
 	}
 
-dk = k+1;
-dn = n;
-return( incbetf( dk, dn, 1.0 - p ) );
+	dk = k + 1;
+	dn = n;
+	return (incbetf(dk, dn, 1.0 - p));
 }
 
 
 
 #ifdef ANSIC
-float nbdtrf( int k, int n, float pp )
+float nbdtrf(int k, int n, float pp)
 #else
-float nbdtrf( k, n, pp )
-int k, n;
+float nbdtrf(k, n, pp) int k, n;
 double pp;
 #endif
 {
-float dk, dn, p;
+	float dk, dn, p;
 
-p = pp;
-if( (p < 0.0) || (p > 1.0) )
-	goto domerr;
-if( k < 0 )
-	{
-domerr:
-	mtherr( "nbdtrf", DOMAIN );
-	return( 0.0 );
+	p = pp;
+	if ((p < 0.0) || (p > 1.0))
+		goto domerr;
+	if (k < 0) {
+	domerr:
+		mtherr("nbdtrf", DOMAIN);
+		return (0.0);
 	}
-dk = k+1;
-dn = n;
-return( incbetf( dn, dk, p ) );
+	dk = k + 1;
+	dn = n;
+	return (incbetf(dn, dk, p));
 }

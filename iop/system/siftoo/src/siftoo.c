@@ -35,7 +35,7 @@
 
 IRX_ID("SIFToo_driver", 1, 1);
 
-#define SIF2_SBUS_IRQ	0
+#define SIF2_SBUS_IRQ 0
 
 int sif2_control(u32 intr, void *unused);
 

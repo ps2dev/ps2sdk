@@ -15,9 +15,9 @@ extern int timer_ID;
 
 extern MCDevInfo mcman_devinfos[4][MCMAN_MAXSLOT];
 
-static sio2_transfer_data_t mcman_sio2packet;	// buffer for mcman sio2 packet
-static u8 mcman_wdmabufs[0x0b * 0x90];		// buffer array for SIO2 DMA I/O (write)
-static u8 mcman_rdmabufs[0x0b * 0x90];		// not sure here for size, buffer array for SIO2 DMA I/O (read)
+static sio2_transfer_data_t mcman_sio2packet; // buffer for mcman sio2 packet
+static u8 mcman_wdmabufs[0x0b * 0x90];        // buffer array for SIO2 DMA I/O (write)
+static u8 mcman_rdmabufs[0x0b * 0x90];        // not sure here for size, buffer array for SIO2 DMA I/O (read)
 
 static sio2_transfer_data_t mcman_sio2packet_PS1PDA;
 static u8 mcman_sio2inbufs_PS1PDA[0x90];
@@ -28,12 +28,11 @@ static int mcman_timerthick;
 
 // mcman cmd table used by sio2packet_add fnc
 static const u8 mcman_cmdtable[36] = {
-	0x11, 0x04, 0x12, 0x04, 0x21, 0x09, 0x22, 0x09,
-	0x23, 0x09, 0x24, 0x86, 0x25, 0x04, 0x26, 0x0d,
-	0x27, 0x05, 0x28, 0x05, 0x42, 0x86, 0x43, 0x86,
-	0x81, 0x04, 0x82, 0x04, 0x42, 0x06, 0x43, 0x06,
-	0xbf, 0x05, 0xf3, 0x05
-};
+    0x11, 0x04, 0x12, 0x04, 0x21, 0x09, 0x22, 0x09,
+    0x23, 0x09, 0x24, 0x86, 0x25, 0x04, 0x26, 0x0d,
+    0x27, 0x05, 0x28, 0x05, 0x42, 0x86, 0x43, 0x86,
+    0x81, 0x04, 0x82, 0x04, 0x42, 0x06, 0x43, 0x06,
+    0xbf, 0x05, 0xf3, 0x05};
 
 extern int (*mcman_sio2transfer)(int port, int slot, sio2_transfer_data_t *sio2data);
 
@@ -51,27 +50,27 @@ static void sio2packet_add_do_nothing(int port, int slot, int cmd, u8 *buf, int 
 
 // functions pointer array to handle sio2packet_add inner functions calls
 static void *sio2packet_add_funcs_array[16] = {
-    (void *)sio2packet_add_wdma_00,		// commands that needs to clear in_dma.addr[2]
-    (void *)sio2packet_add_wdma_u32,	// commands that needs to copy an int to in_dma.addr[2..5] (an int* can be passed as arg into buf)
-    (void *)sio2packet_add_wdma_u32,	// ...
-    (void *)sio2packet_add_wdma_u32,	// ...
-    (void *)sio2packet_add_wdma_u8,		// commands that needs to copy an u8 value to in_dma.addr[2]
-    (void *)sio2packet_add_do_nothing,	// do nothing
-    (void *)sio2packet_add_do_nothing,	// ...
-    (void *)sio2packet_add_wdma_5a,		// commands that needs to set in_dma.addr[2] to value 0x5a, used to set termination code
-    (void *)sio2packet_add_do_nothing,	// do nothing
-    (void *)sio2packet_add_pagedata_in,	// commands that needs to copy pagedata buf into in_dma.addr
-    (void *)sio2packet_add_pagedata_out,// commands that needs to set in_dma.addr[2] to value 128 for pagedata out
-    (void *)sio2packet_add_do_nothing,	// do nothing
-    (void *)sio2packet_add_do_nothing,	// ...
-    (void *)sio2packet_add_ecc_in,		// commands that needs to copy sparedata buf into in_dma.addr
-    (void *)sio2packet_add_ecc_out,		// commands that needs to prepare regdata and in_dma.addr to receive sparedata
-    (void *)sio2packet_add_wdma_u8		// commands that needs to copy an u8 value to in_dma.addr[2]
+    (void *)sio2packet_add_wdma_00,      // commands that needs to clear in_dma.addr[2]
+    (void *)sio2packet_add_wdma_u32,     // commands that needs to copy an int to in_dma.addr[2..5] (an int* can be passed as arg into buf)
+    (void *)sio2packet_add_wdma_u32,     // ...
+    (void *)sio2packet_add_wdma_u32,     // ...
+    (void *)sio2packet_add_wdma_u8,      // commands that needs to copy an u8 value to in_dma.addr[2]
+    (void *)sio2packet_add_do_nothing,   // do nothing
+    (void *)sio2packet_add_do_nothing,   // ...
+    (void *)sio2packet_add_wdma_5a,      // commands that needs to set in_dma.addr[2] to value 0x5a, used to set termination code
+    (void *)sio2packet_add_do_nothing,   // do nothing
+    (void *)sio2packet_add_pagedata_in,  // commands that needs to copy pagedata buf into in_dma.addr
+    (void *)sio2packet_add_pagedata_out, // commands that needs to set in_dma.addr[2] to value 128 for pagedata out
+    (void *)sio2packet_add_do_nothing,   // do nothing
+    (void *)sio2packet_add_do_nothing,   // ...
+    (void *)sio2packet_add_ecc_in,       // commands that needs to copy sparedata buf into in_dma.addr
+    (void *)sio2packet_add_ecc_out,      // commands that needs to prepare regdata and in_dma.addr to receive sparedata
+    (void *)sio2packet_add_wdma_u8       // commands that needs to copy an u8 value to in_dma.addr[2]
 };
 
 //--------------------------------------------------------------
 void sio2packet_add(int port, int slot, int cmd, u8 *buf)
-{	// Used to build the sio2packets for all mc commands
+{ // Used to build the sio2packets for all mc commands
 	register u32 regdata;
 	register int pos;
 	u8 *p;
@@ -106,7 +105,7 @@ void sio2packet_add(int port, int slot, int cmd, u8 *buf)
 		if (((cmd - 1) >= 16) || ((cmd - 1) < 0))
 			return;
 
-		sio2packet_add_func = (void*)sio2packet_add_funcs_array[(cmd - 1)];
+		sio2packet_add_func = (void *)sio2packet_add_funcs_array[(cmd - 1)];
 		(sio2packet_add_func)(port, slot, cmd, buf, pos); // call to the needed child func
 	}
 }
@@ -142,7 +141,7 @@ static void sio2packet_add_pagedata_in(int port, int slot, int cmd, u8 *buf, int
 	u8 *p = mcman_sio2packet.in_dma.addr + pos;
 	p[2] = 128;
 
-	for (i=0; i<128; i++)
+	for (i = 0; i < 128; i++)
 		p[3 + i] = buf[i];
 
 	p[3 + 128] = mcman_calcEDC(&buf[0], 128);
@@ -159,17 +158,17 @@ static void sio2packet_add_ecc_in(int port, int slot, int cmd, u8 *buf, int pos)
 
 	p[2] = mcman_sparesize(port, slot);
 
-	for (i=0; i<(p[2] & 0xff); i++)
+	for (i = 0; i < (p[2] & 0xff); i++)
 		p[3 + i] = buf[i];
 
 	p[3 + p[2]] = mcman_calcEDC(&buf[0], p[2]);
 
-	regdata  = (p[2] + mcman_cmdtable[(cmd << 1) + 1]) << 18;
-	regdata |= mcman_sio2packet.regdata[mcman_sio2packet.in_dma.count-1] & 0xf803ffff;
+	regdata = (p[2] + mcman_cmdtable[(cmd << 1) + 1]) << 18;
+	regdata |= mcman_sio2packet.regdata[mcman_sio2packet.in_dma.count - 1] & 0xf803ffff;
 	regdata &= 0xfffe00ff;
 	regdata |= (p[2] + mcman_cmdtable[(cmd << 1) + 1]) << 8;
 
-	mcman_sio2packet.regdata[mcman_sio2packet.in_dma.count-1] = regdata;
+	mcman_sio2packet.regdata[mcman_sio2packet.in_dma.count - 1] = regdata;
 }
 
 //--
@@ -182,12 +181,12 @@ static void sio2packet_add_ecc_out(int port, int slot, int cmd, u8 *buf, int pos
 
 	p[2] = mcman_sparesize(port, slot);
 
-	regdata  = (p[2] + mcman_cmdtable[(cmd << 1) + 1]) << 18;
-	regdata |= mcman_sio2packet.regdata[mcman_sio2packet.in_dma.count-1] & 0xf803ffff;
+	regdata = (p[2] + mcman_cmdtable[(cmd << 1) + 1]) << 18;
+	regdata |= mcman_sio2packet.regdata[mcman_sio2packet.in_dma.count - 1] & 0xf803ffff;
 	regdata &= 0xfffe00ff;
 	regdata |= (p[2] + mcman_cmdtable[(cmd << 1) + 1]) << 8;
 
-	mcman_sio2packet.regdata[mcman_sio2packet.in_dma.count-1] = regdata;
+	mcman_sio2packet.regdata[mcman_sio2packet.in_dma.count - 1] = regdata;
 }
 
 //--
@@ -205,7 +204,6 @@ static void sio2packet_add_wdma_00(int port, int slot, int cmd, u8 *buf, int pos
 {
 	u8 *p = mcman_sio2packet.in_dma.addr + pos;
 	p[2] = 0x00;
-
 }
 
 //--
@@ -282,7 +280,7 @@ int mcsio2_transfer2(int port, int slot, sio2_transfer_data_t *sio2data)
 //--------------------------------------------------------------
 void mcman_initPS2com(void)
 {
-	mcman_wmemset((void *)&mcman_sio2packet, sizeof (mcman_sio2packet), 0);
+	mcman_wmemset((void *)&mcman_sio2packet, sizeof(mcman_sio2packet), 0);
 
 	mcman_sio2packet.port_ctrl1[2] = 0xff020405;
 	mcman_sio2packet.port_ctrl1[3] = 0xff020405;
@@ -310,7 +308,7 @@ void mcman_initPS2com(void)
 //--------------------------------------------------------------
 void mcman_initPS1PDAcom(void)
 {
-	memset((void *)&mcman_sio2packet_PS1PDA, 0, sizeof (mcman_sio2packet_PS1PDA));
+	memset((void *)&mcman_sio2packet_PS1PDA, 0, sizeof(mcman_sio2packet_PS1PDA));
 
 	mcman_sio2packet_PS1PDA.port_ctrl1[0] = 0xffc00505;
 	mcman_sio2packet_PS1PDA.port_ctrl1[1] = 0xffc00505;
@@ -418,7 +416,7 @@ int mcman_eraseblock(int port, int slot, int block, void **pagebuf, void *eccbuf
 			ecc_offset = ecc_offset >> 5;
 			p_ecc = (void *)(eccbuf + ecc_offset);
 			size = 0;
-			while (size < mcdi->pagesize)	{
+			while (size < mcdi->pagesize) {
 				if (*pagebuf)
 					McDataChecksum((void *)(*pagebuf + size), p_ecc);
 				size += 128;
@@ -465,20 +463,20 @@ int McWritePage(int port, int slot, int page, void *pagebuf, void *eccbuf) // Ex
 		if (retries > 0)
 			mcman_cardchanged(port, slot);
 
- 		sio2packet_add(port, slot, 0xffffffff, NULL);
- 		sio2packet_add(port, slot, 0x03, (u8 *)&page);
+		sio2packet_add(port, slot, 0xffffffff, NULL);
+		sio2packet_add(port, slot, 0x03, (u8 *)&page);
 
- 		index = 0;
- 		while (index < count) {
-     		sio2packet_add(port, slot, 0x0a, (u8 *)&p_pagebuf[index << 7]);
+		index = 0;
+		while (index < count) {
+			sio2packet_add(port, slot, 0x0a, (u8 *)&p_pagebuf[index << 7]);
 			index++;
- 		}
-
-   		if (mcman_devinfos[port][slot].cardflags & CF_USE_ECC) {
-     		// if memcard have ECC support
-   			sio2packet_add(port, slot, 0x0e, eccbuf);
 		}
- 		sio2packet_add(port, slot, 0xfffffffe, NULL);
+
+		if (mcman_devinfos[port][slot].cardflags & CF_USE_ECC) {
+			// if memcard have ECC support
+			sio2packet_add(port, slot, 0x0e, eccbuf);
+		}
+		sio2packet_add(port, slot, 0xfffffffe, NULL);
 
 		mcman_sio2transfer(port, slot, &mcman_sio2packet);
 
@@ -486,20 +484,20 @@ int McWritePage(int port, int slot, int page, void *pagebuf, void *eccbuf) // Ex
 			continue;
 
 		index = 0;
- 		while (index < count) {
+		while (index < count) {
 			if (p[0x94 + 128 + 1 + ((index + (index << 3)) << 4)] != 0x5a)
 				break;
 			index++;
-   		}
+		}
 
-	   	if (index < count)
-	   		continue;
+		if (index < count)
+			continue;
 
-	   	if (mcman_devinfos[port][slot].cardflags & CF_USE_ECC) {
-     		// if memcard have ECC support
+		if (mcman_devinfos[port][slot].cardflags & CF_USE_ECC) {
+			// if memcard have ECC support
 			index++;
-     		if (p[5 + ((index + (index << 3)) << 4) + mcman_sparesize(port, slot)] != 0x5a)
-     			continue;
+			if (p[5 + ((index + (index << 3)) << 4) + mcman_sparesize(port, slot)] != 0x5a)
+				continue;
 		}
 
 		sio2packet_add(port, slot, 0xffffffff, NULL);
@@ -538,52 +536,50 @@ int mcman_readpage(int port, int slot, int page, void *buf, void *eccbuf)
 		if (retries > 0)
 			mcman_cardchanged(port, slot);
 
- 		sio2packet_add(port, slot, 0xffffffff, NULL);
- 		sio2packet_add(port, slot, 0x04, (u8 *)&page);
+		sio2packet_add(port, slot, 0xffffffff, NULL);
+		sio2packet_add(port, slot, 0x04, (u8 *)&page);
 
- 		if (count > 0) {
-	 		index = 0;
-     		while (index < count) {
-	     		sio2packet_add(port, slot, 0x0b, NULL);
-	     		index++;
-     		}
- 		}
+		if (count > 0) {
+			index = 0;
+			while (index < count) {
+				sio2packet_add(port, slot, 0x0b, NULL);
+				index++;
+			}
+		}
 
-   		if (mcdi->cardflags & CF_USE_ECC) // if memcard have ECC support
-   			sio2packet_add(port, slot, 0x0f, NULL);
+		if (mcdi->cardflags & CF_USE_ECC) // if memcard have ECC support
+			sio2packet_add(port, slot, 0x0f, NULL);
 
- 		sio2packet_add(port, slot, 0x0c, NULL);
- 		sio2packet_add(port, slot, 0xfffffffe, NULL);
+		sio2packet_add(port, slot, 0x0c, NULL);
+		sio2packet_add(port, slot, 0xfffffffe, NULL);
 
 		mcman_sio2transfer(port, slot, &mcman_sio2packet);
 
-		if (((mcman_sio2packet.stat6c & 0xF000) != 0x1000)
-			|| (p[8] != 0x5a)
-				|| (p[0x94 + 0x2cf] != 0x5a))
+		if (((mcman_sio2packet.stat6c & 0xF000) != 0x1000) || (p[8] != 0x5a) || (p[0x94 + 0x2cf] != 0x5a))
 			continue;
 
 		if (count > 0) {
-	 		index = 0;
-	 		while (index < count) {
-   				// checking EDC
-   				r = mcman_calcEDC(&p[0x94 + ((index + (index << 3)) << 4)], 128) & 0xFF;
-   				if (r != p[0x94 + 128 + ((index + (index << 3)) << 4)])
-   					break;
-	     		index++;
-	   		}
+			index = 0;
+			while (index < count) {
+				// checking EDC
+				r = mcman_calcEDC(&p[0x94 + ((index + (index << 3)) << 4)], 128) & 0xFF;
+				if (r != p[0x94 + 128 + ((index + (index << 3)) << 4)])
+					break;
+				index++;
+			}
 
-	   		if (index < count)
-		   		continue;
+			if (index < count)
+				continue;
 
-	 		index = 0;
-	 		while (index < count) {
-	     		for (i=0; i<128; i++)
-	     			pbuf[(index << 7) + i] = p[0x94 + ((index + (index << 3)) << 4) + i];
-	     		index++;
-   			}
+			index = 0;
+			while (index < count) {
+				for (i = 0; i < 128; i++)
+					pbuf[(index << 7) + i] = p[0x94 + ((index + (index << 3)) << 4) + i];
+				index++;
+			}
 		}
 
-		memcpy(pecc, &p[0x94 + ((count + (count << 3)) << 4)] , mcman_sparesize(port, slot));
+		memcpy(pecc, &p[0x94 + ((count + (count << 3)) << 4)], mcman_sparesize(port, slot));
 		break;
 
 	} while (++retries < 5);
@@ -614,10 +610,10 @@ int McGetCardSpec(int port, int slot, s16 *pagesize, u16 *blocksize, int *cardsi
 		mcman_sio2transfer(port, slot, &mcman_sio2packet);
 
 		if (((mcman_sio2packet.stat6c & 0xF000) == 0x1000) && (p[12] == 0x5a)) {
-   			// checking EDC
-   			r = mcman_calcEDC(&p[3], 8) & 0xFF;
-   			if (r == p[11])
-   				break;
+			// checking EDC
+			r = mcman_calcEDC(&p[3], 8) & 0xFF;
+			if (r == p[11])
+				break;
 		}
 	} while (++retries < 5);
 
@@ -791,14 +787,14 @@ int mcman_probePS2Card(int port, int slot) //2
 	sio2packet_add(port, slot, 0xfffffffe, NULL);
 
 	retries = 0;
-    do {
+	do {
 		mcman_sio2transfer(port, slot, &mcman_sio2packet);
 
-    	if ((mcman_sio2packet.stat6c & 0xF000) != 0x1000)
-    		continue;
+		if ((mcman_sio2packet.stat6c & 0xF000) != 0x1000)
+			continue;
 
-    	if (p[4] == 0x5a)
-    		break;
+		if (p[4] == 0x5a)
+			break;
 	} while (++retries < 5);
 
 	if (retries >= 5) {
@@ -867,8 +863,7 @@ int mcman_probePS1Card2(int port, int slot)
 		mcman_timercount = GetTimerCounter(timer_ID);
 		mcman_timerthick = 0;
 
-		if (((mcman_sio2packet_PS1PDA.stat6c & 0xf000) == 0x1000) \
-				&& (mcman_sio2outbufs_PS1PDA[2] == 0x5a)) {
+		if (((mcman_sio2packet_PS1PDA.stat6c & 0xf000) == 0x1000) && (mcman_sio2outbufs_PS1PDA[2] == 0x5a)) {
 			break;
 		}
 	} while (++retries < 5);
@@ -881,8 +876,7 @@ int mcman_probePS1Card2(int port, int slot)
 			return sceMcResSucceed;
 		if (mcdi->cardform < 0)
 			return sceMcResNoFormat;
-	}
-	else if (mcman_sio2outbufs_PS1PDA[1] != 8) {
+	} else if (mcman_sio2outbufs_PS1PDA[1] != 8) {
 		return -14;
 	}
 
@@ -924,8 +918,7 @@ int mcman_probePS1Card(int port, int slot)
 		mcman_timercount = GetTimerCounter(timer_ID);
 		mcman_timerthick = 0;
 
-		if (((mcman_sio2packet_PS1PDA.stat6c & 0xf000) == 0x1000) \
-				&& (mcman_sio2outbufs_PS1PDA[2] == 0x5a)) {
+		if (((mcman_sio2packet_PS1PDA.stat6c & 0xf000) == 0x1000) && (mcman_sio2outbufs_PS1PDA[2] == 0x5a)) {
 			break;
 		}
 	} while (++retries < 5);
@@ -936,8 +929,7 @@ int mcman_probePS1Card(int port, int slot)
 	if (mcman_sio2outbufs_PS1PDA[1] == 0) {
 		if (mcdi->cardform != 0)
 			return sceMcResSucceed;
-	}
-	else if (mcman_sio2outbufs_PS1PDA[1] != 8) {
+	} else if (mcman_sio2outbufs_PS1PDA[1] != 8) {
 		return -12;
 	}
 
@@ -983,7 +975,7 @@ int mcman_probePDACard(int port, int slot)
 		mcman_sio2transfer(port, slot, &mcman_sio2packet_PS1PDA);
 
 		if ((mcman_sio2packet_PS1PDA.stat6c & 0xf000) == 0x1000)
-				break;
+			break;
 
 	} while (++retries < 5);
 
@@ -1001,7 +993,7 @@ int McWritePS1PDACard(int port, int slot, int page, void *buf) // Export #30
 	u8 *p;
 
 #ifdef DEBUG
-	//DPRINTF("mcman: McWritePS1PDACard port%d slot%d page %x\n", port, slot, page);
+//DPRINTF("mcman: McWritePS1PDACard port%d slot%d page %x\n", port, slot, page);
 #endif
 
 	mcman_sio2packet_PS1PDA.regdata[0] = 0;
@@ -1041,10 +1033,7 @@ int McWritePS1PDACard(int port, int slot, int page, void *buf) // Export #30
 		mcman_timercount = GetTimerCounter(timer_ID);
 		mcman_timerthick = 20000;
 
-		if (((mcman_sio2packet_PS1PDA.stat6c & 0xf000) == 0x1000) \
-				&& (mcman_sio2outbufs_PS1PDA[2] == 0x5a) \
-					&& (mcman_sio2outbufs_PS1PDA[3] == 0x5d) \
-						&& (mcman_sio2outbufs_PS1PDA[137] == 0x47)) {
+		if (((mcman_sio2packet_PS1PDA.stat6c & 0xf000) == 0x1000) && (mcman_sio2outbufs_PS1PDA[2] == 0x5a) && (mcman_sio2outbufs_PS1PDA[3] == 0x5d) && (mcman_sio2outbufs_PS1PDA[137] == 0x47)) {
 			break;
 		}
 	} while (++retries < 5);
@@ -1066,7 +1055,7 @@ int McReadPS1PDACard(int port, int slot, int page, void *buf) // Export #29
 	u8 *p;
 
 #ifdef DEBUG
-	//DPRINTF("mcman: McReadPS1PDACard port%d slot%d page %x\n", port, slot, page);
+//DPRINTF("mcman: McReadPS1PDACard port%d slot%d page %x\n", port, slot, page);
 #endif
 
 	mcman_sio2packet_PS1PDA.regdata[0] = 0;
@@ -1100,13 +1089,7 @@ int McReadPS1PDACard(int port, int slot, int page, void *buf) // Export #29
 		mcman_timercount = GetTimerCounter(timer_ID);
 		mcman_timerthick = 10000;
 
-		if (((mcman_sio2packet_PS1PDA.stat6c & 0xf000) == 0x1000) \
-				&& (mcman_sio2outbufs_PS1PDA[2] == 0x5a) \
-					&& (mcman_sio2outbufs_PS1PDA[3] == 0x5d) \
-						&& (mcman_sio2outbufs_PS1PDA[4] == 0x00) \
-							&& (mcman_sio2outbufs_PS1PDA[6] == 0x5c) \
-								&& (mcman_sio2outbufs_PS1PDA[7] == 0x5d) \
-									&& (mcman_sio2outbufs_PS1PDA[139] == 0x47)) {
+		if (((mcman_sio2packet_PS1PDA.stat6c & 0xf000) == 0x1000) && (mcman_sio2outbufs_PS1PDA[2] == 0x5a) && (mcman_sio2outbufs_PS1PDA[3] == 0x5d) && (mcman_sio2outbufs_PS1PDA[4] == 0x00) && (mcman_sio2outbufs_PS1PDA[6] == 0x5c) && (mcman_sio2outbufs_PS1PDA[7] == 0x5d) && (mcman_sio2outbufs_PS1PDA[139] == 0x47)) {
 
 			if (mcman_sio2outbufs_PS1PDA[138] == (mcman_calcEDC(&mcman_sio2outbufs_PS1PDA[8], 130) & 0xff))
 				break;
@@ -1125,5 +1108,3 @@ int McReadPS1PDACard(int port, int slot, int page, void *buf) // Export #29
 
 	return sceMcResSucceed;
 }
-
-

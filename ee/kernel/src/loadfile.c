@@ -42,16 +42,19 @@ enum _lf_functions {
 	LF_F_SEARCH_MOD_BY_ADDRESS,
 };
 
-struct _lf_iop_val_arg {
-	union {
-		u32	iop_addr;
-		int	result;
+struct _lf_iop_val_arg
+{
+	union
+	{
+		u32 iop_addr;
+		int result;
 	} p;
-	int	type;
-	union {
-		u8	b;
-		u16	s;
-		u32	l;
+	int type;
+	union
+	{
+		u8 b;
+		u16 s;
+		u32 l;
 	} val;
 } ALIGNED(16);
 
@@ -60,7 +63,7 @@ extern SifRpcClientData_t _lf_cd;
 extern int _lf_init;
 
 int _SifLoadModule(const char *path, int arg_len, const char *args,
-		int *modres, int fno, int dontwait);
+                   int *modres, int fno, int dontwait);
 int _SifLoadElfPart(const char *path, const char *secname, t_ExecData *data, int fno);
 int _SifLoadModuleBuffer(void *ptr, int arg_len, const char *args, int *modres);
 
@@ -79,14 +82,13 @@ int SifLoadFileInit()
 {
 	int res;
 	static int _rb_count = 0;
-	if(_rb_count != _iop_reboot_count)
-	{
-	    _rb_count = _iop_reboot_count;
-	    memset(&_lf_cd, 0, sizeof _lf_cd);
-	    _lf_init = 0;
+	if (_rb_count != _iop_reboot_count) {
+		_rb_count = _iop_reboot_count;
+		memset(&_lf_cd, 0, sizeof _lf_cd);
+		_lf_init = 0;
 	}
 
-    if (_lf_init)
+	if (_lf_init)
 		return 0;
 
 	SifInitRpc(0);
@@ -117,18 +119,20 @@ void SifLoadFileExit()
 #endif
 
 #ifdef F__SifLoadModule
-struct _lf_module_load_arg {
-	union {
-		int	arg_len;
-		int	result;
+struct _lf_module_load_arg
+{
+	union
+	{
+		int arg_len;
+		int result;
 	} p;
-	int	modres;
-	char	path[LF_PATH_MAX];
-	char	args[LF_ARG_MAX];
+	int modres;
+	char path[LF_PATH_MAX];
+	char args[LF_ARG_MAX];
 } ALIGNED(16);
 
 int _SifLoadModule(const char *path, int arg_len, const char *args, int *modres,
-		int fno, int dontwait)
+                   int fno, int dontwait)
 {
 	struct _lf_module_load_arg arg;
 
@@ -235,17 +239,20 @@ int SifLoadModuleEncrypted(const char *path, int arg_len, const char *args)
 #endif
 
 #ifdef F_SifStopModule
-struct _lf_module_stop_arg {
-	union {
-		int	id;
-		int	result;
+struct _lf_module_stop_arg
+{
+	union
+	{
+		int id;
+		int result;
 	} p;
-	union {
-    		int	arg_len;
-		int	modres;
+	union
+	{
+		int arg_len;
+		int modres;
 	} q;
-	char	dummy[LF_PATH_MAX];
-	char	args[LF_ARG_MAX];
+	char dummy[LF_PATH_MAX];
+	char args[LF_ARG_MAX];
 } ALIGNED(16);
 
 int SifStopModule(int id, int arg_len, const char *args, int *mod_res)
@@ -275,9 +282,10 @@ int SifStopModule(int id, int arg_len, const char *args, int *mod_res)
 #endif
 
 #ifdef F_SifUnloadModule
-union _lf_module_unload_arg {
-	int	id;
-	int	result;
+union _lf_module_unload_arg
+{
+	int id;
+	int result;
 } ALIGNED(16);
 
 int SifUnloadModule(int id)
@@ -297,14 +305,15 @@ int SifUnloadModule(int id)
 #endif
 
 #ifdef F_SifSearchModuleByName
-struct _lf_search_module_by_name_arg {
-	int	id;
-	int	dummy1;
-	char	name[LF_PATH_MAX];
-	char	dummy2[LF_ARG_MAX];
+struct _lf_search_module_by_name_arg
+{
+	int id;
+	int dummy1;
+	char name[LF_PATH_MAX];
+	char dummy2[LF_ARG_MAX];
 } ALIGNED(16);
 
-int SifSearchModuleByName(const char * name)
+int SifSearchModuleByName(const char *name)
 {
 	struct _lf_search_module_by_name_arg arg;
 	if (SifLoadFileInit() < 0)
@@ -321,10 +330,12 @@ int SifSearchModuleByName(const char * name)
 #endif
 
 #ifdef F_SifSearchModuleByAddress
-struct _lf_search_module_by_address_arg {
-	union {
-		const void	*ptr;
-		int	id;
+struct _lf_search_module_by_address_arg
+{
+	union
+	{
+		const void *ptr;
+		int id;
 	} p;
 } ALIGNED(16);
 
@@ -344,11 +355,12 @@ int SifSearchModuleByAddress(const void *ptr)
 #endif
 
 #ifdef F__SifLoadElfPart
-struct _lf_elf_load_arg {
-	u32	epc;
-	u32	gp;
-	char	path[LF_PATH_MAX];
-	char	secname[LF_ARG_MAX];
+struct _lf_elf_load_arg
+{
+	u32 epc;
+	u32 gp;
+	char path[LF_PATH_MAX];
+	char secname[LF_ARG_MAX];
 } ALIGNED(16);
 
 int _SifLoadElfPart(const char *path, const char *secname, t_ExecData *data, int fno)
@@ -364,13 +376,12 @@ int _SifLoadElfPart(const char *path, const char *secname, t_ExecData *data, int
 	arg.secname[LF_ARG_MAX - 1] = 0;
 
 	if (SifCallRpc(&_lf_cd, fno, 0, &arg, sizeof arg, &arg,
-				sizeof(t_ExecData), NULL, NULL) < 0)
+	               sizeof(t_ExecData), NULL, NULL) < 0)
 		return -SCE_ECALLMISS;
 
-	if (arg.epc != 0)
-	{
+	if (arg.epc != 0) {
 		data->epc = arg.epc;
-		data->gp  = arg.gp;
+		data->gp = arg.gp;
 
 		return 0;
 	} else
@@ -421,7 +432,7 @@ int SifLoadElfPart(const char *path, const char *secname, t_ExecData *data)
 */
 int SifLoadElf(const char *path, t_ExecData *data)
 {
-	u32 secname = 0x6c6c61;  /* "all" */
+	u32 secname = 0x6c6c61; /* "all" */
 	return _SifLoadElfPart(path, (char *)&secname, data, LF_F_ELF_LOAD);
 }
 #endif
@@ -442,7 +453,7 @@ int SifLoadElf(const char *path, t_ExecData *data)
 */
 int SifLoadElfEncrypted(const char *path, t_ExecData *data)
 {
-	u32 secname = 0x6c6c61;  /* "all" */
+	u32 secname = 0x6c6c61; /* "all" */
 	return _SifLoadElfPart(path, (char *)&secname, data, LF_F_MG_ELF_LOAD);
 }
 #endif
@@ -496,7 +507,7 @@ int SifIopSetVal(u32 iop_addr, int val, int type)
 	arg.type = type;
 
 	if (SifCallRpc(&_lf_cd, LF_F_SET_ADDR, 0, &arg, sizeof arg, &arg, 4,
-				NULL, NULL) < 0)
+	               NULL, NULL) < 0)
 		return -SCE_ECALLMISS;
 
 	return arg.p.result;
@@ -536,13 +547,13 @@ int SifIopGetVal(u32 iop_addr, void *val, int type)
 	arg.type = type;
 
 	if (SifCallRpc(&_lf_cd, LF_F_GET_ADDR, 0, &arg, sizeof arg, &arg, 4,
-				NULL, NULL) < 0)
+	               NULL, NULL) < 0)
 		return -SCE_ECALLMISS;
 
 	if (val) {
 		switch (type) {
 			case LF_VAL_BYTE:
-				*(u8 *)val  = (u8)arg.p.result & 0xff;
+				*(u8 *)val = (u8)arg.p.result & 0xff;
 				break;
 			case LF_VAL_SHORT:
 				*(u16 *)val = (u16)arg.p.result & 0xffff;
@@ -558,17 +569,20 @@ int SifIopGetVal(u32 iop_addr, void *val, int type)
 #endif
 
 #ifdef F__SifLoadModuleBuffer
-struct _lf_module_buffer_load_arg {
-	union {
-		void	*ptr;
-		int	result;
+struct _lf_module_buffer_load_arg
+{
+	union
+	{
+		void *ptr;
+		int result;
 	} p;
-	union {
-		int	arg_len;
-		int	modres;
+	union
+	{
+		int arg_len;
+		int modres;
 	} q;
-	char	unused[LF_PATH_MAX];
-	char	args[LF_ARG_MAX];
+	char unused[LF_PATH_MAX];
+	char args[LF_ARG_MAX];
 } ALIGNED(16);
 
 int _SifLoadModuleBuffer(void *ptr, int arg_len, const char *args, int *modres)
@@ -589,7 +603,7 @@ int _SifLoadModuleBuffer(void *ptr, int arg_len, const char *args, int *modres)
 	}
 
 	if (SifCallRpc(&_lf_cd, LF_F_MOD_BUF_LOAD, 0, &arg, sizeof arg, &arg, 8,
-				NULL, NULL) < 0)
+	               NULL, NULL) < 0)
 		return -SCE_ECALLMISS;
 
 	if (modres)
@@ -694,9 +708,10 @@ int SifExecModuleBuffer(void *ptr, u32 size, u32 arg_len, const char *args, int 
 	qid = SifSetDma(&dmat, 1);
 
 	if (!qid)
-	    return -1; // should have a better error here...
+		return -1; // should have a better error here...
 
-	while(SifDmaStat(qid) >= 0);
+	while (SifDmaStat(qid) >= 0)
+		;
 
 	res = _SifLoadModuleBuffer(iop_addr, arg_len, args, mod_res);
 	SifFreeIopHeap(iop_addr);

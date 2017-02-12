@@ -20,9 +20,9 @@
 enum sbus_errors {
 	SBUS_E_OK,
 
-	SBUS_E_INIT = 0xd600,	/* Initialization error */
-	SBUS_E_ARG,		/* Error with an argument */
-	SBUS_E_IRQ,		/* Wrong IRQ number / already in use */
+	SBUS_E_INIT = 0xd600, /* Initialization error */
+	SBUS_E_ARG,           /* Error with an argument */
+	SBUS_E_IRQ,           /* Wrong IRQ number / already in use */
 };
 
 typedef int (*sbus_intr_handler_t)(u32, void *);

@@ -12,9 +12,8 @@
 
 #include <erl.h>
 
-char * erl_id = "libdraw";
-char * erl_dependancies[] = {
-	"libc",
-	"libmf",
-    0
-};
+char *erl_id = "libdraw";
+char *erl_dependancies[] = {
+    "libc",
+    "libmf",
+    0};

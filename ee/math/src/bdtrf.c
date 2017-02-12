@@ -149,117 +149,102 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 
 #ifdef ANSIC
 float incbetf(float, float, float), powf(float, float);
-float incbif( float, float, float );
+float incbif(float, float, float);
 #else
 float incbetf(), powf(), incbif();
 #endif
 
 #ifdef ANSIC
-float bdtrcf( int k, int n, float pp )
+float bdtrcf(int k, int n, float pp)
 #else
-float bdtrcf( k, n, pp )
-int k, n;
+float bdtrcf(k, n, pp) int k, n;
 double pp;
 #endif
 {
-float p, dk, dn;
+	float p, dk, dn;
 
-p = pp;
-if( (p < 0.0) || (p > 1.0) )
-	goto domerr;
-if( k < 0 )
-	return( 1.0 );
+	p = pp;
+	if ((p < 0.0) || (p > 1.0))
+		goto domerr;
+	if (k < 0)
+		return (1.0);
 
-if( n < k )
-	{
-domerr:
-	mtherr( "bdtrcf", DOMAIN );
-	return( 0.0 );
+	if (n < k) {
+	domerr:
+		mtherr("bdtrcf", DOMAIN);
+		return (0.0);
 	}
 
-if( k == n )
-	return( 0.0 );
-dn = n - k;
-if( k == 0 )
-	{
-	dk = 1.0 - powf( 1.0-p, dn );
+	if (k == n)
+		return (0.0);
+	dn = n - k;
+	if (k == 0) {
+		dk = 1.0 - powf(1.0 - p, dn);
+	} else {
+		dk = k + 1;
+		dk = incbetf(dk, dn, p);
 	}
-else
-	{
-	dk = k + 1;
-	dk = incbetf( dk, dn, p );
-	}
-return( dk );
+	return (dk);
 }
 
 
 
 #ifdef ANSIC
-float bdtrf( int k, int n, float pp )
+float bdtrf(int k, int n, float pp)
 #else
-float bdtrf( k, n, pp )
-int k, n;
+float bdtrf(k, n, pp) int k, n;
 double pp;
 #endif
 {
-float p, dk, dn;
+	float p, dk, dn;
 
-p = pp;
-if( (p < 0.0) || (p > 1.0) )
-	goto domerr;
-if( (k < 0) || (n < k) )
-	{
-domerr:
-	mtherr( "bdtrf", DOMAIN );
-	return( 0.0 );
+	p = pp;
+	if ((p < 0.0) || (p > 1.0))
+		goto domerr;
+	if ((k < 0) || (n < k)) {
+	domerr:
+		mtherr("bdtrf", DOMAIN);
+		return (0.0);
 	}
 
-if( k == n )
-	return( 1.0 );
+	if (k == n)
+		return (1.0);
 
-dn = n - k;
-if( k == 0 )
-	{
-	dk = powf( 1.0-p, dn );
+	dn = n - k;
+	if (k == 0) {
+		dk = powf(1.0 - p, dn);
+	} else {
+		dk = k + 1;
+		dk = incbetf(dn, dk, 1.0 - p);
 	}
-else
-	{
-	dk = k + 1;
-	dk = incbetf( dn, dk, 1.0 - p );
-	}
-return( dk );
+	return (dk);
 }
 
 
 #ifdef ANSIC
-float bdtrif( int k, int n, float yy )
+float bdtrif(int k, int n, float yy)
 #else
-float bdtrif( k, n, yy )
-int k, n;
+float bdtrif(k, n, yy) int k, n;
 double yy;
 #endif
 {
-float y, dk, dn, p;
+	float y, dk, dn, p;
 
-y = yy;
-if( (y < 0.0) || (y > 1.0) )
-	goto domerr;
-if( (k < 0) || (n <= k) )
-	{
-domerr:
-	mtherr( "bdtrif", DOMAIN );
-	return( 0.0 );
+	y = yy;
+	if ((y < 0.0) || (y > 1.0))
+		goto domerr;
+	if ((k < 0) || (n <= k)) {
+	domerr:
+		mtherr("bdtrif", DOMAIN);
+		return (0.0);
 	}
 
-dn = n - k;
-if( k == 0 )
-	{
-	p = 1.0 - powf( y, 1.0/dn );
+	dn = n - k;
+	if (k == 0) {
+		p = 1.0 - powf(y, 1.0 / dn);
+	} else {
+		dk = k + 1;
+		p = 1.0 - incbif(dn, dk, y);
 	}
-else
-	{
-	dk = k + 1;
-	p = 1.0 - incbif( dn, dk, y );
-	}
-return( p );
+	return (p);
 }

@@ -17,7 +17,7 @@ static int dummy2 = 0;
 
 /* defined by kernel */
 void SifInitRpc(int);
-s32  SetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *arg2), void *arg2);
+s32 SetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *arg2), void *arg2);
 
 void nested()
 {
@@ -26,8 +26,7 @@ void nested()
 
 void loops_10_times()
 {
-	if (dummy & 1)
-	{
+	if (dummy & 1) {
 		nested();
 	}
 
@@ -44,8 +43,9 @@ void wakeup(s32 id, u16 time, void *arg)
 void sleeping_beauty()
 {
 	/* sleep around 3 seconds on NTSC */
-	SetAlarm(15734*3, wakeup, 0);
-	while (locked);
+	SetAlarm(15734 * 3, wakeup, 0);
+	while (locked)
+		;
 }
 
 int main()
@@ -54,8 +54,7 @@ int main()
 
 	SifInitRpc(0);
 
-	for (i=0; i<10; i++)
-	{
+	for (i = 0; i < 10; i++) {
 		loops_10_times();
 	}
 

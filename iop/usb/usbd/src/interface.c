@@ -15,7 +15,8 @@
 #include "hcd.h"
 #include "usbio.h"
 
-int UsbRegisterDriver(UsbDriver *driver) {
+int UsbRegisterDriver(UsbDriver *driver)
+{
 	int res;
 
 	if (usbdLock() != 0)
@@ -23,11 +24,12 @@ int UsbRegisterDriver(UsbDriver *driver) {
 
 	res = doRegisterDriver(driver, NULL); // gp
 
-    usbdUnlock();
+	usbdUnlock();
 	return res;
 }
 
-int UsbUnregisterDriver(UsbDriver *driver) {
+int UsbUnregisterDriver(UsbDriver *driver)
+{
 	int res;
 
 	if (usbdLock() != 0)
@@ -39,7 +41,8 @@ int UsbUnregisterDriver(UsbDriver *driver) {
 	return res;
 }
 
-void *UsbGetDeviceStaticDescriptor(int devId, void *data, uint8 type) {
+void *UsbGetDeviceStaticDescriptor(int devId, void *data, uint8 type)
+{
 	void *res;
 
 	if (usbdLock() != 0)
@@ -51,7 +54,8 @@ void *UsbGetDeviceStaticDescriptor(int devId, void *data, uint8 type) {
 	return res;
 }
 
-int UsbGetDeviceLocation(int devId, uint8 *path) {
+int UsbGetDeviceLocation(int devId, uint8 *path)
+{
 	Device *dev;
 	int res;
 
@@ -68,7 +72,8 @@ int UsbGetDeviceLocation(int devId, uint8 *path) {
 	return res;
 }
 
-int UsbSetPrivateData(int devId, void *data) {
+int UsbSetPrivateData(int devId, void *data)
+{
 	Device *dev;
 	int res = USB_RC_OK;
 
@@ -85,7 +90,8 @@ int UsbSetPrivateData(int devId, void *data) {
 	return res;
 }
 
-void *UsbGetPrivateData(int devId) {
+void *UsbGetPrivateData(int devId)
+{
 	Device *dev;
 	void *res = NULL;
 
@@ -100,7 +106,8 @@ void *UsbGetPrivateData(int devId) {
 	return res;
 }
 
-int UsbOpenEndpoint(int devId, UsbEndpointDescriptor *desc) {
+int UsbOpenEndpoint(int devId, UsbEndpointDescriptor *desc)
+{
 	Device *dev;
 	Endpoint *ep;
 	int res = -1;
@@ -119,7 +126,8 @@ int UsbOpenEndpoint(int devId, UsbEndpointDescriptor *desc) {
 	return res;
 }
 
-int UsbCloseEndpoint(int id) {
+int UsbCloseEndpoint(int id)
+{
 	Endpoint *ep;
 	int res;
 
@@ -136,7 +144,8 @@ int UsbCloseEndpoint(int id) {
 	return res;
 }
 
-int UsbTransfer(int id, void *data, uint32 len, void *option, UsbCallbackProc callback, void *cbArg) {
+int UsbTransfer(int id, void *data, uint32 len, void *option, UsbCallbackProc callback, void *cbArg)
+{
 	UsbDeviceRequest *ctrlPkt = (UsbDeviceRequest *)option;
 	IoRequest *req;
 	Endpoint *ep;
@@ -179,8 +188,8 @@ int UsbTransfer(int id, void *data, uint32 len, void *option, UsbCallbackProc ca
 				freeIoRequest(req);
 			} else {
 				res = doControlTransfer(ep, req,
-					ctrlPkt->requesttype, ctrlPkt->request, ctrlPkt->value, ctrlPkt->index, ctrlPkt->length,
-					data, signalCallbackThreadFunc);
+				                        ctrlPkt->requesttype, ctrlPkt->request, ctrlPkt->value, ctrlPkt->index, ctrlPkt->length,
+				                        data, signalCallbackThreadFunc);
 			}
 		} else {
 			if (ep->endpointType == TYPE_ISOCHRON)
@@ -193,7 +202,8 @@ int UsbTransfer(int id, void *data, uint32 len, void *option, UsbCallbackProc ca
 	return res;
 }
 
-int UsbOpenEndpointAligned(int devId, UsbEndpointDescriptor *desc) {
+int UsbOpenEndpointAligned(int devId, UsbEndpointDescriptor *desc)
+{
 	Device *dev;
 	Endpoint *ep;
 	int res = -1;
@@ -212,18 +222,20 @@ int UsbOpenEndpointAligned(int devId, UsbEndpointDescriptor *desc) {
 	return res;
 }
 
-int UsbRegisterAutoloader(UsbDriver *drv) {
+int UsbRegisterAutoloader(UsbDriver *drv)
+{
 	dbg_printf("UsbRegisterAutoloader stub\n");
 	return 0;
 }
 
-int UsbUnregisterAutoloader(UsbDriver *drv) {
+int UsbUnregisterAutoloader(UsbDriver *drv)
+{
 	dbg_printf("UsbUnregisterAutoloader stub\n");
 	return 0;
 }
 
-int UsbChangeThreadPriority(void) {
+int UsbChangeThreadPriority(void)
+{
 	dbg_printf("UsbChangeThreadPriority stub\n");
 	return 0;
 }
-

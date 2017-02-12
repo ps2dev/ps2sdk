@@ -18,7 +18,7 @@
 
 #include "iopheap.h"
 
-#define IH_C_BOUND	0x0001
+#define IH_C_BOUND 0x0001
 
 extern int _iop_reboot_count;
 extern SifRpcClientData_t _ih_cd;
@@ -33,12 +33,11 @@ int SifInitIopHeap()
 	int res;
 
 	static int _rb_count = 0;
-	if(_rb_count != _iop_reboot_count)
-	{
-	    _rb_count = _iop_reboot_count;
-	    memset(&_ih_cd, 0, sizeof _ih_cd);
- 	    _ih_caps = 0;
-	    memset(&_ih_caps, 0, sizeof _ih_caps);
+	if (_rb_count != _iop_reboot_count) {
+		_rb_count = _iop_reboot_count;
+		memset(&_ih_cd, 0, sizeof _ih_cd);
+		_ih_caps = 0;
+		memset(&_ih_caps, 0, sizeof _ih_caps);
 	}
 
 	if (_ih_caps)
@@ -67,9 +66,13 @@ void SifExitIopHeap()
 #endif
 
 #ifdef F_SifAllocIopHeap
-void * SifAllocIopHeap(int size)
+void *SifAllocIopHeap(int size)
 {
-	union { int size; u32 addr; } arg;
+	union
+	{
+		int size;
+		u32 addr;
+	} arg;
 
 	if (SifInitIopHeap() < 0)
 		return NULL;
@@ -86,7 +89,11 @@ void * SifAllocIopHeap(int size)
 #ifdef F_SifFreeIopHeap
 int SifFreeIopHeap(void *addr)
 {
-	union { void *addr; int result; } arg;
+	union
+	{
+		void *addr;
+		int result;
+	} arg;
 
 	if (SifInitIopHeap() < 0)
 		return -E_LIB_API_INIT;
@@ -102,14 +109,16 @@ int SifFreeIopHeap(void *addr)
 
 #ifdef F_SifLoadIopHeap
 
-#define LIH_PATH_MAX	252
+#define LIH_PATH_MAX 252
 
-struct _iop_load_heap_arg {
-	union	{
-		void	*addr;
-		int	result;
+struct _iop_load_heap_arg
+{
+	union
+	{
+		void *addr;
+		int result;
 	} p;
-	char	path[LIH_PATH_MAX];
+	char path[LIH_PATH_MAX];
 };
 
 int SifLoadIopHeap(const char *path, void *addr)

@@ -12,10 +12,9 @@
 
 #include <erl.h>
 
-char * erl_id = "libsior";
+char *erl_id = "libsior";
 
-char * erl_dependancies[] = {
+char *erl_dependancies[] = {
     "libkernel",
     "libc",
-    0
-};
+    0};

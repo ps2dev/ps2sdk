@@ -19,10 +19,10 @@
 
 #include "log.h"
 
-#define DPRINTF(format, args...) printf("%s: " format, __FUNCTION__ , ## args)
+#define DPRINTF(format, args...) printf("%s: " format, __FUNCTION__, ##args)
 
-#define FLUSH_COUNT_MAX	4
-#define DMA_MAX		1024
+#define FLUSH_COUNT_MAX 4
+#define DMA_MAX 1024
 
 static int init = 0;
 static int logging = 1;
@@ -46,7 +46,8 @@ static int log_init(void)
 
 void log_default(int type)
 {
-	if (!logging) return;
+	if (!logging)
+		return;
 
 	log_write8(type);
 }
@@ -55,7 +56,8 @@ void log_portdata(u32 *pd1, u32 *pd2)
 {
 	int i;
 
-	if (!logging) return;
+	if (!logging)
+		return;
 
 	log_default(LOG_TRS_PD);
 
@@ -69,7 +71,8 @@ void log_regdata(u32 *rd)
 {
 	int i;
 
-	if (!logging) return;
+	if (!logging)
+		return;
 
 	log_default(LOG_TRS_RD);
 
@@ -81,7 +84,8 @@ void log_data(int type, u8 *data, u32 size)
 {
 	int i;
 
-	if (!logging) return;
+	if (!logging)
+		return;
 
 	log_default(type);
 
@@ -96,7 +100,8 @@ void log_dma(int type, struct _sio2_dma_arg *arg)
 	u8 *p;
 	int i, effective;
 
-	if (!logging) return;
+	if (!logging)
+		return;
 
 	log_default(type);
 
@@ -114,11 +119,14 @@ void log_dma(int type, struct _sio2_dma_arg *arg)
 
 void log_stat(u32 stat6c, u32 stat70, u32 stat74)
 {
-	if (!logging) return;
+	if (!logging)
+		return;
 
 	log_default(LOG_TRR_STAT);
 
-	log_write32(stat6c); log_write32(stat70); log_write32(stat74);
+	log_write32(stat6c);
+	log_write32(stat70);
+	log_write32(stat74);
 }
 
 void log_write8(u8 val)
@@ -146,7 +154,8 @@ void log_flush(int now)
 	if (!init && !log_init())
 		return;
 
-	if (!logging || logfd < 0) return;
+	if (!logging || logfd < 0)
+		return;
 
 	flushcount++;
 

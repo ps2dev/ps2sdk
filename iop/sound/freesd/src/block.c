@@ -30,43 +30,42 @@ s32 BlockTransWriteFrom(u8 *iopaddr, u32 size, s32 chan, u16 mode, u8 *startaddr
 	BlockTransSize[core] = size;
 	BlockTransAddr[core] = (u32)iopaddr;
 
-	if(startaddr == 0)
+	if (startaddr == 0)
 		startaddr = iopaddr;
 
 	offset = startaddr - iopaddr;
 
-	if(offset > size)
-	{
-		if(mode & SD_TRANS_LOOP)
-		{
+	if (offset > size) {
+		if (mode & SD_TRANS_LOOP) {
 			offset -= size;
 			BlockTransBuff[core] = 1;
-		}
-		else
-		{
+		} else {
 			return -1;
 		}
 	}
 
-	if(offset & 1023) offset += 1024;
+	if (offset & 1023)
+		offset += 1024;
 
 	iopaddr += (BlockTransSize[core] * BlockTransBuff[core]) + offset;
 
-	if(*SD_CORE_ATTR(core) & SD_DMA_IN_PROCESS) return -1;
-	if(*SD_DMA_CHCR(core) & SD_DMA_START) return -1;
+	if (*SD_CORE_ATTR(core) & SD_DMA_IN_PROCESS)
+		return -1;
+	if (*SD_DMA_CHCR(core) & SD_DMA_START)
+		return -1;
 
 	*SD_CORE_ATTR(core) &= 0xFFCF;
 
 	*SD_A_TSA_HI(core) = 0;
 	*SD_A_TSA_LO(core) = 0;
 
-	*U16_REGISTER(0x1B0+(core*1024)) = 1 << core;
+	*U16_REGISTER(0x1B0 + (core * 1024)) = 1 << core;
 
 	SetDmaWrite(core);
 
 	*SD_DMA_ADDR(core) = (u32)iopaddr;
 	*SD_DMA_MODE(core) = 0x10;
-	*SD_DMA_SIZE(core) = (size/64)+((size&63)>0);
+	*SD_DMA_SIZE(core) = (size / 64) + ((size & 63) > 0);
 	*SD_DMA_CHCR(core) = SD_DMA_CS | SD_DMA_START | SD_DMA_DIR_IOP2SPU;
 
 	return 0;
@@ -80,21 +79,23 @@ s32 BlockTransWrite(u8 *iopaddr, u32 size, s32 chan)
 	BlockTransSize[core] = size;
 	BlockTransAddr[core] = (u32)iopaddr;
 
-	if(*SD_CORE_ATTR(core) & SD_DMA_IN_PROCESS) return -1;
-	if(*SD_DMA_CHCR(core) & SD_DMA_START) return -1;
+	if (*SD_CORE_ATTR(core) & SD_DMA_IN_PROCESS)
+		return -1;
+	if (*SD_DMA_CHCR(core) & SD_DMA_START)
+		return -1;
 
 	*SD_CORE_ATTR(core) &= 0xFFCF;
 
 	*SD_A_TSA_HI(core) = 0;
 	*SD_A_TSA_LO(core) = 0;
 
-	*U16_REGISTER(0x1B0+(core*1024)) = 1 << core;
+	*U16_REGISTER(0x1B0 + (core * 1024)) = 1 << core;
 
 	SetDmaWrite(core);
 
 	*SD_DMA_ADDR(core) = (u32)iopaddr;
 	*SD_DMA_MODE(core) = 0x10;
-	*SD_DMA_SIZE(core) = (size/64)+((size&63)>0);
+	*SD_DMA_SIZE(core) = (size / 64) + ((size & 63) > 0);
 	*SD_DMA_CHCR(core) = SD_DMA_CS | SD_DMA_START | SD_DMA_DIR_IOP2SPU;
 
 	return 0;
@@ -111,27 +112,30 @@ s32 BlockTransRead(u8 *iopaddr, u32 size, s32 chan, s16 mode)
 	BlockTransSize[core] = size;
 	BlockTransAddr[core] = (u32)iopaddr;
 
-	if(*SD_CORE_ATTR(core) & SD_DMA_IN_PROCESS) return -1;
-	if(*SD_DMA_CHCR(core) & SD_DMA_START) return -1;
+	if (*SD_CORE_ATTR(core) & SD_DMA_IN_PROCESS)
+		return -1;
+	if (*SD_DMA_CHCR(core) & SD_DMA_START)
+		return -1;
 
 	*SD_CORE_ATTR(core) &= 0xFFCF;
 
 	*SD_A_TSA_HI(core) = 0;
 	*SD_A_TSA_LO(core) = ((mode & 0xF00) << 1) + 0x400;
 
-	*U16_REGISTER(0x1AE + (core*1024)) = (mode & 0xF000) >> 11;
+	*U16_REGISTER(0x1AE + (core * 1024)) = (mode & 0xF000) >> 11;
 
 	i = 0x4937;
 
-	while(i--);
+	while (i--)
+		;
 
-	*U16_REGISTER(0x1B0+(core*1024)) = 4;
+	*U16_REGISTER(0x1B0 + (core * 1024)) = 4;
 
 	SetDmaRead(core);
 
 	*SD_DMA_ADDR(core) = (u32)iopaddr;
 	*SD_DMA_MODE(core) = 0x10;
-	*SD_DMA_SIZE(core) = (size/64)+((size&63)>0);
+	*SD_DMA_SIZE(core) = (size / 64) + ((size & 63) > 0);
 	*SD_DMA_CHCR(core) = SD_DMA_CS | SD_DMA_START | SD_DMA_DIR_SPU2IOP;
 
 
@@ -145,60 +149,51 @@ int sceSdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, u8 *startaddr)
 	int core = chan & 1;
 	int _size = size;
 
-	switch(transfer_dir)
-	{
-		case SD_TRANS_WRITE:
-		{
+	switch (transfer_dir) {
+		case SD_TRANS_WRITE: {
 			TransIntrData[core].mode = 0x100 | core;
 
-			if(mode & SD_TRANS_LOOP)
-			{
+			if (mode & SD_TRANS_LOOP) {
 				TransIntrData[core].mode |= SD_TRANS_LOOP << 8;
 				_size /= 2;
 			}
 
-			if(BlockTransWrite(iopaddr, _size, core) >= 0)
+			if (BlockTransWrite(iopaddr, _size, core) >= 0)
 				return 0;
 
 		} break;
 
-		case SD_TRANS_READ:
-		{
+		case SD_TRANS_READ: {
 			TransIntrData[core].mode = 0x300 | core;
 
-			if(mode & SD_TRANS_LOOP)
-			{
+			if (mode & SD_TRANS_LOOP) {
 				TransIntrData[core].mode |= SD_TRANS_LOOP << 8;
 				_size /= 2;
 			}
 
-			if(BlockTransRead(iopaddr, _size, chan, mode) >= 0)
+			if (BlockTransRead(iopaddr, _size, chan, mode) >= 0)
 				return 0;
 
 		} break;
 
-		case SD_TRANS_STOP:
-		{
+		case SD_TRANS_STOP: {
 			return DmaStop(core);
 
 		} break;
 
-		case SD_TRANS_WRITE_FROM:
-		{
+		case SD_TRANS_WRITE_FROM: {
 			TransIntrData[core].mode = 0x100 | core;
 
-			if(mode & SD_TRANS_LOOP)
-			{
+			if (mode & SD_TRANS_LOOP) {
 				TransIntrData[core].mode |= SD_TRANS_LOOP << 8;
 				_size /= 2;
 			}
 
-			if(BlockTransWriteFrom(iopaddr, _size, core, mode, startaddr) >= 0)
+			if (BlockTransWriteFrom(iopaddr, _size, core, mode, startaddr) >= 0)
 				return 0;
 
 
 		} break;
-
 	}
 	return -1;
 }
@@ -209,7 +204,7 @@ u32 sceSdBlockTransStatus(s16 chan, s16 flag)
 
 	chan &= 1;
 
-	if(*U16_REGISTER(0x1B0 + (chan * 1024)) == 0)
+	if (*U16_REGISTER(0x1B0 + (chan * 1024)) == 0)
 		retval = 0;
 	else
 		retval = *SD_DMA_ADDR(chan);

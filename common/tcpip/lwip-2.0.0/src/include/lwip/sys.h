@@ -92,7 +92,7 @@ typedef u8_t sys_mbox_t;
 #define sys_sem_new(s, c) ERR_OK
 #define sys_sem_signal(s)
 #define sys_sem_wait(s)
-#define sys_arch_sem_wait(s,t)
+#define sys_arch_sem_wait(s, t)
 #define sys_sem_free(s)
 #define sys_sem_valid(s) 0
 #define sys_sem_valid_val(s) 0
@@ -105,17 +105,17 @@ typedef u8_t sys_mbox_t;
 #define sys_mutex_valid(mu) 0
 #define sys_mutex_set_invalid(mu)
 #define sys_mbox_new(m, s) ERR_OK
-#define sys_mbox_fetch(m,d)
-#define sys_mbox_tryfetch(m,d)
-#define sys_mbox_post(m,d)
-#define sys_mbox_trypost(m,d)
+#define sys_mbox_fetch(m, d)
+#define sys_mbox_tryfetch(m, d)
+#define sys_mbox_post(m, d)
+#define sys_mbox_trypost(m, d)
 #define sys_mbox_free(m)
 #define sys_mbox_valid(m)
 #define sys_mbox_valid_val(m)
 #define sys_mbox_set_invalid(m)
 #define sys_mbox_set_invalid_val(m)
 
-#define sys_thread_new(n,t,a,s,p)
+#define sys_thread_new(n, t, a, s, p)
 
 #define sys_msleep(t)
 
@@ -148,13 +148,13 @@ typedef void (*lwip_thread_fn)(void *arg);
 
 #if LWIP_COMPAT_MUTEX
 /* for old ports that don't have mutexes: define them to binary semaphores */
-#define sys_mutex_t                   sys_sem_t
-#define sys_mutex_new(mutex)          sys_sem_new(mutex, 1)
-#define sys_mutex_lock(mutex)         sys_sem_wait(mutex)
-#define sys_mutex_unlock(mutex)       sys_sem_signal(mutex)
-#define sys_mutex_free(mutex)         sys_sem_free(mutex)
-#define sys_mutex_valid(mutex)        sys_sem_valid(mutex)
-#define sys_mutex_set_invalid(mutex)  sys_sem_set_invalid(mutex)
+#define sys_mutex_t sys_sem_t
+#define sys_mutex_new(mutex) sys_sem_new(mutex, 1)
+#define sys_mutex_lock(mutex) sys_sem_wait(mutex)
+#define sys_mutex_unlock(mutex) sys_sem_signal(mutex)
+#define sys_mutex_free(mutex) sys_sem_free(mutex)
+#define sys_mutex_valid(mutex) sys_sem_valid(mutex)
+#define sys_mutex_set_invalid(mutex) sys_sem_set_invalid(mutex)
 
 #else /* LWIP_COMPAT_MUTEX */
 
@@ -233,7 +233,7 @@ u32_t sys_arch_sem_wait(sys_sem_t *sem, u32_t timeout);
  */
 void sys_sem_free(sys_sem_t *sem);
 /** Wait for a semaphore - forever/no timeout */
-#define sys_sem_wait(sem)                  sys_arch_sem_wait(sem, 0)
+#define sys_sem_wait(sem) sys_arch_sem_wait(sem, 0)
 #ifndef sys_sem_valid
 /**
  * @ingroup sys_sem
@@ -252,7 +252,7 @@ void sys_sem_set_invalid(sys_sem_t *sem);
 /**
  * Same as sys_sem_valid() but taking a value, not a pointer
  */
-#define sys_sem_valid_val(sem)       sys_sem_valid(&(sem))
+#define sys_sem_valid_val(sem) sys_sem_valid(&(sem))
 #endif
 #ifndef sys_sem_set_invalid_val
 /**
@@ -346,7 +346,7 @@ void sys_mbox_set_invalid(sys_mbox_t *mbox);
 /**
  * Same as sys_mbox_valid() but taking a value, not a pointer
  */
-#define sys_mbox_valid_val(mbox)       sys_mbox_valid(&(mbox))
+#define sys_mbox_valid_val(mbox) sys_mbox_valid(&(mbox))
 #endif
 #ifndef sys_mbox_set_invalid_val
 /**
@@ -450,39 +450,43 @@ void sys_arch_unprotect(sys_prot_t pval);
  */
 
 #ifndef SYS_ARCH_INC
-#define SYS_ARCH_INC(var, val) do { \
-                                SYS_ARCH_DECL_PROTECT(old_level); \
-                                SYS_ARCH_PROTECT(old_level); \
-                                var += val; \
-                                SYS_ARCH_UNPROTECT(old_level); \
-                              } while(0)
+#define SYS_ARCH_INC(var, val)            \
+	do {                                  \
+		SYS_ARCH_DECL_PROTECT(old_level); \
+		SYS_ARCH_PROTECT(old_level);      \
+		var += val;                       \
+		SYS_ARCH_UNPROTECT(old_level);    \
+	} while (0)
 #endif /* SYS_ARCH_INC */
 
 #ifndef SYS_ARCH_DEC
-#define SYS_ARCH_DEC(var, val) do { \
-                                SYS_ARCH_DECL_PROTECT(old_level); \
-                                SYS_ARCH_PROTECT(old_level); \
-                                var -= val; \
-                                SYS_ARCH_UNPROTECT(old_level); \
-                              } while(0)
+#define SYS_ARCH_DEC(var, val)            \
+	do {                                  \
+		SYS_ARCH_DECL_PROTECT(old_level); \
+		SYS_ARCH_PROTECT(old_level);      \
+		var -= val;                       \
+		SYS_ARCH_UNPROTECT(old_level);    \
+	} while (0)
 #endif /* SYS_ARCH_DEC */
 
 #ifndef SYS_ARCH_GET
-#define SYS_ARCH_GET(var, ret) do { \
-                                SYS_ARCH_DECL_PROTECT(old_level); \
-                                SYS_ARCH_PROTECT(old_level); \
-                                ret = var; \
-                                SYS_ARCH_UNPROTECT(old_level); \
-                              } while(0)
+#define SYS_ARCH_GET(var, ret)            \
+	do {                                  \
+		SYS_ARCH_DECL_PROTECT(old_level); \
+		SYS_ARCH_PROTECT(old_level);      \
+		ret = var;                        \
+		SYS_ARCH_UNPROTECT(old_level);    \
+	} while (0)
 #endif /* SYS_ARCH_GET */
 
 #ifndef SYS_ARCH_SET
-#define SYS_ARCH_SET(var, val) do { \
-                                SYS_ARCH_DECL_PROTECT(old_level); \
-                                SYS_ARCH_PROTECT(old_level); \
-                                var = val; \
-                                SYS_ARCH_UNPROTECT(old_level); \
-                              } while(0)
+#define SYS_ARCH_SET(var, val)            \
+	do {                                  \
+		SYS_ARCH_DECL_PROTECT(old_level); \
+		SYS_ARCH_PROTECT(old_level);      \
+		var = val;                        \
+		SYS_ARCH_UNPROTECT(old_level);    \
+	} while (0)
 #endif /* SYS_ARCH_SET */
 
 

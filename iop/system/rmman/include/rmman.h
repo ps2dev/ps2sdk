@@ -31,4 +31,4 @@ int rmmanClose(int port, int slot);
 int rmmanEnd(void);
 #define I_rmmanEnd DECLARE_IMPORT(7, rmmanEnd)
 
-#endif	// _IOP_RMMAN_H
+#endif // _IOP_RMMAN_H

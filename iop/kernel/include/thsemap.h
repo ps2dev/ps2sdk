@@ -24,18 +24,20 @@
 #include "irx.h"
 
 //Semaphore attributes
-#define SA_THFIFO	0x000
-#define SA_THPRI	0x001
-#define SA_IHTHPRI	0x100
+#define SA_THFIFO 0x000
+#define SA_THPRI 0x001
+#define SA_IHTHPRI 0x100
 
-typedef struct {
-	u32	attr;
-	u32	option;
-	int	initial;
-	int	max;
+typedef struct
+{
+	u32 attr;
+	u32 option;
+	int initial;
+	int max;
 } iop_sema_t;
 
-typedef struct {
+typedef struct
+{
 	u32 attr;
 	u32 option;
 	int initial;
@@ -67,8 +69,8 @@ int ReferSemaStatus(int semid, iop_sema_info_t *info);
 int iReferSemaStatus(int semid, iop_sema_info_t *info);
 #define I_iReferSemaStatus DECLARE_IMPORT(12, iReferSemaStatus)
 
-#define IOP_MUTEX_LOCKED	0
-#define IOP_MUTEX_UNLOCKED	1
+#define IOP_MUTEX_LOCKED 0
+#define IOP_MUTEX_UNLOCKED 1
 
 static inline int CreateMutex(int state)
 {

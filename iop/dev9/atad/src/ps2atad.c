@@ -31,8 +31,8 @@
 #define MODNAME "atad"
 IRX_ID(MODNAME, 2, 4);
 
-#define M_PRINTF(format, args...)	\
-	printf(MODNAME ": " format, ## args)
+#define M_PRINTF(format, args...) \
+	printf(MODNAME ": " format, ##args)
 
 #define BANNER "ATA device driver %s - Copyright (c) 2003 Marcus R. Brown\n"
 #define VERSION "v1.2"
@@ -43,7 +43,7 @@ static int ata_evflg = -1;
 /* Used for indicating 48-bit LBA support.  */
 static u8 lba_48bit[2] = {0, 0};
 
-static u8 Disable48bitLBA = 0;	//Please read the comments in _start().
+static u8 Disable48bitLBA = 0; //Please read the comments in _start().
 
 /* Local device info kept for drives 0 and 1.  */
 static ata_devinfo_t atad_devinfo[2];
@@ -53,100 +53,100 @@ static ata_devinfo_t atad_devinfo[2];
 static u16 ata_param[256];
 
 /* ATA command info.  */
-typedef struct _ata_cmd_info {
+typedef struct _ata_cmd_info
+{
 	u8 command;
 	u8 type;
 } ata_cmd_info_t;
 
 static const ata_cmd_info_t ata_cmd_table[] = {
-	{ATA_C_NOP,1},
-	{ATA_C_CFA_REQUEST_EXTENDED_ERROR_CODE,1},
-	{ATA_C_DEVICE_RESET,5},
-	{ATA_C_READ_SECTOR,2},
-	{ATA_C_READ_DMA_EXT,0x84},
-	{ATA_C_WRITE_SECTOR,3},
-	{ATA_C_WRITE_LONG,8},	//??? This seems to be WRITE_LONG, but the READ_LONG command isn't present (Why would Sony have only one of these two commands?). Both are obsolete too.
-	{ATA_C_WRITE_DMA_EXT,0x84},
-	{ATA_C_CFA_WRITE_SECTORS_WITHOUT_ERASE,3},
-	{ATA_C_READ_VERIFY_SECTOR,1},
-	{ATA_C_READ_VERIFY_SECTOR_EXT,0x81},
-	{ATA_C_SEEK,1},
-	{ATA_C_CFA_TRANSLATE_SECTOR,2},
-	{ATA_C_SCE_SECURITY_CONTROL,7},
-	{ATA_C_EXECUTE_DEVICE_DIAGNOSTIC,6},
-	{ATA_C_INITIALIZE_DEVICE_PARAMETERS,1},
-	{ATA_C_DOWNLOAD_MICROCODE,3},
-	{ATA_C_IDENTIFY_PACKET_DEVICE,2},
-	{ATA_C_SMART,7},
-	{ATA_C_CFA_ERASE_SECTORS,1},
-	{ATA_C_READ_MULTIPLE,2},
-	{ATA_C_WRITE_MULTIPLE,3},
-	{ATA_C_SET_MULTIPLE_MODE,1},
-	{ATA_C_READ_DMA,4},
-	{ATA_C_WRITE_DMA,4},
-	{ATA_C_CFA_WRITE_MULTIPLE_WITHOUT_ERASE,3},
-	{ATA_C_GET_MEDIA_STATUS,1},
-	{ATA_C_MEDIA_LOCK,1},
-	{ATA_C_MEDIA_UNLOCK,1},
-	{ATA_C_STANDBY_IMMEDIATE,1},
-	{ATA_C_IDLE_IMMEDIATE,1},
-	{ATA_C_STANDBY,1},
-	{ATA_C_IDLE,1},
-	{ATA_C_READ_BUFFER,2},
-	{ATA_C_CHECK_POWER_MODE,1},
-	{ATA_C_SLEEP,1},
-	{ATA_C_FLUSH_CACHE,1},
-	{ATA_C_WRITE_BUFFER,3},
-	{ATA_C_FLUSH_CACHE_EXT,1},
-	{ATA_C_IDENTIFY_DEVICE,2},
-	{ATA_C_MEDIA_EJECT,1},
-	{ATA_C_SET_FEATURES,1},
-	{ATA_C_SECURITY_SET_PASSWORD,3},
-	{ATA_C_SECURITY_UNLOCK,3},
-	{ATA_C_SECURITY_ERASE_PREPARE,1},
-	{ATA_C_SECURITY_ERASE_UNIT,3},
-	{ATA_C_SECURITY_FREEZE_LOCK,1},
-	{ATA_C_SECURITY_DISABLE_PASSWORD,3},
-	{ATA_C_READ_NATIVE_MAX_ADDRESS,1},
-	{ATA_C_SET_MAX_ADDRESS,1}
-};
-#define ATA_CMD_TABLE_SIZE	(sizeof ata_cmd_table/sizeof(ata_cmd_info_t))
+    {ATA_C_NOP, 1},
+    {ATA_C_CFA_REQUEST_EXTENDED_ERROR_CODE, 1},
+    {ATA_C_DEVICE_RESET, 5},
+    {ATA_C_READ_SECTOR, 2},
+    {ATA_C_READ_DMA_EXT, 0x84},
+    {ATA_C_WRITE_SECTOR, 3},
+    {ATA_C_WRITE_LONG, 8}, //??? This seems to be WRITE_LONG, but the READ_LONG command isn't present (Why would Sony have only one of these two commands?). Both are obsolete too.
+    {ATA_C_WRITE_DMA_EXT, 0x84},
+    {ATA_C_CFA_WRITE_SECTORS_WITHOUT_ERASE, 3},
+    {ATA_C_READ_VERIFY_SECTOR, 1},
+    {ATA_C_READ_VERIFY_SECTOR_EXT, 0x81},
+    {ATA_C_SEEK, 1},
+    {ATA_C_CFA_TRANSLATE_SECTOR, 2},
+    {ATA_C_SCE_SECURITY_CONTROL, 7},
+    {ATA_C_EXECUTE_DEVICE_DIAGNOSTIC, 6},
+    {ATA_C_INITIALIZE_DEVICE_PARAMETERS, 1},
+    {ATA_C_DOWNLOAD_MICROCODE, 3},
+    {ATA_C_IDENTIFY_PACKET_DEVICE, 2},
+    {ATA_C_SMART, 7},
+    {ATA_C_CFA_ERASE_SECTORS, 1},
+    {ATA_C_READ_MULTIPLE, 2},
+    {ATA_C_WRITE_MULTIPLE, 3},
+    {ATA_C_SET_MULTIPLE_MODE, 1},
+    {ATA_C_READ_DMA, 4},
+    {ATA_C_WRITE_DMA, 4},
+    {ATA_C_CFA_WRITE_MULTIPLE_WITHOUT_ERASE, 3},
+    {ATA_C_GET_MEDIA_STATUS, 1},
+    {ATA_C_MEDIA_LOCK, 1},
+    {ATA_C_MEDIA_UNLOCK, 1},
+    {ATA_C_STANDBY_IMMEDIATE, 1},
+    {ATA_C_IDLE_IMMEDIATE, 1},
+    {ATA_C_STANDBY, 1},
+    {ATA_C_IDLE, 1},
+    {ATA_C_READ_BUFFER, 2},
+    {ATA_C_CHECK_POWER_MODE, 1},
+    {ATA_C_SLEEP, 1},
+    {ATA_C_FLUSH_CACHE, 1},
+    {ATA_C_WRITE_BUFFER, 3},
+    {ATA_C_FLUSH_CACHE_EXT, 1},
+    {ATA_C_IDENTIFY_DEVICE, 2},
+    {ATA_C_MEDIA_EJECT, 1},
+    {ATA_C_SET_FEATURES, 1},
+    {ATA_C_SECURITY_SET_PASSWORD, 3},
+    {ATA_C_SECURITY_UNLOCK, 3},
+    {ATA_C_SECURITY_ERASE_PREPARE, 1},
+    {ATA_C_SECURITY_ERASE_UNIT, 3},
+    {ATA_C_SECURITY_FREEZE_LOCK, 1},
+    {ATA_C_SECURITY_DISABLE_PASSWORD, 3},
+    {ATA_C_READ_NATIVE_MAX_ADDRESS, 1},
+    {ATA_C_SET_MAX_ADDRESS, 1}};
+#define ATA_CMD_TABLE_SIZE (sizeof ata_cmd_table / sizeof(ata_cmd_info_t))
 
 static const ata_cmd_info_t sec_ctrl_cmd_table[] = {
-	{ATA_SCE_IDENTIFY_DRIVE,2},
-	{ATA_SCE_SECURITY_ERASE_PREPARE,1},
-	{ATA_SCE_SECURITY_ERASE_UNIT,1},
-	{ATA_SCE_SECURITY_FREEZE_LOCK,1},
-	{ATA_SCE_SECURITY_SET_PASSWORD,3},
-	{ATA_SCE_SECURITY_UNLOCK,3},
-	{ATA_SCE_SECURITY_WRITE_ID,3},
-	{ATA_SCE_SECURITY_READ_ID,2}
-};
-#define SEC_CTRL_CMD_TABLE_SIZE	(sizeof sec_ctrl_cmd_table/sizeof(ata_cmd_info_t))
+    {ATA_SCE_IDENTIFY_DRIVE, 2},
+    {ATA_SCE_SECURITY_ERASE_PREPARE, 1},
+    {ATA_SCE_SECURITY_ERASE_UNIT, 1},
+    {ATA_SCE_SECURITY_FREEZE_LOCK, 1},
+    {ATA_SCE_SECURITY_SET_PASSWORD, 3},
+    {ATA_SCE_SECURITY_UNLOCK, 3},
+    {ATA_SCE_SECURITY_WRITE_ID, 3},
+    {ATA_SCE_SECURITY_READ_ID, 2}};
+#define SEC_CTRL_CMD_TABLE_SIZE (sizeof sec_ctrl_cmd_table / sizeof(ata_cmd_info_t))
 
 static const ata_cmd_info_t smart_cmd_table[] = {
-	{ATA_S_SMART_READ_DATA,2},
-	{ATA_S_SMART_ENABLE_DISABLE_AUTOSAVE,1},
-	{ATA_S_SMART_SAVE_ATTRIBUTE_VALUES,1},
-	{ATA_S_SMART_EXECUTE_OFF_LINE,1},
-	{ATA_S_SMART_READ_LOG,2},
-	{ATA_S_SMART_WRITE_LOG,3},
-	{ATA_S_SMART_ENABLE_OPERATIONS,1},
-	{ATA_S_SMART_DISABLE_OPERATIONS,1},
-	{ATA_S_SMART_RETURN_STATUS,1}
-};
-#define SMART_CMD_TABLE_SIZE	(sizeof smart_cmd_table/sizeof(ata_cmd_info_t))
+    {ATA_S_SMART_READ_DATA, 2},
+    {ATA_S_SMART_ENABLE_DISABLE_AUTOSAVE, 1},
+    {ATA_S_SMART_SAVE_ATTRIBUTE_VALUES, 1},
+    {ATA_S_SMART_EXECUTE_OFF_LINE, 1},
+    {ATA_S_SMART_READ_LOG, 2},
+    {ATA_S_SMART_WRITE_LOG, 3},
+    {ATA_S_SMART_ENABLE_OPERATIONS, 1},
+    {ATA_S_SMART_DISABLE_OPERATIONS, 1},
+    {ATA_S_SMART_RETURN_STATUS, 1}};
+#define SMART_CMD_TABLE_SIZE (sizeof smart_cmd_table / sizeof(ata_cmd_info_t))
 
 /* This is the state info tracked between ata_io_start() and ata_io_finish().  */
-typedef struct _ata_cmd_state {
-	s32	type;		/* The ata_cmd_info_t type field. */
-	union {
-		void	*buf;
-		u8	*buf8;
-		u16	*buf16;
+typedef struct _ata_cmd_state
+{
+	s32 type; /* The ata_cmd_info_t type field. */
+	union
+	{
+		void *buf;
+		u8 *buf8;
+		u16 *buf16;
 	};
-	u32	blkcount;	/* The number of 512-byte blocks (sectors) to transfer.  */
-	s32	dir;		/* DMA direction: 0 - to RAM, 1 - from RAM.  */
+	u32 blkcount; /* The number of 512-byte blocks (sectors) to transfer.  */
+	s32 dir;      /* DMA direction: 0 - to RAM, 1 - from RAM.  */
 } ata_cmd_state_t;
 
 static ata_cmd_state_t atad_cmd_state;
@@ -162,16 +162,18 @@ static void ata_ultra_dma_mode(int mode);
 
 extern struct irx_export_table _exp_atad;
 
-static void AtadPreDmaCb(int bcr, int dir){
+static void AtadPreDmaCb(int bcr, int dir)
+{
 	USE_SPD_REGS;
 
-	SPD_REG16(SPD_R_XFR_CTRL)|=0x80;
+	SPD_REG16(SPD_R_XFR_CTRL) |= 0x80;
 }
 
-static void AtadPostDmaCb(int bcr, int dir){
+static void AtadPostDmaCb(int bcr, int dir)
+{
 	USE_SPD_REGS;
 
-	SPD_REG16(SPD_R_XFR_CTRL)&=~0x80;
+	SPD_REG16(SPD_R_XFR_CTRL) &= ~0x80;
 }
 
 int _start(int argc, char *argv[])
@@ -198,7 +200,7 @@ int _start(int argc, char *argv[])
 		In the eyes of Sony, there isn't a problem because none of their retail PlayStation 2 software ever supported 48-bit LBA.
 
 		The obvious workaround here would be to disable 48-bit LBA support when ATAD is loaded on a PSX. */
-	Disable48bitLBA = (SPD_REG16(SPD_R_REV_3) & SPD_CAPS_DVR)?1:0;
+	Disable48bitLBA = (SPD_REG16(SPD_R_REV_3) & SPD_CAPS_DVR) ? 1 : 0;
 
 	if ((res = RegisterLibraryEntries(&_exp_atad)) != 0) {
 		M_PRINTF("Library is already registered, exiting.\n");
@@ -228,7 +230,7 @@ int _exit(void) { return 0; }
 
 static int ata_intr_cb(int flag)
 {
-	if (flag == 1) {	/* New card, invalidate device info.  */
+	if (flag == 1) { /* New card, invalidate device info.  */
 		memset(atad_devinfo, 0, sizeof atad_devinfo);
 	} else {
 		dev9IntrDisable(SPD_INTR_ATA);
@@ -411,24 +413,24 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
 	/* Finally!  We send off the ATA command with arguments.  */
 	ata_hwport->r_control = (using_timeout == 0) << 1;
 
-	if(type&0x80){	//For the sake of achieving (greatly) improved performance, write the registers twice only if required! This is also required for compatibility with the buggy firmware of certain PSX units.
+	if (type & 0x80) { //For the sake of achieving (greatly) improved performance, write the registers twice only if required! This is also required for compatibility with the buggy firmware of certain PSX units.
 		/* 48-bit LBA requires writing to the address registers twice,
 		   24 bits of the LBA address is written each time.
 		   Writing to registers twice does not affect 28-bit LBA since
 		   only the latest data stored in address registers is used.  */
 		ata_hwport->r_feature = (feature >> 8) & 0xff;
 		ata_hwport->r_nsector = (nsector >> 8) & 0xff;
-		ata_hwport->r_sector  = (sector >> 8) & 0xff;
-		ata_hwport->r_lcyl    = (lcyl >> 8) & 0xff;
-		ata_hwport->r_hcyl    = (hcyl >> 8) & 0xff;
+		ata_hwport->r_sector = (sector >> 8) & 0xff;
+		ata_hwport->r_lcyl = (lcyl >> 8) & 0xff;
+		ata_hwport->r_hcyl = (hcyl >> 8) & 0xff;
 	}
 
 	ata_hwport->r_feature = feature & 0xff;
 	ata_hwport->r_nsector = nsector & 0xff;
-	ata_hwport->r_sector  = sector & 0xff;
-	ata_hwport->r_lcyl    = lcyl & 0xff;
-	ata_hwport->r_hcyl    = hcyl & 0xff;
-	ata_hwport->r_select  = select & 0xff;
+	ata_hwport->r_sector = sector & 0xff;
+	ata_hwport->r_lcyl = lcyl & 0xff;
+	ata_hwport->r_hcyl = hcyl & 0xff;
+	ata_hwport->r_select = select & 0xff;
 	ata_hwport->r_command = command & 0xff;
 
 	/* Turn on the LED.  */
@@ -502,9 +504,9 @@ static inline int ata_dma_complete(void *buf, u32 blkcount, int dir)
 
 		dev9IntrEnable(SPD_INTR_ATA);
 		/* Wait for the previous transfer to complete or a timeout.  */
-		WaitEventFlag(ata_evflg, 0x03, WEF_CLEAR|WEF_OR, &bits);
+		WaitEventFlag(ata_evflg, 0x03, WEF_CLEAR | WEF_OR, &bits);
 
-		if (bits & 0x01) {	/* Timeout.  */
+		if (bits & 0x01) { /* Timeout.  */
 			M_PRINTF("Error: DMA timeout.\n");
 			return -502;
 		}
@@ -522,13 +524,13 @@ static inline int ata_dma_complete(void *buf, u32 blkcount, int dir)
 
 		dma_stat = SPD_REG16(0x38) & 0x1f;
 
-next_transfer:
+	next_transfer:
 		count = (blkcount < dma_stat) ? blkcount : dma_stat;
 		nbytes = count * 512;
-		if ((res = dev9DmaTransfer(0, buf, (nbytes << 9)|32, dir)) < 0)
+		if ((res = dev9DmaTransfer(0, buf, (nbytes << 9) | 32, dir)) < 0)
 			return res;
 
-		buf = (void*)((u8 *)buf + nbytes);
+		buf = (void *)((u8 *)buf + nbytes);
 		blkcount -= count;
 	}
 
@@ -545,15 +547,15 @@ int ata_io_finish(void)
 	int i, res = 0, type = cmd_state->type;
 	u16 stat;
 
-	if (type == 1 || type == 6) {	/* Non-data commands.  */
-		WaitEventFlag(ata_evflg, 0x03, WEF_CLEAR|WEF_OR, &bits);
-		if (bits & 0x01) {	/* Timeout.  */
+	if (type == 1 || type == 6) { /* Non-data commands.  */
+		WaitEventFlag(ata_evflg, 0x03, WEF_CLEAR | WEF_OR, &bits);
+		if (bits & 0x01) { /* Timeout.  */
 			M_PRINTF("Error: ATA timeout on a non-data command.\n");
 			return -502;
 		}
-	} else if (type == 4) {		/* DMA.  */
+	} else if (type == 4) { /* DMA.  */
 		if ((res = ata_dma_complete(cmd_state->buf, cmd_state->blkcount,
-						cmd_state->dir)) < 0)
+		                            cmd_state->dir)) < 0)
 			goto finish;
 
 		for (i = 0; i < 100; i++)
@@ -561,13 +563,13 @@ int ata_io_finish(void)
 				break;
 		if (!stat) {
 			dev9IntrEnable(SPD_INTR_ATA0);
-			WaitEventFlag(ata_evflg, 0x03, WEF_CLEAR|WEF_OR, &bits);
+			WaitEventFlag(ata_evflg, 0x03, WEF_CLEAR | WEF_OR, &bits);
 			if (bits & 0x01) {
 				M_PRINTF("Error: ATA timeout on DMA completion.\n");
 				res = -502;
 			}
 		}
-	} else {			/* PIO transfers.  */
+	} else { /* PIO transfers.  */
 		stat = ata_hwport->r_control;
 		if ((res = ata_wait_busy(0x80)) < 0)
 			goto finish;
@@ -636,7 +638,8 @@ int ata_device_flush_cache(int device)
 {
 	int res;
 
-	if(!(res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, lba_48bit[device]?ATA_C_FLUSH_CACHE_EXT:ATA_C_FLUSH_CACHE))) res=ata_io_finish();
+	if (!(res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, lba_48bit[device] ? ATA_C_FLUSH_CACHE_EXT : ATA_C_FLUSH_CACHE)))
+		res = ata_io_finish();
 
 	return res;
 }
@@ -646,7 +649,8 @@ int ata_device_idle(int device, int period)
 {
 	int res;
 
-	if(!(res = ata_io_start(NULL, 1, 0, period & 0xff, 0, 0, 0, (device << 4) & 0xffff, ATA_C_IDLE))) res=ata_io_finish();
+	if (!(res = ata_io_start(NULL, 1, 0, period & 0xff, 0, 0, 0, (device << 4) & 0xffff, ATA_C_IDLE)))
+		res = ata_io_finish();
 
 	return res;
 }
@@ -655,7 +659,8 @@ static int ata_device_identify(int device, void *info)
 {
 	int res;
 
-	if(!(res = ata_io_start(info, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_IDENTIFY_DEVICE))) res=ata_io_finish();
+	if (!(res = ata_io_start(info, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_IDENTIFY_DEVICE)))
+		res = ata_io_finish();
 
 	return res;
 }
@@ -675,7 +680,8 @@ int ata_device_sce_identify_drive(int device, void *data)
 {
 	int res;
 
-	if(!(res = ata_io_start(data, 1, ATA_SCE_IDENTIFY_DRIVE, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SCE_SECURITY_CONTROL))) res=ata_io_finish();
+	if (!(res = ata_io_start(data, 1, ATA_SCE_IDENTIFY_DRIVE, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SCE_SECURITY_CONTROL)))
+		res = ata_io_finish();
 
 	return res;
 }
@@ -684,7 +690,8 @@ static int ata_device_smart_enable(int device)
 {
 	int res;
 
-	if(!(res = ata_io_start(NULL, 1, ATA_S_SMART_ENABLE_OPERATIONS, 0, 0, 0x4f, 0xc2, (device << 4) & 0xffff, ATA_C_SMART))) res=ata_io_finish();
+	if (!(res = ata_io_start(NULL, 1, ATA_S_SMART_ENABLE_OPERATIONS, 0, 0, 0x4f, 0xc2, (device << 4) & 0xffff, ATA_C_SMART)))
+		res = ata_io_finish();
 
 	return res;
 }
@@ -694,7 +701,8 @@ int ata_device_smart_save_attr(int device)
 {
 	int res;
 
-	if(!(res = ata_io_start(NULL, 1, ATA_S_SMART_SAVE_ATTRIBUTE_VALUES, 0, 0, 0x4f, 0xc2, (device << 4) & 0xffff, ATA_C_SMART))) res=ata_io_finish();
+	if (!(res = ata_io_start(NULL, 1, ATA_S_SMART_SAVE_ATTRIBUTE_VALUES, 0, 0, 0x4f, 0xc2, (device << 4) & 0xffff, ATA_C_SMART)))
+		res = ata_io_finish();
 
 	return res;
 }
@@ -714,7 +722,7 @@ int ata_device_smart_get_status(int device)
 		return res;
 
 	/* Check to see if the report exceeded the threshold.  */
-	if (((ata_hwport->r_lcyl&0xFF) != 0x4f) || ((ata_hwport->r_hcyl&0xFF) != 0xc2)) {
+	if (((ata_hwport->r_lcyl & 0xFF) != 0x4f) || ((ata_hwport->r_hcyl & 0xFF) != 0xc2)) {
 		M_PRINTF("Error: SMART report exceeded threshold.\n");
 		return 1;
 	}
@@ -727,7 +735,7 @@ static int ata_device_set_transfer_mode(int device, int type, int mode)
 {
 	int res;
 
-	res = ata_io_start(NULL, 1, 3, (type|mode) & 0xff, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SET_FEATURES);
+	res = ata_io_start(NULL, 1, 3, (type | mode) & 0xff, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SET_FEATURES);
 	if (res)
 		return res;
 
@@ -735,7 +743,7 @@ static int ata_device_set_transfer_mode(int device, int type, int mode)
 	if (res)
 		return res;
 
-	switch(type){
+	switch (type) {
 		case ATAD_XFER_MODE_MDMA:
 			ata_multiword_dma_mode(mode);
 			break;
@@ -788,7 +796,7 @@ int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir)
 		if ((res = ata_io_finish()) != 0)
 			return res;
 
-		buf = (void*)((u8 *)buf + len * 512);
+		buf = (void *)((u8 *)buf + len * 512);
 		lba += len;
 		nsectors -= len;
 	}
@@ -809,7 +817,8 @@ int ata_device_sce_sec_set_password(int device, void *password)
 	u16 *param = ata_param;
 	int res;
 
-	if (devinfo[device].security_status & ATA_F_SEC_ENABLED) return 0;
+	if (devinfo[device].security_status & ATA_F_SEC_ENABLED)
+		return 0;
 
 	memset(param, 0, 512);
 	memcpy(param + 1, password, 32);
@@ -829,7 +838,8 @@ int ata_device_sce_sec_unlock(int device, void *password)
 	u16 *param = ata_param;
 	int res;
 
-	if (!(devinfo[device].security_status & ATA_F_SEC_LOCKED)) return 0;
+	if (!(devinfo[device].security_status & ATA_F_SEC_LOCKED))
+		return 0;
 
 	memset(param, 0, 512);
 	memcpy(param + 1, password, 32);
@@ -853,7 +863,8 @@ int ata_device_sce_sec_erase(int device)
 	ata_devinfo_t *devinfo = atad_devinfo;
 	int res;
 
-	if (!(devinfo[device].security_status & ATA_F_SEC_ENABLED) || !(devinfo[device].security_status & ATA_F_SEC_LOCKED)) return 0;
+	if (!(devinfo[device].security_status & ATA_F_SEC_ENABLED) || !(devinfo[device].security_status & ATA_F_SEC_LOCKED))
+		return 0;
 
 	/* First send the mandatory ERASE PREPARE command.  */
 	if ((res = ata_io_start(NULL, 1, ATA_SCE_SECURITY_ERASE_PREPARE, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SCE_SECURITY_CONTROL)) != 0)
@@ -872,7 +883,7 @@ finish:
 static void ata_device_probe(ata_devinfo_t *devinfo)
 {
 	USE_ATA_REGS;
-	u16 nsector, sector, lcyl, hcyl;//, select; unused
+	u16 nsector, sector, lcyl, hcyl; //, select; unused
 
 	devinfo->exists = 0;
 	devinfo->has_packet = 0;
@@ -949,13 +960,13 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 				devinfo[i].total_sectors = 0xffffffff;
 			} else {
 				devinfo[i].total_sectors =
-					(ata_param[ATA_ID_48BIT_SECTOTAL_MI] << 16)|
-					ata_param[ATA_ID_48BIT_SECTOTAL_LO];
+				    (ata_param[ATA_ID_48BIT_SECTOTAL_MI] << 16) |
+				    ata_param[ATA_ID_48BIT_SECTOTAL_LO];
 			}
 		} else {
 			lba_48bit[i] = 0;
-			devinfo[i].total_sectors = (ata_param[ATA_ID_SECTOTAL_HI] << 16)|
-				ata_param[ATA_ID_SECTOTAL_LO];
+			devinfo[i].total_sectors = (ata_param[ATA_ID_SECTOTAL_HI] << 16) |
+			                           ata_param[ATA_ID_SECTOTAL_LO];
 		}
 		devinfo[i].security_status = ata_param[ATA_ID_SECURITY_STATUS];
 
@@ -969,10 +980,11 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 }
 
 /* Export 4 */
-ata_devinfo_t * ata_get_devinfo(int device)
+ata_devinfo_t *ata_get_devinfo(int device)
 {
-	if(!ata_devinfo_init){
-		if(ata_bus_reset() || ata_init_devices(atad_devinfo)) return NULL;
+	if (!ata_devinfo_init) {
+		if (ata_bus_reset() || ata_init_devices(atad_devinfo))
+			return NULL;
 		ata_devinfo_init = 1;
 	}
 
@@ -1021,7 +1033,7 @@ static void ata_multiword_dma_mode(int mode)
 	USE_SPD_REGS;
 	u16 val;
 
-	switch(mode){
+	switch (mode) {
 		case 1:
 			val = 0x45;
 			break;
@@ -1033,7 +1045,7 @@ static void ata_multiword_dma_mode(int mode)
 	}
 
 	SPD_REG16(SPD_R_MWDMA_MODE) = val;
-	SPD_REG16(SPD_R_IF_CTRL) = (SPD_REG16(SPD_R_IF_CTRL) & 0xfffe)|0x48;
+	SPD_REG16(SPD_R_IF_CTRL) = (SPD_REG16(SPD_R_IF_CTRL) & 0xfffe) | 0x48;
 }
 
 static void ata_ultra_dma_mode(int mode)
@@ -1041,8 +1053,7 @@ static void ata_ultra_dma_mode(int mode)
 	USE_SPD_REGS;
 	u16 val;
 
-	switch (mode)
-	{
+	switch (mode) {
 		case 1:
 			val = 0x85;
 			break;
@@ -1064,10 +1075,12 @@ static void ata_ultra_dma_mode(int mode)
 }
 
 /* Export 18 */
-int ata_device_idle_immediate(int device){
+int ata_device_idle_immediate(int device)
+{
 	int res;
 
-	if (!(res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4)&0xFFFF, ATA_C_IDLE_IMMEDIATE))) res = ata_io_finish();
+	if (!(res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xFFFF, ATA_C_IDLE_IMMEDIATE)))
+		res = ata_io_finish();
 
 	return res;
 }

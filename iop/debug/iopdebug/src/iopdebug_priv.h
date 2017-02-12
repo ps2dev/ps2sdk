@@ -25,10 +25,10 @@ extern "C" {
 #endif
 
 // Enter a critical state(interrupts are disabled)
-static inline void EnterCritical(u32 *old_state) { CpuSuspendIntr((int *) old_state); }
+static inline void EnterCritical(u32 *old_state) { CpuSuspendIntr((int *)old_state); }
 
 // Exit a critical state(interrupts are resumed)
-static inline void ExitCritical(u32 old_state) { CpuResumeIntr((int) old_state); }
+static inline void ExitCritical(u32 old_state) { CpuResumeIntr((int)old_state); }
 
 #ifdef __cplusplus
 }

@@ -46,7 +46,7 @@
 
 #include "lwip/opt.h"
 
-#if LWIP_IPV6  /* don't build if not configured for use in lwipopts.h */
+#if LWIP_IPV6 /* don't build if not configured for use in lwipopts.h */
 
 #include "lwip/pbuf.h"
 #include "lwip/ip6.h"
@@ -59,69 +59,75 @@ extern "C" {
 #endif
 
 /** Struct for tables. */
-struct nd6_neighbor_cache_entry {
-  ip6_addr_t next_hop_address;
-  struct netif *netif;
-  u8_t lladdr[NETIF_MAX_HWADDR_LEN];
-  /*u32_t pmtu;*/
+struct nd6_neighbor_cache_entry
+{
+	ip6_addr_t next_hop_address;
+	struct netif *netif;
+	u8_t lladdr[NETIF_MAX_HWADDR_LEN];
+/*u32_t pmtu;*/
 #if LWIP_ND6_QUEUEING
-  /** Pointer to queue of pending outgoing packets on this entry. */
-  struct nd6_q_entry *q;
-#else /* LWIP_ND6_QUEUEING */
-  /** Pointer to a single pending outgoing packet on this entry. */
-  struct pbuf *q;
+	/** Pointer to queue of pending outgoing packets on this entry. */
+	struct nd6_q_entry *q;
+#else  /* LWIP_ND6_QUEUEING */
+	/** Pointer to a single pending outgoing packet on this entry. */
+	struct pbuf *q;
 #endif /* LWIP_ND6_QUEUEING */
-  u8_t state;
-  u8_t isrouter;
-  union {
-    u32_t reachable_time; /* in ms since value may originate from network packet */
-    u32_t delay_time;     /* ticks (ND6_TMR_INTERVAL) */
-    u32_t probes_sent;
-    u32_t stale_time;     /* ticks (ND6_TMR_INTERVAL) */
-  } counter;
+	u8_t state;
+	u8_t isrouter;
+	union
+	{
+		u32_t reachable_time; /* in ms since value may originate from network packet */
+		u32_t delay_time;     /* ticks (ND6_TMR_INTERVAL) */
+		u32_t probes_sent;
+		u32_t stale_time; /* ticks (ND6_TMR_INTERVAL) */
+	} counter;
 };
 
-struct nd6_destination_cache_entry {
-  ip6_addr_t destination_addr;
-  ip6_addr_t next_hop_addr;
-  u16_t pmtu;
-  u32_t age;
+struct nd6_destination_cache_entry
+{
+	ip6_addr_t destination_addr;
+	ip6_addr_t next_hop_addr;
+	u16_t pmtu;
+	u32_t age;
 };
 
-struct nd6_prefix_list_entry {
-  ip6_addr_t prefix;
-  struct netif *netif;
-  u32_t invalidation_timer; /* in ms since value may originate from network packet */
+struct nd6_prefix_list_entry
+{
+	ip6_addr_t prefix;
+	struct netif *netif;
+	u32_t invalidation_timer; /* in ms since value may originate from network packet */
 #if LWIP_IPV6_AUTOCONFIG
-  u8_t flags;
+	u8_t flags;
 #define ND6_PREFIX_AUTOCONFIG_AUTONOMOUS 0x01
 #define ND6_PREFIX_AUTOCONFIG_ADDRESS_GENERATED 0x02
 #define ND6_PREFIX_AUTOCONFIG_ADDRESS_DUPLICATE 0x04
 #endif /* LWIP_IPV6_AUTOCONFIG */
 };
 
-struct nd6_router_list_entry {
-  struct nd6_neighbor_cache_entry *neighbor_entry;
-  u32_t invalidation_timer; /* in ms since value may originate from network packet */
-  u8_t flags;
+struct nd6_router_list_entry
+{
+	struct nd6_neighbor_cache_entry *neighbor_entry;
+	u32_t invalidation_timer; /* in ms since value may originate from network packet */
+	u8_t flags;
 };
 
 enum nd6_neighbor_cache_entry_state {
-  ND6_NO_ENTRY = 0,
-  ND6_INCOMPLETE,
-  ND6_REACHABLE,
-  ND6_STALE,
-  ND6_DELAY,
-  ND6_PROBE
+	ND6_NO_ENTRY = 0,
+	ND6_INCOMPLETE,
+	ND6_REACHABLE,
+	ND6_STALE,
+	ND6_DELAY,
+	ND6_PROBE
 };
 
 #if LWIP_ND6_QUEUEING
 /** struct for queueing outgoing packets for unknown address
   * defined here to be accessed by memp.h
   */
-struct nd6_q_entry {
-  struct nd6_q_entry *next;
-  struct pbuf *p;
+struct nd6_q_entry
+{
+	struct nd6_q_entry *next;
+	struct pbuf *p;
 };
 #endif /* LWIP_ND6_QUEUEING */
 

@@ -48,42 +48,43 @@ extern "C" {
 #define IP_HLEN 20
 
 #ifdef PACK_STRUCT_USE_INCLUDES
-#  include "arch/bpstruct.h"
+#include "arch/bpstruct.h"
 #endif
 PACK_STRUCT_BEGIN
 /* The IPv4 header */
-struct ip_hdr {
-  /* version / header length */
-  PACK_STRUCT_FLD_8(u8_t _v_hl);
-  /* type of service */
-  PACK_STRUCT_FLD_8(u8_t _tos);
-  /* total length */
-  PACK_STRUCT_FIELD(u16_t _len);
-  /* identification */
-  PACK_STRUCT_FIELD(u16_t _id);
-  /* fragment offset field */
-  PACK_STRUCT_FIELD(u16_t _offset);
-#define IP_RF 0x8000U        /* reserved fragment flag */
-#define IP_DF 0x4000U        /* don't fragment flag */
-#define IP_MF 0x2000U        /* more fragments flag */
-#define IP_OFFMASK 0x1fffU   /* mask for fragmenting bits */
-  /* time to live */
-  PACK_STRUCT_FLD_8(u8_t _ttl);
-  /* protocol*/
-  PACK_STRUCT_FLD_8(u8_t _proto);
-  /* checksum */
-  PACK_STRUCT_FIELD(u16_t _chksum);
-  /* source and destination IP addresses */
-  PACK_STRUCT_FLD_S(ip4_addr_p_t src);
-  PACK_STRUCT_FLD_S(ip4_addr_p_t dest);
+struct ip_hdr
+{
+	/* version / header length */
+	PACK_STRUCT_FLD_8(u8_t _v_hl);
+	/* type of service */
+	PACK_STRUCT_FLD_8(u8_t _tos);
+	/* total length */
+	PACK_STRUCT_FIELD(u16_t _len);
+	/* identification */
+	PACK_STRUCT_FIELD(u16_t _id);
+	/* fragment offset field */
+	PACK_STRUCT_FIELD(u16_t _offset);
+#define IP_RF 0x8000U      /* reserved fragment flag */
+#define IP_DF 0x4000U      /* don't fragment flag */
+#define IP_MF 0x2000U      /* more fragments flag */
+#define IP_OFFMASK 0x1fffU /* mask for fragmenting bits */
+	/* time to live */
+	PACK_STRUCT_FLD_8(u8_t _ttl);
+	/* protocol*/
+	PACK_STRUCT_FLD_8(u8_t _proto);
+	/* checksum */
+	PACK_STRUCT_FIELD(u16_t _chksum);
+	/* source and destination IP addresses */
+	PACK_STRUCT_FLD_S(ip4_addr_p_t src);
+	PACK_STRUCT_FLD_S(ip4_addr_p_t dest);
 } PACK_STRUCT_STRUCT;
 PACK_STRUCT_END
 #ifdef PACK_STRUCT_USE_INCLUDES
-#  include "arch/epstruct.h"
+#include "arch/epstruct.h"
 #endif
 
 /* Macros to get struct ip_hdr fields: */
-#define IPH_V(hdr)  ((hdr)->_v_hl >> 4)
+#define IPH_V(hdr) ((hdr)->_v_hl >> 4)
 #define IPH_HL(hdr) ((hdr)->_v_hl & 0x0f)
 #define IPH_TOS(hdr) ((hdr)->_tos)
 #define IPH_LEN(hdr) ((hdr)->_len)

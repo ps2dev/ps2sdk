@@ -32,11 +32,12 @@
 void LoadModules(void);
 int CreateSave(void);
 
-#define ARRAY_ENTRIES	64
+#define ARRAY_ENTRIES 64
 static mcTable mcDir[ARRAY_ENTRIES] __attribute__((aligned(64)));
 static int mc_Type, mc_Free, mc_Format;
 
-int main() {
+int main()
+{
 
 	int fd, ret;
 	int i;
@@ -45,12 +46,12 @@ int main() {
 	SifInitRpc(0);
 	LoadModules();
 #ifdef TYPE_MC
-	if(mcInit(MC_TYPE_MC) < 0) {
+	if (mcInit(MC_TYPE_MC) < 0) {
 		printf("Failed to initialise memcard server!\n");
 		SleepThread();
 	}
 #else
-	if(mcInit(MC_TYPE_XMC) < 0) {
+	if (mcInit(MC_TYPE_XMC) < 0) {
 		printf("Failed to initialise memcard server!\n");
 		SleepThread();
 	}
@@ -77,13 +78,13 @@ int main() {
 	// Since this is the first call, -1 should be returned.
 	mcGetInfo(0, 0, &mc_Type, &mc_Free, &mc_Format);
 	mcSync(0, NULL, &ret);
-	printf("mcGetInfo returned %d\n",ret);
+	printf("mcGetInfo returned %d\n", ret);
 	printf("Type: %d Free: %d Format: %d\n\n", mc_Type, mc_Free, mc_Format);
 
 	// Assuming that the same memory card is connected, this should return 0
-	mcGetInfo(0,0,&mc_Type,&mc_Free,&mc_Format);
+	mcGetInfo(0, 0, &mc_Type, &mc_Free, &mc_Format);
 	mcSync(0, NULL, &ret);
-	printf("mcGetInfo returned %d\n",ret);
+	printf("mcGetInfo returned %d\n", ret);
 	printf("Type: %d Free: %d Format: %d\n\n", mc_Type, mc_Free, mc_Format);
 
 	// int mcGetDir(int port, int slot, char *name, unsigned mode, int maxent, mcTable* table);
@@ -103,9 +104,8 @@ int main() {
 	mcSync(0, NULL, &ret);
 	printf("mcGetDir returned %d\n\nListing of root directory on memory card:\n\n", ret);
 
-	for(i=0; i < ret; i++)
-	{
-		if(mcDir[i].attrFile & MC_ATTR_SUBDIR)
+	for (i = 0; i < ret; i++) {
+		if (mcDir[i].attrFile & MC_ATTR_SUBDIR)
 			printf("[DIR] %s\n", mcDir[i].name);
 		else
 			printf("%s - %d bytes\n", mcDir[i].name, mcDir[i].fileSizeByte);
@@ -113,13 +113,13 @@ int main() {
 
 	// Check if existing save is present
 	fd = fioOpen("mc0:PS2DEV/icon.sys", O_RDONLY);
-	if(fd <= 0) {
+	if (fd <= 0) {
 
 		printf("\nNo previous save exists, creating...\n");
 
-		if((ret = CreateSave()) < 0) {
+		if ((ret = CreateSave()) < 0) {
 
-			printf("Failed to create save! Errorno: %d\n",ret);
+			printf("Failed to create save! Errorno: %d\n", ret);
 			SleepThread();
 		}
 
@@ -130,9 +130,8 @@ int main() {
 		ret = mcGetDir(0, 0, "/PS2DEV/*", 0, ARRAY_ENTRIES, mcDir);
 		printf("mcGetDir returned %d\n\n", ret);
 
-		for(i=0; i < ret; i++)
-		{
-			if(mcDir[i].attrFile & MC_ATTR_SUBDIR)
+		for (i = 0; i < ret; i++) {
+			if (mcDir[i].attrFile & MC_ATTR_SUBDIR)
 				printf("[DIR] %s\n", mcDir[i].name);
 			else
 				printf("%s - %d bytes\n", mcDir[i].name, mcDir[i].fileSizeByte);
@@ -147,33 +146,34 @@ int main() {
 int CreateSave(void)
 {
 	int mc_fd;
-	int icon_fd,icon_size;
-	char* icon_buffer;
+	int icon_fd, icon_size;
+	char *icon_buffer;
 	mcIcon icon_sys;
 
 	static iconIVECTOR bgcolor[4] = {
-		{  68,  23, 116,  0 }, // top left
-		{ 255, 255, 255,  0 }, // top right
-		{ 255, 255, 255,  0 }, // bottom left
-		{  68,  23, 116,  0 }, // bottom right
+	    {68, 23, 116, 0},   // top left
+	    {255, 255, 255, 0}, // top right
+	    {255, 255, 255, 0}, // bottom left
+	    {68, 23, 116, 0},   // bottom right
 	};
 
 	static iconFVECTOR lightdir[3] = {
-		{ 0.5, 0.5, 0.5, 0.0 },
-		{ 0.0,-0.4,-0.1, 0.0 },
-		{-0.5,-0.5, 0.5, 0.0 },
+	    {0.5, 0.5, 0.5, 0.0},
+	    {0.0, -0.4, -0.1, 0.0},
+	    {-0.5, -0.5, 0.5, 0.0},
 	};
 
 	static iconFVECTOR lightcol[3] = {
-		{ 0.3, 0.3, 0.3, 0.00 },
-		{ 0.4, 0.4, 0.4, 0.00 },
-		{ 0.5, 0.5, 0.5, 0.00 },
+	    {0.3, 0.3, 0.3, 0.00},
+	    {0.4, 0.4, 0.4, 0.00},
+	    {0.5, 0.5, 0.5, 0.00},
 	};
 
-	static iconFVECTOR ambient = { 0.50, 0.50, 0.50, 0.00 };
+	static iconFVECTOR ambient = {0.50, 0.50, 0.50, 0.00};
 
 
-	if(fioMkdir("mc0:PS2DEV") < 0) return -1;
+	if (fioMkdir("mc0:PS2DEV") < 0)
+		return -1;
 
 	// Set up icon.sys. This is the file which controls how our memory card save looks
 	// in the PS2 browser screen. It contains info on the bg colour, lighting, save name
@@ -193,8 +193,9 @@ int CreateSave(void)
 	strcpy(icon_sys.del, "ps2dev.icn");
 
 	// Write icon.sys to the memory card (Note that this filename is fixed)
-	mc_fd = fioOpen("mc0:PS2DEV/icon.sys",O_WRONLY | O_CREAT);
-	if(mc_fd < 0) return -2;
+	mc_fd = fioOpen("mc0:PS2DEV/icon.sys", O_WRONLY | O_CREAT);
+	if (mc_fd < 0)
+		return -2;
 
 	fioWrite(mc_fd, &icon_sys, sizeof(icon_sys));
 	fioClose(mc_fd);
@@ -203,21 +204,25 @@ int CreateSave(void)
 	// Write icon file to the memory card.
 	// Note: The icon file was created with my bmp2icon tool, available for download at
 	//       http://www.ps2dev.org
-	icon_fd = fioOpen("host:ps2dev.icn",O_RDONLY);
-	if(icon_fd < 0) return -3;
+	icon_fd = fioOpen("host:ps2dev.icn", O_RDONLY);
+	if (icon_fd < 0)
+		return -3;
 
-	icon_size = fioLseek(icon_fd,0,SEEK_END);
-	fioLseek(icon_fd,0,SEEK_SET);
+	icon_size = fioLseek(icon_fd, 0, SEEK_END);
+	fioLseek(icon_fd, 0, SEEK_SET);
 
 	icon_buffer = malloc(icon_size);
-	if(icon_buffer == NULL) return -4;
-	if(fioRead(icon_fd, icon_buffer, icon_size) != icon_size) return -5;
+	if (icon_buffer == NULL)
+		return -4;
+	if (fioRead(icon_fd, icon_buffer, icon_size) != icon_size)
+		return -5;
 	fioClose(icon_fd);
 
-	icon_fd = fioOpen("mc0:PS2DEV/ps2dev.icn",O_WRONLY | O_CREAT);
-	if(icon_fd < 0) return -6;
+	icon_fd = fioOpen("mc0:PS2DEV/ps2dev.icn", O_WRONLY | O_CREAT);
+	if (icon_fd < 0)
+		return -6;
 
-	fioWrite(icon_fd,icon_buffer,icon_size);
+	fioWrite(icon_fd, icon_buffer, icon_size);
 	fioClose(icon_fd);
 	printf("ps2dev.icn written sucessfully.\n");
 
@@ -227,7 +232,7 @@ int CreateSave(void)
 
 void LoadModules(void)
 {
-    int ret;
+	int ret;
 
 #ifdef TYPE_MC
 	ret = SifLoadModule("rom0:SIO2MAN", 0, NULL);
@@ -266,5 +271,4 @@ void LoadModules(void)
 		SleepThread();
 	}
 #endif
-
 }

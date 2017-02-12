@@ -20,7 +20,8 @@ void initialize_rpc_client(void)
 	rpc_sema = CreateMutex(IOP_MUTEX_UNLOCKED);
 
 	client.server = NULL;
-	while(sceSifBindRpc(&client, AUDSRV_IRX, 0) < 0 || client.server == NULL) DelayThread(500);
+	while (sceSifBindRpc(&client, AUDSRV_IRX, 0) < 0 || client.server == NULL)
+		DelayThread(500);
 }
 
 void deinitialize_rpc_client(void)

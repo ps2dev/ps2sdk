@@ -21,4 +21,3 @@
 #define _EX_L2_STACK_SIZE (16 * 1024)
 
 #endif // #ifndef _EEDEBUG_DEFS_H_
-

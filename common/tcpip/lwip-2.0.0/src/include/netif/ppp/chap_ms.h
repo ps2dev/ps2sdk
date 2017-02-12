@@ -31,7 +31,7 @@
  */
 
 #include "netif/ppp/ppp_opts.h"
-#if PPP_SUPPORT && MSCHAP_SUPPORT  /* don't build if not configured for use in lwipopts.h */
+#if PPP_SUPPORT && MSCHAP_SUPPORT /* don't build if not configured for use in lwipopts.h */
 
 #ifndef CHAPMS_INCLUDE
 #define CHAPMS_INCLUDE

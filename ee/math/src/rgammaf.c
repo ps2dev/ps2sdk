@@ -47,17 +47,16 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
  */
 
 static float R[] = {
- 1.08965386454418662084E-9,
--3.33964630686836942556E-8,
- 2.68975996440595483619E-7,
- 2.96001177518801696639E-6,
--8.04814124978471142852E-5,
- 4.16609138709688864714E-4,
- 5.06579864028608725080E-3,
--6.41925436109158228810E-2,
--4.98558728684003594785E-3,
- 1.27546015610523951063E-1
-};
+    1.08965386454418662084E-9,
+    -3.33964630686836942556E-8,
+    2.68975996440595483619E-7,
+    2.96001177518801696639E-6,
+    -8.04814124978471142852E-5,
+    4.16609138709688864714E-4,
+    5.06579864028608725080E-3,
+    -6.41925436109158228810E-2,
+    -4.98558728684003594785E-3,
+    1.27546015610523951063E-1};
 
 
 static char name[] = "rgammaf";
@@ -74,64 +73,57 @@ float rgammaf(float xx)
 #else
 float chbevlf(), expf(), logf(), sinf(), lgamf();
 
-float rgammaf(xx)
-double xx;
+float rgammaf(xx) double xx;
 #endif
 {
-float x, w, y, z;
-int sign;
+	float x, w, y, z;
+	int sign;
 
-x = xx;
-if( x > 34.84425627277176174)
-	{
-	mtherr( name, UNDERFLOW );
-	return(1.0/MAXNUMF);
+	x = xx;
+	if (x > 34.84425627277176174) {
+		mtherr(name, UNDERFLOW);
+		return (1.0 / MAXNUMF);
 	}
-if( x < -34.034 )
-	{
-	w = -x;
-	z = sinf( PIF*w );
-	if( z == 0.0 )
-		return(0.0);
-	if( z < 0.0 )
-		{
-		sign = 1;
-		z = -z;
+	if (x < -34.034) {
+		w = -x;
+		z = sinf(PIF * w);
+		if (z == 0.0)
+			return (0.0);
+		if (z < 0.0) {
+			sign = 1;
+			z = -z;
+		} else
+			sign = -1;
+
+		y = logf(w * z / PIF) + lgamf(w);
+		if (y < -MAXLOGF) {
+			mtherr(name, UNDERFLOW);
+			return (sign * 1.0 / MAXNUMF);
 		}
-	else
-		sign = -1;
-
-	y = logf( w * z / PIF ) + lgamf(w);
-	if( y < -MAXLOGF )
-		{
-		mtherr( name, UNDERFLOW );
-		return( sign * 1.0 / MAXNUMF );
+		if (y > MAXLOGF) {
+			mtherr(name, OVERFLOW);
+			return (sign * MAXNUMF);
 		}
-	if( y > MAXLOGF )
-		{
-		mtherr( name, OVERFLOW );
-		return( sign * MAXNUMF );
-		}
-	return( sign * expf(y));
+		return (sign * expf(y));
 	}
-z = 1.0;
-w = x;
+	z = 1.0;
+	w = x;
 
-while( w > 1.0 )	/* Downward recurrence */
+	while (w > 1.0) /* Downward recurrence */
 	{
-	w -= 1.0;
-	z *= w;
+		w -= 1.0;
+		z *= w;
 	}
-while( w < 0.0 )	/* Upward recurrence */
+	while (w < 0.0) /* Upward recurrence */
 	{
-	z /= w;
-	w += 1.0;
+		z /= w;
+		w += 1.0;
 	}
-if( w == 0.0 )		/* Nonpositive integer */
-	return(0.0);
-if( w == 1.0 )		/* Other integer */
-	return( 1.0/z );
+	if (w == 0.0) /* Nonpositive integer */
+		return (0.0);
+	if (w == 1.0) /* Other integer */
+		return (1.0 / z);
 
-y = w * ( 1.0 + chbevlf( 4.0*w-2.0, R, 10 ) ) / z;
-return(y);
+	y = w * (1.0 + chbevlf(4.0 * w - 2.0, R, 10)) / z;
+	return (y);
 }

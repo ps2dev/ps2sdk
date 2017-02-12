@@ -16,13 +16,13 @@ void shiftarray(u8 *buf)
 	u8 temp[32];
 	u32 i;
 
-	for(i=0; i < 32; i++)
+	for (i = 0; i < 32; i++)
 		temp[i] = buf[i];
 
 	buf[0] = 0xFF;
 
-	for(i=0; i < 31; i++)
-		buf[i+1] = temp[i];
+	for (i = 0; i < 31; i++)
+		buf[i + 1] = temp[i];
 }
 
 u32 PadIsSupported(padState_t *pstate)
@@ -60,16 +60,14 @@ u32 PadIsSupported(padState_t *pstate)
 
 	res = pdGetError(pstate->port, pstate->slot);
 
-	if(res == 0)
-	{
+	if (res == 0) {
 		pdGetOutBuffer(pstate->port, pstate->slot, 0, pstate->outbuffer);
 
-		if(pstate->stat70bit == 1) shiftarray(pstate->outbuffer);
+		if (pstate->stat70bit == 1)
+			shiftarray(pstate->outbuffer);
 
-		if(pstate->outbuffer[1] != 0)
-		{
-			if(sio2cmdCheckId(pstate->outbuffer[1]) == 1)
-			{
+		if (pstate->outbuffer[1] != 0) {
+			if (sio2cmdCheckId(pstate->outbuffer[1]) == 1) {
 
 				pstate->modeCurId = pstate->outbuffer[1];
 				ret = 1;
@@ -95,7 +93,7 @@ u32 VrefParam(u32 val, padState_t *pstate)
 
 	pdSetCtrl2(pstate->port, pstate->slot, res),
 
-	res = pdGetRegData(PAD_ID_CONFIG);
+	    res = pdGetRegData(PAD_ID_CONFIG);
 
 	pdSetRegData(pstate->port, pstate->slot, res);
 
@@ -118,13 +116,14 @@ u32 VrefParam(u32 val, padState_t *pstate)
 
 	WaitClearEvent(pstate->eventflag, EF_PAD_TRANSFER_DONE, 0x10, 0);
 
-	if( pdGetError(pstate->port, pstate->slot) == 0)
-	{
+	if (pdGetError(pstate->port, pstate->slot) == 0) {
 		pdGetOutBuffer(pstate->port, pstate->slot, 0, pstate->outbuffer);
 
-		if(pstate->stat70bit == 1) shiftarray(pstate->outbuffer);
+		if (pstate->stat70bit == 1)
+			shiftarray(pstate->outbuffer);
 
-		if(pstate->outbuffer[1] == PAD_ID_CONFIG) ret = 1;
+		if (pstate->outbuffer[1] == PAD_ID_CONFIG)
+			ret = 1;
 	}
 
 	SetEventFlag(pstate->eventflag, EF_TASK_DONE);
@@ -145,55 +144,52 @@ u32 ReadData(padState_t *pstate)
 
 	pdSetCtrl2(pstate->port, pstate->slot, res);
 
-	res = pdGetRegData( pstate->modeCurId );
+	res = pdGetRegData(pstate->modeCurId);
 
-	pdSetRegData( pstate->port, pstate->slot, res);
+	pdSetRegData(pstate->port, pstate->slot, res);
 
-	res = pdGetInSize( pstate->modeCurId );
+	res = pdGetInSize(pstate->modeCurId);
 
-	pdSetInSize( pstate->port, pstate->slot, res);
+	pdSetInSize(pstate->port, pstate->slot, res);
 
-	res = pdGetOutSize( pstate->modeCurId );
+	res = pdGetOutSize(pstate->modeCurId);
 
 	pdSetOutSize(pstate->port, pstate->slot, res);
 
-	for(i=0; i < 32; i++)
-	{
+	for (i = 0; i < 32; i++) {
 		pstate->inbuffer[i] = 0;
 		pstate->outbuffer[i] = 0;
 	}
 
 	sio2CmdSetReadData(pstate->modeCurId, pstate->inbuffer);
 
-	if( pstate->ee_actDirectSize > 0)
-	{
-		for(i=0; i < pstate->ee_actDirectSize; i++)
-		{
-			if(pstate->ee_actAlignData.data[i] == 0xFF)
-				pstate->inbuffer[i+3] = pstate->ee_actAlignData.data[i];
+	if (pstate->ee_actDirectSize > 0) {
+		for (i = 0; i < pstate->ee_actDirectSize; i++) {
+			if (pstate->ee_actAlignData.data[i] == 0xFF)
+				pstate->inbuffer[i + 3] = pstate->ee_actAlignData.data[i];
 			else
-				pstate->inbuffer[i+3] = pstate->ee_actDirectData.data[i];
+				pstate->inbuffer[i + 3] = pstate->ee_actDirectData.data[i];
 		}
 	}
 
 	pdSetInBuffer(pstate->port, pstate->slot, 0, pstate->inbuffer);
 
-	SetEventFlag( pstate->eventflag, EF_PAD_TRANSFER_START);
+	SetEventFlag(pstate->eventflag, EF_PAD_TRANSFER_START);
 
-	WaitClearEvent( pstate->eventflag, EF_PAD_TRANSFER_DONE, 0x10, 0);
+	WaitClearEvent(pstate->eventflag, EF_PAD_TRANSFER_DONE, 0x10, 0);
 
 	res = pdGetError(pstate->port, pstate->slot);
 
-	if(res == 0)
-	{
+	if (res == 0) {
 		pdGetOutBuffer(pstate->port, pstate->slot, 0, pstate->outbuffer);
 
 		ret = 1;
 
-		if(pstate->stat70bit == 1) shiftarray( pstate->outbuffer );
+		if (pstate->stat70bit == 1)
+			shiftarray(pstate->outbuffer);
 	}
 
-	SetEventFlag( pstate->eventflag, EF_TASK_DONE);
+	SetEventFlag(pstate->eventflag, EF_TASK_DONE);
 
 	return ret;
 }
@@ -231,12 +227,10 @@ u32 EnterConfigMode(u8 val, padState_t *pstate)
 
 	WaitClearEvent(pstate->eventflag, EF_PAD_TRANSFER_DONE, 0x10, 0);
 
-	if( pdGetError(pstate->port, pstate->slot) == 0)
-	{
+	if (pdGetError(pstate->port, pstate->slot) == 0) {
 		pdGetOutBuffer(pstate->port, pstate->slot, 0, pstate->outbuffer);
 
-		if( pstate->stat70bit == 1)
-		{
+		if (pstate->stat70bit == 1) {
 			shiftarray(pstate->outbuffer);
 		}
 
@@ -282,23 +276,25 @@ u32 QueryModel(padState_t *pstate)
 
 	WaitClearEvent(pstate->eventflag, EF_PAD_TRANSFER_DONE, 0x10, 0);
 
-	if( pdGetError(pstate->port, pstate->slot) == 0)
-	{
+	if (pdGetError(pstate->port, pstate->slot) == 0) {
 		pdGetOutBuffer(pstate->port, pstate->slot, 0, pstate->outbuffer);
 
-		if( pstate->stat70bit == 1) shiftarray( pstate->outbuffer );
+		if (pstate->stat70bit == 1)
+			shiftarray(pstate->outbuffer);
 
-		if( pstate->outbuffer[1] == PAD_ID_CONFIG)
-		{
+		if (pstate->outbuffer[1] == PAD_ID_CONFIG) {
 			pstate->numActuators = pstate->outbuffer[6];
 			pstate->model = pstate->outbuffer[3];
 			pstate->numModes = pstate->outbuffer[4];
 			pstate->modeCurOffs = pstate->outbuffer[5];
 			pstate->numActComb = pstate->outbuffer[7];
 
-			if( pstate->numActuators > 4) pstate->numActuators = 4;
-			if( pstate->numActComb > 4 ) pstate->numActComb = 4;
-			if( pstate->numModes > 4) pstate->numModes = 4;
+			if (pstate->numActuators > 4)
+				pstate->numActuators = 4;
+			if (pstate->numActComb > 4)
+				pstate->numActComb = 4;
+			if (pstate->numModes > 4)
+				pstate->numModes = 4;
 
 			ret = 1;
 		}
@@ -345,14 +341,14 @@ u32 SetMainMode(padState_t *pstate)
 
 	WaitClearEvent(pstate->eventflag, EF_PAD_TRANSFER_DONE, 0x10, 0);
 
-	if( pdGetError(pstate->port, pstate->slot) == 0)
-	{
+	if (pdGetError(pstate->port, pstate->slot) == 0) {
 		pdGetOutBuffer(pstate->port, pstate->slot, 0, pstate->outbuffer);
 
-		if(pstate->stat70bit == 1) shiftarray( pstate->outbuffer);
+		if (pstate->stat70bit == 1)
+			shiftarray(pstate->outbuffer);
 
-		if(pstate->outbuffer[1] == PAD_ID_CONFIG) ret = 1;
-
+		if (pstate->outbuffer[1] == PAD_ID_CONFIG)
+			ret = 1;
 	}
 
 	SetEventFlag(pstate->eventflag, EF_TASK_DONE);
@@ -395,15 +391,14 @@ u32 QueryAct(u32 actuator, padState_t *pstate)
 
 	WaitClearEvent(pstate->eventflag, EF_PAD_TRANSFER_DONE, 0x10, 0);
 
-	if( pdGetError(pstate->port, pstate->slot) == 0)
-	{
+	if (pdGetError(pstate->port, pstate->slot) == 0) {
 		pdGetOutBuffer(pstate->port, pstate->slot, 0, pstate->outbuffer);
 
-		if(pstate->stat70bit == 1) shiftarray( pstate->outbuffer );
+		if (pstate->stat70bit == 1)
+			shiftarray(pstate->outbuffer);
 
-		if(pstate->outbuffer[1] == PAD_ID_CONFIG)
-		{
-			u8 *actData = (u8*)&pstate->actData[actuator];
+		if (pstate->outbuffer[1] == PAD_ID_CONFIG) {
+			u8 *actData = (u8 *)&pstate->actData[actuator];
 
 			actData[0] = pstate->outbuffer[5];
 			actData[1] = pstate->outbuffer[6];
@@ -432,7 +427,7 @@ u32 QueryComb(u32 val, padState_t *pstate)
 
 	pdSetCtrl2(pstate->port, pstate->slot, res),
 
-	res = pdGetRegData(PAD_ID_CONFIG);
+	    res = pdGetRegData(PAD_ID_CONFIG);
 
 	pdSetRegData(pstate->port, pstate->slot, res);
 
@@ -454,15 +449,14 @@ u32 QueryComb(u32 val, padState_t *pstate)
 
 	WaitClearEvent(pstate->eventflag, EF_PAD_TRANSFER_DONE, 0x10, 0);
 
-	if( pdGetError(pstate->port, pstate->slot) == 0)
-	{
+	if (pdGetError(pstate->port, pstate->slot) == 0) {
 		pdGetOutBuffer(pstate->port, pstate->slot, 0, pstate->outbuffer);
 
-		if(pstate->stat70bit == 1) shiftarray(pstate->outbuffer);
+		if (pstate->stat70bit == 1)
+			shiftarray(pstate->outbuffer);
 
-		if(pstate->outbuffer[1] == PAD_ID_CONFIG)
-		{
-			u8 *data = (u8*)&pstate->combData[val];
+		if (pstate->outbuffer[1] == PAD_ID_CONFIG) {
+			u8 *data = (u8 *)&pstate->combData[val];
 
 			data[0] = pstate->outbuffer[5];
 			data[1] = pstate->outbuffer[6];
@@ -492,7 +486,7 @@ u32 QueryMode(u32 val, padState_t *pstate)
 
 	pdSetCtrl2(pstate->port, pstate->slot, res),
 
-	res = pdGetRegData(PAD_ID_CONFIG);
+	    res = pdGetRegData(PAD_ID_CONFIG);
 
 	pdSetRegData(pstate->port, pstate->slot, res);
 
@@ -514,15 +508,14 @@ u32 QueryMode(u32 val, padState_t *pstate)
 
 	WaitClearEvent(pstate->eventflag, EF_PAD_TRANSFER_DONE, 0x10, 0);
 
-	if( pdGetError(pstate->port, pstate->slot) == 0)
-	{
+	if (pdGetError(pstate->port, pstate->slot) == 0) {
 		pdGetOutBuffer(pstate->port, pstate->slot, 0, pstate->outbuffer);
 
-		if(pstate->stat70bit == 1) shiftarray(pstate->outbuffer);
+		if (pstate->stat70bit == 1)
+			shiftarray(pstate->outbuffer);
 
-		if(pstate->outbuffer[1] == PAD_ID_CONFIG)
-		{
-			u16 *modeTable = (u16*)&pstate->modeTable[0];
+		if (pstate->outbuffer[1] == PAD_ID_CONFIG) {
+			u16 *modeTable = (u16 *)&pstate->modeTable[0];
 
 			modeTable[val] = (pstate->outbuffer[5] << 8) | pstate->outbuffer[6];
 
@@ -548,7 +541,7 @@ u32 ExitConfigMode(padState_t *pstate)
 
 	pdSetCtrl2(pstate->port, pstate->slot, res),
 
-	res = pdGetRegData(PAD_ID_CONFIG);
+	    res = pdGetRegData(PAD_ID_CONFIG);
 
 	pdSetRegData(pstate->port, pstate->slot, res);
 
@@ -568,11 +561,11 @@ u32 ExitConfigMode(padState_t *pstate)
 
 	WaitClearEvent(pstate->eventflag, EF_PAD_TRANSFER_DONE, 0x10, 0);
 
-	if( pdGetError(pstate->port, pstate->slot) == 0)
-	{
+	if (pdGetError(pstate->port, pstate->slot) == 0) {
 		pdGetOutBuffer(pstate->port, pstate->slot, 0, pstate->outbuffer);
 
-		if(pstate->stat70bit == 1) shiftarray(pstate->outbuffer);
+		if (pstate->stat70bit == 1)
+			shiftarray(pstate->outbuffer);
 
 		ret = 1;
 	}
@@ -595,7 +588,7 @@ u32 SetActAlign(padState_t *pstate)
 
 	pdSetCtrl2(pstate->port, pstate->slot, res),
 
-	res = pdGetRegData(PAD_ID_CONFIG);
+	    res = pdGetRegData(PAD_ID_CONFIG);
 
 	pdSetRegData(pstate->port, pstate->slot, res);
 
@@ -609,8 +602,8 @@ u32 SetActAlign(padState_t *pstate)
 
 	sio2CmdSetSetActAlign(PAD_ID_CONFIG, pstate->inbuffer);
 
-	for(i=0; i < 6; i++)
-		pstate->inbuffer[3+i] = pstate->ee_actAlignData.data[i];
+	for (i = 0; i < 6; i++)
+		pstate->inbuffer[3 + i] = pstate->ee_actAlignData.data[i];
 
 	pdSetInBuffer(pstate->port, pstate->slot, 0, pstate->inbuffer);
 
@@ -618,13 +611,14 @@ u32 SetActAlign(padState_t *pstate)
 
 	WaitClearEvent(pstate->eventflag, EF_PAD_TRANSFER_DONE, 0x10, 0);
 
-	if( pdGetError(pstate->port, pstate->slot) == 0)
-	{
+	if (pdGetError(pstate->port, pstate->slot) == 0) {
 		pdGetOutBuffer(pstate->port, pstate->slot, 0, pstate->outbuffer);
 
-		if(pstate->stat70bit == 1) shiftarray(pstate->outbuffer);
+		if (pstate->stat70bit == 1)
+			shiftarray(pstate->outbuffer);
 
-		if(pstate->outbuffer[1] == PAD_ID_CONFIG) ret = 1;
+		if (pstate->outbuffer[1] == PAD_ID_CONFIG)
+			ret = 1;
 	}
 
 
@@ -646,7 +640,7 @@ u32 QueryButtonMask(padState_t *pstate)
 
 	pdSetCtrl2(pstate->port, pstate->slot, res),
 
-	res = pdGetRegData(PAD_ID_CONFIG);
+	    res = pdGetRegData(PAD_ID_CONFIG);
 
 	pdSetRegData(pstate->port, pstate->slot, res);
 
@@ -666,21 +660,18 @@ u32 QueryButtonMask(padState_t *pstate)
 
 	WaitClearEvent(pstate->eventflag, EF_PAD_TRANSFER_DONE, 0x10, 0);
 
-	if( pdGetError(pstate->port, pstate->slot) == 0)
-	{
+	if (pdGetError(pstate->port, pstate->slot) == 0) {
 		pdGetOutBuffer(pstate->port, pstate->slot, 0, pstate->outbuffer);
 
-		if(pstate->stat70bit == 1) shiftarray(pstate->outbuffer);
+		if (pstate->stat70bit == 1)
+			shiftarray(pstate->outbuffer);
 
-		if(pstate->outbuffer[8] == 0x5A)
-		{
+		if (pstate->outbuffer[8] == 0x5A) {
 			pstate->buttonMask[0] = pstate->outbuffer[3];
 			pstate->buttonMask[1] = pstate->outbuffer[4];
 			pstate->buttonMask[2] = pstate->outbuffer[5];
 			pstate->buttonMask[3] = pstate->outbuffer[6];
-		}
-		else
-		{
+		} else {
 			pstate->buttonMask[0] = 0;
 			pstate->buttonMask[1] = 0;
 			pstate->buttonMask[2] = 0;
@@ -708,7 +699,7 @@ u32 SetButtonInfo(padState_t *pstate)
 
 	pdSetCtrl2(pstate->port, pstate->slot, res),
 
-	res = pdGetRegData(PAD_ID_CONFIG);
+	    res = pdGetRegData(PAD_ID_CONFIG);
 
 	pdSetRegData(pstate->port, pstate->slot, res);
 
@@ -722,8 +713,8 @@ u32 SetButtonInfo(padState_t *pstate)
 
 	sio2CmdSetSetButtonInfo(PAD_ID_CONFIG, pstate->inbuffer);
 
-	for(i=0; i < 4; i++)
-		pstate->inbuffer[3+i] = pstate->buttonInfo[i];
+	for (i = 0; i < 4; i++)
+		pstate->inbuffer[3 + i] = pstate->buttonInfo[i];
 
 	pdSetInBuffer(pstate->port, pstate->slot, 0, pstate->inbuffer);
 
@@ -731,17 +722,17 @@ u32 SetButtonInfo(padState_t *pstate)
 
 	WaitClearEvent(pstate->eventflag, EF_PAD_TRANSFER_DONE, 0x10, 0);
 
-	if( pdGetError(pstate->port, pstate->slot) == 0)
-	{
+	if (pdGetError(pstate->port, pstate->slot) == 0) {
 		pdGetOutBuffer(pstate->port, pstate->slot, 0, pstate->outbuffer);
 
-		if(pstate->stat70bit == 1) shiftarray(pstate->outbuffer);
+		if (pstate->stat70bit == 1)
+			shiftarray(pstate->outbuffer);
 
-		if(pstate->outbuffer[1] == PAD_ID_CONFIG) ret = 1;
+		if (pstate->outbuffer[1] == PAD_ID_CONFIG)
+			ret = 1;
 	}
 
 	SetEventFlag(pstate->eventflag, EF_TASK_DONE);
 
 	return ret;
 }
-

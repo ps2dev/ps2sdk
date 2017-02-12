@@ -18,8 +18,7 @@ s32 iWakeupThread(s32 thread_id)
 	ee_thread_status_t info;
 	int prio, result;
 
-	if(_iGetThreadId() == thread_id)
-	{
+	if (_iGetThreadId() == thread_id) {
 		iReferThreadStatus(thread_id, &info);
 		prio = info.current_priority;
 
@@ -31,7 +30,7 @@ s32 iWakeupThread(s32 thread_id)
 
 		/*	If there are multiple threads with the same priority, another thread may get preempted.
 			Therefore rotate the priority queue until the specified thread becomes the running thread. */
-		while((result = _iGetThreadId()) != thread_id)
+		while ((result = _iGetThreadId()) != thread_id)
 			iRotateThreadReadyQueue(prio);
 
 		return result;
@@ -46,18 +45,20 @@ int DIntr()
 {
 	int eie, res;
 
-	asm volatile ("mfc0\t%0, $12" : "=r" (eie));
+	asm volatile("mfc0\t%0, $12"
+	             : "=r"(eie));
 	eie &= 0x10000;
 	res = eie != 0;
 
 	if (!eie)
 		return 0;
 
-	asm (".p2align 3");
+	asm(".p2align 3");
 	do {
-		asm volatile ("di");
-		asm volatile ("sync.p");
-		asm volatile ("mfc0\t%0, $12" : "=r" (eie));
+		asm volatile("di");
+		asm volatile("sync.p");
+		asm volatile("mfc0\t%0, $12"
+		             : "=r"(eie));
 		eie &= 0x10000;
 	} while (eie);
 
@@ -70,9 +71,10 @@ int EIntr()
 {
 	int eie;
 
-	asm volatile ("mfc0\t%0, $12" : "=r" (eie));
+	asm volatile("mfc0\t%0, $12"
+	             : "=r"(eie));
 	eie &= 0x10000;
-	asm volatile ("ei");
+	asm volatile("ei");
 
 	return eie != 0;
 }
@@ -83,7 +85,8 @@ int EnableIntc(int intc)
 {
 	int eie, res;
 
-	asm volatile ("mfc0\t%0, $12" : "=r" (eie));
+	asm volatile("mfc0\t%0, $12"
+	             : "=r"(eie));
 	eie &= 0x10000;
 
 	if (eie)
@@ -104,7 +107,8 @@ int DisableIntc(int intc)
 {
 	int eie, res;
 
-	asm volatile ("mfc0\t%0, $12" : "=r" (eie));
+	asm volatile("mfc0\t%0, $12"
+	             : "=r"(eie));
 	eie &= 0x10000;
 
 	if (eie)
@@ -125,7 +129,8 @@ int EnableDmac(int dmac)
 {
 	int eie, res;
 
-	asm volatile ("mfc0\t%0, $12" : "=r" (eie));
+	asm volatile("mfc0\t%0, $12"
+	             : "=r"(eie));
 	eie &= 0x10000;
 
 	if (eie)
@@ -146,7 +151,8 @@ int DisableDmac(int dmac)
 {
 	int eie, res;
 
-	asm volatile ("mfc0\t%0, $12" : "=r" (eie));
+	asm volatile("mfc0\t%0, $12"
+	             : "=r"(eie));
 	eie &= 0x10000;
 
 	if (eie)
@@ -207,7 +213,8 @@ void SyncDCache(void *start, void *end)
 {
 	int eie;
 
-	asm volatile ("mfc0\t%0, $12" : "=r" (eie));
+	asm volatile("mfc0\t%0, $12"
+	             : "=r"(eie));
 	eie &= 0x10000;
 
 	if (eie)
@@ -232,7 +239,8 @@ void InvalidDCache(void *start, void *end)
 {
 	int eie;
 
-	asm volatile ("mfc0\t%0, $12" : "=r" (eie));
+	asm volatile("mfc0\t%0, $12"
+	             : "=r"(eie));
 	eie &= 0x10000;
 
 	if (eie)

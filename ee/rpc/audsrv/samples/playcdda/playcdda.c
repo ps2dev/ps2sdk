@@ -44,8 +44,7 @@ int main(int argc, char **argv)
 	printf("audsrv loadmodule %d\n", ret);
 
 	ret = audsrv_init();
-	if (ret != 0)
-	{
+	if (ret != 0) {
 		printf("sample: failed to initialize audsrv\n");
 		printf("audsrv returned error string: %s\n", audsrv_get_error_string());
 		return 1;
@@ -61,12 +60,10 @@ int main(int argc, char **argv)
 	//printf("starting loop\n");
 
 	lastpos = 0;
-	while (track_ended == 0)
-	{
+	while (track_ended == 0) {
 		int pos;
 
-		if (audsrv_get_cdpos() == 0)
-		{
+		if (audsrv_get_cdpos() == 0) {
 			printf("-- track ended before semaphore --\n");
 			break;
 		}
@@ -74,10 +71,9 @@ int main(int argc, char **argv)
 		pos = audsrv_get_trackpos();
 		nopdelay();
 
-		if (lastpos != pos)
-		{
+		if (lastpos != pos) {
 			printf("\rTrack %02d: %02d:%02d:%02d",
-			track, pos / (75*60), (pos / 75) % 60, pos % 75);
+			       track, pos / (75 * 60), (pos / 75) % 60, pos % 75);
 			lastpos = pos;
 		}
 	}

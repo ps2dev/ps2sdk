@@ -18,45 +18,43 @@
 
 int TestFunction3()
 {
-  unsigned int* stackTrace[256];
-  int i = 0;
+	unsigned int *stackTrace[256];
+	int i = 0;
 
-  ps2GetStackTrace((unsigned int*)&stackTrace,256);
+	ps2GetStackTrace((unsigned int *)&stackTrace, 256);
 
-  for(i = 0; i < 256; ++i)
-  {
-    if (stackTrace[i] == 0)
-      break;
+	for (i = 0; i < 256; ++i) {
+		if (stackTrace[i] == 0)
+			break;
 
-    printf("adress %d 0x%08x\n",i,(int)stackTrace[i]);
-  }
+		printf("adress %d 0x%08x\n", i, (int)stackTrace[i]);
+	}
 
-  return 0;
+	return 0;
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 int TestFunction2()
 {
-  return TestFunction3();
+	return TestFunction3();
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 int testFunction1()
 {
-  return TestFunction2();
+	return TestFunction2();
 }
 
 ////////////////////////////////////////////////////////////////////////
 
 int main()
 {
-  testFunction1();
+	testFunction1();
 
-  while(1)
-  {
-  }
+	while (1) {
+	}
 
-  return 0;
+	return 0;
 }

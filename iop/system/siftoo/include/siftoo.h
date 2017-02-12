@@ -17,9 +17,9 @@
 #include "irx.h"
 
 enum sif2_errors {
-    SIF2_E_OK,		/* No error.  */
+	SIF2_E_OK, /* No error.  */
 
-    SIF2_E_INIT = 0xd700, /* Initialization error.  */
+	SIF2_E_INIT = 0xd700, /* Initialization error.  */
 };
 
 typedef int (*sif2_pipe_handler_t)(u32, void *, u32);
@@ -39,7 +39,7 @@ int sif2_mem_write(u32 addr, void *buf, u32 size);
 
 /* Pipe API.  */
 int sif2_pipe_create(u32 id, void *buf, u32 size, u32 flags,
-        sif2_pipe_handler_t phandler);
+                     sif2_pipe_handler_t phandler);
 #define I_sif2_pipe_create DECLARE_IMPORT(10, sif2_pipe_create)
 int sif2_pipe_open(u32 id);
 #define I_sif2_pipe_open DECLARE_IMPORT(11, sif2_pipe_open)

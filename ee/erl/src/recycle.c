@@ -16,70 +16,64 @@ This also decreases memory fragmentation, and freeing structures
 #include <string.h>
 
 #ifndef STANDARD
-# include "standard.h"
+#include "standard.h"
 #endif
 #ifndef RECYCLE
-# include "recycle.h"
+#include "recycle.h"
 #endif
 
 reroot *remkroot(size)
-size_t  size;
+    size_t size;
 {
-   reroot *r = (reroot *)remalloc(sizeof(reroot));
-   r->list = (recycle *)0;
-   r->trash = (recycle *)0;
-   r->size = align(size);
-   r->logsize = RESTART;
-   r->numleft = 0;
-   return r;
+	reroot *r = (reroot *)remalloc(sizeof(reroot));
+	r->list = (recycle *)0;
+	r->trash = (recycle *)0;
+	r->size = align(size);
+	r->logsize = RESTART;
+	r->numleft = 0;
+	return r;
 }
 
-void  refree(r)
-struct reroot *r;
+void refree(r) struct reroot *r;
 {
-   recycle *temp;
-   if ((temp = r->list)) while (r->list)
-   {
-      temp = r->list->next;
-      free((char *)r->list);
-      r->list = temp;
-   }
-   free((char *)r);
-   return;
+	recycle *temp;
+	if ((temp = r->list))
+		while (r->list) {
+			temp = r->list->next;
+			free((char *)r->list);
+			r->list = temp;
+		}
+	free((char *)r);
+	return;
 }
 
 /* to be called from the macro renew only */
-char  *renewx(r)
-struct reroot *r;
+char *renewx(r) struct reroot *r;
 {
-   recycle *temp;
-   if (r->trash)
-   {  /* pull a node off the trash heap */
-      temp = r->trash;
-      r->trash = temp->next;
-      (void)memset((void *)temp, 0, r->size);
-   }
-   else
-   {  /* allocate a new block of nodes */
-      r->numleft = r->size*((ub4)1<<r->logsize);
-      if (r->numleft < REMAX) ++r->logsize;
-      temp = (recycle *)remalloc(sizeof(recycle) + r->numleft);
-      temp->next = r->list;
-      r->list = temp;
-      r->numleft-=r->size;
-      temp = (recycle *)((char *)(r->list+1)+r->numleft);
-   }
-   return (char *)temp;
+	recycle *temp;
+	if (r->trash) { /* pull a node off the trash heap */
+		temp = r->trash;
+		r->trash = temp->next;
+		(void)memset((void *)temp, 0, r->size);
+	} else { /* allocate a new block of nodes */
+		r->numleft = r->size * ((ub4)1 << r->logsize);
+		if (r->numleft < REMAX)
+			++r->logsize;
+		temp = (recycle *)remalloc(sizeof(recycle) + r->numleft);
+		temp->next = r->list;
+		r->list = temp;
+		r->numleft -= r->size;
+		temp = (recycle *)((char *)(r->list + 1) + r->numleft);
+	}
+	return (char *)temp;
 }
 
-char   *remalloc(len)
-size_t  len;
+char *remalloc(len)
+    size_t len;
 {
-  char *x = (char *)malloc(len);
-  if (!x)
-  {
-    //exit(SUCCESS);  // let's just bug silently...
-  }
-  return x;
+	char *x = (char *)malloc(len);
+	if (!x) {
+		//exit(SUCCESS);  // let's just bug silently...
+	}
+	return x;
 }
-

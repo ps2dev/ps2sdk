@@ -13,51 +13,52 @@
 IRX_ID(MODNAME, 2, 8);
 
 #ifdef SIO_DEBUG
-	#include <sior.h>
-	#define DEBUG
-	#define DPRINTF(args...)	sio_printf(args)
+#include <sior.h>
+#define DEBUG
+#define DPRINTF(args...) sio_printf(args)
 #else
-	#define DPRINTF(args...)	printf(args)
+#define DPRINTF(args...) printf(args)
 #endif
 
 static const u8 XMCSERV_RpcCmd[2][16] =
-{	// libmc rpc cmd values for XMCMAN/XMCSERV
-	{	0xFE,	// CMD_INIT
-		0x01,	// CMD_GETINFO
-		0x02,	// CMD_OPEN
-		0x03,	// CMD_CLOSE
-		0x04,	// CMD_SEEK
-		0x05,	// CMD_READ
-		0x06,	// CMD_WRITE
-		0x0A,	// CMD_FLUSH
-		0x0C,	// CMD_CHDIR
-		0x0D,	// CMD_GETDIR
-		0x0E,	// CMD_SETFILEINFO
-		0x0F,	// CMD_DELETE
-		0x10,	// CMD_FORMAT
-		0x11,	// CMD_UNFORMAT
-		0x12,	// CMD_GETENTSPACE
-		0x33	// CMD_CHECKBLOCK (calls xmcman_funcs: 45)
-	},
-	{ // corresponding internal rpc function
-		0x00,	// sceMcInit
-		0x12,	// sceMcGetInfo2
-		0x01,	// sceMcOpen
-		0x02,	// sceMcClose
-		0x05,	// sceMcSeek
-		0x11,	// sceMcRead2
-		0x04,	// sceMcWrite
-		0x0A,	// sceMcFlush
-		0x0B,	// sceMcChDir
-		0x06,	// sceMcGetDir
-		0x0C,	// sceMcSetFileInfo
-		0x09,	// sceMcDelete
-		0x07,	// sceMcFormat
-		0x10,	// sceMcUnformat
-		0x13,	// sceMcGetEntSpace
-		0x14	// sceMcCheckBlock (calls xmcman_funcs: 45)
-	}
-};
+    { // libmc rpc cmd values for XMCMAN/XMCSERV
+        {
+            0xFE, // CMD_INIT
+            0x01, // CMD_GETINFO
+            0x02, // CMD_OPEN
+            0x03, // CMD_CLOSE
+            0x04, // CMD_SEEK
+            0x05, // CMD_READ
+            0x06, // CMD_WRITE
+            0x0A, // CMD_FLUSH
+            0x0C, // CMD_CHDIR
+            0x0D, // CMD_GETDIR
+            0x0E, // CMD_SETFILEINFO
+            0x0F, // CMD_DELETE
+            0x10, // CMD_FORMAT
+            0x11, // CMD_UNFORMAT
+            0x12, // CMD_GETENTSPACE
+            0x33  // CMD_CHECKBLOCK (calls xmcman_funcs: 45)
+        },
+        {
+            // corresponding internal rpc function
+            0x00, // sceMcInit
+            0x12, // sceMcGetInfo2
+            0x01, // sceMcOpen
+            0x02, // sceMcClose
+            0x05, // sceMcSeek
+            0x11, // sceMcRead2
+            0x04, // sceMcWrite
+            0x0A, // sceMcFlush
+            0x0B, // sceMcChDir
+            0x06, // sceMcGetDir
+            0x0C, // sceMcSetFileInfo
+            0x09, // sceMcDelete
+            0x07, // sceMcFormat
+            0x10, // sceMcUnformat
+            0x13, // sceMcGetEntSpace
+            0x14  // sceMcCheckBlock (calls xmcman_funcs: 45)
+        }};
 
 // rpc command handling array
 static void *rpc_funcs_array[21] = {
@@ -81,8 +82,7 @@ static void *rpc_funcs_array[21] = {
     (void *)sceMcRead2,
     (void *)sceMcGetInfo2,
     (void *)sceMcGetEntSpace,
-    (void *)sceMcCheckBlock
-};
+    (void *)sceMcCheckBlock};
 
 static int mcserv_tidS_0400;
 
@@ -117,7 +117,7 @@ int _start(int argc, const char **argv)
 	mcman_loaded = 0;
 	libptr = GetLoadcoreInternalData()->let_next;
 	while (libptr != 0) {
-		for (i=0; i<8; i++) {
+		for (i = 0; i < 8; i++) {
 			if (libptr->name[i] != mcman_modname[i])
 				break;
 		}
@@ -172,14 +172,14 @@ int _start(int argc, const char **argv)
 
 	// Set functions pointers to match XMCMAN exports if needed
 	if (mcman_type == XMCMAN) {
-	pMcDetectCard2 = export_tab[21];
-	pMcGetFormat = export_tab[22];
-	pMcGetEntSpace = export_tab[23];
-	pMcGetModuleInfo = export_tab[42];
-	pMcCheckBlock = export_tab[45];
+		pMcDetectCard2 = export_tab[21];
+		pMcGetFormat = export_tab[22];
+		pMcGetEntSpace = export_tab[23];
+		pMcGetModuleInfo = export_tab[42];
+		pMcCheckBlock = export_tab[45];
 	}
 
-	// Register mcserv dummy export table
+// Register mcserv dummy export table
 #ifdef DEBUG
 	DPRINTF("mcserv: registering exports...\n");
 #endif
@@ -191,11 +191,11 @@ int _start(int argc, const char **argv)
 #ifdef DEBUG
 	DPRINTF("mcserv: starting RPC thread...\n");
 #endif
- 	thread_param.attr = TH_C;
- 	thread_param.thread = (void *)thread_rpc_S_0400;
- 	thread_param.priority = 0x68;
- 	thread_param.stacksize = 0x1000;
- 	thread_param.option = 0;
+	thread_param.attr = TH_C;
+	thread_param.thread = (void *)thread_rpc_S_0400;
+	thread_param.priority = 0x68;
+	thread_param.stacksize = 0x1000;
+	thread_param.option = 0;
 
 	thread_id = CreateThread(&thread_param);
 	mcserv_tidS_0400 = thread_id;
@@ -218,7 +218,7 @@ err_out:
 }
 
 //--------------------------------------------------------------
-void thread_rpc_S_0400(void* arg)
+void thread_rpc_S_0400(void *arg)
 {
 	if (!sceSifCheckInit())
 		sceSifInit();
@@ -237,14 +237,13 @@ void *cb_rpc_S_0400(u32 fno, void *buf, int size)
 	register int i;
 
 	if (mcman_type == XMCMAN) {
-		for (i=0; i<16; i++) { // retrieve correct function number for xmcserv
+		for (i = 0; i < 16; i++) { // retrieve correct function number for xmcserv
 			if (fno == XMCSERV_RpcCmd[0][i]) {
 				fno = XMCSERV_RpcCmd[1][i];
 				break;
 			}
 		}
-	}
-	else { // retrieve correct function number for mcserv
+	} else { // retrieve correct function number for mcserv
 		fno -= 112;
 		if (fno > 16)
 			return (void *)&rpc_stat;
@@ -482,7 +481,7 @@ int _McRead(void *rpc_buf)
 	eP.size1 = dP->size;
 
 	if (dP->size > 16)
-		eP.size1 = (((int)(eedata)-1) & 0xfffffff0) - ((int)(eedata) - 16);
+		eP.size1 = (((int)(eedata)-1) & 0xfffffff0) - ((int)(eedata)-16);
 
 	eP.size2 = (dP->size - eP.size1) & 0x0f;
 	left_to_read = (dP->size - eP.size1) - eP.size2;
@@ -497,8 +496,7 @@ int _McRead(void *rpc_buf)
 			eP.size1 = 0;
 			eP.size2 = 0;
 			goto dma_transfer2;
-		}
-		else {
+		} else {
 			file_offset = size_readed;
 			eP.dest1 = eedata;
 			eedata += size_readed;
@@ -508,8 +506,7 @@ int _McRead(void *rpc_buf)
 				eP.size2 = 0;
 				size_readed = 0;
 				goto dma_transfer2;
-			}
-			else
+			} else
 				size_readed = 0;
 		}
 	}
@@ -568,7 +565,7 @@ int _McRead(void *rpc_buf)
 dma_transfer2:
 	dmaStruct.src = (void *)&eP;
 	dmaStruct.dest = (void *)dP->param;
-	dmaStruct.size = sizeof (mcEndParam_t);
+	dmaStruct.size = sizeof(mcEndParam_t);
 	dmaStruct.attr = 0;
 
 	CpuSuspendIntr(&intStatus);
@@ -612,7 +609,7 @@ int _McRead2(void *rpc_buf)
 	eP.size1 = dP->size;
 
 	if (dP->size > 64)
-		eP.size1 = (((u32)(eedata)-1) & 0xffffffc0) - ((u32)(eedata) - 64);
+		eP.size1 = (((u32)(eedata)-1) & 0xffffffc0) - ((u32)(eedata)-64);
 
 	eP.size2 = (dP->size - eP.size1) & 0x3f;
 	left_to_read = (dP->size - eP.size1) - eP.size2;
@@ -627,8 +624,7 @@ int _McRead2(void *rpc_buf)
 			eP.size1 = 0;
 			eP.size2 = 0;
 			goto dma_transfer2;
-		}
-		else {
+		} else {
 			file_offset = size_readed;
 			eP.dest1 = eedata;
 			eedata += size_readed;
@@ -638,8 +634,7 @@ int _McRead2(void *rpc_buf)
 				eP.size2 = 0;
 				size_readed = 0;
 				goto dma_transfer2;
-			}
-			else
+			} else
 				size_readed = 0;
 		}
 	}
@@ -674,7 +669,7 @@ int _McRead2(void *rpc_buf)
 
 		dmaStruct.size = size_readed - eP.size2;
 
-dma_transfer:
+	dma_transfer:
 		dmaStruct.src = (void *)mcserv_buf;
 		dmaStruct.dest = (void *)eedata;
 		dmaStruct.attr = 0;
@@ -683,7 +678,7 @@ dma_transfer:
 		sceSifSetDma(&dmaStruct, 1);
 		CpuResumeIntr(intStatus);
 
-skip_dma_transfer:
+	skip_dma_transfer:
 		file_offset += size_readed;
 		left_to_read -= size_readed;
 		eedata += size_readed;
@@ -712,7 +707,7 @@ skip_dma_transfer:
 dma_transfer2:
 	dmaStruct.src = (void *)&eP;
 	dmaStruct.dest = (void *)dP->param;
-	dmaStruct.size = sizeof (mcEndParam2_t);
+	dmaStruct.size = sizeof(mcEndParam2_t);
 	dmaStruct.attr = 0;
 
 	CpuSuspendIntr(&intStatus);
@@ -732,7 +727,7 @@ dma_transfer2:
 int _McWrite(void *rpc_buf)
 {
 	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
-	SifRpcReceiveData_t	rD;
+	SifRpcReceiveData_t rD;
 	register int size_to_write, size_written, r;
 
 #ifdef DEBUG
@@ -803,7 +798,7 @@ int _McGetDir(void *rpc_buf)
 
 		dmaStruct.src = (void *)mcserv_buf;
 		dmaStruct.dest = (void *)nP->mcT;
-		dmaStruct.size = sizeof (sceMcTblGetDir);
+		dmaStruct.size = sizeof(sceMcTblGetDir);
 		dmaStruct.attr = 0;
 
 		CpuSuspendIntr(&intStatus);
@@ -912,7 +907,7 @@ dma_transfer:
 
 	dmaStruct.src = (void *)&eP;
 	dmaStruct.dest = (void *)dP->param;
-	dmaStruct.size = sizeof (mcEndParam_t);
+	dmaStruct.size = sizeof(mcEndParam_t);
 	dmaStruct.attr = 0;
 
 	CpuSuspendIntr(&intStatus);
@@ -973,7 +968,7 @@ dma_transfer:
 
 	dmaStruct.src = (void *)&eP;
 	dmaStruct.dest = (void *)dP->param;
-	dmaStruct.size = sizeof (mcEndParam2_t);
+	dmaStruct.size = sizeof(mcEndParam2_t);
 	dmaStruct.attr = 0;
 
 	CpuSuspendIntr(&intStatus);
@@ -1058,10 +1053,9 @@ int _McEraseBlock(void *rpc_buf)
 		do {
 			r = pMcWritePage(dP->port, dP->slot, (dP->offset << 4) + pagenum, mcserv_buf, eccbuf);
 
-		} while (++pagenum < 16);   // <-- and the last page of the block ???
+		} while (++pagenum < 16); // <-- and the last page of the block ???
 
 		return r;
-
 	}
 
 	memset(mcserv_buf, dP->origin, 128);
@@ -1092,8 +1086,7 @@ int _McReadPage(void *rpc_buf)
 	if (pMcGetMcType(dP->port, dP->slot) == 2) {
 		r = 0;
 		pMcReadPage(dP->port, dP->slot, dP->fd, (void *)(mcserv_buf + fastsize));
-	}
-	else {
+	} else {
 		memset((void *)(mcserv_buf + fastsize), 0, 512);
 		r = pMcReadPS1PDACard(dP->port, dP->slot, dP->fd, (void *)(mcserv_buf + fastsize));
 	}
@@ -1137,7 +1130,7 @@ dma_transfer:
 
 	dmaStruct.src = (void *)&eP;
 	dmaStruct.dest = (void *)dP->param;
-	dmaStruct.size = sizeof (mcEndParam_t);
+	dmaStruct.size = sizeof(mcEndParam_t);
 	dmaStruct.attr = 0;
 
 	CpuSuspendIntr(&intStatus);
@@ -1155,7 +1148,7 @@ int _McWritePage(void *rpc_buf)
 {
 	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
 	register int fastsize, i, j;
-	SifRpcReceiveData_t	rD;
+	SifRpcReceiveData_t rD;
 	u8 eccbuf[16];
 
 #ifdef DEBUG
@@ -1206,13 +1199,13 @@ ecc_calc:
 int _McSetFileInfo(void *rpc_buf)
 {
 	mcNameParam_t *nP = (mcNameParam_t *)rpc_buf;
-	SifRpcReceiveData_t	rD;
+	SifRpcReceiveData_t rD;
 
 #ifdef DEBUG
 	DPRINTF("mcserv: _McSetFileInfo port%d slot%d file %s flags %d\n", nP->port, nP->slot, nP->name, nP->flags);
 #endif
 
-	sceSifGetOtherData(&rD, (void *)nP->mcT, &mcserv_buf, sizeof (sceMcTblGetDir), 0);
+	sceSifGetOtherData(&rD, (void *)nP->mcT, &mcserv_buf, sizeof(sceMcTblGetDir), 0);
 
 	return pMcSetFileInfo(nP->port, nP->slot, nP->name, (sceMcTblGetDir *)mcserv_buf, nP->flags);
 }

@@ -13,12 +13,16 @@
 #ifndef DRV_LIST_H
 #define DRV_LIST_H
 
-typedef struct _list {
+typedef struct _list
+{
 	struct _list *next;
 	struct _list *prev;
 } list_t;
 
-#define LIST_INIT(name) { &(name), &(name) }
+#define LIST_INIT(name)  \
+	{                    \
+		&(name), &(name) \
+	}
 
 static inline int list_empty(void *l)
 {
@@ -51,7 +55,7 @@ static inline list_t *list_remove(void *i)
 
 /* Iterate over a list.  Dir is 'next' to iterate forward and 'prev' to
    iterate in reverse.  */
-#define list_for_each(dir, pos, head)	\
+#define list_for_each(dir, pos, head) \
 	for (pos = (head)->dir; pos != (head); pos = pos->dir)
 
 #endif /* DRV_LIST_H */

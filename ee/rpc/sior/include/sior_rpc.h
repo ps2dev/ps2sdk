@@ -17,7 +17,7 @@
 extern "C" {
 #endif
 
-#define	SIOR_IRX              0xC001510
+#define SIOR_IRX 0xC001510
 
 int SIOR_Init(int priority);
 

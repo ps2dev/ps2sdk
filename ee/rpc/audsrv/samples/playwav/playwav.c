@@ -40,8 +40,7 @@ int main(int argc, char **argv)
 	printf("audsrv loadmodule %d\n", ret);
 
 	ret = audsrv_init();
-	if (ret != 0)
-	{
+	if (ret != 0) {
 		printf("sample: failed to initialize audsrv\n");
 		printf("audsrv returned error string: %s\n", audsrv_get_error_string());
 		return 1;
@@ -57,8 +56,7 @@ int main(int argc, char **argv)
 	audsrv_set_volume(MAX_VOLUME);
 
 	wav = fopen("host:song_22k.wav", "rb");
-	if (wav == NULL)
-	{
+	if (wav == NULL) {
 		printf("failed to open wav file\n");
 		audsrv_quit();
 		return 1;
@@ -68,28 +66,25 @@ int main(int argc, char **argv)
 
 	printf("starting play loop\n");
 	played = 0;
-	while (1)
-	{
+	while (1) {
 		ret = fread(chunk, 1, sizeof(chunk), wav);
-		if (ret > 0)
-		{
+		if (ret > 0) {
 			audsrv_wait_audio(ret);
 			audsrv_play_audio(chunk, ret);
 		}
 
-		if (ret < sizeof(chunk))
-		{
+		if (ret < sizeof(chunk)) {
 			/* no more data */
 			break;
 		}
 
 		played++;
-		if (played % 8 == 0)
-		{
+		if (played % 8 == 0) {
 			printf(".");
 		}
 
-		if (played == 512) break;
+		if (played == 512)
+			break;
 	}
 
 	fclose(wav);

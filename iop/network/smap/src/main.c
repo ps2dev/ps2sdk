@@ -13,17 +13,18 @@ extern struct irx_export_table _exp_smap;
 
 extern const char VersionString[];
 
-int _start(int argc, char *argv[]){
+int _start(int argc, char *argv[])
+{
 	int result;
 
-	if(RegisterLibraryEntries(&_exp_smap)!=0){
+	if (RegisterLibraryEntries(&_exp_smap) != 0) {
 		DEBUG_PRINTF("smap: module already loaded\n");
 		return MODULE_NO_RESIDENT_END;
 	}
 
 	printf("SMAP (%s)\n", VersionString);
 
-	if((result=smap_init(argc, argv))<0){
+	if ((result = smap_init(argc, argv)) < 0) {
 		DEBUG_PRINTF("smap: smap_init -> %d\n", result);
 		ReleaseLibraryEntries(&_exp_smap);
 		return MODULE_NO_RESIDENT_END;
@@ -31,4 +32,3 @@ int _start(int argc, char *argv[]){
 
 	return MODULE_RESIDENT_END;
 }
-

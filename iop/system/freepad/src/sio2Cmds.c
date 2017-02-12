@@ -9,8 +9,8 @@
 #include "types.h"
 #include "sio2Cmds.h"
 
-#define PAD_ID_HI(id)		((id)>>4)
-#define PAD_ID_LO(id)		((id)&0xF)
+#define PAD_ID_HI(id) ((id) >> 4)
+#define PAD_ID_LO(id) ((id)&0xF)
 
 typedef struct
 {
@@ -44,7 +44,7 @@ void sio2cmdReset()
 {
 	u32 i;
 
-	for(i=0; i < 16; i++)
+	for (i = 0; i < 16; i++)
 		cmdsBuffer[i] = 0;
 
 	numControllers = 0;
@@ -52,20 +52,17 @@ void sio2cmdReset()
 
 u32 SetupCmds(sio2Cmds_t *s)
 {
-	if( ((numControllers+1) < 16) && (s) )
-	{
-		if(numControllers > 0)
-		{
+	if (((numControllers + 1) < 16) && (s)) {
+		if (numControllers > 0) {
 			u32 i = 0;
 
 			// Look for free entry and check if already initialized
-			do
-			{
-				if(s->id == sio2Cmds[i].id)
+			do {
+				if (s->id == sio2Cmds[i].id)
 					return 0;
 
 				i++;
-			} while(numControllers > i);
+			} while (numControllers > i);
 		}
 
 		u32 i = numControllers;
@@ -93,9 +90,7 @@ u32 SetupCmds(sio2Cmds_t *s)
 		numControllers++;
 
 		return 1;
-	}
-	else
-	{
+	} else {
 		return 0;
 	}
 }
@@ -115,7 +110,7 @@ void FindPadsReadData(u8 *a)
 
 u32 FindPadsGetPortCtrl1(u32 a, u32 b)
 {
-	if(a == 0)
+	if (a == 0)
 		return 0xFFC00505;
 	else
 		return 0xFF060505;
@@ -123,7 +118,7 @@ u32 FindPadsGetPortCtrl1(u32 a, u32 b)
 
 u32 FindPadsGetPortCtrl2(u32 a)
 {
-	if(a == 0)
+	if (a == 0)
 		return 0x2000A;
 	else
 		return 0x2012C;
@@ -192,7 +187,7 @@ void sio2cmdInitFindPads()
  Mouse
 *******************************************************************************/
 
-void MouseReadData(u8* a)
+void MouseReadData(u8 *a)
 {
 	a[0] = 1;
 	a[1] = 0x42;
@@ -205,7 +200,7 @@ void MouseReadData(u8* a)
 
 u32 MouseGetPortCtrl1(u32 a, u32 b)
 {
-	if(a == 0)
+	if (a == 0)
 		return 0xFFC00505;
 	else
 		return 0xFF060505;
@@ -213,7 +208,7 @@ u32 MouseGetPortCtrl1(u32 a, u32 b)
 
 u32 MouseGetPortCtrl2(u32 a)
 {
-	if(a == 0)
+	if (a == 0)
 		return 0x20014;
 	else
 		return 0x2012C;
@@ -279,7 +274,7 @@ void sio2cmdInitMouse()
  Negicon
 *******************************************************************************/
 
-void NegiconReadData(u8* a)
+void NegiconReadData(u8 *a)
 {
 	a[0] = 1;
 	a[1] = 0x42;
@@ -295,7 +290,7 @@ void NegiconReadData(u8* a)
 
 u32 NegiconGetPortCtrl1(u32 a, u32 b)
 {
-	if(a == 0)
+	if (a == 0)
 		return 0xFFC00505;
 	else
 		return 0xFF060505;
@@ -304,7 +299,7 @@ u32 NegiconGetPortCtrl1(u32 a, u32 b)
 
 u32 NegiconGetPortCtrl2(u32 a)
 {
-	if(a == 0)
+	if (a == 0)
 		return 0x20014;
 	else
 		return 0x2012C;
@@ -372,7 +367,7 @@ void sio2cmdInitNegicon()
 *******************************************************************************/
 
 
-void KonamiGunReadData(u8* a)
+void KonamiGunReadData(u8 *a)
 {
 	a[0] = 1;
 	a[1] = 0x42;
@@ -383,7 +378,7 @@ void KonamiGunReadData(u8* a)
 
 u32 KonamiGunGetPortCtrl1(u32 a, u32 b)
 {
-	if(a == 0)
+	if (a == 0)
 		return 0xFFC00505;
 	else
 		return 0xFF060505;
@@ -391,7 +386,7 @@ u32 KonamiGunGetPortCtrl1(u32 a, u32 b)
 
 u32 KonamiGunGetPortCtrl2(u32 a)
 {
-	if(a == 0)
+	if (a == 0)
 		return 0x20014;
 	else
 		return 0x2012C;
@@ -427,7 +422,7 @@ void sio2cmdInitKonamiGun()
 {
 	sio2Cmds_t s;
 
-	s.id = PAD_ID_HI( PAD_ID_KONAMIGUN );
+	s.id = PAD_ID_HI(PAD_ID_KONAMIGUN);
 
 	s.readdata = KonamiGunReadData;
 	s.getportctrl1 = KonamiGunGetPortCtrl1;
@@ -455,7 +450,7 @@ void sio2cmdInitKonamiGun()
 *******************************************************************************/
 
 
-void DigitalReadData(u8* a)
+void DigitalReadData(u8 *a)
 {
 	a[0] = 1;
 	a[1] = 0x42;
@@ -466,7 +461,7 @@ void DigitalReadData(u8* a)
 
 u32 DigitalGetPortCtrl1(u32 a, u32 b)
 {
-	if(a == 0)
+	if (a == 0)
 		return 0xFFC00505;
 	else
 		return 0xFF060505;
@@ -474,7 +469,7 @@ u32 DigitalGetPortCtrl1(u32 a, u32 b)
 
 u32 DigitalGetPortCtrl2(u32 a)
 {
-	if(a == 0)
+	if (a == 0)
 		return 0x20014;
 	else
 		return 0x2012C;
@@ -537,7 +532,7 @@ void sio2cmdInitDigital()
  Joystick
 *******************************************************************************/
 
-void JoystickReadData(u8* a)
+void JoystickReadData(u8 *a)
 {
 	a[0] = 1;
 	a[1] = 0x42;
@@ -552,7 +547,7 @@ void JoystickReadData(u8* a)
 
 u32 JoystickGetPortCtrl1(u32 a, u32 b)
 {
-	if(a == 0)
+	if (a == 0)
 		return 0xFFC00505;
 	else
 		return 0xFF060505;
@@ -560,7 +555,7 @@ u32 JoystickGetPortCtrl1(u32 a, u32 b)
 
 u32 JoystickGetPortCtrl2(u32 a)
 {
-	if(a == 0)
+	if (a == 0)
 		return 0x20014;
 	else
 		return 0x2012C;
@@ -601,7 +596,7 @@ void sio2cmdInitJoystick()
 {
 	sio2Cmds_t s;
 
-	s.id = PAD_ID_HI( PAD_ID_JOYSTICK );
+	s.id = PAD_ID_HI(PAD_ID_JOYSTICK);
 
 	s.readdata = JoystickReadData;
 	s.getportctrl1 = JoystickGetPortCtrl1;
@@ -629,7 +624,7 @@ void sio2cmdInitJoystick()
 *******************************************************************************/
 
 
-void NamcoGunReadData(u8* a)
+void NamcoGunReadData(u8 *a)
 {
 	a[0] = 1;
 	a[1] = 0x42;
@@ -644,7 +639,7 @@ void NamcoGunReadData(u8* a)
 
 u32 NamcoGunGetPortCtrl1(u32 a, u32 b)
 {
-	if(a == 0)
+	if (a == 0)
 		return 0xFFC00505;
 	else
 		return 0xFF060505;
@@ -652,7 +647,7 @@ u32 NamcoGunGetPortCtrl1(u32 a, u32 b)
 
 u32 NamcoGunGetPortCtrl2(u32 a)
 {
-	if(a == 0)
+	if (a == 0)
 		return 0x20014;
 	else
 		return 0x2012C;
@@ -720,7 +715,7 @@ void sio2cmdInitNamcoGun()
  Analog
 *******************************************************************************/
 
-void AnalogReadData(u8* a)
+void AnalogReadData(u8 *a)
 {
 	a[0] = 1;
 	a[1] = 0x42;
@@ -741,28 +736,27 @@ void AnalogReadData(u8* a)
 
 u32 AnalogGetPortCtrl1(u32 a, u32 b)
 {
-	if(a != 0)
+	if (a != 0)
 		return 0xFF060505;
-	else
-	{
-		u32 val1, val2, val3 ;
+	else {
+		u32 val1, val2, val3;
 
-		if((b & 0x2) == 0)
+		if ((b & 0x2) == 0)
 			val1 = 0x5;
 		else
 			val1 = 0xA;
 
-		if((b & 0x2) == 0)
+		if ((b & 0x2) == 0)
 			val2 = 0x5;
 		else
 			val2 = 0xA;
 
 		val1 &= 0xFFFF00FF;
 
-		val3 = val2 | ( val2 << 8);
+		val3 = val2 | (val2 << 8);
 
 
-		if((b & 0x2) == 0)
+		if ((b & 0x2) == 0)
 			val1 = 0xC0;
 		else
 			val1 = 0x60;
@@ -776,7 +770,7 @@ u32 AnalogGetPortCtrl1(u32 a, u32 b)
 
 u32 AnalogGetPortCtrl2(u32 a)
 {
-	if(a == 0)
+	if (a == 0)
 		return 0x20014;
 	else
 		return 0x2012C;
@@ -838,7 +832,7 @@ void sio2cmdInitAnalog()
 *******************************************************************************/
 
 
-void JogconReadData(u8* a)
+void JogconReadData(u8 *a)
 {
 	a[0] = 1;
 	a[1] = 0x42;
@@ -858,7 +852,7 @@ void JogconReadData(u8* a)
 
 u32 JogconGetPortCtrl1(u32 a, u32 b)
 {
-	if(a == 0)
+	if (a == 0)
 		return 0xFFC00505;
 	else
 		return 0xFF060505;
@@ -866,7 +860,7 @@ u32 JogconGetPortCtrl1(u32 a, u32 b)
 
 u32 JogconGetPortCtrl2(u32 a)
 {
-	if(a == 0)
+	if (a == 0)
 		return 0x20014;
 	else
 		return 0x2012C;
@@ -937,7 +931,7 @@ void sio2cmdInitJogcon()
  Config
 *******************************************************************************/
 
-static void ConfigReadData(u8* a)
+static void ConfigReadData(u8 *a)
 {
 	a[0] = 1;
 	a[1] = 0x42;
@@ -952,7 +946,7 @@ static void ConfigReadData(u8* a)
 
 u32 ConfigGetPortCtrl1(u32 a, u32 b)
 {
-	if(a == 0)
+	if (a == 0)
 		return 0xFFC00505;
 	else
 		return 0xFF060505;
@@ -960,7 +954,7 @@ u32 ConfigGetPortCtrl1(u32 a, u32 b)
 
 u32 ConfigGetPortCtrl2(u32 a)
 {
-	if(a == 0)
+	if (a == 0)
 		return 0x20014;
 	else
 		return 0x2012C;
@@ -1136,7 +1130,7 @@ void sio2cmdInitConfig()
 {
 	sio2Cmds_t s;
 
-	s.id = PAD_ID_HI( PAD_ID_CONFIG );
+	s.id = PAD_ID_HI(PAD_ID_CONFIG);
 
 	s.readdata = ConfigReadData;
 	s.getportctrl1 = ConfigGetPortCtrl1;
@@ -1166,13 +1160,11 @@ u32 sio2cmdCheckId(u8 id)
 {
 	id >>= 4;
 
-	if(numControllers > 0)
-	{
+	if (numControllers > 0) {
 		u32 i = 0;
 
-		for(i=0; i < numControllers; i++)
-		{
-			if( sio2Cmds[i].id == id )
+		for (i = 0; i < numControllers; i++) {
+			if (sio2Cmds[i].id == id)
 				return 1;
 		}
 	}
@@ -1185,16 +1177,12 @@ u32 sio2CmdGetPortCtrl1(u8 id, u32 b, u8 c)
 {
 	id >>= 4;
 
-	if(numControllers > 0)
-	{
+	if (numControllers > 0) {
 		u32 i;
 
-		for(i=0; i < numControllers; i++)
-		{
-			if(sio2Cmds[i].id == id)
-			{
-				if(sio2Cmds[i].getportctrl1)
-				{
+		for (i = 0; i < numControllers; i++) {
+			if (sio2Cmds[i].id == id) {
+				if (sio2Cmds[i].getportctrl1) {
 					return sio2Cmds[i].getportctrl1(b, c);
 				}
 			}
@@ -1209,16 +1197,12 @@ u32 sio2CmdGetPortCtrl2(u32 id, u32 b)
 {
 	id >>= 4;
 
-	if(numControllers > 0)
-	{
+	if (numControllers > 0) {
 		u32 i;
 
-		for(i=0; i < numControllers; i++)
-		{
-			if(sio2Cmds[i].id == id)
-			{
-				if(sio2Cmds[i].getportctrl2)
-				{
+		for (i = 0; i < numControllers; i++) {
+			if (sio2Cmds[i].id == id) {
+				if (sio2Cmds[i].getportctrl2) {
 					return sio2Cmds[i].getportctrl2(b);
 				}
 			}
@@ -1232,16 +1216,12 @@ void sio2CmdSetReadData(u32 id, u8 *buf)
 {
 	id >>= 4;
 
-	if(numControllers > 0)
-	{
+	if (numControllers > 0) {
 		u32 i;
 
-		for(i=0; i < numControllers; i++)
-		{
-			if(sio2Cmds[i].id == id)
-			{
-				if(sio2Cmds[i].readdata)
-				{
+		for (i = 0; i < numControllers; i++) {
+			if (sio2Cmds[i].id == id) {
+				if (sio2Cmds[i].readdata) {
 					sio2Cmds[i].readdata(buf);
 				}
 			}
@@ -1253,17 +1233,13 @@ u32 sio2CmdSetEnterConfigMode(u32 id, u8 *buf)
 {
 	id >>= 4;
 
-	if(numControllers > 0)
-	{
+	if (numControllers > 0) {
 		u32 i;
 
-		for(i=0; i < numControllers; i++)
-		{
-			if(sio2Cmds[i].id == id)
-			{
+		for (i = 0; i < numControllers; i++) {
+			if (sio2Cmds[i].id == id) {
 				return sio2Cmds[i].enterconfigmode(buf);
 			}
-
 		}
 	}
 
@@ -1276,15 +1252,12 @@ u32 sio2CmdSetQueryModel(u32 id, u8 *buf)
 {
 	id >>= 4;
 
-	if( numControllers > 0)
-	{
+	if (numControllers > 0) {
 		u32 i;
 
-		for(i=0; i < numControllers; i++)
-		{
-			if( sio2Cmds[i].id == id )
-			{
-				if( sio2Cmds[i].querymodel != 0)
+		for (i = 0; i < numControllers; i++) {
+			if (sio2Cmds[i].id == id) {
+				if (sio2Cmds[i].querymodel != 0)
 					return sio2Cmds[i].querymodel(buf);
 			}
 		}
@@ -1297,15 +1270,12 @@ u32 sio2CmdSetSetMainMode(u32 id, u8 *buf)
 {
 	id >>= 4;
 
-	if( numControllers > 0)
-	{
+	if (numControllers > 0) {
 		u32 i;
 
-		for(i=0; i < numControllers; i++)
-		{
-			if( sio2Cmds[i].id == id )
-			{
-				if( sio2Cmds[i].setmainmode != 0)
+		for (i = 0; i < numControllers; i++) {
+			if (sio2Cmds[i].id == id) {
+				if (sio2Cmds[i].setmainmode != 0)
 					return sio2Cmds[i].setmainmode(buf);
 			}
 		}
@@ -1318,15 +1288,12 @@ u32 sio2CmdSetQueryAct(u32 id, u8 *buf)
 {
 	id >>= 4;
 
-	if( numControllers > 0)
-	{
+	if (numControllers > 0) {
 		u32 i;
 
-		for(i=0; i < numControllers; i++)
-		{
-			if( sio2Cmds[i].id == id )
-			{
-				if( sio2Cmds[i].queryact != 0)
+		for (i = 0; i < numControllers; i++) {
+			if (sio2Cmds[i].id == id) {
+				if (sio2Cmds[i].queryact != 0)
 					return sio2Cmds[i].queryact(buf);
 			}
 		}
@@ -1339,15 +1306,12 @@ u32 sio2CmdSetQueryComb(u32 id, u8 *buf)
 {
 	id >>= 4;
 
-	if( numControllers > 0)
-	{
+	if (numControllers > 0) {
 		u32 i;
 
-		for(i=0; i < numControllers; i++)
-		{
-			if( sio2Cmds[i].id == id )
-			{
-				if( sio2Cmds[i].querycomb != 0)
+		for (i = 0; i < numControllers; i++) {
+			if (sio2Cmds[i].id == id) {
+				if (sio2Cmds[i].querycomb != 0)
 					return sio2Cmds[i].querycomb(buf);
 			}
 		}
@@ -1360,15 +1324,12 @@ u32 sio2CmdSetQueryMode(u32 id, u8 *buf)
 {
 	id >>= 4;
 
-	if( numControllers > 0)
-	{
+	if (numControllers > 0) {
 		u32 i;
 
-		for(i=0; i < numControllers; i++)
-		{
-			if( sio2Cmds[i].id == id )
-			{
-				if( sio2Cmds[i].querymode != 0)
+		for (i = 0; i < numControllers; i++) {
+			if (sio2Cmds[i].id == id) {
+				if (sio2Cmds[i].querymode != 0)
 					return sio2Cmds[i].querymode(buf);
 			}
 		}
@@ -1381,15 +1342,12 @@ u32 sio2CmdSetExitConfigMode(u32 id, u8 *buf)
 {
 	id >>= 4;
 
-	if( numControllers > 0)
-	{
+	if (numControllers > 0) {
 		u32 i;
 
-		for(i=0; i < numControllers; i++)
-		{
-			if( sio2Cmds[i].id == id )
-			{
-				if( sio2Cmds[i].exitconfigmode != 0)
+		for (i = 0; i < numControllers; i++) {
+			if (sio2Cmds[i].id == id) {
+				if (sio2Cmds[i].exitconfigmode != 0)
 					return sio2Cmds[i].exitconfigmode(buf);
 			}
 		}
@@ -1402,15 +1360,12 @@ u32 sio2CmdSetSetActAlign(u32 id, u8 *buf)
 {
 	id >>= 4;
 
-	if( numControllers > 0)
-	{
+	if (numControllers > 0) {
 		u32 i;
 
-		for(i=0; i < numControllers; i++)
-		{
-			if( sio2Cmds[i].id == id )
-			{
-				if( sio2Cmds[i].setactalign != 0)
+		for (i = 0; i < numControllers; i++) {
+			if (sio2Cmds[i].id == id) {
+				if (sio2Cmds[i].setactalign != 0)
 					return sio2Cmds[i].setactalign(buf);
 			}
 		}
@@ -1423,15 +1378,12 @@ u32 sio2CmdSetQueryButtonMask(u32 id, u8 *buf)
 {
 	id >>= 4;
 
-	if( numControllers > 0)
-	{
+	if (numControllers > 0) {
 		u32 i;
 
-		for(i=0; i < numControllers; i++)
-		{
-			if( sio2Cmds[i].id == id )
-			{
-				if( sio2Cmds[i].querybuttonmask != 0)
+		for (i = 0; i < numControllers; i++) {
+			if (sio2Cmds[i].id == id) {
+				if (sio2Cmds[i].querybuttonmask != 0)
 					return sio2Cmds[i].querybuttonmask(buf);
 			}
 		}
@@ -1444,45 +1396,34 @@ u32 sio2CmdSetSetVrefParam(u32 id, u8 *buf)
 {
 	id >>= 4;
 
-	if( numControllers > 0)
-	{
+	if (numControllers > 0) {
 		u32 i;
 
-		for(i=0; i < numControllers; i++)
-		{
-			if( sio2Cmds[i].id == id )
-			{
-				if( sio2Cmds[i].setvrefparam != 0)
+		for (i = 0; i < numControllers; i++) {
+			if (sio2Cmds[i].id == id) {
+				if (sio2Cmds[i].setvrefparam != 0)
 					return sio2Cmds[i].setvrefparam(buf);
 			}
 		}
 	}
 
 	return 0;
-
 }
 
 u32 sio2CmdSetSetButtonInfo(u32 id, u8 *buf)
 {
 	id >>= 4;
 
-	if( numControllers > 0)
-	{
+	if (numControllers > 0) {
 		u32 i;
 
-		for(i=0; i < numControllers; i++)
-		{
-			if( sio2Cmds[i].id == id )
-			{
-				if( sio2Cmds[i].setbuttoninfo != 0)
+		for (i = 0; i < numControllers; i++) {
+			if (sio2Cmds[i].id == id) {
+				if (sio2Cmds[i].setbuttoninfo != 0)
 					return sio2Cmds[i].setbuttoninfo(buf);
 			}
 		}
 	}
 
 	return 0;
-
 }
-
-
-

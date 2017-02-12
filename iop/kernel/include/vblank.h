@@ -28,7 +28,7 @@ void WaitNonVblank();
 #define I_WaitNonVblank DECLARE_IMPORT(7, WaitNonVblank)
 
 int RegisterVblankHandler(int startend, int priority, int (*handler)(void *),
-		void *arg);
+                          void *arg);
 #define I_RegisterVblankHandler DECLARE_IMPORT(8, RegisterVblankHandler)
 int ReleaseVblankHandler(int startend, int (*handler)(void *));
 #define I_ReleaseVblankHandler DECLARE_IMPORT(9, ReleaseVblankHandler)

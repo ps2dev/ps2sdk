@@ -93,7 +93,7 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 #include "mconf.h"
 
 /* BIG = 1/MACHEPF */
-#define BIG   16777216.
+#define BIG 16777216.
 
 extern float MACHEPF, MAXLOGF;
 
@@ -103,79 +103,72 @@ float lgamf(float), expf(float), logf(float), igamf(float, float);
 float lgamf(), expf(), logf(), igamf();
 #endif
 
-#define fabsf(x) ( (x) < 0 ? -(x) : (x) )
+#define fabsf(x) ((x) < 0 ? -(x) : (x))
 
 
 
 #ifdef ANSIC
-float igamcf( float aa, float xx )
+float igamcf(float aa, float xx)
 #else
-float igamcf( aa, xx )
-double aa, xx;
+float igamcf(aa, xx) double aa, xx;
 #endif
 {
-float a, x, ans, c, yc, ax, y, z;
-float pk, pkm1, pkm2, qk, qkm1, qkm2;
-float r, t;
-static float big = BIG;
+	float a, x, ans, c, yc, ax, y, z;
+	float pk, pkm1, pkm2, qk, qkm1, qkm2;
+	float r, t;
+	static float big = BIG;
 
-a = aa;
-x = xx;
-if( (x <= 0) || ( a <= 0) )
-	return( 1.0 );
+	a = aa;
+	x = xx;
+	if ((x <= 0) || (a <= 0))
+		return (1.0);
 
-if( (x < 1.0) || (x < a) )
-	return( 1.0 - igamf(a,x) );
+	if ((x < 1.0) || (x < a))
+		return (1.0 - igamf(a, x));
 
-ax = a * logf(x) - x - lgamf(a);
-if( ax < -MAXLOGF )
-	{
-	mtherr( "igamcf", UNDERFLOW );
-	return( 0.0 );
+	ax = a * logf(x) - x - lgamf(a);
+	if (ax < -MAXLOGF) {
+		mtherr("igamcf", UNDERFLOW);
+		return (0.0);
 	}
-ax = expf(ax);
+	ax = expf(ax);
 
-/* continued fraction */
-y = 1.0 - a;
-z = x + y + 1.0;
-c = 0.0;
-pkm2 = 1.0;
-qkm2 = x;
-pkm1 = x + 1.0;
-qkm1 = z * x;
-ans = pkm1/qkm1;
+	/* continued fraction */
+	y = 1.0 - a;
+	z = x + y + 1.0;
+	c = 0.0;
+	pkm2 = 1.0;
+	qkm2 = x;
+	pkm1 = x + 1.0;
+	qkm1 = z * x;
+	ans = pkm1 / qkm1;
 
-do
-	{
-	c += 1.0;
-	y += 1.0;
-	z += 2.0;
-	yc = y * c;
-	pk = pkm1 * z  -  pkm2 * yc;
-	qk = qkm1 * z  -  qkm2 * yc;
-	if( qk != 0 )
-		{
-		r = pk/qk;
-		t = fabsf( (ans - r)/r );
-		ans = r;
+	do {
+		c += 1.0;
+		y += 1.0;
+		z += 2.0;
+		yc = y * c;
+		pk = pkm1 * z - pkm2 * yc;
+		qk = qkm1 * z - qkm2 * yc;
+		if (qk != 0) {
+			r = pk / qk;
+			t = fabsf((ans - r) / r);
+			ans = r;
+		} else
+			t = 1.0;
+		pkm2 = pkm1;
+		pkm1 = pk;
+		qkm2 = qkm1;
+		qkm1 = qk;
+		if (fabsf(pk) > big) {
+			pkm2 *= MACHEPF;
+			pkm1 *= MACHEPF;
+			qkm2 *= MACHEPF;
+			qkm1 *= MACHEPF;
 		}
-	else
-		t = 1.0;
-	pkm2 = pkm1;
-	pkm1 = pk;
-	qkm2 = qkm1;
-	qkm1 = qk;
-	if( fabsf(pk) > big )
-		{
-		pkm2 *= MACHEPF;
-		pkm1 *= MACHEPF;
-		qkm2 *= MACHEPF;
-		qkm1 *= MACHEPF;
-		}
-	}
-while( t > MACHEPF );
+	} while (t > MACHEPF);
 
-return( ans * ax );
+	return (ans * ax);
 }
 
 
@@ -191,43 +184,39 @@ return( ans * ax );
  */
 
 #ifdef ANSIC
-float igamf( float aa, float xx )
+float igamf(float aa, float xx)
 #else
-float igamf( aa, xx )
-double aa, xx;
+float igamf(aa, xx) double aa, xx;
 #endif
 {
-float a, x, ans, ax, c, r;
+	float a, x, ans, ax, c, r;
 
-a = aa;
-x = xx;
-if( (x <= 0) || ( a <= 0) )
-	return( 0.0 );
+	a = aa;
+	x = xx;
+	if ((x <= 0) || (a <= 0))
+		return (0.0);
 
-if( (x > 1.0) && (x > a ) )
-	return( 1.0 - igamcf(a,x) );
+	if ((x > 1.0) && (x > a))
+		return (1.0 - igamcf(a, x));
 
-/* Compute  x**a * exp(-x) / gamma(a)  */
-ax = a * logf(x) - x - lgamf(a);
-if( ax < -MAXLOGF )
-	{
-	mtherr( "igamf", UNDERFLOW );
-	return( 0.0 );
+	/* Compute  x**a * exp(-x) / gamma(a)  */
+	ax = a * logf(x) - x - lgamf(a);
+	if (ax < -MAXLOGF) {
+		mtherr("igamf", UNDERFLOW);
+		return (0.0);
 	}
-ax = expf(ax);
+	ax = expf(ax);
 
-/* power series */
-r = a;
-c = 1.0;
-ans = 1.0;
+	/* power series */
+	r = a;
+	c = 1.0;
+	ans = 1.0;
 
-do
-	{
-	r += 1.0;
-	c *= x/r;
-	ans += c;
-	}
-while( c/ans > MACHEPF );
+	do {
+		r += 1.0;
+		c *= x / r;
+		ans += c;
+	} while (c / ans > MACHEPF);
 
-return( ans * ax/a );
+	return (ans * ax / a);
 }

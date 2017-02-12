@@ -95,28 +95,28 @@ u32 GetHoldReg(int holdnum);
 int GetHardTimerIntrCode(int timid);
 #define I_GetHardTimerIntrCode DECLARE_IMPORT(16, GetHardTimerIntrCode)
 
-#define timrman_IMPORTS \
-	timrman_IMPORTS_start \
- \
- 	I_AllocHardTimer \
-	I_ReferHardTimer \
-	I_FreeHardTimer \
- \
-	I_SetTimerMode \
- \
-	I_GetTimerStatus \
- \
-	I_SetTimerCounter \
-	I_GetTimerCounter \
- \
-	I_SetTimerCompare \
-	I_GetTimerCompare \
- \
-	I_SetHoldMode \
-	I_GetHoldMode \
- \
-	I_GetHardTimerIntrCode \
- \
-	timrman_IMPORTS_end END_IMPORT_TABLE
+#define timrman_IMPORTS                                                    \
+	timrman_IMPORTS_start                                                  \
+                                                                           \
+	    I_AllocHardTimer                                                   \
+	        I_ReferHardTimer                                               \
+	            I_FreeHardTimer                                            \
+                                                                           \
+	                I_SetTimerMode                                         \
+                                                                           \
+	                    I_GetTimerStatus                                   \
+                                                                           \
+	                        I_SetTimerCounter                              \
+	                            I_GetTimerCounter                          \
+                                                                           \
+	                                I_SetTimerCompare                      \
+	                                    I_GetTimerCompare                  \
+                                                                           \
+	                                        I_SetHoldMode                  \
+	                                            I_GetHoldMode              \
+                                                                           \
+	                                                I_GetHardTimerIntrCode \
+                                                                           \
+	                                                    timrman_IMPORTS_end END_IMPORT_TABLE
 
 #endif /* IOP_TIMRMAN_H */

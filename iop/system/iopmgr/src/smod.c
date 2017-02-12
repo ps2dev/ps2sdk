@@ -35,16 +35,16 @@
  */
 ModuleInfo_t *smod_get_next_mod(ModuleInfo_t *cur_mod)
 {
-  /* If cur_mod is 0, return the head of the list.  */
-  if (!cur_mod) {
-    return GetLoadcoreInternalData()->image_info;
-  } else {
-    if (!cur_mod->next)
-      return 0;
-    else
-      return cur_mod->next;
-  }
-  return 0;
+	/* If cur_mod is 0, return the head of the list.  */
+	if (!cur_mod) {
+		return GetLoadcoreInternalData()->image_info;
+	} else {
+		if (!cur_mod->next)
+			return 0;
+		else
+			return cur_mod->next;
+	}
+	return 0;
 }
 
 /*! \brief Get pointer to module structure for named module.
@@ -59,17 +59,16 @@ ModuleInfo_t *smod_get_next_mod(ModuleInfo_t *cur_mod)
  */
 ModuleInfo_t *smod_get_mod_by_name(const char *name)
 {
-  ModuleInfo_t *modptr;
-  int len = strlen(name)+1;
+	ModuleInfo_t *modptr;
+	int len = strlen(name) + 1;
 
-  modptr = smod_get_next_mod(0);
-  while (modptr != 0)
-  {
-    if (!memcmp(modptr->name, name, len))
-      return modptr;
-    modptr = modptr->next;
-  }
-  return 0;
+	modptr = smod_get_next_mod(0);
+	while (modptr != 0) {
+		if (!memcmp(modptr->name, name, len))
+			return modptr;
+		modptr = modptr->next;
+	}
+	return 0;
 }
 
 /*! \brief Get instance count for given module name.
@@ -84,19 +83,18 @@ ModuleInfo_t *smod_get_mod_by_name(const char *name)
  */
 int smod_get_modcount_by_name(const char *name)
 {
-  ModuleInfo_t *modptr = 0;
-  int len = strlen(name)+1;
-  int count = 0;
+	ModuleInfo_t *modptr = 0;
+	int len = strlen(name) + 1;
+	int count = 0;
 
-  modptr = smod_get_next_mod(0);
-  while (modptr != 0)
-  {
-    if (!memcmp(modptr->name, name, len))
-      count++;
-    modptr = modptr->next;
-  }
+	modptr = smod_get_next_mod(0);
+	while (modptr != 0) {
+		if (!memcmp(modptr->name, name, len))
+			count++;
+		modptr = modptr->next;
+	}
 
-  return count;
+	return count;
 }
 
 /*! \brief Get version number for given module name.
@@ -111,12 +109,12 @@ int smod_get_modcount_by_name(const char *name)
  */
 int smod_get_modversion_by_name(const char *name)
 {
-  ModuleInfo_t *modptr = 0;
-  modptr = smod_get_mod_by_name(name);
-  if (modptr != 0)
-    return (int)modptr->version;
-  else
-    return -1;
+	ModuleInfo_t *modptr = 0;
+	modptr = smod_get_mod_by_name(name);
+	if (modptr != 0)
+		return (int)modptr->version;
+	else
+		return -1;
 }
 
 /*! \brief Unload the named module.
@@ -132,5 +130,5 @@ int smod_get_modversion_by_name(const char *name)
  */
 int smod_unload_module(const char *name)
 {
-  return -2;
+	return -2;
 }

@@ -23,11 +23,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-    int __assert_fail (const char *assertion, const char *file, unsigned int line) __attribute__((noreturn));
+int __assert_fail(const char *assertion, const char *file, unsigned int line) __attribute__((noreturn));
 #ifdef __cplusplus
 }
 #endif
-#define assert(cond) (void)((cond)?0:__assert_fail(#cond, __FILE__, __LINE__))
+#define assert(cond) (void)((cond) ? 0 : __assert_fail(#cond, __FILE__, __LINE__))
 #endif
 
 #endif

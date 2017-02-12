@@ -1,7 +1,9 @@
-#define SMEM_BUF_SIZE	0x300	//Must be large enough to accommodate all operations.
+#define SMEM_BUF_SIZE 0x300 //Must be large enough to accommodate all operations.
 
-struct smem_buf {
-	union {
+struct smem_buf
+{
+	union
+	{
 		u8 bytes[SMEM_BUF_SIZE / sizeof(u8)];
 		u32 words[SMEM_BUF_SIZE / sizeof(u32)];
 		smod_mod_info_t mod_info;

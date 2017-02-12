@@ -26,8 +26,8 @@
 #define MODNAME "atad"
 IRX_ID(MODNAME, 1, 1);
 
-#define M_PRINTF(format, args...)	\
-	printf(MODNAME ": " format, ## args)
+#define M_PRINTF(format, args...) \
+	printf(MODNAME ": " format, ##args)
 
 #define BANNER "ATA device driver for HD Pro Kit %s\n"
 #define VERSION "v1.0"
@@ -36,38 +36,39 @@ IRX_ID(MODNAME, 1, 1);
 // HD Pro Kit is mapping the 1st word in ROM0 seg as a main ATA controller,
 // The pseudo ATA controller registers are accessed (input/ouput) by writing
 // an id to the main ATA controller (id specific to HDpro, see registers id below).
-#define HDPROreg_IO8	      (*(volatile unsigned char *)0xBFC00000)
-#define HDPROreg_IO32	      (*(volatile unsigned int  *)0xBFC00000)
+#define HDPROreg_IO8 (*(volatile unsigned char *)0xBFC00000)
+#define HDPROreg_IO32 (*(volatile unsigned int *)0xBFC00000)
 
-#define CDVDreg_STATUS        (*(volatile unsigned char *)0xBF40200A)
+#define CDVDreg_STATUS (*(volatile unsigned char *)0xBF40200A)
 
 // Pseudo ATA controller registers id - Output
-#define ATAreg_CONTROL_RD	0x68
-#define ATAreg_SELECT_RD	0x70
-#define ATAreg_STATUS_RD	0xf0
-#define ATAreg_ERROR_RD		0x90
-#define ATAreg_NSECTOR_RD	0x50
-#define ATAreg_SECTOR_RD	0xd0
-#define ATAreg_LCYL_RD 		0x30
-#define ATAreg_HCYL_RD		0xb0
-#define ATAreg_DATA_RD		0x41
+#define ATAreg_CONTROL_RD 0x68
+#define ATAreg_SELECT_RD 0x70
+#define ATAreg_STATUS_RD 0xf0
+#define ATAreg_ERROR_RD 0x90
+#define ATAreg_NSECTOR_RD 0x50
+#define ATAreg_SECTOR_RD 0xd0
+#define ATAreg_LCYL_RD 0x30
+#define ATAreg_HCYL_RD 0xb0
+#define ATAreg_DATA_RD 0x41
 
 // Pseudo ATA controller registers id - Input
-#define ATAreg_CONTROL_WR	0x6a
-#define ATAreg_SELECT_WR	0x72
-#define ATAreg_COMMAND_WR	0xf2
-#define ATAreg_FEATURE_WR	0x92
-#define ATAreg_NSECTOR_WR	0x52
-#define ATAreg_SECTOR_WR	0xd2
-#define ATAreg_LCYL_WR 		0x32
-#define ATAreg_HCYL_WR		0xb2
-#define ATAreg_DATA_WR		0x12
+#define ATAreg_CONTROL_WR 0x6a
+#define ATAreg_SELECT_WR 0x72
+#define ATAreg_COMMAND_WR 0xf2
+#define ATAreg_FEATURE_WR 0x92
+#define ATAreg_NSECTOR_WR 0x52
+#define ATAreg_SECTOR_WR 0xd2
+#define ATAreg_LCYL_WR 0x32
+#define ATAreg_HCYL_WR 0xb2
+#define ATAreg_DATA_WR 0x12
 
-typedef struct _ata_devinfo {
-	int		exists;			/* Was successfully probed.  		*/
-	int		has_packet;		/* Supports the PACKET command set.  	*/
-	unsigned int	total_sectors;		/* Total number of user sectors.  	*/
-	unsigned int	security_status;	/* Word 0x100 of the identify info.  	*/
+typedef struct _ata_devinfo
+{
+	int exists;                   /* Was successfully probed.  		*/
+	int has_packet;               /* Supports the PACKET command set.  	*/
+	unsigned int total_sectors;   /* Total number of user sectors.  	*/
+	unsigned int security_status; /* Word 0x100 of the identify info.  	*/
 } ata_devinfo_t;
 
 static int ata_evflg = -1;
@@ -83,90 +84,91 @@ static ata_devinfo_t atad_devinfo[2];
 static unsigned short int ata_param[256];
 
 /* ATA command info.  */
-typedef struct _ata_cmd_info {
+typedef struct _ata_cmd_info
+{
 	unsigned char command;
 	unsigned char type;
 } ata_cmd_info_t;
 
 static const ata_cmd_info_t ata_cmd_table[] = {
-	{ATA_C_NOP,1},
-	{ATA_C_CFA_REQUEST_EXTENDED_ERROR_CODE,1},
-	{ATA_C_DEVICE_RESET,5},
-	{ATA_C_READ_SECTOR,2},
-	{ATA_C_READ_SECTOR_EXT,0x83},
-	{ATA_C_READ_DMA_EXT,0x84},
-	{ATA_C_WRITE_SECTOR,3},
-	{ATA_C_WRITE_LONG,8},	//??? This seems to be WRITE_LONG, but the READ_LONG command isn't present (Why would ). Both are obsolete too.
-	{ATA_C_WRITE_SECTOR_EXT,0x83},
-	{ATA_C_WRITE_DMA_EXT,0x84},
-	{ATA_C_CFA_WRITE_SECTORS_WITHOUT_ERASE,3},
-	{ATA_C_READ_VERIFY_SECTOR,1},
-	{ATA_C_READ_VERIFY_SECTOR_EXT,0x81},
-	{ATA_C_SEEK,1},
-	{ATA_C_CFA_TRANSLATE_SECTOR,2},
-	{ATA_C_SCE_SECURITY_CONTROL,7},
-	{ATA_C_EXECUTE_DEVICE_DIAGNOSTIC,6},
-	{ATA_C_INITIALIZE_DEVICE_PARAMETERS,1},
-	{ATA_C_DOWNLOAD_MICROCODE,3},
-	{ATA_C_IDENTIFY_PACKET_DEVICE,2},
-	{ATA_C_SMART,7},
-	{ATA_C_CFA_ERASE_SECTORS,1},
-	{ATA_C_READ_MULTIPLE,2},
-	{ATA_C_WRITE_MULTIPLE,3},
-	{ATA_C_SET_MULTIPLE_MODE,1},
-	{ATA_C_READ_DMA,4},
-	{ATA_C_WRITE_DMA,4},
-	{ATA_C_CFA_WRITE_MULTIPLE_WITHOUT_ERASE,3},
-	{ATA_C_GET_MEDIA_STATUS,1},
-	{ATA_C_MEDIA_LOCK,1},
-	{ATA_C_MEDIA_UNLOCK,1},
-	{ATA_C_STANDBY_IMMEDIATE,1},
-	{ATA_C_IDLE_IMMEDIATE,1},
-	{ATA_C_STANDBY,1},
-	{ATA_C_IDLE,1},
-	{ATA_C_READ_BUFFER,2},
-	{ATA_C_CHECK_POWER_MODE,1},
-	{ATA_C_SLEEP,1},
-	{ATA_C_FLUSH_CACHE,1},
-	{ATA_C_WRITE_BUFFER,3},
-	{ATA_C_FLUSH_CACHE_EXT,1},
-	{ATA_C_IDENTIFY_DEVICE,2},
-	{ATA_C_MEDIA_EJECT,1},
-	{ATA_C_SET_FEATURES,1},
-	{ATA_C_SECURITY_SET_PASSWORD,3},
-	{ATA_C_SECURITY_UNLOCK,3},
-	{ATA_C_SECURITY_ERASE_PREPARE,1},
-	{ATA_C_SECURITY_ERASE_UNIT,3},
-	{ATA_C_SECURITY_FREEZE_LOCK,1},
-	{ATA_C_SECURITY_DISABLE_PASSWORD,3},
-	{ATA_C_READ_NATIVE_MAX_ADDRESS,1},
-	{ATA_C_SET_MAX_ADDRESS,1}
-};
-#define ATA_CMD_TABLE_SIZE	(sizeof ata_cmd_table/sizeof(ata_cmd_info_t))
+    {ATA_C_NOP, 1},
+    {ATA_C_CFA_REQUEST_EXTENDED_ERROR_CODE, 1},
+    {ATA_C_DEVICE_RESET, 5},
+    {ATA_C_READ_SECTOR, 2},
+    {ATA_C_READ_SECTOR_EXT, 0x83},
+    {ATA_C_READ_DMA_EXT, 0x84},
+    {ATA_C_WRITE_SECTOR, 3},
+    {ATA_C_WRITE_LONG, 8}, //??? This seems to be WRITE_LONG, but the READ_LONG command isn't present (Why would ). Both are obsolete too.
+    {ATA_C_WRITE_SECTOR_EXT, 0x83},
+    {ATA_C_WRITE_DMA_EXT, 0x84},
+    {ATA_C_CFA_WRITE_SECTORS_WITHOUT_ERASE, 3},
+    {ATA_C_READ_VERIFY_SECTOR, 1},
+    {ATA_C_READ_VERIFY_SECTOR_EXT, 0x81},
+    {ATA_C_SEEK, 1},
+    {ATA_C_CFA_TRANSLATE_SECTOR, 2},
+    {ATA_C_SCE_SECURITY_CONTROL, 7},
+    {ATA_C_EXECUTE_DEVICE_DIAGNOSTIC, 6},
+    {ATA_C_INITIALIZE_DEVICE_PARAMETERS, 1},
+    {ATA_C_DOWNLOAD_MICROCODE, 3},
+    {ATA_C_IDENTIFY_PACKET_DEVICE, 2},
+    {ATA_C_SMART, 7},
+    {ATA_C_CFA_ERASE_SECTORS, 1},
+    {ATA_C_READ_MULTIPLE, 2},
+    {ATA_C_WRITE_MULTIPLE, 3},
+    {ATA_C_SET_MULTIPLE_MODE, 1},
+    {ATA_C_READ_DMA, 4},
+    {ATA_C_WRITE_DMA, 4},
+    {ATA_C_CFA_WRITE_MULTIPLE_WITHOUT_ERASE, 3},
+    {ATA_C_GET_MEDIA_STATUS, 1},
+    {ATA_C_MEDIA_LOCK, 1},
+    {ATA_C_MEDIA_UNLOCK, 1},
+    {ATA_C_STANDBY_IMMEDIATE, 1},
+    {ATA_C_IDLE_IMMEDIATE, 1},
+    {ATA_C_STANDBY, 1},
+    {ATA_C_IDLE, 1},
+    {ATA_C_READ_BUFFER, 2},
+    {ATA_C_CHECK_POWER_MODE, 1},
+    {ATA_C_SLEEP, 1},
+    {ATA_C_FLUSH_CACHE, 1},
+    {ATA_C_WRITE_BUFFER, 3},
+    {ATA_C_FLUSH_CACHE_EXT, 1},
+    {ATA_C_IDENTIFY_DEVICE, 2},
+    {ATA_C_MEDIA_EJECT, 1},
+    {ATA_C_SET_FEATURES, 1},
+    {ATA_C_SECURITY_SET_PASSWORD, 3},
+    {ATA_C_SECURITY_UNLOCK, 3},
+    {ATA_C_SECURITY_ERASE_PREPARE, 1},
+    {ATA_C_SECURITY_ERASE_UNIT, 3},
+    {ATA_C_SECURITY_FREEZE_LOCK, 1},
+    {ATA_C_SECURITY_DISABLE_PASSWORD, 3},
+    {ATA_C_READ_NATIVE_MAX_ADDRESS, 1},
+    {ATA_C_SET_MAX_ADDRESS, 1}};
+#define ATA_CMD_TABLE_SIZE (sizeof ata_cmd_table / sizeof(ata_cmd_info_t))
 
 static const ata_cmd_info_t smart_cmd_table[] = {
-	{ATA_S_SMART_READ_DATA,2},
-	{ATA_S_SMART_ENABLE_DISABLE_AUTOSAVE,1},
-	{ATA_S_SMART_SAVE_ATTRIBUTE_VALUES,1},
-	{ATA_S_SMART_EXECUTE_OFF_LINE,1},
-	{ATA_S_SMART_READ_LOG,2},
-	{ATA_S_SMART_WRITE_LOG,3},
-	{ATA_S_SMART_ENABLE_OPERATIONS,1},
-	{ATA_S_SMART_DISABLE_OPERATIONS,1},
-	{ATA_S_SMART_RETURN_STATUS,1}
-};
-#define SMART_CMD_TABLE_SIZE	(sizeof smart_cmd_table/sizeof(ata_cmd_info_t))
+    {ATA_S_SMART_READ_DATA, 2},
+    {ATA_S_SMART_ENABLE_DISABLE_AUTOSAVE, 1},
+    {ATA_S_SMART_SAVE_ATTRIBUTE_VALUES, 1},
+    {ATA_S_SMART_EXECUTE_OFF_LINE, 1},
+    {ATA_S_SMART_READ_LOG, 2},
+    {ATA_S_SMART_WRITE_LOG, 3},
+    {ATA_S_SMART_ENABLE_OPERATIONS, 1},
+    {ATA_S_SMART_DISABLE_OPERATIONS, 1},
+    {ATA_S_SMART_RETURN_STATUS, 1}};
+#define SMART_CMD_TABLE_SIZE (sizeof smart_cmd_table / sizeof(ata_cmd_info_t))
 
 /* This is the state info tracked between ata_io_start() and ata_io_finish().  */
-typedef struct _ata_cmd_state {
-	s32	type;		/* The ata_cmd_info_t type field. */
-	union {
-		void	*buf;
-		u8	*buf8;
-		u16	*buf16;
+typedef struct _ata_cmd_state
+{
+	s32 type; /* The ata_cmd_info_t type field. */
+	union
+	{
+		void *buf;
+		u8 *buf8;
+		u16 *buf16;
 	};
-	u32	blkcount;	/* The number of 512-byte blocks (sectors) to transfer.  */
-	s32	dir;		/* DMA direction: 0 - to RAM, 1 - from RAM.  */
+	u32 blkcount; /* The number of 512-byte blocks (sectors) to transfer.  */
+	s32 dir;      /* DMA direction: 0 - to RAM, 1 - from RAM.  */
 } ata_cmd_state_t;
 
 static ata_cmd_state_t atad_cmd_state;
@@ -250,7 +252,7 @@ static int hdpro_io_finish(void)
 	DelayThread(200);
 
 	if (HDPROreg_IO32 == 0x401a7800) // check the 1st in ROM0 seg get
-		hdpro_io_active = 0;	 // back to it's original state
+		hdpro_io_active = 0;         // back to it's original state
 
 	return hdpro_io_active ^ 1;
 }
@@ -410,7 +412,6 @@ static int ata_wait_busy(int bits)
 				break;
 			default:
 				delay = 1000000;
-
 		}
 
 		DelayThread(delay);
@@ -534,7 +535,7 @@ int ata_io_start(void *buf, unsigned int blkcount, unsigned short int feature, u
 	/* Finally!  We send off the ATA command with arguments.  */
 	hdpro_io_write(ATAreg_CONTROL_WR, (using_timeout == 0) << 1);
 
-	if(type&0x80){	//For the sake of achieving  (greatly) improved performance, write the registers twice only if required!
+	if (type & 0x80) { //For the sake of achieving  (greatly) improved performance, write the registers twice only if required!
 		/* 48-bit LBA requires writing to the address registers twice,
 		   24 bits of the LBA address is written each time.
 		   Writing to registers twice does not affect 28-bit LBA since
@@ -661,7 +662,7 @@ int ata_reset_devices(void)
 
 static void ata_device_probe(ata_devinfo_t *devinfo)
 {
-	u16 nsector, lcyl, hcyl;//sector, select;	unused
+	u16 nsector, lcyl, hcyl; //sector, select;	unused
 
 	devinfo->exists = 0;
 	devinfo->has_packet = 0;
@@ -692,7 +693,8 @@ int ata_device_flush_cache(int device)
 	if (!hdpro_io_start())
 		return -1;
 
-	if(!(res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, lba_48bit[device]?ATA_C_FLUSH_CACHE_EXT:ATA_C_FLUSH_CACHE))) res=ata_io_finish();
+	if (!(res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, lba_48bit[device] ? ATA_C_FLUSH_CACHE_EXT : ATA_C_FLUSH_CACHE)))
+		res = ata_io_finish();
 
 	if (!hdpro_io_finish())
 		return -2;
@@ -717,7 +719,7 @@ static int ata_device_set_transfer_mode(int device, int type, int mode)
 {
 	int res;
 
-	res = ata_io_start(NULL, 1, 3, (type|mode) & 0xff, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SET_FEATURES);
+	res = ata_io_start(NULL, 1, 3, (type | mode) & 0xff, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SET_FEATURES);
 	if (res)
 		return res;
 
@@ -786,13 +788,13 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 				devinfo[i].total_sectors = 0xffffffff;
 			} else {
 				devinfo[i].total_sectors =
-					(ata_param[ATA_ID_48BIT_SECTOTAL_MI] << 16)|
-					ata_param[ATA_ID_48BIT_SECTOTAL_LO];
+				    (ata_param[ATA_ID_48BIT_SECTOTAL_MI] << 16) |
+				    ata_param[ATA_ID_48BIT_SECTOTAL_LO];
 			}
 		} else {
 			lba_48bit[i] = 0;
-			devinfo[i].total_sectors = (ata_param[ATA_ID_SECTOTAL_HI] << 16)|
-				ata_param[ATA_ID_SECTOTAL_LO];
+			devinfo[i].total_sectors = (ata_param[ATA_ID_SECTOTAL_HI] << 16) |
+			                           ata_param[ATA_ID_SECTOTAL_LO];
 		}
 		devinfo[i].security_status = ata_param[ATA_ID_SECURITY_STATUS];
 
@@ -810,9 +812,9 @@ int ata_io_finish(void)
 	int res = 0, type = cmd_state->type;
 	u16 stat;
 
-	if (type == 1 || type == 6) {	/* Non-data commands.  */
+	if (type == 1 || type == 6) { /* Non-data commands.  */
 
-retry:
+	retry:
 		suspend_intr();
 
 		HDPROreg_IO8 = 0x21;
@@ -823,8 +825,8 @@ retry:
 		resume_intr();
 
 		if (((ret & 0xff) & 1) == 0) {
-			WaitEventFlag(ata_evflg, 0x03, WEF_CLEAR|WEF_OR, &bits);
-			if (bits & 0x01) {	/* Timeout.  */
+			WaitEventFlag(ata_evflg, 0x03, WEF_CLEAR | WEF_OR, &bits);
+			if (bits & 0x01) { /* Timeout.  */
 				M_PRINTF("Error: ATA timeout on a non-data command.\n");
 				return -502;
 			}
@@ -833,10 +835,10 @@ retry:
 			goto retry;
 		}
 
-	} else if (type == 4) {		/* DMA.  */
-			M_PRINTF("Error: DMA mode not implemented.\n");
-			res = -502;
-	} else {			/* PIO transfers.  */
+	} else if (type == 4) { /* DMA.  */
+		M_PRINTF("Error: DMA mode not implemented.\n");
+		res = -502;
+	} else { /* PIO transfers.  */
 		stat = hdpro_io_read(ATAreg_CONTROL_RD);
 		if ((res = ata_wait_busy(0x80)) < 0)
 			goto finish;
@@ -900,12 +902,12 @@ int ata_device_sector_io(int device, void *buf, unsigned int lba, unsigned int n
 		}
 
 		if ((res = ata_io_start(buf, len, 0, len, sector, lcyl,
-					hcyl, select, command)) != 0)
+		                        hcyl, select, command)) != 0)
 			continue;
 		if ((res = ata_io_finish()) != 0)
 			continue;
 
-		buf = (void*)((u8 *)buf + len * 512);
+		buf = (void *)((u8 *)buf + len * 512);
 		lba += len;
 		nsectors -= len;
 	}
@@ -917,8 +919,7 @@ int ata_device_sector_io(int device, void *buf, unsigned int lba, unsigned int n
 }
 
 /* Export 4 */
-ata_devinfo_t * ata_get_devinfo(int device)
+ata_devinfo_t *ata_get_devinfo(int device)
 {
 	return &atad_devinfo[device];
 }
-

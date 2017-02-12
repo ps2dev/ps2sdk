@@ -29,10 +29,10 @@
 #include "internal.h"
 
 // rpc bind values
-#define CD_SERVER_INIT			0x80000592
-#define CD_SERVER_SEARCHFILE		0x80000597
-#define CD_SERVER_DISKREADY		0x8000059A
-#define CD_SERVER_POFF			0x80000596	// XCDVDFSV only
+#define CD_SERVER_INIT 0x80000592
+#define CD_SERVER_SEARCHFILE 0x80000597
+#define CD_SERVER_DISKREADY 0x8000059A
+#define CD_SERVER_POFF 0x80000596 // XCDVDFSV only
 
 // allows access to gp reg value from linker script
 extern void *_gp;
@@ -41,7 +41,8 @@ extern void *_gp;
 void _CdSemaExit(void);
 
 // searchfile structure
-typedef struct {
+typedef struct
+{
 	u8 padding[32];
 	char name[256];
 	void *dest;
@@ -53,16 +54,16 @@ int bindInit = -1;
 int bindDiskReady = -1;
 int bindSearchFile = -1;
 // rpc binded client data
-SifRpcClientData_t clientInit __attribute__ ((aligned(64)));	// for sceCdInit()
-SifRpcClientData_t clientDiskReady __attribute__ ((aligned(64)));	// for sceCdDiskReady() (s-cmd)
-SifRpcClientData_t clientSearchFile __attribute__ ((aligned(64)));	// for sceCdSearchFile() (n-cmd)
+SifRpcClientData_t clientInit __attribute__((aligned(64)));       // for sceCdInit()
+SifRpcClientData_t clientDiskReady __attribute__((aligned(64)));  // for sceCdDiskReady() (s-cmd)
+SifRpcClientData_t clientSearchFile __attribute__((aligned(64))); // for sceCdSearchFile() (n-cmd)
 
 // set this to 1 or 2 to print sceCdvd debug messages
 int CdDebug = 0;
 
 // semaphore ids
-int callbackSemaId = -1;	// callback semaphore id
-volatile int cbSema = 0;	// callback semaphore variable (not a real semaphore)
+int callbackSemaId = -1; // callback semaphore id
+volatile int cbSema = 0; // callback semaphore variable (not a real semaphore)
 
 // callbacks
 volatile int CdCallbackNum;
@@ -76,13 +77,13 @@ ee_thread_t callbackThreadParam;
 
 // current command variables
 
-s32 diskReadyMode __attribute__ ((aligned(64)));
-s32 trayReqData __attribute__ ((aligned(64)));
-u32 initMode __attribute__ ((aligned(64)));
+s32 diskReadyMode __attribute__((aligned(64)));
+s32 trayReqData __attribute__((aligned(64)));
+u32 initMode __attribute__((aligned(64)));
 
 // searchfile stuff
-SearchFilePkt searchFileSendBuff __attribute__ ((aligned(64)));
-u32 searchFileRecvBuff __attribute__ ((aligned(64)));
+SearchFilePkt searchFileSendBuff __attribute__((aligned(64)));
+u32 searchFileRecvBuff __attribute__((aligned(64)));
 #endif
 
 // Prototypes for multimodule
@@ -111,7 +112,7 @@ extern u32 searchFileRecvBuff;
 
 
 // init sceCdvd system
-// 
+//
 // args:        init mode (CDVD_INIT_???)
 // returns:     1 if successful
 //                      0 if error
@@ -138,7 +139,8 @@ s32 sceCdInit(s32 mode)
 			break;
 
 		i = 0x10000;
-		while (i--);
+		while (i--)
+			;
 	}
 
 	bindInit = 0;
@@ -162,7 +164,7 @@ s32 sceCdInit(s32 mode)
 
 // convert from sector number to minute:second:frame
 #ifdef F_sceCdIntToPos
-sceCdlLOCCD *sceCdIntToPos(u32 i, sceCdlLOCCD * p)
+sceCdlLOCCD *sceCdIntToPos(u32 i, sceCdlLOCCD *p)
 {
 	p->minute = (((((i + 150) / 75) / 60) / 10) * 16) + ((((i + 150) / 75) / 60) % 10);
 	p->second = (((((i + 150) / 75) % 60) / 10) * 16) + ((((i + 150) / 75) % 60) % 10);
@@ -173,23 +175,22 @@ sceCdlLOCCD *sceCdIntToPos(u32 i, sceCdlLOCCD * p)
 
 // convert from minute:second:frame to sector number
 #ifdef F_sceCdPosToInt
-u32 sceCdPosToInt(sceCdlLOCCD * p)
+u32 sceCdPosToInt(sceCdlLOCCD *p)
 {
-	return ((((p->minute / 16) * 10) + (p->minute & 0xF)) * 60 + ((p->second / 16) * 10) + (p->second & 0xF)
-	    ) * 75 + (p->sector / 16) * 10 + (p->sector & 0xF) - 150;
+	return ((((p->minute / 16) * 10) + (p->minute & 0xF)) * 60 + ((p->second / 16) * 10) + (p->second & 0xF)) * 75 + (p->sector / 16) * 10 + (p->sector & 0xF) - 150;
 }
 #endif
 
 
 // search for a file on disc
-// 
+//
 // args:        file structure to get file info in
 //                      name of file to search for (no wildcard characters)
 //                              (should be in the form '\\SYSTEM.CNF;1')
 // returns:     1 if successful
 //                      0 if error (or no file found)
 #ifdef F_sceCdSearchFile
-s32 sceCdSearchFile(sceCdlFILE * file, const char *name)
+s32 sceCdSearchFile(sceCdlFILE *file, const char *name)
 {
 	int i;
 
@@ -213,7 +214,8 @@ s32 sceCdSearchFile(sceCdlFILE * file, const char *name)
 				break;
 
 			i = 0x10000;
-			while (i--);
+			while (i--)
+				;
 		}
 		bindSearchFile = 0;
 	}
@@ -244,12 +246,12 @@ s32 sceCdSearchFile(sceCdlFILE * file, const char *name)
 	}
 
 	SignalSema(nCmdSemaId);
-	return *(s32*)UNCACHED_SEG(nCmdRecvBuff);
+	return *(s32 *)UNCACHED_SEG(nCmdRecvBuff);
 }
 #endif
 
 // checks if drive is ready
-// 
+//
 // args:         mode
 // returns:     CDVD_READY_READY if ready
 //                      SCECdNotReady if busy
@@ -280,7 +282,8 @@ s32 sceCdDiskReady(s32 mode)
 				break;
 
 			i = 0x10000;
-			while (i--);
+			while (i--)
+				;
 		}
 	}
 	bindDiskReady = 0;
@@ -294,7 +297,7 @@ s32 sceCdDiskReady(s32 mode)
 		printf("DiskReady ended\n");
 
 	SignalSema(sCmdSemaId);
-	return *(s32 *) UNCACHED_SEG(sCmdRecvBuff);
+	return *(s32 *)UNCACHED_SEG(sCmdRecvBuff);
 }
 #endif
 
@@ -334,7 +337,7 @@ void _CdSemaExit(void)
 #endif
 
 // initialise callback thread
-// 
+//
 // args:        callback thread priority
 //                      callback thread stack address (16 byte aligned)
 //                      callback thread stack size
@@ -367,7 +370,7 @@ s32 sceCdInitEeCB(s32 priority, void *stackAddr, s32 stackSize)
 // sets the sceCd callback function
 // gets called when the following functions complete:
 //    sceCdSeek, sceCdStandby, sceCdStop, sceCdPause, sceCdRead
-// 
+//
 // args:        pointer to new callback function (or null)
 // returns:     pointer to old function
 #ifdef F_sceCdCallback
@@ -401,7 +404,7 @@ static void _CdCallbackLoop(void)
 			ExitThread();
 
 		if (CdDebug > 0)
-			printf("sceCdCallbackFunc = %08X   CdCallbackNum = %d\n", (u32) sceCdCallbackFunc, CdCallbackNum);
+			printf("sceCdCallbackFunc = %08X   CdCallbackNum = %d\n", (u32)sceCdCallbackFunc, CdCallbackNum);
 
 		// if callback function number and 'custom callback function' pointer are valid, do callback
 		if (sceCdCallbackFunc && CdCallbackNum)
@@ -417,19 +420,17 @@ static void _CdCallbackLoop(void)
 void _CdGenericCallbackFunction(void *funcNum)
 {
 	// set the currently executing function num
-	CdCallbackNum = *(s32*) funcNum;
+	CdCallbackNum = *(s32 *)funcNum;
 	iSignalSema(nCmdSemaId);
-	
+
 	// check if user callback is registered
-	if (callbackThreadId)
-	{
-		if (sceCdCallbackFunc)
-		{
+	if (callbackThreadId) {
+		if (sceCdCallbackFunc) {
 			iSignalSema(callbackSemaId);
 			return;
 		}
 	}
-	
+
 	// clear the currently executing function num
 	cbSema = 0;
 	CdCallbackNum = 0;

@@ -14,11 +14,11 @@
 #define poweroff_IMPORTS_start DECLARE_IMPORT_TABLE(poweroff, 1, 1)
 #define poweroff_IMPORTS_end END_IMPORT_TABLE
 
-typedef void (*pwoffcb)(void*);
+typedef void (*pwoffcb)(void *);
 
-void SetPowerButtonHandler(pwoffcb func, void* param);
+void SetPowerButtonHandler(pwoffcb func, void *param);
 #define I_SetPowerButtonHandler DECLARE_IMPORT(4, SetPowerButtonHandler)
-void AddPowerOffHandler(pwoffcb func, void* param);
+void AddPowerOffHandler(pwoffcb func, void *param);
 #define I_AddPowerOffHandler DECLARE_IMPORT(5, AddPowerOffHandler)
 void RemovePowerOffHandler(pwoffcb func);
 #define I_RemovePowerOffHandler DECLARE_IMPORT(6, RemovePowerOffHandler)

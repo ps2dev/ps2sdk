@@ -44,11 +44,11 @@
 #include "lwip/opt.h"
 
 #ifndef LWIP_6LOWPAN
-#define LWIP_6LOWPAN                     0
+#define LWIP_6LOWPAN 0
 #endif
 
 #ifndef LWIP_6LOWPAN_NUM_CONTEXTS
-#define LWIP_6LOWPAN_NUM_CONTEXTS        10
+#define LWIP_6LOWPAN_NUM_CONTEXTS 10
 #endif
 
 #ifndef LWIP_6LOWPAN_INFER_SHORT_ADDRESS
@@ -56,15 +56,15 @@
 #endif
 
 #ifndef LWIP_6LOWPAN_IPHC
-#define LWIP_6LOWPAN_IPHC                1
+#define LWIP_6LOWPAN_IPHC 1
 #endif
 
 #ifndef LWIP_6LOWPAN_HW_CRC
-#define LWIP_6LOWPAN_HW_CRC              1
+#define LWIP_6LOWPAN_HW_CRC 1
 #endif
 
 #ifndef LOWPAN6_DEBUG
-#define LOWPAN6_DEBUG                    LWIP_DBG_OFF
+#define LOWPAN6_DEBUG LWIP_DBG_OFF
 #endif
 
 #endif /* LWIP_HDR_LOWPAN6_OPTS_H */

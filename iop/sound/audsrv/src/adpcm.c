@@ -69,8 +69,7 @@ static void free_all_samples()
 	int OldState;
 
 	CpuSuspendIntr(&OldState);
-	for (p = adpcm_list_head; p != NULL; p = q)
-	{
+	for (p = adpcm_list_head; p != NULL; p = q) {
 		q = p->next;
 		FreeSysMemory(p);
 	}
@@ -88,10 +87,8 @@ static adpcm_list_t *adpcm_loaded(int id)
 {
 	adpcm_list_t *cur = adpcm_list_head;
 
-	while (cur != 0)
-	{
-		if (cur->id == id)
-		{
+	while (cur != 0) {
+		if (cur->id == id) {
 			return cur;
 		}
 
@@ -123,24 +120,20 @@ void *audsrv_load_adpcm(u32 *buffer, int size, int id)
 	adpcm_list_t *adpcm;
 
 	adpcm = adpcm_loaded(id);
-	if (adpcm == 0)
-	{
-		if (adpcm_list_head == 0)
-		{
+	if (adpcm == 0) {
+		if (adpcm_list_head == 0) {
 			/* first entry ever! yay! */
 			adpcm = alloc_new_sample();
 			adpcm->id = id;
 			adpcm->spu2_addr = 0x5010; /* Need to change this so it considers to PCM streaming space usage :) */
-			adpcm->size = size - 16; /* header is 16 bytes */
+			adpcm->size = size - 16;   /* header is 16 bytes */
 
 			audsrv_read_adpcm_header(adpcm, buffer);
 
 			adpcm_list_head = adpcm;
 			adpcm_list_head->next = 0;
 			adpcm_list_tail = adpcm_list_head;
-		}
-		else
-		{
+		} else {
 			/* add at the end of the list */
 			adpcm = alloc_new_sample();
 			adpcm->id = id;
@@ -154,7 +147,7 @@ void *audsrv_load_adpcm(u32 *buffer, int size, int id)
 		}
 
 		/* DMA from IOP to SPU2 */
-		sceSdVoiceTrans(0, SD_TRANS_WRITE | SD_TRANS_MODE_DMA, ((u8*)buffer)+16, (u32*)adpcm->spu2_addr, adpcm->size);
+		sceSdVoiceTrans(0, SD_TRANS_WRITE | SD_TRANS_MODE_DMA, ((u8 *)buffer) + 16, (u32 *)adpcm->spu2_addr, adpcm->size);
 		sceSdVoiceTransStatus(0, 1);
 	}
 
@@ -180,16 +173,14 @@ int audsrv_play_adpcm(u32 id)
 	adpcm_list_t *a;
 
 	a = adpcm_loaded(id);
-	if (a == 0)
-	{
+	if (a == 0) {
 		/* bad joke */
 		return AUDSRV_ERR_ARGS;
 	}
 
 	/* sample was loaded */
 	endx = sceSdGetSwitch(SD_CORE_1 | SD_SWITCH_ENDX);
-	if (endx == 0)
-	{
+	if (endx == 0) {
 		/* all channels are occupied */
 		return -AUDSRV_ERR_NO_MORE_CHANNELS;
 	}
@@ -197,18 +188,15 @@ int audsrv_play_adpcm(u32 id)
 	/* find first channel available */
 	i = 1;
 	channel = -1;
-	while ((channel < 0) && (i < 24))
-	{
-		if (endx & (1 << i))
-		{
+	while ((channel < 0) && (i < 24)) {
+		if (endx & (1 << i)) {
 			channel = i;
 		}
 
-        	i++;
+		i++;
 	}
 
-	if (channel == -1)
-	{
+	if (channel == -1) {
 		/* cannot find a single channel free */
 		return -AUDSRV_ERR_NO_MORE_CHANNELS;
 	}
@@ -234,19 +222,15 @@ int audsrv_adpcm_init()
 	sceSdSetParam(SD_CORE_1 | SD_PARAM_MVOLL, 0x3fff);
 	sceSdSetParam(SD_CORE_1 | SD_PARAM_MVOLR, 0x3fff);
 
-	for (voice = 1; voice < 24; voice++)
-	{
+	for (voice = 1; voice < 24; voice++) {
 		sceSdSetParam(SD_CORE_1 | (voice << 1) | SD_VPARAM_VOLL, 0x3fff);
 		sceSdSetParam(SD_CORE_1 | (voice << 1) | SD_VPARAM_VOLR, 0x3fff);
 	}
 
-	if (adpcm_list_head != 0)
-	{
+	if (adpcm_list_head != 0) {
 		/* called second time, after samples were already uploaded */
 		free_all_samples();
 	}
 
 	return AUDSRV_ERR_NOERROR;
 }
-
-

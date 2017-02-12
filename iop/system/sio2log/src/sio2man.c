@@ -25,58 +25,58 @@
 #include "xsio2man.h"
 
 #ifndef XSIO2MAN
-	#include "log.h"
+#include "log.h"
 #endif
 
 #ifndef XSIO2MAN
-	IRX_ID("sio2man_logger", 2, 1);
+IRX_ID("sio2man_logger", 2, 1);
 #else
 #ifndef SIO2MAN_V2
-	IRX_ID("sio2man", 2, 1);
+IRX_ID("sio2man", 2, 1);
 #else
-	IRX_ID("sio2man", 2, 4);
+IRX_ID("sio2man", 2, 4);
 #endif
 #endif
 
 extern struct irx_export_table _exp_sio2man;
 
-#define SIO2_REG_BASE		0xbf808200
-#define SIO2_REG_PORT0_CTRL1	0xbf808240
-#define SIO2_REG_PORT0_CTRL2	0xbf808244
-#define SIO2_REG_DATA_OUT	0xbf808260
-#define SIO2_REG_DATA_IN	0xbf808264
-#define SIO2_REG_CTRL		0xbf808268
-#define SIO2_REG_STAT6C		0xbf80826c
-#define SIO2_REG_STAT70		0xbf808270
-#define SIO2_REG_STAT74		0xbf808274
-#define SIO2_REG_UNKN78		0xbf808278
-#define SIO2_REG_UNKN7C		0xbf80827c
-#define SIO2_REG_STAT		0xbf808280
+#define SIO2_REG_BASE 0xbf808200
+#define SIO2_REG_PORT0_CTRL1 0xbf808240
+#define SIO2_REG_PORT0_CTRL2 0xbf808244
+#define SIO2_REG_DATA_OUT 0xbf808260
+#define SIO2_REG_DATA_IN 0xbf808264
+#define SIO2_REG_CTRL 0xbf808268
+#define SIO2_REG_STAT6C 0xbf80826c
+#define SIO2_REG_STAT70 0xbf808270
+#define SIO2_REG_STAT74 0xbf808274
+#define SIO2_REG_UNKN78 0xbf808278
+#define SIO2_REG_UNKN7C 0xbf80827c
+#define SIO2_REG_STAT 0xbf808280
 
 /* Event flags */
-#define EF_PAD_TRANSFER_INIT	0x00000001
-#define EF_PAD_TRANSFER_READY	0x00000002
-#define EF_MC_TRANSFER_INIT	0x00000004
-#define EF_MC_TRANSFER_READY	0x00000008
-#define EF_MTAP_TRANSFER_INIT	0x00000010
-#define EF_MTAP_TRANSFER_READY	0x00000020
+#define EF_PAD_TRANSFER_INIT 0x00000001
+#define EF_PAD_TRANSFER_READY 0x00000002
+#define EF_MC_TRANSFER_INIT 0x00000004
+#define EF_MC_TRANSFER_READY 0x00000008
+#define EF_MTAP_TRANSFER_INIT 0x00000010
+#define EF_MTAP_TRANSFER_READY 0x00000020
 #ifndef SIO2MAN_V2
-	#define EF_TRANSFER_START	0x00000040
-	#define EF_TRANSFER_FINISH	0x00000080
-	#define EF_TRANSFER_RESET	0x00000100
-	#define EF_SIO2_INTR_COMPLETE	0x00000200
+#define EF_TRANSFER_START 0x00000040
+#define EF_TRANSFER_FINISH 0x00000080
+#define EF_TRANSFER_RESET 0x00000100
+#define EF_SIO2_INTR_COMPLETE 0x00000200
 #else
-	#define EF_RM_TRANSFER_INIT	0x00000040
-	#define EF_RM_TRANSFER_READY	0x00000080
-	#define EF_UNK_TRANSFER_INIT	0x00000100
-	#define EF_UNK_TRANSFER_READY	0x00000200
-	#define EF_TRANSFER_START	0x00000400
-	#define EF_TRANSFER_FINISH	0x00000800
-	#define EF_TRANSFER_RESET	0x00001000
-	#define EF_SIO2_INTR_COMPLETE	0x00002000
+#define EF_RM_TRANSFER_INIT 0x00000040
+#define EF_RM_TRANSFER_READY 0x00000080
+#define EF_UNK_TRANSFER_INIT 0x00000100
+#define EF_UNK_TRANSFER_READY 0x00000200
+#define EF_TRANSFER_START 0x00000400
+#define EF_TRANSFER_FINISH 0x00000800
+#define EF_TRANSFER_RESET 0x00001000
+#define EF_SIO2_INTR_COMPLETE 0x00002000
 #endif
 
-#define EPRINTF(format, args...) printf("%s: " format, _irx_id.n , ## args)
+#define EPRINTF(format, args...) printf("%s: " format, _irx_id.n, ##args)
 
 int init = 0;
 int event_flag = -1;
@@ -125,29 +125,29 @@ void send_td(sio2_transfer_data_t *td)
 	if (td->in_size) {
 		for (i = 0; i < td->in_size; i++)
 			sio2_data_out(td->in[i]);
-	#ifndef XSIO2MAN
+#ifndef XSIO2MAN
 		log_data(LOG_TRS_DATA, td->in, td->in_size);
-	#endif
+#endif
 	}
 
 	if (td->in_dma.addr) {
 		dmac_request(IOP_DMAC_SIO2in, td->in_dma.addr, td->in_dma.size,
-				td->in_dma.count, DMAC_FROM_MEM);
+		             td->in_dma.count, DMAC_FROM_MEM);
 		dmac_transfer(IOP_DMAC_SIO2in);
 
-	#ifndef XSIO2MAN
+#ifndef XSIO2MAN
 		log_dma(LOG_TRS_DMA_IN, &td->in_dma);
-	#endif
+#endif
 	}
 
 	if (td->out_dma.addr) {
 		dmac_request(IOP_DMAC_SIO2out, td->out_dma.addr, td->out_dma.size,
-				td->out_dma.count, DMAC_TO_MEM);
+		             td->out_dma.count, DMAC_TO_MEM);
 		dmac_transfer(IOP_DMAC_SIO2out);
 
-	#ifndef XSIO2MAN
+#ifndef XSIO2MAN
 		log_dma(LOG_TRS_DMA_OUT, &td->out_dma);
-	#endif
+#endif
 	}
 }
 
@@ -177,15 +177,16 @@ void main_thread(void *unused)
 	u32 resbits[4];
 
 	while (1) {
-	#ifndef XSIO2MAN
+#ifndef XSIO2MAN
 		log_flush(0);
-	#endif
-		WaitEventFlag(event_flag, EF_PAD_TRANSFER_INIT |
-				EF_MC_TRANSFER_INIT | EF_MTAP_TRANSFER_INIT
-#ifdef SIO2MAN_V2
-				| EF_RM_TRANSFER_INIT | EF_UNK_TRANSFER_INIT
 #endif
-				, 1, resbits);
+		WaitEventFlag(event_flag, EF_PAD_TRANSFER_INIT |
+		                              EF_MC_TRANSFER_INIT | EF_MTAP_TRANSFER_INIT
+#ifdef SIO2MAN_V2
+		                              | EF_RM_TRANSFER_INIT | EF_UNK_TRANSFER_INIT
+#endif
+		              ,
+		              1, resbits);
 
 		if (resbits[0] & EF_PAD_TRANSFER_INIT) {
 			ClearEventFlag(event_flag, ~EF_PAD_TRANSFER_INIT);
@@ -224,7 +225,7 @@ void main_thread(void *unused)
 			return;
 		}
 
-transfer_loop:
+	transfer_loop:
 		WaitEventFlag(event_flag, EF_TRANSFER_START | EF_TRANSFER_RESET, 1, resbits);
 
 		if (resbits[0] & EF_TRANSFER_RESET) {
@@ -253,7 +254,7 @@ transfer_loop:
 		   TODO
 		   I guess the correct solution is to do all logging in a
 		   dedicated thread.  */
-//		log_flush(1);
+		//		log_flush(1);
 
 		goto transfer_loop;
 	}
@@ -312,7 +313,10 @@ int _start(int argc, const char **argv)
 
 	sio2_ctrl_set(0x3bc);
 
-	mtap_change_slot_cb = NULL;  mtap_get_slot_max_cb = NULL;  mtap_get_slot_max2_cb = NULL; mtap_update_slots_cb = NULL;
+	mtap_change_slot_cb = NULL;
+	mtap_get_slot_max_cb = NULL;
+	mtap_get_slot_max2_cb = NULL;
+	mtap_update_slots_cb = NULL;
 	event_flag = create_event_flag();
 	thid = create_main_thread();
 
@@ -437,21 +441,21 @@ void sio2_mtap_get_slot_max2_set(sio2_mtap_get_slot_max2_cb_t cb) { mtap_get_slo
 void sio2_mtap_update_slots_set(sio2_mtap_update_slots_t cb) { mtap_update_slots_cb = cb; }
 
 void sio2_ctrl_set(u32 val) { _sw(val, SIO2_REG_CTRL); }
-u32  sio2_ctrl_get() { return _lw(SIO2_REG_CTRL); }
-u32  sio2_stat6c_get() { return _lw(SIO2_REG_STAT6C); }
+u32 sio2_ctrl_get() { return _lw(SIO2_REG_CTRL); }
+u32 sio2_stat6c_get() { return _lw(SIO2_REG_STAT6C); }
 void sio2_portN_ctrl1_set(int N, u32 val) { _sw(val, SIO2_REG_PORT0_CTRL1 + (N * 8)); }
-u32  sio2_portN_ctrl1_get(int N) { return _lw(SIO2_REG_PORT0_CTRL1 + (N * 8)); }
+u32 sio2_portN_ctrl1_get(int N) { return _lw(SIO2_REG_PORT0_CTRL1 + (N * 8)); }
 void sio2_portN_ctrl2_set(int N, u32 val) { _sw(val, SIO2_REG_PORT0_CTRL2 + (N * 8)); }
-u32  sio2_portN_ctrl2_get(int N) { return _lw(SIO2_REG_PORT0_CTRL2 + (N * 8)); }
-u32  sio2_stat70_get() { return _lw(SIO2_REG_STAT70); }
+u32 sio2_portN_ctrl2_get(int N) { return _lw(SIO2_REG_PORT0_CTRL2 + (N * 8)); }
+u32 sio2_stat70_get() { return _lw(SIO2_REG_STAT70); }
 void sio2_regN_set(int N, u32 val) { _sw(val, SIO2_REG_BASE + (N * 4)); }
-u32  sio2_regN_get(int N) { return _lw(SIO2_REG_BASE + (N * 4)); }
-u32  sio2_stat74_get() { return _lw(SIO2_REG_STAT74); }
+u32 sio2_regN_get(int N) { return _lw(SIO2_REG_BASE + (N * 4)); }
+u32 sio2_stat74_get() { return _lw(SIO2_REG_STAT74); }
 void sio2_unkn78_set(u32 val) { _sw(val, SIO2_REG_UNKN78); }
-u32  sio2_unkn78_get() { return _lw(SIO2_REG_UNKN78); }
+u32 sio2_unkn78_get() { return _lw(SIO2_REG_UNKN78); }
 void sio2_unkn7c_set(u32 val) { _sw(val, SIO2_REG_UNKN7C); }
-u32  sio2_unkn7c_get() { return _lw(SIO2_REG_UNKN7C); }
+u32 sio2_unkn7c_get() { return _lw(SIO2_REG_UNKN7C); }
 void sio2_data_out(u8 val) { _sb(val, SIO2_REG_DATA_OUT); }
-u8   sio2_data_in() { return _lb(SIO2_REG_DATA_IN); }
+u8 sio2_data_in() { return _lb(SIO2_REG_DATA_IN); }
 void sio2_stat_set(u32 val) { _sw(val, SIO2_REG_STAT); }
-u32  sio2_stat_get() { return _lw(SIO2_REG_STAT); }
+u32 sio2_stat_get() { return _lw(SIO2_REG_STAT); }

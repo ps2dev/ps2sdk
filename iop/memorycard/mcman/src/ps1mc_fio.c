@@ -107,7 +107,7 @@ int mcman_open1(int port, int slot, char *filename, int flags)
 	if (fd == MAX_FDHANDLES)
 		return -7;
 
-	mcman_wmemset((void *)fh, sizeof (MC_FHANDLE), 0);
+	mcman_wmemset((void *)fh, sizeof(MC_FHANDLE), 0);
 
 	fh->port = port;
 	fh->slot = slot;
@@ -133,8 +133,7 @@ int mcman_open1(int port, int slot, char *filename, int flags)
 			fh->filesize = fse->field_38;
 		else
 			fh->filesize = fse->length;
-	}
-	else
+	} else
 		fh->filesize = 0;
 
 	fh->rdflag = flags & sceMcFileAttrReadable;
@@ -150,9 +149,9 @@ int mcman_open1(int port, int slot, char *filename, int flags)
 	}
 
 	for (i = 0; i < MAX_FDHANDLES; i++) {
-		if ((mcman_fdhandles[i].status != 0) && \
-			(mcman_fdhandles[i].port == port) && (mcman_fdhandles[i].slot == slot) && \
-			 	(mcman_fdhandles[i].freeclink == r) && (fh->wrflag != 0))
+		if ((mcman_fdhandles[i].status != 0) &&
+		    (mcman_fdhandles[i].port == port) && (mcman_fdhandles[i].slot == slot) &&
+		    (mcman_fdhandles[i].freeclink == r) && (fh->wrflag != 0))
 			return sceMcResDeniedPermit;
 	}
 
@@ -314,12 +313,11 @@ int mcman_write1(int fd, void *buffer, int nbyte)
 				r = mcman_fatWseekPS1(fd);
 				if (r == sceMcResFullDevice)
 					return r;
-				if (r!= sceMcResSucceed)
+				if (r != sceMcResSucceed)
 					return r;
 
 				r = mcman_fatRseekPS1(fd);
-			}
-			else {
+			} else {
 				if (r < 0)
 					return r;
 			}
@@ -351,7 +349,6 @@ int mcman_write1(int fd, void *buffer, int nbyte)
 			wpos += size;
 
 		} while (nbyte);
-
 	}
 
 	mcman_close1(fd);
@@ -397,8 +394,7 @@ int mcman_dread1(int fd, fio_dirent_t *dirent)
 		memcpy(dirent->stat.mtime, &fse->modified, sizeof(sceMcStDateTime));
 		dirent->stat.size = fse->field_38;
 		dirent->stat.attr = fse->field_28;
-	}
-	else {
+	} else {
 		dirent->stat.size = fse->length;
 	}
 
@@ -460,13 +456,12 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 	ret = 0;
 	if (sio2man_type >= XSIO2MAN) {
 		if ((flags & sceMcFileAttrFile) != 0) {
-			r = mcman_getPS1direntry(port, slot, (char*)info->EntryName, &fse1, 1);
+			r = mcman_getPS1direntry(port, slot, (char *)info->EntryName, &fse1, 1);
 			if (r < 0) {
 				if (r != sceMcResNoEntry) {
 					ret = r;
-				}
-				else {
-					if ((!strcmp(".", (char*)info->EntryName)) || (!strcmp("..", (char*)info->EntryName)) || (info->EntryName[0] == 0))
+				} else {
+					if ((!strcmp(".", (char *)info->EntryName)) || (!strcmp("..", (char *)info->EntryName)) || (info->EntryName[0] == 0))
 						ret = sceMcResNoEntry;
 				}
 			}
@@ -498,9 +493,8 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 		fse2->field_7d = 0;
 		fse2->field_2c = 0;
 		flags &= -12;
-	}
-	else {
-		if(fse2->field_7d != 1) {
+	} else {
+		if (fse2->field_7d != 1) {
 			fse2->field_7d = 1;
 			fse2->field_38 = fse2->length;
 		}
@@ -519,8 +513,8 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 	//as Sony code never uses it, and the value is changed after its use here.
 	//This is primarily needed for PS2 MC backups, but must be implemented here
 	//too since the 'flags' argument may be used indiscriminately for both
-	if(flags == 0xFEED){
-		flags = sceMcFileAttrReadable|sceMcFileAttrWriteable;
+	if (flags == 0xFEED) {
+		flags = sceMcFileAttrReadable | sceMcFileAttrWriteable;
 		//The changed flags value allows more entries to be copied below
 	}
 
@@ -534,7 +528,7 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 		fse2->modified = info->_Modify;
 
 	if ((flags & sceMcFileAttrFile) != 0)
-		strncpy(fse2->name, (char*)info->EntryName, 20);
+		strncpy(fse2->name, (char *)info->EntryName, 20);
 
 	fse2->field_1e = 0;
 
@@ -569,7 +563,6 @@ int mcman_getdir1(int port, int slot, char *dirname, int flags, int maxent, sceM
 		} while (1);
 
 		strncpy(mcman_PS1curdir, p, 63);
-
 	}
 
 	if (maxent) {
@@ -589,7 +582,7 @@ int mcman_getdir1(int port, int slot, char *dirname, int flags, int maxent, sceM
 			if (!mcman_checkdirpath(fse->name, mcman_PS1curdir))
 				continue;
 
-			memset((void *)info, 0, sizeof (sceMcTblGetDir));
+			memset((void *)info, 0, sizeof(sceMcTblGetDir));
 
 			info->AttrFile = 0x9417;
 
@@ -605,12 +598,11 @@ int mcman_getdir1(int port, int slot, char *dirname, int flags, int maxent, sceM
 				info->_Modify = fse->modified;
 				info->FileSizeByte = fse->field_38;
 				info->Reserve2 = fse->field_28;
-			}
-			else {
+			} else {
 				info->FileSizeByte = fse->length;
 			}
 
-			strncpy((char*)info->EntryName, fse->name, 20);
+			strncpy((char *)info->EntryName, fse->name, 20);
 			info->EntryName[20] = 0;
 
 			i++;
@@ -667,8 +659,7 @@ int mcman_close1(int fd)
 
 	if (fh->filesize == 0) {
 		fse->length = 0x2000;
-	}
-	else {
+	} else {
 		if ((fh->filesize - 1) < 0)
 			temp = (fh->filesize + 8190) >> 13;
 		else
@@ -679,13 +670,12 @@ int mcman_close1(int fd)
 	}
 
 	if (sio2man_type >= XSIO2MAN) {
-		fse->field_7d = 0; // <--- To preserve for XMCMAN
-		fse->field_2c = 0; //
-		fse->field_38 = 0; //
+		fse->field_7d = 0;                    // <--- To preserve for XMCMAN
+		fse->field_2c = 0;                    //
+		fse->field_38 = 0;                    //
 		memset((void *)&fse->created, 0, 8);  //
 		memset((void *)&fse->modified, 0, 8); //
-	}
-	else { // MCMAN does as following
+	} else {                                  // MCMAN does as following
 		fse->field_7d = 1;
 		fse->field_38 = fh->filesize;
 		mcman_getmcrtime(&fse->modified);

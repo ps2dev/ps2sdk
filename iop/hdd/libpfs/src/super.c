@@ -18,14 +18,13 @@
 #include "pfs-opt.h"
 #include "libpfs.h"
 
-int pfsBlockSize = 1;// block size(in sectors(512) )
+int pfsBlockSize = 1;   // block size(in sectors(512) )
 u32 pfsMetaSize = 1024; // size of each metadata structure
 
 int pfsCheckZoneSize(u32 zone_size)
 {
-	if((zone_size & (zone_size - 1)) || (zone_size < (2 * 1024)) || (zone_size > (128 * 1024)))
-	{
-		PFS_PRINTF(PFS_DRV_NAME": Error: Invalid zone size\n");
+	if ((zone_size & (zone_size - 1)) || (zone_size < (2 * 1024)) || (zone_size > (128 * 1024))) {
+		PFS_PRINTF(PFS_DRV_NAME ": Error: Invalid zone size\n");
 		return 0;
 	}
 
@@ -48,6 +47,6 @@ u32 pfsGetBitmapSizeSectors(int zoneScale, u32 partSize)
 // Returns the number of blocks/zones which will be used for bitmaps
 u32 pfsGetBitmapSizeBlocks(int scale, u32 mainsize)
 {
-	u32 a=pfsGetBitmapSizeSectors(scale, mainsize);
-	return a / (1<<scale) + ((a % (1<<scale))>0);
+	u32 a = pfsGetBitmapSizeSectors(scale, mainsize);
+	return a / (1 << scale) + ((a % (1 << scale)) > 0);
 }

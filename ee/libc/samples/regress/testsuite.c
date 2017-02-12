@@ -23,18 +23,14 @@ int run_testsuite(test_suite *p)
 
 	printf("Running %d tests\n", p->ntests);
 	successful = 0;
-	for (i=0; i<p->ntests; i++)
-	{
+	for (i = 0; i < p->ntests; i++) {
 		const char *error;
 
 		printf("Test %d: %s ", i + 1, p->tests[i].name);
 		error = p->tests[i].func(p->tests[i].arg);
-		if (error != NULL)
-		{
+		if (error != NULL) {
 			printf("[%s]", error);
-		}
-		else
-		{
+		} else {
 			successful++;
 		}
 

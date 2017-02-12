@@ -16,7 +16,7 @@
 // set this to enable it
 #define PS2FIOINC
 
-int ps2netfs_Init( );
+int ps2netfs_Init();
 int ps2netfs_Destroy(void);
 
 #endif

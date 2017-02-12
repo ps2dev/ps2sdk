@@ -16,9 +16,9 @@
 typedef struct _mouse_data
 
 {
-  s32 x, y;
-  s32 wheel;
-  u32 buttons;
+	s32 x, y;
+	s32 wheel;
+	u32 buttons;
 } mouse_data;
 
 #define PS2MOUSE_READMODE_DIFF 0
@@ -26,9 +26,9 @@ typedef struct _mouse_data
 
 /* Define mouse button constants */
 
-#define PS2MOUSE_BTN1    1
-#define PS2MOUSE_BTN2    2
-#define PS2MOUSE_BTN3    4
+#define PS2MOUSE_BTN1 1
+#define PS2MOUSE_BTN2 2
+#define PS2MOUSE_BTN3 4
 #define PS2MOUSE_BTN1DBL (PS2MOUSE_BTN1 << 8)
 #define PS2MOUSE_BTN2DBL (PS2MOUSE_BTN2 << 8)
 #define PS2MOUSE_BTN3DBL (PS2MOUSE_BTN3 << 8)

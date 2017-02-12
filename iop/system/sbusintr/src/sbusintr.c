@@ -21,9 +21,10 @@
 
 IRX_ID("sbusintr", 1, 1);
 
-static struct {
+static struct
+{
 	sbus_intr_handler_t handler;
-	void	*arg;
+	void *arg;
 } sbus_handler_table[32];
 
 extern struct irx_export_table _exp_sbusintr;
@@ -52,7 +53,7 @@ static int sbus_dispatch(void *arg)
 
 		if (sbus_handler_table[irq].handler)
 			sbus_handler_table[irq].handler(irq,
-					sbus_handler_table[irq].arg);
+			                                sbus_handler_table[irq].arg);
 	}
 
 	return 1;
@@ -76,7 +77,7 @@ int sbus_intr_handler_add(u32 irq, sbus_intr_handler_t handler, void *arg)
 	}
 
 	sbus_handler_table[irq].handler = handler;
-	sbus_handler_table[irq].arg     = arg;
+	sbus_handler_table[irq].arg = arg;
 out:
 	CpuResumeIntr(state);
 	return res;
@@ -88,7 +89,7 @@ int sbus_intr_handler_del(u32 irq)
 		return -SBUS_E_ARG;
 
 	sbus_handler_table[irq].handler = NULL;
-	sbus_handler_table[irq].arg     = NULL;
+	sbus_handler_table[irq].arg = NULL;
 
 	return irq;
 }
@@ -121,7 +122,7 @@ int sbus_intr_init()
 
 	for (i = 0; i < 32; ++i) {
 		sbus_handler_table[i].handler = NULL;
-		sbus_handler_table[i].arg     = NULL;
+		sbus_handler_table[i].arg = NULL;
 	}
 
 	if (RegisterIntrHandler(IOP_IRQ_SBUS, 1, sbus_dispatch, NULL) < 0) {

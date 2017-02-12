@@ -4,6 +4,7 @@
 // Maybe we have important typedefs here!
 #include "hello.h"
 
-void hello(void) {
-    printf("Hello world!\n");
+void hello(void)
+{
+	printf("Hello world!\n");
 }

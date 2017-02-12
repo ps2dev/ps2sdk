@@ -55,47 +55,50 @@ int io_chstat(const char *name, io_stat_t *stat, unsigned int statmask);
 /* Device drivers.  */
 
 /* Device types.  */
-#define IOP_DT_CHAR	0x01
-#define IOP_DT_CONS	0x02
-#define IOP_DT_BLOCK	0x04
-#define IOP_DT_RAW	0x08
-#define IOP_DT_FS	0x10
+#define IOP_DT_CHAR 0x01
+#define IOP_DT_CONS 0x02
+#define IOP_DT_BLOCK 0x04
+#define IOP_DT_RAW 0x08
+#define IOP_DT_FS 0x10
 
 /* File objects passed to driver operations.  */
-typedef struct _iop_io_file {
-	int	mode;		/* File open mode.  */
-	int	unit;		/* HW device unit number.  */
+typedef struct _iop_io_file
+{
+	int mode;                      /* File open mode.  */
+	int unit;                      /* HW device unit number.  */
 	struct _iop_io_device *device; /* Device driver.  */
-	void	*privdata;	/* The device driver can use this however it
+	void *privdata;                /* The device driver can use this however it
 				   wants.  */
 } iop_io_file_t;
 
-typedef struct _iop_io_device {
+typedef struct _iop_io_device
+{
 	const char *name;
 	unsigned int type;
-	unsigned int version;	/* Not so sure about this one.  */
+	unsigned int version; /* Not so sure about this one.  */
 	const char *desc;
 	struct _iop_io_device_ops *ops;
 } iop_io_device_t;
 
-typedef struct _iop_io_device_ops {
-	int	(*io_init)(iop_io_device_t *);
-	int	(*io_deinit)(iop_io_device_t *);
-	int	(*io_format)(iop_io_file_t *);
-	int	(*io_open)(iop_io_file_t *, const char *, int);
-	int	(*io_close)(iop_io_file_t *);
-	int	(*io_read)(iop_io_file_t *, void *, int);
-	int	(*io_write)(iop_io_file_t *, void *, int);
-	int	(*io_lseek)(iop_io_file_t *, int, int);
-	int	(*io_ioctl)(iop_io_file_t *, unsigned long, void *);
-	int	(*io_remove)(iop_io_file_t *, const char *);
-	int	(*io_mkdir)(iop_io_file_t *, const char *);
-	int	(*io_rmdir)(iop_io_file_t *, const char *);
-	int	(*io_dopen)(iop_io_file_t *, const char *);
-	int	(*io_dclose)(iop_io_file_t *);
-	int	(*io_dread)(iop_io_file_t *, io_dirent_t *);
-	int	(*io_getstat)(iop_io_file_t *, const char *, io_stat_t *);
-	int	(*io_chstat)(iop_io_file_t *, const char *, io_stat_t *, unsigned int);
+typedef struct _iop_io_device_ops
+{
+	int (*io_init)(iop_io_device_t *);
+	int (*io_deinit)(iop_io_device_t *);
+	int (*io_format)(iop_io_file_t *);
+	int (*io_open)(iop_io_file_t *, const char *, int);
+	int (*io_close)(iop_io_file_t *);
+	int (*io_read)(iop_io_file_t *, void *, int);
+	int (*io_write)(iop_io_file_t *, void *, int);
+	int (*io_lseek)(iop_io_file_t *, int, int);
+	int (*io_ioctl)(iop_io_file_t *, unsigned long, void *);
+	int (*io_remove)(iop_io_file_t *, const char *);
+	int (*io_mkdir)(iop_io_file_t *, const char *);
+	int (*io_rmdir)(iop_io_file_t *, const char *);
+	int (*io_dopen)(iop_io_file_t *, const char *);
+	int (*io_dclose)(iop_io_file_t *);
+	int (*io_dread)(iop_io_file_t *, io_dirent_t *);
+	int (*io_getstat)(iop_io_file_t *, const char *, io_stat_t *);
+	int (*io_chstat)(iop_io_file_t *, const char *, io_stat_t *, unsigned int);
 } iop_io_device_ops_t;
 
 int io_AddDrv(iop_io_device_t *device);

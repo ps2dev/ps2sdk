@@ -22,63 +22,66 @@
 /* Device drivers.  */
 
 /* Device types.  */
-#define IOP_DT_CHAR	0x01
-#define IOP_DT_CONS	0x02
-#define IOP_DT_BLOCK	0x04
-#define IOP_DT_RAW	0x08
-#define IOP_DT_FS	0x10
+#define IOP_DT_CHAR 0x01
+#define IOP_DT_CONS 0x02
+#define IOP_DT_BLOCK 0x04
+#define IOP_DT_RAW 0x08
+#define IOP_DT_FS 0x10
 #ifndef IOMAN_NO_EXTENDED
-#define IOP_DT_FSEXT	0x10000000	/* Supports calls after chstat().  */
+#define IOP_DT_FSEXT 0x10000000 /* Supports calls after chstat().  */
 #endif
 
 /* File objects passed to driver operations.  */
-typedef struct _iop_file {
-	int	mode;		/* File open mode.  */
-	int	unit;		/* HW device unit number.  */
+typedef struct _iop_file
+{
+	int mode;                   /* File open mode.  */
+	int unit;                   /* HW device unit number.  */
 	struct _iop_device *device; /* Device driver.  */
-	void	*privdata;	/* The device driver can use this however it
+	void *privdata;             /* The device driver can use this however it
 				   wants.  */
 } iop_file_t;
 
-typedef struct _iop_device {
+typedef struct _iop_device
+{
 	const char *name;
 	unsigned int type;
-	unsigned int version;	/* Not so sure about this one.  */
+	unsigned int version; /* Not so sure about this one.  */
 	const char *desc;
 	struct _iop_device_ops *ops;
 } iop_device_t;
 
-typedef struct _iop_device_ops {
-	int	(*init)(iop_device_t *);
-	int	(*deinit)(iop_device_t *);
-	int	(*format)(iop_file_t *, const char *, const char *, void *, int);
-	int	(*open)(iop_file_t *, const char *, int, int);
-	int	(*close)(iop_file_t *);
-	int	(*read)(iop_file_t *, void *, int);
-	int	(*write)(iop_file_t *, void *, int);
-	int	(*lseek)(iop_file_t *, int, int);
-	int	(*ioctl)(iop_file_t *, int, void *);
-	int	(*remove)(iop_file_t *, const char *);
-	int	(*mkdir)(iop_file_t *, const char *, int);
-	int	(*rmdir)(iop_file_t *, const char *);
-	int	(*dopen)(iop_file_t *, const char *);
-	int	(*dclose)(iop_file_t *);
-	int	(*dread)(iop_file_t *, iox_dirent_t *);
-	int	(*getstat)(iop_file_t *, const char *, iox_stat_t *);
-	int	(*chstat)(iop_file_t *, const char *, iox_stat_t *, unsigned int);
+typedef struct _iop_device_ops
+{
+	int (*init)(iop_device_t *);
+	int (*deinit)(iop_device_t *);
+	int (*format)(iop_file_t *, const char *, const char *, void *, int);
+	int (*open)(iop_file_t *, const char *, int, int);
+	int (*close)(iop_file_t *);
+	int (*read)(iop_file_t *, void *, int);
+	int (*write)(iop_file_t *, void *, int);
+	int (*lseek)(iop_file_t *, int, int);
+	int (*ioctl)(iop_file_t *, int, void *);
+	int (*remove)(iop_file_t *, const char *);
+	int (*mkdir)(iop_file_t *, const char *, int);
+	int (*rmdir)(iop_file_t *, const char *);
+	int (*dopen)(iop_file_t *, const char *);
+	int (*dclose)(iop_file_t *);
+	int (*dread)(iop_file_t *, iox_dirent_t *);
+	int (*getstat)(iop_file_t *, const char *, iox_stat_t *);
+	int (*chstat)(iop_file_t *, const char *, iox_stat_t *, unsigned int);
 
 #ifndef IOMAN_NO_EXTENDED
 	/* Extended ops start here.  */
-	int	(*rename)(iop_file_t *, const char *, const char *);
-	int	(*chdir)(iop_file_t *, const char *);
-	int	(*sync)(iop_file_t *, const char *, int);
-	int	(*mount)(iop_file_t *, const char *, const char *, int, void *, int);
-	int	(*umount)(iop_file_t *, const char *);
-	s64	(*lseek64)(iop_file_t *, s64, int);
-	int	(*devctl)(iop_file_t *, const char *, int, void *, unsigned int, void *, unsigned int);
-	int	(*symlink)(iop_file_t *, const char *, const char *);
-	int	(*readlink)(iop_file_t *, const char *, char *, unsigned int);
-	int	(*ioctl2)(iop_file_t *, int, void *, unsigned int, void *, unsigned int);
+	int (*rename)(iop_file_t *, const char *, const char *);
+	int (*chdir)(iop_file_t *, const char *);
+	int (*sync)(iop_file_t *, const char *, int);
+	int (*mount)(iop_file_t *, const char *, const char *, int, void *, int);
+	int (*umount)(iop_file_t *, const char *);
+	s64 (*lseek64)(iop_file_t *, s64, int);
+	int (*devctl)(iop_file_t *, const char *, int, void *, unsigned int, void *, unsigned int);
+	int (*symlink)(iop_file_t *, const char *, const char *);
+	int (*readlink)(iop_file_t *, const char *, char *, unsigned int);
+	int (*ioctl2)(iop_file_t *, int, void *, unsigned int, void *, unsigned int);
 #endif /* IOMAN_NO_EXTENDED */
 } iop_device_ops_t;
 

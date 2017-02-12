@@ -21,7 +21,7 @@ extern int InitUSB();
 
 extern struct irx_export_table _exp_usbmass;
 
-int _start( int argc, char *argv[])
+int _start(int argc, char *argv[])
 {
 	printf("USB HDD FileSystem Driver v%d.%d\n", MAJOR_VER, MINOR_VER);
 
@@ -31,22 +31,19 @@ int _start( int argc, char *argv[])
 	}
 
 	// initialize the FAT driver
-	if(InitFAT() != 0)
-	{
+	if (InitFAT() != 0) {
 		printf("USBHDFSD: Error initializing FAT driver!\n");
 		return MODULE_NO_RESIDENT_END;
 	}
 
 	// initialize the USB driver
-	if(InitUSB() != 0)
-	{
+	if (InitUSB() != 0) {
 		printf("USBHDFSD: Error initializing USB driver!\n");
 		return MODULE_NO_RESIDENT_END;
 	}
 
 	// initialize the file system driver
-	if(InitFS() != 0)
-	{
+	if (InitFS() != 0) {
 		printf("USBHDFSD: Error initializing FS driver!\n");
 		return MODULE_NO_RESIDENT_END;
 	}
@@ -56,7 +53,8 @@ int _start( int argc, char *argv[])
 }
 
 #ifndef WIN32
-void *malloc(int size){
+void *malloc(int size)
+{
 	void *result;
 	int OldState;
 
@@ -67,7 +65,8 @@ void *malloc(int size){
 	return result;
 }
 
-void free(void *ptr){
+void free(void *ptr)
+{
 	int OldState;
 
 	CpuSuspendIntr(&OldState);

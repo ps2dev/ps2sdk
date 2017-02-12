@@ -28,7 +28,7 @@ extern "C" {
 #define iopdebug_IMPORTS_start DECLARE_IMPORT_TABLE(iopdebug, 1, 1)
 #define iopdebug_IMPORTS_end END_IMPORT_TABLE
 
-typedef int (IOP_ExceptionHandler)(struct st_IOP_RegFrame *);
+typedef int(IOP_ExceptionHandler)(struct st_IOP_RegFrame *);
 
 int iop_dbg_install(void);
 #define I_iop_dbg_install DECLARE_IMPORT(5, iop_dbg_install)

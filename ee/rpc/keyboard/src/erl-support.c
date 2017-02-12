@@ -12,9 +12,8 @@
 
 #include <erl.h>
 
-char * erl_id = "libkeyboard";
+char *erl_id = "libkeyboard";
 
-char * erl_dependancies[] = {
+char *erl_dependancies[] = {
     "libkernel",
-    0
-};
+    0};

@@ -24,9 +24,9 @@ int main(int argc, char *argv[])
 {
 	test_suite suite;
 
-	#ifdef _EE
+#ifdef _EE
 	SifInitRpc(0);
-	#endif
+#endif
 
 	/* initialize test suite */
 	init_testsuite(&suite);

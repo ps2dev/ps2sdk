@@ -26,14 +26,14 @@
 #include <audsrv.h>
 #include "audsrv_rpc.h"
 
-#define MIN(a,b) ((a) <= (b)) ? (a) : (b)
+#define MIN(a, b) ((a) <= (b)) ? (a) : (b)
 
 /* rpc mambo jambo */
 static struct t_SifRpcClientData cd0;
-static unsigned int sbuff[4096] __attribute__((aligned (64)));
+static unsigned int sbuff[4096] __attribute__((aligned(64)));
 static struct t_SifRpcDataQueue cb_queue;
 static struct t_SifRpcServerData cb_srv;
-static unsigned char rpc_server_stack[0x1800] __attribute__((aligned (16)));
+static unsigned char rpc_server_stack[0x1800] __attribute__((aligned(16)));
 
 extern void *_gp;
 
@@ -79,7 +79,7 @@ static int call_rpc_1(int func, int arg)
 	WaitSema(completion_sema);
 
 	sbuff[0] = arg;
-	SifCallRpc(&cd0, func, 0, sbuff, 1*4, sbuff, 4, _audsrv_intr, NULL);
+	SifCallRpc(&cd0, func, 0, sbuff, 1 * 4, sbuff, 4, _audsrv_intr, NULL);
 
 	set_error(sbuff[0]);
 	return sbuff[0];
@@ -97,7 +97,7 @@ static int call_rpc_2(int func, int arg1, int arg2)
 
 	sbuff[0] = arg1;
 	sbuff[1] = arg2;
-	SifCallRpc(&cd0, func, 0, sbuff, 2*4, sbuff, 4, _audsrv_intr, NULL);
+	SifCallRpc(&cd0, func, 0, sbuff, 2 * 4, sbuff, 4, _audsrv_intr, NULL);
 
 	set_error(sbuff[0]);
 	return sbuff[0];
@@ -110,7 +110,7 @@ int audsrv_quit()
 {
 	WaitSema(completion_sema);
 
-	SifCallRpc(&cd0, AUDSRV_QUIT, 0, sbuff, 1*4, sbuff, 4, _audsrv_intr, NULL);
+	SifCallRpc(&cd0, AUDSRV_QUIT, 0, sbuff, 1 * 4, sbuff, 4, _audsrv_intr, NULL);
 	set_error(AUDSRV_ERR_NOERROR);
 
 	SifRemoveRpc(&cb_srv, &cb_queue);
@@ -138,7 +138,7 @@ int audsrv_set_format(struct audsrv_fmt_t *fmt)
 	sbuff[0] = fmt->freq;
 	sbuff[1] = fmt->bits;
 	sbuff[2] = fmt->channels;
-	SifCallRpc(&cd0, AUDSRV_SET_FORMAT, 0, sbuff, 3*4, sbuff, 4, _audsrv_intr, NULL);
+	SifCallRpc(&cd0, AUDSRV_SET_FORMAT, 0, sbuff, 3 * 4, sbuff, 4, _audsrv_intr, NULL);
 	set_error(sbuff[0]);
 	return sbuff[0];
 }
@@ -162,25 +162,21 @@ int audsrv_wait_audio(int bytes)
 int audsrv_set_volume(int volume)
 {
 	unsigned short vol_values[26] =
-	{
-		0x0000,
-		0x0000, 0x0096, 0x0190, 0x0230, 0x0320,
-		0x042E, 0x0532, 0x05FA, 0x06C2, 0x088E,
-		0x09F6, 0x0BC2, 0x0DC0, 0x0FF0, 0x118A,
-		0x1482, 0x1752, 0x1B4E, 0x1F40, 0x2378,
-		0x28D2, 0x2EFE, 0x34F8, 0x3A5C, 0x3FFF
-	};
+	    {
+	        0x0000,
+	        0x0000, 0x0096, 0x0190, 0x0230, 0x0320,
+	        0x042E, 0x0532, 0x05FA, 0x06C2, 0x088E,
+	        0x09F6, 0x0BC2, 0x0DC0, 0x0FF0, 0x118A,
+	        0x1482, 0x1752, 0x1B4E, 0x1F40, 0x2378,
+	        0x28D2, 0x2EFE, 0x34F8, 0x3A5C, 0x3FFF};
 
-	if (volume > 100)
-	{
+	if (volume > 100) {
 		volume = 100;
-	}
-	else if (volume < 0)
-	{
+	} else if (volume < 0) {
 		volume = 0;
 	}
 
-	return call_rpc_1(AUDSRV_SET_VOLUME, vol_values[volume/4]);
+	return call_rpc_1(AUDSRV_SET_VOLUME, vol_values[volume / 4]);
 }
 
 /** Starts playing the request track
@@ -310,18 +306,16 @@ int audsrv_play_audio(const char *chunk, int bytes)
 
 	set_error(AUDSRV_ERR_NOERROR);
 	maxcopy = sizeof(sbuff) - sizeof(int);
-	while (bytes > 0)
-	{
+	while (bytes > 0) {
 		WaitSema(completion_sema);
 
 		copy = MIN(bytes, maxcopy);
 		sbuff[0] = copy;
 		memcpy(&sbuff[1], chunk, copy);
 		packet_size = copy + sizeof(int);
-		SifCallRpc(&cd0, AUDSRV_PLAY_AUDIO, 0, sbuff, packet_size, sbuff, 1*4, _audsrv_intr, NULL);
+		SifCallRpc(&cd0, AUDSRV_PLAY_AUDIO, 0, sbuff, packet_size, sbuff, 1 * 4, _audsrv_intr, NULL);
 
-		if (sbuff[0] < 0)
-		{
+		if (sbuff[0] < 0) {
 			/* there was an error */
 			set_error(-sbuff[0]);
 			break;
@@ -347,7 +341,7 @@ int audsrv_stop_audio()
 
 static void *audsrv_ee_rpc_handler(int fnum, void *buffer, int len)
 {
-	switch(fnum){
+	switch (fnum) {
 		case AUDSRV_FILLBUF_CALLBACK:
 			if (on_fillbuf != NULL)
 				on_fillbuf(on_fillbuf_arg);
@@ -379,24 +373,20 @@ int audsrv_init()
 	ee_thread_t rpcThread;
 	int ret;
 
-	if (initialized)
-	{
+	if (initialized) {
 		/* already done */
 		return 0;
 	}
 
 	memset(&cd0, '\0', sizeof(cd0));
 
-	while (1)
-	{
-		if (SifBindRpc(&cd0, AUDSRV_IRX, 0) < 0)
-		{
+	while (1) {
+		if (SifBindRpc(&cd0, AUDSRV_IRX, 0) < 0) {
 			set_error(AUDSRV_ERR_RPC_FAILED);
 			return -1;
 		}
 
- 		if (cd0.server != 0)
-		{
+		if (cd0.server != 0) {
 			break;
 		}
 
@@ -407,8 +397,7 @@ int audsrv_init()
 	compSema.max_count = 1;
 	compSema.option = 0;
 	completion_sema = CreateSema(&compSema);
-	if (completion_sema < 0)
-	{
+	if (completion_sema < 0) {
 		set_error(AUDSRV_ERR_FAILED_TO_CREATE_SEMA);
 		return -1;
 	}
@@ -426,8 +415,7 @@ int audsrv_init()
 
 	SifCallRpc(&cd0, AUDSRV_INIT, 0, sbuff, 64, sbuff, 64, NULL, NULL);
 	ret = sbuff[0];
-	if (ret != 0)
-	{
+	if (ret != 0) {
 		set_error(ret);
 		return ret;
 	}
@@ -456,15 +444,14 @@ int audsrv_adpcm_init()
 */
 int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size)
 {
-	void* iop_addr;
+	void *iop_addr;
 	SifDmaTransfer_t sifdma;
 	int id;
 
 	WaitSema(completion_sema);
 
 	iop_addr = SifAllocIopHeap(size);
-	if (iop_addr == 0)
-	{
+	if (iop_addr == 0) {
 		return -AUDSRV_ERR_OUT_OF_MEMORY;
 	}
 
@@ -475,7 +462,8 @@ int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size)
 
 	/* send by dma */
 	id = SifSetDma(&sifdma, 1);
-	while(SifDmaStat(id) >= 0);
+	while (SifDmaStat(id) >= 0)
+		;
 
 	sbuff[0] = (int)iop_addr;
 	sbuff[1] = size;
@@ -484,13 +472,10 @@ int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size)
 	SifCallRpc(&cd0, AUDSRV_LOAD_ADPCM, 0, sbuff, 12, sbuff, 16, _audsrv_intr, NULL);
 	SifFreeIopHeap(iop_addr);
 
-	if(sbuff[0] != 0)
-	{
+	if (sbuff[0] != 0) {
 		adpcm->buffer = 0;
 		return sbuff[0];
-	}
-	else
-	{
+	} else {
 		adpcm->buffer = buffer;
 		adpcm->size = size;
 		adpcm->pitch = sbuff[1];
@@ -519,25 +504,24 @@ int audsrv_play_adpcm(audsrv_adpcm_t *adpcm)
 */
 const char *audsrv_get_error_string()
 {
-	switch(audsrv_get_error())
-	{
+	switch (audsrv_get_error()) {
 		case AUDSRV_ERR_NOERROR:
-		return "No error";
+			return "No error";
 
 		case AUDSRV_ERR_NOT_INITIALIZED:
-		return "Not initialized";
+			return "Not initialized";
 
 		case AUDSRV_ERR_OUT_OF_MEMORY:
-		return "Out of IOP memory";
+			return "Out of IOP memory";
 
 		case AUDSRV_ERR_RPC_FAILED:
-		return "RPC operation failed";
+			return "RPC operation failed";
 
 		case AUDSRV_ERR_FORMAT_NOT_SUPPORTED:
-		return "Format not supported";
+			return "Format not supported";
 
 		case AUDSRV_ERR_NO_DISC:
-		return "No disc in drive";
+			return "No disc in drive";
 	}
 
 	return "Unknown error";
@@ -570,8 +554,7 @@ int audsrv_on_fillbuf(int amount, audsrv_callback_t cb, void *arg)
 	on_fillbuf_arg = 0;
 
 	err = call_rpc_1(AUDSRV_SET_THRESHOLD, amount);
-	if (err != 0)
-	{
+	if (err != 0) {
 		return err;
 	}
 

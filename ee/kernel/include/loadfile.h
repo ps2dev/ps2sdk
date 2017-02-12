@@ -19,11 +19,11 @@ extern "C" {
 
 #include <tamtypes.h>
 
-#define LF_PATH_MAX	252
-#define LF_ARG_MAX	252
+#define LF_PATH_MAX 252
+#define LF_ARG_MAX 252
 
 enum _lf_val_types {
-	LF_VAL_BYTE  = 0,
+	LF_VAL_BYTE = 0,
 	LF_VAL_SHORT,
 	LF_VAL_LONG
 };
@@ -37,9 +37,9 @@ typedef struct
 } t_ExecData;
 
 /* Extended error codes */
-#define SCE_EBINDMISS 0x10000	/* Could not bind with RPC server */
-#define SCE_ECALLMISS 0x10001	/* Could not call the RPC function */
-#define SCE_ELOADMISS 0x10003	/* ELF/Module load failed */
+#define SCE_EBINDMISS 0x10000 /* Could not bind with RPC server */
+#define SCE_ECALLMISS 0x10001 /* Could not call the RPC function */
+#define SCE_ELOADMISS 0x10003 /* ELF/Module load failed */
 
 int SifLoadFileInit(void);
 void SifLoadFileExit(void);

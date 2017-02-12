@@ -15,5 +15,4 @@
 
 #include <sysclib.h>
 
-#endif	// _STRING_H
-
+#endif // _STRING_H

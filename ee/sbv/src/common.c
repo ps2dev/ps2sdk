@@ -41,16 +41,15 @@ int smem_write_word(void *address, u32 value)
 	int result;
 	SifDmaTransfer_t dmat;
 
-	pDestRounded=(void*)(((u32)address)&0xFFFFFFC0);
-	SyncDCache(&smem_buf, smem_buf.bytes+64);
-	if((result=SifRpcGetOtherData(&RData, pDestRounded, &smem_buf, 64, 0))>=0)
-	{
-		*(u32*)UNCACHED_SEG((&smem_buf.bytes[((u32)address&0x3F)]))=value;
+	pDestRounded = (void *)(((u32)address) & 0xFFFFFFC0);
+	SyncDCache(&smem_buf, smem_buf.bytes + 64);
+	if ((result = SifRpcGetOtherData(&RData, pDestRounded, &smem_buf, 64, 0)) >= 0) {
+		*(u32 *)UNCACHED_SEG((&smem_buf.bytes[((u32)address & 0x3F)])) = value;
 
-		dmat.src=&smem_buf;
-		dmat.dest=pDestRounded;
-		dmat.size=64;
-		dmat.attr=0;
+		dmat.src = &smem_buf;
+		dmat.dest = pDestRounded;
+		dmat.size = 64;
+		dmat.attr = 0;
 		SifSetDma(&dmat, 1);
 	}
 

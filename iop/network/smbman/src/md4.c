@@ -55,8 +55,8 @@ static void transform(unsigned char *block)
 	int i;
 	unsigned int X[16];
 
-	for (i=0; i<16; i++)
-		X[i] = (block[i*4+3] << 24) | (block[i*4+2] << 16) | (block[i*4+1] << 8) | block[i*4];
+	for (i = 0; i < 16; i++)
+		X[i] = (block[i * 4 + 3] << 24) | (block[i * 4 + 2] << 16) | (block[i * 4 + 1] << 8) | block[i * 4];
 
 	unsigned int A = context[0];
 	unsigned int B = context[1];
@@ -110,7 +110,7 @@ static void transform(unsigned char *block)
 	C = HH(C, D, A, B, X[5], 11);
 	B = HH(B, C, D, A, X[13], 15);
 	A = HH(A, B, C, D, X[3], 3);
-        D = HH(D, A, B, C, X[11], 9);
+	D = HH(D, A, B, C, X[11], 9);
 	C = HH(C, D, A, B, X[7], 11);
 	B = HH(B, C, D, A, X[15], 15);
 
@@ -144,9 +144,10 @@ static void engineReset()
  */
 unsigned char *MD4(unsigned char *message, int len, unsigned char *cipher)
 {
-	union {
+	union
+	{
 		unsigned char ucbuff[128];
-		unsigned int uibuff[128/sizeof(unsigned int)];
+		unsigned int uibuff[128 / sizeof(unsigned int)];
 	} buffer;
 	unsigned int b = len * 8;
 
@@ -164,10 +165,10 @@ unsigned char *MD4(unsigned char *message, int len, unsigned char *cipher)
 	buffer.ucbuff[len] = 0x80;
 
 	if (len < 56) {
-		buffer.uibuff[56/sizeof(unsigned int)] = b;
+		buffer.uibuff[56 / sizeof(unsigned int)] = b;
 		transform(buffer.ucbuff);
 	} else {
-		buffer.uibuff[120/sizeof(unsigned int)] = b;
+		buffer.uibuff[120 / sizeof(unsigned int)] = b;
 		transform(buffer.ucbuff);
 		transform(&buffer.ucbuff[64]);
 	}
@@ -179,4 +180,3 @@ unsigned char *MD4(unsigned char *message, int len, unsigned char *cipher)
 
 	return (unsigned char *)cipher;
 }
-

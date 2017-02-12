@@ -18,7 +18,8 @@
 int GetModuleIdList(int *readbuf, int readbufsize, int *modulecount);
 #define I_GetModuleIdList DECLARE_IMPORT(16, GetModuleIdList)
 
-typedef struct {
+typedef struct
+{
 	char name[56];
 	u16 version;
 	u16 flags;
@@ -38,7 +39,8 @@ int ReferModuleStatus(int, ModuleStatus *status);
 int GetModuleIdListByName(const char *name, int *readbuf, int readbufsize, int *modulecount);
 #define I_GetModuleIdListByName DECLARE_IMPORT(18, GetModuleIdListByName)
 
-typedef struct {
+typedef struct
+{
 	int (*beforeOpen)(void *opt, const char *filename, int flag);
 	int (*afterOpen)(void *opt, int fd);
 	int (*close)(void *opt, int fd);
@@ -49,7 +51,8 @@ typedef struct {
 	int (*getfsize)(void *opt, int fd);
 } LDfilefunc;
 
-typedef struct {
+typedef struct
+{
 	char position;
 	char access;
 	char creserved[2];

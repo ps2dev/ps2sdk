@@ -5,24 +5,24 @@
  *	Programmer:	SP193
  */
 
-#define BSWAP32(x) ((x<<24)|((x&0xff00)<<8)|((x&0xff0000)>>8)|(x>>24))
-#define BSWAP16(x) ((((unsigned short int)x)<<8)|(x>>8))
+#define BSWAP32(x) ((x << 24) | ((x & 0xff00) << 8) | ((x & 0xff0000) >> 8) | (x >> 24))
+#define BSWAP16(x) ((((unsigned short int)x) << 8) | (x >> 8))
 
 /* IEEE1394 speeds */
-#define S100	0
-#define S200	1
-#define S400	2
+#define S100 0
+#define S200 1
+#define S400 2
 
-#define iLink_NODE_IRMC		0x10
-#define iLink_NODE_CMC		0x08
-#define iLink_NODE_ISC		0x04
-#define iLink_NODE_BMC		0x02
-#define iLink_NODE_PMC		0x01
+#define iLink_NODE_IRMC 0x10
+#define iLink_NODE_CMC 0x08
+#define iLink_NODE_ISC 0x04
+#define iLink_NODE_BMC 0x02
+#define iLink_NODE_PMC 0x01
 
-#define iLink_CB_WRITE_REQUEST	0x01
-#define iLink_CB_READ_REQUEST	0x02
-#define iLink_CB_LOCK_REQUEST	0x04
-#define iLink_CB_BUS_RESET	0x08
+#define iLink_CB_WRITE_REQUEST 0x01
+#define iLink_CB_READ_REQUEST 0x02
+#define iLink_CB_LOCK_REQUEST 0x04
+#define iLink_CB_BUS_RESET 0x08
 
 /* Module function import stuff. */
 #define iLinkman_IMPORTS_start DECLARE_IMPORT_TABLE(iLinkman, 1, 1)

@@ -54,21 +54,19 @@ float coshf(float xx)
 #else
 float expf();
 
-float coshf(xx)
-double xx;
+float coshf(xx) double xx;
 #endif
 {
-float x, y;
+	float x, y;
 
-x = xx;
-if( x < 0 )
-	x = -x;
-if( x > MAXLOGF )
-	{
-	mtherr( "coshf", OVERFLOW );
-	return( MAXNUMF );
+	x = xx;
+	if (x < 0)
+		x = -x;
+	if (x > MAXLOGF) {
+		mtherr("coshf", OVERFLOW);
+		return (MAXNUMF);
 	}
-y = expf(x);
-y = y + 1.0/y;
-return( 0.5*y );
+	y = expf(x);
+	y = y + 1.0 / y;
+	return (0.5 * y);
 }

@@ -13,17 +13,17 @@
 #define ssbusc_IMPORTS_start DECLARE_IMPORT_TABLE(ssbusc, 1, 1)
 #define ssbusc_IMPORTS_end END_IMPORT_TABLE
 
-enum SSBUSC_DEV_IDS{
-	SSBUSC_DEV0		=0,	//Seems to affect the memory map entirely.
-	SSBUSC_DEV_DVDROM,	//DVD ROM chip (contains rom1 and erom), DEV1
+enum SSBUSC_DEV_IDS {
+	SSBUSC_DEV0 = 0,   //Seems to affect the memory map entirely.
+	SSBUSC_DEV_DVDROM, //DVD ROM chip (contains rom1 and erom), DEV1
 	SSBUSC_DEV2,
 	SSBUSC_DEV3,
-	SSBUSC_DEV_SPU,		//SPU, DEV4
-	SSBUSC_DEV_CDVD,	//CD/DVD hardware, DEV5
+	SSBUSC_DEV_SPU,  //SPU, DEV4
+	SSBUSC_DEV_CDVD, //CD/DVD hardware, DEV5
 	SSBUSC_DEV6,
 	SSBUSC_DEV7,
 	SSBUSC_DEV8,
-	SSBUSC_DEV_SPU2,	//SPU2
+	SSBUSC_DEV_SPU2, //SPU2
 	//These 3 seem to be controls for the DEV9 expansion interface. Only SSBUSC_DEV_DEV9_3 can have its address adjusted.
 	SSBUSC_DEV_DEV9_2,
 	SSBUSC_DEV_DEV9_3,

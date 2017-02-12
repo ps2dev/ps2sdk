@@ -16,7 +16,7 @@
 
 #include "internal.h"
 
-static short int gs_db_draw_buffer=0;
+static short int gs_db_draw_buffer = 0;
 
 int GsDbGetDrawBuffer(void)
 {
@@ -25,10 +25,10 @@ int GsDbGetDrawBuffer(void)
 
 int GsDbGetDisplayBuffer(void)
 {
-	return(gs_db_draw_buffer? 0: 1);
+	return (gs_db_draw_buffer ? 0 : 1);
 }
 
 void GsDbSwapBuffer(void)
 {
-	gs_db_draw_buffer = gs_db_draw_buffer? 0: 1;
+	gs_db_draw_buffer = gs_db_draw_buffer ? 0 : 1;
 }

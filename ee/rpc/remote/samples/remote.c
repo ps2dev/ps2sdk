@@ -52,8 +52,7 @@ static s32 VblankEndHandler(s32 cause)
 
 static const char *getRmStatus(u32 status)
 {
-	switch(status)
-	{
+	switch (status) {
 		case RM_INIT:
 			return "INITIALIZING";
 		case RM_READY:
@@ -69,8 +68,7 @@ static const char *getRmStatus(u32 status)
 
 static const char *getRmButton(u32 button)
 {
-	switch(button)
-	{
+	switch (button) {
 		case RM_AUDIO:
 			return "AUDIO";
 		case RM_SHUFFLE:
@@ -190,47 +188,43 @@ int main(int argc, char *argv[])
 	//Initialize RPC services
 	SifInitRpc(0);
 	SifIopReset(NULL, 0);
-	while(!SifIopSync()){};
+	while (!SifIopSync()) {
+	};
 	SifInitRpc(0);
 
 	//Initialize graphics library
 	init_scr();
 
-	scr_printf(	"Welcome to the RMMAN sample!\n");
-	scr_printf(	"For this demo, the remote should be plugged into port 2.\n");
-	scr_printf(	"Loading modules...\n");
+	scr_printf("Welcome to the RMMAN sample!\n");
+	scr_printf("For this demo, the remote should be plugged into port 2.\n");
+	scr_printf("Loading modules...\n");
 
 	//Load modules
 	SifLoadFileInit();
 
 #ifdef USE_ROM_MODULES
-	if(SifLoadModule("rom0:ADDDRV", 0, NULL) < 0)
-	{
+	if (SifLoadModule("rom0:ADDDRV", 0, NULL) < 0) {
 		scr_printf("Failed to load ADDDRV!\n");
 		SleepThread();
 	}
 
-	if(SifLoadModule("rom1:SIO2MAN", 0, NULL) < 0)
-	{
+	if (SifLoadModule("rom1:SIO2MAN", 0, NULL) < 0) {
 		scr_printf("Failed to load SIO2MAN!\n");
 		SleepThread();
 	}
 
-	if(SifLoadModule("rom1:RMMAN", 0, NULL) < 0)
-	{
+	if (SifLoadModule("rom1:RMMAN", 0, NULL) < 0) {
 		scr_printf("Failed to load RMMAN!\n");
 		SleepThread();
 	}
 #else
 	sbv_patch_enable_lmb();
 
-	if(SifExecModuleBuffer(SIO2MAN_irx, size_SIO2MAN_irx, 0, NULL, NULL) < 0)
-	{
+	if (SifExecModuleBuffer(SIO2MAN_irx, size_SIO2MAN_irx, 0, NULL, NULL) < 0) {
 		scr_printf("Failed to load SIO2MAN!\n");
 		SleepThread();
 	}
-	if(SifExecModuleBuffer(RMMAN_irx, size_RMMAN_irx, 0, NULL, NULL) < 0)
-	{
+	if (SifExecModuleBuffer(RMMAN_irx, size_RMMAN_irx, 0, NULL, NULL) < 0) {
 		scr_printf("Failed to load RMMAN!\n");
 		SleepThread();
 	}
@@ -238,7 +232,7 @@ int main(int argc, char *argv[])
 
 	SifLoadFileExit();
 
-	scr_printf(	"Initializing...\n");
+	scr_printf("Initializing...\n");
 
 	//Prepare semaphores, for detecting Vertical-Blanking events.
 	sema.count = 0;
@@ -254,17 +248,17 @@ int main(int argc, char *argv[])
 
 	//Initialize the RMMAN RPC service
 	RMMan_Init();
-	scr_printf(	"Module version: 0x%04x\n", RMMan_GetModuleVersion());
+	scr_printf("Module version: 0x%04x\n", RMMan_GetModuleVersion());
 
-	scr_printf(	"Opening ports...");
+	scr_printf("Opening ports...");
 
 	/*	The remote can only be connected to slot 0 of any port (multitaps are not supported).
 		For this demo, assume that the remote controller dongle is connected to
 		controller port 2 (port = 1).	*/
 	RMMan_Open(1, 0, rmData);
 
-	scr_printf(	"done!\n");
-	scr_printf(	"New input will be displayed here:\n");
+	scr_printf("done!\n");
+	scr_printf("New input will be displayed here:\n");
 
 	//Enable interrupt handlers
 	_EnableIntc(INTC_VBLANK_S);
@@ -278,8 +272,7 @@ int main(int argc, char *argv[])
 	memset(&olddata, 0, sizeof(olddata));
 
 	//Enter the main loop
-	while(1)
-	{	//Like with PADMAN, RMMAN only sends updates once every 1/60th (NTSC) or 1/50th (PAL) second.
+	while (1) { //Like with PADMAN, RMMAN only sends updates once every 1/60th (NTSC) or 1/50th (PAL) second.
 		//Hence, wait for a VBlank cycle (1/50th or 1/60th second).
 		WaitSema(VblankStartSema);
 		WaitSema(VblankEndSema);
@@ -288,24 +281,23 @@ int main(int argc, char *argv[])
 		RMMan_Read(1, 0, &data);
 
 		//If there was a difference, print it.
-		if((olddata.status != data.status) || (olddata.button != data.button))
-		{
+		if ((olddata.status != data.status) || (olddata.button != data.button)) {
 			olddata = data;
 
 			/*	Do not draw past the end of the screen. If this is the last line, prepare to wrap around. */
-			if(scr_getY() + 1 >= 27)
+			if (scr_getY() + 1 >= 27)
 				wrap = 1;
 
 			scr_printf("\t%08x (%s)\t%08x (%s)\n", data.status, getRmStatus(data.status), data.button, getRmButton(data.button));
 
-			if(wrap)	//From libdebug itself
+			if (wrap) //From libdebug itself
 			{
 				scr_setXY(0, startY);
 				wrap = 0;
 			}
 		}
 	}
-	
+
 	scr_printf("Shutting down...\n");
 
 	//Prepare for shutdown

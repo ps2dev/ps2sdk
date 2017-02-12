@@ -27,18 +27,34 @@ definitions for use inside the PS2 sbus project.
 #include <stdio.h>
 
 #ifdef _KMODE
-#define M_SuspendIntr(__stat_ptr) { }
-#define M_ResumeIntr(__stat) { }
+#define M_SuspendIntr(__stat_ptr) \
+	{                             \
+	}
+#define M_ResumeIntr(__stat) \
+	{                        \
+	}
 #else
-#define M_SuspendIntr(__stat_ptr) *(int *) (__stat_ptr) = DIntr(); *(int *) (__stat_ptr) |= ((((ee_kmode_enter() >> 3) & 3) != 0) << 1)
-#define M_ResumeIntr(__stat) { if(__stat & 2) { ee_kmode_exit(); } if(__stat & 1) { EIntr(); } }
+#define M_SuspendIntr(__stat_ptr)   \
+	*(int *)(__stat_ptr) = DIntr(); \
+	*(int *)(__stat_ptr) |= ((((ee_kmode_enter() >> 3) & 3) != 0) << 1)
+#define M_ResumeIntr(__stat) \
+	{                        \
+		if (__stat & 2) {    \
+			ee_kmode_exit(); \
+		}                    \
+		if (__stat & 1) {    \
+			EIntr();         \
+		}                    \
+	}
 #endif
 
-#define M_DisableIrq(__irq, __stat_ptr) *(int *) (__stat_ptr) = DisableIntc(__irq)
+#define M_DisableIrq(__irq, __stat_ptr) *(int *)(__stat_ptr) = DisableIntc(__irq)
 #define M_EnableIrq(__irq) EnableIntc(__irq)
 
 // TODO: FIX ME!!!
-#define M_ReleaseIrqHandler(__irq) if(0) { }
+#define M_ReleaseIrqHandler(__irq) \
+	if (0) {                       \
+	}
 
 #define M_RegisterIrqHandler(__irq, __handler, __param) AddIntcHandler((__irq), (__handler), 0)
 
@@ -63,6 +79,6 @@ definitions for use inside the PS2 sbus project.
 
 #define SIF2_XFER_CHUNK_SIZE (128)
 
-typedef void (*SIF2_TransferCbFunc) (void);
+typedef void (*SIF2_TransferCbFunc)(void);
 
 #endif // #ifndef __SBUS_PRIV

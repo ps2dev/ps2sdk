@@ -21,10 +21,10 @@
 #endif
 
 /* Use this to set the default malloc() alignment. */
-#define DEFAULT_ALIGNMENT	16
+#define DEFAULT_ALIGNMENT 16
 
 #ifndef ALIGN
-#define ALIGN(x, align) (((x)+((align)-1))&~((align)-1))
+#define ALIGN(x, align) (((x) + ((align)-1)) & ~((align)-1))
 #endif
 
 #ifdef DEBUG_ALLOC
@@ -40,60 +40,61 @@ void _ps2sdk_alloc_unlock();
 static vs32 alloc_sema = -1;
 void _ps2sdk_alloc_init()
 {
-    ee_sema_t alloc_sema_struct;
-    alloc_sema_struct.init_count = 1;
-    alloc_sema_struct.max_count = 1;
-    alloc_sema = CreateSema(&alloc_sema_struct);
+	ee_sema_t alloc_sema_struct;
+	alloc_sema_struct.init_count = 1;
+	alloc_sema_struct.max_count = 1;
+	alloc_sema = CreateSema(&alloc_sema_struct);
 }
 
 void _ps2sdk_alloc_deinit()
 {
-    if (alloc_sema >= 0) {
-	DeleteSema(alloc_sema);
-    }
+	if (alloc_sema >= 0) {
+		DeleteSema(alloc_sema);
+	}
 }
 
 void _ps2sdk_alloc_lock()
 {
-    if (alloc_sema >= 0) {
-	WaitSema(alloc_sema);
-    }
+	if (alloc_sema >= 0) {
+		WaitSema(alloc_sema);
+	}
 }
 
 void _ps2sdk_alloc_unlock()
 {
-    if (alloc_sema >= 0) {
-	SignalSema(alloc_sema);
-    }
+	if (alloc_sema >= 0) {
+		SignalSema(alloc_sema);
+	}
 }
 #endif
 
 /* _heap_mem_block_header structure. */
-typedef struct _heap_mem_header {
+typedef struct _heap_mem_header
+{
 #ifdef DEBUG_ALLOC
-	u32     magic;
+	u32 magic;
 #endif
-	void *	ptr;
-	size_t	size;
-	struct _heap_mem_header * prev;
-	struct _heap_mem_header * next;
+	void *ptr;
+	size_t size;
+	struct _heap_mem_header *prev;
+	struct _heap_mem_header *next;
 } heap_mem_header_t;
 
-extern void * __alloc_heap_base;
+extern void *__alloc_heap_base;
 extern heap_mem_header_t *__alloc_heap_head;
 extern heap_mem_header_t *__alloc_heap_tail;
 
-heap_mem_header_t * _heap_mem_fit(heap_mem_header_t *head, size_t size);
+heap_mem_header_t *_heap_mem_fit(heap_mem_header_t *head, size_t size);
 
 #ifdef F_malloc
 
-void * __alloc_heap_base = NULL;
+void *__alloc_heap_base = NULL;
 heap_mem_header_t *__alloc_heap_head = NULL;
 heap_mem_header_t *__alloc_heap_tail = NULL;
 
 /* Find a the lowest block that we can allocate AFTER, returning NULL if there
    are none.  */
-heap_mem_header_t * _heap_mem_fit(heap_mem_header_t *head, size_t size)
+heap_mem_header_t *_heap_mem_fit(heap_mem_header_t *head, size_t size)
 {
 	heap_mem_header_t *prev_mem = head;
 	u32 prev_top, next_bot;
@@ -112,8 +113,7 @@ heap_mem_header_t * _heap_mem_fit(heap_mem_header_t *head, size_t size)
 	return prev_mem;
 }
 
-__attribute__((weak))
-void * malloc(size_t size)
+__attribute__((weak)) void *malloc(size_t size)
 {
 	void *ptr = NULL, *mem_ptr;
 	heap_mem_header_t *new_mem, *prev_mem;
@@ -138,15 +138,15 @@ void * malloc(size_t size)
 
 		/* Allocate the physical heap and setup the head block.  */
 		if ((mem_ptr = ps2_sbrk(mem_sz)) == (void *)-1)
-			return ptr;	/* NULL */
+			return ptr; /* NULL */
 
 		ptr = (void *)((u32)mem_ptr + sizeof(heap_mem_header_t));
 
-		__alloc_heap_head       = (heap_mem_header_t *)mem_ptr;
+		__alloc_heap_head = (heap_mem_header_t *)mem_ptr;
 #ifdef DEBUG_ALLOC
 		__alloc_heap_head->magic = ALLOC_MAGIC;
 #endif
-		__alloc_heap_head->ptr  = ptr;
+		__alloc_heap_head->ptr = ptr;
 		__alloc_heap_head->size = mem_sz - sizeof(heap_mem_header_t);
 		__alloc_heap_head->prev = NULL;
 		__alloc_heap_head->next = NULL;
@@ -160,12 +160,12 @@ void * malloc(size_t size)
 	/* Check to see if there's free space at the bottom of the heap.  */
 	if ((__alloc_heap_base + mem_sz) < (void *)__alloc_heap_head) {
 		new_mem = (heap_mem_header_t *)__alloc_heap_base;
-		ptr     = (void *)((u32)new_mem + sizeof(heap_mem_header_t));
+		ptr = (void *)((u32)new_mem + sizeof(heap_mem_header_t));
 
 #ifdef DEBUG_ALLOC
 		new_mem->magic = ALLOC_MAGIC;
 #endif
-		new_mem->ptr  = ptr;
+		new_mem->ptr = ptr;
 		new_mem->size = mem_sz - sizeof(heap_mem_header_t);
 		new_mem->prev = NULL;
 		new_mem->next = __alloc_heap_head;
@@ -180,12 +180,12 @@ void * malloc(size_t size)
 	prev_mem = _heap_mem_fit(__alloc_heap_head, mem_sz);
 	if (prev_mem != NULL) {
 		new_mem = (heap_mem_header_t *)((u32)prev_mem->ptr + prev_mem->size);
-		ptr     = (void *)((u32)new_mem + sizeof(heap_mem_header_t));
+		ptr = (void *)((u32)new_mem + sizeof(heap_mem_header_t));
 
 #ifdef DEBUG_ALLOC
 		new_mem->magic = ALLOC_MAGIC;
 #endif
-		new_mem->ptr  = ptr;
+		new_mem->ptr = ptr;
 		new_mem->size = mem_sz - sizeof(heap_mem_header_t);
 		new_mem->prev = prev_mem;
 		new_mem->next = prev_mem->next;
@@ -200,22 +200,22 @@ void * malloc(size_t size)
 	   order. */
 	if ((mem_ptr = ps2_sbrk(mem_sz)) == (void *)-1) {
 		_ps2sdk_alloc_unlock();
-		return ptr;	/* NULL */
+		return ptr; /* NULL */
 	}
 
 	ptr = (void *)((u32)mem_ptr + sizeof(heap_mem_header_t));
 
-	new_mem       = (heap_mem_header_t *)mem_ptr;
+	new_mem = (heap_mem_header_t *)mem_ptr;
 #ifdef DEBUG_ALLOC
 	new_mem->magic = ALLOC_MAGIC;
 #endif
-	new_mem->ptr  = ptr;
+	new_mem->ptr = ptr;
 	new_mem->size = mem_sz - sizeof(heap_mem_header_t);
 	new_mem->prev = __alloc_heap_tail;
 	new_mem->next = NULL;
 
 	__alloc_heap_tail->next = new_mem;
-	__alloc_heap_tail       = new_mem;
+	__alloc_heap_tail = new_mem;
 
 	_ps2sdk_alloc_unlock();
 	return ptr;
@@ -223,7 +223,7 @@ void * malloc(size_t size)
 #endif
 
 #ifdef F_realloc
-static void * do_realloc(void *ptr, size_t size, size_t align )
+static void *do_realloc(void *ptr, size_t size, size_t align)
 {
 	heap_mem_header_t *prev_mem;
 	void *new_ptr = NULL;
@@ -269,7 +269,7 @@ static void * do_realloc(void *ptr, size_t size, size_t align )
 	/* Are we the last memory block ? */
 	if (!prev_mem->next) {
 		/* Yes, let's just extend the heap then. */
-		if (ps2_sbrk(size - prev_mem->size) == (void*) -1)
+		if (ps2_sbrk(size - prev_mem->size) == (void *)-1)
 			return NULL;
 		prev_mem->size = size;
 
@@ -291,29 +291,26 @@ static void * do_realloc(void *ptr, size_t size, size_t align )
 	if ((new_ptr = memalign(align, size)) == NULL)
 		return new_ptr;
 
-        /* New block is larger, we only copy the old data. */
+	/* New block is larger, we only copy the old data. */
 	memcpy(new_ptr, ptr, prev_mem->size);
 
 	free(ptr);
 	return new_ptr;
 }
 
-__attribute__((weak))
-void *realloc(void *ptr, size_t size)
+__attribute__((weak)) void *realloc(void *ptr, size_t size)
 {
 	return do_realloc(ptr, size, DEFAULT_ALIGNMENT);
 }
 
-__attribute__((weak))
-void *realloc64(void *ptr, size_t size)
+__attribute__((weak)) void *realloc64(void *ptr, size_t size)
 {
 	return do_realloc(ptr, size, 64);
 }
 #endif
 
 #ifdef F_calloc
-__attribute__((weak))
-void * calloc(size_t n, size_t size)
+__attribute__((weak)) void *calloc(size_t n, size_t size)
 {
 	void *ptr = NULL;
 	size_t sz = n * size;
@@ -321,15 +318,15 @@ void * calloc(size_t n, size_t size)
 	if ((ptr = malloc(sz)) == NULL)
 		return ptr;
 
-	asm ("":"+r"(ptr));	//SP193: FIXME: temporary workaround for the GCC calloc optimization bug (results in recursive call to calloc)
+	asm(""
+	    : "+r"(ptr)); //SP193: FIXME: temporary workaround for the GCC calloc optimization bug (results in recursive call to calloc)
 	memset(ptr, 0, sz);
 	return ptr;
 }
 #endif
 
 #ifdef F_memalign
-__attribute__((weak))
-void * memalign(size_t align, size_t size)
+__attribute__((weak)) void *memalign(size_t align, size_t size)
 {
 	heap_mem_header_t new_mem;
 	heap_mem_header_t *cur_mem;
@@ -342,7 +339,7 @@ void * memalign(size_t align, size_t size)
 	/* Allocate with extra alignment bytes just in case it isn't aligned
 	   properly by malloc.  */
 	if ((ptr = malloc(size + align)) == NULL)
-		return ptr;	/* NULL */
+		return ptr; /* NULL */
 
 	/* If malloc returned it aligned for us we're fine.  */
 	if (((u32)ptr & (align - 1)) == 0)
@@ -382,8 +379,7 @@ void * memalign(size_t align, size_t size)
 #endif
 
 #ifdef F_free
-__attribute__((weak))
-void free(void *ptr)
+__attribute__((weak)) void free(void *ptr)
 {
 	heap_mem_header_t *cur;
 	void *heap_top;
@@ -412,7 +408,7 @@ void free(void *ptr)
 	/* Freeing the head pointer is a special case.  */
 	if (ptr == __alloc_heap_head->ptr) {
 		size = __alloc_heap_head->size +
-			(size_t)(__alloc_heap_head->ptr - (void *)__alloc_heap_head);
+		       (size_t)(__alloc_heap_head->ptr - (void *)__alloc_heap_head);
 
 		__alloc_heap_head = __alloc_heap_head->next;
 
@@ -429,7 +425,7 @@ void free(void *ptr)
 	}
 
 	cur = __alloc_heap_head;
-	while (ptr != cur->ptr)  {
+	while (ptr != cur->ptr) {
 		/* ptr isn't in our list */
 		if (cur->next == NULL) {
 			_ps2sdk_alloc_unlock();
@@ -461,24 +457,27 @@ void free(void *ptr)
 
 /* These are here in case C++ needs them.  */
 #ifdef F___builtin_alloc
-__attribute__((weak))
-void * __builtin_new(size_t size) { return malloc(size); }
+__attribute__((weak)) void *__builtin_new(size_t size)
+{
+	return malloc(size);
+}
 
-__attribute__((weak))
-void __builtin_delete(void *ptr) { free(ptr); }
+__attribute__((weak)) void __builtin_delete(void *ptr) { free(ptr); }
 #endif
 
 #ifdef F___mem_walk
-void * __mem_walk_begin() {
+void *__mem_walk_begin()
+{
 	return __alloc_heap_head;
 }
 
-void __mem_walk_read(void * token, u32 * size, void ** ptr, int * valid) {
-        heap_mem_header_t * cur = (heap_mem_header_t *) token;
+void __mem_walk_read(void *token, u32 *size, void **ptr, int *valid)
+{
+	heap_mem_header_t *cur = (heap_mem_header_t *)token;
 
 #ifdef DEBUG_ALLOC
 	if (cur->magic != ALLOC_MAGIC) {
-    		*valid = 0;
+		*valid = 0;
 		return;
 	}
 #endif
@@ -488,13 +487,15 @@ void __mem_walk_read(void * token, u32 * size, void ** ptr, int * valid) {
 	*ptr = cur->ptr;
 }
 
-void * __mem_walk_inc(void * token) {
-	heap_mem_header_t * cur = (heap_mem_header_t *) token;
+void *__mem_walk_inc(void *token)
+{
+	heap_mem_header_t *cur = (heap_mem_header_t *)token;
 
 	return cur->next;
 }
 
-int __mem_walk_end(void * token) {
+int __mem_walk_end(void *token)
+{
 	return token == NULL;
 }
 #endif
