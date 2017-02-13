@@ -12,10 +12,9 @@
 
 #include <erl.h>
 
-char * erl_id = "libinputx";
-char * erl_dependancies[] = {
+char *erl_id = "libinputx";
+char *erl_dependancies[] = {
     "libc",
     "libmtap",
     "libpadx",
-    0
-};
+    0};

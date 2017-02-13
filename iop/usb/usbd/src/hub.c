@@ -26,16 +26,17 @@ int hubDrvConnect(int devId);
 int hubDrvDisconnect(int devId);
 
 UsbDriver HubDriver = {
-	NULL, NULL, // next, prev
-	"hub",
-	hubDrvProbe,
-	hubDrvConnect,
-	hubDrvDisconnect,
-	0, 0, 0, 0, 0, // reserved fields
-	0	// gp
+    NULL, NULL, // next, prev
+    "hub",
+    hubDrvProbe,
+    hubDrvConnect,
+    hubDrvDisconnect,
+    0, 0, 0, 0, 0, // reserved fields
+    0              // gp
 };
 
-int initHubDriver(void) {
+int initHubDriver(void)
+{
 	int i;
 	UsbHub *hub;
 	uint32 needMem = usbConfig.maxHubDevices * sizeof(UsbHub);
@@ -58,7 +59,8 @@ int initHubDriver(void) {
 	return 0;
 }
 
-UsbHub *allocHubBuffer(void) {
+UsbHub *allocHubBuffer(void)
+{
 	UsbHub *res = hubBufferList;
 	if (res) {
 		hubBufferList = res->next;
@@ -69,7 +71,8 @@ UsbHub *allocHubBuffer(void) {
 	return res;
 }
 
-void freeHubBuffer(UsbHub *hub) {
+void freeHubBuffer(UsbHub *hub)
+{
 	if (hub) {
 		hub->next = hubBufferList;
 		hubBufferList = hub;
@@ -77,13 +80,13 @@ void freeHubBuffer(UsbHub *hub) {
 }
 
 void HubControlTransfer(UsbHub *hubDev, uint8 requestType, uint8 request, uint16 value,
-						  uint16 index, uint16 length, void *destData,
-						  void *callback)
+                        uint16 index, uint16 length, void *destData,
+                        void *callback)
 {
 	if (!hubDev->controlIoReq.busyFlag) {
 		doControlTransfer(hubDev->controlEp, &hubDev->controlIoReq,
-			requestType, request, value, index, length, destData,
-			callback);
+		                  requestType, request, value, index, length, destData,
+		                  callback);
 	} else
 		dbg_printf("ERROR: HubControlTransfer %p: ioReq busy\n", hubDev);
 }
@@ -92,7 +95,8 @@ void hubGetHubStatusCallback(IoRequest *req);
 void hubGetPortStatusCallback(IoRequest *req);
 void getHubStatusChange(UsbHub *dev);
 
-void hubStatusChangeCallback(IoRequest *req) {
+void hubStatusChangeCallback(IoRequest *req)
+{
 	UsbHub *dev = (UsbHub *)req->userCallbackArg;
 	int port;
 
@@ -100,8 +104,8 @@ void hubStatusChangeCallback(IoRequest *req) {
 		if (dev->statusChangeInfo[0] & 1) {
 			dev->statusChangeInfo[0] &= ~1;
 			HubControlTransfer(dev,
-				USB_DIR_IN | USB_RT_HUB, USB_REQ_GET_STATUS, 0, 0, 4, &dev->hubStatus,
-				hubGetHubStatusCallback);
+			                   USB_DIR_IN | USB_RT_HUB, USB_REQ_GET_STATUS, 0, 0, 4, &dev->hubStatus,
+			                   hubGetHubStatusCallback);
 		} else {
 			if (dev->hubStatusCounter > 0) {
 				port = dev->hubStatusCounter;
@@ -109,9 +113,9 @@ void hubStatusChangeCallback(IoRequest *req) {
 					dev->statusChangeInfo[port >> 3] &= ~BIT(port & 7);
 					dev->portCounter = port;
 					HubControlTransfer(dev,
-						USB_DIR_IN | USB_RT_PORT, USB_REQ_GET_STATUS, 0, port, 4, &dev->portStatusChange,
-						hubGetPortStatusCallback);
-                    return;
+					                   USB_DIR_IN | USB_RT_PORT, USB_REQ_GET_STATUS, 0, port, 4, &dev->portStatusChange,
+					                   hubGetPortStatusCallback);
+					return;
 				}
 			} else {
 				for (port = 1; port <= dev->numChildDevices; port++) {
@@ -119,8 +123,8 @@ void hubStatusChangeCallback(IoRequest *req) {
 						dev->statusChangeInfo[port >> 3] &= ~BIT(port & 7);
 						dev->portCounter = port;
 						HubControlTransfer(dev,
-							USB_DIR_IN | USB_RT_PORT, USB_REQ_GET_STATUS, 0, port, 4, &dev->portStatusChange,
-							hubGetPortStatusCallback);
+						                   USB_DIR_IN | USB_RT_PORT, USB_REQ_GET_STATUS, 0, port, 4, &dev->portStatusChange,
+						                   hubGetPortStatusCallback);
 						return;
 					}
 				}
@@ -131,27 +135,29 @@ void hubStatusChangeCallback(IoRequest *req) {
 		dbg_printf("hubStatusChangeCallback, iores %d\n", req->resultCode);
 }
 
-void hubGetHubStatusCallback(IoRequest *req) {
+void hubGetHubStatusCallback(IoRequest *req)
+{
 	UsbHub *dev = (UsbHub *)req->userCallbackArg;
 	if (req->resultCode == USB_RC_OK) {
 		if (dev->hubStatusChange & BIT(C_HUB_LOCAL_POWER)) {
 			dev->hubStatusChange &= ~BIT(C_HUB_LOCAL_POWER);
 			HubControlTransfer(dev,
-				USB_DIR_OUT | USB_RT_HUB, USB_REQ_CLEAR_FEATURE, C_HUB_LOCAL_POWER, 0, 0, NULL,
-				hubGetHubStatusCallback);
+			                   USB_DIR_OUT | USB_RT_HUB, USB_REQ_CLEAR_FEATURE, C_HUB_LOCAL_POWER, 0, 0, NULL,
+			                   hubGetHubStatusCallback);
 
 		} else if (dev->hubStatusChange & BIT(C_HUB_OVER_CURRENT)) {
 			dev->hubStatusChange &= ~BIT(C_HUB_OVER_CURRENT);
 			HubControlTransfer(dev,
-				USB_DIR_OUT | USB_RT_HUB, USB_REQ_CLEAR_FEATURE, C_HUB_OVER_CURRENT, 0, 0, NULL,
-				hubGetHubStatusCallback);
+			                   USB_DIR_OUT | USB_RT_HUB, USB_REQ_CLEAR_FEATURE, C_HUB_OVER_CURRENT, 0, 0, NULL,
+			                   hubGetHubStatusCallback);
 
 		} else
 			hubStatusChangeCallback(&dev->statusIoReq);
 	}
 }
 
-int cancelTimerCallback(TimerCbStruct *arg) {
+int cancelTimerCallback(TimerCbStruct *arg)
+{
 	if (arg->isActive) {
 		if (arg->next)
 			arg->next->prev = arg->prev;
@@ -165,18 +171,19 @@ int cancelTimerCallback(TimerCbStruct *arg) {
 
 		arg->prev = arg->next = NULL;
 		arg->isActive = 0;
-        return 0;
+		return 0;
 	} else
 		return -1;
 }
 
-int addTimerCallback(TimerCbStruct *arg, TimerCallback func, void *cbArg, uint32 delay) {
+int addTimerCallback(TimerCbStruct *arg, TimerCallback func, void *cbArg, uint32 delay)
+{
 	if (arg->isActive)
 		return -1;
 
 	arg->isActive = 1;
 	arg->callbackProc = func;
-	arg->callbackArg  = cbArg;
+	arg->callbackArg = cbArg;
 
 	TimerCbStruct *pos = memPool.timerListStart;
 
@@ -208,7 +215,8 @@ int addTimerCallback(TimerCbStruct *arg, TimerCallback func, void *cbArg, uint32
 	return 0;
 }
 
-void killEndpoint(Endpoint *ep) {
+void killEndpoint(Endpoint *ep)
+{
 	int i = 0;
 	IoRequest *req;
 	HcED *hcEd = &ep->hcEd;
@@ -221,7 +229,7 @@ void killEndpoint(Endpoint *ep) {
 				freeIsoTd(memPool.hcIsoTdBuf + i);
 			}
 		}
-		freeIsoTd((HcIsoTD*)hcEd->tdTail);
+		freeIsoTd((HcIsoTD *)hcEd->tdTail);
 	} else {
 		for (i = 0; i < usbConfig.maxTransfDesc; i++) {
 			req = memPool.hcTdToIoReqLUT[i];
@@ -260,7 +268,8 @@ void killEndpoint(Endpoint *ep) {
 	memPool.freeEpListEnd = ep;
 }
 
-int removeEndpointFromDevice(Device *dev, Endpoint *ep) {
+int removeEndpointFromDevice(Device *dev, Endpoint *ep)
+{
 	ep->hcEd.hcArea |= HCED_SKIP;
 	removeHcEdFromList(ep->endpointType, &ep->hcEd);
 
@@ -279,14 +288,16 @@ int removeEndpointFromDevice(Device *dev, Endpoint *ep) {
 	return 0;
 }
 
-void hubDeviceResetCallback(IoRequest *arg) {
+void hubDeviceResetCallback(IoRequest *arg)
+{
 	if (arg->resultCode == USB_RC_OK)
 		getHubStatusChange((UsbHub *)arg->userCallbackArg);
 	else
 		dbg_printf("port reset err: %d\n", arg->resultCode);
 }
 
-int hubResetDevice(Device *dev) {
+int hubResetDevice(Device *dev)
+{
 	UsbHub *hub;
 	if (memPool.delayResets) {
 		dev->deviceStatus = DEVICE_RESETDELAYED;
@@ -302,14 +313,15 @@ int hubResetDevice(Device *dev) {
 			hub->hubStatusCounter = dev->attachedToPortNo;
 
 			HubControlTransfer(hub,
-				USB_DIR_OUT | USB_RT_PORT, USB_REQ_SET_FEATURE, PORT_RESET, dev->attachedToPortNo, 0, NULL,
-				hubDeviceResetCallback);
+			                   USB_DIR_OUT | USB_RT_PORT, USB_REQ_SET_FEATURE, PORT_RESET, dev->attachedToPortNo, 0, NULL,
+			                   hubDeviceResetCallback);
 		}
 		return 1;
 	}
 }
 
-int checkDelayedResetsTree(Device *tree) {
+int checkDelayedResetsTree(Device *tree)
+{
 	Device *dev;
 	for (dev = tree->childListStart; dev != NULL; dev = dev->next) {
 		if (dev->deviceStatus == DEVICE_RESETDELAYED) {
@@ -324,20 +336,23 @@ int checkDelayedResetsTree(Device *tree) {
 	return 0;
 }
 
-int checkDelayedResets(Device *dev) {
+int checkDelayedResets(Device *dev)
+{
 	memPool.delayResets = 0;
 	dev->resetFlag = 0;
 	checkDelayedResetsTree(memPool.deviceTreeRoot);
 	return 0;
 }
 
-void killDevice(Device *dev, Endpoint *ep) {
+void killDevice(Device *dev, Endpoint *ep)
+{
 	removeEndpointFromDevice(dev, ep);
 	checkDelayedResets(dev);
 	hubResetDevice(dev);
 }
 
-void flushPort(Device *dev) {
+void flushPort(Device *dev)
+{
 	Device *child;
 	if (dev->deviceStatus != DEVICE_NOTCONNECTED) {
 		dev->deviceStatus = DEVICE_NOTCONNECTED;
@@ -387,7 +402,8 @@ void flushPort(Device *dev) {
 		checkDelayedResets(dev);
 }
 
-void fetchConfigDescriptors(IoRequest *req) {
+void fetchConfigDescriptors(IoRequest *req)
+{
 	Endpoint *ep = req->correspEndpoint;
 	Device *dev = ep->correspDevice;
 	uint16 readLen;
@@ -410,15 +426,15 @@ void fetchConfigDescriptors(IoRequest *req) {
 		} else
 			readLen = 4;
 
-		if ((uint8*)dev->staticDeviceDescEndPtr + readLen > (uint8*)dev->staticDeviceDescPtr + usbConfig.maxStaticDescSize) {
+		if ((uint8 *)dev->staticDeviceDescEndPtr + readLen > (uint8 *)dev->staticDeviceDescPtr + usbConfig.maxStaticDescSize) {
 			dbg_printf("USBD: Device ignored, Device descriptors too large\n");
 			return; // buffer is too small, silently ignore the device
 		}
 
-		if (curDescNum < ((UsbDeviceDescriptor*)dev->staticDeviceDescPtr)->bNumConfigurations) {
+		if (curDescNum < ((UsbDeviceDescriptor *)dev->staticDeviceDescPtr)->bNumConfigurations) {
 			doControlTransfer(ep, &dev->ioRequest,
-				USB_DIR_IN | USB_RECIP_DEVICE, USB_REQ_GET_DESCRIPTOR, (USB_DT_CONFIG << 8) | curDescNum, 0, readLen,
-				dev->staticDeviceDescEndPtr, fetchConfigDescriptors);
+			                  USB_DIR_IN | USB_RECIP_DEVICE, USB_REQ_GET_DESCRIPTOR, (USB_DT_CONFIG << 8) | curDescNum, 0, readLen,
+			                  dev->staticDeviceDescEndPtr, fetchConfigDescriptors);
 		} else {
 			dev->prevConnected = memPool.deviceConnectedListEnd;
 			if (memPool.deviceConnectedListEnd)
@@ -436,7 +452,8 @@ void fetchConfigDescriptors(IoRequest *req) {
 
 void requestDeviceDescriptor(IoRequest *req, uint16 length);
 
-void requestDevDescrptCb(IoRequest *req) {
+void requestDevDescrptCb(IoRequest *req)
+{
 	Endpoint *ep = req->correspEndpoint;
 	Device *dev = ep->correspDevice;
 	UsbDeviceDescriptor *desc = dev->staticDeviceDescPtr;
@@ -447,7 +464,7 @@ void requestDevDescrptCb(IoRequest *req) {
 			requestDeviceDescriptor(req, sizeof(UsbDeviceDescriptor));
 		} else {
 			dev->fetchDescriptorCounter = 0;
-			dev->staticDeviceDescEndPtr = (uint8*)dev->staticDeviceDescEndPtr + sizeof(UsbDeviceDescriptor);
+			dev->staticDeviceDescEndPtr = (uint8 *)dev->staticDeviceDescEndPtr + sizeof(UsbDeviceDescriptor);
 			fetchConfigDescriptors(req);
 		}
 	} else {
@@ -456,18 +473,20 @@ void requestDevDescrptCb(IoRequest *req) {
 	}
 }
 
-void requestDeviceDescriptor(IoRequest *req, uint16 length) {
+void requestDeviceDescriptor(IoRequest *req, uint16 length)
+{
 	Endpoint *ep = req->correspEndpoint;
 	Device *dev = ep->correspDevice;
 
 	dev->staticDeviceDescEndPtr = dev->staticDeviceDescPtr;
 
 	doControlTransfer(ep, &dev->ioRequest,
-		USB_DIR_IN | USB_RECIP_DEVICE, USB_REQ_GET_DESCRIPTOR, USB_DT_DEVICE << 8, 0, length, dev->staticDeviceDescEndPtr,
-		requestDevDescrptCb);
+	                  USB_DIR_IN | USB_RECIP_DEVICE, USB_REQ_GET_DESCRIPTOR, USB_DT_DEVICE << 8, 0, length, dev->staticDeviceDescEndPtr,
+	                  requestDevDescrptCb);
 }
 
-void hubPeekDeviceDescriptor(IoRequest *req) {
+void hubPeekDeviceDescriptor(IoRequest *req)
+{
 	requestDeviceDescriptor(req, 8);
 
 	// we've assigned a function address to the device and can reset the next device now, if there is one
@@ -476,7 +495,8 @@ void hubPeekDeviceDescriptor(IoRequest *req) {
 
 void hubSetFuncAddress(Endpoint *ep);
 
-void hubSetFuncAddressCB(IoRequest *req) {
+void hubSetFuncAddressCB(IoRequest *req)
+{
 	Endpoint *ep = req->correspEndpoint;
 	Device *dev = ep->correspDevice;
 
@@ -495,21 +515,24 @@ void hubSetFuncAddressCB(IoRequest *req) {
 	}
 }
 
-void hubSetFuncAddress(Endpoint *ep) {
+void hubSetFuncAddress(Endpoint *ep)
+{
 	Device *dev = ep->correspDevice;
 
 	//printf("setting FA %02X\n", dev->functionAddress);
 	doControlTransfer(ep, &dev->ioRequest,
-		USB_DIR_OUT | USB_RECIP_DEVICE, USB_REQ_SET_ADDRESS, dev->functionAddress, 0, 0, NULL, hubSetFuncAddressCB);
+	                  USB_DIR_OUT | USB_RECIP_DEVICE, USB_REQ_SET_ADDRESS, dev->functionAddress, 0, 0, NULL, hubSetFuncAddressCB);
 }
 
-int hubTimedSetFuncAddress(Device *dev) {
+int hubTimedSetFuncAddress(Device *dev)
+{
 	dev->functionDelay = 20;
 	addTimerCallback(&dev->timer, (TimerCallback)hubSetFuncAddress, dev->endpointListStart, 20);
 	return 0;
 }
 
-void hubGetPortStatusCallback(IoRequest *req) {
+void hubGetPortStatusCallback(IoRequest *req)
+{
 	int feature = -1;
 	UsbHub *dev = (UsbHub *)req->userCallbackArg;
 	Device *port;
@@ -529,8 +552,8 @@ void hubGetPortStatusCallback(IoRequest *req) {
 		if (feature >= 0) {
 			dev->portStatusChange &= ~BIT(feature);
 			HubControlTransfer(dev,
-				USB_DIR_OUT | USB_RT_PORT, USB_REQ_CLEAR_FEATURE, feature, dev->portCounter, 0, NULL,
-				hubGetPortStatusCallback);
+			                   USB_DIR_OUT | USB_RT_PORT, USB_REQ_CLEAR_FEATURE, feature, dev->portCounter, 0, NULL,
+			                   hubGetPortStatusCallback);
 		} else {
 			port = fetchPortElemByNumber(dev->controlEp->correspDevice, dev->portCounter);
 			if (port) {
@@ -565,15 +588,17 @@ void hubGetPortStatusCallback(IoRequest *req) {
 		dbg_printf("HubGetPortStatusCallback res %d\n", req->resultCode);
 }
 
-void getHubStatusChange(UsbHub *dev) {
+void getHubStatusChange(UsbHub *dev)
+{
 	if (dev->statusIoReq.busyFlag == 0) {
 		attachIoReqToEndpoint(dev->statusChangeEp, &dev->statusIoReq,
-			dev->statusChangeInfo, (dev->numChildDevices + 8) >> 3, hubStatusChangeCallback);
+		                      dev->statusChangeInfo, (dev->numChildDevices + 8) >> 3, hubStatusChangeCallback);
 	} else
 		dbg_printf("getHubStatusChange: StatusChangeEP IoReq is busy!\n");
 }
 
-void hubSetPortPower(IoRequest *req) {
+void hubSetPortPower(IoRequest *req)
+{
 	UsbHub *dev = (UsbHub *)req->userCallbackArg;
 
 	if ((req->resultCode == USB_RC_OK) || (dev->portCounter == 0)) {
@@ -581,14 +606,15 @@ void hubSetPortPower(IoRequest *req) {
 		dev->portCounter++;
 		if (dev->portCounter <= dev->numChildDevices) {
 			HubControlTransfer(dev,
-				USB_DIR_OUT | USB_RT_PORT, USB_REQ_SET_FEATURE, PORT_POWER, dev->portCounter, 0, NULL,
-				hubSetPortPower);
+			                   USB_DIR_OUT | USB_RT_PORT, USB_REQ_SET_FEATURE, PORT_POWER, dev->portCounter, 0, NULL,
+			                   hubSetPortPower);
 		} else
 			getHubStatusChange(dev);
 	}
 }
 
-void hubSetupPorts(IoRequest *req) {
+void hubSetupPorts(IoRequest *req)
+{
 	int port;
 	UsbHub *dev = (UsbHub *)req->userCallbackArg;
 	Device *usbDev = dev->controlEp->correspDevice;
@@ -608,31 +634,34 @@ void hubSetupPorts(IoRequest *req) {
 	}
 }
 
-void hubCheckPorts(IoRequest *req) {
+void hubCheckPorts(IoRequest *req)
+{
 	UsbHub *dev = (UsbHub *)req->userCallbackArg;
 	if (req->resultCode == USB_RC_OK) {
 		if (dev->desc.bNbrPorts <= usbConfig.maxPortsPerHub) {
 			HubControlTransfer(dev,
-				USB_DIR_IN | USB_RT_HUB, USB_REQ_GET_STATUS, 0, 0, 4,
-				&dev->hubStatus, hubSetupPorts);
+			                   USB_DIR_IN | USB_RT_HUB, USB_REQ_GET_STATUS, 0, 0, 4,
+			                   &dev->hubStatus, hubSetupPorts);
 		} else
 			dbg_printf("Hub has too many ports (%d > %d)\n", dev->desc.bNbrPorts, usbConfig.maxPortsPerHub);
 	}
 }
 
-void hubCheckDeviceDesc(IoRequest *req) {
+void hubCheckDeviceDesc(IoRequest *req)
+{
 	UsbHub *dev = (UsbHub *)req->userCallbackArg;
 	if (req->resultCode == USB_RC_OK) {
 		if (dev->desc.bDescriptorType == USB_DT_HUB)
-			hubCheckPorts(req);	// we've got the descriptor already
+			hubCheckPorts(req); // we've got the descriptor already
 		else
 			HubControlTransfer(dev,
-				USB_DIR_IN | USB_RT_HUB, USB_REQ_GET_DESCRIPTOR, USB_DT_HUB << 8, 0, sizeof(UsbHubDescriptor), &dev->desc,
-				hubCheckPorts);
+			                   USB_DIR_IN | USB_RT_HUB, USB_REQ_GET_DESCRIPTOR, USB_DT_HUB << 8, 0, sizeof(UsbHubDescriptor), &dev->desc,
+			                   hubCheckPorts);
 	}
 }
 
-int hubDrvProbe(int devId) {
+int hubDrvProbe(int devId)
+{
 	UsbDeviceDescriptor *devDesc;
 	devDesc = (UsbDeviceDescriptor *)doGetDeviceStaticDescriptor(devId, NULL, USB_DT_DEVICE);
 
@@ -642,7 +671,8 @@ int hubDrvProbe(int devId) {
 		return 0;
 }
 
-int hubDrvConnect(int devId) {
+int hubDrvConnect(int devId)
+{
 	UsbConfigDescriptor *confDesc;
 	UsbInterfaceDescriptor *intfDesc;
 	UsbEndpointDescriptor *endpDesc;
@@ -699,13 +729,14 @@ int hubDrvConnect(int devId) {
 		memset(&hubDevice->desc, 0, sizeof(UsbHubDescriptor));
 
 	HubControlTransfer(hubDevice,
-		USB_DIR_OUT, USB_REQ_SET_CONFIGURATION, confDesc->bConfigurationValue, 0, 0, NULL,
-		hubCheckDeviceDesc);
+	                   USB_DIR_OUT, USB_REQ_SET_CONFIGURATION, confDesc->bConfigurationValue, 0, 0, NULL,
+	                   hubCheckDeviceDesc);
 
 	return 0;
 }
 
-int hubDrvDisconnect(int devId) {
+int hubDrvDisconnect(int devId)
+{
 	Device *dev = fetchDeviceById(devId);
 	if (dev) {
 		freeHubBuffer((UsbHub *)dev->privDataField);
@@ -713,4 +744,3 @@ int hubDrvDisconnect(int devId) {
 	} else
 		return -1;
 }
-

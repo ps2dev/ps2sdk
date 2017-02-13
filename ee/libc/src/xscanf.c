@@ -67,31 +67,30 @@
 #define SCANF_FLT 3
 
 #ifndef SCANF_LEVEL
-#  define SCANF_LEVEL SCANF_FLT
+#define SCANF_LEVEL SCANF_FLT
 #endif
 
-#if SCANF_LEVEL == SCANF_MIN || SCANF_LEVEL == SCANF_STD \
-|| SCANF_LEVEL == SCANF_FLT
+#if SCANF_LEVEL == SCANF_MIN || SCANF_LEVEL == SCANF_STD || SCANF_LEVEL == SCANF_FLT
 /* OK */
 #else
-#  error "Not a known scanf level."
+#error "Not a known scanf level."
 #endif
 
 #if SCANF_LEVEL >= SCANF_MIN
-#define FLHASPERCENT	0x01	/* first % found */
-#define	FLUNSIGNED	0x02	/* arg is unsinged (long) * */
-#define FLLONG		0x04	/* arg is long int * */
-#define FLMINUS		0x08	/* minus sign scanned */
-#define FLSHORT		0x10    /* arg is short int * */
+#define FLHASPERCENT 0x01 /* first % found */
+#define FLUNSIGNED 0x02   /* arg is unsinged (long) * */
+#define FLLONG 0x04       /* arg is long int * */
+#define FLMINUS 0x08      /* minus sign scanned */
+#define FLSHORT 0x10      /* arg is short int * */
 #endif
 
 #if SCANF_LEVEL >= SCANF_STD
-#define FLSTAR		0x20	/* suppress assingment (* fmt) */
+#define FLSTAR 0x20 /* suppress assingment (* fmt) */
 #endif
 
 #if SCANF_LEVEL >= SCANF_FLT
-#define FLBRACKET	0x40	/* %[ found, now collecting the set */
-#define FLNEGATE	0x80	/* negate %[ set */
+#define FLBRACKET 0x40 /* %[ found, now collecting the set */
+#define FLNEGATE 0x80  /* negate %[ set */
 
 /* bit set macros for %[ format */
 #define xscanf_set_bit(i) \
@@ -105,31 +104,33 @@
  * bit vector for %[ formats, so it must be at least 256/8 = 32 bytes
  * long.
  */
-#define FLTBUF	40
+#define FLTBUF 40
 #endif
 
 #ifdef F_vxscanf
 #define w_xgetc(s) xgetc(s), clen++
 
-int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, const char *fmt, va_list ap) {
-	union {
+int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, const char *fmt, va_list ap)
+{
+	union
+	{
 #if SCANF_LEVEL >= SCANF_FLT
-		float	d;
+		float d;
 #endif
 		unsigned long ul;
-		long	l;
-		char	*cp;
+		long l;
+		char *cp;
 	} a;
-	char	c;	/* holds a char from the format string */
-	u8	base = 0;
-	int	nconvs, i, j = 0, olen, clen;
+	char c; /* holds a char from the format string */
+	u8 base = 0;
+	int nconvs, i, j = 0, olen, clen;
 #if SCANF_LEVEL > SCANF_MIN
-	s8	width = 0;
+	s8 width = 0;
 #endif
 	u8 flags;
 #if SCANF_LEVEL >= SCANF_FLT
-	char	*buf, *bp;
-	char	fltchars[] = "0123456789Ee.";
+	char *buf, *bp;
+	char fltchars[] = "0123456789Ee.";
 #endif
 
 	flags = 0;
@@ -148,11 +149,11 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 		if (flags & FLBRACKET) {
 			if (c == '^' && i == 0 && !(flags & FLNEGATE)) {
 				flags |= FLNEGATE; /* negate set */
-				continue; /* without bumping i */
+				continue;          /* without bumping i */
 			}
 			if (c == '-') {
 				if (i == 0) {
-				  addbit:
+				addbit:
 					xscanf_set_bit(c);
 					i++;
 					continue;
@@ -207,7 +208,7 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 #endif
 			}
 
-			/*
+/*
 			 * Modifiers go first.  They all end up in a
 			 * "continue" statement so to fetch the next
 			 * char from the format string.
@@ -235,133 +236,133 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 
 			switch (c) {
 #if SCANF_LEVEL > SCANF_MIN
-			case '*':
-				flags |= FLSTAR;
-				continue;
+				case '*':
+					flags |= FLSTAR;
+					continue;
 #endif /* SCANF_LEVEL > SCANF_MIN */
 
-			case 'h':
+				case 'h':
 #if SHRT_MAX != INT_MAX
-				flags |= FLSHORT;
+					flags |= FLSHORT;
 #endif
-				/*
+					/*
 				 * short int and int are identical on
 				 * our target platform, ignore.
 				 */
-				continue;
+					continue;
 
-			case 'l':
-				flags |= FLLONG;
-				continue;
+				case 'l':
+					flags |= FLLONG;
+					continue;
 
 				/*
 				 * Actual conversion specifications go
 				 * here.
 				 */
-			case 'c':
-#if SCANF_LEVEL > SCANF_MIN
-				if (!(flags & FLSTAR))
-#endif /* SCANF_LEVEL > SCANF_MIN */
-					a.cp = va_arg(ap, char *);
-#if SCANF_LEVEL > SCANF_MIN
-				if (width == SCHAR_MAX)
-					width = 1;
-				while (width-- > 0) {
-#endif /* SCANF_LEVEL > SCANF_MIN */
-					i = w_xgetc(&stream);
-					if (i == EOF)
-						goto leave;
+				case 'c':
 #if SCANF_LEVEL > SCANF_MIN
 					if (!(flags & FLSTAR))
 #endif /* SCANF_LEVEL > SCANF_MIN */
-						*a.cp++ = i;
+						a.cp = va_arg(ap, char *);
 #if SCANF_LEVEL > SCANF_MIN
-				}
+					if (width == SCHAR_MAX)
+						width = 1;
+					while (width-- > 0) {
 #endif /* SCANF_LEVEL > SCANF_MIN */
-				break;
-
-			case 's':
+						i = w_xgetc(&stream);
+						if (i == EOF)
+							goto leave;
 #if SCANF_LEVEL > SCANF_MIN
-				if (!(flags & FLSTAR))
+						if (!(flags & FLSTAR))
 #endif /* SCANF_LEVEL > SCANF_MIN */
-					a.cp = va_arg(ap, char *);
-				do {
-					i = w_xgetc(&stream);
-				} while (isspace(i));
-				if (i == EOF)
-					goto leave;
+							*a.cp++ = i;
+#if SCANF_LEVEL > SCANF_MIN
+					}
+#endif /* SCANF_LEVEL > SCANF_MIN */
+					break;
+
+				case 's':
+#if SCANF_LEVEL > SCANF_MIN
+					if (!(flags & FLSTAR))
+#endif /* SCANF_LEVEL > SCANF_MIN */
+						a.cp = va_arg(ap, char *);
+					do {
+						i = w_xgetc(&stream);
+					} while (isspace(i));
+					if (i == EOF)
+						goto leave;
 
 #if SCANF_LEVEL > SCANF_MIN
-				while (width-- > 0)
+					while (width-- > 0)
 #else
-				for (;;)
+					for (;;)
 #endif /* SCANF_LEVEL > SCANF_MIN */
-				{
-					if (isspace(i)) {
-						xungetc(i, &stream);
-						break;
+					{
+						if (isspace(i)) {
+							xungetc(i, &stream);
+							break;
+						}
+#if SCANF_LEVEL > SCANF_MIN
+						if (!(flags & FLSTAR))
+#endif /* SCANF_LEVEL > SCANF_MIN */
+							*a.cp++ = i;
+						i = w_xgetc(&stream);
+						if (i == EOF)
+							break;
 					}
 #if SCANF_LEVEL > SCANF_MIN
 					if (!(flags & FLSTAR))
 #endif /* SCANF_LEVEL > SCANF_MIN */
-						*a.cp++ = i;
-					i = w_xgetc(&stream);
-					if (i == EOF)
-						break;
-				}
-#if SCANF_LEVEL > SCANF_MIN
-				if (!(flags & FLSTAR))
-#endif /* SCANF_LEVEL > SCANF_MIN */
-					*a.cp = '\0';
-				break;
+						*a.cp = '\0';
+					break;
 
-			case 'o':
-				base = 8;
-				flags |= FLUNSIGNED;
-				goto dointeger;
+				case 'o':
+					base = 8;
+					flags |= FLUNSIGNED;
+					goto dointeger;
 
-			case 'p':
+				case 'p':
 				/*
 				 * Handle pointers as plain unsigned
 				 * integers.  This assumes that
 				 * sizeof(void *) == sizeof(unsigned int).
 				 */
-			case 'x':
-				base = 16;
+				case 'x':
+					base = 16;
 				/* FALLTHROUGH */
 
-			case 'u':
-				flags |= FLUNSIGNED;
+				case 'u':
+					flags |= FLUNSIGNED;
 				/* FALLTHROUGH */
 
-			case 'd':
-			case 'i':
-			  dointeger:
-				do {
-					i = w_xgetc(&stream);
-				} while (isspace(i));
-				if (i == EOF)
-					goto leave;
+				case 'd':
+				case 'i':
+				dointeger:
+					do {
+						i = w_xgetc(&stream);
+					} while (isspace(i));
+					if (i == EOF)
+						goto leave;
 
-				if ((char)i == '-' || (char)i == '+') {
+					if ((char)i == '-' || (char)i == '+') {
 #if SCANF_LEVEL > SCANF_MIN
-					if (--width <= 0)
-						/*
+						if (--width <= 0)
+							/*
 						 * Incomplete conversion
 						 * due to field width
 						 * truncation.
 						 */
-						goto leave;
+							goto leave;
 #endif /* SCANF_LEVEL > SCANF_MIN */
-					if ((char)i == '-')
-						flags |= FLMINUS;
-					i = w_xgetc(&stream);
-					if (i == EOF)
-						goto leave;
-				}
+						if ((char)i == '-')
+							flags |= FLMINUS;
+						i = w_xgetc(&stream);
+						if (i == EOF)
+							goto leave;
+					}
 
-				if ((char)i == '0') {
-					/*
+					if ((char)i == '0') {
+						/*
 					 * %i conversions default to base
 					 * 10, but allow for base 8
 					 * indicated by a leading 0 in
@@ -379,74 +380,74 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 					 * conversion succeeded, assigning
 					 * 0.
 					 */
-					a.ul = 0;
+						a.ul = 0;
 
 #if SCANF_LEVEL > SCANF_MIN
-					if (--width <= 0)
-						goto intdone;
-#endif /* SCANF_LEVEL > SCANF_MIN */
-					i = w_xgetc(&stream);
-					if (i == EOF)
-						goto intdone;
-					if ((char)tolower(i) == 'x') {
-						if (c == 'o' ||
-						    c == 'd' || c == 'u') {
-							/*
-							 * Invalid 0x in
-							 * %d/%u/%o
-							 */
-							xungetc(i, &stream);
+						if (--width <= 0)
 							goto intdone;
-						}
-						base = 16;
+#endif /* SCANF_LEVEL > SCANF_MIN */
 						i = w_xgetc(&stream);
 						if (i == EOF)
 							goto intdone;
-					} else if (c == 'i')
-						base = 8;
-				}
+						if ((char)tolower(i) == 'x') {
+							if (c == 'o' ||
+							    c == 'd' || c == 'u') {
+								/*
+							 * Invalid 0x in
+							 * %d/%u/%o
+							 */
+								xungetc(i, &stream);
+								goto intdone;
+							}
+							base = 16;
+							i = w_xgetc(&stream);
+							if (i == EOF)
+								goto intdone;
+						} else if (c == 'i')
+							base = 8;
+					}
 
-				a.ul = 0;
-				for (;;) {
-					j = tolower(i);
-					/*
+					a.ul = 0;
+					for (;;) {
+						j = tolower(i);
+						/*
 					 * First, assume it is a decimal
 					 * digit.
 					 */
-					j -= '0';
-					if (j > 9) {
-						/*
+						j -= '0';
+						if (j > 9) {
+							/*
 						 * Not a decimal digit.
 						 * Try hex next.
 						 */
-						j += '0'; /* undo "- '0'"
+							j += '0'; /* undo "- '0'"
 							   * above */
-						j -= 'a'; /* 'a' is first
+							j -= 'a'; /* 'a' is first
 							   * hex digit */
-						if (j >= 0)
-							/* 'a' has value
+							if (j >= 0)
+								/* 'a' has value
 							 * 10 */
-							j += 10;
-						/*
+								j += 10;
+							/*
 						 * else: not a hex digit,
 						 * gets caught below.
 						 */
-					}
-					if (j < 0 || j >= base) {
-						xungetc(i, &stream);
-						break;
-					}
-					a.ul *= base;
-					a.ul += j;
+						}
+						if (j < 0 || j >= base) {
+							xungetc(i, &stream);
+							break;
+						}
+						a.ul *= base;
+						a.ul += j;
 #if SCANF_LEVEL > SCANF_MIN
-					if (--width <= 0)
-						break;
+						if (--width <= 0)
+							break;
 #endif /* SCANF_LEVEL > SCANF_MIN */
-					i = w_xgetc(&stream);
-					if (i == EOF)
-						break;
-				}
-				/*
+						i = w_xgetc(&stream);
+						if (i == EOF)
+							break;
+					}
+					/*
 				 * This is a bit of a hack: while we
 				 * collect all integer digits in an
 				 * unsigned long number in order to be
@@ -458,129 +459,127 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 				 * mapping the signed and unsigned
 				 * fields suitably.
 				 */
-				if (flags & FLMINUS)
-					a.l = -a.l;
-			  intdone:
+					if (flags & FLMINUS)
+						a.l = -a.l;
+				intdone:
 #if SCANF_LEVEL > SCANF_MIN
-				if (!(flags & FLSTAR)) {
+					if (!(flags & FLSTAR)) {
 #endif /* SCANF_LEVEL > SCANF_MIN */
-					if ((flags & (FLLONG | FLUNSIGNED)) == (FLLONG | FLUNSIGNED))
-						*(va_arg(ap, unsigned long *)) = a.ul;
-					else if ((flags & (FLSHORT | FLUNSIGNED)) == (FLSHORT | FLUNSIGNED))
-						*(va_arg(ap, unsigned short *)) = (unsigned short)a.ul;
-					else if (flags & (FLUNSIGNED))
-						*(va_arg(ap, unsigned *)) = (unsigned)a.ul;
-					else if (flags & FLLONG)
-						*(va_arg(ap, long *)) = a.l;
-					else if (flags & FLSHORT)
-						*(va_arg(ap, short *)) = (short)a.l;
-					else
-						*(va_arg(ap, int *)) = (int)a.l;
+						if ((flags & (FLLONG | FLUNSIGNED)) == (FLLONG | FLUNSIGNED))
+							*(va_arg(ap, unsigned long *)) = a.ul;
+						else if ((flags & (FLSHORT | FLUNSIGNED)) == (FLSHORT | FLUNSIGNED))
+							*(va_arg(ap, unsigned short *)) = (unsigned short)a.ul;
+						else if (flags & (FLUNSIGNED))
+							*(va_arg(ap, unsigned *)) = (unsigned)a.ul;
+						else if (flags & FLLONG)
+							*(va_arg(ap, long *)) = a.l;
+						else if (flags & FLSHORT)
+							*(va_arg(ap, short *)) = (short)a.l;
+						else
+							*(va_arg(ap, int *)) = (int)a.l;
 #if SCANF_LEVEL > SCANF_MIN
-				}
+					}
 #endif /* SCANF_LEVEL > SCANF_MIN */
-				break;
+					break;
 
 #if SCANF_LEVEL > SCANF_MIN
-			case 'n':
-				if (!(flags & FLSTAR))
-					*(va_arg(ap, int *)) = clen;
-				break;
+				case 'n':
+					if (!(flags & FLSTAR))
+						*(va_arg(ap, int *)) = clen;
+					break;
 #endif /* SCANF_LEVEL > SCANF_MIN */
 
 #if SCANF_LEVEL >= SCANF_FLT
-			case 'e':
-			case 'f':
-			case 'g':
-				do {
-					i = w_xgetc(&stream);
-				} while (isspace(i));
-				if (i == EOF)
-					goto leave;
-
-				if ((char)i == '-' || (char)i == '+') {
-					if ((char)i == '-')
-						flags |= FLMINUS;
-					i = w_xgetc(&stream);
+				case 'e':
+				case 'f':
+				case 'g':
+					do {
+						i = w_xgetc(&stream);
+					} while (isspace(i));
 					if (i == EOF)
 						goto leave;
-				}
 
-				a.d = 0.0;
-				for (bp = buf;
-				     bp < buf + FLTBUF - 1 && width > 0;
-				     width--) {
+					if ((char)i == '-' || (char)i == '+') {
+						if ((char)i == '-')
+							flags |= FLMINUS;
+						i = w_xgetc(&stream);
+						if (i == EOF)
+							goto leave;
+					}
+
+					a.d = 0.0;
+					for (bp = buf;
+					     bp < buf + FLTBUF - 1 && width > 0;
+					     width--) {
 						if (isspace(i))
 							break;
-					if (strchr(fltchars, i) == 0) {
-						xungetc(i, &stream);
-						break;
-					}
-					if ((char)i == 'e' ||
-					    (char)i == 'E') {
-						/*
+						if (strchr(fltchars, i) == 0) {
+							xungetc(i, &stream);
+							break;
+						}
+						if ((char)i == 'e' ||
+						    (char)i == 'E') {
+							/*
 						 * Prevent another 'E'
 						 * from being recognized.
 						 */
-						fltchars[10] = 0;
-						*bp++ = i;
-						i = w_xgetc(&stream);
-						if (i == EOF)
-							break;
-						if ((char)i != '-' &&
-						    (char)i != '+')
-							continue;
-					} else if ((char)i == '.')
-						/*
+							fltchars[10] = 0;
+							*bp++ = i;
+							i = w_xgetc(&stream);
+							if (i == EOF)
+								break;
+							if ((char)i != '-' &&
+							    (char)i != '+')
+								continue;
+						} else if ((char)i == '.')
+							/*
 						 * Prevent another dot from
 						 * being recognized.  If we
 						 * already saw an 'E'
 						 * above, we could not get
 						 * here at all.
 						 */
-						fltchars[12] = 0;
-					*bp++ = i;
-					i = w_xgetc(&stream);
-					if (i == EOF)
-						break;
-				}
-				*bp++ = 0;
-				a.d = (float)strtod(buf, 0);
-				if (flags & FLMINUS)
-					a.d = -a.d;
-				*(va_arg(ap, float  *)) = a.d;
-				/*
+							fltchars[12] = 0;
+						*bp++ = i;
+						i = w_xgetc(&stream);
+						if (i == EOF)
+							break;
+					}
+					*bp++ = 0;
+					a.d = (float)strtod(buf, 0);
+					if (flags & FLMINUS)
+						a.d = -a.d;
+					*(va_arg(ap, float *)) = a.d;
+					/*
 				 * Restore the 'E' and '.' chars that
 				 * might have been clobbered above.
 				 */
-				fltchars[10] = 'E';
-				fltchars[12] = '.';
-				break;
+					fltchars[10] = 'E';
+					fltchars[12] = '.';
+					break;
 
-			case '[':
-				flags |= FLBRACKET;
-				i = j = 0;
-				memset(buf, 0, 256 / 8);
-				continue;
+				case '[':
+					flags |= FLBRACKET;
+					i = j = 0;
+					memset(buf, 0, 256 / 8);
+					continue;
 #endif /* SCANF_LEVEL >= SCANF_FLT */
 			}
 
 #if SCANF_LEVEL >= SCANF_FLT
-		  nextconv:
+		nextconv:
 #endif
 			if (clen > olen && !(flags & FLSTAR)) {
 				flags = 0;
 				nconvs++;
-			}
-			else if (i == EOF) {
+			} else if (i == EOF) {
 				/*
 				 * If one conversion failed completely,
 				 * punt.
 				 */
 				flags = 0;
 				goto leave;
-			}
-			else
+			} else
 				flags = 0;
 		} else if (c == '%') {
 			flags = FLHASPERCENT;
@@ -597,9 +596,9 @@ int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, 
 				goto leave;
 			xungetc(i, &stream);
 		} else {
-			/* literal character in format, match it */
-		  literal:
-		  	i = w_xgetc(&stream);
+		/* literal character in format, match it */
+		literal:
+			i = w_xgetc(&stream);
 			if (i == EOF)
 				goto leave;
 			if (i != c)
@@ -632,12 +631,13 @@ leave:
 #endif
 
 #ifdef F_xscanf
-int xscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, const char *fmt, ...) {
+int xscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, const char *fmt, ...)
+{
 	int r;
-        va_list args;
-        va_start(args, fmt);
+	va_list args;
+	va_start(args, fmt);
 	r = vxscanf(xgetc, xungetc, stream, fmt, args);
-        va_end(args);
+	va_end(args);
 	return r;
 }
 #endif
@@ -648,71 +648,81 @@ int _s_xgetc(void **);
 void _s_xungetc(int, void **);
 
 #ifdef F__xscanf_internals
-int _f_xgetc(void ** stream) {
-    return fgetc(*(FILE**)stream);
+int _f_xgetc(void **stream)
+{
+	return fgetc(*(FILE **)stream);
 }
 
-void _f_xungetc(int c, void ** stream) {
-    ungetc(c, *(FILE**)stream);
+void _f_xungetc(int c, void **stream)
+{
+	ungetc(c, *(FILE **)stream);
 }
 
-int _s_xgetc(void** p_str) {
-    char c = *((*(char**)p_str)++);
-    return c ? c : EOF;
+int _s_xgetc(void **p_str)
+{
+	char c = *((*(char **)p_str)++);
+	return c ? c : EOF;
 }
 
-void _s_xungetc(int c, void ** p_str) {
-    *(--(*((char **)p_str))) = (c == EOF ? 0 : c);
+void _s_xungetc(int c, void **p_str)
+{
+	*(--(*((char **)p_str))) = (c == EOF ? 0 : c);
 }
 #endif
 
 #ifdef F_scanf
-int scanf(const char * fmt, ...) {
+int scanf(const char *fmt, ...)
+{
 	int r;
-        va_list args;
-        va_start(args, fmt);
+	va_list args;
+	va_start(args, fmt);
 	r = vxscanf(_f_xgetc, _f_xungetc, stdin, fmt, args);
-        va_end(args);
+	va_end(args);
 	return r;
 }
 #endif
 
 #ifdef F_sscanf
-int sscanf(const char * str, const char * fmt, ...) {
+int sscanf(const char *str, const char *fmt, ...)
+{
 	int r;
-        va_list args;
-        va_start(args, fmt);
-	r = vxscanf(_s_xgetc, _s_xungetc, (void *) str, fmt, args);
-        va_end(args);
+	va_list args;
+	va_start(args, fmt);
+	r = vxscanf(_s_xgetc, _s_xungetc, (void *)str, fmt, args);
+	va_end(args);
 	return r;
 }
 #endif
 
 #ifdef F_fscanf
-int fscanf(FILE * stream, const char * fmt, ...) {
+int fscanf(FILE *stream, const char *fmt, ...)
+{
 	int r;
-        va_list args;
-        va_start(args, fmt);
+	va_list args;
+	va_start(args, fmt);
 	r = vxscanf(_f_xgetc, _f_xungetc, stream, fmt, args);
-        va_end(args);
+	va_end(args);
 	return r;
 }
 #endif
 
 #ifdef F_vscanf
-int vscanf(const char * fmt, va_list args) {
+int vscanf(const char *fmt, va_list args)
+{
 	return vxscanf(_f_xgetc, _f_xungetc, stdin, fmt, args);
 }
 #endif
 
 #ifdef F_vsscanf
-int vsscanf(const char * str, const char * fmt, va_list args) {
-	return vxscanf(_s_xgetc, _s_xungetc, (void *) str, fmt, args);
+int vsscanf(const char *str, const char *fmt, va_list args)
+{
+	return vxscanf(_s_xgetc, _s_xungetc, (void *)str, fmt, args);
 }
 #endif
 
 #ifdef F_vfscanf
-int vfscanf(FILE * stream, const char * fmt, va_list args) {
+int vfscanf(FILE *stream, const char *fmt, va_list args)
+{
 	return vxscanf(_f_xgetc, _f_xungetc, stream, fmt, args);
 }
 #endif

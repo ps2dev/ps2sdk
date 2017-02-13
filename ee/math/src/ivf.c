@@ -59,63 +59,55 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 #include "mconf.h"
 
 extern double MAXNUMF;
-#define fabsf(x) ( (x) < 0 ? -(x) : (x) )
+#define fabsf(x) ((x) < 0 ? -(x) : (x))
 
 #ifdef ANSIC
 float hypergf(float, float, float);
 float expf(float), gammaf(float), logf(float), floorf(float);
 
-float ivf( float v, float x )
+float ivf(float v, float x)
 #else
 float hypergf(), expf(), gammaf(), logf(), floorf();
 
-float ivf( v, x )
-double v, x;
+float ivf(v, x) double v, x;
 #endif
 {
-int sign;
-float t, ax;
+	int sign;
+	float t, ax;
 
-/* If v is a negative integer, invoke symmetry */
-t = floorf(v);
-if( v < 0.0 )
-	{
-	if( t == v )
-		{
-		v = -v;	/* symmetry */
-		t = -t;
+	/* If v is a negative integer, invoke symmetry */
+	t = floorf(v);
+	if (v < 0.0) {
+		if (t == v) {
+			v = -v; /* symmetry */
+			t = -t;
 		}
 	}
-/* If x is negative, require v to be an integer */
-sign = 1;
-if( x < 0.0 )
-	{
-	if( t != v )
-		{
-		mtherr( "ivf", DOMAIN );
-		return( 0.0 );
+	/* If x is negative, require v to be an integer */
+	sign = 1;
+	if (x < 0.0) {
+		if (t != v) {
+			mtherr("ivf", DOMAIN);
+			return (0.0);
 		}
-	if( v != 2.0 * floorf(v/2.0) )
-		sign = -1;
+		if (v != 2.0 * floorf(v / 2.0))
+			sign = -1;
 	}
 
-/* Avoid logarithm singularity */
-if( x == 0.0 )
-	{
-	if( v == 0.0 )
-		return( 1.0 );
-	if( v < 0.0 )
-		{
-		mtherr( "ivf", OVERFLOW );
-		return( MAXNUMF );
-		}
-	else
-		return( 0.0 );
+	/* Avoid logarithm singularity */
+	if (x == 0.0) {
+		if (v == 0.0)
+			return (1.0);
+		if (v < 0.0) {
+			mtherr("ivf", OVERFLOW);
+			return (MAXNUMF);
+		} else
+			return (0.0);
 	}
 
-ax = fabsf(x);
-t = v * logf( 0.5 * ax )  -  x;
-t = sign * expf(t) / gammaf( v + 1.0 );
-ax = v + 0.5;
-return( t * hypergf( ax,  2.0 * ax,  2.0 * x ) );
+	ax = fabsf(x);
+	t = v * logf(0.5 * ax) - x;
+	t = sign * expf(t) / gammaf(v + 1.0);
+	ax = v + 0.5;
+	return (t * hypergf(ax, 2.0 * ax, 2.0 * x));
 }

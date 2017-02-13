@@ -27,30 +27,33 @@ IRX_ID("usbd", 1, 1);
 extern struct irx_export_table _exp_usbd;
 
 UsbdConfig usbConfig = {
-	0x20,	// maxDevices
-	0x40,	// maxEndpoints
-	0x80,	// maxTransDesc
-	0x80,	// maxIsoTransfDesc
-	0x100,	// maxIoReqs
-	0x200,	// maxStaticDescSize
-	8,		// maxHubDevices
-	8,		// maxPortsPerHub
+    0x20,  // maxDevices
+    0x40,  // maxEndpoints
+    0x80,  // maxTransDesc
+    0x80,  // maxIsoTransfDesc
+    0x100, // maxIoReqs
+    0x200, // maxStaticDescSize
+    8,     // maxHubDevices
+    8,     // maxPortsPerHub
 
-	0x1E,	// hcdThreadPrio
-	0x24	// cbThreadPrio
+    0x1E, // hcdThreadPrio
+    0x24  // cbThreadPrio
 };
 
 int usbdSema;
 
-int usbdLock(void) {
+int usbdLock(void)
+{
 	return WaitSema(usbdSema);
 }
 
-int usbdUnlock(void) {
+int usbdUnlock(void)
+{
 	return SignalSema(usbdSema);
 }
 
-int doGetDeviceLocation(Device *dev, uint8 *path) {
+int doGetDeviceLocation(Device *dev, uint8 *path)
+{
 	uint8 tempPath[6];
 	int count, cpCount;
 	for (count = 0; (count < 6) && (dev != memPool.deviceTreeRoot); count++) {
@@ -69,7 +72,8 @@ int doGetDeviceLocation(Device *dev, uint8 *path) {
 		return USB_RC_BADHUBDEPTH;
 }
 
-void processDoneQueue_IsoTd(HcIsoTD *arg) {
+void processDoneQueue_IsoTd(HcIsoTD *arg)
+{
 	uint32 tdHcRes = arg->hcArea >> 28;
 	uint32 pswRes = arg->psw[0] >> 12;
 	uint32 pswOfs = arg->psw[0] & 0x7FF;
@@ -104,7 +108,7 @@ void processDoneQueue_IsoTd(HcIsoTD *arg) {
 	if (ED_HALTED(req->correspEndpoint->hcEd)) {
 		HcIsoTD *curTd = (HcIsoTD *)((uint32)ed->tdHead & ~0xF);
 
-		while (curTd && (curTd != (HcIsoTD*)ed->tdTail)) {
+		while (curTd && (curTd != (HcIsoTD *)ed->tdTail)) {
 			HcIsoTD *nextTd = curTd->next;
 			freeIsoTd(curTd);
 
@@ -145,7 +149,8 @@ void processDoneQueue_IsoTd(HcIsoTD *arg) {
 	checkTdQueue(ISOTD_QUEUE);
 }
 
-void processDoneQueue_GenTd(HcTD *arg) {
+void processDoneQueue_GenTd(HcTD *arg)
+{
 	IoRequest *req;
 	IoRequest *firstElem = NULL, *lastElem = NULL;
 
@@ -157,7 +162,7 @@ void processDoneQueue_GenTd(HcTD *arg) {
 		uint32 tdHcArea = arg->HcArea;
 
 		if (arg->bufferEnd && (tdHcArea & 0x180000)) { // dir != SETUP
-			if (arg->curBufPtr == 0) // transfer successful
+			if (arg->curBufPtr == 0)                   // transfer successful
 				req->transferedBytes = req->length;
 			else
 				req->transferedBytes = (uint8 *)arg->curBufPtr - (uint8 *)req->destPtr;
@@ -180,7 +185,7 @@ void processDoneQueue_GenTd(HcTD *arg) {
 
 		HcED *ed = &req->correspEndpoint->hcEd;
 		if (hcRes && ED_HALTED(req->correspEndpoint->hcEd)) {
-			HcTD *tdListPos = (HcTD*)((uint32)ed->tdHead & ~0xF);
+			HcTD *tdListPos = (HcTD *)((uint32)ed->tdHead & ~0xF);
 			while (tdListPos && (tdListPos != ed->tdTail)) {
 				HcTD *nextTd = tdListPos->next;
 				freeTd(tdListPos);
@@ -226,7 +231,8 @@ void processDoneQueue_GenTd(HcTD *arg) {
 	}
 }
 
-void handleTimerList(void) {
+void handleTimerList(void)
+{
 	TimerCbStruct *timer = memPool.timerListStart;
 	if (timer) {
 		if (timer->delayCount > 0)
@@ -251,40 +257,43 @@ void handleTimerList(void) {
 		memPool.ohciRegs->HcInterruptDisable = OHCI_INT_SF;
 }
 
-struct ArgOption{
+struct ArgOption
+{
 	const char *param;
 	int *value, *value2;
 };
 
-static inline void ParseOptionInput(const struct ArgOption *option, const char *arguments){
+static inline void ParseOptionInput(const struct ArgOption *option, const char *arguments)
+{
 	const char *p;
 	int value, NewValue;
 
-	p=arguments;
-	value=0;
-	while(*p!='\0'){
-		if(*p==',') break;
+	p = arguments;
+	value = 0;
+	while (*p != '\0') {
+		if (*p == ',')
+			break;
 
-		if((NewValue=*p-'0')>9){
+		if ((NewValue = *p - '0') > 9) {
 			return;
-		}else{
-			value=(((value<<2)+value)<<1)+NewValue;
+		} else {
+			value = (((value << 2) + value) << 1) + NewValue;
 			p++;
 		}
 	}
 
-	if((option->value2!=NULL && *p == ',') || (option->value2==NULL && *p != ',')){
-		if(arguments<p++){
+	if ((option->value2 != NULL && *p == ',') || (option->value2 == NULL && *p != ',')) {
+		if (arguments < p++) {
 			*option->value = value;
 		}
 
-		if(option->value2 != NULL){
+		if (option->value2 != NULL) {
 			value = 0;
-			while(*p != '\0'){
-				if((NewValue=*p-'0')>9){
+			while (*p != '\0') {
+				if ((NewValue = *p - '0') > 9) {
 					return;
-				}else{
-					value=(((value<<2)+value)<<1)+NewValue;
+				} else {
+					value = (((value << 2) + value) << 1) + NewValue;
 					p++;
 				}
 			}
@@ -294,75 +303,56 @@ static inline void ParseOptionInput(const struct ArgOption *option, const char *
 	}
 }
 
-int _start(int argc, char *argv[]) {
-	static const struct ArgOption SupportedArgs[]={
-		{
-			"dev=",
-			&usbConfig.maxDevices,
-			NULL
-		},
-		{
-			"ed=",
-			&usbConfig.maxEndpoints,
-			NULL
-		},
-		{
-			"gtd=",
-			&usbConfig.maxTransfDesc,
-			NULL
-		},
-		{
-			"itd=",
-			&usbConfig.maxIsoTransfDesc,
-			NULL
-		},
-		{
-			"ioreq=",
-			&usbConfig.maxIoReqs,
-			NULL
-		},
-		{
-			"conf=",
-			&usbConfig.maxStaticDescSize,
-			NULL
-		},
-		{
-			"hub=",
-			&usbConfig.maxHubDevices,
-			NULL
-		},
-		{
-			"port=",
-			&usbConfig.maxPortsPerHub,
-			NULL
-		},
-		{
-			"thpri=",
-			&usbConfig.hcdThreadPrio,
-			&usbConfig.cbThreadPrio
-		},
-		{
-			NULL,
-			NULL,
-			NULL
-		}
-	};
+int _start(int argc, char *argv[])
+{
+	static const struct ArgOption SupportedArgs[] = {
+	    {"dev=",
+	     &usbConfig.maxDevices,
+	     NULL},
+	    {"ed=",
+	     &usbConfig.maxEndpoints,
+	     NULL},
+	    {"gtd=",
+	     &usbConfig.maxTransfDesc,
+	     NULL},
+	    {"itd=",
+	     &usbConfig.maxIsoTransfDesc,
+	     NULL},
+	    {"ioreq=",
+	     &usbConfig.maxIoReqs,
+	     NULL},
+	    {"conf=",
+	     &usbConfig.maxStaticDescSize,
+	     NULL},
+	    {"hub=",
+	     &usbConfig.maxHubDevices,
+	     NULL},
+	    {"port=",
+	     &usbConfig.maxPortsPerHub,
+	     NULL},
+	    {"thpri=",
+	     &usbConfig.hcdThreadPrio,
+	     &usbConfig.cbThreadPrio},
+	    {NULL,
+	     NULL,
+	     NULL}};
 	iop_sema_t sema;
 	const char *pArgs, *pParam;
 	int i, option;
 
-	for(i=1; i<argc; i++){
-		for(option=0; SupportedArgs[option].param!=NULL; option++){
-			pParam=SupportedArgs[option].param;
-			pArgs=argv[i];
-			while(*pParam!='\0'){
-				if(*pArgs!=*pParam) break;
+	for (i = 1; i < argc; i++) {
+		for (option = 0; SupportedArgs[option].param != NULL; option++) {
+			pParam = SupportedArgs[option].param;
+			pArgs = argv[i];
+			while (*pParam != '\0') {
+				if (*pArgs != *pParam)
+					break;
 
 				pParam++;
 				pArgs++;
 			}
 
-			if(*pParam=='\0'){
+			if (*pParam == '\0') {
 				ParseOptionInput(&SupportedArgs[option], pArgs);
 			}
 		}
@@ -389,4 +379,3 @@ int _start(int argc, char *argv[]) {
 	dbg_printf("Init done\n");
 	return MODULE_RESIDENT_END;
 }
-

@@ -34,42 +34,42 @@
  * PPP_SUPPORT==1: Enable PPP.
  */
 #ifndef PPP_SUPPORT
-#define PPP_SUPPORT                     0
+#define PPP_SUPPORT 0
 #endif
 
 /**
  * PPPOE_SUPPORT==1: Enable PPP Over Ethernet
  */
 #ifndef PPPOE_SUPPORT
-#define PPPOE_SUPPORT                   0
+#define PPPOE_SUPPORT 0
 #endif
 
 /**
  * PPPOL2TP_SUPPORT==1: Enable PPP Over L2TP
  */
 #ifndef PPPOL2TP_SUPPORT
-#define PPPOL2TP_SUPPORT                0
+#define PPPOL2TP_SUPPORT 0
 #endif
 
 /**
  * PPPOL2TP_AUTH_SUPPORT==1: Enable PPP Over L2TP Auth (enable MD5 support)
  */
 #ifndef PPPOL2TP_AUTH_SUPPORT
-#define PPPOL2TP_AUTH_SUPPORT           PPPOL2TP_SUPPORT
+#define PPPOL2TP_AUTH_SUPPORT PPPOL2TP_SUPPORT
 #endif
 
 /**
  * PPPOS_SUPPORT==1: Enable PPP Over Serial
  */
 #ifndef PPPOS_SUPPORT
-#define PPPOS_SUPPORT                   PPP_SUPPORT
+#define PPPOS_SUPPORT PPP_SUPPORT
 #endif
 
 /**
  * LWIP_PPP_API==1: Enable PPP API (in pppapi.c)
  */
 #ifndef LWIP_PPP_API
-#define LWIP_PPP_API                    (PPP_SUPPORT && (NO_SYS == 0))
+#define LWIP_PPP_API (PPP_SUPPORT && (NO_SYS == 0))
 #endif
 
 /**
@@ -77,7 +77,7 @@
  * connections (requires the PPP_SUPPORT option)
  */
 #ifndef MEMP_NUM_PPP_PCB
-#define MEMP_NUM_PPP_PCB       1
+#define MEMP_NUM_PPP_PCB 1
 #endif
 
 #if PPP_SUPPORT
@@ -87,7 +87,7 @@
  * interfaces (only used with PPPOS_SUPPORT==1)
  */
 #ifndef MEMP_NUM_PPPOS_INTERFACES
-#define MEMP_NUM_PPPOS_INTERFACES       MEMP_NUM_PPP_PCB
+#define MEMP_NUM_PPPOS_INTERFACES MEMP_NUM_PPP_PCB
 #endif
 
 /**
@@ -95,7 +95,7 @@
  * interfaces (only used with PPPOE_SUPPORT==1)
  */
 #ifndef MEMP_NUM_PPPOE_INTERFACES
-#define MEMP_NUM_PPPOE_INTERFACES       1
+#define MEMP_NUM_PPPOE_INTERFACES 1
 #endif
 
 /**
@@ -103,7 +103,7 @@
  * interfaces (only used with PPPOL2TP_SUPPORT==1)
  */
 #ifndef MEMP_NUM_PPPOL2TP_INTERFACES
-#define MEMP_NUM_PPPOL2TP_INTERFACES       1
+#define MEMP_NUM_PPPOL2TP_INTERFACES 1
 #endif
 
 /**
@@ -117,7 +117,7 @@
  * PPP_DEBUG: Enable debugging for PPP.
  */
 #ifndef PPP_DEBUG
-#define PPP_DEBUG                       LWIP_DBG_OFF
+#define PPP_DEBUG LWIP_DBG_OFF
 #endif
 
 /**
@@ -126,7 +126,7 @@
  * Please read the "PPPoS input path" chapter in the PPP documentation about this option.
  */
 #ifndef PPP_INPROC_IRQ_SAFE
-#define PPP_INPROC_IRQ_SAFE             0
+#define PPP_INPROC_IRQ_SAFE 0
 #endif
 
 /**
@@ -135,21 +135,21 @@
  * Mandatory for debugging, it displays exchanged packet content in debug trace.
  */
 #ifndef PRINTPKT_SUPPORT
-#define PRINTPKT_SUPPORT                0
+#define PRINTPKT_SUPPORT 0
 #endif
 
 /**
  * PPP_IPV4_SUPPORT==1: Enable PPP IPv4 support
  */
 #ifndef PPP_IPV4_SUPPORT
-#define PPP_IPV4_SUPPORT                (LWIP_IPV4)
+#define PPP_IPV4_SUPPORT (LWIP_IPV4)
 #endif
 
 /**
  * PPP_IPV6_SUPPORT==1: Enable PPP IPv6 support
  */
 #ifndef PPP_IPV6_SUPPORT
-#define PPP_IPV6_SUPPORT                (LWIP_IPV6)
+#define PPP_IPV6_SUPPORT (LWIP_IPV6)
 #endif
 
 /**
@@ -162,7 +162,7 @@
  * current phase of the PPP session.
  */
 #ifndef PPP_NOTIFY_PHASE
-#define PPP_NOTIFY_PHASE                0
+#define PPP_NOTIFY_PHASE 0
 #endif
 
 /**
@@ -176,100 +176,100 @@
  * buffers are required, allowing you to use a smaller PBUF_POOL_BUFSIZE.
  */
 #ifndef PPP_USE_PBUF_RAM
-#define PPP_USE_PBUF_RAM                0
+#define PPP_USE_PBUF_RAM 0
 #endif
 
 /**
  * PPP_FCS_TABLE: Keep a 256*2 byte table to speed up FCS calculation for PPPoS
  */
 #ifndef PPP_FCS_TABLE
-#define PPP_FCS_TABLE                   1
+#define PPP_FCS_TABLE 1
 #endif
 
 /**
  * PAP_SUPPORT==1: Support PAP.
  */
 #ifndef PAP_SUPPORT
-#define PAP_SUPPORT                     0
+#define PAP_SUPPORT 0
 #endif
 
 /**
  * CHAP_SUPPORT==1: Support CHAP.
  */
 #ifndef CHAP_SUPPORT
-#define CHAP_SUPPORT                    0
+#define CHAP_SUPPORT 0
 #endif
 
 /**
  * MSCHAP_SUPPORT==1: Support MSCHAP.
  */
 #ifndef MSCHAP_SUPPORT
-#define MSCHAP_SUPPORT                  0
+#define MSCHAP_SUPPORT 0
 #endif
 #if MSCHAP_SUPPORT
 /* MSCHAP requires CHAP support */
 #undef CHAP_SUPPORT
-#define CHAP_SUPPORT                    1
+#define CHAP_SUPPORT 1
 #endif /* MSCHAP_SUPPORT */
 
 /**
  * EAP_SUPPORT==1: Support EAP.
  */
 #ifndef EAP_SUPPORT
-#define EAP_SUPPORT                     0
+#define EAP_SUPPORT 0
 #endif
 
 /**
  * CCP_SUPPORT==1: Support CCP.
  */
 #ifndef CCP_SUPPORT
-#define CCP_SUPPORT                     0
+#define CCP_SUPPORT 0
 #endif
 
 /**
  * MPPE_SUPPORT==1: Support MPPE.
  */
 #ifndef MPPE_SUPPORT
-#define MPPE_SUPPORT                    0
+#define MPPE_SUPPORT 0
 #endif
 #if MPPE_SUPPORT
 /* MPPE requires CCP support */
 #undef CCP_SUPPORT
-#define CCP_SUPPORT                     1
+#define CCP_SUPPORT 1
 /* MPPE requires MSCHAP support */
 #undef MSCHAP_SUPPORT
-#define MSCHAP_SUPPORT                  1
+#define MSCHAP_SUPPORT 1
 /* MSCHAP requires CHAP support */
 #undef CHAP_SUPPORT
-#define CHAP_SUPPORT                    1
+#define CHAP_SUPPORT 1
 #endif /* MPPE_SUPPORT */
 
 /**
  * CBCP_SUPPORT==1: Support CBCP. CURRENTLY NOT SUPPORTED! DO NOT SET!
  */
 #ifndef CBCP_SUPPORT
-#define CBCP_SUPPORT                    0
+#define CBCP_SUPPORT 0
 #endif
 
 /**
  * ECP_SUPPORT==1: Support ECP. CURRENTLY NOT SUPPORTED! DO NOT SET!
  */
 #ifndef ECP_SUPPORT
-#define ECP_SUPPORT                     0
+#define ECP_SUPPORT 0
 #endif
 
 /**
  * DEMAND_SUPPORT==1: Support dial on demand. CURRENTLY NOT SUPPORTED! DO NOT SET!
  */
 #ifndef DEMAND_SUPPORT
-#define DEMAND_SUPPORT                  0
+#define DEMAND_SUPPORT 0
 #endif
 
 /**
  * LQR_SUPPORT==1: Support Link Quality Report. Do nothing except exchanging some LCP packets.
  */
 #ifndef LQR_SUPPORT
-#define LQR_SUPPORT                     0
+#define LQR_SUPPORT 0
 #endif
 
 /**
@@ -278,7 +278,7 @@
  * Currently only supported for PPPoS.
  */
 #ifndef PPP_SERVER
-#define PPP_SERVER                      0
+#define PPP_SERVER 0
 #endif
 
 #if PPP_SERVER
@@ -286,7 +286,7 @@
  * PPP_OUR_NAME: Our name for authentication purposes
  */
 #ifndef PPP_OUR_NAME
-#define PPP_OUR_NAME                    "lwIP"
+#define PPP_OUR_NAME "lwIP"
 #endif
 #endif /* PPP_SERVER */
 
@@ -294,12 +294,12 @@
  * VJ_SUPPORT==1: Support VJ header compression.
  */
 #ifndef VJ_SUPPORT
-#define VJ_SUPPORT                      1
+#define VJ_SUPPORT 1
 #endif
 /* VJ compression is only supported for TCP over IPv4 over PPPoS. */
 #if !PPPOS_SUPPORT || !PPP_IPV4_SUPPORT || !LWIP_TCP
 #undef VJ_SUPPORT
-#define VJ_SUPPORT                      0
+#define VJ_SUPPORT 0
 #endif /* !PPPOS_SUPPORT */
 
 /**
@@ -307,7 +307,7 @@
  * Enabled by default if CHAP, EAP, or L2TP AUTH support is enabled.
  */
 #ifndef PPP_MD5_RANDM
-#define PPP_MD5_RANDM                   (CHAP_SUPPORT || EAP_SUPPORT || PPPOL2TP_AUTH_SUPPORT)
+#define PPP_MD5_RANDM (CHAP_SUPPORT || EAP_SUPPORT || PPPOL2TP_AUTH_SUPPORT)
 #endif
 
 /**
@@ -336,14 +336,14 @@
  * LWIP_USE_EXTERNAL_POLARSSL: Use external PolarSSL library
  */
 #ifndef LWIP_USE_EXTERNAL_POLARSSL
-#define LWIP_USE_EXTERNAL_POLARSSL      0
+#define LWIP_USE_EXTERNAL_POLARSSL 0
 #endif
 
 /**
  * LWIP_USE_EXTERNAL_MBEDTLS: Use external mbed TLS library
  */
 #ifndef LWIP_USE_EXTERNAL_MBEDTLS
-#define LWIP_USE_EXTERNAL_MBEDTLS       0
+#define LWIP_USE_EXTERNAL_MBEDTLS 0
 #endif
 
 /*
@@ -354,42 +354,42 @@
  * FSM_DEFTIMEOUT: Timeout time in seconds
  */
 #ifndef FSM_DEFTIMEOUT
-#define FSM_DEFTIMEOUT                  6
+#define FSM_DEFTIMEOUT 6
 #endif
 
 /**
  * FSM_DEFMAXTERMREQS: Maximum Terminate-Request transmissions
  */
 #ifndef FSM_DEFMAXTERMREQS
-#define FSM_DEFMAXTERMREQS              2
+#define FSM_DEFMAXTERMREQS 2
 #endif
 
 /**
  * FSM_DEFMAXCONFREQS: Maximum Configure-Request transmissions
  */
 #ifndef FSM_DEFMAXCONFREQS
-#define FSM_DEFMAXCONFREQS              10
+#define FSM_DEFMAXCONFREQS 10
 #endif
 
 /**
  * FSM_DEFMAXNAKLOOPS: Maximum number of nak loops
  */
 #ifndef FSM_DEFMAXNAKLOOPS
-#define FSM_DEFMAXNAKLOOPS              5
+#define FSM_DEFMAXNAKLOOPS 5
 #endif
 
 /**
  * UPAP_DEFTIMEOUT: Timeout (seconds) for retransmitting req
  */
 #ifndef UPAP_DEFTIMEOUT
-#define UPAP_DEFTIMEOUT                 6
+#define UPAP_DEFTIMEOUT 6
 #endif
 
 /**
  * UPAP_DEFTRANSMITS: Maximum number of auth-reqs to send
  */
 #ifndef UPAP_DEFTRANSMITS
-#define UPAP_DEFTRANSMITS               10
+#define UPAP_DEFTRANSMITS 10
 #endif
 
 #if PPP_SERVER
@@ -397,7 +397,7 @@
  * UPAP_DEFREQTIME: Time to wait for auth-req from peer
  */
 #ifndef UPAP_DEFREQTIME
-#define UPAP_DEFREQTIME                 30
+#define UPAP_DEFREQTIME 30
 #endif
 #endif /* PPP_SERVER */
 
@@ -405,14 +405,14 @@
  * CHAP_DEFTIMEOUT: Timeout (seconds) for retransmitting req
  */
 #ifndef CHAP_DEFTIMEOUT
-#define CHAP_DEFTIMEOUT                 6
+#define CHAP_DEFTIMEOUT 6
 #endif
 
 /**
  * CHAP_DEFTRANSMITS: max # times to send challenge
  */
 #ifndef CHAP_DEFTRANSMITS
-#define CHAP_DEFTRANSMITS               10
+#define CHAP_DEFTRANSMITS 10
 #endif
 
 #if PPP_SERVER
@@ -420,7 +420,7 @@
  * CHAP_DEFRECHALLENGETIME: If this option is > 0, rechallenge the peer every n seconds
  */
 #ifndef CHAP_DEFRECHALLENGETIME
-#define CHAP_DEFRECHALLENGETIME         0
+#define CHAP_DEFRECHALLENGETIME 0
 #endif
 #endif /* PPP_SERVER */
 
@@ -428,14 +428,14 @@
  * EAP_DEFREQTIME: Time to wait for peer request
  */
 #ifndef EAP_DEFREQTIME
-#define EAP_DEFREQTIME                  6
+#define EAP_DEFREQTIME 6
 #endif
 
 /**
  * EAP_DEFALLOWREQ: max # times to accept requests
  */
 #ifndef EAP_DEFALLOWREQ
-#define EAP_DEFALLOWREQ                 10
+#define EAP_DEFALLOWREQ 10
 #endif
 
 #if PPP_SERVER
@@ -443,14 +443,14 @@
  * EAP_DEFTIMEOUT: Timeout (seconds) for rexmit
  */
 #ifndef EAP_DEFTIMEOUT
-#define EAP_DEFTIMEOUT                  6
+#define EAP_DEFTIMEOUT 6
 #endif
 
 /**
  * EAP_DEFTRANSMITS: max # times to transmit
  */
 #ifndef EAP_DEFTRANSMITS
-#define EAP_DEFTRANSMITS                10
+#define EAP_DEFTRANSMITS 10
 #endif
 #endif /* PPP_SERVER */
 
@@ -459,28 +459,28 @@
  * before deciding the link is looped-back.
  */
 #ifndef LCP_DEFLOOPBACKFAIL
-#define LCP_DEFLOOPBACKFAIL             10
+#define LCP_DEFLOOPBACKFAIL 10
 #endif
 
 /**
  * LCP_ECHOINTERVAL: Interval in seconds between keepalive echo requests, 0 to disable.
  */
 #ifndef LCP_ECHOINTERVAL
-#define LCP_ECHOINTERVAL                0
+#define LCP_ECHOINTERVAL 0
 #endif
 
 /**
  * LCP_MAXECHOFAILS: Number of unanswered echo requests before failure.
  */
 #ifndef LCP_MAXECHOFAILS
-#define LCP_MAXECHOFAILS                3
+#define LCP_MAXECHOFAILS 3
 #endif
 
 /**
  * PPP_MAXIDLEFLAG: Max Xmit idle time (in ms) before resend flag char.
  */
 #ifndef PPP_MAXIDLEFLAG
-#define PPP_MAXIDLEFLAG                 100
+#define PPP_MAXIDLEFLAG 100
 #endif
 
 /**
@@ -491,28 +491,28 @@
  * PPP_MRU: Default MRU
  */
 #ifndef PPP_MRU
-#define PPP_MRU                         1500
+#define PPP_MRU 1500
 #endif
 
 /**
  * PPP_DEFMRU: Default MRU to try
  */
 #ifndef PPP_DEFMRU
-#define PPP_DEFMRU                      1500
+#define PPP_DEFMRU 1500
 #endif
 
 /**
  * PPP_MAXMRU: Normally limit MRU to this (pppd default = 16384)
  */
 #ifndef PPP_MAXMRU
-#define PPP_MAXMRU                      1500
+#define PPP_MAXMRU 1500
 #endif
 
 /**
  * PPP_MINMRU: No MRUs below this
  */
 #ifndef PPP_MINMRU
-#define PPP_MINMRU                      128
+#define PPP_MINMRU 128
 #endif
 
 /**
@@ -522,7 +522,7 @@
  */
 #if PPPOL2TP_SUPPORT
 #ifndef PPPOL2TP_DEFMRU
-#define PPPOL2TP_DEFMRU                 1450
+#define PPPOL2TP_DEFMRU 1450
 #endif
 #endif /* PPPOL2TP_SUPPORT */
 
@@ -530,14 +530,14 @@
  * MAXNAMELEN: max length of hostname or name for auth
  */
 #ifndef MAXNAMELEN
-#define MAXNAMELEN                      256
+#define MAXNAMELEN 256
 #endif
 
 /**
  * MAXSECRETLEN: max length of password or secret
  */
 #ifndef MAXSECRETLEN
-#define MAXSECRETLEN                    256
+#define MAXSECRETLEN 256
 #endif
 
 /* ------------------------------------------------------------------------- */
@@ -549,22 +549,22 @@
 
 /* CHAP, EAP, L2TP AUTH and MD5 Random require MD5 support */
 #if CHAP_SUPPORT || EAP_SUPPORT || PPPOL2TP_AUTH_SUPPORT || PPP_MD5_RANDM
-#define LWIP_INCLUDED_POLARSSL_MD5      1
+#define LWIP_INCLUDED_POLARSSL_MD5 1
 #endif /* CHAP_SUPPORT || EAP_SUPPORT || PPPOL2TP_AUTH_SUPPORT || PPP_MD5_RANDM */
 
 #if MSCHAP_SUPPORT
 
 /* MSCHAP require MD4 support */
-#define LWIP_INCLUDED_POLARSSL_MD4      1
+#define LWIP_INCLUDED_POLARSSL_MD4 1
 /* MSCHAP require SHA1 support */
-#define LWIP_INCLUDED_POLARSSL_SHA1     1
+#define LWIP_INCLUDED_POLARSSL_SHA1 1
 /* MSCHAP require DES support */
-#define LWIP_INCLUDED_POLARSSL_DES      1
+#define LWIP_INCLUDED_POLARSSL_DES 1
 
 /* MS-CHAP support is required for MPPE */
 #if MPPE_SUPPORT
 /* MPPE require ARC4 support */
-#define LWIP_INCLUDED_POLARSSL_ARC4     1
+#define LWIP_INCLUDED_POLARSSL_ARC4 1
 #endif /* MPPE_SUPPORT */
 
 #endif /* MSCHAP_SUPPORT */
@@ -573,19 +573,19 @@
 
 /* Default value if unset */
 #ifndef LWIP_INCLUDED_POLARSSL_MD4
-#define LWIP_INCLUDED_POLARSSL_MD4      0
+#define LWIP_INCLUDED_POLARSSL_MD4 0
 #endif /* LWIP_INCLUDED_POLARSSL_MD4 */
 #ifndef LWIP_INCLUDED_POLARSSL_MD5
-#define LWIP_INCLUDED_POLARSSL_MD5      0
+#define LWIP_INCLUDED_POLARSSL_MD5 0
 #endif /* LWIP_INCLUDED_POLARSSL_MD5 */
 #ifndef LWIP_INCLUDED_POLARSSL_SHA1
-#define LWIP_INCLUDED_POLARSSL_SHA1     0
+#define LWIP_INCLUDED_POLARSSL_SHA1 0
 #endif /* LWIP_INCLUDED_POLARSSL_SHA1 */
 #ifndef LWIP_INCLUDED_POLARSSL_DES
-#define LWIP_INCLUDED_POLARSSL_DES      0
+#define LWIP_INCLUDED_POLARSSL_DES 0
 #endif /* LWIP_INCLUDED_POLARSSL_DES */
 #ifndef LWIP_INCLUDED_POLARSSL_ARC4
-#define LWIP_INCLUDED_POLARSSL_ARC4     0
+#define LWIP_INCLUDED_POLARSSL_ARC4 0
 #endif /* LWIP_INCLUDED_POLARSSL_ARC4 */
 
 #endif /* PPP_SUPPORT */

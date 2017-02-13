@@ -39,8 +39,7 @@ int create_thread(void *func, int priority, void *param)
 	thr.priority = priority;
 	thr.stacksize = 4096;
 	tid = CreateThread(&thr);
-	if (tid < 0)
-	{
+	if (tid < 0) {
 		return 0;
 	}
 
@@ -56,10 +55,8 @@ void print_hex_buffer(unsigned char *ptr, int len)
 {
 	int p;
 
-	for (p=0; p<len; p++)
-	{
-		if (p > 0 && (p & 0x0f) == 0)
-		{
+	for (p = 0; p < len; p++) {
+		if (p > 0 && (p & 0x0f) == 0) {
 			printf("\n");
 		}
 

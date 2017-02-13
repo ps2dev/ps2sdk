@@ -19,7 +19,7 @@ int sbv_patch_user_mem_clear(void *start)
 	DI();
 	ee_kmode_enter();
 
-	for (p = (unsigned int*)0x80001000; p < (unsigned int*)0x80080000; p++) {
+	for (p = (unsigned int *)0x80001000; p < (unsigned int *)0x80080000; p++) {
 		/*
 		 * Search for function call and patch $a0
 		 *  lui  $a0, 0x0008

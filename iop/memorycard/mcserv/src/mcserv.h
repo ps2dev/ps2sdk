@@ -24,11 +24,11 @@
 //#define DEBUG
 
 #define MODNAME "mcserv"
-#define MODVER  0x208
+#define MODVER 0x208
 
 // internal function prototypes
 void *cb_rpc_S_0400(u32 fno, void *buf, int size);
-void thread_rpc_S_0400(void* param);
+void thread_rpc_S_0400(void *param);
 int sceMcInit(void);
 int sceMcOpen(void);
 int sceMcClose(void);
@@ -75,16 +75,18 @@ int _McCheckBlock(void *rpc_buf);
 
 // filename related mc command
 // used by: mcOpen, mcGetDir, mcChdir, mcDelete, mcSetFileInfo, mcRename, mcGetEntSpace
-typedef struct {			// size = 1044
-	int port;			// 0
-	int slot;			// 4
-	int flags;			// 8
-	int maxent;			// 12
-	union {
-		sceMcTblGetDir *mcT;	// 16
+typedef struct
+{               // size = 1044
+	int port;   // 0
+	int slot;   // 4
+	int flags;  // 8
+	int maxent; // 12
+	union
+	{
+		sceMcTblGetDir *mcT; // 16
 		char *curdir;
 	};
-	char name[1024];		// 20
+	char name[1024]; // 20
 } mcNameParam_t;
 
 #endif

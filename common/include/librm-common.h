@@ -15,9 +15,12 @@
 
 #include <tamtypes.h>
 
-struct rmRpcPacket{
-	union{
-		struct {
+struct rmRpcPacket
+{
+	union
+	{
+		struct
+		{
 			s32 command;
 			s32 port, slot;
 			s32 result;
@@ -36,14 +39,14 @@ struct rmEEData
 	u32 state;
 };
 
-#define RMMAN_RPC_ID 	0x80000C00
+#define RMMAN_RPC_ID 0x80000C00
 
 enum RMMAN_RPCFUNC {
-	RMMAN_RPCFUNC_END	= 1,
-	RMMAN_RPCFUNC_INIT	= 3,
+	RMMAN_RPCFUNC_END = 1,
+	RMMAN_RPCFUNC_INIT = 3,
 	RMMAN_RPCFUNC_CLOSE,
 	RMMAN_RPCFUNC_OPEN,
-	RMMAN_RPCFUNC_VERSION	= 7
+	RMMAN_RPCFUNC_VERSION = 7
 };
 
 enum RM_RSTATE {
@@ -59,4 +62,4 @@ enum RM_STATE {
 	RM_STATE_STABLE
 };
 
-#endif	// _LIBRM_COMMON_H_
+#endif // _LIBRM_COMMON_H_

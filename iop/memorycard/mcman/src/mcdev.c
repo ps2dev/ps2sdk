@@ -33,37 +33,35 @@ int mc_dclose(iop_file_t *f);
 int mc_dread(iop_file_t *f, fio_dirent_t *dirent);
 int mc_getstat(iop_file_t *f, char *filename, fio_stat_t *stat);
 int mc_chstat(iop_file_t *f, char *filename, fio_stat_t *stat, u32 statmask);
-int mc_ioctl(iop_file_t *f, int a1, void* a2);
+int mc_ioctl(iop_file_t *f, int a1, void *a2);
 
 // driver ops func tab
 void *mcman_mcops[17] = {
-	(void*)mc_init,
-	(void*)mc_deinit,
-	(void*)mc_format,
-	(void*)mc_open,
-	(void*)mc_close,
-	(void*)mc_read,
-	(void*)mc_write,
-	(void*)mc_lseek,
-	(void*)mc_ioctl,
-	(void*)mc_remove,
-	(void*)mc_mkdir,
-	(void*)mc_rmdir,
-	(void*)mc_dopen,
-	(void*)mc_dclose,
-	(void*)mc_dread,
-	(void*)mc_getstat,
-	(void*)mc_chstat
-};
+    (void *)mc_init,
+    (void *)mc_deinit,
+    (void *)mc_format,
+    (void *)mc_open,
+    (void *)mc_close,
+    (void *)mc_read,
+    (void *)mc_write,
+    (void *)mc_lseek,
+    (void *)mc_ioctl,
+    (void *)mc_remove,
+    (void *)mc_mkdir,
+    (void *)mc_rmdir,
+    (void *)mc_dopen,
+    (void *)mc_dclose,
+    (void *)mc_dread,
+    (void *)mc_getstat,
+    (void *)mc_chstat};
 
 // driver descriptor
 static iop_device_t mcman_mcdev = {
-	"mc",
-	IOP_DT_FS,
-	1,
-	"Memory Card",
-	(struct _iop_device_ops *)&mcman_mcops
-};
+    "mc",
+    IOP_DT_FS,
+    1,
+    "Memory Card",
+    (struct _iop_device_ops *)&mcman_mcops};
 
 //--------------------------------------------------------------
 int mc_init(iop_device_t *dev)
@@ -111,7 +109,7 @@ int mcman_ioerrcode(int errcode)
 int mcman_modloadcb(char *filename, int *port, int *slot)
 {
 	register char *path = filename;
-	register int   upos;
+	register int upos;
 
 	if (*path == 0x20) {
 		path++;
@@ -124,7 +122,8 @@ int mcman_modloadcb(char *filename, int *port, int *slot)
 	if (((u8)path[1] | 0x20) != mcman_mcdev.name[1])
 		return 0;
 
-	if ((u32)strlen(path) < 2) return 2;
+	if ((u32)strlen(path) < 2)
+		return 2;
 
 	upos = mcman_chrpos(path, ':');
 
@@ -132,10 +131,11 @@ int mcman_modloadcb(char *filename, int *port, int *slot)
 		upos = strlen(path);
 
 	if (port) {
-		upos --;
+		upos--;
 		if (((u8)path[upos] - 0x30) < 10)
 			*port = (u8)path[upos] - 0x30;
-		else *port = 0;
+		else
+			*port = 0;
 	}
 
 	upos--;
@@ -145,7 +145,7 @@ int mcman_modloadcb(char *filename, int *port, int *slot)
 		register int m, v;
 
 		*slot = 0;
-		for (m = 1; ((u8)path[upos --] - 0x30) < 10; m = v << 1) {
+		for (m = 1; ((u8)path[upos--] - 0x30) < 10; m = v << 1) {
 			v = m << 2;
 			*slot += m * (path[upos] - 0x30);
 			v += m;
@@ -158,8 +158,8 @@ int mcman_modloadcb(char *filename, int *port, int *slot)
 //--------------------------------------------------------------
 void mcman_unit2card(u32 unit)
 {
- 	mcman_mc_port = unit & 1;
- 	mcman_mc_slot = (unit >> 1) & (MCMAN_MAXSLOT - 1);
+	mcman_mc_port = unit & 1;
+	mcman_mc_slot = (unit >> 1) & (MCMAN_MAXSLOT - 1);
 
 	// original mcman/xmcman code below is silly and I doubt it
 	// can support more than 2 units anyway...
@@ -228,7 +228,7 @@ int mc_open(iop_file_t *f, char *filename, int mode, int flags)
 	if (r >= -1) {
 		r = McOpen(mcman_mc_port, mcman_mc_slot, filename, mode);
 		if (r >= 0)
-			f->privdata = (void*)r;
+			f->privdata = (void *)r;
 	}
 	SignalSema(mcman_io_sema);
 
@@ -363,7 +363,7 @@ int mc_dopen(iop_file_t *f, char *dirname)
 	if (r >= -1) {
 		r = McOpen(mcman_mc_port, mcman_mc_slot, dirname, 0);
 		if (r >= 0)
-			f->privdata = (void*)r;
+			f->privdata = (void *)r;
 	}
 
 	SignalSema(mcman_io_sema);
@@ -427,28 +427,40 @@ int mc_chstat(iop_file_t *f, char *filename, fio_stat_t *stat, u32 statmask)
 		if (statmask & SCE_CST_ATTR) {
 			flags = 0x008;
 			mctbl.Reserve2 = stat->attr;
-		}
-		else flags = 0x000;
+		} else
+			flags = 0x000;
 
 		if (statmask & SCE_CST_MODE) {
 			flags |= 0x200;
-			if (stat->mode & SCE_STM_R) mctbl.AttrFile |= sceMcFileAttrReadable;
-			else mctbl.AttrFile &= (unsigned short)~sceMcFileAttrReadable;
+			if (stat->mode & SCE_STM_R)
+				mctbl.AttrFile |= sceMcFileAttrReadable;
+			else
+				mctbl.AttrFile &= (unsigned short)~sceMcFileAttrReadable;
 
-			if (stat->mode & SCE_STM_W) mctbl.AttrFile |= sceMcFileAttrWriteable;
-			else mctbl.AttrFile &= (unsigned short)~sceMcFileAttrWriteable;
+			if (stat->mode & SCE_STM_W)
+				mctbl.AttrFile |= sceMcFileAttrWriteable;
+			else
+				mctbl.AttrFile &= (unsigned short)~sceMcFileAttrWriteable;
 
-			if (stat->mode & SCE_STM_X) mctbl.AttrFile |= sceMcFileAttrExecutable;
-			else mctbl.AttrFile &= (unsigned short)~sceMcFileAttrExecutable;
+			if (stat->mode & SCE_STM_X)
+				mctbl.AttrFile |= sceMcFileAttrExecutable;
+			else
+				mctbl.AttrFile &= (unsigned short)~sceMcFileAttrExecutable;
 
-			if (stat->mode & SCE_STM_C) mctbl.AttrFile |= sceMcFileAttrDupProhibit;
-			else mctbl.AttrFile &= (unsigned short)~sceMcFileAttrDupProhibit;
+			if (stat->mode & SCE_STM_C)
+				mctbl.AttrFile |= sceMcFileAttrDupProhibit;
+			else
+				mctbl.AttrFile &= (unsigned short)~sceMcFileAttrDupProhibit;
 
-			if (stat->mode & sceMcFileAttrPS1) mctbl.AttrFile |= sceMcFileAttrPS1;
-			else mctbl.AttrFile &= (unsigned short)~sceMcFileAttrPS1;
+			if (stat->mode & sceMcFileAttrPS1)
+				mctbl.AttrFile |= sceMcFileAttrPS1;
+			else
+				mctbl.AttrFile &= (unsigned short)~sceMcFileAttrPS1;
 
-			if (stat->mode & sceMcFileAttrPDAExec) mctbl.AttrFile |= sceMcFileAttrPDAExec;
-			else mctbl.AttrFile &= (unsigned short)~sceMcFileAttrPDAExec;
+			if (stat->mode & sceMcFileAttrPDAExec)
+				mctbl.AttrFile |= sceMcFileAttrPDAExec;
+			else
+				mctbl.AttrFile &= (unsigned short)~sceMcFileAttrPDAExec;
 		}
 
 		if (statmask & SCE_CST_CT) {
@@ -469,11 +481,10 @@ int mc_chstat(iop_file_t *f, char *filename, fio_stat_t *stat, u32 statmask)
 }
 
 //--------------------------------------------------------------
-int mc_ioctl(iop_file_t *f, int a1, void* a2)
+int mc_ioctl(iop_file_t *f, int a1, void *a2)
 {
 	WaitSema(mcman_io_sema);
 	return 0;
 }
 
 //--------------------------------------------------------------
-

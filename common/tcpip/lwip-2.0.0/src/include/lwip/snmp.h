@@ -53,44 +53,44 @@ struct netif;
  */
 
 /* MIB2 statistics functions */
-#if MIB2_STATS  /* don't build if not configured for use in lwipopts.h */
+#if MIB2_STATS /* don't build if not configured for use in lwipopts.h */
 /**
  * @ingroup netif_mib2
  * @see RFC1213, "MIB-II, 6. Definitions"
  */
 enum snmp_ifType {
-  snmp_ifType_other=1,                /* none of the following */
-  snmp_ifType_regular1822,
-  snmp_ifType_hdh1822,
-  snmp_ifType_ddn_x25,
-  snmp_ifType_rfc877_x25,
-  snmp_ifType_ethernet_csmacd,
-  snmp_ifType_iso88023_csmacd,
-  snmp_ifType_iso88024_tokenBus,
-  snmp_ifType_iso88025_tokenRing,
-  snmp_ifType_iso88026_man,
-  snmp_ifType_starLan,
-  snmp_ifType_proteon_10Mbit,
-  snmp_ifType_proteon_80Mbit,
-  snmp_ifType_hyperchannel,
-  snmp_ifType_fddi,
-  snmp_ifType_lapb,
-  snmp_ifType_sdlc,
-  snmp_ifType_ds1,                    /* T-1 */
-  snmp_ifType_e1,                     /* european equiv. of T-1 */
-  snmp_ifType_basicISDN,
-  snmp_ifType_primaryISDN,            /* proprietary serial */
-  snmp_ifType_propPointToPointSerial,
-  snmp_ifType_ppp,
-  snmp_ifType_softwareLoopback,
-  snmp_ifType_eon,                    /* CLNP over IP [11] */
-  snmp_ifType_ethernet_3Mbit,
-  snmp_ifType_nsip,                   /* XNS over IP */
-  snmp_ifType_slip,                   /* generic SLIP */
-  snmp_ifType_ultra,                  /* ULTRA technologies */
-  snmp_ifType_ds3,                    /* T-3 */
-  snmp_ifType_sip,                    /* SMDS */
-  snmp_ifType_frame_relay
+	snmp_ifType_other = 1, /* none of the following */
+	snmp_ifType_regular1822,
+	snmp_ifType_hdh1822,
+	snmp_ifType_ddn_x25,
+	snmp_ifType_rfc877_x25,
+	snmp_ifType_ethernet_csmacd,
+	snmp_ifType_iso88023_csmacd,
+	snmp_ifType_iso88024_tokenBus,
+	snmp_ifType_iso88025_tokenRing,
+	snmp_ifType_iso88026_man,
+	snmp_ifType_starLan,
+	snmp_ifType_proteon_10Mbit,
+	snmp_ifType_proteon_80Mbit,
+	snmp_ifType_hyperchannel,
+	snmp_ifType_fddi,
+	snmp_ifType_lapb,
+	snmp_ifType_sdlc,
+	snmp_ifType_ds1, /* T-1 */
+	snmp_ifType_e1,  /* european equiv. of T-1 */
+	snmp_ifType_basicISDN,
+	snmp_ifType_primaryISDN, /* proprietary serial */
+	snmp_ifType_propPointToPointSerial,
+	snmp_ifType_ppp,
+	snmp_ifType_softwareLoopback,
+	snmp_ifType_eon, /* CLNP over IP [11] */
+	snmp_ifType_ethernet_3Mbit,
+	snmp_ifType_nsip,  /* XNS over IP */
+	snmp_ifType_slip,  /* generic SLIP */
+	snmp_ifType_ultra, /* ULTRA technologies */
+	snmp_ifType_ds3,   /* T-3 */
+	snmp_ifType_sip,   /* SMDS */
+	snmp_ifType_frame_relay
 };
 
 /** This macro has a precision of ~49 days because sys_now returns u32_t. \#define your own if you want ~490 days. */
@@ -102,12 +102,18 @@ enum snmp_ifType {
  * @ingroup netif_mib2
  * Increment stats member for SNMP MIB2 stats (struct stats_mib2_netif_ctrs)
  */
-#define MIB2_STATS_NETIF_INC(n, x)      do { ++(n)->mib2_counters.x; } while(0)
+#define MIB2_STATS_NETIF_INC(n, x) \
+	do {                           \
+		++(n)->mib2_counters.x;    \
+	} while (0)
 /**
  * @ingroup netif_mib2
  * Add value to stats member for SNMP MIB2 stats (struct stats_mib2_netif_ctrs)
  */
-#define MIB2_STATS_NETIF_ADD(n, x, val) do { (n)->mib2_counters.x += (val); } while(0)
+#define MIB2_STATS_NETIF_ADD(n, x, val) \
+	do {                                \
+		(n)->mib2_counters.x += (val);  \
+	} while (0)
 
 /**
  * @ingroup netif_mib2
@@ -116,21 +122,23 @@ enum snmp_ifType {
  * @param type one of enum @ref snmp_ifType
  * @param speed your link speed here (units: bits per second)
  */
-#define MIB2_INIT_NETIF(netif, type, speed) do { \
-  (netif)->link_type = (type);  \
-  (netif)->link_speed = (speed);\
-  (netif)->ts = 0;              \
-  (netif)->mib2_counters.ifinoctets = 0;      \
-  (netif)->mib2_counters.ifinucastpkts = 0;   \
-  (netif)->mib2_counters.ifinnucastpkts = 0;  \
-  (netif)->mib2_counters.ifindiscards = 0;    \
-  (netif)->mib2_counters.ifinerrors = 0;    \
-  (netif)->mib2_counters.ifinunknownprotos = 0;    \
-  (netif)->mib2_counters.ifoutoctets = 0;     \
-  (netif)->mib2_counters.ifoutucastpkts = 0;  \
-  (netif)->mib2_counters.ifoutnucastpkts = 0; \
-  (netif)->mib2_counters.ifoutdiscards = 0; \
-  (netif)->mib2_counters.ifouterrors = 0; } while(0)
+#define MIB2_INIT_NETIF(netif, type, speed)           \
+	do {                                              \
+		(netif)->link_type = (type);                  \
+		(netif)->link_speed = (speed);                \
+		(netif)->ts = 0;                              \
+		(netif)->mib2_counters.ifinoctets = 0;        \
+		(netif)->mib2_counters.ifinucastpkts = 0;     \
+		(netif)->mib2_counters.ifinnucastpkts = 0;    \
+		(netif)->mib2_counters.ifindiscards = 0;      \
+		(netif)->mib2_counters.ifinerrors = 0;        \
+		(netif)->mib2_counters.ifinunknownprotos = 0; \
+		(netif)->mib2_counters.ifoutoctets = 0;       \
+		(netif)->mib2_counters.ifoutucastpkts = 0;    \
+		(netif)->mib2_counters.ifoutnucastpkts = 0;   \
+		(netif)->mib2_counters.ifoutdiscards = 0;     \
+		(netif)->mib2_counters.ifouterrors = 0;       \
+	} while (0)
 #else /* MIB2_STATS */
 #ifndef MIB2_COPY_SYSUPTIME_TO
 #define MIB2_COPY_SYSUPTIME_TO(ptrToVal)
@@ -151,8 +159,8 @@ void mib2_netif_removed(struct netif *ni);
 void mib2_add_arp_entry(struct netif *ni, ip4_addr_t *ip);
 void mib2_remove_arp_entry(struct netif *ni, ip4_addr_t *ip);
 #else /* LWIP_IPV4 && LWIP_ARP */
-#define mib2_add_arp_entry(ni,ip)
-#define mib2_remove_arp_entry(ni,ip)
+#define mib2_add_arp_entry(ni, ip)
+#define mib2_remove_arp_entry(ni, ip)
 #endif /* LWIP_IPV4 && LWIP_ARP */
 
 /* IP */
@@ -178,8 +186,8 @@ void mib2_udp_unbind(struct udp_pcb *pcb);
 #define mib2_netif_removed(ni)
 
 /* ARP */
-#define mib2_add_arp_entry(ni,ip)
-#define mib2_remove_arp_entry(ni,ip)
+#define mib2_add_arp_entry(ni, ip)
+#define mib2_remove_arp_entry(ni, ip)
 
 /* IP */
 #define mib2_add_ip4(ni)
@@ -193,18 +201,18 @@ void mib2_udp_unbind(struct udp_pcb *pcb);
 #endif /* LWIP_MIB2_CALLBACKS */
 
 /* for source-code compatibility reasons only, can be removed (not used internally) */
-#define NETIF_INIT_SNMP                MIB2_INIT_NETIF
-#define snmp_add_ifinoctets(ni,value)  MIB2_STATS_NETIF_ADD(ni, ifinoctets, value)
-#define snmp_inc_ifinucastpkts(ni)     MIB2_STATS_NETIF_INC(ni, ifinucastpkts)
-#define snmp_inc_ifinnucastpkts(ni)    MIB2_STATS_NETIF_INC(ni, ifinnucastpkts)
-#define snmp_inc_ifindiscards(ni)      MIB2_STATS_NETIF_INC(ni, ifindiscards)
-#define snmp_inc_ifinerrors(ni)        MIB2_STATS_NETIF_INC(ni, ifinerrors)
+#define NETIF_INIT_SNMP MIB2_INIT_NETIF
+#define snmp_add_ifinoctets(ni, value) MIB2_STATS_NETIF_ADD(ni, ifinoctets, value)
+#define snmp_inc_ifinucastpkts(ni) MIB2_STATS_NETIF_INC(ni, ifinucastpkts)
+#define snmp_inc_ifinnucastpkts(ni) MIB2_STATS_NETIF_INC(ni, ifinnucastpkts)
+#define snmp_inc_ifindiscards(ni) MIB2_STATS_NETIF_INC(ni, ifindiscards)
+#define snmp_inc_ifinerrors(ni) MIB2_STATS_NETIF_INC(ni, ifinerrors)
 #define snmp_inc_ifinunknownprotos(ni) MIB2_STATS_NETIF_INC(ni, ifinunknownprotos)
-#define snmp_add_ifoutoctets(ni,value) MIB2_STATS_NETIF_ADD(ni, ifoutoctets, value)
-#define snmp_inc_ifoutucastpkts(ni)    MIB2_STATS_NETIF_INC(ni, ifoutucastpkts)
-#define snmp_inc_ifoutnucastpkts(ni)   MIB2_STATS_NETIF_INC(ni, ifoutnucastpkts)
-#define snmp_inc_ifoutdiscards(ni)     MIB2_STATS_NETIF_INC(ni, ifoutdiscards)
-#define snmp_inc_ifouterrors(ni)       MIB2_STATS_NETIF_INC(ni, ifouterrors)
+#define snmp_add_ifoutoctets(ni, value) MIB2_STATS_NETIF_ADD(ni, ifoutoctets, value)
+#define snmp_inc_ifoutucastpkts(ni) MIB2_STATS_NETIF_INC(ni, ifoutucastpkts)
+#define snmp_inc_ifoutnucastpkts(ni) MIB2_STATS_NETIF_INC(ni, ifoutnucastpkts)
+#define snmp_inc_ifoutdiscards(ni) MIB2_STATS_NETIF_INC(ni, ifoutdiscards)
+#define snmp_inc_ifouterrors(ni) MIB2_STATS_NETIF_INC(ni, ifouterrors)
 
 #ifdef __cplusplus
 }

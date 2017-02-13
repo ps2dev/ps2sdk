@@ -42,20 +42,20 @@
 #include "lwip/opt.h"
 #if LWIP_PERF
 #include "arch/perf.h"
-#else /* LWIP_PERF */
-#define PERF_START    /* null definition */
-#define PERF_STOP(x)  /* null definition */
-#endif /* LWIP_PERF */
+#else                /* LWIP_PERF */
+#define PERF_START   /* null definition */
+#define PERF_STOP(x) /* null definition */
+#endif               /* LWIP_PERF */
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define LWIP_MAX(x , y)  (((x) > (y)) ? (x) : (y))
-#define LWIP_MIN(x , y)  (((x) < (y)) ? (x) : (y))
+#define LWIP_MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define LWIP_MIN(x, y) (((x) < (y)) ? (x) : (y))
 
 /* Get the number of entries in an array ('x' must NOT be a pointer!) */
-#define LWIP_ARRAYSIZE(x) (sizeof(x)/sizeof((x)[0]))
+#define LWIP_ARRAYSIZE(x) (sizeof(x) / sizeof((x)[0]))
 
 #ifndef NULL
 #ifdef __cplusplus
@@ -103,12 +103,12 @@ u32_t lwip_htonl(u32_t x);
 /* These macros should be calculated by the preprocessor and are used
    with compile-time constants only (so that there is no little-endian
    overhead at runtime). */
-#define PP_HTONS(x) ((((x) & 0xff) << 8) | (((x) & 0xff00) >> 8))
+#define PP_HTONS(x) ((((x)&0xff) << 8) | (((x)&0xff00) >> 8))
 #define PP_NTOHS(x) PP_HTONS(x)
-#define PP_HTONL(x) ((((x) & 0xff) << 24) | \
-                     (((x) & 0xff00) << 8) | \
-                     (((x) & 0xff0000UL) >> 8) | \
-                     (((x) & 0xff000000UL) >> 24))
+#define PP_HTONL(x) ((((x)&0xff) << 24) |      \
+                     (((x)&0xff00) << 8) |     \
+                     (((x)&0xff0000UL) >> 8) | \
+                     (((x)&0xff000000UL) >> 24))
 #define PP_NTOHL(x) PP_HTONL(x)
 
 #endif /* BYTE_ORDER == BIG_ENDIAN */
@@ -121,19 +121,19 @@ u32_t lwip_htonl(u32_t x);
 
 #ifndef lwip_itoa
 /* This can be #defined to itoa() or snprintf(result, bufsize, "%d", number) depending on your platform */
-void  lwip_itoa(char* result, size_t bufsize, int number);
+void lwip_itoa(char *result, size_t bufsize, int number);
 #endif
 #ifndef lwip_strnicmp
 /* This can be #defined to strnicmp() or strncasecmp() depending on your platform */
-int   lwip_strnicmp(const char* str1, const char* str2, size_t len);
+int lwip_strnicmp(const char *str1, const char *str2, size_t len);
 #endif
 #ifndef lwip_stricmp
 /* This can be #defined to stricmp() or strcasecmp() depending on your platform */
-int   lwip_stricmp(const char* str1, const char* str2);
+int lwip_stricmp(const char *str1, const char *str2);
 #endif
 #ifndef lwip_strnstr
 /* This can be #defined to strnstr() depending on your platform */
-char* lwip_strnstr(const char* buffer, const char* token, size_t n);
+char *lwip_strnstr(const char *buffer, const char *token, size_t n);
 #endif
 
 #ifdef __cplusplus

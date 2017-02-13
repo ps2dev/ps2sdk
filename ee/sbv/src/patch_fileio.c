@@ -9,8 +9,8 @@
 
 #include "common.h"
 
-#define JMP(addr)	(0x08000000|(0x3ffffff&((addr)>>2)))
-#define JAL(addr)	(0x0c000000 | (0x3ffffff & ((addr) >> 2)))
+#define JMP(addr) (0x08000000 | (0x3ffffff & ((addr) >> 2)))
+#define JAL(addr) (0x0c000000 | (0x3ffffff & ((addr) >> 2)))
 
 int sbv_patch_fileio(void)
 {
@@ -28,29 +28,29 @@ int sbv_patch_fileio(void)
 
 	smod_mod_info_t mod_info;
 	SifDmaTransfer_t dmat;
-	static u32 new_fileio[20] ALIGNED(16)={
-		//sceFioRemove fix
-		0x0c0001ce,	// jal		+0x738 <- jal fio_remove
-		0x00000000,	// nop
-		0x0800033a,	// j		+0xce8 <- j rpc_handler_exit
-		0x00000000,	// nop
-		//sceFioGetstat()/sceFioDread() fix
-		0x27bdfff0,	// addiu	sp,sp,-16
-		0xafbf0000,	// sw		ra,0(sp)
-		0xafa40004,	// sw		a0,4(sp)
-		0xafa50008,	// sw		a1,8(sp)
-		0x0c000423,	// jal		+0x108c <- jal CpuSuspendIntr
-		0x27a4000c,	// addiu	a0,sp,12
-		0x8fa40004,	// lw		a0,4(sp)
-		0x0c000430,	// jal		+0x10c0 <- jal sceSifSetDma
-		0x8fa50008,	// lw		a1,8(sp)
-		0x8fa4000c,	// lw		a0,12(sp)
-		0x0c000425,	// jal		+0x1094 <- jal CpuResumeIntr
-		0xafa20004,	// sw		v0,4(sp)
-		0x8fbf0000,	// lw		ra,0(sp)
-		0x8fa20004,	// lw		v0,4(sp)
-		0x03e00008,	// jr		ra
-		0x27bd0010,	// addiu	sp,sp,16
+	static u32 new_fileio[20] ALIGNED(16) = {
+	    //sceFioRemove fix
+	    0x0c0001ce, // jal		+0x738 <- jal fio_remove
+	    0x00000000, // nop
+	    0x0800033a, // j		+0xce8 <- j rpc_handler_exit
+	    0x00000000, // nop
+	    //sceFioGetstat()/sceFioDread() fix
+	    0x27bdfff0, // addiu	sp,sp,-16
+	    0xafbf0000, // sw		ra,0(sp)
+	    0xafa40004, // sw		a0,4(sp)
+	    0xafa50008, // sw		a1,8(sp)
+	    0x0c000423, // jal		+0x108c <- jal CpuSuspendIntr
+	    0x27a4000c, // addiu	a0,sp,12
+	    0x8fa40004, // lw		a0,4(sp)
+	    0x0c000430, // jal		+0x10c0 <- jal sceSifSetDma
+	    0x8fa50008, // lw		a1,8(sp)
+	    0x8fa4000c, // lw		a0,12(sp)
+	    0x0c000425, // jal		+0x1094 <- jal CpuResumeIntr
+	    0xafa20004, // sw		v0,4(sp)
+	    0x8fbf0000, // lw		ra,0(sp)
+	    0x8fa20004, // lw		v0,4(sp)
+	    0x03e00008, // jr		ra
+	    0x27bd0010, // addiu	sp,sp,16
 	};
 	u32 *p_new_fileio;
 	u32 new_jump_op;
@@ -62,7 +62,7 @@ int sbv_patch_fileio(void)
 		return -1;
 
 	SifInitIopHeap();
-	if((patch_addr = SifAllocIopHeap(sizeof(new_fileio))) == NULL)
+	if ((patch_addr = SifAllocIopHeap(sizeof(new_fileio))) == NULL)
 		return -1;
 
 	/* setup our jump opcodes */
@@ -78,16 +78,16 @@ int sbv_patch_fileio(void)
 	p_new_fileio[14] += ((u32)mod_info.text_start >> 2);
 
 	/* apply it */
-	dmat.src=new_fileio;
-	dmat.dest=patch_addr;
-	dmat.size=sizeof(new_fileio);
-	dmat.attr=0;
+	dmat.src = new_fileio;
+	dmat.dest = patch_addr;
+	dmat.size = sizeof(new_fileio);
+	dmat.attr = 0;
 	SifSetDma(&dmat, 1);
 
 	//For the dump to sceRemove()
-	new_jump_op =  JMP((u32)patch_addr);
+	new_jump_op = JMP((u32)patch_addr);
 	smem_write_word((void *)mod_info.text_start + 0x0bb8, new_jump_op);
-	new_jump_op =  JAL((u32)patch_addr + 16);
+	new_jump_op = JAL((u32)patch_addr + 16);
 	//For the jumps to sceSifSetDma within sceGetstat() and sceDread():
 	smem_write_word((void *)mod_info.text_start + 0x09cc, new_jump_op);
 	smem_write_word((void *)mod_info.text_start + 0x0a58, new_jump_op);

@@ -18,11 +18,10 @@
 
 void GsDrawSync(int mode)
 {
-	switch(mode)
-	{
-	case 0:
-	default:
-		GsDmaWait();
+	switch (mode) {
+		case 0:
+		default:
+			GsDmaWait();
 	}
 }
 
@@ -30,21 +29,20 @@ void GsHSync(int mode)
 {
 	unsigned short i;
 
-	switch(mode)
-	{
-	case 0:
-		GS_SET_CSR_hsync_intrupt(1);
-		while(!GS_GET_CSR_hsync_intrupt);
-	break;
-	default:
-		if(mode>1)
-		{
-			for(i=0;i<mode;i++)
-			{
-				GS_SET_CSR_hsync_intrupt(1);
-				while(!GS_GET_CSR_hsync_intrupt);
+	switch (mode) {
+		case 0:
+			GS_SET_CSR_hsync_intrupt(1);
+			while (!GS_GET_CSR_hsync_intrupt)
+				;
+			break;
+		default:
+			if (mode > 1) {
+				for (i = 0; i < mode; i++) {
+					GS_SET_CSR_hsync_intrupt(1);
+					while (!GS_GET_CSR_hsync_intrupt)
+						;
+				}
 			}
-		}
 	}
 }
 
@@ -52,22 +50,20 @@ void GsVSync(int mode)
 {
 	unsigned short i;
 
-	switch(mode)
-	{
-	case 0: //just wait
-		GS_SET_CSR_vsync_intrupt(1);
-		while(!GS_GET_CSR_vsync_intrupt);
-	break;
-	default: // wait for num of vsync to pass
-		if(mode>1)
-		{
+	switch (mode) {
+		case 0: //just wait
+			GS_SET_CSR_vsync_intrupt(1);
+			while (!GS_GET_CSR_vsync_intrupt)
+				;
+			break;
+		default: // wait for num of vsync to pass
+			if (mode > 1) {
 
-			for(i=0;i<mode;i++)
-			{
-				GS_SET_CSR_vsync_intrupt(1);
-				while(!GS_GET_CSR_vsync_intrupt);
-
+				for (i = 0; i < mode; i++) {
+					GS_SET_CSR_vsync_intrupt(1);
+					while (!GS_GET_CSR_vsync_intrupt)
+						;
+				}
 			}
-		}
 	}
 }

@@ -13,11 +13,12 @@
 #include "udptty.h"
 #include <sysclib.h>
 
-typedef struct {
-	unsigned short int txfree;		/* Number of bytes free in the TX FIFO.  */
-	unsigned short int txbdsi;		/* Saved index into TX BD.  */
-	unsigned short int txbdi;		/* Index into current TX BD.  */
-	unsigned short int txbd_used;	/* Keeps track of how many TX BD's have been used.  */
+typedef struct
+{
+	unsigned short int txfree;    /* Number of bytes free in the TX FIFO.  */
+	unsigned short int txbdsi;    /* Saved index into TX BD.  */
+	unsigned short int txbdi;     /* Index into current TX BD.  */
+	unsigned short int txbd_used; /* Keeps track of how many TX BD's have been used.  */
 } smap_tx_state_t;
 
 static smap_tx_state_t tx_state;
@@ -29,8 +30,8 @@ static int smap_phy_read(int reg, u16 *data)
 	USE_SMAP_EMAC3_REGS;
 	u32 i, val;
 
-	val = SMAP_E3_PHY_READ|(SMAP_DsPHYTER_ADDRESS << SMAP_E3_PHY_ADDR_BITSFT)|
-		(reg & SMAP_E3_PHY_REG_ADDR_MSK);
+	val = SMAP_E3_PHY_READ | (SMAP_DsPHYTER_ADDRESS << SMAP_E3_PHY_ADDR_BITSFT) |
+	      (reg & SMAP_E3_PHY_REG_ADDR_MSK);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_STA_CTRL, val);
 
 	/* Wait for the read operation to complete.  */
@@ -51,9 +52,9 @@ static int smap_phy_write(int reg, u16 data)
 	USE_SMAP_EMAC3_REGS;
 	u32 i, val;
 
-	val = ((data & SMAP_E3_PHY_DATA_MSK) << SMAP_E3_PHY_DATA_BITSFT)|
-		SMAP_E3_PHY_WRITE|(SMAP_DsPHYTER_ADDRESS << SMAP_E3_PHY_ADDR_BITSFT)|
-		(reg & SMAP_E3_PHY_REG_ADDR_MSK);
+	val = ((data & SMAP_E3_PHY_DATA_MSK) << SMAP_E3_PHY_DATA_BITSFT) |
+	      SMAP_E3_PHY_WRITE | (SMAP_DsPHYTER_ADDRESS << SMAP_E3_PHY_ADDR_BITSFT) |
+	      (reg & SMAP_E3_PHY_REG_ADDR_MSK);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_STA_CTRL, val);
 
 	/* Wait for the write operation to complete.  */
@@ -85,7 +86,7 @@ static int smap_phy_init(void)
 	if (!i)
 		return 2;
 
-	val = SMAP_PHY_BMCR_ANEN|SMAP_PHY_BMCR_RSAN;
+	val = SMAP_PHY_BMCR_ANEN | SMAP_PHY_BMCR_RSAN;
 	smap_phy_write(SMAP_DsPHYTER_BMCR, val);
 
 	/* Attempt to complete autonegotiation up to 3 times.  */
@@ -118,9 +119,9 @@ auto_done:
 
 	val = SMAP_EMAC3_GET(SMAP_R_EMAC3_MODE1);
 	if (phydata & SMAP_PHY_STS_FDX)
-		val |= SMAP_E3_FDX_ENABLE|SMAP_E3_FLOWCTRL_ENABLE|SMAP_E3_ALLOW_PF;
+		val |= SMAP_E3_FDX_ENABLE | SMAP_E3_FLOWCTRL_ENABLE | SMAP_E3_ALLOW_PF;
 	else
-		val &= ~(SMAP_E3_FDX_ENABLE|SMAP_E3_FLOWCTRL_ENABLE|SMAP_E3_ALLOW_PF);
+		val &= ~(SMAP_E3_FDX_ENABLE | SMAP_E3_FLOWCTRL_ENABLE | SMAP_E3_ALLOW_PF);
 
 	val &= ~SMAP_E3_MEDIA_MSK;
 	if (phydata & SMAP_PHY_STS_10M) {
@@ -139,7 +140,7 @@ auto_done:
 		return 8;
 
 	if (idr1 == SMAP_PHY_IDR1_VAL &&
-			((idr2 & SMAP_PHY_IDR2_MSK) == SMAP_PHY_IDR2_VAL)) {
+	    ((idr2 & SMAP_PHY_IDR2_MSK) == SMAP_PHY_IDR2_VAL)) {
 		if (phydata & SMAP_PHY_STS_10M)
 			smap_phy_write(0x1a, 0x104);
 
@@ -159,7 +160,8 @@ int smap_init(void)
 	USE_SPD_REGS;
 	USE_SMAP_REGS;
 	USE_SMAP_EMAC3_REGS;
-	USE_SMAP_TX_BD; USE_SMAP_RX_BD;
+	USE_SMAP_TX_BD;
+	USE_SMAP_RX_BD;
 	u8 *hwaddr;
 	u16 EEPROM_data[5];
 	u32 val;
@@ -172,7 +174,7 @@ int smap_init(void)
 
 	/* Disable TX/RX.  */
 	val = SMAP_EMAC3_GET(SMAP_R_EMAC3_MODE0);
-	val &= ~( SMAP_E3_TXMAC_ENABLE|SMAP_E3_RXMAC_ENABLE);
+	val &= ~(SMAP_E3_TXMAC_ENABLE | SMAP_E3_RXMAC_ENABLE);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_MODE0, val);
 
 	/* Disable interrupts.  */
@@ -212,39 +214,39 @@ int smap_init(void)
 
 	/* Initialize all RX and TX buffer descriptors.  */
 	for (i = 0; i < SMAP_BD_MAX_ENTRY; i++, tx_bd++) {
-			tx_bd->ctrl_stat = 0;
-			tx_bd->reserved  = 0;
-			tx_bd->length    = 0;
-			tx_bd->pointer   = 0;
+		tx_bd->ctrl_stat = 0;
+		tx_bd->reserved = 0;
+		tx_bd->length = 0;
+		tx_bd->pointer = 0;
 	}
 	for (i = 0; i < SMAP_BD_MAX_ENTRY; i++, rx_bd++) {
-			rx_bd->ctrl_stat = SMAP_BD_RX_EMPTY;
-			rx_bd->reserved  = 0;
-			rx_bd->length    = 0;
-			rx_bd->pointer   = 0;
+		rx_bd->ctrl_stat = SMAP_BD_RX_EMPTY;
+		rx_bd->reserved = 0;
+		rx_bd->length = 0;
+		rx_bd->pointer = 0;
 	}
 
 	SMAP_REG16(SMAP_R_INTR_CLR) = SMAP_INTR_BITMSK;
 
-	val = SMAP_E3_FDX_ENABLE|SMAP_E3_IGNORE_SQE|SMAP_E3_MEDIA_100M|
-		SMAP_E3_RXFIFO_2K|SMAP_E3_TXFIFO_1K|SMAP_E3_TXREQ0_MULTI;
+	val = SMAP_E3_FDX_ENABLE | SMAP_E3_IGNORE_SQE | SMAP_E3_MEDIA_100M |
+	      SMAP_E3_RXFIFO_2K | SMAP_E3_TXFIFO_1K | SMAP_E3_TXREQ0_MULTI;
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_MODE1, val);
 
 	val = (7 << SMAP_E3_TX_LOW_REQ_BITSFT) | (15 << SMAP_E3_TX_URG_REQ_BITSFT);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_TxMODE1, val);
 
-	val = SMAP_E3_RX_STRIP_PAD|SMAP_E3_RX_STRIP_FCS|SMAP_E3_RX_INDIVID_ADDR|
-		SMAP_E3_RX_BCAST|SMAP_E3_RX_MCAST;
+	val = SMAP_E3_RX_STRIP_PAD | SMAP_E3_RX_STRIP_FCS | SMAP_E3_RX_INDIVID_ADDR |
+	      SMAP_E3_RX_BCAST | SMAP_E3_RX_MCAST;
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_RxMODE, val);
 
 	//Retrieve the console's MAC address.
 	dev9GetEEPROM(EEPROM_data);
-	hwaddr=(u8*)&EEPROM_data[1];
+	hwaddr = (u8 *)&EEPROM_data[1];
 
-	val = (u16)((hwaddr[0] >> 8)|(hwaddr[0] << 8));
+	val = (u16)((hwaddr[0] >> 8) | (hwaddr[0] << 8));
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_ADDR_HI, val);
-	val = (((hwaddr[1] >> 8)|(hwaddr[1] << 8)) << 16)|(u16)((hwaddr[2] >> 8)|
-			(hwaddr[2] << 8));
+	val = (((hwaddr[1] >> 8) | (hwaddr[1] << 8)) << 16) | (u16)((hwaddr[2] >> 8) |
+	                                                            (hwaddr[2] << 8));
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_ADDR_LO, val);
 
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_PAUSE_TIMER, 0xffff);
@@ -297,7 +299,7 @@ static int smap_tx(void *buf, size_t size)
 	tx_bd[txbdi].length = size;
 	tx_bd[txbdi].pointer = BD_data_ptr;
 	SMAP_REG8(SMAP_R_TXFIFO_FRAME_INC) = 1;
-	tx_bd[txbdi].ctrl_stat = SMAP_BD_TX_READY|SMAP_BD_TX_GENFCS|SMAP_BD_TX_GENPAD;
+	tx_bd[txbdi].ctrl_stat = SMAP_BD_TX_READY | SMAP_BD_TX_GENFCS | SMAP_BD_TX_GENPAD;
 
 	tx_state.txbdi++;
 	tx_state.txbd_used++;

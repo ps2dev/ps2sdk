@@ -50,50 +50,40 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 extern float MAXNUMF;
 
 #ifdef ANSIC
-float logf( float );
+float logf(float);
 
-float atanhf( float xx )
+float atanhf(float xx)
 #else
 float logf();
 
-float atanhf(xx)
-double xx;
+float atanhf(xx) double xx;
 #endif
 {
-float x, z;
+	float x, z;
 
-x = xx;
-if( x < 0 )
-	z = -x;
-else
-	z = x;
-if( z >= 1.0 )
-	{
-	if( x == 1.0 )
-		return( MAXNUMF );
-	if( x == -1.0 )
-		return( -MAXNUMF );
-	mtherr( "atanhl", DOMAIN );
-	return( MAXNUMF );
+	x = xx;
+	if (x < 0)
+		z = -x;
+	else
+		z = x;
+	if (z >= 1.0) {
+		if (x == 1.0)
+			return (MAXNUMF);
+		if (x == -1.0)
+			return (-MAXNUMF);
+		mtherr("atanhl", DOMAIN);
+		return (MAXNUMF);
 	}
 
-if( z < 1.0e-4 )
-	return(x);
+	if (z < 1.0e-4)
+		return (x);
 
-if( z < 0.5 )
-	{
-	z = x * x;
-	z =
-	(((( 1.81740078349E-1 * z
-	  + 8.24370301058E-2) * z
-	  + 1.46691431730E-1) * z
-	  + 1.99782164500E-1) * z
-	  + 3.33337300303E-1) * z * x
-	  + x;
+	if (z < 0.5) {
+		z = x * x;
+		z =
+		    ((((1.81740078349E-1 * z + 8.24370301058E-2) * z + 1.46691431730E-1) * z + 1.99782164500E-1) * z + 3.33337300303E-1) * z * x + x;
+	} else {
+		z = 0.5 * logf((1.0 + x) / (1.0 - x));
 	}
-else
-	{
-	z = 0.5 * logf( (1.0+x)/(1.0-x) );
-	}
-return( z );
+	return (z);
 }

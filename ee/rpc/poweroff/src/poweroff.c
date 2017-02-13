@@ -23,7 +23,7 @@ extern void *_gp;
 static poweroff_callback poweroff_cb = NULL;
 static void *poweroff_data = NULL;
 
-static u8 poffThreadStack[512 * 16] __attribute__ ((aligned(16)));
+static u8 poffThreadStack[512 * 16] __attribute__((aligned(16)));
 
 extern int _iop_reboot_count;
 static SifRpcClientData_t cd0;
@@ -33,7 +33,7 @@ static int powerOffThreadId = -1;
 
 static void *PowerOff_ee_rpc_handler(int fnum, void *buffer, int len)
 {
-	switch(fnum){
+	switch (fnum) {
 		case POFF_RPC_BUTTON:
 			printf("EE: power button pressed\n");
 
@@ -60,11 +60,11 @@ int poweroffInit(void)
 	int res;
 	static int _init_count = -1;
 
-	if(_init_count == _iop_reboot_count)
+	if (_init_count == _iop_reboot_count)
 		return 0;
 	_init_count = _iop_reboot_count;
 
-	while(((res = SifBindRpc(&cd0, PWROFF_IRX, 0)) < 0) || (cd0.server == NULL))
+	while (((res = SifBindRpc(&cd0, PWROFF_IRX, 0)) < 0) || (cd0.server == NULL))
 		nopdelay();
 
 	// Terminate and delete any previously created threads

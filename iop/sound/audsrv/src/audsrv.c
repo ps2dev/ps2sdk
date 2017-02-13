@@ -38,35 +38,35 @@
 IRX_ID("audsrv", 1, 2);
 
 /* globals */
-static int core1_volume = MAX_VOLUME;   ///< core1 (sfx) volume
-static int core1_freq = 0;              ///< frequency set by user
-static int core1_bits = 0;              ///< bits per sample, set by user
-static int core1_channels = 0;          ///< number of audio channels
-static int core1_sample_shift = 0;      ///< shift count from bytes to samples
+static int core1_volume = MAX_VOLUME; ///< core1 (sfx) volume
+static int core1_freq = 0;            ///< frequency set by user
+static int core1_bits = 0;            ///< bits per sample, set by user
+static int core1_channels = 0;        ///< number of audio channels
+static int core1_sample_shift = 0;    ///< shift count from bytes to samples
 
 /* status */
-static int initialized = 0;             ///< initialization status
-static int playing = 0;                 ///< playing (not mute) status
+static int initialized = 0; ///< initialization status
+static int playing = 0;     ///< playing (not mute) status
 
 /* ring buffer properties */
 /** size of ring buffer in bytes */
-static char ringbuf[20480];             ///< ring buffer itself
+static char ringbuf[20480]; ///< ring buffer itself
 static int ringbuf_size = sizeof(ringbuf);
-static int readpos;                     ///< reading head pointer
-static int writepos;                    ///< writing head pointer
+static int readpos;  ///< reading head pointer
+static int writepos; ///< writing head pointer
 
-static int play_tid = 0;                ///< playing thread id
-static int queue_sema = 0;              ///< semaphore for wait_audio()
-static int transfer_sema = 0;           ///< SPU2 transfer complete semaphore
-static int fillbuf_threshold = 0;       ///< threshold to initiate a callback
+static int play_tid = 0;          ///< playing thread id
+static int queue_sema = 0;        ///< semaphore for wait_audio()
+static int transfer_sema = 0;     ///< SPU2 transfer complete semaphore
+static int fillbuf_threshold = 0; ///< threshold to initiate a callback
 
-static int format_changed = 0;          ///< boolean to notify when format has changed
+static int format_changed = 0; ///< boolean to notify when format has changed
 
 /** double buffer for streaming */
-static u8 core1_buf[0x1000] __attribute__((aligned (64)));
+static u8 core1_buf[0x1000] __attribute__((aligned(64)));
 
-static short rendered_left [ 512 ];
-static short rendered_right[ 512 ];
+static short rendered_left[512];
+static short rendered_right[512];
 
 /** exports table */
 extern struct irx_export_table _exp_audsrv;
@@ -139,8 +139,7 @@ int audsrv_stop_audio()
 */
 int audsrv_format_ok(int freq, int bits, int channels)
 {
-	if (find_upsampler(freq, bits, channels) != NULL)
-	{
+	if (find_upsampler(freq, bits, channels) != NULL) {
 		return 1;
 	}
 
@@ -163,20 +162,17 @@ int audsrv_set_format(int freq, int bits, int channels)
 {
 	int feed_size;
 
-	if (audsrv_format_ok(freq, bits, channels) == 0)
-	{
+	if (audsrv_format_ok(freq, bits, channels) == 0) {
 		return -AUDSRV_ERR_FORMAT_NOT_SUPPORTED;
 	}
 
 	/* update shift-right count */
 	core1_sample_shift = 0;
-	if (bits == 16)
-	{
+	if (bits == 16) {
 		core1_sample_shift++;
 	}
 
-	if (channels == 2)
-	{
+	if (channels == 2) {
 		core1_sample_shift++;
 	}
 
@@ -202,14 +198,12 @@ int audsrv_set_format(int freq, int bits, int channels)
 */
 int audsrv_init()
 {
-	if (initialized)
-	{
+	if (initialized) {
 		return 0;
 	}
 
 	/* initialize libsd */
-	if (sceSdInit(SD_INIT_COLD) < 0)
-	{
+	if (sceSdInit(SD_INIT_COLD) < 0) {
 		printf("audsrv: failed to initialize libsd\n");
 		return -1;
 	}
@@ -219,14 +213,12 @@ int audsrv_init()
 
 	/* initialize transfer_complete's semaphore */
 	transfer_sema = CreateMutex(0);
-	if (transfer_sema < 0)
-	{
+	if (transfer_sema < 0) {
 		return AUDSRV_ERR_OUT_OF_MEMORY;
 	}
 
 	queue_sema = CreateMutex(0);
-	if (queue_sema < 0)
-	{
+	if (queue_sema < 0) {
 		DeleteSema(transfer_sema);
 		return AUDSRV_ERR_OUT_OF_MEMORY;
 	}
@@ -261,12 +253,9 @@ int audsrv_init()
 */
 int audsrv_available()
 {
-	if (writepos <= readpos)
-	{
+	if (writepos <= readpos) {
 		return readpos - writepos;
-	}
-	else
-	{
+	} else {
 		return (ringbuf_size - (writepos - readpos));
 	}
 }
@@ -280,16 +269,13 @@ int audsrv_available()
 */
 int audsrv_wait_audio(int buflen)
 {
-	if (ringbuf_size < buflen)
-	{
+	if (ringbuf_size < buflen) {
 		/* this will never happen */
 		return AUDSRV_ERR_ARGS;
 	}
 
-	while (1)
-	{
-		if (audsrv_available() >= buflen)
-		{
+	while (1) {
+		if (audsrv_available() >= buflen) {
 			/* enough space! */
 			return AUDSRV_ERR_NOERROR;
 		}
@@ -312,13 +298,11 @@ int audsrv_play_audio(const char *buf, int buflen)
 {
 	int sent = 0;
 
-	if (initialized == 0)
-	{
+	if (initialized == 0) {
 		return -AUDSRV_ERR_NOT_INITIALIZED;
 	}
 
-	if (playing == 0)
-	{
+	if (playing == 0) {
 		/* audio is always playing, just change the volume */
 		playing = 1;
 		update_volume();
@@ -329,11 +313,9 @@ int audsrv_play_audio(const char *buf, int buflen)
 	/* limit to what's available, no crossing possible */
 	buflen = MIN(buflen, audsrv_available());
 
-	while (buflen > 0)
-	{
+	while (buflen > 0) {
 		int copy = buflen;
-		if (writepos >= readpos)
-		{
+		if (writepos >= readpos) {
 			copy = MIN(ringbuf_size - writepos, buflen);
 		}
 
@@ -343,8 +325,7 @@ int audsrv_play_audio(const char *buf, int buflen)
 		sent = sent + copy;
 
 		writepos = writepos + copy;
-		if (writepos >= ringbuf_size)
-		{
+		if (writepos >= ringbuf_size) {
 			/* rewind */
 			writepos = 0;
 		}
@@ -359,8 +340,7 @@ int audsrv_play_audio(const char *buf, int buflen)
 */
 int audsrv_set_volume(int vol)
 {
-	if (vol < 0 || vol > MAX_VOLUME)
-	{
+	if (vol < 0 || vol > MAX_VOLUME) {
 		/* bad joke */
 		return AUDSRV_ERR_ARGS;
 	}
@@ -372,8 +352,7 @@ int audsrv_set_volume(int vol)
 
 int audsrv_set_threshold(int amount)
 {
-	if (amount > (ringbuf_size / 2))
-	{
+	if (amount > (ringbuf_size / 2)) {
 		/* amount is greater than what we'd recommend */
 		return AUDSRV_ERR_ARGS;
 	}
@@ -404,30 +383,24 @@ static void play_thread(void *arg)
 	upsampler_t upsampler = NULL;
 
 	printf("starting play thread\n");
-	while (1)
-	{
-		if (format_changed)
-		{
+	while (1) {
+		if (format_changed) {
 			upsampler = find_upsampler(core1_freq, core1_bits, core1_channels);
 			format_changed = 0;
 		}
 
-		if (playing && upsampler != NULL)
-		{
+		if (playing && upsampler != NULL) {
 			up.src = (const unsigned char *)ringbuf + readpos;
 			up.left = rendered_left;
 			up.right = rendered_right;
 			step = upsampler(&up);
 
 			readpos = readpos + step;
-			if (readpos >= ringbuf_size)
-			{
+			if (readpos >= ringbuf_size) {
 				/* wrap around */
 				readpos = 0;
 			}
-		}
-		else
-		{
+		} else {
 			/* not playing */
 			memset(rendered_left, '\0', sizeof(rendered_left));
 			memset(rendered_right, '\0', sizeof(rendered_right));
@@ -444,24 +417,22 @@ static void play_thread(void *arg)
 
 		/* copy 1024 bytes from left and right buffers, into core1_buf */
 		bufptr = core1_buf + (block << 11);
-		wmemcpy(bufptr +    0, rendered_left + 0, 512);
-		wmemcpy(bufptr +  512, rendered_right + 0, 512);
+		wmemcpy(bufptr + 0, rendered_left + 0, 512);
+		wmemcpy(bufptr + 512, rendered_right + 0, 512);
 		wmemcpy(bufptr + 1024, rendered_left + 256, 512);
 		wmemcpy(bufptr + 1536, rendered_right + 256, 512);
 
 		CpuResumeIntr(intr_state);
 
 		available = audsrv_available();
-		if (available >= (ringbuf_size / 10))
-		{
+		if (available >= (ringbuf_size / 10)) {
 			/* arbitrarily selected ringbuf_size / 10, to reduce
 			 * number of semaphores signalled.
 			 */
 			SignalSema(queue_sema);
 		}
 
-		if (fillbuf_threshold > 0 && available >= fillbuf_threshold)
-		{
+		if (fillbuf_threshold > 0 && available >= fillbuf_threshold) {
 			/* EE client requested a callback */
 			call_client_callback(AUDSRV_FILLBUF_CALLBACK);
 		}
@@ -488,21 +459,18 @@ int audsrv_quit()
 	sceSdBlockTrans(SD_CORE_1, SD_TRANS_STOP, 0, 0, 0);
 
 	/* stop playing thread */
-	if (play_tid > 0)
-	{
+	if (play_tid > 0) {
 		TerminateThread(play_tid);
 		DeleteThread(play_tid);
 		play_tid = 0;
 	}
 
-	if (transfer_sema > 0)
-	{
+	if (transfer_sema > 0) {
 		DeleteSema(transfer_sema);
 		transfer_sema = 0;
 	}
 
-	if (queue_sema > 0)
-	{
+	if (queue_sema > 0) {
 		DeleteSema(queue_sema);
 		queue_sema = 0;
 	}
@@ -510,8 +478,7 @@ int audsrv_quit()
 	return 0;
 }
 
-__attribute__((weak))
-void unittest_start()
+__attribute__((weak)) void unittest_start()
 {
 	/* override this from a unittest */
 }
@@ -528,8 +495,7 @@ int _start(int argc, char *argv[])
 	printf("audsrv: greetings from version " VERSION " !\n");
 
 	err = RegisterLibraryEntries(&_exp_audsrv);
-	if (err != 0)
-	{
+	if (err != 0) {
 		printf("audsrv: couldn't register library entries. Error %d\n", err);
 		return MODULE_NO_RESIDENT_END;
 	}

@@ -3,8 +3,8 @@
 
 #define PS2IP_IRX 0xB0125F2
 
-enum PS2IPS_RPC_ID{
-	PS2IPS_ID_ACCEPT	= 1,
+enum PS2IPS_RPC_ID {
+	PS2IPS_ID_ACCEPT = 1,
 	PS2IPS_ID_BIND,
 	PS2IPS_ID_DISCONNECT,
 	PS2IPS_ID_CONNECT,
@@ -36,16 +36,18 @@ enum PS2IPS_RPC_ID{
 	PS2IPS_ID_COUNT
 };
 
-typedef struct {
-	s32  ssize;
-	s32  esize;
+typedef struct
+{
+	s32 ssize;
+	s32 esize;
 	u8 *sbuf;
 	u8 *ebuf;
 	u8 sbuffer[16];
 	u8 ebuffer[16];
 } rests_pkt; // sizeof = 48
 
-typedef struct {
+typedef struct
+{
 	s32 socket;
 	s32 length;
 	s32 flags;
@@ -55,7 +57,8 @@ typedef struct {
 	u8 malign_buff[16]; // buffer for sending misaligned portion
 } send_pkt;
 
-typedef struct {
+typedef struct
+{
 	s32 socket;
 	s32 length;
 	s32 flags;
@@ -63,35 +66,41 @@ typedef struct {
 	void *intr_data;
 } s_recv_pkt;
 
-typedef struct {
+typedef struct
+{
 	s32 ret;
 	struct sockaddr sockaddr;
 } r_recv_pkt;
 
-typedef struct {
+typedef struct
+{
 	s32 socket;
 	struct sockaddr sockaddr;
 	s32 len;
 } cmd_pkt;
 
-typedef struct {
+typedef struct
+{
 	s32 retval;
 	struct sockaddr sockaddr;
 } ret_pkt;
 
-typedef struct {
+typedef struct
+{
 	s32 s;
 	s32 level;
 	s32 optname;
 } getsockopt_pkt;
 
-typedef struct {
+typedef struct
+{
 	s32 result;
 	s32 optlen;
 	u8 buffer[128];
 } getsockopt_res_pkt;
 
-typedef struct {
+typedef struct
+{
 	s32 s;
 	s32 level;
 	s32 optname;
@@ -99,8 +108,10 @@ typedef struct {
 	u8 buffer[128];
 } setsockopt_pkt;
 
-typedef struct {
-	union {
+typedef struct
+{
+	union
+	{
 		s32 maxfdp1;
 		s32 result;
 	};
@@ -114,8 +125,10 @@ typedef struct {
 	struct fd_set exceptset;
 } select_pkt;
 
-typedef struct {
-	union {
+typedef struct
+{
+	union
+	{
 		s32 s;
 		s32 result;
 	};
@@ -125,26 +138,30 @@ typedef struct {
 } ioctl_pkt;
 
 #ifdef PS2IP_DNS
-struct hostent_res{
+struct hostent_res
+{
 	short h_addrtype;
 	short h_length;
 	ip_addr_t h_addr;
 };
 
-typedef struct {
+typedef struct
+{
 	s32 result;
 	struct hostent_res hostent;
 } gethostbyname_res_pkt;
 
-typedef struct {
+typedef struct
+{
 	ip_addr_t dnsserver;
 	u8 numdns;
 } dns_setserver_pkt;
 
-typedef struct {
+typedef struct
+{
 	ip_addr_t dnsserver;
 } dns_getserver_res_pkt;
 
 #endif
 
-#endif	//_PS2IP_RPC_H
+#endif //_PS2IP_RPC_H

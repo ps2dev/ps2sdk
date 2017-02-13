@@ -15,11 +15,11 @@
 extern "C" {
 #endif
 
-#define POWEROFF_THREAD_PRIORITY	0x70
+#define POWEROFF_THREAD_PRIORITY 0x70
 
 typedef void (*poweroff_callback)(void *arg);
 
-int poweroffInit(void);	//Initializes the poweroff library. A service thread with a default priority of 0x70 will be created.
+int poweroffInit(void); //Initializes the poweroff library. A service thread with a default priority of 0x70 will be created.
 void poweroffSetCallback(poweroff_callback cb, void *arg);
 void poweroffShutdown(void);
 void poweroffChangeThreadPriority(int priority);

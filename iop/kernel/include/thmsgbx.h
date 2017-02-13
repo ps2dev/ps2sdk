@@ -17,12 +17,13 @@
 #include "irx.h"
 
 //Message box attributes
-#define MBA_THFIFO	0x000
-#define MBA_THPRI	0x001
-#define MBA_MSFIFO	0x000
-#define MBA_MSPRI	0x004
+#define MBA_THFIFO 0x000
+#define MBA_THPRI 0x001
+#define MBA_MSFIFO 0x000
+#define MBA_MSPRI 0x004
 
-typedef struct {
+typedef struct
+{
 	unsigned int attr;
 	unsigned int option;
 } iop_mbx_t;
@@ -35,13 +36,15 @@ typedef struct {
 	   ...
        } my_message_t;
 */
-typedef struct _iop_message {
+typedef struct _iop_message
+{
 	struct iop_message *next;
 	unsigned char priority;
 	unsigned char unused[3];
 } iop_message_t;
 
-typedef struct _iop_mbx_status {
+typedef struct _iop_mbx_status
+{
 	unsigned int attr;
 	unsigned int option;
 	int numWaitThreads;

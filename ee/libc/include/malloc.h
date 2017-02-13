@@ -22,18 +22,18 @@ extern "C" {
 #endif
 
 /* stdlib/malloc */
-void *	malloc(size_t size);
-void *	realloc(void *ptr, size_t size);
-void *	realloc64(void *ptr, size_t size);
-void *	calloc(size_t n, size_t size);
-void *	memalign(size_t align, size_t size);
-void	free(void * ptr);
+void *malloc(size_t size);
+void *realloc(void *ptr, size_t size);
+void *realloc64(void *ptr, size_t size);
+void *calloc(size_t n, size_t size);
+void *memalign(size_t align, size_t size);
+void free(void *ptr);
 
 /* Memory walkers. Used for debugging/profiling purposes. */
-void * __mem_walk_begin(void);
-void __mem_walk_read(void * token, u32 * size, void ** ptr, int * valid);
-void * __mem_walk_inc(void * token);
-int __mem_walk_end(void * token);
+void *__mem_walk_begin(void);
+void __mem_walk_read(void *token, u32 *size, void **ptr, int *valid);
+void *__mem_walk_inc(void *token);
+int __mem_walk_end(void *token);
 
 /* Example of use:
 
@@ -58,11 +58,10 @@ int __mem_walk_end(void * token);
 
 
 /* You should never need to use this normally.  */
-void *	ps2_sbrk(size_t incr);
+void *ps2_sbrk(size_t incr);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif	// _MALLOC_H
-
+#endif // _MALLOC_H

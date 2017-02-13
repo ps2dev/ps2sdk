@@ -12,4 +12,3 @@ int hubTimedSetFuncAddress(Device *dev);
 
 
 #endif // __HUB_H__
-

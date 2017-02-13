@@ -16,7 +16,7 @@
 #include <tamtypes.h>
 
 /* Instruction address breakpoint enable */
-#define BPC_IAE	(1 << 31)
+#define BPC_IAE (1 << 31)
 /* Data address (read) breakpoint enable */
 #define BPC_DRE (1 << 30)
 /* Data address (write) breakpoint enable */
@@ -69,32 +69,32 @@ void SetDataAddrBP(u32 addr, u32 mask, u32 options);
 void SetDataValueBP(u32 addr, u32 mask, u32 value, u32 vmask, u32 options);
 
 /* Get the BPC register */
-u32  GetBPC(void);
+u32 GetBPC(void);
 /* Set the BPC register */
 void SetBPC(u32 bpc);
 
 /* Get the instruction address register */
-u32  GetIAB(void);
+u32 GetIAB(void);
 /* Set the instruction address register */
 void SetIAB(u32 val);
 /* Get the instruction address mask register */
-u32  GetIABM(void);
+u32 GetIABM(void);
 /* Set the instruction address mask register */
 void SetIABM(u32 val);
 /* Get the data address register */
-u32  GetDAB(void);
+u32 GetDAB(void);
 /* Set the data address register */
 void SetDAB(u32 val);
 /* Get the data address register */
-u32  GetDABM(void);
+u32 GetDABM(void);
 /* Set the data address mask register */
 void SetDABM(u32 val);
 /* Get the data value mask register */
-u32  GetDVB(void);
+u32 GetDVB(void);
 /* Set the data value register */
 void SetDVB(u32 val);
 /* Get the data value mask register */
-u32  GetDVBM(void);
+u32 GetDVBM(void);
 /* Set the data value mask register */
 void SetDVBM(u32 val);
 

@@ -39,35 +39,37 @@
 extern "C" {
 #endif
 
-#define FS_READ_EOF     -1
+#define FS_READ_EOF -1
 #define FS_READ_DELAYED -2
 
 #if HTTPD_PRECALCULATED_CHECKSUM
-struct fsdata_chksum {
-  u32_t offset;
-  u16_t chksum;
-  u16_t len;
+struct fsdata_chksum
+{
+	u32_t offset;
+	u16_t chksum;
+	u16_t len;
 };
 #endif /* HTTPD_PRECALCULATED_CHECKSUM */
 
-#define FS_FILE_FLAGS_HEADER_INCLUDED     0x01
-#define FS_FILE_FLAGS_HEADER_PERSISTENT   0x02
+#define FS_FILE_FLAGS_HEADER_INCLUDED 0x01
+#define FS_FILE_FLAGS_HEADER_PERSISTENT 0x02
 
-struct fs_file {
-  const char *data;
-  int len;
-  int index;
-  void *pextension;
+struct fs_file
+{
+	const char *data;
+	int len;
+	int index;
+	void *pextension;
 #if HTTPD_PRECALCULATED_CHECKSUM
-  const struct fsdata_chksum *chksum;
-  u16_t chksum_count;
+	const struct fsdata_chksum *chksum;
+	u16_t chksum_count;
 #endif /* HTTPD_PRECALCULATED_CHECKSUM */
-  u8_t flags;
+	u8_t flags;
 #if LWIP_HTTPD_CUSTOM_FILES
-  u8_t is_custom_file;
+	u8_t is_custom_file;
 #endif /* LWIP_HTTPD_CUSTOM_FILES */
 #if LWIP_HTTPD_FILE_STATE
-  void *state;
+	void *state;
 #endif /* LWIP_HTTPD_FILE_STATE */
 };
 
@@ -80,7 +82,7 @@ void fs_close(struct fs_file *file);
 #if LWIP_HTTPD_DYNAMIC_FILE_READ
 #if LWIP_HTTPD_FS_ASYNC_READ
 int fs_read_async(struct fs_file *file, char *buffer, int count, fs_wait_cb callback_fn, void *callback_arg);
-#else /* LWIP_HTTPD_FS_ASYNC_READ */
+#else  /* LWIP_HTTPD_FS_ASYNC_READ */
 int fs_read(struct fs_file *file, char *buffer, int count);
 #endif /* LWIP_HTTPD_FS_ASYNC_READ */
 #endif /* LWIP_HTTPD_DYNAMIC_FILE_READ */

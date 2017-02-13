@@ -47,35 +47,34 @@
  * @param priv_algo is a pointer to u8_t. The implementation has to set this if user was found.
  * @param priv_key is a pointer to a pointer to a string. Implementation has to set this if user was found.
  */
-err_t
-snmpv3_get_user(const char* username, u8_t *auth_algo, u8_t *auth_key, u8_t *priv_algo, u8_t *priv_key)
+err_t snmpv3_get_user(const char *username, u8_t *auth_algo, u8_t *auth_key, u8_t *priv_algo, u8_t *priv_key)
 {
-  const char* engine_id;
-  u8_t engine_id_len;
-  
-  if(strlen(username) == 0) {
-    return ERR_OK;
-  }
-  
-  if(memcmp(username, "lwip", 4) != 0) {
-    return ERR_VAL;
-  }
-  
-  snmpv3_get_engine_id(&engine_id, &engine_id_len);
-  
-  if(auth_key != NULL) {
-    snmpv3_password_to_key_sha((const u8_t*)"maplesyrup", 10,
-      (const u8_t*)engine_id, engine_id_len,
-      auth_key);
-    *auth_algo = SNMP_V3_AUTH_ALGO_SHA;
-  }
-  if(priv_key != NULL) {
-    snmpv3_password_to_key_sha((const u8_t*)"maplesyrup", 10,
-      (const u8_t*)engine_id, engine_id_len,
-      priv_key);
-    *priv_algo = SNMP_V3_PRIV_ALGO_DES;
-  }
-  return ERR_OK;
+	const char *engine_id;
+	u8_t engine_id_len;
+
+	if (strlen(username) == 0) {
+		return ERR_OK;
+	}
+
+	if (memcmp(username, "lwip", 4) != 0) {
+		return ERR_VAL;
+	}
+
+	snmpv3_get_engine_id(&engine_id, &engine_id_len);
+
+	if (auth_key != NULL) {
+		snmpv3_password_to_key_sha((const u8_t *)"maplesyrup", 10,
+		                           (const u8_t *)engine_id, engine_id_len,
+		                           auth_key);
+		*auth_algo = SNMP_V3_AUTH_ALGO_SHA;
+	}
+	if (priv_key != NULL) {
+		snmpv3_password_to_key_sha((const u8_t *)"maplesyrup", 10,
+		                           (const u8_t *)engine_id, engine_id_len,
+		                           priv_key);
+		*priv_algo = SNMP_V3_PRIV_ALGO_DES;
+	}
+	return ERR_OK;
 }
 
 /**
@@ -83,11 +82,10 @@ snmpv3_get_user(const char* username, u8_t *auth_algo, u8_t *auth_key, u8_t *pri
  * @param id
  * @param len
  */
-void
-snmpv3_get_engine_id(const char **id, u8_t *len)
+void snmpv3_get_engine_id(const char **id, u8_t *len)
 {
-  *id = "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02";
-  *len = 12;
+	*id = "\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02";
+	*len = 12;
 }
 
 /**
@@ -95,32 +93,29 @@ snmpv3_get_engine_id(const char **id, u8_t *len)
  * @param id
  * @param len
  */
-err_t
-snmpv3_set_engine_id(const char *id, u8_t len)
+err_t snmpv3_set_engine_id(const char *id, u8_t len)
 {
-  LWIP_UNUSED_ARG(id);
-  LWIP_UNUSED_ARG(len);
-  return ERR_OK;
+	LWIP_UNUSED_ARG(id);
+	LWIP_UNUSED_ARG(len);
+	return ERR_OK;
 }
 
 /**
  * Get engine boots from persistence. Must be increased on each boot.
  * @return 
  */
-u32_t
-snmpv3_get_engine_boots(void)
+u32_t snmpv3_get_engine_boots(void)
 {
-  return 0;
+	return 0;
 }
 
 /**
  * Store engine boots in persistence
  * @param boots
  */
-void 
-snmpv3_set_engine_boots(u32_t boots)
+void snmpv3_set_engine_boots(u32_t boots)
 {
-  LWIP_UNUSED_ARG(boots);
+	LWIP_UNUSED_ARG(boots);
 }
 
 /**
@@ -128,17 +123,15 @@ snmpv3_set_engine_boots(u32_t boots)
  * Once the timer reaches 2147483647 it gets reset to zero and the
  * engine boot ups get incremented.
  */
-u32_t
-snmpv3_get_engine_time(void)
+u32_t snmpv3_get_engine_time(void)
 {
-  return 0;
+	return 0;
 }
 
 /**
  * Reset current engine time to 0
  */
-void
-snmpv3_reset_engine_time(void)
+void snmpv3_reset_engine_time(void)
 {
 }
 

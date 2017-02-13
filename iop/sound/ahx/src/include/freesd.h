@@ -5,8 +5,8 @@
 
 typedef struct
 {
-  u32 mode;
-  void *data;
+	u32 mode;
+	void *data;
 } IntrData;
 
 #endif

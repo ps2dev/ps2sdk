@@ -49,47 +49,37 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 extern float LOGE2F;
 
 #ifdef ANSIC
-float logf( float );
-float sqrtf( float );
+float logf(float);
+float sqrtf(float);
 
-float asinhf( float xx )
+float asinhf(float xx)
 #else
 float logf(), sqrtf();
 
-float asinhf(xx)
-double xx;
+float asinhf(xx) double xx;
 #endif
 {
-float x, z;
+	float x, z;
 
-if( xx < 0 )
-	x = -xx;
-else
-	x = xx;
+	if (xx < 0)
+		x = -xx;
+	else
+		x = xx;
 
-if( x > 1500.0 )
-	{
-	z = logf(x) + LOGE2F;
-	goto done;
+	if (x > 1500.0) {
+		z = logf(x) + LOGE2F;
+		goto done;
 	}
-z = x * x;
-if( x < 0.5 )
-	{
-	z =
-	((( 2.0122003309E-2 * z
-	  - 4.2699340972E-2) * z
-	  + 7.4847586088E-2) * z
-	  - 1.6666288134E-1) * z * x
-	  + x;
-	}
-else
-	{
-	z = sqrtf( z + 1.0 );
-	z = logf( x + z );
+	z = x * x;
+	if (x < 0.5) {
+		z =
+		    (((2.0122003309E-2 * z - 4.2699340972E-2) * z + 7.4847586088E-2) * z - 1.6666288134E-1) * z * x + x;
+	} else {
+		z = sqrtf(z + 1.0);
+		z = logf(x + z);
 	}
 done:
-if( xx < 0 )
-	z = -z;
-return( z );
+	if (xx < 0)
+		z = -z;
+	return (z);
 }
-

@@ -38,7 +38,7 @@ void init_gs(framebuffer_t *frame, zbuffer_t *z)
 	//frame->mask = 0xFFFF0000;
 
 	// Allocate some vram for our framebuffer
-	frame->address = graph_vram_allocate(frame->width,frame->height, frame->psm, GRAPH_ALIGN_PAGE);
+	frame->address = graph_vram_allocate(frame->width, frame->height, frame->psm, GRAPH_ALIGN_PAGE);
 
 	// Disable the zbuffer.
 	z->enable = 0;
@@ -47,7 +47,7 @@ void init_gs(framebuffer_t *frame, zbuffer_t *z)
 	z->zsm = 0;
 
 	// Initialize the screen and tie the framebuffer to the read circuits.
-	graph_initialize(frame->address,frame->width,frame->height,frame->psm,0,0);
+	graph_initialize(frame->address, frame->width, frame->height, frame->psm, 0, 0);
 
 	// This is how you would define a custom mode
 	//graph_set_mode(GRAPH_MODE_NONINTERLACED,GRAPH_MODE_VGA_1024_60,GRAPH_MODE_FRAME,GRAPH_DISABLE);
@@ -55,7 +55,6 @@ void init_gs(framebuffer_t *frame, zbuffer_t *z)
 	//graph_set_bgcolor(0,0,0);
 	//graph_set_framebuffer_filtered(frame->address,frame->width,frame->psm,0,0);
 	//graph_enable_output();
-
 }
 
 void init_drawing_environment(packet_t *packet, framebuffer_t *frame, zbuffer_t *z)
@@ -65,7 +64,7 @@ void init_drawing_environment(packet_t *packet, framebuffer_t *frame, zbuffer_t 
 	qword_t *q = packet->data;
 
 	// This will setup a default drawing environment.
-	q = draw_setup_environment(q,0,frame,z);
+	q = draw_setup_environment(q, 0, frame, z);
 
 	// This is where you could add various other drawing environment settings,
 	// or keep on adding onto the packet, but I'll stop with the default setup
@@ -74,11 +73,10 @@ void init_drawing_environment(packet_t *packet, framebuffer_t *frame, zbuffer_t 
 	q = draw_finish(q);
 
 	// Now send the packet, no need to wait since it's the first.
-	dma_channel_send_normal(DMA_CHANNEL_GIF,packet->data,q - packet->data, 0, 0);
+	dma_channel_send_normal(DMA_CHANNEL_GIF, packet->data, q - packet->data, 0, 0);
 
 	// Wait until the finish event occurs.
 	draw_wait_finish();
-
 }
 
 void render(packet_t *packet, framebuffer_t *frame)
@@ -95,10 +93,10 @@ void render(packet_t *packet, framebuffer_t *frame)
 	dma_wait_fast();
 
 	q = packet->data;
-	q = draw_clear(q,0,0,0,frame->width,frame->height,0,0,0);
+	q = draw_clear(q, 0, 0, 0, frame->width, frame->height, 0, 0, 0);
 	q = draw_finish(q);
 
-	dma_channel_send_normal(DMA_CHANNEL_GIF,packet->data, q - packet->data, 0, 0);
+	dma_channel_send_normal(DMA_CHANNEL_GIF, packet->data, q - packet->data, 0, 0);
 
 	// Wait until the screen is cleared.
 	draw_wait_finish();
@@ -107,8 +105,7 @@ void render(packet_t *packet, framebuffer_t *frame)
 	graph_wait_vsync();
 
 	// Draw 20 100x100 squares from the origin point.
-	for (loop0=0;loop0<20;loop0++)
-	{
+	for (loop0 = 0; loop0 < 20; loop0++) {
 
 		// No dmatags in a normal transfer.
 		q = packet->data;
@@ -117,30 +114,28 @@ void render(packet_t *packet, framebuffer_t *frame)
 		dma_wait_fast();
 
 		// Draw another square on the screen.
-		PACK_GIFTAG(q, GIF_SET_TAG(4, 1, 0, 0, 0, 1),GIF_REG_AD);
+		PACK_GIFTAG(q, GIF_SET_TAG(4, 1, 0, 0, 0, 1), GIF_REG_AD);
 		q++;
 		PACK_GIFTAG(q, GIF_SET_PRIM(6, 0, 0, 0, 0, 0, 0, 0, 0), GIF_REG_PRIM);
 		q++;
 		PACK_GIFTAG(q, GIF_SET_RGBAQ((loop0 * 10), 0, 255 - (loop0 * 10), 0x80, 0x3F800000), GIF_REG_RGBAQ);
 		q++;
-		PACK_GIFTAG(q, GIF_SET_XYZ(( (loop0 * 20) << 4) + (2048<<4), ((loop0 * 10) << 4) + (2048<<4), 0), GIF_REG_XYZ2);
+		PACK_GIFTAG(q, GIF_SET_XYZ(((loop0 * 20) << 4) + (2048 << 4), ((loop0 * 10) << 4) + (2048 << 4), 0), GIF_REG_XYZ2);
 		q++;
-		PACK_GIFTAG(q, GIF_SET_XYZ( (((loop0 * 20) + 100) << 4) + (2048<<4), (((loop0 * 10) + 100) << 4) + (2048<<4), 0), GIF_REG_XYZ2);
+		PACK_GIFTAG(q, GIF_SET_XYZ((((loop0 * 20) + 100) << 4) + (2048 << 4), (((loop0 * 10) + 100) << 4) + (2048 << 4), 0), GIF_REG_XYZ2);
 		q++;
 
 		q = draw_finish(q);
 
 		// DMA send
-		dma_channel_send_normal(DMA_CHANNEL_GIF,packet->data,q - packet->data, 0, 0);
+		dma_channel_send_normal(DMA_CHANNEL_GIF, packet->data, q - packet->data, 0, 0);
 
 		// Wait until the drawing is finished.
 		draw_wait_finish();
 
 		// Now initiate vsync.
 		graph_wait_vsync();
-
 	}
-
 }
 
 int main(void)
@@ -151,20 +146,20 @@ int main(void)
 	zbuffer_t z;
 
 	// The data packet.
-	packet_t *packet = packet_init(50,PACKET_NORMAL);
+	packet_t *packet = packet_init(50, PACKET_NORMAL);
 
 	// Init GIF dma channel.
-	dma_channel_initialize(DMA_CHANNEL_GIF,NULL,0);
+	dma_channel_initialize(DMA_CHANNEL_GIF, NULL, 0);
 	dma_channel_fast_waits(DMA_CHANNEL_GIF);
 
 	// Init the GS, framebuffer, and zbuffer.
-	init_gs(&frame,&z);
+	init_gs(&frame, &z);
 
 	// Init the drawing environment and framebuffer.
-	init_drawing_environment(packet,&frame,&z);
+	init_drawing_environment(packet, &frame, &z);
 
 	// Render the sample.
-	render(packet,&frame);
+	render(packet, &frame);
 
 	// Free the vram.
 	graph_vram_free(frame.address);
@@ -176,11 +171,10 @@ int main(void)
 	graph_shutdown();
 
 	// Shutdown our currently used dma channel.
-	dma_channel_shutdown(DMA_CHANNEL_GIF,0);
+	dma_channel_shutdown(DMA_CHANNEL_GIF, 0);
 
 	// Sleep
 	SleepThread();
 
 	return 0;
-
 }

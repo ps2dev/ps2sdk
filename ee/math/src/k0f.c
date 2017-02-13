@@ -84,15 +84,14 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
  */
 
 static float A[] =
-{
- 1.90451637722020886025E-9f,
- 2.53479107902614945675E-7f,
- 2.28621210311945178607E-5f,
- 1.26461541144692592338E-3f,
- 3.59799365153615016266E-2f,
- 3.44289899924628486886E-1f,
--5.35327393233902768720E-1f
-};
+    {
+        1.90451637722020886025E-9f,
+        2.53479107902614945675E-7f,
+        2.28621210311945178607E-5f,
+        1.26461541144692592338E-3f,
+        3.59799365153615016266E-2f,
+        3.44289899924628486886E-1f,
+        -5.35327393233902768720E-1f};
 
 
 
@@ -103,17 +102,16 @@ static float A[] =
  */
 
 static float B[] = {
--1.69753450938905987466E-9f,
- 8.57403401741422608519E-9f,
--4.66048989768794782956E-8f,
- 2.76681363944501510342E-7f,
--1.83175552271911948767E-6f,
- 1.39498137188764993662E-5f,
--1.28495495816278026384E-4f,
- 1.56988388573005337491E-3f,
--3.14481013119645005427E-2f,
- 2.44030308206595545468E0f
-};
+    -1.69753450938905987466E-9f,
+    8.57403401741422608519E-9f,
+    -4.66048989768794782956E-8f,
+    2.76681363944501510342E-7f,
+    -1.83175552271911948767E-6f,
+    1.39498137188764993662E-5f,
+    -1.28495495816278026384E-4f,
+    1.56988388573005337491E-3f,
+    -3.14481013119645005427E-2f,
+    2.44030308206595545468E0f};
 
 /*							k0.c	*/
 
@@ -128,58 +126,52 @@ float chbevlf(), expf(), i0f(), logf(), sqrtf();
 
 
 #ifdef ANSIC
-float k0f( float xx )
+float k0f(float xx)
 #else
-float k0f(xx)
-double xx;
+float k0f(xx) double xx;
 #endif
 {
-float x, y, z;
+	float x, y, z;
 
-x = xx;
-if( x <= 0.0f )
-	{
-	mtherr( "k0f", DOMAIN );
-	return( MAXNUMF );
+	x = xx;
+	if (x <= 0.0f) {
+		mtherr("k0f", DOMAIN);
+		return (MAXNUMF);
 	}
 
-if( x <= 2.0f )
-	{
-	y = x * x - 2.0f;
-	y = chbevlf( y, A, 7 ) - logf( 0.5f * x ) * i0f(x);
-	return( y );
+	if (x <= 2.0f) {
+		y = x * x - 2.0f;
+		y = chbevlf(y, A, 7) - logf(0.5f * x) * i0f(x);
+		return (y);
 	}
-z = 8.0f/x - 2.0f;
-y = expf(-x) * chbevlf( z, B, 10 ) / sqrtf(x);
-return(y);
+	z = 8.0f / x - 2.0f;
+	y = expf(-x) * chbevlf(z, B, 10) / sqrtf(x);
+	return (y);
 }
 
 
 
 #ifdef ANSIC
-float k0ef( float xx )
+float k0ef(float xx)
 #else
-float k0ef( xx )
-double xx;
+float k0ef(xx) double xx;
 #endif
 {
-float x, y;
+	float x, y;
 
 
-x = xx;
-if( x <= 0.0f )
-	{
-	mtherr( "k0ef", DOMAIN );
-	return( MAXNUMF );
+	x = xx;
+	if (x <= 0.0f) {
+		mtherr("k0ef", DOMAIN);
+		return (MAXNUMF);
 	}
 
-if( x <= 2.0f )
-	{
-	y = x * x - 2.0f;
-	y = chbevlf( y, A, 7 ) - logf( 0.5f * x ) * i0f(x);
-	return( y * expf(x) );
+	if (x <= 2.0f) {
+		y = x * x - 2.0f;
+		y = chbevlf(y, A, 7) - logf(0.5f * x) * i0f(x);
+		return (y * expf(x));
 	}
 
-y = chbevlf( 8.0f/x - 2.0f, B, 10 ) / sqrtf(x);
-return(y);
+	y = chbevlf(8.0f / x - 2.0f, B, 10) / sqrtf(x);
+	return (y);
 }

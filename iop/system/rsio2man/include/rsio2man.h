@@ -69,4 +69,4 @@ int sio2_mtap_get_slot_max2(int port);
 void sio2_mtap_update_slots(void);
 #define I_sio2_mtap_update_slots DECLARE_IMPORT(60, sio2_mtap_update_slots)
 
-#endif	// IOP_RSIO2MAN_H
+#endif // IOP_RSIO2MAN_H

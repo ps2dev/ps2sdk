@@ -3,7 +3,7 @@
  * MDNS responder
  */
 
- /*
+/*
  * Copyright (c) 2015 Verisure Innovation AB
  * All rights reserved.
  *
@@ -43,11 +43,11 @@
 #if LWIP_MDNS_RESPONDER
 
 enum mdns_sd_proto {
-  DNSSD_PROTO_UDP = 0,
-  DNSSD_PROTO_TCP = 1
+	DNSSD_PROTO_UDP = 0,
+	DNSSD_PROTO_TCP = 1
 };
 
-#define MDNS_LABEL_MAXLEN  63
+#define MDNS_LABEL_MAXLEN 63
 
 struct mdns_host;
 struct mdns_service;

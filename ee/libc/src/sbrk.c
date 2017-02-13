@@ -14,11 +14,11 @@
 
 #include <kernel.h>
 
-extern void * _end;
+extern void *_end;
 
 void *ps2_sbrk(size_t increment)
 {
-	static void * _heap_ptr = &_end;
+	static void *_heap_ptr = &_end;
 	void *mp, *ret = (void *)-1;
 
 	if (increment == 0)

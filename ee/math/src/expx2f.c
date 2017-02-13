@@ -31,31 +31,29 @@ Cephes Math Library Release 2.9:  June, 2000
 Copyright 2000 by Stephen L. Moshier
 */
 
-extern float floorf (float);
-extern float expf (float);
+extern float floorf(float);
+extern float expf(float);
 extern float MAXLOGF;
 extern float MAXNUMF;
 
-float expx2f (float x)
+float expx2f(float x)
 {
-  float u, u1, m;
+	float u, u1, m;
 
-  if (x < 0)
-    x = -x;
+	if (x < 0)
+		x = -x;
 
-  /* Represent x as an exact multiple of 1/32 plus a residual.  */
-  m = .03125f * floorf(32.0f * x + 0.5f);
-  x -= m;
-  /* x**2 = m**2 + 2mf + f**2 */
-  u = m * m;
-  u1 = 2 * m * x  +  x * x;
+	/* Represent x as an exact multiple of 1/32 plus a residual.  */
+	m = .03125f * floorf(32.0f * x + 0.5f);
+	x -= m;
+	/* x**2 = m**2 + 2mf + f**2 */
+	u = m * m;
+	u1 = 2 * m * x + x * x;
 
-  if ((u+u1) > MAXLOGF)
-    return (MAXNUMF);
+	if ((u + u1) > MAXLOGF)
+		return (MAXNUMF);
 
-  /* u is exact, u1 is small.  */
-  u = expf(u) * expf(u1);
-  return(u);
+	/* u is exact, u1 is small.  */
+	u = expf(u) * expf(u1);
+	return (u);
 }
-
-

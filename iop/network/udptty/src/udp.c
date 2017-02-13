@@ -13,32 +13,36 @@
 #include "udptty.h"
 #include "sysclib.h"
 
-typedef struct { u8 addr[4]; } ip_addr_t __attribute__((packed));
+typedef struct
+{
+	u8 addr[4];
+} ip_addr_t __attribute__((packed));
 
-typedef struct {
+typedef struct
+{
 	/* Ethernet header (14).  */
-	u8	eth_addr_dst[6];
-	u8	eth_addr_src[6];
-	u16	eth_type;
+	u8 eth_addr_dst[6];
+	u8 eth_addr_src[6];
+	u16 eth_type;
 
 	/* IP header (20).  */
-	u8	ip_hlen;
-	u8	ip_tos;
-	u16	ip_len;
-	u16	ip_id;
-	u8	ip_flags;
-	u8	ip_frag_offset;
-	u8	ip_ttl;
-	u8	ip_proto;
-	u16	ip_csum;
+	u8 ip_hlen;
+	u8 ip_tos;
+	u16 ip_len;
+	u16 ip_id;
+	u8 ip_flags;
+	u8 ip_frag_offset;
+	u8 ip_ttl;
+	u8 ip_proto;
+	u16 ip_csum;
 	ip_addr_t ip_addr_src;
 	ip_addr_t ip_addr_dst;
 
 	/* UDP header (8).  */
-	u16	udp_port_src;
-	u16	udp_port_dst;
-	u16	udp_len;
-	u16	udp_csum;
+	u16 udp_port_src;
+	u16 udp_port_dst;
+	u16 udp_len;
+	u16 udp_csum;
 
 	/* Data goes here.  */
 } udp_pkt_t __attribute__((packed));
@@ -79,7 +83,7 @@ int udp_init()
 	udp_pkt = (udp_pkt_t *)pktbuf;
 
 	memcpy(udp_pkt->eth_addr_dst, udptty_param.eth_addr_dst, 12);
-	udp_pkt->eth_type = 0x0008;	/* Network byte order: 0x800 */
+	udp_pkt->eth_type = 0x0008; /* Network byte order: 0x800 */
 
 	udp_pkt->ip_hlen = 0x45;
 	udp_pkt->ip_tos = 0;
@@ -114,19 +118,19 @@ int udp_send(void *buf, size_t size)
 	udp_pkt = (udp_pkt_t *)pktbuf;
 	pktsize = size + sizeof(udp_pkt_t);
 
-	udp_pkt->ip_len = htons(pktsize - 14);	/* Subtract the ethernet header.  */
+	udp_pkt->ip_len = htons(pktsize - 14); /* Subtract the ethernet header.  */
 
 	udp_pkt->ip_csum = 0;
-	csum = checksum(&udp_pkt->ip_hlen, 20);	/* Checksum the IP header (20 bytes).  */
+	csum = checksum(&udp_pkt->ip_hlen, 20); /* Checksum the IP header (20 bytes).  */
 	while (csum >> 16)
 		csum = (csum & 0xffff) + (csum >> 16);
 	udp_pkt->ip_csum = ~(csum & 0xffff);
 
-	udpsize = htons(size + 8);		/* Size of the UDP header + data.  */
+	udpsize = htons(size + 8); /* Size of the UDP header + data.  */
 	udp_pkt->udp_len = udpsize;
 	memcpy(pktbuf + sizeof(udp_pkt_t), buf, size);
 
-	udp_pkt->udp_csum = 0;			/* Don't bother.  */
+	udp_pkt->udp_csum = 0; /* Don't bother.  */
 
 	return smap_transmit(pktbuf, pktsize);
 }

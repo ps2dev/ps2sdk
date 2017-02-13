@@ -61,12 +61,12 @@
 /* Define generic types used in lwIP */
 #if !LWIP_NO_STDINT_H
 #include <stdint.h>
-typedef uint8_t   u8_t;
-typedef int8_t    s8_t;
-typedef uint16_t  u16_t;
-typedef int16_t   s16_t;
-typedef uint32_t  u32_t;
-typedef int32_t   s32_t;
+typedef uint8_t u8_t;
+typedef int8_t s8_t;
+typedef uint16_t u16_t;
+typedef int16_t s16_t;
+typedef uint32_t u32_t;
+typedef int32_t s32_t;
 typedef uintptr_t mem_ptr_t;
 #endif
 
@@ -85,7 +85,7 @@ typedef uintptr_t mem_ptr_t;
 #if !LWIP_NO_INTTYPES_H
 #include <inttypes.h>
 #ifndef X8_F
-#define X8_F  "02" PRIx8
+#define X8_F "02" PRIx8
 #endif
 #ifndef U16_F
 #define U16_F PRIu16
@@ -129,7 +129,7 @@ typedef uintptr_t mem_ptr_t;
  * LWIP_MEM_ALIGN_SIZE(4) will both yield 4 for MEM_ALIGNMENT == 4).
  */
 #ifndef LWIP_MEM_ALIGN_SIZE
-#define LWIP_MEM_ALIGN_SIZE(size) (((size) + MEM_ALIGNMENT - 1U) & ~(MEM_ALIGNMENT-1U))
+#define LWIP_MEM_ALIGN_SIZE(size) (((size) + MEM_ALIGNMENT - 1U) & ~(MEM_ALIGNMENT - 1U))
 #endif
 
 /** Calculate safe memory size for an aligned buffer when using an unaligned
@@ -144,7 +144,7 @@ typedef uintptr_t mem_ptr_t;
  * so that ADDR % MEM_ALIGNMENT == 0
  */
 #ifndef LWIP_MEM_ALIGN
-#define LWIP_MEM_ALIGN(addr) ((void *)(((mem_ptr_t)(addr) + MEM_ALIGNMENT - 1) & ~(mem_ptr_t)(MEM_ALIGNMENT-1)))
+#define LWIP_MEM_ALIGN(addr) ((void *)(((mem_ptr_t)(addr) + MEM_ALIGNMENT - 1) & ~(mem_ptr_t)(MEM_ALIGNMENT - 1)))
 #endif
 
 #ifdef __cplusplus

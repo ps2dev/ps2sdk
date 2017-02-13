@@ -23,8 +23,8 @@
 #define PS2LIB_STR_MAX 4096
 #endif
 
-#define CPUCLK		294912000	/* Use this to determine the baud divide value.  */
-#define LCR_SCS_VAL	(1<<5)		/* Baud rate generator output that divided CPUCLK.  */
+#define CPUCLK 294912000     /* Use this to determine the baud divide value.  */
+#define LCR_SCS_VAL (1 << 5) /* Baud rate generator output that divided CPUCLK.  */
 
 #ifdef F_sio_init
 /* Initialize the SIO. The lcr_* parameters are passed as is, so
@@ -34,17 +34,18 @@
    base the baud rate on the CPU clock.  */
 void sio_init(u32 baudrate, u8 lcr_ueps, u8 lcr_upen, u8 lcr_usbl, u8 lcr_umode)
 {
-	u32 brd;		/* Baud rate divisor.  */
-	u8 bclk = 0;		/* Baud rate generator clock.  */
+	u32 brd;     /* Baud rate divisor.  */
+	u8 bclk = 0; /* Baud rate generator clock.  */
 
-	_sw(LCR_SCS_VAL|((lcr_ueps & 1) << 4)|((lcr_upen & 1) << 3)|
-			((lcr_usbl & 1) << 2)|(lcr_umode & 1), SIO_LCR);
+	_sw(LCR_SCS_VAL | ((lcr_ueps & 1) << 4) | ((lcr_upen & 1) << 3) |
+	        ((lcr_usbl & 1) << 2) | (lcr_umode & 1),
+	    SIO_LCR);
 
 	/* Disable all interrupts.  */
 	_sw(0, SIO_IER);
 
 	/* Reset the FIFOs.  */
-	_sw(SIO_FCR_FRSTE|SIO_FCR_RFRST|SIO_FCR_TFRST, SIO_FCR);
+	_sw(SIO_FCR_FRSTE | SIO_FCR_RFRST | SIO_FCR_TFRST, SIO_FCR);
 	/* Enable them.  */
 	_sw(0, SIO_FCR);
 
@@ -61,20 +62,20 @@ void sio_init(u32 baudrate, u8 lcr_ueps, u8 lcr_upen, u8 lcr_usbl, u8 lcr_umode)
 static u8 ___last_sio_putc = 0;
 int sio_putc(int c)
 {
-    if((c == '\n') && (___last_sio_putc != '\r'))
-    {
-        // hack: if the character to be outputted is a '\n'
-        //  and the previously-outputted character is not a '\r',
-        //  output a '\r' first.
-        sio_putc('\r');
-    }
+	if ((c == '\n') && (___last_sio_putc != '\r')) {
+		// hack: if the character to be outputted is a '\n'
+		//  and the previously-outputted character is not a '\r',
+		//  output a '\r' first.
+		sio_putc('\r');
+	}
 
-    /* Block until we're ready to transmit.  */
-    while ((_lw(SIO_ISR) & 0xf000) == 0x8000);
+	/* Block until we're ready to transmit.  */
+	while ((_lw(SIO_ISR) & 0xf000) == 0x8000)
+		;
 
-    _sb(c, SIO_TXFIFO);
-    ___last_sio_putc = c;
-    return c;
+	_sb(c, SIO_TXFIFO);
+	___last_sio_putc = c;
+	return c;
 }
 #endif
 
@@ -99,7 +100,8 @@ int sio_getc()
 int sio_getc_block()
 {
 	/* Do we have something in the RX FIFO?  */
-	while (!(_lw(SIO_ISR) & 0xf00));
+	while (!(_lw(SIO_ISR) & 0xf00))
+		;
 	return sio_getc();
 }
 #endif
@@ -159,7 +161,7 @@ int sio_putsn(const char *str)
 	int res;
 
 	for (res = 0; *str; res++, str++)
-	    sio_putc(*str);
+		sio_putc(*str);
 
 	return res;
 }
@@ -190,7 +192,7 @@ char *sio_gets(char *str)
 // Flushes the input buffer.
 void sio_flush()
 {
-    while (_lw(SIO_ISR) & 0xf00)
-	_lb(SIO_RXFIFO);
+	while (_lw(SIO_ISR) & 0xf00)
+		_lb(SIO_RXFIFO);
 }
 #endif

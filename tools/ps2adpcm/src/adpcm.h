@@ -11,12 +11,12 @@
 #ifndef _ADPCM_H_
 #define _ADPCM_H_
 
-typedef int (*AdpcmGetPCMfunc)  (void *priv, double *pcm, int len); /* Length in samples */
-typedef int (*AdpcmPutADPCMfunc)(void *priv, void  *data, int len); /* Length in bytes */
+typedef int (*AdpcmGetPCMfunc)(void *priv, double *pcm, int len);  /* Length in samples */
+typedef int (*AdpcmPutADPCMfunc)(void *priv, void *data, int len); /* Length in bytes */
 
 typedef struct
 {
-	AdpcmGetPCMfunc   GetPCM;
+	AdpcmGetPCMfunc GetPCM;
 	AdpcmPutADPCMfunc PutADPCM;
 	double s_1, s_2;
 	double ps_1, ps_2;

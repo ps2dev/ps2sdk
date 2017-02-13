@@ -12,11 +12,10 @@
 
 #include <erl.h>
 
-char * erl_id = "libhdd";
+char *erl_id = "libhdd";
 
-char * erl_dependancies[] = {
+char *erl_dependancies[] = {
     "libkernel",
     "libc",
     "libfileXio",
-    0
-};
+    0};

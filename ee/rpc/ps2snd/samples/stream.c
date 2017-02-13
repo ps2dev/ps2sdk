@@ -18,23 +18,20 @@ int main(void)
 	int ret;
 	/* Load LibSD (freesd will work too one day, I promise ;) */
 	ret = SifLoadModule("host:LIBSD.IRX", 0, NULL);
-	if (ret<0)
-	{
+	if (ret < 0) {
 		printf("XXXXX failed to load host:LIBSD.IRX (%d)\n", ret);
 		SleepThread();
 	}
 
 	/* Load ps2snd */
 	ret = SifLoadModule("host:ps2snd.irx", 0, NULL);
-	if (ret<0)
-	{
+	if (ret < 0) {
 		printf("XXXXX failed to load host:ps2snd.irx (%d)\n", ret);
 		SleepThread();
 	}
 
 	/* Start LibSD */
-	if (SdInit(0)<0)
-	{
+	if (SdInit(0) < 0) {
 		printf("Failed to start LibSD\n");
 		SleepThread();
 	}
@@ -51,8 +48,7 @@ int main(void)
 		The SPU buffers are at 0x6000 in spu2 ram.
 		The chunksize is 1024 blocks (16kbyte)
 	*/
-	if (sndStreamOpen("host:stream.adpcm", SD_VOICE(0,22) | (SD_VOICE(0,23)<<16), STREAM_STEREO | STREAM_END_CLOSE, 0x6000, 1024)<0)
-	{
+	if (sndStreamOpen("host:stream.adpcm", SD_VOICE(0, 22) | (SD_VOICE(0, 23) << 16), STREAM_STEREO | STREAM_END_CLOSE, 0x6000, 1024) < 0) {
 		printf("Failed to open stream\n");
 		SleepThread();
 	}
@@ -62,6 +58,5 @@ int main(void)
 
 	SleepThread();
 
-	return(0);
+	return (0);
 }
-

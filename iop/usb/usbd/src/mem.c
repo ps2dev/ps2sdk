@@ -16,7 +16,8 @@
 
 MemoryPool memPool;
 
-HcIsoTD *allocIsoTd(void) {
+HcIsoTD *allocIsoTd(void)
+{
 	HcIsoTD *newTd = memPool.freeHcIsoTdList;
 	if (newTd) {
 		memPool.freeHcIsoTdList = newTd->next;
@@ -25,7 +26,8 @@ HcIsoTD *allocIsoTd(void) {
 	return newTd;
 }
 
-void freeIsoTd(HcIsoTD *argTd) {
+void freeIsoTd(HcIsoTD *argTd)
+{
 	HcIsoTD *pos;
 	if (argTd) {
 		for (pos = memPool.freeHcIsoTdList; pos != NULL; pos = pos->next)
@@ -38,7 +40,8 @@ void freeIsoTd(HcIsoTD *argTd) {
 	}
 }
 
-HcTD *allocTd(void) {
+HcTD *allocTd(void)
+{
 	HcTD *res = memPool.freeHcTdList;
 	if (res) {
 		memPool.freeHcTdList = res->next;
@@ -47,7 +50,8 @@ HcTD *allocTd(void) {
 	return res;
 }
 
-void freeTd(HcTD *argTd) {
+void freeTd(HcTD *argTd)
+{
 	HcTD *pos;
 	if (argTd) {
 		for (pos = memPool.freeHcTdList; pos != NULL; pos = pos->next)
@@ -60,7 +64,8 @@ void freeTd(HcTD *argTd) {
 	}
 }
 
-Device *attachChildDevice(Device *parent, uint32 portNum) {
+Device *attachChildDevice(Device *parent, uint32 portNum)
+{
 	Device *newDev = memPool.freeDeviceListStart;
 	if (!newDev) {
 		dbg_printf("Ran out of device handles\n");
@@ -95,10 +100,11 @@ Device *attachChildDevice(Device *parent, uint32 portNum) {
 		parent->childListEnd = newDev;
 	} else
 		newDev->next = newDev->prev = NULL;
-    return newDev;
+	return newDev;
 }
 
-void freeDevice(Device *dev) {
+void freeDevice(Device *dev)
+{
 	if (!dev)
 		return;
 
@@ -118,7 +124,8 @@ void freeDevice(Device *dev) {
 	memPool.freeDeviceListEnd = dev;
 }
 
-Device *fetchPortElemByNumber(Device *hub, int port) {
+Device *fetchPortElemByNumber(Device *hub, int port)
+{
 	Device *res = hub->childListStart;
 	while (--port > 0) {
 		if (!res)
@@ -128,14 +135,16 @@ Device *fetchPortElemByNumber(Device *hub, int port) {
 	return res;
 }
 
-void addToHcEndpointList(uint8 type, HcED *ed) {
+void addToHcEndpointList(uint8 type, HcED *ed)
+{
 	ed->next = memPool.hcEdBuf[type].next;
 	memPool.hcEdBuf[type].next = ed;
 }
 
-void removeHcEdFromList(int type, HcED *hcEd) {
+void removeHcEdFromList(int type, HcED *hcEd)
+{
 	HcED *prev = memPool.hcEdBuf + type;
-	HcED *pos  = prev->next;
+	HcED *pos = prev->next;
 	while (pos) {
 		if (pos == hcEd) {
 			prev->next = pos->next;
@@ -146,7 +155,8 @@ void removeHcEdFromList(int type, HcED *hcEd) {
 	}
 }
 
-Endpoint *allocEndpointForDevice(Device *dev, uint32 align) {
+Endpoint *allocEndpointForDevice(Device *dev, uint32 align)
+{
 	Endpoint *newEp = memPool.freeEpListStart;
 	if (!newEp)
 		return NULL;
@@ -178,7 +188,8 @@ Endpoint *allocEndpointForDevice(Device *dev, uint32 align) {
 	return newEp;
 }
 
-Device *fetchDeviceById(int devId) {
+Device *fetchDeviceById(int devId)
+{
 	Device *dev;
 	if ((devId > 0) && (devId < usbConfig.maxDevices)) {
 		dev = memPool.deviceTreeBuf + devId;
@@ -188,7 +199,8 @@ Device *fetchDeviceById(int devId) {
 	return NULL;
 }
 
-Endpoint *fetchEndpointById(int id) {
+Endpoint *fetchEndpointById(int id)
+{
 	Endpoint *res;
 	if ((id >= 0) && (id < usbConfig.maxEndpoints)) {
 		res = memPool.endpointBuf + id;
@@ -198,7 +210,8 @@ Endpoint *fetchEndpointById(int id) {
 	return NULL;
 }
 
-IoRequest *allocIoRequest(void) {
+IoRequest *allocIoRequest(void)
+{
 	IoRequest *res = memPool.freeIoReqList;
 	if (res) {
 		if (res->next)
@@ -216,7 +229,8 @@ IoRequest *allocIoRequest(void) {
 	return res;
 }
 
-void freeIoRequest(IoRequest *req) {
+void freeIoRequest(IoRequest *req)
+{
 	int num = req - memPool.ioReqBufPtr;
 	IoRequest *pos;
 	if (req) {
@@ -237,4 +251,3 @@ void freeIoRequest(IoRequest *req) {
 		req->busyFlag = 0;
 	}
 }
-

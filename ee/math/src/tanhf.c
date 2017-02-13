@@ -49,47 +49,37 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 extern float MAXLOGF;
 
 #ifdef ANSIC
-float expf( float );
+float expf(float);
 
-float tanhf( float xx )
+float tanhf(float xx)
 #else
 float expf();
 
-float tanhf(xx)
-double xx;
+float tanhf(xx) double xx;
 #endif
 {
-float x, z;
+	float x, z;
 
-if( xx < 0 )
-	x = -xx;
-else
-	x = xx;
-
-if( x > 0.5 * MAXLOGF )
-	{
-	if( xx > 0 )
-		return( 1.0 );
+	if (xx < 0)
+		x = -xx;
 	else
-		return( -1.0 );
+		x = xx;
+
+	if (x > 0.5 * MAXLOGF) {
+		if (xx > 0)
+			return (1.0);
+		else
+			return (-1.0);
 	}
-if( x >= 0.625 )
-	{
-	x = expf(x+x);
-	z =  1.0  - 2.0/(x + 1.0);
-	if( xx < 0 )
-		z = -z;
+	if (x >= 0.625) {
+		x = expf(x + x);
+		z = 1.0 - 2.0 / (x + 1.0);
+		if (xx < 0)
+			z = -z;
+	} else {
+		z = x * x;
+		z =
+		    ((((-5.70498872745E-3 * z + 2.06390887954E-2) * z - 5.37397155531E-2) * z + 1.33314422036E-1) * z - 3.33332819422E-1) * z * xx + xx;
 	}
-else
-	{
-	z = x * x;
-	z =
-	(((( -5.70498872745E-3 * z
-	  + 2.06390887954E-2) * z
-	  - 5.37397155531E-2) * z
-	  + 1.33314422036E-1) * z
-	  - 3.33332819422E-1) * z * xx
-	  + xx;
-	}
-return( z );
+	return (z);
 }

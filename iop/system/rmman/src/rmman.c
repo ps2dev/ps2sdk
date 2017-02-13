@@ -13,10 +13,10 @@
 
 IRX_ID("rmman", 1, 16);
 
-#define RM_EF_EXIT_THREAD		1
-#define RM_EF_EXIT_THREAD_DONE		2
-#define RM_EF_CLOSE_PORT		4
-#define RM_EF_CLOSE_PORT_DONE		8
+#define RM_EF_EXIT_THREAD 1
+#define RM_EF_EXIT_THREAD_DONE 2
+#define RM_EF_CLOSE_PORT 4
+#define RM_EF_CLOSE_PORT_DONE 8
 
 enum RM_TASK {
 	RM_TASK_QUERY = 0,
@@ -24,25 +24,26 @@ enum RM_TASK {
 	RM_TASK_POLL
 };
 
-struct RmData{				//size = 316
-	struct rmEEData eeData;		//0x000
-	u32 unused1;			//0x030
-	u8 inBuffer[32];		//0x034
-	u8 outBuffer[32];		//0x054
-	u32 state;			//0x074
-	u32 reqState;			//0x078
-	u32 frame;			//0x07C
-	struct rmEEData *eeBuffer;	//0x080
-	s32 port;			//0x084
-	s32 slot;			//0x088
-	u32 currentTask;		//0x08C
-	u32 counter;			//0x090
-	u32 powerMode;			//0x094
-	u32 closed;			//0x098
-	u32 connected;			//0x09C
-	u32 eventFlagID;		//0x0a0
-	u32 unused2;			//0x0a4
-	sio2_transfer_data_t sio2Data;	//0x0a8
+struct RmData
+{                                  //size = 316
+	struct rmEEData eeData;        //0x000
+	u32 unused1;                   //0x030
+	u8 inBuffer[32];               //0x034
+	u8 outBuffer[32];              //0x054
+	u32 state;                     //0x074
+	u32 reqState;                  //0x078
+	u32 frame;                     //0x07C
+	struct rmEEData *eeBuffer;     //0x080
+	s32 port;                      //0x084
+	s32 slot;                      //0x088
+	u32 currentTask;               //0x08C
+	u32 counter;                   //0x090
+	u32 powerMode;                 //0x094
+	u32 closed;                    //0x098
+	u32 connected;                 //0x09C
+	u32 eventFlagID;               //0x0a0
+	u32 unused2;                   //0x0a4
+	sio2_transfer_data_t sio2Data; //0x0a8
 };
 
 extern struct irx_export_table _exp_rmman;
@@ -74,11 +75,10 @@ int _start(int argc, char *argv[])
 {
 	int result;
 
-	if(RegisterLibraryEntries(&_exp_rmman) == 0)
-	{
+	if (RegisterLibraryEntries(&_exp_rmman) == 0) {
 		result = CreateMainThread() <= 0 ? MODULE_NO_RESIDENT_END : MODULE_RESIDENT_END;
-	}
-	else result = MODULE_NO_RESIDENT_END;
+	} else
+		result = MODULE_NO_RESIDENT_END;
 
 	return result;
 }
@@ -94,20 +94,18 @@ int rmmanInit(void)
 	IsInitialized = 1;
 	EventFlagData.attr = 2;
 	EventFlagData.bits = 0;
-	if((eventFlagID = CreateEventFlag(&EventFlagData)) != 0)
-	{
+	if ((eventFlagID = CreateEventFlag(&EventFlagData)) != 0) {
 		ThreadData.attr = TH_C;
 		ThreadData.thread = &MainThread;
 		ThreadData.priority = 0x2E;
 		ThreadData.stacksize = 0x800;
-		if((MainThreadID = CreateThread(&ThreadData)) != 0)
-		{
+		if ((MainThreadID = CreateThread(&ThreadData)) != 0) {
 			StartThread(MainThreadID, NULL);
-			result=MainThreadID;
-		}
-		else result=0;
-	}
-	else result=0;
+			result = MainThreadID;
+		} else
+			result = 0;
+	} else
+		result = 0;
 
 	return result;
 }
@@ -118,8 +116,7 @@ int rmmanOpen(int port, int slot, void *buffer)
 	int result;
 	struct RmData *pRmData;
 
-	if(!((portStatus[port] >> slot) & 1))
-	{
+	if (!((portStatus[port] >> slot) & 1)) {
 		pRmData = &RmData[port][slot];
 		pRmData->port = port;
 		pRmData->slot = slot;
@@ -132,8 +129,7 @@ int rmmanOpen(int port, int slot, void *buffer)
 		evf.attr = EA_MULTI;
 		evf.bits = 0;
 
-		if((pRmData->eventFlagID = CreateEventFlag(&evf)) != 0)
-		{
+		if ((pRmData->eventFlagID = CreateEventFlag(&evf)) != 0) {
 			pRmData->powerMode = 0;
 			portStatus[port] |= (1 << slot);
 			result = 1;
@@ -151,17 +147,14 @@ int rmmanClose(int port, int slot)
 	struct RmData *pRmData;
 	u32 bits;
 
-	if((portStatus[port] >> slot) & 1)
-	{
+	if ((portStatus[port] >> slot) & 1) {
 		pRmData = &RmData[port][slot];
 
-		if(pRmData->state != RM_STATE_FINDRM)
-		{
+		if (pRmData->state != RM_STATE_FINDRM) {
 			SetEventFlag(pRmData->eventFlagID, RM_EF_EXIT_THREAD);
-			WaitEventFlag(pRmData->eventFlagID, RM_EF_EXIT_THREAD_DONE, WEF_AND|WEF_CLEAR, &bits);
+			WaitEventFlag(pRmData->eventFlagID, RM_EF_EXIT_THREAD_DONE, WEF_AND | WEF_CLEAR, &bits);
 
-			if(pRmData->closed != 0)
-			{	//Remote Control port was closed successfully.
+			if (pRmData->closed != 0) { //Remote Control port was closed successfully.
 				portStatus[port] ^= (1 << slot);
 				result = 1;
 			} else {
@@ -182,23 +175,19 @@ int rmmanEnd(void)
 	u32 bits;
 	int port, slot, result;
 
-	if(IsInitialized != 0)
-	{
-		for(port = 0; port < 2; port++)
-		{
-			for(slot = 0; slot < 4; slot++)
-			{	//If port,slot is opened, close it.
-				if((portStatus[port] >> slot) & 1)
+	if (IsInitialized != 0) {
+		for (port = 0; port < 2; port++) {
+			for (slot = 0; slot < 4; slot++) { //If port,slot is opened, close it.
+				if ((portStatus[port] >> slot) & 1)
 					rmmanClose(port, slot);
 			}
 		}
 
 		SetEventFlag(eventFlagID, RM_EF_EXIT_THREAD);
-		WaitEventFlag(eventFlagID, RM_EF_EXIT_THREAD_DONE, WEF_AND|WEF_CLEAR, &bits);
+		WaitEventFlag(eventFlagID, RM_EF_EXIT_THREAD_DONE, WEF_AND | WEF_CLEAR, &bits);
 		DeleteEventFlag(eventFlagID);
 		eventFlagID = 0;
-		if(DeleteThread(eventFlagID) == 0)
-		{
+		if (DeleteThread(eventFlagID) == 0) {
 			MainThreadID = 0;
 			IsInitialized = 0;
 
@@ -216,30 +205,24 @@ static void MainThread(void *arg)
 	iop_event_info_t evfInfo;
 	int port, slot;
 
-	while(1)
-	{
+	while (1) {
 		WaitVblankStart();
 
 		ReferEventFlagStatus(eventFlagID, &evfInfo);
 
-		if(evfInfo.currBits == RM_EF_EXIT_THREAD)
-		{
+		if (evfInfo.currBits == RM_EF_EXIT_THREAD) {
 			SetEventFlag(eventFlagID, RM_EF_EXIT_THREAD_DONE);
 			ExitThread();
 		}
 
-		for(port = 0; port < 2; port++)
-		{
-			for(slot = 0; slot < 4; slot++)
-			{
-				if((portStatus[port] >> slot) & 1)
-				{
+		for (port = 0; port < 2; port++) {
+			for (slot = 0; slot < 4; slot++) {
+				if ((portStatus[port] >> slot) & 1) {
 					ReferEventFlagStatus(RmData[port][slot].eventFlagID, &evfInfo);
 
-					if(evfInfo.currBits == RM_EF_CLOSE_PORT)
-					{
+					if (evfInfo.currBits == RM_EF_CLOSE_PORT) {
 						RmData[port][slot].powerMode = 3;
-						if(InitRemote(&RmData[port][slot]) == 0)
+						if (InitRemote(&RmData[port][slot]) == 0)
 							RmData[port][slot].closed = 0;
 						else
 							RmData[port][slot].closed = 1;
@@ -256,27 +239,23 @@ static void MainThread(void *arg)
 
 static int HandleTasks(struct RmData *RmData)
 {
-	switch(RmData->currentTask)
-	{
+	switch (RmData->currentTask) {
 		case RM_TASK_QUERY:
-			if(RmData->counter == 0 && FindRemote(RmData) != 0)
-			{
+			if (RmData->counter == 0 && FindRemote(RmData) != 0) {
 				RmData->counter = 0;
 				RmData->state = RM_STATE_EXECCMD;
 				RmData->currentTask++;
-			 } else {
-				 if(RmData->counter < 10)
-				 {
-					 RmData->counter++;
-					 RmData->state = RM_STATE_FINDRM;
-				 } else {
-					 RmData->counter = 0;
-				 }
-			 }
+			} else {
+				if (RmData->counter < 10) {
+					RmData->counter++;
+					RmData->state = RM_STATE_FINDRM;
+				} else {
+					RmData->counter = 0;
+				}
+			}
 			break;
 		case RM_TASK_INIT:
-			if(InitRemote(RmData) != 0)
-			{
+			if (InitRemote(RmData) != 0) {
 				RmData->counter = 0;
 				RmData->currentTask++;
 			} else {
@@ -285,14 +264,13 @@ static int HandleTasks(struct RmData *RmData)
 			break;
 		case RM_TASK_POLL:
 			RmData->state = RM_STATE_STABLE;
-			if(PollRemote(RmData) != 0)
-			{
+			if (PollRemote(RmData) != 0) {
 				RmData->counter = 0;
 
-				if(RmData->reqState == RM_RSTATE_BUSY)
+				if (RmData->reqState == RM_RSTATE_BUSY)
 					RmData->reqState = RM_RSTATE_COMPLETE;
 			} else {
-				if(HandleRmTaskFailed(RmData) == 0 && RmData->reqState == RM_RSTATE_BUSY)
+				if (HandleRmTaskFailed(RmData) == 0 && RmData->reqState == RM_RSTATE_BUSY)
 					RmData->reqState = RM_RSTATE_FAILED;
 			}
 			break;
@@ -308,12 +286,9 @@ static int FindRemote(struct RmData *RmData)
 	int result;
 
 	InitFindRmCmd(RmData);
-	if(RmExecute(RmData) != 0)
-	{
-		if(RmData->port < 2)
-		{
-			switch(RmData->outBuffer[1])
-			{
+	if (RmExecute(RmData) != 0) {
+		if (RmData->port < 2) {
+			switch (RmData->outBuffer[1]) {
 				case 0x12:
 					result = 1;
 					break;
@@ -355,8 +330,8 @@ static int InitFindRmCmd(struct RmData *RmData)
 	RmData->sio2Data.regdata[0] = (RmData->sio2Data.regdata[0] & ~0x000000C0) | 0x40;
 	RmData->sio2Data.regdata[0] = (RmData->sio2Data.regdata[0] & ~0x0001FF00) | 0x00700;
 	RmData->sio2Data.regdata[0] = (RmData->sio2Data.regdata[0] & ~0x07FC0000) | 0x001C0000;
-	
-	for(i = 2; i < 7; i++)
+
+	for (i = 2; i < 7; i++)
 		RmData->inBuffer[i] = 0;
 
 	return 1;
@@ -365,7 +340,7 @@ static int InitFindRmCmd(struct RmData *RmData)
 static int PollRemote(struct RmData *RmData)
 {
 	InitPollRmCmd(RmData);
-	return(RmExecute(RmData) > 0);
+	return (RmExecute(RmData) > 0);
 }
 
 static int InitPollRmCmd(struct RmData *RmData)
@@ -374,7 +349,7 @@ static int InitPollRmCmd(struct RmData *RmData)
 
 	RmData->inBuffer[0] = 0x61;
 	RmData->inBuffer[1] = 0x04;
-	for(i = 2; i < 7; i++)
+	for (i = 2; i < 7; i++)
 		RmData->inBuffer[i] = 0;
 
 	return 1;
@@ -388,8 +363,7 @@ static int RmExecute(struct RmData *RmData)
 	sio2_transfer(&RmData->sio2Data);
 	sio2_transfer_reset();
 
-	if(((RmData->sio2Data.stat6c >> 14) & 3) == 0)
-	{
+	if (((RmData->sio2Data.stat6c >> 14) & 3) == 0) {
 		RmData->connected = 1;
 		result = 1;
 	} else {
@@ -402,8 +376,7 @@ static int RmExecute(struct RmData *RmData)
 
 static int HandleRmTaskFailed(struct RmData *RmData)
 {
-	if(RmData->counter + 1 < 10)
-	{
+	if (RmData->counter + 1 < 10) {
 		RmData->counter++;
 		return RmData->counter;
 	} else {
@@ -419,14 +392,14 @@ static int DmaSendEE(struct RmData *RmData)
 
 	RmData->eeData.frame = RmData->frame;
 	RmData->frame++;
-	for(i = 0; i < sizeof(RmData->eeData.data); i++)
+	for (i = 0; i < sizeof(RmData->eeData.data); i++)
 		RmData->eeData.data[i] = RmData->outBuffer[i];
 
 	RmData->eeData.state = RmData->state;
 	RmData->eeData.connected = RmData->connected;
 
 	dmat.src = &RmData->eeData;
-	dmat.dest = ((RmData->frame & 1) == 0) ? (u8*)RmData->eeBuffer : (u8*)RmData->eeBuffer + 128;
+	dmat.dest = ((RmData->frame & 1) == 0) ? (u8 *)RmData->eeBuffer : (u8 *)RmData->eeBuffer + 128;
 	dmat.size = 128;
 	dmat.attr = 0;
 
@@ -434,13 +407,13 @@ static int DmaSendEE(struct RmData *RmData)
 	dmatID = sceSifSetDma(&dmat, 1);
 	CpuResumeIntr(OldState);
 
-	return(dmatID > 0);
+	return (dmatID > 0);
 }
 
 static int InitRemote(struct RmData *RmData)
 {
 	InitInitRmCmd(RmData);
-	return(RmExecute(RmData) > 0);
+	return (RmExecute(RmData) > 0);
 }
 
 static int InitInitRmCmd(struct RmData *RmData)
@@ -451,7 +424,7 @@ static int InitInitRmCmd(struct RmData *RmData)
 	RmData->inBuffer[1] = 0x06;
 	RmData->inBuffer[2] = (u8)RmData->powerMode;
 
-	for(i = 3; i < 7; i++)
+	for (i = 3; i < 7; i++)
 		RmData->inBuffer[i] = 0;
 
 	return 1;
@@ -496,8 +469,7 @@ static void *RpcHandler(int fno, void *buffer, int len)
 {
 	void *retBuff;
 
-	switch(((struct rmRpcPacket *)buffer)->cmd.command)
-	{
+	switch (((struct rmRpcPacket *)buffer)->cmd.command) {
 		case RMMAN_RPCFUNC_END:
 			retBuff = RmmanRpc_end((struct rmRpcPacket *)buffer);
 			break;
@@ -523,8 +495,7 @@ static void *RpcHandler(int fno, void *buffer, int len)
 
 static void RpcThread(void *arg)
 {
-	if(!sceSifCheckInit())
-	{
+	if (!sceSifCheckInit()) {
 		printf("yet sif hasn't been init\n");
 		sceSifInit();
 	}
@@ -541,16 +512,15 @@ static int CreateMainThread(void)
 	iop_thread_t ThreadData;
 	int result;
 
-	ThreadData.attr=TH_C;
-	ThreadData.thread=&RpcThread;
-	ThreadData.priority=0x2E;
-	ThreadData.stacksize=0x800;
-	if((RpcThreadID=CreateThread(&ThreadData))!=0)
-	{
+	ThreadData.attr = TH_C;
+	ThreadData.thread = &RpcThread;
+	ThreadData.priority = 0x2E;
+	ThreadData.stacksize = 0x800;
+	if ((RpcThreadID = CreateThread(&ThreadData)) != 0) {
 		StartThread(RpcThreadID, NULL);
 		result = 1;
-	}
-	else result = 0;
+	} else
+		result = 0;
 
 	return result;
 }

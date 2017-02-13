@@ -58,71 +58,63 @@ extern float MAXNUMF, MAXLOGF;
 #ifdef ANSIC
 float y0f(float), y1f(float), logf(float);
 
-float ynf( int nn, float xx )
+float ynf(int nn, float xx)
 #else
 float y0f(), y1f(), logf();
 
-float ynf( nn, xx )
-int nn;
+float ynf(nn, xx) int nn;
 double xx;
 #endif
 {
-float x, an, anm1, anm2, r, xinv;
-int k, n, sign;
+	float x, an, anm1, anm2, r, xinv;
+	int k, n, sign;
 
-x = xx;
-n = nn;
-if( n < 0 )
-	{
-	n = -n;
-	if( (n & 1) == 0 )	/* -1**n */
+	x = xx;
+	n = nn;
+	if (n < 0) {
+		n = -n;
+		if ((n & 1) == 0) /* -1**n */
+			sign = 1;
+		else
+			sign = -1;
+	} else
 		sign = 1;
-	else
-		sign = -1;
+
+
+	if (n == 0)
+		return (sign * y0f(x));
+	if (n == 1)
+		return (sign * y1f(x));
+
+	/* test for overflow */
+	if (x <= 0.0) {
+		mtherr("ynf", SING);
+		return (-MAXNUMF);
 	}
-else
-	sign = 1;
-
-
-if( n == 0 )
-	return( sign * y0f(x) );
-if( n == 1 )
-	return( sign * y1f(x) );
-
-/* test for overflow */
-if( x <= 0.0 )
-	{
-	mtherr( "ynf", SING );
-	return( -MAXNUMF );
-	}
-if( (x < 1.0) || (n > 29) )
-	{
-	an = (float )n;
-	r = an * logf( an/x );
-	if( r > MAXLOGF )
-		{
-		mtherr( "ynf", OVERFLOW );
-		return( -MAXNUMF );
+	if ((x < 1.0) || (n > 29)) {
+		an = (float)n;
+		r = an * logf(an / x);
+		if (r > MAXLOGF) {
+			mtherr("ynf", OVERFLOW);
+			return (-MAXNUMF);
 		}
 	}
 
-/* forward recurrence on n */
+	/* forward recurrence on n */
 
-anm2 = y0f(x);
-anm1 = y1f(x);
-k = 1;
-r = 2 * k;
-xinv = 1.0/x;
-do
-	{
-	an = r * anm1 * xinv  -  anm2;
-	anm2 = anm1;
-	anm1 = an;
-	r += 2.0;
-	++k;
-	}
-while( k < n );
+	anm2 = y0f(x);
+	anm1 = y1f(x);
+	k = 1;
+	r = 2 * k;
+	xinv = 1.0 / x;
+	do {
+		an = r * anm1 * xinv - anm2;
+		anm2 = anm1;
+		anm1 = an;
+		r += 2.0;
+		++k;
+	} while (k < n);
 
 
-return( sign * an );
+	return (sign * an);
 }

@@ -19,38 +19,34 @@ IRX_ID("iopdebug", 1, 0);
 extern struct irx_export_table _exp_iopdebug;
 int _start(int argc, char *argv[])
 {
-    // install IOP debug system.
-    if(iop_dbg_install() != 0)
-    {
-        //printf("Failed installing IOP debug system!\n");
-        return(1); // return "non-resident"
-    }
+	// install IOP debug system.
+	if (iop_dbg_install() != 0) {
+		//printf("Failed installing IOP debug system!\n");
+		return (1); // return "non-resident"
+	}
 
-    // register our IRX exports.
-    if(RegisterLibraryEntries(&_exp_iopdebug) != 0)
-    {
-        iop_dbg_remove();
+	// register our IRX exports.
+	if (RegisterLibraryEntries(&_exp_iopdebug) != 0) {
+		iop_dbg_remove();
 
-        //printf("Error registering library!\n");
-        return(1);
-    }
+		//printf("Error registering library!\n");
+		return (1);
+	}
 
-    FlushIcache();
-    FlushDcache();
+	FlushIcache();
+	FlushDcache();
 
-    //printf("IOPDEBUG installed!\n");
+	//printf("IOPDEBUG installed!\n");
 
-    return(0); // return "resident"
+	return (0); // return "resident"
 }
 // export 2, called when the module is being unloaded(like when IOP is being "rebooted").
 int _stop(int argc, char *argv[])
 {
-    // remove IOP debug system.
-    if(iop_dbg_remove() != 0)
-    {
-        //printf("Failed removing IOP debug handlers!\n");
-    }
+	// remove IOP debug system.
+	if (iop_dbg_remove() != 0) {
+		//printf("Failed removing IOP debug handlers!\n");
+	}
 
-    return(1); // return "non-resident"
+	return (1); // return "non-resident"
 }
-

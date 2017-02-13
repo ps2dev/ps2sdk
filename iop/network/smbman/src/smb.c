@@ -16,238 +16,261 @@
 #include "poll.h"
 #include "debug.h"
 
-#define SMB_MAGIC	0x424d53ff
+#define SMB_MAGIC 0x424d53ff
 
-struct SMBHeader_t {			//size = 36
+struct SMBHeader_t
+{                      //size = 36
 	u32 sessionHeader; /* Direct transport packet header. Some packet sniffers like Wireshark treats this as a NetBIOS session header.
 				The lower 24 bytes are the length of the payload in network byte-order, while the upper 8 bits must be set to 0.
 				Microsoft does not consider it as being part of the SMB message header, but we will put this here for convenience.
 				Therefore our functions will add 4 to the packet length while invoking send() or recv(). */
-	u32	Magic;
-	u8	Cmd;
-	short	Eclass;
-	short	Ecode;
-	u8	Flags;
-	u16	Flags2;
-	u8	Extra[12];
-	u16	TID;
-	u16	PID;
-	u16	UID;
-	u16	MID;
+	u32 Magic;
+	u8 Cmd;
+	short Eclass;
+	short Ecode;
+	u8 Flags;
+	u16 Flags2;
+	u8 Extra[12];
+	u16 TID;
+	u16 PID;
+	u16 UID;
+	u16 MID;
 } __attribute__((packed));
 
-struct SMBTransactionRequest_t {	//size = 28
-	u16	TotalParamCount;
-	u16	TotalDataCount;
-	u16	MaxParamCount;
-	u16	MaxDataCount;
-	u8	MaxSetupCount;
-	u8	Reserved;
-	u16	Flags;
-	u32	Timeout;
-	u16	Reserved2;
-	u16	ParamCount;
-	u16	ParamOffset;
-	u16	DataCount;
-	u16	DataOffset;
-	u8	SetupCount;
-	u8	Reserved3;
+struct SMBTransactionRequest_t
+{ //size = 28
+	u16 TotalParamCount;
+	u16 TotalDataCount;
+	u16 MaxParamCount;
+	u16 MaxDataCount;
+	u8 MaxSetupCount;
+	u8 Reserved;
+	u16 Flags;
+	u32 Timeout;
+	u16 Reserved2;
+	u16 ParamCount;
+	u16 ParamOffset;
+	u16 DataCount;
+	u16 DataOffset;
+	u8 SetupCount;
+	u8 Reserved3;
 } __attribute__((packed));
 
-struct SMBTransactionResponse_t {	//size = 20
-	u16	TotalParamCount;
-	u16	TotalDataCount;
-	u16	Reserved;
-	u16	ParamCount;
-	u16	ParamOffset;
-	u16	ParamDisplacement;
-	u16	DataCount;
-	u16	DataOffset;
-	u16	DataDisplacement;
-	u8	SetupCount;
-	u8	Reserved2;
+struct SMBTransactionResponse_t
+{ //size = 20
+	u16 TotalParamCount;
+	u16 TotalDataCount;
+	u16 Reserved;
+	u16 ParamCount;
+	u16 ParamOffset;
+	u16 ParamDisplacement;
+	u16 DataCount;
+	u16 DataOffset;
+	u16 DataDisplacement;
+	u8 SetupCount;
+	u8 Reserved2;
 } __attribute__((packed));
 
-struct NegotiateProtocolRequest_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u16	ByteCount;		// 37
-	u8	DialectFormat;		// 39
-	char	DialectName[0];		// 40
+struct NegotiateProtocolRequest_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u16 ByteCount;           // 37
+	u8 DialectFormat;        // 39
+	char DialectName[0];     // 40
 } __attribute__((packed));
 
-struct NegotiateProtocolResponse_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u16	DialectIndex;		// 37
-	u8	SecurityMode;		// 39
-	u16	MaxMpxCount;		// 40
-	u16	MaxVC;			// 42
-	u32	MaxBufferSize;		// 44
-	u32	MaxRawBuffer;		// 48
-	u32	SessionKey;		// 52
-	u32	Capabilities;		// 56
-	s64	SystemTime;		// 60
-	u16	ServerTimeZone;		// 68
-	u8	KeyLength;		// 70
-	u16	ByteCount;		// 71
-	u8	ByteField[0];		// 73
+struct NegotiateProtocolResponse_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u16 DialectIndex;        // 37
+	u8 SecurityMode;         // 39
+	u16 MaxMpxCount;         // 40
+	u16 MaxVC;               // 42
+	u32 MaxBufferSize;       // 44
+	u32 MaxRawBuffer;        // 48
+	u32 SessionKey;          // 52
+	u32 Capabilities;        // 56
+	s64 SystemTime;          // 60
+	u16 ServerTimeZone;      // 68
+	u8 KeyLength;            // 70
+	u16 ByteCount;           // 71
+	u8 ByteField[0];         // 73
 } __attribute__((packed));
 
-struct SessionSetupAndXRequest_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u8	smbAndxCmd;		// 37
-	u8	smbAndxReserved;	// 38
-	u16	smbAndxOffset;		// 39
-	u16	MaxBufferSize;		// 41
-	u16	MaxMpxCount;		// 43
-	u16	VCNumber;		// 45
-	u32	SessionKey;		// 47
-	u16	AnsiPasswordLength;	// 51
-	u16	UnicodePasswordLength;	// 53
-	u32	reserved;		// 55
-	u32	Capabilities;		// 59
-	u16	ByteCount;		// 63
-	u8	ByteField[0];		// 65
+struct SessionSetupAndXRequest_t
+{
+	struct SMBHeader_t smbH;   // 0
+	u8 smbWordcount;           // 36
+	u8 smbAndxCmd;             // 37
+	u8 smbAndxReserved;        // 38
+	u16 smbAndxOffset;         // 39
+	u16 MaxBufferSize;         // 41
+	u16 MaxMpxCount;           // 43
+	u16 VCNumber;              // 45
+	u32 SessionKey;            // 47
+	u16 AnsiPasswordLength;    // 51
+	u16 UnicodePasswordLength; // 53
+	u32 reserved;              // 55
+	u32 Capabilities;          // 59
+	u16 ByteCount;             // 63
+	u8 ByteField[0];           // 65
 } __attribute__((packed));
 
-struct SessionSetupAndXResponse_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u8	smbAndxCmd;		// 37
-	u8	smbAndxReserved;	// 38
-	u16	smbAndxOffset;		// 39
-	u16	Action;			// 41
-	u16	ByteCount;		// 43
+struct SessionSetupAndXResponse_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u8 smbAndxCmd;           // 37
+	u8 smbAndxReserved;      // 38
+	u16 smbAndxOffset;       // 39
+	u16 Action;              // 41
+	u16 ByteCount;           // 43
 } __attribute__((packed));
 
-struct TreeConnectAndXRequest_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u8	smbAndxCmd;		// 37
-	u8	smbAndxReserved;	// 38
-	u16	smbAndxOffset;		// 39
-	u16	Flags;			// 41
-	u16	PasswordLength;		// 43
-	u16	ByteCount;		// 45
-	u8	ByteField[0];		// 47
+struct TreeConnectAndXRequest_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u8 smbAndxCmd;           // 37
+	u8 smbAndxReserved;      // 38
+	u16 smbAndxOffset;       // 39
+	u16 Flags;               // 41
+	u16 PasswordLength;      // 43
+	u16 ByteCount;           // 45
+	u8 ByteField[0];         // 47
 } __attribute__((packed));
 
-struct TreeConnectAndXResponse_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u8	smbAndxCmd;		// 37
-	u8	smbAndxReserved;	// 38
-	u16	smbAndxOffset;		// 39
-	u16	OptionalSupport;	// 41
-	u16	ByteCount;		// 43
+struct TreeConnectAndXResponse_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u8 smbAndxCmd;           // 37
+	u8 smbAndxReserved;      // 38
+	u16 smbAndxOffset;       // 39
+	u16 OptionalSupport;     // 41
+	u16 ByteCount;           // 43
 } __attribute__((packed));
 
-struct TreeDisconnectRequest_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u16	ByteCount;		// 37
+struct TreeDisconnectRequest_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u16 ByteCount;           // 37
 } __attribute__((packed));
 
-struct TreeDisconnectResponse_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u16	ByteCount;		// 37
+struct TreeDisconnectResponse_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u16 ByteCount;           // 37
 } __attribute__((packed));
 
-struct NetShareEnumRequest_t {
-	struct SMBHeader_t smbH;			// 0
-	u8	smbWordcount;				// 36
-	struct SMBTransactionRequest_t smbTrans;	// 37
-	u16	ByteCount;				// 65
-	u8	ByteField[0];				// 67
+struct NetShareEnumRequest_t
+{
+	struct SMBHeader_t smbH;                 // 0
+	u8 smbWordcount;                         // 36
+	struct SMBTransactionRequest_t smbTrans; // 37
+	u16 ByteCount;                           // 65
+	u8 ByteField[0];                         // 67
 } __attribute__((packed));
 
-struct NetShareEnumResponse_t {
-	struct SMBHeader_t smbH;			// 0
-	u8	smbWordcount;				// 36
-	struct SMBTransactionResponse_t smbTrans; 	// 37
-	u16	ByteCount;				// 57
-	u8	ByteField[0];				// 59
+struct NetShareEnumResponse_t
+{
+	struct SMBHeader_t smbH;                  // 0
+	u8 smbWordcount;                          // 36
+	struct SMBTransactionResponse_t smbTrans; // 37
+	u16 ByteCount;                            // 57
+	u8 ByteField[0];                          // 59
 } __attribute__((packed));
 
-struct LogOffAndXRequest_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u8	smbAndxCmd;		// 37
-	u8	smbAndxReserved;	// 38
-	u16	smbAndxOffset;		// 39
-	u16	ByteCount;		// 41
+struct LogOffAndXRequest_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u8 smbAndxCmd;           // 37
+	u8 smbAndxReserved;      // 38
+	u16 smbAndxOffset;       // 39
+	u16 ByteCount;           // 41
 } __attribute__((packed));
 
-struct LogOffAndXResponse_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u8	smbAndxCmd;		// 37
-	u8	smbAndxReserved;	// 38
-	u16	smbAndxOffset;		// 39
-	u16	ByteCount;		// 41
+struct LogOffAndXResponse_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u8 smbAndxCmd;           // 37
+	u8 smbAndxReserved;      // 38
+	u16 smbAndxOffset;       // 39
+	u16 ByteCount;           // 41
 } __attribute__((packed));
 
-struct EchoRequest_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u16	EchoCount;		// 37
-	u16	ByteCount;		// 39
-	u8	ByteField[0];		// 41
+struct EchoRequest_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u16 EchoCount;           // 37
+	u16 ByteCount;           // 39
+	u8 ByteField[0];         // 41
 } __attribute__((packed));
 
-struct EchoResponse_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u16	SequenceNumber;		// 37
-	u16	ByteCount;		// 39
-	u8	ByteField[0];		// 41
+struct EchoResponse_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u16 SequenceNumber;      // 37
+	u16 ByteCount;           // 39
+	u8 ByteField[0];         // 41
 } __attribute__((packed));
 
-struct QueryInformationDiskRequest_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u16	ByteCount;		// 37
-	u8	ByteField[0];		// 39
+struct QueryInformationDiskRequest_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u16 ByteCount;           // 37
+	u8 ByteField[0];         // 39
 } __attribute__((packed));
 
-struct QueryInformationDiskResponse_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u16	TotalUnits;		// 37
-	u16	BlocksPerUnit;		// 39
-	u16	BlockSize;		// 41
-	u16	FreeUnits;		// 43
-	u16	Reserved;		// 45
-	u16	ByteCount;		// 47
+struct QueryInformationDiskResponse_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u16 TotalUnits;          // 37
+	u16 BlocksPerUnit;       // 39
+	u16 BlockSize;           // 41
+	u16 FreeUnits;           // 43
+	u16 Reserved;            // 45
+	u16 ByteCount;           // 47
 } __attribute__((packed));
 
-struct QueryPathInformationRequestParam_t {
-	u16	LevelOfInterest;
-	u32	Reserved;
-	u8	FileName[0];
+struct QueryPathInformationRequestParam_t
+{
+	u16 LevelOfInterest;
+	u32 Reserved;
+	u8 FileName[0];
 } __attribute__((packed));
 
-struct QueryPathInformationRequest_t {
-	struct SMBHeader_t smbH;			// 0
-	u8	smbWordcount;				// 36
-	struct SMBTransactionRequest_t smbTrans;	// 37
-	u16	SubCommand;				// 65
-	u16	ByteCount;				// 67
-	u8	ByteField[0];				// 69
+struct QueryPathInformationRequest_t
+{
+	struct SMBHeader_t smbH;                 // 0
+	u8 smbWordcount;                         // 36
+	struct SMBTransactionRequest_t smbTrans; // 37
+	u16 SubCommand;                          // 65
+	u16 ByteCount;                           // 67
+	u8 ByteField[0];                         // 69
 } __attribute__((packed));
 
-struct QueryPathInformationResponse_t {
-	struct SMBHeader_t smbH;			// 0
-	u8	smbWordcount;				// 36
-	struct SMBTransactionResponse_t smbTrans;	// 37
-	u16	ByteCount;				// 57
-	u8	ByteField[0];				// 59
+struct QueryPathInformationResponse_t
+{
+	struct SMBHeader_t smbH;                  // 0
+	u8 smbWordcount;                          // 36
+	struct SMBTransactionResponse_t smbTrans; // 37
+	u16 ByteCount;                            // 57
+	u8 ByteField[0];                          // 59
 } __attribute__((packed));
 
-struct BasicFileInfo_t {
+struct BasicFileInfo_t
+{
 	s64 Created;
 	s64 LastAccess;
 	s64 LastWrite;
@@ -255,308 +278,348 @@ struct BasicFileInfo_t {
 	u32 FileAttributes;
 } __attribute__((packed));
 
-struct StandardFileInfo_t {
+struct StandardFileInfo_t
+{
 	u64 AllocationSize;
 	u64 EndOfFile;
 	u32 LinkCount;
-	u8  DeletePending;
-	u8  IsDirectory;
+	u8 DeletePending;
+	u8 IsDirectory;
 } __attribute__((packed));
 
-struct FindFirst2RequestParam_t {
-	u16	SearchAttributes;
-	u16	SearchCount;
-	u16	Flags;
-	u16	LevelOfInterest;
-	u32	StorageType;
-	u8	SearchPattern[0];
+struct FindFirst2RequestParam_t
+{
+	u16 SearchAttributes;
+	u16 SearchCount;
+	u16 Flags;
+	u16 LevelOfInterest;
+	u32 StorageType;
+	u8 SearchPattern[0];
 } __attribute__((packed));
 
-struct FindNext2RequestParam_t {
-	u16	SearchID;
-	u16	SearchCount;
-	u16	LevelOfInterest;
-	u32	ResumeKey;
-	u16	Flags;
-	u8	SearchPattern[0];
+struct FindNext2RequestParam_t
+{
+	u16 SearchID;
+	u16 SearchCount;
+	u16 LevelOfInterest;
+	u32 ResumeKey;
+	u16 Flags;
+	u8 SearchPattern[0];
 } __attribute__((packed));
 
-struct FindFirstNext2Request_t {
-	struct SMBHeader_t smbH;			// 0
-	u8	smbWordcount;				// 36
-	struct SMBTransactionRequest_t smbTrans;	// 37
-	u16	SubCommand;				// 65
-	u16	ByteCount;				// 67
-	u8	ByteField[0];				// 69
+struct FindFirstNext2Request_t
+{
+	struct SMBHeader_t smbH;                 // 0
+	u8 smbWordcount;                         // 36
+	struct SMBTransactionRequest_t smbTrans; // 37
+	u16 SubCommand;                          // 65
+	u16 ByteCount;                           // 67
+	u8 ByteField[0];                         // 69
 } __attribute__((packed));
 
-struct FindFirstNext2ResponseParam_t {
-	u16	SearchID;
-	u16	SearchCount;
-	u16	EndOfSearch;
-	u16	EAErrorOffset;
-	u16	LastNameOffset;
+struct FindFirstNext2ResponseParam_t
+{
+	u16 SearchID;
+	u16 SearchCount;
+	u16 EndOfSearch;
+	u16 EAErrorOffset;
+	u16 LastNameOffset;
 } __attribute__((packed));
 
-struct FindFirst2ResponseData_t {
-	u32	NextEntryOffset;
-	u32	FileIndex;
-	s64	Created;
-	s64	LastAccess;
-	s64	LastWrite;
-	s64	Change;
-	u64	EndOfFile;
-	u64	AllocationSize;
-	u32	FileAttributes;
-	u32	FileNameLen;
-	u32	EAListLength;
-	u16	ShortFileNameLen;
-	u8	ShortFileName[24];
-	u8	FileName[0];
+struct FindFirst2ResponseData_t
+{
+	u32 NextEntryOffset;
+	u32 FileIndex;
+	s64 Created;
+	s64 LastAccess;
+	s64 LastWrite;
+	s64 Change;
+	u64 EndOfFile;
+	u64 AllocationSize;
+	u32 FileAttributes;
+	u32 FileNameLen;
+	u32 EAListLength;
+	u16 ShortFileNameLen;
+	u8 ShortFileName[24];
+	u8 FileName[0];
 } __attribute__((packed));
 
-struct FindFirstNext2Response_t {
-	struct SMBHeader_t smbH;			// 0
-	u8	smbWordcount;				// 36
-	struct SMBTransactionResponse_t smbTrans; 	// 37
-	u16	ByteCount;				// 57
-	u8	ByteField[0];				// 59
+struct FindFirstNext2Response_t
+{
+	struct SMBHeader_t smbH;                  // 0
+	u8 smbWordcount;                          // 36
+	struct SMBTransactionResponse_t smbTrans; // 37
+	u16 ByteCount;                            // 57
+	u8 ByteField[0];                          // 59
 } __attribute__((packed));
 
-struct NTCreateAndXRequest_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u8	smbAndxCmd;		// 37
-	u8	smbAndxReserved;	// 38
-	u16	smbAndxOffset;		// 39
-	u8	reserved;		// 41
-	short	NameLength;		// 42
-	u32	Flags;			// 44
-	u32	RootDirectoryFid;	// 48
-	u32	AccessMask;		// 52
-	u64	AllocationSize;		// 56
-	u32	FileAttributes;		// 64
-	u32	ShareAccess;		// 68
-	u32	CreateDisposition;	// 72
-	u32	CreateOptions;		// 76
-	u32	ImpersonationLevel;	// 80
-	u8	SecurityFlags;		// 84
-	u16	ByteCount;		// 85
-	char	ByteField[0];		// 87
+struct NTCreateAndXRequest_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u8 smbAndxCmd;           // 37
+	u8 smbAndxReserved;      // 38
+	u16 smbAndxOffset;       // 39
+	u8 reserved;             // 41
+	short NameLength;        // 42
+	u32 Flags;               // 44
+	u32 RootDirectoryFid;    // 48
+	u32 AccessMask;          // 52
+	u64 AllocationSize;      // 56
+	u32 FileAttributes;      // 64
+	u32 ShareAccess;         // 68
+	u32 CreateDisposition;   // 72
+	u32 CreateOptions;       // 76
+	u32 ImpersonationLevel;  // 80
+	u8 SecurityFlags;        // 84
+	u16 ByteCount;           // 85
+	char ByteField[0];       // 87
 } __attribute__((packed));
 
-struct NTCreateAndXResponse_t {		// size = 107
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u8	smbAndxCmd;		// 37
-	u8	smbAndxReserved;	// 38
-	u16	smbAndxOffset;		// 39
-	u8	OplockLevel;		// 41
-	u16	FID;			// 42
-	u32	Action;			// 44
-	s64	Created;		// 48
-	s64	LastAccess;		// 56
-	s64	LastWrite;		// 64
-	s64	Changed;		// 72
-	u32	FileAttributes;		// 80
-	u64	AllocationSize;		// 84
-	u64	FileSize;		// 92
-	u16	FileType;		// 100
-	u16	IPCState;		// 102
-	u8	IsDirectory;		// 104
-	u16	ByteCount;		// 105
+struct NTCreateAndXResponse_t
+{                            // size = 107
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u8 smbAndxCmd;           // 37
+	u8 smbAndxReserved;      // 38
+	u16 smbAndxOffset;       // 39
+	u8 OplockLevel;          // 41
+	u16 FID;                 // 42
+	u32 Action;              // 44
+	s64 Created;             // 48
+	s64 LastAccess;          // 56
+	s64 LastWrite;           // 64
+	s64 Changed;             // 72
+	u32 FileAttributes;      // 80
+	u64 AllocationSize;      // 84
+	u64 FileSize;            // 92
+	u16 FileType;            // 100
+	u16 IPCState;            // 102
+	u8 IsDirectory;          // 104
+	u16 ByteCount;           // 105
 } __attribute__((packed));
 
-struct OpenAndXRequest_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u8	smbAndxCmd;		// 37
-	u8	smbAndxReserved;	// 38
-	u16	smbAndxOffset;		// 39
-	u16	Flags;			// 41
-	u16	AccessMask;		// 43
-	u16	SearchAttributes;	// 45
-	u16	FileAttributes;		// 47
-	u8	Created[4];		// 49
-	u16	CreateOptions;		// 53
-	u32	AllocationSize;		// 55
-	u32	reserved[2];		// 59
-	u16	ByteCount;		// 67
-	u8	ByteField[0];		// 69
+struct OpenAndXRequest_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u8 smbAndxCmd;           // 37
+	u8 smbAndxReserved;      // 38
+	u16 smbAndxOffset;       // 39
+	u16 Flags;               // 41
+	u16 AccessMask;          // 43
+	u16 SearchAttributes;    // 45
+	u16 FileAttributes;      // 47
+	u8 Created[4];           // 49
+	u16 CreateOptions;       // 53
+	u32 AllocationSize;      // 55
+	u32 reserved[2];         // 59
+	u16 ByteCount;           // 67
+	u8 ByteField[0];         // 69
 } __attribute__((packed));
 
-struct OpenAndXResponse_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u8	smbAndxCmd;		// 37
-	u8	smbAndxReserved;	// 38
-	u16	smbAndxOffset;		// 39
-	u16	FID;			// 41
-	u16	FileAttributes;		// 43
-	u8	LastWrite[4];		// 45
-	u32	FileSize;		// 49
-	u16	GrantedAccess;		// 53
-	u16	FileType;		// 55
-	u16	IPCState;		// 57
-	u16	Action;			// 59
-	u32	ServerFID;		// 61
-	u16	reserved;		// 65
-	u16	ByteCount;		// 67
+struct OpenAndXResponse_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u8 smbAndxCmd;           // 37
+	u8 smbAndxReserved;      // 38
+	u16 smbAndxOffset;       // 39
+	u16 FID;                 // 41
+	u16 FileAttributes;      // 43
+	u8 LastWrite[4];         // 45
+	u32 FileSize;            // 49
+	u16 GrantedAccess;       // 53
+	u16 FileType;            // 55
+	u16 IPCState;            // 57
+	u16 Action;              // 59
+	u32 ServerFID;           // 61
+	u16 reserved;            // 65
+	u16 ByteCount;           // 67
 } __attribute__((packed));
 
-struct ReadAndXRequest_t {		// size = 63
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u8	smbAndxCmd;		// 37
-	u8	smbAndxReserved;	// 38
-	u16	smbAndxOffset;		// 39
-	u16	FID;			// 41
-	u32	OffsetLow;		// 43
-	u16	MaxCountLow;		// 47
-	u16	MinCount;		// 49
-	u32	MaxCountHigh;		// 51
-	u16	Remaining;		// 55
-	u32	OffsetHigh;		// 57
-	u16	ByteCount;		// 61
+struct ReadAndXRequest_t
+{                            // size = 63
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u8 smbAndxCmd;           // 37
+	u8 smbAndxReserved;      // 38
+	u16 smbAndxOffset;       // 39
+	u16 FID;                 // 41
+	u32 OffsetLow;           // 43
+	u16 MaxCountLow;         // 47
+	u16 MinCount;            // 49
+	u32 MaxCountHigh;        // 51
+	u16 Remaining;           // 55
+	u32 OffsetHigh;          // 57
+	u16 ByteCount;           // 61
 } __attribute__((packed));
 
-struct ReadAndXResponse_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u8	smbAndxCmd;		// 37
-	u8	smbAndxReserved;	// 38
-	u16	smbAndxOffset;		// 39
-	u16	Remaining;		// 41
-	u16	DataCompactionMode;	// 43
-	u16	reserved;		// 45
-	u16	DataLengthLow;		// 47
-	u16	DataOffset;		// 49
-	u32	DataLengthHigh;		// 51
-	u8	reserved2[6];		// 55
-	u16	ByteCount;		// 61
+struct ReadAndXResponse_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u8 smbAndxCmd;           // 37
+	u8 smbAndxReserved;      // 38
+	u16 smbAndxOffset;       // 39
+	u16 Remaining;           // 41
+	u16 DataCompactionMode;  // 43
+	u16 reserved;            // 45
+	u16 DataLengthLow;       // 47
+	u16 DataOffset;          // 49
+	u32 DataLengthHigh;      // 51
+	u8 reserved2[6];         // 55
+	u16 ByteCount;           // 61
 } __attribute__((packed));
 
-struct WriteAndXRequest_t {		// size = 63
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u8	smbAndxCmd;		// 37
-	u8	smbAndxReserved;	// 38
-	u16	smbAndxOffset;		// 39
-	u16	FID;			// 41
-	u32	OffsetLow;		// 43
-	u32	Reserved;		// 47
-	u16	WriteMode;		// 51
-	u16	Remaining;		// 53
-	u16	DataLengthHigh;		// 55
-	u16	DataLengthLow;		// 57
-	u16	DataOffset;		// 59
-	u32	OffsetHigh;		// 61
-	u16	ByteCount;		// 65
+struct WriteAndXRequest_t
+{                            // size = 63
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u8 smbAndxCmd;           // 37
+	u8 smbAndxReserved;      // 38
+	u16 smbAndxOffset;       // 39
+	u16 FID;                 // 41
+	u32 OffsetLow;           // 43
+	u32 Reserved;            // 47
+	u16 WriteMode;           // 51
+	u16 Remaining;           // 53
+	u16 DataLengthHigh;      // 55
+	u16 DataLengthLow;       // 57
+	u16 DataOffset;          // 59
+	u32 OffsetHigh;          // 61
+	u16 ByteCount;           // 65
 } __attribute__((packed));
 
-struct WriteAndXResponse_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u8	smbAndxCmd;		// 37
-	u8	smbAndxReserved;	// 38
-	u16	smbAndxOffset;		// 39
-	u16	Count;			// 41
-	u16	Remaining;		// 43
-	u16	CountHigh;		// 45
-	u16	Reserved;		// 47
+struct WriteAndXResponse_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u8 smbAndxCmd;           // 37
+	u8 smbAndxReserved;      // 38
+	u16 smbAndxOffset;       // 39
+	u16 Count;               // 41
+	u16 Remaining;           // 43
+	u16 CountHigh;           // 45
+	u16 Reserved;            // 47
 } __attribute__((packed));
 
-struct CloseRequest_t {			// size = 45
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u16	FID;			// 37
-	u32	LastWrite;		// 39
-	u16	ByteCount;		// 43
+struct CloseRequest_t
+{                            // size = 45
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u16 FID;                 // 37
+	u32 LastWrite;           // 39
+	u16 ByteCount;           // 43
 } __attribute__((packed));
 
-struct CloseResponse_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u16	ByteCount;		// 37
+struct CloseResponse_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u16 ByteCount;           // 37
 } __attribute__((packed));
 
-struct DeleteRequest_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u16	SearchAttributes;	// 37
-	u16	ByteCount;		// 39
-	u8	BufferFormat;		// 41
-	u8	FileName[0];		// 42
+struct DeleteRequest_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u16 SearchAttributes;    // 37
+	u16 ByteCount;           // 39
+	u8 BufferFormat;         // 41
+	u8 FileName[0];          // 42
 } __attribute__((packed));
 
-struct DeleteResponse_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u16	ByteCount;		// 37
+struct DeleteResponse_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u16 ByteCount;           // 37
 } __attribute__((packed));
 
-struct ManageDirectoryRequest_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u16	ByteCount;		// 37
-	u8	BufferFormat;		// 39
-	u8	DirectoryName[0];	// 40
+struct ManageDirectoryRequest_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u16 ByteCount;           // 37
+	u8 BufferFormat;         // 39
+	u8 DirectoryName[0];     // 40
 } __attribute__((packed));
 
-struct ManageDirectoryResponse_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u16	ByteCount;		// 37
+struct ManageDirectoryResponse_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u16 ByteCount;           // 37
 } __attribute__((packed));
 
-struct RenameRequest_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u16	SearchAttributes;	// 37
-	u16	ByteCount;		// 39
-	u8	ByteField[0];		// 41
+struct RenameRequest_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u16 SearchAttributes;    // 37
+	u16 ByteCount;           // 39
+	u8 ByteField[0];         // 41
 } __attribute__((packed));
 
-struct RenameResponse_t {
-	struct SMBHeader_t smbH;	// 0
-	u8	smbWordcount;		// 36
-	u16	ByteCount;		// 37
+struct RenameResponse_t
+{
+	struct SMBHeader_t smbH; // 0
+	u8 smbWordcount;         // 36
+	u16 ByteCount;           // 37
 } __attribute__((packed));
 
 
 static server_specs_t server_specs;
 
 struct ReadAndXRequest_t smb_Read_Request = {
-	{	0x3b000000,
-		SMB_MAGIC,
-		SMB_COM_READ_ANDX,
-		0, 0, 0, SMB_FLAGS2_32BIT_STATUS, "\0", 0, 0, 0, 0
-	},
-	12,
-	SMB_COM_NONE,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
+    {0x3b000000,
+     SMB_MAGIC,
+     SMB_COM_READ_ANDX,
+     0, 0, 0, SMB_FLAGS2_32BIT_STATUS, "\0", 0, 0, 0, 0},
+    12,
+    SMB_COM_NONE,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0};
 
 struct WriteAndXRequest_t smb_Write_Request = {
-	{	0,
-		SMB_MAGIC,
-		SMB_COM_WRITE_ANDX,
-		0, 0, 0, SMB_FLAGS2_32BIT_STATUS, "\0", 0, 0, 0, 0
-	},
-	14,
-	SMB_COM_NONE,
-	0, 0, 0, 0, 0, 0x01, 0, 0, 0, 0x3f, 0 	// 0x01 is WriteThrough mode and 0x3f is DataOffset
+    {0,
+     SMB_MAGIC,
+     SMB_COM_WRITE_ANDX,
+     0, 0, 0, SMB_FLAGS2_32BIT_STATUS, "\0", 0, 0, 0, 0},
+    14,
+    SMB_COM_NONE,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0x01,
+    0,
+    0,
+    0,
+    0x3f,
+    0 // 0x01 is WriteThrough mode and 0x3f is DataOffset
 };
 
-#define LM_AUTH 	0
-#define NTLM_AUTH 	1
+#define LM_AUTH 0
+#define NTLM_AUTH 1
 
 static int main_socket = -1;
 
-static union {
-	u8 u8buff[MAX_SMB_BUF+1024];
-	u16 u16buff[(MAX_SMB_BUF+1024) / sizeof(u16)];
-	s16 s16buff[(MAX_SMB_BUF+1024) / sizeof(s16)];
+static union
+{
+	u8 u8buff[MAX_SMB_BUF + 1024];
+	u16 u16buff[(MAX_SMB_BUF + 1024) / sizeof(u16)];
+	s16 s16buff[(MAX_SMB_BUF + 1024) / sizeof(s16)];
 } SMB_buf;
 
 //-------------------------------------------------------------------------
@@ -583,7 +646,7 @@ static int rawTCP_GetSessionHeader(void) // Read Session Service header: careful
 	u32 size;
 
 	// maximum for raw TCP transport (24 bits) !!!
-	size  = SMB_buf.u8buff[3];
+	size = SMB_buf.u8buff[3];
 	size |= SMB_buf.u8buff[2] << 8;
 	size |= SMB_buf.u8buff[1] << 16;
 
@@ -605,7 +668,7 @@ static int OpenTCPSession(struct in_addr dst_IP, u16 dst_port, int *sock)
 
 	*sock = sck;
 
-    	memset(&sock_addr, 0, sizeof(sock_addr));
+	memset(&sock_addr, 0, sizeof(sock_addr));
 	sock_addr.sin_addr = dst_IP;
 	sock_addr.sin_family = AF_INET;
 	sock_addr.sin_port = htons(dst_port);
@@ -667,7 +730,7 @@ receive:
 	if (rcv_size <= 0)
 		return -2;
 
-	if (SMB_buf.u8buff[0] != 0)	// dropping NBSS Session Keep alive
+	if (SMB_buf.u8buff[0] != 0) // dropping NBSS Session Keep alive
 		goto receive;
 
 	// Handle fragmented packets
@@ -701,11 +764,11 @@ negotiate_retry:
 	NPR->smbH.Flags = SMB_FLAGS_CASELESS_PATHNAMES;
 	NPR->smbH.Flags2 = SMB_FLAGS2_KNOWS_LONG_NAMES | SMB_FLAGS2_32BIT_STATUS;
 	length = strlen(dialect);
-	NPR->ByteCount = length+2;
+	NPR->ByteCount = length + 2;
 	NPR->DialectFormat = 0x02;
 	strcpy(NPR->DialectName, dialect);
 
-	rawTCP_SetSessionHeader(37+length);
+	rawTCP_SetSessionHeader(37 + length);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		goto negotiate_error;
@@ -772,18 +835,16 @@ static int AddPassword(char *Password, int PasswordType, int AuthType, u16 *Ansi
 
 				default:
 					if (AuthType == LM_AUTH) {
-						LM_Password_Hash((const unsigned char*)Password, passwordhash);
+						LM_Password_Hash((const unsigned char *)Password, passwordhash);
 						memcpy(AnsiPassLen, &passwordlen, 2);
-					}
-					else if (AuthType == NTLM_AUTH) {
-						NTLM_Password_Hash((const unsigned char*)Password, passwordhash);
+					} else if (AuthType == NTLM_AUTH) {
+						NTLM_Password_Hash((const unsigned char *)Password, passwordhash);
 						memcpy(UnicodePassLen, &passwordlen, 2);
 					}
 			}
 			LM_Response(passwordhash, server_specs.EncryptionKey, LMresponse);
 			memcpy(Buffer, LMresponse, passwordlen);
-		}
-		else if (server_specs.PasswordType == SERVER_USE_PLAINTEXT_PASSWORD) {
+		} else if (server_specs.PasswordType == SERVER_USE_PLAINTEXT_PASSWORD) {
 			// It seems that PlainText passwords and Unicode isn't meant to be...
 			passwordlen = strlen(Password);
 			if (passwordlen > 14)
@@ -793,8 +854,7 @@ static int AddPassword(char *Password, int PasswordType, int AuthType, u16 *Ansi
 			memcpy(AnsiPassLen, &passwordlen, 2);
 			memcpy(Buffer, Password, passwordlen);
 		}
-	}
-	else {
+	} else {
 		if (server_specs.SecurityMode == SERVER_SHARE_SECURITY_LEVEL) {
 			passwordlen = 1;
 			memcpy(AnsiPassLen, &passwordlen, 2);
@@ -826,7 +886,7 @@ lbl_session_setup:
 	if (CF == 2)
 		SSR->smbH.Flags2 |= SMB_FLAGS2_UNICODE_STRING;
 	SSR->smbWordcount = 13;
-	SSR->smbAndxCmd = SMB_COM_NONE;		// no ANDX command
+	SSR->smbAndxCmd = SMB_COM_NONE; // no ANDX command
 	SSR->MaxBufferSize = server_specs.MaxBufferSize > 65535 ? 65535 : (u16)server_specs.MaxBufferSize;
 	SSR->MaxMpxCount = server_specs.MaxMpxCount >= 2 ? 2 : (u16)server_specs.MaxMpxCount;
 	SSR->VCNumber = 1;
@@ -842,26 +902,26 @@ lbl_session_setup:
 	}
 
 	if ((CF == 2) && (!(passwordlen & 1)))
-		offset += 1;				// pad needed only for unicode as aligment fix if password length is even
+		offset += 1; // pad needed only for unicode as aligment fix if password length is even
 
 	for (i = 0; i < strlen(User); i++) {
-		SSR->ByteField[offset] = User[i]; 	// add User name
+		SSR->ByteField[offset] = User[i]; // add User name
 		offset += CF;
 	}
-	offset += CF;					// null terminator
+	offset += CF; // null terminator
 
-	for (i = 0; server_specs.PrimaryDomainServerName[i] != 0; i+=CF) {
+	for (i = 0; server_specs.PrimaryDomainServerName[i] != 0; i += CF) {
 		SSR->ByteField[offset] = server_specs.PrimaryDomainServerName[i]; // PrimaryDomain, acquired from Negotiate Protocol Response data
 		offset += CF;
 	}
-	offset += CF;					// null terminator
+	offset += CF; // null terminator
 
 	for (i = 0; i < (CF << 1); i++)
-		SSR->ByteField[offset++] = 0;		// NativeOS, NativeLanMan
+		SSR->ByteField[offset++] = 0; // NativeOS, NativeLanMan
 
 	SSR->ByteCount = offset;
 
-	rawTCP_SetSessionHeader(61+offset);
+	rawTCP_SetSessionHeader(61 + offset);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -873,12 +933,11 @@ lbl_session_setup:
 		return -EIO;
 
 	// check there's no error (NT STATUS error type!)
-	switch(SSRsp->smbH.Eclass | (SSRsp->smbH.Ecode << 16)){
+	switch (SSRsp->smbH.Eclass | (SSRsp->smbH.Ecode << 16)) {
 		case STATUS_SUCCESS:
 			break;
-		case STATUS_LOGON_FAILURE:	// check there's no auth failure
-			if ((server_specs.SecurityMode == SERVER_USER_SECURITY_LEVEL)
-				&& (AuthType == NTLM_AUTH)) {
+		case STATUS_LOGON_FAILURE: // check there's no auth failure
+			if ((server_specs.SecurityMode == SERVER_USER_SECURITY_LEVEL) && (AuthType == NTLM_AUTH)) {
 				AuthType = LM_AUTH;
 				goto lbl_session_setup;
 			}
@@ -914,7 +973,7 @@ lbl_tree_connect:
 		TCR->smbH.Flags2 |= SMB_FLAGS2_UNICODE_STRING;
 	TCR->smbH.UID = UID;
 	TCR->smbWordcount = 4;
-	TCR->smbAndxCmd = SMB_COM_NONE;		// no ANDX command
+	TCR->smbAndxCmd = SMB_COM_NONE; // no ANDX command
 
 	// Fill ByteField
 	offset = 0;
@@ -928,20 +987,20 @@ lbl_tree_connect:
 	offset += passwordlen;
 
 	if ((CF == 2) && (!(passwordlen & 1)))
-		offset += 1;				// pad needed only for unicode as aligment fix is password len is even
+		offset += 1; // pad needed only for unicode as aligment fix is password len is even
 
 	for (i = 0; i < strlen(ShareName); i++) {
-		TCR->ByteField[offset] = ShareName[i];	// add Share name
+		TCR->ByteField[offset] = ShareName[i]; // add Share name
 		offset += CF;
 	}
-	offset += CF;					// null terminator
+	offset += CF; // null terminator
 
-	memcpy(&TCR->ByteField[offset], "?????\0", 6); 	// Service, any type of device
+	memcpy(&TCR->ByteField[offset], "?????\0", 6); // Service, any type of device
 	offset += 6;
 
 	TCR->ByteCount = offset;
 
-	rawTCP_SetSessionHeader(43+offset);
+	rawTCP_SetSessionHeader(43 + offset);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -953,12 +1012,11 @@ lbl_tree_connect:
 		return -EIO;
 
 	// check there's no error (NT STATUS error type!)
-	switch(TCRsp->smbH.Eclass | (TCRsp->smbH.Ecode << 16)){
+	switch (TCRsp->smbH.Eclass | (TCRsp->smbH.Ecode << 16)) {
 		case STATUS_SUCCESS:
 			break;
-		case STATUS_LOGON_FAILURE:	// check there's no auth failure
-			if ((server_specs.SecurityMode == SERVER_USER_SECURITY_LEVEL)
-				&& (AuthType == NTLM_AUTH)) {
+		case STATUS_LOGON_FAILURE: // check there's no auth failure
+			if ((server_specs.SecurityMode == SERVER_USER_SECURITY_LEVEL) && (AuthType == NTLM_AUTH)) {
 				AuthType = LM_AUTH;
 				goto lbl_tree_connect;
 			}
@@ -1015,7 +1073,7 @@ int smb_NetShareEnum(int UID, int TID, ShareEntry_t *shareEntries, int index, in
 	if (NSERsp->smbH.Magic != SMB_MAGIC)
 		return -EIO;
 
-	switch(NSERsp->smbH.Eclass | (NSERsp->smbH.Ecode << 16)){
+	switch (NSERsp->smbH.Eclass | (NSERsp->smbH.Ecode << 16)) {
 		// check there's no error
 		case STATUS_SUCCESS:
 			break;
@@ -1027,34 +1085,33 @@ int smb_NetShareEnum(int UID, int TID, ShareEntry_t *shareEntries, int index, in
 	}
 
 	// API status must be 0
-	if (SMB_buf.u16buff[(NSERsp->smbTrans.ParamOffset+4) / sizeof(u16)] != 0)
+	if (SMB_buf.u16buff[(NSERsp->smbTrans.ParamOffset + 4) / sizeof(u16)] != 0)
 		return -EIO;
 
 	// available entries
-	int AvailableEntries = SMB_buf.s16buff[(NSERsp->smbTrans.ParamOffset+4+6) / sizeof(s16)];
+	int AvailableEntries = SMB_buf.s16buff[(NSERsp->smbTrans.ParamOffset + 4 + 6) / sizeof(s16)];
 
 	// data start
-	char *data = (char *)&SMB_buf.u8buff[NSERsp->smbTrans.DataOffset+4];
+	char *data = (char *)&SMB_buf.u8buff[NSERsp->smbTrans.DataOffset + 4];
 	char *p = data;
 
-	for (i=0; i<AvailableEntries; i++) {
+	for (i = 0; i < AvailableEntries; i++) {
 
 		// calculate the padding after the Share name
-		int padding = (strlen(p)+1+2) % 16 ? 16-((strlen(p)+1) % 16) : 0;
+		int padding = (strlen(p) + 1 + 2) % 16 ? 16 - ((strlen(p) + 1) % 16) : 0;
 
-		if (*((u16 *)&p[strlen(p)+1+padding-2]) == 0) { // Directory Tree type
+		if (*((u16 *)&p[strlen(p) + 1 + padding - 2]) == 0) { // Directory Tree type
 			if (maxEntries > 0) {
 				if ((count < maxEntries) && (i >= index)) {
 					count++;
 					strncpy(shareEntries->ShareName, p, 256);
-					strncpy(shareEntries->ShareComment, &data[*((u16 *)&p[strlen(p)+1+padding])], 256);
+					strncpy(shareEntries->ShareComment, &data[*((u16 *)&p[strlen(p) + 1 + padding])], 256);
 					shareEntries++;
 				}
-			}
-			else // if maxEntries is 0 then we're just counting shares
+			} else // if maxEntries is 0 then we're just counting shares
 				count++;
 		}
-		p += strlen(p)+1+padding+4;
+		p += strlen(p) + 1 + padding + 4;
 	}
 
 	return count;
@@ -1084,7 +1141,7 @@ int smb_QueryInformationDisk(int UID, int TID, smbQueryDiskInfo_out_t *QueryInfo
 	if (QIDRsp->smbH.Magic != SMB_MAGIC)
 		return -EIO;
 
-	switch(QIDRsp->smbH.Eclass | (QIDRsp->smbH.Ecode << 16)){
+	switch (QIDRsp->smbH.Eclass | (QIDRsp->smbH.Ecode << 16)) {
 		// check there's no error
 		case STATUS_SUCCESS:
 			break;
@@ -1131,21 +1188,21 @@ query:
 	QPIR->SubCommand = TRANS2_QUERY_PATH_INFORMATION;
 
 	QPIR->smbTrans.ParamOffset = 68;
-	QPIR->smbTrans.MaxParamCount = 256; 		// Max Parameters len in reply
-	QPIR->smbTrans.MaxDataCount = 16384;		// Max Data len in reply
+	QPIR->smbTrans.MaxParamCount = 256;  // Max Parameters len in reply
+	QPIR->smbTrans.MaxDataCount = 16384; // Max Data len in reply
 
-	struct QueryPathInformationRequestParam_t *QPIRParam = (struct QueryPathInformationRequestParam_t *)&SMB_buf.u8buff[QPIR->smbTrans.ParamOffset+4];
+	struct QueryPathInformationRequestParam_t *QPIRParam = (struct QueryPathInformationRequestParam_t *)&SMB_buf.u8buff[QPIR->smbTrans.ParamOffset + 4];
 
 	QPIRParam->LevelOfInterest = queryType;
 
 	PathLen = 0;
 	for (i = 0; i < strlen(Path); i++) {
-		QPIRParam->FileName[PathLen] = Path[i];	// add Path
+		QPIRParam->FileName[PathLen] = Path[i]; // add Path
 		PathLen += CF;
 	}
-	PathLen += CF;					// null terminator
+	PathLen += CF; // null terminator
 
-	QPIR->smbTrans.TotalParamCount = QPIR->smbTrans.ParamCount = 2+4+PathLen;
+	QPIR->smbTrans.TotalParamCount = QPIR->smbTrans.ParamCount = 2 + 4 + PathLen;
 
 	QPIR->ByteCount = 3 + QPIR->smbTrans.TotalParamCount;
 
@@ -1163,7 +1220,7 @@ query:
 		return -EIO;
 
 	// check there's no error
-	switch(QPIRsp->smbH.Eclass | (QPIRsp->smbH.Ecode << 16)){
+	switch (QPIRsp->smbH.Eclass | (QPIRsp->smbH.Ecode << 16)) {
 		// check there's no error
 		case STATUS_SUCCESS:
 			break;
@@ -1176,7 +1233,7 @@ query:
 
 	if (queryType == SMB_QUERY_FILE_BASIC_INFO) {
 
-		struct BasicFileInfo_t *BFI = (struct BasicFileInfo_t *)&SMB_buf.u8buff[QPIRsp->smbTrans.DataOffset+4];
+		struct BasicFileInfo_t *BFI = (struct BasicFileInfo_t *)&SMB_buf.u8buff[QPIRsp->smbTrans.DataOffset + 4];
 
 		Info->Created = BFI->Created;
 		Info->LastAccess = BFI->LastAccess;
@@ -1187,10 +1244,9 @@ query:
 		// a 2nd query is done with SMB_QUERY_FILE_STANDARD_INFO LevelOfInterest to get a valid 64bit size
 		queryType = SMB_QUERY_FILE_STANDARD_INFO;
 		goto query;
-	}
-	else if (queryType == SMB_QUERY_FILE_STANDARD_INFO) {
+	} else if (queryType == SMB_QUERY_FILE_STANDARD_INFO) {
 
-		struct StandardFileInfo_t *SFI = (struct StandardFileInfo_t *)&SMB_buf.u8buff[QPIRsp->smbTrans.DataOffset+4];
+		struct StandardFileInfo_t *SFI = (struct StandardFileInfo_t *)&SMB_buf.u8buff[QPIRsp->smbTrans.DataOffset + 4];
 
 		Info->AllocationSize = SFI->AllocationSize;
 		Info->EndOfFile = SFI->EndOfFile;
@@ -1221,7 +1277,7 @@ int smb_NTCreateAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	NTCR->smbH.UID = (u16)UID;
 	NTCR->smbH.TID = (u16)TID;
 	NTCR->smbWordcount = 24;
-	NTCR->smbAndxCmd = SMB_COM_NONE;	// no ANDX command
+	NTCR->smbAndxCmd = SMB_COM_NONE; // no ANDX command
 	NTCR->AccessMask = ((mode & O_RDWR) == O_RDWR || (mode & O_WRONLY)) ? 0x2019f : 0x20089;
 	NTCR->FileAttributes = ((mode & O_RDWR) == O_RDWR || (mode & O_WRONLY)) ? EXT_ATTR_NORMAL : EXT_ATTR_READONLY;
 	NTCR->ShareAccess = 0x01; // Share in read mode only
@@ -1238,11 +1294,11 @@ int smb_NTCreateAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 
 	offset = 0;
 	if (CF == 2)
-		offset++;				// pad needed only for unicode as aligment fix
+		offset++; // pad needed only for unicode as aligment fix
 
 	length = strlen(filename);
 	for (i = 0; i < length; i++) {
-		NTCR->ByteField[offset] = filename[i];	// add filename
+		NTCR->ByteField[offset] = filename[i]; // add filename
 		offset += CF;
 	}
 	offset += CF;
@@ -1252,7 +1308,7 @@ int smb_NTCreateAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 		NTCR->NameLength = NTCR->NameLength << 1;
 	NTCR->ByteCount = offset;
 
-	rawTCP_SetSessionHeader(84+offset);
+	rawTCP_SetSessionHeader(84 + offset);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -1263,7 +1319,7 @@ int smb_NTCreateAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	if (NTCRsp->smbH.Magic != SMB_MAGIC)
 		return -EIO;
 
-	switch(NTCRsp->smbH.Eclass | (NTCRsp->smbH.Ecode << 16)){
+	switch (NTCRsp->smbH.Eclass | (NTCRsp->smbH.Ecode << 16)) {
 		// check there's no error
 		case STATUS_SUCCESS:
 			break;
@@ -1307,7 +1363,7 @@ int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	OR->smbH.UID = (u16)UID;
 	OR->smbH.TID = (u16)TID;
 	OR->smbWordcount = 15;
-	OR->smbAndxCmd = SMB_COM_NONE;		// no ANDX command
+	OR->smbAndxCmd = SMB_COM_NONE; // no ANDX command
 	OR->AccessMask = ((mode & O_RDWR) == O_RDWR || (mode & O_WRONLY)) ? 0x02 : 0x00;
 	OR->FileAttributes = ((mode & O_RDWR) == O_RDWR || (mode & O_WRONLY)) ? EXT_ATTR_NORMAL : EXT_ATTR_READONLY;
 	if (mode & O_CREAT)
@@ -1319,17 +1375,17 @@ int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 
 	offset = 0;
 	if (CF == 2)
-		offset++;				// pad needed only for unicode as aligment fix
+		offset++; // pad needed only for unicode as aligment fix
 
 	for (i = 0; i < strlen(filename); i++) {
-		OR->ByteField[offset] = filename[i];	// add filename
+		OR->ByteField[offset] = filename[i]; // add filename
 		offset += CF;
 	}
 	offset += CF;
 
 	OR->ByteCount = offset;
 
-	rawTCP_SetSessionHeader(66+offset);
+	rawTCP_SetSessionHeader(66 + offset);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -1340,7 +1396,7 @@ int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	if (ORsp->smbH.Magic != SMB_MAGIC)
 		return -EIO;
 
-	switch(ORsp->smbH.Eclass | (ORsp->smbH.Ecode << 16)){
+	switch (ORsp->smbH.Eclass | (ORsp->smbH.Ecode << 16)) {
 		// check there's no error
 		case STATUS_SUCCESS:
 			break;
@@ -1353,7 +1409,7 @@ int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 
 	r = (int)ORsp->FID;
 
-	if(smb_QueryPathInformation(UID, TID, &info, filename) >= 0)
+	if (smb_QueryPathInformation(UID, TID, &info, filename) >= 0)
 		*filesize = info.EndOfFile;
 	else
 		r = -1;
@@ -1417,7 +1473,7 @@ int smb_WriteAndX(int UID, int TID, int FID, s64 fileoffset, void *writebuf, u16
 
 	memcpy((void *)(&SMB_buf.u8buff[4 + WR->DataOffset]), writebuf, nbytes);
 
-	rawTCP_SetSessionHeader(63+nbytes);
+	rawTCP_SetSessionHeader(63 + nbytes);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -1494,14 +1550,14 @@ int smb_Delete(int UID, int TID, char *Path)
 
 	PathLen = 0;
 	for (i = 0; i < strlen(Path); i++) {
-		DR->FileName[PathLen] = Path[i];	// add Path
+		DR->FileName[PathLen] = Path[i]; // add Path
 		PathLen += CF;
 	}
-	PathLen += CF;					// null terminator
+	PathLen += CF; // null terminator
 
-	DR->ByteCount = PathLen+1; 			// +1 for the BufferFormat byte
+	DR->ByteCount = PathLen + 1; // +1 for the BufferFormat byte
 
-	rawTCP_SetSessionHeader(38+PathLen);
+	rawTCP_SetSessionHeader(38 + PathLen);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -1542,14 +1598,14 @@ int smb_ManageDirectory(int UID, int TID, char *Path, int cmd)
 
 	PathLen = 0;
 	for (i = 0; i < strlen(Path); i++) {
-		MDR->DirectoryName[PathLen] = Path[i];	// add Path
+		MDR->DirectoryName[PathLen] = Path[i]; // add Path
 		PathLen += CF;
 	}
-	PathLen += CF;					// null terminator
+	PathLen += CF; // null terminator
 
-	MDR->ByteCount = PathLen+1; 			// +1 for the BufferFormat byte
+	MDR->ByteCount = PathLen + 1; // +1 for the BufferFormat byte
 
-	rawTCP_SetSessionHeader(36+PathLen);
+	rawTCP_SetSessionHeader(36 + PathLen);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -1560,7 +1616,7 @@ int smb_ManageDirectory(int UID, int TID, char *Path, int cmd)
 	if (MDRsp->smbH.Magic != SMB_MAGIC)
 		return -EIO;
 
-	switch(MDRsp->smbH.Eclass | (MDRsp->smbH.Ecode << 16)){
+	switch (MDRsp->smbH.Eclass | (MDRsp->smbH.Ecode << 16)) {
 		// check there's no error
 		case STATUS_SUCCESS:
 			break;
@@ -1599,28 +1655,28 @@ int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 	RR->SearchAttributes = 0; // coud be other attributes to find Hidden/System files /Directories
 
 	offset = 0;
-	RR->ByteField[offset++] = 0x04;			// BufferFormat
+	RR->ByteField[offset++] = 0x04; // BufferFormat
 
 	for (i = 0; i < strlen(oldPath); i++) {
-		RR->ByteField[offset] = oldPath[i];	// add oldPath
+		RR->ByteField[offset] = oldPath[i]; // add oldPath
 		offset += CF;
 	}
-	offset += CF;					// null terminator
+	offset += CF; // null terminator
 
-	RR->ByteField[offset++] = 0x04;			// BufferFormat
+	RR->ByteField[offset++] = 0x04; // BufferFormat
 
 	if (CF == 2)
-		offset++;				// pad needed for unicode
+		offset++; // pad needed for unicode
 
 	for (i = 0; i < strlen(newPath); i++) {
-		RR->ByteField[offset] = newPath[i];	// add newPath
+		RR->ByteField[offset] = newPath[i]; // add newPath
 		offset += CF;
 	}
-	offset += CF;					// null terminator
+	offset += CF; // null terminator
 
 	RR->ByteCount = offset;
 
-	rawTCP_SetSessionHeader(37+offset);
+	rawTCP_SetSessionHeader(37 + offset);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -1632,7 +1688,7 @@ int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 		return -EIO;
 
 	// check there's no error
-	switch(RRsp->smbH.Eclass | (RRsp->smbH.Ecode << 16)){
+	switch (RRsp->smbH.Eclass | (RRsp->smbH.Ecode << 16)) {
 		// check there's no error
 		case STATUS_SUCCESS:
 			break;
@@ -1670,11 +1726,11 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 	FFNR->SubCommand = (u8)cmd;
 
 	FFNR->smbTrans.ParamOffset = 68;
-	FFNR->smbTrans.MaxParamCount = 256; 		// Max Parameters len in reply
-	FFNR->smbTrans.MaxDataCount = 16384;		// Max Data len in reply
+	FFNR->smbTrans.MaxParamCount = 256;  // Max Parameters len in reply
+	FFNR->smbTrans.MaxDataCount = 16384; // Max Data len in reply
 
 	if (cmd == TRANS2_FIND_FIRST2) {
-		struct FindFirst2RequestParam_t *FFRParam = (struct FindFirst2RequestParam_t *)&SMB_buf.u8buff[FFNR->smbTrans.ParamOffset+4];
+		struct FindFirst2RequestParam_t *FFRParam = (struct FindFirst2RequestParam_t *)&SMB_buf.u8buff[FFNR->smbTrans.ParamOffset + 4];
 
 		FFRParam->SearchAttributes = ATTR_READONLY | ATTR_HIDDEN | ATTR_SYSTEM | ATTR_DIRECTORY | ATTR_ARCHIVE;
 		FFRParam->SearchCount = 1;
@@ -1683,22 +1739,21 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 
 		PathLen = 0;
 		for (i = 0; i < strlen(Path); i++) {
-			FFRParam->SearchPattern[PathLen] = Path[i];	// add Path
+			FFRParam->SearchPattern[PathLen] = Path[i]; // add Path
 			PathLen += CF;
 		}
-		PathLen += CF;					// null terminator
+		PathLen += CF; // null terminator
 
-		FFNR->smbTrans.TotalParamCount = FFNR->smbTrans.ParamCount = 2+2+2+2+4+PathLen;
-	}
-	else {
-		struct FindNext2RequestParam_t *FNRParam = (struct FindNext2RequestParam_t *)&SMB_buf.u8buff[FFNR->smbTrans.ParamOffset+4];
+		FFNR->smbTrans.TotalParamCount = FFNR->smbTrans.ParamCount = 2 + 2 + 2 + 2 + 4 + PathLen;
+	} else {
+		struct FindNext2RequestParam_t *FNRParam = (struct FindNext2RequestParam_t *)&SMB_buf.u8buff[FFNR->smbTrans.ParamOffset + 4];
 
 		FNRParam->SearchID = (u16)info->SID;
 		FNRParam->SearchCount = 1;
 		FNRParam->LevelOfInterest = SMB_FIND_FILE_BOTH_DIRECTORY_INFO;
 		FNRParam->Flags = CLOSE_SEARCH_IF_EOS | RESUME_SEARCH | CONTINUE_SEARCH;
 		FNRParam->SearchPattern[0] = 0;
-		FFNR->smbTrans.TotalParamCount = FFNR->smbTrans.ParamCount = 2+2+2+2+4+1;
+		FFNR->smbTrans.TotalParamCount = FFNR->smbTrans.ParamCount = 2 + 2 + 2 + 2 + 4 + 1;
 	}
 
 	FFNR->ByteCount = 3 + FFNR->smbTrans.TotalParamCount;
@@ -1717,7 +1772,7 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 		return -EIO;
 
 	// check there's no error
-	switch(FFNRsp->smbH.Eclass | (FFNRsp->smbH.Ecode << 16)){
+	switch (FFNRsp->smbH.Eclass | (FFNRsp->smbH.Ecode << 16)) {
 		// check there's no error
 		case STATUS_SUCCESS:
 			break;
@@ -1731,13 +1786,12 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 	struct FindFirstNext2ResponseParam_t *FFNRspParam;
 
 	if (cmd == TRANS2_FIND_FIRST2) {
-		FFNRspParam = (struct FindFirstNext2ResponseParam_t *)&SMB_buf.u8buff[FFNRsp->smbTrans.ParamOffset+4];
+		FFNRspParam = (struct FindFirstNext2ResponseParam_t *)&SMB_buf.u8buff[FFNRsp->smbTrans.ParamOffset + 4];
 		info->SID = FFNRspParam->SearchID;
-	}
-	else
-		FFNRspParam = (struct FindFirstNext2ResponseParam_t *)&SMB_buf.u8buff[FFNRsp->smbTrans.ParamOffset+4-2];
+	} else
+		FFNRspParam = (struct FindFirstNext2ResponseParam_t *)&SMB_buf.u8buff[FFNRsp->smbTrans.ParamOffset + 4 - 2];
 
-	struct FindFirst2ResponseData_t *FFRspData = (struct FindFirst2ResponseData_t *)&SMB_buf.u8buff[FFNRsp->smbTrans.DataOffset+4];
+	struct FindFirst2ResponseData_t *FFRspData = (struct FindFirst2ResponseData_t *)&SMB_buf.u8buff[FFNRsp->smbTrans.DataOffset + 4];
 
 	info->EOS = FFNRspParam->EndOfSearch;
 
@@ -1753,9 +1807,9 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 		info->fileInfo.IsDirectory = 1;
 	info->fileInfo.AllocationSize = FFRspData->AllocationSize;
 	info->fileInfo.EndOfFile = FFRspData->EndOfFile;
-	for (i = 0, j =0; j < FFRspData->FileNameLen; i++, j+=CF)
+	for (i = 0, j = 0; j < FFRspData->FileNameLen; i++, j += CF)
 		info->FileName[i] = FFRspData->FileName[j];
-	info->FileName[i]='\0';
+	info->FileName[i] = '\0';
 
 	return 0;
 }
@@ -1805,7 +1859,7 @@ int smb_LogOffAndX(int UID)
 	LR->smbH.Cmd = SMB_COM_LOGOFF_ANDX;
 	LR->smbH.UID = (u16)UID;
 	LR->smbWordcount = 2;
-	LR->smbAndxCmd = SMB_COM_NONE;		// no ANDX command
+	LR->smbAndxCmd = SMB_COM_NONE; // no ANDX command
 
 	rawTCP_SetSessionHeader(39);
 	r = GetSMBServerReply();
@@ -1843,7 +1897,7 @@ int smb_Echo(void *echo, int len)
 	memcpy(&ER->ByteField[0], echo, (u16)len);
 	ER->ByteCount = (u16)len;
 
-	rawTCP_SetSessionHeader(37+(u16)len);
+	rawTCP_SetSessionHeader(37 + (u16)len);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;

@@ -12,9 +12,8 @@
 
 #include <erl.h>
 
-char * erl_id = "libeedebug";
-char * erl_dependancies[] = {
+char *erl_id = "libeedebug";
+char *erl_dependancies[] = {
     "libkernel",
     "libc",
-    0
-};
+    0};

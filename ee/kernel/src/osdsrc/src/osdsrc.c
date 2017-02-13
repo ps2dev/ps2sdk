@@ -4,33 +4,35 @@
 #include "osd.h"
 #include "ExecPS2.h"
 
-struct SyscallPatchData{
+struct SyscallPatchData
+{
 	unsigned int syscall;
 	void *function;
 };
 
-static const struct SyscallPatchData SyscallPatchData[]={
-	{ __NR_SetOsdConfigParam, &SetOsdConfigParam},
-	{ __NR_GetOsdConfigParam, &GetOsdConfigParam},
-	{ __NR_SetOsdConfigParam2, &SetOsdConfigParam2},
-	{ __NR_GetOsdConfigParam2, &GetOsdConfigParam2},
-	{ 0xFFFFC402, &ExecPS2Patch},
+static const struct SyscallPatchData SyscallPatchData[] = {
+    {__NR_SetOsdConfigParam, &SetOsdConfigParam},
+    {__NR_GetOsdConfigParam, &GetOsdConfigParam},
+    {__NR_SetOsdConfigParam2, &SetOsdConfigParam2},
+    {__NR_GetOsdConfigParam2, &GetOsdConfigParam2},
+    {0xFFFFC402, &ExecPS2Patch},
 };
 
-SystemConfiguration_t SystemConfiguration = { .EEGS=0x40};
+SystemConfiguration_t SystemConfiguration = {.EEGS = 0x40};
 
-int _start(int syscall){
+int _start(int syscall)
+{
 	unsigned int i;
 	int result;
 
 	InitSystemConfig(&SystemConfiguration, 0x26);
 
-	for(i=0; i<5; i++){
-		if(SyscallPatchData[i].syscall==syscall){
-			if(syscall==0xFFFFC402){
-				result=((unsigned int)SyscallPatchData[i].function>>2&0x03FFFFFF)|0x0C000000;	//Creates a JAL instruction to the function.
-			}
-			else result=(unsigned int)SyscallPatchData[i].function;
+	for (i = 0; i < 5; i++) {
+		if (SyscallPatchData[i].syscall == syscall) {
+			if (syscall == 0xFFFFC402) {
+				result = ((unsigned int)SyscallPatchData[i].function >> 2 & 0x03FFFFFF) | 0x0C000000; //Creates a JAL instruction to the function.
+			} else
+				result = (unsigned int)SyscallPatchData[i].function;
 
 			return result;
 		}

@@ -15,27 +15,29 @@
 
 #include "libkrnlupd.h"
 
-int kCopy(u32 *dest, const u32 *src, int size){
+int kCopy(u32 *dest, const u32 *src, int size)
+{
 	unsigned int i;
 
-	if(size>>2){
-		for(i=0; i<size; i+=4,dest++,src++){
-			*dest=*src;
+	if (size >> 2) {
+		for (i = 0; i < size; i += 4, dest++, src++) {
+			*dest = *src;
 		}
 	}
 
 	return 0;
 }
 
-int PatchIsNeeded(void){
+int PatchIsNeeded(void)
+{
 	ConfigParam original_config, config;
 
 	GetOsdConfigParam(&original_config);
-	config=original_config;
-	config.version=1;	//Protokernels cannot retain values set in this field.
+	config = original_config;
+	config.version = 1; //Protokernels cannot retain values set in this field.
 	SetOsdConfigParam(&config);
 	GetOsdConfigParam(&config);
 	SetOsdConfigParam(&original_config);
 
-	return(config.version<1);
+	return (config.version < 1);
 }

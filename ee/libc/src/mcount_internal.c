@@ -14,34 +14,34 @@
 #include <kernel.h>
 #include <timer.h>
 
-#define	GMON_PROF_ON	0
-#define	GMON_PROF_BUSY	1
-#define	GMON_PROF_ERROR	2
-#define	GMON_PROF_OFF	3
+#define GMON_PROF_ON 0
+#define GMON_PROF_BUSY 1
+#define GMON_PROF_ERROR 2
+#define GMON_PROF_OFF 3
 
-#define GMONVERSION	0x00051879
+#define GMONVERSION 0x00051879
 
 #ifndef MCOUNT_USE_T1
-#define INTC_TIM       INTC_TIM0
-#define T_COUNT        T0_COUNT
-#define T_MODE         T0_MODE
-#define T_COMP         T0_COMP
+#define INTC_TIM INTC_TIM0
+#define T_COUNT T0_COUNT
+#define T_MODE T0_MODE
+#define T_COMP T0_COMP
 #else
-#define INTC_TIM       INTC_TIM1
-#define T_COUNT        T1_COUNT
-#define T_MODE         T1_MODE
-#define T_COMP         T1_COMP
+#define INTC_TIM INTC_TIM1
+#define T_COUNT T1_COUNT
+#define T_MODE T1_MODE
+#define T_COMP T1_COMP
 #endif
 
 /** gmon.out file header */
 struct gmonhdr
 {
-	int lpc;        /* lowest pc address */
-	int hpc;        /* highest pc address */
-	int ncnt;       /* size of samples + size of header */
-	int version;    /* version number */
-	int profrate;   /* profiling clock rate */
-	int resv[3];    /* reserved */
+	int lpc;      /* lowest pc address */
+	int hpc;      /* highest pc address */
+	int ncnt;     /* size of samples + size of header */
+	int version;  /* version number */
+	int profrate; /* profiling clock rate */
+	int resv[3];  /* reserved */
 };
 
 /** frompc -> selfpc graph */
@@ -74,7 +74,7 @@ struct gmonparam
 static struct gmonparam gp;
 
 /// one histogram per four bytes of text space
-#define	HISTFRACTION	4
+#define HISTFRACTION 4
 
 /// have we allocated memory and registered already
 static int initialized = 0;
@@ -109,16 +109,14 @@ static void initialize()
 
 	gp.narcs = (gp.textsize + gp.hashfraction - 1) / gp.hashfraction;
 	gp.arcs = (struct rawarc *)malloc(sizeof(struct rawarc) * gp.narcs);
-	if (gp.arcs == NULL)
-	{
+	if (gp.arcs == NULL) {
 		gp.state = GMON_PROF_ERROR;
 		return;
 	}
 
 	gp.nsamples = (gp.textsize + gp.hashfraction - 1) / gp.hashfraction;
 	gp.samples = (unsigned int *)malloc(sizeof(unsigned int) * gp.nsamples);
-	if (gp.samples == NULL)
-	{
+	if (gp.samples == NULL) {
 		free(gp.arcs);
 		gp.arcs = 0;
 		gp.state = GMON_PROF_ERROR;
@@ -126,7 +124,7 @@ static void initialize()
 	}
 
 	memset((void *)gp.arcs, '\0', gp.narcs * (sizeof(struct rawarc)));
-	memset((void *)gp.samples, '\0', gp.nsamples * (sizeof(unsigned int )));
+	memset((void *)gp.samples, '\0', gp.nsamples * (sizeof(unsigned int)));
 
 	gp.timer = AddIntcHandler2(INTC_TIM, profil, 0, NULL);
 	EnableIntc(INTC_TIM);
@@ -134,7 +132,7 @@ static void initialize()
 	/* fire up timer, every 1 ms */
 	*T_COUNT = 0;
 	*T_COMP = 586; /* 150MHZ / 256 / 1000 */
-	*T_MODE = 2 | (0<<2) | (0<<6) | (1<<7) | (1<<8);
+	*T_MODE = 2 | (0 << 2) | (0 << 6) | (1 << 7) | (1 << 8);
 }
 
 /** Writes gmon.out dump file and stops profiling
@@ -148,8 +146,7 @@ static void cleanup()
 	int i;
 	struct gmonhdr hdr;
 
-	if (gp.state != GMON_PROF_ON)
-	{
+	if (gp.state != GMON_PROF_ON) {
 		/* profiling was disabled anyway */
 		return;
 	}
@@ -159,8 +156,7 @@ static void cleanup()
 
 	/* kill timer */
 	DisableIntc(INTC_TIM);
-	if (gp.timer > 0)
-	{
+	if (gp.timer > 0) {
 		RemoveIntcHandler(INTC_TIM, gp.timer);
 	}
 
@@ -176,10 +172,8 @@ static void cleanup()
 	fwrite(&hdr, 1, sizeof(hdr), fp);
 	fwrite(gp.samples, gp.nsamples, sizeof(unsigned int), fp);
 
-	for (i=0; i<gp.narcs; i++)
-	{
-		if (gp.arcs[i].count > 0)
-		{
+	for (i = 0; i < gp.narcs; i++) {
+		if (gp.arcs[i].count > 0) {
 			fwrite(gp.arcs + i, sizeof(struct rawarc), 1, fp);
 		}
 	}
@@ -201,20 +195,17 @@ void __mcount(unsigned int frompc, unsigned int selfpc)
 	int e;
 	struct rawarc *arc;
 
-	if (initialized == 0)
-	{
+	if (initialized == 0) {
 		initialize();
 	}
 
-	if (gp.state != GMON_PROF_ON)
-	{
+	if (gp.state != GMON_PROF_ON) {
 		/* returned off for some reason */
 		return;
 	}
 
 	/* call might come from stack */
-	if (frompc >= gp.lowpc && frompc <= gp.highpc)
-	{
+	if (frompc >= gp.lowpc && frompc <= gp.highpc) {
 		e = (frompc - gp.lowpc) / gp.hashfraction;
 		arc = gp.arcs + e;
 		arc->frompc = frompc;
@@ -237,11 +228,9 @@ static int profil(int ca, void *arg, void *addr)
 {
 	unsigned int frompc = (unsigned int)addr;
 
-	if (gp.state == GMON_PROF_ON)
-	{
+	if (gp.state == GMON_PROF_ON) {
 		/* call might come from stack */
-		if (frompc >= gp.lowpc && frompc <= gp.highpc)
-		{
+		if (frompc >= gp.lowpc && frompc <= gp.highpc) {
 			int e = (frompc - gp.lowpc) / gp.hashfraction;
 			gp.samples[e]++;
 		}

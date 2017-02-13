@@ -30,14 +30,12 @@ s32 _start(char **argv, int argc)
 
 	D_PRINTF("Debug Version\n");
 
-	if(RegisterLibraryEntries(&_exp_padman) != 0)
-	{
+	if (RegisterLibraryEntries(&_exp_padman) != 0) {
 		M_PRINTF("RegisterLibraryEntries failed.\n");
 		return 1;
 	}
 
-	if(InitRpcServers() != 0)
-	{
+	if (InitRpcServers() != 0) {
 		M_PRINTF("Failed to init RPC servers.\n");
 		return 1;
 	}
@@ -52,8 +50,7 @@ void WaitClearEvent(u32 eventflag, u32 bits, u32 unused1, u32 unused2)
 
 	WaitEventFlag(eventflag, bits | EF_EXIT_THREAD, WEF_OR, &resbits);
 
-	if( resbits & EF_EXIT_THREAD )
-	{
+	if (resbits & EF_EXIT_THREAD) {
 		iop_thread_info_t tinfo;
 
 		ReferThreadStatus(TH_SELF, &tinfo);

@@ -5,7 +5,7 @@
  * and must return string describing the error, or why the test failed.
  * Tests that complete successfully should return NULL.
  */
-typedef const char *(* testfunc_t)(void *arg);
+typedef const char *(*testfunc_t)(void *arg);
 
 typedef struct test_t
 {

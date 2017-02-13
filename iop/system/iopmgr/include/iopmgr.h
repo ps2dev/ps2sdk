@@ -18,7 +18,7 @@
 #include "loadcore.h"
 
 /* Module info entry.  */
-typedef ModuleInfo_t smod_mod_info_t __attribute__ ((deprecated));	//For backward-compatibility with older projects.
+typedef ModuleInfo_t smod_mod_info_t __attribute__((deprecated)); //For backward-compatibility with older projects.
 
 #define iopmgr_IMPORTS_start DECLARE_IMPORT_TABLE(iopmgr, 1, 1)
 #define iopmgr_IMPORTS_end END_IMPORT_TABLE
@@ -55,27 +55,27 @@ iop_device_t *iopmgr_get_device(char *device);
 #define I_iopmgr_get_device DECLARE_IMPORT(17, iopmgr_get_device)
 int iopmgr_get_devicetype(char *device);
 #define I_iopmgr_get_devicetype DECLARE_IMPORT(18, iopmgr_get_devicetype)
-int iopmgr_get_devicelist(int man,int devtype,char *buffer);
+int iopmgr_get_devicelist(int man, int devtype, char *buffer);
 #define I_iopmgr_get_devicelist DECLARE_IMPORT(19, iopmgr_get_devicelist)
 
 /* from modules.c */
 
 /* These are the types returned by the devicetype call as return values. */
-#define IOPMGR_DEVTYPE_INVALID  0
-#define IOPMGR_DEVTYPE_IOMAN    1
-#define IOPMGR_DEVTYPE_IOMANX   2
-#define IOPMGR_DEVTYPE_ALL      0xffff
+#define IOPMGR_DEVTYPE_INVALID 0
+#define IOPMGR_DEVTYPE_IOMAN 1
+#define IOPMGR_DEVTYPE_IOMANX 2
+#define IOPMGR_DEVTYPE_ALL 0xffff
 
 /* iomgr module identifier */
-#define IOPMGR_MODNAME        "IOP_Manager"
-#define IOPMGR_LIBNAME        "iopmgr"
+#define IOPMGR_MODNAME "IOP_Manager"
+#define IOPMGR_LIBNAME "iopmgr"
 
 /* iomgr module version number, so programs can check required version is installed */
 #define IOPMGR_VERSION_HIGH 1
-#define IOPMGR_VERSION_LOW  1
+#define IOPMGR_VERSION_LOW 1
 
 /* defines for ioman and iomanx module identifiers , so we can locate them */
-#define IOPMGR_IOMAN_IDENT  "IO/File_Manager"
+#define IOPMGR_IOMAN_IDENT "IO/File_Manager"
 #define IOPMGR_IOMANX_IDENT "IOX/File_Manager"
 
 #endif

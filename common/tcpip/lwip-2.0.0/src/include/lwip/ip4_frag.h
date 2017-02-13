@@ -58,18 +58,19 @@ extern "C" {
 /** IP reassembly helper struct.
  * This is exported because memp needs to know the size.
  */
-struct ip_reassdata {
-  struct ip_reassdata *next;
-  struct pbuf *p;
-  struct ip_hdr iphdr;
-  u16_t datagram_len;
-  u8_t flags;
-  u8_t timer;
+struct ip_reassdata
+{
+	struct ip_reassdata *next;
+	struct pbuf *p;
+	struct ip_hdr iphdr;
+	u16_t datagram_len;
+	u8_t flags;
+	u8_t timer;
 };
 
 void ip_reass_init(void);
 void ip_reass_tmr(void);
-struct pbuf * ip4_reass(struct pbuf *p);
+struct pbuf *ip4_reass(struct pbuf *p);
 #endif /* IP_REASSEMBLY */
 
 #if IP_FRAG
@@ -79,11 +80,12 @@ struct pbuf * ip4_reass(struct pbuf *p);
 /** A custom pbuf that holds a reference to another pbuf, which is freed
  * when this custom pbuf is freed. This is used to create a custom PBUF_REF
  * that points into the original pbuf. */
-struct pbuf_custom_ref {
-  /** 'base class' */
-  struct pbuf_custom pc;
-  /** pointer to the original pbuf that is referenced */
-  struct pbuf *original;
+struct pbuf_custom_ref
+{
+	/** 'base class' */
+	struct pbuf_custom pc;
+	/** pointer to the original pbuf that is referenced */
+	struct pbuf *original;
 };
 #endif /* LWIP_PBUF_CUSTOM_REF_DEFINED */
 #endif /* !LWIP_NETIF_TX_SINGLE_PBUF */

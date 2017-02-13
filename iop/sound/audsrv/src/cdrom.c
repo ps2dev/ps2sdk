@@ -36,21 +36,21 @@
 #include "hw.h"
 
 /* cdda */
-static int cdda_initialized = 0;        ///< initialization status
-static int cd_playing = 0;              ///< cd status
-static volatile int cd_paused = 0;      ///< cd is paused (but playing)
-static int cdda_play_tid = -1;          ///< thread id for cdda player
-static volatile int cdda_pos = 0;       ///< current sector being played
-static int cdda_play_start = 0;         ///< first sector played
-static int cdda_play_end = 0;           ///< last sector to be played
-static cdda_toc toc;                    ///< toc for cdda
-static unsigned char raw_toc[3000];     ///< unparsed toc data
+static int cdda_initialized = 0;    ///< initialization status
+static int cd_playing = 0;          ///< cd status
+static volatile int cd_paused = 0;  ///< cd is paused (but playing)
+static int cdda_play_tid = -1;      ///< thread id for cdda player
+static volatile int cdda_pos = 0;   ///< current sector being played
+static int cdda_play_start = 0;     ///< first sector played
+static int cdda_play_end = 0;       ///< last sector to be played
+static cdda_toc toc;                ///< toc for cdda
+static unsigned char raw_toc[3000]; ///< unparsed toc data
 
-static int cd_transfer_sema = -1;       ///< SPU2 cd transfer complete semaphore
+static int cd_transfer_sema = -1; ///< SPU2 cd transfer complete semaphore
 
-static u8 cd_ringbuf[SECTOR_SIZE*8] __attribute__((aligned (64)));  ///< cdda ring buffer
-static u8 cd_sparebuf[1880] __attribute__((aligned (64)));          ///< used upon overflow
-static u8 core0_buf[0x1000] __attribute__((aligned (64)));
+static u8 cd_ringbuf[SECTOR_SIZE * 8] __attribute__((aligned(64))); ///< cdda ring buffer
+static u8 cd_sparebuf[1880] __attribute__((aligned(64)));           ///< used upon overflow
+static u8 core0_buf[0x1000] __attribute__((aligned(64)));
 
 static short cd_rendered_left[512];
 static short cd_rendered_right[512];
@@ -59,11 +59,9 @@ static int audsrv_cd_init()
 {
 	toc.num_tracks = 0;
 
-	if (cd_transfer_sema < 0)
-	{
+	if (cd_transfer_sema < 0) {
 		cd_transfer_sema = CreateMutex(0);
-		if (cd_transfer_sema < 0)
-		{
+		if (cd_transfer_sema < 0) {
 			return AUDSRV_ERR_OUT_OF_MEMORY;
 		}
 	}
@@ -91,8 +89,7 @@ int audsrv_get_cd_type()
 {
 	int type = sceCdGetDiskType();
 
-	if (type == 0)
-	{
+	if (type == 0) {
 		/* no disc inserted */
 		return -AUDSRV_ERR_NO_DISC;
 	}
@@ -121,11 +118,10 @@ static int process_toc()
 
 	//print_hex_buffer(raw_toc, sizeof(raw_toc));
 
-	for (track=0; track<toc.num_tracks; track++)
-	{
+	for (track = 0; track < toc.num_tracks; track++) {
 		unsigned char *ptr;
 
-		ptr = raw_toc + 37 + (10*track);
+		ptr = raw_toc + 37 + (10 * track);
 		toc.tracks[track].track = track;
 		toc.tracks[track].minute = btoi(ptr[0]);
 		toc.tracks[track].second = btoi(ptr[1]);
@@ -146,8 +142,7 @@ static int initialize_cdda()
 {
 	int err, dummy, type;
 
-	if (cdda_initialized)
-	{
+	if (cdda_initialized) {
 		/* no need to reinitialize */
 		return 0;
 	}
@@ -155,8 +150,7 @@ static int initialize_cdda()
 	printf("initializing cdda\n");
 
 	err = audsrv_cd_init();
-	if (err < 0)
-	{
+	if (err < 0) {
 		return err;
 	}
 
@@ -173,8 +167,7 @@ static int initialize_cdda()
 	type = audsrv_get_cd_type();
 	printf("audsrv: disc type: %d\n", type);
 
-	if (type != 0x11 && type != 0x13 && type != 0xfd)
-	{
+	if (type != 0x11 && type != 0x13 && type != 0xfd) {
 		/* not a cdda disc, or a ps1/ps2 with cdda tracks */
 		printf("audsrv: not a cdda disc!\n");
 		return -AUDSRV_ERR_ARGS;
@@ -193,8 +186,7 @@ static int initialize_cdda()
 int audsrv_get_numtracks()
 {
 	int err = initialize_cdda();
-	if (err < 0)
-	{
+	if (err < 0) {
 		return err;
 	}
 
@@ -211,13 +203,11 @@ int audsrv_get_track_offset(int track)
 	int offset;
 
 	err = initialize_cdda();
-	if (err < 0)
-	{
+	if (err < 0) {
 		return err;
 	}
 
-	if (track < 1 || track > toc.num_tracks)
-	{
+	if (track < 1 || track > toc.num_tracks) {
 		return -AUDSRV_ERR_ARGS;
 	}
 
@@ -243,13 +233,11 @@ static int read_sectors(void *dest, int sector, int count)
 	mode.datapattern = SCECdSecS2048;
 	mode.pad = 0;
 
-	while (tries < max_retries)
-	{
+	while (tries < max_retries) {
 		/* wait until CD is ready to receive commands */
 		sceCdDiskReady(0);
 
-		if (sceCdReadCDDA(sector, count, dest, &mode))
-		{
+		if (sceCdReadCDDA(sector, count, dest, &mode)) {
 			/* success! */
 			break;
 		}
@@ -259,8 +247,7 @@ static int read_sectors(void *dest, int sector, int count)
 
 	sceCdSync(0);
 
-	if (tries == max_retries)
-	{
+	if (tries == max_retries) {
 		return -1;
 	}
 
@@ -314,8 +301,7 @@ static void cdda_procedure(void *arg)
 
 	printf("cdda_procedure started with %d, %d\n", cdda_play_start, cdda_play_end);
 
-	if (cdda_play_start >= cdda_play_end)
-	{
+	if (cdda_play_start >= cdda_play_end) {
 		/* nothing to play :| */
 		return;
 	}
@@ -330,8 +316,7 @@ static void cdda_procedure(void *arg)
 	offset = 0;
 	nsectors = sizeof(cd_ringbuf) / SECTOR_SIZE;
 	printf("filling buffer with nsectors %d..\n", nsectors);
-	if (read_sectors(cd_ringbuf, cdda_pos, nsectors) != nsectors)
-	{
+	if (read_sectors(cd_ringbuf, cdda_pos, nsectors) != nsectors) {
 		printf("failed to read %d sectors..\n", nsectors);
 		return;
 	}
@@ -350,8 +335,7 @@ static void cdda_procedure(void *arg)
 	memset(cd_rendered_left, 0, sizeof(cd_rendered_left));
 	memset(cd_rendered_right, 0, sizeof(cd_rendered_right));
 
-	while (cdda_pos < cdda_play_end)
-	{
+	while (cdda_pos < cdda_play_end) {
 		/* wait until it's safe to transmit */
 		WaitSema(cd_transfer_sema);
 
@@ -361,19 +345,15 @@ static void cdda_procedure(void *arg)
 		block = 1 - (sceSdBlockTransStatus(SD_CORE_0, 0) >> 24);
 		bufptr = core0_buf + (block << 11);
 
-		if (cd_paused == 0)
-		{
+		if (cd_paused == 0) {
 			up.left = (short *)cd_rendered_left;
 			up.right = (short *)cd_rendered_right;
 
-			if (offset + 1880 < sizeof(cd_ringbuf))
-			{
+			if (offset + 1880 < sizeof(cd_ringbuf)) {
 				/* enough bytes in ringbuffer */
 				up.src = cd_ringbuf + offset;
 				offset = offset + up44k1(&up);
-			}
-			else
-			{
+			} else {
 				/* two portions */
 				sz = sizeof(cd_ringbuf) - offset;
 				wmemcpy(cd_sparebuf, cd_ringbuf + offset, sz);
@@ -384,24 +364,20 @@ static void cdda_procedure(void *arg)
 			}
 
 			/* upsample 44k1 -> 48k0 */
-			wmemcpy(bufptr +    0, cd_rendered_left + 0, 512);
-			wmemcpy(bufptr +  512, cd_rendered_right + 0, 512);
+			wmemcpy(bufptr + 0, cd_rendered_left + 0, 512);
+			wmemcpy(bufptr + 512, cd_rendered_right + 0, 512);
 			wmemcpy(bufptr + 1024, cd_rendered_left + 256, 512);
 			wmemcpy(bufptr + 1536, cd_rendered_right + 256, 512);
-		}
-		else
-		{
+		} else {
 			/* paused, send mute */
 			memset(bufptr, '\0', 2048);
 		}
 
 		CpuResumeIntr(intr_state);
 
-		if ((offset / SECTOR_SIZE) != last_read)
-		{
+		if ((offset / SECTOR_SIZE) != last_read) {
 			/* read another sector.. */
-			if (read_sectors(cd_ringbuf + (last_read * SECTOR_SIZE), cdda_pos, 1) != 1)
-			{
+			if (read_sectors(cd_ringbuf + (last_read * SECTOR_SIZE), cdda_pos, 1) != 1) {
 				printf("failed to read 1 sector\n");
 				break;
 			}
@@ -422,8 +398,7 @@ static void cdda_procedure(void *arg)
 */
 int audsrv_get_cdpos()
 {
-	if (cd_playing == 0)
-	{
+	if (cd_playing == 0) {
 		/* cdrom not playing */
 		return 0;
 	}
@@ -436,8 +411,7 @@ int audsrv_get_cdpos()
 */
 int audsrv_get_trackpos()
 {
-	if (cd_playing == 0)
-	{
+	if (cd_playing == 0) {
 		/* cdrom not playing */
 		return 0;
 	}
@@ -458,8 +432,7 @@ int audsrv_cd_play_sectors(int start, int end)
 {
 	printf("audsrv: cd_play_sectors: %d %d\n", start, end);
 
-	if (initialize_cdda() < 0)
-	{
+	if (initialize_cdda() < 0) {
 		printf("audsrv: initialized cdda failed\n");
 		return AUDSRV_ERR_NOT_INITIALIZED; //FIXME
 	}
@@ -475,8 +448,7 @@ int audsrv_cd_play_sectors(int start, int end)
 
 	/* .. and start a new one! */
 	cdda_play_tid = create_thread(cdda_procedure, 48, 0);
-	if (cdda_play_tid < 0)
-	{
+	if (cdda_play_tid < 0) {
 		return AUDSRV_ERR_OUT_OF_MEMORY;
 	}
 
@@ -498,21 +470,18 @@ int audsrv_play_cd(int track)
 
 	printf("request to play track %d\n", track);
 
-	if (initialize_cdda() < 0)
-	{
+	if (initialize_cdda() < 0) {
 		printf("audsrv: initialized cdda failed\n");
 		return AUDSRV_ERR_NOT_INITIALIZED; //FIXME
 	}
 
-	if (track < 1 || track > toc.num_tracks)
-	{
+	if (track < 1 || track > toc.num_tracks) {
 		/* invalid track selected */
 		return AUDSRV_ERR_ARGS;
 	}
 
 	type = sceCdGetDiskType();
-	if (track == 1 && (type == 11 || type == 0x13))
-	{
+	if (track == 1 && (type == 11 || type == 0x13)) {
 		/* first track is data */
 		printf("audsrv: request to play data track\n");
 		return AUDSRV_ERR_ARGS;
@@ -521,8 +490,7 @@ int audsrv_play_cd(int track)
 	start = audsrv_get_track_offset(track - 1);
 	end = audsrv_get_track_offset(track);
 
-	if (start < 0 || end < 0 || end < start)
-	{
+	if (start < 0 || end < 0 || end < start) {
 		printf("audsrv: invalid track offsets %d, %d\n", start, end);
 		return AUDSRV_ERR_ARGS; //FIXME:
 	}
@@ -551,8 +519,7 @@ int audsrv_stop_cd()
 	audsrv_stop_cd_stream();
 
 	/* stop playing thread */
-	if (cdda_play_tid >= 0)
-	{
+	if (cdda_play_tid >= 0) {
 		TerminateThread(cdda_play_tid);
 		DeleteThread(cdda_play_tid);
 		cdda_play_tid = -1;
@@ -560,4 +527,3 @@ int audsrv_stop_cd()
 
 	return 0;
 }
-

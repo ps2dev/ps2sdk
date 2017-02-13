@@ -13,42 +13,15 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-extern float			vu_projection;
-extern int				vu_projection_type;			//0=vu_projection  ,   1=VuPrjectionMatrix
-extern unsigned short	vu_offset_x;
-extern unsigned short	vu_offset_y;
-extern VU_FCVECTOR		vu_light_ambient;
-extern float			vu_fog_near;
-extern float			vu_fog_far;
-extern float			vu_near_plane_w;
-extern float			vu_near_plane_h;
-
-
-
-
-
-
-
-
-
-
+extern float vu_projection;
+extern int vu_projection_type; //0=vu_projection  ,   1=VuPrjectionMatrix
+extern unsigned short vu_offset_x;
+extern unsigned short vu_offset_y;
+extern VU_FCVECTOR vu_light_ambient;
+extern float vu_fog_near;
+extern float vu_fog_far;
+extern float vu_near_plane_w;
+extern float vu_near_plane_h;
 
 
 

@@ -31,8 +31,8 @@ typedef long off_t;
 /* Some aliases for the unix 'unistd' functions */
 static __inline__ int open(const char *fname, int flags, ...) { return fioOpen(fname, flags); }
 static __inline__ int close(int handle) { return fioClose(handle); }
-static __inline__ size_t read(int handle, void * buffer, size_t size) { return fioRead(handle, buffer, size); }
-static __inline__ size_t write(int handle, const void * buffer, size_t size) { return fioWrite(handle, buffer, size); }
+static __inline__ size_t read(int handle, void *buffer, size_t size) { return fioRead(handle, buffer, size); }
+static __inline__ size_t write(int handle, const void *buffer, size_t size) { return fioWrite(handle, buffer, size); }
 static __inline__ off_t lseek(int handle, off_t position, int wheel) { return fioLseek(handle, position, wheel); }
 static __inline__ off_t tell(int handle) { return fioLseek(handle, 0, 1); }
 static __inline__ int mkdir(const char *path) { return fioMkdir(path); }
@@ -47,11 +47,11 @@ static __inline__ int rmdir(const char *path) { return fioRmdir(path); }
 
 #define _O_APPEND O_APPEND
 #define _O_BINARY O_BINARY
-#define _O_CREAT  O_CREAT
+#define _O_CREAT O_CREAT
 #define _O_RDONKY O_RDONKY
-#define _O_RDWR   O_RDWR
-#define _O_TEXT   O_TEXT
-#define _O_TRUNC  O_TRUNC
+#define _O_RDWR O_RDWR
+#define _O_TEXT O_TEXT
+#define _O_TRUNC O_TRUNC
 #define _O_WRONLY O_WRONLY
 
 #ifndef O_BINARY
@@ -63,36 +63,36 @@ static __inline__ int rmdir(const char *path) { return fioRmdir(path); }
 #endif
 
 
-#define BUFSIZ                         1024
+#define BUFSIZ 1024
 
-#define _NFILE                         16
+#define _NFILE 16
 
 
-#define _IOFBF                         0x0000
-#define _IOLBF                         0x0100
-#define _IONBF                         0x0004
-#define _IOEOF                         0x0020
-#define _IOERR                         0x0040
+#define _IOFBF 0x0000
+#define _IOLBF 0x0100
+#define _IONBF 0x0004
+#define _IOEOF 0x0020
+#define _IOERR 0x0040
 
-#define _IOREAD                        0x0001
-#define _IOWRT                         0x0002
-#define _IORW                          0x0200
-#define _IOMYBUF                       0x0010
+#define _IOREAD 0x0001
+#define _IOWRT 0x0002
+#define _IORW 0x0200
+#define _IOMYBUF 0x0010
 
 
 /* ensure EOF is defined. */
 #ifndef EOF
-#define EOF                            (-1)
+#define EOF (-1)
 #endif
 
 
-#define FOPEN_MAX                      _NFILE
-#define FILENAME_MAX                   1024
+#define FOPEN_MAX _NFILE
+#define FILENAME_MAX 1024
 
 
-#define SEEK_SET                       0
-#define SEEK_CUR                       1
-#define SEEK_END                       2
+#define SEEK_SET 0
+#define SEEK_CUR 1
+#define SEEK_END 2
 
 
 /* ensure fpos_t is defined. */
@@ -105,13 +105,14 @@ typedef long fpos_t;
 /* ensure FILE is defined. */
 #ifndef __FILE_DEFINED
 #define __FILE_DEFINED
-typedef struct {
-  int  type;
-  int  fd;
-  int  cnt;
-  int  flag;
-  int  has_putback;
-  u8   putback;
+typedef struct
+{
+	int type;
+	int fd;
+	int cnt;
+	int flag;
+	int has_putback;
+	u8 putback;
 } FILE;
 #endif // __FILE_DEFINED
 
@@ -119,61 +120,61 @@ typedef struct {
 extern FILE __iob[_NFILE];
 
 
-#define stdin                          (&__iob[0])
-#define stdout                         (&__iob[1])
-#define stderr                         (&__iob[2])
+#define stdin (&__iob[0])
+#define stdout (&__iob[1])
+#define stderr (&__iob[2])
 
 
 /* function declarations. */
-void   clearerr(FILE *);
-int    feof(FILE *);
-int    ferror(FILE *);
-FILE   *fopen(const char *, const char *);
-FILE   *fdopen(int, const char *);
-int    fclose(FILE *);
-int    fflush(FILE *);
-int    fgetc(FILE *);
-int    fgetpos(FILE *, fpos_t *);
-char   *fgets(char *, int, FILE *);
-int    fileno(FILE *);
-int    fputc(int, FILE *);
-int    fputs(const char *, FILE *);
+void clearerr(FILE *);
+int feof(FILE *);
+int ferror(FILE *);
+FILE *fopen(const char *, const char *);
+FILE *fdopen(int, const char *);
+int fclose(FILE *);
+int fflush(FILE *);
+int fgetc(FILE *);
+int fgetpos(FILE *, fpos_t *);
+char *fgets(char *, int, FILE *);
+int fileno(FILE *);
+int fputc(int, FILE *);
+int fputs(const char *, FILE *);
 size_t fread(void *, size_t, size_t, FILE *);
-FILE   *freopen(const char *, const char *, FILE *);
-int    fscanf(FILE *, const char *, ...);
-int    fseek(FILE *, long, int);
-int    fsetpos(FILE *, const fpos_t *);
-long   ftell(FILE *);
+FILE *freopen(const char *, const char *, FILE *);
+int fscanf(FILE *, const char *, ...);
+int fseek(FILE *, long, int);
+int fsetpos(FILE *, const fpos_t *);
+long ftell(FILE *);
 size_t fwrite(const void *, size_t, size_t, FILE *);
-int    getc(FILE *);
-int    getchar(void);
-char   *gets(char *);
-void   perror(const char *);
-int    putc(int, FILE *);
-int    puts(const char *);
-int    rename(const char *, const char *);
-int    remove(const char *);
-void   rewind(FILE *);
-int    scanf(const char *, ...);
-int    setbuf(FILE *, char *);
-int    setvbuf(FILE *, char *, int, size_t);
-int    sscanf(const char *, const char *, ...);
-FILE   *tmpfile(void);
-char   *tmpnam(char *);
-int    vfscanf(FILE *, const char *, va_list);
-int    vscanf(const char *, va_list);
-int    vsscanf(const char *, const char *, va_list);
-int    vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, const char *, va_list);
-int    xscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, const char *, ...);
-int    ungetc(int, FILE *);
+int getc(FILE *);
+int getchar(void);
+char *gets(char *);
+void perror(const char *);
+int putc(int, FILE *);
+int puts(const char *);
+int rename(const char *, const char *);
+int remove(const char *);
+void rewind(FILE *);
+int scanf(const char *, ...);
+int setbuf(FILE *, char *);
+int setvbuf(FILE *, char *, int, size_t);
+int sscanf(const char *, const char *, ...);
+FILE *tmpfile(void);
+char *tmpnam(char *);
+int vfscanf(FILE *, const char *, va_list);
+int vscanf(const char *, va_list);
+int vsscanf(const char *, const char *, va_list);
+int vxscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, const char *, va_list);
+int xscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream, const char *, ...);
+int ungetc(int, FILE *);
 
-int    _fcloseall(void);
-int    _fflushall(void);
+int _fcloseall(void);
+int _fflushall(void);
 
-int    chdir(const char *path);
+int chdir(const char *path);
 
 /* from xprintf */
-int vxprintf(void (*func)(char*, int, void *), void * arg, const char * format, va_list ap);
+int vxprintf(void (*func)(char *, int, void *), void *arg, const char *format, va_list ap);
 int vsnprintf(char *buf, size_t n, const char *fmt, va_list ap);
 int vsprintf(char *buf, const char *fmt, va_list ap);
 char *vmprintf(const char *zFormat, va_list ap);
@@ -181,20 +182,20 @@ int vfprintf(FILE *pOut, const char *zFormat, va_list ap);
 int vprintf(const char *format, va_list ap);
 int vasprintf(char **strp, const char *format, va_list ap);
 
-int xprintf(void (*func)(char*, int, void *), void * arg, const char * format, ...)
-    __attribute__((format(printf,3,4)));
+int xprintf(void (*func)(char *, int, void *), void *arg, const char *format, ...)
+    __attribute__((format(printf, 3, 4)));
 int snprintf(char *str, size_t sz, const char *format, ...)
-    __attribute__((format(printf,3,4)));
+    __attribute__((format(printf, 3, 4)));
 int sprintf(char *buf, const char *fmt, ...)
-    __attribute__((format(printf,2,3)));
+    __attribute__((format(printf, 2, 3)));
 char *mprintf(const char *zFormat, ...)
-    __attribute__((format(printf,1,2)));
+    __attribute__((format(printf, 1, 2)));
 int fprintf(FILE *pOut, const char *zFormat, ...)
-    __attribute__((format(printf,2,3)));
+    __attribute__((format(printf, 2, 3)));
 int printf(const char *format, ...)
-    __attribute__((format(printf,1,2)));
+    __attribute__((format(printf, 1, 2)));
 int asprintf(char **strp, const char *format, ...)
-    __attribute__((format(printf,2,3)));
+    __attribute__((format(printf, 2, 3)));
 
 int putchar(int);
 

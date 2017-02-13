@@ -7,28 +7,26 @@
 
 static const char *test_init(void *arg)
 {
-    // _ps2sdk_args_parse should setup the initial cwd called from crt0.s
-    char cwd[256];
-    if (getcwd(cwd, 256)[0] == '\0')
-        return "failed to setup cwd";
+	// _ps2sdk_args_parse should setup the initial cwd called from crt0.s
+	char cwd[256];
+	if (getcwd(cwd, 256)[0] == '\0')
+		return "failed to setup cwd";
 
-    return NULL;
+	return NULL;
 }
 
 static const char *test_fgets(void *arg)
 {
 	char buf[64], *ret;
 	FILE *fp = fopen((char *)arg, "rt");
-	if (fp == NULL)
-	{
+	if (fp == NULL) {
 		return "failed to open test file";
 	}
 
 	ret = fgets(buf, sizeof(buf), fp);
 	fclose(fp);
 
-	if (ret != buf || strcmp(buf, "hello world\n") != 0)
-	{
+	if (ret != buf || strcmp(buf, "hello world\n") != 0) {
 		return "read wrong data from file";
 	}
 
@@ -38,8 +36,7 @@ static const char *test_fgets(void *arg)
 static const char *test_fopen_fclose(void *arg)
 {
 	FILE *fp = fopen((char *)arg, "rt");
-	if (fp == NULL)
-	{
+	if (fp == NULL) {
 		return "failed to open test file";
 	}
 
@@ -53,31 +50,26 @@ static const char *test_fgetc(void *arg)
 	char *error;
 
 	FILE *fp = fopen((char *)arg, "rt");
-	if (fp == NULL)
-	{
+	if (fp == NULL) {
 		return "failed to open test file";
 	}
 
 	/* read one byte */
 	ch = fgetc(fp);
-	if (ch != 'h')
-	{
+	if (ch != 'h') {
 		error = "fgetc failed";
 		goto failed;
 	}
 
 	/* read until EOF */
-	for (p=0; p<512; p++)
-	{
+	for (p = 0; p < 512; p++) {
 		ch = fgetc(fp);
-		if (ch == EOF)
-		{
+		if (ch == EOF) {
 			break;
 		}
 	}
 
-	if (ch != EOF)
-	{
+	if (ch != EOF) {
 		error = "EOF not returned when should";
 		goto failed;
 	}
@@ -85,7 +77,7 @@ static const char *test_fgetc(void *arg)
 	fclose(fp);
 	return NULL;
 
-	failed:
+failed:
 	fclose(fp);
 	return error;
 }
@@ -96,29 +88,25 @@ static const char *test_fseek_ftell(void *arg)
 	char buf[512], *error;
 
 	FILE *fp = fopen((char *)arg, "rt");
-	if (fp == NULL)
-	{
+	if (fp == NULL) {
 		return "failed to open test file";
 	}
 
 	/* seek to the beginning of a file */
 	ret = fseek(fp, 0, SEEK_SET);
-	if (ret != 0)
-	{
+	if (ret != 0) {
 		error = "failed to seek to beginning of file";
 		goto failed;
 	}
 
 	off = ftell(fp);
-	if (off != 0)
-	{
+	if (off != 0) {
 		error = "ftell returned wrong offset\n";
 		goto failed;
 	}
 
 	ret = fread(buf, 2, 1, fp);
-	if (ret != 1 || strncmp(buf, "he", 2) != 0)
-	{
+	if (ret != 1 || strncmp(buf, "he", 2) != 0) {
 		error = "failed to read first two bytes";
 		goto failed;
 	}
@@ -126,15 +114,13 @@ static const char *test_fseek_ftell(void *arg)
 	/* seek forward */
 	ret = fseek(fp, +2, SEEK_CUR);
 	off = ftell(fp);
-	if (ret != 0 || off != 4)
-	{
+	if (ret != 0 || off != 4) {
 		error = "failed to seek forward / tell returned wrong offset";
 		goto failed;
 	}
 
 	ret = fread(buf, 2, 1, fp);
-	if (ret != 1 || strncmp(buf, "o ", 2) != 0)
-	{
+	if (ret != 1 || strncmp(buf, "o ", 2) != 0) {
 		error = "error reading from test file";
 		goto failed;
 	}
@@ -142,15 +128,13 @@ static const char *test_fseek_ftell(void *arg)
 	/* seek backward */
 	ret = fseek(fp, -2, SEEK_CUR);
 	off = ftell(fp);
-	if (ret != 0 || off != 4)
-	{
+	if (ret != 0 || off != 4) {
 		error = "error seeking backwards / tell returned wrong offset";
 		goto failed;
 	}
 
 	ret = fread(buf, 2, 1, fp);
-	if (ret != 1 || strncmp(buf, "o ", 2) != 0)
-	{
+	if (ret != 1 || strncmp(buf, "o ", 2) != 0) {
 		error = "error reading from test file";
 		goto failed;
 	}
@@ -158,8 +142,7 @@ static const char *test_fseek_ftell(void *arg)
 	/* seek to end of file */
 	ret = fseek(fp, 0, SEEK_END);
 	off = ftell(fp);
-	if (ret != 0 || off < 8)
-	{
+	if (ret != 0 || off < 8) {
 		/* fixme: what's the real size of ''arg'' file? */
 		error = "error seeking end of file";
 		goto failed;
@@ -168,7 +151,7 @@ static const char *test_fseek_ftell(void *arg)
 	fclose(fp);
 	return NULL;
 
-	failed:
+failed:
 	fclose(fp);
 	return error;
 }
@@ -179,39 +162,34 @@ static const char *test_fread(void *arg)
 	char buf[512], *error;
 
 	FILE *fp = fopen((char *)arg, "rt");
-	if (fp == NULL)
-	{
+	if (fp == NULL) {
 		return "cannot open test file";
 	}
 
 	/* test of reading one chunk */
 	ret = fread(buf, 3, 1, fp);
-	if (ret != 1 || strncmp(buf, "hel", 3) != 0)
-	{
+	if (ret != 1 || strncmp(buf, "hel", 3) != 0) {
 		error = "failed to read one block";
 		goto failed;
 	}
 
 	/* three chunks */
 	ret = fread(buf, 2, 3, fp);
-	if (ret != 3 || strncmp(buf, "lo wor", 6) != 0)
-	{
+	if (ret != 3 || strncmp(buf, "lo wor", 6) != 0) {
 		error = "failed to read three blocks";
 		goto failed;
 	}
 
 	/* until end of file */
 	ret = fread(buf, 1, sizeof(buf), fp);
-	if (ret < 2 || strncmp(buf, "ld", 2) != 0)
-	{
+	if (ret < 2 || strncmp(buf, "ld", 2) != 0) {
 		error = "failed to read until eof";
 		goto failed;
 	}
 
 	/* past end of file */
 	ret = fread(buf, 1, sizeof(buf), fp);
-	if (ret != 0)
-	{
+	if (ret != 0) {
 		error = "read past end of file";
 		goto failed;
 	}
@@ -219,7 +197,7 @@ static const char *test_fread(void *arg)
 	fclose(fp);
 	return NULL;
 
-	failed:
+failed:
 	fclose(fp);
 	return error;
 }
@@ -230,8 +208,7 @@ static const char *test_stat_file(void *arg)
 
 	stat((const char *)arg, &st);
 	printf("fn %s mode 0x%x, size %d\n", (char *)arg, st.st_mode, st.st_size);
-	if (S_ISDIR(st.st_mode))
-	{
+	if (S_ISDIR(st.st_mode)) {
 		return "expected file, not a directory";
 	}
 
@@ -244,8 +221,7 @@ static const char *test_stat_dir(void *arg)
 
 	stat((const char *)arg, &st);
 	printf("fn %s mode 0x%x, size %d\n", (char *)arg, st.st_mode, st.st_size);
-	if (S_ISDIR(st.st_mode) == 0)
-	{
+	if (S_ISDIR(st.st_mode) == 0) {
 		return "expected directory, not regular file";
 	}
 
@@ -254,8 +230,7 @@ static const char *test_stat_dir(void *arg)
 
 static const char *test_mkdir(void *arg)
 {
-	if (mkdir(arg) != 0)
-	{
+	if (mkdir(arg) != 0) {
 		return "failed to create directory";
 	}
 
@@ -264,8 +239,7 @@ static const char *test_mkdir(void *arg)
 
 static const char *test_rmdir(void *arg)
 {
-	if (rmdir(arg) != 0)
-	{
+	if (rmdir(arg) != 0) {
 		return "failed to delete directory";
 	}
 
@@ -277,18 +251,18 @@ int libc_add_tests(test_suite *p)
 	const char *textfile;
 	const char *dir, *dir2;
 
-	#ifdef _EE
+#ifdef _EE
 	textfile = "host:testfiles/dummy";
 	dir = "host:testfiles";
 	dir2 = "host:dummydir";
-	#else
+#else
 	textfile = "testfiles/dummy";
 	dir = "textfiles/";
 	dir2 = "dummydir";
-	#endif
+#endif
 
-    add_test(p, "init", test_init, NULL);
-    add_test(p, "fopen, fclose", test_fopen_fclose, (void *)textfile);
+	add_test(p, "init", test_init, NULL);
+	add_test(p, "fopen, fclose", test_fopen_fclose, (void *)textfile);
 	add_test(p, "fgets", test_fgets, (void *)textfile);
 	add_test(p, "fread", test_fread, (void *)textfile);
 	add_test(p, "fgetc", test_fgetc, (void *)textfile);
@@ -299,4 +273,3 @@ int libc_add_tests(test_suite *p)
 	add_test(p, "rmdir", test_rmdir, (void *)dir2);
 	return 0;
 }
-

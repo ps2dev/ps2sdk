@@ -16,8 +16,8 @@ void removeEndpointFromQueue(Endpoint *ep);
 void checkTdQueue(int type);
 void handleIoReqList(Endpoint *ep);
 int doControlTransfer(Endpoint *ep, IoRequest *req,
-	uint8 requestType, uint8 request, uint16 value, uint16 index, uint16 length,
-	void *destdata, void *callback);
+                      uint8 requestType, uint8 request, uint16 value, uint16 index, uint16 length,
+                      void *destdata, void *callback);
 int attachIoReqToEndpoint(Endpoint *ep, IoRequest *req, void *destdata, uint16 length, void *callback);
 void handleIoReqList(Endpoint *ep);
 

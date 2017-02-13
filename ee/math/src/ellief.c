@@ -56,7 +56,7 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 
 extern float PIF, PIO2F, MACHEPF;
 
-#define fabsf(x) ( (x) < 0 ? -(x) : (x) )
+#define fabsf(x) ((x) < 0 ? -(x) : (x))
 
 #ifdef ANSIC
 float sqrtf(float), logf(float), sinf(float), tanf(float), atanf(float);
@@ -68,53 +68,51 @@ float ellpef(), ellpkf();
 
 
 #ifdef ANSIC
-float ellief( float phia, float ma )
+float ellief(float phia, float ma)
 #else
-float ellief( phia, ma )
-double phia, ma;
+float ellief(phia, ma) double phia, ma;
 #endif
 {
-float phi, m, a, b, c, e, temp;
-float lphi, t;
-int d, mod;
+	float phi, m, a, b, c, e, temp;
+	float lphi, t;
+	int d, mod;
 
-phi = phia;
-m = ma;
-if( m == 0.0 )
-	return( phi );
-if( m == 1.0 )
-	return( sinf(phi) );
-lphi = phi;
-if( lphi < 0.0 )
-	lphi = -lphi;
-a = 1.0;
-b = 1.0 - m;
-b = sqrtf(b);
-c = sqrtf(m);
-d = 1;
-e = 0.0;
-t = tanf( lphi );
-mod = (lphi + PIO2F)/PIF;
+	phi = phia;
+	m = ma;
+	if (m == 0.0)
+		return (phi);
+	if (m == 1.0)
+		return (sinf(phi));
+	lphi = phi;
+	if (lphi < 0.0)
+		lphi = -lphi;
+	a = 1.0;
+	b = 1.0 - m;
+	b = sqrtf(b);
+	c = sqrtf(m);
+	d = 1;
+	e = 0.0;
+	t = tanf(lphi);
+	mod = (lphi + PIO2F) / PIF;
 
-while( fabsf(c/a) > MACHEPF )
-	{
-	temp = b/a;
-	lphi = lphi + atanf(t*temp) + mod * PIF;
-	mod = (lphi + PIO2F)/PIF;
-	t = t * ( 1.0 + temp )/( 1.0 - temp * t * t );
-	c = 0.5 * ( a - b );
-	temp = sqrtf( a * b );
-	a = 0.5 * ( a + b );
-	b = temp;
-	d += d;
-	e += c * sinf(lphi);
+	while (fabsf(c / a) > MACHEPF) {
+		temp = b / a;
+		lphi = lphi + atanf(t * temp) + mod * PIF;
+		mod = (lphi + PIO2F) / PIF;
+		t = t * (1.0 + temp) / (1.0 - temp * t * t);
+		c = 0.5 * (a - b);
+		temp = sqrtf(a * b);
+		a = 0.5 * (a + b);
+		b = temp;
+		d += d;
+		e += c * sinf(lphi);
 	}
 
-b = 1.0 - m;
-temp = ellpef(b)/ellpkf(b);
-temp *= (atanf(t) + mod * PIF)/(d * a);
-temp += e;
-if( phi < 0.0 )
-	temp = -temp;
-return( temp );
+	b = 1.0 - m;
+	temp = ellpef(b) / ellpkf(b);
+	temp *= (atanf(t) + mod * PIF) / (d * a);
+	temp += e;
+	if (phi < 0.0)
+		temp = -temp;
+	return (temp);
 }

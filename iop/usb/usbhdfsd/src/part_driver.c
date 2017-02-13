@@ -15,33 +15,36 @@
 
 #include "mass_debug.h"
 
-#define READ_SECTOR(d, a, b)	scache_readSector((d)->cache, (a), (void **)&b)
+#define READ_SECTOR(d, a, b) scache_readSector((d)->cache, (a), (void **)&b)
 
-typedef struct _part_record {
-	unsigned char sid;	//system id-	4=16bit FAT (16bit sector numbers)
-				//		5=extended partition
-				//		6=16bit FAT (32bit sector numbers)
-	unsigned int start;	// start sector of the partition
-	unsigned int count;	// length of the partititon (total number of sectors)
+typedef struct _part_record
+{
+	unsigned char sid;  //system id-	4=16bit FAT (16bit sector numbers)
+	                    //		5=extended partition
+	                    //		6=16bit FAT (32bit sector numbers)
+	unsigned int start; // start sector of the partition
+	unsigned int count; // length of the partititon (total number of sectors)
 } part_record;
 
-typedef struct _part_table {
-	part_record record[4];	//maximum of 4 primary partitions
+typedef struct _part_table
+{
+	part_record record[4]; //maximum of 4 primary partitions
 } part_table;
 
-typedef struct _part_raw_record {
-	unsigned char active;		//Set to 80h if this partition is active / bootable
-	unsigned char startH;		//Partition's starting head.
-	unsigned char startST[2];	//Partition's starting sector and track.
-	unsigned char sid;		//Partition's system ID number.
-	unsigned char endH;		//Partition's ending head.
-	unsigned char endST[2];		//Partition's ending sector and track.
-	unsigned char startLBA[4];	//Starting LBA (sector)
-	unsigned char size[4];		//Partition size in sectors.
+typedef struct _part_raw_record
+{
+	unsigned char active;      //Set to 80h if this partition is active / bootable
+	unsigned char startH;      //Partition's starting head.
+	unsigned char startST[2];  //Partition's starting sector and track.
+	unsigned char sid;         //Partition's system ID number.
+	unsigned char endH;        //Partition's ending head.
+	unsigned char endST[2];    //Partition's ending sector and track.
+	unsigned char startLBA[4]; //Starting LBA (sector)
+	unsigned char size[4];     //Partition size in sectors.
 } part_raw_record;
 
 //---------------------------------------------------------------------------
-static USBHD_INLINE void part_getPartitionRecord(part_raw_record* raw, part_record* rec)
+static USBHD_INLINE void part_getPartitionRecord(part_raw_record *raw, part_record *rec)
 {
 	rec->sid = raw->sid;
 	rec->start = getI32(raw->startLBA);
@@ -49,42 +52,37 @@ static USBHD_INLINE void part_getPartitionRecord(part_raw_record* raw, part_reco
 }
 
 //---------------------------------------------------------------------------
-static int part_getPartitionTable(mass_dev* dev, part_table* part)
+static int part_getPartitionTable(mass_dev *dev, part_table *part)
 {
-	part_raw_record* part_raw;
+	part_raw_record *part_raw;
 	int ret;
 	unsigned int i;
-	unsigned char* sbuf;
+	unsigned char *sbuf;
 
-	ret = READ_SECTOR(dev, 0, sbuf);  // read sector 0 - Disk MBR or boot sector
-	if ( ret < 0 )
-	{
+	ret = READ_SECTOR(dev, 0, sbuf); // read sector 0 - Disk MBR or boot sector
+	if (ret < 0) {
 		XPRINTF("USBHDFSD: part_getPartitionTable read failed %d!\n", ret);
 		return -EIO;
 	}
 
 	printf("USBHDFSD: boot signature %X %X\n", sbuf[0x1FE], sbuf[0x1FF]);
-	if (sbuf[0x1FE] == 0x55 && sbuf[0x1FF] == 0xAA)
-	{
-		for ( i = 0; i < 4; i++)
-		{
-			part_raw = ( part_raw_record* )(  sbuf + 0x01BE + ( i * 16 )  );
+	if (sbuf[0x1FE] == 0x55 && sbuf[0x1FF] == 0xAA) {
+		for (i = 0; i < 4; i++) {
+			part_raw = (part_raw_record *)(sbuf + 0x01BE + (i * 16));
 			part_getPartitionRecord(part_raw, &part->record[i]);
 		}
 		return 4;
-	}
-	else
-	{
-		for ( i = 0; i < 4; i++)
-		{
-			part->record[i].sid = 0;;
+	} else {
+		for (i = 0; i < 4; i++) {
+			part->record[i].sid = 0;
+			;
 		}
 		return 0;
 	}
 }
 
 //---------------------------------------------------------------------------
-int part_connect(mass_dev* dev)
+int part_connect(mass_dev *dev)
 {
 	part_table partTable;
 	unsigned int count = 0, i;
@@ -93,15 +91,14 @@ int part_connect(mass_dev* dev)
 	if (part_getPartitionTable(dev, &partTable) < 0)
 		return -1;
 
-	for ( i = 0; i < 4; i++)
-	{
-		if(
-			partTable.record[ i ].sid == 6    ||
-			partTable.record[ i ].sid == 4    ||
-			partTable.record[ i ].sid == 1    ||  // fat 16, fat 12
-			partTable.record[ i ].sid == 0x0B ||
-			partTable.record[ i ].sid == 0x0C ||  // fat 32
-			partTable.record[ i ].sid == 0x0E)    // fat 16 LBA
+	for (i = 0; i < 4; i++) {
+		if (
+		    partTable.record[i].sid == 6 ||
+		    partTable.record[i].sid == 4 ||
+		    partTable.record[i].sid == 1 || // fat 16, fat 12
+		    partTable.record[i].sid == 0x0B ||
+		    partTable.record[i].sid == 0x0C || // fat 32
+		    partTable.record[i].sid == 0x0E)   // fat 16 LBA
 		{
 			XPRINTF("USBHDFSD: mount partition %d\n", i);
 			if (fat_mount(dev, partTable.record[i].start, partTable.record[i].count) >= 0)
@@ -109,8 +106,7 @@ int part_connect(mass_dev* dev)
 		}
 	}
 
-	if ( count == 0 )
-	{	// no partition table detected
+	if (count == 0) { // no partition table detected
 		// try to use "floppy" option
 		XPRINTF("USBHDFSD: mount drive\n");
 		if (fat_mount(dev, 0, dev->maxLBA) < 0)
@@ -121,7 +117,7 @@ int part_connect(mass_dev* dev)
 }
 
 //---------------------------------------------------------------------------
-void part_disconnect(mass_dev* dev)
+void part_disconnect(mass_dev *dev)
 {
 	printf("USBHDFSD: part_disconnect devId %i \n", dev->devId);
 	fat_forceUnmount(dev);

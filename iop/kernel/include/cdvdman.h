@@ -32,34 +32,34 @@ int sceCdRC(sceCdCLOCK *clock);
 int sceCdRead0(u32 lsn, u32 sectors, void *buffer, sceCdRMode *mode, int csec, void *callback);
 
 // send an s-command by function number
-// 
+//
 // arguments:	command number
 //			input buffer  (can be null)
 //			size of input buffer  (0 - 16 bytes)
 //			output buffer (can be null)
 // returns:	1 if successful
 //		0 if error
-int sceCdApplySCmd(u8 cmdNum, const void* inBuff, u16 inBuffSize, void *outBuff);
+int sceCdApplySCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff);
 
 // send an s-command by function number
-// 
+//
 // arguments:	command number
 //			input buffer  (can be null)
 //			size of input buffer  (>= 16 bytes)
 //			output buffer (can be null)
 // returns:	1 if successful
 //		0 if error
-int sceCdApplySCmd2(u8 cmdNum, const void* inBuff, unsigned long int inBuffSize, void *outBuff);
+int sceCdApplySCmd2(u8 cmdNum, const void *inBuff, unsigned long int inBuffSize, void *outBuff);
 
 // send an n-command by function number
-// 
+//
 // arguments:	command number
 //			input buffer  (can be null)
 //			size of input buffer  (0 - 16 bytes)
 //			output buffer (can be null)
 // returns:	1 if successful
 //		0 if error
-int sceCdApplyNCmd(u8 cmdNum, const void* inBuff, u16 inBuffSize, void* outBuff);
+int sceCdApplyNCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff);
 
 // Opens a specified configuration block, within NVRAM. Each block is 15 bytes long.
 //
@@ -116,7 +116,7 @@ int sceCdReadGUID(u64 *guid);
 #define I_sceCdWI DECLARE_IMPORT(23, sceCdWI)
 #define I_sceCdReadClock DECLARE_IMPORT(24, sceCdReadClock)
 #define I_sceCdWriteClock DECLARE_IMPORT(25, sceCdWriteClock)
-#define I_sceCdStatus DECLARE_IMPORT(28 , sceCdStatus)
+#define I_sceCdStatus DECLARE_IMPORT(28, sceCdStatus)
 #define I_sceCdApplySCmd DECLARE_IMPORT(29, sceCdApplySCmd)
 #define I_sceCdSetHDMode DECLARE_IMPORT(30, sceCdSetHDMode)
 #define I_sceCdOpenConfig DECLARE_IMPORT(31, sceCdOpenConfig)

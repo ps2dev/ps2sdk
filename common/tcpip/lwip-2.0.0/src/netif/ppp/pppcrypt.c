@@ -38,10 +38,11 @@
 #include "netif/ppp/pppcrypt.h"
 
 
-static u_char pppcrypt_get_7bits(u_char *input, int startBit) {
+static u_char pppcrypt_get_7bits(u_char *input, int startBit)
+{
 	unsigned int word;
 
-	word  = (unsigned)input[startBit / 8] << 8;
+	word = (unsigned)input[startBit / 8] << 8;
 	word |= (unsigned)input[startBit / 8 + 1];
 
 	word >>= 15 - (startBit % 8 + 7);
@@ -52,9 +53,10 @@ static u_char pppcrypt_get_7bits(u_char *input, int startBit) {
 /* IN  56 bit DES key missing parity bits
  * OUT 64 bit DES key with parity bits added
  */
-void pppcrypt_56_to_64_bit_key(u_char *key, u_char * des_key) {
-	des_key[0] = pppcrypt_get_7bits(key,  0);
-	des_key[1] = pppcrypt_get_7bits(key,  7);
+void pppcrypt_56_to_64_bit_key(u_char *key, u_char *des_key)
+{
+	des_key[0] = pppcrypt_get_7bits(key, 0);
+	des_key[1] = pppcrypt_get_7bits(key, 7);
 	des_key[2] = pppcrypt_get_7bits(key, 14);
 	des_key[3] = pppcrypt_get_7bits(key, 21);
 	des_key[4] = pppcrypt_get_7bits(key, 28);

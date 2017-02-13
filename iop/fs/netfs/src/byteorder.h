@@ -14,7 +14,7 @@
 #define BYTEORDER_H
 
 #ifdef BIG_ENDIAN
-inline unsigned int   ntohl(x) { return x; }
+inline unsigned int ntohl(x) { return x; }
 inline unsigned short ntohs(x) { return x; }
 #else
 // LITTLE_ENDIAN
@@ -22,10 +22,10 @@ inline unsigned short ntohs(x) { return x; }
 inline unsigned int
 htonl(unsigned int x)
 {
-    return ((x & 0xff) << 24 ) |
-        ((x & 0xff00) << 8 ) |
-        ((x & 0xff0000) >> 8 ) |
-        ((x & 0xff000000) >> 24 );
+	return ((x & 0xff) << 24) |
+	       ((x & 0xff00) << 8) |
+	       ((x & 0xff0000) >> 8) |
+	       ((x & 0xff000000) >> 24);
 }
 #endif
 
@@ -33,7 +33,7 @@ htonl(unsigned int x)
 inline unsigned short
 htons(unsigned short x)
 {
-    return ((x & 0xff) << 8 ) | ((x & 0xff00) >> 8 );
+	return ((x & 0xff) << 8) | ((x & 0xff00) >> 8);
 }
 #endif
 

@@ -82,119 +82,115 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 extern float PIF, PIO2F, PIO4F;
 
 #ifdef ANSIC
-float atanf( float xx )
+float atanf(float xx)
 #else
-float atanf(xx)
-double xx;
+float atanf(xx) double xx;
 #endif
 {
-float x, y, z;
-int sign;
+	float x, y, z;
+	int sign;
 
-x = xx;
-
-/* make argument positive and save the sign */
-if( xx < 0.0 )
-	{
-	sign = -1;
-	x = -xx;
-	}
-else
-	{
-	sign = 1;
 	x = xx;
+
+	/* make argument positive and save the sign */
+	if (xx < 0.0) {
+		sign = -1;
+		x = -xx;
+	} else {
+		sign = 1;
+		x = xx;
 	}
-/* range reduction */
-if( x > 2.414213562373095 )  /* tan 3pi/8 */
+	/* range reduction */
+	if (x > 2.414213562373095) /* tan 3pi/8 */
 	{
-	y = PIO2F;
-	x = -( 1.0/x );
+		y = PIO2F;
+		x = -(1.0 / x);
 	}
 
-else if( x > 0.4142135623730950 ) /* tan pi/8 */
+	else if (x > 0.4142135623730950) /* tan pi/8 */
 	{
-	y = PIO4F;
-	x = (x-1.0)/(x+1.0);
-	}
-else
-	y = 0.0;
+		y = PIO4F;
+		x = (x - 1.0) / (x + 1.0);
+	} else
+		y = 0.0;
 
-z = x * x;
-y +=
-((( 8.05374449538e-2 * z
-  - 1.38776856032E-1) * z
-  + 1.99777106478E-1) * z
-  - 3.33329491539E-1) * z * x
-  + x;
+	z = x * x;
+	y +=
+	    (((8.05374449538e-2 * z - 1.38776856032E-1) * z + 1.99777106478E-1) * z - 3.33329491539E-1) * z * x + x;
 
-if( sign < 0 )
-	y = -y;
+	if (sign < 0)
+		y = -y;
 
-return( y );
+	return (y);
 }
 
 
 
-
 #if ANSIC
-float atan2f( float y, float x )
+float atan2f(float y, float x)
 #else
-float atan2f( x, y )
-double x, y;
+float atan2f(x, y) double x, y;
 #endif
 {
-float z, w;
-int code;
+	float z, w;
+	int code;
 
 
-code = 0;
+	code = 0;
 
-if( x < 0.0 )
-	code = 2;
-if( y < 0.0 )
-	code |= 1;
+	if (x < 0.0)
+		code = 2;
+	if (y < 0.0)
+		code |= 1;
 
-if( x == 0.0 )
-	{
-	if( code & 1 )
-		{
+	if (x == 0.0) {
+		if (code & 1) {
 #if ANSIC
-		return( -PIO2F );
+			return (-PIO2F);
 #else
-		return( 3.0*PIO2F );
+			return (3.0 * PIO2F);
 #endif
 		}
-	if( y == 0.0 )
-		return( 0.0 );
-	return( PIO2F );
+		if (y == 0.0)
+			return (0.0);
+		return (PIO2F);
 	}
 
-if( y == 0.0 )
-	{
-	if( code & 2 )
-		return( PIF );
-	return( 0.0 );
+	if (y == 0.0) {
+		if (code & 2)
+			return (PIF);
+		return (0.0);
 	}
 
 
-switch( code )
-	{
-	default:
+	switch (code) {
+		default:
 #if ANSIC
-	case 0:
-	case 1: w = 0.0; break;
-	case 2: w = PIF; break;
-	case 3: w = -PIF; break;
+		case 0:
+		case 1:
+			w = 0.0;
+			break;
+		case 2:
+			w = PIF;
+			break;
+		case 3:
+			w = -PIF;
+			break;
 #else
-	case 0: w = 0.0; break;
-	case 1: w = 2.0 * PIF; break;
-	case 2:
-	case 3: w = PIF; break;
+		case 0:
+			w = 0.0;
+			break;
+		case 1:
+			w = 2.0 * PIF;
+			break;
+		case 2:
+		case 3:
+			w = PIF;
+			break;
 #endif
 	}
 
-z = atanf( y/x );
+	z = atanf(y / x);
 
-return( w + z );
+	return (w + z);
 }
-

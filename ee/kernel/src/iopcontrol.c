@@ -20,7 +20,7 @@
 
 #include <iopcontrol.h>
 
-#define RESET_ARG_MAX	79
+#define RESET_ARG_MAX 79
 
 #ifdef F___iop_control_internals
 int _iop_reboot_count = 0;
@@ -30,26 +30,27 @@ extern int _iop_reboot_count;
 
 #ifdef F_SifIopReset
 
-struct _iop_reset_pkt {
+struct _iop_reset_pkt
+{
 	struct t_SifCmdHeader header;
-	int	arglen;
-	int	mode;
-	char	arg[RESET_ARG_MAX + 1];
+	int arglen;
+	int mode;
+	char arg[RESET_ARG_MAX + 1];
 } ALIGNED(16);
 
 int SifIopReset(const char *arg, int mode)
 {
-	struct _iop_reset_pkt reset_pkt;  /* Implicitly aligned. */
+	struct _iop_reset_pkt reset_pkt; /* Implicitly aligned. */
 	struct t_SifDmaTransfer dmat;
 
 	_iop_reboot_count++; // increment reboot counter to allow RPC clients to detect unbinding!
 
-	SifStopDma();	//Stop DMA transfers across SIF0 (IOP -> EE).
+	SifStopDma(); //Stop DMA transfers across SIF0 (IOP -> EE).
 
 	memset(&reset_pkt, 0, sizeof reset_pkt);
 
 	reset_pkt.header.size = sizeof reset_pkt;
-	reset_pkt.header.cid  = SIF_CMD_RESET_CMD;
+	reset_pkt.header.cid = SIF_CMD_RESET_CMD;
 
 	reset_pkt.mode = mode;
 	if (arg != NULL) {
@@ -59,7 +60,7 @@ int SifIopReset(const char *arg, int mode)
 		reset_pkt.arglen = strlen(reset_pkt.arg) + 1;
 	}
 
-	dmat.src  = &reset_pkt;
+	dmat.src = &reset_pkt;
 	dmat.dest = (void *)SifGetReg(SIF_SYSREG_SUBADDR);
 	dmat.size = sizeof(reset_pkt);
 	dmat.attr = SIF_DMA_ERT | SIF_DMA_INT_O;
@@ -80,12 +81,11 @@ int SifIopReset(const char *arg, int mode)
 #endif
 
 #ifdef F_SifIopReboot
-int SifIopReboot(const char* arg)
+int SifIopReboot(const char *arg)
 {
-	char param_str[RESET_ARG_MAX+1];
+	char param_str[RESET_ARG_MAX + 1];
 
-	if(strlen(arg) + 11 > RESET_ARG_MAX)
-	{
+	if (strlen(arg) + 11 > RESET_ARG_MAX) {
 		printf("too long parameter \'%s\'\n", arg);
 		return 0;
 	}
@@ -110,6 +110,6 @@ int SifIopIsAlive(void)
 #ifdef F_SifIopSync
 int SifIopSync()
 {
-	return((SifGetReg(SIF_REG_SMFLAG) & SIF_STAT_BOOTEND) != 0);
+	return ((SifGetReg(SIF_REG_SMFLAG) & SIF_STAT_BOOTEND) != 0);
 }
 #endif

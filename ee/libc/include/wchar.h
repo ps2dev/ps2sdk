@@ -34,11 +34,11 @@ extern "C" {
 #include <stdarg.h>
 
 #ifndef NULL
-#define NULL	0
+#define NULL 0
 #endif
 
 #ifndef WEOF
-# define WEOF ((wint_t)-1)
+#define WEOF ((wint_t)-1)
 #endif
 
 #ifndef WCHAR_MIN
@@ -53,14 +53,14 @@ extern "C" {
 #endif
 #endif
 
-wchar_t *wcsdup(const wchar_t* string);
-int wcscasecmp(const wchar_t* wcs1, const wchar_t* wcs2);
-int wcsncasecmp(const wchar_t* ws1, const wchar_t* ws2, size_t n);
-wchar_t* wcstok(wchar_t* wcs, const wchar_t* delimiters);
-wchar_t* wcsrchr(const wchar_t* ws, wint_t wc);
-wchar_t* wcswcs(const wchar_t* ws1, const wchar_t* ws2);
-wchar_t* wcsupr(wchar_t* wcs);
-wchar_t* wcslwr(wchar_t* wcs);
+wchar_t *wcsdup(const wchar_t *string);
+int wcscasecmp(const wchar_t *wcs1, const wchar_t *wcs2);
+int wcsncasecmp(const wchar_t *ws1, const wchar_t *ws2, size_t n);
+wchar_t *wcstok(wchar_t *wcs, const wchar_t *delimiters);
+wchar_t *wcsrchr(const wchar_t *ws, wint_t wc);
+wchar_t *wcswcs(const wchar_t *ws1, const wchar_t *ws2);
+wchar_t *wcsupr(wchar_t *wcs);
+wchar_t *wcslwr(wchar_t *wcs);
 wint_t towlower(wint_t wc);
 wint_t towupper(wint_t wc);
 int iswupper(wint_t wc);
@@ -74,19 +74,19 @@ int iswprint(wint_t wc);
 int iswpunct(wint_t wc);
 int iswspace(wint_t wc);
 int iswxdigit(wint_t wc);
-wchar_t* wcscpy(wchar_t* destination, const wchar_t* source);
-wchar_t* wcsncpy(wchar_t* destination, const wchar_t* source, size_t num);
-wchar_t* wcspbrk(const wchar_t* wcs1, const wchar_t* wcs2);
-size_t wcsspn(const wchar_t* ws1, const wchar_t* ws2);
-size_t wcscspn(const wchar_t* wcs1, const wchar_t* wcs2);
+wchar_t *wcscpy(wchar_t *destination, const wchar_t *source);
+wchar_t *wcsncpy(wchar_t *destination, const wchar_t *source, size_t num);
+wchar_t *wcspbrk(const wchar_t *wcs1, const wchar_t *wcs2);
+size_t wcsspn(const wchar_t *ws1, const wchar_t *ws2);
+size_t wcscspn(const wchar_t *wcs1, const wchar_t *wcs2);
 int wcscmp(const wchar_t *s1, const wchar_t *s2);
 int wcsncmp(const wchar_t *s1, const wchar_t *s2, int len);
 int wcslen(const wchar_t *string);
 wchar_t *wcschr(const wchar_t *string, wint_t character);
-wchar_t* wcscat(wchar_t* destination, const wchar_t* source);
-wchar_t* wcsncat(wchar_t* destination, const wchar_t* source, size_t num);
+wchar_t *wcscat(wchar_t *destination, const wchar_t *source);
+wchar_t *wcsncat(wchar_t *destination, const wchar_t *source, size_t num);
 
-int vxwprintf(void (*func)(wchar_t*,int,void*), void *arg, const wchar_t *format, va_list ap);
+int vxwprintf(void (*func)(wchar_t *, int, void *), void *arg, const wchar_t *format, va_list ap);
 void __swout(wchar_t *txt, int amt, void *arg);
 int vsnwprintf(wchar_t *buf, size_t n, const wchar_t *fmt, va_list ap);
 int snwprintf(wchar_t *str, size_t sz, const wchar_t *format, ...);

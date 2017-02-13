@@ -30,98 +30,101 @@ static vs32 alloc_sema = -1;
 #define DEFAULT_HEAP_SIZE 128 * 1024
 
 u32 heap_size = DEFAULT_HEAP_SIZE;
-static u8 * heap_start, * heap_end, * _heap_ptr;
+static u8 *heap_start, *heap_end, *_heap_ptr;
 
-static void alloc_lock() {
-    if (alloc_sema >= 0) {
-	WaitSema(alloc_sema);
-    }
+static void alloc_lock()
+{
+	if (alloc_sema >= 0) {
+		WaitSema(alloc_sema);
+	}
 }
 
-static void alloc_unlock() {
-    if (alloc_sema >= 0) {
-	SignalSema(alloc_sema);
-    }
+static void alloc_unlock()
+{
+	if (alloc_sema >= 0) {
+		SignalSema(alloc_sema);
+	}
 }
 
 int _start(int argc, char **argv)
 {
-    iop_sema_t sem_info;
+	iop_sema_t sem_info;
 
-    if (RegisterLibraryEntries(&_exp_alloc) != 0)
-	return 1;
+	if (RegisterLibraryEntries(&_exp_alloc) != 0)
+		return 1;
 
-    // check arguments for a heap_size parameter.
-    if (argc > 1) {
-	heap_size = strtoul(argv[1], NULL, 0);
-    }
+	// check arguments for a heap_size parameter.
+	if (argc > 1) {
+		heap_size = strtoul(argv[1], NULL, 0);
+	}
 
-    if (!(heap_start = AllocSysMemory(ALLOC_FIRST, heap_size, NULL)))
-	return -1;
-    heap_end = heap_start + heap_size;
-    _heap_ptr = heap_start;
+	if (!(heap_start = AllocSysMemory(ALLOC_FIRST, heap_size, NULL)))
+		return -1;
+	heap_end = heap_start + heap_size;
+	_heap_ptr = heap_start;
 
-    sem_info.attr = 1;
-    sem_info.option = 1;
-    sem_info.initial = 1;
-    sem_info.max = 1;
+	sem_info.attr = 1;
+	sem_info.option = 1;
+	sem_info.initial = 1;
+	sem_info.max = 1;
 
-    alloc_sema = CreateSema(&sem_info);
+	alloc_sema = CreateSema(&sem_info);
 
-    return 0;
+	return 0;
 }
 
 
 int shutdown()
 {
-    if (alloc_sema >= 0) {
-	DeleteSema(alloc_sema);
-    }
+	if (alloc_sema >= 0) {
+		DeleteSema(alloc_sema);
+	}
 
-    FreeSysMemory(heap_start);
+	FreeSysMemory(heap_start);
 
-    return 0;
+	return 0;
 }
 
 /* Use this to set the default malloc() alignment. */
-#define DEFAULT_ALIGNMENT	16
+#define DEFAULT_ALIGNMENT 16
 
 #ifndef ALIGN
-#define ALIGN(x, align) (((x)+((align)-1))&~((align)-1))
+#define ALIGN(x, align) (((x) + ((align)-1)) & ~((align)-1))
 #endif
 
 /* _heap_mem_block_header structure. */
-typedef struct _heap_mem_header {
-	void *	ptr;
-	size_t	size;
-	struct _heap_mem_header * prev;
-	struct _heap_mem_header * next;
+typedef struct _heap_mem_header
+{
+	void *ptr;
+	size_t size;
+	struct _heap_mem_header *prev;
+	struct _heap_mem_header *next;
 } heap_mem_header_t;
 
-static void * __alloc_heap_base = NULL;
+static void *__alloc_heap_base = NULL;
 static heap_mem_header_t *__alloc_heap_head = NULL;
 static heap_mem_header_t *__alloc_heap_tail = NULL;
 
-static void * alloc_sbrk(size_t increment)
+static void *alloc_sbrk(size_t increment)
 {
-        u8 *mp, *ret = (void *)-1;
+	u8 *mp, *ret = (void *)-1;
 
-        if (increment == 0)
-                return _heap_ptr;
+	if (increment == 0)
+		return _heap_ptr;
 
-        /* If the area we want to allocated is past the end of our heap, we have a problem. */
-        mp = _heap_ptr + increment;
-        if (mp <= heap_end) {
-                ret = _heap_ptr;
-                _heap_ptr = mp;
-        }
+	/* If the area we want to allocated is past the end of our heap, we have a problem. */
+	mp = _heap_ptr + increment;
+	if (mp <= heap_end) {
+		ret = _heap_ptr;
+		_heap_ptr = mp;
+	}
 
-        return ret;
+	return ret;
 }
 
 /* Find a the lowest block that we can allocate AFTER, returning NULL if there
    are none.  */
-static heap_mem_header_t * _heap_mem_fit(heap_mem_header_t *head, size_t size)
+static heap_mem_header_t *_heap_mem_fit(heap_mem_header_t *head, size_t size)
 {
 	heap_mem_header_t *prev_mem = head;
 	u32 prev_top, next_bot;
@@ -140,7 +143,7 @@ static heap_mem_header_t * _heap_mem_fit(heap_mem_header_t *head, size_t size)
 	return prev_mem;
 }
 
-void * malloc(size_t size)
+void *malloc(size_t size)
 {
 	void *ptr = NULL, *mem_ptr;
 	heap_mem_header_t *new_mem, *prev_mem;
@@ -165,12 +168,12 @@ void * malloc(size_t size)
 
 		/* Allocate the physical heap and setup the head block.  */
 		if ((mem_ptr = alloc_sbrk(mem_sz)) == (void *)-1)
-			return ptr;	/* NULL */
+			return ptr; /* NULL */
 
 		ptr = (void *)((u32)mem_ptr + sizeof(heap_mem_header_t));
 
-		__alloc_heap_head       = (heap_mem_header_t *)mem_ptr;
-		__alloc_heap_head->ptr  = ptr;
+		__alloc_heap_head = (heap_mem_header_t *)mem_ptr;
+		__alloc_heap_head->ptr = ptr;
 		__alloc_heap_head->size = mem_sz - sizeof(heap_mem_header_t);
 		__alloc_heap_head->prev = NULL;
 		__alloc_heap_head->next = NULL;
@@ -184,9 +187,9 @@ void * malloc(size_t size)
 	/* Check to see if there's free space at the bottom of the heap.  */
 	if ((__alloc_heap_base + mem_sz) < (void *)__alloc_heap_head) {
 		new_mem = (heap_mem_header_t *)__alloc_heap_base;
-		ptr     = (void *)((u32)new_mem + sizeof(heap_mem_header_t));
+		ptr = (void *)((u32)new_mem + sizeof(heap_mem_header_t));
 
-		new_mem->ptr  = ptr;
+		new_mem->ptr = ptr;
 		new_mem->size = mem_sz - sizeof(heap_mem_header_t);
 		new_mem->prev = NULL;
 		new_mem->next = __alloc_heap_head;
@@ -201,9 +204,9 @@ void * malloc(size_t size)
 	prev_mem = _heap_mem_fit(__alloc_heap_head, mem_sz);
 	if (prev_mem != NULL) {
 		new_mem = (heap_mem_header_t *)((u32)prev_mem->ptr + prev_mem->size);
-		ptr     = (void *)((u32)new_mem + sizeof(heap_mem_header_t));
+		ptr = (void *)((u32)new_mem + sizeof(heap_mem_header_t));
 
-		new_mem->ptr  = ptr;
+		new_mem->ptr = ptr;
 		new_mem->size = mem_sz - sizeof(heap_mem_header_t);
 		new_mem->prev = prev_mem;
 		new_mem->next = prev_mem->next;
@@ -218,25 +221,25 @@ void * malloc(size_t size)
 	   order. */
 	if ((mem_ptr = alloc_sbrk(mem_sz)) == (void *)-1) {
 		alloc_unlock();
-		return ptr;	/* NULL */
+		return ptr; /* NULL */
 	}
 
 	ptr = (void *)((u32)mem_ptr + sizeof(heap_mem_header_t));
 
-	new_mem       = (heap_mem_header_t *)mem_ptr;
-	new_mem->ptr  = ptr;
+	new_mem = (heap_mem_header_t *)mem_ptr;
+	new_mem->ptr = ptr;
 	new_mem->size = mem_sz - sizeof(heap_mem_header_t);
 	new_mem->prev = __alloc_heap_tail;
 	new_mem->next = NULL;
 
 	__alloc_heap_tail->next = new_mem;
-	__alloc_heap_tail       = new_mem;
+	__alloc_heap_tail = new_mem;
 
 	alloc_unlock();
 	return ptr;
 }
 
-void * realloc(void *ptr, size_t size)
+void *realloc(void *ptr, size_t size)
 {
 	heap_mem_header_t *prev_mem;
 	void *new_ptr = NULL;
@@ -274,7 +277,7 @@ void * realloc(void *ptr, size_t size)
 	/* Are we the last memory block ? */
 	if (!prev_mem->next) {
 		/* Yes, let's just extend the heap then. */
-		if (alloc_sbrk(size - prev_mem->size) == (void*) -1)
+		if (alloc_sbrk(size - prev_mem->size) == (void *)-1)
 			return NULL;
 		prev_mem->size = size;
 
@@ -296,14 +299,14 @@ void * realloc(void *ptr, size_t size)
 	if ((new_ptr = malloc(size)) == NULL)
 		return new_ptr;
 
-        /* New block is larger, we only copy the old data. */
+	/* New block is larger, we only copy the old data. */
 	memcpy(new_ptr, ptr, prev_mem->size);
 
 	free(ptr);
 	return new_ptr;
 }
 
-void * calloc(size_t n, size_t size)
+void *calloc(size_t n, size_t size)
 {
 	void *ptr = NULL;
 	size_t sz = n * size;
@@ -315,7 +318,7 @@ void * calloc(size_t n, size_t size)
 	return ptr;
 }
 
-void * memalign(size_t align, size_t size)
+void *memalign(size_t align, size_t size)
 {
 	heap_mem_header_t new_mem;
 	heap_mem_header_t *cur_mem;
@@ -328,7 +331,7 @@ void * memalign(size_t align, size_t size)
 	/* Allocate with extra alignment bytes just in case it isn't aligned
 	   properly by malloc.  */
 	if ((ptr = malloc(size + align)) == NULL)
-		return ptr;	/* NULL */
+		return ptr; /* NULL */
 
 	/* If malloc returned it aligned for us we're fine.  */
 	if (((u32)ptr & (align - 1)) == 0)
@@ -386,7 +389,7 @@ void free(void *ptr)
 	/* Freeing the head pointer is a special case.  */
 	if (ptr == __alloc_heap_head->ptr) {
 		size = __alloc_heap_head->size +
-			(size_t)(__alloc_heap_head->ptr - (void *)__alloc_heap_head);
+		       (size_t)(__alloc_heap_head->ptr - (void *)__alloc_heap_head);
 
 		__alloc_heap_head = __alloc_heap_head->next;
 
@@ -403,7 +406,7 @@ void free(void *ptr)
 	}
 
 	cur = __alloc_heap_head;
-	while (ptr != cur->ptr)  {
+	while (ptr != cur->ptr) {
 		/* ptr isn't in our list */
 		if (cur->next == NULL) {
 			alloc_unlock();
@@ -432,12 +435,14 @@ void free(void *ptr)
 	alloc_unlock();
 }
 
-void * __mem_walk_begin() {
+void *__mem_walk_begin()
+{
 	return __alloc_heap_head;
 }
 
-void __mem_walk_read(void * token, u32 * size, void ** ptr, int * valid) {
-        heap_mem_header_t * cur = (heap_mem_header_t *) token;
+void __mem_walk_read(void *token, u32 *size, void **ptr, int *valid)
+{
+	heap_mem_header_t *cur = (heap_mem_header_t *)token;
 
 	*valid = 1;
 
@@ -445,12 +450,14 @@ void __mem_walk_read(void * token, u32 * size, void ** ptr, int * valid) {
 	*ptr = cur->ptr;
 }
 
-void * __mem_walk_inc(void * token) {
-	heap_mem_header_t * cur = (heap_mem_header_t *) token;
+void *__mem_walk_inc(void *token)
+{
+	heap_mem_header_t *cur = (heap_mem_header_t *)token;
 
 	return cur->next;
 }
 
-int __mem_walk_end(void * token) {
+int __mem_walk_end(void *token)
+{
 	return token == NULL;
 }

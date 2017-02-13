@@ -22,7 +22,7 @@ extern "C" {
 //EE-only libcdvd function prototypes.
 
 // read data to iop memory
-// 
+//
 // arguments:	sector location to read from
 //		number of sectors to read
 //		buffer to read to (in iop memory)
@@ -33,14 +33,14 @@ int sceCdReadIOPMem(u32 lbn, u32 sectors, void *buf, sceCdRMode *mode);
 
 // wait for disc to finish all n-commands
 // (shouldnt really need to call this yourself)
-// 
+//
 // returns:	SCECdNotReady (6) if busy
 //		SCECdComplete (2) if ready
 //		0 if error
 int sceCdNCmdDiskReady(void);
 
 // send an s-command by function number
-// 
+//
 // arguments:	command number
 //		input buffer  (can be null)
 //		size of input buffer  (0 - 16 bytes)
@@ -48,10 +48,10 @@ int sceCdNCmdDiskReady(void);
 //		size of output buffer (0 - 16 bytes)
 // returns:	1 if successful
 //		0 if error
-int sceCdApplySCmd(u8 cmdNum, const void* inBuff, u16 inBuffSize, void *outBuff, u16 outBuffSize);
+int sceCdApplySCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff, u16 outBuffSize);
 
 // send an n-command by function number
-// 
+//
 // arguments:	command number
 //		input buffer  (can be null)
 //		size of input buffer  (0 - 16 bytes)
@@ -59,7 +59,7 @@ int sceCdApplySCmd(u8 cmdNum, const void* inBuff, u16 inBuffSize, void *outBuff,
 //		size of output buffer (0 - 16 bytes)
 // returns:	1 if successful
 //		0 if error
-int sceCdApplyNCmd(u8 cmdNum, const void* inBuff, u16 inBuffSize, void* outBuff, u16 outBuffSize);
+int sceCdApplyNCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff, u16 outBuffSize);
 
 // Opens a specified configuration block, within NVRAM. Each block is 15 bytes long.
 //

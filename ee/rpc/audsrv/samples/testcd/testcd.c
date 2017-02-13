@@ -37,8 +37,7 @@ int main(int argc, char **argv)
 	printf("audsrv loadmodule %d\n", ret);
 
 	ret = audsrv_init();
-	if (ret != 0)
-	{
+	if (ret != 0) {
 		printf("sample: failed to initialize audsrv\n");
 		printf("audsrv returned error string: %s\n", audsrv_get_error_string());
 		return 1;
@@ -48,16 +47,14 @@ int main(int argc, char **argv)
 	printf("There are %d tracks on this disc\n", n);
 
 	lastpos = 0;
-	for (track=0; track<=n; track++)
-	{
+	for (track = 0; track <= n; track++) {
 		int pos = audsrv_get_track_offset(track);
 
-		if (track > 0)
-		{
+		if (track > 0) {
 			int length = pos - lastpos;
 
 			printf("Track %02d: sector 0x%x, length: %02d:%02d:%02d\n",
-			track, pos, length / (75*60), (length / 75) % 60, length % 75);
+			       track, pos, length / (75 * 60), (length / 75) % 60, length % 75);
 		}
 
 		lastpos = pos;

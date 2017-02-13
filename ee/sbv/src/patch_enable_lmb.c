@@ -28,9 +28,9 @@ extern struct smem_buf smem_buf;
 /* from slib.c */
 extern slib_exp_lib_list_t _slib_cur_exp_lib_list;
 
-#define JAL(addr)	(0x0c000000 | (0x3ffffff & ((addr) >> 2)))
-#define HI16(addr)	(0x3c110000 | (((addr) >> 16) & 0xffff))	/* lui $s1, HI(addr) */
-#define LO16(addr)	(0x36310000 | ((addr) & 0xffff))		/* ori $s1, LO(addr) */
+#define JAL(addr) (0x0c000000 | (0x3ffffff & ((addr) >> 2)))
+#define HI16(addr) (0x3c110000 | (((addr) >> 16) & 0xffff)) /* lui $s1, HI(addr) */
+#define LO16(addr) (0x36310000 | ((addr)&0xffff))           /* ori $s1, LO(addr) */
 
 int sbv_patch_enable_lmb(void)
 {
@@ -38,34 +38,33 @@ int sbv_patch_enable_lmb(void)
 	   over RPC (call #6).  The bracketed operands are the ones patched by the real
 	   locations in IOP memory before being installed onto the IOP.  */
 	static u32 lmb_patch[32] ALIGNED(64) = {
-		0x27bdffd8,	/*	addiu	$sp, -40	*/
-		0xafb00018,	/*	sw	$s0, 0x18($sp)	*/
-		0xafbf0020,	/*	sw	$ra, 0x20($sp)	*/
-		0x00808021,	/*	move	$s0, $a0	*/
-		0x8c840000,	/*	lw	$a0, 0($a0)	*/
-		0x0c000000,	/*	jal	[LoadModuleBuffer] */
-		0xafb1001c,	/*	 sw	$s1, 0x1c($sp)	*/
-		0x3c110000,	/*	lui	$s1, [HI16(result)] */
-		0x04400008,	/*	bltz	$v0, 1f		*/
-		0x36310000,	/*	 ori	$s1, [LO16(result)] */
-		0x00402021,	/*	move	$a0, $v0	*/
-		0x26250008,	/*	addiu	$a1, $s1, 8	*/
-		0x8e060004,	/*	lw	$a2, 4($s0)	*/
-		0x26070104,	/*	addiu	$a3, $s0, 0x104 */
-		0x26280004,	/*	addiu	$t0, $s1, 4	*/
-		0x0c000000,	/*	jal	[StartModule]	*/
-		0xafa80010,	/*	 sw	$t0, 0x10($sp)	*/
-		0xae220000,	/* 1:	sw	$v0, 0($s1)	*/
-		0x02201021,	/*	move	$v0, $s1	*/
-		0x8fbf0020,	/*	lw	$ra, 0x20($sp)	*/
-		0x8fb1001c,	/*	lw	$s1, 0x1c($sp)	*/
-		0x8fb00018,	/*	lw	$s0, 0x18($sp)	*/
-		0x03e00008,	/*	jr	$ra		*/
-		0x27bd0028,	/*	 addiu	$sp, 40		*/
-		0x00000000, 0x00000000,
-		0x7962424c, 0x00004545,	/* "LBbyEE" */
-		0x00000000, 0x00000000, 0x00000000, 0x00000000
-	};
+	    0x27bdffd8, /*	addiu	$sp, -40	*/
+	    0xafb00018, /*	sw	$s0, 0x18($sp)	*/
+	    0xafbf0020, /*	sw	$ra, 0x20($sp)	*/
+	    0x00808021, /*	move	$s0, $a0	*/
+	    0x8c840000, /*	lw	$a0, 0($a0)	*/
+	    0x0c000000, /*	jal	[LoadModuleBuffer] */
+	    0xafb1001c, /*	 sw	$s1, 0x1c($sp)	*/
+	    0x3c110000, /*	lui	$s1, [HI16(result)] */
+	    0x04400008, /*	bltz	$v0, 1f		*/
+	    0x36310000, /*	 ori	$s1, [LO16(result)] */
+	    0x00402021, /*	move	$a0, $v0	*/
+	    0x26250008, /*	addiu	$a1, $s1, 8	*/
+	    0x8e060004, /*	lw	$a2, 4($s0)	*/
+	    0x26070104, /*	addiu	$a3, $s0, 0x104 */
+	    0x26280004, /*	addiu	$t0, $s1, 4	*/
+	    0x0c000000, /*	jal	[StartModule]	*/
+	    0xafa80010, /*	 sw	$t0, 0x10($sp)	*/
+	    0xae220000, /* 1:	sw	$v0, 0($s1)	*/
+	    0x02201021, /*	move	$v0, $s1	*/
+	    0x8fbf0020, /*	lw	$ra, 0x20($sp)	*/
+	    0x8fb1001c, /*	lw	$s1, 0x1c($sp)	*/
+	    0x8fb00018, /*	lw	$s0, 0x18($sp)	*/
+	    0x03e00008, /*	jr	$ra		*/
+	    0x27bd0028, /*	 addiu	$sp, 40		*/
+	    0x00000000, 0x00000000,
+	    0x7962424c, 0x00004545, /* "LBbyEE" */
+	    0x00000000, 0x00000000, 0x00000000, 0x00000000};
 	u8 buf[256];
 	SifRpcReceiveData_t RData;
 	slib_exp_lib_t *modload_lib = (slib_exp_lib_t *)buf;
@@ -106,21 +105,21 @@ int sbv_patch_enable_lmb(void)
 			14400003	bnez	$v0, +12
 			afbf0010	sw	$ra, 0x10($sp)	*/
 
-	if(loadfile_info.text_size < 0x4c4 + 128)
+	if (loadfile_info.text_size < 0x4c4 + 128)
 		return -1;
 
 	lf_rpc_dispatch = (void *)(loadfile_info.text_start + 0x4c4);
-	SyncDCache(&smem_buf, smem_buf.bytes+128);
-	if(SifRpcGetOtherData(&RData, (void*)lf_rpc_dispatch, &smem_buf, 128, 0)>=0){
-		data=smem_buf.words;
-		if(data[0]==0x27bdffe8 && data[1]==0x2c820006 && data[2]==0x14400003 && data[3]==0xafbf0010 && data[5]==0x00001021 && data[6]==0x00041080){
-			lf_fno_check = (void*)(lf_rpc_dispatch+4);
+	SyncDCache(&smem_buf, smem_buf.bytes + 128);
+	if (SifRpcGetOtherData(&RData, (void *)lf_rpc_dispatch, &smem_buf, 128, 0) >= 0) {
+		data = smem_buf.words;
+		if (data[0] == 0x27bdffe8 && data[1] == 0x2c820006 && data[2] == 0x14400003 && data[3] == 0xafbf0010 && data[5] == 0x00001021 && data[6] == 0x00041080) {
+			lf_fno_check = (void *)(lf_rpc_dispatch + 4);
 
 			/* We need to extract the address of the jump table. */
-			JumpTableOffset_hi=*(unsigned short int*)&data[7];
-			JumpTableOffset_lo=*(unsigned short int*)&data[9];
+			JumpTableOffset_hi = *(unsigned short int *)&data[7];
+			JumpTableOffset_lo = *(unsigned short int *)&data[9];
 
-			lf_jump_table_end = (void*)((JumpTableOffset_hi<<16) + (short int)JumpTableOffset_lo + 0x18);
+			lf_jump_table_end = (void *)((JumpTableOffset_hi << 16) + (short int)JumpTableOffset_lo + 0x18);
 
 			/* Now we can patch our subversive LoadModuleBuffer RPC call.  */
 			SifInitIopHeap();
@@ -136,10 +135,10 @@ int sbv_patch_enable_lmb(void)
 
 			SyncDCache(lmb_patch, (void *)(lmb_patch + 24));
 
-			dmat.src=lmb_patch;
-			dmat.size=sizeof(lmb_patch);
-			dmat.dest=patch_addr;
-			dmat.attr=0;
+			dmat.src = lmb_patch;
+			dmat.size = sizeof(lmb_patch);
+			dmat.dest = patch_addr;
+			dmat.attr = 0;
 
 			SifSetDma(&dmat, 1);
 
@@ -147,7 +146,7 @@ int sbv_patch_enable_lmb(void)
 			   so that it will jump to entry #6 in it's jump table, and to patch the jump
 			   table itself.  */
 			smem_write_word(lf_jump_table_end, (u32)patch_addr);
-			smem_write_word(lf_fno_check, 0x2C820007);	//sltiu v0, a0, $0007
+			smem_write_word(lf_fno_check, 0x2C820007); //sltiu v0, a0, $0007
 
 			return 0;
 		}

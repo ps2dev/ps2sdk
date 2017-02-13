@@ -60,11 +60,10 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 
 
 static float A[] = {
--4.16666666666666666667E-3,
- 3.96825396825396825397E-3,
--8.33333333333333333333E-3,
- 8.33333333333333333333E-2
-};
+    -4.16666666666666666667E-3,
+    3.96825396825396825397E-3,
+    -8.33333333333333333333E-3,
+    8.33333333333333333333E-2};
 
 
 #define EUL 0.57721566490153286061
@@ -81,80 +80,67 @@ float psif(float xx)
 #else
 float floorf(), logf(), tanf(), polevlf();
 
-float psif(xx)
-double xx;
+float psif(xx) double xx;
 #endif
 {
-float p, q, nz, x, s, w, y, z;
-int i, n, negative;
+	float p, q, nz, x, s, w, y, z;
+	int i, n, negative;
 
 
-x = xx;
-nz = 0.0;
-negative = 0;
-if( x <= 0.0 )
-	{
-	negative = 1;
-	q = x;
-	p = floorf(q);
-	if( p == q )
-		{
-		mtherr( "psif", SING );
-		return( MAXNUMF );
+	x = xx;
+	nz = 0.0;
+	negative = 0;
+	if (x <= 0.0) {
+		negative = 1;
+		q = x;
+		p = floorf(q);
+		if (p == q) {
+			mtherr("psif", SING);
+			return (MAXNUMF);
 		}
-	nz = q - p;
-	if( nz != 0.5 )
-		{
-		if( nz > 0.5 )
-			{
-			p += 1.0;
-			nz = q - p;
+		nz = q - p;
+		if (nz != 0.5) {
+			if (nz > 0.5) {
+				p += 1.0;
+				nz = q - p;
 			}
-		nz = PIF/tanf(PIF*nz);
+			nz = PIF / tanf(PIF * nz);
+		} else {
+			nz = 0.0;
 		}
-	else
-		{
-		nz = 0.0;
+		x = 1.0 - x;
+	}
+
+	/* check for positive integer up to 10 */
+	if ((x <= 10.0) && (x == floorf(x))) {
+		y = 0.0;
+		n = x;
+		for (i = 1; i < n; i++) {
+			w = i;
+			y += 1.0 / w;
 		}
-	x = 1.0 - x;
+		y -= EUL;
+		goto done;
 	}
 
-/* check for positive integer up to 10 */
-if( (x <= 10.0) && (x == floorf(x)) )
-	{
-	y = 0.0;
-	n = x;
-	for( i=1; i<n; i++ )
-		{
-		w = i;
-		y += 1.0/w;
-		}
-	y -= EUL;
-	goto done;
+	s = x;
+	w = 0.0;
+	while (s < 10.0) {
+		w += 1.0 / s;
+		s += 1.0;
 	}
 
-s = x;
-w = 0.0;
-while( s < 10.0 )
-	{
-	w += 1.0/s;
-	s += 1.0;
-	}
+	if (s < 1.0e8) {
+		z = 1.0 / (s * s);
+		y = z * polevlf(z, A, 3);
+	} else
+		y = 0.0;
 
-if( s < 1.0e8 )
-	{
-	z = 1.0/(s * s);
-	y = z * polevlf( z, A, 3 );
-	}
-else
-	y = 0.0;
-
-y = logf(s)  -  (0.5/s)  -  y  -  w;
+	y = logf(s) - (0.5 / s) - y - w;
 
 done:
-if( negative )
-	{
-	y -= nz;
+	if (negative) {
+		y -= nz;
 	}
-return(y);
+	return (y);
 }

@@ -9,29 +9,29 @@
 */
 
 #ifndef IOP_PS2IP_INTERNAL_H
-#define	IOP_PS2IP_INTERNAL_H
+#define IOP_PS2IP_INTERNAL_H
 
 #include <types.h>
 #include "lwip/sockets.h"
 
 #ifdef DEBUG
-#define	dbgprintf(args...)	printf(args)
+#define dbgprintf(args...) printf(args)
 #else
-#define	dbgprintf(args...)
+#define dbgprintf(args...)
 #endif
 
-#define netif_dhcp_data(netif) ((struct dhcp*)(netif)->client_data[LWIP_NETIF_CLIENT_DATA_INDEX_DHCP])
+#define netif_dhcp_data(netif) ((struct dhcp *)(netif)->client_data[LWIP_NETIF_CLIENT_DATA_INDEX_DHCP])
 
 //This structure is also found in common/tcpip.h, but that header file cannot be imported because it will conflict with the full LWIP header files.
 typedef struct
 {
-	char			netif_name[4];
-	struct in_addr		ipaddr;
-	struct in_addr		netmask;
-	struct in_addr		gw;
-	u32			dhcp_enabled;
-	u32			dhcp_status;
-	u8			hw_addr[8];
+	char netif_name[4];
+	struct in_addr ipaddr;
+	struct in_addr netmask;
+	struct in_addr gw;
+	u32 dhcp_enabled;
+	u32 dhcp_status;
+	u8 hw_addr[8];
 } t_ip_info;
 
-#endif	// !defined(IOP_PS2IP_INTERNAL_H)
+#endif // !defined(IOP_PS2IP_INTERNAL_H)

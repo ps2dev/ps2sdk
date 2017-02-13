@@ -23,15 +23,14 @@ int pfsBlockExpandSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 coun
 	int ret;
 	pfs_blockinfo_t *bi;
 
-	if(pfsFixIndex(blockpos->block_segment)==0)
+	if (pfsFixIndex(blockpos->block_segment) == 0)
 		return 0;
 
 	bi = &blockpos->inode->u.inode->data[pfsFixIndex(blockpos->block_segment)];
 
-	if ((ret = pfsBitmapAllocateAdditionalZones(clink->pfsMount, bi, count)))
-	{
-		bi->count+=ret;
-		clink->u.inode->number_blocks+=ret;
+	if ((ret = pfsBitmapAllocateAdditionalZones(clink->pfsMount, bi, count))) {
+		bi->count += ret;
+		clink->u.inode->number_blocks += ret;
 		blockpos->inode->flags |= PFS_CACHE_FLAG_DIRTY;
 		clink->flags |= PFS_CACHE_FLAG_DIRTY;
 	}
@@ -43,33 +42,31 @@ int pfsBlockExpandSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 coun
 int pfsBlockAllocNewSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 blocks)
 {
 	pfs_blockinfo_t bi, *bi2;
-	int result=0;
-	pfs_mount_t *pfsMount=clink->pfsMount;
+	int result = 0;
+	pfs_mount_t *pfsMount = clink->pfsMount;
 	u32 i, old_blocks = blocks;
 
 	if (pfsCacheIsFull())
 		return -ENOMEM;
 
 	// create "indirect segment descriptor" if necessary
-	if (pfsFixIndex(clink->u.inode->number_data) == 0)
-	{
+	if (pfsFixIndex(clink->u.inode->number_data) == 0) {
 		pfs_cache_t *clink2;
 
 		bi2 = &blockpos->inode->u.inode->data[pfsFixIndex(blockpos->block_segment)];
-		bi.subpart=bi2->subpart;
-		bi.count=1;
-		bi.number=bi2->number+bi2->count;
-		result=pfsBitmapSearchFreeZone(pfsMount, &bi, clink->u.inode->number_blocks);
-		if (result<0)
-		{
-			PFS_PRINTF(PFS_DRV_NAME": Error: Couldnt allocate zone! (1)\n");
+		bi.subpart = bi2->subpart;
+		bi.count = 1;
+		bi.number = bi2->number + bi2->count;
+		result = pfsBitmapSearchFreeZone(pfsMount, &bi, clink->u.inode->number_blocks);
+		if (result < 0) {
+			PFS_PRINTF(PFS_DRV_NAME ": Error: Couldnt allocate zone! (1)\n");
 			return result;
 		}
 
-		clink2=pfsCacheGetData(pfsMount, bi.subpart, bi.number << pfsMount->inode_scale,
-								PFS_CACHE_FLAG_SEGI | PFS_CACHE_FLAG_NOLOAD, &result);
+		clink2 = pfsCacheGetData(pfsMount, bi.subpart, bi.number << pfsMount->inode_scale,
+		                         PFS_CACHE_FLAG_SEGI | PFS_CACHE_FLAG_NOLOAD, &result);
 		memset(clink2->u.inode, 0, sizeof(pfs_inode_t));
-		clink2->u.inode->magic=PFS_SEGI_MAGIC;
+		clink2->u.inode->magic = PFS_SEGI_MAGIC;
 
 		memcpy(&clink2->u.inode->inode_block, &clink->u.inode->inode_block, sizeof(pfs_blockinfo_t));
 		memcpy(&clink2->u.inode->last_segment, blockpos->inode->u.inode->data, sizeof(pfs_blockinfo_t));
@@ -77,7 +74,7 @@ int pfsBlockAllocNewSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 bl
 
 		clink2->flags |= PFS_CACHE_FLAG_DIRTY;
 
-		clink->u.inode->number_blocks+=bi.count;
+		clink->u.inode->number_blocks += bi.count;
 		clink->u.inode->number_data++;
 
 		memcpy(&clink->u.inode->last_segment, &bi, sizeof(pfs_blockinfo_t));
@@ -86,13 +83,13 @@ int pfsBlockAllocNewSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 bl
 
 		clink->flags |= PFS_CACHE_FLAG_DIRTY;
 		blockpos->block_segment++;
-		blockpos->block_offset=0;
+		blockpos->block_offset = 0;
 
 		memcpy(&blockpos->inode->u.inode->next_segment, &bi, sizeof(pfs_blockinfo_t));
 
 		blockpos->inode->flags |= PFS_CACHE_FLAG_DIRTY;
 		pfsCacheFree(blockpos->inode);
-		blockpos->inode=clink2;
+		blockpos->inode = clink2;
 	}
 
 	bi2 = &blockpos->inode->u.inode->data[pfsFixIndex(blockpos->block_segment)];
@@ -101,19 +98,18 @@ int pfsBlockAllocNewSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 bl
 	bi.number = bi2->number + bi2->count;
 
 	result = pfsBitmapSearchFreeZone(pfsMount, &bi, clink->u.inode->number_blocks);
-	if(result < 0)
-	{
-		PFS_PRINTF(PFS_DRV_NAME": Error: Couldnt allocate zone! (2)\n");
+	if (result < 0) {
+		PFS_PRINTF(PFS_DRV_NAME ": Error: Couldnt allocate zone! (2)\n");
 		return result;
 	}
 
 	clink->u.inode->number_blocks += bi.count;
 	clink->u.inode->number_data++;
 	clink->flags |= PFS_CACHE_FLAG_DIRTY;
-	blockpos->block_offset=0;
+	blockpos->block_offset = 0;
 	blockpos->block_segment++;
 
-	i = pfsFixIndex(clink->u.inode->number_data-1);
+	i = pfsFixIndex(clink->u.inode->number_data - 1);
 	memcpy(&blockpos->inode->u.inode->data[i], &bi, sizeof(pfs_blockinfo_t));
 
 	blockpos->inode->flags |= PFS_CACHE_FLAG_DIRTY;
@@ -126,7 +122,7 @@ int pfsBlockAllocNewSegment(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 bl
 
 // Returns the block info for the block segment corresponding to the
 // files current position.
-pfs_blockinfo_t* pfsBlockGetCurrent(pfs_blockpos_t *blockpos)
+pfs_blockinfo_t *pfsBlockGetCurrent(pfs_blockpos_t *blockpos)
 {
 	return &blockpos->inode->u.inode->data[pfsFixIndex(blockpos->block_segment)];
 }
@@ -134,9 +130,12 @@ pfs_blockinfo_t* pfsBlockGetCurrent(pfs_blockpos_t *blockpos)
 pfs_cache_t *pfsBlockGetLastSegmentDescriptorInode(pfs_cache_t *clink, int *result)
 {
 	return pfsCacheGetData(clink->pfsMount, clink->u.inode->last_segment.subpart,
-		clink->u.inode->last_segment.number<<clink->pfsMount->inode_scale,
-		(clink->u.inode->last_segment.subpart==
-		 clink->u.inode->inode_block.subpart)&&
-		(clink->u.inode->last_segment.number==
-		 clink->u.inode->inode_block.number) ? 16 : 32, result);
+	                       clink->u.inode->last_segment.number << clink->pfsMount->inode_scale,
+	                       (clink->u.inode->last_segment.subpart ==
+	                        clink->u.inode->inode_block.subpart) &&
+	                               (clink->u.inode->last_segment.number ==
+	                                clink->u.inode->inode_block.number) ?
+	                           16 :
+	                           32,
+	                       result);
 }

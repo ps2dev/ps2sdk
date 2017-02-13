@@ -29,7 +29,7 @@
  */
 
 #include "netif/ppp/ppp_opts.h"
-#if PPP_SUPPORT && CHAP_SUPPORT  /* don't build if not configured for use in lwipopts.h */
+#if PPP_SUPPORT && CHAP_SUPPORT /* don't build if not configured for use in lwipopts.h */
 
 #if 0 /* UNUSED */
 #include <stdlib.h>
@@ -43,13 +43,14 @@
 #include "netif/ppp/magic.h"
 #include "netif/ppp/pppcrypt.h"
 
-#define MD5_HASH_SIZE		16
-#define MD5_MIN_CHALLENGE	17
-#define MD5_MAX_CHALLENGE	24
-#define MD5_MIN_MAX_POWER_OF_TWO_CHALLENGE     3   /* 2^3-1 = 7, 17+7 = 24 */
+#define MD5_HASH_SIZE 16
+#define MD5_MIN_CHALLENGE 17
+#define MD5_MAX_CHALLENGE 24
+#define MD5_MIN_MAX_POWER_OF_TWO_CHALLENGE 3 /* 2^3-1 = 7, 17+7 = 24 */
 
 #if PPP_SERVER
-static void chap_md5_generate_challenge(ppp_pcb *pcb, unsigned char *cp) {
+static void chap_md5_generate_challenge(ppp_pcb *pcb, unsigned char *cp)
+{
 	int clen;
 	LWIP_UNUSED_ARG(pcb);
 
@@ -59,9 +60,10 @@ static void chap_md5_generate_challenge(ppp_pcb *pcb, unsigned char *cp) {
 }
 
 static int chap_md5_verify_response(ppp_pcb *pcb, int id, const char *name,
-			 const unsigned char *secret, int secret_len,
-			 const unsigned char *challenge, const unsigned char *response,
-			 char *message, int message_space) {
+                                    const unsigned char *secret, int secret_len,
+                                    const unsigned char *challenge, const unsigned char *response,
+                                    char *message, int message_space)
+{
 	lwip_md5_context ctx;
 	unsigned char idbyte = id;
 	unsigned char hash[MD5_HASH_SIZE];
@@ -93,8 +95,9 @@ static int chap_md5_verify_response(ppp_pcb *pcb, int id, const char *name,
 #endif /* PPP_SERVER */
 
 static void chap_md5_make_response(ppp_pcb *pcb, unsigned char *response, int id, const char *our_name,
-		       const unsigned char *challenge, const char *secret, int secret_len,
-		       unsigned char *private_) {
+                                   const unsigned char *challenge, const char *secret, int secret_len,
+                                   unsigned char *private_)
+{
 	lwip_md5_context ctx;
 	unsigned char idbyte = id;
 	int challenge_len = *challenge++;
@@ -113,14 +116,14 @@ static void chap_md5_make_response(ppp_pcb *pcb, unsigned char *response, int id
 }
 
 const struct chap_digest_type md5_digest = {
-	CHAP_MD5,		/* code */
+    CHAP_MD5, /* code */
 #if PPP_SERVER
-	chap_md5_generate_challenge,
-	chap_md5_verify_response,
+    chap_md5_generate_challenge,
+    chap_md5_verify_response,
 #endif /* PPP_SERVER */
-	chap_md5_make_response,
-	NULL,			/* check_success */
-	NULL,			/* handle_failure */
+    chap_md5_make_response,
+    NULL, /* check_success */
+    NULL, /* handle_failure */
 };
 
 #endif /* PPP_SUPPORT && CHAP_SUPPORT */

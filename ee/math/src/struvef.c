@@ -44,7 +44,7 @@ Direct inquiries to 30 Frost Street, Cambridge, MA 02140
 
 extern float MACHEPF, MAXNUMF, PIF;
 
-#define fabsf(x) ( (x) < 0 ? -(x) : (x) )
+#define fabsf(x) ((x) < 0 ? -(x) : (x))
 
 #ifdef ANSIC
 float gammaf(float), powf(float, float), sqrtf(float);
@@ -58,238 +58,218 @@ float floorf(), ynf(), jvf(), sinf(), cosf();
 #endif
 
 #ifdef ANSIC
-float onef2f( float aa, float bb, float cc, float xx, float *err )
+float onef2f(float aa, float bb, float cc, float xx, float *err)
 #else
-float onef2f( aa, bb, cc, xx, err )
-double aa, bb, cc, xx;
+float onef2f(aa, bb, cc, xx, err) double aa, bb, cc, xx;
 float *err;
 #endif
 {
-float a, b, c, x, n, a0, sum, t;
-float an, bn, cn, max, z;
+	float a, b, c, x, n, a0, sum, t;
+	float an, bn, cn, max, z;
 
-a = aa;
-b = bb;
-c = cc;
-x = xx;
-an = a;
-bn = b;
-cn = c;
-a0 = 1.0;
-sum = 1.0;
-n = 1.0;
-t = 1.0;
-max = 0.0;
+	a = aa;
+	b = bb;
+	c = cc;
+	x = xx;
+	an = a;
+	bn = b;
+	cn = c;
+	a0 = 1.0;
+	sum = 1.0;
+	n = 1.0;
+	t = 1.0;
+	max = 0.0;
 
-do
-	{
-	if( an == 0 )
-		goto done;
-	if( bn == 0 )
-		goto error;
-	if( cn == 0 )
-		goto error;
-	if( (a0 > 1.0e34) || (n > 200) )
-		goto error;
-	a0 *= (an * x) / (bn * cn * n);
-	sum += a0;
-	an += 1.0;
-	bn += 1.0;
-	cn += 1.0;
-	n += 1.0;
-	z = fabsf( a0 );
-	if( z > max )
-		max = z;
-	if( sum != 0 )
-		t = fabsf( a0 / sum );
-	else
-		t = z;
-	}
-while( t > MACHEPF );
-
-done:
-
-*err = fabsf( MACHEPF*max /sum );
-
-#if DEBUG
-	printf(" onef2f cancellation error %.5E\n", *err );
-#endif
-
-goto xit;
-
-error:
-#if DEBUG
-printf("onef2f does not converge\n");
-#endif
-*err = MAXNUMF;
-
-xit:
-
-#if DEBUG
-printf("onef2( %.2E %.2E %.2E %.5E ) =  %.3E  %.6E\n", a, b, c, x, n, sum);
-#endif
-return(sum);
-}
-
-
-
-#ifdef ANSIC
-float threef0f( float aa, float bb, float cc, float xx, float *err )
-#else
-float threef0f( aa, bb, cc, xx, err )
-double aa, bb, cc, xx;
-float *err;
-#endif
-{
-float a, b, c, x, n, a0, sum, t, conv, conv1;
-float an, bn, cn, max, z;
-
-a = aa;
-b = bb;
-c = cc;
-x = xx;
-an = a;
-bn = b;
-cn = c;
-a0 = 1.0;
-sum = 1.0;
-n = 1.0;
-t = 1.0;
-max = 0.0;
-conv = 1.0e38;
-conv1 = conv;
-
-do
-	{
-	if( an == 0.0 )
-		goto done;
-	if( bn == 0.0 )
-		goto done;
-	if( cn == 0.0 )
-		goto done;
-	if( (a0 > 1.0e34) || (n > 200) )
-		goto error;
-	a0 *= (an * bn * cn * x) / n;
-	an += 1.0;
-	bn += 1.0;
-	cn += 1.0;
-	n += 1.0;
-	z = fabsf( a0 );
-	if( z > max )
-		max = z;
-	if( z >= conv )
-		{
-		if( (z < max) && (z > conv1) )
+	do {
+		if (an == 0)
 			goto done;
-		}
-	conv1 = conv;
-	conv = z;
-	sum += a0;
-	if( sum != 0 )
-		t = fabsf( a0 / sum );
-	else
-		t = z;
-	}
-while( t > MACHEPF );
+		if (bn == 0)
+			goto error;
+		if (cn == 0)
+			goto error;
+		if ((a0 > 1.0e34) || (n > 200))
+			goto error;
+		a0 *= (an * x) / (bn * cn * n);
+		sum += a0;
+		an += 1.0;
+		bn += 1.0;
+		cn += 1.0;
+		n += 1.0;
+		z = fabsf(a0);
+		if (z > max)
+			max = z;
+		if (sum != 0)
+			t = fabsf(a0 / sum);
+		else
+			t = z;
+	} while (t > MACHEPF);
 
 done:
 
-t = fabsf( MACHEPF*max/sum );
+	*err = fabsf(MACHEPF * max / sum);
+
 #if DEBUG
-	printf(" threef0f cancellation error %.5E\n", t );
+	printf(" onef2f cancellation error %.5E\n", *err);
 #endif
 
-max = fabsf( conv/sum );
-if( max > t )
-	t = max;
-#if DEBUG
-	printf(" threef0f convergence %.5E\n", max );
-#endif
-
-goto xit;
+	goto xit;
 
 error:
 #if DEBUG
-printf("threef0f does not converge\n");
+	printf("onef2f does not converge\n");
 #endif
-t = MAXNUMF;
+	*err = MAXNUMF;
 
 xit:
 
 #if DEBUG
-printf("threef0f( %.2E %.2E %.2E %.5E ) =  %.3E  %.6E\n", a, b, c, x, n, sum);
+	printf("onef2( %.2E %.2E %.2E %.5E ) =  %.3E  %.6E\n", a, b, c, x, n, sum);
 #endif
-
-*err = t;
-return(sum);
+	return (sum);
 }
-
 
 
 
 #ifdef ANSIC
-float struvef( float vv, float xx )
+float threef0f(float aa, float bb, float cc, float xx, float *err)
 #else
-float struvef( vv, xx )
-double vv, xx;
+float threef0f(aa, bb, cc, xx, err) double aa, bb, cc, xx;
+float *err;
 #endif
 {
-float v, x, y, ya, f, g, h, t;
-float onef2err, threef0err;
+	float a, b, c, x, n, a0, sum, t, conv, conv1;
+	float an, bn, cn, max, z;
 
-v = vv;
-x = xx;
-f = floorf(v);
-if( (v < 0) && ( v-f == 0.5 ) )
-	{
-	y = jvf( -v, x );
-	f = 1.0 - f;
-	g =  2.0 * floorf(0.5*f);
-	if( g != f )
-		y = -y;
-	return(y);
-	}
-t = 0.25*x*x;
-f = fabsf(x);
-g = 1.5 * fabsf(v);
-if( (f > 30.0) && (f > g) )
-	{
-	onef2err = MAXNUMF;
-	y = 0.0;
-	}
-else
-	{
-	y = onef2f( 1.0, 1.5, 1.5+v, -t, &onef2err );
-	}
+	a = aa;
+	b = bb;
+	c = cc;
+	x = xx;
+	an = a;
+	bn = b;
+	cn = c;
+	a0 = 1.0;
+	sum = 1.0;
+	n = 1.0;
+	t = 1.0;
+	max = 0.0;
+	conv = 1.0e38;
+	conv1 = conv;
 
-if( (f < 18.0) || (x < 0.0) )
-	{
-	threef0err = MAXNUMF;
-	ya = 0.0;
-	}
-else
-	{
-	ya = threef0f( 1.0, 0.5, 0.5-v, -1.0/t, &threef0err );
-	}
+	do {
+		if (an == 0.0)
+			goto done;
+		if (bn == 0.0)
+			goto done;
+		if (cn == 0.0)
+			goto done;
+		if ((a0 > 1.0e34) || (n > 200))
+			goto error;
+		a0 *= (an * bn * cn * x) / n;
+		an += 1.0;
+		bn += 1.0;
+		cn += 1.0;
+		n += 1.0;
+		z = fabsf(a0);
+		if (z > max)
+			max = z;
+		if (z >= conv) {
+			if ((z < max) && (z > conv1))
+				goto done;
+		}
+		conv1 = conv;
+		conv = z;
+		sum += a0;
+		if (sum != 0)
+			t = fabsf(a0 / sum);
+		else
+			t = z;
+	} while (t > MACHEPF);
 
-f = sqrtf( PIF );
-h = powf( 0.5*x, v-1.0 );
+done:
 
-if( onef2err <= threef0err )
-	{
-	g = gammaf( v + 1.5 );
-	y = y * h * t / ( 0.5 * f * g );
-	return(y);
-	}
-else
-	{
-	g = gammaf( v + 0.5 );
-	ya = ya * h / ( f * g );
-	ya = ya + yvf( v, x );
-	return(ya);
-	}
+	t = fabsf(MACHEPF * max / sum);
+#if DEBUG
+	printf(" threef0f cancellation error %.5E\n", t);
+#endif
+
+	max = fabsf(conv / sum);
+	if (max > t)
+		t = max;
+#if DEBUG
+	printf(" threef0f convergence %.5E\n", max);
+#endif
+
+	goto xit;
+
+error:
+#if DEBUG
+	printf("threef0f does not converge\n");
+#endif
+	t = MAXNUMF;
+
+xit:
+
+#if DEBUG
+	printf("threef0f( %.2E %.2E %.2E %.5E ) =  %.3E  %.6E\n", a, b, c, x, n, sum);
+#endif
+
+	*err = t;
+	return (sum);
 }
 
+
+
+#ifdef ANSIC
+float struvef(float vv, float xx)
+#else
+float struvef(vv, xx) double vv, xx;
+#endif
+{
+	float v, x, y, ya, f, g, h, t;
+	float onef2err, threef0err;
+
+	v = vv;
+	x = xx;
+	f = floorf(v);
+	if ((v < 0) && (v - f == 0.5)) {
+		y = jvf(-v, x);
+		f = 1.0 - f;
+		g = 2.0 * floorf(0.5 * f);
+		if (g != f)
+			y = -y;
+		return (y);
+	}
+	t = 0.25 * x * x;
+	f = fabsf(x);
+	g = 1.5 * fabsf(v);
+	if ((f > 30.0) && (f > g)) {
+		onef2err = MAXNUMF;
+		y = 0.0;
+	} else {
+		y = onef2f(1.0, 1.5, 1.5 + v, -t, &onef2err);
+	}
+
+	if ((f < 18.0) || (x < 0.0)) {
+		threef0err = MAXNUMF;
+		ya = 0.0;
+	} else {
+		ya = threef0f(1.0, 0.5, 0.5 - v, -1.0 / t, &threef0err);
+	}
+
+	f = sqrtf(PIF);
+	h = powf(0.5 * x, v - 1.0);
+
+	if (onef2err <= threef0err) {
+		g = gammaf(v + 1.5);
+		y = y * h * t / (0.5 * f * g);
+		return (y);
+	} else {
+		g = gammaf(v + 0.5);
+		ya = ya * h / (f * g);
+		ya = ya + yvf(v, x);
+		return (ya);
+	}
+}
 
 
 
@@ -297,27 +277,25 @@ else
  */
 
 #ifdef ANSIC
-float yvf( float vv, float xx )
+float yvf(float vv, float xx)
 #else
-float yvf( vv, xx )
-double vv, xx;
+float yvf(vv, xx) double vv, xx;
 #endif
 {
-float v, x,  y, t;
-int n;
+	float v, x, y, t;
+	int n;
 
-v = vv;
-x = xx;
-y = floorf( v );
-if( y == v )
-	{
-	n = v;
-	y = ynf( n, x );
-	return( y );
+	v = vv;
+	x = xx;
+	y = floorf(v);
+	if (y == v) {
+		n = v;
+		y = ynf(n, x);
+		return (y);
 	}
-t = PIF * v;
-y = (cosf(t) * jvf( v, x ) - jvf( -v, x ))/sinf(t);
-return( y );
+	t = PIF * v;
+	y = (cosf(t) * jvf(v, x) - jvf(-v, x)) / sinf(t);
+	return (y);
 }
 
 /* Crossover points between ascending series and asymptotic series

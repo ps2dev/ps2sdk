@@ -28,54 +28,53 @@ int smbman_io_sema;
 
 // driver ops func tab
 void *smbman_ops[27] = {
-	(void*)smb_init,
-	(void*)smb_deinit,
-	(void*)smb_dummy,
-	(void*)smb_open,
-	(void*)smb_close,
-	(void*)smb_read,
-	(void*)smb_write,
-	(void*)smb_lseek,
-	(void*)smb_dummy,
-	(void*)smb_remove,
-	(void*)smb_mkdir,
-	(void*)smb_rmdir,
-	(void*)smb_dopen,
-	(void*)smb_dclose,
-	(void*)smb_dread,
-	(void*)smb_getstat,
-	(void*)smb_dummy,
-	(void*)smb_rename,
-	(void*)smb_chdir,
-	(void*)smb_dummy,
-	(void*)smb_dummy,
-	(void*)smb_dummy,
-	(void*)smb_lseek64,
-	(void*)smb_devctl,
-	(void*)smb_dummy,
-	(void*)smb_dummy,
-	(void*)smb_dummy
-};
+    (void *)smb_init,
+    (void *)smb_deinit,
+    (void *)smb_dummy,
+    (void *)smb_open,
+    (void *)smb_close,
+    (void *)smb_read,
+    (void *)smb_write,
+    (void *)smb_lseek,
+    (void *)smb_dummy,
+    (void *)smb_remove,
+    (void *)smb_mkdir,
+    (void *)smb_rmdir,
+    (void *)smb_dopen,
+    (void *)smb_dclose,
+    (void *)smb_dread,
+    (void *)smb_getstat,
+    (void *)smb_dummy,
+    (void *)smb_rename,
+    (void *)smb_chdir,
+    (void *)smb_dummy,
+    (void *)smb_dummy,
+    (void *)smb_dummy,
+    (void *)smb_lseek64,
+    (void *)smb_devctl,
+    (void *)smb_dummy,
+    (void *)smb_dummy,
+    (void *)smb_dummy};
 
 // driver descriptor
 static iop_ext_device_t smbdev = {
-	"smb",
-	IOP_DT_FS  | IOP_DT_FSEXT,
-	1,
-	"SMB",
-	(struct _iop_ext_device_ops *)&smbman_ops
-};
+    "smb",
+    IOP_DT_FS | IOP_DT_FSEXT,
+    1,
+    "SMB",
+    (struct _iop_ext_device_ops *)&smbman_ops};
 
-typedef struct {
-	iop_file_t 	*f;
-	int		smb_fid;
-	s64		filesize;
-	s64		position;
-	u32		mode;
-	char		name[256];
+typedef struct
+{
+	iop_file_t *f;
+	int smb_fid;
+	s64 filesize;
+	s64 position;
+	u32 mode;
+	char name[256];
 } FHANDLE;
 
-#define MAX_FDHANDLES		32
+#define MAX_FDHANDLES 32
 FHANDLE smbman_fdhandles[MAX_FDHANDLES];
 
 static ShareEntry_t ShareList;
@@ -217,7 +216,7 @@ int smb_init(iop_device_t *dev)
 	keepalive_mutex = CreateMutex(IOP_MUTEX_LOCKED);
 
 	// set the keepalive timer (3 seconds)
-	USec2SysClock(3000*1000, &keepalive_sysclock);
+	USec2SysClock(3000 * 1000, &keepalive_sysclock);
 
 	// starting the keepalive thead
 	thread.attr = TH_C;
@@ -242,7 +241,7 @@ int smb_initdev(void)
 	if (AddDrv((iop_device_t *)&smbdev))
 		return 1;
 
-	for (i=0; i<MAX_FDHANDLES; i++) {
+	for (i = 0; i < MAX_FDHANDLES; i++) {
 		fh = (FHANDLE *)&smbman_fdhandles[i];
 		fh->f = NULL;
 		fh->smb_fid = -1;
@@ -274,7 +273,7 @@ static FHANDLE *smbman_getfilefreeslot(void)
 	int i;
 	FHANDLE *fh;
 
-	for (i=0; i<MAX_FDHANDLES; i++) {
+	for (i = 0; i < MAX_FDHANDLES; i++) {
 		fh = (FHANDLE *)&smbman_fdhandles[i];
 		if (fh->f == NULL)
 			return fh;
@@ -297,18 +296,17 @@ static char *prepare_path(char *path, char *full_path, int max_path)
 	while ((*p2 == '\\') || (*p2 == '/'))
 		*p2-- = 0;
 
-	for (i=0; i<strlen(p); i++) {
+	for (i = 0; i < strlen(p); i++) {
 		if (p[i] == '/')
 			p[i] = '\\';
 	}
 
 	if (strlen(p) > 0) {
-		strncpy(full_path, smb_curdir, max_path-1-strlen(p));
+		strncpy(full_path, smb_curdir, max_path - 1 - strlen(p));
 		strcat(full_path, "\\");
 		strcat(full_path, p);
-	}
-	else {
-		strncpy(full_path, smb_curdir, max_path-1);
+	} else {
+		strncpy(full_path, smb_curdir, max_path - 1);
 		strcat(full_path, "\\");
 	}
 
@@ -349,8 +347,7 @@ int smb_open(iop_file_t *f, const char *filename, int mode, int flags)
 			strncpy(fh->name, path, 256);
 			r = 0;
 		}
-	}
-	else
+	} else
 		r = -EMFILE;
 
 	smb_io_unlock();
@@ -393,7 +390,7 @@ void smb_closeAll(void)
 	int i;
 	FHANDLE *fh;
 
-	for (i=0; i<MAX_FDHANDLES; i++) {
+	for (i = 0; i < MAX_FDHANDLES; i++) {
 		fh = (FHANDLE *)&smbman_fdhandles[i];
 		if (fh->smb_fid != -1)
 			smb_Close(UID, TID, fh->smb_fid);
@@ -430,7 +427,7 @@ int smb_read(iop_file_t *f, void *buf, int size)
 
 		r = smb_ReadAndX(UID, TID, fh->smb_fid, fh->position, (void *)(buf + rpos), (u16)nbytes);
 		if (r < 0) {
-   			goto io_unlock;
+			goto io_unlock;
 		}
 
 		rpos += nbytes;
@@ -468,7 +465,7 @@ int smb_write(iop_file_t *f, void *buf, int size)
 
 		r = smb_WriteAndX(UID, TID, fh->smb_fid, fh->position, (void *)(buf + wpos), (u16)nbytes);
 		if (r < 0) {
-   			goto io_unlock;
+			goto io_unlock;
 		}
 
 		wpos += nbytes;
@@ -566,16 +563,16 @@ io_unlock:
 //--------------------------------------------------------------
 static void FileTimeToDate(u64 FileTime, u8 *datetime)
 {
-	u8 daysPerMonth[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
+	u8 daysPerMonth[12] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 	int i;
 	u64 time;
 	u16 years, days;
 	u8 leapdays, months, hours, minutes, seconds;
 
-	time = FileTime / 10000000;	// convert to seconds from 100-nanosecond intervals
+	time = FileTime / 10000000; // convert to seconds from 100-nanosecond intervals
 
-	years = (u16)(time / ((u64)60 * 60 * 24 * 365));	// hurray for interger division
-	time -= years *	((u64)60 * 60 * 24 *365);	// truncate off the years
+	years = (u16)(time / ((u64)60 * 60 * 24 * 365)); // hurray for interger division
+	time -= years * ((u64)60 * 60 * 24 * 365);       // truncate off the years
 
 	leapdays = (years / 4) - (years / 100) + (years / 400);
 	years += 1601; // add base year from FILETIME struct;
@@ -584,23 +581,19 @@ static void FileTimeToDate(u64 FileTime, u8 *datetime)
 	time -= (unsigned int)days * (60 * 60 * 24);
 	days -= leapdays;
 
-	if( (years % 4) == 0 && ((years % 100) != 0 || (years % 400) == 0) )
+	if ((years % 4) == 0 && ((years % 100) != 0 || (years % 400) == 0))
 		daysPerMonth[1]++;
 
 	months = 0;
-	for( i=0; i<12; i++ )
-	{
-		if( days > daysPerMonth[i] )
-		{
+	for (i = 0; i < 12; i++) {
+		if (days > daysPerMonth[i]) {
 			days -= daysPerMonth[i];
 			months++;
-		}
-		else
+		} else
 			break;
 	}
 
-	if( months >= 12 )
-	{
+	if (months >= 12) {
 		months -= 12;
 		years++;
 	}
@@ -658,7 +651,7 @@ int smb_dopen(iop_file_t *f, const char *dirname)
 	}
 
 	if (!(info.FileAttributes & EXT_ATTR_DIRECTORY)) {
-   		r = -ENOTDIR;
+		r = -ENOTDIR;
 		goto io_unlock;
 	}
 
@@ -671,13 +664,12 @@ int smb_dopen(iop_file_t *f, const char *dirname)
 		fh->position = 0;
 
 		strncpy(fh->name, path, 255);
-		if (fh->name[strlen(fh->name)-1] != '\\')
+		if (fh->name[strlen(fh->name) - 1] != '\\')
 			strcat(fh->name, "\\");
 		strcat(fh->name, "*");
 
 		r = 0;
-	}
-	else
+	} else
 		r = -EMFILE;
 
 io_unlock:
@@ -714,8 +706,7 @@ int smb_dread(iop_file_t *f, iox_dirent_t *dirent)
 		}
 		fh->smb_fid = info->SID;
 		r = 1;
-	}
-	else {
+	} else {
 		info->SID = fh->smb_fid;
 		r = smb_FindFirstNext2(UID, TID, NULL, TRANS2_FIND_NEXT2, info);
 		if (r < 0) {
@@ -807,30 +798,28 @@ int smb_chdir(iop_file_t *f, const char *dirname)
 
 	smb_io_lock();
 
-	if ((path[strlen(path)-2] == '.') && (path[strlen(path)-1] == '.')) {
+	if ((path[strlen(path) - 2] == '.') && (path[strlen(path) - 1] == '.')) {
 		char *p = (char *)smb_curdir;
-		for (i=strlen(p)-1; i>=0; i--) {
+		for (i = strlen(p) - 1; i >= 0; i--) {
 			if (p[i] == '\\') {
 				p[i] = 0;
 				break;
 			}
 		}
-	}
-	else if (path[strlen(path)-1] == '.') {
+	} else if (path[strlen(path) - 1] == '.') {
 		smb_curdir[0] = 0;
-	}
-	else {
+	} else {
 		r = smb_QueryPathInformation(UID, TID, &info, path);
 		if (r < 0) {
 			goto io_unlock;
 		}
 
 		if (!(info.FileAttributes & EXT_ATTR_DIRECTORY)) {
-	   		r = -ENOTDIR;
+			r = -ENOTDIR;
 			goto io_unlock;
 		}
 
-		strncpy(smb_curdir, path, sizeof(smb_curdir)-1);
+		strncpy(smb_curdir, path, sizeof(smb_curdir) - 1);
 	}
 
 io_unlock:
@@ -895,7 +884,8 @@ void DMA_sendEE(void *buf, int size, void *EE_addr)
 		id = sceSifSetDma(&dmat, 1);
 		CpuResumeIntr(oldstate);
 	}
-	while (sceSifDmaStat(id) >= 0);
+	while (sceSifDmaStat(id) >= 0)
+		;
 }
 
 //--------------------------------------------------------------
@@ -999,7 +989,7 @@ static int smb_GetShareList(smbGetShareList_in_t *getsharelist)
 	shareindex = 0;
 
 	// now we list the following shares if any
-	for (i=0; i<sharecount; i++) {
+	for (i = 0; i < sharecount; i++) {
 
 		r = smb_NetShareEnum(UID, TID, (ShareEntry_t *)&ShareList, i, 1);
 		if (r < 0)
@@ -1090,7 +1080,7 @@ int smb_devctl(iop_file_t *f, const char *devname, int cmd, void *arg, u32 argle
 
 	smb_io_lock();
 
-	switch(cmd) {
+	switch (cmd) {
 
 		case SMB_DEVCTL_GETPASSWORDHASHES:
 			smb_GetPasswordHashes((smbGetPasswordHashes_in_t *)arg, (smbGetPasswordHashes_out_t *)bufp);
