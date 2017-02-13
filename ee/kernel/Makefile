@@ -156,17 +156,20 @@ $(EE_OBJS_DIR)tibfunc.o: $(EE_SRC_DIR)tlbfunc.c
 $(EE_OBJS_DIR)tlbsrc_bin.o: $(EE_OBJS_DIR)tlbsrc_bin.c
 	$(EE_C_COMPILE) $< -c -o $@
 
-$(EE_SRC_DIR)osdsrc/bin/osdsrc.bin: $(EE_SRC_DIR)osdsrc
-	make -C $(EE_SRC_DIR)osdsrc
+$(PS2SDKSRC)/tools/bin2c/bin/bin2c: $(PS2SDKSRC)/tools/bin2c
+	make -C $<
 
-$(EE_OBJS_DIR)osdsrc_bin.c: $(EE_SRC_DIR)osdsrc/bin/osdsrc.bin
-	bin2c $< $@ osdsrc
+$(EE_SRC_DIR)osdsrc/bin/osdsrc.bin: $(EE_SRC_DIR)osdsrc
+	make -C $<
+
+$(EE_OBJS_DIR)osdsrc_bin.c: $(EE_SRC_DIR)osdsrc/bin/osdsrc.bin $(PS2SDKSRC)/tools/bin2c/bin/bin2c
+	$(PS2SDKSRC)/tools/bin2c/bin/bin2c $< $@ osdsrc
 
 $(EE_SRC_DIR)tlbsrc/bin/tlbsrc.bin: $(EE_SRC_DIR)tlbsrc
-	make -C $(EE_SRC_DIR)tlbsrc
+	make -C $<
 
-$(EE_OBJS_DIR)tlbsrc_bin.c: $(EE_SRC_DIR)tlbsrc/bin/tlbsrc.bin
-	bin2c $< $@ tlbsrc
+$(EE_OBJS_DIR)tlbsrc_bin.c: $(EE_SRC_DIR)tlbsrc/bin/tlbsrc.bin $(PS2SDKSRC)/tools/bin2c/bin/bin2c
+	$(PS2SDKSRC)/tools/bin2c/bin/bin2c $< $@ tlbsrc
 
 clean::
 	make -C $(EE_SRC_DIR)osdsrc clean
