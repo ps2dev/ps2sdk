@@ -157,7 +157,7 @@ static void *AllocRxPacket(unsigned int size, void **payload)
 	struct pbuf* pbuf;
 
 	if((pbuf = pbuf_alloc(PBUF_RAW, size, PBUF_POOL)) != NULL)
-		*payload = pbuf->payload;	
+		*payload = pbuf->payload;
 
 	return pbuf;
 }
@@ -199,25 +199,15 @@ static err_t SMapIFInit(struct netif* pNetIF)
 
 err_t ps2ip_input(PBuf* pInput, NetIF* pNetIF)
 {
-	switch(htons(((struct eth_hdr*)(pInput->payload))->type))
-	{
-	case ETHTYPE_IP:
-	case ETHTYPE_ARP:
-		//IP-packet. Update ARP table, obtain first queued packet.
-		//ARP-packet. Pass pInput to ARP module, get ARP reply or ARP queued packet.
-		//Pass to network layer.
+	err_t result;
 
-		pNetIF->input(pInput, pNetIF);
-		break;
-	default:
-		//Unsupported ethernet packet-type. Free pInput.
+	if((result = pNetIF->input(pInput, pNetIF)) != ERR_OK)
 		pbuf_free(pInput);
-	}
 
-	return	ERR_OK;
+	return result;
 }
 
-static inline int InitializeLWIP(void)
+static inline void InitializeLWIP(void)
 {
 	sys_sem_t Sema;
 
@@ -231,8 +221,6 @@ static inline int InitializeLWIP(void)
 	sys_sem_free(&Sema);
 
 	dbgprintf("PS2IP: System Initialised\n");
-
-	return 0;
 }
 
 int ps2ipInit(struct ip4_addr *ip_address, struct ip4_addr *subnet_mask, struct ip4_addr *gateway){
