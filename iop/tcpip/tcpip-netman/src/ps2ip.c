@@ -356,7 +356,7 @@ static inline int InitLWIPStack(IPAddr *IP, IPAddr *NM, IPAddr *GW){
 	if((result = InitializeLWIP()) != 0)
 		return result;
 
-	netif_add(&NIF, IP, NM, GW, &NIF, &SMapIFInit, tcpip_input);
+	netif_add(&NIF, IP, NM, GW, NULL, &SMapIFInit, tcpip_input);
 	netif_set_default(&NIF);
 
 	NetManRegisterNetworkStack(&stack);

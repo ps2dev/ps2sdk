@@ -236,7 +236,7 @@ int ps2ipInit(struct ip4_addr *ip_address, struct ip4_addr *subnet_mask, struct 
 
 	InitializeLWIP();
 
-	netif_add(&NIF, ip_address, subnet_mask, gateway, &NIF, &SMapIFInit, tcpip_input);
+	netif_add(&NIF, ip_address, subnet_mask, gateway, NULL, &SMapIFInit, tcpip_input);
 	netif_set_default(&NIF);
 
 	NetManRegisterNetworkStack(&stack);
