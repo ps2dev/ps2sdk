@@ -211,6 +211,7 @@ static void TxThread(void *arg)
 		if(PacketReqs.count > 0)
 		{
 			WaitSema(NetManIOSemaID);
+			//NETMAN_IOP_RPC_FUNC_SEND_PACKETS should attempt to send PacketReqs.count frames.
 			if(SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_SEND_PACKETS, 0, &PacketReqs, sizeof(PacketReqs), &ReceiveBuffer, sizeof(s32), NULL, NULL) >= 0)
 				sent = ReceiveBuffer.result;
 			else
