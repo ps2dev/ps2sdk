@@ -438,8 +438,7 @@ sys_prot_t sys_arch_protect(void)
 {
 	sys_prot_t OldLevel;
 
-	if(ProtLevel < 1)
-		DI();
+	DI();
 
 	OldLevel = ProtLevel;
 	ProtLevel++;
