@@ -30,9 +30,13 @@ s32 iWakeupThread(s32 thread_id)
 		iResumeThread(thread_id);
 
 		/*	If there are multiple threads with the same priority, another thread may get preempted.
-			Therefore rotate the priority queue until the specified thread becomes the running thread. */
+			Therefore rotate the priority queue until the specified thread becomes the running thread.
+
+			Note: the original used RotateThreadReadyQueue (not iRotateThreadReadyQueue).
+			I do not really know why this was done, but it seems to me that iRotateThreadReadyQueue
+			does not change the running thread ID on its own.	*/
 		while((result = _iGetThreadId()) != thread_id)
-			iRotateThreadReadyQueue(prio);
+			RotateThreadReadyQueue(prio);
 
 		return result;
 	} else {
