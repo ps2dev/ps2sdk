@@ -32,7 +32,8 @@ IOPHEAP_OBJS = SifInitIopHeap.o SifExitIopHeap.o SifAllocIopHeap.o \
 
 IOPCONTROL_OBJS = SifIopReboot.o SifIopReset.o SifIopIsAlive.o SifIopSync.o __iop_control_internals.o
 
-GLUE_OBJS = DIntr.o EIntr.o iWakeupThread.o EnableIntc.o DisableIntc.o EnableDmac.o DisableDmac.o \
+GLUE_OBJS = __glue_internals.o iWakeupThread.o iRotateThreadReadyQueue.o iSuspendThread.o \
+	DIntr.o EIntr.o EnableIntc.o DisableIntc.o EnableDmac.o DisableDmac.o \
 	iEnableIntc.o iDisableIntc.o iEnableDmac.o iDisableDmac.o SyncDCache.o \
 	iSyncDCache.o InvalidDCache.o iInvalidDCache.o
 
@@ -66,10 +67,10 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
 	StartThread.o ExitThread.o ExitDeleteThread.o TerminateThread.o \
 	iTerminateThread.o DisableDispatchThread.o EnableDispatchThread.o \
 	ChangeThreadPriority.o iChangeThreadPriority.o RotateThreadReadyQueue.o \
-	iRotateThreadReadyQueue.o ReleaseWaitThread.o iReleaseWaitThread.o \
+	_iRotateThreadReadyQueue.o ReleaseWaitThread.o iReleaseWaitThread.o \
 	GetThreadId.o _iGetThreadId.o ReferThreadStatus.o iReferThreadStatus.o SleepThread.o \
 	WakeupThread.o _iWakeupThread.o CancelWakeupThread.o iCancelWakeupThread.o \
-	SuspendThread.o iSuspendThread.o ResumeThread.o iResumeThread.o \
+	SuspendThread.o _iSuspendThread.o ResumeThread.o iResumeThread.o \
 	RFU059.o RFU060.o SetupThread.o RFU061.o SetupHeap.o EndOfHeap.o CreateSema.o DeleteSema.o \
 	iSignalSema.o SignalSema.o WaitSema.o PollSema.o iPollSema.o \
 	ReferSemaStatus.o iReferSemaStatus.o iDeleteSema.o SetOsdConfigParam.o \

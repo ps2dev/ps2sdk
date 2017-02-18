@@ -236,7 +236,10 @@ typedef struct t_ee_thread_status
 int DIntr(void);
 int EIntr(void);
 
+int InitThread(void);
 s32 iWakeupThread(s32 thread_id);
+s32 iRotateThreadReadyQueue(s32 priority);
+s32 iSuspendThread(s32 thread_id);
 
 int EnableIntc(int intc);
 int DisableIntc(int intc);
@@ -299,7 +302,7 @@ s32  iTerminateThread(s32 thread_id);
 s32  ChangeThreadPriority(s32 thread_id, s32 priority);
 s32  iChangeThreadPriority(s32 thread_id, s32 priority);
 s32  RotateThreadReadyQueue(s32 priority);
-s32  iRotateThreadReadyQueue(s32 priority);
+s32  _iRotateThreadReadyQueue(s32 priority);
 s32  ReleaseWaitThread(s32 thread_id);
 s32  iReleaseWaitThread(s32 thread_id);
 s32	 GetThreadId(void);
@@ -312,7 +315,7 @@ s32	 _iWakeupThread(s32 thread_id);
 s32	 CancelWakeupThread(s32 thread_id);
 s32	 iCancelWakeupThread(s32 thread_id);
 s32	 SuspendThread(s32 thread_id);
-s32	 iSuspendThread(s32 thread_id);
+s32	 _iSuspendThread(s32 thread_id);
 s32	 ResumeThread(s32 thread_id);
 s32	 iResumeThread(s32 thread_id);
 

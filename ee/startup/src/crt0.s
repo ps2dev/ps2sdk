@@ -32,6 +32,7 @@
 
    .extern InitKernel
    .extern InitTLBFunctions
+   .extern InitThread
    .extern InitTLB
 
    .set   noat
@@ -119,6 +120,10 @@ ctors:
 1:
    # Initialize the kernel (Apply necessary patches).
    jal InitKernel
+   nop
+
+   # Initialize add-on thread functions
+   jal InitThread
    nop
 
    # Initialize TLB functions.

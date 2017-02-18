@@ -251,8 +251,8 @@ SYSCALL(iChangeThreadPriority)
 SYSCALL(RotateThreadReadyQueue)
 #endif
 
-#ifdef F_iRotateThreadReadyQueue
-SYSCALL(iRotateThreadReadyQueue)
+#ifdef F__iRotateThreadReadyQueue
+SYSCALL(_iRotateThreadReadyQueue)
 #endif
 
 #ifdef F_ReleaseWaitThread
@@ -303,8 +303,8 @@ SYSCALL(iCancelWakeupThread)
 SYSCALL(SuspendThread)
 #endif
 
-#ifdef F_iSuspendThread
-SYSCALL(iSuspendThread)
+#ifdef F__iSuspendThread
+SYSCALL(_iSuspendThread)
 #endif
 
 #ifdef F_ResumeThread

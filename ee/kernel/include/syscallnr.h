@@ -46,7 +46,7 @@
 #define __NR_ChangeThreadPriority	0x29
 #define __NR_iChangeThreadPriority	(-0x2a)
 #define __NR_RotateThreadReadyQueue	0x2b
-#define __NR_iRotateThreadReadyQueue	(-0x2c)
+#define __NR__iRotateThreadReadyQueue	(-0x2c)
 #define __NR_ReleaseWaitThread		0x2d
 #define __NR_iReleaseWaitThread		(-0x2e)
 #define __NR_GetThreadId		0x2f
@@ -59,7 +59,7 @@
 #define __NR_CancelWakeupThread		0x35
 #define __NR_iCancelWakeupThread	(-0x36)
 #define __NR_SuspendThread		0x37
-#define __NR_iSuspendThread		(-0x38)
+#define __NR__iSuspendThread		(-0x38)
 #define __NR_ResumeThread		0x39
 #define __NR_iResumeThread		(-0x3a)
 #define __NR_RFU059			0x3b
