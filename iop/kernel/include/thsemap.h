@@ -39,8 +39,8 @@ typedef struct {
 	u32 attr;
 	u32 option;
 	int initial;
-	int current;
 	int max;
+	int current;
 	int numWaitThreads;
 	int reserved[2];
 } iop_sema_info_t;
