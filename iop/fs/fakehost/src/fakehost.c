@@ -6,14 +6,16 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# IOP filesystem driver v1.0
-# This redirects an iomanx device (eg a pfs mount point) the ioman device called 'host'
-# it also installs a naplink RPC driver.
-# This basically sets up ready to run programs as though they were run from naplink or
-# pukklink, regarding host and naplink printf.
-#
 */
+
+/**
+ * @file
+ * IOP filesystem driver v1.0
+ * This redirects an iomanx device (eg a pfs mount point) the ioman device called 'host'
+ * it also installs a naplink RPC driver.
+ * This basically sets up ready to run programs as though they were run from naplink or
+ * pukklink, regarding host and naplink printf.
+ */
 
 //#define DEBUG_T
 
@@ -32,7 +34,7 @@
 #define TRUE	1
 #define FALSE	0
 
-/** \defgroup fakehost fakehost - host: to hdd driver */
+/** @defgroup fakehost fakehost - host: to hdd driver */
 
 #define MODNAME "fakehost"
 
@@ -55,12 +57,12 @@ static int fd_global;
 extern int ttyMount(void);
 extern int naplinkRpcInit(void);
 
-/*! \brief Make a full pathname string, adding base on.
- *  \ingroup fakehost
+/** Make a full pathname string, adding base on.
+ * @ingroup fakehost
  *
- *  \param buffer buffer to hold result.
- *  \param name   name to add base to.
- *  \return Pointer to buffer.
+ * @param buffer buffer to hold result.
+ * @param name   name to add base to.
+ * @return Pointer to buffer.
  *
  *  This function takes the name param and adds it to the basename
  *  for replacement, returning the destination full pathname.
@@ -72,13 +74,12 @@ char * fd_name( char * buffer, const char * name )
 	return buffer;
 }
 
-/*! \brief Store filedescriptor and get client filedescriptor.
- *  \ingroup fakehost
+/** Store filedescriptor and get client filedescriptor.
+ * @ingroup fakehost
  *
- *  \param fd  filedescriptor to store.
- *  \param f   io_file pointer to store fd in .
- *  \return client filedescriptor.
- *
+ * @param fd  filedescriptor to store.
+ * @param f   io_file pointer to store fd in .
+ * @return client filedescriptor.
  */
 int fd_save( int fd, iop_io_file_t *f )
 {
@@ -87,20 +88,19 @@ int fd_save( int fd, iop_io_file_t *f )
 	return f->unit;
 }
 
-/*! \brief Get real filedescriptor.
- *  \ingroup fakehost
+/** Get real filedescriptor.
+ * @ingroup fakehost
  *
- *  \param f   io_file pointer to get fd from.
- *  \return real filedescriptor.
- *
+ * @param f   io_file pointer to get fd from.
+ * @return real filedescriptor.
  */
 int realfd( iop_io_file_t *f )
 {
 	return (int) f->privdata;
 }
 
-/*! \brief Dummy function, for where needed.
- *  \ingroup fakehost
+/** Dummy function, for where needed.
+ * @ingroup fakehost
  */
 int dummy()
 {
@@ -110,12 +110,11 @@ int dummy()
 	return -5;
 }
 
-/*! \brief Initialise fs driver.
- *  \ingroup fakehost
+/** Initialise fs driver.
+ * @ingroup fakehost
  *
- *  \param driver  io_device pointer to device
- *  \return Status (0=successful).
- *
+ * @param driver  io_device pointer to device
+ * @return Status (0=successful).
  */
 int fd_initialize( iop_io_device_t *driver)
 {
@@ -123,14 +122,13 @@ int fd_initialize( iop_io_device_t *driver)
 	return 0;
 }
 
-/*! \brief Handle open request.
- *  \ingroup fakehost
+/** Handle open request.
+ * @ingroup fakehost
  *
- *  \param f     Pointer to io_device structure.
- *  \param name  pathname.
- *  \param mode  open mode.
- *  \return Status (as for fileio open).
- *
+ * @param f     Pointer to io_device structure.
+ * @param name  pathname.
+ * @param mode  open mode.
+ * @return Status (as for fileio open).
  */
 int fd_open( iop_io_file_t *f, const char *name, int mode)
 {
@@ -146,76 +144,72 @@ int fd_open( iop_io_file_t *f, const char *name, int mode)
 	return fd_save( fd, f );
 }
 
-/*! \brief Handle close request.
- *  \ingroup fakehost
+/** Handle close request.
+ * @ingroup fakehost
  *
- *  \param f     Pointer to io_device structure.
- *  \return Status (as for fileio close).
- *
+ * @param f     Pointer to io_device structure.
+ * @return Status (as for fileio close).
  */
 int fd_close( iop_io_file_t *f )
 {
 	return close( realfd(f) );
 }
 
-/*! \brief Handle read request.
- *  \ingroup fakehost
+/** Handle read request.
+ * @ingroup fakehost
  *
- *  \param f       Pointer to io_device structure.
- *  \param buffer  Pointer to read buffer.
- *  \param size    Size of buffer.
- *  \return Status (as for fileio read).
- *
+ * @param f       Pointer to io_device structure.
+ * @param buffer  Pointer to read buffer.
+ * @param size    Size of buffer.
+ * @return Status (as for fileio read).
  */
 int fd_read( iop_io_file_t *f, void * buffer, int size )
 {
 	return read( realfd(f), buffer, size );
 }
 
-/*! \brief Handle write request.
- *  \ingroup fakehost
+/** Handle write request.
+ * @ingroup fakehost
  *
- *  \param f       Pointer to io_device structure.
- *  \param buffer  Pointer to read buffer.
- *  \param size    Size of buffer.
- *  \return Status (as for fileio write).
- *
+ * @param f       Pointer to io_device structure.
+ * @param buffer  Pointer to read buffer.
+ * @param size    Size of buffer.
+ * @return Status (as for fileio write).
  */
 int fd_write( iop_io_file_t *fd, void *buffer, int size )
 {
 	return write( realfd(fd), buffer, size );
 }
 
-/*! \brief Handle lseek request.
- *  \ingroup fakehost
+/** Handle lseek request.
+ * @ingroup fakehost
  *
- *  \param f       Pointer to io_device structure.
- *  \param offset  Offset for seek.
- *  \param whence  Base for seek.
- *  \return Status (as for fileio lseek).
- *
+ * @param f       Pointer to io_device structure.
+ * @param offset  Offset for seek.
+ * @param whence  Base for seek.
+ * @return Status (as for fileio lseek).
  */
 int fd_lseek( iop_io_file_t *fd, int offset, int whence)
 {
 	return lseek( realfd(fd), offset, whence );
 }
 
-/*! \brief Entry point for IRX.
- *  \ingroup fakehost
+/** Entry point for IRX.
+ * @ingroup fakehost
  *
- *  if argc != 2 , quit, as it needs parameter
- *  if argc == 2 , use arv[1] as basename.
+ * if argc != 2 , quit, as it needs parameter
+ * if argc == 2 , use arv[1] as basename.
  *
- *  \param argc Number of arguments.
- *  \param argv Pointer to array of arguments.
- *  \return Module Status on Exit.
+ * @param argc Number of arguments.
+ * @param argv Pointer to array of arguments.
+ * @return Module Status on Exit.
  *
- *  This initialises the fakehost driver, setting up the 'host:' fs driver
- *  basename redirection, and naplink compatible rpc hander.
+ * This initialises the fakehost driver, setting up the 'host:' fs driver
+ * basename redirection, and naplink compatible rpc hander.
  *
- *  return values:
- *    MODULE_RESIDENT_END if loaded and registered as library.
- *    MODULE_NO_RESIDENT_END if just exiting normally.
+ * return values:
+ *   MODULE_RESIDENT_END if loaded and registered as library.
+ *   MODULE_NO_RESIDENT_END if just exiting normally.
  */
 int _start( int argc, char **argv )
 {

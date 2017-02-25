@@ -6,11 +6,14 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# IOP naplink RPC server v1.0
-# This installs a naplink compatible RPC handler, to service the nprintf functions
-# given via naplink for printing from ee.
 */
+
+/**
+ * @file
+ * IOP naplink RPC server v1.0
+ * This installs a naplink compatible RPC handler, to service the nprintf functions
+ * given via naplink for printing from ee.
+ */
 
 #include "types.h"
 #include "stdio.h"
@@ -25,12 +28,12 @@
 #define NPM_PUTS     0x01
 #define RPC_NPM_USER 0x014d704e
 
-/*! \brief RPC handler function.
- *  \ingroup fakehost
+/** RPC handler function.
+ * @ingroup fakehost
  *
- *  \param  cmd    Command.
- *  \param  buffer Pointer to buffer.
- *  \param  size   Size of buffer.
+ * @param cmd Command.
+ * @param buffer Pointer to buffer.
+ * @param size Size of buffer.
  */
 static void *naplinkRpcHandler(int cmd, void *buffer, int size)
 {
@@ -42,10 +45,10 @@ static SifRpcServerData_t server __attribute((aligned(16)));
 static SifRpcDataQueue_t  queue __attribute((aligned(16)));
 static unsigned char rpc_buffer[512] __attribute((aligned(16)));
 
-/*! \brief naplink compatbile RPC handler thread.
- *  \ingroup fakehost
+/** naplink compatbile RPC handler thread.
+ * @ingroup fakehost
  *
- *  \param  arg Startup parameters.
+ * @param arg Startup parameters.
  */
 static void napThread(void *arg)
 {
@@ -60,14 +63,14 @@ static void napThread(void *arg)
     ExitDeleteThread();
 }
 
-/*! \brief Setup naplink compatible RPC handler.
- *  \ingroup fakehost
+/** Setup naplink compatible RPC handler.
+ * @ingroup fakehost
  *
- *  \return Status.
+ * @return Status.
  *
- *  return values:
- *    0 on success.
- *    -1 on error.
+ * return values:
+ *   0 on success.
+ *   -1 on error.
  */
 int naplinkRpcInit(void)
 {
