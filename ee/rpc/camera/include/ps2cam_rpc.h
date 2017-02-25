@@ -2,83 +2,113 @@
   PSX2 OpenSource Project
   (C)2004-2005 Lion[PS2Dev]
   (C)2004-2005 PS2Dev.org
-------------------------------------------------------------------------
-  ps2cam_rpc.h
-					PS2Camera EE-IOP RPC CALLS
-
 */
+
+/**
+ * @file
+ * PS2Camera EE-IOP RPC CALLS
+ */
+
 #ifndef _PS2CAM_RPC_H
 #define _PS2CAM_RPC_H
 
 
 
+/** get irx version */
+#define PS2CAM_RPC_GETIRXVERSION	40
+/** PS2CamInit */
+#define PS2CAM_RPC_INITIALIZE		41
+/** PS2CamGetDeviceCount */
+#define PS2CAM_RPC_GETDEVCOUNT		42
+#define PS2CAM_RPC_OPENDEVICE		43
+#define PS2CAM_RPC_CLOSEDEVICE		44
+/** PS2CamGetStatus */
+#define PS2CAM_RPC_GETDEVSTATUS		45
+/** PS2CamGetInfo */
+#define PS2CAM_RPC_GETDEVINFO		46
+/** PS2CamSetDeviceBandwidth */
+#define PS2CAM_RPC_SETDEVBANDWIDTH	47
+/** PS2CamReadPacketCOMMAND */
+#define PS2CAM_RPC_READPACKET		48
+/** PS2CamSetLEDMode */
+#define PS2CAM_RPC_SETLEDMODE		49
 
-#define PS2CAM_RPC_GETIRXVERSION	40		// get irx version
-#define PS2CAM_RPC_INITIALIZE		41		// PS2CamInit
-#define PS2CAM_RPC_GETDEVCOUNT		42		// PS2CamGetDeviceCount
-#define PS2CAM_RPC_OPENDEVICE		43		//
-#define PS2CAM_RPC_CLOSEDEVICE		44		//
-#define PS2CAM_RPC_GETDEVSTATUS		45		// PS2CamGetStatus
-#define PS2CAM_RPC_GETDEVINFO		46		// PS2CamGetInfo
-#define PS2CAM_RPC_SETDEVBANDWIDTH	47		// PS2CamSetDeviceBandwidth
-#define PS2CAM_RPC_READPACKET		48		// PS2CamReadPacketCOMMAND
-#define PS2CAM_RPC_SETLEDMODE		49		// PS2CamSetLEDMode
-#define PS2CAM_RPC_SETDEVCONFIG		50		//
+#define PS2CAM_RPC_SETDEVCONFIG		50
 
-// led modes
+/* led modes */
 #define PS2CAM_LED_MODE_OFF			0
 #define PS2CAM_LED_MODE_ON			1
 //#define PS2CAM_LED_MODE_FLASH		2
 
+/* device status */
+/** device not connected */
+#define CAM_STATUS_NOTCONNECTED		0
+/** connected but initializing */
+#define CAM_STATUS_CONNECTED		1
+/** connect & ready for commands */
+#define CAM_STATUS_CONNECTEDREADY	2
 
-// device status
-#define CAM_STATUS_NOTCONNECTED		0	// device not connected
-#define CAM_STATUS_CONNECTED		1	// connected but initializing
-#define CAM_STATUS_CONNECTEDREADY	2	// connect & ready for commands
 
 
 
-// used with PS2CAM_DEVICE_CONFIG->mask
+/* used with PS2CAM_DEVICE_CONFIG->mask */
 #define CAM_CONFIG_MASK_DIMENSION	0x00000001
 #define CAM_CONFIG_MASK_OFFSET		0x00000002
 #define CAM_CONFIG_MASK_DIVIDER		0x00000004
 #define CAM_CONFIG_MASK_FRAMERATE	0x00000008
 
 
-// error codes
-#define CAM_ERROR_NONE				 (00)	// ok
-#define CAM_ERROR_NOTINIT			-(20)	//
-#define CAM_ERROR_INVALIDDEVICE		-(21)	//
-#define CAM_ERROR_COMMUNKNOWN		-(22)	// unknown command
-#define CAM_ERROR_DEVNOTREADY		-(23)	// device not ready
-#define CAM_ERROR_NODEVICE			-(24)	// no compatible device connected
-#define CAM_ERROR_BADRANGE			-(25)	// a value was out of range
-#define CAM_ERROR_UNKNOWN			-(26)	// unknown error
-#define CAM_ERROR_MAXHANDLE			-(27)	// out of free device handle(s)
-#define CAM_ERROR_BADHANDLE			-(28)	// invalid device handle
-#define CAM_ERROR_DISCONNECTED		-(29)	// device was removed
+/* error codes */
+/** ok */
+#define CAM_ERROR_NONE				 (00)
+#define CAM_ERROR_NOTINIT			-(20)
+#define CAM_ERROR_INVALIDDEVICE		-(21)
+/** unknown command */
+#define CAM_ERROR_COMMUNKNOWN		-(22)
+/** device not ready */
+#define CAM_ERROR_DEVNOTREADY		-(23)
+/** no compatible device connected */
+#define CAM_ERROR_NODEVICE			-(24)
+/** a value was out of range */
+#define CAM_ERROR_BADRANGE			-(25)
+/** unknown error */
+#define CAM_ERROR_UNKNOWN			-(26)
+/** out of free device handle(s) */
+#define CAM_ERROR_MAXHANDLE			-(27)
+/** invalid device handle */
+#define CAM_ERROR_BADHANDLE			-(28)
+/** device was removed */
+#define CAM_ERROR_DISCONNECTED		-(29)
+
 
 
 
 
 typedef struct
 {
-	unsigned char	magic1;	//0x01
-	unsigned char	magic2;	//0xff
-	unsigned char	magic3;	//0xff
-	unsigned char	type;	//0x51:EOF     0x50:SOF
-	unsigned char	uk1;	//?
-	unsigned char	uk2;	//?
-	unsigned char	uk3;	//?
-	unsigned char	uk4;	//?
-	unsigned char	uk5;	//?
-	unsigned char	frame;	//0x01:framehead+no data, 0x00:framehead+data
-	unsigned char	uk6;	//?
-	unsigned char	uk7;	//?
-	unsigned char	uk8;	//?
-	unsigned char	uk9;	//?
-	unsigned char	Lo;		//file size Lo byte (only in EOF)
-	unsigned char	Hi;		//file size Hi byte (only in EOF)
+	/** 0x01 */
+	unsigned char	magic1;
+	/** 0xff */
+	unsigned char	magic2;
+	/** 0xff */
+	unsigned char	magic3;
+	/** 0x51:EOF     0x50:SOF */
+	unsigned char	type;
+	unsigned char	uk1;
+	unsigned char	uk2;
+	unsigned char	uk3;
+	unsigned char	uk4;
+	unsigned char	uk5;
+	/** 0x01:framehead+no data, 0x00:framehead+data */
+	unsigned char	frame;
+	unsigned char	uk6;
+	unsigned char	uk7;
+	unsigned char	uk8;
+	unsigned char	uk9;
+	/** file size Lo byte (only in EOF) */
+	unsigned char	Lo;
+	/** file size Hi byte (only in EOF) */
+	unsigned char	Hi;
 
 }EYETOY_FRAME_HEAD;
 
@@ -86,13 +116,18 @@ typedef struct
 
 typedef struct
 {
-	unsigned int	ssize;				// sizeof this struct
-	unsigned short	vendor_id;			// vendor  id extracted from device
-	unsigned short	product_id;			// product id extracted from device
-	unsigned char	vendor_name[32];	// vender string
-	unsigned char	product_name[32];	// product string
-	unsigned char	model[16];			// device model
-
+	/** sizeof this struct */
+	unsigned int	ssize;
+	/** vendor  id extracted from device */
+	unsigned short	vendor_id;
+	/** product id extracted from device */
+	unsigned short	product_id;
+	/** vender string */
+	unsigned char	vendor_name[32];
+	/** product string */
+	unsigned char	product_name[32];
+	/** device model */
+	unsigned char	model[16];
 
 }PS2CAM_DEVICE_INFO;
 
@@ -100,15 +135,24 @@ typedef struct
 
 typedef struct
 {
-	unsigned int	ssize;			// structure size
-	unsigned int	mask;			// CAM_CONFIG_MASK.....
-	unsigned short	width;			// camera horizontal resolution
-	unsigned short	height;			// camera vertical   resolution
-	unsigned short	x_offset;		// x offset of camera image
-	unsigned short	y_offset;		// y offset of camera image
-	unsigned char	h_divider;		// Horizontal Divider
-	unsigned char	v_divider;		// Vertical Divider
-	unsigned short	framerate;		// framerate
+	/** structure size */
+	unsigned int	ssize;
+	/** CAM_CONFIG_MASK..... */
+	unsigned int	mask;
+	/** camera horizontal resolution */
+	unsigned short	width;
+	/** camera vertical   resolution */
+	unsigned short	height;
+	/** x offset of camera image */
+	unsigned short	x_offset;
+	/** y offset of camera image */
+	unsigned short	y_offset;
+	/** Horizontal Divider */
+	unsigned char	h_divider;
+	/** Vertical Divider */
+	unsigned char	v_divider;
+	/** framerate */
+	unsigned short	framerate;
 
 }PS2CAM_DEVICE_CONFIG;
 

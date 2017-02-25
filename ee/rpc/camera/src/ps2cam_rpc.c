@@ -2,12 +2,12 @@
   _____     ___ ____
    ____|   |    ____|      PSX2 OpenSource Project
   |     ___|   |____       (c) 2004-2005 Lion | (psxdever@hotmail.com)
-  ------------------------------------------------------------------------
-  ps2cam.c
-                           PS2CAM.irc rpc client
 */
 
-
+/**
+ * @file
+ * PS2CAM.irx rpc client
+ */
 
 #include <tamtypes.h>
 #include <kernel.h>
