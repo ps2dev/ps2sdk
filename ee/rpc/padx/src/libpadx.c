@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Pad library functions for the new PADMAN module.
 */
+
+/**
+ * @file
+ * Pad library functions for the new PADMAN module.
+ */
 
 #include <tamtypes.h>
 #include <kernel.h>
@@ -221,11 +224,6 @@ padReset()
     return 0;
 }
 
-
-/*
- * Initialise padman
- * a = 0 should work..
- */
 int
 padInit(int a)
 {
@@ -283,10 +281,6 @@ padInit(int a)
 
 }
 
-
-/*
- * Ends all pad communication.
- */
 int
 padEnd()
 {
@@ -306,13 +300,6 @@ padEnd()
     return ret;
 }
 
-
-/*
- * The user should provide a pointer to a 256 byte (2xsizeof(struct pad_data))
- * 64 byte aligned pad data area for each pad port opened
- *
- * return != 0 => OK
- */
 int
 padPortOpen(int port, int slot, void *padArea)
 {
@@ -376,11 +363,6 @@ padPortClose(int port, int slot)
     }
 }
 
-
-/*
- * Read pad data
- * Result is stored in 'data' which should point to a 32 byte array
- */
 unsigned char
 padRead(int port, int slot, struct padButtonStatus *data)
 {
@@ -393,11 +375,6 @@ padRead(int port, int slot, struct padButtonStatus *data)
     return pdata->length;
 }
 
-
-/*
- * Get current pad state
- * Wait until state == 6 (Ready) before trying to access the pad
- */
 int
 padGetState(int port, int slot)
 {
@@ -425,10 +402,6 @@ padGetState(int port, int slot)
     return state;
 }
 
-
-/*
- * Get pad request state
- */
 unsigned char
 padGetReqState(int port, int slot)
 {
@@ -439,10 +412,6 @@ padGetReqState(int port, int slot)
     return pdata->reqState;
 }
 
-
-/*
- * Set pad request state (after a param setting)
- */
 int
 padSetReqState(int port, int slot, int state)
 {
@@ -454,10 +423,6 @@ padSetReqState(int port, int slot, int state)
     return 1;
 }
 
-
-/*
- * Debug print functions
- */
 void
 padStateInt2String(int state, char buf[16])
 {
@@ -474,10 +439,6 @@ padReqStateInt2String(int state, char buf[16])
         strcpy(buf, padReqStateString[state]);
 }
 
-
-/*
- * Returns # slots on the PS2 (usally 2)
- */
 int
 padGetPortMax(void)
 {
@@ -490,11 +451,6 @@ padGetPortMax(void)
     return buffer.padResult.result;
 }
 
-
-/*
- * Returns # slots the port has (usually 1)
- * probably 4 if using a multi tap (not tested)
- */
 int
 padGetSlotMax(int port)
 {
@@ -508,10 +464,6 @@ padGetSlotMax(int port)
     return buffer.padResult.result;
 }
 
-
-/*
- * Returns the padman version
- */
 int
 padGetModVersion()
 {
@@ -523,15 +475,6 @@ padGetModVersion()
     return buffer.padResult.result;
 }
 
-
-/*
- * Get pad info (digital (4), dualshock (7), etc..)
- * ID: 3 - KONAMI GUN
- *     4 - DIGITAL PAD
- *     5 - JOYSTICK
- *     6 - NAMCO GUN
- *     7 - DUAL SHOCK
- */
 int
 padInfoMode(int port, int slot, int infoMode, int index)
 {
@@ -584,11 +527,6 @@ padInfoMode(int port, int slot, int infoMode, int index)
     return 0;
 }
 
-
-/*
- * mode = 1, -> Analog/dual shock enabled; mode = 0 -> Digital
- * lock = 3 -> Mode not changeable by user
- */
 int
 padSetMainMode(int port, int slot, int mode, int lock)
 {
@@ -608,10 +546,6 @@ padSetMainMode(int port, int slot, int mode, int lock)
     return buffer.padModeResult.result;
 }
 
-
-/*
- * Check if the pad has pressure sensitive buttons
- */
 int
 padInfoPressMode(int port, int slot)
 {
@@ -627,21 +561,12 @@ padInfoPressMode(int port, int slot)
     }
 }
 
-
-/*
- * Pressure sensitive mode ON
- */
 int
 padEnterPressMode(int port, int slot)
 {
     return padSetButtonInfo(port, slot, 0xFFF);
 }
 
-
-/*
- * Check for newer version
- * Pressure sensitive mode OFF
- */
 int
 padExitPressMode(int port, int slot)
 {
@@ -649,10 +574,6 @@ padExitPressMode(int port, int slot)
 
 }
 
-
-/*
- *
- */
 int
 padGetButtonMask(int port, int slot)
 {
@@ -667,10 +588,6 @@ padGetButtonMask(int port, int slot)
     return buffer.padResult.result;
 }
 
-
-/*
- *
- */
 int
 padSetButtonInfo(int port, int slot, int buttonInfo)
 {
@@ -692,12 +609,6 @@ padSetButtonInfo(int port, int slot, int buttonInfo)
     return buffer.padSetButtonInfoResult.result;
 }
 
-
-/*
- * Get actuator status for this controller
- * If padInfoAct(port, slot, -1, 0) != 0, the controller has actuators
- * (i think ;) )
- */
 unsigned char
 padInfoAct(int port, int slot, int actuator, int cmd)
 {
@@ -721,13 +632,6 @@ padInfoAct(int port, int slot, int actuator, int cmd)
     return pdata->actData[actuator*4+cmd];
 }
 
-
-/*
- * Initalise actuators. On dual shock controller:
- * actAlign[0] = 0 enables 'small' engine
- * actAlign[1] = 1 enables 'big' engine
- * set actAlign[2-5] to 0xff (disable)
- */
 int
 padSetActAlign(int port, int slot, char actAlign[6])
 {
@@ -751,13 +655,6 @@ padSetActAlign(int port, int slot, char actAlign[6])
     return buffer.padModeResult.result;
 }
 
-
-/*
- * Set actuator status
- * On dual shock controller,
- * actAlign[0] = 0/1 turns off/on 'small' engine
- * actAlign[1] = 0-255 sets 'big' engine speed
- */
 int
 padSetActDirect(int port, int slot, char actAlign[6])
 {
