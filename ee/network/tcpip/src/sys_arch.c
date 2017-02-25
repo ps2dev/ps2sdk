@@ -12,7 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <kernel.h>
-#include <timer.h>
+#include <time.h>
 #include <limits.h>
 
 #include "lwip/sys.h"
@@ -265,10 +265,10 @@ static u32_t sys_arch_mbox_fetch_internal(sys_mbox_t pMBox, void** ppvMSG, u32_t
 
 	TimeElasped=0;
 	if(block){
-		start=cpu_ticks();
+		start=clock()/(CLOCKS_PER_SEC*1000);
 
 		if((result=ReceiveMbx(&pmsg, pMBox, u32Timeout))==0){
-			TimeElasped = ComputeTimeDiff(start, cpu_ticks());
+			TimeElasped = ComputeTimeDiff(start, clock()/(CLOCKS_PER_SEC*1000));
 		}
 		else{
 			return SYS_ARCH_TIMEOUT;
@@ -374,14 +374,14 @@ u32_t sys_arch_sem_wait(sys_sem_t *Sema, u32_t u32Timeout)
 		int	AlarmID;
 		u32_t	WaitTime;
 
-		start=cpu_ticks();
+		start=clock()/(CLOCKS_PER_SEC*1000);
 		AlarmID=SetAlarm(mSec2HSyncTicks(u32Timeout), &TimeoutHandler, (void*)GetThreadId());
 
 		if(WaitSema(*Sema)==*Sema)
 		{
 			ReleaseAlarm(AlarmID);
 
-			WaitTime=ComputeTimeDiff(start, cpu_ticks());
+			WaitTime=ComputeTimeDiff(start, clock()/(CLOCKS_PER_SEC*1000));
 			result=(WaitTime<=u32Timeout?WaitTime:u32Timeout);
 		}
 		else result=SYS_ARCH_TIMEOUT;
@@ -431,7 +431,7 @@ void sys_init(void)
 
 u32_t sys_now(void)
 {
-	return(cpu_ticks()/295000);
+	return(clock()/(CLOCKS_PER_SEC*1000));
 }
 
 sys_prot_t sys_arch_protect(void)
