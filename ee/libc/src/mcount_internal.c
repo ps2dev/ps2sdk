@@ -6,9 +6,13 @@
 # Copyright 2001-2005, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# __mcount implementation
 */
+
+/**
+ * @file
+ * __mcount implementation
+ */
+
 #include <stdio.h>
 #include <string.h>
 #include <kernel.h>
@@ -36,12 +40,18 @@
 /** gmon.out file header */
 struct gmonhdr
 {
-	int lpc;        /* lowest pc address */
-	int hpc;        /* highest pc address */
-	int ncnt;       /* size of samples + size of header */
-	int version;    /* version number */
-	int profrate;   /* profiling clock rate */
-	int resv[3];    /* reserved */
+	/** lowest pc address */
+	int lpc;        
+	/** highest pc address */
+	int hpc;        
+	/** size of samples + size of header */
+	int ncnt;       
+	/** version number */
+	int version;    
+	/** profiling clock rate */
+	int profrate;   
+	/** reserved */
+	int resv[3];    
 };
 
 /** frompc -> selfpc graph */
@@ -70,16 +80,16 @@ struct gmonparam
 	int timer;
 };
 
-/// holds context statistics
+/** holds context statistics */
 static struct gmonparam gp;
 
-/// one histogram per four bytes of text space
+/** one histogram per four bytes of text space */
 #define	HISTFRACTION	4
 
-/// have we allocated memory and registered already
+/** have we allocated memory and registered already */
 static int initialized = 0;
 
-/// defined by linker
+/** defined by linker */
 extern int _ftext;
 extern int _etext;
 
@@ -88,13 +98,13 @@ static void cleanup();
 static int profil(int, void *, void *);
 
 /** Initializes pg library
-
-    After calculating the text size, initialize() allocates enough
-    memory to allow fastest access to arc structures, and some more
-    for sampling statistics. Note that this also installs a timer that
-    runs at 1000 hertz on TIM0. You can change the definition above to
-    hook on TIM1 instead.
-*/
+ *
+ * After calculating the text size, initialize() allocates enough
+ * memory to allow fastest access to arc structures, and some more
+ * for sampling statistics. Note that this also installs a timer that
+ * runs at 1000 hertz on TIM0. You can change the definition above to
+ * hook on TIM1 instead.
+ */
 static void initialize()
 {
 	initialized = 1;
@@ -138,10 +148,10 @@ static void initialize()
 }
 
 /** Writes gmon.out dump file and stops profiling
-
-    Called from atexit() handler; will dump out a host:gmon.out file
-    with all collected information.
-*/
+ *
+ * Called from atexit() handler; will dump out a host:gmon.out file
+ * with all collected information.
+ */
 static void cleanup()
 {
 	FILE *fp;
@@ -188,14 +198,14 @@ static void cleanup()
 }
 
 /** Internal C handler for _mcount()
-    @param frompc    pc address of caller
-    @param selfpc    pc address of current function
-
-    Called from mcount.S to make life a bit easier. __mcount is called
-    right before a function starts. GCC generates a tiny stub at the very
-    beginning of each compiled routine, which eventually brings the
-    control to here.
-*/
+ * @param frompc    pc address of caller
+ * @param selfpc    pc address of current function
+ *
+ * Called from mcount.S to make life a bit easier. __mcount is called
+ * right before a function starts. GCC generates a tiny stub at the very
+ * beginning of each compiled routine, which eventually brings the
+ * control to here.
+ */
 void __mcount(unsigned int frompc, unsigned int selfpc)
 {
 	int e;
@@ -224,15 +234,15 @@ void __mcount(unsigned int frompc, unsigned int selfpc)
 }
 
 /** Internal timer handler
-    @param ca
-    @param arg
-    @param addr    pointer to code, when timer expired
-    @returns zero
-
-    Called by the Playstation 2 kernel when the timer expires. This
-    callback will reset the counter, and update the sample statistics
-    of the addr passed as argument.
-*/
+ * @param ca
+ * @param arg
+ * @param addr    pointer to code, when timer expired
+ * @returns zero
+ *
+ * Called by the Playstation 2 kernel when the timer expires. This
+ * callback will reset the counter, and update the sample statistics
+ * of the addr passed as argument.
+ */
 static int profil(int ca, void *arg, void *addr)
 {
 	unsigned int frompc = (unsigned int)addr;

@@ -6,9 +6,12 @@
 # Some portions of this file Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Various wide-character *printf functions.
 */
+
+/**
+ * @file
+ * Various wide-character *printf functions.
+ */
 
 /* Code borrowed from mysql's xprintf.c, by Richard Hipp */
 /* This xprintf.c file on which this one is based is in public domain. */

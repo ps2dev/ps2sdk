@@ -6,9 +6,12 @@
 # (c) 2003 Marcus R. Brown (mrbrown@0xd6.org)
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Standard C library heap allocation routines.
 */
+
+/**
+ * @file
+ * Standard C library heap allocation routines.
+ */
 
 /* This code is based on code contributed by Philip Joaqiun (jenova0). */
 
@@ -20,7 +23,7 @@
 #include <stdio.h>
 #endif
 
-/* Use this to set the default malloc() alignment. */
+/** Use this to set the default malloc() alignment. */
 #define DEFAULT_ALIGNMENT	16
 
 #ifndef ALIGN
@@ -91,7 +94,7 @@ void * __alloc_heap_base = NULL;
 heap_mem_header_t *__alloc_heap_head = NULL;
 heap_mem_header_t *__alloc_heap_tail = NULL;
 
-/* Find a the lowest block that we can allocate AFTER, returning NULL if there
+/** Find a the lowest block that we can allocate AFTER, returning NULL if there
    are none.  */
 heap_mem_header_t * _heap_mem_fit(heap_mem_header_t *head, size_t size)
 {

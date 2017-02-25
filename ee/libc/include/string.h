@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# String function prototypes
 */
+
+/**
+ * @file
+ * String function prototypes
+ */
 
 #ifndef _STRING_H
 #define _STRING_H
@@ -54,18 +57,19 @@ static __inline__ size_t strxfrm(char *dest, const char *src, size_t n) { strncp
 
 char *  strerror(int);
 
-// copies ascii string to sjis string
-//
-// args:    dest sjis string buffer
-//          source ascii string buffer
-// returns: length of ascii string copied
+/** copies ascii string to sjis string
+ * @param sjis_buff dest sjis string buffer
+ * @param ascii_buff source ascii string buffer
+ * @return length of ascii string copied
+ */
 int strcpy_sjis(short* sjis_buff, const char* ascii_buff);
 
-// copies sjis string to ascii string
-//
-// args:    dest ascii string buffer
-//          source sjis string buffer
-// returns: length of sjis string copied
+/** copies sjis string to ascii string
+ *
+ * @param ascii_buff dest ascii string buffer
+ * @param sjis_buff source sjis string buffer
+ * @return length of sjis string copied
+ */
 int strcpy_ascii(char* ascii_buff, const short* sjis_buff);
 
 

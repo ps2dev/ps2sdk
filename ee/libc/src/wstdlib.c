@@ -6,21 +6,6 @@
 #include <wchar.h>
 
 #ifdef F_wcstod
-/*
-**
-**  [func] - wcstod.
-**  [desc] - if s is a valid floating point number string then converts the
-**           string to it's corresponding float point value and returns the
-**           value. else returns 0.0. if eptr is not NULL then stores the
-**           pointer to the last processed character in the string.
-**  [entr] - const wchar_t *s; the source string pointer.
-**           wchar_t **endptr; the pointer to the store string end pointer.
-**  [exit] - double; the converted 64-bit float value. else 0.0.
-**  [prec] - s is a valid string pointer and eptr is a valid string pointer
-**           pointer.
-**  [post] - the memory pointed to by eptr is modified.
-**
-*/
 double wcstod(const wchar_t *s, wchar_t **eptr)
 {
   double d, ret = 0.0, sign = 1.0;
@@ -75,22 +60,6 @@ double wcstod(const wchar_t *s, wchar_t **eptr)
 #endif
 
 #ifdef F_wcstol
-/*
-**
-**  [func] - wcstol.
-**  [desc] - if s is a valid long integer string then converts the string to
-**           it's corresponding long integer value and returns the value. else
-**           returns the long integer huge value. if eptr is not NULL then
-**           stores the pointer to the last processed character in the string.
-**  [entr] - const char *s; the source string pointer.
-**           char **eptr; the pointer to store the string end pointer.
-**           int b; the long integer base.
-**  [exit] - long; the converted long integer value. else the long integer huge value.
-**  [prec] - s is a valid string pointer and eptr is a valid string pointer
-**           pointer.
-**  [post] - the memory pointed to by eptr is modified.
-**
-*/
 long int wcstol(const wchar_t *nptr, wchar_t **endptr, int base)
 {
          register const wchar_t *s = nptr;
@@ -185,22 +154,6 @@ long int wcstol(const wchar_t *nptr, wchar_t **endptr, int base)
 #endif
 
 #ifdef F_wcstoul
-/*
-**
-**  [func] - wcstoul.
-**  [desc] - if s is a valid long integer string then converts the string to
-**           it's corresponding long integer value and returns the value. else
-**           returns the long integer huge value. if eptr is not NULL then
-**           stores the pointer to the last processed character in the string.
-**  [entr] - const char *s; the source string pointer.
-**           char **eptr; the pointer to store the string end pointer.
-**           int b; the long integer base.
-**  [exit] - long; the converted long integer value. else the long integer huge value.
-**  [prec] - s is a valid string pointer and eptr is a valid string pointer
-**           pointer.
-**  [post] - the memory pointed to by eptr is modified.
-**
-*/
 unsigned long int wcstoul(const wchar_t *nptr, wchar_t **endptr, int base)
 {
          register const wchar_t *s = nptr;
