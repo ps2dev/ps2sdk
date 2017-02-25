@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# SIOR EE-side RPC code.
 */
+
+/**
+ * @file
+ * SIOR EE-side RPC code.
+ */
 
 #include <tamtypes.h>
 #include <kernel.h>
@@ -25,7 +28,8 @@ static SifRpcDataQueue_t qd __attribute__((aligned(64)));
 static SifRpcServerData_t Sd0 __attribute__((aligned(64)));
 static u32 buffer[32] __attribute__((aligned(64)));
 
-#define IOP_MEM	0xbc000000 // EE mapped IOP mem
+/** EE mapped IOP mem */
+#define IOP_MEM	0xbc000000
 
 enum {
     SIOR_INIT = 1,
