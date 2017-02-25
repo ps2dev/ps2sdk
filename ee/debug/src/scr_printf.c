@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# EE UGLY DEBUG ON SCREEN
 */
+
+/**
+ * @file
+ * EE UGLY DEBUG ON SCREEN
+ */
 
 #include <stdio.h>
 #include <tamtypes.h>
@@ -17,8 +20,6 @@
 #include <osd_config.h>
 #include <stdarg.h>
 #include <debug.h>
-
-/* baseado nas libs do Duke... */
 
 static short int X = 0, Y = 0;
 static short int MX=80, MY=40;
@@ -152,11 +153,9 @@ static void DmaReset(void)
                 : "=&r" (dma_addr), "=&r" (temp) );
 }
 
-/*
- * addr is the address of the data to be transfered.  addr must be 16
- * byte aligned.
- *
- * size is the size (in 16 byte quads) of the data to be transfered.
+/**
+ * @param addr The address of the data to be transfered, which must be 16 byte aligned.
+ * @param size The size (in 16 byte quads) of the data to be transfered.
  */
 
 static inline void progdma( void *addr, int size)
