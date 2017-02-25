@@ -6,9 +6,12 @@
 # Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# ATA Device Driver definitions and imports.
 */
+
+/**
+ * @file
+ * ATA Device Driver definitions and imports.
+ */
 
 #ifndef IOP_ATAD_H
 #define IOP_ATAD_H
@@ -25,10 +28,14 @@
 #define ATAD_XFER_MODE_UDMA	0x40
 
 typedef struct _ata_devinfo {
-	s32	exists;		/* Was successfully probed.  */
-	s32	has_packet;	/* Supports the PACKET command set.  */
-	u32	total_sectors;	/* Total number of user sectors.  */
-	u32	security_status;/* Word 0x100 of the identify info.  */
+	/** Was successfully probed.  */
+	s32	exists;
+	/** Supports the PACKET command set.  */
+	s32	has_packet;
+	/** Total number of user sectors.  */
+	u32	total_sectors;
+	/** Word 0x100 of the identify info.  */
+	u32	security_status;
 } ata_devinfo_t;
 
 #define atad_IMPORTS_start DECLARE_IMPORT_TABLE(atad, 1, 3)
