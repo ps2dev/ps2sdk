@@ -8,6 +8,11 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
+/**
+ * @file
+ * IOP exception handling.
+ */
+
 #ifndef __IOPTRAP_H__
 #define __IOPTRAP_H__
 
