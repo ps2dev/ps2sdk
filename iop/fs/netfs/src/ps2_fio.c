@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# iop tcp fs driver.
 */
+
+/**
+ * @file
+ * iop tcp fs driver.
+ */
 
 #include <types.h>
 #include <defs.h>
@@ -61,11 +64,10 @@ static char ps2netfs_fiobuffer[FIOTRAN_MAXSIZE+1];
 
 //////////////////////////////////////////////////////////////////////////
 
-/*
- *  \brief File Descriptor Handler functions
- *  \ingroup ps2netfs
+/** File Descriptor Handler functions
+ * @ingroup ps2netfs
  *
- *        Handles upto FDH_MAXFD open files concurrently.
+ * Handles upto FDH_MAXFD open files concurrently.
  */
 typedef struct {
   int used;
@@ -76,28 +78,28 @@ typedef struct {
 #define FDH_MAX 50
 static fd_table_t fd_info_list[FDH_MAX+1]; /* one for padding */
 
-/*! \brief Initialise the file descriptor table.
- *  \ingroup ps2netfs
+/** Initialise the file descriptor table.
+ * @ingroup ps2netfs
  *
- *  This initialises the file descriptor table that we
- *  use to translate to numbers passed to client, and to
- *  enable quick lookups on handler type.
+ * This initialises the file descriptor table that we
+ * use to translate to numbers passed to client, and to
+ * enable quick lookups on handler type.
  */
 static inline void fdh_setup()
 {
   memset(&fd_info_list,0,sizeof(fd_info_list));
 }
 
-/*! \brief Get file descriptor for client.
- *  \ingroup ps2netfs
+/** Get file descriptor for client.
+ * @ingroup ps2netfs
  *
- *  \param devtype Device Manager type.
- *  \param fd      PS2 file descriptor.
- *  \return FD to send to client.
+ * @param devtype Device Manager type.
+ * @param fd      PS2 file descriptor.
+ * @return FD to send to client.
  *
- *  return values:
- *    -1 if no space in list.
- *    FD if returning valid entry.
+ * return values:
+ *   -1 if no space in list.
+ *   FD if returning valid entry.
  */
 static inline int fdh_getfd(int devtype,int fd)
 {
@@ -116,12 +118,10 @@ static inline int fdh_getfd(int devtype,int fd)
   return -1;
 }
 
-/*! \brief Free file descriptor from client table.
- *  \ingroup ps2netfs
+/** Free file descriptor from client table.
+ * @ingroup ps2netfs
  *
- *  \param fd      client file descriptor.
- *
- *  no return value.
+ * @param fd      client file descriptor.
  */
 static inline void fdh_freefd(int fd)
 {
@@ -133,19 +133,18 @@ static inline void fdh_freefd(int fd)
   }
 }
 
-/*! \brief Get fd list entry. */
+/** Get fd list entry. */
 #define fdh_get(a) (&fd_info_list[a])
-/*! \brief Get fd list entry used value. */
+/** Get fd list entry used value. */
 #define fdh_getused(a) (fd_info_list[a].used)
-/*! \brief Get fd list entry type value. */
+/** Get fd list entry type value. */
 #define fdh_getfdtype(a) (fd_info_list[a].devtype)
-/*! \brief Get fd list entry ps2 file descriptor value. */
+/** Get fd list entry ps2 file descriptor value. */
 #define fdh_getrealfd(a) (fd_info_list[a].realfd)
 
 
-/*! \brief changes mode from ioman to iomanx format
- *  \ingroup ps2netfs
- *
+/** changes mode from ioman to iomanx format
+ * @ingroup ps2netfs
  */
 static inline int convmode_to_iomanx(int stat)
 {
@@ -165,19 +164,18 @@ static inline int convmode_to_iomanx(int stat)
   return mode;
 }
 
-/*! \brief changes mode from iomanx to ioman format
- *  \ingroup ps2netfs
- *
+/** changes mode from iomanx to ioman format
+ * @ingroup ps2netfs
  */
 static inline int convmode_from_iomanx(int stat)
 {
   return stat;
 }
 
-/*! \brief Shortcut to close the socket and cleanup.
- *  \ingroup ps2netfs
+/** Shortcut to close the socket and cleanup.
+ * @ingroup ps2netfs
  *
- *  \return disconnect return value.
+ * @return disconnect return value.
  */
 int ps2netfs_close_socket(void)
 {
@@ -190,12 +188,12 @@ int ps2netfs_close_socket(void)
   return ret;
 }
 
-/*! \brief Shortcut to close the socket forcibly and set to exit (active=0).
- *  \ingroup ps2netfs
+/** Shortcut to close the socket forcibly and set to exit (active=0).
+ * @ingroup ps2netfs
  *
- *  This will close down the socket, and cause the server thread to exit.
+ * This will close down the socket, and cause the server thread to exit.
  *
- *  \return disconnect return value.
+ * @return disconnect return value.
  */
 void ps2netfs_close_fsys(void)
 {
@@ -226,9 +224,7 @@ static inline int ps2netfs_lwip_send(int sock, void *buf, int len, int flag)
   else return ret;
 }
 
-//----------------------------------------------------------------------
-// Do repetetive recv() calls until 'bytes' bytes are received
-// or error returned
+/** Do repetetive recv() calls until 'bytes' bytes are received or error returned */
 int ps2netfs_recv_bytes(int sock, char *buf, int bytes)
 {
   int left;
@@ -252,8 +248,7 @@ int ps2netfs_recv_bytes(int sock, char *buf, int bytes)
   return bytes;
 }
 
-//----------------------------------------------------------------------
-// Receive a 'packet' of unknown type, max size 4096 bytes
+/** Receive a 'packet' of unknown type, max size 4096 bytes */
 int ps2netfs_accept_pktunknown(int sock, char *buf)
 {
   int length;
@@ -309,20 +304,20 @@ int ps2netfs_accept_pktunknown(int sock, char *buf)
   return hlen;
 }
 
-/*! \brief Handles a PS2NETFS_INFO_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_INFO_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
- *   -X if error.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
  *
- *  return values for client:
- *    -1 if error.
- *    0 if handled ok.
+ * return values for client:
+ *   -1 if error.
+ *   0 if handled ok.
  */
 static int ps2netfs_op_info(char *buf, int len)
 {
@@ -360,20 +355,20 @@ static int ps2netfs_op_info(char *buf, int len)
   return 0;
 }
 
-/*! \brief Handles a PS2NETFS_FSTYPE_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_FSTYPE_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
- *   -X if error.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
  *
- *  return values for client:
- *    -1 if error.
- *    0 if handled ok.
+ * return values for client:
+ *   -1 if error.
+ *   0 if handled ok.
  */
 static int ps2netfs_op_fstype(char *buf, int len)
 {
@@ -409,20 +404,20 @@ static int ps2netfs_op_fstype(char *buf, int len)
   return 0;
 }
 
-/*! \brief Handles a PS2NETFS_DEVLIST_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_DEVLIST_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
- *   -X if error.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
  *
- *  return values for client:
- *    -1 if error.
- *    0 if handled ok.
+ * return values for client:
+ *   -1 if error.
+ *   0 if handled ok.
  */
 static int ps2netfs_op_devlist(char *buf, int len)
 {
@@ -474,21 +469,21 @@ static int ps2netfs_op_devlist(char *buf, int len)
 }
 
 
-/*! \brief Handles a PS2NETFS_OPEN_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_OPEN_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   +X if handled ok, valid FD returned.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    +X if handled ok, valid FD returned.
- *    -X if error.
  */
 // int open(const char *name, int flags, ...);
 static int ps2netfs_op_open(char *buf, int len)
@@ -535,21 +530,21 @@ static int ps2netfs_op_open(char *buf, int len)
   return 0;
 }
 
-/*! \brief Handles a PS2NETFS_CLOSE_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_CLOSE_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   >=0 if handled ok.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    >=0 if handled ok.
- *    -X if error.
  */
 // int close(int fd);
 static int ps2netfs_op_close(char *buf, int len)
@@ -595,21 +590,21 @@ static int ps2netfs_op_close(char *buf, int len)
   return 0;
 }
 
-/*! \brief Handles a PS2NETFS_READ_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_READ_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   >=0 if handled ok , bytes read.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    >=0 if handled ok , bytes read.
- *    -X if error.
  */
 // int read(int fd, void *ptr, size_t size);
 static int ps2netfs_op_read(char *buf, int len)
@@ -667,21 +662,21 @@ static int ps2netfs_op_read(char *buf, int len)
   return 0;
 }
 
-/*! \brief Handles a PS2NETFS_WRITE_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_WRITE_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   >=0 if handled ok , bytes written.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    >=0 if handled ok , bytes written.
- *    -X if error.
  */
 // int write(int fd, void *ptr, size_t size);
 static int ps2netfs_op_write(char *buf, int len)
@@ -737,21 +732,21 @@ static int ps2netfs_op_write(char *buf, int len)
   return 0;
 }
 
-/*! \brief Handles a PS2NETFS_LSEEK_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_LSEEK_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   >=0 if handled ok , position.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    >=0 if handled ok , position.
- *    -X if error.
  */
 // int lseek(int fd, int offset, int mode);
 static int ps2netfs_op_lseek(char *buf, int len)
@@ -795,21 +790,21 @@ static int ps2netfs_op_lseek(char *buf, int len)
   return 0;
 }
 
-/*! \brief Handles a PS2NETFS_IOCTL_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_IOCTL_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   >=0 if handled ok.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    >=0 if handled ok.
- *    -X if error.
  */
 // int ioctl(int fd, unsigned long cmd, void *param);
 static int ps2netfs_op_ioctl(char *buf, int len)
@@ -853,21 +848,21 @@ static int ps2netfs_op_ioctl(char *buf, int len)
   return 0;
 }
 
-/*! \brief Handles a PS2NETFS_REMOVE_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_REMOVE_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   >=0 if handled ok.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    >=0 if handled ok.
- *    -X if error.
  */
 // int remove(const char *name);
 static int ps2netfs_op_remove(char *buf, int len)
@@ -912,21 +907,21 @@ static int ps2netfs_op_remove(char *buf, int len)
   return 0;
 }
 
-/*! \brief Handles a PS2NETFS_MKDIR_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_MKDIR_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   >=0 if handled ok.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    >=0 if handled ok.
- *    -X if error.
  */
 // int mkdir(const char *path, ...);
 static int ps2netfs_op_mkdir(char *buf, int len)
@@ -971,21 +966,21 @@ static int ps2netfs_op_mkdir(char *buf, int len)
   return 0;
 }
 
-/*! \brief Handles a PS2NETFS_RMDIR_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_RMDIR_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   >=0 if handled ok.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    >=0 if handled ok.
- *    -X if error.
  */
 // int rmdir(const char *path);
 static int ps2netfs_op_rmdir(char *buf, int len)
@@ -1030,21 +1025,21 @@ static int ps2netfs_op_rmdir(char *buf, int len)
   return 0;
 }
 
-/*! \brief Handles a PS2NETFS_DOPEN_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_DOPEN_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   +X if handled ok, valid FD returned.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    +X if handled ok, valid FD returned.
- *    -X if error.
  */
 // int dopen(const char *path);
 static int ps2netfs_op_dopen(char *buf, int len)
@@ -1091,21 +1086,21 @@ static int ps2netfs_op_dopen(char *buf, int len)
   return 0;
 }
 
-/*! \brief Handles a PS2NETFS_DCLOSE_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_DCLOSE_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   >=0 if handled ok.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    >=0 if handled ok.
- *    -X if error.
  */
 // int dclose(int fd);
 static int ps2netfs_op_dclose(char *buf, int len)
@@ -1151,21 +1146,21 @@ static int ps2netfs_op_dclose(char *buf, int len)
   return 0;
 }
 
-/*! \brief Handles a PS2NETFS_DREAD_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_DREAD_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   >=0 if handled ok.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    >=0 if handled ok.
- *    -X if error.
  */
 // int dread(int fd, void *buf);
 static int ps2netfs_op_dread(char *buf, int len)
@@ -1237,21 +1232,21 @@ static int ps2netfs_op_dread(char *buf, int len)
   return 0;
 }
 
-/*! \brief Handles a PS2NETFS_GETSTAT_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_GETSTAT_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   +X if handled ok, valid FD returned.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    +X if handled ok, valid FD returned.
- *    -X if error.
  */
 // int getstat(const char *name, void *stat);
 static int ps2netfs_op_getstat(char *buf, int len)
@@ -1259,21 +1254,21 @@ static int ps2netfs_op_getstat(char *buf, int len)
   return -1;
 }
 
-/*! \brief Handles a PS2NETFS_CHSTAT_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_CHSTAT_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   +X if handled ok, valid FD returned.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    +X if handled ok, valid FD returned.
- *    -X if error.
  */
 // int chstat(const char *name, void *stat, unsigned int statmask);
 static int ps2netfs_op_chstat(char *buf, int len)
@@ -1281,21 +1276,21 @@ static int ps2netfs_op_chstat(char *buf, int len)
   return -1;
 }
 
-/*! \brief Handles a PS2NETFS_FORMAT_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_FORMAT_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   +X if handled ok, valid FD returned.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    +X if handled ok, valid FD returned.
- *    -X if error.
  */
 // int format(const char *dev, const char *blockdev, void *arg, size_t arglen);
 // #define PFS_ZONE_SIZE	8192
@@ -1351,21 +1346,21 @@ static int ps2netfs_op_format(char *buf, int len)
 
 // EXTENDED CALLS FROM HERE ON IN
 
-/*! \brief Handles a PS2NETFS_RENAME_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_RENAME_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   +X if handled ok, valid FD returned.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    +X if handled ok, valid FD returned.
- *    -X if error.
  */
 // int rename(const char *old, const char *new);
 static int ps2netfs_op_rename(char *buf, int len)
@@ -1409,21 +1404,21 @@ static int ps2netfs_op_rename(char *buf, int len)
   return 0;
 }
 
-/*! \brief Handles a PS2NETFS_CHDIR_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_CHDIR_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   +X if handled ok, valid FD returned.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    +X if handled ok, valid FD returned.
- *    -X if error.
  */
 // int chdir(const char *name);
 static int ps2netfs_op_chdir(char *buf, int len)
@@ -1463,21 +1458,21 @@ static int ps2netfs_op_chdir(char *buf, int len)
   return 0;
 }
 
-/*! \brief Handles a PS2NETFS_SYNC_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_SYNC_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   +X if handled ok, valid FD returned.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    +X if handled ok, valid FD returned.
- *    -X if error.
  */
 // int sync(const char *dev, int flag);
 static int ps2netfs_op_sync(char *buf, int len)
@@ -1517,21 +1512,21 @@ static int ps2netfs_op_sync(char *buf, int len)
   return 0;
 }
 
-/*! \brief Handles a PS2NETFS_MOUNT_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_MOUNT_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   +X if handled ok, valid FD returned.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    +X if handled ok, valid FD returned.
- *    -X if error.
  */
 // int mount(const char *fsname, const char *devname, int flag, void *arg, size_t arglen);
 static int ps2netfs_op_mount(char *buf, int len)
@@ -1571,21 +1566,21 @@ static int ps2netfs_op_mount(char *buf, int len)
   return 0;
 }
 
-/*! \brief Handles a PS2NETFS_UMOUNT_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_UMOUNT_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   +X if handled ok, valid FD returned.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    +X if handled ok, valid FD returned.
- *    -X if error.
  */
 // int umount(const char *fsname);
 static int ps2netfs_op_umount(char *buf, int len)
@@ -1625,21 +1620,21 @@ static int ps2netfs_op_umount(char *buf, int len)
   return 0;
 }
 
-/*! \brief Handles a PS2NETFS_LSEEK64_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_LSEEK64_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   +X if handled ok, valid FD returned.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    +X if handled ok, valid FD returned.
- *    -X if error.
  */
 // int lseek64(int fd, long long offset, int whence);
 static int ps2netfs_op_lseek64(char *buf, int len)
@@ -1647,21 +1642,21 @@ static int ps2netfs_op_lseek64(char *buf, int len)
   return -1;
 }
 
-/*! \brief Handles a PS2NETFS_DEVCTL_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_DEVCTL_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   +X if handled ok, valid FD returned.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    +X if handled ok, valid FD returned.
- *    -X if error.
  */
 // int devctl(const char *name, int cmd, void *arg, size_t arglen, void *buf, size_t buflen);
 static int ps2netfs_op_devctl(char *buf, int len)
@@ -1669,21 +1664,21 @@ static int ps2netfs_op_devctl(char *buf, int len)
   return -1;
 }
 
-/*! \brief Handles a PS2NETFS_SYMLINK_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_SYMLINK_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   +X if handled ok, valid FD returned.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    +X if handled ok, valid FD returned.
- *    -X if error.
  */
 // int symlink(const char *old, const char *new);
 static int ps2netfs_op_symlink(char *buf, int len)
@@ -1727,21 +1722,21 @@ static int ps2netfs_op_symlink(char *buf, int len)
   return 0;
 }
 
-/*! \brief Handles a PS2NETFS_READLINK_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_READLINK_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   +X if handled ok, valid FD returned.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    +X if handled ok, valid FD returned.
- *    -X if error.
  */
 // int readlink(const char *path, char *buf, size_t buflen);
 static int ps2netfs_op_readlink(char *buf, int len)
@@ -1782,21 +1777,21 @@ static int ps2netfs_op_readlink(char *buf, int len)
   return 0;
 }
 
-/*! \brief Handles a PS2NETFS_IOCTL2_CMD request.
- *  \ingroup ps2netfs
+/** Handles a PS2NETFS_IOCTL2_CMD request.
+ * @ingroup ps2netfs
  *
- *  \param buf Pointer to packet data.
- *  \param len Length of packet.
- *  \return Status.
+ * @param buf Pointer to packet data.
+ * @param len Length of packet.
+ * @return Status.
  *
- *  status returns:
- *    0 if all request and response handled ok.
+ * status returns:
+ *   0 if all request and response handled ok.
+ *  -X if error.
+ *
+ * return values for client:
+ *   -19 (ENODEV) if device not found
+ *   +X if handled ok, valid FD returned.
  *   -X if error.
- *
- *  return values for client:
- *    -19 (ENODEV) if device not found
- *    +X if handled ok, valid FD returned.
- *    -X if error.
  */
 // int ioctl2(int fd, int cmd, void *arg, size_t arglen, void *buf, size_t buflen);
 static int ps2netfs_op_ioctl2(char *buf, int len)
@@ -1805,14 +1800,14 @@ static int ps2netfs_op_ioctl2(char *buf, int len)
 }
 
 
-/*! \brief Listen for packets and handle them.
- *  \ingroup ps2netfs
+/** Listen for packets and handle them.
+ * @ingroup ps2netfs
  *
- *  \param sock Socket to receive on.
+ * @param sock Socket to receive on.
  *
- *  This function listens on the given socket for command packets.
- *  It loops until a socket error, or protocol error is found, then
- *  exits to the calling function, which should clean the socket up.
+ * This function listens on the given socket for command packets.
+ * It loops until a socket error, or protocol error is found, then
+ * exits to the calling function, which should clean the socket up.
  */
 static void ps2netfs_Listener(int sock)
 {
@@ -1943,20 +1938,20 @@ static void ps2netfs_Listener(int sock)
   }
 }
 
-/*! \brief Main ps2netfs Thread.
- *  \ingroup ps2netfs
+/** Main ps2netfs Thread.
+ * @ingroup ps2netfs
  *
- *  \param argv Parameters to thread.
- *  \return Status.
+ * @param argv Parameters to thread.
+ * @return Status.
  *
- *  This is the main thread function for ps2netfs. It runs until
- *  'ps2netfs_active' is set to 0.
- *  Handles accepting connections and passing them onto the listener
- *  function to handle them.
+ * This is the main thread function for ps2netfs. It runs until
+ * 'ps2netfs_active' is set to 0.
+ * Handles accepting connections and passing them onto the listener
+ * function to handle them.
  *
- *  status returns:
- *    0 if exiting and finished.
- *   -1 if error starting thread.
+ * status returns:
+ *   0 if exiting and finished.
+ *  -1 if error starting thread.
  */
 int
 ps2netfs_serv(void *argv)
@@ -2051,13 +2046,12 @@ ps2netfs_serv(void *argv)
  return 0;
 }
 
-/*! \brief Init ps2netfs.
- *  \ingroup ps2netfs
+/** Init ps2netfs.
+ * @ingroup ps2netfs
  *
- *  \return Status (0=success, -1 = failure).
+ * @return Status (0=success, -1 = failure).
  *
- *  This handles setting up the Thread, and starting it running.
- *
+ * This handles setting up the Thread, and starting it running.
  */
 int ps2netfs_Init(void)
 {
@@ -2096,12 +2090,11 @@ int ps2netfs_Init(void)
   return 0;
 }
 
-/*! \brief Shutdown ps2netfs.
- *  \ingroup ps2netfs
+/** Shutdown ps2netfs.
+ * @ingroup ps2netfs
  *
- *  This handles Stopping the thread and disconnecting. All shutdown
- *  for ps2netfs.
- *
+ * This handles Stopping the thread and disconnecting. All shutdown
+ * for ps2netfs.
  */
 int ps2fs_Destroy(void)
 {
