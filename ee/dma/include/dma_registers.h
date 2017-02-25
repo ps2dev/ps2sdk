@@ -6,51 +6,64 @@
 # (c) 2005 Dan Peori <peori@oopo.net>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
 */
+
+/**
+ * @file
+ * DMA registers
+ */
 
 #ifndef __DMA_REGISTERS_H__
 #define __DMA_REGISTERS_H__
 
 #include <tamtypes.h>
 
-#define DMA_REG_CTRL		(volatile u32 *)0x1000E000	// DMA Control Register
-#define DMA_REG_STAT		(volatile u32 *)0x1000E010	// Interrupt Status Register
-#define DMA_REG_PCR			(volatile u32 *)0x1000E020	// Priority Control Register
-#define DMA_REG_SQWC		(volatile u32 *)0x1000E030	// Interleave Size Register
-#define DMA_REG_RBSR		(volatile u32 *)0x1000E040	// Ring Buffer Size Register
-#define DMA_REG_RBOR		(volatile u32 *)0x1000E050	// Ring Buffer Address Register
-#define DMA_REG_STADR		(volatile u32 *)0x1000E060	// Stall Address Register
-#define DMA_REG_ENABLER		(volatile u32 *)0x1000F520	// DMA Hold State Register
-#define DMA_REG_ENABLEW		(volatile u32 *)0x1000F590	// DMA Hold Control Register
+/** DMA Control Register */
+#define DMA_REG_CTRL		(volatile u32 *)0x1000E000
+/** Interrupt Status Register */
+#define DMA_REG_STAT		(volatile u32 *)0x1000E010
+/** Priority Control Register */
+#define DMA_REG_PCR			(volatile u32 *)0x1000E020
+/** Interleave Size Register */
+#define DMA_REG_SQWC		(volatile u32 *)0x1000E030
+/** Ring Buffer Size Register */
+#define DMA_REG_RBSR		(volatile u32 *)0x1000E040
+/** Ring Buffer Address Register */
+#define DMA_REG_RBOR		(volatile u32 *)0x1000E050
+/** Stall Address Register */
+#define DMA_REG_STADR		(volatile u32 *)0x1000E060
+/** DMA Hold State Register */
+#define DMA_REG_ENABLER		(volatile u32 *)0x1000F520
+/** DMA Hold Control Register */
+#define DMA_REG_ENABLEW		(volatile u32 *)0x1000F590
 
-// Enable DMA Controller
+/** Enable DMA Controller */
 #define DMAE_DISABLE 0
 #define DMAE_ENABLE  1
 
-// Enable Cycle Stealing
+/** Enable Cycle Stealing */
 #define RELE_OFF 0
 #define RELE_ON  1
 
-// fifo drain?
+/** fifo drain? */
 #define MFD_OFF  0
 #define MFD_RES  1
 #define MFD_VIF  2
 #define MFD_GIF  3
 
-// stall source?
+/** stall source? */
 #define STS_UNSPEC 0
 #define STS_SIF    1
 #define STS_SPR    2
 #define STS_IPU    3
 
-// stall drain?
+/** stall drain? */
 #define STD_OFF 0
 #define STD_VIF 1
 #define STD_GIF 2
 #define STD_SIF 3
 
-// Cycles to release control
+/** Cycles to release control */
 #define RCYC_8   0
 #define RCYC_16  1
 #define RCYC_32  2
@@ -86,9 +99,7 @@
 
 #define DMA_SET_ENABLER(A)  (u32)((A) & 0x00000001) << 16
 
-
-// Per-dma channel registers
-
+/** Per-dma channel registers */
 #define DMA_SET_CHCR(DIR,MODE,ASP,TTE,TIE,STR,TAG) \
 	(u32)((DIR) & 0x00000001) <<  0 | (u32)((MODE) & 0x00000003) <<  2 | \
 	(u32)((ASP) & 0x00000003) <<  4 | (u32)((TTE ) & 0x00000001) <<  6 | \
