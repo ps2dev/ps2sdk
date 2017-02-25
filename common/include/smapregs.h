@@ -78,14 +78,29 @@
 #define USE_SMAP_EMAC3_REGS	volatile u8 *emac3_regbase = \
 	(volatile u8 *)(SMAP_REGBASE + SMAP_EMAC3_REGBASE)
 
-#define SMAP_EMAC3_REG(offset)	(*(volatile u16 *)(emac3_regbase + (offset)))
+#define SMAP_EMAC3_REG(offset)		(*(volatile u16 *)(emac3_regbase + (offset)))
+#define SMAP_EMAC3_REG32(offset)	(*(volatile u32 *)(emac3_regbase + (offset)))
 
-#define SMAP_EMAC3_GET(offset)	((SMAP_EMAC3_REG((offset)) << 16) | \
-	(SMAP_EMAC3_REG((offset)+2)))
+#define SMAP_EMAC3_GET(offset)		((SMAP_EMAC3_REG((offset)) << 16) | \
+					(SMAP_EMAC3_REG((offset)+2)))
 
-#define SMAP_EMAC3_SET(offset, val)					\
+#define SMAP_EMAC3_GET32(offset)	(((SMAP_EMAC3_REG32((offset)) >> 16) & 0xffff) |	\
+					((SMAP_EMAC3_REG32((offset)) & 0xffff) << 16))
+
+#define SMAP_EMAC3_WRITE32(offset, val)					\
+		SMAP_EMAC3_REG32((offset))   = ((((val) >> 16) & 0xffff) | (((val) & 0xffff) << 16));
+
+#define SMAP_EMAC3_WRITE(offset, val)					\
 		SMAP_EMAC3_REG((offset))   = ((val) >> 16) & 0xffff;	\
 		SMAP_EMAC3_REG((offset)+2) = (val) & 0xffff;
+
+#define SMAP_EMAC3_SET(offset, val)			\
+		SMAP_EMAC3_WRITE(offset, val)		\
+		SMAP_EMAC3_GET(offset)
+
+#define SMAP_EMAC3_SET32(offset, val)			\
+		SMAP_EMAC3_WRITE32(offset, val)		\
+		SMAP_EMAC3_GET32(offset)
 
 #define	SMAP_R_EMAC3_MODE0		0x00
 #define	  SMAP_E3_RXMAC_IDLE		(1<<31)
