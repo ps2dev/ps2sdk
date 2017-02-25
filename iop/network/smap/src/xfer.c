@@ -57,7 +57,7 @@ static inline void CopyFromFIFO(volatile u8 *smap_regbase, void *buffer, unsigne
 
 int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData){
 	USE_SMAP_RX_BD;
-	int NumPacketsReceived;
+	int NumPacketsReceived, i;
 	volatile smap_bd_t *PktBdPtr;
 	volatile u8 *smap_regbase;
 	void *pbuf, *payload;
@@ -70,7 +70,10 @@ int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData){
 	while(1){
 		PktBdPtr=&rx_bd[SmapDrivPrivData->RxBDIndex&(SMAP_BD_MAX_ENTRY-1)];
 		if(!((ctrl_stat=PktBdPtr->ctrl_stat)&SMAP_BD_RX_EMPTY)){
-			if(ctrl_stat&(SMAP_BD_RX_INRANGE|SMAP_BD_RX_OUTRANGE|SMAP_BD_RX_FRMTOOLONG|SMAP_BD_RX_BADFCS|SMAP_BD_RX_ALIGNERR|SMAP_BD_RX_SHORTEVNT|SMAP_BD_RX_RUNTFRM|SMAP_BD_RX_OVERRUN) || PktBdPtr->length>MAX_FRAME_SIZE){
+			if(ctrl_stat&(SMAP_BD_RX_INRANGE|SMAP_BD_RX_OUTRANGE|SMAP_BD_RX_FRMTOOLONG|SMAP_BD_RX_BADFCS|SMAP_BD_RX_ALIGNERR|SMAP_BD_RX_SHORTEVNT|SMAP_BD_RX_RUNTFRM|SMAP_BD_RX_OVERRUN)){
+				for(i=0; i < 16; i++)
+					if((ctrl_stat>>i) & 1) SmapDrivPrivData->RuntimeStats.RxErrorCount++;
+
 				SmapDrivPrivData->RuntimeStats.RxDroppedFrameCount++;
 
 				if(ctrl_stat&SMAP_BD_RX_OVERRUN) SmapDrivPrivData->RuntimeStats.RxFrameOverrunCount++;
@@ -81,13 +84,12 @@ int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData){
 			else{
 				length = PktBdPtr->length;
 
-				if((pbuf=NetManNetProtStackAllocRxPacket(length, &payload))==NULL){
-					break;	// Cannot continue. Stop.
-				}
-
-				CopyFromFIFO(SmapDrivPrivData->smap_regbase, payload, length, PktBdPtr->pointer);
-				NetManNetProtStackEnQRxPacket(pbuf);
-				NumPacketsReceived++;
+				if((pbuf=NetManNetProtStackAllocRxPacket(length, &payload))!=NULL){
+					CopyFromFIFO(SmapDrivPrivData->smap_regbase, payload, length, PktBdPtr->pointer);
+					NetManNetProtStackEnQRxPacket(pbuf);
+					NumPacketsReceived++;
+				} else
+					SmapDrivPrivData->RuntimeStats.RxAllocFail++;
 			}
 
 			SMAP_REG8(SMAP_R_RXFIFO_FRAME_DEC)=0;

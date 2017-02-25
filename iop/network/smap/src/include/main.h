@@ -1,8 +1,6 @@
 //In the SONY original, all the calls to DEBUG_PRINTF() were to sceInetPrintf().
 #define DEBUG_PRINTF(args...) printf(args)
 
-#define MAX_FRAME_SIZE	1518
-
 /*
 	Sorry, but even I can't explain the syntax used here. :(
 	I know that _ori_gp has to be "early-clobbered" and the GP register will get clobbered... but I don't really know why GCC can't determine which registers it can and can't use automatically. And I don't really understand what "clobbering" registers is.
@@ -17,6 +15,7 @@
 
 struct RuntimeStats{
 	u32 RxDroppedFrameCount;
+	u32 RxErrorCount;
 	u16 RxFrameOverrunCount;
 	u16 RxFrameBadLengthCount;
 	u16 RxFrameBadFCSCount;
@@ -26,6 +25,7 @@ struct RuntimeStats{
 	u16 TxFrameEDEFERCount;
 	u16 TxFrameCollisionCount;
 	u16 TxFrameUnderrunCount;
+	u16 RxAllocFail;
 };
 
 struct SmapDriverData{

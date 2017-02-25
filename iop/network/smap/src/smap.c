@@ -48,10 +48,9 @@
 		7. If there are frames to transmit, write to TX_GNP_0 and enable the TXDNV interrupt */
 
 #define DEV9_SMAP_ALL_INTR_MASK	(SMAP_INTR_EMAC3|SMAP_INTR_RXEND|SMAP_INTR_TXEND|SMAP_INTR_RXDNV|SMAP_INTR_TXDNV)
-//Unlike the SONY original, the EMAC3 and RXDNV interrupts are not handled. They didn't even do anything useful in the SONY original.
-#define DEV9_SMAP_INTR_MASK	(SMAP_INTR_RXEND|SMAP_INTR_TXDNV)
+#define DEV9_SMAP_INTR_MASK	(SMAP_INTR_EMAC3|SMAP_INTR_RXEND|SMAP_INTR_RXDNV|SMAP_INTR_TXDNV)
 //The Tx interrupt events are handled separately
-#define DEV9_SMAP_INTR_MASK2	(SMAP_INTR_RXEND)
+#define DEV9_SMAP_INTR_MASK2	(SMAP_INTR_EMAC3|SMAP_INTR_RXEND|SMAP_INTR_RXDNV)
 
 struct SmapDriverData SmapDriverData;
 
@@ -433,17 +432,22 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData){
 			ResetCounterFlag=0;
 			if(EFBits&SMAP_EVENT_INTR){
 				while((IntrReg=SPD_REG16(SPD_R_INTR_STAT)&DEV9_SMAP_INTR_MASK)!=0){
-					/*	Other interrupts that were handled in the SONY original:
-							1. EMAC3: nothing useful was done, other than just acknowledging the events.
-							2. RXDNV: nothing useful was done, other than logging the event (same field as the BD_RX_OVERRUN event).
-						Original order/priority:
+					/*	Original order/priority:
 							1. EMAC3
 							2. RXEND
 							3. RXDNV
 							4. TXDNV */
+					if(IntrReg&SMAP_INTR_EMAC3){
+						SMAP_REG16(SMAP_R_INTR_CLR)=SMAP_INTR_EMAC3;
+						SMAP_EMAC3_SET(SMAP_R_EMAC3_INTR_STAT, SMAP_E3_INTR_TX_ERR_0|SMAP_E3_INTR_SQE_ERR_0|SMAP_E3_INTR_DEAD_0);
+					}
 					if(IntrReg&SMAP_INTR_RXEND){
 						SMAP_REG16(SMAP_R_INTR_CLR)=SMAP_INTR_RXEND;
 						ResetCounterFlag=HandleRxIntr(SmapDrivPrivData);
+					}
+					if(IntrReg&SMAP_INTR_RXDNV){
+						SMAP_REG16(SMAP_R_INTR_CLR)=SMAP_INTR_RXDNV;
+						SmapDrivPrivData->RuntimeStats.RxFrameOverrunCount++;
 					}
 					if(IntrReg&SMAP_INTR_TXDNV){
 						SMAP_REG16(SMAP_R_INTR_CLR)=SMAP_INTR_TXDNV;
@@ -913,8 +917,7 @@ int smap_init(int argc, char *argv[]){
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_TxMODE1, 7<<SMAP_E3_TX_LOW_REQ_BITSFT | 15<<SMAP_E3_TX_URG_REQ_BITSFT);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_RxMODE, SMAP_E3_RX_STRIP_PAD|SMAP_E3_RX_STRIP_FCS|SMAP_E3_RX_INDIVID_ADDR|SMAP_E3_RX_BCAST|SMAP_E3_RX_MCAST);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_INTR_STAT, SMAP_E3_INTR_TX_ERR_0|SMAP_E3_INTR_SQE_ERR_0|SMAP_E3_INTR_DEAD_0);
-	//Do not handle the EMAC3 interrupts because the SONY original didn't do anything useful with them either.
-	SMAP_EMAC3_SET(SMAP_R_EMAC3_INTR_ENABLE, 0);
+	SMAP_EMAC3_SET(SMAP_R_EMAC3_INTR_ENABLE, SMAP_E3_INTR_TX_ERR_0|SMAP_E3_INTR_SQE_ERR_0|SMAP_E3_INTR_DEAD_0);
 
 	mac_address=(u16)(eeprom_data[0]>>8 | eeprom_data[0]<<8);
 	SMAP_EMAC3_SET(SMAP_R_EMAC3_ADDR_HI, mac_address);
