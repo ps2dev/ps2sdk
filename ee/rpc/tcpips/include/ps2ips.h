@@ -8,6 +8,11 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
+/**
+ * @file
+ * PS2IP library.
+ */
+
 #ifndef _EE_PS2IP_H
 #define _EE_PS2IP_H
 
