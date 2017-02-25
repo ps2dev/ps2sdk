@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Functions to provide access to multi-taps.
 */
+
+/**
+ * @file
+ * Functions to provide access to multi-taps.
+ */
 
 #ifndef _LIBMTAP_H
 #define _LIBMTAP_H
@@ -17,20 +20,27 @@
 extern "C" {
 #endif
 
-// Initialise the multitap library. Returns 1 on success, other than 1 on failure.
+/** Initialise the multitap library. 
+ * @return 1 on success; 1 on failure 
+ */
 int mtapInit(void);
 
-// Open a port for the multitap. The "port" argument specifies the port that is to be monitored
-// as a multitap connection destination. Returns 1 on success, other than 1 on failure.
+/** Open a port for the multitap. 
+ * @param port specifies the port that is to be monitored as a multitap connection destination. 
+ * @return 1 on success; !1 on failure. 
+ */
 int mtapPortOpen(int port);
 
-// Closes a port for the multitap. The "port" argument is a port that is to be closed (must have
-// been previously opened by mtapPortOpen. Returns 1 on success, other than 1 on failure.
+/** Closes a port for the multitap. 
+ * @param port is a port that is to be closed (must have been previously opened by mtapPortOpen). 
+ * @return 1 on success; !1 on failure. 
+ */
 int mtapPortClose(int port);
 
-// Checks if a multitap is connected to an opened port. The "port" argument is the port to be
-// checked. Returns 1 if a multitap exists on the specified port, other than 1 if there is
-// no multitap on the specified port.
+/** Checks if a multitap is connected to an opened port. 
+ * @param port is the port to be checked. 
+ * @return 1 if a multitap exists on the specified port; !1 if there isno multitap on the specified port. 
+ */
 int mtapGetConnection(int port);
 
 #ifdef __cplusplus
