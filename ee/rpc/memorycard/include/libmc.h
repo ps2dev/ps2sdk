@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Macro's, structures & function prototypes for mclib.
 */
+
+/**
+ * @file
+ * Macros, structures & function prototypes for mclib.
+ */
 
 #include <libmc-common.h>
 
@@ -54,13 +57,15 @@ extern "C" {
 #define MC_ATTR_PROTECTED       0x0008
 #define MC_ATTR_FILE            0x0010
 #define MC_ATTR_SUBDIR          0x0020
-#define MC_ATTR_OBJECT          0x0030	// File or directory
+/** File or directory */
+#define MC_ATTR_OBJECT          0x0030
 #define MC_ATTR_CLOSED          0x0080
 #define MC_ATTR_PDAEXEC         0x0800
 #define MC_ATTR_PSX             0x1000
-#define MC_ATTR_HIDDEN          0x2000	// not hidden in osdsys, but it is to games
+/** not hidden in osdsys, but it is to games */
+#define MC_ATTR_HIDDEN          0x2000
 
-// function numbers returned by mcSync in the 'cmd' pointer
+/** function numbers returned by mcSync in the 'cmd' pointer */
 enum MC_FUNC_NUMBERS{
 	MC_FUNC_NONE		= 0x00,
 	MC_FUNC_GET_INFO,
@@ -85,10 +90,12 @@ enum MC_FUNC_NUMBERS{
 	MC_FUNC_WRITE_PAGE,
 };
 
-// These types show up in the OSD browser when set.
-// If the OSD doesn't know the number it'll display "Unrecognizable Data" or so.
-// AFAIK these have no other effects.
-// Known type IDs for icon.sys file:
+/**
+ * These types show up in the OSD browser when set.
+ * If the OSD doesn't know the number it'll display "Unrecognizable Data" or so.
+ * AFAIK these have no other effects.
+ * Known type IDs for icon.sys file:
+ */
 enum MCICON_TYPES{
 	MCICON_TYPE_SAVED_DATA		= 0,	// "Saved Data (PlayStation(r)2)"
 	MCICON_TYPE_SOFTWARE_PS2,		// "Software (PlayStation(r)2)"
@@ -101,20 +108,34 @@ typedef float iconFVECTOR[4];
 
 typedef struct
 {
-    unsigned char  head[4];     // header = "PS2D"
-    unsigned short type;        // filetype, used to be "unknown1" (see MCICON_TYPE_* above)
-    unsigned short nlOffset;    // new line pos within title name
-    unsigned unknown2;          // unknown
-    unsigned trans;             // transparency
-    iconIVECTOR bgCol[4];       // background color for each of the four points
-    iconFVECTOR lightDir[3];    // directions of three light sources
-    iconFVECTOR lightCol[3];    // colors of each of these sources
-    iconFVECTOR lightAmbient;   // ambient light
-    unsigned short title[34];   // application title - NOTE: stored in sjis, NOT normal ascii
-    unsigned char view[64];     // list icon filename
-    unsigned char copy[64];     // copy icon filename
-    unsigned char del[64];      // delete icon filename
-    unsigned char unknown3[512];// unknown
+    /** header = "PS2D" */
+    unsigned char  head[4];
+    /** filetype, used to be "unknown1" (see MCICON_TYPE_* above) */
+    unsigned short type;
+    /** new line pos within title name */
+    unsigned short nlOffset;
+    /** unknown */
+    unsigned unknown2;
+    /** transparency */
+    unsigned trans;
+    /** background color for each of the four points */
+    iconIVECTOR bgCol[4];
+    /** directions of three light sources */
+    iconFVECTOR lightDir[3];
+    /** colors of each of these sources */
+    iconFVECTOR lightCol[3];
+    /** ambient light */
+    iconFVECTOR lightAmbient;
+    /** application title - NOTE: stored in sjis, NOT normal ascii */
+    unsigned short title[34];
+    /** list icon filename */
+    unsigned char view[64];
+    /** copy icon filename */
+    unsigned char copy[64];
+    /** delete icon filename */
+    unsigned char del[64];
+    /** unknown */
+    unsigned char unknown3[512];
 } mcIcon;
 
 typedef struct _sceMcTblGetDir {	// size = 64
@@ -133,30 +154,45 @@ typedef struct
     struct
     {
         unsigned char unknown1;
-        unsigned char sec;      // Entry creation date/time (second)
-        unsigned char min;      // Entry creation date/time (minute)
-        unsigned char hour;     // Entry creation date/time (hour)
-        unsigned char day;      // Entry creation date/time (day)
-        unsigned char month;    // Entry creation date/time (month)
-        unsigned short year;    // Entry creation date/time (year)
+        /** Entry creation date/time (second) */        
+        unsigned char sec;
+        /** Entry creation date/time (minute) */
+        unsigned char min;
+        /** Entry creation date/time (hour) */
+        unsigned char hour;
+        /** Entry creation date/time (day) */
+        unsigned char day;
+        /** Entry creation date/time (month) */
+        unsigned char month;
+        /** Entry creation date/time (year) */
+        unsigned short year;
     } _create;
 
     struct
     {
         unsigned char unknown2;
-        unsigned char sec;      // Entry modification date/time (second)
-        unsigned char min;      // Entry modification date/time (minute)
-        unsigned char hour;     // Entry modification date/time (hour)
-        unsigned char day;      // Entry modification date/time (day)
-        unsigned char month;    // Entry modification date/time (month)
-        unsigned short year;    // Entry modification date/time (year)
+        /** Entry modification date/time (second) */        
+        unsigned char sec;
+        /** Entry modification date/time (minute) */
+        unsigned char min;
+        /** Entry modification date/time (hour) */
+        unsigned char hour;
+        /** Entry modification date/time (day) */
+        unsigned char day;
+        /** Entry modification date/time (month) */
+        unsigned char month;
+        /** Entry modification date/time (year) */
+        unsigned short year;
     } _modify;
 
-    unsigned fileSizeByte;      // File size (bytes). For a directory entry: 0
-    unsigned short attrFile;    // File attribute
+    /** File size (bytes). For a directory entry: 0 */
+    unsigned fileSizeByte;
+    /** File attribute */
+    unsigned short attrFile;
     unsigned short unknown3;
     unsigned unknown4[2];
-    unsigned char name[32];         //Entry name
+    /** Entry name */
+    unsigned char name[32];
 } mcTable __attribute__((deprecated, aligned (64)));
 
 // values to send to mcInit() to use either mcserv or xmcserv
@@ -164,262 +200,261 @@ typedef struct
 #define MC_TYPE_XMC	1
 
 
-// init memcard lib
-//
-// args:	MC_TYPE_MC  = use MCSERV/MCMAN
-//			MC_TYPE_XMC = use XMCSERV/XMCMAN
-// returns:	0   = successful
-//			< 0 = error
+/** init memcard lib
+ *
+ * @param type MC_TYPE_MC = use MCSERV/MCMAN; MC_TYPE_XMC = use XMCSERV/XMCMAN
+ * @return 0 = successful; < 0 = error
+ */
 int mcInit(int type);
 
-// get memcard state
-// mcSync result:	 0 = same card as last getInfo call
-//					-1 = formatted card inserted since last getInfo call
-//					-2 = unformatted card inserted since last getInfo call
-//					< -2 = memcard access error (could be due to accessing psx memcard)
-//
-// args:    port number
-//          slot number
-//          pointer to get memcard type
-//          pointer to get number of free clusters
-//          pointer to get whether or not the card is formatted	(Note: Originally, sceMcGetInfo didn't have a 5th argument for returning the format status. As this is emulated based on the return value of sceMcSync() when rom0:MCSERV is used, please keep track of the return value from sceMcSync instead!)
-// returns:	0   = successful
-//			< 0 = error
+/** get memcard state
+ * mcSync result:	 0 = same card as last getInfo call
+ *					-1 = formatted card inserted since last getInfo call
+ *					-2 = unformatted card inserted since last getInfo call
+ *					< -2 = memcard access error (could be due to accessing psx memcard)
+ *
+ * @param port port number
+ * @param slot slot number
+ * @param type pointer to get memcard type
+ * @param free pointer to get number of free clusters
+ * @param format pointer to get whether or not the card is formatted (Note: Originally, sceMcGetInfo didn't have a 5th argument for returning the format status. As this is emulated based on the return value of sceMcSync() when rom0:MCSERV is used, please keep track of the return value from sceMcSync instead!)
+ * @return 0 = successful; < 0 = error
+ */
 int mcGetInfo(int port, int slot, int* type, int* free, int* format);
 
-// open a file on memcard
-// mcSync returns:	0 or more = file descriptor (success)
-//					< 0 = error
-//
-// args:	port number
-//			slot number
-//			filename to open
-//			open file mode (O_RDWR, O_CREAT, etc)
-// returns:	0   = successful
-//			< 0 = error
+/** open a file on memcard
+ * mcSync returns:	0 or more = file descriptor (success)
+ *					< 0 = error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @param name filename to open
+ * @param mode open file mode (O_RDWR, O_CREAT, etc)
+ * @return 0 = successful; < 0 = error
+ */
 int mcOpen(int port, int slot, const char *name, int mode);
 
-// close an open file on memcard
-// mcSync returns:	0 if closed successfully
-//					< 0 = error
-//
-// args:	file descriptor of open file
-// returns:	0   = successful
-//			< 0 = error
+/** close an open file on memcard
+ * mcSync returns:	0 if closed successfully
+ *					< 0 = error
+ *
+ * @param fd file descriptor of open file
+ * @return 0 successful; < 0 = error
+ */
 int mcClose(int fd);
 
-// move memcard file pointer
-// mcSync returns:	0 or more = offset of file pointer from start of file
-//					< 0 = error
-//
-// args:	file descriptor
-//			number of bytes from origin
-//			initial position for offset
-// returns:	0   = successful
-//			< 0 = error
+/** move memcard file pointer
+ * mcSync returns:	0 or more = offset of file pointer from start of file
+ *					< 0 = error
+ *
+ * @param fd file descriptor
+ * @param offset number of bytes from origin
+ * @param origin initial position for offset
+ * @return 0 = successful; < 0 = error
+ */
 int mcSeek(int fd, int offset, int origin);
 
-// read from file on memcard
-// mcSync returns:	0 or more = number of bytes read from memcard
-//					< 0 = error
-//
-// args:	file descriptor
-//			buffer to read to
-//			number of bytes to read
-// returns:	0   = successful
-//			< 0 = error
+/** read from file on memcard
+ * mcSync returns:	0 or more = number of bytes read from memcard
+ *					< 0 = error
+ *
+ * @param fd file descriptor
+ * @param buffer buffer to read to
+ * @param size number of bytes to read
+ * @return 0 = successful; < 0 = error
+ */
 int mcRead(int fd, void *buffer, int size);
 
-// write to file on memcard
-// mcSync returns:	0 or more = number of bytes written to memcard
-//					< 0 = error
-//
-// args:	file descriptor
-//			buffer to write from write
-// returns:	0   = successful
-//			< 0 = error
+/** write to file on memcard
+ * mcSync returns:	0 or more = number of bytes written to memcard
+ *					< 0 = error
+ *
+ * @param fd file descriptor
+ * @param buffer to write from write
+ * @param size number of bytes to read
+ * @return 0 = successful; < 0 = error
+ */
 int mcWrite(int fd, const void *buffer, int size);
 
-// flush file cache to memcard
-// mcSync returns:	0 if ok
-//					< 0 if error
-//
-// args:	file descriptor
-// returns:	0   = successful
-//			< 0 = error
+/** flush file cache to memcard
+ * mcSync returns:	0 if ok
+ *					< 0 if error
+ *
+ * @param fd file descriptor
+ * @return 0 = successful; < 0 = error
+ */
 int mcFlush(int fd);
 
-// create a dir
-// mcSync returns:	0 if ok
-//					< 0 if error
-//
-// args:	port number
-//			slot number
-//			directory name
-// returns:	0   = successful
-//			< 0 = error
+/** create a dir
+ * mcSync returns:	0 if ok
+ *					< 0 if error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @param name directory name
+ * @return 0 = successful; < 0 = error
+ */
 int mcMkDir(int port, int slot, const char* name);
 
-// change current dir
-// (can also get current dir)
-// mcSync returns:	0 if ok
-//					< 0 if error
-//
-// args:	port number
-//			slot number
-//			new dir to change to
-//			buffer to get current dir (use 0 if not needed)
-// returns:	0   = successful
-//			< 0 = error
+/** change current dir
+ * (can also get current dir)
+ * mcSync returns:	0 if ok
+ *					< 0 if error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @param newDir new dir to change to
+ * @param currentDir buffer to get current dir (use 0 if not needed)
+ * @return 0 = successful; < 0 = error
+ */
 int mcChdir(int port, int slot, const char* newDir, char* currentDir);
 
-// get memcard filelist
-// mcSync result:	 0 or more = number of file entries obtained (success)
-//					-2 = unformatted card
-//					-4 = dirname error
-//
-// args:    port number of memcard
-//          slot number of memcard
-//          filename to search for (can use wildcard and relative dirs)
-//          mode: 0 = first call, otherwise = followup call
-//          maximum number of entries to be written to filetable in 1 call
-//          mc table array
-// returns:	0   = successful
-//			< 0 = error
+/** get memcard filelist
+ * mcSync result:	 0 or more = number of file entries obtained (success)
+ *					-2 = unformatted card
+ *					-4 = dirname error
+ *
+ * @param port port number of memcard
+ * @param slot slot number of memcard
+ * @param name filename to search for (can use wildcard and relative dirs)
+ * @param mode mode: 0 = first call, otherwise = followup call
+ * @param maxext maximum number of entries to be written to filetable in 1 call
+ * @param table mc table array
+ * @return 0 = successful; < 0 = error
+ */
 int mcGetDir(int port, int slot, const char *name, unsigned mode, int maxent, sceMcTblGetDir* table);
 
-// change file information
-// mcSync returns:	0 if ok
-//					< 0 if error
-//
-// args:	port number
-//			slot number
-//			filename to access
-//			data to be changed
-//			flags to show which data is valid
-// returns:	0   = successful
-//			< 0 = error
+/** change file information
+ * mcSync returns:	0 if ok
+ *					< 0 if error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @param name filename to access
+ * @param info data to be changed
+ * @param flags flags to show which data is valid
+ * @return 0 = successful; < 0 = error
+ */
 int mcSetFileInfo(int port, int slot, const char* name, const sceMcTblGetDir* info, unsigned flags);
 
-// delete file
-// mcSync returns:	0 if deleted successfully
-//					< 0 if error
-//
-// args:	port number to delete from
-//			slot number to delete from
-//			filename to delete
-// returns:	0   = successful
-//			< 0 = error
+/** delete file
+ * mcSync returns:	0 if deleted successfully
+ *					< 0 if error
+ *
+ * @param port port number to delete from
+ * @param slot slot number to delete from
+ * @param name filename to delete
+ * @return 0 = successful; < 0 = error
+ */
 int mcDelete(int port, int slot, const char *name);
 
-// format memory card
-// mcSync returns:	0 if ok
-//					< 0 if error
-//
-// args:    port number
-//          slot number
-// returns: 0  = success
-//          -1 = error
+/** format memory card
+ * mcSync returns:	0 if ok
+ *					< 0 if error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @return 0 = success; -1 = error
+ */
 int mcFormat(int port, int slot);
 
-// unformat memory card
-// mcSync returns:	0 if ok
-//					< 0 if error
-//
-// args:    port number
-//          slot number
-// returns: 0  = success
-//          -1 = error
+/** unformat memory card
+ * mcSync returns:	0 if ok
+ *					< 0 if error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @return 0 = success; -1 = error
+ */
 int mcUnformat(int port, int slot);
 
-// get free space info
-// mcSync returns:	0 or more = number of free entries (success)
-//					< 0 if error
-//
-// args:	port number
-//			slot number
-//			path to be checked
-// returns:	0 or more = number of empty entries
-//			-1 = error
+/** get free space info
+ * mcSync returns:	0 or more = number of free entries (success)
+ *					< 0 if error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @param path path to be checked
+ * @return 0 or more = number of empty entries; -1 = error
+ */
 int mcGetEntSpace(int port, int slot, const char* path);
 
-// Note: rom0:MCSERV does not support this.
-// rename file or dir on memcard
-// mcSync returns:	0 if ok
-//					< 0 if error
-//
-// args:	port number
-//			slot number
-//			name of file/dir to rename
-//			new name to give to file/dir
-// returns:	1  = success
-//			<0 = error
+/** rename file or dir on memcard
+ * Note: rom0:MCSERV does not support this.
+ * mcSync returns:	0 if ok
+ *					< 0 if error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @param oldName name of file/dir to rename
+ * @param newName new name to give to file/dir
+ * @return 1 = success; < 0 = error
+ */
 int mcRename(int port, int slot, const char* oldName, const char* newName);
 
-// Note: rom0:XMCSERV does not support this.
-// Erases a block on the memory card.
-// mcSync returns:	0 if ok
-//					< 0 if error
-//
-// args:	port number
-//			slot number
-//			Block number of the block to be erased.
-//			Mode: -1 to inhibit ECC recalculation of the erased block's pages (useful if sceMcWritePage is used to fill in its contents later on), 0 for normal operation.
-// returns:	0  = success
-//			-1 = error
+/** Erases a block on the memory card.
+ * Note: rom0:XMCSERV does not support this.
+ * mcSync returns:	0 if ok
+ *					< 0 if error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @param block Block number of the block to be erased.
+ * @param mode Mode: -1 to inhibit ECC recalculation of the erased block's pages (useful if sceMcWritePage is used to fill in its contents later on), 0 for normal operation.
+ * @return 0 = success; -1 = error
+ */
 int mcEraseBlock(int port, int slot, int block, int mode);
 
-// Note: rom0:XMCSERV does not support this.
-// Reads a page from the memory card.
-// mcSync returns:	0 if ok
-//					< 0 if error
-//
-// args:	port number
-//			slot number
-//			Page number of the page to be read.
-//			Pointer to buffer that will contain the read data.
-// returns:	0  = success
-//			-1 = error
+/** Reads a page from the memory card.
+ * Note: rom0:XMCSERV does not support this.
+ * mcSync returns:	0 if ok
+ *					< 0 if error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @param page Page number of the page to be read.
+ * @param buffer Pointer to buffer that will contain the read data.
+ * @return 0 = success; -1 = error
+ */
 int mcReadPage(int port, int slot, unsigned int page, void *buffer);
 
-// Note: rom0:XMCSERV does not support this.
-// Writes a page to the memory card. (The block which the page resides on must be erased first!)
-// mcSync returns:	0 if ok
-//					< 0 if error
-//
-// args:	port number
-//			slot number
-//			Page number of the page to be written.
-//			Pointer to buffer containing data to be written.
-// returns:	0  = success
-//			-1 = error
+/** Writes a page to the memory card. (The block which the page resides on must be erased first!)
+ * Note: rom0:XMCSERV does not support this.
+ * mcSync returns:	0 if ok
+ *					< 0 if error
+ *
+ * @param port port number
+ * @param slot slot number
+ * @param page Page number of the page to be written.
+ * @param buffer Pointer to buffer containing data to be written.
+ * @return 0 = success; -1 = error
+ */
 int mcWritePage(int port, int slot, int page, const void *buffer);
 
-// Note: rom0:MCSERV does not support this.
-// change mcserv thread priority
-// (i dont think this is implemented properly)
-// mcSync returns:	0 if ok
-//					< 0 if error
-//
-// args:	thread priority
-// returns:	0  = success
-//			-1 = error
+/** change mcserv thread priority
+ * (I don't think this is implemented properly)
+ * Note: rom0:MCSERV does not support this.
+ * mcSync returns:	0 if ok
+ *					< 0 if error
+ *
+ * @param level thread priority
+ * @return 0 = success; -1 = error
+ */
 int mcChangeThreadPriority(int level);
 
-// wait for mc functions to finish
-// or check if they have finished yet
-//
-// args:	mode 0=wait till function finishes, 1=check function status
-//			pointer for storing the number of the currenlty processing function
-//			pointer for storing result of function if it finishes
-// returns:	0  = function is still executing (mode=1)
-//			1  = function has finished executing
-//			-1 = no function registered
+/** wait for mc functions to finish or check if they have finished yet
+ *
+ * @param mode mode 0=wait till function finishes, 1=check function status
+ * @param cmd pointer for storing the number of the currenlty processing function
+ * @param result pointer for storing result of function if it finishes
+ * @return 0 = function is still executing (mode=1); 1 = function has finished executing; -1 = no function registered
+ */
 int mcSync(int mode, int *cmd, int *result);
 
-// Reset (force deinit) of library
-//
-// returns:	0  = success
+/** Reset (force deinit) of library
+ *
+ * @return 0 = success
+ */
 int mcReset(void);
 
 #ifdef __cplusplus
