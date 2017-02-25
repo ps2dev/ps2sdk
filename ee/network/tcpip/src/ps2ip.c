@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# PS2 TCP/IP STACK FOR EE
 */
+
+/**
+ * @file
+ * PS2 TCP/IP STACK FOR EE
+ */
 
 #include <stdio.h>
 #include <string.h>
@@ -172,7 +175,7 @@ static void InitDone(void* pvArg)
 	sys_sem_signal((sys_sem_t*)pvArg);
 }
 
-//Should be called at the beginning of the program to set up the network interface.
+/** Should be called at the beginning of the program to set up the network interface. */
 static err_t SMapIFInit(struct netif* pNetIF)
 {
 	pNetIF->name[0]='s';
