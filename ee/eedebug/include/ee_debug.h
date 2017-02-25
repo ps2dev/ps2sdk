@@ -6,13 +6,13 @@
 # Copyright 2001-2009, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-#
-# EEDEBUG - EE debugging library.
-#
-# ee_debug.h - Definitions for the EEDEBUG library.
-#
 */
+
+/**
+ * @file
+ * EEDEBUG - EE debugging library.
+ * Definitions for the EEDEBUG library.
+ */
 
 #ifndef _EE_DEBUG_H
 #define _EE_DEBUG_H
