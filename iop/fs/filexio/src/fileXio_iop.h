@@ -10,6 +10,11 @@
 # fileXio RPC server includes
 */
 
+/**
+ * @file
+ * fileXio RPC server includes
+ */
+
 #ifndef _FILEXIO_IOP_H
 #define _FILEXIO_IOP_H
 
