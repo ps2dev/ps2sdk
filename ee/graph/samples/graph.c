@@ -6,7 +6,6 @@
 # (c) 2005 Dan Peori <peori@oopo.net>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
 */
 
 #include <kernel.h>
