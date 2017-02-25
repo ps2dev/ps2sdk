@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# USB Mouse Driver for PS2
 */
+
+/**
+ * @file
+ * USB Mouse Driver for PS2
+ */
 
 #ifndef __LIBMOUSE_H__
 #define __LIBMOUSE_H__
@@ -21,13 +24,13 @@ typedef mouse_data PS2MouseData;
 extern "C" {
 #endif
 
-/* Initialise the RPC library */
+/** Initialise the RPC library */
 int PS2MouseInit(void);
-/* Reads the current mouse data (depending on read mode) */
+/** Reads the current mouse data (depending on read mode) */
 int PS2MouseRead(PS2MouseData *);
-/* Sets the read mode */
+/** Sets the read mode */
 int PS2MouseSetReadMode(u32 readMode);
-/* Gets the current read mode */
+/** Gets the current read mode */
 u32 PS2MouseGetReadMode();
 
 int PS2MouseSetThres(u32 thres);

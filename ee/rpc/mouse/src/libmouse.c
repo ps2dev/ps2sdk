@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# USB Mouse Driver for PS2
 */
+
+/**
+ * @file
+ * USB Mouse Driver for PS2
+ */
 
 #include <stdio.h>
 #include <tamtypes.h>
