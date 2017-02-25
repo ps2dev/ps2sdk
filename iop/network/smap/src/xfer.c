@@ -111,13 +111,12 @@ int SMAPSendPacket(const void *data, unsigned int length){
 	SaveGP();
 
 	if(SmapDriverData.SmapIsInitialized){
-		ClearEventFlag(SmapDriverData.TxEndEventFlag, ~1);
-
 		SizeRounded=(length+3)&~3;
 		/*	Unlike the SONY implementation, LWIP expects packet transmission to either
 			always succeed or to fail due to an unrecoverable error. This means that the driver
 			should wait for transmissions to complete, if the Tx buffer is full. */
 		while((SmapDriverData.NumPacketsInTx>=SMAP_BD_MAX_ENTRY) || (SmapDriverData.TxBufferSpaceAvailable<SizeRounded)){
+			SetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_XMIT);
 			WaitEventFlag(SmapDriverData.TxEndEventFlag, 1, WEF_AND|WEF_CLEAR, NULL);
 		}
 
