@@ -6,7 +6,6 @@
 # (c) 2009 Lion
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
 */
 
 #include <errno.h>
@@ -16,15 +15,15 @@
 
 #include "internal.h"
 
-/******************************************************************
-* Miscellaneous
-*
-*
-******************************************************************/
-#define gif_chcr	0x1000a000	// GIF Channel Control Register
-#define gif_madr	0x1000a010	// Transfer Address Register
-#define gif_qwc		0x1000a020	// Transfer Size Register (in qwords)
-#define gif_tadr	0x1000a030	// ...
+// Miscellaneous
+
+/** GIF Channel Control Register */
+#define gif_chcr	0x1000a000
+/** Transfer Address Register */
+#define gif_madr	0x1000a010
+/** Transfer Size Register (in qwords) */
+#define gif_qwc		0x1000a020
+#define gif_tadr	0x1000a030
 
  #define DMA_TAG_REFE	0x00
  #define DMA_TAG_CNT	0x01
@@ -36,15 +35,24 @@
  #define DMA_TAG_END	0x07
 
 typedef struct {
-	unsigned direction	:1;	// Direction
-	unsigned pad1		:1; // Pad with zeros
-	unsigned mode		:2;	// Mode
-	unsigned asp		:2;	// Address stack pointer
-	unsigned tte		:1;	// Tag trasfer enable
-	unsigned tie		:1;	// Tag interrupt enable
-	unsigned start_flag	:1;	// start
-	unsigned pad2		:7; // Pad with more zeros
-	unsigned tag		:16;// DMAtag
+	/** Direction */
+	unsigned direction	:1;
+	/** Pad with zeros */
+	unsigned pad1		:1; 
+	/** Mode */
+	unsigned mode		:2;
+	/** Address stack pointer */
+	unsigned asp		:2;
+	/** Tag trasfer enable */
+	unsigned tte		:1;
+	/** Tag interrupt enable */
+	unsigned tie		:1;
+	/** start */
+	unsigned start_flag	:1;
+	/** Pad with more zeros */
+	unsigned pad2		:7; 
+	/** DMAtag */
+	unsigned tag		:16;
 }DMA_CHCR;
 
 void GsDmaInit(void)

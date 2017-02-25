@@ -6,28 +6,39 @@
 # (c) 2009 Lion
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
 */
+
+/**
+ * @file
+ * GS library functions.
+ */
 
 #ifndef _LIBGS_H_
 #define _LIBGS_H_
 
-/**/
 typedef struct {
-	u8 interlace;	//Interlace/non-interlace mode.
-	u8 omode;		//Video mode.
-	u8 ffmode;		//FIELD/FRAME value.
-	u8 version;		//GS version.
+	/** Interlace/non-interlace mode. */
+	u8 interlace;
+	/** Video mode. */
+	u8 omode;
+	/** FIELD/FRAME value. */
+	u8 ffmode;
+	/** GS version. */
+	u8 version;
 } GsGParam_t;
 
-#define GS_INIT_RESET		0	//Resets the GS and GIF.
-#define GS_INIT_DRAW_RESET	1	//Drawing operations are cancelled and primitive data will be discarded.
+/** Resets the GS and GIF. */
+#define GS_INIT_RESET		0
+/** Drawing operations are cancelled and primitive data will be discarded. */
+#define GS_INIT_DRAW_RESET	1
 
 #define GS_NONINTERLACED	0x00
 #define GS_INTERLACED		0x01
 
-#define GS_FFMD_FIELD		0x00	//Read every other line from the beginning with the start of FIELD.
-#define GS_FFMD_FRAME		0x01	//Read every line from the beginning with the start of FRAME.
+/** Read every other line from the beginning with the start of FIELD. */
+#define GS_FFMD_FIELD		0x00
+/** Read every line from the beginning with the start of FRAME. */
+#define GS_FFMD_FRAME		0x01
 
 /*	About the supported video modes:
 		As GsSetDefaultDisplayEnv() has been modified to provide functionality that is similar to the Sony sceGsSetDefDispEnv() function,
@@ -49,7 +60,7 @@ enum GsVideoModes{
 #define GS_DISABLE	0
 #define GS_ENABLE	1
 
-//types of primitives
+/** types of primitives */
 enum GsPrimitiveTypes{
 	GS_PRIM_POINT		=0,
 	GS_PRIM_LINE,
@@ -60,18 +71,18 @@ enum GsPrimitiveTypes{
 	GS_PRIM_SPRITE
 };
 
-// regular Pixel Storage Modes (PSM)
+/** regular Pixel Storage Modes (PSM) */
 #define GS_PIXMODE_32		 0
 #define GS_PIXMODE_24		 1
 #define GS_PIXMODE_16		 2
 #define GS_PIXMODE_16S		10
 
-// clut Pixel Storage Modes (PSM)
+/** clut Pixel Storage Modes (PSM) */
 #define GS_CLUT_32			 0
 #define GS_CLUT_16			 2
 #define GS_CLUT_16S			10
 
-// texture/image Pixel Storage Modes (PSM)
+/** texture/image Pixel Storage Modes (PSM) */
 #define GS_TEX_32			 0
 #define GS_TEX_24			 1
 #define GS_TEX_16			 2
@@ -82,13 +93,13 @@ enum GsPrimitiveTypes{
 #define GS_TEX_4HL			36
 #define GS_TEX_4HH			44
 
-// Z-Buffer Pixel Storage Modes (PSM)
+/** Z-Buffer Pixel Storage Modes (PSM) */
 #define GS_ZBUFF_32			48
 #define GS_ZBUFF_24			49
 #define GS_ZBUFF_16			50
 #define GS_ZBUFF_16S		58
 
-// Alpha test Methods
+/** Alpha test Methods */
 enum GsATestMethods{
 	GS_ALPHA_NEVER		=0,
 	GS_ALPHA_ALWAYS,
@@ -100,15 +111,16 @@ enum GsATestMethods{
 	GS_ALPHA_NOTEQUAL,
 };
 
-// Alpha test failed update Methods
+/** Alpha test failed update Methods */
 enum GsATestFailedUpdateMethods{
-	GS_ALPHA_NO_UPDATE	=0,	//standard
+	/** standard */
+	GS_ALPHA_NO_UPDATE	=0,
 	GS_ALPHA_FB_ONLY,
 	GS_ALPHA_ZB_ONLY,
 	GS_ALPHA_RGB_ONLY
 };
 
-// Zbuffer test Methods
+/** Zbuffer test Methods */
 enum GsZTestMethodTypes{
 	GS_ZBUFF_NEVER		=0,
 	GS_ZBUFF_ALWAYS,
@@ -116,130 +128,204 @@ enum GsZTestMethodTypes{
 	GS_ZBUFF_GREATER
 };
 
-//Texture Details
-#define GS_TEX_CALC	0	//use near/far formula
-#define GS_TEX_FIXED	1	//fixed value (use K value)
+// Texture Details
+/** use near/far formula */
+#define GS_TEX_CALC	0
+/** fixed value (use K value) */
+#define GS_TEX_FIXED	1
 
 enum GsTexMipmaps{
-	GS_TEX_MIPMAP0	=0,	//no mipmap
-	GS_TEX_MIPMAP1,		//1 mipmap
-	GS_TEX_MIPMAP2,		//2 mipmaps
-	GS_TEX_MIPMAP3,		//...
-	GS_TEX_MIPMAP4,		//...
-	GS_TEX_MIPMAP5,		//...
-	GS_TEX_MIPMAP6		//...
+	/** no mipmap */
+	GS_TEX_MIPMAP0	=0,
+	/** 1 mipmap */
+	GS_TEX_MIPMAP1,
+	/** 2 mipmaps */
+	GS_TEX_MIPMAP2,
+	/** 3 mipmaps */
+	GS_TEX_MIPMAP3,
+	/** 4 mipmaps */
+	GS_TEX_MIPMAP4,
+	/** 5 mipmaps */
+	GS_TEX_MIPMAP5,
+	/** 6 mipmaps */
+	GS_TEX_MIPMAP6
 };
 
 enum GsTexFilterMethods{
-	GS_TEX_NEAREST			=0,	//UnFiltered
-	GS_TEX_LINEAR,				//Filtered
-	GS_TEX_NEAREST_MIPMAP_NEAREST,		//
-	GS_TEX_NEAREST_MIPMAP_LINEAR,		//
-	GS_TEX_LINEAR_MIPMAP_NEAREST,		//
-	GS_TEX_LINEAR_MIPMAP_LINEAR		//
+	/** UnFiltered */
+	GS_TEX_NEAREST			=0,
+	/** Filtered */
+	GS_TEX_LINEAR,
+	GS_TEX_NEAREST_MIPMAP_NEAREST,
+	GS_TEX_NEAREST_MIPMAP_LINEAR,
+	GS_TEX_LINEAR_MIPMAP_NEAREST,
+	GS_TEX_LINEAR_MIPMAP_LINEAR
 };
 
-#define GS_TEX_MIPMAP_DEFINE	0	//use values in MIPTBP1
-#define GS_TEX_MIPMAP_AUTO	1	//auto calculate mipmap address
+/** use values in MIPTBP1 */
+#define GS_TEX_MIPMAP_DEFINE	0
+/** auto calculate mipmap address */
+#define GS_TEX_MIPMAP_AUTO	1
 
-//Texture Function (used in TEX0->tex_cc)
+/** Texture Function (used in TEX0->tex_cc) */
 enum GsTexFunctions{
-	GS_TEX_MODULATE		=0,	// brighten texture based on Pixel's Alpha
-	GS_TEX_DECAL,			// keep texture as is
-	GS_TEX_HIGHLIHGT1,		// used when highlighting translucent polygons
-	GS_TEX_HIGHLIHGT2		// used when highlighting opaque	  polygons
+	GS_TEX_MODULATE		=0,	/** brighten texture based on Pixel's Alpha */
+	GS_TEX_DECAL,			/** keep texture as is */
+	GS_TEX_HIGHLIHGT1,		/** used when highlighting translucent polygons */
+	GS_TEX_HIGHLIHGT2		/** used when highlighting opaque polygons */
 };
 
 enum GsGifDataFormat{
 	GS_GIF_PACKED	=0,
 	GS_GIF_REGLIST,
 	GS_GIF_IMAGE,
-	GS_GIF_DISABLE		//Same operation with the IMAGE mode
+	/** Same operation with the IMAGE mode */
+	GS_GIF_DISABLE
 };
 
 /*GS Privileged Regs*/
-#define gs_p_pmode			0x12000000	// Setup CRT Controller
-#define gs_p_smode1			0x12000010	// Video signal settings, undocumented (don't set!)
-#define gs_p_smode2			0x12000020	// CRTC Video Settings: PAL/NTCS, Interlace, etc.
-#define gs_p_dispfb1		0x12000070	// Setup the CRTC's Read Circuit 1 data source settings
-#define gs_p_display1		0x12000080	// RC1 display output settings
-#define gs_p_dispfb2		0x12000090	// Setup the CRTC's Read Circuit 2 data source settings
-#define gs_p_display2		0x120000a0	// RC2 display output settings
-#define gs_p_extbuf			0x120000b0	// ...
-#define gs_p_extdata		0x120000c0	// ...
-#define gs_p_extwrite		0x120000d0	// ...
-#define gs_p_bgcolor		0x120000e0	// Set CRTC background color
-#define gs_p_csr			0x12001000	// System status and reset
-#define gs_p_imr			0x12001010	// Interrupt Mask Register
-#define gs_p_busdir			0x12001040	// Set direction of data transmission FIFO
-#define gs_p_siglblid		0x12001080	// Signal\label value
+/** Setup CRT Controller */
+#define gs_p_pmode			0x12000000
+/** Video signal settings, undocumented (don't set!) */
+#define gs_p_smode1			0x12000010
+/** CRTC Video Settings: PAL/NTCS, Interlace, etc. */
+#define gs_p_smode2			0x12000020
+/** Setup the CRTC's Read Circuit 1 data source settings */
+#define gs_p_dispfb1		0x12000070
+/** RC1 display output settings */
+#define gs_p_display1		0x12000080
+/** Setup the CRTC's Read Circuit 2 data source settings */
+#define gs_p_dispfb2		0x12000090
+/** RC2 display output settings */
+#define gs_p_display2		0x120000a0
+#define gs_p_extbuf			0x120000b0
+#define gs_p_extdata		0x120000c0
+#define gs_p_extwrite		0x120000d0
+/** Set CRTC background color */
+#define gs_p_bgcolor		0x120000e0
+/** System status and reset */
+#define gs_p_csr			0x12001000
+/** Interrupt Mask Register */
+#define gs_p_imr			0x12001010
+/** Set direction of data transmission FIFO */
+#define gs_p_busdir			0x12001040
+/** Signal\label value */
+#define gs_p_siglblid		0x12001080
+
 
 /*GS General Purpose Regs*/
-#define gs_g_prim		0x00	// Select and configure current drawing primitive
-#define gs_g_rgbaq		0x01	// Setup current vertex color
-#define gs_g_st			0x02	// ST map
-#define gs_g_uv			0x03	// UV map
-#define gs_g_xyzf2		0x04	// Set vertex position and fog coefflcient (with draw kick)
-#define gs_g_xyz2		0x05	// Set vertex coordinate (with draw kick)
-#define gs_g_tex0_1		0x06	// Select current texture in context 1
-#define gs_g_tex0_2		0x07	// Select current texture in context 2
-#define gs_g_clamp_1	0x08	// Set texture wrap mode in context 1
-#define gs_g_clamp_2	0x09	// Set texture wrap mode in context 2
-#define gs_g_fog		0x0a	// Set fog attributes
-#define gs_g_xyzf3		0x0c	// Set vertex position and fog coefflcient (no draw kick)
-#define gs_g_xyz3		0x0d	// Set vertex position (no draw kick)
-#define gs_g_tex1_1		0x14	// ...
-#define gs_g_tex1_2		0x15	// ...
-#define gs_g_tex2_1		0x16	// Set texture filtering\sampling style in context 1
-#define gs_g_tex2_2		0x17	// Set texture filtering\sampling style in context 2
-#define gs_g_xyoffset_1	0x18	// Mapping from Primitive to Window coordinate system (Context 1)
-#define gs_g_xyoffset_2	0x19	// Mapping from Primitive to Window coordinate system (Context 2)
-#define gs_g_prmodecont	0x1a	// gs_g_prim or gs_g_prmode selector
-#define gs_g_prmode		0x1b	// attributes of current drawing primitive
-#define gs_g_texclut	0x1c	// ...
-#define gs_g_scanmsk	0x22	// Raster odd\even line drawing setting
-#define gs_g_miptbp1_1	0x34	// Set mipmap address in context 1(mip level 1-3)
-#define gs_g_miptbp1_2	0x35	// Set mipmap address in context 1(mip level 1-3)
-#define gs_g_miptbp2_1	0x36	// Set mipmap address in context 2(mip level 4-6)
-#define gs_g_miptbp2_2	0x37	// Set mipmap address in context 2(mip level 4-6)
-#define gs_g_texa		0x3b	// Texture alpha setting
-#define gs_g_fogcol		0x3d	// Set fog far color
-#define gs_g_texflush	0x3f	// Flush texture buffer/cache
-#define gs_g_scissor_1	0x40	// Setup clipping rectangle (Context 1)
-#define gs_g_scissor_2	0x41	// Setup clipping rectangle (Context 2)
-#define gs_g_alpha_1	0x42	// Alpha blending setting (Context 1)
-#define gs_g_alpha_2	0x43	// Alpha blending setting (Context 2)
-#define gs_g_dimx		0x44	// Dither matrix values
-#define gs_g_dthe		0x45	// Enabel dither matrix
-#define gs_g_colclamp	0x46	// Color clamp control
-#define gs_g_test_1		0x47	// FrameBuffer\ZBuffer Pixel test contol (Context 1)
-#define gs_g_test_2		0x48	// FrameBuffer\ZBuffer Pixel test contol (Context 2)
-#define gs_g_pabe		0x49	// Enable alpha blending
-#define gs_g_fba_1		0x4a	// Alpha correction value (Context 1)
-#define gs_g_fba_2		0x4b	// Alpha correction value (Context 2)
-#define gs_g_frame_1	0x4c	// Frame buffer settings (Context 1)
-#define gs_g_frame_2	0x4d	// Frame buffer settings (Context 2)
-#define gs_g_zbuf_1		0x4e	// Zbuffer configuration (Context 1)
-#define gs_g_zbuf_2		0x4f	// Zbuffer configuration (Context 2)
-#define gs_g_bitbltbuf	0x50	// Texture transmission address & format
-#define gs_g_trxpos		0x51	// Texture transmission coordinates
-#define gs_g_trxreg		0x52	// Texture transmission width & height
-#define gs_g_trxdir		0x53	// Texture transmission direction
-#define gs_g_hwreg		0x54	// ...
-#define gs_g_signal		0x60	// ...
-#define gs_g_finish		0x61	// ...
-#define gs_g_label		0x62	// ...
-#define gs_g_nop		0x7f	// no operation\does nothing\can be used as padding
+/** Select and configure current drawing primitive */
+#define gs_g_prim		0x00
+/** Setup current vertex color */
+#define gs_g_rgbaq		0x01
+/** ST map */
+#define gs_g_st			0x02
+/** UV map */
+#define gs_g_uv			0x03
+/** Set vertex position and fog coefflcient (with draw kick) */
+#define gs_g_xyzf2		0x04
+/** Set vertex coordinate (with draw kick) */
+#define gs_g_xyz2		0x05
+/** Select current texture in context 1 */
+#define gs_g_tex0_1		0x06
+/** Select current texture in context 2 */
+#define gs_g_tex0_2		0x07
+/** Set texture wrap mode in context 1 */
+#define gs_g_clamp_1	0x08
+/** Set texture wrap mode in context 2 */
+#define gs_g_clamp_2	0x09
+/** Set fog attributes */
+#define gs_g_fog		0x0a
+/** Set vertex position and fog coefflcient (no draw kick) */
+#define gs_g_xyzf3		0x0c
+/** Set vertex position (no draw kick) */
+#define gs_g_xyz3		0x0d
+#define gs_g_tex1_1		0x14
+#define gs_g_tex1_2		0x15
+/** Set texture filtering\sampling style in context 1 */
+#define gs_g_tex2_1		0x16
+/** Set texture filtering\sampling style in context 2 */
+#define gs_g_tex2_2		0x17
+/** Mapping from Primitive to Window coordinate system (Context 1) */
+#define gs_g_xyoffset_1	0x18
+/** Mapping from Primitive to Window coordinate system (Context 2) */
+#define gs_g_xyoffset_2	0x19
+/** gs_g_prim or gs_g_prmode selector */
+#define gs_g_prmodecont	0x1a
+/** attributes of current drawing primitive */
+#define gs_g_prmode		0x1b
+#define gs_g_texclut	0x1c
+/** Raster odd\even line drawing setting */
+#define gs_g_scanmsk	0x22
+/** Set mipmap address in context 1(mip level 1-3) */
+#define gs_g_miptbp1_1	0x34
+/** Set mipmap address in context 1(mip level 1-3) */
+#define gs_g_miptbp1_2	0x35
+/** Set mipmap address in context 2(mip level 4-6) */
+#define gs_g_miptbp2_1	0x36
+/** Set mipmap address in context 2(mip level 4-6) */
+#define gs_g_miptbp2_2	0x37
+/** Texture alpha setting */
+#define gs_g_texa		0x3b
+/** Set fog far color */
+#define gs_g_fogcol		0x3d
+/** Flush texture buffer/cache */
+#define gs_g_texflush	0x3f
+/** Setup clipping rectangle (Context 1) */
+#define gs_g_scissor_1	0x40
+/** Setup clipping rectangle (Context 2) */
+#define gs_g_scissor_2	0x41
+/** Alpha blending setting (Context 1) */
+#define gs_g_alpha_1	0x42
+/** Alpha blending setting (Context 2) */
+#define gs_g_alpha_2	0x43
+/** Dither matrix values */
+#define gs_g_dimx		0x44
+/** Enabel dither matrix */
+#define gs_g_dthe		0x45
+/** Color clamp control */
+#define gs_g_colclamp	0x46
+/** FrameBuffer\ZBuffer Pixel test contol (Context 1) */
+#define gs_g_test_1		0x47
+/** FrameBuffer\ZBuffer Pixel test contol (Context 2) */
+#define gs_g_test_2		0x48
+/** Enable alpha blending */
+#define gs_g_pabe		0x49
+/** Alpha correction value (Context 1) */
+#define gs_g_fba_1		0x4a
+/** Alpha correction value (Context 2) */
+#define gs_g_fba_2		0x4b
+/** Frame buffer settings (Context 1) */
+#define gs_g_frame_1	0x4c
+/** Frame buffer settings (Context 2) */
+#define gs_g_frame_2	0x4d
+/** Zbuffer configuration (Context 1) */
+#define gs_g_zbuf_1		0x4e
+/** Zbuffer configuration (Context 2) */
+#define gs_g_zbuf_2		0x4f
+/** Texture transmission address & format */
+#define gs_g_bitbltbuf	0x50
+/** Texture transmission coordinates */
+#define gs_g_trxpos		0x51
+/** Texture transmission width & height */
+#define gs_g_trxreg		0x52
+/** Texture transmission direction */
+#define gs_g_trxdir		0x53
+#define gs_g_hwreg		0x54
+#define gs_g_signal		0x60
+#define gs_g_finish		0x61
+#define gs_g_label		0x62
+/** no operation\does nothing\can be used as padding */
+#define gs_g_nop		0x7f
+
 
 /*GIF Register Descriptors (non-registers) */
-#define gif_rd_ad		0x0e	// A+D
-#define gif_rd_nop		0x0f	// NOP (Not OutPut)
+/** A+D */
+#define gif_rd_ad		0x0e
+/** NOP (Not OutPut) */
+#define gif_rd_nop		0x0f
 
-/*----------------------------------------------------
---	MISC											--
---													--
---													--
-----------------------------------------------------*/
+/* MISC */
 
 #ifndef QWORD
 typedef struct {
@@ -251,30 +337,37 @@ typedef struct {
 
 #endif/*QWORD*/
 
-/*----------------------------------------------------
---	GS Privileged Reg STRUCTs						--
---													--
---													--
-----------------------------------------------------*/
+/* GS Privileged Reg STRUCTs */
 
-/*PMODE*/
 typedef struct {
-	u32 enable_rc1	:1;		// Enable ReadCircuit 1
-	u32 enable_rc2	:1;		// Enable ReadCircuit 2
-	u32 crt_out	:3;		// CRT output switching(always 1)
-	u32 mmod		:1;		// Value to use for alpha blend(0=value in 'RC1',1=value in 'blend_value')
-	u32 amod		:1;		// ReadCircuit to output alpha to (0=RC1, 1=RC2)
-	u32 blend_style:1;		// Blend Method(0=blend with RC2, 0=blend with BG)
-	u32 blend_value:8;		// Alpha Blend Value (0-255)
-	u32 nfld		:1;		// Output to NFIELD
-	u32 pad1		:15;	// Pad with zeros
-	u32 exvwins	:10;	// ??
-	u32 exvwine	:10;	// ??
-	u32 exsyncmd	:1;		// ??
-	u32 pad2		:11;	// Pad with zeros
+	/** Enable ReadCircuit 1 */
+	u32 enable_rc1	:1;
+	/** Enable ReadCircuit 2 */
+	u32 enable_rc2	:1;
+	/** CRT output switching(always 1) */
+	u32 crt_out	:3;
+	/** Value to use for alpha blend(0=value in 'RC1',1=value in 'blend_value') */
+	u32 mmod		:1;
+	/** ReadCircuit to output alpha to (0=RC1, 1=RC2) */
+	u32 amod		:1;
+	/** Blend Method(0=blend with RC2, 0=blend with BG) */
+	u32 blend_style:1;
+	/** Alpha Blend Value (0-255) */
+	u32 blend_value:8;
+	/** Output to NFIELD */
+	u32 nfld		:1;
+	/** Pad with zeros */
+	u32 pad1		:15;
+	/** ?? */
+	u32 exvwins	:10;
+	/** ?? */
+	u32 exvwine	:10;
+	/** ?? */
+	u32 exsyncmd	:1;
+	/** Pad with zeros */
+	u32 pad2		:11;
 }GS_PMODE;
 
-/*SMODE1*/
 typedef struct {
 	u64 rc	:3;
 	u64 lc	:7;
@@ -300,7 +393,6 @@ typedef struct {
 	u64 pad	:26;
 }GS_SMODE1;
 
-/*SMODE2*/
 typedef struct {
 	u32 interlace   :1;
 	u32 field_frame :1;
@@ -308,30 +400,42 @@ typedef struct {
 	u64 pad2	 :60;
 }GS_SMODE2;
 
-/*DISPFB*/
 typedef struct {
-	u32 address	:9;	// Base pointer in VRam
-	u32 fbw		:6;	// Buffer width in VRam
-	u32 psm	:5;	// Pixel store mode
-	u32 pad1		:12;// Pad with zeros
-	u32 x			:11;// X Pos in  in VRam
-	u32 y			:11;// Y Pos in  in VRam
-	u32 pad2		:10;// Pad with zeros
+	/** Base pointer in VRam */
+	u32 address	:9;
+	/** Buffer width in VRam */
+	u32 fbw		:6;
+	/** Pixel store mode */
+	u32 psm	:5;
+	/** Pad with zeros */
+	u32 pad1		:12;
+	/** X Pos in  in VRam */
+	u32 x			:11;
+	/** Y Pos in VRam */
+	u32 y			:11;
+	/** Pad with zeros */
+	u32 pad2		:10;
 }GS_DISPFB;
 
-/*DISPLAY*/
 typedef struct {
-	u32 display_x	:12;	// Display area X pos
-	u32 display_y	:11;	// Display area Y pos
-	u32 magnify_h	:4;	// Horizontal magnification
-	u32 magnify_v	:2;	// Vertical   magnification
-	u32 pad1	:3;	// Pad with zeros
-	u32 display_w	:12;	// Display area width
-	u32 display_h	:11;	// Display area height
-	u32 pad2     	:9;	// Pad with zeros
+	/** Display area X pos */
+	u32 display_x	:12;
+	/** Display area Y pos */
+	u32 display_y	:11;
+	/** Horizontal magnification */
+	u32 magnify_h	:4;
+	/** Vertical   magnification */
+	u32 magnify_v	:2;
+	/** Pad with zeros */
+	u32 pad1	:3;
+	/** Display area width */
+	u32 display_w	:12;
+	/** Display area height */
+	u32 display_h	:11;
+	/** Pad with zeros */
+	u32 pad2     	:9;
 }GS_DISPLAY;
 
-/*EXTBUF*/
 typedef struct {
 	u64 exbp	: 14;
 	u64 exbw	: 6;
@@ -345,89 +449,132 @@ typedef struct {
 	u64 pad2	: 10;
 }GS_EXTBUF;
 
-/*EXTDATA*/
 typedef struct {
-	u32 x		:12;	// X coord where image is written to
-	u32 y		:11;	// Y coord where image is written to
-	u32 sample_r_h	:4;	// Horizontal Smaple Rate(VK units)
-	u32 sample_r_v	:2;	// Vertical   Smaple Rate
-	u32 pad1	:3;	// Pad with zeros
-	u32 write_w	:12;	// Width  of area to write
-	u32 write_h	:11;	// Height of area to write
-	u32 pad2	:9;	// Pad with zeros
+	/** X coord where image is written to */
+	u32 x		:12;
+	/** Y coord where image is written to */
+	u32 y		:11;
+	/** Horizontal Smaple Rate(VK units) */
+	u32 sample_r_h	:4;
+	/** Vertical   Smaple Rate */
+	u32 sample_r_v	:2;
+	/** Pad with zeros */
+	u32 pad1	:3;
+	/** Width  of area to write */
+	u32 write_w	:12;
+	/** Height of area to write */
+	u32 write_h	:11;
+	/** Pad with zeros */
+	u32 pad2	:9;
 }GS_EXTDATA;
 
-/*EXTWRITE*/
 typedef struct {
-	u32     write    :1;	// Write Control(0=write done, 1=write start)
-	u32     pad1	 :31;	// Pad with zeros
-    u32 pad2;			// Pad with zeros
+	/** Write Control(0=write done, 1=write start) */
+	u32     write    :1;
+	/** Pad with zeros */
+	u32     pad1	 :31;
+	/** Pad with zeros */
+    u32 pad2;
 }GS_EXTWRITE;
 
-/*BGCOLOR*/
 typedef struct {
-	u8	r;		// Background Color Red
-	u8	g;		// Background Color Green
-	u8	b;		// Background Color Blue
-	u8	pada;	// 0x0
-	float			padq;	// 0x0
+	/** Background Color Red */
+	u8	r;
+	/** Background Color Green */
+	u8	g;
+	/** Background Color Blue */
+	u8	b;
+	/** 0x0 */
+	u8	pada;
+	/** 0x0 */
+	float			padq;
 }GS_BGCOLOR;
 
-/*CSR*/
 typedef struct {
-	u32 signal_evnt    	:1;	// Signal event control(write: 0=nothing,1=enable signal event,  read: 0=signal not generated, 1=signal generated)
-	u32 finish_evnt    	:1;	// Finish event control(write: 0=nothing,1=enable finish event,  read: 0=finish not generated, 1=finish generated)
-	u32 hsync_intrupt  	:1;	// HSync interrupt ,,   ,,   ,,   ,,
-	u32 vsync_intrupt  	:1;	// VSync interrupt ,,    ,,   ,,   ,,
-	u32 write_terminate	:1;	// Write termination control ,,   ,,    ,,   ,,
-	u32 exhsint		:1;	// ??
-	u32 exvsint		:1;	// ??
-	u32 pad1		:1;	// Pad with zeros
-	u32 flush		:1;	// Flush GS
-	u32 reset		:1;	// Reset GS
-	u32 exverr		:1;	// ??
-	u32 exfield		:1;	// ??
-	u32 nfield		:1;	// NFIELD output
-	u32 current_field 	:1;	// Currnet displayed field
-	u32 fifo_status		:2;	// Host interface FIFO status
-	u32 gs_rev_number	:8;	// Revision number of GS
-	u32 gs_id		:8;	// id of GS
-	u32 pad2		:32;	// Pad with zeros
+	/** Signal event control(write: 0=nothing,1=enable signal event,  read: 0=signal not generated, 1=signal generated) */
+	u32 signal_evnt    	:1;
+	/** Finish event control(write: 0=nothing,1=enable finish event,  read: 0=finish not generated, 1=finish generated) */
+	u32 finish_evnt    	:1;
+	/** HSync interrupt ,,   ,,   ,,   ,, */
+	u32 hsync_intrupt  	:1;
+	/** VSync interrupt ,,    ,,   ,,   ,, */
+	u32 vsync_intrupt  	:1;
+	/** Write termination control ,,   ,,    ,,   ,, */
+	u32 write_terminate	:1;
+	/** ?? */
+	u32 exhsint		:1;
+	/** ?? */
+	u32 exvsint		:1;
+	/** Pad with zeros */
+	u32 pad1		:1;
+	/** Flush GS */
+	u32 flush		:1;
+	/** Reset GS */
+	u32 reset		:1;
+	/** ?? */
+	u32 exverr		:1;
+	/** ?? */
+	u32 exfield		:1;
+	/** NFIELD output */
+	u32 nfield		:1;
+	/** Currnet displayed field */
+	u32 current_field 	:1;
+	/** Host interface FIFO status */
+	u32 fifo_status		:2;
+	/** Revision number of GS */
+	u32 gs_rev_number	:8;
+	/** id of GS */
+	u32 gs_id		:8;
+	/** Pad with zeros */
+	u32 pad2		:32;
+
 }GS_CSR;
 
-/*IMR*/
 typedef struct {
-	u32 pad1		:8;	// Pad with zeros
-	u32 signal_mask		:1;	// Signal event interrupt mask
-	u32 finish_mask		:1;	// Finish event interrupt mask
-	u32 hsync_mask		:1;	// HSync interrupt mask
-	u32 vsync_mask		:1;	// VSync interrupt mask
-	u32 write_mask		:1;	// Write termination mask
-	u32 exhs_mask		:1;	// ??
-	u32 exvs_mask		:1;	// ??
-	u32 pad2		:17;	// Pad with zeros
-    u32 pad3;				// Pad with zeros
+	/** Pad with zeros */
+	u32 pad1		:8;
+	/** Signal event interrupt mask */
+	u32 signal_mask		:1;
+	/** Finish event interrupt mask */
+	u32 finish_mask		:1;
+	/** HSync interrupt mask */
+	u32 hsync_mask		:1;
+	/** VSync interrupt mask */
+	u32 vsync_mask		:1;
+	/** Write termination mask */
+	u32 write_mask		:1;
+	/** ?? */
+	u32 exhs_mask		:1;
+	/** ?? */
+	u32 exvs_mask		:1;
+	/** Pad with zeros */
+	u32 pad2		:17;
+    /** Pad with zeros */
+    u32 pad3;			
 }GS_IMR;
 
-/*BUSDIR*/
 typedef struct {
-	u32	direction	:1;	// Transmission direction(0=host->local, 1=host<-local)
-	u32	p0		:31;	// Pad with zeros
-	u32	p1;			// Pad with more zeros
+	/** Transmission direction(0=host->local, 1=host<-local) */
+	u32	direction	:1;
+	/** Pad with zeros */
+	u32	p0		:31;
+	/** Pad with more zeros */
+	u32	p1;
 }GS_BUSDIR;
 
-/*SIGLBLID*/
-/*typedef struct {
-	u32 id;	// SIGNAL register id
+#if 0
+typedef struct {
+	/** SIGNAL register id */
+	u32 id;
 	u32 p0;
 }GS_SIGLBLID;
-*/
+#endif
 
-/*--------------------------------------------------------
---	GENERAL PURPOSE REG STRUCTS							--
---														--
---	these structs have a size of 64 bits 				--
-----------------------------------------------------------*/
+/*
+ * GENERAL PURPOSE REG STRUCTS
+ *
+ * these structs have a size of 64 bits
+ */
 
 typedef struct {
 	u64 prim_type	:3;
@@ -605,7 +752,8 @@ typedef struct {
 }GS_FOGCOLOR;
 
 typedef struct {
-	u64 pad1;			// Pad With Zeros
+	/** Pad With Zeros */
+	u64 pad1;
 } GS_TEXFLUSH;
 
 typedef struct {
@@ -781,11 +929,11 @@ typedef struct {
 	u64 pad0;
 }GS_NOP;
 
-/*--------------------------------------------------------
---	GENERAL PURPOSE REG STRUCTS	'WITH' A 64 BIT REG		--
---														--
---	these structs have a size of 128 bits (1 QWORD)		--
-----------------------------------------------------------*/
+/*
+ * GENERAL PURPOSE REG STRUCTS 'WITH' A 64 BIT REG
+ *
+ * these structs have a size of 128 bits (1 QWORD)
+ */
 
 typedef struct {
 	GS_PRIM			data;
@@ -987,11 +1135,7 @@ typedef struct {
 	u64	reg;
 }GS_R_NOP;
 
-/*----------------------------------------------------
---	Set Funtion For GS Privileged Regs				--
---													--
---													--
-----------------------------------------------------*/
+/* Set Funtion For GS Privileged Regs */
 
 #define GS_SET_PMODE(enable_rc1, enable_rc2, mmod, amod, blend_style, blend_value) \
 			*(vu64 *)gs_p_pmode =			\
@@ -1003,7 +1147,7 @@ typedef struct {
 		(u64)((blend_style) & 0x00000001) <<  7 | \
 		(u64)((blend_value) & 0x000000FF) <<  8
 
-//Set by SetGsCrt(). DO NOT SET MANUALLY!!
+/** Set by SetGsCrt(). DO NOT SET MANUALLY!! */
 #define GS_SET_SMODE1(rc, lc, t1248, slck, cmod, ex, prst, sint, xpck,		\
 			pck2, spml, gcont, phs, pvs, pehs, pevs, clksel,	\
 			nvck, slck2, vcksel, vhp) \
@@ -1135,13 +1279,10 @@ typedef struct {
 		(u64)((label_id		) & 0xFFFFFFFF) << 32
 
 /*
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-x These are use to SET the individual values		x
-x in each of the readable Privileged registers.		x
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-*/
+ * These are use to SET the individual values
+ * in each of the readable Privileged registers.
+ */
 
-/*CSR */
 #define GS_SET_CSR_signal_evnt(val) \
 			GS_SET_CSR(val,0,0,0,0,0,0,0,0,0,0,0)
 
@@ -1170,13 +1311,10 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 /*gs_id			(r)*/
 
 /*
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-x These are use to GET the individual values		x
-x in each of the readable Privileged registers.		x
-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-*/
+ * These are use to GET the individual values
+ * in each of the readable Privileged registers.
+ */
 
-/*CSR */
 #define GS_GET_CSR_signal_evnt \
 			(*((vu64 *)(gs_p_csr)) & (0x00000001 << 0))
 
@@ -1210,13 +1348,8 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #define GS_GET_CSR_gs_id \
 			(*((vu64 *)(gs_p_csr)) & (0x000000FF << 24))
 
-/*--------------------------------------------------------
---	'SET' GENERAL PURPOSE REG STRUCTS 'WITHOUT' REG		--
---														--
---														--
-----------------------------------------------------------*/
+/* 'SET' GENERAL PURPOSE REG STRUCTS 'WITHOUT' REG */
 
-//PRIM
 #define gs_setPRIM(p, _prim_type,_iip,_tme,_fge,_abe,_aa1,_fst,_ctxt,_fix)\
 	(p)->prim_type = _prim_type,	\
 	(p)->iip = _iip,				\
@@ -1228,7 +1361,6 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	(p)->ctxt = _ctxt,				\
 	(p)->fix	= _fix
 
-//RGBAQ
 #define gs_setRGBAQ(p, _r,_g,_b,_a,_q)	\
 	(p)->r = _r,						\
 	(p)->g = _g,						\
@@ -1236,24 +1368,20 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 	(p)->a = _a,						\
 	(p)->q = _q
 
-//ST
 #define gs_setST(p, _s,_t)	\
 	(p)->s = _s,			\
 	(p)->t = _t
 
-//UV
 #define gs_setUV(p, _u,_v)	\
 	(p)->u = _u,			\
 	(p)->v = _v
 
-//XYZF2
 #define gs_setXYZF2(p, _x,_y,_z,_f)	\
 	(p)->x = _x,						\
 	(p)->y = _y,						\
 	(p)->z = _z,						\
 	(p)->f = _f
 
-//XYZF3
 #define gs_setXYZF3(p, _x,_y,_z,_f)	\
 	(p)->x = _x,						\
 	(p)->y = _y,						\
@@ -1492,11 +1620,7 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 #define gs_setNOP(p) \
 	(p)->pad0 = 0
 
-/*--------------------------------------------------------
---	'SET' GENERAL PURPOSE REG STRUCTs & REGs			--
---														--
---														--
-----------------------------------------------------------*/
+/* 'SET' GENERAL PURPOSE REG STRUCTs & REGs */
 
 #define gs_setR_PRIM(p, _prim_type,_iip,_tme,_fge,_abe,_aa1,_fst,_ctxt,_fix)\
 						gs_setPRIM(&p->data, _prim_type,_iip,_tme,_fge,_abe,_aa1,_fst,_ctxt,_fix),\
@@ -1716,13 +1840,9 @@ xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 							gs_setNOP(&p->data),\
 							(p)->reg = gs_g_label
 
-/*----------------------------------------------------
---	MISC											--
---													--
---													--
-----------------------------------------------------*/
+/* MISC */
 
-/*SOURCE CHAIN TAG for DMA CHAIN MODE*/
+/** SOURCE CHAIN TAG for DMA CHAIN MODE */
 typedef struct _GS_GIF_DMACHAIN_TAG{
 	u64	qwc	:16;
 	u64	pad1	:10;
@@ -1734,7 +1854,6 @@ typedef struct _GS_GIF_DMACHAIN_TAG{
 	u64	pad2	:64;
 }GS_GIF_DMACHAIN_TAG		__attribute__ ((aligned(16)));/*aligned 128bits*/
 
-/*GIFTAG*/
 typedef struct {
 	u64 nloop	:15;
 	u64 eop	:1;
@@ -1755,11 +1874,7 @@ typedef struct {
 	(p)->nreg	= _nreg,				\
 	(p)->reg	= _reg
 
-/*----------------------------------------------------
---	MID LEVEL DEFINES								--
---													--
---													--
-------------------------------------------------------*/
+/* MID LEVEL DEFINES */
 
 /* settings for GsSetCRTCSettings() */
 
@@ -1767,16 +1882,24 @@ typedef struct {
 #define CRTC_SETTINGS_DEFAULT1		CRTC_SETTINGS_EN1|CRTC_SETTINGS_BLENDVAL|CRTC_SETTINGS_OUTRC1|CRTC_SETTINGS_STYLERC1
 #define CRTC_SETTINGS_DEFAULT2		CRTC_SETTINGS_EN2|CRTC_SETTINGS_BLENDVAL|CRTC_SETTINGS_OUTRC1|CRTC_SETTINGS_STYLERC1
 
-/*setting*/
-#define CRTC_SETTINGS_EN1			((u64)(1)<<0)				// Enable RC1(ReadCircuit 1)
-#define CRTC_SETTINGS_EN2			((u64)(1)<<1)				// Enable RC2(ReadCircuit 1)
-#define CRTC_SETTINGS_ENBOTH		CRTC_SETTINGS_EN1|CRTC_SETTINGS_EN2	// Enable RC1 & R2
-#define CRTC_SETTINGS_BLENDRC1		((u64)(0)<<5)				// Use Alpha value from rc1 for blending
-#define CRTC_SETTINGS_BLENDVAL		((u64)(1)<<5)				// Use Alpha value from alpha_value of GsSetCRTCSettings() for blending
-#define CRTC_SETTINGS_OUTRC1		((u64)(0)<<6)				// Output Final image to RC1
-#define CRTC_SETTINGS_OUTRC2		((u64)(1)<<6)				// Output Final image to RC2
-#define CRTC_SETTINGS_STYLERC1		((u64)(0)<<7)				// Blend With The Out Put of RC1
-#define CRTC_SETTINGS_STYLEBG		((u64)(1)<<7)				// Blend With The Out Put of BG(background)
+/** Enable RC1(ReadCircuit 1) */
+#define CRTC_SETTINGS_EN1			((u64)(1)<<0)
+/** Enable RC2(ReadCircuit 1) */
+#define CRTC_SETTINGS_EN2			((u64)(1)<<1)
+/** Enable RC1 & R2 */
+#define CRTC_SETTINGS_ENBOTH		CRTC_SETTINGS_EN1|CRTC_SETTINGS_EN2
+/** Use Alpha value from rc1 for blending */
+#define CRTC_SETTINGS_BLENDRC1		((u64)(0)<<5)
+/** Use Alpha value from alpha_value of GsSetCRTCSettings() for blending */
+#define CRTC_SETTINGS_BLENDVAL		((u64)(1)<<5)
+/** Output Final image to RC1 */
+#define CRTC_SETTINGS_OUTRC1		((u64)(0)<<6)
+/** Output Final image to RC2 */
+#define CRTC_SETTINGS_OUTRC2		((u64)(1)<<6)
+/** Blend With The Out Put of RC1 */
+#define CRTC_SETTINGS_STYLERC1		((u64)(0)<<7)
+/** Blend With The Out Put of BG(background) */
+#define CRTC_SETTINGS_STYLEBG		((u64)(1)<<7)
 
 typedef struct {
 	short	x;
@@ -1811,222 +1934,344 @@ typedef struct
 	u8	update_mask;
 }GS_ZENV;
 
-/*Screen Draw Environment*/
+/** Screen Draw Environment */
 typedef struct {
-	u16	offset_x;	// Draw offset X
-	u16	offset_y;	// Draw offset Y
-	GS_URECT	clip;		// Draw Clip rect
-	u16	vram_addr;	// Vram Address in frame buffer
-	u8	fbw;		// Width of vram (1=64)
-	u8	psm;		// Pixel Mode / PSM
-	u16	vram_x;		// X offset in vram;
-	u16	vram_y;		// Y offset in vram;
-	u32	draw_mask;	// Draw Mask (0=draw, 1=no draw)
-	u8	auto_clear;	// Set To 1 If You Want The Draw Environment's Backgroud to Clear When GsPutDrawEnv() is called
-	GS_RGBAQ		bg_color;	// Color to use to clear backgroud
+	/* Draw offset X */
+	u16	offset_x;
+	/* Draw offset Y */
+	u16	offset_y;
+	/* Draw Clip rect */
+	GS_URECT	clip;
+	/* Vram Address in frame buffer */
+	u16	vram_addr;
+	/* Width of vram (1=64) */
+	u8	fbw;
+	/* Pixel Mode / PSM */
+	u8	psm;
+	/* X offset in vram; */
+	u16	vram_x;
+	/* Y offset in vram; */
+	u16	vram_y;
+	/* Draw Mask (0=draw, 1=no draw) */
+	u32	draw_mask;
+	/* Set To 1 If You Want The Draw Environment's Backgroud to Clear When GsPutDrawEnv() is called */
+	u8	auto_clear;
+	/* Color to use to clear backgroud */
+	GS_RGBAQ		bg_color;
+
 }GS_DRAWENV;
 
-/*Screen Display Environment*/
+/** Screen Display Environment */
 typedef struct {
 	GS_DISPLAY	disp;
 	GS_DISPFB	dispfb;
 }GS_DISPENV __attribute__ ((aligned(8)));/* Aligned, 64bits*/
 
-/*a pixel  */
+/** a pixel */
 typedef struct
 {
-	GS_R_PRIM		prim;		// primitive attributes
-	GS_R_RGBAQ		rgbaq0;		// point Color
-	GS_R_XYZ		xyz0;		// vertex coordinate
+	/** primitive attributes */
+	GS_R_PRIM		prim;
+	/** point Color */
+	GS_R_RGBAQ		rgbaq0;
+	/** vertex coordinate */
+	GS_R_XYZ		xyz0;
 }GS_POINT_P;					/*Size= 3 QWords*/
 
 typedef struct
 {
-	GS_R_RGBAQ		rgbaq0;		// point color
-	GS_R_XYZ		xyz0;		// Primative vertex coordinate
+	/** point color */
+	GS_R_RGBAQ		rgbaq0;
+	/** Primative vertex coordinate */
+	GS_R_XYZ		xyz0;
 }GS_POINT;						/*Size= 2 QWords*/
 
-/*A Flat Line*/
+/** A Flat Line */
 typedef struct
 {
-	GS_R_PRIM		prim;		// primitive attributes
-	GS_R_RGBAQ		rgbaq0;		// line color
-	GS_R_XYZ		xyz0;		// vertex coordinate
-	GS_R_XYZ		xyz1;		// vertex coordinate
+	/** primitive attributes */
+	GS_R_PRIM		prim;
+	/** line color */
+	GS_R_RGBAQ		rgbaq0;
+	/** vertex coordinate */
+	GS_R_XYZ		xyz0;
+	/** vertex coordinate */
+	GS_R_XYZ		xyz1;
 }GS_LINE_F1_P;					/*Size = 4 QWords*/
 
 typedef struct
 {
-	GS_R_RGBAQ		rgbaq0;		// line color
-	GS_R_XYZ		xyz0;		// vertex coordinate
-	GS_R_XYZ		xyz1;		// vertex coordinate
+	/** line color */
+	GS_R_RGBAQ		rgbaq0;
+	/** vertex coordinate */
+	GS_R_XYZ		xyz0;
+	/** vertex coordinate */
+	GS_R_XYZ		xyz1;
 }GS_LINE_F1;					/*Size = 3 QWords*/
 
-/*A Gouraud Line */
+/** A Gouraud Line */
 typedef struct
 {
-	GS_R_PRIM		prim;		// primitive attributes
-	GS_R_RGBAQ		rgbaq0;		// vertex 0 color
-	GS_R_XYZ		xyz0;		// vertex 0 coordinate
-	GS_R_RGBAQ		rgbaq1;		// vertex 1 color
-	GS_R_XYZ		xyz1;		// vertex 1 coordinate
+	/** primitive attributes */
+	GS_R_PRIM		prim;
+	/** vertex 0 color */
+	GS_R_RGBAQ		rgbaq0;
+	/** vertex 0 coordinate */
+	GS_R_XYZ		xyz0;
+	/** vertex 1 color */
+	GS_R_RGBAQ		rgbaq1;
+	/** vertex 1 coordinate */
+	GS_R_XYZ		xyz1;
 }GS_LINE_G1_P;					/*Size= 5 QWords*/
 
 typedef struct
 {
-	GS_R_RGBAQ		rgbaq0;		// vertex 0 color
-	GS_R_XYZ		xyz0;		// vertex 0 coordinate
-	GS_R_RGBAQ		rgbaq1;		// vertex 1 color
-	GS_R_XYZ		xyz1;		// vertex 1 coordinate
+	/** vertex 0 color */
+	GS_R_RGBAQ		rgbaq0;
+	/** vertex 0 coordinate */
+	GS_R_XYZ		xyz0;
+	/** vertex 1 color */
+	GS_R_RGBAQ		rgbaq1;
+	/** vertex 1 coordinate */
+	GS_R_XYZ		xyz1;
 }GS_LINE_G1;					/*Size= 4 QWords*/
 
-/*A Flat Triangle / Triangle Strip / Triangle Fan */
+/** A Flat Triangle / Triangle Strip / Triangle Fan */
 typedef struct
 {
-	GS_R_PRIM		prim;		// primitive attributes
-	GS_R_RGBAQ		rgbaq0;		// tringle color
-	GS_R_XYZ		xyz0;		// vertex 0 coordinate
-	GS_R_XYZ		xyz1;		// vertex 1 coordinate
-	GS_R_XYZ		xyz2;		// vertex 2 coordinate
+	/** primitive attributes */
+	GS_R_PRIM		prim;
+	/** tringle color */
+	GS_R_RGBAQ		rgbaq0;
+	/** vertex 0 coordinate */
+	GS_R_XYZ		xyz0; 
+	/** vertex 1 coordinate */
+	GS_R_XYZ		xyz1;
+	/** vertex 2 coordinate */
+	GS_R_XYZ		xyz2;
 }GS_TRIANGLE_F3_P;				/*Size= 5 QWords*/
 
 typedef struct
 {
-	GS_R_RGBAQ		rgbaq0;		// triangle color
-	GS_R_XYZ		xyz0;		// vertex 0 coordinate
-	GS_R_XYZ		xyz1;		// vertex 1 coordinate
-	GS_R_XYZ		xyz2;		// vertex 2 coordinate
+	/** triangle color */
+	GS_R_RGBAQ		rgbaq0;
+	/** vertex 0 coordinate */
+	GS_R_XYZ		xyz0;
+	/** vertex 1 coordinate */
+	GS_R_XYZ		xyz1;
+	/** vertex 2 coordinate */
+	GS_R_XYZ		xyz2;
 }GS_TRIANGLE_F3;				/*Size= 4 QWords*/
 
 typedef struct
 {
-	GS_R_PRIM		prim;		// primitive attributes
-	GS_R_RGBAQ		rgbaq0;		// triangle color
-	GS_R_UV			uv0;		// vertex 0 texture coordinate
-	GS_R_XYZ		xyz0;		// vertex 0 coordinate
-	GS_R_UV			uv1;		// vertex 1 texture coordinate
-	GS_R_XYZ		xyz1;		// vertex 1 coordinate
-	GS_R_UV			uv2;		// vertex 2 texture coordinate
-	GS_R_XYZ		xyz2;		// vertex 2 coordinate
+	/** primitive attributes */
+	GS_R_PRIM		prim; 
+	/** triangle color */
+	GS_R_RGBAQ		rgbaq0; 
+	/** vertex 0 texture coordinate */
+	GS_R_UV			uv0; 
+	/** vertex 0 coordinate */
+	GS_R_XYZ		xyz0; 
+	/** vertex 1 texture coordinate */
+	GS_R_UV			uv1; 
+	/** vertex 1 coordinate */
+	GS_R_XYZ		xyz1; 
+	/** vertex 2 texture coordinate */
+	GS_R_UV			uv2; 
+	/** vertex 2 coordinate */
+	GS_R_XYZ		xyz2; 
 }GS_TRIANGLE_FT3_P;				/*Size= 8 QWords*/
 
 typedef struct
 {
-	GS_R_RGBAQ		rgbaq0;		// triangle color
-	GS_R_UV			uv0;		// vertex 0 texture coordinate
-	GS_R_XYZ		xyz0;		// vertex 0 coordinate
-	GS_R_UV			uv1;		// vertex 1 texture coordinate
-	GS_R_XYZ		xyz1;		// vertex 1 coordinate
-	GS_R_UV			uv2;		// vertex 2 texture coordinate
-	GS_R_XYZ		xyz2;		// vertex 2 coordinate
+	/** triangle color */
+	GS_R_RGBAQ		rgbaq0;
+	/** vertex 0 texture coordinate */
+	GS_R_UV			uv0;
+	/** vertex 0 coordinate */
+	GS_R_XYZ		xyz0;
+	/** vertex 1 texture coordinate */
+	GS_R_UV			uv1;
+	/** vertex 1 coordinate */
+	GS_R_XYZ		xyz1;
+	/** vertex 2 texture coordinate */
+	GS_R_UV			uv2;
+	/** vertex 2 coordinate */
+	GS_R_XYZ		xyz2;
 }GS_TRIANGLE_FT3;				/*Size= 7 QWords*/
 
 typedef struct
 {
-	GS_R_PRIM		prim;		// primitive attributes
-	GS_R_RGBAQ		rgbaq0;		// triangle color
-	GS_R_ST			st0;		// vertex 0 texture coordinate
-	GS_R_XYZ		xyz0;		// vertex 0 coordinate
-	GS_R_ST			st1;		// vertex 1 texture coordinate
-	GS_R_XYZ		xyz1;		// vertex 1 coordinate
-	GS_R_ST			st2;		// vertex 2 texture coordinate
-	GS_R_XYZ		xyz2;		// vertex 2 coordinate
+	/** primitive attributes */
+	GS_R_PRIM		prim;
+	/** triangle color */
+	GS_R_RGBAQ		rgbaq0;
+	/** vertex 0 texture coordinate */
+	GS_R_ST			st0;
+	/** vertex 0 coordinate */
+	GS_R_XYZ		xyz0;
+	/** vertex 1 texture coordinate */
+	GS_R_ST			st1;
+	/** vertex 1 coordinate */
+	GS_R_XYZ		xyz1;
+	/** vertex 2 texture coordinate */
+	GS_R_ST			st2;
+	/** vertex 2 coordinate */
+	GS_R_XYZ		xyz2;
 }GS_TRIANGLE_FT3ST_P;			/*Size= 8 QWords*/
 
 typedef struct
 {
-	GS_R_RGBAQ		rgbaq0;		// triangle color
-	GS_R_ST			st0;		// vertex 0 texture coordinate
-	GS_R_XYZ		xyz0;		// vertex 0 coordinate
-	GS_R_ST			st1;		// vertex 1 texture coordinate
-	GS_R_XYZ		xyz1;		// vertex 1 coordinate
-	GS_R_ST			st2;		// vertex 2 texture coordinate
-	GS_R_XYZ		xyz2;		// vertex 2 coordinate
+	/** triangle color */
+	GS_R_RGBAQ		rgbaq0;
+	/** vertex 0 texture coordinate */
+	GS_R_ST			st0;
+	/** vertex 0 coordinate */
+	GS_R_XYZ		xyz0;
+	/** vertex 1 texture coordinate */
+	GS_R_ST			st1;
+	/** vertex 1 coordinate */
+	GS_R_XYZ		xyz1;
+	/** vertex 2 texture coordinate */
+	GS_R_ST			st2;
+	/** vertex 2 coordinate */
+	GS_R_XYZ		xyz2;
 }GS_TRIANGLE_FT3ST;				/*Size= 7 QWords*/
 
-/*A Gouraud Triangle / Tri-Strip / Tri-Fan */
+/** A Gouraud Triangle / Tri-Strip / Tri-Fan */
 typedef struct
 {
-	GS_R_PRIM		prim;		// primitive attributes
-	GS_R_RGBAQ		rgbaq0;		// vertex 0 color
-	GS_R_XYZ		xyz0;		// vertex 0 coordinate
-	GS_R_RGBAQ		rgbaq1;		// vertex 1 color
-	GS_R_XYZ		xyz1;		// vertex 1 coordinate
-	GS_R_RGBAQ		rgbaq2;		// vertex 2 color
-	GS_R_XYZ		xyz2;		// vertex 2 coordinate
+	/** primitive attributes */
+	GS_R_PRIM		prim;
+	/** vertex 0 color */
+	GS_R_RGBAQ		rgbaq0;
+	/** vertex 0 coordinate */
+	GS_R_XYZ		xyz0;
+	/** vertex 1 color */
+	GS_R_RGBAQ		rgbaq1;
+	/** vertex 1 coordinate */
+	GS_R_XYZ		xyz1;
+	/** vertex 2 color */
+	GS_R_RGBAQ		rgbaq2;
+	/** vertex 2 coordinate */
+	GS_R_XYZ		xyz2;
 }GS_TRIANGLE_G3_P;				/*Size= 7 QWords*/
 
 typedef struct
 {
-	GS_R_RGBAQ		rgbaq0;		// vertex 0 color
-	GS_R_XYZ		xyz0;		// vertex 0 coordinate
-	GS_R_RGBAQ		rgbaq1;		// vertex 1 color
-	GS_R_XYZ		xyz1;		// vertex 1 coordinate
-	GS_R_RGBAQ		rgbaq2;		// vertex 2 color
-	GS_R_XYZ		xyz2;		// vertex 2 coordinate
+	/** vertex 0 color */
+	GS_R_RGBAQ		rgbaq0;
+	/** vertex 0 coordinate */
+	GS_R_XYZ		xyz0;
+	/** vertex 1 color */
+	GS_R_RGBAQ		rgbaq1;
+	/** vertex 1 coordinate */
+	GS_R_XYZ		xyz1;
+	/** vertex 2 color */
+	GS_R_RGBAQ		rgbaq2;
+	/** vertex 2 coordinate */
+	GS_R_XYZ		xyz2;
 }GS_TRIANGLE_G3;				/*Size= 6 QWords*/
 
 typedef struct
 {
-	GS_R_PRIM		prim;		// Primitive Attributes
-	GS_R_RGBAQ		rgbaq0;		// Vertex 0 Color
-	GS_R_ST			st0;		// vertex 0 texture coordinate
-	GS_R_XYZ		xyz0;		// vertex 0 coordinate
-	GS_R_RGBAQ		rgbaq1;		// Vertex 1 Color
-	GS_R_ST			st1;		// vertex 1 texture coordinate
-	GS_R_XYZ		xyz1;		// vertex 1 coordinate
-	GS_R_RGBAQ		rgbaq2;		// Vertex 2 Color
-	GS_R_ST			st2;		// vertex 2 texture coordinate
-	GS_R_XYZ		xyz2;		// vertex 2 coordinate
+	/** Primitive Attributes */
+	GS_R_PRIM		prim;
+	/** Vertex 0 Color */
+	GS_R_RGBAQ		rgbaq0;
+	/** vertex 0 texture coordinate */
+	GS_R_ST			st0;
+	/** vertex 0 coordinate */
+	GS_R_XYZ		xyz0;
+	/** Vertex 1 Color */
+	GS_R_RGBAQ		rgbaq1;
+	/** vertex 1 texture coordinate */
+	GS_R_ST			st1;
+	/** vertex 1 coordinate */
+	GS_R_XYZ		xyz1;
+	/** Vertex 2 Color */
+	GS_R_RGBAQ		rgbaq2;
+	/** vertex 2 texture coordinate */
+	GS_R_ST			st2;
+	/** vertex 2 coordinate */
+	GS_R_XYZ		xyz2;
 }GS_TRIANGLE_GT3ST_P;			/*Size= 10 QWords*/
 
 typedef struct
 {
-	GS_R_RGBAQ		rgbaq0;		// Vertex 0 Color
-	GS_R_ST			st0;		// vertex 0 texture coordinate
-	GS_R_XYZ		xyz0;		// vertex 0 coordinate
-	GS_R_RGBAQ		rgbaq1;		// Vertex 1 Color
-	GS_R_ST			st1;		// vertex 1 texture coordinate
-	GS_R_XYZ		xyz1;		// vertex 1 coordinate
-	GS_R_RGBAQ		rgbaq2;		// Vertex 2 Color
-	GS_R_ST			st2;		// vertex 2 texture coordinate
-	GS_R_XYZ		xyz2;		// vertex 2 coordinate
+	/** Vertex 0 Color */
+	GS_R_RGBAQ		rgbaq0;
+	/** vertex 0 texture coordinate */
+	GS_R_ST			st0;
+	/** vertex 0 coordinate */
+	GS_R_XYZ		xyz0;
+	/** Vertex 1 Color */
+	GS_R_RGBAQ		rgbaq1;
+	/** vertex 1 texture coordinate */
+	GS_R_ST			st1;
+	/** vertex 1 coordinate */
+	GS_R_XYZ		xyz1;
+	/** Vertex 2 Color */
+	GS_R_RGBAQ		rgbaq2;
+	/** vertex 2 texture coordinate */
+	GS_R_ST			st2;
+	/** vertex 2 coordinate */
+	GS_R_XYZ		xyz2;
 }GS_TRIANGLE_GT3ST;			/*Size= 9 QWords*/
 
-/*A Untextured Sprite*/
+/** A Untextured Sprite */
 typedef struct
 {
-	GS_R_PRIM		prim;		// Primitive Attributes
-	GS_R_RGBAQ		rgbaq0;		// sprite Color
-	GS_R_XYZ		xyz0;		// vertex 1 coordinate(upper left)
-	GS_R_XYZ		xyz1;		// vertex 2 coordinate(lower right)
+	/** Primitive Attributes */
+	GS_R_PRIM		prim;
+	/** sprite Color */
+	GS_R_RGBAQ		rgbaq0;
+	/** vertex 1 coordinate(upper left) */
+	GS_R_XYZ		xyz0;
+	/** vertex 2 coordinate(lower right) */
+	GS_R_XYZ		xyz1;
 }GS_SPRITE_F4_P;			/*Size= 4 QWords*/
 
 typedef struct
 {
-	GS_R_RGBAQ		rgbaq0;		// Vertex 1 Color
-	GS_R_XYZ		xyz0;		// vertex 1 coordinate(upper left)
-	GS_R_XYZ		xyz1;		// vertex 2 coordinate(lower right)
+	/** Vertex 1 Color */
+	GS_R_RGBAQ		rgbaq0;
+	/** vertex 1 coordinate(upper left) */
+	GS_R_XYZ		xyz0;
+	/** vertex 2 coordinate(lower right) */
+	GS_R_XYZ		xyz1;
 }GS_SPRITE_F4;				/*Size= 3 QWords*/
 
 /*A Textured Sprite*/
 typedef struct
 {
-	GS_R_PRIM		prim;		// Primitive Attributes
-	GS_R_RGBAQ		rgbaq0;		// sprite Color
-	GS_R_UV			uv0;		// vertex 0 Texture Coordinate(upper left)
-	GS_R_XYZ		xyz0;		// vertex 0 coordinate(upper left)
-	GS_R_UV			uv1;		// vertex 1 Texture Coordinate(lower right)
-	GS_R_XYZ		xyz1;		// vertex 1 coordinate(lower right)
+	/** Primitive Attributes */
+	GS_R_PRIM		prim;
+	/** sprite Color */
+	GS_R_RGBAQ		rgbaq0;
+	/** vertex 0 Texture Coordinate(upper left) */
+	GS_R_UV			uv0;
+	/** vertex 0 coordinate(upper left) */
+	GS_R_XYZ		xyz0;
+	/** vertex 1 Texture Coordinate(lower right) */
+	GS_R_UV			uv1;
+	/** vertex 1 coordinate(lower right) */
+	GS_R_XYZ		xyz1;
 }GS_SPRITE_FT4_P;			/*Size= 6 QWords*/
 
 typedef struct
 {
-	GS_R_RGBAQ		rgbaq0;		// sprite Color
-	GS_R_UV			uv0;		// vertex 0 texture coordinate
-	GS_R_XYZ		xyz0;		// vertex 0 coordinate(upper left)
-	GS_R_UV			uv1;		// vertex 1 texture coordinate
-	GS_R_XYZ		xyz1;		// vertex 1 coordinate(lower right)
+	/** sprite Color */
+	GS_R_RGBAQ		rgbaq0;
+	/** vertex 0 texture coordinate */
+	GS_R_UV			uv0;
+	/** vertex 0 coordinate(upper left) */
+	GS_R_XYZ		xyz0;
+	/** vertex 1 texture coordinate */
+	GS_R_UV			uv1;
+	/** vertex 1 coordinate(lower right) */
+	GS_R_XYZ		xyz1;
 }GS_SPRITE_FT4;				/*Size= 5 QWords*/
 
 #define	GS_PACKET_DATA_QWORD_MAX	32000
@@ -2047,16 +2292,23 @@ typedef struct
 
 typedef struct
 {
-	u16	x;			// X Offset in Vram Address
-	u16	y;			// X Offset in Vram Address
-	u16	width;		// Height of image
-	u16	height;		// Width  of image
-	u16	vram_addr;	// Address in frame buffer
-	u8	vram_width;	// Width of vram (1=64)
-	u8	psm;	// Pixel Mode / PSM
+	/** X Offset in Vram Address */
+	u16	x; 
+	/** X Offset in Vram Address */
+	u16	y; 
+	/** Height of image */
+	u16	width;
+	/** Width  of image */
+	u16	height;
+	/** Address in frame buffer */
+	u16	vram_addr;
+	/** Width of vram (1=64) */
+	u8	vram_width;
+	/** Pixel Mode / PSM */
+	u8	psm;
 }GS_IMAGE;
 
-/*
+#if 0
 typedef struct
 {
 	u8	 img_psm;
@@ -2069,17 +2321,14 @@ typedef struct
 	u16	 clt_width;
 	u16	 clt_height;
 	u32	*clt_addr;
-}GS_EE_IMAGE;	*/
+}GS_EE_IMAGE;
+#endif
 
 #if defined(__LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
 extern "C" {
 #endif
 
-/*----------------------------------------------------
---	COMMONLY UDED, LOW LEVEL FUNTIONS				--
---													--
---													--
-------------------------------------------------------*/
+/* COMMONLY UDED, LOW LEVEL FUNCTIONS */
 
 /* These Use Gif-Dma To Transfer*/
 int GsSetXYOffset1(u16 x, u16 y);
@@ -2096,11 +2345,7 @@ int GsSelectTexure2(u16 tex_addr, u8 addr_width, u8 tex_pixmode, u16 tex_width, 
 void GsSetFogColor(u8 r, u8 g, u8 b);
 void GsEnableColorClamp(u16 enable);
 
-/*----------------------------------------------------
---	NORMAL FUNTIONS									--
---													--
---													--
-------------------------------------------------------*/
+/* NORMAL FUNCTIONS */
 
 GsGParam_t *GsGetGParam(void);
 void GsResetGraph(short int mode, short int interlace, short int omode, short int ffmode);
@@ -2122,8 +2367,10 @@ void GsPutDisplayEnv1(GS_DISPENV	*dispenv);
 void GsPutDisplayEnv2(GS_DISPENV	*dispenv);
 void GsPutZBufferEnv1(GS_ZENV *zenv);
 void GsPutZBufferEnv2(GS_ZENV *zenv);
-void GsClearDrawEnv1(GS_DRAWENV	*drawenv);	// clear draw buffer with GS_DRAWENV->bg_color color (contex 1)
-void GsClearDrawEnv2(GS_DRAWENV	*drawenv);	// clear draw buffer with GS_DRAWENV->bg_color color (contex 2)
+/** clear draw buffer with GS_DRAWENV->bg_color color (contex 1) */
+void GsClearDrawEnv1(GS_DRAWENV	*drawenv);
+/** clear draw buffer with GS_DRAWENV->bg_color color (contex 2) */
+void GsClearDrawEnv2(GS_DRAWENV	*drawenv);
 
 /* Gif packet execution*/
 QWORD *GsGifPacketsAlloc(GS_PACKET_TABLE *table, u32  num_qwords);
@@ -2133,7 +2380,6 @@ int GsGifPacketsExecute(GS_PACKET_TABLE	*table, u16 wait);
 /* Texture/Image Funtions*/
 int GsLoadImage(const void *source_addr, GS_IMAGE *dest);
 
-/**/
 void GsOverridePrimAttributes(s8 override, s8 iip, s8 tme, s8 fge, s8 abe, s8 aa1, s8 fst, s8 ctxt, s8 fix);
 void GsEnableDithering(u8 enable, int mode);
 void GsEnableAlphaTransparency1(u16 enable,u16 method,u8 alpha_ref,u16 fail_method);
@@ -2143,15 +2389,15 @@ void GsEnableZbuffer2(u16 enable,u16 test_method);
 void GsEnableAlphaBlending1(u16 enable);
 void GsEnableAlphaBlending2(u16 enable);
 
-/**/
 void GsDrawSync(int mode);
 void GsHSync(int mode);
 void GsVSync(int mode);
 
-/* Vram Allocation*/
+/* Vram Allocation */
 int    GsVramAllocFrameBuffer(s16 w, s16 h, s16 psm);
 int    GsVramAllocTextureBuffer(s16 w, s16 h, s16 psm);
-void GsVramFreeAllTextureBuffer(void);  //free texture buffer without freeing frame buffer
+/** free texture buffer without freeing frame buffer */
+void GsVramFreeAllTextureBuffer(void);
 void GsVramFreeAll(void);
 
 /* Just used for buffer swapping*/

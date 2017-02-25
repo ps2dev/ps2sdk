@@ -6,7 +6,6 @@
 # (c) 2009 Lion
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
 */
 
 #include <errno.h>
@@ -18,10 +17,7 @@
 
 extern QWORD GsPrimWorkArea[];
 
-/*****************************************************************
-*** Miscellaneous
-***
-*****************************************************************/
+/* Miscellaneous */
 
 static s8 twh(s16 val)
 {
@@ -35,11 +31,7 @@ static s8 twh(s16 val)
 	return res;
 }
 
-/*-------------------------------------------
--											-
-- LOW LEVEL FUNTIONS						-
--											-
--------------------------------------------*/
+/* LOW LEVEL FUNCTIONS */
 
 int GsSetXYOffset1(u16 x, u16 y)
 {
