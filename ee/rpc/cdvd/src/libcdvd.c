@@ -8,15 +8,17 @@
 # (c) 2004 Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-#
-# Function definitions for libsceCdvd (EE side calls to the iop module sceCdvdfsv).
-#
-# NOTE: These functions will work with the CDVDMAN/CDVDFSV or XCDVDMAN/XCDVDFSV
-# modules stored in rom0.
-#		
-# NOTE: not all functions work with each set of modules!
 */
+
+/**
+ * @file
+ * Function definitions for libsceCdvd (EE side calls to the iop module sceCdvdfsv).
+ *
+ * NOTE: These functions will work with the CDVDMAN/CDVDFSV or XCDVDMAN/XCDVDFSV
+ * modules stored in rom0.
+ *		
+ * NOTE: not all functions work with each set of modules!
+ */
 
 #include <stdio.h>
 #include <tamtypes.h>
@@ -32,15 +34,16 @@
 #define CD_SERVER_INIT			0x80000592
 #define CD_SERVER_SEARCHFILE		0x80000597
 #define CD_SERVER_DISKREADY		0x8000059A
-#define CD_SERVER_POFF			0x80000596	// XCDVDFSV only
+/** XCDVDFSV only */
+#define CD_SERVER_POFF			0x80000596
 
-// allows access to gp reg value from linker script
+/** allows access to gp reg value from linker script */
 extern void *_gp;
 
 // prototypes
 void _CdSemaExit(void);
 
-// searchfile structure
+/** searchfile structure */
 typedef struct {
 	u8 padding[32];
 	char name[256];
@@ -53,16 +56,21 @@ int bindInit = -1;
 int bindDiskReady = -1;
 int bindSearchFile = -1;
 // rpc binded client data
-SifRpcClientData_t clientInit __attribute__ ((aligned(64)));	// for sceCdInit()
-SifRpcClientData_t clientDiskReady __attribute__ ((aligned(64)));	// for sceCdDiskReady() (s-cmd)
-SifRpcClientData_t clientSearchFile __attribute__ ((aligned(64)));	// for sceCdSearchFile() (n-cmd)
+/** for sceCdInit() */
+SifRpcClientData_t clientInit __attribute__ ((aligned(64)));
+/** for sceCdDiskReady() (s-cmd) */
+SifRpcClientData_t clientDiskReady __attribute__ ((aligned(64)));
+/** for sceCdSearchFile() (n-cmd) */
+SifRpcClientData_t clientSearchFile __attribute__ ((aligned(64)));
 
-// set this to 1 or 2 to print sceCdvd debug messages
+/** set this to 1 or 2 to print sceCdvd debug messages */
 int CdDebug = 0;
 
 // semaphore ids
-int callbackSemaId = -1;	// callback semaphore id
-volatile int cbSema = 0;	// callback semaphore variable (not a real semaphore)
+/** callback semaphore id */
+int callbackSemaId = -1;
+/** callback semaphore variable (not a real semaphore) */
+volatile int cbSema = 0;
 
 // callbacks
 volatile int CdCallbackNum;
@@ -107,14 +115,8 @@ extern u32 initMode;
 extern SearchFilePkt searchFileSendBuff;
 extern u32 searchFileRecvBuff;
 
-// **** Other Functions ****
+/* Other Functions */
 
-
-// init sceCdvd system
-// 
-// args:        init mode (CDVD_INIT_???)
-// returns:     1 if successful
-//                      0 if error
 #ifdef F_sceCdInit
 s32 sceCdInit(s32 mode)
 {
@@ -160,7 +162,6 @@ s32 sceCdInit(s32 mode)
 }
 #endif
 
-// convert from sector number to minute:second:frame
 #ifdef F_sceCdIntToPos
 sceCdlLOCCD *sceCdIntToPos(u32 i, sceCdlLOCCD * p)
 {
@@ -171,7 +172,6 @@ sceCdlLOCCD *sceCdIntToPos(u32 i, sceCdlLOCCD * p)
 }
 #endif
 
-// convert from minute:second:frame to sector number
 #ifdef F_sceCdPosToInt
 u32 sceCdPosToInt(sceCdlLOCCD * p)
 {
@@ -180,14 +180,6 @@ u32 sceCdPosToInt(sceCdlLOCCD * p)
 }
 #endif
 
-
-// search for a file on disc
-// 
-// args:        file structure to get file info in
-//                      name of file to search for (no wildcard characters)
-//                              (should be in the form '\\SYSTEM.CNF;1')
-// returns:     1 if successful
-//                      0 if error (or no file found)
 #ifdef F_sceCdSearchFile
 s32 sceCdSearchFile(sceCdlFILE * file, const char *name)
 {
@@ -248,11 +240,6 @@ s32 sceCdSearchFile(sceCdlFILE * file, const char *name)
 }
 #endif
 
-// checks if drive is ready
-// 
-// args:         mode
-// returns:     CDVD_READY_READY if ready
-//                      SCECdNotReady if busy
 #ifdef F_sceCdDiskReady
 s32 sceCdDiskReady(s32 mode)
 {
@@ -333,13 +320,6 @@ void _CdSemaExit(void)
 }
 #endif
 
-// initialise callback thread
-// 
-// args:        callback thread priority
-//                      callback thread stack address (16 byte aligned)
-//                      callback thread stack size
-// returns:     1 if initialised callback
-//                      0 if only priority was changed
 #ifdef F_sceCdInitEeCB
 static void _CdCallbackLoop(void);
 s32 sceCdInitEeCB(s32 priority, void *stackAddr, s32 stackSize)
@@ -364,12 +344,6 @@ s32 sceCdInitEeCB(s32 priority, void *stackAddr, s32 stackSize)
 }
 #endif
 
-// sets the sceCd callback function
-// gets called when the following functions complete:
-//    sceCdSeek, sceCdStandby, sceCdStop, sceCdPause, sceCdRead
-// 
-// args:        pointer to new callback function (or null)
-// returns:     pointer to old function
 #ifdef F_sceCdCallback
 sceCdCBFunc sceCdCallback(sceCdCBFunc newFunc)
 {
@@ -383,13 +357,14 @@ sceCdCBFunc sceCdCallback(sceCdCBFunc newFunc)
 }
 #endif
 
-// **** Util Functions ****
+/* Util Functions */
 
 
-// callback loop thread
-// once callbacks have been inited using sceCdInitCallbackThread()
-// this function continually loops until a callback with function
-// number '-1' is generated
+/** callback loop thread
+ * once callbacks have been inited using sceCdInitCallbackThread()
+ * this function continually loops until a callback with function
+ * number '-1' is generated
+ */
 #ifdef F_sceCdInitEeCB
 static void _CdCallbackLoop(void)
 {
@@ -412,7 +387,7 @@ static void _CdCallbackLoop(void)
 }
 #endif
 
-// generic callback function
+/** generic callback function */
 #ifdef F__CdGenericCallbackFunction
 void _CdGenericCallbackFunction(void *funcNum)
 {

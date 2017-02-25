@@ -7,15 +7,17 @@
 #     2003 loser (loser@internalreality.com)
 # (c) 2004 Marcus R. Brown <mrbrown@0xd6.org> Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-#
-# Function definitions for libsceCdvd (EE side calls to the iop module sceCdvdfsv).
-#
-# NOTE: These functions will work with the CDVDMAN/CDVDFSV or XCDVDMAN/XCDVDFSV
-# modules stored in rom0.
-#
-# NOTE: not all functions work with each set of modules!
 */
+
+/**
+ * @file
+ * Function definitions for libsceCdvd (EE side calls to the iop module sceCdvdfsv).
+ *
+ * NOTE: These functions will work with the CDVDMAN/CDVDFSV or XCDVDMAN/XCDVDFSV
+ * modules stored in rom0.
+ *
+ * NOTE: not all functions work with each set of modules!
+ */
 
 #include <stdio.h>
 #include <kernel.h>
@@ -26,9 +28,10 @@
 
 #include "internal.h"
 
-#define CD_SERVER_NCMD		0x80000595	// non-blocking commands (Non-synchronous)
+/** non-blocking commands (Non-synchronous) */
+#define CD_SERVER_NCMD		0x80000595
 
-/* Stream commands. */
+/** Stream commands. */
 typedef enum {
 	CDVD_ST_CMD_START = 1,
 	CDVD_ST_CMD_READ,
@@ -59,7 +62,8 @@ enum CD_NCMD_CMDS {
 	CD_NCMD_NCMD,
 	CD_NCMD_READIOPMEM,
 	CD_NCMD_DISKREADY,
-	CD_NCMD_READCHAIN	// XCDVDFSV only
+	/** XCDVDFSV only */
+	CD_NCMD_READCHAIN
 };
 
 int _CdCheckNCmd(int cmd);
@@ -73,19 +77,23 @@ typedef union {
 #ifdef F__ncmd_internals
 int bindNCmd = -1;
 
-SifRpcClientData_t clientNCmd __attribute__ ((aligned(64)));	// for n-cmds
+/** for n-cmds */
+SifRpcClientData_t clientNCmd __attribute__ ((aligned(64)));
 
-int nCmdSemaId = -1;		// n-cmd semaphore id
+/** n-cmd semaphore id */
+int nCmdSemaId = -1;
 
 int nCmdNum = 0;
 
 u32 readStreamData[5] __attribute__ ((aligned(64)));
 u32 readData[6] __attribute__ ((aligned(64)));
 sceCdRChain readChainData[66] __attribute__ ((aligned(64)));
-u32 getTocSendBuff[3] __attribute__ ((aligned(64)));	// get toc
+/** get toc */
+u32 getTocSendBuff[3] __attribute__ ((aligned(64)));
 u32 _rd_intr_data[64] __attribute__ ((aligned(64)));
 u32 curReadPos __attribute__ ((aligned(64)));
-u8 tocBuff[2064] __attribute__ ((aligned(64)));	// toc buffer (for sceCdGetToc())
+/** toc buffer (for sceCdGetToc()) */
+u8 tocBuff[2064] __attribute__ ((aligned(64)));
 u8 nCmdRecvBuff[48] __attribute__ ((aligned(64)));
 nCmdSendParams_t nCmdSendBuff __attribute__ ((aligned(64)));
 int streamStatus = 0;
@@ -114,7 +122,7 @@ extern u32 cdda_st_buf[64/sizeof(u32)];
 
 int sceCdNCmdDiskReady(void);
 
-// **** N-Command Functions ****
+/* N-Command Functions */
 
 #ifdef _XCDVD
 struct _cdvd_read_data
@@ -139,8 +147,9 @@ struct _cdvd_read_data
 #endif
 
 void _CdAlignReadBuffer(void *data);
-// this gets called when the sceCdRead function finishes
-// to copy the data read in to unaligned buffers
+/** this gets called when the sceCdRead function finishes
+ * to copy the data read in to unaligned buffers 
+ */
 #ifdef F__CdAlignReadBuffer
 void _CdAlignReadBuffer(void *data)
 {
@@ -158,15 +167,6 @@ void _CdAlignReadBuffer(void *data)
 }
 #endif
 
-// read data from sceCd
-// non-blocking, requires sceCdSync() call
-// 
-// args:        sector location to start reading from
-//                      number of sectors to read
-//                      buffer to read to
-//                      mode to read as
-// returns: 1 if successful
-//                      0 if error
 #ifdef F_sceCdRead
 int sceCdRead(u32 lbn, u32 sectors, void *buf, sceCdRMode * mode)
 {
@@ -293,11 +293,6 @@ int sceCdReadCDDA(u32 lbn, u32 nsectors, void *buf, sceCdRMode *rm)
 }
 #endif
 
-// get toc from inserted disc
-// 
-// args:        buffer to hold toc (1024 or 2064 bytes?)
-// returns:     1 if successful
-//                      0 otherwise
 #ifdef F_sceCdGetToc
 int sceCdGetToc(u8 * toc)
 {
@@ -339,12 +334,6 @@ int sceCdGetToc(u8 * toc)
 }
 #endif
 
-// seek to given sector on disc
-// non-blocking, requires sceCdSync() call
-// 
-// args:        sector to seek to on disc
-// returns:     1 if successful
-//                      0 if error
 #ifdef F_sceCdSeek
 int sceCdSeek(u32 lbn)
 {
@@ -369,11 +358,6 @@ int sceCdSeek(u32 lbn)
 }
 #endif
 
-// puts ps2 sceCd drive into standby mode
-// non-blocking, requires sceCdSync() call
-// 
-// returns:     1 if successful
-//                      0 if error
 #ifdef F_sceCdStandby
 int sceCdStandby(void)
 {
@@ -396,11 +380,6 @@ int sceCdStandby(void)
 }
 #endif
 
-// stops ps2 sceCd drive from spinning
-// non-blocking, requires sceCdSync() call
-// 
-// returns:     1 if successful
-//                      0 if error
 #ifdef F_sceCdStop
 int sceCdStop(void)
 {
@@ -423,11 +402,6 @@ int sceCdStop(void)
 }
 #endif
 
-// pauses ps2 sceCd drive
-// non-blocking, requires sceCdSync() call
-// 
-// returns:     1 if successful
-//                      0 if error
 #ifdef F_sceCdPause
 int sceCdPause(void)
 {
@@ -450,15 +424,6 @@ int sceCdPause(void)
 }
 #endif
 
-// send an n-command by function number
-// 
-// args:        command number
-//                      input buffer  (can be null)
-//                      size of input buffer  (0 - 16 byte)
-//                      output buffer (can be null)
-//                      size of output buffer (0 - 16 bytes)
-// returns:     1 if successful
-//                      0 if error
 #ifdef F_sceCdApplyNCmd
 int sceCdApplyNCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff, u16 outBuffSize)
 {
@@ -486,15 +451,6 @@ int sceCdApplyNCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff,
 }
 #endif
 
-// read data to iop memory
-// non-blocking, requires sceCdSync() call
-// 
-// args:        sector location to read from
-//                      number of sectors to read
-//                      buffer to read to (in iop memory)
-//                      read mode
-// returns:     1 if successful
-//                      0 if error
 #ifdef F_sceCdReadIOPMem
 int sceCdReadIOPMem(u32 lbn, u32 sectors, void *buf, sceCdRMode * mode)
 {
@@ -527,12 +483,6 @@ int sceCdReadIOPMem(u32 lbn, u32 sectors, void *buf, sceCdRMode * mode)
 }
 #endif
 
-// wait for disc to finish all n-commands
-// (shouldnt really need to call this yourself)
-// 
-// returns:     6 if busy
-//                      2 if ready
-//                      0 if error
 #ifdef F_sceCdNCmdDiskReady
 int sceCdNCmdDiskReady(void)
 {
@@ -549,17 +499,6 @@ int sceCdNCmdDiskReady(void)
 }
 #endif
 
-// do a 'chain' of reads with one command
-// last chain values must be all 0xFFFFFFFF
-// (max of 64 reads can be set at once)
-// non-blocking, requires sceCdSync() call
-// 
-// SUPPORTED IN XCDVDMAN/XCDVDFSV ONLY
-// 
-// args:        pointer to an array of read chain data
-//                      read mode
-// returns:     1 if successful
-//                      0 if error
 #ifdef F_sceCdReadChain
 int sceCdReadChain(sceCdRChain * readChain, sceCdRMode * mode)
 {
@@ -633,7 +572,6 @@ int sceCdReadChain(sceCdRChain * readChain, sceCdRMode * mode)
 }
 #endif
 
-// get the current read position (when reading using sceCdRead)
 #ifdef F_sceCdGetReadPos
 u32 sceCdGetReadPos(void)
 {
@@ -644,15 +582,8 @@ u32 sceCdGetReadPos(void)
 }
 #endif
 
-// **** Stream Functions ****
+/* Stream Functions */
 
-
-// start streaming data
-// 
-// args:        sector location to start streaming from
-//                      mode to read in
-// returns:     1 if successful
-//                      0 otherwise
 #ifdef F_sceCdStStart
 int sceCdStStart(u32 lbn, sceCdRMode * mode)
 {
@@ -661,14 +592,6 @@ int sceCdStStart(u32 lbn, sceCdRMode * mode)
 }
 #endif
 
-// read stream data
-// 
-// args:        number of sectors to read
-//                      read buffer address
-//                      data stream mode (STMBLK oo CDVD_STREAM_NONBLOCK)
-//                      error value holder
-// returns:     number of sectors read if successful
-//                      0 otherwise
 #ifdef F_sceCdStRead
 int sceCdStRead(u32 sectorType, u32 * buffer, u32 mode, u32 * error)
 {
@@ -711,10 +634,6 @@ int sceCdStRead(u32 sectorType, u32 * buffer, u32 mode, u32 * error)
 }
 #endif
 
-// stop streaming
-// 
-// returns:     1 if successful
-//                      0 otherwise
 #ifdef F_sceCdStStop
 int sceCdStStop(void)
 {
@@ -723,11 +642,6 @@ int sceCdStStop(void)
 }
 #endif
 
-// seek to a new stream position
-// 
-// args:        sector location to start streaming from
-// returns:     1 if successful
-//                      0 otherwise
 #ifdef F_sceCdStSeek
 int sceCdStSeek(u32 lbn)
 {
@@ -735,13 +649,6 @@ int sceCdStSeek(u32 lbn)
 }
 #endif
 
-// init streaming
-// 
-// args:        stream buffer size
-//                      number of ring buffers
-//                      buffer address on iop
-// returns:     1 if successful
-//                      0 otherwise
 #ifdef F_sceCdStInit
 int sceCdStInit(u32 buffSize, u32 numBuffers, void *buf)
 {
@@ -750,10 +657,6 @@ int sceCdStInit(u32 buffSize, u32 numBuffers, void *buf)
 }
 #endif
 
-// get stream read status
-// 
-// returns:     number of sectors read if successful
-//                      0 otherwise
 #ifdef F_sceCdStStat
 int sceCdStStat(void)
 {
@@ -762,10 +665,6 @@ int sceCdStStat(void)
 }
 #endif
 
-// pause streaming
-// 
-// returns:     1 if successful
-//                      0 otherwise
 #ifdef F_sceCdStPause
 int sceCdStPause(void)
 {
@@ -774,10 +673,6 @@ int sceCdStPause(void)
 }
 #endif
 
-// continue streaming
-// 
-// returns:     1 if successful
-//                      0 otherwise
 #ifdef F_sceCdStResume
 int sceCdStResume(void)
 {
@@ -786,7 +681,7 @@ int sceCdStResume(void)
 }
 #endif
 
-// perform the stream operation
+/** perform the stream operation */
 #ifdef F_sceCdStream
 int sceCdStream(u32 lbn, u32 nsectors, void *buf, CdvdStCmd_t cmd, sceCdRMode *rm)
 {
@@ -852,12 +747,6 @@ int sceCdCddaStream(u32 lbn, u32 nsectors, void *buf, CdvdStCmd_t cmd, sceCdRMod
 }
 #endif
 
-// waits/checks for completion of n-commands
-// 
-// args:        mode:   0 = wait for completion of command (blocking)
-//                      1 = check current status and return immediately
-// returns:     0 if completed
-//              1 if still executing command
 #ifdef F_sceCdSync
 int sceCdSync(int mode)
 {
@@ -879,11 +768,11 @@ int sceCdSync(int mode)
 }
 #endif
 
-// check whether ready to send an n-command
-// 
-// args:        current command
-// returns:     1 if read to send
-//                      0 if busy/error
+/** check whether ready to send an n-command
+ * 
+ * @param cmd current command
+ * @return 1 if read to send; 0 if busy/error
+ */
 #ifdef F__CdCheckNCmd
 int _CdCheckNCmd(int cmd)
 {
@@ -926,16 +815,6 @@ int _CdCheckNCmd(int cmd)
 #endif
 
 #ifdef F_sceCdReadKey
-/* Retrieves the specified key from the currently inserted CD/DVD.
- *
- * Arguments:	arg1	- unknown
- *		arg2	- unknown
- *		command	- The command to execute.
- *		key	- A 16-byte buffer for containing the retrieved key.
- *
- * Returns:	1 if successful.
- *		0 if an error occurred.
-*/
 int sceCdReadKey(unsigned char arg1, unsigned char arg2, unsigned int command, unsigned char *key)
 {
 	int result;
