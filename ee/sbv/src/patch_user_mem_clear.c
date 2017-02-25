@@ -1,16 +1,11 @@
+/**
+ * @file
+ * Patch user memory clear on EE restart.
+ */
+
 #include <tamtypes.h>
 #include <kernel.h>
 
-/**
- * sbv_patch_user_mem_clear - Patch user memory clear on EE restart.
- * @start: address above which all user memory is cleared
- * @return: 0: success, -1: error
- *
- * LoadExecPS2() wipes all user-space memory above 0x82000.  With this patch,
- * you can define a different start address to prevent your data from being
- * overwritten.  In order to completely disable the memory clear, simply pass
- * 0x02000000 to it.
- */
 int sbv_patch_user_mem_clear(void *start)
 {
 	int ret = -1;

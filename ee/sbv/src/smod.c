@@ -6,9 +6,12 @@
 # Copyright (c) 2003  Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Sub-CPU module interface.
 */
+
+/**
+ * @file
+ * Sub-CPU module interface.
+ */
 
 #include <tamtypes.h>
 #include <kernel.h>
@@ -24,9 +27,6 @@
 /* from common.c */
 extern struct smem_buf smem_buf;
 
-/**
- * smod_get_next_mod - Return the next module referenced in the global module list.
- */
 int smod_get_next_mod(smod_mod_info_t *cur_mod, smod_mod_info_t *next_mod)
 {
 	SifRpcReceiveData_t RData;
@@ -51,9 +51,6 @@ int smod_get_next_mod(smod_mod_info_t *cur_mod, smod_mod_info_t *next_mod)
 	return 0;
 }
 
-/**
- * smod_get_mod_by_name - Find and retreive a module by it's module name.
- */
 int smod_get_mod_by_name(const char *name, smod_mod_info_t *info)
 {
 	SifRpcReceiveData_t RData;

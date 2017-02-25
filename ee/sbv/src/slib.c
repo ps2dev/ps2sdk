@@ -6,9 +6,12 @@
 # Copyright (c) 2003  Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Sub CPU library interface.
 */
+
+/**
+ * @file
+ * Sub CPU library interface.
+ */
 
 #include <tamtypes.h>
 #include <kernel.h>
@@ -25,14 +28,6 @@ slib_exp_lib_list_t _slib_cur_exp_lib_list = {NULL, NULL};
 /* from common.c */
 extern struct smem_buf smem_buf;
 
-/**
- * slib_exp_lib_list - Find the head and tail of the export library list.
- *
- * Returns NULL if the list couldn't be found, and the address of the head and
- * tail pointers if it was located.
- *
- * This routine will need to be called everytime the IOP is reset.
- */
 slib_exp_lib_list_t *slib_exp_lib_list(void)
 {
 	SifRpcReceiveData_t RData;
@@ -103,9 +98,6 @@ slib_exp_lib_list_t *slib_exp_lib_list(void)
 
 #define EXP_LIB_MAX	SMEM_BUF_SIZE	/* We can even handle CDVDMAN's bloat!  */
 
-/**
- * slib_get_exp_lib - Retrieve an export library by name.
- */
 int slib_get_exp_lib(const char *name, slib_exp_lib_t *library)
 {
 	SifRpcReceiveData_t RData;
