@@ -6,7 +6,6 @@
 # (c) 2005 Dan Peori <peori@oopo.net>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
 */
 
  #include <tamtypes.h>
@@ -16,9 +15,7 @@
  #include <string.h>
  #include <floatlib.h>
 
- //////////////////////
- // VECTOR FUNCTIONS //
- //////////////////////
+ /* VECTOR FUNCTIONS */
 
  void vector_apply(VECTOR output, VECTOR input0, MATRIX input1) {
   asm __volatile__ (
@@ -129,9 +126,7 @@
   );
  }
 
- //////////////////////
- // MATRIX FUNCTIONS //
- //////////////////////
+ /* MATRIX FUNCTIONS */
 
  void matrix_copy(MATRIX output, MATRIX input0) {
   asm __volatile__ (
@@ -289,9 +284,7 @@
 
  }
 
- //////////////////////
- // CREATE FUNCTIONS //
- //////////////////////
+ /* CREATE FUNCTIONS */
 
  void create_local_world(MATRIX local_world, VECTOR translation, VECTOR rotation) {
 
@@ -360,9 +353,7 @@
 
  }
 
- /////////////////////////
- // CALCULATE FUNCTIONS //
- /////////////////////////
+ /* CALCULATE FUNCTIONS */
 
  void calculate_normals(VECTOR *output, int count, VECTOR *normals, MATRIX local_light) {
   asm __volatile__ (
