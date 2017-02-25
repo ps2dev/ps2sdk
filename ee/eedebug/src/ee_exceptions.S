@@ -6,13 +6,13 @@
 # Copyright 2001-2009, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-#
-# EEDEBUG - EE debugging library.
-#
-# ee_exceptions.S - low-level EE exception-handler code.
-#
 */
+
+/**
+ * @file
+ * EEDEBUG - EE debugging library.
+ * low-level EE exception-handler code.
+ */
 
 #include <ee_cop0_defs.h>
 #include "eedebug_defs.h"
