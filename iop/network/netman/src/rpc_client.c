@@ -86,7 +86,7 @@ int NetManInitRPCClient(void)
 				thread.option = 0;
 				thread.thread = &EERxThread;
 				thread.stacksize = 0x600;
-				thread.priority = 0x26; //The receive thread should have a higher priority than transmission threads, so that it won't get interrupted
+				thread.priority = 0x29;	//Should have a lower priority than the driver thread, so that frames can be received without stalling the driver thread.
 				RxThreadID = CreateThread(&thread);
 				StartThread(RxThreadID, NULL);
 			}

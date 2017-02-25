@@ -109,7 +109,7 @@ int NetManInitRPCServer(void)
 		ThreadData.stack=NETMAN_RpcSvr_ThreadStack;
 		ThreadData.stack_size=sizeof(NETMAN_RpcSvr_ThreadStack);
 		ThreadData.gp_reg=&_gp;
-		ThreadData.initial_priority=0x59;	/* The RPC server thread should be given lower priority than the protocol stack, as frame transmission should be given priority. */
+		ThreadData.initial_priority=0x57;	/* The RPC server thread should be given a higher priority than the protocol stack, so that it can dump frames in the EE and return. */
 		ThreadData.attr=ThreadData.option=0;
 
 		if((NETMAN_RpcSvr_threadID=CreateThread(&ThreadData))>=0)

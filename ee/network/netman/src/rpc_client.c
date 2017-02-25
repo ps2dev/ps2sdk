@@ -92,7 +92,7 @@ int NetManInitRPCClient(void){
 		ThreadData.stack=TxThreadStack;
 		ThreadData.stack_size=sizeof(TxThreadStack);
 		ThreadData.gp_reg=&_gp;
-		ThreadData.initial_priority=0x57;	//Transmissions should have higher priority than the TCP/IP stack's threads.
+		ThreadData.initial_priority=0x57;	//I would design this to have a lower priority than the TCP/IP stack, but somehow that results in worse sending performance (I guess because the TCP/IP stack takes quite a bit of runtime).
 		ThreadData.attr=ThreadData.option=0;
 
 		if((TxThreadID=CreateThread(&ThreadData)) < 0)

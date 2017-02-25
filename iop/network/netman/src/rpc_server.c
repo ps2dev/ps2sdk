@@ -181,7 +181,7 @@ int NetmanInitRPCServer(void)
 		ThreadData.option=0;
 		ThreadData.thread=&NETMAN_RPC_srv;
 		ThreadData.stacksize=0x600;
-		ThreadData.priority=0x27;	//Should have higher priority than the IF driver thread, but lower priority than the receive thread.
+		ThreadData.priority=0x27;	//Should have higher priority than the IF driver thread, in order to dump frames in the IOP before returning.
 
 		StartThread(RpcThreadID=CreateThread(&ThreadData), NULL);
 		IsInitialized=1;
