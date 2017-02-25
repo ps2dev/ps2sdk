@@ -1,3 +1,8 @@
+/**
+ * @file
+ * Draw library types
+ */
+
 #ifndef __DRAW_TYPES_H__
 #define __DRAW_TYPES_H__
 
