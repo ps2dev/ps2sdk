@@ -8,6 +8,11 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
+/**
+ * @file
+ * Power-off processing definitions and imports.
+ */
+
 #ifndef __POWEROFF_H__
 #define __POWEROFF_H__
 
