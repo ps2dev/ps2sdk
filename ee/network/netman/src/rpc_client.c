@@ -200,9 +200,20 @@ int NetManRpcIoctl(unsigned int command, void *args, unsigned int args_len, void
 
 static int NetmanTxWaitingThread = -1;
 
+static void TxEndCallback(void *arg)
+{
+	PacketReqs.count -= ReceiveBuffer.result;
+
+	if(NetmanTxWaitingThread >= 0)
+	{
+		iWakeupThread(NetmanTxWaitingThread);
+		NetmanTxWaitingThread = -1;
+	}
+}
+
 static void TxThread(void *arg)
 {
-	int ThreadToWakeUp, sent;
+	int ThreadToWakeUp;
 
 	while(1)
 	{
@@ -210,26 +221,23 @@ static void TxThread(void *arg)
 
 		if(PacketReqs.count > 0)
 		{
-			WaitSema(NetManIOSemaID);
-			//NETMAN_IOP_RPC_FUNC_SEND_PACKETS should attempt to send PacketReqs.count frames.
-			if(SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_SEND_PACKETS, 0, &PacketReqs, sizeof(PacketReqs), &ReceiveBuffer, sizeof(s32), NULL, NULL) >= 0)
-				sent = ReceiveBuffer.result;
-			else
-				sent = 0;
-			SignalSema(NetManIOSemaID);
-
-			DI();
-			PacketReqs.count -= sent;
-			EI();
+			while(PacketReqs.count > 0)
+			{
+				WaitSema(NetManIOSemaID);
+				while(SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_SEND_PACKETS, 0, &PacketReqs, sizeof(PacketReqs), &ReceiveBuffer, sizeof(ReceiveBuffer.result), &TxEndCallback, NULL) < 0){};
+				SignalSema(NetManIOSemaID);
+			}
 		}
-
-		if(NetmanTxWaitingThread >= 0)
+		else
 		{
-			DI();
-			ThreadToWakeUp=NetmanTxWaitingThread;
-			NetmanTxWaitingThread=-1;
-			EI();
-			WakeupThread(ThreadToWakeUp);
+			if(NetmanTxWaitingThread >= 0)
+			{
+				DI();
+				ThreadToWakeUp=NetmanTxWaitingThread;
+				NetmanTxWaitingThread=-1;
+				EI();
+				WakeupThread(ThreadToWakeUp);
+			}
 		}
 	}
 }
@@ -238,7 +246,7 @@ static void TxThread(void *arg)
 static void EnQFrame(const void *frame, unsigned int length)
 {
 	SifDmaTransfer_t dmat;
-	int dmat_id, ThreadID;
+	int dmat_id;
 
 	//Write back D-cache, before performing a DMA transfer.
 	SifWriteBackDCache((void*)frame, length);
@@ -246,10 +254,7 @@ static void EnQFrame(const void *frame, unsigned int length)
 	//Wait for a spot to be freed up.
 	while(PacketReqs.count + 1 >= NETMAN_RPC_BLOCK_SIZE)
 	{
-		ThreadID = GetThreadId();
-		DI();
-		NetmanTxWaitingThread = ThreadID;
-		EI();
+		NetmanTxWaitingThread = GetThreadId();
 		WakeupThread(TxThreadID);
 		SleepThread();
 	}

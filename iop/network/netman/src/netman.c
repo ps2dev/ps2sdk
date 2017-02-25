@@ -22,7 +22,7 @@ static char NIFLinkState=0;
 static unsigned char NextNetIFID=0;
 static int NetManIOSemaID;
 
-IRX_ID("Network_Manager", 1, 2);
+IRX_ID("Network_Manager", 1, 3);
 
 extern struct irx_export_table _exp_netman;
 

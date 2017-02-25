@@ -58,12 +58,11 @@ static void *NETMAN_EE_RPC_Handler(int fnum, void *buffer, int NumBytes)
 					data=UNCACHED_SEG(&FrameBuffer[RxBufferRdPtr * NETMAN_MAX_FRAME_SIZE]);
 					PacketLength=((struct PacketReqs*)buffer)->length[RxBufferRdPtr];
 
-					// Need to be careful here. With some packets in the waiting queue (Occupying packet buffers), packet buffer exhaustion can occur.
-					if((packet = NetManNetProtStackAllocRxPacket(PacketLength, &payload)) == NULL)
-						break;	// Can't continue.
-
-					memcpy(payload, data, PacketLength);
-					NetManNetProtStackEnQRxPacket(packet);
+					if((packet = NetManNetProtStackAllocRxPacket(PacketLength, &payload)) != NULL)
+					{
+						memcpy(payload, data, PacketLength);
+						NetManNetProtStackEnQRxPacket(packet);
+					}
 
 					//Increment read pointer by one place.
 					RxBufferRdPtr = (RxBufferRdPtr + 1) % NETMAN_RPC_BLOCK_SIZE;

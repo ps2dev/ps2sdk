@@ -52,6 +52,7 @@ thevent_IMPORTS_start
 I_CreateEventFlag
 I_DeleteEventFlag
 I_SetEventFlag
+I_iSetEventFlag
 I_ClearEventFlag
 I_WaitEventFlag
 thevent_IMPORTS_end
