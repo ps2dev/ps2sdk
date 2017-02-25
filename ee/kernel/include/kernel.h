@@ -7,9 +7,12 @@
 # (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# EE Kernel prototypes
 */
+
+/**
+ * @file
+ * EE Kernel prototypes
+ */
 
 #ifndef _KERNEL_H
 #define _KERNEL_H
@@ -47,13 +50,13 @@ extern "C" {
 
 #define ALIGNED(x) __attribute__((aligned((x))))
 
-//Modes for FlushCache
+/** Modes for FlushCache */
 #define WRITEBACK_DCACHE	0
 #define INVALIDATE_DCACHE	1
 #define INVALIDATE_ICACHE	2
 #define INVALIDATE_CACHE	(INVALIDATE_DCACHE|INVALIDATE_ICACHE)
 
-// EE Interrupt Controller (INTC) interrupt numebrs
+/** EE Interrupt Controller (INTC) interrupt numebrs */
 enum
 {
 	INTC_GS,
@@ -82,7 +85,7 @@ enum
 #define kINTC_TIMER0		INTC_TIM0
 #define kINTC_TIMER1		INTC_TIM1
 
-//EE Direct Memory Access Controller (DMAC) interrupt numbers
+/** EE Direct Memory Access Controller (DMAC) interrupt numbers */
 enum
 {
 	DMAC_VIF0,
@@ -101,7 +104,7 @@ enum
 	DMAC_BEIS,		//Bus error interrupt
 };
 
-//ResetEE argument bits
+/** ResetEE argument bits */
 #define INIT_DMAC               0x01
 #define INIT_VU1                0x02
 #define INIT_VIF1               0x04
@@ -207,7 +210,7 @@ typedef struct t_ee_thread
 
 } ee_thread_t;
 
-// Thread status
+/** Thread status */
 #define THS_RUN		0x01
 #define THS_READY	0x02
 #define THS_WAIT	0x04

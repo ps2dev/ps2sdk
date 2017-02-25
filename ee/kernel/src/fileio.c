@@ -7,9 +7,12 @@
 # (c) 2003 Marcus R. Brown (mrbrown@0xd6.org)
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# EE FILE IO handling
 */
+
+/**
+ * @file
+ * EE FILE IO handling
+ */
 
 #include <tamtypes.h>
 #include <ps2lib_err.h>
@@ -40,7 +43,7 @@ enum _fio_functions {
 	FIO_F_DELDRV
 };
 
-/* Shared between _fio_read_intr and fio_read.  The updated modules shipped
+/** Shared between _fio_read_intr and fio_read.  The updated modules shipped
    with licensed games changed the size of the buffers from 16 to 64.  */
 struct _fio_read_data {
 	u32	size1;

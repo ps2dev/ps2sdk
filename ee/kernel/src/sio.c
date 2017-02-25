@@ -6,9 +6,12 @@
 # (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Routines for accessing the EE's on-chip serial port.
 */
+
+/**
+ * @file
+ * Routines for accessing the EE's on-chip serial port.
+ */
 
 #include <stdio.h>
 #include <stddef.h>
@@ -23,15 +26,12 @@
 #define PS2LIB_STR_MAX 4096
 #endif
 
-#define CPUCLK		294912000	/* Use this to determine the baud divide value.  */
-#define LCR_SCS_VAL	(1<<5)		/* Baud rate generator output that divided CPUCLK.  */
+/** Use this to determine the baud divide value.  */
+#define CPUCLK		294912000
+/** Baud rate generator output that divided CPUCLK.  */
+#define LCR_SCS_VAL	(1<<5)	
 
 #ifdef F_sio_init
-/* Initialize the SIO. The lcr_* parameters are passed as is, so
-   you'll need to use the SIO_LCR_* register values. You can pass 0 for all of
-   the lcr_* params to get the standard 8N1 setting (8 data bits, no parity
-   checking, 1 stop bit). Note: Unlike the BIOS sio_init() routine, we always
-   base the baud rate on the CPU clock.  */
 void sio_init(u32 baudrate, u8 lcr_ueps, u8 lcr_upen, u8 lcr_usbl, u8 lcr_umode)
 {
 	u32 brd;		/* Baud rate divisor.  */
@@ -94,8 +94,6 @@ int sio_getc()
 #endif
 
 #ifdef F_sio_getc_block
-// Same as above, but blocking.
-// Note that getc should be blocking by default. Ho well.
 int sio_getc_block()
 {
 	/* Do we have something in the RX FIFO?  */
@@ -105,9 +103,6 @@ int sio_getc_block()
 #endif
 
 #ifdef F_sio_write
-/* Not really much to do in the way of error-handling.  sio_putc() already
-   checks to see if there's room in the TX FIFO, and my cable doesn't support
-   hardware flow control.  */
 size_t sio_write(void *buf, size_t size)
 {
 	u8 *p = (u8 *)buf;
@@ -121,8 +116,6 @@ size_t sio_write(void *buf, size_t size)
 #endif
 
 #ifdef F_sio_read
-/* This will read from the serial port until size characters have been read or
-   EOF (RX FIFO is empty).  */
 size_t sio_read(void *buf, size_t size)
 {
 	u8 *p = (u8 *)buf;
@@ -166,7 +159,6 @@ int sio_putsn(const char *str)
 #endif
 
 #ifdef F_sio_gets
-// Will block until it recieves \n or \r.
 char *sio_gets(char *str)
 {
 	char *s = str;
@@ -187,7 +179,6 @@ char *sio_gets(char *str)
 #endif
 
 #ifdef F_sio_flush
-// Flushes the input buffer.
 void sio_flush()
 {
     while (_lw(SIO_ISR) & 0xf00)

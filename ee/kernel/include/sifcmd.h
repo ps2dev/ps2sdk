@@ -7,9 +7,12 @@
 # (c) 2003 Marcus R. Brown (mrbrown@0xd6.org)
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# EE SIF commands prototypes
 */
+
+/**
+ * @file
+ * EE SIF commands prototypes
+ */
 
 #ifndef _SIFCMD_H
 #define _SIFCMD_H
@@ -26,7 +29,7 @@ typedef struct t_SifCmdHeader
    u32				opt;
 } SifCmdHeader_t;
 
-/* System functions */
+/** System functions */
 #define	SIF_CMD_ID_SYSTEM	0x80000000
 
 #define SIF_CMD_CHANGE_SADDR	(SIF_CMD_ID_SYSTEM | 0)
@@ -38,11 +41,12 @@ typedef struct t_SifCmdHeader
 #define SIF_CMD_RPC_CALL	(SIF_CMD_ID_SYSTEM | 10)
 #define SIF_CMD_RPC_RDATA	(SIF_CMD_ID_SYSTEM | 12)
 
-//System SREG
+/** System SREG */
 #define SIF_SREG_RPCINIT	0
 
-//Structure for remotely (over the SIF) changing the value of a software register (SREG).
-//There are 32 software registers (0 - 31). Registers 0-7 are used by the system.
+/** Structure for remotely (over the SIF) changing the value of a software register (SREG).
+ * There are 32 software registers (0 - 31). Registers 0-7 are used by the system.
+ */
 typedef struct t_SifCmdSRegData {
 	SifCmdHeader_t	header;
 	int		index;
@@ -71,8 +75,10 @@ int SifGetSreg(int index);
 void SifWriteBackDCache(void *ptr, int size);	//EE only
 
 //Send mode bits
-#define SIF_CMD_M_INTR	0x01	//Called within an interrupt context
-#define SIF_CMD_M_WBDC	0x04 	//Write back D-cache for extended data
+/** Called within an interrupt context */
+#define SIF_CMD_M_INTR	0x01
+/** Write back D-cache for extended data */
+#define SIF_CMD_M_WBDC	0x04
 
 #ifdef __cplusplus
 }
