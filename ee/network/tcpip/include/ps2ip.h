@@ -6,21 +6,25 @@
 # Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# $
-# Imports and definitions for ps2ip.
 */
+
+/**
+ * @file
+ * Imports and definitions for ps2ip.
+ */
 
 #ifndef IOP_PS2IP_H
 #define IOP_PS2IP_H
 
 #include <tcpip.h>
 
-//Initializes PS2IP. Specify a dummy address like "169.254.0.1" if DHCP is to be used, before enabling DHCP via ps2ip_setconfig().
+/** Initializes PS2IP. Specify a dummy address like "169.254.0.1" if DHCP is to be used, before enabling DHCP via ps2ip_setconfig(). */
 int ps2ipInit(struct ip4_addr *ip_address, struct ip4_addr *subnet_mask, struct ip4_addr *gateway);
 void ps2ipDeinit(void);
-/*	Use to specify the number of H-sync ticks per milisecond (Default: 16). Use this function
-	to keep timings accurate, if a mode like 480P (~31KHz H-sync) is used instead of NTSC/PAL (~16KHz H-sync).	*/
+/**
+ * Use to specify the number of H-sync ticks per milisecond (Default: 16). 
+ * Use this function to keep timings accurate, if a mode like 480P (~31KHz H-sync) is used instead of NTSC/PAL (~16KHz H-sync).	
+ */
 void ps2ipSetHsyncTicksPerMSec(unsigned char ticks);
 
 /* From include/lwip/sockets.h:  */
@@ -95,10 +99,10 @@ struct netif *netif_add(struct netif *netif,
                         void *state, netif_init_fn init, netif_input_fn input);
 #define        I_netif_add DECLARE_IMPORT(26, netif_add)
 
-/* Returns a network interface given its name. The name is of the form
-   "et0", where the first two letters are the "name" field in the
-   netif structure, and the digit is in the num field in the same
-   structure. */
+/** Returns a network interface given its name. 
+ * The name is of the form "et0", where the first two letters are the "name" field in the
+ * netif structure, and the digit is in the num field in the same structure. 
+ */
 struct netif *netif_find(const char *name);
 void netif_set_default(struct netif *netif);
 void netif_set_ipaddr(struct netif *netif, const ip4_addr_t *ipaddr);
