@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# DevFS source file
 */
+
+/**
+ * @file
+ * DevFS source file
+ */
 
 #include "types.h"
 #include "defs.h"
@@ -60,7 +63,8 @@ typedef struct
 
 typedef struct _devfs_device
 {
-  struct _devfs_device *forw, *back; /* Pointers to the next device in the chain */
+  /** Pointers to the next device in the chain */
+  struct _devfs_device *forw, *back;
   HDEV hDev;
   devfs_node_t node;
   subdev_t subdevs[DEVFS_MAX_SUBDEVS];
@@ -71,31 +75,35 @@ typedef struct _devfs_device
 typedef struct _ioman_data
 {
    HDEV hDev;
-   devfs_device_t *dev;  /* Pointer to the main device, set to NULL if device closed */
+   /** Pointer to the main device, set to NULL if device closed */
+   devfs_device_t *dev;  
    int subdev;
    u32 mode;
    devfs_loc_t loc;
 } ioman_data_t;
 
-devfs_device_t *root_device; /* Pointer to the root device */
+/** Pointer to the root device */
+devfs_device_t *root_device;
 HDEV dev_count;
 
 typedef struct _directory_file
 
 {
-   HDEV hDev; /* Should always be set to -1 */
-   u32 devno; /* The number of the file being listed */
-   u32 opened; /* If this directory file is in an opened state */
+   /** Should always be set to -1 */
+   HDEV hDev;
+   /** The number of the file being listed */
+   u32 devno;
+   /** If this directory file is in an opened state */
+   u32 opened;
 } directory_file_t;
 
 directory_file_t open_dirfiles[MAX_OPEN_DIRFILES];
 
 /** Simple function to convert a number to a string
-
-    @param subdev: The number to conver.
-    @returns A constant string containing the number. Returns an
-    empty string if not possible to convert.
-*/
+ * @param subdev: The number to convert.
+ * @returns A constant string containing the number. Returns an
+ * empty string if not possible to convert.
+ */
 const char *devfs_subdev_to_str(int subdev)
 
 {
@@ -123,12 +131,12 @@ const char *devfs_subdev_to_str(int subdev)
 }
 
 /** Scans the device list and fills in the corresponding directory entry
-
-    @param dirent: Pointer to a ::iox_dirent_t structure.
-    @param devno: The sequential device number to read
-
-    @returns Always 0
-*/
+ *
+ * @param dirent: Pointer to a ::iox_dirent_t structure.
+ * @param devno: The sequential device number to read
+ *
+ * @returns Always 0
+ */
 
 int devfs_fill_dirent(iox_dirent_t *dirent, int devno)
 
@@ -186,11 +194,11 @@ int devfs_fill_dirent(iox_dirent_t *dirent, int devno)
 }
 
 /** Creates a new device based on the node data supplied
-
-    @param node: Pointer to a ::devfs_node_t structure
-
-    @returns A new device structure or NULL on error.
-*/
+ *
+ * @param node: Pointer to a ::devfs_node_t structure
+ *
+ * @returns A new device structure or NULL on error.
+ */
 devfs_device_t *devfs_create_device(const devfs_node_t *node)
 
 {
@@ -237,9 +245,9 @@ devfs_device_t *devfs_create_device(const devfs_node_t *node)
 }
 
 /** Deletes a device
-    @param dev: Pointer to a previously allocated device structure
-    @returns Always 0
-*/
+ * @param dev: Pointer to a previously allocated device structure
+ * @returns Always 0
+ */
 
 int devfs_delete_device(devfs_device_t *dev)
 
@@ -263,12 +271,12 @@ int devfs_delete_device(devfs_device_t *dev)
 }
 
 /** Trys to find a device with a matching name.
-
-    The name can be a full device name with subdev on the end, the function should
-    still find the device.
-    @param name: The name of the device to find
-    @returns A pointer to the device, if not found returns NULL
-*/
+ *
+ * The name can be a full device name with subdev on the end, the function should
+ * still find the device.
+ * @param name: The name of the device to find
+ * @returns A pointer to the device, if not found returns NULL
+ */
 devfs_device_t *devfs_find_devicename(const char *name)
 
 {
@@ -298,10 +306,10 @@ devfs_device_t *devfs_find_devicename(const char *name)
 }
 
 /** Finds a device from its device handle.
-
-    @param hDev: Handle to the device.
-    @returns A pointer to the device, if not found returns NULL
-*/
+ *
+ * @param hDev: Handle to the device.
+ * @returns A pointer to the device, if not found returns NULL
+ */
 devfs_device_t *devfs_find_deviceid(HDEV hDev)
 
 {
@@ -322,8 +330,8 @@ devfs_device_t *devfs_find_deviceid(HDEV hDev)
 }
 
 /** Dummy ioman handler
-    @returns Always returns -1
-*/
+ * @returns Always returns -1
+ */
 int devfs_dummy(void)
 
 {
@@ -332,8 +340,8 @@ int devfs_dummy(void)
 }
 
 /** ioman init handler
-    @returns Always returns 0
-*/
+ * @returns Always returns 0
+ */
 int devfs_init(iop_device_t *dev)
 
 {
@@ -342,8 +350,8 @@ int devfs_init(iop_device_t *dev)
 }
 
 /** ioman deinit handler
-    @returns Always returns 0
-*/
+ * @returns Always returns 0
+ */
 int devfs_deinit(iop_device_t *dev)
 
 {
@@ -352,10 +360,10 @@ int devfs_deinit(iop_device_t *dev)
 }
 
 /** ioman open handler
-    @oaram file: Pointer to the ioman file structure
-    @param name: Name of file to open
-    @param mode: Open file mode settings
-    @returns 0 if success, -1 on error
+ * @oaram file: Pointer to the ioman file structure
+ * @param name: Name of file to open
+ * @param mode: Open file mode settings
+ * @returns 0 if success, -1 on error
 */
 #ifdef USE_IOMAN
 int devfs_open(iop_file_t *file, const char *name, int mode)
@@ -486,10 +494,10 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
 }
 
 /** ioman close handler
-
-    @param file: Pointer to an ioman file structure
-    @returns 0 on success, else -1
-*/
+ *
+ * @param file: Pointer to an ioman file structure
+ * @returns 0 on success, else -1
+ */
 int devfs_close(iop_file_t *file)
 
 {
@@ -547,11 +555,11 @@ int devfs_close(iop_file_t *file)
 }
 
 /** ioman ioctl handler
-    @param file: Pointer to an ioman file structure
-    @param cmd: ioctl command number
-    @param args: Pointer to a buffer containing any arguments
-    @returns >= 0 Defined by the type of command, -1 on error
-*/
+ * @param file: Pointer to an ioman file structure
+ * @param cmd: ioctl command number
+ * @param args: Pointer to a buffer containing any arguments
+ * @returns >= 0 Defined by the type of command, -1 on error
+ */
 int devfs_ioctl(iop_file_t *file, int cmd, void *args)
 
 {
@@ -592,14 +600,14 @@ int devfs_ioctl(iop_file_t *file, int cmd, void *args)
 }
 
 /** ioman ioctl2 handler
-    @param file: Pointer to an ioman file structure
-    @param cmd: ioctl command number
-    @param args: Pointer a buffer containing command arguments
-    @param arglen: Length of args buffer
-    @param buf: Pointer to a return buffer
-    @param buflen: Length of buf
-    @returns >= 0 Depends on command, -1 on error
-*/
+ * @param file: Pointer to an ioman file structure
+ * @param cmd: ioctl command number
+ * @param args: Pointer a buffer containing command arguments
+ * @param arglen: Length of args buffer
+ * @param buf: Pointer to a return buffer
+ * @param buflen: Length of buf
+ * @returns >= 0 Depends on command, -1 on error
+ */
 int devfs_ioctl2(iop_file_t *file, int cmd, void *args, unsigned int arglen, void *buf, unsigned int buflen)
 
 {
@@ -647,11 +655,11 @@ int devfs_ioctl2(iop_file_t *file, int cmd, void *args, unsigned int arglen, voi
 }
 
 /** ioman read handler
-    @param file: Pointer to an ioman file structure
-    @param buf: Buffer to read data to
-    @param len: Length of data to read
-    @returns Length of data read. 0 on eof or file pointer out of range. -1 on error.
-*/
+ * @param file: Pointer to an ioman file structure
+ * @param buf: Buffer to read data to
+ * @param len: Length of data to read
+ * @returns Length of data read. 0 on eof or file pointer out of range. -1 on error.
+ */
 int devfs_read(iop_file_t *file, void *buf, int len)
 
 {
@@ -695,11 +703,11 @@ int devfs_read(iop_file_t *file, void *buf, int len)
 }
 
 /** ioman write handler
-    @param file: Pointer to an ioman file structure
-    @param buf: Pointer to the buffer to write
-    @param len: Length of data to write
-    @returns Number of bytes written, 0 on eof or -1 on error
-*/
+ * @param file: Pointer to an ioman file structure
+ * @param buf: Pointer to the buffer to write
+ * @param len: Length of data to write
+ * @returns Number of bytes written, 0 on eof or -1 on error
+ */
 int devfs_write(iop_file_t *file, void *buf, int len)
 
 {
@@ -742,11 +750,11 @@ int devfs_write(iop_file_t *file, void *buf, int len)
 }
 
 /** ioman lseek handler
-    @param file: Pointer to a ioman file structure
-    @param loc: Location to seek to
-    @param whence: Seek base.
-    @returns location seeked to, -1 on error.
-*/
+ * @param file: Pointer to a ioman file structure
+ * @param loc: Location to seek to
+ * @param whence: Seek base.
+ * @returns location seeked to, -1 on error.
+ */
 int devfs_lseek(iop_file_t *file, long loc, int whence)
 {
    devfs_device_t *dev;
@@ -791,10 +799,10 @@ int devfs_lseek(iop_file_t *file, long loc, int whence)
 }
 
 /** ioman lseek64 handler
-    @param file: Pointer to an ioman file structure
-    @param loc: 64bit seek location
-    @param whence: Seek base
-*/
+ * @param file: Pointer to an ioman file structure
+ * @param loc: 64bit seek location
+ * @param whence: Seek base
+ */
 int devfs_lseek64(iop_file_t *file, long long loc, int whence)
 {
    devfs_device_t *dev;
@@ -839,10 +847,10 @@ int devfs_lseek64(iop_file_t *file, long long loc, int whence)
 }
 
 /** ioman dopen handler
-    @param file: Pointer to an ioman file structure
-    @param name: Name of directory to open
-    @returns 0 if success, -1 on error
-*/
+ * @param file: Pointer to an ioman file structure
+ * @param name: Name of directory to open
+ * @returns 0 if success, -1 on error
+ */
 int devfs_dopen(iop_file_t *file, const char *name)
 {
    int dir_loop;
@@ -869,9 +877,9 @@ int devfs_dopen(iop_file_t *file, const char *name)
 }
 
 /** ioman dclose handler
-    @param file: Pointer to an ioman file structure
-    @returns Alwats returns 0
-*/
+ * @param file: Pointer to an ioman file structure
+ * @returns Always returns 0
+ */
 int devfs_dclose(iop_file_t *file)
 {
    directory_file_t *dir;
@@ -912,11 +920,11 @@ int devfs_dread(iop_file_t *file, iox_dirent_t *buf)
 }
 
 /** ioman getstat handler
-    @param file: Pointer to an ioman file structure
-    @param name: Name of the file to stat
-    @param stat: Buffer to receive the stat
-    @returns 0 on success, -1 on error
-*/
+ * @param file: Pointer to an ioman file structure
+ * @param name: Name of the file to stat
+ * @param stat: Buffer to receive the stat
+ * @returns 0 on success, -1 on error
+ */
 #ifdef USE_IOMAN
 int devfs_getstat(iop_file_t *file, const char *name, fio_stat_t *stat)
 #else
@@ -1001,8 +1009,8 @@ int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
 }
 
 /** DevFS initialise function
-    @returns >= 0 on success, -1 on error
-*/
+ * @returns >= 0 on success, -1 on error
+ */
 int init_devfs(void)
 
 {
@@ -1042,10 +1050,10 @@ int init_devfs(void)
 }
 
 /** Main start function of the module
-    @param argc: Unused
-    @param argv: Unused
-    @returns 0 on success, -1 on error
-*/
+ * @param argc: Unused
+ * @param argv: Unused
+ * @returns 0 on success, -1 on error
+ */
 int _start(int argc, char **argv)
 {
    int res = 1;
@@ -1068,9 +1076,9 @@ int _start(int argc, char **argv)
 }
 
 /** Function to check a device name only contains alphabetic characters
-    @param name: The name to check.
-    @returns 0 if the name is invalid, else 1
-*/
+ * @param name: The name to check.
+ * @returns 0 if the name is invalid, else 1
+ */
 int devfs_check_devname(const char *name)
 /* Valid device name uses alphabetic characters only */
 
@@ -1107,11 +1115,6 @@ int devfs_check_devname(const char *name)
    return 1;
 }
 
-/** Adds a new device to the filing system
-    @param node: Pointer to a ::devfs_node_t structure
-    @returns A device handle is returned if the device was added.
-    On error INVALID_HDEV is returned
-*/
 HDEV DevFSAddDevice(const devfs_node_t *node)
 
 {
@@ -1165,10 +1168,6 @@ HDEV DevFSAddDevice(const devfs_node_t *node)
    return dev->hDev;
 }
 
-/** Deletes an previously opened device.
-    @param hDev: Handle to the device to delete
-    @returns 0 if device deleted, -1 on error
-*/
 int DevFSDelDevice(HDEV hDev)
 
 {
@@ -1220,13 +1219,6 @@ int DevFSDelDevice(HDEV hDev)
    return ret;
 }
 
-/** Adds a sub device to a previously opened device
-    @param hDev: Handle to an opened device
-    @param subdev_no: The number of the subdevice. Can be 0 to DEVFS_MAX_SUBDEVS
-    @param extent: A 64bit extent which reflects the size of the underlying device
-    @param data: Pointer to some private data to associate with this sub device
-    @returns 0 if sub device added, else -1
-*/
 int DevFSAddSubDevice(HDEV hDev, u32 subdev_no, s32 mode, devfs_loc_t extent, void *data)
 
 {
@@ -1265,11 +1257,6 @@ int DevFSAddSubDevice(HDEV hDev, u32 subdev_no, s32 mode, devfs_loc_t extent, vo
    return 0;
 }
 
-/** Deletes a sub device.
-    @param hDev: Handle to an opened device.
-    @param subdev_no: The number of the subdevice to delete.
-    @returns 0 if device deleted. -1 on error.
-*/
 int DevFSDelSubDevice(HDEV hDev, u32 subdev_no)
 
 {
