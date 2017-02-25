@@ -1,3 +1,8 @@
+/**
+ * @file
+ * IOP SBUS debug library.
+ */
+
 #ifndef _IOP_DEBUG_H
 #define _IOP_DEBUG_H
 
