@@ -6,29 +6,28 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# HTTP CLIENT FILE SYSTEM DRIVER.
 */
 
 /*
-
-  The HTTP file io driver is a read only driver that slots into the PS2
-  IO subsystem and provides access to HTTP.
-
-  For each open request a file handle is allocated and any read request
-  is directed to the socket.  After close has been called the file
-  handle slot is free'd for the next request.
-
-  No header information normally returned from a HTTP request is returned.
-  The client must know the content of the data stream and how to deal with it.
-
-  lseek is currently only supported in order to get the size of a file. With
-  the current implimentation, it is not possible to seek to different positions
-  in a file.
-
-  With the current implimentation, hostnames may only be specified as an IP
-  address. This will change once we get a DNS resolver up & running with lwip.
-*/
+ * @file
+ * HTTP CLIENT FILE SYSTEM DRIVER.
+ * The HTTP file io driver is a read only driver that slots into the PS2
+ * IO subsystem and provides access to HTTP.
+ *
+ * For each open request a file handle is allocated and any read request
+ * is directed to the socket.  After close has been called the file
+ * handle slot is free'd for the next request.
+ *
+ * No header information normally returned from a HTTP request is returned.
+ * The client must know the content of the data stream and how to deal with it.
+ *
+ * lseek is currently only supported in order to get the size of a file. With
+ * the current implimentation, it is not possible to seek to different positions
+ * in a file.
+ *
+ * With the current implimentation, hostnames may only be specified as an IP
+ * address. This will change once we get a DNS resolver up & running with lwip.
+ */
 
 #include <types.h>
 #include <irx.h>
@@ -65,9 +64,9 @@ char HTTPGETEND[] = " HTTP/1.0\r\n";
 char HTTPUSERAGENT[] = "User-Agent: PS2IP HTTP Client\r\n";
 char HTTPENDHEADER[] = "\r\n";
 
-//
-// This function will parse the Content-Length header line and return the file size
-//
+/** 
+ * This function will parse the Content-Length header line and return the file size 
+ */
 int parseContentLength(char *mimeBuffer)
 {
 	char *line;
@@ -81,10 +80,10 @@ int parseContentLength(char *mimeBuffer)
 	return (int)strtol(line,NULL, 10);
 }
 
-//
-// This function will parse the initial response header line and return 0 for a "200 OK",
-// or return the error code in the event of an error (such as 404 - not found)
-//
+/** 
+ * This function will parse the initial response header line and return 0 for a "200 OK",
+ * or return the error code in the event of an error (such as 404 - not found)
+ */
 int isErrorHeader(char *mimeBuffer)
 {
 	char *line;
@@ -111,11 +110,11 @@ int isErrorHeader(char *mimeBuffer)
 		return code;
 }
 
-//
-// When a request has been sent, we can expect mime headers to be
-// before the data.  We need to read exactly to the end of the headers
-// and no more data.  This readline reads a single char at a time.
-//
+/** 
+ * When a request has been sent, we can expect mime headers to be
+ * before the data.  We need to read exactly to the end of the headers
+ * and no more data.  This readline reads a single char at a time.
+ */
 int readLine( int socket, char * buffer, int size )
 {
 	char * ptr = buffer;
@@ -145,11 +144,11 @@ int readLine( int socket, char * buffer, int size )
 }
 
 
-//
-// This is the main HTTP client connect work.  Makes the connection
-// and handles the protocol and reads the return headers.  Needs
-// to leave the stream at the start of the real data.
-//
+/**
+ * This is the main HTTP client connect work.  Makes the connection
+ * and handles the protocol and reads the return headers.  Needs
+ * to leave the stream at the start of the real data.
+ */
 int httpConnect( struct sockaddr_in * server, char *hostAddr, const char * url, t_fioPrivData *pHandle )
 {
 	int sockHandle;
@@ -256,17 +255,17 @@ static int _ResolveHostname(const char *hostname , struct in_addr* ip)
 	return 1;
 }
 
-//
-// Before we can connect we need to parse the server address and optional
-// port from the url provided.  the format of "url" as passed to this function
-// is "//192.168.0.1:8080/blah.elf" where "192.168.0.1" can be either an IP
-// or a domain name and ":8080" is the optional port to connect to, default
-// port is 80.
-//
-// This function will return a filename string for use in GET
-// requests, and fill the structure pointed to by *server with the
-// correct values.
-//
+/**
+ * Before we can connect we need to parse the server address and optional
+ * port from the url provided.  the format of "url" as passed to this function
+ * is "//192.168.0.1:8080/blah.elf" where "192.168.0.1" can be either an IP
+ * or a domain name and ":8080" is the optional port to connect to, default
+ * port is 80.
+ *
+ * This function will return a filename string for use in GET
+ * requests, and fill the structure pointed to by *server with the
+ * correct values.
+ */
 const char *resolveAddress( struct sockaddr_in *server, const char * url, char *hostAddr )
 {
 	unsigned char w,x,y,z;
@@ -353,9 +352,9 @@ const char *resolveAddress( struct sockaddr_in *server, const char * url, char *
 #endif
 }
 
-//
-// Any calls we don't implement calls dummy.
-//
+/**
+ * Any calls we don't implement calls dummy.
+ */
 int httpDummy()
 {
 	printf("PS2HTTP: dummy function called\n");
@@ -369,15 +368,15 @@ int httpInitialize(iop_io_device_t *driver)
 	return 0;
 }
 
-//
-// Open has the most work to do in the file driver.  It must:
-//
-//  1. Find a free file Handle.
-//  2. Check we have a valid IP address and URL.
-//  3. Try and connect to the remote server.
-//  4. Send a GET request to the server
-//  5. Parse the GET response header from the server
-//
+/**
+ * Open has the most work to do in the file driver.  It must:
+ *
+ *  1. Find a free file Handle.
+ *  2. Check we have a valid IP address and URL.
+ *  3. Try and connect to the remote server.
+ *  4. Send a GET request to the server
+ *  5. Parse the GET response header from the server
+ */
 int httpOpen(iop_io_file_t *f, const char *name, int mode)
 {
 	int peerHandle = 0;
@@ -423,10 +422,10 @@ int httpOpen(iop_io_file_t *f, const char *name, int mode)
 }
 
 
-//
-// Read is simple.  It simply needs to find the socket no
-// based on the file handle and call recv.
-//
+/**
+ * Read is simple.  It simply needs to find the socket no
+ * based on the file handle and call recv.
+ */
 int httpRead(iop_io_file_t *f, void *buffer, int size)
 {
 	int bytesRead = 0;
@@ -459,10 +458,10 @@ int httpRead(iop_io_file_t *f, void *buffer, int size)
 }
 
 
-//
-// Close finds the correct handle and
-// calls disconnect.
-//
+/**
+ * Close finds the correct handle and
+ * calls disconnect.
+ */
 int httpClose(iop_io_file_t *f)
 {
 	t_fioPrivData *privData = (t_fioPrivData *)f->privdata;
@@ -477,11 +476,11 @@ int httpClose(iop_io_file_t *f)
 	return 0;
 }
 
-//
-// lseek is only supported in order to get the size of a file. Allough the function
-// does modify the filePos member, this does not have any effect on the read position
-// of the file in the current implimentation.
-//
+/**
+ * lseek is only supported in order to get the size of a file. Allough the function
+ * does modify the filePos member, this does not have any effect on the read position
+ * of the file in the current implimentation.
+ */
 int httpLseek(iop_io_file_t *f, int offset, int mode)
 {
 	t_fioPrivData *privData = (t_fioPrivData *)f->privdata;
@@ -527,9 +526,9 @@ iop_io_device_t ps2httpDev = {
 };
 
 
-//
-// Main..  registers the File driver.
-//
+/**
+ * Main..  registers the File driver.
+ */
 int _start( int argc, char **argv)
 {
 	printf("PS2HTTP: Module Loaded\n");
