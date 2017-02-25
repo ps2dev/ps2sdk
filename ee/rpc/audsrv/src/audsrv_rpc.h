@@ -6,18 +6,15 @@
 # Copyright 2005, ps2dev - http://www.ps2dev.org
 # Licenced under GNU Library General Public License version 2
 # Review ps2sdk README & LICENSE files for further details.
-#
-# audsrv EE-side RPC code.
 */
+
+/**
+ * @file
+ * audsrv EE-side RPC code.
+ */
 
 #ifndef _AUDSRV_RPC_C_H_
 #define _AUDSRV_RPC_C_H_
-
-/**
- * \file audsrv_rpc.c.h
- * \author gawd (Gil Megidish)
- * \date 04-24-05
- */
 
 /** intialization and destruction functions */
 #define AUDSRV_INIT                 0x0000
