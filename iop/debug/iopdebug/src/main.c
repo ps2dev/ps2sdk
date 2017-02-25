@@ -1,10 +1,8 @@
-/*
-
-IOPDEBUG - IOP debugging library.
-
-main.c - startup code
-
-*/
+/**
+ * @file
+ * IOPDEBUG - IOP debugging library.
+ * startup code
+ */
 
 #include <tamtypes.h>
 #include <stdio.h>
