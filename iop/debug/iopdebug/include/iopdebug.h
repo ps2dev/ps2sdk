@@ -6,13 +6,13 @@
 # Copyright 2001-2009, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-#
-# IOPDEBUG - IOP debugging library.
-#
-# iopdebug.h - Definitions for the IOPDEBUG library.
-#
 */
+
+/**
+ * @file
+ * IOPDEBUG - IOP debugging library.
+ * Definitions for the IOPDEBUG library.
+ */
 
 #ifndef _IOP_DEBUG_H
 #define _IOP_DEBUG_H
