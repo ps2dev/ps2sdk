@@ -7,6 +7,12 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 */
+
+/**
+ * @file
+ * MPEG decoding functions.
+ */
+
 #ifndef __libmpeg_H
 # define __libmpeg_H
 
