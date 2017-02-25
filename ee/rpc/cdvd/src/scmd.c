@@ -7,14 +7,17 @@
 #     2003 loser (loser@internalreality.com)
 # (c) 2004 Marcus R. Brown <mrbrown@0xd6.org> Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Function definitions for libsceCdvd (EE side calls to the iop module sceCdvdfsv).
-#
-# NOTE: These functions will work with the CDVDMAN/CDVDFSV or XCDVDMAN/XCDVDFSV
-# modules stored in rom0.
-#
-# NOTE: not all functions work with each set of modules!
 */
+
+/**
+ * @file
+ * Function definitions for libsceCdvd (EE side calls to the iop module sceCdvdfsv).
+ *
+ * NOTE: These functions will work with the CDVDMAN/CDVDFSV or XCDVDMAN/XCDVDFSV
+ * modules stored in rom0.
+ *
+ * NOTE: not all functions work with each set of modules!
+ */
 
 #include <stdio.h>
 #include <kernel.h>
@@ -25,7 +28,8 @@
 
 #include "internal.h"
 
-#define CD_SERVER_SCMD			0x80000593	// blocking commands (Synchronous)
+/** blocking commands (Synchronous) */
+#define CD_SERVER_SCMD			0x80000593
 
 enum CD_SCMD_CMDS {
 	CD_SCMD_READCLOCK	=	0x01,
@@ -104,7 +108,7 @@ extern int CdConfigRdWrNumBlocks;
 
 int _CdCheckSCmd(int cmd);
 
-// **** S-Command Functions ****
+/* S-Command Functions */
 
 #ifdef F_sceCdReadClock
 int sceCdReadClock(sceCdCLOCK * clock)
