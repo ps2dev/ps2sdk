@@ -6,7 +6,6 @@
 # (c) 2009 Lion
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
 */
 
 #include <libvux.h>
@@ -914,11 +913,7 @@ int VuxClipW(VU_VECTOR *tv0)
 
 
 
-/**********************************************
-* LIGHTING
-*
-*
-***********************************************/
+/* LIGHTING */
 
 
 
@@ -967,26 +962,3 @@ int VuxLightNormal(VU_VECTOR *normal, VU_CVECTOR *col0, void *light, unsigned in
 	return 0;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*EOF*/

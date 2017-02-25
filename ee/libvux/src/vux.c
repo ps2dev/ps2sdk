@@ -6,7 +6,6 @@
 # (c) 2009 Lion
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
 */
 
 #include <libvux.h>
@@ -67,8 +66,6 @@ float			vu_near_plane_h		= 300.0f;
 
 
 
-
-/**/
 
 void VuInit(void)
 {
@@ -162,9 +159,3 @@ void VuSetAmbientLight(float r, float g, float b)
 	vu_light_ambient.b = b;
 	vu_light_ambient.a = 1.0f;
 }
-
-
-
-
-
-/*EOF*/
