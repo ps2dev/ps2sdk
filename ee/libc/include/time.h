@@ -6,9 +6,12 @@
 # Copyright 2001-2005, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Struct and function declarations for dealing with time
 */
+
+/**
+ * @file
+ * Struct and function declarations for dealing with time
+ */
 
 #ifndef _TIME_H
 #define _TIME_H

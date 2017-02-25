@@ -6,9 +6,13 @@
 # Copyright 2001-2005, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Trap the unistd.h include and redirect it to stdio.h
 */
+
+/**
+ * @file
+ * Trap the unistd.h include and redirect it to stdio.h
+ */
+
 #ifndef __UNISTD_H__
 #define __UNISTD_H__
 

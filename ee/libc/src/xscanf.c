@@ -6,9 +6,12 @@
 # Copyright (c) 2005, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Various *scanf functions.
 */
+
+/**
+ * @file
+ * Various *scanf functions.
+ */
 
 /* This code is modified from avr libc.
    Original (C) text and license of this code follows */

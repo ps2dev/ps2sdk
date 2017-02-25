@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Definition file for our stdlib.
 */
+
+/**
+ * @file
+ * Definition file for our stdlib.
+ */
 
 #ifndef __STDLIB_H__
 #define __STDLIB_H__

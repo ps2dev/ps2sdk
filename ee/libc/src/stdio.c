@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Simple standard C library implementation.
 */
+
+/**
+ * @file
+ * Simple standard C library implementation.
+ */
 
 #ifdef F_strerror
 #define E_USE_NAMES
@@ -48,16 +51,6 @@ extern char __direct_pwd[256];
 extern int __stdio_initialised;
 
 #ifdef F_clearerr
-/*
-**
-**  [func] - clearerr.
-**  [desc] - clears the stream file stream error condition.
-**  [entr] - FILE *stream; the pointer to the FILE stream.
-**  [exit] - none.
-**  [prec] - stream is a valid FILE pointer.
-**  [post] - the stream file stream error condition is cleared.
-**
-*/
 void clearerr(FILE *stream)
 {
   stream->flag &= ~(_IOERR|_IOEOF);
@@ -66,17 +59,6 @@ void clearerr(FILE *stream)
 
 
 #ifdef F_fclose
-/*
-**
-**  [func] - fclose.
-**  [desc] - if stream is a valid FILE stream and able to close the stream file
-**           then returns 0. else returns EOF.
-**  [entr] - FILE *stream; the pointer to the FILE stream.
-**  [exit] - int; 0 if able to close the stream file. else EOF.
-**  [prec] - stream is a valid FILE pointer.
-**  [post] - the stream file is closed.
-**
-*/
 int fclose(FILE *stream)
 {
   int ret = EOF;
@@ -112,17 +94,6 @@ int fclose(FILE *stream)
 
 
 #ifdef F_fcloseall
-/*
-**
-**  [func] - _fcloseall.
-**  [desc] - attempts to close all the open files. if able to close all the open
-**           files then returns the number of files closed. else returns -1.
-**  [entr] - none.
-**  [exit] - int; the number of files closed if successful. else -1.
-**  [prec] - none.
-**  [post] - all open non-system files are closed.
-**
-*/
 int _fcloseall(void)
 {
   int  i, ret = 0;
@@ -142,17 +113,6 @@ int _fcloseall(void)
 
 
 #ifdef F_feof
-/*
-**
-**  [func] - feof.
-**  [desc] - if the stream file stream has reached the end of the file then
-**           returns non-zero. else returns 0.
-**  [entr] - FILE *stream; the pointer to the FILE stream.
-**  [exit] - int; non-zero if the stream file has reached EOF. else 0.
-**  [prec] - stream is a valid FILE pointer.
-**  [post] - none.
-**
-*/
 int feof(FILE *stream)
 {
   return ((stream->flag & _IOEOF) != 0);
@@ -161,17 +121,6 @@ int feof(FILE *stream)
 
 
 #ifdef F_ferror
-/*
-**
-**  [func] - ferror.
-**  [desc] - if an error has occured for the stream file stream then returns
-**           non-zero. else returns 0.
-**  [entr] - FILE *stream; the pointer to the FILE stream.
-**  [exit] - int; non-zero if error has occured for the stream file. else 0.
-**  [prec] - stream is a valid FILE pointer.
-**  [post] - none.
-**
-*/
 int ferror(FILE *stream)
 {
   return ((stream->flag & _IOERR) != 0);
@@ -191,18 +140,6 @@ int mcSync(int mode, int *cmd, int *result)
 	return 0;
 }
 
-/*
-**
-**  [func] - fflush.
-**  [desc] - if the stream file is opened as read-only then returns 0. else
-**           if stream is a valid FILE stream and able to flush the stream
-**           file write buffer then returns 0. else returns EOF.
-**  [entr] - FILE *stream; the pointer to the FILE stream.
-**  [exit] - int; 0 if able to flush the write buffer or file is read-only. else EOF.
-**  [prec] - stream is a valid FILE pointer.
-**  [post] - the stream FILE stream write buffer is flushed.
-**
-*/
 int fflush(FILE *stream)
 {
   int ret;
@@ -245,18 +182,6 @@ int fflush(FILE *stream)
 
 
 #ifdef F_fflushall
-/*
-**
-**  [func] - _fflushall.
-**  [desc] - attempts to flush all the open files with write-access. if able
-**           to flush all the open files with write-access then returns the
-**           number of files flushed. else returns -1.
-**  [entr] - none.
-**  [exit] - int; the number of files flushed if successful. else -1.
-**  [prec] - none.
-**  [post] - all open non-system files with write-access are flushed.
-**
-*/
 int _fflushall(void)
 {
   int  i, ret = 0;
@@ -276,18 +201,6 @@ int _fflushall(void)
 
 
 #ifdef F_fgetc
-/*
-**
-**  [func] - fgetc.
-**  [desc] - attempts to read one character from the stream file. if able to
-**           read one character from the file then returns the chaaracter
-**           read. else EOF.
-**  [entr] - FILE *stream; the pointer to the FILE stream.
-**  [exit] - int; the character read from the stream file. else -1.
-**  [prec] - stream is a valid FILE pointer.
-**  [post] - the stream file is modified.
-**
-*/
 int fgetc(FILE *stream)
 {
   unsigned char c;
@@ -317,19 +230,6 @@ int fgetc(FILE *stream)
 
 
 #ifdef F_fgetpos
-/*
-**
-**  [func] - fgetpos.
-**  [desc] - attempts to retrieve the stream file stream pointer position.
-**           if able to retrieve the stream file stream pointer position
-**           then stores the position to pos and returns 0. else returns -1.
-**  [entr] - FILE *stream; the pointer to the file stream.
-**           fpos_t *pos; the pointer to the destination file position buffer.
-**  [exit] - int; 0 if able to retrieve the stream file pointer position. else -1.
-**  [prec] - stream is a valid FILE pointer and pos is a valid fpos_t pointer.
-**  [post] - the memory pointed to by pos is modified.
-**
-*/
 int fgetpos(FILE *stream, fpos_t *pos)
 {
   long n;
@@ -342,23 +242,6 @@ int fgetpos(FILE *stream, fpos_t *pos)
 
 
 #ifdef F_fgets
-/*
-**
-**  [func] - fgets.
-**  [desc] - attempts to read a string from the stream file. if able to read
-**           a string from the stream file stdin then stores the string up to
-**           n characters to the memory pointed by buf and returns buf. else
-**           returns NULL.
-**  [entr] - char *buf; the pointer to the destination string buffer.
-**           int n; the maximum number of characters to write to buf.
-**           FILE *stream; the pointer to the FILE stream.
-**  [exit] - char *; buf if the string is read successfully. else NULL.
-**  [prec] - buf is a valid memory pointer of n size in bytes and stream is a
-**           valid FILE pointer.
-**  [post] - the memory pointed to by buf is modified and the stream file
-**           pointer is modified.
-**
-*/
 char *fgets(char *buf, int n, FILE *stream)
 {
   char *ret = buf;
@@ -405,12 +288,11 @@ char *fgets(char *buf, int n, FILE *stream)
 
 
 #ifdef F_fopen
-/* std I/O internal function. */
+/** std I/O internal function. */
 int __stdio_get_fd_type(const char *);
 
 
- /* Normalize a pathname by removing
-  . and .. components, duplicated /, etc. */
+/** Normalize a pathname by removing . and .. components, duplicated /, etc. */
 char* __ps2_normalize_path(char *path_name)
 {
         int i, j;
@@ -470,19 +352,6 @@ char* __ps2_normalize_path(char *path_name)
         return (char*)out;
 }
 
-/*
-**
-**  [func] - fopen.
-**  [desc] - attempts to open the fname file using the mode file mode. if able
-**           open the fname then returns the pointer to the FILE stream. else
-**           returns NULL.
-**  [entr] - const char *fname; the filename string pointer.
-**           const char *mode; the file mode string pointer.
-**  [exit] - FILE *; the pointer the fname FILE stream. else NULL.
-**  [prec] - fname and mode are valid string pointers.
-**  [post] - the fname file is opened.
-**
-*/
 FILE *fopen(const char *fname, const char *mode)
 {
   FILE *ret = NULL;
@@ -613,18 +482,6 @@ FILE *fopen(const char *fname, const char *mode)
 #endif
 
 #ifdef F_fdopen
-/*
-**
-**  [func] - fdopen.
-**  [desc] - produces a file descriptor of type `FILE *', from a
-**           descriptor for an already-open file (returned, for
-**           example, by the system subroutine `open' rather than by `fopen').
-**           The MODE argument has the same meanings as in `fopen'.
-**  [entr] - int fd; file descriptor returned by 'open'.
-**           const char *mode; the file mode string pointer.
-**  [exit] - file pointer or `NULL', as for `fopen'.
-**
-*/
 FILE *fdopen(int fd, const char *mode)
 {
   FILE *ret = NULL;
@@ -695,19 +552,6 @@ int fileno(FILE * f) {
 #endif
 
 #ifdef F_fputc
-/*
-**
-**  [func] - fputc.
-**  [desc] - attempts to write the c character to the stream file. if able to
-**           write the character to the stream file then returns the character
-**           written. else returns -1.
-**  [entr] - int c; the character to write to the file.
-**           FILE *stream; the pointer to the FILE stream.
-**  [exit] - int; the character written to the file if successful. else -1.
-**  [prec] - stream is a valid FILE pointer.
-**  [post] - the stream file is modified.
-**
-*/
 int fputc(int c, FILE *stream)
 {
   unsigned char ch = (unsigned char)c;
@@ -717,18 +561,6 @@ int fputc(int c, FILE *stream)
 
 
 #ifdef F_fputs
-/*
-**
-**  [func] - fputs.
-**  [desc] - attempts to write the s string to the stream file. if able to
-**           successfully write the string to the stream file then returns
-**           the number of characters written to the file. else returns -1.
-**  [entr] - const char *s; the source string pointer.
-**  [exit] - int; the number of chars. written to file if successful. else -1.
-**  [prec] - stream is a valid FILE pointer and s is a valid string pointer.
-**  [post] - the stream file is modified.
-**
-*/
 int fputs(const char *s, FILE *stream)
 {
   size_t len;
@@ -743,21 +575,6 @@ int fputs(const char *s, FILE *stream)
 
 
 #ifdef F_fread
-/*
-**
-**  [func] - fread.
-**  [desc] - attempts to read n number of records of r size to the stream file
-**           and returns the number of records successfully read from the file.
-**  [entr] - void *buf; the pointer to the destination data buffer.
-**           size_t r; the size of the records to read.
-**           size_t n; the number of records to read.
-**           FILE *stream; the pointer to the FILE stream.
-**  [exit] - size_t; the number of records successfully read from the stream file.
-**  [prec] - buf is a valid memory pointer of (r * n) size in bytes and stream
-**           is a valid FILE pointer.
-**  [post] - the stream file is modified.
-**
-*/
 size_t fread(void *buf, size_t r, size_t n, FILE *stream)
 {
   size_t ret = 0, read_len = r * n;
@@ -796,21 +613,6 @@ size_t fread(void *buf, size_t r, size_t n, FILE *stream)
 
 
 #ifdef F_fseek
-/*
-**
-**  [func] - fseek.
-**  [desc] - attempts to seek the stream file pointer to offset from origin.
-**           if able to seek the stream file pointer to offset from origin
-**           returns 0. else returns -1.
-**  [entr] - FILE *stream; the pointer to the FILE stream.
-**           long offset; the seek offset.
-**           int origin; the seek origin.
-**  [exit] - int; 0 if able to seek to offset from origin successfully. else -1.
-**  [prec] - stream is a valid FILE pointer and origin is a valid seek origin
-**           type.
-**  [post] - the stream file pointer position is modified.
-**
-*/
 int fseek(FILE *stream, long offset, int origin)
 {
   int ret;
@@ -841,19 +643,6 @@ int fseek(FILE *stream, long offset, int origin)
 
 
 #ifdef F_fsetpos
-/*
-**
-**  [func] - fsetpos.
-**  [desc] - attempts to set the stream file pointer position to the pos offset.
-**           if able to set the stream file pointer position to pos then returns
-**           0. else returns -1.
-**  [entr] - FILE *stream; the pointer to the FILE stream.
-**           const fpos_t *pos; the pointer to the source file position buffer.
-**  [exit] - 0 if able to set the stream file pointer position. else -1.
-**  [prec] - stream is a valid FILE pointer and pos is a valid fpos_t pointer.
-**  [post] - the stream file pointer position is modified.
-**
-*/
 int fsetpos(FILE *stream, const fpos_t *pos)
 {
   stream->has_putback = 0;
@@ -863,18 +652,6 @@ int fsetpos(FILE *stream, const fpos_t *pos)
 
 
 #ifdef F_ftell
-/*
-**
-**  [func] - ftell.
-**  [desc] - attempts to retrieve the stream file stream pointer position.
-**           if able to retrieve the stream file stream pointer position
-**           then returns the position. else sets error code and returns -1.
-**  [entr] - FILE *stream; the pointer to the FILE stream.
-**  [exit] - long; the stream file pointer position if successful. else -1.
-**  [prec] - stream is a valid FILE pointer.
-**  [post] - none.
-**
-*/
 long ftell(FILE *stream)
 {
   long n, ret = -1L;
@@ -910,21 +687,6 @@ long ftell(FILE *stream)
 
 
 #ifdef F_fwrite
-/*
-**
-**  [func] - fwrite.
-**  [desc] - attempts to write n number of records of r size to the stream file
-**           and returns the number of records successfully written to the file.
-**  [entr] - const void *buf; the pointer to the source data buffer.
-**           size_t r; the size of the records to write.
-**           size_t n the number of records to write.
-**           FILE *stream; the pointer to the FILE stream.
-**  [exit] - size_t; the number of records successfully written to the stream file.
-**  [prec] - buf is a valid memory pointer of (r * n) size in bytes and stream
-**           is a valid FILE pointer.
-**  [post] - the stream file is modified.
-**
-*/
 size_t fwrite(const void *buf, size_t r, size_t n, FILE *stream)
 {
   size_t i, len, ret;
@@ -967,18 +729,6 @@ size_t fwrite(const void *buf, size_t r, size_t n, FILE *stream)
 
 
 #ifdef F_getc
-/*
-**
-**  [func] - getc.
-**  [desc] - attempts to read one character from the stream file. if able to
-**           read one character from the file then returns the chaaracter
-**           read. else EOF.
-**  [entr] - FILE *stream; the pointer to the FILE stream.
-**  [exit] - int; the character read from the stream file. else -1.
-**  [prec] - stream is a valid FILE pointer.
-**  [post] - the stream file is modified.
-**
-*/
 int getc(FILE *stream)
 {
   unsigned char c;
@@ -1001,18 +751,6 @@ int getc(FILE *stream)
 
 
 #ifdef F_getchar
-/*
-**
-**  [func] - getchar.
-**  [desc] - attempts to read one character from the stdin file stream. if able
-**           to read one character from the stdin file stream then returns the
-**           character read. else returns -1.
-**  [entr] - none.
-**  [exit] - int; the character read from stdin if successful. else -1.
-**  [prec] - none.
-**  [post] - the stdin file stream is modified.
-**
-*/
 int getchar(void)
 {
   return (getc(stdin));
@@ -1045,17 +783,10 @@ static struct {
 };
 
 /*
-**
-**  [func] - __stdio_get_fd_type.
-**  [desc] - if s or the present working directory begins with a valid file
-**           device name then returns the corresponding file descriptor type.
-**           else returns -1.
-**  [entr] - const char *s; the source string pointer.
-**  [exit] - int; the device name file descriptor type if determined. else -1.
-**  [prec] - s is a valid string pointer.
-**  [post] - none.
-**
-*/
+ * Determines if s or the present working directory begins with a valid file device name
+ *  @param s the source string pointer which is valid.
+ *  @return the device name file descriptor type if determined. else -1.
+ */
 int __stdio_get_fd_type(const char *s)
 {
   int i;
@@ -1076,18 +807,6 @@ int __stdio_get_fd_type(const char *s)
 
 
 #ifdef F_gets
-/*
-**
-**  [func] - gets.
-**  [desc] - attempts to read a string from stdin. if able to read a string
-**           from stdin then stores the string to the memory pointed by buf
-**           and returns buf. else returns NULL.
-**  [entr] - char *buf; the pointer to the destination string buffer.
-**  [exit] - char *; buf if string is read successfully. else NULL.
-**  [prec] - buf is a valid memory pointer.
-**  [post] - the memory pointed to by buf is modified.
-**
-*/
 char *gets(char *buf)
 {
   char *str = NULL;
@@ -1112,17 +831,6 @@ char * strerror(int err) {
 
 
 #ifdef F_perror
-/*
-**
-**  [func] - perror.
-**  [desc] - if there is a current error then prints the corresponding error
-**           and then prints s to stderr. else prints s to stderr.
-**  [entr] - const char *s; the error string pointer.
-**  [exit] - none.
-**  [prec] - s is a valid string pointer.
-**  [post] - none.
-**
-*/
 void perror(const char *s)
 {
   char *err;
@@ -1140,23 +848,10 @@ void perror(const char *s)
 extern int __stdio_stdout_xy[2];
 
 
-/* stdio internal function. */
+/** stdio internal function. */
 void __stdio_update_stdout_xy(int, int);
 #endif
 
-/*
-**
-**  [func] - putc.
-**  [desc] - attempts to write the c character to the stream file. if able to
-**           write the character to the stream file then returns the character
-**           written. else returns -1.
-**  [entr] - int c; the character to write to the file.
-**           FILE *stream; the pointer to the FILE stream.
-**  [exit] - int; the character written to the file if successful. else -1.
-**  [prec] - stream is a valid FILE pointer.
-**  [post] - the stream file is modified.
-**
-*/
 int putc(int c, FILE *stream)
 {
   char ch;
@@ -1207,18 +902,6 @@ int putc(int c, FILE *stream)
 
 
 #ifdef F_putchar
-/*
-**
-**  [func] - putchar.
-**  [desc] - attempts to write the c character to stdout. if able to write
-**           the character to stdout then returns the character written.
-**           else returns -1.
-**  [entr] - int c; the character to write to stdout.
-**  [exit] - int; the character written to stdout. else -1.
-**  [prec] - none.
-**  [post] - the stdout file stream is modified.
-**
-*/
 int putchar(int c)
 {
   return (putc(c, stdout));
@@ -1227,18 +910,6 @@ int putchar(int c)
 
 
 #ifdef F_puts
-/*
-**
-**  [func] - puts.
-**  [desc] - attempts to write the s string to stdout. if able to write the s
-**           string to stdout then returns the number of characters written.
-**           else returns -1.
-**  [entr] - const char *s; the source string pointer.
-**  [exit] - int; the number of characters written to stdout. else -1.
-**  [prec] - s is a valid string pointer.
-**  [post] - the stdout file stream is modified.
-**
-*/
 int puts(const char *s)
 {
   int ret;
@@ -1256,17 +927,6 @@ int puts(const char *s)
 
 
 #ifdef F_remove
-/*
-**
-**  [func] - remove.
-**  [desc] - if the s named file exists then deletes the s named file and
-**           returns 0. else returns -1.
-**  [entr] - const char *s; the filename string pointer.
-**  [exit] - int; 0 if able to delete the s file. else -1.
-**  [prec] - s is a valid string pointer.
-**  [post] - the s file is deleted.
-**
-*/
 int remove(const char *s)
 {
   int ret = _ps2sdk_remove(s);
@@ -1277,22 +937,6 @@ int remove(const char *s)
 
 
 #ifdef F_rename
-/*
-**
-**  [func] - rename.
-**  [desc] - renames oldfn to newfn and if successful returns 0.
-**           else returns -1.
-**  [entr] - const char *oldfn; the old filename string pointer.
-**  [entr] - const char *newfn; the new filename string pointer.
-**  [exit] - int; 0 if able to rename the file. else -1.
-**  [prec] - oldfn and newfn are valid string pointers
-**           if oldfn points to a non directory, newfn must not
-**           point to a directory and vice-versa
-**           if newfn points to existing directory or file
-**           it is removed and oldfn is renamed to newfn
-**  [post] - oldfn is renamed to newfn
-**
-*/
 int rename(const char *oldfn, const char *newfn)
 {
   int ret = _ps2sdk_rename(oldfn, newfn);
@@ -1307,16 +951,6 @@ int rename(const char *oldfn, const char *newfn)
 
 
 #ifdef F_rewind
-/*
-**
-**  [func] - rewind.
-**  [desc] - resets the stream file pointer to 0.
-**  [entr] - FILE *stream; the pointer to the FILE stream.
-**  [exit] - none.
-**  [prec] - stream is a valid FILE pointer.
-**  [post] - the stream file pointer is modified.
-**
-*/
 void rewind(FILE *stream)
 {
   fseek(stream, 0, SEEK_SET);
@@ -1325,16 +959,9 @@ void rewind(FILE *stream)
 
 
 #ifdef F_skipatoi
-/*
-**
-**  [func] - __stdio_skip_atoi.
-**  [desc] -
-**  [entr] - const char **s; the pointer to the source string pointer.
-**  [exit] - int;
-**  [prec] - s is a valid pointer to string pointer.
-**  [post] - the memory pointed to by s is modified.
-**
-*/
+/**
+ * @param s the pointer to the source string pointer.
+ */
 int __stdio_skip_atoi(const char **s)
 {
   int ret = 0;
@@ -1373,18 +1000,6 @@ int  __stdio_stdout_xy[2];
 /* stdio temp name variable. */
 extern char __stdio_tmpnam[256];
 
-
-/*
-**
-**  [func] - tmpfile.
-**  [desc] - attempts to create a temporary file. if able to create a temporary
-**           file then returns the pointer to the FILE stream. else returns NULL.
-**  [entr] - none.
-**  [exit] - FILE *; the ptr. to the opened temp. file if successful. else NULL.
-**  [prec] - none.
-**  [post] - a temporary is opened.
-**
-*/
 FILE *tmpfile(void)
 {
   return ((tmpnam(NULL) != NULL) ?  fopen(__stdio_tmpnam, "rw+") : NULL);
@@ -1396,17 +1011,6 @@ FILE *tmpfile(void)
 /* stdio temp name variable. */
 extern char __stdio_tmpnam[256];
 
-
-/*
-**
-**  [func] - tmpnam.
-**  [desc] - creates a temporary filename string,
-**  [entr] - char *name; the pointer to the destination string pointer.
-**  [exit] - char *;
-**  [prec] -
-**  [post] -
-**
-*/
 char *tmpnam(char *name)
 {
   char *ret = NULL;
@@ -1417,17 +1021,6 @@ char *tmpnam(char *name)
 
 
 #ifdef F_ungetc
-/*
-**
-**  [func] - ungetc.
-**  [desc] -
-**  [entr] - int c;
-**           FILE *stream; the pointer to the FILE stream.
-**  [exit] - int;
-**  [prec] - stream is a valid FILE pointer.
-**  [post] - the stream FILE stream is modified.
-**
-*/
 int ungetc(int c, FILE *stream)
 {
   // int ret = EOF;
@@ -1450,16 +1043,9 @@ int ungetc(int c, FILE *stream)
 extern int __stdio_stdout_xy[2];
 #endif
 
-/*
-**
-**  [func] - __stdio_update_stdout_xy.
-**  [desc] - updates the stdout (x, y) screen coordinates.
-**  [entr] - int x; the x screen coordinate.
-**           int y; the y screen coordinate.
-**  [exit] - none.
-**  [prec] - none.
-**  [post] - the stdout screen coordinates are modified.
-**
+/* Updates the stdout (x, y) screen coordinates.
+ * @param x the x screen coordinate.
+ * @param y the y screen coordinate.
 */
 void __stdio_update_stdout_xy(int x, int y)
 {

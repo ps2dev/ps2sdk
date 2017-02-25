@@ -6,9 +6,13 @@
 # Copyright 2001-2005, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# unistd implementation
 */
+
+/**
+ * @file
+ * unistd implementation
+ */
+
 #include <unistd.h>
 #include <sys/stat.h>
 #include <string.h>

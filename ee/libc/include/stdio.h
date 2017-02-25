@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# LIBC (stdio) type, constant and function declarations.
 */
+
+/**
+ * @file
+ * LIBC (stdio) type, constant and function declarations.
+ */
 
 #ifndef __STDIO_H__
 #define __STDIO_H__
@@ -168,6 +171,10 @@ int    xscanf(int (*xgetc)(void **), void (*xungetc)(int, void **), void *stream
 int    ungetc(int, FILE *);
 
 int    _fcloseall(void);
+/** all open non-system files with write-access are flushed.
+ * attempts to flush all the open files with write-access. 
+ * @return int; the number of files flushed if successful. else -1.
+ */
 int    _fflushall(void);
 
 int    chdir(const char *path);
