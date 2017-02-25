@@ -7,11 +7,14 @@
 # (c) 2003 Marcus R. Brown (mrbrown@0xd6.org)
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# EE SIF RPC commands
-# MRB: This file now contains the SIF routines included
-# with libpsware.  Bug reports welcome.
 */
+
+/**
+ * @file
+ * EE SIF RPC commands
+ * MRB: This file now contains the SIF routines included
+ * with libpsware.  Bug reports welcome.
+ */
 
 #include <tamtypes.h>
 #include <ps2lib_err.h>
@@ -21,7 +24,7 @@
 
 #define RPC_PACKET_SIZE	64
 
-/* Set if the packet has been allocated */
+/** Set if the packet has been allocated */
 #define PACKET_F_ALLOC	0x01
 
 struct rpc_data {

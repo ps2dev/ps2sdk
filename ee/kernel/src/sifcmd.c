@@ -7,11 +7,14 @@
 # (c) 2003 Marcus R. Brown (mrbrown@0xd6.org)
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# EE SIF commands
-# MRB: This file now contains the SIF routines included
-# with libpsware.  Bug reports welcome.
 */
+
+/**
+ * @file
+ * EE SIF commands
+ * MRB: This file now contains the SIF routines included
+ * with libpsware.  Bug reports welcome.
+ */
 
 #include <tamtypes.h>
 #include <kernel.h>
@@ -27,16 +30,18 @@
 #define   CHCR_STR		0x100
 #define   STAT_SIF0		0x20
 
-/* Even though I'm reluctant to do this, I've made this structure binary
+/** Even though I'm reluctant to do this, I've made this structure binary
    compatible with the SCE libs and ps2lib.  In all implementations, a pointer
    to this data is stored in SIF register 0x80000001.  Each routine that
    relies on this data can then use the data referenced from that register, so
    that even if a SIF library is initialized after this one, we should still
    work exactly as expected.  */
 struct cmd_data {
-	void	*pktbuf;	/* Command packet received from the IOP */
+	/** Command packet received from the IOP */
+	void	*pktbuf;	
 	void	*unused;
-	void	*iopbuf;	/* Address of IOP SIF DMA receive address */
+	/** Address of IOP SIF DMA receive address */
+	void	*iopbuf;	
 	SifCmdHandlerData_t *sys_cmd_handlers;
 	u32	nr_sys_handlers;
 	SifCmdHandlerData_t *usr_cmd_handlers;

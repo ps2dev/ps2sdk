@@ -5,9 +5,12 @@
 #-----------------------------------------------------------------------
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Routines for accessing the EE's on-chip serial port.
 */
+
+/**
+ * @file
+ * Routines for accessing the EE's on-chip serial port.
+ */
 
 #include <kernel.h>
 
@@ -29,9 +32,9 @@ static void InitSyscallTable(void)
 }
 
 /** Get the address of an EE syscall handler function.
-    @param syscall_no - The syscall number.
-    @return - The address of the syscall handler function (or NULL)
-*/
+ * @param syscall_no - The syscall number.
+ * @return - The address of the syscall handler function (or NULL)
+ */
 void *GetSyscallHandler(int syscall_no)
 {
     u32 oldintr, oldop;
@@ -57,9 +60,9 @@ void *GetSyscallHandler(int syscall_no)
 
 #ifdef F_GetSyscall
 /** Get the address of an EE syscall handler function. Deprecated, use GetSyscallHandler.
-    @param syscall_no - The syscall number.
-    @return - The address of the syscall handler function (or NULL)
-*/
+ * @param syscall_no - The syscall number.
+ * @return - The address of the syscall handler function (or NULL)
+ */
 void *GetSyscall(int syscall_no) { return(GetSyscallHandler(syscall_no)); }
 #endif
 
@@ -68,9 +71,9 @@ void *GetSyscall(int syscall_no) { return(GetSyscallHandler(syscall_no)); }
 extern void *GetSyscallHandler(int syscall_no);
 
 /** Get the address of an EE exception handler function.
-    @param ex_cause_no - The exception cause number.
-    @return - The address of the exception handler function (or NULL)
-*/
+ * @param ex_cause_no - The exception cause number.
+ * @return - The address of the exception handler function (or NULL)
+ */
 void *GetExceptionHandler(int ex_cause_no)
 {
     u32 oldintr, oldop;
@@ -109,9 +112,9 @@ void *GetExceptionHandler(int ex_cause_no)
 extern void *GetSyscallHandler(int syscall_no);
 
 /** Get the address of an EE interrupt handler function.
-    @param intr_cause_no - The interrupt number.
-    @return - The address of the interrupt handler function (or NULL)
-*/
+ * @param intr_cause_no - The interrupt number.
+ * @return - The address of the interrupt handler function (or NULL)
+ */
 void *GetInterruptHandler(int intr_cause_no)
 {
     u32 oldintr, oldop;

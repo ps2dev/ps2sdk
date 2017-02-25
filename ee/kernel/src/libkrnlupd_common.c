@@ -1,13 +1,14 @@
-/*
-	libkrnlupd	- Kernel updates library.
-
-	Contains updates for the Playstation 2's "Protokernel" EE kernel.
-
-	The only known consoles to have a "Protokernel" are the SCPH-10000 and SCPH-15000. Both contain either boot ROM v1.00 or v1.01.
-
-	Note that these kernels are not necessarily buggy, but were based on an older set of specifications. This file contains patches that will "modernize" these kernels until a hard reset.
-	(Code was based on the official Sony "libosd" patch)
-*/
+/**
+ * @file
+ * libkrnlupd - Kernel updates library.
+ *
+ * Contains updates for the Playstation 2's "Protokernel" EE kernel.
+ *
+ * The only known consoles to have a "Protokernel" are the SCPH-10000 and SCPH-15000. Both contain either boot ROM v1.00 or v1.01.
+ *
+ * Note that these kernels are not necessarily buggy, but were based on an older set of specifications. This file contains patches that will "modernize" these kernels until a hard reset.
+ * (Code was based on the official Sony "libosd" patch)
+ */
 
 #include <kernel.h>
 #include <syscallnr.h>

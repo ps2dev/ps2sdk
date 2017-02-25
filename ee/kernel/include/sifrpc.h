@@ -7,9 +7,12 @@
 # (c) Marcus R. Brown (mrbrown@0xd6.org)
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# EE SIF RPC commands prototypes
 */
+
+/**
+ * @file
+ * EE SIF RPC commands prototypes
+ */
 
 #ifndef _SIFRPC_H
 #define _SIFRPC_H
@@ -21,8 +24,10 @@ extern "C" {
 #include <sifcmd.h>
 
 /* Modes for bind() and call() */
-#define SIF_RPC_M_NOWAIT	0x01 /* Don't wait for end function */
-#define SIF_RPC_M_NOWBDC	0x02 /* Don't write back the D cache */
+/** Don't wait for end function */
+#define SIF_RPC_M_NOWAIT	0x01
+/** Don't write back the D cache */
+#define SIF_RPC_M_NOWBDC	0x02
 
 typedef void * (*SifRpcFunc_t)(int fno, void *buffer, int length);
 typedef void (*SifRpcEndFunc_t)(void *end_param);

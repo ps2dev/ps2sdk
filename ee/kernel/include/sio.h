@@ -6,9 +6,12 @@
 # (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# EE Serial I/O
 */
+
+/**
+ * @file
+ * EE Serial I/O
+ */
 
 #ifndef EE_SIO_H
 #define EE_SIO_H
@@ -21,60 +24,97 @@
    handler, it looks like some registers are borrowed from the TX7901 UART
    (0x1000f110 or LSR, in particular). I'm still trying to find the correct
    register names and values.  */
-#define SIO_LCR		0x1000f100	/* Line Control Register.  */
-#define   SIO_LCR_UMODE_8BIT 0x00 /* UART Mode.  */
+/** Line Control Register.  */
+#define SIO_LCR		0x1000f100
+/** UART Mode.  */
+#define   SIO_LCR_UMODE_8BIT 0x00
 #define   SIO_LCR_UMODE_7BIT 0x01
-#define   SIO_LCR_USBL_1BIT  0x00 /* UART Stop Bit Length.  */
+/** UART Stop Bit Length.  */
+#define   SIO_LCR_USBL_1BIT  0x00
 #define   SIO_LCR_USBL_2BITS 0x01
-#define   SIO_LCR_UPEN_OFF   0x00 /* UART Parity Enable.  */
+/** UART Parity Enable.  */
+#define   SIO_LCR_UPEN_OFF   0x00
 #define   SIO_LCR_UPEN_ON    0x01
-#define   SIO_LCR_UEPS_ODD   0x00 /* UART Even Parity Select.  */
+/** UART Even Parity Select.  */
+#define   SIO_LCR_UEPS_ODD   0x00
 #define   SIO_LCR_UEPS_EVEN  0x01
 
-#define SIO_LSR		0x1000f110	/* Line Status Register.  */
-#define   SIO_LSR_DR 0x01	/* Data Ready. (Not tested) */
-#define   SIO_LSR_OE 0x02	/* Overrun Error.  */
-#define   SIO_LSR_PE 0x04	/* Parity Error.  */
-#define   SIO_LSR_FE 0x08	/* Framing Error.  */
+/** Line Status Register.  */
+#define SIO_LSR		0x1000f110
+/** Data Ready. (Not tested) */
+#define   SIO_LSR_DR 0x01
+/** Overrun Error.  */
+#define   SIO_LSR_OE 0x02
+/** Parity Error.  */
+#define   SIO_LSR_PE 0x04
+/** Framing Error.  */
+#define   SIO_LSR_FE 0x08
 
-#define SIO_IER		0x1000f120	/* Interrupt Enable Register.  */
-#define   SIO_IER_ERDAI	0x01		/* Enable Received Data Available Interrupt */
-#define   SIO_IER_ELSI 	0x04		/* Enable Line Status Interrupt.  */
+/** Interrupt Enable Register.  */
+#define SIO_IER		0x1000f120	
+/** Enable Received Data Available Interrupt */
+#define   SIO_IER_ERDAI	0x01		
+/** Enable Line Status Interrupt.  */
+#define   SIO_IER_ELSI 	0x04		
 
-#define SIO_ISR		0x1000f130	/* Interrupt Status Register (?).  */
+/** Interrupt Status Register (?).  */
+#define SIO_ISR		0x1000f130	
 #define   SIO_ISR_RX_DATA  0x01
 #define   SIO_ISR_TX_EMPTY 0x02
 #define   SIO_ISR_RX_ERROR 0x04
 
-#define SIO_FCR		0x1000f140	/* FIFO Control Register.  */
-#define   SIO_FCR_FRSTE 0x01	/* FIFO Reset Enable.  */
-#define   SIO_FCR_RFRST 0x02	/* RX FIFO Reset.  */
-#define   SIO_FCR_TFRST 0x04	/* TX FIFO Reset.  */
+/** FIFO Control Register.  */
+#define SIO_FCR		0x1000f140
+/** FIFO Reset Enable.  */
+#define   SIO_FCR_FRSTE 0x01
+/** RX FIFO Reset.  */
+#define   SIO_FCR_RFRST 0x02
+/** TX FIFO Reset.  */
+#define   SIO_FCR_TFRST 0x04
 
-#define SIO_BGR		0x1000f150	/* Baud Rate Control Register.  */
+/** Baud Rate Control Register.  */
+#define SIO_BGR		0x1000f150
 
-#define SIO_TXFIFO	0x1000f180	/* Transmit FIFO.  */
-#define SIO_RXFIFO	0x1000f1c0	/* Receive FIFO.  */
+/** Transmit FIFO.  */
+#define SIO_TXFIFO	0x1000f180
+/** Receive FIFO.  */
+#define SIO_RXFIFO	0x1000f1c0
 
-#define SIO_CAUSE_BIT	(1 << 12) /* The bit in the EE cause register which indicates an SIO exception */
+/** The bit in the EE cause register which indicates an SIO exception */
+#define SIO_CAUSE_BIT	(1 << 12)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/* Initialize the SIO. 
+ * The lcr_* parameters are passed as is, so you'll need to use the SIO_LCR_* register values. 
+ * You can pass 0 for all of the lcr_* params to get the standard 8N1 setting (8 data bits, no parity checking, 1 stop bit). 
+ * Note: Unlike the BIOS sio_init() routine, we always base the baud rate on the CPU clock.  
+ */
 void sio_init(u32 baudrate, u8 lcr_ueps, u8 lcr_upen, u8 lcr_usbl, u8 lcr_umode);
 
 int sio_putc(int c);
 int sio_getc(void);
+/** Same as sio_getc, but blocking.
+ * Note that getc should be blocking by default. Ho well.
+ */
 int sio_getc_block(void);
 
+/** Not really much to do in the way of error-handling.  sio_putc() already
+ * checks to see if there's room in the TX FIFO, and my cable doesn't support
+ * hardware flow control.  
+ */
 size_t sio_write(void *buf, size_t size);
+/** This will read from the serial port until size characters have been read or EOF (RX FIFO is empty).  */
 size_t sio_read(void *buf, size_t size);
 
 int sio_puts(const char *str);
 int sio_putsn(const char *str); // no newline for this one
+/** Will block until it recieves \n or \r. */
 char *sio_gets(char *str);
 
+/** Flushes the input buffer. */
 void sio_flush(void);
 
 #ifdef __cplusplus
