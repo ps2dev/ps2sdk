@@ -1,9 +1,14 @@
+/**
+ * @file
+ * Draw library testing functions
+ */
+
 #ifndef __DRAW_TESTS_H__
 #define __DRAW_TESTS_H__
 
 #include <tamtypes.h>
 
-// Alpha Testing
+/*& Alpha Testing */
 #define ATEST_METHOD_ALLFAIL		0
 #define ATEST_METHOD_ALLPASS		1
 #define ATEST_METHOD_LESS			2
@@ -18,11 +23,11 @@
 #define ATEST_KEEP_FRAMEBUFFER		2
 #define ATEST_KEEP_ALPHA			3
 
-// Destination Alpha Testing
+/** Destination Alpha Testing */
 #define DTEST_METHOD_PASS_ZERO		0
 #define DTEST_METHOD_PASS_ONE		1
 
-// Depth Test
+/** Depth Test */
 #define ZTEST_METHOD_ALLFAIL		0
 #define ZTEST_METHOD_ALLPASS		1
 #define ZTEST_METHOD_GREATER_EQUAL	2
@@ -49,16 +54,16 @@ typedef struct {
 extern "C" {
 #endif
 
-	// Scissoring pixel test area
+	/** Scissoring pixel test area */
 	qword_t *draw_scissor_area(qword_t *q, int context, int x0, int x1, int y0, int y1);
 
-	// Pixel Testing
+	/** Pixel Testing */
 	qword_t *draw_pixel_test(qword_t *q, int context, atest_t *atest, dtest_t *dtest, ztest_t *ztest);
 
-	// Disable pixel testing defaults
+	/** Disable pixel testing defaults */
 	qword_t *draw_disable_tests(qword_t *q, int context, zbuffer_t *z);
 
-	// Enable pixel testing defaults
+	/** Enable pixel testing defaults */
 	qword_t *draw_enable_tests(qword_t *q, int context, zbuffer_t *z);
 
 #ifdef __cplusplus

@@ -1,23 +1,28 @@
+/**
+ * @file
+ * Draw library buffer functions
+ */
+
 #ifndef __DRAW_BUFFER_H__
 #define __DRAW_BUFFER_H__
 
 #include <tamtypes.h>
 
-// Texture Color Components
+/** Texture Color Components */
 #define TEXTURE_COMPONENTS_RGB		0
 #define TEXTURE_COMPONENTS_RGBA		1
 
-// Texture Function
+/** Texture Function */
 #define TEXTURE_FUNCTION_MODULATE	0
 #define TEXTURE_FUNCTION_DECAL		1
 #define TEXTURE_FUNCTION_HIGHLIGHT	2
 #define TEXTURE_FUNCTION_HIGHLIGHT2	3
 
-// CLUT Storage Mode
+/** CLUT Storage Mode */
 #define CLUT_STORAGE_MODE1			0
 #define CLUT_STORAGE_MODE2			1
 
-// CLUT Load Control
+/** CLUT Load Control */
 #define CLUT_NO_LOAD				0
 #define CLUT_LOAD					1
 #define CLUT_LOAD_COPY_CBP0			2
@@ -67,22 +72,22 @@ typedef struct {
 extern "C" {
 #endif
 
-	// Returns the power of 2 needed for texture width and height
+	/** Returns the power of 2 needed for texture width and height */
 	unsigned char draw_log2(unsigned int x);
 
-	// Framebuffer Attributes
+	/** Framebuffer Attributes */
 	qword_t *draw_framebuffer(qword_t *q, int context, framebuffer_t *frame);
 
-	// ZBuffer Attributes
+	/** ZBuffer Attributes */
 	qword_t *draw_zbuffer(qword_t *q, int context, zbuffer_t *zbuffer);
 
-	// TextureBuffer Attributes
+	/** TextureBuffer Attributes */
 	qword_t *draw_texturebuffer(qword_t *q, int context, texbuffer_t *texbuffer, clutbuffer_t *clut);
 
-	// CLUT Storage Mode 1 Information
+	/** CLUT Storage Mode 1 Information */
 	qword_t *draw_clutbuffer(qword_t *q, int context, int psm, clutbuffer_t *clut);
 
-	// CLUT Storage Mode 2 Information
+	/** CLUT Storage Mode 2 Information */
 	qword_t *draw_clut_offset(qword_t *q, int cbw, int u, int v);
 
 #ifdef __cplusplus

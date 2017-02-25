@@ -1,3 +1,8 @@
+/**
+ * @file
+ * Draw library blending functions
+ */
+
 #ifndef __DRAW_BLENDING_H__
 #define __DRAW_BLENDING_H__
 
@@ -5,7 +10,7 @@
 
 // color = (c1-c2)*a>>7 + c3
 
-// Alpha Blending
+/** Alpha Blending */
 #define BLEND_COLOR_SOURCE		0
 #define BLEND_COLOR_DEST		1
 #define BLEND_COLOR_ZERO		2
@@ -14,7 +19,7 @@
 #define BLEND_ALPHA_DEST		1
 #define BLEND_ALPHA_FIXED		2
 
-// Alpha Correction
+/** Alpha Correction */
 #define ALPHA_CORRECT_RGBA32	0
 #define ALPHA_CORRECT_RGBA16	1
 
@@ -30,13 +35,13 @@ typedef struct {
 extern "C" {
 #endif
 
-	// Alpha Blending Per-Pixel MSB Control
+	/** Alpha Blending Per-Pixel MSB Control */
 	qword_t *draw_pixel_alpha_control(qword_t *q, int enable);
 
-	// Alpha Blending
+	/** Alpha Blending */
 	qword_t *draw_alpha_blending(qword_t *q, int context, blend_t *blend);
 
-	// Alpha Correction
+	/** Alpha Correction */
 	qword_t *draw_alpha_correction(qword_t *q, int context, int alpha);
 
 #ifdef __cplusplus

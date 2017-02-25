@@ -5,7 +5,6 @@
 
 #include <draw.h>
 
-// Alpha Blending Per-Pixel MSB Control
 qword_t *draw_pixel_alpha_control(qword_t *q, int enable)
 {
 
@@ -18,7 +17,6 @@ qword_t *draw_pixel_alpha_control(qword_t *q, int enable)
 
 }
 
-// Alpha Blending
 qword_t *draw_alpha_blending(qword_t *q, int context, blend_t *blend)
 {
 
@@ -32,7 +30,6 @@ qword_t *draw_alpha_blending(qword_t *q, int context, blend_t *blend)
 
 }
 
-// Framebuffer Attributes
 qword_t *draw_framebuffer(qword_t *q, int context, framebuffer_t *frame)
 {
 
@@ -45,7 +42,6 @@ qword_t *draw_framebuffer(qword_t *q, int context, framebuffer_t *frame)
 
 }
 
-// ZBuffer Attributes
 qword_t *draw_zbuffer(qword_t *q, int context, zbuffer_t *zbuffer)
 {
 
@@ -58,7 +54,6 @@ qword_t *draw_zbuffer(qword_t *q, int context, zbuffer_t *zbuffer)
 
 }
 
-// TextureBuffer Attributes
 qword_t *draw_texturebuffer(qword_t *q, int context, texbuffer_t *texture, clutbuffer_t *clut)
 {
 
@@ -79,7 +74,6 @@ qword_t *draw_texturebuffer(qword_t *q, int context, texbuffer_t *texture, clutb
 
 }
 
-// CLUT Storage Mode 1 Information
 qword_t *draw_clutbuffer(qword_t *q, int context, int psm, clutbuffer_t *clut)
 {
 
@@ -98,7 +92,6 @@ qword_t *draw_clutbuffer(qword_t *q, int context, int psm, clutbuffer_t *clut)
 
 }
 
-// CLUT Storage Mode 2 Information
 qword_t *draw_clut_offset(qword_t *q, int cbw, int u, int v)
 {
 
@@ -112,7 +105,6 @@ qword_t *draw_clut_offset(qword_t *q, int cbw, int u, int v)
 
 }
 
-// Dithering Switch
 qword_t *draw_dithering(qword_t *q, int enable)
 {
 
@@ -126,7 +118,6 @@ qword_t *draw_dithering(qword_t *q, int enable)
 
 }
 
-// Dithering Matrix
 qword_t *draw_dither_matrix(qword_t *q,char *dm)
 {
 
@@ -143,7 +134,6 @@ qword_t *draw_dither_matrix(qword_t *q,char *dm)
 
 }
 
-// Fog Color
 qword_t *draw_fog_color(qword_t *q, unsigned char r, unsigned char g, unsigned char b)
 {
 
@@ -157,7 +147,6 @@ qword_t *draw_fog_color(qword_t *q, unsigned char r, unsigned char g, unsigned c
 
 }
 
-// Scanline Masking (framebuffer)
 qword_t *draw_scan_masking(qword_t *q, int mask)
 {
 
@@ -171,7 +160,6 @@ qword_t *draw_scan_masking(qword_t *q, int mask)
 
 }
 
-// Color Masking/Clamping
 qword_t *draw_color_clamping(qword_t *q, int enable)
 {
 
@@ -185,7 +173,6 @@ qword_t *draw_color_clamping(qword_t *q, int enable)
 
 }
 
-// Alpha Correction
 qword_t *draw_alpha_correction(qword_t *q, int context, int alpha)
 {
 
@@ -199,7 +186,6 @@ qword_t *draw_alpha_correction(qword_t *q, int context, int alpha)
 
 }
 
-// Primitive Coordinate System offset
 qword_t *draw_primitive_xyoffset(qword_t *q, int context, float x, float y)
 {
 
@@ -213,7 +199,6 @@ qword_t *draw_primitive_xyoffset(qword_t *q, int context, float x, float y)
 
 }
 
-// Primitive Control
 qword_t *draw_primitive_override(qword_t *q, int mode)
 {
 
@@ -227,7 +212,6 @@ qword_t *draw_primitive_override(qword_t *q, int mode)
 
 }
 
-// Overridden Primitive Attributes
 qword_t *draw_primitive_override_setting(qword_t *q, int context, prim_t *prim)
 {
 
@@ -243,7 +227,6 @@ qword_t *draw_primitive_override_setting(qword_t *q, int context, prim_t *prim)
 
 }
 
-// Texture Sampling, Level-of-Detail, and Filtering
 qword_t *draw_texture_sampling(qword_t *q, int context, lod_t *lod)
 {
 
@@ -257,7 +240,6 @@ qword_t *draw_texture_sampling(qword_t *q, int context, lod_t *lod)
 
 }
 
-// Mipmap levels 1-3
 qword_t *draw_mipmap1(qword_t *q, int context, mipmap_t *mipmap)
 {
 
@@ -273,7 +255,6 @@ qword_t *draw_mipmap1(qword_t *q, int context, mipmap_t *mipmap)
 
 }
 
-// Mipmap levels 4-6
 qword_t *draw_mipmap2(qword_t *q, int context, mipmap_t *mipmap)
 {
 
@@ -289,7 +270,6 @@ qword_t *draw_mipmap2(qword_t *q, int context, mipmap_t *mipmap)
 
 }
 
-// Scissoring pixel test area
 qword_t *draw_scissor_area(qword_t *q, int context, int x0, int x1, int y0, int y1)
 {
 
@@ -303,7 +283,6 @@ qword_t *draw_scissor_area(qword_t *q, int context, int x0, int x1, int y0, int 
 
 }
 
-// Pixel Testing
 qword_t *draw_pixel_test(qword_t *q, int context, atest_t *atest, dtest_t *dtest, ztest_t *ztest)
 {
 
@@ -319,7 +298,6 @@ qword_t *draw_pixel_test(qword_t *q, int context, atest_t *atest, dtest_t *dtest
 
 }
 
-// Texture Clamping
 qword_t *draw_texture_wrapping(qword_t *q, int context, texwrap_t *wrap)
 {
 
@@ -334,7 +312,6 @@ qword_t *draw_texture_wrapping(qword_t *q, int context, texwrap_t *wrap)
 
 }
 
-// Alpha Expansion Values
 qword_t *draw_texture_expand_alpha(qword_t *q, unsigned char zero_value, int expand, unsigned char one_value)
 {
 
