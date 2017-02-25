@@ -6,20 +6,15 @@
 # (c) 2009 Lion
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
 */
+
+/**
+ * @file
+ * VU library functions.
+ */
 
 #ifndef _LIBVUX_H_
 #define _LIBVUX_H_
-
-
-
-
-
-
-
-
-
 
 /*
 
@@ -36,10 +31,7 @@ row major
 
 #define VU_LIGHT_TYPE_FLAT			0x10
 
-
-
-
-/*Float Matrix (4x4)*/
+/** Float Matrix (4x4) */
 typedef struct
 {
 
@@ -47,10 +39,7 @@ typedef struct
 
 }VU_MATRIX __attribute__((aligned(16)));
 
-
-
-
-/*3D Float Vector (128 bit)*/
+/** 3D Float Vector (128 bit) */
 typedef struct
 {
 	float	x;
@@ -60,37 +49,30 @@ typedef struct
 
 }VU_VECTOR __attribute__((aligned(16)));
 
-
-
-
-/*2D Screen xy and z (64 bit)*/
+/** 2D Screen xy and z (64 bit) */
 typedef struct
 {
-
-	unsigned short	x;		// format is same as gs 0:12:4
-	unsigned short	y;		// format is same as gs 0:12:4
+	/** format is same as gs 0:12:4 */
+	unsigned short	x; 
+	/** format is same as gs 0:12:4 */
+	unsigned short	y;
 	unsigned int	z;
 
 }VU_SXYZ;
 
-
-
-
-/*2D Screen xy and z with fog coefficient (64 bit)*/
+/** 2D Screen xy and z with fog coefficient (64 bit) */
 typedef struct
 {
-
-	unsigned short	x;		// format is same as gs 0:12:4
-	unsigned short	y;		// format is same as gs 0:12:4
+	/** format is same as gs 0:12:4 */
+	unsigned short	x;
+	/** format is same as gs 0:12:4 */
+	unsigned short	y;
 	unsigned int	z:24;
 	unsigned char	f;
 
 }VU_SXYZF;
 
-
-
-
-/*color vector (64 bit)*/
+/** color vector (64 bit) */
 typedef struct
 {
 	unsigned char	r;
@@ -101,11 +83,7 @@ typedef struct
 
 }VU_CVECTOR;
 
-
-
-
-
-/*float version of color vector(128)*/
+/** float version of color vector(128) */
 typedef struct
 {
 	float			r;
@@ -115,28 +93,12 @@ typedef struct
 
 }VU_FCVECTOR;
 
-
-
-
-
-
 typedef struct
 {
 	VU_VECTOR		direction;
 	VU_FCVECTOR		color;
 
 }VU_FLAT_LIGHT;
-
-
-
-
-
-
-
-
-
-
-
 
 #ifndef ftoi4
 #define ftoi4(f)				((int)((f)*16.0f))
@@ -150,30 +112,11 @@ typedef struct
 #define radian2deg(radian)		((180.0f / 3.1415926535f) * (radian))
 #endif
 
-
-
-
-
-
-
-
-
-
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif /*__cplusplus*/
 
-
-
-
-
-/*
------------------------------
-- common stuff
------------------------------
-*/
+/* common stuff */
 extern void  VuInit(void);
 
 extern void  VuSetGeometryXYOffset(unsigned short x, unsigned short y);
@@ -186,18 +129,7 @@ extern void  VuSetLocalScreenMatrix(VU_MATRIX	*m);
 extern void  VuSetProjectionNearPlaneWH(unsigned int w, unsigned int h);
 extern void  VuSetAmbientLight(float r, float g, float b);
 
-
-
-
-
-
-
-
-/*
------------------------------
-- 99% hw(vu0 macro mode)
------------------------------
-*/
+/* 99% hw(vu0 macro mode) */
 extern void  Vu0IdMatrix(VU_MATRIX *m);
 extern void  Vu0ResetMatrix(VU_MATRIX *m);
 //extern void  VuxRotMatrixX(VU_MATRIX *m, float x);
@@ -215,16 +147,7 @@ extern void  Vu0ApplyRotMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out);
 extern void  Vu0CopyMatrix(VU_MATRIX *dest, VU_MATRIX *src);
 extern float Vu0DotProduct(VU_VECTOR *v0, VU_VECTOR *v1);
 
-
-
-
-
-
-/*
---------------------------
-- 100% sw
---------------------------
-*/
+/* 100% sw */
 extern void  VuxIdMatrix(VU_MATRIX *m);
 extern void  VuxResetMatrix(VU_MATRIX *m);
 extern void  VuxRotMatrix(VU_MATRIX *m, VU_VECTOR *v);
@@ -257,7 +180,7 @@ extern void  VuxMakeViewMatrix(VU_MATRIX *out, VU_VECTOR *rot, VU_VECTOR *pos, V
 extern void  VuxMakeLookAtViewMatrix(VU_MATRIX *out, VU_VECTOR *eye, VU_VECTOR *target, VU_VECTOR *up);
 extern void  VuxMakeProjectionMatrix(VU_MATRIX *proj, float near_plane_w, float near_plane_h, float near_plane_z, float far_plane_z);
 
-// update lsm using view, world, proj
+/** update lsm using view, world, proj */
 extern void  VuxUpdateLocalScreenMatrix(void);
 
 extern void  VuxRotTrans(VU_VECTOR *v0, VU_VECTOR *out);
@@ -272,49 +195,18 @@ extern float VuxRotTransPers3(VU_VECTOR *v0, VU_VECTOR *v1, VU_VECTOR *v2, VU_SX
 extern void  VuxRotTransPersN(VU_VECTOR *verts, VU_SXYZ *sxyz, unsigned int num_verts);
 extern int   VuxRotTransPersClip3(VU_VECTOR *v0, VU_VECTOR *v1, VU_VECTOR *v2, VU_SXYZ *sxyz0, VU_SXYZ *sxyz1, VU_SXYZ *sxyz2);
 
-
-
 extern int   VuxClipSxyz(VU_SXYZ *sxyz0, VU_SXYZ *sxyz1, VU_SXYZ *sxyz2);
-
 
 /*lighting*/
 extern int VuxLightNormal(VU_VECTOR *normal, VU_CVECTOR *col0, void *light, unsigned int light_type, VU_CVECTOR *out0);
 
-
-
-
-/**/
 extern VU_MATRIX	VuWorldMatrix;
 extern VU_MATRIX	VuViewMatrix;
 extern VU_MATRIX	VuPrjectionMatrix;
 extern VU_MATRIX	VuLocalScreenMatrix;
 
-
-
-
-
-
-
 #ifdef __cplusplus
 }
 #endif /*__cplusplus*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #endif /*_LIBVUX_H_*/

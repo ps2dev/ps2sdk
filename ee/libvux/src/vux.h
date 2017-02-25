@@ -6,7 +6,6 @@
 # (c) 2009 Lion
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
 */
 
 #include <libvux.h>
@@ -41,15 +40,3 @@ extern float			vu_near_plane_w;
 extern float			vu_near_plane_h;
 
 
-
-
-
-
-
-
-
-
-
-
-
-/*EOF*/
