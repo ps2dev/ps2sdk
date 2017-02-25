@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Function defenitions for mclib.
 */
+
+/**
+ * @file
+ * Function defenitions for mclib.
+ */
 
 #include <tamtypes.h>
 #include <kernel.h>
@@ -23,7 +26,7 @@
 #endif
 
 
-// rpc command function numbers
+/** rpc command function numbers */
 enum MC_RPCCMD_NUMBERS{
 	MC_RPCCMD_INIT		= 0x00,
 	MC_RPCCMD_GET_INFO,
@@ -47,8 +50,9 @@ enum MC_RPCCMD_NUMBERS{
 	MC_RPCCMD_WRITE_PAGE
 };
 
-// rpc command function numbers
-// mcRpcCmd[MC_TYPE_??][MC_RPCCMD_???]
+/** rpc command function numbers
+ * mcRpcCmd[MC_TYPE_??][MC_RPCCMD_???]
+ */
 static const int mcRpcCmd[2][17] =
 {
 	// MCMAN/MCSERV values
@@ -93,8 +97,9 @@ static const int mcRpcCmd[2][17] =
 	}
 };
 
-// filename related mc command
-// used by: mcOpen, mcGetDir, mcChdir, mcDelete, mcSetFileInfo, mcRename, mcGetEntSpace
+/** filename related mc command
+ * used by: mcOpen, mcGetDir, mcChdir, mcDelete, mcSetFileInfo, mcRename, mcGetEntSpace
+ */
 typedef struct {			// size = 1044
 	int port;			// 0
 	int slot;			// 4
@@ -109,8 +114,9 @@ typedef struct {			// size = 1044
 
 static mcNameParam_t g_nameParam __attribute__((aligned(64)));
 
-// file descriptor related mc command
-// used by: mcInit, mcClose, mcSeek, mcRead, mcWrite, mcGetinfo, mcFormat, mcFlush, mcUnformat, mcChangeThreadPriority
+/** file descriptor related mc command
+ * used by: mcInit, mcClose, mcSeek, mcRead, mcWrite, mcGetinfo, mcFormat, mcFlush, mcUnformat, mcChangeThreadPriority
+ */
 static mcDescParam_t g_descParam __attribute__((aligned(64)));
 
 // params sent with rpc commands
@@ -118,13 +124,13 @@ static mcDescParam_t g_descParam __attribute__((aligned(64)));
 //static McRpcDescParam g_descParam  __attribute__((aligned(64)));
 //static unsigned int mcInfoCmd[12] __attribute__((aligned(64)));
 
-// external IOP reboot count
+/** external IOP reboot count */
 extern int _iop_reboot_count;
 
-// rpc client data
+/** rpc client data */
 static SifRpcClientData_t g_cdata __attribute__((aligned(64)));
 
-// rpc receive data buffer
+/** rpc receive data buffer */
 #define RSIZE 2048
 static union{
 	s32 result;
@@ -141,18 +147,19 @@ static char curDir[1024];
 static sceMcTblGetDir g_fileInfoBuff __attribute__((aligned(64)));	// used by mcSetFileInfo and mcRename
 
 
-// whether or not mc lib has been inited
+/** whether or not mc lib has been inited */
 static int g_mclibInited = 0;
 
-// stores command currently being executed on the iop
+/** stores command currently being executed on the iop */
 static unsigned int g_currentCmd = 0;
 
-// specifies whether using MCSERV or XMCSERV modules
+/** specifies whether using MCSERV or XMCSERV modules */
 static int g_mcType = MC_TYPE_MC;
 
 
-// function that gets called when mcGetInfo ends
-// and interrupts are disabled
+/** function that gets called when mcGetInfo ends
+ * and interrupts are disabled
+ */
 static void mcGetInfoApdx(void* info)
 {
 	mcEndParam_t	*ptr	= (mcEndParam_t*)UNCACHED_SEG(info);
@@ -182,8 +189,9 @@ static void mcGetInfoApdx(void* info)
 	}
 }
 
-// function that gets called when mcRead ends
-// and interrupts are disabled
+/** function that gets called when mcRead ends
+ * and interrupts are disabled
+ */
 static void mcReadFixAlign(void* data_raw)
 {
 	mcEndParam_t	*ptr	= (mcEndParam_t*)UNCACHED_SEG(data_raw);
@@ -205,8 +213,9 @@ static void mcReadFixAlign(void* data_raw)
 	}
 }
 
-// function that gets called when mcChDir ends
-// and interrupts are disabled
+/** function that gets called when mcChDir ends
+ * and interrupts are disabled
+ */
 static void mcStoreDir(void* arg)
 {
 	int len;
@@ -218,13 +227,6 @@ static void mcStoreDir(void* arg)
 	*(currentDir+len) = 0;
 }
 
-
-// init memcard lib
-//
-// args:	MC_TYPE_MC  = use MCSERV/MCMAN
-//			MC_TYPE_XMC = use XMCSERV/XMCMAN
-// returns:	0   = successful
-//			< 0 = error
 int mcInit(int type)
 {
 	int ret=0;
@@ -331,19 +333,6 @@ int mcInit(int type)
 	return ret;
 }
 
-// get memcard state
-// mcSync result:	 0 = same card as last getInfo call
-//					-1 = formatted card inserted since last getInfo call
-//					-2 = unformatted card inserted since last getInfo call
-//					< -2 = memcard access error (could be due to accessing psx memcard)
-//
-// args:    port number
-//          slot number
-//          pointer to get memcard type
-//          pointer to get number of free clusters
-//          pointer to get whether or not the card is formatted
-// returns:	0   = successful
-//			< 0 = error
 int mcGetInfo(int port, int slot, int* type, int* free, int* format)
 {
 	int ret;
@@ -386,16 +375,6 @@ int mcGetInfo(int port, int slot, int* type, int* free, int* format)
 	return ret;
 }
 
-// open a file on memcard
-// mcSync returns:	0 or more = file descriptor (success)
-//					< 0 = error
-//
-// args:	port number
-//			slot number
-//			filename to open
-//			open file mode (O_RDWR, O_CREAT, etc)
-// returns:	0   = successful
-//			< 0 = error
 int mcOpen(int port, int slot, const char *name, int mode)
 {
 	int ret;
@@ -421,13 +400,6 @@ int mcOpen(int port, int slot, const char *name, int mode)
 	return ret;
 }
 
-// close an open file on memcard
-// mcSync returns:	0 if closed successfully
-//					< 0 = error
-//
-// args:	file descriptor of open file
-// returns:	0   = successful
-//			< 0 = error
 int mcClose(int fd)
 {
 	int ret;
@@ -449,15 +421,6 @@ int mcClose(int fd)
 	return ret;
 }
 
-// move memcard file pointer
-// mcSync returns:	0 or more = offset of file pointer from start of file
-//					< 0 = error
-//
-// args:	file descriptor
-//			number of bytes from origin
-//			initial position for offset
-// returns:	0   = successful
-//			< 0 = error
 int mcSeek(int fd, int offset, int origin)
 {
 	int ret;
@@ -481,15 +444,6 @@ int mcSeek(int fd, int offset, int origin)
 	return ret;
 }
 
-// read from file on memcard
-// mcSync returns:	0 or more = number of bytes read from memcard
-//					< 0 = error
-//
-// args:	file descriptor
-//			buffer to read to
-//			number of bytes to read
-// returns:	0   = successful
-//			< 0 = error
 int mcRead(int fd, void *buffer, int size)
 {
 	int ret;
@@ -516,14 +470,6 @@ int mcRead(int fd, void *buffer, int size)
 	return ret;
 }
 
-// write to file on memcard
-// mcSync returns:	0 or more = number of bytes written to memcard
-//					< 0 = error
-//
-// args:	file descriptor
-//			buffer to write from write
-// returns:	0   = successful
-//			< 0 = error
 int mcWrite(int fd, const void *buffer, int size)
 {
 	int i, ret;
@@ -562,13 +508,6 @@ int mcWrite(int fd, const void *buffer, int size)
 	return ret;
 }
 
-// flush file cache to memcard
-// mcSync returns:	0 if ok
-//					< 0 if error
-//
-// args:	file descriptor
-// returns:	0   = successful
-//			< 0 = error
 int mcFlush(int fd)
 {
 	int ret;
@@ -590,15 +529,6 @@ int mcFlush(int fd)
 	return ret;
 }
 
-// create a dir
-// mcSync returns:	0 if ok
-//					< 0 if error
-//
-// args:	port number
-//			slot number
-//			directory name
-// returns:	0   = successful
-//			< 0 = error
 int mcMkDir(int port, int slot, const char* name)
 {
 	int ret = mcOpen(port, slot, name, 0x40);
@@ -608,17 +538,6 @@ int mcMkDir(int port, int slot, const char* name)
 	return ret;
 }
 
-// change current dir
-// (can also get current dir)
-// mcSync returns:	0 if ok
-//					< 0 if error
-//
-// args:	port number
-//			slot number
-//			new dir to change to
-//			buffer to get current dir (use 0 if not needed)
-// returns:	0   = successful
-//			< 0 = error
 int mcChdir(int port, int slot, const char* newDir, char* currentDir)
 {
 	int ret;
@@ -645,19 +564,6 @@ int mcChdir(int port, int slot, const char* newDir, char* currentDir)
 	return ret;
 }
 
-// get memcard filelist
-// mcSync result:	 0 or more = number of file entries obtained (success)
-//					-2 = unformatted card
-//					-4 = dirname error
-//
-// args:    port number of memcard
-//          slot number of memcard
-//          filename to search for (can use wildcard and relative dirs)
-//          mode: 0 = first call, otherwise = followup call
-//          maximum number of entries to be written to filetable in 1 call
-//          mc table array
-// returns:	0   = successful
-//			< 0 = error
 int mcGetDir(int port, int slot, const char *name, unsigned mode, int maxent, sceMcTblGetDir* table)
 {
 	int ret;
@@ -686,17 +592,6 @@ int mcGetDir(int port, int slot, const char *name, unsigned mode, int maxent, sc
    	return ret;
 }
 
-// change file information
-// mcSync returns:	0 if ok
-//					< 0 if error
-//
-// args:	port number
-//			slot number
-//			filename to access
-//			data to be changed
-//			flags to show which data is valid
-// returns:	0   = successful
-//			< 0 = error
 int mcSetFileInfo(int port, int slot, const char* name, const sceMcTblGetDir* info, unsigned flags)
 {
 	int ret;
@@ -726,15 +621,6 @@ int mcSetFileInfo(int port, int slot, const char* name, const sceMcTblGetDir* in
 	return ret;
 }
 
-// delete file
-// mcSync returns:	0 if deleted successfully
-//					< 0 if error
-//
-// args:	port number to delete from
-//			slot number to delete from
-//			filename to delete
-// returns:	0   = successful
-//			< 0 = error
 int mcDelete(int port, int slot, const char *name)
 {
 	int ret;
@@ -760,14 +646,6 @@ int mcDelete(int port, int slot, const char *name)
    	return ret;
 }
 
-// format memory card
-// mcSync returns:	0 if ok
-//					< 0 if error
-//
-// args:    port number
-//          slot number
-// returns:	0   = successful
-//			< 0 = error
 int mcFormat(int port, int slot)
 {
 	int ret;
@@ -790,14 +668,6 @@ int mcFormat(int port, int slot)
 	return ret;
 }
 
-// unformat memory card
-// mcSync returns:	0 if ok
-//					< 0 if error
-//
-// args:    port number
-//          slot number
-// returns:	0   = successful
-//			< 0 = error
 int mcUnformat(int port, int slot)
 {
 	int ret;
@@ -820,15 +690,6 @@ int mcUnformat(int port, int slot)
 	return ret;
 }
 
-// get free space info
-// mcSync returns:	0 or more = number of free entries (success)
-//					< 0 if error
-//
-// args:	port number
-//			slot number
-//			path to be checked
-// returns:	0   = successful
-//			< 0 = error
 int mcGetEntSpace(int port, int slot, const char* path)
 {
 	int ret;
@@ -853,16 +714,6 @@ int mcGetEntSpace(int port, int slot, const char* path)
 	return ret;
 }
 
-// rename file or dir on memcard
-// mcSync returns:	0 if ok
-//					< 0 if error
-//
-// args:	port number
-//			slot number
-//			name of file/dir to rename
-//			new name to give to file/dir
-// returns:	0   = successful
-//			< 0 = error
 int mcRename(int port, int slot, const char* oldName, const char* newName)
 {
 	int ret;
@@ -989,14 +840,6 @@ int mcWritePage(int port, int slot, int page, const void *buffer){
 	return result;
 }
 
-// change mcserv thread priority
-// (i dont think this is implemented properly)
-// mcSync returns:	0 if ok
-//					< 0 if error
-//
-// args:	thread priority
-// returns:	0   = successful
-//			< 0 = error
 int mcChangeThreadPriority(int level)
 {
 	int ret;
@@ -1018,15 +861,6 @@ int mcChangeThreadPriority(int level)
 	return ret;
 }
 
-// wait for mc functions to finish
-// or check if they have finished yet
-//
-// args:	mode: 0=wait till function finishes, 1=check function status
-//			pointer for getting the number of the currently processing function (can be NULL)
-//			pointer for getting result of completed function (if it does complete) (can be NULL)
-// returns:	0  = function is still executing (mode=1)
-//			1  = function has finished executing
-//			-1 = no function registered
 int mcSync(int mode, int *cmd, int *result)
 {
 	int funcIsExecuting, i;
