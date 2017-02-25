@@ -96,8 +96,9 @@
  * MEM_SIZE: the size of the heap memory. If the application will send
  * a lot of data that needs to be copied, this should be set high.
  */
-//SP193: setting this too low may cause tcp_write() to fail when it tries to allocate from PBUF_RAM!
-#define MEM_SIZE		(TCP_MSS * 8)
+/*	SP193: setting this too low may cause tcp_write() to fail when it tries to allocate from PBUF_RAM!
+	Up to TCP_SND_BUF * 2 segments may be transmitted at once, thanks to Nagle and Delayed Ack. */
+#define MEM_SIZE		(TCP_SND_BUF * 2)
 
 /*
    ------------------------------------------------
@@ -113,7 +114,30 @@
 /**
  * PBUF_POOL_SIZE: the number of buffers in the pbuf pool.
  */
-#define PBUF_POOL_SIZE		60	//SP193: should be at least ((TCP_WND/PBUF_POOL_BUFSIZE)+1). But that is too small to handle simultaneous connections.
+//SP193: should be at least ((TCP_WND/PBUF_POOL_BUFSIZE)+1). But that is too small to accommodate data not accepted by the application layer and multiple connections.
+#define PBUF_POOL_SIZE			60
+
+/**
+ * MEMP_NUM_TCPIP_MSG_INPKT: the number of struct tcpip_msg, which are used
+ * for incoming packets.
+ * (only needed if you use tcpip.c)
+ */
+//SP193: this should at least match the size of the TCP window because the TCPIP thread may take a while to execute (non-preemptive multitasking), otherwise incoming frames may get dropped.
+#define MEMP_NUM_TCPIP_MSG_INPKT	50
+
+/**
+ * MEMP_NUM_TCPIP_MSG_API: the number of struct tcpip_msg, which are used
+ * for callback/timeout API communication.
+ * (only needed if you use tcpip.c)
+ */
+//SP193: allocate sufficient, to prevent transmissions from being potentially being dropped.
+#define MEMP_NUM_TCPIP_MSG_API		50
+
+/**
+ * MEMP_NUM_TCP_SEG: the number of simultaneously queued TCP segments.
+ * (requires the LWIP_TCP option)
+ */
+#define MEMP_NUM_TCP_SEG		TCP_SND_QUEUELEN
 
 /** SYS_LIGHTWEIGHT_PROT
  * define SYS_LIGHTWEIGHT_PROT in lwipopts.h if you want inter-task protection
@@ -131,7 +155,7 @@
 #define TCP_MSS                 1460
 
 /* TCP sender buffer space (bytes). */
-#define TCP_SND_BUF             (TCP_MSS*4)
+#define TCP_SND_BUF             (TCP_MSS*32)
 
 /* TCP receive window. */
 #define TCP_WND                 65535
