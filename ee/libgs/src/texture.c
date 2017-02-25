@@ -6,7 +6,6 @@
 # (c) 2009 Lion
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
 */
 
 #include <errno.h>
@@ -98,12 +97,7 @@ int GsLoadImage(const void *source_addr, GS_IMAGE *dest)
 	return 1;
 }
 
-/*************************************************
-*
-*
-* VRAM
-*
-*************************************************/
+/* VRAM */
 static unsigned int vr_addr=0;
 static unsigned int vr_tex_start=0;
 static unsigned int vr_2ndtolast_alloc=0;	//address before last alloc so we can Free the last alloc
@@ -214,7 +208,7 @@ void GsVramFreeAllTextureBuffer(void)
 	vr_addr = vr_tex_start;
 }
 
-/*
+#if 0
 int VramFreeLastTextureBuffer()
 {
 	if(vr_2ndtolast_alloc)
@@ -223,7 +217,7 @@ int VramFreeLastTextureBuffer()
 		vr_2ndtolast_alloc =0;
 	}
 }
-*/
+#endif
 
 void GsVramFreeAll(void)
 {

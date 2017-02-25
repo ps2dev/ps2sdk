@@ -6,7 +6,6 @@
 # (c) 2009 Lion
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
 */
 
 #include <errno.h>
@@ -18,11 +17,7 @@
 
 extern QWORD GsPrimWorkArea[];
 
-/*-------------------------------------------
--
-- Initialization functions.											-
--
--------------------------------------------*/
+/* Initialization functions. */
 
 static GsGParam_t gp_15={GS_INTERLACED, GS_MODE_NTSC, GS_FFMD_FRAME, 3};
 
