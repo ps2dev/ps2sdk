@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# device driver scanner and handler
 */
+
+/**
+ * @file
+ * device driver scanner and handler
+ */
 
 #include <types.h>
 #include <defs.h>
@@ -32,16 +35,16 @@
 #define dbgprintf(args...) do { } while(0)
 #endif
 
-/*! \brief Device type structure.
- *  \ingroup ps2netfs
+/** Device type structure.
+ * @ingroup ps2netfs
  */
 static dev_table_t dev_info_list[DEVSCAN_MAX+1]; /* one for padding */
 
-/*! \brief Get pointer to module structure for named module.
- *  \ingroup ps2netfs
+/** Get pointer to module structure for named module.
+ * @ingroup ps2netfs
  *
- *  \param name Stringname of module (eg "atad_driver").
- *  \return Pointer to module structure.
+ * @param name Stringname of module (eg "atad_driver").
+ * @return Pointer to module structure.
  *
  * return values:
  *   0 if not found.
@@ -62,16 +65,16 @@ ModuleInfo_t *devscan_getmodule(const char *name)
   return 0;
 }
 
-/*! \brief Initialise the devices table
- *  \ingroup ps2netfs
+/** Initialise the devices table
+ * @ingroup ps2netfs
  *
- *  \param devtype Mask for device types to return (0x10 = FS drivers).
- *  \return Number of devices found.
+ * @param devtype Mask for device types to return (0x10 = FS drivers).
+ * @return Number of devices found.
  *
- *  This scans ioman and iomanx for devices, then adds them to the
- *  internal list, with basename and the handler type.
+ * This scans ioman and iomanx for devices, then adds them to the
+ * internal list, with basename and the handler type.
  *
- *  Also used to re-init the devices table
+ * Also used to re-init the devices table
  */
 int devscan_setup(int devtype)
 {
@@ -131,15 +134,15 @@ int devscan_setup(int devtype)
   return count;
 }
 
-/*! \brief Get device handler type for path.
- *  \ingroup ps2netfs
+/** Get device handler type for path.
+ * @ingroup ps2netfs
  *
- *  \param name Full pathname to check.
- *  \return Device handler type.
+ * @param name Full pathname to check.
+ * @return Device handler type.
  *
- *  return values:
- *    MODULE_RESIDENT_END if loaded and registered as library.
- *    MODULE_NO_RESIDENT_END if just exiting normally.
+ * return values:
+ *   MODULE_RESIDENT_END if loaded and registered as library.
+ *   MODULE_NO_RESIDENT_END if just exiting normally.
  */
 int devscan_gettype(char *name)
 {
@@ -157,11 +160,11 @@ int devscan_gettype(char *name)
   return IOPMGR_DEVTYPE_INVALID;
 }
 
-/*! \brief Get device list.
- *  \ingroup ps2netfs
+/** Get device list.
+ * @ingroup ps2netfs
  *
- *  \param  buffer    Pointer to dest buffer
- *  \return number of devices returned.
+ * @param  buffer    Pointer to dest buffer
+ * @return number of devices returned.
  */
 int devscan_getdevlist(char *buffer)
 {
