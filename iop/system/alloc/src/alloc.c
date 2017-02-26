@@ -7,9 +7,12 @@
 # Copyright (c) 2004 adresd <adresd_ps2dev@yahoo.com>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Advanced I/O library.
 */
+
+/**
+ * @file
+ * Basic alloc library
+ */
 
 #include <stdarg.h>
 
@@ -83,7 +86,7 @@ int shutdown()
     return 0;
 }
 
-/* Use this to set the default malloc() alignment. */
+/** Use this to set the default malloc() alignment. */
 #define DEFAULT_ALIGNMENT	16
 
 #ifndef ALIGN
@@ -119,8 +122,7 @@ static void * alloc_sbrk(size_t increment)
         return ret;
 }
 
-/* Find a the lowest block that we can allocate AFTER, returning NULL if there
-   are none.  */
+/** Find the lowest block that we can allocate AFTER, returning NULL if there are none.  */
 static heap_mem_header_t * _heap_mem_fit(heap_mem_header_t *head, size_t size)
 {
 	heap_mem_header_t *prev_mem = head;
