@@ -8,6 +8,11 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
+/**
+ * @file
+ * SIO2 logging.
+ */
+
 #ifndef SIO2LOG_LOG_H
 #define SIO2LOG_LOG_H
 

@@ -6,10 +6,12 @@
 # Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# $
-# Imports and definitions for ps2ip.
 */
+
+/**
+ * @file
+ * Imports and definitions for ps2ip.
+ */
 
 #ifndef IOP_PS2IP_H
 #define IOP_PS2IP_H
