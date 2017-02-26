@@ -6,10 +6,13 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# rom1:SIO2MAN module definitions
-# rom1:SIO2MAN is a newer version of SIO2MAN than rom0:SIO2MAN.
 */
+
+/**
+ * @file
+ * rom1:SIO2MAN module definitions
+ * rom1:SIO2MAN is a newer version of SIO2MAN than rom0:SIO2MAN.
+ */
 
 #ifndef IOP_RSIO2MAN_H
 #define IOP_RSIO2MAN_H
