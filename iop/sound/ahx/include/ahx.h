@@ -8,6 +8,11 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
+/**
+ * @file
+ * AHX player functions
+ */
+
 #ifndef __AHX_H
 #define __AHX_H
 
