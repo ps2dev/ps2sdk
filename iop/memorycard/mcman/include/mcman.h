@@ -8,6 +8,11 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
+/**
+ * @file
+ * Memory card manager definitions
+ */
+
 #ifndef __MCMAN_H__
 #define __MCMAN_H__
 
