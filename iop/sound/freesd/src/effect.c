@@ -1,10 +1,13 @@
 /*
- * effect.c - Part of the IOP Sound Driver
- *
  * Copyright (c) 2004 TyRaNiD <tiraniddo@hotmail.com>
  * Copyright (c) 2004,2007 Lukasz Bruun <mail@lukasz.dk>
  *
  * See the file LICENSE included with this distribution for licensing terms.
+ */
+
+/**
+ * @file
+ * Part of the IOP Sound Driver
  */
 
 #include "types.h"
