@@ -6,9 +6,12 @@
 # Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Kernel module loader.
 */
+
+/**
+ * @file
+ * Kernel module loader.
+ */
 
 #ifndef IOP_LOADCORE_H
 #define IOP_LOADCORE_H
@@ -19,15 +22,18 @@
 #define MODULE_RESIDENT_END		0
 #define MODULE_NO_RESIDENT_END	1
 
-/* Module info entry. Taken from iopmgr. */
+/** Module info entry. Taken from iopmgr. */
 typedef struct _ModuleInfo {
 	struct _ModuleInfo *next;
 	char	*name;
 	u16	version;
-	u16	newflags;        /* For modload shipped with games. */
+	/** For modload shipped with games. */
+	u16	newflags;
 	u16	id;
-	u16	flags;		/* I believe this is where flags are kept for BIOS versions. */
-	u32	entry;		/* _start */
+	/** I believe this is where flags are kept for BIOS versions. */
+	u16	flags;
+	/** _start */
+	u32	entry;
 	u32	gp;
 	u32	text_start;
 	u32	text_size;
@@ -46,11 +52,12 @@ typedef struct _iop_library {
 	void	*exports[0];
 } iop_library_t;
 
-//Loadcore internal data structure. Based on the one from loadcore.c of the FPS2BIOS project from PCSX2.
+/** Loadcore internal data structure. Based on the one from loadcore.c of the FPS2BIOS project from PCSX2. */
 typedef struct tag_LC_internals {
 	iop_library_t* let_next, *let_prev;	//let_next = tail, let_prev = head. I don't know what "let" and "mda" stand for.
 	iop_library_t* mda_next, *mda_prev;
-	ModuleInfo_t *image_info; // Points to the module image information structure chain that usually starts at 0x800.
+	/** Points to the module image information structure chain that usually starts at 0x800. */
+	ModuleInfo_t *image_info;
 	int	module_count;
 	int	module_index;
 } lc_internals_t;
@@ -62,7 +69,10 @@ struct bootmode {
 	int	data[0];
 };
 
-typedef struct {	//For backward-compatibility with older projects. Read the comment on GetLibraryEntryTable(). This structure is incomplete.
+/** 
+ * For backward-compatibility with older projects. Read the comment on GetLibraryEntryTable(). This structure is incomplete. 
+ */
+typedef struct {
 	struct	_iop_library *tail;
 	struct	_iop_library *head;
 } iop_library_table_t __attribute__ ((deprecated));
@@ -70,7 +80,10 @@ typedef struct {	//For backward-compatibility with older projects. Read the comm
 #define loadcore_IMPORTS_start DECLARE_IMPORT_TABLE(loadcore, 1, 1)
 #define loadcore_IMPORTS_end END_IMPORT_TABLE
 
-iop_library_table_t *GetLibraryEntryTable(void) __attribute__ ((deprecated));	//Retained for backward-compatibility with older projects. This function actually returns a pointer to LOADCORE's internal data structure.
+/**
+ * Retained for backward-compatibility with older projects. This function actually returns a pointer to LOADCORE's internal data structure.
+ */
+iop_library_table_t *GetLibraryEntryTable(void) __attribute__ ((deprecated));
 #define I_GetLibraryEntryTable DECLARE_IMPORT(3, GetLibraryEntryTable)
 lc_internals_t *GetLoadcoreInternalData(void);
 #define I_GetLoadcoreInternalData DECLARE_IMPORT(3, GetLoadcoreInternalData)

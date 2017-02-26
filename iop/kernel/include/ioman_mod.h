@@ -7,9 +7,12 @@
 # Copyright (c) 2004 adresd <adresd_ps2dev@yahoo.com>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# IOMAN definitions and imports.
 */
+
+/**
+ * @file
+ * IOMAN definitions and imports.
+ */
 
 #ifndef IOP_IOMAN_MOD_H
 #define IOP_IOMAN_MOD_H
@@ -61,19 +64,23 @@ int io_chstat(const char *name, io_stat_t *stat, unsigned int statmask);
 #define IOP_DT_RAW	0x08
 #define IOP_DT_FS	0x10
 
-/* File objects passed to driver operations.  */
+/** File objects passed to driver operations.  */
 typedef struct _iop_io_file {
-	int	mode;		/* File open mode.  */
-	int	unit;		/* HW device unit number.  */
-	struct _iop_io_device *device; /* Device driver.  */
-	void	*privdata;	/* The device driver can use this however it
-				   wants.  */
+	/** File open mode.  */
+	int	mode;		
+	/** HW device unit number.  */
+	int	unit;		
+	/** Device driver.  */
+	struct _iop_io_device *device; 
+	/** The device driver can use this however it wants.  */
+	void	*privdata;	
 } iop_io_file_t;
 
 typedef struct _iop_io_device {
 	const char *name;
 	unsigned int type;
-	unsigned int version;	/* Not so sure about this one.  */
+	/** Not so sure about this one.  */
+	unsigned int version;
 	const char *desc;
 	struct _iop_io_device_ops *ops;
 } iop_io_device_t;

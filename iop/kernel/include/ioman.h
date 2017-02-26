@@ -6,9 +6,12 @@
 # Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# IOMAN definitions and imports.
 */
+
+/**
+ * @file
+ * IOMAN definitions and imports.
+ */
 
 #ifndef IOP_IOMAN_H
 #define IOP_IOMAN_H
@@ -62,19 +65,23 @@ int format(const char *dev);
 #define IOP_DT_RAW	0x08
 #define IOP_DT_FS	0x10
 
-/* File objects passed to driver operations.  */
+/** File objects passed to driver operations.  */
 typedef struct _iop_file {
-	int	mode;		/* File open mode.  */
-	int	unit;		/* HW device unit number.  */
-	struct _iop_device *device; /* Device driver.  */
-	void	*privdata;	/* The device driver can use this however it
-				   wants.  */
+	/** File open mode.  */
+	int	mode;		
+	/** HW device unit number.  */
+	int	unit;		
+	/** Device driver.  */
+	struct _iop_device *device; 
+	/** The device driver can use this however it wants.  */
+	void	*privdata;	
 } iop_file_t;
 
 typedef struct _iop_device {
 	const char *name;
 	unsigned int type;
-	unsigned int version;	/* Not so sure about this one.  */
+	/** Not so sure about this one.  */
+	unsigned int version;
 	const char *desc;
 	struct _iop_device_ops *ops;
 } iop_device_t;

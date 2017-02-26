@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# rom0:XSIO2MAN module definitions
 */
+
+/**
+ * @file
+ * rom0:XSIO2MAN module definitions
+ */
 
 #ifndef IOP_XSIO2MAN_H
 #define IOP_XSIO2MAN_H

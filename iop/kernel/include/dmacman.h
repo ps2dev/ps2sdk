@@ -6,9 +6,12 @@
 # Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# DMACMAN definitions and imports.
 */
+
+/**
+ * @file
+ * DMACMAN definitions and imports.
+ */
 
 #ifndef IOP_DMACMAN_H
 #define IOP_DMACMAN_H
@@ -24,11 +27,15 @@ typedef struct _iop_dmac_chan {
 
 /* CHCR flags */
 #define DMAC_CHCR_30 (1<<30)
-#define DMAC_CHCR_TR (1<<24)		/* TRansfer */
-#define DMAC_CHCR_LI (1<<10)		/* LInked list (GPU, SPU and SIF0) */
-#define DMAC_CHCR_CO (1<<9)		/* COntinuous (?) */
+/** TRansfer */
+#define DMAC_CHCR_TR (1<<24)
+/** LInked list (GPU, SPU and SIF0) */
+#define DMAC_CHCR_LI (1<<10)
+/** COntinuous (?) */
+#define DMAC_CHCR_CO (1<<9)
 #define DMAC_CHCR_08 (1<<8)
-#define DMAC_CHCR_DR (1<<0)		/* DiRection; 0 = to RAM, 1 = from RAM */
+/** DiRection; 0 = to RAM, 1 = from RAM */
+#define DMAC_CHCR_DR (1<<0)
 
 #define DMAC_TO_MEM	0
 #define DMAC_FROM_MEM	1

@@ -6,9 +6,12 @@
 # Copyright (c) 2009 jimmikaelkael
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Definitions and imports for secrman module.
 */
+
+/**
+ * @file
+ * Definitions and imports for secrman module.
+ */
 
 #ifndef IOP_SECRMAN_H
 #define IOP_SECRMAN_H

@@ -6,9 +6,12 @@
 # Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Definitions and imports for iomanX.
 */
+
+/**
+ * @file
+ * Definitions and imports for iomanX.
+ */
 
 #ifndef IOP_IOMANX_H
 #define IOP_IOMANX_H
@@ -28,22 +31,27 @@
 #define IOP_DT_RAW	0x08
 #define IOP_DT_FS	0x10
 #ifndef IOMAN_NO_EXTENDED
-#define IOP_DT_FSEXT	0x10000000	/* Supports calls after chstat().  */
+/** Supports calls after chstat().  */
+#define IOP_DT_FSEXT	0x10000000	
 #endif
 
-/* File objects passed to driver operations.  */
+/** File objects passed to driver operations.  */
 typedef struct _iop_file {
-	int	mode;		/* File open mode.  */
-	int	unit;		/* HW device unit number.  */
-	struct _iop_device *device; /* Device driver.  */
-	void	*privdata;	/* The device driver can use this however it
-				   wants.  */
+	/** File open mode.  */
+	int	mode;		
+	/** HW device unit number.  */
+	int	unit;		
+	/** Device driver.  */
+	struct _iop_device *device; 
+	/** The device driver can use this however it wants.  */
+	void	*privdata;	
 } iop_file_t;
 
 typedef struct _iop_device {
 	const char *name;
 	unsigned int type;
-	unsigned int version;	/* Not so sure about this one.  */
+	/** Not so sure about this one.  */
+	unsigned int version;
 	const char *desc;
 	struct _iop_device_ops *ops;
 } iop_device_t;
@@ -120,7 +128,7 @@ int getstat(const char *name, iox_stat_t *stat);
 int chstat(const char *name, iox_stat_t *stat, unsigned int statmask);
 #define I_chstat DECLARE_IMPORT(17, chstat)
 
-/* This can take take more than one form.  */
+/** This can take take more than one form.  */
 int format(const char *dev, const char *blockdev, void *arg, int arglen);
 #define I_format DECLARE_IMPORT(18, format)
 
