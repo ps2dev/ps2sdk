@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# USB Mouse Driver for PS2
 */
+
+/**
+ * @file
+ * USB Mouse Driver for PS2
+ */
 
 #include "types.h"
 #include "iomanX.h"
@@ -70,8 +73,10 @@ typedef struct _mouse_dev
   int dataEndp;
   int packetSize;
   int devId;
-  mouse_data_recv data; /* Holds the data for the transfers */
-  u32 timer[PS2MOUSE_MAXBUTTONS];         /* Array to hold timers for double click */
+  /** Holds the data for the transfers */
+  mouse_data_recv data;
+  /** Array to hold timers for double click */
+  u32 timer[PS2MOUSE_MAXBUTTONS];
 } mouse_dev;
 
 /* Global Variables */
@@ -85,8 +90,10 @@ int mouse_thres;
 int mouse_accel;
 int mouse_dblclicktime;
 int mouse_sema;
-mouse_data mouse; /* Holds the current mouse information */
-mouse_dev *devices[PS2MOUSE_MAXDEV]; /* Holds a list of current devices */
+/** Holds the current mouse information */
+mouse_data mouse;
+/** Holds a list of current devices */
+mouse_dev *devices[PS2MOUSE_MAXDEV];
 int dev_count;
 UsbDriver mouse_driver = { NULL, NULL, "PS2Mouse", ps2mouse_probe, ps2mouse_connect, ps2mouse_disconnect };
 
