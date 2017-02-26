@@ -1,8 +1,12 @@
 /*
- * freepad - IOP pad driver
  * Copyright (c) 2007 Lukasz Bruun <mail@lukasz.dk>
  *
  * See the file LICENSE included with this distribution for licensing terms.
+ */
+
+/**
+ * @file
+ * IOP pad driver
  */
 
 #ifndef __FREEPAD_PADDATA_H__
