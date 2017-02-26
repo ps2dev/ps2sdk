@@ -1,3 +1,8 @@
+/**
+ * @file
+ * SPU2 registers
+ */
+
 #ifndef __SPU2REGS_H__
 #define __SPU2REGS_H__
 
