@@ -1,8 +1,12 @@
 /*
- * freemtap - IOP multitap driver
  * Copyright (c) 2007 Lukasz Bruun <mail@lukasz.dk>
  *
  * See the file LICENSE included with this distribution for licensing terms.
+ */
+
+/**
+ * @file
+ * IOP multitap driver
  */
 
 #ifndef _FREEMTAP_H_
