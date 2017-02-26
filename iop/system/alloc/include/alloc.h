@@ -8,6 +8,11 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
+/**
+ * @file
+ * Basic alloc library
+ */
+
 #ifndef __ALLOC_H__
 #define __ALLOC_H__
 
