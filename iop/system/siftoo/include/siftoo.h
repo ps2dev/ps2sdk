@@ -6,9 +6,12 @@
 # Copyright (c) 2003  Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# SIFToo driver.
 */
+
+/**
+ * @file
+ * SIFToo driver.
+ */
 
 #ifndef IOP_SIFTOO_H
 #define IOP_SIFTOO_H
@@ -17,9 +20,11 @@
 #include "irx.h"
 
 enum sif2_errors {
-    SIF2_E_OK,		/* No error.  */
+	/** No error.  */
+    SIF2_E_OK,
 
-    SIF2_E_INIT = 0xd700, /* Initialization error.  */
+    /** Initialization error.  */
+    SIF2_E_INIT = 0xd700, 
 };
 
 typedef int (*sif2_pipe_handler_t)(u32, void *, u32);
