@@ -6,9 +6,13 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# USB Driver function prototypes and constants.
 */
+
+/**
+ * @file
+ * USB Driver function prototypes and constants.
+ */
+
 #ifndef __USBD_H__
 #define __USBD_H__
 
@@ -46,11 +50,11 @@ typedef struct {
 } UsbHubDescriptor;
 
 
-/* USB driver bus event listener structure */
+/** USB driver bus event listener structure */
 typedef struct _UsbDriver {
 	struct _UsbDriver *next, *prev;
 
-	/* short sweet name for your driver, like "usbmouse" or "pl2301" */
+	/** short sweet name for your driver, like "usbmouse" or "pl2301" */
 	char *name;
 
 	int (*probe)(int devID);
@@ -216,38 +220,64 @@ typedef	void (*UsbMultiIsochronousDoneCallback)(int result, UsbMultiIsochronousR
 #define USB_REQ_SET_INTERFACE		0x0B
 #define USB_REQ_SYNCH_FRAME			0x0C
 
-#define USB_RC_OK			0x000	// No Error
-#define USB_RC_CRC			0x001	// Bad CRC
-#define USB_RC_BITSTUFF		0x002	// Bit Stuffing
-#define USB_RC_TOGGLE		0x003	// Bad Direction Toggle
-#define USB_RC_STALL		0x004	// Endpoint Stalled
-#define USB_RC_NORESPONSE	0x005	// Device Is Not Responding
-#define USB_RC_BADPID		0x006	// PID Check Failed
-#define USB_RC_WRONGPID		0x007	// Unexpected PID
-#define USB_RC_DATAOVER		0x008	// Data Overrun
-#define USB_RC_DATAUNDER	0x009	// Data Underrun
-#define USB_RC_BUFFOVER		0x00C	// Buffer Overrun
-#define USB_RC_BUFFUNDER	0x00D	// Buffer Underrun
-#define USB_RC_NOTACCESSED	0x00E	// Not Accessed
-#define USB_RC_NOTACCESSED2	0x00F	// Not Accessed
+/** No Error */
+#define USB_RC_OK			0x000
+/** Bad CRC */
+#define USB_RC_CRC			0x001
+/** Bit Stuffing */
+#define USB_RC_BITSTUFF		0x002
+/** Bad Direction Toggle */
+#define USB_RC_TOGGLE		0x003
+/** Endpoint Stalled */
+#define USB_RC_STALL		0x004
+/** Device Is Not Responding */
+#define USB_RC_NORESPONSE	0x005
+/** PID Check Failed */
+#define USB_RC_BADPID		0x006
+/** Unexpected PID */
+#define USB_RC_WRONGPID		0x007
+/** Data Overrun */
+#define USB_RC_DATAOVER		0x008
+/** Data Underrun */
+#define USB_RC_DATAUNDER	0x009
+/** Buffer Overrun */
+#define USB_RC_BUFFOVER		0x00C
+/** Buffer Underrun */
+#define USB_RC_BUFFUNDER	0x00D
+/** Not Accessed */
+#define USB_RC_NOTACCESSED	0x00E
+/** Not Accessed */
+#define USB_RC_NOTACCESSED2	0x00F
 
-#define USB_RC_BADDEV		0x101	// Invalid device ID
-#define USB_RC_BADPIPE		0x102	// Invalid pipe ID
-#define USB_RC_BADLENGTH	0x103	// Invalid length
-#define USB_RC_BADDRIVER	0x104	// Invalid driver
-#define USB_RC_BADCONTEXT	0x105	// Invalid context
+/** Invalid device ID */
+#define USB_RC_BADDEV		0x101
+/** Invalid pipe ID */
+#define USB_RC_BADPIPE		0x102
+/** Invalid length */
+#define USB_RC_BADLENGTH	0x103
+/** Invalid driver */
+#define USB_RC_BADDRIVER	0x104
+/** Invalid context */
+#define USB_RC_BADCONTEXT	0x105
 #define USB_RC_BADALIGN		0x106
 #define USB_RC_BADHUBDEPTH	0x107
 
-//#define USB_RC_ED			0x111	// No space for Endpoint Descriptor
-#define USB_RC_IOREQ		0x112	// No space for Input/Output Request
-#define USB_RC_BADOPTION	0x113	// Bad Option
+/** No space for Endpoint Descriptor */
+#define USB_RC_ED			0x111
+/** No space for Input/Output Request */
+#define USB_RC_IOREQ		0x112
+/** Bad Option */
+#define USB_RC_BADOPTION	0x113
 
-#define USB_RC_BUSY			0x121	// Device or Bus Busy
-#define USB_RC_ABORTED		0x122	// Operation Aborted
+/** Device or Bus Busy */
+#define USB_RC_BUSY			0x121
+/** Operation Aborted */
+#define USB_RC_ABORTED		0x122
 
-//#define USB_RC_NOSUPPORT	0x131	// Unsupported Operation (not implemented)
-//#define USB_RC_UNKNOWN		0x132	// Unknown Error (USBD.IRX doesn't know what went wrong)
+/** Unsupported Operation (not implemented) */
+#define USB_RC_NOSUPPORT	0x131
+/** Unknown Error (USBD.IRX doesn't know what went wrong) */
+#define USB_RC_UNKNOWN		0x132
 
 int UsbRegisterDriver(UsbDriver *driver);
 int UsbUnregisterDriver(UsbDriver *driver);
