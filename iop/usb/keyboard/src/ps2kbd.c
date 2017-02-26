@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# USB Keyboard Driver for PS2
 */
+
+/**
+ * @file
+ * USB Keyboard Driver for PS2
+ */
 
 #include "types.h"
 #include "ioman.h"
@@ -37,9 +40,9 @@
 
 #define PS2KBD_DEFLINELEN 4096
 #define PS2KBD_DEFREPEATRATE 100
-/* Default repeat rate in milliseconds */
+/** Default repeat rate in milliseconds */
 #define PS2KBD_REPEATWAIT 1000
-/* Number of milliseconds to wait before starting key repeat */
+/** Number of milliseconds to wait before starting key repeat */
 #define USB_KEYB_NUMLOCK 0x53
 #define USB_KEYB_CAPSLOCK 0x39
 #define USB_KEYB_SCRLOCK 0x47
@@ -74,12 +77,15 @@ typedef struct _keyb_dev
   int dataEndp;
   int packetSize;
   int devId;
-  int interfaceNo;    /* Holds the interface number selected on this device */
+  /** Holds the interface number selected on this device */
+  int interfaceNo;    
   char repeatkeys[2];
   u32 eventmask;
-  u8 ledStatus;     /* Maintains state on the led status */
+  /** Maintains state on the led status */
+  u8 ledStatus;     
   kbd_data_recv oldData;
-  kbd_data_recv data; /* Holds the data for the transfers */
+  /** Holds the data for the transfers */
+  kbd_data_recv data; 
 } kbd_dev;
 
 /* Global Variables */
@@ -87,7 +93,8 @@ typedef struct _keyb_dev
 int kbd_readmode;
 int kbd_blocking;
 u32 kbd_repeatrate;
-kbd_dev *devices[PS2KBD_MAXDEV]; /* Holds a list of current devices */
+/** Holds a list of current devices */
+kbd_dev *devices[PS2KBD_MAXDEV]; 
 int dev_count;
 UsbDriver kbd_driver = { NULL, NULL, "PS2Kbd", ps2kbd_probe, ps2kbd_connect, ps2kbd_disconnect };
 u8 *lineBuffer;
@@ -95,9 +102,12 @@ u32 lineStartP, lineEndP;
 int lineSema;
 int bufferSema;
 u32 lineSize;
-u8 keymap[PS2KBD_KEYMAP_SIZE];         /* Normal key map */
-u8 shiftkeymap[PS2KBD_KEYMAP_SIZE];  /* Shifted key map */
-u8 keycap[PS2KBD_KEYMAP_SIZE];          /* Does this key get shifted by capslock ? */
+/** Normal key map */
+u8 keymap[PS2KBD_KEYMAP_SIZE];        
+/** Shifted key map */ 
+u8 shiftkeymap[PS2KBD_KEYMAP_SIZE];  
+/** Does this key get shifted by capslock ? */
+u8 keycap[PS2KBD_KEYMAP_SIZE];          
 u8 special_keys[PS2KBD_KEYMAP_SIZE];
 u8 control_map[PS2KBD_KEYMAP_SIZE];
 u8 alt_map[PS2KBD_KEYMAP_SIZE];
