@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# USB Driver function prototypes and constants.
 */
+
+/**
+ * @file
+ * USB Driver function prototypes and constants.
+ */
 
 #if !defined(_USBD_MACRO_H)
 #define _USBD_MACRO_H
@@ -29,7 +32,7 @@ static int UsbControlTransfer(int epID, int reqtyp, int req, int val, int index,
 
 
 
-/*
+#if 0
 #define UsbControlTransfer(epID, reqtyp, req, val, index, len, dataptr, doneCB, arg) \
  ({ \
 	UsbDeviceRequest devreq; \
@@ -40,7 +43,7 @@ static int UsbControlTransfer(int epID, int reqtyp, int req, int val, int index,
 	devreq.length = (len); \
 	UsbTransfer((epID), (dataptr), devreq.length, &devreq, (doneCB), (arg)); \
 	})
-*/
+#endif
 
 #define UsbIsochronousTransfer(epID, dataptr, len, delta, doneCB, arg) \
 	UsbTransfer((epID), (dataptr), (len), (void *)(delta), (doneCB), (arg))

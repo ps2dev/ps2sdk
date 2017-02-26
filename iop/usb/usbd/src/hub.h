@@ -1,3 +1,8 @@
+/**
+ * @file
+ * USB Driver function prototypes and constants.
+ */
+
 #ifndef __HUB_H__
 #define __HUB_H__
 
