@@ -6,9 +6,12 @@
 # Copyright (c) 2003  Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# SBUS interrupts.
 */
+
+/**
+ * @file
+ * SBUS interrupts.
+ */
 
 #ifndef IOP_SBUSINTR_H
 #define IOP_SBUSINTR_H
@@ -20,9 +23,12 @@
 enum sbus_errors {
 	SBUS_E_OK,
 
-	SBUS_E_INIT = 0xd600,	/* Initialization error */
-	SBUS_E_ARG,		/* Error with an argument */
-	SBUS_E_IRQ,		/* Wrong IRQ number / already in use */
+	/** Initialization error */
+	SBUS_E_INIT = 0xd600,
+	/** Error with an argument */
+	SBUS_E_ARG,
+	/** Wrong IRQ number / already in use */
+	SBUS_E_IRQ,
 };
 
 typedef int (*sbus_intr_handler_t)(u32, void *);
