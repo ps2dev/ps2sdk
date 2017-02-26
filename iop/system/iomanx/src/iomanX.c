@@ -7,9 +7,12 @@
 # Copyright (c) 2004 adresd <adresd_ps2dev@yahoo.com>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Advanced I/O library.
 */
+
+/**
+ * @file
+ * Advanced I/O library.
+ */
 
 #include "types.h"
 #include "defs.h"
