@@ -5,9 +5,12 @@
 #-----------------------------------------------------------------------
 # Copyright 2005, ps2dev - http://www.ps2dev.org
 # Licenced under GNU Library General Public License version 2
-#
-# audsrv iop rpc server.
 */
+
+/**
+ * @file
+ * audsrv iop rpc server.
+ */
 
 #include <stdio.h>
 #include <thbase.h>
@@ -23,19 +26,23 @@
 #include "rpc_client.h"
 
 /* rpc server variables */
-static int rpc_buffer[18000/4];         ///< buffer for RPC DMA
-static SifRpcDataQueue_t qd;            ///< RPC thread variables
-static SifRpcServerData_t sd0;          ///< RPC thread variables
+/** buffer for RPC DMA */
+static int rpc_buffer[18000/4];
+/** RPC thread variables */
+static SifRpcDataQueue_t qd;
+/** RPC thread variables */
+static SifRpcServerData_t sd0;
+
 
 /** RPC command handler.
-    @param func     command (one of AUDSRV_x)
-    @param data     pointer to data array
-    @param size     size of data array (in bytes)
-    @returns value depends on function invoked
-
-    This is a single rpc handler, it unpacks the data array and calls
-    local functions.
-*/
+ * @param func     command (one of AUDSRV_x)
+ * @param data     pointer to data array
+ * @param size     size of data array (in bytes)
+ * @returns value depends on function invoked
+ *
+ * This is a single rpc handler, it unpacks the data array and calls
+ * local functions.
+ */
 static void *rpc_command(int func, unsigned *data, int size)
 {
 	int ret;
@@ -145,10 +152,10 @@ static void *rpc_command(int func, unsigned *data, int size)
 }
 
 /** RPC listener thread
-    @param arg   not used
+ * @param arg   not used
 
-    This is the main RPC thread. Nothing fancy here.
-*/
+ * This is the main RPC thread. Nothing fancy here.
+ */
 static void rpc_server_thread(void *arg)
 {
 	SifInitRpc(0);

@@ -5,9 +5,12 @@
 #-----------------------------------------------------------------------
 # Copyright 2005, ps2dev - http://www.ps2dev.org
 # Licenced under GNU Library General Public License version 2
-#
-# audsrv IOP server
 */
+
+/**
+ * @file
+ * audsrv IOP server
+ */
 
 #ifndef __AUDSRV_H__
 #define __AUDSRV_H__
