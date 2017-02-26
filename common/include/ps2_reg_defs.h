@@ -1,3 +1,8 @@
+/**
+ * @file
+ * Register definitions
+ */
+
 #ifndef _PS2_REG_DEFS_H
 #define _PS2_REG_DEFS_H
 
@@ -47,16 +52,16 @@ typedef volatile struct st_PS2_SBUS_Registers
 #define PS2_IRQ_UNK9 (9)
 #define PS2_IRQ_UNK10 (10)
 
-// PS1 GPU interrupt, IOP->EE
+/** PS1 GPU interrupt, IOP->EE */
 #define SBUS_CTRL_PGPU_INT (1 << 0)
 
-// I suspect this is bit 8
+/** I suspect this is bit 8 */
 #define SBUS_CTRL_MSCLK (1 << 8)
 
-// right? bit 18 is set to interrupt IOP from EE.  there should be a corresponding "SMINT" for IOP...
+/** right? bit 18 is set to interrupt IOP from EE.  there should be a corresponding "SMINT" for IOP... */
 #define SBUS_CTRL_MSINT  (1 << 18)
 
-// PS1 Mode Reset, EE->IOP.  Resets IOP into "PS1 Mode" though EE needs to do some initializing first.
+/** PS1 Mode Reset, EE->IOP.  Resets IOP into "PS1 Mode" though EE needs to do some initializing first. */
 #define SBUS_CTRL_PS1_RESET (1 << 19)
 
 #define R_PS2_SBUS(__base_addr, __reg_no) ((vu32 *) ((u32) (__base_addr) + (__reg_no * 0x10)))

@@ -1,3 +1,8 @@
+/**
+ * @file
+ * Limit definitions.
+ */
+
 #ifndef _LIMITS_H___
 #define _LIMITS_H___
 

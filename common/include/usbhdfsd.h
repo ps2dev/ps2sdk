@@ -1,17 +1,27 @@
+/**
+ * @file
+ * USBHDFSD definitions.
+ */
+
 #ifndef _USBHDFSD_H
 #define _USBHDFSD_H
 
 //IOCTL function codes
-#define USBMASS_IOCTL_RENAME 0x0000  //Rename opened file. Data input to ioctl() -> new, full filename of file.
+/** Rename opened file. Data input to ioctl() -> new, full filename of file. */
+#define USBMASS_IOCTL_RENAME 0x0000
 
 //Device status bits.
-#define USBMASS_DEV_STAT_CONN	0x01	//CONNected
-#define USBMASS_DEV_STAT_CONF	0x02	//CONFigured
-#define USBMASS_DEV_STAT_ERR	0x80	//ERRor
+/** CONNected */
+#define USBMASS_DEV_STAT_CONN	0x01
+/** CONFigured */
+#define USBMASS_DEV_STAT_CONF	0x02
+/** ERRor */
+#define USBMASS_DEV_STAT_ERR	0x80
 
 //Structure definitions
 typedef struct UsbMassDeviceInfo{
-	unsigned short int status;	// If the CONNected bit is not set, the contents of the other fields of this structure are undefined.
+	/** If the CONNected bit is not set, the contents of the other fields of this structure are undefined. */
+	unsigned short int status;
 	unsigned short int SectorSize;
 	unsigned int MaxLBA;
 } UsbMassDeviceInfo_t;

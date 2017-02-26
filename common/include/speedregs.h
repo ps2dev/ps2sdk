@@ -6,9 +6,12 @@
 # Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# SPEED (ASIC on SMAP) register definitions.
 */
+
+/**
+ * @file
+ * SPEED (ASIC on SMAP) register definitions.
+ */
 
 #ifndef SPEEDREGS_H
 #define SPEEDREGS_H
@@ -48,10 +51,14 @@
 #define   SPD_INTR_UART			(1<<12)				//mask=0x1000
 #define SPD_R_PIO_DIR			0x2c
 #define SPD_R_PIO_DATA			0x2e
-#define	  SPD_PP_DOUT		(1<<4)	/* Data output, read port */
-#define	  SPD_PP_DIN		(1<<5)	/* Data input,  write port */
-#define	  SPD_PP_SCLK		(1<<6)	/* Clock,       write port */
-#define	  SPD_PP_CSEL		(1<<7)	/* Chip select, write port */
+/** Data output, read port */
+#define	  SPD_PP_DOUT		(1<<4)
+/** Data input,  write port */
+#define	  SPD_PP_DIN		(1<<5)
+/** Clock,       write port */
+#define	  SPD_PP_SCLK		(1<<6)
+/** Chip select, write port */
+#define	  SPD_PP_CSEL		(1<<7)
 /* Operation codes */
 #define	  SPD_PP_OP_READ	2
 #define	  SPD_PP_OP_WRITE	1

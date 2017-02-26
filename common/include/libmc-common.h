@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Common definitions for libmc on the EE and IOP
 */
+
+/**
+ * @file
+ * Common definitions for libmc on the EE and IOP
+ */
 
 #ifndef _LIBMC_COMMON_H_
 #define _LIBMC_COMMON_H_
@@ -59,8 +62,9 @@ typedef struct {			// size = 512
 	u8  unused3[416];		// 96
 } McFsEntry;
 
-// file descriptor related mc command
-// used by: McInit, McClose, McSeek, McRead, McWrite, McGetinfo, McFormat, McFlush, McUnformat
+/** file descriptor related mc command
+ * used by: McInit, McClose, McSeek, McRead, McWrite, McGetinfo, McFormat, McFlush, McUnformat
+ */
 typedef struct {	// size = 48
 	int fd;		// 0
 	int port;	// 4
@@ -73,8 +77,9 @@ typedef struct {	// size = 48
 	u8 data[16];	// 32
 } mcDescParam_t;
 
-// endParamenter struct
-// used by: McRead, McGetInfo, McReadPage
+/** endParamenter struct
+ * used by: McRead, McGetInfo, McReadPage
+ */
 typedef struct {		// size = 64
 	union {
 		s32	size1; 	// 0
@@ -91,8 +96,9 @@ typedef struct {		// size = 64
 	u8	unused[16];	// 48
 } mcEndParam_t;
 
-// endParamenter2 struct
-// used by: McRead2, McGetInfo2
+/** endParamenter2 struct
+ * used by: McRead2, McGetInfo2
+ */
 typedef struct {			// size = 192
 	union {
 		s32	size1; 		// 0

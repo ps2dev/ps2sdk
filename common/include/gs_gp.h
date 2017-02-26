@@ -1,86 +1,167 @@
+/**
+ * @file
+ * GS General Purpose Registers
+ */
+
 #ifndef __GS_GP_H__
 #define __GS_GP_H__
 
 #include <tamtypes.h>
 
 // General Purpose Registers
-#define GS_REG_PRIM			0x00	// Drawing primitive setting.
-#define GS_REG_RGBAQ		0x01	// Vertex color setting.
-#define GS_REG_ST			0x02	// Specification of vertex texture coordinates.
-#define GS_REG_UV			0x03	// Specification of vertex texture coordinates.
-#define GS_REG_XYZF2		0x04	// Setting for vertex coordinate values.
-#define GS_REG_XYZ2			0x05	// Setting for vertex coordinate values.
-#define GS_REG_TEX0			0x06	// Texture information setting.
-#define GS_REG_TEX0_1		0x06	// Texture information setting. (Context 1)
-#define GS_REG_TEX0_2		0x07	// Texture information setting. (Context 2)
-#define GS_REG_CLAMP		0x08	// Texture wrap mode.
-#define GS_REG_CLAMP_1		0x08	// Texture wrap mode. (Context 1)
-#define GS_REG_CLAMP_2		0x09	// Texture wrap mode. (Context 2)
-#define GS_REG_FOG			0x0A	// Vertex fog value setting.
-#define GS_REG_XYZF3		0x0C	// Setting for vertex coordinate values. (Without Drawing Kick)
-#define GS_REG_XYZ3			0x0D	// Setting for vertex coordinate values. (Without Drawing Kick)
-#define GS_REG_TEX1			0x14	// Texture information setting.
-#define GS_REG_TEX1_1		0x14	// Texture information setting. (Context 1)
-#define GS_REG_TEX1_2		0x15	// Texture information setting. (Context 2)
-#define GS_REG_TEX2			0x16	// Texture information setting.
-#define GS_REG_TEX2_1		0x16	// Texture information setting. (Context 1)
-#define GS_REG_TEX2_2		0x17	// Texture information setting. (Context 2)
-#define GS_REG_XYOFFSET		0x18	// Offset value setting.
-#define GS_REG_XYOFFSET_1	0x18	// Offset value setting. (Context 1)
-#define GS_REG_XYOFFSET_2	0x19	// Offset value setting. (Context 2)
-#define GS_REG_PRMODECONT	0x1A	// Specification of primitive attribute setting method.
-#define GS_REG_PRMODE		0x1B	// Setting for attributes of drawing primitives.
-#define GS_REG_TEXCLUT		0x1C	// Clut position specification.
-#define GS_REG_SCANMSK		0x22	// Raster address mask setting.
-#define GS_REG_MIPTBP1		0x34	// Mipmap information setting for levels 1 - 3.
-#define GS_REG_MIPTBP1_1	0x34	// Mipmap information setting for levels 1 - 3. (Context 1)
-#define GS_REG_MIPTBP1_2	0x35	// Mipmap information setting for levels 1 - 3. (Context 2)
-#define GS_REG_MIPTBP2		0x36	// Mipmap information setting for levels 4 - 6.
-#define GS_REG_MIPTBP2_1	0x36	// Mipmap information setting for levels 4 - 6. (Context 1)
-#define GS_REG_MIPTBP2_2	0x37	// Mipmap information setting for levels 4 - 6. (Context 2)
-#define GS_REG_TEXA			0x3B	// Texture alpha value setting.
-#define GS_REG_FOGCOL		0x3D	// Distant fog color setting.
-#define GS_REG_TEXFLUSH		0x3F	// Texture page buffer disabling.
-#define GS_REG_SCISSOR		0x40	// Setting for scissoring area.
-#define GS_REG_SCISSOR_1	0x40	// Setting for scissoring area. (Context 1)
-#define GS_REG_SCISSOR_2	0x41	// Setting for scissoring area. (Context 2)
-#define GS_REG_ALPHA		0x42	// Alpha blending setting.
-#define GS_REG_ALPHA_1		0x42	// Alpha blending setting. (Context 1)
-#define GS_REG_ALPHA_2		0x43	// Alpha blending setting. (Context 2)
-#define GS_REG_DIMX			0x44	// Dither matrix setting.
-#define GS_REG_DTHE			0x45	// Dither control.
-#define GS_REG_COLCLAMP		0x46	// Color clamp control.
-#define GS_REG_TEST			0x47	// Pixel test control.
-#define GS_REG_TEST_1		0x47	// Pixel test control. (Context 1)
-#define GS_REG_TEST_2		0x48	// Pixel test control. (Context 2)
-#define GS_REG_PABE			0x49	// Alpha blending control in units of pixels.
-#define GS_REG_FBA			0x4A	// Alpha correction value.
-#define GS_REG_FBA_1		0x4A	// Alpha correction value. (Context 1)
-#define GS_REG_FBA_2		0x4B	// Alpha correction value. (Context 2)
-#define GS_REG_FRAME		0x4C	// Frame buffer setting.
-#define GS_REG_FRAME_1		0x4C	// Frame buffer setting. (Context 1)
-#define GS_REG_FRAME_2		0x4D	// Frame buffer setting. (Context 2)
-#define GS_REG_ZBUF			0x4E	// Z-Buffer setting.
-#define GS_REG_ZBUF_1		0x4E	// Z-Buffer setting. (Context 1)
-#define GS_REG_ZBUF_2		0x4F	// Z-Buffer setting. (Context 2)
-#define GS_REG_BITBLTBUF	0x50	// Setting for transmissions between buffers.
-#define GS_REG_TRXPOS		0x51	// Specification of transmission area in buffers.
-#define GS_REG_TRXREG		0x52	// Specification of transmission area in buffers.
-#define GS_REG_TRXDIR		0x53	// Activation of transmission area in buffers.
-#define GS_REG_HWREG		0x54	// Data port for transmission between buffers.
-#define GS_REG_SIGNAL		0x60	// Signal event occurence request.
-#define GS_REG_FINISH		0x61	// Finish event occurence request.
-#define GS_REG_LABEL		0x62	// Label event occurence request.
-#define GS_REG_NOP			0x7F	// GS No Operation
+/** Drawing primitive setting. */
+#define GS_REG_PRIM			0x00
+/** Vertex color setting. */
+#define GS_REG_RGBAQ		0x01
+/** Specification of vertex texture coordinates. */
+#define GS_REG_ST			0x02
+/** Specification of vertex texture coordinates. */
+#define GS_REG_UV			0x03
+/** Setting for vertex coordinate values. */
+#define GS_REG_XYZF2		0x04
+/** Setting for vertex coordinate values. */
+#define GS_REG_XYZ2			0x05
+/** Texture information setting. */
+#define GS_REG_TEX0			0x06
+/** Texture information setting. (Context 1) */
+#define GS_REG_TEX0_1		0x06
+/** Texture information setting. (Context 2) */
+#define GS_REG_TEX0_2		0x07
+/** Texture wrap mode. */
+#define GS_REG_CLAMP		0x08
+/** Texture wrap mode. (Context 1) */
+#define GS_REG_CLAMP_1		0x08
+/** Texture wrap mode. (Context 2) */
+#define GS_REG_CLAMP_2		0x09
+/** Vertex fog value setting. */
+#define GS_REG_FOG			0x0A
+/** Setting for vertex coordinate values. (Without Drawing Kick) */
+#define GS_REG_XYZF3		0x0C
+/** Setting for vertex coordinate values. (Without Drawing Kick) */
+#define GS_REG_XYZ3			0x0D
+/** Texture information setting. */
+#define GS_REG_TEX1			0x14
+/** Texture information setting. (Context 1) */
+#define GS_REG_TEX1_1		0x14
+/** Texture information setting. (Context 2) */
+#define GS_REG_TEX1_2		0x15
+/** Texture information setting. */
+#define GS_REG_TEX2			0x16
+/** Texture information setting. (Context 1) */
+#define GS_REG_TEX2_1		0x16
+/** Texture information setting. (Context 2) */
+#define GS_REG_TEX2_2		0x17
+/** Offset value setting. */
+#define GS_REG_XYOFFSET		0x18
+/** Offset value setting. (Context 1) */
+#define GS_REG_XYOFFSET_1	0x18
+/** Offset value setting. (Context 2) */
+#define GS_REG_XYOFFSET_2	0x19
+/** Specification of primitive attribute setting method. */
+#define GS_REG_PRMODECONT	0x1A
+/** Setting for attributes of drawing primitives. */
+#define GS_REG_PRMODE		0x1B
+/** Clut position specification. */
+#define GS_REG_TEXCLUT		0x1C
+/** Raster address mask setting. */
+#define GS_REG_SCANMSK		0x22
+/** Mipmap information setting for levels 1 - 3. */
+#define GS_REG_MIPTBP1		0x34
+/** Mipmap information setting for levels 1 - 3. (Context 1) */
+#define GS_REG_MIPTBP1_1	0x34
+/** Mipmap information setting for levels 1 - 3. (Context 2) */
+#define GS_REG_MIPTBP1_2	0x35
+/** Mipmap information setting for levels 4 - 6. */
+#define GS_REG_MIPTBP2		0x36
+/** Mipmap information setting for levels 4 - 6. (Context 1) */
+#define GS_REG_MIPTBP2_1	0x36
+/** Mipmap information setting for levels 4 - 6. (Context 2) */
+#define GS_REG_MIPTBP2_2	0x37
+/** Texture alpha value setting. */
+#define GS_REG_TEXA			0x3B
+/** Distant fog color setting. */
+#define GS_REG_FOGCOL		0x3D
+/** Texture page buffer disabling. */
+#define GS_REG_TEXFLUSH		0x3F
+/** Setting for scissoring area. */
+#define GS_REG_SCISSOR		0x40
+/** Setting for scissoring area. (Context 1) */
+#define GS_REG_SCISSOR_1	0x40
+/** Setting for scissoring area. (Context 2) */
+#define GS_REG_SCISSOR_2	0x41
+/** Alpha blending setting. */
+#define GS_REG_ALPHA		0x42
+/** Alpha blending setting. (Context 1) */
+#define GS_REG_ALPHA_1		0x42
+/** Alpha blending setting. (Context 2) */
+#define GS_REG_ALPHA_2		0x43
+/** Dither matrix setting. */
+#define GS_REG_DIMX			0x44
+/** Dither control. */
+#define GS_REG_DTHE			0x45
+/** Color clamp control. */
+#define GS_REG_COLCLAMP		0x46
+/** Pixel test control. */
+#define GS_REG_TEST			0x47
+/** Pixel test control. (Context 1) */
+#define GS_REG_TEST_1		0x47
+/** Pixel test control. (Context 2) */
+#define GS_REG_TEST_2		0x48
+/** Alpha blending control in units of pixels. */
+#define GS_REG_PABE			0x49
+/** Alpha correction value. */
+#define GS_REG_FBA			0x4A
+/** Alpha correction value. (Context 1) */
+#define GS_REG_FBA_1		0x4A
+/** Alpha correction value. (Context 2) */
+#define GS_REG_FBA_2		0x4B
+/** Frame buffer setting. */
+#define GS_REG_FRAME		0x4C
+/** Frame buffer setting. (Context 1) */
+#define GS_REG_FRAME_1		0x4C
+/** Frame buffer setting. (Context 2) */
+#define GS_REG_FRAME_2		0x4D
+/** Z-Buffer setting. */
+#define GS_REG_ZBUF			0x4E
+/** Z-Buffer setting. (Context 1) */
+#define GS_REG_ZBUF_1		0x4E
+/** Z-Buffer setting. (Context 2) */
+#define GS_REG_ZBUF_2		0x4F
+/** Setting for transmissions between buffers. */
+#define GS_REG_BITBLTBUF	0x50
+/** Specification of transmission area in buffers. */
+#define GS_REG_TRXPOS		0x51
+/** Specification of transmission area in buffers. */
+#define GS_REG_TRXREG		0x52
+/** Activation of transmission area in buffers. */
+#define GS_REG_TRXDIR		0x53
+/** Data port for transmission between buffers. */
+#define GS_REG_HWREG		0x54
+/** Signal event occurence request. */
+#define GS_REG_SIGNAL		0x60
+/** Finish event occurence request. */
+#define GS_REG_FINISH		0x61
+/** Label event occurence request. */
+#define GS_REG_LABEL		0x62
+/** GS No Operation */
+#define GS_REG_NOP			0x7F
 
 // GS Primitive types
-#define GS_PRIM_POINT			0x00	// Point primitive
-#define GS_PRIM_LINE			0x01	// Line primitive
-#define GS_PRIM_LINE_STRIP		0x02	// Line strip primitive
-#define GS_PRIM_TRIANGLE		0x03	// Triangle primitive
-#define GS_PRIM_TRIANGLE_STRIP	0x04	// Triangle strip primitive
-#define GS_PRIM_TRIANGLE_FAN	0x05	// Triangle fan primitive
-#define GS_PRIM_SPRITE			0x06	// Sprite primitive
+/** Point primitive */
+#define GS_PRIM_POINT			0x00
+/** Line primitive */
+#define GS_PRIM_LINE			0x01
+/** Line strip primitive */
+#define GS_PRIM_LINE_STRIP		0x02
+/** Triangle primitive */
+#define GS_PRIM_TRIANGLE		0x03
+/** Triangle strip primitive */
+#define GS_PRIM_TRIANGLE_STRIP	0x04
+/** Triangle fan primitive */
+#define GS_PRIM_TRIANGLE_FAN	0x05
+/** Sprite primitive */
+#define GS_PRIM_SPRITE			0x06
+
 
 // For generic enabling or disabling
 #define GS_DISABLE				0x00

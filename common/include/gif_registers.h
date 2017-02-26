@@ -1,18 +1,31 @@
+/**
+ * @file
+ * GIF Registers
+ */
+
 #ifndef __GIF_REGISTERS_H__
 #define __GIF_REGISTERS_H__
 
-// GIF Registers
-
-#define GIF_REG_CTRL	*(volatile u32 *)0x10003000	// Control Register
-#define GIF_REG_MODE	*(volatile u32 *)0x10003010	// Mode Setting Register
-#define GIF_REG_STAT	*(volatile u32 *)0x10003020	// Status Register
-#define GIF_REG_TAG0	*(volatile u32 *)0x10003040	// GIFtag Save Register
-#define GIF_REG_TAG1	*(volatile u32 *)0x10003050	// GIFtag Save Register
-#define GIF_REG_TAG2	*(volatile u32 *)0x10003060	// GIFtag Save Register
-#define GIF_REG_TAG3	*(volatile u32 *)0x10003070	// GIFtag Save Register
-#define GIF_REG_CNT		*(volatile u32 *)0x10003080	// Count Register
-#define GIF_REG_P3CNT	*(volatile u32 *)0x10003090	// PATH3 Count Register
-#define GIF_REG_P3TAG	*(volatile u32 *)0x100030A0	// PATH3 Tag Register
+/** Control Register */
+#define GIF_REG_CTRL	*(volatile u32 *)0x10003000
+/** Mode Setting Register */
+#define GIF_REG_MODE	*(volatile u32 *)0x10003010
+/** Status Register */
+#define GIF_REG_STAT	*(volatile u32 *)0x10003020
+/** GIFtag Save Register */
+#define GIF_REG_TAG0	*(volatile u32 *)0x10003040
+/** GIFtag Save Register */
+#define GIF_REG_TAG1	*(volatile u32 *)0x10003050
+/** GIFtag Save Register */
+#define GIF_REG_TAG2	*(volatile u32 *)0x10003060
+/** GIFtag Save Register */
+#define GIF_REG_TAG3	*(volatile u32 *)0x10003070
+/** Count Register */
+#define GIF_REG_CNT		*(volatile u32 *)0x10003080
+/** PATH3 Count Register */
+#define GIF_REG_P3CNT	*(volatile u32 *)0x10003090
+/** PATH3 Tag Register */
+#define GIF_REG_P3TAG	*(volatile u32 *)0x100030A0
 
 #define GIF_SET_CTRL(RST,PSE) \
 	(u32)((RST) & 0x00000001) <<  0 | (u32)((PSE) & 0x00000001) <<  3

@@ -3,6 +3,11 @@
   Licenced under Academic Free License version 3.0
 */
 
+/**
+ * @file
+ * PS2SMB definitions.
+ */
+
 #ifndef _PS2SMB_H
 #define _PS2SMB_H
 

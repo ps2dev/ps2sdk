@@ -6,44 +6,56 @@
 # Copyright (c) 2009 jimmikaelkael
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Definitions and imports for secrman module.
 */
+
+/**
+ * @file
+ * Definitions and imports for secrman module.
+ */
 
 #ifndef LIBSECR_COMMON_H
 #define LIBSECR_COMMON_H
 
 #include <tamtypes.h>
 
-// Encrypted file Data Block info struct
+/** Encrypted file Data Block info struct */
 typedef struct SecrBitBlockData{
-	u32 size;		// Size of data block
-	u32 flags;		// Flags : 0x01 = signed, 0x02 = encrypted.
+	/** Size of data block */
+	u32 size;
+	/** Flags : 0x01 = signed, 0x02 = encrypted. */
+	u32 flags;
 	u8 checksum[8];
 } SecrBitBlockData_t;
 
 typedef struct SecrBitTableHeader{
-	u32 headersize;	// KELF header size (same as SecrKELFHeader_t.KELF_header_size)
-	u8 block_count;	// Number of blocks in the KELF file
+	/** KELF header size (same as SecrKELFHeader_t.KELF_header_size) */
+	u32 headersize;
+	/** Number of blocks in the KELF file */
+	u8 block_count;
 	u8 pad1;
 	u8 pad2;
 	u8 pad3;
 } SecrBitTableHeader_t;
 
-// Encrypted file BIT table struct
+/** Encrypted file BIT table struct */
 typedef struct SecrBitTable {
 	SecrBitTableHeader_t header;
-	SecrBitBlockData_t blocks[63];	// KELF section information.
+	/** KELF section information. */
+	SecrBitBlockData_t blocks[63];
 } SecrBitTable_t;
 
-// Encrypted file header struct
+/** Encrypted file header struct */
 typedef struct KELF_Header{
 	u8 UserHeader[16];
-	u32 ELF_size;		// Size of data blocks = Decrypted elf size
-	u16 KELF_header_size;	// KELF header size
+	/** Size of data blocks = Decrypted elf size */
+	u32 ELF_size;
+	/** KELF header size */
+	u16 KELF_header_size; 
 	u16 unknown5;
-	u16 flags;		// Controls the layout of the KELF header.
-	u16 BIT_count;		// Number of entries in the bit table.
+	/** Controls the layout of the KELF header. */
+	u16 flags;
+	/** Number of entries in the bit table. */
+	u16 BIT_count;
 	u32 mg_zones;
 } SecrKELFHeader_t;
 

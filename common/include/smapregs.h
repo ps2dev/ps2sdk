@@ -6,11 +6,14 @@
 # Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# SMAP (PS2 Network Adapter) register definitions.
-# Contains register definitions for the Ethernet MAC (EMAC).
-# The EMAC is similar to the EMAC from the IBM PowerPC 405gp.
 */
+
+/**
+ * @file
+ * SMAP (PS2 Network Adapter) register definitions.
+ * Contains register definitions for the Ethernet MAC (EMAC).
+ * The EMAC is similar to the EMAC from the IBM PowerPC 405gp.
+ */
 
 #ifndef SMAPREGS_H
 #define SMAPREGS_H
@@ -112,11 +115,15 @@
 
 #define	SMAP_R_EMAC3_MODE1		0x04
 #define	  SMAP_E3_FDX_ENABLE		(1<<31)
-#define	  SMAP_E3_INLPBK_ENABLE		(1<<30)	/* internal loop back */
+/** internal loop back */
+#define	  SMAP_E3_INLPBK_ENABLE		(1<<30)
 #define	  SMAP_E3_VLAN_ENABLE		(1<<29)
-#define	  SMAP_E3_FLOWCTRL_ENABLE	(1<<28)	/* integrated flow ctrl(pause frame) */
-#define	  SMAP_E3_ALLOW_PF		(1<<27)	/* allow pause frame */
-#define	  SMAP_E3_ALLOW_EXTMNGIF	(1<<25)	/* allow external management IF */
+/** integrated flow ctrl(pause frame) */
+#define	  SMAP_E3_FLOWCTRL_ENABLE	(1<<28)
+/** allow pause frame */
+#define	  SMAP_E3_ALLOW_PF		(1<<27)
+/** allow external management IF */
+#define	  SMAP_E3_ALLOW_EXTMNGIF	(1<<25)
 #define	  SMAP_E3_IGNORE_SQE		(1<<24)
 #define	  SMAP_E3_MEDIA_FREQ_BITSFT	(22)
 #define	    SMAP_E3_MEDIA_10M		(0<<22)
@@ -143,16 +150,23 @@
 #define	  SMAP_E3_JUMBO_ENABLE		(1<<12)
 
 #define	SMAP_R_EMAC3_TxMODE0		0x08
-#define	  SMAP_E3_TX_GNP_0		(1<<31)	/* get new packet */
-#define	  SMAP_E3_TX_GNP_1		(1<<30)	/* get new packet */
-#define	  SMAP_E3_TX_GNP_DEPEND		(1<<29)	/* get new packet */
+/** get new packet */
+#define	  SMAP_E3_TX_GNP_0		(1<<31)
+/** get new packet */
+#define	  SMAP_E3_TX_GNP_1		(1<<30)
+/** get new packet */
+#define	  SMAP_E3_TX_GNP_DEPEND		(1<<29)
 #define	  SMAP_E3_TX_FIRST_CHANNEL	(1<<28)
 
 #define	SMAP_R_EMAC3_TxMODE1		0x0C
-#define	  SMAP_E3_TX_LOW_REQ_MSK	(0x1F)	/* low priority request */
-#define	  SMAP_E3_TX_LOW_REQ_BITSFT	(27)	/* low priority request */
-#define	  SMAP_E3_TX_URG_REQ_MSK	(0xFF)	/* urgent priority request */
-#define	  SMAP_E3_TX_URG_REQ_BITSFT	(16)	/* urgent priority request */
+/** low priority request */
+#define	  SMAP_E3_TX_LOW_REQ_MSK	(0x1F)
+/** low priority request */
+#define	  SMAP_E3_TX_LOW_REQ_BITSFT	(27)
+/** urgent priority request */
+#define	  SMAP_E3_TX_URG_REQ_MSK	(0xFF)
+/** urgent priority request */
+#define	  SMAP_E3_TX_URG_REQ_BITSFT	(16)
 
 #define	SMAP_R_EMAC3_RxMODE		0x10
 #define	  SMAP_E3_RX_STRIP_PAD		(1<<31)
@@ -161,7 +175,8 @@
 #define	  SMAP_E3_RX_RX_FCS_ERR		(1<<28)
 #define	  SMAP_E3_RX_RX_TOO_LONG_ERR	(1<<27)
 #define	  SMAP_E3_RX_RX_IN_RANGE_ERR	(1<<26)
-#define	  SMAP_E3_RX_PROP_PF		(1<<25)	/* propagate pause frame */
+/** propagate pause frame */
+#define	  SMAP_E3_RX_PROP_PF		(1<<25)
 #define	  SMAP_E3_RX_PROMISC		(1<<24)
 #define	  SMAP_E3_RX_PROMISC_MCAST	(1<<23)
 #define	  SMAP_E3_RX_INDIVID_ADDR	(1<<22)
@@ -171,7 +186,8 @@
 
 #define	SMAP_R_EMAC3_INTR_STAT		0x14
 #define	SMAP_R_EMAC3_INTR_ENABLE	0x18
-#define	  SMAP_E3_INTR_OVERRUN		(1<<25)	/* this bit does NOT WORKED */
+/** this bit does NOT WORK */
+#define	  SMAP_E3_INTR_OVERRUN		(1<<25)
 #define	  SMAP_E3_INTR_PF		(1<<24)
 #define	  SMAP_E3_INTR_BAD_FRAME	(1<<23)
 #define	  SMAP_E3_INTR_RUNT_FRAME	(1<<22)
@@ -236,7 +252,8 @@
 #define	SMAP_R_EMAC3_STA_CTRL		0x5C
 #define	  SMAP_E3_PHY_DATA_MSK		(0xFFFF)
 #define	  SMAP_E3_PHY_DATA_BITSFT	(16)
-#define	  SMAP_E3_PHY_OP_COMP		(1<<15)	/* operation complete */
+/** operation complete */
+#define	  SMAP_E3_PHY_OP_COMP		(1<<15)
 #define	  SMAP_E3_PHY_ERR_READ		(1<<14)
 #define	  SMAP_E3_PHY_STA_CMD_BITSFT	(12)
 #define	    SMAP_E3_PHY_READ		(1<<12)
@@ -263,12 +280,13 @@
 #define	SMAP_R_EMAC3_TX_OCTETS		0x68
 #define	SMAP_R_EMAC3_RX_OCTETS		0x6C
 
-/* Buffer descriptors.  */
-
+/** Buffer descriptors.  */
 typedef struct _smap_bd {
 	u16	ctrl_stat;
-	u16	reserved;	/* must be zero */
-	u16	length;		/* number of bytes in pkt */
+	/** must be zero */
+	u16	reserved;
+	/** number of bytes in pkt */
+	u16	length;
 	u16	pointer;
 } smap_bd_t;
 
@@ -286,45 +304,75 @@ typedef struct _smap_bd {
 		(volatile smap_bd_t *)(SMAP_REGBASE + SMAP_BD_RX_BASE)
 
 /* TX Control */
-#define	SMAP_BD_TX_READY	(1<<15)	/* set:driver, clear:HW */
-#define	SMAP_BD_TX_GENFCS	(1<<9)	/* generate FCS */
-#define	SMAP_BD_TX_GENPAD	(1<<8)	/* generate padding */
-#define	SMAP_BD_TX_INSSA	(1<<7)	/* insert source address */
-#define	SMAP_BD_TX_RPLSA	(1<<6)	/* replace source address */
-#define	SMAP_BD_TX_INSVLAN	(1<<5)	/* insert VLAN Tag */
-#define	SMAP_BD_TX_RPLVLAN	(1<<4)	/* replace VLAN Tag */
+/** set:driver, clear:HW */
+#define	SMAP_BD_TX_READY	(1<<15)
+/** generate FCS */
+#define	SMAP_BD_TX_GENFCS	(1<<9)
+/** generate padding */
+#define	SMAP_BD_TX_GENPAD	(1<<8)
+/** insert source address */
+#define	SMAP_BD_TX_INSSA	(1<<7)
+/** replace source address */
+#define	SMAP_BD_TX_RPLSA	(1<<6)
+/** insert VLAN Tag */
+#define	SMAP_BD_TX_INSVLAN	(1<<5)
+/** replace VLAN Tag */
+#define	SMAP_BD_TX_RPLVLAN	(1<<4)
 
 /* TX Status */
-#define	SMAP_BD_TX_READY	(1<<15) /* set:driver, clear:HW */
-#define	SMAP_BD_TX_BADFCS	(1<<9)	/* bad FCS */
-#define	SMAP_BD_TX_BADPKT	(1<<8)	/* bad previous pkt in dependent mode */
-#define	SMAP_BD_TX_LOSSCR	(1<<7)	/* loss of carrior sense */
-#define	SMAP_BD_TX_EDEFER	(1<<6)	/* excessive deferal */
-#define	SMAP_BD_TX_ECOLL	(1<<5)	/* excessive collision */
-#define	SMAP_BD_TX_LCOLL	(1<<4)	/* late collision */
-#define	SMAP_BD_TX_MCOLL	(1<<3)	/* multiple collision */
-#define	SMAP_BD_TX_SCOLL	(1<<2)	/* single collision */
-#define	SMAP_BD_TX_UNDERRUN	(1<<1)	/* underrun */
-#define	SMAP_BD_TX_SQE		(1<<0)	/* SQE */
+/** set:driver, clear:HW */
+#define	SMAP_BD_TX_READY	(1<<15)
+/** bad FCS */
+#define	SMAP_BD_TX_BADFCS	(1<<9)
+/** bad previous pkt in dependent mode */
+#define	SMAP_BD_TX_BADPKT	(1<<8)
+/** loss of carrior sense */
+#define	SMAP_BD_TX_LOSSCR	(1<<7)
+/** excessive deferal */
+#define	SMAP_BD_TX_EDEFER	(1<<6)
+/** excessive collision */
+#define	SMAP_BD_TX_ECOLL	(1<<5)
+/** late collision */
+#define	SMAP_BD_TX_LCOLL	(1<<4)
+/** multiple collision */
+#define	SMAP_BD_TX_MCOLL	(1<<3)
+/** single collision */
+#define	SMAP_BD_TX_SCOLL	(1<<2)
+/** underrun */
+#define	SMAP_BD_TX_UNDERRUN	(1<<1)
+/** SQE */
+#define	SMAP_BD_TX_SQE		(1<<0)
 
 #define SMAP_BD_TX_ERROR (SMAP_BD_TX_LOSSCR|SMAP_BD_TX_EDEFER|SMAP_BD_TX_ECOLL|	\
 		SMAP_BD_TX_LCOLL|SMAP_BD_TX_UNDERRUN)
 
 /* RX Control */
-#define	SMAP_BD_RX_EMPTY	(1<<15)	/* set:driver, clear:HW */
+/** set:driver, clear:HW */
+#define	SMAP_BD_RX_EMPTY	(1<<15)	
 
 /* RX Status */
-#define	SMAP_BD_RX_EMPTY	(1<<15)	/* set:driver, clear:HW */
-#define	SMAP_BD_RX_OVERRUN	(1<<9)	/* overrun */
-#define	SMAP_BD_RX_PFRM		(1<<8)	/* pause frame */
-#define	SMAP_BD_RX_BADFRM	(1<<7)	/* bad frame */
-#define	SMAP_BD_RX_RUNTFRM	(1<<6)	/* runt frame */
-#define	SMAP_BD_RX_SHORTEVNT	(1<<5)	/* short event */
-#define	SMAP_BD_RX_ALIGNERR	(1<<4)	/* alignment error */
-#define	SMAP_BD_RX_BADFCS	(1<<3)	/* bad FCS */
-#define	SMAP_BD_RX_FRMTOOLONG	(1<<2)	/* frame too long */
-#define	SMAP_BD_RX_OUTRANGE	(1<<1)	/* out of range error */
-#define	SMAP_BD_RX_INRANGE	(1<<0)	/* in range error */
+/** set:driver, clear:HW */
+#define	SMAP_BD_RX_EMPTY	(1<<15)
+/** overrun */
+#define	SMAP_BD_RX_OVERRUN	(1<<9)
+/** pause frame */
+#define	SMAP_BD_RX_PFRM		(1<<8)
+/** bad frame */
+#define	SMAP_BD_RX_BADFRM	(1<<7)
+/** runt frame */
+#define	SMAP_BD_RX_RUNTFRM	(1<<6)
+/** short event */
+#define	SMAP_BD_RX_SHORTEVNT	(1<<5)
+/** alignment error */
+#define	SMAP_BD_RX_ALIGNERR	(1<<4)
+/** bad FCS */
+#define	SMAP_BD_RX_BADFCS	(1<<3)
+/** frame too long */
+#define	SMAP_BD_RX_FRMTOOLONG	(1<<2)
+/** out of range error */
+#define	SMAP_BD_RX_OUTRANGE	(1<<1)
+/** in range error */
+#define	SMAP_BD_RX_INRANGE	(1<<0)
 
 #define SMAP_BD_RX_ERROR (SMAP_BD_RX_OVERRUN|SMAP_BD_RX_RUNTFRM|SMAP_BD_RX_SHORTEVNT|	\
 		SMAP_BD_RX_ALIGNERR|SMAP_BD_RX_BADFCS|SMAP_BD_RX_FRMTOOLONG|		\
@@ -336,20 +384,32 @@ typedef struct _smap_bd {
 #define	SMAP_DsPHYTER_ADDRESS		0x1
 
 #define	SMAP_DsPHYTER_BMCR		0x00
-#define	  SMAP_PHY_BMCR_RST	(1<<15)		/* ReSeT */
-#define	  SMAP_PHY_BMCR_LPBK	(1<<14)		/* LooPBacK */
-#define	  SMAP_PHY_BMCR_100M	(1<<13)		/* speed select, 1:100M, 0:10M */
-#define	  SMAP_PHY_BMCR_10M	(0<<13)		/* speed select, 1:100M, 0:10M */
-#define	  SMAP_PHY_BMCR_ANEN	(1<<12)		/* Auto-Negotiation ENable */
-#define	  SMAP_PHY_BMCR_PWDN	(1<<11)		/* PoWer DowN */
-#define	  SMAP_PHY_BMCR_ISOL	(1<<10)		/* ISOLate */
-#define	  SMAP_PHY_BMCR_RSAN	(1<<9)		/* ReStart Auto-Negotiation */
-#define	  SMAP_PHY_BMCR_DUPM	(1<<8)		/* DUPlex Mode, 1:FDX, 0:HDX */
-#define	  SMAP_PHY_BMCR_COLT	(1<<7)		/* COLlision Test */
+/* ReSeT */
+#define	  SMAP_PHY_BMCR_RST	(1<<15)
+/* LooPBacK */
+#define	  SMAP_PHY_BMCR_LPBK	(1<<14)
+/* speed select, 1:100M, 0:10M */
+#define	  SMAP_PHY_BMCR_100M	(1<<13)
+/* speed select, 1:100M, 0:10M */
+#define	  SMAP_PHY_BMCR_10M	(0<<13)
+/* Auto-Negotiation ENable */
+#define	  SMAP_PHY_BMCR_ANEN	(1<<12)
+/* PoWer DowN */
+#define	  SMAP_PHY_BMCR_PWDN	(1<<11)
+/* ISOLate */
+#define	  SMAP_PHY_BMCR_ISOL	(1<<10)
+/* ReStart Auto-Negotiation */
+#define	  SMAP_PHY_BMCR_RSAN	(1<<9)
+/* DUPlex Mode, 1:FDX, 0:HDX */
+#define	  SMAP_PHY_BMCR_DUPM	(1<<8)
+/* COLlision Test */
+#define	  SMAP_PHY_BMCR_COLT	(1<<7)
 
 #define	SMAP_DsPHYTER_BMSR		0x01
-#define	  SMAP_PHY_BMSR_ANCP	(1<<5)		/* Auto-Negotiation ComPlete */
-#define	  SMAP_PHY_BMSR_LINK	(1<<2)		/* LINK status */
+/** Auto-Negotiation ComPlete */
+#define	  SMAP_PHY_BMSR_ANCP	(1<<5)
+/** LINK status */
+#define	  SMAP_PHY_BMSR_LINK	(1<<2)
 
 #define	SMAP_DsPHYTER_PHYIDR1		0x02
 #define	  SMAP_PHY_IDR1_VAL	(((SMAP_NS_OUI<<2)>>8)&0xffff)
@@ -369,23 +429,40 @@ typedef struct _smap_bd {
 
 /* Extended registers.  */
 #define	SMAP_DsPHYTER_PHYSTS		0x10
-#define	  SMAP_PHY_STS_REL	(1<<13)		/* Receive Error Latch */
-#define	  SMAP_PHY_STS_POST	(1<<12)		/* POlarity STatus */
-#define	  SMAP_PHY_STS_FCSL	(1<<11)		/* False Carrier Sense Latch */
-#define	  SMAP_PHY_STS_SD	(1<<10)		/* 100BT unconditional Signal Detect */
-#define	  SMAP_PHY_STS_DSL	(1<<9)		/* 100BT DeScrambler Lock */
-#define	  SMAP_PHY_STS_PRCV	(1<<8)		/* Page ReCeiVed */
-#define	  SMAP_PHY_STS_RFLT	(1<<6)		/* Remote FauLT */
-#define	  SMAP_PHY_STS_JBDT	(1<<5)		/* JaBber DetecT */
-#define	  SMAP_PHY_STS_ANCP	(1<<4)		/* Auto-Negotiation ComPlete */
-#define	  SMAP_PHY_STS_LPBK	(1<<3)		/* LooPBacK status */
-#define	  SMAP_PHY_STS_DUPS	(1<<2)		/* DUPlex Status,1:FDX,0:HDX */
-#define	  SMAP_PHY_STS_FDX	(1<<2)		/* Full Duplex */
-#define	  SMAP_PHY_STS_HDX	(0<<2)		/* Half Duplex */
-#define	  SMAP_PHY_STS_SPDS	(1<<1)		/* SPeeD Status */
-#define	  SMAP_PHY_STS_10M	(1<<1)		/* 10Mbps */
-#define	  SMAP_PHY_STS_100M	(0<<1)		/* 100Mbps */
-#define	  SMAP_PHY_STS_LINK	(1<<0)		/* LINK status */
+/** Receive Error Latch */
+#define	  SMAP_PHY_STS_REL	(1<<13)
+/** POlarity STatus */
+#define	  SMAP_PHY_STS_POST	(1<<12)
+/** False Carrier Sense Latch */
+#define	  SMAP_PHY_STS_FCSL	(1<<11)
+/** 100BT unconditional Signal Detect */
+#define	  SMAP_PHY_STS_SD	(1<<10)
+/** 100BT DeScrambler Lock */
+#define	  SMAP_PHY_STS_DSL	(1<<9)
+/** Page ReCeiVed */
+#define	  SMAP_PHY_STS_PRCV	(1<<8)
+/** Remote FauLT */
+#define	  SMAP_PHY_STS_RFLT	(1<<6)
+/** JaBber DetecT */
+#define	  SMAP_PHY_STS_JBDT	(1<<5)
+/** Auto-Negotiation ComPlete */
+#define	  SMAP_PHY_STS_ANCP	(1<<4)
+/** LooPBacK status */
+#define	  SMAP_PHY_STS_LPBK	(1<<3)
+/** DUPlex Status,1:FDX,0:HDX */
+#define	  SMAP_PHY_STS_DUPS	(1<<2)
+/** Full Duplex */
+#define	  SMAP_PHY_STS_FDX	(1<<2)
+/** Half Duplex */
+#define	  SMAP_PHY_STS_HDX	(0<<2)
+/** SPeeD Status */
+#define	  SMAP_PHY_STS_SPDS	(1<<1)
+/** 10Mbps */
+#define	  SMAP_PHY_STS_10M	(1<<1)
+/** 100Mbps */
+#define	  SMAP_PHY_STS_100M	(0<<1)
+/** LINK status */
+#define	  SMAP_PHY_STS_LINK	(1<<0)
 #define	SMAP_DsPHYTER_FCSCR		0x14
 #define	SMAP_DsPHYTER_RECR		0x15
 #define	SMAP_DsPHYTER_PCSR		0x16
