@@ -1,3 +1,8 @@
+/**
+ * @file
+ * Multitap manager functions
+ */
+
 #ifndef IOP_XMTAPMAN_H
 #define IOP_XMTAPMAN_H
 

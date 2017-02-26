@@ -1,3 +1,8 @@
+/**
+ * @file
+ * Extended pad functions
+ */
+
 #ifndef IOP_XPADMAN_H
 #define IOP_XPADMAN_H
 

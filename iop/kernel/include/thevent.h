@@ -6,9 +6,12 @@
 # Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Event flags for threads.
 */
+
+/**
+ * @file
+ * Event flags for threads.
+ */
 
 #ifndef IOP_THEVENT_H
 #define IOP_THEVENT_H
@@ -21,8 +24,10 @@
 #define WEF_CLEAR	0x10
 
 //Attributes for event flags
-#define EA_SINGLE	0	//Only one thread can wait on the event flag.
-#define EA_MULTI	2	//Multiple threads can wait on the event flag.
+/** Only one thread can wait on the event flag. */
+#define EA_SINGLE	0
+/** Multiple threads can wait on the event flag. */
+#define EA_MULTI	2
 
 typedef struct {
 	u32	attr;
@@ -31,11 +36,16 @@ typedef struct {
 } iop_event_t;
 
 typedef struct {
-	u32 attr;		// set by CreateEventFlag
-	u32 option;		// set by CreateEventFlag
-	u32 initBits;		// initial 'bits' value set by CreateEventFlag
-	u32 currBits;		// current 'bits' value
-	int numThreads;		// number of threads waiting on this event
+	/** set by CreateEventFlag */
+	u32 attr;
+	/** set by CreateEventFlag */
+	u32 option;
+	/** initial 'bits' value set by CreateEventFlag */
+	u32 initBits;
+	/** current 'bits' value */
+	u32 currBits;
+	/** number of threads waiting on this event */
+	int numThreads;
 	int reserved1;
 	int reserved2;
 } iop_event_info_t;

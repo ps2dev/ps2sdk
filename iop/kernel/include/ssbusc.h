@@ -6,24 +6,32 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# SSBUSC service control function definitions.
 */
+
+/**
+ * @file
+ * SSBUSC service control function definitions.
+ */
 
 #define ssbusc_IMPORTS_start DECLARE_IMPORT_TABLE(ssbusc, 1, 1)
 #define ssbusc_IMPORTS_end END_IMPORT_TABLE
 
 enum SSBUSC_DEV_IDS{
-	SSBUSC_DEV0		=0,	//Seems to affect the memory map entirely.
-	SSBUSC_DEV_DVDROM,	//DVD ROM chip (contains rom1 and erom), DEV1
+	/** Seems to affect the memory map entirely. */
+	SSBUSC_DEV0 = 0,
+	/** DVD ROM chip (contains rom1 and erom), DEV1 */
+	SSBUSC_DEV_DVDROM,
 	SSBUSC_DEV2,
 	SSBUSC_DEV3,
-	SSBUSC_DEV_SPU,		//SPU, DEV4
-	SSBUSC_DEV_CDVD,	//CD/DVD hardware, DEV5
+	/** SPU, DEV4 */
+	SSBUSC_DEV_SPU,
+	/** CD/DVD hardware, DEV5 */
+	SSBUSC_DEV_CDVD,
 	SSBUSC_DEV6,
 	SSBUSC_DEV7,
 	SSBUSC_DEV8,
-	SSBUSC_DEV_SPU2,	//SPU2
+	/** SPU2 */
+	SSBUSC_DEV_SPU2,
 	//These 3 seem to be controls for the DEV9 expansion interface. Only SSBUSC_DEV_DEV9_3 can have its address adjusted.
 	SSBUSC_DEV_DEV9_2,
 	SSBUSC_DEV_DEV9_3,

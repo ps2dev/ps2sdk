@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Definitions and imports for cdvdman
 */
+
+/**
+ * @file
+ * Definitions and imports for cdvdman
+ */
 
 #ifndef IOP_CDVDMAN_H
 #define IOP_CDVDMAN_H
@@ -31,65 +34,69 @@ int sceCdSC(int code, int *param);
 int sceCdRC(sceCdCLOCK *clock);
 int sceCdRead0(u32 lsn, u32 sectors, void *buffer, sceCdRMode *mode, int csec, void *callback);
 
-// send an s-command by function number
-// 
-// arguments:	command number
-//			input buffer  (can be null)
-//			size of input buffer  (0 - 16 bytes)
-//			output buffer (can be null)
-// returns:	1 if successful
-//		0 if error
+/** send an s-command by function number
+ * 
+ * @param cmdNum command number
+ * @param inBuff input buffer  (can be null)
+ * @param inBuffSize size of input buffer  (0 - 16 bytes)
+ * @param outBuff output buffer (can be null)
+ * @return 1 on success, 0 on failure.
+ */
 int sceCdApplySCmd(u8 cmdNum, const void* inBuff, u16 inBuffSize, void *outBuff);
 
-// send an s-command by function number
-// 
-// arguments:	command number
-//			input buffer  (can be null)
-//			size of input buffer  (>= 16 bytes)
-//			output buffer (can be null)
-// returns:	1 if successful
-//		0 if error
+/** send an s-command by function number
+ * 
+ * @param cmdNum command number
+ * @param inBuff input buffer  (can be null)
+ * @param inBuffSize size of input buffer  (>= 16 bytes)
+ * @param outBuff output buffer (can be null)
+ * @return 1 on success, 0 on failure.
+ */
 int sceCdApplySCmd2(u8 cmdNum, const void* inBuff, unsigned long int inBuffSize, void *outBuff);
 
-// send an n-command by function number
-// 
-// arguments:	command number
-//			input buffer  (can be null)
-//			size of input buffer  (0 - 16 bytes)
-//			output buffer (can be null)
-// returns:	1 if successful
-//		0 if error
+/** send an n-command by function number
+ * 
+ * @param cmdNum command number
+ * @param inBuff input buffer  (can be null)
+ * @param inBuffSize size of input buffer  (0 - 16 bytes)
+ * @param outBuff output buffer (can be null)
+ * @return 1 on success, 0 on failure.
+ */
 int sceCdApplyNCmd(u8 cmdNum, const void* inBuff, u16 inBuffSize, void* outBuff);
 
-// Opens a specified configuration block, within NVRAM. Each block is 15 bytes long.
-//
-// arguments:	Block number.
-//		Mode (0 = read, 1 = write).
-//		Number of blocks.
-// returns:	1 on success, 0 on failure.
+/** Opens a specified configuration block, within NVRAM. Each block is 15 bytes long.
+ *
+ * @param block Block number.
+ * @param mode Mode (0 = read, 1 = write).
+ * @param NumBlocks Number of blocks.
+ * @return 1 on success, 0 on failure.
+ */
 int sceCdOpenConfig(int block, int mode, int NumBlocks);
 
-// Controls spindle speed? Not sure what it really does.
-// SUPPORTED IN XCDVDMAN ONLY
-//
-// arguments:	Speed mode.
-// returns:	1 on success, 0 on failure.
+/** Controls spindle speed? Not sure what it really does.
+ * SUPPORTED IN XCDVDMAN ONLY
+ *
+ * @param speed Speed mode.
+ * @return 1 on success, 0 on failure.
+ */
 int sceCdSpinCtrlIOP(u32 speed);
 
 //DNAS functions
 
-// Reads the Disk ID.
-// SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN DNAS IOPRP ONLY
-//
-// arguments:	integer where the Disk ID is stored.
-// returns:	1 on success, 0 on failure.
+/** Reads the Disk ID.
+ * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN DNAS IOPRP ONLY
+ *
+ * @param id integer where the Disk ID is stored.
+ * @return 1 on success, 0 on failure.
+ */
 int sceCdReadDiskID(unsigned int *id);
 
-// Reads a GUID.
-// SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN DNAS IOPRP ONLY
-//
-// arguments:	u64 integer where the GUID is stored.
-// returns:	1 on success, 0 on failure.
+/** Reads a GUID.
+ * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN DNAS IOPRP ONLY
+ *
+ * @param guid u64 integer where the GUID is stored.
+ * @return 1 on success, 0 on failure.
+ */
 int sceCdReadGUID(u64 *guid);
 
 #define cdvdman_IMPORTS_start DECLARE_IMPORT_TABLE(cdvdman, 1, 1)

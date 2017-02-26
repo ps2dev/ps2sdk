@@ -6,9 +6,12 @@
 # Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Kernel-based threads.
 */
+
+/**
+ * @file
+ * Kernel-based threads.
+ */
 
 #ifndef IOP_THBASE_H
 #define IOP_THBASE_H
@@ -31,7 +34,8 @@ typedef struct _iop_thread {
 	u32	priority;
 } iop_thread_t;
 
-#define TH_SELF		0	//Special thread ID for referring to the running thread. Not supported by all functions.
+/** Special thread ID for referring to the running thread. Not supported by all functions. */
+#define TH_SELF		0
 
 //Thread status definitions
 #define	THS_RUN	 	0x01
@@ -63,7 +67,8 @@ typedef struct _iop_thread_status {
 	int waitType;
 	int waitId;
 	int wakeupCount;
-	long int *regContext;	//Only valid for use with iReferThreadStatus.
+	/** Only valid for use with iReferThreadStatus. */
+	long int *regContext;	//
 	unsigned int reserved[4];
 } iop_thread_info_t;
 

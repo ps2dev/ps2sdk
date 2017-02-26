@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# ctype functions for the IOP
 */
+
+/**
+ * @file
+ * ctype functions for the IOP
+ */
 
 #ifndef IOP__CTYPES_H__
 #define IOP__CTYPES_H__
@@ -39,14 +42,22 @@
 
 #else
 
-#define	_U		0x01	/* Uppercase letter */
-#define	_L		0x02	/* Lowercase letter */
-#define	_N		0x04	/* Digit (0-9) */
-#define	_S		0x08	/* Space, tab, newline, vertical tab, formfeed or carriage return */
-#define _P		0x10	/* Punctuation character */
-#define _C		0x20	/* Control character or delete */
-#define _X		0x40	/* Hexadecimal digit (0-9, a-f, A-F) */
-#define	_B		0x80	/* Blank (space) */
+/** Uppercase letter */
+#define	_U		0x01
+/** Lowercase letter */
+#define	_L		0x02
+/** Digit (0-9) */
+#define	_N		0x04
+/** Space, tab, newline, vertical tab, formfeed or carriage return */
+#define	_S		0x08
+/** Punctuation character */
+#define _P		0x10
+/** Control character or delete */
+#define _C		0x20
+/** Hexadecimal digit (0-9, a-f, A-F) */
+#define _X		0x40
+/** Blank (space) */
+#define	_B		0x80
 
 #define	isalpha(c)	(look_ctype_table((unsigned int)(c)) & (_U|_L))
 #define	isupper(c)	(look_ctype_table((unsigned int)(c)) & (_U))

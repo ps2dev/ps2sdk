@@ -6,13 +6,16 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Kernel Errors for the IOP
-# Extracted from TESTSPU by TyRaNiD
 */
 
-/* I am not going to explain these errors, not sure myself for most of them */
+/**
+ * @file
+ * Kernel Errors for the IOP
+ * Extracted from TESTSPU by TyRaNiD
+ */
+
 #ifndef __KERR_H__
+#define __KERR_H__
 
 #define KE_OK			0
 #define KE_ERROR		-1

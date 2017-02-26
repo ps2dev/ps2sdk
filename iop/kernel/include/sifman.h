@@ -6,9 +6,12 @@
 # Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Low-level SIF DMA.
 */
+
+/**
+ * @file
+ * Low-level SIF DMA.
+ */
 
 #ifndef IOP_SIFMAN_H
 #define IOP_SIFMAN_H
@@ -39,16 +42,23 @@ typedef struct t_SifDmaTransfer
 #define SIF_REG_ID_SYSTEM	0x80000000
 
 enum _sif_regs {
-	SIF_REG_MAINADDR = 1,	//Main -> sub-CPU command buffer (MSCOM)
-	SIF_REG_SUBADDR,	//Sub -> main-CPU command buffer (SMCOM)
-	SIF_REG_MSFLAG,		//Main -> sub-CPU flag (MSFLAG)
-	SIF_REG_SMFLAG,		//Sub -> main-CPU flag (SMFLAG)
+	/** Main -> sub-CPU command buffer (MSCOM) */
+	SIF_REG_MAINADDR = 1,
+	/** Sub -> main-CPU command buffer (SMCOM) */
+	SIF_REG_SUBADDR,
+	/** Main -> sub-CPU flag (MSFLAG) */
+	SIF_REG_MSFLAG,
+	/** Sub -> main-CPU flag (SMFLAG) */
+	SIF_REG_SMFLAG,
 };
 
 //Status bits for the SM and MS SIF registers
-#define SIF_STAT_SIFINIT	0x10000	//SIF initialized
-#define SIF_STAT_CMDINIT	0x20000	//SIFCMD initialized
-#define SIF_STAT_BOOTEND	0x40000	//Bootup completed
+/** SIF initialized */
+#define SIF_STAT_SIFINIT	0x10000
+/** SIFCMD initialized */
+#define SIF_STAT_CMDINIT	0x20000
+/** Bootup completed */
+#define SIF_STAT_BOOTEND	0x40000
 
 #define sifman_IMPORTS_start DECLARE_IMPORT_TABLE(sifman, 1, 1)
 #define sifman_IMPORTS_end END_IMPORT_TABLE

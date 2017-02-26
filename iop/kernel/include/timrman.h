@@ -6,9 +6,12 @@
 # Copyright (c) 2005 linuzappz <linuzappz@hotmail.com>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# Timer manager.
 */
+
+/**
+ * @file
+ * Timer manager.
+ */
 
 #ifndef IOP_TIMRMAN_H
 #define IOP_TIMRMAN_H

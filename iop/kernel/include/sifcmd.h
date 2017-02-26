@@ -6,9 +6,12 @@
 # Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# SIF CMD and RPC.
 */
+
+/**
+ * @file
+ * SIF CMD and RPC.
+ */
 
 #ifndef IOP_SIFCMD_H
 #define IOP_SIFCMD_H
@@ -19,11 +22,12 @@
 #define sifcmd_IMPORTS_start DECLARE_IMPORT_TABLE(sifcmd, 1, 1)
 #define sifcmd_IMPORTS_end END_IMPORT_TABLE
 
-/* SIF command.  */
-
+/** SIF command.  */
 typedef struct t_SifCmdHeader {
-	u32	size;	//Upper 8 bits: packet size, lower 24 bits: extra data length
-	void	*dest;	//Extra data destination address. May be NULL if there's no extra data.
+	/** Upper 8 bits: packet size, lower 24 bits: extra data length */
+	u32	size;
+	/** Extra data destination address. May be NULL if there's no extra data. */
+	void	*dest;
 	int	cid;
 	u32	opt;
 } SifCmdHeader_t;
@@ -42,8 +46,9 @@ typedef struct t_SifCmdHeader {
 //System SREG
 #define SIF_SREG_RPCINIT	0
 
-//Structure for remotely (over the SIF) changing the value of a software register (SREG).
-//There are 32 software registers (0 - 31). Registers 0-7 are used by the system.
+/** Structure for remotely (over the SIF) changing the value of a software register (SREG).
+ * There are 32 software registers (0 - 31). Registers 0-7 are used by the system.
+ */
 typedef struct t_SifCmdSRegData {
 	SifCmdHeader_t	header;
 	int		index;
@@ -82,8 +87,10 @@ void sceSifAddCmdHandler(int cid, SifCmdHandler_t handler, void *harg);
 /* SIF RPC.  */
 
 /* Modes for bind() and call() */
-#define SIF_RPC_M_NOWAIT	0x01	/* Don't wait for end function */
-#define SIF_RPC_M_NOWBDC	0x02	/* Don't write back the D cache */
+/** Don't wait for end function */
+#define SIF_RPC_M_NOWAIT	0x01	
+/** Don't write back the D cache */
+#define SIF_RPC_M_NOWBDC	0x02	
 
 typedef void * (*SifRpcFunc_t)(int fno, void *buffer, int length);
 typedef void (*SifRpcEndFunc_t)(void *end_param);
