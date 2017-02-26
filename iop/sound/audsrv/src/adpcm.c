@@ -5,14 +5,11 @@
 #-----------------------------------------------------------------------
 # Copyright 2005, ps2dev - http://www.ps2dev.org
 # Licenced under GNU Library General Public License version 2
-#
-# audsrv adpcm module
 */
 
 /**
- * \file adpcm.c
- * \author lukasz
- * \date 05-06-27
+ * @file
+ * audsrv adpcm module
  */
 
 #include <stdio.h>
@@ -47,8 +44,7 @@ static adpcm_list_t *adpcm_list_tail = 0;
 
 static u32 sbuffer[16] __attribute__((aligned(64)));
 
-/** Allocates memory for a new sample.
-*/
+/** Allocates memory for a new sample. */
 static adpcm_list_t *alloc_new_sample(void)
 {
 	void *buffer;
@@ -61,8 +57,7 @@ static adpcm_list_t *alloc_new_sample(void)
 	return buffer;
 }
 
-/** Frees up all memory taken by the linked list of samples
-*/
+/** Frees up all memory taken by the linked list of samples */
 static void free_all_samples()
 {
 	adpcm_list_t *p, *q;
@@ -81,9 +76,9 @@ static void free_all_samples()
 }
 
 /** Looks up the given identifier in list of loaded samples
-    @param id    sample identifier
-    @returns node entry from container, NULL on failure
-*/
+ * @param id    sample identifier
+ * @returns node entry from container, NULL on failure
+ */
 static adpcm_list_t *adpcm_loaded(int id)
 {
 	adpcm_list_t *cur = adpcm_list_head;
@@ -102,9 +97,9 @@ static adpcm_list_t *adpcm_loaded(int id)
 }
 
 /** Extracts adpcm parameters from header
-    @param adpcm   node entry
-    @param buffer  pointer to adpcm header
-*/
+ * @param adpcm   node entry
+ * @param buffer  pointer to adpcm header
+ */
 static void audsrv_read_adpcm_header(adpcm_list_t *adpcm, u32 *buffer)
 {
 	adpcm->pitch = buffer[2];
@@ -113,11 +108,11 @@ static void audsrv_read_adpcm_header(adpcm_list_t *adpcm, u32 *buffer)
 }
 
 /** Uploads a sample to SPU2 memory
-    @param buffer    pointer to adpcm sample header
-    @param size      size of sample in bytes
-    @param id        sample identifier (to be later used in play())
-    @returns         pointer to local adpcm buffer
-*/
+ * @param buffer    pointer to adpcm sample header
+ * @param size      size of sample in bytes
+ * @param id        sample identifier (to be later used in play())
+ * @returns         pointer to local adpcm buffer
+ */
 void *audsrv_load_adpcm(u32 *buffer, int size, int id)
 {
 	adpcm_list_t *adpcm;
@@ -166,13 +161,13 @@ void *audsrv_load_adpcm(u32 *buffer, int size, int id)
 }
 
 /** Plays an adpcm sample already uploaded with audsrv_load_adpcm()
-    @param id    sample identifier, as specified in load()
-    @returns zero on success, negative value on error
-
-    The sample will be played in an unoccupied channel. If all 24 channels
-    are used, then -AUDSRV_ERR_NO_MORE_CHANNELS is returned. Trying to play
-    a sample which is unavailable will result in -AUDSRV_ERR_ARGS
-*/
+ * @param id    sample identifier, as specified in load()
+ * @returns zero on success, negative value on error
+ *
+ * The sample will be played in an unoccupied channel. If all 24 channels
+ * are used, then -AUDSRV_ERR_NO_MORE_CHANNELS is returned. Trying to play
+ * a sample which is unavailable will result in -AUDSRV_ERR_ARGS
+ */
 int audsrv_play_adpcm(u32 id)
 {
 	int i, channel;
@@ -220,9 +215,9 @@ int audsrv_play_adpcm(u32 id)
 }
 
 /** Initializes adpcm unit of audsrv
-
-    @returns zero on success, negative value on error
-*/
+ *
+ * @returns zero on success, negative value on error
+ */
 int audsrv_adpcm_init()
 {
 	u32 voice;

@@ -5,21 +5,18 @@
 #-----------------------------------------------------------------------
 # Copyright 2005, ps2dev - http://www.ps2dev.org
 # Licenced under GNU Library General Public License version 2
-#
-# audsrv IOP-side upsamplers
 */
+
+/**
+ * @file
+ * audsrv IOP-side upsamplers
+ */
 
 #include <stdio.h>
 #include "upsamplers.h"
 
-/**
- * \file upsamplers.c
- * \author gawd (Gil Megidish)
- * \date 04-24-05
- */
-
+#if 0
 /** lut for converting 8000 -> 48000 */
-/* UNUSED!
 static const short int up_8000_lut[512] =
 {
 	0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x01,
@@ -86,7 +83,8 @@ static const short int up_8000_lut[512] =
 	0x51, 0x51, 0x51, 0x51, 0x52, 0x52, 0x52, 0x52,
 	0x52, 0x52, 0x53, 0x53, 0x53, 0x53, 0x53, 0x53,
 	0x54, 0x54, 0x54, 0x54, 0x54, 0x54, 0x55, 0x55,
-}; */
+};
+#endif
 
 /** lut for converting 11025 -> 48000 */
 static const short int up_11025_lut[512] =
@@ -296,10 +294,10 @@ static const short up_44100_lut[512] =
 };
 
 /** Demux, split interleaved audio to left and right
-    @param mux   source buffer
-    @param left  left channel destination buffer
-    @param right right channel destination buffer
-    @param len   number of samples to copy
+ * @param mux   source buffer
+ * @param left  left channel destination buffer
+ * @param right right channel destination buffer
+ * @param len   number of samples to copy
 */
 static void demux(short *mux, short *left, short *right, int len)
 {
@@ -498,10 +496,14 @@ static int up_48000_16_stereo(struct upsample_t *up)
 
 typedef struct entry_t
 {
-	int freq;                       ///< source frequency
-	int bits;                       ///< source sample bit count
-	int channels;                   ///< source number of channels
-	upsampler_t func;               ///< upsamplers to convert to native
+	/** source frequency */
+	int freq;
+	/** source sample bit count */
+	int bits;
+	/** source number of channels */
+	int channels;
+	/** upsamplers to convert to native */
+	upsampler_t func;
 } entry_t;
 
 /** supported upsamplers */
@@ -525,15 +527,15 @@ static entry_t upsamplers[] =
 };
 
 /** Returns an upsampler from a specified format to SPU2's native
-    @param freq      frequency used
-    @param bits      bits per sample
-    @param channels  number of audio channels
-    @returns a function to be used for upsampling, null if not found
-
-    Will return a function to convert source audio to Playstation's native.
-    Note a very limited selection of upsamplers are available, only the most
-    commonly used.
-*/
+ * @param freq      frequency used
+ * @param bits      bits per sample
+ * @param channels  number of audio channels
+ * @returns a function to be used for upsampling, null if not found
+ *
+ * Will return a function to convert source audio to Playstation's native.
+ * Note a very limited selection of upsamplers are available, only the most
+ * commonly used.
+ */
 upsampler_t find_upsampler(int freq, int bits, int channels)
 {
 	struct entry_t *p = upsamplers;

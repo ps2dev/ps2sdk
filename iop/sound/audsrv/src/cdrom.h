@@ -5,18 +5,15 @@
 #-----------------------------------------------------------------------
 # Copyright 2005, ps2dev - http://www.ps2dev.org
 # Licenced under GNU Library General Public License version 2
-#
-# cdsrv IOP server.
 */
+
+/**
+ * @file
+ * cdsrv IOP server.
+ */
 
 #ifndef __CDROM_C_H__
 #define __CDROM_C_H__
-
-/**
- * \file cdrom.h
- * \author gawd (Gil Megidish)
- * \date 05-09-05
- */
 
 #define SECTOR_SIZE                2352
 

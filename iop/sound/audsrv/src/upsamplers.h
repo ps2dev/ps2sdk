@@ -5,18 +5,15 @@
 #-----------------------------------------------------------------------
 # Copyright 2005, ps2dev - http://www.ps2dev.org
 # Licenced under GNU Library General Public License version 2
-#
-# audsrv IOP-side upsamplers
 */
+
+/**
+ * @file
+ * audsrv IOP-side upsamplers
+ */
 
 #ifndef __UPSAMPLERS_INCLUDED__
 #define __UPSAMPLERS_INCLUDED__
-
-/**
- * \file upsamplers.h
- * \author gawd (Gil Megidish)
- * \date 04-24-05
- */
 
 typedef struct upsample_t
 {
