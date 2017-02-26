@@ -18,7 +18,7 @@
 /* Please keep these in alphabetical order!  */
 #include "dmacman.h"
 #include "intrman.h"
-#include "iomanX.h"
+#include "ioman.h"
 #include "loadcore.h"
 #include "poweroff.h"
 #include "stdio.h"
