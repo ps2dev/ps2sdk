@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# iop device handling and inquiry functions.
 */
+
+/**
+ * @file
+ * iop device handling and inquiry functions.
+ */
 
 #include "defs.h"
 #include "stdio.h"
@@ -18,11 +21,11 @@
 
 #include "iopmgr.h"
 
-/*! \brief Get a pointer to an ioman device handler.
- *  \ingroup iopmgr
+/** Get a pointer to an ioman device handler.
+ * @ingroup iopmgr
  *
- *  \param device Stringname of device (eg "host").
- *  \return Pointer to device structure.
+ * @param device Stringname of device (eg "host").
+ * @return Pointer to device structure.
  *
  * return values:
  *   0 if not found.
@@ -51,11 +54,11 @@ iop_device_t *iopmgr_get_iomandev(char *device)
   return 0;
 }
 
-/*! \brief Get a pointer to an iomanx device handler.
- *  \ingroup iopmgr
+/** Get a pointer to an iomanx device handler.
+ * @ingroup iopmgr
  *
- *  \param device Stringname of device (eg "hdd").
- *  \return Pointer to device structure.
+ * @param device Stringname of device (eg "hdd").
+ * @return Pointer to device structure.
  *
  * return values:
  *   0 if not found.
@@ -84,12 +87,12 @@ iop_device_t *iopmgr_get_iomanxdev(char *device)
   return 0;
 }
 
-/*! \brief Get a list of devices of a certain type
- *  \ingroup iopmgr
+/** Get a list of devices of a certain type
+ * @ingroup iopmgr
  *
- *  \param man Device manager mask (IOPMGR_DEVTYPE_IOMAN or IOPMGR_DEVTYPE_IOMANX).
- *  \param devtype Device type mask (0x10 for filesystems).
- *  \return Number of devices found
+ * @param man Device manager mask (IOPMGR_DEVTYPE_IOMAN or IOPMGR_DEVTYPE_IOMANX).
+ * @param devtype Device type mask (0x10 for filesystems).
+ * @return Number of devices found
  *
  * return values:
  *   0 if no matching devices found
@@ -147,11 +150,11 @@ int iopmgr_get_devicelist(int man,int devtype,char *buffer)
   return count;
 }
 
-/*! \brief Get a pointer to a device of either type
- *  \ingroup iopmgr
+/** Get a pointer to a device of either type
+ * @ingroup iopmgr
  *
- *  \param device Stringname of device (eg "host).
- *  \Return Pointer to device structure.
+ * @param device Stringname of device (eg "host).
+ * @return Pointer to device structure.
  *
  * return values:
  *   0 if not found.
@@ -167,11 +170,11 @@ iop_device_t *iopmgr_get_device(char *device)
   return 0;
 }
 
-/*! \brief Returns which i/o manager handles the given device.
- *  \ingroup iopmgr
+/** Returns which i/o manager handles the given device.
+ * @ingroup iopmgr
  *
- *  \param device Stringname of device (eg "host).
- *  \Return numeric value for i/o manager.
+ * @param device Stringname of device (eg "host).
+ * @return numeric value for i/o manager.
  *
  * return values:
  *   IOPMGR_DEVTYPE_INVALID if not found,

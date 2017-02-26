@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# command line parser and handler for iop manager.
 */
+
+/**
+ * @file
+ * command line parser and handler for iop manager.
+ */
 
 #include "defs.h"
 #include "iomanX.h"
@@ -19,9 +22,8 @@
 
 extern int shutdown();
 
-/*! \brief Prints out a list of all currently registered libraries
- *         with their name and version.
- *  \ingroup iopmgr
+/** Prints out a list of all currently registered libraries with their name and version.
+ * @ingroup iopmgr
  */
 void list_all_libraries()
 {
@@ -44,9 +46,8 @@ void list_all_libraries()
 }
 
 
-/*! \brief Prints out a list of all currently loaded IRX modules
- *         with description and version number.
- *  \ingroup iopmgr
+/** Prints out a list of all currently loaded IRX modules with description and version number.
+ * @ingroup iopmgr
  */
 void list_all_modules()
 {
@@ -62,9 +63,8 @@ void list_all_modules()
   printf("\n");
 }
 
-/*! \brief Print out all devices for ONLY ioman
- *         and shows which one they belong to.
- *  \ingroup iopmgr
+/** Print out all devices for ONLY ioman and shows which one they belong to.
+ * @ingroup iopmgr
  */
 void list_devices_ioman()
 {
@@ -93,9 +93,8 @@ void list_devices_ioman()
 	printf("\n");
 }
 
-/*! \brief Print out all devices for ONLY iomanx
- *         and shows which one they belong to.
- *  \ingroup iopmgr
+/** Print out all devices for ONLY iomanx and shows which one they belong to.
+ * @ingroup iopmgr
  */
 void list_devices_iomanx()
 {
@@ -124,11 +123,10 @@ void list_devices_iomanx()
 	printf("\n");
 }
 
-/*! \brief Print out all devices for both ioman and iomanx
- *         and shows which one they belong to.
+/** Print out all devices for both ioman and iomanx and shows which one they belong to.
  *
- *  \param mgrtype Device manager type search mask (IOPMGR_DEVTYPE_XXXX).
- *  \ingroup iopmgr
+ * @param mgrtype Device manager type search mask (IOPMGR_DEVTYPE_XXXX).
+ * @ingroup iopmgr
  */
 void list_fs_devices(int mgrtype)
 {
@@ -155,10 +153,10 @@ void list_fs_devices(int mgrtype)
 }
 
 
-/*! \brief Handles basic parsing of commands, for command execution mode.
- *  \ingroup iopmgr
+/** Handles basic parsing of commands, for command execution mode.
+ * @ingroup iopmgr
  *
- *  \param command Pointer to command string.
+ * @param command Pointer to command string.
  */
 void cmdline_handle(char *command, char *arg1)
 {
