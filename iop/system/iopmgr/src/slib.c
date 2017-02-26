@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# IOP Sub-CPU library manipulation functions
 */
+
+/**
+ * @file
+ * IOP Sub-CPU library manipulation functions
+ */
 
 #include "types.h"
 #include "defs.h"
@@ -21,11 +24,11 @@
 
 #include "iopmgr.h"
 
-/*! \brief Get pointer to system library structure for named library.
- *  \ingroup iopmgr
+/** Get pointer to system library structure for named library.
+ * @ingroup iopmgr
  *
- *  \param name Stringname of library (eg "ioman").
- *  \return Pointer to IOP library structure.
+ * @param name Stringname of library (eg "ioman").
+ * @return Pointer to IOP library structure.
  *
  * return values:
  *   0 if not found.
@@ -46,11 +49,11 @@ iop_library_t *slib_get_lib_by_name(const char *name)
   return 0;
 }
 
-/*! \brief Get pointer to export list for named library.
- *  \ingroup iopmgr
+/** Get pointer to export list for named library.
+ * @ingroup iopmgr
  *
- *  \param name Stringname of library (eg "ioman").
- *  \return Pointer to export list.
+ * @param name Stringname of library (eg "ioman").
+ * @return Pointer to export list.
  *
  * return values:
  *   0 if not found.
@@ -66,11 +69,11 @@ void *slib_get_exportlist_by_name(const char *name)
   return 0;
 }
 
-/*! \brief Get version number for named library.
- *  \ingroup iopmgr
+/** Get version number for named library.
+ * @ingroup iopmgr
  *
- *  \param name Stringname of library (eg "ioman").
- *  \return version number.
+ * @param name Stringname of library (eg "ioman").
+ * @return version number.
  *
  * return values:
  *   0 if not found.
@@ -86,11 +89,11 @@ int slib_get_version_by_name(const char *name)
   return 0;
 }
 
-/*! \brief Release (Unregister) a given named registered library.
- *  \ingroup iopmgr
+/** Release (Unregister) a given named registered library.
+ * @ingroup iopmgr
  *
- *  \param name Stringname of library (eg "ioman").
- *  \return Status of operation.
+ * @param name Stringname of library (eg "ioman").
+ * @return Status of operation.
  *
  * return values:
  *  0 if found and sucessfully unregistered.

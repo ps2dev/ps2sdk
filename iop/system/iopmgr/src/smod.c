@@ -7,9 +7,12 @@
 # Copyright (c) 2003, 2004 adresd   <adresd_ps2dev@yahoo.com>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# iop Sub-CPU module library
 */
+
+/**
+ * @file
+ * iop Sub-CPU module library
+ */
 
 #include "types.h"
 #include "defs.h"
@@ -22,11 +25,11 @@
 
 #include "iopmgr.h"
 
-/*! \brief Get pointer to head of module list, or next module in list.
- *  \ingroup iopmgr
+/** Get pointer to head of module list, or next module in list.
+ * @ingroup iopmgr
  *
- *  \param cur_mod Pointer to module structure, or 0 to return the head.
- *  \return Pointer to module structure.
+ * @param cur_mod Pointer to module structure, or 0 to return the head.
+ * @return Pointer to module structure.
  *
  * return values:
  *   0 if end of list.
@@ -47,11 +50,11 @@ ModuleInfo_t *smod_get_next_mod(ModuleInfo_t *cur_mod)
   return 0;
 }
 
-/*! \brief Get pointer to module structure for named module.
- *  \ingroup iopmgr
+/** Get pointer to module structure for named module.
+ * @ingroup iopmgr
  *
- *  \param name Stringname of module (eg "atad_driver").
- *  \return Pointer to module structure.
+ * @param name Stringname of module (eg "atad_driver").
+ * @return Pointer to module structure.
  *
  * return values:
  *   0 if not found.
@@ -72,11 +75,11 @@ ModuleInfo_t *smod_get_mod_by_name(const char *name)
   return 0;
 }
 
-/*! \brief Get instance count for given module name.
- *  \ingroup iopmgr
+/** Get instance count for given module name.
+ * @ingroup iopmgr
  *
- *  \param name Stringname of module (eg "atad_driver").
- *  \return Number of instances loaded.
+ * @param name Stringname of module (eg "atad_driver").
+ * @return Number of instances loaded.
  *
  * NOTE: if doing this to check for own module, the run being used to check
  *       automatically adds one to the count.. so ret=2 means another,
@@ -99,11 +102,11 @@ int smod_get_modcount_by_name(const char *name)
   return count;
 }
 
-/*! \brief Get version number for given module name.
- *  \ingroup iopmgr
+/** Get version number for given module name.
+ * @ingroup iopmgr
  *
- *  \param name Stringname of module (eg "atad_driver").
- *  \return Version number.
+ * @param name Stringname of module (eg "atad_driver").
+ * @return Version number.
  *
  * return values:
  *   0 if not found.
@@ -119,11 +122,11 @@ int smod_get_modversion_by_name(const char *name)
     return -1;
 }
 
-/*! \brief Unload the named module.
- *  \ingroup iopmgr
+/** Unload the named module.
+ * @ingroup iopmgr
  *
- *  \param name Stringname of module (eg "atad_driver").
- *  \return Status of operation.
+ * @param name Stringname of module (eg "atad_driver").
+ * @return Status of operation.
  *
  * return values:
  *  0 if found and sucessfully unloaded.

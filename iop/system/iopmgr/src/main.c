@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# init code for iop manager.
 */
+
+/**
+ * @file
+ * init code for iop manager.
+ */
 
 #include "types.h"
 #include "defs.h"
@@ -18,8 +21,7 @@
 
 #include "iopmgr.h"
 
-/** \defgroup iopmgr iopmgr - IOP Manager*/
-
+/** @defgroup iopmgr iopmgr - IOP Manager*/
 
 IRX_ID(IOPMGR_MODNAME, IOPMGR_VERSION_HIGH, IOPMGR_VERSION_LOW);
 
@@ -27,15 +29,15 @@ extern struct irx_export_table _exp_iopmgr;
 
 extern void cmdline_handle(char *command, char *arg1);
 
-/*! \brief Entry point for IRX.
- *  \ingroup iopmgr
+/** Entry point for IRX.
+ * @ingroup iopmgr
  *
- *  if argc <= 1 , install as library.
- *  if argc > 1 , run given command in argv[1].
+ * if argc <= 1 , install as library.
+ * if argc > 1 , run given command in argv[1].
  *
- *  \param argc Number of arguments.
- *  \param argv Pointer to array of arguments.
- *  \return Module Status on Exit.
+ * @param argc Number of arguments.
+ * @param argv Pointer to array of arguments.
+ * @return Module Status on Exit.
  *
  *  return values:
  *    MODULE_RESIDENT_END if loaded and registered as library.
@@ -82,17 +84,17 @@ int _start(int argc, char *argv[])
   return MODULE_NO_RESIDENT_END;
 }
 
-/*! \brief shutdown the IRX.
- *  \ingroup iopmgr
+/** shutdown the IRX.
+ * @ingroup iopmgr
  *
- *  This checks if the library is registered, if it is then
- *  it unregisters it.
+ * This checks if the library is registered, if it is then
+ * it unregisters it.
  *
- *  \return Module Status on Exit.
+ * @return Module Status on Exit.
  *
- *  return values:
- *    MODULE_RESIDENT_END if loaded and registered as library.
- *    MODULE_NO_RESIDENT_END if just exiting normally.
+ * return values:
+ *   MODULE_RESIDENT_END if loaded and registered as library.
+ *   MODULE_NO_RESIDENT_END if just exiting normally.
  */
 int shutdown()
 {
