@@ -6,9 +6,12 @@
 # Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# ATA hardware types and definitions.
 */
+
+/**
+ * @file
+ * ATA hardware types and definitions.
+ */
 
 #ifndef DRV_ATAHW_H
 #define DRV_ATAHW_H
@@ -18,10 +21,10 @@
 #include <speedregs.h>
 
 #define ATA_DEV9_HDD_BASE		(SPD_REGBASE + 0x40)
-/* AIF on T10Ks - supported with aifatad.  */
+/** AIF on T10Ks - supported with aifatad.  */
 #define ATA_AIF_HDD_BASE		(AIF_REGBASE + AIF_ATA)
 
-/* A port contains all of the ATA controller registers.  */
+/** A port contains all of the ATA controller registers.  */
 typedef struct _ata_hwport {
 	u16	r_data;		/* 00 */
 	u16	r_error;	/* 02 */
@@ -63,7 +66,7 @@ typedef struct _ata_hwport {
 #define ATA_STAT_READY		0x40
 #define ATA_STAT_BUSY		0x80
 
-/* ATA command codes.  */
+/** ATA command codes.  */
 enum ATA_C_CODES {
 	ATA_C_NOP				= 0x00,
 	ATA_C_CFA_REQUEST_EXTENDED_ERROR_CODE	= 0x03,
@@ -150,7 +153,7 @@ enum ATA_S_SMART_CODES {
 	ATA_S_SMART_RETURN_STATUS
 };
 
-/* Offsets for the data returned from IDENTIFY DEVICE commands.  */
+/** Offsets for the data returned from IDENTIFY DEVICE commands.  */
 enum _ata_identify_offsets {
 	ATA_ID_SECTOTAL_LO = 60, ATA_ID_SECTOTAL_HI = 61,
 	ATA_ID_COMMAND_SETS_SUPPORTED = 83,

@@ -1,3 +1,8 @@
+/**
+ * @file
+ * VIF registers.
+ */
+
 #ifndef __VIF_REGISTERS_H__
 #define __VIF_REGISTERS_H__
 

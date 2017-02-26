@@ -1,3 +1,8 @@
+/**
+ * @file
+ * Debug definitions
+ */
+
 #ifndef _PS2_DEBUG_H
 #define _PS2_DEBUG_H
 

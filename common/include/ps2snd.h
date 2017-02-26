@@ -8,8 +8,13 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
+/**
+ * @file
+ * PS2SND definitions.
+ */
+
 #ifndef __PS2SND_H
-#define __PS2SND_H 1
+#define __PS2SND_H
 
 #include <libsd.h>
 

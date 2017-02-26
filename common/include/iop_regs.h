@@ -1,3 +1,8 @@
+/**
+ * @file
+ * IOP register definitions.
+ */
+
 #ifndef _IOP_REGS_H
 #define _IOP_REGS_H
 
@@ -9,22 +14,23 @@
 
 #define M_reg8(___base, ___reg_num) ((vu8 *) (___base + (___reg_num)))
 
-// N_CMD is written to supply the command number for a CDVD "N" command.
+/** N_CMD is written to supply the command number for a CDVD "N" command. */
 #define R_CDVD_N_CMD M_reg8(A_CDVD_REG_BASE, 0x04)
 
-// CDVD Register 0x05 is written to add a byte to N-command param FIFO
-// and read to determine N-command status.
-// Command status:
-// bit      explaination
-// ---      ------------
-//   0      Unknown
-//   1      Unknown
-//   2      Unknown
-//   3      Unknown
-//   4      Unknown
-//   5      Unknown
-//   6      result FIFO empty(0 = result in FIFO, 1 = result FIFO is empty)
-//   7      busy(1 if currently processing a N-command)
+/** CDVD Register 0x05 is written to add a byte to N-command param FIFO
+ * and read to determine N-command status.
+ * Command status:
+ * bit      explaination
+ * ---      ------------
+ *   0      Unknown
+ *   1      Unknown
+ *   2      Unknown
+ *   3      Unknown
+ *   4      Unknown
+ *   5      Unknown
+ *   6      result FIFO empty(0 = result in FIFO, 1 = result FIFO is empty)
+ *   7      busy(1 if currently processing a N-command)
+ */
 #define R_CDVD_N_CMD_STATUS M_reg8(A_CDVD_REG_BASE, 0x05)
 #define R_CDVD_N_CMD_PARAM_FIFO M_reg8(A_CDVD_REG_BASE, 0x05)
 
@@ -33,44 +39,47 @@
 // 0x01 is written to this register to cause a "break" to occur, along with an interrupt.
 #define R_CDVD_REG07 M_reg8(A_CDVD_REG_BASE, 0x07)
 
-// TRAY_STAT is read to get the status of the drive tray.
-// Tray status:
-// bit      explaination
-// ---      ------------
-//   0      Tray Open(1 if tray is open, 0 if closed)
-// 1-7      Unknown
+/* TRAY_STAT is read to get the status of the drive tray.
+ * Tray status:
+ * bit      explaination
+ * ---      ------------
+ *   0      Tray Open(1 if tray is open, 0 if closed)
+ * 1-7      Unknown
+ */
 #define R_CDVD_TRAY_STATUS M_reg8(A_CDVD_REG_BASE, 0x0A)
 
-// bits for CDVD_TRAY_STAT register
+/** bits for CDVD_TRAY_STAT register */
 #define CDVD_TRAY_STAT_OPEN (1 << 0)
 
 #define R_CDVD_DISK_TYPE M_reg8(A_CDVD_REG_BASE, 0x0F)
 
-// CDVD Register "S_CMD" : 0x16
-// write 8-bit "S" command number after parameters.
-// read: unknown
+/** CDVD Register "S_CMD" : 0x16
+ * write 8-bit "S" command number after parameters.
+ * read: unknown
+ */
 #define R_CDVD_S_CMD M_reg8(A_CDVD_REG_BASE, 0x16)
 
-// CDVD Register 0x17 is written to add a parameter to the S-command param FIFO
-// and read to determine command status.
-// Command status:
-// bit      explaination
-// ---      ------------
-//   0      Unknown
-//   1      Unknown
-//   2      Unknown
-//   3      Unknown
-//   4      Unknown
-//   5      Unknown
-//   6      result FIFO empty(0 = result in FIFO, 1 = result FIFO is empty)
-//   7      busy(1 if currently processing a command)
+/* CDVD Register 0x17 is written to add a parameter to the S-command param FIFO
+ * and read to determine command status.
+ * Command status:
+ * bit      explaination
+ * ---      ------------
+ *   0      Unknown
+ *   1      Unknown
+ *   2      Unknown
+ *   3      Unknown
+ *   4      Unknown
+ *   5      Unknown
+ *   6      result FIFO empty(0 = result in FIFO, 1 = result FIFO is empty)
+ *   7      busy(1 if currently processing a command)
+ */
 #define R_CDVD_S_STATUS M_reg8(A_CDVD_REG_BASE, 0x17)
 #define R_CDVD_S_PARAM_FIFO M_reg8(A_CDVD_REG_BASE, 0x17)
 
 #define CDVD_S_STAT_RFIFO_EMPTY (1 << 6)
 #define CDVD_S_STAT_BUSY (1 << 7)
 
-// S_RES_FIFO is read to get a byte from the S-command result FIFO.
+/** S_RES_FIFO is read to get a byte from the S-command result FIFO. */
 #define R_CDVD_S_RES_FIFO M_reg8(A_CDVD_REG_BASE, 0x18)
 
 #define R_CDVD_KEY_DATA0  M_reg8(A_CDVD_REG_BASE, 0x20)
@@ -91,24 +100,27 @@
 #define R_CDVD_KEY_DATAD  M_reg8(A_CDVD_REG_BASE, 0x33)
 #define R_CDVD_KEY_DATAE  M_reg8(A_CDVD_REG_BASE, 0x34)
 
-// Flags indicating the format of the key data.
-// Bits 0-2 set indicate that the corresponding 5-byte key data block is valid.
-// Bits 3-7 are unknown, but may be used to determine additional encryption measures used for DSP<->mechacon communication.
+/** Flags indicating the format of the key data.
+ * Bits 0-2 set indicate that the corresponding 5-byte key data block is valid.
+ * Bits 3-7 are unknown, but may be used to determine additional encryption measures used for DSP<->mechacon communication.
+ */
 #define R_CDVD_KEY_FLAGS  M_reg8(A_CDVD_REG_BASE, 0x38)
 
-// Key Data Block XOR key
-// XOR'd with each byte of each valid Key Data Block to decrypt their values.
+/** Key Data Block XOR key
+ * XOR'd with each byte of each valid Key Data Block to decrypt their values.
+ */
 #define R_CDVD_KEY_XOR    M_reg8(A_CDVD_REG_BASE, 0x39)
 
-// Decryption control, enable/disable decryption algorithms on data being read from disc using 5th byte of current
-//      key as the XOR key.
-// Bit 0 is Data XOR enable, this causes data being read from the disc to be XOR'd with the value of the CDVD_KEY_DATA4
-//      register.
-// Bit 1 is Rotate Left enable, this causes data being read to be rotated left by a specified number of bits(see Bits 4-6).
-// Bit 2 doesn't seem to do anything..
-// Bit 3 is Swap Nibble enable, this causes data being read to have the the high and low nibbles of each byte
-//      to be swapped.
-// Bits 4-7 is the number of bits the data being read will be shifted left byte, if enabled.
+/** Decryption control, enable/disable decryption algorithms on data being read from disc using 5th byte of current
+ *      key as the XOR key.
+ * Bit 0 is Data XOR enable, this causes data being read from the disc to be XOR'd with the value of the CDVD_KEY_DATA4
+ *      register.
+ * Bit 1 is Rotate Left enable, this causes data being read to be rotated left by a specified number of bits(see Bits 4-6).
+ * Bit 2 doesn't seem to do anything..
+ * Bit 3 is Swap Nibble enable, this causes data being read to have the the high and low nibbles of each byte
+ *      to be swapped.
+ * Bits 4-7 is the number of bits the data being read will be shifted left byte, if enabled.
+ */
 #define R_CDVD_DEC_CTRL   M_reg8(A_CDVD_REG_BASE, 0x3A)
 
 // bits for CDVD_DEC_CTRL(bits 4-7 are "rotate left number")
@@ -121,10 +133,10 @@
 #define A_IOP_IRQ_CTRL 0xBF801450
 #define A_IOP_REG_1454 0xBF801454
 
-// unknown, related to CD? 32-bit
+/** unknown, related to CD? 32-bit */
 #define A_PS1_1F801018 0x1F801018
 
-// unknown, related to CD? 32-bit
+/** unknown, related to CD? 32-bit */
 #define A_PS1_1F801020 0x1F801020
 
 
@@ -353,7 +365,7 @@
 #define R_IOP_DICR2 ((vu32 *) (A_IOP_DICR2))
 #define R_IOP_DICR3 ((vu32 *) (A_IOP_DICR3))
 
-// ??? Set to 1 by DMACMAN when DMAC is initilized, set to 0 by DMACMAN when shut down.
+/** ??? Set to 1 by DMACMAN when DMAC is initilized, set to 0 by DMACMAN when shut down. */
 #define R_IOP_DMAC_1578 ((vu32 *) (A_IOP_DMAC_1578))
 
 // SIF/SBUS
@@ -373,7 +385,7 @@
 
 #define R_IOP_UNK_2070 ((vu32 *) (A_IOP_UNK_2070))
 
-// IOP SBUS Registers(add PS2_SBUS_xxx to this to get register address)
+/** IOP SBUS Registers(add PS2_SBUS_xxx to this to get register address) */
 #define R_IOP_SBUS_REG_BASE ((vu32 *) (A_IOP_SBUS_REG_BASE))
 
 // Accessed by EECONF.IRX:
@@ -399,22 +411,22 @@
 #define R_IOP_BF808430 ((vu32 *) (A_IOP_BF808430))
 #define R_IOP_BF80847C ((vu32 *) (A_IOP_BF80847C))
 
-// Unknown, seems to be related to SIF2?
+/** Unknown, seems to be related to SIF2? */
 #define IOP_CHCR_30 (1<<30)
 
-// Transfer(used to kick a transfer and determine if a transfer is in progress).
+/** Transfer(used to kick a transfer and determine if a transfer is in progress). */
 #define IOP_CHCR_TR (1<<24)
 
-// Linked List(DMA tags), valid for GPU(SIF2?), SPU and SIF0
+/** Linked List(DMA tags), valid for GPU(SIF2?), SPU and SIF0 */
 #define IOP_CHCR_LI (1<<10)
 
-// Continuous transfer, TR is not cleared when transfer has completed.
+/** Continuous transfer, TR is not cleared when transfer has completed. */
 #define IOP_CHCR_CO (1<<9)
 
-// Unknown..
+// Unknown
 #define IOP_CHCR_08 (1<<8)
 
-// Direction: 0 = "to RAM", 1 = "from RAM"
+/** Direction: 0 = "to RAM", 1 = "from RAM" */
 #define IOP_CHCR_DR (1<<0)
 
 #define IOP_TO_MEM	0

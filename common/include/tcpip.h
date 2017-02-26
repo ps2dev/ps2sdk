@@ -6,10 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# $
-# Common definitions file for the LWIP v2.0.0 port.
 */
+
+/**
+ * @file
+ * Common definitions file for the LWIP v2.0.0 port.
+ */
 
 #ifndef _TCPIP_H
 #define _TCPIP_H

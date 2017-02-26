@@ -6,9 +6,12 @@
 # Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# fileXio RPC client/server shared includes
 */
+
+/**
+ * @file
+ * fileXio RPC client/server shared includes
+ */
 
 #ifndef _FILEXIO_H
 #define _FILEXIO_H
@@ -55,7 +58,7 @@ enum FILEXIO_CMDS{
 	FILEXIO_SETRWBUFFSIZE
 };
 
-//Used for buffer alignment correction when reading data.
+/** Used for buffer alignment correction when reading data. */
 typedef struct {
 	int  ssize;
 	int  esize;
@@ -82,7 +85,8 @@ typedef struct {
 #define FILEXIO_DT_BLOCK	0x04
 #define FILEXIO_DT_RAW	0x08
 #define FILEXIO_DT_FS	0x10
-#define FILEXIO_DT_FSEXT	0x10000000	/* Supports calls after chstat().  */
+/** Supports calls after chstat().  */
+#define FILEXIO_DT_FSEXT	0x10000000
 
 struct fileXioDirEntry
 {
@@ -95,7 +99,8 @@ struct fileXioDevice
 {
 	char name[16];
 	unsigned int type;
-	unsigned int version;	/* Not so sure about this one.  */
+	/** Not so sure about this one.  */
+	unsigned int version;
 	char desc[128];
 } __attribute__((aligned(64)));
 
@@ -131,11 +136,13 @@ struct fxio_mkdir_packet {
 	int mode;
 };
 
-struct fxio_pathsel_packet {	//Also used for rmdir, chdir and dopen.
+/** Also used for rmdir, chdir and dopen. */
+struct fxio_pathsel_packet {
 	char pathname[512];
 };
 
-struct fxio_rename_packet {	//Also used for symlink.
+/** Also used for symlink. */
+struct fxio_rename_packet {
 	char source[512];
 	char dest[512];
 };
@@ -151,7 +158,8 @@ struct fxio_open_packet {
 	int flags, mode;
 };
 
-struct fxio_close_packet {	//Also used by dclose.
+/** Also used by dclose. */
+struct fxio_close_packet {
 	int fd;
 };
 

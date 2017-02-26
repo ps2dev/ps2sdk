@@ -1,3 +1,8 @@
+/**
+ * @file
+ * PS2IP RPC definitions
+ */
+
 #ifndef _PS2IP_RPC_H
 #define _PS2IP_RPC_H
 
@@ -52,7 +57,8 @@ typedef struct {
 	void *ee_addr;
 	struct sockaddr sockaddr; // sizeof = 16
 	s32 malign;
-	u8 malign_buff[16]; // buffer for sending misaligned portion
+	/** buffer for sending misaligned portion */
+	u8 malign_buff[16];
 } send_pkt;
 
 typedef struct {

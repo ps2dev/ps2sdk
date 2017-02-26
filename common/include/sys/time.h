@@ -6,9 +6,12 @@
 # Copyright 2001-2005, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
-#
-# POSIX declarations for time
 */
+
+/**
+ * @file
+ * POSIX declarations for time
+ */
 
 #ifndef SYS_TIME_H
 #define SYS_TIME_H

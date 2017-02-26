@@ -1,42 +1,77 @@
+/**
+ * @file
+ * GIF Tags
+ */
+
 #ifndef __GIF_TAGS_H__
 #define __GIF_TAGS_H__
 
 #include <tamtypes.h>
 
-#define GIF_BLOCK_SIZE			0x7FFF	// Not sure if this is correct...
+/** Not sure if this is correct... */
+#define GIF_BLOCK_SIZE			0x7FFF
 
-#define GIF_PRE_DISABLE			0x00	// Enable PRIM field output
-#define GIF_PRE_ENABLE			0x01	// Disable PRIM field output
+/** Enable PRIM field output */
+#define GIF_PRE_DISABLE			0x00
+/** Disable PRIM field output */
+#define GIF_PRE_ENABLE			0x01
 
-#define GIF_PRIM_POINT			0x00	// Point primitive
-#define GIF_PRIM_LINE			0x01	// Line primitive
-#define GIF_PRIM_LINE_STRIP		0x02	// Line strip primitive
-#define GIF_PRIM_TRIANGLE		0x03	// Triangle primitive
-#define GIF_PRIM_TRIANGLE_STRIP	0x04	// Triangle strip primitive
-#define GIF_PRIM_TRIANGLE_FAN	0x05	// Triangle fan primitive
-#define GIF_PRIM_SPRITE			0x06	// Sprite primitive
+/** Point primitive */
+#define GIF_PRIM_POINT			0x00
+/** Line primitive */
+#define GIF_PRIM_LINE			0x01
+/** Line strip primitive */
+#define GIF_PRIM_LINE_STRIP		0x02
+/** Triangle primitive */
+#define GIF_PRIM_TRIANGLE		0x03
+/** Triangle strip primitive */
+#define GIF_PRIM_TRIANGLE_STRIP	0x04
+/** Triangle fan primitive */
+#define GIF_PRIM_TRIANGLE_FAN	0x05
+/** Sprite primitive */
+#define GIF_PRIM_SPRITE			0x06
 
-#define GIF_FLG_PACKED			0x00	// Packed GIF packet
-#define GIF_FLG_REGLIST			0x01	// Reglist GIF packet
-#define GIF_FLG_IMAGE			0x02	// Image GIF packet
+/** Packed GIF packet */
+#define GIF_FLG_PACKED			0x00
+/** Reglist GIF packet */
+#define GIF_FLG_REGLIST			0x01
+/** Image GIF packet */
+#define GIF_FLG_IMAGE			0x02
 
-#define GIF_REG_PRIM			0x00	// Drawing primitive setting.
-#define GIF_REG_RGBAQ			0x01	// Vertex color setting.
-#define GIF_REG_ST				0x02	// Specification of vertex texture coordinates.
-#define GIF_REG_UV				0x03	// Specification of vertex texture coordinates.
-#define GIF_REG_XYZF2			0x04	// Setting for vertex coordinate values.
-#define GIF_REG_XYZ2			0x05	// Setting for vertex coordinate values.
-#define GIF_REG_TEX0			0x06	// Texture information setting.
-#define GIF_REG_TEX0_1			0x06	// Texture information setting. (Context 1)
-#define GIF_REG_TEX0_2			0x07	// Texture information setting. (Context 2)
-#define GIF_REG_CLAMP			0x08	// Texture wrap mode.
-#define GIF_REG_CLAMP_1			0x08	// Texture wrap mode. (Context 1)
-#define GIF_REG_CLAMP_2			0x09	// Texture wrap mode. (Context 2)
-#define GIF_REG_FOG				0x0A	// Vertex fog value setting.
-#define GIF_REG_XYZF3			0x0C	// Setting for vertex coordinate values. (Without Drawing Kick)
-#define GIF_REG_XYZ3			0x0D	// Setting for vertex coordinate values. (Without Drawing Kick)
-#define GIF_REG_AD				0x0E	// GIFtag Address+Data
-#define GIF_REG_NOP				0x0F	// GIFtag No Operation
+/** Drawing primitive setting. */
+#define GIF_REG_PRIM			0x00
+/** Vertex color setting. */
+#define GIF_REG_RGBAQ			0x01
+/** Specification of vertex texture coordinates. */
+#define GIF_REG_ST				0x02
+/** Specification of vertex texture coordinates. */
+#define GIF_REG_UV				0x03
+/** Setting for vertex coordinate values. */
+#define GIF_REG_XYZF2			0x04
+/** Setting for vertex coordinate values. */
+#define GIF_REG_XYZ2			0x05
+/** Texture information setting. */
+#define GIF_REG_TEX0			0x06
+/** Texture information setting. (Context 1) */
+#define GIF_REG_TEX0_1			0x06
+/** Texture information setting. (Context 2) */
+#define GIF_REG_TEX0_2			0x07
+/** Texture wrap mode. */
+#define GIF_REG_CLAMP			0x08
+/** Texture wrap mode. (Context 1) */
+#define GIF_REG_CLAMP_1			0x08
+/** Texture wrap mode. (Context 2) */
+#define GIF_REG_CLAMP_2			0x09
+/** Vertex fog value setting. */
+#define GIF_REG_FOG				0x0A
+/** Setting for vertex coordinate values. (Without Drawing Kick) */
+#define GIF_REG_XYZF3			0x0C
+/** Setting for vertex coordinate values. (Without Drawing Kick) */
+#define GIF_REG_XYZ3			0x0D
+/** GIFtag Address+Data */
+#define GIF_REG_AD				0x0E
+/** GIFtag No Operation */
+#define GIF_REG_NOP				0x0F
 
 #define PACK_GIFTAG(Q,D0,D1) \
 	Q->dw[0] = (u64)(D0), \

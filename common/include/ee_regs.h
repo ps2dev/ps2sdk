@@ -1,3 +1,8 @@
+/**
+ * @file
+ * EE register definitions.
+ */
+
 #ifndef _EE_REGS_H
 #define _EE_REGS_H
 
@@ -204,398 +209,398 @@ extern "C" {
 #define A_EE_GS_IMR (0x12001010)
 #define A_EE_GS_BUSDIR (0x12001040)
 
-// Timer 0 counter value
+/** Timer 0 counter value */
 #define R_EE_T0_COUNT ((vu32 *) A_EE_T0_COUNT)
-// Timer 0 mode/status
+/** Timer 0 mode/status */
 #define R_EE_T0_MODE ((vu32 *) A_EE_T0_MODE)
-// Timer 0 compare value
+/** Timer 0 compare value */
 #define R_EE_T0_COMP ((vu32 *) A_EE_T0_COMP)
-// Timer 0 hold value
+/** Timer 0 hold value */
 #define R_EE_T0_HOLD ((vu32 *) A_EE_T0_HOLD)
-// Timer 1 counter value
+/** Timer 1 counter value */
 #define R_EE_T1_COUNT ((vu32 *) A_EE_T1_COUNT)
-// Timer 1 mode/status
+/** Timer 1 mode/status */
 #define R_EE_T1_MODE ((vu32 *) A_EE_T1_MODE)
-// Timer 1 compare value
+/** Timer 1 compare value */
 #define R_EE_T1_COMP ((vu32 *) A_EE_T1_COMP)
-// Timer 1 hold value
+/** Timer 1 hold value */
 #define R_EE_T1_HOLD ((vu32 *) A_EE_T1_HOLD)
-// Timer 2 counter value
+/** Timer 2 counter value */
 #define R_EE_T2_COUNT ((vu32 *) A_EE_T2_COUNT)
-// Timer 2 mode/status
+/** Timer 2 mode/status */
 #define R_EE_T2_MODE ((vu32 *) A_EE_T2_MODE)
-// Timer 2 compare value
+/** Timer 2 compare value */
 #define R_EE_T2_COMP ((vu32 *) A_EE_T2_COMP)
-// Timer 3 counter value
+/** Timer 3 counter value */
 #define R_EE_T3_COUNT ((vu32 *) A_EE_T3_COUNT)
-// Timer 3 mode/status
+/** Timer 3 mode/status */
 #define R_EE_T3_MODE ((vu32 *) A_EE_T3_MODE)
-// Timer 3 compare value
+/** Timer 3 compare value */
 #define R_EE_T3_COMP ((vu32 *) A_EE_T3_COMP)
-// IPU command
+/** IPU command */
 #define R_EE_IPU_CMD ((vu64 *) A_EE_IPU_CMD)
-// IPU control
+/** IPU control */
 #define R_EE_IPU_CTRL ((vu32 *) A_EE_IPU_CTRL)
-// IPU input FIFO control
+/** IPU input FIFO control */
 #define R_EE_IPU_BP ((vu32 *) A_EE_IPU_BP)
-// First data of bit stream
+/** First data of bit stream */
 #define R_EE_IPU_TOP ((vu64 *) A_EE_IPU_TOP)
-// GIF control
+/** GIF control */
 #define R_EE_GIF_CTRL ((vu32 *) A_EE_GIF_CTRL)
-// GIF mode setting
+/** GIF mode setting */
 #define R_EE_GIF_MODE ((vu32 *) A_EE_GIF_MODE)
-// GIF status
+/** GIF status */
 #define R_EE_GIF_STAT ((vu32 *) A_EE_GIF_STAT)
-// GIFtag ((vu32 *) bits 31-0) immediately before
+/** GIFtag ((vu32 *) bits 31-0) immediately before */
 #define R_EE_GIF_TAG0 ((vu32 *) A_EE_GIF_TAG0)
-// GIFtag ((vu32 *) bits 63-32) immediately before
+/** GIFtag ((vu32 *) bits 63-32) immediately before */
 #define R_EE_GIF_TAG1 ((vu32 *) A_EE_GIF_TAG1)
-// GIFtag ((vu32 *) bits 95-64) immediately before
+/** GIFtag ((vu32 *) bits 95-64) immediately before */
 #define R_EE_GIF_TAG2 ((vu32 *) A_EE_GIF_TAG2)
-// GIFtag ((vu32 *) bits 127-96) immediately before
+/** GIFtag ((vu32 *) bits 127-96) immediately before */
 #define R_EE_GIF_TAG3 ((vu32 *) A_EE_GIF_TAG3)
-// Transfer status counter
+/** Transfer status counter */
 #define R_EE_GIF_CNT ((vu32 *) A_EE_GIF_CNT)
-// PATH3 transfer status counter
+/** PATH3 transfer status counter */
 #define R_EE_GIF_P3CNT ((vu32 *) A_EE_GIF_P3CNT)
-// PATH3 tag value
+/** PATH3 tag value */
 #define R_EE_GIF_P3TAG ((vu32 *) A_EE_GIF_P3TAG)
-// Status
+/** Status */
 #define R_EE_VIF0_STAT ((vu32 *) A_EE_VIF0_STAT)
-// Operation control
+/** Operation control */
 #define R_EE_VIF0_FBRST ((vu32 *) A_EE_VIF0_FBRST)
-// Error status
+/** Error status */
 #define R_EE_VIF0_ERR ((vu32 *) A_EE_VIF0_ERR)
-// Mark value
+/** Mark value */
 #define R_EE_VIF0_MARK ((vu32 *) A_EE_VIF0_MARK)
-// Data write cycle
+/** Data write cycle */
 #define R_EE_VIF0_CYCLE ((vu32 *) A_EE_VIF0_CYCLE)
-// ADD mode
+/** ADD mode */
 #define R_EE_VIF0_MODE ((vu32 *) A_EE_VIF0_MODE)
-// Amount of non-transferred data
+/** Amount of non-transferred data */
 #define R_EE_VIF0_NUM ((vu32 *) A_EE_VIF0_NUM)
-// Write mask pattern
+/** Write mask pattern */
 #define R_EE_VIF0_MASK ((vu32 *) A_EE_VIF0_MASK)
-// Last processed VIFcode
+/** Last processed VIFcode */
 #define R_EE_VIF0_CODE ((vu32 *) A_EE_VIF0_CODE)
-// Next ITOP value
+/** Next ITOP value */
 #define R_EE_VIF0_ITOPS ((vu32 *) A_EE_VIF0_ITOPS)
-// ITOP value
+/** ITOP value */
 #define R_EE_VIF0_ITOP ((vu32 *) A_EE_VIF0_ITOP)
-// Filling data R0 ((vu32 *) Row register)
+/** Filling data R0 ((vu32 *) Row register) */
 #define R_EE_VIF0_R0 ((vu32 *) A_EE_VIF0_R0)
-// Filling data R1 ((vu32 *) Row register)
+/** Filling data R1 ((vu32 *) Row register) */
 #define R_EE_VIF0_R1 ((vu32 *) A_EE_VIF0_R1)
-// Filling data R2 ((vu32 *) Row register)
+/** Filling data R2 ((vu32 *) Row register) */
 #define R_EE_VIF0_R2 ((vu32 *) A_EE_VIF0_R2)
-// Filling data R3 ((vu32 *) Row register)
+/** Filling data R3 ((vu32 *) Row register) */
 #define R_EE_VIF0_R3 ((vu32 *) A_EE_VIF0_R3)
-// Filling data C0 ((vu32 *) Col register)
+/** Filling data C0 ((vu32 *) Col register) */
 #define R_EE_VIF0_C0 ((vu32 *) A_EE_VIF0_C0)
-// Filling data C1 ((vu32 *) Col register)
+/** Filling data C1 ((vu32 *) Col register) */
 #define R_EE_VIF0_C1 ((vu32 *) A_EE_VIF0_C1)
-// Filling data C2 ((vu32 *) Col register)
+/** Filling data C2 ((vu32 *) Col register) */
 #define R_EE_VIF0_C2 ((vu32 *) A_EE_VIF0_C2)
-// Filling data C3 ((vu32 *) Col register)
+/** Filling data C3 ((vu32 *) Col register) */
 #define R_EE_VIF0_C3 ((vu32 *) A_EE_VIF0_C3)
-// Status
+/** Status */
 #define R_EE_VIF1_STAT ((vu32 *) A_EE_VIF1_STAT)
-// Operation control
+/** Operation control */
 #define R_EE_VIF1_FBRST ((vu32 *) A_EE_VIF1_FBRST)
-// Error status
+/** Error status */
 #define R_EE_VIF1_ERR ((vu32 *) A_EE_VIF1_ERR)
-// Mark value
+/** Mark value */
 #define R_EE_VIF1_MARK ((vu32 *) A_EE_VIF1_MARK)
-// Data write cycle
+/** Data write cycle */
 #define R_EE_VIF1_CYCLE ((vu32 *) A_EE_VIF1_CYCLE)
-// ADD mode
+/** ADD mode */
 #define R_EE_VIF1_MODE ((vu32 *) A_EE_VIF1_MODE)
-// Amount of non-transferred data
+/** Amount of non-transferred data */
 #define R_EE_VIF1_NUM ((vu32 *) A_EE_VIF1_NUM)
-// Write mask pattern
+/** Write mask pattern */
 #define R_EE_VIF1_MASK ((vu32 *) A_EE_VIF1_MASK)
-// Last processed VIFcode
+/** Last processed VIFcode */
 #define R_EE_VIF1_CODE ((vu32 *) A_EE_VIF1_CODE)
-// Next ITOP value
+/** Next ITOP value */
 #define R_EE_VIF1_ITOPS ((vu32 *) A_EE_VIF1_ITOPS)
-// Base address of double buffer
+/** Base address of double buffer */
 #define R_EE_VIF1_BASE ((vu32 *) A_EE_VIF1_BASE)
-// Offset of double buffer
+/** Offset of double buffer */
 #define R_EE_VIF1_OFST ((vu32 *) A_EE_VIF1_OFST)
-// Next TOP value/data write address
+/** Next TOP value/data write address */
 #define R_EE_VIF1_TOPS ((vu32 *) A_EE_VIF1_TOPS)
-// ITOP value
+/** ITOP value */
 #define R_EE_VIF1_ITOP ((vu32 *) A_EE_VIF1_ITOP)
-// TOP value
+/** TOP value */
 #define R_EE_VIF1_TOP ((vu32 *) A_EE_VIF1_TOP)
-// Filling data R0 ((vu32 *) Row register)
+/** Filling data R0 ((vu32 *) Row register) */
 #define R_EE_VIF1_R0 ((vu32 *) A_EE_VIF1_R0)
-// Filling data R1 ((vu32 *) Row register)
+/** Filling data R1 ((vu32 *) Row register) */
 #define R_EE_VIF1_R1 ((vu32 *) A_EE_VIF1_R1)
-// Filling data R2 ((vu32 *) Row register)
+/** Filling data R2 ((vu32 *) Row register) */
 #define R_EE_VIF1_R2 ((vu32 *) A_EE_VIF1_R2)
-// Filling data R3 ((vu32 *) Row register)
+/** Filling data R3 ((vu32 *) Row register) */
 #define R_EE_VIF1_R3 ((vu32 *) A_EE_VIF1_R3)
-// Filling data C0 ((vu32 *) Col register)
+/** Filling data C0 ((vu32 *) Col register) */
 #define R_EE_VIF1_C0 ((vu32 *) A_EE_VIF1_C0)
-// Filling data C1 ((vu32 *) Col register)
+/** Filling data C1 ((vu32 *) Col register) */
 #define R_EE_VIF1_C1 ((vu32 *) A_EE_VIF1_C1)
-// Filling data C2 ((vu32 *) Col register)
+/** Filling data C2 ((vu32 *) Col register) */
 #define R_EE_VIF1_C2 ((vu32 *) A_EE_VIF1_C2)
-// Filling data C3 ((vu32 *) Col register)
+/** Filling data C3 ((vu32 *) Col register) */
 #define R_EE_VIF1_C3 ((vu32 *) A_EE_VIF1_C3)
-// VIF0 FIFO ((vu32 *) write)
+/** VIF0 FIFO ((vu32 *) write) */
 #define R_EE_VIF0_FIFO ((vu32 *) A_EE_VIF0_FIFO)
-// VIF1 FIFO ((vu32 *) read/write)
+/** VIF1 FIFO ((vu32 *) read/write) */
 #define R_EE_VIF1_FIFO ((vu32 *) A_EE_VIF1_FIFO)
-// GIF FIFO ((vu32 *) write)
+/** GIF FIFO ((vu32 *) write) */
 #define R_EE_GIF_FIFO ((vu32 *) A_EE_GIF_FIFO)
-// IPU FIFO ((vu32 *) read)
+/** IPU FIFO ((vu32 *) read) */
 #define R_EE_IPU_out_FIFO ((vu32 *) A_EE_IPU_out_FIFO)
-// IPU FIFO ((vu32 *) write)
+/** IPU FIFO ((vu32 *) write) */
 #define R_EE_IPU_in_FIFO ((vu32 *) A_EE_IPU_in_FIFO)
-// Ch0 channel control
+/** Ch0 channel control */
 #define R_EE_D0_CHCR ((vu32 *) A_EE_D0_CHCR)
-// Ch0 memory address
+/** Ch0 memory address */
 #define R_EE_D0_MADR ((vu32 *) A_EE_D0_MADR)
-// Ch0 quad word count
+/** Ch0 quad word count */
 #define R_EE_D0_QWC ((vu32 *) A_EE_D0_QWC)
-// Ch0 tag address
+/** Ch0 tag address */
 #define R_EE_D0_TADR ((vu32 *) A_EE_D0_TADR)
-// Ch0 address stack 0
+/** Ch0 address stack 0 */
 #define R_EE_D0_ASR0 ((vu32 *) A_EE_D0_ASR0)
-// Ch0 address stack 1
+/** Ch0 address stack 1 */
 #define R_EE_D0_ASR1 ((vu32 *) A_EE_D0_ASR1)
-// Ch1 channel control
+/** Ch1 channel control */
 #define R_EE_D1_CHCR ((vu32 *) A_EE_D1_CHCR)
-// Ch1 memory address
+/** Ch1 memory address */
 #define R_EE_D1_MADR ((vu32 *) A_EE_D1_MADR)
-// Ch1 quad word count
+/** Ch1 quad word count */
 #define R_EE_D1_QWC ((vu32 *) A_EE_D1_QWC)
-// Ch1 tag address
+/** Ch1 tag address */
 #define R_EE_D1_TADR ((vu32 *) A_EE_D1_TADR)
-// Ch1 address stack 0
+/** Ch1 address stack 0 */
 #define R_EE_D1_ASR0 ((vu32 *) A_EE_D1_ASR0)
-// Ch1 address stack 1
+/** Ch1 address stack 1 */
 #define R_EE_D1_ASR1 ((vu32 *) A_EE_D1_ASR1)
-// Ch2 channel control
+/** Ch2 channel control */
 #define R_EE_D2_CHCR ((vu32 *) A_EE_D2_CHCR)
-// Ch2 memory address
+/** Ch2 memory address */
 #define R_EE_D2_MADR ((vu32 *) A_EE_D2_MADR)
-// Ch2 quad word count
+/** Ch2 quad word count */
 #define R_EE_D2_QWC ((vu32 *) A_EE_D2_QWC)
-// Ch2 tag address
+/** Ch2 tag address */
 #define R_EE_D2_TADR ((vu32 *) A_EE_D2_TADR)
-// Ch2 address stack 0
+/** Ch2 address stack 0 */
 #define R_EE_D2_ASR0 ((vu32 *) A_EE_D2_ASR0)
-// Ch2 address stack 1
+/** Ch2 address stack 1 */
 #define R_EE_D2_ASR1 ((vu32 *) A_EE_D2_ASR1)
-// Ch3 channel control
+/** Ch3 channel control */
 #define R_EE_D3_CHCR ((vu32 *) A_EE_D3_CHCR)
-// Ch3 memory address
+/** Ch3 memory address */
 #define R_EE_D3_MADR ((vu32 *) A_EE_D3_MADR)
-// Ch3 quad word count
+/** Ch3 quad word count */
 #define R_EE_D3_QWC ((vu32 *) A_EE_D3_QWC)
-// Ch4 chnnel control
+/** Ch4 chnnel control */
 #define R_EE_D4_CHCR ((vu32 *) A_EE_D4_CHCR)
-// Ch4 memory address
+/** Ch4 memory address */
 #define R_EE_D4_MADR ((vu32 *) A_EE_D4_MADR)
-// Ch4 quad word count
+/** Ch4 quad word count */
 #define R_EE_D4_QWC ((vu32 *) A_EE_D4_QWC)
-// Ch4 tag address
+/** Ch4 tag address */
 #define R_EE_D4_TADR ((vu32 *) A_EE_D4_TADR)
-// Ch5 channel control
+/** Ch5 channel control */
 #define R_EE_D5_CHCR ((vu32 *) A_EE_D5_CHCR)
-// Ch5 memory address
+/** Ch5 memory address */
 #define R_EE_D5_MADR ((vu32 *) A_EE_D5_MADR)
-// Ch5 quad word count
+/** Ch5 quad word count */
 #define R_EE_D5_QWC ((vu32 *) A_EE_D5_QWC)
-// Ch6 channel control
+/** Ch6 channel control */
 #define R_EE_D6_CHCR ((vu32 *) A_EE_D6_CHCR)
-// Ch6 memory address
+/** Ch6 memory address */
 #define R_EE_D6_MADR ((vu32 *) A_EE_D6_MADR)
-// Ch6 quad word count
+/** Ch6 quad word count */
 #define R_EE_D6_QWC ((vu32 *) A_EE_D6_QWC)
-// Ch6 tag address
+/** Ch6 tag address */
 #define R_EE_D6_TADR ((vu32 *) A_EE_D6_TADR)
-// Ch7 channel control
+/** Ch7 channel control */
 #define R_EE_D7_CHCR ((vu32 *) A_EE_D7_CHCR)
-// Ch7 memory address
+/** Ch7 memory address */
 #define R_EE_D7_MADR ((vu32 *) A_EE_D7_MADR)
-// Ch7 quad word count
+/** Ch7 quad word count */
 #define R_EE_D7_QWC ((vu32 *) A_EE_D7_QWC)
-// Ch8 channel control
+/** Ch8 channel control */
 #define R_EE_D8_CHCR ((vu32 *) A_EE_D8_CHCR)
-// Ch8 memory address
+/** Ch8 memory address */
 #define R_EE_D8_MADR ((vu32 *) A_EE_D8_MADR)
-// Ch8 quad word count
+/** Ch8 quad word count */
 #define R_EE_D8_QWC ((vu32 *) A_EE_D8_QWC)
-// Ch8 SPR address
+/** Ch8 SPR address */
 #define R_EE_D8_SADR ((vu32 *) A_EE_D8_SADR)
-// Ch9 channel control
+/** Ch9 channel control */
 #define R_EE_D9_CHCR ((vu32 *) A_EE_D9_CHCR)
-// Ch9 memory address
+/** Ch9 memory address */
 #define R_EE_D9_MADR ((vu32 *) A_EE_D9_MADR)
-// Ch9 quad word count
+/** Ch9 quad word count */
 #define R_EE_D9_QWC ((vu32 *) A_EE_D9_QWC)
-// Ch9 tag address
+/** Ch9 tag address */
 #define R_EE_D9_TADR ((vu32 *) A_EE_D9_TADR)
-// Ch9 SPR address
+/** Ch9 SPR address */
 #define R_EE_D9_SADR ((vu32 *) A_EE_D9_SADR)
-// DMAC control
+/** DMAC control */
 #define R_EE_D_CTRL ((vu32 *) A_EE_D_CTRL)
-// DMAC status
+/** DMAC status */
 #define R_EE_D_STAT ((vu32 *) A_EE_D_STAT)
-// DMAC priority control
+/** DMAC priority control */
 #define R_EE_D_PCR ((vu32 *) A_EE_D_PCR)
-// DMAC skip quad word
+/** DMAC skip quad word */
 #define R_EE_D_SQWC ((vu32 *) A_EE_D_SQWC)
-// DMAC ring buffer size
+/** DMAC ring buffer size */
 #define R_EE_D_RBSR ((vu32 *) A_EE_D_RBSR)
-// DMAC ring buffer offset
+/** DMAC ring buffer offset */
 #define R_EE_D_RBOR ((vu32 *) A_EE_D_RBOR)
-// DMA stall address
+/** DMA stall address */
 #define R_EE_D_STADR ((vu32 *) A_EE_D_STADR)
-// Interrupt status
+/** Interrupt status */
 #define R_EE_I_STAT ((vu32 *) A_EE_I_STAT)
-// Interrupt mask
+/** Interrupt mask */
 #define R_EE_I_MASK ((vu32 *) A_EE_I_MASK)
 
 
-// EE SIO Line Control Register
+/** EE SIO Line Control Register */
 #define R_EE_SIO_LCR ((vu32 *) A_EE_SIO_LCR)
-// EE SIO Line Status Register
+/** EE SIO Line Status Register */
 #define R_EE_SIO_LSR ((vu32 *) A_EE_SIO_LSR)
-// EE SIO Interrupt Enable Register
+/** EE SIO Interrupt Enable Register */
 #define R_EE_SIO_IER ((vu32 *) A_EE_SIO_IER)
-// EE SIO Interrupt Status Register
+/** EE SIO Interrupt Status Register */
 #define R_EE_SIO_ISR ((vu32 *) A_EE_SIO_ISR)
-// EE SIO FIFO Control Register
+/** EE SIO FIFO Control Register */
 #define R_EE_SIO_FCR ((vu32 *) A_EE_SIO_FCR)
-// EE SIO Baud Rate Control Register
+/** EE SIO Baud Rate Control Register */
 #define R_EE_SIO_BRC ((vu32 *) A_EE_SIO_BRC)
-// Unknown SIO Register 0x60
+/** Unknown SIO Register 0x60 */
 #define R_EE_SIO_REG60 ((vu8 *) A_EE_SIO_REG60)
-// Unknown SIO Register 0x70
+/** Unknown SIO Register 0x70 */
 #define R_EE_SIO_REG70 ((vu8 *) A_EE_SIO_REG70)
-// Transfer Holding Register
+/** Transfer Holding Register */
 #define R_EE_SIO_TXFIFO ((vu8 *) A_EE_SIO_TXFIFO)
-// Unknown SIO Register 0x90
+/** Unknown SIO Register 0x90 */
 #define R_EE_SIO_REG90 ((vu8 *) A_EE_SIO_REG90)
-// Unknown SIO Register 0xA0
+/** Unknown SIO Register 0xA0 */
 #define R_EE_SIO_REGA0 ((vu8 *) A_EE_SIO_REGA0)
-// Unknown SIO Register 0xB0
+/** Unknown SIO Register 0xB0 */
 #define R_EE_SIO_REGB0 ((vu8 *) A_EE_SIO_REGB0)
-// Recieve Buffer Register
+/** Recieve Buffer Register */
 #define R_EE_SIO_RXFIFO ((vu8 *) A_EE_SIO_RXFIFO)
 
-// SBUS Unknown Reg 0x00
+/** SBUS Unknown Reg 0x00 */
 #define R_EE_SBUS_MADDR ((vu32 *) A_EE_SBUS_REG00)
-// SBUS Unknown Reg 0x10
+/** SBUS Unknown Reg 0x10 */
 #define R_EE_SBUS_SADDR ((vu32 *) A_EE_SBUS_REG10)
-// SBUS Main -> Sub Flag
+/** SBUS Main -> Sub Flag */
 #define R_EE_SBUS_MSFLAG ((vu32 *) A_EE_SBUS_MSFLAG)
-// SBUS Sub -> Main Flag
+/** SBUS Sub -> Main Flag */
 #define R_EE_SBUS_SMFLAG ((vu32 *) A_EE_SBUS_SMFLAG)
-// SBUS Unknown Reg 0x40
+/** SBUS Unknown Reg 0x40 */
 #define R_EE_SBUS_REG40 ((vu32 *) A_EE_SBUS_REG40)
-// SBUS Unknown Reg 0x50
+/** SBUS Unknown Reg 0x50 */
 #define R_EE_SBUS_REG50 ((vu32 *) A_EE_SBUS_REG50)
-// SBUS Unknown Reg 0x60
+/** SBUS Unknown Reg 0x60 */
 #define R_EE_SBUS_REG60 ((vu32 *) A_EE_SBUS_REG60)
-// SBUS Unknown Reg 0x70
+/** SBUS Unknown Reg 0x70 */
 #define R_EE_SBUS_REG70 ((vu32 *) A_EE_SBUS_REG70)
-// SBUS Unknown Reg 0x80
+/** SBUS Unknown Reg 0x80 */
 #define R_EE_SBUS_REG80 ((vu32 *) A_EE_SBUS_REG80)
-// SBUS Unknown Reg 0x90
+/** SBUS Unknown Reg 0x90 */
 #define R_EE_SBUS_REG90 ((vu32 *) A_EE_SBUS_REG90)
-// SBUS Unknown Reg 0xA0
+/** SBUS Unknown Reg 0xA0 */
 #define R_EE_SBUS_REGA0 ((vu32 *) A_EE_SBUS_REGA0)
-// SBUS Unknown Reg 0xB0
+/** SBUS Unknown Reg 0xB0 */
 #define R_EE_SBUS_REGB0 ((vu32 *) A_EE_SBUS_REGB0)
-// SBUS Unknown Reg 0xC0
+/** SBUS Unknown Reg 0xC0 */
 #define R_EE_SBUS_REGC0 ((vu32 *) A_EE_SBUS_REGC0)
-// SBUS Unknown Reg 0xD0
+/** SBUS Unknown Reg 0xD0 */
 #define R_EE_SBUS_REGD0 ((vu32 *) A_EE_SBUS_REGD0)
-// SBUS Unknown Reg 0xE0
+/** SBUS Unknown Reg 0xE0 */
 #define R_EE_SBUS_REGE0 ((vu32 *) A_EE_SBUS_REGE0)
-// SBUS Unknown Reg 0xF0
+/** SBUS Unknown Reg 0xF0 */
 #define R_EE_SBUS_REGF0 ((vu32 *) A_EE_SBUS_REGF0)
 
-// PGIF GPU Status
+/** PGIF GPU Status */
 #define R_EE_PGIF_GPU_STAT ((vu32 *) A_EE_PGIF_GPU_STAT)
-// PGIF Unknown Reg 0x10
+/** PGIF Unknown Reg 0x10 */
 #define R_EE_PGIF_REG10 ((vu32 *) A_EE_PGIF_REG10)
-// PGIF Unknown Reg 0x20
+/** PGIF Unknown Reg 0x20 */
 #define R_EE_PGIF_REG20 ((vu32 *) A_EE_PGIF_REG20)
-// PGIF Unknown Reg 0x30
+/** PGIF Unknown Reg 0x30 */
 #define R_EE_PGIF_REG30 ((vu32 *) A_EE_PGIF_REG30)
-// PGIF Unknown Reg 0x40
+/** PGIF Unknown Reg 0x40 */
 #define R_EE_PGIF_REG40 ((vu32 *) A_EE_PGIF_REG40)
-// PGIF Unknown Reg 0x50
+/** PGIF Unknown Reg 0x50 */
 #define R_EE_PGIF_REG50 ((vu32 *) A_EE_PGIF_REG50)
-// PGIF Unknown Reg 0x60
+/** PGIF Unknown Reg 0x60 */
 #define R_EE_PGIF_REG60 ((vu32 *) A_EE_PGIF_REG60)
-// PGIF Unknown Reg 0x70
+/** PGIF Unknown Reg 0x70 */
 #define R_EE_PGIF_REG70 ((vu32 *) A_EE_PGIF_REG70)
-// PGIF GPU Command FIFO Status
+/** PGIF GPU Command FIFO Status */
 #define R_EE_PGIF_CFIFO_STAT ((vu32 *) A_EE_PGIF_CFIFO_STAT)
-// PGIF Unknown Reg 0x90
+/** PGIF Unknown Reg 0x90 */
 #define R_EE_PGIF_REG90 ((vu32 *) A_EE_PGIF_REG90)
-// PGIF Unknown Reg 0xA0
+/** PGIF Unknown Reg 0xA0 */
 #define R_EE_PGIF_REGA0 ((vu32 *) A_EE_PGIF_REGA0)
-// PGIF Unknown Reg 0xB0
+/** PGIF Unknown Reg 0xB0 */
 #define R_EE_PGIF_REGB0 ((vu32 *) A_EE_PGIF_REGB0)
-// PGIF GPU Command FIFO Data
+/** PGIF GPU Command FIFO Data */
 #define R_EE_PGIF_CFIFO_DATA ((vu32 *) A_EE_PGIF_CFIFO_DATA)
-// PGIF Unknown Reg 0xD0
+/** PGIF Unknown Reg 0xD0 */
 #define R_EE_PGIF_REGD0 ((vu32 *) A_EE_PGIF_REGD0)
-// PGIF Unknown Reg 0xE0
+/** PGIF Unknown Reg 0xE0 */
 #define R_EE_PGIF_REGE0 ((vu32 *) A_EE_PGIF_REGE0)
-// PGIF Unknown Reg 0xF0
+/** PGIF Unknown Reg 0xF0 */
 #define R_EE_PGIF_REGF0 ((vu32 *) A_EE_PGIF_REGF0)
-// Acquisition of DMA suspend status
+/** Acquisition of DMA suspend status */
 #define R_EE_D_ENABLER ((vu32 *) A_EE_D_ENABLER)
-// DMA suspend control
+/** DMA suspend control */
 #define R_EE_D_ENABLEW ((vu32 *) A_EE_D_ENABLEW)
 
-// EE GS Registers
+/* EE GS Registers */
 
-// Various PCRTC modes
+/** Various PCRTC modes */
 #define R_EE_GS_PMODE ((vu64 *) A_EE_GS_PMODE)
-// Related to Sync
+/** Related to Sync */
 #define R_EE_GS_SMODE1 ((vu64 *) A_EE_GS_SMODE1)
-// Related to Sync
+/** Related to Sync */
 #define R_EE_GS_SMODE2 ((vu64 *) A_EE_GS_SMODE2)
-// DRAM refresh
+/** DRAM refresh */
 #define R_EE_GS_SRFSH ((vu64 *) A_EE_GS_SRFSH)
-// Related to Sync
+/** Related to Sync */
 #define R_EE_GS_SYNCH1 ((vu64 *) A_EE_GS_SYNCH1)
-// Related to Sync
+/** Related to Sync */
 #define R_EE_GS_SYNCH2 ((vu64 *) A_EE_GS_SYNCH2)
-// Related to Sync/start
+/** Related to Sync/start */
 #define R_EE_GS_SYNCV ((vu64 *) A_EE_GS_SYNCV)
-// Related to display buffer of Rectangular Area 1
+/** Related to display buffer of Rectangular Area 1 */
 #define R_EE_GS_DISPFB1 ((vu64 *) A_EE_GS_DISPFB1)
-// Rectangular Area 1 display position etc.
+/** Rectangular Area 1 display position etc. */
 #define R_EE_GS_DISPLAY1 ((vu64 *) A_EE_GS_DISPLAY1)
-// Related to display buffer of Rectangular Area 2
+/** Related to display buffer of Rectangular Area 2 */
 #define R_EE_GS_DISPFB2 ((vu64 *) A_EE_GS_DISPFB2)
-// Rectangular Area 2 display position etc.
+/** Rectangular Area 2 display position etc. */
 #define R_EE_GS_DISPLAY2 ((vu64 *) A_EE_GS_DISPLAY2)
-// Rectangular area write buffer
+/** Rectangular area write buffer */
 #define R_EE_GS_EXTBUF ((vu64 *) A_EE_GS_EXTBUF)
-// Rectangular area write data
+/** Rectangular area write data */
 #define R_EE_GS_EXTDATA ((vu64 *) A_EE_GS_EXTDATA)
-// Rectangular area write start
+/** Rectangular area write start */
 #define R_EE_GS_EXTWRITE ((vu64 *) A_EE_GS_EXTWRITE)
-// Background color
+/** Background color */
 #define R_EE_GS_BGCOLOR ((vu64 *) A_EE_GS_BGCOLOR)
-// Various GS status
+/** Various GS status */
 #define R_EE_GS_CSR ((vu64 *) A_EE_GS_CSR)
-// Interrupt mask
+/** Interrupt mask */
 #define R_EE_GS_IMR ((vu64 *) A_EE_GS_IMR)
-// Host I/F switching
+/** Host I/F switching */
 #define R_EE_GS_BUSDIR ((vu64 *) A_EE_GS_BUSDIR)
 
 #define EE_CHCR_MOD_NORM  (0)

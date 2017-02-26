@@ -1,3 +1,8 @@
+/**
+ * @file
+ * Netman RPC common definitions
+ */
+
 #define NETMAN_RPC_NUMBER	0x00004239
 #define NETMAN_RPC_BUFF_SIZE	128
 

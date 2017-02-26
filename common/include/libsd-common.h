@@ -1,5 +1,10 @@
+/**
+ * @file
+ * Common definitions for libsd on the EE and IOP
+ */
+
 #ifndef __LIBSD_COMMON_H
-#define __LIBSD_COMMON_H 1
+#define __LIBSD_COMMON_H
 
 
 #define SD_VOICE(_core,_v)   ((_core)|((_v)<<1))
