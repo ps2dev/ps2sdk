@@ -119,22 +119,19 @@ static err_t SMapLowLevelOutput(struct netif* pNetIF, struct pbuf* pOutput)
 	static u8 buffer[1536] __attribute__((aligned((64))));
 	struct pbuf* pbuf;
 	unsigned char *buffer_ptr;
-	unsigned short int TotalLength;
 
-	if(pOutput->next != NULL)
+	if(pOutput->tot_len > pOutput->len)
 	{
 		pbuf=pOutput;
 		buffer_ptr=buffer;
-		TotalLength=0;
 		while(pbuf!=NULL)
 		{
 			memcpy(buffer_ptr, pbuf->payload, pbuf->len);
-			TotalLength+=pbuf->len;
 			buffer_ptr+=pbuf->len;
 			pbuf=pbuf->next;
 		}
 
-		NetManNetIFSendPacket(buffer, TotalLength);
+		NetManNetIFSendPacket(buffer, pOutput->tot_len);
 	} else {
 		NetManNetIFSendPacket(pOutput->payload, pOutput->len);
 	}
