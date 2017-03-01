@@ -452,3 +452,15 @@ void sys_arch_unprotect(sys_prot_t level)
 	if(ProtLevel == 0)
 		EI();
 }
+
+void *ps2ip_calloc64(size_t n, size_t size)
+{
+	void *ptr = NULL;
+	size_t sz = n * size;
+
+	if ((ptr = memalign(64, sz)) == NULL)
+		return ptr;
+
+	memset(ptr, 0, sz);
+	return ptr;
+}

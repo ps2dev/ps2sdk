@@ -26,5 +26,9 @@ typedef int	sys_sem_t;
 typedef struct MboxData *sys_mbox_t;
 typedef int	sys_thread_t;
 
-#endif /* __SYS_ARCH_H__ */
+#define mem_clib_malloc(size) memalign(64,size)
+#define mem_clib_calloc(count,size) ps2ip_calloc64(count,size)
 
+void *ps2ip_calloc64(size_t n, size_t size);
+
+#endif /* __SYS_ARCH_H__ */
