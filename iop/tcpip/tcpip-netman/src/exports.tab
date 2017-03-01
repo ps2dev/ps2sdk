@@ -1,6 +1,6 @@
 void _retonly(void){}
 
-DECLARE_EXPORT_TABLE(ps2ip, 2, 5)
+DECLARE_EXPORT_TABLE(ps2ip, 2, 6)
 	DECLARE_EXPORT(_start)
 	DECLARE_EXPORT(_retonly)
 	DECLARE_EXPORT(_exit)
@@ -68,4 +68,5 @@ DECLARE_EXPORT_TABLE(ps2ip, 2, 5)
 	DECLARE_EXPORT(netif_set_link_up)
 	DECLARE_EXPORT(netif_set_link_down)	//55
 	DECLARE_EXPORT(tcpip_callback_with_block)
+	DECLARE_EXPORT(pbuf_coalesce)
 END_EXPORT_TABLE

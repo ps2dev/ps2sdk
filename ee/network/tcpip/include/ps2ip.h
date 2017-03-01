@@ -116,6 +116,7 @@ u8               pbuf_clen(struct pbuf *p);
 void             pbuf_chain(struct pbuf *h, struct pbuf *t);
 struct pbuf*     pbuf_dechain(struct pbuf *p);
 struct pbuf*     pbuf_take(struct pbuf *f);
+struct pbuf*     pbuf_coalesce(struct pbuf *p, pbuf_layer layer);
 
 #ifdef PS2IP_DNS
 /* From include/lwip/netdb.h:  */

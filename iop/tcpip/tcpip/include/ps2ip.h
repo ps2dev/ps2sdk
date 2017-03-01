@@ -19,7 +19,7 @@
 
 #include "tcpip.h"
 
-#define ps2ip_IMPORTS_start	DECLARE_IMPORT_TABLE(ps2ip, 2, 5)
+#define ps2ip_IMPORTS_start	DECLARE_IMPORT_TABLE(ps2ip, 2, 6)
 #define ps2ip_IMPORTS_end	END_IMPORT_TABLE
 
 /* From include/lwip/sockets.h:  */
@@ -143,6 +143,8 @@ struct pbuf*     pbuf_dechain(struct pbuf *p);
 #define        I_pbuf_dechain DECLARE_IMPORT(41, pbuf_dechain)
 struct pbuf*     pbuf_take(struct pbuf *f);
 #define        I_pbuf_take DECLARE_IMPORT(42, pbuf_take)
+struct pbuf*     pbuf_coalesce(struct pbuf *p, pbuf_layer layer);
+#define        I_pbuf_coalesce DECLARE_IMPORT(57, pbuf_coalesce)
 
 /* From include/lwip/inet.h:  */
 /* directly map this to the lwip internal functions */
