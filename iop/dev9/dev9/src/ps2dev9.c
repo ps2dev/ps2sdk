@@ -23,7 +23,6 @@
 #include <thsemap.h>
 #include <stdio.h>
 #include <dev9.h>
-#include <poweroff.h>
 
 #include <aifregs.h>
 #include <dev9regs.h>
@@ -67,8 +66,6 @@ static dev9_shutdown_cb_t dev9_shutdown_cbs[16];
 static dev9_dma_cb_t dev9_predma_cbs[4], dev9_postdma_cbs[4];
 
 static int dev9_intr_dispatch(int flag);
-
-static void dev9x_on_shutdown(void*);
 
 static void dev9_set_stat(int stat);
 static int dev9_device_probe(void);
@@ -179,8 +176,6 @@ int _start(int argc, char **argv)
 	if (AddDrv(&dev9x_device) != 0) {
 		return MODULE_NO_RESIDENT_END;
 	}
-
-	AddPowerOffHandler(&dev9x_on_shutdown, NULL);
 
 	return MODULE_RESIDENT_END;
 }
@@ -1084,11 +1079,4 @@ static int expbay_init(void)
 
 	M_PRINTF("CXD9611 (Expansion Bay type) initialized.\n");
 	return 0;
-}
-
-static void dev9x_on_shutdown(void*p)
-{
-	M_PRINTF("shutdown\n");
-	dev9IntrDisable(-1);
-	dev9Shutdown();
 }

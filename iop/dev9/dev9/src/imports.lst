@@ -21,10 +21,6 @@ I_RegisterLibraryEntries
 I_QueryBootMode
 loadcore_IMPORTS_end
 
-poweroff_IMPORTS_start
-I_AddPowerOffHandler
-poweroff_IMPORTS_end
-
 stdio_IMPORTS_start
 I_printf
 stdio_IMPORTS_end

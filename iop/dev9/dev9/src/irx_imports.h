@@ -20,7 +20,6 @@
 #include "intrman.h"
 #include "ioman.h"
 #include "loadcore.h"
-#include "poweroff.h"
 #include "stdio.h"
 #include "thbase.h"
 #include "thsemap.h"
