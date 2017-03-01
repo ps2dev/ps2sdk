@@ -250,4 +250,20 @@
  * or when using against non standard DNS servers. */
 #define LWIP_DNS_SECURE	0
 
+/*
+   ------------------------------------------------
+   ---------- Network Interfaces options ----------
+   ------------------------------------------------
+*/
+/**
+ * LWIP_NETIF_TX_SINGLE_PBUF: if this is set to 1, lwIP tries to put all data
+ * to be sent into one single pbuf. This is for compatibility with DMA-enabled
+ * MACs that do not support scatter-gather.
+ * Beware that this might involve CPU-memcpy before transmitting that would not
+ * be needed without this flag! Use this only if you need to!
+ *
+ * @todo: TCP and IP-frag do not work with this, yet:
+ */
+#define LWIP_NETIF_TX_SINGLE_PBUF             1
+
 #endif /* __LWIPOPTS_H__ */
