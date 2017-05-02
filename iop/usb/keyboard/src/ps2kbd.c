@@ -267,6 +267,7 @@ int ps2kbd_connect(int devId)
       currDev->packetSize = sizeof(kbd_data_recv);
     }
 
+#if 0
   if(dev->iManufacturer != 0)
     {
       usb_getstring(currDev->configEndp, dev->iManufacturer, "Keyboard Manufacturer");
@@ -276,6 +277,7 @@ int ps2kbd_connect(int devId)
     {
       usb_getstring(currDev->configEndp, dev->iProduct, "Keyboard Product");
     }
+#endif
 
   currDev->devId = devId;
   currDev->interfaceNo = intf->bInterfaceNumber;
