@@ -78,7 +78,14 @@ int hddCheckFormatted()
 
 int hddFormat()
 {
-	int retVal;
+	int retVal, i;
+	const char *partitionList[] = {
+		"hdd0:__net",
+		"hdd0:__system",
+		"hdd0:__common",
+		"hdd0:__sysconf",
+		NULL
+	};
 
 	if(!hddStatusCurrent)
 		hddUpdateInfo();
@@ -87,21 +94,12 @@ int hddFormat()
 	if(retVal < 0)
 		return retVal;
 
-	retVal = fileXioFormat("pfs:", "hdd0:__net", (const char*)&pfsFormatArg, sizeof(pfsFormatArg));
-	if(retVal < 0)
-		return retVal;
-
-	retVal = fileXioFormat("pfs:", "hdd0:__system", (const char*)&pfsFormatArg, sizeof(pfsFormatArg));
-	if(retVal < 0)
-		return retVal;
-
-	retVal = fileXioFormat("pfs:", "hdd0:__common", (const char*)&pfsFormatArg, sizeof(pfsFormatArg));
-	if(retVal < 0)
-		return retVal;
-
-	retVal = fileXioFormat("pfs:", "hdd0:__sysconf", (const char*)&pfsFormatArg, sizeof(pfsFormatArg));
-	if(retVal < 0)
-		return retVal;
+	for(i = 0; partitionList[i] != NULL; i++)
+	{
+		retVal = fileXioFormat("pfs:", partitionList[i], (const char*)&pfsFormatArg, sizeof(pfsFormatArg));
+		if(retVal < 0)
+			return retVal;
+	}
 
 	hddUpdateInfo();
 
