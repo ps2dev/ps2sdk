@@ -1206,7 +1206,7 @@ int pfsFioSymlink(iop_file_t *f, const char *old, const char *new)
 	return rv;
 }
 
-int pfsFioReadlink(iop_file_t *f, const char *path, char *buf, int buflen)
+int pfsFioReadlink(iop_file_t *f, const char *path, char *buf, unsigned int buflen)
 {
 	int rv=0;
 	pfs_mount_t *pfsMount;
@@ -1224,8 +1224,8 @@ int pfsFioReadlink(iop_file_t *f, const char *path, char *buf, int buflen)
 		else
 		{
 			rv=strlen((char *)&clink->u.inode->data[1]);
-			if(buflen < rv)
-				rv=buflen;
+			if(buflen < (unsigned int)rv)
+				rv=(int)buflen;
 			memcpy(buf, &clink->u.inode->data[1], rv);
 		}
 		pfsCacheFree(clink);
