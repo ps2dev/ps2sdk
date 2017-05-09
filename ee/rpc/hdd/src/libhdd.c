@@ -40,6 +40,29 @@ static int pfsFormatArg[1] = { PFS_ZONE_SIZE };
 #define _OMIT_SYSTEM_PARTITION
 //#define DEBUG
 
+static char *sizesString[9] = {
+		"128M",
+		"256M",
+		"512M",
+		"1G",
+		"2G",
+		"4G",
+		"8G",
+		"16G",
+		"32G"
+};
+
+static int sizesMB[9] = {
+		128,
+		256,
+		512,
+		1024,
+		2048,
+		4096,
+		8192,
+		16384,
+		32768
+};
 
 static void hddUpdateInfo();
 
@@ -82,8 +105,8 @@ int hddFormat()
 	const char *partitionList[] = {
 		"hdd0:__net",
 		"hdd0:__system",
-		"hdd0:__common",
 		"hdd0:__sysconf",
+		"hdd0:__common",
 		NULL
 	};
 
@@ -265,30 +288,6 @@ static void hddUpdateInfo()
 
 	hddStatusCurrent = 1;
 }
-
-static char *sizesString[9] = {
-		"128M",
-		"256M",
-		"512M",
-		"1G",
-		"2G",
-		"4G",
-		"8G",
-		"16G",
-		"32G"
-};
-
-static int sizesMB[9] = {
-		128,
-		256,
-		512,
-		1024,
-		2048,
-		4096,
-		8192,
-		16384,
-		32768
-};
 
 int hddMakeFilesystem(int fsSizeMB, char *name, int type)
 {
