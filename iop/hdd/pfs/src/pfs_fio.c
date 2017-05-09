@@ -501,7 +501,7 @@ int	pfsFioFormat(iop_file_t *t, const char *dev, const char *blockdev, void *arg
 
 	WaitSema(pfsFioSema);
 
-	fd = open(blockdev, O_RDWR, 0644);
+	fd = open(blockdev, O_RDWR);
 
 	if(fd < 0)
 		rv = fd;
@@ -1147,7 +1147,7 @@ int pfsFioMount(iop_file_t *f, const char *fsname, const char *devname, int flag
 
 	WaitSema(pfsFioSema);
 
-	fd = open(devname, (flag & FIO_MT_RDONLY) ? O_RDONLY : O_RDWR, 0644); // ps2hdd.irx fd
+	fd = open(devname, (flag & FIO_MT_RDONLY) ? O_RDONLY : O_RDWR); // ps2hdd.irx fd
 	if(fd < 0)
 		rv = fd;
 	else {
