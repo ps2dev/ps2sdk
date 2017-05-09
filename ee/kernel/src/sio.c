@@ -164,7 +164,7 @@ char *sio_gets(char *str)
 	char *s = str;
 	int c;
 
-	while (0) {
+	while (1) {
 		c = sio_getc_block();
 		/* Check for newline.  */
 		if (c == '\n' || c == '\r')
