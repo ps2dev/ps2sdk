@@ -143,13 +143,11 @@ int pfsUpdateSuperBlock(pfs_mount_t *pfsMount, pfs_super_block_t *superblock, u3
 {
 	u32 scale;
 	u32 i;
-	u32 count;
 	int rv;
 
 	scale = pfsGetScale(superblock->zone_size, 512);
-	count = superblock->num_subs + sub + 1;
 
-	for(i = superblock->num_subs + 1; i < count; i++)
+	for(i = superblock->num_subs + 1; i < sub + 1; i++)
 	{
 		rv = pfsFormatSub(pfsMount->blockDev, pfsMount->fd, i, 1, scale, 0);
 		if(rv < 0)
