@@ -11,8 +11,8 @@
 /**
  * @file
  * ATA device driver.
- * This module provides the low-level ATA support for hard disk drives.  It is
- * 100% compatible with its proprietary counterpart called atad.irx.
+ * This module provides the low-level ATA support for hard disk drives, based on ATAD v2.4.
+ * It is 100% compatible with its proprietary counterpart called atad.irx.
  *
  * This module also include support for 48-bit feature set (done by Clement).
  */
@@ -39,6 +39,9 @@ IRX_ID(MODNAME, 2, 4);
 
 #define BANNER "ATA device driver %s - Copyright (c) 2003 Marcus R. Brown\n"
 #define VERSION "v1.2"
+
+#define ATA_EV_TIMEOUT	1
+#define ATA_EV_COMPLETE	2
 
 static int ata_devinfo_init = 0;
 static int ata_evflg = -1;
@@ -68,7 +71,7 @@ static const ata_cmd_info_t ata_cmd_table[] = {
 	{ATA_C_READ_SECTOR,2},
 	{ATA_C_READ_DMA_EXT,0x84},
 	{ATA_C_WRITE_SECTOR,3},
-	{ATA_C_WRITE_LONG,8},	//??? This seems to be WRITE_LONG, but the READ_LONG command isn't present (Why would Sony have only one of these two commands?). Both are obsolete too.
+	{ATA_C_WRITE_LONG,8},
 	{ATA_C_WRITE_DMA_EXT,0x84},
 	{ATA_C_CFA_WRITE_SECTORS_WITHOUT_ERASE,3},
 	{ATA_C_READ_VERIFY_SECTOR,1},
@@ -241,7 +244,7 @@ static int ata_intr_cb(int flag)
 		memset(atad_devinfo, 0, sizeof atad_devinfo);
 	} else {
 		dev9IntrDisable(SPD_INTR_ATA);
-		iSetEventFlag(ata_evflg, 0x02);
+		iSetEventFlag(ata_evflg, ATA_EV_COMPLETE);
 	}
 
 	return 1;
@@ -249,7 +252,7 @@ static int ata_intr_cb(int flag)
 
 static unsigned int ata_alarm_cb(void *unused)
 {
-	iSetEventFlag(ata_evflg, 0x01);
+	iSetEventFlag(ata_evflg, ATA_EV_TIMEOUT);
 	return 0;
 }
 
@@ -260,8 +263,15 @@ int ata_get_error(void)
 	return ata_hwport->r_error & 0xff;
 }
 
-/* 0x80 for busy, 0x88 for bus busy.  */
-static int ata_wait_busy(int bits)
+#define ATA_WAIT_BUSY		0x80
+#define ATA_WAIT_BUSBUSY	0x88
+
+#define ata_wait_busy()		gen_ata_wait_busy(ATA_WAIT_BUSY)
+#define ata_wait_bus_busy()	gen_ata_wait_busy(ATA_WAIT_BUSBUSY)
+
+/* 0x80 for busy, 0x88 for bus busy.
+	In the original ATAD, the busy and bus-busy functions were separate, but similar.  */
+static int gen_ata_wait_busy(int bits)
 {
 	USE_ATA_REGS;
 	int i, didx, delay;
@@ -294,7 +304,7 @@ static int ata_wait_busy(int bits)
 	}
 
 	M_PRINTF("Timeout while waiting on busy (0x%02x).\n", bits);
-	return -502;
+	return ATA_RES_ERR_TIMEOUT;
 }
 
 static int ata_device_select(int device)
@@ -302,7 +312,7 @@ static int ata_device_select(int device)
 	USE_ATA_REGS;
 	int res;
 
-	if ((res = ata_wait_busy(0x88)) < 0)
+	if ((res = ata_wait_bus_busy()) < 0)
 		return res;
 
 	/* If the device was already selected, nothing to do.  */
@@ -314,7 +324,7 @@ static int ata_device_select(int device)
 	res = ata_hwport->r_control;
 	res = ata_hwport->r_control;	//Only done once in v1.04.
 
-	return ata_wait_busy(0x88);
+	return ata_wait_bus_busy();
 }
 
 /* Export 6 */
@@ -339,7 +349,7 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
 	ClearEventFlag(ata_evflg, 0);
 
 	if (!atad_devinfo[device].exists)
-		return -505;
+		return ATA_RES_ERR_NODEV;
 
 	if ((res = ata_device_select(device)) != 0)
 		return res;
@@ -369,7 +379,7 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
 	}
 
 	if (!(atad_cmd_state.type = type & 0x7F))
-		return -506;
+		return ATA_RES_ERR_CMD;
 
 	atad_cmd_state.buf = buf;
 	atad_cmd_state.blkcount = blkcount;
@@ -377,15 +387,15 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
 	/* Check that the device is ready if this the appropiate command.  */
 	if (!(ata_hwport->r_control & 0x40)) {
 		switch (command) {
-			case 0x08:
-			case 0x90:
-			case 0x91:
-			case 0xa0:
-			case 0xa1:
+			case ATA_C_DEVICE_RESET:
+			case ATA_C_EXECUTE_DEVICE_DIAGNOSTIC:
+			case ATA_C_INITIALIZE_DEVICE_PARAMETERS:
+			case ATA_C_PACKET:
+			case ATA_C_IDENTIFY_PACKET_DEVICE:
 				break;
 			default:
 				M_PRINTF("Error: Device %d is not ready.\n", device);
-				return -501;
+				return ATA_RES_ERR_NOTREADY;
 		}
 	}
 
@@ -458,12 +468,12 @@ static int ata_pio_transfer(ata_cmd_state_t *cmd_state)
 
 	if (status & ATA_STAT_ERR) {
 		M_PRINTF("Error: PIO cmd error: status 0x%02x, error 0x%02x.\n", status, ata_get_error());
-		return -503;
+		return ATA_RES_ERR_IO;
 	}
 
 	/* DRQ must be set (data request).  */
 	if (!(status & ATA_STAT_DRQ))
-		return -504;
+		return ATA_RES_ERR_NODATA;
 
 	type = cmd_state->type;
 
@@ -512,11 +522,11 @@ static int ata_dma_complete(void *buf, u32 blkcount, int dir)
 
 		dev9IntrEnable(SPD_INTR_ATA);
 		/* Wait for the previous transfer to complete or a timeout.  */
-		WaitEventFlag(ata_evflg, 0x03, WEF_CLEAR|WEF_OR, &bits);
+		WaitEventFlag(ata_evflg, ATA_EV_TIMEOUT|ATA_EV_COMPLETE, WEF_CLEAR|WEF_OR, &bits);
 
-		if (bits & 0x01) {	/* Timeout.  */
+		if (bits & ATA_EV_TIMEOUT) {	/* Timeout.  */
 			M_PRINTF("Error: DMA timeout.\n");
-			return -502;
+			return ATA_RES_ERR_TIMEOUT;
 		}
 		/* No DMA completion bit? Spurious interrupt.  */
 		if (!(SPD_REG16(SPD_R_INTR_STAT) & 0x02)) {
@@ -524,7 +534,7 @@ static int ata_dma_complete(void *buf, u32 blkcount, int dir)
 				M_PRINTF("Error: Command error while doing DMA.\n");
 				M_PRINTF("Error: Command error status 0x%02x, error 0x%02x.\n", ata_hwport->r_status, ata_get_error());
 				/* In v1.04, there was no check for ICRC. */
-				return((ata_get_error() & ATA_ERR_ICRC) ? -510 : -503);
+				return((ata_get_error() & ATA_ERR_ICRC) ? ATA_RES_ERR_ICRC : ATA_RES_ERR_IO);
 			} else {
 				M_PRINTF("Warning: Got command interrupt, but not an error.\n");
 				continue;
@@ -557,10 +567,10 @@ int ata_io_finish(void)
 	u16 stat;
 
 	if (type == 1 || type == 6) {	/* Non-data commands.  */
-		WaitEventFlag(ata_evflg, 0x03, WEF_CLEAR|WEF_OR, &bits);
-		if (bits & 0x01) {	/* Timeout.  */
+		WaitEventFlag(ata_evflg, ATA_EV_TIMEOUT|ATA_EV_COMPLETE, WEF_CLEAR|WEF_OR, &bits);
+		if (bits & ATA_EV_TIMEOUT) {	/* Timeout.  */
 			M_PRINTF("Error: ATA timeout on a non-data command.\n");
-			return -502;
+			return ATA_RES_ERR_TIMEOUT;
 		}
 	} else if (type == 4) {		/* DMA.  */
 		if ((res = ata_dma_complete(cmd_state->buf, cmd_state->blkcount,
@@ -572,23 +582,23 @@ int ata_io_finish(void)
 				break;
 		if (!stat) {
 			dev9IntrEnable(SPD_INTR_ATA0);
-			WaitEventFlag(ata_evflg, 0x03, WEF_CLEAR|WEF_OR, &bits);
-			if (bits & 0x01) {
+			WaitEventFlag(ata_evflg, ATA_EV_TIMEOUT|ATA_EV_COMPLETE, WEF_CLEAR|WEF_OR, &bits);
+			if (bits & ATA_EV_TIMEOUT) {
 				M_PRINTF("Error: ATA timeout on DMA completion, buffer stat %04x\n", SPD_REG16(0x38));
 				M_PRINTF("Error: istat %x, ienable %x\n", SPD_REG16(SPD_R_INTR_STAT), SPD_REG16(SPD_R_INTR_MASK));
-				res = -502;
+				res = ATA_RES_ERR_TIMEOUT;
 			}
 		}
 	} else {			/* PIO transfers.  */
 		stat = ata_hwport->r_control;
-		if ((res = ata_wait_busy(0x80)) < 0)
+		if ((res = ata_wait_busy()) < 0)
 			goto finish;
 
 		/* Transfer each PIO data block.  */
 		while (--cmd_state->blkcount != -1) {
 			if ((res = ata_pio_transfer(cmd_state)) < 0)
 				goto finish;
-			if ((res = ata_wait_busy(0x80)) < 0)
+			if ((res = ata_wait_busy()) < 0)
 				goto finish;
 		}
 	}
@@ -598,11 +608,11 @@ int ata_io_finish(void)
 
 	/* Wait until the device isn't busy.  */
 	if (ata_hwport->r_status & ATA_STAT_BUSY)
-		res = ata_wait_busy(0x80);
+		res = ata_wait_busy();
 	if ((stat = ata_hwport->r_status) & ATA_STAT_ERR) {
 		M_PRINTF("Error: Command error: status 0x%02x, error 0x%02x.\n", stat, ata_get_error());
 		/* In v1.04, there was no check for ICRC. */
-		res = (ata_get_error() & ATA_ERR_ICRC) ? -510 : -503;
+		res = (ata_get_error() & ATA_ERR_ICRC) ? ATA_RES_ERR_ICRC : ATA_RES_ERR_IO;
 	}
 
 finish:
@@ -626,7 +636,7 @@ static int ata_bus_reset(void)
 	SPD_REG16(SPD_R_IF_CTRL) = 0;	//Not present in v1.04.
 	SPD_REG16(SPD_R_IF_CTRL) = 0x48;
 	DelayThread(3000);
-	return ata_wait_busy(0x80);
+	return ata_wait_busy();
 }
 
 /* Export 5 */
@@ -635,7 +645,7 @@ int ata_reset_devices(void)
 	USE_ATA_REGS;
 
 	if (ata_hwport->r_control & 0x80)
-		return -501;
+		return ATA_RES_ERR_NOTREADY;
 
 	/* Disables device interrupt assertion and asserts SRST. */
 	ata_hwport->r_control = 6;
@@ -645,7 +655,7 @@ int ata_reset_devices(void)
 	ata_hwport->r_control = 2;
 	DelayThread(3000);
 
-	return ata_wait_busy(0x80);
+	return ata_wait_busy();
 }
 
 /* Export 17 */
@@ -768,6 +778,7 @@ static int ata_device_set_transfer_mode(int device, int type, int mode)
 }
 
 /* Export 9 */
+/* Note: this can only support DMA modes, due to the commands issued. */
 int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir)
 {
 	USE_SPD_REGS;
@@ -811,7 +822,7 @@ int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir)
 			/* In v1.04, this was not done. Neither was there a mechanism to retry if a non-permanent error occurs. */
 			SPD_REG16(SPD_R_IF_CTRL) &= ~SPD_IF_DMA_ENABLE;
 
-			if(res != -510)
+			if(res != ATA_RES_ERR_ICRC)
 				break;
 		}
 
@@ -869,7 +880,7 @@ int ata_device_sce_sec_unlock(int device, void *password)
 	/* Check to see if the drive was actually unlocked.  */
 	ata_get_security_status(device, devinfo, param);
 	if (devinfo[device].security_status & ATA_F_SEC_LOCKED)
-		return -509;
+		return ATA_RES_ERR_LOCKED;
 
 	return 0;
 }
@@ -935,7 +946,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 	if (!devinfo[0].exists) {
 		M_PRINTF("Error: Unable to detect HDD 0.\n");
 		devinfo[1].exists = 0;
-		return -505;	//Returns 0 in v1.04.
+		return ATA_RES_ERR_NODEV;	//Returns 0 in v1.04.
 	}
 
 	/* If there is a device 1, grab it's info too.  */

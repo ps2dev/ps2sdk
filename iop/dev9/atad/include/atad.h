@@ -38,6 +38,16 @@ typedef struct _ata_devinfo {
 	u32	security_status;
 } ata_devinfo_t;
 
+/* Error definitions.  */
+#define ATA_RES_ERR_NOTREADY	-501
+#define ATA_RES_ERR_TIMEOUT	-502
+#define ATA_RES_ERR_IO		-503
+#define ATA_RES_ERR_NODATA	-504
+#define ATA_RES_ERR_NODEV	-505
+#define ATA_RES_ERR_CMD		-506
+#define ATA_RES_ERR_LOCKED	-509
+#define ATA_RES_ERR_ICRC	-510
+
 #define atad_IMPORTS_start DECLARE_IMPORT_TABLE(atad, 1, 3)
 #define atad_IMPORTS_end END_IMPORT_TABLE
 
