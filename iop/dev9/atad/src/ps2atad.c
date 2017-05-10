@@ -177,10 +177,17 @@ static void AtadPostDmaCb(int bcr, int dir){
 	SPD_REG16(SPD_R_XFR_CTRL)&=~0x80;
 }
 
+static int ata_create_event_flag(void) {
+	iop_event_t event;
+
+	event.attr = EA_SINGLE;	//In v1.04, EA_MULTI was specified.
+	event.bits = 0;
+	return CreateEventFlag(&event);
+}
+
 int _start(int argc, char *argv[])
 {
 	USE_SPD_REGS;
-	iop_event_t event;
 	int res = 1;
 
 	printf(BANNER, VERSION);
@@ -203,14 +210,7 @@ int _start(int argc, char *argv[])
 		The obvious workaround here would be to disable 48-bit LBA support when ATAD is loaded on a PSX. */
 	Disable48bitLBA = (SPD_REG16(SPD_R_REV_3) & SPD_CAPS_DVR)?1:0;
 
-	if ((res = RegisterLibraryEntries(&_exp_atad)) != 0) {
-		M_PRINTF("Library is already registered, exiting.\n");
-		goto out;
-	}
-
-	event.attr = 0;
-	event.bits = 0;
-	if ((ata_evflg = CreateEventFlag(&event)) < 0) {
+	if ((ata_evflg = ata_create_event_flag()) < 0) {
 		M_PRINTF("Couldn't create event flag, exiting.\n");
 		res = 1;
 		goto out;
@@ -221,6 +221,11 @@ int _start(int argc, char *argv[])
 	dev9RegisterIntrCb(0, &ata_intr_cb);
 	dev9RegisterPreDmaCb(0, &AtadPreDmaCb);
 	dev9RegisterPostDmaCb(0, &AtadPostDmaCb);
+
+	if ((res = RegisterLibraryEntries(&_exp_atad)) != 0) {
+		M_PRINTF("Library is already registered, exiting.\n");
+		goto out;
+	}
 
 	res = 0;
 	M_PRINTF("Driver loaded.\n");
@@ -443,7 +448,7 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
 }
 
 /* Do a PIO transfer, to or from the device.  */
-static inline int ata_pio_transfer(ata_cmd_state_t *cmd_state)
+static int ata_pio_transfer(ata_cmd_state_t *cmd_state)
 {
 	USE_ATA_REGS;
 	u8 *buf8;
@@ -489,7 +494,7 @@ static inline int ata_pio_transfer(ata_cmd_state_t *cmd_state)
 }
 
 /* Complete a DMA transfer, to or from the device.  */
-static inline int ata_dma_complete(void *buf, u32 blkcount, int dir)
+static int ata_dma_complete(void *buf, u32 blkcount, int dir)
 {
 	USE_ATA_REGS;
 	USE_SPD_REGS;
@@ -611,7 +616,7 @@ finish:
 }
 
 /* Reset the ATA controller/bus.  */
-static inline int ata_bus_reset(void)
+static int ata_bus_reset(void)
 {
 	USE_SPD_REGS;
 	SPD_REG16(SPD_R_IF_CTRL) = SPD_IF_ATA_RESET;
@@ -994,8 +999,8 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 ata_devinfo_t * ata_get_devinfo(int device)
 {
 	if(!ata_devinfo_init){
-		if(ata_bus_reset() || ata_init_devices(atad_devinfo)) return NULL;
 		ata_devinfo_init = 1;
+		if(ata_bus_reset() || ata_init_devices(atad_devinfo)) return NULL;
 	}
 
 	return &atad_devinfo[device];
