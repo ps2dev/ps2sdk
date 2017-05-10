@@ -523,7 +523,8 @@ static int ata_dma_complete(void *buf, u32 blkcount, int dir)
 			if (ata_hwport->r_control & 0x01) {
 				M_PRINTF("Error: Command error while doing DMA.\n");
 				M_PRINTF("Error: Command error status 0x%02x, error 0x%02x.\n", ata_hwport->r_status, ata_get_error());
-				return -503;
+				/* In v1.04, there was no check for ICRC. */
+				return((ata_get_error() & ATA_ERR_ICRC) ? -510 : -503);
 			} else {
 				M_PRINTF("Warning: Got command interrupt, but not an error.\n");
 				continue;
@@ -600,7 +601,8 @@ int ata_io_finish(void)
 		res = ata_wait_busy(0x80);
 	if ((stat = ata_hwport->r_status) & ATA_STAT_ERR) {
 		M_PRINTF("Error: Command error: status 0x%02x, error 0x%02x.\n", stat, ata_get_error());
-		res = -503;
+		/* In v1.04, there was no check for ICRC. */
+		res = (ata_get_error() & ATA_ERR_ICRC) ? -510 : -503;
 	}
 
 finish:
@@ -768,12 +770,11 @@ static int ata_device_set_transfer_mode(int device, int type, int mode)
 /* Export 9 */
 int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir)
 {
-	int res = 0;
+	USE_SPD_REGS;
+	int res = 0, retries;
 	u16 sector, lcyl, hcyl, select, command, len;
 
-	while (nsectors > 0) {
-		ata_set_dir(dir);
-
+	while (res == 0 && nsectors > 0) {
 		/* Variable lba is only 32 bits so no change for lcyl and hcyl.  */
 		lcyl = (lba >> 8) & 0xff;
 		hcyl = (lba >> 16) & 0xff;
@@ -798,10 +799,21 @@ int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir)
 			command = (dir == 1) ? ATA_C_WRITE_DMA : ATA_C_READ_DMA;
 		}
 
-		if ((res = ata_io_start(buf, len, 0, len, sector, lcyl, hcyl, select, command)) != 0)
-			return res;
-		if ((res = ata_io_finish()) != 0)
-			return res;
+		for(retries = 3; retries > 0; retries--) {
+			if ((res = ata_io_start(buf, len, 0, len, sector, lcyl, hcyl, select, command)) != 0)
+				break;
+
+			/* Set up (part of) the transfer here. In v1.04, this was called at the top of the outer loop. */
+			ata_set_dir(dir);
+
+			res = ata_io_finish();
+
+			/* In v1.04, this was not done. Neither was there a mechanism to retry if a non-permanent error occurs. */
+			SPD_REG16(SPD_R_IF_CTRL) &= ~SPD_IF_DMA_ENABLE;
+
+			if(res != -510)
+				break;
+		}
 
 		buf = (void*)((u8 *)buf + len * 512);
 		lba += len;
