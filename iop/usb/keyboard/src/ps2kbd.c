@@ -359,7 +359,7 @@ void usb_getstring(int endp, int index, char *desc)
     {
       str->desc = desc;
       ret = UsbControlTransfer(endp, 0x80, USB_REQ_GET_DESCRIPTOR, (USB_DT_STRING << 8) | index,
-			       0, sizeof(string_descriptor) - 4, data, ps2kbd_getstring_set, data);
+			       0x0409, sizeof(string_descriptor) - 4, data, ps2kbd_getstring_set, data);
       if(ret != USB_RC_OK)
 	{
 	  printf("PS2KBD: Error sending string descriptor request\n");
