@@ -24,6 +24,7 @@
 #define ATA_DIR_WRITE	1
 
 #define ATAD_XFER_MODE_PIO	0x08
+/* Only supported if ATAD was built with ATA_MWDMA_MODES defined.  */
 #define ATAD_XFER_MODE_MDMA	0x20
 #define ATAD_XFER_MODE_UDMA	0x40
 

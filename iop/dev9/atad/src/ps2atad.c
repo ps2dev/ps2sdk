@@ -163,7 +163,9 @@ static unsigned int ata_alarm_cb(void *unused);
 static void ata_set_dir(int dir);
 
 static void ata_pio_mode(int mode);
+#ifdef ATA_MWDMA_MODES
 static void ata_multiword_dma_mode(int mode);
+#endif
 static void ata_ultra_dma_mode(int mode);
 
 extern struct irx_export_table _exp_atad;
@@ -763,9 +765,11 @@ static int ata_device_set_transfer_mode(int device, int type, int mode)
 		return res;
 
 	switch(type){
+#ifdef ATA_MWDMA_MODES
 		case ATAD_XFER_MODE_MDMA:
 			ata_multiword_dma_mode(mode);
 			break;
+#endif
 		case ATAD_XFER_MODE_UDMA:
 			ata_ultra_dma_mode(mode);
 			break;
@@ -1071,6 +1075,7 @@ static void ata_pio_mode(int mode)
 #endif
 }
 
+#ifdef ATA_MWDMA_MODES
 static void ata_multiword_dma_mode(int mode)
 {
 	USE_SPD_REGS;
@@ -1090,6 +1095,7 @@ static void ata_multiword_dma_mode(int mode)
 	SPD_REG16(SPD_R_MWDMA_MODE) = val;
 	SPD_REG16(SPD_R_IF_CTRL) = (SPD_REG16(SPD_R_IF_CTRL) & 0xfffe)|0x48;
 }
+#endif
 
 static void ata_ultra_dma_mode(int mode)
 {
