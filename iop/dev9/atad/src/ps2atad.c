@@ -216,6 +216,7 @@ int _start(int argc, char *argv[])
 		goto out;
 	}
 
+	/* In v1.04, PIO mode 0 was set here. In late versions, it is set in ata_init_devices(). */
 	dev9RegisterIntrCb(1, &ata_intr_cb);
 	dev9RegisterIntrCb(0, &ata_intr_cb);
 	dev9RegisterPreDmaCb(0, &AtadPreDmaCb);
@@ -306,6 +307,7 @@ static int ata_device_select(int device)
 	/* Select the device.  */
 	ata_hwport->r_select = (device & 1) << 4;
 	res = ata_hwport->r_control;
+	res = ata_hwport->r_control;	//Only done once in v1.04.
 
 	return ata_wait_busy(0x88);
 }
@@ -450,7 +452,7 @@ static inline int ata_pio_transfer(ata_cmd_state_t *cmd_state)
 	u16 status = ata_hwport->r_status & 0xff;
 
 	if (status & ATA_STAT_ERR) {
-		M_PRINTF("Error: Command error: status 0x%02x, error 0x%02x.\n", status, ata_get_error());
+		M_PRINTF("Error: PIO cmd error: status 0x%02x, error 0x%02x.\n", status, ata_get_error());
 		return -503;
 	}
 
@@ -566,7 +568,8 @@ int ata_io_finish(void)
 			dev9IntrEnable(SPD_INTR_ATA0);
 			WaitEventFlag(ata_evflg, 0x03, WEF_CLEAR|WEF_OR, &bits);
 			if (bits & 0x01) {
-				M_PRINTF("Error: ATA timeout on DMA completion.\n");
+				M_PRINTF("Error: ATA timeout on DMA completion, buffer stat %04x\n", SPD_REG16(0x38));
+				M_PRINTF("Error: istat %x, ienable %x\n", SPD_REG16(SPD_R_INTR_STAT), SPD_REG16(SPD_R_INTR_MASK));
 				res = -502;
 			}
 		}
@@ -601,6 +604,9 @@ finish:
 	/* Turn off the LED.  */
 	dev9LEDCtl(0);
 
+	if(res)
+		M_PRINTF("error: ATA failed, %d\n", res);
+
 	return res;
 }
 
@@ -610,6 +616,7 @@ static inline int ata_bus_reset(void)
 	USE_SPD_REGS;
 	SPD_REG16(SPD_R_IF_CTRL) = SPD_IF_ATA_RESET;
 	DelayThread(100);
+	SPD_REG16(SPD_R_IF_CTRL) = 0;	//Not present in v1.04.
 	SPD_REG16(SPD_R_IF_CTRL) = 0x48;
 	DelayThread(3000);
 	return ata_wait_busy(0x80);
@@ -875,10 +882,10 @@ finish:
 static void ata_device_probe(ata_devinfo_t *devinfo)
 {
 	USE_ATA_REGS;
-	u16 nsector, sector, lcyl, hcyl;//, select; unused
+	u16 nsector, sector, lcyl, hcyl, select;
 
 	devinfo->exists = 0;
-	devinfo->has_packet = 0;
+	devinfo->has_packet = 2;
 
 	if (ata_hwport->r_control & 0x88)
 		return;
@@ -887,13 +894,15 @@ static void ata_device_probe(ata_devinfo_t *devinfo)
 	sector = ata_hwport->r_sector & 0xff;
 	lcyl = ata_hwport->r_lcyl & 0xff;
 	hcyl = ata_hwport->r_hcyl & 0xff;
-	//select = ata_hwport->r_select; // unused
+	select = ata_hwport->r_select;
 
 	if ((nsector != 1) || (sector != 1))
 		return;
 	devinfo->exists = 1;
 
-	if ((lcyl == 0x14) && (hcyl == 0xeb))
+	if ((lcyl == 0x00) && (hcyl == 0x00))
+		devinfo->has_packet = 0;
+	else if ((lcyl == 0x14) && (hcyl == 0xeb))
 		devinfo->has_packet = 1;
 }
 
@@ -902,13 +911,14 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 	USE_ATA_REGS;
 	int i, res;
 
-	ata_reset_devices();
+	if((res = ata_reset_devices()) != 0)
+		return res;
 
 	ata_device_probe(&devinfo[0]);
 	if (!devinfo[0].exists) {
 		M_PRINTF("Error: Unable to detect HDD 0.\n");
 		devinfo[1].exists = 0;
-		return 0;
+		return -505;	//Returns 0 in v1.04.
 	}
 
 	/* If there is a device 1, grab it's info too.  */
@@ -919,7 +929,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 	else
 		devinfo[1].exists = 0;
 
-	ata_pio_mode(0);
+	ata_pio_mode(0);	//PIO mode is set here, in late ATAD versions.
 
 	for (i = 0; i < 2; i++) {
 		if (!devinfo[i].exists)
@@ -930,12 +940,13 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 		if (!devinfo[i].has_packet) {
 			res = ata_device_identify(i, ata_param);
 			devinfo[i].exists = (res == 0);
-		} else {
+		} else if (devinfo[i].has_packet == 1) {
 			/* If it's a packet device, send the IDENTIFY PACKET
 			   DEVICE command.  */
 			res = ata_device_pkt_identify(i, ata_param);
 			devinfo[i].exists = (res == 0);
 		}
+		/* Otherwise, do nothing if has_packet = 2. */
 
 		/* This next section is HDD-specific: if no device or it's a
 		   packet (ATAPI) device, we're done.  */
@@ -967,6 +978,14 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 		ata_device_smart_enable(i);
 		/* Set idle timeout period to 21min 15s.  */
 		ata_device_idle(i, 0xff);
+
+		/* Call the proprietary identify command. */
+#ifdef ATA_SCE_AUTH_HDD
+		if(ata_device_sce_identify_drive(i, ata_param) != 0) {
+			M_PRINTF("error: This is not SCE genuine HDD.\n");
+			memset(&devinfo[i], 0, sizeof(devinfo[i]));
+		}
+#endif
 	}
 	return 0;
 }
@@ -997,6 +1016,7 @@ static void ata_set_dir(int dir)
 static void ata_pio_mode(int mode)
 {
 	USE_SPD_REGS;
+#ifdef ATA_ALL_PIO_MODES
 	u16 val;
 
 	switch (mode) {
@@ -1017,6 +1037,10 @@ static void ata_pio_mode(int mode)
 	}
 
 	SPD_REG16(SPD_R_PIO_MODE) = val;
+#else
+	/* In the late ATAD versions, PIO mode 0 is always used if PIO mode is utilized. */
+	SPD_REG16(SPD_R_PIO_MODE) = 0x92;
+#endif
 }
 
 static void ata_multiword_dma_mode(int mode)
