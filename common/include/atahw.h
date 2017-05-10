@@ -66,6 +66,9 @@ typedef struct _ata_hwport {
 #define ATA_STAT_READY		0x40
 #define ATA_STAT_BUSY		0x80
 
+/* r_select bits.  */
+#define ATA_SEL_LBA		0x40
+
 /** ATA command codes.  */
 enum ATA_C_CODES {
 	ATA_C_NOP				= 0x00,

@@ -450,7 +450,7 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
 	ata_hwport->r_sector  = sector & 0xff;
 	ata_hwport->r_lcyl    = lcyl & 0xff;
 	ata_hwport->r_hcyl    = hcyl & 0xff;
-	ata_hwport->r_select  = select & 0xff;
+	ata_hwport->r_select  = (select | ATA_SEL_LBA) & 0xff;
 	ata_hwport->r_command = command & 0xff;
 
 	/* Turn on the LED.  */
@@ -802,8 +802,8 @@ int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir)
 
 			/* Combine bits 24-31 and bits 0-7 of lba into sector.  */
 			sector = ((lba >> 16) & 0xff00) | (lba & 0xff);
-			/* 0x40 enables LBA.  */
-			select = ((device << 4) | 0x40) & 0xffff;
+			/* In v1.04, LBA was enabled here.  */
+			select = (device << 4) & 0xffff;
 			command = (dir == 1) ? ATA_C_WRITE_DMA_EXT : ATA_C_READ_DMA_EXT;
 		} else {
 			/* Setup for 28-bit LBA.  */
