@@ -936,6 +936,16 @@ static void ata_device_probe(ata_devinfo_t *devinfo)
 		devinfo->has_packet = 0;
 	else if ((lcyl == 0x14) && (hcyl == 0xeb))
 		devinfo->has_packet = 1;
+
+	/* Seems to be for ensuring that there is a device connected.
+		Not sure why this has to be done, but is present in v2.4.  */
+	ata_hwport->r_lcyl = 0x55;
+	ata_hwport->r_hcyl = 0xaa;
+	lcyl = ata_hwport->r_lcyl & 0xff;
+	hcyl = ata_hwport->r_hcyl & 0xff;
+
+	if((lcyl != 0x55) || (hcyl != 0xaa))
+		devinfo->exists = 0;
 }
 
 static int ata_init_devices(ata_devinfo_t *devinfo)
