@@ -22,8 +22,6 @@
 #define APA_MAGIC		0x00415041	// 'APA\0'
 #define APA_MBR_VERSION		2
 
-#define APA_MODVER_MAJOR	2
-#define APA_MODVER_MINOR	1
 #define APA_MODVER		((APA_MODVER_MAJOR << 8) | APA_MODVER_MINOR)
 
 typedef struct {

@@ -21,4 +21,8 @@
 #define APA_FORMAT_MAKE_PARTITIONS	1
 #endif
 
+//Module version
+#define APA_MODVER_MAJOR	2
+#define APA_MODVER_MINOR	1
+
 #endif
