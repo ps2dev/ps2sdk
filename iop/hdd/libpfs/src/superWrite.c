@@ -86,7 +86,7 @@ int pfsFormat(pfs_block_device_t *blockDev, int fd, int zonesize, int fragment)
 		memset(sb, 0, pfsMetaSize);
 		sb->magic = PFS_SUPER_MAGIC;
 		sb->version = 3;
-		sb->unknown1 = 0x201;
+		sb->modver = ((PFS_MAJOR << 8) | PFS_MINOR);
 		sb->zone_size = zonesize;
 		sb->num_subs = subnumber;
 		sb->log.number = pfsGetBitmapSizeBlocks(scale, mainsize) + (0x2000 >> scale) + 1;

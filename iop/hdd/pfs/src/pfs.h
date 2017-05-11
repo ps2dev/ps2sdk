@@ -15,9 +15,6 @@
 #define min(a, b)	((a) < (b) ? (a) : (b))
 #endif
 
-#define PFS_MAJOR	2
-#define PFS_MINOR	2
-
 ///////////////////////////////////////////////////////////////////////////////
 //   Global types
 

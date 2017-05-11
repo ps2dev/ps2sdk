@@ -110,7 +110,7 @@ typedef struct {
 typedef struct {
     u32 magic;			//
 	u32 version;		//
-    u32 unknown1;		//
+    u32 modver;		//
 	u32 pfsFsckStat;		//
     u32 zone_size;		//
     u32 num_subs;		// number of subs attached to filesystem
