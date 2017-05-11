@@ -41,6 +41,10 @@ I_AllocSysMemory
 I_FreeSysMemory
 sysmem_IMPORTS_end
 
+thbase_IMPORTS_start
+I_DelayThread
+thbase_IMPORTS_end
+
 thsemap_IMPORTS_start
 I_CreateSema
 I_DeleteSema
