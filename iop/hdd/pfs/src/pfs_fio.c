@@ -360,7 +360,7 @@ static int fileTransfer(pfs_file_slot_t *fileSlot, u8 *buf, int size, int operat
 	pfs_blockpos_t *blockpos=&fileSlot->block_pos;
 	pfs_mount_t *pfsMount=fileSlot->clink->pfsMount;
 	u32 bytes_remain;
-	u32 total = 0;
+	u32 total = size;
 
 	// If we're writing and there is less free space in the last allocated block segment
 	// than can hold the data being written, then try and expand the block segment
@@ -447,7 +447,6 @@ static int fileTransfer(pfs_file_slot_t *fileSlot, u8 *buf, int size, int operat
 		size -= result;
 		fileSlot->position += result;
 		buf += result;
-		total += result;
 
 		// If file has grown, need to mark inode as dirty
 		if(fileSlot->clink->u.inode->size < fileSlot->position)
@@ -611,7 +610,10 @@ int pfsFioWrite(iop_file_t *f, void *buf, int size)
 
 	pfsMount = fileSlot->clink->pfsMount;
 
-	result = fileTransfer(fileSlot, buf, size, 1);
+	if(fileSlot->position + (unsigned int)size < fileSlot->position)
+		result = -EINVAL;
+	else
+		result = fileTransfer(fileSlot, buf, size, 1);
 
 	if (pfsMount->flags & PFS_FIO_ATTR_WRITEABLE)
 		pfsCacheFlushAllDirty(pfsMount);

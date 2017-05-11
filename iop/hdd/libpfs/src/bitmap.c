@@ -228,15 +228,16 @@ int pfsBitmapSearchFreeZone(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi, u32 max_
 
 	num = pfsMount->num_subs + 1;
 
-	if (bi->subpart > pfsMount->num_subs)
+	if (bi->subpart >= num)
 		bi->subpart = 0;
 	if (bi->number)
 		num = pfsMount->num_subs + 2;
 
 	count = max_count < 33 ? max_count : 32;		//min(max_count, 32)
-	count = count < bi->count ? bi->count : count;	//max(count, bi->count)
-													// => count = bound(bi->count, 32);
-	for(; num >= 0; num--)
+	if(count < bi->count)
+		count = bi->count;				//max(count, bi->count)
+								// => count = bound(bi->count, 32);
+	for(--num; num >= 0; num--)
 	{
 		for (n = count; n; n /= 2)
 		{
