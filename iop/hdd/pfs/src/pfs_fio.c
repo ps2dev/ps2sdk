@@ -299,38 +299,61 @@ label:
 	return pfsFioCheckForLastError(pfsMount, result);
 }
 
-// Reads unaligned data, or remainder data (size < 512)
 static int fileTransferRemainder(pfs_file_slot_t *fileSlot, void *buf, int size, int operation)
 {
 	u32 sector, pos;
-	int result;
+	int result, i;
 	pfs_blockpos_t *blockpos = &fileSlot->block_pos;
 	pfs_mount_t *pfsMount = fileSlot->clink->pfsMount;
 	pfs_unaligned_io_t *unaligned = &fileSlot->unaligned;
+	pfs_unaligned_io_t *unaligned2 = NULL;
 	pfs_blockinfo_t *bi = pfsBlockGetCurrent(blockpos);
 
 	sector = ((bi->number+blockpos->block_offset) << pfsMount->sector_scale) +
 	   (blockpos->byte_offset >> 9);
 	pos = blockpos->byte_offset & 0x1FF;
 
-	if((unaligned->sector != sector) || (unaligned->sub!=bi->subpart))
-	{
-		if (fileSlot->unaligned.dirty)
+	if(operation == 0)
+	{	//If READ, copy latest data from the buffer of any FD that was opened for writing.
+		for(i = 0; i < pfsConfig.maxOpen; i++)
 		{
-			result=pfsMount->blockDev->transfer(pfsMount->fd, fileSlot->unaligned.buffer, unaligned->sub, unaligned->sector, 1, 1);
-			if(result)
-				return result;
-			fileSlot->unaligned.dirty=0;
+			if((pfsFileSlots[i].clink != NULL)
+				&& (pfsFileSlots[i].clink->pfsMount == pfsMount)
+				&& (pfsFileSlots[i].unaligned.dirty)
+				&& (pfsFileSlots[i].unaligned.sub == bi->subpart)
+				&& (pfsFileSlots[i].unaligned.sector == sector))
+			{
+				unaligned2 = &pfsFileSlots[i].unaligned;
+				if(unaligned != unaligned2)
+					memcpy(unaligned->buffer, unaligned2->buffer, sizeof(unaligned->buffer));
+				else
+					unaligned2 = NULL;	//Nothing to update.
+				break;
+			}
 		}
+	}
 
-		unaligned->sub=bi->subpart;
-		unaligned->sector=sector;
-
-		if(pos || (fileSlot->position != fileSlot->clink->u.inode->size))
+	if(unaligned2 == NULL)
+	{	//If the latest version is likely in disk.
+		if((unaligned->sector != sector) || (unaligned->sub!=bi->subpart))
 		{
-			result = pfsMount->blockDev->transfer(pfsMount->fd, fileSlot->unaligned.buffer, unaligned->sub, unaligned->sector, 1, 0);
-			if(result)
-				return result | 0x10000;
+			if (unaligned->dirty)
+			{
+				result=pfsMount->blockDev->transfer(pfsMount->fd, unaligned->buffer, unaligned->sub, unaligned->sector, 1, 1);
+				if(result)
+					return result;
+				unaligned->dirty=0;
+			}
+
+			unaligned->sub=bi->subpart;
+			unaligned->sector=sector;
+
+			if(pos || (fileSlot->position != fileSlot->clink->u.inode->size))
+			{
+				result = pfsMount->blockDev->transfer(pfsMount->fd, unaligned->buffer, unaligned->sub, unaligned->sector, 1, 0);
+				if(result)
+					return result | 0x10000;
+			}
 		}
 	}
 
@@ -346,6 +369,19 @@ static int fileTransferRemainder(pfs_file_slot_t *fileSlot, void *buf, int size,
 			if ((result=pfsMount->blockDev->transfer(pfsMount->fd, unaligned->buffer, unaligned->sub,
 				 unaligned->sector, operation, operation)))
 				return result;
+
+			//In late modules, sync data with all other FDs that were opened for reading.
+			for(i = 0; i < pfsConfig.maxOpen; i++)
+			{
+				if((pfsFileSlots[i].clink != NULL)
+					&& (pfsFileSlots[i].clink->pfsMount == pfsMount)
+					&& (pfsFileSlots[i].unaligned.sub == fileSlot->unaligned.sub)
+					&& (pfsFileSlots[i].unaligned.sector == fileSlot->unaligned.sector))
+				{
+					if(!pfsFileSlots[i].unaligned.dirty)
+						memcpy(pfsFileSlots[i].unaligned.buffer, unaligned->buffer, sizeof(pfsFileSlots[i].unaligned.buffer));
+				}
+			}
 		}
 		else
 			unaligned->dirty=operation;
@@ -417,6 +453,20 @@ static int fileTransfer(pfs_file_slot_t *fileSlot, u8 *buf, int size, int operat
 		{
 			PFS_PRINTF(PFS_DRV_NAME" Panic: There is no zone.\n");
 			return 0;
+		}
+
+		if(fileSlot->unaligned.dirty)
+		{	//If there is going to be a partial transfer, write the dirty data to disk first.
+			u32 sector = ((bi->number + fileSlot->block_pos.block_offset) << pfsMount->sector_scale) + (fileSlot->block_pos.byte_offset / 512);
+			if((fileSlot->unaligned.sector == sector) &&
+				(fileSlot->unaligned.sub == bi->subpart)
+				&& (size < 512))
+			{
+				if((result = pfsMount->blockDev->transfer(pfsMount->fd, fileSlot->unaligned.buffer, fileSlot->unaligned.sub, fileSlot->unaligned.sector, 1, PFS_IO_MODE_WRITE)) != 0)
+					return result;
+
+				fileSlot->unaligned.dirty = 0;
+			}
 		}
 
 		// If we are transferring size not a multiple of 512, under 512, or to
@@ -1111,7 +1161,8 @@ int pfsFioChdir(iop_file_t *f, const char *name)
 
 static void _sync(void)
 {
-	u32 i;
+	u32 i, j;
+
 	for(i=0;i<pfsConfig.maxOpen;i++)
 	{
 		pfs_unaligned_io_t *unaligned=&pfsFileSlots[i].unaligned;
@@ -1119,6 +1170,20 @@ static void _sync(void)
 			pfs_mount_t *pfsMount=pfsFileSlots[i].clink->pfsMount;
 			pfsMount->blockDev->transfer(pfsMount->fd, unaligned->buffer,
 				unaligned->sub, unaligned->sector, 1, PFS_IO_MODE_WRITE);
+
+			//In late modules, sync data with all other FDs that were opened for reading.
+			for(j = 0; j < pfsConfig.maxOpen; j++)
+			{
+				if((pfsFileSlots[j].clink != NULL)
+					&& (pfsFileSlots[i].clink->pfsMount == pfsFileSlots[j].clink->pfsMount)
+					&& (pfsFileSlots[i].unaligned.sub == pfsFileSlots[j].unaligned.sub)
+					&& (pfsFileSlots[i].unaligned.sector == pfsFileSlots[j].unaligned.sector))
+				{
+					if(!pfsFileSlots[j].unaligned.dirty)
+						memcpy(pfsFileSlots[j].unaligned.buffer, pfsFileSlots[i].unaligned.buffer, sizeof(pfsFileSlots[j].unaligned.buffer));
+				}
+			}
+
 			unaligned->dirty=0;
 		}
 	}
