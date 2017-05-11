@@ -74,10 +74,10 @@ void pfsFioCloseFileSlot(pfs_file_slot_t *fileSlot)
 
 	if(fileSlot->fd->mode & O_WRONLY)
 	{
-		if(fileSlot->restsInfo.dirty!=0)
+		if(fileSlot->unaligned.dirty!=0)
 		{
-			pfsMount->blockDev->transfer(pfsMount->fd, fileSlot->restsBuffer,
-				fileSlot->restsInfo.sub, fileSlot->restsInfo.sector, 1, PFS_IO_MODE_WRITE);
+			pfsMount->blockDev->transfer(pfsMount->fd, fileSlot->unaligned.buffer,
+				fileSlot->unaligned.sub, fileSlot->unaligned.sector, 1, PFS_IO_MODE_WRITE);
 		}
 		pfsInodeSetTime(fileSlot->clink);	// set time :P
 		fileSlot->clink->u.inode->attr|=PFS_FIO_ATTR_CLOSED;
@@ -306,49 +306,49 @@ static int fileTransferRemainder(pfs_file_slot_t *fileSlot, void *buf, int size,
 	int result;
 	pfs_blockpos_t *blockpos = &fileSlot->block_pos;
 	pfs_mount_t *pfsMount = fileSlot->clink->pfsMount;
-	pfs_restsInfo_t *info = &fileSlot->restsInfo;
+	pfs_unaligned_io_t *unaligned = &fileSlot->unaligned;
 	pfs_blockinfo_t *bi = pfsBlockGetCurrent(blockpos);
 
 	sector = ((bi->number+blockpos->block_offset) << pfsMount->sector_scale) +
 	   (blockpos->byte_offset >> 9);
 	pos = blockpos->byte_offset & 0x1FF;
 
-	if((info->sector != sector) || (info->sub!=bi->subpart))
+	if((unaligned->sector != sector) || (unaligned->sub!=bi->subpart))
 	{
-		if (fileSlot->restsInfo.dirty)
+		if (fileSlot->unaligned.dirty)
 		{
-			result=pfsMount->blockDev->transfer(pfsMount->fd, fileSlot->restsBuffer, info->sub, info->sector, 1, 1);
+			result=pfsMount->blockDev->transfer(pfsMount->fd, fileSlot->unaligned.buffer, unaligned->sub, unaligned->sector, 1, 1);
 			if(result)
 				return result;
-			fileSlot->restsInfo.dirty=0;
+			fileSlot->unaligned.dirty=0;
 		}
 
-		info->sub=bi->subpart;
-		info->sector=sector;
+		unaligned->sub=bi->subpart;
+		unaligned->sector=sector;
 
 		if(pos || (fileSlot->position != fileSlot->clink->u.inode->size))
 		{
-			result = pfsMount->blockDev->transfer(pfsMount->fd, fileSlot->restsBuffer, info->sub, info->sector, 1, 0);
+			result = pfsMount->blockDev->transfer(pfsMount->fd, fileSlot->unaligned.buffer, unaligned->sub, unaligned->sector, 1, 0);
 			if(result)
 				return result | 0x10000;
 		}
 	}
 
 	if (operation==0)
-		memcpy(buf, fileSlot->restsBuffer+pos, size=min(size, 512-(int)pos));
+		memcpy(buf, &unaligned->buffer[pos], size=min(size, sizeof(unaligned->buffer)-(int)pos));
 	else
-		memcpy(fileSlot->restsBuffer+pos, buf, size=min(size, 512-(int)pos));
+		memcpy(&unaligned->buffer[pos], buf, size=min(size, sizeof(unaligned->buffer)-(int)pos));
 
 	if (operation == 1)
 	{
 		if (pfsMount->flags & PFS_FIO_ATTR_WRITEABLE)
 		{
-			if ((result=pfsMount->blockDev->transfer(pfsMount->fd, fileSlot->restsBuffer, info->sub,
-				 info->sector, operation, operation)))
+			if ((result=pfsMount->blockDev->transfer(pfsMount->fd, unaligned->buffer, unaligned->sub,
+				 unaligned->sector, operation, operation)))
 				return result;
 		}
 		else
-			info->dirty=operation;
+			unaligned->dirty=operation;
 	}
 	return size;
 }
@@ -1112,12 +1112,12 @@ static void _sync(void)
 	u32 i;
 	for(i=0;i<pfsConfig.maxOpen;i++)
 	{
-		pfs_restsInfo_t *info=&pfsFileSlots[i].restsInfo;
-		if(info->dirty) {
+		pfs_unaligned_io_t *unaligned=&pfsFileSlots[i].unaligned;
+		if(unaligned->dirty) {
 			pfs_mount_t *pfsMount=pfsFileSlots[i].clink->pfsMount;
-			pfsMount->blockDev->transfer(pfsMount->fd, &pfsFileSlots[i].restsBuffer,
-				info->sub, info->sector, 1, PFS_IO_MODE_WRITE);
-			pfsFileSlots[i].restsInfo.dirty=0;
+			pfsMount->blockDev->transfer(pfsMount->fd, unaligned->buffer,
+				unaligned->sub, unaligned->sector, 1, PFS_IO_MODE_WRITE);
+			unaligned->dirty=0;
 		}
 	}
 }

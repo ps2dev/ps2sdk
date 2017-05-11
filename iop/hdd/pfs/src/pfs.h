@@ -23,10 +23,11 @@
 
 typedef struct
 {
-	u16 dirty;	//
-	u16 sub;	// Sub/main partition
-	u32 sector;	// Sector
-} pfs_restsInfo_t;
+	u16 dirty;		// Whether the buffer is dirty or not.
+	u16 sub;		// Sub/main partition
+	u32 sector;		// Sector
+	u8 buffer[512];	// used for reading mis-aligned/remainder data
+} pfs_unaligned_io_t;
 
 typedef struct
 {
@@ -35,13 +36,12 @@ typedef struct
 } pfs_ioctl2attr_t;
 
 typedef struct {
-	iop_file_t *fd;				//
-	pfs_cache_t *clink;			//
-	u32 aentryOffset;			// used for read offset
-	u64 position;				//
+	iop_file_t *fd;			//
+	pfs_cache_t *clink;		//
+	u32 aentryOffset;		// used for read offset
+	u64 position;			//
 	pfs_blockpos_t block_pos;	// current position into file
-	pfs_restsInfo_t restsInfo;	//
-	u8 restsBuffer[512];		// used for reading mis-aligned/remainder data
+	pfs_unaligned_io_t unaligned;	// Contains unaligned data (data can only be read from the HDD in units of 512)
 } pfs_file_slot_t;
 
 typedef struct {
