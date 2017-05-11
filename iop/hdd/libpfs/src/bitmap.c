@@ -107,7 +107,7 @@ int pfsBitmapAllocateAdditionalZones(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi,
 
 		// Read the bitmap chunk from the hdd
 		c=pfsCacheGetData(pfsMount, bi->subpart, sector, PFS_CACHE_FLAG_BITMAP, &result);
-		if (c==0)break;
+		if (c==NULL)break;
 
 		// Loop over each 32-bit word in the current bitmap chunk until
 		// we find a used zone or we've allocated all the zones we need

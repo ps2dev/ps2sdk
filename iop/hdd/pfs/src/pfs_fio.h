@@ -49,6 +49,4 @@ s64 pfsFioLseek64(iop_file_t *f, s64 offset, int whence);
 int pfsFioSymlink(iop_file_t *f, const char *old, const char *new);
 int pfsFioReadlink(iop_file_t *f, const char *path, char *buf, unsigned int buflen);
 
-int pfsFioUnsupported(void);
-
 #endif /* _PFS_FIO_H */

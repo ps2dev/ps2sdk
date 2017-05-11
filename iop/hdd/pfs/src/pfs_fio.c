@@ -339,7 +339,7 @@ static int fileTransferRemainder(pfs_file_slot_t *fileSlot, void *buf, int size,
 		{
 			if (unaligned->dirty)
 			{
-				result=pfsMount->blockDev->transfer(pfsMount->fd, unaligned->buffer, unaligned->sub, unaligned->sector, 1, 1);
+				result=pfsMount->blockDev->transfer(pfsMount->fd, unaligned->buffer, unaligned->sub, unaligned->sector, 1, PFS_IO_MODE_WRITE);
 				if(result)
 					return result;
 				unaligned->dirty=0;
@@ -350,7 +350,7 @@ static int fileTransferRemainder(pfs_file_slot_t *fileSlot, void *buf, int size,
 
 			if(pos || (fileSlot->position != fileSlot->clink->u.inode->size))
 			{
-				result = pfsMount->blockDev->transfer(pfsMount->fd, unaligned->buffer, unaligned->sub, unaligned->sector, 1, 0);
+				result = pfsMount->blockDev->transfer(pfsMount->fd, unaligned->buffer, unaligned->sub, unaligned->sector, 1, PFS_IO_MODE_READ);
 				if(result)
 					return result | 0x10000;
 			}
@@ -1300,11 +1300,4 @@ int pfsFioReadlink(iop_file_t *f, const char *path, char *buf, unsigned int bufl
 	SignalSema(pfsFioSema);
 
 	return pfsFioCheckForLastError(pfsMount, rv);
-}
-
-int pfsFioUnsupported(void)
-{
-	PFS_PRINTF(PFS_DRV_NAME" Error: Operation currently unsupported.\n");
-
-	return -1;
 }
