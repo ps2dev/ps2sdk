@@ -395,17 +395,17 @@ static int fileTransfer(pfs_file_slot_t *fileSlot, u8 *buf, int size, int operat
 	int result=0;
 	pfs_blockpos_t *blockpos=&fileSlot->block_pos;
 	pfs_mount_t *pfsMount=fileSlot->clink->pfsMount;
-	u32 bytes_remain;
-	u32 total = size;
+	u64 bytes_remain;
+	int total = size;
 
 	// If we're writing and there is less free space in the last allocated block segment
 	// than can hold the data being written, then try and expand the block segment
 	if ((operation==1) &&
 	    (fileSlot->clink->u.inode->number_data - 1 == blockpos->block_segment))
 	{
-		bytes_remain = (pfsBlockGetCurrent(blockpos)->count - blockpos->block_offset) * pfsMount->zsize - blockpos->byte_offset;//u32
+		bytes_remain = (pfsBlockGetCurrent(blockpos)->count - blockpos->block_offset) * pfsMount->zsize - blockpos->byte_offset;
 
-		if (bytes_remain < size)
+		if (bytes_remain < (u32)size)
 		{
 			pfsBlockExpandSegment(fileSlot->clink, blockpos,
 				((size-bytes_remain+pfsMount->zsize-1) & (~(pfsMount->zsize-1))) / pfsMount->zsize);
