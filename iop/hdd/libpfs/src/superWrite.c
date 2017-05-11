@@ -85,7 +85,7 @@ int pfsFormat(pfs_block_device_t *blockDev, int fd, int zonesize, int fragment)
 		sb = clink->u.superblock;
 		memset(sb, 0, pfsMetaSize);
 		sb->magic = PFS_SUPER_MAGIC;
-		sb->version = 3;
+		sb->version = PFS_FORMAT_VERSION;
 		sb->modver = ((PFS_MAJOR << 8) | PFS_MINOR);
 		sb->zone_size = zonesize;
 		sb->num_subs = subnumber;
@@ -189,7 +189,7 @@ int pfsMountSuperBlock(pfs_mount_t *pfsMount)
 	result = pfsMount->blockDev->transfer(pfsMount->fd, superblock, 0, PFS_SUPER_SECTOR, 1, PFS_IO_MODE_READ);
 	if(result) goto error;
 
-	if((superblock->magic != PFS_SUPER_MAGIC) || (superblock->version >= PFS_VERSION))
+	if((superblock->magic != PFS_SUPER_MAGIC) || (superblock->version > PFS_FORMAT_VERSION))
 	{
 		PFS_PRINTF(PFS_DRV_NAME": Error: Invalid magic/version\n");
 		pfsCacheFree(clink);

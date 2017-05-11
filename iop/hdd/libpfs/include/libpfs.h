@@ -20,7 +20,7 @@
 #define PFS_SEGI_MAGIC		0x53454749	// "SEGI" aka segment descriptor indirect
 #define PFS_MAX_SUBPARTS	64
 #define PFS_NAME_LEN		255
-#define PFS_VERSION			4
+#define PFS_FORMAT_VERSION	3
 
 // attribute flags
 #define PFS_FIO_ATTR_READABLE		0x0001
