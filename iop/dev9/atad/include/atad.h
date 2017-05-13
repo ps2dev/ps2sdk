@@ -23,11 +23,6 @@
 #define ATA_DIR_READ	0
 #define ATA_DIR_WRITE	1
 
-#define ATAD_XFER_MODE_PIO	0x08
-/* Only supported if ATAD was built with ATA_MWDMA_MODES defined.  */
-#define ATAD_XFER_MODE_MDMA	0x20
-#define ATAD_XFER_MODE_UDMA	0x40
-
 typedef struct _ata_devinfo {
 	/** Was successfully probed.  */
 	s32	exists;
@@ -37,6 +32,8 @@ typedef struct _ata_devinfo {
 	u32	total_sectors;
 	/** Word 0x100 of the identify info.  */
 	u32	security_status;
+	/** Supports the 48-bit LBA command set (unofficial).  */
+	u32	lba48;
 } ata_devinfo_t;
 
 /* Error definitions.  */

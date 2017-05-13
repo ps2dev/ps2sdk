@@ -40,14 +40,17 @@ IRX_ID(MODNAME, 2, 4);
 #define BANNER "ATA device driver %s - Copyright (c) 2003 Marcus R. Brown\n"
 #define VERSION "v1.2"
 
+#define ATA_XFER_MODE_PIO	0x08
+#ifdef ATA_MWDMA_MODES
+#define ATA_XFER_MODE_MDMA	0x20
+#endif
+#define ATA_XFER_MODE_UDMA	0x40
+
 #define ATA_EV_TIMEOUT	1
 #define ATA_EV_COMPLETE	2
 
 static int ata_devinfo_init = 0;
 static int ata_evflg = -1;
-
-/* Used for indicating 48-bit LBA support.  */
-static u8 lba_48bit[2] = {0, 0};
 
 static u8 Disable48bitLBA = 0;	//Please read the comments in _start().
 
@@ -665,7 +668,7 @@ int ata_device_flush_cache(int device)
 {
 	int res;
 
-	if(!(res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, lba_48bit[device]?ATA_C_FLUSH_CACHE_EXT:ATA_C_FLUSH_CACHE))) res=ata_io_finish();
+	if(!(res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, atad_devinfo[device].lba48?ATA_C_FLUSH_CACHE_EXT:ATA_C_FLUSH_CACHE))) res=ata_io_finish();
 
 	return res;
 }
@@ -766,14 +769,14 @@ static int ata_device_set_transfer_mode(int device, int type, int mode)
 
 	switch(type){
 #ifdef ATA_MWDMA_MODES
-		case ATAD_XFER_MODE_MDMA:
+		case ATA_XFER_MODE_MDMA:
 			ata_multiword_dma_mode(mode);
 			break;
 #endif
-		case ATAD_XFER_MODE_UDMA:
+		case ATA_XFER_MODE_UDMA:
 			ata_ultra_dma_mode(mode);
 			break;
-		case ATAD_XFER_MODE_PIO:
+		case ATA_XFER_MODE_PIO:
 			ata_pio_mode(mode);
 			break;
 	}
@@ -794,7 +797,7 @@ int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir)
 		lcyl = (lba >> 8) & 0xff;
 		hcyl = (lba >> 16) & 0xff;
 
-		if (lba_48bit[device]) {
+		if (atad_devinfo[device].lba48) {
 			/* Setup for 48-bit LBA.
 			   While ATA-6 allows for the transfer of up to 65536 sectors,
 			   the DMAC allows only up to 65536 x 128 / 512 = 16384 sectors. */
@@ -999,7 +1002,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 		   (IDENITFY DEVICE bit 10 word 83) and get the total sectors from
 		   either words(61:60) for 28-bit or words(103:100) for 48-bit.  */
 		if (!Disable48bitLBA && (ata_param[ATA_ID_COMMAND_SETS_SUPPORTED] & 0x0400)) {
-			lba_48bit[i] = 1;
+			atad_devinfo[i].lba48 = 1;
 			/* I don't think anyone would use a >2TB HDD but just in case.  */
 			if (ata_param[ATA_ID_48BIT_SECTOTAL_HI]) {
 				devinfo[i].total_sectors = 0xffffffff;
@@ -1009,14 +1012,14 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 					ata_param[ATA_ID_48BIT_SECTOTAL_LO];
 			}
 		} else {
-			lba_48bit[i] = 0;
+			atad_devinfo[i].lba48 = 0;
 			devinfo[i].total_sectors = (ata_param[ATA_ID_SECTOTAL_HI] << 16)|
 				ata_param[ATA_ID_SECTOTAL_LO];
 		}
 		devinfo[i].security_status = ata_param[ATA_ID_SECURITY_STATUS];
 
 		/* Ultra DMA mode 4.  */
-		ata_device_set_transfer_mode(i, ATAD_XFER_MODE_UDMA, 4);
+		ata_device_set_transfer_mode(i, ATA_XFER_MODE_UDMA, 4);
 		ata_device_smart_enable(i);
 		/* Set idle timeout period to 21min 15s.  */
 		ata_device_idle(i, 0xff);
