@@ -1097,7 +1097,7 @@ static int getDirentryStoreOffset(fat_driver* fatd, int entryCount, int direntry
   the reason is to speed up modification of the SFN (size of the file)
 //dlanor: This function has been rewritten to use global bitmask arrays for output
 */
-static int fat_fillDirentryInfo(fat_driver* fatd, const char* lname, char* sname,
+static int fat_fillDirentryInfo(fat_driver* fatd, const char* lname, const char* sname,
 			char directory, unsigned int* startCluster,
 			unsigned int* retSector, int* retOffset) {
 	fat_direntry_summary dir;
@@ -1328,6 +1328,54 @@ static int createDirectorySpace(fat_driver* fatd, unsigned int dirCluster, unsig
 	return(0);
 }
 
+/*
+  Update the parent directory ("..") entry cluster number of the specified SFN direntry.
+*/
+static int updateDirectoryParent(fat_driver* fatd, unsigned int dirCluster, unsigned int parentDirCluster) {
+	int i, j;
+	int ret;
+	unsigned int startSector;
+
+	//we do not mess with root directory
+	if (dirCluster < 2) {
+		return -EFAULT;
+	}
+
+	//The basic directory space should be within one cluster. No need to worry about
+	//large dir space spread on multiple clusters
+	startSector = fat_cluster2sector(&fatd->partBpb, dirCluster);
+	XPRINTF("USBHDFSD: I: update dir parent: cluster=%u sector=%u (%u) \n", dirCluster, startSector, startSector * fatd->partBpb.sectorSize);
+
+	//go through all sectors of the cluster
+	for (i = 0; i < fatd->partBpb.clusterSize; i++) {
+		unsigned char* sbuf = NULL; //sector buffer
+
+		ret = READ_SECTOR(fatd->dev, startSector + i, sbuf);
+		if (ret < 0) {
+			XPRINTF("USBHDFSD: read directory sector failed ! sector=%u\n", startSector + i);
+			return -EIO;
+		}
+		fat_direntry_sfn* dsfn = (fat_direntry_sfn*) sbuf;
+		for(j = 0; j < fatd->partBpb.sectorSize; j += sizeof(fat_direntry_sfn),dsfn++) {
+			if(memcmp(dsfn->name, "..      ", sizeof(dsfn->name)) == 0) {
+				dsfn->clusterH[0] = (parentDirCluster & 0xFF0000) >> 16;
+				dsfn->clusterH[1] = (parentDirCluster & 0xFF000000) >> 24;
+				dsfn->clusterL[0] = (parentDirCluster & 0x00FF);
+				dsfn->clusterL[1] = (parentDirCluster & 0xFF00) >> 8;
+
+				ret = WRITE_SECTOR(fatd->dev, startSector + i);
+				if (ret < 0) {
+					XPRINTF("USBHDFSD: write directory sector failed ! sector=%u\n", startSector + i);
+					return -EIO;
+				}
+
+				return 0;
+			}
+		}
+	}
+
+	return -1;
+}
 
 //---------------------------------------------------------------------------
 /*
@@ -1981,9 +2029,10 @@ int fat_renameFile(fat_driver* fatd, fat_dir *fatdir, const char* fname) {
 	unsigned int dDirCluster, dParentDirCluster;
 	char lname[FAT_MAX_NAME], pathToDirent[FAT_MAX_PATH];
 	unsigned int sfnSector, new_sfnSector;
-	int directory, sfnOffset, new_sfnOffset;
+	int sfnOffset, new_sfnOffset;
 	char sname[12]; //short name 8+3 + terminator
 	unsigned char* sbuf = NULL;
+	unsigned char srcIsDirectory;
 	fat_direntry_sfn OriginalSFN;
 
 	ret = separatePathAndName(fname, pathToDirent, lname);
@@ -2015,14 +2064,8 @@ int fat_renameFile(fat_driver* fatd, fat_dir *fatdir, const char* fname) {
 	}
 	dParentDirCluster = dDirCluster; //Backup dDirCluster, as every call to fat_filleDirentryInfo will update it to point to the scanned file's first cluster.
 
-	sname[0] = 0;
-	ret = fat_fillDirentryInfo(fatd, lname, sname, -1, &dDirCluster, &new_sfnSector, &new_sfnOffset);
-	if (ret == 0) {
-		XPRINTF("USBHDFSD: E: file already exists!\n");
-		return -EEXIST;
-	}
-
 	//Get the SFN sector number and offset, so that the SFN record can be read.
+	sname[0] = 0;
 	ret = fat_fillDirentryInfo(fatd, fatdir->name, sname, -1, &sDirCluster, &sfnSector, &sfnOffset);
 	if (ret != 0) {
 		XPRINTF("USBHDFSD: E: direntry not found! %d\n", ret);
@@ -2037,12 +2080,35 @@ int fat_renameFile(fat_driver* fatd, fat_dir *fatdir, const char* fname) {
 		return ret;
 	}
 	memcpy(&OriginalSFN, (fat_direntry_sfn*) (sbuf + sfnOffset), sizeof(fat_direntry_sfn));
-	directory = ((fat_direntry_sfn*) (sbuf + sfnOffset))->attr & FAT_ATTR_DIRECTORY;
+	srcIsDirectory = ((fat_direntry_sfn*) (sbuf + sfnOffset))->attr & FAT_ATTR_DIRECTORY;
+
+	ret = fat_fillDirentryInfo(fatd, lname, sname, srcIsDirectory, &dDirCluster, &new_sfnSector, &new_sfnOffset);
+	if (ret == 0) {
+		//Entry is found and the type is the same as the original (both are either directories or files).
+		if(srcIsDirectory) {
+			//If directory, the rename can still take place if the directory can be deleted (is empty).
+			dDirCluster = dParentDirCluster;
+			if((ret = fat_clearDirSpace(fatd, lname, 1, &dDirCluster)) < 0)
+				return ret;
+		} else {
+			//Do not allow a file to be renamed to an existing file.
+			return -EEXIST;
+		}
+	}
 
 	//Insert a new record.
-	if((ret = fat_modifyDirSpace(fatd, lname, directory, 0, dDirCluster, &sfnSector, &sfnOffset, &OriginalSFN)) < 0){
+	if((ret = fat_modifyDirSpace(fatd, lname, srcIsDirectory, 0, dParentDirCluster, &sfnSector, &sfnOffset, &OriginalSFN)) < 0){
 		XPRINTF("USBHDFSD: E: fat_modifyDirSpace failed! %d\n", ret);
 		return ret;
+	}
+
+	//If it is a directory, update the parent directory record.
+	if (srcIsDirectory) {
+		dDirCluster = (fatd->partBpb.fatType == FAT32) ? getI32_2(OriginalSFN.clusterL, OriginalSFN.clusterH) : getI16(OriginalSFN.clusterL);
+		if((ret = updateDirectoryParent(fatd, dDirCluster, dParentDirCluster)) != 0) {
+			XPRINTF("USBHDFSD: E: could not update \"..\" entry! %d\n", ret);
+			return ret;
+		}
 	}
 
 	//Wipe the original entry.
