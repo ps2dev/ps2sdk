@@ -158,16 +158,16 @@ struct pbuf*     pbuf_coalesce(struct pbuf *p, pbuf_layer layer);
 u32        ipaddr_addr(const char *cp);
 #define  I_ipaddr_addr DECLARE_IMPORT(24, ipaddr_addr)
 #define  I_inet_addr DECLARE_IMPORT(24, ipaddr_addr)
-int        ipaddr_aton(const char *cp, ip_addr_t *addr);
-#define  I_ipaddr_aton DECLARE_IMPORT(43, ipaddr_aton)
-#define  I_inet_aton DECLARE_IMPORT(43, ipaddr_aton)
+int        ipaddr4_aton(const char *cp, ip4_addr_t *addr);
+#define  I_ipaddr4_aton DECLARE_IMPORT(43, ipaddr4_aton)
+#define  I_inet_aton DECLARE_IMPORT(43, ip4addr_aton)
 /** returns ptr to static buffer; not reentrant! */
-char       *ipaddr_ntoa(const ip_addr_t *addr);
-#define  I_ipaddr_ntoa DECLARE_IMPORT(44, ipaddr_ntoa)
-#define  I_inet_ntoa DECLARE_IMPORT(44, ipaddr_ntoa)
-char       *ipaddr_ntoa_r(const ip_addr_t *addr, char *buf, int buflen);
-#define  I_ipaddr_ntoa_r DECLARE_IMPORT(45, ipaddr_ntoa_r)
-#define  I_inet_ntoa_r DECLARE_IMPORT(45, ipaddr_ntoa_r)
+char       *ip4addr_ntoa(const ip4_addr_t *addr);
+#define  I_ip4addr_ntoa DECLARE_IMPORT(44, ip4addr_ntoa)
+#define  I_inet_ntoa DECLARE_IMPORT(44, ip4addr_ntoa)
+char       *ip4addr_ntoa_r(const ip4_addr_t *addr, char *buf, int buflen);
+#define  I_ip4addr_ntoa_r DECLARE_IMPORT(45, ip4addr_ntoa_r)
+#define  I_inet_ntoa_r DECLARE_IMPORT(45, ip4addr_ntoa_r)
 
 #ifdef PS2IP_DNS
 /* From include/lwip/netdb.h:  */

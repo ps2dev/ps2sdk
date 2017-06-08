@@ -83,10 +83,10 @@ err_t	etharp_output(struct netif *netif, struct pbuf *q, const ip_addr_t *ipaddr
 #define inet_ntoa_r(addr, buf, buflen)  ip4addr_ntoa_r((const ip4_addr_t*)&(addr), buf, buflen)
 
 u32        ipaddr_addr(const char *cp);
-int        ipaddr_aton(const char *cp, ip_addr_t *addr);
+int        ip4addr_aton(const char *cp, ip4_addr_t *addr);
 /** returns ptr to static buffer; not reentrant! */
-char       *ipaddr_ntoa(const ip_addr_t *addr);
-char       *ipaddr_ntoa_r(const ip_addr_t *addr, char *buf, int buflen);
+char       *ip4addr_ntoa(const ip4_addr_t *addr);
+char       *ip4addr_ntoa_r(const ip4_addr_t *addr, char *buf, int buflen);
 
 /* From include/lwip/tcpip.h:  */
 err_t     tcpip_input(struct pbuf *p, struct netif *inp);
