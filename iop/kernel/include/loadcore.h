@@ -62,12 +62,12 @@ typedef struct tag_LC_internals {
 	int	module_index;
 } lc_internals_t;
 
-struct bootmode {
-	short	unk0;
-	char	id;
-	char	len;
-	int	data[0];
-};
+typedef struct {
+	u16	value;
+	u8	id;
+	u8	len;
+	u32	data[0];
+} iop_bootmode_t;
 
 /** 
  * For backward-compatibility with older projects. Read the comment on GetLibraryEntryTable(). This structure is incomplete. 
@@ -105,7 +105,7 @@ void *QueryLibraryEntryTable(iop_library_t *library);
 #define I_QueryLibraryEntryTable DECLARE_IMPORT(11, QueryLibraryEntryTable)
 int * QueryBootMode(int mode);
 #define I_QueryBootMode DECLARE_IMPORT(12, QueryBootMode)
-void RegisterBootMode(struct bootmode *b);
+void RegisterBootMode(iop_bootmode_t *b);
 #define I_RegisterBootMode DECLARE_IMPORT(13, RegisterBootMode)
 
 #define loadcore_IMPORTS \
