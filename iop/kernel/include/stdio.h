@@ -43,14 +43,14 @@ int fdprintf(int fd, const char *format, ...);
 int fdgetc(int fd);
 #define I_fdgetc DECLARE_IMPORT(10, fdgetc)
 
-char *fdgets(char *buf, int fd);
-#define I_fdgets DECLARE_IMPORT(11, fdgets)
-
 int fdputc(int c, int fd);
-#define I_fdputc DECLARE_IMPORT(12, fdputc)
+#define I_fdputc DECLARE_IMPORT(11, fdputc)
 
 int fdputs(const char *s, int fd);
-#define I_fdputs DECLARE_IMPORT(13, fdputs)
+#define I_fdputs DECLARE_IMPORT(12, fdputs)
+
+char *fdgets(char *buf, int fd);
+#define I_fdgets DECLARE_IMPORT(13, fdgets)
 
 int vfdprintf(int fd, const char *format, va_list ap);
 #define I_vfdprintf DECLARE_IMPORT(14, vfdprintf)
