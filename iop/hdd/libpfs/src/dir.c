@@ -312,13 +312,13 @@ pfs_cache_t *pfsInodeGetFileInDir(pfs_cache_t *dirInode, char *path, int *result
 pfs_cache_t *pfsInodeGetFile(pfs_mount_t *pfsMount, pfs_cache_t *clink,
 			const char *name, int *result) {
 	char path[256];
-	pfs_cache_t *c;
+	pfs_cache_t *c,*fileInode;
 
 	c=pfsInodeGetParent(pfsMount, clink, name, path, result);
 	if (c){
-		c=pfsInodeGetFileInDir(c, path, result);
+		fileInode=pfsInodeGetFileInDir(c, path, result);
 		pfsCacheFree(c);
-		return c;
+		return fileInode;
 	}
 	return NULL;
 }
