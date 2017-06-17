@@ -502,9 +502,13 @@ int dev9RegisterShutdownCb(int idx, dev9_shutdown_cb_t cb)
 
 static int dev9_init(void)
 {
+	iop_sema_t sema;
 	int i, flags;
 
-	if ((dma_lock_sem = CreateMutex(IOP_MUTEX_UNLOCKED)) < 0)
+	sema.attr = SA_THPRI;
+	sema.initial = 1;
+	sema.max = 1;
+	if ((dma_lock_sem = CreateSema(&sema)) < 0)
 		return -1;
 
 	CpuSuspendIntr(&flags);
