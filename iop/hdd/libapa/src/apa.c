@@ -12,7 +12,11 @@
 
 #include <errno.h>
 #include <iomanX.h>
+#ifdef _IOP
 #include <sysclib.h>
+#else
+#include <string.h>
+#endif
 #include <stdio.h>
 #include <atad.h>
 #include <hdd-ioctl.h>

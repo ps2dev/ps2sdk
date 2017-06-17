@@ -11,10 +11,15 @@
 */
 
 #include <stdio.h>
+#ifdef _IOP
 #include <irx.h>
-#include <atad.h>
-#include <loadcore.h>
 #include <sysclib.h>
+#include <loadcore.h>
+#else
+#include <string.h>
+#include <stdlib.h>
+#endif
+#include <atad.h>
 #include <errno.h>
 #include <iomanX.h>
 #include <hdd-ioctl.h>
@@ -24,7 +29,9 @@
 #include "hdd.h"
 #include "hdd_fio.h"
 
+#ifdef _IOP
 IRX_ID("hdd_driver", APA_MODVER_MAJOR, APA_MODVER_MINOR);
+#endif
 
 static iop_device_ops_t hddOps={
 	hddInit,
@@ -68,7 +75,7 @@ apa_device_t hddDevices[2]={
 	{0, 0, 0, 3}
 };
 
-extern u32 apaMaxOpen;
+extern int apaMaxOpen;
 extern hdd_file_slot_t *hddFileSlots;
 
 static int inputError(char *input);
@@ -93,7 +100,7 @@ apa_cache_t *hddAddPartitionHere(s32 device, const apa_params_t *params, u32 *em
 	// walk empty blocks in case can use one :)
 	for(i=0;i< 32;i++)
 	{
-		if((1 << i) >= params->size && emptyBlocks[i]!=0)
+		if((u32)(1 << i) >= params->size && emptyBlocks[i]!=0)
 			return apaInsertPartition(device, params, emptyBlocks[i], err);
 	}
 	clink_this=apaCacheGetHeader(device, sector, APA_IO_MODE_READ, err);
@@ -216,7 +223,7 @@ int _start(int argc, char **argv)
 		argc--; argv++;
 	}
 
-	APA_PRINTF(APA_DRV_NAME": max open = %ld, %d buffers\n", apaMaxOpen, cacheSize);
+	APA_PRINTF(APA_DRV_NAME": max open = %d, %d buffers\n", apaMaxOpen, cacheSize);
 	apaGetTime(&tm);
 	APA_PRINTF(APA_DRV_NAME": %02d:%02d:%02d %02d/%02d/%d\n",
 		tm.hour, tm.min, tm.sec, tm.month, tm.day, tm.year);

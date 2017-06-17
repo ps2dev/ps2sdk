@@ -11,11 +11,15 @@
 */
 
 #include <stdio.h>
+#ifdef _IOP
 #include <irx.h>
-#include <atad.h>
-#include <dev9.h>
 #include <loadcore.h>
 #include <sysclib.h>
+#else
+#include <string.h>
+#endif
+#include <atad.h>
+#include <dev9.h>
 #include <errno.h>
 #include <iomanX.h>
 #include <thsemap.h>
@@ -28,7 +32,7 @@
 
 hdd_file_slot_t	*hddFileSlots;
 int				fioSema;
-u32 apaMaxOpen=1;
+int apaMaxOpen=1;
 
 extern const char apaMBRMagic[];
 extern apa_device_t hddDevices[];
@@ -70,7 +74,7 @@ static int fioPartitionSizeLookUp(char *str)
 
 static int fioInputBreaker(char const **arg, char *outBuf, int maxout)
 {
-	u32 len;
+	int len;
 	char *p;
 
 	if((p=strchr(arg[0], ','))) {
@@ -398,10 +402,10 @@ static int apaOpen(s32 device, hdd_file_slot_t *fileSlot, apa_params_t *params, 
 
 static int apaRemove(s32 device, const char *id, const char *fpwd)
 {
-	u32			nsub, i;
+	u32			nsub;
 	apa_cache_t	*clink;
 	apa_cache_t	*clink2;
-	int			rv;
+	int			rv, i;
 
 	for(i=0;i<apaMaxOpen;i++)	// look to see if open
 	{
