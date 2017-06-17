@@ -880,7 +880,7 @@ static int pcmcia_device_reset(void)
 	u16 cstc1, cstc2;
 
 	/* The card must be 16-bit (type 2?) */
-	if (pcic_cardtype != PC_CARD_TYPE_PCMCIA)
+	if ((DEV9_REG(DEV9_R_1462) & 0x03) != 0)
 		return -1;
 
 	DEV9_REG(DEV9_R_147E) = 1;
