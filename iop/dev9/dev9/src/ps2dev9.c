@@ -22,6 +22,7 @@
 #include <thbase.h>
 #include <thsemap.h>
 #include <stdio.h>
+#include <sysclib.h>
 #include <dev9.h>
 
 #include <aifregs.h>
@@ -44,6 +45,8 @@ IRX_ID(MODNAME, 2, 8);
 #define SSBUS_R_141c		0xbf80141c
 #define SSBUS_R_1420		0xbf801420
 
+static int semaAttrGlobal;	/* Semaphore attribute value to use. */
+static const char *mod_name;	/* Module name. */
 static int dev9type = -1;	/* 0 for PCMCIA, 1 for expansion bay */
 static int using_aif = 0;	/* 1 if using AIF on a T10K */
 
@@ -90,7 +93,7 @@ static int dev9_device_reset(void);
 static int dev9_card_find_manfid(u32 manfid);
 
 static int read_eeprom_data(void);
-static int dev9_init(void);
+static int dev9_init(int sema_attr);
 static int speed_device_init(void);
 
 static void pcmcia_set_stat(int stat);
@@ -98,12 +101,12 @@ static int pcic_ssbus_mode(int mode);
 static int pcmcia_device_probe(void);
 static int pcmcia_device_reset(void);
 static int card_find_manfid(u32 manfid);
-static int pcmcia_init(void);
+static int pcmcia_init(int sema_attr);
 
 static void expbay_set_stat(int stat);
 static int expbay_device_probe(void);
 static int expbay_device_reset(void);
-static int expbay_init(void);
+static int expbay_init(int sema_attr);
 
 extern struct irx_export_table _exp_dev9;
 
@@ -163,13 +166,52 @@ static iop_device_t dev9x_device =
 	&dev9x_ops
 };
 
+static int print_help(void)
+{
+	printf("Usage:\n");
+	printf("  %s [-sa] <attribute>]\n", mod_name);
+	printf("      -sa  You can specify attibute of sempahore for queuing thread.\n");
+	printf("           List of possible <attribute>:\n");
+	printf("             SA_THPRI(default), SA_THFIFO\n");
+
+	return MODULE_NO_RESIDENT_END;
+}
+
 int _start(int argc, char **argv)
 {
 	USE_DEV9_REGS;
-	int idx, res = 1;
+	const char *pModName;
+	int idx, res;
 	u16 dev9hw;
 
+	semaAttrGlobal = SA_THPRI;
+
 	printf(BANNER, VERSION);
+
+	mod_name = (pModName = strrchr(argv[0], '/')) != NULL ? pModName + 1 : argv[0];
+
+	for(--argc,++argv; argc > 0; argc--,argv++) {
+		if((*argv)[0] != '-')
+			break;
+
+		if(strcmp("-sa", *argv) == 0) {
+			--argc;
+			++argv;
+			if (argc > 0) {
+				if(strcmp("SA_THFIFO", *argv) == 0) {
+					semaAttrGlobal = SA_THFIFO;
+				} else if(strcmp("SA_THPRI", *argv) == 0) {
+					semaAttrGlobal = SA_THPRI;
+				} else {
+					return print_help();
+				}
+			} else {
+				return print_help();
+			}
+		} else {
+			return print_help();
+		}
+	}
 
 	for (idx = 0; idx < 16; idx++)
 		dev9_shutdown_cbs[idx] = NULL;
@@ -178,13 +220,14 @@ int _start(int argc, char **argv)
 	if (dev9hw == 0x20) {		/* CXD9566 (PCMCIA) */
 		dev9type = DEV9_TYPE_PCMCIA;
 		M_PRINTF("CXD9566 detected.\n");
-		res = pcmcia_init();
+		res = pcmcia_init(semaAttrGlobal);
 	} else if (dev9hw == 0x30) {	/* CXD9611 (Expansion Bay) */
 		dev9type = DEV9_TYPE_EXPBAY;
 		M_PRINTF("CXD9611 detected.\n");
-		res = expbay_init();
+		res = expbay_init(semaAttrGlobal);
 	} else {
 		M_PRINTF("unknown dev9 hardware.\n");
+		res = MODULE_NO_RESIDENT_END;
 	}
 
 	if (res)
@@ -500,12 +543,12 @@ int dev9RegisterShutdownCb(int idx, dev9_shutdown_cb_t cb)
 	return -1;
 }
 
-static int dev9_init(void)
+static int dev9_init(int sema_attr)
 {
 	iop_sema_t sema;
 	int i, flags;
 
-	sema.attr = SA_THPRI;
+	sema.attr = sema_attr;
 	sema.initial = 1;
 	sema.max = 1;
 	if ((dma_lock_sem = CreateSema(&sema)) < 0)
@@ -992,7 +1035,7 @@ static int pcmcia_intr(void *unused)
 	return 1;
 }
 
-static int pcmcia_init(void)
+static int pcmcia_init(int sema_attr)
 {
 	USE_DEV9_REGS;
 	USE_AIF_REGS;
@@ -1040,7 +1083,7 @@ static int pcmcia_init(void)
 		_sw(0xe01a3043, SSBUS_R_1418);
 	}
 
-	if (dev9_init() != 0)
+	if (dev9_init(sema_attr) != 0)
 		return 1;
 
 	CpuSuspendIntr(&flags);
@@ -1097,7 +1140,7 @@ static int expbay_intr(void *unused)
 	return 1;
 }
 
-static int expbay_init(void)
+static int expbay_init(int sema_attr)
 {
 	USE_DEV9_REGS;
 	int flags;
@@ -1115,7 +1158,7 @@ static int expbay_init(void)
 			return 1;
 	}
 
-	if (dev9_init() != 0)
+	if (dev9_init(sema_attr) != 0)
 		return 1;
 
 	CpuSuspendIntr(&flags);
