@@ -41,11 +41,21 @@ typedef struct _part_raw_record {
 } part_raw_record;
 
 //---------------------------------------------------------------------------
-static USBHD_INLINE void part_getPartitionRecord(part_raw_record* raw, part_record* rec)
+static USBHD_INLINE int part_getPartitionRecord(mass_dev* dev, part_raw_record* raw, part_record* rec)
 {
 	rec->sid = raw->sid;
 	rec->start = getI32(raw->startLBA);
 	rec->count = getI32(raw->size);
+
+	if(rec->sid != 0x00)
+	{	/*	Windows appears to check if the start LBA is not 0 and whether the start LBA is within the disk.
+			There may be checks against the size, but I didn't manage to identify a pattern.
+			If the disk has no partition table (i.e. disks with "removable" media), then this check is also one safeguard. */
+		if((rec->start == 0) || (rec->start >= dev->maxLBA))
+			return 1;
+	}
+
+	return 0;
 }
 
 //---------------------------------------------------------------------------
@@ -69,7 +79,8 @@ static int part_getPartitionTable(mass_dev* dev, part_table* part)
 		for ( i = 0; i < 4; i++)
 		{
 			part_raw = ( part_raw_record* )(  sbuf + 0x01BE + ( i * 16 )  );
-			part_getPartitionRecord(part_raw, &part->record[i]);
+			if(part_getPartitionRecord(dev, part_raw, &part->record[i]) != 0)
+				return 0;	//Invalid record encountered, so the table is probably invalid.
 		}
 		return 4;
 	}
