@@ -12,13 +12,17 @@
 
 #include <errno.h>
 #include <stdio.h>
+#ifdef _IOP
 #include <sysclib.h>
+#else
+#include <string.h>
+#endif
 #include <hdd-ioctl.h>
 
 #include "pfs-opt.h"
 #include "libpfs.h"
 
-int pfsBlockSize = 1;// block size(in sectors(512) )
+u32 pfsBlockSize = 1;// block size(in sectors(512) )
 u32 pfsMetaSize = 1024; // size of each metadata structure
 
 int pfsCheckZoneSize(u32 zone_size)

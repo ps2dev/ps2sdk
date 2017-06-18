@@ -17,7 +17,7 @@
 #include "libpfs.h"
 
 extern u32 pfsMetaSize;
-extern int pfsBlockSize;
+extern u32 pfsBlockSize;
 
 u32 pfsBitsPerBitmapChunk = 8192; // number of bitmap bits in each bitmap data chunk (1024 bytes)
 
@@ -91,7 +91,7 @@ int pfsBitmapAllocateAdditionalZones(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi,
 	pfsBitmapSetupInfo(pfsMount, &info, bi->subpart, bi->number+bi->count);
 
 	// Make sure we're not trying to allocate more than is possible
-	if (65535-bi->count < count)
+	if ((u32)65535-bi->count < count)
 		count=65535-bi->count;
 
 	// Loop over each bitmap chunk (each is 1024 bytes in size) until either we have allocated
@@ -346,7 +346,7 @@ void pfsBitmapShow(pfs_mount_t *pfsMount)
 
 			PFS_PRINTF(PFS_DRV_NAME": Zone show: pn %ld, bn %ld, bitcnt %ld\n", pn, info.chunk, bitcnt);
 
-			for(i=0; (i < (1<<pfsBlockSize)) && ((i * 512) < (bitcnt / 8)); i++)
+			for(i=0; (i < (u32)(1<<pfsBlockSize)) && ((i * 512) < (bitcnt / 8)); i++)
 				pfsPrintBitmap(clink->u.bitmap+128*i);
 
 			pfsCacheFree(clink);

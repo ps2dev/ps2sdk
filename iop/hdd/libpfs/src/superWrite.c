@@ -12,13 +12,17 @@
 
 #include <errno.h>
 #include <stdio.h>
+#ifdef _IOP
 #include <sysclib.h>
+#else
+#include <string.h>
+#endif
 #include <hdd-ioctl.h>
 
 #include "pfs-opt.h"
 #include "libpfs.h"
 
-extern int pfsBlockSize;
+extern u32 pfsBlockSize;
 extern u32 pfsMetaSize;
 
 // Formats a partition (main or sub) by filling with fragment pattern and setting the bitmap accordingly
@@ -26,6 +30,7 @@ int pfsFormatSub(pfs_block_device_t *blockDev, int fd, u32 sub, u32 reserved, u3
 {
 	pfs_cache_t *cache;
 	int i;
+	unsigned int j;
 	u32 sector, count, size, *b;
 	int result = 0;
 
@@ -44,11 +49,11 @@ int pfsFormatSub(pfs_block_device_t *blockDev, int fd, u32 sub, u32 reserved, u3
 
 		// set as allocated the sectors up to reserved, for the first part of the bitmap
 		// this will mark the area the bitmaps themselves occupy as used
-		for (i=0, b=cache->u.bitmap; i<reserved; i++)
+		for (j=0, b=cache->u.bitmap; j<reserved; j++)
 		{
-			if (i && ((i & 0x1F)==0))
+			if (j && ((j & 0x1F)==0))
 				b++;
-			*b |= 1 << (i & 0x1F);
+			*b |= 1 << (j & 0x1F);
 		}
 
 		PFS_PRINTF(PFS_DRV_NAME": Format sub: sub = %ld, sector start = %ld, ", sub, sector);

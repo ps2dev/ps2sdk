@@ -320,7 +320,7 @@ int pfsGetTime(pfs_datetime_t *tm);
 void pfsPrintBitmap(const u32 *bitmap);
 
 pfs_block_device_t *pfsGetBlockDeviceTable(const char *name);
-int pfsGetScale(int num, int size);
+u32 pfsGetScale(u32 num, u32 size);
 u32 pfsFixIndex(u32 index);
 
 #endif /* _LIBPFS_H */

@@ -11,7 +11,11 @@
 */
 
 #include <stdio.h>
+#ifdef _IOP
 #include <sysclib.h>
+#else
+#include <string.h>
+#endif
 #include <errno.h>
 #include <iomanX.h>
 #include <thsemap.h>
@@ -180,7 +184,7 @@ static int ioctl2Attr(pfs_cache_t *clink, int cmd, void *arg, void *outbuf, u32 
 
 void pfsFioDevctlCloseAll(void)
 {
-	u32 i;
+	s32 i;
 
 	for(i=0;i < pfsConfig.maxOpen;i++)
 	{

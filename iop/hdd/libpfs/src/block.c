@@ -12,7 +12,11 @@
 
 #include <errno.h>
 #include <stdio.h>
+#ifdef _IOP
 #include <sysclib.h>
+#else
+#include <string.h>
+#endif
 
 #include "pfs-opt.h"
 #include "libpfs.h"

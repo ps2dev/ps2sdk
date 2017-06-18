@@ -11,7 +11,11 @@
 */
 
 #include <stdio.h>
+#ifdef _IOP
 #include <sysclib.h>
+#else
+#include <string.h>
+#endif
 #include <errno.h>
 #include <iomanX.h>
 #include <thsemap.h>
@@ -101,10 +105,10 @@ pfs_mount_t *pfsFioGetMountedUnit(int unit)
 
 static int mountDevice(pfs_block_device_t *blockDev, int fd, int unit, int flag)
 {
-	u32 i;
+	s32 i;
 	int rv;
 
-	if((u32)unit >= pfsConfig.maxMount)
+	if(unit >= pfsConfig.maxMount)
 		return -EMFILE;
 
 	if(pfsMountBuf[unit].flags & PFS_MOUNT_BUSY)
@@ -302,7 +306,8 @@ label:
 static int fileTransferRemainder(pfs_file_slot_t *fileSlot, void *buf, int size, int operation)
 {
 	u32 sector, pos;
-	int result, i;
+	s32 i;
+	int result;
 	pfs_blockpos_t *blockpos = &fileSlot->block_pos;
 	pfs_mount_t *pfsMount = fileSlot->clink->pfsMount;
 	pfs_unaligned_io_t *unaligned = &fileSlot->unaligned;
@@ -358,9 +363,9 @@ static int fileTransferRemainder(pfs_file_slot_t *fileSlot, void *buf, int size,
 	}
 
 	if (operation==0)
-		memcpy(buf, &unaligned->buffer[pos], size=min(size, sizeof(unaligned->buffer)-(int)pos));
+		memcpy(buf, &unaligned->buffer[pos], size=min(size, (int)sizeof(unaligned->buffer)-(int)pos));
 	else
-		memcpy(&unaligned->buffer[pos], buf, size=min(size, sizeof(unaligned->buffer)-(int)pos));
+		memcpy(&unaligned->buffer[pos], buf, size=min(size, (int)sizeof(unaligned->buffer)-(int)pos));
 
 	if (operation == 1)
 	{
@@ -479,8 +484,8 @@ static int fileTransfer(pfs_file_slot_t *fileSlot, u8 *buf, int size, int operat
 		}
 		else
 		{
-			sectors = bytes_remain / 512;
-			if ((size / 512) < sectors)	sectors = size / 512; //sectors=min(size/512, sectors)
+			sectors = (u32)(bytes_remain / 512);
+			if ((u32)(size / 512) < sectors)	sectors = size / 512; //sectors=min(size/512, sectors)
 
 			// Do the ATA sector transfer
 			result=pfsMount->blockDev->transfer(pfsMount->fd, buf, bi->subpart,
@@ -567,7 +572,7 @@ int	pfsFioFormat(iop_file_t *t, const char *dev, const char *blockdev, void *arg
 int	pfsFioOpen(iop_file_t *f, const char *name, int flags, int mode)
 {
 	int rv = 0;
-	u32 i;
+	s32 i;
 	pfs_file_slot_t *freeSlot;
 	pfs_mount_t *pfsMount;
 
@@ -640,7 +645,7 @@ int pfsFioRead(iop_file_t *f, void *buf, int size)
 
 	// Check bounds, adjust size if necessary
 	if(fileSlot->clink->u.inode->size <  (fileSlot->position + size))
-		size = fileSlot->clink->u.inode->size - fileSlot->position;
+		size = (int)(fileSlot->clink->u.inode->size - fileSlot->position);
 
 	result = size ? fileTransfer(fileSlot, buf, size, 0) : 0;
 	result = pfsFioCheckForLastError(fileSlot->clink->pfsMount, result);
@@ -701,7 +706,7 @@ static s64 _seek(pfs_file_slot_t *fileSlot, s64 offset, int whence, int mode)
 
 	if (((offset < 0) && (startPos < newPos)) ||
 		((offset > 0) && (startPos > newPos)) ||
-		(fileSlot->clink->u.inode->size < newPos))
+		(fileSlot->clink->u.inode->size < (u64)newPos))
 	{
 		return -EINVAL;
 	}
@@ -1161,7 +1166,7 @@ int pfsFioChdir(iop_file_t *f, const char *name)
 
 static void _sync(void)
 {
-	u32 i, j;
+	s32 i, j;
 
 	for(i=0;i<pfsConfig.maxOpen;i++)
 	{
@@ -1227,7 +1232,7 @@ int pfsFioMount(iop_file_t *f, const char *fsname, const char *devname, int flag
 
 int pfsFioUmount(iop_file_t *f, const char *fsname)
 {
-	u32 i;
+	s32 i;
 	int rv=0;
 	int	busy_flag=0;
 	pfs_mount_t *pfsMount;

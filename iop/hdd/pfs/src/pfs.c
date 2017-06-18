@@ -11,13 +11,17 @@
 */
 
 #include <stdio.h>
+#ifdef _IOP
 #include <sysclib.h>
-#include <errno.h>
-#include <iomanX.h>
-#include <thsemap.h>
-#include <poweroff.h>
 #include <irx.h>
 #include <loadcore.h>
+#else
+#include <string.h>
+#include <stdlib.h>
+#endif
+#include <iomanX.h>
+#include <errno.h>
+#include <thsemap.h>
 
 #include "pfs-opt.h"
 #include "libpfs.h"
@@ -25,7 +29,9 @@
 #include "pfs_fio.h"
 #include "pfs_fioctl.h"
 
+#ifdef _IOP
 IRX_ID("pfs_driver", PFS_MAJOR, PFS_MINOR);
+#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 //	Globals

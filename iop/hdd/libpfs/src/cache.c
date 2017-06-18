@@ -12,13 +12,17 @@
 
 #include <errno.h>
 #include <stdio.h>
+#ifdef _IOP
 #include <sysclib.h>
+#else
+#include <string.h>
+#endif
 #include <hdd-ioctl.h>
 
 #include "pfs-opt.h"
 #include "libpfs.h"
 
-extern int pfsBlockSize;
+extern u32 pfsBlockSize;
 
 pfs_cache_t *pfsCacheBuf;
 u32 pfsCacheNumBuffers;

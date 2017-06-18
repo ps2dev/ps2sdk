@@ -13,12 +13,18 @@
 #include <errno.h>
 #include <stdio.h>
 #include <iomanX.h>
+#ifdef _IOP
 #include <intrman.h>
 #include <sysmem.h>
 #include <sysclib.h>
 #include <thbase.h>
-#include <ctype.h>
 #include <cdvdman.h>
+#else
+#include <string.h>
+#include <malloc.h>
+#include <time.h>
+#endif
+#include <ctype.h>
 #include <hdd-ioctl.h>
 
 #include "pfs-opt.h"
@@ -29,6 +35,7 @@
 
 void *pfsAllocMem(int size)
 {
+#ifdef _IOP
 	int intrStat;
 	void *mem;
 
@@ -37,19 +44,27 @@ void *pfsAllocMem(int size)
 	CpuResumeIntr(intrStat);
 
 	return mem;
+#else
+	return malloc(size);
+#endif
 }
 
 void pfsFreeMem(void *buffer)
 {
+#ifdef _IOP
 	int OldState;
 
 	CpuSuspendIntr(&OldState);
 	FreeSysMemory(buffer);
 	CpuResumeIntr(OldState);
+#else
+	free(buffer);
+#endif
 }
 
 int pfsGetTime(pfs_datetime_t *tm)
 {
+#ifdef _IOP
 	int ret, i;
 	sceCdCLOCK	cdtime;
 	static pfs_datetime_t timeBuf={
@@ -77,6 +92,20 @@ int pfsGetTime(pfs_datetime_t *tm)
 		DelayThread(100000);
 	}
 	memcpy(tm, &timeBuf, sizeof(pfs_datetime_t));
+#else
+	time_t rawtime;
+	struct tm * timeinfo;
+	time (&rawtime);
+	timeinfo=localtime (&rawtime);
+
+	tm->sec=timeinfo->tm_sec;
+	tm->min=timeinfo->tm_min;
+	tm->hour=timeinfo->tm_hour;
+	tm->day=timeinfo->tm_mday;
+	tm->month=timeinfo->tm_mon;
+	tm->year=timeinfo->tm_year+1900;
+#endif
+
 	return 0;
 }
 
@@ -123,9 +152,9 @@ void pfsPrintBitmap(const u32 *bitmap) {
 	}
 }
 
-int pfsGetScale(int num, int size)
+u32 pfsGetScale(u32 num, u32 size)
 {
-	int scale = 0;
+	u32 scale = 0;
 
 	while((size << scale) != num)
 		scale++;
