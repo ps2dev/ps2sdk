@@ -584,6 +584,7 @@ static int dev9_init(int sema_attr)
 	return 0;
 }
 
+#ifndef SKIP_SMAP_INIT
 static int dev9_smap_read_phy(volatile u8 *emac3_regbase, unsigned int address, unsigned int *data){
 	unsigned int i, PHYRegisterValue;
 	int result;
@@ -734,17 +735,23 @@ static int dev9_smap_init(void)
 
 	return 0;
 }
+#endif
 
 static int speed_device_init(void)
 {
 	USE_SPD_REGS;
 	const char *spdnames[] = { "(unknown)", "TS", "ES1", "ES2" };
-	int idx, res, InitCount;
+	int idx, res;
 	u16 spdrev;
+#ifndef SKIP_SMAP_INIT
+	int i;
+#endif
 
 	eeprom_data[0] = 0;
 
-	for(InitCount=0; InitCount<8; InitCount++){
+#ifndef SKIP_SMAP_INIT
+	for(i = 0; i < 8; i++) {
+#endif
 		if (dev9_device_probe() < 0) {
 			M_PRINTF("PC card or expansion device isn't connected.\n");
 			return -1;
@@ -765,6 +772,7 @@ static int speed_device_init(void)
 			return -1;
 		}
 
+#ifndef SKIP_SMAP_INIT
 		if((res = dev9_smap_init()) == 0){
 			break;
 		}
@@ -777,6 +785,7 @@ static int speed_device_init(void)
 		M_PRINTF("SMAP initialization failed: %d\n", res);
 		eeprom_data[0] = -1;
 	}
+#endif
 
 	/* Print out the SPEED chip revision.  */
 	spdrev = SPD_REG16(SPD_R_REV_1);
