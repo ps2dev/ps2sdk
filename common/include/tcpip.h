@@ -42,7 +42,9 @@
 
 /*** Taken from src/include/lwip/opt.h. If changes were made to lwipopts.h, please update this section.
 	Some settings affect the fields present in structures like struct netif! ****/
-#define MEMP_NUM_NETCONN		4
+#define MEMP_NUM_UDP_PCB		4
+#define MEMP_NUM_TCP_PCB		5
+#define MEMP_NUM_NETCONN		(MEMP_NUM_TCP_PCB+MEMP_NUM_UDP_PCB)
 #define LWIP_NETIF_STATUS_CALLBACK	0
 #define LWIP_NETIF_LINK_CALLBACK	0
 #define LWIP_AUTOIP			0
