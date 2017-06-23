@@ -365,7 +365,7 @@ int fat_getDirentry(unsigned char fatType, fat_direntry* dir_entry, fat_direntry
 		for (i = 0; i < 10 && cont; i+=2) {
 			character = dir_entry->lfn.name1[i] | (dir_entry->lfn.name1[i+1] << 8);
 
-			if (character == 0 || offset >= FAT_MAX_NAME) {
+			if (character == 0 || offset >= (FAT_MAX_NAME - 1)) {
 				dir->name[offset] = 0; //terminate
 				cont = 0; //stop
 			} else {
@@ -378,7 +378,7 @@ int fat_getDirentry(unsigned char fatType, fat_direntry* dir_entry, fat_direntry
 		for (i = 0; i < 12 && cont; i+=2) {
 			character = dir_entry->lfn.name2[i] | (dir_entry->lfn.name2[i+1] << 8);
 
-			if (character == 0 || offset >= FAT_MAX_NAME) {
+			if (character == 0 || offset >= (FAT_MAX_NAME - 1)) {
 				dir->name[offset] = 0; //terminate
 				cont = 0; //stop
 			} else {
@@ -391,7 +391,7 @@ int fat_getDirentry(unsigned char fatType, fat_direntry* dir_entry, fat_direntry
 		for (i = 0; i < 4 && cont; i+=2) {
 			character = dir_entry->lfn.name3[i] | (dir_entry->lfn.name3[i+1] << 8);
 
-			if (character == 0 || offset >= FAT_MAX_NAME) {
+			if (character == 0 || offset >= (FAT_MAX_NAME - 1)) {
 				dir->name[offset] = 0; //terminate
 				cont = 0; //stop
 			} else {
