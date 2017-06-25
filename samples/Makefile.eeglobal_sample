@@ -36,15 +36,15 @@ EE_CXX_COMPILE = $(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS)
 
 # Extra macro for disabling the automatic inclusion of the built-in CRT object(s)
 ifeq ($(EE_CC_VERSION),3.2.2)
-EE_NO_CRT = -mno-crt0
-endif
-ifeq ($(EE_CC_VERSION),3.2.3)
-EE_NO_CRT = -mno-crt0
-endif
-ifneq ($(EE_CC_VERSION),3.2.2)
-ifneq ($(EE_CC_VERSION),3.2.3)
-EE_NO_CRT = -nostartfiles
-endif
+	EE_NO_CRT = -mno-crt0
+else ifeq ($(EE_CC_VERSION),3.2.3)
+	EE_NO_CRT = -mno-crt0
+else
+	EE_NO_CRT = -nostartfiles
+	CRTBEGIN_OBJ := $(shell $(EE_CC) $(CFLAGS) -print-file-name=crtbegin.o)
+	CRTEND_OBJ := $(shell $(EE_CC) $(CFLAGS) -print-file-name=crtend.o)
+	CRTI_OBJ := $(shell $(EE_CC) $(CFLAGS) -print-file-name=crti.o)
+	CRTN_OBJ := $(shell $(EE_CC) $(CFLAGS) -print-file-name=crtn.o)
 endif
 
 %.o: %.c
@@ -64,7 +64,7 @@ endif
 
 $(EE_BIN): $(EE_OBJS) $(PS2SDK)/ee/startup/crt0.o
 	$(EE_CC) $(EE_NO_CRT) -T$(PS2SDK)/ee/startup/linkfile $(EE_CFLAGS) \
-		-o $(EE_BIN) $(PS2SDK)/ee/startup/crt0.o $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS)
+		-o $(EE_BIN) $(PS2SDK)/ee/startup/crt0.o $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(EE_OBJS) $(CRTEND_OBJ) $(CRTN_OBJ) $(EE_LDFLAGS) $(EE_LIBS)
 
 $(EE_ERL): $(EE_OBJS)
 	$(EE_CC) $(EE_NO_CRT) -o $(EE_ERL) $(EE_OBJS) $(EE_CFLAGS) $(EE_LDFLAGS) -Wl,-r -Wl,-d
