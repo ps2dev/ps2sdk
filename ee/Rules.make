@@ -39,15 +39,15 @@ EE_CXX_COMPILE = $(EE_CXX) $(EE_CXXFLAGS)
 
 # Extra macro for disabling the automatic inclusion of the built-in CRT object(s)
 ifeq ($(EE_CC_VERSION),3.2.2)
-EE_NO_CRT = -mno-crt0
-endif
-ifeq ($(EE_CC_VERSION),3.2.3)
-EE_NO_CRT = -mno-crt0
-endif
-ifneq ($(EE_CC_VERSION),3.2.2)
-ifneq ($(EE_CC_VERSION),3.2.3)
-EE_NO_CRT = -nostartfiles
-endif
+	EE_NO_CRT = -mno-crt0
+else ifeq ($(EE_CC_VERSION),3.2.3)
+	EE_NO_CRT = -mno-crt0
+else
+	EE_NO_CRT = -nostartfiles
+	CRTBEGIN_OBJ := $(shell $(EE_CC) $(CFLAGS) -print-file-name=crtbegin.o)
+	CRTEND_OBJ := $(shell $(EE_CC) $(CFLAGS) -print-file-name=crtend.o)
+	CRTI_OBJ := $(shell $(EE_CC) $(CFLAGS) -print-file-name=crti.o)
+	CRTN_OBJ := $(shell $(EE_CC) $(CFLAGS) -print-file-name=crtn.o)
 endif
 
 $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.c
@@ -75,7 +75,7 @@ $(EE_OBJS): | $(EE_OBJS_DIR)
 
 $(EE_BIN): $(EE_OBJS) $(PS2SDKSRC)/ee/startup/obj/crt0.o | $(EE_BIN_DIR)
 	$(EE_CC) $(EE_NO_CRT) -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_CFLAGS) \
-		-o $(EE_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS)
+		-o $(EE_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(EE_OBJS) $(CRTEND_OBJ) $(CRTN_OBJ) $(EE_LDFLAGS) $(EE_LIBS)
 
 $(EE_LIB): $(EE_OBJS) $(EE_LIB:%.a=%.erl) | $(EE_LIB_DIR)
 	$(EE_AR) cru $(EE_LIB) $(EE_OBJS)
