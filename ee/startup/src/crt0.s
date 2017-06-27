@@ -30,9 +30,7 @@
    .globl   _ps2sdk_libc_deinit_weak
    .type    _ps2sdk_libc_deinit_weak, @function
 
-   .extern InitExecPS2
-   .extern InitTLBFunctions
-   .extern InitThread
+   .extern _InitSys
    .extern InitTLB
 
    .set   noat
@@ -119,15 +117,7 @@ ctors:
    nop
 1:
    # Initialize the kernel (Apply necessary patches).
-   jal InitExecPS2
-   nop
-
-   # Initialize add-on thread functions
-   jal InitThread
-   nop
-
-   # Initialize TLB functions.
-   jal InitTLBFunctions
+   jal _InitSys
    nop
 
    # call main

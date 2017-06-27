@@ -57,6 +57,8 @@ GETKERNEL_OBJS = GetSyscallHandler.o GetSyscall.o GetExceptionHandler.o GetInter
 
 SETUP_OBJS = setup.o setup_syscalls.o
 
+INITSYS_OBJS = initsys.o
+
 ### SYSCALL OBJECTS
 
 KERNEL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
@@ -95,7 +97,7 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
 EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(CONFIG_OBJS) \
 	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(GETKERNEL_OBJS) $(LIBOSD_OBJS)	\
-	$(TLBFUNC_OBJS) $(SETUP_OBJS) erl-support.o
+	$(TLBFUNC_OBJS) $(SETUP_OBJS) $(INITSYS_OBJS) erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make
