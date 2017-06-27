@@ -1,7 +1,10 @@
 /*
- Copyright 2010, jimmikaelkael <jimmikaelkael@wanadoo.fr>
- Licenced under Academic Free License version 3.0
- Review Open-PS2-Loader README & LICENSE files for further details.
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
 */
 
 ENTRY(_start);
@@ -21,6 +24,4 @@ SECTIONS {
 		*(.rodata.*)
 		*(.gnu.linkonce.r*)
 	}
-
 }
-
