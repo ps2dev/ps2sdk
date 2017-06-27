@@ -1,14 +1,11 @@
 /**
  * @file
- * libkrnlupd - Kernel updates library.
+ * libosd - ExecPS2 + OSD configuration function update.
  *
- * Contains updates for the Playstation 2's "Protokernel" EE kernel.
+ * Applicable to only the SCPH-10000 and SCPH-15000. Both contain either boot ROM v1.00 or v1.01.
+ * This is the full libosd update will replace ExecPS2, SetOsdConfigParam, SetOsdConfigParam, SetOsdConfigParam2 and SetOsdConfigParam2, as done by the HDD Browser.
  *
- * The only known consoles to have a "Protokernel" are the SCPH-10000 and SCPH-15000. Both contain either boot ROM v1.00 or v1.01.
- *
- * Note that these kernels are not necessarily buggy, but were based on an older set of specifications.  
- * This file contains patches that will "modernize" these kernels until a hard reset.  
- * The code within this file was based on the code from the HDD Browser, not libosd.  
+ * The code within this file was based on the code from the HDD Browser, not libosd.
  * Originally, this was the version that I linked crt0 to,
  *  but I realized that SONY had a reason for only fully patching the protokernels within the HDD Browser:
  *  Only the HDD browser can change the new language setting, while the protokernel browser is not aware of the new language field.
@@ -20,7 +17,7 @@
 #include <syscallnr.h>
 #include <osd_config.h>
 
-#include "libkrnlupd.h"
+#include "libosd.h"
 
 extern unsigned char osdsrc[];
 extern unsigned int size_osdsrc;
@@ -62,7 +59,7 @@ static struct SyscallData SyscallPatchEntries[]={
 	},
 };
 
-void InitKernelFull(void){
+void InitOsd(void){
 	unsigned int i;
 
 	if(PatchIsNeeded()){

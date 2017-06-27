@@ -434,9 +434,14 @@ void *GetSyscallHandler(int syscall_no);
 void *GetExceptionHandler(int except_no);
 void *GetInterruptHandler(int intr_no);
 
+/* Helper functions for kernel patching */
+int kCopy(void *dest, const void *src, int size);
+int Copy(void *dest, const void *src, int size);
+void setup(int syscall_num, void* handler);	//alias of "SetSyscall"
+void *GetEntryAddress(int syscall);
+
 #ifdef __cplusplus
 }
 #endif
 
 #endif	// _KERNEL_H
-

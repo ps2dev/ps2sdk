@@ -11,14 +11,6 @@ struct SyscallData{
 	void *function;
 };
 
-static void kCopy(void *dest, const void *src, unsigned int length){
-	unsigned int i;
-
-	for(i=0; i<length/4; i++){
-		((unsigned int*)dest)[i]=((unsigned int*)src)[i];
-	}
-}
-
 static const struct SyscallData SysEntry[]={
 	{0x5A, &kCopy},
 	{0x5B, (void*)0x80075000},
@@ -35,7 +27,6 @@ static void *_kExecArg=NULL;
 extern unsigned char tlbsrc[];
 extern unsigned int size_tlbsrc;
 
-void Copy(void *dest, const void *src, unsigned int length);
 void *GetEntryAddress(int syscall);
 void setup(int syscall, void *function);
 

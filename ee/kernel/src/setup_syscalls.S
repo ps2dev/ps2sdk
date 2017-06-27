@@ -1,8 +1,5 @@
 .text
 
-#What did I learn? Never trust GCC... never EVER trust GCC.
-#Never trust it to integrate your inline assembly code properly into the rest of the program on its own!
-
 .globl setup
 .ent setup
 setup:
@@ -29,4 +26,3 @@ GetEntryAddress:
 	jr $ra
 	nop
 .end GetEntryAddress
-

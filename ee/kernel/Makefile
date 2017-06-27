@@ -47,13 +47,15 @@ CONFIG_OBJS = _config_internals.o GetRomName.o IsT10K.o IsEarlyJap.o configGetLa
 	configIsSpdifEnabled.o configSetSpdifEnabled.o configGetTime.o \
 	configIsDaylightSavingEnabled.o configSetDaylightSavingEnabled.o
 
-LIBKRNLUPD_OBJS = libkrnlupd.o libkrnlupd_osd.o libkrnlupd_common.o libkrnlupd_syscalls.o osdsrc_bin.o
+LIBOSD_OBJS = libosd.o libosd_full.o libosd_common.o osdsrc_bin.o
 
 TLBFUNC_OBJS = tlbfunc.o tlbsrc_bin.o
 
 TIMER_OBJS = cpu_ticks.o
 
 GETKERNEL_OBJS = GetSyscallHandler.o GetSyscall.o GetExceptionHandler.o GetInterruptHandler.o
+
+SETUP_OBJS = setup.o setup_syscalls.o
 
 ### SYSCALL OBJECTS
 
@@ -92,8 +94,8 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
 
 EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(CONFIG_OBJS) \
-	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(GETKERNEL_OBJS) $(LIBKRNLUPD_OBJS)	\
-	$(TLBFUNC_OBJS) erl-support.o
+	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(GETKERNEL_OBJS) $(LIBOSD_OBJS)	\
+	$(TLBFUNC_OBJS) $(SETUP_OBJS) erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make
@@ -136,19 +138,19 @@ $(GLUE_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)glue.c
 $(SIO_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)sio.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(EE_OBJS_DIR)libkrnlupd.o: $(EE_SRC_DIR)libkrnlupd.c
+$(EE_OBJS_DIR)libosd.o: $(EE_SRC_DIR)libosd.c
 	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
 
-$(EE_OBJS_DIR)libkrnlupd_osd.o: $(EE_SRC_DIR)libkrnlupd_osd.c
+$(EE_OBJS_DIR)libosd_full.o: $(EE_SRC_DIR)libosd_full.c
 	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
 
-$(EE_OBJS_DIR)libkrnlupd_common.o: $(EE_SRC_DIR)libkrnlupd_common.c
+$(EE_OBJS_DIR)libosd_common.o: $(EE_SRC_DIR)libosd_common.c
 	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
 
 $(EE_OBJS_DIR)osdsrc_bin.o: $(EE_OBJS_DIR)osdsrc_bin.c
 	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
 
-$(EE_OBJS_DIR)libkrnlupd_syscalls.o: $(EE_SRC_DIR)libkrnlupd_syscalls.S
+$(EE_OBJS_DIR)libosd_syscalls.o: $(EE_SRC_DIR)libosd_syscalls.S
 	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
 
 $(EE_OBJS_DIR)tibfunc.o: $(EE_SRC_DIR)tlbfunc.c 

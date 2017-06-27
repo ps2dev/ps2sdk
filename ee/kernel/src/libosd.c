@@ -1,20 +1,17 @@
 /**
  * @file
- * libkrnlupd - Kernel updates library.
+ * libosd - ExecPS2 update.
  *
- * Contains updates for the Playstation 2's "Protokernel" EE kernel.
+ * Applicable to only the SCPH-10000 and SCPH-15000. Both contain either boot ROM v1.00 or v1.01.
+ * This is the "lite" libosd update will replace only ExecPS2, as done by games.
  *
- * The only known consoles to have a "Protokernel" are the SCPH-10000 and SCPH-15000. Both contain either boot ROM v1.00 or v1.01.
- *
- * Note that these kernels are not necessarily buggy, but were based on an older set of specifications. This file contains patches that will "modernize" these kernels until a hard reset.
- * (Code was based on the official Sony "libosd" patch)
  */
 
 #include <kernel.h>
 #include <syscallnr.h>
 #include <osd_config.h>
 
-#include "libkrnlupd.h"
+#include "libosd.h"
 
 extern unsigned char osdsrc[];
 extern unsigned int size_osdsrc;
@@ -40,7 +37,7 @@ static struct SyscallData SyscallPatchEntries[]={
 	},
 };
 
-void InitKernel(void){
+void InitExecPS2(void){
 	unsigned int i;
 
 	if(PatchIsNeeded()){
@@ -56,4 +53,3 @@ void InitKernel(void){
 		}
 	}
 }
-
