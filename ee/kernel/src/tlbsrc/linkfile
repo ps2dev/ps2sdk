@@ -12,6 +12,7 @@ ENTRY(_start);
 SECTIONS {
 	.text 0x80075000: {
 		_ftext = . ;
+		*(.start)
 		*(.text)
 		*(.text.*)
 		*(.gnu.linkonce.t*)

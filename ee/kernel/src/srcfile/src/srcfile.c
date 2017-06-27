@@ -25,6 +25,8 @@ static struct SyscallData entries[NUM_ENTRIES] = {
 	{0x08, &ResumeIntrDispatch}
 };
 
+void *_start(int syscall) __attribute__((section(".start")));
+
 void *_start(int syscall)
 {
 	int i;

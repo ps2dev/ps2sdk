@@ -28,6 +28,8 @@ static const struct SyscallPatchData SyscallPatchData[]={
 
 SystemConfiguration_t SystemConfiguration = { .EEGS=0x40};
 
+int _start(int syscall) __attribute__((section(".start")));
+
 int _start(int syscall){
 	unsigned int i;
 	int result;
