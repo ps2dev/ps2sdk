@@ -235,6 +235,10 @@ typedef struct t_ee_thread_status
     u32 wakeupCount; // 0x2C
 } ee_thread_status_t;
 
+/* Initialization/deinitialization routines.  */
+void _InitSys(void);
+void TerminateLibrary(void);
+
 /* Glue routines.  */
 int DIntr(void);
 int EIntr(void);
@@ -436,6 +440,7 @@ void *GetInterruptHandler(int intr_no);
 
 /* Helper functions for kernel patching */
 int kCopy(void *dest, const void *src, int size);
+int kCopyBytes(void *dest, const void *src, int size);
 int Copy(void *dest, const void *src, int size);
 void setup(int syscall_num, void* handler);	//alias of "SetSyscall"
 void *GetEntryAddress(int syscall);

@@ -25,4 +25,6 @@ SECTIONS {
 		*(.rodata.*)
 		*(.gnu.linkonce.r*)
 	}
+
+	.kExecArg ALIGN(16): { *(.kExecArg) }
 }

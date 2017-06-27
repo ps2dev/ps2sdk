@@ -57,9 +57,9 @@ TIMER_OBJS = cpu_ticks.o
 
 GETKERNEL_OBJS = GetSyscallHandler.o GetSyscall.o GetExceptionHandler.o GetInterruptHandler.o
 
-SETUP_OBJS = setup.o setup_syscalls.o
+SETUP_OBJS = kCopy.o kCopyBytes.o
 
-INITSYS_OBJS = initsys.o
+INITSYS_OBJS = _InitSys.o TerminateLibrary.o _initsys_internals.o
 
 ### SYSCALL OBJECTS
 
@@ -99,7 +99,7 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
 EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(CONFIG_OBJS) \
 	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(GETKERNEL_OBJS) $(LIBOSD_OBJS)	\
-	$(TLBFUNC_OBJS) $(ALARM_OBJS) $(SETUP_OBJS) $(INITSYS_OBJS) erl-support.o
+	$(TLBFUNC_OBJS) $(ALARM_OBJS) $(SETUP_OBJS) setup_syscalls.o $(INITSYS_OBJS) erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make
@@ -130,6 +130,9 @@ $(TIMER_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)timer.c
 $(GETKERNEL_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)getkernel.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
+$(SETUP_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)setup.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
 $(IOPHEAP_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)iopheap.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
@@ -140,6 +143,9 @@ $(GLUE_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)glue.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(SIO_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)sio.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(INITSYS_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)initsys.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(EE_OBJS_DIR)libosd.o: $(EE_SRC_DIR)libosd.c

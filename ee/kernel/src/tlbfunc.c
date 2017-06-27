@@ -31,7 +31,7 @@ static const struct SyscallData SysEntry[]={
 	{0x59, NULL},	//ExpandScratchPad
 };
 
-static void *_kExecArg=NULL;
+extern char **_kExecArg;
 
 extern unsigned char tlbsrc[];
 extern unsigned int size_tlbsrc;
@@ -52,7 +52,7 @@ void InitTLBFunctions(void){
 		setup(SysEntry[i].syscall, GetEntryAddress(SysEntry[i].syscall));
 	}
 
-	_kExecArg=GetEntryAddress(3);
+	_kExecArg = GetEntryAddress(3);
 }
 
 void InitTLB(void){

@@ -9,6 +9,7 @@
 
 #include <kernel.h>
 
+#ifdef F_kCopy
 int kCopy(void *dest, const void *src, int size)
 {
 	const u32 *pSrc;
@@ -25,3 +26,23 @@ int kCopy(void *dest, const void *src, int size)
 
 	return 0;
 }
+#endif
+
+#ifdef F_kCopyBytes
+int kCopyBytes(void *dest, const void *src, int size)
+{
+	const u8 *pSrc;
+	u8 *pDest;
+	int i;
+
+	if(size != 0)
+	{
+		pDest = (u8*)dest;
+		pSrc = (const u8*)src;
+		for(i=0; i<size; i++,pDest++,pSrc++)
+			*pDest = *pSrc;
+	}
+
+	return 0;
+}
+#endif

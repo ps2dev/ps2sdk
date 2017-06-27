@@ -31,7 +31,7 @@
    .type    _ps2sdk_libc_deinit_weak, @function
 
    .extern _InitSys
-   .extern InitTLB
+   .extern TerminateLibrary
 
    .set   noat
    .set   noreorder
@@ -160,8 +160,8 @@ libc_uninit:
    nop
 1:
 
-   #Re-initialize the TLB
-   jal InitTLB
+   #Deinitialize kernel libraries
+   jal TerminateLibrary
    nop
 
    move    $4, $16

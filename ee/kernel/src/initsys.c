@@ -8,10 +8,14 @@
 */
 
 #include "kernel.h"
+#include "string.h"
 #include "alarm.h"
 #include "libosd.h"
 #include "tlbfunc.h"
 
+extern char **_kExecArg;
+
+#ifdef F__InitSys
 void _InitSys(void)
 {
 	InitAlarm();
@@ -19,3 +23,15 @@ void _InitSys(void)
 	InitExecPS2();
 	InitTLBFunctions();
 }
+#endif
+
+#ifdef F_TerminateLibrary
+void TerminateLibrary(void)
+{
+	InitTLB();
+}
+#endif
+
+#ifdef F__initsys_internals
+char **_kExecArg;
+#endif
