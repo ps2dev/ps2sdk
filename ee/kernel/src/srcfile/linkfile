@@ -7,15 +7,21 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
-#include "kernel.h"
-#include "alarm.h"
-#include "libosd.h"
-#include "tlbfunc.h"
+ENTRY(_start);
 
-void _InitSys(void)
-{
-	InitAlarm();
-	InitThread();
-	InitExecPS2();
-	InitTLBFunctions();
+SECTIONS {
+	.text 0x80076000: {
+		_ftext = . ;
+		*(.text)
+		*(.text.*)
+		*(.gnu.linkonce.t*)
+		QUAD(0)
+	}
+
+	/* Static data.  */
+	.rodata ALIGN(128): {
+		*(.rodata)
+		*(.rodata.*)
+		*(.gnu.linkonce.r*)
+	}
 }

@@ -7,15 +7,6 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
-#include "kernel.h"
-#include "alarm.h"
-#include "libosd.h"
-#include "tlbfunc.h"
-
-void _InitSys(void)
-{
-	InitAlarm();
-	InitThread();
-	InitExecPS2();
-	InitTLBFunctions();
-}
+void Intc12Handler(void);
+void InvokeUserModeCallback(void *dispatcher, void *callback, int id, u32 target, void *common);
+void ResumeIntrDispatch(void);

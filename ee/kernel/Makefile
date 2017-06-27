@@ -51,6 +51,8 @@ LIBOSD_OBJS = libosd.o libosd_full.o libosd_common.o osdsrc_bin.o
 
 TLBFUNC_OBJS = tlbfunc.o tlbsrc_bin.o
 
+ALARM_OBJS = alarm.o srcfile_bin.o eenull_bin.o
+
 TIMER_OBJS = cpu_ticks.o
 
 GETKERNEL_OBJS = GetSyscallHandler.o GetSyscall.o GetExceptionHandler.o GetInterruptHandler.o
@@ -66,8 +68,8 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
 	SetVTLBRefillHandler.o SetVCommonHandler.o SetVInterruptHandler.o \
 	AddIntcHandler.o AddIntcHandler2.o RemoveIntcHandler.o AddDmacHandler.o AddDmacHandler2.o \
 	RemoveDmacHandler.o _EnableIntc.o _DisableIntc.o _EnableDmac.o _DisableDmac.o \
-	SetAlarm.o ReleaseAlarm.o _iEnableIntc.o _iDisableIntc.o _iEnableDmac.o \
-	_iDisableDmac.o iSetAlarm.o iReleaseAlarm.o CreateThread.o DeleteThread.o \
+	_SetAlarm.o SetAlarm.o _ReleaseAlarm.o ReleaseAlarm.o _iEnableIntc.o _iDisableIntc.o _iEnableDmac.o \
+	_iDisableDmac.o _iSetAlarm.o iSetAlarm.o _iReleaseAlarm.o iReleaseAlarm.o CreateThread.o DeleteThread.o \
 	StartThread.o ExitThread.o ExitDeleteThread.o TerminateThread.o \
 	iTerminateThread.o DisableDispatchThread.o EnableDispatchThread.o \
 	ChangeThreadPriority.o iChangeThreadPriority.o RotateThreadReadyQueue.o \
@@ -97,7 +99,7 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
 EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(CONFIG_OBJS) \
 	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(GETKERNEL_OBJS) $(LIBOSD_OBJS)	\
-	$(TLBFUNC_OBJS) $(SETUP_OBJS) $(INITSYS_OBJS) erl-support.o
+	$(TLBFUNC_OBJS) $(ALARM_OBJS) $(SETUP_OBJS) $(INITSYS_OBJS) erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make
@@ -161,6 +163,12 @@ $(EE_OBJS_DIR)tibfunc.o: $(EE_SRC_DIR)tlbfunc.c
 $(EE_OBJS_DIR)tlbsrc_bin.o: $(EE_OBJS_DIR)tlbsrc_bin.c
 	$(EE_C_COMPILE) $< -c -o $@
 
+$(EE_OBJS_DIR)srcfile_bin.o: $(EE_OBJS_DIR)srcfile_bin.c
+	$(EE_C_COMPILE) $< -c -o $@
+
+$(EE_OBJS_DIR)eenull_bin.o: $(EE_OBJS_DIR)eenull_bin.c
+	$(EE_C_COMPILE) $< -c -o $@
+
 $(PS2SDKSRC)/tools/bin2c/bin/bin2c: $(PS2SDKSRC)/tools/bin2c
 	make -C $<
 
@@ -176,6 +184,20 @@ $(EE_SRC_DIR)tlbsrc/bin/tlbsrc.bin: $(EE_SRC_DIR)tlbsrc
 $(EE_OBJS_DIR)tlbsrc_bin.c: $(EE_SRC_DIR)tlbsrc/bin/tlbsrc.bin $(PS2SDKSRC)/tools/bin2c/bin/bin2c
 	$(PS2SDKSRC)/tools/bin2c/bin/bin2c $< $@ tlbsrc
 
+$(EE_SRC_DIR)srcfile/bin/srcfile.bin: $(EE_SRC_DIR)srcfile
+	make -C $<
+
+$(EE_OBJS_DIR)srcfile_bin.c: $(EE_SRC_DIR)srcfile/bin/srcfile.bin $(PS2SDKSRC)/tools/bin2c/bin/bin2c
+	$(PS2SDKSRC)/tools/bin2c/bin/bin2c $< $@ srcfile
+
+$(EE_SRC_DIR)eenull/bin/eenull.bin: $(EE_SRC_DIR)eenull
+	make -C $<
+
+$(EE_OBJS_DIR)eenull_bin.c: $(EE_SRC_DIR)eenull/bin/eenull.bin $(PS2SDKSRC)/tools/bin2c/bin/bin2c
+	$(PS2SDKSRC)/tools/bin2c/bin/bin2c $< $@ eenull
+
 clean::
 	make -C $(EE_SRC_DIR)osdsrc clean
 	make -C $(EE_SRC_DIR)tlbsrc clean
+	make -C $(EE_SRC_DIR)srcfile clean
+	make -C $(EE_SRC_DIR)eenull clean

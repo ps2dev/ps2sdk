@@ -174,8 +174,16 @@ SYSCALL(_EnableDmac)
 SYSCALL(_DisableDmac)
 #endif
 
+#ifdef F__SetAlarm
+SYSCALL(_SetAlarm)
+#endif
+
 #ifdef F_SetAlarm
 SYSCALL(SetAlarm)
+#endif
+
+#ifdef F__ReleaseAlarm
+SYSCALL(_ReleaseAlarm)
 #endif
 
 #ifdef F_ReleaseAlarm
@@ -198,8 +206,16 @@ SYSCALL(_iEnableDmac)
 SYSCALL(_iDisableDmac)
 #endif
 
+#ifdef F__iSetAlarm
+SYSCALL(_iSetAlarm)
+#endif
+
 #ifdef F_iSetAlarm
 SYSCALL(iSetAlarm)
+#endif
+
+#ifdef F__iReleaseAlarm
+SYSCALL(_iReleaseAlarm)
 #endif
 
 #ifdef F_iReleaseAlarm

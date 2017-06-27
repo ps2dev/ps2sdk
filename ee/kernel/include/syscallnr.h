@@ -7,8 +7,10 @@
 #define __NR_ResetEE			1
 #define __NR_SetGsCrt			2
 #define __NR_Exit			4
+#define __NR_ResumeIntrDispatch		5	//Arbitrarily named
 #define __NR_LoadExecPS2		6
 #define __NR_ExecPS2			7
+#define __NR_ResumeT3IntrDispatch	8	//Arbitrarily named (used by alarm update)
 #define __NR_RFU009			9
 #define __NR_AddSbusIntcHandler		0xa
 #define __NR_RemoveSbusIntcHandler	0xb
@@ -26,14 +28,18 @@
 #define __NR__DisableIntc		0x15
 #define __NR__EnableDmac		0x16
 #define __NR__DisableDmac		0x17
-#define __NR_SetAlarm			0x18
-#define __NR_ReleaseAlarm		0x19
+#define __NR__SetAlarm			0x18
+#define __NR__ReleaseAlarm		0x19
+#define __NR_SetAlarm			0xfc
+#define __NR_ReleaseAlarm		0xfe
 #define __NR__iEnableIntc		(-0x1a)
 #define __NR__iDisableIntc		(-0x1b)
 #define __NR__iEnableDmac		(-0x1c)
 #define __NR__iDisableDmac		(-0x1d)
-#define __NR_iSetAlarm			(-0x1e)
-#define __NR_iReleaseAlarm		(-0x1f)
+#define __NR__iSetAlarm			(-0x1e)
+#define __NR__iReleaseAlarm		(-0x1f)
+#define __NR_iSetAlarm			(-0xfd)
+#define __NR_iReleaseAlarm		(-0xff)
 #define __NR_CreateThread		0x20
 #define __NR_DeleteThread		0x21
 #define __NR_StartThread		0x22
