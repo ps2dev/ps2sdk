@@ -77,6 +77,8 @@ static void _sleep_waker(s32 alarm_id, u16 time, void *arg2)
         iSignalSema(sd->s);
     else
         iSetAlarm(HSYNC_COUNT, _sleep_waker, arg2);
+
+    ExitHandler();
 }
 
 unsigned int sleep(unsigned int seconds)

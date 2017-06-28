@@ -95,6 +95,7 @@ static void free_msg(arch_message *msg)
 
 static void TimeoutHandler(s32 alarm_id, u16 time, void *pvArg){
 	iReleaseWaitThread((int)pvArg);
+	ExitHandler();
 }
 
 static inline u32_t ComputeTimeDiff(u32 start, u32 end)
