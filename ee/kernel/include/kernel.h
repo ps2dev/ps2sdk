@@ -50,13 +50,20 @@ extern "C" {
 
 #define ALIGNED(x) __attribute__((aligned((x))))
 
+/** Limits */
+#define MAX_THREADS	256	//A few will be used for the kernel patches.
+#define MAX_SEMAPHORES	256	//A few will be used for the kernel patches.
+#define MAX_PRIORITY	128
+#define MAX_HANDLERS	128
+#define MAX_ALARMS	64
+
 /** Modes for FlushCache */
 #define WRITEBACK_DCACHE	0
 #define INVALIDATE_DCACHE	1
 #define INVALIDATE_ICACHE	2
 #define INVALIDATE_CACHE	(INVALIDATE_DCACHE|INVALIDATE_ICACHE)
 
-/** EE Interrupt Controller (INTC) interrupt numebrs */
+/** EE Interrupt Controller (INTC) interrupt numbers */
 enum
 {
 	INTC_GS,
@@ -70,6 +77,10 @@ enum
 	INTC_IPU,
 	INTC_TIM0,
 	INTC_TIM1,
+	INTC_TIM2,
+//	INTC_TIM3,		//Reserved by the EE kernel for alarms (do not use)
+	INTC_SFIFO = 13,	//Error encountered during SFIFO transfer
+	INTC_VU0WD		//VU0 WatchDog; ForceBreak is sent to VU0 if left in RUN state for extended periods of time.
 };
 
 //For backward-compatibility

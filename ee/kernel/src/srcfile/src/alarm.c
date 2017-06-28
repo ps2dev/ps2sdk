@@ -14,10 +14,9 @@
 
 #include "internal.h"
 
-#define MAX_ALARMS	64
-#define INTC_TIM3	12
 #define USER_MODE_DISPATCHER	0x00082000
 
+#define INTC_TIM3 12
 #define T3_COUNT_W ((vu32*)0xB0001800)
 #define T3_MODE_W ((vu32*)0xB0001810)
 #define T3_COMP_W ((vu32*)0xB0001820)
@@ -124,7 +123,7 @@ s32 ReleaseAlarm(s32 id)
 		{
 			if(alarms[i].target == *T3_COMP_W)
 			{
-				if(*R_EE_I_STAT & 0x1000)	//Cannot release alarm that has already triggered.
+				if(*R_EE_I_STAT & (1 << INTC_TIM3))	//Cannot release alarm that has already triggered.
 					return -1;
 			}
 
@@ -146,7 +145,7 @@ s32 ReleaseAlarm(s32 id)
 		}
 	}
 
-	asm volatile("sync\n");
+	EE_SYNC();
 	return result;
 }
 
@@ -155,7 +154,7 @@ s32 SetAlarm(u16 time, void (*callback)(s32 dispatch_id, u16 time, void *common)
 	s32 result;
 
 	result = _SetAlarm(time, callback, common);
-	asm volatile("sync\n");
+	EE_SYNC();
 
 	return result;
 }
@@ -163,7 +162,7 @@ s32 SetAlarm(u16 time, void (*callback)(s32 dispatch_id, u16 time, void *common)
 static void SetupTIM3(u16 ticks)
 {
 	*T3_COMP_W = ticks;
-	asm volatile("sync\n");
+	EE_SYNC();
 	*T3_MODE_W = Tn_MODE(3,0,0,0,0,1,1,0,1,0);
 }
 
