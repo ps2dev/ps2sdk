@@ -9,9 +9,6 @@
 
 #include "kernel.h"
 #include "string.h"
-#include "alarm.h"
-#include "libosd.h"
-#include "tlbfunc.h"
 
 extern char **_kExecArg;
 

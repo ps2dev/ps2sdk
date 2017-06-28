@@ -7,6 +7,11 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
+/**
+ * @file
+ * EE kernel update setup functions
+ */
+
 #include <kernel.h>
 
 #ifdef F_kCopy

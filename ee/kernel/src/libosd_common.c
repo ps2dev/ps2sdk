@@ -17,8 +17,6 @@
 #include <syscallnr.h>
 #include <osd_config.h>
 
-#include "libosd.h"
-
 int PatchIsNeeded(void){
 	ConfigParam original_config, config;
 

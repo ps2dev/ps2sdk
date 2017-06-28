@@ -7,6 +7,14 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
+/**
+ * @file
+ * EE kernel update for alarm functions
+ * ReleaseAlarm is unable to correctly release alarm in all CEX/DEX EE kernels.
+ * This also includes code for dealing with the restriction on the COP0 EIE bit
+ * becoming set to 0 when an interrupt occurs before interrupts can be disabled.
+ */
+
 #include <kernel.h>
 #include <stdio.h>
 

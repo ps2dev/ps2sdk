@@ -247,17 +247,34 @@ typedef struct t_ee_thread_status
 } ee_thread_status_t;
 
 /* Initialization/deinitialization routines.  */
-void _InitSys(void);
-void TerminateLibrary(void);
+void _InitSys(void);		//Run by crt0
+
+void TerminateLibrary(void);	//Run by crt0
+
+/* Thread update functions */
+int InitThread(void);		//Run by _InitSys
+
+s32 iWakeupThread(s32 thread_id);
+s32 iRotateThreadReadyQueue(s32 priority);
+s32 iSuspendThread(s32 thread_id);
+
+/* TLB update functions */
+void InitTLBFunctions(void);	//Run by _InitSys
+
+void InitTLB(void);
+
+/* Alarm update functions */
+void InitAlarm(void);		//Run by _InitSys
+
+/* libosd update functions */
+void InitExecPS2(void);		//ExecPS2 patch only. Run by _InitSys
+void InitOsd(void);		//ExecPS2 + System Configuration patches. Please refer to the comments within libosd_full.c
+
+int PatchIsNeeded(void);	//Indicates whether the patch is required.
 
 /* Glue routines.  */
 int DIntr(void);
 int EIntr(void);
-
-int InitThread(void);
-s32 iWakeupThread(s32 thread_id);
-s32 iRotateThreadReadyQueue(s32 priority);
-s32 iSuspendThread(s32 thread_id);
 
 int EnableIntc(int intc);
 int DisableIntc(int intc);

@@ -1,1 +1,0 @@
-void InitAlarm(void);

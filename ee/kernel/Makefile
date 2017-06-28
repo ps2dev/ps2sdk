@@ -32,10 +32,11 @@ IOPHEAP_OBJS = SifInitIopHeap.o SifExitIopHeap.o SifAllocIopHeap.o \
 
 IOPCONTROL_OBJS = SifIopReboot.o SifIopReset.o SifIopIsAlive.o SifIopSync.o __iop_control_internals.o
 
-GLUE_OBJS = __glue_internals.o iWakeupThread.o iRotateThreadReadyQueue.o iSuspendThread.o \
-	DIntr.o EIntr.o EnableIntc.o DisableIntc.o EnableDmac.o DisableDmac.o \
+GLUE_OBJS = DIntr.o EIntr.o EnableIntc.o DisableIntc.o EnableDmac.o DisableDmac.o \
 	iEnableIntc.o iDisableIntc.o iEnableDmac.o iDisableDmac.o SyncDCache.o \
 	iSyncDCache.o InvalidDCache.o iInvalidDCache.o
+
+THREAD_OBJS = _thread_internals.o iWakeupThread.o iRotateThreadReadyQueue.o iSuspendThread.o
 
 SIO_OBJS = sio_init.o sio_putc.o sio_getc.o sio_write.o sio_read.o sio_puts.o \
 	sio_gets.o sio_getc_block.o sio_flush.o sio_putsn.o
@@ -98,7 +99,7 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
 
 EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(CONFIG_OBJS) \
-	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(GETKERNEL_OBJS) $(LIBOSD_OBJS)	\
+	$(GLUE_OBJS) $(THREAD_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(GETKERNEL_OBJS) $(LIBOSD_OBJS)	\
 	$(TLBFUNC_OBJS) $(ALARM_OBJS) $(SETUP_OBJS) setup_syscalls.o $(INITSYS_OBJS) erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
@@ -140,6 +141,9 @@ $(IOPCONTROL_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)iopcontrol.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(GLUE_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)glue.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(THREAD_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)thread.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(SIO_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)sio.c

@@ -20,8 +20,6 @@
 #include <syscallnr.h>
 #include <osd_config.h>
 
-#include "libosd.h"
-
 extern unsigned char osdsrc[];
 extern unsigned int size_osdsrc;
 
