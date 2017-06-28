@@ -60,11 +60,11 @@ GETKERNEL_OBJS = GetSyscallHandler.o GetSyscall.o GetExceptionHandler.o GetInter
 
 SETUP_OBJS = kCopy.o kCopyBytes.o
 
-INITSYS_OBJS = _InitSys.o TerminateLibrary.o _initsys_internals.o
+INITSYS_OBJS = _InitSys.o SetArg.o TerminateLibrary.o _initsys_internals.o Exit.o ExecPS2.o LoadExecPS2.o ExecOSD.o
 
 ### SYSCALL OBJECTS
 
-KERNEL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
+KERNEL_OBJS = ResetEE.o SetGsCrt.o _Exit.o _LoadExecPS2.o _ExecPS2.o \
 	RFU009.o AddSbusIntcHandler.o RemoveSbusIntcHandler.o Interrupt2Iop.o \
 	SetVTLBRefillHandler.o SetVCommonHandler.o SetVInterruptHandler.o \
 	AddIntcHandler.o AddIntcHandler2.o RemoveIntcHandler.o AddDmacHandler.o AddDmacHandler2.o \
@@ -93,7 +93,7 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o Exit.o LoadExecPS2.o ExecPS2.o \
 	GetOsdConfigParam2.o GsGetIMR.o iGsGetIMR.o GsPutIMR.o iGsPutIMR.o \
 	SetPgifHandler.o SetVSyncFlag.o SetSyscall.o SifDmaStat.o iSifDmaStat.o \
 	SifSetDma.o iSifSetDma.o SifSetDChain.o iSifSetDChain.o SifSetReg.o \
-	SifGetReg.o ExecOSD.o Deci2Call.o PSMode.o MachineType.o GetMemorySize.o _GetGsDxDyOffset.o _InitTLB.o \
+	SifGetReg.o _ExecOSD.o Deci2Call.o PSMode.o MachineType.o GetMemorySize.o _GetGsDxDyOffset.o _InitTLB.o \
 	SifWriteBackDCache.o _SyncDCache.o _InvalidDCache.o __errno.o errno.o \
 	strncpy.o strlen.o memcpy.o memset.o __syscall.o
 

@@ -94,16 +94,16 @@ SYSCALL(ResetEE)
 SYSCALL(SetGsCrt)
 #endif
 
-#ifdef F_Exit
-SYSCALL(Exit)
+#ifdef F__Exit
+SYSCALL(_Exit)
 #endif
 
-#ifdef F_LoadExecPS2
-SYSCALL(LoadExecPS2)
+#ifdef F__LoadExecPS2
+SYSCALL(_LoadExecPS2)
 #endif
 
-#ifdef F_ExecPS2
-SYSCALL(ExecPS2)
+#ifdef F__ExecPS2
+SYSCALL(_ExecPS2)
 #endif
 
 #ifdef F_RFU009
@@ -630,8 +630,8 @@ SYSCALL(SifSetReg)
 SYSCALL(SifGetReg)
 #endif
 
-#ifdef F_ExecOSD
-SYSCALL(ExecOSD)
+#ifdef F__ExecOSD
+SYSCALL(_ExecOSD)
 #endif
 
 #ifdef F_Deci2Call

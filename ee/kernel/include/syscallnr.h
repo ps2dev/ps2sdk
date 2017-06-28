@@ -6,10 +6,10 @@
  */
 #define __NR_ResetEE			1
 #define __NR_SetGsCrt			2
-#define __NR_Exit			4
+#define __NR__Exit			4
 #define __NR_ResumeIntrDispatch		5	//Arbitrarily named
-#define __NR_LoadExecPS2		6
-#define __NR_ExecPS2			7
+#define __NR__LoadExecPS2		6
+#define __NR__ExecPS2			7
 #define __NR_ResumeT3IntrDispatch	8	//Arbitrarily named (used by alarm update)
 #define __NR_RFU009			9
 #define __NR_AddSbusIntcHandler		0xa
@@ -142,7 +142,7 @@
 #define __NR_iSifSetDChain		(-0x78)
 #define __NR_SifSetReg			0x79
 #define __NR_SifGetReg			0x7a
-#define __NR_ExecOSD			0x7b
+#define __NR__ExecOSD			0x7b
 #define __NR_Deci2Call			0x7c
 #define __NR_PSMode			0x7d
 #define __NR_MachineType		0x7e

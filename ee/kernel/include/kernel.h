@@ -262,12 +262,16 @@ s32 iSuspendThread(s32 thread_id);
 void InitTLBFunctions(void);	//Run by _InitSys
 
 void InitTLB(void);
+void Exit(s32 exit_code) __attribute__((noreturn));
+s32  ExecPS2(void *entry, void *gp, int num_args, char *args[]);
+void LoadExecPS2(const char *filename, s32 num_args, char *args[]) __attribute__((noreturn));
+void ExecOSD(int num_args, char *args[]) __attribute__((noreturn));
 
 /* Alarm update functions */
 void InitAlarm(void);		//Run by _InitSys
 
 /* libosd update functions */
-void InitExecPS2(void);		//ExecPS2 patch only. Run by _InitSys
+void InitExecPS2(void);		//ExecPS2 patch only. Run by _InitSys, Exit, LoadExecPS2, ExecPS2 and ExecOSD
 void InitOsd(void);		//ExecPS2 + System Configuration patches. Please refer to the comments within libosd_full.c
 
 int PatchIsNeeded(void);	//Indicates whether the patch is required.
@@ -294,9 +298,9 @@ void iInvalidDCache(void *start, void *end);
 /* System call prototypes */
 void ResetEE(u32 init_bitfield);
 void SetGsCrt(s16 interlace, s16 pal_ntsc, s16 field);
-void Exit(s32 exit_code) __attribute__((noreturn));
-void LoadExecPS2(const char *filename, s32 num_args, char *args[]);
-s32  ExecPS2(void *entry, void *gp, int num_args, char *args[]);
+void _Exit(s32 exit_code) __attribute__((noreturn));
+void _LoadExecPS2(const char *filename, s32 num_args, char *args[]) __attribute__((noreturn));
+s32  _ExecPS2(void *entry, void *gp, int num_args, char *args[]);
 void RFU009(u32 arg0, u32 arg1);
 s32  AddSbusIntcHandler(s32 cause, void (*handler)(int call));
 s32  RemoveSbusIntcHandler(s32 cause);
@@ -436,7 +440,7 @@ void iSifSetDChain(void);
 int  SifSetReg(u32 register_num, int register_value);
 int  SifGetReg(u32 register_num);
 
-void ExecOSD(int num_args, char *args[]);
+void _ExecOSD(int num_args, char *args[]) __attribute__((noreturn));
 s32  Deci2Call(s32 , u32 *);
 void PSMode(void);
 s32  MachineType(void);
