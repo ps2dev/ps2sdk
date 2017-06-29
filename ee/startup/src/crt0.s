@@ -32,6 +32,7 @@
 
    .extern _InitSys
    .extern Exit
+   .extern FlushCache
 
    .set   noat
    .set   noreorder
@@ -80,10 +81,8 @@ setupthread:
    syscall         # SetupHeap(_end, _heap_size)
 
    # writeback data cache
-
+   jal FlushCache  # FlushCache(0)
    move   $4, $0
-   addiu   $3, $0, 100
-   syscall         # FlushCache(0)
 
 parseargs:
    # call ps2sdk argument parsing (weak)
@@ -160,7 +159,7 @@ libc_uninit:
    nop
 1:
 
-   jal Exit         # Exit(retval) (noreturn)
+   j Exit         # Exit(retval) (noreturn)
    nop
 
    .end   _exit
