@@ -25,25 +25,6 @@
 #include <iopheap.h>
 #include <fileio.h>
 
-enum _lf_functions {
-	LF_F_MOD_LOAD = 0,
-	LF_F_ELF_LOAD,
-
-	LF_F_SET_ADDR,
-	LF_F_GET_ADDR,
-
-	LF_F_MG_MOD_LOAD,
-	LF_F_MG_ELF_LOAD,
-
-	LF_F_MOD_BUF_LOAD,
-
-	LF_F_MOD_STOP,
-	LF_F_MOD_UNLOAD,
-
-	LF_F_SEARCH_MOD_BY_NAME,
-	LF_F_SEARCH_MOD_BY_ADDRESS,
-};
-
 struct _lf_iop_val_arg {
 	union {
 		u32	iop_addr;
@@ -61,8 +42,6 @@ extern int _iop_reboot_count;
 extern SifRpcClientData_t _lf_cd;
 extern int _lf_init;
 
-int _SifLoadModule(const char *path, int arg_len, const char *args,
-		int *modres, int fno, int dontwait);
 int _SifLoadElfPart(const char *path, const char *secname, t_ExecData *data, int fno);
 int _SifLoadModuleBuffer(void *ptr, int arg_len, const char *args, int *modres);
 

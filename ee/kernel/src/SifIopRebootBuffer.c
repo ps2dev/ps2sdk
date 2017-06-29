@@ -24,11 +24,6 @@ extern u8 iopbtconf_img[0x400];
 extern unsigned char imgdrv_irx[];
 extern unsigned int size_imgdrv_irx;
 
-//From loadfile.c:
-#define LF_F_MOD_LOAD		0
-#define LF_F_MG_MOD_LOAD	4
-int _SifLoadModule(const char *path, int arg_len, const char *args, int *modres, int fno, int dontwait);
-
 //If for whatever reason imgdrv changes, update these offsets.
 #define IMGDRV_IRX_PTRS		0x1b4
 #define IMGDRV_IRX_SIZES	0x1bC

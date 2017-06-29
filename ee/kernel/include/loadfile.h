@@ -31,6 +31,25 @@ enum _lf_val_types {
 	LF_VAL_LONG
 };
 
+enum _lf_functions {
+	LF_F_MOD_LOAD = 0,
+	LF_F_ELF_LOAD,
+
+	LF_F_SET_ADDR,
+	LF_F_GET_ADDR,
+
+	LF_F_MG_MOD_LOAD,
+	LF_F_MG_ELF_LOAD,
+
+	LF_F_MOD_BUF_LOAD,
+
+	LF_F_MOD_STOP,
+	LF_F_MOD_UNLOAD,
+
+	LF_F_SEARCH_MOD_BY_NAME,
+	LF_F_SEARCH_MOD_BY_ADDRESS,
+};
+
 typedef struct
 {
 	u32 epc;
@@ -295,6 +314,27 @@ int SifExecModuleBuffer(void *ptr, u32 size, u32 arg_len, const char *args, int 
  * @see SifLoadModule, SifLoadModuleBuffer
  */
 int SifExecModuleFile(const char *path, u32 arg_len, const char *args, int *mod_res);
+
+
+/** Low-level function for loading and executing an IRX module.
+ * @ingroup loadfile
+ *
+ * @param path     Path to an IRX module
+ * @param arg_len  Length, in bytes, of the argument list
+ * @param args     List of arguments to pass to the IRX on startup
+ * @param *modres  Pointer to a variable that will store the return value from the IRX's _start() function
+ * @param fno      Function number of function to execute.
+ * @param dontwait Whether to wait for the module's _start function to finish executing.
+ *
+ * @returns The ID of the loaded module on success, or an error if the module
+ * couldn't be loaded.
+ *
+ * Unless required, use the higher-level functions instead.
+ *
+ * @see SifLoadModule, SifLoadModuleBuffer, SifLoadModuleEncrypted
+ */
+int _SifLoadModule(const char *path, int arg_len, const char *args,
+		int *modres, int fno, int dontwait);
 
 #ifdef __cplusplus
 }
