@@ -20,7 +20,10 @@
 #include "sifrpc.h"
 #include "sbv_patches.h"
 
-extern u8 iopbtconf_img[0x400];
+#define IMGDRV_IRX_SIZE		((size_imgdrv_irx + 15) & ~15)	//Originally was a hardcoded values of 0x400 bytes
+#define IOPBTCONF_IOP_MAX_SIZE	0x400
+
+extern u8 iopbtconf_img[IOPBTCONF_IOP_MAX_SIZE];
 extern unsigned char imgdrv_irx[];
 extern unsigned int size_imgdrv_irx;
 
@@ -29,7 +32,7 @@ extern unsigned int size_imgdrv_irx;
 #define IMGDRV_IRX_SIZES	0x1bC
 
 #ifdef F__iopcontrol_special_internals
-u8 iopbtconf_img[0x400] __attribute__((aligned(64)));
+u8 iopbtconf_img[IOPBTCONF_IOP_MAX_SIZE] __attribute__((aligned(64)));
 #endif
 
 #ifdef F_SifIopRebootBufferEncrypted
@@ -50,9 +53,9 @@ int SifIopRebootBufferEncrypted(void *udnl, int size)
 	SifLoadFileInit();
 	SifInitIopHeap();
 
-	imgdrv_iop = SifAllocIopHeap(0x400);
+	imgdrv_iop = SifAllocIopHeap(IMGDRV_IRX_SIZE);
 	udnl_iop = SifAllocIopHeap(size);
-	iopbtconf_img_iop = SifAllocIopHeap(0x400);
+	iopbtconf_img_iop = SifAllocIopHeap(IOPBTCONF_IOP_MAX_SIZE);
 
 	if(imgdrv_iop == NULL || udnl_iop == NULL || iopbtconf_img_iop == NULL)
 		return -1;
@@ -63,7 +66,7 @@ int SifIopRebootBufferEncrypted(void *udnl, int size)
 	imgdrv_img_size = (int*)&imgdrv_irx[IMGDRV_IRX_SIZES];
 	dmat[0].src = imgdrv_irx;
 	dmat[0].dest = imgdrv_iop;
-	dmat[0].size = 0x400;
+	dmat[0].size = IMGDRV_IRX_SIZE;
 	dmat[0].attr = 0;
 	dmat[1].src = udnl;
 	dmat[1].dest = udnl_iop;
@@ -120,9 +123,9 @@ int SifIopRebootBuffer(void *ioprp, int size)
 	SifLoadFileInit();
 	SifInitIopHeap();
 
-	imgdrv_iop = SifAllocIopHeap(0x400);
+	imgdrv_iop = SifAllocIopHeap(IMGDRV_IRX_SIZE);
 	ioprp_iop = SifAllocIopHeap(size);
-	iopbtconf_img_iop = SifAllocIopHeap(0x400);
+	iopbtconf_img_iop = SifAllocIopHeap(IOPBTCONF_IOP_MAX_SIZE);
 
 	if(imgdrv_iop == NULL || ioprp_iop == NULL || iopbtconf_img_iop == NULL)
 		return -1;
@@ -133,7 +136,7 @@ int SifIopRebootBuffer(void *ioprp, int size)
 	imgdrv_img_size = (int*)&imgdrv_irx[IMGDRV_IRX_SIZES];
 	dmat[0].src = imgdrv_irx;
 	dmat[0].dest = imgdrv_iop;
-	dmat[0].size = 0x400;
+	dmat[0].size = IMGDRV_IRX_SIZE;
 	dmat[0].attr = 0;
 	dmat[1].src = ioprp;
 	dmat[1].dest = ioprp_iop;
