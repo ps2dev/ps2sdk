@@ -160,7 +160,7 @@ libc_uninit:
 1:
 
    j Exit         # Exit(retval) (noreturn)
-   nop
+   move   $4, $16
 
    .end   _exit
 
