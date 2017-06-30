@@ -801,7 +801,7 @@ int sceCdReadDvdDualInfo(int *on_dual, unsigned long int *layer1_start);
  */
 int sceCdLayerSearchFile(sceCdlFILE *fp, const char *path, int layer);
 
-/** Returns the C/DVD drive status.
+/** Returns the CD/DVD drive status.
  * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
  *
  * @return status
@@ -819,14 +819,14 @@ int sceCdStatus2(void);
  */
 int sceCdRE(unsigned long int lsn,unsigned long int sectors,void *buf,sceCdRMode *mode);
 
-/** It is unknown what this function does.
- * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
+/** Controls remote-control bypass
+ * SUPPORTED BY ONLY PSX CDVDMAN MODULES
  *
- * @param Unknown
- * @param Unknown
- * @return Unknown
+ * @param mode 0 = Bypass, 1 = Normal
+ * @param status Result code.
+ * @return 1 on success, 0 on failure
  */
-int sceCdRcBypassCtl(int param, int *stat);
+int sceCdRcBypassCtl(int mode, u32 *status);
 
 #ifdef __cplusplus
 }
