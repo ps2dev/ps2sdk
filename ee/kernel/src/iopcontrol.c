@@ -44,23 +44,28 @@ int SifIopReset(const char *arg, int mode)
 {
 	static struct _iop_reset_pkt reset_pkt __attribute__((aligned(64)));
 	struct t_SifDmaTransfer dmat;
+	int arglen;
 
 	_iop_reboot_count++; // increment reboot counter to allow RPC clients to detect unbinding!
 
 	SifStopDma();	//Stop DMA transfers across SIF0 (IOP -> EE).
 
-	memset(&reset_pkt, 0, sizeof reset_pkt);
+	/*	The original did not null-terminate, had no bounds-checking and counted the characters as it copied.
+		The IOP side will only copy up to arglen characters. */
+	if(arg != NULL)
+	{
+		for(arglen = 0; arg[arglen] != '\0'; arglen++)
+			reset_pkt.arg[arglen] = arg[arglen];
+	}
+	else
+	{	//While NULL was not officially supported, do this for backward-compatibility with old homebrew projects.
+		arglen = 0;
+	}
 
 	reset_pkt.header.psize = sizeof reset_pkt;	//dsize is not initialized (and not processed, even on the IOP).
 	reset_pkt.header.cid  = SIF_CMD_RESET_CMD;
-
+	reset_pkt.arglen = arglen;
 	reset_pkt.mode = mode;
-	if (arg != NULL) {
-		strncpy(reset_pkt.arg, arg, RESET_ARG_MAX);
-		reset_pkt.arg[RESET_ARG_MAX] = '\0';
-
-		reset_pkt.arglen = strlen(reset_pkt.arg) + 1;
-	}
 
 	dmat.src  = &reset_pkt;
 	dmat.dest = (void *)SifGetReg(SIF_SYSREG_SUBADDR);

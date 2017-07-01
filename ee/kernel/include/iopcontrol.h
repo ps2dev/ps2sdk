@@ -27,8 +27,8 @@ extern "C" {
  */
 int SifIopReboot(const char *arg);
 /** Resets IOP
- * @param arg a const character pointer for path to module that will be loaded afterwards or NULL
- * @param mode 0x100 for magicgate anything else for no magicgate.
+ * @param arg a const character pointer for path to module that will be loaded afterwards or a blank. NULL is not officially supported, but is supported for backward-compatibility with old homebrew projects.
+ * @param mode Bitmask for optional settings. 0x80000000 for verbose messages and 0x100 for magicgate.
  * @return 1 for success or 0 for failure.
  */
 int SifIopReset(const char *arg, int mode);
