@@ -23,9 +23,15 @@ extern "C" {
 
 typedef struct t_SifCmdHeader
 {
-   u32				size;
+   /** Packet size. Min: 1x16 (header only), max: 7*16 */
+   u32				psize:8;
+   /** Payload size */
+   u32				dsize:24;
+   /** Destination address for payload. Can be NULL if there is no payload. */
    void				*dest;
+   /** Function number of function to call. */
    int				cid;
+   /** Can be freely used. */
    u32				opt;
 } SifCmdHeader_t;
 

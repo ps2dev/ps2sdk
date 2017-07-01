@@ -51,7 +51,7 @@ int SifIopReset(const char *arg, int mode)
 
 	memset(&reset_pkt, 0, sizeof reset_pkt);
 
-	reset_pkt.header.size = sizeof reset_pkt;
+	reset_pkt.header.psize = sizeof reset_pkt;	//dsize is not initialized (and not processed, even on the IOP).
 	reset_pkt.header.cid  = SIF_CMD_RESET_CMD;
 
 	reset_pkt.mode = mode;

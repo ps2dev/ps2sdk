@@ -24,11 +24,15 @@
 
 /** SIF command.  */
 typedef struct t_SifCmdHeader {
-	/** Upper 8 bits: packet size, lower 24 bits: extra data length */
-	u32	size;
+	/** Packet size. Min: 1x16 (header only), max: 7*16 */
+	u32	psize:8;
+	/** Extra data size */
+	u32	dsize:24;
 	/** Extra data destination address. May be NULL if there's no extra data. */
 	void	*dest;
+	/** Function number of the function to call. */
 	int	cid;
+	/** Can be freely used. */
 	u32	opt;
 } SifCmdHeader_t;
 

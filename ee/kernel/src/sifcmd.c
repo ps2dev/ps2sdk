@@ -68,11 +68,11 @@ static unsigned int _SifSendCmd(int cid, int mode, void *pkt, int pktsize, void 
 
 	header = (SifCmdHeader_t *)pkt;
 	header->cid  = cid;
-	header->size = pktsize;
+	header->psize = pktsize;
 	header->dest = NULL;
 
 	if (size > 0) {
-		header->size = pktsize | (size << 8);
+		header->dsize = size;
 		header->dest = dest;
 
 		if (mode & SIF_CMD_M_WBDC)	/* if mode is & 4, flush reference cache */
@@ -130,11 +130,11 @@ int _SifCmdIntHandler(int channel)
 
 	header = (SifCmdHeader_t *)cmd_data->pktbuf;
 
-	if (!(size = (header->size & 0xff)))
+	if (!(size = header->psize))
 		goto out;
 
 	pktquads = (size + 30) >> 4;
-	header->size = 0;
+	header->psize = 0;
 	if (pktquads) {
 		pktbuf = (u128 *)cmd_data->pktbuf;
 		while (pktquads--) {
