@@ -38,11 +38,11 @@ struct _iop_reset_pkt {
 	int	arglen;
 	int	mode;
 	char	arg[RESET_ARG_MAX + 1];
-} ALIGNED(16);
+};
 
 int SifIopReset(const char *arg, int mode)
 {
-	struct _iop_reset_pkt reset_pkt;  /* Implicitly aligned. */
+	static struct _iop_reset_pkt reset_pkt __attribute__((aligned(64)));
 	struct t_SifDmaTransfer dmat;
 
 	_iop_reboot_count++; // increment reboot counter to allow RPC clients to detect unbinding!

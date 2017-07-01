@@ -38,10 +38,10 @@
    work exactly as expected.  */
 struct cmd_data {
 	/** Command packet received from the IOP */
-	void	*pktbuf;	
+	void	*pktbuf;
 	void	*unused;
 	/** Address of IOP SIF DMA receive address */
-	void	*iopbuf;	
+	void	*iopbuf;
 	SifCmdHandlerData_t *sys_cmd_handlers;
 	u32	nr_sys_handlers;
 	SifCmdHandlerData_t *usr_cmd_handlers;
@@ -214,7 +214,7 @@ static void set_sreg(void *packet, void *harg)
 
 void SifInitCmd(void)
 {
-	u32 packet[5];	/* Implicitly aligned to 16 bytes */
+	static struct ca_pkt packet __attribute((aligned(64)));
 	int i;
 	static int _rb_count = 0;
 	if(_rb_count != _iop_reboot_count)
@@ -273,8 +273,8 @@ void SifInitCmd(void)
 	if (_sif_cmd_data.iopbuf) {
 		/* IOP SIF CMD is already initialized, so give it our new
 		   receive address.  */
-		((struct ca_pkt *)(packet))->buf = _sif_cmd_data.pktbuf;
-		SifSendCmd(SIF_CMD_CHANGE_SADDR, packet, sizeof packet, NULL, NULL, 0);
+		packet.buf = _sif_cmd_data.pktbuf;
+		SifSendCmd(SIF_CMD_CHANGE_SADDR, &packet, sizeof packet, NULL, NULL, 0);
 	} else {
 		/* Sync with the IOP side's SIFCMD implementation. */
 		while (!(SifGetReg(SIF_REG_SMFLAG) & SIF_STAT_CMDINIT)) ;
@@ -284,9 +284,9 @@ void SifInitCmd(void)
 		/* See the note above about struct cmd_data, and the use of
 		   this register.  */
 		SifSetReg(SIF_SYSREG_MAINADDR, (u32)&_sif_cmd_data);
-		packet[3] = 0;
-		packet[4] = (u32)_sif_cmd_data.pktbuf;
-		SifSendCmd(SIF_CMD_INIT_CMD, packet, sizeof packet, NULL, NULL, 0);
+		packet.header.opt = 0;	//SIFCMD initialization on the IOP (opt = 0)
+		packet.buf = _sif_cmd_data.pktbuf;
+		SifSendCmd(SIF_CMD_INIT_CMD, &packet, sizeof packet, NULL, NULL, 0);
 	}
 }
 
