@@ -18,6 +18,7 @@
 #include "iopheap.h"
 #include "sifdma.h"
 #include "sifrpc.h"
+#include "string.h"
 #include "sbv_patches.h"
 
 #define IMGDRV_IRX_SIZE		((size_imgdrv_irx + 15) & ~15)	//Originally was a hardcoded values of 0x400 bytes
@@ -86,7 +87,7 @@ int SifIopRebootBufferEncrypted(void *udnl, int size)
 	sbv_patch_enable_lmb();
 
 	SifLoadModule("rom0:SYSCLIB", 0, NULL);
-	SifLoadModuleBuffer(udnl_iop, 0, NULL);
+	SifLoadModuleBuffer(imgdrv_iop, 0, NULL);
 	//Actually something like _SifLoadModuleEncrypted, hence no argument for fno.
 	_SifLoadModule("img0:", 0, NULL, NULL, LF_F_MG_MOD_LOAD, 1);
 
@@ -103,8 +104,8 @@ int SifIopRebootBufferEncrypted(void *udnl, int size)
 }
 #endif
 
-#ifdef F_sceSifIopRebootBuffer
-static int generateIOPBTCONF_img(void *output, const void *ioprp);
+#ifdef F_SifIopRebootBuffer
+static int generateIOPBTCONF_img(void *output, void *ioprp);
 
 int SifIopRebootBuffer(void *ioprp, int size)
 {
@@ -156,7 +157,7 @@ int SifIopRebootBuffer(void *ioprp, int size)
 	sbv_patch_enable_lmb();
 
 	SifLoadModule("rom0:SYSCLIB", 0, NULL);
-	SifLoadModuleBuffer(ioprp_iop, 0, NULL, NULL);
+	SifLoadModuleBuffer(imgdrv_iop, 0, NULL);
 	//Actually something like _SifLoadModule, hence no argument for fno.
 	_SifLoadModule("rom0:UDNL", 11, "img0:\0img1:", NULL, LF_F_MOD_LOAD, 1);
 
@@ -191,7 +192,12 @@ enum EXTINFO_TYPE{
 	EXTINFO_TYPE_FIXED = 0x7F	//Must exist at a fixed location.
 };
 
-static const struct iopbtconf_img iopbtconf_img = {
+struct iopbtconf_img {
+	romdir_t romdir[5];
+	u32 extinfo[4];
+};
+
+static const struct iopbtconf_img iopbtconf_img_base = {
 	{
 		{"RESET", 8, 0},
 		{"ROMDIR", 0, 0x50},
@@ -212,7 +218,7 @@ static const struct iopbtconf_img iopbtconf_img = {
 static int generateIOPBTCONF_img(void *output, void *ioprp)
 {
 	int size, offset, fsize_rounded;
-	romdir_t *romdir, *in;
+	romdir_t *romdir;
 	const u8 *ptr_in;
 	u8 *ptr_out;
 
@@ -230,11 +236,11 @@ static int generateIOPBTCONF_img(void *output, void *ioprp)
 		{
 			romdir->name[0] = 'X';	//Change 'IOPBTCONF' to 'XOPBTCONF', so that UDNL will not find the original.
 			//Copy IOPBTCONF into the new image.
-			size = romdir->size + sizeof(iopbtconf_img);
+			size = romdir->size + sizeof(iopbtconf_img_base);
 			ptr_out = (u8*)output;
 			ptr_in = (const u8*)ioprp;
-			memcpy(ptr_out, &iopbtconf_img, sizeof(iopbtconf_img));
-			memcpy(ptr_out + sizeof(iopbtconf_img), &ptr_in[offset], romdir->size);
+			memcpy(ptr_out, &iopbtconf_img_base, sizeof(iopbtconf_img_base));
+			memcpy(ptr_out + sizeof(iopbtconf_img_base), &ptr_in[offset], romdir->size);
 			((romdir_t*)ptr_out)[3].size = romdir->size;	//Update the size of IOPBTCONF within the generated IOPRP image.
 			break;
 		}
