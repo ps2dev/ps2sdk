@@ -31,7 +31,7 @@ EE_ASFLAGS := -G0 $(EE_ASFLAGS)
 EE_LIBS += -lstdc++ \
 	-Wl,--whole-archive $(PS2SDK)/ee/lib/libc.a -Wl,--no-whole-archive \
 	$(PS2DEV)/ee/ee/lib/libc.a \
-	-Wl,--whole-archive -lkernel -Wl,--no-whole-archive
+	-Wl,--whole-archive -lkernel -Wl,--no-whole-archive -lpatches
 
 # Externally defined variables: EE_BIN, EE_OBJS, EE_LIB
 
