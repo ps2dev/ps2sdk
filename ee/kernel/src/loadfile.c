@@ -115,7 +115,7 @@ int _SifLoadModule(const char *path, int arg_len, const char *args, int *modres,
 		arg.p.arg_len = 0;
 	}
 
-	if (SifCallRpc(&_lf_cd, fno, 0, &arg, sizeof arg, &arg, 8, NULL, NULL) < 0)
+	if (SifCallRpc(&_lf_cd, fno, dontwait, &arg, sizeof arg, &arg, 8, NULL, NULL) < 0)
 		return -SCE_ECALLMISS;
 
 	if (modres)
