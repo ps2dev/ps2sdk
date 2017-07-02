@@ -95,13 +95,12 @@ int sbv_patch_enable_lmb(void)
 	/*	In the Sony original, the whole text section of LOADFILE is scanned for the pattern.
 
 		But that required a larger portion of EE RAM, which means that memory
-		will have to be allocated. It will also mean that this library will become dependent on malloc/memalign.
+		will have to be allocated. It will also mean that this library will become dependent on additional memory (i.e. 0x01e00000-0x01e80000).
 		I think that it's fine to hardcode the address because the affected LOADFILE module is the same in all boot ROMs.
-		If someday, somebody finds an older (perhaps even prototype) PlayStation 2 console that has an older LOADFILE module that needs this patch too,
+		If someday, somebody finds an unusual (perhaps even prototype) PlayStation 2 console that has an older LOADFILE module that needs this patch too,
 		this patch can be revised.
 
 		The original sbv library's LMB patch starts scanning at offset 0x400, in a mere 256-byte radius.
-		I don't see how that is effective at supporting changes in LOADFILE, if there were any.
 			Locate the loadfile RPC dispatch code, where the first 4 instructions look like:
 
 			27bdffe8	addiu	$sp, -24
