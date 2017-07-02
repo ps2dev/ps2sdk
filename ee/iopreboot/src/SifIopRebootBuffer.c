@@ -14,6 +14,7 @@
 
 #include "kernel.h"
 #include "iopcontrol.h"
+#include "iopcontrol_special.h"
 #include "loadfile.h"
 #include "iopheap.h"
 #include "sifdma.h"
@@ -21,7 +22,7 @@
 #include "string.h"
 #include "sbv_patches.h"
 
-#define IMGDRV_IRX_SIZE		((size_imgdrv_irx + 15) & ~15)	//Originally was a hardcoded values of 0x400 bytes
+#define IMGDRV_IRX_SIZE		((size_imgdrv_irx + 15) & ~15)	//Was a hardcoded value of 0x400 bytes
 #define IOPBTCONF_IOP_MAX_SIZE	0x400
 
 extern u8 iopbtconf_img[IOPBTCONF_IOP_MAX_SIZE];
@@ -30,7 +31,7 @@ extern unsigned int size_imgdrv_irx;
 
 //If for whatever reason imgdrv changes, update these offsets.
 #define IMGDRV_IRX_PTRS		0x1b4
-#define IMGDRV_IRX_SIZES	0x1bC
+#define IMGDRV_IRX_SIZES	0x1bc
 
 #ifdef F__iopcontrol_special_internals
 u8 iopbtconf_img[IOPBTCONF_IOP_MAX_SIZE] __attribute__((aligned(64)));

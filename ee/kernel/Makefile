@@ -32,10 +32,6 @@ IOPHEAP_OBJS = SifInitIopHeap.o SifExitIopHeap.o SifAllocIopHeap.o \
 
 IOPCONTROL_OBJS = SifIopReboot.o SifIopReset.o SifIopIsAlive.o SifIopSync.o __iop_control_internals.o
 
-IOPCONTROL_SPECIAL_EE_OBJS = _iopcontrol_special_internals.o SifIopRebootBufferEncrypted.o SifIopRebootBuffer.o
-IOPCONTROL_SPECIAL_IOP_OBJS = imgdrv_irx.o
-IOPCONTROL_SPECIAL_OBJS = $(IOPCONTROL_SPECIAL_EE_OBJS) $(IOPCONTROL_SPECIAL_IOP_OBJS)
-
 GLUE_OBJS = DIntr.o EIntr.o EnableIntc.o DisableIntc.o EnableDmac.o DisableDmac.o \
 	iEnableIntc.o iDisableIntc.o iEnableDmac.o iDisableDmac.o SyncDCache.o \
 	iSyncDCache.o InvalidDCache.o iInvalidDCache.o
@@ -102,7 +98,7 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o _Exit.o _LoadExecPS2.o _ExecPS2.o \
 	strncpy.o strlen.o memcpy.o memset.o __syscall.o
 
 EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
-	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(IOPCONTROL_SPECIAL_OBJS) $(CONFIG_OBJS) \
+	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(CONFIG_OBJS) \
 	$(GLUE_OBJS) $(THREAD_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(GETKERNEL_OBJS) $(LIBOSD_OBJS)	\
 	$(TLBFUNC_OBJS) $(ALARM_OBJS) $(SETUP_OBJS) setup_syscalls.o $(INITSYS_OBJS) erl-support.o
 
@@ -144,9 +140,6 @@ $(IOPHEAP_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)iopheap.c
 $(IOPCONTROL_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)iopcontrol.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
-$(IOPCONTROL_SPECIAL_EE_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)SifIopRebootBuffer.c
-	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/sbv/include  -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
-
 $(GLUE_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)glue.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
@@ -186,9 +179,6 @@ $(EE_OBJS_DIR)srcfile_bin.o: $(EE_OBJS_DIR)srcfile_bin.c
 $(EE_OBJS_DIR)eenull_bin.o: $(EE_OBJS_DIR)eenull_bin.c
 	$(EE_C_COMPILE) $< -c -o $@
 
-$(EE_OBJS_DIR)imgdrv_irx.o: $(EE_OBJS_DIR)imgdrv_irx.c
-	$(EE_C_COMPILE) $< -c -o $@
-
 $(PS2SDKSRC)/tools/bin2c/bin/bin2c: $(PS2SDKSRC)/tools/bin2c
 	make -C $<
 
@@ -216,15 +206,8 @@ $(EE_SRC_DIR)eenull/bin/eenull.bin: $(EE_SRC_DIR)eenull
 $(EE_OBJS_DIR)eenull_bin.c: $(EE_SRC_DIR)eenull/bin/eenull.bin $(PS2SDKSRC)/tools/bin2c/bin/bin2c
 	$(PS2SDKSRC)/tools/bin2c/bin/bin2c $< $@ eenull
 
-$(EE_SRC_DIR)imgdrv/irx/imgdrv.irx: $(EE_SRC_DIR)imgdrv
-	make -C $<
-
-$(EE_OBJS_DIR)imgdrv_irx.c: $(EE_SRC_DIR)imgdrv/irx/imgdrv.irx $(PS2SDKSRC)/tools/bin2c/bin/bin2c
-	$(PS2SDKSRC)/tools/bin2c/bin/bin2c $< $@ imgdrv_irx
-
 clean::
 	make -C $(EE_SRC_DIR)osdsrc clean
 	make -C $(EE_SRC_DIR)tlbsrc clean
 	make -C $(EE_SRC_DIR)srcfile clean
 	make -C $(EE_SRC_DIR)eenull clean
-	make -C $(EE_SRC_DIR)imgdrv clean

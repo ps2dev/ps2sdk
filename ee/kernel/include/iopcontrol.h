@@ -40,21 +40,6 @@ int SifIopIsAlive(void);
  * @return 1 for bootup complete or 0 for incomplete.
  */
 int SifIopSync(void);
-/** Resets IOP
- * Reboots the IOP with an encrypted UDNL module.
- * @param udnl Pointer to UDNL module to reboot with.
- * @param size Size of UDNL module in bytes.
- * @return 1 for success or 0 for failure.
- */
-int SifIopRebootBufferEncrypted(void *udnl, int size);
-/** Resets IOP
- * Reboots the IOP with an IOPRP image. If the image contains an IOPBTCONF file,
- * the IOPBTCONF file will be automatically split off into its own image
- * @param ioprp Pointer to IOPRP image to reboot with.
- * @param size Size of the IOPRP image in bytes.
- * @return 1 for success or 0 for failure.
- */
-int SifIopRebootBuffer(void *ioprp, int size);
 
 #ifdef __cplusplus
 }
