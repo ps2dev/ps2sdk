@@ -67,6 +67,16 @@ typedef struct t_SifCmdHandlerData
 	void	 	*harg;
 } SifCmdHandlerData_t;
 
+/** Triggers an IOP reboot */
+#define RESET_ARG_MAX	79
+
+typedef struct _iop_reset_pkt {
+	struct t_SifCmdHeader header;
+	int	arglen;
+	int	mode;
+	char	arg[RESET_ARG_MAX + 1];
+} SifCmdResetData_t;
+
 unsigned int SifSendCmd(int cmd, void *packet, int packet_size, void *src_extra,
 	void *dest_extra, int size_extra);
 unsigned int iSifSendCmd(int cmd, void *packet, int packet_size, void *src_extra,
