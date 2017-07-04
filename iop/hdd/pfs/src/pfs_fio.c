@@ -39,6 +39,10 @@ extern pfs_cache_t *pfsCacheBuf;
 extern u32 pfsCacheNumBuffers;
 extern pfs_mount_t *pfsMountBuf;
 
+#ifdef PFS_STAT_RETURN_INODE_LBA
+extern u32 pfsBlockSize;
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 //	Function declarations
 
@@ -911,8 +915,13 @@ static void fioStatFiller(pfs_cache_t *clink, iox_stat_t *stat)
 	stat->private_1 = clink->u.inode->gid;
 	stat->private_2 = clink->u.inode->number_blocks;
 	stat->private_3 = clink->u.inode->number_data;
+#ifndef PFS_STAT_RETURN_INODE_LBA
 	stat->private_4 = 0;
 	stat->private_5 = 0;
+#else
+	stat->private_4 = clink->sub;
+	stat->private_5 = clink->block << pfsBlockSize;
+#endif
 }
 
 int	pfsFioGetstat(iop_file_t *f, const char *name, iox_stat_t *stat)

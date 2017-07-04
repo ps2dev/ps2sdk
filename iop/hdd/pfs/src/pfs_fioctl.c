@@ -111,7 +111,7 @@ int pfsFioDevctl(iop_file_t *f, const char *name, int cmd, void *arg, size_t arg
 static int ioctl2InvalidateInode(pfs_cache_t *clink)
 {
 	clink->u.inode->checksum++;
-	return clink->pfsMount->blockDev->transfer(clink->pfsMount->fd, clink->u.inode, clink->sub, clink->sector << pfsBlockSize, 1 << pfsBlockSize, PFS_IO_MODE_WRITE);
+	return clink->pfsMount->blockDev->transfer(clink->pfsMount->fd, clink->u.inode, clink->sub, clink->block << pfsBlockSize, 1 << pfsBlockSize, PFS_IO_MODE_WRITE);
 }
 #endif
 
