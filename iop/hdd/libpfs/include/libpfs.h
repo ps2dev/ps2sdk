@@ -21,6 +21,7 @@
 #define PFS_MAX_SUBPARTS	64
 #define PFS_NAME_LEN		255
 #define PFS_FORMAT_VERSION	3
+#define PFS_INODE_MAX_BLOCKS	114
 
 // attribute flags
 #define PFS_FIO_ATTR_READABLE		0x0001
@@ -126,7 +127,7 @@ typedef struct {
 	pfs_blockinfo_t next_segment;	// next segment descriptor inode
 	pfs_blockinfo_t last_segment;	// last segment descriptor inode
 	pfs_blockinfo_t unused;		//
-	pfs_blockinfo_t data[114];	//
+	pfs_blockinfo_t data[PFS_INODE_MAX_BLOCKS];	//
 	u16 mode;					// file mode
 	u16 attr;					// file attributes
 	u16 uid;					//

@@ -164,10 +164,10 @@ u32 pfsGetScale(u32 num, u32 size)
 
 u32 pfsFixIndex(u32 index)
 {
-	if(index < 114)
+	if(index < PFS_INODE_MAX_BLOCKS)
 		return index;
 
-	index -= 114;
+	index -= PFS_INODE_MAX_BLOCKS;
 	return index % 123;
 }
 
