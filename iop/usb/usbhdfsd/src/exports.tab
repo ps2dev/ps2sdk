@@ -1,12 +1,17 @@
 /**/
 
-DECLARE_EXPORT_TABLE(usbmass, 1, 1)
+DECLARE_EXPORT_TABLE(usbmass, 1, 2)
 	DECLARE_EXPORT(_start)
 	DECLARE_EXPORT(_retonly)
 	DECLARE_EXPORT(_retonly)
 	DECLARE_EXPORT(_retonly)
 	DECLARE_EXPORT(UsbMassGetDeviceInfo)
 	DECLARE_EXPORT(UsbMassRegisterCallback)
+	DECLARE_EXPORT(fat_getData)
+	DECLARE_EXPORT(UsbMassReadSector)
+	DECLARE_EXPORT(UsbMassWriteSector)
+	DECLARE_EXPORT(UsbMassFlushCache)
+	DECLARE_EXPORT(fat_getClusterChain)
 END_EXPORT_TABLE
 
 void _retonly() {}

@@ -40,34 +40,8 @@
 
 #define BLOCK_SIZE 4096
 
-//number of cache slots (1 slot = block)
-#define CACHE_SIZE 32
-
 //when the flushCounter reaches FLUSH_TRIGGER then flushSectors is called
 //#define FLUSH_TRIGGER 16
-
-typedef struct _cache_record
-{
-	unsigned int sector;
-	int tax;
-	char writeDirty;
-} cache_record;
-
-struct _cache_set
-{
-	mass_dev* dev;
-	unsigned int sectorSize;
-	unsigned int indexLimit;
-	unsigned char* sectorBuf; // = NULL;		//sector content - the cache buffer
-	cache_record rec[CACHE_SIZE];	//cache info record
-
-#ifdef SCACHE_RECORD_STATS
-	//statistical information
-	unsigned int cacheAccess;
-	unsigned int cacheHits;
-#endif
-	unsigned int writeFlag;
-};
 
 //---------------------------------------------------------------------------
 static void initRecords(cache_set* cache)

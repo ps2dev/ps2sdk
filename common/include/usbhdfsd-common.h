@@ -17,7 +17,11 @@
 
 //IOCTL function codes
 /** Rename opened file. Data input to ioctl() -> new, full filename of file. */
-#define USBMASS_IOCTL_RENAME	0x0000
+#define USBMASS_IOCTL_RENAME		0x0000
+/** Returns first cluster number of opened file, within the filesystem. */
+#define USBMASS_IOCTL_GET_CLUSTER	0x0001
+/** Returns the absolute LBA of the opened file. */
+#define USBMASS_IOCTL_GET_LBA		0x0002
 
 //Device status bits.
 /** CONNected */

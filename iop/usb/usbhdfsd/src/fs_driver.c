@@ -704,6 +704,12 @@ int fs_ioctl(iop_file_t *fd, int cmd, void *data)
 			ret = fat_renameFile(fatd, &dirent->fatdir, data);	//No need to re-cast since this inner structure is a common one.
 			FLUSH_SECTORS(fatd);
 			break;
+		case USBMASS_IOCTL_GET_CLUSTER:
+			ret = ((fs_rec *)fd->privdata)->dirent.fatdir.startCluster;
+			break;
+		case USBMASS_IOCTL_GET_LBA:
+			ret = fat_cluster2sector(&fatd->partBpb, ((fs_rec *)fd->privdata)->dirent.fatdir.startCluster);
+			break;
 		default:
 			ret = fs_dummy();
 	}

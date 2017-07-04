@@ -8,7 +8,7 @@
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/usb/usbd/include
 
-IOP_OBJS = usb_driver.o fs_driver.o part_driver.o fat_driver.o fat_write.o scache.o usbhdfsd.o imports.o exports.o
+IOP_OBJS = usb_driver.o fs_driver.o part_driver.o fat_driver.o fat_write.o scache.o usbhdfsd.o api.o imports.o exports.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make
