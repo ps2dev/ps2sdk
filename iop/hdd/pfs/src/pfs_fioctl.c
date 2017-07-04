@@ -110,10 +110,17 @@ int pfsFioIoctl2(iop_file_t *f, int cmd, void *arg, size_t arglen,	void *buf, si
 		if(cmd==PIOCATTRREAD)
 			return -EISDIR;
 
-	if(!(f->mode & O_WRONLY)) {
-		if(cmd!=PIOCATTRLOOKUP)
-			if(cmd!=PIOCATTRREAD)
+	if(!(f->mode & O_WRONLY))
+	{
+		switch(cmd)
+		{
+			case PIOCATTRLOOKUP:
+			case PIOCATTRREAD:
+			case PIOCINVINODE:
+				break;
+			default:
 				return -EACCES;
+		}
 	}
 	if((rv=pfsFioCheckFileSlot(fileSlot))<0)
 		return rv;

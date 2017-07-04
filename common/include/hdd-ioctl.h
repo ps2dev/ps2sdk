@@ -189,6 +189,7 @@ typedef struct
 #define PIOCATTRDEL			0x7004
 #define PIOCATTRLOOKUP			0x7005
 #define PIOCATTRREAD			0x7006
+#define PIOCINVINODE			0x7032	//Only available in OSD version. Arbitrarily named.
 
 // DEVCTL commands
 // Command set 'P'
