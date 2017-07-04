@@ -31,11 +31,18 @@ extern pfs_config_t pfsConfig;
 extern int pfsFioSema;
 extern pfs_file_slot_t *pfsFileSlots;
 
+#ifdef PFS_IOCTL2_INC_CHECKSUM
+extern u32 pfsBlockSize;
+#endif
+
 ///////////////////////////////////////////////////////////////////////////////
 //	Function declarations
 
 static int devctlFsckStat(pfs_mount_t *pfsMount, int mode);
 
+#ifdef PFS_IOCTL2_INC_CHECKSUM
+static int ioctl2InvalidateInode(pfs_cache_t *clink);
+#endif
 static int ioctl2Attr(pfs_cache_t *clink, int cmd, void *arg, void *outbuf, u32 *offset);
 static pfs_aentry_t *getAentry(pfs_cache_t *clink, char *key, char *value, int mode);
 static int ioctl2AttrAdd(pfs_cache_t *clink, pfs_ioctl2attr_t *attr);
@@ -100,6 +107,14 @@ int pfsFioDevctl(iop_file_t *f, const char *name, int cmd, void *arg, size_t arg
 	return rv;
 }
 
+#ifdef PFS_IOCTL2_INC_CHECKSUM
+static int ioctl2InvalidateInode(pfs_cache_t *clink)
+{
+	clink->u.inode->checksum++;
+	return clink->pfsMount->blockDev->transfer(clink->pfsMount->fd, clink->u.inode, clink->sub, clink->sector << pfsBlockSize, 1 << pfsBlockSize, PFS_IO_MODE_WRITE);
+}
+#endif
+
 int pfsFioIoctl2(iop_file_t *f, int cmd, void *arg, size_t arglen,	void *buf, size_t buflen)
 {
 	int rv;
@@ -142,6 +157,12 @@ int pfsFioIoctl2(iop_file_t *f, int cmd, void *arg, size_t arglen,	void *buf, si
 	case PIOCATTRREAD:
 		rv=ioctl2Attr(fileSlot->clink, cmd, arg, buf, &fileSlot->aentryOffset);
 		break;
+
+#ifdef PFS_IOCTL2_INC_CHECKSUM
+	case PIOCINVINODE:
+		rv=ioctl2InvalidateInode(fileSlot->clink);
+		break;
+#endif
 
 	default:
 		rv=-EINVAL;
