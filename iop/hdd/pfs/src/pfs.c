@@ -223,9 +223,14 @@ int _start(int argc, char *argv[])
 		return MODULE_NO_RESIDENT_END;
 
 	DelDrv("pfs");
-	AddDrv(&pfsFioDev);
+	if(AddDrv(&pfsFioDev) == 0) {
+#ifdef PFS_OSD_VER
+		PFS_PRINTF(PFS_DRV_NAME" Driver start. This is OSD version!\n");
+#else
+		PFS_PRINTF(PFS_DRV_NAME" Driver start.\n");
+#endif
+		return MODULE_RESIDENT_END;
+	}
 
-	PFS_PRINTF(PFS_DRV_NAME" Driver start.\n");
-
-	return MODULE_RESIDENT_END;
+	return MODULE_NO_RESIDENT_END;
 }

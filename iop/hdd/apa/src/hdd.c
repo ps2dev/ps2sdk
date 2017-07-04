@@ -265,7 +265,11 @@ int _start(int argc, char **argv)
 	DelDrv("hdd");
 	if(AddDrv(&hddFioDev)==0)
 	{
+#ifdef APA_OSD_VER
+		APA_PRINTF(APA_DRV_NAME": driver start. This is OSD version!\n");
+#else
 		APA_PRINTF(APA_DRV_NAME": driver start.\n");
+#endif
 		return MODULE_RESIDENT_END;
 	}
 	return MODULE_NO_RESIDENT_END;
