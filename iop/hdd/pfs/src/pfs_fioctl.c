@@ -182,7 +182,7 @@ static int ioctl2Attr(pfs_cache_t *clink, int cmd, void *arg, void *outbuf, u32 
 	int rv;
 	pfs_cache_t *flink;
 
-	if((flink=pfsCacheGetData(clink->pfsMount, clink->sub, clink->sector+1
+	if((flink=pfsCacheGetData(clink->pfsMount, clink->sub, clink->block+1
 		,PFS_CACHE_FLAG_NOTHING, &rv))==NULL)
 		return rv;
 

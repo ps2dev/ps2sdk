@@ -202,7 +202,7 @@ static int openFile(pfs_mount_t *pfsMount, pfs_file_slot_t *freeSlot, const char
 			    ((result=pfsCheckAccess(fileInode, flags & 0xFFFF))==0) &&
 			    (openFlags & O_TRUNC))
 			{
-				cached=pfsCacheGetData(fileInode->pfsMount, fileInode->sub, fileInode->sector+1, PFS_CACHE_FLAG_NOLOAD | PFS_CACHE_FLAG_NOTHING, &result2);
+				cached=pfsCacheGetData(fileInode->pfsMount, fileInode->sub, fileInode->block+1, PFS_CACHE_FLAG_NOLOAD | PFS_CACHE_FLAG_NOTHING, &result2);
 				if (cached)
 				{
 					memset(cached->u.aentry, 0, sizeof(pfs_inode_t)); //1024
@@ -250,7 +250,7 @@ static int openFile(pfs_mount_t *pfsMount, pfs_file_slot_t *freeSlot, const char
 				result=result3;
 			// Otherwise if its just a regular file, just zero its attribute entry
 			}else{
-				cached=pfsCacheGetData(fileInode->pfsMount, fileInode->sub, fileInode->sector+1,
+				cached=pfsCacheGetData(fileInode->pfsMount, fileInode->sub, fileInode->block+1,
 						PFS_CACHE_FLAG_NOLOAD | PFS_CACHE_FLAG_NOTHING, &result4);
 				if (cached)
 				{

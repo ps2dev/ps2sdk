@@ -292,7 +292,7 @@ pfs_cache_t *pfsInodeGetFileInDir(pfs_cache_t *dirInode, char *path, int *result
 		return pfsCacheUsedAdd(dirInode);
 
 	// If we're in the root dir, don't do anything for ".."
-	if ((dirInode->sector ==
+	if ((dirInode->block ==
 	     dirInode->pfsMount->root_dir.number << dirInode->pfsMount->inode_scale) &&
 	    (dirInode->sub    == dirInode->pfsMount->root_dir.subpart) &&
 	    (strcmp(path, "..") == 0))
@@ -504,7 +504,7 @@ pfs_cache_t *pfsInodeCreate(pfs_cache_t *clink, u16 mode, u16 uid, u16 gid, int 
 			clink->u.inode->subpart=0;
 		a.number =0;
 		a.subpart=clink->u.inode->subpart;
-		j= (pfsMount->zfree * (u64)100) / pfsMount->total_sector;
+		j= (pfsMount->zfree * (u64)100) / pfsMount->total_zones;
 		i= (pfsMount->free_zone[a.subpart] * (u64)100) /
 			(pfsMount->blockDev->getSize(pfsMount->fd, a.subpart) >> pfsMount->sector_scale);
 		if ((i < j) && ((j-i) >= 11))

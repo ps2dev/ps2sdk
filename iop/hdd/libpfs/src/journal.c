@@ -51,7 +51,7 @@ void pfsJournalWrite(pfs_mount_t *pfsMount, pfs_cache_t *clink, u32 pfsCacheNumB
 		if((clink[i].flags & PFS_CACHE_FLAG_DIRTY) && clink[i].pfsMount == pfsMount) {
 			if(clink[i].flags & (PFS_CACHE_FLAG_SEGD|PFS_CACHE_FLAG_SEGI))
 				clink[i].u.inode->checksum=pfsInodeCheckSum(clink[i].u.inode);
-			pfsJournalBuf.log[pfsJournalBuf.num].sector = clink[i].sector << pfsBlockSize;
+			pfsJournalBuf.log[pfsJournalBuf.num].sector = clink[i].block << pfsBlockSize;
 			pfsJournalBuf.log[pfsJournalBuf.num].sub = clink[i].sub;
 			pfsJournalBuf.log[pfsJournalBuf.num].logSector = logSector;
 			pfsJournalBuf.num+=1;

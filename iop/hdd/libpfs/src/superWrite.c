@@ -231,7 +231,7 @@ int pfsMountSuperBlock(pfs_mount_t *pfsMount)
 	memcpy(&pfsMount->root_dir, &superblock->root, sizeof(pfs_blockinfo_t));
 	memcpy(&pfsMount->log, &superblock->log, sizeof(pfs_blockinfo_t));
 	memcpy(&pfsMount->current_dir, &superblock->root, sizeof(pfs_blockinfo_t));
-	pfsMount->total_sector = 0;
+	pfsMount->total_zones = 0;
 	pfsMount->uid = 0;
 	pfsMount->gid = 0;
 
@@ -243,7 +243,7 @@ int pfsMountSuperBlock(pfs_mount_t *pfsMount)
 	{
 		int free;
 
-		pfsMount->total_sector += pfsMount->blockDev->getSize(pfsMount->fd, i) >> pfsMount->sector_scale;
+		pfsMount->total_zones += pfsMount->blockDev->getSize(pfsMount->fd, i) >> pfsMount->sector_scale;
 
 		free = pfsBitmapCalcFreeZones(pfsMount, i);
 		pfsMount->free_zone[i] = free;

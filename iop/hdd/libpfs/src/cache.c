@@ -81,7 +81,7 @@ int pfsCacheTransfer(pfs_cache_t* clink, int mode)
 
 	if(pfsMount->lastError == 0) {	// no error
 		if((err=pfsMount->blockDev->transfer(pfsMount->fd, clink->u.inode, clink->sub,
-			clink->sector << pfsBlockSize, 1 << pfsBlockSize, mode))==0) {
+			clink->block << pfsBlockSize, 1 << pfsBlockSize, mode))==0) {
 			if(mode==PFS_IO_MODE_READ) {
 				if(clink->flags & PFS_CACHE_FLAG_SEGD && ((pfs_inode_t *)clink->u.inode)->magic!=PFS_SEGD_MAGIC)
 					err=-EIO;
@@ -95,7 +95,7 @@ int pfsCacheTransfer(pfs_cache_t* clink, int mode)
 		}
 		if(err!=0) {
 			PFS_PRINTF(PFS_DRV_NAME": Error: Disk error partition %ld, block %ld, err %d\n",
-				clink->sub, clink->sector, err);
+				clink->sub, clink->block, err);
 #ifndef PFS_NO_WRITE_ERROR_STAT
 			pfsMount->blockDev->setPartitionError(pfsMount->fd);
 			pfsFsckStat(pfsMount, clink->u.superblock, PFS_FSCK_STAT_WRITE_ERROR, PFS_MODE_SET_FLAG);
@@ -129,7 +129,7 @@ void pfsCacheFlushAllDirty(pfs_mount_t *pfsMount)
 	pfsJournalReset(pfsMount);
 }
 
-pfs_cache_t *pfsCacheAlloc(pfs_mount_t *pfsMount, u16 sub, u32 sector,
+pfs_cache_t *pfsCacheAlloc(pfs_mount_t *pfsMount, u16 sub, u32 block,
 					int flags, int *result)
 {
 	pfs_cache_t *allocated;
@@ -147,12 +147,12 @@ pfs_cache_t *pfsCacheAlloc(pfs_mount_t *pfsMount, u16 sub, u32 sector,
 	allocated->flags 	= flags & PFS_CACHE_FLAG_MASKTYPE;
 	allocated->pfsMount	= pfsMount;
 	allocated->sub		= sub;
-	allocated->sector	= sector;
+	allocated->block	= block;
 	allocated->nused	= 1;
 	return pfsCacheUnLink(allocated);
 }
 
-pfs_cache_t *pfsCacheGetData(pfs_mount_t *pfsMount, u16 sub, u32 sector,
+pfs_cache_t *pfsCacheGetData(pfs_mount_t *pfsMount, u16 sub, u32 block,
 					int flags, int *result)
 {
 	u32 i;
@@ -163,7 +163,7 @@ pfs_cache_t *pfsCacheGetData(pfs_mount_t *pfsMount, u16 sub, u32 sector,
 	for (i=1; i < pfsCacheNumBuffers + 1; i++)
 		if ( pfsCacheBuf[i].pfsMount &&
 		    (pfsCacheBuf[i].pfsMount==pfsMount) &&
-		    (pfsCacheBuf[i].sector  == sector))
+		    (pfsCacheBuf[i].block  == block))
 			if (pfsCacheBuf[i].sub==sub){
 				pfsCacheBuf[i].flags &= PFS_CACHE_FLAG_MASKSTATUS;
 				pfsCacheBuf[i].flags |= flags & PFS_CACHE_FLAG_MASKTYPE;
@@ -173,7 +173,7 @@ pfs_cache_t *pfsCacheGetData(pfs_mount_t *pfsMount, u16 sub, u32 sector,
 				return &pfsCacheBuf[i];
 			}
 
-	clink=pfsCacheAlloc(pfsMount, sub, sector, flags, result);
+	clink=pfsCacheAlloc(pfsMount, sub, block, flags, result);
 
 	if (clink){
 		if (flags & PFS_CACHE_FLAG_NOLOAD)
@@ -243,13 +243,13 @@ void pfsCacheClose(pfs_mount_t *pfsMount)
 	}
 }
 
-void pfsCacheMarkClean(pfs_mount_t *pfsMount, u32 subpart, u32 sectorStart, u32 sectorEnd)
+void pfsCacheMarkClean(pfs_mount_t *pfsMount, u32 subpart, u32 blockStart, u32 blockEnd)
 {
 	u32 i;
 
 	for(i=1; i< pfsCacheNumBuffers+1;i++){
 		if(pfsCacheBuf[i].pfsMount==pfsMount && pfsCacheBuf[i].sub==subpart) {
-			if(pfsCacheBuf[i].sector >= sectorStart && pfsCacheBuf[i].sector < sectorEnd)
+			if(pfsCacheBuf[i].block >= blockStart && pfsCacheBuf[i].block < blockEnd)
 				pfsCacheBuf[i].flags&=~PFS_CACHE_FLAG_DIRTY;
 		}
 	}

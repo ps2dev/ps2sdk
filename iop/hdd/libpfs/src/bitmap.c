@@ -195,7 +195,7 @@ int pfsBitmapAllocZones(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi, u32 amount)
 						if (count < bi->count)
 							bi->count=count;
 
-						if (bitmap->sector != (startChunk + (1 << pfsMount->inode_scale)))
+						if (bitmap->block != (startChunk + (1 << pfsMount->inode_scale)))
 						{
 							pfsCacheFree(bitmap);
 							sector = (1 << pfsMount->inode_scale) + startChunk;

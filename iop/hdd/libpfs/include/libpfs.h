@@ -156,10 +156,10 @@ typedef struct {
 	pfs_block_device_t *blockDev;		// call table for hdd(hddCallTable)
 	int fd;						//
 	u32 flags;					// rename to attr ones checked
-	u32 total_sector;			// number of sectors in the filesystem
+	u32 total_zones;			// number of zones in the filesystem
 	u32 zfree;					// zone free
-	u32 sector_scale;			//
-	u32 inode_scale;			//
+	u32 sector_scale;			// Number of sectors within a zone
+	u32 inode_scale;			// Number of inodes within a zone
 	u32 zsize;					// zone size
 	u32 num_subs;				// number of sub partitions in the filesystem
 	pfs_blockinfo_t root_dir;		// block info for root directory
@@ -178,7 +178,7 @@ typedef struct pfs_cache_s {
 	u16 nused;					//
 	pfs_mount_t *pfsMount;		//
 	u32 sub;					// main(0)/sub(+1) partition
-	u32 sector;					// block/sector for partition
+	u32 block;					// block within for partition
 	union{						//
 		void *data;
 		pfs_inode_t *inode;
@@ -220,13 +220,13 @@ pfs_cache_t *pfsCacheUnLink(pfs_cache_t *clink);
 pfs_cache_t *pfsCacheUsedAdd(pfs_cache_t *clink);
 int pfsCacheTransfer(pfs_cache_t* clink, int mode);
 void pfsCacheFlushAllDirty(pfs_mount_t *pfsMount);
-pfs_cache_t *pfsCacheAlloc(pfs_mount_t *pfsMount, u16 sub, u32 sector, int flags, int *result);
-pfs_cache_t *pfsCacheGetData(pfs_mount_t *pfsMount, u16 sub, u32 sector, int flags, int *result);
+pfs_cache_t *pfsCacheAlloc(pfs_mount_t *pfsMount, u16 sub, u32 block, int flags, int *result);
+pfs_cache_t *pfsCacheGetData(pfs_mount_t *pfsMount, u16 sub, u32 block, int flags, int *result);
 pfs_cache_t *pfsCacheAllocClean(int *result);
 int pfsCacheIsFull(void);
 int pfsCacheInit(u32 numBuf, u32 bufSize);
 void pfsCacheClose(pfs_mount_t *pfsMount);
-void pfsCacheMarkClean(pfs_mount_t *pfsMount, u32 subpart, u32 sectorStart, u32 sectorEnd);
+void pfsCacheMarkClean(pfs_mount_t *pfsMount, u32 subpart, u32 blockStart, u32 blockEnd);
 
 ///////////////////////////////////////////////////////////////////////////////
 //	Bitmap functions
