@@ -129,7 +129,7 @@ void pfsCacheFlushAllDirty(pfs_mount_t *pfsMount)
 	pfsJournalReset(pfsMount);
 }
 
-pfs_cache_t *pfsCacheAlloc(pfs_mount_t *pfsMount, u16 sub, u32 scale,
+pfs_cache_t *pfsCacheAlloc(pfs_mount_t *pfsMount, u16 sub, u32 sector,
 					int flags, int *result)
 {
 	pfs_cache_t *allocated;
@@ -147,7 +147,7 @@ pfs_cache_t *pfsCacheAlloc(pfs_mount_t *pfsMount, u16 sub, u32 scale,
 	allocated->flags 	= flags & PFS_CACHE_FLAG_MASKTYPE;
 	allocated->pfsMount	= pfsMount;
 	allocated->sub		= sub;
-	allocated->sector	= scale;
+	allocated->sector	= sector;
 	allocated->nused	= 1;
 	return pfsCacheUnLink(allocated);
 }
