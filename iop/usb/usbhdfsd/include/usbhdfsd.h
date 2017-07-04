@@ -1,22 +1,22 @@
+/*
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+*/
+
 /**
  * @file
- * USBHDFSD definitions.
+ * IOP USBHDFSD definitions.
  */
 
-#ifndef _USBHDFSD_H
-#define _USBHDFSD_H
+#include <irx.h>
+#include "usbhdfsd-common.h"
 
-//IOCTL function codes
-/** Rename opened file. Data input to ioctl() -> new, full filename of file. */
-#define USBMASS_IOCTL_RENAME 0x0000
-
-//Device status bits.
-/** CONNected */
-#define USBMASS_DEV_STAT_CONN	0x01
-/** CONFigured */
-#define USBMASS_DEV_STAT_CONF	0x02
-/** ERRor */
-#define USBMASS_DEV_STAT_ERR	0x80
+#ifndef _USBHDFSD_IOP_H
+#define _USBHDFSD_IOP_H
 
 //Structure definitions
 typedef struct UsbMassDeviceInfo{
@@ -37,14 +37,10 @@ typedef void (*usbmass_cb_t)(int cause);
 int UsbMassGetDeviceInfo(int device, UsbMassDeviceInfo_t *info);
 int UsbMassRegisterCallback(int device, usbmass_cb_t callback);
 
-#ifdef _IOP
-#include <irx.h>
-
 #define usbmass_IMPORTS_start DECLARE_IMPORT_TABLE(usbmass, 1, 1)
 #define usbmass_IMPORTS_end END_IMPORT_TABLE
 
 #define I_UsbMassGetDeviceInfo DECLARE_IMPORT(5, UsbMassGetDeviceInfo)
 #define I_UsbMassRegisterCallback DECLARE_IMPORT(5, UsbMassRegisterCallback)
-#endif
 
-#endif //_USBHDFSD_H
+#endif //_USBHDFSD_IOP_H

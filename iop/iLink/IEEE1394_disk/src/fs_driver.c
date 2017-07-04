@@ -30,7 +30,7 @@
 #include <sysmem.h>
 #endif
 
-#include <usbhdfsd.h>
+#include <usbhdfsd-common.h>
 #include "usbhd_common.h"
 #include "fat_driver.h"
 #include "fat_write.h"

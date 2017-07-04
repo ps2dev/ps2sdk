@@ -24,7 +24,7 @@
 #include <sysclib.h>
 #endif
 
-#include <usbhdfsd.h>
+#include <usbhdfsd-common.h>
 #include "usbhd_common.h"
 #include "fat_driver.h"
 #include "fat.h"
@@ -291,7 +291,7 @@ static void fat_setClusterRecord12(unsigned char* buf, unsigned int cluster, int
 static void fat_setClusterRecord12part1(unsigned char* buf, unsigned int cluster, int type) {
 	if (type) { //type 1
 		buf[0] = (buf[0] & 0x0F) + ((cluster & 0x0F)<<4);
-	} else { // type 0
+	} 	else { // type 0
 		buf[0] = (cluster & 0xFF);
 	}
 }
