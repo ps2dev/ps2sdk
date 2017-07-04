@@ -1,6 +1,6 @@
-/* We conform to the 1.2 version of atad.irx exports.  */
+/* We conform to the 1.3 version of atad.irx exports.  */
 
-DECLARE_EXPORT_TABLE(atad, 1, 2)
+DECLARE_EXPORT_TABLE(atad, 1, 3)
 	DECLARE_EXPORT(_start)
 	DECLARE_EXPORT(_retonly)
 	DECLARE_EXPORT(shutdown)

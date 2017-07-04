@@ -20,11 +20,12 @@
 #include <thevent.h>
 #include <stdio.h>
 #include <sysclib.h>
+#include <atad.h>
 
 #include <atahw.h>
 
 #define MODNAME "atad"
-IRX_ID(MODNAME, 1, 1);
+IRX_ID(MODNAME, 2, 4);
 
 #define M_PRINTF(format, args...)	\
 	printf(MODNAME ": " format, ## args)
@@ -32,6 +33,10 @@ IRX_ID(MODNAME, 1, 1);
 #define BANNER "ATA device driver for HD Pro Kit %s\n"
 #define VERSION "v1.0"
 
+#define ATA_XFER_MODE_PIO	0x08
+
+#define ATA_EV_TIMEOUT	1
+#define ATA_EV_COMPLETE	2
 
 // HD Pro Kit is mapping the 1st word in ROM0 seg as a main ATA controller,
 // The pseudo ATA controller registers are accessed (input/ouput) by writing
@@ -63,17 +68,7 @@ IRX_ID(MODNAME, 1, 1);
 #define ATAreg_HCYL_WR		0xb2
 #define ATAreg_DATA_WR		0x12
 
-typedef struct _ata_devinfo {
-	int		exists;			/* Was successfully probed.  		*/
-	int		has_packet;		/* Supports the PACKET command set.  	*/
-	unsigned int	total_sectors;		/* Total number of user sectors.  	*/
-	unsigned int	security_status;	/* Word 0x100 of the identify info.  	*/
-} ata_devinfo_t;
-
 static int ata_evflg = -1;
-
-/* Used for indicating 48-bit LBA support.  */
-static unsigned char lba_48bit[2] = {0, 0};
 
 /* Local device info kept for drives 0 and 1.  */
 static ata_devinfo_t atad_devinfo[2];
@@ -84,8 +79,8 @@ static unsigned short int ata_param[256];
 
 /* ATA command info.  */
 typedef struct _ata_cmd_info {
-	unsigned char command;
-	unsigned char type;
+	u8 command;
+	u8 type;
 } ata_cmd_info_t;
 
 static const ata_cmd_info_t ata_cmd_table[] = {
@@ -96,7 +91,7 @@ static const ata_cmd_info_t ata_cmd_table[] = {
 	{ATA_C_READ_SECTOR_EXT,0x83},
 	{ATA_C_READ_DMA_EXT,0x84},
 	{ATA_C_WRITE_SECTOR,3},
-	{ATA_C_WRITE_LONG,8},	//??? This seems to be WRITE_LONG, but the READ_LONG command isn't present (Why would ). Both are obsolete too.
+	{ATA_C_WRITE_LONG,8},
 	{ATA_C_WRITE_SECTOR_EXT,0x83},
 	{ATA_C_WRITE_DMA_EXT,0x84},
 	{ATA_C_CFA_WRITE_SECTORS_WITHOUT_ERASE,3},
@@ -175,8 +170,13 @@ static int hdpro_io_active = 0;
 static int intr_suspended = 0;
 static int intr_state;
 
+static int hdpro_io_start(void);
+static int hdpro_io_finish(void);
+static void hdpro_io_write(unsigned char cmd, unsigned short int val);
+static int hdpro_io_read(unsigned char cmd);
+static int hdpro_io_init(void);
 static int ata_init_devices(ata_devinfo_t *devinfo);
-static int ata_wait_busy(int bits);
+static int gen_ata_wait_busy(int bits);
 int ata_io_finish(void);
 int ata_device_flush_cache(int device);
 
@@ -184,7 +184,7 @@ extern struct irx_export_table _exp_atad;
 
 static unsigned int ata_alarm_cb(void *unused)
 {
-	iSetEventFlag(ata_evflg, 0x01);
+	iSetEventFlag(ata_evflg, ATA_EV_TIMEOUT);
 	return 0;
 }
 
@@ -204,6 +204,127 @@ static void resume_intr(void)
 
 		intr_suspended = 0;
 	}
+}
+
+static int ata_create_event_flag(void) {
+	iop_event_t event;
+
+	event.attr = EA_SINGLE;	//In v1.04, EA_MULTI was specified.
+	event.bits = 0;
+	return CreateEventFlag(&event);
+}
+
+int _start(int argc, char *argv[])
+{
+	int res = MODULE_NO_RESIDENT_END;
+
+	printf(BANNER, VERSION);
+
+	if ((ata_evflg = ata_create_event_flag()) < 0) {
+		M_PRINTF("Couldn't create event flag, exiting.\n");
+		goto out;
+	}
+
+	if (!hdpro_io_start()) {
+		M_PRINTF("Failed to detect HD Pro, exiting.\n");
+		goto out;
+	}
+
+	HDPROreg_IO8 = 0xe3;
+	CDVDreg_STATUS = 0;
+
+	if (hdpro_io_init() != 0) {
+		M_PRINTF("Failed to init HD Pro, exiting.\n");
+		goto out;
+	}
+
+	if (ata_init_devices(atad_devinfo) != 0) {
+		M_PRINTF("Failed to init device, exiting.\n");
+		goto out;
+	}
+
+	if ((res = RegisterLibraryEntries(&_exp_atad)) != 0) {
+		M_PRINTF("Library is already registered, exiting.\n");
+		goto out;
+	}
+
+	res = MODULE_RESIDENT_END;
+	M_PRINTF("Driver loaded.\n");
+
+out:
+	hdpro_io_finish();
+	return res;
+}
+
+int shutdown(void)
+{
+	ata_device_flush_cache(0);
+	hdpro_io_finish();
+
+	return 0;
+}
+
+/* Export 8 */
+int ata_get_error(void)
+{
+	return hdpro_io_read(ATAreg_ERROR_RD) & 0xff;
+}
+
+#define ATA_WAIT_BUSY		0x80
+#define ATA_WAIT_BUSBUSY	0x88
+
+#define ata_wait_busy()		gen_ata_wait_busy(ATA_WAIT_BUSY)
+#define ata_wait_bus_busy()	gen_ata_wait_busy(ATA_WAIT_BUSBUSY)
+
+/* 0x80 for busy, 0x88 for bus busy.
+	In the original ATAD, the busy and bus-busy functions were separate, but similar.  */
+static int gen_ata_wait_busy(int bits)
+{
+	int i, didx, delay;
+	int res = 0;
+
+	for (i = 0; i < 80; i++) {
+
+		hdpro_io_start();
+
+		unsigned short int r_control = hdpro_io_read(ATAreg_CONTROL_RD);
+
+		hdpro_io_finish();
+
+		if (!((r_control & 0xffff) & bits))
+			goto out;
+
+		didx = i / 10;
+		switch (didx) {
+			case 0:
+				continue;
+			case 1:
+				delay = 100;
+				break;
+			case 2:
+				delay = 1000;
+				break;
+			case 3:
+				delay = 10000;
+				break;
+			case 4:
+				delay = 100000;
+				break;
+			default:
+				delay = 1000000;
+
+		}
+
+		DelayThread(delay);
+	}
+
+	res = ATA_RES_ERR_TIMEOUT;
+	M_PRINTF("Timeout while waiting on busy (0x%02x).\n", bits);
+
+out:
+	hdpro_io_start();
+
+	return res;
 }
 
 static int hdpro_io_start(void)
@@ -255,7 +376,7 @@ static int hdpro_io_finish(void)
 	return hdpro_io_active ^ 1;
 }
 
-static void hdpro_io_write(unsigned char cmd, unsigned short int val)
+static void hdpro_io_write(u8 cmd, u16 val)
 {
 	suspend_intr();
 
@@ -270,7 +391,7 @@ static void hdpro_io_write(unsigned char cmd, unsigned short int val)
 	resume_intr();
 }
 
-static int hdpro_io_read(unsigned char cmd)
+static int hdpro_io_read(u8 cmd)
 {
 	suspend_intr();
 
@@ -313,123 +434,14 @@ static int hdpro_io_init(void)
 
 	DelayThread(3000);
 
-	return ata_wait_busy(0x80);
-}
-
-int _start(int argc, char *argv[])
-{
-	int res = MODULE_NO_RESIDENT_END;
-	iop_event_t event;
-
-	printf(BANNER, VERSION);
-
-	event.attr = 0;
-	event.bits = 0;
-	if ((ata_evflg = CreateEventFlag(&event)) < 0) {
-		M_PRINTF("Couldn't create event flag, exiting.\n");
-		goto out;
-	}
-
-	if (!hdpro_io_start()) {
-		M_PRINTF("Failed to detect HD Pro, exiting.\n");
-		goto out;
-	}
-
-	HDPROreg_IO8 = 0xe3;
-	CDVDreg_STATUS = 0;
-
-	if (hdpro_io_init() != 0) {
-		M_PRINTF("Failed to init HD Pro, exiting.\n");
-		goto out;
-	}
-
-	if (ata_init_devices(atad_devinfo) != 0) {
-		M_PRINTF("Failed to init device, exiting.\n");
-		goto out;
-	}
-
-	if ((res = RegisterLibraryEntries(&_exp_atad)) != 0) {
-		M_PRINTF("Library is already registered, exiting.\n");
-		goto out;
-	}
-
-	res = MODULE_RESIDENT_END;
-	M_PRINTF("Driver loaded.\n");
-
-out:
-	hdpro_io_finish();
-	return res;
-}
-
-int shutdown(void)
-{
-	ata_device_flush_cache(0);
-	hdpro_io_finish();
-
-	return 0;
-}
-
-/* Export 8 */
-int ata_get_error(void)
-{
-	return hdpro_io_read(ATAreg_ERROR_RD) & 0xff;
-}
-
-/* 0x80 for busy, 0x88 for bus busy.  */
-static int ata_wait_busy(int bits)
-{
-	int i, didx, delay;
-	int res = 0;
-
-	for (i = 0; i < 80; i++) {
-
-		hdpro_io_start();
-
-		unsigned short int r_control = hdpro_io_read(ATAreg_CONTROL_RD);
-
-		hdpro_io_finish();
-
-		if (!((r_control & 0xffff) & bits))
-			goto out;
-
-		didx = i / 10;
-		switch (didx) {
-			case 0:
-				continue;
-			case 1:
-				delay = 100;
-				break;
-			case 2:
-				delay = 1000;
-				break;
-			case 3:
-				delay = 10000;
-				break;
-			case 4:
-				delay = 100000;
-				break;
-			default:
-				delay = 1000000;
-
-		}
-
-		DelayThread(delay);
-	}
-
-	res = -502;
-	M_PRINTF("Timeout while waiting on busy (0x%02x).\n", bits);
-
-out:
-	hdpro_io_start();
-
-	return res;
+	return ata_wait_busy();
 }
 
 static int ata_device_select(int device)
 {
 	int res;
 
-	if ((res = ata_wait_busy(0x88)) < 0)
+	if ((res = ata_wait_bus_busy()) < 0)
 		return res;
 
 	/* If the device was already selected, nothing to do.  */
@@ -440,24 +452,24 @@ static int ata_device_select(int device)
 	hdpro_io_write(ATAreg_SELECT_WR, (device & 1) << 4);
 	res = hdpro_io_read(ATAreg_CONTROL_RD);
 
-	return ata_wait_busy(0x88);
+	return ata_wait_bus_busy();
 }
 
 /* Export 6 */
-int ata_io_start(void *buf, unsigned int blkcount, unsigned short int feature, unsigned short int nsector, unsigned short int sector, unsigned short int lcyl, unsigned short int hcyl, unsigned short int select, unsigned short int command)
+int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, u16 lcyl, u16 hcyl, u16 select, u16 command)
 {
 	iop_sys_clock_t cmd_timeout;
 	const ata_cmd_info_t *cmd_table;
 	int i, res, type, cmd_table_size;
 	int using_timeout, device = (select >> 4) & 1;
-	unsigned int searchcmd;
+	u8 searchcmd;
 
 	ClearEventFlag(ata_evflg, 0);
 
-	if (!atad_devinfo[device & 1].exists)
-		return -505;
+	if (!atad_devinfo[device].exists)
+		return ATA_RES_ERR_NODEV;
 
-	if ((res = ata_device_select(device & 1)) != 0)
+	if ((res = ata_device_select(device)) != 0)
 		return res;
 
 	/* For the SMART commands, we need to search on the subcommand
@@ -469,19 +481,19 @@ int ata_io_start(void *buf, unsigned int blkcount, unsigned short int feature, u
 	} else {
 		cmd_table = ata_cmd_table;
 		cmd_table_size = ATA_CMD_TABLE_SIZE;
-		searchcmd = command;
+		searchcmd = command & 0xff;
 	}
 
 	type = 0;
 	for (i = 0; i < cmd_table_size; i++) {
-		if ((searchcmd & 0xff) == cmd_table[i].command) {
+		if (searchcmd == cmd_table[i].command) {
 			type = cmd_table[i].type;
 			break;
 		}
 	}
 
 	if (!(atad_cmd_state.type = type & 0x7F))
-		return -506;
+		return ATA_RES_ERR_CMD;
 
 	atad_cmd_state.buf = buf;
 	atad_cmd_state.blkcount = blkcount;
@@ -489,15 +501,15 @@ int ata_io_start(void *buf, unsigned int blkcount, unsigned short int feature, u
 	/* Check that the device is ready if this the appropiate command.  */
 	if (!(hdpro_io_read(ATAreg_CONTROL_RD) & 0x40)) {
 		switch (command) {
-			case 0x08:
-			case 0x90:
-			case 0x91:
-			case 0xa0:
-			case 0xa1:
+			case ATA_C_DEVICE_RESET:
+			case ATA_C_EXECUTE_DEVICE_DIAGNOSTIC:
+			case ATA_C_INITIALIZE_DEVICE_PARAMETERS:
+			case ATA_C_PACKET:
+			case ATA_C_IDENTIFY_PACKET_DEVICE:
 				break;
 			default:
 				M_PRINTF("Error: Device %d is not ready.\n", device);
-				return -501;
+				return ATA_RES_ERR_NOTREADY;
 		}
 	}
 
@@ -552,7 +564,7 @@ int ata_io_start(void *buf, unsigned int blkcount, unsigned short int feature, u
 	hdpro_io_write(ATAreg_LCYL_WR, lcyl & 0xff);
 	hdpro_io_write(ATAreg_HCYL_WR, hcyl & 0xff);
 
-	hdpro_io_write(ATAreg_SELECT_WR, select & 0xff);
+	hdpro_io_write(ATAreg_SELECT_WR, (select | ATA_SEL_LBA) & 0xff);	//In v1.04, LBA was enabled in the ata_device_sector_io function.
 	hdpro_io_write(ATAreg_COMMAND_WR, command & 0xff);
 
 	return 0;
@@ -569,12 +581,12 @@ static int ata_pio_transfer(ata_cmd_state_t *cmd_state)
 
 	if (status & ATA_STAT_ERR) {
 		M_PRINTF("Error: Command error: status 0x%02x, error 0x%02x.\n", status, ata_get_error());
-		return -503;
+		return ATA_RES_ERR_IO;
 	}
 
 	/* DRQ must be set (data request).  */
 	if (!(status & ATA_STAT_DRQ))
-		return -504;
+		return ATA_RES_ERR_NODATA;
 
 	type = cmd_state->type;
 
@@ -594,7 +606,7 @@ static int ata_pio_transfer(ata_cmd_state_t *cmd_state)
 
 		u16 out = hdpro_io_read(ATAreg_DATA_RD) & 0xffff;
 		if (out != (chk & 0xffff))
-			return -504;
+			return ATA_RES_ERR_NODATA;
 
 		if (cmd_state->type == 8) {
 			buf8 = cmd_state->buf8;
@@ -636,7 +648,7 @@ static int ata_pio_transfer(ata_cmd_state_t *cmd_state)
 
 		u16 r_data = hdpro_io_read(ATAreg_DATA_RD) & 0xffff;
 		if (r_data != (chk & 0xffff))
-			return -504;
+			return ATA_RES_ERR_NODATA;
 	}
 
 	return res;
@@ -646,7 +658,7 @@ static int ata_pio_transfer(ata_cmd_state_t *cmd_state)
 int ata_reset_devices(void)
 {
 	if (hdpro_io_read(ATAreg_CONTROL_RD) & 0x80)
-		return -501;
+		return ATA_RES_ERR_NOTREADY;
 
 	/* Disables device interrupt assertion and asserts SRST. */
 	hdpro_io_write(ATAreg_CONTROL_WR, 6);
@@ -656,31 +668,31 @@ int ata_reset_devices(void)
 	hdpro_io_write(ATAreg_CONTROL_WR, 2);
 	DelayThread(3000);
 
-	return ata_wait_busy(0x80);
+	return ata_wait_busy();
 }
 
 static void ata_device_probe(ata_devinfo_t *devinfo)
 {
-	u16 nsector, lcyl, hcyl;//sector, select;	unused
+	u16 nsector, lcyl, hcyl, sector, select;
 
 	devinfo->exists = 0;
-	devinfo->has_packet = 0;
+	devinfo->has_packet = 2;
 
 	if (hdpro_io_read(ATAreg_CONTROL_RD) & 0x88)
 		return;
 
 	nsector = hdpro_io_read(ATAreg_NSECTOR_RD) & 0xff;
-	//sector = hdpro_io_read(ATAreg_SECTOR_RD) & 0xff;	unused
+	sector = hdpro_io_read(ATAreg_SECTOR_RD) & 0xff;
 	lcyl = hdpro_io_read(ATAreg_LCYL_RD) & 0xff;
 	hcyl = hdpro_io_read(ATAreg_HCYL_RD) & 0xff;
-	//select = hdpro_io_read(ATAreg_SELECT_RD) & 0xff;	unused
+	select = hdpro_io_read(ATAreg_SELECT_RD) & 0xff;
 
 	if (nsector != 1)
 		return;
 
-	devinfo->exists = 1;
-
-	if ((lcyl == 0x14) && (hcyl == 0xeb))
+	if ((lcyl == 0x00) && (hcyl == 0x00))
+		devinfo->has_packet = 0;
+	else if ((lcyl == 0x14) && (hcyl == 0xeb))
 		devinfo->has_packet = 1;
 }
 
@@ -692,7 +704,7 @@ int ata_device_flush_cache(int device)
 	if (!hdpro_io_start())
 		return -1;
 
-	if(!(res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, lba_48bit[device]?ATA_C_FLUSH_CACHE_EXT:ATA_C_FLUSH_CACHE))) res=ata_io_finish();
+	if(!(res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, atad_devinfo[device].lba48?ATA_C_FLUSH_CACHE_EXT:ATA_C_FLUSH_CACHE))) res=ata_io_finish();
 
 	if (!hdpro_io_finish())
 		return -2;
@@ -743,13 +755,14 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 {
 	int i, res;
 
-	ata_reset_devices();
+	if((res = ata_reset_devices()) != 0)
+		return res;
 
 	ata_device_probe(&devinfo[0]);
 	if (!devinfo[0].exists) {
 		M_PRINTF("Error: Unable to detect HDD 0.\n");
 		devinfo[1].exists = 0;
-		return 0;
+		return ATA_RES_ERR_NODEV;	//Returns 0 in v1.04.
 	}
 
 	/* If there is a device 1, grab it's info too.  */
@@ -780,7 +793,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 		   (IDENITFY DEVICE bit 10 word 83) and get the total sectors from
 		   either words(61:60) for 28-bit or words(103:100) for 48-bit.  */
 		if (ata_param[ATA_ID_COMMAND_SETS_SUPPORTED] & 0x0400) {
-			lba_48bit[i] = 1;
+			atad_devinfo[i].lba48 = 1;
 			/* I don't think anyone would use a >2TB HDD but just in case.  */
 			if (ata_param[ATA_ID_48BIT_SECTOTAL_HI]) {
 				devinfo[i].total_sectors = 0xffffffff;
@@ -790,13 +803,15 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 					ata_param[ATA_ID_48BIT_SECTOTAL_LO];
 			}
 		} else {
-			lba_48bit[i] = 0;
+			atad_devinfo[i].lba48 = 0;
 			devinfo[i].total_sectors = (ata_param[ATA_ID_SECTOTAL_HI] << 16)|
 				ata_param[ATA_ID_SECTOTAL_LO];
 		}
 		devinfo[i].security_status = ata_param[ATA_ID_SECURITY_STATUS];
 
-		ata_device_set_transfer_mode(i, 8, 0); /* PIO (flow control).  */
+		/* PIO mode 0 (flow control).  */
+		ata_device_set_transfer_mode(i, ATA_XFER_MODE_PIO, 0);
+		/* Disable idle timeout.  */
 		ata_device_idle(i, 0);
 	}
 	return 0;
@@ -823,10 +838,10 @@ retry:
 		resume_intr();
 
 		if (((ret & 0xff) & 1) == 0) {
-			WaitEventFlag(ata_evflg, 0x03, WEF_CLEAR|WEF_OR, &bits);
-			if (bits & 0x01) {	/* Timeout.  */
+			WaitEventFlag(ata_evflg, ATA_EV_TIMEOUT | ATA_EV_COMPLETE, WEF_CLEAR|WEF_OR, &bits);
+			if (bits & ATA_EV_TIMEOUT) {	/* Timeout.  */
 				M_PRINTF("Error: ATA timeout on a non-data command.\n");
-				return -502;
+				return ATA_RES_ERR_TIMEOUT;
 			}
 
 			DelayThread(500);
@@ -835,17 +850,17 @@ retry:
 
 	} else if (type == 4) {		/* DMA.  */
 			M_PRINTF("Error: DMA mode not implemented.\n");
-			res = -502;
+			res = ATA_RES_ERR_TIMEOUT;
 	} else {			/* PIO transfers.  */
 		stat = hdpro_io_read(ATAreg_CONTROL_RD);
-		if ((res = ata_wait_busy(0x80)) < 0)
+		if ((res = ata_wait_busy()) < 0)
 			goto finish;
 
 		/* Transfer each PIO data block.  */
 		while (--cmd_state->blkcount != -1) {
 			if ((res = ata_pio_transfer(cmd_state)) < 0)
 				goto finish;
-			if ((res = ata_wait_busy(0x80)) < 0)
+			if ((res = ata_wait_busy()) < 0)
 				goto finish;
 		}
 	}
@@ -855,10 +870,10 @@ retry:
 
 	/* Wait until the device isn't busy.  */
 	if (hdpro_io_read(ATAreg_STATUS_RD) & ATA_STAT_BUSY)
-		res = ata_wait_busy(0x80);
+		res = ata_wait_busy();
 	if ((stat = hdpro_io_read(ATAreg_STATUS_RD)) & ATA_STAT_ERR) {
 		M_PRINTF("Error: Command error: status 0x%02x, error 0x%02x.\n", stat, ata_get_error());
-		res = -503;
+		res = ATA_RES_ERR_IO;
 	}
 
 finish:
@@ -869,7 +884,7 @@ finish:
 }
 
 /* Export 9 */
-int ata_device_sector_io(int device, void *buf, unsigned int lba, unsigned int nsectors, int dir)
+int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir)
 {
 	int res = 0;
 	u16 sector, lcyl, hcyl, select, command, len;
@@ -884,18 +899,18 @@ int ata_device_sector_io(int device, void *buf, unsigned int lba, unsigned int n
 		lcyl = (lba >> 8) & 0xff;
 		hcyl = (lba >> 16) & 0xff;
 
-		if (lba_48bit[device]) {
+		if (atad_devinfo[device].lba48) {
 			/* Setup for 48-bit LBA.  */
 			/* Combine bits 24-31 and bits 0-7 of lba into sector.  */
 			sector = ((lba >> 16) & 0xff00) | (lba & 0xff);
-			/* 0x40 enables LBA.  */
-			select = ((device << 4) | 0x40) & 0xffff;
+			/* In v1.04, LBA was enabled here.  */
+			select = (device << 4) & 0xffff;
 			command = (dir == 1) ? ATA_C_WRITE_SECTOR_EXT : ATA_C_READ_SECTOR_EXT;
 		} else {
 			/* Setup for 28-bit LBA.  */
 			sector = lba & 0xff;
-			/* 0x40 enables LBA.  */
-			select = ((device << 4) | ((lba >> 24) & 0xf) | 0x40) & 0xffff;
+			/* In v1.04, LBA was enabled here.  */
+			select = ((device << 4) | ((lba >> 24) & 0xf)) & 0xffff;
 			command = (dir == 1) ? ATA_C_WRITE_SECTOR : ATA_C_READ_SECTOR;
 		}
 
@@ -921,4 +936,3 @@ ata_devinfo_t * ata_get_devinfo(int device)
 {
 	return &atad_devinfo[device];
 }
-

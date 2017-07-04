@@ -489,8 +489,8 @@ static int ata_pio_transfer(ata_cmd_state_t *cmd_state)
 			ata_hwport->r_data = *buf16;
 			cmd_state->buf16 = ++buf16;
 		}
-		buf8 = cmd_state->buf8;
 		if (cmd_state->type == 8) {
+			buf8 = cmd_state->buf8;
 			for (i = 0; i < 4; i++) {
 				ata_hwport->r_data = *buf8;
 				cmd_state->buf8 = ++buf8;

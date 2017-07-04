@@ -8,6 +8,8 @@
 
 IOP_BIN ?= hdproatad.irx
 
+IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/atad/include
+
 IOP_OBJS = hdproatad.o exports.o imports.o
 
 include $(PS2SDKSRC)/Defs.make
