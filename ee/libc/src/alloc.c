@@ -134,7 +134,7 @@ void * malloc(size_t size)
 	if (__alloc_heap_head == NULL) {
 		/* Align the bottom of the heap to our default alignment.  */
 		if (__alloc_heap_base == NULL) {
-			heap_align_bytes = (u32)ps2_sbrk(0) & (DEFAULT_ALIGNMENT - 1);
+			heap_align_bytes = DEFAULT_ALIGNMENT - ((u32)ps2_sbrk(0) & (DEFAULT_ALIGNMENT - 1));
 			ps2_sbrk(heap_align_bytes);
 			__alloc_heap_base = ps2_sbrk(0);
 		}
