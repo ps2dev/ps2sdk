@@ -191,7 +191,7 @@ int mcman_open1(int port, int slot, char *filename, int flags)
 		}
 	}
 
-	r = mcman_flushmccache(port, slot);
+	r = McFlushCache(port, slot);
 	if (r != sceMcResSucceed)
 		return r;
 
@@ -225,7 +225,7 @@ int mcman_open1(int port, int slot, char *filename, int flags)
 
 	mce->wr_flag |= 1 << ((cluster + 1) - ((temp >> 3) << 3));
 
-	r = mcman_flushmccache(port, slot);
+	r = McFlushCache(port, slot);
 	if (r != sceMcResSucceed)
 		return r;
 
@@ -298,7 +298,7 @@ int mcman_write1(int fd, void *buffer, int nbyte)
 			r = mcman_close1(fd);
 			if (r != sceMcResSucceed)
 				return r;
-			r = mcman_flushmccache(fh->port, fh->slot);
+			r = McFlushCache(fh->port, fh->slot);
 			if (r != sceMcResSucceed)
 				return r;
 		}
@@ -538,7 +538,7 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 
 	fse2->field_1e = 0;
 
-	r = mcman_flushmccache(port, slot);
+	r = McFlushCache(port, slot);
 
 	return r;
 }
@@ -693,7 +693,7 @@ int mcman_close1(int fd)
 
 	fse->edc = mcman_calcEDC((void *)fse, 127);
 
-	r = mcman_flushmccache(fh->port, fh->slot);
+	r = McFlushCache(fh->port, fh->slot);
 	if (r != sceMcResSucceed)
 		return r;
 

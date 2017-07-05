@@ -62,6 +62,16 @@ typedef struct {			// size = 512
 	u8  unused3[416];		// 96
 } McFsEntry;
 
+typedef struct _MCCacheEntry {
+	int  cluster;   // 0
+	u8  *cl_data;   // 4
+	u16  mc_slot;   // 8
+	u8   wr_flag;   // 10
+	u8   mc_port;   // 11
+	u8   rd_flag;   // 12
+	u8   unused[3]; // 13
+} McCacheEntry;
+
 /** file descriptor related mc command
  * used by: McInit, McClose, McSeek, McRead, McWrite, McGetinfo, McFormat, McFlush, McUnformat
  */

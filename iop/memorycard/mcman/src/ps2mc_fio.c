@@ -136,7 +136,7 @@ lbl1:
 			indirect_offset = j % mcdi->FATentries_per_cluster;
 
 			if (indirect_offset == 0) {
-				if (mcman_readcluster(port, slot, mcdi->ifc_list[ifc_index], &mce) != sceMcResSucceed)
+				if (McReadCluster(port, slot, mcdi->ifc_list[ifc_index], &mce) != sceMcResSucceed)
 					return -42;
 				mce->wr_flag = 1;
 			}
@@ -219,7 +219,7 @@ lbl1:
 				fat_entry = 0xfffffffd; // marking bad cluster
 			}
 
-			if (mcman_setFATentry(port, slot, j - mcdi->alloc_offset, fat_entry) != sceMcResSucceed)
+			if (McSetFATentry(port, slot, j - mcdi->alloc_offset, fat_entry) != sceMcResSucceed)
 				return -46;
 
 			j++;
@@ -241,7 +241,7 @@ lbl1:
 		else
 			size = i;
 
-		if (mcman_readcluster(port, slot, size >> 10, &mce) != sceMcResSucceed)
+		if (McReadCluster(port, slot, size >> 10, &mce) != sceMcResSucceed)
 			return -48;
 
 		size = MCMAN_CLUSTERSIZE;
@@ -259,11 +259,11 @@ lbl1:
 	mcdi->rootdir_cluster2 = mcdi->rootdir_cluster;
 
 	// Create root dir
-	if (mcman_createDirentry(port, slot, 0, 0, 0, NULL) != sceMcResSucceed)
+	if (McCreateDirentry(port, slot, 0, 0, 0, NULL) != sceMcResSucceed)
 		return -49;
 
 	// finally flush cache to memcard
-	r = mcman_flushmccache(port, slot);
+	r = McFlushCache(port, slot);
 	if (r != sceMcResSucceed)
 		return r;
 
@@ -287,7 +287,7 @@ int mcman_dread2(int fd, fio_dirent_t *dirent)
 		return sceMcResSucceed;
 
 	do {
-		r = mcman_readdirentry(fh->port, fh->slot, fh->freeclink, fh->position, &fse);
+		r = McReadDirEntry(fh->port, fh->slot, fh->freeclink, fh->position, &fse);
 		if (r != sceMcResSucceed)
 			return r;
 
@@ -405,11 +405,11 @@ int mcman_setinfo2(int port, int slot, char *filename, sceMcTblGetDir *info, int
 		if (dirInfo.fsindex < 2)
 			return sceMcResNoEntry;
 
-		r = mcman_readdirentry(port, slot, dirInfo.cluster, 0, &fse);
+		r = McReadDirEntry(port, slot, dirInfo.cluster, 0, &fse);
 		if (r != sceMcResSucceed)
 			return r;
 
-		r = mcman_readdirentry(port, slot, fse->cluster, fse->dir_entry, &fse);
+		r = McReadDirEntry(port, slot, fse->cluster, fse->dir_entry, &fse);
 		if (r != sceMcResSucceed)
 			return r;
 
@@ -441,11 +441,11 @@ int mcman_setinfo2(int port, int slot, char *filename, sceMcTblGetDir *info, int
 		}
 	}
 
-	r = mcman_readdirentry(port, slot, dirInfo.cluster, dirInfo.fsindex, &fse);
+	r = McReadDirEntry(port, slot, dirInfo.cluster, dirInfo.fsindex, &fse);
 	if (r != sceMcResSucceed)
 		return r;
 
-	mcman_1stcacheEntsetwrflagoff();
+	Mc1stCacheEntSetWrFlagOff();
 
 	//Special fix clause for file managers (like uLaunchELF)
 	//This allows writing most entries that can be read by mcGetDir
@@ -524,7 +524,7 @@ int mcman_read2(int fd, void *buffer, int nbyte)
 				if (r <= 0)
 					return r;
 
-				r = mcman_readcluster(fh->port, fh->slot, r, &mce);
+				r = McReadCluster(fh->port, fh->slot, r, &mce);
 				if (r != sceMcResSucceed)
 					return r;
 
@@ -557,7 +557,7 @@ int mcman_write2(int fd, void *buffer, int nbyte)
 			r = mcman_close2(fd);
 			if (r != sceMcResSucceed)
 				return r;
-			r = mcman_flushmccache(fh->port, fh->slot);
+			r = McFlushCache(fh->port, fh->slot);
 			if (r != sceMcResSucceed)
 				return r;
 		}
@@ -583,7 +583,7 @@ int mcman_write2(int fd, void *buffer, int nbyte)
 					return r;
 			}
 
-			r = mcman_readcluster(fh->port, fh->slot, r, &mce);
+			r = McReadCluster(fh->port, fh->slot, r, &mce);
 			if (r != sceMcResSucceed)
 				return r;
 
@@ -632,7 +632,7 @@ int mcman_close2(int fd)
 	DPRINTF("mcman: mcman_close2 fd %d\n", fd);
 #endif
 
-	r = mcman_readdirentry(fh->port, fh->slot, fh->field_20, fh->field_24, &fse1);
+	r = McReadDirEntry(fh->port, fh->slot, fh->field_20, fh->field_24, &fse1);
 	if (r != sceMcResSucceed)
 		return -31;
 
@@ -649,17 +649,17 @@ int mcman_close2(int fd)
 	fse1->cluster = fh->freeclink;
 	fse1->length = fh->filesize;
 
-	mcman_1stcacheEntsetwrflagoff();
+	Mc1stCacheEntSetWrFlagOff();
 
 	mcman_fsmodtime = fse1->modified;
 
-	r = mcman_readdirentry(fh->port, fh->slot, fh->field_28, fh->field_2C, &fse2);
+	r = McReadDirEntry(fh->port, fh->slot, fh->field_28, fh->field_2C, &fse2);
 	if (r != sceMcResSucceed)
 		return r;
 
 	fse2->modified = mcman_fsmodtime;
 
-	mcman_1stcacheEntsetwrflagoff();
+	Mc1stCacheEntSetWrFlagOff();
 
 	return sceMcResSucceed;
 }
@@ -777,7 +777,7 @@ int mcman_open2(int port, int slot, char *filename, int flags)
 					return sceMcResDeniedPermit;
 			}
 		}
-		r = mcman_readdirentry(port, slot, cacheDir.cluster, 0, &fse2);
+		r = McReadDirEntry(port, slot, cacheDir.cluster, 0, &fse2);
 		if (r != sceMcResSucceed)
 			return r;
 
@@ -816,8 +816,8 @@ int mcman_open2(int port, int slot, char *filename, int flags)
 		}
 
 		if ((flags & sceMcFileCreateFile) != 0) {
-			r = mcman_setdirentrystate(port, slot, cacheDir.cluster, cacheDir.fsindex, 0);
-			mcman_flushmccache(port, slot);
+			r = McSetDirEntryState(port, slot, cacheDir.cluster, cacheDir.fsindex, 0);
+			McFlushCache(port, slot);
 
 			if (r != sceMcResSucceed)
 				return -43;
@@ -850,7 +850,7 @@ int mcman_open2(int port, int slot, char *filename, int flags)
 		fh->field_2C = cacheDir.fsindex;
 	}
 
-	r = mcman_readdirentry(port, slot, fh->field_28, fh->field_2C, &fse1);
+	r = McReadDirEntry(port, slot, fh->field_28, fh->field_2C, &fse1);
 	if (r != sceMcResSucceed)
 		return r;
 
@@ -888,7 +888,7 @@ int mcman_open2(int port, int slot, char *filename, int flags)
 			if (i != -1) {
 
 				do {
-					r = mcman_getFATentry(port, slot, fat_index, &fat_entry);
+					r = McGetFATentry(port, slot, fat_index, &fat_entry);
 					if (r != sceMcResSucceed)
 						return r;
 
@@ -902,7 +902,7 @@ int mcman_open2(int port, int slot, char *filename, int flags)
 
 						fat_entry |= 0x80000000;
 
-						r = mcman_setFATentry(port, slot, fat_index, fat_entry);
+						r = McSetFATentry(port, slot, fat_index, fat_entry);
 						if (r != sceMcResSucceed)
 							return r;
 
@@ -915,7 +915,7 @@ int mcman_open2(int port, int slot, char *filename, int flags)
 			}
 		}
 
-		r = mcman_flushmccache(port, slot);
+		r = McFlushCache(port, slot);
 		if (r != sceMcResSucceed)
 			return r;
 
@@ -948,7 +948,7 @@ int mcman_open2(int port, int slot, char *filename, int flags)
 
 	mcman_getmcrtime(&mcman_dircache[2].modified);
 
-	r = mcman_readdirentry(port, slot, mcman_dircache[2].cluster, cacheDir.maxent, &fse2);
+	r = McReadDirEntry(port, slot, mcman_dircache[2].cluster, cacheDir.maxent, &fse2);
 	if (r != sceMcResSucceed)
 		return r;
 
@@ -959,7 +959,7 @@ int mcman_open2(int port, int slot, char *filename, int flags)
 	fse2->created = mcman_dircache[2].modified;
 	fse2->modified = mcman_dircache[2].modified;
 
-	mcman_1stcacheEntsetwrflagoff();
+	Mc1stCacheEntSetWrFlagOff();
 
 	mcman_addcacheentry(mce);
 
@@ -974,11 +974,11 @@ int mcman_open2(int port, int slot, char *filename, int flags)
 		fse2->length = 2;
 		fse2->cluster = mcfree;
 
-		r = mcman_createDirentry(port, slot, mcman_dircache[2].cluster, cacheDir.maxent, mcfree, (sceMcStDateTime *)&fse2->created);
+		r = McCreateDirentry(port, slot, mcman_dircache[2].cluster, cacheDir.maxent, mcfree, (sceMcStDateTime *)&fse2->created);
 		if (r != sceMcResSucceed)
 			return -46;
 
-		r = mcman_readdirentry(port, slot, fh->field_28, fh->field_2C, &fse1);
+		r = McReadDirEntry(port, slot, fh->field_28, fh->field_2C, &fse1);
 		if (r != sceMcResSucceed)
 			return r;
 
@@ -995,9 +995,9 @@ int mcman_open2(int port, int slot, char *filename, int flags)
 			pcache += 16;
 		} while (pfsentry < pfseend);
 
-		mcman_1stcacheEntsetwrflagoff();
+		Mc1stCacheEntSetWrFlagOff();
 
-		r = mcman_flushmccache(port, slot);
+		r = McFlushCache(port, slot);
 		if (r != sceMcResSucceed)
 			return r;
 
@@ -1013,7 +1013,7 @@ int mcman_open2(int port, int slot, char *filename, int flags)
 		fh->status = 1;
 		fh->field_24 = cacheDir.maxent;
 
-		r = mcman_readdirentry(port, slot, fh->field_28, fh->field_2C, &fse1);
+		r = McReadDirEntry(port, slot, fh->field_28, fh->field_2C, &fse1);
 		if (r != sceMcResSucceed)
 			return r;
 
@@ -1030,9 +1030,9 @@ int mcman_open2(int port, int slot, char *filename, int flags)
 			pcache += 16;
 		} while (pfsentry < pfseend);
 
-		mcman_1stcacheEntsetwrflagoff();
+		Mc1stCacheEntSetWrFlagOff();
 
-		r = mcman_flushmccache(port, slot);
+		r = McFlushCache(port, slot);
 		if (r != sceMcResSucceed)
 			return r;
 	}
@@ -1069,7 +1069,7 @@ int mcman_chdir(int port, int slot, char *newdir, char *currentdir)
 
 	cluster = cacheDir.cluster;
 	if (!strcmp(fse->name, "..")) {
-		r = mcman_readdirentry(port, slot, cluster, 0, &fse);
+		r = McReadDirEntry(port, slot, cluster, 0, &fse);
 		if (r != sceMcResSucceed)
 			return r;
 	}
@@ -1079,7 +1079,7 @@ int mcman_chdir(int port, int slot, char *newdir, char *currentdir)
 		mcdi->unknown1 = fse->dir_entry;
 
 		cluster = fse->cluster;
-		r = mcman_readdirentry(port, slot, cluster, fse->dir_entry, &fse);
+		r = McReadDirEntry(port, slot, cluster, fse->dir_entry, &fse);
 		if (r != sceMcResSucceed)
 			return r;
 	}
@@ -1109,11 +1109,11 @@ lbl1:
 			currentdir[32] = 0;
 		}
 
-		r = mcman_readdirentry(port, slot, cluster, 0, &fse);
+		r = McReadDirEntry(port, slot, cluster, 0, &fse);
 		if (r != sceMcResSucceed)
 			return r;
 
-		r = mcman_readdirentry(port, slot, fse->cluster, fse->dir_entry, &fse);
+		r = McReadDirEntry(port, slot, fse->cluster, fse->dir_entry, &fse);
 
 		if (r == sceMcResSucceed)
 			goto lbl1;
@@ -1208,7 +1208,7 @@ int mcman_getdir2(int port, int slot, char *dirname, int flags, int maxent, sceM
 			if (mcman_curdirmaxent >= mcman_curdirlength)
 				break;
 
-			r = mcman_readdirentry(port, slot, mcman_curdircluster, mcman_curdirmaxent, &fse);
+			r = McReadDirEntry(port, slot, mcman_curdircluster, mcman_curdirmaxent, &fse);
 			if (r != sceMcResSucceed)
 				return r;
 
@@ -1225,15 +1225,15 @@ int mcman_getdir2(int port, int slot, char *dirname, int flags, int maxent, sceM
 
 			if (mcman_curdirmaxent == 2) {
 
-				r = mcman_readdirentry(port, slot, mcman_curdircluster, 0, &fse);
+				r = McReadDirEntry(port, slot, mcman_curdircluster, 0, &fse);
 				if (r != sceMcResSucceed)
 					return r;
 
-				r = mcman_readdirentry(port, slot, fse->cluster, 0, &fse);
+				r = McReadDirEntry(port, slot, fse->cluster, 0, &fse);
 				if (r != sceMcResSucceed)
 					return r;
 
-				r = mcman_readdirentry(port, slot, fse->cluster, fse->dir_entry, &fse);
+				r = McReadDirEntry(port, slot, fse->cluster, fse->dir_entry, &fse);
 				if (r != sceMcResSucceed)
 					return r;
 
@@ -1243,11 +1243,11 @@ int mcman_getdir2(int port, int slot, char *dirname, int flags, int maxent, sceM
 			}
 			else if (mcman_curdirmaxent == 1) {
 
-				r = mcman_readdirentry(port, slot, mcman_curdircluster, 0, &fse);
+				r = McReadDirEntry(port, slot, mcman_curdircluster, 0, &fse);
 				if (r != sceMcResSucceed)
 					return r;
 
-				r = mcman_readdirentry(port, slot, fse->cluster, fse->dir_entry, &fse);
+				r = McReadDirEntry(port, slot, fse->cluster, fse->dir_entry, &fse);
 				if (r != sceMcResSucceed)
 					return r;
 
@@ -1318,7 +1318,7 @@ int mcman_delete2(int port, int slot, char *filename, int flags)
 	if ((!flags) && (fse1->mode & sceMcFileAttrSubdir) && (i < fse1->length)) {
 
 		do {
-			r = mcman_readdirentry(port, slot, fse1->cluster, i, &fse2);
+			r = McReadDirEntry(port, slot, fse1->cluster, i, &fse2);
 			if (r != sceMcResSucceed)
 				return r;
 
@@ -1328,11 +1328,11 @@ int mcman_delete2(int port, int slot, char *filename, int flags)
 		} while (++i < fse1->length);
 	}
 
-	r = mcman_setdirentrystate(port, slot, cacheDir.cluster, cacheDir.fsindex, flags);
+	r = McSetDirEntryState(port, slot, cacheDir.cluster, cacheDir.fsindex, flags);
 	if (r != sceMcResSucceed)
 		return r;
 
-	r = mcman_flushmccache(port, slot);
+	r = McFlushCache(port, slot);
 	if (r != sceMcResSucceed)
 		return r;
 

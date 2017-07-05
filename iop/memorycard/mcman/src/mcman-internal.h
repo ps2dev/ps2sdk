@@ -37,16 +37,6 @@
 #define MODNAME "mcman_cex"
 #define MODVER  0x20b
 
-typedef struct _MCCacheEntry {
-	int  cluster;   // 0
-	u8  *cl_data;   // 4
-	u16  mc_slot;   // 8
-	u8   wr_flag;   // 10
-	u8   mc_port;   // 11
-	u8   rd_flag;   // 12
-	u8   unused[3]; // 13
-} McCacheEntry;
-
 typedef struct _MCCacheDir {
 	int  cluster;   // 0
 	int  fsindex;   // 4
@@ -129,7 +119,6 @@ int  mcman_setdevspec(int port, int slot);
 int  mcman_reportBadBlocks(int port, int slot);
 int  mcman_setdevinfos(int port, int slot);
 int  mcman_format2(int port, int slot);
-int  mcman_createDirentry(int port, int slot, int parent_cluster, int num_entries, int cluster, sceMcStDateTime *ctime);
 int  mcman_fatRseek(int fd);
 int  mcman_fatWseek(int fd);
 int  mcman_findfree2(int port, int slot, int reserve);
@@ -145,7 +134,6 @@ int  mcman_getdirinfo(int port, int slot, McFsEntry *pfse, char *filename, McCac
 int  mcman_open2(int port, int slot, char *filename, int flags);
 int  mcman_chdir(int port, int slot, char *newdir, char *currentdir);
 int  mcman_writecluster(int port, int slot, int cluster, int flag);
-int  mcman_setdirentrystate(int port, int slot, int cluster, int fsindex, int flags);
 int  mcman_getdir2(int port, int slot, char *dirname, int flags, int maxent, sceMcTblGetDir *info);
 int  mcman_delete2(int port, int slot, char *filename, int flags);
 int  mcman_checkBackupBlocks(int port, int slot);
@@ -182,9 +170,7 @@ void mcman_freecluster(int port, int slot, int cluster);
 int  mcman_getFATindex(int port, int slot, int num);
 McCacheEntry *mcman_get1stcacheEntp(void);
 void mcman_addcacheentry(McCacheEntry *mce);
-int  mcman_flushmccache(int port, int slot);
 int  mcman_flushcacheentry(McCacheEntry *mce);
-int  mcman_readcluster(int port, int slot, int cluster, McCacheEntry **pmce);
 int  mcman_readdirentryPS1(int port, int slot, int cluster, McFsEntryPS1 **pfse);
 int  mcman_readclusterPS1(int port, int slot, int cluster, McCacheEntry **pmce);
 int  mcman_replaceBackupBlock(int port, int slot, int block);
