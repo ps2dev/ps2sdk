@@ -27,4 +27,4 @@ include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make
 
 $(EE_TLBSRC_ELF): $(EE_OBJS) | $(EE_BIN_DIR)
-	$(EE_CC) $(EE_CFLAGS) -o $@ $^ -nostartfiles -Tlinkfile $(EE_LIBS)
+	$(EE_CC) $(EE_CFLAGS) -o $@ $^ -nostartfiles -Tlinkfile -s $(EE_LIBS)
