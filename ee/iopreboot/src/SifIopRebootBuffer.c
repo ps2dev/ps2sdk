@@ -30,8 +30,8 @@ extern unsigned char imgdrv_irx[];
 extern unsigned int size_imgdrv_irx;
 
 //If for whatever reason imgdrv changes, update these offsets.
-#define IMGDRV_IRX_PTRS		0x1b4
-#define IMGDRV_IRX_SIZES	0x1bc
+#define IMGDRV_IRX_PTRS		0x190
+#define IMGDRV_IRX_SIZES	0x198
 
 #ifdef F__iopcontrol_special_internals
 u8 iopbtconf_img[IOPBTCONF_IOP_MAX_SIZE] __attribute__((aligned(64)));

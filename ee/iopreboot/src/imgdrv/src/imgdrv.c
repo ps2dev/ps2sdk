@@ -22,7 +22,20 @@ static int imgdrv_dummy(void);
 static int imgdrv_read(iop_file_t *f, void *buf, int size);
 static int imgdrv_lseek(iop_file_t *f, int offset, int whence);
 
-static iop_device_ops_t imgdrv_ops = {
+/*	The IOMAN operations structure is usually longer than this,
+	but the structure in the original was this short (probably to save space). */
+typedef struct _iop_device_ops_short {
+	int	(*init)(iop_device_t *);
+	int	(*deinit)(iop_device_t *);
+	int	(*format)(iop_file_t *);
+	int	(*open)(iop_file_t *, const char *, int);
+	int	(*close)(iop_file_t *);
+	int	(*read)(iop_file_t *, void *, int);
+	int	(*write)(iop_file_t *, void *, int);
+	int	(*lseek)(iop_file_t *, int, int);
+} iop_device_ops_short_t;
+
+static iop_device_ops_short_t imgdrv_ops = {
 	(void*)imgdrv_dummy,	//init
 	(void*)imgdrv_dummy,	//deinit
 	NULL,			//format
@@ -43,7 +56,7 @@ static iop_device_t img_device = {
 	IOP_DT_FS,
 	1,
 	"img",
-	&imgdrv_ops
+	(iop_device_ops_t*)&imgdrv_ops
 };
 
 int _start(int argc, char *argv[])
