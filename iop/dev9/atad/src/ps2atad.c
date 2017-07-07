@@ -173,6 +173,7 @@ static void ata_ultra_dma_mode(int mode);
 
 extern struct irx_export_table _exp_atad;
 
+//In v1.04, DMA was enabled in ata_set_dir() instead.
 static void AtadPreDmaCb(int bcr, int dir){
 	USE_SPD_REGS;
 
@@ -364,15 +365,15 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
 	if (command == ATA_C_SCE_SECURITY_CONTROL) {
 		cmd_table = sec_ctrl_cmd_table;
 		cmd_table_size = SEC_CTRL_CMD_TABLE_SIZE;
-		searchcmd = feature;
+		searchcmd = (u8)feature;
 	} else if (command == ATA_C_SMART) {
 		cmd_table = smart_cmd_table;
 		cmd_table_size = SMART_CMD_TABLE_SIZE;
-		searchcmd = feature;
+		searchcmd = (u8)feature;
 	} else {
 		cmd_table = ata_cmd_table;
 		cmd_table_size = ATA_CMD_TABLE_SIZE;
-		searchcmd = command & 0xff;
+		searchcmd = (u8)command;
 	}
 
 	type = 0;
@@ -383,7 +384,7 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
 		}
 	}
 
-	if (!(atad_cmd_state.type = type & 0x7F))
+	if (!(atad_cmd_state.type = type & 0x7F))	//Non-SONY: ignore the 48-bit LBA flag.
 		return ATA_RES_ERR_CMD;
 
 	atad_cmd_state.buf = buf;
@@ -406,7 +407,7 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
 
 	/* Does this command need a timeout?  */
 	using_timeout = 0;
-	switch (type & 0x7F) {
+	switch (type & 0x7F) {	//Non-SONY: ignore the 48-bit LBA flag.
 		case 1:
 		case 6:
 			using_timeout = 1;
@@ -436,7 +437,7 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
 	/* Finally!  We send off the ATA command with arguments.  */
 	ata_hwport->r_control = (using_timeout == 0) << 1;
 
-	if(type&0x80){	//For the sake of achieving (greatly) improved performance, write the registers twice only if required! This is also required for compatibility with the buggy firmware of certain PSX units.
+	if(type&0x80) {	//For the sake of achieving improved performance, write the registers twice only if required! This is also required for compatibility with the buggy firmware of certain PSX units.
 		/* 48-bit LBA requires writing to the address registers twice,
 		   24 bits of the LBA address is written each time.
 		   Writing to registers twice does not affect 28-bit LBA since
@@ -453,7 +454,7 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
 	ata_hwport->r_sector  = sector & 0xff;
 	ata_hwport->r_lcyl    = lcyl & 0xff;
 	ata_hwport->r_hcyl    = hcyl & 0xff;
-	ata_hwport->r_select  = (select | ATA_SEL_LBA) & 0xff;
+	ata_hwport->r_select  = (select | ATA_SEL_LBA) & 0xff;	//In v1.04, LBA was enabled in the ata_device_sector_io function.
 	ata_hwport->r_command = command & 0xff;
 
 	/* Turn on the LED.  */
@@ -812,8 +813,8 @@ int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir)
 			/* Setup for 28-bit LBA.  */
 			len = (nsectors > 256) ? 256 : nsectors;
 			sector = lba & 0xff;
-			/* 0x40 enables LBA.  */
-			select = ((device << 4) | ((lba >> 24) & 0xf) | 0x40) & 0xffff;
+			/* In v1.04, LBA was enabled here.  */
+			select = ((device << 4) | ((lba >> 24) & 0xf)) & 0xffff;
 			command = (dir == 1) ? ATA_C_WRITE_DMA : ATA_C_READ_DMA;
 		}
 
@@ -1055,7 +1056,7 @@ static void ata_set_dir(int dir)
 	val = SPD_REG16(SPD_R_IF_CTRL) & 1;
 	val |= (dir == ATA_DIR_WRITE) ? 0x4c : 0x4e;
 	SPD_REG16(SPD_R_IF_CTRL) = val;
-	SPD_REG16(SPD_R_XFR_CTRL) = dir | 0x6;
+	SPD_REG16(SPD_R_XFR_CTRL) = dir | 0x6;	//In v1.04, DMA was enabled here (0x86 instead of 0x6)
 }
 
 static void ata_pio_mode(int mode)

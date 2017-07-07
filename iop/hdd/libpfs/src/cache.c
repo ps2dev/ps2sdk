@@ -80,7 +80,7 @@ int pfsCacheTransfer(pfs_cache_t* clink, int mode)
 	int err;
 
 	if(pfsMount->lastError == 0) {	// no error
-		if((err=pfsMount->blockDev->transfer(pfsMount->fd, clink->u.inode, clink->sub,
+		if((err=pfsMount->blockDev->transfer(pfsMount->fd, clink->u.data, clink->sub,
 			clink->block << pfsBlockSize, 1 << pfsBlockSize, mode))==0) {
 			if(mode==PFS_IO_MODE_READ) {
 				if(clink->flags & PFS_CACHE_FLAG_SEGD && ((pfs_inode_t *)clink->u.inode)->magic!=PFS_SEGD_MAGIC)
