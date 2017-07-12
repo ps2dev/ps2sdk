@@ -36,7 +36,7 @@ IOP_LDFLAGS := $(LDFLAGS_TARGET) -nostdlib -L$(PS2SDK)/iop/lib $(IOP_LDFLAGS)
 #   output multiple LO relocs after one HI reloc (which the IOP kernel cannot deal with).
 # -fno-toplevel-reorder (for IOP import and export tables only) disables toplevel reordering by GCC v4.2 and later.
 #   Without it, the import and export tables can be broken apart by GCC's optimizations.
-ifneq ($(IOP_CC_VERSION),3.2.3)
+ifneq ($(IOP_CC_VERSION),3.2.2)
 ifneq ($(IOP_CC_VERSION),3.2.3)
 IOP_CFLAGS += -msoft-float -mno-explicit-relocs
 IOP_IETABLE_CFLAGS := -fno-toplevel-reorder
