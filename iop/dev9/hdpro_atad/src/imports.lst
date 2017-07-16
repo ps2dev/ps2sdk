@@ -14,7 +14,7 @@ thevent_IMPORTS_start
 I_CreateEventFlag
 I_iSetEventFlag
 I_ClearEventFlag
-I_WaitEventFlag
+I_PollEventFlag
 thevent_IMPORTS_end
 
 stdio_IMPORTS_start
