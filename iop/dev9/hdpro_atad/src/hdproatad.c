@@ -84,17 +84,16 @@ typedef struct _ata_cmd_info {
 	u8 type;
 } ata_cmd_info_t;
 
+//DMA commands have been removed, since there is no support for DMA.
 static const ata_cmd_info_t ata_cmd_table[] = {
 	{ATA_C_NOP,1},
 	{ATA_C_CFA_REQUEST_EXTENDED_ERROR_CODE,1},
 	{ATA_C_DEVICE_RESET,5},
 	{ATA_C_READ_SECTOR,2},
 	{ATA_C_READ_SECTOR_EXT,0x83},
-	{ATA_C_READ_DMA_EXT,0x84},
 	{ATA_C_WRITE_SECTOR,3},
 	{ATA_C_WRITE_LONG,8},
 	{ATA_C_WRITE_SECTOR_EXT,0x83},
-	{ATA_C_WRITE_DMA_EXT,0x84},
 	{ATA_C_CFA_WRITE_SECTORS_WITHOUT_ERASE,3},
 	{ATA_C_READ_VERIFY_SECTOR,1},
 	{ATA_C_READ_VERIFY_SECTOR_EXT,0x81},
@@ -110,8 +109,6 @@ static const ata_cmd_info_t ata_cmd_table[] = {
 	{ATA_C_READ_MULTIPLE,2},
 	{ATA_C_WRITE_MULTIPLE,3},
 	{ATA_C_SET_MULTIPLE_MODE,1},
-	{ATA_C_READ_DMA,4},
-	{ATA_C_WRITE_DMA,4},
 	{ATA_C_CFA_WRITE_MULTIPLE_WITHOUT_ERASE,3},
 	{ATA_C_GET_MEDIA_STATUS,1},
 	{ATA_C_MEDIA_LOCK,1},
@@ -162,7 +159,6 @@ typedef struct _ata_cmd_state {
 		u16	*buf16;
 	};
 	u32	blkcount;	/* The number of 512-byte blocks (sectors) to transfer.  */
-	s32	dir;		/* DMA direction: 0 - to RAM, 1 - from RAM.  */
 } ata_cmd_state_t;
 
 static ata_cmd_state_t atad_cmd_state;
@@ -508,10 +504,6 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
 	switch (type & 0x7F) {
 		case 1:
 		case 6:
-			using_timeout = 1;
-			break;
-		case 4:
-			atad_cmd_state.dir = (command != ATA_C_READ_DMA && command != ATA_C_READ_DMA_EXT);
 			using_timeout = 1;
 			break;
 	}
@@ -865,9 +857,8 @@ int ata_io_finish(void)
 			DelayThread(500);
 		}
 
-	} else if (type == 4) {		/* DMA.  */
-			M_PRINTF("Error: DMA mode not implemented.\n");
-			res = ATA_RES_ERR_TIMEOUT;
+	/*	Support for DMA commands (type = 4) is removed because HDPro cannot support DMA.
+		The original would return ATA_RES_ERR_TIMEOUT for type = 4. */
 	} else {			/* PIO transfers.  */
 		stat = hdpro_io_read(ATAreg_CONTROL_RD);
 		if ((res = ata_wait_busy()) < 0)
