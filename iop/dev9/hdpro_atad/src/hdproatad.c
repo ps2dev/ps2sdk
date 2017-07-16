@@ -178,8 +178,6 @@ static int hdpro_io_read(unsigned char cmd);
 static int ata_bus_reset(void);
 static int ata_init_devices(ata_devinfo_t *devinfo);
 static int gen_ata_wait_busy(int bits);
-int ata_io_finish(void);
-int ata_device_flush_cache(int device);
 
 extern struct irx_export_table _exp_atad;
 
@@ -316,6 +314,7 @@ out:
 	return res;
 }
 
+//Must be called before any I/O is done with HDPro
 static int hdpro_io_start(void)
 {
 	if (hdpro_io_active)
@@ -344,6 +343,7 @@ static int hdpro_io_start(void)
 	return hdpro_io_active;
 }
 
+//Must be called after I/O is done with HDPro
 static int hdpro_io_finish(void)
 {
 	if (!hdpro_io_active)
