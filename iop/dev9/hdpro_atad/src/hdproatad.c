@@ -742,6 +742,15 @@ static int ata_device_identify(int device, void *info)
 	return ata_io_finish();
 }
 
+static int ata_device_smart_enable(int device)
+{
+	int res;
+
+	if(!(res = ata_io_start(NULL, 1, ATA_S_SMART_ENABLE_OPERATIONS, 0, 0, 0x4f, 0xc2, (device << 4) & 0xffff, ATA_C_SMART))) res=ata_io_finish();
+
+	return res;
+}
+
 static int ata_init_devices(ata_devinfo_t *devinfo)
 {
 	int i, res;
@@ -773,7 +782,18 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 		if (!devinfo[i].has_packet) {
 			res = ata_device_identify(i, ata_param);
 			devinfo[i].exists = (res == 0);
+		} else if (devinfo[i].has_packet == 1) {
+			/* If it's a packet device, send the IDENTIFY PACKET
+			   DEVICE command.  */
+			/*	Packet devices are not supported:
+
+				The original HDPro driver issues the IDENTIFY PACKET DEVICE command,
+				but does not export ata_io_start and ata_io_finish.
+				This makes packet device support impossible. */
+			res = -1;
+			devinfo[i].exists = (res == 0);
 		}
+		/* Otherwise, do nothing if has_packet = 2. */
 
 		/* This next section is HDD-specific: if no device or it's a
 		   packet (ATAPI) device, we're done.  */
@@ -802,6 +822,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 
 		/* PIO mode 0 (flow control).  */
 		ata_device_set_transfer_mode(i, ATA_XFER_MODE_PIO, 0);
+		ata_device_smart_enable(i);
 		/* Disable idle timeout.  */
 		ata_device_idle(i, 0);
 	}
