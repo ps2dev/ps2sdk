@@ -687,8 +687,9 @@ static void ata_device_probe(ata_devinfo_t *devinfo)
 	hcyl = hdpro_io_read(ATAreg_HCYL_RD) & 0xff;
 	select = hdpro_io_read(ATAreg_SELECT_RD) & 0xff;
 
-	if (nsector != 1)
+	if (nsector != 1)	//Original did not check sector, although it checked nsector.
 		return;
+	devinfo->exists = 1;
 
 	if ((lcyl == 0x00) && (hcyl == 0x00))
 		devinfo->has_packet = 0;
