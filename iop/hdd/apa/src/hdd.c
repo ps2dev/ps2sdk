@@ -164,7 +164,7 @@ apa_cache_t *hddAddPartitionHere(s32 device, const apa_params_t *params, u32 *em
 static int inputError(char *input)
 {
 	APA_PRINTF(APA_DRV_NAME": Error: Usage: %s [-o <apaMaxOpen>] [-n <maxcache>]\n", input);
-	return 1;
+	return MODULE_NO_RESIDENT_END;
 }
 
 static void printStartup(void)
@@ -232,7 +232,7 @@ int _start(int argc, char **argv)
 		if(!(hddInfo=ata_get_devinfo(i)))
 		{
 			APA_PRINTF(APA_DRV_NAME": Error: ata initialization failed.\n");
-			return 0;
+			return MODULE_NO_RESIDENT_END;
 		}
 		if(hddInfo->exists!=0 && hddInfo->has_packet==0)
 		{
@@ -255,7 +255,7 @@ int _start(int argc, char **argv)
 		if(hddDevices[i].status<2)
 		{
 			if(apaJournalRestore(i)!=0)
-				return 1;
+				return MODULE_NO_RESIDENT_END;
 			if(apaGetFormat(i, &hddDevices[i].format))
 				hddDevices[i].status--;
 			APA_PRINTF(APA_DRV_NAME": drive status %d, format version %08x\n",
