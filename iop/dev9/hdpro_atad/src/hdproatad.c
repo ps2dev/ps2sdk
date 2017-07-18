@@ -848,10 +848,12 @@ int ata_io_finish(void)
 			}
 
 			//PollEventFlag is used instead of WaitEventFlag, as there is no hardware interrupt.
-			PollEventFlag(ata_evflg, ATA_EV_TIMEOUT | ATA_EV_COMPLETE, WEF_CLEAR|WEF_OR, &bits);
-			if (bits & ATA_EV_TIMEOUT) {	/* Timeout.  */
-				M_PRINTF("Error: ATA timeout on a non-data command.\n");
-				return ATA_RES_ERR_TIMEOUT;
+			if(PollEventFlag(ata_evflg, ATA_EV_TIMEOUT | ATA_EV_COMPLETE, WEF_CLEAR|WEF_OR, &bits) == 0)
+			{
+				if (bits & ATA_EV_TIMEOUT) {	/* Timeout.  */
+					M_PRINTF("Error: ATA timeout on a non-data command.\n");
+					return ATA_RES_ERR_TIMEOUT;
+				}
 			}
 
 			DelayThread(500);
