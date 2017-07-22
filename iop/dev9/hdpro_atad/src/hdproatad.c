@@ -24,8 +24,8 @@
 
 #include <atahw.h>
 
-#define MODNAME "atad"
-IRX_ID(MODNAME, 2, 4);
+#define MODNAME "hdcombo_driver"
+IRX_ID(MODNAME, 1, 1);
 
 #define M_PRINTF(format, args...)	\
 	printf(MODNAME ": " format, ## args)
