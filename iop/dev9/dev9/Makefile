@@ -7,7 +7,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 #Enable to disable initialization of SMAP within DEV9 (i.e. clone adaptor compatibility).
-#SKIP_SMAP_INIT = 1
+SKIP_SMAP_INIT ?= 0
 
 IOP_BIN ?= ps2dev9.irx
 
