@@ -2,7 +2,7 @@
   Copyright 2011, jimmikaelkael
   Licenced under Academic Free License version 3.0
 
-  ATA Driver for the HD Pro Kit, based on original ATAD form ps2sdk:
+  ATA Driver for the HD Pro Kit, based on original & updated ATAD from ps2sdk:
 
   Copyright (c) 2003 Marcus R. Brown <mrbrown@0xd6.org>
   Licenced under Academic Free License version 2.0
@@ -36,7 +36,7 @@ IRX_ID(MODNAME, 1, 1);
 #define ATA_XFER_MODE_PIO	0x08
 
 #define ATA_EV_TIMEOUT	1
-#define ATA_EV_COMPLETE	2
+#define ATA_EV_COMPLETE	2	//Unused as there is no completion interrupt
 
 // HD Pro Kit is mapping the 1st word in ROM0 seg as a main ATA controller,
 // The pseudo ATA controller registers are accessed (input/ouput) by writing
@@ -651,6 +651,12 @@ int ata_reset_devices(void)
 	DelayThread(3000);
 
 	return ata_wait_busy();
+}
+
+/* Export 11 */
+int ata_device_sce_sec_unlock(int device, void *password)
+{	//Device can always be unlocked.
+	return 0;
 }
 
 static void ata_device_probe(ata_devinfo_t *devinfo)
