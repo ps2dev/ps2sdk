@@ -27,6 +27,7 @@
 #include <sysmem.h>
 #include <sifman.h>
 #include <sifcmd.h>
+#include <errno.h>
 
 #include "fileXio_iop.h"
 
