@@ -7,8 +7,7 @@
 *.swp
 *.tmp
 *.bin
+obj/
 ee/erl-loader/src/exports.c
-ee/kernel/obj/
-ee/loader/obj/
 tools/**/bin/
 Doxyoutput
