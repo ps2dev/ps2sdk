@@ -11,6 +11,7 @@
  */
 
 #include "types.h"
+#include <stdarg.h>
 #include "freesd.h"
 #include "spu2regs.h"
 
@@ -142,11 +143,13 @@ s32 BlockTransRead(u8 *iopaddr, u32 size, s32 chan, s16 mode)
 }
 
 
-int sceSdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, u8 *startaddr)
+int sceSdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, ...)
 {
 	int transfer_dir = mode & 3;
 	int core = chan & 1;
 	int _size = size;
+	va_list alist;
+	u8* startaddr;
 
 	switch(transfer_dir)
 	{
@@ -188,6 +191,10 @@ int sceSdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, u8 *startaddr)
 
 		case SD_TRANS_WRITE_FROM:
 		{
+			va_start(alist, size);
+			startaddr = va_arg(alist, u8*);
+			va_end(alist);
+
 			TransIntrData[core].mode = 0x100 | core;
 
 			if(mode & SD_TRANS_LOOP)

@@ -33,17 +33,17 @@ int main(void)
 	}
 
 	/* Start LibSD */
-	if (SdInit(0)<0)
+	if (sceSdInit(0)<0)
 	{
 		printf("Failed to start LibSD\n");
 		SleepThread();
 	}
 
 	/* Setup master volumes for both cores */
-	SdSetParam(0 | SD_PARAM_MVOLL, 0x3fff);
-	SdSetParam(0 | SD_PARAM_MVOLR, 0x3fff);
-	SdSetParam(1 | SD_PARAM_MVOLL, 0x3fff);
-	SdSetParam(1 | SD_PARAM_MVOLR, 0x3fff);
+	sceSdSetParam(0 | SD_PARAM_MVOLL, 0x3fff);
+	sceSdSetParam(0 | SD_PARAM_MVOLR, 0x3fff);
+	sceSdSetParam(1 | SD_PARAM_MVOLL, 0x3fff);
+	sceSdSetParam(1 | SD_PARAM_MVOLR, 0x3fff);
 
 	/*
 		Open a stream, using voices 0:22 and 0:23
