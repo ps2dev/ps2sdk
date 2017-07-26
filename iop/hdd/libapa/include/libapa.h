@@ -8,8 +8,11 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
-#ifndef _LIBAPA_H
-#define _LIBAPA_H
+#ifndef __LIBAPA_H__
+#define __LIBAPA_H__
+
+#include <types.h>
+#include <hdd-ioctl.h>
 
 // Sectors for this and that ;)
 #define APA_SECTOR_MBR			0
@@ -173,4 +176,4 @@ typedef struct
 
 int apaGetFreeSectors(s32 device, u32 *free, apa_device_t *deviceinfo);
 
-#endif /* _LIBAPA_H */
+#endif /* __LIBAPA_H__ */

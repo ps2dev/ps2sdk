@@ -13,8 +13,8 @@
  * Definitions and imports for cdvdman
  */
 
-#ifndef IOP_CDVDMAN_H
-#define IOP_CDVDMAN_H
+#ifndef __CDVDMAN_H__
+#define __CDVDMAN_H__
 
 #include <types.h>
 #include <irx.h>
@@ -186,4 +186,4 @@ int sceCdReadGUID(u64 *guid);
 #define I_sceCdRE DECLARE_IMPORT(114, sceCdRE)
 #define I_sceCdRcBypassCtl DECLARE_IMPORT(115, sceCdRcBypassCtl)
 
-#endif /* IOP_CDVDMAN_H */
+#endif /* __CDVDMAN_H__ */

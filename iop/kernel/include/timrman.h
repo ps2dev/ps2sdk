@@ -13,11 +13,11 @@
  * Timer manager.
  */
 
-#ifndef IOP_TIMRMAN_H
-#define IOP_TIMRMAN_H
+#ifndef __TIMRMAN_H__
+#define __TIMRMAN_H__
 
-#include "types.h"
-#include "irx.h"
+#include <types.h>
+#include <irx.h>
 
 /*	Documentation on the old module's SetTimerCompare() and SetTimerMode() functions is difficult because SCE had replaced them 
 		with a single function within later SDK versions: SetupHardTimer().
@@ -61,42 +61,26 @@
 		RTC4	SYSCLOCK		None		32	256
 		RTC5	SYSCLOCK		None		32	256	*/
 
-#define timrman_IMPORTS_start DECLARE_IMPORT_TABLE(timrman, 1, 1)
-#define timrman_IMPORTS_end END_IMPORT_TABLE
-
 int AllocHardTimer(int source, int size, int prescale);
-#define I_AllocHardTimer DECLARE_IMPORT(4, AllocHardTimer)
 int ReferHardTimer(int source, int size, int mode, int modemask);
-#define I_ReferHardTimer DECLARE_IMPORT(5, ReferHardTimer)
 int FreeHardTimer(int timid);
-#define I_FreeHardTimer DECLARE_IMPORT(6, FreeHardTimer)
 
 void SetTimerMode(int timid, int mode);
-#define I_SetTimerMode DECLARE_IMPORT(7, SetTimerMode)
 
 u32 GetTimerStatus(int timid);
-#define I_GetTimerStatus DECLARE_IMPORT(8, GetTimerStatus)
 
 void SetTimerCounter(int timid, u32 count);
-#define I_SetTimerCounter DECLARE_IMPORT(9, SetTimerCounter)
 u32 GetTimerCounter(int timid);
-#define I_GetTimerCounter DECLARE_IMPORT(10, GetTimerCounter)
 
 void SetTimerCompare(int timid, u32 compare);
-#define I_SetTimerCompare DECLARE_IMPORT(11, SetTimerCompare)
 u32 GetTimerCompare(int timid);
-#define I_GetTimerCompare DECLARE_IMPORT(12, GetTimerCompare)
 
 void SetHoldMode(int holdnum, int mode);
-#define I_SetHoldMode DECLARE_IMPORT(13, SetHoldMode)
 u32 GetHoldMode(int holdnum);
-#define I_GetHoldMode DECLARE_IMPORT(14, GetHoldMode)
 
 u32 GetHoldReg(int holdnum);
-#define I_GetHoldReg DECLARE_IMPORT(15, GetHoldReg)
 
 int GetHardTimerIntrCode(int timid);
-#define I_GetHardTimerIntrCode DECLARE_IMPORT(16, GetHardTimerIntrCode)
 
 #define timrman_IMPORTS \
 	timrman_IMPORTS_start \
@@ -122,4 +106,22 @@ int GetHardTimerIntrCode(int timid);
  \
 	timrman_IMPORTS_end END_IMPORT_TABLE
 
-#endif /* IOP_TIMRMAN_H */
+
+#define timrman_IMPORTS_start DECLARE_IMPORT_TABLE(timrman, 1, 1)
+#define timrman_IMPORTS_end END_IMPORT_TABLE
+
+#define I_AllocHardTimer DECLARE_IMPORT(4, AllocHardTimer)
+#define I_ReferHardTimer DECLARE_IMPORT(5, ReferHardTimer)
+#define I_FreeHardTimer DECLARE_IMPORT(6, FreeHardTimer)
+#define I_SetTimerMode DECLARE_IMPORT(7, SetTimerMode)
+#define I_GetTimerStatus DECLARE_IMPORT(8, GetTimerStatus)
+#define I_SetTimerCounter DECLARE_IMPORT(9, SetTimerCounter)
+#define I_GetTimerCounter DECLARE_IMPORT(10, GetTimerCounter)
+#define I_SetTimerCompare DECLARE_IMPORT(11, SetTimerCompare)
+#define I_GetTimerCompare DECLARE_IMPORT(12, GetTimerCompare)
+#define I_SetHoldMode DECLARE_IMPORT(13, SetHoldMode)
+#define I_GetHoldMode DECLARE_IMPORT(14, GetHoldMode)
+#define I_GetHoldReg DECLARE_IMPORT(15, GetHoldReg)
+#define I_GetHardTimerIntrCode DECLARE_IMPORT(16, GetHardTimerIntrCode)
+
+#endif /* __TIMRMAN_H__ */

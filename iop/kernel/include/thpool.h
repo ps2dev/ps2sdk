@@ -13,11 +13,11 @@
  * Memory pool management
  */
 
-#ifndef IOP_THPOOL_H
-#define IOP_THPOOL_H
+#ifndef __THPOOL_H__
+#define __THPOOL_H__
 
-#include "types.h"
-#include "irx.h"
+#include <types.h>
+#include <irx.h>
 
 //Fixed-length pool attributes
 #define FA_THFIFO	0x000
@@ -45,24 +45,25 @@ typedef struct _iop_fpl_info {
 	int reserved[4];
 } iop_fpl_info_t;
 
+int CreateFpl(iop_fpl_param *param);
+int DeleteFpl(int fplId);
+void *AllocateFpl(int fplId);
+void *pAllocateFpl(int fplId);
+void *ipAllocateFpl(int fplId);
+int FreeFpl(int fplId, void *memory);
+int ReferFplStatus(int fplId, iop_fpl_info_t *info);
+int iReferFplStatus(int fplId, iop_fpl_info_t *info);
+
 #define thfpool_IMPORTS_start DECLARE_IMPORT_TABLE(thfpool, 1, 1)
 #define thfpool_IMPORTS_end END_IMPORT_TABLE
 
-int CreateFpl(iop_fpl_param *param);
 #define I_CreateFpl DECLARE_IMPORT(4, CreateFpl)
-int DeleteFpl(int fplId);
 #define I_DeleteFpl DECLARE_IMPORT(5, DeleteFpl)
-void *AllocateFpl(int fplId);
 #define I_AllocateFpl DECLARE_IMPORT(6, AllocateFpl)
-void *pAllocateFpl(int fplId);
 #define I_pAllocateFpl DECLARE_IMPORT(7, pAllocateFpl)
-void *ipAllocateFpl(int fplId);
 #define I_ipAllocateFpl DECLARE_IMPORT(8, ipAllocateFpl)
-int FreeFpl(int fplId, void *memory);
 #define I_FreeFpl DECLARE_IMPORT(9, FreeFpl)
-int ReferFplStatus(int fplId, iop_fpl_info_t *info);
 #define I_ReferFplStatus DECLARE_IMPORT(11, ReferFplStatus)
-int iReferFplStatus(int fplId, iop_fpl_info_t *info);
 #define I_iReferFplStatus DECLARE_IMPORT(12, iReferFplStatus)
 
 /*
@@ -89,24 +90,25 @@ typedef struct _iop_vpl_info {
 	int reserved[3];
 } iop_vpl_info_t;
 
+int CreateVpl(iop_vpl_param *param);
+int DeleteVpl(int vplId);
+void *AllocateVpl(int vplId, int size);
+void *pAllocateVpl(int vplId, int size);
+void *ipAllocateVpl(int vplId, int size);
+int FreeVpl(int vplId, void *memory);
+int ReferVplStatus(int vplId, iop_vpl_info_t *info);
+int iReferVplStatus(int vplId, iop_vpl_info_t *info);
+
 #define thvpool_IMPORTS_start DECLARE_IMPORT_TABLE(thvpool, 1, 1)
 #define thvpool_IMPORTS_end END_IMPORT_TABLE
 
-int CreateVpl(iop_vpl_param *param);
 #define I_CreateVpl DECLARE_IMPORT(4, CreateVpl)
-int DeleteVpl(int vplId);
 #define I_DeleteVpl DECLARE_IMPORT(5, DeleteVpl)
-void *AllocateVpl(int vplId, int size);
 #define I_AllocateVpl DECLARE_IMPORT(6, AllocateVpl)
-void *pAllocateVpl(int vplId, int size);
 #define I_pAllocateVpl DECLARE_IMPORT(7, pAllocateVpl)
-void *ipAllocateVpl(int vplId, int size);
 #define I_ipAllocateVpl DECLARE_IMPORT(8, ipAllocateVpl)
-int FreeVpl(int vplId, void *memory);
 #define I_FreeVpl DECLARE_IMPORT(9, FreeVpl)
-int ReferVplStatus(int vplId, iop_vpl_info_t *info);
 #define I_ReferVplStatus DECLARE_IMPORT(11, ReferVplStatus)
-int iReferVplStatus(int vplId, iop_vpl_info_t *info);
 #define I_iReferVplStatus DECLARE_IMPORT(12, iReferVplStatus)
 
-#endif
+#endif /* __THPOOL_H__ */

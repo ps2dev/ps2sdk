@@ -13,53 +13,38 @@
  * iop manager includes
  */
 
-#ifndef _IOP_IOPMGR_H
-#define _IOP_IOPMGR_H
+#ifndef __IOPMGR_H__
+#define __IOPMGR_H__
 
-#include "types.h"
-#include "irx.h"
-#include "loadcore.h"
+#include <types.h>
+#include <irx.h>
+#ifndef __IOMANX_H__
+#include <ioman.h>
+#endif
+#include <loadcore.h>
 
 /* Module info entry.  */
 typedef ModuleInfo_t smod_mod_info_t __attribute__ ((deprecated));	//For backward-compatibility with older projects.
 
-#define iopmgr_IMPORTS_start DECLARE_IMPORT_TABLE(iopmgr, 1, 1)
-#define iopmgr_IMPORTS_end END_IMPORT_TABLE
-
 /* from smod.c */
 ModuleInfo_t *smod_get_next_mod(ModuleInfo_t *cur_mod);
-#define I_smod_get_next_mod DECLARE_IMPORT(4, smod_get_next_mod)
 ModuleInfo_t *smod_get_mod_by_name(const char *name);
-#define I_smod_get_mod_by_name DECLARE_IMPORT(5, smod_get_mod_by_name)
 int smod_get_modcount_by_name(const char *name);
-#define I_smod_get_modcount_by_name DECLARE_IMPORT(6, smod_get_modcount_by_name)
 int smod_get_modversion_by_name(const char *name);
-#define I_smod_get_modversion_by_name DECLARE_IMPORT(7, smod_get_modversion_by_name)
 int smod_unload_module(const char *name);
-#define I_smod_unload_module DECLARE_IMPORT(8, smod_unload_module)
 
 /* from slib.c */
 iop_library_t *slib_get_lib_by_name(const char *name);
-#define I_slib_get_lib_by_name DECLARE_IMPORT(10, slib_get_lib_by_name)
 void *slib_get_exportlist_by_name(const char *name);
-#define I_slib_get_exportlist_by_name DECLARE_IMPORT(11, slib_get_exportlist_by_name)
 int slib_get_version_by_name(const char *name);
-#define I_slib_get_version_by_name DECLARE_IMPORT(12, slib_get_version_by_name)
 int slib_release_library(const char *name);
-#define I_slib_release_library DECLARE_IMPORT(13, slib_release_library)
-
 
 /* from devices.c */
 iop_device_t *iopmgr_get_iomandev(char *device);
-#define I_iopmgr_get_iomandev DECLARE_IMPORT(15, iopmgr_get_iomandev)
 iop_device_t *iopmgr_get_iomanxdev(char *device);
-#define I_iopmgr_get_iomanxdev DECLARE_IMPORT(16, iopmgr_get_iomanxdev)
 iop_device_t *iopmgr_get_device(char *device);
-#define I_iopmgr_get_device DECLARE_IMPORT(17, iopmgr_get_device)
 int iopmgr_get_devicetype(char *device);
-#define I_iopmgr_get_devicetype DECLARE_IMPORT(18, iopmgr_get_devicetype)
 int iopmgr_get_devicelist(int man,int devtype,char *buffer);
-#define I_iopmgr_get_devicelist DECLARE_IMPORT(19, iopmgr_get_devicelist)
 
 /* from modules.c */
 
@@ -81,4 +66,22 @@ int iopmgr_get_devicelist(int man,int devtype,char *buffer);
 #define IOPMGR_IOMAN_IDENT  "IO/File_Manager"
 #define IOPMGR_IOMANX_IDENT "IOX/File_Manager"
 
-#endif
+#define iopmgr_IMPORTS_start DECLARE_IMPORT_TABLE(iopmgr, 1, 1)
+#define iopmgr_IMPORTS_end END_IMPORT_TABLE
+
+#define I_smod_get_next_mod DECLARE_IMPORT(4, smod_get_next_mod)
+#define I_smod_get_mod_by_name DECLARE_IMPORT(5, smod_get_mod_by_name)
+#define I_smod_get_modcount_by_name DECLARE_IMPORT(6, smod_get_modcount_by_name)
+#define I_smod_get_modversion_by_name DECLARE_IMPORT(7, smod_get_modversion_by_name)
+#define I_smod_unload_module DECLARE_IMPORT(8, smod_unload_module)
+#define I_slib_get_lib_by_name DECLARE_IMPORT(10, slib_get_lib_by_name)
+#define I_slib_get_exportlist_by_name DECLARE_IMPORT(11, slib_get_exportlist_by_name)
+#define I_slib_get_version_by_name DECLARE_IMPORT(12, slib_get_version_by_name)
+#define I_slib_release_library DECLARE_IMPORT(13, slib_release_library)
+#define I_iopmgr_get_iomandev DECLARE_IMPORT(15, iopmgr_get_iomandev)
+#define I_iopmgr_get_iomanxdev DECLARE_IMPORT(16, iopmgr_get_iomanxdev)
+#define I_iopmgr_get_device DECLARE_IMPORT(17, iopmgr_get_device)
+#define I_iopmgr_get_devicetype DECLARE_IMPORT(18, iopmgr_get_devicetype)
+#define I_iopmgr_get_devicelist DECLARE_IMPORT(19, iopmgr_get_devicelist)
+
+#endif /* __IOPMGR_H__ */

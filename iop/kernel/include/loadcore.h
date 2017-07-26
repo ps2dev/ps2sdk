@@ -13,11 +13,11 @@
  * Kernel module loader.
  */
 
-#ifndef IOP_LOADCORE_H
-#define IOP_LOADCORE_H
+#ifndef __LOADCORE_H__
+#define __LOADCORE_H__
 
-#include "types.h"
-#include "irx.h"
+#include <types.h>
+#include <irx.h>
 
 #define MODULE_RESIDENT_END		0
 #define MODULE_NO_RESIDENT_END	1
@@ -77,36 +77,23 @@ typedef struct {
 	struct	_iop_library *head;
 } iop_library_table_t __attribute__ ((deprecated));
 
-#define loadcore_IMPORTS_start DECLARE_IMPORT_TABLE(loadcore, 1, 1)
-#define loadcore_IMPORTS_end END_IMPORT_TABLE
-
 /**
  * Retained for backward-compatibility with older projects. This function actually returns a pointer to LOADCORE's internal data structure.
  */
 iop_library_table_t *GetLibraryEntryTable(void) __attribute__ ((deprecated));
-#define I_GetLibraryEntryTable DECLARE_IMPORT(3, GetLibraryEntryTable)
 lc_internals_t *GetLoadcoreInternalData(void);
-#define I_GetLoadcoreInternalData DECLARE_IMPORT(3, GetLoadcoreInternalData)
 
 void FlushIcache(void);
-#define I_FlushIcache DECLARE_IMPORT(4, FlushIcache)
 void FlushDcache(void);
-#define I_FlushDcache DECLARE_IMPORT(5, FlushDcache)
 
 int RegisterLibraryEntries(struct irx_export_table *exports);
-#define I_RegisterLibraryEntries DECLARE_IMPORT(6, RegisterLibraryEntries)
 int ReleaseLibraryEntries(struct irx_export_table *exports);
-#define I_ReleaseLibraryEntries DECLARE_IMPORT(7, ReleaseLibraryEntries)
 
 int RegisterNonAutoLinkEntries(struct irx_export_table *exports);
-#define I_RegisterNonAutoLinkEntries DECLARE_IMPORT(10, RegisterNonAutoLinkEntries)
 
 void *QueryLibraryEntryTable(iop_library_t *library);
-#define I_QueryLibraryEntryTable DECLARE_IMPORT(11, QueryLibraryEntryTable)
 int * QueryBootMode(int mode);
-#define I_QueryBootMode DECLARE_IMPORT(12, QueryBootMode)
 void RegisterBootMode(iop_bootmode_t *b);
-#define I_RegisterBootMode DECLARE_IMPORT(13, RegisterBootMode)
 
 #define loadcore_IMPORTS \
 	loadcore_IMPORTS_start \
@@ -124,5 +111,18 @@ void RegisterBootMode(iop_bootmode_t *b);
  \
 	loadcore_IMPORTS_end
 
+#define loadcore_IMPORTS_start DECLARE_IMPORT_TABLE(loadcore, 1, 1)
+#define loadcore_IMPORTS_end END_IMPORT_TABLE
 
-#endif /* IOP_LOADCORE_H */
+#define I_GetLibraryEntryTable DECLARE_IMPORT(3, GetLibraryEntryTable)
+#define I_GetLoadcoreInternalData DECLARE_IMPORT(3, GetLoadcoreInternalData)
+#define I_FlushIcache DECLARE_IMPORT(4, FlushIcache)
+#define I_FlushDcache DECLARE_IMPORT(5, FlushDcache)
+#define I_RegisterLibraryEntries DECLARE_IMPORT(6, RegisterLibraryEntries)
+#define I_ReleaseLibraryEntries DECLARE_IMPORT(7, ReleaseLibraryEntries)
+#define I_RegisterNonAutoLinkEntries DECLARE_IMPORT(10, RegisterNonAutoLinkEntries)
+#define I_QueryLibraryEntryTable DECLARE_IMPORT(11, QueryLibraryEntryTable)
+#define I_QueryBootMode DECLARE_IMPORT(12, QueryBootMode)
+#define I_RegisterBootMode DECLARE_IMPORT(13, RegisterBootMode)
+
+#endif /* __LOADCORE_H__ */

@@ -13,8 +13,8 @@
  * Kernel-based threads.
  */
 
-#ifndef IOP_INTRMAN_H
-#define IOP_INTRMAN_H
+#ifndef __INTRMAN_H__
+#define __INTRMAN_H__
 
 #include <types.h>
 #include <irx.h>
@@ -86,57 +86,39 @@ enum iop_irq_list {
 
 };
 
-#define intrman_IMPORTS_start DECLARE_IMPORT_TABLE(intrman, 1, 2)
-#define intrman_IMPORTS_end END_IMPORT_TABLE
-
 int RegisterIntrHandler(int irq, int mode, int (*handler)(void *), void *arg);
-#define I_RegisterIntrHandler DECLARE_IMPORT(4, RegisterIntrHandler)
 int ReleaseIntrHandler(int irq);
-#define I_ReleaseIntrHandler DECLARE_IMPORT(5, ReleaseIntrHandler)
 
 int EnableIntr(int irq);
-#define I_EnableIntr DECLARE_IMPORT(6, EnableIntr)
 int DisableIntr(int irq, int *res);
-#define I_DisableIntr DECLARE_IMPORT(7, DisableIntr)
 
 int CpuDisableIntr();
-#define I_CpuDisableIntr DECLARE_IMPORT(8, CpuDisableIntr)
 int CpuEnableIntr();
-#define I_CpuEnableIntr DECLARE_IMPORT(9, CpuEnableIntr)
 
 int CpuSuspendIntr(int *state);
-#define I_CpuSuspendIntr DECLARE_IMPORT(17, CpuSuspendIntr)
 int CpuResumeIntr(int state);
-#define I_CpuResumeIntr DECLARE_IMPORT(18, CpuResumeIntr)
 
 /** 
  * @return 1 if within the interrupt context 
  */
 int QueryIntrContext(void);
-#define I_QueryIntrContext DECLARE_IMPORT(23, QueryIntrContext)
 int QueryIntrStack(void);
-#define I_QueryIntrStack DECLARE_IMPORT(24, QueryIntrStack)
 
 int iCatchMultiIntr(void);
+
+#define intrman_IMPORTS_start DECLARE_IMPORT_TABLE(intrman, 1, 2)
+#define intrman_IMPORTS_end END_IMPORT_TABLE
+
+#define I_RegisterIntrHandler DECLARE_IMPORT(4, RegisterIntrHandler)
+#define I_ReleaseIntrHandler DECLARE_IMPORT(5, ReleaseIntrHandler)
+#define I_EnableIntr DECLARE_IMPORT(6, EnableIntr)
+#define I_DisableIntr DECLARE_IMPORT(7, DisableIntr)
+#define I_CpuDisableIntr DECLARE_IMPORT(8, CpuDisableIntr)
+#define I_CpuEnableIntr DECLARE_IMPORT(9, CpuEnableIntr)
+#define I_CpuSuspendIntr DECLARE_IMPORT(17, CpuSuspendIntr)
+#define I_CpuResumeIntr DECLARE_IMPORT(18, CpuResumeIntr)
+#define I_QueryIntrContext DECLARE_IMPORT(23, QueryIntrContext)
+#define I_QueryIntrStack DECLARE_IMPORT(24, QueryIntrStack)
 #define I_iCatchMultiIntr DECLARE_IMPORT(25, iCatchMultiIntr)
 
-#define intrman_IMPORTS \
-	intrman_IMPORTS_start \
- \
- 	I_RegisterIntrHandler \
-	I_ReleaseIntrHandler \
- \
- 	I_EnableIntr \
-	I_DisableIntr \
- \
- 	I_CpuDisableIntr \
-	I_CpuEnableIntr \
- \
- 	I_CpuSuspendIntr \
-	I_CpuResumeIntr \
- \
- 	I_QueryIntrContext \
- \
-	intrman_IMPORTS_end
-
-#endif /* IOP_INTRMAN_H */
+#endif /* __INTRMAN_H__ */

@@ -8,6 +8,8 @@
 
 IOP_CFLAGS += -mno-check-zero-division # -DSIF_CALLBACKS_12_13
 
+IOP_INCS += -I$(PS2SDKSRC)/iop/iLink/iLinkman/include
+
 IOP_OBJS = sbp2_driver.o imports.o main.o scsi.o fat_write.o fs_driver.o scache.o fat_driver.o part_driver.o
 
 include $(PS2SDKSRC)/Defs.make

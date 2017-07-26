@@ -16,10 +16,7 @@
 #ifndef __USBD_H__
 #define __USBD_H__
 
-#include "irx.h"
-
-#define usbd_IMPORTS_start DECLARE_IMPORT_TABLE(usbd,1,1)
-#define usbd_IMPORTS_end END_IMPORT_TABLE
+#include <irx.h>
 
 typedef unsigned int uint32;
 typedef unsigned short uint16;
@@ -297,6 +294,8 @@ int UsbChangeThreadPriority(void);
 int UsbGetReportDescriptor(int devId, int cfgNum, int ifNum, void **desc, uint32 *len);
 int UsbMultiIsochronousTransfer(int pipeId, UsbMultiIsochronousRequest *request, UsbMultiIsochronousDoneCallback callback, void *cbArg);
 
+#define usbd_IMPORTS_start DECLARE_IMPORT_TABLE(usbd,1,1)
+#define usbd_IMPORTS_end END_IMPORT_TABLE
 
 #define I_UsbRegisterDriver DECLARE_IMPORT(4,UsbRegisterDriver)
 #define I_UsbUnregisterDriver DECLARE_IMPORT(5,UsbUnregisterDriver)
@@ -314,6 +313,4 @@ int UsbMultiIsochronousTransfer(int pipeId, UsbMultiIsochronousRequest *request,
 #define I_UsbGetReportDescriptor DECLARE_IMPORT(17,UsbGetReportDescriptor)
 #define I_UsbMultiIsochronousTransfer DECLARE_IMPORT(18,UsbMultiIsochronousTransfer)
 
-#endif // __USBD_H__
-
-
+#endif /* __USBD_H__ */

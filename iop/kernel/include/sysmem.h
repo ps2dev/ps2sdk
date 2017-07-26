@@ -13,12 +13,12 @@
  * System memory manager.
  */
 
-#ifndef IOP_SYSMEM_H
-#define IOP_SYSMEM_H
+#ifndef __SYSMEM_H__
+#define __SYSMEM_H__
 
 #include <types.h>
-#include <stdarg.h>
 #include <irx.h>
+#include <stdarg.h>
 
 // Allocation strategies
 #define ALLOC_FIRST	0
@@ -29,50 +29,32 @@
 #define USED	0x00000000
 #define FREE	0x80000000
 
-#define sysmem_IMPORTS_start DECLARE_IMPORT_TABLE(sysmem, 1, 1)
-#define sysmem_IMPORTS_end END_IMPORT_TABLE
-
 void * AllocSysMemory(int mode, int size, void *ptr);
-#define I_AllocSysMemory DECLARE_IMPORT(4, AllocSysMemory)
 
 int FreeSysMemory(void *ptr);
-#define I_FreeSysMemory DECLARE_IMPORT(5, FreeSysMemory)
 
 u32 QueryMemSize();
-#define I_QueryMemSize DECLARE_IMPORT(6, QueryMemSize)
 u32 QueryMaxFreeMemSize();
-#define I_QueryMaxFreeMemSize DECLARE_IMPORT(7, QueryMaxFreeMemSize)
 u32 QueryTotalFreeMemSize();
-#define I_QueryTotalFreeMemSize DECLARE_IMPORT(8, QueryTotalFreeMemSize)
 void * QueryBlockTopAddress(void *address);
-#define I_QueryBlockTopAddress DECLARE_IMPORT(9, QueryBlockTopAddress)
 int QueryBlockSize(void *address);
-#define I_QueryBlockSize DECLARE_IMPORT(10, QueryBlockSize)
 
 typedef int (KprintfHandler_t)(void *context, const char *format, va_list ap);
 
 int Kprintf(const char *format,...);
-#define I_Kprintf DECLARE_IMPORT(14, Kprintf)
 void KprintfSet(KprintfHandler_t *, void *context);
+
+#define sysmem_IMPORTS_start DECLARE_IMPORT_TABLE(sysmem, 1, 1)
+#define sysmem_IMPORTS_end END_IMPORT_TABLE
+
+#define I_AllocSysMemory DECLARE_IMPORT(4, AllocSysMemory)
+#define I_FreeSysMemory DECLARE_IMPORT(5, FreeSysMemory)
+#define I_QueryMemSize DECLARE_IMPORT(6, QueryMemSize)
+#define I_QueryMaxFreeMemSize DECLARE_IMPORT(7, QueryMaxFreeMemSize)
+#define I_QueryTotalFreeMemSize DECLARE_IMPORT(8, QueryTotalFreeMemSize)
+#define I_QueryBlockTopAddress DECLARE_IMPORT(9, QueryBlockTopAddress)
+#define I_QueryBlockSize DECLARE_IMPORT(10, QueryBlockSize)
+#define I_Kprintf DECLARE_IMPORT(14, Kprintf)
 #define I_KprintfSet DECLARE_IMPORT(15, KprintfSet)
-
-#define sysmem_IMPORTS \
-	sysmem_IMPORTS_start \
- \
- 	I_AllocSysMemory \
- \
- 	I_FreeSysMemory \
- \
- 	I_QueryMemSize \
-	I_QueryMaxFreeMemSize \
-	I_QueryTotalFreeMemSize \
-	I_QueryBlockTopAddress \
-	I_QueryBlockSize \
- \
- 	I_Kprintf \
- 	I_Kprintf_set \
- \
-	sysmem_IMPORTS_end END_IMPORT_TABLE
-
 
 #endif /* IOP_SYSMEM_H */

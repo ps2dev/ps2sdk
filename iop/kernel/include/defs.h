@@ -13,10 +13,10 @@
  * IOPkit standard definitions.
  */
 
-#ifndef IOP_DEFS_H
-#define IOP_DEFS_H
+#ifndef __DEFS_H__
+#define __DEFS_H__
 
-#include "types.h"
+#include <types.h>
 
 #ifndef NULL
 #define NULL	((void *)0)
@@ -38,4 +38,4 @@ static inline void *iop_memcpy(void *dest, const void *src, int size)
 	return dest;
 }
 
-#endif /* IOP_DEFS_H */
+#endif /* __DEFS_H__ */

@@ -17,27 +17,29 @@
 #define __ALLOC_H__
 
 #include <types.h>
+#include <irx.h>
+
+void * malloc(size_t size);
+void * realloc(void * ptr, size_t size);
+void free(void * ptr);
+void * calloc(size_t n, size_t size);
+void * memalign(size_t align, size_t size);
+void * __mem_walk_begin();
+void __mem_walk_read(void * token, u32 * size, void ** ptr, int * valid);
+void * __mem_walk_inc(void * token);
+int __mem_walk_end(void * token);
 
 #define alloc_IMPORTS_start DECLARE_IMPORT_TABLE(alloc, 1, 1)
 #define alloc_IMPORTS_end END_IMPORT_TABLE
 
-void * malloc(size_t size);
 #define I_malloc DECLARE_IMPORT(4, malloc)
-void * realloc(void * ptr, size_t size);
 #define I_realloc DECLARE_IMPORT(5, realloc)
-void free(void * ptr);
 #define I_free DECLARE_IMPORT(6, free)
-void * calloc(size_t n, size_t size);
 #define I_calloc DECLARE_IMPORT(7, calloc)
-void * memalign(size_t align, size_t size);
 #define I_memalign DECLARE_IMPORT(8, memalign)
-void * __mem_walk_begin();
 #define I___mem_walk_begin DECLARE_IMPORT(9, __mem_walk_begin)
-void __mem_walk_read(void * token, u32 * size, void ** ptr, int * valid);
 #define I___mem_walk_read DECLARE_IMPORT(10, __mem_walk_read)
-void * __mem_walk_inc(void * token);
 #define I___mem_walk_inc DECLARE_IMPORT(11, __mem_walk_inc)
-int __mem_walk_end(void * token);
 #define I___mem_walk_end DECLARE_IMPORT(12, __mem_walk_end)
 
-#endif
+#endif /* __ALLOC_H__ */
