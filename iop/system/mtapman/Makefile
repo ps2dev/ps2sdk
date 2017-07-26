@@ -6,6 +6,8 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+IOP_BIN_ALTNAMES ?= freemtap.irx
+
 IOP_INCS += -I$(PS2SDKSRC)/iop/system/sio2log/include
 
 IOP_OBJS = freemtap.o rpcservers.o exports.o imports.o

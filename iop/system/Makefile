@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = alloc freemtap rmtapman freepad rpadman rmman freesio2 rsio2man iomanx iopmgr sbusintr siftoo sio2log
+SUBDIRS = alloc mtapman rmtapman freepad rpadman rmman freesio2 rsio2man iomanx iopmgr sbusintr siftoo sio2log
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
