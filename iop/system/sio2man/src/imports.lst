@@ -36,7 +36,7 @@ I_ClearEventFlag
 I_WaitEventFlag
 thevent_IMPORTS_end
 
-#ifndef XSIO2MAN
+#ifdef SIO2LOG
 ioman_IMPORTS_start
 I_open
 I_write

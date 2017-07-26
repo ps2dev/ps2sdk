@@ -8,7 +8,7 @@
 
 IOP_BIN_ALTNAMES ?= freemtap.irx
 
-IOP_INCS += -I$(PS2SDKSRC)/iop/system/sio2log/include
+IOP_INCS += -I$(PS2SDKSRC)/iop/system/sio2man/include
 
 IOP_OBJS = freemtap.o rpcservers.o exports.o imports.o
 

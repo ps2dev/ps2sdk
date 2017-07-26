@@ -8,7 +8,7 @@
 
 # IOP_CFLAGS += -DDEBUG
 
-IOP_INCS += -I$(PS2SDKSRC)/iop/system/sio2log/include
+IOP_INCS += -I$(PS2SDKSRC)/iop/system/sio2man/include
 
 IOP_OBJS = freepad.o rpcserver.o exports.o imports.o padInit.o padPortOpen.o padMiscFuncs.o sio2Cmds.o padData.o padCmds.o
 

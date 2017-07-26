@@ -8,7 +8,7 @@
 
 # IOP_CFLAGS += -DSIO_DEBUG -DDEBUG
 
-IOP_INCS += -I$(PS2SDKSRC)/iop/system/sio2log/include
+IOP_INCS += -I$(PS2SDKSRC)/iop/system/sio2man/include
 
 IOP_OBJS = main.o mcdev.o mcsio2.o ps2mc_fio.o ps1mc_fio.o imports.o exports.o
 

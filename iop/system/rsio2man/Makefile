@@ -6,6 +6,11 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+IOP_BIN_ALTNAMES =
+
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/system/sio2man/src/
+IOP_INC_DIR = $(PS2SDKSRC)/iop/system/sio2man/include/
+
 IOP_CFLAGS += -DSIO2MAN_V2
 
-include $(PS2SDKSRC)/iop/system/freesio2/Makefile
+include $(PS2SDKSRC)/iop/system/sio2man/Makefile
