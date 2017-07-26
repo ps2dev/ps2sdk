@@ -12,8 +12,7 @@
 #ifndef __PS2CAM_H__
 #define __PS2CAM_H__
 
-
-
+#include <types.h>
 
 //rpc call id
 /** get irx version */
@@ -37,8 +36,6 @@
 
 #define PS2CAM_RPC_SETDEVCONFIG		50
 
-
-
 /* camera vendor(s) */
 /** Sony */
 #define PS2CAM_VEND_SONY			0x054C 
@@ -59,8 +56,6 @@
 
 /** D-Link VisualStream DSB-C310 */
 #define PS2CAM_PROD_VISUALSTREAM	0x8519
-
-
 
 // eyetoy regs
 #define EYETOY_IREG_H_SIZE			0x10
@@ -118,14 +113,11 @@
 /** connect & ready for commands */
 #define CAM_STATUS_CONNECTEDREADY	2
 
-
 // used with PS2CAM_DEVICE_CONFIG->mask
 #define CAM_CONFIG_MASK_DIMENSION	0x00000001
 #define CAM_CONFIG_MASK_OFFSET		0x00000002
 #define CAM_CONFIG_MASK_DIVIDER		0x00000004
 #define CAM_CONFIG_MASK_FRAMERATE	0x00000008
-
-
 
 // error codes
 /** ok */
@@ -149,10 +141,6 @@
 /** device was removed */
 #define CAM_ERROR_DISCONNECTED		-(29)
 
-
-
-
-
 typedef struct
 {
 	/** sizeof this struct */
@@ -162,13 +150,7 @@ typedef struct
 	unsigned char	vendor_name[32];
 	unsigned char	product_name[32];
 	unsigned char	model[16];
-
-
 }PS2CAM_DEVICE_INFO;
-
-
-
-
 
 typedef struct
 {
@@ -187,26 +169,14 @@ typedef struct
 	int			result;
 	int			bytes;
 	void		*arg;
-
-
 }CAMERA_DEVICE;
-
-
-
 
 typedef struct
 {
 	int				fd;
 	int				status;
 	CAMERA_DEVICE	*cam;
-
 }PS2CAM_DEVICE_HANDLE;
-
-
-
-
-
-
 
 typedef struct
 {
@@ -228,12 +198,7 @@ typedef struct
 	/** framerate */
 	unsigned short	framerate;
 
-
 }PS2CAM_DEVICE_CONFIG;
-
-
-
-
 
 typedef struct
 {
@@ -260,21 +225,13 @@ typedef struct
 	unsigned char	Lo;
 	/** file size Hi byte (only in EOF) */
 	unsigned char	Hi;
-
 }EYETOY_FRAME_HEAD;
-
-
-
 
 #define camSetDIVIDER(p, hdiv, en_lpf, vdiv, en_sa)		 setReg8((p), EYETOY_IREG_DIVIDER,	 \
 															((unsigned char)(hdiv)		<<0)|\
 															((unsigned char)(en_lpf)	<<3)|\
 															((unsigned char)(vdiv)		<<4)|\
 															((unsigned char)(en_sa)		<<7));
-
-
-
-
 
 void rpcMainThread(void* param);
 void *rpcCommandHandler(u32 command, void *buffer, int size);
@@ -298,15 +255,12 @@ int PS2CamOpenDevice(int device_index);
 int PS2CamCloseDevice(int handle);
 int PS2CamGetDeviceInfo(int handle,int *info);
 
-
-
 // low level camera funtions
 int  setReg8(CAMERA_DEVICE		*dev, unsigned char reg_id, unsigned char  value);
 int  getReg8(CAMERA_DEVICE		*dev, unsigned char reg_id, unsigned char *value);
 int  setReg8Mask(CAMERA_DEVICE	*dev, unsigned char reg_id, unsigned char  value,unsigned char mask);
 int  setReg16(CAMERA_DEVICE		*dev, unsigned char reg_id, unsigned short value);
 int  PS2CamSelectInterface(CAMERA_DEVICE* dev, int interface, int altSetting);
-
 
 void camResetDevice(CAMERA_DEVICE *dev);
 void camEnableAutoLaunch(CAMERA_DEVICE *dev);
@@ -324,7 +278,6 @@ void camBlockStream(CAMERA_DEVICE *dev);
 void camStartStream(CAMERA_DEVICE *dev);
 void camStopStream(CAMERA_DEVICE *dev);
 
-
 // PS2Cam rpc/export funtions
 int PS2CamReadPacket(int device_id);
 int PS2CamGetDeviceStatus(int device_id);
@@ -332,10 +285,4 @@ int PS2CamSetDeviceBandwidth(int device_id, char bandwidth);
 int PS2CamSetLEDMode(int device_id, int mode);
 int PS2CamSetDeviceConfig(int handle, void *config);
 
-
-
-
-
-
-#endif	/*__PS2CAM_H__*/
-
+#endif /* __PS2CAM_H__ */

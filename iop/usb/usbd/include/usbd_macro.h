@@ -13,37 +13,22 @@
  * USB Driver function prototypes and constants.
  */
 
-#if !defined(_USBD_MACRO_H)
-#define _USBD_MACRO_H
+#ifndef __USBD_MACRO_H__
+#define __USBD_MACRO_H__
 
+#include <usbd.h>
 
-static int UsbControlTransfer(int epID, int reqtyp, int req, int val, int index, int leng, void *dataptr, void *doneCB, void* arg)
-
+inline int UsbControlTransfer(int epID, int reqtyp, int req, int val, int index, int leng, void *dataptr, void *doneCB, void* arg)
 {
-  UsbDeviceRequest devreq;
-  devreq.requesttype = reqtyp;
-  devreq.request = req;
-  devreq.value = val;
-  devreq.index = index;
-  devreq.length = leng;
+	UsbDeviceRequest devreq;
+	devreq.requesttype = reqtyp;
+	devreq.request = req;
+	devreq.value = val;
+	devreq.index = index;
+	devreq.length = leng;
 
-  return UsbTransfer(epID, dataptr, devreq.length, &devreq, doneCB, arg);
+	return UsbTransfer(epID, dataptr, devreq.length, &devreq, doneCB, arg);
 }
-
-
-
-#if 0
-#define UsbControlTransfer(epID, reqtyp, req, val, index, len, dataptr, doneCB, arg) \
- ({ \
-	UsbDeviceRequest devreq; \
-	devreq.requesttype = (reqtyp); \
-	devreq.request = (req); \
-	devreq.value = (val); \
-	devreq.index = (index); \
-	devreq.length = (len); \
-	UsbTransfer((epID), (dataptr), devreq.length, &devreq, (doneCB), (arg)); \
-	})
-#endif
 
 #define UsbIsochronousTransfer(epID, dataptr, len, delta, doneCB, arg) \
 	UsbTransfer((epID), (dataptr), (len), (void *)(delta), (doneCB), (arg))
@@ -139,5 +124,4 @@ static int UsbControlTransfer(int epID, int reqtyp, int req, int val, int index,
 	UsbControlTransfer((epID), USB_DIR_IN | USB_RECIP_ENDPOINT, USB_REQ_SYNCH_FRAME, \
 	0, (endpoint), 2, (pfn), (doneCB), (arg))
 
-#endif
-
+#endif /* __USBD_MACRO_H__ */

@@ -68,4 +68,4 @@
 #define KE_ILLEGAL_MEMBLOCK	-426
 #define KE_ILLEGAL_MEMSIZE	-427
 
-#endif
+#endif /* __KERR_H__ */

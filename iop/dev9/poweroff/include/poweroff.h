@@ -16,18 +16,21 @@
 #ifndef __POWEROFF_H__
 #define __POWEROFF_H__
 
-#define poweroff_IMPORTS_start DECLARE_IMPORT_TABLE(poweroff, 1, 1)
-#define poweroff_IMPORTS_end END_IMPORT_TABLE
+#include <irx.h>
 
 typedef void (*pwoffcb)(void*);
 
 void SetPowerButtonHandler(pwoffcb func, void* param);
-#define I_SetPowerButtonHandler DECLARE_IMPORT(4, SetPowerButtonHandler)
 void AddPowerOffHandler(pwoffcb func, void* param);
-#define I_AddPowerOffHandler DECLARE_IMPORT(5, AddPowerOffHandler)
 void RemovePowerOffHandler(pwoffcb func);
-#define I_RemovePowerOffHandler DECLARE_IMPORT(6, RemovePowerOffHandler)
 void PoweroffShutdown();
+
+#define poweroff_IMPORTS_start DECLARE_IMPORT_TABLE(poweroff, 1, 1)
+#define poweroff_IMPORTS_end END_IMPORT_TABLE
+
+#define I_SetPowerButtonHandler DECLARE_IMPORT(4, SetPowerButtonHandler)
+#define I_AddPowerOffHandler DECLARE_IMPORT(5, AddPowerOffHandler)
+#define I_RemovePowerOffHandler DECLARE_IMPORT(6, RemovePowerOffHandler)
 #define I_PoweroffShutdown DECLARE_IMPORT(7, PoweroffShutdown)
 
 #endif /* __POWEROFF_H__ */

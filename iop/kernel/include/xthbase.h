@@ -13,22 +13,23 @@
  * Additional thbase functions only found in newer IOPRP images
  */
 
-#ifndef IOP_XTHBASE_H
-#define IOP_XTHBASE_H
+#ifndef __XTHBASE_H__
+#define __XTHBASE_H__
 
-#include "thbase.h"
+#include <thbase.h>
 
 int GetThreadCurrentPriority(void);
-#define I_GetThreadCurrentPriority DECLARE_IMPORT(42, GetThreadCurrentPriority)
 unsigned int GetSystemTimeLow(void);
-#define I_GetSystemTimeLow DECLARE_IMPORT(43, GetSystemTimeLow)
 int ReferSystemStatus(iop_sys_status_t *info, size_t size);
-#define I_ReferSystemStatus DECLARE_IMPORT(44, ReferSystemStatus)
 int ReferThreadRunStatus(int thid, iop_thread_run_status_t *stat, size_t size);
-#define I_ReferThreadRunStatus DECLARE_IMPORT(45, ReferThreadRunStatus)
 int GetThreadStackFreeSize(int thid);
-#define I_GetThreadStackFreeSize DECLARE_IMPORT(46, GetThreadStackFreeSize)
 int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount);
+
+#define I_GetThreadCurrentPriority DECLARE_IMPORT(42, GetThreadCurrentPriority)
+#define I_GetSystemTimeLow DECLARE_IMPORT(43, GetSystemTimeLow)
+#define I_ReferSystemStatus DECLARE_IMPORT(44, ReferSystemStatus)
+#define I_ReferThreadRunStatus DECLARE_IMPORT(45, ReferThreadRunStatus)
+#define I_GetThreadStackFreeSize DECLARE_IMPORT(46, GetThreadStackFreeSize)
 #define I_GetThreadmanIdList DECLARE_IMPORT(47, GetThreadmanIdList)
 
-#endif /* IOP_XTHBASE_H */
+#endif /* __XTHBASE_H__ */

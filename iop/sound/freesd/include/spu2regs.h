@@ -6,7 +6,6 @@
 #ifndef __SPU2REGS_H__
 #define __SPU2REGS_H__
 
-
 //   Base of SPU2 regs is 0x0xBF900000
 //  Cores are 0x400 bytes apart
 
@@ -132,5 +131,4 @@
 #define SD_DMA_DIR_SPU2IOP				0
 #define SD_DMA_DIR_IOP2SPU				1
 
-
-#endif
+#endif /* __SPU2REGS_H__ */

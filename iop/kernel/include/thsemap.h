@@ -20,11 +20,11 @@
  * http://ps2dev.livemedia.com.au/.
  */
 
-#ifndef IOP_THSEMAP_H
-#define IOP_THSEMAP_H
+#ifndef __THSEMAP_H__
+#define __THSEMAP_H__
 
-#include "types.h"
-#include "irx.h"
+#include <types.h>
+#include <irx.h>
 
 //Semaphore attributes
 #define SA_THFIFO	0x000
@@ -48,27 +48,16 @@ typedef struct {
 	int reserved[2];
 } iop_sema_info_t;
 
-#define thsemap_IMPORTS_start DECLARE_IMPORT_TABLE(thsemap, 1, 2)
-#define thsemap_IMPORTS_end END_IMPORT_TABLE
-
 int CreateSema(iop_sema_t *sema);
-#define I_CreateSema DECLARE_IMPORT(4, CreateSema)
 int DeleteSema(int semid);
-#define I_DeleteSema DECLARE_IMPORT(5, DeleteSema)
 
 int SignalSema(int semid);
-#define I_SignalSema DECLARE_IMPORT(6, SignalSema)
 int iSignalSema(int semid);
-#define I_iSignalSema DECLARE_IMPORT(7, iSignalSema)
 int WaitSema(int semid);
-#define I_WaitSema DECLARE_IMPORT(8, WaitSema);
 int PollSema(int semid);
-#define I_PollSema DECLARE_IMPORT(9, PollSema);
 
 int ReferSemaStatus(int semid, iop_sema_info_t *info);
-#define I_ReferSemaStatus DECLARE_IMPORT(11, ReferSemaStatus)
 int iReferSemaStatus(int semid, iop_sema_info_t *info);
-#define I_iReferSemaStatus DECLARE_IMPORT(12, iReferSemaStatus)
 
 #define IOP_MUTEX_LOCKED	0
 #define IOP_MUTEX_UNLOCKED	1
@@ -83,4 +72,16 @@ static inline int CreateMutex(int state)
 	return CreateSema(&sema);
 }
 
-#endif /* IOP_THSEMAP_H */
+#define thsemap_IMPORTS_start DECLARE_IMPORT_TABLE(thsemap, 1, 2)
+#define thsemap_IMPORTS_end END_IMPORT_TABLE
+
+#define I_CreateSema DECLARE_IMPORT(4, CreateSema)
+#define I_DeleteSema DECLARE_IMPORT(5, DeleteSema)
+#define I_SignalSema DECLARE_IMPORT(6, SignalSema)
+#define I_iSignalSema DECLARE_IMPORT(7, iSignalSema)
+#define I_WaitSema DECLARE_IMPORT(8, WaitSema);
+#define I_PollSema DECLARE_IMPORT(9, PollSema);
+#define I_ReferSemaStatus DECLARE_IMPORT(11, ReferSemaStatus)
+#define I_iReferSemaStatus DECLARE_IMPORT(12, iReferSemaStatus)
+
+#endif /* __THSEMAP_H__ */

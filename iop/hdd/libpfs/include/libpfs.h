@@ -9,8 +9,10 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
-#ifndef _LIBPFS_H
-#define _LIBPFS_H
+#ifndef __LIBPFS_H__
+#define __LIBPFS_H__
+
+#include <types.h>
 
 // General constants
 #define PFS_BLOCKSIZE 		0x2000

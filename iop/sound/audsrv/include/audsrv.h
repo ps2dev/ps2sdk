@@ -15,9 +15,8 @@
 #ifndef __AUDSRV_H__
 #define __AUDSRV_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <types.h>
+#include <irx.h>
 
 /** intialization and destruction functions */
 #define AUDSRV_INIT                 0x0000
@@ -93,6 +92,8 @@ void *audsrv_load_adpcm(u32 *buffer, int size, int id);
 int audsrv_play_adpcm(u32 id);
 
 #define audsrv_IMPORTS_start DECLARE_IMPORT_TABLE(audsrv, 1, 1)
+#define audsrv_IMPORTS_end END_IMPORT_TABLE
+
 #define I_audsrv_init              DECLARE_IMPORT( 4, audsrv_init)
 #define I_audsrv_quit              DECLARE_IMPORT( 5, audsrv_quit)
 
@@ -122,10 +123,4 @@ int audsrv_play_adpcm(u32 id);
 #define I_audsrv_load_adpcm        DECLARE_IMPORT(25, audsrv_load_adpcm)
 #define I_audsrv_play_adpcm        DECLARE_IMPORT(26, audsrv_play_adpcm)
 
-#define audsrv_IMPORTS_end END_IMPORT_TABLE
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif
+#endif /* __AUDSRV_H__ */

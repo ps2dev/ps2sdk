@@ -13,14 +13,11 @@
  * Definitions and imports for excepman
  */
 
-#ifndef IOP_EXCEPMAN_H
-#define IOP_EXCEPMAN_H
+#ifndef __EXCEPMAN_H__
+#define __EXCEPMAN_H__
 
-#include "types.h"
-#include "irx.h"
-
-#define excepman_IMPORTS_start DECLARE_IMPORT_TABLE(excepman, 1, 2)
-#define excepman_IMPORTS_end END_IMPORT_TABLE
+#include <types.h>
+#include <irx.h>
 
 /* From any r3000's cop0 documentation */
 /** External Interrupt */
@@ -61,15 +58,18 @@ typedef void (*exception_handler_t)(void);
 
 /** will call RegisterPriorityExceptionHandler with prio = 2 */
 int RegisterExceptionHandler(int exception, exception_handler_t);
-#define I_RegisterExceptionHandler DECLARE_IMPORT(4, RegisterExceptionHandler)
 int RegisterPriorityExceptionHandler(int exception, int priority, exception_handler_t);
-#define I_RegisterPriorityExceptionHandler DECLARE_IMPORT(5, RegisterPriorityExceptionHandler)
 int RegisterDefaultExceptionHandler(exception_handler_t);
-#define I_RegisterDefaultExceptionHandler DECLARE_IMPORT(6, RegisterDefaultExceptionHandler)
 int ReleaseExceptionHandler(int exception, exception_handler_t);
-#define I_ReleaseExceptionHandler DECLARE_IMPORT(7, ReleaseExceptionHandler)
 int ReleaseDefaultExceptionHandler(exception_handler_t);
+
+#define excepman_IMPORTS_start DECLARE_IMPORT_TABLE(excepman, 1, 2)
+#define excepman_IMPORTS_end END_IMPORT_TABLE
+
+#define I_RegisterExceptionHandler DECLARE_IMPORT(4, RegisterExceptionHandler)
+#define I_RegisterPriorityExceptionHandler DECLARE_IMPORT(5, RegisterPriorityExceptionHandler)
+#define I_RegisterDefaultExceptionHandler DECLARE_IMPORT(6, RegisterDefaultExceptionHandler)
+#define I_ReleaseExceptionHandler DECLARE_IMPORT(7, ReleaseExceptionHandler)
 #define I_ReleaseDefaultExceptionHandler DECLARE_IMPORT(8, ReleaseDefaultExceptionHandler)
 
-#endif /* IOP_EXCEPMAN_H */
-
+#endif /* __EXCEPMAN_H__ */

@@ -13,11 +13,12 @@
  * Additional loadcore functions only found in newer IOPRP images
  */
 
-#ifndef IOP_XLOADCORE_H
-#define IOP_XLOADCORE_H
-#include "loadcore.h"
+#ifndef __XLOADCORE_H__
+#define __XLOADCORE_H__
+
+#include <loadcore.h>
 
 int SetRebootTimeLibraryHandlingMode(struct irx_export_table *exports, int mode);
 #define I_SetRebootTimeLibraryHandlingMode DECLARE_IMPORT(27, SetRebootTimeLibraryHandlingMode)
 
-#endif /* IOP_XLOADCORE_H */
+#endif /* __XLOADCORE_H__ */

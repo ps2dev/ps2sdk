@@ -13,10 +13,11 @@
  * Event flags for threads.
  */
 
-#ifndef IOP_THEVENT_H
-#define IOP_THEVENT_H
+#ifndef __THEVENT_H__
+#define __THEVENT_H__
 
-#include "types.h"
+#include <types.h>
+#include <irx.h>
 
 /* Defines for WaitEventFlag */
 #define WEF_AND		0
@@ -50,36 +51,21 @@ typedef struct {
 	int reserved2;
 } iop_event_info_t;
 
-
-#define thevent_IMPORTS_start DECLARE_IMPORT_TABLE(thevent, 1, 1)
-#define thevent_IMPORTS_end END_IMPORT_TABLE
-
 int CreateEventFlag(iop_event_t *event);
-#define I_CreateEventFlag DECLARE_IMPORT(4, CreateEventFlag)
 int DeleteEventFlag(int ef);
-#define I_DeleteEventFlag DECLARE_IMPORT(5, DeleteEventFlag)
 
 int SetEventFlag(int ef, u32 bits);
-#define I_SetEventFlag DECLARE_IMPORT(6, SetEventFlag)
 int iSetEventFlag(int ef, u32 bits);
-#define I_iSetEventFlag DECLARE_IMPORT(7, iSetEventFlag)
 
 int ClearEventFlag(int ef, u32 bits);
-#define I_ClearEventFlag DECLARE_IMPORT(8, ClearEventFlag)
 int iClearEventFlag(int ef, u32 bits);
-#define I_iClearEventFlag DECLARE_IMPORT(9, iClearEventFlag)
 
 int WaitEventFlag(int ef, u32 bits, int mode, u32 *resbits);
-#define I_WaitEventFlag DECLARE_IMPORT(10, WaitEventFlag)
 
 int PollEventFlag(int ef, u32 bits, int mode, u32 *resbits);
-#define I_PollEventFlag DECLARE_IMPORT(11, PollEventFlag)
 
 int ReferEventFlagStatus(int ef, iop_event_info_t* info);
-#define I_ReferEventFlagStatus DECLARE_IMPORT(13, ReferEventFlagStatus)
 int iReferEventFlagStatus(int ef, iop_event_info_t* info);
-#define I_iReferEventFlagStatus DECLARE_IMPORT(14, iReferEventFlagStatus)
-
 
 #define thevent_IMPORTS \
 	thevent_IMPORTS_start \
@@ -102,5 +88,18 @@ int iReferEventFlagStatus(int ef, iop_event_info_t* info);
  \
 	thevent_IMPORTS_end END_IMPORT_TABLE
 
+#define thevent_IMPORTS_start DECLARE_IMPORT_TABLE(thevent, 1, 1)
+#define thevent_IMPORTS_end END_IMPORT_TABLE
 
-#endif /* IOP_THEVENT_H */
+#define I_CreateEventFlag DECLARE_IMPORT(4, CreateEventFlag)
+#define I_DeleteEventFlag DECLARE_IMPORT(5, DeleteEventFlag)
+#define I_SetEventFlag DECLARE_IMPORT(6, SetEventFlag)
+#define I_iSetEventFlag DECLARE_IMPORT(7, iSetEventFlag)
+#define I_ClearEventFlag DECLARE_IMPORT(8, ClearEventFlag)
+#define I_iClearEventFlag DECLARE_IMPORT(9, iClearEventFlag)
+#define I_WaitEventFlag DECLARE_IMPORT(10, WaitEventFlag)
+#define I_PollEventFlag DECLARE_IMPORT(11, PollEventFlag)
+#define I_ReferEventFlagStatus DECLARE_IMPORT(13, ReferEventFlagStatus)
+#define I_iReferEventFlagStatus DECLARE_IMPORT(14, iReferEventFlagStatus)
+
+#endif /* __THEVENT_H__ */

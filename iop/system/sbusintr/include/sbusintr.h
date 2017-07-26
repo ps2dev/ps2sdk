@@ -13,11 +13,11 @@
  * SBUS interrupts.
  */
 
-#ifndef IOP_SBUSINTR_H
-#define IOP_SBUSINTR_H
+#ifndef __SBUSINTR_H__
+#define __SBUSINTR_H__
 
-#include "types.h"
-#include "irx.h"
+#include <types.h>
+#include <irx.h>
 
 /* SBUS interface */
 enum sbus_errors {
@@ -33,20 +33,21 @@ enum sbus_errors {
 
 typedef int (*sbus_intr_handler_t)(u32, void *);
 
+int sbus_intr_init();
+void sbus_intr_exit();
+
+int sbus_intr_handler_add(u32 irq, sbus_intr_handler_t handler, void *arg);
+int sbus_intr_handler_del(u32 irq);
+
+void sbus_intr_main_interrupt(u32 irq);
+
 #define sbusintr_IMPORTS_start DECLARE_IMPORT_TABLE(sbusintr, 1, 1)
 #define sbusintr_IMPORTS_end END_IMPORT_TABLE
 
-int sbus_intr_init();
 #define I_sbus_intr_init DECLARE_IMPORT(4, sbus_intr_init)
-void sbus_intr_exit();
 #define I_sbus_intr_exit DECLARE_IMPORT(2, sbus_intr_exit)
-
-int sbus_intr_handler_add(u32 irq, sbus_intr_handler_t handler, void *arg);
 #define I_sbus_intr_handler_add DECLARE_IMPORT(5, sbus_intr_handler_add)
-int sbus_intr_handler_del(u32 irq);
 #define I_sbus_intr_handler_del DECLARE_IMPORT(6, sbus_intr_handler_del)
-
-void sbus_intr_main_interrupt(u32 irq);
 #define I_sbus_intr_main_interrupt DECLARE_IMPORT(7, sbus_intr_main_interrupt)
 
-#endif /* IOP_SBUSINTR_H */
+#endif /* __SBUSINTR_H__ */

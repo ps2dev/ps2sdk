@@ -13,13 +13,12 @@
  * Additional modload functions only found in newer IOPRP images
  */
 
-#ifndef IOP_XMODLOAD_H
-#define IOP_XMODLOAD_H
+#ifndef __XMODLOAD_H__
+#define __XMODLOAD_H__
 
-#include "modload.h"
+#include <modload.h>
 
 int GetModuleIdList(int *readbuf, int readbufsize, int *modulecount);
-#define I_GetModuleIdList DECLARE_IMPORT(16, GetModuleIdList)
 
 typedef struct {
 	char name[56];
@@ -36,10 +35,7 @@ typedef struct {
 } ModuleStatus;
 
 int ReferModuleStatus(int, ModuleStatus *status);
-#define I_ReferModuleStatus DECLARE_IMPORT(17, ReferModuleStatus)
-
 int GetModuleIdListByName(const char *name, int *readbuf, int readbufsize, int *modulecount);
-#define I_GetModuleIdListByName DECLARE_IMPORT(18, GetModuleIdListByName)
 
 typedef struct {
 	int (*beforeOpen)(void *opt, const char *filename, int flag);
@@ -64,33 +60,28 @@ typedef struct {
 } LMWOoption;
 
 int LoadModuleWithOption(const char *filename, const LMWOoption *option);
-#define I_LoadModuleWithOption DECLARE_IMPORT(19, LoadModuleWithOption)
-
 int StopModule(int, int arglen, const char *args, int *result);
-#define I_StopModule DECLARE_IMPORT(20, StopModule)
-
 int UnloadModule(int);
-#define I_UnloadModule DECLARE_IMPORT(21, UnloadModule)
-
 int SearchModuleByName(const char *name);
-#define I_SearchModuleByName DECLARE_IMPORT(22, SearchModuleByName)
-
 int SearchModuleByAddress(const void *addr);
-#define I_SearchModuleByAddress DECLARE_IMPORT(23, SearchModuleByAddress)
-
 int SelfStopModule(int arglen, const char *args, int *result);
-#define I_SelfStopModule DECLARE_IMPORT(24, SelfStopModule)
-
 void SelfUnloadModule(void);
-#define I_SelfUnloadModule DECLARE_IMPORT(25, SelfUnloadModule)
-
 void *AllocLoadMemory(int type, unsigned long size, void *addr);
-#define I_AllocLoadMemory DECLARE_IMPORT(26, AllocLoadMemory)
-
 int FreeLoadMemory(void *area);
-#define I_FreeLoadMemory DECLARE_IMPORT(27, FreeLoadMemory)
-
 int SetModuleFlags(int, int flag);
+
+#define I_GetModuleIdList DECLARE_IMPORT(16, GetModuleIdList)
+#define I_ReferModuleStatus DECLARE_IMPORT(17, ReferModuleStatus)
+#define I_GetModuleIdListByName DECLARE_IMPORT(18, GetModuleIdListByName)
+#define I_LoadModuleWithOption DECLARE_IMPORT(19, LoadModuleWithOption)
+#define I_StopModule DECLARE_IMPORT(20, StopModule)
+#define I_UnloadModule DECLARE_IMPORT(21, UnloadModule)
+#define I_SearchModuleByName DECLARE_IMPORT(22, SearchModuleByName)
+#define I_SearchModuleByAddress DECLARE_IMPORT(23, SearchModuleByAddress)
+#define I_SelfStopModule DECLARE_IMPORT(24, SelfStopModule)
+#define I_SelfUnloadModule DECLARE_IMPORT(25, SelfUnloadModule)
+#define I_AllocLoadMemory DECLARE_IMPORT(26, AllocLoadMemory)
+#define I_FreeLoadMemory DECLARE_IMPORT(27, FreeLoadMemory)
 #define I_SetModuleFlags DECLARE_IMPORT(28, SetModuleFlags)
 
-#endif /* IOP_XMODLOAD_H */
+#endif /* __XMODLOAD_H__ */

@@ -8,8 +8,8 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
-#ifndef IOP_PS2IP_INTERNAL_H
-#define	IOP_PS2IP_INTERNAL_H
+#ifndef __PS2IP_INTERNAL_H__
+#define	__PS2IP_INTERNAL_H__
 
 #include <types.h>
 #include "lwip/sockets.h"
@@ -34,4 +34,4 @@ typedef struct
 	u8			hw_addr[8];
 } t_ip_info;
 
-#endif	// !defined(IOP_PS2IP_INTERNAL_H)
+#endif /* __PS2IP_INTERNAL_H__ */

@@ -13,8 +13,8 @@
  * ctype functions for the IOP
  */
 
-#ifndef IOP__CTYPES_H__
-#define IOP__CTYPES_H__
+#ifndef __CTYPE_H__
+#define __CTYPE_H__
 
 #define isascii(c)	((unsigned int)(c) <= 127)
 #define toascii(c)	((unsigned char)(c) & 127)
@@ -73,4 +73,4 @@
 
 #endif
 
-#endif	/* IOP__CTYPES_H__ */
+#endif /* __CTYPE_H__ */

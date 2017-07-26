@@ -13,48 +13,29 @@
  * IOMAN definitions and imports.
  */
 
-#ifndef IOP_IOMAN_H
-#define IOP_IOMAN_H
+#ifndef __IOMAN_H__
+#define __IOMAN_H__
 
-#include "types.h"
-#include "irx.h"
+#include <types.h>
+#include <irx.h>
 #include <io_common.h>
-
-#include "sys/fcntl.h"
-
-#define ioman_IMPORTS_start DECLARE_IMPORT_TABLE(ioman, 1, 1)
-#define ioman_IMPORTS_end END_IMPORT_TABLE
+#include <sys/stat.h>
 
 int open(const char *name, int mode);
-#define I_open DECLARE_IMPORT(4, open)
 int close(int fd);
-#define I_close DECLARE_IMPORT(5, close)
 int read(int fd, void *ptr, size_t size);
-#define I_read DECLARE_IMPORT(6, read)
 int write(int fd, void *ptr, size_t size);
-#define I_write DECLARE_IMPORT(7, write)
 int lseek(int fd, int pos, int mode);
-#define I_lseek DECLARE_IMPORT(8, lseek)
 int ioctl(int fd, int command, void *arg);
-#define I_ioctl DECLARE_IMPORT(9, ioctl)
 int remove(const char *name);
-#define I_remove DECLARE_IMPORT(10, remove)
 int mkdir(const char *path);
-#define I_mkdir DECLARE_IMPORT(11, mkdir)
 int rmdir(const char *path);
-#define I_rmdir DECLARE_IMPORT(12, rmdir)
 int dopen(const char *path, int mode);
-#define I_dopen DECLARE_IMPORT(13, dopen)
 int dclose(int fd);
-#define I_dclose DECLARE_IMPORT(14, dclose)
 int dread(int fd, fio_dirent_t *buf);
-#define I_dread DECLARE_IMPORT(15, dread)
 int getstat(const char *name, fio_stat_t *stat);
-#define I_getstat DECLARE_IMPORT(16, getstat)
 int chstat(const char *name, fio_stat_t *stat, unsigned int statmask);
-#define I_chstat DECLARE_IMPORT(17, chstat)
 int format(const char *dev);
-#define I_format DECLARE_IMPORT(18, format)
 
 /* Device drivers.  */
 
@@ -107,8 +88,27 @@ typedef struct _iop_device_ops {
 } iop_device_ops_t;
 
 int AddDrv(iop_device_t *device);
-#define I_AddDrv DECLARE_IMPORT(20, AddDrv);
 int DelDrv(const char *name);
+
+#define ioman_IMPORTS_start DECLARE_IMPORT_TABLE(ioman, 1, 1)
+#define ioman_IMPORTS_end END_IMPORT_TABLE
+
+#define I_open DECLARE_IMPORT(4, open)
+#define I_close DECLARE_IMPORT(5, close)
+#define I_read DECLARE_IMPORT(6, read)
+#define I_write DECLARE_IMPORT(7, write)
+#define I_lseek DECLARE_IMPORT(8, lseek)
+#define I_ioctl DECLARE_IMPORT(9, ioctl)
+#define I_remove DECLARE_IMPORT(10, remove)
+#define I_mkdir DECLARE_IMPORT(11, mkdir)
+#define I_rmdir DECLARE_IMPORT(12, rmdir)
+#define I_dopen DECLARE_IMPORT(13, dopen)
+#define I_dclose DECLARE_IMPORT(14, dclose)
+#define I_dread DECLARE_IMPORT(15, dread)
+#define I_getstat DECLARE_IMPORT(16, getstat)
+#define I_chstat DECLARE_IMPORT(17, chstat)
+#define I_format DECLARE_IMPORT(18, format)
+#define I_AddDrv DECLARE_IMPORT(20, AddDrv);
 #define I_DelDrv DECLARE_IMPORT(21, DelDrv);
 
-#endif /* IOP_IOMAN_H */
+#endif /* __IOMAN_H__ */

@@ -12,11 +12,12 @@
  * IOP USBHDFSD definitions.
  */
 
-#include <irx.h>
-#include "usbhdfsd-common.h"
+#ifndef __USBHDFSD_H__
+#define __USBHDFSD_H__
 
-#ifndef _USBHDFSD_IOP_H
-#define _USBHDFSD_IOP_H
+#include <types.h>
+#include <irx.h>
+#include <usbhdfsd-common.h>
 
 //Structure definitions
 typedef struct UsbMassDeviceInfo{
@@ -148,4 +149,4 @@ int UsbMassFatGetClusterChain(fat_driver* fatd, unsigned int cluster, unsigned i
 #define I_UsbMassFlushCache DECLARE_IMPORT(9, UsbMassFlushCache)
 #define I_UsbMassFatGetClusterChain DECLARE_IMPORT(10, UsbMassFatGetClusterChain)
 
-#endif //_USBHDFSD_IOP_H
+#endif /* __USBHDFSD_H__ */
