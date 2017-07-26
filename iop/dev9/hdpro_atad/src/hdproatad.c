@@ -41,10 +41,10 @@ IRX_ID(MODNAME, 1, 1);
 // HD Pro Kit is mapping the 1st word in ROM0 seg as a main ATA controller,
 // The pseudo ATA controller registers are accessed (input/ouput) by writing
 // an id to the main ATA controller (id specific to HDpro, see registers id below).
-#define HDPROreg_IO8	      (*(volatile unsigned char *)0xBFC00000)
-#define HDPROreg_IO32	      (*(volatile unsigned int  *)0xBFC00000)
+#define HDPROreg_IO8	      (*(vu8 *)0xBFC00000)
+#define HDPROreg_IO32	      (*(vu32  *)0xBFC00000)
 
-#define CDVDreg_STATUS        (*(volatile unsigned char *)0xBF40200A)
+#define CDVDreg_STATUS        (*(vu8 *)0xBF40200A)
 
 // Pseudo ATA controller registers id - Output
 #define ATAreg_CONTROL_RD	0x68
@@ -169,8 +169,8 @@ static int intr_state;
 
 static int hdpro_io_start(void);
 static int hdpro_io_finish(void);
-static void hdpro_io_write(unsigned char cmd, unsigned short int val);
-static int hdpro_io_read(unsigned char cmd);
+static void hdpro_io_write(u8 cmd, u16 val);
+static int hdpro_io_read(u8 cmd);
 static int ata_bus_reset(void);
 static int ata_init_devices(ata_devinfo_t *devinfo);
 static int gen_ata_wait_busy(int bits);
@@ -506,6 +506,7 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
 		case 6:
 			using_timeout = 1;
 			break;
+		//Support for DMA commands (type = 4) is removed because HDPro cannot support DMA. The original HDPro driver still had code for it though.
 	}
 
 	if (using_timeout) {
@@ -528,7 +529,7 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
 	/* Finally!  We send off the ATA command with arguments.  */
 	hdpro_io_write(ATAreg_CONTROL_WR, (using_timeout == 0) << 1);
 
-	if(type&0x80){	//For the sake of achieving improved performance, write the registers twice only if required!
+	if(type&0x80) {	//For the sake of achieving improved performance, write the registers twice only if required!
 		/* 48-bit LBA requires writing to the address registers twice,
 		   24 bits of the LBA address is written each time.
 		   Writing to registers twice does not affect 28-bit LBA since
@@ -675,7 +676,10 @@ static void ata_device_probe(ata_devinfo_t *devinfo)
 	hcyl = hdpro_io_read(ATAreg_HCYL_RD) & 0xff;
 	select = hdpro_io_read(ATAreg_SELECT_RD) & 0xff;
 
-	if (nsector != 1)	//Original did not check sector, although it checked nsector.
+	/*	The original HDPro driver did not check sector.
+		However, by the ATA-4 specification (9.1), sector should be 1.
+		So it should be perfectly fine to check. */
+	if ((nsector != 1) || (sector != 1))
 		return;
 	devinfo->exists = 1;
 
@@ -683,6 +687,16 @@ static void ata_device_probe(ata_devinfo_t *devinfo)
 		devinfo->has_packet = 0;
 	else if ((lcyl == 0x14) && (hcyl == 0xeb))
 		devinfo->has_packet = 1;
+
+	/* Seems to be for ensuring that there is a device connected.
+		Not sure why this has to be done, but is present in v2.4.  */
+	hdpro_io_write(ATAreg_LCYL_WR, 0x55);
+	hdpro_io_write(ATAreg_HCYL_WR, 0xaa);
+	lcyl = hdpro_io_read(ATAreg_LCYL_RD) & 0xff;
+	hcyl = hdpro_io_read(ATAreg_HCYL_RD) & 0xff;
+
+	if((lcyl != 0x55) || (hcyl != 0xaa))
+		devinfo->exists = 0;
 }
 
 /* Export 17 */
@@ -837,8 +851,9 @@ int ata_io_finish(void)
 
 	if (type == 1 || type == 6) {	/* Non-data commands.  */
 
+		//Unlike ATAD, poll until the device either completes its command or times out. There is no completion interrupt.
 		while(1)
-		{	//Unlike ATAD, poll until either the operation is done or a timeout occurs.
+		{
 			suspend_intr();
 
 			HDPROreg_IO8 = 0x21;
@@ -853,7 +868,8 @@ int ata_io_finish(void)
 				break;
 			}
 
-			//PollEventFlag is used instead of WaitEventFlag, as there is no hardware interrupt.
+			/*	The original did not check on the return value of PollEventFlag,
+				but PollEventFlag does not seem to return the event flag's bits if the wait condition is not satisfied.	*/
 			if(PollEventFlag(ata_evflg, ATA_EV_TIMEOUT | ATA_EV_COMPLETE, WEF_CLEAR|WEF_OR, &bits) == 0)
 			{
 				if (bits & ATA_EV_TIMEOUT) {	/* Timeout.  */
@@ -930,6 +946,7 @@ int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir)
 			command = (dir == 1) ? ATA_C_WRITE_SECTOR : ATA_C_READ_SECTOR;
 		}
 
+		//Unlike ATAD, retry indefinitely until the I/O operation succeeds.
 		if ((res = ata_io_start(buf, len, 0, len, sector, lcyl,
 					hcyl, select, command)) != 0)
 			continue;
