@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = freesd ahx audsrv ps2snd
+SUBDIRS = libsd ahx audsrv ps2snd
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
