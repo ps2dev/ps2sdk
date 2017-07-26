@@ -13,7 +13,7 @@
  * Logging code used by sio2log.
  */
 
-#ifndef XSIO2MAN
+#ifdef SIO2LOG
 
 #include <types.h>
 #include <defs.h>

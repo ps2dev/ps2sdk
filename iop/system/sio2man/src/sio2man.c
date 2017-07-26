@@ -27,11 +27,11 @@
 
 #include "xsio2man.h"
 
-#ifndef XSIO2MAN
+#ifdef SIO2LOG
 	#include "log.h"
 #endif
 
-#ifndef XSIO2MAN
+#ifdef SIO2LOG
 	IRX_ID("sio2man_logger", 2, 1);
 #else
 #ifndef SIO2MAN_V2
@@ -105,7 +105,7 @@ void send_td(sio2_transfer_data_t *td)
 {
 	int i;
 
-#ifndef XSIO2MAN
+#ifdef SIO2LOG
 	log_default(LOG_TRS);
 #endif
 
@@ -114,23 +114,23 @@ void send_td(sio2_transfer_data_t *td)
 		sio2_portN_ctrl2_set(i, td->port_ctrl2[i]);
 	}
 
-#ifndef XSIO2MAN
+#ifdef SIO2LOG
 	log_portdata(td->port_ctrl1, td->port_ctrl2);
 #endif
 
 	for (i = 0; i < 16; i++)
 		sio2_regN_set(i, td->regdata[i]);
 
-#ifndef XSIO2MAN
+#ifdef SIO2LOG
 	log_regdata(td->regdata);
 #endif
 
 	if (td->in_size) {
 		for (i = 0; i < td->in_size; i++)
 			sio2_data_out(td->in[i]);
-	#ifndef XSIO2MAN
+#ifdef SIO2LOG
 		log_data(LOG_TRS_DATA, td->in, td->in_size);
-	#endif
+#endif
 	}
 
 	if (td->in_dma.addr) {
@@ -138,9 +138,9 @@ void send_td(sio2_transfer_data_t *td)
 				td->in_dma.count, DMAC_FROM_MEM);
 		dmac_transfer(IOP_DMAC_SIO2in);
 
-	#ifndef XSIO2MAN
+#ifdef SIO2LOG
 		log_dma(LOG_TRS_DMA_IN, &td->in_dma);
-	#endif
+#endif
 	}
 
 	if (td->out_dma.addr) {
@@ -148,28 +148,28 @@ void send_td(sio2_transfer_data_t *td)
 				td->out_dma.count, DMAC_TO_MEM);
 		dmac_transfer(IOP_DMAC_SIO2out);
 
-	#ifndef XSIO2MAN
+#ifdef SIO2LOG
 		log_dma(LOG_TRS_DMA_OUT, &td->out_dma);
-	#endif
+#endif
 	}
 }
 
 void recv_td(sio2_transfer_data_t *td)
 {
 	int i;
-#ifndef XSIO2MAN
+#ifdef SIO2LOG
 	log_default(LOG_TRR);
 #endif
 	td->stat6c = sio2_stat6c_get();
 	td->stat70 = sio2_stat70_get();
 	td->stat74 = sio2_stat74_get();
-#ifndef XSIO2MAN
+#ifdef SIO2LOG
 	log_stat(td->stat6c, td->stat70, td->stat74);
 #endif
 	if (td->out_size) {
 		for (i = 0; i < td->out_size; i++)
 			td->out[i] = sio2_data_in();
-#ifndef XSIO2MAN
+#ifdef SIO2LOG
 		log_data(LOG_TRR_DATA, td->out, td->out_size);
 #endif
 	}
@@ -180,7 +180,7 @@ void main_thread(void *unused)
 	u32 resbits[4];
 
 	while (1) {
-	#ifndef XSIO2MAN
+	#ifdef SIO2LOG
 		log_flush(0);
 	#endif
 		WaitEventFlag(event_flag, EF_PAD_TRANSFER_INIT |
@@ -193,32 +193,32 @@ void main_thread(void *unused)
 		if (resbits[0] & EF_PAD_TRANSFER_INIT) {
 			ClearEventFlag(event_flag, ~EF_PAD_TRANSFER_INIT);
 			SetEventFlag(event_flag, EF_PAD_TRANSFER_READY);
-#ifndef XSIO2MAN
+#ifdef SIO2LOG
 			log_default(LOG_PAD_READY);
 #endif
 		} else if (resbits[0] & EF_MC_TRANSFER_INIT) {
 			ClearEventFlag(event_flag, ~EF_MC_TRANSFER_INIT);
 			SetEventFlag(event_flag, EF_MC_TRANSFER_READY);
-#ifndef XSIO2MAN
+#ifdef SIO2LOG
 			log_default(LOG_MC_READY);
 #endif
 		} else if (resbits[0] & EF_MTAP_TRANSFER_INIT) {
 			ClearEventFlag(event_flag, ~EF_MTAP_TRANSFER_INIT);
 			SetEventFlag(event_flag, EF_MTAP_TRANSFER_READY);
-#ifndef XSIO2MAN
+#ifdef SIO2LOG
 			log_default(LOG_MTAP_READY);
 #endif
 #ifdef SIO2MAN_V2
 		} else if (resbits[0] & EF_RM_TRANSFER_INIT) {
 			ClearEventFlag(event_flag, ~EF_RM_TRANSFER_INIT);
 			SetEventFlag(event_flag, EF_RM_TRANSFER_READY);
-#ifndef XSIO2MAN
+#ifdef SIO2LOG
 			log_default(LOG_RM_READY);
 #endif
 		} else if (resbits[0] & EF_UNK_TRANSFER_INIT) {
 			ClearEventFlag(event_flag, ~EF_UNK_TRANSFER_INIT);
 			SetEventFlag(event_flag, EF_UNK_TRANSFER_READY);
-#ifndef XSIO2MAN
+#ifdef SIO2LOG
 			log_default(LOG_UNK_READY);
 #endif
 #endif
@@ -232,7 +232,7 @@ transfer_loop:
 
 		if (resbits[0] & EF_TRANSFER_RESET) {
 			ClearEventFlag(event_flag, ~EF_TRANSFER_RESET);
-#ifndef XSIO2MAN
+#ifdef SIO2LOG
 			log_default(LOG_RESET);
 #endif
 			continue;
@@ -287,7 +287,7 @@ int create_event_flag(void)
 void shutdown(void)
 {
 	int state;
-#ifndef XSIO2MAN
+#ifdef SIO2LOG
 	log_flush(1);
 #endif
 	CpuSuspendIntr(&state);
@@ -330,7 +330,7 @@ int _start(int argc, const char **argv)
 	dmac_enable(IOP_DMAC_SIO2out);
 
 	StartThread(thid, NULL);
-#ifndef XSIO2MAN
+#ifdef SIO2LOG
 	EPRINTF("Logging started.\n");
 #endif
 	return 0;

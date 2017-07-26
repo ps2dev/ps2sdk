@@ -18,7 +18,7 @@
 /* Please keep these in alphabetical order!  */
 #include <dmacman.h>
 #include <intrman.h>
-#ifndef XSIO2MAN
+#ifdef SIO2LOG
 #include <ioman.h>
 #endif
 #include <loadcore.h>
