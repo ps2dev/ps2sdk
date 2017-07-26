@@ -42,7 +42,7 @@ UsbDriver HubDriver = {
 int initHubDriver(void) {
 	int i;
 	UsbHub *hub;
-	uint32 needMem = usbConfig.maxHubDevices * sizeof(UsbHub);
+	u32 needMem = usbConfig.maxHubDevices * sizeof(UsbHub);
 
 	hubBufferList = (UsbHub *)AllocSysMemory(ALLOC_FIRST, needMem, 0);
 	if (!hubBufferList) {
@@ -80,8 +80,8 @@ void freeHubBuffer(UsbHub *hub) {
 	}
 }
 
-void HubControlTransfer(UsbHub *hubDev, uint8 requestType, uint8 request, uint16 value,
-						  uint16 index, uint16 length, void *destData,
+void HubControlTransfer(UsbHub *hubDev, u8 requestType, u8 request, u16 value,
+						  u16 index, u16 length, void *destData,
 						  void *callback)
 {
 	if (!hubDev->controlIoReq.busyFlag) {
@@ -174,7 +174,7 @@ int cancelTimerCallback(TimerCbStruct *arg) {
 		return -1;
 }
 
-int addTimerCallback(TimerCbStruct *arg, TimerCallback func, void *cbArg, uint32 delay) {
+int addTimerCallback(TimerCbStruct *arg, TimerCallback func, void *cbArg, u32 delay) {
 	if (arg->isActive)
 		return -1;
 
@@ -394,11 +394,11 @@ void flushPort(Device *dev) {
 void fetchConfigDescriptors(IoRequest *req) {
 	Endpoint *ep = req->correspEndpoint;
 	Device *dev = ep->correspDevice;
-	uint16 readLen;
+	u16 readLen;
 	int fetchDesc;
 
 	if ((req->resultCode == USB_RC_OK) || (dev->fetchDescriptorCounter == 0)) {
-		uint32 curDescNum = dev->fetchDescriptorCounter++;
+		u32 curDescNum = dev->fetchDescriptorCounter++;
 
 		fetchDesc = curDescNum & 1;
 		curDescNum >>= 1;
@@ -414,7 +414,7 @@ void fetchConfigDescriptors(IoRequest *req) {
 		} else
 			readLen = 4;
 
-		if ((uint8*)dev->staticDeviceDescEndPtr + readLen > (uint8*)dev->staticDeviceDescPtr + usbConfig.maxStaticDescSize) {
+		if ((u8*)dev->staticDeviceDescEndPtr + readLen > (u8*)dev->staticDeviceDescPtr + usbConfig.maxStaticDescSize) {
 			dbg_printf("USBD: Device ignored, Device descriptors too large\n");
 			return; // buffer is too small, silently ignore the device
 		}
@@ -438,7 +438,7 @@ void fetchConfigDescriptors(IoRequest *req) {
 		killDevice(dev, ep);
 }
 
-void requestDeviceDescriptor(IoRequest *req, uint16 length);
+void requestDeviceDescriptor(IoRequest *req, u16 length);
 
 void requestDevDescrptCb(IoRequest *req) {
 	Endpoint *ep = req->correspEndpoint;
@@ -451,7 +451,7 @@ void requestDevDescrptCb(IoRequest *req) {
 			requestDeviceDescriptor(req, sizeof(UsbDeviceDescriptor));
 		} else {
 			dev->fetchDescriptorCounter = 0;
-			dev->staticDeviceDescEndPtr = (uint8*)dev->staticDeviceDescEndPtr + sizeof(UsbDeviceDescriptor);
+			dev->staticDeviceDescEndPtr = (u8*)dev->staticDeviceDescEndPtr + sizeof(UsbDeviceDescriptor);
 			fetchConfigDescriptors(req);
 		}
 	} else {
@@ -460,7 +460,7 @@ void requestDevDescrptCb(IoRequest *req) {
 	}
 }
 
-void requestDeviceDescriptor(IoRequest *req, uint16 length) {
+void requestDeviceDescriptor(IoRequest *req, u16 length) {
 	Endpoint *ep = req->correspEndpoint;
 	Device *dev = ep->correspDevice;
 
@@ -695,7 +695,7 @@ int hubDrvConnect(int devId) {
 	hubDevice->statusIoReq.userCallbackArg = hubDevice;
 
 	if (hubDesc) {
-		uint8 len = hubDesc->bLength;
+		u8 len = hubDesc->bLength;
 		if (len > sizeof(UsbHubDescriptor))
 			len = sizeof(UsbHubDescriptor);
 		memcpy(&hubDevice->desc, hubDesc, len);

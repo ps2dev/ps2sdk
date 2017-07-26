@@ -36,7 +36,7 @@ void removeEndpointFromQueue(Endpoint *ep) {
 	ep->inTdQueue = 0;
 }
 
-void enqueueEndpoint(Endpoint *ep, uint32 listType) {
+void enqueueEndpoint(Endpoint *ep, u32 listType) {
 	if (ep->inTdQueue)
 		return;
 
@@ -98,7 +98,7 @@ int setupControlTransfer(Endpoint *ep) {
 		// first stage: setup
 		ep->hcEd.tdTail->HcArea = TD_HCAREA(USB_RC_NOTACCESSED, 2, 7, TD_SETUP, 0) << 16;
 		ep->hcEd.tdTail->curBufPtr = &curIoReq->devReq;
-		ep->hcEd.tdTail->bufferEnd = ((uint8 *)&curIoReq->devReq) + sizeof(UsbDeviceRequest) - 1;
+		ep->hcEd.tdTail->bufferEnd = ((u8 *)&curIoReq->devReq) + sizeof(UsbDeviceRequest) - 1;
 
 		memPool.hcTdToIoReqLUT[ep->hcEd.tdTail - memPool.hcTdBuf] = curIoReq;
 
@@ -112,7 +112,7 @@ int setupControlTransfer(Endpoint *ep) {
 				dataTd->HcArea = TD_HCAREA(USB_RC_NOTACCESSED, 3, 7, TD_OUT, 1) << 16;
 
 			dataTd->curBufPtr = curIoReq->destPtr;
-			dataTd->bufferEnd = (uint8 *)curIoReq->destPtr + curIoReq->length - 1;
+			dataTd->bufferEnd = (u8 *)curIoReq->destPtr + curIoReq->length - 1;
 			dataTd->next = statusTd;
 
 			memPool.hcTdToIoReqLUT[dataTd - memPool.hcTdBuf] = curIoReq;
@@ -152,7 +152,7 @@ int setupIsocronTransfer(Endpoint *ep) {
 	HcIsoTD	  *curTd = (HcIsoTD*)ed->tdTail;
 	HcIsoTD	  *newTd;
 
-	uint32 frameNo;
+	u32 frameNo;
 
 	if (ep->hcEd.tdTail && !ED_HALTED(ep->hcEd) && !ED_SKIPPED(ep->hcEd) && curIoReq) {
 		newTd = allocIsoTd();
@@ -171,7 +171,7 @@ int setupIsocronTransfer(Endpoint *ep) {
 		else
 			ep->ioReqListStart = curIoReq->next;
 
-		if (ed->tdTail == (HcTD *)((uint32)ed->tdHead & ~0xF))
+		if (ed->tdTail == (HcTD *)((u32)ed->tdHead & ~0xF))
 			frameNo = memPool.hcHCCA->FrameNumber + 2;
 		else
 			frameNo = ep->isochronLastFrameNum;
@@ -181,15 +181,15 @@ int setupIsocronTransfer(Endpoint *ep) {
 		ep->isochronLastFrameNum = frameNo + 1;
 
 		curTd->hcArea	   = (USB_RC_NOTACCESSED << 28) | frameNo;
-		curTd->bufferPage0 = (void*)((uint32)curIoReq->destPtr & ~0xFFF);
+		curTd->bufferPage0 = (void*)((u32)curIoReq->destPtr & ~0xFFF);
 		curTd->next		   = newTd;
 
 		if (curIoReq->destPtr && curIoReq->length)
-			curTd->bufferEnd = (uint8*)curIoReq->destPtr + curIoReq->length - 1;
+			curTd->bufferEnd = (u8*)curIoReq->destPtr + curIoReq->length - 1;
 		else
 			curTd->bufferEnd = NULL;
 
-		curTd->psw[0] = (USB_RC_NOTACCESSED << 12) | ((uint32)curIoReq->destPtr & 0xFFF);
+		curTd->psw[0] = (USB_RC_NOTACCESSED << 12) | ((u32)curIoReq->destPtr & 0xFFF);
 
 		memPool.hcIsoTdToIoReqLUT[curTd - memPool.hcIsoTdBuf] = curIoReq;
 
@@ -235,7 +235,7 @@ int setupBulkTransfer(Endpoint *ep) {
 		curTd->curBufPtr = curIoReq->destPtr;
 
 		if (curIoReq->destPtr && curIoReq->length)
-			curTd->bufferEnd = (uint8*)curIoReq->destPtr + curIoReq->length - 1;
+			curTd->bufferEnd = (u8*)curIoReq->destPtr + curIoReq->length - 1;
 		else
 			curTd->bufferEnd = NULL;
 
@@ -267,7 +267,7 @@ void handleIoReqList(Endpoint *ep) {
 		setupBulkTransfer(ep);
 }
 
-int attachIoReqToEndpoint(Endpoint *ep, IoRequest *req, void *destdata, uint16 length, void *callback) {
+int attachIoReqToEndpoint(Endpoint *ep, IoRequest *req, void *destdata, u16 length, void *callback) {
 	if (!ep->correspDevice)
 		return USB_RC_BUSY;
 	if (req->busyFlag)
@@ -294,7 +294,7 @@ int attachIoReqToEndpoint(Endpoint *ep, IoRequest *req, void *destdata, uint16 l
 }
 
 int doControlTransfer(Endpoint *ep, IoRequest *req,
-					   uint8 requestType, uint8 request, uint16 value, uint16 index, uint16 length,
+					   u8 requestType, u8 request, u16 value, u16 index, u16 length,
 					   void *destdata, void *callback)
 {
 	if (req->busyFlag) {

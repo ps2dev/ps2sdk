@@ -54,8 +54,8 @@ int usbdUnlock(void) {
 	return SignalSema(usbdSema);
 }
 
-int doGetDeviceLocation(Device *dev, uint8 *path) {
-	uint8 tempPath[6];
+int doGetDeviceLocation(Device *dev, u8 *path) {
+	u8 tempPath[6];
 	int count, cpCount;
 	for (count = 0; (count < 6) && (dev != memPool.deviceTreeRoot); count++) {
 		tempPath[count] = dev->attachedToPortNo;
@@ -74,9 +74,9 @@ int doGetDeviceLocation(Device *dev, uint8 *path) {
 }
 
 void processDoneQueue_IsoTd(HcIsoTD *arg) {
-	uint32 tdHcRes = arg->hcArea >> 28;
-	uint32 pswRes = arg->psw[0] >> 12;
-	uint32 pswOfs = arg->psw[0] & 0x7FF;
+	u32 tdHcRes = arg->hcArea >> 28;
+	u32 pswRes = arg->psw[0] >> 12;
+	u32 pswOfs = arg->psw[0] & 0x7FF;
 
 	IoRequest *listStart = NULL, *listEnd = NULL;
 
@@ -106,7 +106,7 @@ void processDoneQueue_IsoTd(HcIsoTD *arg) {
 
 	HcED *ed = &req->correspEndpoint->hcEd;
 	if (ED_HALTED(req->correspEndpoint->hcEd)) {
-		HcIsoTD *curTd = (HcIsoTD *)((uint32)ed->tdHead & ~0xF);
+		HcIsoTD *curTd = (HcIsoTD *)((u32)ed->tdHead & ~0xF);
 
 		while (curTd && (curTd != (HcIsoTD*)ed->tdTail)) {
 			HcIsoTD *nextTd = curTd->next;
@@ -153,18 +153,18 @@ void processDoneQueue_GenTd(HcTD *arg) {
 	IoRequest *req;
 	IoRequest *firstElem = NULL, *lastElem = NULL;
 
-	uint32 hcRes;
+	u32 hcRes;
 
 	if ((req = memPool.hcTdToIoReqLUT[arg - memPool.hcTdBuf])) {
 		memPool.hcTdToIoReqLUT[arg - memPool.hcTdBuf] = NULL;
 
-		uint32 tdHcArea = arg->HcArea;
+		u32 tdHcArea = arg->HcArea;
 
 		if (arg->bufferEnd && (tdHcArea & 0x180000)) { // dir != SETUP
 			if (arg->curBufPtr == 0) // transfer successful
 				req->transferedBytes = req->length;
 			else
-				req->transferedBytes = (uint8 *)arg->curBufPtr - (uint8 *)req->destPtr;
+				req->transferedBytes = (u8 *)arg->curBufPtr - (u8 *)req->destPtr;
 		}
 		hcRes = tdHcArea >> 28;
 		freeTd(arg);
@@ -184,7 +184,7 @@ void processDoneQueue_GenTd(HcTD *arg) {
 
 		HcED *ed = &req->correspEndpoint->hcEd;
 		if (hcRes && ED_HALTED(req->correspEndpoint->hcEd)) {
-			HcTD *tdListPos = (HcTD*)((uint32)ed->tdHead & ~0xF);
+			HcTD *tdListPos = (HcTD*)((u32)ed->tdHead & ~0xF);
 			while (tdListPos && (tdListPos != ed->tdTail)) {
 				HcTD *nextTd = tdListPos->next;
 				freeTd(tdListPos);

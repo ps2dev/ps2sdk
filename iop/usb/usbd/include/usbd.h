@@ -16,34 +16,28 @@
 #ifndef __USBD_H__
 #define __USBD_H__
 
+#include <types.h>
 #include <irx.h>
 
-typedef unsigned int uint32;
-typedef unsigned short uint16;
-typedef unsigned char uint8;
-typedef signed int int32;
-typedef signed short int16;
-typedef signed char int8;
-
 typedef struct {
-	uint8  requesttype;
-	uint8  request;
-	uint16 value;
-	uint16 index;
-	uint16 length;
+	u8  requesttype;
+	u8  request;
+	u16 value;
+	u16 index;
+	u16 length;
 } UsbDeviceRequest;
 
 typedef void (*UsbCallbackProc)(int result, int count, void *arg);
 
 typedef struct {
-	uint8 bLength;
-	uint8 bDescriptorType;
-	uint8 bNbrPorts;
-	uint8 wHubCharacteristicsLb;
-	uint8 wHubCharacteristicsHb;
-	uint8 bPwrOn2PwrGood;
-	uint8 bHubContrCurrent;
-	uint8 deviceRemovable[8]; // arbitrary number, depends on number of ports
+	u8 bLength;
+	u8 bDescriptorType;
+	u8 bNbrPorts;
+	u8 wHubCharacteristicsLb;
+	u8 wHubCharacteristicsHb;
+	u8 bPwrOn2PwrGood;
+	u8 bHubContrCurrent;
+	u8 deviceRemovable[8]; // arbitrary number, depends on number of ports
 } UsbHubDescriptor;
 
 
@@ -59,84 +53,84 @@ typedef struct _UsbDriver {
 	int (*connect)(int devID);
 
 	int (*disconnect)(int devID);
-	uint32 reserved1;
-	uint32 reserved2;
-	uint32 reserved3;
-	uint32 reserved4;
-	uint32 reserved5;
+	u32 reserved1;
+	u32 reserved2;
+	u32 reserved3;
+	u32 reserved4;
+	u32 reserved5;
 	void *gp;
 } UsbDriver;
 
 typedef struct {
-	uint8 bLength;
-	uint8 bDescriptorType;
-	uint16 bcdUSB;
-	uint8 bDeviceClass;
-	uint8 bDeviceSubClass;
-	uint8 bDeviceProtocol;
-	uint8 bMaxPacketSize0;
-	uint16 idVendor;
-	uint16 idProduct;
-	uint16 bcdDevice;
-	uint8 iManufacturer;
-	uint8 iProduct;
-	uint8 iSerialNumber;
-	uint8 bNumConfigurations;
+	u8 bLength;
+	u8 bDescriptorType;
+	u16 bcdUSB;
+	u8 bDeviceClass;
+	u8 bDeviceSubClass;
+	u8 bDeviceProtocol;
+	u8 bMaxPacketSize0;
+	u16 idVendor;
+	u16 idProduct;
+	u16 bcdDevice;
+	u8 iManufacturer;
+	u8 iProduct;
+	u8 iSerialNumber;
+	u8 bNumConfigurations;
 } UsbDeviceDescriptor;
 
 typedef struct {
-	uint8 bLength;
-	uint8 bDescriptorType;
-	//uint8 wTotalLengthLb;
-	//uint8 wTotalLengthHb;
-	uint16 wTotalLength; // apparently we can expect this to be aligned, for some reason
-	uint8 bNumInterfaces;
-	uint8 bConfigurationValue;
-	uint8 iConfiguration;
-	uint8 bmAttributes;
-	uint8 maxPower;
+	u8 bLength;
+	u8 bDescriptorType;
+	//u8 wTotalLengthLb;
+	//u8 wTotalLengthHb;
+	u16 wTotalLength; // apparently we can expect this to be aligned, for some reason
+	u8 bNumInterfaces;
+	u8 bConfigurationValue;
+	u8 iConfiguration;
+	u8 bmAttributes;
+	u8 maxPower;
 } UsbConfigDescriptor;
 
 typedef struct {
-	uint8 bLength;
-	uint8 bDescriptorType;
-	uint8 bInterfaceNumber;
-	uint8 bAlternateSetting;
-	uint8 bNumEndpoints;
-	uint8 bInterfaceClass;
-	uint8 bInterfaceSubClass;
-	uint8 bInterfaceProtocol;
-	uint8 iInterface;
+	u8 bLength;
+	u8 bDescriptorType;
+	u8 bInterfaceNumber;
+	u8 bAlternateSetting;
+	u8 bNumEndpoints;
+	u8 bInterfaceClass;
+	u8 bInterfaceSubClass;
+	u8 bInterfaceProtocol;
+	u8 iInterface;
 } UsbInterfaceDescriptor;
 
 typedef struct {
-	uint8 bLength;
-	uint8 bDescritorLength;
-	uint8 bEndpointAddress;
-	uint8 bmAttributes;
-	uint8 wMaxPacketSizeLB;
-	uint8 wMaxPacketSizeHB;
-	uint8 bInterval;
+	u8 bLength;
+	u8 bDescritorLength;
+	u8 bEndpointAddress;
+	u8 bmAttributes;
+	u8 wMaxPacketSizeLB;
+	u8 wMaxPacketSizeHB;
+	u8 bInterval;
 } UsbEndpointDescriptor;
 
 typedef struct {
-	uint8  bLength;
-	uint8  bDescriptorType;
-	uint16 wData[1];
+	u8  bLength;
+	u8  bDescriptorType;
+	u16 wData[1];
 } UsbStringDescriptor;
 
 typedef struct {
-	uint16 bLength:11;
-	uint16 reserved:1;
-	uint16 PSW:4;
+	u16 bLength:11;
+	u16 reserved:1;
+	u16 PSW:4;
 } UsbIsochronousPswLen;
 
 #define USB_MAX_ISOCH_PACKETS 8
 
 typedef struct {
 	void *bBufStart;
-	uint32 bRelStartFrame;
-	uint32 bNumPackets;
+	u32 bRelStartFrame;
+	u32 bNumPackets;
 	UsbIsochronousPswLen Packets[USB_MAX_ISOCH_PACKETS];
 } UsbMultiIsochronousRequest;
 
@@ -278,20 +272,20 @@ typedef	void (*UsbMultiIsochronousDoneCallback)(int result, UsbMultiIsochronousR
 
 int UsbRegisterDriver(UsbDriver *driver);
 int UsbUnregisterDriver(UsbDriver *driver);
-void *UsbGetDeviceStaticDescriptor(int devId, void *data, uint8 type);
-int UsbGetDeviceLocation(int devId, uint8 *path);
+void *UsbGetDeviceStaticDescriptor(int devId, void *data, u8 type);
+int UsbGetDeviceLocation(int devId, u8 *path);
 int UsbSetDevicePrivateData(int devId, void *data);
 void *UsbGetDevicePrivateData(int devId);
 int UsbOpenEndpoint(int devId, UsbEndpointDescriptor *desc);
 int UsbCloseEndpoint(int id);
-int UsbTransfer(int id, void *data, uint32 len, void *option, UsbCallbackProc callback, void *cbArg);
+int UsbTransfer(int id, void *data, u32 len, void *option, UsbCallbackProc callback, void *cbArg);
 int UsbOpenEndpointAligned(int devId, UsbEndpointDescriptor *desc);
 
 // these aren't implemented:
 int UsbRegisterAutoloader(UsbDriver *drv);
 int UsbUnregisterAutoloader(UsbDriver *drv);
 int UsbChangeThreadPriority(void);
-int UsbGetReportDescriptor(int devId, int cfgNum, int ifNum, void **desc, uint32 *len);
+int UsbGetReportDescriptor(int devId, int cfgNum, int ifNum, void **desc, u32 *len);
 int UsbMultiIsochronousTransfer(int pipeId, UsbMultiIsochronousRequest *request, UsbMultiIsochronousDoneCallback callback, void *cbArg);
 
 #define usbd_IMPORTS_start DECLARE_IMPORT_TABLE(usbd,1,1)

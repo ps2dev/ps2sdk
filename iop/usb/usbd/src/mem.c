@@ -64,7 +64,7 @@ void freeTd(HcTD *argTd) {
 	}
 }
 
-Device *attachChildDevice(Device *parent, uint32 portNum) {
+Device *attachChildDevice(Device *parent, u32 portNum) {
 	Device *newDev = memPool.freeDeviceListStart;
 	if (!newDev) {
 		dbg_printf("Ran out of device handles\n");
@@ -132,7 +132,7 @@ Device *fetchPortElemByNumber(Device *hub, int port) {
 	return res;
 }
 
-void addToHcEndpointList(uint8 type, HcED *ed) {
+void addToHcEndpointList(u8 type, HcED *ed) {
 	ed->next = memPool.hcEdBuf[type].next;
 	memPool.hcEdBuf[type].next = ed;
 }
@@ -150,7 +150,7 @@ void removeHcEdFromList(int type, HcED *hcEd) {
 	}
 }
 
-Endpoint *allocEndpointForDevice(Device *dev, uint32 align) {
+Endpoint *allocEndpointForDevice(Device *dev, u32 align) {
 	Endpoint *newEp = memPool.freeEpListStart;
 	if (!newEp)
 		return NULL;

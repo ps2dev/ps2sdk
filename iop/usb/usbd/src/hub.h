@@ -11,7 +11,7 @@
 int removeEndpointFromDevice(Device *dev, Endpoint *ep);
 int initHubDriver(void);
 void flushPort(Device *dev);
-int addTimerCallback(TimerCbStruct *arg, TimerCallback func, void *cbArg, uint32 delay);
+int addTimerCallback(TimerCbStruct *arg, TimerCallback func, void *cbArg, u32 delay);
 int hubResetDevice(Device *dev);
 int hubTimedSetFuncAddress(Device *dev);
 
