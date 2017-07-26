@@ -22,7 +22,7 @@
  * T   = location of qwords
  * D   = next dmatag to be read
  * QWC = quadword count for dmatag
-*/
+ */
 
 /** T=QWC D=QWC+1 MADR => STADR */
 #define DMA_TAG_CNTS	0x00
@@ -107,4 +107,4 @@
 	Q->sw[2] = (u32)(W2), \
 	Q->sw[3] = (u32)(W3)
 
-#endif /*__DMA_TAGS_H__*/
+#endif /* __DMA_TAGS_H__ */

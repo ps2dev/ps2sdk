@@ -35,17 +35,17 @@ typedef struct {
 extern "C" {
 #endif
 
-	/** Alpha Blending Per-Pixel MSB Control */
-	qword_t *draw_pixel_alpha_control(qword_t *q, int enable);
+/** Alpha Blending Per-Pixel MSB Control */
+qword_t *draw_pixel_alpha_control(qword_t *q, int enable);
 
-	/** Alpha Blending */
-	qword_t *draw_alpha_blending(qword_t *q, int context, blend_t *blend);
+/** Alpha Blending */
+qword_t *draw_alpha_blending(qword_t *q, int context, blend_t *blend);
 
-	/** Alpha Correction */
-	qword_t *draw_alpha_correction(qword_t *q, int context, int alpha);
+/** Alpha Correction */
+qword_t *draw_alpha_correction(qword_t *q, int context, int alpha);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /*__DRAW_BLENDING_H__*/
+#endif /* __DRAW_BLENDING_H__ */

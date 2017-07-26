@@ -13,14 +13,10 @@
  * EE SIF control function prototypes and structures
  */
 
-#ifndef _SIFDMA_H
-#define _SIFDMA_H
+#ifndef __SIFDMA_H__
+#define __SIFDMA_H__
 
 #include <tamtypes.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #define SIF_DMA_INT_I	0x2
 #define SIF_DMA_INT_O	0x4
@@ -61,6 +57,10 @@ typedef struct t_SifDmaTransfer
    int				attr;
 } SifDmaTransfer_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 u32 SifSetDma(SifDmaTransfer_t *sdd, s32 len);
 s32 SifDmaStat(u32 id);
 
@@ -68,4 +68,4 @@ s32 SifDmaStat(u32 id);
 }
 #endif
 
-#endif
+#endif /* __SIFDMA_H__ */

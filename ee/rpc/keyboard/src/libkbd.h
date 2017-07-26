@@ -58,4 +58,4 @@ int PS2KbdClose(void);
 }
 #endif
 
-#endif
+#endif /* __LIBKBD_H__ */

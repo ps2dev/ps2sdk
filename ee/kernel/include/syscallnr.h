@@ -1,9 +1,11 @@
-#ifndef _SYSCALLNR_H_
-#define _SYSCALLNR_H_
-
-/*
+/**
+ * @file
  * This file contains the system call numbers, similar to asm/unistd.h on Linux.
  */
+
+#ifndef __SYSCALLNR_H__
+#define __SYSCALLNR_H__
+
 #define __NR_ResetEE			1
 #define __NR_SetGsCrt			2
 #define __NR__Exit			4
@@ -150,4 +152,4 @@
 #define __NR__GetGsDxDyOffset		0x80
 #define __NR__InitTLB			0x82
 
-#endif /* _SYSCALLNR_H_ */
+#endif /* __SYSCALLNR_H__ */

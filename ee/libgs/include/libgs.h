@@ -13,8 +13,10 @@
  * GS library functions.
  */
 
-#ifndef _LIBGS_H_
-#define _LIBGS_H_
+#ifndef __LIBGS_H__
+#define __LIBGS_H__
+
+#include <tamtypes.h>
 
 typedef struct {
 	/** Interlace/non-interlace mode. */
@@ -2324,7 +2326,7 @@ typedef struct
 }GS_EE_IMAGE;
 #endif
 
-#if defined(__LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
+#ifdef __cplusplus
 extern "C" {
 #endif
 
@@ -2405,7 +2407,8 @@ int    GsDbGetDrawBuffer(void);
 int    GsDbGetDisplayBuffer(void);
 void GsDbSwapBuffer(void);
 
-#if defined(__LANGUAGE_C_PLUS_PLUS)||defined(__cplusplus)||defined(c_plusplus)
+#ifdef __cplusplus
 }
 #endif
-#endif /*_LIBGS_H_*/
+
+#endif /* __LIBGS_H__ */

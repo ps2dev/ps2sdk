@@ -1,11 +1,16 @@
-#ifndef __LIBSD_H
-#define __LIBSD_H 1
+/**
+ * @file
+ * Sound driver library.
+ */
+
+#ifndef __LIBSD_H__
+#define __LIBSD_H__
+
+#include <libsd-common.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include <libsd-common.h>
 
 int  SdInit(int flag);
 void SdSetParam(u16 entry, u16 value);
@@ -32,5 +37,4 @@ int  SdClearEffectWorkArea (int core, int channel, int effect_mode);
 }
 #endif
 
-#endif /* __LIBSD_H */
-
+#endif /* __LIBSD_H__ */

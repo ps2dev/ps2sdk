@@ -36,4 +36,4 @@ char *dirname (char *path);
 }
 #endif
 
-#endif //LIBGEN
+#endif /* __LIBGEN_H__ */

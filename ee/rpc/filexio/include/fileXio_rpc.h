@@ -13,22 +13,21 @@
  * fileXio RPC client header file
  */
 
-#ifndef _FILEXIO_RPC_H
-#define _FILEXIO_RPC_H
+#ifndef __FILEXIO_RPC_H__
+#define __FILEXIO_RPC_H__
 
-// include the common definitions
 #include <fileXio.h>
 #include <sys/stat.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #define FXIO_WAIT		0
 #define FXIO_NOWAIT		1
 
 #define FXIO_COMPLETE	1
 #define FXIO_INCOMPLETE	0
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 int fileXioInit(void);
 void fileXioExit(void);
@@ -70,5 +69,4 @@ int fileXioSetRWBufferSize(int size);
 }
 #endif
 
-
-#endif // _FILEXIO_H
+#endif /* __FILEXIO_RPC_H__ */

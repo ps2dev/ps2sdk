@@ -13,8 +13,8 @@
  * IOP heap handling prototypes
  */
 
-#ifndef _IOP_HEAP_H_
-#define _IOP_HEAP_H_
+#ifndef __IOPHEAP_H__
+#define __IOPHEAP_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,4 +32,4 @@ int SifLoadIopHeap(const char *path, void *addr);
 }
 #endif
 
-#endif
+#endif /* __IOPHEAP_H__ */

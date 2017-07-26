@@ -16,10 +16,11 @@
 #ifndef __PS2KBD_H__
 #define __PS2KBD_H__
 
+#include <tamtypes.h>
+
 #define PS2KBD_FSNAME "usbkbd"
 #define PS2KBD_KBDFILE "dev"
 #define PS2KBD_DEVFILE (PS2KBD_FSNAME ":" PS2KBD_KBDFILE)
-
 
 #define PS2KBD_LED_NUMLOCK   1
 #define PS2KBD_LED_CAPSLOCK  2
@@ -49,7 +50,6 @@
 #define PS2KBD_RAWKEY_DOWN 0xF1
 
 typedef struct _kbd_rawkey
-
 {
   u8 state;
   u8 key;
@@ -71,7 +71,6 @@ typedef struct _kbd_rawkey
 #define PS2KBD_KEYMAP_SIZE 256
 
 typedef struct _kbd_keymap
-
 {
   u8 keymap[PS2KBD_KEYMAP_SIZE];
   u8 shiftkeymap[PS2KBD_KEYMAP_SIZE];
@@ -106,4 +105,4 @@ typedef struct _kbd_keymap
 /* Second table maps USB key to a char when shifted */
 /* Third table contains boolean values. If 1 then the key is shifted/unshifted in capslock, else capslock is ignored */
 
-#endif
+#endif /* __PS2KBD_H__ */

@@ -13,8 +13,8 @@
  * IOP reset and status routines.
  */
 
-#ifndef IOPCONTROL_H
-#define IOPCONTROL_H
+#ifndef __IOPCONTROL_H__
+#define __IOPCONTROL_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,4 +45,4 @@ int SifIopSync(void);
 }
 #endif
 
-#endif /* IOPCONTROL_H */
+#endif /* __IOPCONTROL_H__ */

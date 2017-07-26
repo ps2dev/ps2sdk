@@ -13,14 +13,10 @@
  * Sub-CPU module interface.
  */
 
-#ifndef SBV_SMOD_H
-#define SBV_SMOD_H
+#ifndef __SMOD_H__
+#define __SMOD_H__
 
-#include "tamtypes.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <tamtypes.h>
 
 /** Module info entry.  
  * Most of the fields are self-explanatory.  I don't know what the *flags fields do, and they don't seem to be important.
@@ -45,6 +41,10 @@ typedef struct _smod_mod_info {
 	u32	unused2;
 } smod_mod_info_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** Return the next module referenced in the global module list.  */
 int smod_get_next_mod(smod_mod_info_t *cur_mod, smod_mod_info_t *next_mod);
 
@@ -55,4 +55,4 @@ int smod_get_mod_by_name(const char *name, smod_mod_info_t *info);
 }
 #endif
 
-#endif /* SBV_SMOD_H */
+#endif /* __SMOD_H__ */

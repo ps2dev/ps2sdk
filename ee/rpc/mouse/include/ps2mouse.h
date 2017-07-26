@@ -16,8 +16,9 @@
 #ifndef __PS2MOUSE_H__
 #define __PS2MOUSE_H__
 
-typedef struct _mouse_data
+#include <tamtypes.h>
 
+typedef struct _mouse_data
 {
   s32 x, y;
   s32 wheel;
@@ -55,4 +56,4 @@ typedef struct _mouse_data
 #define PS2MOUSE_GETDBLCLICKTIME 0xE
 #define PS2MOUSE_GETVERSION 0x20
 
-#endif
+#endif /* __PS2MOUSE_H__ */

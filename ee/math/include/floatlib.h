@@ -1,15 +1,21 @@
+/**
+ * @file
+ * Float library functions.
+ */
 
-#ifndef _FLOATLIB_H_
-#define _FLOATLIB_H_
+#ifndef __FLOATLIB_H__
+#define __FLOATLIB_H__
+
+typedef struct {
+	/** real part */
+	float r;
+	/** imaginary part */
+	float i;
+}cmplxf;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-typedef struct {
-  float r;     /* real part */
-  float i;     /* imaginary part */
- }cmplxf;
 
 float acosf( float );
 float acoshf( float );
@@ -134,4 +140,4 @@ float zetaf( float, float );
 }
 #endif
 
-#endif
+#endif /* __FLOATLIB_H__ */

@@ -14,12 +14,8 @@
  * EE SIF RPC commands prototypes
  */
 
-#ifndef _SIFRPC_H
-#define _SIFRPC_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __SIFRPC_H__
+#define __SIFRPC_H__
 
 #include <sifcmd.h>
 
@@ -29,8 +25,16 @@ extern "C" {
 /** Don't write back the D cache */
 #define SIF_RPC_M_NOWBDC	0x02
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef void * (*SifRpcFunc_t)(int fno, void *buffer, int length);
 typedef void (*SifRpcEndFunc_t)(void *end_param);
+
+#ifdef __cplusplus
+}
+#endif
 
 typedef struct t_SifRpcPktHeader {
 	struct t_SifCmdHeader	sifcmd;
@@ -156,6 +160,10 @@ typedef struct t_SifRpcDataQueue
    struct t_SifRpcDataQueue	*next;  	/* 05 */
 } SifRpcDataQueue_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void SifInitRpc(int mode);
 void SifExitRpc(void);
 
@@ -192,4 +200,4 @@ void SifRpcLoop(SifRpcDataQueue_t *q);
 }
 #endif
 
-#endif
+#endif /* __SIFRPC_H__ */

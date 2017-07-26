@@ -14,12 +14,10 @@
  * EE SIF commands prototypes
  */
 
-#ifndef _SIFCMD_H
-#define _SIFCMD_H
+#ifndef __SIFCMD_H__
+#define __SIFCMD_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <tamtypes.h>
 
 typedef struct t_SifCmdHeader
 {
@@ -59,6 +57,9 @@ typedef struct t_SifCmdSRegData {
 	unsigned int	value;
 } SifCmdSRegData_t;
 
+#ifdef __cplusplus
+extern "C"
+#endif
 typedef void (*SifCmdHandler_t)(void *data, void *harg);
 
 typedef struct t_SifCmdHandlerData
@@ -76,6 +77,10 @@ typedef struct _iop_reset_pkt {
 	int	mode;
 	char	arg[RESET_ARG_MAX + 1];
 } SifCmdResetData_t;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 unsigned int SifSendCmd(int cmd, void *packet, int packet_size, void *src_extra,
 	void *dest_extra, int size_extra);
@@ -100,4 +105,4 @@ void SifWriteBackDCache(void *ptr, int size);	//EE only
 }
 #endif
 
-#endif
+#endif /* __SIFCMD_H__ */

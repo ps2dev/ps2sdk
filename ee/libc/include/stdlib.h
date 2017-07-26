@@ -20,44 +20,32 @@
 #include <ps2lib_err.h>
 #include <malloc.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-
-/* ensure NULL is defined. */
 #ifndef NULL
 #define NULL                           (void *)0
 #endif
-
 
 /* exit status constants. */
 #define EXIT_SUCCESS                   0
 #define EXIT_FAILURE                   1
 
-
 /* multibyte maximum character constant. */
 #define MB_CUR_MAX                     4
 
-/* ensure div_t is defined. */
 #ifndef __DIV_T_DEFINED
 #define __DIV_T_DEFINED
 typedef struct {
   int quot;
   int rem;
 } div_t;
-#endif // __DIV_T_DEFINED
+#endif
 
-
-/* ensure ldiv_t is defined. */
 #ifndef __LDIV_T_DEFINED
 #define __LDIV_T_DEFINED
 typedef struct {
   long quot;
   long rem;
 } ldiv_t;
-#endif // __LDIV_T_DEFINED
-
+#endif
 
 #ifndef __STRICT_ANSI__
 #ifndef __LLDIV_T_DEFINED
@@ -66,14 +54,16 @@ typedef struct {
   long long quot;
   long long rem;
 } lldiv_t;
-#endif // __LLDIV_T_DEFINED
-#endif // __STRICT_ANSI__
+#endif
+#endif
 
 /* we don't check for any previously defined value. This HAS to be that. */
 #define        RAND_MAX        2147483647
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-/* function declarations. */
 void          abort(void) __attribute__ ((noreturn));
 int           abs(int);
 int           atexit(void (*)(void));
@@ -98,12 +88,10 @@ void          srand(unsigned int);
 double        strtod(const char *, char **);
 long          strtol(const char *, char **, int);
 unsigned long strtoul(const char *, char **, int);
-static __inline__ int atoi(const char * x) { return strtol(x, NULL, 10); }
-static __inline__ long atol(const char * x) { return strtol(x, NULL, 10); }
-
+static inline int atoi(const char * x) { return strtol(x, NULL, 10); }
+static inline long atol(const char * x) { return strtol(x, NULL, 10); }
 
 void          qsort(void *base, size_t nmemb, size_t size, int (*compar)(const void *, const void *));
-
 
 /* UTF-8 multi-byte string functions */
 int           mblen(const char *, size_t);
@@ -131,5 +119,4 @@ int system (const char * string);
 
 #endif
 
-
-#endif // __STDLIB_H__
+#endif /* __STDLIB_H__ */

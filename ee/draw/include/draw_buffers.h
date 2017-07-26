@@ -3,8 +3,8 @@
  * Draw library buffer functions
  */
 
-#ifndef __DRAW_BUFFER_H__
-#define __DRAW_BUFFER_H__
+#ifndef __DRAW_BUFFERS_H__
+#define __DRAW_BUFFERS_H__
 
 #include <tamtypes.h>
 
@@ -72,26 +72,26 @@ typedef struct {
 extern "C" {
 #endif
 
-	/** Returns the power of 2 needed for texture width and height */
-	unsigned char draw_log2(unsigned int x);
+/** Returns the power of 2 needed for texture width and height */
+unsigned char draw_log2(unsigned int x);
 
-	/** Framebuffer Attributes */
-	qword_t *draw_framebuffer(qword_t *q, int context, framebuffer_t *frame);
+/** Framebuffer Attributes */
+qword_t *draw_framebuffer(qword_t *q, int context, framebuffer_t *frame);
 
-	/** ZBuffer Attributes */
-	qword_t *draw_zbuffer(qword_t *q, int context, zbuffer_t *zbuffer);
+/** ZBuffer Attributes */
+qword_t *draw_zbuffer(qword_t *q, int context, zbuffer_t *zbuffer);
 
-	/** TextureBuffer Attributes */
-	qword_t *draw_texturebuffer(qword_t *q, int context, texbuffer_t *texbuffer, clutbuffer_t *clut);
+/** TextureBuffer Attributes */
+qword_t *draw_texturebuffer(qword_t *q, int context, texbuffer_t *texbuffer, clutbuffer_t *clut);
 
-	/** CLUT Storage Mode 1 Information */
-	qword_t *draw_clutbuffer(qword_t *q, int context, int psm, clutbuffer_t *clut);
+/** CLUT Storage Mode 1 Information */
+qword_t *draw_clutbuffer(qword_t *q, int context, int psm, clutbuffer_t *clut);
 
-	/** CLUT Storage Mode 2 Information */
-	qword_t *draw_clut_offset(qword_t *q, int cbw, int u, int v);
+/** CLUT Storage Mode 2 Information */
+qword_t *draw_clut_offset(qword_t *q, int cbw, int u, int v);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /*__DRAW_BUFFER_H__*/
+#endif /* __DRAW_BUFFERS_H__ */

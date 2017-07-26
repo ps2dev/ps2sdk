@@ -14,8 +14,8 @@
  * EE FILE IO handling
  */
 
-#ifndef _FILEIO_H
-#define _FILEIO_H
+#ifndef __FILEIO_H__
+#define __FILEIO_H__
 
 #include <io_common.h>
 
@@ -65,4 +65,4 @@ int fioRmdir(const char* dirname);
 }
 #endif
 
-#endif // _FILEIO_H
+#endif /* __FILEIO_H__ */

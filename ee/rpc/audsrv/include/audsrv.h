@@ -13,12 +13,8 @@
  * audsrv EE-side RPC code
  */
 
-#ifndef _AUDSRV_H
-#define _AUDSRV_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __AUDSRV_H__
+#define __AUDSRV_H__
 
 #define	AUDSRV_IRX              0x870884d
 
@@ -61,6 +57,10 @@ typedef struct audsrv_adpcm_t
 	void *buffer;
 	int size;
 } audsrv_adpcm_t;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef int (*audsrv_callback_t)(void *arg);
 
@@ -243,9 +243,8 @@ int audsrv_play_adpcm(audsrv_adpcm_t *adpcm);
  */
 int audsrv_on_cdda_stop(audsrv_callback_t cb, void *arg);
 
-
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _AUDSRV_H
+#endif /* __AUDSRV_H__ */

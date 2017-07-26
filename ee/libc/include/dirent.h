@@ -26,7 +26,6 @@ typedef struct DIR
 {
 	/** handle used against fio */
 	int  d_fd;
-
 	/** entry returned at readdir */
 	struct dirent *d_entry;
 } DIR;
@@ -62,4 +61,4 @@ int closedir (DIR *d);
 }
 #endif
 
-#endif //DIRENT
+#endif /* __DIRENT_H__ */

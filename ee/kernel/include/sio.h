@@ -13,10 +13,11 @@
  * EE Serial I/O
  */
 
-#ifndef EE_SIO_H
-#define EE_SIO_H
+#ifndef __SIO_H__
+#define __SIO_H__
 
-#include "tamtypes.h"
+#include <tamtypes.h>
+#include <stddef.h>
 
 /* SIO Registers.  */
 /* Most of these are based off of Toshiba documentation for the TX49 and the
@@ -121,4 +122,4 @@ void sio_flush(void);
 }
 #endif
 
-#endif /* EE_SIO_H */
+#endif /* __SIO_H__ */

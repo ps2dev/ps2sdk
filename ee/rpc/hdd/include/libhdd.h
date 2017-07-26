@@ -13,12 +13,12 @@
  * HDD library functions
  */
 
-#ifndef _LIBHDD_H
-#define _LIBHDD_H
+#ifndef __LIBHDD_H__
+#define __LIBHDD_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <tamtypes.h>
+#include <hdd-ioctl.h>
+#include <libpwroff.h>
 
 #define PFS_MT_ROBUST			0x02
 
@@ -35,9 +35,6 @@ extern "C" {
 
 #define ATTR_MAIN_PARTITION		0x0000
 #define ATTR_SUB_PARTITION		0x0001
-
-#include <hdd-ioctl.h>
-#include <tamtypes.h>
 
 typedef struct {
 	/** Filesystem name */
@@ -63,6 +60,10 @@ typedef struct {
 	u32 hddMaxPartitionSize;
 } t_hddInfo;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int hddCheckPresent();
 int hddCheckFormatted();
 int hddFormat();
@@ -72,15 +73,15 @@ int hddMakeFilesystem(int fsSizeMB, char *name, int type);
 int hddRemoveFilesystem(t_hddFilesystem *fs);
 int hddExpandFilesystem(t_hddFilesystem *fs, int extraMB);
 
-// These hdd* functions are deprecated
-// Use the poweroff* version instead
-#include "libpwroff.h"
-#define hddPreparePoweroff poweroffInit
-#define hddSetUserPoweroffCallback poweroffSetCallback
-#define hddPowerOff poweroffShutdown
-
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* _LIBHDD_H */
+// These hdd* functions are deprecated
+// Use the poweroff* version instead
+
+#define hddPreparePoweroff poweroffInit
+#define hddSetUserPoweroffCallback poweroffSetCallback
+#define hddPowerOff poweroffShutdown
+
+#endif /* __LIBHDD_H__ */

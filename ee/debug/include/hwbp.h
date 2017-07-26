@@ -60,6 +60,10 @@
 /** Data instruction breakpoint occurred */
 #define BPC_IAB (1 << 0)
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** Initialise the Breakpoint controller */
 void InitBPC(void);
 /** Set an instruction BP */
@@ -102,4 +106,8 @@ u32  GetDVBM(void);
 /** Set the data value mask register */
 void SetDVBM(u32 val);
 
+#ifdef __cplusplus
+}
 #endif
+
+#endif /* __HWBP_H__ */

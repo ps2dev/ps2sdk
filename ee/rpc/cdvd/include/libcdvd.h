@@ -13,8 +13,8 @@
  * Definitions for libcdvd on the EE
  */
 
-#ifndef _LIBCDVD_H_
-#define _LIBCDVD_H_
+#ifndef __LIBCDVD_H__
+#define __LIBCDVD_H__
 
 #include <libcdvd-common.h>
 
@@ -85,4 +85,4 @@ int sceCdSpinCtrlEE(u32 speed);
 }
 #endif
 
-#endif // _LIBCDVD_H_
+#endif /* __LIBCDVD_H__ */
