@@ -10,16 +10,16 @@ EE_BIN = padx_sample.elf
 EE_OBJS = padx.o
 EE_LIBS = -lpadx
 
-all: $(EE_BIN) freesio2.irx freepad.irx
+all: $(EE_BIN) sio2man.irx padman.irx
 
 clean:
-	rm -f $(EE_BIN) $(EE_OBJS) freepad.irx freesio2.irx
+	rm -f $(EE_BIN) $(EE_OBJS) padman.irx sio2man.irx
 
-freesio2.irx:
-	cp $(PS2SDK)/iop/irx/freesio2.irx $@
+sio2man.irx:
+	cp $(PS2SDK)/iop/irx/sio2man.irx $@
 
-freepad.irx:
-	cp $(PS2SDK)/iop/irx/freepad.irx $@
+padman.irx:
+	cp $(PS2SDK)/iop/irx/padman.irx $@
 
 run: $(EE_BIN)
 	ps2client execee host:$(EE_BIN)

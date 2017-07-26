@@ -10,19 +10,19 @@ EE_BIN = mtap_sample.elf
 EE_OBJS = mtap_sample.o
 EE_LIBS = -lpadx -lc -lmtap
 
-all: $(EE_BIN) freesio2.irx freemtap.irx freepad.irx
+all: $(EE_BIN) sio2man.irx mtapman.irx padman.irx
 
 clean:
-	rm -f $(EE_BIN) $(EE_OBJS) freesio2.irx freemtap.irx freepad.irx
+	rm -f $(EE_BIN) $(EE_OBJS) sio2man.irx mtapman.irx padman.irx
 
-freesio2.irx:
-	cp $(PS2SDK)/iop/irx/freesio2.irx $@
+sio2man.irx:
+	cp $(PS2SDK)/iop/irx/sio2man.irx $@
 
-freemtap.irx:
-	cp $(PS2SDK)/iop/irx/freemtap.irx $@
+mtapman.irx:
+	cp $(PS2SDK)/iop/irx/mtapman.irx $@
 
-freepad.irx:
-	cp $(PS2SDK)/iop/irx/freepad.irx $@
+padman.irx:
+	cp $(PS2SDK)/iop/irx/padman.irx $@
 
 run: $(EE_BIN)
 	ps2client execee host:$(EE_BIN)
