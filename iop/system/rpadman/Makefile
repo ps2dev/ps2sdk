@@ -6,10 +6,12 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_SRC_DIR = $(PS2SDKSRC)/iop/system/freepad/src/
+IOP_BIN_ALTNAMES =
+
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/system/padman/src/
 
 IOP_CFLAGS += -DSIO2MAN_V2 # -DDEBUG
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/system/rsio2man/include
 
-include $(PS2SDKSRC)/iop/system/freepad/Makefile
+include $(PS2SDKSRC)/iop/system/padman/Makefile
