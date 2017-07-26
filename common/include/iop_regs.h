@@ -3,8 +3,8 @@
  * IOP register definitions.
  */
 
-#ifndef _IOP_REGS_H
-#define _IOP_REGS_H
+#ifndef __IOP_REGS_H__
+#define __IOP_REGS_H__
 
 #include <tamtypes.h>
 
@@ -435,5 +435,4 @@
 #define IOP_I_STAT_VB (1 << 0)
 #define IOP_I_STAT_SBUS (1 << 1)
 
-#endif // #ifndef _IOP_REGS_H
-
+#endif /* __IOP_REGS_H__ */

@@ -13,8 +13,8 @@
  * File attributes and directory entries.
  */
 
-#ifndef SYS_STAT_H
-#define SYS_STAT_H
+#ifndef __SYS_STAT_H__
+#define __SYS_STAT_H__
 
 #include <sys/time.h>
 
@@ -176,4 +176,4 @@ struct stat {
 	time_t st_ctime;
 };
 
-#endif /* SYS_STAT_H */
+#endif /* __SYS_STAT_H__ */

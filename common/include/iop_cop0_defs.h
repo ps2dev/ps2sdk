@@ -13,12 +13,8 @@
  * IOP Co-processor 0(COP0) register definitions.
  */
 
-#ifndef _IOP_COP0_DEFS_H_
-#define _IOP_COP0_DEFS_H_
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __IOP_COP0_DEFS_H__
+#define __IOP_COP0_DEFS_H__
 
 #define M_IOP_GET_CAUSE_EXCODE(__cause) (((__cause) >> 2) & 0x1F)
 
@@ -74,9 +70,4 @@ extern "C" {
 // IOP COP0 Cause Register
 #define IOP_CAUSE_BD (1 << 31)
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif // _IOP_COP0_DEFS_H_
-
+#endif /* __IOP_COP0_DEFS_H__ */

@@ -15,8 +15,8 @@
  * The EMAC is similar to the EMAC from the IBM PowerPC 405gp.
  */
 
-#ifndef SMAPREGS_H
-#define SMAPREGS_H
+#ifndef __SMAPREGS_H__
+#define __SMAPREGS_H__
 
 #include <tamtypes.h>
 #include <speedregs.h>
@@ -470,4 +470,4 @@ typedef struct _smap_bd {
 #define	SMAP_DsPHYTER_10BTSCR		0x1A
 #define	SMAP_DsPHYTER_CDCTRL		0x1B
 
-#endif /* SMAPREGS_H */
+#endif /* __SMAPREGS_H__ */

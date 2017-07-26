@@ -3,16 +3,12 @@
  * Register definitions
  */
 
-#ifndef _PS2_REG_DEFS_H
-#define _PS2_REG_DEFS_H
+#ifndef __PS2_REG_DEFS_H__
+#define __PS2_REG_DEFS_H__
 
-#include "tamtypes.h"
-#include "ee_regs.h"
-#include "iop_regs.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <tamtypes.h>
+#include <ee_regs.h>
+#include <iop_regs.h>
 
 typedef volatile struct st_PS2_SBUS_Registers
 {
@@ -85,10 +81,4 @@ typedef volatile struct st_PS2_SBUS_Registers
 // SIF..
 #define SIF_FLAG_INIT (1 << 16)
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif // #ifndef _PS2_REG_DEFS_H
-
-
+#endif /* __PS2_REG_DEFS_H__ */

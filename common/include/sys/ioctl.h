@@ -13,8 +13,10 @@
  * ioctl(), ioctl2(), and devctl() definitions.
  */
 
-#ifndef SYS_IOCTL_H
-#define SYS_IOCTL_H
+#ifndef __SYS_IOCTL_H__
+#define __SYS_IOCTL_H__
+
+#include <tamtypes.h>
 
 #define _IOC(type, nr)	(((type) << 8)|(nr))
 
@@ -98,4 +100,4 @@ typedef struct {
 /** Not supported by hddfsd.irx!  */
 #define HDDCTLSCEIDENTIFY	_IOC(HDD_IOC_TYPE, 56)
 
-#endif /* SYS_IOCTL_H */
+#endif /* __SYS_IOCTL_H__ */

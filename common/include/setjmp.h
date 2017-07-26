@@ -20,7 +20,7 @@
 
 #include <tamtypes.h>
 
-#if defined(_EE)
+#ifdef _EE
 /* we need some room after the gpr, to store some fp registers. */
 #define _JBLEN 14
 #define _JBTYPE u128
@@ -43,4 +43,4 @@ void longjmp(jmp_buf env, int val);
 }
 #endif
 
-#endif
+#endif /* __SETJMP_H__ */

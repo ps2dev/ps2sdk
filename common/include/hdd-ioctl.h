@@ -13,8 +13,10 @@
  * Common HDD IOCTL, DEVCTL and IOCTL2 command definitions
  */
 
-#ifndef _HDD_IOCTL_H
-#define _HDD_IOCTL_H
+#ifndef __HDD_IOCTL_H__
+#define __HDD_IOCTL_H__
+
+#include <tamtypes.h>
 
 ///////////////////////////////////////////////////////////////////////////////
 //	DEV9.IRX
@@ -241,4 +243,4 @@ typedef struct
 #define PFS_DEVCTL_SET_GID		PDIOC_SETGID
 #define PFS_DEVCTL_SHOW_BITMAP		PDIOC_SHOWBITMAP
 
-#endif /* _HDD_IOCTL_H */
+#endif /* __HDD_IOCTL_H__ */

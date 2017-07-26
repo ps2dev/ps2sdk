@@ -123,4 +123,4 @@
 
 #define GIF_SET_FOG(FOG) (u64)((FOG) & 0x000000FF) << 56
 
-#endif /*__GIFTAGS_H__*/
+#endif /* __GIFTAGS_H__ */

@@ -13,8 +13,8 @@
  * poweroff RPC
  */
 
-#ifndef PWROFF_RPC_H
-#define PWROFF_RPC_H
+#ifndef __PWROFF_RPC_H__
+#define __PWROFF_RPC_H__
 
 #define PWROFF_IRX 0x9090900
 #define PWROFF_SHUTDOWN 			0x01
@@ -22,4 +22,4 @@
 
 #define POFF_RPC_BUTTON	1
 
-#endif /* PWROFF_RPC_H */
+#endif /* __PWROFF_RPC_H__ */

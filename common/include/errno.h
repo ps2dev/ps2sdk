@@ -13,8 +13,8 @@
  * global error codes and string values
  */
 
-#ifndef _ERRNO_H
-#define _ERRNO_H
+#ifndef __ERRNO_H__
+#define __ERRNO_H__
 
 /** Not super-user */
 #define	EPERM 1		
@@ -408,4 +408,4 @@ char *file_errors[] = {
 
 extern int errno;
 
-#endif // _ERRNO_H_
+#endif /* __ERRNO_H__ */

@@ -13,8 +13,8 @@
  * Error codes shared across ps2lib.
  */
 
-#ifndef PS2LIB_ERR_H
-#define PS2LIB_ERR_H
+#ifndef __PS2LIB_ERR_H__
+#define __PS2LIB_ERR_H__
 
 /* Some of these error codes are taken from libc, since a few of them
    overlap with errors returned by the IOP kernel.  Some others have been
@@ -89,4 +89,4 @@ enum _ps2lib_errors {
 
 
 };
-#endif /* PS2LIB_ERR_H */
+#endif /* __PS2LIB_ERR_H__ */

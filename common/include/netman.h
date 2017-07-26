@@ -3,6 +3,9 @@
  * Netman common definitions
  */
 
+#ifndef __NETMAN_H__
+#define __NETMAN_H__
+
 //Common structures
 #define NETMAN_NETIF_NAME_MAX_LEN	4
 
@@ -156,3 +159,5 @@ void NetManToggleNetIFLinkState(int NetIFID, unsigned char state);	//Also toggle
 #define I_NetManSetLinkMode DECLARE_IMPORT(17, NetManSetLinkMode)
 
 #endif
+
+#endif /* __NETMAN_H__ */

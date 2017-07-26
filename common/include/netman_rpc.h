@@ -3,6 +3,12 @@
  * Netman RPC common definitions
  */
 
+#ifndef __NETMAN_RPC_H__
+#define __NETMAN_RPC_H__
+
+#include <tamtypes.h>
+#include <netman.h>
+
 #define NETMAN_RPC_NUMBER	0x00004239
 #define NETMAN_RPC_BUFF_SIZE	128
 
@@ -60,3 +66,5 @@ struct NetManIoctlResult{
 	s32 result;
 	u8 output[64];
 };
+
+#endif /* __NETMAN_RPC_H__ */

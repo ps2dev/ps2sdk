@@ -13,8 +13,8 @@
  * SPEED (ASIC on SMAP) register definitions.
  */
 
-#ifndef SPEEDREGS_H
-#define SPEEDREGS_H
+#ifndef __SPEEDREGS_H__
+#define __SPEEDREGS_H__
 
 #include <tamtypes.h>
 
@@ -73,4 +73,4 @@
 #define SPD_R_MWDMA_MODE		0x72
 #define SPD_R_UDMA_MODE			0x74
 
-#endif /* SPEEDREGS_H */
+#endif /* __SPEEDREGS_H__ */

@@ -6,6 +6,8 @@
 #ifndef __GIF_REGISTERS_H__
 #define __GIF_REGISTERS_H__
 
+#include <tamtypes.h>
+
 /** Control Register */
 #define GIF_REG_CTRL	*(volatile u32 *)0x10003000
 /** Mode Setting Register */

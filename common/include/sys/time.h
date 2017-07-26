@@ -13,8 +13,8 @@
  * POSIX declarations for time
  */
 
-#ifndef SYS_TIME_H
-#define SYS_TIME_H
+#ifndef __SYS_TIME_H__
+#define __SYS_TIME_H__
 
 #ifndef __clock_t_defined
 typedef unsigned long long clock_t;
@@ -26,4 +26,4 @@ typedef unsigned long time_t;
 #define __time_t_defined
 #endif
 
-#endif //SYS_TIME_H
+#endif /* __SYS_TIME_H__ */

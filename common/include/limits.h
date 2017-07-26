@@ -3,8 +3,8 @@
  * Limit definitions.
  */
 
-#ifndef _LIMITS_H___
-#define _LIMITS_H___
+#ifndef __LIMITS_H__
+#define __LIMITS_H__
 
 /* Number of bits in a `char'.  */
 #undef CHAR_BIT
@@ -72,11 +72,11 @@
 /* Minimum and maximum values a `signed long int' can hold.
    (Same as `int').  */
 #ifndef __LONG_MAX__
-#if defined (__alpha__) || (defined (__sparc__) && defined(__arch64__)) || defined (__sparcv9) || defined (__R5900)
+#ifdef __R5900
 #define __LONG_MAX__ 9223372036854775807L
 #else
 #define __LONG_MAX__ 2147483647L
-#endif /* __alpha__ || sparc64 || R5900 */
+#endif /* __R5900 */
 #endif
 #undef LONG_MIN
 #define LONG_MIN (-LONG_MAX-1)
@@ -115,4 +115,4 @@
 #define ULONG_LONG_MAX (LONG_LONG_MAX * 2ULL + 1)
 #endif
 
-#endif /* _LIMITS_H___ */
+#endif /* __LIMITS_H__ */

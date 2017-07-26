@@ -1,10 +1,14 @@
 /**
  * @file
  * PS2IP RPC definitions
+ * This header conflicts with fileXio.h
  */
 
-#ifndef _PS2IP_RPC_H
-#define _PS2IP_RPC_H
+#ifndef __PS2IP_RPC_H__
+#define __PS2IP_RPC_H__
+
+#include <tamtypes.h>
+#include <tcpip.h>
 
 #define PS2IP_IRX 0xB0125F2
 
@@ -153,4 +157,4 @@ typedef struct {
 
 #endif
 
-#endif	//_PS2IP_RPC_H
+#endif /* __PS2IP_RPC_H__ */

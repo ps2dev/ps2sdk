@@ -13,8 +13,8 @@
  * Common definitions for librm on the EE and IOP
  */
 
-#ifndef _LIBRM_COMMON_H_
-#define _LIBRM_COMMON_H_
+#ifndef __LIBRM_COMMON_H__
+#define __LIBRM_COMMON_H__
 
 #include <tamtypes.h>
 
@@ -62,4 +62,4 @@ enum RM_STATE {
 	RM_STATE_STABLE
 };
 
-#endif	// _LIBRM_COMMON_H_
+#endif /* _LIBRM_COMMON_H_ */
