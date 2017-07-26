@@ -13,8 +13,8 @@
  * Functions to provide access to multi-taps.
  */
 
-#ifndef _LIBMTAP_H
-#define _LIBMTAP_H
+#ifndef __LIBMTAP_H__
+#define __LIBMTAP_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,4 +47,4 @@ int mtapGetConnection(int port);
 }
 #endif
 
-#endif // _LIBMTAP_H
+#endif /* __LIBMTAP_H__ */

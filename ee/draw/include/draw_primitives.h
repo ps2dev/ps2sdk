@@ -48,17 +48,17 @@ typedef struct {
 extern "C" {
 #endif
 
-	/** Primitive Coordinate System offset */
-	qword_t *draw_primitive_xyoffset(qword_t *q, int context, float x, float y);
+/** Primitive Coordinate System offset */
+qword_t *draw_primitive_xyoffset(qword_t *q, int context, float x, float y);
 
-	/** Primitive Control */
-	qword_t *draw_primitive_override(qword_t *q, int mode);
+/** Primitive Control */
+qword_t *draw_primitive_override(qword_t *q, int mode);
 
-	/** Overridden Primitive Attributes */
-	qword_t *draw_primitive_override_setting(qword_t *q, int context, prim_t *prim);
+/** Overridden Primitive Attributes */
+qword_t *draw_primitive_override_setting(qword_t *q, int context, prim_t *prim);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /*__DRAW_PRIMITIVES_H__*/
+#endif /* __DRAW_PRIMITIVES_H__ */

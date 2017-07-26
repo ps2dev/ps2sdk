@@ -36,43 +36,43 @@
 extern "C" {
 #endif
 
-	int dma_reset(void);
+int dma_reset(void);
 
-	/** Initializes the specified dma channel. */
-	int dma_channel_initialize(int channel, void *handler, int flags);
+/** Initializes the specified dma channel. */
+int dma_channel_initialize(int channel, void *handler, int flags);
 
-	/** Enables dma fast waits for that channel */
-	void dma_channel_fast_waits(int channel);
+/** Enables dma fast waits for that channel */
+void dma_channel_fast_waits(int channel);
 
-	/** Waits until channel is usable based on coprocessor status */
-	void dma_wait_fast(void);
+/** Waits until channel is usable based on coprocessor status */
+void dma_wait_fast(void);
 
-	/** Wait until the specified dma channel is ready. */
-	int dma_channel_wait(int channel, int timeout);
+/** Wait until the specified dma channel is ready. */
+int dma_channel_wait(int channel, int timeout);
 
-	/** Send a dmachain to the specified dma channel. */
-	int dma_channel_send_chain(int channel, void *data, int qwc, int flags, int spr);
+/** Send a dmachain to the specified dma channel. */
+int dma_channel_send_chain(int channel, void *data, int qwc, int flags, int spr);
 
-	/** Send a ucab dmachain to the specified dma channel. */
-	int dma_channel_send_chain_ucab(int channel, void *data, int qwc, int flags);
+/** Send a ucab dmachain to the specified dma channel. */
+int dma_channel_send_chain_ucab(int channel, void *data, int qwc, int flags);
 
-	/** Send data to the specified dma channel. */
-	int dma_channel_send_normal(int channel, void *data, int qwc, int flags, int spr);
+/** Send data to the specified dma channel. */
+int dma_channel_send_normal(int channel, void *data, int qwc, int flags, int spr);
 
-	/** Send ucab data to the specified dma channel. */
-	int dma_channel_send_normal_ucab(int channel, void *data, int qwc, int flags);
+/** Send ucab data to the specified dma channel. */
+int dma_channel_send_normal_ucab(int channel, void *data, int qwc, int flags);
 
-	/** Receive data from the specified dma channel. */
-	int dma_channel_receive_normal(int channel, void *data, int data_size, int flags, int spr);
+/** Receive data from the specified dma channel. */
+int dma_channel_receive_normal(int channel, void *data, int data_size, int flags, int spr);
 
-	/** Receive data from the specified dma channel. */
-	int dma_channel_receive_chain(int channel, void *data, int data_size, int flags, int spr);
+/** Receive data from the specified dma channel. */
+int dma_channel_receive_chain(int channel, void *data, int data_size, int flags, int spr);
 
-	/** Shut down the specified dma channel. */
-	int dma_channel_shutdown(int channel, int flags);
+/** Shut down the specified dma channel. */
+int dma_channel_shutdown(int channel, int flags);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /* __DMA_H__ */

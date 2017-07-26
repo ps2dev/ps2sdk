@@ -44,4 +44,4 @@ unsigned int sleep(unsigned int seconds);
 }
 #endif
 
-#endif
+#endif /* __UNISTD_H__ */

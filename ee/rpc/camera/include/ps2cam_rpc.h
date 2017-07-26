@@ -9,10 +9,8 @@
  * PS2Camera EE-IOP RPC CALLS
  */
 
-#ifndef _PS2CAM_RPC_H
-#define _PS2CAM_RPC_H
-
-
+#ifndef __PS2CAM_RPC_H__
+#define __PS2CAM_RPC_H__
 
 /** get irx version */
 #define PS2CAM_RPC_GETIRXVERSION	40
@@ -48,15 +46,11 @@
 /** connect & ready for commands */
 #define CAM_STATUS_CONNECTEDREADY	2
 
-
-
-
 /* used with PS2CAM_DEVICE_CONFIG->mask */
 #define CAM_CONFIG_MASK_DIMENSION	0x00000001
 #define CAM_CONFIG_MASK_OFFSET		0x00000002
 #define CAM_CONFIG_MASK_DIVIDER		0x00000004
 #define CAM_CONFIG_MASK_FRAMERATE	0x00000008
-
 
 /* error codes */
 /** ok */
@@ -79,10 +73,6 @@
 #define CAM_ERROR_BADHANDLE			-(28)
 /** device was removed */
 #define CAM_ERROR_DISCONNECTED		-(29)
-
-
-
-
 
 typedef struct
 {
@@ -109,10 +99,7 @@ typedef struct
 	unsigned char	Lo;
 	/** file size Hi byte (only in EOF) */
 	unsigned char	Hi;
-
 }EYETOY_FRAME_HEAD;
-
-
 
 typedef struct
 {
@@ -128,9 +115,7 @@ typedef struct
 	unsigned char	product_name[32];
 	/** device model */
 	unsigned char	model[16];
-
 }PS2CAM_DEVICE_INFO;
-
 
 
 typedef struct
@@ -153,22 +138,14 @@ typedef struct
 	unsigned char	v_divider;
 	/** framerate */
 	unsigned short	framerate;
-
 }PS2CAM_DEVICE_CONFIG;
 
-
-
-
-
-
 //extern char		campacket[];		//data is stored here when PS2CamReadPacket(...) is called. Still not used anywhere
-
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-//ee funtions
 int PS2CamInit(int mode);
 int PS2CamGetIRXVersion(void);
 int PS2CamGetDeviceCount(void);
@@ -183,32 +160,8 @@ int PS2CamSetDeviceConfig(int handle, PS2CAM_DEVICE_CONFIG *cfg);
 
 int PS2CamExtractFrame(int handle, char *buffer, int bufsize);
 
-
 #ifdef __cplusplus
 }
 #endif
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#endif /*_PS2CAM_RPC_H*/
+#endif /* __PS2CAM_RPC_H__ */

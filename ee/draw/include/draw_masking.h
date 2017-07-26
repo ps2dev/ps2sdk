@@ -21,14 +21,14 @@
 extern "C" {
 #endif
 
-	// Scanline Masking (framebuffer)
-	qword_t *draw_scan_masking(qword_t *q, int mask);
+/** Scanline Masking (framebuffer) */
+qword_t *draw_scan_masking(qword_t *q, int mask);
 
-	// Color Masking/Clamping
-	qword_t *draw_color_clamping(qword_t *q, int enable);
+/** Color Masking/Clamping */
+qword_t *draw_color_clamping(qword_t *q, int enable);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /*__DRAW_MASKING_H__*/
+#endif /* __DRAW_MASKING_H__ */

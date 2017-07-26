@@ -13,8 +13,8 @@
  * EE memory allocation prototypes
  */
 
-#ifndef _MALLOC_H
-#define _MALLOC_H
+#ifndef __MALLOC_H__
+#define __MALLOC_H__
 
 #include <stddef.h>
 #include <stdarg.h>
@@ -59,7 +59,6 @@ int __mem_walk_end(void * token);
 
 */
 
-
 /* You should never need to use this normally.  */
 void *	ps2_sbrk(size_t incr);
 
@@ -67,5 +66,4 @@ void *	ps2_sbrk(size_t incr);
 }
 #endif
 
-#endif	// _MALLOC_H
-
+#endif /* __MALLOC_H__ */

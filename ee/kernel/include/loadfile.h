@@ -13,12 +13,8 @@
  * IOP executable file loader.
  */
 
-#ifndef LOADFILE_H
-#define LOADFILE_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __LOADFILE_H__
+#define __LOADFILE_H__
 
 #include <tamtypes.h>
 
@@ -65,6 +61,10 @@ typedef struct
 #define SCE_ECALLMISS 0x10001
 /** ELF/Module load failed */
 #define SCE_ELOADMISS 0x10003
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /** Initialize the LOADFILE library.
  * @ingroup loadfile
@@ -340,4 +340,4 @@ int _SifLoadModule(const char *path, int arg_len, const char *args,
 }
 #endif
 
-#endif /* LOADFILE_H */
+#endif /* __LOADFILE_H__ */

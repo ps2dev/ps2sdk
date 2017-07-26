@@ -13,12 +13,9 @@
  * Pad externals
  */
 
-#ifndef _PAD_H_
-#define _PAD_H_
+#ifndef __LIBPAD_H__
+#define __LIBPAD_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 /*
  * Button bits
  */
@@ -94,8 +91,6 @@ extern "C" {
 #define PAD_ACTSIZE		3
 #define PAD_ACTCURR		4
 
-
-
 /** Button info */
 struct padButtonStatus
 {
@@ -123,6 +118,9 @@ struct padButtonStatus
     unsigned char unkn16[12];
 } __attribute__((packed));
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /** Initialise padman
  * @param a 0 should work..
@@ -247,5 +245,4 @@ int padReset();
 }
 #endif
 
-#endif
-
+#endif /* __LIBPAD_H__ */

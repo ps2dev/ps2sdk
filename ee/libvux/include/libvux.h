@@ -13,8 +13,8 @@
  * VU library functions.
  */
 
-#ifndef _LIBVUX_H_
-#define _LIBVUX_H_
+#ifndef __LIBVUX_H__
+#define __LIBVUX_H__
 
 /*
 
@@ -114,7 +114,7 @@ typedef struct
 
 #ifdef __cplusplus
 extern "C" {
-#endif /*__cplusplus*/
+#endif
 
 /* common stuff */
 extern void  VuInit(void);
@@ -207,6 +207,6 @@ extern VU_MATRIX	VuLocalScreenMatrix;
 
 #ifdef __cplusplus
 }
-#endif /*__cplusplus*/
+#endif
 
-#endif /*_LIBVUX_H_*/
+#endif /* __LIBVUX_H__ */

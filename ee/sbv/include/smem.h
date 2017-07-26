@@ -13,14 +13,10 @@
  * Sub-CPU memory interface.
  */
 
-#ifndef SBV_SMEM_H
-#define SBV_SMEM_H
+#ifndef __SMEM_H__
+#define __SMEM_H__
 
-#include "tamtypes.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <tamtypes.h>
 
 /**
  * IOP RAM is mysteriously mapped into EE HW space at this address.  I first
@@ -39,6 +35,10 @@ extern "C" {
 */
 #define SUB_VIRT_MEM	0xbc000000
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 u32 smem_read(void *addr, void *buf, u32 size);
 u32 smem_write(void *addr, void *buf, u32 size);
 
@@ -46,4 +46,4 @@ u32 smem_write(void *addr, void *buf, u32 size);
 }
 #endif
 
-#endif /* SBV_SMEM_H */
+#endif /* __SMEM_H__ */

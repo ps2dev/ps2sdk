@@ -21,11 +21,8 @@
  *	although only HDDOSDs will fully patch kernel completely (causes the kernel to appear as a newer kernel to everything).
  */
 
-#ifndef _CONFIG_H_
-#define _CONFIG_H_
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __OSD_CONFIG_H__
+#define __OSD_CONFIG_H__
 
 #include <tamtypes.h>
 #include <libcdvd.h>
@@ -110,6 +107,10 @@ typedef struct {
 	/** The true language, unlike the one from ConfigParam */
 /*16*/u8 language;
 } Config2Param;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /** get the language the ps2 is currently set to
  * @return Language value (See OSD_LANGUAGES above) 
@@ -213,4 +214,4 @@ char* GetRomName(char *romname);
 }
 #endif
 
-#endif	// _CONFIG_H_
+#endif /* __OSD_CONFIG_H__ */

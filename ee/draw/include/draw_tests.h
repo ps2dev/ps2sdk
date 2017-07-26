@@ -7,6 +7,7 @@
 #define __DRAW_TESTS_H__
 
 #include <tamtypes.h>
+#include <draw_buffers.h>
 
 /*& Alpha Testing */
 #define ATEST_METHOD_ALLFAIL		0
@@ -54,20 +55,20 @@ typedef struct {
 extern "C" {
 #endif
 
-	/** Scissoring pixel test area */
-	qword_t *draw_scissor_area(qword_t *q, int context, int x0, int x1, int y0, int y1);
+/** Scissoring pixel test area */
+qword_t *draw_scissor_area(qword_t *q, int context, int x0, int x1, int y0, int y1);
 
-	/** Pixel Testing */
-	qword_t *draw_pixel_test(qword_t *q, int context, atest_t *atest, dtest_t *dtest, ztest_t *ztest);
+/** Pixel Testing */
+qword_t *draw_pixel_test(qword_t *q, int context, atest_t *atest, dtest_t *dtest, ztest_t *ztest);
 
-	/** Disable pixel testing defaults */
-	qword_t *draw_disable_tests(qword_t *q, int context, zbuffer_t *z);
+/** Disable pixel testing defaults */
+qword_t *draw_disable_tests(qword_t *q, int context, zbuffer_t *z);
 
-	/** Enable pixel testing defaults */
-	qword_t *draw_enable_tests(qword_t *q, int context, zbuffer_t *z);
+/** Enable pixel testing defaults */
+qword_t *draw_enable_tests(qword_t *q, int context, zbuffer_t *z);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /*__DRAW_TESTS_H__*/
+#endif /* __DRAW_TESTS_H__ */

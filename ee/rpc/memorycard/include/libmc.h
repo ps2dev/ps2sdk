@@ -13,8 +13,6 @@
  * Macros, structures & function prototypes for mclib.
  */
 
-#include <libmc-common.h>
-
 /*
 	NOTE: These functions will work with the MCMAN/MCSERV or XMCMAN/XMCSERV
 	modules stored in rom0. To determine which one you are using, send the
@@ -32,12 +30,10 @@
         usage to test when they are done
 */
 
-#ifndef _MCLIB_H_
-#define _MCLIB_H_
+#ifndef __LIBMC_H__
+#define __LIBMC_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <libmc-common.h>
 
 #define MC_WAIT					0
 #define MC_NOWAIT				1
@@ -199,6 +195,9 @@ typedef struct
 #define MC_TYPE_MC	0
 #define MC_TYPE_XMC	1
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /** init memcard lib
  *
@@ -461,4 +460,4 @@ int mcReset(void);
 }
 #endif
 
-#endif // _MCLIB_H_
+#endif /* __LIBMC_H__ */

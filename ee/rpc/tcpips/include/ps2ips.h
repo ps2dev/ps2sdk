@@ -13,10 +13,10 @@
  * PS2IP library.
  */
 
-#ifndef _EE_PS2IP_H
-#define _EE_PS2IP_H
+#ifndef __PS2IPS_H__
+#define __PS2IPS_H__
 
-#include "tcpip.h"
+#include <tcpip.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,4 +49,4 @@ ip_addr_t dns_getserver(u8 numdns);
 }
 #endif
 
-#endif /* _EE_PS2IP_H */
+#endif /* __PS2IPS_H__ */

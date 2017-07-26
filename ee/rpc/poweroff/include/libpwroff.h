@@ -13,14 +13,14 @@
  * Power-off library.
  */
 
-#ifndef _LIBPWROFF_H
-#define _LIBPWROFF_H
+#ifndef __LIBPWROFF_H__
+#define __LIBPWROFF_H__
+
+#define POWEROFF_THREAD_PRIORITY	0x70
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define POWEROFF_THREAD_PRIORITY	0x70
 
 typedef void (*poweroff_callback)(void *arg);
 
@@ -36,4 +36,4 @@ void poweroffChangeThreadPriority(int priority);
 }
 #endif
 
-#endif /* _LIBPWROFF_H */
+#endif /* __LIBPWROFF_H__ */

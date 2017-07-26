@@ -16,7 +16,7 @@
 #ifndef __libmpeg_internal_H
 # define __libmpeg_internal_H
 
-# include "libmpeg.h"
+# include <libmpeg.h>
 
 # define _MPEG_PT_I 1
 # define _MPEG_PT_P 2

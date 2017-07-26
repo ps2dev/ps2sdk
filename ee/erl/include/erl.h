@@ -18,10 +18,6 @@
 
 #include <tamtypes.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 struct htab;
 
 /** ERL is sticky and cannot be unloaded */
@@ -47,6 +43,10 @@ struct symbol_t {
     struct erl_record_t * provider;
     u32 address;
 };
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 extern char _init_erl_prefix[];
 
@@ -85,4 +85,4 @@ void erl_flush_symbols(struct erl_record_t * erl);
 }
 #endif
 
-#endif // __ERL_H__
+#endif /* __ERL_H__ */

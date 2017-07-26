@@ -14,17 +14,12 @@
  * EE Kernel prototypes
  */
 
-#ifndef _KERNEL_H
-#define _KERNEL_H
+#ifndef __KERNEL_H__
+#define __KERNEL_H__
 
 #include <stddef.h>
 #include <stdarg.h>
-
-#include "sifdma.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <sifdma.h>
 
 #define DI	DIntr
 #define EI	EIntr
@@ -245,6 +240,10 @@ typedef struct t_ee_thread_status
     u32 waitId; // 0x28
     u32 wakeupCount; // 0x2C
 } ee_thread_status_t;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Initialization/deinitialization routines.  */
 void _InitSys(void);		//Run by crt0
@@ -481,4 +480,4 @@ void *GetEntryAddress(int syscall);
 }
 #endif
 
-#endif	// _KERNEL_H
+#endif /* __KERNEL_H__ */

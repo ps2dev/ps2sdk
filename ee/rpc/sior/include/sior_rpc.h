@@ -16,11 +16,11 @@
 #ifndef __SIOR_RPC_H__
 #define __SIOR_RPC_H__
 
+#define	SIOR_IRX              0xC001510
+
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define	SIOR_IRX              0xC001510
 
 int SIOR_Init(int priority);
 
@@ -28,4 +28,4 @@ int SIOR_Init(int priority);
 }
 #endif
 
-#endif
+#endif /* __SIOR_RPC_H__ */

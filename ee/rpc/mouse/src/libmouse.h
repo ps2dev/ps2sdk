@@ -16,7 +16,7 @@
 #ifndef __LIBMOUSE_H__
 #define __LIBMOUSE_H__
 
-#include "ps2mouse.h"
+#include <ps2mouse.h>
 
 typedef mouse_data PS2MouseData;
 
@@ -50,4 +50,4 @@ u32 PS2MouseGetVersion();
 }
 #endif
 
-#endif
+#endif /* __LIBMOUSE_H__ */

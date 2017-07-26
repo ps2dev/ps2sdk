@@ -13,14 +13,10 @@
  * Sub-CPU library interface.
  */
 
-#ifndef SBV_SLIB_H
-#define SBV_SLIB_H
+#ifndef __SLIB_H__
+#define __SLIB_H__
 
-#include "tamtypes.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <tamtypes.h>
 
 /** Describes an IRX import list.  */
 typedef struct _slib_imp_list {
@@ -51,6 +47,10 @@ typedef struct _slib_exp_lib_list {
 	struct _slib_exp_lib *head;
 } slib_exp_lib_list_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** Find the head and tail of the export library list.
  *
  * @return NULL if the list couldn't be found, and the address of the head and tail pointers if it was located.
@@ -66,4 +66,4 @@ int slib_get_exp_lib(const char *name, slib_exp_lib_t *library);
 }
 #endif
 
-#endif /* SBV_SLIB_H */
+#endif /* __SLIB_H__ */

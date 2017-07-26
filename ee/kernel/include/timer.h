@@ -16,9 +16,7 @@
 #ifndef __TIMER_H__
 #define __TIMER_H__
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <tamtypes.h>
 
 // EE Timers
 #define T0_COUNT   ((volatile unsigned int*)0x10000000)
@@ -57,10 +55,14 @@ extern "C" {
 #define kHBLNK_DTV480p      (31469)
 #define kHBLNK_DTV1080i     (33750)
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 u32 cpu_ticks(void);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif /* __TIMER_H__ */

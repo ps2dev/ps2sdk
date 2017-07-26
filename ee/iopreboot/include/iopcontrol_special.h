@@ -12,8 +12,8 @@
  * Special IOP reboot routines.
  */
 
-#ifndef SIFIOPREBOOT_H
-#define SIFIOPREBOOT_H
+#ifndef __IOPCONTROL_SPECIAL_H__
+#define __IOPCONTROL_SPECIAL_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,4 +39,4 @@ int SifIopRebootBuffer(void *ioprp, int size);
 }
 #endif
 
-#endif /* SIFIOPREBOOT_H */
+#endif /* __IOPCONTROL_SPECIAL_H__ */

@@ -14,8 +14,8 @@
  * Definitions for the EEDEBUG library.
  */
 
-#ifndef _EE_DEBUG_H
-#define _EE_DEBUG_H
+#ifndef __EE_DEBUG_H__
+#define __EE_DEBUG_H__
 
 #include <tamtypes.h>
 #include <ee_cop0_defs.h>
@@ -71,5 +71,4 @@ void ee_dbg_clr_bpx(void);
 }
 #endif
 
-#endif // #ifndef _EE_DEBUG_H
-
+#endif /* __EE_DEBUG_H__ */

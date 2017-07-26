@@ -13,8 +13,8 @@
  * Screenshot prototypes.
  */
 
-#ifndef __PS2SCREENSHOT_H__
-#define __PS2SCREENSHOT_H__
+#ifndef __SCREENSHOT_H__
+#define __SCREENSHOT_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,4 +30,4 @@ int ps2_screenshot( void* pTemp, unsigned int VramAdress,unsigned int x,unsigned
 }
 #endif
 
-#endif //__PS2SCREENSHOT_H__
+#endif /* __SCREENSHOT_H__ */

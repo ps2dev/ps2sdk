@@ -84,4 +84,4 @@ typedef union {
 	};
 } __attribute__((packed,aligned(16))) vertex_f_t;
 
-#endif /*__DRAW_TYPES_H__*/
+#endif /* __DRAW_TYPES_H__ */

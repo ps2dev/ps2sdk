@@ -13,8 +13,8 @@
  * SBV patches.
  */
 
-#ifndef SBV_PATCHES_H
-#define SBV_PATCHES_H
+#ifndef __SBV_PATCHES_H__
+#define __SBV_PATCHES_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,4 +62,4 @@ int sbv_patch_fileio(void);
 }
 #endif
 
-#endif /* SBV_PATCHES_H */
+#endif /* __SBV_PATCHES_H__ */

@@ -13,13 +13,12 @@
  * RPC Interface for PS2 Remote Control Driver (RMMAN)
  */
 
-#include <librm-common.h>
-
 #ifndef __LIBRM_H__
 #define __LIBRM_H__
 
-struct remote_data
+#include <librm-common.h>
 
+struct remote_data
 {
    u32 status;
    u32 button;
@@ -100,4 +99,4 @@ u32 RMMan_GetModuleVersion(void);
 }
 #endif
 
-#endif
+#endif /* __LIBRM_H__ */

@@ -13,9 +13,10 @@
  * Imports and definitions for ps2ip.
  */
 
-#ifndef IOP_PS2IP_H
-#define IOP_PS2IP_H
+#ifndef __PS2IP_H__
+#define __PS2IP_H__
 
+#include <stddef.h>
 #include <tcpip.h>
 
 /** Initializes PS2IP. Specify a dummy address like "169.254.0.1" if DHCP is to be used, before enabling DHCP via ps2ip_setconfig(). */
@@ -138,4 +139,4 @@ void           dns_setserver(u8 numdns, const ip_addr_t *dnsserver);
 ip_addr_t      dns_getserver(u8 numdns);
 #endif
 
-#endif /* IOP_PS2IP_H */
+#endif /* __PS2IP_H__ */

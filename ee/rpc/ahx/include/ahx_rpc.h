@@ -13,12 +13,8 @@
  * AHX EE-side RPC code.
  */
 
-#ifndef _AHX_H
-#define _AHX_H
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __AHX_H__
+#define __AHX_H__
 
 #define	AHX_IRX		         0xC001D0E
 #define AHX_INIT             0x01
@@ -30,6 +26,10 @@ extern "C" {
 #define AHX_SETBOOST         0x07
 #define AHX_OVERSAMPLING     0x08
 #define AHX_SUBSONG          0x09
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /** AHX Init
  *
@@ -119,4 +119,4 @@ int  AHX_Pause();
 }
 #endif
 
-#endif // _AHX_H
+#endif /* __AHX_H__ */
