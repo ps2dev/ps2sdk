@@ -27,7 +27,7 @@ typedef struct {
 	u16 length;
 } UsbDeviceRequest;
 
-typedef void (*UsbCallbackProc)(int result, int count, void *arg);
+typedef void (*sceUsbdDoneCallback)(int result, int count, void *arg);
 
 typedef struct {
 	u8 bLength;
@@ -44,14 +44,10 @@ typedef struct {
 /** USB driver bus event listener structure */
 typedef struct _UsbDriver {
 	struct _UsbDriver *next, *prev;
-
 	/** short sweet name for your driver, like "usbmouse" or "pl2301" */
 	char *name;
-
 	int (*probe)(int devID);
-
 	int (*connect)(int devID);
-
 	int (*disconnect)(int devID);
 	u32 reserved1;
 	u32 reserved2;
@@ -59,7 +55,7 @@ typedef struct _UsbDriver {
 	u32 reserved4;
 	u32 reserved5;
 	void *gp;
-} UsbDriver;
+} sceUsbdLddOps;
 
 typedef struct {
 	u8 bLength;
@@ -123,7 +119,7 @@ typedef struct {
 	u16 bLength:11;
 	u16 reserved:1;
 	u16 PSW:4;
-} UsbIsochronousPswLen;
+} sceUsbdIsochronousPswLen;
 
 #define USB_MAX_ISOCH_PACKETS 8
 
@@ -131,10 +127,10 @@ typedef struct {
 	void *bBufStart;
 	u32 bRelStartFrame;
 	u32 bNumPackets;
-	UsbIsochronousPswLen Packets[USB_MAX_ISOCH_PACKETS];
-} UsbMultiIsochronousRequest;
+	sceUsbdIsochronousPswLen Packets[USB_MAX_ISOCH_PACKETS];
+} sceUsbdMultiIsochronousRequest;
 
-typedef	void (*UsbMultiIsochronousDoneCallback)(int result, UsbMultiIsochronousRequest *req, void *arg);
+typedef	void (*sceUsbdMultiIsochronousDoneCallback)(int result, sceUsbdMultiIsochronousRequest *req, void *arg);
 
 /*
  * Device and/or Interface Class codes
@@ -270,41 +266,61 @@ typedef	void (*UsbMultiIsochronousDoneCallback)(int result, UsbMultiIsochronousR
 /** Unknown Error (USBD.IRX doesn't know what went wrong) */
 #define USB_RC_UNKNOWN		0x132
 
-int UsbRegisterDriver(UsbDriver *driver);
-int UsbUnregisterDriver(UsbDriver *driver);
-void *UsbGetDeviceStaticDescriptor(int devId, void *data, u8 type);
-int UsbGetDeviceLocation(int devId, u8 *path);
-int UsbSetDevicePrivateData(int devId, void *data);
-void *UsbGetDevicePrivateData(int devId);
-int UsbOpenEndpoint(int devId, UsbEndpointDescriptor *desc);
-int UsbCloseEndpoint(int id);
-int UsbTransfer(int id, void *data, u32 len, void *option, UsbCallbackProc callback, void *cbArg);
-int UsbOpenEndpointAligned(int devId, UsbEndpointDescriptor *desc);
+int sceUsbdRegisterLdd(sceUsbdLddOps *driver);
+int sceUsbdUnregisterLdd(sceUsbdLddOps *driver);
+void *sceUsbdScanStaticDescriptor(int devId, void *data, u8 type);
+int sceUsbdGetDeviceLocation(int devId, u8 *path);
+int sceUsbdSetPrivateData(int devId, void *data);
+void *sceUsbdGetPrivateData(int devId);
+int sceUsbdOpenPipe(int devId, UsbEndpointDescriptor *desc);
+int sceUsbdOpenPipeAligned(int devId, UsbEndpointDescriptor *desc);
+int sceUsbdClosePipe(int id);
+int sceUsbdTransferPipe(int id, void *data, u32 len, void *option, sceUsbdDoneCallback callback, void *cbArg);
 
 // these aren't implemented:
-int UsbRegisterAutoloader(UsbDriver *drv);
-int UsbUnregisterAutoloader(UsbDriver *drv);
-int UsbChangeThreadPriority(void);
-int UsbGetReportDescriptor(int devId, int cfgNum, int ifNum, void **desc, u32 *len);
-int UsbMultiIsochronousTransfer(int pipeId, UsbMultiIsochronousRequest *request, UsbMultiIsochronousDoneCallback callback, void *cbArg);
+int UsbRegisterAutoloader(sceUsbdLddOps *drv);
+int UsbUnregisterAutoloader(sceUsbdLddOps *drv);
+int sceUsbdChangeThreadPriority(int prio1, int prio2);
+int sceUsbdGetReportDescriptor(int devId, int cfgNum, int ifNum, void **desc, u32 *len);
+int sceUsbdMultiIsochronousTransfer(int pipeId, sceUsbdMultiIsochronousRequest *request, sceUsbdMultiIsochronousDoneCallback callback, void *cbArg);
+
+// For backwards compatibility:
+#define UsbCallbackProc sceUsbdDoneCallback
+#define UsbDriver sceUsbdLddOps
+#define UsbIsochronousPswLen sceUsbdIsochronousPswLen
+#define UsbMultiIsochronousRequest sceUsbdMultiIsochronousRequest
+#define UsbMultiIsochronousDoneCallback sceUsbdMultiIsochronousDoneCallback
+#define UsbRegisterDriver sceUsbdRegisterLdd
+#define UsbUnregisterDriver sceUsbdUnregisterLdd
+#define UsbGetDeviceStaticDescriptor sceUsbdScanStaticDescriptor
+#define UsbGetDeviceLocation sceUsbdGetDeviceLocation
+#define UsbSetDevicePrivateData sceUsbdSetPrivateData
+#define UsbGetDevicePrivateData sceUsbdGetPrivateData
+#define UsbOpenEndpoint sceUsbdOpenPipe
+#define UsbOpenEndpointAligned sceUsbdOpenPipeAligned
+#define UsbCloseEndpoint sceUsbdClosePipe
+#define UsbTransfer sceUsbdTransferPipe
+#define UsbChangeThreadPriority sceUsbdChangeThreadPriority
+#define UsbGetReportDescriptor sceUsbdGetReportDescriptor
+#define UsbMultiIsochronousTransfer sceUsbdMultiIsochronousTransfer
 
 #define usbd_IMPORTS_start DECLARE_IMPORT_TABLE(usbd,1,1)
 #define usbd_IMPORTS_end END_IMPORT_TABLE
 
-#define I_UsbRegisterDriver DECLARE_IMPORT(4,UsbRegisterDriver)
-#define I_UsbUnregisterDriver DECLARE_IMPORT(5,UsbUnregisterDriver)
-#define I_UsbGetDeviceStaticDescriptor DECLARE_IMPORT(6,UsbGetDeviceStaticDescriptor)
-#define I_UsbSetDevicePrivateData DECLARE_IMPORT(7,UsbSetDevicePrivateData)
-#define I_UsbGetDevicePrivateData DECLARE_IMPORT(8,UsbGetDevicePrivateData)
-#define I_UsbOpenEndpoint DECLARE_IMPORT(9, UsbOpenEndpoint)
-#define I_UsbCloseEndpoint DECLARE_IMPORT(10, UsbCloseEndpoint)
-#define I_UsbTransfer DECLARE_IMPORT(11,UsbTransfer)
-#define I_UsbOpenEndpointAligned DECLARE_IMPORT(12,UsbOpenEndpointAligned)
-#define I_UsbGetDeviceLocation DECLARE_IMPORT(13,UsbGetDeviceLocation)
-#define I_UsbRegisterAutoloader DECLARE_IMPORT(14,UsbRegisterAutoloader)
-#define I_UsbUnregisterAutoloader DECLARE_IMPORT(15,UsbUnregisterAutoloader)
-#define I_UsbChangeThreadPriority DECLARE_IMPORT(16,UsbChangeThreadPriority)
-#define I_UsbGetReportDescriptor DECLARE_IMPORT(17,UsbGetReportDescriptor)
-#define I_UsbMultiIsochronousTransfer DECLARE_IMPORT(18,UsbMultiIsochronousTransfer)
+#define I_sceUsbdRegisterLdd DECLARE_IMPORT(4, sceUsbdRegisterLdd)
+#define I_sceUsbdUnregisterLdd DECLARE_IMPORT(5, sceUsbdUnregisterLdd)
+#define I_sceUsbdScanStaticDescriptor DECLARE_IMPORT(6, sceUsbdScanStaticDescriptor)
+#define I_sceUsbdSetPrivateData DECLARE_IMPORT(7, sceUsbdSetPrivateData)
+#define I_sceUsbdGetPrivateData DECLARE_IMPORT(8, sceUsbdGetPrivateData)
+#define I_sceUsbdOpenPipe DECLARE_IMPORT(9, sceUsbdOpenPipe)
+#define I_sceUsbdClosePipe DECLARE_IMPORT(10, sceUsbdClosePipe)
+#define I_sceUsbdTransferPipe DECLARE_IMPORT(11, sceUsbdTransferPipe)
+#define I_sceUsbdOpenPipeAligned DECLARE_IMPORT(12, sceUsbdOpenPipeAligned)
+#define I_sceUsbdGetDeviceLocation DECLARE_IMPORT(13, sceUsbdGetDeviceLocation)
+#define I_UsbRegisterAutoloader DECLARE_IMPORT(14, UsbRegisterAutoloader)
+#define I_UsbUnregisterAutoloader DECLARE_IMPORT(15, UsbUnregisterAutoloader)
+#define I_sceUsbdChangeThreadPriority DECLARE_IMPORT(16, sceUsbdChangeThreadPriority)
+#define I_sceUsbdGetReportDescriptor DECLARE_IMPORT(17, sceUsbdGetReportDescriptor)
+#define I_sceUsbdMultiIsochronousTransfer DECLARE_IMPORT(18, sceUsbdMultiIsochronousTransfer)
 
 #endif /* __USBD_H__ */

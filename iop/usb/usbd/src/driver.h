@@ -19,8 +19,8 @@
 #include "usbdpriv.h"
 
 int callUsbDriverFunc(int (*func)(int devId), int devId, void *gp);
-int doRegisterDriver(UsbDriver *drv, void *drvGpSeg);
-int doUnregisterDriver(UsbDriver *drv);
+int doRegisterDriver(sceUsbdLddOps *drv, void *drvGpSeg);
+int doUnregisterDriver(sceUsbdLddOps *drv);
 void signalCallbackThreadFunc(IoRequest *req);
 void callbackThreadFunc(void *arg);
 void connectNewDevice(Device *dev);

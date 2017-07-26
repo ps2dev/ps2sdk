@@ -95,7 +95,7 @@ typedef struct _read_capacity_data {
 	u8 block_length[4];
 } read_capacity_data;
 
-static UsbDriver driver;
+static sceUsbdLddOps driver;
 
 typedef struct _usb_callback_data {
 	int semh;
@@ -124,7 +124,7 @@ static void usb_set_configuration(mass_dev* dev, int configNumber) {
 	cb_data.semh = dev->ioSema;
 
 	XPRINTF("USBHDFSD: setting configuration controlEp=%i, confNum=%i \n", dev->controlEp, configNumber);
-	ret = UsbSetDeviceConfiguration(dev->controlEp, configNumber, usb_callback, (void*)&cb_data);
+	ret = sceUsbdSetConfiguration(dev->controlEp, configNumber, usb_callback, (void*)&cb_data);
 
 	if (ret == USB_RC_OK) {
 		WaitSema(cb_data.semh);
@@ -142,7 +142,7 @@ static void usb_set_interface(mass_dev* dev, int interface, int altSetting) {
 	cb_data.semh = dev->ioSema;
 
 	XPRINTF("USBHDFSD: setting interface controlEp=%i, interface=%i altSetting=%i\n", dev->controlEp, interface, altSetting);
-	ret = UsbSetInterface(dev->controlEp, interface, altSetting, usb_callback, (void*)&cb_data);
+	ret = sceUsbdSetInterface(dev->controlEp, interface, altSetting, usb_callback, (void*)&cb_data);
 
 	if (ret == USB_RC_OK) {
 		WaitSema(cb_data.semh);
@@ -159,7 +159,7 @@ static int usb_bulk_clear_halt(mass_dev* dev, int endpoint) {
 
 	cb_data.semh = dev->ioSema;
 
-	ret = UsbClearEndpointFeature(
+	ret = sceUsbdClearEndpointFeature(
 		dev->controlEp, 	//Config pipe
 		0,			//HALT feature
 		(endpoint==USB_BLK_EP_IN) ? dev->bulkEpI : dev->bulkEpO,
@@ -185,7 +185,7 @@ static void usb_bulk_reset(mass_dev* dev, int mode) {
 	cb_data.semh = dev->ioSema;
 
 	//Call Bulk only mass storage reset
-	ret = UsbControlTransfer(
+	ret = sceUsbdControlTransfer(
 		dev->controlEp, 		//default pipe
 		0x21,			//bulk reset
 		0xFF,
@@ -228,7 +228,7 @@ static int usb_bulk_status(mass_dev* dev, csw_packet* csw, unsigned int tag) {
 	csw->dataResidue = 0;
 	csw->status = 0;
 
-	ret = UsbBulkTransfer(
+	ret = sceUsbdBulkTransfer(
 		dev->bulkEpI,		//bulk input pipe
 		csw,			//data ptr
 		13,	//data length
@@ -290,7 +290,7 @@ static int usb_bulk_get_max_lun(mass_dev* dev) {
 	cb_data.semh = dev->ioSema;
 
 	//Call Bulk only mass storage reset
-	ret = UsbControlTransfer(
+	ret = sceUsbdControlTransfer(
 		dev->controlEp, 	//default pipe
 		0xA1,
 		0xFE,
@@ -330,7 +330,7 @@ static int usb_bulk_command(mass_dev* dev, cbw_packet* packet ) {
 
 	cb_data.semh = dev->ioSema;
 
-	ret =  UsbBulkTransfer(
+	ret =  sceUsbdBulkTransfer(
 		dev->bulkEpO,		//bulk output pipe
 		packet,			//data ptr
 		31,	//data length
@@ -365,7 +365,7 @@ static int usb_bulk_transfer(mass_dev* dev, int direction, void* buffer, unsigne
 			blockSize = transferSize;
 		}
 
-		ret = UsbBulkTransfer(
+		ret = sceUsbdBulkTransfer(
 			pipe,			//bulk pipe epI(Read)  epO(Write)
 			(buf + offset),		//data ptr
 			blockSize,		//data length
@@ -763,12 +763,12 @@ static void usb_bulk_probeEndpoint(int devId, mass_dev* dev, UsbEndpointDescript
 	if (endpoint->bmAttributes == USB_ENDPOINT_XFER_BULK) {
 		/* out transfer */
 		if ((endpoint->bEndpointAddress & USB_ENDPOINT_DIR_MASK) == USB_DIR_OUT && dev->bulkEpO < 0) {
-			dev->bulkEpO = UsbOpenEndpointAligned(devId, endpoint);
+			dev->bulkEpO = sceUsbdOpenPipeAligned(devId, endpoint);
 			XPRINTF("USBHDFSD: register Output endpoint id =%i addr=%02X packetSize=%i\n", dev->bulkEpO, endpoint->bEndpointAddress, (unsigned short int)endpoint->wMaxPacketSizeHB<<8 | endpoint->wMaxPacketSizeLB);
 		} else
 		/* in transfer */
 		if ((endpoint->bEndpointAddress & USB_ENDPOINT_DIR_MASK) == USB_DIR_IN && dev->bulkEpI < 0) {
-			dev->bulkEpI = UsbOpenEndpointAligned(devId, endpoint);
+			dev->bulkEpI = sceUsbdOpenPipeAligned(devId, endpoint);
 			XPRINTF("USBHDFSD: register Input endpoint id =%i addr=%02X packetSize=%i\n", dev->bulkEpI, endpoint->bEndpointAddress, (unsigned short int)endpoint->wMaxPacketSizeHB<<8 | endpoint->wMaxPacketSizeLB);
 		}
 	}
@@ -792,7 +792,7 @@ int mass_stor_probe(int devId)
 	}
 
 	/* get device descriptor */
-	device = (UsbDeviceDescriptor*)UsbGetDeviceStaticDescriptor(devId, NULL, USB_DT_DEVICE);
+	device = (UsbDeviceDescriptor*)sceUsbdScanStaticDescriptor(devId, NULL, USB_DT_DEVICE);
 	if (device == NULL)  {
 		XPRINTF("USBHDFSD: Error - Couldn't get device descriptor\n");
 		return 0;
@@ -802,7 +802,7 @@ int mass_stor_probe(int devId)
 	if (device->bNumConfigurations < 1) { return 0; }
 
 	/* read configuration */
-	config = (UsbConfigDescriptor*)UsbGetDeviceStaticDescriptor(devId, device, USB_DT_CONFIG);
+	config = (UsbConfigDescriptor*)sceUsbdScanStaticDescriptor(devId, device, USB_DT_CONFIG);
 	if (config == NULL) {
 	    XPRINTF("USBHDFSD: Error - Couldn't get configuration descriptor\n");
 	    return 0;
@@ -861,11 +861,11 @@ int mass_stor_connect(int devId)
 	dev->bulkEpO = -1;
 
 	/* open the config endpoint */
-	dev->controlEp = UsbOpenEndpoint(devId, NULL);
+	dev->controlEp = sceUsbdOpenPipe(devId, NULL);
 
-	device = (UsbDeviceDescriptor*)UsbGetDeviceStaticDescriptor(devId, NULL, USB_DT_DEVICE);
+	device = (UsbDeviceDescriptor*)sceUsbdScanStaticDescriptor(devId, NULL, USB_DT_DEVICE);
 
-	config = (UsbConfigDescriptor*)UsbGetDeviceStaticDescriptor(devId, device, USB_DT_CONFIG);
+	config = (UsbConfigDescriptor*)sceUsbdScanStaticDescriptor(devId, device, USB_DT_CONFIG);
 
 	interface = (UsbInterfaceDescriptor *) ((char *) config + config->bLength); /* Get first interface */
 
@@ -874,7 +874,7 @@ int mass_stor_connect(int devId)
 	dev->interfaceAlt    = interface->bAlternateSetting;
 
 	epCount = interface->bNumEndpoints;
-	endpoint = (UsbEndpointDescriptor*)UsbGetDeviceStaticDescriptor(devId, NULL, USB_DT_ENDPOINT);
+	endpoint = (UsbEndpointDescriptor*)sceUsbdScanStaticDescriptor(devId, NULL, USB_DT_ENDPOINT);
 	usb_bulk_probeEndpoint(devId, dev, endpoint);
 
 	for (i = 1; i < epCount; i++)
@@ -914,12 +914,12 @@ static void mass_stor_release(mass_dev *dev)
 {
 	if (dev->bulkEpI >= 0)
 	{
-		UsbCloseEndpoint(dev->bulkEpI);
+		sceUsbdClosePipe(dev->bulkEpI);
 	}
 
 	if (dev->bulkEpO >= 0)
 	{
-		UsbCloseEndpoint(dev->bulkEpO);
+		sceUsbdClosePipe(dev->bulkEpO);
 	}
 
 	dev->bulkEpI = -1;
@@ -1070,7 +1070,7 @@ int InitUSB(void)
 	driver.connect		= mass_stor_connect;
 	driver.disconnect	= mass_stor_disconnect;
 
-	ret = UsbRegisterDriver(&driver);
+	ret = sceUsbdRegisterLdd(&driver);
 	XPRINTF("USBHDFSD: registerDriver=%i \n", ret);
 	if (ret < 0)
 	{

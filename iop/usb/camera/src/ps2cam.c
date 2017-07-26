@@ -41,7 +41,7 @@ static SifRpcServerData_t	rpc_server			__attribute((aligned(64)));
 static int					_rpc_buffer[1024]	__attribute((aligned(64)));
 //static int					threadId;
 static int					maintain_thread;
-UsbDriver					cam_driver = {NULL,
+sceUsbdLddOps					cam_driver = {NULL,
 											 NULL,
 											 "ps2cam",
 											   PS2CamProbe,
@@ -126,7 +126,7 @@ int PS2CamInitDriver(void)
 
 
 	//connect to usb.irx
-	return UsbRegisterDriver(&cam_driver);
+	return sceUsbdRegisterLdd(&cam_driver);
 }
 
 
@@ -142,8 +142,8 @@ int PS2CamProbe(int devId)
 	UsbInterfaceDescriptor	*intf;
 
 
-	dev  = UsbGetDeviceStaticDescriptor(devId, NULL, USB_DT_DEVICE);
-	conf = UsbGetDeviceStaticDescriptor(devId, dev,  USB_DT_CONFIG);
+	dev  = sceUsbdScanStaticDescriptor(devId, NULL, USB_DT_DEVICE);
+	conf = sceUsbdScanStaticDescriptor(devId, dev,  USB_DT_CONFIG);
 	intf = (UsbInterfaceDescriptor  *) ((char *) conf + conf->bLength);
 
 
@@ -219,10 +219,10 @@ int PS2CamConnect(int devId)
 
 
 
-	dev   = UsbGetDeviceStaticDescriptor(devId, NULL, USB_DT_DEVICE);
+	dev   = sceUsbdScanStaticDescriptor(devId, NULL, USB_DT_DEVICE);
 
-	intf0 = UsbGetDeviceStaticDescriptor(devId, dev,  USB_DT_INTERFACE);
-	intf1 = UsbGetDeviceStaticDescriptor(devId, intf0,  USB_DT_INTERFACE);
+	intf0 = sceUsbdScanStaticDescriptor(devId, dev,  USB_DT_INTERFACE);
+	intf1 = sceUsbdScanStaticDescriptor(devId, intf0,  USB_DT_INTERFACE);
 
 	endp1= (UsbEndpointDescriptor  *) ((char *) intf1 + intf1->bLength);
 
@@ -245,8 +245,8 @@ int PS2CamConnect(int devId)
 
 	cam->device_id			= devId;
 
-	cam->controll			= UsbOpenEndpoint(devId, NULL);
-	cam->stream				= UsbOpenEndpoint(devId, endp1);
+	cam->controll			= sceUsbdOpenPipe(devId, NULL);
+	cam->stream				= sceUsbdOpenPipe(devId, endp1);
 	cam->stream_pocket_size	= (endp1->wMaxPacketSizeHB * 256 + endp1->wMaxPacketSizeLB);
 
 
@@ -318,8 +318,8 @@ int PS2CamDisconnect(int devId)
 
 
 	// close endpoints
-	UsbCloseEndpoint(cam->controll);
-	UsbCloseEndpoint(cam->stream  );
+	sceUsbdClosePipe(cam->controll);
+	sceUsbdClosePipe(cam->stream  );
 
 	cam->status	= CAM_STATUS_NOTCONNECTED;
 
@@ -393,7 +393,7 @@ void PS2CamInitializeNewDevice(CAMERA_DEVICE *cam)
 
 
 	// connected message (alloc som mem and get device string then print it and free the mem we alloced)
-	d   = UsbGetDeviceStaticDescriptor(cam->device_id, NULL, USB_DT_DEVICE);
+	d   = sceUsbdScanStaticDescriptor(cam->device_id, NULL, USB_DT_DEVICE);
 	temp_str = AllocSysMemory(0, 128, 0);
 	temp_str[0]=0x00;
 	PS2CamGetDeviceSring(cam, d->iProduct,      (char *)temp_str, 128);
@@ -420,7 +420,7 @@ void PS2CamSetDeviceConfiguration(CAMERA_DEVICE *dev,int id)
 
 	WaitSema(ps2cam_sema);
 
-	ret = UsbSetDeviceConfiguration(dev->controll, id, PS2CamCallback, (void*)ps2cam_sema);
+	ret = sceUsbdSetConfiguration(dev->controll, id, PS2CamCallback, (void*)ps2cam_sema);
 
 	if(ret != USB_RC_OK)
 	{
@@ -570,11 +570,11 @@ int setReg8(CAMERA_DEVICE *dev, unsigned char reg_id, unsigned char value)
 
 	WaitSema(ps2cam_sema);
 
-	ret = UsbControlTransfer(dev->controll, USB_TYPE_VENDOR | USB_RECIP_DEVICE, 1, 0, (unsigned short)reg_id, 1, &value, PS2CamCallback, (void*)ps2cam_sema);
+	ret = sceUsbdControlTransfer(dev->controll, USB_TYPE_VENDOR | USB_RECIP_DEVICE, 1, 0, (unsigned short)reg_id, 1, &value, PS2CamCallback, (void*)ps2cam_sema);
 
 	if(ret != USB_RC_OK)
 	{
-		printf("UsbControlTransfer failed in 'setReg8'.\n");
+		printf("sceUsbdControlTransfer failed in 'setReg8'.\n");
 		ret = -1;
 	}
 	else
@@ -596,11 +596,11 @@ int getReg8(CAMERA_DEVICE *dev, unsigned char reg_id, unsigned char *value)
 
 	WaitSema(ps2cam_sema);
 
-	ret = UsbControlTransfer(dev->controll,USB_DIR_IN|USB_TYPE_VENDOR | USB_RECIP_DEVICE, 1, 0,(unsigned short)reg_id, 1, value, PS2CamCallback, (void*)ps2cam_sema);
+	ret = sceUsbdControlTransfer(dev->controll,USB_DIR_IN|USB_TYPE_VENDOR | USB_RECIP_DEVICE, 1, 0,(unsigned short)reg_id, 1, value, PS2CamCallback, (void*)ps2cam_sema);
 
 	if(ret != USB_RC_OK)
 	{
-		printf("UsbControlTransfer failed in 'getRegValue'.\n");
+		printf("sceUsbdControlTransfer failed in 'getRegValue'.\n");
 		ret = -1;
 	}
 	else
@@ -640,7 +640,7 @@ int setReg16(CAMERA_DEVICE *dev, unsigned char reg_id, unsigned short value)
 
 	WaitSema(ps2cam_sema);
 
-	ret = UsbControlTransfer(dev->controll,USB_TYPE_VENDOR | USB_RECIP_DEVICE, 1, 0, (unsigned short)reg_id, 2, &value, PS2CamCallback, (void*)ps2cam_sema);
+	ret = sceUsbdControlTransfer(dev->controll,USB_TYPE_VENDOR | USB_RECIP_DEVICE, 1, 0, (unsigned short)reg_id, 2, &value, PS2CamCallback, (void*)ps2cam_sema);
 
 
 	if(ret != USB_RC_OK)
@@ -669,7 +669,7 @@ void PS2CamGetDeviceSring(CAMERA_DEVICE* dev, int index, char *str, int strmax)
 	WaitSema(ps2cam_sema);
 
 
-	ret = UsbControlTransfer(dev->controll, 0x80, USB_REQ_GET_DESCRIPTOR, (USB_DT_STRING << 8) | index, 0, sizeof(buff), (char *)&buff[0], PS2CamCallback, (void*)ps2cam_sema);
+	ret = sceUsbdControlTransfer(dev->controll, 0x80, USB_REQ_GET_DESCRIPTOR, (USB_DT_STRING << 8) | index, 0, sizeof(buff), (char *)&buff[0], PS2CamCallback, (void*)ps2cam_sema);
 
 	if(ret != USB_RC_OK)
 	{
@@ -706,7 +706,7 @@ int PS2CamSelectInterface(CAMERA_DEVICE* dev, int interface, int altSetting)
 	WaitSema(ps2cam_sema);
 
 
-	ret = UsbSetInterface(dev->controll, interface, altSetting, PS2CamCallback, (void*)ps2cam_sema);
+	ret = sceUsbdSetInterface(dev->controll, interface, altSetting, PS2CamCallback, (void*)ps2cam_sema);
 
     if(ret != USB_RC_OK)
 	{
@@ -874,11 +874,11 @@ int PS2CamReadData(CAMERA_DEVICE* dev, void *addr, int size)
 
 	WaitSema(ps2cam_sema);
 
-	ret = UsbIsochronousTransfer(dev->stream, addr, size, 0, PS2CamReadDataCallback, (void*)ps2cam_sema);
+	ret = sceUsbdIsochronousTransfer(dev->stream, addr, size, 0, PS2CamReadDataCallback, (void*)ps2cam_sema);
 
 	if(ret != USB_RC_OK)
 	{
-		printf("Usb: Error sending UsbIsochronousTransfer\n");
+		printf("Usb: Error sending sceUsbdIsochronousTransfer\n");
 		return -1;
 	}
 	else
@@ -1119,7 +1119,7 @@ int PS2CamGetDeviceInfo(int handle,int *info)
 	cam = CamHandle[handle-1].cam;
 
 	//get descripters
-	dev  = UsbGetDeviceStaticDescriptor(cam->device_id, NULL, USB_DT_DEVICE);
+	dev  = sceUsbdScanStaticDescriptor(cam->device_id, NULL, USB_DT_DEVICE);
 
 
 	// now collect inf
@@ -1178,20 +1178,20 @@ int PS2CamSetDeviceBandwidth(int handle, char bandwidth)
 
 
 	//search for enpoint to open
-	dev  = UsbGetDeviceStaticDescriptor(cam->device_id, NULL, USB_DT_DEVICE);
-	intf = UsbGetDeviceStaticDescriptor(cam->device_id, dev,  USB_DT_INTERFACE);
+	dev  = sceUsbdScanStaticDescriptor(cam->device_id, NULL, USB_DT_DEVICE);
+	intf = sceUsbdScanStaticDescriptor(cam->device_id, dev,  USB_DT_INTERFACE);
 
 	for(i=0;i<cam->bandwidth;i++)
 	{
-		intf = UsbGetDeviceStaticDescriptor(cam->device_id, intf,  USB_DT_INTERFACE);
+		intf = sceUsbdScanStaticDescriptor(cam->device_id, intf,  USB_DT_INTERFACE);
 	}
 
 	endp= (UsbEndpointDescriptor  *) ((char *) intf + intf->bLength);
 
 
 	// close old endpoint and open new one
-					UsbCloseEndpoint(cam->stream);
-	cam->stream =	UsbOpenEndpoint(cam->device_id, endp);
+					sceUsbdClosePipe(cam->stream);
+	cam->stream =	sceUsbdOpenPipe(cam->device_id, endp);
 
 	cam->stream_pocket_size	= (endp->wMaxPacketSizeHB * 256 + endp->wMaxPacketSizeLB);
 	printf("bandwidth =%d\n",cam->stream_pocket_size);

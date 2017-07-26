@@ -76,7 +76,7 @@ typedef struct _ioRequest {
 	u32 resultCode;
 	u32 transferedBytes;
 	u32 waitFrames; // number of frames to wait for isochronous transfers
-	UsbCallbackProc userCallbackProc;
+	sceUsbdDoneCallback userCallbackProc;
 	void   *userCallbackArg;
     void   *gpSeg;
 } IoRequest;
@@ -86,7 +86,7 @@ typedef struct _device {
 	struct _device *next, *prev;
 	struct _device *nextConnected, *prevConnected;
 	struct _endpoint *endpointListStart, *endpointListEnd;
-	UsbDriver  *devDriver;
+	sceUsbdLddOps  *devDriver;
 	u8  deviceStatus;
 	u8  functionAddress;
 	u8  isLowSpeedDevice;

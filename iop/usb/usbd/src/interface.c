@@ -19,7 +19,7 @@
 #include "hcd.h"
 #include "usbio.h"
 
-int UsbRegisterDriver(UsbDriver *driver) {
+int sceUsbdRegisterLdd(sceUsbdLddOps *driver) {
 	int res;
 
 	if (usbdLock() != 0)
@@ -31,7 +31,7 @@ int UsbRegisterDriver(UsbDriver *driver) {
 	return res;
 }
 
-int UsbUnregisterDriver(UsbDriver *driver) {
+int sceUsbdUnregisterLdd(sceUsbdLddOps *driver) {
 	int res;
 
 	if (usbdLock() != 0)
@@ -43,7 +43,7 @@ int UsbUnregisterDriver(UsbDriver *driver) {
 	return res;
 }
 
-void *UsbGetDeviceStaticDescriptor(int devId, void *data, u8 type) {
+void *sceUsbdScanStaticDescriptor(int devId, void *data, u8 type) {
 	void *res;
 
 	if (usbdLock() != 0)
@@ -55,7 +55,7 @@ void *UsbGetDeviceStaticDescriptor(int devId, void *data, u8 type) {
 	return res;
 }
 
-int UsbGetDeviceLocation(int devId, u8 *path) {
+int sceUsbdGetDeviceLocation(int devId, u8 *path) {
 	Device *dev;
 	int res;
 
@@ -104,7 +104,7 @@ void *UsbGetPrivateData(int devId) {
 	return res;
 }
 
-int UsbOpenEndpoint(int devId, UsbEndpointDescriptor *desc) {
+int sceUsbdOpenPipe(int devId, UsbEndpointDescriptor *desc) {
 	Device *dev;
 	Endpoint *ep;
 	int res = -1;
@@ -123,7 +123,7 @@ int UsbOpenEndpoint(int devId, UsbEndpointDescriptor *desc) {
 	return res;
 }
 
-int UsbCloseEndpoint(int id) {
+int sceUsbdClosePipe(int id) {
 	Endpoint *ep;
 	int res;
 
@@ -140,7 +140,7 @@ int UsbCloseEndpoint(int id) {
 	return res;
 }
 
-int UsbTransfer(int id, void *data, u32 len, void *option, UsbCallbackProc callback, void *cbArg) {
+int sceUsbdTransferPipe(int id, void *data, u32 len, void *option, sceUsbdDoneCallback callback, void *cbArg) {
 	UsbDeviceRequest *ctrlPkt = (UsbDeviceRequest *)option;
 	IoRequest *req;
 	Endpoint *ep;
@@ -151,7 +151,7 @@ int UsbTransfer(int id, void *data, u32 len, void *option, UsbCallbackProc callb
 
 	ep = fetchEndpointById(id);
 	if (!ep) {
-		dbg_printf("UsbTransfer: Endpoint %d not found\n", id);
+		dbg_printf("sceUsbdTransferPipe: Endpoint %d not found\n", id);
 		res = USB_RC_BADPIPE;
 	}
 
@@ -197,7 +197,7 @@ int UsbTransfer(int id, void *data, u32 len, void *option, UsbCallbackProc callb
 	return res;
 }
 
-int UsbOpenEndpointAligned(int devId, UsbEndpointDescriptor *desc) {
+int sceUsbdOpenPipeAligned(int devId, UsbEndpointDescriptor *desc) {
 	Device *dev;
 	Endpoint *ep;
 	int res = -1;
@@ -216,18 +216,18 @@ int UsbOpenEndpointAligned(int devId, UsbEndpointDescriptor *desc) {
 	return res;
 }
 
-int UsbRegisterAutoloader(UsbDriver *drv) {
+int UsbRegisterAutoloader(sceUsbdLddOps *drv) {
 	dbg_printf("UsbRegisterAutoloader stub\n");
 	return 0;
 }
 
-int UsbUnregisterAutoloader(UsbDriver *drv) {
+int UsbUnregisterAutoloader(sceUsbdLddOps *drv) {
 	dbg_printf("UsbUnregisterAutoloader stub\n");
 	return 0;
 }
 
-int UsbChangeThreadPriority(void) {
-	dbg_printf("UsbChangeThreadPriority stub\n");
+int sceUsbdChangeThreadPriority(int prio1, int prio2) {
+	dbg_printf("sceUsbdChangeThreadPriority stub\n");
 	return 0;
 }
 

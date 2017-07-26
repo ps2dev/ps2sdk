@@ -29,7 +29,7 @@ int hubDrvProbe(int devId);
 int hubDrvConnect(int devId);
 int hubDrvDisconnect(int devId);
 
-UsbDriver HubDriver = {
+sceUsbdLddOps HubDriver = {
 	NULL, NULL, // next, prev
 	"hub",
 	hubDrvProbe,

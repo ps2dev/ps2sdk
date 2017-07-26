@@ -56,10 +56,10 @@ I_FreeSysMemory
 sysmem_IMPORTS_end
 
 usbd_IMPORTS_start
-I_UsbGetDeviceStaticDescriptor
-I_UsbOpenEndpoint
-I_UsbSetDevicePrivateData
-I_UsbTransfer
-I_UsbRegisterDriver
+I_sceUsbdScanStaticDescriptor
+I_sceUsbdOpenPipe
+I_sceUsbdSetPrivateData
+I_sceUsbdTransferPipe
+I_sceUsbdRegisterLdd
 usbd_IMPORTS_end
 
