@@ -43,7 +43,6 @@
 #define SD_PARAM_MVOLXL				((0x11<<8)|0x80)
 #define SD_PARAM_MVOLXR				((0x12<<8)|0x80)
 
-
 /* Transfer modes */
 #define SD_TRANS_WRITE          0
 #define SD_TRANS_READ           1
@@ -52,8 +51,6 @@
 #define SD_TRANS_LOOP           0x10 /* only for block*/
 #define SD_TRANS_MODE_DMA       0
 #define SD_TRANS_MODE_IO        8
-
-
 
 // Reverb
 #define SD_EFFECT_MODE_OFF  		0x0
@@ -137,17 +134,67 @@ typedef struct
 
 typedef struct
 {
-     int     core;
-     int     mode;
-     short   depth_L;
-     short   depth_R;
-     int     delay;
-     int     feedback;
+	int     core;
+	int     mode;
+	short   depth_L;
+	short   depth_R;
+	int     delay;
+	int     feedback;
 } sceSdEffectAttr;
 
 typedef int (*sceSdSpu2IntrHandler)(int, void *);
 typedef int (*sceSdTransIntrHandler)(int, void *);
 typedef int (*SdIntrCallback)(void *data);
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int sceSdQuit();
+int sceSdInit(int flag);
+SdIntrCallback sceSdSetIRQCallback(SdIntrCallback cb);
+SdIntrCallback sceSdSetTransCallback(s32 core, SdIntrCallback cb);
+
+void sceSdSetParam(u16 entry, u16 value);
+u16 sceSdGetParam(u16 entry);
+
+void sceSdSetCoreAttr(u16 entry, u16 value );
+u16 sceSdGetCoreAttr(u16 entry );
+int sceSdClearEffectWorkArea (int core, int channel, int effect_mode);
+
+void sceSdSetAddr(u16 entry, u32 value);
+u32 sceSdGetAddr(u16 entry );
+
+void sceSdSetSwitch(u16 entry, u32 value);
+u32 sceSdGetSwitch(u16 entry );
+
+u16 sceSdNote2Pitch (u16 center_note, u16 center_fine, u16 note, s16 fine);
+u16 sceSdPitch2Note (u16 center_note, u16 center_fine, u16 pitch);
+
+int sceSdSetEffectAttr (int core, sceSdEffectAttr *attr );
+void sceSdGetEffectAttr (int core, sceSdEffectAttr *attr );
+
+int sceSdProcBatch(sceSdBatch *batch, u32 *rets, u32 num);
+int sceSdProcBatchEx(sceSdBatch *batch, u32 *rets, u32 num, u32 voice);
+
+int sceSdVoiceTrans(s16 chan, u16 mode, u8 *iopaddr, u32 *spuaddr, u32 size);
+int sceSdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, ...);
+u32 sceSdVoiceTransStatus (s16 channel, s16 flag);
+u32 sceSdBlockTransStatus (s16 channel, s16 flag);
+
+sceSdTransIntrHandler sceSdSetTransIntrHandler(int channel, sceSdTransIntrHandler func, void *arg);
+sceSdSpu2IntrHandler sceSdSetSpu2IntrHandler(sceSdSpu2IntrHandler func, void *arg);
+
+void *sceSdGetTransIntrHandlerArgument(int arg);
+void *sceSdGetSpu2IntrHandlerArgument();
+int sceSdStopTrans(int channel);
+int sceSdCleanEffectWorkArea(int core, int channel, int effect_mode);
+int sceSdSetEffectMode(int core, sceSdEffectAttr *param);
+int sceSdSetEffectModeParams(int core, sceSdEffectAttr *attr);
+
+#ifdef __cplusplus
+}
+#endif
 
 //Backwards compatibility definitions
 #define BATCH_SETPARAM SD_BATCH_SETPARAM
@@ -179,5 +226,37 @@ typedef int (*SdIntrCallback)(void *data);
 #define SdSpu2IntrHandler sceSdSpu2IntrHandler
 #define SdTransIntrHandler sceSdTransIntrHandler
 #define IntrCallback SdIntrCallback
+
+#define SdQuit sceSdQuit
+#define SdInit sceSdInit
+#define SdSetIRQCallback sceSdSetIRQCallback
+#define SdSetTransCallback sceSdSetTransCallback
+#define SdSetParam sceSdSetParam
+#define SdGetParam sceSdGetParam
+#define SdSetCoreAttr sceSdSetCoreAttr
+#define SdGetCoreAttr sceSdGetCoreAttr
+#define SdClearEffectWorkArea sceSdClearEffectWorkArea
+#define SdSetAddr sceSdSetAddr
+#define SdGetAddr sceSdGetAddr
+#define SdSetSwitch sceSdSetSwitch
+#define SdGetSwitch sceSdGetSwitch
+#define SdNote2Pitch sceSdNote2Pitch
+#define SdPitch2Note sceSdPitch2Note
+#define SdSetEffectAttr sceSdSetEffectAttr
+#define SdGetEffectAttr sceSdGetEffectAttr
+#define SdProcBatch sceSdProcBatch
+#define SdProcBatchEx sceSdProcBatchEx
+#define SdVoiceTrans sceSdVoiceTrans
+#define SdBlockTrans sceSdBlockTrans
+#define SdVoiceTransStatus sceSdVoiceTransStatus
+#define SdBlockTransStatus sceSdBlockTransStatus
+#define SdSetTransIntrHandler sceSdSetTransIntrHandler
+#define SdSetSpu2IntrHandler sceSdSetSpu2IntrHandler
+#define SdGetTransIntrHandlerArgument sceSdGetTransIntrHandlerArgument
+#define SdGetSpu2IntrHandlerArgument sceSdGetSpu2IntrHandlerArgument
+#define SdStopTrans sceSdStopTrans
+#define SdCleanEffectWorkArea sceSdCleanEffectWorkArea
+#define SdSetEffectMode sceSdSetEffectMode
+#define SdSetEffectModeParams sceSdSetEffectModeParams
 
 #endif /* __LIBSD_COMMON_H__ */

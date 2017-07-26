@@ -147,7 +147,7 @@ int sceSdVoiceTrans(s16 chan, u16 mode, u8 *iopaddr, u32 *spuaddr, u32 size)
 	return res;
 }
 
-int sceSdVoiceTransStatus(s16 chan, s16 flag)
+u32 sceSdVoiceTransStatus(s16 chan, s16 flag)
 {
 	chan &= 1;
 	flag &= 1;
