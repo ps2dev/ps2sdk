@@ -43,7 +43,7 @@ int UsbUnregisterDriver(UsbDriver *driver) {
 	return res;
 }
 
-void *UsbGetDeviceStaticDescriptor(int devId, void *data, uint8 type) {
+void *UsbGetDeviceStaticDescriptor(int devId, void *data, u8 type) {
 	void *res;
 
 	if (usbdLock() != 0)
@@ -55,7 +55,7 @@ void *UsbGetDeviceStaticDescriptor(int devId, void *data, uint8 type) {
 	return res;
 }
 
-int UsbGetDeviceLocation(int devId, uint8 *path) {
+int UsbGetDeviceLocation(int devId, u8 *path) {
 	Device *dev;
 	int res;
 
@@ -140,7 +140,7 @@ int UsbCloseEndpoint(int id) {
 	return res;
 }
 
-int UsbTransfer(int id, void *data, uint32 len, void *option, UsbCallbackProc callback, void *cbArg) {
+int UsbTransfer(int id, void *data, u32 len, void *option, UsbCallbackProc callback, void *cbArg) {
 	UsbDeviceRequest *ctrlPkt = (UsbDeviceRequest *)option;
 	IoRequest *req;
 	Endpoint *ep;
@@ -156,9 +156,9 @@ int UsbTransfer(int id, void *data, uint32 len, void *option, UsbCallbackProc ca
 	}
 
 	if ((res == 0) && data && len) {
-		if ((((uint32)(data + len - 1) >> 12) - ((uint32)data >> 12)) > 1)
+		if ((((u32)(data + len - 1) >> 12) - ((u32)data >> 12)) > 1)
 			res = USB_RC_BADLENGTH;
-		else if (ep->alignFlag && ((uint32)data & 3))
+		else if (ep->alignFlag && ((u32)data & 3))
 			res = USB_RC_BADALIGN;
 		else if ((ep->endpointType == TYPE_ISOCHRON) && ((ep->hcEd.maxPacketSize & 0x7FF) < len))
 			res = USB_RC_BADLENGTH;
@@ -188,7 +188,7 @@ int UsbTransfer(int id, void *data, uint32 len, void *option, UsbCallbackProc ca
 			}
 		} else {
 			if (ep->endpointType == TYPE_ISOCHRON)
-				req->waitFrames = (uint32)option;
+				req->waitFrames = (u32)option;
 			res = attachIoReqToEndpoint(ep, req, data, len, signalCallbackThreadFunc);
 		}
 	}

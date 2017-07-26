@@ -19,9 +19,9 @@
 #include "usbdpriv.h"
 
 int callUsbDriverFunc(int (*func)(int), int devId, void *gp);
-Endpoint *openDeviceEndpoint(Device *dev, UsbEndpointDescriptor *endpDesc, uint32 alignFlag);
-Endpoint *doOpenEndpoint(Device *dev, UsbEndpointDescriptor *endpDesc, uint32 alignFlag);
-void *doGetDeviceStaticDescriptor(int devId, void *data, uint8 type);
+Endpoint *openDeviceEndpoint(Device *dev, UsbEndpointDescriptor *endpDesc, u32 alignFlag);
+Endpoint *doOpenEndpoint(Device *dev, UsbEndpointDescriptor *endpDesc, u32 alignFlag);
+void *doGetDeviceStaticDescriptor(int devId, void *data, u8 type);
 int doCloseEndpoint(Endpoint *ep);
 int hcdInit(void);
 

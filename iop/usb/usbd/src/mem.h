@@ -26,15 +26,15 @@ void freeIsoTd(HcIsoTD *argTd);
 HcTD *allocTd(void);
 void freeTd(HcTD *argTd);
 
-Device *attachChildDevice(Device *parent, uint32 portNum);
+Device *attachChildDevice(Device *parent, u32 portNum);
 void freeDevice(Device *dev);
 
 Device *fetchPortElemByNumber(Device *hub, int port);
 
-void addToHcEndpointList(uint8 type, HcED *ed);
+void addToHcEndpointList(u8 type, HcED *ed);
 void removeHcEdFromList(int type, HcED *hcEd);
 
-Endpoint *allocEndpointForDevice(Device *dev, uint32 align);
+Endpoint *allocEndpointForDevice(Device *dev, u32 align);
 
 Device *fetchDeviceById(int devId);
 Endpoint *fetchEndpointById(int id);

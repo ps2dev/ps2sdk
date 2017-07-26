@@ -27,7 +27,7 @@
 #define dbg_printf(a...)	(void)0
 #endif
 
-#define READ_UINT16(a) (((uint8*)a)[0] | (((uint8 *)a)[1] << 8))
+#define READ_UINT16(a) (((u8*)a)[0] | (((u8 *)a)[1] << 8))
 
 typedef struct {
 	int maxDevices;
@@ -58,86 +58,86 @@ typedef void (*TimerCallback)(void *arg);
 typedef void (*InternCallback)(struct _ioRequest *arg);
 
 typedef struct _timerCbStruct {
-	uint32 isActive;
+	u32 isActive;
 	struct _timerCbStruct *prev, *next;
 	TimerCallback callbackProc;
 	void   *callbackArg;
-	uint32 delayCount;
+	u32 delayCount;
 } TimerCbStruct;
 
 typedef struct _ioRequest {
-	uint32 busyFlag;
+	u32 busyFlag;
 	struct _ioRequest *next, *prev;
 	struct _endpoint *correspEndpoint;
 	UsbDeviceRequest devReq;
     void   *destPtr;
-	uint32 length;	// length of destPtr buffer
+	u32 length;	// length of destPtr buffer
 	InternCallback callbackProc;
-	uint32 resultCode;
-	uint32 transferedBytes;
-	uint32 waitFrames; // number of frames to wait for isochronous transfers
+	u32 resultCode;
+	u32 transferedBytes;
+	u32 waitFrames; // number of frames to wait for isochronous transfers
 	UsbCallbackProc userCallbackProc;
 	void   *userCallbackArg;
     void   *gpSeg;
 } IoRequest;
 
 typedef struct _device {
-	uint32 id;
+	u32 id;
 	struct _device *next, *prev;
 	struct _device *nextConnected, *prevConnected;
 	struct _endpoint *endpointListStart, *endpointListEnd;
 	UsbDriver  *devDriver;
-	uint8  deviceStatus;
-	uint8  functionAddress;
-	uint8  isLowSpeedDevice;
-	uint8  resetFlag;
+	u8  deviceStatus;
+	u8  functionAddress;
+	u8  isLowSpeedDevice;
+	u8  resetFlag;
 	struct _device *childListStart, *childListEnd;
 	struct _device *parent;
-	uint32 attachedToPortNo;
+	u32 attachedToPortNo;
 	void   *privDataField;
 	TimerCbStruct timer;
 	IoRequest ioRequest;
-	uint32 functionDelay;		// is this necessary?
+	u32 functionDelay;		// is this necessary?
 	void   *staticDeviceDescPtr;
 	void   *staticDeviceDescEndPtr;
-	uint32 fetchDescriptorCounter;
+	u32 fetchDescriptorCounter;
 } Device;
 
 typedef struct _hcTd {
-	uint32 HcArea;
+	u32 HcArea;
 	void   *curBufPtr;
 	struct _hcTd *next;
 	void   *bufferEnd;
 } HcTD;
 
 typedef struct _hcIsoTd {
-	uint32 hcArea;
+	u32 hcArea;
 	void   *bufferPage0;
 	struct _hcIsoTd *next;
 	void   *bufferEnd;
-	uint16 psw[8];
+	u16 psw[8];
 } HcIsoTD;
 
 typedef struct _hcEd {
-	uint16 hcArea;
-	uint16 maxPacketSize;
+	u16 hcArea;
+	u16 maxPacketSize;
 	HcTD   *tdTail;
 	HcTD   *tdHead;
 	struct _hcEd *next;
 } HcED;
 
 typedef struct _endpoint {
-	uint32			id;
-	uint8			endpointType;
-	uint8			inTdQueue;
-	uint8			alignFlag;
-	uint8			pad;
+	u32			id;
+	u8			endpointType;
+	u8			inTdQueue;
+	u8			alignFlag;
+	u8			pad;
 	struct _endpoint *next, *prev;
 	struct _endpoint *busyNext, *busyPrev;
 	Device		*correspDevice;
 	IoRequest	*ioReqListStart;
 	IoRequest	*ioReqListEnd;
-	uint32		isochronLastFrameNum; // 40
+	u32		isochronLastFrameNum; // 40
 	TimerCbStruct timer;	// sizeof(TimerCbStruct) => 24 bytes
 	HcED		hcEd;		// HcED has to be aligned to 0x10 bytes!
 } Endpoint;
@@ -147,47 +147,47 @@ typedef struct _usbHub {
 	Endpoint *controlEp, *statusChangeEp;
     IoRequest controlIoReq, statusIoReq;
 	UsbHubDescriptor desc;
-    uint32 numChildDevices;
-	uint32 portCounter;
-	uint32 hubStatusCounter;
-	uint16 hubStatus;			//
-	uint16 hubStatusChange;		// unite to uint32 to make it match portStatusChange
-	uint32 portStatusChange;
-	uint8 statusChangeInfo[8]; // depends on number of ports
+    u32 numChildDevices;
+	u32 portCounter;
+	u32 hubStatusCounter;
+	u16 hubStatus;			//
+	u16 hubStatusChange;		// unite to u32 to make it match portStatusChange
+	u32 portStatusChange;
+	u8 statusChangeInfo[8]; // depends on number of ports
 } UsbHub;
 
 typedef struct {
 	volatile HcED   *InterruptTable[32];
-	volatile uint16 FrameNumber;
-	volatile uint16 pad;
+	volatile u16 FrameNumber;
+	volatile u16 pad;
 	volatile HcTD   *DoneHead;
-	volatile uint8  reserved[116];
-	volatile uint32 pad2; // expand struct to 256 bytes for alignment
+	volatile u8  reserved[116];
+	volatile u32 pad2; // expand struct to 256 bytes for alignment
 } HcCA;
 
 typedef struct {
-	volatile uint32 HcRevision;
-	volatile uint32 HcControl;
-	volatile uint32 HcCommandStatus;
-	volatile uint32 HcInterruptStatus;
-	volatile uint32 HcInterruptEnable;
-	volatile uint32 HcInterruptDisable;
+	volatile u32 HcRevision;
+	volatile u32 HcControl;
+	volatile u32 HcCommandStatus;
+	volatile u32 HcInterruptStatus;
+	volatile u32 HcInterruptEnable;
+	volatile u32 HcInterruptDisable;
 	volatile HcCA   *HcHCCA;
 	volatile HcED   *HcPeriodCurrentEd;
 	volatile HcED   *HcControlHeadEd;
 	volatile HcED	*HcControlCurrentEd;
 	volatile HcED   *HcBulkHeadEd;
 	volatile HcED	*HcBulkCurrentEd;
-	volatile uint32 HcDoneHead;
-	volatile uint32 HcFmInterval;
-	volatile uint32 HcFmRemaining;
-	volatile uint32 HcFmNumber;
-	volatile uint32 HcPeriodicStart;
-	volatile uint32 HcLsThreshold;
-	volatile uint32 HcRhDescriptorA;
-	volatile uint32 HcRhDescriptorB;
-	volatile uint32 HcRhStatus;
-	volatile uint32 HcRhPortStatus[2];
+	volatile u32 HcDoneHead;
+	volatile u32 HcFmInterval;
+	volatile u32 HcFmRemaining;
+	volatile u32 HcFmNumber;
+	volatile u32 HcPeriodicStart;
+	volatile u32 HcLsThreshold;
+	volatile u32 HcRhDescriptorA;
+	volatile u32 HcRhDescriptorB;
+	volatile u32 HcRhStatus;
+	volatile u32 HcRhPortStatus[2];
 } OhciRegs;
 
 typedef struct _memPool {
@@ -229,7 +229,7 @@ typedef struct _memPool {
 	struct _device		*deviceConnectedListStart;
 	struct _device		*deviceConnectedListEnd;
 
-	uint32 delayResets;
+	u32 delayResets;
 } MemoryPool;
 
 #define GENTD_QUEUE 1
@@ -274,8 +274,8 @@ typedef struct _memPool {
 #define HCED_ISOC		BIT(15)		// Format bit
 #define HCED_DIR_MASK	(HCED_DIR_OUT | HCED_DIR_IN)
 
-#define ED_HALTED(a)	((uint32)((a).tdHead) & 1)
-#define ED_SKIPPED(a)	((uint32)((a).hcArea) & HCED_SKIP)
+#define ED_HALTED(a)	((u32)((a).tdHead) & 1)
+#define ED_SKIPPED(a)	((u32)((a).hcArea) & HCED_SKIP)
 
 #define TD_HCAREA(CC, T, DI, DP, R)		(((CC) << 12) | ((T) << 8) | ((DI) << 5) | ((DP) << 3) | ((R) << 2))
 
@@ -308,7 +308,7 @@ typedef struct _memPool {
 
 int usbdLock(void);
 int usbdUnlock(void);
-int doGetDeviceLocation(Device *dev, uint8 *path);
+int doGetDeviceLocation(Device *dev, u8 *path);
 void processDoneQueue_IsoTd(HcIsoTD *arg);
 void processDoneQueue_GenTd(HcTD *arg);
 void handleTimerList(void);
