@@ -38,15 +38,15 @@ static void loadmodules(int free)
 
 	if(free == 1)
 	{
-		if((ret = SifLoadModule("host0:freesio2.irx", 0, NULL)) < 0)
+		if((ret = SifLoadModule("host0:sio2man.irx", 0, NULL)) < 0)
 		{
-			printf("Failed to load freesio2.irx module (%d)\n", ret);
+			printf("Failed to load sio2man.irx module (%d)\n", ret);
 			SleepThread();
 		}
 
-		if((ret = SifLoadModule("host0:freepad.irx", 0, NULL)) < 0)
+		if((ret = SifLoadModule("host0:padman.irx", 0, NULL)) < 0)
 		{
-			printf("Failed to load freepad.irx module (%d)\n", ret);
+			printf("Failed to load padman.irx module (%d)\n", ret);
 			SleepThread();
 		}
 	}
@@ -106,13 +106,13 @@ int main(int argc, char **argv)
 
 	if((argc == 2) && (strncmp(argv[1], "free", 4) == 0))
 	{
-		printf(" - Using PS2SDK freesio2.irx and freepad.irx modules.\n");
+		printf(" - Using PS2SDK sio2man.irx and padman.irx modules.\n");
 		loadmodules(1);
 	}
 	else
 	{
 		printf(" - Using ROM XSIO2MAN and XPADMAN modules.\n");
-		printf("Start this sample with 'free' as an argument to load freesio2.irx and freepad.irx\n");
+		printf("Start this sample with 'free' as an argument to load sio2man.irx and padman.irx\n");
 		printf("Example: ps2client execee host:padx_sample.elf free\n");
 		loadmodules(0);
 	}
