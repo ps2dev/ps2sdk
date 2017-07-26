@@ -95,7 +95,7 @@ mouse_data mouse;
 /** Holds a list of current devices */
 mouse_dev *devices[PS2MOUSE_MAXDEV];
 int dev_count;
-UsbDriver mouse_driver = { NULL, NULL, "PS2Mouse", ps2mouse_probe, ps2mouse_connect, ps2mouse_disconnect };
+sceUsbdLddOps mouse_driver = { NULL, NULL, "PS2Mouse", ps2mouse_probe, ps2mouse_connect, ps2mouse_disconnect };
 
 int _start ()
 {
@@ -150,7 +150,7 @@ int ps2mouse_probe(int devId)
 
   //printf("PS2Mouse_probe devId %d\n", devId);
 
-  dev = UsbGetDeviceStaticDescriptor(devId, NULL, USB_DT_DEVICE); /* Get device descriptor */
+  dev = sceUsbdScanStaticDescriptor(devId, NULL, USB_DT_DEVICE); /* Get device descriptor */
   if(!dev)
     {
       printf("ERROR: Couldn't get device descriptor\n");
@@ -165,7 +165,7 @@ int ps2mouse_probe(int devId)
       return 0;
     }
 
-  conf = UsbGetDeviceStaticDescriptor(devId, dev, USB_DT_CONFIG);
+  conf = sceUsbdScanStaticDescriptor(devId, dev, USB_DT_CONFIG);
   if(!conf)
     {
       //printf("ERROR: Couldn't get configuration descriptor\n");
@@ -222,14 +222,14 @@ int ps2mouse_connect(int devId)
 
   //printf("PS2Mouse_connect devId %d\n", devId);
 
-  dev = UsbGetDeviceStaticDescriptor(devId, NULL, USB_DT_DEVICE); /* Get device descriptor */
+  dev = sceUsbdScanStaticDescriptor(devId, NULL, USB_DT_DEVICE); /* Get device descriptor */
   if(!dev)
     {
       printf("ERROR: Couldn't get device descriptor\n");
       return 1;
     }
 
-  conf = UsbGetDeviceStaticDescriptor(devId, dev, USB_DT_CONFIG);
+  conf = sceUsbdScanStaticDescriptor(devId, dev, USB_DT_CONFIG);
   if(!conf)
     {
       printf("ERROR: Couldn't get configuration descriptor\n");
@@ -247,8 +247,8 @@ int ps2mouse_connect(int devId)
       return 1;
     }
 
-  currDev->configEndp = UsbOpenEndpoint(devId, NULL);
-  currDev->dataEndp = UsbOpenEndpoint(devId, endp);
+  currDev->configEndp = sceUsbdOpenPipe(devId, NULL);
+  currDev->dataEndp = sceUsbdOpenPipe(devId, endp);
   currDev->packetSize = endp->wMaxPacketSizeLB | ((int) endp->wMaxPacketSizeHB << 8);
   if(currDev->packetSize > sizeof(mouse_data_recv))
     {
@@ -283,10 +283,10 @@ int ps2mouse_connect(int devId)
       return 1;
     }
 
-  UsbSetDevicePrivateData(devId, currDev); /* Set the index for the device data */
+  sceUsbdSetPrivateData(devId, currDev); /* Set the index for the device data */
 
   //printf("Configuration value %d\n", conf->bConfigurationValue);
-  UsbSetDeviceConfiguration(currDev->configEndp, conf->bConfigurationValue, ps2mouse_config_set, currDev);
+  sceUsbdSetConfiguration(currDev->configEndp, conf->bConfigurationValue, ps2mouse_config_set, currDev);
 
   dev_count++; /* Increment device count */
   printf("PS2MOUSE: Connected device\n");
@@ -361,7 +361,7 @@ void usb_getstring(int endp, int index, char *desc)
   if(data != NULL)
     {
       str->desc = desc;
-      ret = UsbControlTransfer(endp, 0x80, USB_REQ_GET_DESCRIPTOR, (USB_DT_STRING << 8) | index,
+      ret = sceUsbdControlTransfer(endp, 0x80, USB_REQ_GET_DESCRIPTOR, (USB_DT_STRING << 8) | index,
 			       0, sizeof(string_descriptor) - 4, data, ps2mouse_getstring_set, data);
       if(ret != USB_RC_OK)
 	{
@@ -389,7 +389,7 @@ void ps2mouse_config_set(int resultCode, int bytes, void *arg)
   dev = (mouse_dev *) arg;
   if(dev != NULL)
     {
-      UsbInterruptTransfer(dev->dataEndp, &dev->data, dev->packetSize, ps2mouse_data_recv, arg);
+      sceUsbdInterruptTransfer(dev->dataEndp, &dev->data, dev->packetSize, ps2mouse_data_recv, arg);
     }
 }
 
@@ -484,7 +484,7 @@ void ps2mouse_data_recv(int resultCode, int bytes, void *arg)
       SignalSema(mouse_sema);
       //printf("X = %d, Y = %d, Wheel = %d, Buttons = %x\n", mouse.x, mouse.y, mouse.wheel, mouse.buttons);
 
-      UsbInterruptTransfer(dev->dataEndp, &dev->data, dev->packetSize, ps2mouse_data_recv, arg);
+      sceUsbdInterruptTransfer(dev->dataEndp, &dev->data, dev->packetSize, ps2mouse_data_recv, arg);
     }
 }
 
@@ -504,7 +504,7 @@ int ps2mouse_init()
       return 1;
     }
 
-  if(UsbRegisterDriver(&mouse_driver) >= 0)
+  if(sceUsbdRegisterLdd(&mouse_driver) >= 0)
     {
       memset(&mouse, 0, sizeof(mouse_data));
       memset(devices, 0, sizeof(mouse_dev *) * PS2MOUSE_MAXDEV);
