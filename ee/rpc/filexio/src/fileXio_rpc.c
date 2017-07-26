@@ -21,6 +21,7 @@
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <fileXio_rpc.h>
+#include <errno.h>
 
 // from stdio.c
 extern int (*_ps2sdk_close)(int);
