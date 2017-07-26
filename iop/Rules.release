@@ -28,7 +28,10 @@ release-iop-lib:
 	@if test $(IOP_LIB) ; then \
 	   $(ECHO) Installing $(IOP_LIB) to $(PS2SDK)/iop/lib ; \
 	   cp -f $(IOP_LIB) $(PS2SDK)/iop/lib/ ; \
-	   chmod 644 $(PS2SDK)/iop/$(IOP_LIB) ; \
+	   chmod 644 $(PS2SDK)/iop/lib/`basename $(IOP_LIB)` ; \
+	   for file in $(IOP_LIB_ALTNAMES); do \
+	      ln -s `basename $(IOP_LIB)` $(PS2SDK)/iop/lib/$$file; \
+	   done; \
 	fi;
 
 
@@ -40,7 +43,10 @@ release-iop-bin:
 	@if test $(IOP_BIN) ; then \
 	   $(ECHO) Installing $(IOP_BIN) to $(PS2SDK)/iop/irx ; \
 	   cp -f $(IOP_BIN) $(PS2SDK)/iop/irx/ ; \
-	   chmod 644 $(PS2SDK)/iop/$(IOP_BIN) ; \
+	   chmod 644 $(PS2SDK)/iop/irx/`basename $(IOP_BIN)` ; \
+	   for file in $(IOP_BIN_ALTNAMES); do \
+	      ln -s `basename $(IOP_BIN)` $(PS2SDK)/iop/irx/$$file; \
+	   done; \
 	fi;
 
 #
@@ -54,7 +60,7 @@ release-iop-include:
 	     if test -f $$file ; then \
 	       $(ECHO) Installing $$file to $(PS2SDK)/iop/include ; \
 	       cp -f $$file $(PS2SDK)/iop/include ; \
-	       chmod 644 $(PS2SDK)/iop/$$file ; \
+	       chmod 644 $(PS2SDK)/iop/include/`basename $$file` ; \
 	     fi \
 	   done; \
 	fi;
