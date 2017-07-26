@@ -3,15 +3,14 @@
  * SBUS definitions.
  */
 
-
-#ifndef _PS2_SBUS_H
-#define _PS2_SBUS_H
+#ifndef __PS2_SBUS_H__
+#define __PS2_SBUS_H__
 
 #include <tamtypes.h>
 #include <ps2_reg_defs.h>
 
-#ifndef _EE
-#include "irx.h"
+#ifdef _IOP
+#include <irx.h>
 
 #define sbus_IMPORTS_start DECLARE_IMPORT_TABLE(sbus, 1, 1)
 #define sbus_IMPORTS_end END_IMPORT_TABLE
@@ -89,4 +88,4 @@ void SBUS_check_intr(void);
 #define I_SIF2_rem_cmd_handler DECLARE_IMPORT(18, SIF2_rem_cmd_handler)
 #define I_SIF2_send_cmd DECLARE_IMPORT(19, SIF2_send_cmd)
 
-#endif // #ifndef _PS2_SBUS_H
+#endif /* __PS2_SBUS_H__ */

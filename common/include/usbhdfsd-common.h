@@ -12,8 +12,8 @@
  * Common USBHDFSD definitions.
  */
 
-#ifndef _USBHDFSD_COMMON_H
-#define _USBHDFSD_COMMON_H
+#ifndef __USBHDFSD_COMMON_H__
+#define __USBHDFSD_COMMON_H__
 
 //IOCTL function codes
 /** Rename opened file. Data input to ioctl() -> new, full filename of file. */
@@ -31,4 +31,4 @@
 /** ERRor */
 #define USBMASS_DEV_STAT_ERR	0x80
 
-#endif //_USBHDFSD_COMMON_H
+#endif /* __USBHDFSD_COMMON_H__ */

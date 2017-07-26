@@ -3,14 +3,10 @@
  * EE register definitions.
  */
 
-#ifndef _EE_REGS_H
-#define _EE_REGS_H
+#ifndef __EE_REGS_H__
+#define __EE_REGS_H__
 
-#include "tamtypes.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <tamtypes.h>
 
 #define A_EE_SBUS_REG_BASE (0x1000F200)
 #define A_EE_PGIF_REG_BASE (0x1000F300)
@@ -618,8 +614,4 @@ extern "C" {
 #define EE_I_STAT_VSS   (1 << 2)
 #define EE_I_STAT_VSE   (1 << 3)
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif
+#endif /* __EE_REGS_H__ */

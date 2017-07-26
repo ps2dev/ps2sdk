@@ -13,8 +13,8 @@
  * DEV9 register definitions.
  */
 
-#ifndef DEV9REGS_H
-#define DEV9REGS_H
+#ifndef __DEV9REGS_H__
+#define __DEV9REGS_H__
 
 #include <tamtypes.h>
 
@@ -43,4 +43,4 @@ typedef struct _dev9_regs {
 #define DEV9_DEV9C_9566		0x20
 #define DEV9_DEV9C_9611		0x30
 
-#endif /* DEV9REGS_H */
+#endif /* __DEV9REGS_H__ */

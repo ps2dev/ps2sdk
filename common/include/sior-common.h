@@ -13,8 +13,10 @@
  * Common definitions for SIOR on the EE and IOP
  */
 
-#ifndef _SIOR_COMMON_H_
-#define _SIOR_COMMON_H_
+#ifndef __SIOR_COMMON_H__
+#define __SIOR_COMMON_H__
+
+#include <tamtypes.h>
 
 #define	SIOR_IRX              0xC001510
 
@@ -60,4 +62,4 @@ union siorCommsData {
 	int c;
 };
 
-#endif // _SIOR_COMMON_H_
+#endif /* __SIOR_COMMON_H__ */

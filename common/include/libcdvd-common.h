@@ -13,8 +13,10 @@
  * Common definitions for libcdvd on the EE and IOP
  */
 
-#ifndef _LIBCDVD_COMMON_H_
-#define _LIBCDVD_COMMON_H_
+#ifndef __LIBCDVD_COMMON_H__
+#define __LIBCDVD_COMMON_H__
+
+#include <tamtypes.h>
 
 /* File open modes */
 /** Open file for streaming */
@@ -832,4 +834,4 @@ int sceCdRcBypassCtl(int mode, u32 *status);
 }
 #endif
 
-#endif // _LIBCDVD_COMMON_H_
+#endif /* __LIBCDVD_COMMON_H__ */

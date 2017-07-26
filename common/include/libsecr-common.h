@@ -13,8 +13,8 @@
  * Definitions and imports for secrman module.
  */
 
-#ifndef LIBSECR_COMMON_H
-#define LIBSECR_COMMON_H
+#ifndef __LIBSECR_COMMON_H__
+#define __LIBSECR_COMMON_H__
 
 #include <tamtypes.h>
 
@@ -74,4 +74,4 @@ int SecrDownloadGetKbit(int port, int slot, void *kbit);
 int SecrDownloadGetKc(int port, int slot, void *kbit);
 int SecrDownloadGetICVPS2(void *icvps2);
 
-#endif /* LIBSECR_COMMON_H */
+#endif /* __LIBSECR_COMMON_H__ */

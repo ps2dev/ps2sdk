@@ -13,12 +13,8 @@
  * EE Co-processor 0(COP0) register definitions.
  */
 
-#ifndef _EE_COP0_DEFS_H_
-#define _EE_COP0_DEFS_H_
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#ifndef __EE_COP0_DEFS_H__
+#define __EE_COP0_DEFS_H__
 
 #define M_EE_GET_CAUSE_EXCODE(__cause) (((__cause) >> 2) & 0x1F)
 #define M_EE_GET_CAUSE_EXC2(__cause) (((__cause) >> 16) & 0x7)
@@ -117,8 +113,4 @@ extern "C" {
 /* Instruction Address Breakpoint */
 #define EE_BPC_IAB         (1 << 0)
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif // _EE_COP0_DEFS_H_
+#endif /* __EE_COP0_DEFS_H__ */

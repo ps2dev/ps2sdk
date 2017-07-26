@@ -11,16 +11,16 @@
 /**
  * @file
  * fileXio RPC client/server shared includes
+ * This header contains the common definitions for fileXio
+ * that are used by both IOP and EE sides. This header
+ * conflicts with ps2ip_rpc.h
  */
 
-#ifndef _FILEXIO_H
-#define _FILEXIO_H
+#ifndef __FILEXIO_H__
+#define __FILEXIO_H__
 
-#include <errno.h>
+#include <tamtypes.h>
 #include <sys/stat.h>
-
-// This header contains the common definitions for fileXio
-// that are used by both IOP and EE sides
 
 #define FILEXIO_IRX	0xb0b0b00
 enum FILEXIO_CMDS{
@@ -260,4 +260,4 @@ struct fxio_rwbuff{
 	int size;
 };
 
-#endif // _FILEXIO_H
+#endif /* __FILEXIO_H__ */

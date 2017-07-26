@@ -13,8 +13,8 @@
  * ATA hardware types and definitions.
  */
 
-#ifndef DRV_ATAHW_H
-#define DRV_ATAHW_H
+#ifndef __ATAHW_H__
+#define __ATAHW_H__
 
 #include <tamtypes.h>
 #include <aifregs.h>
@@ -168,5 +168,4 @@ enum _ata_identify_offsets {
 #define ATA_F_SEC_ENABLED	(1<<1)
 #define ATA_F_SEC_LOCKED	(1<<2)
 
-#endif /* DRV_ATAHW_H */
-
+#endif /* __ATAHW_H__ */

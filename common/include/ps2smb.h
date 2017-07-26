@@ -8,14 +8,10 @@
  * PS2SMB definitions.
  */
 
-#ifndef _PS2SMB_H
-#define _PS2SMB_H
+#ifndef __PS2SMB_H__
+#define __PS2SMB_H__
 
 #include <tamtypes.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #define NO_PASSWORD		-1
 #define PLAINTEXT_PASSWORD 	 0
@@ -83,8 +79,4 @@ typedef struct {		// size = 512
 #define	SMB_DEVCTL_LOGON_ERR_PROT	0x1002
 #define	SMB_DEVCTL_LOGON_ERR_LOGON	0x1003
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif
+#endif /* __PS2SMB_H__ */

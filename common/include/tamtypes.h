@@ -13,8 +13,8 @@
  * Commonly used typedefs
  */
 
-#ifndef _TAMTYPES_H_
-#define _TAMTYPES_H_ 1
+#ifndef __TAMTYPES_H__
+#define __TAMTYPES_H__
 
 #if !defined(_EE) && !defined(_IOP)
 #error Either _EE or _IOP must be defined!
@@ -98,4 +98,4 @@ static inline void _sd(u64 val, u32 addr) { *(vu64 *)addr = val; }
 static inline void _sq(u128 val, u32 addr) { *(vu128 *)addr = val; }
 #endif
 
-#endif
+#endif /* __TAMTYPES_H__ */

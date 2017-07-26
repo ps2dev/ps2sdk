@@ -3,9 +3,10 @@
  * Common definitions for libsd on the EE and IOP
  */
 
-#ifndef __LIBSD_COMMON_H
-#define __LIBSD_COMMON_H
+#ifndef __LIBSD_COMMON_H__
+#define __LIBSD_COMMON_H__
 
+#include <tamtypes.h>
 
 #define SD_VOICE(_core,_v)   ((_core)|((_v)<<1))
 
@@ -179,5 +180,4 @@ typedef int (*SdIntrCallback)(void *data);
 #define SdTransIntrHandler sceSdTransIntrHandler
 #define IntrCallback SdIntrCallback
 
-#endif /* __LIBSD_H */
-
+#endif /* __LIBSD_COMMON_H__ */

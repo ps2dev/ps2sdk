@@ -51,4 +51,4 @@
 #define fp      30
 #define ra      31
 
-#endif
+#endif /* __AS_REG_COMPAT_H__ */

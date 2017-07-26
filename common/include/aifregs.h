@@ -3,8 +3,10 @@
  * AIF and RTC registers
  */
 
-#ifndef IOP_AIF_REGS_H
-#define IOP_AIF_REGS_H
+#ifndef __AIFREGS_H__
+#define __AIFREGS_H__
+
+#include <tamtypes.h>
 
 #define AIF_REGBASE	(SPD_REGBASE + 0x4000000)
 
@@ -118,4 +120,4 @@ enum RTC_REGS{
 # define RTC_VRT	0x80	
 /**********************************************************************/
 
-#endif /* IOP_AIF_REGS_H */
+#endif /* __AIFREGS_H__ */

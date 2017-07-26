@@ -111,4 +111,4 @@
 	(u32)((IMDT) & 0x0000FFFF) << 0  | (u32)((NUM)  & 0x000000FF) << 16 | \
 	(u32)((CMD)  & 0x000000FF) << 24 | (u32)((IRQ)  & 0x00000001) << 31
 
-#endif /*__VIF_CODES_H__*/
+#endif /* __VIF_CODES_H__ */

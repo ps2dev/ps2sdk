@@ -3,14 +3,10 @@
  * Debug definitions
  */
 
-#ifndef _PS2_DEBUG_H
-#define _PS2_DEBUG_H
+#ifndef __PS2_DEBUG_H__
+#define __PS2_DEBUG_H__
 
-#include "tamtypes.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
+#include <tamtypes.h>
 
 typedef struct st_IOP_RegFrame
 {
@@ -114,8 +110,4 @@ typedef struct st_EE_RegFrame
     u32 dvbm;
 } EE_RegFrame;
 
-#ifdef __cplusplus
-}
-#endif
-
-#endif
+#endif /* __PS2_DEBUG_H__ */

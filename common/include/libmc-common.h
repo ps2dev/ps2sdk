@@ -13,8 +13,8 @@
  * Common definitions for libmc on the EE and IOP
  */
 
-#ifndef _LIBMC_COMMON_H_
-#define _LIBMC_COMMON_H_
+#ifndef __LIBMC_COMMON_H__
+#define __LIBMC_COMMON_H__
 
 #include <tamtypes.h>
 
@@ -193,4 +193,4 @@ typedef struct {
 #define sceMcFileAttrHidden		0x2000
 #define sceMcFileAttrExists		0x8000
 
-#endif // _LIBMC_COMMON_H_
+#endif /* __LIBMC_COMMON_H__ */

@@ -13,8 +13,10 @@
  * Common definitions file for the LWIP v2.0.0 port.
  */
 
-#ifndef _TCPIP_H
-#define _TCPIP_H
+#ifndef __TCPIP_H__
+#define __TCPIP_H__
+
+#include <tamtypes.h>
 
 /* Some portions of this header fall under the following copyright.  The license
    is compatible with that of ps2sdk.
@@ -1762,4 +1764,4 @@ typedef struct
 	u8			hw_addr[8];
 } t_ip_info;
 
-#endif	/* _TCPIP_H */
+#endif /* __TCPIP_H__ */

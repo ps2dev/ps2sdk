@@ -13,8 +13,8 @@
  * Simple list support.
  */
 
-#ifndef DRV_LIST_H
-#define DRV_LIST_H
+#ifndef __LIST_H__
+#define __LIST_H__
 
 typedef struct _list {
 	struct _list *next;
@@ -56,4 +56,4 @@ static inline list_t *list_remove(void *i)
 #define list_for_each(dir, pos, head)	\
 	for (pos = (head)->dir; pos != (head); pos = pos->dir)
 
-#endif /* DRV_LIST_H */
+#endif /* __LIST_H__ */
