@@ -13,12 +13,12 @@
 #include <stdio.h>
 #ifdef _IOP
 #include <sysclib.h>
-#include <irx.h>
 #include <loadcore.h>
 #else
 #include <string.h>
 #include <stdlib.h>
 #endif
+#include <irx.h>
 #include <iomanX.h>
 #include <errno.h>
 #include <thsemap.h>
@@ -133,7 +133,7 @@ int _start(int argc, char *argv[])
 	int number;
 	int numBuf = 8;
 	int reqBuf;
-	int size;
+	int size, ret;
 
 	PFS_PRINTF(PFS_DRV_NAME" Playstation Filesystem Driver v%d.%d\nps2fs: (c) 2003 Sjeep, Vector and Florin Sasu\n", PFS_MAJOR, PFS_MINOR);
 
@@ -212,8 +212,10 @@ int _start(int argc, char *argv[])
 	// Allocate and zero memory for file slots
 	size = pfsConfig.maxOpen * sizeof(pfs_file_slot_t);
 	pfsFileSlots = pfsAllocMem(size);
-	if(!pfsFileSlots) {
-		PFS_PRINTF(PFS_DRV_NAME" Error: Failed to allocate memory!\n");
+	ret = (pfsFileSlots == NULL) ? -ENOMEM : 0;
+	if(ret != 0)
+	{	//Official PFS module does not print an error message here.
+		PFS_PRINTF(PFS_DRV_NAME" Error: Failed to allocate memory for file descriptors!\n");
 		return MODULE_NO_RESIDENT_END;
 	}
 
@@ -225,9 +227,9 @@ int _start(int argc, char *argv[])
 	DelDrv("pfs");
 	if(AddDrv(&pfsFioDev) == 0) {
 #ifdef PFS_OSD_VER
-		PFS_PRINTF(PFS_DRV_NAME" Driver start. This is OSD version!\n");
+		PFS_PRINTF(PFS_DRV_NAME" version %04x driver start. This is OSD version!\n", IRX_VER(PFS_MAJOR, PFS_MINOR));
 #else
-		PFS_PRINTF(PFS_DRV_NAME" Driver start.\n");
+		PFS_PRINTF(PFS_DRV_NAME" version %04x driver start.\n", IRX_VER(PFS_MAJOR, PFS_MINOR));
 #endif
 		return MODULE_RESIDENT_END;
 	}
