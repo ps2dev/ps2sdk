@@ -54,7 +54,7 @@
 
 struct SmapDriverData SmapDriverData;
 
-const char VersionString[]="Version 2.25.0";
+static const char VersionString[]="Version 2.25.0";
 static unsigned int ThreadPriority=0x28;
 static unsigned int ThreadStackSize=0x1000;
 static unsigned int EnableVerboseOutput=0;
@@ -63,6 +63,11 @@ static unsigned int EnablePinStrapConfig=0;
 static unsigned int SmapConfiguration=0x5E0;
 
 extern void *_gp;
+
+int DisplayBanner(void){
+	printf("SMAP (%s)\n", VersionString);
+	return MODULE_NO_RESIDENT_END;
+}
 
 static void _smap_write_phy(volatile u8 *emac3_regbase, unsigned int address, u16 value){
 	u32 PHYRegisterValue;
@@ -113,6 +118,8 @@ static u16 _smap_read_phy(volatile u8 *emac3_regbase, unsigned int address){
 }
 
 static int DisplayHelpMessage(void){
+	DisplayBanner();
+
 	printf(	"Usage: smap [<option>] [thpri=<prio>] [thstack=<stack>] [<conf>]\n"
 		"  <option>:\n"
 		"    -verbose       display verbose messages\n"
@@ -798,6 +805,9 @@ int smap_init(int argc, char *argv[]){
 	while(argc>0){
 		if(strcmp("-help", *argv)==0){
 			return DisplayHelpMessage();
+		}
+		else if(strcmp("-version", *argv)==0){
+			return DisplayBanner();
 		}
 		else if(strcmp("-verbose", *argv)==0){
 			EnableVerboseOutput=1;
