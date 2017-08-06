@@ -57,32 +57,31 @@ int apaJournalWrite(apa_cache_t *clink)
 }
 
 int apaJournalRestore(s32 device)
-{	// copys apa headers from apal to apa system
-	int i;
+{	// copies the journal from the HDD and erases the original.
+	int i, ret;
 	u32 sector;
 	apa_cache_t *clink;
 
 	APA_PRINTF(APA_DRV_NAME": checking log...\n");
-	if(ata_device_sector_io(device, &journalBuf, APA_SECTOR_APAL, sizeof(apa_journal_t)/512, ATA_DIR_READ)){
-		apaJournalReset(device);
-		return -EIO;
-	}
-	if(journalBuf.magic==APAL_MAGIC)
+	ret = ata_device_sector_io(device, &journalBuf, APA_SECTOR_APAL, sizeof(apa_journal_t)/512, ATA_DIR_READ) == 0 ? 0 : -EIO;
+	if((ret == 0) && (journalBuf.magic == APAL_MAGIC))
 	{
-		if(journalBuf.num==0)
+		if(journalBuf.num == 0)
 			return 0;
+
 		clink=apaCacheAlloc();
 		for(i=0, sector=APA_SECTOR_APAL_HEADERS;i<journalBuf.num;i++, sector+=2)
 		{
-			if(ata_device_sector_io(device, clink->header, sector, 2, ATA_DIR_READ))
+			ret = (ata_device_sector_io(device, clink->header, sector, 2, ATA_DIR_READ) == 0) ? 0 : -EIO;
+			if(ret != 0)
 				break;
-			if(ata_device_sector_io(device, clink->header, journalBuf.sectors[i], 2, ATA_DIR_WRITE))
+
+			ret = (ata_device_sector_io(device, clink->header, journalBuf.sectors[i], 2, ATA_DIR_WRITE) == 0) ? 0 : -EIO;
+			if(ret != 0)
 				break;
 		}
 		apaCacheFree(clink);
-		return apaJournalReset(device);// only do if journal..
 	}
-	memset(&journalBuf, 0, sizeof(apa_journal_t));// safe e
-	journalBuf.magic=APAL_MAGIC;
-	return 0;//-EINVAL;
+
+	return apaJournalReset(device);
 }
