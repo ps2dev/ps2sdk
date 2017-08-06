@@ -22,6 +22,6 @@
 
 //Module version
 #define APA_MODVER_MAJOR	2
-#define APA_MODVER_MINOR	1
+#define APA_MODVER_MINOR	5
 
 #endif

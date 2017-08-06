@@ -37,6 +37,8 @@ void *apaAllocMem(int size)
 
 	CpuSuspendIntr(&intrStat);
 	mem = AllocSysMemory(ALLOC_FIRST, size, NULL);
+	if(mem == NULL)
+		APA_PRINTF(APA_DRV_NAME": error: out of memory\n");
 	CpuResumeIntr(intrStat);
 
 	return mem;
@@ -109,13 +111,25 @@ int apaGetTime(apa_ps2time_t *tm)
 int apaGetIlinkID(u8 *idbuf)
 {
 #ifdef _IOP
-	u32 err=0;
+	u32 stat;
+	int i;
 
-	memset(idbuf, 0, 32);
-	if(sceCdRI(idbuf, &err))
-		if(err==0)
+	for(i = 0; ; i++)
+	{
+		stat=0;
+		memset(idbuf, 0, 32);
+		if((sceCdRI(idbuf, &stat) != 0) && (stat == 0))
+		{
 			return 0;
-	APA_PRINTF(APA_DRV_NAME": Error: cannot get ilink id\n");
+		}
+
+		if(i >= 20)
+			break;
+
+		DelayThread(100000);
+	}
+
+	APA_PRINTF(APA_DRV_NAME": Error: cannot get id\n");
 	return -EIO;
 #else
 	memset(idbuf, 0, 32);

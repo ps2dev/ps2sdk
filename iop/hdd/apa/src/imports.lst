@@ -18,6 +18,7 @@ cdvdman_IMPORTS_end
 
 dev9_IMPORTS_start
 I_dev9Shutdown
+I_dev9RegisterShutdownCb
 dev9_IMPORTS_end
 
 intrman_IMPORTS_start
