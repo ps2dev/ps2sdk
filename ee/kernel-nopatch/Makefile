@@ -6,11 +6,9 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = kernel kernel-nopatch libc rpc startup debug \
-	eedebug sbv dma graph math3d math \
-	packet draw erl erl-loader mpeg libgs \
-	libvux font input inputx network iopreboot
+#Define to 1, to build a special version of libkernel that does not contain any runtime patches (useful for loaders/resident programs).
+KERNEL_NO_PATCHES = 1
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
-include $(PS2SDKSRC)/ee/Rules.release
+EE_SRC_DIR = $(PS2SDKSRC)/ee/kernel/src/
+
+include $(PS2SDKSRC)/ee/kernel/Makefile
