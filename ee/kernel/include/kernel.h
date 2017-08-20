@@ -320,14 +320,18 @@ s32  _DisableDmac(s32 channel);
 
 //Alarm value is in H-SYNC ticks.
 s32  SetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *common), void *common);
+s32  _SetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *common), void *common);
 s32  ReleaseAlarm(s32 alarm_id);
+s32  _ReleaseAlarm(s32 alarm_id);
 
 s32  _iEnableIntc(s32 cause);
 s32  _iDisableIntc(s32 cause);
 s32  _iEnableDmac(s32 channel);
 s32  _iDisableDmac(s32 channel);
 s32  iSetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *common), void *common);
+s32  _iSetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *common), void *common);
 s32  iReleaseAlarm(s32 alarm_id);
+s32  _iReleaseAlarm(s32 alarm_id);
 s32	 CreateThread(ee_thread_t *thread);
 s32	 DeleteThread(s32 thread_id);
 s32	 StartThread(s32 thread_id, void *args);

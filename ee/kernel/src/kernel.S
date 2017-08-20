@@ -19,36 +19,39 @@
 	.text
 	.p2align 3
 
+#define SYSCALL(name)	\
+		SYSCALL_SPECIAL(name, name)
+
 #ifdef USE_KMODE
-#define SYSCALL(name) 		\
+#define SYSCALL_SPECIAL(symbol, name) 		\
 	.set	push;		\
 	.set	noreorder;	\
 	.text;			\
 	.align 4;		\
-	.globl	name;		\
-	.type	name,@function;	\
-	.ent	name,0;		\
-name:	j	__syscall;	\
+	.globl	symbol;		\
+	.type	symbol,@function;	\
+	.ent	symbol,0;		\
+symbol:	j	__syscall;	\
 	li	$3, __NR_##name;\
 	nop;			\
-	.end	name;		\
-	.size	name,.-name;	\
+	.end	symbol;		\
+	.size	symbol,.-symbol;	\
 	.set	pop;
 #else
-#define SYSCALL(name) 		\
+#define SYSCALL_SPECIAL(symbol, name) 		\
 	.set	push;		\
 	.set	noreorder;	\
 	.text;			\
 	.align 4;		\
-	.globl	name;		\
-	.type	name,@function;	\
-	.ent	name,0;		\
-name:	li	$3, __NR_##name;\
+	.globl	symbol;		\
+	.type	symbol,@function;	\
+	.ent	symbol,0;		\
+symbol:	li	$3, __NR_##name;\
 	syscall;		\
 	jr	$31;		\
 	nop;			\
-	.end	name;		\
-	.size	name,.-name;	\
+	.end	symbol;		\
+	.size	symbol,.-symbol;	\
 	.set	pop;
 #endif
 
@@ -94,6 +97,22 @@ SYSCALL(ResetEE)
 SYSCALL(SetGsCrt)
 #endif
 
+#ifdef KERNEL_NO_PATCHES
+
+#ifdef F_Exit
+SYSCALL_SPECIAL(Exit, _Exit)
+#endif
+
+#ifdef F_LoadExecPS2
+SYSCALL_SPECIAL(LoadExecPS2, _LoadExecPS2)
+#endif
+
+#ifdef F_ExecPS2
+SYSCALL_SPECIAL(ExecPS2, _ExecPS2)
+#endif
+
+#else	/* KERNEL_NO_PATCHES */
+
 #ifdef F__Exit
 SYSCALL(_Exit)
 #endif
@@ -105,6 +124,8 @@ SYSCALL(_LoadExecPS2)
 #ifdef F__ExecPS2
 SYSCALL(_ExecPS2)
 #endif
+
+#endif	/* KERNEL_NO_PATCHES */
 
 #ifdef F_RFU009
 SYSCALL(RFU009)
@@ -179,15 +200,19 @@ SYSCALL(_SetAlarm)
 #endif
 
 #ifdef F_SetAlarm
+#ifndef KERNEL_NO_PATCHES
 SYSCALL(SetAlarm)
+#endif
 #endif
 
 #ifdef F__ReleaseAlarm
 SYSCALL(_ReleaseAlarm)
 #endif
 
+#ifndef KERNEL_NO_PATCHES
 #ifdef F_ReleaseAlarm
 SYSCALL(ReleaseAlarm)
+#endif
 #endif
 
 #ifdef F__iEnableIntc
@@ -210,16 +235,20 @@ SYSCALL(_iDisableDmac)
 SYSCALL(_iSetAlarm)
 #endif
 
+#ifndef KERNEL_NO_PATCHES
 #ifdef F_iSetAlarm
 SYSCALL(iSetAlarm)
+#endif
 #endif
 
 #ifdef F__iReleaseAlarm
 SYSCALL(_iReleaseAlarm)
 #endif
 
+#ifndef KERNEL_NO_PATCHES
 #ifdef F_iReleaseAlarm
 SYSCALL(iReleaseAlarm)
+#endif
 #endif
 
 #ifdef F_CreateThread
@@ -270,9 +299,19 @@ SYSCALL(iChangeThreadPriority)
 SYSCALL(RotateThreadReadyQueue)
 #endif
 
+#ifdef KERNEL_NO_PATCHES
+
+#ifdef F_iRotateThreadReadyQueue
+SYSCALL_SPECIAL(iRotateThreadReadyQueue, _iRotateThreadReadyQueue)
+#endif
+
+#else	/* KERNEL_NO_PATCHES */
+
 #ifdef F__iRotateThreadReadyQueue
 SYSCALL(_iRotateThreadReadyQueue)
 #endif
+
+#endif	/* KERNEL_NO_PATCHES */
 
 #ifdef F_ReleaseWaitThread
 SYSCALL(ReleaseWaitThread)
@@ -306,9 +345,19 @@ SYSCALL(SleepThread)
 SYSCALL(WakeupThread)
 #endif
 
+#ifdef KERNEL_NO_PATCHES
+
+#ifdef F_iWakeupThread
+SYSCALL_SPECIAL(iWakeupThread, _iWakeupThread)
+#endif
+
+#else	/* KERNEL_NO_PATCHES */
+
 #ifdef F__iWakeupThread
 SYSCALL(_iWakeupThread)
 #endif
+
+#endif	/* KERNEL_NO_PATCHES */
 
 #ifdef F_CancelWakeupThread
 SYSCALL(CancelWakeupThread)
@@ -322,9 +371,19 @@ SYSCALL(iCancelWakeupThread)
 SYSCALL(SuspendThread)
 #endif
 
+#ifdef KERNEL_NO_PATCHES
+
+#ifdef F_iSuspendThread
+SYSCALL_SPECIAL(iSuspendThread, _iSuspendThread)
+#endif
+
+#else	/* KERNEL_NO_PATCHES */
+
 #ifdef F__iSuspendThread
 SYSCALL(_iSuspendThread)
 #endif
+
+#endif	/* KERNEL_NO_PATCHES */
 
 #ifdef F_ResumeThread
 SYSCALL(ResumeThread)
@@ -438,6 +497,8 @@ SYSCALL(SetEventFlag)
 SYSCALL(iSetEventFlag)
 #endif
 
+#ifndef KERNEL_NO_PATCHES
+
 #ifdef F_PutTLBEntry
 SYSCALL(PutTLBEntry)
 #endif
@@ -473,6 +534,8 @@ SYSCALL(iProbeTLBEntry)
 #ifdef F_ExpandScratchPad
 SYSCALL(ExpandScratchPad)
 #endif
+
+#endif /* KERNEL_NO_PATCHES */
 
 #ifdef F_EnableIntcHandler
 SYSCALL(EnableIntcHandler)
@@ -630,9 +693,19 @@ SYSCALL(SifSetReg)
 SYSCALL(SifGetReg)
 #endif
 
+#ifdef KERNEL_NO_PATCHES
+
+#ifdef F_ExecOSD
+SYSCALL_SPECIAL(ExecOSD, _ExecOSD)
+#endif
+
+#else	/* KERNEL_NO_PATCHES */
+
 #ifdef F__ExecOSD
 SYSCALL(_ExecOSD)
 #endif
+
+#endif	/* KERNEL_NO_PATCHES */
 
 #ifdef F_Deci2Call
 SYSCALL(Deci2Call)

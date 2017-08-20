@@ -41,7 +41,7 @@ u128 AlarmDispatch_sp;
 //Function prototypes
 static u32 CalculateTimeDiff(u32 t1, u32 t2);
 static int InsertAlarm(u32 now, u32 target);
-static s32 _SetAlarm(u16 time, void (*callback)(s32 dispatch_id, u16 time, void *common), void *common);
+static s32 SetAlarmInternal(u16 time, void (*callback)(s32 dispatch_id, u16 time, void *common), void *common);
 static void SetupTIM3(u16 ticks);
 
 static u32 CalculateTimeDiff(u32 t1, u32 t2)
@@ -68,7 +68,7 @@ static int InsertAlarm(u32 now, u32 target)
 	return pos;
 }
 
-static s32 _SetAlarm(u16 time, void (*callback)(s32 dispatch_id, u16 time, void *common), void *common)
+static s32 SetAlarmInternal(u16 time, void (*callback)(s32 dispatch_id, u16 time, void *common), void *common)
 {
 	void *gp;
 	u32 target, now;
@@ -153,7 +153,7 @@ s32 SetAlarm(u16 time, void (*callback)(s32 dispatch_id, u16 time, void *common)
 {
 	s32 result;
 
-	result = _SetAlarm(time, callback, common);
+	result = SetAlarmInternal(time, callback, common);
 	EE_SYNC();
 
 	return result;
