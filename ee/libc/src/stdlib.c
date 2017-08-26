@@ -551,9 +551,13 @@ void srand(unsigned int seed)
 #endif
 
 
+#ifdef F___stdlib_environmentals
+/* stdlib environmental data variables. */
+environvariable_t    __stdlib_env[32];
+#endif
+
 #ifdef F___stdlib_internals
 /* stdlib data variables. */
-environvariable_t    __stdlib_env[32];
 void                 (* __stdlib_exit_func[32])(void);
 int                  __stdlib_exit_index = 0;
 int                  __stdlib_mb_shift = 0;

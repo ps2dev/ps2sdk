@@ -759,9 +759,6 @@ int getchar(void)
 
 
 #ifdef F_getfdtype
-/* the present working directory variable. */
-char __direct_pwd[256] = "";
-
 static struct {
   char * prefix;
   int len;
@@ -976,6 +973,9 @@ int __stdio_skip_atoi(const char **s)
 /* stdio data variables. */
 int __stdio_initialised = 0;
 
+/* the present working directory variable. */
+char __direct_pwd[256] = "";
+
 FILE __iob[_NFILE] = {
   { -1,                 0, 0, 0 },     // stdin
 #ifdef USE_GS
@@ -1062,7 +1062,7 @@ void __stdio_update_stdout_xy(int x, int y)
 #endif
 
 
-#ifdef F___stdio_internals
+#ifdef F___stdio_helper_internals
 int (*_ps2sdk_close)(int) = fioClose;
 int (*_ps2sdk_open)(const char*, int) = fioOpen;
 int (*_ps2sdk_read)(int, void*, int) = fioRead;
@@ -1076,8 +1076,9 @@ int fioRename(const char *old, const char *new)
 }
 
 int (*_ps2sdk_rename)(const char*, const char*) = fioRename;
+#endif
 
-
+#ifdef F___stdio_internals
 void _ps2sdk_stdio_init()
 {
     int i;

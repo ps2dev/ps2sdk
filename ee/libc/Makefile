@@ -42,12 +42,12 @@ STDIO_OBJS = clearerr.o fclose.o fcloseall.o feof.o ferror.o fflush.o fflushall.
 	fgetpos.o fgets.o fopen.o fputc.o fputs.o fread.o fseek.o fsetpos.o ftell.o fwrite.o fileno.o \
 	getc.o getchar.o getfdtype.o gets.o perror.o putc.o puts.o remove.o fdopen.o \
 	rewind.o skipatoi.o stdio.o tmpfile.o tmpnam.o ungetc.o updatestdoutxy.o strerror.o \
-	__stdio_internals.o chdir.o
+	__stdio_internals.o __stdio_helper_internals.o chdir.o
 
 STDLIB_OBJS = abs.o atexit.o atof.o bsearch.o div.o getenv.o _itoa.o labs.o \
 	ldiv.o llabs.o lldiv.o _lltoa.o _ltoa.o rand.o setenv.o srand.o \
 	strtod.o strtol.o strtoul.o __assert_fail.o \
-	__stdlib_internals.o \
+	__stdlib_internals.o __stdlib_environmentals.o \
 	mblen.o mbslen.o mbstowcs.o mbtowc.o wcstombs.o wctomb.o
 
 WSTDLIB_OBJS = wcstod.o wcstol.o wcstoul.o
