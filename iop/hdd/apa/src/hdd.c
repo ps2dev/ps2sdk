@@ -246,7 +246,7 @@ int _start(int argc, char **argv)
 		if(!(hddInfo=ata_get_devinfo(i)))
 		{
 			APA_PRINTF(APA_DRV_NAME": Error: ata initialization failed.\n");
-			return MODULE_NO_RESIDENT_END;
+			return hddInitError();
 		}
 		if(hddInfo->exists!=0 && hddInfo->has_packet==0)
 		{
