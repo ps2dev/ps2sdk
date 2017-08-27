@@ -122,7 +122,7 @@
  * for incoming packets.
  * (only needed if you use tcpip.c)
  */
-//SP193: this should at least match the size of the TCP window because the TCPIP thread may take a while to execute (non-preemptive multitasking), otherwise incoming frames may get dropped.
+//SP193: this should be around the size of the TCP window because the TCPIP thread may take a while to execute (non-preemptive multitasking), otherwise incoming frames may get dropped.
 #define MEMP_NUM_TCPIP_MSG_INPKT	50
 
 /**
@@ -130,7 +130,7 @@
  * for callback/timeout API communication.
  * (only needed if you use tcpip.c)
  */
-//SP193: allocate sufficient, to prevent transmissions from being potentially being dropped.
+//SP193: this should be around the size of MEM_SIZE (in PBUFs), to prevent transmissions from being potentially being dropped.
 #define MEMP_NUM_TCPIP_MSG_API		50
 
 /**
