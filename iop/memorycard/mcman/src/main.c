@@ -1116,28 +1116,29 @@ int mcman_getmcrtime(sceMcStDateTime *time)
 			break;
 	} while (--retries > 0);
 
-	if (cdtime.stat & 128) {
-		*((u16 *)&cdtime.month) = 0x7d0;
-		cdtime.day = 3;
-		cdtime.pad = 4;
-		cdtime.hour = 0;
-		cdtime.minute = 0;
-		cdtime.second = 0;
-		cdtime.stat = 0;
+	if (cdtime.stat & 0x80) {
+		time->Year = 2000;
+		time->Month = 3;
+		time->Day = 4;
+		time->Hour = 0;
+		time->Min = 0;
+		time->Sec = 0;
+		time->Resv2 = 0;
 	}
+	else {
+		time->Resv2 = 0;
+		time->Sec = ((((cdtime.second >> 4) << 2) + (cdtime.second >> 4)) << 1) + (cdtime.second & 0xf);
+		time->Min = ((((cdtime.minute >> 4) << 2) + (cdtime.minute >> 4)) << 1) + (cdtime.minute & 0xf);
+		time->Hour = ((((cdtime.hour >> 4) << 2) + (cdtime.hour >> 4)) << 1) + (cdtime.hour & 0xf);
+		time->Day = ((((cdtime.day >> 4) << 2) + (cdtime.day >> 4)) << 1) + (cdtime.day & 0xf);
 
-	time->Resv2 = 0;
-	time->Sec = ((((cdtime.second >> 4) << 2) + (cdtime.second >> 4)) << 1) + (cdtime.second & 0xf);
-	time->Min = ((((cdtime.minute >> 4) << 2) + (cdtime.minute >> 4)) << 1) + (cdtime.minute & 0xf);
-	time->Hour = ((((cdtime.hour >> 4) << 2) + (cdtime.hour >> 4)) << 1) + (cdtime.hour & 0xf);
-	time->Day = ((((cdtime.day >> 4) << 2) + (cdtime.day >> 4)) << 1) + (cdtime.day & 0xf);
+		if ((cdtime.month & 0x10) != 0)
+			time->Month = (cdtime.month & 0xf) + 0xa;
+		else
+			time->Month = cdtime.month & 0xf;
 
-	if ((cdtime.month & 0x10) != 0)
-		time->Month = (cdtime.month & 0xf) + 0xa;
-	else
-		time->Month = cdtime.month & 0xf;
-
-	time->Year = ((((cdtime.year >> 4) << 2) + (cdtime.year >> 4)) << 1) + ((cdtime.year & 0xf) | 0x7d0);
+		time->Year = ((((cdtime.year >> 4) << 2) + (cdtime.year >> 4)) << 1) + ((cdtime.year & 0xf) | 0x7d0);
+	}
 
 	return 0;
 }
