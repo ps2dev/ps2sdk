@@ -25,6 +25,7 @@
 #include "ps2ip_internal.h"
 
 static arch_message msg_pool[SYS_MAX_MESSAGES];
+static arch_message *free_head;
 
 /* Function prototypes */
 static inline arch_message *alloc_msg(void);
@@ -37,22 +38,14 @@ extern void *_gp;
 
 static inline arch_message *try_alloc_msg(void)
 {
-	unsigned int i;
 	arch_message *message;
 
-	if(PollSema(MsgCountSema)==MsgCountSema){
+	if(PollSema(MsgCountSema)==MsgCountSema)
+	{
 		DI();
 
-		for(i=0,message=NULL; i<SYS_MAX_MESSAGES; i++)
-		{
-			if((msg_pool[i].next == NULL) && (msg_pool[i].sys_msg == NULL))
-			{
-				msg_pool[i].next = (arch_message *) 0xFFFFFFFF;
-				msg_pool[i].sys_msg = (void *) 0xFFFFFFFF;
-				message=&msg_pool[i];
-				break;
-			}
-		}
+		message = free_head;
+		free_head = free_head->next;
 
 		EI();
 	}else message=NULL;
@@ -62,22 +55,13 @@ static inline arch_message *try_alloc_msg(void)
 
 static inline arch_message *alloc_msg(void)
 {
-	unsigned int i;
 	arch_message *message;
 
 	WaitSema(MsgCountSema);
 	DI();
 
-	for(i=0,message=NULL; i<SYS_MAX_MESSAGES; i++)
-	{
-		if((msg_pool[i].next == NULL) && (msg_pool[i].sys_msg == NULL))
-		{
-			msg_pool[i].next = (arch_message *) 0xFFFFFFFF;
-			msg_pool[i].sys_msg = (void *) 0xFFFFFFFF;
-			message=&msg_pool[i];
-			break;
-		}
-	}
+	message = free_head;
+	free_head = free_head->next;
 
 	EI();
 
@@ -87,8 +71,10 @@ static inline arch_message *alloc_msg(void)
 static void free_msg(arch_message *msg)
 {
 	DI();
-	msg->next = NULL;
-	msg->sys_msg = NULL;
+
+	msg->next = free_head;
+	free_head = msg;
+
 	EI();
 	SignalSema(MsgCountSema);
 }
@@ -411,6 +397,7 @@ void sys_sem_set_invalid(sys_sem_t *sem){
 
 void sys_init(void)
 {
+	arch_message *prev;
 	unsigned int i;
 	ee_sema_t sema;
 
@@ -421,11 +408,17 @@ void sys_init(void)
 	sema.init_count = sema.max_count = SYS_MAX_MESSAGES;
 	MsgCountSema=CreateSema(&sema);
 
-	for(i = 0; i < SYS_MAX_MESSAGES; i++)
+	free_head = &msg_pool[0];
+	prev = &msg_pool[0];
+
+	for(i = 1; i < SYS_MAX_MESSAGES; i++)
 	{
-		msg_pool[i].next = NULL;
-		msg_pool[i].sys_msg = NULL;
+		prev->next = &msg_pool[i];
+		prev = &msg_pool[i];
 	}
+
+	//NULL-terminate free message list
+	prev->next = NULL;
 
 	ProtLevel = 0;
 }

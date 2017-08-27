@@ -28,6 +28,7 @@
 #include "ps2ip_internal.h"
 
 static arch_message msg_pool[SYS_MAX_MESSAGES];
+static arch_message *free_head;
 
 /* Function prototypes */
 static arch_message *alloc_msg(void);
@@ -37,23 +38,15 @@ static int MsgCountSema;
 
 static arch_message *try_alloc_msg(void)
 {
-	unsigned int i;
 	arch_message *message;
 	int OldState;
 
-	if(PollSema(MsgCountSema)==0){
+	if(PollSema(MsgCountSema)==0)
+	{
 		CpuSuspendIntr(&OldState);
 
-		for(i=0,message=NULL; i<SYS_MAX_MESSAGES; i++)
-		{
-			if((msg_pool[i].next == NULL) && (msg_pool[i].sys_msg == NULL))
-			{
-				msg_pool[i].next = (arch_message *) 0xFFFFFFFF;
-				msg_pool[i].sys_msg = (void *) 0xFFFFFFFF;
-				message=&msg_pool[i];
-				break;
-			}
-		}
+		message = free_head;
+		free_head = free_head->next;
 
 		CpuResumeIntr(OldState);
 	}else message=NULL;
@@ -63,7 +56,6 @@ static arch_message *try_alloc_msg(void)
 
 static arch_message *alloc_msg(void)
 {
-	unsigned int i;
 	arch_message *message;
 	int OldState;
 
@@ -71,16 +63,8 @@ static arch_message *alloc_msg(void)
 
 	CpuSuspendIntr(&OldState);
 
-	for(i=0,message=NULL; i<SYS_MAX_MESSAGES; i++)
-	{
-		if((msg_pool[i].next == NULL) && (msg_pool[i].sys_msg == NULL))
-		{
-			msg_pool[i].next = (arch_message *) 0xFFFFFFFF;
-			msg_pool[i].sys_msg = (void *) 0xFFFFFFFF;
-			message=&msg_pool[i];
-			break;
-		}
-	}
+	message = free_head;
+	free_head = free_head->next;
 
 	CpuResumeIntr(OldState);
 
@@ -92,8 +76,10 @@ static void free_msg(arch_message *msg)
 	int oldIntr;
 
 	CpuSuspendIntr(&oldIntr);
-	msg->next = NULL;
-	msg->sys_msg = NULL;
+
+	msg->next = free_head;
+	free_head = msg;
+
 	CpuResumeIntr(oldIntr);
 	SignalSema(MsgCountSema);
 }
@@ -334,13 +320,25 @@ void sys_sem_free(sys_sem_t *sem)
 
 void sys_init(void)
 {
+	arch_message *prev;
+	unsigned int i;
 	iop_sema_t sema;
-
-	memset(msg_pool, 0, sizeof(msg_pool));
 
 	sema.initial=sema.max=SYS_MAX_MESSAGES;
 	sema.attr=sema.option=0;
 	MsgCountSema=CreateSema(&sema);
+
+	free_head = &msg_pool[0];
+	prev = &msg_pool[0];
+
+	for(i = 1; i < SYS_MAX_MESSAGES; i++)
+	{
+		prev->next = &msg_pool[i];
+		prev = &msg_pool[i];
+	}
+
+	//NULL-terminate free message list
+	prev->next = NULL;
 }
 
 sys_prot_t sys_arch_protect(void)
