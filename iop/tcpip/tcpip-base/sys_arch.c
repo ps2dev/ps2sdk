@@ -258,8 +258,8 @@ u32_t sys_arch_mbox_tryfetch(sys_mbox_t *mbox, void **msg){
 
 err_t sys_sem_new(sys_sem_t *sem, u8_t count)
 {
-	//Create a new semaphore.
-	iop_sema_t Sema={MBA_THFIFO, (u32)"PS2IP", count, 1};
+	//Create a new semaphore. Use SA_THPRI to prevent lower-priority threads from hogging the resource.
+	iop_sema_t Sema={SA_THPRI, (u32)"PS2IP", count, 1};
 	err_t result;
 
 	if((*sem=CreateSema(&Sema))<0)
