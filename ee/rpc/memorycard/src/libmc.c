@@ -272,7 +272,7 @@ int mcInit(int type)
 		printf("libmc: using MCMAN & MCSERV\n");
 
 #endif
-		g_descParam.offset=0xFFFFFF27;
+		g_descParam.offset = -217;
 
 		// call init function
 		if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_INIT], 0, &g_descParam, sizeof(g_descParam), &g_rdata, 4, NULL, NULL))>=0)

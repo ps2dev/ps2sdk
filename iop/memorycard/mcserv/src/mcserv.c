@@ -409,7 +409,7 @@ int _McInit(void *rpc_buf)
 #endif
 
 	if (mcman_type == MCMAN) {
-		if (dP->offset == 217)
+		if (dP->offset == -217)
 			ps1flag = 1;
 
 		pMcSetPS1CardFlag(ps1flag);
