@@ -16,7 +16,7 @@
 #include "string.h"
 
 extern char **_kExecArg;
-void *SetArg(const char *filename, int argc, char *argv[]);
+const char *SetArg(const char *filename, int argc, char *argv[]);
 
 #ifdef F__InitSys
 void _InitSys(void)
@@ -54,14 +54,18 @@ struct SyscallData SysEntry = {
 	&kCopyBytes
 };
 
-void *SetArg(const char *filename, int argc, char *argv[])
+#define SETARG_MAX_ARGS	15
+
+const char *SetArg(const char *filename, int argc, char *argv[])
 {
+	const char *filenameOut;
 	char *ptr;
 	int len, i;
 
-	ptr = (char*)((u32*)_kExecArg + 16);
+	ptr = (char*)(_kExecArg + 16);
+	filenameOut = ptr;
 	setup(SysEntry.syscall, SysEntry.function);
-	argc = (argc >= 16) ? 15 : argc;
+	argc = (argc > SETARG_MAX_ARGS) ? SETARG_MAX_ARGS : argc;
 	Copy(&_kExecArg[0], &ptr, 4);
 	len = strlen(filename) + 1;
 	Copy(ptr, filename, len);
@@ -75,7 +79,7 @@ void *SetArg(const char *filename, int argc, char *argv[])
 		ptr += len;
 	}
 
-	return _kExecArg;
+	return filenameOut;
 }
 #endif
 
@@ -99,9 +103,11 @@ s32  ExecPS2(void *entry, void *gp, int num_args, char *args[])
 #ifdef F_LoadExecPS2
 void LoadExecPS2(const char *filename, s32 num_args, char *args[])
 {
-	SetArg(filename, num_args, args);
+	const char *pFilename;
+
+	pFilename = SetArg(filename, num_args, args);
 	TerminateLibrary();
-	_LoadExecPS2(_kExecArg[0], num_args, &_kExecArg[1]);
+	_LoadExecPS2(pFilename, num_args, &_kExecArg[1]);
 }
 #endif
 
