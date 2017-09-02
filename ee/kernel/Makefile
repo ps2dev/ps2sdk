@@ -106,6 +106,8 @@ ifneq ($(KERNEL_NO_PATCHES),1)
 	THREAD_OBJS = _thread_internals.o iWakeupThread.o iRotateThreadReadyQueue.o iSuspendThread.o
 
 	SETUP_OBJS = kCopy.o kCopyBytes.o
+
+	EXIT_OBJS += _exit_internals.o SetArg.o Exit.o ExecPS2.o LoadExecPS2.o ExecOSD.o
 endif
 
 ### Timer objects
@@ -118,10 +120,7 @@ GETKERNEL_OBJS = GetSyscallHandler.o GetSyscall.o GetExceptionHandler.o GetInter
 
 ### System initialization objects
 
-INITSYS_OBJS = _InitSys.o SetArg.o TerminateLibrary.o
-ifneq ($(KERNEL_NO_PATCHES),1)
-	INITSYS_OBJS += _initsys_internals.o Exit.o ExecPS2.o LoadExecPS2.o ExecOSD.o
-endif
+INITSYS_OBJS = _InitSys.o TerminateLibrary.o
 
 ### SYSCALL OBJECTS
 
@@ -163,7 +162,7 @@ EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(INITSYS_OBJS) erl-support.o
 
 ifneq ($(KERNEL_NO_PATCHES),1)
-	EE_OBJS += $(THREAD_OBJS) $(LIBOSD_OBJS) $(TLBFUNC_OBJS) $(ALARM_OBJS) $(SETUP_OBJS) setup_syscalls.o
+	EE_OBJS += $(THREAD_OBJS) $(LIBOSD_OBJS) $(TLBFUNC_OBJS) $(ALARM_OBJS) $(EXIT_OBJS) $(SETUP_OBJS) setup_syscalls.o
 endif
 
 include $(PS2SDKSRC)/Defs.make
@@ -214,6 +213,9 @@ $(SIO_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)sio.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(INITSYS_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)initsys.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(EXIT_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)exit.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(EE_OBJS_DIR)libosd.o: $(EE_SRC_DIR)libosd.c
