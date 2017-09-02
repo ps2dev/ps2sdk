@@ -350,10 +350,12 @@ static int usb_bulk_command(mass_dev* dev, cbw_packet* packet ) {
 	return ret;
 }
 
+#define USB_BLOCK_SIZE	4096
+
 static int usb_bulk_transfer(mass_dev* dev, int direction, void* buffer, unsigned int transferSize) {
 	int ret;
 	unsigned char* buf = (unsigned char*) buffer;
-	int blockSize = transferSize;
+	int blockSize = USB_BLOCK_SIZE;
 	int offset = 0, pipe;
 	usb_callback_data cb_data;
 
