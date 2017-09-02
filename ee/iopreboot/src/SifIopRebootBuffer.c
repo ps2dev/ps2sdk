@@ -25,6 +25,8 @@
 #define IMGDRV_IRX_SIZE		((size_imgdrv_irx + 15) & ~15)	//Was a hardcoded value of 0x400 bytes
 #define IOPBTCONF_IOP_MAX_SIZE	0x400
 
+extern int _iop_reboot_count;
+
 extern u8 iopbtconf_img[IOPBTCONF_IOP_MAX_SIZE];
 extern unsigned char imgdrv_irx[];
 extern unsigned int size_imgdrv_irx;
@@ -36,6 +38,12 @@ extern unsigned int size_imgdrv_irx;
 #ifdef F__iopcontrol_special_internals
 u8 iopbtconf_img[IOPBTCONF_IOP_MAX_SIZE] __attribute__((aligned(64)));
 #endif
+
+#define SifLoadModuleSpecial(path, arg_len, args, dontwait)	\
+	_SifLoadModule(path, arg_len, args, NULL, LF_F_MOD_LOAD, dontwait);
+
+#define SifLoadModuleEncryptedSpecial(path, arg_len, args, dontwait)	\
+	_SifLoadModule(path, arg_len, args, NULL, LF_F_MG_MOD_LOAD, dontwait);
 
 #ifdef F_SifIopRebootBufferEncrypted
 int SifIopRebootBufferEncrypted(void *udnl, int size)
@@ -89,17 +97,19 @@ int SifIopRebootBufferEncrypted(void *udnl, int size)
 
 	SifLoadModule("rom0:SYSCLIB", 0, NULL);
 	SifLoadModuleBuffer(imgdrv_iop, 0, NULL);
-	//Actually something like _SifLoadModuleEncrypted, hence no argument for fno.
-	_SifLoadModule("img0:", 0, NULL, NULL, LF_F_MG_MOD_LOAD, 1);
+	SifLoadModuleEncryptedSpecial("img0:", 0, NULL, 1);
 
 	SifExitRpc();
 	SifLoadFileExit();
+	SifExitIopHeap();	//Not originally here, but for correctness.
 
 	SifSetReg(SIF_REG_SMFLAG, SIF_STAT_SIFINIT);
 	SifSetReg(SIF_REG_SMFLAG, SIF_STAT_CMDINIT);
 	SifSetReg(SIF_REG_SMFLAG, SIF_STAT_BOOTEND);
 	SifSetReg(SIF_SYSREG_RPCINIT, 0);
 	SifSetReg(SIF_SYSREG_SUBADDR, 0);
+
+	_iop_reboot_count++;	//Not originally here: increment to allow RPC clients to detect unbinding.
 
 	return 1;
 }
@@ -159,17 +169,19 @@ int SifIopRebootBuffer(void *ioprp, int size)
 
 	SifLoadModule("rom0:SYSCLIB", 0, NULL);
 	SifLoadModuleBuffer(imgdrv_iop, 0, NULL);
-	//Actually something like _SifLoadModule, hence no argument for fno.
-	_SifLoadModule("rom0:UDNL", 11, "img0:\0img1:", NULL, LF_F_MOD_LOAD, 1);
+	SifLoadModuleSpecial("rom0:UDNL", 11, "img0:\0img1:", 1);
 
 	SifExitRpc();
 	SifLoadFileExit();
+	SifExitIopHeap();	//Not originally here, but for correctness.
 
 	SifSetReg(SIF_REG_SMFLAG, SIF_STAT_SIFINIT);
 	SifSetReg(SIF_REG_SMFLAG, SIF_STAT_CMDINIT);
 	SifSetReg(SIF_REG_SMFLAG, SIF_STAT_BOOTEND);
 	SifSetReg(SIF_SYSREG_RPCINIT, 0);
 	SifSetReg(SIF_SYSREG_SUBADDR, 0);
+
+	_iop_reboot_count++;	//Not originally here: increment to allow RPC clients to detect unbinding.
 
 	return 1;
 }
