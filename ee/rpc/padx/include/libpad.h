@@ -226,8 +226,9 @@ int padSetActAlign(int port, int slot, char act_align[6]);
  */
 int padSetActDirect(int port, int slot, char act_align[6]);
 
-/** Dunno about this one.. always returns 1?
- * I guess it should've returned if the pad was connected.. or?
+/** Returns whether the device at port,slot is connected (1 = connected)
+ * Appears to have been removed very early during the PS2's lifetime.
+ * If possible, use the documented padGetState instead.
  *
  * NOT SUPPORTED with module rom0:padman
  */

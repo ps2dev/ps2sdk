@@ -38,7 +38,6 @@
 #define PAD_RPCCMD_CLOSE        0x0E
 #define PAD_RPCCMD_END          0x0F
 #define PAD_RPCCMD_INIT         0x10
-#define PAD_RPCCMD_GET_CONNECT  0x11
 #define PAD_RPCCMD_GET_MODVER   0x12
 
 /*
@@ -109,7 +108,8 @@ static union {
 	s32 command;
 	struct {
 		s32 command;
-		void *buffer;
+		s32 unused[3];
+		void *statBuf;
 	} padInitArgs;
 	struct {
 		s32 unknown[3];
@@ -174,7 +174,7 @@ static union {
 	char buffer[128];
 } buffer __attribute__((aligned(64)));
 
-static struct open_slot openSlot[2];
+static struct open_slot openSlot[2] __attribute__((aligned(64)));
 
 /* Port state data */
 static struct pad_state PadState[2][8];
@@ -203,6 +203,20 @@ padGetDmaStr(int port, int slot)
     }
 }
 
+/*
+ * Returns the data for pad (opened) status.
+ * This seems to have been removed from the official SDKs, very early during the PS2's lifetime.
+ */
+static struct open_slot*
+padGetConnDmaStr(void)
+{
+	SyncDCache(openSlot, (u8*)openSlot + sizeof(openSlot));
+
+	if(openSlot[0].frame < openSlot[1].frame)
+		return &openSlot[1];
+	else
+		return &openSlot[0];
+}
 
 /*
  * Global functions
@@ -272,7 +286,7 @@ padInit(int a)
     }
 
 	buffer.padInitArgs.command = PAD_RPCCMD_INIT;
-	buffer.padInitArgs.buffer = openSlot;
+	buffer.padInitArgs.statBuf = openSlot;
     if (SifCallRpc( &padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
         return -1;
 
@@ -675,15 +689,15 @@ padSetActDirect(int port, int slot, char actAlign[6])
     return buffer.padModeResult.result;
 }
 
+/*
+ * This seems to have been removed from the official SDKs, very early during the PS2's lifetime.
+ */
 int
 padGetConnection(int port, int slot)
 {
 	struct open_slot *oslot;
 
-	if(openSlot[0].frame < openSlot[1].frame)
-		oslot = &openSlot[1];
-	else
-		oslot = &openSlot[0];
+	oslot = padGetConnDmaStr();
 
 	return ((oslot->openSlots[port] >> slot) & 0x1);
 }
