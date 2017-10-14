@@ -20,24 +20,27 @@
 #define PAD_BIND_RPC_ID1 0x80000100
 #define PAD_BIND_RPC_ID2 0x80000101
 
-#define PAD_RPCCMD_OPEN         0x01
-// 0x2 undefined
-#define PAD_RPCCMD_INFO_ACT		0x03
-#define PAD_RPCCMD_INFO_COMB	0x04
-#define PAD_RPCCMD_INFO_MODE	0x05
-#define PAD_RPCCMD_SET_MMODE    0x06
-#define PAD_RPCCMD_SET_ACTDIR   0x07
-#define PAD_RPCCMD_SET_ACTALIGN 0x08
-#define PAD_RPCCMD_GET_BTNMASK  0x09
-#define PAD_RPCCMD_SET_BTNINFO  0x0A
-#define PAD_RPCCMD_SET_VREF     0x0B
-#define PAD_RPCCMD_GET_PORTMAX  0x0C
-#define PAD_RPCCMD_GET_SLOTMAX  0x0D
-#define PAD_RPCCMD_CLOSE        0x0E
-#define PAD_RPCCMD_END          0x0F
-#define PAD_RPCCMD_INIT         0x10
-// 0x11 undefined
-#define PAD_RPCCMD_GET_MODVER   0x12
+enum PAD_RPCCMD {
+	PAD_RPCCMD_OPEN	= 0x01,
+	// 0x2 undefined
+	PAD_RPCCMD_INFO_ACT	= 0x03,
+	PAD_RPCCMD_INFO_COMB,
+	PAD_RPCCMD_INFO_MODE,
+	PAD_RPCCMD_SET_MMODE,
+	PAD_RPCCMD_SET_ACTDIR,
+	PAD_RPCCMD_SET_ACTALIGN,
+	PAD_RPCCMD_GET_BTNMASK,
+	PAD_RPCCMD_SET_BTNINFO,
+	PAD_RPCCMD_SET_VREF,
+	PAD_RPCCMD_GET_PORTMAX,
+	PAD_RPCCMD_GET_SLOTMAX,
+	PAD_RPCCMD_CLOSE,
+	PAD_RPCCMD_END,
+	PAD_RPCCMD_INIT,
+	// 0x11 undefined
+	PAD_RPCCMD_GET_MODVER	= 0x12,
+	PAD_RPCCMD_13
+};
 
 // RPC Server
 static s32 ThreadIdRpcServer;
@@ -51,7 +54,7 @@ static SifRpcDataQueue_t qdext;
 static SifRpcServerData_t sdext;
 static u32 sbext[32]; // server buffer
 
-void* RpcPadOpen(u32 *data)
+static void* RpcPadOpen(u32 *data)
 {
 
 	data[3] = padPortOpen(data[1], data[2], data[4], &data[5]);
@@ -59,14 +62,14 @@ void* RpcPadOpen(u32 *data)
 	return data;
 }
 
-void* RpcPadSetMainMode(u32 *data)
+static void* RpcPadSetMainMode(u32 *data)
 {
 	data[5] = padSetMainMode(data[1], data[2], data[3], data[4]);
 
 	return data;
 }
 
-void* RpcPadInfoAct(u32 *data)
+static void* RpcPadInfoAct(u32 *data)
 {
 
 	data[5] = padInfoAct(data[1], data[2], data[3], data[4]);
@@ -74,28 +77,28 @@ void* RpcPadInfoAct(u32 *data)
 	return data;
 }
 
-void* RpcPadInfoComb(u32 *data)
+static void* RpcPadInfoComb(u32 *data)
 {
 	data[5] = padInfoComb(data[1], data[2], data[3], data[4]);
 
 	return data;
 }
 
-void* RpcPadInfoMode(u32 *data)
+static void* RpcPadInfoMode(u32 *data)
 {
 	data[5] = padInfoMode(data[1], data[2], data[3], data[4]);
 
 	return data;
 }
 
-void* RpcPadSetActDirect(u32 *data)
+static void* RpcPadSetActDirect(u32 *data)
 {
 	data[5] = padSetActDirect(data[1], data[2], (u8*)&data[3]);
 
 	return data;
 }
 
-void* RpcPadSetActAlign(u32 *data)
+static void* RpcPadSetActAlign(u32 *data)
 {
 
 	data[5] = padSetActAlign(data[1], data[2], (u8*)&data[3]);
@@ -103,7 +106,7 @@ void* RpcPadSetActAlign(u32 *data)
 	return data;
 }
 
-void* RpcPadGetButtonMask(u32 *data)
+static void* RpcPadGetButtonMask(u32 *data)
 {
 
 	data[3] = padGetButtonMask(data[1], data[2]);
@@ -111,71 +114,77 @@ void* RpcPadGetButtonMask(u32 *data)
 	return data;
 }
 
-void* RpcPadSetButtonInfo(u32 *data)
+static void* RpcPadSetButtonInfo(u32 *data)
 {
 	data[4] = padSetButtonInfo(data[1], data[2], data[3]);
 
 	return data;
 }
 
-void* RpcPadSetVrefParam(u32 *data)
+static void* RpcPadSetVrefParam(u32 *data)
 {
 	data[7] = padSetVrefParam(data[1], data[2], (u8*)&data[3]);
 
 	return data;
 }
 
-void* RpcPadGetPortMax(u32 *data)
+static void* RpcPadGetPortMax(u32 *data)
 {
 	data[3] = padGetPortMax();
 
 	return data;
 }
 
-void* RpcPadGetSlotMax(u32 *data)
+static void* RpcPadGetSlotMax(u32 *data)
 {
 	data[3] = padGetSlotMax(data[1]);
 
 	return data;
 }
 
-void* RpcPadClose(u32 *data)
+static void* RpcPadClose(u32 *data)
 {
 	data[3] = padPortClose(data[1], data[2], data[4]);
 
 	return data;
 }
 
-void* RpcPadEnd(u32 *data)
+static void* RpcPadEnd(u32 *data)
 {
 	data[3] = padEnd();
 
 	return data;
 }
 
-void* RpcPadInit(u32 *data)
+static void* RpcPadInit(u32 *data)
 {
 	data[3] = padInit((void*)data[4]);
 
 	return data;
 }
 
-void* RpcGetModVersion(u32 *data)
+static void* RpcGetModVersion(u32 *data)
 {
 	data[3] = padGetModVersion();
 
 	return data;
 }
 
-void* RpcServer(s32 fno, u32 *data, s32 size)
+static void* RpcServer(int fno, void *buffer, int length)
 {
+	u32 *data = (u32*)buffer;
+
 	switch(data[0])
 	{
+		case PAD_RPCCMD_INIT:			return RpcPadInit(data);
+		case PAD_RPCCMD_END:			return RpcPadEnd(data);
+		case PAD_RPCCMD_GET_MODVER:		return RpcGetModVersion(data);
 		case PAD_RPCCMD_OPEN:			return RpcPadOpen(data);
-		case PAD_RPCCMD_SET_MMODE:		return RpcPadSetMainMode(data);
+		case PAD_RPCCMD_CLOSE:			return RpcPadClose(data);
 		case PAD_RPCCMD_INFO_ACT:		return RpcPadInfoAct(data);
 		case PAD_RPCCMD_INFO_COMB:		return RpcPadInfoComb(data);
 		case PAD_RPCCMD_INFO_MODE:		return RpcPadInfoMode(data);
+		case PAD_RPCCMD_SET_MMODE:		return RpcPadSetMainMode(data);
 		case PAD_RPCCMD_SET_ACTDIR:		return RpcPadSetActDirect(data);
 		case PAD_RPCCMD_SET_ACTALIGN:	return RpcPadSetActAlign(data);
 		case PAD_RPCCMD_GET_BTNMASK:	return RpcPadGetButtonMask(data);
@@ -183,28 +192,24 @@ void* RpcServer(s32 fno, u32 *data, s32 size)
 		case PAD_RPCCMD_SET_VREF:		return RpcPadSetVrefParam(data);
 		case PAD_RPCCMD_GET_PORTMAX:	return RpcPadGetPortMax(data);
 		case PAD_RPCCMD_GET_SLOTMAX:	return RpcPadGetSlotMax(data);
-		case PAD_RPCCMD_CLOSE:			return RpcPadClose(data);
-		case PAD_RPCCMD_END:			return RpcPadEnd(data);
-		case PAD_RPCCMD_INIT:			return RpcPadInit(data);
-		case PAD_RPCCMD_GET_MODVER:		return RpcGetModVersion(data);
 
 		default:
-			M_PRINTF("RpcServer, invalid function code (%i).\n", (int)fno);
+			M_PRINTF("invalid function code (%03x)\n", (int)data[0]);
 		break;
 	}
 
-	return data;
+	return buffer;
 }
 
-void* RpcServerExt(s32 fno, u32 *data, s32 size)
+static void* RpcServerExt(int fno, void *buffer, int length)
 {
-	M_PRINTF("Extend Service: This serviced is not supported.\n");
+	M_PRINTF("Extend Service: This service is not supported.\n");
 
-	return data;
+	return buffer;
 }
 
 
-void RpcThread()
+static void RpcThread(void *arg)
 {
 	if( sceSifCheckInit() == 0)
 	{
@@ -214,11 +219,11 @@ void RpcThread()
 
 	sceSifInitRpc(0);
 	sceSifSetRpcQueue(&qd, GetThreadId());
-	sceSifRegisterRpc(&sd, PAD_BIND_RPC_ID1, (void*)RpcServer, sb, 0, 0, &qd);
+	sceSifRegisterRpc(&sd, PAD_BIND_RPC_ID1, &RpcServer, sb, NULL, NULL, &qd);
 	sceSifRpcLoop(&qd);
 }
 
-void RpcThreadExt()
+static void RpcThreadExt(void *arg)
 {
 	if( sceSifCheckInit() == 0)
 	{
@@ -228,41 +233,40 @@ void RpcThreadExt()
 
 	sceSifInitRpc(0);
 	sceSifSetRpcQueue(&qdext, GetThreadId());
-	sceSifRegisterRpc(&sdext, PAD_BIND_RPC_ID2, (void*)RpcServerExt, sbext, 0, 0, &qdext);
+	sceSifRegisterRpc(&sdext, PAD_BIND_RPC_ID2, &RpcServerExt, sbext, NULL, NULL, &qdext);
 	sceSifRpcLoop(&qdext);
 }
 
-
-u32 InitRpcServers()
+int InitRpcServers(int prio)
 {
 	iop_thread_t rpc_thread;
-	iop_thread_t rpc_threadext;
+
+	if(prio == 0)
+		prio = PADMAN_THPRI_LO;
 
 	// RPC Server
 	rpc_thread.attr = TH_C;
-	rpc_thread.option = 0;
-	rpc_thread.thread = RpcThread;
+	rpc_thread.thread = &RpcThread;
 	rpc_thread.stacksize = 0x800;
-	rpc_thread.priority = 20;
+	rpc_thread.priority = prio;
 
 	ThreadIdRpcServer = CreateThread(&rpc_thread);
 
-	if(ThreadIdRpcServer == 0) return 1;
+	if(ThreadIdRpcServer == 0) return 0;
 
 	StartThread(ThreadIdRpcServer, NULL);
 
 	// RPC Server Extended
-	rpc_threadext.attr = TH_C;
-	rpc_threadext.option = 0;
-	rpc_threadext.thread = RpcThreadExt;
-	rpc_threadext.stacksize = 0x800;
-	rpc_threadext.priority = 20;
+	rpc_thread.attr = TH_C;
+	rpc_thread.thread = &RpcThreadExt;
+	rpc_thread.stacksize = 0x800;
+	rpc_thread.priority = prio;
 
-	ThreadIdRpcServerExt = CreateThread(&rpc_threadext);
+	ThreadIdRpcServerExt = CreateThread(&rpc_thread);
 
-	if(ThreadIdRpcServerExt == 0) return 1;
+	if(ThreadIdRpcServerExt == 0) return 0;
 
 	StartThread(ThreadIdRpcServerExt, NULL);
 
-	return 0;
+	return 1;
 }

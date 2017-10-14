@@ -35,36 +35,36 @@ typedef struct
 	u32 error;
 } padData_t;
 
-padData_t padData[2][4];
+static padData_t padData[2][4];
 
-sio2_transfer_data_t sio2_td __attribute__((aligned(16)));
-u8 sio2_in_buffer[256];
-u8 sio2_out_buffer[256];
-s32 change_slot_buffer[8];
+static sio2_transfer_data_t sio2_td;
+static u8 sio2_in_buffer[256];
+static u8 sio2_out_buffer[256];
+static s32 change_slot_buffer[8];
 
-s32 transferCount;
+static int transferCount;
 
 u32 pdGetInSize(u8 id)
 {
-	if(id == 0) id = 0x41;
+	if(id == 0) id = PAD_ID_DIGITAL;
 
-	return ((id & 0xf)*2)+3;
+	return (PAD_ID_LO(id)*2)+3;
 }
 
 u32 pdGetOutSize(u8 id)
 {
-	if(id == 0) id = 0x41;
+	if(id == 0) id = PAD_ID_DIGITAL;
 
-	return ((id & 0xf)*2)+3;
+	return (PAD_ID_LO(id)*2)+3;
 }
 
 u32 pdGetRegData(u32 id)
 {
 	u32 ret1, ret2;
 
-	ret1 = pdGetInSize(id & 0xFF);
+	ret1 = pdGetInSize((u8)id);
 
-	ret2 = pdGetOutSize(id & 0xFF );
+	ret2 = pdGetOutSize((u8)id);
 
 	return ((ret2 & 0x1FF) << 18) | ((ret1 & 0x1FF) << 8) | 0x40;
 }
@@ -129,15 +129,14 @@ u32 pdIsActive(u32 port, u32 slot)
 	return padData[port][slot].active;
 }
 
-
-u32 mtapChangeSlot(u32 slot)
+static u32 mtapChangeSlot(u32 slot)
 {
 	change_slot_buffer[0] = -1;
 	change_slot_buffer[1] = -1;
 	change_slot_buffer[2] = -1;
 	change_slot_buffer[3] = -1;
 
-	if( (padData[0][slot].active != 1) && (padData[1][slot].active != 1) )
+	if( (padData[0][slot].active == 0) && (padData[1][slot].active == 0) )
 		return 0;
 
 	if(padData[0][slot].active == 1)
@@ -160,12 +159,12 @@ u32 pdSetStat70bit(u32 port, u32 slot, u32 val)
 	return ret;
 }
 
-u32 setupTransferData(u32 reg, u32 port, u32 slot)
+static u32 setupTransferData(u32 index, u32 port, u32 slot)
 {
 
 	if(padData[port][slot].in_size > 0)
 	{
-		u32 i;
+		int i;
 
 		for(i=0; i < padData[port][slot].in_size; i++)
 		{
@@ -178,22 +177,16 @@ u32 setupTransferData(u32 reg, u32 port, u32 slot)
 
 	sio2_td.port_ctrl1[port] = padData[port][slot].port_ctrl1;
 	sio2_td.port_ctrl2[port] = padData[port][slot].port_ctrl2;
+	sio2_td.regdata[index] = (padData[port][slot].reg_data & 0xFFFFFFFC) | (port & 0x3);
 
-	padData[port][slot].reg_data &= 0xFFFFFFFC;
+	sio2_td.regdata[index+1] = 0;
 
-	sio2_td.regdata[reg] = padData[port][slot].reg_data | (port & 0x3);
-
-	sio2_td.regdata[reg+1] = 0;
-
-	return (reg+1);
+	return (index+1);
 }
 
 u32 readStat6cBit(u32 bit, sio2_transfer_data_t *td)
 {
-	if( (td->stat6c & (1 << bit)) > 0 )
-		return 1;
-	else
-		return 0;
+	return( (td->stat6c & (0x00010000 << bit)) != 0);
 }
 
 u32 readSio2OutBuffer(u32 bit, u32 port, u32 slot)
@@ -216,7 +209,7 @@ u32 readSio2OutBuffer(u32 bit, u32 port, u32 slot)
 
 			if( padData[port][slot].out_size > 0)
 			{
-				u32 i;
+				int i;
 
 				for(i=0; i < padData[port][slot].out_size; i++)
 				{
@@ -233,7 +226,7 @@ u32 readSio2OutBuffer(u32 bit, u32 port, u32 slot)
 u32 padTransfer(u32 slot)
 {
 	u32 stat70;
-	u32 res = 0, res1 = 0;
+	u32 trans_count = 0, port0_start = 0, port1_start = 0;
 	u32 val_port0 = 0;
 	u32 val_port1 = 0;
 
@@ -252,8 +245,8 @@ u32 padTransfer(u32 slot)
 		if(change_slot_buffer[4] == 1)
 		{
 			val_port0 = 1;
-			res = setupTransferData(0, 0, slot);
-			res1 = res;
+			port0_start = 0;
+			trans_count = setupTransferData(0, 0, slot);
 		}
 	}
 
@@ -262,11 +255,26 @@ u32 padTransfer(u32 slot)
 		if(change_slot_buffer[5] == 1)
 		{
 			val_port1 = 1;
-			res1= setupTransferData(res, 1, slot);
+			port1_start = trans_count;
+			trans_count = setupTransferData(trans_count, 1, slot);
 		}
 	}
 
-	if(res1 != 0)
+	/*	These two blocks of code change position before v3.6.
+		At v3.3 and earlier, they were within the transfer block below. At v3.0, there were no checks on change_slot_buffer.	*/
+	if(padData[0][slot].active == 1)
+	{
+		if(change_slot_buffer[4] != 1)
+			padData[0][slot].error = 0xA;
+	}
+
+	if(padData[1][slot].active == 1)
+	{
+		if(change_slot_buffer[5] != 1)
+			padData[1][slot].error = 0xA;
+	}
+
+	if(trans_count != 0)
 	{
 		sio2_transfer2( &sio2_td );
 
@@ -274,27 +282,14 @@ u32 padTransfer(u32 slot)
 
 		if(val_port0 == 1)
 		{
-			readSio2OutBuffer(0, 0, slot);
+			readSio2OutBuffer(port0_start, 0, slot);
 			sio2_td.out_size = padData[0][slot].out_size;
 		}
 
 		if(val_port1 == 1)
 		{
-			readSio2OutBuffer(res1, 1, slot);
+			readSio2OutBuffer(port1_start, 1, slot);
 			sio2_td.out_size = padData[1][slot].out_size;
-		}
-
-		if(padData[0][slot].active == 1)
-		{
-			if(change_slot_buffer[4] != 1)
-				padData[0][slot].error = 0xA;
-
-		}
-
-		if(padData[1][slot].active == 1)
-		{
-			if(change_slot_buffer[5] != 1)
-				padData[1][slot].error = 0xA;
 		}
 
 		return 1;
@@ -303,7 +298,7 @@ u32 padTransfer(u32 slot)
 	return 0;
 }
 
-void pdTransfer()
+void pdTransfer(void)
 {
 	u32 slot;
 
@@ -331,91 +326,65 @@ u32 pdGetStat70bit(u32 port, u32 slot)
 	return padData[port][slot].stat70bit;
 }
 
-void pdReset()
+void pdReset(void)
 {
-	u32 i,j;
+	int i,j;
 
 	for(i=0; i < 2; i++)
 	{
 		for(j=0; j < 4; j++)
 		{
 			padData[i][j].active = 0;
-			padData[i][j].stat70bit = 0;
+			padData[i][j].stat70bit = 0;	//This is probably more correct, compared to the original line (below)
 		}
+
+		//padData[i+1][0].stat70bit = 0;	//BUG: can cause buffer overrun.
 	}
 
 	sio2_td.in = sio2_in_buffer;
 	sio2_td.out = sio2_out_buffer;
-
 }
 
-u32 SlotCheckConnection(u32 slot)
+//In versions before v3.6, only the slot argument was present.
+static u32 SlotCheckConnection(u32 port, u32 slot)
 {
 	u32 stat70;
-	u32 val = 0;
-	u32 val1 = 0;
-	u32 val_port0 = 0;
-	u32 val_port1 = 0;
 
 	sio2_td.in_size = 0;
 	sio2_td.out_size = 0;
 	sio2_td.out_dma.addr = 0;
 	sio2_td.in_dma.addr = 0;
 
-	stat70 = sio2_stat70_get();
+	if(change_slot_buffer[4+port] == 1)
+	{	//In versions before v3.6, this outer check did not exist.
+		stat70 = sio2_stat70_get();
 
-	pdSetStat70bit(0, slot, (stat70 >> 4) & 0x1);
-	pdSetStat70bit(1, slot, (stat70 >> 5) & 0x1);
+		//In versions before v3.6, stat70 is always set regardless of the slot selected.
+		switch(port)
+		{
+			case 0:
+				pdSetStat70bit(0, slot, (stat70 >> 4) & 0x1);
+				break;
+			case 1:
+				pdSetStat70bit(1, slot, (stat70 >> 5) & 0x1);
+				break;
+		}
 
-	if( change_slot_buffer[4] == 1)
-	{
-		val_port0 = 1;
-		val = setupTransferData(0, 0, slot);
-		val1 = val;
+		//In versions before v3.6, there used to be checks on change_slot_buffer[] and independent calls to setupTransferData, for each port (very much like padTransfer).
+		setupTransferData(0, port, slot);
 
-		change_slot_buffer[4] = 0;
-		change_slot_buffer[5] = 1;
-
-	}
-
-	if( change_slot_buffer[5] == 1)
-	{
-		val_port1 = 1;
-
-		val = setupTransferData(val1, 1, slot);
-
-		change_slot_buffer[4] = 1;
-		change_slot_buffer[5] = 0;
-
-
-	}
-
-	if( val != 0)
-	{
+		//As a result, there is neither a check on whether there is data to send.
 		sio2_transfer2( &sio2_td );
 
 		sio2_td.out_size = 0;
 
+		//There used to be independent calls to readSio2OutBuffer for each port too.
+		readSio2OutBuffer(0, port, slot);
+		sio2_td.out_size = padData[port][slot].out_size;
 
-		if(val_port0 == 1)
-		{
-			readSio2OutBuffer(0, 0, slot);
-			sio2_td.out_size = padData[0][slot].out_size;
-
-		}
-
-		if(val_port1 == 1)
-		{
-			readSio2OutBuffer(val1, 1, slot);
-			sio2_td.out_size = padData[1][slot].out_size;
-
-		}
-
-		if(change_slot_buffer[4] != 1)
-			padData[0][slot].error = 10;
-
-		if(change_slot_buffer[5] != 1)
-			padData[1][slot].error = 10;
+		//This used to be per port too.
+		if(change_slot_buffer[4+port] != 1)
+			padData[port][slot].error = 0xA;
 
 		return 1;
 	}
@@ -429,7 +398,6 @@ u32 pdCheckConnection(u32 port, u32 slot)
 	u32 ret = 0;
 
 	sio2_pad_transfer_init();
-
 
 	change_slot_buffer[0] = slot;
 	change_slot_buffer[1] = slot;
@@ -445,7 +413,7 @@ u32 pdCheckConnection(u32 port, u32 slot)
 	setupReadData(1, slot, res);
 
 
-	if(SlotCheckConnection(slot) == 1)
+	if(SlotCheckConnection(port, slot) == 1)
 	{
 		if( padData[port][slot].error == 0 )
 			ret = 1;
@@ -517,7 +485,7 @@ u32 pdSetOutSize(u32 port, u32 slot, u32 size)
 
 }
 
-u32 pdSetInBuffer(u32 port, u32 slot, u32 size, u8 *buf)
+u32 pdSetInBuffer(u32 port, u32 slot, u32 size, const u8 *buf)
 {
 	if(port < 2)
 	{
@@ -525,7 +493,7 @@ u32 pdSetInBuffer(u32 port, u32 slot, u32 size, u8 *buf)
 
 		if(size > 0)
 		{
-			u32 i;
+			int i;
 
 			for(i=0; i < size; i++)
 				padData[port][slot].in_buffer[i] = buf[i];
@@ -545,11 +513,10 @@ u32 pdGetOutBuffer(u32 port, u32 slot, u32 size, u8 *buf)
 
 		if(size > 0)
 		{
-			u32 i;
+			int i;
 
 			for(i=0; i < size; i++)
 				buf[i] = padData[port][slot].out_buffer[i];
-
 		}
 
 		return size;
@@ -557,6 +524,3 @@ u32 pdGetOutBuffer(u32 port, u32 slot, u32 size, u8 *buf)
 
 	return 0;
 }
-
-
-

@@ -13,13 +13,13 @@
 #define __FREEPAD_PADDATA_H__
 
 
-void pdReset();
-void pdTransfer();
+void pdReset(void);
+void pdTransfer(void);
 
 u32 pdSetCtrl1(u32 port, u32 slot, u32 ctrl);
 u32 pdSetCtrl2(u32 port, u32 slot, u32 ctrl);
 
-u32 pdSetInBuffer(u32 port, u32 slot, u32 size, u8 *buf);
+u32 pdSetInBuffer(u32 port, u32 slot, u32 size, const u8 *buf);
 u32 pdGetOutBuffer(u32 port, u32 slot, u32 size, u8 *buf);
 
 u32 pdSetInSize(u32 port, u32 slot, u32 size);

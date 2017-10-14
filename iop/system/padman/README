@@ -1,4 +1,6 @@
 freepad is a free replacement module for XPADMAN.
+freepad is based off XPADMAN v3.6, which is the last known version of XPADMAN.
+It was originally based on a module around v3.0.
 
 I'd like to thank pukko for libpad(x), Hanimar for ps2dis, [RO]man for
 padspecs.txt and Marcus R. Brown for sio2log.
@@ -10,5 +12,8 @@ debug output to stdout.
 
 Changelog
 -------------------------------------------------------------------------------
+2017-10-14
+  - SP193, full update to v3.6 and bugfixes.
+
 2007-08-30
   - lukasz, initial release

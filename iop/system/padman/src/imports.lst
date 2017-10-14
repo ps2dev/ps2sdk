@@ -46,6 +46,12 @@ stdio_IMPORTS_start
 I_printf
 stdio_IMPORTS_end
 
+sysclib_IMPORTS_start
+I_look_ctype_table
+I_strncmp
+I_strtol
+sysclib_IMPORTS_end
+
 vblank_IMPORTS_start
 I_RegisterVblankHandler
 I_ReleaseVblankHandler
@@ -68,3 +74,7 @@ xsio2man_IMPORTS_end
 #else
 rsio2man_IMPORTS_end
 #endif
+
+sysmem_IMPORTS_start
+I_Kprintf
+sysmem_IMPORTS_end

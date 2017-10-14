@@ -17,6 +17,7 @@
 
 #define MODNAME "freepad"
 #define M_PRINTF(format, args...)	printf(MODNAME ": " format, ## args)
+#define M_KPRINTF(format, args...)	Kprintf(MODNAME ": " format, ## args)
 
 #ifdef DEBUG
 #define D_PRINTF(format, args...)	printf(MODNAME ": " format, ## args)
@@ -24,8 +25,10 @@
 #define D_PRINTF(a...)		(void)0
 #endif
 
+#define PADMAN_THPRI_LO	46
+#define PADMAN_THPRI_HI	20
 
-#define SB_STAT	*((volatile u32*)0xBD000040)
+#define SB_STAT	*((volatile unsigned int*)0xBD000040)
 
 /*
  * Pad states
@@ -62,6 +65,7 @@
 #define MODE_CONFIG_READY		0x2
 
 // PAD Tasks
+#define TASK_NONE				0
 #define	TASK_UPDATE_PAD			1
 #define TASK_QUERY_PAD			2
 #define TASK_PORT_CLOSE			3
@@ -92,12 +96,12 @@
 // Global Types
 typedef struct
 {
-	u32 padEnd;
-	s32 eventflag;
-	u32 init;
-	u32	stopTransfer;
-	s32 tid_1;
-	s32 tid_2;
+	int padEnd;
+	int eventflag;
+	int init;
+	int	stopTransfer;
+	int tid_1;
+	int tid_2;
 } vblankData_t;
 
 typedef struct
@@ -142,13 +146,23 @@ typedef struct
 	u8 numActuators;
 	u8 numActComb;
 	u8 disconnected;
-	u32 actData[4];
-	u32 combData[4];
-	u32 modeTable[2];
+	union {
+		u8 data[4][4];
+		u32 data32[4];
+	} actData;
+	union {
+		u8 data[4][4];
+		u32 data32[4];
+	} combData;
+	union {
+		u16 data[4];
+		u32 data32[2];
+	} modeTable;
 	u8 buttonInfo[4];
 	u8 buttonMask[4];
-	u8 vrefParam[12];
-	u16 val_c6; // unused
+	u8 modeParam[12];
+	u16 val_c4; // unused
+	u16 val_c6;
 	u8 inbuffer[32];
 	u8 outbuffer[32];
 	u8 buttonStatus[32];
@@ -158,12 +172,12 @@ typedef struct
 	union {
 		u8 data[8];
 		u32 data32[8 / sizeof(u32)];
-	} ee_actDirectData __attribute__((aligned(4)));
+	} ee_actDirectData;
 	s16 ee_actDirectSize;
 	union {
 		u8 data[8];
 		u32 data32[8 / sizeof(u32)];
-	} ee_actAlignData __attribute__((aligned(4)));
+	} ee_actAlignData;
 	u16 state;
 	u16 reqState;
 	u32 frame;
@@ -176,33 +190,24 @@ typedef struct
 	s32 setactalignTid;
 	s32 setbuttoninfoTid;
 	s32 setvrefparamTid;
-	u32 eventflag;
+	int eventflag;
 	u16 port;
 	u16 slot;
 	u32 currentTask;
 	u32 runTask;
 	u32 taskTid;
 	u32 stat70bit;
-	u32 val_184; // unused
+	u32 val_184; // Set, but unused
 } padState_t;
 
-
-// Global variables
-extern u32 freepad_init;
-extern padState_t padState[2][4];
-extern u32 openSlots[2];
-extern vblankData_t vblankData;
-extern u16 version;
-
 // Internal functions
-void WaitClearEvent(u32 eventflag, u32 bits, u32 unused1, u32 unused2);
-int VblankStart(vblankData_t *vData);
+void WaitClearEvent(int eventflag, u32 bits, int mode, u32 *resbits_out);
+int VblankStart(void *arg);
 int VblankEnd(void *arg);
-
 
 // Exported/RPC functions
 s32 padInit(void * ee_addr);
-s32 padEnd();
+s32 padEnd(void);
 s32 padPortClose(s32 port, s32 slot, s32 wait);
 s32 padPortOpen(s32 port, s32 slot, s32 pad_area_ee_addr, u32 *buf);
 u32 padSetMainMode(u32 port, u32 slot, u32 mode, u32 lock);
@@ -212,12 +217,10 @@ u32 padGetButtonMask(u32 port, u32 slot);
 u32 padSetButtonInfo(u32 port, u32 slot, u32 info);
 u32 padSetVrefParam(u32 port, u32 slot, u8 *vparam);
 s32 padInfoAct(u32 port, u32 slot, s32 act, u32 val);
-s32 padInfoComb(u32 port, u32 slot, s32 val1, u32 val2);
-s32 padInfoMode(u32 port, u32 slot, s32 val1, u32 val2);
-u32 padGetPortMax();
+s32 padInfoComb(u32 port, u32 slot, s32 listno, u32 offs);
+s32 padInfoMode(u32 port, u32 slot, s32 term, u32 offs);
+u32 padGetPortMax(void);
 u32 padGetSlotMax(u32 port);
-u32 padGetModVersion();
+u32 padGetModVersion(void);
 
 #endif
-
-

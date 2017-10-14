@@ -13,9 +13,20 @@
 #include "freepad.h"
 #include "stdio.h"
 #include "xsio2man.h"
+#include "sio2Cmds.h"
+#include "sysmem.h"
 #include "thevent.h"
 #include "thbase.h"
 #include "vblank.h"
+#include "irx.h"
+
+// Global variables
+extern struct irx_id _irx_id;
+
+extern padState_t padState[2][4];
+extern u32 openSlots[2];
+extern vblankData_t vblankData;
+extern int padman_init;
 
 void DeleteThreadsEventFlag(vblankData_t *s)
 {
@@ -24,11 +35,11 @@ void DeleteThreadsEventFlag(vblankData_t *s)
 	DeleteEventFlag(s->eventflag);
 }
 
-s32 padEnd()
+s32 padEnd(void)
 {
-	if(freepad_init != 0)
+	if(padman_init != 0)
 	{
-		u32 port,slot;
+		int port,slot;
 
 		for(port = 0; port < 2; port++)
 			for(slot=0; slot < 4; slot++)
@@ -51,7 +62,7 @@ s32 padEnd()
 		while(ReleaseVblankHandler(1, VblankEnd) != 0)
 			M_PRINTF("Release VB_END failed.\n");
 
-		freepad_init = 0;
+		padman_init = 0;
 	}
 
 	return 1;
@@ -92,7 +103,7 @@ u32 padSetMainMode(u32 port, u32 slot, u32 mode, u32 lock)
 	if( (padState[port][slot].currentTask != TASK_UPDATE_PAD) || ( padState[port][slot].modeConfig < MODE_CONFIG_READY) )
 		return 0;
 
-	if( mode > padState[port][slot].numModes )
+	if( mode >= padState[port][slot].numModes )
 		return 0;
 
 	if( padState[port][slot].reqState != PAD_RSTAT_BUSY)
@@ -111,158 +122,146 @@ u32 padSetMainMode(u32 port, u32 slot, u32 mode, u32 lock)
 
 s32 padInfoAct(u32 port, u32 slot, s32 act, u32 val)
 {
-	if( (padState[port][slot].currentTask != TASK_UPDATE_PAD) || ( padState[port][slot].modeConfig < MODE_CONFIG_READY) )
+	if(padState[port][slot].currentTask != TASK_UPDATE_PAD)
 		return 0;
+
+	if(padState[port][slot].modeConfig < MODE_CONFIG_READY)
+		return -1;
 
 	if(act == -1) return padState[port][slot].numActuators;
 
 	if( act < padState[port][slot].numActuators )
 	{
-		u8 *actData = (u8*)&padState[port][slot].actData[act];
+		u8 *actData = padState[port][slot].actData.data[act];
 
-		if( val == 1 ) return actData[0];
-		if( val == 2 ) return actData[1];
-		if( val == 3 ) return actData[2];
-		if( val == 4 ) return actData[3];
-
-	}
-
-	return -1;
-}
-
-s32 padInfoComb(u32 port, u32 slot, s32 val1, u32 val2)
-{
-	if( (padState[port][slot].currentTask != TASK_UPDATE_PAD) || ( padState[port][slot].modeConfig < MODE_CONFIG_READY) )
-		return 0;
-
-	if(val1 == -1) return padState[port][slot].numActComb;
-
-	if( val1 < padState[port][slot].numActComb)
-	{
-		u8 *combData = (u8*)&padState[port][slot].combData[val1];
-
-		if(val2 == -1) return combData[0];
-		if(val2 == 0)  return combData[1];
-		if(val2 == 1)  return combData[2];
-		if(val2 == 2)  return combData[3];
-	}
-
-	return -1;
-}
-
-s32 padInfoMode(u32 port, u32 slot, s32 val1, u32 val2)
-{
-	if((padState[port][slot].currentTask != TASK_UPDATE_PAD))
-		return 0;
-
-	if( padState[port][slot].reqState != PAD_RSTAT_BUSY)
-	{
-		if(val1 == 2)
+		switch(val)
 		{
-			if( padState[port][slot].currentTask == padState[port][slot].modeConfig)
+			case 1:
+				return actData[0];
+			case 2:
+				return actData[1];
+			case 3:
+				return actData[2];
+			case 4:
+				return actData[3];
+		}
+	}
+
+	return -1;
+}
+
+s32 padInfoComb(u32 port, u32 slot, s32 listno, u32 offs)
+{
+	if(padState[port][slot].currentTask != TASK_UPDATE_PAD)
+		return 0;
+
+	if(padState[port][slot].modeConfig < MODE_CONFIG_READY)
+		return -1;
+
+	if(listno == -1) return padState[port][slot].numActComb;
+
+	if( listno < padState[port][slot].numActComb)
+	{
+		u8 *combData = padState[port][slot].combData.data[listno];
+
+		switch(offs)
+		{
+			case -1:
+				return combData[0];
+			case 0:
+				return combData[1];
+			case 1:
+				return combData[2];
+			case 2:
+				return combData[3];
+		}
+	}
+
+	return -1;
+}
+
+s32 padInfoMode(u32 port, u32 slot, s32 term, u32 offs)
+{
+	if((padState[port][slot].currentTask != TASK_UPDATE_PAD) || (padState[port][slot].reqState == PAD_RSTAT_BUSY))
+		return 0;
+
+	switch(term)
+	{
+		case 2:
+			if(padState[port][slot].modeConfig == MODE_CONFIG_QUERY_PAD)
 				return 0;
 			else
-				return padState[port][slot].modeTable[padState[port][slot].modeCurOffs];
-		}
-
-		if(val1 < 3)
-		{
-			if(val1 == 1)
-			{
-				if( padState[port][slot].modeCurId != 0xF3)
-					return (0xF3 >> 4);
-				else
-					return 0;
-			}
+				return padState[port][slot].modeTable.data[padState[port][slot].modeCurOffs];
+		case 1:
+			if( padState[port][slot].modeCurId != PAD_ID_CONFIG)
+				return (PAD_ID_HI(PAD_ID_CONFIG));
 			else
-				return -1;
-		}
-
-		if(val1 == 3)
-		{
-			if(padState[port][slot].modeConfig == 1)
+				return 0;
+		case 3:
+			if(padState[port][slot].modeConfig == MODE_CONFIG_QUERY_PAD)
 				return 0;
 			else
 				return padState[port][slot].modeCurOffs;
-		}
-
-
-		if(val1 == 4)
-		{
-			u16* mode = (u16*)padState[port][slot].modeTable;
-
-			if(padState[port][slot].modeConfig == 1)
-			{
+		case 4:
+			if(padState[port][slot].modeConfig == MODE_CONFIG_QUERY_PAD)
 				return 0;
-			}
 			else
 			{
-				if(val2 == -1)
+				if(offs == -1)
 				{
 					return padState[port][slot].numModes;
 				}
 				else
 				{
-					if(val2 < padState[port][slot].numModes)
-						return 0;
+					u16* mode = padState[port][slot].modeTable.data;
+
+					if(offs < padState[port][slot].numModes)
+						return mode[offs];
 					else
-						return mode[val2];
+						return 0;
 				}
 			}
-		}
-
-
-
 	}
 
-	return 0;
+	return -1;
 }
 
-u32 SetActDirect3(u32 port, u32 slot)
+u32 ActDirectTotal(u32 port, u32 slot)
 {
 	u32 ret = 0;
-	u32 p = 0, s = 0;
+	u32 p, s;
 
-	while(p < padGetPortMax())
+	for(p = 0; p < padGetPortMax(); p++)
 	{
-		s = 0;
-
-		while(s < padGetSlotMax(port))
+		for(s = 0; s < padGetSlotMax(port); s++)
 		{
-			if( (p == port) && (s == slot) && (openSlots[port] != 0))
+			if( (p == port) && (s == slot) && (((openSlots[port] >> slot) & 1) != 0))
 			{
 				if(padState[port][slot].modeCurId != 0)
 				{
-					if(padState[port][slot].ee_actDirectSize >= 0)
-					{
-						u32 i;
+					int i;
 
-						for(i=0; i < padState[port][slot].ee_actDirectSize; i++)
+					for(i=0; i < padState[port][slot].ee_actDirectSize; i++)
+					{
+						if((padState[port][slot].ee_actAlignData.data[i] != 0xFF)
+							&& (padState[port][slot].ee_actDirectData.data[i] != 0))
 						{
-							if((padState[port][slot].ee_actAlignData.data[i] != 0xFF)
-								&& (padState[port][slot].ee_actDirectData.data[i] != 0))
-							{
-								u8 *act = (u8*)padState[port][slot].actData;
-								ret += act[3+i];
-							}
+							u8 *act = padState[port][slot].actData.data[padState[port][slot].ee_actAlignData.data[i]];
+							ret += act[3];
 						}
 					}
 				}
 			}
-			s++;
 		}
-
-		p++;
 	}
-
 
 	return ret;
 }
 
-u32 SetActDirect2(u32 port, u32 slot, u8 *actData)
+u32 CheckAirDirectTotal(u32 port, u32 slot, u8 *actData)
 {
-	u32 i;
-	u32 res = SetActDirect3(port, slot);
+	int i;
+	u32 total = ActDirectTotal(port, slot);
 
 	for(i=0; i < 6; i++)
 	{
@@ -272,31 +271,33 @@ u32 SetActDirect2(u32 port, u32 slot, u8 *actData)
 		{
 			if( actData[a] != 0 )
 			{
-				u8 *act = (u8*)padState[port][slot].actData;
+				u8 *act = padState[port][slot].actData.data[a];
 
-				res += act[3+i];
+				total += act[3];
 
-				if(res >= 0x3D) actData[i] = 0;
+				if(total >= 0x3D)
+				{
+					M_KPRINTF("Over Consumpt Max 600mA[%d][%d]\n", (int)port, (int)slot);
+					actData[a] = 0;
+				}
 			}
 		}
 	}
 
-	return 0;
+	return 1;
 }
 
 u32 padSetActDirect(u32 port, u32 slot, u8 *actData)
 {
 	if(padState[port][slot].currentTask == TASK_UPDATE_PAD)
 	{
-		if( SetActDirect2(port, slot, actData) != 0)
-		{
-			// Really kprintf
-			M_PRINTF("Over consumpt Max\n");
+		if( CheckAirDirectTotal(port, slot, actData) == 0)
+		{	//This doesn't seem to be ever used.
+			M_KPRINTF("Over consumpt Max [%d][%d]\n", (int)port, (int)slot);
 		}
 		else
 		{
-
-			u32 i;
+			int i;
 
 			for(i=0; i < 6; i++)
 				padState[port][slot].ee_actDirectData.data[i] = actData[i];
@@ -306,7 +307,6 @@ u32 padSetActDirect(u32 port, u32 slot, u8 *actData)
 			return 1;
 		}
 	}
-
 
 	return 0;
 }
@@ -318,7 +318,7 @@ u32 padSetActAlign(u32 port, u32 slot, u8 *actData)
 
 	if( padState[port][slot].reqState != PAD_RSTAT_BUSY)
 	{
-		u32 i;
+		int i;
 
 		for(i=0; i < 6; i++)
 			padState[port][slot].ee_actAlignData.data[i] = actData[i];
@@ -361,7 +361,7 @@ u32 padSetButtonInfo(u32 port, u32 slot, u32 info)
 
 	if( padState[port][slot].reqState != PAD_RSTAT_BUSY)
 	{
-		u32 i;
+		int i;
 
 		info = (info << 6) | 0x3F;
 
@@ -371,7 +371,7 @@ u32 padSetButtonInfo(u32 port, u32 slot, u32 info)
 		padState[port][slot].buttonInfo[3] = (u8)(info >> 24);
 
 		for(i=0; i < 11; i++)
-			padState[port][slot].vrefParam[i] = 0x2;
+			padState[port][slot].modeParam[i] = 0x2;
 
 		padState[port][slot].reqState = PAD_RSTAT_BUSY;
 		padState[port][slot].runTask = TASK_SET_BUTTON_INFO;
@@ -394,15 +394,14 @@ u32 padSetVrefParam(u32 port, u32 slot, u8 *vparam)
 
 	if( padState[port][slot].reqState != PAD_RSTAT_BUSY)
 	{
-		u32 i;
+		int i;
 
-		for(i=0; i < 11; i++)
-			padState[port][slot].vrefParam[i] = vparam[i];
+		for(i=0; i < 12; i++)
+			padState[port][slot].modeParam[i] = vparam[i];
 
-		padState[port][slot].reqState = PAD_RSTAT_BUSY;
 		padState[port][slot].runTask = TASK_SET_VREF_PARAM;
+		padState[port][slot].reqState = PAD_RSTAT_BUSY;
 		padState[port][slot].taskTid = padState[port][slot].setvrefparamTid;
-
 
 		return 1;
 	}
@@ -410,7 +409,7 @@ u32 padSetVrefParam(u32 port, u32 slot, u8 *vparam)
 	return 0;
 }
 
-u32 padGetPortMax()
+u32 padGetPortMax(void)
 {
 	return 2;
 }
@@ -420,14 +419,14 @@ u32 padGetSlotMax(u32 port)
 	return sio2_mtap_get_slot_max(port);
 }
 
-u32 padGetModVersion()
+u32 padGetModVersion(void)
 {
-	return version;
+	return _irx_id.v;
 }
 
 u32 padGetInBuffer(u32 port, u32 slot, u8 *buf)
 {
-	u32 i;
+	int i;
 
 	for(i=0; i < 32 ; i++)
 		buf[i] = padState[port][slot].inbuffer[i];

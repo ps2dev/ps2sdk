@@ -12,7 +12,6 @@
 #ifndef __FREEPAD_RPC_SERVER_H__
 #define __FREEPAD_RPC_SERVER_H__
 
-u32 InitRpcServers();
+int InitRpcServers(int prio);
 
 #endif
-

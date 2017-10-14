@@ -20,6 +20,7 @@
 #include <sifcmd.h>
 #include <sifman.h>
 #include <stdio.h>
+#include <sysclib.h>
 #include <thbase.h>
 #include <thevent.h>
 #include <vblank.h>
@@ -28,5 +29,6 @@
 #else
 #include <rsio2man.h>
 #endif
+#include <sysmem.h>
 
 #endif

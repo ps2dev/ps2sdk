@@ -19,31 +19,35 @@
 #include "xsio2man.h"
 #include "sifman.h"
 #include "sio2Cmds.h"
+#include "sysmem.h"
 #include "padData.h"
 
-u32 vblank_end;
-u32 frame_count = 0;
-u32 vblankStartCount = 0;
-void *pad_ee_addr;
-s32 mainThreadCount = 0;
-u32 mainThreadCount2 = 0;
-u32 pad_port = 0;
-u32 pad_slot = 0;
-u32 freepad_init = 0;
-vblankData_t vblankData;
+int pad_port;
+int pad_slot;
+u32 mainThreadCount2;
 u32 pad_portdata[2];
-u32 openSlots[2];
-s32 sifdma_id;
-SifDmaTransfer_t sifdma_td[9];
 /* It is very important that sif_buffer and padState are right after each other. */
 u32 sif_buffer[4] __attribute__((aligned(4)));
 padState_t padState[2][4];
+u32 openSlots[2];
+vblankData_t vblankData;
+int padman_init;
+void *pad_ee_addr;
+int thpri_hi;
+int thpri_lo;
+SifDmaTransfer_t sifdma_td[9];	//Original was likely 16 descriptors.
 
-void TransferThread(void *arg)
+int vblank_end = 0;
+u32 frame_count = 0;
+int sifdma_id = 0;
+u32 vblankStartCount = 0;
+s32 mainThreadCount = 0;
+
+static void TransferThread(void *arg)
 {
 	while(1)
 	{
-		WaitClearEvent(vblankData.eventflag, EF_VB_TRANSFER, 0x10, 0);
+		WaitClearEvent(vblankData.eventflag, EF_VB_TRANSFER, WEF_AND|WEF_CLEAR, NULL);
 		pdTransfer();
 		SetEventFlag(vblankData.eventflag, EF_VB_TRANSFER_DONE);
 	}
@@ -53,7 +57,7 @@ u32 setupEEButtonData(u32 port, u32 slot, padState_t *pstate)
 {
 	if(padState[port][slot].buttonDataReady == 1)
 	{
-		u32 i;
+		int i;
 
 		pstate->ee_pdata.data[0] = 0;
 		pstate->ee_pdata.data[1] = padState[port][slot].modeCurId;
@@ -62,7 +66,7 @@ u32 setupEEButtonData(u32 port, u32 slot, padState_t *pstate)
 		for(i=2; i < 31; i++)
 			pstate->ee_pdata.data[i] = padState[port][slot].buttonStatus[i+1];
 
-		if(padState[port][slot].modeCurId == 18)
+		if(padState[port][slot].modeCurId == 0x12)
 		{
 			pstate->ee_pdata.data[2] = 0xFF,
 			pstate->ee_pdata.data[3] = 0xFF;
@@ -70,11 +74,151 @@ u32 setupEEButtonData(u32 port, u32 slot, padState_t *pstate)
 			pstate->ee_pdata.data[5] = 0;
 		}
 
+		//New in v3.6
+		if(padState[port][slot].modeCurId == 0x79)
+		{
+			int value;
+
+			//Check button status & update pressure data
+			value = ~((pstate->ee_pdata.data[2] << 8) | pstate->ee_pdata.data[3]);
+			if(value & 0x2000)
+			{
+				if(pstate->ee_pdata.data[8] == 0)
+					pstate->ee_pdata.data[8] = 1;
+			}
+			else
+			{
+				if(pstate->ee_pdata.data[8] != 0)
+					pstate->ee_pdata.data[8] = 0;
+			}
+
+			if(value & 0x8000)
+			{
+				if(pstate->ee_pdata.data[9] == 0)
+					pstate->ee_pdata.data[9] = 1;
+			}
+			else
+			{
+				if(pstate->ee_pdata.data[9] != 0)
+					pstate->ee_pdata.data[9] = 0;
+			}
+
+			if(value & 0x1000)
+			{
+				if(pstate->ee_pdata.data[10] == 0)
+					pstate->ee_pdata.data[10] = 1;
+			}
+			else
+			{
+				if(pstate->ee_pdata.data[10] != 0)
+					pstate->ee_pdata.data[10] = 0;
+			}
+
+			if(value & 0x4000)
+			{
+				if(pstate->ee_pdata.data[11] == 0)
+					pstate->ee_pdata.data[11] = 1;
+			}
+			else
+			{
+				if(pstate->ee_pdata.data[11] != 0)
+					pstate->ee_pdata.data[11] = 0;
+			}
+
+			if(value & 0x0010)
+			{
+				if(pstate->ee_pdata.data[12] == 0)
+					pstate->ee_pdata.data[12] = 1;
+			}
+			else
+			{
+				if(pstate->ee_pdata.data[12] != 0)
+					pstate->ee_pdata.data[12] = 0;
+			}
+
+			if(value & 0x0020)
+			{
+				if(pstate->ee_pdata.data[13] == 0)
+					pstate->ee_pdata.data[13] = 1;
+			}
+			else
+			{
+				if(pstate->ee_pdata.data[13] != 0)
+					pstate->ee_pdata.data[13] = 0;
+			}
+
+			if(value & 0x0040)
+			{
+				if(pstate->ee_pdata.data[14] == 0)
+					pstate->ee_pdata.data[14] = 1;
+			}
+			else
+			{
+				if(pstate->ee_pdata.data[14] != 0)
+					pstate->ee_pdata.data[14] = 0;
+			}
+
+			if(value & 0x0080)
+			{
+				if(pstate->ee_pdata.data[15] == 0)
+					pstate->ee_pdata.data[15] = 1;
+			}
+			else
+			{
+				if(pstate->ee_pdata.data[15] != 0)
+					pstate->ee_pdata.data[15] = 0;
+			}
+
+			if(value & 0x0004)
+			{
+				if(pstate->ee_pdata.data[16] == 0)
+					pstate->ee_pdata.data[16] = 1;
+			}
+			else
+			{
+				if(pstate->ee_pdata.data[16] != 0)
+					pstate->ee_pdata.data[16] = 0;
+			}
+
+			if(value & 0x0008)
+			{
+				if(pstate->ee_pdata.data[17] == 0)
+					pstate->ee_pdata.data[17] = 1;
+			}
+			else
+			{
+				if(pstate->ee_pdata.data[17] != 0)
+					pstate->ee_pdata.data[17] = 0;
+			}
+
+			if(value & 0x0001)
+			{
+				if(pstate->ee_pdata.data[18] == 0)
+					pstate->ee_pdata.data[18] = 1;
+			}
+			else
+			{
+				if(pstate->ee_pdata.data[18] != 0)
+					pstate->ee_pdata.data[18] = 0;
+			}
+
+			if(value & 0x0002)
+			{
+				if(pstate->ee_pdata.data[19] == 0)
+					pstate->ee_pdata.data[19] = 1;
+			}
+			else
+			{
+				if(pstate->ee_pdata.data[19] != 0)
+					pstate->ee_pdata.data[19] = 0;
+			}
+		}
+
 		return 32;
 	}
 	else
 	{
-		u32 i;
+		int i;
 
 		pstate->ee_pdata.data[0] = 0xFF;
 
@@ -86,19 +230,18 @@ u32 setupEEButtonData(u32 port, u32 slot, padState_t *pstate)
 }
 
 
-void DmaSendEE()
+static void DmaSendEE(void)
 {
-	s32 dma_stat;
+	int dma_stat;
 
 	dma_stat = sceSifDmaStat(sifdma_id);
 
 	if(dma_stat >= 0)
 	{
-		if( (frame_count % 30) == 0)
+		if( (frame_count % 240) == 0)
 		{
-			// These are actually kprintfs
-			M_PRINTF("DMA Busy, ID = 0x%08X, dma_stat = %i\n", (int)sifdma_id, (int)dma_stat);
-			M_PRINTF("        SB_STAT = 0x%08X\n", (int)SB_STAT);
+			M_KPRINTF("DMA Busy ID = %08x ret = %d\n", sifdma_id, dma_stat);
+			M_KPRINTF("        SB_STAT = %08x\n", SB_STAT);
 		}
 	}
 	else
@@ -119,7 +262,7 @@ void DmaSendEE()
 		sif_buffer[1] = pad_portdata[0];
 		sif_buffer[2] = pad_portdata[1];
 
-		if( (sif_buffer[0] % 30) == 0)
+		if( (sif_buffer[0] % 2) == 0)
 			sifdma_td[0].dest = pad_ee_addr + 128;
 		else
 			sifdma_td[0].dest = pad_ee_addr;
@@ -164,17 +307,17 @@ void DmaSendEE()
 					p->ee_pdata.actAlignData[0] = p->ee_actAlignData.data32[0];
 					p->ee_pdata.actAlignData[1] = p->ee_actAlignData.data32[1];
 
-					p->ee_pdata.actData[0] = p->actData[0];
-					p->ee_pdata.actData[1] = p->actData[1];
-					p->ee_pdata.actData[2] = p->actData[2];
-					p->ee_pdata.actData[3] = p->actData[3];
-					p->ee_pdata.combData[0] = p->combData[0];
-					p->ee_pdata.combData[1] = p->combData[1];
-					p->ee_pdata.combData[2] = p->combData[2];
-					p->ee_pdata.combData[3] = p->combData[3];
+					p->ee_pdata.actData[0] = p->actData.data32[0];
+					p->ee_pdata.actData[1] = p->actData.data32[1];
+					p->ee_pdata.actData[2] = p->actData.data32[2];
+					p->ee_pdata.actData[3] = p->actData.data32[3];
+					p->ee_pdata.combData[0] = p->combData.data32[0];
+					p->ee_pdata.combData[1] = p->combData.data32[1];
+					p->ee_pdata.combData[2] = p->combData.data32[2];
+					p->ee_pdata.combData[3] = p->combData.data32[3];
 
-					p->ee_pdata.modeTable[0] = p->modeTable[0];
-					p->ee_pdata.modeTable[1] = p->modeTable[1];
+					p->ee_pdata.modeTable[0] = p->modeTable.data32[0];
+					p->ee_pdata.modeTable[1] = p->modeTable.data32[1];
 
 					p->ee_pdata.stat70bit = p->stat70bit;
 
@@ -211,11 +354,13 @@ void DmaSendEE()
 
 			CpuResumeIntr(intr_state);
 
+			if(sifdma_id == 0)
+				M_KPRINTF("sceSifSetDma failed\n");
 		}
 	}
 }
 
-u32 GetThreadsStatus(padState_t *state)
+static u32 GetThreadsStatus(padState_t *state)
 {
 	u32 count = 0;
 	iop_thread_info_t tinfo;
@@ -256,7 +401,7 @@ u32 GetThreadsStatus(padState_t *state)
 		return 0;
 }
 
-void DeleteThreads(padState_t *state)
+static void DeleteThreads(padState_t *state)
 {
 	DeleteThread(state->updatepadTid);
 	DeleteThread(state->querypadTid);
@@ -266,17 +411,15 @@ void DeleteThreads(padState_t *state)
 	DeleteThread(state->setvrefparamTid);
 }
 
-void MainThread(void *arg)
+static void MainThread(void *arg)
 {
-	vblankData.stopTransfer = 0;
-
 	while(1)
 	{
 		u32 port, slot;
 
-		mainThreadCount = (mainThreadCount+1) % 30;
+		mainThreadCount++;
 
-		if( mainThreadCount == 0) sio2_mtap_update_slots();
+		if( mainThreadCount % 30 == 0 ) sio2_mtap_update_slots();
 
 		for(port=0; port < 2; port++)
 		{
@@ -288,107 +431,110 @@ void MainThread(void *arg)
 
 					padState[port][slot].stat70bit = pdGetStat70bit(port, slot);
 
-					if(padState[port][slot].runTask != 0)
+					if(padState[port][slot].runTask != TASK_NONE)
 					{
 						if(padState[port][slot].runTask == TASK_PORT_CLOSE)
 						{
-							padState[port][slot].currentTask = 3;
-							padState[port][slot].runTask = 0;
+							padState[port][slot].currentTask = padState[port][slot].runTask;
+							padState[port][slot].runTask = TASK_NONE;
 							padState[port][slot].reqState = PAD_RSTAT_BUSY;
 
 							SetEventFlag(padState[port][slot].eventflag, EF_EXIT_THREAD);
-
 						}
 						else
 						{
 							if(padState[port][slot].currentTask == TASK_UPDATE_PAD)
 							{
 								// Start Task
-								StartThread(padState[port][slot].taskTid, 0);
+								StartThread(padState[port][slot].taskTid, NULL);
 								padState[port][slot].currentTask = padState[port][slot].runTask;
-								padState[port][slot].runTask = 0;
+								padState[port][slot].runTask = TASK_NONE;
 								padState[port][slot].reqState = PAD_RSTAT_BUSY;
 							}
 							else
 							{
-								padState[port][slot].runTask = 0;
+								padState[port][slot].runTask = TASK_NONE;
 								padState[port][slot].reqState = PAD_RSTAT_FAILED;
 							}
 						}
 					}
 				}
 
-				if( padState[port][slot].currentTask < 8 )
+				switch(padState[port][slot].currentTask)
 				{
-					switch(padState[port][slot].currentTask)
+					case TASK_UPDATE_PAD:
 					{
-						case TASK_UPDATE_PAD:
+						SetEventFlag(padState[port][slot].eventflag, EF_UPDATE_PAD);
+						WaitEventFlag(padState[port][slot].eventflag, EF_PAD_TRANSFER_START, 0x10, 0);
+						pdSetActive(port, slot, 1);
+					} break;
+
+					case TASK_QUERY_PAD:
+					{
+						padState[port][slot].buttonDataReady = 0;
+
+						SetEventFlag(padState[port][slot].eventflag, EF_QUERY_PAD);
+						WaitEventFlag(padState[port][slot].eventflag, EF_PAD_TRANSFER_START, 0x10, 0);
+						pdSetActive(port, slot, 1);
+					} break;
+
+					case TASK_PORT_CLOSE:
+					{
+						if(GetThreadsStatus( &padState[port][slot] ) == 1)
 						{
-							SetEventFlag(padState[port][slot].eventflag, EF_UPDATE_PAD);
-							WaitEventFlag(padState[port][slot].eventflag, EF_PAD_TRANSFER_START, 0x10, 0);
-							pdSetActive(port, slot, 1);
-						} break;
+							padState[port][slot].currentTask = TASK_NONE;
+							padState[port][slot].reqState = PAD_RSTAT_COMPLETE;
+							openSlots[port] ^= (1 << slot);
 
-						case TASK_QUERY_PAD:
-						{
-							SetEventFlag(padState[port][slot].eventflag, EF_QUERY_PAD);
-							WaitEventFlag(padState[port][slot].eventflag, EF_PAD_TRANSFER_START, 0x10, 0);
-							pdSetActive(port, slot, 1);
-						} break;
+							DeleteThreads( &padState[port][slot] );
+							SetEventFlag(padState[port][slot].eventflag, EF_PORT_CLOSE);
+						}
 
-						case TASK_PORT_CLOSE:
-						{
-							padState[port][slot].buttonDataReady = 0;
+					} break;
 
-							if(GetThreadsStatus( &padState[port][slot] ) == 1)
-							{
-								padState[port][slot].currentTask = 0;
-								padState[port][slot].reqState = PAD_RSTAT_COMPLETE ;
-								openSlots[port] ^= (1 << slot);
+					case TASK_SET_MAIN_MODE:
+					{
+						padState[port][slot].buttonDataReady = 0;
 
-								DeleteThreads( &padState[port][slot] );
-								SetEventFlag(padState[port][slot].eventflag, EF_PORT_CLOSE);
-							}
+						SetEventFlag(padState[port][slot].eventflag, EF_SET_MAIN_MODE);
+						WaitEventFlag(padState[port][slot].eventflag, EF_PAD_TRANSFER_START, 0x10, 0);
+						pdSetActive(port, slot, 1);
+					} break;
 
-						} break;
+					case TASK_SET_ACT_ALIGN:
+					{
+						padState[port][slot].buttonDataReady = 0;
 
-						case TASK_SET_MAIN_MODE:
-						{
-							SetEventFlag(padState[port][slot].eventflag, EF_SET_MAIN_MODE);
-							WaitEventFlag(padState[port][slot].eventflag, EF_PAD_TRANSFER_START, 0x10, 0);
-							pdSetActive(port, slot, 1);
-						} break;
+						SetEventFlag(padState[port][slot].eventflag, EF_SET_ACT_ALIGN);
+						WaitEventFlag(padState[port][slot].eventflag, EF_PAD_TRANSFER_START, 0x10, 0);
+						pdSetActive(port, slot, 1);
+					} break;
 
-						case TASK_SET_ACT_ALIGN:
-						{
-							SetEventFlag(padState[port][slot].eventflag, EF_SET_ACT_ALIGN);
-							WaitEventFlag(padState[port][slot].eventflag, EF_PAD_TRANSFER_START, 0x10, 0);
-							pdSetActive(port, slot, 1);
-						} break;
+					case TASK_SET_BUTTON_INFO:
+					{
+						padState[port][slot].buttonDataReady = 0;
 
-						case TASK_SET_BUTTON_INFO:
-						{
-							SetEventFlag(padState[port][slot].eventflag, EF_SET_SET_BUTTON_INFO);
-							WaitEventFlag(padState[port][slot].eventflag, EF_PAD_TRANSFER_START, 0x10, 0);
-							pdSetActive(port, slot, 1);
-						} break;
+						SetEventFlag(padState[port][slot].eventflag, EF_SET_SET_BUTTON_INFO);
+						WaitEventFlag(padState[port][slot].eventflag, EF_PAD_TRANSFER_START, 0x10, 0);
+						pdSetActive(port, slot, 1);
+					} break;
 
-						case TASK_SET_VREF_PARAM:
-						{
-							SetEventFlag(padState[port][slot].eventflag, EF_SET_VREF_PARAM);
-							WaitEventFlag(padState[port][slot].eventflag, EF_PAD_TRANSFER_START, 0x10, 0);
-							pdSetActive(port, slot, 1);
-						} break;
+					case TASK_SET_VREF_PARAM:
+					{
+						padState[port][slot].buttonDataReady = 0;
 
-					}
+						SetEventFlag(padState[port][slot].eventflag, EF_SET_VREF_PARAM);
+						WaitEventFlag(padState[port][slot].eventflag, EF_PAD_TRANSFER_START, 0x10, 0);
+						pdSetActive(port, slot, 1);
+					} break;
+
 				}
 			}
 		}
 
 		// Transfer is started in VblankStart
 		vblankData.stopTransfer = 0;
-		WaitClearEvent(vblankData.eventflag, EF_VB_TRANSFER_DONE, 0x10, 0);
-		vblankData.stopTransfer = 1;
+		WaitClearEvent(vblankData.eventflag, EF_VB_TRANSFER_DONE, WEF_AND|WEF_CLEAR, NULL);
 
 		if( (openSlots[0] != 0) || (openSlots[1] != 0))
 		{
@@ -402,7 +548,6 @@ void MainThread(void *arg)
 						   sio2 data) to be done. */
 						SetEventFlag(padState[port][slot].eventflag, EF_PAD_TRANSFER_DONE);
 						WaitEventFlag(padState[port][slot].eventflag, EF_TASK_DONE, 0x10, 0);
-
 					}
 				}
 			}
@@ -416,7 +561,7 @@ void MainThread(void *arg)
 		// Check for disconnected controllers
 		if(mainThreadCount2 >= 8)
 		{
-			if(mainThreadCount == 0)
+			if(mainThreadCount % 30 != 0)
 			{
 				if( pdIsActive(pad_port, pad_slot) == 1)
 				{
@@ -433,24 +578,20 @@ void MainThread(void *arg)
 						pad_portdata[pad_port] &= ~(1 << pad_slot); // clear slot
 				}
 
-
+				//Move onto the next slot
 				pad_slot++;
-
 				if(pad_slot >= 4)
 				{
+					//Move onto the next port
 					pad_slot = 0;
-
 					pad_port++;
 
 					if(pad_port >= 2) pad_port = 0;
 				}
 
-
 				mainThreadCount2 = 0;
-
 			}
 		}
-
 	}
 }
 
@@ -474,15 +615,19 @@ s32 VbReferThreadStatus(vblankData_t *vData)
 	return ret;
 }
 
-int VblankStart(vblankData_t *vData)
+int VblankStart(void *arg)
 {
-	vblank_end = 0;
+	vblankData_t *vData = arg;
 
-	frame_count++;
+	vblank_end = 0;
 	vblankStartCount++;
+	frame_count++;
 
 	if((vData->init == 1) && (vData->stopTransfer == 0))
+	{
+		vData->stopTransfer = 1;
 		iSetEventFlag(vData->eventflag, EF_VB_TRANSFER);
+	}
 
 	/* Wait for threads to exit and signal event to padEnd */
 	if(vData->padEnd == 1)
@@ -503,9 +648,11 @@ int VblankEnd(void *arg)
 
 s32 padInit(void * ee_addr)
 {
+	iop_thread_t thread;
+	int intr_state;
 	iop_event_t event;
 
-	if(freepad_init == 1)
+	if(padman_init == 1)
 	{
 		M_PRINTF("Refresh request from EE\n.");
 		padEnd();
@@ -513,7 +660,7 @@ s32 padInit(void * ee_addr)
 
 	vblankData.padEnd = 0;
 	vblankData.init = 0;
-	vblankData.stopTransfer = 0;
+	vblankData.stopTransfer = 1;
 
 	pad_ee_addr = ee_addr;
 	pad_port = 0;
@@ -540,65 +687,56 @@ s32 padInit(void * ee_addr)
 	openSlots[0] = 0;
 	openSlots[1] = 0;
 
-	event.attr = 2;
+	event.attr = EA_MULTI;
 	event.bits = 0;
 
 	vblankData.eventflag = CreateEventFlag(&event);
 
 	if( vblankData.eventflag == 0)
-		M_PRINTF("padInit: CreateEventFlag failed (%i).\n", (int)vblankData.eventflag);
-
-	if(vblankData.eventflag != 0)
 	{
-		iop_thread_t thread;
-		int intr_state;
-
-		thread.attr = TH_C;
-		thread.thread = TransferThread;
-		thread.stacksize = 0x800;
-		thread.priority = 20;
-
-		vblankData.tid_2 = CreateThread(&thread);
-
-		if(vblankData.tid_2 == 0)
-		{
-			M_PRINTF("padInit: CreateThread TransferThread failed (%i)\n.", (int)vblankData.tid_2);
-			return 0;
-		}
-
-		StartThread(vblankData.tid_2, 0);
-
-		thread.attr = TH_C;
-		thread.thread = MainThread;
-		thread.stacksize = 0x1000;
-		thread.priority = 46;
-
-		vblankData.tid_1 = CreateThread(&thread);
-
-		if(vblankData.tid_1 == 0)
-		{
-			M_PRINTF("padInit: CreateThread MainThread failed (%i)\n.", (int)vblankData.tid_1);
-			return 0;
-		}
-
-		StartThread(vblankData.tid_1, 0);
-
-		CpuSuspendIntr(&intr_state);
-
-		RegisterVblankHandler(0, 16, (void*)VblankStart, (void*)&vblankData);
-		RegisterVblankHandler(1, 16, (void*)VblankEnd, (void*)&vblankData);
-
-		CpuResumeIntr(intr_state);
-
-		vblankData.init = 1;
-		freepad_init = 1;
-
-		D_PRINTF("padInit: Success\n");
-
-		return 1;
+		M_PRINTF("padInit: CreateEventFlag failed (%d).\n", vblankData.eventflag);
+		return 0;
 	}
 
-	D_PRINTF("padInit: Failed\n");
+	thread.attr = TH_C;
+	thread.thread = &TransferThread;
+	thread.stacksize = 0x800;
+	thread.priority = thpri_hi;
 
-	return 0;
+	vblankData.tid_2 = CreateThread(&thread);
+
+	if(vblankData.tid_2 == 0)
+	{
+		M_PRINTF("padInit: CreateThread TransferThread failed (%d)\n.", vblankData.tid_2);
+		return 0;
+	}
+
+	StartThread(vblankData.tid_2, NULL);
+
+	thread.attr = TH_C;
+	thread.thread = MainThread;
+	thread.stacksize = 0x1000;
+	thread.priority = thpri_lo;
+
+	vblankData.tid_1 = CreateThread(&thread);
+
+	if(vblankData.tid_1 == 0)
+	{
+		M_PRINTF("padInit: CreateThread MainThread failed (%d)\n.", vblankData.tid_1);
+		return 0;
+	}
+
+	StartThread(vblankData.tid_1, NULL);
+
+	CpuSuspendIntr(&intr_state);
+
+	RegisterVblankHandler(0, 16, &VblankStart, (void*)&vblankData);
+	RegisterVblankHandler(1, 16, &VblankEnd, (void*)&vblankData);
+
+	CpuResumeIntr(intr_state);	//Original BUG: was originally a call to CpuEnableIntr with intr_state as an argument
+
+	vblankData.init = 1;
+	padman_init = 1;
+
+	return 1;
 }

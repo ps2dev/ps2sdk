@@ -12,6 +12,8 @@
 #ifndef __FREEPAD_SIO2CMDS_H__
 #define __FREEPAD_SIO2CMDS_H__
 
+#define SIO2_CMD_MAX		16
+
 #define PAD_ID_FINDPADS		0x01
 #define PAD_ID_MOUSE		0x12
 #define PAD_ID_NEGICON		0x23
@@ -26,17 +28,20 @@
 #define PAD_ID_JOGCON2		0xE5
 #define PAD_ID_CONFIG		0xF3
 
-void sio2cmdReset();
-void sio2cmdInitFindPads();
-void sio2cmdInitMouse();
-void sio2cmdInitNegicon();
-void sio2cmdInitKonamiGun();
-void sio2cmdInitDigital();
-void sio2cmdInitJoystick();
-void sio2cmdInitNamcoGun();
-void sio2cmdInitAnalog();
-void sio2cmdInitJogcon();
-void sio2cmdInitConfig();
+#define PAD_ID_HI(id)		((id)>>4)
+#define PAD_ID_LO(id)		((id)&0xF)
+
+void sio2cmdReset(void);
+void sio2cmdInitFindPads(void);
+void sio2cmdInitMouse(void);
+void sio2cmdInitNegicon(void);
+void sio2cmdInitKonamiGun(void);
+void sio2cmdInitDigital(void);
+void sio2cmdInitJoystick(void);
+void sio2cmdInitNamcoGun(void);
+void sio2cmdInitAnalog(void);
+void sio2cmdInitJogcon(void);
+void sio2cmdInitConfig(void);
 
 u32 sio2cmdCheckId(u8 id);
 
