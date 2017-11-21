@@ -20,6 +20,7 @@ struct dirent
 {
 	/** relative filename */
 	char d_name[256];
+	unsigned int d_type;
 };
 
 typedef struct DIR
