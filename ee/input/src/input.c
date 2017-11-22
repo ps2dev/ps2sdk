@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include <libpad.h>
+#ifdef _XINPUT
+#include <libmtap.h>
+#endif
 
 #include <input.h>
 
@@ -20,6 +23,20 @@ pad_t *pad_open(unsigned int port, unsigned int slot, unsigned int mode, unsigne
 		return NULL;
 	}
 
+#ifdef _XINPUT
+	if (mtapGetConnection(pad->port))
+	{
+		// there are only four slots
+		if (slot > 3)
+		{
+			free(pad->buttons);
+			free(pad);
+			return NULL;
+		}
+	}
+	else
+	{
+#endif
 	// there's only one slot
 	if (slot)
 	{
@@ -27,9 +44,16 @@ pad_t *pad_open(unsigned int port, unsigned int slot, unsigned int mode, unsigne
 		free(pad);
 		return NULL;
 	}
+#ifdef _XINPUT
+	}
+#endif
 
 	pad->port = port;
+#ifdef _XINPUT
+	pad->slot = slot;
+#else
 	pad->slot = 0;
+#endif
 
 	// Placeholders
 	pad->type = PAD_TYPE_DIGITAL;
@@ -265,7 +289,11 @@ void pad_init_actuators(pad_t *pad)
 
 	if (pad->actuator == NULL)
 	{
+#ifdef _XINPUT
+		if (padInfoAct(pad->port, pad->slot, -1, 0))
+#else
 		if (padInfoMode(pad->port,pad->slot,PAD_MODECUREXID,0))
+#endif
 		{
 			pad_wait(pad);
 			pad->actuator = (actuator_t*)malloc(sizeof(actuator_t));

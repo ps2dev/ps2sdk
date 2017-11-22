@@ -12,9 +12,17 @@
 
 #include <erl.h>
 
+#ifdef _XINPUT
+char * erl_id = "libinputx";
+#else
 char * erl_id = "libinput";
+#endif
+
 char * erl_dependancies[] = {
     "libc",
+#ifdef _XINPUT
+    "libmtap",
+#endif
     "libpad",
     0
 };
