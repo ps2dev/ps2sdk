@@ -12,7 +12,11 @@
 
 #include <erl.h>
 
+#ifdef _XPAD
+char * erl_id = "libpadx";
+#else
 char * erl_id = "libpad";
+#endif
 
 char * erl_dependancies[] = {
     "libkernel",

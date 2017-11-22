@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-EE_INCS += -I$(PS2SDKSRC)/ee/rpc/padx/include -I$(PS2SDKSRC)/ee/rpc/multitap/include
+EE_INCS += -I$(PS2SDKSRC)/ee/rpc/pad/include -I$(PS2SDKSRC)/ee/rpc/multitap/include
 
 EE_OBJS = input.o erl-support.o
 
