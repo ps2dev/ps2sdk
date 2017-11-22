@@ -26,7 +26,7 @@ IOP_INCS := $(IOP_INCS) -I$(IOP_SRC_DIR) -I$(IOP_SRC_DIR)include -I$(IOP_INC_DIR
 # C compiler flags
 # -fno-builtin is required to prevent the GCC built-in functions from being included,
 #   for finer-grained control over what goes into each IRX.
-IOP_CFLAGS := -D_IOP -fno-builtin -O2 -G0 -Wall $(IOP_INCS) $(IOP_CFLAGS)
+IOP_CFLAGS := -D_IOP -fno-builtin -Os -G0 -Wall $(IOP_INCS) $(IOP_CFLAGS)
 # Linker flags
 IOP_LDFLAGS := -nostdlib -s $(IOP_LDFLAGS)
 
