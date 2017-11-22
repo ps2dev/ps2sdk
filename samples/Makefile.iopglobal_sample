@@ -25,7 +25,7 @@ IOP_INCS := -I$(PS2SDK)/iop/include -I$(PS2SDK)/common/include \
 # C compiler flags
 # -fno-builtin is required to prevent the GCC built-in functions from being included,
 #   for finer-grained control over what goes into each IRX.
-IOP_CFLAGS := $(CFLAGS_TARGET) -D_IOP -fno-builtin -O2 -G0 $(IOP_INCS) $(IOP_CFLAGS)
+IOP_CFLAGS := $(CFLAGS_TARGET) -D_IOP -fno-builtin -Os -G0 $(IOP_INCS) $(IOP_CFLAGS)
 # linker flags
 IOP_LDFLAGS := $(LDFLAGS_TARGET) -nostdlib -L$(PS2SDK)/iop/lib $(IOP_LDFLAGS)
 
