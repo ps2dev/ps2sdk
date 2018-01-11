@@ -54,6 +54,9 @@ static int ata_evflg = -1;
 
 //Workarounds
 static u8 ata_disable_lba48 = 0;	//Please read the comments in _start().
+#ifdef ATA_GAMESTAR_WORKAROUND
+static u8 ata_gamestar_workaround = 0;
+#endif
 
 /* Local device info kept for drives 0 and 1.  */
 static ata_devinfo_t atad_devinfo[2];
@@ -223,6 +226,19 @@ int _start(int argc, char *argv[])
 		The obvious workaround here would be to disable 48-bit LBA support when ATAD is loaded on a PSX. */
 	ata_disable_lba48 = (SPD_REG16(SPD_R_REV_3) & SPD_CAPS_DVR)?1:0;
 
+#ifdef ATA_GAMESTAR_WORKAROUND
+	/*	Some compatible adaptors may malfunction if transfers are not done according to the old ps2atad design.
+		Official adaptors appear to have a 0x0001 set for this register, but not compatibles.
+		While official I/O to this register are 8-bit, some compatibles have a 0x01 for the lower 8-bits,
+		but the upper 8-bits contain some random value. Hence perform a 16-bit read instead. */
+	if(SPD_REG16(0x20) != 1) {
+		ata_gamestar_workaround = 1;
+		M_PRINTF("Compatible adaptor detected.\n");
+	} else {
+		ata_gamestar_workaround = 0;
+	}   
+#endif
+
 	if ((ata_evflg = ata_create_event_flag()) < 0) {
 		M_PRINTF("Couldn't create event flag, exiting.\n");
 		res = 1;
@@ -232,8 +248,14 @@ int _start(int argc, char *argv[])
 	/* In v1.04, PIO mode 0 was set here. In late versions, it is set in ata_init_devices(). */
 	dev9RegisterIntrCb(1, &ata_intr_cb);
 	dev9RegisterIntrCb(0, &ata_intr_cb);
+#ifdef ATA_GAMESTAR_WORKAROUND
+	if (!ata_gamestar_workaround) {
+#endif
 	dev9RegisterPreDmaCb(0, &ata_pre_dma_cb);
 	dev9RegisterPostDmaCb(0, &ata_post_dma_cb);
+#ifdef ATA_GAMESTAR_WORKAROUND
+	}
+#endif
 
 	if ((res = RegisterLibraryEntries(&_exp_atad)) != 0) {
 		M_PRINTF("Library is already registered, exiting.\n");
@@ -823,11 +845,22 @@ int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir)
 		}
 
 		for(retries = 3; retries > 0; retries--) {
+#ifdef ATA_GAMESTAR_WORKAROUND
+			/* Due to the retry loop, put this call (for the GameStar workaround) here instead of the old location. */
+			if (ata_gamestar_workaround)
+				ata_set_dir(dir);
+#endif
+
 			if ((res = ata_io_start(buf, len, 0, len, sector, lcyl, hcyl, select, command)) != 0)
 				break;
 
+#ifdef ATA_GAMESTAR_WORKAROUND
+			if (!ata_gamestar_workaround)
+				ata_set_dir(dir);
+#else
 			/* Set up (part of) the transfer here. In v1.04, this was called at the top of the outer loop. */
 			ata_set_dir(dir);
+#endif
 
 			res = ata_io_finish();
 
@@ -1060,7 +1093,11 @@ static void ata_set_dir(int dir)
 	val = SPD_REG16(SPD_R_IF_CTRL) & 1;
 	val |= (dir == ATA_DIR_WRITE) ? 0x4c : 0x4e;
 	SPD_REG16(SPD_R_IF_CTRL) = val;
+#ifdef ATA_GAMESTAR_WORKAROUND
+	SPD_REG16(SPD_R_XFR_CTRL) = dir | (ata_gamestar_workaround ? 0x86 : 0x6);
+#else
 	SPD_REG16(SPD_R_XFR_CTRL) = dir | 0x6;	//In v1.04, DMA was enabled here (0x86 instead of 0x6)
+#endif
 }
 
 static void ata_pio_mode(int mode)

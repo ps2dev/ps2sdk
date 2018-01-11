@@ -661,9 +661,8 @@ static int dev9_smap_init(void)
 	//Do not perform SMAP initialization if the SPEED device does not have such an interface
 	if (!(SPD_REG16(SPD_R_REV_3)&SPD_CAPS_SMAP)
 #ifdef DEV9_GAMESTAR_WORKAROUND
-	/*	If this adaptor is a GameStar compatible adaptor, do not initialize SMAP.
-		A GameStar masquerades as a SCPH-10281, but does not have SMAP implemented correctly.
-		Official adaptors appear to have a 0x0001 set for this register, but not the GameStar.
+	/*	If this adaptor is a compatible adaptor, do not initialize SMAP.
+		Official adaptors appear to have a 0x0001 set for this register, but not compatibles.
 		While official I/O to this register are 8-bit, some compatibles have a 0x01 for the lower 8-bits,
 		but the upper 8-bits contain some random value. Hence perform a 16-bit read instead. */
 	|| (SPD_REG16(0x20) != 1)
