@@ -31,4 +31,10 @@
 /** ERRor */
 #define USBMASS_DEV_STAT_ERR	0x80
 
+//Device events
+enum USBMASS_DEV_EV{
+	USBMASS_DEV_EV_CONN	= 0,
+	USBMASS_DEV_EV_DISCONN
+};
+
 #endif /* __USBHDFSD_COMMON_H__ */

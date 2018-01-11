@@ -27,11 +27,6 @@ typedef struct UsbMassDeviceInfo{
 	unsigned int MaxLBA;
 } UsbMassDeviceInfo_t;
 
-enum USBMASS_DEV_EV{
-	USBMASS_DEV_EV_CONN	= 0,
-	USBMASS_DEV_EV_DISCONN
-};
-
 typedef void (*usbmass_cb_t)(int cause);
 
 struct _cache_set;
