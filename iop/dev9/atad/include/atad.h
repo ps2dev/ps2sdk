@@ -55,6 +55,7 @@ int ata_io_finish(void);
 
 int ata_get_error(void);
 
+#define ata_device_dma_transfer ata_device_sector_io //Backward-compatibility
 int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir);
 
 //DRM functions that were meant to keep users from sharing disks (and hence the contained content). Supported by only Sony-modified HDDs (e.g. the SCPH-20400).
@@ -77,6 +78,7 @@ int ata_device_idle_immediate(int device);
 #define I_ata_io_start DECLARE_IMPORT(6, ata_io_start)
 #define I_ata_io_finish DECLARE_IMPORT(7, ata_io_finish)
 #define I_ata_get_error DECLARE_IMPORT(8, ata_get_error)
+#define I_ata_device_dma_transfer I_ata_device_sector_io //Backward-compatibility
 #define I_ata_device_sector_io DECLARE_IMPORT(9, ata_device_sector_io)
 #define I_ata_device_sce_sec_set_password DECLARE_IMPORT(10, ata_device_sce_sec_set_password)
 #define I_ata_device_sce_sec_unlock DECLARE_IMPORT(11, ata_device_sce_sec_unlock)

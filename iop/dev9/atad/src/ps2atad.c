@@ -52,7 +52,8 @@ IRX_ID(MODNAME, 2, 4);
 static int ata_devinfo_init = 0;
 static int ata_evflg = -1;
 
-static u8 Disable48bitLBA = 0;	//Please read the comments in _start().
+//Workarounds
+static u8 ata_disable_lba48 = 0;	//Please read the comments in _start().
 
 /* Local device info kept for drives 0 and 1.  */
 static ata_devinfo_t atad_devinfo[2];
@@ -174,19 +175,22 @@ static void ata_ultra_dma_mode(int mode);
 extern struct irx_export_table _exp_atad;
 
 //In v1.04, DMA was enabled in ata_set_dir() instead.
-static void AtadPreDmaCb(int bcr, int dir){
+static void ata_pre_dma_cb(int bcr, int dir)
+{
 	USE_SPD_REGS;
 
 	SPD_REG16(SPD_R_XFR_CTRL)|=0x80;
 }
 
-static void AtadPostDmaCb(int bcr, int dir){
+static void ata_post_dma_cb(int bcr, int dir)
+{
 	USE_SPD_REGS;
 
 	SPD_REG16(SPD_R_XFR_CTRL)&=~0x80;
 }
 
-static int ata_create_event_flag(void) {
+static int ata_create_event_flag(void)
+{
 	iop_event_t event;
 
 	event.attr = EA_SINGLE;	//In v1.04, EA_MULTI was specified.
@@ -217,7 +221,7 @@ int _start(int argc, char *argv[])
 		In the eyes of Sony, there isn't a problem because none of their retail PlayStation 2 software ever supported 48-bit LBA.
 
 		The obvious workaround here would be to disable 48-bit LBA support when ATAD is loaded on a PSX. */
-	Disable48bitLBA = (SPD_REG16(SPD_R_REV_3) & SPD_CAPS_DVR)?1:0;
+	ata_disable_lba48 = (SPD_REG16(SPD_R_REV_3) & SPD_CAPS_DVR)?1:0;
 
 	if ((ata_evflg = ata_create_event_flag()) < 0) {
 		M_PRINTF("Couldn't create event flag, exiting.\n");
@@ -228,8 +232,8 @@ int _start(int argc, char *argv[])
 	/* In v1.04, PIO mode 0 was set here. In late versions, it is set in ata_init_devices(). */
 	dev9RegisterIntrCb(1, &ata_intr_cb);
 	dev9RegisterIntrCb(0, &ata_intr_cb);
-	dev9RegisterPreDmaCb(0, &AtadPreDmaCb);
-	dev9RegisterPostDmaCb(0, &AtadPostDmaCb);
+	dev9RegisterPreDmaCb(0, &ata_pre_dma_cb);
+	dev9RegisterPostDmaCb(0, &ata_post_dma_cb);
 
 	if ((res = RegisterLibraryEntries(&_exp_atad)) != 0) {
 		M_PRINTF("Library is already registered, exiting.\n");
@@ -1002,7 +1006,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 		/* This section is to detect whether the HDD supports 48-bit LBA
 		   (IDENITFY DEVICE bit 10 word 83) and get the total sectors from
 		   either words(61:60) for 28-bit or words(103:100) for 48-bit.  */
-		if (!Disable48bitLBA && (ata_param[ATA_ID_COMMAND_SETS_SUPPORTED] & 0x0400)) {
+		if (!ata_disable_lba48 && (ata_param[ATA_ID_COMMAND_SETS_SUPPORTED] & 0x0400)) {
 			atad_devinfo[i].lba48 = 1;
 			/* I don't think anyone would use a >2TB HDD but just in case.  */
 			if (ata_param[ATA_ID_48BIT_SECTOTAL_HI]) {
