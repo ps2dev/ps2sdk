@@ -15,6 +15,9 @@ ATA_MWDMA_MODES ?= 0
 #Enable to enable support for PIO modes 0-4 (as in early ATAD modules), instead of just PIO mode 0.
 ATA_ALL_PIO_MODES ?= 0
 
+#Disable to disable the workaround for bad GameStar compatible adaptors.
+ATA_GAMESTAR_WORKAROUND ?= 1
+
 IOP_BIN ?= ps2atad.irx
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include
@@ -30,6 +33,10 @@ endif
 
 ifeq ($(ATA_ALL_PIO_MODES),1)
 IOP_CFLAGS += -DATA_ALL_PIO_MODES=1
+endif
+
+ifeq ($(ATA_GAMESTAR_WORKAROUND),1)
+IOP_CFLAGS += -DATA_GAMESTAR_WORKAROUND=1
 endif
 
 include $(PS2SDKSRC)/Defs.make
