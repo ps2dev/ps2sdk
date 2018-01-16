@@ -253,6 +253,7 @@ int mcClose(int fd);
  */
 int mcSeek(int fd, int offset, int origin);
 
+
 /** read from file on memcard
  * mcSync returns:	0 or more = number of bytes read from memcard
  *					< 0 = error

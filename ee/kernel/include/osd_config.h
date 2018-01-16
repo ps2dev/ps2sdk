@@ -56,6 +56,12 @@ enum TV_SCREEN_TYPES{
 	TV_SCREEN_169
 };
 
+/** Video output type values */
+enum VIDEO_OUTPUT_TYPES{
+	VIDEO_OUTPUT_RGB	= 0,
+	VIDEO_OUTPUT_COMPONENT
+};
+
 /** date format values returned by: int getDateFormat(void) */
 enum DATE_FORMAT_TYPES{
 	DATE_YYYYMMDD	= 0,
@@ -93,19 +99,21 @@ typedef struct {
  * (Not supported by unpatched, early kernels. Do NOT invoke GetOsdConfigParam2 or SetOsdConfigParam2 on one!)
  */
 typedef struct {
-/*00*/u16 reserved:4;
+/*00*/u8 format;
+
+/*00*/u8 reserved:4;
 	/** 0=standard(winter), 1=daylight savings(summer) */
-/*04*/u16 daylightSaving:1;
+/*04*/u8 daylightSaving:1;
 	/** 0=24 hour, 1=12 hour */
-/*05*/u16 timeFormat:1;
+/*05*/u8 timeFormat:1;
 	/** 0=YYYYMMDD, 1=MMDDYYYY, 2=DDMMYYYY */
-/*06*/u16 dateFormat:2;
+/*06*/u8 dateFormat:2;
 
 //Only used if ConfigParam.version = 2
 	/** Set to 2 */
-/*08*/u8 version;
+/*00*/u8 version;
 	/** The true language, unlike the one from ConfigParam */
-/*16*/u8 language;
+/*00*/u8 language;
 } Config2Param;
 
 #ifdef __cplusplus
