@@ -167,12 +167,12 @@ static iop_device_t dev9x_device =
 };
 
 static int print_help(void)
-{
-	printf("Usage:\n");
-	printf("  %s [-sa] <attribute>]\n", mod_name);
-	printf("      -sa  You can specify attibute of sempahore for queuing thread.\n");
-	printf("           List of possible <attribute>:\n");
-	printf("             SA_THPRI(default), SA_THFIFO\n");
+{	//The original made a printf() call for each line.
+	printf(	"Usage:\n"
+		"  %s [-sa] <attribute>]\n"
+		"      -sa  You can specify attibute of sempahore for queuing thread.\n"
+		"           List of possible <attribute>:\n"
+		"             SA_THPRI(default), SA_THFIFO\n", mod_name);
 
 	return MODULE_NO_RESIDENT_END;
 }
@@ -391,49 +391,63 @@ void dev9IntrDisable(int mask)
 }
 
 /* Export 5 */
-int dev9DmaTransfer(int ctrl, void *buf, int bcr, int dir)
+int dev9DmaTransfer(int device, void *buf, int bcr, int dir)
 {
 	USE_SPD_REGS;
 	volatile iop_dmac_chan_t *dev9_chan = (iop_dmac_chan_t *)DEV9_DMAC_BASE;
-	int res = 0, dmactrl;
+	int res, dmactrl, OldState;
 
-	switch(ctrl){
-	case 0:
-	case 1:	dmactrl = ctrl;
-		break;
-
-	case 2:
-	case 3:
-		if (dev9_predma_cbs[ctrl] == NULL)	return -1;
-		if (dev9_postdma_cbs[ctrl] == NULL)	return -1;
-		dmactrl = (4 << ctrl);
-		break;
-
-	default:
-		return -1;
+	if(device >= 2)
+	{
+		if (dev9_predma_cbs[device] == NULL)	return -1;
+		if (dev9_postdma_cbs[device] == NULL)	return -1;
 	}
 
 	if ((res = WaitSema(dma_lock_sem)) < 0)
 		return res;
 
-	SPD_REG16(SPD_R_DMA_CTRL) = (SPD_REG16(SPD_R_REV_1)<17)?(dmactrl&0x03)|0x04:(dmactrl&0x01)|0x06;
+	switch (device)
+	{
+		case 0:
+			dmactrl = 0;
+			break;
+		case 1:
+			dmactrl = 1;
+			break;
+#ifdef DEV9_PSX_SUPPORT
+		//Used for the PSX
+		case 2:
+			dmactrl = 0x10;
+			break;
+		case 3:
+			dmactrl = 0x20;
+			break;
+#endif
+		default:
+			dmactrl = 0;
+	}
 
-	if (dev9_predma_cbs[ctrl])
-		dev9_predma_cbs[ctrl](bcr, dir);
+	SPD_REG16(SPD_R_DMA_CTRL) = (SPD_REG16(SPD_R_REV_1) < 17) ? (dmactrl & 0x03) | 0x04 : dmactrl | 0x06;
+
+	if (dev9_predma_cbs[device])
+		dev9_predma_cbs[device](bcr, dir);
 
 	dev9_chan->madr = (u32)buf;
+
+	/* Older versions of DEV9 do not suspend interrupts. Not sure why this must be done though. */
+	CpuSuspendIntr(&OldState);
 	dev9_chan->bcr  = bcr;
 	dev9_chan->chcr = DMAC_CHCR_30|DMAC_CHCR_TR|DMAC_CHCR_CO|(dir & DMAC_CHCR_DR);
+	CpuResumeIntr(OldState);
 
 	/* Wait for DMA to complete. Do not use a semaphore as thread switching hurts throughput greatly.  */
-	while(dev9_chan->chcr & DMAC_CHCR_TR){}
-	res = 0;
+	while(dev9_chan->chcr & DMAC_CHCR_TR) {}
 
-	if (dev9_postdma_cbs[ctrl])
-		dev9_postdma_cbs[ctrl](bcr, dir);
+	if (dev9_postdma_cbs[device])
+		dev9_postdma_cbs[device](bcr, dir);
 
 	SignalSema(dma_lock_sem);
-	return res;
+	return 0;
 }
 
 static int read_eeprom_data(void)
@@ -584,7 +598,7 @@ static int dev9_init(int sema_attr)
 	return 0;
 }
 
-#ifndef SKIP_SMAP_INIT
+#ifndef DEV9_SKIP_SMAP_INIT
 static int dev9_smap_read_phy(volatile u8 *emac3_regbase, unsigned int address, unsigned int *data){
 	unsigned int i, PHYRegisterValue;
 	int result;
@@ -743,17 +757,17 @@ static int speed_device_init(void)
 	const char *spdnames[] = { "(unknown)", "TS", "ES1", "ES2" };
 	int idx, res;
 	u16 spdrev;
-#ifndef SKIP_SMAP_INIT
+#ifndef DEV9_SKIP_SMAP_INIT
 	int i;
 #endif
 
 	eeprom_data[0] = 0;
 
-#ifndef SKIP_SMAP_INIT
+#ifndef DEV9_SKIP_SMAP_INIT
 	for(i = 0; i < 8; i++) {
 #endif
 		if (dev9_device_probe() < 0) {
-			M_PRINTF("PC card or expansion device isn't connected.\n");
+			M_PRINTF("No device.\n");
 			return -1;
 		}
 
@@ -772,7 +786,7 @@ static int speed_device_init(void)
 			return -1;
 		}
 
-#ifndef SKIP_SMAP_INIT
+#ifndef DEV9_SKIP_SMAP_INIT
 		if((res = dev9_smap_init()) == 0){
 			break;
 		}
@@ -795,7 +809,7 @@ static int speed_device_init(void)
 	else if (spdrev < 9 || (spdrev < 16 || spdrev > 17))
 		idx = 0;	/* Unknown revision */
 
-	M_PRINTF("SPEED chip '%s', revision 0x%0X\n", spdnames[idx], spdrev);
+	M_PRINTF("SPEED chip '%s', revision %0x\n", spdnames[idx], spdrev);
 	return 0;
 }
 
@@ -1105,7 +1119,7 @@ static int pcmcia_init(int sema_attr)
 	if (RegisterLibraryEntries(&_exp_dev9) != 0)
 		return 1;
 
-	M_PRINTF("CXD9566 (PCMCIA type) initialized.\n");
+	M_PRINTF("CXD9566 (PCMCIA) driver start.\n");
 	return 0;
 }
 
@@ -1180,6 +1194,6 @@ static int expbay_init(int sema_attr)
 	if (RegisterLibraryEntries(&_exp_dev9) != 0)
 		return 1;
 
-	M_PRINTF("CXD9611 (Expansion Bay type) initialized.\n");
+	M_PRINTF("CXD9611 (SSBUS Buffer) driver start.\n");
 	return 0;
 }

@@ -7,15 +7,22 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 #Enable to disable initialization of SMAP within DEV9 (i.e. clone adaptor compatibility).
-SKIP_SMAP_INIT ?= 0
+DEV9_SKIP_SMAP_INIT ?= 0
+
+#Enable to enable support for the PSX's devices
+DEV9_PSX_SUPPORT ?= 1
 
 IOP_BIN ?= ps2dev9.irx
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/poweroff/include
 IOP_OBJS = ps2dev9.o exports.o imports.o
 
-ifeq ($(SKIP_SMAP_INIT),1)
-IOP_CFLAGS += -DSKIP_SMAP_INIT=1
+ifeq ($(DEV9_SKIP_SMAP_INIT),1)
+IOP_CFLAGS += -DDEV9_SKIP_SMAP_INIT=1
+endif
+
+ifeq ($(DEV9_PSX_SUPPORT),1)
+IOP_CFLAGS += -DDEV9_PSX_SUPPORT=1
 endif
 
 include $(PS2SDKSRC)/Defs.make
