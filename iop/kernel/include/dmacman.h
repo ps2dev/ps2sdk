@@ -68,8 +68,8 @@ enum _iop_dmac_ch {
 	IOP_DMAC_SPU,		IOP_DMAC_PIO,		IOP_DMAC_OTC,	IOP_DMAC_SPU2,
 	IOP_DMAC_DEV9,		IOP_DMAC_SIF0,		IOP_DMAC_SIF1,	IOP_DMAC_SIO2in,
 	IOP_DMAC_SIO2out,	IOP_DMAC_FDMA0,		IOP_DMAC_FDMA1,	IOP_DMAC_FDMA2,
-	IOP_DMAC_67 = 67,
-	IOP_DMAC_USB = 85,
+	IOP_DMAC_CPU = 67,	//'C'
+	IOP_DMAC_USB = 85,	//'U'
 };
 
 /* Note that these are far from official names.  */
@@ -106,16 +106,16 @@ u32 dmac_get_dicr2(void);
 
 /* Initialize the given channel and start the transfer.  Returns 1 if the
    transfer was started, and 0 on error.  */
-int dmac_request(u32 channel, void * addr, u32 size, u32 count, int dir);
+int dmac_request(u32 channel, void * addr, u32 size, u32 count, int dir);	//sceSetSliceDMA
 
 /* Start a transfer on the given channel.  */
-void dmac_transfer(u32 channel);
+void dmac_transfer(u32 channel);	//sceStartDMA
 
 /* Set the DPCRn value for a specific channel.  */
-void dmac_ch_set_dpcr(u32 channel, u32 val);
+void dmac_ch_set_dpcr(u32 channel, u32 val);	//sceSetDMAPriority
 
-void dmac_enable(u32 channel);
-void dmac_disable(u32 channel);
+void dmac_enable(u32 channel);	//sceEnableDMAChannel
+void dmac_disable(u32 channel);	//sceDisableDMAChannel
 
 #define dmacman_IMPORTS_start DECLARE_IMPORT_TABLE(dmacman, 1, 1)
 #define dmacman_IMPORTS_end END_IMPORT_TABLE
@@ -139,8 +139,8 @@ void dmac_disable(u32 channel);
 #define I_dmac_set_dicr2 DECLARE_IMPORT(22, dmac_set_dicr2)
 #define I_dmac_get_dicr2 DECLARE_IMPORT(23, dmac_get_dicr2)
 #define I_dmac_request DECLARE_IMPORT(28, dmac_request)
-#define I_dmac_ch_set_dpcr DECLARE_IMPORT(33, dmac_ch_set_dpcr)
 #define I_dmac_transfer DECLARE_IMPORT(32, dmac_transfer)
+#define I_dmac_ch_set_dpcr DECLARE_IMPORT(33, dmac_ch_set_dpcr)
 #define I_dmac_enable DECLARE_IMPORT(34, dmac_enable)
 #define I_dmac_disable DECLARE_IMPORT(35, dmac_disable)
 
