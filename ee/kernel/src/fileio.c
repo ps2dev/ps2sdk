@@ -210,7 +210,8 @@ int fioOpen(const char *name, int mode)
 		result=(_fio_block_mode == FIO_NOWAIT)?0:_fio_recv_data[0];
 	}
 	else
-	{
+	{	//Signal semaphore to avoid a deadlock if SifCallRpc fails.
+		SignalSema(_fio_completion_sema);
 		result=res;
 	}
 
@@ -238,7 +239,8 @@ int fioClose(int fd)
 		result=arg.result;
 	}
 	else
-	{
+	{	//Signal semaphore to avoid a deadlock if SifCallRpc fails.
+		SignalSema(_fio_completion_sema);
 		result=res;
 	}
 
@@ -295,7 +297,8 @@ int fioRead(int fd, void *ptr, int size)
 		result=(_fio_block_mode == FIO_NOWAIT)?0:_fio_recv_data[0];
 	}
 	else
-	{
+	{	//Signal semaphore to avoid a deadlock if SifCallRpc fails.
+		SignalSema(_fio_completion_sema);
 		result=res;
 	}
 
@@ -347,7 +350,8 @@ int fioWrite(int fd, const void *ptr, int size)
 		result=(_fio_block_mode == FIO_NOWAIT)?0:_fio_recv_data[0];
 	}
 	else
-	{
+	{	//Signal semaphore to avoid a deadlock if SifCallRpc fails.
+		SignalSema(_fio_completion_sema);
 		result=res;
 	}
 
@@ -385,7 +389,8 @@ int fioLseek(int fd, int offset, int whence)
 		result=arg.p.result;
 	}
 	else
-	{
+	{	//Signal semaphore to avoid a deadlock if SifCallRpc fails.
+		SignalSema(_fio_completion_sema);
 		result=res;
 	}
 
@@ -425,7 +430,8 @@ int fioIoctl(int fd, int request, void *data)
 		result=arg.p.result;
 	}
 	else
-	{
+	{	//Signal semaphore to avoid a deadlock if SifCallRpc fails.
+		SignalSema(_fio_completion_sema);
 		result=res;
 	}
 
@@ -456,7 +462,8 @@ int fioRemove(const char *name)
 		result=arg.result;
 	}
 	else
-	{
+	{	//Signal semaphore to avoid a deadlock if SifCallRpc fails.
+		SignalSema(_fio_completion_sema);
 		result=res;
 	}
 
@@ -487,7 +494,8 @@ int fioMkdir(const char* path)
 		result=arg.result;
 	}
 	else
-	{
+	{	//Signal semaphore to avoid a deadlock if SifCallRpc fails.
+		SignalSema(_fio_completion_sema);
 		result=res;
 	}
 
@@ -518,7 +526,8 @@ int fioRmdir(const char* dirname)
 		result=arg.result;
 	}
 	else
-	{
+	{	//Signal semaphore to avoid a deadlock if SifCallRpc fails.
+		SignalSema(_fio_completion_sema);
 		result=res;
 	}
 
@@ -595,7 +604,8 @@ int fioDopen(const char *name)
 		result=arg.result;
 	}
 	else
-	{
+	{	//Signal semaphore to avoid a deadlock if SifCallRpc fails.
+		SignalSema(_fio_completion_sema);
 		result=res;
 	}
 
@@ -625,7 +635,8 @@ int fioDclose(int fd)
 		result=arg.result;
 	}
 	else
-	{
+	{	//Signal semaphore to avoid a deadlock if SifCallRpc fails.
+		SignalSema(_fio_completion_sema);
 		result=res;
 	}
 
@@ -664,7 +675,8 @@ int fioDread(int fd, fio_dirent_t *buf)
 		result=arg.p.result;
 	}
 	else
-	{
+	{	//Signal semaphore to avoid a deadlock if SifCallRpc fails.
+		SignalSema(_fio_completion_sema);
 		result=res;
 	}
 
@@ -704,7 +716,8 @@ int fioGetstat(const char *name, fio_stat_t *buf)
 		result=arg.p.result;
 	}
 	else
-	{
+	{	//Signal semaphore to avoid a deadlock if SifCallRpc fails.
+		SignalSema(_fio_completion_sema);
 		result=res;
 	}
 
@@ -743,7 +756,8 @@ int fioChstat(const char *name, fio_stat_t *buf, u32 cbit)
 		result=arg.p.result;
 	}
 	else
-	{
+	{	//Signal semaphore to avoid a deadlock if SifCallRpc fails.
+		SignalSema(_fio_completion_sema);
 		result=res;
 	}
 
@@ -774,7 +788,8 @@ int fioFormat(const char *name)
 		result=arg.result;
 	}
 	else
-	{
+	{	//Signal semaphore to avoid a deadlock if SifCallRpc fails.
+		SignalSema(_fio_completion_sema);
 		result=res;
 	}
 
