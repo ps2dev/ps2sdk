@@ -10,7 +10,6 @@
 #include <netman.h>
 
 #define NETMAN_RPC_NUMBER	0x00004239
-#define NETMAN_RPC_BUFF_SIZE	128
 
 enum NETMAN_EE_RPC_FUNC_NUMS{
 	NETMAN_EE_RPC_FUNC_INIT=0x00,
@@ -36,6 +35,10 @@ struct NetManEEInitResult{
 	void *FrameBuffer;
 };
 
+struct NetManRegNetworkStack{
+	void *FrameBufferStatus;
+};
+
 struct NetManRegNetworkStackResult{
 	s32 result;
 	void *FrameBuffer;
@@ -46,18 +49,13 @@ struct NetManQueryMainNetIFResult{
 	char name[NETMAN_NETIF_NAME_MAX_LEN];
 };
 
-#define NETMAN_MAX_FRAME_SIZE	1520
-#define NETMAN_RPC_BLOCK_SIZE	63
-
-struct PacketReqs{
-	u16 count;
-	u16 length[NETMAN_RPC_BLOCK_SIZE];
-};
+#define NETMAN_MAX_FRAME_SIZE	1536	//Maximum 1518 bytes, rounded up to nearest multiple of 64-byte units
+#define NETMAN_RPC_BLOCK_SIZE	64
 
 struct NetManIoctl{
 	u32 command;
 	u8 args[64];
-	u8 args_len;
+	u32 args_len;
 	void *output;
 	u32 length;
 };

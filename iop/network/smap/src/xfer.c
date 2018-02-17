@@ -123,8 +123,9 @@ int SMAPSendPacket(const void *data, unsigned int length){
 		}
 
 		smap_regbase=SmapDriverData.smap_regbase;
+
 		BD_data_ptr=SMAP_REG16(SMAP_R_TXFIFO_WR_PTR);
-		BD_ptr=&tx_bd[SmapDriverData.TxBDIndex&0x3F];
+		BD_ptr=&tx_bd[SmapDriverData.TxBDIndex&(SMAP_BD_MAX_ENTRY-1)];
 
 		if((i=SmapDmaTransfer(SmapDriverData.smap_regbase, (void*)data, length, DMAC_FROM_MEM))<0){
 			i=0;

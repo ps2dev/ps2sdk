@@ -14,26 +14,43 @@ static int NETMAN_RpcSvr_threadID=-1;
 static unsigned char NETMAN_RpcSvr_ThreadStack[0x1000] ALIGNED(16);
 static unsigned char IsInitialized=0;
 
-static u8 *FrameBuffer;
+static u8 *FrameBuffer = NULL;
+static u8 *RxIOPFrameBuffer;
 static unsigned short int RxBufferRdPtr;
-
 extern void *_gp;
+
+static void ClearBufferLen(int index)
+{
+	static u32 zero ALIGNED(16) = 0;
+
+	SifDmaTransfer_t dmat;
+
+	//Transfer to IOP RAM
+	dmat.src = (void*)&zero;
+	dmat.dest = &RxIOPFrameBuffer[index * NETMAN_MAX_FRAME_SIZE];
+	dmat.size = 16;
+	dmat.attr = 0;
+	while(SifSetDma(&dmat, 1)==0){ };
+}
 
 /* Main EE RPC thread. */
 static void *NETMAN_EE_RPC_Handler(int fnum, void *buffer, int NumBytes)
 {
-	unsigned int PacketNum;
 	void *data, *result, *payload;
-	u16 PacketLength;
+	vu32 *pPacketLength;
+	u32 PacketLength;
 	void *packet;
 
 	switch(fnum)
 	{
 		case NETMAN_EE_RPC_FUNC_INIT:
-			if(FrameBuffer == NULL) FrameBuffer = memalign(64, NETMAN_MAX_FRAME_SIZE*NETMAN_RPC_BLOCK_SIZE);
+			RxIOPFrameBuffer = *(void**)buffer;
+
+			if(FrameBuffer == NULL) FrameBuffer = memalign(64, NETMAN_MAX_FRAME_SIZE * NETMAN_RPC_BLOCK_SIZE);
 
 			if(FrameBuffer != NULL)
 			{
+				memset(UNCACHED_SEG(FrameBuffer), 0, NETMAN_MAX_FRAME_SIZE * NETMAN_RPC_BLOCK_SIZE);
 				RxBufferRdPtr = 0;
 				((struct NetManEEInitResult *)buffer)->FrameBuffer = FrameBuffer;
 				((struct NetManEEInitResult *)buffer)->result = 0;
@@ -46,17 +63,20 @@ static void *NETMAN_EE_RPC_Handler(int fnum, void *buffer, int NumBytes)
 			if(FrameBuffer != NULL)
 			{
 				free(FrameBuffer);
-				FrameBuffer=NULL;
+				FrameBuffer = NULL;
 			}
 			result=NULL;
 			break;
 		case NETMAN_EE_RPC_FUNC_HANDLE_PACKETS:
 			if(FrameBuffer != NULL)
 			{
-				for(PacketNum=0; PacketNum<((struct PacketReqs*)buffer)->count; PacketNum++)
+				while(1)
 				{
-					data=UNCACHED_SEG(&FrameBuffer[RxBufferRdPtr * NETMAN_MAX_FRAME_SIZE]);
-					PacketLength=((struct PacketReqs*)buffer)->length[RxBufferRdPtr];
+					pPacketLength = (vu32*)UNCACHED_SEG(&FrameBuffer[RxBufferRdPtr * NETMAN_MAX_FRAME_SIZE]);
+					if((PacketLength = *pPacketLength) < 1)
+						break;
+
+					data = UNCACHED_SEG(&FrameBuffer[RxBufferRdPtr * NETMAN_MAX_FRAME_SIZE + 16]);
 
 					if((packet = NetManNetProtStackAllocRxPacket(PacketLength, &payload)) != NULL)
 					{
@@ -64,13 +84,14 @@ static void *NETMAN_EE_RPC_Handler(int fnum, void *buffer, int NumBytes)
 						NetManNetProtStackEnQRxPacket(packet);
 					}
 
+					*pPacketLength = 0;
+					ClearBufferLen(RxBufferRdPtr);
 					//Increment read pointer by one place.
 					RxBufferRdPtr = (RxBufferRdPtr + 1) % NETMAN_RPC_BLOCK_SIZE;
 				}
+			}
 
-				*(u32 *)buffer=PacketNum;
-			}else *(u32 *)buffer=0;
-
+			*(u32 *)buffer=0;
 			result=buffer;
 			break;
 		case NETMAN_EE_RPC_FUNC_HANDLE_LINK_STATUS_CHANGE:
@@ -91,7 +112,7 @@ static struct t_SifRpcServerData cb_srv;
 
 static void NETMAN_RPC_Thread(void *arg)
 {
-	static unsigned char cb_rpc_buffer[NETMAN_RPC_BUFF_SIZE] __attribute__((aligned(64)));
+	static unsigned char cb_rpc_buffer[64] __attribute__((aligned(64)));
 
 	SifSetRpcQueue(&cb_queue, NETMAN_RpcSvr_threadID);
 	SifRegisterRpc(&cb_srv, NETMAN_RPC_NUMBER, &NETMAN_EE_RPC_Handler, cb_rpc_buffer, NULL, NULL, &cb_queue);
