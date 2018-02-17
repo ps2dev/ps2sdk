@@ -17,7 +17,7 @@
 
 /* Data used for registering the RPC server. */
 static SifRpcServerData_t rpc_sdata;
-static unsigned char rpc_buffer[NETMAN_RPC_BUFF_SIZE];
+static unsigned char rpc_buffer[80];
 static SifRpcDataQueue_t rpc_qdata;
 
 static union{
@@ -30,6 +30,7 @@ static union{
 
 /* Packet transmission buffer. The EE will DMA transfer the packet to be transmitted directly into this buffer before invoking FUNC_SEND_PACKET. */
 static u8 *TxFrameBuffer = NULL;
+static u8 *EEFrameBufferStatus = NULL;
 static unsigned short int IOPFrameBufferRdPtr;
 
 static int RpcThreadID = -1;
@@ -81,20 +82,39 @@ static void unregisterEENetworkStack(void)
 			TxFrameBuffer = NULL;
 		}
 
-		IOPFrameBufferRdPtr = 0;
+		EEFrameBufferStatus = NULL;
 	}
+}
+
+static void ClearBufferLen(int index)
+{
+	static u32 zero[4] = {0};
+	SifDmaTransfer_t dmat;
+	int dmat_id, OldState;
+
+	//Transfer to EE RAM
+	dmat.src = (void*)zero;
+	dmat.dest = &EEFrameBufferStatus[index * 16];
+	dmat.size = 16;
+	dmat.attr = 0;
+
+	do{
+		CpuSuspendIntr(&OldState);
+		dmat_id = sceSifSetDma(&dmat, 1);
+		CpuResumeIntr(OldState);
+	}while(dmat_id == 0);
 }
 
 static void *NETMAN_rpc_handler(int fno, void *buffer, int size)
 {
 	static int ResultValue;
 	void *result;
-	unsigned int i;
+	vu32 *pPacketLength;
+	u32 PacketLength;
 
 	switch(fno)
 	{
 		case NETMAN_IOP_RPC_FUNC_INIT:
-			IOPFrameBufferRdPtr = 0;
 			ResultValue=NetManInitRPCClient();
 			result=&ResultValue;
 			break;
@@ -106,11 +126,14 @@ static void *NETMAN_rpc_handler(int fno, void *buffer, int size)
 		case NETMAN_IOP_RPC_FUNC_REG_NETWORK_STACK:
 			result = &SifRpcTxBuffer;
 
-			if(TxFrameBuffer == NULL) TxFrameBuffer = malloc(NETMAN_MAX_FRAME_SIZE*NETMAN_RPC_BLOCK_SIZE);
+			if(TxFrameBuffer == NULL) TxFrameBuffer = malloc(NETMAN_MAX_FRAME_SIZE * NETMAN_RPC_BLOCK_SIZE);
 
 			if(TxFrameBuffer != NULL)
 			{
+				EEFrameBufferStatus = ((struct NetManRegNetworkStack*)buffer)->FrameBufferStatus;
+				memset(TxFrameBuffer, 0, NETMAN_MAX_FRAME_SIZE * NETMAN_RPC_BLOCK_SIZE);
 				SifRpcTxBuffer.RegNetworkStackResult.FrameBuffer = TxFrameBuffer;
+				IOPFrameBufferRdPtr = 0;
 				ResultValue = NetManRegisterNetworkStack(&RpcStack);
 			}else{
 				ResultValue = -ENOMEM;
@@ -126,16 +149,23 @@ static void *NETMAN_rpc_handler(int fno, void *buffer, int size)
 		case NETMAN_IOP_RPC_FUNC_SEND_PACKETS:
 			if(TxFrameBuffer!=NULL)
 			{
-				for(i=0; i<((struct PacketReqs*)buffer)->count; i++)
+				while(1)
 				{
-					NetManNetIFSendPacket(&TxFrameBuffer[IOPFrameBufferRdPtr * NETMAN_MAX_FRAME_SIZE], ((struct PacketReqs*)buffer)->length[IOPFrameBufferRdPtr]);
+					pPacketLength = (vu32*)&TxFrameBuffer[IOPFrameBufferRdPtr * NETMAN_MAX_FRAME_SIZE];
+					if((PacketLength = *pPacketLength) < 1)
+						break;
+
+					NetManNetIFSendPacket(&TxFrameBuffer[IOPFrameBufferRdPtr * NETMAN_MAX_FRAME_SIZE + 16], PacketLength);
+
+					*pPacketLength = 0;
+					ClearBufferLen(IOPFrameBufferRdPtr);
+
 					//Increment read pointer by one place.
 					IOPFrameBufferRdPtr = (IOPFrameBufferRdPtr + 1) % NETMAN_RPC_BLOCK_SIZE;
 				}
+			}
 
-				ResultValue = i;
-			}else ResultValue = 0;
-
+			ResultValue = 0;
 			result=&ResultValue;
 			break;
 		case NETMAN_IOP_RPC_FUNC_IOCTL:

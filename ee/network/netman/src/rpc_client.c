@@ -15,6 +15,7 @@ static union {
 	s32 mode;
 	struct NetManIoctl IoctlArgs;
 	char netifName[NETMAN_NETIF_NAME_MAX_LEN];
+	struct NetManRegNetworkStack NetStack;
 	u8 buffer[128];
 }TransmitBuffer ALIGNED(64);
 
@@ -30,8 +31,7 @@ static int NetManIOSemaID = -1, NetManTxSemaID = -1;
 
 static unsigned short int IOPFrameBufferWrPtr;
 static u8 *IOPFrameBuffer = NULL;	/* On the IOP side. */
-
-static struct PacketReqs PacketReqs ALIGNED(64);
+static u8 *FrameBufferStatus = NULL;
 
 static int TxThreadID = -1;
 
@@ -92,7 +92,7 @@ int NetManInitRPCClient(void){
 		ThreadData.stack=TxThreadStack;
 		ThreadData.stack_size=sizeof(TxThreadStack);
 		ThreadData.gp_reg=&_gp;
-		ThreadData.initial_priority=0x57;	//I would design this to have a lower priority than the TCP/IP stack, but somehow that results in worse sending performance (I guess because the TCP/IP stack takes quite a bit of runtime).
+		ThreadData.initial_priority=0x57;	//Must have a higher priority than the TCP/IP stack to ensure transmission throughput and to avoid busy-looping over TxThread.
 		ThreadData.attr=ThreadData.option=0;
 
 		if((TxThreadID=CreateThread(&ThreadData)) < 0)
@@ -131,14 +131,25 @@ int NetManRPCRegisterNetworkStack(void)
 
 	WaitSema(NetManIOSemaID);
 
-	if((result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_REG_NETWORK_STACK, 0, NULL, 0, &ReceiveBuffer, sizeof(struct NetManRegNetworkStackResult), NULL, NULL))>=0)
+	if(FrameBufferStatus == NULL) FrameBufferStatus = memalign(64, NETMAN_RPC_BLOCK_SIZE * 16);
+
+	if(FrameBufferStatus != NULL)
 	{
-		if((result=ReceiveBuffer.NetStackResult.result) == 0)
+		memset(UNCACHED_SEG(FrameBufferStatus), 0, NETMAN_RPC_BLOCK_SIZE * 16);
+		TransmitBuffer.NetStack.FrameBufferStatus = FrameBufferStatus;
+		IOPFrameBufferWrPtr = 0;
+
+		if((result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_REG_NETWORK_STACK, 0, &TransmitBuffer, sizeof(struct NetManRegNetworkStack), &ReceiveBuffer, sizeof(struct NetManRegNetworkStackResult), NULL, NULL))>=0)
 		{
-			IOPFrameBuffer=ReceiveBuffer.NetStackResult.FrameBuffer;
-			memset(&PacketReqs, 0, sizeof(PacketReqs));
-			IOPFrameBufferWrPtr = 0;
+			if((result=ReceiveBuffer.NetStackResult.result) == 0)
+			{
+				IOPFrameBuffer=ReceiveBuffer.NetStackResult.FrameBuffer;
+			}
 		}
+	}
+	else
+	{
+		result = -ENOMEM;
 	}
 
 	SignalSema(NetManIOSemaID);
@@ -155,6 +166,9 @@ int NetManRPCUnregisterNetworkStack(void)
 	result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_UNREG_NETWORK_STACK, 0, NULL, 0, NULL, 0, NULL, NULL);
 	IOPFrameBuffer = NULL;
 	IOPFrameBufferWrPtr = 0;
+
+	free(FrameBufferStatus);
+	FrameBufferStatus = NULL;
 
 	SignalSema(NetManIOSemaID);
 
@@ -198,87 +212,60 @@ int NetManRpcIoctl(unsigned int command, void *args, unsigned int args_len, void
 	return result;
 }
 
-static int NetmanTxWaitingThread = -1;
-
-static void TxEndCallback(void *arg)
-{
-	PacketReqs.count -= ReceiveBuffer.result;
-
-	if(NetmanTxWaitingThread >= 0)
-	{
-		iWakeupThread(NetmanTxWaitingThread);
-		NetmanTxWaitingThread = -1;
-	}
-}
+static u8 NetmanTxRequest = 0;
 
 static void TxThread(void *arg)
 {
-	int ThreadToWakeUp;
-
 	while(1)
 	{
-		SleepThread();
+		while(NetmanTxRequest == 0)
+			SleepThread();
 
-		if(PacketReqs.count > 0)
-		{
-			while(PacketReqs.count > 0)
-			{
-				WaitSema(NetManIOSemaID);
-				while(SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_SEND_PACKETS, 0, &PacketReqs, sizeof(PacketReqs), &ReceiveBuffer, sizeof(ReceiveBuffer.result), &TxEndCallback, NULL) < 0){};
-				SignalSema(NetManIOSemaID);
-			}
-		}
-		else
-		{
-			if(NetmanTxWaitingThread >= 0)
-			{
-				DI();
-				ThreadToWakeUp=NetmanTxWaitingThread;
-				NetmanTxWaitingThread=-1;
-				EI();
-				WakeupThread(ThreadToWakeUp);
-			}
-		}
+		NetmanTxRequest = 0;
+
+		WaitSema(NetManIOSemaID);
+		while(SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_SEND_PACKETS, 0, NULL, 0, NULL, 0, NULL, NULL) < 0){ };
+		SignalSema(NetManIOSemaID);
 	}
 }
 
 //Only one thread can enter this critical section!
 static void EnQFrame(const void *frame, unsigned int length)
 {
-	SifDmaTransfer_t dmat;
-	int dmat_id;
+	SifDmaTransfer_t dmat[2];
+	int dmat_id, WakeupTxThread;
 
 	//Write back D-cache, before performing a DMA transfer.
-	SifWriteBackDCache((void*)frame, length);
+	SifWriteBackDCache((void*)frame, (length + 63) & ~63);
+
+	//Prepare DMA tags
+	dmat[0].src = (void*)frame;
+	dmat[0].dest = &IOPFrameBuffer[IOPFrameBufferWrPtr * NETMAN_MAX_FRAME_SIZE + 16];
+	dmat[0].size = (length + 15) & ~15;
+	dmat[0].attr = 0;
+	dmat[1].src = (void*)&FrameBufferStatus[IOPFrameBufferWrPtr * 16];
+	dmat[1].dest = &IOPFrameBuffer[IOPFrameBufferWrPtr * NETMAN_MAX_FRAME_SIZE];
+	dmat[1].size = 16;
+	dmat[1].attr = 0;
 
 	//Wait for a spot to be freed up.
-	while(PacketReqs.count + 1 >= NETMAN_RPC_BLOCK_SIZE)
-	{
-		NetmanTxWaitingThread = GetThreadId();
-		WakeupThread(TxThreadID);
-		SleepThread();
-	}
-
-	//Transfer to IOP RAM
-	dmat.src = (void*)frame;
-	dmat.dest = &IOPFrameBuffer[IOPFrameBufferWrPtr * NETMAN_MAX_FRAME_SIZE];
-	dmat.size = length;
-	dmat.attr = 0;
-	while((dmat_id = SifSetDma(&dmat, 1))==0){};
+	while(*(vu32*)UNCACHED_SEG(&FrameBufferStatus[IOPFrameBufferWrPtr * 16]) > 0){}
 
 	//Record the frame length.
-	PacketReqs.length[IOPFrameBufferWrPtr] = length;
+	*(vu32*)UNCACHED_SEG(&FrameBufferStatus[IOPFrameBufferWrPtr * 16]) = length;
 
-	DI();
-	//Update the frame count.
-	PacketReqs.count++;
-	EI();
+	//Transfer to IOP RAM
+	while((dmat_id = SifSetDma(dmat, 2))==0){ };
 
 	//Increase write pointer by one position.
 	IOPFrameBufferWrPtr = (IOPFrameBufferWrPtr + 1) % NETMAN_RPC_BLOCK_SIZE;
 
 	//Signal the transmission thread that there are more frames to transmit.
-	WakeupThread(TxThreadID);
+	WakeupTxThread = (NetmanTxRequest == 0);
+	NetmanTxRequest = 1;
+
+	if(WakeupTxThread)
+		WakeupThread(TxThreadID);
 
 	//Ensure that the frame is copied over before returning (so that the buffer can be freed).
 	while(SifDmaStat(dmat_id) >= 0){};
