@@ -1,4 +1,4 @@
-PlayStation 2 Network Manager (NETMAN)	- 2016/12/25
+PlayStation 2 Network Manager (NETMAN)	- 2018/02/25
 ----------------------------------------------------
 
 For "end-user" developers who want to bring network support to their software:
@@ -52,3 +52,6 @@ For developers who want to develop their own network protocol stack:
 	On shutdown, NetManDeinit() should be invoked.
 
 	For working examples, please refer to ee/network/tcpip and iop/tcpip/tcpip-netman.
+
+Note regarding SIFCMD:
+	NETMAN uses SIFCMD 0x8000000D for transferring frames between the EE and IOP.

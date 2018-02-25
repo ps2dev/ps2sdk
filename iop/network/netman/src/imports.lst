@@ -10,7 +10,6 @@ loadcore_IMPORTS_end
 
 sifman_IMPORTS_start
 I_sceSifSetDma
-I_sceSifDmaStat
 sifman_IMPORTS_end
 
 sifcmd_IMPORTS_start
@@ -19,6 +18,9 @@ I_sceSifBindRpc
 I_sceSifSetRpcQueue
 I_sceSifRegisterRpc
 I_sceSifRpcLoop
+I_sceSifAddCmdHandler
+I_sceSifRemoveCmdHandler
+I_sceSifSendCmd
 sifcmd_IMPORTS_end
 
 stdio_IMPORTS_start
@@ -46,6 +48,7 @@ I_TerminateThread
 I_DeleteThread
 I_GetThreadId
 I_DelayThread
+I_iWakeupThread
 thbase_IMPORTS_end
 
 thevent_IMPORTS_start
