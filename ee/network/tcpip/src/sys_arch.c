@@ -132,6 +132,7 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 
 	if((MBox=malloc(sizeof(struct MboxData)))!=NULL)
 	{
+		//Last = first, empty mbox.
 		MBox->LastMessage=MBox->FirstMessage=NULL;
 
 		sema.attr = 0;
@@ -200,11 +201,16 @@ static void RetrieveMbxInternal(sys_mbox_t mBox, arch_message **message)
 
 	DI();
 
-	*message=mBox->FirstMessage;
+	*message=mBox->FirstMessage;	//Take first message in mbox
+
+	//The next message is next. If there is no next message, NULL is assigned,
 	NextMessage=(unsigned int)(*message)->next!=0xFFFFFFFF?(*message)->next:NULL;
-	if(mBox->FirstMessage==mBox->LastMessage)
-		mBox->LastMessage=NextMessage;
-	mBox->FirstMessage=NextMessage;
+
+	//if the mbox only had one message, then update LastMessage as well.
+	if(mBox->FirstMessage == mBox->LastMessage)
+		mBox->LastMessage = NULL;
+
+	mBox->FirstMessage = NextMessage;	//The next message becomes the first message. Or NULL, if there are no next messages.
 
 	EI();
 }
@@ -289,9 +295,10 @@ static void SendMbx(sys_mbox_t *mbox, arch_message *msg, void *sys_msg){
 
 	/* Store the message and update the message chain for this message box. */
 	msg->sys_msg = sys_msg;
-	if((*mbox)->FirstMessage==NULL) (*mbox)->FirstMessage=msg;
-	if((*mbox)->LastMessage!=NULL) (*mbox)->LastMessage->next=msg;
-	(*mbox)->LastMessage=msg;
+	msg->next = NULL;
+	if((*mbox)->FirstMessage==NULL) (*mbox)->FirstMessage=msg;	//If this is the first message, it goes at the front.
+	if((*mbox)->LastMessage!=NULL) (*mbox)->LastMessage->next=msg;	//Otherwise, it becomes the next message of the last message.
+	(*mbox)->LastMessage=msg;					//The message becomes the new message at the end of the queue.
 
 	EI();
 	SignalSema((*mbox)->MessageCountSema);
