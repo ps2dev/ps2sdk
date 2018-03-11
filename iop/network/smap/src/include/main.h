@@ -37,6 +37,7 @@ struct SmapDriverData{
 	unsigned char TxBDIndex;
 	unsigned char RxBDIndex;
 	unsigned char TxDNVBDIndex;
+	void *packetToSend;
 	int Dev9IntrEventFlag;
 	int TxEndEventFlag;
 	int IntrHandlerThreadID;
@@ -61,6 +62,7 @@ int DisplayBanner(void);
 int smap_init(int argc, char *argv[]);
 int SMAPStart(void);
 void SMAPStop(void);
+void SMAPXmit(void);
 int SMAPGetMACAddress(u8 *buffer);
 
 #include "xfer.h"

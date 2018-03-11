@@ -1,2 +1,3 @@
 int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData);
-int SMAPSendPacket(const void *data, unsigned int length);
+int HandleTxReqs(struct SmapDriverData *SmapDrivPrivData);
+

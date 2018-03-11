@@ -99,9 +99,10 @@ void NetManUnregisterNetworkStack(void)
 	}
 }
 
-int NetManNetIFSendPacket(const void *packet, unsigned int length)
+void NetManNetIFXmit(void)
 {
-	return IsInitialized?NetManRpcNetIFSendPacket(packet, length):-1;
+	if(IsInitialized)
+		NetManRpcNetIFXmit();
 }
 
 int NetManIoctl(unsigned int command, void *arg, unsigned int arg_len, void *output, unsigned int length)
@@ -123,4 +124,15 @@ void NetManNetProtStackEnQRxPacket(void *packet)
 {
 	if(IsNetStackInitialized)
 		MainNetProtStack.EnQRxPacket(packet);
+}
+
+int NetManTxPacketNext(void **payload)
+{
+	return IsInitialized?MainNetProtStack.NextTxPacket(payload):-1;
+}
+
+void NetManTxPacketDeQ(void)
+{
+	if(IsInitialized)
+		MainNetProtStack.DeQTxPacket();
 }

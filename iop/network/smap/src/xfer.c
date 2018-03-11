@@ -48,10 +48,20 @@ static inline void CopyFromFIFO(volatile u8 *smap_regbase, void *buffer, unsigne
 		result=0;
 	}
 
-	if(result<length){
-		for(i=result; i<length; i+=4){
-			((u32*)buffer)[i/4]=SMAP_REG32(SMAP_R_RXFIFO_DATA);
-		}
+	for(i=result; i<length; i+=4){
+		((u32*)buffer)[i/4]=SMAP_REG32(SMAP_R_RXFIFO_DATA);
+	}
+}
+
+static inline void CopyToFIFO(volatile u8 *smap_regbase, const void *buffer, unsigned int length){
+	int i, result;
+
+	if((result=SmapDmaTransfer(smap_regbase, (void*)buffer, length, DMAC_FROM_MEM))<0){
+		result=0;
+	}
+
+	for(i=result; i<length; i+=4){
+		SMAP_REG32(SMAP_R_TXFIFO_DATA)=((u32*)buffer)[i/4];
 	}
 }
 
@@ -109,58 +119,53 @@ int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData){
 	return NumPacketsReceived;
 }
 
-int SMAPSendPacket(const void *data, unsigned int length){
-	int result, i, OldState;
+int HandleTxReqs(struct SmapDriverData *SmapDrivPrivData){
+	int result, length;
+	void *data;
 	USE_SMAP_TX_BD;
 	volatile u8 *smap_regbase;
 	volatile smap_bd_t *BD_ptr;
 	u16 BD_data_ptr;
 	unsigned int SizeRounded;
 
-	SaveGP();
-
-	if(SmapDriverData.SmapIsInitialized){
-		SizeRounded=(length+3)&~3;
-		/*	Unlike the SONY implementation, LWIP expects packet transmission to either
-			always succeed or to fail due to an unrecoverable error. This means that the driver
-			should wait for transmissions to complete, if the Tx buffer is full. */
-		while((SmapDriverData.NumPacketsInTx>=SMAP_BD_MAX_ENTRY) || (SmapDriverData.TxBufferSpaceAvailable<SizeRounded)){
-			SetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_XMIT);
-			WaitEventFlag(SmapDriverData.TxEndEventFlag, 1, WEF_AND|WEF_CLEAR, NULL);
+	result=0;
+	while(1){
+		if((length = NetManTxPacketNext(&data)) < 1){
+			return result;
 		}
+		SmapDrivPrivData->packetToSend = data;
 
-		smap_regbase=SmapDriverData.smap_regbase;
+		if(SmapDrivPrivData->NumPacketsInTx < SMAP_BD_MAX_ENTRY){
+			if(length <= 0){
+				printf("smap: dropped\n");
+			}
+			else{
+				SizeRounded = (length+3)&~3;
 
-		BD_data_ptr=SMAP_REG16(SMAP_R_TXFIFO_WR_PTR);
-		BD_ptr=&tx_bd[SmapDriverData.TxBDIndex&(SMAP_BD_MAX_ENTRY-1)];
+				if(SmapDrivPrivData->TxBufferSpaceAvailable >= SizeRounded){
+					smap_regbase=SmapDrivPrivData->smap_regbase;
 
-		if((i=SmapDmaTransfer(SmapDriverData.smap_regbase, (void*)data, length, DMAC_FROM_MEM))<0){
-			i=0;
+					BD_data_ptr=SMAP_REG16(SMAP_R_TXFIFO_WR_PTR) + SMAP_TX_BASE;
+					BD_ptr=&tx_bd[SmapDrivPrivData->TxBDIndex&(SMAP_BD_MAX_ENTRY-1)];
+
+					CopyToFIFO(SmapDrivPrivData->smap_regbase, data, length);
+
+					result++;
+					BD_ptr->length=length;
+					BD_ptr->pointer=BD_data_ptr;
+					SMAP_REG8(SMAP_R_TXFIFO_FRAME_INC)=0;
+					BD_ptr->ctrl_stat=SMAP_BD_TX_READY|SMAP_BD_TX_GENFCS|SMAP_BD_TX_GENPAD;
+					SmapDrivPrivData->TxBDIndex++;
+					SmapDrivPrivData->NumPacketsInTx++;
+					SmapDrivPrivData->TxBufferSpaceAvailable-=SizeRounded;
+				}
+				else return result;	//Out of FIFO space
+			}
 		}
+		else return result;	//Queue full
 
-		for(; i<length; i+=4){
-			SMAP_REG32(SMAP_R_TXFIFO_DATA)=((u32*)data)[i/4];
-		}
-
-		BD_ptr->length=length;
-		BD_ptr->pointer=BD_data_ptr;
-		SMAP_REG8(SMAP_R_TXFIFO_FRAME_INC)=0;
-		BD_ptr->ctrl_stat=SMAP_BD_TX_READY|SMAP_BD_TX_GENFCS|SMAP_BD_TX_GENPAD;
-		SmapDriverData.TxBDIndex++;
-
-		CpuSuspendIntr(&OldState);
-		SmapDriverData.NumPacketsInTx++;
-		SmapDriverData.TxBufferSpaceAvailable-=SizeRounded;
-		CpuResumeIntr(OldState);
-
-		SetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_XMIT);
-
-		result=1;
+		SmapDrivPrivData->packetToSend = NULL;
+		NetManTxPacketDeQ();
 	}
-	else result=-1;
-
-	RestoreGP();
-
-	return result;
 }
 

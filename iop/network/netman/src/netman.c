@@ -22,7 +22,7 @@ static char NIFLinkState=0;
 static unsigned char NextNetIFID=0;
 static int NetManIOSemaID;
 
-IRX_ID("Network_Manager", 1, 3);
+IRX_ID("Network_Manager", 2, 1);
 
 extern struct irx_export_table _exp_netman;
 
@@ -135,15 +135,9 @@ void NetManUnregisterNetworkStack(void){
 	SignalSema(NetManIOSemaID);
 }
 
-int NetManNetIFSendPacket(const void *packet, unsigned int length){
-	int result;
-
-	if(MainNetIF!=NULL){
-		result=MainNetIF->xmit(packet, length);
-	}
-	else result=-1;
-
-	return result;
+void NetManNetIFXmit(void){
+	if(MainNetIF != NULL)
+		MainNetIF->xmit();
 }
 
 int NetManIoctl(unsigned int command, void *args, unsigned int args_len, void *output, unsigned int length){
@@ -177,6 +171,15 @@ void NetManNetProtStackFreeRxPacket(void *packet){
 void NetManNetProtStackEnQRxPacket(void *packet){
 	if(IsInitialized)
 		MainNetProtStack.EnQRxPacket(packet);
+}
+
+int NetManTxPacketNext(void **payload){
+	return IsInitialized?MainNetProtStack.NextTxPacket(payload):0;
+}
+
+void NetManTxPacketDeQ(void){
+	if(IsInitialized)
+		MainNetProtStack.DeQTxPacket();
 }
 
 int NetManRegisterNetIF(struct NetManNetIF *NetIF){

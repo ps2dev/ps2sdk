@@ -1,6 +1,6 @@
 void _retonly(){};
 
-DECLARE_EXPORT_TABLE(netman, 2, 1)
+DECLARE_EXPORT_TABLE(netman, 3, 1)
 	DECLARE_EXPORT(_start)
 	DECLARE_EXPORT(_retonly)
 	DECLARE_EXPORT(_retonly)
@@ -8,7 +8,7 @@ DECLARE_EXPORT_TABLE(netman, 2, 1)
 
 	DECLARE_EXPORT(NetManRegisterNetworkStack)
 	DECLARE_EXPORT(NetManUnregisterNetworkStack)
-	DECLARE_EXPORT(NetManNetIFSendPacket)
+	DECLARE_EXPORT(NetManNetIFXmit)
 	DECLARE_EXPORT(NetManIoctl)
 	DECLARE_EXPORT(NetManNetProtStackAllocRxPacket)
 	DECLARE_EXPORT(NetManNetProtStackFreeRxPacket)
@@ -20,4 +20,6 @@ DECLARE_EXPORT_TABLE(netman, 2, 1)
 	DECLARE_EXPORT(NetManSetMainIF)
 	DECLARE_EXPORT(NetManQueryMainIF)
 	DECLARE_EXPORT(NetManSetLinkMode)
+	DECLARE_EXPORT(NetManTxPacketNext)
+	DECLARE_EXPORT(NetManTxPacketDeQ)
 END_EXPORT_TABLE
