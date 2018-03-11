@@ -27,14 +27,14 @@ static union {
 	u8 buffer[128];
 }ReceiveBuffer ALIGNED(64);
 
-static int NetManIOSemaID = -1, NetManTxSemaID = -1;
+static int NetManIOSemaID = -1, NETMAN_Tx_threadID = -1;
+static unsigned char NETMAN_Tx_ThreadStack[0x1000] ALIGNED(16);
 
 static unsigned short int IOPFrameBufferWrPtr;
 static u8 *IOPFrameBuffer = NULL;	/* On the IOP side. */
 static u8 *FrameBufferStatus = NULL;
-static SifCmdHeader_t *SifCmdBuffer = NULL;
 
-static unsigned char IsInitialized=0;
+static unsigned char IsInitialized=0, IsProcessingTx;
 
 static void deinitCleanup(void)
 {
@@ -43,17 +43,21 @@ static void deinitCleanup(void)
 		DeleteSema(NetManIOSemaID);
 		NetManIOSemaID = -1;
 	}
-	if(NetManTxSemaID >= 0)
+	if(NETMAN_Tx_threadID >= 0)
 	{
-		DeleteSema(NetManTxSemaID);
-		NetManTxSemaID = -1;
+		TerminateThread(NETMAN_Tx_threadID);
+		DeleteThread(NETMAN_Tx_threadID);
+		NETMAN_Tx_threadID = -1;
 	}
 }
+
+static void NETMAN_TxThread(void *arg);
 
 int NetManInitRPCClient(void){
 	static const char NetManID[]="NetMan";
 	int result;
 	ee_sema_t SemaData;
+	ee_thread_t thread;
 
 	if(!IsInitialized)
 	{
@@ -67,14 +71,20 @@ int NetManInitRPCClient(void){
 			return NetManIOSemaID;
 		}
 
-		SemaData.max_count=1;
-		SemaData.init_count=1;
-		SemaData.option=(u32)NetManID;
-		SemaData.attr=0;
-		if((NetManTxSemaID=CreateSema(&SemaData)) < 0)
+		thread.func=&NETMAN_TxThread;
+		thread.stack=NETMAN_Tx_ThreadStack;
+		thread.stack_size=sizeof(NETMAN_Tx_ThreadStack);
+		thread.gp_reg=&_gp;
+		thread.initial_priority=0x59;	/* Should be given a lower priority than the protocol stack, so that it can dump frames in the EE and return. */
+		thread.attr=thread.option=0;
+
+		if((NETMAN_Tx_threadID=CreateThread(&thread)) >= 0)
 		{
+			IsProcessingTx = 0;
+			StartThread(NETMAN_Tx_threadID, NULL);
+		} else {
 			deinitCleanup();
-			return NetManTxSemaID;
+			return NETMAN_Tx_threadID;
 		}
 
 		while((SifBindRpc(&NETMAN_rpc_cd, NETMAN_RPC_NUMBER, 0)<0)||(NETMAN_rpc_cd.server==NULL))
@@ -102,9 +112,8 @@ int NetManRPCRegisterNetworkStack(void)
 	WaitSema(NetManIOSemaID);
 
 	if(FrameBufferStatus == NULL) FrameBufferStatus = memalign(64, NETMAN_RPC_BLOCK_SIZE * 16);
-	if(SifCmdBuffer == NULL) SifCmdBuffer = memalign(64, NETMAN_RPC_BLOCK_SIZE * sizeof(SifCmdHeader_t));
 
-	if(FrameBufferStatus != NULL && SifCmdBuffer != NULL)
+	if(FrameBufferStatus != NULL)
 	{
 		memset(UNCACHED_SEG(FrameBufferStatus), 0, NETMAN_RPC_BLOCK_SIZE * 16);
 		TransmitBuffer.NetStack.FrameBufferStatus = FrameBufferStatus;
@@ -140,9 +149,6 @@ int NetManRPCUnregisterNetworkStack(void)
 
 	free(FrameBufferStatus);
 	FrameBufferStatus = NULL;
-
-	free(SifCmdBuffer);
-	SifCmdBuffer = NULL;
 
 	SignalSema(NetManIOSemaID);
 
@@ -186,52 +192,55 @@ int NetManRpcIoctl(unsigned int command, void *args, unsigned int args_len, void
 	return result;
 }
 
-//Only one thread can enter this critical section!
-static void EnQFrame(const void *frame, unsigned int length)
+static void NETMAN_TxThread(void *arg)
 {
+	static SifCmdHeader_t cmd ALIGNED(64);
 	SifCmdHeader_t *pcmd;
-	int dmat_id;
+	int dmat_id, length;
+	void *payload;
 
-	//Unlike the IOP side, there is no need to wait for the command packet to be freed (see comment below).
+	while(1)
+	{
+		SleepThread();
 
-	//Write back D-cache, before performing a DMA transfer.
-	SifWriteBackDCache((void*)frame, (length + 63) & ~63);
+		while((length = NetManTxPacketNext(&payload)) > 0)
+		{
+			IsProcessingTx = 1;
 
-	//Wait for a spot to be freed up.
-	while(*(vu32*)UNCACHED_SEG(&FrameBufferStatus[IOPFrameBufferWrPtr * 16]) != 0){}
+			//Write back D-cache, before performing a DMA transfer.
+			SifWriteBackDCache((void*)payload, (length + 63) & ~63);
 
-	//Prepare SIFCMD packet
-	pcmd = &SifCmdBuffer[IOPFrameBufferWrPtr];
+			//Wait for a spot to be freed up.
+			while(*(vu32*)UNCACHED_SEG(&FrameBufferStatus[IOPFrameBufferWrPtr * 16]) != 0){}
 
-	//Record the frame length.
-	pcmd->opt = (IOPFrameBufferWrPtr & 0xFFFF) | (length << 16);
-	*(vu32*)UNCACHED_SEG(&FrameBufferStatus[IOPFrameBufferWrPtr * 16]) = length;
+			//Prepare SIFCMD packet
+			pcmd = &cmd;
 
-	//Transfer to IOP RAM
-	while((dmat_id = SifSendCmd(NETMAN_SIFCMD_ID, pcmd, sizeof(SifCmdHeader_t),
-					(void*)frame,
-					(void*)&IOPFrameBuffer[IOPFrameBufferWrPtr * NETMAN_MAX_FRAME_SIZE],
-					(length + 15) & ~15)) == 0){ };
+			//Record the frame length.
+			pcmd->opt = (IOPFrameBufferWrPtr & 0xFFFF) | (length << 16);
+			*(vu32*)UNCACHED_SEG(&FrameBufferStatus[IOPFrameBufferWrPtr * 16]) = length;
 
-	//Increase write pointer by one position.
-	IOPFrameBufferWrPtr = (IOPFrameBufferWrPtr + 1) % NETMAN_RPC_BLOCK_SIZE;
+			//Transfer to IOP RAM
+			while((dmat_id = SifSendCmd(NETMAN_SIFCMD_ID, pcmd, sizeof(SifCmdHeader_t),
+							(void*)payload,
+							(void*)&IOPFrameBuffer[IOPFrameBufferWrPtr * NETMAN_MAX_FRAME_SIZE],
+							(length + 15) & ~15)) == 0){ };
 
-	//Ensure that the frame is copied over before returning (so that the buffer can be freed).
-	while(SifDmaStat(dmat_id) >= 0){ };
+			//Increase write pointer by one position.
+			IOPFrameBufferWrPtr = (IOPFrameBufferWrPtr + 1) % NETMAN_RPC_BLOCK_SIZE;
+
+			while(SifDmaStat(dmat_id) >= 0){ };
+			NetManTxPacketDeQ();
+
+			IsProcessingTx = 0;
+		}
+	}
 }
 
-int NetManRpcNetIFSendPacket(const void *packet, unsigned int length)
+void NetManRpcNetIFXmit(void)
 {
-	if(IOPFrameBuffer != NULL)
-	{
-		WaitSema(NetManTxSemaID);
-		EnQFrame(packet, length);
-		SignalSema(NetManTxSemaID);
-
-		return 0;
-	}else{
-		return -1;
-	}
+	if(!IsProcessingTx)
+		WakeupThread(NETMAN_Tx_threadID);
 }
 
 int NetManSetMainIF(const char *name)

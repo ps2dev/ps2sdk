@@ -34,10 +34,10 @@ static u16 *FrameBufferStatus = NULL;
 static u8 *EEFrameBufferStatus = NULL;
 static unsigned short int IOPFrameBufferRdPtr;
 
-static int RpcThreadID = -1, RxThreadID = -1;
-static unsigned char IsInitialized=0, IsRpcStackInitialized=0, IsProcessingRx;
+static int RpcThreadID = -1;
+static unsigned char IsInitialized=0, IsRpcStackInitialized=0;
 
-static void NETMAN_RxThread(void *args);
+static void ClearBufferLen(int index);
 
 static void LinkStateUp(void)
 {
@@ -64,12 +64,28 @@ static void EnQRxPacket(void *packet)
 	NetManRpcProtStackEnQRxPacket(packet);
 }
 
+static int NextTxPacket(void **payload)
+{
+	*payload = &TxFrameBuffer[IOPFrameBufferRdPtr * NETMAN_MAX_FRAME_SIZE];
+	return FrameBufferStatus[IOPFrameBufferRdPtr];
+}
+
+static void DeQTxPacket(void)
+{
+	ClearBufferLen(IOPFrameBufferRdPtr);
+
+	//Increment read pointer by one place.
+	IOPFrameBufferRdPtr = (IOPFrameBufferRdPtr + 1) % NETMAN_RPC_BLOCK_SIZE;
+}
+
 static struct NetManNetProtStack RpcStack={
 	&LinkStateUp,
 	&LinkStateDown,
 	&AllocRxPacket,
 	&FreeRxPacket,
-	&EnQRxPacket
+	&EnQRxPacket,
+	&NextTxPacket,
+	&DeQTxPacket
 };
 
 static void unregisterEENetworkStack(void)
@@ -130,16 +146,11 @@ static void HandleRxEvent(void *packet, void *common)
 
 	FrameBufferStatus[id] = len;
 
-	if(!IsProcessingRx)
-	{
-		IsProcessingRx = 1;
-		iWakeupThread(RxThreadID);
-	}
+	NetManNetIFXmit();
 }
 
 static void *NETMAN_rpc_handler(int fno, void *buffer, int size)
 {
-	iop_thread_t thread;
 	static int ResultValue;
 	void *result;
 
@@ -167,21 +178,10 @@ static void *NETMAN_rpc_handler(int fno, void *buffer, int size)
 				memset(TxFrameBuffer, 0, NETMAN_MAX_FRAME_SIZE * NETMAN_RPC_BLOCK_SIZE);
 				SifRpcTxBuffer.RegNetworkStackResult.FrameBuffer = TxFrameBuffer;
 				IOPFrameBufferRdPtr = 0;
-				IsProcessingRx = 0;
 				ResultValue = NetManRegisterNetworkStack(&RpcStack);
 
 				if(ResultValue == 0)
-				{
-					thread.attr=TH_C;
-					thread.option=0;
-					thread.thread=&NETMAN_RxThread;
-					thread.stacksize=0x600;
-					thread.priority=0x27;	//Should have higher priority than the IF driver thread, in order to dump frames in the IOP before returning.
-
-					StartThread(RxThreadID=CreateThread(&thread), NULL);
-
 					sceSifAddCmdHandler(NETMAN_SIFCMD_ID, &HandleRxEvent, NULL);
-				}
 			}else{
 				ResultValue = -ENOMEM;
 			}
@@ -224,39 +224,6 @@ static void NETMAN_RPC_srv(void *args)
 
 	sceSifRegisterRpc(&rpc_sdata, NETMAN_RPC_NUMBER, &NETMAN_rpc_handler, rpc_buffer, NULL, NULL, &rpc_qdata);
 	sceSifRpcLoop(&rpc_qdata);
-}
-
-static void NETMAN_RxThread(void *args)
-{
-	u32 PacketLength;
-	int OldState;
-	u8 run;
-
-	while(1)
-	{
-		do{
-			CpuSuspendIntr(&OldState);
-			PacketLength = FrameBufferStatus[IOPFrameBufferRdPtr];
-			if(PacketLength > 0)
-			{
-				run = 1;
-			} else {
-				run = 0;
-				IsProcessingRx = 0;
-			}
-			CpuResumeIntr(OldState);
-
-			if(!run)
-				SleepThread();
-		} while(!run);
-
-		NetManNetIFSendPacket(&TxFrameBuffer[IOPFrameBufferRdPtr * NETMAN_MAX_FRAME_SIZE], PacketLength);
-
-		ClearBufferLen(IOPFrameBufferRdPtr);
-
-		//Increment read pointer by one place.
-		IOPFrameBufferRdPtr = (IOPFrameBufferRdPtr + 1) % NETMAN_RPC_BLOCK_SIZE;
-	}
 }
 
 int NetmanInitRPCServer(void)

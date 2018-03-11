@@ -463,14 +463,10 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData){
 				}
 			}
 
-			/*	In the SONY original, the XMIT event handler was here.
-				But for performance, it is moved into SMAPSendPacket() instead.
-				It used to copy the frames into the Tx buffer and set up the BDs.
-				Immediately after that, there was also a call to the TXDNV handler function too.
-
-				After which, the interrupts were re-enabled (see above). */
-			/* if(EFBits&NETDEV_EVENT_XMIT)
-				HandleTxReqs(SmapDrivPrivData);  */
+			/*	Non-Sony: process transmission if the last packet was not sent. Not sure how the Sony system managed to work,
+				but the system does lock up when the queue is filled up and if there is no way to retry transmissions.	*/
+			if((EFBits&SMAP_EVENT_XMIT) || (SmapDrivPrivData->packetToSend != NULL))
+				HandleTxReqs(SmapDrivPrivData);
 			HandleTxIntr(SmapDrivPrivData);
 
 			//TXDNV is not enabled here, but only when frames are transmitted.
@@ -546,6 +542,15 @@ void SMAPStop(void){
 	SaveGP();
 	SetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_STOP);
 	SmapDriverData.NetDevStopFlag=1;
+	RestoreGP();
+}
+
+void SMAPXmit(void){
+	SaveGP();
+	if(QueryIntrContext())
+		iSetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_XMIT);
+	else
+		SetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_XMIT);
 	RestoreGP();
 }
 
@@ -688,8 +693,8 @@ static inline int SetupNetDev(void){
 		0,
 		&SMAPStart,
 		&SMAPStop,
-		&SMAPSendPacket,
-		&SMAPIoctl
+		&SMAPXmit,
+		&SMAPIoctl,
 	};
 
 	EventFlagData.attr=0;

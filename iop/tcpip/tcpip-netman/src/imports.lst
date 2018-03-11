@@ -12,7 +12,7 @@ intrman_IMPORTS_end
 netman_IMPORTS_start
 I_NetManRegisterNetworkStack
 I_NetManUnregisterNetworkStack
-I_NetManNetIFSendPacket
+I_NetManNetIFXmit
 I_NetManIoctl
 netman_IMPORTS_end
 
