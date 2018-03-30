@@ -117,8 +117,7 @@ void *NetManRpcNetProtStackAllocRxPacket(unsigned int length, void **payload)
 	struct NetManPacketBuffer *result;
 
 	//Wait for a free spot to appear in the ring buffer.
-	while(*(vu32*)&FrameBufferStatus[EEFrameBufferWrPtr * 16] != 0)
-		DelayThread(100);
+	while(*(vu32*)&FrameBufferStatus[EEFrameBufferWrPtr * 16] != 0) { }
 
 	//Allocation of PBUF descriptors is tied with the allocation of frame slots in the ring buffer by EnQ.
 	result = &pbufs[EEFrameBufferWrPtr];
