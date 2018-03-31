@@ -138,14 +138,10 @@ void NetManUnregisterNetworkStack(void){
 int NetManNetIFSendPacket(const void *packet, unsigned int length){
 	int result;
 
-	WaitSema(NetManIOSemaID);
-
 	if(MainNetIF!=NULL){
 		result=MainNetIF->xmit(packet, length);
 	}
 	else result=-1;
-
-	SignalSema(NetManIOSemaID);
 
 	return result;
 }
