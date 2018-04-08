@@ -461,12 +461,6 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData){
 						HandleTxIntr(SmapDrivPrivData);
 					}
 				}
-
-				/*	In the SONY original, this was outside of the interrupt event check.
-					Don't waste time re-enabling interrupts, if they were never disabled.
-
-					TXDNV is not enabled here, but only when frames are transmitted. */
-				dev9IntrEnable(DEV9_SMAP_INTR_MASK2);
 			}
 
 			/*	In the SONY original, the XMIT event handler was here.
@@ -479,7 +473,8 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData){
 				HandleTxReqs(SmapDrivPrivData);  */
 			HandleTxIntr(SmapDrivPrivData);
 
-			//dev9IntrEnable(DEV9_SMAP_INTR_MASK2);
+			//TXDNV is not enabled here, but only when frames are transmitted.
+			dev9IntrEnable(DEV9_SMAP_INTR_MASK2);
 
 			//If there are frames to send out, let Tx channel 0 know and enable TXDNV.
 			if(SmapDrivPrivData->NumPacketsInTx>0){
