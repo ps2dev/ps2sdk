@@ -75,7 +75,7 @@ int NetManInitRPCClient(void){
 		thread.stack=NETMAN_Tx_ThreadStack;
 		thread.stack_size=sizeof(NETMAN_Tx_ThreadStack);
 		thread.gp_reg=&_gp;
-		thread.initial_priority=0x59;	/* Should be given a lower priority than the protocol stack, so that it can dump frames in the EE and return. */
+		thread.initial_priority=0x56;	/* Should be given a higher priority than the protocol stack, so that it can dump frames in the EE and return. */
 		thread.attr=thread.option=0;
 
 		if((NETMAN_Tx_threadID=CreateThread(&thread)) >= 0)
