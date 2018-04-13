@@ -28,9 +28,11 @@ static int SmapDmaTransfer(volatile u8 *smap_regbase, void *buffer, unsigned int
 	unsigned int NumBlocks;
 	int result;
 
-	if((NumBlocks=size>>7)>0){
-		if(dev9DmaTransfer(1, buffer, NumBlocks<<16|0x20, direction)>=0){
-			result=NumBlocks<<7;
+	/*	Non-Sony: the original block size was (32*4 = 128) bytes.
+		However, that resulted in slightly lower performance due to the IOP needing to copy more data.	*/
+	if((NumBlocks=size>>6)>0){
+		if(dev9DmaTransfer(1, buffer, NumBlocks<<16|0x10, direction)>=0){
+			result=NumBlocks<<6;
 		}
 		else result=0;
 	}
