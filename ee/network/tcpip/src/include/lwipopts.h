@@ -123,7 +123,9 @@
  * (only needed if you use tcpip.c)
  */
 //SP193: this should be around the size of the TCP window because the TCPIP thread may take a while to execute (non-preemptive multitasking), otherwise incoming frames may get dropped.
+#ifndef LWIP_TCPIP_CORE_LOCKING_INPUT
 #define MEMP_NUM_TCPIP_MSG_INPKT	50
+#endif
 
 /**
  * MEMP_NUM_TCPIP_MSG_API: the number of struct tcpip_msg, which are used
@@ -138,6 +140,16 @@
  * (requires the LWIP_TCP option)
  */
 #define MEMP_NUM_TCP_SEG		TCP_SND_QUEUELEN
+
+/**
+ * LWIP_TCPIP_CORE_LOCKING_INPUT: when LWIP_TCPIP_CORE_LOCKING is enabled,
+ * this lets tcpip_input() grab the mutex for input packets as well,
+ * instead of allocating a message and passing it to tcpip_thread.
+ *
+ * ATTENTION: this does not work when tcpip_input() is called from
+ * interrupt context!
+ */
+#define LWIP_TCPIP_CORE_LOCKING_INPUT	1
 
 /** SYS_LIGHTWEIGHT_PROT
  * define SYS_LIGHTWEIGHT_PROT in lwipopts.h if you want inter-task protection
