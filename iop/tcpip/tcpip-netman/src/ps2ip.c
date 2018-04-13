@@ -417,7 +417,8 @@ static inline int InitLWIPStack(IPAddr *IP, IPAddr *NM, IPAddr *GW){
 		&FreeRxPacket,
 		&EnQRxPacket,
 		&NextTxPacket,
-		&DeQTxPacket
+		&DeQTxPacket,
+		NULL
 	};
 
 	if((result = InitializeLWIP()) != 0)

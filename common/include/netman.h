@@ -17,6 +17,7 @@ struct NetManNetProtStack{
 	void (*EnQRxPacket)(void *packet);
 	int (*NextTxPacket)(void **payload);
 	void (*DeQTxPacket)(void);
+	int (*AfterTxPacket)(void **payload);	//For EE only, peek at the packet after the current packet.
 };
 
 /** Flow-control */
@@ -103,6 +104,8 @@ void NetManNetProtStackFreeRxPacket(void *packet);
 void NetManNetProtStackEnQRxPacket(void *packet);
 int NetManTxPacketNext(void **payload);
 void NetManTxPacketDeQ(void);
+
+int NetManTxPacketAfter(void **payload);	//For EE only, for NETMAN's internal use
 
 /* NETIF flags. */
 /** Set internally by NETMAN. Do not set externally. */

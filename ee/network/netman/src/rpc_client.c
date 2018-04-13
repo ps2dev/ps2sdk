@@ -210,27 +210,34 @@ static void NETMAN_TxThread(void *arg)
 			//Write back D-cache, before performing a DMA transfer.
 			SifWriteBackDCache((void*)payload, (length + 63) & ~63);
 
-			//Wait for a spot to be freed up.
-			while(*(vu32*)UNCACHED_SEG(&FrameBufferStatus[IOPFrameBufferWrPtr * 16]) != 0){}
+			do {
+				//Wait for a spot to be freed up.
+				while(*(vu32*)UNCACHED_SEG(&FrameBufferStatus[IOPFrameBufferWrPtr * 16]) != 0){}
 
-			//Prepare SIFCMD packet
-			pcmd = &cmd;
+				//Prepare SIFCMD packet
+				pcmd = &cmd;
 
-			//Record the frame length.
-			pcmd->opt = (IOPFrameBufferWrPtr & 0xFFFF) | (length << 16);
-			*(vu32*)UNCACHED_SEG(&FrameBufferStatus[IOPFrameBufferWrPtr * 16]) = length;
+				//Record the frame length.
+				pcmd->opt = (IOPFrameBufferWrPtr & 0xFFFF) | (length << 16);
+				*(vu32*)UNCACHED_SEG(&FrameBufferStatus[IOPFrameBufferWrPtr * 16]) = length;
 
-			//Transfer to IOP RAM
-			while((dmat_id = SifSendCmd(NETMAN_SIFCMD_ID, pcmd, sizeof(SifCmdHeader_t),
-							(void*)payload,
-							(void*)&IOPFrameBuffer[IOPFrameBufferWrPtr * NETMAN_MAX_FRAME_SIZE],
-							(length + 15) & ~15)) == 0){ };
+				//Transfer to IOP RAM
+				while((dmat_id = SifSendCmd(NETMAN_SIFCMD_ID, pcmd, sizeof(SifCmdHeader_t),
+								(void*)payload,
+								(void*)&IOPFrameBuffer[IOPFrameBufferWrPtr * NETMAN_MAX_FRAME_SIZE],
+								(length + 15) & ~15)) == 0){ };
 
-			//Increase write pointer by one position.
-			IOPFrameBufferWrPtr = (IOPFrameBufferWrPtr + 1) % NETMAN_RPC_BLOCK_SIZE;
+				//Increase write pointer by one position.
+				IOPFrameBufferWrPtr = (IOPFrameBufferWrPtr + 1) % NETMAN_RPC_BLOCK_SIZE;
 
-			while(SifDmaStat(dmat_id) >= 0){ };
-			NetManTxPacketDeQ();
+				if((length = NetManTxPacketAfter(&payload)) > 0)
+				{	//Write back the cache of the next packet, while waiting.
+					SifWriteBackDCache((void*)payload, (length + 63) & ~63);
+				}
+
+				while(SifDmaStat(dmat_id) >= 0){ };
+				NetManTxPacketDeQ();
+			} while(length > 0);
 
 			IsProcessingTx = 0;
 		}
