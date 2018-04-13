@@ -230,6 +230,20 @@ static void DeQTxPacket(void)
 	}
 }
 
+static int AfterTxPacket(void **payload)
+{
+	int len;
+
+	if(TxTail != NULL && TxTail->next != NULL)
+	{
+		*payload = TxTail->next->payload;
+		len = TxTail->next->len;
+	} else
+		len = 0;
+
+	return len;
+}
+
 static void InitDone(void* pvArg)
 {
 	dbgprintf("InitDone: TCPIP initialized\n");
@@ -292,7 +306,8 @@ int ps2ipInit(struct ip4_addr *ip_address, struct ip4_addr *subnet_mask, struct 
 		&FreeRxPacket,
 		&EnQRxPacket,
 		&NextTxPacket,
-		&DeQTxPacket
+		&DeQTxPacket,
+		&AfterTxPacket
 	};
 
 	NetManInit();

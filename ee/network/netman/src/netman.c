@@ -136,3 +136,8 @@ void NetManTxPacketDeQ(void)
 	if(IsInitialized)
 		MainNetProtStack.DeQTxPacket();
 }
+
+int NetManTxPacketAfter(void **payload)
+{
+	return IsInitialized?MainNetProtStack.AfterTxPacket(payload):-1;
+}
