@@ -17,6 +17,8 @@ I_sceSifCallRpc
 I_sceSifBindRpc
 I_sceSifSetRpcQueue
 I_sceSifRegisterRpc
+I_sceSifRemoveRpc
+I_sceSifRemoveRpcQueue
 I_sceSifRpcLoop
 I_sceSifAddCmdHandler
 I_sceSifRemoveCmdHandler

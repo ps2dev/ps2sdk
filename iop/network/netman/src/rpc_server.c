@@ -110,12 +110,6 @@ static void unregisterEENetworkStack(void)
 	}
 
 	sceSifRemoveCmdHandler(NETMAN_SIFCMD_ID);
-
-	if(RxThreadID >= 0)
-	{
-		TerminateThread(RxThreadID);
-		DeleteThread(RxThreadID);
-	}
 }
 
 static void ClearBufferLen(int index)
@@ -249,6 +243,9 @@ void NetmanDeinitRPCServer(void)
 {
 	if(IsInitialized)
 	{
+		sceSifRemoveRpc(&rpc_sdata, &rpc_qdata);
+		sceSifRemoveRpcQueue(&rpc_qdata);
+
 		TerminateThread(RpcThreadID);
 		DeleteThread(RpcThreadID);
 		IsInitialized=0;
