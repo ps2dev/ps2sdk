@@ -74,12 +74,12 @@ $(EE_OBJS_DIR):
 $(EE_OBJS): | $(EE_OBJS_DIR)
 
 $(EE_BIN): $(EE_OBJS) $(PS2SDKSRC)/ee/startup/obj/crt0.o | $(EE_BIN_DIR)
-	$(EE_CC) $(EE_NO_CRT) -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_CFLAGS) \
+	$(EE_CC) -nostdlib $(EE_NO_CRT) -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_CFLAGS) \
 		-o $(EE_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(EE_OBJS) $(CRTEND_OBJ) $(CRTN_OBJ) $(EE_LDFLAGS) $(EE_LIBS)
 
 $(EE_LIB): $(EE_OBJS) $(EE_LIB:%.a=%.erl) | $(EE_LIB_DIR)
 	$(EE_AR) cru $(EE_LIB) $(EE_OBJS)
 
 $(EE_LIB:%.a=%.erl): $(EE_OBJS) | $(EE_LIB_DIR)
-	$(EE_CC) $(EE_NO_CRT) -Wl,-r -Wl,-d -o $(EE_LIB:%.a=%.erl) $(EE_OBJS)
+	$(EE_CC) -nostdlib $(EE_NO_CRT) -Wl,-r -Wl,-d -o $(EE_LIB:%.a=%.erl) $(EE_OBJS)
 	$(EE_STRIP) --strip-unneeded -R .mdebug.eabi64 -R .reginfo -R .comment $(EE_LIB:%.a=%.erl)

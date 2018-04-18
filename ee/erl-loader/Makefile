@@ -38,9 +38,9 @@ include $(PS2SDKSRC)/ee/Rules.release
 $(EE_OBJS_DIR)erl-loader.o: | $(EE_OBJS_DIR)
 
 $(LOADER_BIN): $(EE_OBJS) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_LIBS) | $(EE_BIN_DIR)
-	$(EE_CC) $(EE_NO_CRT) -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_CFLAGS) \
-	-o $(EE_BIN_DIR)tmp.elf $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_LIBS) $(EE_SRC_DIR)dummy-exports.c
+	$(EE_CC) $(EE_NO_CRT) -nostdlib -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_CFLAGS) \
+	-o $(EE_BIN_DIR)tmp.elf $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_LIBS) -lgcc $(EE_SRC_DIR)dummy-exports.c
 	$(EE_SRC_DIR)build-exports.sh
 	rm $(EE_BIN_DIR)tmp.elf
-	$(EE_CC) $(EE_NO_CRT) -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_CFLAGS) \
-	-o $(LOADER_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_LIBS) $(EE_SRC_DIR)exports.c
+	$(EE_CC) $(EE_NO_CRT) -nostdlib -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_CFLAGS) \
+	-o $(LOADER_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_LIBS) -lgcc $(EE_SRC_DIR)exports.c
