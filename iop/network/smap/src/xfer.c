@@ -73,7 +73,7 @@ int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData){
 	volatile smap_bd_t *PktBdPtr;
 	volatile u8 *smap_regbase;
 	void *pbuf, *payload;
-	u16 ctrl_stat, length, pointer;
+	u16 ctrl_stat, length, pointer, LengthRounded;
 
 	smap_regbase=SmapDrivPrivData->smap_regbase;
 
@@ -82,6 +82,7 @@ int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData){
 	while(1){
 		PktBdPtr=&rx_bd[SmapDrivPrivData->RxBDIndex&(SMAP_BD_MAX_ENTRY-1)];
 		length = PktBdPtr->length;
+		LengthRounded = (length + 3) & ~3;
 		pointer = PktBdPtr->pointer;
 		if(!((ctrl_stat=PktBdPtr->ctrl_stat)&SMAP_BD_RX_EMPTY)){
 			if(ctrl_stat&(SMAP_BD_RX_INRANGE|SMAP_BD_RX_OUTRANGE|SMAP_BD_RX_FRMTOOLONG|SMAP_BD_RX_BADFCS|SMAP_BD_RX_ALIGNERR|SMAP_BD_RX_SHORTEVNT|SMAP_BD_RX_RUNTFRM|SMAP_BD_RX_OVERRUN)){
@@ -96,10 +97,10 @@ int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData){
 				if(ctrl_stat&SMAP_BD_RX_ALIGNERR) SmapDrivPrivData->RuntimeStats.RxFrameBadAlignmentCount++;
 
 				//Original did this whenever a frame is dropped.
-				SMAP_REG16(SMAP_R_RXFIFO_RD_PTR) = pointer + ((length + 3) & ~3);
+				SMAP_REG16(SMAP_R_RXFIFO_RD_PTR) = pointer + LengthRounded;
 			}
 			else{
-				if((pbuf=NetManNetProtStackAllocRxPacket(length, &payload))!=NULL){
+				if((pbuf=NetManNetProtStackAllocRxPacket(LengthRounded, &payload))!=NULL){
 					CopyFromFIFO(SmapDrivPrivData->smap_regbase, payload, length, pointer);
 					NetManNetProtStackEnQRxPacket(pbuf);
 					NumPacketsReceived++;
@@ -107,7 +108,7 @@ int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData){
 				else {
 					SmapDrivPrivData->RuntimeStats.RxAllocFail++;
 					//Original did this whenever a frame is dropped.
-					SMAP_REG16(SMAP_R_RXFIFO_RD_PTR) = pointer + ((length + 3) & ~3);
+					SMAP_REG16(SMAP_R_RXFIFO_RD_PTR) = pointer + LengthRounded;
 				}
 			}
 
