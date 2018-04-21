@@ -40,8 +40,9 @@ static void ClearBufferLen(int index)
 
 static void HandleRxEvent(void *packet, void *common)
 {
-	u16 id = ((SifCmdHeader_t*)packet)->opt & 0xFFFF;
-	u16 len = (((SifCmdHeader_t*)packet)->opt >> 16) & 0xFFFF;
+	struct NetManPktCmd *bd = (struct NetManPktCmd*)&((SifCmdHeader_t*)packet)->opt;
+	u8 id = bd->id;
+	u16 len = bd->length;
 
 	FrameBufferStatus[id] = len;
 

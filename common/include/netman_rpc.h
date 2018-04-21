@@ -49,7 +49,7 @@ struct NetManQueryMainNetIFResult{
 	char name[NETMAN_NETIF_NAME_MAX_LEN];
 };
 
-#define NETMAN_MAX_FRAME_SIZE	1520	//Maximum 1518 bytes, rounded up to nearest multiple of 16-byte units
+#define NETMAN_MAX_FRAME_SIZE	1536	//Maximum 1518 bytes, rounded up to nearest multiple of 16-byte units + 16 (for alignment)
 #define NETMAN_RPC_BLOCK_SIZE	64
 
 struct NetManIoctl{
@@ -63,6 +63,12 @@ struct NetManIoctl{
 struct NetManIoctlResult{
 	s32 result;
 	u8 output[64];
+};
+
+struct NetManPktCmd {
+	u8 id;
+	u8 offset;	//For alignment correction on the EE (unused for IOP->EE).
+	u16 length;
 };
 
 #endif /* __NETMAN_RPC_H__ */

@@ -28,9 +28,14 @@ static union{
 	u8 buffer[80];
 } SifRpcTxBuffer;
 
+struct FrameBufferStatus {
+	u16 len;
+	u16 offset;
+};
+
 /* Packet transmission buffer. The EE will DMA transfer the packet to be transmitted directly into this buffer before invoking FUNC_SEND_PACKET. */
 static u8 *TxFrameBuffer = NULL;
-static u16 *FrameBufferStatus = NULL;
+static struct FrameBufferStatus *FrameBufferStatus = NULL;
 static u8 *EEFrameBufferStatus = NULL;
 static unsigned short int IOPFrameBufferRdPtr;
 
@@ -66,8 +71,8 @@ static void EnQRxPacket(void *packet)
 
 static int NextTxPacket(void **payload)
 {
-	*payload = &TxFrameBuffer[IOPFrameBufferRdPtr * NETMAN_MAX_FRAME_SIZE];
-	return FrameBufferStatus[IOPFrameBufferRdPtr];
+	*payload = &TxFrameBuffer[IOPFrameBufferRdPtr * NETMAN_MAX_FRAME_SIZE + FrameBufferStatus[IOPFrameBufferRdPtr].offset];
+	return FrameBufferStatus[IOPFrameBufferRdPtr].len;
 }
 
 static void DeQTxPacket(void)
@@ -118,7 +123,7 @@ static void ClearBufferLen(int index)
 	SifDmaTransfer_t dmat;
 	int dmat_id, OldState;
 
-	FrameBufferStatus[index] = 0;
+	FrameBufferStatus[index].len = 0;
 
 	//Transfer to EE RAM
 	dmat.src = (void*)zero;
@@ -135,10 +140,13 @@ static void ClearBufferLen(int index)
 
 static void HandleRxEvent(void *packet, void *common)
 {
-	u16 id = ((SifCmdHeader_t*)packet)->opt & 0xFFFF;
-	u16 len = (((SifCmdHeader_t*)packet)->opt >> 16) & 0xFFFF;
+	struct NetManPktCmd *bd = (struct NetManPktCmd*)&((SifCmdHeader_t*)packet)->opt;
+	u8 id = bd->id;
+	u8 offset = bd->offset;
+	u16 len = bd->length;
 
-	FrameBufferStatus[id] = len;
+	FrameBufferStatus[id].len = len;
+	FrameBufferStatus[id].offset = offset;
 
 	NetManNetIFXmit();
 }
@@ -163,7 +171,7 @@ static void *NETMAN_rpc_handler(int fno, void *buffer, int size)
 			result = &SifRpcTxBuffer;
 
 			if(TxFrameBuffer == NULL) TxFrameBuffer = malloc(NETMAN_MAX_FRAME_SIZE * NETMAN_RPC_BLOCK_SIZE);
-			if(FrameBufferStatus == NULL) FrameBufferStatus = malloc(sizeof(u16) * NETMAN_RPC_BLOCK_SIZE);
+			if(FrameBufferStatus == NULL) FrameBufferStatus = malloc(sizeof(struct FrameBufferStatus) * NETMAN_RPC_BLOCK_SIZE);
 
 			if(TxFrameBuffer != NULL && FrameBufferStatus != NULL)
 			{

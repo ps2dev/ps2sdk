@@ -141,14 +141,17 @@ void NetManRpcNetProtStackFreeRxPacket(void *packet)
 static void EnQFrame(const void *frame, unsigned int length)
 {
 	SifCmdHeader_t *pcmd;
+	struct NetManPktCmd *bd;
 
 	//No need to wait for a free spot to appear, as Alloc already took care of that.
 	pcmd = &SifCmdBuffer[EEFrameBufferWrPtr];
 
 	//Prepare SIFCMD packet.
 	//Record the frame length.
+	bd = (struct NetManPktCmd*)&pcmd->opt;
+	bd->id = EEFrameBufferWrPtr;
+	bd->length = length;
 	*(vu32*)&FrameBufferStatus[EEFrameBufferWrPtr * 16] = length;
-	pcmd->opt = (length << 16) | (EEFrameBufferWrPtr & 0xFFFF);
 
 	//Transfer the frame over to the EE
 	//Notify the receive thread of the incoming frame.
