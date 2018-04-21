@@ -184,6 +184,11 @@
  * LWIP_DHCP==1: Enable DHCP module.
  */
 #define LWIP_DHCP		1
+
+/**
+ * DHCP_DOES_ARP_CHECK==1: Do an ARP check on the offered address.
+ */
+#define DHCP_DOES_ARP_CHECK	0	//Don't do the ARP check because an IP address would be first required.
 #endif
 
 /*
