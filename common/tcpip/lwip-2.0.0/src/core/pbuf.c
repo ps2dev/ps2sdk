@@ -354,6 +354,7 @@ pbuf_alloc(pbuf_layer layer, u16_t length, pbuf_type type)
 #if (!defined(_IOP) && !defined(_EE))
     p = (struct pbuf*)mem_malloc(LWIP_MEM_ALIGN_SIZE(SIZEOF_STRUCT_PBUF + offset) + LWIP_MEM_ALIGN_SIZE(length));
 #else
+    //Do not align this, otherwise the final address will not be aligned.
     p = (struct pbuf*)mem_malloc(LWIP_MEM_ALIGN_SIZE(SIZEOF_STRUCT_PBUF) + offset + LWIP_MEM_ALIGN_SIZE(length));
 #endif
     if (p == NULL) {
@@ -363,6 +364,7 @@ pbuf_alloc(pbuf_layer layer, u16_t length, pbuf_type type)
 #if (!defined(_IOP) && !defined(_EE))
     p->payload = LWIP_MEM_ALIGN((void *)((u8_t *)p + SIZEOF_STRUCT_PBUF + offset));
 #else
+    //Do not align this, otherwise the final address will not be aligned.
     p->payload = (void *)((u8_t *)p + SIZEOF_STRUCT_PBUF + offset);
 #endif
     p->len = p->tot_len = length;
@@ -461,7 +463,12 @@ pbuf_alloced_custom(pbuf_layer l, u16_t length, pbuf_type type, struct pbuf_cust
 
   p->pbuf.next = NULL;
   if (payload_mem != NULL) {
+#if (!defined(_IOP) && !defined(_EE))
     p->pbuf.payload = (u8_t *)payload_mem + LWIP_MEM_ALIGN_SIZE(offset);
+#else
+    //Do not align this, otherwise the final address will not be aligned.
+    p->pbuf.payload = (u8_t *)payload_mem + offset;
+#endif
   } else {
     p->pbuf.payload = NULL;
   }
