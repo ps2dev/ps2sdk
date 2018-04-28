@@ -22,6 +22,8 @@
 #define USBMASS_IOCTL_GET_CLUSTER	0x0001
 /** Returns the absolute LBA of the opened file. */
 #define USBMASS_IOCTL_GET_LBA		0x0002
+/** Returns the block device driver name */
+#define USBMASS_IOCTL_GET_DRIVERNAME	0x0003
 
 //Device status bits.
 /** CONNected */
