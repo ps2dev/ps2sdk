@@ -6,7 +6,14 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = iLinkman IEEE1394_disk IEEE1394_bd
+IOP_CFLAGS += -mno-check-zero-division # -DSIF_CALLBACKS_12_13
+
+IOP_INCS += -I$(PS2SDKSRC)/iop/iLink/iLinkman/include
+IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
+
+IOP_OBJS = sbp2_driver.o imports.o main.o scsi.o
 
 include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+include $(PS2SDKSRC)/iop/Rules.bin.make
+include $(PS2SDKSRC)/iop/Rules.make
+include $(PS2SDKSRC)/iop/Rules.release
