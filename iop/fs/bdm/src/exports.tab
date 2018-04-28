@@ -1,0 +1,16 @@
+/**/
+
+DECLARE_EXPORT_TABLE(bdm, 1, 1)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(bdm_connect_bd)
+	DECLARE_EXPORT(bdm_disconnect_bd)
+	DECLARE_EXPORT(bdm_connect_fs)
+	DECLARE_EXPORT(bdm_disconnect_fs)
+	DECLARE_EXPORT(bdm_get_bd)
+	DECLARE_EXPORT(bdm_RegisterCallback)
+END_EXPORT_TABLE
+
+void _retonly() {}
