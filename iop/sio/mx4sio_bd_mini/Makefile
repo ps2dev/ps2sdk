@@ -6,8 +6,8 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = kernel dev9 fs hdd sound tcpip usb system debug memorycard network iLink cdvd sio
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/sio/mx4sio_bd/src/
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
-include $(PS2SDKSRC)/iop/Rules.release
+IOP_CFLAGS += -DMINI_DRIVER
+
+include $(PS2SDKSRC)/iop/sio/mx4sio_bd/Makefile
