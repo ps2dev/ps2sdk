@@ -197,8 +197,8 @@ static void NETMAN_TxThread(void *arg)
 	static SifCmdHeader_t cmd ALIGNED(64);
 	SifCmdHeader_t *pcmd;
 	struct NetManPktCmd *bd;
-	int dmat_id, length, unaligned;
-	void *payload, *payloadAligned;
+	int dmat_id, length, unaligned, unalignedCache;
+	void *payload, *payloadAligned, *payloadCacheAligned;
 
 	while(1)
 	{
@@ -210,8 +210,10 @@ static void NETMAN_TxThread(void *arg)
 
 			//Write back D-cache, before performing a DMA transfer.
 			unaligned = (int)((u32)payload & 15);
+			unalignedCache = (int)((u32)payload & 63);
 			payloadAligned = (void*)((u32)payload & ~15);
-			SifWriteBackDCache(payloadAligned, (length + unaligned + 63) & ~63);
+			payloadCacheAligned = (void*)((u32)payload & ~63);
+			SifWriteBackDCache(payloadCacheAligned, (length + unalignedCache + 63) & ~63);
 
 			do {
 				//Wait for a spot to be freed up.
@@ -239,8 +241,10 @@ static void NETMAN_TxThread(void *arg)
 				if((length = NetManTxPacketAfter(&payload)) > 0)
 				{	//Write back the cache of the next packet, while waiting.
 					unaligned = (int)((u32)payload & 15);
+					unalignedCache = (int)((u32)payload & 63);
 					payloadAligned = (void*)((u32)payload & ~15);
-					SifWriteBackDCache(payloadAligned, (length + unaligned + 63) & ~63);
+					payloadCacheAligned = (void*)((u32)payload & ~63);
+					SifWriteBackDCache(payloadCacheAligned, (length + unalignedCache + 63) & ~63);
 				}
 
 				while(SifDmaStat(dmat_id) >= 0){ };

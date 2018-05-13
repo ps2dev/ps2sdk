@@ -176,7 +176,7 @@ static void *NETMAN_rpc_handler(int fno, void *buffer, int size)
 			if(TxFrameBuffer != NULL && FrameBufferStatus != NULL)
 			{
 				EEFrameBufferStatus = ((struct NetManRegNetworkStack*)buffer)->FrameBufferStatus;
-				memset(FrameBufferStatus, 0, sizeof(u16) * NETMAN_RPC_BLOCK_SIZE);
+				memset(FrameBufferStatus, 0, sizeof(struct FrameBufferStatus) * NETMAN_RPC_BLOCK_SIZE);
 				memset(TxFrameBuffer, 0, NETMAN_MAX_FRAME_SIZE * NETMAN_RPC_BLOCK_SIZE);
 				SifRpcTxBuffer.RegNetworkStackResult.FrameBuffer = TxFrameBuffer;
 				IOPFrameBufferRdPtr = 0;
