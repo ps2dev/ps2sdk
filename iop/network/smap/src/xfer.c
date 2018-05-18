@@ -79,7 +79,9 @@ int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData){
 
 	NumPacketsReceived=0;
 
-	while(1){
+	/*	Non-Sony: Workaround for the hardware BUG whereby the Rx FIFO of the MAL becomes unresponsive or loses frames when under load.
+		Check that there are frames to process, before accessing the BD registers. */
+	while(SMAP_REG8(SMAP_R_RXFIFO_FRAME_CNT) > 0){
 		PktBdPtr = &rx_bd[SmapDrivPrivData->RxBDIndex % SMAP_BD_MAX_ENTRY];
 		ctrl_stat = PktBdPtr->ctrl_stat;
 		if(!(ctrl_stat & SMAP_BD_RX_EMPTY)){
