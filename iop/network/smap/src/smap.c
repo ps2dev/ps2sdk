@@ -348,7 +348,8 @@ static int HandleTxIntr(struct SmapDriverData *SmapDrivPrivData){
 
 	result=0;
 	while(SmapDrivPrivData->NumPacketsInTx>0){
-		if(!((ctrl_stat=tx_bd[SmapDrivPrivData->TxDNVBDIndex&(SMAP_BD_MAX_ENTRY-1)].ctrl_stat)&SMAP_BD_TX_READY)){
+		ctrl_stat = tx_bd[SmapDrivPrivData->TxDNVBDIndex % SMAP_BD_MAX_ENTRY].ctrl_stat;
+		if(!(ctrl_stat & SMAP_BD_TX_READY)){
 			if(ctrl_stat&(SMAP_BD_TX_UNDERRUN|SMAP_BD_TX_LCOLL|SMAP_BD_TX_ECOLL|SMAP_BD_TX_EDEFER|SMAP_BD_TX_LOSSCR)){
 				for(i=0; i < 16; i++)
 					if((ctrl_stat>>i) & 1) SmapDrivPrivData->RuntimeStats.TxErrorCount++;
@@ -544,12 +545,34 @@ void SMAPStop(void){
 	RestoreGP();
 }
 
+static void ClearPacketQueue(struct SmapDriverData *SmapDrivPrivData){
+	int OldState;
+	void *pkt;
+
+	CpuSuspendIntr(&OldState);
+	pkt = SmapDrivPrivData->packetToSend;
+	SmapDrivPrivData->packetToSend = NULL;
+	CpuResumeIntr(OldState);
+
+	if(pkt!=NULL){
+		while(NetManTxPacketNext(&pkt) > 0)
+			NetManTxPacketDeQ();
+	}
+}
+
 void SMAPXmit(void){
 	SaveGP();
-	if(QueryIntrContext())
-		iSetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_XMIT);
-	else
-		SetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_XMIT);
+
+	if(SmapDriverData.LinkStatus){
+		if(QueryIntrContext())
+			iSetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_XMIT);
+		else
+			SetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_XMIT);
+	} else {
+		//No link. Clear the packet queue.
+		ClearPacketQueue(&SmapDriverData);
+	}
+
 	RestoreGP();
 }
 

@@ -16,7 +16,7 @@ Usage: smap [<option>] [thpri=<prio>] [thstack=<stack>] [<conf>]
 	thstack=<stack>:
 		Thread stack size, in bytes or in Kilobytes. Default: 0x1000 bytes.
 			thstack=stackKB	Stack size specified in Kilobytes.
-			thstac=stack	Stack size specified in bytes.
+			thstack=stack	Stack size specified in bytes.
 
 	<conf>:
 		Hardware configuration. For setting the list of supported link speed and duplex settings for auto mode, and the speed and duplex setting to use when in no_auto mode.

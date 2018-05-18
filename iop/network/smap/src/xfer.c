@@ -80,11 +80,13 @@ int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData){
 	NumPacketsReceived=0;
 
 	while(1){
-		PktBdPtr=&rx_bd[SmapDrivPrivData->RxBDIndex&(SMAP_BD_MAX_ENTRY-1)];
-		length = PktBdPtr->length;
-		LengthRounded = (length + 3) & ~3;
-		pointer = PktBdPtr->pointer;
-		if(!((ctrl_stat=PktBdPtr->ctrl_stat)&SMAP_BD_RX_EMPTY)){
+		PktBdPtr = &rx_bd[SmapDrivPrivData->RxBDIndex % SMAP_BD_MAX_ENTRY];
+		ctrl_stat = PktBdPtr->ctrl_stat;
+		if(!(ctrl_stat & SMAP_BD_RX_EMPTY)){
+			length = PktBdPtr->length;
+			LengthRounded = (length + 3) & ~3;
+			pointer = PktBdPtr->pointer;
+
 			if(ctrl_stat&(SMAP_BD_RX_INRANGE|SMAP_BD_RX_OUTRANGE|SMAP_BD_RX_FRMTOOLONG|SMAP_BD_RX_BADFCS|SMAP_BD_RX_ALIGNERR|SMAP_BD_RX_SHORTEVNT|SMAP_BD_RX_RUNTFRM|SMAP_BD_RX_OVERRUN)){
 				for(i=0; i < 16; i++)
 					if((ctrl_stat>>i) & 1) SmapDrivPrivData->RuntimeStats.RxErrorCount++;
@@ -139,17 +141,14 @@ int HandleTxReqs(struct SmapDriverData *SmapDrivPrivData){
 		SmapDrivPrivData->packetToSend = data;
 
 		if(SmapDrivPrivData->NumPacketsInTx < SMAP_BD_MAX_ENTRY){
-			if(length <= 0){
-				printf("smap: dropped\n");
-			}
-			else{
+			if(length > 0){
 				SizeRounded = (length+3)&~3;
 
 				if(SmapDrivPrivData->TxBufferSpaceAvailable >= SizeRounded){
 					smap_regbase=SmapDrivPrivData->smap_regbase;
 
 					BD_data_ptr=SMAP_REG16(SMAP_R_TXFIFO_WR_PTR) + SMAP_TX_BASE;
-					BD_ptr=&tx_bd[SmapDrivPrivData->TxBDIndex&(SMAP_BD_MAX_ENTRY-1)];
+					BD_ptr=&tx_bd[SmapDrivPrivData->TxBDIndex % SMAP_BD_MAX_ENTRY];
 
 					CopyToFIFO(SmapDrivPrivData->smap_regbase, data, length);
 
@@ -163,7 +162,8 @@ int HandleTxReqs(struct SmapDriverData *SmapDrivPrivData){
 					SmapDrivPrivData->TxBufferSpaceAvailable-=SizeRounded;
 				}
 				else return result;	//Out of FIFO space
-			}
+			} else
+				printf("smap: dropped\n");
 		}
 		else return result;	//Queue full
 
