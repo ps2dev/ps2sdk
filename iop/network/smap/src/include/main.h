@@ -21,6 +21,7 @@ struct RuntimeStats{
 	u16 RxFrameBadFCSCount;
 	u16 RxFrameBadAlignmentCount;
 	u32 TxDroppedFrameCount;
+	u32 TxErrorCount;
 	u16 TxFrameLOSSCRCount;
 	u16 TxFrameEDEFERCount;
 	u16 TxFrameCollisionCount;
@@ -32,22 +33,22 @@ struct SmapDriverData{
 	volatile u8 *smap_regbase;
 	volatile u8 *emac3_regbase;
 	unsigned int TxBufferSpaceAvailable;
-	struct RuntimeStats RuntimeStats;
 	unsigned char NumPacketsInTx;
 	unsigned char TxBDIndex;
-	unsigned char RxBDIndex;
 	unsigned char TxDNVBDIndex;
+	unsigned char RxBDIndex;
 	void *packetToSend;
 	int Dev9IntrEventFlag;
-	int TxEndEventFlag;
 	int IntrHandlerThreadID;
-	int NetIFID;
+	unsigned char SmapDriverStarted;	//SMAP driver is started.
 	unsigned char SmapIsInitialized;	//SMAP driver is initialized (software)
 	unsigned char NetDevStopFlag;
 	unsigned char EnableLinkCheckTimer;
 	unsigned char LinkStatus;		//Ethernet link is initialized (hardware)
 	unsigned char LinkMode;
 	iop_sys_clock_t LinkCheckTimer;
+	struct RuntimeStats RuntimeStats;
+	int NetIFID;
 };
 
 /* Event flag bits */
