@@ -419,7 +419,7 @@ size_t mbstowcs(wchar_t *ws, const char *s, size_t n)
   size_t ret;
 
   /* convert the multibyte string to wide-character string. */
-  for (ret = 0; *s != '\0'; n--,ws++,s+=len,ret++) {
+  for (ret = 0; *s != '\0' && n > 0; n--,ws++,s+=len,ret++) {
     if ((s[0]&0x80) == 0) {
       *ws = s[0];
       len = 1;
@@ -892,7 +892,7 @@ size_t wcstombs(char *s, const wchar_t *ws, size_t n)
   size_t         ret = 0;
   wchar_t        wc;
 
-  for (; ((wc = *ws++) != (wchar_t)'\0'); s+=len,ret+=len) {
+  for (; ((wc = *ws++) != (wchar_t)'\0') && n > 0; n-=len,s+=len,ret+=len) {
     if (wc <= 0x7F) {
       if (n >= 1) {
         s[0] = (char)wc;
