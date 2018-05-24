@@ -32,7 +32,6 @@ static inline arch_message *alloc_msg(void);
 static void free_msg(arch_message *msg);
 
 static int MsgCountSema;
-static int ProtLevel;
 
 extern void *_gp;
 
@@ -426,8 +425,6 @@ void sys_init(void)
 
 	//NULL-terminate free message list
 	prev->next = NULL;
-
-	ProtLevel = 0;
 }
 
 u32_t sys_now(void)
@@ -437,21 +434,13 @@ u32_t sys_now(void)
 
 sys_prot_t sys_arch_protect(void)
 {
-	sys_prot_t OldLevel;
-
-	DI();
-
-	OldLevel = ProtLevel;
-	ProtLevel++;
-
-	return OldLevel;
+	return DIntr();
 }
 
 void sys_arch_unprotect(sys_prot_t level)
 {
-	ProtLevel = level;
-	if(ProtLevel == 0)
-		EI();
+	if(level)
+		EIntr();
 }
 
 void *ps2ip_calloc64(size_t n, size_t size)

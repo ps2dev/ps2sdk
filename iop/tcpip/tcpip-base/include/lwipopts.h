@@ -4,14 +4,6 @@
 #ifndef __LWIPOPTS_H__
 #define __LWIPOPTS_H__
 
-#ifdef DEBUG
-#define LWIP_PLATFORM_DIAG(args...) printf(args)
-#define LWIP_PLATFORM_ASSERT(args...) printf(args)
-#else
-#define LWIP_PLATFORM_DIAG(args...)
-#define LWIP_PLATFORM_ASSERT(args...)
-#endif
-
 /**
  * NO_SYS==1: Provides VERY minimal functionality. Otherwise,
  * use lwIP facilities.

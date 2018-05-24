@@ -27,11 +27,11 @@ typedef u32_t mem_ptr_t;
 #define PACK_STRUCT_END
 
 #ifdef DEBUG
-#define LWIP_PLATFORM_DIAG(args...) printf(args...)
-#define LWIP_PLATFORM_ASSERT(args...) printf(args...)
+#define LWIP_PLATFORM_DIAG(args) printf args
+#define LWIP_PLATFORM_ASSERT(args) printf args
 #else
-#define LWIP_PLATFORM_DIAG(args...)
-#define LWIP_PLATFORM_ASSERT(args...)
+#define LWIP_PLATFORM_DIAG(args)
+#define LWIP_PLATFORM_ASSERT(args)
 #endif
 
 /* Define (sn)printf formatters for these lwIP types */

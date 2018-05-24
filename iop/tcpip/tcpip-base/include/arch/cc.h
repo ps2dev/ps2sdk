@@ -38,6 +38,14 @@ typedef u32_t			mem_ptr_t;
 #define PACK_STRUCT_BEGIN
 #define PACK_STRUCT_END
 
+#ifdef DEBUG
+#define LWIP_PLATFORM_DIAG(args) printf args
+#define LWIP_PLATFORM_ASSERT(args) printf args
+#else
+#define LWIP_PLATFORM_DIAG(args)
+#define LWIP_PLATFORM_ASSERT(args)
+#endif
+
 #define atoi(x) strtol(x, NULL, 10)
 
 #define LWIP_NO_STDINT_H	1	//stdint.h does not exist.
