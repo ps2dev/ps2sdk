@@ -178,6 +178,11 @@ static void *AllocRxPacket(unsigned int size, void **payload)
 	return pbuf;
 }
 
+static void ReallocRxPacket(void *packet, unsigned int size)
+{
+	pbuf_realloc((struct pbuf *)packet, size);
+}
+
 static void FreeRxPacket(void *packet)
 {
 	pbuf_free(packet);
@@ -307,7 +312,8 @@ int ps2ipInit(struct ip4_addr *ip_address, struct ip4_addr *subnet_mask, struct 
 		&EnQRxPacket,
 		&NextTxPacket,
 		&DeQTxPacket,
-		&AfterTxPacket
+		&AfterTxPacket,
+		&ReallocRxPacket
 	};
 
 	NetManInit();

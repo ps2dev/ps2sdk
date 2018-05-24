@@ -79,7 +79,8 @@ int NetManRegisterNetworkStack(const struct NetManNetProtStack *stack)
 			{
 				memcpy(&MainNetProtStack, stack, sizeof(MainNetProtStack));
 				IsNetStackInitialized=1;
-				NetManUpdateStackNIFLinkState();
+				if((result=NetManRPCAllocRxBuffers()) == 0)
+					NetManUpdateStackNIFLinkState();
 			}
 		}
 		else result=0;
@@ -140,4 +141,9 @@ void NetManTxPacketDeQ(void)
 int NetManTxPacketAfter(void **payload)
 {
 	return IsInitialized?MainNetProtStack.AfterTxPacket(payload):-1;
+}
+
+void NetManNetProtStackReallocRxPacket(void *packet, unsigned int length)
+{
+	if(IsNetStackInitialized) MainNetProtStack.ReallocRxPacket(packet, length);
 }

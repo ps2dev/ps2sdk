@@ -15,42 +15,64 @@ static unsigned char NETMAN_RpcSvr_ThreadStack[0x1000] ALIGNED(16);
 static unsigned char NETMAN_Rx_ThreadStack[0x1000] ALIGNED(16);
 static unsigned char IsInitialized=0, IsProcessingRx;
 
-static u8 *FrameBuffer = NULL;
-static u16 *FrameBufferStatus = NULL;
-static u8 *RxIOPFrameBufferStatus;
+static struct NetManBD *FrameBufferStatus = NULL;
+static struct NetManBD *RxIOPFrameBufferStatus;
 static unsigned short int RxBufferRdPtr;
 extern void *_gp;
 
 static void NETMAN_RxThread(void *arg);
 
-static void ClearBufferLen(int index)
+static void ClearBufferLen(int index, void *packet, void *payload)
 {
-	static u32 zero[4] ALIGNED(16) = {0, 0, 0, 0};
+	struct NetManBD *bd;
 	SifDmaTransfer_t dmat;
 
-	FrameBufferStatus[index] = 0;
+	bd = UNCACHED_SEG(&FrameBufferStatus[index]);
+	bd->length = 0;
+	bd->packet = packet;
+	bd->payload = payload;
 
 	//Transfer to IOP RAM
-	dmat.src = (void*)zero;
-	dmat.dest = &RxIOPFrameBufferStatus[index * 16];
-	dmat.size = sizeof(zero);
+	dmat.src = (void*)&FrameBufferStatus[index];
+	dmat.dest = &RxIOPFrameBufferStatus[index];
+	dmat.size = sizeof(struct NetManBD);
 	dmat.attr = 0;
 	while(SifSetDma(&dmat, 1) == 0){ };
 }
 
 static void HandleRxEvent(void *packet, void *common)
 {
-	struct NetManPktCmd *bd = (struct NetManPktCmd*)&((SifCmdHeader_t*)packet)->opt;
-	u8 id = bd->id;
-	u16 len = bd->length;
+	struct NetManPktCmd *cmd = (struct NetManPktCmd*)&((SifCmdHeader_t*)packet)->opt;
+	u8 id = cmd->id;
+	u16 len = cmd->length;
+	struct NetManBD *bd = UNCACHED_SEG(&FrameBufferStatus[id]);
 
-	FrameBufferStatus[id] = len;
+	bd->length = len;
 
 	if(!IsProcessingRx)
 	{
 		IsProcessingRx = 1;
 		iWakeupThread(NETMAN_Rx_threadID);
 	}
+}
+
+int NetManRPCAllocRxBuffers(void)
+{
+	int i;
+	void *packet, *payload;
+
+	for(i = 0; i < NETMAN_RPC_BLOCK_SIZE; i++)
+	{
+		if((packet = NetManNetProtStackAllocRxPacket(NETMAN_NETIF_FRAME_SIZE, &payload)) != NULL)
+		{
+			ClearBufferLen(i, packet, payload);
+		} else {
+			printf("NETMAN: error - unable to allocate Rx FIFO buffers.\n");
+			return -ENOMEM;
+		}
+	}
+
+	return 0;
 }
 
 /* Main EE RPC thread. */
@@ -64,23 +86,20 @@ static void *NETMAN_EE_RPC_Handler(int fnum, void *buffer, int NumBytes)
 		case NETMAN_EE_RPC_FUNC_INIT:
 			RxIOPFrameBufferStatus = *(void**)buffer;
 
-			if(FrameBuffer == NULL) FrameBuffer = memalign(64, NETMAN_MAX_FRAME_SIZE * NETMAN_RPC_BLOCK_SIZE);
-			if(FrameBufferStatus == NULL) FrameBufferStatus = malloc(sizeof(u16) * NETMAN_RPC_BLOCK_SIZE);
+			//Maintain 64-byte alignment to avoid non-uncached writes to the same cache line from contaminating the line.
+			if(FrameBufferStatus == NULL) FrameBufferStatus = memalign(64, sizeof(struct NetManBD) * NETMAN_RPC_BLOCK_SIZE);
 
-			if(FrameBuffer != NULL && FrameBufferStatus != NULL)
+			if(FrameBufferStatus != NULL)
 			{
-				memset(UNCACHED_SEG(FrameBuffer), 0, NETMAN_MAX_FRAME_SIZE * NETMAN_RPC_BLOCK_SIZE);
-				memset(FrameBufferStatus, 0, sizeof(u16) * NETMAN_RPC_BLOCK_SIZE);
+				memset(UNCACHED_SEG(FrameBufferStatus), 0, sizeof(struct NetManBD) * NETMAN_RPC_BLOCK_SIZE);
 				RxBufferRdPtr = 0;
 				IsProcessingRx = 0;
-
-				((struct NetManEEInitResult *)buffer)->FrameBuffer = FrameBuffer;
 
 				thread.func=&NETMAN_RxThread;
 				thread.stack=NETMAN_Rx_ThreadStack;
 				thread.stack_size=sizeof(NETMAN_Rx_ThreadStack);
 				thread.gp_reg=&_gp;
-				thread.initial_priority=0x57;	/* Should be given a higher priority than the protocol stack, so that it can dump frames in the EE and return. */
+				thread.initial_priority=0x59;	/* Should be given a lower priority than the protocol stack, so that the protocol stack can process incoming frames. */
 				thread.attr=thread.option=0;
 
 				if((NETMAN_Rx_threadID=CreateThread(&thread)) >= 0)
@@ -99,11 +118,6 @@ static void *NETMAN_EE_RPC_Handler(int fnum, void *buffer, int NumBytes)
 			result=buffer;
 			break;
 		case NETMAN_EE_RPC_FUNC_DEINIT:
-			if(FrameBuffer != NULL)
-			{
-				free(FrameBuffer);
-				FrameBuffer = NULL;
-			}
 			if(FrameBufferStatus != NULL)
 			{
 				free(FrameBufferStatus);
@@ -138,16 +152,19 @@ static void NETMAN_RPC_Thread(void *arg)
 
 static void NETMAN_RxThread(void *arg)
 {
-	void *data, *payload;
-	u32 PacketLength;
-	void *packet;
+	volatile struct NetManBD *bd;
+	void *payload, *payloadNext;
+	u32 PacketLength, PacketLengthAligned;
+	void *packet, *packetNext;
 	u8 run;
 
 	while(1)
 	{
+		bd = UNCACHED_SEG(&FrameBufferStatus[RxBufferRdPtr]);
+
 		do {
 			DI();
-			PacketLength = FrameBufferStatus[RxBufferRdPtr];
+			PacketLength = bd->length;
 			if (PacketLength > 0)
 			{
 				run = 1;
@@ -161,17 +178,21 @@ static void NETMAN_RxThread(void *arg)
 				SleepThread();
 		} while(!run);
 
-		data = UNCACHED_SEG(&FrameBuffer[RxBufferRdPtr * NETMAN_MAX_FRAME_SIZE]);
+		payload = bd->payload;
+		packet = bd->packet;
 
-		if((packet = NetManNetProtStackAllocRxPacket(PacketLength, &payload)) != NULL)
-		{
-			memcpy(payload, data, PacketLength);
-			NetManNetProtStackEnQRxPacket(packet);
-		}
+		//Must successfully allocate a replacement buffer for the input buffer.
+		while((packetNext = NetManNetProtStackAllocRxPacket(NETMAN_NETIF_FRAME_SIZE, &payloadNext)) == NULL){};
+		ClearBufferLen(RxBufferRdPtr, packetNext, payloadNext);
 
-		ClearBufferLen(RxBufferRdPtr);
 		//Increment read pointer by one place.
 		RxBufferRdPtr = (RxBufferRdPtr + 1) % NETMAN_RPC_BLOCK_SIZE;
+
+		//Now process the received packet.
+		PacketLengthAligned = (PacketLength + 63) & ~63;
+		SifWriteBackDCache(payload, PacketLengthAligned);
+		NetManNetProtStackReallocRxPacket(packet, PacketLength);
+		NetManNetProtStackEnQRxPacket(packet);
 	}
 }
 
