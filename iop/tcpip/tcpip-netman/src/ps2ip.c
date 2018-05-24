@@ -418,6 +418,7 @@ static inline int InitLWIPStack(IPAddr *IP, IPAddr *NM, IPAddr *GW){
 		&EnQRxPacket,
 		&NextTxPacket,
 		&DeQTxPacket,
+		NULL,
 		NULL
 	};
 

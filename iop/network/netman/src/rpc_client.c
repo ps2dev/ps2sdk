@@ -1,5 +1,6 @@
 #include <errno.h>
 #include <intrman.h>
+#include <limits.h>
 #include <sifcmd.h>
 #include <sifman.h>
 #include <sysclib.h>
@@ -25,7 +26,6 @@ static union{
 
 //Data for IOP -> EE transfers
 static unsigned short int EEFrameBufferWrPtr;
-static u8 *EEFrameBuffer = NULL;	/* On the EE side */
 
 static int NetManIOSemaID = -1;
 
@@ -38,24 +38,27 @@ struct NetManPacketBuffer{
 //Data for SPEED -> IOP transfers
 static struct NetManPacketBuffer pbufs[NETMAN_RPC_BLOCK_SIZE];
 static u8 *FrameBuffer = NULL;
-static u8 *FrameBufferStatus = NULL;
+static struct NetManBD *FrameBufferStatus = NULL;
 static SifCmdHeader_t *SifCmdBuffer = NULL;
 
 int NetManInitRPCClient(void)
 {
 	static const char NetManID[] = "NetMan";
 	iop_sema_t sema;
-	int result;
+	int result, i;
 
 	if(FrameBuffer == NULL) FrameBuffer = malloc(NETMAN_RPC_BLOCK_SIZE * NETMAN_MAX_FRAME_SIZE);
-	if(FrameBufferStatus == NULL) FrameBufferStatus = malloc(NETMAN_RPC_BLOCK_SIZE * 16);
+	if(FrameBufferStatus == NULL) FrameBufferStatus = malloc(NETMAN_RPC_BLOCK_SIZE * sizeof(struct NetManBD));
 	if(SifCmdBuffer == NULL) SifCmdBuffer = malloc(NETMAN_RPC_BLOCK_SIZE * sizeof(SifCmdHeader_t));
 
 	if(FrameBuffer != NULL && FrameBufferStatus != NULL && SifCmdBuffer != NULL)
 	{
 		memset(FrameBuffer, 0, NETMAN_RPC_BLOCK_SIZE * NETMAN_MAX_FRAME_SIZE);
-		memset(FrameBufferStatus, 0, NETMAN_RPC_BLOCK_SIZE * 16);
+		memset(FrameBufferStatus, 0, NETMAN_RPC_BLOCK_SIZE * sizeof(struct NetManBD));
 		EEFrameBufferWrPtr = 0;
+
+		for(i = 0; i < NETMAN_RPC_BLOCK_SIZE; i++)	//Mark all descriptors as "in-use", until the EE-side allocates buffers.
+			FrameBufferStatus[i].length = UINT_MAX;
 
 		while((result=sceSifBindRpc(&EEClient, NETMAN_RPC_NUMBER, 0))<0 || EEClient.server==NULL) DelayThread(500);
 
@@ -63,8 +66,6 @@ int NetManInitRPCClient(void)
 		{
 			if((result=SifRpcRxBuffer.EEInitResult.result) == 0)
 			{
-				EEFrameBuffer = SifRpcRxBuffer.EEInitResult.FrameBuffer;
-
 				sema.attr = 0;
 				sema.option = (u32)NetManID;
 				sema.initial = 1;
@@ -115,13 +116,14 @@ void NetManRpcToggleGlobalNetIFLinkState(int state)
 void *NetManRpcNetProtStackAllocRxPacket(unsigned int length, void **payload)
 {
 	struct NetManPacketBuffer *result;
+	volatile const struct NetManBD *bd = &FrameBufferStatus[EEFrameBufferWrPtr];
 
 	//Wait for a free spot to appear in the ring buffer.
-	while(*(vu32*)&FrameBufferStatus[EEFrameBufferWrPtr * 16] != 0) { }
+	while(bd->length != 0) { }
 
 	//Allocation of PBUF descriptors is tied with the allocation of frame slots in the ring buffer by EnQ.
 	result = &pbufs[EEFrameBufferWrPtr];
-	result->handle = &FrameBufferStatus[EEFrameBufferWrPtr * 16];
+	result->handle = (void*)bd;
 	result->payload = &FrameBuffer[EEFrameBufferWrPtr * NETMAN_MAX_FRAME_SIZE];
 	result->length = length;
 
@@ -141,23 +143,25 @@ void NetManRpcNetProtStackFreeRxPacket(void *packet)
 static void EnQFrame(const void *frame, unsigned int length)
 {
 	SifCmdHeader_t *pcmd;
-	struct NetManPktCmd *bd;
+	struct NetManPktCmd *cmd;
+	struct NetManBD *bd;
 
 	//No need to wait for a free spot to appear, as Alloc already took care of that.
 	pcmd = &SifCmdBuffer[EEFrameBufferWrPtr];
+	bd = &FrameBufferStatus[EEFrameBufferWrPtr];
 
 	//Prepare SIFCMD packet.
 	//Record the frame length.
-	bd = (struct NetManPktCmd*)&pcmd->opt;
-	bd->id = EEFrameBufferWrPtr;
+	cmd = (struct NetManPktCmd*)&pcmd->opt;
+	cmd->id = EEFrameBufferWrPtr;
+	cmd->length = length;
 	bd->length = length;
-	*(vu32*)&FrameBufferStatus[EEFrameBufferWrPtr * 16] = length;
 
 	//Transfer the frame over to the EE
 	//Notify the receive thread of the incoming frame.
 	while(sceSifSendCmd(NETMAN_SIFCMD_ID, pcmd, sizeof(SifCmdHeader_t),
 				(void*)frame,
-				(void*)&EEFrameBuffer[EEFrameBufferWrPtr * NETMAN_MAX_FRAME_SIZE],
+				bd->payload,
 				(length + 3) & ~3) == 0){ };
 
 	//Increase the write (IOP -> EE) pointer by one place.

@@ -8,6 +8,7 @@
 
 //Common structures
 #define NETMAN_NETIF_NAME_MAX_LEN	4
+#define NETMAN_NETIF_FRAME_SIZE		1514
 
 struct NetManNetProtStack{
 	void (*LinkStateUp)(void);
@@ -17,7 +18,8 @@ struct NetManNetProtStack{
 	void (*EnQRxPacket)(void *packet);
 	int (*NextTxPacket)(void **payload);
 	void (*DeQTxPacket)(void);
-	int (*AfterTxPacket)(void **payload);	//For EE only, peek at the packet after the current packet.
+	int (*AfterTxPacket)(void **payload);				//For EE only, peek at the packet after the current packet.
+	void (*ReallocRxPacket)(void *packet, unsigned int size);	//For EE only, update the size of the Rx packet (size will be always smaller than NETMAN_NETIF_FRAME_SIZE).
 };
 
 /** Flow-control */
@@ -105,7 +107,8 @@ void NetManNetProtStackEnQRxPacket(void *packet);
 int NetManTxPacketNext(void **payload);
 void NetManTxPacketDeQ(void);
 
-int NetManTxPacketAfter(void **payload);	//For EE only, for NETMAN's internal use
+int NetManTxPacketAfter(void **payload);					//For EE only, for NETMAN's internal use.
+void NetManNetProtStackReallocRxPacket(void *packet, unsigned int length);	//For EE only, for NETMAN's internal use.
 
 /* NETIF flags. */
 /** Set internally by NETMAN. Do not set externally. */

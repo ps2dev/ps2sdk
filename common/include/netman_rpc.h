@@ -32,7 +32,6 @@ enum NETMAN_IOP_RPC_FUNC_NUMS{
 
 struct NetManEEInitResult{
 	s32 result;
-	void *FrameBuffer;
 };
 
 struct NetManRegNetworkStack{
@@ -50,7 +49,7 @@ struct NetManQueryMainNetIFResult{
 };
 
 #define NETMAN_MAX_FRAME_SIZE	1536	//Maximum 1518 bytes, rounded up to nearest multiple of 16-byte units + 16 (for alignment)
-#define NETMAN_RPC_BLOCK_SIZE	64
+#define NETMAN_RPC_BLOCK_SIZE	32
 
 struct NetManIoctl{
 	u32 command;
@@ -69,6 +68,13 @@ struct NetManPktCmd {
 	u8 id;
 	u8 offset;	//For alignment correction on the EE (unused for IOP->EE).
 	u16 length;
+};
+
+struct NetManBD {
+	u32 length;	//When set to 0, buffer is available for use by MAC driver.
+	void *packet;
+	void *payload;	//Pointer to the data section of the packet.
+	u32 unused;
 };
 
 #endif /* __NETMAN_RPC_H__ */
