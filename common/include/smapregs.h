@@ -292,9 +292,13 @@ typedef struct _smap_bd {
 
 #define	SMAP_BD_REGBASE			0x2f00
 #define	SMAP_BD_TX_BASE			(SMAP_BD_REGBASE + 0x0000)
-#define SMAP_TX_BASE			0x1000
+/* For backward compatibility */
+#define SMAP_TX_BASE			SMAP_TX_BUFBASE
+#define SMAP_TX_BUFBASE			0x1000
 #define SMAP_TX_BUFSIZE			4096
 #define	SMAP_BD_RX_BASE			(SMAP_BD_REGBASE + 0x0200)
+#define SMAP_RX_BUFBASE			0x4000
+#define SMAP_RX_BUFSIZE			16384
 #define	  SMAP_BD_SIZE		512
 #define	  SMAP_BD_MAX_ENTRY	64
 
@@ -422,6 +426,20 @@ typedef struct _smap_bd {
 #define	  SMAP_PHY_IDR2_REV_MSK	0x000F
 
 #define	SMAP_DsPHYTER_ANAR		0x04
+/** Remote FauLT */
+#define	  SMAP_PHY_ANAR_RFLT	(1<<13)
+/** Pause */
+#define	  SMAP_PHY_ANAR_PAUSE	(1<<10)
+/** 100BASE-T4 Support */
+#define	  SMAP_PHY_ANAR_T4	(1<<9)
+/** 100BASE-TX Full Duplex Support */
+#define	  SMAP_PHY_ANAR_TX_FD	(1<<8)
+/** 100BASE-TX Support */
+#define	  SMAP_PHY_ANAR_TX	(1<<7)
+/** 10BASE-T Full Duplex Support */
+#define	  SMAP_PHY_ANAR_10_FD	(1<<6)
+/** 10BASE-T Support */
+#define	  SMAP_PHY_ANAR_10	(1<<5)
 #define	SMAP_DsPHYTER_ANLPAR		0x05
 #define	SMAP_DsPHYTER_ANLPARNP		0x05
 #define	SMAP_DsPHYTER_ANER		0x06
@@ -468,6 +486,24 @@ typedef struct _smap_bd {
 #define	SMAP_DsPHYTER_PCSR		0x16
 #define	SMAP_DsPHYTER_PHYCTRL		0x19
 #define	SMAP_DsPHYTER_10BTSCR		0x1A
+/** 10BASE-T Loopback Disable */
+#define	  SMAP_PHY_10BTSCR_LOOPBACK_10_DIS	(1<<8)
+/** Normal Link Pulse Disable */
+#define	  SMAP_PHY_10BTSCR_LP_DIS		(1<<7)
+/** Force 10Mb Good Link */
+#define	  SMAP_PHY_10BTSCR_FORCE_10_LINK	(1<<6)
+/** Force 10Mb Polarity Correction */
+#define	  SMAP_PHY_10BTSCR_FORCE_POL_COR	(1<<5)
+/** 10Mb Polarity Status */
+#define	  SMAP_PHY_10BTSCR_POLARITY		(1<<4)
+/** Auto Polarity Detection & Correction Disable */
+#define	  SMAP_PHY_10BTSCR_AUTOPOL_DIS		(1<<3)
+/** RESERVED - Must be set to 1 */
+#define	  SMAP_PHY_10BTSCR_2			(1<<2)
+/** Heartbeat Disable */
+#define	  SMAP_PHY_10BTSCR_HEARTBEAT_DIS	(1<<1)
+/** Jabber Disable */
+#define	  SMAP_PHY_10BTSCR_JABBER_DIS		(1<<0)
 #define	SMAP_DsPHYTER_CDCTRL		0x1B
 
 #endif /* __SMAPREGS_H__ */

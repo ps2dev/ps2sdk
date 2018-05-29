@@ -34,6 +34,7 @@
 
 		The TXDNV interrupt is hence always disabled, but only enabled when a frame(s) is sent.
 		Perhaps there is a lack of a check on the TXEND interrupt because it is polling on the TX BDs before every transmission.
+		Might be related to the TXEND/RXEND event race condition that was documented within the PS2Linux SMAP driver.
 
 		I don't know how to test this, but it seems like the TXDNV interrupt is asserted for as long as
 		there is no valid frame to transmit, hence this design by SONY.
@@ -268,6 +269,7 @@ RepeatAutoNegoProcess:
 
 	if(EnableVerboseOutput) DEBUG_PRINTF("smap: PHY: %04x %04x %04x %04x %04x %04x\n", RegDump[SMAP_DsPHYTER_BMCR], RegDump[SMAP_DsPHYTER_BMSR], RegDump[SMAP_DsPHYTER_PHYIDR1], RegDump[SMAP_DsPHYTER_PHYIDR2], RegDump[SMAP_DsPHYTER_ANAR], RegDump[SMAP_DsPHYTER_ANLPAR]);
 
+	/* Special initialization for the National Semiconductor DP83846A PHY. */
 	if(RegDump[SMAP_DsPHYTER_PHYIDR1]==SMAP_PHY_IDR1_VAL && (RegDump[SMAP_DsPHYTER_PHYIDR2]&SMAP_PHY_IDR2_MSK)==SMAP_PHY_IDR2_VAL){
 		if(EnableAutoNegotiation){
 			_smap_read_phy(SmapDrivPrivData->emac3_regbase, SMAP_DsPHYTER_FCSCR);
@@ -284,15 +286,14 @@ RepeatAutoNegoProcess:
 
 		DEBUG_PRINTF("smap: PHY chip: DP83846A%d\n", (RegDump[SMAP_DsPHYTER_PHYIDR2]&SMAP_PHY_IDR2_REV_MSK)+1);
 
+		/* If operating in 10Mbit mode, disable the 10Mb/s Loopback mode. */
 		if(!EnableAutoNegotiation){
-			if((RegDump[SMAP_DsPHYTER_BMCR]&(SMAP_PHY_BMCR_DUPM|SMAP_PHY_BMCR_100M)) == 0){
-				_smap_write_phy(SmapDrivPrivData->emac3_regbase, SMAP_DsPHYTER_10BTSCR, 0x104);
-			}
+			if((RegDump[SMAP_DsPHYTER_BMCR]&(SMAP_PHY_BMCR_DUPM|SMAP_PHY_BMCR_100M)) == 0)
+				_smap_write_phy(SmapDrivPrivData->emac3_regbase, SMAP_DsPHYTER_10BTSCR, SMAP_PHY_10BTSCR_LOOPBACK_10_DIS|SMAP_PHY_10BTSCR_2);
 		}
 		else{
-			if((RegDump[SMAP_DsPHYTER_ANAR]&0x1E0)==0x20){
-				_smap_write_phy(SmapDrivPrivData->emac3_regbase, SMAP_DsPHYTER_10BTSCR, 0x104);
-			}
+			if((RegDump[SMAP_DsPHYTER_ANAR]&(SMAP_PHY_ANAR_TX_FD|SMAP_PHY_ANAR_TX|SMAP_PHY_ANAR_10_FD|SMAP_PHY_ANAR_10)) == SMAP_PHY_ANAR_10)
+				_smap_write_phy(SmapDrivPrivData->emac3_regbase, SMAP_DsPHYTER_10BTSCR, SMAP_PHY_10BTSCR_LOOPBACK_10_DIS|SMAP_PHY_10BTSCR_2);
 		}
 
 		if((RegDump[SMAP_DsPHYTER_PHYIDR2]&SMAP_PHY_IDR2_REV_MSK)==0){
@@ -305,6 +306,7 @@ RepeatAutoNegoProcess:
 		}
 	}
 
+	/* Determine what was negotiated for. */
 	FlowControlEnabled=0;
 	if(RegDump[SMAP_DsPHYTER_BMCR]&SMAP_PHY_BMCR_ANEN){
 		value=RegDump[SMAP_DsPHYTER_ANAR]&RegDump[SMAP_DsPHYTER_ANLPAR];
@@ -397,7 +399,11 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData){
 	emac3_regbase=SmapDrivPrivData->emac3_regbase;
 	smap_regbase=SmapDrivPrivData->smap_regbase;
 	while(1){
-		WaitEventFlag(SmapDrivPrivData->Dev9IntrEventFlag, SMAP_EVENT_START|SMAP_EVENT_STOP|SMAP_EVENT_INTR|SMAP_EVENT_XMIT|SMAP_EVENT_LINK_CHECK, WEF_OR|WEF_CLEAR, &EFBits);
+		if((result = WaitEventFlag(SmapDrivPrivData->Dev9IntrEventFlag, SMAP_EVENT_START|SMAP_EVENT_STOP|SMAP_EVENT_INTR|SMAP_EVENT_XMIT|SMAP_EVENT_LINK_CHECK, WEF_OR|WEF_CLEAR, &EFBits)) != 0)
+		{
+			DEBUG_PRINTF("smap: WaitEventFlag -> %d\n", result);
+			break;
+		}
 
 		if(EFBits&SMAP_EVENT_STOP){
 			if(SmapDrivPrivData->SmapIsInitialized){
@@ -458,13 +464,12 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData){
 					if(IntrReg&SMAP_INTR_TXDNV){
 						SMAP_REG16(SMAP_R_INTR_CLR)=SMAP_INTR_TXDNV;
 						HandleTxIntr(SmapDrivPrivData);
+						EFBits |= SMAP_EVENT_XMIT;
 					}
 				}
 			}
 
-			/*	Non-Sony: process transmission if the last packet was not sent. Not sure how the Sony system managed to work,
-				but the system does lock up when the queue is filled up and if there is no way to retry transmissions.	*/
-			if((EFBits&SMAP_EVENT_XMIT) || (SmapDrivPrivData->packetToSend != NULL))
+			if(EFBits&SMAP_EVENT_XMIT)
 				HandleTxReqs(SmapDrivPrivData);
 			HandleTxIntr(SmapDrivPrivData);
 
