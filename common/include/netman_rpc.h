@@ -49,7 +49,7 @@ struct NetManQueryMainNetIFResult{
 };
 
 #define NETMAN_MAX_FRAME_SIZE	1536	//Maximum 1518 bytes, rounded up to nearest multiple of 16-byte units + 16 (for alignment)
-#define NETMAN_RPC_BLOCK_SIZE	32
+#define NETMAN_RPC_BLOCK_SIZE	64	//Small sizes will result in poorer performance and perhaps stability issues (due to resource exhaustion).
 
 struct NetManIoctl{
 	u32 command;

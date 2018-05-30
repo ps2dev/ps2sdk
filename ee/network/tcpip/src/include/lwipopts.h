@@ -107,7 +107,7 @@
  * PBUF_POOL_SIZE: the number of buffers in the pbuf pool.
  */
 //SP193: should be at least ((TCP_WND/PBUF_POOL_BUFSIZE)+1). But that is too small to accommodate data not accepted by the application layer and multiple connections.
-#define PBUF_POOL_SIZE			64
+#define PBUF_POOL_SIZE			128
 
 /**
  * MEMP_NUM_TCPIP_MSG_INPKT: the number of struct tcpip_msg, which are used
