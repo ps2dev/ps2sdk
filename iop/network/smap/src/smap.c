@@ -443,7 +443,7 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData){
 		if(SmapDrivPrivData->SmapIsInitialized){
 			ResetCounterFlag=0;
 			if(EFBits&SMAP_EVENT_INTR){
-				while((IntrReg=SPD_REG16(SPD_R_INTR_STAT)&DEV9_SMAP_INTR_MASK)!=0){
+				if((IntrReg=SPD_REG16(SPD_R_INTR_STAT)&DEV9_SMAP_INTR_MASK)!=0){
 					/*	Original order/priority:
 							1. EMAC3
 							2. RXEND
