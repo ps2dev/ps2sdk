@@ -107,9 +107,6 @@ ps2ip_setconfig(const t_ip_info* pInfo)
 	{
 		return	0;
 	}
-	netif_set_ipaddr(pNetIF,(const IPAddr*)&pInfo->ipaddr);
-	netif_set_netmask(pNetIF,(const IPAddr*)&pInfo->netmask);
-	netif_set_gw(pNetIF,(const IPAddr*)&pInfo->gw);
 
 #if	LWIP_DHCP
 	struct dhcp *dhcp = netif_dhcp_data(pNetIF);
@@ -120,7 +117,12 @@ ps2ip_setconfig(const t_ip_info* pInfo)
 	{
 		if ((dhcp == NULL) || (dhcp->state == DHCP_STATE_OFF))
 		{
-			//Start dhcp client
+			//Set initial IP address
+			netif_set_ipaddr(pNetIF,(const IPAddr*)&pInfo->ipaddr);
+			netif_set_netmask(pNetIF,(const IPAddr*)&pInfo->netmask);
+			netif_set_gw(pNetIF,(const IPAddr*)&pInfo->gw);
+
+			//Start DHCP client
 			dhcp_start(pNetIF);
 		}
 	}
@@ -131,11 +133,18 @@ ps2ip_setconfig(const t_ip_info* pInfo)
 			//Release DHCP lease
 			dhcp_release(pNetIF);
 
-			//Stop dhcp client
+			//Stop DHCP client
 			dhcp_stop(pNetIF);
 		}
-	}
 
+		netif_set_ipaddr(pNetIF,(const IPAddr*)&pInfo->ipaddr);
+		netif_set_netmask(pNetIF,(const IPAddr*)&pInfo->netmask);
+		netif_set_gw(pNetIF,(const IPAddr*)&pInfo->gw);
+	}
+#else
+	netif_set_ipaddr(pNetIF,(const IPAddr*)&pInfo->ipaddr);
+	netif_set_netmask(pNetIF,(const IPAddr*)&pInfo->netmask);
+	netif_set_gw(pNetIF,(const IPAddr*)&pInfo->gw);
 #endif
 
 	return	1;
