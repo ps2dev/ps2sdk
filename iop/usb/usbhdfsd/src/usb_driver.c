@@ -427,7 +427,6 @@ static int usb_bulk_transfer(mass_dev* dev, int direction, void* buffer, unsigne
 	ret = perform_bulk_transfer(&cb_data);
 	if (ret == USB_RC_OK) {
 		WaitSema(cb_data.sema);
-		//XPRINTF("USBHDFSD: retCode=%i retSize=%i \n", cb_data.returnCode, cb_data.returnSize);
 		ret = cb_data.returnCode;
 	}
 
@@ -966,6 +965,7 @@ int mass_stor_connect(int devId)
 	SemaData.option = 0;
 	SemaData.attr = 0;
 	if((dev->ioSema = CreateSema(&SemaData)) <0){
+		mass_stor_release(dev);
 		printf("USBHDFSD: Failed to allocate I/O semaphore.\n");
 		return -1;
 	}
@@ -990,6 +990,7 @@ int mass_stor_connect(int devId)
 	} else
 		printf("USBHDFSD: Error - sending set_configuration %d\n", ret);
 
+	mass_stor_release(dev);
 	return -1;
 }
 
