@@ -10,14 +10,14 @@
 #include "internal.h"
 #include "rpc_server.h"
 
-static int NETMAN_RpcSvr_threadID=-1, NETMAN_Rx_threadID=-1;
+static int NETMAN_RpcSvr_threadID=-1, NETMAN_Rx_threadID=-1, SifHandlerID=-1;
 static unsigned char NETMAN_RpcSvr_ThreadStack[0x1000] ALIGNED(16);
 static unsigned char NETMAN_Rx_ThreadStack[0x1000] ALIGNED(16);
 static unsigned char IsInitialized=0, IsProcessingRx;
 
 static struct NetManBD *FrameBufferStatus = NULL;
 static struct NetManBD *RxIOPFrameBufferStatus;
-static unsigned short int RxBufferRdPtr;
+static unsigned short int RxBufferRdPtr, RxBufferNextRdPtr;
 extern void *_gp;
 
 static void NETMAN_RxThread(void *arg);
@@ -40,20 +40,24 @@ static void ClearBufferLen(int index, void *packet, void *payload)
 	while(SifSetDma(&dmat, 1) == 0){ };
 }
 
-static void HandleRxEvent(void *packet, void *common)
+static s32 HandleRxEvent(s32 channel)
 {
-	struct NetManPktCmd *cmd = (struct NetManPktCmd*)&((SifCmdHeader_t*)packet)->opt;
-	u8 id = cmd->id;
-	u16 len = cmd->length;
-	struct NetManBD *bd = UNCACHED_SEG(&FrameBufferStatus[id]);
+	struct NetManBD *bd;
 
-	bd->length = len;
-
-	if(!IsProcessingRx)
+	bd = UNCACHED_SEG(&FrameBufferStatus[RxBufferNextRdPtr]);
+	if(bd->length > 0)
 	{
-		IsProcessingRx = 1;
-		iWakeupThread(NETMAN_Rx_threadID);
+		iSifSetDChain();
+
+		if(!IsProcessingRx)
+		{
+			IsProcessingRx = 1;
+			iWakeupThread(NETMAN_Rx_threadID);
+		}
 	}
+
+	ExitHandler();
+	return 0;
 }
 
 int NetManRPCAllocRxBuffers(void)
@@ -93,6 +97,7 @@ static void *NETMAN_EE_RPC_Handler(int fnum, void *buffer, int NumBytes)
 			{
 				memset(UNCACHED_SEG(FrameBufferStatus), 0, sizeof(struct NetManBD) * NETMAN_RPC_BLOCK_SIZE);
 				RxBufferRdPtr = 0;
+				RxBufferNextRdPtr = 0;
 				IsProcessingRx = 0;
 
 				thread.func=&NETMAN_RxThread;
@@ -106,8 +111,10 @@ static void *NETMAN_EE_RPC_Handler(int fnum, void *buffer, int NumBytes)
 				{
 					StartThread(NETMAN_Rx_threadID, NULL);
 
-					SifAddCmdHandler(NETMAN_SIFCMD_ID, &HandleRxEvent, NULL);
+					SifHandlerID = AddDmacHandler(DMAC_SIF0, &HandleRxEvent, 0);
+					EnableDmac(DMAC_SIF0);
 					((struct NetManEEInitResult *)buffer)->result = 0;
+					((struct NetManEEInitResult *)buffer)->FrameBufferStatus = FrameBufferStatus;
 				}
 				else{
 					((struct NetManEEInitResult *)buffer)->result = NETMAN_Rx_threadID;
@@ -175,7 +182,10 @@ static void NETMAN_RxThread(void *arg)
 			EI();
 
 			if(!run)
+			{
+				SifSetReg(SIF_REG_SMFLAG, NETMAN_SBUS_BITS);	//Acknowledge interrupt
 				SleepThread();
+			}
 		} while(!run);
 
 		payload = bd->payload;
@@ -183,10 +193,11 @@ static void NETMAN_RxThread(void *arg)
 
 		//Must successfully allocate a replacement buffer for the input buffer.
 		while((packetNext = NetManNetProtStackAllocRxPacket(NETMAN_NETIF_FRAME_SIZE, &payloadNext)) == NULL){};
+		RxBufferNextRdPtr = (RxBufferNextRdPtr + 1) % NETMAN_RPC_BLOCK_SIZE;
 		ClearBufferLen(RxBufferRdPtr, packetNext, payloadNext);
 
 		//Increment read pointer by one place.
-		RxBufferRdPtr = (RxBufferRdPtr + 1) % NETMAN_RPC_BLOCK_SIZE;
+		RxBufferRdPtr = RxBufferNextRdPtr;
 
 		//Now process the received packet.
 		PacketLengthAligned = (PacketLength + 63) & ~63;
@@ -229,7 +240,7 @@ void NetManDeinitRPCServer(void)
 	{
 		SifRemoveRpc(&cb_srv, &cb_queue);
 		SifRemoveRpcQueue(&cb_queue);
-		SifRemoveCmdHandler(NETMAN_SIFCMD_ID);
+		RemoveDmacHandler(DMAC_SIF0, SifHandlerID);
 
 		if(NETMAN_RpcSvr_threadID>=0)
 		{

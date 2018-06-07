@@ -11,6 +11,8 @@
 
 #define NETMAN_RPC_NUMBER	0x00004239
 #define NETMAN_SIFCMD_ID	0x8000000D
+#define NETMAN_SBUS_FLAG	15
+#define NETMAN_SBUS_BITS	(1 << NETMAN_SBUS_FLAG)
 
 enum NETMAN_EE_RPC_FUNC_NUMS{
 	NETMAN_EE_RPC_FUNC_INIT=0x00,
@@ -32,15 +34,17 @@ enum NETMAN_IOP_RPC_FUNC_NUMS{
 
 struct NetManEEInitResult{
 	s32 result;
+	struct NetManBD *FrameBufferStatus;
 };
 
 struct NetManRegNetworkStack{
-	void *FrameBufferStatus;
+	struct NetManBD *FrameBufferStatus;
 };
 
 struct NetManRegNetworkStackResult{
 	s32 result;
 	void *FrameBuffer;
+	struct NetManBD *FrameBufferStatus;
 };
 
 struct NetManQueryMainNetIFResult{
@@ -71,9 +75,10 @@ struct NetManPktCmd {
 };
 
 struct NetManBD {
-	u32 length;	//When set to 0, buffer is available for use by MAC driver.
-	void *packet;
-	void *payload;	//Pointer to the data section of the packet.
+	u16 length;	//When set to 0, buffer is available for use by MAC driver.
+	u16 offset;	//For alignment correction on the EE (unused for IOP->EE).
+	void *packet;	//Unused for EE->IOP.
+	void *payload;	//Pointer to the data section of the packet. Unused for EE->IOP.
 	u32 unused;
 };
 

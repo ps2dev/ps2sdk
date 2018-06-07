@@ -10,6 +10,9 @@ loadcore_IMPORTS_end
 
 sifman_IMPORTS_start
 I_sceSifSetDma
+I_sceSifGetSMFlag
+I_sceSifSetSMFlag
+I_sceSifIntrMain
 sifman_IMPORTS_end
 
 sifcmd_IMPORTS_start
