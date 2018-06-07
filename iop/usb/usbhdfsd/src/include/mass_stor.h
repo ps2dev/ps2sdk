@@ -7,6 +7,5 @@ int mass_stor_connect(int devId);
 int mass_stor_probe(int devId);
 int mass_stor_readSector(mass_dev* mass_device, unsigned int sector, unsigned char* buffer, unsigned short int count);
 int mass_stor_writeSector(mass_dev* mass_device, unsigned int sector, const unsigned char* buffer, unsigned short int count);
-int mass_stor_configureNextDevice(void);
 
 #endif
