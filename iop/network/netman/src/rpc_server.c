@@ -28,15 +28,10 @@ static union{
 	u8 buffer[80];
 } SifRpcTxBuffer;
 
-struct FrameBufferStatus {
-	u16 len;
-	u16 offset;
-};
-
 /* Packet transmission buffer. The EE will DMA transfer the packet to be transmitted directly into this buffer before invoking FUNC_SEND_PACKET. */
 static u8 *TxFrameBuffer = NULL;
-static struct FrameBufferStatus *FrameBufferStatus = NULL;
-static u8 *EEFrameBufferStatus = NULL;
+static struct NetManBD *FrameBufferStatus = NULL;
+static struct NetManBD *EEFrameBufferStatus = NULL;
 static unsigned short int IOPFrameBufferRdPtr;
 
 static int RpcThreadID = -1;
@@ -72,7 +67,7 @@ static void EnQRxPacket(void *packet)
 static int NextTxPacket(void **payload)
 {
 	*payload = &TxFrameBuffer[IOPFrameBufferRdPtr * NETMAN_MAX_FRAME_SIZE + FrameBufferStatus[IOPFrameBufferRdPtr].offset];
-	return FrameBufferStatus[IOPFrameBufferRdPtr].len;
+	return FrameBufferStatus[IOPFrameBufferRdPtr].length;
 }
 
 static void DeQTxPacket(void)
@@ -119,15 +114,15 @@ static void unregisterEENetworkStack(void)
 
 static void ClearBufferLen(int index)
 {
-	static u32 zero[4] = { 0, 0, 0, 0 };
+	static struct NetManBD zero = { 0 };
 	SifDmaTransfer_t dmat;
 	int dmat_id, OldState;
 
-	FrameBufferStatus[index].len = 0;
+	FrameBufferStatus[index].length = 0;
 
 	//Transfer to EE RAM
-	dmat.src = (void*)zero;
-	dmat.dest = &EEFrameBufferStatus[index * 16];
+	dmat.src = (void*)&zero;
+	dmat.dest = &EEFrameBufferStatus[index];
 	dmat.size = sizeof(zero);
 	dmat.attr = 0;
 
@@ -145,7 +140,7 @@ static void HandleRxEvent(void *packet, void *common)
 	u8 offset = bd->offset;
 	u16 len = bd->length;
 
-	FrameBufferStatus[id].len = len;
+	FrameBufferStatus[id].length = len;
 	FrameBufferStatus[id].offset = offset;
 
 	NetManNetIFXmit();
@@ -171,12 +166,12 @@ static void *NETMAN_rpc_handler(int fno, void *buffer, int size)
 			result = &SifRpcTxBuffer;
 
 			if(TxFrameBuffer == NULL) TxFrameBuffer = malloc(NETMAN_MAX_FRAME_SIZE * NETMAN_RPC_BLOCK_SIZE);
-			if(FrameBufferStatus == NULL) FrameBufferStatus = malloc(sizeof(struct FrameBufferStatus) * NETMAN_RPC_BLOCK_SIZE);
+			if(FrameBufferStatus == NULL) FrameBufferStatus = malloc(sizeof(struct NetManBD) * NETMAN_RPC_BLOCK_SIZE);
 
 			if(TxFrameBuffer != NULL && FrameBufferStatus != NULL)
 			{
 				EEFrameBufferStatus = ((struct NetManRegNetworkStack*)buffer)->FrameBufferStatus;
-				memset(FrameBufferStatus, 0, sizeof(struct FrameBufferStatus) * NETMAN_RPC_BLOCK_SIZE);
+				memset(FrameBufferStatus, 0, sizeof(struct NetManBD) * NETMAN_RPC_BLOCK_SIZE);
 				memset(TxFrameBuffer, 0, NETMAN_MAX_FRAME_SIZE * NETMAN_RPC_BLOCK_SIZE);
 				SifRpcTxBuffer.RegNetworkStackResult.FrameBuffer = TxFrameBuffer;
 				IOPFrameBufferRdPtr = 0;
@@ -189,7 +184,8 @@ static void *NETMAN_rpc_handler(int fno, void *buffer, int size)
 			}
 
 			IsRpcStackInitialized=1;
-			SifRpcTxBuffer.RegNetworkStackResult.result=ResultValue;
+			SifRpcTxBuffer.RegNetworkStackResult.result = ResultValue;
+			SifRpcTxBuffer.RegNetworkStackResult.FrameBufferStatus = FrameBufferStatus;
 			break;
 		case NETMAN_IOP_RPC_FUNC_UNREG_NETWORK_STACK:
 			unregisterEENetworkStack();
