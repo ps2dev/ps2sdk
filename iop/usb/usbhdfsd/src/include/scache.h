@@ -8,6 +8,7 @@ int  scache_allocSector(cache_set* cache, unsigned int sector, void** buf);
 int  scache_readSector(cache_set* cache, unsigned int sector, void** buf);
 int  scache_writeSector(cache_set* cache, unsigned int sector);
 int  scache_flushSectors(cache_set* cache);
+void scache_invalidate(cache_set* cache, unsigned int sector, int count);
 
 void scache_getStat(cache_set* cache, unsigned int* access, unsigned int* hits);
 

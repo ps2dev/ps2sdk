@@ -128,6 +128,22 @@ static int getIndexWrite(cache_set* cache, unsigned int sector) {
 /*
 	flush dirty sectors
  */
+static int scache_flushSector(cache_set* cache, int index) {
+	int ret;
+
+	if (cache->rec[index].writeDirty) {
+		XPRINTF("scache: flushSectors dirty index=%d sector=%u \n", index, cache->rec[index].sector);
+		ret = WRITE_SECTOR(cache->dev, cache->rec[index].sector, cache->sectorBuf + (index * BLOCK_SIZE), BLOCK_SIZE/cache->sectorSize);
+		if (ret < 0) {
+			printf("scache: ERROR writing sector to disk! sector=%u\n", cache->rec[index].sector);
+			return ret;
+		}
+
+		cache->rec[index].writeDirty = 0;
+	}
+	return 1;
+}
+
 int scache_flushSectors(cache_set* cache) {
 	unsigned int i;
 	int counter = 0, ret;
@@ -141,17 +157,10 @@ int scache_flushSectors(cache_set* cache) {
 	}
 
 	for (i = 0; i < CACHE_SIZE; i++) {
-		if (cache->rec[i].writeDirty) {
-			XPRINTF("scache: flushSectors dirty index=%d sector=%u \n", i, cache->rec[i].sector);
-			ret = WRITE_SECTOR(cache->dev, cache->rec[i].sector, cache->sectorBuf + (i * BLOCK_SIZE), BLOCK_SIZE/cache->sectorSize);
-			if (ret < 0) {
-				printf("scache: ERROR writing sector to disk! sector=%u\n", cache->rec[i].sector);
-				return ret;
-			}
-
-			cache->rec[i].writeDirty = 0;
+		if((ret = scache_flushSector(cache, i)) >= 0)
 			counter ++;
-		}
+		else
+			return ret;
 	}
 	cache->writeFlag = 0;
 	return counter;
@@ -262,6 +271,25 @@ int scache_writeSector(cache_set* cache, unsigned int sector) {
 	//}
 
 	return cache->sectorSize;
+}
+
+void scache_invalidate(cache_set* cache, unsigned int sector, int count) {
+	int index; //index is given in single sectors not octal sectors
+	int i;
+
+	XPRINTF("cache: invalidate devId = %i sector = %u count = %d \n", cache->dev->devId, sector, count);
+
+	for(i = 0; i < count; i++)
+	{
+		index = getSlot(cache, sector);
+		if (index >=  0) { //sector found in cache. Write back and invalidate the block it belongs to.
+			scache_flushSector(cache, index);
+
+			cache->rec[index].sector = 0xFFFFFFF0;
+			cache->rec[index].tax = 0;
+			cache->rec[index].writeDirty = 0;
+		}
+	}
 }
 
 //---------------------------------------------------------------------------
