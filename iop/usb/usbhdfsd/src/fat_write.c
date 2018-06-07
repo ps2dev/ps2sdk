@@ -1675,6 +1675,7 @@ static int fat_wipeDirEntries(fat_driver *fatd){
 	int ret;
 	unsigned int i, theSector;
 	unsigned char* sbuf = NULL;
+	fat_direntry_sfn *sfn;
 
 	//now mark direntries as deleted
 	theSector = 0;
@@ -1697,7 +1698,10 @@ static int fat_wipeDirEntries(fat_driver *fatd){
 				break;
 			}
 		}
-		sbuf[fatd->deOfs[i]] = 0xE5; //delete marker
+
+		//Change the first character of the directory entry (regardless of whether it was the actual SFN entry or one of the others used for LFN) to the deleted marker.
+		sfn = (fat_direntry_sfn*)&sbuf[fatd->deOfs[i]];
+		sfn->name[0] = sfn->name[0] == 0xE5 ? 0x05 : 0xE5; //delete marker
 	}
 	if (theSector > 0) {
 		ret = WRITE_SECTOR(fatd->dev, theSector);
