@@ -2241,23 +2241,38 @@ int fat_writeFile(fat_driver* fatd, fat_dir* fatDir, int* updateClusterIndices, 
 		for (i = 0 + clusterSkip; i < chainSize && size > 0; i++) {
 			//read cluster and save cluster content
 			startSector = fat_cluster2sector(&fatd->partBpb, fatd->cbuf[i]);
-			//process all sectors of the cluster (and skip leading sectors if needed)
 
-			j = sectorSkip;
+			//Calculate how long we can continuously write for.
+			toWrite = fatd->partBpb.clusterSize;
+			j = (size + dataSkip) / fatd->partBpb.sectorSize;
+			if ((size + dataSkip) % fatd->partBpb.sectorSize > 0)
+				j++;
+			for (j = size; i < chainSize && j > 0; i++) {
+				if (fatd->cbuf[i] == (fatd->cbuf[i+1]-1))
+				{	//Next cluster is adjacent to this one, so we can write across.
+					toWrite += fatd->partBpb.clusterSize;
+					j -= fatd->partBpb.clusterSize;
+				} else
+					break;
+			}
+
+			startSector += sectorSkip;
+
+			//process all sectors of the cluster (and skip leading sectors if needed)
 			if(dataSkip > 0) {
 				unsigned char* sbuf = NULL; //sector buffer
 
 				//Handle the partially-filled sector within the cluster.
-				ret = READ_SECTOR(fatd->dev, startSector + j, sbuf);
+				ret = READ_SECTOR(fatd->dev, startSector, sbuf);
 				if (ret < 0) {
-					XPRINTF("USBHDFSD: Read sector failed ! sector=%u\n", startSector + j);
+					XPRINTF("USBHDFSD: Read sector failed ! sector=%u\n", startSector);
 					return bufferPos; //return number of bytes already written
 				}
 
 				memcpy(sbuf + dataSkip, buffer+bufferPos, mass_device->sectorSize - dataSkip);
-				ret = WRITE_SECTOR(fatd->dev, startSector + j);
+				ret = WRITE_SECTOR(fatd->dev, startSector);
 				if (ret < 0) {
-					printf("USBHDFSD: Write sector failed ! sector=%u\n", startSector + j);
+					printf("USBHDFSD: Write sector failed ! sector=%u\n", startSector);
 					return bufferPos; //return number of bytes already written
 				}
 
@@ -2265,32 +2280,32 @@ int fat_writeFile(fat_driver* fatd, fat_dir* fatDir, int* updateClusterIndices, 
 				size -= bufSize;
 				bufferPos +=  bufSize;
 				dataSkip = 0;
-				j++;
+				toWrite--;
+				startSector++;
 			}
 
-			toWrite = fatd->partBpb.clusterSize - j;
 			if(size / mass_device->sectorSize < toWrite)
 				toWrite = size / mass_device->sectorSize;
 			if(toWrite > 0) {
-				INVALIDATE_SECTORS(fatd->dev, startSector + j, toWrite);
-				ret = WRITE_SECTORS_RAW(fatd->dev, startSector + j, toWrite, buffer+bufferPos);
-				if (ret != toWrite) {
-					XPRINTF("USBHDFSD: Write sectors failed ! sector=%u (%u)\n", startSector + j, toWrite);
+				INVALIDATE_SECTORS(fatd->dev, startSector, toWrite);
+				ret = WRITE_SECTORS_RAW(fatd->dev, startSector, toWrite, buffer+bufferPos);
+				if (ret != 0) {
+					XPRINTF("USBHDFSD: Write sectors failed ! sector=%u (%u)\n", startSector, toWrite);
 					return bufferPos; //return number of bytes already written
 				}
 
 				bufSize = toWrite * mass_device->sectorSize;
 				size -= bufSize;
 				bufferPos +=  bufSize;
-				j += toWrite;
+				startSector += toWrite;
 			}
 
 			if (size < mass_device->sectorSize) {
 				unsigned char* sbuf = NULL; //sector buffer
 
-				ret = ALLOC_SECTOR(fatd->dev, startSector + j, sbuf);
+				ret = ALLOC_SECTOR(fatd->dev, startSector, sbuf);
 				if (ret < 0) {
-					XPRINTF("USBHDFSD: Write sector failed ! sector=%u\n", startSector + j);
+					XPRINTF("USBHDFSD: Write sector failed ! sector=%u\n", startSector);
 					return bufferPos;
 				}
 
