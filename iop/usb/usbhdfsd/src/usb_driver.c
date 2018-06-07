@@ -119,6 +119,17 @@ static mass_dev g_mass_device[NUM_DEVICES];
 static void usb_callback(int resultCode, int bytes, void *arg);
 static int perform_bulk_transfer(usb_transfer_callback_data* data);
 static void usb_transfer_callback(int resultCode, int bytes, void *arg);
+static int usb_set_configuration(mass_dev* dev, int configNumber);
+static int usb_set_interface(mass_dev* dev, int interface, int altSetting);
+static int usb_bulk_clear_halt(mass_dev* dev, int endpoint);
+static void usb_bulk_reset(mass_dev* dev, int mode);
+static int usb_bulk_status(mass_dev* dev, csw_packet* csw, unsigned int tag);
+static int usb_bulk_manage_status(mass_dev* dev, unsigned int tag);
+static int usb_bulk_get_max_lun(mass_dev* dev);
+static int usb_bulk_command(mass_dev* dev, cbw_packet* packet );
+static int usb_bulk_transfer(mass_dev* dev, int direction, void* buffer, unsigned int transferSize);
+
+static int mass_stor_mount(mass_dev *dev);
 static void mass_stor_release(mass_dev *dev);
 
 static void usb_callback(int resultCode, int bytes, void *arg)
@@ -172,7 +183,7 @@ static void usb_transfer_callback(int resultCode, int bytes, void *arg)
 	}
 }
 
-static void usb_set_configuration(mass_dev* dev, int configNumber) {
+static int usb_set_configuration(mass_dev* dev, int configNumber) {
 	int ret;
 	usb_callback_data cb_data;
 
@@ -185,12 +196,11 @@ static void usb_set_configuration(mass_dev* dev, int configNumber) {
 		WaitSema(cb_data.sema);
 		ret = cb_data.returnCode;
 	}
-	if (ret != USB_RC_OK) {
-		XPRINTF("USBHDFSD: Error - sending set_configuration %d\n", ret);
-	}
+
+	return ret;
 }
 
-static void usb_set_interface(mass_dev* dev, int interface, int altSetting) {
+static int usb_set_interface(mass_dev* dev, int interface, int altSetting) {
 	int ret;
 	usb_callback_data cb_data;
 
@@ -203,9 +213,8 @@ static void usb_set_interface(mass_dev* dev, int interface, int altSetting) {
 		WaitSema(cb_data.sema);
 		ret = cb_data.returnCode;
 	}
-	if (ret != USB_RC_OK) {
-		XPRINTF("USBHDFSD: Error - sending set_interface %d\n", ret);
-	}
+
+	return ret;
 }
 
 static int usb_bulk_clear_halt(mass_dev* dev, int endpoint) {
@@ -429,7 +438,7 @@ static int usb_bulk_transfer(mass_dev* dev, int direction, void* buffer, unsigne
 	return ret;
 }
 
-static inline int cbw_scsi_test_unit_ready(mass_dev* dev)
+static int cbw_scsi_test_unit_ready(mass_dev* dev)
 {
 	int result, retries;
 	static cbw_packet cbw={
@@ -468,7 +477,7 @@ static inline int cbw_scsi_test_unit_ready(mass_dev* dev)
 	return result;
 }
 
-static inline int cbw_scsi_request_sense(mass_dev* dev, void *buffer, int size)
+static int cbw_scsi_request_sense(mass_dev* dev, void *buffer, int size)
 {
 	int rcode, result, retries;
 	static cbw_packet cbw={
@@ -513,7 +522,7 @@ static inline int cbw_scsi_request_sense(mass_dev* dev, void *buffer, int size)
 	return -EIO;
 }
 
-static inline int cbw_scsi_inquiry(mass_dev* dev, void *buffer, int size)
+static int cbw_scsi_inquiry(mass_dev* dev, void *buffer, int size)
 {
 	int rcode, result, retries;
 	static cbw_packet cbw={
@@ -558,7 +567,7 @@ static inline int cbw_scsi_inquiry(mass_dev* dev, void *buffer, int size)
 	return -EIO;
 }
 
-static inline int cbw_scsi_start_stop_unit(mass_dev* dev)
+static int cbw_scsi_start_stop_unit(mass_dev* dev)
 {
 	int result, retries;
 	static cbw_packet cbw={
@@ -597,7 +606,7 @@ static inline int cbw_scsi_start_stop_unit(mass_dev* dev)
 	return result;
 }
 
-static inline int cbw_scsi_read_capacity(mass_dev* dev, void *buffer, int size)
+static int cbw_scsi_read_capacity(mass_dev* dev, void *buffer, int size)
 {
 	int rcode, result, retries;
 	static cbw_packet cbw={
@@ -641,7 +650,7 @@ static inline int cbw_scsi_read_capacity(mass_dev* dev, void *buffer, int size)
 	return -EIO;
 }
 
-static inline int cbw_scsi_read_sector(mass_dev* dev, unsigned int lba, void* buffer, unsigned short int sectorCount)
+static int cbw_scsi_read_sector(mass_dev* dev, unsigned int lba, void* buffer, unsigned short int sectorCount)
 {
 	int rcode, result;
 	static cbw_packet cbw={
@@ -691,7 +700,7 @@ static inline int cbw_scsi_read_sector(mass_dev* dev, unsigned int lba, void* bu
 	return result;
 }
 
-static inline int cbw_scsi_write_sector(mass_dev* dev, unsigned int lba, const void* buffer, unsigned short int sectorCount)
+static int cbw_scsi_write_sector(mass_dev* dev, unsigned int lba, const void* buffer, unsigned short int sectorCount)
 {
 	int rcode, result;
 	static cbw_packet cbw={
@@ -866,7 +875,7 @@ int mass_stor_probe(int devId)
 
 int mass_stor_connect(int devId)
 {
-	int i;
+	int i, ret;
 	int epCount;
 	UsbDeviceDescriptor *device;
 	UsbConfigDescriptor *config;
@@ -937,12 +946,24 @@ int mass_stor_connect(int devId)
 	/*store current configuration id - can't call set_configuration here */
 	dev->devId = devId;
 	dev->configId = config->bConfigurationValue;
-	dev->status = USBMASS_DEV_STAT_CONN;
-	XPRINTF("USBHDFSD: connect ok: epI=%i, epO=%i \n", dev->bulkEpI, dev->bulkEpO);
 
-	if(dev->callback != NULL) dev->callback(USBMASS_DEV_EV_CONN);
+	if ((ret = usb_set_configuration(dev, dev->configId)) == USB_RC_OK)
+	{
+		if ((ret = usb_set_interface(dev, dev->interfaceNumber, dev->interfaceAlt)) == USB_RC_OK)
+		{
+			if (mass_stor_mount(dev) >= 0)
+			{
+				dev->status = USBMASS_DEV_STAT_CONN;
+				if(dev->callback != NULL) dev->callback(USBMASS_DEV_EV_CONN);
 
-	return 0;
+				return 0;
+			}
+		} else
+			printf("USBHDFSD: Error - sending set_interface %d\n", ret);
+	} else
+		printf("USBHDFSD: Error - sending set_configuration %d\n", ret);
+
+	return -1;
 }
 
 static void mass_stor_release(mass_dev *dev)
@@ -999,11 +1020,6 @@ static int mass_stor_warmup(mass_dev *dev) {
 
 	XPRINTF("USBHDFSD: mass_stor_warmup\n");
 
-	if (!(dev->status & USBMASS_DEV_STAT_CONN)) {
-		printf("USBHDFSD: Error - no mass storage device found!\n");
-		return -1;
-	}
-
 	stat = usb_bulk_get_max_lun(dev);
 	XPRINTF("USBHDFSD: usb_bulk_get_max_lun %d\n", stat);
 
@@ -1013,9 +1029,9 @@ static int mass_stor_warmup(mass_dev *dev) {
 		return -1;
 	}
 
-	printf("USBHDFSD: Vendor: %.8s\n", id.vendor);
-	printf("USBHDFSD: Product: %.16s\n", id.product);
-	printf("USBHDFSD: Revision: %.4s\n", id.revision);
+	printf(	"USBHDFSD: Vendor: %.8s\n"
+		"USBHDFSD: Product: %.16s\n"
+		"USBHDFSD: Revision: %.4s\n", id.vendor, id.product, id.revision);
 
 	while((stat = cbw_scsi_test_unit_ready(dev)) != 0)
 	{
@@ -1052,40 +1068,32 @@ static int mass_stor_warmup(mass_dev *dev) {
 	return 0;
 }
 
-int mass_stor_configureNextDevice(void)
+static int mass_stor_mount(mass_dev *dev)
 {
-	int i;
+	int ret;
 
-	XPRINTF("USBHDFSD: configuring devices... \n");
-
-	for (i = 0; i < NUM_DEVICES; ++i)
+	ret = mass_stor_warmup(dev);
+	if (ret < 0)
 	{
-		mass_dev *dev = &g_mass_device[i];
-		if (dev->devId != -1 && (dev->status & USBMASS_DEV_STAT_CONN) && !(dev->status & USBMASS_DEV_STAT_CONF))
-		{
-			int ret;
-			usb_set_configuration(dev, dev->configId);
-			usb_set_interface(dev, dev->interfaceNumber, dev->interfaceAlt);
-			dev->status |= USBMASS_DEV_STAT_CONF;
-
-			ret = mass_stor_warmup(dev);
-			if (ret < 0)
-			{
-				printf("USBHDFSD: Error - failed to warmup device %d\n", dev->devId);
-				mass_stor_release(dev);
-				continue;
-			}
-
-			dev->cache = scache_init(dev, dev->sectorSize); // modified by Hermes
-			if (dev->cache == NULL) {
-				printf("USBHDFSD: Error - scache_init failed \n" );
-				continue;
-			}
-
-			return part_connect(dev) >= 0;
-		}
+		printf("USBHDFSD: Error - failed to warmup device %d\n", dev->devId);
+		mass_stor_release(dev);
+		return -1;
 	}
-	return 0;
+
+	dev->cache = scache_init(dev, dev->sectorSize); // modified by Hermes
+	if (dev->cache == NULL) {
+		printf("USBHDFSD: Error - scache_init failed \n" );
+		mass_stor_release(dev);
+		return -1;
+	}
+
+	if (part_connect(dev) >= 0)
+		return 0;
+	else
+	{
+		mass_stor_release(dev);
+		return -1;
+	}
 }
 
 int InitUSB(void)
