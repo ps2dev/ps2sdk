@@ -98,14 +98,27 @@ typedef struct _read_capacity_data {
 static sceUsbdLddOps driver;
 
 typedef struct _usb_callback_data {
-	int semh;
+	int sema;
 	int returnCode;
 	int returnSize;
 } usb_callback_data;
 
+#define USB_BLOCK_SIZE	4096	//Maximum single USB 1.1 transfer length.
+
+typedef struct _usb_transfer_callback_data {
+	int sema;
+	int pipe;
+	u8 *buffer;
+	int returnCode;
+	unsigned int remaining;
+} usb_transfer_callback_data;
+
 #define NUM_DEVICES 2
 static mass_dev g_mass_device[NUM_DEVICES];
 
+static void usb_callback(int resultCode, int bytes, void *arg);
+static int perform_bulk_transfer(usb_transfer_callback_data* data);
+static void usb_transfer_callback(int resultCode, int bytes, void *arg);
 static void mass_stor_release(mass_dev *dev);
 
 static void usb_callback(int resultCode, int bytes, void *arg)
@@ -114,20 +127,62 @@ static void usb_callback(int resultCode, int bytes, void *arg)
 	data->returnCode = resultCode;
 	data->returnSize = bytes;
 	XPRINTF("USBHDFSD: callback: res %d, bytes %d, arg %p \n", resultCode, bytes, arg);
-	SignalSema(data->semh);
+	SignalSema(data->sema);
+}
+
+static int perform_bulk_transfer(usb_transfer_callback_data* data)
+{
+	int ret, len;
+
+	len = data->remaining > USB_BLOCK_SIZE ? USB_BLOCK_SIZE : data->remaining;
+	ret = sceUsbdBulkTransfer(
+		data->pipe,		//bulk pipe epI (Read) or epO (Write)
+		data->buffer,		//data ptr
+		len,			//data length
+		&usb_transfer_callback,
+		(void*)data
+		);
+	return ret;
+}
+
+static void usb_transfer_callback(int resultCode, int bytes, void *arg)
+{
+	int ret;
+	usb_transfer_callback_data* data = (usb_transfer_callback_data*)arg;
+
+	data->returnCode = resultCode;
+	if(resultCode == USB_RC_OK)
+	{	//Update transfer progress if successful.
+		data->remaining -= bytes;
+		data->buffer += bytes;
+	}
+
+	if((resultCode == USB_RC_OK) && (data->remaining > 0))
+	{	//OK to continue.
+		ret = perform_bulk_transfer(data);
+		if (ret != USB_RC_OK)
+		{
+			data->returnCode = ret;
+			SignalSema(data->sema);
+		}
+	}
+	else
+	{
+		SignalSema(data->sema);
+	}
 }
 
 static void usb_set_configuration(mass_dev* dev, int configNumber) {
 	int ret;
 	usb_callback_data cb_data;
 
-	cb_data.semh = dev->ioSema;
+	cb_data.sema = dev->ioSema;
 
 	XPRINTF("USBHDFSD: setting configuration controlEp=%i, confNum=%i \n", dev->controlEp, configNumber);
 	ret = sceUsbdSetConfiguration(dev->controlEp, configNumber, usb_callback, (void*)&cb_data);
 
 	if (ret == USB_RC_OK) {
-		WaitSema(cb_data.semh);
+		WaitSema(cb_data.sema);
 		ret = cb_data.returnCode;
 	}
 	if (ret != USB_RC_OK) {
@@ -139,13 +194,13 @@ static void usb_set_interface(mass_dev* dev, int interface, int altSetting) {
 	int ret;
 	usb_callback_data cb_data;
 
-	cb_data.semh = dev->ioSema;
+	cb_data.sema = dev->ioSema;
 
 	XPRINTF("USBHDFSD: setting interface controlEp=%i, interface=%i altSetting=%i\n", dev->controlEp, interface, altSetting);
 	ret = sceUsbdSetInterface(dev->controlEp, interface, altSetting, usb_callback, (void*)&cb_data);
 
 	if (ret == USB_RC_OK) {
-		WaitSema(cb_data.semh);
+		WaitSema(cb_data.sema);
 		ret = cb_data.returnCode;
 	}
 	if (ret != USB_RC_OK) {
@@ -157,7 +212,7 @@ static int usb_bulk_clear_halt(mass_dev* dev, int endpoint) {
 	int ret;
 	usb_callback_data cb_data;
 
-	cb_data.semh = dev->ioSema;
+	cb_data.sema = dev->ioSema;
 
 	ret = sceUsbdClearEndpointFeature(
 		dev->controlEp, 	//Config pipe
@@ -168,7 +223,7 @@ static int usb_bulk_clear_halt(mass_dev* dev, int endpoint) {
 		);
 
 	if (ret == USB_RC_OK) {
-		WaitSema(cb_data.semh);
+		WaitSema(cb_data.sema);
 		ret = cb_data.returnCode;
 	}
 	if (ret != USB_RC_OK) {
@@ -182,7 +237,7 @@ static void usb_bulk_reset(mass_dev* dev, int mode) {
 	int ret;
 	usb_callback_data cb_data;
 
-	cb_data.semh = dev->ioSema;
+	cb_data.sema = dev->ioSema;
 
 	//Call Bulk only mass storage reset
 	ret = sceUsbdControlTransfer(
@@ -198,7 +253,7 @@ static void usb_bulk_reset(mass_dev* dev, int mode) {
 		);
 
 	if (ret == USB_RC_OK) {
-		WaitSema(cb_data.semh);
+		WaitSema(cb_data.sema);
 		ret = cb_data.returnCode;
 	}
 	if(ret == USB_RC_OK) {
@@ -221,7 +276,7 @@ static int usb_bulk_status(mass_dev* dev, csw_packet* csw, unsigned int tag) {
 	int ret;
 	usb_callback_data cb_data;
 
-	cb_data.semh = dev->ioSema;
+	cb_data.sema = dev->ioSema;
 
 	csw->signature = CSW_TAG;
 	csw->tag = tag;
@@ -237,7 +292,7 @@ static int usb_bulk_status(mass_dev* dev, csw_packet* csw, unsigned int tag) {
         );
 
 	if (ret == USB_RC_OK) {
-		WaitSema(cb_data.semh);
+		WaitSema(cb_data.sema);
 		ret = cb_data.returnCode;
 
 #ifdef DEBUG
@@ -287,7 +342,7 @@ static int usb_bulk_get_max_lun(mass_dev* dev) {
 	usb_callback_data cb_data;
 	char max_lun;
 
-	cb_data.semh = dev->ioSema;
+	cb_data.sema = dev->ioSema;
 
 	//Call Bulk only mass storage reset
 	ret = sceUsbdControlTransfer(
@@ -303,7 +358,7 @@ static int usb_bulk_get_max_lun(mass_dev* dev) {
 		);
 
 	if (ret == USB_RC_OK) {
-		WaitSema(cb_data.semh);
+		WaitSema(cb_data.sema);
 		ret = cb_data.returnCode;
 	}
 	if(ret == USB_RC_OK){
@@ -328,7 +383,7 @@ static int usb_bulk_command(mass_dev* dev, cbw_packet* packet ) {
 		return -1;
 	}
 
-	cb_data.semh = dev->ioSema;
+	cb_data.sema = dev->ioSema;
 
 	ret =  sceUsbdBulkTransfer(
 		dev->bulkEpO,		//bulk output pipe
@@ -339,7 +394,7 @@ static int usb_bulk_command(mass_dev* dev, cbw_packet* packet ) {
 	);
 
 	if (ret == USB_RC_OK) {
-		WaitSema(cb_data.semh);
+		WaitSema(cb_data.sema);
 		ret = cb_data.returnCode;
 	}
 	if (ret != USB_RC_OK) {
@@ -350,50 +405,28 @@ static int usb_bulk_command(mass_dev* dev, cbw_packet* packet ) {
 	return ret;
 }
 
-#define USB_BLOCK_SIZE	4096
-
 static int usb_bulk_transfer(mass_dev* dev, int direction, void* buffer, unsigned int transferSize) {
 	int ret;
-	unsigned char* buf = (unsigned char*) buffer;
-	int blockSize = USB_BLOCK_SIZE;
-	int offset = 0, pipe;
-	usb_callback_data cb_data;
+	usb_transfer_callback_data cb_data;
 
-	cb_data.semh = dev->ioSema;
+	cb_data.sema = dev->ioSema;
+	cb_data.pipe = (direction==USB_BLK_EP_IN) ? dev->bulkEpI : dev->bulkEpO;
+	cb_data.buffer = buffer;
+	cb_data.remaining = transferSize;
 
-	pipe = (direction==USB_BLK_EP_IN) ? dev->bulkEpI : dev->bulkEpO;
-	while (transferSize > 0) {
-		if (transferSize < blockSize) {
-			blockSize = transferSize;
-		}
-
-		ret = sceUsbdBulkTransfer(
-			pipe,			//bulk pipe epI(Read)  epO(Write)
-			(buf + offset),		//data ptr
-			blockSize,		//data length
-			usb_callback,
-			(void*)&cb_data
-			);
-		if (ret != USB_RC_OK) {
-			cb_data.returnCode = ret;
-			break;
-		} else {
-			WaitSema(cb_data.semh);
-			//XPRINTF("USBHDFSD: retCode=%i retSize=%i \n", cb_data.returnCode, cb_data.returnSize);
-			if (cb_data.returnCode != USB_RC_OK) {
-				break;
-			}
-			offset += cb_data.returnSize;
-			transferSize-= cb_data.returnSize;
-		}
+	ret = perform_bulk_transfer(&cb_data);
+	if (ret == USB_RC_OK) {
+		WaitSema(cb_data.sema);
+		//XPRINTF("USBHDFSD: retCode=%i retSize=%i \n", cb_data.returnCode, cb_data.returnSize);
+		ret = cb_data.returnCode;
 	}
 
-	if(cb_data.returnCode != USB_RC_OK){
+	if(ret != USB_RC_OK) {
 		XPRINTF("USBHDFSD: Error - bulk data transfer %d. Clearing HALT state.\n", cb_data.returnCode);
 		usb_bulk_clear_halt(dev, direction);
 	}
 
-	return cb_data.returnCode;
+	return ret;
 }
 
 static inline int cbw_scsi_test_unit_ready(mass_dev* dev)
