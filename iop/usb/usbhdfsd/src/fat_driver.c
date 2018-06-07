@@ -1023,6 +1023,12 @@ fat_driver * fat_getData(int device)
 	if (device >= NUM_DRIVES)
 		return NULL;
 
+	while (g_fatd[device] == NULL || g_fatd[device]->dev == NULL)
+	{
+		if (mass_stor_configureNextDevice() <= 0)
+			break;
+	}
+
 	if (g_fatd[device] == NULL || g_fatd[device]->dev == NULL)
 		return NULL;
 	else

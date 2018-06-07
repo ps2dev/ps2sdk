@@ -26,6 +26,8 @@
 //Device status bits.
 /** CONNected */
 #define USBMASS_DEV_STAT_CONN	0x01
+/** CONFigured */
+#define USBMASS_DEV_STAT_CONF	0x02
 /** ERRor */
 #define USBMASS_DEV_STAT_ERR	0x80
 
