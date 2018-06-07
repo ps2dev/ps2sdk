@@ -751,6 +751,7 @@ int fat_readFile(fat_driver* fatd, fat_dir* fatDir, unsigned int filePos, unsign
 	dataSkip  = filePos  % fatd->partBpb.sectorSize;
 	bufferPos = 0;
 
+
 	XPRINTF("USBHDFSD: fileCluster = %u,  clusterPos= %u clusterSkip=%u, sectorSkip=%u dataSkip=%u \n",
 		fileCluster, clusterPos, clusterSkip, sectorSkip, dataSkip);
 
@@ -796,8 +797,16 @@ int fat_readFile(fat_driver* fatd, fat_dir* fatDir, unsigned int filePos, unsign
 			for (; i < chainSize && j > 0; i++) {
 				if (fatd->cbuf[i] == (fatd->cbuf[i+1]-1))
 				{	//Next cluster is adjacent to this one, so we can read across.
-					toRead += fatd->partBpb.clusterSize;
-					j -= fatd->partBpb.clusterSize;
+					if(j >= fatd->partBpb.clusterSize)
+					{
+						toRead += fatd->partBpb.clusterSize;			
+						j -= fatd->partBpb.clusterSize;
+					}
+					else
+					{
+						toRead += j;
+						j = 0;
+					}
 				} else
 					break;
 			}
@@ -808,14 +817,17 @@ int fat_readFile(fat_driver* fatd, fat_dir* fatDir, unsigned int filePos, unsign
 			if (dataSkip > 0) {
 				unsigned char* sbuf = NULL; //sector buffer
 
+				bufSize = mass_device->sectorSize - dataSkip;
+				if (size < bufSize)
+					bufSize = size;
+				
 				ret = READ_SECTOR(fatd->dev, startSector, sbuf);
 				if (ret < 0) {
 					XPRINTF("USBHDFSD: Read sector failed ! sector=%u\n", startSector);
 					return bufferPos;
 				}
 
-				memcpy(buffer+bufferPos, sbuf + dataSkip, mass_device->sectorSize - dataSkip);
-				bufSize = mass_device->sectorSize - dataSkip;
+				memcpy(buffer+bufferPos, sbuf + dataSkip, bufSize);
 				size -= bufSize;
 				bufferPos += bufSize;
 				dataSkip = 0;
@@ -839,7 +851,7 @@ int fat_readFile(fat_driver* fatd, fat_dir* fatDir, unsigned int filePos, unsign
 				startSector += toRead;
 			}
 
-			if (size < mass_device->sectorSize) {
+			if (size > 0 && size < mass_device->sectorSize) {
 				unsigned char* sbuf = NULL; //sector buffer
 
 				ret = READ_SECTOR(fatd->dev, startSector, sbuf);
