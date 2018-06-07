@@ -28,6 +28,8 @@
 #include "mass_debug.h"
 
 #define READ_SECTOR(d, a, b)	scache_readSector((d)->cache, (a), (void **)&b)
+#define READ_SECTORS_RAW(d, a, c, b)	mass_stor_readSector((d), a, b, c);
+#define INVALIDATE_SECTORS(d, s, c)	scache_invalidate((d)->cache, s, c)
 
 #define NUM_DRIVES 10
 static fat_driver* g_fatd[NUM_DRIVES];
@@ -736,7 +738,7 @@ void fat_getClusterAtFilePos(fat_driver* fatd, fat_dir* fatDir, unsigned int fil
 //---------------------------------------------------------------------------
 int fat_readFile(fat_driver* fatd, fat_dir* fatDir, unsigned int filePos, unsigned char* buffer, unsigned int size) {
 	int ret, chainSize;
-	unsigned int i, j, startSector, clusterChainStart, bufSize, sectorSkip, clusterSkip, dataSkip;
+	unsigned int i, j, startSector, clusterChainStart, bufSize, sectorSkip, clusterSkip, dataSkip, toRead;
 	unsigned char nextChain;
 	mass_dev* mass_device = fatd->dev;
 
@@ -756,7 +758,6 @@ int fat_readFile(fat_driver* fatd, fat_dir* fatDir, unsigned int filePos, unsign
 		return 0;
 	}
 
-	bufSize = mass_device->sectorSize;
 	nextChain = 1;
 	clusterChainStart = 1;
 
@@ -787,7 +788,9 @@ int fat_readFile(fat_driver* fatd, fat_dir* fatDir, unsigned int filePos, unsign
 			//read cluster and save cluster content
 			startSector = fat_cluster2sector(&fatd->partBpb, fatd->cbuf[i]);
 			//process all sectors of the cluster (and skip leading sectors if needed)
-			for (j = 0 + sectorSkip; j < fatd->partBpb.clusterSize && size > 0; j++) {
+			j = sectorSkip;
+
+			if (dataSkip > 0) {
 				unsigned char* sbuf = NULL; //sector buffer
 
 				ret = READ_SECTOR(fatd->dev, startSector + j, sbuf);
@@ -796,20 +799,46 @@ int fat_readFile(fat_driver* fatd, fat_dir* fatDir, unsigned int filePos, unsign
 					return bufferPos;
 				}
 
-				//compute exact size of transfered bytes
-				if (size < bufSize) {
-					bufSize = size + dataSkip;
-				}
-				if (bufSize > mass_device->sectorSize) {
-					bufSize = mass_device->sectorSize;
-				}
-				XPRINTF("USBHDFSD: memcopy dst=%u, src=%u, size=%u  bufSize=%u \n", bufferPos, dataSkip, bufSize-dataSkip, bufSize);
-				memcpy(buffer+bufferPos, sbuf + dataSkip, bufSize - dataSkip);
-				size-= (bufSize - dataSkip);
-				bufferPos +=  (bufSize - dataSkip);
+				memcpy(buffer+bufferPos, sbuf + dataSkip, mass_device->sectorSize - dataSkip);
+				bufSize = mass_device->sectorSize - dataSkip;
+				size -= bufSize;
+				bufferPos += bufSize;
 				dataSkip = 0;
-				bufSize = mass_device->sectorSize;
+				j++;
 			}
+
+			toRead = fatd->partBpb.clusterSize - j;
+			if(size / mass_device->sectorSize < toRead)
+				toRead = size / mass_device->sectorSize;
+			if(toRead > 0) {
+				INVALIDATE_SECTORS(fatd->dev, startSector + j, toRead);
+				ret = READ_SECTORS_RAW(fatd->dev, startSector + j, toRead, buffer + bufferPos);
+				if (ret != toRead) {
+					XPRINTF("USBHDFSD: Read sectors failed ! sector=%u (%u)\n", startSector + j, toRead);
+					return bufferPos;
+				}
+
+				bufSize = toRead * mass_device->sectorSize;
+				size -= bufSize;
+				bufferPos += bufSize;
+				j += toRead;
+			}
+
+			if (size < mass_device->sectorSize) {
+				unsigned char* sbuf = NULL; //sector buffer
+
+				ret = READ_SECTOR(fatd->dev, startSector + j, sbuf);
+				if (ret < 0) {
+					XPRINTF("USBHDFSD: Read sector failed ! sector=%u\n", startSector + j);
+					return bufferPos;
+				}
+
+				memcpy(buffer+bufferPos, sbuf, size);
+				bufSize = size;
+				size -= bufSize;
+				bufferPos += bufSize;
+			}
+
 			sectorSkip = 0;
 		}
 		clusterSkip = 0;
