@@ -45,6 +45,7 @@
 
 #define USB_XFER_MAX_RETRIES	8
 #define USB_IO_MAX_RETRIES	16
+#define USB_IO_MAX_SECTORS	65535
 
 #define CBW_TAG 0x43425355
 #define CSW_TAG 0x53425355
@@ -772,34 +773,60 @@ static mass_dev* mass_stor_findDevice(int devId, int create)
 	return dev;
 }
 
-/* size should be a multiple of sector size */
-int mass_stor_readSector(mass_dev* mass_device, unsigned int sector, unsigned char* buffer, unsigned short int count)
+int mass_stor_readSector(mass_dev* dev, unsigned int sector, unsigned char* buffer, unsigned int count)
 {
-	//assert(size % mass_device->sectorSize == 0);
-	//assert(sector <= mass_device->maxLBA);
+	unsigned int remaining;
+	unsigned short int toRead;
 	int retries;
 
-	for(retries = USB_IO_MAX_RETRIES; retries > 0; retries--){
-		if(cbw_scsi_read_sector(mass_device, sector, buffer, count) == 0){
-			return count;
+	remaining = count;
+	while(remaining > 0)
+	{
+		toRead = remaining > USB_IO_MAX_SECTORS ? USB_IO_MAX_SECTORS : remaining;
+
+		for(retries = USB_IO_MAX_RETRIES; retries > 0; retries--)
+		{
+			if(cbw_scsi_read_sector(dev, sector, buffer, toRead) == 0)
+				break;
 		}
+
+		if(retries == 0)
+			return -EIO;
+
+		buffer += (toRead * dev->sectorSize);
+		sector += toRead;
+		remaining -= toRead;
 	}
-	return -EIO;
+
+	return 0;
 }
 
-/* size should be a multiple of sector size */
-int mass_stor_writeSector(mass_dev* mass_device, unsigned int sector, const unsigned char* buffer, unsigned short int count)
+int mass_stor_writeSector(mass_dev* dev, unsigned int sector, const unsigned char* buffer, unsigned int count)
 {
-	//assert(size % mass_device->sectorSize == 0);
-	//assert(sector <= mass_device->maxLBA);
+	unsigned int remaining;
+	unsigned short int toWrite;
 	int retries;
 
-	for(retries = USB_IO_MAX_RETRIES; retries > 0; retries--){
-		if(cbw_scsi_write_sector(mass_device, sector, buffer, count) == 0){
-			return count;
+	remaining = count;
+	while(remaining > 0)
+	{
+		toWrite = remaining > USB_IO_MAX_SECTORS ? USB_IO_MAX_SECTORS : remaining;
+
+		for(retries = USB_IO_MAX_RETRIES; retries > 0; retries--)
+		{
+			if(cbw_scsi_write_sector(dev, sector, buffer, toWrite) == 0)
+				break;
 		}
+
+		if(retries == 0)
+			return -EIO;
+
+		buffer += (toWrite * dev->sectorSize);
+		sector += toWrite;
+		remaining -= toWrite;
 	}
-	return -EIO;
+
+	return 0;
 }
 
 /* test that endpoint is bulk endpoint and if so, update device info */
