@@ -352,7 +352,7 @@ int fat_getDirentry(unsigned char fatType, fat_direntry* dir_entry, fat_direntry
 		return 0;
 	}
 	//detect deleted entry - it will be ignored
-	if (dir_entry->sfn.name[0] == 0xE5 || dir_entry->sfn.name[0] == 0x05) {
+	if (dir_entry->sfn.name[0] == 0xE5) {
 		return 3;
 	}
 
