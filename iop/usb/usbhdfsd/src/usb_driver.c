@@ -45,7 +45,6 @@
 
 #define USB_XFER_MAX_RETRIES	8
 #define USB_IO_MAX_RETRIES	16
-#define USB_IO_MAX_SECTORS	65535
 
 #define CBW_TAG 0x43425355
 #define CSW_TAG 0x53425355
@@ -761,60 +760,30 @@ static mass_dev* mass_stor_findDevice(int devId, int create)
 	return dev;
 }
 
-int mass_stor_readSector(mass_dev* dev, unsigned int sector, unsigned char* buffer, unsigned int count)
+int mass_stor_readSector(mass_dev* dev, unsigned int sector, unsigned char* buffer, unsigned short int count)
 {
-	unsigned int remaining;
-	unsigned short int toRead;
 	int retries;
 
-	remaining = count;
-	while(remaining > 0)
+	for(retries = USB_IO_MAX_RETRIES; retries > 0; retries--)
 	{
-		toRead = remaining > USB_IO_MAX_SECTORS ? USB_IO_MAX_SECTORS : remaining;
-
-		for(retries = USB_IO_MAX_RETRIES; retries > 0; retries--)
-		{
-			if(cbw_scsi_read_sector(dev, sector, buffer, toRead) == 0)
-				break;
-		}
-
-		if(retries == 0)
-			return -EIO;
-
-		buffer += (toRead * dev->sectorSize);
-		sector += toRead;
-		remaining -= toRead;
+		if(cbw_scsi_read_sector(dev, sector, buffer, count) == 0)
+			return 0;
 	}
 
-	return 0;
+	return -EIO;
 }
 
-int mass_stor_writeSector(mass_dev* dev, unsigned int sector, const unsigned char* buffer, unsigned int count)
+int mass_stor_writeSector(mass_dev* dev, unsigned int sector, const unsigned char* buffer, unsigned short int count)
 {
-	unsigned int remaining;
-	unsigned short int toWrite;
 	int retries;
 
-	remaining = count;
-	while(remaining > 0)
+	for(retries = USB_IO_MAX_RETRIES; retries > 0; retries--)
 	{
-		toWrite = remaining > USB_IO_MAX_SECTORS ? USB_IO_MAX_SECTORS : remaining;
-
-		for(retries = USB_IO_MAX_RETRIES; retries > 0; retries--)
-		{
-			if(cbw_scsi_write_sector(dev, sector, buffer, toWrite) == 0)
-				break;
-		}
-
-		if(retries == 0)
-			return -EIO;
-
-		buffer += (toWrite * dev->sectorSize);
-		sector += toWrite;
-		remaining -= toWrite;
+		if(cbw_scsi_write_sector(dev, sector, buffer, count) == 0)
+			return 0;
 	}
 
-	return 0;
+	return -EIO;
 }
 
 /* test that endpoint is bulk endpoint and if so, update device info */
@@ -822,12 +791,12 @@ static void usb_bulk_probeEndpoint(int devId, mass_dev* dev, UsbEndpointDescript
 	if (endpoint->bmAttributes == USB_ENDPOINT_XFER_BULK) {
 		/* out transfer */
 		if ((endpoint->bEndpointAddress & USB_ENDPOINT_DIR_MASK) == USB_DIR_OUT && dev->bulkEpO < 0) {
-			dev->bulkEpO = sceUsbdOpenPipeAligned(devId, endpoint);
+			dev->bulkEpO = sceUsbdOpenPipe(devId, endpoint);
 			XPRINTF("USBHDFSD: register Output endpoint id =%i addr=%02X packetSize=%i\n", dev->bulkEpO, endpoint->bEndpointAddress, (unsigned short int)endpoint->wMaxPacketSizeHB<<8 | endpoint->wMaxPacketSizeLB);
 		} else
 		/* in transfer */
 		if ((endpoint->bEndpointAddress & USB_ENDPOINT_DIR_MASK) == USB_DIR_IN && dev->bulkEpI < 0) {
-			dev->bulkEpI = sceUsbdOpenPipeAligned(devId, endpoint);
+			dev->bulkEpI = sceUsbdOpenPipe(devId, endpoint);
 			XPRINTF("USBHDFSD: register Input endpoint id =%i addr=%02X packetSize=%i\n", dev->bulkEpI, endpoint->bEndpointAddress, (unsigned short int)endpoint->wMaxPacketSizeHB<<8 | endpoint->wMaxPacketSizeLB);
 		}
 	}
