@@ -85,14 +85,6 @@ int pfsFioDevctl(iop_file_t *f, const char *name, int cmd, void *arg, size_t arg
 		rv=devctlFsckStat(pfsMount, PFS_MODE_CHECK_FLAG);
 		break;
 
-	case PDIOC_SETUID:
-		pfsMount->uid=*(u16 *)(arg);
-		break;
-
-	case PDIOC_SETGID:
-		pfsMount->gid=*(u16 *)(arg);
-		break;
-
 	case PDIOC_SHOWBITMAP:
 		pfsBitmapShow(pfsMount);
 		break;

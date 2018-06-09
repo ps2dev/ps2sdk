@@ -202,8 +202,6 @@ typedef struct
 #define PDIOC_CLRFSCKSTAT		0x5005
 
 // Arbitrarily-named commands
-#define PDIOC_SETUID			0x5032
-#define PDIOC_SETGID			0x5033
 #define PDIOC_SHOWBITMAP		0xFF
 
 // I/O direction
@@ -239,8 +237,6 @@ typedef struct
 #define PFS_DEVCTL_GET_STAT		PDIOC_GETFSCKSTAT
 #define PFS_DEVCTL_CLEAR_STAT		PDIOC_CLRFSCKSTAT
 
-#define PFS_DEVCTL_SET_UID		PDIOC_SETUID
-#define PFS_DEVCTL_SET_GID		PDIOC_SETGID
 #define PFS_DEVCTL_SHOW_BITMAP		PDIOC_SHOWBITMAP
 
 #endif /* __HDD_IOCTL_H__ */

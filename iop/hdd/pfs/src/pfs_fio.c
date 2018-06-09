@@ -228,8 +228,8 @@ static int openFile(pfs_mount_t *pfsMount, pfs_file_slot_t *freeSlot, const char
 	}else{
 		if ((openFlags & O_CREAT) && (result==-ENOENT) &&
 		    ((result=pfsCheckAccess(parentInode, 2))==0) &&
-		    (fileInode=pfsInodeCreate(parentInode, mode, pfsMount->uid,
-						  pfsMount->gid, &result)))
+		    (fileInode=pfsInodeCreate(parentInode, mode, PFS_UID,
+						  PFS_GID, &result)))
 		{
 			if ((mode & FIO_S_IFMT) == FIO_S_IFLNK)
 			{
@@ -973,10 +973,11 @@ int	pfsFioChstat(iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int
 				memcpy(&clink->u.inode->atime, stat->atime, sizeof(pfs_datetime_t));
 			if(statmask & FIO_CST_MT)
 				memcpy(&clink->u.inode->mtime, stat->mtime, sizeof(pfs_datetime_t));
+/*			//By PFS v2.2, changing UID and GID was no longer allowed.
 			if(statmask & FIO_CST_PRVT) {
 				clink->u.inode->uid = stat->private_0;
 				clink->u.inode->gid = stat->private_1;
-			}
+			}	*/
 
 			if(pfsMount->flags & PFS_FIO_ATTR_WRITEABLE)
 				pfsCacheFlushAllDirty(pfsMount);

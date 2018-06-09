@@ -64,6 +64,19 @@
 #define PFS_MODE_REMOVE_FLAG		0x01
 #define PFS_MODE_CHECK_FLAG			0x02
 
+// UID and GID
+/*	UID and GID are fixed with constants.
+	Files (and directories) created by the system have UID and GID set to 0,
+	as they were made with an older library.
+
+	As of release v2.3, the UID and GID were changed to 0xFFFF.
+	The HDD Browser probably changes the UID and GID to 0xFFFF with chstat,
+	although I have not verified that.
+
+	If the UID and GID are not set to 0xFFFF, then the software may ignore the entry.	*/
+#define PFS_UID				0xFFFF
+#define PFS_GID				0xFFFF
+
 // journal/log
 typedef struct {
 	u32 magic;			// =PFS_JOUNRNAL_MAGIC
@@ -168,8 +181,6 @@ typedef struct {
 	pfs_blockinfo_t log;			// block info for the log
 	pfs_blockinfo_t current_dir;	// block info for current directory
 	u32 lastError;				// 0 if no error :)
-	u16 uid;					//
-	u16 gid;					//
 	u32 free_zone[65];			// free zones in each partition (1 main + 64 possible subs)
 } pfs_mount_t;
 
