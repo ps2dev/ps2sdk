@@ -308,6 +308,7 @@ void pfsFreeZones(pfs_cache_t *pfree);
 void pfsInodePrint(pfs_inode_t *inode);
 int pfsInodeCheckSum(pfs_inode_t *inode);
 void pfsInodeSetTime(pfs_cache_t *clink);
+void pfsInodeSetTimeParent(pfs_cache_t *parent, pfs_cache_t *self);
 pfs_cache_t *pfsInodeGetData(pfs_mount_t *pfsMount, u16 sub, u32 inode, int *result);
 int pfsInodeSync(pfs_blockpos_t *blockpos, u64 size, u32 used_segments);
 pfs_cache_t *pfsGetDentriesChunk(pfs_blockpos_t *position, int *result);

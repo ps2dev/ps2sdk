@@ -270,8 +270,7 @@ static int openFile(pfs_mount_t *pfsMount, pfs_file_slot_t *freeSlot, const char
 			if ((result==0) && (cached=pfsDirAddEntry(parentInode, file, &fileInode->u.inode->inode_block,
 							 mode, &result)))
 			{
-				pfsInodeSetTime(parentInode);
-				cached->flags|=PFS_CACHE_FLAG_DIRTY;
+				pfsInodeSetTimeParent(parentInode, cached);
 				pfsCacheFree(cached);
 			}
 		}
@@ -881,6 +880,7 @@ int	pfsFioDread(iop_file_t *f, iox_dirent_t *dirent)
 		rv = -ENOTDIR;
 	}
 	else
+	{
 		if((rv = pfsGetNextDentry(fileSlot->clink, &fileSlot->block_pos, (u32 *)&fileSlot->position,
 									dirent->name, &bi)) > 0)
 		{
@@ -895,6 +895,7 @@ int	pfsFioDread(iop_file_t *f, iox_dirent_t *dirent)
 			if(result)
 				rv = result;
 		}
+	}
 
 	rv = pfsFioCheckForLastError(pfsMount, rv);
 	SignalSema(pfsFioSema);
@@ -996,7 +997,7 @@ int pfsFioRename(iop_file_t *ff, const char *old, const char *new)
 	char path1[256], path2[256];
 	int result=0;
 	pfs_mount_t *pfsMount;
-	int f;
+	int f, sameParent;
 	pfs_cache_t *parentOld=NULL, *parentNew=NULL;
 	pfs_cache_t *removeOld=NULL, *removeNew=NULL;
 	pfs_cache_t *iFileOld=NULL, *iFileNew=NULL;
@@ -1014,13 +1015,15 @@ int pfsFioRename(iop_file_t *ff, const char *old, const char *new)
 			goto exit;
 		}
 
-		if ((iFileOld=pfsInodeGetFileInDir(parentOld, path1, &result))==0) goto exit;
+		if ((iFileOld=pfsInodeGetFileInDir(parentOld, path1, &result))==NULL) goto exit;
 
-		if ((parentNew=pfsInodeGetParent(pfsMount, NULL, new, path2, &result))==0) goto exit;
+		if ((parentNew=pfsInodeGetParent(pfsMount, NULL, new, path2, &result))==NULL) goto exit;
 
 		f=(iFileOld->u.inode->mode & FIO_S_IFMT) == FIO_S_IFDIR;
 
-		if ((parentNew->nused != nused) && ((parentOld!=parentNew) || (parentNew->nused!=2))){
+		sameParent = parentOld == parentNew;
+
+		if ((parentNew->nused != nused) && ((!sameParent) || (parentNew->nused!=2))){
 			result=-EBUSY;
 			goto exit;
 		}
@@ -1056,7 +1059,7 @@ int pfsFioRename(iop_file_t *ff, const char *old, const char *new)
 
 		if (result)	goto exit;
 
-		if (f && (parentOld!=parentNew)){
+		if (f && (!sameParent)){
 			pfs_cache_t *parent;
 
 			parent=pfsCacheUsedAdd(parentNew);
@@ -1093,7 +1096,7 @@ int pfsFioRename(iop_file_t *ff, const char *old, const char *new)
 						result=-ENOENT;
 					else{
 						addNew=pfsDirAddEntry(parentNew, path2, &iFileOld->u.inode->inode_block, iFileOld->u.inode->mode, &result);
-						if (addNew && f && (parentOld!=parentNew))
+						if (addNew && f && (!sameParent))
 							newParent=pfsSetDentryParent(iFileOld, &parentNew->u.inode->inode_block, &result);
 					}
 				}
@@ -1108,30 +1111,27 @@ int pfsFioRename(iop_file_t *ff, const char *old, const char *new)
 			parentOld->pfsMount=NULL;
 			parentNew->pfsMount=NULL;
 		}else{
-			if (parentOld==parentNew){
+			if (sameParent){
 				if (removeOld!=addNew)
 					removeOld->flags |= PFS_CACHE_FLAG_DIRTY;
 			}else
 			{
-				pfsInodeSetTime(parentOld);
-				removeOld->flags|=PFS_CACHE_FLAG_DIRTY;
+				pfsInodeSetTimeParent(parentOld, removeOld);
 			}
-			pfsInodeSetTime(parentNew);
-			addNew->flags|=PFS_CACHE_FLAG_DIRTY;
+			pfsInodeSetTimeParent(parentNew, addNew);
 
-			if (newParent){
-				pfsInodeSetTime(iFileOld);
-				newParent->flags|=PFS_CACHE_FLAG_DIRTY;
+			if (newParent != NULL){
+				pfsInodeSetTimeParent(iFileOld, newParent);
 				pfsCacheFree(newParent);
 			}
 
-			if (iFileNew){
+			if (iFileNew != NULL){
 				iFileNew->flags &= ~PFS_CACHE_FLAG_DIRTY;
 				pfsBitmapFreeInodeBlocks(iFileNew);
 			}
 
-			if (pfsMount->flags & PFS_FIO_ATTR_WRITEABLE)
-				pfsCacheFlushAllDirty(pfsMount);
+			//if (pfsMount->flags & PFS_FIO_ATTR_WRITEABLE)		No check for this in late versions of PFS.
+			pfsCacheFlushAllDirty(pfsMount);
 		}
 		if (removeOld)	pfsCacheFree(removeOld);
 		if (addNew)		pfsCacheFree(addNew);

@@ -60,26 +60,27 @@ pfs_cache_t *pfsGetDentry(pfs_cache_t *clink, char *path, pfs_dentry_t **dentry,
 					break;
 				pfsCacheFree(dentCache);
 
-				if ((dentCache=pfsGetDentriesChunk(&block_pos, &result))==0)
+				if ((dentCache=pfsGetDentriesChunk(&block_pos, &result)) == NULL)
 					break;
 				d=dentCache->u.dentry;
 			}
 
-			for (d2=(pfs_dentry_t*)((int)d+512); d < d2; d=(pfs_dentry_t *)((int)d + aLen))
+			// Scan through the sector.
+			for (d2=(pfs_dentry_t*)((u8*)d+512); d < d2; d=(pfs_dentry_t *)((u8*)d + aLen))
 			{
 				aLen=(d->aLen & 0xFFF);
 
 				if (aLen & 3){
-					PFS_PRINTF(PFS_DRV_NAME": Error: dir-entry allocated length/4 != 0\n");
+					PFS_PRINTF(PFS_DRV_NAME": Error: dentry allocated length/4 != 0\n");
 					goto _exit;
 				}
 				dentryLen = (d->pLen + 8 + 3) & 0x1FC;
 				if (aLen < dentryLen){
-					PFS_PRINTF(PFS_DRV_NAME": Error: dir-entry is too small\n");
+					PFS_PRINTF(PFS_DRV_NAME": Error: dentry is too small\n");
 					goto _exit;
 				}
 				if (d2 < (pfs_dentry_t*)((u8*)d + aLen)){
-					PFS_PRINTF(PFS_DRV_NAME": Error: dir-entry across sectors\n");
+					PFS_PRINTF(PFS_DRV_NAME": Error: dentry across sectors\n");
 					goto _exit;
 				}
 
@@ -171,7 +172,7 @@ pfs_cache_t *pfsDirAddEntry(pfs_cache_t *dir, char *filename, pfs_blockinfo_t *b
 	pfs_cache_t *dcache;
 
 	dcache=pfsGetDentry(dir, filename, &dentry, &size, 1);
-	if (dcache){
+	if (dcache != NULL){
 		len=dentry->aLen & 0xFFF;
 		if (dentry->pLen)
 			len-=(dentry->pLen + 11) & 0x1FC;
@@ -203,11 +204,13 @@ pfs_cache_t *pfsDirRemoveEntry(pfs_cache_t *clink, char *path)
 	pfs_dentry_t *dlast=NULL, *dnext;
 	pfs_cache_t *c;
 
-	if ((c=pfsGetDentry(clink, path, &dentry, &size, 0))){
+	if ((c=pfsGetDentry(clink, path, &dentry, &size, 0)) != NULL){
 		val=(int)dentry-(int)c->u.dentry;
 		if (val<0)	val +=511;
-		val /=512;	val *=512;
-		dnext=(pfs_dentry_t*)((int)c->u.dentry+val);
+		val /=512;
+		val *=512;
+
+		dnext=(pfs_dentry_t*)((u8*)c->u.dentry+val);
 		do{
 			aLen = dnext->aLen & 0xFFF;
 
@@ -215,7 +218,8 @@ pfs_cache_t *pfsDirRemoveEntry(pfs_cache_t *clink, char *path)
 				if (dlast)
 					dlast->aLen=(dlast->aLen & FIO_S_IFMT) | ((dlast->aLen & 0xFFF) + aLen);
 				else{
-					dnext->pLen=dnext->inode=0;
+					dnext->inode=0;
+					dnext->pLen=0;
 
 					if (size+aLen >= clink->u.inode->size)
 							clink->u.inode->size -= aLen;
@@ -355,8 +359,8 @@ void pfsInodeFill(pfs_cache_t *ci, pfs_blockinfo_t *bi, u16 mode, u16 uid, u16 g
 		ci->u.inode->size=0;
 		val=1;
 	}
-	ci->u.inode->number_data=ci->u.inode->number_blocks=val;
-
+	ci->u.inode->number_data=val;
+	ci->u.inode->number_blocks=val;
 
 	pfsGetTime(&ci->u.inode->ctime);
 	memcpy(&ci->u.inode->atime, &ci->u.inode->ctime, sizeof(pfs_datetime_t));
@@ -467,8 +471,7 @@ int pfsInodeRemove(pfs_cache_t *parent, pfs_cache_t *inode, char *path)
 
 	if((entry=pfsDirRemoveEntry(parent, path))!=NULL)
 	{
-		pfsInodeSetTime(parent);
-		entry->flags|=PFS_CACHE_FLAG_DIRTY;
+		pfsInodeSetTimeParent(parent, entry);
 		pfsCacheFree(entry);
 	}
 	else
@@ -479,8 +482,8 @@ int pfsInodeRemove(pfs_cache_t *parent, pfs_cache_t *inode, char *path)
 	{
 		inode->flags&=~PFS_CACHE_FLAG_DIRTY;
 		pfsBitmapFreeInodeBlocks(inode);
-		if(parent->pfsMount->flags & PFS_FIO_ATTR_WRITEABLE)
-			pfsCacheFlushAllDirty(parent->pfsMount);
+		//if(parent->pfsMount->flags & PFS_FIO_ATTR_WRITEABLE)	//Not checked for in late versions of PFS.
+		pfsCacheFlushAllDirty(parent->pfsMount);
 	}
 
 	pfsCacheFree(inode);
@@ -669,18 +672,22 @@ void pfsFreeZones(pfs_cache_t *pfree)
 			nextsegdesc++;
 		}
 		else
-			if(j < clink->u.inode->data[pfsFixIndex(i)].count)
+		{
+			bi = &clink->u.inode->data[pfsFixIndex(i)];
+
+			if(j < bi->count)
 			{
-				clink->u.inode->data[pfsFixIndex(i)].count -= j;
-				b.subpart = clink->u.inode->data[pfsFixIndex(i)].subpart;
+				bi->count -= j;
+				b.subpart = bi->subpart;
 				b.count = j;
-				b.number = clink->u.inode->data[pfsFixIndex(i)].number +
-					clink->u.inode->data[pfsFixIndex(i)].count;
+				b.number = bi->number +
+					bi->count;
 				j = 0;
 				clink->flags |= PFS_CACHE_FLAG_DIRTY;
 			}
 			else
-				j -= clink->u.inode->data[pfsFixIndex(i)].count;
+				j -= bi->count;
+		}
 	}
 
 	pfree->u.inode->number_data = i;
@@ -694,14 +701,14 @@ void pfsFreeZones(pfs_cache_t *pfree)
 	if (b.number)
 		pfsBitmapFreeBlockSegment(pfsMount, &b);
 
-	while(i < limit)
+	for( ; i < limit; i++)
 	{
 		if (pfsFixIndex(i) == 0)
 		{
 			if((clink = pfsBlockGetNextSegment(clink, &result)) == 0)
 				return;
 		}
-		bi = &clink->u.inode->data[pfsFixIndex(i++)];
+		bi = &clink->u.inode->data[pfsFixIndex(i)];
 		pfsBitmapFreeBlockSegment(pfsMount, bi);
 		pfsCacheMarkClean(pfsMount, bi->subpart, bi->number<<pfsMount->inode_scale,
 			(bi->number+bi->count)<<pfsMount->inode_scale);

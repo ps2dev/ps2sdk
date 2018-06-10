@@ -58,6 +58,12 @@ void pfsInodeSetTime(pfs_cache_t *clink)
 	clink->flags|=PFS_CACHE_FLAG_DIRTY;
 }
 
+void pfsInodeSetTimeParent(pfs_cache_t *parent, pfs_cache_t *self)
+{	// set the inode time's in cache
+	pfsInodeSetTime(parent);
+	self->flags|=PFS_CACHE_FLAG_DIRTY;
+}
+
 int pfsInodeSync(pfs_blockpos_t *blockpos, u64 size, u32 used_segments)
 {
 	int result=0;
