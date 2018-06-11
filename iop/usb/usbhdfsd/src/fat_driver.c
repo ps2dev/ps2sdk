@@ -736,6 +736,21 @@ void fat_getClusterAtFilePos(fat_driver* fatd, fat_dir* fatDir, unsigned int fil
 }
 
 //---------------------------------------------------------------------------
+static int fat_readSingleSector(mass_dev *dev, unsigned int sector, void *buffer, int size, int dataSkip) {
+	unsigned char* sbuf = NULL; //sector buffer
+	int ret;
+
+	ret = READ_SECTOR(dev, sector, sbuf);
+	if (ret < 0) {
+		XPRINTF("USBHDFSD: Read sector failed ! sector=%u\n", sector);
+		return 0;
+	}
+
+	memcpy(buffer, sbuf + dataSkip, size);
+
+	return 1;
+}
+
 int fat_readFile(fat_driver* fatd, fat_dir* fatDir, unsigned int filePos, unsigned char* buffer, unsigned int size) {
 	int ret, chainSize;
 	unsigned int i, j, startSector, clusterChainStart, bufSize, sectorSkip, clusterSkip, dataSkip, toRead;
@@ -750,7 +765,6 @@ int fat_readFile(fat_driver* fatd, fat_dir* fatDir, unsigned int filePos, unsign
 	sectorSkip %= fatd->partBpb.clusterSize;
 	dataSkip  = filePos  % fatd->partBpb.sectorSize;
 	bufferPos = 0;
-
 
 	XPRINTF("USBHDFSD: fileCluster = %u,  clusterPos= %u clusterSkip=%u, sectorSkip=%u dataSkip=%u \n",
 		fileCluster, clusterPos, clusterSkip, sectorSkip, dataSkip);
@@ -790,24 +804,22 @@ int fat_readFile(fat_driver* fatd, fat_dir* fatDir, unsigned int filePos, unsign
 			startSector = fat_cluster2sector(&fatd->partBpb, fatd->cbuf[i]);
 
 			//Calculate how long we can continuously read for.
-			toRead = fatd->partBpb.clusterSize;
 			j = (size + dataSkip) / fatd->partBpb.sectorSize;
-			if ((size + dataSkip) % fatd->partBpb.sectorSize > 0)
-				j++;
-			for (; i < chainSize && j > 0; i++) {
-				if (fatd->cbuf[i] == (fatd->cbuf[i+1]-1))
-				{	//Next cluster is adjacent to this one, so we can read across.
-					if(j >= fatd->partBpb.clusterSize)
-					{
-						toRead += fatd->partBpb.clusterSize;			
-						j -= fatd->partBpb.clusterSize;
-					}
-					else
-					{
-						toRead += j;
-						j = 0;
-					}
-				} else
+			toRead = 0;
+			for (; j > 0; i++) {
+				if(j >= fatd->partBpb.clusterSize)
+				{
+					toRead += fatd->partBpb.clusterSize;
+					j -= fatd->partBpb.clusterSize;
+				}
+				else
+				{
+					toRead += j;
+					j = 0;
+				}
+
+				//Check that the next cluster is adjacent to this one, so we can read across.
+				if ((i >= chainSize - 1) || (fatd->cbuf[i] != (fatd->cbuf[i+1]-1)))
 					break;
 			}
 
@@ -815,28 +827,24 @@ int fat_readFile(fat_driver* fatd, fat_dir* fatDir, unsigned int filePos, unsign
 
 			//process all sectors of the cluster (and skip leading sectors if needed)
 			if (dataSkip > 0) {
-				unsigned char* sbuf = NULL; //sector buffer
-
 				bufSize = mass_device->sectorSize - dataSkip;
 				if (size < bufSize)
 					bufSize = size;
-				
-				ret = READ_SECTOR(fatd->dev, startSector, sbuf);
-				if (ret < 0) {
-					XPRINTF("USBHDFSD: Read sector failed ! sector=%u\n", startSector);
+
+				ret = fat_readSingleSector(fatd->dev, startSector, buffer + bufferPos, bufSize, dataSkip);
+				if (ret != 1) {
 					return bufferPos;
 				}
 
-				memcpy(buffer+bufferPos, sbuf + dataSkip, bufSize);
+				if(size + dataSkip >= mass_device->sectorSize)
+					toRead--;
+
 				size -= bufSize;
 				bufferPos += bufSize;
 				dataSkip = 0;
 				startSector++;
-				toRead--;
 			}
 
-			if(size / mass_device->sectorSize < toRead)
-				toRead = size / mass_device->sectorSize;
 			if(toRead > 0) {
 				INVALIDATE_SECTORS(fatd->dev, startSector, toRead);
 				ret = READ_SECTORS_RAW(fatd->dev, startSector, toRead, buffer + bufferPos);
@@ -851,17 +859,14 @@ int fat_readFile(fat_driver* fatd, fat_dir* fatDir, unsigned int filePos, unsign
 				startSector += toRead;
 			}
 
-			if (size > 0 && size < mass_device->sectorSize) {
-				unsigned char* sbuf = NULL; //sector buffer
+			if (size > 0 && size <= mass_device->sectorSize) {
+				bufSize = size;
 
-				ret = READ_SECTOR(fatd->dev, startSector, sbuf);
-				if (ret < 0) {
-					XPRINTF("USBHDFSD: Read sector failed ! sector=%u\n", startSector);
+				ret = fat_readSingleSector(fatd->dev, startSector, buffer + bufferPos, bufSize, 0);
+				if (ret != 1) {
 					return bufferPos;
 				}
 
-				memcpy(buffer+bufferPos, sbuf, size);
-				bufSize = size;
 				size -= bufSize;
 				bufferPos += bufSize;
 			}
