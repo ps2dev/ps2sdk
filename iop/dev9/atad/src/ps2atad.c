@@ -825,10 +825,8 @@ int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir)
 		hcyl = (lba >> 16) & 0xff;
 
 		if (atad_devinfo[device].lba48) {
-			/* Setup for 48-bit LBA.
-			   While ATA-6 allows for the transfer of up to 65536 sectors,
-			   the DMAC allows only up to 65536 x 128 / 512 = 16384 sectors. */
-			len = (nsectors > 16384) ? 16384 : nsectors;
+			/* Setup for 48-bit LBA.  */
+			len = (nsectors > 65536) ? 65536 : nsectors;
 
 			/* Combine bits 24-31 and bits 0-7 of lba into sector.  */
 			sector = ((lba >> 16) & 0xff00) | (lba & 0xff);

@@ -24,6 +24,7 @@
 #define DI	DIntr
 #define EI	EIntr
 
+// Workaround for EE kernel bug: call this immediately before returning from any interrupt handler.
 #define ExitHandler() asm volatile("sync\nei\n")
 
 // note: 'sync' is the same as 'sync.l'
@@ -37,6 +38,9 @@
 #define IS_UNCACHED_SEG(x)		\
    (((u32)(x)) & 0x20000000)
 
+#define UCAB_SEG(x)		\
+   ((void *)(((u32)(x)) | 0x30000000))
+
 #define PUSHDATA( t, x, v, l) \
     *(t *)(x) = (v); (l) = sizeof(t)
 
@@ -46,7 +50,7 @@
 #define ALIGNED(x) __attribute__((aligned((x))))
 
 /** Limits */
-#define MAX_THREADS	256	//A few will be used for the kernel patches.
+#define MAX_THREADS	256	//A few will be used for the kernel patches. Thread 0 is always the idle thread.
 #define MAX_SEMAPHORES	256	//A few will be used for the kernel patches.
 #define MAX_PRIORITY	128
 #define MAX_HANDLERS	128
@@ -328,10 +332,12 @@ s32  _iEnableIntc(s32 cause);
 s32  _iDisableIntc(s32 cause);
 s32  _iEnableDmac(s32 channel);
 s32  _iDisableDmac(s32 channel);
+
 s32  iSetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *common), void *common);
 s32  _iSetAlarm(u16 time, void (*callback)(s32 alarm_id, u16 time, void *common), void *common);
 s32  iReleaseAlarm(s32 alarm_id);
 s32  _iReleaseAlarm(s32 alarm_id);
+
 s32	 CreateThread(ee_thread_t *thread);
 s32	 DeleteThread(s32 thread_id);
 s32	 StartThread(s32 thread_id, void *args);
@@ -348,7 +354,7 @@ s32  _iRotateThreadReadyQueue(s32 priority);
 s32  ReleaseWaitThread(s32 thread_id);
 s32  iReleaseWaitThread(s32 thread_id);
 s32	 GetThreadId(void);
-s32  _iGetThreadId(void);		//This is used for a hack by SCE, to work around the iWakeupThread design flaw
+s32  _iGetThreadId(void);		//This is actually GetThreadId(), used for a hack by SCE to work around the iWakeupThread design flaw.
 s32  ReferThreadStatus(s32 thread_id, ee_thread_status_t *info);
 s32  iReferThreadStatus(s32 thread_id, ee_thread_status_t *info);
 s32  SleepThread(void);
