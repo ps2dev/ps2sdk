@@ -89,6 +89,7 @@ typedef struct {
 	} log[127];
 } pfs_journal_t;
 
+// Attribute Entry
 typedef struct{
 	u8 kLen;			// key len/used for offset in to str for value
 	u8 vLen;			// value len
@@ -96,6 +97,7 @@ typedef struct{
 	char str[3];		// size = 3 so sizeof pfs_aentry_t=7 :P
 } pfs_aentry_t;
 
+// Directory Entry
 typedef struct {
 	u32	inode;
 	u8	sub;

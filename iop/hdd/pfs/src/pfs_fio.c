@@ -1275,7 +1275,7 @@ int pfsFioSymlink(iop_file_t *f, const char *old, const char *new)
 {
 	int rv;
 	pfs_mount_t *pfsMount;
-	int mode=0x141FF;
+	int mode = 0x10000 | FIO_S_IFLNK | 0x1FF;
 
 	if(old==NULL || new==NULL)
 		return -ENOENT;
@@ -1301,7 +1301,7 @@ int pfsFioReadlink(iop_file_t *f, const char *path, char *buf, unsigned int bufl
 
 	if((clink=pfsInodeGetFile(pfsMount, NULL, path, &rv))!=NULL)
 	{
-		if((clink->u.inode->mode & FIO_S_IFMT) == FIO_S_IFLNK)
+		if(!FIO_S_ISLNK(clink->u.inode->mode))
 			rv=-EINVAL;
 		else
 		{

@@ -26,10 +26,13 @@ typedef struct
 	u8 buffer[512];	// used for reading mis-aligned/remainder data
 } pfs_unaligned_io_t;
 
+#define PFS_AENTRY_KEY_MAX	256
+#define PFS_AENTRY_VALUE_MAX	256
+
 typedef struct
 {
-	char key[256];
-	char value[256];
+	char key[PFS_AENTRY_KEY_MAX];
+	char value[PFS_AENTRY_VALUE_MAX];
 } pfs_ioctl2attr_t;
 
 typedef struct {
