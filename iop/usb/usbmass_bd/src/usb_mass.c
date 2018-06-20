@@ -456,7 +456,7 @@ int usb_queue_cmd(struct scsi_interface* scsi, const unsigned char* cmd, unsigne
     ucmd.cbw.signature          = CBW_TAG;
     ucmd.cbw.tag                = tag;
     ucmd.cbw.dataTransferLength = data_len;
-    ucmd.cbw.flags              = 0x80;
+    ucmd.cbw.flags              = data_wr ? 0 : 0x80;
     ucmd.cbw.lun                = 0;
     ucmd.cbw.comLength          = cmd_len;
     memcpy(ucmd.cbw.comData, cmd, cmd_len);
