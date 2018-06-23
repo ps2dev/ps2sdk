@@ -30,7 +30,7 @@
 #define MODNAME "udptty"
 IRX_ID(MODNAME, 2, 1);
 
-struct irx_export_table _exp_udptty;
+extern struct irx_export_table _exp_udptty;
 
 #define DEVNAME "tty"
 
@@ -86,13 +86,12 @@ typedef struct _KprArg
     int calls;
 } KprArg;
 
-KprArg g_kprarg;
+static KprArg g_kprarg;
 
 #define KPR_BUFFER_SIZE 0x1000
-char kprbuffer[KPR_BUFFER_SIZE];
+static char kprbuffer[KPR_BUFFER_SIZE];
 
-
-void PrntFunc(void *context, int chr)
+static void PrntFunc(void *context, int chr)
 {
     KprArg *kpa = (KprArg *)context;
 
@@ -113,7 +112,7 @@ void PrntFunc(void *context, int chr)
     }
 }
 
-int Kprnt(void *context, const char *format, void *arg)
+static int Kprnt(void *context, const char *format, void *arg)
 {
     if (format)
         prnt(PrntFunc, context, format, arg);
@@ -121,7 +120,7 @@ int Kprnt(void *context, const char *format, void *arg)
     return 0;
 }
 
-int Kprintf_Handler(void *context, const char *format, va_list ap)
+static int Kprintf_Handler(void *context, const char *format, va_list ap)
 {
     KprArg *kpa = (KprArg *)context;
     int res;
@@ -136,7 +135,7 @@ int Kprintf_Handler(void *context, const char *format, va_list ap)
     return res;
 }
 
-void KPRTTY_Thread(void *args)
+static void KPRTTY_Thread(void *args)
 {
     u32 flags;
     KprArg *kpa = (KprArg *)args;
@@ -145,14 +144,13 @@ void KPRTTY_Thread(void *args)
         WaitEventFlag(kpa->eflag, 1, WEF_AND | WEF_CLEAR, &flags);
 
         if (kpa->prpos) {
-            if (strncmp(kpa->kpbuf, "WARNING: WaitSema KE_CAN_NOT_WAIT", kpa->prpos - 2))
-                write(1, kpa->kpbuf, kpa->prpos);
+            write(1, kpa->kpbuf, kpa->prpos);
             kpa->prpos = 0;
         }
     }
 }
 
-void kprtty_init(void)
+static void kprtty_init(void)
 {
     iop_event_t efp;
     iop_thread_t thp;
