@@ -139,8 +139,10 @@ iop_device_t tty_fsd =
 	(iop_device_ops_t *) &fsd_ops
 };
 
-void sprintf_putchar(char **string, int c)
+void sprintf_putchar(void *context, int c)
 {
+    char **string = (char **)context;
+
     if(c < 0x100) { ((*string)++)[0] = c; }
     else { (*string)[0] = 0; }
 }
