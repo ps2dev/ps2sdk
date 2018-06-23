@@ -98,6 +98,15 @@ int CpuEnableIntr();
 int CpuSuspendIntr(int *state);
 int CpuResumeIntr(int state);
 
+//Invokes a function in kernel mode via a syscall.
+int CpuInvokeInKmode(void *function, ...);
+
+//These are used to allow DECI2 to indicate that INTRMAN should not manage the interrupt.
+//Disables interrupt handler dispatching for the specified interrupt (interrupt status is independent).
+void DisableDispatchIntr(int irq);
+//Enables interrupt handler dispatching for the specified interrupt (interrupt status is independent).
+void EnableDispatchIntr(int irq);
+
 /** 
  * @return 1 if within the interrupt context 
  */
@@ -115,6 +124,9 @@ int iCatchMultiIntr(void);
 #define I_DisableIntr DECLARE_IMPORT(7, DisableIntr)
 #define I_CpuDisableIntr DECLARE_IMPORT(8, CpuDisableIntr)
 #define I_CpuEnableIntr DECLARE_IMPORT(9, CpuEnableIntr)
+#define I_CpuInvokeInKmode DECLARE_IMPORT(14, CpuInvokeInKmode);
+#define I_DisableDispatchIntr DECLARE_IMPORT(15, DisableDispatchIntr);
+#define I_EnableDispatchIntr DECLARE_IMPORT(16, EnableDispatchIntr);
 #define I_CpuSuspendIntr DECLARE_IMPORT(17, CpuSuspendIntr)
 #define I_CpuResumeIntr DECLARE_IMPORT(18, CpuResumeIntr)
 #define I_QueryIntrContext DECLARE_IMPORT(23, QueryIntrContext)

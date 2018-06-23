@@ -69,6 +69,13 @@ typedef struct {
 	u32	data[0];
 } iop_bootmode_t;
 
+
+typedef struct{	//FIXME: Incomplete structure definition. Provided only for compatibility, as I don't know what the full structure is like.
+	void *callback;
+}iop_init_entry_t;
+
+typedef int (*BootupCallback_t)(iop_init_entry_t* next, int delayed);
+
 /** 
  * For backward-compatibility with older projects. Read the comment on GetLibraryEntryTable(). This structure is incomplete. 
  */
@@ -94,6 +101,8 @@ int RegisterNonAutoLinkEntries(struct irx_export_table *exports);
 void *QueryLibraryEntryTable(iop_library_t *library);
 int * QueryBootMode(int mode);
 void RegisterBootMode(iop_bootmode_t *b);
+
+int RegisterPostBootCallback(BootupCallback_t func, int priority, int *stat);
 
 #define loadcore_IMPORTS \
 	loadcore_IMPORTS_start \
@@ -124,5 +133,6 @@ void RegisterBootMode(iop_bootmode_t *b);
 #define I_QueryLibraryEntryTable DECLARE_IMPORT(11, QueryLibraryEntryTable)
 #define I_QueryBootMode DECLARE_IMPORT(12, QueryBootMode)
 #define I_RegisterBootMode DECLARE_IMPORT(13, RegisterBootMode)
+#define I_RegisterBootCallback DECLARE_IMPORT(20, RegisterBootCallback);
 
 #endif /* __LOADCORE_H__ */

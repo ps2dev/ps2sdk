@@ -21,7 +21,7 @@
 #include <stdarg.h>
 #include <setjmp.h>
 
-typedef void (*print_callback_t)(char **string, int c);
+typedef void (*print_callback_t)(void *context, int c);
 
 /* These functions are already defined in setjmp.h */
 
@@ -47,7 +47,7 @@ void * memset(void *ptr, int c, size_t size);
 int bcmp(const void *, const void *, size_t);
 void bcopy(const void *, void *, size_t);
 void bzero(void *, size_t);
-int prnt(print_callback_t, void * opaque, const char * format, va_list ap);
+int prnt(print_callback_t, void *context, const char * format, va_list ap);
 int sprintf(char *str, const char *format, ...);
 char *strcat(char *dest, const char *src);
 char *strchr(const char *s, int c);

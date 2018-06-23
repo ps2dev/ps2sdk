@@ -19,6 +19,8 @@
 #include <types.h>
 #include <irx.h>
 
+void *GetModloadInternalData(void **pInternalData);
+
 int ReBootStart(const char *command, unsigned int flags);
 int LoadModuleAddress(const char *name, int, int);
 int LoadModule(const char *name);
@@ -32,6 +34,7 @@ void SetCheckKelfPathCallback(void *CheckKelfPath_fnc);
 #define modload_IMPORTS_start DECLARE_IMPORT_TABLE(modload, 1, 1)
 #define modload_IMPORTS_end END_IMPORT_TABLE
 
+#define I_GetModloadInternalData DECLARE_IMPORT(3, GetModloadInternalData);
 #define I_ReBootStart DECLARE_IMPORT(4, ReBootStart)
 #define I_LoadModuleAddress DECLARE_IMPORT(5, LoadModuleAddress)
 #define I_LoadModule DECLARE_IMPORT(6, LoadModule)
