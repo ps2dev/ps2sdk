@@ -20,7 +20,6 @@
 #include <thsemap.h>
 #include <ioman.h>
 #include <intrman.h>
-#include "intrman_add.h"
 #include <sysclib.h>
 #include <sysmem.h>
 #include <thbase.h>
@@ -93,9 +92,9 @@ KprArg g_kprarg;
 char kprbuffer[KPR_BUFFER_SIZE];
 
 
-void PrntFunc(void *common, int chr)
+void PrntFunc(void *context, int chr)
 {
-    KprArg *kpa = (KprArg *)common;
+    KprArg *kpa = (KprArg *)context;
 
     switch (chr) {
         case 0:
@@ -106,7 +105,7 @@ void PrntFunc(void *common, int chr)
         case PRNT_IO_END:
             break;
         case '\n':
-            PrntFunc(common, '\r');
+            PrntFunc(context, '\r');
         default:
             if (kpa->prpos < kpa->bsize)
                 kpa->kpbuf[kpa->prpos++] = chr;
@@ -114,20 +113,20 @@ void PrntFunc(void *common, int chr)
     }
 }
 
-void *Kprnt(void *common, const char *format, void *arg)
+int Kprnt(void *context, const char *format, void *arg)
 {
     if (format)
-        prnt((print_callback_t)PrntFunc, common, format, arg);
+        prnt(PrntFunc, context, format, arg);
 
     return 0;
 }
 
-void *Kprintf_Handler(void *common, const char *format, void *arg)
+int Kprintf_Handler(void *context, const char *format, va_list ap)
 {
-    KprArg *kpa = (KprArg *)common;
-    void *res;
+    KprArg *kpa = (KprArg *)context;
+    int res;
 
-    res = intrman_14(Kprnt, kpa, (void *)format, arg);
+    res = CpuInvokeInKmode(Kprnt, kpa, format, ap);
 
     if (QueryIntrContext())
         iSetEventFlag(kpa->eflag, 1);
@@ -168,7 +167,7 @@ void kprtty_init(void)
 
     thp.attr = TH_C;
     thp.option = 0;
-    thp.thread = (void *)KPRTTY_Thread;
+    thp.thread = &KPRTTY_Thread;
     thp.stacksize = 0x800;
     thp.priority = 8;
 
@@ -181,7 +180,7 @@ void kprtty_init(void)
     thid = CreateThread(&thp);
     StartThread(thid, (void *)kpa);
 
-    KprintfSet((KprintfHandler_t *)Kprintf_Handler, (u32 *)kpa);
+    KprintfSet(&Kprintf_Handler, kpa);
 }
 #endif
 

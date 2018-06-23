@@ -18,7 +18,6 @@
 /* Please keep these in alphabetical order!  */
 #include "ioman.h"
 #include "intrman.h"
-#include "intrman_add.h"
 #include "loadcore.h"
 #include "ps2ip.h"
 #include "stdio.h"
