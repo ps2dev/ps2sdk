@@ -176,17 +176,25 @@ static int scsi_warmup(struct block_device* bd)
 //
 static int scsi_read(struct block_device* bd, u32 sector, void* buffer, u16 count)
 {
+    struct scsi_interface* scsi = (struct scsi_interface*)bd->priv;
     u16 sc_remaining = count;
+    int retries;
 
     M_DEBUG("%s: sector=%d, count=%d\n", __func__, sector, count);
 
     while (sc_remaining > 0) {
-        u16 sc = sc_remaining > 64 ? 64 : sc_remaining;
+        u16 sc = sc_remaining > scsi->max_sectors ? scsi->max_sectors : sc_remaining;
 
-        if (scsi_cmd_rw_sector(bd, sector, buffer, sc, 0) < 0)
+        for (retries = SCSI_MAX_RETRIES; retries > 0; retries--) {
+            if (scsi_cmd_rw_sector(bd, sector, buffer, sc, 0) == 0)
+                break;
+        }
+
+        if (retries == 0)
             return -EIO;
 
         sc_remaining -= sc;
+        sector += sc;
         buffer = (u8*)buffer + (sc * bd->sectorSize);
     }
 
@@ -195,17 +203,25 @@ static int scsi_read(struct block_device* bd, u32 sector, void* buffer, u16 coun
 
 static int scsi_write(struct block_device* bd, u32 sector, const void* buffer, u16 count)
 {
+    struct scsi_interface* scsi = (struct scsi_interface*)bd->priv;
     u16 sc_remaining = count;
+    int retries;
 
     M_DEBUG("%s: sector=%d, count=%d\n", __func__, sector, count);
 
     while (sc_remaining > 0) {
-        u16 sc = sc_remaining > 64 ? 64 : sc_remaining;
+        u16 sc = sc_remaining > scsi->max_sectors ? scsi->max_sectors : sc_remaining;
 
-        if (scsi_cmd_rw_sector(bd, sector, buffer, sc, 1) < 0)
+        for (retries = SCSI_MAX_RETRIES; retries > 0; retries--) {
+            if (scsi_cmd_rw_sector(bd, sector, buffer, sc, 1) == 0)
+                break;
+        }
+
+        if (retries == 0)
             return -EIO;
 
         sc_remaining -= sc;
+        sector += sc;
         buffer = (u8*)buffer + (sc * bd->sectorSize);
     }
 
@@ -229,7 +245,9 @@ void scsi_connect(struct scsi_interface* scsi)
     for (i = 0; i < NUM_DEVICES; ++i) {
         if (g_scsi_bd[i].priv == NULL) {
             struct block_device* bd = &g_scsi_bd[i];
-            bd->priv                = scsi;
+
+            bd->priv = scsi;
+            bd->name = scsi->name;
             scsi_warmup(bd);
             bdm_connect_bd(bd);
             break;
@@ -260,7 +278,6 @@ int scsi_init(void)
     M_DEBUG("%s\n", __func__);
 
     for (i = 0; i < NUM_DEVICES; ++i) {
-        g_scsi_bd[i].name  = "sd";
         g_scsi_bd[i].devNr = i;
         g_scsi_bd[i].parNr = 0;
 

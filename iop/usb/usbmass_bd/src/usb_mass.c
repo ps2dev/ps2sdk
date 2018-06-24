@@ -768,6 +768,8 @@ int usb_mass_init(void)
         g_mass_device[i].devId  = -1;
 
         g_mass_device[i].scsi.priv        = &g_mass_device[i];
+        g_mass_device[i].scsi.name        = "usb";
+        g_mass_device[i].scsi.max_sectors = 0xffff;
         g_mass_device[i].scsi.get_max_lun = usb_bulk_get_max_lun;
         g_mass_device[i].scsi.queue_cmd   = usb_queue_cmd;
     }
