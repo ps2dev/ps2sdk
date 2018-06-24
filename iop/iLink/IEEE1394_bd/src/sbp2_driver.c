@@ -91,6 +91,8 @@ void init_ieee1394DiskDriver(void)
         SBP2Devices[i].trContext   = (-1);
 
         SBP2Devices[i].scsi.priv        = &SBP2Devices[i];
+        SBP2Devices[i].scsi.name        = "sd";
+        SBP2Devices[i].scsi.max_sectors = XFER_BLOCK_SIZE / 512;
         SBP2Devices[i].scsi.get_max_lun = sbp2_get_max_lun;
         SBP2Devices[i].scsi.queue_cmd   = sbp2_queue_cmd;
     }
