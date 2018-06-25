@@ -16,6 +16,7 @@
 
 #define MAX_DEVICES 5
 static struct SBP2Device SBP2Devices[MAX_DEVICES];
+static u8 *writeBuffer = NULL;
 
 /* Thread creation data. */
 static iop_thread_t threadData = {
@@ -96,6 +97,8 @@ void init_ieee1394DiskDriver(void)
         SBP2Devices[i].scsi.get_max_lun = sbp2_get_max_lun;
         SBP2Devices[i].scsi.queue_cmd   = sbp2_queue_cmd;
     }
+
+    writeBuffer = malloc(XFER_BLOCK_SIZE);
 
     sbp2_event_flag = CreateEventFlag(&evfp);
 
@@ -561,7 +564,7 @@ static int sbp2_queue_cmd(struct scsi_interface* scsi, const unsigned char* cmd,
     if (data_len > 0)
         cdb.misc |= CDB_DATA_SIZE(data_len);
 
-    cdb.DataDescriptor.low    = (u32)data;
+    cdb.DataDescriptor.low    = data_wr ? (u32)writeBuffer : (u32)data;
     cdb.DataDescriptor.high   = 0;
     cdb.DataDescriptor.NodeID = dev->InitiatorNodeID;
 
@@ -576,7 +579,7 @@ static int sbp2_queue_cmd(struct scsi_interface* scsi, const unsigned char* cmd,
     if ((data_len > 0) && (data_wr == 1)) {
         // BSWAP32 all data we write
         for (i = 0; i < data_len / 4; i++)
-            ((unsigned int*)data)[i] = BSWAP32(((unsigned int*)data)[i]);
+            ((unsigned int*)writeBuffer)[i] = BSWAP32(((unsigned int*)data)[i]);
     }
 
     ieee1394_SendCommandBlockORB(dev, &cdb);
