@@ -119,14 +119,19 @@ static int initConfigureSBP2Device(struct SBP2Device* dev)
 {
     unsigned char retries;
 
-    retries = 10;
-    do {
-        if (ieee1394_SendManagementORB(SBP2_LOGIN_REQUEST, dev) < 0) {
-            M_DEBUG("Error logging into the SBP-2 device.\n");
-            retries--;
-        } else
+    // Try 5 x 200ms to login (same as Linux: drivers/firewire/sbp2.c)
+    retries = 5;
+    while (1) {
+        if (ieee1394_SendManagementORB(SBP2_LOGIN_REQUEST, dev) >= 0)
             break;
-    } while (retries > 0);
+
+        retries--;
+        if (retries == 0)
+            break;
+
+        DelayThread(200 * 1000); // 200ms
+    }
+
     if (retries == 0) {
         M_DEBUG("Failed to log into the SBP-2 device.\n");
         return -1;
