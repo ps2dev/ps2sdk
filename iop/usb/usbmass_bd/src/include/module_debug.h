@@ -1,8 +1,6 @@
 #ifndef _MODULE_DEBUG_H
 #define _MODULE_DEBUG_H
 
-//#define MINI_DRIVER
-
 #ifndef MINI_DRIVER
 #define M_PRINTF(format, args...) printf("USBMASS: " format, ##args)
 #else
