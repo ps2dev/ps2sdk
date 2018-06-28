@@ -146,41 +146,6 @@ static int initConfigureSBP2Device(struct SBP2Device* dev)
 
     M_DEBUG("Completed device initialization.\n");
 
-    /****** !!!FOR TESTING ONLY!!! ******/
-#if 0
-	iop_sys_clock_t lTime;
-	u32 lSecStart, lUSecStart;
-	u32 lSecEnd,   lUSecEnd, nbytes, i, rounds;
-	void *buffer;
-	int result;
-
-	nbytes=1048576;
-	rounds=64;
-	if((buffer=malloc(nbytes))==NULL) M_PRINTF("Unable to allocate memory. :(\n");
-	M_PRINTF("Read test: %p.\n", buffer);
-	M_PRINTF("Start reading data...\n" );
-
-	GetSystemTime ( &lTime );
-	SysClock2USec ( &lTime, &lSecStart, &lUSecStart );
-
-	for(i=0; i<rounds; i++){
-		if((result=scsiReadSector(dev, 16, buffer, nbytes/512))!=0){
-		    M_PRINTF("Sector read error %d.\n", result);
-		    break;
-		}
-	}
-	free(buffer);
-
-	GetSystemTime ( &lTime );
-	SysClock2USec ( &lTime, &lSecEnd, &lUSecEnd );
-
-	M_PRINTF("Completed.\n");
-
-	M_PRINTF( "Done: %lu %lu/%lu %lu\n", lSecStart, lUSecStart, lSecEnd, lUSecEnd );
-	M_PRINTF("KB: %lu, time: %lu, Approximate KB/s: %lu", (nbytes*rounds/1024), (lSecEnd -lSecStart), (nbytes*rounds/1024)/(lSecEnd -lSecStart));
-	/****** !!!FOR TESTING ONLY!!! ******/
-#endif
-
     return 0;
 }
 
