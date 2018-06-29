@@ -415,13 +415,17 @@ FILE *fopen(const char *fname, const char *mode)
               strcpy(b_fname, "host:");
               strcpy(b_fname + 5, __direct_pwd);
               if (!(__direct_pwd[b_fname_len - 1] == '/' || __direct_pwd[b_fname_len - 1] == '\\')) { // does it has trailing slash ?
-                if(__iob[i].type == STD_IOBUF_TYPE_CDROM)
+                if(__iob[i].type == STD_IOBUF_TYPE_CDROM) {
               	  b_fname[b_fname_len + 5] = '\\';
-                else
+                  b_fname_len++;
+                } else if(__iob[i].type == STD_IOBUF_TYPE_HOST) {
+                  //Do nothing for the host device, as adding a leading slash (where there is none) after the device name will change the origin of the path.
+                } else {
                   b_fname[b_fname_len + 5] = '/';
                   // b_fname[b_fname_len + 6] = 0;
                   // b_fname_len += 2;
-                b_fname_len++;
+                  b_fname_len++;
+                }
               }
               b_fname_len += 5;
               strcpy(b_fname + b_fname_len, fname);
@@ -429,13 +433,17 @@ FILE *fopen(const char *fname, const char *mode)
               if (b_fname_len) {
                 strcpy(b_fname, __direct_pwd);
                 if (!(b_fname[b_fname_len - 1] == '/' || b_fname[b_fname_len - 1] == '\\')) {
-                  if(__iob[i].type == STD_IOBUF_TYPE_CDROM)
-                  	b_fname[b_fname_len] = '\\';
-                  else
+                  if(__iob[i].type == STD_IOBUF_TYPE_CDROM) {
+                    b_fname[b_fname_len] = '\\';
+                    b_fname_len++;
+                  } else if(__iob[i].type == STD_IOBUF_TYPE_HOST) {
+                    //Do nothing for the host device, as adding a leading slash (where there is none) after the device name will change the origin of the path.
+                  } else {
                     b_fname[b_fname_len] = '/';
-                  // b_fname[b_fname_len + 1] = 0; // #neofar
-                  // b_fname_len += 2;
-                  b_fname_len++;
+                    // b_fname[b_fname_len + 1] = 0; // #neofar
+                    // b_fname_len += 2;
+                    b_fname_len++;
+                  }
                 }
                 strcpy(b_fname + b_fname_len, fname);
               }
