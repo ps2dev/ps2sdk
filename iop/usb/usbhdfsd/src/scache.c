@@ -217,6 +217,12 @@ int scache_readSector(cache_set* cache, unsigned int sector, void** buf) {
 
 
 //---------------------------------------------------------------------------
+/* SP193: this function is dangerous if not used correctly.
+   As scache's blocks are aligned to the start of the disk, the clusters of the partition
+   must also be aligned to a multiple of the scache block size.
+   Otherwise, it is possible to cause the adjacent cluster to lose data, if the block spans across more than one cluster.
+*/
+#if 0
 int scache_allocSector(cache_set* cache, unsigned int sector, void** buf) {
 	int index; //index is given in single sectors not octal sectors
 	//int ret;
@@ -240,6 +246,7 @@ int scache_allocSector(cache_set* cache, unsigned int sector, void** buf) {
 	XPRINTF("cache: done allocating sector\n");
 	return cache->sectorSize;
 }
+#endif
 
 //---------------------------------------------------------------------------
 int scache_writeSector(cache_set* cache, unsigned int sector) {
