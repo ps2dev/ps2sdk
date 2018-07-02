@@ -43,6 +43,8 @@
 //when the flushCounter reaches FLUSH_TRIGGER then flushSectors is called
 //#define FLUSH_TRIGGER 16
 
+static int scache_flushSector(cache_set* cache, int index);
+
 //---------------------------------------------------------------------------
 static void initRecords(cache_set* cache)
 {
@@ -108,16 +110,10 @@ static int getIndexWrite(cache_set* cache, unsigned int sector) {
 	}
 
 	//this sector is dirty - we need to flush it first
-	if (cache->rec[index].writeDirty) {
-		XPRINTF("scache: getIndexWrite: sector is dirty : %u   index=%d \n", cache->rec[index].sector, index);
-		ret = WRITE_SECTOR(cache->dev, cache->rec[index].sector, cache->sectorBuf + (index * BLOCK_SIZE), BLOCK_SIZE/cache->sectorSize);
-		if (ret < 0) {
-			printf("scache: ERROR writing sector to disk! sector=%u\n", sector);
-			return ret;
-		}
+	ret = scache_flushSector(cache, index);
+	if (ret != 1)
+		return ret;
 
-		cache->rec[index].writeDirty = 0;
-	}
 	cache->rec[index].tax +=2;
 	cache->rec[index].sector = sector;
 
@@ -132,7 +128,7 @@ static int scache_flushSector(cache_set* cache, int index) {
 	int ret;
 
 	if (cache->rec[index].writeDirty) {
-		XPRINTF("scache: flushSectors dirty index=%d sector=%u \n", index, cache->rec[index].sector);
+		XPRINTF("scache: flushSector dirty index=%d sector=%u \n", index, cache->rec[index].sector);
 		ret = WRITE_SECTOR(cache->dev, cache->rec[index].sector, cache->sectorBuf + (index * BLOCK_SIZE), BLOCK_SIZE/cache->sectorSize);
 		if (ret < 0) {
 			printf("scache: ERROR writing sector to disk! sector=%u\n", cache->rec[index].sector);
