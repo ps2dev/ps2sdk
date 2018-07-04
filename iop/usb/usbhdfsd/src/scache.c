@@ -282,7 +282,7 @@ void scache_invalidate(cache_set* cache, unsigned int sector, int count) {
 
 	XPRINTF("cache: invalidate devId = %i sector = %u count = %d \n", cache->dev->devId, sector, count);
 
-	for(i = 0; i < count; i++)
+	for(i = 0; i < count; i++, sector++)
 	{
 		index = getSlot(cache, sector);
 		if (index >=  0) { //sector found in cache. Write back and invalidate the block it belongs to.
