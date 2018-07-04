@@ -17,6 +17,7 @@
 
 #include <tamtypes.h>
 #include <kernel.h>
+#include <stdio.h>
 #include <string.h>
 #include <sifrpc.h>
 #include <sifcmd.h>
@@ -61,6 +62,7 @@
 #define PAD_RPCCMD_GET_SLOTMAX  0x8000010c
 #define PAD_RPCCMD_CLOSE        0x8000010d
 #define PAD_RPCCMD_END          0x8000010e
+#define PAD_RPCCMD_INIT         0x00000100
 #endif
 
 /*
@@ -292,30 +294,22 @@ padGetConnDmaStr(void)
  */
 
 int
-padReset()
-{
-    padInitialised = 0;
-    padsif[0].server = NULL;
-    padsif[1].server = NULL;
-    return 0;
-}
-
-int
-padInit(int a)
+padInit(int mode)
 {
     // Version check isn't used by default
     // int ver;
-    int i;
     static int _rb_count = 0;
 
     if (_rb_count != _iop_reboot_count)
     {
         _rb_count = _iop_reboot_count;
-        padReset();
+        padInitialised = 0;
     }
 
     if(padInitialised)
         return 0;
+
+    padInitialised = 1;
 
     padsif[0].server = NULL;
     padsif[1].server = NULL;
@@ -337,6 +331,17 @@ padInit(int a)
     // If you require a special version of the padman, check for that here (uncomment)
     // ver = padGetModVersion();
 
+    //At v1.3.4, this used to return 1 (and padPortInit is not used). But we are interested in the better design from release 1.4.
+    return padPortInit(mode);
+}
+
+int padPortInit(int mode)
+{
+#ifdef _XPAD    //Unofficial: libpad EE client from v1.3.4 has this RPC function implemented, but is not implemented within its PADMAN module.
+    int ret;
+#endif
+    int i;
+
     for(i = 0; i<8; i++)
     {
         PadState[0][i].open = 0;
@@ -347,20 +352,24 @@ padInit(int a)
         PadState[1][i].slot = 0;
     }
 
+#ifdef _XPAD    //Unofficial: libpad EE client from v1.3.4 has this RPC function implemented, but is not implemented within its PADMAN module.
+
 #ifdef _XPAD
     buffer.padInitArgs.command = PAD_RPCCMD_INIT;
     buffer.padInitArgs.statBuf = openSlot;
-    if (SifCallRpc( &padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
-        return -1;
+#else
+    buffer.command = PAD_RPCCMD_INIT;
 #endif
- 
-    padInitialised = 1;
-    return 0;
+    ret = SifCallRpc( &padsif[0], 1, 0, &buffer, 128, &buffer, 128, NULL, NULL);
 
+    return(ret >= 0 ? buffer.padResult.result : 0);
+#else
+    return 1;
+#endif
 }
 
 int
-padEnd()
+padClose(void)
 {
 
     int ret;
@@ -386,11 +395,19 @@ padPortOpen(int port, int slot, void *padArea)
     int i;
     struct pad_data *dma_buf = (struct pad_data *)padArea;
 
-    // Check 64 byte alignment
-    if((u32)padArea & 0x3f) {
-        //        scr_printf("dmabuf misaligned (%x)!!\n", dma_buf);
+#ifndef _XPAD
+    // Check 16 byte alignment
+    if((u32)padArea & 0xf) {
+        printf("Address is not 16-byte aligned.\n");
         return 0;
     }
+#else
+    // Check 64 byte alignment
+    if((u32)padArea & 0x3f) {
+        printf("Address is not 16-byte aligned.\n");
+        return 0;
+    }
+#endif
 
     for (i=0; i<2; i++) {                // Pad data is double buffered
         memset(dma_buf[i].data, 0xff, 32); // 'Clear' data area
