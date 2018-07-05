@@ -157,31 +157,26 @@
 /* TCP receive window. */
 #define TCP_WND                 32768
 
-/* ---------- ARP options ---------- */
-/**
- * ETHARP_TRUST_IP_MAC==1: Incoming IP packets cause the ARP table to be
- * updated with the source MAC and IP addresses supplied in the packet.
- * You may want to disable this if you do not trust LAN peers to have the
- * correct addresses, or as a limited approach to attempt to handle
- * spoofing. If disabled, lwIP will need to make a new ARP request if
- * the peer is not already in the ARP table, adding a little latency.
- * The peer *is* in the ARP table if it requested our address before.
- * Also notice that this slows down input processing of every IP packet!
- */
-#define ETHARP_TRUST_IP_MAC	1
-
 /* ---------- DHCP options ---------- */
 #ifdef PS2IP_DHCP
 /**
  * LWIP_DHCP==1: Enable DHCP module.
  */
 #define LWIP_DHCP		1
+#endif
 
 /**
  * DHCP_DOES_ARP_CHECK==1: Do an ARP check on the offered address.
  */
 #define DHCP_DOES_ARP_CHECK	0	//Don't do the ARP check because an IP address would be first required.
-#endif
+
+/**
+ * LWIP_DHCP_CHECK_LINK_UP==1: dhcp_start() only really starts if the netif has
+ * NETIF_FLAG_LINK_UP set in its flags. As this is only an optimization and
+ * netif drivers might not set this flag, the default is off. If enabled,
+ * netif_set_link_up() must be called to continue dhcp starting.
+ */
+#define LWIP_DHCP_CHECK_LINK_UP	1
 
 /*
    ----------------------------------
@@ -203,20 +198,36 @@
 #define LWIP_STATS	0
 
 /*
-   ---------------------------------
-   ---------- RAW options ----------
-   ---------------------------------
-*/
-/**
- * LWIP_RAW==1: Enable application layer to hook into the IP layer itself.
- */
-#define LWIP_RAW	0
-
-/*
    --------------------------------------
    ---------- Checksum options ----------
    --------------------------------------
 */
+//Rely on the Ethernet checksums to reduce the number of checksum compuations. If you require any of these, re-enable them.
+/**
+ * CHECKSUM_CHECK_IP==1: Check checksums in software for incoming IP packets.
+ */
+#define CHECKSUM_CHECK_IP	0
+
+/**
+ * CHECKSUM_CHECK_UDP==1: Check checksums in software for incoming UDP packets.
+ */
+#define CHECKSUM_CHECK_UDP	0
+
+/**
+ * CHECKSUM_CHECK_TCP==1: Check checksums in software for incoming TCP packets.
+ */
+#define CHECKSUM_CHECK_TCP	0
+
+/**
+ * CHECKSUM_CHECK_ICMP==1: Check checksums in software for incoming ICMP packets.
+ */
+#define CHECKSUM_CHECK_ICMP	0
+
+/**
+ * CHECKSUM_CHECK_ICMP6==1: Check checksums in software for incoming ICMPv6 packets
+ */
+#define CHECKSUM_CHECK_ICMP6	0
+
 /**
  * LWIP_CHECKSUM_ON_COPY==1: Calculate checksum when copying data from
  * application buffers to pbufs.

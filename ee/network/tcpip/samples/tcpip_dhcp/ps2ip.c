@@ -278,13 +278,6 @@ int main(int argc, char *argv[])
 	//Initialize the TCP/IP protocol stack.
 	ps2ipInit(&IP, &NM, &GW);
 
-	//Before enabling DHCP, wait for a valid link status.
-	if(ethWaitValidNetIFLinkState() != 0)
-	{
-		scr_printf("Failed to get valid link status.\n");
-		goto end;
-	}
-
 	//Enable DHCP
 	ethApplyIPConfig(1, &IP, &NM, &GW, &DNS);
 
