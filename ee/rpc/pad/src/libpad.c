@@ -369,7 +369,7 @@ int padPortInit(int mode)
 }
 
 int
-padClose(void)
+padEnd(void)
 {
 
     int ret;
