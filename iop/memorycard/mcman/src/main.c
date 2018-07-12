@@ -1127,17 +1127,17 @@ int mcman_getmcrtime(sceMcStDateTime *time)
 	}
 	else {
 		time->Resv2 = 0;
-		time->Sec = ((((cdtime.second >> 4) << 2) + (cdtime.second >> 4)) << 1) + (cdtime.second & 0xf);
-		time->Min = ((((cdtime.minute >> 4) << 2) + (cdtime.minute >> 4)) << 1) + (cdtime.minute & 0xf);
-		time->Hour = ((((cdtime.hour >> 4) << 2) + (cdtime.hour >> 4)) << 1) + (cdtime.hour & 0xf);
-		time->Day = ((((cdtime.day >> 4) << 2) + (cdtime.day >> 4)) << 1) + (cdtime.day & 0xf);
+		time->Sec = btoi(cdtime.second);
+		time->Min = btoi(cdtime.minute);
+		time->Hour = btoi(cdtime.hour);
+		time->Day = btoi(cdtime.day);
 
-		if ((cdtime.month & 0x10) != 0)
+		if ((cdtime.month & 0x10) != 0) //Keep only valid bits: 0x1f (for month values 1-12 in BCD)
 			time->Month = (cdtime.month & 0xf) + 0xa;
 		else
 			time->Month = cdtime.month & 0xf;
 
-		time->Year = ((((cdtime.year >> 4) << 2) + (cdtime.year >> 4)) << 1) + ((cdtime.year & 0xf) | 0x7d0);
+		time->Year = btoi(cdtime.year) + 2000;
 	}
 
 	return 0;

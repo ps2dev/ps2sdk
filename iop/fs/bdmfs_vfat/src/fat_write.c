@@ -726,27 +726,14 @@ static void setSfnDate(fat_direntry_sfn* dsfn, int mode)
 #else
     //ps2 specific routine to get time and date
     sceCdCLOCK cdtime;
-    s32 tmp;
 
     if (sceCdReadClock(&cdtime) != 0 && cdtime.stat == 0) {
-
-        tmp = cdtime.second >> 4;
-        sec = (u32)(((tmp << 2) + tmp) << 1) + (cdtime.second & 0x0F);
-
-        tmp    = cdtime.minute >> 4;
-        minute = (((tmp << 2) + tmp) << 1) + (cdtime.minute & 0x0F);
-
-        tmp  = cdtime.hour >> 4;
-        hour = (((tmp << 2) + tmp) << 1) + (cdtime.hour & 0x0F);
-
-        tmp = cdtime.day >> 4;
-        day = (((tmp << 2) + tmp) << 1) + (cdtime.day & 0x0F);
-
-        tmp   = (cdtime.month & 0x7F) >> 4;
-        month = (((tmp << 2) + tmp) << 1) + (cdtime.month & 0x0F);
-
-        tmp  = cdtime.year >> 4;
-        year = (((tmp << 2) + tmp) << 1) + (cdtime.year & 0xF) + 2000;
+        sec = btoi(cdtime.second);
+        minute = btoi(cdtime.minute);
+        hour = btoi(cdtime.hour);
+        day = btoi(cdtime.day);
+        month = btoi(cdtime.month & 0x7F); //Ignore century bit (when an old CDVDMAN is used).
+        year = btoi(cdtime.year) + 2000;
     } else {
         year   = 2005;
         month  = 1;

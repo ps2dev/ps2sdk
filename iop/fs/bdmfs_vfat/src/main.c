@@ -15,7 +15,8 @@
 
 IRX_ID("bdmvfat", MAJOR_VER, MINOR_VER);
 
-extern int InitFAT();
+extern int InitFAT(void);
+extern int InitFS(void);
 
 static struct file_system g_fs = {
     .priv          = NULL,

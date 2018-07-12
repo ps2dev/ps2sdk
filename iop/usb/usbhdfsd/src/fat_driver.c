@@ -411,7 +411,7 @@ int fat_getDirentry(unsigned char fatType, fat_direntry* dir_entry, fat_direntry
 		//copy name
 		for (i = 0; i < 8 && dir_entry->sfn.name[i]!= ' '; i++) {
 			dir->sname[i] = dir_entry->sfn.name[i];
-			// NT—adaption for LaunchELF
+			// NT-adaption for LaunchELF
 			if (dir_entry->sfn.reservedNT & 0x08 &&
 			  dir->sname[i] >= 'A' && dir->sname[i] <= 'Z') {
 				dir->sname[i] += 0x20;	//Force standard letters in name to lower case
@@ -423,7 +423,7 @@ int fat_getDirentry(unsigned char fatType, fat_direntry* dir_entry, fat_direntry
 				i++;
 			}
 			dir->sname[i+j] = dir_entry->sfn.ext[j];
-			// NT—adaption for LaunchELF
+			// NT-adaption for LaunchELF
 			if (dir_entry->sfn.reservedNT & 0x10 &&
 			  dir->sname[i+j] >= 'A' && dir->sname[i+j] <= 'Z') {
 				dir->sname[i+j] += 0x20;	//Force standard letters in ext to lower case
