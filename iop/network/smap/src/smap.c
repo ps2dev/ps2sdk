@@ -1,3 +1,4 @@
+#include <defs.h>
 #include <errno.h>
 #include <stdio.h>
 #include <dmacman.h>
@@ -62,8 +63,6 @@ static unsigned int EnableVerboseOutput=0;
 static unsigned int EnableAutoNegotiation=1;
 static unsigned int EnablePinStrapConfig=0;
 static unsigned int SmapConfiguration=0x5E0;
-
-extern void *_gp;
 
 int DisplayBanner(void){
 	printf("SMAP (%s)\n", VersionString);
@@ -497,12 +496,14 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData){
 }
 
 static int Dev9IntrCb(int flag){
-	SaveGP();
+	void *OldGP;
+
+	OldGP = SetModuleGP();
 
 	dev9IntrDisable(DEV9_SMAP_ALL_INTR_MASK);
 	iSetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_INTR);
 
-	RestoreGP();
+	SetGP(OldGP);
 
 	return 0;
 }
@@ -536,18 +537,26 @@ static void Dev9PostDmaCbHandler(int bcr, int dir){
 }
 
 int SMAPStart(void){
-	SaveGP();
+	void *OldGP;
+
+	OldGP = SetModuleGP();
+
 	SetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_START);
-	RestoreGP();
+
+	SetGP(OldGP);
 
 	return 0;
 }
 
 void SMAPStop(void){
-	SaveGP();
+	void *OldGP;
+
+	OldGP = SetModuleGP();
+
 	SetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_STOP);
 	SmapDriverData.NetDevStopFlag=1;
-	RestoreGP();
+
+	SetGP(OldGP);
 }
 
 static void ClearPacketQueue(struct SmapDriverData *SmapDrivPrivData){
@@ -566,7 +575,9 @@ static void ClearPacketQueue(struct SmapDriverData *SmapDrivPrivData){
 }
 
 void SMAPXmit(void){
-	SaveGP();
+	void *OldGP;
+
+	OldGP = SetModuleGP();
 
 	if(SmapDriverData.LinkStatus){
 		if(QueryIntrContext())
@@ -578,7 +589,7 @@ void SMAPXmit(void){
 		ClearPacketQueue(&SmapDriverData);
 	}
 
-	RestoreGP();
+	SetGP(OldGP);
 }
 
 static inline int SMAPGetLinkMode(void){
@@ -655,8 +666,9 @@ static inline int SMAPGetLinkStatus(void){
 
 int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, void *output, unsigned int length){
 	int result;
+	void *OldGP;
 
-	SaveGP();
+	OldGP = SetModuleGP();
 
 	switch(command){
 		case NETMAN_NETIF_IOCTL_ETH_GET_MAC:
@@ -705,7 +717,7 @@ int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, void *out
 			result=-1;
 	}
 
-	RestoreGP();
+	SetGP(OldGP);
 
 	return result;
 }

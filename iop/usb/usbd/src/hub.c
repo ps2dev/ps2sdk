@@ -19,6 +19,7 @@
 #include "usbio.h"
 #include "driver.h"
 
+#include "defs.h"
 #include "stdio.h"
 #include "sysclib.h"
 #include "sysmem.h"
@@ -58,7 +59,7 @@ int initHubDriver(void) {
 	}
 	hub->next = NULL;
 
-	doRegisterDriver(&HubDriver, NULL); // gp, actually
+	doRegisterDriver(&HubDriver, &_gp);
 	return 0;
 }
 

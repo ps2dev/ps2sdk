@@ -18,6 +18,7 @@
 #include "mem.h"
 #include "hub.h"
 
+#include "defs.h"
 #include "stdio.h"
 #include "sysclib.h"
 #include "thbase.h"
@@ -31,11 +32,12 @@ int callbackEvent;
 
 int callUsbDriverFunc(int (*func)(int devId), int devId, void *gp) {
 	int res;
+
 	if (func) {
-	    usbdUnlock();
-		// move gp..
+		usbdUnlock();
+		ChangeGP(gp);
 		res = func(devId);
-		// restore gp...
+		SetGP(&_gp);
 		usbdLock();
 		return res;
 	} else
@@ -172,6 +174,7 @@ void callbackThreadFunc(void *arg) {
 	int intrStat;
 	IoRequest *req;
 	IoRequest reqCopy;
+
 	while (1) {
 		WaitEventFlag(callbackEvent, 1, WEF_CLEAR | WEF_OR, &eventRes);
 		do {
@@ -197,9 +200,12 @@ void callbackThreadFunc(void *arg) {
 				freeIoRequest(req);
 				usbdUnlock();
 
-				// add GP stuff
 				if (reqCopy.userCallbackProc)
+				{
+					SetGP(req->gpSeg);
 					reqCopy.userCallbackProc(reqCopy.resultCode, reqCopy.transferedBytes, reqCopy.userCallbackArg);
+					SetGP(&_gp);
+				}
 			}
 		} while (req);
 	}

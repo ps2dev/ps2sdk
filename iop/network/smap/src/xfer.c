@@ -21,7 +21,6 @@
 
 #include "xfer.h"
 
-extern void *_gp;
 extern struct SmapDriverData SmapDriverData;
 
 static int SmapDmaTransfer(volatile u8 *smap_regbase, void *buffer, unsigned int size, int direction){
