@@ -455,7 +455,7 @@ ip_addr_t dns_getserver(u8 numdns)
 	info.addr = 0;
 	*(u8*)_rpc_buffer = numdns;
 
-	if(SifCallRpc(&_ps2ip, PS2IPS_ID_DNS_SETSERVER, 0, (void*)_rpc_buffer, sizeof(u8), (void*)_rpc_buffer, sizeof(dns_getserver_res_pkt), NULL, NULL) >=0)
+	if(SifCallRpc(&_ps2ip, PS2IPS_ID_DNS_GETSERVER, 0, (void*)_rpc_buffer, sizeof(u8), (void*)_rpc_buffer, sizeof(dns_getserver_res_pkt), NULL, NULL) >=0)
 		info = ((dns_getserver_res_pkt*)_rpc_buffer)->dnsserver;
 
 	return info;
