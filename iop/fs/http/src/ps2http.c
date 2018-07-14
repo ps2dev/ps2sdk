@@ -184,7 +184,7 @@ int httpConnect( struct sockaddr_in * server, char *hostAddr, const char * url, 
 	rc = send( peerHandle, HTTPGETEND, sizeof( HTTPGETEND ) - 1, 0 );
 
 	rc = send( peerHandle, HTTPHOST,  sizeof( HTTPHOST ) - 1, 0 );
-	rc = send( peerHandle, hostAddr, strlen( url ), 0 );
+	rc = send( peerHandle, hostAddr, strlen( hostAddr ), 0 );
 	rc = send( peerHandle, HTTPENDHEADER, sizeof( HTTPENDHEADER ) - 1, 0 ); // "\r\n"
 
 	rc = send( peerHandle, HTTPUSERAGENT, sizeof( HTTPUSERAGENT ) - 1, 0 );
