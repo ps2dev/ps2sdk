@@ -277,10 +277,11 @@ int sceUsbdOpenPipeAligned(int devId, UsbEndpointDescriptor *desc);
 int sceUsbdClosePipe(int id);
 int sceUsbdTransferPipe(int id, void *data, u32 len, void *option, sceUsbdDoneCallback callback, void *cbArg);
 
-// these aren't implemented:
-int UsbRegisterAutoloader(sceUsbdLddOps *drv);
-int UsbUnregisterAutoloader(sceUsbdLddOps *drv);
+int sceUsbdRegisterAutoloader(sceUsbdLddOps *drv);	//Arbitrarily named
+int sceUsbdUnregisterAutoloader(void);			//Arbitrarily named
 int sceUsbdChangeThreadPriority(int prio1, int prio2);
+
+// these aren't implemented:
 int sceUsbdGetReportDescriptor(int devId, int cfgNum, int ifNum, void **desc, u32 *len);
 int sceUsbdMultiIsochronousTransfer(int pipeId, sceUsbdMultiIsochronousRequest *request, sceUsbdMultiIsochronousDoneCallback callback, void *cbArg);
 
@@ -300,6 +301,8 @@ int sceUsbdMultiIsochronousTransfer(int pipeId, sceUsbdMultiIsochronousRequest *
 #define UsbOpenEndpointAligned sceUsbdOpenPipeAligned
 #define UsbCloseEndpoint sceUsbdClosePipe
 #define UsbTransfer sceUsbdTransferPipe
+#define UsbRegisterAutoloader sceUsbdRegisterAutoloader
+#define UsbUnregisterAutoloader sceUsbdUnregisterAutoloader
 #define UsbChangeThreadPriority sceUsbdChangeThreadPriority
 #define UsbGetReportDescriptor sceUsbdGetReportDescriptor
 #define UsbMultiIsochronousTransfer sceUsbdMultiIsochronousTransfer
@@ -317,8 +320,8 @@ int sceUsbdMultiIsochronousTransfer(int pipeId, sceUsbdMultiIsochronousRequest *
 #define I_sceUsbdTransferPipe DECLARE_IMPORT(11, sceUsbdTransferPipe)
 #define I_sceUsbdOpenPipeAligned DECLARE_IMPORT(12, sceUsbdOpenPipeAligned)
 #define I_sceUsbdGetDeviceLocation DECLARE_IMPORT(13, sceUsbdGetDeviceLocation)
-#define I_UsbRegisterAutoloader DECLARE_IMPORT(14, UsbRegisterAutoloader)
-#define I_UsbUnregisterAutoloader DECLARE_IMPORT(15, UsbUnregisterAutoloader)
+#define I_sceUsbdRegisterAutoloader DECLARE_IMPORT(14, sceUsbRegisterAutoloader)
+#define I_sceUsbdUnregisterAutoloader DECLARE_IMPORT(15, sceUsbUnregisterAutoloader)
 #define I_sceUsbdChangeThreadPriority DECLARE_IMPORT(16, sceUsbdChangeThreadPriority)
 #define I_sceUsbdGetReportDescriptor DECLARE_IMPORT(17, sceUsbdGetReportDescriptor)
 #define I_sceUsbdMultiIsochronousTransfer DECLARE_IMPORT(18, sceUsbdMultiIsochronousTransfer)

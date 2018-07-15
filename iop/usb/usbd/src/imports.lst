@@ -44,4 +44,5 @@ I_CreateThread
 I_StartThread
 I_DeleteThread
 I_DelayThread
+I_ChangeThreadPriority
 thbase_IMPORTS_end

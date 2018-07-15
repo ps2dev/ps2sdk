@@ -20,6 +20,8 @@
 
 int callUsbDriverFunc(int (*func)(int devId), int devId, void *gp);
 int doRegisterDriver(sceUsbdLddOps *drv, void *drvGpSeg);
+int doRegisterAutoLoader(sceUsbdLddOps *drv, void *drvGpSeg);
+int doUnregisterAutoLoader(void);
 int doUnregisterDriver(sceUsbdLddOps *drv);
 void signalCallbackThreadFunc(IoRequest *req);
 void callbackThreadFunc(void *arg);

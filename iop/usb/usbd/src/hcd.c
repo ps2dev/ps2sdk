@@ -28,6 +28,7 @@
 #include "intrman.h"
 
 int hcdIrqEvent;
+int hcdTid;
 
 int cleanUpFunc(Device *dev, Endpoint *ep) {
 	if (!ep)
@@ -485,8 +486,6 @@ int hcdInit(void) {
 	int irqRes;
 	iop_event_t event;
 	iop_thread_t thread;
-
-	int hcdTid;
 
 	dbg_printf("Threads and events...\n");
 	event.attr = event.option = event.bits = 0;
