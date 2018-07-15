@@ -32,7 +32,7 @@ int sceUsbdRegisterLdd(sceUsbdLddOps *driver) {
 		return USB_RC_BADCONTEXT;
 	}
 
-	res = doRegisterDriver(driver, GetGP());
+	res = doRegisterDriver(driver, OldGP);
 
 	usbdUnlock();
 	SetGP(OldGP);

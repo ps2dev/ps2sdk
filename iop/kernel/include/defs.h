@@ -37,7 +37,7 @@ static __inline__ void *ChangeGP(void *gp)
 				"move $gp, %1"
 				: "=&r"(OldGP)
 				: "r"(gp)
-				: "gp");
+				: "gp", "memory");
 
 	return OldGP;
 }
@@ -47,7 +47,7 @@ static __inline__ void SetGP(void *gp)
 	__asm__ volatile(	"move $gp, %0"
 				:
 				: "r"(gp)
-				: "gp");
+				: "gp", "memory");
 }
 
 extern void *_gp;
@@ -57,10 +57,10 @@ static __inline__ void *GetGP(void)
 {
 	void *gp;
 
-	__asm__ volatile(	"move $gp, %0"
-				: "=&r"(gp)
+	__asm__ volatile(	"move %0, $gp"
+				: "=r"(gp)
 				:
-				: "gp");
+				: "memory");
 
 	return gp;
 }
