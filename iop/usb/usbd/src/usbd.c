@@ -28,7 +28,8 @@ IRX_ID("usbd", 1, 1);
 
 #define WELCOME_STR "FreeUsbd v.0.1.2\n"
 
-extern struct irx_export_table _exp_usbd;
+//While the header of the export table is small, the large size of the export table (as a whole) places it in data instead of sdata.
+extern struct irx_export_table _exp_usbd __attribute__((section("data")));
 
 UsbdConfig usbConfig = {
 	0x20,	// maxDevices

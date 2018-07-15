@@ -9,7 +9,8 @@
 
 IRX_ID("SMAP_driver", 0x2, 0x19);
 
-extern struct irx_export_table _exp_smap;
+//While the header of the export table is small, the large size of the export table (as a whole) places it in data instead of sdata.
+extern struct irx_export_table _exp_smap __attribute__((section("data")));
 
 int _start(int argc, char *argv[]){
 	int result;
