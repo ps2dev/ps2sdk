@@ -10,6 +10,7 @@
 ENTRY(UModeCallbackDispatcher);
 
 SECTIONS {
+	/* Unlike the built-in module, which loads at 0x00081fc0 instead (and also contains the idle thread). */
 	.text 0x00082000: {
 		_ftext = . ;
 		*(.text)

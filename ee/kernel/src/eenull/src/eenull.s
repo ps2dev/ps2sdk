@@ -8,7 +8,9 @@
 .set noreorder
 
 #Will be executed in user mode, but with interrupts disabled.
-#Set stack address to 0x00081fc0
+#Set stack address to 0x00081fc0. This is meant to be the replacement for the built-in dispatcher,
+#which also shares the same stack.
+
 .globl UModeCallbackDispatcher
 .ent UModeCallbackDispatcher
 UModeCallbackDispatcher:

@@ -42,6 +42,7 @@ static void* (*p_ExecPS2)(void *entry, void *gp, int argc, char *argv[])=(void*)
 
 #endif
 
+//Taken from PCSX2's FPS2BIOS
 struct TCB { //internal struct
 	struct TCB	*next; //+00
 	struct TCB	*prev; //+04
@@ -91,7 +92,7 @@ void *ExecPS2Patch(void *EntryPoint, void *gp, int argc, char *argv[]){
 	p_ChangeThreadPriority(CurrentThreadID, 0);
 
 	//Like IOP kernels, the first thread is the idle thread.
-	for(i=1,tcb=&p_TCBs[1]; i<256; i++,tcb++){
+	for(i=1,tcb=&p_TCBs[1]; i<MAX_THREADS; i++,tcb++){
 		if(tcb->status!=0 && i!=CurrentThreadID){
 			if(tcb->status!=THS_DORMANT) p_TerminateThread(i);
 
@@ -112,8 +113,6 @@ void *ExecPS2Patch(void *EntryPoint, void *gp, int argc, char *argv[]){
 	for(i=0,ArgsPtr=p_ArgsBuffer; i<argc; i++){
 		ArgsPtr=p_eestrcpy(ArgsPtr, argv[i]);
 	}
-
-	p_FlushICache();
 
 	tcb=&p_TCBs[CurrentThreadID];
 	tcb->argstring=p_ArgsBuffer;

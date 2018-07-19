@@ -14,7 +14,7 @@
 
 #include "internal.h"
 
-#define USER_MODE_DISPATCHER	0x00082000
+#define USER_MODE_DISPATCHER	0x00082000 //Call the replacement dispatcher (the original dispatcher function is located at 0x00081fe0).
 
 #define INTC_TIM3 12
 #define T3_COUNT_W ((vu32*)0xB0001800)
@@ -34,9 +34,6 @@ struct alarm{
 };
 
 static struct alarm alarms[MAX_ALARMS];
-
-u128 AlarmDispatch_ra;
-u128 AlarmDispatch_sp;
 
 //Function prototypes
 static u32 CalculateTimeDiff(u32 t1, u32 t2);
