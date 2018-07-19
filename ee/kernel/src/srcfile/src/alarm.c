@@ -185,11 +185,10 @@ void Intc12Handler(void)
 		for(i = 0; i < AlarmCount; i++)
 			alarms[i] = alarms[i+1];
 
-		asm volatile(	"move %0, $gp\n"
-				"move $gp, %1\n" :"=r"(gp):"r"(alarm.gp));
+		gp = ChangeGP(alarm.gp);
 		AlarmStatus &= ~(1 << alarm.id);
 		InvokeUserModeCallback((void*)USER_MODE_DISPATCHER, alarm.callback, alarm.id, alarm.target, alarm.common);
-		asm volatile(	"move $gp, %0\n" ::"r"(gp));
+		SetGP(gp);
 
 		if(AlarmCount <= 0)
 			break;

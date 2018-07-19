@@ -49,6 +49,43 @@
 
 #define ALIGNED(x) __attribute__((aligned((x))))
 
+// GP macros
+static __inline__ void *ChangeGP(void *gp)
+{
+	void *OldGP;
+
+	__asm__ volatile(	"move %0, $gp\n"
+				"move $gp, %1"
+				: "=&r"(OldGP)
+				: "r"(gp)
+				: "gp", "memory");
+
+	return OldGP;
+}
+
+static __inline__ void SetGP(void *gp)
+{
+	__asm__ volatile(	"move $gp, %0"
+				:
+				: "r"(gp)
+				: "gp", "memory");
+}
+
+extern void *_gp;
+#define SetModuleGP()	ChangeGP(&_gp)
+
+static __inline__ void *GetGP(void)
+{
+	void *gp;
+
+	__asm__ volatile(	"move %0, $gp"
+				: "=r"(gp)
+				:
+				: "memory");
+
+	return gp;
+}
+
 /** Limits */
 #define MAX_THREADS	256	//A few will be used for the kernel patches. Thread 0 is always the idle thread.
 #define MAX_SEMAPHORES	256	//A few will be used for the kernel patches.
