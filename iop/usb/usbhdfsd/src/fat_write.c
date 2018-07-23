@@ -2337,10 +2337,10 @@ int fat_writeFile(fat_driver* fatd, fat_dir* fatDir, int* updateClusterIndices, 
 				for (j = 0 + sectorSkip; j < fatd->partBpb.clusterSize && size > 0; j++) {
 					//compute exact size of transfered bytes
 					if (size < bufSize) {
-						bufSize = size + dataSkip;
+						bufSize = size;
 					}
-					if (bufSize > mass_device->sectorSize) {
-						bufSize = mass_device->sectorSize;
+					if (bufSize > mass_device->sectorSize - dataSkip) {
+						bufSize = mass_device->sectorSize - dataSkip;
 					}
 
 					ret = fat_writeSingleSector(fatd->dev, startSector + j, buffer+bufferPos, bufSize, dataSkip);
@@ -2348,8 +2348,8 @@ int fat_writeFile(fat_driver* fatd, fat_dir* fatDir, int* updateClusterIndices, 
 						return bufferPos;
 					}
 
-					size -= (bufSize - dataSkip);
-					bufferPos += (bufSize - dataSkip);
+					size -= bufSize;
+					bufferPos += bufSize;
 					dataSkip = 0;
 					bufSize = mass_device->sectorSize;
 				}
