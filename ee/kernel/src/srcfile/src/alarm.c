@@ -92,7 +92,7 @@ static s32 SetAlarmInternal(u16 time, void (*callback)(s32 dispatch_id, u16 time
 	if(alarmID < 0)
 		return alarmID;
 
-	asm volatile("move %0, $gp\n" :"=r"(gp):);
+	gp = GetGP();
 	pos = InsertAlarm(now, target);
 	alarm = &alarms[pos];
 	alarm->time = time;

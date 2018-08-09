@@ -14,20 +14,18 @@
 
 extern SystemConfiguration_t SystemConfiguration;
 
-void InitSystemConfig(void *SysConf, int SysConfLen){
+void InitSystemConfig(SystemConfiguration_t *SysConf, int SysConfLen){
 	unsigned int SysConfRegAddr, i;
 	vu8 *ptr;
-	u64 *config;
 
 	if((SysConfRegAddr=*(vu32*)0xbc0003c0)!=0){
 		ptr=(vu8 *)(0xbc000000+SysConfRegAddr+0xF);
 
-		for(i=0; i<SysConfLen; i++) SystemConfiguration.data[i]=ptr[i];
+		for(i=0; i<SysConfLen; i++) SysConf->data[i]=ptr[i];
 	}
 
-	config=(u64*)SysConf;
-	if((*config>>6&7)==0){
-		*config&=0xFFFF02FFFFFFFFFF;
+	if((SysConf->EEGS>>6&7)==0){
+		SysConf->EEGS&=0xFFFF02FFFFFFFFFF;
 	}
 }
 
