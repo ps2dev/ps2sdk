@@ -11,7 +11,7 @@
  */
 //---------------------------------------------------------------------------
 #include <errno.h>
-#include <ioman.h>
+#include <iomanX.h>
 #include <stdio.h>
 #include <sys/stat.h>
 
@@ -64,16 +64,16 @@ typedef struct _fs_dir {
 #define MAX_FILES 16
 static fs_rec fsRec[MAX_FILES]; //file info record
 
-static void fillStat(fio_stat_t* stat, const fat_dir* fatdir)
+static void fillStat(iox_stat_t* stat, const fat_dir* fatdir)
 {
-    stat->mode = FIO_SO_IROTH | FIO_SO_IXOTH;
+    stat->mode = FIO_S_IROTH | FIO_S_IXOTH;
     if (fatdir->attr & FAT_ATTR_DIRECTORY) {
-        stat->mode |= FIO_SO_IFDIR;
+        stat->mode |= FIO_S_IFDIR;
     } else {
-        stat->mode |= FIO_SO_IFREG;
+        stat->mode |= FIO_S_IFREG;
     }
     if (!(fatdir->attr & FAT_ATTR_READONLY)) {
-        stat->mode |= FIO_SO_IWOTH;
+        stat->mode |= FIO_S_IWOTH;
     }
 
     stat->size = fatdir->size;
@@ -220,7 +220,7 @@ static int fs_init(iop_device_t* driver)
 }
 
 //---------------------------------------------------------------------------
-static int fs_open(iop_file_t* fd, const char* name, int mode)
+static int fs_open(iop_file_t* fd, const char* name, int flags, int mode)
 {
     fat_driver* fatd;
     fs_rec *rec, *rec2;
@@ -228,7 +228,7 @@ static int fs_open(iop_file_t* fd, const char* name, int mode)
     unsigned int cluster;
     char escapeNotExist;
 
-    M_DEBUG("%s: %s mode=%X\n", __func__, name, mode);
+    M_DEBUG("%s: %s flags=%X mode=%X\n", __func__, name, flags, mode);
 
     _fs_lock();
 
@@ -256,7 +256,7 @@ static int fs_open(iop_file_t* fd, const char* name, int mode)
         //File exists. Check if the file is already open
         rec2 = fs_findFileSlotByCluster(rec->dirent.fatdir.startCluster);
         if (rec2 != NULL) {
-            if ((mode & O_WRONLY) ||       //current file is opened for write
+            if ((flags & O_WRONLY) ||       //current file is opened for write
                 (rec2->mode & O_WRONLY)) { //other file is opened for write
                 _fs_unlock();
                 return -EACCES;
@@ -264,11 +264,11 @@ static int fs_open(iop_file_t* fd, const char* name, int mode)
         }
     }
 
-    if (mode & O_WRONLY) { //dlanor: corrected bad test condition
+    if (flags & O_WRONLY) { //dlanor: corrected bad test condition
         cluster = 0;       //start from root
 
         escapeNotExist = 1;
-        if (mode & O_CREAT) {
+        if (flags & O_CREAT) {
             M_DEBUG("FAT I: O_CREAT detected!\n");
             escapeNotExist = 0;
         }
@@ -280,8 +280,8 @@ static int fs_open(iop_file_t* fd, const char* name, int mode)
             _fs_unlock();
             return ret;
         }
-        //the file already exist but mode is set to truncate
-        if (ret == 2 && (mode & O_TRUNC)) {
+        //the file already exist but flags is set to truncate
+        if (ret == 2 && (flags & O_TRUNC)) {
             M_DEBUG("FAT I: O_TRUNC detected!\n");
             fat_truncateFile(fatd, cluster, rec->sfnSector, rec->sfnOffset);
         }
@@ -298,17 +298,17 @@ static int fs_open(iop_file_t* fd, const char* name, int mode)
     }
 
     if ((rec->dirent.fatdir.attr & FAT_ATTR_DIRECTORY) == FAT_ATTR_DIRECTORY) {
-        // Can't open a directory with fioOpen
+        // Can't open a directory with open
         _fs_unlock();
         return -EISDIR;
     }
 
     rec->dirent.file_flag = FS_FILE_FLAG_FILE;
-    rec->mode             = mode;
+    rec->mode             = flags;
     rec->filePos          = 0;
     rec->sizeChange       = 0;
 
-    if ((mode & O_APPEND) && (mode & O_WRONLY)) {
+    if ((flags & O_APPEND) && (flags & O_WRONLY)) {
         M_DEBUG("FAT I: O_APPEND detected!\n");
         rec->filePos = rec->dirent.fatdir.size;
     }
@@ -555,7 +555,7 @@ static int fs_remove(iop_file_t* fd, const char* name)
 }
 
 //---------------------------------------------------------------------------
-static int fs_mkdir(iop_file_t* fd, const char* name)
+static int fs_mkdir(iop_file_t* fd, const char* name, int mode)
 {
     fat_driver* fatd;
     int ret;
@@ -672,7 +672,7 @@ static int fs_dclose(iop_file_t* fd)
 }
 
 //---------------------------------------------------------------------------
-static int fs_dread(iop_file_t* fd, fio_dirent_t* buffer)
+static int fs_dread(iop_file_t* fd, iox_dirent_t* buffer)
 {
     fat_driver* fatd;
     int ret;
@@ -705,7 +705,7 @@ static int fs_dread(iop_file_t* fd, fio_dirent_t* buffer)
 
     ret = rec->status;
     if (rec->status >= 0) {
-        memset(buffer, 0, sizeof(fio_dirent_t));
+        memset(buffer, 0, sizeof(iox_dirent_t));
         fillStat(&buffer->stat, &rec->current_fatdir);
         strcpy(buffer->name, (const char*)rec->current_fatdir.name);
     }
@@ -718,7 +718,7 @@ static int fs_dread(iop_file_t* fd, fio_dirent_t* buffer)
 }
 
 //---------------------------------------------------------------------------
-static int fs_getstat(iop_file_t* fd, const char* name, fio_stat_t* stat)
+static int fs_getstat(iop_file_t* fd, const char* name, iox_stat_t* stat)
 {
     fat_driver* fatd;
     int ret;
@@ -742,7 +742,7 @@ static int fs_getstat(iop_file_t* fd, const char* name, fio_stat_t* stat)
         return ret;
     }
 
-    memset(stat, 0, sizeof(fio_stat_t));
+    memset(stat, 0, sizeof(iox_stat_t));
     fillStat(stat, &fatdir);
 
     _fs_unlock();
@@ -791,6 +791,49 @@ int fs_ioctl(iop_file_t* fd, int cmd, void* data)
     return ret;
 }
 
+int fs_rename(iop_file_t *fd, const char *path, const char *newpath)
+{
+    fat_dir fatdir;
+    fat_driver *fatd;
+    fs_rec *rec = NULL;
+    unsigned int cluster;
+    struct fs_dirent *dirent = (struct fs_dirent *)fd->privdata;
+    int ret;
+
+    if (dirent == NULL)
+        return -EBADF;
+
+    _fs_lock();
+
+    fatd = fat_getData(fd->unit);
+    if (fatd == NULL) {
+        _fs_unlock();
+        return -ENODEV;
+    }
+
+    //find the file
+    cluster = 0; //allways start from root
+    M_DEBUG("Calling fat_getFileStartCluster from fs_rename\n");
+    ret = fat_getFileStartCluster(fatd, path, &cluster, &fatdir);
+    if (ret < 0 && ret != -ENOENT) {
+        _fs_unlock();
+        return ret;
+    } else {
+        //File exists. Check if the file is already open
+        rec = fs_findFileSlotByCluster(fatdir.startCluster);
+        if (rec != NULL) {
+            _fs_unlock();
+            return -EACCES;
+        }
+    }
+
+    ret = fat_renameFile(fatd, &fatdir, newpath);
+    FLUSH_SECTORS(fatd);
+
+    _fs_unlock();
+    return ret;
+}
+
 static iop_device_ops_t fs_functarray = {
     &fs_init,
     (void*)&fs_dummy,
@@ -808,11 +851,21 @@ static iop_device_ops_t fs_functarray = {
     &fs_dclose,
     &fs_dread,
     &fs_getstat,
-    (void*)&fs_dummy
+    (void*)&fs_dummy,
+    &fs_rename,
+    (void*)&fs_dummy,
+    (void*)&fs_dummy,
+    (void*)&fs_dummy,
+    (void*)&fs_dummy,
+    (void*)&fs_dummy,
+    (void*)&fs_dummy,
+    (void*)&fs_dummy,
+    (void*)&fs_dummy,
+    (void*)&fs_dummy,
 };
 static iop_device_t fs_driver = {
     "mass",
-    IOP_DT_FS,
+    IOP_DT_FS | IOP_DT_FSEXT,
     2,
     "VFAT driver",
     &fs_functarray
@@ -826,22 +879,4 @@ int InitFS(void)
     DelDrv("mass");
     return (AddDrv(&fs_driver) == 0 ? 0 : -1);
 }
-iop_device_ops_t dev_ops = {
-    .init    = &fs_init,
-    .deinit  = (void*)&fs_dummy,
-    .format  = (void*)&fs_dummy,
-    .open    = &fs_open,
-    .close   = &fs_close,
-    .read    = &fs_read,
-    .write   = &fs_write,
-    .lseek   = &fs_lseek,
-    .ioctl   = &fs_ioctl,
-    .remove  = &fs_remove,
-    .mkdir   = &fs_mkdir,
-    .rmdir   = &fs_rmdir,
-    .dopen   = &fs_dopen,
-    .dclose  = &fs_dclose,
-    .dread   = &fs_dread,
-    .getstat = &fs_getstat,
-    .chstat  = (void*)&fs_dummy,
-};
+
