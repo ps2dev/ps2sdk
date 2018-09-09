@@ -24,7 +24,7 @@ struct NetManNetProtStack{
 };
 
 /** Flow-control */
-#define NETMAN_NETIF_ETH_LINK_MODE_PAUSE	0x40
+#define NETMAN_NETIF_ETH_LINK_DISABLE_PAUSE	0x40
 
 enum NETMAN_NETIF_ETH_LINK_MODE{
 	/** Auto negotiation cannot be reflected by NETMAN_NETIF_IOCTL_ETH_GET_LINK_MODE. */

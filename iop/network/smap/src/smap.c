@@ -603,20 +603,22 @@ static inline int SMAPGetLinkMode(void){
 		if(value&0x04) result=NETMAN_NETIF_ETH_LINK_MODE_100M_HDX;	/* 100Base-TX HDX */
 		if(value&0x02) result=NETMAN_NETIF_ETH_LINK_MODE_10M_FDX;	/* 10Base-TX FDX */
 		if(value&0x01) result=NETMAN_NETIF_ETH_LINK_MODE_10M_HDX;	/* 10Base-TX HDX */
-		if(value&0x40) result|=NETMAN_NETIF_ETH_LINK_MODE_PAUSE;
+		if(!(value&0x40)) result|=NETMAN_NETIF_ETH_LINK_DISABLE_PAUSE;
 	}
 
 	return result;
 }
 
 static inline int SMAPSetLinkMode(int mode){
-	int result;
+	int result, baseMode;
 
 	if(SmapDriverData.SmapIsInitialized){
-		if(mode != NETMAN_NETIF_ETH_LINK_MODE_AUTO){
+		baseMode = mode & (~NETMAN_NETIF_ETH_LINK_DISABLE_PAUSE);
+
+		if(baseMode != NETMAN_NETIF_ETH_LINK_MODE_AUTO){
 			EnableAutoNegotiation = 0;
 
-			switch(mode){
+			switch(baseMode){
 				case NETMAN_NETIF_ETH_LINK_MODE_10M_HDX:
 					SmapConfiguration = 0x020;
 					result = 0;
@@ -633,25 +635,20 @@ static inline int SMAPSetLinkMode(int mode){
 					SmapConfiguration = 0x0100;
 					result = 0;
 					break;
-				case (NETMAN_NETIF_ETH_LINK_MODE_10M_FDX|NETMAN_NETIF_ETH_LINK_MODE_PAUSE):
-					SmapConfiguration = 0x440;
-					result = 0;
-					break;
-				case (NETMAN_NETIF_ETH_LINK_MODE_100M_FDX|NETMAN_NETIF_ETH_LINK_MODE_PAUSE):
-					SmapConfiguration = 0x500;
-					result = 0;
-					break;
 				default:
 					result = -1;
-			}
 
+			}
 		}else{
-			SmapConfiguration = 0x5E0;
+			SmapConfiguration = 0x1E0;
 			EnableAutoNegotiation = 1;
 			result = 0;
 		}
 
 		if(result == 0){
+			if(!(mode & NETMAN_NETIF_ETH_LINK_DISABLE_PAUSE))
+				SmapConfiguration |= 0x400;	//Enable flow control.
+
 			SetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_STOP|SMAP_EVENT_START);
 			SmapDriverData.NetDevStopFlag=1;
 		}

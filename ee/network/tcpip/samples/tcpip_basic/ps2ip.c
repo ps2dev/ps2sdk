@@ -171,7 +171,7 @@ static void ethPrintIPConfig(void)
 
 static void ethPrintLinkStatus(void)
 {
-	int mode;
+	int mode, baseMode;
 
 	//SMAP is registered as the "sm0" device to the TCP/IP stack.
 	scr_printf("Link:\t");
@@ -184,7 +184,8 @@ static void ethPrintLinkStatus(void)
 	mode = NetManIoctl(NETMAN_NETIF_IOCTL_ETH_GET_LINK_MODE, NULL, 0, NULL, 0);
 
 	//NETMAN_NETIF_ETH_LINK_MODE_PAUSE is a flag, so file it off first.
-	switch((mode & ~NETMAN_NETIF_ETH_LINK_MODE_PAUSE))
+	baseMode = mode & (~NETMAN_NETIF_ETH_LINK_DISABLE_PAUSE);
+	switch(baseMode)
 	{
 		case NETMAN_NETIF_ETH_LINK_MODE_10M_HDX:
 			scr_printf("10M HDX");
@@ -201,7 +202,7 @@ static void ethPrintLinkStatus(void)
 		default:
 			scr_printf("Unknown");
 	}
-	if(mode & NETMAN_NETIF_ETH_LINK_MODE_PAUSE)
+	if(!(mode & NETMAN_NETIF_ETH_LINK_DISABLE_PAUSE))
 		scr_printf(" with ");
 	else
 		scr_printf(" without ");
