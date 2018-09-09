@@ -237,15 +237,11 @@ int main(int argc, char *argv[])
 	//The network interface link mode/duplex can be set.
 	EthernetLinkMode = NETMAN_NETIF_ETH_LINK_MODE_AUTO;
 
-	do{
-		//Wait for the link to become ready before changing the setting.
-		if(ethWaitValidNetIFLinkState() != 0) {
-			scr_printf("Error: failed to get valid link status.\n");
-			goto end;
-		}
-
-		//Attempt to apply the new link setting.
-	} while(ethApplyNetIFConfig(EthernetLinkMode) != 0);
+	//Attempt to apply the new link setting.
+	if(ethApplyNetIFConfig(EthernetLinkMode) != 0) {
+		scr_printf("Error: failed to set link mode.\n");
+		goto end;
+	}
 
 	//Initialize IP address.
 	IP4_ADDR(&IP, 192, 168, 0, 80);
@@ -261,6 +257,13 @@ int main(int argc, char *argv[])
 	//Change IP address
 	IP4_ADDR(&IP, 192, 168, 0, 10);
 	ethApplyIPConfig(0, &IP, &NM, &GW, &DNS);
+
+	//Wait for the link to become ready.
+	scr_printf("Waiting for connection...\n");
+	if(ethWaitValidNetIFLinkState() != 0) {
+		scr_printf("Error: failed to get valid link status.\n");
+		goto end;
+	}
 
 	scr_printf("Initialized:\n");
 	ethPrintLinkStatus();

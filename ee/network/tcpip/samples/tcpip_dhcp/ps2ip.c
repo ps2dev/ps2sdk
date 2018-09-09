@@ -258,15 +258,11 @@ int main(int argc, char *argv[])
 	//The network interface link mode/duplex can be set.
 	EthernetLinkMode = NETMAN_NETIF_ETH_LINK_MODE_AUTO;
 
-	do{
-		//Wait for the link to become ready before changing the setting.
-		if(ethWaitValidNetIFLinkState() != 0) {
-			scr_printf("Error: failed to get valid link status.\n");
-			goto end;
-		}
-
-		//Attempt to apply the new link setting.
-	} while(ethApplyNetIFConfig(EthernetLinkMode) != 0);
+	//Attempt to apply the new link setting.
+	if(ethApplyNetIFConfig(EthernetLinkMode) != 0) {
+		scr_printf("Error: failed to set link mode.\n");
+		goto end;
+	}
 
 	//Initialize IP address.
 	//In this example, DHCP is enabled, hence the IP, NM, GW and DNS fields are cleared to 0..
@@ -280,6 +276,13 @@ int main(int argc, char *argv[])
 
 	//Enable DHCP
 	ethApplyIPConfig(1, &IP, &NM, &GW, &DNS);
+
+	//Wait for the link to become ready.
+	scr_printf("Waiting for connection...\n");
+	if(ethWaitValidNetIFLinkState() != 0) {
+		scr_printf("Error: failed to get valid link status.\n");
+		goto end;
+	}
 
 	scr_printf("Waiting for DHCP lease...");
 	//Wait for DHCP to initialize, if DHCP is enabled.
