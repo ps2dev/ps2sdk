@@ -9,6 +9,7 @@
 //Common structures
 #define NETMAN_NETIF_NAME_MAX_LEN	4
 #define NETMAN_NETIF_FRAME_SIZE		1514
+#define NETMAN_FRAME_GROUP_SIZE		8	//The actual number of DMA transfer tags is twice this. The total number presented to sceSifSetDma must never exceed 32.
 
 struct NetManNetProtStack{
 	void (*LinkStateUp)(void);

@@ -57,6 +57,7 @@ static s32 HandleRxEvent(s32 channel)
 	}
 
 	ExitHandler();
+	//Must allow the other SIF handlers to check their states, as it is possible for this handler to block other handlers until FrameBufferStatus is cleared.
 	return 0;
 }
 
@@ -182,10 +183,7 @@ static void NETMAN_RxThread(void *arg)
 			EI();
 
 			if(!run)
-			{
-				SifSetReg(SIF_REG_SMFLAG, NETMAN_SBUS_BITS);	//Acknowledge interrupt
 				SleepThread();
-			}
 		} while(!run);
 
 		payload = bd->payload;

@@ -227,7 +227,7 @@ static void NETMAN_TxThread(void *arg)
 				//Transfer to IOP RAM
 				//Determine mode of transfer.
 				bdNext = UNCACHED_SEG(&FrameBufferStatus[(IOPFrameBufferWrPtr + 1) % NETMAN_RPC_BLOCK_SIZE]);
-				if((NumTx + 1) >= (NETMAN_RPC_BLOCK_SIZE / 4) || bdNext->length == 0)
+				if((NumTx + 1) >= NETMAN_FRAME_GROUP_SIZE || bdNext->length == 0)
 				{
 					//Prepare SIFCMD packet
 					//Record the frame length.

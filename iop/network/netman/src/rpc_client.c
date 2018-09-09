@@ -25,7 +25,8 @@ static union{
 } SifRpcTxBuffer;
 
 //Data for IOP -> EE transfers
-static unsigned short int EEFrameBufferWrPtr;
+static unsigned short int EEFrameBufferWrPtr, NumFramesInQueue;
+static SifDmaTransfer_t dmatReqs[NETMAN_FRAME_GROUP_SIZE*2];
 
 static int NetManIOSemaID = -1;
 
@@ -55,6 +56,7 @@ int NetManInitRPCClient(void)
 		memset(FrameBuffer, 0, NETMAN_RPC_BLOCK_SIZE * NETMAN_MAX_FRAME_SIZE);
 		memset(FrameBufferStatus, 0, NETMAN_RPC_BLOCK_SIZE * sizeof(struct NetManBD));
 		EEFrameBufferWrPtr = 0;
+		NumFramesInQueue = 0;
 
 		for(i = 0; i < NETMAN_RPC_BLOCK_SIZE; i++)	//Mark all descriptors as "in-use", until the EE-side allocates buffers.
 			FrameBufferStatus[i].length = USHRT_MAX;
@@ -136,11 +138,57 @@ void NetManRpcNetProtStackFreeRxPacket(void *packet)
 }
 
 //Only one thread can enter this critical section!
+static int sendFramesToEE(int mode)
+{
+	int OldState, res;
+
+	if (NumFramesInQueue > 0)
+	{
+		dmatReqs[(NumFramesInQueue-1) * 2 + 1].attr = SIF_DMA_INT_O;	//Mark the last entry to notify the receive thread of the incoming frame(s). This will stall SIF0.
+
+		//Transfer the frame over to the EE
+		do{
+			if (mode == 0)
+				CpuSuspendIntr(&OldState);
+			res = sceSifSetDma(dmatReqs, 2*NumFramesInQueue);
+			if (mode == 0)
+				CpuResumeIntr(OldState);
+
+			/*	In interrupt mode, do not loop around sceSifSetDma as its status can only be updated by the SIF0 interrupt handler,
+				which would be blocked by this interrupt handler. */
+			if (mode != 0 && res == 0)
+				return -1;
+		}while(res == 0);
+
+		NumFramesInQueue = 0;
+	}
+
+	return 0;
+}
+
+//The SMAP Rx FIFO may only hold 16384 / 1518 = 10 frames. In 1ms, roughly 8 full-length frames can be transferred at 100Mbit within 1ms. 1ms = 36864 ticks.
+#define FRAME_GROUPING_INTERVAL	36864
+
+static unsigned int FrameSendCB(void *arg)
+{
+	return(sendFramesToEE(1) == 0 ? 0 : FRAME_GROUPING_INTERVAL); //If sending failed, try again later.
+}
+
+//Only one thread can enter this critical section!
 static void EnQFrame(const void *frame, unsigned int length)
 {
-	SifDmaTransfer_t dmat[2];
+	SifDmaTransfer_t *dmat;
 	struct NetManBD *bd;
-	int OldState, res;
+	iop_sys_clock_t clock;
+
+	//Cancel any ongoing callbacks.
+	CancelAlarm(&FrameSendCB, NULL);
+
+	if (NumFramesInQueue >= NETMAN_FRAME_GROUP_SIZE)
+	{	/* If there are already sufficient frames, the frames can be sent right away.
+		   This may happen here if sending failed within the interrupt callback and there are more frames to send. */
+		sendFramesToEE(0);
+	}
 
 	//No need to wait for a free spot to appear, as Alloc already took care of that.
 	bd = &FrameBufferStatus[EEFrameBufferWrPtr];
@@ -149,6 +197,7 @@ static void EnQFrame(const void *frame, unsigned int length)
 	bd->length = length;
 
 	//Prepare DMA transfer.
+	dmat = &dmatReqs[NumFramesInQueue * 2];
 	dmat[0].src = (void*)frame;
 	dmat[0].dest = bd->payload;
 	dmat[0].size = (length + 3) & ~3;
@@ -157,22 +206,21 @@ static void EnQFrame(const void *frame, unsigned int length)
 	dmat[1].src = bd;
 	dmat[1].dest = &EEFrameBufferStatus[EEFrameBufferWrPtr];
 	dmat[1].size = sizeof(struct NetManBD);
-	if(!(sceSifGetSMFlag() & NETMAN_SBUS_BITS))
-	{
-		dmat[1].attr = SIF_DMA_INT_O;	//Notify the receive thread of the incoming frame, if it's sleeping. This will stall SIF0.
-		sceSifSetSMFlag(NETMAN_SBUS_BITS);
-	} else
-		dmat[1].attr = 0;
-
-	//Transfer the frame over to the EE
-	do{
-		CpuSuspendIntr(&OldState);
-		res = sceSifSetDma(dmat, 2);
-		CpuResumeIntr(OldState);
-	}while(res == 0);
+	dmat[1].attr = 0;
+	NumFramesInQueue++;
 
 	//Increase the write (IOP -> EE) pointer by one place.
 	EEFrameBufferWrPtr = (EEFrameBufferWrPtr + 1) % NETMAN_RPC_BLOCK_SIZE;
+
+	if (NumFramesInQueue >= NETMAN_FRAME_GROUP_SIZE)
+	{	//If there are sufficient frames, the frames can be sent right away.
+		sendFramesToEE(0);
+	} else {
+		//Wait a while in case further frames can be grouped, to allow sceSifSetDma() to chain the requests together.
+		clock.lo = FRAME_GROUPING_INTERVAL;
+		clock.hi = 0;
+		SetAlarm(&clock, &FrameSendCB, NULL);
+	}
 }
 
 //Frames will be enqueued in the order that they were allocated.

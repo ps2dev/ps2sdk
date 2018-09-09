@@ -10,9 +10,6 @@ loadcore_IMPORTS_end
 
 sifman_IMPORTS_start
 I_sceSifSetDma
-I_sceSifGetSMFlag
-I_sceSifSetSMFlag
-I_sceSifIntrMain
 sifman_IMPORTS_end
 
 sifcmd_IMPORTS_start
@@ -54,6 +51,8 @@ I_DeleteThread
 I_GetThreadId
 I_DelayThread
 I_iWakeupThread
+I_SetAlarm
+I_CancelAlarm
 thbase_IMPORTS_end
 
 thevent_IMPORTS_start
