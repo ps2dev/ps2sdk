@@ -118,20 +118,20 @@ void *audsrv_load_adpcm(u32 *buffer, int size, int id)
 	adpcm_list_t *adpcm;
 
 	adpcm = adpcm_loaded(id);
-	if (adpcm == 0)
+	if (adpcm == NULL)
 	{
-		if (adpcm_list_head == 0)
+		if (adpcm_list_head == NULL)
 		{
 			/* first entry ever! yay! */
 			adpcm = alloc_new_sample();
 			adpcm->id = id;
 			adpcm->spu2_addr = 0x5010; /* Need to change this so it considers to PCM streaming space usage :) */
 			adpcm->size = size - 16; /* header is 16 bytes */
+			adpcm->next = NULL;
 
 			audsrv_read_adpcm_header(adpcm, buffer);
 
 			adpcm_list_head = adpcm;
-			adpcm_list_head->next = 0;
 			adpcm_list_tail = adpcm_list_head;
 		}
 		else
@@ -141,6 +141,7 @@ void *audsrv_load_adpcm(u32 *buffer, int size, int id)
 			adpcm->id = id;
 			adpcm->spu2_addr = adpcm_list_tail->spu2_addr + adpcm_list_tail->size;
 			adpcm->size = size - 16; /* header is 16 bytes */
+			adpcm->next = NULL;
 
 			audsrv_read_adpcm_header(adpcm, buffer);
 
@@ -175,7 +176,7 @@ int audsrv_play_adpcm(u32 id)
 	adpcm_list_t *a;
 
 	a = adpcm_loaded(id);
-	if (a == 0)
+	if (a == NULL)
 	{
 		/* bad joke */
 		return AUDSRV_ERR_ARGS;
@@ -235,7 +236,7 @@ int audsrv_adpcm_init()
 		sceSdSetParam(SD_CORE_1 | (voice << 1) | SD_VPARAM_VOLR, 0x3fff);
 	}
 
-	if (adpcm_list_head != 0)
+	if (adpcm_list_head != NULL)
 	{
 		/* called second time, after samples were already uploaded */
 		free_all_samples();
