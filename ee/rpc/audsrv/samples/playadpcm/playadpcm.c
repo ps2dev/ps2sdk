@@ -70,8 +70,9 @@ int main(int argc, char **argv)
 
 	audsrv_adpcm_init();
 	audsrv_set_volume(MAX_VOLUME);
+	audsrv_adpcm_set_volume(0, MAX_VOLUME);
 	audsrv_load_adpcm(&sample, buffer, size);
-	audsrv_play_adpcm(&sample);
+	audsrv_ch_play_adpcm(0, &sample);
 
 	/* Uncomment to hear two samples played simultaenously
 	for (i=0; i<100; i++)
@@ -79,7 +80,8 @@ int main(int argc, char **argv)
 		nopdelay();
 	}
 
-	audsrv_play_adpcm(&sample);
+	audsrv_adpcm_set_volume(1, MAX_VOLUME);
+	audsrv_ch_play_adpcm(1, &sample);
 	*/
 
 	printf("sample played..\n");

@@ -156,13 +156,13 @@ int audsrv_wait_audio(int bytes)
 
 int audsrv_set_volume(int volume)
 {
-	if (volume > 100)
+	if (volume > MAX_VOLUME)
 	{
-		volume = 100;
+		volume = MAX_VOLUME;
 	}
-	else if (volume < 0)
+	else if (volume < MIN_VOLUME)
 	{
-		volume = 0;
+		volume = MIN_VOLUME;
 	}
 
 	return call_rpc_1(AUDSRV_SET_VOLUME, vol_values[volume/4]);
@@ -366,13 +366,13 @@ int audsrv_adpcm_init()
 
 int audsrv_adpcm_set_volume(int ch, int volume)
 {
-	if (volume > 100)
+	if (volume > MAX_VOLUME)
 	{
-		volume = 100;
+		volume = MAX_VOLUME;
 	}
-	else if (volume < 0)
+	else if (volume < MIN_VOLUME)
 	{
-		volume = 0;
+		volume = MIN_VOLUME;
 	}
 
 	return call_rpc_2(AUDSRV_ADPCM_SET_VOLUME, ch, vol_values[volume/4]);

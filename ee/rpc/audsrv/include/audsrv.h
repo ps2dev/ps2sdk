@@ -19,10 +19,10 @@
 #define	AUDSRV_IRX              0x870884d
 
 /** minmum volume */
-#define MIN_VOLUME                 0x0000
+#define MIN_VOLUME                 0
 
 /** maximum volume */
-#define MAX_VOLUME                 0x3fff
+#define MAX_VOLUME                 100
 
 /** error codes */
 #define AUDSRV_ERR_NOERROR                 0x0000
