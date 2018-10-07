@@ -45,6 +45,16 @@ static void *on_cdda_stop_arg = NULL;
 static audsrv_callback_t on_fillbuf = NULL;
 static void *on_fillbuf_arg = NULL;
 
+static const unsigned short vol_values[26] =
+{
+	0x0000,
+	0x0000, 0x0096, 0x0190, 0x0230, 0x0320,
+	0x042E, 0x0532, 0x05FA, 0x06C2, 0x088E,
+	0x09F6, 0x0BC2, 0x0DC0, 0x0FF0, 0x118A,
+	0x1482, 0x1752, 0x1B4E, 0x1F40, 0x2378,
+	0x28D2, 0x2EFE, 0x34F8, 0x3A5C, 0x3FFF
+};
+
 /** Internal function to set last error
  * @param err
  */
@@ -146,16 +156,6 @@ int audsrv_wait_audio(int bytes)
 
 int audsrv_set_volume(int volume)
 {
-	unsigned short vol_values[26] =
-	{
-		0x0000,
-		0x0000, 0x0096, 0x0190, 0x0230, 0x0320,
-		0x042E, 0x0532, 0x05FA, 0x06C2, 0x088E,
-		0x09F6, 0x0BC2, 0x0DC0, 0x0FF0, 0x118A,
-		0x1482, 0x1752, 0x1B4E, 0x1F40, 0x2378,
-		0x28D2, 0x2EFE, 0x34F8, 0x3A5C, 0x3FFF
-	};
-
 	if (volume > 100)
 	{
 		volume = 100;
@@ -364,6 +364,20 @@ int audsrv_adpcm_init()
 	return call_rpc_1(AUDSRV_INIT_ADPCM, 0);
 }
 
+int audsrv_adpcm_set_volume(int ch, int volume)
+{
+	if (volume > 100)
+	{
+		volume = 100;
+	}
+	else if (volume < 0)
+	{
+		volume = 0;
+	}
+
+	return call_rpc_2(AUDSRV_ADPCM_SET_VOLUME, ch, vol_values[volume/4]);
+}
+
 int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size)
 {
 	void* iop_addr;
@@ -415,10 +429,10 @@ int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size)
 	return ret;
 }
 
-int audsrv_play_adpcm(audsrv_adpcm_t *adpcm)
+int audsrv_ch_play_adpcm(int ch, audsrv_adpcm_t *adpcm)
 {
 	/* on iop side, the sample id is like the pointer on ee side */
-	return call_rpc_1(AUDSRV_PLAY_ADPCM, (u32)adpcm);
+	return call_rpc_2(AUDSRV_PLAY_ADPCM, ch, (u32)adpcm);
 }
 
 const char *audsrv_get_error_string()

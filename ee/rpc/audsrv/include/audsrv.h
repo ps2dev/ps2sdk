@@ -218,6 +218,13 @@ int audsrv_on_fillbuf(int amount, audsrv_callback_t cb, void *arg);
  */
 int audsrv_adpcm_init();
 
+/** Sets output volume for the specified voice channel.
+ * @param ch       Voice channel ID
+ * @param vol      volume in percentage (0-100)
+ * @returns 0 on success, negative otherwise
+ */
+int audsrv_adpcm_set_volume(int ch, int vol);
+
 /** Uploads a sample to SPU2 memory
  * @param adpcm    adpcm descriptor structure
  * @param buffer   pointer to adpcm sample
@@ -227,14 +234,17 @@ int audsrv_adpcm_init();
 int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size);
 
 /** Plays an adpcm sample already uploaded with audsrv_load_adpcm()
+ * @param ch    channel identifier. Specifies one of the 24 voice channel to play the ADPCM channel on.
  * @param id    sample identifier, as specified in load()
  * @returns zero on success, negative value on error
  *
- * The sample will be played in an unoccupied channel. If all 24 channels
- * are used, then -AUDSRV_ERR_NO_MORE_CHANNELS is returned. Trying to play
- * a sample which is unavailable will result in -AUDSRV_ERR_ARGS
+ * When ch is set to an invalid channel ID, the sample will be played in an unoccupied channel.
+ * If all 24 channels are used, then -AUDSRV_ERR_NO_MORE_CHANNELS is returned.
+ * When ch is set to a valid channel ID, -AUDSRV_ERR_NO_MORE_CHANNELS is returned if the channel is currently in use.
+ * Trying to play a sample which is unavailable will result in -AUDSRV_ERR_ARGS
  */
-int audsrv_play_adpcm(audsrv_adpcm_t *adpcm);
+int audsrv_ch_play_adpcm(int ch, audsrv_adpcm_t *adpcm);
+#define audsrv_play_adpcm(adpcm) audsrv_ch_play_adpcm(-1, adpcm) //For backward-compatibility
 
 /** Installs a callback function upon completion of a cdda track
  * @param cb your callback

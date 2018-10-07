@@ -50,6 +50,7 @@
 #define AUDSRV_INIT_ADPCM           0x0016
 #define AUDSRV_LOAD_ADPCM           0x0017
 #define AUDSRV_PLAY_ADPCM           0x0018
+#define AUDSRV_ADPCM_SET_VOLUME     0x0019
 
 #define AUDSRV_FILLBUF_CALLBACK     0x0001
 #define AUDSRV_CDDA_CALLBACK        0x0002

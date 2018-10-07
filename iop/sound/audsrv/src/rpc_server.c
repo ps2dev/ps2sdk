@@ -139,7 +139,11 @@ static void *rpc_command(int func, unsigned *data, int size)
 		return audsrv_load_adpcm((u32*)data[0], data[1], data[2]);
 
 		case AUDSRV_PLAY_ADPCM:
-		ret = audsrv_play_adpcm(data[0]);
+		ret = audsrv_ch_play_adpcm(data[0], data[1]);
+		break;
+
+		case AUDSRV_SET_ADPCM_VOL:
+		ret = audsrv_adpcm_set_volume(data[0], data[1]);
 		break;
 
 		default:

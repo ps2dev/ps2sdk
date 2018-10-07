@@ -47,6 +47,7 @@
 #define AUDSRV_INIT_ADPCM           0x0016
 #define AUDSRV_LOAD_ADPCM           0x0017
 #define AUDSRV_PLAY_ADPCM           0x0018
+#define AUDSRV_SET_ADPCM_VOL        0x0019
 
 #define AUDSRV_FILLBUF_CALLBACK     0x0001
 #define AUDSRV_CDDA_CALLBACK        0x0002
@@ -88,8 +89,10 @@ int audsrv_get_cd_type();
 
 /* adpcm functions */
 int audsrv_adpcm_init();
+int audsrv_adpcm_set_volume(int ch, int vol);
 void *audsrv_load_adpcm(u32 *buffer, int size, int id);
-int audsrv_play_adpcm(u32 id);
+#define audsrv_play_adpcm(id)      audsrv_ch_play_adpcm(-1, id) //For backward-compatibility
+int audsrv_ch_play_adpcm(int ch, u32 id);
 
 #define audsrv_IMPORTS_start DECLARE_IMPORT_TABLE(audsrv, 1, 1)
 #define audsrv_IMPORTS_end END_IMPORT_TABLE
@@ -121,6 +124,8 @@ int audsrv_play_adpcm(u32 id);
 
 #define I_audsrv_adpcm_init        DECLARE_IMPORT(24, audsrv_adpcm_init)
 #define I_audsrv_load_adpcm        DECLARE_IMPORT(25, audsrv_load_adpcm)
-#define I_audsrv_play_adpcm        DECLARE_IMPORT(26, audsrv_play_adpcm)
+#define I_audsrv_play_adpcm        I_audsrv_ch_play_adpcm //For backward-compatibility
+#define I_audsrv_ch_play_adpcm     DECLARE_IMPORT(26, audsrv_ch_play_adpcm)
+#define I_audsrv_adpcm_set_volume  DECLARE_IMPORT(27, audsrv_adpcm_set_volume)
 
 #endif /* __AUDSRV_H__ */

@@ -1,4 +1,4 @@
-DECLARE_EXPORT_TABLE(audsrv, 1, 1)
+DECLARE_EXPORT_TABLE(audsrv, 1, 2)
 /*00*/	DECLARE_EXPORT(_start)
 	DECLARE_EXPORT(_retonly)
 	DECLARE_EXPORT(_retonly)
@@ -25,7 +25,8 @@ DECLARE_EXPORT_TABLE(audsrv, 1, 1)
 	DECLARE_EXPORT(audsrv_get_cd_type)
 	DECLARE_EXPORT(audsrv_adpcm_init)
 /*25*/	DECLARE_EXPORT(audsrv_load_adpcm)
-	DECLARE_EXPORT(audsrv_play_adpcm)
+	DECLARE_EXPORT(audsrv_ch_play_adpcm)
+	DECLARE_EXPORT(audsrv_adpcm_set_volume)
 END_EXPORT_TABLE
 
 void _retonly() {}
