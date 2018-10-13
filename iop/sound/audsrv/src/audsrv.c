@@ -249,8 +249,8 @@ int audsrv_init()
 	audsrv_stop_audio();
 
 	/* initialize transfer-complete callback */
-	sceSdSetTransCallback(SD_CORE_1, (void *)transfer_complete);
-	sceSdBlockTrans(SD_CORE_1, SD_TRANS_LOOP, core1_buf, sizeof(core1_buf), 0);
+	sceSdSetTransCallback(AUDSRV_BLOCK_DMA_CH, (void *)transfer_complete);
+	sceSdBlockTrans(AUDSRV_BLOCK_DMA_CH, SD_TRANS_LOOP, core1_buf, sizeof(core1_buf), 0);
 
 	/* default to SPU's native */
 	audsrv_set_format(48000, 16, 2);
@@ -452,7 +452,7 @@ static void play_thread(void *arg)
 		CpuSuspendIntr(&intr_state);
 
 		/* one block is playing currently, other is idle */
-		block = 1 - (sceSdBlockTransStatus(SD_CORE_1, 0) >> 24);
+		block = 1 - (sceSdBlockTransStatus(AUDSRV_BLOCK_DMA_CH, 0) >> 24);
 
 		/* copy 1024 bytes from left and right buffers, into core1_buf */
 		bufptr = core1_buf + (block << 11);
@@ -487,17 +487,14 @@ static void play_thread(void *arg)
  */
 int audsrv_quit()
 {
-#ifndef NO_RPC_THREAD
-	deinitialize_rpc_client();
-#endif
-
 	/* silence! */
 	audsrv_stop_audio();
 	audsrv_stop_cd();
+	audsrv_adpcm_init();
 
 	/* stop transmission */
-	sceSdSetTransCallback(SD_CORE_1, NULL);
-	sceSdBlockTrans(SD_CORE_1, SD_TRANS_STOP, 0, 0, 0);
+	sceSdSetTransCallback(AUDSRV_BLOCK_DMA_CH, NULL);
+	sceSdBlockTrans(AUDSRV_BLOCK_DMA_CH, SD_TRANS_STOP, 0, 0, 0);
 
 	/* stop playing thread */
 	if (play_tid > 0)
@@ -506,6 +503,11 @@ int audsrv_quit()
 		DeleteThread(play_tid);
 		play_tid = 0;
 	}
+
+#ifndef NO_RPC_THREAD
+	/* Deinitialize RPC client, only once the playback thread is stopped. */
+	deinitialize_rpc_client();
+#endif
 
 	if (transfer_sema > 0)
 	{

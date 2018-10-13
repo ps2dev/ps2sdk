@@ -75,8 +75,10 @@
 /* Switches */
 #define SD_SWITCH_PMON              (0x13<<8)
 #define SD_SWITCH_NON               (0x14<<8)
-#define SD_SWITCH_KEYDOWN           (0x15<<8)
-#define SD_SWITCH_KEYUP             (0x16<<8)
+#define SD_SWITCH_KON               (0x15<<8)
+#define SD_SWITCH_KEYDOWN SD_SWITCH_KON //For backward-compatibility
+#define SD_SWITCH_KOFF              (0x16<<8)
+#define SD_SWITCH_KEYUP SD_SWITCH_KOFF //For backward-compatibility
 #define SD_SWITCH_ENDX              (0x17<<8)
 #define SD_SWITCH_VMIXL             (0x18<<8)
 #define SD_SWITCH_VMIXEL            (0x19<<8)

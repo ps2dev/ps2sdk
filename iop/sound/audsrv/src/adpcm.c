@@ -150,8 +150,8 @@ void *audsrv_load_adpcm(u32 *buffer, int size, int id)
 		}
 
 		/* DMA from IOP to SPU2 */
-		sceSdVoiceTrans(0, SD_TRANS_WRITE | SD_TRANS_MODE_DMA, ((u8*)buffer)+16, (u32*)adpcm->spu2_addr, adpcm->size);
-		sceSdVoiceTransStatus(0, 1);
+		sceSdVoiceTrans(AUDSRV_VOICE_DMA_CH, SD_TRANS_WRITE | SD_TRANS_MODE_DMA, ((u8*)buffer)+16, (u32*)adpcm->spu2_addr, adpcm->size);
+		sceSdVoiceTransStatus(AUDSRV_VOICE_DMA_CH, 1);
 	}
 
 	sbuffer[0] = 0;
@@ -239,7 +239,7 @@ int audsrv_ch_play_adpcm(int ch, u32 id)
 
 	sceSdSetParam(SD_CORE_1 | (channel << 1) | SD_VPARAM_PITCH, a->pitch);
 	sceSdSetAddr(SD_CORE_1 | (channel << 1) | SD_VOICE_START, a->spu2_addr);
-	sceSdSetSwitch(SD_CORE_1 | SD_VOICE_KEYON, (1 << channel));
+	sceSdSetSwitch(SD_CORE_1 | SD_SWITCH_KON, (1 << channel));
 	return AUDSRV_ERR_NOERROR;
 }
 
@@ -249,17 +249,13 @@ int audsrv_ch_play_adpcm(int ch, u32 id)
  */
 int audsrv_adpcm_init()
 {
-	u32 voice;
+	int voice;
 
 	printf("audsrv_adpcm_init()\n");
 
-	sceSdInit(0);
-
-	sceSdSetParam(SD_CORE_1 | SD_PARAM_MVOLL, 0x3fff);
-	sceSdSetParam(SD_CORE_1 | SD_PARAM_MVOLR, 0x3fff);
-
-	for (voice = 1; voice < 24; voice++)
+	for (voice = 0; voice < 24; voice++)
 	{
+		sceSdSetSwitch(SD_CORE_1 | SD_SWITCH_KOFF, (1 << voice));
 		sceSdSetParam(SD_CORE_1 | (voice << 1) | SD_VPARAM_VOLL, 0x3fff);
 		sceSdSetParam(SD_CORE_1 | (voice << 1) | SD_VPARAM_VOLR, 0x3fff);
 	}
