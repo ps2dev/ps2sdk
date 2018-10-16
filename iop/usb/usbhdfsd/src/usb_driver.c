@@ -426,7 +426,7 @@ static int usb_bulk_transfer(mass_dev* dev, int direction, void* buffer, unsigne
 	return ret;
 }
 
-static inline int cbw_scsi_test_unit_ready(mass_dev* dev)
+static int cbw_scsi_test_unit_ready(mass_dev* dev)
 {
 	int result, retries;
 	static cbw_packet cbw={
@@ -465,7 +465,7 @@ static inline int cbw_scsi_test_unit_ready(mass_dev* dev)
 	return result;
 }
 
-static inline int cbw_scsi_request_sense(mass_dev* dev, void *buffer, int size)
+static int cbw_scsi_request_sense(mass_dev* dev, void *buffer, int size)
 {
 	int rcode, result, retries;
 	static cbw_packet cbw={
@@ -510,7 +510,7 @@ static inline int cbw_scsi_request_sense(mass_dev* dev, void *buffer, int size)
 	return -EIO;
 }
 
-static inline int cbw_scsi_inquiry(mass_dev* dev, void *buffer, int size)
+static int cbw_scsi_inquiry(mass_dev* dev, void *buffer, int size)
 {
 	int rcode, result, retries;
 	static cbw_packet cbw={
@@ -555,7 +555,7 @@ static inline int cbw_scsi_inquiry(mass_dev* dev, void *buffer, int size)
 	return -EIO;
 }
 
-static inline int cbw_scsi_start_stop_unit(mass_dev* dev)
+static int cbw_scsi_start_stop_unit(mass_dev* dev)
 {
 	int result, retries;
 	static cbw_packet cbw={
@@ -594,7 +594,7 @@ static inline int cbw_scsi_start_stop_unit(mass_dev* dev)
 	return result;
 }
 
-static inline int cbw_scsi_read_capacity(mass_dev* dev, void *buffer, int size)
+static int cbw_scsi_read_capacity(mass_dev* dev, void *buffer, int size)
 {
 	int rcode, result, retries;
 	static cbw_packet cbw={
@@ -638,7 +638,7 @@ static inline int cbw_scsi_read_capacity(mass_dev* dev, void *buffer, int size)
 	return -EIO;
 }
 
-static inline int cbw_scsi_read_sector(mass_dev* dev, unsigned int lba, void* buffer, unsigned short int sectorCount)
+static int cbw_scsi_read_sector(mass_dev* dev, unsigned int lba, void* buffer, unsigned short int sectorCount)
 {
 	int rcode, result;
 	static cbw_packet cbw={
@@ -688,7 +688,7 @@ static inline int cbw_scsi_read_sector(mass_dev* dev, unsigned int lba, void* bu
 	return result;
 }
 
-static inline int cbw_scsi_write_sector(mass_dev* dev, unsigned int lba, const void* buffer, unsigned short int sectorCount)
+static int cbw_scsi_write_sector(mass_dev* dev, unsigned int lba, const void* buffer, unsigned short int sectorCount)
 {
 	int rcode, result;
 	static cbw_packet cbw={
@@ -818,17 +818,17 @@ int mass_stor_probe(int devId)
 
 	mass_dev* mass_device = mass_stor_findDevice(devId, 0);
 
-	/* only one device supported */
+	/* Check that a device descriptor was successfully allocated and the device was not already connected. */
 	if ((mass_device != NULL) && (mass_device->status & USBMASS_DEV_STAT_CONN))
 	{
-		printf("USBHDFSD: Error - only one mass storage device allowed ! \n");
+		printf("USBHDFSD: Error - no free device descriptors!\n");
 		return 0;
 	}
 
 	/* get device descriptor */
 	device = (UsbDeviceDescriptor*)sceUsbdScanStaticDescriptor(devId, NULL, USB_DT_DEVICE);
 	if (device == NULL)  {
-		XPRINTF("USBHDFSD: Error - Couldn't get device descriptor\n");
+		printf("USBHDFSD: Error - Couldn't get device descriptor\n");
 		return 0;
 	}
 
@@ -838,14 +838,14 @@ int mass_stor_probe(int devId)
 	/* read configuration */
 	config = (UsbConfigDescriptor*)sceUsbdScanStaticDescriptor(devId, device, USB_DT_CONFIG);
 	if (config == NULL) {
-	    XPRINTF("USBHDFSD: Error - Couldn't get configuration descriptor\n");
+	    printf("USBHDFSD: Error - Couldn't get configuration descriptor\n");
 	    return 0;
 	}
 	/* check that at least one interface exists */
 	XPRINTF("USBHDFSD: bNumInterfaces %d\n", config->bNumInterfaces);
 	if ((config->bNumInterfaces < 1) ||
 		(config->wTotalLength < (sizeof(UsbConfigDescriptor) + sizeof(UsbInterfaceDescriptor)))) {
-			XPRINTF("USBHDFSD: Error - No interfaces available\n");
+			printf("USBHDFSD: Error - No interfaces available\n");
 			return 0;
 	}
         /* get interface */
@@ -857,8 +857,8 @@ int mass_stor_probe(int devId)
 		(intf->bInterfaceSubClass	!= USB_SUBCLASS_MASS_SCSI  &&
 		 intf->bInterfaceSubClass	!= USB_SUBCLASS_MASS_SFF_8070I) ||
 		(intf->bInterfaceProtocol	!= USB_PROTOCOL_MASS_BULK_ONLY) ||
-		(intf->bNumEndpoints < 2))    { //one bulk endpoint is not enough because
-			return 0;		//we send the CBW to te bulk out endpoint
+		(intf->bNumEndpoints < 2))    { //4.3: There shall be at least 2 endpoints, for bulk in and bulk out.
+			return 0;
 	}
 	return 1;
 }
@@ -878,13 +878,13 @@ int mass_stor_connect(int devId)
 	dev = mass_stor_findDevice(devId, 1);
 
 	if (dev == NULL) {
-		printf("USBHDFSD: Error - unable to allocate space!\n");
+		printf("USBHDFSD: Error - no free device descriptors!\n");
 		return 1;
 	}
 
-	/* only one mass device allowed */
+	/* Device cannot be registered twice. */
 	if (dev->devId != -1) {
-		printf("USBHDFSD: Error - only one mass storage device allowed !\n");
+		printf("USBHDFSD: Error - device descriptor in use!\n");
 		return 1;
 	}
 
@@ -1005,7 +1005,7 @@ static int mass_stor_warmup(mass_dev *dev) {
 	}
 
 	stat = usb_bulk_get_max_lun(dev);
-	XPRINTF("USBHDFSD: usb_bulk_get_max_lun %d\n", stat);
+	printf("USBHDFSD: usb_bulk_get_max_lun %d\n", stat);
 
 	memset(&id, 0, sizeof(inquiry_data));
 	if ((stat = cbw_scsi_inquiry(dev, &id, sizeof(inquiry_data))) < 0) {
@@ -1013,13 +1013,13 @@ static int mass_stor_warmup(mass_dev *dev) {
 		return -1;
 	}
 
-	printf("USBHDFSD: Vendor: %.8s\n", id.vendor);
-	printf("USBHDFSD: Product: %.16s\n", id.product);
-	printf("USBHDFSD: Revision: %.4s\n", id.revision);
+	printf(	"USBHDFSD:\tVendor: %.8s\n"
+			"\t\tProduct: %.16s\n"
+			"\t\tRevision: %.4s\n", id.vendor, id.product, id.revision);
 
 	while((stat = cbw_scsi_test_unit_ready(dev)) != 0)
 	{
-		printf("USBHDFSD: Error - cbw_scsi_test_unit_ready %d\n", stat);
+		printf("USBHDFSD: cbw_scsi_test_unit_ready %d\n", stat);
 
 		stat = cbw_scsi_request_sense(dev, &sd, sizeof(sense_data));
 		if (stat != 0)
@@ -1076,8 +1076,15 @@ int mass_stor_configureNextDevice(void)
 			if((ret = usb_set_interface(dev, dev->interfaceNumber, dev->interfaceAlt)) != USB_RC_OK)
 			{
 				printf("USBHDFSD: Error - sending set_interface %d\n", ret);
-				mass_stor_release(dev);
-				continue;
+				if (ret == USB_RC_STALL)
+				{	/* USB Specification 1.1, section 9.4.10: Devices that only support a default setting for the specified interface may return a STALL.
+					   As with Linux, we shall clear the halt state of the interface's pipes and continue. */
+					usb_bulk_clear_halt(dev, USB_BLK_EP_IN);
+					usb_bulk_clear_halt(dev, USB_BLK_EP_OUT);
+				} else {
+					mass_stor_release(dev);
+					continue;
+				}
 			}
 
 			dev->status |= USBMASS_DEV_STAT_CONF;

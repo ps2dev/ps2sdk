@@ -743,8 +743,15 @@ static void usb_mass_update(void* arg)
 
                 if ((ret = usb_set_interface(dev, dev->interfaceNumber, dev->interfaceAlt)) != USB_RC_OK) {
                     M_PRINTF("ERROR: sending set_interface %d\n", ret);
-                    usb_mass_release(dev);
-                    continue;
+                    if (ret == USB_RC_STALL) {
+                        /* USB Specification 1.1, section 9.4.10: Devices that only support a default setting for the specified interface may return a STALL.
+                           As with Linux, we shall clear the halt state of the interface's pipes and continue. */
+                        usb_bulk_clear_halt(dev, USB_BLK_EP_IN);
+                        usb_bulk_clear_halt(dev, USB_BLK_EP_OUT);
+                    } else {
+                        usb_mass_release(dev);
+                        continue;
+                    }
                 }
 
                 dev->status |= USBMASS_DEV_STAT_CONF;
