@@ -291,6 +291,9 @@ int NetManSetMainIF(const char *name)
 {
 	int result;
 
+	if (!IsInitialized)
+		return -1;
+
 	WaitSema(NetManIOSemaID);
 
 	strncpy(TransmitBuffer.netifName, name, NETMAN_NETIF_NAME_MAX_LEN);
@@ -306,6 +309,9 @@ int NetManSetMainIF(const char *name)
 int NetManQueryMainIF(char *name)
 {
 	int result;
+	
+	if (!IsInitialized)
+		return -1;
 
 	WaitSema(NetManIOSemaID);
 
@@ -326,6 +332,9 @@ int NetManQueryMainIF(char *name)
 int NetManSetLinkMode(int mode)
 {
 	int result;
+	
+	if (!IsInitialized)
+		return -1;
 
 	WaitSema(NetManIOSemaID);
 
