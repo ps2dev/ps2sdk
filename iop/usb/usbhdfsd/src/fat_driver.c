@@ -1044,6 +1044,8 @@ fat_driver * fat_getData(int device)
 	{
 		if (mass_stor_configureNextDevice() <= 0)
 			break;
+		//Do not block USBD by busy-looping here, if the device is not ready. This function call will carry the priority of the calling thread.
+		DelayThread(5000);
 	}
 
 	if (g_fatd[device] == NULL || g_fatd[device]->dev == NULL)

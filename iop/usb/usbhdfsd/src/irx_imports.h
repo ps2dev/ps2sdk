@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <sysclib.h>
 #include <sysmem.h>
+#include <thbase.h>
 #include <thevent.h>
 #include <thsemap.h>
 #include <usbd.h>
