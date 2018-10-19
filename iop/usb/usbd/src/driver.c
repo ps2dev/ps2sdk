@@ -60,19 +60,6 @@ void probeDeviceTree(Device *tree, sceUsbdLddOps *drv) {
 		}
 }
 
-void probeDeviceConnectList(sceUsbdLddOps *drv) {
-	Device *curDevice;
-	for (curDevice = memPool.deviceConnectedListStart; curDevice != NULL; curDevice = curDevice->nextConnected)
-		if (curDevice->deviceStatus == DEVICE_READY) {
-			if (curDevice->devDriver == NULL) {
-				if (callUsbDriverFunc(drv->probe, curDevice->id, drv->gp) != 0) {
-					curDevice->devDriver = drv;
-					callUsbDriverFunc(drv->connect, curDevice->id, drv->gp);
-				}
-			}
-		}
-}
-
 int doRegisterDriver(sceUsbdLddOps *drv, void *drvGpSeg) {
 	if (drv->next || drv->prev)
 		return USB_RC_BUSY;
@@ -94,7 +81,7 @@ int doRegisterDriver(sceUsbdLddOps *drv, void *drvGpSeg) {
 	drvListEnd = drv;
 
 	if (drv->probe)
-		probeDeviceConnectList(drv);
+		probeDeviceTree(memPool.deviceTreeRoot, drv);
 
 	return 0;
 }
@@ -115,7 +102,7 @@ int doRegisterAutoLoader(sceUsbdLddOps *drv, void *drvGpSeg) {
 	drvAutoLoader = drv;
 
 	if (drv->probe)
-		probeDeviceConnectList(drv);
+		probeDeviceTree(memPool.deviceTreeRoot, drv);
 
 	return 0;
 }
