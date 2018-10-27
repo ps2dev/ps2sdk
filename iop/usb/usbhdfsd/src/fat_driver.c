@@ -3,6 +3,7 @@
 //---------------------------------------------------------------------------
 #include <stdio.h>
 #include <errno.h>
+#include <limits.h>
 
 #ifdef WIN32
 #include <malloc.h>
@@ -371,8 +372,8 @@ int fat_getDirentry(unsigned char fatType, fat_direntry* dir_entry, fat_direntry
 				dir->name[offset] = 0; //terminate
 				cont = 0; //stop
 			} else {
-				// Handle non-ASCII characters
-				dir->name[offset] = character < 128 ? dir_entry->lfn.name1[i] : '?';
+				// Handle characters that we don't support.
+				dir->name[offset] = character <= UCHAR_MAX ? dir_entry->lfn.name1[i] : '?';
 				offset++;
 			}
 		}
@@ -384,8 +385,8 @@ int fat_getDirentry(unsigned char fatType, fat_direntry* dir_entry, fat_direntry
 				dir->name[offset] = 0; //terminate
 				cont = 0; //stop
 			} else {
-				// Handle non-ASCII characters
-				dir->name[offset] = character < 128 ? dir_entry->lfn.name2[i] : '?';
+				// Handle characters that we don't support.
+				dir->name[offset] = character <= UCHAR_MAX ? dir_entry->lfn.name2[i] : '?';
 				offset++;
 			}
 		}
@@ -397,8 +398,8 @@ int fat_getDirentry(unsigned char fatType, fat_direntry* dir_entry, fat_direntry
 				dir->name[offset] = 0; //terminate
 				cont = 0; //stop
 			} else {
-				// Handle non-ASCII characters
-				dir->name[offset] = character < 128 ? dir_entry->lfn.name3[i] : '?';
+				// Handle characters that we don't support.
+				dir->name[offset] = character <= UCHAR_MAX ? dir_entry->lfn.name3[i] : '?';
 				offset++;
 			}
 		}
