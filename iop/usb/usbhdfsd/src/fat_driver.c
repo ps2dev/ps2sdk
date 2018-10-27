@@ -804,9 +804,9 @@ int fat_readFile(fat_driver* fatd, fat_dir* fatDir, unsigned int filePos, unsign
 			startSector = fat_cluster2sector(&fatd->partBpb, fatd->cbuf[i]);
 
 			//Calculate how long we can continuously read for.
-			j = (size + dataSkip) / fatd->partBpb.sectorSize;
+			j = (size + dataSkip) / fatd->partBpb.sectorSize + sectorSkip;
 			toRead = 0;
-			for (; j > 0; i++) {
+			while (1) {
 				if(j >= fatd->partBpb.clusterSize)
 				{
 					toRead += fatd->partBpb.clusterSize;
@@ -821,9 +821,14 @@ int fat_readFile(fat_driver* fatd, fat_dir* fatDir, unsigned int filePos, unsign
 				//Check that the next cluster is adjacent to this one, so we can read across.
 				if ((i >= chainSize - 1) || (fatd->cbuf[i] != (fatd->cbuf[i+1]-1)))
 					break;
+				if (j == 0)
+					break;
+				i++; //Advance to the next cluster.
 			}
 
+			//Consider the number of sectors within the cluster to skip.
 			startSector += sectorSkip;
+			toRead -= sectorSkip;
 
 			//process all sectors of the cluster (and skip leading sectors if needed)
 			if (dataSkip > 0) {

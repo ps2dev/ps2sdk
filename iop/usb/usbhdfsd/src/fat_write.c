@@ -2266,9 +2266,9 @@ int fat_writeFile(fat_driver* fatd, fat_dir* fatDir, int* updateClusterIndices, 
 			   are compatible with that workaround. */
 			if (((u32)(buffer+bufferPos) & 3) == 0) {
 				//Calculate how long we can continuously write for.
-				j = (size + dataSkip) / fatd->partBpb.sectorSize;
+				j = (size + dataSkip) / fatd->partBpb.sectorSize + sectorSkip;
 				toWrite = 0;
-				for (; j > 0; i++) {
+				while (1) {
 					if(j >= fatd->partBpb.clusterSize)
 					{
 						toWrite += fatd->partBpb.clusterSize;			
@@ -2283,9 +2283,14 @@ int fat_writeFile(fat_driver* fatd, fat_dir* fatDir, int* updateClusterIndices, 
 					//Check that the next cluster is adjacent to this one, so we can write across.
 					if ((i >= chainSize - 1) || (fatd->cbuf[i] != (fatd->cbuf[i+1]-1)))
 						break;
+					if (j == 0)
+						break;
+					i++; //Advance to the next cluster.
 				}
 
+				//Consider the number of sectors within the cluster to skip.
 				startSector += sectorSkip;
+				toWrite -= sectorSkip;
 
 				//process all sectors of the cluster (and skip leading sectors if needed)
 				if(dataSkip > 0) {
