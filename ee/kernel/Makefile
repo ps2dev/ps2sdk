@@ -246,34 +246,34 @@ $(EE_OBJS_DIR)eenull_bin.o: $(EE_OBJS_DIR)eenull_bin.c
 	$(EE_C_COMPILE) $< -c -o $@
 
 $(PS2SDKSRC)/tools/bin2c/bin/bin2c: $(PS2SDKSRC)/tools/bin2c
-	make -C $<
+	$(GNUMAKE) -C $<
 
 $(EE_SRC_DIR)osdsrc/bin/osdsrc.bin: $(EE_SRC_DIR)osdsrc
-	make -C $<
+	$(GNUMAKE) -C $<
 
 $(EE_OBJS_DIR)osdsrc_bin.c: $(EE_SRC_DIR)osdsrc/bin/osdsrc.bin $(PS2SDKSRC)/tools/bin2c/bin/bin2c
 	$(PS2SDKSRC)/tools/bin2c/bin/bin2c $< $@ osdsrc
 
 $(EE_SRC_DIR)tlbsrc/bin/tlbsrc.bin: $(EE_SRC_DIR)tlbsrc
-	make -C $<
+	$(GNUMAKE) -C $<
 
 $(EE_OBJS_DIR)tlbsrc_bin.c: $(EE_SRC_DIR)tlbsrc/bin/tlbsrc.bin $(PS2SDKSRC)/tools/bin2c/bin/bin2c
 	$(PS2SDKSRC)/tools/bin2c/bin/bin2c $< $@ tlbsrc
 
 $(EE_SRC_DIR)srcfile/bin/srcfile.bin: $(EE_SRC_DIR)srcfile
-	make -C $<
+	$(GNUMAKE) -C $<
 
 $(EE_OBJS_DIR)srcfile_bin.c: $(EE_SRC_DIR)srcfile/bin/srcfile.bin $(PS2SDKSRC)/tools/bin2c/bin/bin2c
 	$(PS2SDKSRC)/tools/bin2c/bin/bin2c $< $@ srcfile
 
 $(EE_SRC_DIR)eenull/bin/eenull.bin: $(EE_SRC_DIR)eenull
-	make -C $<
+	$(GNUMAKE) -C $<
 
 $(EE_OBJS_DIR)eenull_bin.c: $(EE_SRC_DIR)eenull/bin/eenull.bin $(PS2SDKSRC)/tools/bin2c/bin/bin2c
 	$(PS2SDKSRC)/tools/bin2c/bin/bin2c $< $@ eenull
 
 clean::
-	make -C $(EE_SRC_DIR)osdsrc clean
-	make -C $(EE_SRC_DIR)tlbsrc clean
-	make -C $(EE_SRC_DIR)srcfile clean
-	make -C $(EE_SRC_DIR)eenull clean
+	$(GNUMAKE) -C $(EE_SRC_DIR)osdsrc clean
+	$(GNUMAKE) -C $(EE_SRC_DIR)tlbsrc clean
+	$(GNUMAKE) -C $(EE_SRC_DIR)srcfile clean
+	$(GNUMAKE) -C $(EE_SRC_DIR)eenull clean
