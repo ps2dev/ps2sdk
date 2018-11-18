@@ -23,13 +23,13 @@ $(EE_OBJS_DIR)imgdrv_irx.o: $(EE_OBJS_DIR)imgdrv_irx.c
 	$(EE_C_COMPILE) $< -c -o $@
 
 $(PS2SDKSRC)/tools/bin2c/bin/bin2c: $(PS2SDKSRC)/tools/bin2c
-	make -C $<
+	$(GNUMAKE) -C $<
 
 $(EE_SRC_DIR)imgdrv/irx/imgdrv.irx: $(EE_SRC_DIR)imgdrv
-	make -C $<
+	$(GNUMAKE) -C $<
 
 $(EE_OBJS_DIR)imgdrv_irx.c: $(EE_SRC_DIR)imgdrv/irx/imgdrv.irx $(PS2SDKSRC)/tools/bin2c/bin/bin2c
 	$(PS2SDKSRC)/tools/bin2c/bin/bin2c $< $@ imgdrv_irx
 
 clean::
-	make -C $(EE_SRC_DIR)imgdrv clean
+	$(GNUMAKE) -C $(EE_SRC_DIR)imgdrv clean
