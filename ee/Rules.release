@@ -78,7 +78,7 @@ release-ee-include:
 
 release-ee-samples:
 	@if test -f samples/Makefile ; then \
-	   $(GNUMAKE) -C samples release ; \
+	   $(MAKE) -C samples release ; \
 	fi;
 
 

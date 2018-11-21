@@ -40,11 +40,11 @@ build: env_build_check $(subdir_list)
 clean: env_build_check $(subdir_clean)
 
 release-clean:
-	make -C common release-clean
-	make -C iop release-iop-clean
-	make -C ee release-ee-clean
-	make -C samples release-clean
-	make -C tools release-clean
+	$(MAKE) -C common release-clean
+	$(MAKE) -C iop release-iop-clean
+	$(MAKE) -C ee release-ee-clean
+	$(MAKE) -C samples release-clean
+	$(MAKE) -C tools release-clean
 	
 rebuild: env_build_check $(subdir_clean) $(subdir_list)
 
