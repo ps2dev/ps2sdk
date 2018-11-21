@@ -18,11 +18,11 @@ subdirs: dummy $(subdir_list)
 
 ifdef SUBDIRS
 $(subdir_list): dummy
-	$(GNUMAKE) -C $(patsubst all-%,%,$@)
+	$(MAKE) -C $(patsubst all-%,%,$@)
 $(subdir_clean): dummy
-	$(GNUMAKE) -C $(patsubst clean-%,%,$@) clean
+	$(MAKE) -C $(patsubst clean-%,%,$@) clean
 $(subdir_release): dummy
-	$(GNUMAKE) -C $(patsubst release-%,%,$@) release
+	$(MAKE) -C $(patsubst release-%,%,$@) release
 
 endif
 
