@@ -30,6 +30,7 @@ static arch_message *free_head;
 /* Function prototypes */
 static inline arch_message *alloc_msg(void);
 static void free_msg(arch_message *msg);
+static int WaitSemaTimeout(int sema, unsigned int msec);
 
 static int MsgCountSema;
 
@@ -214,19 +215,43 @@ static void RetrieveMbxInternal(sys_mbox_t mBox, arch_message **message)
 	EI();
 }
 
+static int WaitSemaTimeout(int sema, unsigned int msec)
+{
+	unsigned int ticks;
+	unsigned short int ticksToWait;
+	int alarmID, threadID;
+
+	ticks = mSec2HSyncTicks(msec);
+	threadID = GetThreadId();
+	while(ticks > 0)
+	{
+		ticksToWait = ticks > USHRT_MAX ? USHRT_MAX : ticks;
+		alarmID = SetAlarm(ticksToWait, &TimeoutHandler, (void*)threadID);
+		if (WaitSema(sema) == sema)
+		{
+			ReleaseAlarm(alarmID);
+			return sema; //Wait condition satisfied.
+		}
+
+		//Otherwise, continue waiting.
+		ticks -= ticksToWait;
+	}
+
+	return -1; //Timed out.
+}
+
 static int ReceiveMbx(arch_message **message, sys_mbox_t mBox, u32_t timeout)
 {
-	int result, AlarmID;
+	int result;
 
-	if(timeout > 0)
-    		AlarmID=SetAlarm(mSec2HSyncTicks(timeout), &TimeoutHandler, (void*)GetThreadId());
-	else
-		AlarmID=-1;
+	if(timeout > 0) {
+		result = WaitSemaTimeout(mBox->MessageCountSema, timeout);
+	} else {
+		result = WaitSema(mBox->MessageCountSema);
+	}
 
-	if(WaitSema(mBox->MessageCountSema)==mBox->MessageCountSema)
+	if(result == mBox->MessageCountSema)
 	{
-		if(AlarmID>=0) ReleaseAlarm(AlarmID);
-
 		RetrieveMbxInternal(mBox, message);
 		result=0;
 	}
@@ -345,37 +370,32 @@ err_t sys_sem_new(sys_sem_t *sem, u8_t count)
 	return ERR_OK;
 }
 
-u32_t sys_arch_sem_wait(sys_sem_t *Sema, u32_t u32Timeout)
+u32_t sys_arch_sem_wait(sys_sem_t *sema, u32_t timeout)
 {
 	u32_t result;
 
-	//Wait u32Timeout msec for the Sema to receive a signal.
-	if(u32Timeout==0)
+	//Wait timeout msec for the Sema to receive a signal.
+	if(timeout==0)
 	{
 		//Wait with no timeouts.
-		result=(WaitSema(*Sema)==*Sema?0:SYS_ARCH_TIMEOUT);
+		result=(WaitSema(*sema)==*sema?0:SYS_ARCH_TIMEOUT);
 	}
-	else if(u32Timeout==1)
+	else if(timeout==1)
 	{
 		//Poll.
-		result=(PollSema(*Sema)==*Sema?0:SYS_ARCH_TIMEOUT);
+		result=(PollSema(*sema)==*sema?0:SYS_ARCH_TIMEOUT);
 	}
 	else
 	{
 		//Use alarm to timeout.
 		unsigned int start;
-		int	AlarmID;
 		u32_t	WaitTime;
 
 		start=clock()/(CLOCKS_PER_SEC/1000);
-		AlarmID=SetAlarm(mSec2HSyncTicks(u32Timeout), &TimeoutHandler, (void*)GetThreadId());
-
-		if(WaitSema(*Sema)==*Sema)
+		if(WaitSemaTimeout(*sema, timeout) == *sema)
 		{
-			ReleaseAlarm(AlarmID);
-
 			WaitTime=ComputeTimeDiff(start, clock()/(CLOCKS_PER_SEC/1000));
-			result=(WaitTime<=u32Timeout?WaitTime:u32Timeout);
+			result=(WaitTime <= timeout ? WaitTime : timeout);
 		}
 		else result=SYS_ARCH_TIMEOUT;
 	}
