@@ -40,7 +40,7 @@ IOP_STRIP = $(IOP_TOOL_PREFIX)strip
 # Definitions for the local toolchain
 #
 
-CC = gcc
+CC = cc
 AS = as
 LD = ld
 AR = ar
