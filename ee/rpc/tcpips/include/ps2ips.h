@@ -22,7 +22,8 @@
 extern "C" {
 #endif
 
-int ps2ip_init();
+int ps2ip_init(void);
+void ps2ip_deinit(void);
 int accept(int s, struct sockaddr *addr, int *addrlen);
 int bind(int s, struct sockaddr *name, int namelen);
 int disconnect(int s);

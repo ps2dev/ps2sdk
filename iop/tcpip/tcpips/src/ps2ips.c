@@ -18,7 +18,7 @@
 NOTES:
 
 - recv/recvfrom/send/sendto are designed so that the data buffer can be misaligned, and the recv/send size is
-  not restricted to a multiple of 16 bytes. The implimentation method was borrowed from fileio
+  not restricted to a multiple of 64 bytes. The implimentation method was borrowed from fileio
   read/write code :P
 
 */
@@ -40,7 +40,7 @@ IRX_ID(MODNAME, 1, 1);
 #define BUFF_SIZE	(1024)
 
 #define MIN(a, b)	(((a)<(b))?(a):(b))
-#define RDOWN_16(a)	(((a) >> 4) << 4)
+#define RDOWN_64(a)	(((a) >> 6) << 6)
 
 static SifRpcDataQueue_t ps2ips_queue;
 static SifRpcServerData_t ps2ips_server;
@@ -117,42 +117,42 @@ static void do_recv( void * rpcBuffer, int size )
 	r_recv_pkt *ret_pkt = (r_recv_pkt *)rpcBuffer;
 	struct t_SifDmaTransfer sifdma;
 
-	if(recv_pkt->length <= 16)
+	if(recv_pkt->length <= 64)
 	{
 		srest = recv_pkt->length;
 
 	} else {
 
-		if( ((int)recv_pkt->ee_addr & 0xF) == 0 ) // ee address is aligned
+		if( ((int)recv_pkt->ee_addr & 0x3F) == 0 ) // ee address is aligned
 			srest = 0;
 		else
-			srest = RDOWN_16((int)recv_pkt->ee_addr) - (int)recv_pkt->ee_addr + 16;
+			srest = RDOWN_64((int)recv_pkt->ee_addr) - (int)recv_pkt->ee_addr + 64;
 	}
 
-	s_offset = 16 - srest;
+	s_offset = 64 - srest;
 	recvlen = MIN(BUFF_SIZE, recv_pkt->length);
 
 	// Do actual TCP recv
 	rlen = recv(recv_pkt->socket, lwip_buffer + s_offset, recvlen, recv_pkt->flags);
 
 	if(rlen <= 0) goto recv_end;
-	if(rlen <= 16) srest = rlen;
+	if(rlen <= 64) srest = rlen;
 
 	// fill sbuffer, calculate align buffer & erest valules, fill ebuffer
 	if(srest)
 		memcpy((void *)rests.sbuffer, (void *)(lwip_buffer + s_offset), srest);
 
-	if(rlen > 16)
+	if(rlen > 64)
 	{
 		abuffer = recv_pkt->ee_addr + srest; // aligned buffer (round up)
-		aebuffer = (void *)RDOWN_16((int)recv_pkt->ee_addr + rlen); // aligned buffer end (round down)
+		aebuffer = (void *)RDOWN_64((int)recv_pkt->ee_addr + rlen); // aligned buffer end (round down)
 
 		asize = (int)aebuffer - (int)abuffer;
 
 		erest = recv_pkt->ee_addr + rlen - aebuffer;
 
 		if(erest)
-			memcpy((void *)rests.ebuffer, (void *)(lwip_buffer + 16 + asize), erest);
+			memcpy((void *)rests.ebuffer, (void *)(lwip_buffer + 64 + asize), erest);
 
 //		printf("srest = 0x%X\nabuffer = 0x%X\naebuffer = 0x%X\nasize = 0x%X\nerest = 0x%X\n", srest, abuffer, aebuffer, asize, erest);
 
@@ -168,7 +168,7 @@ static void do_recv( void * rpcBuffer, int size )
 	{
 		while(SifDmaStat(dma_id) >= 0);
 
-		sifdma.src = lwip_buffer + 16;
+		sifdma.src = lwip_buffer + 64;
 		sifdma.dest = abuffer;
 		sifdma.size = asize;
 		sifdma.attr = 0;
@@ -211,26 +211,26 @@ static void do_recvfrom( void * rpcBuffer, int size )
 	static struct sockaddr sockaddr;
 	int fromlen;
 
-	if(recv_pkt->length <= 16)
+	if(recv_pkt->length <= 64)
 	{
 		srest = recv_pkt->length;
 
 	} else {
 
-		if( ((int)recv_pkt->ee_addr & 0xF) == 0 ) // ee address is aligned
+		if( ((int)recv_pkt->ee_addr & 0x3F) == 0 ) // ee address is aligned
 			srest = 0;
 		else
-			srest = RDOWN_16((int)recv_pkt->ee_addr) - (int)recv_pkt->ee_addr + 16;
+			srest = RDOWN_64((int)recv_pkt->ee_addr) - (int)recv_pkt->ee_addr + 64;
 	}
 
-	s_offset = 16 - srest;
+	s_offset = 64 - srest;
 	recvlen = MIN(BUFF_SIZE, recv_pkt->length);
 
 	// Do actual UDP recvfrom
 	rlen = recvfrom(recv_pkt->socket, lwip_buffer + s_offset, recvlen, recv_pkt->flags, &sockaddr, &fromlen);
 
 	if(rlen <= 0) goto recv_end;
-	if(rlen <= 16) srest = rlen;
+	if(rlen <= 64) srest = rlen;
 
 	// copy sockaddr struct to return packet
 	memcpy((void *)&ret_pkt->sockaddr, (void *)&sockaddr, sizeof(struct sockaddr));
@@ -239,17 +239,17 @@ static void do_recvfrom( void * rpcBuffer, int size )
 	if(srest)
 		memcpy((void *)rests.sbuffer, (void *)(lwip_buffer + s_offset), srest);
 
-	if(rlen > 16)
+	if(rlen > 64)
 	{
 		abuffer = recv_pkt->ee_addr + srest; // aligned buffer (round up)
-		aebuffer = (void *)RDOWN_16((int)recv_pkt->ee_addr + rlen); // aligned buffer end (round down)
+		aebuffer = (void *)RDOWN_64((int)recv_pkt->ee_addr + rlen); // aligned buffer end (round down)
 
 		asize = (int)aebuffer - (int)abuffer;
 
 		erest = recv_pkt->ee_addr + rlen - aebuffer;
 
 		if(erest)
-			memcpy((void *)rests.ebuffer, (void *)(lwip_buffer + 16 + asize), erest);
+			memcpy((void *)rests.ebuffer, (void *)(lwip_buffer + 64 + asize), erest);
 
 //		printf("srest = 0x%X\nabuffer = 0x%X\naebuffer = 0x%X\nasize = 0x%X\nerest = 0x%X\n", srest, abuffer, aebuffer, asize, erest);
 
@@ -265,7 +265,7 @@ static void do_recvfrom( void * rpcBuffer, int size )
 	{
 		while(SifDmaStat(dma_id) >= 0);
 
-		sifdma.src = lwip_buffer + 16;
+		sifdma.src = lwip_buffer + 64;
 		sifdma.dest = abuffer;
 		sifdma.size = asize;
 		sifdma.attr = 0;
@@ -307,16 +307,16 @@ static void do_send( void * rpcBuffer, int size )
 	{
 //		printf("send: misaligned = %d\n", pkt->malign);
 
-		s_offset = 16 - pkt->malign;
+		s_offset = 64 - pkt->malign;
 		memcpy((void *)(lwip_buffer + s_offset), pkt->malign_buff, pkt->malign);
 
-	} else s_offset = 16;
+	} else s_offset = 64;
 
 	ee_pos = pkt->ee_addr + pkt->malign;
 
 	sendlen = MIN(BUFF_SIZE, pkt->length);
 
-	SifRpcGetOtherData(&rdata, ee_pos, lwip_buffer + 16, sendlen - pkt->malign, 0);
+	SifRpcGetOtherData(&rdata, ee_pos, lwip_buffer + 64, sendlen - pkt->malign, 0);
 
 	// So actual TCP send
 	slen = send(pkt->socket, lwip_buffer + s_offset, sendlen, pkt->flags);
@@ -338,16 +338,16 @@ static void do_sendto( void * rpcBuffer, int size )
 	{
 //		printf("send: misaligned = %d\n", pkt->malign);
 
-		s_offset = 16 - pkt->malign;
+		s_offset = 64 - pkt->malign;
 		memcpy((void *)(lwip_buffer + s_offset), pkt->malign_buff, pkt->malign);
 
-	} else s_offset = 16;
+	} else s_offset = 64;
 
 	ee_pos = pkt->ee_addr + pkt->malign;
 
 	sendlen = MIN(BUFF_SIZE, pkt->length);
 
-	SifRpcGetOtherData(&rdata, ee_pos, lwip_buffer + 16, sendlen - pkt->malign, 0);
+	SifRpcGetOtherData(&rdata, ee_pos, lwip_buffer + 64, sendlen - pkt->malign, 0);
 
 	// So actual UDP sendto
 	slen = sendto(pkt->socket, lwip_buffer + s_offset, sendlen, pkt->flags, &pkt->sockaddr, sizeof(struct sockaddr));
