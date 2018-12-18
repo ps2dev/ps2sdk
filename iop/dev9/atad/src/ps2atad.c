@@ -15,6 +15,8 @@
  * It is 100% compatible with its proprietary counterpart called atad.irx.
  *
  * This module also include support for 48-bit feature set (done by Clement).
+ * To avoid causing an "emergency park" for some HDDs, shutdown callback 15 of dev9
+ * is used for issuing the STANDBY IMMEDIATE command prior to DEV9 getting shut down.
  */
 
 #include <types.h>
@@ -174,6 +176,7 @@ static void ata_pio_mode(int mode);
 static void ata_multiword_dma_mode(int mode);
 #endif
 static void ata_ultra_dma_mode(int mode);
+static void ata_shutdown_cb(void);
 
 extern struct irx_export_table _exp_atad;
 
@@ -256,6 +259,8 @@ int _start(int argc, char *argv[])
 #ifdef ATA_GAMESTAR_WORKAROUND
 	}
 #endif
+	/* Register this at the last position, as it should be the last thing done before shutdown. */
+	dev9RegisterShutdownCb(15, &ata_shutdown_cb);
 
 	if ((res = RegisterLibraryEntries(&_exp_atad)) != 0) {
 		M_PRINTF("Library is already registered, exiting.\n");
@@ -1038,7 +1043,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 		   (IDENITFY DEVICE bit 10 word 83) and get the total sectors from
 		   either words(61:60) for 28-bit or words(103:100) for 48-bit.  */
 		if (!ata_disable_lba48 && (ata_param[ATA_ID_COMMAND_SETS_SUPPORTED] & 0x0400)) {
-			atad_devinfo[i].lba48 = 1;
+			devinfo[i].lba48 = 1;
 			/* I don't think anyone would use a >2TB HDD but just in case.  */
 			if (ata_param[ATA_ID_48BIT_SECTOTAL_HI]) {
 				devinfo[i].total_sectors = 0xffffffff;
@@ -1048,7 +1053,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 					ata_param[ATA_ID_48BIT_SECTOTAL_LO];
 			}
 		} else {
-			atad_devinfo[i].lba48 = 0;
+			devinfo[i].lba48 = 0;
 			devinfo[i].total_sectors = (ata_param[ATA_ID_SECTOTAL_HI] << 16)|
 				ata_param[ATA_ID_SECTOTAL_LO];
 		}
@@ -1057,7 +1062,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 		/* Ultra DMA mode 4.  */
 		ata_device_set_transfer_mode(i, ATA_XFER_MODE_UDMA, 4);
 		ata_device_smart_enable(i);
-		/* Set idle timeout period to 21min 15s.  */
+		/* Set standby timer to 21min 15s.  */
 		ata_device_idle(i, 0xff);
 
 		/* Call the proprietary identify command. */
@@ -1178,10 +1183,32 @@ static void ata_ultra_dma_mode(int mode)
 }
 
 /* Export 18 */
-int ata_device_idle_immediate(int device){
+int ata_device_idle_immediate(int device)
+{
 	int res;
 
 	if (!(res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4)&0xFFFF, ATA_C_IDLE_IMMEDIATE))) res = ata_io_finish();
 
 	return res;
 }
+
+static int ata_device_standby_immediate(int device)
+{
+	int res;
+
+	if (!(res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4)&0xFFFF, ATA_C_STANDBY_IMMEDIATE))) res = ata_io_finish();
+
+	return res;
+}
+
+static void ata_shutdown_cb(void)
+{
+	int i;
+
+	for (i = 0; i < 2; i++)
+	{
+		if (atad_devinfo[i].exists)
+			ata_device_standby_immediate(i);
+	}
+}
+
