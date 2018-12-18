@@ -834,6 +834,28 @@ int fs_rename(iop_file_t *fd, const char *path, const char *newpath)
     return ret;
 }
 
+static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
+{
+    fat_driver *fatd;
+    int ret;
+
+    _fs_lock();
+
+    switch(cmd)
+    {
+        case USBMASS_DEVCTL_STOP_UNIT:
+            fatd = fat_getData(fd->unit);
+            ret = (fatd != NULL) ? fatd->bd->stop(fatd->bd) : -ENODEV;
+            break;
+        default:
+            ret = -ENXIO;
+    }
+
+    _fs_unlock();
+
+    return ret;
+}
+
 static iop_device_ops_t fs_functarray = {
     &fs_init,
     (void*)&fs_dummy,
@@ -858,7 +880,7 @@ static iop_device_ops_t fs_functarray = {
     (void*)&fs_dummy,
     (void*)&fs_dummy,
     (void*)&fs_dummy,
-    (void*)&fs_dummy,
+    &fs_devctl,
     (void*)&fs_dummy,
     (void*)&fs_dummy,
     (void*)&fs_dummy,

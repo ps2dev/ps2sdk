@@ -25,6 +25,10 @@
 /** Returns the block device driver name */
 #define USBMASS_IOCTL_GET_DRIVERNAME	0x0003
 
+//DEVCTL function codes
+/** Issues the SCSI STOP UNIT command. Use this to shut down devices properly. */
+#define USBMASS_DEVCTL_STOP_UNIT	0x0000
+
 //Device status bits.
 /** CONNected */
 #define USBMASS_DEV_STAT_CONN	0x01

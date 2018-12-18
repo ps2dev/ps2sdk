@@ -36,6 +36,7 @@ struct block_device {
     int (*read)(struct block_device* bd, u32 sector, void* buffer, u16 count);
     int (*write)(struct block_device* bd, u32 sector, const void* buffer, u16 count);
     void (*flush)(struct block_device* bd);
+    int (*stop)(struct block_device* bd);
 };
 
 struct file_system {
