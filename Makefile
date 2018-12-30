@@ -85,6 +85,6 @@ env_release_check:
 	fi
 
 docs:
-	doxygen doxy.conf
+	doxygen
 
 include Defs.make
