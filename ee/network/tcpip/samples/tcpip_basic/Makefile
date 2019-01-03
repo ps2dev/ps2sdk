@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SAMPLE_DIR = network/tcpip-dhcp
+SAMPLE_DIR = network/tcpip-basic
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/samples/Rules.samples

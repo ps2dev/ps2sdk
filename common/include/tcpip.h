@@ -58,6 +58,7 @@
 #define LWIP_NUM_NETIF_CLIENT_DATA	0
 #define LWIP_SOCKET_OFFSET		0
 #define LWIP_IPV6_SEND_ROUTER_SOLICIT	1
+#define DNS_MAX_SERVERS			2
 
 /*
  * Copyright (c) 2001-2003 Swedish Institute of Computer Science.
