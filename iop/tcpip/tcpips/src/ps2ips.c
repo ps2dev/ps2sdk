@@ -482,7 +482,9 @@ static void do_dns_setserver( void *rpcBuffer, int size )
 
 static void do_dns_getserver( void *rpcBuffer, int size )
 {
-	((dns_getserver_res_pkt*)rpcBuffer)->dnsserver = dns_getserver(*(u8*)_rpc_buffer);
+	const ip_addr_t *dns;
+	dns = dns_getserver(*(u8*)_rpc_buffer);
+	ip_addr_copy(((dns_getserver_res_pkt*)rpcBuffer)->dnsserver, *dns);
 }
 #endif
 

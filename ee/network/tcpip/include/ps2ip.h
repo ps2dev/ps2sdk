@@ -136,7 +136,7 @@ int lwip_getaddrinfo(const char *nodename,
 
 /* From include/lwip/dns.h:  */
 void           dns_setserver(u8 numdns, const ip_addr_t *dnsserver);
-ip_addr_t      dns_getserver(u8 numdns);
+const ip_addr_t* dns_getserver(u8 numdns);
 #endif
 
 #endif /* __PS2IP_H__ */

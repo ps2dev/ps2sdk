@@ -102,7 +102,7 @@ static int ethWaitValidDHCPState(void)
 static int ethApplyIPConfig(int use_dhcp, const struct ip4_addr *ip, const struct ip4_addr *netmask, const struct ip4_addr *gateway, const struct ip4_addr *dns)
 {
 	t_ip_info ip_info;
-	struct ip4_addr dns_curr;
+	const ip_addr_t *dns_curr;
 	int result;
 
 	//SMAP is registered as the "sm0" device to the TCP/IP stack.
@@ -117,7 +117,7 @@ static int ethApplyIPConfig(int use_dhcp, const struct ip4_addr *ip, const struc
 			 (!ip_addr_cmp(ip, (struct ip4_addr *)&ip_info.ipaddr) ||
 			 !ip_addr_cmp(netmask, (struct ip4_addr *)&ip_info.netmask) ||
 			 !ip_addr_cmp(gateway, (struct ip4_addr *)&ip_info.gw) ||
-			 !ip_addr_cmp(dns, &dns_curr))))
+			 !ip_addr_cmp(dns, dns_curr))))
 		{
 			if (use_dhcp)
 			{
@@ -133,8 +133,9 @@ static int ethApplyIPConfig(int use_dhcp, const struct ip4_addr *ip, const struc
 			}
 
 			//Update settings.
-			dns_setserver(0, dns);
 			result = ps2ip_setconfig(&ip_info);
+			if (!use_dhcp)
+				dns_setserver(0, dns);
 		}
 		else
 			result = 0;
@@ -146,7 +147,7 @@ static int ethApplyIPConfig(int use_dhcp, const struct ip4_addr *ip, const struc
 static void ethPrintIPConfig(void)
 {
 	t_ip_info ip_info;
-	struct ip4_addr dns_curr;
+	const ip_addr_t *dns_curr;
 	u8 ip_address[4], netmask[4], gateway[4], dns[4];
 
 	//SMAP is registered as the "sm0" device to the TCP/IP stack.
@@ -170,10 +171,10 @@ static void ethPrintIPConfig(void)
 		gateway[2] = ip4_addr3((struct ip4_addr *)&ip_info.gw);
 		gateway[3] = ip4_addr4((struct ip4_addr *)&ip_info.gw);
 
-		dns[0] = ip4_addr1(&dns_curr);
-		dns[1] = ip4_addr2(&dns_curr);
-		dns[2] = ip4_addr3(&dns_curr);
-		dns[3] = ip4_addr4(&dns_curr);
+		dns[0] = ip4_addr1(dns_curr);
+		dns[1] = ip4_addr2(dns_curr);
+		dns[2] = ip4_addr3(dns_curr);
+		dns[3] = ip4_addr4(dns_curr);
 
 		scr_printf(	"IP:\t%d.%d.%d.%d\n"
 				"NM:\t%d.%d.%d.%d\n"

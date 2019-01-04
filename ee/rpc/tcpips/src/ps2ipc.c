@@ -51,6 +51,12 @@ static struct {
 } _rpc_buffer __attribute__((aligned(64)));
 static int _intr_data[32] __attribute__((aligned(64)));
 
+static ip_addr_t dns_servers[DNS_MAX_SERVERS];
+
+//Copied from LWIP, to be independent of the full LWIP source.
+/* used by IP4_ADDR_ANY and IP_ADDR_BROADCAST in ip_addr.h */
+static const ip_addr_t ip_addr_any = IPADDR4_INIT(IPADDR_ANY);
+
 int ps2ip_init(void)
 {
 	ee_sema_t sema;
@@ -711,26 +717,31 @@ void dns_setserver(u8 numdns, ip_addr_t *dnsserver)
 
 	SifCallRpc(&_ps2ip, PS2IPS_ID_DNS_SETSERVER, 0, (void*)pkt, sizeof(dns_setserver_pkt), NULL, 0, NULL, NULL);
 
+	if (numdns < DNS_MAX_SERVERS)
+		dns_servers[numdns] = (dnsserver != NULL) ? (*dnsserver) : *IP4_ADDR_ANY;
+
 	SignalSema(lock_sema);
 }
 
-ip_addr_t dns_getserver(u8 numdns)
+const ip_addr_t *dns_getserver(u8 numdns)
 {
 	dns_getserver_res_pkt *res_pkt = &_rpc_buffer.dns_getserver_res_pkt;
-	ip_addr_t info;
+	ip_addr_t *dns;
 
-	memset(&info, 0, sizeof(info));
+	if ((!_init_check) || (numdns >= DNS_MAX_SERVERS))
+		return IP4_ADDR_ANY;
 
 	WaitSema(lock_sema);
 
-	info.addr = 0;
 	_rpc_buffer.numdns = numdns;
+	dns = &dns_servers[numdns];
 
+	//If this fails, use the cached copy.
 	if(SifCallRpc(&_ps2ip, PS2IPS_ID_DNS_GETSERVER, 0, (void*)&_rpc_buffer.numdns, sizeof(u8), (void*)res_pkt, sizeof(dns_getserver_res_pkt), NULL, NULL) >=0)
-		info = res_pkt->dnsserver;
+		ip_addr_copy(*dns, res_pkt->dnsserver);
 
 	SignalSema(lock_sema);
 
-	return info;
+	return dns;
 }
 #endif
