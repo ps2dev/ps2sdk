@@ -225,7 +225,7 @@ static int usb_bulk_clear_halt(mass_dev* dev, int endpoint) {
 		ret = cb_data.returnCode;
 	}
 	if (ret != USB_RC_OK) {
-		XPRINTF("USBHDFSD: Error - sending clear halt %d\n", ret);
+		printf("USBHDFSD: Error - sending clear halt %d\n", ret);
 	}
 
 	return ret;
@@ -265,7 +265,7 @@ static void usb_bulk_reset(mass_dev* dev, int mode) {
 			ret = usb_bulk_clear_halt(dev, USB_BLK_EP_OUT);
 	}
 	if(ret != USB_RC_OK){
-		XPRINTF("USBHDFSD: Error - sending reset %d to device %d.\n", ret, dev->devId);
+		printf("USBHDFSD: Error - sending reset %d to device %d.\n", ret, dev->devId);
 		dev->status |= USBMASS_DEV_STAT_ERR;
 	}
 }
@@ -293,13 +293,11 @@ static int usb_bulk_status(mass_dev* dev, csw_packet* csw, unsigned int tag) {
 		WaitSema(cb_data.sema);
 		ret = cb_data.returnCode;
 
-#ifdef DEBUG
 		if (cb_data.returnSize != 13)
 			printf("USBHDFSD: bulk csw.status returnSize: %i != 13\n", cb_data.returnSize);
 		if (csw->dataResidue != 0)
 			printf("USBHDFSD: bulk csw.status residue: %i\n", csw->dataResidue);
 		XPRINTF("USBHDFSD: bulk csw result: %d, csw.status: %i\n", ret, csw->status);
-#endif
 	}
 
 	return ret;
@@ -322,7 +320,7 @@ static int usb_bulk_manage_status(mass_dev* dev, unsigned int tag) {
 	if (ret != USB_RC_OK) { /* STALL bulk in  -OR- Bulk error */
 		usb_bulk_clear_halt(dev, USB_BLK_EP_IN); /* clear the stall condition for bulk in */
 
-		XPRINTF("USBHDFSD: usb_bulk_manage_status error %d ...\n", ret);
+		printf("USBHDFSD: usb_bulk_manage_status error %d ...\n", ret);
 		ret = usb_bulk_status(dev, &csw, tag); /* Attempt to read CSW from bulk in endpoint */
 	}
 
@@ -396,7 +394,7 @@ static int usb_bulk_command(mass_dev* dev, cbw_packet* packet ) {
 		ret = cb_data.returnCode;
 	}
 	if (ret != USB_RC_OK) {
-		XPRINTF("USBHDFSD: Error - sending bulk command %d. Calling reset recovery.\n", ret);
+		printf("USBHDFSD: Error - sending bulk command %d. Calling reset recovery.\n", ret);
 		usb_bulk_reset(dev, 3);
 	}
 
@@ -419,7 +417,7 @@ static int usb_bulk_transfer(mass_dev* dev, int direction, void* buffer, unsigne
 	}
 
 	if(ret != USB_RC_OK) {
-		XPRINTF("USBHDFSD: Error - bulk data transfer %d. Clearing HALT state.\n", cb_data.returnCode);
+		printf("USBHDFSD: Error - bulk data transfer %d. Clearing HALT state.\n", cb_data.returnCode);
 		usb_bulk_clear_halt(dev, direction);
 	}
 

@@ -99,7 +99,7 @@ static int getIndexRead(cache_set* cache, unsigned int sector) {
 /* select the best record where to store new sector */
 static int getIndexWrite(cache_set* cache, unsigned int sector) {
 	int ret;
-	unsigned int minTax = 0x0FFFFFFF;
+	int minTax = 0x0FFFFFFF;
 	unsigned int i, index = 0;
 
 	for (i = 0; i < CACHE_SIZE; i++) {
