@@ -942,7 +942,7 @@ int hddDevctl(iop_file_t *f, const char *devname, int cmd, void *arg,
 	{
 	// Command set 1 ('H')
 	case HDIOC_DEV9OFF:
-		ata_device_smart_save_attr(f->unit);
+		//Early versions called ata_device_smart_save_attr() here, when their old dev9 versions did not support the pre-shutdown callback.
 		dev9Shutdown();
 		break;
 
