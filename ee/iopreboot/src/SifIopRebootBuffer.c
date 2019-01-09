@@ -22,14 +22,14 @@
 #include "string.h"
 #include "sbv_patches.h"
 
-#define IMGDRV_IRX_SIZE		((size_imgdrv_irx + 15) & ~15)	//Was a hardcoded value of 0x400 bytes
+#define IMGDRV_IRX_SIZE		((size__imgdrv_irx + 15) & ~15)	//Was a hardcoded value of 0x400 bytes
 #define IOPBTCONF_IOP_MAX_SIZE	0x400
 
 extern int _iop_reboot_count;
 
 extern u8 iopbtconf_img[IOPBTCONF_IOP_MAX_SIZE];
-extern unsigned char imgdrv_irx[];
-extern unsigned int size_imgdrv_irx;
+extern unsigned char _imgdrv_irx[];
+extern unsigned int size__imgdrv_irx;
 
 //If for whatever reason imgdrv changes, update these offsets.
 #define IMGDRV_IRX_PTRS		0x190
@@ -39,6 +39,7 @@ extern unsigned int size_imgdrv_irx;
 u8 iopbtconf_img[IOPBTCONF_IOP_MAX_SIZE] __attribute__((aligned(64)));
 #endif
 
+//Our LOADFILE functions are slightly different.
 #define SifLoadModuleSpecial(path, arg_len, args, dontwait)	\
 	_SifLoadModule(path, arg_len, args, NULL, LF_F_MOD_LOAD, dontwait);
 
@@ -46,7 +47,7 @@ u8 iopbtconf_img[IOPBTCONF_IOP_MAX_SIZE] __attribute__((aligned(64)));
 	_SifLoadModule(path, arg_len, args, NULL, LF_F_MG_MOD_LOAD, dontwait);
 
 #ifdef F_SifIopRebootBufferEncrypted
-int SifIopRebootBufferEncrypted(void *udnl, int size)
+int SifIopRebootBufferEncrypted(const void *udnl, int size)
 {
 	int iopbtconf_img_size;
 	void *imgdrv_iop, *udnl_iop,  *iopbtconf_img_iop;
@@ -72,13 +73,13 @@ int SifIopRebootBufferEncrypted(void *udnl, int size)
 
 	iopbtconf_img_size = 0;	//No support for IOPBTCONF manipulation
 
-	imgdrv_img = (void**)&imgdrv_irx[IMGDRV_IRX_PTRS];
-	imgdrv_img_size = (int*)&imgdrv_irx[IMGDRV_IRX_SIZES];
-	dmat[0].src = imgdrv_irx;
+	imgdrv_img = (void**)&_imgdrv_irx[IMGDRV_IRX_PTRS];
+	imgdrv_img_size = (int*)&_imgdrv_irx[IMGDRV_IRX_SIZES];
+	dmat[0].src = _imgdrv_irx;
 	dmat[0].dest = imgdrv_iop;
 	dmat[0].size = IMGDRV_IRX_SIZE;
 	dmat[0].attr = 0;
-	dmat[1].src = udnl;
+	dmat[1].src = (void*)udnl;
 	dmat[1].dest = udnl_iop;
 	dmat[1].size = size;
 	dmat[1].attr = 0;
@@ -101,7 +102,6 @@ int SifIopRebootBufferEncrypted(void *udnl, int size)
 
 	SifExitRpc();
 	SifLoadFileExit();
-	SifExitIopHeap();	//Not originally here, but for correctness.
 
 	SifSetReg(SIF_REG_SMFLAG, SIF_STAT_SIFINIT);
 	SifSetReg(SIF_REG_SMFLAG, SIF_STAT_CMDINIT);
@@ -116,9 +116,9 @@ int SifIopRebootBufferEncrypted(void *udnl, int size)
 #endif
 
 #ifdef F_SifIopRebootBuffer
-static int generateIOPBTCONF_img(void *output, void *ioprp);
+static int generateIOPBTCONF_img(void *output, const void *ioprp);
 
-int SifIopRebootBuffer(void *ioprp, int size)
+int SifIopRebootBuffer(const void *ioprp, int size)
 {
 	int iopbtconf_img_size;
 	void *imgdrv_iop, *ioprp_iop,  *iopbtconf_img_iop;
@@ -144,13 +144,13 @@ int SifIopRebootBuffer(void *ioprp, int size)
 
 	iopbtconf_img_size = generateIOPBTCONF_img(iopbtconf_img, ioprp);
 
-	imgdrv_img = (void**)&imgdrv_irx[IMGDRV_IRX_PTRS];
-	imgdrv_img_size = (int*)&imgdrv_irx[IMGDRV_IRX_SIZES];
-	dmat[0].src = imgdrv_irx;
+	imgdrv_img = (void**)&_imgdrv_irx[IMGDRV_IRX_PTRS];
+	imgdrv_img_size = (int*)&_imgdrv_irx[IMGDRV_IRX_SIZES];
+	dmat[0].src = _imgdrv_irx;
 	dmat[0].dest = imgdrv_iop;
 	dmat[0].size = IMGDRV_IRX_SIZE;
 	dmat[0].attr = 0;
-	dmat[1].src = ioprp;
+	dmat[1].src = (void*)ioprp;
 	dmat[1].dest = ioprp_iop;
 	dmat[1].size = size;
 	dmat[1].attr = 0;
@@ -173,7 +173,6 @@ int SifIopRebootBuffer(void *ioprp, int size)
 
 	SifExitRpc();
 	SifLoadFileExit();
-	SifExitIopHeap();	//Not originally here, but for correctness.
 
 	SifSetReg(SIF_REG_SMFLAG, SIF_STAT_SIFINIT);
 	SifSetReg(SIF_REG_SMFLAG, SIF_STAT_CMDINIT);
@@ -228,7 +227,7 @@ static const struct iopbtconf_img iopbtconf_img_base = {
 
 /*	Generate an IOPRP image that contains IOPBTCONF, if the original contains IOPBTCONF.
 	This is required because UDNL will only seach succeeding IOPRP images for modules specified within IOPBTCONF.	*/
-static int generateIOPBTCONF_img(void *output, void *ioprp)
+static int generateIOPBTCONF_img(void *output, const void *ioprp)
 {
 	int size, offset, fsize_rounded;
 	romdir_t *romdir;

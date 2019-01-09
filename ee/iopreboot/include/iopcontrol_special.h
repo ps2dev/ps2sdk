@@ -25,7 +25,7 @@ extern "C" {
  * @param size Size of UDNL module in bytes.
  * @return 1 for success or 0 for failure.
  */
-int SifIopRebootBufferEncrypted(void *udnl, int size);
+int SifIopRebootBufferEncrypted(const void *udnl, int size);
 /** Resets IOP
  * Reboots the IOP with an IOPRP image. If the image contains an IOPBTCONF file,
  * the IOPBTCONF file will be automatically split off into its own image
@@ -33,7 +33,7 @@ int SifIopRebootBufferEncrypted(void *udnl, int size);
  * @param size Size of the IOPRP image in bytes.
  * @return 1 for success or 0 for failure.
  */
-int SifIopRebootBuffer(void *ioprp, int size);
+int SifIopRebootBuffer(const void *ioprp, int size);
 
 #ifdef __cplusplus
 }

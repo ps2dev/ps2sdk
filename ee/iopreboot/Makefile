@@ -29,7 +29,7 @@ $(EE_SRC_DIR)imgdrv/irx/imgdrv.irx: $(EE_SRC_DIR)imgdrv
 	$(MAKEREC) $<
 
 $(EE_OBJS_DIR)imgdrv_irx.c: $(EE_SRC_DIR)imgdrv/irx/imgdrv.irx $(PS2SDKSRC)/tools/bin2c/bin/bin2c
-	$(PS2SDKSRC)/tools/bin2c/bin/bin2c $< $@ imgdrv_irx
+	$(PS2SDKSRC)/tools/bin2c/bin/bin2c $< $@ _imgdrv_irx
 
 clean::
 	$(MAKEREC) $(EE_SRC_DIR)imgdrv clean
