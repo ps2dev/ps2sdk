@@ -775,6 +775,10 @@ static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsig
 			fatd = fat_getData(fd->unit);
 			ret = (fatd != NULL) ? mass_stor_stop_unit(fatd->dev) : -ENODEV;
 			break;
+		case USBMASS_DEVCTL_STOP_ALL:
+			mass_store_stop_all();
+			ret = 0;
+			break;
 		default:
 			ret = -ENXIO;
 	}

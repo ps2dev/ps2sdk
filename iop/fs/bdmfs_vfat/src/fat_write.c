@@ -24,7 +24,7 @@
 #define DATE_MODIFY 2
 
 #define READ_SECTOR(d, a, b) scache_readSector((d)->cache, (a), (void**)&b)
-#define ALLOC_SECTOR(d, a, b) scache_allocSector((d)->cache, (a), (void**)&b)
+#define ALLOC_SECTOR(d, a, b) scache_readSector((d)->cache, (a), (void **)&b)	//Cannot allocate a block as the cluster might not necessarily be aligned with the cache block; may result in corruption of the adjacent cluster.
 #define WRITE_SECTOR(d, a) scache_writeSector((d)->cache, (a))
 #define FLUSH_SECTORS(d) scache_flushSectors((d)->cache)
 

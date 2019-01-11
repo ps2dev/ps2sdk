@@ -49,18 +49,18 @@ QWORD *GsGifPacketsAlloc(GS_PACKET_TABLE *table, u32 num_qwords)
 			//now reset qwords offset in this packet & update packet offset
 			table->qword_offset= 0;
 			table->packet_offset++;
-		}
 
-		//now we use the new packet
-		// but we still got to check if enough mem is available
-		if( num_qwords <= (GS_PACKET_DATA_QWORD_MAX-table->qword_offset) )
-		{
-			pointer=&table->packets[table->packet_offset].data[table->qword_offset];
-			table->qword_offset += num_qwords;
-		}
-		else //not enough
-		{
-			pointer=NULL;
+			//now we use the new packet
+			// but we still got to check if enough mem is available
+			if( num_qwords <= (GS_PACKET_DATA_QWORD_MAX-table->qword_offset) )
+			{
+				pointer=&table->packets[table->packet_offset].data[table->qword_offset];
+				table->qword_offset += num_qwords;
+			}
+			else //not enough
+			{
+				pointer=NULL;
+			}
 		}
 	}
 

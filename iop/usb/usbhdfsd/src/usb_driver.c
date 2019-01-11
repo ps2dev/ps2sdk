@@ -1052,6 +1052,30 @@ static int mass_stor_warmup(mass_dev *dev) {
 	return 0;
 }
 
+static int mass_store_configureDevice(mass_dev *dev)
+{
+	int ret;
+	if ((ret = usb_set_configuration(dev, dev->configId)) != USB_RC_OK)
+	{
+		printf("USBHDFSD: Error - sending set_configuration %d\n", ret);
+		return ret;
+	}
+
+	if((ret = usb_set_interface(dev, dev->interfaceNumber, dev->interfaceAlt)) != USB_RC_OK)
+	{
+		printf("USBHDFSD: Error - sending set_interface %d\n", ret);
+		if (ret == USB_RC_STALL)
+		{	/* USB Specification 1.1, section 9.4.10: Devices that only support a default setting for the specified interface may return a STALL.
+			   As with Linux, we shall clear the halt state of the interface's pipes and continue. */
+			usb_bulk_clear_halt(dev, USB_BLK_EP_IN);
+			usb_bulk_clear_halt(dev, USB_BLK_EP_OUT);
+			ret = USB_RC_OK;
+		}
+	}
+
+	return ret;
+}
+
 /*	Do this outside of mass_stor_connect() as callback functions do not work,
 	causing the PS2 to hang while setting configuration (which does control transfer). */
 int mass_stor_configureNextDevice(void)
@@ -1066,25 +1090,11 @@ int mass_stor_configureNextDevice(void)
 		if (dev->devId != -1 && (dev->status & USBMASS_DEV_STAT_CONN) && !(dev->status & USBMASS_DEV_STAT_CONF))
 		{
 			int ret;
-			if ((ret = usb_set_configuration(dev, dev->configId)) != USB_RC_OK)
+			ret = mass_store_configureDevice(dev);
+			if (ret != USB_RC_OK)
 			{
-				printf("USBHDFSD: Error - sending set_configuration %d\n", ret);
 				mass_stor_release(dev);
 				continue;
-			}
-
-			if((ret = usb_set_interface(dev, dev->interfaceNumber, dev->interfaceAlt)) != USB_RC_OK)
-			{
-				printf("USBHDFSD: Error - sending set_interface %d\n", ret);
-				if (ret == USB_RC_STALL)
-				{	/* USB Specification 1.1, section 9.4.10: Devices that only support a default setting for the specified interface may return a STALL.
-					   As with Linux, we shall clear the halt state of the interface's pipes and continue. */
-					usb_bulk_clear_halt(dev, USB_BLK_EP_IN);
-					usb_bulk_clear_halt(dev, USB_BLK_EP_OUT);
-				} else {
-					mass_stor_release(dev);
-					continue;
-				}
 			}
 
 			dev->status |= USBMASS_DEV_STAT_CONF;
@@ -1182,5 +1192,25 @@ int mass_stor_stop_unit(mass_dev* dev)
 	}
 
 	return stat;
+}
+
+void mass_store_stop_all(void)
+{
+	int i;
+
+	for (i = 0; i < NUM_DEVICES; ++i)
+	{
+		mass_dev *dev = &g_mass_device[i];
+		if (dev->devId != -1 && (dev->status & USBMASS_DEV_STAT_CONN))
+		{
+			if(!(dev->status & USBMASS_DEV_STAT_CONF))
+			{	//Configure unconfigured devices, to be able to shut them down.
+				if (mass_store_configureDevice(dev) != USB_RC_OK)
+					continue;
+			}
+
+			mass_stor_stop_unit(dev);
+		}
+	}
 }
 

@@ -1041,3 +1041,26 @@ fat_driver* fat_getData(int device)
 
     return g_fatd[device];
 }
+
+//---------------------------------------------------------------------------
+int fat_stopUnit(int device)
+{
+    fat_driver *fatd;
+
+    fatd = fat_getData(device);
+    return (fatd != NULL) ? fatd->bd->stop(fatd->bd) : -ENODEV;
+}
+
+void fat_stopAll(void)
+{
+    fat_driver *fatd;
+    int i;
+
+    for (i = 0; i < NUM_DRIVES; i++)
+    {
+        fatd = fat_getData(i);
+        if (fatd != NULL)
+            fatd->bd->stop(fatd->bd);
+    }
+}
+

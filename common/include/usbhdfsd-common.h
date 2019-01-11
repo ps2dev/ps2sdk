@@ -26,8 +26,10 @@
 #define USBMASS_IOCTL_GET_DRIVERNAME	0x0003
 
 //DEVCTL function codes
-/** Issues the SCSI STOP UNIT command. Use this to shut down devices properly. */
+/** Issues the SCSI STOP UNIT command to the specified device. Use this to shut down devices properly. */
 #define USBMASS_DEVCTL_STOP_UNIT	0x0000
+/** Issues the SCSI STOP UNIT command too all devices. Use this to shut down devices properly. */
+#define USBMASS_DEVCTL_STOP_ALL		0x0001
 
 //Device status bits.
 /** CONNected */

@@ -30,7 +30,7 @@ typedef struct _cache_set {
 cache_set* scache_init(struct block_device* bd);
 void scache_close(cache_set* cache);
 void scache_kill(cache_set* cache); //dlanor: added for disconnection events (flush impossible)
-int scache_allocSector(cache_set* cache, unsigned int sector, void** buf);
+//int scache_allocSector(cache_set* cache, unsigned int sector, void** buf);
 int scache_readSector(cache_set* cache, unsigned int sector, void** buf);
 int scache_writeSector(cache_set* cache, unsigned int sector);
 int scache_flushSectors(cache_set* cache);

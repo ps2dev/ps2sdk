@@ -836,7 +836,6 @@ int fs_rename(iop_file_t *fd, const char *path, const char *newpath)
 
 static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
-    fat_driver *fatd;
     int ret;
 
     _fs_lock();
@@ -844,8 +843,11 @@ static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsig
     switch(cmd)
     {
         case USBMASS_DEVCTL_STOP_UNIT:
-            fatd = fat_getData(fd->unit);
-            ret = (fatd != NULL) ? fatd->bd->stop(fatd->bd) : -ENODEV;
+            ret = fat_stopUnit(fd->unit);
+            break;
+        case USBMASS_DEVCTL_STOP_ALL:
+            fat_stopAll();
+            ret = 0;
             break;
         default:
             ret = -ENXIO;
