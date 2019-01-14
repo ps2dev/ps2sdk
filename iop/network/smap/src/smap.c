@@ -592,7 +592,7 @@ void SMAPXmit(void){
 	SetGP(OldGP);
 }
 
-static inline int SMAPGetLinkMode(void){
+static int SMAPGetLinkMode(void){
 	u16 value;
 	int result;
 
@@ -609,7 +609,7 @@ static inline int SMAPGetLinkMode(void){
 	return result;
 }
 
-static inline int SMAPSetLinkMode(int mode){
+static int SMAPSetLinkMode(int mode){
 	int result, baseMode;
 
 	if(SmapDriverData.SmapIsInitialized){
@@ -709,6 +709,12 @@ int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, void *out
 			break;
 		case NETMAN_NETIF_IOCTL_ETH_SET_LINK_MODE:
 			result=SMAPSetLinkMode(*(int*)args);
+			break;
+		case NETMAN_NETIF_IOCTL_ETH_GET_STATUS:
+			((struct NetManEthStatus*)output)->LinkMode = SMAPGetLinkMode();
+			((struct NetManEthStatus*)output)->LinkStatus = SMAPGetLinkStatus();
+			((struct NetManEthStatus*)output)->stats = SmapDriverData.RuntimeStats;
+			result=0;
 			break;
 		default:
 			result=-1;

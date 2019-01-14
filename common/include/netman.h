@@ -23,6 +23,27 @@ struct NetManNetProtStack{
 	void (*ReallocRxPacket)(void *packet, unsigned int size);	//For EE only, update the size of the Rx packet (size will be always smaller than NETMAN_NETIF_FRAME_SIZE).
 };
 
+struct NetManEthRuntimeStats{
+	u32 RxDroppedFrameCount;
+	u32 RxErrorCount;
+	u16 RxFrameOverrunCount;
+	u16 RxFrameBadLengthCount;
+	u16 RxFrameBadFCSCount;
+	u16 RxFrameBadAlignmentCount;
+	u32 TxDroppedFrameCount;
+	u32 TxErrorCount;
+	u16 TxFrameLOSSCRCount;
+	u16 TxFrameEDEFERCount;
+	u16 TxFrameCollisionCount;
+	u16 TxFrameUnderrunCount;
+	u16 RxAllocFail;
+};
+
+struct NetManEthStatus{
+	u8 LinkStatus, LinkMode;
+	struct NetManEthRuntimeStats stats;
+};
+
 /** Flow-control */
 #define NETMAN_NETIF_ETH_LINK_DISABLE_PAUSE	0x40
 
@@ -37,8 +58,6 @@ enum NETMAN_NETIF_ETH_LINK_MODE{
 	NETMAN_NETIF_ETH_LINK_MODE_100M_HDX,
 	/** 100Mbit Full-DupleX */
 	NETMAN_NETIF_ETH_LINK_MODE_100M_FDX,
-	/** 1000Mbit */
-	NETMAN_NETIF_ETH_LINK_MODE_1000M,
 
 	NETMAN_NETIF_ETH_LINK_MODE_COUNT
 };
@@ -62,6 +81,8 @@ enum NETMAN_NETIF_IOCTL_CODES{
 	NETMAN_NETIF_IOCTL_ETH_GET_TX_EEDEFER_CNT,
 	NETMAN_NETIF_IOCTL_ETH_GET_TX_ECOLL_CNT,
 	NETMAN_NETIF_IOCTL_ETH_GET_TX_EUNDERRUN_CNT,
+	//Returns struct NetManEthStatus
+	NETMAN_NETIF_IOCTL_ETH_GET_STATUS,
 
 	/** Input = struct NetManIFLinkModeParams. Note: does not wait for the IF to finish. Use NetManSetLinkMode() instead. */
 	NETMAN_NETIF_IOCTL_ETH_SET_LINK_MODE,

@@ -1,22 +1,6 @@
 //In the SONY original, all the calls to DEBUG_PRINTF() were to sceInetPrintf().
 #define DEBUG_PRINTF(args...) printf(args)
 
-struct RuntimeStats{
-	u32 RxDroppedFrameCount;
-	u32 RxErrorCount;
-	u16 RxFrameOverrunCount;
-	u16 RxFrameBadLengthCount;
-	u16 RxFrameBadFCSCount;
-	u16 RxFrameBadAlignmentCount;
-	u32 TxDroppedFrameCount;
-	u32 TxErrorCount;
-	u16 TxFrameLOSSCRCount;
-	u16 TxFrameEDEFERCount;
-	u16 TxFrameCollisionCount;
-	u16 TxFrameUnderrunCount;
-	u16 RxAllocFail;
-};
-
 struct SmapDriverData{
 	volatile u8 *smap_regbase;
 	volatile u8 *emac3_regbase;
@@ -35,7 +19,7 @@ struct SmapDriverData{
 	unsigned char LinkStatus;		//Ethernet link is initialized (hardware)
 	unsigned char LinkMode;
 	iop_sys_clock_t LinkCheckTimer;
-	struct RuntimeStats RuntimeStats;
+	struct NetManEthRuntimeStats RuntimeStats;
 	int NetIFID;
 };
 

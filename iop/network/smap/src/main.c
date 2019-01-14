@@ -3,6 +3,7 @@
 #include <loadcore.h>
 #include <thbase.h>
 #include <irx.h>
+#include <netman.h>
 
 #include "main.h"
 #include "xfer.h"
