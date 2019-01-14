@@ -212,7 +212,8 @@ int sceCdRead(u32 lbn, u32 sectors, void *buf, sceCdRMode * mode)
 	if (CdDebug > 0)
 		printf("sceCdread end\n");
 
-	SignalSema(nCmdSemaId);
+	//Old versions have this extra SignalSema call here.
+	//SignalSema(nCmdSemaId);
 	return 1;
 }
 #endif
@@ -243,7 +244,8 @@ int sceCdReadDVDV(u32 lbn, u32 nsectors, void *buf, sceCdRMode *rm)
 		return 0;
 	}
 
-	SignalSema(nCmdSemaId);
+	//Old versions have this extra SignalSema call here.
+	//SignalSema(nCmdSemaId);
 	return 1;
 }
 #endif
@@ -288,7 +290,8 @@ int sceCdReadCDDA(u32 lbn, u32 nsectors, void *buf, sceCdRMode *rm)
 		return 0;
 	}
 
-	SignalSema(nCmdSemaId);
+	//Old versions have this extra SignalSema call here.
+	//SignalSema(nCmdSemaId);
 	return 1;
 }
 #endif
@@ -353,7 +356,8 @@ int sceCdSeek(u32 lbn)
 		return 0;
 	}
 
-	SignalSema(nCmdSemaId);
+	//Old versions have this extra SignalSema call here.
+	//SignalSema(nCmdSemaId);
 	return 1;
 }
 #endif
@@ -375,7 +379,8 @@ int sceCdStandby(void)
 		return 0;
 	}
 
-	SignalSema(nCmdSemaId);
+	//Old versions have this extra SignalSema call here.
+	//SignalSema(nCmdSemaId);
 	return 1;
 }
 #endif
@@ -397,7 +402,8 @@ int sceCdStop(void)
 		return 0;
 	}
 
-	SignalSema(nCmdSemaId);
+	//Old versions have this extra SignalSema call here.
+	//SignalSema(nCmdSemaId);
 	return 1;
 }
 #endif
@@ -419,7 +425,8 @@ int sceCdPause(void)
 		return 0;
 	}
 
-	SignalSema(nCmdSemaId);
+	//Old versions have this extra SignalSema call here.
+	//SignalSema(nCmdSemaId);
 	return 1;
 }
 #endif
@@ -478,7 +485,8 @@ int sceCdReadIOPMem(u32 lbn, u32 sectors, void *buf, sceCdRMode * mode)
 	if (CdDebug > 0)
 		printf("sceCdread end\n");
 
-	SignalSema(nCmdSemaId);
+	//Old versions have this extra SignalSema call here.
+	//SignalSema(nCmdSemaId);
 	return 1;
 }
 #endif
@@ -567,7 +575,9 @@ int sceCdReadChain(sceCdRChain * readChain, sceCdRMode * mode)
 
 	if (CdDebug > 0)
 		printf("sceCdread end\n");
-	SignalSema(nCmdSemaId);
+
+	//Old versions have this extra SignalSema call here.
+	//SignalSema(nCmdSemaId);
 	return 1;
 }
 #endif
