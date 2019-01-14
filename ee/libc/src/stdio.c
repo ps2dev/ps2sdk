@@ -26,14 +26,6 @@
 #include <string.h>
 #include <limits.h>
 
-extern int (*_ps2sdk_close)(int);
-extern int (*_ps2sdk_open)(const char*, int);
-extern int (*_ps2sdk_read)(int, void*, int);
-extern int (*_ps2sdk_lseek)(int, int, int);
-extern int (*_ps2sdk_write)(int, const void*, int);
-extern int (*_ps2sdk_remove)(const char*);
-extern int (*_ps2sdk_rename)(const char*, const char*);
-
 void _ps2sdk_stdio_init();
 
 /* std I/O buffer type constants. */
@@ -450,7 +442,7 @@ FILE *fopen(const char *fname, const char *mode)
             }
           }
         }
-        if ((fd = _ps2sdk_open((char *)t_fname, iomode)) >= 0) {
+        if ((fd = _ps2sdk_open((char *)t_fname, iomode, 0666)) >= 0) {
           __iob[i].fd = fd;
           __iob[i].cnt = 0;
           __iob[i].flag = flag;
@@ -464,7 +456,7 @@ FILE *fopen(const char *fname, const char *mode)
             cd_fname[fname_len + 0] = ';';
             cd_fname[fname_len + 1] = '1';
             cd_fname[fname_len + 2] = 0;
-            if ((fd = _ps2sdk_open((char *)cd_fname, iomode)) >= 0) {
+            if ((fd = _ps2sdk_open((char *)cd_fname, iomode, 0666)) >= 0) {
               __iob[i].fd = fd;
               __iob[i].cnt = 0;
               __iob[i].flag = flag;
@@ -1071,12 +1063,26 @@ void __stdio_update_stdout_xy(int x, int y)
 
 
 #ifdef F___stdio_helper_internals
+static int fioOpenHelper(const char* source, int flags, ...);
+
 int (*_ps2sdk_close)(int) = fioClose;
-int (*_ps2sdk_open)(const char*, int) = fioOpen;
+int (*_ps2sdk_open)(const char*, int, ...) = fioOpenHelper;
 int (*_ps2sdk_read)(int, void*, int) = fioRead;
 int (*_ps2sdk_lseek)(int, int, int) = fioLseek;
 int (*_ps2sdk_write)(int, const void*, int) = fioWrite;
 int (*_ps2sdk_remove)(const char*) = fioRemove;
+
+static int fioOpenHelper(const char* pathname, int flags, ...)
+{
+	int mode;
+	va_list alist;
+
+	va_start(alist, flags);
+	mode = va_arg(alist, int);	//Retrieve the mode argument, regardless of whether it is expected or not.
+	va_end(alist);
+
+	return fioOpen(pathname, flags);
+}
 
 int fioRename(const char *old, const char *new)
 {

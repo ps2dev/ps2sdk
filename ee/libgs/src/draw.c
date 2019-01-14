@@ -15,10 +15,6 @@
 
 #include "internal.h"
 
-extern int (*_ps2sdk_close)(int);
-extern int (*_ps2sdk_open)(const char*, int);
-extern int (*_ps2sdk_read)(int, void*, int);
-
 extern QWORD GsPrimWorkArea[];
 
 void GsSetDefaultDrawEnv(GS_DRAWENV *drawenv, u16 psm, u16 w, u16 h)

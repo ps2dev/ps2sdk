@@ -42,10 +42,6 @@ ConfigParamT10K g_t10KConfig = {540, TV_SCREEN_43, DATE_YYYYMMDD, LANGUAGE_JAPAN
 char g_RomName[15] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 #endif
 
-extern int (*_ps2sdk_close)(int);
-extern int (*_ps2sdk_open)(const char*, int);
-extern int (*_ps2sdk_read)(int, void*, int);
-
 #ifdef F_GetRomName
 char* GetRomName(char *romname)
 {

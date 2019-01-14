@@ -192,6 +192,15 @@ int putchar(int);
 
 int sio_printf(const char *format, ...);
 
+/** Inter-library helpers */
+extern int (*_ps2sdk_close)(int) __attribute__((section("data")));
+extern int (*_ps2sdk_open)(const char*, int, ...) __attribute__((section("data")));
+extern int (*_ps2sdk_read)(int, void*, int) __attribute__((section("data")));
+extern int (*_ps2sdk_lseek)(int, int, int) __attribute__((section("data")));
+extern int (*_ps2sdk_write)(int, const void*, int) __attribute__((section("data")));
+extern int (*_ps2sdk_remove)(const char*) __attribute__((section("data")));
+extern int (*_ps2sdk_rename)(const char*, const char*) __attribute__((section("data")));
+
 #ifdef __cplusplus
 }
 #endif
