@@ -264,13 +264,20 @@ static int fs_open(iop_file_t* fd, const char *name, int flags, int mode) {
 		rec->sfnOffset = 0;
 		ret = fat_createFile(fatd, name, 0, escapeNotExist, &cluster, &rec->sfnSector, &rec->sfnOffset);
 		if (ret < 0) {
+			FLUSH_SECTORS(fatd);
 			_fs_unlock();
 			return ret;
 		}
 		//the file already exist but flags is set to truncate
-		if (ret == 2 && (flags & O_TRUNC)) {
+		if (ret == EEXIST && (flags & O_TRUNC)) {
 			XPRINTF("USBHDFSD: FAT I: O_TRUNC detected!\n");
-			fat_truncateFile(fatd, cluster, rec->sfnSector, rec->sfnOffset);
+			ret = fat_truncateFile(fatd, cluster, rec->sfnSector, rec->sfnOffset);
+			if (ret < 0) {
+				FLUSH_SECTORS(fatd);
+				XPRINTF("USBHDFSD: FAT E: failed to truncate!\n");
+				_fs_unlock();
+				return ret;
+			}
 		}
 
 		//find the file

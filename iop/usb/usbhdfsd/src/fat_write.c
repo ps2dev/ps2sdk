@@ -1077,7 +1077,7 @@ static int getDirentryStoreOffset(fat_driver* fatd, int entryCount, int direntry
 
   lname        - long filename (to test wether existing entry match the long name) (input)
   sname        - short filename ( ditto ^^ ) (input)
-  startCluster - valid start cluster of the directory or 0 if we scan the root directory (input)
+  startCluster - valid start cluster of the directory or 0 if we scan the root directory (input), first cluster of dirent (output).
   directory    - Entry type to check against. 0 = file, >0 = directory, <0 = ignore type.
 
   if file/directory already exist (return code 0) then:
@@ -1483,14 +1483,15 @@ static int saveDirentry(fat_driver* fatd, unsigned int startCluster,
   lname         - long name
   directory     - 0-> create file  1->create directory
   escapeNoExist - 0->allways create file  1->early exit if file doesn't exist
-  startCluster  - directory space start cluster (set to zero for root directory)
+  startCluster  - directory space start cluster (set to zero for root directory) (input), first cluster of dirent (output)
   retSector     - SFN sector - sector of the SFN direntry (output)
   retOffset     - byte offset of the SFN direntry counting from the start of the sector (output)
+  orig_dsfn     - Dirent SFN entry, to use as the new dirent.
 */
 
-static int fat_modifyDirSpace(fat_driver* fatd, char* lname, char directory, char escapeNotExist, unsigned int startCluster, unsigned int* retSector, int* retOffset, const fat_direntry_sfn *orig_dsfn) {
+static int fat_modifyDirSpace(fat_driver* fatd, char* lname, char directory, char escapeNotExist, unsigned int *startCluster, unsigned int* retSector, int* retOffset, const fat_direntry_sfn *orig_dsfn) {
 	char sname[12]; //short name 8+3 + terminator
-	unsigned int newCluster, parentDirCluster_tmp;
+	unsigned int newCluster, parentDirCluster;
 	int ret, entryCount, compressShortName, entryIndex, direntrySize;
 
 	//dlanor: Since each filename may need up to 11 directory entries (MAX_FAT_NAME==128)
@@ -1535,9 +1536,9 @@ static int fat_modifyDirSpace(fat_driver* fatd, char* lname, char directory, cha
 
 	//get information about existing direntries (palcement of the empty/reusable direntries)
 	//and sequence numbers of the short filenames
-	parentDirCluster_tmp = startCluster;
+	parentDirCluster = *startCluster;
 	ret = fat_fillDirentryInfo(fatd, lname, sname, directory,
-		&parentDirCluster_tmp, retSector, retOffset);
+		startCluster, retSector, retOffset);
 	if (ret < 0) {
 		XPRINTF("USBHDFSD: E: direntry data invalid!\n");
 		return ret;
@@ -1551,7 +1552,6 @@ static int fat_modifyDirSpace(fat_driver* fatd, char* lname, char directory, cha
 	if (escapeNotExist) {
 		return -ENOENT;
 	}
-
 
 	if (ret > DIR_MASK_SIZE) {
 		XPRINTF("USBHDFSD: W: Direntry count is larger than number of records!\n");
@@ -1575,7 +1575,7 @@ static int fat_modifyDirSpace(fat_driver* fatd, char* lname, char directory, cha
 
 	//if the direntry offset excede current space of directory clusters
 	//we have to add one cluster to directory space
-	ret = enlargeDirentryClusterSpace(fatd, startCluster, entryCount, entryIndex, direntrySize);
+	ret = enlargeDirentryClusterSpace(fatd, parentDirCluster, entryCount, entryIndex, direntrySize);
 	XPRINTF("USBHDFSD: I: enlarge direntry cluster space ret=%d\n", ret);
 	if (ret < 0) {
 		return ret;
@@ -1588,12 +1588,14 @@ static int fat_modifyDirSpace(fat_driver* fatd, char* lname, char directory, cha
 			return -ENOSPC;
 		}
 		XPRINTF("USBHDFSD: I: new file/dir cluster=%u\n", newCluster);
+		*startCluster = newCluster;
 	}else{
+		*startCluster = (fatd->partBpb.fatType == FAT32) ? getI32_2(orig_dsfn->clusterL, orig_dsfn->clusterH) : getI16(orig_dsfn->clusterL);
 		newCluster = 0;
 	}
 
 	//now store direntries into the directory space
-	ret = saveDirentry(fatd, startCluster, lname, sname, directory, newCluster, direntrySize, entryIndex, retSector, retOffset, orig_dsfn);
+	ret = saveDirentry(fatd, parentDirCluster, lname, sname, directory, newCluster, direntrySize, entryIndex, retSector, retOffset, orig_dsfn);
 	XPRINTF("USBHDFSD: I: save direntry ret=%d\n", ret);
 	if (ret < 0) {
 		return ret;
@@ -1601,7 +1603,7 @@ static int fat_modifyDirSpace(fat_driver* fatd, char* lname, char directory, cha
 
 	//create empty directory structure
 	if ((orig_dsfn == NULL) && directory) {
-		ret = createDirectorySpace(fatd, newCluster, startCluster);
+		ret = createDirectorySpace(fatd, newCluster, parentDirCluster);
 		XPRINTF("USBHDFSD: I: create directory space ret=%d\n", ret);
 		if (ret < 0) {
 			return ret;
@@ -1787,7 +1789,6 @@ int fat_truncateFile(fat_driver* fatd, unsigned int cluster, unsigned int sfnSec
 		return -EFAULT;
 	}
 
-
 	//now delete whole cluster chain starting at the file's first cluster
 	ret = fat_deleteClusterChain(fatd, cluster);
 	if (ret < 0) {
@@ -1871,7 +1872,7 @@ int fat_updateSfn(fat_driver* fatd, int size, unsigned int sfnSector, int sfnOff
  directory      - set to 0 to create file, 1 to create directory
  escapeNotExist - set to 1 if you want to report error if file not exist.
                   Otherwise set to 0 and file/dir will be created.
- cluster        - start cluster of the directory space - default is 0 -> root directory
+ cluster        - start cluster of the directory space - default is 0 -> root directory (input), first cluster of dirent (output).
  sfnSector      - sector of the SFN entry (output) - helps to modify direntry (size, date, time)
  sfnOffset      - offset (in bytes) of the SFN entry (output)
 */
@@ -1922,7 +1923,7 @@ int fat_createFile(fat_driver* fatd, const char* fname, char directory, char esc
 	//modify directory space of the path (cread direntries)
 	//and/or create new (empty) directory space if directory creation requested
 	directoryCluster = startCluster;
-	ret = fat_modifyDirSpace(fatd, lname, directory, escapeNotExist, startCluster, sfnSector, sfnOffset, NULL);
+	ret = fat_modifyDirSpace(fatd, lname, directory, escapeNotExist, &startCluster, sfnSector, sfnOffset, NULL);
 	if (ret < 0) {
 		XPRINTF("USBHDFSD: E: modifyDirSpace failed!\n");
 		return ret;
@@ -1944,7 +1945,7 @@ int fat_createFile(fat_driver* fatd, const char* fname, char directory, char esc
 			)
 		) {
 		XPRINTF("USBHDFSD: I: file already exists at cluster=%u\n", startCluster);
-		return 2;
+		return EEXIST;
 	}
 	return 0;
 }
@@ -2017,7 +2018,7 @@ int fat_renameFile(fat_driver* fatd, fat_dir *fatdir, const char* fname) {
 	unsigned int sDirCluster;
 	unsigned int dDirCluster, dParentDirCluster;
 	char lname[FAT_MAX_NAME], pathToDirent[FAT_MAX_PATH];
-	unsigned int sfnSector, new_sfnSector;
+	unsigned int sfnSector, new_sfnSector, startCluster;
 	int sfnOffset, new_sfnOffset;
 	char sname[12]; //short name 8+3 + terminator
 	unsigned char* sbuf = NULL;
@@ -2086,7 +2087,8 @@ int fat_renameFile(fat_driver* fatd, fat_dir *fatdir, const char* fname) {
 	}
 
 	//Insert a new record.
-	if((ret = fat_modifyDirSpace(fatd, lname, srcIsDirectory, 0, dParentDirCluster, &sfnSector, &sfnOffset, &OriginalSFN)) < 0){
+	startCluster = dParentDirCluster;
+	if((ret = fat_modifyDirSpace(fatd, lname, srcIsDirectory, 0, &startCluster, &sfnSector, &sfnOffset, &OriginalSFN)) < 0){
 		XPRINTF("USBHDFSD: E: fat_modifyDirSpace failed! %d\n", ret);
 		return ret;
 	}
