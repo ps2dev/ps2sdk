@@ -221,8 +221,8 @@ The Calls Below are modified slightly from the example and are to show how the p
 ==
 mcGetInfo(0, 0, &mc_Type, &mc_Free, &mc_Format); << This would Target the 1A Port on the Multitap (port 0, slot 0)
 mcGetInfo(0, 1, &mc_Type, &mc_Free, &mc_Format); << 1B Port
-mcGetInfo(0, 2, &mc_Type, &mc_Free, &mc_Format); << 1B Port
-mcGetInfo(0, 3, &mc_Type, &mc_Free, &mc_Format); << 1B Port
+mcGetInfo(0, 2, &mc_Type, &mc_Free, &mc_Format); << 1C Port
+mcGetInfo(0, 3, &mc_Type, &mc_Free, &mc_Format); << 1D Port
 mcGetInfo(1, 0, &mc_Type, &mc_Free, &mc_Format); << 2A Port
 mcGetInfo(1, 1, &mc_Type, &mc_Free, &mc_Format); << 2B Port
 mcGetInfo(1, 2, &mc_Type, &mc_Free, &mc_Format); << 2C Port
