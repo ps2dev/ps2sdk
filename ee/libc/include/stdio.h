@@ -103,7 +103,7 @@ typedef struct {
 } FILE;
 #endif
 
-extern FILE __iob[_NFILE];
+extern FILE __iob[_NFILE] __attribute__((section("data")));
 
 #define stdin                          (&__iob[0])
 #define stdout                         (&__iob[1])

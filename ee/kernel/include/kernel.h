@@ -508,7 +508,7 @@ void	_exit(int retval) __attribute__((noreturn));
 
 /* errno.h */
 #ifndef errno
-extern int errno;
+extern int errno __attribute__((section("data")));
 int *__errno(void);
 #endif
 

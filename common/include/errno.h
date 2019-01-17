@@ -406,6 +406,6 @@ char *file_errors[] = {
 #define error_to_string(errnum) (file_errors[errnum*-1])
 #endif
 
-extern int errno;
+extern int errno __attribute__((section("data")));
 
 #endif /* __ERRNO_H__ */
