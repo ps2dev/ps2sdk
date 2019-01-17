@@ -163,31 +163,31 @@ int PS2CamProbe(int devId)
 	if(intf->bInterfaceClass == USB_CLASS_VENDOR_SPEC)
 	{
 		// eyetoy 1
-		if(dev->idVendor == PS2CAM_VEND_SONY  &&  dev->idProduct == PS2CAM_PROD_EYETOY);
+		if(dev->idVendor == PS2CAM_VEND_SONY  &&  dev->idProduct == PS2CAM_PROD_EYETOY)
 		{
 			return 1;
 		}
 
 		// eyetoy 2
-		if(dev->idVendor == PS2CAM_VEND_SONY  &&  dev->idProduct == PS2CAM_PROD_EYETOY2);
+		if(dev->idVendor == PS2CAM_VEND_SONY  &&  dev->idProduct == PS2CAM_PROD_EYETOY2)
 		{
 			return 1;
 		}
 
 		// eyetoy 3
-		if(dev->idVendor == PS2CAM_VEND_SONY  &&  dev->idProduct == PS2CAM_PROD_EYETOY3);
+		if(dev->idVendor == PS2CAM_VEND_SONY  &&  dev->idProduct == PS2CAM_PROD_EYETOY3)
 		{
 			return 1;
 		}
 
 		// eyetoy 4
-		if(dev->idVendor == PS2CAM_VEND_SONY  &&  dev->idProduct == PS2CAM_PROD_EYETOY4);
+		if(dev->idVendor == PS2CAM_VEND_SONY  &&  dev->idProduct == PS2CAM_PROD_EYETOY4)
 		{
 			return 1;
 		}
 
 		// D-Link VisualStream DSB-C310
-		if(dev->idVendor == PS2CAM_VEND_DLINK  &&  dev->idProduct == PS2CAM_PROD_VISUALSTREAM);
+		if(dev->idVendor == PS2CAM_VEND_DLINK  &&  dev->idProduct == PS2CAM_PROD_VISUALSTREAM)
 		{
 			return 1;
 		}
