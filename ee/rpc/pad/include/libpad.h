@@ -80,7 +80,7 @@
 #define PAD_MMODE_DIGITAL   0
 #define PAD_MMODE_DUALSHOCK 1
 
-#define PAD_MMODE_UNLOCK    0
+#define PAD_MMODE_UNLOCK    2
 #define PAD_MMODE_LOCK      3
 
 /*
