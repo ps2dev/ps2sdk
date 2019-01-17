@@ -158,7 +158,7 @@ void mtapDetect()
     else
     {
         printf("Controller Port 0: Multi-tap is Not Connected. \n");
-        mtapPortClose(1); //Closes The Multitap Port if The Multitap Is Not Connected
+        mtapPortClose(0); //Closes The Multitap Port if The Multitap Is Not Connected
     }
     
     mtapPortOpen(1); // Checks MTAP port 1 (Controller Port 1) For MTAP Connection
