@@ -545,9 +545,10 @@ FILE *fdopen(int fd, const char *mode)
 int fileno(FILE * f) {
     if (f->fd > 0)
       return f->fd;
-    else
+    else {
       errno = EBADF;
       return -1;
+  }
 }
 #endif
 
