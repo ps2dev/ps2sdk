@@ -52,9 +52,9 @@ However You Will Need to Load The freesio2,MCMAN,MCSERV Modules in addition to t
   |            |          |        | A   B |
   |            |          |        |-------|
   |            |          |          |   \_____ [ Port 1, Slot 1 ]
-  |ConsolePort1|]---------|          \__________[ Port 1, Slot 0 ]
+  |ConsolePort2|]---------|          \__________[ Port 1, Slot 0 ]
   |            |
-  |ConsolePort2|]---[ Port 0, Slot 0 ]
+  |ConsolePort1|]---[ Port 0, Slot 0 ]
   |            |
   |------------|
 ==== Controller/Memcard Port & Slot Listing ====
