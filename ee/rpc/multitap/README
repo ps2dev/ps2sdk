@@ -75,7 +75,7 @@ Meaning that Mtap Port 2 is Still Memory Card Port 0 (Console Port 1)
 
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 //MTAP Controller Ports
-mtapPortOpen(0); >> MTAP PORT0 = Memory Card Port 2 (Console Port 1)
+mtapPortOpen(0); >> MTAP PORT0 = Memory Card Port 0 (Console Port 1)
 mtapPortOpen(1); >> MTAP PORT1 = Memory Card Port 1 (Console Port 2)
 //MTAP Memory Card Ports
 mtapPortOpen(2); >> MTAP PORT2 = Memory Card Port 0 (Console Port 1)
