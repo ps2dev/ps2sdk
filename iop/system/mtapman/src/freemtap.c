@@ -155,7 +155,7 @@ void update_slot_numbers_thread()
 
 		WaitEventFlag(event_flag, EF_UPDATE_SLOTS | EF_EXIT_THREAD, 0x11, &resbits);
 
-		if((resbits & EF_EXIT_THREAD) == 1)
+		if(resbits & EF_EXIT_THREAD)
 		{
 			SetEventFlag(event_flag, 0x4);
 			ExitThread();
