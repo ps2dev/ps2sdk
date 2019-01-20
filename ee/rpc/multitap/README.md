@@ -231,7 +231,16 @@ void mtDetect(int mtP)
     }
 }
 ```
+This is a Set of Functions Written to Handle Opening and Closing the Multitap Ports Automatically.
 
+you can call mtGO() and it will Will do Open a connection on all 4 MTAP ports check them for The mutltiap and Close the Ports if one is not present.
+
+
+You Can also call mtGO() again if you need to check for the multitap connection more then once in your application. 
+
+With that being said if you are using the controller on any multitap ports you should probably close the pad connections before calling mtGO and then re open them afterwards
+
+when you are dealing with memory cards 
 
 
 #### 4. Open the controllers 
