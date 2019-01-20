@@ -59,7 +59,7 @@ int sceUsbdRegisterAutoloader(sceUsbdLddOps *drv) {
 	usbdUnlock();
 	SetGP(OldGP);
 
-	return 0;
+	return res;
 }
 
 int sceUsbdUnregisterLdd(sceUsbdLddOps *driver) {
