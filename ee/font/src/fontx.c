@@ -565,6 +565,7 @@ qword_t *fontx_print_ascii(qword_t *q, int context, const unsigned char *str, in
 	int line = 0;
 
 	float x_orig[100];
+	x_orig[0] = 0;
 
 	float w = fontx_header->width;
 	float h = fontx_header->height;
@@ -742,6 +743,7 @@ qword_t *fontx_print_sjis(qword_t *q, int context, const unsigned char *str, int
 	short halfwidth[100];
 	short fullwidth[100];
 	float x_orig[100];
+	x_orig[0] = 0;
 
 	unsigned short wide;
 
