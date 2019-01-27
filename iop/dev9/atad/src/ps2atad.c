@@ -11,7 +11,7 @@
 /**
  * @file
  * ATA device driver.
- * This module provides the low-level ATA support for hard disk drives, based on ATAD v2.4.
+ * This module provides the low-level ATA support for hard disk drives, based on ATAD v2.7.
  * It is 100% compatible with its proprietary counterpart called atad.irx.
  *
  * This module also include support for 48-bit feature set (done by Clement).
@@ -34,7 +34,7 @@
 #include <atahw.h>
 
 #define MODNAME "atad"
-IRX_ID(MODNAME, 2, 4);
+IRX_ID(MODNAME, 2, 7);
 
 #define M_PRINTF(format, args...)	\
 	printf(MODNAME ": " format, ## args)
