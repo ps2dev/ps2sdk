@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-EE_CC_VERSION := $(shell $(EE_CC) --version 2>&1 | sed -n 's/^.*(GCC) //p')
+EE_CC_VERSION := $(shell $(EE_CC) -dumpversion)
 
 EE_OBJS_DIR ?= obj/
 EE_SRC_DIR ?= src/
