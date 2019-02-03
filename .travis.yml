@@ -1,13 +1,48 @@
-language: c
-
-sudo: required
+language: cpp
 
 services:
   - docker
 
-script:
-  - docker run -it --rm -v "$PWD:/src" mlafeldt/ps2dev make install
+sudo: required
 
-branches:
-  only:
-    - master
+env:
+  - MATRIX_EVAL="PS2DOCKER=akuhak/ps2toolchain PS2FORK=ps2dev PS2BRANCH=master"
+
+matrix:
+  fast_finish: true
+  include:
+    - env:
+      - MATRIX_EVAL="PS2DOCKER=ps2homebrew/ps2toolchain PS2FORK=ps2homebrew PS2BRANCH=test1"
+    - env:
+      - MATRIX_EVAL="PS2DOCKER=akuhak/ps2toolchain PS2FORK=ps2dev PS2BRANCH=master"
+  allow_failures:
+    - env:
+      - MATRIX_EVAL="PS2DOCKER=akuhak/ps2toolchain PS2FORK=ps2dev PS2BRANCH=master"
+
+before_install:
+    - eval "${MATRIX_EVAL}"
+
+before_script:
+  # Get docker image
+  - docker pull ${PS2DOCKER}:latest
+  - docker ps
+
+  # Run DOCKER, run!
+  - docker run -d ${PS2DOCKER} bash -c "while true; do sleep 5; done" > container_id
+
+  # Configure ps2sdk
+  - docker exec -t $(cat container_id) bash -c "ls -l"
+
+  - docker exec -t $(cat container_id) bash -c "mkdir -p /work/;"
+  - docker cp $TRAVIS_BUILD_DIR/. $(cat container_id):/work/
+
+script:
+  - docker exec -t $(cat container_id) bash -c "cd /work/; make"
+
+after_success:
+  - docker exec -t $(cat container_id) bash -c "cd /usr/local/ps2dev/ps2sdk/samples; make"
+  - mkdir $TRAVIS_BUILD_DIR/samples_test
+  - docker cp $(cat container_id):/usr/local/ps2dev/ps2sdk/samples/. $TRAVIS_BUILD_DIR/samples_test/
+  - cd $TRAVIS_BUILD_DIR
+  - zip -r samples_$TRAVIS_COMMIT.zip samples_test
+  - curl --upload-file samples_$TRAVIS_COMMIT.zip https://transfer.sh/samples_$TRAVIS_COMMIT.zip | grep transfer
