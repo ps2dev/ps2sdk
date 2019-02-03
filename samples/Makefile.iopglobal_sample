@@ -25,7 +25,7 @@ IOP_INCS := -I$(PS2SDK)/iop/include -I$(PS2SDK)/common/include \
 #   for finer-grained control over what goes into each IRX.
 IOP_CFLAGS := -D_IOP -fno-builtin -Os -G0 -Wall $(IOP_INCS) $(IOP_CFLAGS)
 # linker flags
-IOP_LDFLAGS := -nostdlib -s $(IOP_LDFLAGS)
+IOP_LDFLAGS := -nostdlib -s -L$(PS2SDK)/iop/lib $(IOP_LDFLAGS)
 
 # Additional C compiler flags for GCC >=v5.3.0
 # -msoft-float is to "remind" GCC/Binutils that the soft-float ABI is to be used. This is due to a bug, which
