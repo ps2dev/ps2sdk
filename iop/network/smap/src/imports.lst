@@ -13,6 +13,7 @@ I_printf
 stdio_IMPORTS_end
 
 sysclib_IMPORTS_start
+I_memcpy
 I_strcmp
 I_strtoul
 I_strncmp

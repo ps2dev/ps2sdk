@@ -55,7 +55,7 @@ static ip_addr_t dns_servers[DNS_MAX_SERVERS];
 
 //Copied from LWIP, to be independent of the full LWIP source.
 /* used by IP4_ADDR_ANY and IP_ADDR_BROADCAST in ip_addr.h */
-static const ip_addr_t ip_addr_any = IPADDR4_INIT(IPADDR_ANY);
+const ip_addr_t ip_addr_any = IPADDR4_INIT(IPADDR_ANY);
 
 int ps2ip_init(void)
 {
