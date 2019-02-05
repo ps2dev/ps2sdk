@@ -86,6 +86,13 @@ static __inline__ void *GetGP(void)
 	return gp;
 }
 
+/** Special thread ID for referring to the running thread.
+    Unlike the IOP kernel, this is only supported by ReferThreadStatus() and ChangeThreadPriority().
+    It can also be used by the iWakeupThread() _syscall_.
+    But because the libkernel patch may call WakeupThread() to avoid the defect within iWakeupThread() that prevents the running thread from being woken up,
+    THS_SELF should not be used with iWakeupThread(). */
+#define TH_SELF		0
+
 /** Limits */
 #define MAX_THREADS	256	//A few will be used for the kernel patches. Thread 0 is always the idle thread.
 #define MAX_SEMAPHORES	256	//A few will be used for the kernel patches.
@@ -97,7 +104,7 @@ static __inline__ void *GetGP(void)
 #define WRITEBACK_DCACHE	0
 #define INVALIDATE_DCACHE	1
 #define INVALIDATE_ICACHE	2
-#define INVALIDATE_CACHE	(INVALIDATE_DCACHE|INVALIDATE_ICACHE)
+#define INVALIDATE_CACHE	3 //Invalidate both data & instruction caches.
 
 /** EE Interrupt Controller (INTC) interrupt numbers */
 enum
@@ -265,6 +272,11 @@ typedef struct t_ee_thread
 #define THS_WAITSUSPEND	0x0c
 #define THS_DORMANT	0x10
 
+/** Thread WAIT Status */
+#define TSW_NONE	0	//Thread is not in WAIT state
+#define TSW_SLEEP	1
+#define TSW_SEMA	2
+
 // sizeof() == 0x30
 typedef struct t_ee_thread_status
 {
@@ -281,6 +293,20 @@ typedef struct t_ee_thread_status
     u32 waitId; // 0x28
     u32 wakeupCount; // 0x2C
 } ee_thread_status_t;
+
+/** CpuConfig options */
+enum CPU_CONFIG {
+	CPU_CONFIG_ENABLE_DIE	= 0,	//Enable Dual Issue
+	CPU_CONFIG_ENABLE_ICE,		//Enable Instruction Cache
+	CPU_CONFIG_ENABLE_DCE,		//Enable Data Cache
+	CPU_CONFIG_DISBLE_DIE,		//Disable Dual Issue
+	CPU_CONFIG_DISBLE_ICE,		//Disable Instruction Cache
+	CPU_CONFIG_DISBLE_DCE		//Disable Data Cache
+};
+
+/** EnableCache & DisableCache options (multiple options may be specified) */
+#define CPU_DATA_CACHE		1
+#define CPU_INSTRUCTION_CACHE	2
 
 #ifdef __cplusplus
 extern "C" {
