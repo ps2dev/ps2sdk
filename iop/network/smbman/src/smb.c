@@ -211,6 +211,96 @@ receive:
 }
 
 //-------------------------------------------------------------------------
+//These functions will process UTF-16 characters on a byte-level, so that they will be safe for use with byte-alignment.
+static int asciiToUtf16(char *out, const char *in)
+{
+	int len;
+	const char *pIn;
+	u8 *pOut;
+
+	for(pIn = in, pOut = out, len = 0; *pIn != '\0'; pIn++, pOut += 2, len += 2)
+	{
+		pOut[0] = *pIn;
+		pOut[1] = '\0';
+	}
+
+	pOut[0] = '\0'; //NULL terminate.
+	pOut[1] = '\0';
+	len += 2;
+
+	return len;
+}
+
+static int utf16ToAscii(char *out, const char *in)
+{
+	int len;
+	const u8 *pIn;
+	char *pOut;
+	u16 wchar;
+
+	for(pIn = in, pOut = out, len = 0; ; len++)
+	{
+		wchar = pIn[0] | ((u16)pIn[1] << 8);
+		if (wchar == '\0')
+			break;
+
+		if (wchar >= 0xD800 && wchar < 0xDC00)
+		{	//Skip surrogate. Replace unsupported character with '?'.
+			*pOut = '?';
+
+			pIn += 4;
+			pOut++;
+		} else {
+			// Write decoded character. Replace unsupported characters with '?'.
+			*pOut = (wchar > 128) ? '?' : (char)wchar;
+
+			pIn += 2;
+			pOut++;
+		}
+	}
+
+	pOut[0] = '\0'; //NULL terminate.
+	pOut[1] = '\0';
+	len++;
+
+	return len;
+}
+
+static int setStringField(char *out, const char *in)
+{
+	int len;
+
+	if (server_specs.StringsCF == 2)
+	{
+		len = asciiToUtf16(out, in);
+	}
+	else
+	{
+		len = strlen(in) + 1;
+		strcpy(out, in);
+	}
+
+	return len;
+}
+
+static int getStringField(char *out, const char *in)
+{
+	int len;
+
+	if (server_specs.StringsCF == 2)
+	{
+		len = utf16ToAscii(out, in);
+	}
+	else
+	{
+		len = strlen(in) + 1;
+		strcpy(out, in);
+	}
+
+	return len;
+}
+
+//-------------------------------------------------------------------------
 int smb_NegotiateProtocol(u32 *capabilities)
 {
 	static char *dialect = "NT LM 0.12";
@@ -261,7 +351,7 @@ negotiate_retry:
 	server_specs.MaxMpxCount = NPRsp->MaxMpxCount;
 	server_specs.SessionKey = NPRsp->SessionKey;
 	memcpy(server_specs.EncryptionKey, NPRsp->ByteField, NPRsp->KeyLength);
-	memcpy(server_specs.PrimaryDomainServerName, &NPRsp->ByteField[NPRsp->KeyLength], 64);
+	getStringField(server_specs.PrimaryDomainServerName, &NPRsp->ByteField[NPRsp->KeyLength]);
 
 	return 0;
 
@@ -336,7 +426,7 @@ int smb_SessionSetupAndX(char *User, char *Password, int PasswordType, u32 capab
 {
 	SessionSetupAndXRequest_t *SSR = &SMB_buf.pkt.sessionSetupAndXRequest;
 	SessionSetupAndXResponse_t *SSRsp = &SMB_buf.pkt.sessionSetupAndXResponse;
-	int r, i, offset, CF;
+	int r, offset, CF;
 	int passwordlen = 0;
 	int AuthType = NTLM_AUTH;
 
@@ -371,20 +461,15 @@ lbl_session_setup:
 	if ((CF == 2) && (!(passwordlen & 1)))
 		offset += 1;				// pad needed only for unicode as aligment fix if password length is even
 
-	for (i = 0; i < strlen(User); i++) {
-		SSR->ByteField[offset] = User[i]; 	// add User name
-		offset += CF;
-	}
-	offset += CF;					// null terminator
+	// Add User name
+	offset += setStringField(&SSR->ByteField[offset], User);
 
-	for (i = 0; server_specs.PrimaryDomainServerName[i] != 0; i+=CF) {
-		SSR->ByteField[offset] = server_specs.PrimaryDomainServerName[i]; // PrimaryDomain, acquired from Negotiate Protocol Response data
-		offset += CF;
-	}
-	offset += CF;					// null terminator
+	// PrimaryDomain, acquired from Negotiate Protocol Response data
+	offset += setStringField(&SSR->ByteField[offset], server_specs.PrimaryDomainServerName);
 
-	for (i = 0; i < (CF << 1); i++)
-		SSR->ByteField[offset++] = 0;		// NativeOS, NativeLanMan
+	// NativeOS, NativeLanMan
+	memset(&SSR->ByteField[offset], 0, CF * 2);
+	offset += CF * 2;
 
 	SSR->ByteCount = offset;
 
@@ -422,7 +507,7 @@ int smb_TreeConnectAndX(int UID, char *ShareName, char *Password, int PasswordTy
 {
 	TreeConnectAndXRequest_t *TCR = &SMB_buf.pkt.treeConnectAndXRequest;
 	TreeConnectAndXResponse_t *TCRsp = &SMB_buf.pkt.treeConnectAndXResponse;
-	int r, i, offset, CF;
+	int r, offset, CF;
 	int passwordlen = 0;
 	int AuthType = NTLM_AUTH;
 
@@ -456,11 +541,8 @@ lbl_tree_connect:
 	if ((CF == 2) && (!(passwordlen & 1)))
 		offset += 1;				// pad needed only for unicode as aligment fix is password len is even
 
-	for (i = 0; i < strlen(ShareName); i++) {
-		TCR->ByteField[offset] = ShareName[i];	// add Share name
-		offset += CF;
-	}
-	offset += CF;					// null terminator
+	// Add share name
+	offset += setStringField(&TCR->ByteField[offset], ShareName);
 
 	memcpy(&TCR->ByteField[offset], "?????\0", 6); 	// Service, any type of device
 	offset += 6;
@@ -628,7 +710,7 @@ int smb_QueryInformationDisk(int UID, int TID, smbQueryDiskInfo_out_t *QueryInfo
 //-------------------------------------------------------------------------
 int smb_QueryPathInformation(int UID, int TID, PathInformation_t *Info, char *Path)
 {
-	int r, PathLen, CF, i, queryType;
+	int r, PathLen, CF, queryType;
 	QueryPathInformationRequest_t *QPIR = &SMB_buf.pkt.queryPathInformationRequest;
 	QueryPathInformationResponse_t *QPIRsp = &SMB_buf.pkt.queryPathInformationResponse;
 
@@ -661,12 +743,8 @@ query:
 
 	QPIRParam->LevelOfInterest = queryType;
 
-	PathLen = 0;
-	for (i = 0; i < strlen(Path); i++) {
-		QPIRParam->FileName[PathLen] = Path[i];	// add Path
-		PathLen += CF;
-	}
-	PathLen += CF;					// null terminator
+	// Add path
+	PathLen = setStringField(QPIRParam->FileName, Path);
 
 	QPIR->smbTrans.TotalParamCount = QPIR->smbTrans.ParamCount = 2+4+PathLen;
 
@@ -728,7 +806,7 @@ int smb_NTCreateAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 {
 	NTCreateAndXRequest_t *NTCR = &SMB_buf.pkt.ntCreateAndXRequest;
 	NTCreateAndXResponse_t *NTCRsp = &SMB_buf.pkt.ntCreateAndXResponse;
-	int r, i, offset, length, CF;
+	int r, offset, CF;
 
 	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
 
@@ -762,16 +840,10 @@ int smb_NTCreateAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	if (CF == 2)
 		offset++;				// pad needed only for unicode as aligment fix
 
-	length = strlen(filename);
-	for (i = 0; i < length; i++) {
-		NTCR->ByteField[offset] = filename[i];	// add filename
-		offset += CF;
-	}
-	offset += CF;
+	// Add filename
+	NTCR->NameLength = setStringField(&NTCR->ByteField[offset], filename);
+	offset += NTCR->NameLength;
 
-	NTCR->NameLength = length;
-	if (CF == 2)
-		NTCR->NameLength = NTCR->NameLength << 1;
 	NTCR->ByteCount = offset;
 
 	rawTCP_SetSessionHeader(sizeof(NTCreateAndXRequest_t) + offset + 1);
@@ -810,7 +882,7 @@ int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	PathInformation_t info;
 	OpenAndXRequest_t *OR = &SMB_buf.pkt.openAndXRequest;
 	OpenAndXResponse_t *ORsp = &SMB_buf.pkt.openAndXResponse;
-	int r, i, offset, CF;
+	int r, offset, CF;
 
 	if (server_specs.SupportsNTSMB)
 		return smb_NTCreateAndX(UID, TID, filename, filesize, mode);
@@ -842,12 +914,8 @@ int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	if (CF == 2)
 		offset++;				// pad needed only for unicode as aligment fix
 
-	for (i = 0; i < strlen(filename); i++) {
-		OR->ByteField[offset] = filename[i];	// add filename
-		offset += CF;
-	}
-	offset += CF;
-
+	// Add filename
+	offset += setStringField(&OR->ByteField[offset], filename);
 	OR->ByteCount = offset;
 
 	rawTCP_SetSessionHeader(sizeof(OpenAndXRequest_t) + offset + 1);
@@ -990,7 +1058,7 @@ int smb_Close(int UID, int TID, int FID)
 //-------------------------------------------------------------------------
 int smb_Delete(int UID, int TID, char *Path)
 {
-	int r, CF, PathLen, i;
+	int r, CF, PathLen;
 	DeleteRequest_t *DR = &SMB_buf.pkt.deleteRequest;
 	DeleteResponse_t *DRsp = &SMB_buf.pkt.deleteResponse;
 
@@ -1010,13 +1078,8 @@ int smb_Delete(int UID, int TID, char *Path)
 	DR->SearchAttributes = 0; // coud be other attributes to find Hidden/System files
 	DR->BufferFormat = 0x04;
 
-	PathLen = 0;
-	for (i = 0; i < strlen(Path); i++) {
-		DR->FileName[PathLen] = Path[i];	// add Path
-		PathLen += CF;
-	}
-	PathLen += CF;					// null terminator
-
+	// Add path
+	PathLen = setStringField(DR->FileName, Path);
 	DR->ByteCount = PathLen+1; 			// +1 for the BufferFormat byte
 
 	rawTCP_SetSessionHeader(sizeof(DeleteRequest_t) + PathLen);
@@ -1038,7 +1101,7 @@ int smb_Delete(int UID, int TID, char *Path)
 //-------------------------------------------------------------------------
 int smb_ManageDirectory(int UID, int TID, char *Path, int cmd)
 {
-	int r, CF, PathLen, i;
+	int r, CF, PathLen;
 	ManageDirectoryRequest_t *MDR = &SMB_buf.pkt.manageDirectoryRequest;
 	ManageDirectoryResponse_t *MDRsp = &SMB_buf.pkt.manageDirectoryResponse;
 
@@ -1057,13 +1120,8 @@ int smb_ManageDirectory(int UID, int TID, char *Path, int cmd)
 	MDR->smbH.TID = (u16)TID;
 	MDR->BufferFormat = 0x04;
 
-	PathLen = 0;
-	for (i = 0; i < strlen(Path); i++) {
-		MDR->DirectoryName[PathLen] = Path[i];	// add Path
-		PathLen += CF;
-	}
-	PathLen += CF;					// null terminator
-
+	// Add path
+	PathLen = setStringField(MDR->DirectoryName, Path);
 	MDR->ByteCount = PathLen+1; 			// +1 for the BufferFormat byte
 
 	rawTCP_SetSessionHeader(sizeof(ManageDirectoryRequest_t)+PathLen);
@@ -1092,7 +1150,7 @@ int smb_ManageDirectory(int UID, int TID, char *Path, int cmd)
 //-------------------------------------------------------------------------
 int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 {
-	int r, CF, offset, i;
+	int r, CF, offset;
 	RenameRequest_t *RR = &SMB_buf.pkt.renameRequest;
 	RenameResponse_t *RRsp = &SMB_buf.pkt.renameResponse;
 
@@ -1115,24 +1173,16 @@ int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 	RR->SearchAttributes = 0; // coud be other attributes to find Hidden/System files /Directories
 
 	offset = 0;
+
+	// Add oldPath
 	RR->ByteField[offset++] = 0x04;			// BufferFormat
+	offset += setStringField(&RR->ByteField[offset], oldPath);
 
-	for (i = 0; i < strlen(oldPath); i++) {
-		RR->ByteField[offset] = oldPath[i];	// add oldPath
-		offset += CF;
-	}
-	offset += CF;					// null terminator
-
+	// Add newPath
 	RR->ByteField[offset++] = 0x04;			// BufferFormat
-
 	if (CF == 2)
 		offset++;				// pad needed for unicode
-
-	for (i = 0; i < strlen(newPath); i++) {
-		RR->ByteField[offset] = newPath[i];	// add newPath
-		offset += CF;
-	}
-	offset += CF;					// null terminator
+	offset += setStringField(&RR->ByteField[offset], newPath);
 
 	RR->ByteCount = offset;
 
@@ -1163,7 +1213,7 @@ int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 //-------------------------------------------------------------------------
 int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info)
 {
-	int r, CF, PathLen, i, j;
+	int r, CF, PathLen;
 	FindFirstNext2Request_t *FFNR = &SMB_buf.pkt.findFirstNext2Request;
 	FindFirstNext2Response_t *FFNRsp = &SMB_buf.pkt.findFirstNext2Response;
 
@@ -1196,12 +1246,8 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 		FFRParam->Flags = CLOSE_SEARCH_IF_EOS | RESUME_SEARCH;
 		FFRParam->LevelOfInterest = SMB_FIND_FILE_BOTH_DIRECTORY_INFO;
 
-		PathLen = 0;
-		for (i = 0; i < strlen(Path); i++) {
-			FFRParam->SearchPattern[PathLen] = Path[i];	// add Path
-			PathLen += CF;
-		}
-		PathLen += CF;					// null terminator
+		// Add path
+		PathLen = setStringField(FFRParam->SearchPattern, Path);
 
 		FFNR->smbTrans.TotalParamCount = FFNR->smbTrans.ParamCount = 2+2+2+2+4+PathLen;
 	}
@@ -1266,9 +1312,7 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 		info->fileInfo.IsDirectory = 1;
 	info->fileInfo.AllocationSize = FFRspData->AllocationSize;
 	info->fileInfo.EndOfFile = FFRspData->EndOfFile;
-	for (i = 0, j =0; j < FFRspData->FileNameLen; i++, j+=CF)
-		info->FileName[i] = FFRspData->FileName[j];
-	info->FileName[i]='\0';
+	getStringField(info->FileName, FFRspData->FileName);
 
 	return 0;
 }
