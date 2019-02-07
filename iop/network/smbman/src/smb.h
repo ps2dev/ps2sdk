@@ -8,6 +8,8 @@
 
 #include "ps2smb.h"
 
+#define SMB_MAGIC	0x424d53ff
+
 // SMB Headers are always 32 bytes long
 #define SMB_HDR_SIZE 32
 
@@ -303,6 +305,507 @@ typedef struct {
 	PathInformation_t fileInfo;
 	char FileName[0];
 } SearchInfo_t;
+
+typedef struct {
+	u32	Magic;
+	u8	Cmd;
+	short	Eclass;
+	short	Ecode;
+	u8	Flags;
+	u16	Flags2;
+	u8	Extra[12];
+	u16	TID;
+	u16	PID;
+	u16	UID;
+	u16	MID;
+} __attribute__((packed)) SMBHeader_t;
+
+typedef struct {
+	u16	TotalParamCount;
+	u16	TotalDataCount;
+	u16	MaxParamCount;
+	u16	MaxDataCount;
+	u8	MaxSetupCount;
+	u8	Reserved;
+	u16	Flags;
+	u32	Timeout;
+	u16	Reserved2;
+	u16	ParamCount;
+	u16	ParamOffset;
+	u16	DataCount;
+	u16	DataOffset;
+	u8	SetupCount;
+	u8	Reserved3;
+} __attribute__((packed)) SMBTransactionRequest_t;
+
+typedef struct {
+	u16	TotalParamCount;
+	u16	TotalDataCount;
+	u16	Reserved;
+	u16	ParamCount;
+	u16	ParamOffset;
+	u16	ParamDisplacement;
+	u16	DataCount;
+	u16	DataOffset;
+	u16	DataDisplacement;
+	u8	SetupCount;
+	u8	Reserved2;
+} __attribute__((packed)) SMBTransactionResponse_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u16	ByteCount;
+	u8	DialectFormat;
+	char	DialectName[0];
+} __attribute__((packed)) NegotiateProtocolRequest_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u16	DialectIndex;
+	u8	SecurityMode;
+	u16	MaxMpxCount;
+	u16	MaxVC;
+	u32	MaxBufferSize;
+	u32	MaxRawBuffer;
+	u32	SessionKey;
+	u32	Capabilities;
+	s64	SystemTime;
+	u16	ServerTimeZone;
+	u8	KeyLength;
+	u16	ByteCount;
+	u8	ByteField[0];
+} __attribute__((packed)) NegotiateProtocolResponse_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u8	smbAndxCmd;
+	u8	smbAndxReserved;
+	u16	smbAndxOffset;
+	u16	MaxBufferSize;
+	u16	MaxMpxCount;
+	u16	VCNumber;
+	u32	SessionKey;
+	u16	AnsiPasswordLength;
+	u16	UnicodePasswordLength;
+	u32	reserved;
+	u32	Capabilities;
+	u16	ByteCount;
+	u8	ByteField[0];
+} __attribute__((packed)) SessionSetupAndXRequest_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u8	smbAndxCmd;
+	u8	smbAndxReserved;
+	u16	smbAndxOffset;
+	u16	Action;
+	u16	ByteCount;
+} __attribute__((packed)) SessionSetupAndXResponse_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u8	smbAndxCmd;
+	u8	smbAndxReserved;
+	u16	smbAndxOffset;
+	u16	Flags;
+	u16	PasswordLength;
+	u16	ByteCount;
+	u8	ByteField[0];
+} __attribute__((packed)) TreeConnectAndXRequest_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u8	smbAndxCmd;
+	u8	smbAndxReserved;
+	u16	smbAndxOffset;
+	u16	OptionalSupport;
+	u16	ByteCount;
+} __attribute__((packed)) TreeConnectAndXResponse_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u16	ByteCount;
+} __attribute__((packed)) TreeDisconnectRequest_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u16	ByteCount;
+} __attribute__((packed)) TreeDisconnectResponse_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	SMBTransactionRequest_t smbTrans;
+	u16	ByteCount;
+	u8	ByteField[0];
+} __attribute__((packed)) NetShareEnumRequest_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	SMBTransactionResponse_t smbTrans;
+	u16	ByteCount;
+	u8	ByteField[0];
+} __attribute__((packed)) NetShareEnumResponse_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u8	smbAndxCmd;
+	u8	smbAndxReserved;
+	u16	smbAndxOffset;
+	u16	ByteCount;
+} __attribute__((packed)) LogOffAndXRequest_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u8	smbAndxCmd;
+	u8	smbAndxReserved;
+	u16	smbAndxOffset;
+	u16	ByteCount;
+} __attribute__((packed)) LogOffAndXResponse_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u16	EchoCount;
+	u16	ByteCount;
+	u8	ByteField[0];
+} __attribute__((packed)) EchoRequest_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u16	SequenceNumber;
+	u16	ByteCount;
+	u8	ByteField[0];
+} __attribute__((packed)) EchoResponse_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u16	ByteCount;
+	u8	ByteField[0];
+} __attribute__((packed)) QueryInformationDiskRequest_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u16	TotalUnits;
+	u16	BlocksPerUnit;
+	u16	BlockSize;
+	u16	FreeUnits;
+	u16	Reserved;
+	u16	ByteCount;
+} __attribute__((packed)) QueryInformationDiskResponse_t;
+
+typedef struct {
+	u16	LevelOfInterest;
+	u32	Reserved;
+	u8	FileName[0];
+} __attribute__((packed)) QueryPathInformationRequestParam_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	SMBTransactionRequest_t smbTrans;
+	u16	SubCommand;
+	u16	ByteCount;
+	u8	ByteField[0];
+} __attribute__((packed)) QueryPathInformationRequest_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	SMBTransactionResponse_t smbTrans;
+	u16	ByteCount;
+	u8	ByteField[0];
+} __attribute__((packed)) QueryPathInformationResponse_t;
+
+typedef struct {
+	s64 Created;
+	s64 LastAccess;
+	s64 LastWrite;
+	s64 Change;
+	u32 FileAttributes;
+} __attribute__((packed)) BasicFileInfo_t;
+
+typedef struct {
+	u64 AllocationSize;
+	u64 EndOfFile;
+	u32 LinkCount;
+	u8  DeletePending;
+	u8  IsDirectory;
+} __attribute__((packed)) StandardFileInfo_t;
+
+typedef struct {
+	u16	SearchAttributes;
+	u16	SearchCount;
+	u16	Flags;
+	u16	LevelOfInterest;
+	u32	StorageType;
+	u8	SearchPattern[0];
+} __attribute__((packed)) FindFirst2RequestParam_t;
+
+typedef struct {
+	u16	SearchID;
+	u16	SearchCount;
+	u16	LevelOfInterest;
+	u32	ResumeKey;
+	u16	Flags;
+	u8	SearchPattern[0];
+} __attribute__((packed)) FindNext2RequestParam_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	SMBTransactionRequest_t smbTrans;
+	u16	SubCommand;
+	u16	ByteCount;
+	u8	ByteField[0];
+} __attribute__((packed)) FindFirstNext2Request_t;
+
+typedef struct {
+	u16	SearchID;
+	u16	SearchCount;
+	u16	EndOfSearch;
+	u16	EAErrorOffset;
+	u16	LastNameOffset;
+} __attribute__((packed)) FindFirstNext2ResponseParam_t;
+
+typedef struct {
+	u32	NextEntryOffset;
+	u32	FileIndex;
+	s64	Created;
+	s64	LastAccess;
+	s64	LastWrite;
+	s64	Change;
+	u64	EndOfFile;
+	u64	AllocationSize;
+	u32	FileAttributes;
+	u32	FileNameLen;
+	u32	EAListLength;
+	u16	ShortFileNameLen;
+	u8	ShortFileName[24];
+	u8	FileName[0];
+} __attribute__((packed)) FindFirst2ResponseData_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	SMBTransactionResponse_t smbTrans;
+	u16	ByteCount;
+	u8	ByteField[0];
+} __attribute__((packed)) FindFirstNext2Response_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u8	smbAndxCmd;
+	u8	smbAndxReserved;
+	u16	smbAndxOffset;
+	u8	reserved;
+	short	NameLength;
+	u32	Flags;
+	u32	RootDirectoryFid;
+	u32	AccessMask;
+	u64	AllocationSize;
+	u32	FileAttributes;
+	u32	ShareAccess;
+	u32	CreateDisposition;
+	u32	CreateOptions;
+	u32	ImpersonationLevel;
+	u8	SecurityFlags;
+	u16	ByteCount;
+	char	ByteField[0];
+} __attribute__((packed)) NTCreateAndXRequest_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u8	smbAndxCmd;
+	u8	smbAndxReserved;
+	u16	smbAndxOffset;
+	u8	OplockLevel;
+	u16	FID;
+	u32	Action;
+	s64	Created;
+	s64	LastAccess;
+	s64	LastWrite;
+	s64	Changed;
+	u32	FileAttributes;
+	u64	AllocationSize;
+	u64	FileSize;
+	u16	FileType;
+	u16	IPCState;
+	u8	IsDirectory;
+	u16	ByteCount;
+} __attribute__((packed)) NTCreateAndXResponse_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u8	smbAndxCmd;
+	u8	smbAndxReserved;
+	u16	smbAndxOffset;
+	u16	Flags;
+	u16	AccessMask;
+	u16	SearchAttributes;
+	u16	FileAttributes;
+	u8	Created[4];
+	u16	CreateOptions;
+	u32	AllocationSize;
+	u32	reserved[2];
+	u16	ByteCount;
+	u8	ByteField[0];
+} __attribute__((packed)) OpenAndXRequest_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u8	smbAndxCmd;
+	u8	smbAndxReserved;
+	u16	smbAndxOffset;
+	u16	FID;
+	u16	FileAttributes;
+	u8	LastWrite[4];
+	u32	FileSize;
+	u16	GrantedAccess;
+	u16	FileType;
+	u16	IPCState;
+	u16	Action;
+	u32	ServerFID;
+	u16	reserved;
+	u16	ByteCount;
+} __attribute__((packed)) OpenAndXResponse_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u8	smbAndxCmd;
+	u8	smbAndxReserved;
+	u16	smbAndxOffset;
+	u16	FID;
+	u32	OffsetLow;
+	u16	MaxCountLow;
+	u16	MinCount;
+	u32	MaxCountHigh;
+	u16	Remaining;
+	u32	OffsetHigh;
+	u16	ByteCount;
+} __attribute__((packed)) ReadAndXRequest_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u8	smbAndxCmd;
+	u8	smbAndxReserved;
+	u16	smbAndxOffset;
+	u16	Remaining;
+	u16	DataCompactionMode;
+	u16	reserved;
+	u16	DataLengthLow;
+	u16	DataOffset;
+	u32	DataLengthHigh;
+	u8	reserved2[6];
+	u16	ByteCount;
+} __attribute__((packed)) ReadAndXResponse_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u8	smbAndxCmd;
+	u8	smbAndxReserved;
+	u16	smbAndxOffset;
+	u16	FID;
+	u32	OffsetLow;
+	u32	Reserved;
+	u16	WriteMode;
+	u16	Remaining;
+	u16	DataLengthHigh;
+	u16	DataLengthLow;
+	u16	DataOffset;
+	u32	OffsetHigh;
+	u16	ByteCount;
+} __attribute__((packed)) WriteAndXRequest_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u8	smbAndxCmd;
+	u8	smbAndxReserved;
+	u16	smbAndxOffset;
+	u16	Count;
+	u16	Remaining;
+	u16	CountHigh;
+	u16	Reserved;
+} __attribute__((packed)) WriteAndXResponse_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u16	FID;
+	u32	LastWrite;
+	u16	ByteCount;
+} __attribute__((packed)) CloseRequest_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u16	ByteCount;
+} __attribute__((packed)) CloseResponse_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u16	SearchAttributes;
+	u16	ByteCount;
+	u8	BufferFormat;
+	u8	FileName[0];
+} __attribute__((packed)) DeleteRequest_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u16	ByteCount;
+} __attribute__((packed)) DeleteResponse_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u16	ByteCount;
+	u8	BufferFormat;
+	u8	DirectoryName[0];
+} __attribute__((packed)) ManageDirectoryRequest_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u16	ByteCount;
+} __attribute__((packed)) ManageDirectoryResponse_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u16	SearchAttributes;
+	u16	ByteCount;
+	u8	ByteField[0];
+} __attribute__((packed)) RenameRequest_t;
+
+typedef struct {
+	SMBHeader_t smbH;
+	u8	smbWordcount;
+	u16	ByteCount;
+} __attribute__((packed)) RenameResponse_t;
 
 // function prototypes
 server_specs_t *getServerSpecs(void);
