@@ -312,7 +312,7 @@ int smb_NegotiateProtocol(u32 *capabilities)
 
 negotiate_retry:
 
-	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
+	memset(NPR, 0, sizeof(NegotiateProtocolRequest_t));
 
 	NPR->smbH.Magic = SMB_MAGIC;
 	NPR->smbH.Cmd = SMB_COM_NEGOTIATE;
@@ -432,7 +432,7 @@ int smb_SessionSetupAndX(char *User, char *Password, int PasswordType, u32 capab
 
 lbl_session_setup:
 
-	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
+	memset(SSR, 0, sizeof(SessionSetupAndXRequest_t));
 
 	CF = server_specs.StringsCF;
 
@@ -459,7 +459,10 @@ lbl_session_setup:
 	}
 
 	if ((CF == 2) && (!(passwordlen & 1)))
-		offset += 1;				// pad needed only for unicode as aligment fix if password length is even
+	{
+		SSR->ByteField[offset] = '\0';
+		offset++;				// pad needed only for unicode as aligment fix if password length is even
+	}
 
 	// Add User name
 	offset += setStringField(&SSR->ByteField[offset], User);
@@ -513,7 +516,7 @@ int smb_TreeConnectAndX(int UID, char *ShareName, char *Password, int PasswordTy
 
 lbl_tree_connect:
 
-	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
+	memset(TCR, 0, sizeof(TreeConnectAndXRequest_t));
 
 	CF = server_specs.StringsCF;
 
@@ -539,7 +542,10 @@ lbl_tree_connect:
 	offset += passwordlen;
 
 	if ((CF == 2) && (!(passwordlen & 1)))
-		offset += 1;				// pad needed only for unicode as aligment fix is password len is even
+	{
+		TCR->ByteField[offset] = '\0';
+		offset++;				// pad needed only for unicode as aligment fix is password len is even
+	}
 
 	// Add share name
 	offset += setStringField(&TCR->ByteField[offset], ShareName);
@@ -586,7 +592,7 @@ int smb_NetShareEnum(int UID, int TID, ShareEntry_t *shareEntries, int index, in
 	NetShareEnumRequest_t *NSER = &SMB_buf.pkt.netShareEnumRequest;
 	NetShareEnumResponse_t *NSERsp = &SMB_buf.pkt.netShareEnumResponse;
 
-	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
+	memset(NSER, 0, sizeof(NetShareEnumRequest_t));
 
 	NSER->smbH.Magic = SMB_MAGIC;
 	NSER->smbH.Cmd = SMB_COM_TRANSACTION;
@@ -672,7 +678,7 @@ int smb_QueryInformationDisk(int UID, int TID, smbQueryDiskInfo_out_t *QueryInfo
 	QueryInformationDiskRequest_t *QIDR = &SMB_buf.pkt.queryInformationDiskRequest;
 	QueryInformationDiskResponse_t *QIDRsp = &SMB_buf.pkt.queryInformationDiskResponse;
 
-	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
+	memset(QIDR, 0, sizeof(QueryInformationDiskRequest_t));
 
 	QIDR->smbH.Magic = SMB_MAGIC;
 	QIDR->smbH.Cmd = SMB_COM_QUERY_INFORMATION_DISK;
@@ -718,7 +724,7 @@ int smb_QueryPathInformation(int UID, int TID, PathInformation_t *Info, char *Pa
 
 query:
 
-	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
+	memset(QPIR, 0, sizeof(QueryPathInformationRequest_t));
 
 	CF = server_specs.StringsCF;
 
@@ -742,6 +748,7 @@ query:
 	QueryPathInformationRequestParam_t *QPIRParam = (QueryPathInformationRequestParam_t *)&SMB_buf.u8buff[QPIR->smbTrans.ParamOffset+4];
 
 	QPIRParam->LevelOfInterest = queryType;
+	QPIRParam->Reserved = 0;
 
 	// Add path
 	PathLen = setStringField(QPIRParam->FileName, Path);
@@ -808,7 +815,7 @@ int smb_NTCreateAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	NTCreateAndXResponse_t *NTCRsp = &SMB_buf.pkt.ntCreateAndXResponse;
 	int r, offset, CF;
 
-	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
+	memset(NTCR, 0, sizeof(NTCreateAndXRequest_t));
 
 	CF = server_specs.StringsCF;
 
@@ -838,7 +845,10 @@ int smb_NTCreateAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 
 	offset = 0;
 	if (CF == 2)
+	{
+		NTCR->ByteField[offset] = '\0';
 		offset++;				// pad needed only for unicode as aligment fix
+	}
 
 	// Add filename
 	NTCR->NameLength = setStringField(&NTCR->ByteField[offset], filename);
@@ -887,7 +897,7 @@ int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	if (server_specs.SupportsNTSMB)
 		return smb_NTCreateAndX(UID, TID, filename, filesize, mode);
 
-	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
+	memset(OR, 0, sizeof(OpenAndXRequest_t));
 
 	CF = server_specs.StringsCF;
 
@@ -912,7 +922,10 @@ int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 
 	offset = 0;
 	if (CF == 2)
+	{
+		OR->ByteField[offset] = '\0';
 		offset++;				// pad needed only for unicode as aligment fix
+	}
 
 	// Add filename
 	offset += setStringField(&OR->ByteField[offset], filename);
@@ -1028,7 +1041,7 @@ int smb_Close(int UID, int TID, int FID)
 	CloseRequest_t *CR = &SMB_buf.pkt.closeRequest;
 	CloseResponse_t *CRsp = &SMB_buf.pkt.closeResponse;
 
-	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
+	memset(CR, 0, sizeof(CloseRequest_t));
 
 	CR->smbH.Magic = SMB_MAGIC;
 	CR->smbH.Cmd = SMB_COM_CLOSE;
@@ -1062,7 +1075,7 @@ int smb_Delete(int UID, int TID, char *Path)
 	DeleteRequest_t *DR = &SMB_buf.pkt.deleteRequest;
 	DeleteResponse_t *DRsp = &SMB_buf.pkt.deleteResponse;
 
-	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
+	memset(DR, 0, sizeof(DeleteRequest_t));
 
 	CF = server_specs.StringsCF;
 
@@ -1105,7 +1118,7 @@ int smb_ManageDirectory(int UID, int TID, char *Path, int cmd)
 	ManageDirectoryRequest_t *MDR = &SMB_buf.pkt.manageDirectoryRequest;
 	ManageDirectoryResponse_t *MDRsp = &SMB_buf.pkt.manageDirectoryResponse;
 
-	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
+	memset(MDR, 0, sizeof(ManageDirectoryRequest_t));
 
 	CF = server_specs.StringsCF;
 
@@ -1154,7 +1167,7 @@ int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 	RenameRequest_t *RR = &SMB_buf.pkt.renameRequest;
 	RenameResponse_t *RRsp = &SMB_buf.pkt.renameResponse;
 
-	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
+	memset(RR, 0, sizeof(RenameRequest_t));
 
 	CF = server_specs.StringsCF;
 
@@ -1181,7 +1194,10 @@ int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 	// Add newPath
 	RR->ByteField[offset++] = 0x04;			// BufferFormat
 	if (CF == 2)
+	{
+		RR->ByteField[offset] = '\0';
 		offset++;				// pad needed for unicode
+	}
 	offset += setStringField(&RR->ByteField[offset], newPath);
 
 	RR->ByteCount = offset;
@@ -1213,11 +1229,11 @@ int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 //-------------------------------------------------------------------------
 int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info)
 {
-	int r, CF, PathLen;
+	int r, CF, PathLen, offset;
 	FindFirstNext2Request_t *FFNR = &SMB_buf.pkt.findFirstNext2Request;
 	FindFirstNext2Response_t *FFNRsp = &SMB_buf.pkt.findFirstNext2Response;
 
-	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
+	memset(FFNR, 0, sizeof(FindFirstNext2Request_t));
 
 	CF = server_specs.StringsCF;
 
@@ -1234,39 +1250,46 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 	FFNR->smbTrans.SetupCount = 1;
 	FFNR->SubCommand = (u8)cmd;
 
-	FFNR->smbTrans.ParamOffset = 68;
+	FFNR->smbTrans.ParamOffset = (sizeof(FindFirstNext2Request_t) + 3) & ~3; //Keep aligned to a 4-byte boundary as required.
 	FFNR->smbTrans.MaxParamCount = 256; 		// Max Parameters len in reply
 	FFNR->smbTrans.MaxDataCount = 16384;		// Max Data len in reply
 
+	//Zero Pad1.
+	memset((void*)(FFNR + 1), 0, FFNR->smbTrans.ParamOffset - sizeof(FindFirstNext2Request_t));
+
 	if (cmd == TRANS2_FIND_FIRST2) {
-		FindFirst2RequestParam_t *FFRParam = (FindFirst2RequestParam_t *)&SMB_buf.u8buff[FFNR->smbTrans.ParamOffset+4];
+		FindFirst2RequestParam_t *FFRParam = (FindFirst2RequestParam_t *)&SMB_buf.u8buff[FFNR->smbTrans.ParamOffset+4]; //+4 to skip the session header.
 
 		FFRParam->SearchAttributes = ATTR_READONLY | ATTR_HIDDEN | ATTR_SYSTEM | ATTR_DIRECTORY | ATTR_ARCHIVE;
 		FFRParam->SearchCount = 1;
 		FFRParam->Flags = CLOSE_SEARCH_IF_EOS | RESUME_SEARCH;
 		FFRParam->LevelOfInterest = SMB_FIND_FILE_BOTH_DIRECTORY_INFO;
+		FFRParam->StorageType = 0;
 
 		// Add path
 		PathLen = setStringField(FFRParam->SearchPattern, Path);
 
-		FFNR->smbTrans.TotalParamCount = FFNR->smbTrans.ParamCount = 2+2+2+2+4+PathLen;
+		FFNR->smbTrans.TotalParamCount = FFNR->smbTrans.ParamCount = sizeof(FindFirst2RequestParam_t) + PathLen;
 	}
 	else {
-		FindNext2RequestParam_t *FNRParam = (FindNext2RequestParam_t *)&SMB_buf.u8buff[FFNR->smbTrans.ParamOffset+4];
+		FindNext2RequestParam_t *FNRParam = (FindNext2RequestParam_t *)&SMB_buf.u8buff[FFNR->smbTrans.ParamOffset+4]; //+4 to skip the session header.
 
 		FNRParam->SearchID = (u16)info->SID;
 		FNRParam->SearchCount = 1;
 		FNRParam->LevelOfInterest = SMB_FIND_FILE_BOTH_DIRECTORY_INFO;
+		FNRParam->ResumeKey = 0;
 		FNRParam->Flags = CLOSE_SEARCH_IF_EOS | RESUME_SEARCH | CONTINUE_SEARCH;
 		FNRParam->SearchPattern[0] = 0;
-		FFNR->smbTrans.TotalParamCount = FFNR->smbTrans.ParamCount = 2+2+2+2+4+1;
+		FFNR->smbTrans.TotalParamCount = FFNR->smbTrans.ParamCount = sizeof(FindNext2RequestParam_t) + 1;
 	}
 
 	FFNR->ByteCount = 3 + FFNR->smbTrans.TotalParamCount;
+	offset = FFNR->smbTrans.ParamOffset + FFNR->smbTrans.TotalParamCount;
 
-	FFNR->smbTrans.DataOffset = FFNR->smbTrans.ParamOffset + FFNR->smbTrans.TotalParamCount;
+	//No data, so no Pad2. As DataCount is 0, the client may set DataOffset to 0.
+	//FFNR->smbTrans.DataOffset = (u16)offset;
 
-	rawTCP_SetSessionHeader(FFNR->smbTrans.DataOffset);
+	rawTCP_SetSessionHeader(offset);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -1324,7 +1347,7 @@ int smb_TreeDisconnect(int UID, int TID)
 	TreeDisconnectRequest_t *TDR = &SMB_buf.pkt.treeDisconnectRequest;
 	TreeDisconnectResponse_t *TDRsp = &SMB_buf.pkt.treeDisconnectResponse;
 
-	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
+	memset(TDR, 0, sizeof(TreeDisconnectRequest_t));
 
 	TDR->smbH.Magic = SMB_MAGIC;
 	TDR->smbH.Cmd = SMB_COM_TREE_DISCONNECT;
@@ -1356,7 +1379,7 @@ int smb_LogOffAndX(int UID)
 	LogOffAndXRequest_t *LR = &SMB_buf.pkt.logOffAndXRequest;
 	LogOffAndXResponse_t *LRsp = &SMB_buf.pkt.logOffAndXResponse;
 
-	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
+	memset(LR, 0, sizeof(LogOffAndXRequest_t));
 
 	LR->smbH.Magic = SMB_MAGIC;
 	LR->smbH.Cmd = SMB_COM_LOGOFF_ANDX;
@@ -1389,7 +1412,7 @@ int smb_Echo(void *echo, int len)
 	EchoRequest_t *ER = &SMB_buf.pkt.echoRequest;
 	EchoResponse_t *ERsp = &SMB_buf.pkt.echoResponse;
 
-	memset(SMB_buf.u8buff, 0, sizeof(SMB_buf.u8buff));
+	memset(ER, 0, sizeof(EchoRequest_t));
 
 	ER->smbH.Magic = SMB_MAGIC;
 	ER->smbH.Cmd = SMB_COM_ECHO;
