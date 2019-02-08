@@ -43,53 +43,51 @@ WriteAndXRequest_t smb_Write_Request = {
 
 static int main_socket = -1;
 
-static union {
-	u8 u8buff[MAX_SMB_BUF+1024];
-	u16 u16buff[(MAX_SMB_BUF+1024) / sizeof(u16)];
-	s16 s16buff[(MAX_SMB_BUF+1024) / sizeof(s16)];
-	struct {
-		//Direct transport packet header. This is also a NetBIOS session header.
-		u32 sessionHeader; //The lower 24 bytes are the length of the payload in network byte-order, while the upper 8 bits must be set to 0 (Session Message Packet).
-		union {
-			NegotiateProtocolRequest_t negotiateProtocolRequest;
-			NegotiateProtocolResponse_t negotiateProtocolResponse;
-			SessionSetupAndXRequest_t sessionSetupAndXRequest;
-			SessionSetupAndXResponse_t sessionSetupAndXResponse;
-			TreeConnectAndXRequest_t treeConnectAndXRequest;
-			TreeConnectAndXResponse_t treeConnectAndXResponse;
-			TreeDisconnectRequest_t treeDisconnectRequest;
-			TreeDisconnectResponse_t treeDisconnectResponse;
-			NetShareEnumRequest_t netShareEnumRequest;
-			NetShareEnumResponse_t netShareEnumResponse;
-			LogOffAndXRequest_t logOffAndXRequest;
-			LogOffAndXResponse_t logOffAndXResponse;
-			EchoRequest_t echoRequest;
-			EchoResponse_t echoResponse;
-			QueryInformationDiskRequest_t queryInformationDiskRequest;
-			QueryInformationDiskResponse_t queryInformationDiskResponse;
-			QueryPathInformationRequest_t queryPathInformationRequest;
-			QueryPathInformationResponse_t queryPathInformationResponse;
-			FindFirstNext2Request_t findFirstNext2Request;
-			FindFirstNext2Response_t findFirstNext2Response;
-			NTCreateAndXRequest_t ntCreateAndXRequest;
-			NTCreateAndXResponse_t ntCreateAndXResponse;
-			OpenAndXRequest_t openAndXRequest;
-			OpenAndXResponse_t openAndXResponse;
-			ReadAndXRequest_t readAndXRequest;
-			ReadAndXResponse_t readAndXResponse;
-			WriteAndXRequest_t writeAndXRequest;
-			WriteAndXResponse_t writeAndXResponse;
-			CloseRequest_t closeRequest;
-			CloseResponse_t closeResponse;
-			DeleteRequest_t deleteRequest;
-			DeleteResponse_t deleteResponse;
-			ManageDirectoryRequest_t manageDirectoryRequest;
-			ManageDirectoryResponse_t manageDirectoryResponse;
-			RenameRequest_t renameRequest;
-			RenameResponse_t renameResponse;
-		};
-	} __attribute__((packed)) pkt;
-} SMB_buf;
+static struct {
+	//Direct transport packet header. This is also a NetBIOS session header.
+	u32 sessionHeader; //The lower 24 bytes are the length of the payload in network byte-order, while the upper 8 bits must be set to 0 (Session Message Packet).
+	union {
+		u8 u8buff[MAX_SMB_BUF+1024];
+		u16 u16buff[(MAX_SMB_BUF+1024) / sizeof(u16)];
+		s16 s16buff[(MAX_SMB_BUF+1024) / sizeof(s16)];
+		NegotiateProtocolRequest_t negotiateProtocolRequest;
+		NegotiateProtocolResponse_t negotiateProtocolResponse;
+		SessionSetupAndXRequest_t sessionSetupAndXRequest;
+		SessionSetupAndXResponse_t sessionSetupAndXResponse;
+		TreeConnectAndXRequest_t treeConnectAndXRequest;
+		TreeConnectAndXResponse_t treeConnectAndXResponse;
+		TreeDisconnectRequest_t treeDisconnectRequest;
+		TreeDisconnectResponse_t treeDisconnectResponse;
+		NetShareEnumRequest_t netShareEnumRequest;
+		NetShareEnumResponse_t netShareEnumResponse;
+		LogOffAndXRequest_t logOffAndXRequest;
+		LogOffAndXResponse_t logOffAndXResponse;
+		EchoRequest_t echoRequest;
+		EchoResponse_t echoResponse;
+		QueryInformationDiskRequest_t queryInformationDiskRequest;
+		QueryInformationDiskResponse_t queryInformationDiskResponse;
+		QueryPathInformationRequest_t queryPathInformationRequest;
+		QueryPathInformationResponse_t queryPathInformationResponse;
+		FindFirstNext2Request_t findFirstNext2Request;
+		FindFirstNext2Response_t findFirstNext2Response;
+		NTCreateAndXRequest_t ntCreateAndXRequest;
+		NTCreateAndXResponse_t ntCreateAndXResponse;
+		OpenAndXRequest_t openAndXRequest;
+		OpenAndXResponse_t openAndXResponse;
+		ReadAndXRequest_t readAndXRequest;
+		ReadAndXResponse_t readAndXResponse;
+		WriteAndXRequest_t writeAndXRequest;
+		WriteAndXResponse_t writeAndXResponse;
+		CloseRequest_t closeRequest;
+		CloseResponse_t closeResponse;
+		DeleteRequest_t deleteRequest;
+		DeleteResponse_t deleteResponse;
+		ManageDirectoryRequest_t manageDirectoryRequest;
+		ManageDirectoryResponse_t manageDirectoryResponse;
+		RenameRequest_t renameRequest;
+		RenameResponse_t renameResponse;
+	} smb;
+} __attribute__((packed)) SMB_buf;
 
 //-------------------------------------------------------------------------
 server_specs_t *getServerSpecs(void)
@@ -102,7 +100,7 @@ static void nb_SetSessionMessage(u32 size) // Write Session Service header: care
 {
 	// maximum for raw TCP transport (24 bits) !!!
 	// Byte-swap length into network byte-order.
-	SMB_buf.pkt.sessionHeader = ((size & 0xff0000) >> 8) | ((size & 0xff00) << 8) | ((size & 0xff) << 24);
+	SMB_buf.sessionHeader = ((size & 0xff0000) >> 8) | ((size & 0xff00) << 8) | ((size & 0xff) << 24);
 }
 
 //-------------------------------------------------------------------------
@@ -112,7 +110,7 @@ static int nb_GetSessionMessageLength(void) // Read Session Service header lengt
 
 	// maximum for raw TCP transport (24 bits) !!!
 	// Byte-swap length from network byte-order.
-	size = ((SMB_buf.pkt.sessionHeader << 8) & 0xff0000) | ((SMB_buf.pkt.sessionHeader >> 8) & 0xff00) | ((SMB_buf.pkt.sessionHeader >> 24) & 0xff);
+	size = ((SMB_buf.sessionHeader << 8) & 0xff0000) | ((SMB_buf.sessionHeader >> 8) & 0xff00) | ((SMB_buf.sessionHeader >> 24) & 0xff);
 
 	return (int)size;
 }
@@ -120,7 +118,7 @@ static int nb_GetSessionMessageLength(void) // Read Session Service header lengt
 static u8 nb_GetPacketType(void) // Read Session Service header type.
 {
 	// Byte-swap length from network byte-order.
-	return((u8)(SMB_buf.pkt.sessionHeader & 0xff));
+	return((u8)(SMB_buf.sessionHeader & 0xff));
 }
 
 //-------------------------------------------------------------------------
@@ -232,13 +230,13 @@ static int GetSMBServerReply(void)
 	int rcv_size, totalpkt_size;
 
 	//Send the whole message, including the 4-byte direct transport packet header.
-	rcv_size = SendData(main_socket, (char *)&SMB_buf.pkt, nb_GetSessionMessageLength() + 4);
+	rcv_size = SendData(main_socket, (char *)&SMB_buf, nb_GetSessionMessageLength() + 4);
 	if (rcv_size <= 0)
 		return -1;
 
 	//Read NetBIOS session message header. Drop NBSS Session Keep alive messages (type == 0x85, with no body), but process session messages (type == 0x00).
 	do{
-		rcv_size = RecvData(main_socket, (char *)&SMB_buf.pkt.sessionHeader, sizeof(SMB_buf.pkt.sessionHeader), 10000); // 10s before the packet is considered lost
+		rcv_size = RecvData(main_socket, (char *)&SMB_buf.sessionHeader, sizeof(SMB_buf.sessionHeader), 10000); // 10s before the packet is considered lost
 		if (rcv_size <= 0)
 			return -2;
 	} while (nb_GetPacketType() != 0);
@@ -246,7 +244,7 @@ static int GetSMBServerReply(void)
 	// Handle fragmented packets
 	totalpkt_size = nb_GetSessionMessageLength();
 
-	rcv_size = RecvData(main_socket, (char *)&SMB_buf.pkt, totalpkt_size, 3000); // 3s before the packet is considered lost
+	rcv_size = RecvData(main_socket, (char *)&SMB_buf, totalpkt_size, 3000); // 3s before the packet is considered lost
 	if (rcv_size <= 0)
 		return -2;
 
@@ -348,8 +346,8 @@ int smb_NegotiateProtocol(u32 *capabilities)
 {
 	static char *dialect = "NT LM 0.12";
 	int r, length, retry_count;
-	NegotiateProtocolRequest_t *NPR = &SMB_buf.pkt.negotiateProtocolRequest;
-	NegotiateProtocolResponse_t *NPRsp = &SMB_buf.pkt.negotiateProtocolResponse;
+	NegotiateProtocolRequest_t *NPR = &SMB_buf.smb.negotiateProtocolRequest;
+	NegotiateProtocolResponse_t *NPRsp = &SMB_buf.smb.negotiateProtocolResponse;
 
 	retry_count = 0;
 
@@ -467,8 +465,8 @@ static int AddPassword(char *Password, int PasswordType, int AuthType, u16 *Ansi
 //-------------------------------------------------------------------------
 int smb_SessionSetupAndX(char *User, char *Password, int PasswordType, u32 capabilities)
 {
-	SessionSetupAndXRequest_t *SSR = &SMB_buf.pkt.sessionSetupAndXRequest;
-	SessionSetupAndXResponse_t *SSRsp = &SMB_buf.pkt.sessionSetupAndXResponse;
+	SessionSetupAndXRequest_t *SSR = &SMB_buf.smb.sessionSetupAndXRequest;
+	SessionSetupAndXResponse_t *SSRsp = &SMB_buf.smb.sessionSetupAndXResponse;
 	int r, offset, CF;
 	int passwordlen = 0;
 	int AuthType = NTLM_AUTH;
@@ -551,8 +549,8 @@ lbl_session_setup:
 //-------------------------------------------------------------------------
 int smb_TreeConnectAndX(int UID, char *ShareName, char *Password, int PasswordType) // PasswordType: 0 = PlainText, 1 = Hash
 {
-	TreeConnectAndXRequest_t *TCR = &SMB_buf.pkt.treeConnectAndXRequest;
-	TreeConnectAndXResponse_t *TCRsp = &SMB_buf.pkt.treeConnectAndXResponse;
+	TreeConnectAndXRequest_t *TCR = &SMB_buf.smb.treeConnectAndXRequest;
+	TreeConnectAndXResponse_t *TCRsp = &SMB_buf.smb.treeConnectAndXResponse;
 	int r, offset, CF;
 	int passwordlen = 0;
 	int AuthType = NTLM_AUTH;
@@ -632,8 +630,8 @@ int smb_NetShareEnum(int UID, int TID, ShareEntry_t *shareEntries, int index, in
 {
 	int r, i;
 	int count = 0;
-	NetShareEnumRequest_t *NSER = &SMB_buf.pkt.netShareEnumRequest;
-	NetShareEnumResponse_t *NSERsp = &SMB_buf.pkt.netShareEnumResponse;
+	NetShareEnumRequest_t *NSER = &SMB_buf.smb.netShareEnumRequest;
+	NetShareEnumResponse_t *NSERsp = &SMB_buf.smb.netShareEnumResponse;
 
 	memset(NSER, 0, sizeof(NetShareEnumRequest_t));
 
@@ -681,14 +679,14 @@ int smb_NetShareEnum(int UID, int TID, ShareEntry_t *shareEntries, int index, in
 	}
 
 	// API status must be 0
-	if (SMB_buf.u16buff[(NSERsp->smbTrans.ParamOffset+4) / sizeof(u16)] != 0)
+	if (SMB_buf.smb.u16buff[NSERsp->smbTrans.ParamOffset / sizeof(u16)] != 0)
 		return -EIO;
 
 	// available entries
-	int AvailableEntries = SMB_buf.s16buff[(NSERsp->smbTrans.ParamOffset+4+6) / sizeof(s16)];
+	int AvailableEntries = SMB_buf.smb.s16buff[(NSERsp->smbTrans.ParamOffset+6) / sizeof(s16)];
 
 	// data start
-	char *data = (char *)&SMB_buf.u8buff[NSERsp->smbTrans.DataOffset+4];
+	char *data = (char *)&SMB_buf.smb.u8buff[NSERsp->smbTrans.DataOffset];
 	char *p = data;
 
 	for (i=0; i<AvailableEntries; i++) {
@@ -718,8 +716,8 @@ int smb_NetShareEnum(int UID, int TID, ShareEntry_t *shareEntries, int index, in
 int smb_QueryInformationDisk(int UID, int TID, smbQueryDiskInfo_out_t *QueryInformationDisk)
 {
 	int r;
-	QueryInformationDiskRequest_t *QIDR = &SMB_buf.pkt.queryInformationDiskRequest;
-	QueryInformationDiskResponse_t *QIDRsp = &SMB_buf.pkt.queryInformationDiskResponse;
+	QueryInformationDiskRequest_t *QIDR = &SMB_buf.smb.queryInformationDiskRequest;
+	QueryInformationDiskResponse_t *QIDRsp = &SMB_buf.smb.queryInformationDiskResponse;
 
 	memset(QIDR, 0, sizeof(QueryInformationDiskRequest_t));
 
@@ -760,8 +758,8 @@ int smb_QueryInformationDisk(int UID, int TID, smbQueryDiskInfo_out_t *QueryInfo
 int smb_QueryPathInformation(int UID, int TID, PathInformation_t *Info, char *Path)
 {
 	int r, PathLen, CF, queryType;
-	QueryPathInformationRequest_t *QPIR = &SMB_buf.pkt.queryPathInformationRequest;
-	QueryPathInformationResponse_t *QPIRsp = &SMB_buf.pkt.queryPathInformationResponse;
+	QueryPathInformationRequest_t *QPIR = &SMB_buf.smb.queryPathInformationRequest;
+	QueryPathInformationResponse_t *QPIRsp = &SMB_buf.smb.queryPathInformationResponse;
 
 	queryType = SMB_QUERY_FILE_BASIC_INFO;
 
@@ -788,7 +786,7 @@ query:
 	QPIR->smbTrans.MaxParamCount = 256; 		// Max Parameters len in reply
 	QPIR->smbTrans.MaxDataCount = 16384;		// Max Data len in reply
 
-	QueryPathInformationRequestParam_t *QPIRParam = (QueryPathInformationRequestParam_t *)&SMB_buf.u8buff[QPIR->smbTrans.ParamOffset+4];
+	QueryPathInformationRequestParam_t *QPIRParam = (QueryPathInformationRequestParam_t *)&SMB_buf.smb.u8buff[QPIR->smbTrans.ParamOffset];
 
 	QPIRParam->LevelOfInterest = queryType;
 	QPIRParam->Reserved = 0;
@@ -825,7 +823,7 @@ query:
 
 	if (queryType == SMB_QUERY_FILE_BASIC_INFO) {
 
-		BasicFileInfo_t *BFI = (BasicFileInfo_t *)&SMB_buf.u8buff[QPIRsp->smbTrans.DataOffset+4];
+		BasicFileInfo_t *BFI = (BasicFileInfo_t *)&SMB_buf.smb.u8buff[QPIRsp->smbTrans.DataOffset];
 
 		Info->Created = BFI->Created;
 		Info->LastAccess = BFI->LastAccess;
@@ -839,7 +837,7 @@ query:
 	}
 	else if (queryType == SMB_QUERY_FILE_STANDARD_INFO) {
 
-		StandardFileInfo_t *SFI = (StandardFileInfo_t *)&SMB_buf.u8buff[QPIRsp->smbTrans.DataOffset+4];
+		StandardFileInfo_t *SFI = (StandardFileInfo_t *)&SMB_buf.smb.u8buff[QPIRsp->smbTrans.DataOffset];
 
 		Info->AllocationSize = SFI->AllocationSize;
 		Info->EndOfFile = SFI->EndOfFile;
@@ -854,8 +852,8 @@ query:
 //-------------------------------------------------------------------------
 int smb_NTCreateAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 {
-	NTCreateAndXRequest_t *NTCR = &SMB_buf.pkt.ntCreateAndXRequest;
-	NTCreateAndXResponse_t *NTCRsp = &SMB_buf.pkt.ntCreateAndXResponse;
+	NTCreateAndXRequest_t *NTCR = &SMB_buf.smb.ntCreateAndXRequest;
+	NTCreateAndXResponse_t *NTCRsp = &SMB_buf.smb.ntCreateAndXResponse;
 	int r, offset, CF;
 
 	memset(NTCR, 0, sizeof(NTCreateAndXRequest_t));
@@ -933,8 +931,8 @@ int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	// NT SMB commands set.
 
 	PathInformation_t info;
-	OpenAndXRequest_t *OR = &SMB_buf.pkt.openAndXRequest;
-	OpenAndXResponse_t *ORsp = &SMB_buf.pkt.openAndXResponse;
+	OpenAndXRequest_t *OR = &SMB_buf.smb.openAndXRequest;
+	OpenAndXResponse_t *ORsp = &SMB_buf.smb.openAndXResponse;
 	int r, offset, CF;
 
 	if (server_specs.SupportsNTSMB)
@@ -1007,8 +1005,8 @@ int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 //-------------------------------------------------------------------------
 int smb_ReadAndX(int UID, int TID, int FID, s64 fileoffset, void *readbuf, u16 nbytes)
 {
-	ReadAndXRequest_t *RR = &SMB_buf.pkt.readAndXRequest;
-	ReadAndXResponse_t *RRsp = &SMB_buf.pkt.readAndXResponse;
+	ReadAndXRequest_t *RR = &SMB_buf.smb.readAndXRequest;
+	ReadAndXResponse_t *RRsp = &SMB_buf.smb.readAndXResponse;
 	int r;
 
 	memcpy(RR, &smb_Read_Request, sizeof(ReadAndXRequest_t));
@@ -1036,7 +1034,7 @@ int smb_ReadAndX(int UID, int TID, int FID, s64 fileoffset, void *readbuf, u16 n
 	r = RRsp->DataLengthLow;
 
 	if (RRsp->DataOffset > 0)
-		memcpy(readbuf, &SMB_buf.u8buff[4 + RRsp->DataOffset], r);
+		memcpy(readbuf, &SMB_buf.smb.u8buff[RRsp->DataOffset], r);
 
 	return r;
 }
@@ -1045,8 +1043,8 @@ int smb_ReadAndX(int UID, int TID, int FID, s64 fileoffset, void *readbuf, u16 n
 int smb_WriteAndX(int UID, int TID, int FID, s64 fileoffset, void *writebuf, u16 nbytes)
 {
 	int r;
-	WriteAndXRequest_t *WR = &SMB_buf.pkt.writeAndXRequest;
-	WriteAndXResponse_t *WRsp = &SMB_buf.pkt.writeAndXResponse;
+	WriteAndXRequest_t *WR = &SMB_buf.smb.writeAndXRequest;
+	WriteAndXResponse_t *WRsp = &SMB_buf.smb.writeAndXResponse;
 
 	memcpy(WR, &smb_Write_Request, sizeof(WriteAndXRequest_t));
 
@@ -1059,7 +1057,7 @@ int smb_WriteAndX(int UID, int TID, int FID, s64 fileoffset, void *writebuf, u16
 	WR->DataLengthLow = nbytes;
 	WR->ByteCount = nbytes;
 
-	memcpy((void *)(&SMB_buf.u8buff[4 + WR->DataOffset]), writebuf, nbytes);
+	memcpy((void *)(&SMB_buf.smb.u8buff[WR->DataOffset]), writebuf, nbytes);
 
 	nb_SetSessionMessage(sizeof(WriteAndXRequest_t) + nbytes);
 	r = GetSMBServerReply();
@@ -1081,8 +1079,8 @@ int smb_WriteAndX(int UID, int TID, int FID, s64 fileoffset, void *writebuf, u16
 int smb_Close(int UID, int TID, int FID)
 {
 	int r;
-	CloseRequest_t *CR = &SMB_buf.pkt.closeRequest;
-	CloseResponse_t *CRsp = &SMB_buf.pkt.closeResponse;
+	CloseRequest_t *CR = &SMB_buf.smb.closeRequest;
+	CloseResponse_t *CRsp = &SMB_buf.smb.closeResponse;
 
 	memset(CR, 0, sizeof(CloseRequest_t));
 
@@ -1115,8 +1113,8 @@ int smb_Close(int UID, int TID, int FID)
 int smb_Delete(int UID, int TID, char *Path)
 {
 	int r, CF, PathLen;
-	DeleteRequest_t *DR = &SMB_buf.pkt.deleteRequest;
-	DeleteResponse_t *DRsp = &SMB_buf.pkt.deleteResponse;
+	DeleteRequest_t *DR = &SMB_buf.smb.deleteRequest;
+	DeleteResponse_t *DRsp = &SMB_buf.smb.deleteResponse;
 
 	memset(DR, 0, sizeof(DeleteRequest_t));
 
@@ -1158,8 +1156,8 @@ int smb_Delete(int UID, int TID, char *Path)
 int smb_ManageDirectory(int UID, int TID, char *Path, int cmd)
 {
 	int r, CF, PathLen;
-	ManageDirectoryRequest_t *MDR = &SMB_buf.pkt.manageDirectoryRequest;
-	ManageDirectoryResponse_t *MDRsp = &SMB_buf.pkt.manageDirectoryResponse;
+	ManageDirectoryRequest_t *MDR = &SMB_buf.smb.manageDirectoryRequest;
+	ManageDirectoryResponse_t *MDRsp = &SMB_buf.smb.manageDirectoryResponse;
 
 	memset(MDR, 0, sizeof(ManageDirectoryRequest_t));
 
@@ -1207,8 +1205,8 @@ int smb_ManageDirectory(int UID, int TID, char *Path, int cmd)
 int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 {
 	int r, CF, offset;
-	RenameRequest_t *RR = &SMB_buf.pkt.renameRequest;
-	RenameResponse_t *RRsp = &SMB_buf.pkt.renameResponse;
+	RenameRequest_t *RR = &SMB_buf.smb.renameRequest;
+	RenameResponse_t *RRsp = &SMB_buf.smb.renameResponse;
 
 	memset(RR, 0, sizeof(RenameRequest_t));
 
@@ -1273,8 +1271,8 @@ int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info)
 {
 	int r, CF, PathLen, offset;
-	FindFirstNext2Request_t *FFNR = &SMB_buf.pkt.findFirstNext2Request;
-	FindFirstNext2Response_t *FFNRsp = &SMB_buf.pkt.findFirstNext2Response;
+	FindFirstNext2Request_t *FFNR = &SMB_buf.smb.findFirstNext2Request;
+	FindFirstNext2Response_t *FFNRsp = &SMB_buf.smb.findFirstNext2Response;
 
 	memset(FFNR, 0, sizeof(FindFirstNext2Request_t));
 
@@ -1301,7 +1299,7 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 	memset((void*)(FFNR + 1), 0, FFNR->smbTrans.ParamOffset - sizeof(FindFirstNext2Request_t));
 
 	if (cmd == TRANS2_FIND_FIRST2) {
-		FindFirst2RequestParam_t *FFRParam = (FindFirst2RequestParam_t *)&SMB_buf.u8buff[FFNR->smbTrans.ParamOffset+4]; //+4 to skip the session header.
+		FindFirst2RequestParam_t *FFRParam = (FindFirst2RequestParam_t *)&SMB_buf.smb.u8buff[FFNR->smbTrans.ParamOffset];
 
 		FFRParam->SearchAttributes = ATTR_READONLY | ATTR_HIDDEN | ATTR_SYSTEM | ATTR_DIRECTORY | ATTR_ARCHIVE;
 		FFRParam->SearchCount = 1;
@@ -1315,7 +1313,7 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 		FFNR->smbTrans.TotalParamCount = FFNR->smbTrans.ParamCount = sizeof(FindFirst2RequestParam_t) + PathLen;
 	}
 	else {
-		FindNext2RequestParam_t *FNRParam = (FindNext2RequestParam_t *)&SMB_buf.u8buff[FFNR->smbTrans.ParamOffset+4]; //+4 to skip the session header.
+		FindNext2RequestParam_t *FNRParam = (FindNext2RequestParam_t *)&SMB_buf.smb.u8buff[FFNR->smbTrans.ParamOffset];
 
 		FNRParam->SearchID = (u16)info->SID;
 		FNRParam->SearchCount = 1;
@@ -1356,13 +1354,13 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 	FindFirstNext2ResponseParam_t *FFNRspParam;
 
 	if (cmd == TRANS2_FIND_FIRST2) {
-		FFNRspParam = (FindFirstNext2ResponseParam_t *)&SMB_buf.u8buff[FFNRsp->smbTrans.ParamOffset+4];
+		FFNRspParam = (FindFirstNext2ResponseParam_t *)&SMB_buf.smb.u8buff[FFNRsp->smbTrans.ParamOffset];
 		info->SID = FFNRspParam->SearchID;
 	}
 	else
-		FFNRspParam = (FindFirstNext2ResponseParam_t *)&SMB_buf.u8buff[FFNRsp->smbTrans.ParamOffset+4-2];
+		FFNRspParam = (FindFirstNext2ResponseParam_t *)&SMB_buf.smb.u8buff[FFNRsp->smbTrans.ParamOffset-2];
 
-	FindFirst2ResponseData_t *FFRspData = (FindFirst2ResponseData_t *)&SMB_buf.u8buff[FFNRsp->smbTrans.DataOffset+4];
+	FindFirst2ResponseData_t *FFRspData = (FindFirst2ResponseData_t *)&SMB_buf.smb.u8buff[FFNRsp->smbTrans.DataOffset];
 
 	info->EOS = FFNRspParam->EndOfSearch;
 
@@ -1387,8 +1385,8 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 int smb_TreeDisconnect(int UID, int TID)
 {
 	int r;
-	TreeDisconnectRequest_t *TDR = &SMB_buf.pkt.treeDisconnectRequest;
-	TreeDisconnectResponse_t *TDRsp = &SMB_buf.pkt.treeDisconnectResponse;
+	TreeDisconnectRequest_t *TDR = &SMB_buf.smb.treeDisconnectRequest;
+	TreeDisconnectResponse_t *TDRsp = &SMB_buf.smb.treeDisconnectResponse;
 
 	memset(TDR, 0, sizeof(TreeDisconnectRequest_t));
 
@@ -1419,8 +1417,8 @@ int smb_TreeDisconnect(int UID, int TID)
 int smb_LogOffAndX(int UID)
 {
 	int r;
-	LogOffAndXRequest_t *LR = &SMB_buf.pkt.logOffAndXRequest;
-	LogOffAndXResponse_t *LRsp = &SMB_buf.pkt.logOffAndXResponse;
+	LogOffAndXRequest_t *LR = &SMB_buf.smb.logOffAndXRequest;
+	LogOffAndXResponse_t *LRsp = &SMB_buf.smb.logOffAndXResponse;
 
 	memset(LR, 0, sizeof(LogOffAndXRequest_t));
 
@@ -1452,8 +1450,8 @@ int smb_LogOffAndX(int UID)
 int smb_Echo(void *echo, int len)
 {
 	int r;
-	EchoRequest_t *ER = &SMB_buf.pkt.echoRequest;
-	EchoResponse_t *ERsp = &SMB_buf.pkt.echoResponse;
+	EchoRequest_t *ER = &SMB_buf.smb.echoRequest;
+	EchoResponse_t *ERsp = &SMB_buf.smb.echoResponse;
 
 	memset(ER, 0, sizeof(EchoRequest_t));
 
