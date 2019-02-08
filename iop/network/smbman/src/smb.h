@@ -149,14 +149,15 @@
 #define SERVER_CAP_RAW_MODE			0x00000001
 
 // SMB Client Capabilities
-#define CLIENT_CAP_EXTENDED_SECURITY		0x80000000
-#define CLIENT_CAP_LARGE_READX			0x00004000
-#define CLIENT_CAP_NT_FIND			0x00000200
-#define CLIENT_CAP_LEVEL_II_OPLOCKS		0x00000080
-#define CLIENT_CAP_STATUS32			0x00000040
-#define CLIENT_CAP_NT_SMBS			0x00000010
-#define CLIENT_CAP_LARGE_FILES			0x00000008
-#define CLIENT_CAP_UNICODE			0x00000004
+#define CLIENT_CAP_EXTENDED_SECURITY		SERVER_CAP_EXTENDED_SECURITY
+#define CLIENT_CAP_LARGE_WRITEX			SERVER_CAP_LARGE_WRITEX
+#define CLIENT_CAP_LARGE_READX			SERVER_CAP_LARGE_READX
+#define CLIENT_CAP_NT_FIND			SERVER_CAP_NT_FIND
+#define CLIENT_CAP_LEVEL_II_OPLOCKS		SERVER_CAP_LEVEL_II_OPLOCKS
+#define CLIENT_CAP_STATUS32			SERVER_CAP_STATUS32
+#define CLIENT_CAP_NT_SMBS			SERVER_CAP_NT_SMBS
+#define CLIENT_CAP_LARGE_FILES			SERVER_CAP_LARGE_FILES
+#define CLIENT_CAP_UNICODE			SERVER_CAP_UNICODE
 
 // Security Modes
 #define NEGOTIATE_SECURITY_SIGNATURES_REQUIRED	0x08
@@ -271,14 +272,13 @@
 typedef struct {
 	char	ServerIP[16];
 	u32	MaxBufferSize;
-	u32	MaxMpxCount;
 	u32	SessionKey;
-	u32	StringsCF;
-	u32	SupportsNTSMB;
+	u32	Capabilities;
+	u16	MaxMpxCount;
+	u8	SecurityMode;		// 0 = share level, 1 = user level
+	u8	PasswordType;		// 0 = PlainText passwords, 1 = use challenge/response
 	u8	PrimaryDomainServerName[64];
 	u8	EncryptionKey[8];
-	int	SecurityMode;		// 0 = share level, 1 = user level
-	int	PasswordType;		// 0 = PlainText passwords, 1 = use challenge/response
 } server_specs_t;
 
 #define SERVER_SHARE_SECURITY_LEVEL	0
@@ -698,7 +698,10 @@ typedef struct {
 	u32	OffsetLow;
 	u16	MaxCountLow;
 	u16	MinCount;
-	u32	MaxCountHigh;
+	union {
+		u32 Timeout;
+		u16 MaxCountHigh;
+	};
 	u16	Remaining;
 	u32	OffsetHigh;
 	u16	ByteCount;
@@ -825,15 +828,15 @@ int smb_LogOffAndX(int UID);
 int smb_Echo(void *echo, int len);
 
 int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode);
-int smb_ReadAndX(int UID, int TID, int FID, s64 offset, void *readbuf, u16 nbytes);
-int smb_WriteAndX(int UID, int TID, int FID, s64 offset, void *writebuf, u16 nbytes);
+int smb_ReadAndX(int UID, int TID, int FID, s64 offset, void *readbuf, int nbytes);
+int smb_WriteAndX(int UID, int TID, int FID, s64 offset, void *writebuf, int nbytes);
+int smb_ReadFile(int UID, int TID, int FID, s64 fileoffset, void *readbuf, int nbytes);
+int smb_WriteFile(int UID, int TID, int FID, s64 fileoffset, void *writebuf, int nbytes);
 int smb_Close(int UID, int TID, int FID);
 int smb_Delete(int UID, int TID, char *Path);
 int smb_ManageDirectory(int UID, int TID, char *Path, int cmd);
 int smb_Rename(int UID, int TID, char *oldPath, char *newPath);
 
 #define MAX_SMB_BUF 	64511 // must fit on u16 !!!
-#define MAX_RD_BUF	4096
-#define MAX_WR_BUF	4096
 
 #endif
