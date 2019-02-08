@@ -18,26 +18,6 @@
 
 static server_specs_t server_specs;
 
-ReadAndXRequest_t smb_Read_Request = {
-	{	SMB_MAGIC,
-		SMB_COM_READ_ANDX,
-		0, 0, 0, SMB_FLAGS2_32BIT_STATUS, "\0", 0, 0, 0, 0
-	},
-	12,
-	SMB_COM_NONE,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-};
-
-WriteAndXRequest_t smb_Write_Request = {
-	{	SMB_MAGIC,
-		SMB_COM_WRITE_ANDX,
-		0, 0, 0, SMB_FLAGS2_32BIT_STATUS, "\0", 0, 0, 0, 0
-	},
-	14,
-	SMB_COM_NONE,
-	0, 0, 0, 0, 0, 0x01, 0, 0, 0, 0x3f, 0 	// 0x01 is WriteThrough mode and 0x3f is DataOffset
-};
-
 #define LM_AUTH 	0
 #define NTLM_AUTH 	1
 
@@ -1009,10 +989,15 @@ int smb_ReadAndX(int UID, int TID, int FID, s64 fileoffset, void *readbuf, u16 n
 	ReadAndXResponse_t *RRsp = &SMB_buf.smb.readAndXResponse;
 	int r;
 
-	memcpy(RR, &smb_Read_Request, sizeof(ReadAndXRequest_t));
+	memset(RR, 0, sizeof(ReadAndXRequest_t));
 
+	RR->smbH.Magic = SMB_MAGIC;
+	RR->smbH.Flags2 = SMB_FLAGS2_32BIT_STATUS;
+	RR->smbH.Cmd = SMB_COM_READ_ANDX;
 	RR->smbH.UID = (u16)UID;
 	RR->smbH.TID = (u16)TID;
+	RR->smbWordcount = 12;
+	RR->smbAndxCmd = SMB_COM_NONE;		// no ANDX command
 	RR->FID = (u16)FID;
 	RR->OffsetLow = (u32)(fileoffset & 0xffffffff);
 	RR->OffsetHigh = (u32)((fileoffset >> 32) & 0xffffffff);
@@ -1046,13 +1031,20 @@ int smb_WriteAndX(int UID, int TID, int FID, s64 fileoffset, void *writebuf, u16
 	WriteAndXRequest_t *WR = &SMB_buf.smb.writeAndXRequest;
 	WriteAndXResponse_t *WRsp = &SMB_buf.smb.writeAndXResponse;
 
-	memcpy(WR, &smb_Write_Request, sizeof(WriteAndXRequest_t));
+	memset(WR, 0, sizeof(WriteAndXRequest_t));
 
+	WR->smbH.Magic = SMB_MAGIC;
+	WR->smbH.Flags2 = SMB_FLAGS2_32BIT_STATUS;
+	WR->smbH.Cmd = SMB_COM_WRITE_ANDX;
 	WR->smbH.UID = (u16)UID;
 	WR->smbH.TID = (u16)TID;
+	WR->smbWordcount = 14;
+	WR->smbAndxCmd = SMB_COM_NONE;		// no ANDX command
 	WR->FID = (u16)FID;
 	WR->OffsetLow = (u32)(fileoffset & 0xffffffff);
 	WR->OffsetHigh = (u32)((fileoffset >> 32) & 0xffffffff);
+	WR->WriteMode = 0x0001;			//WritethroughMode
+	WR->DataOffset = sizeof(WriteAndXRequest_t);
 	WR->Remaining = nbytes;
 	WR->DataLengthLow = nbytes;
 	WR->ByteCount = nbytes;
