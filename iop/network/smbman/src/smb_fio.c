@@ -288,35 +288,36 @@ static FHANDLE *smbman_getfilefreeslot(void)
 }
 
 //--------------------------------------------------------------
-static char *prepare_path(char *path, char *full_path, int max_path)
+static char *prepare_path(const char *path, char *full_path, int max_path)
 {
+	const char *p, *p2;
 	int i;
 
-	char *p = (char *)path;
-	char *p2 = (char *)&path[strlen(path)];
+	//Reserve space for 2 backslashes and a NULL.
+	strncpy(full_path, smb_curdir, max_path - 3);
+	strcat(full_path, "\\");
 
+	//Skip all leading slashes and backslashes.
+	p = path;
 	while ((*p == '\\') || (*p == '/'))
 		p++;
 
+	//Locate the end of the path, ignoring any trailing slashes and backslashes.
+	p2 = &path[strlen(path)];
 	while ((*p2 == '\\') || (*p2 == '/'))
-		*p2-- = 0;
+		p2--;
 
-	for (i=0; i<strlen(p); i++) {
-		if (p[i] == '/')
-			p[i] = '\\';
+	//Copy path. Reserve space for a backslash and a NULL
+	for (i = strlen(full_path); (p <= p2) && (max_path - i - 2 > 0); p++,i++)
+	{	//Convert all slashes along the path to backslashes.
+		full_path[i] = (*p == '/') ? '\\' : *p;
 	}
 
-	if (strlen(p) > 0) {
-		strncpy(full_path, smb_curdir, max_path-1-strlen(p));
-		strcat(full_path, "\\");
-		strcat(full_path, p);
-	}
-	else {
-		strncpy(full_path, smb_curdir, max_path-1);
-		strcat(full_path, "\\");
-	}
+	//Append a backslash and null-terminate.
+	full_path[i] = '\\';
+	full_path[i+1] = '\0';
 
-	return (char *)full_path;
+	return full_path;
 }
 
 //--------------------------------------------------------------
@@ -332,7 +333,7 @@ int smb_open(iop_file_t *f, const char *filename, int flags, int mode)
 	if ((UID == -1) || (TID == -1))
 		return -ENOTCONN;
 
-	char *path = prepare_path((char *)filename, smb_curpath, SMB_PATH_MAX);
+	char *path = prepare_path(filename, smb_curpath, SMB_PATH_MAX);
 
 	smb_io_lock();
 
@@ -471,7 +472,7 @@ int smb_remove(iop_file_t *f, const char *filename)
 	if ((UID == -1) || (TID == -1))
 		return -ENOTCONN;
 
-	char *path = prepare_path((char *)filename, smb_curpath, SMB_PATH_MAX);
+	char *path = prepare_path(filename, smb_curpath, SMB_PATH_MAX);
 
 	smb_io_lock();
 
@@ -495,7 +496,7 @@ int smb_mkdir(iop_file_t *f, const char *dirname, int mode)
 	if ((UID == -1) || (TID == -1))
 		return -ENOTCONN;
 
-	char *path = prepare_path((char *)dirname, smb_curpath, SMB_PATH_MAX);
+	char *path = prepare_path(dirname, smb_curpath, SMB_PATH_MAX);
 
 	smb_io_lock();
 
@@ -518,7 +519,7 @@ int smb_rmdir(iop_file_t *f, const char *dirname)
 	if ((UID == -1) || (TID == -1))
 		return -ENOTCONN;
 
-	char *path = prepare_path((char *)dirname, smb_curpath, SMB_PATH_MAX);
+	char *path = prepare_path(dirname, smb_curpath, SMB_PATH_MAX);
 
 	smb_io_lock();
 
@@ -623,7 +624,7 @@ int smb_dopen(iop_file_t *f, const char *dirname)
 	if ((UID == -1) || (TID == -1))
 		return -ENOTCONN;
 
-	char *path = prepare_path((char *)dirname, smb_curpath, SMB_PATH_MAX);
+	char *path = prepare_path(dirname, smb_curpath, SMB_PATH_MAX);
 
 	smb_io_lock();
 
@@ -723,7 +724,7 @@ int smb_getstat(iop_file_t *f, const char *filename, iox_stat_t *stat)
 	if ((UID == -1) || (TID == -1))
 		return -ENOTCONN;
 
-	char *path = prepare_path((char *)filename, smb_curpath, SMB_PATH_MAX);
+	char *path = prepare_path(filename, smb_curpath, SMB_PATH_MAX);
 
 	smb_io_lock();
 
@@ -753,8 +754,8 @@ int smb_rename(iop_file_t *f, const char *oldname, const char *newname)
 	if ((UID == -1) || (TID == -1))
 		return -ENOTCONN;
 
-	char *oldpath = prepare_path((char *)oldname, smb_curpath, SMB_PATH_MAX);
-	char *newpath = prepare_path((char *)newname, smb_secpath, SMB_PATH_MAX);
+	char *oldpath = prepare_path(oldname, smb_curpath, SMB_PATH_MAX);
+	char *newpath = prepare_path(newname, smb_secpath, SMB_PATH_MAX);
 
 	smb_io_lock();
 
@@ -779,7 +780,7 @@ int smb_chdir(iop_file_t *f, const char *dirname)
 	if ((UID == -1) || (TID == -1))
 		return -ENOTCONN;
 
-	char *path = prepare_path((char *)dirname, smb_curpath, SMB_PATH_MAX);
+	char *path = prepare_path(dirname, smb_curpath, SMB_PATH_MAX);
 
 	smb_io_lock();
 
