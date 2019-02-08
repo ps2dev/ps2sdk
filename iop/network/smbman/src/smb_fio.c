@@ -65,23 +65,28 @@ static iop_device_t smbdev = {
 	&smbman_ops
 };
 
+#define SMB_NAME_MAX	256
+
 typedef struct {
 	iop_file_t 	*f;
 	int		smb_fid;
 	s64		filesize;
 	s64		position;
 	u32		mode;
-	char		name[256];
+	char		name[SMB_NAME_MAX];
 } FHANDLE;
 
 #define MAX_FDHANDLES		32
 FHANDLE smbman_fdhandles[MAX_FDHANDLES];
 
+#define SMB_SEARCH_BUF_MAX	4096
+#define SMB_PATH_MAX		1024
+
 static ShareEntry_t ShareList;
-static u8 SearchBuf[4096];
-static char smb_curdir[4096];
-static char smb_curpath[4096];
-static char smb_secpath[4096];
+static u8 SearchBuf[SMB_SEARCH_BUF_MAX];
+static char smb_curdir[SMB_PATH_MAX];
+static char smb_curpath[SMB_PATH_MAX];
+static char smb_secpath[SMB_PATH_MAX];
 
 static int keepalive_mutex = -1;
 static int keepalive_inited = 0;
@@ -327,7 +332,7 @@ int smb_open(iop_file_t *f, const char *filename, int flags, int mode)
 	if ((UID == -1) || (TID == -1))
 		return -ENOTCONN;
 
-	char *path = prepare_path((char *)filename, smb_curpath, 4096);
+	char *path = prepare_path((char *)filename, smb_curpath, SMB_PATH_MAX);
 
 	smb_io_lock();
 
@@ -345,7 +350,7 @@ int smb_open(iop_file_t *f, const char *filename, int flags, int mode)
 				fh->filesize = 0;
 			else if (fh->mode & O_APPEND)
 				fh->position = filesize;
-			strncpy(fh->name, path, 256);
+			strncpy(fh->name, path, SMB_NAME_MAX);
 			r = 0;
 		}
 	}
@@ -466,7 +471,7 @@ int smb_remove(iop_file_t *f, const char *filename)
 	if ((UID == -1) || (TID == -1))
 		return -ENOTCONN;
 
-	char *path = prepare_path((char *)filename, smb_curpath, 4096);
+	char *path = prepare_path((char *)filename, smb_curpath, SMB_PATH_MAX);
 
 	smb_io_lock();
 
@@ -490,7 +495,7 @@ int smb_mkdir(iop_file_t *f, const char *dirname, int mode)
 	if ((UID == -1) || (TID == -1))
 		return -ENOTCONN;
 
-	char *path = prepare_path((char *)dirname, smb_curpath, 4096);
+	char *path = prepare_path((char *)dirname, smb_curpath, SMB_PATH_MAX);
 
 	smb_io_lock();
 
@@ -513,7 +518,7 @@ int smb_rmdir(iop_file_t *f, const char *dirname)
 	if ((UID == -1) || (TID == -1))
 		return -ENOTCONN;
 
-	char *path = prepare_path((char *)dirname, smb_curpath, 4096);
+	char *path = prepare_path((char *)dirname, smb_curpath, SMB_PATH_MAX);
 
 	smb_io_lock();
 
@@ -618,7 +623,7 @@ int smb_dopen(iop_file_t *f, const char *dirname)
 	if ((UID == -1) || (TID == -1))
 		return -ENOTCONN;
 
-	char *path = prepare_path((char *)dirname, smb_curpath, 4096);
+	char *path = prepare_path((char *)dirname, smb_curpath, SMB_PATH_MAX);
 
 	smb_io_lock();
 
@@ -697,7 +702,7 @@ int smb_dread(iop_file_t *f, iox_dirent_t *dirent)
 
 	if (r == 1) {
 		smb_statFiller(&info->fileInfo, &dirent->stat);
-		strncpy(dirent->name, info->FileName, 256);
+		strncpy(dirent->name, info->FileName, SMB_NAME_MAX);
 	}
 
 io_unlock:
@@ -718,7 +723,7 @@ int smb_getstat(iop_file_t *f, const char *filename, iox_stat_t *stat)
 	if ((UID == -1) || (TID == -1))
 		return -ENOTCONN;
 
-	char *path = prepare_path((char *)filename, smb_curpath, 4096);
+	char *path = prepare_path((char *)filename, smb_curpath, SMB_PATH_MAX);
 
 	smb_io_lock();
 
@@ -748,8 +753,8 @@ int smb_rename(iop_file_t *f, const char *oldname, const char *newname)
 	if ((UID == -1) || (TID == -1))
 		return -ENOTCONN;
 
-	char *oldpath = prepare_path((char *)oldname, smb_curpath, 4096);
-	char *newpath = prepare_path((char *)newname, smb_secpath, 4096);
+	char *oldpath = prepare_path((char *)oldname, smb_curpath, SMB_PATH_MAX);
+	char *newpath = prepare_path((char *)newname, smb_secpath, SMB_PATH_MAX);
 
 	smb_io_lock();
 
@@ -774,7 +779,7 @@ int smb_chdir(iop_file_t *f, const char *dirname)
 	if ((UID == -1) || (TID == -1))
 		return -ENOTCONN;
 
-	char *path = prepare_path((char *)dirname, smb_curpath, 4096);
+	char *path = prepare_path((char *)dirname, smb_curpath, SMB_PATH_MAX);
 
 	smb_io_lock();
 
@@ -940,7 +945,7 @@ static int smb_LogOff(void)
 static int smb_GetShareList(smbGetShareList_in_t *getsharelist)
 {
 	int i, r, sharecount, shareindex;
-	char tree_str[256];
+	char tree_str[64];
 	server_specs_t *specs;
 
 	specs = (server_specs_t *)getServerSpecs();
