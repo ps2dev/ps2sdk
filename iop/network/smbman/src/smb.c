@@ -98,7 +98,7 @@ server_specs_t *getServerSpecs(void)
 }
 
 //-------------------------------------------------------------------------
-static void rawTCP_SetSessionHeader(u32 size) // Write Session Service header: careful it's raw TCP transport here and not NBT transport
+static void nb_SetSessionMessage(u32 size) // Write Session Service header: careful it's raw TCP transport here and not NBT transport
 {
 	// maximum for raw TCP transport (24 bits) !!!
 	// Byte-swap length into network byte-order.
@@ -106,7 +106,7 @@ static void rawTCP_SetSessionHeader(u32 size) // Write Session Service header: c
 }
 
 //-------------------------------------------------------------------------
-static int rawTCP_GetSessionHeader(void) // Read Session Service header: careful it's raw TCP transport here and not NBT transport
+static int nb_GetSessionMessageLength(void) // Read Session Service header length: careful it's raw TCP transport here and not NBT transport
 {
 	u32 size;
 
@@ -115,6 +115,12 @@ static int rawTCP_GetSessionHeader(void) // Read Session Service header: careful
 	size = ((SMB_buf.pkt.sessionHeader << 8) & 0xff0000) | ((SMB_buf.pkt.sessionHeader >> 8) & 0xff00) | ((SMB_buf.pkt.sessionHeader >> 24) & 0xff);
 
 	return (int)size;
+}
+
+static u8 nb_GetPacketType(void) // Read Session Service header type.
+{
+	// Byte-swap length from network byte-order.
+	return((u8)(SMB_buf.pkt.sessionHeader & 0xff));
 }
 
 //-------------------------------------------------------------------------
@@ -145,6 +151,14 @@ static int OpenTCPSession(struct in_addr dst_IP, u16 dst_port, int *sock)
 }
 
 //-------------------------------------------------------------------------
+/*	RecvTimeout() is used instead of just recv(), in order to prevent
+	lockups in the event of a network failure in-between calls to socket functions.
+
+	TCP only protects against failures that occur during calls to socket functions.
+
+	Just to illustrate its importance here, imagine what would happen if recv() is called,
+	right before the server terminates the connection without the PlayStation 2 ever
+	receiving the TCP retransmission and the TCP RST packets.	*/
 static int RecvTimeout(int sock, void *buf, int bsize, int timeout_ms)
 {
 	int ret;
@@ -172,42 +186,71 @@ static int RecvTimeout(int sock, void *buf, int bsize, int timeout_ms)
 	return ret;
 }
 
+static int SendData(int sock, char *buf, int size)
+{
+	int remaining, result;
+	char *ptr;
+
+	ptr = buf;
+	remaining = size;
+	while (remaining > 0)
+	{
+		result = lwip_send(sock, ptr, remaining, 0);
+		if (result <= 0)
+			return result;
+
+		ptr += result;
+		remaining -= result;
+	}
+
+	return size;
+}
+
+static int RecvData(int sock, char *buf, int size, int timeout_ms)
+{
+	int remaining, result;
+	char *ptr;
+
+	ptr = buf;
+	remaining = size;
+	while (remaining > 0)
+	{
+		result = RecvTimeout(sock, ptr, remaining, timeout_ms);
+		if (result <= 0)
+			return result;
+
+		ptr += result;
+		remaining -= result;
+	}
+
+	return size;
+}
+
 //-------------------------------------------------------------------------
-/*	RecvTimeout() is used instead of just recv(), in order to prevent
-	lockups in the event of a network failure in-between calls to socket functions.
-
-	TCP only protects against failures that occur during calls to socket functions.
-
-	Just to illustrate its importance here, imagine what would happen if recv() is called,
-	right before the server terminates the connection without the PlayStation 2 ever
-	receiving the TCP retransmission and the TCP RST packets.	*/
 static int GetSMBServerReply(void)
 {
-	int rcv_size, totalpkt_size, pkt_size;
+	int rcv_size, totalpkt_size;
 
-	rcv_size = lwip_send(main_socket, SMB_buf.u8buff, rawTCP_GetSessionHeader() + 4, 0);
+	//Send the whole message, including the 4-byte direct transport packet header.
+	rcv_size = SendData(main_socket, (char *)&SMB_buf.pkt, nb_GetSessionMessageLength() + 4);
 	if (rcv_size <= 0)
 		return -1;
 
-receive:
-	rcv_size = RecvTimeout(main_socket, SMB_buf.u8buff, sizeof(SMB_buf.u8buff), 10000); // 10s before the packet is considered lost
+	//Read NetBIOS session message header. Drop NBSS Session Keep alive messages (type == 0x85, with no body), but process session messages (type == 0x00).
+	do{
+		rcv_size = RecvData(main_socket, (char *)&SMB_buf.pkt.sessionHeader, sizeof(SMB_buf.pkt.sessionHeader), 10000); // 10s before the packet is considered lost
+		if (rcv_size <= 0)
+			return -2;
+	} while (nb_GetPacketType() != 0);
+
+	// Handle fragmented packets
+	totalpkt_size = nb_GetSessionMessageLength();
+
+	rcv_size = RecvData(main_socket, (char *)&SMB_buf.pkt, totalpkt_size, 3000); // 3s before the packet is considered lost
 	if (rcv_size <= 0)
 		return -2;
 
-	if (SMB_buf.u8buff[0] != 0)	// dropping NBSS Session Keep alive
-		goto receive;
-
-	// Handle fragmented packets
-	totalpkt_size = rawTCP_GetSessionHeader() + 4;
-
-	while (rcv_size < totalpkt_size) {
-		pkt_size = RecvTimeout(main_socket, &SMB_buf.u8buff[rcv_size], sizeof(SMB_buf.u8buff) - rcv_size, 3000); // 3s before the packet is considered lost
-		if (pkt_size <= 0)
-			return -2;
-		rcv_size += pkt_size;
-	}
-
-	return rcv_size;
+	return totalpkt_size;
 }
 
 //-------------------------------------------------------------------------
@@ -323,7 +366,7 @@ negotiate_retry:
 	NPR->DialectFormat = 0x02;
 	strcpy(NPR->DialectName, dialect);
 
-	rawTCP_SetSessionHeader(sizeof(NegotiateProtocolRequest_t) + length + 1);
+	nb_SetSessionMessage(sizeof(NegotiateProtocolRequest_t) + length + 1);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		goto negotiate_error;
@@ -476,7 +519,7 @@ lbl_session_setup:
 
 	SSR->ByteCount = offset;
 
-	rawTCP_SetSessionHeader(sizeof(SessionSetupAndXRequest_t)+offset);
+	nb_SetSessionMessage(sizeof(SessionSetupAndXRequest_t)+offset);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -555,7 +598,7 @@ lbl_tree_connect:
 
 	TCR->ByteCount = offset;
 
-	rawTCP_SetSessionHeader(sizeof(TreeConnectAndXRequest_t)+offset);
+	nb_SetSessionMessage(sizeof(TreeConnectAndXRequest_t)+offset);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -617,7 +660,7 @@ int smb_NetShareEnum(int UID, int TID, ShareEntry_t *shareEntries, int index, in
 	// Receive Buffer Length: 0x1fa0
 	memcpy(&NSER->ByteField[0], "\\PIPE\\LANMAN\0\0\0WrLeh\0B13BWz\0\x01\0\xa0\x1f", 32);
 
-	rawTCP_SetSessionHeader(sizeof(NetShareEnumRequest_t) + NSER->ByteCount);
+	nb_SetSessionMessage(sizeof(NetShareEnumRequest_t) + NSER->ByteCount);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -685,7 +728,7 @@ int smb_QueryInformationDisk(int UID, int TID, smbQueryDiskInfo_out_t *QueryInfo
 	QIDR->smbH.UID = (u16)UID;
 	QIDR->smbH.TID = (u16)TID;
 
-	rawTCP_SetSessionHeader(sizeof(QueryInformationDiskRequest_t));
+	nb_SetSessionMessage(sizeof(QueryInformationDiskRequest_t));
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -759,7 +802,7 @@ query:
 
 	QPIR->smbTrans.DataOffset = QPIR->smbTrans.ParamOffset + QPIR->smbTrans.TotalParamCount;
 
-	rawTCP_SetSessionHeader(QPIR->smbTrans.DataOffset);
+	nb_SetSessionMessage(QPIR->smbTrans.DataOffset);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -856,7 +899,7 @@ int smb_NTCreateAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 
 	NTCR->ByteCount = offset;
 
-	rawTCP_SetSessionHeader(sizeof(NTCreateAndXRequest_t) + offset + 1);
+	nb_SetSessionMessage(sizeof(NTCreateAndXRequest_t) + offset + 1);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -931,7 +974,7 @@ int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	offset += setStringField(&OR->ByteField[offset], filename);
 	OR->ByteCount = offset;
 
-	rawTCP_SetSessionHeader(sizeof(OpenAndXRequest_t) + offset + 1);
+	nb_SetSessionMessage(sizeof(OpenAndXRequest_t) + offset + 1);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -977,7 +1020,7 @@ int smb_ReadAndX(int UID, int TID, int FID, s64 fileoffset, void *readbuf, u16 n
 	RR->OffsetHigh = (u32)((fileoffset >> 32) & 0xffffffff);
 	RR->MaxCountLow = nbytes;
 
-	rawTCP_SetSessionHeader(sizeof(ReadAndXRequest_t));
+	nb_SetSessionMessage(sizeof(ReadAndXRequest_t));
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -1018,7 +1061,7 @@ int smb_WriteAndX(int UID, int TID, int FID, s64 fileoffset, void *writebuf, u16
 
 	memcpy((void *)(&SMB_buf.u8buff[4 + WR->DataOffset]), writebuf, nbytes);
 
-	rawTCP_SetSessionHeader(sizeof(WriteAndXRequest_t) + nbytes);
+	nb_SetSessionMessage(sizeof(WriteAndXRequest_t) + nbytes);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -1052,7 +1095,7 @@ int smb_Close(int UID, int TID, int FID)
 	CR->smbWordcount = 3;
 	CR->FID = (u16)FID;
 
-	rawTCP_SetSessionHeader(sizeof(CloseRequest_t));
+	nb_SetSessionMessage(sizeof(CloseRequest_t));
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -1095,7 +1138,7 @@ int smb_Delete(int UID, int TID, char *Path)
 	PathLen = setStringField(DR->FileName, Path);
 	DR->ByteCount = PathLen+1; 			// +1 for the BufferFormat byte
 
-	rawTCP_SetSessionHeader(sizeof(DeleteRequest_t) + PathLen);
+	nb_SetSessionMessage(sizeof(DeleteRequest_t) + PathLen);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -1137,7 +1180,7 @@ int smb_ManageDirectory(int UID, int TID, char *Path, int cmd)
 	PathLen = setStringField(MDR->DirectoryName, Path);
 	MDR->ByteCount = PathLen+1; 			// +1 for the BufferFormat byte
 
-	rawTCP_SetSessionHeader(sizeof(ManageDirectoryRequest_t)+PathLen);
+	nb_SetSessionMessage(sizeof(ManageDirectoryRequest_t)+PathLen);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -1202,7 +1245,7 @@ int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 
 	RR->ByteCount = offset;
 
-	rawTCP_SetSessionHeader(sizeof(RenameRequest_t) + offset);
+	nb_SetSessionMessage(sizeof(RenameRequest_t) + offset);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -1289,7 +1332,7 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 	//No data, so no Pad2. As DataCount is 0, the client may set DataOffset to 0.
 	//FFNR->smbTrans.DataOffset = (u16)offset;
 
-	rawTCP_SetSessionHeader(offset);
+	nb_SetSessionMessage(offset);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -1354,7 +1397,7 @@ int smb_TreeDisconnect(int UID, int TID)
 	TDR->smbH.UID = (u16)UID;
 	TDR->smbH.TID = (u16)TID;
 
-	rawTCP_SetSessionHeader(sizeof(TreeDisconnectRequest_t));
+	nb_SetSessionMessage(sizeof(TreeDisconnectRequest_t));
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -1387,7 +1430,7 @@ int smb_LogOffAndX(int UID)
 	LR->smbWordcount = 2;
 	LR->smbAndxCmd = SMB_COM_NONE;		// no ANDX command
 
-	rawTCP_SetSessionHeader(sizeof(LogOffAndXRequest_t));
+	nb_SetSessionMessage(sizeof(LogOffAndXRequest_t));
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -1422,7 +1465,7 @@ int smb_Echo(void *echo, int len)
 	memcpy(&ER->ByteField[0], echo, (u16)len);
 	ER->ByteCount = (u16)len;
 
-	rawTCP_SetSessionHeader(sizeof(EchoRequest_t)+(u16)len);
+	nb_SetSessionMessage(sizeof(EchoRequest_t)+(u16)len);
 	r = GetSMBServerReply();
 	if (r <= 0)
 		return -EIO;
@@ -1467,7 +1510,14 @@ int smb_Connect(char *SMBServerIP, int SMBServerPort)
 //-------------------------------------------------------------------------
 int smb_Disconnect(void)
 {
+	char dummy;
+
 	if (main_socket != -1) {
+		//Ensure that all data has been received by the other side before closing.
+		shutdown(main_socket, SHUT_WR);
+		//Wait for the remote end to close the socket, which shall happen after all sent data has been received.
+		while(recv(main_socket, &dummy, sizeof(dummy), 0) > 0);
+
 		lwip_close(main_socket);
 		main_socket = -1;
 	}
