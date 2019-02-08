@@ -6,6 +6,7 @@
 #include "types.h"
 #include "defs.h"
 #include "irx.h"
+#include "iomanX.h"
 #include "loadcore.h"
 #include "stdio.h"
 #include "sysclib.h"

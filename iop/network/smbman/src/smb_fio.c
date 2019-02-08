@@ -7,7 +7,7 @@
 #include "defs.h"
 #include "irx.h"
 #include "intrman.h"
-#include "ioman.h"
+#include "iomanX.h"
 #include "io_common.h"
 #include "sifman.h"
 #include "stdio.h"
@@ -18,7 +18,6 @@
 #include "errno.h"
 #include "ps2smb.h"
 
-#include "ioman_add.h"
 #include "smb_fio.h"
 #include "smb.h"
 #include "auth.h"
@@ -27,43 +26,43 @@
 int smbman_io_sema;
 
 // driver ops func tab
-void *smbman_ops[27] = {
-	(void*)smb_init,
-	(void*)smb_deinit,
-	(void*)smb_dummy,
-	(void*)smb_open,
-	(void*)smb_close,
-	(void*)smb_read,
-	(void*)smb_write,
-	(void*)smb_lseek,
-	(void*)smb_dummy,
-	(void*)smb_remove,
-	(void*)smb_mkdir,
-	(void*)smb_rmdir,
-	(void*)smb_dopen,
-	(void*)smb_dclose,
-	(void*)smb_dread,
-	(void*)smb_getstat,
-	(void*)smb_dummy,
-	(void*)smb_rename,
-	(void*)smb_chdir,
-	(void*)smb_dummy,
-	(void*)smb_dummy,
-	(void*)smb_dummy,
-	(void*)smb_lseek64,
-	(void*)smb_devctl,
-	(void*)smb_dummy,
-	(void*)smb_dummy,
-	(void*)smb_dummy
+static iop_device_ops_t smbman_ops = {
+	&smb_init,
+	&smb_deinit,
+	(void*)&smb_dummy,
+	&smb_open,
+	&smb_close,
+	&smb_read,
+	&smb_write,
+	&smb_lseek,
+	(void*)&smb_dummy,
+	&smb_remove,
+	&smb_mkdir,
+	&smb_rmdir,
+	&smb_dopen,
+	&smb_dclose,
+	&smb_dread,
+	&smb_getstat,
+	(void*)&smb_dummy,
+	&smb_rename,
+	&smb_chdir,
+	(void*)&smb_dummy,
+	(void*)&smb_dummy,
+	(void*)&smb_dummy,
+	&smb_lseek64,
+	&smb_devctl,
+	(void*)&smb_dummy,
+	(void*)&smb_dummy,
+	(void*)&smb_dummy
 };
 
 // driver descriptor
-static iop_ext_device_t smbdev = {
+static iop_device_t smbdev = {
 	"smb",
 	IOP_DT_FS  | IOP_DT_FSEXT,
 	1,
 	"SMB",
-	(struct _iop_ext_device_ops *)&smbman_ops
+	&smbman_ops
 };
 
 typedef struct {
@@ -316,7 +315,7 @@ static char *prepare_path(char *path, char *full_path, int max_path)
 }
 
 //--------------------------------------------------------------
-int smb_open(iop_file_t *f, const char *filename, int mode, int flags)
+int smb_open(iop_file_t *f, const char *filename, int flags, int mode)
 {
 	int r = 0;
 	FHANDLE *fh;
@@ -334,12 +333,12 @@ int smb_open(iop_file_t *f, const char *filename, int mode, int flags)
 
 	fh = smbman_getfilefreeslot();
 	if (fh) {
-		r = smb_OpenAndX(UID, TID, path, &filesize, mode);
+		r = smb_OpenAndX(UID, TID, path, &filesize, flags);
 		if (r >= 0) {
 			f->privdata = fh;
 			fh->f = f;
 			fh->smb_fid = r;
-			fh->mode = mode;
+			fh->mode = flags;
 			fh->filesize = filesize;
 			fh->position = 0;
 			if (fh->mode & O_TRUNC)
@@ -401,7 +400,7 @@ void smb_closeAll(void)
 }
 
 //--------------------------------------------------------------
-int smb_lseek(iop_file_t *f, u32 pos, int where)
+int smb_lseek(iop_file_t *f, int pos, int where)
 {
 	return (int)smb_lseek64(f, pos, where);
 }
@@ -481,7 +480,7 @@ int smb_remove(iop_file_t *f, const char *filename)
 }
 
 //--------------------------------------------------------------
-int smb_mkdir(iop_file_t *f, const char *dirname)
+int smb_mkdir(iop_file_t *f, const char *dirname, int mode)
 {
 	int r;
 
@@ -1056,7 +1055,7 @@ static int smb_QueryDiskInfo(smbQueryDiskInfo_out_t *querydiskinfo)
 }
 
 //--------------------------------------------------------------
-int smb_devctl(iop_file_t *f, const char *devname, int cmd, void *arg, u32 arglen, void *bufp, u32 buflen)
+int smb_devctl(iop_file_t *f, const char *devname, int cmd, void *arg, unsigned int arglen, void *bufp, unsigned int buflen)
 {
 	int r = 0;
 
