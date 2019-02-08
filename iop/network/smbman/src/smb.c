@@ -31,9 +31,9 @@ static struct {
 	//Direct transport packet header. This is also a NetBIOS session header.
 	u32 sessionHeader; //The lower 24 bytes are the length of the payload in network byte-order, while the upper 8 bits must be set to 0 (Session Message Packet).
 	union {
-		u8 u8buff[MAX_SMB_BUF+1024];
-		u16 u16buff[(MAX_SMB_BUF+1024) / sizeof(u16)];
-		s16 s16buff[(MAX_SMB_BUF+1024) / sizeof(s16)];
+		u8 u8buff[MAX_SMB_BUF+MAX_SMB_BUF_HDR];
+		u16 u16buff[(MAX_SMB_BUF+MAX_SMB_BUF_HDR) / sizeof(u16)];
+		s16 s16buff[(MAX_SMB_BUF+MAX_SMB_BUF_HDR) / sizeof(s16)];
 		NegotiateProtocolRequest_t negotiateProtocolRequest;
 		NegotiateProtocolResponse_t negotiateProtocolResponse;
 		SessionSetupAndXRequest_t sessionSetupAndXRequest;
@@ -644,7 +644,7 @@ int smb_NetShareEnum(int UID, int TID, ShareEntry_t *shareEntries, int index, in
 
 	NSER->smbTrans.TotalParamCount = NSER->smbTrans.ParamCount = 19;
 	NSER->smbTrans.MaxParamCount = 1024;
-	NSER->smbTrans.MaxDataCount = 8096;
+	NSER->smbTrans.MaxDataCount = MAX_SMB_BUF - NSER->smbTrans.MaxParamCount;
 	NSER->smbTrans.ParamOffset = 76;
 	NSER->smbTrans.DataOffset = 95;
 
@@ -782,8 +782,8 @@ query:
 	QPIR->SubCommand = TRANS2_QUERY_PATH_INFORMATION;
 
 	QPIR->smbTrans.ParamOffset = 68;
-	QPIR->smbTrans.MaxParamCount = 256; 		// Max Parameters len in reply
-	QPIR->smbTrans.MaxDataCount = 16384;		// Max Data len in reply
+	QPIR->smbTrans.MaxParamCount = 256; 						// Max Parameters len in reply
+	QPIR->smbTrans.MaxDataCount = MAX_SMB_BUF - QPIR->smbTrans.MaxParamCount;	// Max Data len in reply
 
 	QueryPathInformationRequestParam_t *QPIRParam = (QueryPathInformationRequestParam_t *)&SMB_buf.smb.u8buff[QPIR->smbTrans.ParamOffset];
 
@@ -1356,9 +1356,9 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 	FFNR->smbTrans.SetupCount = 1;
 	FFNR->SubCommand = (u8)cmd;
 
-	FFNR->smbTrans.ParamOffset = (sizeof(FindFirstNext2Request_t) + 3) & ~3; //Keep aligned to a 4-byte boundary as required.
-	FFNR->smbTrans.MaxParamCount = 256; 		// Max Parameters len in reply
-	FFNR->smbTrans.MaxDataCount = 16384;		// Max Data len in reply
+	FFNR->smbTrans.ParamOffset = (sizeof(FindFirstNext2Request_t) + 3) & ~3;		//Keep aligned to a 4-byte boundary as required.
+	FFNR->smbTrans.MaxParamCount = 256; 							// Max Parameters len in reply
+	FFNR->smbTrans.MaxDataCount = MAX_SMB_BUF - FFNR->smbTrans.MaxParamCount;		// Max Data len in reply
 
 	//Zero Pad1.
 	memset((void*)(FFNR + 1), 0, FFNR->smbTrans.ParamOffset - sizeof(FindFirstNext2Request_t));
