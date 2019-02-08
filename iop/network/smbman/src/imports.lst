@@ -16,6 +16,7 @@ I_lwip_socket
 I_lwip_connect
 I_lwip_select
 I_inet_addr
+I_lwip_setsockopt
 ps2ip_IMPORTS_end
 
 intrman_IMPORTS_start

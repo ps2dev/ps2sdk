@@ -111,7 +111,7 @@ static u8 nb_GetPacketType(void) // Read Session Service header type.
 //-------------------------------------------------------------------------
 static int OpenTCPSession(struct in_addr dst_IP, u16 dst_port, int *sock)
 {
-	int sck, ret;
+	int sck, ret, opt;
 	struct sockaddr_in sock_addr;
 
 	*sock = -1;
@@ -122,6 +122,9 @@ static int OpenTCPSession(struct in_addr dst_IP, u16 dst_port, int *sock)
 		return -1;
 
 	*sock = sck;
+
+	opt = 1;
+	lwip_setsockopt(sck, IPPROTO_TCP, TCP_NODELAY, (char*)&opt, sizeof(opt));
 
     	memset(&sock_addr, 0, sizeof(sock_addr));
 	sock_addr.sin_addr = dst_IP;
