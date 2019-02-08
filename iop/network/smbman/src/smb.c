@@ -6,6 +6,7 @@
 #include <types.h>
 #include <errno.h>
 #include <irx.h>
+#include <limits.h>
 #include <stdio.h>
 #include <sysclib.h>
 #include <ps2ip.h>
@@ -20,6 +21,9 @@ static server_specs_t server_specs;
 
 #define LM_AUTH 	0
 #define NTLM_AUTH 	1
+
+#define CLIENT_MAX_BUFFER_SIZE	USHRT_MAX	//Allow up to 65535 bytes to be received.
+#define CLIENT_MAX_XFER_SIZE	USHRT_MAX	//Allow up to 65535 bytes to be transferred.
 
 static int main_socket = -1;
 
@@ -205,14 +209,32 @@ static int RecvData(int sock, char *buf, int size, int timeout_ms)
 }
 
 //-------------------------------------------------------------------------
-static int GetSMBServerReply(void)
+static int GetSMBServerReply(int shdrlen, void *spayload, int rhdrlen)
 {
-	int rcv_size, totalpkt_size;
+	int rcv_size, totalpkt_size, size;
 
-	//Send the whole message, including the 4-byte direct transport packet header.
-	rcv_size = SendData(main_socket, (char *)&SMB_buf, nb_GetSessionMessageLength() + 4);
-	if (rcv_size <= 0)
-		return -1;
+	totalpkt_size = nb_GetSessionMessageLength() + 4;
+
+	if (shdrlen == 0)
+	{
+		//Send the whole message, including the 4-byte direct transport packet header.
+		rcv_size = SendData(main_socket, (char*)&SMB_buf, totalpkt_size);
+		if (rcv_size <= 0)
+			return -1;
+	}
+	else
+	{
+		size = shdrlen + 4;
+
+		//Send the headers, followed by the payload.
+		rcv_size = SendData(main_socket, (char*)&SMB_buf, size);
+		if (rcv_size <= 0)
+			return -1;
+
+		rcv_size = SendData(main_socket, spayload, totalpkt_size - size);
+		if (rcv_size <= 0)
+			return -1;
+	}
 
 	//Read NetBIOS session message header. Drop NBSS Session Keep alive messages (type == 0x85, with no body), but process session messages (type == 0x00).
 	do{
@@ -221,10 +243,11 @@ static int GetSMBServerReply(void)
 			return -2;
 	} while (nb_GetPacketType() != 0);
 
-	// Handle fragmented packets
 	totalpkt_size = nb_GetSessionMessageLength();
 
-	rcv_size = RecvData(main_socket, (char *)&SMB_buf, totalpkt_size, 3000); // 3s before the packet is considered lost
+	//If rhdrlen is not specified, retrieve the whole packet. Otherwise, retrieve only the headers (caller will retrieve the payload separately).
+	size = (rhdrlen == 0) ? totalpkt_size : rhdrlen;
+	rcv_size = RecvData(main_socket, (char *)&SMB_buf.smb, size, 3000); // 3s before the packet is considered lost
 	if (rcv_size <= 0)
 		return -2;
 
@@ -291,7 +314,7 @@ static int setStringField(char *out, const char *in)
 {
 	int len;
 
-	if (server_specs.StringsCF == 2)
+	if (server_specs.Capabilities & SERVER_CAP_UNICODE)
 	{
 		len = asciiToUtf16(out, in);
 	}
@@ -308,7 +331,7 @@ static int getStringField(char *out, const char *in)
 {
 	int len;
 
-	if (server_specs.StringsCF == 2)
+	if (server_specs.Capabilities & SERVER_CAP_UNICODE)
 	{
 		len = utf16ToAscii(out, in);
 	}
@@ -345,7 +368,7 @@ negotiate_retry:
 	strcpy(NPR->DialectName, dialect);
 
 	nb_SetSessionMessage(sizeof(NegotiateProtocolRequest_t) + length + 1);
-	r = GetSMBServerReply();
+	r = GetSMBServerReply(0, NULL, 0);
 	if (r <= 0)
 		goto negotiate_error;
 
@@ -360,10 +383,9 @@ negotiate_retry:
 	if (NPRsp->smbWordcount != 17)
 		goto negotiate_error;
 
-	*capabilities = NPRsp->Capabilities & (CLIENT_CAP_LARGE_READX | CLIENT_CAP_UNICODE | CLIENT_CAP_LARGE_FILES | CLIENT_CAP_STATUS32);
+	*capabilities = NPRsp->Capabilities & (CLIENT_CAP_LARGE_WRITEX | CLIENT_CAP_LARGE_READX | CLIENT_CAP_UNICODE | CLIENT_CAP_LARGE_FILES | CLIENT_CAP_STATUS32);
 
-	server_specs.StringsCF = (NPRsp->Capabilities & SERVER_CAP_UNICODE) ? 2 : 1;
-	server_specs.SupportsNTSMB = (NPRsp->Capabilities & SERVER_CAP_NT_SMBS) ? 1 : 0;
+	server_specs.Capabilities = NPRsp->Capabilities;
 	server_specs.SecurityMode = (NPRsp->SecurityMode & NEGOTIATE_SECURITY_USER_LEVEL) ? SERVER_USER_SECURITY_LEVEL : SERVER_SHARE_SECURITY_LEVEL;
 	server_specs.PasswordType = (NPRsp->SecurityMode & NEGOTIATE_SECURITY_CHALLENGE_RESPONSE) ? SERVER_USE_ENCRYPTED_PASSWORD : SERVER_USE_PLAINTEXT_PASSWORD;
 
@@ -447,7 +469,7 @@ int smb_SessionSetupAndX(char *User, char *Password, int PasswordType, u32 capab
 {
 	SessionSetupAndXRequest_t *SSR = &SMB_buf.smb.sessionSetupAndXRequest;
 	SessionSetupAndXResponse_t *SSRsp = &SMB_buf.smb.sessionSetupAndXResponse;
-	int r, offset, CF;
+	int r, offset, CF, useUnicode;
 	int passwordlen = 0;
 	int AuthType = NTLM_AUTH;
 
@@ -455,17 +477,18 @@ lbl_session_setup:
 
 	memset(SSR, 0, sizeof(SessionSetupAndXRequest_t));
 
-	CF = server_specs.StringsCF;
+	useUnicode = (server_specs.Capabilities & SERVER_CAP_UNICODE) ? 1 : 0;
+	CF = useUnicode ? 2 : 1;
 
 	SSR->smbH.Magic = SMB_MAGIC;
 	SSR->smbH.Cmd = SMB_COM_SESSION_SETUP_ANDX;
 	SSR->smbH.Flags = SMB_FLAGS_CASELESS_PATHNAMES;
 	SSR->smbH.Flags2 = SMB_FLAGS2_KNOWS_LONG_NAMES | SMB_FLAGS2_32BIT_STATUS;
-	if (CF == 2)
+	if (useUnicode)
 		SSR->smbH.Flags2 |= SMB_FLAGS2_UNICODE_STRING;
 	SSR->smbWordcount = 13;
 	SSR->smbAndxCmd = SMB_COM_NONE;		// no ANDX command
-	SSR->MaxBufferSize = server_specs.MaxBufferSize > 65535 ? 65535 : (u16)server_specs.MaxBufferSize;
+	SSR->MaxBufferSize = CLIENT_MAX_BUFFER_SIZE;
 	SSR->MaxMpxCount = server_specs.MaxMpxCount >= 2 ? 2 : (u16)server_specs.MaxMpxCount;
 	SSR->VCNumber = 1;
 	SSR->SessionKey = server_specs.SessionKey;
@@ -479,7 +502,7 @@ lbl_session_setup:
 		offset += passwordlen;
 	}
 
-	if ((CF == 2) && (!(passwordlen & 1)))
+	if ((useUnicode) && (!(passwordlen & 1)))
 	{
 		SSR->ByteField[offset] = '\0';
 		offset++;				// pad needed only for unicode as aligment fix if password length is even
@@ -498,7 +521,7 @@ lbl_session_setup:
 	SSR->ByteCount = offset;
 
 	nb_SetSessionMessage(sizeof(SessionSetupAndXRequest_t)+offset);
-	r = GetSMBServerReply();
+	r = GetSMBServerReply(0, NULL, 0);
 	if (r <= 0)
 		return -EIO;
 
@@ -531,7 +554,7 @@ int smb_TreeConnectAndX(int UID, char *ShareName, char *Password, int PasswordTy
 {
 	TreeConnectAndXRequest_t *TCR = &SMB_buf.smb.treeConnectAndXRequest;
 	TreeConnectAndXResponse_t *TCRsp = &SMB_buf.smb.treeConnectAndXResponse;
-	int r, offset, CF;
+	int r, offset;
 	int passwordlen = 0;
 	int AuthType = NTLM_AUTH;
 
@@ -539,13 +562,11 @@ lbl_tree_connect:
 
 	memset(TCR, 0, sizeof(TreeConnectAndXRequest_t));
 
-	CF = server_specs.StringsCF;
-
 	TCR->smbH.Magic = SMB_MAGIC;
 	TCR->smbH.Cmd = SMB_COM_TREE_CONNECT_ANDX;
 	TCR->smbH.Flags = SMB_FLAGS_CASELESS_PATHNAMES;
 	TCR->smbH.Flags2 = SMB_FLAGS2_KNOWS_LONG_NAMES | SMB_FLAGS2_32BIT_STATUS;
-	if (CF == 2)
+	if (server_specs.Capabilities & SERVER_CAP_UNICODE)
 		TCR->smbH.Flags2 |= SMB_FLAGS2_UNICODE_STRING;
 	TCR->smbH.UID = UID;
 	TCR->smbWordcount = 4;
@@ -562,7 +583,7 @@ lbl_tree_connect:
 	}
 	offset += passwordlen;
 
-	if ((CF == 2) && (!(passwordlen & 1)))
+	if ((server_specs.Capabilities & SERVER_CAP_UNICODE) && (!(passwordlen & 1)))
 	{
 		TCR->ByteField[offset] = '\0';
 		offset++;				// pad needed only for unicode as aligment fix is password len is even
@@ -577,7 +598,7 @@ lbl_tree_connect:
 	TCR->ByteCount = offset;
 
 	nb_SetSessionMessage(sizeof(TreeConnectAndXRequest_t)+offset);
-	r = GetSMBServerReply();
+	r = GetSMBServerReply(0, NULL, 0);
 	if (r <= 0)
 		return -EIO;
 
@@ -639,7 +660,7 @@ int smb_NetShareEnum(int UID, int TID, ShareEntry_t *shareEntries, int index, in
 	memcpy(&NSER->ByteField[0], "\\PIPE\\LANMAN\0\0\0WrLeh\0B13BWz\0\x01\0\xa0\x1f", 32);
 
 	nb_SetSessionMessage(sizeof(NetShareEnumRequest_t) + NSER->ByteCount);
-	r = GetSMBServerReply();
+	r = GetSMBServerReply(0, NULL, 0);
 	if (r <= 0)
 		return -EIO;
 
@@ -707,7 +728,7 @@ int smb_QueryInformationDisk(int UID, int TID, smbQueryDiskInfo_out_t *QueryInfo
 	QIDR->smbH.TID = (u16)TID;
 
 	nb_SetSessionMessage(sizeof(QueryInformationDiskRequest_t));
-	r = GetSMBServerReply();
+	r = GetSMBServerReply(0, NULL, 0);
 	if (r <= 0)
 		return -EIO;
 
@@ -737,7 +758,7 @@ int smb_QueryInformationDisk(int UID, int TID, smbQueryDiskInfo_out_t *QueryInfo
 //-------------------------------------------------------------------------
 int smb_QueryPathInformation(int UID, int TID, PathInformation_t *Info, char *Path)
 {
-	int r, PathLen, CF, queryType;
+	int r, PathLen, queryType;
 	QueryPathInformationRequest_t *QPIR = &SMB_buf.smb.queryPathInformationRequest;
 	QueryPathInformationResponse_t *QPIRsp = &SMB_buf.smb.queryPathInformationResponse;
 
@@ -747,13 +768,11 @@ query:
 
 	memset(QPIR, 0, sizeof(QueryPathInformationRequest_t));
 
-	CF = server_specs.StringsCF;
-
 	QPIR->smbH.Magic = SMB_MAGIC;
 	QPIR->smbH.Cmd = SMB_COM_TRANSACTION2;
 	QPIR->smbH.Flags = SMB_FLAGS_CANONICAL_PATHNAMES;
 	QPIR->smbH.Flags2 = SMB_FLAGS2_KNOWS_LONG_NAMES | SMB_FLAGS2_32BIT_STATUS;
-	if (CF == 2)
+	if (server_specs.Capabilities & SERVER_CAP_UNICODE)
 		QPIR->smbH.Flags2 |= SMB_FLAGS2_UNICODE_STRING;
 	QPIR->smbH.UID = (u16)UID;
 	QPIR->smbH.TID = (u16)TID;
@@ -781,7 +800,7 @@ query:
 	QPIR->smbTrans.DataOffset = QPIR->smbTrans.ParamOffset + QPIR->smbTrans.TotalParamCount;
 
 	nb_SetSessionMessage(QPIR->smbTrans.DataOffset);
-	r = GetSMBServerReply();
+	r = GetSMBServerReply(0, NULL, 0);
 	if (r <= 0)
 		return -EIO;
 
@@ -834,17 +853,15 @@ int smb_NTCreateAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 {
 	NTCreateAndXRequest_t *NTCR = &SMB_buf.smb.ntCreateAndXRequest;
 	NTCreateAndXResponse_t *NTCRsp = &SMB_buf.smb.ntCreateAndXResponse;
-	int r, offset, CF;
+	int r, offset;
 
 	memset(NTCR, 0, sizeof(NTCreateAndXRequest_t));
-
-	CF = server_specs.StringsCF;
 
 	NTCR->smbH.Magic = SMB_MAGIC;
 	NTCR->smbH.Cmd = SMB_COM_NT_CREATE_ANDX;
 	NTCR->smbH.Flags = SMB_FLAGS_CANONICAL_PATHNAMES;
 	NTCR->smbH.Flags2 = SMB_FLAGS2_KNOWS_LONG_NAMES | SMB_FLAGS2_32BIT_STATUS;
-	if (CF == 2)
+	if (server_specs.Capabilities & SERVER_CAP_UNICODE)
 		NTCR->smbH.Flags2 |= SMB_FLAGS2_UNICODE_STRING;
 	NTCR->smbH.UID = (u16)UID;
 	NTCR->smbH.TID = (u16)TID;
@@ -865,7 +882,7 @@ int smb_NTCreateAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	NTCR->SecurityFlags = 0x03;
 
 	offset = 0;
-	if (CF == 2)
+	if (server_specs.Capabilities & SERVER_CAP_UNICODE)
 	{
 		NTCR->ByteField[offset] = '\0';
 		offset++;				// pad needed only for unicode as aligment fix
@@ -878,7 +895,7 @@ int smb_NTCreateAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	NTCR->ByteCount = offset;
 
 	nb_SetSessionMessage(sizeof(NTCreateAndXRequest_t) + offset + 1);
-	r = GetSMBServerReply();
+	r = GetSMBServerReply(0, NULL, 0);
 	if (r <= 0)
 		return -EIO;
 
@@ -913,20 +930,18 @@ int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	PathInformation_t info;
 	OpenAndXRequest_t *OR = &SMB_buf.smb.openAndXRequest;
 	OpenAndXResponse_t *ORsp = &SMB_buf.smb.openAndXResponse;
-	int r, offset, CF;
+	int r, offset;
 
-	if (server_specs.SupportsNTSMB)
+	if (server_specs.Capabilities & SERVER_CAP_NT_SMBS)
 		return smb_NTCreateAndX(UID, TID, filename, filesize, mode);
 
 	memset(OR, 0, sizeof(OpenAndXRequest_t));
-
-	CF = server_specs.StringsCF;
 
 	OR->smbH.Magic = SMB_MAGIC;
 	OR->smbH.Cmd = SMB_COM_OPEN_ANDX;
 	OR->smbH.Flags = SMB_FLAGS_CANONICAL_PATHNAMES;
 	OR->smbH.Flags2 = SMB_FLAGS2_KNOWS_LONG_NAMES | SMB_FLAGS2_32BIT_STATUS;
-	if (CF == 2)
+	if (server_specs.Capabilities & SERVER_CAP_UNICODE)
 		OR->smbH.Flags2 |= SMB_FLAGS2_UNICODE_STRING;
 	OR->smbH.UID = (u16)UID;
 	OR->smbH.TID = (u16)TID;
@@ -942,7 +957,7 @@ int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 		OR->CreateOptions |= 0x01;
 
 	offset = 0;
-	if (CF == 2)
+	if (server_specs.Capabilities & SERVER_CAP_UNICODE)
 	{
 		OR->ByteField[offset] = '\0';
 		offset++;				// pad needed only for unicode as aligment fix
@@ -953,7 +968,7 @@ int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	OR->ByteCount = offset;
 
 	nb_SetSessionMessage(sizeof(OpenAndXRequest_t) + offset + 1);
-	r = GetSMBServerReply();
+	r = GetSMBServerReply(0, NULL, 0);
 	if (r <= 0)
 		return -EIO;
 
@@ -983,11 +998,11 @@ int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 }
 
 //-------------------------------------------------------------------------
-int smb_ReadAndX(int UID, int TID, int FID, s64 fileoffset, void *readbuf, u16 nbytes)
+int smb_ReadAndX(int UID, int TID, int FID, s64 fileoffset, void *readbuf, int nbytes)
 {
 	ReadAndXRequest_t *RR = &SMB_buf.smb.readAndXRequest;
 	ReadAndXResponse_t *RRsp = &SMB_buf.smb.readAndXResponse;
-	int r;
+	int r, padding, DataLength;
 
 	memset(RR, 0, sizeof(ReadAndXRequest_t));
 
@@ -1001,10 +1016,11 @@ int smb_ReadAndX(int UID, int TID, int FID, s64 fileoffset, void *readbuf, u16 n
 	RR->FID = (u16)FID;
 	RR->OffsetLow = (u32)(fileoffset & 0xffffffff);
 	RR->OffsetHigh = (u32)((fileoffset >> 32) & 0xffffffff);
-	RR->MaxCountLow = nbytes;
+	RR->MaxCountLow = (u16)nbytes;
+	RR->MaxCountHigh = (u16)(nbytes >> 16);
 
 	nb_SetSessionMessage(sizeof(ReadAndXRequest_t));
-	r = GetSMBServerReply();
+	r = GetSMBServerReply(0, NULL, sizeof(ReadAndXResponse_t));
 	if (r <= 0)
 		return -EIO;
 
@@ -1016,16 +1032,56 @@ int smb_ReadAndX(int UID, int TID, int FID, s64 fileoffset, void *readbuf, u16 n
 	if ((RRsp->smbH.Eclass | (RRsp->smbH.Ecode << 16)) != STATUS_SUCCESS)
 		return -EIO;
 
-	r = RRsp->DataLengthLow;
+	//Skip any padding bytes.
+	padding = RRsp->DataOffset - sizeof(ReadAndXResponse_t);
+	if (padding > 0)
+	{
+		r = RecvData(main_socket, (char *)(RRsp + 1), padding, 3000); // 3s before the packet is considered lost
+		if (r <= 0)
+			return -2;
+	}
 
-	if (RRsp->DataOffset > 0)
-		memcpy(readbuf, &SMB_buf.smb.u8buff[RRsp->DataOffset], r);
+	DataLength = (int)(((u32)RRsp->DataLengthHigh << 16) | RRsp->DataLengthLow);
+	if (DataLength > 0)
+	{
+		r = RecvData(main_socket, readbuf, DataLength, 3000); // 3s before the packet is considered lost
+		if (r <= 0)
+			return -2;
+	}
+
+	r = DataLength;
 
 	return r;
 }
 
+int smb_ReadFile(int UID, int TID, int FID, s64 fileoffset, void *readbuf, int nbytes)
+{
+	int result, remaining, toRead;
+	char *ptr;
+	s64 pos;
+
+	remaining = nbytes;
+	ptr = readbuf;
+	pos = fileoffset;
+
+	while (remaining > 0)
+	{
+		toRead = remaining > CLIENT_MAX_XFER_SIZE ? CLIENT_MAX_XFER_SIZE : remaining;
+
+		result = smb_ReadAndX(UID, TID, FID, pos, ptr, toRead);
+		if (result <= 0)
+			return result;
+
+		pos += result;
+		ptr += result;
+		remaining -= result;
+	}
+
+	return nbytes;
+}
+
 //-------------------------------------------------------------------------
-int smb_WriteAndX(int UID, int TID, int FID, s64 fileoffset, void *writebuf, u16 nbytes)
+int smb_WriteAndX(int UID, int TID, int FID, s64 fileoffset, void *writebuf, int nbytes)
 {
 	int r;
 	WriteAndXRequest_t *WR = &SMB_buf.smb.writeAndXRequest;
@@ -1045,14 +1101,13 @@ int smb_WriteAndX(int UID, int TID, int FID, s64 fileoffset, void *writebuf, u16
 	WR->OffsetHigh = (u32)((fileoffset >> 32) & 0xffffffff);
 	WR->WriteMode = 0x0001;			//WritethroughMode
 	WR->DataOffset = sizeof(WriteAndXRequest_t);
-	WR->Remaining = nbytes;
-	WR->DataLengthLow = nbytes;
-	WR->ByteCount = nbytes;
-
-	memcpy((void *)(&SMB_buf.smb.u8buff[WR->DataOffset]), writebuf, nbytes);
+	WR->Remaining = (u16)nbytes;
+	WR->DataLengthLow = (u16)nbytes;
+	WR->DataLengthHigh = (u16)(nbytes >> 16);
+	WR->ByteCount = (u16)nbytes;
 
 	nb_SetSessionMessage(sizeof(WriteAndXRequest_t) + nbytes);
-	r = GetSMBServerReply();
+	r = GetSMBServerReply(sizeof(WriteAndXRequest_t), writebuf, 0);
 	if (r <= 0)
 		return -EIO;
 
@@ -1063,6 +1118,32 @@ int smb_WriteAndX(int UID, int TID, int FID, s64 fileoffset, void *writebuf, u16
 	// check there's no error
 	if ((WRsp->smbH.Eclass | (WRsp->smbH.Ecode << 16)) != STATUS_SUCCESS)
 		return -EIO;
+
+	return nbytes;
+}
+
+int smb_WriteFile(int UID, int TID, int FID, s64 fileoffset, void *writebuf, int nbytes)
+{
+	int result, remaining, toWrite;
+	char *ptr;
+	s64 pos;
+
+	remaining = nbytes;
+	ptr = writebuf;
+	pos = fileoffset;
+
+	while (remaining > 0)
+	{
+		toWrite = remaining > CLIENT_MAX_XFER_SIZE ? CLIENT_MAX_XFER_SIZE : remaining;
+
+		result = smb_WriteAndX(UID, TID, FID, pos, ptr, toWrite);
+		if (result <= 0)
+			return result;
+
+		pos += result;
+		ptr += result;
+		remaining -= result;
+	}
 
 	return nbytes;
 }
@@ -1086,7 +1167,7 @@ int smb_Close(int UID, int TID, int FID)
 	CR->FID = (u16)FID;
 
 	nb_SetSessionMessage(sizeof(CloseRequest_t));
-	r = GetSMBServerReply();
+	r = GetSMBServerReply(0, NULL, 0);
 	if (r <= 0)
 		return -EIO;
 
@@ -1104,19 +1185,17 @@ int smb_Close(int UID, int TID, int FID)
 //-------------------------------------------------------------------------
 int smb_Delete(int UID, int TID, char *Path)
 {
-	int r, CF, PathLen;
+	int r, PathLen;
 	DeleteRequest_t *DR = &SMB_buf.smb.deleteRequest;
 	DeleteResponse_t *DRsp = &SMB_buf.smb.deleteResponse;
 
 	memset(DR, 0, sizeof(DeleteRequest_t));
 
-	CF = server_specs.StringsCF;
-
 	DR->smbH.Magic = SMB_MAGIC;
 	DR->smbH.Cmd = SMB_COM_DELETE;
 	DR->smbH.Flags = SMB_FLAGS_CANONICAL_PATHNAMES;
 	DR->smbH.Flags2 = SMB_FLAGS2_KNOWS_LONG_NAMES | SMB_FLAGS2_32BIT_STATUS;
-	if (CF == 2)
+	if (server_specs.Capabilities & SERVER_CAP_UNICODE)
 		DR->smbH.Flags2 |= SMB_FLAGS2_UNICODE_STRING;
 	DR->smbH.UID = (u16)UID;
 	DR->smbH.TID = (u16)TID;
@@ -1129,7 +1208,7 @@ int smb_Delete(int UID, int TID, char *Path)
 	DR->ByteCount = PathLen+1; 			// +1 for the BufferFormat byte
 
 	nb_SetSessionMessage(sizeof(DeleteRequest_t) + PathLen);
-	r = GetSMBServerReply();
+	r = GetSMBServerReply(0, NULL, 0);
 	if (r <= 0)
 		return -EIO;
 
@@ -1147,20 +1226,18 @@ int smb_Delete(int UID, int TID, char *Path)
 //-------------------------------------------------------------------------
 int smb_ManageDirectory(int UID, int TID, char *Path, int cmd)
 {
-	int r, CF, PathLen;
+	int r, PathLen;
 	ManageDirectoryRequest_t *MDR = &SMB_buf.smb.manageDirectoryRequest;
 	ManageDirectoryResponse_t *MDRsp = &SMB_buf.smb.manageDirectoryResponse;
 
 	memset(MDR, 0, sizeof(ManageDirectoryRequest_t));
-
-	CF = server_specs.StringsCF;
 
 	MDR->smbH.Magic = SMB_MAGIC;
 
 	MDR->smbH.Cmd = (u8)cmd;
 	MDR->smbH.Flags = SMB_FLAGS_CANONICAL_PATHNAMES;
 	MDR->smbH.Flags2 = SMB_FLAGS2_KNOWS_LONG_NAMES | SMB_FLAGS2_32BIT_STATUS;
-	if (CF == 2)
+	if (server_specs.Capabilities & SERVER_CAP_UNICODE)
 		MDR->smbH.Flags2 |= SMB_FLAGS2_UNICODE_STRING;
 	MDR->smbH.UID = (u16)UID;
 	MDR->smbH.TID = (u16)TID;
@@ -1171,7 +1248,7 @@ int smb_ManageDirectory(int UID, int TID, char *Path, int cmd)
 	MDR->ByteCount = PathLen+1; 			// +1 for the BufferFormat byte
 
 	nb_SetSessionMessage(sizeof(ManageDirectoryRequest_t)+PathLen);
-	r = GetSMBServerReply();
+	r = GetSMBServerReply(0, NULL, 0);
 	if (r <= 0)
 		return -EIO;
 
@@ -1196,19 +1273,17 @@ int smb_ManageDirectory(int UID, int TID, char *Path, int cmd)
 //-------------------------------------------------------------------------
 int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 {
-	int r, CF, offset;
+	int r, offset;
 	RenameRequest_t *RR = &SMB_buf.smb.renameRequest;
 	RenameResponse_t *RRsp = &SMB_buf.smb.renameResponse;
 
 	memset(RR, 0, sizeof(RenameRequest_t));
 
-	CF = server_specs.StringsCF;
-
 	RR->smbH.Magic = SMB_MAGIC;
 	RR->smbH.Cmd = SMB_COM_RENAME;
 	RR->smbH.Flags = SMB_FLAGS_CANONICAL_PATHNAMES;
 	RR->smbH.Flags2 = SMB_FLAGS2_KNOWS_LONG_NAMES | SMB_FLAGS2_32BIT_STATUS;
-	if (CF == 2)
+	if (server_specs.Capabilities & SERVER_CAP_UNICODE)
 		RR->smbH.Flags2 |= SMB_FLAGS2_UNICODE_STRING;
 	RR->smbH.UID = (u16)UID;
 	RR->smbH.TID = (u16)TID;
@@ -1226,7 +1301,7 @@ int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 
 	// Add newPath
 	RR->ByteField[offset++] = 0x04;			// BufferFormat
-	if (CF == 2)
+	if (server_specs.Capabilities & SERVER_CAP_UNICODE)
 	{
 		RR->ByteField[offset] = '\0';
 		offset++;				// pad needed for unicode
@@ -1236,7 +1311,7 @@ int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 	RR->ByteCount = offset;
 
 	nb_SetSessionMessage(sizeof(RenameRequest_t) + offset);
-	r = GetSMBServerReply();
+	r = GetSMBServerReply(0, NULL, 0);
 	if (r <= 0)
 		return -EIO;
 
@@ -1262,19 +1337,17 @@ int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 //-------------------------------------------------------------------------
 int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info)
 {
-	int r, CF, PathLen, offset;
+	int r, PathLen, offset;
 	FindFirstNext2Request_t *FFNR = &SMB_buf.smb.findFirstNext2Request;
 	FindFirstNext2Response_t *FFNRsp = &SMB_buf.smb.findFirstNext2Response;
 
 	memset(FFNR, 0, sizeof(FindFirstNext2Request_t));
 
-	CF = server_specs.StringsCF;
-
 	FFNR->smbH.Magic = SMB_MAGIC;
 	FFNR->smbH.Cmd = SMB_COM_TRANSACTION2;
 	FFNR->smbH.Flags = SMB_FLAGS_CANONICAL_PATHNAMES;
 	FFNR->smbH.Flags2 = SMB_FLAGS2_KNOWS_LONG_NAMES | SMB_FLAGS2_32BIT_STATUS;
-	if (CF == 2)
+	if (server_specs.Capabilities & SERVER_CAP_UNICODE)
 		FFNR->smbH.Flags2 |= SMB_FLAGS2_UNICODE_STRING;
 	FFNR->smbH.UID = (u16)UID;
 	FFNR->smbH.TID = (u16)TID;
@@ -1323,7 +1396,7 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 	//FFNR->smbTrans.DataOffset = (u16)offset;
 
 	nb_SetSessionMessage(offset);
-	r = GetSMBServerReply();
+	r = GetSMBServerReply(0, NULL, 0);
 	if (r <= 0)
 		return -EIO;
 
@@ -1388,7 +1461,7 @@ int smb_TreeDisconnect(int UID, int TID)
 	TDR->smbH.TID = (u16)TID;
 
 	nb_SetSessionMessage(sizeof(TreeDisconnectRequest_t));
-	r = GetSMBServerReply();
+	r = GetSMBServerReply(0, NULL, 0);
 	if (r <= 0)
 		return -EIO;
 
@@ -1421,7 +1494,7 @@ int smb_LogOffAndX(int UID)
 	LR->smbAndxCmd = SMB_COM_NONE;		// no ANDX command
 
 	nb_SetSessionMessage(sizeof(LogOffAndXRequest_t));
-	r = GetSMBServerReply();
+	r = GetSMBServerReply(0, NULL, 0);
 	if (r <= 0)
 		return -EIO;
 
@@ -1456,7 +1529,7 @@ int smb_Echo(void *echo, int len)
 	ER->ByteCount = (u16)len;
 
 	nb_SetSessionMessage(sizeof(EchoRequest_t)+(u16)len);
-	r = GetSMBServerReply();
+	r = GetSMBServerReply(0, NULL, 0);
 	if (r <= 0)
 		return -EIO;
 

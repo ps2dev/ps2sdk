@@ -410,8 +410,7 @@ int smb_lseek(iop_file_t *f, u32 pos, int where)
 int smb_read(iop_file_t *f, void *buf, int size)
 {
 	FHANDLE *fh = (FHANDLE *)f->privdata;
-	int r, rpos;
-	u32 nbytes;
+	int r;
 
 	if ((UID == -1) || (TID == -1) || (fh->smb_fid == -1))
 		return -EBADF;
@@ -421,35 +420,21 @@ int smb_read(iop_file_t *f, void *buf, int size)
 
 	smb_io_lock();
 
-	rpos = 0;
-
-	while (size) {
-		nbytes = MAX_RD_BUF;
-		if (size < nbytes)
-			nbytes = size;
-
-		r = smb_ReadAndX(UID, TID, fh->smb_fid, fh->position, (void *)(buf + rpos), (u16)nbytes);
-		if (r < 0) {
-   			goto io_unlock;
-		}
-
-		rpos += nbytes;
-		size -= nbytes;
-		fh->position += nbytes;
+	r = smb_ReadFile(UID, TID, fh->smb_fid, fh->position, buf, size);
+	if (r > 0) {
+		fh->position += r;
 	}
 
-io_unlock:
 	smb_io_unlock();
 
-	return rpos;
+	return r;
 }
 
 //--------------------------------------------------------------
 int smb_write(iop_file_t *f, void *buf, int size)
 {
 	FHANDLE *fh = (FHANDLE *)f->privdata;
-	int r, wpos;
-	u32 nbytes;
+	int r;
 
 	if ((UID == -1) || (TID == -1) || (fh->smb_fid == -1))
 		return -EBADF;
@@ -459,29 +444,16 @@ int smb_write(iop_file_t *f, void *buf, int size)
 
 	smb_io_lock();
 
-	wpos = 0;
-
-	while (size) {
-		nbytes = MAX_WR_BUF;
-		if (size < nbytes)
-			nbytes = size;
-
-		r = smb_WriteAndX(UID, TID, fh->smb_fid, fh->position, (void *)(buf + wpos), (u16)nbytes);
-		if (r < 0) {
-   			goto io_unlock;
-		}
-
-		wpos += nbytes;
-		size -= nbytes;
-		fh->position += nbytes;
+	r = smb_WriteFile(UID, TID, fh->smb_fid, fh->position, buf, size);
+	if (r > 0) {
+		fh->position += r;
 		if (fh->position > fh->filesize)
 			fh->filesize += fh->position - fh->filesize;
 	}
 
-io_unlock:
 	smb_io_unlock();
 
-	return wpos;
+	return r;
 }
 
 //--------------------------------------------------------------
