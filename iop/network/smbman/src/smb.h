@@ -837,6 +837,7 @@ int smb_Delete(int UID, int TID, char *Path);
 int smb_ManageDirectory(int UID, int TID, char *Path, int cmd);
 int smb_Rename(int UID, int TID, char *oldPath, char *newPath);
 
-#define MAX_SMB_BUF 	64511 // must fit on u16 !!!
+#define MAX_SMB_BUF 	4096 // must fit on u16 !!!
+#define MAX_SMB_BUF_HDR	128 //Must be at least as large as the largest header structure.
 
 #endif
