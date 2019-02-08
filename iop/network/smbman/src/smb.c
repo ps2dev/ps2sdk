@@ -17,6 +17,9 @@
 #include "poll.h"
 #include "debug.h"
 
+//Round up the erasure amount, so that memset can erase memory word-by-word.
+#define ZERO_PKT_ALIGNED(hdr, hdrSize) memset((hdr), 0, ((hdrSize) + 3) & ~3)
+
 static server_specs_t server_specs;
 
 #define LM_AUTH 	0
@@ -356,7 +359,7 @@ int smb_NegotiateProtocol(u32 *capabilities)
 
 negotiate_retry:
 
-	memset(NPR, 0, sizeof(NegotiateProtocolRequest_t));
+	ZERO_PKT_ALIGNED(NPR, sizeof(NegotiateProtocolRequest_t));
 
 	NPR->smbH.Magic = SMB_MAGIC;
 	NPR->smbH.Cmd = SMB_COM_NEGOTIATE;
@@ -475,7 +478,7 @@ int smb_SessionSetupAndX(char *User, char *Password, int PasswordType, u32 capab
 
 lbl_session_setup:
 
-	memset(SSR, 0, sizeof(SessionSetupAndXRequest_t));
+	ZERO_PKT_ALIGNED(SSR, sizeof(SessionSetupAndXRequest_t));
 
 	useUnicode = (server_specs.Capabilities & SERVER_CAP_UNICODE) ? 1 : 0;
 	CF = useUnicode ? 2 : 1;
@@ -560,7 +563,7 @@ int smb_TreeConnectAndX(int UID, char *ShareName, char *Password, int PasswordTy
 
 lbl_tree_connect:
 
-	memset(TCR, 0, sizeof(TreeConnectAndXRequest_t));
+	ZERO_PKT_ALIGNED(TCR, sizeof(TreeConnectAndXRequest_t));
 
 	TCR->smbH.Magic = SMB_MAGIC;
 	TCR->smbH.Cmd = SMB_COM_TREE_CONNECT_ANDX;
@@ -634,7 +637,7 @@ int smb_NetShareEnum(int UID, int TID, ShareEntry_t *shareEntries, int index, in
 	NetShareEnumRequest_t *NSER = &SMB_buf.smb.netShareEnumRequest;
 	NetShareEnumResponse_t *NSERsp = &SMB_buf.smb.netShareEnumResponse;
 
-	memset(NSER, 0, sizeof(NetShareEnumRequest_t));
+	ZERO_PKT_ALIGNED(NSER, sizeof(NetShareEnumRequest_t));
 
 	NSER->smbH.Magic = SMB_MAGIC;
 	NSER->smbH.Cmd = SMB_COM_TRANSACTION;
@@ -720,7 +723,7 @@ int smb_QueryInformationDisk(int UID, int TID, smbQueryDiskInfo_out_t *QueryInfo
 	QueryInformationDiskRequest_t *QIDR = &SMB_buf.smb.queryInformationDiskRequest;
 	QueryInformationDiskResponse_t *QIDRsp = &SMB_buf.smb.queryInformationDiskResponse;
 
-	memset(QIDR, 0, sizeof(QueryInformationDiskRequest_t));
+	ZERO_PKT_ALIGNED(QIDR, sizeof(QueryInformationDiskRequest_t));
 
 	QIDR->smbH.Magic = SMB_MAGIC;
 	QIDR->smbH.Cmd = SMB_COM_QUERY_INFORMATION_DISK;
@@ -766,7 +769,7 @@ int smb_QueryPathInformation(int UID, int TID, PathInformation_t *Info, char *Pa
 
 query:
 
-	memset(QPIR, 0, sizeof(QueryPathInformationRequest_t));
+	ZERO_PKT_ALIGNED(QPIR, sizeof(QueryPathInformationRequest_t));
 
 	QPIR->smbH.Magic = SMB_MAGIC;
 	QPIR->smbH.Cmd = SMB_COM_TRANSACTION2;
@@ -855,7 +858,7 @@ int smb_NTCreateAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	NTCreateAndXResponse_t *NTCRsp = &SMB_buf.smb.ntCreateAndXResponse;
 	int r, offset;
 
-	memset(NTCR, 0, sizeof(NTCreateAndXRequest_t));
+	ZERO_PKT_ALIGNED(NTCR, sizeof(NTCreateAndXRequest_t));
 
 	NTCR->smbH.Magic = SMB_MAGIC;
 	NTCR->smbH.Cmd = SMB_COM_NT_CREATE_ANDX;
@@ -935,7 +938,7 @@ int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	if (server_specs.Capabilities & SERVER_CAP_NT_SMBS)
 		return smb_NTCreateAndX(UID, TID, filename, filesize, mode);
 
-	memset(OR, 0, sizeof(OpenAndXRequest_t));
+	ZERO_PKT_ALIGNED(OR, sizeof(OpenAndXRequest_t));
 
 	OR->smbH.Magic = SMB_MAGIC;
 	OR->smbH.Cmd = SMB_COM_OPEN_ANDX;
@@ -1004,7 +1007,7 @@ int smb_ReadAndX(int UID, int TID, int FID, s64 fileoffset, void *readbuf, int n
 	ReadAndXResponse_t *RRsp = &SMB_buf.smb.readAndXResponse;
 	int r, padding, DataLength;
 
-	memset(RR, 0, sizeof(ReadAndXRequest_t));
+	ZERO_PKT_ALIGNED(RR, sizeof(ReadAndXRequest_t));
 
 	RR->smbH.Magic = SMB_MAGIC;
 	RR->smbH.Flags2 = SMB_FLAGS2_32BIT_STATUS;
@@ -1084,10 +1087,11 @@ int smb_ReadFile(int UID, int TID, int FID, s64 fileoffset, void *readbuf, int n
 int smb_WriteAndX(int UID, int TID, int FID, s64 fileoffset, void *writebuf, int nbytes)
 {
 	int r;
+	const int padding = 1;	//1 padding byte, to keep the payload aligned for writing performance.
 	WriteAndXRequest_t *WR = &SMB_buf.smb.writeAndXRequest;
 	WriteAndXResponse_t *WRsp = &SMB_buf.smb.writeAndXResponse;
 
-	memset(WR, 0, sizeof(WriteAndXRequest_t));
+	ZERO_PKT_ALIGNED(WR, sizeof(WriteAndXRequest_t) + padding);
 
 	WR->smbH.Magic = SMB_MAGIC;
 	WR->smbH.Flags2 = SMB_FLAGS2_32BIT_STATUS;
@@ -1100,14 +1104,14 @@ int smb_WriteAndX(int UID, int TID, int FID, s64 fileoffset, void *writebuf, int
 	WR->OffsetLow = (u32)(fileoffset & 0xffffffff);
 	WR->OffsetHigh = (u32)((fileoffset >> 32) & 0xffffffff);
 	WR->WriteMode = 0x0001;			//WritethroughMode
-	WR->DataOffset = sizeof(WriteAndXRequest_t);
+	WR->DataOffset = sizeof(WriteAndXRequest_t) + padding;
 	WR->Remaining = (u16)nbytes;
 	WR->DataLengthLow = (u16)nbytes;
 	WR->DataLengthHigh = (u16)(nbytes >> 16);
-	WR->ByteCount = (u16)nbytes;
+	WR->ByteCount = (u16)nbytes + padding;
 
-	nb_SetSessionMessage(sizeof(WriteAndXRequest_t) + nbytes);
-	r = GetSMBServerReply(sizeof(WriteAndXRequest_t), writebuf, 0);
+	nb_SetSessionMessage(sizeof(WriteAndXRequest_t) + padding + nbytes);
+	r = GetSMBServerReply(sizeof(WriteAndXRequest_t) + padding, writebuf, 0);
 	if (r <= 0)
 		return -EIO;
 
@@ -1155,7 +1159,7 @@ int smb_Close(int UID, int TID, int FID)
 	CloseRequest_t *CR = &SMB_buf.smb.closeRequest;
 	CloseResponse_t *CRsp = &SMB_buf.smb.closeResponse;
 
-	memset(CR, 0, sizeof(CloseRequest_t));
+	ZERO_PKT_ALIGNED(CR, sizeof(CloseRequest_t));
 
 	CR->smbH.Magic = SMB_MAGIC;
 	CR->smbH.Cmd = SMB_COM_CLOSE;
@@ -1189,7 +1193,7 @@ int smb_Delete(int UID, int TID, char *Path)
 	DeleteRequest_t *DR = &SMB_buf.smb.deleteRequest;
 	DeleteResponse_t *DRsp = &SMB_buf.smb.deleteResponse;
 
-	memset(DR, 0, sizeof(DeleteRequest_t));
+	ZERO_PKT_ALIGNED(DR, sizeof(DeleteRequest_t));
 
 	DR->smbH.Magic = SMB_MAGIC;
 	DR->smbH.Cmd = SMB_COM_DELETE;
@@ -1230,7 +1234,7 @@ int smb_ManageDirectory(int UID, int TID, char *Path, int cmd)
 	ManageDirectoryRequest_t *MDR = &SMB_buf.smb.manageDirectoryRequest;
 	ManageDirectoryResponse_t *MDRsp = &SMB_buf.smb.manageDirectoryResponse;
 
-	memset(MDR, 0, sizeof(ManageDirectoryRequest_t));
+	ZERO_PKT_ALIGNED(MDR, sizeof(ManageDirectoryRequest_t));
 
 	MDR->smbH.Magic = SMB_MAGIC;
 
@@ -1277,7 +1281,7 @@ int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 	RenameRequest_t *RR = &SMB_buf.smb.renameRequest;
 	RenameResponse_t *RRsp = &SMB_buf.smb.renameResponse;
 
-	memset(RR, 0, sizeof(RenameRequest_t));
+	ZERO_PKT_ALIGNED(RR, sizeof(RenameRequest_t));
 
 	RR->smbH.Magic = SMB_MAGIC;
 	RR->smbH.Cmd = SMB_COM_RENAME;
@@ -1341,7 +1345,7 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 	FindFirstNext2Request_t *FFNR = &SMB_buf.smb.findFirstNext2Request;
 	FindFirstNext2Response_t *FFNRsp = &SMB_buf.smb.findFirstNext2Response;
 
-	memset(FFNR, 0, sizeof(FindFirstNext2Request_t));
+	ZERO_PKT_ALIGNED(FFNR, sizeof(FindFirstNext2Request_t));
 
 	FFNR->smbH.Magic = SMB_MAGIC;
 	FFNR->smbH.Cmd = SMB_COM_TRANSACTION2;
@@ -1453,7 +1457,7 @@ int smb_TreeDisconnect(int UID, int TID)
 	TreeDisconnectRequest_t *TDR = &SMB_buf.smb.treeDisconnectRequest;
 	TreeDisconnectResponse_t *TDRsp = &SMB_buf.smb.treeDisconnectResponse;
 
-	memset(TDR, 0, sizeof(TreeDisconnectRequest_t));
+	ZERO_PKT_ALIGNED(TDR, sizeof(TreeDisconnectRequest_t));
 
 	TDR->smbH.Magic = SMB_MAGIC;
 	TDR->smbH.Cmd = SMB_COM_TREE_DISCONNECT;
@@ -1485,7 +1489,7 @@ int smb_LogOffAndX(int UID)
 	LogOffAndXRequest_t *LR = &SMB_buf.smb.logOffAndXRequest;
 	LogOffAndXResponse_t *LRsp = &SMB_buf.smb.logOffAndXResponse;
 
-	memset(LR, 0, sizeof(LogOffAndXRequest_t));
+	ZERO_PKT_ALIGNED(LR, sizeof(LogOffAndXRequest_t));
 
 	LR->smbH.Magic = SMB_MAGIC;
 	LR->smbH.Cmd = SMB_COM_LOGOFF_ANDX;
@@ -1518,7 +1522,7 @@ int smb_Echo(void *echo, int len)
 	EchoRequest_t *ER = &SMB_buf.smb.echoRequest;
 	EchoResponse_t *ERsp = &SMB_buf.smb.echoResponse;
 
-	memset(ER, 0, sizeof(EchoRequest_t));
+	ZERO_PKT_ALIGNED(ER, sizeof(EchoRequest_t));
 
 	ER->smbH.Magic = SMB_MAGIC;
 	ER->smbH.Cmd = SMB_COM_ECHO;
