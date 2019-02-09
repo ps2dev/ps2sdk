@@ -281,14 +281,14 @@ static int asciiToUtf16(char *out, const char *in)
 	return len;
 }
 
-static int utf16ToAscii(char *out, const char *in)
+static int utf16ToAscii(char *out, const char *in, int inbytes)
 {
-	int len;
+	int len, bytesProcessed;
 	const u8 *pIn;
 	char *pOut;
 	u16 wchar;
 
-	for(pIn = in, pOut = out, len = 0; ; len++)
+	for(pIn = in, pOut = out, len = 0, bytesProcessed = 0; (inbytes == 0) || (bytesProcessed < inbytes) ; len++)
 	{
 		wchar = pIn[0] | ((u16)pIn[1] << 8);
 		if (wchar == '\0')
@@ -299,18 +299,19 @@ static int utf16ToAscii(char *out, const char *in)
 			*pOut = '?';
 
 			pIn += 4;
+			bytesProcessed += 4;
 			pOut++;
 		} else {
 			// Write decoded character. Replace unsupported characters with '?'.
 			*pOut = (wchar > 128) ? '?' : (char)wchar;
 
 			pIn += 2;
+			bytesProcessed += 2;
 			pOut++;
 		}
 	}
 
 	pOut[0] = '\0'; //NULL terminate.
-	pOut[1] = '\0';
 	len++;
 
 	return len;
@@ -333,18 +334,24 @@ static int setStringField(char *out, const char *in)
 	return len;
 }
 
-static int getStringField(char *out, const char *in)
+static int getStringField(char *out, const char *in, int inbytes)
 {
 	int len;
 
 	if (server_specs.Capabilities & SERVER_CAP_UNICODE)
 	{
-		len = utf16ToAscii(out, in);
+		len = utf16ToAscii(out, in, inbytes);
 	}
 	else
 	{
-		len = strlen(in) + 1;
-		strcpy(out, in);
+		if (inbytes != 0)
+		{
+			strncpy(out, in, inbytes);
+			out[inbytes] = '\0';
+		}
+		else
+			strcpy(out, in);
+		len = strlen(out) + 1;
 	}
 
 	return len;
@@ -400,7 +407,7 @@ negotiate_retry:
 	server_specs.MaxMpxCount = NPRsp->MaxMpxCount;
 	server_specs.SessionKey = NPRsp->SessionKey;
 	memcpy(server_specs.EncryptionKey, NPRsp->ByteField, NPRsp->KeyLength);
-	getStringField(server_specs.PrimaryDomainServerName, &NPRsp->ByteField[NPRsp->KeyLength]);
+	getStringField(server_specs.PrimaryDomainServerName, &NPRsp->ByteField[NPRsp->KeyLength], 0);
 
 	return 0;
 
@@ -475,7 +482,7 @@ int smb_SessionSetupAndX(char *User, char *Password, int PasswordType, u32 capab
 {
 	SessionSetupAndXRequest_t *SSR = &SMB_buf.smb.sessionSetupAndXRequest;
 	SessionSetupAndXResponse_t *SSRsp = &SMB_buf.smb.sessionSetupAndXResponse;
-	int r, offset, CF, useUnicode;
+	int r, offset, useUnicode;
 	int passwordlen = 0;
 	int AuthType = NTLM_AUTH;
 
@@ -484,7 +491,6 @@ lbl_session_setup:
 	ZERO_PKT_ALIGNED(SSR, sizeof(SessionSetupAndXRequest_t));
 
 	useUnicode = (server_specs.Capabilities & SERVER_CAP_UNICODE) ? 1 : 0;
-	CF = useUnicode ? 2 : 1;
 
 	SSR->smbH.Magic = SMB_MAGIC;
 	SSR->smbH.Cmd = SMB_COM_SESSION_SETUP_ANDX;
@@ -520,9 +526,21 @@ lbl_session_setup:
 	// PrimaryDomain, acquired from Negotiate Protocol Response data
 	offset += setStringField(&SSR->ByteField[offset], server_specs.PrimaryDomainServerName);
 
-	// NativeOS, NativeLanMan
-	memset(&SSR->ByteField[offset], 0, CF * 2);
-	offset += CF * 2;
+	// NativeOS
+	if (useUnicode && ((offset & 1) != 0))
+	{	//If Unicode is used, the field must begin on a 16-bit aligned address.
+		SSR->ByteField[offset] = '\0';
+		offset++;
+	}
+	offset += setStringField(&SSR->ByteField[offset], "PlayStation 2");
+
+	// NativeLanMan
+	if (useUnicode && ((offset & 1) != 0))
+	{	//If Unicode is used, the field must begin on a 16-bit aligned address.
+		SSR->ByteField[offset] = '\0';
+		offset++;
+	}
+	offset += setStringField(&SSR->ByteField[offset], "SMBMAN");
 
 	SSR->ByteCount = offset;
 
@@ -1303,11 +1321,13 @@ int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 	offset = 0;
 
 	// Add oldPath
-	RR->ByteField[offset++] = 0x04;			// BufferFormat
+	RR->ByteField[offset] = 0x04;			// BufferFormat
+	offset++;
 	offset += setStringField(&RR->ByteField[offset], oldPath);
 
 	// Add newPath
-	RR->ByteField[offset++] = 0x04;			// BufferFormat
+	RR->ByteField[offset] = 0x04;			// BufferFormat
+	offset++;
 	if (server_specs.Capabilities & SERVER_CAP_UNICODE)
 	{
 		RR->ByteField[offset] = '\0';
@@ -1448,7 +1468,7 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 		info->fileInfo.IsDirectory = 1;
 	info->fileInfo.AllocationSize = FFRspData->AllocationSize;
 	info->fileInfo.EndOfFile = FFRspData->EndOfFile;
-	getStringField(info->FileName, FFRspData->FileName);
+	getStringField(info->FileName, FFRspData->FileName, FFRspData->FileNameLen);
 
 	return 0;
 }

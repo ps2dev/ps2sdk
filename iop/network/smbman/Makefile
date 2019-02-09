@@ -12,7 +12,7 @@ IOP_INCS += -I$(PS2SDKSRC)/iop/tcpip/tcpip/include
 
 IOP_LDFLAGS += -lgcc
 
-IOP_OBJS = smbman.o smb_fio.o smb.o poll.o auth.o des.o md4.o imports.o exports.o
+IOP_OBJS = smbman.o smb_fio.o smb.o poll.o auth.o des.o md4.o imports.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make

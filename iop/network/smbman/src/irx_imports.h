@@ -17,7 +17,6 @@
 
 #include <intrman.h>
 #include <ioman.h>
-#include <loadcore.h>
 #include <ps2ip.h>
 #include <sifman.h>
 #include <stdio.h>
