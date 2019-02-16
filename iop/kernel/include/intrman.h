@@ -54,64 +54,144 @@ enum iop_irq_list {
 	IOP_IRQ_ILINK,
 	/** Firewire DMA */
 	IOP_IRQ_FDMA,
-	//There's a gap in interrupt numbers here.
-	/** INUM_DMA_0 */	
-	IOP_IRQ_DMA_MDEC_IN = 0x20,	
-	/** INUM_DMA_1 */
-	IOP_IRQ_DMA_MDEC_OUT,	
-	/** INUM_DMA_2 */
-	IOP_IRQ_DMA_SIF2,	
-	/** INUM_DMA_3 */
-	IOP_IRQ_DMA_CDVD,	
-	/** INUM_DMA_4 */
-	IOP_IRQ_DMA_SPU,	
-	/** INUM_DMA_5 */
-	IOP_IRQ_DMA_PIO,	
-	/** INUM_DMA_6 */
-	IOP_IRQ_DMA_GPU_OTC,	
-	/** INUM_DMA_BERR (DMA bus error) */
-	IOP_IRQ_DMA_BERR,	
-	/** INUM_DMA_7 */
-	IOP_IRQ_DMA_SPU2,	
-	/** INUM_DMA_8 */
-	IOP_IRQ_DMA_DEV9,	
-	/** INUM_DMA_9 */
-	IOP_IRQ_DMA_SIF0,	
-	/** INUM_DMA_10 */
-	IOP_IRQ_DMA_SIF1,	
-	/** INUM_DMA_11 */
-	IOP_IRQ_DMA_SIO2_IN,	
-	/** INUM_DMA_12 */
-	IOP_IRQ_DMA_SIO2_OUT,	
 
+	/** INUM_DMA_0 */
+	IOP_IRQ_DMA_MDEC_IN = 0x20,
+	/** INUM_DMA_1 */
+	IOP_IRQ_DMA_MDEC_OUT,
+	/** INUM_DMA_2 */
+	IOP_IRQ_DMA_SIF2,
+	/** INUM_DMA_3 */
+	IOP_IRQ_DMA_CDVD,
+	/** INUM_DMA_4 */
+	IOP_IRQ_DMA_SPU,
+	/** INUM_DMA_5 */
+	IOP_IRQ_DMA_PIO,
+	/** INUM_DMA_6 */
+	IOP_IRQ_DMA_GPU_OTC,
+	/** INUM_DMA_BERR (DMA bus error) */
+	IOP_IRQ_DMA_BERR,
+	/** INUM_DMA_7 */
+	IOP_IRQ_DMA_SPU2,
+	/** INUM_DMA_8 */
+	IOP_IRQ_DMA_DEV9,
+	/** INUM_DMA_9 */
+	IOP_IRQ_DMA_SIF0,
+	/** INUM_DMA_10 */
+	IOP_IRQ_DMA_SIF1,
+	/** INUM_DMA_11 */
+	IOP_IRQ_DMA_SIO2_IN,
+	/** INUM_DMA_12 */
+	IOP_IRQ_DMA_SIO2_OUT,
+
+	/** R3000A Software Interrupt 1 (Used by DECI2). */
+	IOP_IRQ_SW1 = 0x3E,
+	/** R3000A Software Interrupt 2 (Used by DRVTIF of DECI2) */
+	IOP_IRQ_SW2
 };
 
+/**
+ * Register an interrupt handler for the specified interrupt.
+ * @param irq Interrupt cause to register an interrupt handler for.
+ * @param mode Specifies the registers that will be preserved before the interrupt handler is run. The more registers are preserved, the slower the operation.
+ *             Mode 0: $at, $v0, $v1, $a0, $a1, $a2, $a3 and $ra can be used.
+ *             Mode 1: All mode 0 registers, as well as $t0-$t9, $gp and $fp can be used.
+ *             Mode 2: All mode 1 registers, as well as $s0-$s7 can be used.
+ * @param handler A pointer to the interrupt handler that will be associated with the interrupt.
+ * @param arg An optional pointer to data that will be passed to the interrupt handler, whenever it is to be invoked.
+ * @return 0 on success, non-zero error code on failure.
+ */
 int RegisterIntrHandler(int irq, int mode, int (*handler)(void *), void *arg);
+
+/**
+ * Releases (deregisters) the interrupt handler for the specified interrupt.
+ * @param irq Interrupt cause to release the interrupt handler for.
+ * @return 0 on success, non-zero error code on failure.
+ */
 int ReleaseIntrHandler(int irq);
 
+/**
+ * Enables (unmasks) the specified hardware interrupt cause.
+ * @param irq Interrupt cause to enable.
+ * @return Returns 0 on success, non-zero error code on failure.
+ */
 int EnableIntr(int irq);
+
+/**
+ * Disables (masks) the specified hardware interrupt cause.
+ * @param irq Interrupt cause to disable.
+ * @param res Pointer to a variable to receive the interrupt number of the interrupt that was disabled.
+ * @return Returns 0 on success, non-zero error code on failure.
+ */
 int DisableIntr(int irq, int *res);
 
+/**
+ * Disables interrupts, regardless of the current statue. This is deprecated.
+ * The interrupt mask registers for each interrupt cause will not be changed.
+ * May be called from an interrupt or thread context.
+ * @return Returns 0 on success, non-zero error code on failure.
+ */
 int CpuDisableIntr();
+/**
+ * Enables interrupts, regardless of the current state. This is deprecated.
+ * The interrupt mask registers for each interrupt cause will not be changed.
+ * May be called from an interrupt or thread context.
+ * @return Returns 0 on success, non-zero error code on failure.
+ */
 int CpuEnableIntr();
 
+/**
+ * Disables interrupts.
+ * The interrupt mask registers for each interrupt cause will not be changed.
+ * May be called from an interrupt or thread context.
+ * @param state A pointer to a variable that will store the current interrupt status. Even if KE_CPUDI is returned, state will be set appropriately.
+ * @return Returns 0 on success, non-zero error code on failure.
+ * @see CpuResumeIntr()
+ */
 int CpuSuspendIntr(int *state);
+
+/**
+ * Enables interrupts.
+ * The interrupt mask registers for each interrupt cause will not be changed.
+ * May be called from an interrupt or thread context.
+ * @param state The previous state of interrupts, as indicated by the preceeding call to CpuSuspendIntr().
+ * @return Returns 0 on success, non-zero error code on failure.
+ * @see CpuSuspendIntr()
+ */
 int CpuResumeIntr(int state);
 
-//Invokes a function in kernel mode via a syscall.
+/**
+ * Invokes a function in kernel mode via a syscall handler. This is usually used for synchronization between interrupt and DECI2 contexts.
+ * @param function A pointer to the function to call. Specify other arguments for the function, after function.
+ * @return The return value of the function.
+ */
 int CpuInvokeInKmode(void *function, ...);
 
-//These are used to allow DECI2 to indicate that INTRMAN should not manage the interrupt.
-//Disables interrupt handler dispatching for the specified interrupt (interrupt status is independent).
+/**
+ * Disables dispatching of the interrupt handler, by INTRMAN. Used by DECI2, when DECI2RS is to manage the SIF2 and SBUS interrupts.
+ * This does not change the interrupt mask status.
+ * @param irq The interrupt to mask in software.
+ */
 void DisableDispatchIntr(int irq);
-//Enables interrupt handler dispatching for the specified interrupt (interrupt status is independent).
+/**
+ * Enables dispatching of the interrupt handler, by INTRMAN.
+ * This does not change the interrupt mask status.
+ * @param irq The interrupt to unmask in software.
+ */
 void EnableDispatchIntr(int irq);
 
-/** 
- * @return 1 if within the interrupt context 
+/**
+ * Indicates whether execution is currently within an interrupt or thread context.
+ * @return 1 if within the interrupt context, 0 if not.
  */
 int QueryIntrContext(void);
-int QueryIntrStack(void);
+
+/**
+ * Indicates whether the specified stack pointer is within the interrupt stack.
+ * @param sp The stack pointer to check.
+ * @return 1 if the specified stack pointer is within the interrupt stack, 0 if not.
+ */
+int QueryIntrStack(void *sp);
 
 int iCatchMultiIntr(void);
 
