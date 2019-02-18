@@ -42,6 +42,6 @@ s32 padInfoMode(u32 port, u32 slot, s32 val1, u32 val2);
 #define I_padSetActDirect DECLARE_IMPORT(15, padSetActDirect)
 #define I_padSetActAlign DECLARE_IMPORT(16, padSetActAlign)
 #define I_padGetButtonMask DECLARE_IMPORT(17, padGetButtonMask)
-#define I_PadGetButtonInfo DECLARE_IMPORT(18, padGetButtonInfo);
+#define I_padGetButtonInfo DECLARE_IMPORT(18, padGetButtonInfo)
 
 #endif /* __XPADMAN_H__ */
