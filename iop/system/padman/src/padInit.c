@@ -53,7 +53,7 @@ static void TransferThread(void *arg)
 	}
 }
 
-u32 setupEEButtonData(u32 port, u32 slot, padState_t *pstate)
+u32 padSetupEEButtonData(u32 port, u32 slot, padState_t *pstate)
 {
 	if(padState[port][slot].buttonDataReady == 1)
 	{
@@ -323,7 +323,7 @@ static void DmaSendEE(void)
 
 					if( p->buttonDataReady == 1)
 					{
-						p->ee_pdata.length = setupEEButtonData(port, slot, p);
+						p->ee_pdata.length = padSetupEEButtonData(port, slot, p);
 					}
 					else
 					{
