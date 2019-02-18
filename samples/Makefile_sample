@@ -6,6 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+ifndef SUBDIRS
 SUBDIRS =
 SUBDIRS += cpp-hello
 SUBDIRS += hello
@@ -33,6 +34,7 @@ SUBDIRS += rpc/pad
 SUBDIRS += rpc/padx
 SUBDIRS += rpc/ps2snd
 SUBDIRS += rpc/tcpips/ee-echo
+endif
 
 all: $(patsubst %, _dir_%, $(SUBDIRS))
 
