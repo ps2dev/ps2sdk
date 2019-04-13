@@ -38,28 +38,28 @@
 #define MC_WAIT					0
 #define MC_NOWAIT				1
 
-#define MC_TYPE_PSX				1
-#define MC_TYPE_PS2				2
-#define MC_TYPE_POCKET			3
-#define MC_TYPE_NONE			0
+#define MC_TYPE_PSX				sceMcTypePS1
+#define MC_TYPE_PS2				sceMcTypePS2
+#define MC_TYPE_POCKET			sceMcTypePDA
+#define MC_TYPE_NONE		sceMcTypeNoCard
 
 #define MC_FORMATTED		1
 #define MC_UNFORMATTED		0
 
 // Valid bits in memcard file attributes (mctable.AttrFile)
-#define MC_ATTR_READABLE        0x0001
-#define MC_ATTR_WRITEABLE       0x0002
-#define MC_ATTR_EXECUTABLE      0x0004
-#define MC_ATTR_PROTECTED       0x0008
-#define MC_ATTR_FILE            0x0010
-#define MC_ATTR_SUBDIR          0x0020
+#define MC_ATTR_READABLE        sceMcFileAttrReadable
+#define MC_ATTR_WRITEABLE       sceMcFileAttrWriteable
+#define MC_ATTR_EXECUTABLE      sceMcFileAttrExecutable
+#define MC_ATTR_PROTECTED       sceMcFileAttrDupProhibit
+#define MC_ATTR_FILE            sceMcFileAttrFile
+#define MC_ATTR_SUBDIR          sceMcFileAttrSubdir
 /** File or directory */
-#define MC_ATTR_OBJECT          0x0030
-#define MC_ATTR_CLOSED          0x0080
-#define MC_ATTR_PDAEXEC         0x0800
-#define MC_ATTR_PSX             0x1000
+#define MC_ATTR_OBJECT          (sceMcFileAttrFile|sceMcFileAttrSubdir)
+#define MC_ATTR_CLOSED          sceMcFileAttrClosed
+#define MC_ATTR_PDAEXEC         sceMcFileAttrPDAExec
+#define MC_ATTR_PSX             sceMcFileAttrPS1
 /** not hidden in osdsys, but it is to games */
-#define MC_ATTR_HIDDEN          0x2000
+#define MC_ATTR_HIDDEN          sceMcFileAttrHidden
 
 /** function numbers returned by mcSync in the 'cmd' pointer */
 enum MC_FUNC_NUMBERS{

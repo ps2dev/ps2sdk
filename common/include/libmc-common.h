@@ -178,19 +178,24 @@ typedef struct {
 #define SCE_STM_D			0x20
 
 /* file attributes */
-#define sceMcFileAttrReadable		SCE_STM_R
-#define sceMcFileAttrWriteable		SCE_STM_W
-#define sceMcFileAttrExecutable		SCE_STM_X
-#define sceMcFileAttrDupProhibit	SCE_STM_C
-#define sceMcFileAttrFile		SCE_STM_F
-#define sceMcFileAttrSubdir		SCE_STM_D
-#define sceMcFileCreateDir		0x0040
-#define sceMcFileAttrClosed		0x0080
-#define sceMcFileCreateFile		0x0200
-#define sceMcFile0400			0x0400
-#define sceMcFileAttrPDAExec		0x0800
-#define sceMcFileAttrPS1		0x1000
-#define sceMcFileAttrHidden		0x2000
-#define sceMcFileAttrExists		0x8000
+#define sceMcFileAttrReadable		SCE_STM_R	//Readable
+#define sceMcFileAttrWriteable		SCE_STM_W	//Writable
+#define sceMcFileAttrExecutable		SCE_STM_X	//Executable
+#define sceMcFileAttrDupProhibit	SCE_STM_C	//Copy Protected
+#define sceMcFileAttrFile		SCE_STM_F	//Is a file.
+#define sceMcFileAttrSubdir		SCE_STM_D	//Is a sub-directory
+#define sceMcFileCreateDir		0x0040		//Used internally to create directories.
+#define sceMcFileAttrClosed		0x0080		//Indicates whether a file _may_ not have been written properly. Earlier browsers do not copy this flag.
+#define sceMcFileCreateFile		0x0200		//Equivalent in value and functionality to O_CREAT.
+#define sceMcFile0400			0x0400		//Set during creation.
+#define sceMcFileAttrPDAExec		0x0800		//PDA Application (1st Generation PDA Download)
+#define sceMcFileAttrPS1		0x1000		//PlayStation-format data
+#define sceMcFileAttrHidden		0x2000		//Indicates whether the file is a hidden file (but not to the browser).
+#define sceMcFileAttrExists		0x8000		//Indicates whether the file exists.
+
+/* Valid information bit fields for sceMcSetFileInfo */
+#define sceMcFileInfoCreate		0x01	//Creation Date/Time
+#define sceMcFileInfoModify		0x02	//Modification Date/Time
+#define sceMcFileInfoAttr		0x04	//File Attributes
 
 #endif /* __LIBMC_COMMON_H__ */
