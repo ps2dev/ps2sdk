@@ -11,7 +11,6 @@
 #include "io_common.h"
 #include "sifman.h"
 #include "stdio.h"
-#include "sys/stat.h"
 #include "sysclib.h"
 #include "thbase.h"
 #include "thsemap.h"

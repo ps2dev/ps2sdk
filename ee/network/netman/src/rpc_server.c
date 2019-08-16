@@ -3,6 +3,7 @@
 #include <sifcmd.h>
 #include <sifrpc.h>
 #include <stdio.h>
+#include <errno.h>
 #include <string.h>
 #include <netman.h>
 #include <netman_rpc.h>

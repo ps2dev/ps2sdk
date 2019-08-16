@@ -20,7 +20,7 @@
 #define __FILEXIO_H__
 
 #include <tamtypes.h>
-#include <sys/stat.h>
+#include <iox_stat.h>
 
 #define FILEXIO_IRX	0xb0b0b00
 enum FILEXIO_CMDS{

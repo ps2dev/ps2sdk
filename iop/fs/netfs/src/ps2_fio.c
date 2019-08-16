@@ -28,8 +28,6 @@
 #include <ps2ip.h>
 #include <iopmgr.h>
 
-#include <sys/stat.h>
-
 #include "ps2_fio.h"
 #include "ps2fs.h"
 #include "byteorder.h"

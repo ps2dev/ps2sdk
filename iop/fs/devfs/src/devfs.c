@@ -25,7 +25,6 @@
 #include "sysclib.h"
 #include "devfs.h"
 #include "sysmem.h"
-#include "sys/stat.h"
 #include "stdio.h"
 
 #ifdef USE_IOMAN

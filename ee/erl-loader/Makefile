@@ -17,7 +17,7 @@ EE_CFLAGS += $(NO_BUILTIN:%=-fno-builtin-%)
 
 EE_INCS += -I$(PS2SDKSRC)/ee/erl/include -I$(PS2SDKSRC)/ee/libc/include -I$(PS2SDKSRC)/ee/erl-loader/src
 
-EE_LIBS += $(PS2SDKSRC)/ee/erl/lib/liberl.a $(PS2SDKSRC)/ee/libc/lib/libc.a $(PS2SDKSRC)/ee/kernel/lib/libkernel.a
+EE_LIBS += $(PS2SDKSRC)/ee/erl/lib/liberl.a -lc $(PS2SDKSRC)/ee/libc/lib/libps2sdkc.a $(PS2SDKSRC)/ee/kernel/lib/libkernel.a
 
 EE_OBJS = erl-loader.o
 
@@ -37,10 +37,10 @@ include $(PS2SDKSRC)/ee/Rules.release
 
 $(EE_OBJS_DIR)erl-loader.o: | $(EE_OBJS_DIR)
 
-$(LOADER_BIN): $(EE_OBJS) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_LIBS) | $(EE_BIN_DIR)
-	$(EE_CC) $(EE_NO_CRT) -nostdlib -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_CFLAGS) \
-	-o $(EE_BIN_DIR)tmp.elf $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_LIBS) -lgcc $(EE_SRC_DIR)dummy-exports.c
+$(LOADER_BIN): $(EE_OBJS) $(EE_LIBS) | $(EE_BIN_DIR)
+	$(EE_CC) -nostdlib $(EE_CFLAGS) \
+	-o $(EE_BIN_DIR)tmp.elf $(EE_OBJS) $(EE_LIBS) -lgcc $(EE_SRC_DIR)dummy-exports.c
 	$(EE_SRC_DIR)build-exports.sh $(EE_TOOL_PREFIX)readelf
 	rm $(EE_BIN_DIR)tmp.elf
-	$(EE_CC) $(EE_NO_CRT) -nostdlib -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_CFLAGS) \
-	-o $(LOADER_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(EE_OBJS) $(EE_LIBS) -lgcc $(EE_SRC_DIR)exports.c
+	$(EE_CC) -nostdlib $(EE_CFLAGS) \
+	-o $(LOADER_BIN) $(EE_OBJS) $(EE_LIBS) -lgcc $(EE_SRC_DIR)exports.c

@@ -28,8 +28,7 @@
 #include <sifman.h>
 #include <sifcmd.h>
 #include <errno.h>
-
-#include "fileXio_iop.h"
+#include <fileXio.h>
 
 #define MODNAME "IOX/File_Manager_Rpc"
 IRX_ID(MODNAME, 1, 2);

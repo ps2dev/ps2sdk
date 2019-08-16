@@ -3,7 +3,6 @@
 #include <stdarg.h>
 #include <sysclib.h>
 #include <sysmem.h>
-#include <sys/stat.h>
 #include <excepman.h>
 #include <intrman.h>
 #include <loadcore.h>

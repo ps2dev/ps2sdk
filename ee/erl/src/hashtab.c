@@ -29,6 +29,7 @@ This implements a hash table.
 */
 
 #include <string.h>
+#include <malloc.h>
 
 #ifndef STANDARD
 #include "standard.h"

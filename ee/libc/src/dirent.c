@@ -1,4 +1,4 @@
-#include <dirent.h>
+#include <sys/dirent.h>
 #include <stdio.h>
 
 #ifdef F_opendir

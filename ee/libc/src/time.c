@@ -78,9 +78,9 @@ void _ps2sdk_time_deinit(void)
    s_intrOverflowCount = 0;
 }
 
-clock_t clock(void)
+clock_t ps2_clock(void)
 {
-   u64         t;
+   u64 t;
 
    // Tn_COUNT is 16 bit precision. Therefore, each s_intrOverflowCount is 65536 ticks
    t = *T_COUNT + (s_intrOverflowCount << 16);
@@ -88,11 +88,3 @@ clock_t clock(void)
    return t;
 }
 
-time_t time(time_t *t)
-{
-	if (t != 0) {
-		*t = (time_t)-1;
-	}
-
-	return (time_t)-1;
-}

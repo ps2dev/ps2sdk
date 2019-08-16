@@ -24,6 +24,8 @@
 #include <fileXio_rpc.h>
 #include <errno.h>
 
+#include <ps2sdkapi.h>
+
 extern int _iop_reboot_count;
 static SifRpcClientData_t cd0;
 static unsigned int sbuff[0x1300] __attribute__((aligned (64)));
@@ -94,6 +96,7 @@ int fileXioInit(void)
 	_ps2sdk_write = fileXioWrite;
 	_ps2sdk_remove= fileXioRemove;
 	_ps2sdk_rename= fileXioRename;
+	_ps2sdk_mkdir= fileXioMkdir;
 
 	return 0;
 }

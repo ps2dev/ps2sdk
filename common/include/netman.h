@@ -6,6 +6,8 @@
 #ifndef __NETMAN_H__
 #define __NETMAN_H__
 
+#include <tamtypes.h>
+
 //Common structures
 #define NETMAN_NETIF_NAME_MAX_LEN	4
 #define NETMAN_NETIF_FRAME_SIZE		1514

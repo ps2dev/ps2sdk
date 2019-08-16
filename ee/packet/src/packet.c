@@ -1,5 +1,6 @@
 #include <string.h>
 #include <stdlib.h>
+#include <malloc.h>
 #include <packet.h>
 
 #define SPR_BEGIN 0x70000000

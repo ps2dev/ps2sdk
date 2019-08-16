@@ -10,6 +10,8 @@
  */
 #define NO_SYS		0
 
+#define LWIP_TIMEVAL_PRIVATE 0
+
 /* ---------- Thread options ---------- */
 /**
  * DEFAULT_THREAD_STACKSIZE: The stack size used by any other lwIP thread.

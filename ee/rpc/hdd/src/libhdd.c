@@ -23,6 +23,7 @@
 #include "sys/stat.h"
 #include "sys/ioctl.h"
 #include "fileXio_rpc.h"
+#include "io_common.h"
 #include "errno.h"
 
 #include "libhdd.h"

@@ -4,7 +4,11 @@
 #include <gif_tags.h>
 #include <gs_gp.h>
 
+#include <fileio.h>
+
 #include <stdio.h>
+#include <malloc.h>
+#include <sys/fcntl.h>
 #include <string.h>
 
 #include <font.h>

@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = kernel kernel-nopatch libc rpc startup debug \
+SUBDIRS = kernel kernel-nopatch libc rpc debug \
 	eedebug sbv dma graph math3d math \
 	packet draw erl erl-loader mpeg libgs \
 	libvux font input inputx network iopreboot

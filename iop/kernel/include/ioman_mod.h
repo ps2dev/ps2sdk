@@ -20,7 +20,7 @@
 #include <types.h>
 #include <irx.h>
 #include <io_common.h>
-#include <sys/stat.h>
+#include <iox_stat.h>
 
 int io_open(const char *name, int mode);
 int io_close(int fd);
