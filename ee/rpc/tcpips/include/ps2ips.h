@@ -17,6 +17,7 @@
 #define __PS2IPS_H__
 
 #include <tcpip.h>
+#include <sys/time.h>
 
 #ifdef __cplusplus
 extern "C" {

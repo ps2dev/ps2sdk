@@ -18,6 +18,8 @@
 #include <tamtypes.h>
 #include <kernel.h>
 #include <stdio.h>
+#include <sys/fcntl.h>
+#include <ps2sdkapi.h>
 #include <string.h>
 #include <osd_config.h>
 

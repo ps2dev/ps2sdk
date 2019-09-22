@@ -10,55 +10,10 @@
 
 /**
  * @file
- * unistd implementation
+ * sleep implementation
  */
 
 #include <unistd.h>
-#include <sys/stat.h>
-#include <string.h>
-
-#ifdef F_getcwd
-extern char __direct_pwd[256];
-
-char *getcwd(char *buf, int len)
-{
-	strncpy(buf, __direct_pwd, len);
-	return buf;
-}
-#endif
-
-#ifdef F_access
-int access(const char *path, int mode)
-{
-	printf("access() unimplemented\n");
-	return -1;
-}
-#endif
-
-#ifdef F_stat
-int stat(const char *path, struct stat *sbuf)
-{
-	printf("stat() unimplemented\n");
-	return -1;
-}
-#endif
-
-#ifdef F_fstat
-int fstat(int filedes, struct stat *buf)
-{
-	printf("fstat() unimplemented\n");
-	return -1;
-}
-#endif
-
-#ifdef F_unlink
-int unlink(const char *path)
-{
-	return fioRemove(path);
-}
-#endif
-
-#ifdef F_sleep
 #include <kernel.h>
 #include <time.h>
 
@@ -98,4 +53,3 @@ unsigned int sleep(unsigned int seconds)
 
 	return 0;
 }
-#endif

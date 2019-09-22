@@ -10,6 +10,9 @@
 
 #include <errno.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <sys/fcntl.h>
+#include <ps2sdkapi.h>
 #include <kernel.h>
 #include <libgs.h>
 

@@ -21,6 +21,7 @@
 #include <stdarg.h>
 #include <sys/fcntl.h>
 #include <sys/stat.h>
+#include <ps2sdkapi.h>
 #include <fileXio_rpc.h>
 #include <errno.h>
 
@@ -94,6 +95,7 @@ int fileXioInit(void)
 	_ps2sdk_write = fileXioWrite;
 	_ps2sdk_remove= fileXioRemove;
 	_ps2sdk_rename= fileXioRename;
+	_ps2sdk_mkdir = fileXioMkdir;
 
 	return 0;
 }

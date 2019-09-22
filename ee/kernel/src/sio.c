@@ -185,3 +185,21 @@ void sio_flush()
 	_lb(SIO_RXFIFO);
 }
 #endif
+
+#ifdef F_sio_printf
+#define SIO_PRINTF_STR_MAX 4096
+int sio_printf(const char *format, ...)
+{
+	static char buf[SIO_PRINTF_STR_MAX];
+	va_list args;
+	int size;
+
+	va_start(args, format);
+	size = vsnprintf(buf, PS2LIB_STR_MAX, format, args);
+	va_end(args);
+
+	sio_write(buf, size);
+
+	return size;
+}
+#endif

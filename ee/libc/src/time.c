@@ -83,8 +83,8 @@ void _ps2sdk_time_deinit(void)
 }
 #endif
 
-#ifdef F_clock
-clock_t clock(void)
+#ifdef F_ps2_clock
+clock_t ps2_clock(void)
 {
    u64         t;
 
@@ -95,13 +95,3 @@ clock_t clock(void)
 }
 #endif
 
-#ifdef F_time
-time_t time(time_t *t)
-{
-	if (t != 0) {
-		*t = (time_t)-1;
-	}
-
-	return (time_t)-1;
-}
-#endif

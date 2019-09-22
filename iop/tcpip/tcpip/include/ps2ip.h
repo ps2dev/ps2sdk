@@ -21,6 +21,8 @@
 
 #include <tcpip.h>
 
+#include <sys/time.h>
+
 /* From include/lwip/sockets.h:  */
 
 int       lwip_accept(int s, struct sockaddr *addr, socklen_t *addrlen);

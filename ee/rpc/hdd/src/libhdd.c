@@ -23,6 +23,7 @@
 #include "sys/stat.h"
 #include "sys/ioctl.h"
 #include "fileXio_rpc.h"
+#include "io_common.h"
 #include "errno.h"
 
 #include "libhdd.h"
@@ -193,7 +194,7 @@ int hddGetFilesystemList(t_hddFilesystem hddFs[], int maxEntries)
 #endif
 
 		// Calculate filesystem size
-		partitionFd = fileXioOpen(hddFs[count].filename, O_RDONLY);
+		partitionFd = fileXioOpen(hddFs[count].filename, FIO_O_RDONLY);
 
 		// If we failed to open the partition, then a password is probably set
 		// (usually this means we have tried to access a game partition). We
@@ -321,7 +322,7 @@ int hddMakeFilesystem(int fsSizeMB, char *name, int type)
 
 	// Check if filesystem already exists
 	sprintf(openString, "hdd0:%s", fsName);
-	partFd = fileXioOpen(openString, O_RDONLY);
+	partFd = fileXioOpen(openString, FIO_O_RDONLY);
 	if(partFd > 0 || partFd == -EACCES)	// Filesystem already exists
 	{
 		fileXioClose(partFd);
@@ -347,7 +348,7 @@ int hddMakeFilesystem(int fsSizeMB, char *name, int type)
 		printf(">>> openString = %s\n", openString);
 #endif
 
-		partFd = fileXioOpen(openString, O_RDWR | O_CREAT);
+		partFd = fileXioOpen(openString, FIO_O_RDWR | FIO_O_CREAT);
 		if(partFd >= 0)
 			break;
 		else {
@@ -493,7 +494,7 @@ int hddExpandFilesystem(t_hddFilesystem *fs, int extraMB)
 	partSize = sizesMB[useIndex];
 
 	// Open partition
-	partFd = fileXioOpen(fs->filename, O_RDWR);
+	partFd = fileXioOpen(fs->filename, FIO_O_RDWR);
 	if(partFd < 0)
 		return partFd;
 

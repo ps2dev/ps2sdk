@@ -19,7 +19,6 @@
 #include <types.h>
 #include <irx.h>
 #include <io_common.h>
-#include <sys/stat.h>
 
 int open(const char *name, int mode);
 int close(int fd);

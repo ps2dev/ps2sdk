@@ -13,8 +13,8 @@
  * File attributes and directory entries.
  */
 
-#ifndef __SYS_STAT_H__
-#define __SYS_STAT_H__
+#ifndef __IOP_SYS_STAT_H__
+#define __IOP_SYS_STAT_H__
 
 #include <sys/time.h>
 
@@ -79,32 +79,6 @@
 
 /* File attributes that are retrieved using the getstat and dread calls, and
    set using chstat.  */
-
-/* The following structures are only supported by iomanX.  */
-
-typedef struct {
-	unsigned int	mode;
-	unsigned int	attr;
-	unsigned int	size;
-	unsigned char	ctime[8];
-	unsigned char	atime[8];
-	unsigned char	mtime[8];
-	unsigned int	hisize;
-	/** Number of subs (main) / subpart number (sub) */
-	unsigned int	private_0;
-	unsigned int	private_1;
-	unsigned int	private_2;
-	unsigned int	private_3;
-	unsigned int	private_4;
-	/** Sector start.  */
-	unsigned int	private_5;
-} iox_stat_t;
-
-typedef struct {
-	iox_stat_t	stat;
-	char		name[256];
-	unsigned int	unknown;
-} iox_dirent_t;
 
 /* The following defines are only supported by ioman.  */
 
