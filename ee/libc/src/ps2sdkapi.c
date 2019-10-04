@@ -94,14 +94,31 @@ int _write(int fd, const void *buf, size_t nbytes) {
 	return _ps2sdk_write(fd, buf, nbytes);
 }
 
-int isatty(int fd) {
-	return 1;
+int _fstat(int fd, struct stat *buf) {
+	if (fd >=0 && fd <= 1) {
+		// Character device
+		buf->st_mode = S_IFCHR;
+		buf->st_blksize = 0;
+	}
+	else {
+		// Block device
+		buf->st_mode = S_IFBLK;
+		buf->st_blksize = 16*1024;
+	}
+
+	return 0;
 }
 
-int _fstat(int fd, struct stat *buf) {
-	buf->st_mode = S_IFCHR;       /* Always pretend to be a tty */
-	buf->st_blksize = 0;
+int isatty(int fd) {
+	struct stat buf;
 
+	if (_fstat (fd, &buf) < 0) {
+		errno = EBADF;
+		return 0;
+	}
+	if (S_ISCHR (buf.st_mode))
+		return 1;
+	errno = ENOTTY;
 	return 0;
 }
 
