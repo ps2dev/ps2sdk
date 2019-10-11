@@ -21,6 +21,13 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+// Include all integer types for compile time checking of:
+// - compiler (gcc)
+// - libc (newlib)
+#include <stdint.h>
+#include <inttypes.h>
+#include <tamtypes.h>
+
 #include "ps2sdkapi.h"
 
 
@@ -60,6 +67,40 @@ int (*_ps2sdk_mkdir)(const char*, int) = fioMkdirHelper;
 #define IOP_O_TRUNC        0x0400
 #define IOP_O_EXCL         0x0800
 #define IOP_O_NOWAIT       0x8000
+
+#if INT_MAX != 0x7fffffffL
+	#error "INT_MAX != 0x7fffffffL"
+#endif
+#ifndef LONG_MAX
+	#error "LONG_MAX not defined"
+#endif
+#if LONG_MAX == 0x7fffffffL
+	#error "LONG_MAX == 0x7fffffffL"
+#endif
+#if LONG_MAX != 9223372036854775807L
+	#error "LONG_MAX != 9223372036854775807L"
+#endif
+
+#define ct_assert(e) {enum { ct_assert_value = 1/(!!(e)) };}
+void compile_time_check() {
+	// Compiler
+	ct_assert(sizeof(unsigned char)==1);
+	ct_assert(sizeof(unsigned short)==2);
+	ct_assert(sizeof(unsigned int)==4);
+	ct_assert(sizeof(unsigned long)==8);
+	ct_assert(sizeof(unsigned int __attribute__(( mode(TI) )))==16);
+	// Defined in tamtypes.h (ps2sdk)
+	ct_assert(sizeof(u8)==1);
+	ct_assert(sizeof(u16)==2);
+	ct_assert(sizeof(u32)==4);
+	ct_assert(sizeof(u64)==8);
+	ct_assert(sizeof(u128)==16);
+	// Defined in inttypes.h/stdint.h (newlib)
+	ct_assert(sizeof(uint8_t)==1);
+	ct_assert(sizeof(uint16_t)==2);
+	ct_assert(sizeof(uint32_t)==4);
+	ct_assert(sizeof(uint64_t)==8);
+}
 
 int _open(const char *buf, int flags, ...) {
 	int iop_flags = 0;
