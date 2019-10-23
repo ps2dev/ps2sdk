@@ -360,7 +360,7 @@ int mcman_write1(int fd, void *buffer, int nbyte)
 }
 
 //--------------------------------------------------------------
-int mcman_dread1(int fd, fio_dirent_t *dirent)
+int mcman_dread1(int fd, io_dirent_t *dirent)
 {
 	register int r;
 	register MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
@@ -382,7 +382,7 @@ int mcman_dread1(int fd, fio_dirent_t *dirent)
 		return 0;
 
 	fh->position++;
-	mcman_wmemset((void *)dirent, sizeof(fio_dirent_t), 0);
+	mcman_wmemset((void *)dirent, sizeof(io_dirent_t), 0);
 
 	strncpy(dirent->name, fse->name, 20);
 	dirent->name[20] = 0;
@@ -406,7 +406,7 @@ int mcman_dread1(int fd, fio_dirent_t *dirent)
 }
 
 //--------------------------------------------------------------
-int mcman_getstat1(int port, int slot, char *filename, fio_stat_t *stat)
+int mcman_getstat1(int port, int slot, char *filename, io_stat_t *stat)
 {
 	register int r;
 	McFsEntryPS1 *fse;
@@ -423,7 +423,7 @@ int mcman_getstat1(int port, int slot, char *filename, fio_stat_t *stat)
 	if (r < 0)
 		return sceMcResNoEntry;
 
-	mcman_wmemset(stat, sizeof(fio_stat_t), 0);
+	mcman_wmemset(stat, sizeof(io_stat_t), 0);
 
 	stat->mode = 0x1f;
 

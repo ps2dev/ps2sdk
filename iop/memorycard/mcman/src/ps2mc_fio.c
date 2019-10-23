@@ -273,7 +273,7 @@ lbl1:
 }
 
 //--------------------------------------------------------------
-int mcman_dread2(int fd, fio_dirent_t *dirent)
+int mcman_dread2(int fd, io_dirent_t *dirent)
 {
 	register int r;
 	register MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
@@ -301,7 +301,7 @@ int mcman_dread2(int fd, fio_dirent_t *dirent)
 		return sceMcResSucceed;
 
 	fh->position++;
-	mcman_wmemset((void *)dirent, sizeof (fio_dirent_t), 0);
+	mcman_wmemset((void *)dirent, sizeof (io_dirent_t), 0);
 	strcpy(dirent->name, fse->name);
 	*(u8 *)&dirent->name[32] = 0;
 
@@ -331,7 +331,7 @@ int mcman_dread2(int fd, fio_dirent_t *dirent)
 }
 
 //--------------------------------------------------------------
-int mcman_getstat2(int port, int slot, char *filename, fio_stat_t *stat)
+int mcman_getstat2(int port, int slot, char *filename, io_stat_t *stat)
 {
 	register int r;
 	McFsEntry *fse;
@@ -344,7 +344,7 @@ int mcman_getstat2(int port, int slot, char *filename, fio_stat_t *stat)
 	if (r != sceMcResSucceed)
 		return r;
 
-	mcman_wmemset((void *)stat, sizeof (fio_stat_t), 0);
+	mcman_wmemset((void *)stat, sizeof (io_stat_t), 0);
 
 	if (fse->mode & sceMcFileAttrReadable)
 		stat->mode |= sceMcFileAttrReadable;

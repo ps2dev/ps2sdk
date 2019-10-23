@@ -17,7 +17,6 @@
 #define __SYS_IOX_STAT_H__
 
 #include <sys/time.h>
-#include <sys/stat.h>
 
 // Flags for chstat 'statmask'
 #define FIO_CST_MODE	0x0001

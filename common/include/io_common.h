@@ -45,12 +45,12 @@ typedef struct {
 	unsigned char atime[8];
 	unsigned char mtime[8];
 	unsigned int hisize;
-} fio_stat_t;
+} io_stat_t;
 
 typedef struct {
-	fio_stat_t stat;
+	io_stat_t stat;
 	char name[256];
 	unsigned int unknown;
-} fio_dirent_t;
+} io_dirent_t;
 
 #endif /* __IO_COMMON_H__ */
