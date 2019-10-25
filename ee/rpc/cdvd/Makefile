@@ -17,7 +17,7 @@ NCMD_OBJS += _ncmd_internals.o _CdAlignReadBuffer.o sceCdRead.o sceCdReadDVDV.o 
 	sceCdStStat.o sceCdStPause.o sceCdStResume.o sceCdStream.o sceCdCddaStream.o sceCdSync.o \
 	_CdCheckNCmd.o sceCdReadKey.o
 
-SCMD_OBJS += _scmd_internals.o sceCdReadClock.o sceCdWriteClock.o sceCdGetDiskType.o \
+SCMD_OBJS += _scmd_internals.o sceCdReadClock.o time.o sceCdWriteClock.o sceCdGetDiskType.o \
 	sceCdGetError.o sceCdTrayReq.o sceCdApplySCmd.o sceCdStatus.o sceCdBreak.o \
 	_CdCheckSCmd.o sceCdCtrlADout.o sceCdMV.o sceCdReadSUBQ.o \
 	sceCdForbidDVDP.o sceCdAutoAdjustCtrl.o sceCdDecSet.o sceCdSetHDMode.o sceCdOpenConfig.o sceCdCloseConfig.o \

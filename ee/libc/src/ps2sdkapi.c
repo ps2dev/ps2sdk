@@ -366,6 +366,22 @@ void * _sbrk(size_t incr) {
 	return ps2_sbrk(incr);
 }
 
+/*
+ * newlib function, unfortunately depends on the 'cdvd' library.
+ * In libc there is a dummy   'time' function declared as WEAK.
+ * In cdvd there is a working 'time' function declared as STRONG
+ * Include libcdvd if you need to use the time function.
+ */
+time_t time(time_t *t) __attribute__((weak));
+time_t time(time_t *t)
+{
+        printf("ERROR: include libcdvd when using the time function\n");
+
+        if(t != NULL)
+                *t = -1;
+	return -1;
+}
+
 int _gettimeofday(struct timeval *__p, struct timezone *__z) {
 	return -1;
 }
