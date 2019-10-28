@@ -382,8 +382,21 @@ time_t time(time_t *t)
 	return -1;
 }
 
-int _gettimeofday(struct timeval *__p, struct timezone *__z) {
-	return -1;
+/*
+ * Implement in terms of time, which means we can't
+ * return the microseconds.
+ */
+int _gettimeofday(struct timeval *tv, struct timezone *tz) {
+        if (tz) {
+                /* Timezone not supported for gettimeofday */
+                tz->tz_minuteswest = 0;
+                tz->tz_dsttime = 0;
+        }
+
+        tv->tv_usec = 0;
+        tv->tv_sec = time(0);
+
+        return 0;
 }
 
 clock_t _times(struct tms *buffer) {
