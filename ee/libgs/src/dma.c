@@ -57,34 +57,31 @@ typedef struct {
 
 void GsDmaInit(void)
 {
-	/*Reset/init dma(gif channel only)*/
+	/* This appears to have been based on code from Sony that initializes DMA channels 0-9, in bulk.
+           Reset/init DMA CH 2 (GIF) only. */
 	__asm__(
 	"li	$2,0x1000A000	\n"
-	"nop				\n"
-	"sw	$0,0x80($2)		\n"
-	"sw	$0,0($2)		\n"
-	"sw	$0,0x30($2)		\n"
-	"sw	$0,0x10($2)		\n"
-	"sw	$0,0x50($2)		\n"
-	"sw	$0,0x40($2)		\n"
-	"li	$2,0xFF1F		\n"//	0xFF1F
+	"sw	$0,0x80($2)		\n" // D2_SADR = 0. Documented to not exist, but is done.
+	"sw	$0,0($2)		\n" // D2_CHCR = 0
+	"sw	$0,0x30($2)		\n" // D2_TADR = 0
+	"sw	$0,0x10($2)		\n" // D2_MADR = 0
+	"sw	$0,0x50($2)		\n" // D2_ASR1 = 0
+	"sw	$0,0x40($2)		\n" // D2_ASR0 = 0
+	"li	$2,0xFF1F		\n" // Clear all interrupt status under D_STAT, other than SIF0, SIF1 & SIF2.
 	"sw	$2,0x1000E010	\n"
 	"lw	$2,0x1000E010	\n"
-	"li	$3,0xFF1F		\n"//0xFF1F
+	"lui	$3,0xFF1F		\n" // Clear all interrupt masks under D_STAT, other SIF0, SIF1 & SIF2. Writing a 1 reverses the bit.
 	"and	$2,$3		\n"
 	"sw	$2,0x1000E010	\n"
-	"sync.p				\n"
-	"sw	$0,0x1000E000	\n"
-	"sw	$0,0x1000E020	\n"
-	"sw	$0,0x1000E030	\n"
-	"sw	$0,0x1000E050	\n"
-	"sw	$0,0x1000E040	\n"
+	"sw	$0,0x1000E000	\n" // D_CTRL = 0
+	"sw	$0,0x1000E020	\n" // D_PCR = 0
+	"sw	$0,0x1000E030	\n" // D_SQWC = 0
+	"sw	$0,0x1000E050	\n" // D_RBOR = 0
+	"sw	$0,0x1000E040	\n" // D_RBSR = 0
 	"li	$3,1			\n"
 	"lw	$2,0x1000E000	\n"
-	"ori	$3,$2,1		\n"
-	"nop				\n"
+	"ori	$3,$2,1		\n" // D_CTRL (DMAE 1)
 	"sw	$3,0x1000E000	\n"
-	"nop				\n"
 	);
 }
 
