@@ -523,6 +523,9 @@ void _GetGsDxDyOffset(int mode, int *dx, int *dy, int *dw, int *dh);
 
 //Internal function for reinitializing the TLB, only present in later kernels. Please use InitTLB() instead to initialize the TLB with all kernels.
 int  _InitTLB(void);
+/* (PSX only) Sets the memory size. 0 = 64MB mode, 1 = 32MB mode. The mode is only binding when either _InitTLB() or the PSX ExecPS2() syscall is called.
+   The stack pointer must remain in range of usable memory, or a TLB exception will occur. */
+int SetMemoryMode(int mode); //Arbitrarily named.
 
 void _SyncDCache(void *start, void *end);
 void _InvalidDCache(void *start, void *end);

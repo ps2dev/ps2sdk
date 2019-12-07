@@ -731,6 +731,10 @@ SYSCALL(_GetGsDxDyOffset)
 SYSCALL(_InitTLB)
 #endif
 
+#ifdef F_SetMemoryMode
+SYSCALL(SetMemoryMode)
+#endif
+
 #ifdef F_SifWriteBackDCache
 
 	.globl	SifWriteBackDCache

@@ -151,5 +151,6 @@
 #define __NR_GetMemorySize		0x7f
 #define __NR__GetGsDxDyOffset		0x80
 #define __NR__InitTLB			0x82
+#define __NR_SetMemoryMode		0x85
 
 #endif /* __SYSCALLNR_H__ */

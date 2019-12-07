@@ -152,7 +152,8 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o $(EXEC_SYSCALLS) \
 	GetOsdConfigParam2.o GsGetIMR.o iGsGetIMR.o GsPutIMR.o iGsPutIMR.o \
 	SetPgifHandler.o SetVSyncFlag.o SetSyscall.o SifDmaStat.o iSifDmaStat.o \
 	SifSetDma.o iSifSetDma.o SifSetDChain.o iSifSetDChain.o SifSetReg.o \
-	SifGetReg.o $(EXECOSD_SYSCALL) Deci2Call.o PSMode.o MachineType.o GetMemorySize.o _GetGsDxDyOffset.o _InitTLB.o \
+	SifGetReg.o $(EXECOSD_SYSCALL) Deci2Call.o PSMode.o MachineType.o GetMemorySize.o _GetGsDxDyOffset.o \
+	_InitTLB.o SetMemoryMode.o \
 	SifWriteBackDCache.o _SyncDCache.o _InvalidDCache.o __errno.o errno.o \
 	strncpy.o strlen.o memcpy.o memset.o __syscall.o
 
