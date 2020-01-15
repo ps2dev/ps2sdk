@@ -23,8 +23,8 @@ static void parse_boot_path(int argc, char ** argv) {
 
     if (argc == 0) // Are people still using naplink ? :P
 	strcpy(_init_erl_prefix, "host:");
-
-    strcpy(_init_erl_prefix, argv[0]);
+    else
+	strcpy(_init_erl_prefix, argv[0]);
 
     p = strrchr(_init_erl_prefix, '/');
 
