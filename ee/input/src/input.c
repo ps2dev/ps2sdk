@@ -91,7 +91,7 @@ void pad_close(pad_t *pad)
 		free(pad->actuator);
 	}
 
-	padPortClose(pad->port,pad->slot);
+	while (padPortClose(pad->port,pad->slot) < 0);
 
 	free(pad->buttons);
 	free(pad->buffer);
