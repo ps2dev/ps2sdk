@@ -218,6 +218,7 @@ int fileXioInit(void)
 	_ps2sdk_read = fileXioRead;
 	_ps2sdk_lseek = fileXioLseek;
 	_ps2sdk_write = fileXioWrite;
+	_ps2sdk_ioctl = fileXioIoctl;
 	_ps2sdk_remove= fileXioRemove;
 	_ps2sdk_rename= fileXioRename;
 	_ps2sdk_mkdir = fileXioMkdir;
