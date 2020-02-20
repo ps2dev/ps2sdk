@@ -15,23 +15,23 @@
 #include <sys/stat.h>
 
 /** Inter-library helpers */
-extern int (*_ps2sdk_close)(int) __attribute__((section("data")));
-extern int (*_ps2sdk_open)(const char*, int, ...) __attribute__((section("data")));
-extern int (*_ps2sdk_read)(int, void*, int) __attribute__((section("data")));
-extern int (*_ps2sdk_lseek)(int, int, int) __attribute__((section("data")));
-extern int (*_ps2sdk_write)(int, const void*, int) __attribute__((section("data")));
-extern int (*_ps2sdk_ioctl)(int, int, void*) __attribute__((section("data")));
-extern int (*_ps2sdk_remove)(const char*) __attribute__((section("data")));
-extern int (*_ps2sdk_rename)(const char*, const char*) __attribute__((section("data")));
-extern int (*_ps2sdk_mkdir)(const char*, int) __attribute__((section("data")));
-extern int (*_ps2sdk_rmdir)(const char*) __attribute__((section("data")));
+extern int (*_ps2sdk_close)(int);
+extern int (*_ps2sdk_open)(const char*, int, ...);
+extern int (*_ps2sdk_read)(int, void*, int);
+extern int (*_ps2sdk_lseek)(int, int, int);
+extern int (*_ps2sdk_write)(int, const void*, int);
+extern int (*_ps2sdk_ioctl)(int, int, void*);
+extern int (*_ps2sdk_remove)(const char*);
+extern int (*_ps2sdk_rename)(const char*, const char*);
+extern int (*_ps2sdk_mkdir)(const char*, int);
+extern int (*_ps2sdk_rmdir)(const char*);
 
-extern int (*_ps2sdk_stat)(const char *path, struct stat *buf) __attribute__((section("data")));
+extern int (*_ps2sdk_stat)(const char *path, struct stat *buf);
 
-extern DIR * (*_ps2sdk_opendir)(const char *path) __attribute__((section("data")));
-extern struct dirent * (*_ps2sdk_readdir)(DIR *dir) __attribute__((section("data")));
-extern void (*_ps2sdk_rewinddir)(DIR *dir) __attribute__((section("data")));
-extern int (*_ps2sdk_closedir)(DIR *dir) __attribute__((section("data")));
+extern DIR * (*_ps2sdk_opendir)(const char *path);
+extern struct dirent * (*_ps2sdk_readdir)(DIR *dir);
+extern void (*_ps2sdk_rewinddir)(DIR *dir);
+extern int (*_ps2sdk_closedir)(DIR *dir);
 
 #define PS2_CLOCKS_PER_SEC (147456000 / 256) // 576.000
 #define PS2_CLOCKS_PER_MSEC (PS2_CLOCKS_PER_SEC / 1000) // 576
