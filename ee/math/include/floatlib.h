@@ -34,17 +34,23 @@ float chbevlf( float, float *, int );
 float chdtrcf(float, float);
 float chdtrf(float, float);
 float chdtrif( float, float );
+#if __GNUC__ <= 3
 float cabsf(cmplxf *);
+#endif
 void caddf( cmplxf *, cmplxf *, cmplxf * );
+#if __GNUC__ <= 3
 void cacosf( cmplxf *, cmplxf * );
 void casinf( cmplxf *, cmplxf * );
 void catanf( cmplxf *, cmplxf * );
 void ccosf( cmplxf *, cmplxf * );
+#endif
 void ccotf( cmplxf *, cmplxf * );
 void cdivf( cmplxf *, cmplxf *, cmplxf * );
 float ceilf( float );
+#if __GNUC__ <= 3
 void cexpf( cmplxf *, cmplxf * );
 void clogf( cmplxf *, cmplxf * );
+#endif
 void cmovf( cmplxf *, cmplxf * );
 void cmulf( cmplxf *, cmplxf *, cmplxf * );
 void cnegf( cmplxf * );
@@ -54,9 +60,11 @@ float coshf(float);
 float cot( float );
 float cotdgf( float );
 void csubf( cmplxf *, cmplxf *, cmplxf * );
+#if __GNUC__ <= 3
 void csinf( cmplxf *, cmplxf * );
 void csqrtf( cmplxf *, cmplxf * );
 void ctanf( cmplxf *, cmplxf * );
+#endif
 float dawsnf(float);
 float ellief( float, float );
 float ellikf( float, float );
