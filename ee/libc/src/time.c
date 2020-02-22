@@ -17,8 +17,8 @@
 #include <kernel.h>
 #include <timer.h>
 
-static int      s_intrOverflowID = -1;
-static clock_t  s_intrOverflowCount = 0;
+extern int      __time_intr_overflow_id;
+extern clock_t  __time_intr_overflow_count;
 
 #ifdef TIME_USE_T0
 #define INTC_TIM       INTC_TIM0
@@ -32,9 +32,13 @@ static clock_t  s_intrOverflowCount = 0;
 #define T_COMP         T1_COMP
 #endif
 
+#ifdef F___time_internals
+int      __time_intr_overflow_id = -1;
+clock_t  __time_intr_overflow_count = 0;
+
 static int intrOverflow(int ca)
 {
-   s_intrOverflowCount++;
+   __time_intr_overflow_id++;
 
    // A write to the overflow flag will clear the overflow flag
    // ---------------------------------------------------------
@@ -48,9 +52,9 @@ void _ps2sdk_time_init(void)
 {
    *T_MODE = 0x0000; // Disable T_MODE
 
-   if (s_intrOverflowID == -1)
+   if (__time_intr_overflow_count == -1)
    {
-       s_intrOverflowID = AddIntcHandler(INTC_TIM, intrOverflow, 0);
+       __time_intr_overflow_count = AddIntcHandler(INTC_TIM, intrOverflow, 0);
        EnableIntc(INTC_TIM);
    }
 
@@ -61,33 +65,37 @@ void _ps2sdk_time_init(void)
    *T_COUNT = 0;
    *T_MODE = Tn_MODE(0x02, 0, 0, 0, 0, 0x01, 0, 0x01, 0, 0);
 
-   s_intrOverflowCount = 0;
+   __time_intr_overflow_id = 0;
 }
 
 void _ps2sdk_time_deinit(void)
 {
    *T_MODE = 0x0000; // Stop the timer
 
-   if (s_intrOverflowID >= 0)
+   if (__time_intr_overflow_count >= 0)
    {
       DisableIntc(INTC_TIM);
-      RemoveIntcHandler(INTC_TIM, s_intrOverflowID);
-      s_intrOverflowID = -1;
+      RemoveIntcHandler(INTC_TIM, __time_intr_overflow_count);
+      __time_intr_overflow_count = -1;
    }
 
-   s_intrOverflowCount = 0;
+   __time_intr_overflow_id = 0;
 }
+#endif
 
+#ifdef F_clock
 clock_t clock(void)
 {
    u64         t;
 
-   // Tn_COUNT is 16 bit precision. Therefore, each s_intrOverflowCount is 65536 ticks
-   t = *T_COUNT + (s_intrOverflowCount << 16);
+   // Tn_COUNT is 16 bit precision. Therefore, each __time_intr_overflow_id is 65536 ticks
+   t = *T_COUNT + (__time_intr_overflow_id << 16);
 
    return t;
 }
+#endif
 
+#ifdef F_time
 time_t time(time_t *t)
 {
 	if (t != 0) {
@@ -96,3 +104,4 @@ time_t time(time_t *t)
 
 	return (time_t)-1;
 }
+#endif

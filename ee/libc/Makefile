@@ -56,7 +56,7 @@ UNISTD_OBJS = stat.o fstat.o access.o unlink.o getcwd.o sleep.o
 
 LIBGEN_OBJS = basename.o dirname.o
 
-TIME_OBJS = clock.o
+TIME_OBJS = clock.o time.o __time_internals.o
 
 DIRENT_OBJS = opendir.o readdir.o rewinddir.o closedir.o
 
