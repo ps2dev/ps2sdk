@@ -19,6 +19,18 @@
 
  void vector_apply(VECTOR output, VECTOR input0, MATRIX input1) {
   asm __volatile__ (
+#if __GNUC__ > 3
+   "lqc2   $vf1, 0x00(%2)  \n"
+   "lqc2   $vf2, 0x10(%2)  \n"
+   "lqc2   $vf3, 0x20(%2)  \n"
+   "lqc2   $vf4, 0x30(%2)  \n"
+   "lqc2   $vf5, 0x00(%1)  \n"
+   "vmulaw   $ACC, $vf4, $vf0  \n"
+   "vmaddax    $ACC, $vf1, $vf5  \n"
+   "vmadday    $ACC, $vf2, $vf5  \n"
+   "vmaddz   $vf6, $vf3, $vf5  \n"
+   "sqc2   $vf6, 0x00(%0)  \n"
+#else
    "lqc2		vf1, 0x00(%2)	\n"
    "lqc2		vf2, 0x10(%2)	\n"
    "lqc2		vf3, 0x20(%2)	\n"
@@ -29,6 +41,7 @@
    "vmadday		ACC, vf2, vf5	\n"
    "vmaddz		vf6, vf3, vf5	\n"
    "sqc2		vf6, 0x00(%0)	\n"
+#endif
    : : "r" (output), "r" (input0), "r" (input1)
   );
  }
@@ -58,8 +71,13 @@
 
  void vector_copy(VECTOR output, VECTOR input0) {
   asm __volatile__ (
+#if __GNUC__ > 3
+   "lqc2   $vf1, 0x00(%1)  \n"
+   "sqc2   $vf1, 0x00(%0)  \n"
+#else
    "lqc2		vf1, 0x00(%1)	\n"
    "sqc2		vf1, 0x00(%0)	\n"
+#endif
    : : "r" (output), "r" (input0)
   );
  }
@@ -100,6 +118,18 @@
 
  void vector_normalize(VECTOR output, VECTOR input0) {
   asm __volatile__ (
+#if __GNUC__ > 3
+   "lqc2   $vf1, 0x00(%1)  \n"
+   "vmul.xyz   $vf2, $vf1, $vf1  \n"
+   "vmulax.w   $ACC, $vf0, $vf2  \n"
+   "vmadday.w    $ACC, $vf0, $vf2  \n"
+   "vmaddz.w   $vf2, $vf0, $vf2  \n"
+   "vrsqrt   $Q, $vf0w, $vf2w  \n"
+   "vsub.w   $vf1, $vf0, $vf0  \n"
+   "vwaitq       \n"
+   "vmulq.xyz    $vf1, $vf1, $Q  \n"
+   "sqc2   $vf1, 0x00(%0)  \n"
+#else
    "lqc2		vf1, 0x00(%1)	\n"
    "vmul.xyz		vf2, vf1, vf1	\n"
    "vmulax.w		ACC, vf0, vf2	\n"
@@ -110,18 +140,28 @@
    "vwaitq				\n"
    "vmulq.xyz		vf1, vf1, Q	\n"
    "sqc2		vf1, 0x00(%0)	\n"
+#endif
    : : "r" (output), "r" (input0)
   );
  }
 
  void vector_outerproduct(VECTOR output, VECTOR input0, VECTOR input1) {
   asm __volatile__ (
+#if __GNUC__ > 3
+   "lqc2   $vf1, 0x00(%1)  \n"
+   "lqc2   $vf2, 0x00(%2)  \n"
+   "vopmula.xyz    $ACC, $vf1, $vf2  \n"
+   "vopmsub.xyz    $vf2, $vf2, $vf1  \n"
+   "vsub.w   $vf2, $vf0, $vf0  \n"
+   "sqc2   $vf2, 0x00(%0)  \n"
+#else
    "lqc2		vf1, 0x00(%1)	\n"
    "lqc2		vf2, 0x00(%2)	\n"
    "vopmula.xyz		ACC, vf1, vf2	\n"
    "vopmsub.xyz		vf2, vf2, vf1	\n"
    "vsub.w		vf2, vf0, vf0	\n"
    "sqc2		vf2, 0x00(%0)	\n"
+#endif
    : : "r" (output), "r" (input0), "r" (input1)
   );
  }
@@ -130,6 +170,16 @@
 
  void matrix_copy(MATRIX output, MATRIX input0) {
   asm __volatile__ (
+#if __GNUC__ > 3
+   "lqc2   $vf1, 0x00(%1)  \n"
+   "lqc2   $vf2, 0x10(%1)  \n"
+   "lqc2   $vf3, 0x20(%1)  \n"
+   "lqc2   $vf4, 0x30(%1)  \n"
+   "sqc2   $vf1, 0x00(%0)  \n"
+   "sqc2   $vf2, 0x10(%0)  \n"
+   "sqc2   $vf3, 0x20(%0)  \n"
+   "sqc2   $vf4, 0x30(%0)  \n"
+#else
    "lqc2		vf1, 0x00(%1)	\n"
    "lqc2		vf2, 0x10(%1)	\n"
    "lqc2		vf3, 0x20(%1)	\n"
@@ -138,6 +188,7 @@
    "sqc2		vf2, 0x10(%0)	\n"
    "sqc2		vf3, 0x20(%0)	\n"
    "sqc2		vf4, 0x30(%0)	\n"
+#endif
    : : "r" (output), "r" (input0)
   );
  }
@@ -162,6 +213,36 @@
 
  void matrix_multiply(MATRIX output, MATRIX input0, MATRIX input1) {
   asm __volatile__ (
+#if __GNUC__ > 3
+   "lqc2   $vf1, 0x00(%1)  \n"
+   "lqc2   $vf2, 0x10(%1)  \n"
+   "lqc2   $vf3, 0x20(%1)  \n"
+   "lqc2   $vf4, 0x30(%1)  \n"
+   "lqc2   $vf5, 0x00(%2)  \n"
+   "lqc2   $vf6, 0x10(%2)  \n"
+   "lqc2   $vf7, 0x20(%2)  \n"
+   "lqc2   $vf8, 0x30(%2)  \n"
+   "vmulax.xyzw    $ACC, $vf5, $vf1  \n"
+   "vmadday.xyzw $ACC, $vf6, $vf1  \n"
+   "vmaddaz.xyzw $ACC, $vf7, $vf1  \n"
+   "vmaddw.xyzw    $vf1, $vf8, $vf1  \n"
+   "vmulax.xyzw    $ACC, $vf5, $vf2  \n"
+   "vmadday.xyzw $ACC, $vf6, $vf2  \n"
+   "vmaddaz.xyzw $ACC, $vf7, $vf2  \n"
+   "vmaddw.xyzw    $vf2, $vf8, $vf2  \n"
+   "vmulax.xyzw    $ACC, $vf5, $vf3  \n"
+   "vmadday.xyzw $ACC, $vf6, $vf3  \n"
+   "vmaddaz.xyzw $ACC, $vf7, $vf3  \n"
+   "vmaddw.xyzw    $vf3, $vf8, $vf3  \n"
+   "vmulax.xyzw    $ACC, $vf5, $vf4  \n"
+   "vmadday.xyzw $ACC, $vf6, $vf4  \n"
+   "vmaddaz.xyzw $ACC, $vf7, $vf4  \n"
+   "vmaddw.xyzw    $vf4, $vf8, $vf4  \n"
+   "sqc2   $vf1, 0x00(%0)  \n"
+   "sqc2   $vf2, 0x10(%0)  \n"
+   "sqc2   $vf3, 0x20(%0)  \n"
+   "sqc2   $vf4, 0x30(%0)  \n"
+#else
    "lqc2		vf1, 0x00(%1)	\n"
    "lqc2		vf2, 0x10(%1)	\n"
    "lqc2		vf3, 0x20(%1)	\n"
@@ -190,6 +271,7 @@
    "sqc2		vf2, 0x10(%0)	\n"
    "sqc2		vf3, 0x20(%0)	\n"
    "sqc2		vf4, 0x30(%0)	\n"
+#endif
    : : "r" (output), "r" (input0), "r" (input1)
   );
  }
@@ -357,6 +439,25 @@
 
  void calculate_normals(VECTOR *output, int count, VECTOR *normals, MATRIX local_light) {
   asm __volatile__ (
+#if __GNUC__ > 3
+   "lqc2   $vf1, 0x00(%3)  \n"
+   "lqc2   $vf2, 0x10(%3)  \n"
+   "lqc2   $vf3, 0x20(%3)  \n"
+   "lqc2   $vf4, 0x30(%3)  \n"
+   "1:                 \n"
+   "lqc2   $vf6, 0x00(%2)  \n"
+   "vmulaw   $ACC, $vf4, $vf0  \n"
+   "vmaddax    $ACC, $vf1, $vf6  \n"
+   "vmadday    $ACC, $vf2, $vf6  \n"
+   "vmaddz   $vf7, $vf3, $vf6  \n"
+   "vdiv   $Q, $vf0w, $vf7w  \n"
+   "vwaitq             \n"
+   "vmulq.xyzw   $vf7, $vf7, $Q  \n"
+   "sqc2   $vf7, 0x00(%0)  \n"
+   "addi       %0, 0x10    \n"
+   "addi       %2, 0x10    \n"
+   "addi       %1, -1      \n"
+#else
    "lqc2		vf1, 0x00(%3)	\n"
    "lqc2		vf2, 0x10(%3)	\n"
    "lqc2		vf3, 0x20(%3)	\n"
@@ -375,6 +476,7 @@
    "addi		%2, 0x10	\n"
    "addi		%1, -1		\n"
    "bne			$0, %1, 1b	\n"
+#endif
    : : "r" (output), "r" (count), "r" (normals), "r" (local_light)
   );
  }
@@ -446,6 +548,29 @@
 
  void calculate_vertices(VECTOR *output, int count, VECTOR *vertices, MATRIX local_screen) {
   asm __volatile__ (
+#if __GNUC__ > 3
+   "lqc2   $vf1, 0x00(%3)  \n"
+   "lqc2   $vf2, 0x10(%3)  \n"
+   "lqc2   $vf3, 0x20(%3)  \n"
+   "lqc2   $vf4, 0x30(%3)  \n"
+   "1:                 \n"
+   "lqc2   $vf6, 0x00(%2)  \n"
+   "vmulaw   $ACC, $vf4, $vf0  \n"
+   "vmaddax    $ACC, $vf1, $vf6  \n"
+   "vmadday    $ACC, $vf2, $vf6  \n"
+   "vmaddz   $vf7, $vf3, $vf6  \n"
+   "vclipw.xyz   $vf7, $vf7  \n" // FIXME: Clip detection is still kinda broken.
+   "cfc2       $10, $18    \n"
+   "beq            $10, $0, 3f \n"
+   "2:                 \n"
+   "sqc2   $0, 0x00(%0)  \n"
+   "j          4f      \n"
+   "3:                 \n"
+   "vdiv   $Q, $vf0w, $vf7w  \n"
+   "vwaitq             \n"
+   "vmulq.xyz    $vf7, $vf7, $Q  \n"
+   "sqc2   $vf7, 0x00(%0)  \n"
+#else
    "lqc2		vf1, 0x00(%3)	\n"
    "lqc2		vf2, 0x10(%3)	\n"
    "lqc2		vf3, 0x20(%3)	\n"
@@ -467,6 +592,7 @@
    "vwaitq				\n"
    "vmulq.xyz		vf7, vf7, Q	\n"
    "sqc2		vf7, 0x00(%0)	\n"
+#endif
    "4:					\n"
    "addi		%0, 0x10	\n"
    "addi		%2, 0x10	\n"
