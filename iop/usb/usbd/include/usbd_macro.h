@@ -18,7 +18,7 @@
 
 #include <usbd.h>
 
-inline int sceUsbdControlTransfer(int epID, int reqtyp, int req, int val, int index, int leng, void *dataptr, void *doneCB, void* arg)
+static int sceUsbdControlTransfer(int epID, int reqtyp, int req, int val, int index, int leng, void *dataptr, void *doneCB, void* arg)
 {
 	UsbDeviceRequest devreq;
 	devreq.requesttype = reqtyp;
