@@ -39,7 +39,7 @@ typedef struct _part_raw_record {
 } part_raw_record;
 
 //---------------------------------------------------------------------------
-inline void part_getPartitionRecord(part_raw_record* raw, part_record* rec)
+static void part_getPartitionRecord(part_raw_record* raw, part_record* rec)
 {
     rec->sid = raw->sid;
     rec->start = getI32(raw->startLBA);
