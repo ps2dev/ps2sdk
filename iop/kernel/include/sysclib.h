@@ -28,11 +28,16 @@ typedef void (*print_callback_t)(void *context, int c);
 /* These functions are non-standardized (char instead of int) */
 char _toupper(char c);
 char _tolower(char c);
-
+#if __GNUC__ > 3
+#undef toupper
+#endif
 #ifndef toupper
 #define toupper(c) _toupper(c)
 #endif
 
+#if __GNUC__ > 3
+#undef tolower
+#endif
 #ifndef tolower
 #define tolower(c) _tolower(c)
 #endif
