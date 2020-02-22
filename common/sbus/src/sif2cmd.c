@@ -11,6 +11,13 @@ This file contains all common code for both EE and IOP SIF management.
 #include "ps2_sbus.h"
 #include "sbus_priv.h"
 
+#ifdef _EE
+#include <stdio.h>
+#include <string.h>
+#else
+#include <sysclib.h>
+#endif
+
 #define SBUS_IRQ_XFER (30)
 #define SBUS_IRQ_EXEC (31)
 
