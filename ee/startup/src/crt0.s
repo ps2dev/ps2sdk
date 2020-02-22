@@ -174,3 +174,9 @@ _root:
    .align   6
 _args:
    .space   4+16*4+256   # argc, 16 arguments, 256 bytes payload
+
+   .sdata
+   .global __dso_handle
+   .weak __dso_handle
+__dso_handle:
+   .long 0
