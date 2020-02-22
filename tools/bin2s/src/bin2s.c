@@ -54,8 +54,12 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
+	fprintf(dest, ".ifdef .gasversion.\n.section .mdebug.abiN32\n.else\n.section .mdebug.eabi64\n.endif\n");
+	fprintf(dest, ".previous\n");
+	fprintf(dest, ".ifdef .gasversion.\n.nan legacy\n.module singlefloat\n.module oddspreg\n.endif\n");
+
 	fprintf(dest, ".sdata\n\n");
-	fprintf(dest, ".globl size_%s\nsize_%s:\t.word %d\n\n", argv[3], argv[3], fd_size);
+	fprintf(dest, ".align 2\n.type size_%s,@object\n.size size_%s,4\n.globl size_%s\nsize_%s:\t.word %d\n\n", argv[3], argv[3], argv[3], argv[3], fd_size);
 
 	if( argc == 5 )
 		fprintf(dest, ".SECTION %s\n\n",argv[4]);
@@ -64,6 +68,8 @@ int main(int argc, char *argv[])
 
 	fprintf(dest, ".balign 16\n\n");
 	fprintf(dest, ".globl %s\n",argv[3]);
+	fprintf(dest, ".type %s,@object\n",argv[3]);
+	fprintf(dest, ".size %s,%d\n",argv[3],fd_size);
 	fprintf(dest, "%s:\n\n",argv[3]);
 
 	for(i=0;i<fd_size;i++) {
