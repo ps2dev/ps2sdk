@@ -59,7 +59,7 @@ int (*_ps2sdk_mkdir)(const char*, int) = fioMkdirHelper;
 #define IOP_O_EXCL         0x0800
 #define IOP_O_NOWAIT       0x8000
 
-int open(const char *buf, int flags, ...) {
+int _open(const char *buf, int flags, ...) {
 	int iop_flags = 0;
 
 	// newlib frags differ from iop flags
@@ -76,15 +76,15 @@ int open(const char *buf, int flags, ...) {
 	return _ps2sdk_open(buf, iop_flags);
 }
 
-int close(int fd) {
+int _close(int fd) {
 	return _ps2sdk_close(fd);
 }
 
-int read(int fd, void *buf, size_t nbytes) {
+int _read(int fd, void *buf, size_t nbytes) {
 	return _ps2sdk_read(fd, buf, nbytes);
 }
 
-int write(int fd, const void *buf, size_t nbytes) {
+int _write(int fd, const void *buf, size_t nbytes) {
 	// HACK: stdout and strerr to serial
 	//if ((fd==1) || (fd==2))
 	//	return sio_write((void *)buf, nbytes);
@@ -96,14 +96,14 @@ int isatty(int fd) {
 	return 1;
 }
 
-int fstat(int fd, struct stat *buf) {
+int _fstat(int fd, struct stat *buf) {
 	buf->st_mode = S_IFCHR;       /* Always pretend to be a tty */
 	buf->st_blksize = 0;
 
 	return 0;
 }
 
-off_t lseek(int fd, off_t offset, int whence)
+off_t _lseek(int fd, off_t offset, int whence)
 {
 	return _ps2sdk_lseek(fd, offset, whence);
 }
@@ -117,11 +117,11 @@ int mkdir(const char *path, mode_t mode) {
     return _ps2sdk_mkdir(path, mode);
 }
 
-int link(const char *old, const char *new) {
+int _link(const char *old, const char *new) {
     return _ps2sdk_rename(old, new);
 }
 
-int unlink(const char *path) {
+int _unlink(const char *path) {
     return _ps2sdk_remove(path);
 }
 
@@ -130,11 +130,11 @@ char *getcwd(char *buf, size_t len) {
 	return buf;
 }
 
-int getpid(void) {
+int _getpid(void) {
 	return GetThreadId();
 }
 
-int kill(int pid, int sig) {
+int _kill(int pid, int sig) {
 #if 0 // needs to be tested first
 	// null signal: do error checking on pid only
 	if (sig == 0)
@@ -150,16 +150,16 @@ int kill(int pid, int sig) {
 	return -1;
 }
 
-void * sbrk(size_t incr) {
+void * _sbrk(size_t incr) {
 	return ps2_sbrk(incr);
 }
 
-int gettimeofday(struct timeval *__p, struct timezone *__z) {
+int _gettimeofday(struct timeval *__p, struct timezone *__z) {
 	return -1;
 }
 
 #define PS2_CLOCKS_PER_SEC (147456000 / 256)
-clock_t times(struct tms *buffer) {
+clock_t _times(struct tms *buffer) {
 	clock_t clk = ps2_clock() / (PS2_CLOCKS_PER_SEC / CLOCKS_PER_SEC);
 
 	if (buffer != NULL) {
