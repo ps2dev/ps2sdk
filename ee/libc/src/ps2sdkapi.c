@@ -21,6 +21,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#include "ps2sdkapi.h"
+
 
 extern void *ps2_sbrk(size_t increment);
 extern clock_t ps2_clock(void);
@@ -158,7 +160,6 @@ int _gettimeofday(struct timeval *__p, struct timezone *__z) {
 	return -1;
 }
 
-#define PS2_CLOCKS_PER_SEC (147456000 / 256)
 clock_t _times(struct tms *buffer) {
 	clock_t clk = ps2_clock() / (PS2_CLOCKS_PER_SEC / CLOCKS_PER_SEC);
 

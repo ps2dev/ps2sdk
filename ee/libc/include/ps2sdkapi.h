@@ -21,4 +21,9 @@ extern int (*_ps2sdk_remove)(const char*) __attribute__((section("data")));
 extern int (*_ps2sdk_rename)(const char*, const char*) __attribute__((section("data")));
 extern int (*_ps2sdk_mkdir)(const char*, int) __attribute__((section("data")));
 
+#define PS2_CLOCKS_PER_SEC (147456000 / 256) // 576.000
+#define PS2_CLOCKS_PER_MSEC (PS2_CLOCKS_PER_SEC / 1000) // 576
+
+clock_t ps2_clock(void);
+
 #endif /* __PS2SDKAPI_H__ */
