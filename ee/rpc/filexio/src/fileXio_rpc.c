@@ -18,6 +18,7 @@
 #include <sifrpc.h>
 #include <stdio.h>
 #include <string.h>
+#include <malloc.h>
 #include <stdarg.h>
 #include <sys/fcntl.h>
 #include <sys/stat.h>
@@ -47,6 +48,76 @@ static inline int _lock(void)
 static inline int _unlock(void)
 {
 	return(SignalSema(_lock_sema_id));
+}
+
+static DIR *fileXioOpendirHelper(const char *path)
+{
+	int dd;
+	DIR *dir;
+
+	dd = fileXioDopen(path);
+	if (dd < 0) {
+		// FIXME: set errno
+		//printf("%s: ERROR: fileXioDopen\n", __FUNCTION__);
+		return NULL;
+	}
+
+	dir = malloc(sizeof(DIR));
+        dir->dd_fd = dd;
+        dir->dd_loc = 0;
+        dir->dd_size = 0;
+        dir->dd_buf = malloc(sizeof(struct dirent) + 255);
+        dir->dd_len = 0;
+        dir->dd_seek = 0;
+
+	return dir;
+}
+
+static struct dirent *fileXioReaddirHelper(DIR *dir)
+{
+	int rv;
+        struct dirent *de;
+        iox_dirent_t fiode;
+
+	if(dir == NULL) {
+		// FIXME: set errno
+		return NULL;
+	}
+
+        de = (struct dirent *)dir->dd_buf;
+        rv = fileXioDread(dir->dd_fd, &fiode);
+	if (rv <= 0) {
+		// FIXME: set errno
+		return NULL;
+	}
+
+        de->d_ino = 0;
+        de->d_off = 0;
+        de->d_reclen = 0;
+	strncpy(de->d_name, fiode.name, 255);
+	de->d_name[255] = 0;
+
+	return de;
+}
+
+static void fileXioRewinddirHelper(DIR *dir)
+{
+	printf("rewinddir not implemented\n");
+}
+
+static int fileXioClosedirHelper(DIR *dir)
+{
+	int rv;
+
+	if(dir == NULL) {
+		// FIXME: set errno
+		return -1;
+	}
+
+	rv = fileXioDclose(dir->dd_fd); // Check return value?
+	free(dir->dd_buf);
+	free(dir);
+	return 0;
 }
 
 int fileXioInit(void)
@@ -96,6 +167,11 @@ int fileXioInit(void)
 	_ps2sdk_remove= fileXioRemove;
 	_ps2sdk_rename= fileXioRename;
 	_ps2sdk_mkdir = fileXioMkdir;
+
+	_ps2sdk_opendir = fileXioOpendirHelper;
+	_ps2sdk_readdir = fileXioReaddirHelper;
+	_ps2sdk_rewinddir = fileXioRewinddirHelper;
+	_ps2sdk_closedir = fileXioClosedirHelper;
 
 	return 0;
 }

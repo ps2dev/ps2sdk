@@ -11,6 +11,8 @@
 #ifndef __PS2SDKAPI_H__
 #define __PS2SDKAPI_H__
 
+#include <dirent.h>
+
 /** Inter-library helpers */
 extern int (*_ps2sdk_close)(int) __attribute__((section("data")));
 extern int (*_ps2sdk_open)(const char*, int, ...) __attribute__((section("data")));
@@ -20,6 +22,11 @@ extern int (*_ps2sdk_write)(int, const void*, int) __attribute__((section("data"
 extern int (*_ps2sdk_remove)(const char*) __attribute__((section("data")));
 extern int (*_ps2sdk_rename)(const char*, const char*) __attribute__((section("data")));
 extern int (*_ps2sdk_mkdir)(const char*, int) __attribute__((section("data")));
+
+extern DIR * (*_ps2sdk_opendir)(const char *path) __attribute__((section("data")));
+extern struct dirent * (*_ps2sdk_readdir)(DIR *dir) __attribute__((section("data")));
+extern void (*_ps2sdk_rewinddir)(DIR *dir) __attribute__((section("data")));
+extern int (*_ps2sdk_closedir)(DIR *dir) __attribute__((section("data")));
 
 #define PS2_CLOCKS_PER_SEC (147456000 / 256) // 576.000
 #define PS2_CLOCKS_PER_MSEC (PS2_CLOCKS_PER_SEC / 1000) // 576

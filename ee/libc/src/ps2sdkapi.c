@@ -8,11 +8,13 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
+#include <stdio.h>
 #include <stdarg.h>
 #include <errno.h>
 #include <string.h>
 #include <fileio.h>
 #include <kernel.h>
+#include <malloc.h>
 #include <sio.h>
 
 #include <time.h>
@@ -28,6 +30,8 @@
 #include <inttypes.h>
 #include <tamtypes.h>
 
+#include "io_common.h"
+#include "iox_stat.h"
 #include "ps2sdkapi.h"
 
 
@@ -48,6 +52,74 @@ int fioMkdirHelper(const char *path, int mode) {
   return fioMkdir(path);
 }
 
+static DIR *fioOpendirHelper(const char *path)
+{
+	int dd;
+	DIR *dir;
+
+	dd = fioDopen(path);
+	if (dd < 0) {
+		errno = ENOENT;
+		return NULL;
+	}
+
+	dir = malloc(sizeof(DIR));
+        dir->dd_fd = dd;
+        dir->dd_loc = 0;
+        dir->dd_size = 0;
+        dir->dd_buf = malloc(sizeof(struct dirent) + 255);
+        dir->dd_len = 0;
+        dir->dd_seek = 0;
+
+	return dir;
+}
+
+static struct dirent *fioReaddirHelper(DIR *dir)
+{
+	int rv;
+        struct dirent *de;
+        io_dirent_t fiode;
+
+	if(dir == NULL) {
+		errno = EBADF;
+		return NULL;
+	}
+
+        de = (struct dirent *)dir->dd_buf;
+        rv = fioDread(dir->dd_fd, &fiode);
+	if (rv <= 0) {
+		return NULL;
+	}
+
+        de->d_ino = 0;
+        de->d_off = 0;
+        de->d_reclen = 0;
+	strncpy(de->d_name, fiode.name, 255);
+	de->d_name[255] = 0;
+
+	return de;
+}
+
+static void fioRewinddirHelper(DIR *dir)
+{
+	printf("rewinddir not implemented\n");
+}
+
+static int fioClosedirHelper(DIR *dir)
+{
+	int rv;
+
+	if(dir == NULL) {
+		errno = EBADF;
+		return -1;
+	}
+
+	rv = fioDclose(dir->dd_fd); // Check return value?
+        free(dir->dd_buf);
+        free(dir);
+	return 0;
+}
+
 int (*_ps2sdk_close)(int) = fioClose;
 int (*_ps2sdk_open)(const char*, int, ...) = (void *)fioOpen;
 int (*_ps2sdk_read)(int, void*, int) = fioRead;
@@ -56,6 +128,11 @@ int (*_ps2sdk_write)(int, const void*, int) = fioWrite;
 int (*_ps2sdk_remove)(const char*) = fioRemove;
 int (*_ps2sdk_rename)(const char*, const char*) = fioRename;
 int (*_ps2sdk_mkdir)(const char*, int) = fioMkdirHelper;
+
+DIR * (*_ps2sdk_opendir)(const char *path) = fioOpendirHelper;
+struct dirent * (*_ps2sdk_readdir)(DIR *dir) = fioReaddirHelper;
+void (*_ps2sdk_rewinddir)(DIR *dir) = fioRewinddirHelper;
+int (*_ps2sdk_closedir)(DIR *dir) = fioClosedirHelper;
 
 #define IOP_O_RDONLY       0x0001
 #define IOP_O_WRONLY       0x0002
@@ -148,6 +225,26 @@ int _fstat(int fd, struct stat *buf) {
 	}
 
 	return 0;
+}
+
+DIR *opendir(const char *path)
+{
+    return _ps2sdk_opendir(path);
+}
+
+struct dirent *readdir(DIR *dir)
+{
+    return _ps2sdk_readdir(dir);
+}
+
+void rewinddir(DIR *dir)
+{
+    return _ps2sdk_rewinddir(dir);
+}
+
+int closedir(DIR *dir)
+{
+    return _ps2sdk_closedir(dir);
 }
 
 int isatty(int fd) {
