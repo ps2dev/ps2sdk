@@ -50,6 +50,60 @@ static inline int _unlock(void)
 	return(SignalSema(_lock_sema_id));
 }
 
+static time_t io_to_posix_time(const unsigned char *ps2time)
+{
+        struct tm tim;
+        tim.tm_sec  = ps2time[1];
+        tim.tm_min  = ps2time[2];
+        tim.tm_hour = ps2time[3];
+        tim.tm_mday = ps2time[4];
+        tim.tm_mon  = ps2time[5] - 1;
+        tim.tm_year = ((u16)ps2time[6] | ((u16)ps2time[7] << 8)) - 1900;
+        return mktime(&tim);
+}
+
+static mode_t iox_to_posix_mode(unsigned int ps2mode)
+{
+        mode_t posixmode = 0;
+        if (ps2mode & FIO_S_IFREG) posixmode |= S_IFREG;
+        if (ps2mode & FIO_S_IFDIR) posixmode |= S_IFDIR;
+        if (ps2mode & FIO_S_IRUSR) posixmode |= S_IRUSR;
+        if (ps2mode & FIO_S_IWUSR) posixmode |= S_IWUSR;
+        if (ps2mode & FIO_S_IXUSR) posixmode |= S_IXUSR;
+        if (ps2mode & FIO_S_IRGRP) posixmode |= S_IRGRP;
+        if (ps2mode & FIO_S_IWGRP) posixmode |= S_IWGRP;
+        if (ps2mode & FIO_S_IXGRP) posixmode |= S_IXGRP;
+        if (ps2mode & FIO_S_IROTH) posixmode |= S_IROTH;
+        if (ps2mode & FIO_S_IWOTH) posixmode |= S_IWOTH;
+        if (ps2mode & FIO_S_IXOTH) posixmode |= S_IXOTH;
+        return posixmode;
+}
+
+static int fileXioGetstatHelper(const char *path, struct stat *buf) {
+        iox_stat_t fiostat;
+
+        if (fileXioGetStat(path, &fiostat) < 0) {
+                // FIXME: set errno
+                return -1;
+        }
+
+        buf->st_dev = 0;
+        buf->st_ino = 0;
+        buf->st_mode = iox_to_posix_mode(fiostat.mode);
+        buf->st_nlink = 0;
+        buf->st_uid = 0;
+        buf->st_gid = 0;
+        buf->st_rdev = 0;
+        buf->st_size = ((off_t)fiostat.hisize << 32) | (off_t)fiostat.size;
+        buf->st_atime = io_to_posix_time(fiostat.atime);
+        buf->st_mtime = io_to_posix_time(fiostat.mtime);
+        buf->st_ctime = io_to_posix_time(fiostat.ctime);
+        buf->st_blksize = 16*1024;
+        buf->st_blocks = buf->st_size / 512;
+
+        return 0;
+}
+
 static DIR *fileXioOpendirHelper(const char *path)
 {
 	int dd;
@@ -167,6 +221,8 @@ int fileXioInit(void)
 	_ps2sdk_remove= fileXioRemove;
 	_ps2sdk_rename= fileXioRename;
 	_ps2sdk_mkdir = fileXioMkdir;
+
+	_ps2sdk_stat = fileXioGetstatHelper;
 
 	_ps2sdk_opendir = fileXioOpendirHelper;
 	_ps2sdk_readdir = fileXioReaddirHelper;

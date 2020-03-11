@@ -9,6 +9,7 @@
 */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdarg.h>
 #include <errno.h>
 #include <string.h>
@@ -50,6 +51,54 @@ int fioRename(const char *old, const char *new) {
 int fioMkdirHelper(const char *path, int mode) {
   // Old fio mkdir has no mode argument
   return fioMkdir(path);
+}
+
+static time_t io_to_posix_time(const unsigned char *ps2time)
+{
+        struct tm tim;
+        tim.tm_sec  = ps2time[1];
+        tim.tm_min  = ps2time[2];
+        tim.tm_hour = ps2time[3];
+        tim.tm_mday = ps2time[4];
+        tim.tm_mon  = ps2time[5] - 1;
+        tim.tm_year = ((u16)ps2time[6] | ((u16)ps2time[7] << 8)) - 1900;
+        return mktime(&tim);
+}
+
+static mode_t io_to_posix_mode(unsigned int ps2mode)
+{
+        mode_t posixmode = 0;
+        if (ps2mode & FIO_SO_IFREG) posixmode |= S_IFREG;
+        if (ps2mode & FIO_SO_IFDIR) posixmode |= S_IFDIR;
+        if (ps2mode & FIO_SO_IROTH) posixmode |= S_IRUSR|S_IRGRP|S_IROTH;
+        if (ps2mode & FIO_SO_IWOTH) posixmode |= S_IWUSR|S_IWGRP|S_IWOTH;
+        if (ps2mode & FIO_SO_IXOTH) posixmode |= S_IXUSR|S_IXGRP|S_IXOTH;
+        return posixmode;
+}
+
+static int fioGetstatHelper(const char *path, struct stat *buf) {
+        io_stat_t fiostat;
+
+        if (fioGetstat(path, &fiostat) < 0) {
+                errno = ENOENT;
+                return -1;
+        }
+
+        buf->st_dev = 0;
+        buf->st_ino = 0;
+        buf->st_mode = io_to_posix_mode(fiostat.mode);
+        buf->st_nlink = 0;
+        buf->st_uid = 0;
+        buf->st_gid = 0;
+        buf->st_rdev = 0;
+        buf->st_size = ((off_t)fiostat.hisize << 32) | (off_t)fiostat.size;
+        buf->st_atime = io_to_posix_time(fiostat.atime);
+        buf->st_mtime = io_to_posix_time(fiostat.mtime);
+        buf->st_ctime = io_to_posix_time(fiostat.ctime);
+        buf->st_blksize = 16*1024;
+        buf->st_blocks = buf->st_size / 512;
+
+        return 0;
 }
 
 static DIR *fioOpendirHelper(const char *path)
@@ -128,6 +177,8 @@ int (*_ps2sdk_write)(int, const void*, int) = fioWrite;
 int (*_ps2sdk_remove)(const char*) = fioRemove;
 int (*_ps2sdk_rename)(const char*, const char*) = fioRename;
 int (*_ps2sdk_mkdir)(const char*, int) = fioMkdirHelper;
+
+int (*_ps2sdk_stat)(const char *path, struct stat *buf) = fioGetstatHelper;
 
 DIR * (*_ps2sdk_opendir)(const char *path) = fioOpendirHelper;
 struct dirent * (*_ps2sdk_readdir)(DIR *dir) = fioReaddirHelper;
@@ -225,6 +276,10 @@ int _fstat(int fd, struct stat *buf) {
 	}
 
 	return 0;
+}
+
+int _stat(const char *path, struct stat *buf) {
+        return _ps2sdk_stat(path, buf);
 }
 
 DIR *opendir(const char *path)

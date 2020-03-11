@@ -12,6 +12,7 @@
 #define __PS2SDKAPI_H__
 
 #include <dirent.h>
+#include <sys/stat.h>
 
 /** Inter-library helpers */
 extern int (*_ps2sdk_close)(int) __attribute__((section("data")));
@@ -22,6 +23,8 @@ extern int (*_ps2sdk_write)(int, const void*, int) __attribute__((section("data"
 extern int (*_ps2sdk_remove)(const char*) __attribute__((section("data")));
 extern int (*_ps2sdk_rename)(const char*, const char*) __attribute__((section("data")));
 extern int (*_ps2sdk_mkdir)(const char*, int) __attribute__((section("data")));
+
+extern int (*_ps2sdk_stat)(const char *path, struct stat *buf) __attribute__((section("data")));
 
 extern DIR * (*_ps2sdk_opendir)(const char *path) __attribute__((section("data")));
 extern struct dirent * (*_ps2sdk_readdir)(DIR *dir) __attribute__((section("data")));
