@@ -112,7 +112,7 @@ int main() {
 	}
 
 	// Check if existing save is present
-	fd = fioOpen("mc0:PS2DEV/icon.sys", O_RDONLY);
+	fd = open("mc0:PS2DEV/icon.sys", O_RDONLY);
 	if(fd <= 0) {
 
 		printf("\nNo previous save exists, creating...\n");
@@ -173,7 +173,7 @@ int CreateSave(void)
 	static iconFVECTOR ambient = { 0.50, 0.50, 0.50, 0.00 };
 
 
-	if(fioMkdir("mc0:PS2DEV") < 0) return -1;
+	if(mkdir("mc0:PS2DEV", 0777) < 0) return -1;
 
 	// Set up icon.sys. This is the file which controls how our memory card save looks
 	// in the PS2 browser screen. It contains info on the bg colour, lighting, save name
@@ -193,32 +193,32 @@ int CreateSave(void)
 	strcpy(icon_sys.del, "ps2dev.icn");
 
 	// Write icon.sys to the memory card (Note that this filename is fixed)
-	mc_fd = fioOpen("mc0:PS2DEV/icon.sys",O_WRONLY | O_CREAT);
+	mc_fd = open("mc0:PS2DEV/icon.sys",O_WRONLY | O_CREAT);
 	if(mc_fd < 0) return -2;
 
-	fioWrite(mc_fd, &icon_sys, sizeof(icon_sys));
-	fioClose(mc_fd);
+	write(mc_fd, &icon_sys, sizeof(icon_sys));
+	close(mc_fd);
 	printf("icon.sys written sucessfully.\n");
 
 	// Write icon file to the memory card.
 	// Note: The icon file was created with my bmp2icon tool, available for download at
 	//       http://www.ps2dev.org
-	icon_fd = fioOpen("host:ps2dev.icn",O_RDONLY);
+	icon_fd = open("host:ps2dev.icn",O_RDONLY);
 	if(icon_fd < 0) return -3;
 
-	icon_size = fioLseek(icon_fd,0,SEEK_END);
-	fioLseek(icon_fd,0,SEEK_SET);
+	icon_size = lseek(icon_fd,0,SEEK_END);
+	lseek(icon_fd,0,SEEK_SET);
 
 	icon_buffer = malloc(icon_size);
 	if(icon_buffer == NULL) return -4;
-	if(fioRead(icon_fd, icon_buffer, icon_size) != icon_size) return -5;
-	fioClose(icon_fd);
+	if(read(icon_fd, icon_buffer, icon_size) != icon_size) return -5;
+	close(icon_fd);
 
-	icon_fd = fioOpen("mc0:PS2DEV/ps2dev.icn",O_WRONLY | O_CREAT);
+	icon_fd = open("mc0:PS2DEV/ps2dev.icn",O_WRONLY | O_CREAT);
 	if(icon_fd < 0) return -6;
 
-	fioWrite(icon_fd,icon_buffer,icon_size);
-	fioClose(icon_fd);
+	write(icon_fd,icon_buffer,icon_size);
+	close(icon_fd);
 	printf("ps2dev.icn written sucessfully.\n");
 
 	return 0;

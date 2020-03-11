@@ -41,7 +41,7 @@ The usb_mass driver requires that usbd.irx is loaded. You can use either
 usbd.irx that can be found on some games and demo disks or you can use
 npm_usbd.irx that is part of the naplink ps2 server side. Then load
 the mass_usb.irx and you are ready to acces the "mass:" device by calling
-fioOpen("mass:xxx/yyy.txt", O_RDONLY), fioRead etc. When you plug in
+open("mass:xxx/yyy.txt", O_RDONLY), read etc. When you plug in
 the flash disk (the supported one) you should see the message on the
 console ("usb_mass: connect ok!") which means that device is recognised
 and ready to use. There is an example in the ee directory that lists

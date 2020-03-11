@@ -59,7 +59,7 @@ int main ( void ) {
  framebuffer_t frame;
  zbuffer_t z;
  InitCBParam lInfo;
- int         lFD = fioOpen ( MPEG_BITSTREAM_FILE, O_RDONLY );
+ int         lFD = open ( MPEG_BITSTREAM_FILE, O_RDONLY );
  long        lSize;
  s64         lPTS, lCurPTS;
 
@@ -82,8 +82,8 @@ int main ( void ) {
   goto end;
  }  /* end if */
 
- lSize = fioLseek ( lFD, 0, SEEK_END );
- fioLseek ( lFD, 0, SEEK_SET );
+ lSize = lseek ( lFD, 0, SEEK_END );
+ lseek ( lFD, 0, SEEK_SET );
 
  if ( lSize <= 0 ) {
   printf ( "test_mpeg: could not obtain file size (%ld)\n", lSize );
@@ -97,7 +97,7 @@ int main ( void ) {
   goto end;
  }  /* end if */
 
- if (  fioRead (
+ if (  read (
         lFD, s_pTransferPtr = s_pMPEGData, s_MPEGDataSize = lSize
        ) != lSize
  ) {
@@ -105,7 +105,7 @@ int main ( void ) {
   goto end;
  }  /* end if */
 
- fioClose ( lFD );
+ close ( lFD );
 
 /* initialize DMAC (I have no idea what this code does as */
 /* I'm not quite familiar with ps2sdk)                    */

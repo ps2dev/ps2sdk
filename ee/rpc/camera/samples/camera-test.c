@@ -117,14 +117,14 @@ int main (int argc, char *argv[])
 	{
 		printf("frame captured\n");
 
-		fh = fioOpen("host:image.jpg", O_WRONLY|O_CREAT|O_TRUNC);
+		fh = open("host:image.jpg", O_WRONLY|O_CREAT|O_TRUNC);
 
 
-		fioWrite(fh, jpg_buffer, ret);
+		write(fh, jpg_buffer, ret);
 
 
 
-		fioClose(fh);
+		close(fh);
 	}
 	else
 	{

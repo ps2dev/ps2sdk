@@ -4,12 +4,13 @@
 #include <gif_tags.h>
 #include <gs_gp.h>
 
-#include <fileio.h>
-
 #include <stdio.h>
 #include <malloc.h>
 #include <sys/fcntl.h>
 #include <string.h>
+
+#include <fcntl.h>
+#include <unistd.h>
 
 #include <font.h>
 
@@ -109,7 +110,7 @@ int fontx_load_single_krom(fontx_t *fontx)
 	int fd = 0;
 	int size;
 
-	fd = fioOpen("rom0:KROM", O_RDONLY);
+	fd = open("rom0:KROM", O_RDONLY);
 
 	if (fd < 0)
 	{
@@ -128,7 +129,7 @@ int fontx_load_single_krom(fontx_t *fontx)
 	{
 
 		printf("Error allocating %d bytes of memory.\n", size);
-		fioClose(fd);
+		close(fd);
 
 		return -1;
 	}
@@ -137,23 +138,23 @@ int fontx_load_single_krom(fontx_t *fontx)
 	memset(fontx->font,0,size);
 
 	// The offset for the ASCII characters
-	fioLseek(fd, 0x198DE, SEEK_SET);
+	lseek(fd, 0x198DE, SEEK_SET);
 
 	// 17 bytes of header and 15 bytes per 33 characters
 	// Read in 95 characters
-	if (fioRead(fd,fontx->font + header_size+char_size*33, char_size*95) < 0)
+	if (read(fd,fontx->font + header_size+char_size*33, char_size*95) < 0)
 	{
 
 		printf("Error reading rom0:KROM.\n");
 
 		free(fontx->font);
-		fioClose(fd);
+		close(fd);
 
 		return -1;
 
 	}
 
-	fioClose(fd);
+	close(fd);
 
 	fontx_header = (fontx_hdr*)fontx->font;
 
@@ -168,9 +169,9 @@ int fontx_load_single_krom(fontx_t *fontx)
 	fontx_header->type = SINGLE_BYTE;
 
 	// Save it as a font
-	//fd=fioOpen("host:KROM_ascii.fnt",O_WRONLY | O_TRUNC | O_CREAT);
-	//fioWrite(fd, fontx->font, size);
-	//fioClose(fd);
+	//fd=open("host:KROM_ascii.fnt",O_WRONLY | O_TRUNC | O_CREAT);
+	//write(fd, fontx->font, size);
+	//close(fd);
 
 	return 0;
 
@@ -191,7 +192,7 @@ int fontx_load_double_krom(fontx_t *fontx)
 	int char_size = 30;
 	int char_num = 3489;
 
-	fd = fioOpen("rom0:KROM", O_RDONLY);
+	fd = open("rom0:KROM", O_RDONLY);
 
 	if (fd < 0)
 	{
@@ -208,7 +209,7 @@ int fontx_load_double_krom(fontx_t *fontx)
 	{
 
 		printf("Error allocating memory.\n");
-		fioClose(fd);
+		close(fd);
 
 		return -1;
 	}
@@ -217,21 +218,21 @@ int fontx_load_double_krom(fontx_t *fontx)
 	memset(fontx->font,0,size);
 
 	// Make sure we're at the beginning
-	fioLseek(fd, 0, SEEK_SET);
+	lseek(fd, 0, SEEK_SET);
 
 	// Read in 95 characters
-	if (fioRead(fd, fontx->font+header_size+table_num*table_size, char_size*char_num) < 0)
+	if (read(fd, fontx->font+header_size+table_num*table_size, char_size*char_num) < 0)
 	{
 
 		printf("Error reading font.\n");
 		free(fontx->font);
-		fioClose(fd);
+		close(fd);
 
 		return -1;
 
 	}
 
-	fioClose(fd);
+	close(fd);
 
 	fontx_header = (fontx_hdr*)fontx->font;
 
@@ -250,9 +251,9 @@ int fontx_load_double_krom(fontx_t *fontx)
 	memcpy(fontx->font+header_size,sjis_table,table_num*table_size);
 
 	// Save it as a font
-	//fd=fioOpen("host:KROM_kanji.fnt",O_WRONLY | O_TRUNC | O_CREAT);
-	//fioWrite(fd, fontx->font, size);
-	//fioClose(fd);
+	//fd=open("host:KROM_kanji.fnt",O_WRONLY | O_TRUNC | O_CREAT);
+	//write(fd, fontx->font, size);
+	//close(fd);
 
 	return 0;
 
