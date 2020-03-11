@@ -221,6 +221,7 @@ int fileXioInit(void)
 	_ps2sdk_remove= fileXioRemove;
 	_ps2sdk_rename= fileXioRename;
 	_ps2sdk_mkdir = fileXioMkdir;
+	_ps2sdk_rmdir = fileXioRmdir;
 
 	_ps2sdk_stat = fileXioGetstatHelper;
 

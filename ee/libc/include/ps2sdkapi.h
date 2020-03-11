@@ -23,6 +23,7 @@ extern int (*_ps2sdk_write)(int, const void*, int) __attribute__((section("data"
 extern int (*_ps2sdk_remove)(const char*) __attribute__((section("data")));
 extern int (*_ps2sdk_rename)(const char*, const char*) __attribute__((section("data")));
 extern int (*_ps2sdk_mkdir)(const char*, int) __attribute__((section("data")));
+extern int (*_ps2sdk_rmdir)(const char*) __attribute__((section("data")));
 
 extern int (*_ps2sdk_stat)(const char *path, struct stat *buf) __attribute__((section("data")));
 

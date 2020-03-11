@@ -177,6 +177,7 @@ int (*_ps2sdk_write)(int, const void*, int) = fioWrite;
 int (*_ps2sdk_remove)(const char*) = fioRemove;
 int (*_ps2sdk_rename)(const char*, const char*) = fioRename;
 int (*_ps2sdk_mkdir)(const char*, int) = fioMkdirHelper;
+int (*_ps2sdk_rmdir)(const char*) = fioRmdir;
 
 int (*_ps2sdk_stat)(const char *path, struct stat *buf) = fioGetstatHelper;
 
@@ -327,6 +328,10 @@ int chdir(const char *path) {
 
 int mkdir(const char *path, mode_t mode) {
     return _ps2sdk_mkdir(path, mode);
+}
+
+int rmdir(const char *path) {
+    return _ps2sdk_rmdir(path);
 }
 
 int _link(const char *old, const char *new) {
