@@ -382,3 +382,13 @@ clock_t _times(struct tms *buffer) {
 
 	return clk;
 }
+
+long int random(void)
+{
+        return rand();
+}
+
+void srandom(unsigned int seed)
+{
+        srand(seed);
+}
