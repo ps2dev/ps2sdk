@@ -22,11 +22,13 @@
 #include "sys/fcntl.h"
 #include "sys/stat.h"
 #include "sys/ioctl.h"
-#include "fileXio_rpc.h"
-#include "io_common.h"
 #include "errno.h"
 
 #include "libhdd.h"
+
+#define NEWLIB_PORT_AWARE
+#include "fileXio_rpc.h"
+#include "io_common.h"
 
 #define PFS_ZONE_SIZE		8192
 #define PFS_FRAGMENT_OPT	0x00002d66	//"-f"

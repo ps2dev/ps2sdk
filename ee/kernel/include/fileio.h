@@ -19,6 +19,11 @@
 
 #include <io_common.h>
 
+#ifndef NEWLIB_PORT_AWARE
+#error "Using fio/fileXio functions directly in the newlib port will lead to problems."
+#error "Use posix function calls instead."
+#endif
+
 #define FIO_PATH_MAX	256
 
 #define FIO_WAIT		0

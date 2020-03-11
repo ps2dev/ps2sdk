@@ -19,6 +19,11 @@
 #include <fileXio.h>
 #include <sys/stat.h>
 
+#ifndef NEWLIB_PORT_AWARE
+#error "Using fio/fileXio functions directly in the newlib port will lead to problems."
+#error "Use posix function calls instead."
+#endif
+
 #define FXIO_WAIT		0
 #define FXIO_NOWAIT		1
 

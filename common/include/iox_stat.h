@@ -18,6 +18,13 @@
 
 #include <sys/time.h>
 
+#ifdef _EE
+#ifndef NEWLIB_PORT_AWARE
+#error "Using fio/fileXio functions directly in the newlib port will lead to problems."
+#error "Use posix function calls instead."
+#endif
+#endif
+
 // Flags for chstat 'statmask'
 #define FIO_CST_MODE	0x0001
 #define FIO_CST_ATTR	0x0002

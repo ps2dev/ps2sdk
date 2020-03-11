@@ -19,6 +19,13 @@
 #include <sys/fcntl.h>
 #include <sys/unistd.h>
 
+#ifdef _EE
+#ifndef NEWLIB_PORT_AWARE
+#error "Using fio/fileXio functions directly in the newlib port will lead to problems."
+#error "Use posix function calls instead."
+#endif
+#endif
+
 #define FIO_O_RDONLY	0x0001
 #define FIO_O_WRONLY	0x0002
 #define FIO_O_RDWR	0x0003

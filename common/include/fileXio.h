@@ -22,6 +22,13 @@
 #include <tamtypes.h>
 #include <iox_stat.h>
 
+#ifdef _EE
+#ifndef NEWLIB_PORT_AWARE
+#error "Using fio/fileXio functions directly in the newlib port will lead to problems."
+#error "Use posix function calls instead."
+#endif
+#endif
+
 #define FILEXIO_IRX	0xb0b0b00
 enum FILEXIO_CMDS{
 	FILEXIO_DOPEN	= 0x01,

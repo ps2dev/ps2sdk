@@ -13,7 +13,6 @@
 #include <stdarg.h>
 #include <errno.h>
 #include <string.h>
-#include <fileio.h>
 #include <kernel.h>
 #include <malloc.h>
 #include <sio.h>
@@ -31,6 +30,8 @@
 #include <inttypes.h>
 #include <tamtypes.h>
 
+#define NEWLIB_PORT_AWARE
+#include "fileio.h"
 #include "io_common.h"
 #include "iox_stat.h"
 #include "ps2sdkapi.h"

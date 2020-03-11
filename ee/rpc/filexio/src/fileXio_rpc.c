@@ -23,6 +23,8 @@
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <ps2sdkapi.h>
+
+#define NEWLIB_PORT_AWARE
 #include <fileXio_rpc.h>
 #include <errno.h>
 

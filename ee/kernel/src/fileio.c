@@ -18,6 +18,7 @@
 #include <ps2lib_err.h>
 #include <kernel.h>
 #include <sifrpc.h>
+#define NEWLIB_PORT_AWARE
 #include <fileio.h>
 #include <string.h>
 
