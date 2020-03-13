@@ -81,7 +81,7 @@ static int fioGetstatHelper(const char *path, struct stat *buf) {
         io_stat_t fiostat;
 
         if (fioGetstat(path, &fiostat) < 0) {
-                errno = ENOENT;
+                //errno = ENOENT;
                 return -1;
         }
 
@@ -109,7 +109,7 @@ static DIR *fioOpendirHelper(const char *path)
 
 	dd = fioDopen(path);
 	if (dd < 0) {
-		errno = ENOENT;
+		//errno = ENOENT;
 		return NULL;
 	}
 
@@ -131,7 +131,7 @@ static struct dirent *fioReaddirHelper(DIR *dir)
         io_dirent_t fiode;
 
 	if(dir == NULL) {
-		errno = EBADF;
+		//errno = EBADF;
 		return NULL;
 	}
 
@@ -160,7 +160,7 @@ static int fioClosedirHelper(DIR *dir)
 	int rv;
 
 	if(dir == NULL) {
-		errno = EBADF;
+		//errno = EBADF;
 		return -1;
 	}
 
@@ -309,12 +309,12 @@ int isatty(int fd) {
 	struct stat buf;
 
 	if (_fstat (fd, &buf) < 0) {
-		errno = EBADF;
+		//errno = EBADF;
 		return 0;
 	}
 	if (S_ISCHR (buf.st_mode))
 		return 1;
-	errno = ENOTTY;
+	//errno = ENOTTY;
 	return 0;
 }
 
