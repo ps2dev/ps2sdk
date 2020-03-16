@@ -40,6 +40,7 @@
 #ifndef LWIP_HDR_INET_H
 #define LWIP_HDR_INET_H
 
+#include <sys/types.h>
 #include "lwip/opt.h"
 #include "lwip/def.h"
 #include "lwip/ip_addr.h"
@@ -51,7 +52,7 @@ extern "C" {
 
 /* If your port already typedef's in_addr_t, define IN_ADDR_T_DEFINED
    to prevent this code from redefining it. */
-#if !defined(in_addr_t) && !defined(IN_ADDR_T_DEFINED)
+#if !defined(in_addr_t) && !defined(IN_ADDR_T_DEFINED) && !defined(_IN_ADDR_T_DECLARED)
 typedef u32_t in_addr_t;
 #endif
 
