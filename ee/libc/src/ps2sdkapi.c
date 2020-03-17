@@ -432,7 +432,7 @@ int closedir(DIR *dir)
     return _ps2sdk_closedir(dir);
 }
 
-int isatty(int fd) {
+int _isatty(int fd) {
 	struct stat buf;
 
 	if (_fstat (fd, &buf) < 0) {
