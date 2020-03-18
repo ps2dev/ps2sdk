@@ -27,6 +27,7 @@
 // - compiler (gcc)
 // - libc (newlib)
 #include <stdint.h>
+#include <limits.h>
 #include <inttypes.h>
 #include <tamtypes.h>
 
@@ -205,27 +206,28 @@ int (*_ps2sdk_closedir)(DIR *dir) = fioClosedirHelper;
 #ifndef LONG_MAX
 	#error "LONG_MAX not defined"
 #endif
-#if LONG_MAX == 0x7fffffffL
-	#error "LONG_MAX == 0x7fffffffL"
-#endif
-#if LONG_MAX != 9223372036854775807L
-	#error "LONG_MAX != 9223372036854775807L"
+#if LONG_MAX != 0x7fffffffL
+	#error "LONG_MAX != 0x7fffffffL"
 #endif
 
 #define ct_assert(e) {enum { ct_assert_value = 1/(!!(e)) };}
 void compile_time_check() {
-	// Compiler
+	// Compiler (ABI n32)
 	ct_assert(sizeof(unsigned char)==1);
 	ct_assert(sizeof(unsigned short)==2);
 	ct_assert(sizeof(unsigned int)==4);
-	ct_assert(sizeof(unsigned long)==8);
+	ct_assert(sizeof(unsigned long)==4);
+	ct_assert(sizeof(unsigned long long)==8);
 	ct_assert(sizeof(unsigned int __attribute__(( mode(TI) )))==16);
+	ct_assert(sizeof(void *)==4);
+
 	// Defined in tamtypes.h (ps2sdk)
 	ct_assert(sizeof(u8)==1);
 	ct_assert(sizeof(u16)==2);
 	ct_assert(sizeof(u32)==4);
 	ct_assert(sizeof(u64)==8);
 	ct_assert(sizeof(u128)==16);
+
 	// Defined in inttypes.h/stdint.h (newlib)
 	ct_assert(sizeof(uint8_t)==1);
 	ct_assert(sizeof(uint16_t)==2);
