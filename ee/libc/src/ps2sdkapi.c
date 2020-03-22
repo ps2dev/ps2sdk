@@ -38,7 +38,6 @@
 
 
 extern void *ps2_sbrk(size_t increment);
-extern clock_t ps2_clock(void);
 
 
 /* the present working directory variable. */

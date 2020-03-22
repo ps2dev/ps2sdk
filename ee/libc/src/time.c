@@ -16,9 +16,10 @@
 #include <time.h>
 #include <kernel.h>
 #include <timer.h>
+#include "ps2sdkapi.h"
 
-extern int      __time_intr_overflow_id;
-extern clock_t  __time_intr_overflow_count;
+extern int  __time_intr_overflow_id;
+extern ps2_clock_t  __time_intr_overflow_count;
 
 #ifdef TIME_USE_T0
 #define INTC_TIM       INTC_TIM0
@@ -33,8 +34,8 @@ extern clock_t  __time_intr_overflow_count;
 #endif
 
 #ifdef F___time_internals
-int      __time_intr_overflow_id = -1;
-clock_t  __time_intr_overflow_count = 0;
+int  __time_intr_overflow_id = -1;
+ps2_clock_t  __time_intr_overflow_count = 0;
 
 static int intrOverflow(int ca)
 {
@@ -84,9 +85,9 @@ void _ps2sdk_time_deinit(void)
 #endif
 
 #ifdef F_ps2_clock
-clock_t ps2_clock(void)
+ps2_clock_t ps2_clock(void)
 {
-   u64         t;
+   ps2_clock_t t;
 
    // Tn_COUNT is 16 bit precision. Therefore, each __time_intr_overflow_count is 65536 ticks
    t = *T_COUNT + (__time_intr_overflow_count << 16);

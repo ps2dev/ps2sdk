@@ -39,11 +39,11 @@ static inline u64 timespec_to_us(const struct timespec *pts) {
     return (pts->tv_sec * 1000000ULL) + (pts->tv_nsec / 1000ULL);
 }
 
-static inline clock_t us_to_ps2_clock(u64 us) {
+static inline ps2_clock_t us_to_ps2_clock(u64 us) {
     return (us * PS2_CLOCKS_PER_MSEC) / 1000;
 }
 
-static inline clock_t timespec_to_ps2_clock(const struct timespec *pts) {
+static inline ps2_clock_t timespec_to_ps2_clock(const struct timespec *pts) {
     return us_to_ps2_clock(timespec_to_us(pts));
 }
 
@@ -51,7 +51,7 @@ int nanosleep(const struct timespec *req, struct timespec *rem)
 {
     ee_sema_t sema;
     s32 sema_id;
-    clock_t clock_delay, clock_end, clock_real_end;
+    ps2_clock_t clock_delay, clock_end, clock_real_end;
     u16 hsync_delay;
 
     clock_delay = timespec_to_ps2_clock(req);

@@ -12,6 +12,7 @@
 #define __PS2SDKAPI_H__
 
 #include <dirent.h>
+#include <inttypes.h>
 #include <sys/stat.h>
 
 /** Inter-library helpers */
@@ -36,6 +37,7 @@ extern int (*_ps2sdk_closedir)(DIR *dir);
 #define PS2_CLOCKS_PER_SEC (147456000 / 256) // 576.000
 #define PS2_CLOCKS_PER_MSEC (PS2_CLOCKS_PER_SEC / 1000) // 576
 
-clock_t ps2_clock(void);
+typedef uint64_t ps2_clock_t;
+ps2_clock_t ps2_clock(void);
 
 #endif /* __PS2SDKAPI_H__ */
