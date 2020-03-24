@@ -13,7 +13,7 @@
 #include "vux.h"
 
 
-#include <floatlib.h>
+#include <math.h>
 
 
 
