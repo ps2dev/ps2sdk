@@ -10,7 +10,7 @@
 # Linkfile script for ee-ld
 */
 
-ENTRY(_start);
+ENTRY(__start);
 
 SECTIONS {
 	.text 0x00100000: {
