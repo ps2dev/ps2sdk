@@ -8,11 +8,6 @@
 // Starting position of primitive
 static qword_t *__prim_start = NULL;
 
-// Amount of vertex loops
-static int __vertex_loops = 0;
-
-static float __vertex_qwords = 0;
-
 qword_t *draw_prim_start(qword_t *q, int context, prim_t *prim, color_t *color)
 {
 
@@ -35,19 +30,20 @@ qword_t *draw_prim_start(qword_t *q, int context, prim_t *prim, color_t *color)
 
 }
 
-qword_t *draw_prim_end(qword_t *q,int nreg, u64 reglist)
+qword_t *draw_prim_end(qword_t *q, int nreg, u64 reglist)
 {
 
-	float lpq = 2.0f / (float)nreg;
+	u32 vertex_qwords;
+	u32 vertex_loops;
 
 	// Determine number qwords that were needed minus the reglist giftag
-	__vertex_qwords = q - __prim_start - 1;
+	vertex_qwords = q - __prim_start - 1;
 
-	// Determine number of loops based on qwords used and loops per qword
-	__vertex_loops = (int)(__vertex_qwords * lpq);
+	// Determine number of loops based on qwords used and number of regs per loop
+	vertex_loops = (vertex_qwords * 2) / nreg;
 
 	// Now set the giftag of the vertex reglist chain
-	__prim_start->dw[0] = GIF_SET_TAG(__vertex_loops,1,0,0,GIF_FLG_REGLIST,nreg);
+	__prim_start->dw[0] = GIF_SET_TAG(vertex_loops,1,0,0,GIF_FLG_REGLIST,nreg);
 
 	// Set the higher 64bits to the reglist
 	__prim_start->dw[1] = reglist;
