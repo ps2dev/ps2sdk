@@ -38,7 +38,7 @@ clock_t  __time_intr_overflow_count = 0;
 
 static int intrOverflow(int ca)
 {
-   __time_intr_overflow_id++;
+   __time_intr_overflow_count++;
 
    // A write to the overflow flag will clear the overflow flag
    // ---------------------------------------------------------
@@ -52,9 +52,9 @@ void _ps2sdk_time_init(void)
 {
    *T_MODE = 0x0000; // Disable T_MODE
 
-   if (__time_intr_overflow_count == -1)
+   if (__time_intr_overflow_id == -1)
    {
-       __time_intr_overflow_count = AddIntcHandler(INTC_TIM, intrOverflow, 0);
+       __time_intr_overflow_id = AddIntcHandler(INTC_TIM, intrOverflow, 0);
        EnableIntc(INTC_TIM);
    }
 
@@ -65,21 +65,21 @@ void _ps2sdk_time_init(void)
    *T_COUNT = 0;
    *T_MODE = Tn_MODE(0x02, 0, 0, 0, 0, 0x01, 0, 0x01, 0, 0);
 
-   __time_intr_overflow_id = 0;
+   __time_intr_overflow_count = 0;
 }
 
 void _ps2sdk_time_deinit(void)
 {
    *T_MODE = 0x0000; // Stop the timer
 
-   if (__time_intr_overflow_count >= 0)
+   if (__time_intr_overflow_id >= 0)
    {
       DisableIntc(INTC_TIM);
-      RemoveIntcHandler(INTC_TIM, __time_intr_overflow_count);
-      __time_intr_overflow_count = -1;
+      RemoveIntcHandler(INTC_TIM, __time_intr_overflow_id);
+      __time_intr_overflow_id = -1;
    }
 
-   __time_intr_overflow_id = 0;
+   __time_intr_overflow_count = 0;
 }
 #endif
 
@@ -88,8 +88,8 @@ clock_t clock(void)
 {
    u64         t;
 
-   // Tn_COUNT is 16 bit precision. Therefore, each __time_intr_overflow_id is 65536 ticks
-   t = *T_COUNT + (__time_intr_overflow_id << 16);
+   // Tn_COUNT is 16 bit precision. Therefore, each __time_intr_overflow_count is 65536 ticks
+   t = *T_COUNT + (__time_intr_overflow_count << 16);
 
    return t;
 }
