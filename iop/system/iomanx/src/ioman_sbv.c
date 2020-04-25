@@ -21,7 +21,6 @@
 #include "loadcore.h"
 #include "iomanX.h"
 #include "sysclib.h"
-#include "sys/stat.h"
 
 #include "errno.h"
 

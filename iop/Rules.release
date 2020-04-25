@@ -11,7 +11,7 @@
 # Creates the base iop directory structure in target directory.
 #
 
-RELEASE_IOP_DIRS = iop/ iop/include/ iop/irx/ iop/lib
+RELEASE_IOP_DIRS = iop/ iop/include/sys/ iop/irx/ iop/lib
 RELEASE_IOP_DIRS := $(RELEASE_IOP_DIRS:%=$(PS2SDK)/%)
 
 
@@ -63,12 +63,21 @@ release-iop-include:
 	       chmod 644 $(PS2SDK)/iop/include/`basename $$file` ; \
 	     fi \
 	   done; \
+	fi; \
+	if test -d include/sys ; then \
+	   for file in include/sys/*; do \
+	     if test -f $$file ; then \
+	       $(ECHO) Installing $$file to $(PS2SDK)/iop/include/sys ; \
+	       cp -f $$file $(PS2SDK)/iop/include/sys ; \
+	       chmod 644 $(PS2SDK)/iop/include/sys/`basename $$file` ; \
+	     fi \
+	   done; \
 	fi;
 
 release: release-iop-dirs release-iop-lib release-iop-bin release-iop-include
 
 
 release-iop-clean:
-	rm -f $(PS2SDK)/iop/include/*
+	rm -rf $(PS2SDK)/iop/include/*
 	rm -f $(PS2SDK)/iop/irx/*
 	rm -f $(PS2SDK)/iop/lib/*

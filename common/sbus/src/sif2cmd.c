@@ -28,6 +28,8 @@ This file contains all common code for both EE and IOP SIF management.
 #define SIF2_XFER_RECV  (0)
 #define SIF2_XFER_SEND  (1)
 
+extern int sio_printf(const char *format, ...);
+
 static u32 _sif2_req_type = 0;
 static u32 _sif2_req_addr = 0;
 static u32 _sif2_req_size = 0;

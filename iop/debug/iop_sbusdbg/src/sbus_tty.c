@@ -16,10 +16,10 @@ Of course this requires that the EE-side code accept this command and output the
 #include <stdarg.h>
 #include <sysclib.h>
 #include <sysmem.h>
-#include <sys/stat.h>
 #include <excepman.h>
 #include <intrman.h>
 #include <ioman.h>
+#include <fileXio.h>
 #include <ps2_debug.h>
 #include <ps2_sbus.h>
 

@@ -19,6 +19,11 @@
 
 #include <io_common.h>
 
+#ifndef NEWLIB_PORT_AWARE
+#error "Using fio/fileXio functions directly in the newlib port will lead to problems."
+#error "Use posix function calls instead."
+#endif
+
 #define FIO_PATH_MAX	256
 
 #define FIO_WAIT		0
@@ -49,9 +54,9 @@ int fioSync(int mode, int *retVal);
 int fioIoctl(int fd, int request, void *data);
 int fioDopen(const char *name);
 int fioDclose(int fd);
-int fioDread(int fd, fio_dirent_t *buf);		//Warning! (*)
-int fioGetstat(const char *name, fio_stat_t *buf);	//Warning! (*)
-int fioChstat(const char *name, fio_stat_t *buf, unsigned int cbit);
+int fioDread(int fd, io_dirent_t *buf);		//Warning! (*)
+int fioGetstat(const char *name, io_stat_t *buf);	//Warning! (*)
+int fioChstat(const char *name, io_stat_t *buf, unsigned int cbit);
 int fioRemove(const char *name);			//Warning! (**)
 int fioFormat(const char *name);
 int fioRmdir(const char* dirname);

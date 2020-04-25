@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <malloc.h>
 #include <libpad.h>
 #ifdef _XINPUT
 #include <libmtap.h>

@@ -14,7 +14,9 @@
  */
 
 #include <tamtypes.h>
-#include <fileio.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <ps2sdkapi.h>
 #include "libkbd.h"
 
 extern int _iop_reboot_count;
@@ -36,7 +38,7 @@ int PS2KbdInit(void)
       return 2;
     }
 
-  kbd_fd = fioOpen(PS2KBD_DEVFILE, O_RDONLY);
+  kbd_fd = open(PS2KBD_DEVFILE, O_RDONLY);
   if(kbd_fd < 0)
     {
       return 0;
@@ -49,7 +51,7 @@ int PS2KbdRead(char *key)
 {
   if((kbd_fd >= 0) && (curr_readmode == PS2KBD_READMODE_NORMAL))
     {
-      return fioRead(kbd_fd, key, 1);
+      return read(kbd_fd, key, 1);
     }
 
   return 0;
@@ -59,7 +61,7 @@ int PS2KbdReadRaw(PS2KbdRawKey *key)
 {
   if((kbd_fd >= 0) && (curr_readmode == PS2KBD_READMODE_RAW))
     {
-      return fioRead(kbd_fd, key, 2) / 2;
+      return read(kbd_fd, key, 2) / 2;
     }
 
   return 0;
@@ -70,7 +72,7 @@ int PS2KbdSetReadmode(u32 readmode)
   if((kbd_fd >= 0) && (curr_readmode != readmode))
     {
       curr_readmode = readmode;
-      return fioIoctl(kbd_fd, PS2KBD_IOCTL_SETREADMODE, &readmode);
+      return _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETREADMODE, &readmode);
     }
   return 0;
 }
@@ -79,7 +81,7 @@ int PS2KbdSetBlockingMode(u32 blockmode)
 {
   if((kbd_fd >= 0) && (curr_blockmode != blockmode))
     {
-      return fioIoctl(kbd_fd, PS2KBD_IOCTL_SETBLOCKMODE, &blockmode);
+      return _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETBLOCKMODE, &blockmode);
     }
 
   return 0;
@@ -89,7 +91,7 @@ int PS2KbdSetRepeatRate(u32 repeat)
 {
   if(kbd_fd >= 0)
     {
-      return fioIoctl(kbd_fd, PS2KBD_IOCTL_SETREPEATRATE, &repeat);
+      return _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETREPEATRATE, &repeat);
     }
   return 0;
 }
@@ -98,7 +100,7 @@ int PS2KbdSetLeds(u8 leds)
 {
   if(kbd_fd >= 0)
     {
-      return fioIoctl(kbd_fd, PS2KBD_IOCTL_SETLEDS, &leds);
+      return _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETLEDS, &leds);
     }
   return 0;
 }
@@ -107,7 +109,7 @@ int PS2KbdSetKeymap(PS2KbdKeyMap *keymaps)
 {
   if(kbd_fd >= 0)
     {
-      return fioIoctl(kbd_fd, PS2KBD_IOCTL_SETKEYMAP, keymaps);
+      return _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETKEYMAP, keymaps);
     }
   return 0;
 }
@@ -116,7 +118,7 @@ int PS2KbdSetCtrlmap(u8 *ctrlmap)
 {
   if(kbd_fd >= 0)
     {
-      return fioIoctl(kbd_fd, PS2KBD_IOCTL_SETCTRLMAP, ctrlmap);
+      return _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETCTRLMAP, ctrlmap);
     }
   return 0;
 }
@@ -125,7 +127,7 @@ int PS2KbdSetAltmap(u8 *altmap)
 {
   if(kbd_fd >= 0)
     {
-      return fioIoctl(kbd_fd, PS2KBD_IOCTL_SETALTMAP, altmap);
+      return _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETALTMAP, altmap);
     }
   return 0;
 }
@@ -134,7 +136,7 @@ int PS2KbdSetSpecialmap(u8 *special)
 {
   if(kbd_fd >= 0)
     {
-      return fioIoctl(kbd_fd, PS2KBD_IOCTL_SETSPECIALMAP, special);
+      return _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETSPECIALMAP, special);
     }
   return 0;
 }
@@ -145,7 +147,7 @@ int PS2KbdFlushBuffer(void)
 
   if(kbd_fd >= 0)
     {
-      return fioIoctl(kbd_fd, PS2KBD_IOCTL_FLUSHBUFFER, &dummy);
+      return _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_FLUSHBUFFER, &dummy);
     }
   return 0;
 }
@@ -156,7 +158,7 @@ int PS2KbdResetKeymap(void)
 
   if(kbd_fd >= 0)
     {
-      return fioIoctl(kbd_fd, PS2KBD_IOCTL_RESETKEYMAP, &dummy);
+      return _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_RESETKEYMAP, &dummy);
     }
   return 0;
 }
@@ -165,7 +167,7 @@ int PS2KbdClose(void)
 {
   if(kbd_fd >= 0)
     {
-      fioClose(kbd_fd);
+      close(kbd_fd);
       kbd_fd = -1;
     }
 

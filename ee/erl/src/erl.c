@@ -37,12 +37,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/fcntl.h>
+#include <sys/unistd.h>
 
 #ifdef __linux__
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
 #endif
 
 #ifdef _WIN32

@@ -19,7 +19,8 @@
 #include <stdarg.h>
 #include <string.h>
 #include <malloc.h>
-#include <fileio.h>
+#include <fcntl.h>
+#include <unistd.h>
 #include <stdio.h>
 #include "ahx_rpc.h"
 
@@ -192,21 +193,21 @@ int AHX_LoadSong(char* filename)
 	int fd, fdSize;
 	char* buffer;
 
-	fd = fioOpen(filename, O_RDONLY);
+	fd = open(filename, O_RDONLY);
 	if(fd < 0)
 	{
 		 printf("ERROR LOADING SONG\n");
 		 return -1;
 	}
-	fdSize = fioLseek(fd, 0, SEEK_END);
-	fioLseek(fd, 0, SEEK_SET);
+	fdSize = lseek(fd, 0, SEEK_END);
+	lseek(fd, 0, SEEK_SET);
 	buffer = malloc(fdSize);
 	if(!buffer)
 	{
 		 printf("ERROR ALLOCATING SONG MEMORY SONG\n");
 		 return -1;
 	}
-	fioRead(fd, buffer, fdSize);
-	fioClose(fd);
+	read(fd, buffer, fdSize);
+	close(fd);
 	return AHX_LoadSongBuffer(buffer, fdSize);
 }

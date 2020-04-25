@@ -9,6 +9,7 @@
 
 #include <tamtypes.h>
 #include <tcpip.h>
+#include <sys/time.h>
 
 #define PS2IP_IRX 0xB0125F2
 

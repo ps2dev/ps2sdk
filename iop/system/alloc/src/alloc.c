@@ -20,7 +20,6 @@
 #include "defs.h"
 #include "alloc.h"
 #include "irx_imports.h"
-#include "sys/stat.h"
 
 
 #define MODNAME "alloc"

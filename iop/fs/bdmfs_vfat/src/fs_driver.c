@@ -13,7 +13,6 @@
 #include <errno.h>
 #include <iomanX.h>
 #include <stdio.h>
-#include <sys/stat.h>
 
 #include <sysclib.h>
 #include <sysmem.h>

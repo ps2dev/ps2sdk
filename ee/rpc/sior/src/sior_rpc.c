@@ -19,7 +19,7 @@
 #include <stdarg.h>
 #include <string.h>
 #include <malloc.h>
-#include <fileio.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <sio.h>
 #include "sior_rpc.h"

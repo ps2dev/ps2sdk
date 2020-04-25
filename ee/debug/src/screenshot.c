@@ -16,8 +16,8 @@
 #include "screenshot.h"
 #include <tamtypes.h>
 #include <kernel.h>
-#include <fileio.h>
-#include <io_common.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 // These macros are kept local so the screenshot funcion can work without
 // interfering with other macros
@@ -99,7 +99,7 @@ int ps2_screenshot_file( const char* pFilename,unsigned int VramAdress,
 
   s16 *p_header = (s16 *)&header;
 
-  file_handle = fioOpen( pFilename, O_CREAT|O_WRONLY );
+  file_handle = open( pFilename, O_CREAT|O_WRONLY );
 
   // make sure we could open the file for output
 
@@ -111,7 +111,7 @@ int ps2_screenshot_file( const char* pFilename,unsigned int VramAdress,
   p_header[6] = (s16) Width;
   p_header[7] = (s16) Height;
 
-  fioWrite (file_handle, (void *)&header, 18);
+  write (file_handle, (void *)&header, 18);
 
   // Check if we have a tempbuffer, if we do we use it
 
@@ -162,10 +162,10 @@ int ps2_screenshot_file( const char* pFilename,unsigned int VramAdress,
        }
     }
 
-    fioWrite(file_handle, p_out, Width * 4);
+    write(file_handle, p_out, Width * 4);
   }
 
-  fioClose(file_handle);
+  close(file_handle);
 
   return 0;
 }

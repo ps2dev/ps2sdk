@@ -18,6 +18,8 @@
 #include <tamtypes.h>
 #include <kernel.h>
 #include <stdio.h>
+#include <sys/fcntl.h>
+#include <sys/unistd.h>
 #include <string.h>
 #include <osd_config.h>
 
@@ -47,9 +49,9 @@ char* GetRomName(char *romname)
 {
 	int fd;
 
-	fd = _ps2sdk_open("rom0:ROMVER", O_RDONLY);
-	_ps2sdk_read(fd, romname, 14);
-	_ps2sdk_close(fd);
+	fd = open("rom0:ROMVER", O_RDONLY);
+	read(fd, romname, 14);
+	close(fd);
 	return romname;
 }
 #endif

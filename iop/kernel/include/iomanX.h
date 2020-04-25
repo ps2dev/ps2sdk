@@ -19,7 +19,7 @@
 #include <types.h>
 #include <irx.h>
 #include <io_common.h>
-#include <sys/stat.h>
+#include <iox_stat.h>
 
 /* Device drivers.  */
 

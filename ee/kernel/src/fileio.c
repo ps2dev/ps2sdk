@@ -18,6 +18,7 @@
 #include <ps2lib_err.h>
 #include <kernel.h>
 #include <sifrpc.h>
+#define NEWLIB_PORT_AWARE
 #include <fileio.h>
 #include <string.h>
 
@@ -696,10 +697,10 @@ struct _fio_dread_arg {
 		int fd;
 		int result;
 	} p;
-	fio_dirent_t *buf;
+	io_dirent_t *buf;
 } ALIGNED(16);
 
-int fioDread(int fd, fio_dirent_t *buf)
+int fioDread(int fd, io_dirent_t *buf)
 {
 	struct _fio_dread_arg arg;
 	int res, result;
@@ -714,7 +715,7 @@ int fioDread(int fd, fio_dirent_t *buf)
 	arg.buf = buf;
 
 	if (!IS_UNCACHED_SEG(buf))
-		SifWriteBackDCache(buf, sizeof(fio_dirent_t));
+		SifWriteBackDCache(buf, sizeof(io_dirent_t));
 
 	if ((res = SifCallRpc(&_fio_cd, FIO_F_DREAD, 0, &arg, sizeof arg,
 					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
@@ -736,13 +737,13 @@ int fioDread(int fd, fio_dirent_t *buf)
 #ifdef F_fio_getstat
 struct _fio_getstat_arg {
 	union {
-		fio_stat_t *buf;
+		io_stat_t *buf;
 		int result;
 	} p;
 	char name[FIO_PATH_MAX];
 } ALIGNED(16);
 
-int fioGetstat(const char *name, fio_stat_t *buf)
+int fioGetstat(const char *name, io_stat_t *buf)
 {
 	struct _fio_getstat_arg arg;
 	int res, result;
@@ -758,7 +759,7 @@ int fioGetstat(const char *name, fio_stat_t *buf)
 	arg.name[FIO_PATH_MAX - 1] = 0;
 
 	if (!IS_UNCACHED_SEG(buf))
-		SifWriteBackDCache(buf, sizeof(fio_stat_t));
+		SifWriteBackDCache(buf, sizeof(io_stat_t));
 
 	if ((res = SifCallRpc(&_fio_cd, FIO_F_GETSTAT, 0, &arg, sizeof arg,
 					&arg, 4, (void *)_fio_intr, NULL)) >= 0)
@@ -783,11 +784,11 @@ struct _fio_chstat_arg {
 		int cbit;
 		int result;
 	} p;
-	fio_stat_t stat;
+	io_stat_t stat;
 	char name[FIO_PATH_MAX];
 };
 
-int fioChstat(const char *name, fio_stat_t *buf, u32 cbit)
+int fioChstat(const char *name, io_stat_t *buf, u32 cbit)
 {
 	struct _fio_chstat_arg arg;
 	int res, result;
@@ -799,7 +800,7 @@ int fioChstat(const char *name, fio_stat_t *buf, u32 cbit)
 	WaitSema(_fio_completion_sema);
 
 	arg.p.cbit = cbit;
-	memcpy(&arg.stat, buf, sizeof(fio_stat_t));
+	memcpy(&arg.stat, buf, sizeof(io_stat_t));
 	strncpy(arg.name, name, FIO_PATH_MAX - 1);
 	arg.name[FIO_PATH_MAX - 1] = 0;
 

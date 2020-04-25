@@ -26,4 +26,9 @@ typedef unsigned long time_t;
 #define __time_t_defined
 #endif
 
+struct timeval {
+  long    tv_sec;         /* seconds */
+  long    tv_usec;        /* and microseconds */
+};
+
 #endif /* __SYS_TIME_H__ */

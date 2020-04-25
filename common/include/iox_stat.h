@@ -13,18 +13,25 @@
  * File attributes and directory entries.
  */
 
-#ifndef __SYS_STAT_H__
-#define __SYS_STAT_H__
+#ifndef __SYS_IOX_STAT_H__
+#define __SYS_IOX_STAT_H__
 
 #include <sys/time.h>
+
+#ifdef _EE
+#ifndef NEWLIB_PORT_AWARE
+#error "Using fio/fileXio functions directly in the newlib port will lead to problems."
+#error "Use posix function calls instead."
+#endif
+#endif
 
 // Flags for chstat 'statmask'
 #define FIO_CST_MODE	0x0001
 #define FIO_CST_ATTR	0x0002
 #define FIO_CST_SIZE	0x0004
-#define FIO_CST_CT		0x0008
-#define FIO_CST_AT		0x0010
-#define FIO_CST_MT		0x0020
+#define FIO_CST_CT	0x0008
+#define FIO_CST_AT	0x0010
+#define FIO_CST_MT	0x0020
 #define FIO_CST_PRVT	0x0040
 
 // File mode flags
@@ -112,7 +119,7 @@ typedef struct {
 /** Format mask */
 #define FIO_SO_IFMT		0x0038
 /** Symbolic link */
-#define FIO_SO_IFLNK		0x0008 
+#define FIO_SO_IFLNK		0x0008
 /** Regular file */
 #define FIO_SO_IFREG		0x0010
 /** Directory */
@@ -130,50 +137,4 @@ typedef struct {
 #define FIO_SO_ISREG(m)	(((m) & FIO_SO_IFMT) == FIO_SO_IFREG)
 #define FIO_SO_ISDIR(m)	(((m) & FIO_SO_IFMT) == FIO_SO_IFDIR)
 
-/* The following structures are only supported by ioman.  */
-
-typedef struct {
-	unsigned int mode;
-	unsigned int attr;
-	unsigned int size;
-	unsigned char ctime[8];
-	unsigned char atime[8];
-	unsigned char mtime[8];
-	unsigned int hisize;
-} io_stat_t;
-
-typedef struct {
-	io_stat_t stat;
-	char name[256];
-	unsigned int unknown;
-} io_dirent_t;
-
-/* ANSI C stat structure */
-/** type of file */
-#define	S_IFMT		0170000
-/** directory */
-#define	S_IFDIR		0040000
-/** regular */
-#define	S_IFREG		0100000
-/** symbolic link */
-#define	S_IFLNK		0120000
-
-#define	S_ISDIR(m)  (((m)&S_IFMT) == S_IFDIR)
-#define	S_ISREG(m)  (((m)&S_IFMT) == S_IFREG)
-#define	S_ISLNK(m)  (((m)&S_IFMT) == S_IFLNK)
-
-struct stat {
-	/** mode */
-	unsigned st_mode;
-	/** file size */
-	unsigned st_size;
-
-	/** modification time */
-	time_t st_mtime;
-	/** access time */
-	time_t st_atime;
-	/** creation time */
-	time_t st_ctime;
-};
-
-#endif /* __SYS_STAT_H__ */
+#endif /* __SYS_IOX_STAT_H__ */
