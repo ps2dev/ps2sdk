@@ -285,6 +285,20 @@ int _stat(const char *path, struct stat *buf) {
         return _ps2sdk_stat(path, buf);
 }
 
+int access(const char *fn, int flags) {
+	struct stat s;
+	if (stat(fn, &s))
+		return -1;
+	if (s.st_mode & S_IFDIR)
+		return 0;
+	if (flags & W_OK) {
+		if (s.st_mode & S_IWRITE)
+			return 0;
+		return -1;
+	}
+	return 0;
+}
+
 DIR *opendir(const char *path)
 {
     return _ps2sdk_opendir(path);
