@@ -8,30 +8,32 @@
 
 ifndef SUBDIRS
 SUBDIRS =
-SUBDIRS += cpp-hello
-SUBDIRS += hello
+#SUBDIRS += cpp-hello            #TODO: missing /ps2sdk/ee/lib/libc.erl
+#SUBDIRS += hello                #TODO: missing /ps2sdk/ee/lib/libc.erl
+SUBDIRS += debug/helloworld
 SUBDIRS += debug/callstacktest
 SUBDIRS += draw/cube
 SUBDIRS += draw/teapot
 SUBDIRS += draw/texture
 SUBDIRS += font
 SUBDIRS += graph
-SUBDIRS += libc/hello
-SUBDIRS += libc/prof
-SUBDIRS += regress
 SUBDIRS += libgs/doublebuffer
 SUBDIRS += libgs/draw
-SUBDIRS += mpeg
+#SUBDIRS += mpeg                #TODO: not modified for updated newlib
+SUBDIRS += network/tcpip-basic 
+SUBDIRS += network/tcpip-dhcp
+SUBDIRS += remote
 SUBDIRS += rpc/audsrv/playadpcm
 SUBDIRS += rpc/audsrv/playcdda
 SUBDIRS += rpc/audsrv/playwav
 SUBDIRS += rpc/audsrv/playwav2
 SUBDIRS += rpc/audsrv/testcd
-SUBDIRS += rpc/camera
-SUBDIRS += rpc/memorycard
+#SUBDIRS += rpc/camera          #TODO: not modified for updated newlib
+#SUBDIRS += rpc/memorycard      #TODO: not modified for updated newlib
 SUBDIRS += rpc/mtap
 SUBDIRS += rpc/pad
 SUBDIRS += rpc/padx
+SUBDIRS += rpc/poweroff
 SUBDIRS += rpc/ps2snd
 SUBDIRS += rpc/tcpips/ee-echo
 endif
