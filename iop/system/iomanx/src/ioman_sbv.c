@@ -143,7 +143,7 @@ static int sbv_DelDrv(const char *name)
 #ifdef FULL_IOMAN
 
 // legacy ioman open and mkdir calls do not specify
-// the "mode" arg.  use default of 0644 for both.
+// the "mode" arg.  use default of 0644 for open and 0755 for mkdir.
 
 int ioman_open(const char *name, u32 flags)
 {
@@ -152,7 +152,7 @@ int ioman_open(const char *name, u32 flags)
 
 int ioman_mkdir(const char *name)
 {
-    return(mkdir(name, 0644));
+    return(mkdir(name, 0755));
 }
 
 // legacy format only takes one arg
