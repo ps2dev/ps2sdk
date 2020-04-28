@@ -15,7 +15,7 @@ EE_OSDSRC_ELF := $(EE_OSDSRC_ELF:%=$(EE_BIN_DIR)%)
 EE_OBJS = osdsrc.o osd.o ExecPS2.o
 
 EE_INCS += -I$(PS2SDKSRC)/ee/rpc/cdvd/include
-EE_CFLAGS += -mno-gpopt -DREUSE_EXECPS2
+EE_CFLAGS += -mno-gpopt -DREUSE_EXECPS2 -fno-tree-loop-distribute-patterns
 
 $(EE_OSDSRC_BIN): $(EE_OSDSRC_ELF)
 	$(EE_OBJCOPY) -Obinary $< $@
