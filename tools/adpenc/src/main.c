@@ -4,7 +4,7 @@
 #include <ctype.h>
 #include <math.h>
 
-#define VERSION	"1.1"
+#define VERSION	"1.2"
 
 extern int adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop);
 
@@ -17,7 +17,7 @@ struct AdpcmHeader{
 	unsigned char loop;
 	unsigned char reserved;
 	unsigned int pitch;
-	unsigned int reserved2;
+	unsigned int samples;
 };
 
 static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_loop){
@@ -141,7 +141,7 @@ static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_l
 			AdpcmHeader.loop=flag_loop;
 			AdpcmHeader.reserved=0;
 			AdpcmHeader.pitch=(sample_freq*4096)/48000;	// pitch, to encode for PS1 change 48000 to 44100
-			AdpcmHeader.reserved2=0;
+			AdpcmHeader.samples=sample_len;
 			fwrite(&AdpcmHeader, sizeof(AdpcmHeader), 1, sad);
 
 			if(channels == 1)
