@@ -1,0 +1,21 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: fjtrujy/ps2dev:toolchain-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Install dependencies
+      run: |
+        apk add gcc musl-dev
+
+    - name: Compile project
+      run: |
+        make 
