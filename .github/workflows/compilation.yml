@@ -19,4 +19,4 @@ jobs:
 
     - name: Compile project
       run: |
-        make 
+        make clean all install
