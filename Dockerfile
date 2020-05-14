@@ -8,6 +8,8 @@ RUN \
   make && \
   make install && \
   make clean && \
+  ln -sf "$PS2SDK/ee/lib/libps2sdkc.a" "$PS2DEV/ee/ee/lib/libps2sdkc.a" && \
+  ln -sf "$PS2SDK/ee/lib/libkernel.a"  "$PS2DEV/ee/ee/lib/libkernel.a" && \
   apk del .build-deps && \
   rm -rf \
     /src/* \
