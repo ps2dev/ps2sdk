@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+  repository_dispatch:
+    types: [run_build]
 
 jobs:
   build:
