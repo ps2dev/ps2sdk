@@ -2,17 +2,16 @@ FROM fjtrujy/ps2dev:toolchain-latest
 
 COPY . /src/ps2sdk
 
-RUN \
-  apk add --no-cache --virtual .build-deps gcc musl-dev && \
-  cd /src/ps2sdk && \
-  make && \
-  make install && \
-  make clean && \
-  ln -sf "$PS2SDK/ee/lib/libps2sdkc.a" "$PS2DEV/ee/ee/lib/libps2sdkc.a" && \
-  ln -sf "$PS2SDK/ee/lib/libkernel.a"  "$PS2DEV/ee/ee/lib/libkernel.a" && \
-  apk del .build-deps && \
-  rm -rf \
-    /src/* \
-    /tmp/*
+RUN apk add build-base git
+RUN cd /src/ps2sdk && make all install clean
+RUN ln -sf "$PS2SDK/ee/lib/libps2sdkc.a" "$PS2DEV/ee/ee/lib/libps2sdkc.a"
+RUN ln -sf "$PS2SDK/ee/lib/libkernel.a"  "$PS2DEV/ee/ee/lib/libkernel.a"
 
-WORKDIR /src
+# Second stage of Dockerfile
+FROM alpine:latest  
+
+ENV PS2DEV /usr/local/ps2dev
+ENV PS2SDK $PS2DEV/ps2sdk
+ENV PATH   $PATH:${PS2DEV}/bin:${PS2DEV}/ee/bin:${PS2DEV}/iop/bin:${PS2DEV}/dvp/bin:${PS2SDK}/bin
+
+COPY --from=0 ${PS2DEV} ${PS2DEV}
