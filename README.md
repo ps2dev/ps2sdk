@@ -1,6 +1,7 @@
 # PS2SDK - PS2DEV Open Source Project.
 
-[![Build Status](https://travis-ci.org/ps2dev/ps2sdk.svg?branch=master)](https://travis-ci.org/ps2dev/ps2sdk)
+![CI](https://github.com/ps2dev/ps2sdk/workflows/CI/badge.svg)
+![CI-Docker](https://github.com/ps2dev/ps2sdk/workflows/CI-Docker/badge.svg)
 
 Copyright 2001-2004, ps2dev - http://www.ps2dev.org  
 All rights reserved.

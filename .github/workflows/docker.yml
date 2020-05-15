@@ -18,8 +18,9 @@ jobs:
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
-        repository: ${{ github.repository_owner }}/ps2dev
-        tags: ps2sdk-latest
+        repository: ${{ env.GITHUB_REPOSITORY }}
+        tags: latest
+        build_args: BASE_DOCKER_IMAGE=${{ github.repository_owner }}/ps2toolchain:latest
     
     - name: Send Compile action
       run: |

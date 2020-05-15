@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: fjtrujy/ps2dev:toolchain-latest
+    container: ${{ github.repository_owner }}/ps2toolchain:latest
     steps:
     - uses: actions/checkout@v2
 
