@@ -1,9 +1,9 @@
 FROM fjtrujy/ps2dev:toolchain-latest
 
-COPY . /src/ps2sdk
+COPY . /src
 
 RUN apk add build-base git
-RUN cd /src/ps2sdk && make all install clean
+RUN cd /src && make all install clean
 RUN ln -sf "$PS2SDK/ee/lib/libps2sdkc.a" "$PS2DEV/ee/ee/lib/libps2sdkc.a"
 RUN ln -sf "$PS2SDK/ee/lib/libkernel.a"  "$PS2DEV/ee/ee/lib/libkernel.a"
 

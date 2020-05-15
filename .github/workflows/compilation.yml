@@ -15,8 +15,10 @@ jobs:
 
     - name: Install dependencies
       run: |
-        apk add gcc musl-dev
+        apk add build-base git
 
     - name: Compile project
       run: |
         make clean all install
+        ln -sf "$PS2SDK/ee/lib/libps2sdkc.a" "$PS2DEV/ee/ee/lib/libps2sdkc.a"
+        ln -sf "$PS2SDK/ee/lib/libkernel.a"  "$PS2DEV/ee/ee/lib/libkernel.a"
