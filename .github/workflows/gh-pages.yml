@@ -14,9 +14,6 @@ jobs:
 
     - name: Doxygen documentation generation
       uses: mattnotmitt/doxygen-action@v1
-      with:
-        working-directory:
-        doxyfile-path:
     
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v3
