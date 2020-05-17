@@ -10,4 +10,4 @@
 obj/
 ee/erl-loader/src/exports.c
 tools/**/bin/
-Doxyoutput
+docs/
