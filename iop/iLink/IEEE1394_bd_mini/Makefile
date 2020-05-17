@@ -6,7 +6,8 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = usbd keyboard camera mouse usbhdfsd usbmass_bd usbmass_bd_mini
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/iLink/IEEE1394_bd/src/
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+IOP_CFLAGS += -DMINI_DRIVER
+
+include $(PS2SDKSRC)/iop/iLink/IEEE1394_bd/Makefile

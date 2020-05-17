@@ -3,9 +3,11 @@ I_bdm_connect_bd
 I_bdm_disconnect_bd
 bdm_IMPORTS_end
 
+#ifndef MINI_DRIVER
 stdio_IMPORTS_start
 I_printf
 stdio_IMPORTS_end
+#endif
 
 sysclib_IMPORTS_start
 I_memset
