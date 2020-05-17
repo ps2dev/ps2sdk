@@ -3,7 +3,7 @@
 ![CI](https://github.com/ps2dev/ps2sdk/workflows/CI/badge.svg)
 ![CI-Docker](https://github.com/ps2dev/ps2sdk/workflows/CI-Docker/badge.svg)
 
-![PS2SDK Documentation](https://ps2dev.github.io/ps2sdk/
+[PS2SDK Documentation](https://ps2dev.github.io/ps2sdk/)
 
 Copyright 2001-2004, ps2dev - http://www.ps2dev.org  
 All rights reserved.
