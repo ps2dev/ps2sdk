@@ -8,7 +8,7 @@
 
 EE_BIN = texture.elf
 EE_OBJS = texture.o
-EE_LIBS = -ldraw -lgraph -lmath3d -lmf -lpacket -ldma
+EE_LIBS = -ldraw -lgraph -lmath3d -lpacket -ldma
 
 all: flower.c $(EE_BIN)
 	$(EE_STRIP) --strip-all $(EE_BIN)
