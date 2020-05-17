@@ -1,0 +1,44 @@
+name: CI-Docker
+
+on:
+  push:
+    branches:
+      - master
+  repository_dispatch:
+    types: [run_build]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+  
+    steps:
+    - uses: actions/checkout@v2
+
+    - uses: docker/build-push-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USERNAME }}
+        password: ${{ secrets.DOCKER_PASSWORD }}
+        repository: ${{ env.GITHUB_REPOSITORY }}
+        tags: latest
+        build_args: BASE_DOCKER_IMAGE=${{ github.repository_owner }}/ps2toolchain:latest
+    
+    - name: Send Compile action
+      run: |
+        export DISPATCH_ACTION="$(echo run_build)"
+        echo "::set-env name=NEW_DISPATCH_ACTION::$DISPATCH_ACTION"
+
+    - name: Repository Dispatch to gsKit
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        repository: ${{ github.repository_owner }}/gskit
+        token: ${{ secrets.DISPATCH_TOKEN }}
+        event-type: ${{ env.NEW_DISPATCH_ACTION }}
+        client-payload: '{"ref": "${{ github.ref }}"}'
+
+    - name: Repository Dispatch to ps2-packer
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        repository: ${{ github.repository_owner }}/ps2-packer
+        token: ${{ secrets.DISPATCH_TOKEN }}
+        event-type: ${{ env.NEW_DISPATCH_ACTION }}
+        client-payload: '{"ref": "${{ github.ref }}"}'
