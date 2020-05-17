@@ -27,10 +27,18 @@ jobs:
         export DISPATCH_ACTION="$(echo run_build)"
         echo "::set-env name=NEW_DISPATCH_ACTION::$DISPATCH_ACTION"
 
-    - name: Repository Dispatch
+    - name: Repository Dispatch to gsKit
       uses: peter-evans/repository-dispatch@v1
       with:
         repository: ${{ github.repository_owner }}/gskit
+        token: ${{ secrets.DISPATCH_TOKEN }}
+        event-type: ${{ env.NEW_DISPATCH_ACTION }}
+        client-payload: '{"ref": "${{ github.ref }}"}'
+
+    - name: Repository Dispatch to ps2-packer
+      uses: peter-evans/repository-dispatch@v1
+      with:
+        repository: ${{ github.repository_owner }}/ps2-packer
         token: ${{ secrets.DISPATCH_TOKEN }}
         event-type: ${{ env.NEW_DISPATCH_ACTION }}
         client-payload: '{"ref": "${{ github.ref }}"}'
