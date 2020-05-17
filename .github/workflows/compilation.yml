@@ -34,5 +34,5 @@ jobs:
       if: ${{ success() }}
       uses: actions/upload-artifact@v2
       with:
-        name: gsKit-samples-${{github.sha}}.tar.gz
-        path: examples.tar.gz
+        name: ps2sdk-samples-${{github.sha}}.zip
+        path: samples.tar.gz
