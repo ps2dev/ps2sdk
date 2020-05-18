@@ -28,10 +28,14 @@ jobs:
       run: |
         cp -rv $PS2SDK/samples ~/
         make -C ~/samples
+    
+    - name: Get short SHA
+      id: slug
+      run: echo "::set-output name=sha8::$(echo ${GITHUB_SHA} | cut -c1-8)"
 
     - name: Upload artifacts
       if: ${{ success() }}
       uses: actions/upload-artifact@v2
       with:
-        name: ps2sdk-samples-${{ github.sha }}
+        name: ps2sdk-samples-${{ steps.slug.outputs.sha8 }}
         path: ~/samples
