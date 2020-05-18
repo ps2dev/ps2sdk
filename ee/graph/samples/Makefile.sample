@@ -8,7 +8,7 @@
 
 EE_BIN = graph.elf
 EE_OBJS = graph.o
-EE_LIBS = -lpacket -ldma -lgraph -ldraw -lc -lmf
+EE_LIBS = -lpacket -ldma -lgraph -ldraw -lc
 
 all: $(EE_BIN)
 	$(EE_STRIP) --strip-all $(EE_BIN)

@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    container: ${{ github.repository_owner }}/ps2toolchain:latest
+    container: ps2dev/ps2toolchain:latest
     steps:
     - uses: actions/checkout@v2
 
@@ -22,3 +22,16 @@ jobs:
         make clean all install
         ln -sf "$PS2SDK/ee/lib/libps2sdkc.a" "$PS2DEV/ee/ee/lib/libps2sdkc.a"
         ln -sf "$PS2SDK/ee/lib/libkernel.a"  "$PS2DEV/ee/ee/lib/libkernel.a"
+        
+    - name: Compile samples
+      if: ${{ success() }}
+      run: |
+        cp -rv $PS2SDK/samples ~/
+        make -C ~/samples
+
+    - name: Upload artifacts
+      if: ${{ success() }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: ps2sdk-samples-${{ github.sha }}
+        path: ~/samples

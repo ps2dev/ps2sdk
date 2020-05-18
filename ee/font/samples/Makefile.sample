@@ -8,7 +8,7 @@
 
 EE_BIN = font.elf
 EE_OBJS = font.o impress.o
-EE_LIBS = -lfont -lpacket -ldma -lgraph -ldraw -lc -lmf
+EE_LIBS = -lfont -lpacket -ldma -lgraph -ldraw -lc
 
 all: $(EE_BIN)
 	$(EE_STRIP) --strip-all $(EE_BIN)

@@ -1,7 +1,7 @@
 # PS2SDK - PS2DEV Open Source Project.
 
-![CI](https://github.com/ps2dev/ps2sdk/workflows/CI/badge.svg)
-![CI-Docker](https://github.com/ps2dev/ps2sdk/workflows/CI-Docker/badge.svg)
+[![CI](https://github.com/ps2dev/ps2sdk/workflows/CI/badge.svg)](https://github.com/ps2dev/ps2sdk/actions?query=workflow%3ACI)
+[![CI-Docker](https://github.com/ps2dev/ps2sdk/workflows/CI-Docker/badge.svg)](https://github.com/ps2dev/ps2sdk/actions?query=workflow%3ACI-Docker)
 
 [PS2SDK Documentation](https://ps2dev.github.io/ps2sdk/)
 
