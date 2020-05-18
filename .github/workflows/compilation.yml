@@ -26,13 +26,12 @@ jobs:
     - name: Compile samples
       if: ${{ success() }}
       run: |
-        cd $PS2SDK/samples
-        make
-        tar -zcvf samples.tar.gz ./
+        cp -rv $PS2SDK/samples ~/
+        make -C ~/samples
 
     - name: Upload artifacts
       if: ${{ success() }}
       uses: actions/upload-artifact@v2
       with:
-        name: ps2sdk-samples-${{github.sha}}.zip
-        path: samples.tar.gz
+        name: ps2sdk-samples-${{ github.sha }}
+        path: ~/samples
