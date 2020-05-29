@@ -20,7 +20,7 @@ SUBDIRS += graph
 SUBDIRS += libgs/doublebuffer
 SUBDIRS += libgs/draw
 #SUBDIRS += mpeg                #TODO: not modified for updated newlib
-SUBDIRS += network/tcpip-basic 
+SUBDIRS += network/tcpip-basic
 SUBDIRS += network/tcpip-dhcp
 SUBDIRS += remote
 SUBDIRS += rpc/audsrv/playadpcm
@@ -41,9 +41,9 @@ endif
 all: $(patsubst %, _dir_%, $(SUBDIRS))
 
 $(patsubst %, _dir_%, $(SUBDIRS)):
-	@$(MAKE) -r -C $(patsubst _dir_%, %, $@)
+	@+$(MAKE) -r -C $(patsubst _dir_%, %, $@)
 
 clean: $(patsubst %, _cleandir_%, $(SUBDIRS))
 
 $(patsubst %, _cleandir_%, $(SUBDIRS)):
-	$(MAKE) -C $(patsubst _cleandir_%, %, $@) clean
+	+$(MAKE) -C $(patsubst _cleandir_%, %, $@) clean

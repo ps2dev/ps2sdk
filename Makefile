@@ -28,9 +28,9 @@ subdir_release = $(patsubst %,release-%,$(SUBDIRS))
 subdirs: dummy $(subdir_list)
 
 $(subdir_list): dummy
-	$(MAKEREC) $(patsubst all-%,%,$@)
+	+$(MAKEREC) $(patsubst all-%,%,$@)
 $(subdir_clean): dummy
-	$(MAKEREC) $(patsubst clean-%,%,$@) clean
+	+$(MAKEREC) $(patsubst clean-%,%,$@) clean
 $(subdir_release): dummy
 	$(MAKEREC) $(patsubst release-%,%,$@) release
 
@@ -40,12 +40,12 @@ build: env_build_check $(subdir_list)
 clean: env_build_check $(subdir_clean)
 
 release-clean:
-	$(MAKE) -C common release-clean
-	$(MAKE) -C iop release-iop-clean
-	$(MAKE) -C ee release-ee-clean
-	$(MAKE) -C samples release-clean
-	$(MAKE) -C tools release-clean
-	
+	+$(MAKE) -C common release-clean
+	+$(MAKE) -C iop release-iop-clean
+	+$(MAKE) -C ee release-ee-clean
+	+$(MAKE) -C samples release-clean
+	+$(MAKE) -C tools release-clean
+
 rebuild: env_build_check $(subdir_clean) $(subdir_list)
 
 $(PS2SDK)/common/include:
@@ -58,7 +58,12 @@ $(PS2SDK)/ports:
 
 install: release
 
-release: build release_base release-clean $(PS2SDK)/common/include $(PS2SDK)/ports $(subdir_release)
+release: | build
+	$(MAKE) release_base
+	$(MAKE) release-clean
+	$(MAKE) $(PS2SDK)/common/include
+	$(MAKE) $(PS2SDK)/ports
+	$(MAKE) $(subdir_release)
 
 release_base: env_release_check
 	@if test ! -d $(PS2SDK) ; then \
