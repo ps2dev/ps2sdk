@@ -9,9 +9,10 @@
 #define MAX_FILES_PER_FOLDER 256
 #define MAX_FILES_OPENED 16
 #define MAX_FOLDERS_OPENED 16
-#define MAX_BITS_READ 16384
+#define MAX_BYTES_READ 16384
 
-#define UNIT_NAME "cdfs"
+#define DRIVER_UNIT_NAME "cdfs"
+#define DRIVER_UNIT_VERSION 2
 
 struct fdtable
 {
@@ -49,7 +50,7 @@ static int last_bk = 0;
 
 static int fio_init(iop_device_t *driver)
 {
-    printf("CDFS Filesystem v2\n");
+    printf("%s Filesystem v%i\n", DRIVER_UNIT_NAME, DRIVER_UNIT_VERSION);
     printf("Re-edited by fjtrujy\n");
     printf("Original implementation\n");
     printf("by A.Lee (aka Hiryu) & Nicholas Van Veen (aka Sjeep)\n");
@@ -171,8 +172,8 @@ static int fio_read(iop_file_t *f, void *buffer, int size)
     if (size <= 0)
         return 0;
 
-    if (size > MAX_BITS_READ)
-        size = MAX_BITS_READ;
+    if (size > MAX_BYTES_READ)
+        size = MAX_BYTES_READ;
 
     // Now work out where we want to start reading from
     start_sector = fd_table[i].LBA + (fd_table[i].filePos >> 11);
@@ -431,17 +432,17 @@ int _start(int argc, char **argv)
     // Prepare cache and read mode
     cdfs_prepare();
 
-    // char desc [250];
-
+    char driverDesc[50];
+    sprintf(driverDesc, "%s Filedriver v%i", DRIVER_UNIT_NAME, DRIVER_UNIT_VERSION);
 
     // setup the fio_driver structure
-    fio_driver.name = UNIT_NAME;
+    fio_driver.name = DRIVER_UNIT_NAME;
     fio_driver.type = IOP_DT_FS;
-    fio_driver.version = 2;
-    fio_driver.desc = "CDFS Filedriver";
+    fio_driver.version = DRIVER_UNIT_VERSION;
+    fio_driver.desc = driverDesc;
     fio_driver.ops = &fio_ops;
 
-    DelDrv(UNIT_NAME);
+    DelDrv(DRIVER_UNIT_NAME);
     if(AddDrv(&fio_driver) != 0) { return(-1); }
 
     return(0);
