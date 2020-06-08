@@ -990,13 +990,6 @@ int cdfs_getDir(const char *pathname, const char *extensions, enum CDFS_getMode 
 
     struct DirTocEntry *tocEntryPointer;
 
-    int intStatus;  // interrupt status - for dis/en-abling interrupts
-
-    struct t_SifDmaTransfer dmaStruct;
-    int dmaID;
-
-    dmaID = 0;
-
 #ifdef DEBUG
     printf("RPC GetDir Request\n\n");
 #endif
@@ -1064,9 +1057,6 @@ int cdfs_getDir(const char *pathname, const char *extensions, enum CDFS_getMode 
                     printf("We found a dir, and we want all dirs\n\n");
 #endif
 
-                    // wait for any previous DMA to complete
-                    // before over-writing localTocEntry
-                    while (sceSifDmaStat(dmaID) >= 0) {}
                     copyToTocEntry(&localTocEntry, tocEntryPointer);
 
                     if (dir_entry == 0) {
@@ -1079,20 +1069,7 @@ int cdfs_getDir(const char *pathname, const char *extensions, enum CDFS_getMode 
                     }
 
                     // DMA localTocEntry to the address specified by tocEntry[matched_entries]
-
-                    // setup the dma struct
-                    dmaStruct.src = &localTocEntry;
-                    dmaStruct.dest = &tocEntry[matched_entries];
                     tocEntry[matched_entries] = localTocEntry;
-                    dmaStruct.size = sizeof(struct TocEntry);
-                    dmaStruct.attr = 0;
-
-                    // Do the DMA transfer
-                    CpuSuspendIntr(&intStatus);
-
-                    dmaID = sceSifSetDma(&dmaStruct, 1);
-
-                    CpuResumeIntr(intStatus);
 
                     matched_entries++;
                 } else  // it must be a file
@@ -1171,12 +1148,7 @@ int cdfs_getDir(const char *pathname, const char *extensions, enum CDFS_getMode 
 #ifdef DEBUG
                     printf("We don't want files now\n\n");
 #endif
-                } else  // it must be a file
-                {
-                    // wait for any previous DMA to complete
-                    // before over-writing localTocEntry
-                    while (sceSifDmaStat(dmaID) >= 0)
-                        ;
+                } else { // it must be a file
 
                     copyToTocEntry(&localTocEntry, tocEntryPointer);
 
@@ -1187,50 +1159,21 @@ int cdfs_getDir(const char *pathname, const char *extensions, enum CDFS_getMode 
                             printf("We found a file that matches the requested extension list\n\n");
 #endif
 
-                            // DMA localTocEntry to the address specified by tocEntry[matched_entries]
-
-                            // setup the dma struct
-                            dmaStruct.src = &localTocEntry;
-                            dmaStruct.dest = &tocEntry[matched_entries];
+                            // Copy from localTocEntry
                             tocEntry[matched_entries] = localTocEntry; 
-                            dmaStruct.size = sizeof(struct TocEntry);
-                            dmaStruct.attr = 0;
-
-                            // Do the DMA transfer
-                            CpuSuspendIntr(&intStatus);
-
-                            dmaID = sceSifSetDma(&dmaStruct, 1);
-
-                            CpuResumeIntr(intStatus);
-
                             matched_entries++;
                         } else {
 #ifdef DEBUG
                             printf("We found a file, but it didnt match the requested extension list\n\n");
 #endif
                         }
-                    } else  // no extension list to match against
-                    {
+                    } else { // no extension list to match against
 #ifdef DEBUG
                         printf("We found a file, and there is not extension list to match against\n\n");
 #endif
 
-                        // DMA localTocEntry to the address specified by tocEntry[matched_entries]
-
-                        // setup the dma struct
-                        dmaStruct.src = &localTocEntry;
-                        dmaStruct.dest = &tocEntry[matched_entries];
+                        // Copy from localTocEntry
                         tocEntry[matched_entries] = localTocEntry; 
-                        dmaStruct.size = sizeof(struct TocEntry);
-                        dmaStruct.attr = 0;
-
-                        // Do the DMA transfer
-                        CpuSuspendIntr(&intStatus);
-
-                        dmaID = sceSifSetDma(&dmaStruct, 1);
-
-                        CpuResumeIntr(intStatus);
-
                         matched_entries++;
                     }
                 }
