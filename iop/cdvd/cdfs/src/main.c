@@ -50,7 +50,7 @@ static int last_bk = 0;
 
 static int fio_init(iop_device_t *driver)
 {
-    printf("%s Filesystem v%i\n", DRIVER_UNIT_NAME, DRIVER_UNIT_VERSION);
+    printf("%s\n", driver->desc);
     printf("Re-edited by fjtrujy\n");
     printf("Original implementation\n");
     printf("by A.Lee (aka Hiryu) & Nicholas Van Veen (aka Sjeep)\n");
