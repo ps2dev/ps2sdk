@@ -61,10 +61,8 @@ static int fio_init(iop_device_t *driver)
 
 static int fio_deinit(iop_device_t *f)
 {
-#if defined(DEBUG)
-    printf("CDFS: fio_deinit called.\n");
-    printf("      kernel_fd.. %p\n", f);
-#endif
+    DPRINTF("CDFS: fio_deinit called.\n");
+    DPRINTF("      kernel_fd.. %p\n", f);
     return cdfs_finish();
 }
 
@@ -73,12 +71,10 @@ static int fio_open(iop_file_t *f, const char *name, int mode)
     int j;
     static struct TocEntry tocEntry;
 
-#ifdef DEBUG
-    printf("CDFS: fio_open called.\n");
-    printf("      kernel_fd.. %p\n", f);
-    printf("      name....... %s %x\n", name, (int)name);
-    printf("      mode....... %d\n\n", mode);
-#endif
+    DPRINTF("CDFS: fio_open called.\n");
+    DPRINTF("      kernel_fd.. %p\n", f);
+    DPRINTF("      name....... %s %x\n", name, (int)name);
+    DPRINTF("      mode....... %d\n\n", mode);
 
     // check if the file exists
     if (!cdfs_findfile(name, &tocEntry)) {
@@ -91,15 +87,13 @@ static int fio_open(iop_file_t *f, const char *name, int mode)
         return -2;
     }   
 
-#ifdef DEBUG
-    printf("CDFS: fio_open TocEntry info\n");
-    printf("      TocEntry....... %p\n", &tocEntry);
-    printf("      fileLBA........ %i\n", tocEntry.fileLBA);
-    printf("      fileSize....... %i\n", tocEntry.fileSize);
-    printf("      fileProperties. %i\n", tocEntry.fileProperties);
-    printf("      dateStamp...... %s\n", tocEntry.dateStamp);
-    printf("      filename....... %s\n", tocEntry.filename);
-#endif
+    DPRINTF("CDFS: fio_open TocEntry info\n");
+    DPRINTF("      TocEntry....... %p\n", &tocEntry);
+    DPRINTF("      fileLBA........ %i\n", tocEntry.fileLBA);
+    DPRINTF("      fileSize....... %i\n", tocEntry.fileSize);
+    DPRINTF("      fileProperties. %i\n", tocEntry.fileProperties);
+    DPRINTF("      dateStamp...... %s\n", tocEntry.dateStamp);
+    DPRINTF("      filename....... %s\n", tocEntry.filename);
 
     // set up a new file descriptor
     for (j = 0; j < MAX_FILES_OPENED; j++) {
@@ -127,10 +121,8 @@ static int fio_close(iop_file_t *f)
 {
     int i;
 
-#ifdef DEBUG
-    printf("CDFS: fio_close called.\n");
-    printf("      kernel fd.. %p\n\n", f);
-#endif
+    DPRINTF("CDFS: fio_close called.\n");
+    DPRINTF("      kernel fd.. %p\n\n", f);
 
     i = (int)f->privdata;
 
@@ -155,13 +147,10 @@ static int fio_read(iop_file_t *f, void *buffer, int size)
     int read = 0;
     static char local_buffer[9 * 2048];
 
-
-#ifdef DEBUG
-    printf("CDFS: fio_read called\n\n");
-    printf("      kernel_fd... %p\n", f);
-    printf("      buffer...... 0x%X\n", (int)buffer);
-    printf("      size........ %d\n\n", size);
-#endif
+    DPRINTF("CDFS: fio_read called\n\n");
+    DPRINTF("      kernel_fd... %p\n", f);
+    DPRINTF("      buffer...... 0x%X\n", (int)buffer);
+    DPRINTF("      size........ %d\n\n", size);
 
     i = (int)f->privdata;
 
@@ -192,9 +181,7 @@ static int fio_read(iop_file_t *f, void *buffer, int size)
     num_sectors = (off_sector + size);
     num_sectors = (num_sectors >> 11) + ((num_sectors & 2047) != 0);
 
-#ifdef DEBUG
-    printf("fio_read: read sectors %d to %d\n", start_sector, start_sector + num_sectors);
-#endif
+    DPRINTF("fio_read: read sectors %d to %d\n", start_sector, start_sector + num_sectors);
 
     // Skip a Sector for equal (use the last sector in buffer)
     if (start_sector == lastsector) {
@@ -209,11 +196,9 @@ static int fio_read(iop_file_t *f, void *buffer, int size)
 
     if (read == 0 || (read == 1 && num_sectors > 1)) {
         if (!cdfs_readSect(start_sector + read, num_sectors - read, local_buffer + ((read) << 11))) {
-#ifdef DEBUG
-            printf("Couldn't Read from file for some reason\n");
-#endif
+            DPRINTF("Couldn't Read from file for some reason\n");
         }
-
+        
         last_bk = num_sectors - 1;
     }
 
@@ -237,20 +222,15 @@ static int fio_lseek(iop_file_t *f, int offset, int whence)
 {
     int i;
 
-#ifdef DEBUG
-    printf("CDFS: fio_lseek called.\n");
-    printf("      kernel_fd... %p\n", f);
-    printf("      offset...... %d\n", offset);
-    printf("      whence...... %d\n\n", whence);
-#endif
+    DPRINTF("CDFS: fio_lseek called.\n");
+    DPRINTF("      kernel_fd... %p\n", f);
+    DPRINTF("      offset...... %d\n", offset);
+    DPRINTF("      whence...... %d\n\n", whence);
 
     i = (int) f->privdata;
 
     if (i >= 16) {
-#ifdef DEBUG
-        printf("fio_lseek: ERROR: File does not appear to be open!\n");
-#endif
-
+        DPRINTF("fio_lseek: ERROR: File does not appear to be open!\n");
         return -1;
     }
 
@@ -283,13 +263,11 @@ static int fio_lseek(iop_file_t *f, int offset, int whence)
 static int fio_openDir(iop_file_t *f, const char *path) {
    int j;
 
-#ifdef DEBUG
-    printf("CDFS: fio_openDir called.\n");
-    printf("      kernel_fd.. %p\n", f);
-    printf("      name....... %s\n", f->device->name);
-    printf("      mode....... %d\n\n", f->mode);
-    printf("      path....... %s\n\n", path);
-#endif
+    DPRINTF("CDFS: fio_openDir called.\n");
+    DPRINTF("      kernel_fd.. %p\n", f);
+    DPRINTF("      name....... %s\n", f->device->name);
+    DPRINTF("      mode....... %d\n\n", f->mode);
+    DPRINTF("      path....... %s\n\n", path);
 
     // set up a new file descriptor
     for (j = 0; j < MAX_FOLDERS_OPENED; j++) {
@@ -310,19 +288,19 @@ static int fio_openDir(iop_file_t *f, const char *path) {
     fod_table[j].fd = f;
     fod_used[j] = 1;
 
+    DPRINTF("ITEMS %i\n\n", fod_table[j].files);
 #ifdef DEBUG
-    printf("ITEMS %i\n\n", fod_table[j].files);
     int index = 0;
     for (index=0; index < fod_table[j].files; index++) {
         struct TocEntry tocEntry = fod_table[j].entries[index];
         
-        printf("CDFS: fio_openDir index=%d TocEntry info\n", index);
-        printf("      TocEntry....... %p\n", &tocEntry);
-        printf("      fileLBA........ %i\n", tocEntry.fileLBA);
-        printf("      fileSize....... %i\n", tocEntry.fileSize);
-        printf("      fileProperties. %i\n", tocEntry.fileProperties);
-        printf("      dateStamp....... %s\n", tocEntry.dateStamp);
-        printf("      filename....... %s\n", tocEntry.filename);
+        DPRINTF("CDFS: fio_openDir index=%d TocEntry info\n", index);
+        DPRINTF("      TocEntry....... %p\n", &tocEntry);
+        DPRINTF("      fileLBA........ %i\n", tocEntry.fileLBA);
+        DPRINTF("      fileSize....... %i\n", tocEntry.fileSize);
+        DPRINTF("      fileProperties. %i\n", tocEntry.fileProperties);
+        DPRINTF("      dateStamp....... %s\n", tocEntry.dateStamp);
+        DPRINTF("      filename....... %s\n", tocEntry.filename);
     }
 #endif
    
@@ -335,10 +313,8 @@ static int fio_closeDir(iop_file_t *fd)
 {
     int i;
 
-#ifdef DEBUG
-    printf("CDFS: fio_closeDir called.\n");
-    printf("      kernel_fd.. %p\n", fd);
-#endif
+    DPRINTF("CDFS: fio_closeDir called.\n");
+    DPRINTF("      kernel_fd.. %p\n", fd);
 
     i = (int)fd->privdata;
 
@@ -356,11 +332,11 @@ static int fio_dread(iop_file_t *fd, io_dirent_t *dirent)
     int i;
     int filesIndex;
     struct TocEntry entry;
-#ifdef DEBUG
-    printf("CDFS: fio_dread called.\n");
-    printf("      kernel_fd.. %p\n", fd);
-    printf("      mode....... %p\n\n", dirent);
-#endif
+
+    DPRINTF("CDFS: fio_dread called.\n");
+    DPRINTF("      kernel_fd.. %p\n", fd);
+    DPRINTF("      mode....... %p\n\n", dirent);
+
     i = (int)fd->privdata;
 
     if (i >= MAX_FOLDERS_OPENED) {
@@ -375,15 +351,15 @@ static int fio_dread(iop_file_t *fd, io_dirent_t *dirent)
     }
 
     entry = fod_table[i].entries[filesIndex];
-#ifdef DEBUG
-    printf("fio_dread: fod_table index=%i, fileIndex=%i\n\n", i, filesIndex);
-    printf("fio_dread: entries=%i\n\n", fod_table[i].files);
-    printf("fio_dread: reading entry\n\n");
-    printf("      entry.. %p\n", entry);
-    printf("      filesize....... %i\n\n", entry.fileSize);
-    printf("      filename....... %s\n\n", entry.filename);
-    printf("      fileproperties.. %i\n\n", entry.fileProperties);
-#endif
+
+    DPRINTF("fio_dread: fod_table index=%i, fileIndex=%i\n\n", i, filesIndex);
+    DPRINTF("fio_dread: entries=%i\n\n", fod_table[i].files);
+    DPRINTF("fio_dread: reading entry\n\n");
+    DPRINTF("      entry.. %p\n", entry);
+    DPRINTF("      filesize....... %i\n\n", entry.fileSize);
+    DPRINTF("      filename....... %s\n\n", entry.filename);
+    DPRINTF("      fileproperties.. %i\n\n", entry.fileProperties);
+
     dirent->stat.mode = (entry.fileProperties == CDFS_FILEPROPERTY_DIR) ? FIO_SO_IFDIR : FIO_SO_IFREG;
     dirent->stat.attr = entry.fileProperties;
     dirent->stat.size = entry.fileSize;
@@ -401,18 +377,18 @@ static int fio_getstat(iop_file_t *fd, const char *name, io_stat_t *stat)
 {
     struct TocEntry entry;
     int ret = -1;
-#ifdef DEBUG
-    printf("CDFS: fio_getstat called.\n");
-    printf("      kernel_fd.. %p\n", fd);
-    printf("      name....... %s\n\n", name);
-#endif
+
+    DPRINTF("CDFS: fio_getstat called.\n");
+    DPRINTF("      kernel_fd.. %p\n", fd);
+    DPRINTF("      name....... %s\n\n", name);
+
     ret = cdfs_findfile(name, &entry);
-#ifdef DEBUG
-    printf("      entry.. %p\n", entry);
-    printf("      filesize....... %i\n\n", entry.fileSize);
-    printf("      filename....... %s\n\n", entry.filename);
-    printf("      fileproperties.. %i\n\n", entry.fileProperties);
-#endif
+
+    DPRINTF("      entry.. %p\n", entry);
+    DPRINTF("      filesize....... %i\n\n", entry.fileSize);
+    DPRINTF("      filename....... %s\n\n", entry.filename);
+    DPRINTF("      fileproperties.. %i\n\n", entry.fileProperties);
+
     stat->mode = (entry.fileProperties == CDFS_FILEPROPERTY_DIR) ? FIO_SO_IFDIR : FIO_SO_IFREG;
     stat->attr = entry.fileProperties;
     stat->size = entry.fileSize;
@@ -424,7 +400,7 @@ static int fio_getstat(iop_file_t *fd, const char *name, io_stat_t *stat)
 }
 
 static int cdfs_dummy() {
-    printf("CDFS: dummy function called\n\n");
+    DPRINTF("CDFS: dummy function called\n\n");
     return -5;
 }
 
@@ -454,6 +430,9 @@ int _start(int argc, char **argv)
 
     // Prepare cache and read mode
     cdfs_prepare();
+
+    // char desc [250];
+
 
     // setup the fio_driver structure
     fio_driver.name = UNIT_NAME;

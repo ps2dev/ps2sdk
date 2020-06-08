@@ -1,6 +1,12 @@
 #ifndef _CDFS_IOP_H
 #define _CDFS_IOP_H
 
+#ifdef DEBUG
+#define DPRINTF(args...)	printf(args)
+#else
+#define DPRINTF(args...)	do { } while(0)
+#endif
+
 #define CDFS_FILEPROPERTY_DIR 0x02
 
 struct TocEntry {
