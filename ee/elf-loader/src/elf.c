@@ -14,8 +14,7 @@
 
 #include "elf.h"
 
-#define MAX_PATH 1025
-
+// Loader ELF variables
 extern u8 loader_elf[];
 extern int size_loader_elf;
 
@@ -23,16 +22,7 @@ extern int size_loader_elf;
 #define ELF_MAGIC 0x464c457f
 #define ELF_PT_LOAD 1
 
-
-//------------------------------
-//End of func:  int checkELFheader(const char *path)
-//--------------------------------------------------------------
-// RunLoaderElf loads LOADER.ELF from program memory and passes
-// args of selected ELF and partition to it
-// Modified version of loader from Independence
-//	(C) 2003 Marcus R. Brown <mrbrown@0xd6.org>
-//------------------------------
-void RunLoaderElf(char *filename, char *party)
+void LoadELFFromFile(char *filename)
 {
 	u8 *boot_elf;
 	elf_header_t *eh;
