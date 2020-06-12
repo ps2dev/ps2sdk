@@ -9,7 +9,8 @@
 SUBDIRS = erl kernel kernel-nopatch libc rpc debug \
 	eedebug sbv dma graph math3d \
 	packet draw erl-loader mpeg libgs \
-	libvux font input inputx network iopreboot
+	libvux font input inputx network iopreboot \
+	elf-loader
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
