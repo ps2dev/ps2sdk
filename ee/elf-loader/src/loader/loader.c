@@ -40,33 +40,26 @@ static void wipeUserMem(void)
 int main(int argc, char *argv[])
 {
 	static t_ExecData elfdata;
-	char *target, *path;
-	char *args[1];
 	int ret;
+
+	if (argc < 1) {  // arg1=path to ELF
+		return -EINVAL;
+	}
 
 	// Initialize
 	SifInitRpc(0);
 	wipeUserMem();
 
-	if (argc != 2) {  // arg1=path to ELF, arg2=partition to mount
-		SifExitRpc();
-		return -EINVAL;
-	}
-
-	target = argv[0];
-	path = argv[1];
-
 	//Writeback data cache before loading ELF.
 	FlushCache(0);
-	ret = SifLoadElf(target, &elfdata);
+	ret = SifLoadElf(argv[0], &elfdata);
 	if (ret == 0) {
 		SifExitRpc();
-
 		FlushCache(0);
 		FlushCache(2);
 
-		ExecPS2((void *)elfdata.epc, (void *)elfdata.gp, 1, args);
-		return 0;
+		// Following the standard the first parameter of a argv is the executable itself
+		return ExecPS2((void *)elfdata.epc, (void *)elfdata.gp, argc, argv);
 	} else {
 		SifExitRpc();
 		return -ENOENT;

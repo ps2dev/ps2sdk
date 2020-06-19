@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-int LoadELFFromFile(const char *filename);
+int LoadELFFromFile(const char *filename, int argc, char *argv[]);
 
 #ifdef __cplusplus
 }

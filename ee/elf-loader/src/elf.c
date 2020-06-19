@@ -11,6 +11,9 @@
 #include <string.h>
 #include <sifrpc.h>
 #include <kernel.h>
+#include <sys/stat.h>
+#include <stdbool.h>
+#include <malloc.h>
 
 #include "elf.h"
 
@@ -22,18 +25,33 @@ extern int size_loader_elf;
 #define ELF_MAGIC 0x464c457f
 #define ELF_PT_LOAD 1
 
-void LoadELFFromFile(char *filename)
+int printf(const char *format, ...);
+
+static bool file_exists(const char *filename) {
+  struct stat   buffer;   
+  return (stat (filename, &buffer) == 0);
+}
+
+int LoadELFFromFile(const char *filename, int argc, char *argv[])
 {
 	u8 *boot_elf;
 	elf_header_t *eh;
 	elf_pheader_t *eph;
 	void *pdata;
 	int i;
-	char *argv[2];
+	int new_argc = argc + 1;
+	char **new_argv = malloc(new_argc);
+	
+	// We need to check that the ELF file before continue
+	if (!file_exists(filename)) {
+		return -1; // ELF file doesn't exists
+	}
 
-    argv[0] = filename;
-    argv[1] = filename;
-
+	new_argv[0] = (char *)filename;
+    for (i = 0; i < argc; i++) {
+		new_argv[i + 1] = argv[i];
+	}
+	
 	/* NB: LOADER.ELF is embedded  */
 	boot_elf = (u8 *)loader_elf;
 	eh = (elf_header_t *)boot_elf;
@@ -60,6 +78,6 @@ void LoadELFFromFile(char *filename)
 	SifExitRpc();
 	FlushCache(0);
 	FlushCache(2);
-
-	ExecPS2((void *)eh->entry, NULL, 2, argv);
+	
+	return ExecPS2((void *)eh->entry, NULL, new_argc, new_argv);
 }
