@@ -40,12 +40,14 @@ int LoadELFFromFile(const char *filename, int argc, char *argv[])
 	void *pdata;
 	int i;
 	int new_argc = argc + 1;
-	char **new_argv = malloc(new_argc);
+	char **new_argv;
 	
 	// We need to check that the ELF file before continue
 	if (!file_exists(filename)) {
 		return -1; // ELF file doesn't exists
 	}
+	// ELF Exists
+	new_argv = malloc(new_argc);
 
 	new_argv[0] = (char *)filename;
     for (i = 0; i < argc; i++) {

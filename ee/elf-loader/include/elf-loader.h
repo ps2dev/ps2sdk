@@ -22,6 +22,7 @@
 extern "C" {
 #endif
 
+// Before call this method be sure that you have previously called sbv_patch_disable_prefix_check();
 int LoadELFFromFile(const char *filename, int argc, char *argv[]);
 
 #ifdef __cplusplus
