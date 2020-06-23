@@ -2,6 +2,7 @@ cdvdman_IMPORTS_start
 I_sceCdInit
 I_sceCdGetError
 I_sceCdRead
+I_sceCdReadDVDV
 I_sceCdStop
 I_sceCdSync
 I_sceCdDiskReady
