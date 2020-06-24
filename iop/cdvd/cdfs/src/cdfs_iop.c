@@ -814,6 +814,7 @@ int cdfs_findfile(const char *fname, struct TocEntry *tocEntry) {
 
 int cdfs_readSect(u32 lsn, u32 sectors, u8 *buf) {
     u32 i;
+    u32 consecutive_sectors = (sectors > 2) ? (sectors * 2048) / 2064 : 0;
     int retry;
     int result = 0;
     cdReadMode.trycount = 32;
@@ -831,7 +832,24 @@ int cdfs_readSect(u32 lsn, u32 sectors, u8 *buf) {
 
         if (sceCdGetDiskType() == SCECdDVDV)
         {
-            for (i = 0; i < sectors; i += 1)
+            if (consecutive_sectors > 0)
+            {
+                result = !sceCdReadDVDV(lsn, consecutive_sectors, buf, &cdReadMode);
+                if (result == 0)
+                {
+                    sceCdSync(0);
+                    result = sceCdGetError();
+                }
+                if (result != 0)
+                {
+                    continue;
+                }
+            }
+            for (i = 0; i < consecutive_sectors; i += 1)
+            {
+                memmove(buf + (2048 * i), buf + (2064 * i) + 12, 2048);
+            }
+            for (i = consecutive_sectors; i < sectors; i += 1)
             {
                 result = !sceCdReadDVDV(lsn + i, 1, dvdvBuffer, &cdReadMode);
                 if (result == 0)
