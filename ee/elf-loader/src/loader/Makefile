@@ -1,6 +1,13 @@
-###dlanor: adjust these three, for PS2Link compatibility tests
-###dlanor: old LaunchELF used LA=0x90000, SA=0xB0000, SS=0x08000
-###dlanor: The values below were implemented in LaunchELF v3.50
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# (c) 2020 Francisco Javier Trujillo Mata <fjtrujy@gmail.com>
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+
+### Adjust these three, for PS2Link compatibility tests
+### Old LaunchELF used LA=0x90000, SA=0xB0000, SS=0x08000
 LOADADDR  = 0x90000
 STACKADDR = 0xA8000
 STACKSIZE = 0x04000

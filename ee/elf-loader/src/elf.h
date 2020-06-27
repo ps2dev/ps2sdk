@@ -3,7 +3,7 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# (c) 20020 Francisco Javier Trujillo Mata <fjtrujy@gmail.com>
+# (c) 2020 Francisco Javier Trujillo Mata <fjtrujy@gmail.com>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 */

@@ -28,6 +28,14 @@ EE_ASFLAGS := -G0 $(EE_ASFLAGS)
 
 # Externally defined variables: EE_BIN, EE_OBJS, EE_LIB
 
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# (c) 2020 Francisco Javier Trujillo Mata <fjtrujy@gmail.com>
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+
 # These macros can be used to simplify certain build rules.
 EE_C_COMPILE = $(EE_CC) $(EE_CFLAGS) $(EE_INCS)
 EE_CXX_COMPILE = $(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS)

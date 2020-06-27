@@ -3,7 +3,7 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# (c) 20020 Francisco Javier Trujillo Mata <fjtrujy@gmail.com>
+# (c) 2020 Francisco Javier Trujillo Mata <fjtrujy@gmail.com>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 */
@@ -25,8 +25,6 @@ extern int size_loader_elf;
 #define ELF_MAGIC 0x464c457f
 #define ELF_PT_LOAD 1
 
-int printf(const char *format, ...);
-
 static bool file_exists(const char *filename) {
   struct stat   buffer;   
   return (stat (filename, &buffer) == 0);
@@ -40,14 +38,13 @@ int LoadELFFromFile(const char *filename, int argc, char *argv[])
 	void *pdata;
 	int i;
 	int new_argc = argc + 1;
-	char **new_argv;
 	
 	// We need to check that the ELF file before continue
 	if (!file_exists(filename)) {
 		return -1; // ELF file doesn't exists
 	}
 	// ELF Exists
-	new_argv = malloc(new_argc);
+	char *new_argv[new_argc];
 
 	new_argv[0] = (char *)filename;
     for (i = 0; i < argc; i++) {
