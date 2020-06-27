@@ -25,10 +25,10 @@ static void wipeUserMem(void)
 	int i;
 	for (i = 0x100000; i < GetMemorySize(); i += 64) {
 		asm volatile(
-		    "\tsq $0, 0(%0) \n"
-		    "\tsq $0, 16(%0) \n"
-		    "\tsq $0, 32(%0) \n"
-		    "\tsq $0, 48(%0) \n" ::"r"(i));
+			"\tsq $0, 0(%0) \n"
+			"\tsq $0, 16(%0) \n"
+			"\tsq $0, 32(%0) \n"
+			"\tsq $0, 48(%0) \n" ::"r"(i));
 	}
 }
 

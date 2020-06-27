@@ -26,8 +26,8 @@ extern int size_loader_elf;
 #define ELF_PT_LOAD 1
 
 static bool file_exists(const char *filename) {
-  struct stat   buffer;   
-  return (stat (filename, &buffer) == 0);
+	struct stat   buffer;   
+	return (stat (filename, &buffer) == 0);
 }
 
 int LoadELFFromFile(const char *filename, int argc, char *argv[])
@@ -47,7 +47,7 @@ int LoadELFFromFile(const char *filename, int argc, char *argv[])
 	char *new_argv[new_argc];
 
 	new_argv[0] = (char *)filename;
-    for (i = 0; i < argc; i++) {
+	for (i = 0; i < argc; i++) {
 		new_argv[i + 1] = argv[i];
 	}
 	
@@ -59,8 +59,7 @@ int LoadELFFromFile(const char *filename, int argc, char *argv[])
 
 	eph = (elf_pheader_t *)(boot_elf + eh->phoff);
 
-	/* Scan through the ELF's program headers and copy them into RAM, then
-									zero out any non-loaded regions.  */
+	/* Scan through the ELF's program headers and copy them into RAM, then zero out any non-loaded regions.  */
 	for (i = 0; i < eh->phnum; i++) {
 		if (eph[i].type != ELF_PT_LOAD)
 			continue;
@@ -69,8 +68,7 @@ int LoadELFFromFile(const char *filename, int argc, char *argv[])
 		memcpy(eph[i].vaddr, pdata, eph[i].filesz);
 
 		if (eph[i].memsz > eph[i].filesz)
-			memset(eph[i].vaddr + eph[i].filesz, 0,
-			       eph[i].memsz - eph[i].filesz);
+			memset(eph[i].vaddr + eph[i].filesz, 0, eph[i].memsz - eph[i].filesz);
 	}
 
 	/* Let's go.  */
