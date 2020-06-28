@@ -2,6 +2,7 @@ cdvdman_IMPORTS_start
 I_sceCdInit
 I_sceCdGetError
 I_sceCdRead
+I_sceCdReadDVDV
 I_sceCdStop
 I_sceCdSync
 I_sceCdDiskReady
@@ -24,6 +25,7 @@ I_strcat
 I_strlen
 I_memset
 I_memcpy
+I_memmove
 sysclib_IMPORTS_end
 
 stdio_IMPORTS_start

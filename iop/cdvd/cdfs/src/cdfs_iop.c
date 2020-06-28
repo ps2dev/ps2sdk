@@ -132,6 +132,7 @@ enum PathMatch {
 static struct CacheInfoDir cacheInfoDir;
 static struct CDVolDesc cdVolDesc;
 static sceCdRMode cdReadMode;
+static u8 dvdvBuffer[2064];
 
 /***********************************************
 *                                              *
@@ -161,6 +162,7 @@ static int isValidDisc(void) {
         case SCECdPS2CD:
         case SCECdPS2CDDA:
         case SCECdPS2DVD:
+        case SCECdDVDV:
             result = 1;
             break;
         default:
@@ -385,7 +387,7 @@ static int cdfs_getVolumeDescriptor(void) {
     DPRINTF("cdfs_getVolumeDescriptor called\n\n");
 
     for (volDescSector = 16; volDescSector < 20; volDescSector++) {
-        cdfs_readSect(volDescSector, 1, &localVolDesc);
+        cdfs_readSect(volDescSector, 1, (u8*)&localVolDesc);
 
         // If this is still a volume Descriptor
         if (strncmp(localVolDesc.volID, "CD001", 5) == 0) {
@@ -810,7 +812,9 @@ int cdfs_findfile(const char *fname, struct TocEntry *tocEntry) {
 * Optimised CD Read *
 ********************/
 
-int cdfs_readSect(u32 lsn, u32 sectors, void *buf) {
+int cdfs_readSect(u32 lsn, u32 sectors, u8 *buf) {
+    u32 i;
+    u32 consecutive_sectors = (sectors > 2) ? (sectors * 2048) / 2064 : 0;
     int retry;
     int result = 0;
     cdReadMode.trycount = 32;
@@ -826,21 +830,50 @@ int cdfs_readSect(u32 lsn, u32 sectors, void *buf) {
 
         sceCdDiskReady(0);
 
-        if (!sceCdRead(lsn, sectors, buf, &cdReadMode)) {
-            // Failed to read
-            if (retry == 31) {
-                // Still failed after last retry
-                memset(buf, 0, (sectors << 11));
-                // printf("Couldn't Read from file for some reason\n");
-                return FALSE;  // error
+        if (sceCdGetDiskType() == SCECdDVDV)
+        {
+            if (consecutive_sectors > 0)
+            {
+                result = !sceCdReadDVDV(lsn, consecutive_sectors, buf, &cdReadMode);
+                if (result == 0)
+                {
+                    sceCdSync(0);
+                    result = sceCdGetError();
+                }
+                if (result != 0)
+                {
+                    continue;
+                }
             }
-        } else {
-            // Read okay
-            sceCdSync(0);
-            break;
+            for (i = 0; i < consecutive_sectors; i += 1)
+            {
+                memmove(buf + (2048 * i), buf + (2064 * i) + 12, 2048);
+            }
+            for (i = consecutive_sectors; i < sectors; i += 1)
+            {
+                result = !sceCdReadDVDV(lsn + i, 1, dvdvBuffer, &cdReadMode);
+                if (result == 0)
+                {
+                    sceCdSync(0);
+                    result = sceCdGetError();
+                }
+                if (result != 0)
+                {
+                    break;
+                }
+                memcpy(buf + (2048 * i), dvdvBuffer + 12, 2048);
+            }
+        }
+        else
+        {
+            result = !sceCdRead(lsn, sectors, buf, &cdReadMode);
+            if (result == 0)
+            {
+                sceCdSync(0);
+                result = sceCdGetError();
+            }
         }
 
-        result = sceCdGetError();
         if (result == 0)
             break;
     }
