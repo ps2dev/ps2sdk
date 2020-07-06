@@ -425,8 +425,8 @@ clock_t _times(struct tms *buffer) {
 	if (buffer != NULL) {
 		buffer->tms_utime  = clk;
 		buffer->tms_stime  = 0;
-		buffer->tms_cutime = 0;
-		buffer->tms_cutime = 0;
+		buffer->tms_cutime = clk;
+		buffer->tms_cstime = 0;
 	}
 
 	return clk;
