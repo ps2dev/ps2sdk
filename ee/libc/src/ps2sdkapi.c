@@ -232,6 +232,71 @@ void compile_time_check() {
 	ct_assert(sizeof(uint64_t)==8);
 }
 
+/* Normalize a pathname by removing . and .. components, duplicated /, etc. */
+static char* normalize_path(const char *path_name)
+{
+	int i, j;
+	int first, next;
+	static char out[255];
+
+	/* First copy the path into our temp buffer */
+	strcpy(out, path_name);
+	/* Then append "/" to make the rest easier */
+	strcat(out,"/");
+
+	/* Convert "//" to "/" */
+	for(i=0; out[i+1]; i++) {
+		if(out[i]=='/' && out[i+1]=='/') {
+			for(j=i+1; out[j]; j++)
+					out[j] = out[j+1];
+			i--;
+		;}
+	}
+
+	/* Convert "/./" to "/" */
+	for(i=0; out[i] && out[i+1] && out[i+2]; i++) {
+		if(out[i]=='/' && out[i+1]=='.' && out[i+2]=='/') {
+			for(j=i+1; out[j]; j++)
+					out[j] = out[j+2];
+			i--;
+		}
+	}
+
+	/* Convert "/path/../" to "/" until we can't anymore.  Also convert leading
+	 * "/../" to "/" */
+	first = next = 0;
+	while(1) {
+		/* If a "../" follows, remove it and the parent */
+		if(out[next+1] && out[next+1]=='.' &&
+			out[next+2] && out[next+2]=='.' &&
+			out[next+3] && out[next+3]=='/') {
+			for(j=0; out[first+j+1]; j++)
+				out[first+j+1] = out[next+j+4];
+			first = next = 0;
+			continue;
+		}
+
+		/* Find next slash */
+		first = next;
+		for(next=first+1; out[next] && out[next] != '/'; next++)
+			continue;
+		if(!out[next]) break;
+	}
+
+	/* Remove trailing "/" */
+	for(i=1; out[i]; i++)
+		continue;
+	if(i >= 1 && out[i-1] == '/')
+		out[i-1] = 0;
+
+	return (char*)out;
+}
+
+static int isCdromPath(const char *path)
+{
+	return !strncmp(path, "cdrom0:", 7) || !strncmp(path, "cdrom:", 6);
+}
+
 int _open(const char *buf, int flags, ...) {
 	int iop_flags = 0;
 
@@ -246,7 +311,55 @@ int _open(const char *buf, int flags, ...) {
 	if (flags & O_EXCL)          iop_flags |= IOP_O_EXCL;
 	//if (flags & O_???)           iop_flags |= IOP_O_NOWAIT;
 
-	return _ps2sdk_open(buf, iop_flags);
+	char *t_fname = normalize_path(buf);
+	char b_fname[FILENAME_MAX];
+
+	if (!strchr(buf, ':')) { // filename doesn't contain device
+		t_fname = b_fname;
+		if (buf[0] == '/' || buf[0] == '\\') {   // does it contain root ?
+			char *device_end = strchr(__direct_pwd, ':');
+			if (device_end) {      // yes, let's strip pwd a bit to keep device only
+				strncpy(b_fname, __direct_pwd, device_end - __direct_pwd);
+				strcpy(b_fname + (device_end - __direct_pwd), buf);
+			} else {               // but pwd doesn't contain any device, let's default to host
+				strcpy(b_fname, "host:");
+				strcpy(b_fname + 5, buf);
+			}
+		} else {                 // otherwise, it's relative directory, let's copy pwd straight
+			int b_fname_len = strlen(__direct_pwd);
+			if (!strchr(__direct_pwd, ':')) { // check if pwd contains device name
+				strcpy(b_fname, "host:");
+				strcpy(b_fname + 5, __direct_pwd);
+				if (!(__direct_pwd[b_fname_len - 1] == '/' || __direct_pwd[b_fname_len - 1] == '\\')) { // does it has trailing slash ?
+					if(isCdromPath(b_fname)) {
+						b_fname[b_fname_len + 5] = '\\';
+						b_fname_len++;
+					} else {
+						b_fname[b_fname_len + 5] = '/';
+						b_fname_len++;
+					}
+				}
+				b_fname_len += 5;
+				strcpy(b_fname + b_fname_len, buf);
+			} else {                          // device name is here
+				if (b_fname_len) {
+				strcpy(b_fname, __direct_pwd);
+				if (!(b_fname[b_fname_len - 1] == '/' || b_fname[b_fname_len - 1] == '\\')) {
+					if(isCdromPath(b_fname)) {
+						b_fname[b_fname_len] = '\\';
+						b_fname_len++;
+					} else {
+						b_fname[b_fname_len] = '/';
+						b_fname_len++;
+					}
+				}
+				strcpy(b_fname + b_fname_len, buf);
+				}
+			}
+		}
+	}
+
+	return _ps2sdk_open(t_fname, iop_flags);
 }
 
 int _close(int fd) {
