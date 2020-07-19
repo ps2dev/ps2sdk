@@ -15,6 +15,7 @@
 
 void _ps2sdk_time_init();
 void _ps2sdk_time_deinit();
+void _ps2sdk_timezone_update();
 
 int chdir(const char *path);
 
@@ -23,6 +24,7 @@ __attribute__((weak))
 void _ps2sdk_libc_init()
 {
     _ps2sdk_time_init();
+    _ps2sdk_timezone_update();
 }
 
 __attribute__((weak))

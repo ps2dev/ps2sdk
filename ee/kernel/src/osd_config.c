@@ -17,6 +17,7 @@
 
 #include <tamtypes.h>
 #include <kernel.h>
+#include <ps2sdkapi.h>
 #include <stdio.h>
 #include <sys/fcntl.h>
 #include <sys/unistd.h>
@@ -247,6 +248,7 @@ void configSetTimezone(int timezoneOffset)
 		return;
 	config.timezoneOffset = timezoneOffset;
 	SetOsdConfigParam(&config);
+	_ps2sdk_timezone_update();
 }
 #endif
 
@@ -310,6 +312,7 @@ void configSetDaylightSavingEnabled(int daylightSaving)
 	GetOsdConfigParam2(&config2, 1, 1);
 	config2.daylightSaving = daylightSaving;
 	SetOsdConfigParam2(&config2, 1, 1);
+	_ps2sdk_timezone_update();
 }
 #endif
 

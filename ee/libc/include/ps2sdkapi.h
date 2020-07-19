@@ -40,4 +40,6 @@ extern int (*_ps2sdk_closedir)(DIR *dir);
 typedef uint64_t ps2_clock_t;
 ps2_clock_t ps2_clock(void);
 
+extern void _ps2sdk_timezone_update();
+
 #endif /* __PS2SDKAPI_H__ */

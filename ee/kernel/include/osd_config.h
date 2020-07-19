@@ -25,7 +25,9 @@
 #define __OSD_CONFIG_H__
 
 #include <tamtypes.h>
+#ifndef OSD_CONFIG_NO_LIBCDVD
 #include <libcdvd.h>
+#endif
 
 /** language values returned and used by: configGetLanguage() and configSetLanguage() */
 enum OSD_LANGUAGES{
@@ -188,6 +190,7 @@ int  configIsDaylightSavingEnabled(void);
  */
 void configSetDaylightSavingEnabled(int enabled);
 
+#ifndef OSD_CONFIG_NO_LIBCDVD
 /** converts the time returned from the ps2's clock into GMT time
  * (ps2 clock is in JST time)
  */
@@ -197,6 +200,7 @@ void configConvertToGmtTime(sceCdCLOCK* time);
  * (ps2 clock is in JST time)
  */
 void configConvertToLocalTime(sceCdCLOCK* time);
+#endif
 
 // Internal functions.
 /** check whether the PlayStation 2 is actually a TOOL DTL-T10000(H)
