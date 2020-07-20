@@ -8,7 +8,7 @@
 
 EE_LIB = libps2sdkc.a
 
-CORE_OBJS = sleep.o sbrk.o terminate.o ps2sdkapi.o
+CORE_OBJS = sleep.o sbrk.o terminate.o timezone.o ps2sdkapi.o
 
 INIT_OBJS = init_libc.o init_args.o
 
