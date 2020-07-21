@@ -19,7 +19,7 @@
 #define OSD_CONFIG_NO_LIBCDVD
 #include "osd_config.h"
 
-static char _ps2sdk_tzname[7];
+static char _ps2sdk_tzname[11];
 
 __attribute__((weak))
 void _ps2sdk_timezone_update()
@@ -34,7 +34,7 @@ void _ps2sdk_timezone_update()
 	// Add one hour if configIsDaylightSavingEnabled is 1
 	_timezone = (configGetTimezone() + (configIsDaylightSavingEnabled() * 60)) * 60;
 	tz->__tzrule[0].offset = _timezone;
-	snprintf(_ps2sdk_tzname, sizeof(_ps2sdk_tzname), "GMT%+ld", _timezone);
+	snprintf(_ps2sdk_tzname, sizeof(_ps2sdk_tzname), "Etc/GMT%+ld", _timezone);
 	_tzname[0] = _ps2sdk_tzname;
 	_tzname[1] = _ps2sdk_tzname;
 
