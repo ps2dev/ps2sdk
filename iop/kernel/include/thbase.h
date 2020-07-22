@@ -26,6 +26,12 @@
 #define TH_NO_FILLSTACK	0x00100000
 #define TH_CLEAR_STACK	0x00200000
 
+//Thread priority definitions
+#define HIGHEST_PRIORITY 1
+#define USER_HIGHEST_PRIORITY 9
+#define USER_LOWEST_PRIORITY 123
+#define LOWEST_PRIORITY 126
+
 typedef struct _iop_thread {
 	u32	attr;
 	u32	option;
