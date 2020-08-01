@@ -20,6 +20,7 @@ extern int (*_ps2sdk_close)(int);
 extern int (*_ps2sdk_open)(const char*, int, ...);
 extern int (*_ps2sdk_read)(int, void*, int);
 extern int (*_ps2sdk_lseek)(int, int, int);
+extern long (*_ps2sdk_lseek64)(int, long, int);
 extern int (*_ps2sdk_write)(int, const void*, int);
 extern int (*_ps2sdk_ioctl)(int, int, void*);
 extern int (*_ps2sdk_remove)(const char*);
@@ -41,5 +42,10 @@ typedef uint64_t ps2_clock_t;
 ps2_clock_t ps2_clock(void);
 
 extern void _ps2sdk_timezone_update();
+
+// The newlib port does not support 64bit
+// this should have been defined in unistd.h
+typedef int64_t off64_t;
+off64_t lseek64(int fd, off64_t offset, int whence);
 
 #endif /* __PS2SDKAPI_H__ */

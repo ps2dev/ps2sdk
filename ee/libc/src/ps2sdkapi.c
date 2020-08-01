@@ -173,6 +173,7 @@ int (*_ps2sdk_close)(int) = fioClose;
 int (*_ps2sdk_open)(const char*, int, ...) = (void *)fioOpen;
 int (*_ps2sdk_read)(int, void*, int) = fioRead;
 int (*_ps2sdk_lseek)(int, int, int) = fioLseek;
+long (*_ps2sdk_lseek64)(int, long, int) = NULL;
 int (*_ps2sdk_write)(int, const void*, int) = fioWrite;
 int (*_ps2sdk_ioctl)(int, int, void*) = fioIoctl;
 int (*_ps2sdk_remove)(const char*) = fioRemove;
@@ -447,6 +448,14 @@ int isatty(int fd) {
 off_t _lseek(int fd, off_t offset, int whence)
 {
 	return _ps2sdk_lseek(fd, offset, whence);
+}
+
+off64_t lseek64(int fd, off64_t offset, int whence)
+{
+    if (_ps2sdk_lseek64 == NULL)
+        return EOVERFLOW;
+
+    return _ps2sdk_lseek64(fd, offset, whence);
 }
 
 int chdir(const char *path) {
