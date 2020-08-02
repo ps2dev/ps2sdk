@@ -766,12 +766,12 @@ int sceCdSync(int mode)
 			printf("N cmd wait\n");
 
 		// wait till callback semaphore and client are ready
-		while (cbSema || SifCheckStatRpc(&clientNCmd))
+		while (cbSema || !WaitSema(nCmdSemaId))
 			;
 		return 0;
 	}
 	// check status and return
-	if (cbSema || SifCheckStatRpc(&clientNCmd))
+	if (cbSema || (PollSema(nCmdSemaId) < 0))
 		return 1;
 
 	return 0;

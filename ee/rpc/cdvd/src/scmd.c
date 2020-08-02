@@ -916,11 +916,10 @@ int _CdSyncS(int mode)
 	if (mode == 0) {
 		if (CdDebug > 0)
 			printf("S cmd wait\n");
-		while (SifCheckStatRpc(&clientSCmd))
-			;
+		WaitSema(sCmdSemaId);
 		return 0;
 	}
 
-	return SifCheckStatRpc(&clientSCmd);
+	return PollSema(sCmdSemaId) < 0;
 }
 #endif
