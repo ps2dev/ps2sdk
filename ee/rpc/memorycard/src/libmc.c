@@ -156,6 +156,25 @@ static unsigned int g_currentCmd = 0;
 /** specifies whether using MCSERV or XMCSERV modules */
 static int g_mcType = MC_TYPE_MC;
 
+/** semaphore that is signaled when operation is complete */
+static int g_completionSema = -1;
+
+static void mcSignalCompletionSema(void* arg)
+{
+	iSignalSema(g_completionSema);
+}
+
+static int _lock_sema_id = -1;
+static inline int _lock(void)
+{
+	return(WaitSema(_lock_sema_id));
+}
+
+static inline int _unlock(void)
+{
+	return(SignalSema(_lock_sema_id));
+}
+
 
 /** function that gets called when mcGetInfo ends
  * and interrupts are disabled
@@ -187,6 +206,7 @@ static void mcGetInfoApdx(void* info)
 		if(g_pFormat != NULL)
 			*g_pFormat = ptrNew->formatted;
 	}
+	mcSignalCompletionSema(info);
 }
 
 /** function that gets called when mcRead ends
@@ -211,6 +231,7 @@ static void mcReadFixAlign(void* data_raw)
 		for(i = 0,dest = (u8*)ptrNew->dest2; i < ptrNew->size2; i++)
 			dest[i] = ptrNew->src2[i];
 	}
+	mcSignalCompletionSema(data_raw);
 }
 
 /** function that gets called when mcChDir ends
@@ -225,6 +246,7 @@ static void mcStoreDir(void* arg)
 		len = strlen(currentDir+1023);
 	memcpy(arg, currentDir, len);
 	*(currentDir+len) = 0;
+	mcSignalCompletionSema(arg);
 }
 
 int mcInit(int type)
@@ -232,6 +254,7 @@ int mcInit(int type)
 	int ret=0;
 	mcRpcStat_t *rpcStat = (mcRpcStat_t*)UNCACHED_SEG(&g_rdata.rpcStat);
 	static int _rb_count = 0;
+	ee_sema_t sp;
 
 	if(_rb_count != _iop_reboot_count)
 	{
@@ -327,6 +350,22 @@ int mcInit(int type)
 		ret = rpcStat->result;
 	}
 
+	sp.init_count = 1;
+	sp.max_count = 1;
+	sp.option = 0;
+	_lock_sema_id = CreateSema(&sp);
+	if(_lock_sema_id < 0)
+	{
+		g_mclibInited = 0;
+		return _lock_sema_id;
+	}
+	g_completionSema = CreateSema(&sp);
+	if(g_completionSema < 0)
+	{
+		g_mclibInited = 0;
+		return g_completionSema;
+	}
+
 	// successfully inited
 	g_mclibInited = 1;
 	g_currentCmd = 0;
@@ -343,6 +382,9 @@ int mcGetInfo(int port, int slot, int* type, int* free, int* format)
 	// check nothing else is processing
 	if(g_currentCmd != MC_FUNC_NONE)
 		return g_currentCmd;
+
+	_lock();
+	WaitSema(g_completionSema);
 
 	// set global variables
 	if(g_mcType == MC_TYPE_MC)
@@ -369,9 +411,12 @@ int mcGetInfo(int port, int slot, int* type, int* free, int* format)
 	SifWriteBackDCache(endParameter, 192);
 
 	// send sif command
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_GET_INFO], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, (SifRpcEndFunc_t)mcGetInfoApdx, endParameter)) != 0)
-		return ret;
-	g_currentCmd = MC_FUNC_GET_INFO;
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_GET_INFO], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, (SifRpcEndFunc_t)mcGetInfoApdx, endParameter)) == 0)
+		g_currentCmd = MC_FUNC_GET_INFO;
+	else
+		SignalSema(g_completionSema);
+
+	_unlock();
 	return ret;
 }
 
@@ -386,6 +431,9 @@ int mcOpen(int port, int slot, const char *name, int mode)
 	if(g_currentCmd != MC_FUNC_NONE)
 		return g_currentCmd;
 
+	_lock();
+	WaitSema(g_completionSema);
+
 	// set global variables
 	g_nameParam.port		= port;
 	g_nameParam.slot		= slot;
@@ -394,9 +442,12 @@ int mcOpen(int port, int slot, const char *name, int mode)
 	g_nameParam.name[1023] = 0;
 
 	// send sif command
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_OPEN], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), &g_rdata, 4, NULL, NULL)) != 0)
-		return ret;
-	g_currentCmd = MC_FUNC_OPEN;
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_OPEN], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), &g_rdata, 4, (SifRpcEndFunc_t)mcSignalCompletionSema, NULL)) == 0)
+		g_currentCmd = MC_FUNC_OPEN;
+	else
+		SignalSema(g_completionSema);
+
+	_unlock();
 	return ret;
 }
 
@@ -411,13 +462,19 @@ int mcClose(int fd)
 	if(g_currentCmd != MC_FUNC_NONE)
 		return g_currentCmd;
 
+	_lock();
+	WaitSema(g_completionSema);
+
 	// set global variables
 	g_descParam.fd	= fd;
 
 	// send sif command
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_CLOSE], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, NULL, NULL)) != 0)
-		return ret;
-	g_currentCmd = MC_FUNC_CLOSE;
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_CLOSE], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, (SifRpcEndFunc_t)mcSignalCompletionSema, NULL)) == 0)
+		g_currentCmd = MC_FUNC_CLOSE;
+	else
+		SignalSema(g_completionSema);
+
+	_unlock();
 	return ret;
 }
 
@@ -432,15 +489,21 @@ int mcSeek(int fd, int offset, int origin)
 	if(g_currentCmd != MC_FUNC_NONE)
 		return g_currentCmd;
 
+	_lock();
+	WaitSema(g_completionSema);
+
 	// set global variables
 	g_descParam.fd		= fd;
 	g_descParam.offset	= offset;
 	g_descParam.origin	= origin;
 
 	// send sif command
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_SEEK], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, NULL, NULL)) != 0)
-		return ret;
-	g_currentCmd = MC_FUNC_SEEK;
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_SEEK], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, (SifRpcEndFunc_t)mcSignalCompletionSema, NULL)) == 0)
+		g_currentCmd = MC_FUNC_SEEK;
+	else
+		SignalSema(g_completionSema);
+
+	_unlock();
 	return ret;
 }
 
@@ -455,6 +518,9 @@ int mcRead(int fd, void *buffer, int size)
 	if(g_currentCmd != MC_FUNC_NONE)
 		return g_currentCmd;
 
+	_lock();
+	WaitSema(g_completionSema);
+
 	// set global variables
 	g_descParam.fd		= fd;
 	g_descParam.size	= size;
@@ -464,9 +530,12 @@ int mcRead(int fd, void *buffer, int size)
 	SifWriteBackDCache(endParameter, 192);
 
 	// send sif command
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_READ], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, (SifRpcEndFunc_t)mcReadFixAlign, endParameter)) != 0)
-		return ret;
-	g_currentCmd = MC_FUNC_READ;
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_READ], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, (SifRpcEndFunc_t)mcReadFixAlign, endParameter)) == 0)
+		g_currentCmd = MC_FUNC_READ;
+	else
+		SignalSema(g_completionSema);
+
+	_unlock();
 	return ret;
 }
 
@@ -480,6 +549,9 @@ int mcWrite(int fd, const void *buffer, int size)
 	// check nothing else is processing
 	if(g_currentCmd != MC_FUNC_NONE)
 		return g_currentCmd;
+
+	_lock();
+	WaitSema(g_completionSema);
 
 	// set global variables
 	g_descParam.fd	= fd;
@@ -502,9 +574,12 @@ int mcWrite(int fd, const void *buffer, int size)
 	FlushCache(0);
 
 	// send sif command
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_WRITE], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, NULL, NULL)) != 0)
-		return ret;
-	g_currentCmd = MC_FUNC_WRITE;
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_WRITE], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, (SifRpcEndFunc_t)mcSignalCompletionSema, NULL)) == 0)
+		g_currentCmd = MC_FUNC_WRITE;
+	else
+		SignalSema(g_completionSema);
+
+	_unlock();
 	return ret;
 }
 
@@ -519,13 +594,19 @@ int mcFlush(int fd)
 	if(g_currentCmd != MC_FUNC_NONE)
 		return g_currentCmd;
 
+	_lock();
+	WaitSema(g_completionSema);
+
 	// set global variables
 	g_descParam.fd	= fd;
 
 	// send sif command
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_FLUSH], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, NULL, NULL)) != 0)
-		return ret;
-	g_currentCmd = MC_FUNC_FLUSH;
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_FLUSH], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, (SifRpcEndFunc_t)mcSignalCompletionSema, NULL)) == 0)
+		g_currentCmd = MC_FUNC_FLUSH;
+	else
+		SignalSema(g_completionSema);
+
+	_unlock();
 	return ret;
 }
 
@@ -549,6 +630,9 @@ int mcChdir(int port, int slot, const char* newDir, char* currentDir)
 	if(g_currentCmd != MC_FUNC_NONE)
 		return g_currentCmd;
 
+	_lock();
+	WaitSema(g_completionSema);
+
 	// set global variables
 	g_nameParam.port		= port;
 	g_nameParam.slot		= slot;
@@ -558,9 +642,12 @@ int mcChdir(int port, int slot, const char* newDir, char* currentDir)
 	SifWriteBackDCache(curDir, 1024);
 
 	// send sif command
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_CH_DIR], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), &g_rdata, 4, (SifRpcEndFunc_t)mcStoreDir, currentDir)) != 0)
-		return ret;
-	g_currentCmd = MC_FUNC_CH_DIR;
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_CH_DIR], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), &g_rdata, 4, (SifRpcEndFunc_t)mcStoreDir, currentDir)) == 0)
+		g_currentCmd = MC_FUNC_CH_DIR;
+	else
+		SignalSema(g_completionSema);
+
+	_unlock();
 	return ret;
 }
 
@@ -575,6 +662,9 @@ int mcGetDir(int port, int slot, const char *name, unsigned mode, int maxent, sc
 	if(g_currentCmd != MC_FUNC_NONE)
 		return g_currentCmd;
 
+	_lock();
+	WaitSema(g_completionSema);
+
 	// set global variables
 	g_nameParam.port	= port;
 	g_nameParam.slot	= slot;
@@ -586,9 +676,12 @@ int mcGetDir(int port, int slot, const char *name, unsigned mode, int maxent, sc
 	SifWriteBackDCache(table, maxent * sizeof(sceMcTblGetDir));
 
 	// send sif command
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_GET_DIR], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), &g_rdata, 4, NULL, NULL)) != 0)
-		return ret;
-	g_currentCmd = MC_FUNC_GET_DIR;
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_GET_DIR], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), &g_rdata, 4, (SifRpcEndFunc_t)mcSignalCompletionSema, NULL)) == 0)
+		g_currentCmd = MC_FUNC_GET_DIR;
+	else
+		SignalSema(g_completionSema);
+
+	_unlock();
    	return ret;
 }
 
@@ -603,6 +696,9 @@ int mcSetFileInfo(int port, int slot, const char* name, const sceMcTblGetDir* in
 	if(g_currentCmd != MC_FUNC_NONE)
 		return g_currentCmd;
 
+	_lock();
+	WaitSema(g_completionSema);
+
 	// set global variables
 	g_nameParam.port	= port;
 	g_nameParam.slot	= slot;
@@ -615,9 +711,12 @@ int mcSetFileInfo(int port, int slot, const char* name, const sceMcTblGetDir* in
 	FlushCache(0);
 
 	// send sif command
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_SET_INFO], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), &g_rdata, 4, NULL, NULL)) != 0)
-		return ret;
-	g_currentCmd = MC_FUNC_SET_INFO;
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_SET_INFO], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), &g_rdata, 4, (SifRpcEndFunc_t)mcSignalCompletionSema, NULL)) == 0)
+		g_currentCmd = MC_FUNC_SET_INFO;
+	else
+		SignalSema(g_completionSema);
+
+	_unlock();
 	return ret;
 }
 
@@ -632,6 +731,9 @@ int mcDelete(int port, int slot, const char *name)
 	if(g_currentCmd != MC_FUNC_NONE)
 		return g_currentCmd;
 
+	_lock();
+	WaitSema(g_completionSema);
+
 	// set global variables
 	g_nameParam.port = port;
 	g_nameParam.slot = slot;
@@ -640,9 +742,12 @@ int mcDelete(int port, int slot, const char *name)
 	g_nameParam.name[1023] = 0;
 
 	// call delete function
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_DELETE], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), &g_rdata, 4, NULL, NULL)) != 0)
-		return ret;
-	g_currentCmd = MC_FUNC_DELETE;
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_DELETE], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), &g_rdata, 4, (SifRpcEndFunc_t)mcSignalCompletionSema, NULL)) == 0)
+		g_currentCmd = MC_FUNC_DELETE;
+	else
+		SignalSema(g_completionSema);
+
+	_unlock();
    	return ret;
 }
 
@@ -657,14 +762,20 @@ int mcFormat(int port, int slot)
 	if(g_currentCmd != MC_FUNC_NONE)
 		return g_currentCmd;
 
+	_lock();
+	WaitSema(g_completionSema);
+
 	// set global variables
 	g_descParam.port = port;
 	g_descParam.slot = slot;
 
 	// call format function
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_FORMAT], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, NULL, NULL)) != 0)
-		return ret;
-	g_currentCmd = MC_FUNC_FORMAT;
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_FORMAT], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, (SifRpcEndFunc_t)mcSignalCompletionSema, NULL)) == 0)
+		g_currentCmd = MC_FUNC_FORMAT;
+	else
+		SignalSema(g_completionSema);
+
+	_unlock();
 	return ret;
 }
 
@@ -679,14 +790,20 @@ int mcUnformat(int port, int slot)
 	if(g_currentCmd != MC_FUNC_NONE)
 		return g_currentCmd;
 
+	_lock();
+	WaitSema(g_completionSema);
+
 	// set global variables
 	g_descParam.port = port;
 	g_descParam.slot = slot;
 
 	// call unformat function
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_UNFORMAT], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, NULL, NULL)) != 0)
-		return ret;
-	g_currentCmd = MC_FUNC_UNFORMAT;
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_UNFORMAT], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, (SifRpcEndFunc_t)mcSignalCompletionSema, NULL)) == 0)
+		g_currentCmd = MC_FUNC_UNFORMAT;
+	else
+		SignalSema(g_completionSema);
+
+	_unlock();
 	return ret;
 }
 
@@ -701,6 +818,9 @@ int mcGetEntSpace(int port, int slot, const char* path)
 	if(g_currentCmd != MC_FUNC_NONE)
 		return g_currentCmd;
 
+	_lock();
+	WaitSema(g_completionSema);
+
 	// set global variables
 	g_nameParam.port = port;
 	g_nameParam.slot = slot;
@@ -708,9 +828,12 @@ int mcGetEntSpace(int port, int slot, const char* path)
 	g_nameParam.name[1023] = 0;
 
 	// call sif function
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_GET_ENT], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), &g_rdata, 4, NULL, NULL)) != 0)
-		return ret;
-	g_currentCmd = MC_FUNC_GET_ENT;
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_GET_ENT], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), &g_rdata, 4, (SifRpcEndFunc_t)mcSignalCompletionSema, NULL)) == 0)
+		g_currentCmd = MC_FUNC_GET_ENT;
+	else
+		SignalSema(g_completionSema);
+
+	_unlock();
 	return ret;
 }
 
@@ -725,6 +848,9 @@ int mcRename(int port, int slot, const char* oldName, const char* newName)
 	if(g_currentCmd != MC_FUNC_NONE)
 		return g_currentCmd;
 
+	_lock();
+	WaitSema(g_completionSema);
+
 	// set global variables
 	g_nameParam.port = port;
 	g_nameParam.slot = slot;
@@ -737,14 +863,17 @@ int mcRename(int port, int slot, const char* oldName, const char* newName)
 	FlushCache(0);
 
 	// call sif function
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_SET_INFO], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), &g_rdata, 4, NULL, NULL)) != 0)
-		return ret;
-	g_currentCmd = MC_FUNC_RENAME;
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_SET_INFO], SIF_RPC_M_NOWAIT, &g_nameParam, sizeof(g_nameParam), &g_rdata, 4, (SifRpcEndFunc_t)mcSignalCompletionSema, NULL)) == 0)
+		g_currentCmd = MC_FUNC_RENAME;
+	else
+		SignalSema(g_completionSema);
+
+	_unlock();
 	return ret;
 }
 
 int mcEraseBlock(int port, int slot, int block, int mode){
-	int result;
+	int ret;
 
 	// check lib is inited
 	if((!g_mclibInited)||(g_mcType==MC_TYPE_XMC))
@@ -753,16 +882,21 @@ int mcEraseBlock(int port, int slot, int block, int mode){
 	if(g_currentCmd != MC_FUNC_NONE)
 		return g_currentCmd;
 
+	_lock();
+	WaitSema(g_completionSema);
+
 	g_descParam.port=port;
 	g_descParam.slot=slot;
 	g_descParam.offset=block;
 	g_descParam.origin=mode;
 
-	if((result = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_ERASE_BLOCK], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, NULL, NULL))==0){
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_ERASE_BLOCK], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, (SifRpcEndFunc_t)mcSignalCompletionSema, NULL)) == 0)
 		g_currentCmd = MC_FUNC_ERASE_BLOCK;
-	}
+	else
+		SignalSema(g_completionSema);
 
-	return result;
+	_unlock();
+	return ret;
 }
 
 struct libmc_PageReadAlignData{
@@ -784,10 +918,11 @@ static void libmc_ReadAlignFunction(struct libmc_PageReadAlignData *data){
 		memcpy(UNCACHED_SEG(data->dest1), UNCACHED_SEG(data->data1), 16-misaligned);
 		memcpy(UNCACHED_SEG((unsigned int)data->dest1+(16-misaligned)), UNCACHED_SEG((unsigned int)data->data1+(16-misaligned)+0x1F0), misaligned);
 	}
+	mcSignalCompletionSema(NULL);
 }
 
 int mcReadPage(int port, int slot, unsigned int page, void *buffer){
-	int result;
+	int ret;
 
 	// check lib is inited
 	if((!g_mclibInited)||(g_mcType==MC_TYPE_XMC))
@@ -795,6 +930,9 @@ int mcReadPage(int port, int slot, unsigned int page, void *buffer){
 	// check nothing else is processing
 	if(g_currentCmd != MC_FUNC_NONE)
 		return g_currentCmd;
+
+	_lock();
+	WaitSema(g_completionSema);
 
 	g_descParam.fd=page;
 	g_descParam.port=port;
@@ -804,15 +942,17 @@ int mcReadPage(int port, int slot, unsigned int page, void *buffer){
 
 	SifWriteBackDCache(buffer, 0x200);
 
-	if((result = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_READ_PAGE], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, (void*)&libmc_ReadAlignFunction, UNCACHED_SEG(&libmc_ReadPageAlignData)))==0){
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_READ_PAGE], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, (void*)&libmc_ReadAlignFunction, UNCACHED_SEG(&libmc_ReadPageAlignData))) == 0)
 		g_currentCmd = MC_FUNC_READ_PAGE;
-	}
+	else
+		SignalSema(g_completionSema);
 
-	return result;
+	_unlock();
+	return ret;
 }
 
 int mcWritePage(int port, int slot, int page, const void *buffer){
-	int result, misaligned;
+	int ret, misaligned;
 
 	// check lib is inited
 	if((!g_mclibInited)||(g_mcType==MC_TYPE_XMC))
@@ -820,6 +960,9 @@ int mcWritePage(int port, int slot, int page, const void *buffer){
 	// check nothing else is processing
 	if(g_currentCmd != MC_FUNC_NONE)
 		return g_currentCmd;
+
+	_lock();
+	WaitSema(g_completionSema);
 
 	g_descParam.fd=page;
 	g_descParam.port=port;
@@ -833,11 +976,13 @@ int mcWritePage(int port, int slot, int page, const void *buffer){
 		memcpy((void*)(g_descParam.data+(16-misaligned)), (void*)(buffer+(16-misaligned)+0x1F0), misaligned);
 	}
 
-	if((result = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_WRITE_PAGE], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, NULL, NULL))==0){
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_WRITE_PAGE], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, (SifRpcEndFunc_t)mcSignalCompletionSema, NULL)) == 0)
 		g_currentCmd = MC_FUNC_WRITE_PAGE;
-	}
+	else
+		SignalSema(g_completionSema);
 
-	return result;
+	_unlock();
+	return ret;
 }
 
 int mcChangeThreadPriority(int level)
@@ -851,38 +996,45 @@ int mcChangeThreadPriority(int level)
 	if(g_currentCmd != MC_FUNC_NONE)
 		return g_currentCmd;
 
+	_lock();
+	WaitSema(g_completionSema);
+
 	// set global variables
 //	*(u32*)mcCmd.name = level;
 
 	// call sif function
-	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_CHG_PRITY], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, NULL, NULL)) != 0)
-		return ret;
-	g_currentCmd = MC_FUNC_CHG_PRITY;
+	if((ret = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_CHG_PRITY], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, (SifRpcEndFunc_t)mcSignalCompletionSema, NULL)) == 0)
+		g_currentCmd = MC_FUNC_CHG_PRITY;
+	else
+		SignalSema(g_completionSema);
+
+	_unlock();
 	return ret;
 }
 
 int mcSync(int mode, int *cmd, int *result)
 {
-	int funcIsExecuting, i;
+	int funcIsExecuting;
 
 	// check if any functions are registered
 	if(g_currentCmd == MC_FUNC_NONE)
 		return -1;
 
-	// check if function is still processing
-	funcIsExecuting = SifCheckStatRpc(&g_cdata);
-
 	// if mode = 0, wait for function to finish
 	if(mode == 0)
 	{
-		while(SifCheckStatRpc(&g_cdata))
-		{
-			for(i=0; i<100000; i++)
-    			;
-		}
+		WaitSema(g_completionSema);
 		// function has finished
 		funcIsExecuting = 0;
 	}
+	else
+	{
+		// check if function is still processing
+		funcIsExecuting = PollSema(g_completionSema) < 0;
+	}
+
+	if(funcIsExecuting == 0)
+		SignalSema(g_completionSema);
 
 	// get the function that just finished
 	if(cmd)
@@ -904,6 +1056,16 @@ int mcSync(int mode, int *cmd, int *result)
 
 int mcReset(void)
 {
+	if(_lock_sema_id >= 0)
+	{
+		DeleteSema(_lock_sema_id);
+		_lock_sema_id = -1;
+	}
+	if(g_completionSema >= 0)
+	{
+		DeleteSema(g_completionSema);
+		g_completionSema = -1;
+	}
 	g_mclibInited = 0;
 	g_cdata.server = NULL;
 	return 0;
