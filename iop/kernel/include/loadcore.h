@@ -21,6 +21,7 @@
 
 #define MODULE_RESIDENT_END		0
 #define MODULE_NO_RESIDENT_END	1
+#define MODULE_REMOVABLE_END	2 // Only for 'modload' > v1.2
 
 /** Module info entry. Taken from iopmgr. */
 typedef struct _ModuleInfo {
