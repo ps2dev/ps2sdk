@@ -492,11 +492,11 @@ SifRegisterRpc(SifRpcServerData_t *sd,
     if (!(server = qd->link)) {
         qd->link = sd;
     } else {
-        while (server->next != NULL) {
-            server = server->next;
+        while (server->link != NULL) {
+            server = server->link;
         }
 
-        server->next = sd;
+        server->link = sd;
     }
 
     EI();
