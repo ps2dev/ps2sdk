@@ -375,7 +375,7 @@ static void _request_call(SifRpcCallPkt_t *request, void *data)
     (void)data;
 
     if (base->start)
-        base->end->link = server;
+        base->end->next = server;
     else
         base->start = server;
 
