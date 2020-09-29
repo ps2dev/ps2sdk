@@ -135,13 +135,16 @@ static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_l
 
 		if ( (sad = fopen(OutputFile, "wb" )) != NULL )
 		{
-			strncpy(AdpcmHeader.id, "APCM", 4);
-			AdpcmHeader.version=1;
-			AdpcmHeader.channels=channels;
-			AdpcmHeader.loop=flag_loop;
-			AdpcmHeader.reserved=0;
-			AdpcmHeader.pitch=(sample_freq*4096)/48000;	// pitch, to encode for PS1 change 48000 to 44100
-			AdpcmHeader.samples=sample_len;
+			AdpcmHeader = (struct AdpcmHeader)
+			{
+				.id="APCM",
+				.version=1,
+				.channels=channels,
+				.loop=flag_loop,
+				.reserved=0,
+				.pitch=(sample_freq*4096)/48000,	// pitch, to encode for PS1 change 48000 to 44100
+				.samples=sample_len
+			};
 			fwrite(&AdpcmHeader, sizeof(AdpcmHeader), 1, sad);
 
 			if(channels == 1)
@@ -211,4 +214,3 @@ int main( int argc, char *argv[] )
 
 	return result;
 }
-
