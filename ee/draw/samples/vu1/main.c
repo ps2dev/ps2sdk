@@ -19,7 +19,7 @@
 #include <dma.h>
 #include <graph.h>
 #include <draw3d.h>
-#include "vu1.h"
+#include <vu1.h>
 #include <draw.h>
 #include "zbyszek.c"
 #include "mesh_data.c"
@@ -261,20 +261,6 @@ void draw_zbyszek(VECTOR t_object_position, texbuffer_t *t_texbuff)
 
 	vu1_send_single_ref_list(0, &local_screen, 8);
 
-	int i = 0;
-	for (i = 0; i < faces_count; i++)
-	{
-		c_verts[i][0] = vertices[faces[i]][0];
-		c_verts[i][1] = vertices[faces[i]][1];
-		c_verts[i][2] = vertices[faces[i]][2];
-		c_verts[i][3] = vertices[faces[i]][3];
-
-		c_sts[i][0] = sts[faces[i]][0];
-		c_sts[i][1] = sts[faces[i]][1];
-		c_sts[i][2] = sts[faces[i]][2];
-		c_sts[i][3] = sts[faces[i]][3];
-	}
-
 	draw_vertices(t_texbuff);
 }
 
@@ -323,6 +309,19 @@ void render(framebuffer_t *t_frame, zbuffer_t *t_z, texbuffer_t *t_texbuff)
 	c_sts = (VECTOR *)memalign(128, sizeof(VECTOR) * faces_count);
 
 	VECTOR c_zbyszek_position;
+
+	for (i = 0; i < faces_count; i++)
+	{
+		c_verts[i][0] = vertices[faces[i]][0];
+		c_verts[i][1] = vertices[faces[i]][1];
+		c_verts[i][2] = vertices[faces[i]][2];
+		c_verts[i][3] = vertices[faces[i]][3];
+
+		c_sts[i][0] = sts[faces[i]][0];
+		c_sts[i][1] = sts[faces[i]][1];
+		c_sts[i][2] = sts[faces[i]][2];
+		c_sts[i][3] = sts[faces[i]][3];
+	}
 
 	// Create the view_screen matrix.
 	create_view_screen(view_screen, graph_aspect_ratio(), -3.00f, 3.00f, -3.00f, 3.00f, 1.00f, 2000.00f);
