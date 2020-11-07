@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = cube teapot texture vu1
+SAMPLE_DIR = draw/vu1
 
 include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+include $(PS2SDKSRC)/samples/Rules.samples
