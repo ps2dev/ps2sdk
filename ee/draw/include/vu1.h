@@ -36,7 +36,7 @@ typedef struct VU1BuildList
  * @param t_dma_buffer_size Size of buffer 
  * @param t_use_double_buffer When true, VU1 double buffer will be set. VU1 DMA is anyways double buffered. 
  * @param t_double_buffer_base At what qword (offset) of VU1 (not DMA), first buffer start? 
- * @param t_double_buffer_offset At what qword (offset) of VU1, second buffer start? 
+ * @param t_double_buffer_offset Offset to second buffer. Will start at base+offset. 
  */
 void vu1_init(u32 t_dma_buffer_size, u8 t_use_double_buffer, u16 t_double_buffer_base, u16 t_double_buffer_offset);
 
@@ -51,7 +51,7 @@ void vu1_create_dyn_list();
  * Reference list is way faster than dynamic list adding. 
  * Not using TOP register (double buffer) 
  * Similar to add_reference_list() 
- * @param t_dest_address At what qword data should be unpacked? 
+ * @param t_dest_address At what VU1 mem qword data should be unpacked? 
  * @param t_data Pointer to data. 
  * @param t_quad_size Size of data in quadwords. 
  */
@@ -59,7 +59,7 @@ void vu1_send_single_ref_list(u32 t_dest_address, void *t_data, u32 t_quad_size)
 
 /** 
  * Add beginning to dynamic list. 
- * This method is settings  double buffer (if required)
+ * This method is setting double buffer if required. 
  */
 void vu1_add_dyn_list_beginning();
 
@@ -72,7 +72,7 @@ void vu1_add_dyn_list_ending();
  * @param t_offset Offset before data in qwords. 
  * @param t_data Data pointer. 
  * @param t_size Size in quadwords. 
- * @param t_use_top When true, data will be loaded at the beginning of curent double buffer. 
+ * @param t_use_top When true, data will be loaded at the beginning of current VU1 buffer. 
  */
 void vu1_add_reference_list(u32 t_offset, void *t_data, u32 t_size, u8 t_use_top);
 

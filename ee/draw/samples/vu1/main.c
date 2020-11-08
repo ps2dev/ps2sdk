@@ -39,19 +39,19 @@ extern unsigned char zbyszek[];
  * 1. Upload program to VU1. 
  * 2. Send calculated local_screen matrix once per mesh (3D object) 
  * 3. Set buffers size. (double-buffering described below) 
- * 4. Send packet with: lod, clut, tex buffer, scale vector, rgba, verts and sts 
+ * 4. Send packet with: lod, clut, tex buffer, scale vector, rgba, verts and sts. 
  * What this program is doing? 
- * 1. Load local_screen 
- * 2. Zero clipping flag 
+ * 1. Load local_screen. 
+ * 2. Zero clipping flag. 
  * 3. Set current buffer start address from TOP register (xtop command) 
  *      To use pararelism, we set two buffers in the VU1. It means, that when 
  *      VU1 is working with one verts packet, we can load second one into another buffer. 
  *      xtop command is automatically switching buffers. I think that AAA games used 
  *      quad buffers (TOP+TOPS) which can give best performance and no VIF_FLUSH should be needed. 
- * 4. Load rest of data 
+ * 4. Load rest of data. 
  * 5. Prepare GIF tag. 
- * 6. For every vertex: transform, clip, scale, perspective divide 
- * 7. Send it to GS via XGKICK command 
+ * 6. For every vertex: transform, clip, scale, perspective divide. 
+ * 7. Send it to GS via XGKICK command. 
  */
 extern u32 VU1Draw3D_CodeStart __attribute__((section(".vudata")));
 extern u32 VU1Draw3D_CodeEnd __attribute__((section(".vudata")));
@@ -61,7 +61,7 @@ VECTOR camera_position = {140.00f, 140.00f, 40.00f, 1.00f};
 VECTOR camera_rotation = {0.00f, 0.00f, 0.00f, 1.00f};
 MATRIX local_world, world_view, view_screen, local_screen;
 
-/** Set GS primitive type of drawing */
+/** Set GS primitive type of drawing. */
 prim_t prim;
 
 /** 
@@ -71,8 +71,8 @@ prim_t prim;
 clutbuffer_t clut;
 
 /** 
- * Level of details.
- * Needed for texture.
+ * Level of details. 
+ * Needed for texture. 
  */
 lod_t lod;
 
@@ -83,9 +83,9 @@ lod_t lod;
 VECTOR *c_verts __attribute__((aligned(128))), *c_sts __attribute__((aligned(128)));
 
 /** 
- * Send vertices and all required data to VU1.
- * To get better understanding, please check out
- * draw_3D.vcl 
+ * Send vertices and all required data to VU1. 
+ * To get better understanding, please check out. 
+ * draw_3D.vcl. 
  */
 void draw_vertices(texbuffer_t *t_texbuff)
 {
@@ -206,7 +206,7 @@ void init_drawing_environment(framebuffer_t *t_frame, zbuffer_t *t_z)
 	packet_free(packet);
 }
 
-/** Send texture data to GS */
+/** Send texture data to GS. */
 void send_texture(texbuffer_t *texbuf)
 {
 	packet_t *packet = packet_init(50, PACKET_NORMAL);
@@ -224,7 +224,7 @@ void send_texture(texbuffer_t *texbuf)
 	packet_free(packet);
 }
 
-/** Send packet which will clear our screen */
+/** Send packet which will clear our screen. */
 void clear_screen(framebuffer_t *frame, zbuffer_t *z)
 {
 	packet_t *current = packet_init(50, PACKET_NORMAL);
@@ -247,7 +247,7 @@ void clear_screen(framebuffer_t *frame, zbuffer_t *z)
 	draw_wait_finish();
 }
 
-/** Draw our 3D cube */
+/** Draw our 3D cube. */
 void draw_zbyszek(VECTOR t_object_position, texbuffer_t *t_texbuff)
 {
 	// Create the local_world matrix.
@@ -302,7 +302,7 @@ void render(framebuffer_t *t_frame, zbuffer_t *t_z, texbuffer_t *t_texbuff)
 	set_lod_clut_prim_tex_buff(t_texbuff);
 
 	/** 
-	 * Allocate some space for object position calculating
+	 * Allocate some space for object position calculating. 
 	 * c_ prefix = calc_
 	 */
 	c_verts = (VECTOR *)memalign(128, sizeof(VECTOR) * faces_count);
@@ -368,6 +368,9 @@ void render(framebuffer_t *t_frame, zbuffer_t *t_z, texbuffer_t *t_texbuff)
 
 int main(int argc, char **argv)
 {
+
+	// Initialize DMA buffer for data transporting.
+	// Set VU1 double buffer size.
 	vu1_init(48 * 1024, 1, 8, 496);
 
 	vu1_upload_program(0, &VU1Draw3D_CodeStart, &VU1Draw3D_CodeEnd);
