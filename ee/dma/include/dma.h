@@ -17,6 +17,7 @@
 #define __DMA_H__
 
 #include <tamtypes.h>
+#include "../../packet2/include/packet2.h"
 
 #define DMA_CHANNEL_VIF0     0x00
 #define DMA_CHANNEL_VIF1     0x01
@@ -49,6 +50,9 @@ void dma_wait_fast(void);
 
 /** Wait until the specified dma channel is ready. */
 int dma_channel_wait(int channel, int timeout);
+
+/** Send packet2. */
+void dma_channel_send_packet2(packet2_t *packet2, int channel, u8 flush_cache);
 
 /** Send a dmachain to the specified dma channel. */
 int dma_channel_send_chain(int channel, void *data, int qwc, int flags, int spr);

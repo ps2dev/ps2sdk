@@ -154,6 +154,32 @@ int dma_channel_wait(int channel, int timeout)
 
 }
 
+void dma_channel_send_packet2(packet2_t *packet2, int channel, u8 flush_cache)
+{
+	// dma_channel_send_chain does NOT flush all data that is "source chained"
+	if (packet2->mode == CHAIN && flush_cache)
+	{
+		if (flush_cache)
+			FlushCache(0);
+		dma_channel_send_chain(
+			channel,
+			(void *)((u32)packet2->base & 0x0FFFFFFF),
+			0,
+			packet2->tte ? DMA_FLAG_TRANSFERTAG : 0,
+			0);
+	}
+	else
+	{
+		dma_channel_send_normal(
+			channel,
+			(void *)((u32)packet2->base & 0x0FFFFFFF),		// make ptr normal
+			((u32)packet2->next - (u32)packet2->base) >> 4, // length in qwords
+			0,
+			0);
+	}
+}
+
+
 int dma_channel_send_chain(int channel, void *data, int data_size, int flags, int spr)
 {
 
