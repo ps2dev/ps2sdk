@@ -17,7 +17,7 @@
 #define __DMA_H__
 
 #include <tamtypes.h>
-#include "../../packet2/include/packet2.h"
+#include <packet2_types.h>
 
 #define DMA_CHANNEL_VIF0     0x00
 #define DMA_CHANNEL_VIF1     0x01
