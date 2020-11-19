@@ -107,7 +107,6 @@ extern "C"
      * NOTICE: packet2_chain_close_tag() required. Qwords 
      * are calculated automatically. 
      * For more details, check description of dma_tag_t. 
-     * NOTICE: Don't forget about close_tag()!
      * @param packet2 Pointer to packet. 
      * @param irq Interrupt Request. False by default.
      * @param pce Priority Control Enable. 0 by default.
