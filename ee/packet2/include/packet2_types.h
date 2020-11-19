@@ -274,9 +274,15 @@ typedef struct
     /** Maximum number of qwords which was defined in packet2_create(). */
     u16 max_qwords_count;
     /** Type of packet's memory mapping. */
-    Packet2Type type;
+    enum Packet2Type type;
     /** Packet mode. */
-    Packet2Mode mode;
+    enum Packet2Mode mode;
+    /** 
+     * Tag transfer enable.
+     * If >0 transfer tag is set during packet sending.
+     * Effective only in chain mode.
+     */
+    u8 tte;
     /** Start position of the buffer. */
     qword_t *base __attribute__((aligned(64)));
     /** Current position of the buffer. */
