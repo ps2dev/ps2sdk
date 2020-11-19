@@ -117,6 +117,28 @@ typedef struct
     u32 OPT2;
 } dma_tag_t __attribute__((aligned(16)));
 
+/** 
+ * Unpack modes. 
+ * V2 = 2 dimensions, S = Single = 1 dimension 
+ * _32 = 32 bits of data length.  
+ */
+enum UnpackMode
+{
+    S_32 = 0x00,
+    S_16 = 0x01,
+    S_8 = 0x02,
+    V2_32 = 0x04,
+    V2_16 = 0x05,
+    V2_8 = 0x06,
+    V3_32 = 0x08,
+    V3_16 = 0x09,
+    V3_8 = 0x0A,
+    V4_32 = 0x0C,
+    V4_16 = 0x0D,
+    V4_8 = 0x0E,
+    V4_5 = 0x0F,
+};
+
 /** VIF opcodes. */
 enum VIFOpcode
 {
