@@ -51,7 +51,13 @@ void dma_wait_fast(void);
 /** Wait until the specified dma channel is ready. */
 int dma_channel_wait(int channel, int timeout);
 
-/** Send packet2. */
+/** 
+ * Send packet2. 
+ * Type chain/normal is choosen from packet2_t. 
+ * @param packet2 Pointer to packet. 
+ * @param channel DMA channel. 
+ * @param flush_cache Should be cache flushed before send? 
+ */
 void dma_channel_send_packet2(packet2_t *packet2, int channel, u8 flush_cache);
 
 /** Send a dmachain to the specified dma channel. */

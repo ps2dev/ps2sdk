@@ -157,7 +157,7 @@ int dma_channel_wait(int channel, int timeout)
 void dma_channel_send_packet2(packet2_t *packet2, int channel, u8 flush_cache)
 {
 	// dma_channel_send_chain does NOT flush all data that is "source chained"
-	if (packet2->mode == MODE_CHAIN && flush_cache)
+	if (packet2->mode == P2_MODE_CHAIN && flush_cache)
 	{
 		if (flush_cache)
 			FlushCache(0);

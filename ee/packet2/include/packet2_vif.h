@@ -40,7 +40,7 @@ extern "C"
      * 0 - Signed - Decompress by sign extension 
      * @param irq Interrupt Request. False by default.
      */
-    inline void packet2_vif_open_unpack(packet2_t *packet2, enum UnpackMode mode, u32 vuAddr, u8 dblBuffered, u8 masked, u8 usigned, u8 irq)
+    static inline void packet2_vif_open_unpack(packet2_t *packet2, enum UnpackMode mode, u32 vuAddr, u8 dblBuffered, u8 masked, u8 usigned, u8 irq)
     {
         assert(packet2->vif_code_opened_at == NULL); // All previous UNPACK/DIRECT are closed.
         packet2->vif_code_opened_at = (vif_code_t *)packet2->next;
@@ -57,7 +57,7 @@ extern "C"
      * @param packet2 Pointer to packet. 
      * @param unpack_num Amount of data written to the VU Mem (qwords) or MicroMem (dwords) 
      */
-    inline void packet2_vif_close_unpack(packet2_t *packet2, u32 unpack_num)
+    static inline void packet2_vif_close_unpack(packet2_t *packet2, u32 unpack_num)
     {
         assert(packet2->vif_code_opened_at != NULL);               // There is open UNPACK/DIRECT.
         assert(((u32)packet2->next & 0x3) == 0);                   // Make sure we're u32 aligned
@@ -74,11 +74,11 @@ extern "C"
      * @param packet2 Pointer to packet. 
      * @param irq Interrupt Request. False by default.
      */
-    inline void packet2_vif_open_direct(packet2_t *packet2, u8 irq)
+    static inline void packet2_vif_open_direct(packet2_t *packet2, u8 irq)
     {
         assert(packet2->vif_code_opened_at == NULL); // All previous UNPACK/DIRECT are closed.
         packet2->vif_code_opened_at = (vif_code_t *)packet2->next;
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, VIF_DIRECT, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, P2_VIF_DIRECT, irq);
     }
 
     /** 
@@ -88,7 +88,7 @@ extern "C"
      * @param packet2 Pointer to packet. 
      * @param qwords Qwords count. 
      */
-    inline void packet2_vif_close_direct_manual(packet2_t *packet2, u32 qwords)
+    static inline void packet2_vif_close_direct_manual(packet2_t *packet2, u32 qwords)
     {
         assert(packet2->vif_code_opened_at != NULL); // There is open UNPACK/DIRECT.
         assert((((u32)packet2->next - ((u32)packet2->vif_code_opened_at + 4)) & 0xF) == 0);
@@ -102,7 +102,7 @@ extern "C"
      * fix immediate value with qwords counted from last packet2_vif_open_direct(). 
      * @param packet2 Pointer to packet. 
      */
-    inline void packet2_vif_close_direct_auto(packet2_t *packet2)
+    static inline void packet2_vif_close_direct_auto(packet2_t *packet2)
     {
         return packet2_vif_close_direct_manual(packet2, ((u32)packet2->next - ((u32)packet2->vif_code_opened_at + 4)) >> 4);
     }
@@ -114,9 +114,9 @@ extern "C"
      * @param packet2 Pointer to packet. 
      * @param irq Interrupt Request. False by default. 
      */
-    inline void packet2_vif_nop(packet2_t *packet2, u8 irq)
+    static inline void packet2_vif_nop(packet2_t *packet2, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, VIF_NOP, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, P2_VIF_NOP, irq);
     }
 
     /** 
@@ -128,9 +128,9 @@ extern "C"
      * @param addr Address. 
      * @param irq Interrupt Request. False by default. 
      */
-    inline void packet2_vif_mpg(packet2_t *packet2, u32 num, u32 addr, u8 irq)
+    static inline void packet2_vif_mpg(packet2_t *packet2, u32 num, u32 addr, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(addr, num, VIF_MPG, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(addr, num, P2_VIF_MPG, irq);
     }
 
     /** 
@@ -142,9 +142,9 @@ extern "C"
      * @param cl CL field. 
      * @param irq Interrupt Request. False by default. 
      */
-    inline void packet2_vif_stcycl(packet2_t *packet2, u32 wl, u32 cl, u8 irq)
+    static inline void packet2_vif_stcycl(packet2_t *packet2, u32 wl, u32 cl, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(cl | (wl << 8), 0, VIF_STCYCL, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(cl | (wl << 8), 0, P2_VIF_STCYCL, irq);
     }
 
     /** 
@@ -155,9 +155,9 @@ extern "C"
      * @param offset Offset. BASE+OFFSET will be the address of second buffer. 
      * @param irq Interrupt Request. False by default. 
      */
-    inline void packet2_vif_offset(packet2_t *packet2, u32 offset, u8 irq)
+    static inline void packet2_vif_offset(packet2_t *packet2, u32 offset, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(offset, 0, VIF_OFFSET, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(offset, 0, P2_VIF_OFFSET, irq);
     }
 
     /** 
@@ -168,9 +168,9 @@ extern "C"
      * @param base Base address of double buffer. 
      * @param irq Interrupt Request. False by default. 
      */
-    inline void packet2_vif_base(packet2_t *packet2, u32 base, u8 irq)
+    static inline void packet2_vif_base(packet2_t *packet2, u32 base, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(base, 0, VIF_BASE, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(base, 0, P2_VIF_BASE, irq);
     }
 
     /** 
@@ -180,9 +180,9 @@ extern "C"
      * @param packet2 Pointer to packet. 
      * @param irq Interrupt Request. False by default. 
      */
-    inline void packet2_vif_flush(packet2_t *packet2, u8 irq)
+    static inline void packet2_vif_flush(packet2_t *packet2, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, VIF_FLUSH, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, P2_VIF_FLUSH, irq);
     }
 
     /** 
@@ -193,9 +193,9 @@ extern "C"
      * @param addr Starting address. 
      * @param irq Interrupt Request. False by default. 
      */
-    inline void packet2_vif_mscal(packet2_t *packet2, u32 addr, u8 irq)
+    static inline void packet2_vif_mscal(packet2_t *packet2, u32 addr, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(addr, 0, VIF_MSCAL, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(addr, 0, P2_VIF_MSCAL, irq);
     }
 
     /** 
@@ -205,9 +205,9 @@ extern "C"
      * @param packet2 Pointer to packet. 
      * @param irq Interrupt Request. False by default. 
      */
-    inline void packet2_vif_mscnt(packet2_t *packet2, u8 irq)
+    static inline void packet2_vif_mscnt(packet2_t *packet2, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, VIF_MSCNT, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, P2_VIF_MSCNT, irq);
     }
 
     /** 
@@ -218,9 +218,9 @@ extern "C"
      * @param itops Value for VU XITOP instruction. 
      * @param irq Interrupt Request. False by default. 
      */
-    inline void packet2_vif_itop(packet2_t *packet2, u32 itops, u8 irq)
+    static inline void packet2_vif_itop(packet2_t *packet2, u32 itops, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(itops, 0, VIF_ITOP, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(itops, 0, P2_VIF_ITOP, irq);
     }
 
     /** 
@@ -231,9 +231,9 @@ extern "C"
      * @param mode Decompression mode. 
      * @param irq Interrupt Request. False by default. 
      */
-    inline void packet2_vif_stmod(packet2_t *packet2, u32 mode, u8 irq)
+    static inline void packet2_vif_stmod(packet2_t *packet2, u32 mode, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(mode, 0, VIF_STMOD, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(mode, 0, P2_VIF_STMOD, irq);
     }
 
     /** 
@@ -244,9 +244,9 @@ extern "C"
      * @param mask Mask. 
      * @param irq Interrupt Request. False by default. 
      */
-    inline void packet2_vif_mskpath3(packet2_t *packet2, u32 mask, u8 irq)
+    static inline void packet2_vif_mskpath3(packet2_t *packet2, u32 mask, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(mask, 0, VIF_MSKPATH3, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(mask, 0, P2_VIF_MSKPATH3, irq);
     }
 
     /** 
@@ -257,9 +257,9 @@ extern "C"
      * @param value Value. 
      * @param irq Interrupt Request. False by default. 
      */
-    inline void packet2_vif_mark(packet2_t *packet2, u32 value, u8 irq)
+    static inline void packet2_vif_mark(packet2_t *packet2, u32 value, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(value, 0, VIF_MARK, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(value, 0, P2_VIF_MARK, irq);
     }
 
     /** 
@@ -269,9 +269,9 @@ extern "C"
      * @param packet2 Pointer to packet. 
      * @param irq Interrupt Request. False by default. 
      */
-    inline void packet2_vif_flushe(packet2_t *packet2, u8 irq)
+    static inline void packet2_vif_flushe(packet2_t *packet2, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, VIF_FLUSHE, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, P2_VIF_FLUSHE, irq);
     }
 
     /** 
@@ -281,9 +281,9 @@ extern "C"
      * @param packet2 Pointer to packet. 
      * @param irq Interrupt Request. False by default. 
      */
-    inline void packet2_vif_flusha(packet2_t *packet2, u8 irq)
+    static inline void packet2_vif_flusha(packet2_t *packet2, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, VIF_FLUSHA, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, P2_VIF_FLUSHA, irq);
     }
 
     /** 
@@ -294,9 +294,9 @@ extern "C"
      * @param addr Address. 
      * @param irq Interrupt Request. False by default. 
      */
-    inline void packet2_vif_mscalf(packet2_t *packet2, u32 addr, u8 irq)
+    static inline void packet2_vif_mscalf(packet2_t *packet2, u32 addr, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(addr, 0, VIF_MSCALF, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(addr, 0, P2_VIF_MSCALF, irq);
     }
 
     /** 
@@ -307,9 +307,9 @@ extern "C"
      * @param mask Mask. 
      * @param irq Interrupt Request. False by default. 
      */
-    inline void packet2_vif_stmask(packet2_t *packet2, Mask mask, u8 irq)
+    static inline void packet2_vif_stmask(packet2_t *packet2, Mask mask, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, VIF_STMASK, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, P2_VIF_STMASK, irq);
         *((Mask *)packet2->next)++ = mask;
     }
 
@@ -321,9 +321,9 @@ extern "C"
      * @param row_arr Row array. 
      * @param irq Interrupt Request. False by default. 
      */
-    inline void packet2_vif_strow(packet2_t *packet2, const void *row_arr, u8 irq)
+    static inline void packet2_vif_strow(packet2_t *packet2, const void *row_arr, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, VIF_STROW, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, P2_VIF_STROW, irq);
         *((u32 *)packet2->next)++ = ((u32 *)row_arr)[0];
         *((u32 *)packet2->next)++ = ((u32 *)row_arr)[1];
         *((u32 *)packet2->next)++ = ((u32 *)row_arr)[2];
@@ -338,9 +338,9 @@ extern "C"
      * @param col_arr Column array. 
      * @param irq Interrupt Request. False by default. 
      */
-    inline void packet2_vif_stcol(packet2_t *packet2, const void *col_arr, u8 irq)
+    static inline void packet2_vif_stcol(packet2_t *packet2, const void *col_arr, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, VIF_STCOL, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, P2_VIF_STCOL, irq);
         *((u32 *)packet2->next)++ = ((u32 *)col_arr)[0];
         *((u32 *)packet2->next)++ = ((u32 *)col_arr)[1];
         *((u32 *)packet2->next)++ = ((u32 *)col_arr)[2];
