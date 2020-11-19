@@ -40,7 +40,7 @@ extern "C"
      * 0 - Signed - Decompress by sign extension 
      * @param irq Interrupt Request. False by default.
      */
-    inline void packet2_vif_open_unpack(packet2_t *packet2, UnpackMode mode, u32 vuAddr, u8 dblBuffered, u8 masked, u8 usigned, u8 irq)
+    inline void packet2_vif_open_unpack(packet2_t *packet2, enum UnpackMode mode, u32 vuAddr, u8 dblBuffered, u8 masked, u8 usigned, u8 irq)
     {
         assert(packet2->vif_code_opened_at == NULL); // All previous UNPACK/DIRECT are closed.
         packet2->vif_code_opened_at = (vif_code_t *)packet2->next;
@@ -78,7 +78,7 @@ extern "C"
     {
         assert(packet2->vif_code_opened_at == NULL); // All previous UNPACK/DIRECT are closed.
         packet2->vif_code_opened_at = (vif_code_t *)packet2->next;
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, DIRECT, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, VIF_DIRECT, irq);
     }
 
     /** 
@@ -116,7 +116,7 @@ extern "C"
      */
     inline void packet2_vif_nop(packet2_t *packet2, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, NOP, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, VIF_NOP, irq);
     }
 
     /** 
@@ -130,7 +130,7 @@ extern "C"
      */
     inline void packet2_vif_mpg(packet2_t *packet2, u32 num, u32 addr, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(addr, num, MPG, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(addr, num, VIF_MPG, irq);
     }
 
     /** 
@@ -144,7 +144,7 @@ extern "C"
      */
     inline void packet2_vif_stcycl(packet2_t *packet2, u32 wl, u32 cl, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(cl | (wl << 8), 0, STCYCL, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(cl | (wl << 8), 0, VIF_STCYCL, irq);
     }
 
     /** 
@@ -157,7 +157,7 @@ extern "C"
      */
     inline void packet2_vif_offset(packet2_t *packet2, u32 offset, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(offset, 0, OFFSET, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(offset, 0, VIF_OFFSET, irq);
     }
 
     /** 
@@ -170,7 +170,7 @@ extern "C"
      */
     inline void packet2_vif_base(packet2_t *packet2, u32 base, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(base, 0, BASE, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(base, 0, VIF_BASE, irq);
     }
 
     /** 
@@ -182,7 +182,7 @@ extern "C"
      */
     inline void packet2_vif_flush(packet2_t *packet2, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, FLUSH, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, VIF_FLUSH, irq);
     }
 
     /** 
@@ -195,7 +195,7 @@ extern "C"
      */
     inline void packet2_vif_mscal(packet2_t *packet2, u32 addr, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(addr, 0, MSCAL, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(addr, 0, VIF_MSCAL, irq);
     }
 
     /** 
@@ -207,7 +207,7 @@ extern "C"
      */
     inline void packet2_vif_mscnt(packet2_t *packet2, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, MSCNT, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, VIF_MSCNT, irq);
     }
 
     /** 
@@ -220,7 +220,7 @@ extern "C"
      */
     inline void packet2_vif_itop(packet2_t *packet2, u32 itops, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(itops, 0, ITOP, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(itops, 0, VIF_ITOP, irq);
     }
 
     /** 
@@ -233,7 +233,7 @@ extern "C"
      */
     inline void packet2_vif_stmod(packet2_t *packet2, u32 mode, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(mode, 0, STMOD, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(mode, 0, VIF_STMOD, irq);
     }
 
     /** 
@@ -246,7 +246,7 @@ extern "C"
      */
     inline void packet2_vif_mskpath3(packet2_t *packet2, u32 mask, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(mask, 0, MSKPATH3, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(mask, 0, VIF_MSKPATH3, irq);
     }
 
     /** 
@@ -259,7 +259,7 @@ extern "C"
      */
     inline void packet2_vif_mark(packet2_t *packet2, u32 value, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(value, 0, MARK, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(value, 0, VIF_MARK, irq);
     }
 
     /** 
@@ -271,7 +271,7 @@ extern "C"
      */
     inline void packet2_vif_flushe(packet2_t *packet2, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, FLUSHE, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, VIF_FLUSHE, irq);
     }
 
     /** 
@@ -283,7 +283,7 @@ extern "C"
      */
     inline void packet2_vif_flusha(packet2_t *packet2, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, FLUSHA, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, VIF_FLUSHA, irq);
     }
 
     /** 
@@ -296,7 +296,7 @@ extern "C"
      */
     inline void packet2_vif_mscalf(packet2_t *packet2, u32 addr, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(addr, 0, MSCALF, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(addr, 0, VIF_MSCALF, irq);
     }
 
     /** 
@@ -309,7 +309,7 @@ extern "C"
      */
     inline void packet2_vif_stmask(packet2_t *packet2, Mask mask, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, STMASK, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, VIF_STMASK, irq);
         *((Mask *)packet2->next)++ = mask;
     }
 
@@ -323,7 +323,7 @@ extern "C"
      */
     inline void packet2_vif_strow(packet2_t *packet2, const void *row_arr, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, STROW, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, VIF_STROW, irq);
         *((u32 *)packet2->next)++ = ((u32 *)row_arr)[0];
         *((u32 *)packet2->next)++ = ((u32 *)row_arr)[1];
         *((u32 *)packet2->next)++ = ((u32 *)row_arr)[2];
@@ -340,7 +340,7 @@ extern "C"
      */
     inline void packet2_vif_stcol(packet2_t *packet2, const void *col_arr, u8 irq)
     {
-        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, STCOL, irq);
+        *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, VIF_STCOL, irq);
         *((u32 *)packet2->next)++ = ((u32 *)col_arr)[0];
         *((u32 *)packet2->next)++ = ((u32 *)col_arr)[1];
         *((u32 *)packet2->next)++ = ((u32 *)col_arr)[2];

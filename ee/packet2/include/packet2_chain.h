@@ -114,7 +114,7 @@ extern "C"
      */
     inline void packet2_chain_open_cnt(packet2_t *packet2, u8 irq, u32 pce, u8 spr)
     {
-        packet2_chain_add_dma_tag(packet2, PACKET2_COUNT_QWC, pce, CNT, irq, 0, spr);
+        packet2_chain_add_dma_tag(packet2, PACKET2_COUNT_QWC, pce, DMA_TAG_CNT, irq, 0, spr);
     }
 
     /** 
@@ -129,7 +129,7 @@ extern "C"
      */
     inline void packet2_chain_open_end(packet2_t *packet2, u8 irq, u32 pce)
     {
-        packet2_chain_add_dma_tag(packet2, PACKET2_COUNT_QWC, pce, END, irq, 0, 0);
+        packet2_chain_add_dma_tag(packet2, PACKET2_COUNT_QWC, pce, DMA_TAG_END, irq, 0, 0);
     }
 
     /** 
@@ -144,10 +144,10 @@ extern "C"
      * @param spr Memory/SPR Selection. False by default.
      * @param pce Priority Control Enable. 0 by default.
      */
-    inline void spacket_ref(packet2_t *packet2, const void *ref_data, u32 qw_length, u8 irq, u8 spr, u32 pce)
+    inline void packet2_chain_ref(packet2_t *packet2, const void *ref_data, u32 qw_length, u8 irq, u8 spr, u32 pce)
     {
         assert(((u32)packet2->next & 0xF) == 0); // Free space in packet is aligned properly.
-        packet2_chain_add_dma_tag(packet2, qw_length, pce, REF, irq, (const u128 *)ref_data, spr);
+        packet2_chain_add_dma_tag(packet2, qw_length, pce, DMA_TAG_REF, irq, (const u128 *)ref_data, spr);
     }
 
     /** 
@@ -160,10 +160,10 @@ extern "C"
      * @param spr Memory/SPR Selection. False by default. 
      * @param pce Priority Control Enable. 0 by default. 
      */
-    void packet2_chain_next(packet2_t *packet2, const dma_tag_t *next_tag, u8 irq, u8 spr, u32 pce)
+    inline void packet2_chain_next(packet2_t *packet2, const dma_tag_t *next_tag, u8 irq, u8 spr, u32 pce)
     {
         assert(((u32)packet2->next & 0xF) == 0); // Free space in packet is aligned properly.
-        packet2_chain_add_dma_tag(packet2, PACKET2_COUNT_QWC, pce, NEXT, irq, (u128 *)next_tag, spr);
+        packet2_chain_add_dma_tag(packet2, PACKET2_COUNT_QWC, pce, DMA_TAG_NEXT, irq, (u128 *)next_tag, spr);
     }
 
     /** 
@@ -178,10 +178,10 @@ extern "C"
      * @param spr Memory/SPR Selection. False by default.
      * @param pce Priority Control Enable. 0 by default.
      */
-    void packet2_chain_refs(packet2_t *packet2, const void *ref_data, u32 qw_length, u8 irq, u8 spr, u32 pce)
+    inline void packet2_chain_refs(packet2_t *packet2, const void *ref_data, u32 qw_length, u8 irq, u8 spr, u32 pce)
     {
         assert(((u32)packet2->next & 0xF) == 0); // Free space in packet is aligned properly.
-        packet2_chain_add_dma_tag(packet2, qw_length, pce, REFS, irq, (const u128 *)ref_data, spr);
+        packet2_chain_add_dma_tag(packet2, qw_length, pce, DMA_TAG_REFS, irq, (const u128 *)ref_data, spr);
     }
 
     /** 
@@ -196,10 +196,10 @@ extern "C"
      * @param spr Memory/SPR Selection. False by default.
      * @param pce Priority Control Enable. 0 by default.
      */
-    void packet2_chain_refe(packet2_t *packet2, const void *ref_data, u32 qw_length, u8 irq, u8 spr, u32 pce)
+    inline void packet2_chain_refe(packet2_t *packet2, const void *ref_data, u32 qw_length, u8 irq, u8 spr, u32 pce)
     {
         assert(((u32)packet2->next & 0xF) == 0); // Free space in packet is aligned properly.
-        packet2_chain_add_dma_tag(packet2, qw_length, pce, REFE, irq, (const u128 *)ref_data, spr);
+        packet2_chain_add_dma_tag(packet2, qw_length, pce, DMA_TAG_REFE, irq, (const u128 *)ref_data, spr);
     }
 
     /** 
@@ -213,10 +213,10 @@ extern "C"
      * @param spr Memory/SPR Selection. False by default.
      * @param pce Priority Control Enable. 0 by default.
      */
-    void packet2_chain_call(packet2_t *packet2, const void *next_tag, u8 irq, u8 spr, u32 pce)
+    inline void packet2_chain_call(packet2_t *packet2, const void *next_tag, u8 irq, u8 spr, u32 pce)
     {
         assert(((u32)packet2->next & 0xF) == 0); // Free space in packet is aligned properly.
-        packet2_chain_add_dma_tag(packet2, PACKET2_COUNT_QWC, pce, CALL, irq, (u128 *)next_tag, spr);
+        packet2_chain_add_dma_tag(packet2, PACKET2_COUNT_QWC, pce, DMA_TAG_CALL, irq, (u128 *)next_tag, spr);
     }
 
     /** 
@@ -228,9 +228,9 @@ extern "C"
      * @param irq Interrupt Request. False by default.
      * @param pce Priority Control Enable. 0 by default.
      */
-    void packet2_chain_ret(packet2_t *packet2, u8 irq, u32 pce)
+    inline void packet2_chain_ret(packet2_t *packet2, u8 irq, u32 pce)
     {
-        packet2_chain_add_dma_tag(packet2, PACKET2_COUNT_QWC, pce, RET, irq, 0, 0);
+        packet2_chain_add_dma_tag(packet2, PACKET2_COUNT_QWC, pce, DMA_TAG_RET, irq, 0, 0);
     }
 
 #ifdef __cplusplus
