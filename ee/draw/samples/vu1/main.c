@@ -12,18 +12,18 @@
 #include <kernel.h>
 #include <malloc.h>
 #include <tamtypes.h>
-#include <packet.h>
 #include <dma_tags.h>
 #include <gif_tags.h>
 #include <gs_psm.h>
 #include <dma.h>
+#include <packet2.h>
 #include <graph.h>
 #include <draw3d.h>
-#include <vu1.h>
 #include <draw.h>
 #include "zbyszek.c"
 #include "mesh_data.c"
 
+#include "./vu1.h"
 #include <gs_gp.h>
 
 // ---
@@ -61,6 +61,11 @@ VECTOR camera_position = {140.00f, 140.00f, 40.00f, 1.00f};
 VECTOR camera_rotation = {0.00f, 0.00f, 0.00f, 1.00f};
 MATRIX local_world, world_view, view_screen, local_screen;
 
+/** Packets for sending VIF data */
+packet2_t *vif_packets[2] __attribute__((aligned(64)));
+packet2_t *curr_vif_packet;
+u8 context = 0;
+
 /** Set GS primitive type of drawing. */
 prim_t prim;
 
@@ -89,17 +94,19 @@ VECTOR *c_verts __attribute__((aligned(128))), *c_sts __attribute__((aligned(128
  */
 void draw_vertices(texbuffer_t *t_texbuff)
 {
-	vu1_create_dyn_list();
-	vu1_add_dyn_list_beginning();
+	curr_vif_packet = vif_packets[context];
+	packet2_reset(curr_vif_packet, 0);
 
-	vu1_dyn_add_float(2048.0F);					  // scale
-	vu1_dyn_add_float(2048.0F);					  // scale
-	vu1_dyn_add_float(((float)0xFFFFFF) / 32.0F); // scale
-	vu1_dyn_add_32(faces_count);				  // vertex count
+	vu1_open_unpack(curr_vif_packet);
+	vu1_unpack_add_float(curr_vif_packet, 2048.0F);					  // scale
+	vu1_unpack_add_float(curr_vif_packet, 2048.0F);					  // scale
+	vu1_unpack_add_float(curr_vif_packet, ((float)0xFFFFFF) / 32.0F); // scale
+	vu1_unpack_add_32(curr_vif_packet, faces_count);				  // vertex count
 
-	vu1_dyn_add_128(GIF_SET_TAG(1, 0, 0, 0, GIF_FLG_PACKED, 1), GIF_REG_AD); // 1x set tag
+	vu1_unpack_add_128(curr_vif_packet, GIF_SET_TAG(1, 0, 0, 0, GIF_FLG_PACKED, 1), GIF_REG_AD); // 1x set tag
 
-	vu1_dyn_add_128( // tex -> lod
+	vu1_unpack_add_128( // tex -> lod
+		curr_vif_packet,
 		GS_SET_TEX1(
 			lod.calculation,
 			lod.max_level,
@@ -110,7 +117,8 @@ void draw_vertices(texbuffer_t *t_texbuff)
 			(int)(lod.k * 16.0F)),
 		GS_REG_TEX1);
 
-	vu1_dyn_add_128( // tex -> buff + clut
+	vu1_unpack_add_128( // tex -> buff + clut
+		curr_vif_packet,
 		GS_SET_TEX0(
 			t_texbuff->address >> 6,
 			t_texbuff->width >> 6,
@@ -126,7 +134,8 @@ void draw_vertices(texbuffer_t *t_texbuff)
 			clut.load_method),
 		GS_REG_TEX0);
 
-	vu1_dyn_add_128(
+	vu1_unpack_add_128(
+		curr_vif_packet,
 		GS_GIFTAG(
 			faces_count, // Information for GS. Amount of loops
 			1,
@@ -141,19 +150,22 @@ void draw_vertices(texbuffer_t *t_texbuff)
 				prim.mapping_type,
 				0, // context
 				prim.colorfix),
-			GS_GIFTAG_PACKED,
+			0,	// GS gif tag packed
 			3), // STQ + RGBA + XYZ
 		DRAW_STQ2_REGLIST);
 
 	u8 j = 0; // RGBA
 	for (j = 0; j < 4; j++)
-		vu1_dyn_add_32(128);
+		vu1_unpack_add_32(curr_vif_packet, 128);
 
-	vu1_add_dyn_list_ending();
-	vu1_add_reference_list(0, c_verts, 2 * faces_count, 1);
-	vu1_add_reference_list(0, c_sts, 2 * faces_count, 1);
-	vu1_add_start_program();
-	vu1_send();
+	vu1_close_unpack(curr_vif_packet);
+	vu1_add_data(curr_vif_packet, c_verts, 2 * faces_count, 1);
+	vu1_add_data(curr_vif_packet, c_sts, 2 * faces_count, 1);
+	vu1_add_start_program(curr_vif_packet);
+	vu1_send_packet(curr_vif_packet);
+
+	// Switch packet, so we can proceed during DMA transfer
+	context = !context;
 }
 
 /** Some initialization of GS and VRAM allocation */
@@ -185,63 +197,51 @@ void init_gs(framebuffer_t *t_frame, zbuffer_t *t_z, texbuffer_t *t_texbuff)
 /** Some initialization of GS 2 */
 void init_drawing_environment(framebuffer_t *t_frame, zbuffer_t *t_z)
 {
-	packet_t *packet = packet_init(20, PACKET_NORMAL);
-
-	// This is our generic qword pointer.
-	qword_t *q = packet->data;
+	packet2_t *packet2 = packet2_create_normal(20, P2_TYPE_NORMAL);
 
 	// This will setup a default drawing environment.
-	q = draw_setup_environment(q, 0, t_frame, t_z);
+	packet2_update(packet2, draw_setup_environment(packet2->next, 0, t_frame, t_z));
 
 	// Now reset the primitive origin to 2048-width/2,2048-height/2.
-	q = draw_primitive_xyoffset(q, 0, (2048 - 320), (2048 - 256));
+	packet2_update(packet2, draw_primitive_xyoffset(packet2->next, 0, (2048 - 320), (2048 - 256)));
 
 	// Finish setting up the environment.
-	q = draw_finish(q);
+	packet2_update(packet2, draw_finish(packet2->next));
 
 	// Now send the packet, no need to wait since it's the first.
-	dma_channel_send_normal(DMA_CHANNEL_GIF, packet->data, q - packet->data, 0, 0);
+	dma_channel_send_packet2(packet2, DMA_CHANNEL_GIF, 1);
 	dma_wait_fast();
 
-	packet_free(packet);
+	packet2_free(packet2);
 }
 
 /** Send texture data to GS. */
 void send_texture(texbuffer_t *texbuf)
 {
-	packet_t *packet = packet_init(50, PACKET_NORMAL);
-
-	qword_t *q = packet->data;
-
-	q = packet->data;
-
-	q = draw_texture_transfer(q, zbyszek, 128, 128, GS_PSM_24, texbuf->address, texbuf->width);
-	q = draw_texture_flush(q);
-
-	dma_channel_send_chain(DMA_CHANNEL_GIF, packet->data, q - packet->data, 0, 0);
+	packet2_t *packet2 = packet2_create_chain(50, P2_TYPE_NORMAL, 0);
+	packet2_update(packet2, draw_texture_transfer(packet2->next, zbyszek, 128, 128, GS_PSM_24, texbuf->address, texbuf->width));
+	packet2_update(packet2, draw_texture_flush(packet2->next));
+	dma_channel_send_packet2(packet2, DMA_CHANNEL_GIF, 1);
 	dma_wait_fast();
-
-	packet_free(packet);
+	packet2_free(packet2);
 }
 
 /** Send packet which will clear our screen. */
 void clear_screen(framebuffer_t *frame, zbuffer_t *z)
 {
-	packet_t *current = packet_init(50, PACKET_NORMAL);
-	qword_t *q;
-	q = current->data;
+	packet2_t *clear = packet2_create_normal(35, P2_TYPE_NORMAL);
 
 	// Clear framebuffer but don't update zbuffer.
-	q = draw_disable_tests(q, 0, z);
-	q = draw_clear(q, 0, 2048.0f - 320.0f, 2048.0f - 256.0f, frame->width, frame->height, 0x40, 0x40, 0x40);
-	q = draw_enable_tests(q, 0, z);
+	packet2_update(clear, draw_disable_tests(clear->next, 0, z));
+	packet2_update(clear, draw_clear(clear->next, 0, 2048.0f - 320.0f, 2048.0f - 256.0f, frame->width, frame->height, 0x40, 0x40, 0x40));
+	packet2_update(clear, draw_enable_tests(clear->next, 0, z));
+	packet2_update(clear, draw_finish(clear->next));
 
-	q = draw_finish(q);
 	// Now send our current dma chain.
 	dma_wait_fast();
-	dma_channel_send_normal(DMA_CHANNEL_GIF, current->data, q - current->data, 0, 0);
+	dma_channel_send_packet2(clear, DMA_CHANNEL_GIF, 1);
 
-	packet_free(current);
+	packet2_free(clear);
 
 	// Wait for scene to finish drawing
 	draw_wait_finish();
@@ -259,7 +259,7 @@ void draw_zbyszek(VECTOR t_object_position, texbuffer_t *t_texbuff)
 	// Create the local_screen matrix.
 	create_local_screen(local_screen, local_world, world_view, view_screen);
 
-	vu1_send_single_ref_list(0, &local_screen, 8);
+	vu1_send_data(0, &local_screen, 8);
 
 	draw_vertices(t_texbuff);
 }
@@ -361,7 +361,6 @@ void render(framebuffer_t *t_frame, zbuffer_t *t_z, texbuffer_t *t_texbuff)
 				draw_zbyszek(c_zbyszek_position, t_texbuff);
 			}
 		}
-
 		graph_wait_vsync();
 	}
 }
@@ -369,20 +368,24 @@ void render(framebuffer_t *t_frame, zbuffer_t *t_z, texbuffer_t *t_texbuff)
 int main(int argc, char **argv)
 {
 
-	// Initialize DMA buffer for data transporting.
-	// Set VU1 double buffer size.
-	vu1_init(48 * 1024, 1, 8, 496);
+	// Init DMA channels.
+	dma_channel_initialize(DMA_CHANNEL_GIF, NULL, 0);
+	dma_channel_initialize(DMA_CHANNEL_VIF1, NULL, 0);
+	dma_channel_fast_waits(DMA_CHANNEL_GIF);
+	dma_channel_fast_waits(DMA_CHANNEL_VIF1);
+
+	// Initialize vif packets
+	vif_packets[0] = packet2_create_chain(11, P2_TYPE_NORMAL, 1);
+	vif_packets[1] = packet2_create_chain(11, P2_TYPE_NORMAL, 1);
 
 	vu1_upload_program(0, &VU1Draw3D_CodeStart, &VU1Draw3D_CodeEnd);
+
+	vu1_set_double_buffer(8, 496);
 
 	// The buffers to be used.
 	framebuffer_t frame;
 	zbuffer_t z;
 	texbuffer_t texbuff;
-
-	// Init GIF dma channel.
-	dma_channel_initialize(DMA_CHANNEL_GIF, NULL, 0);
-	dma_channel_fast_waits(DMA_CHANNEL_GIF);
 
 	// Init the GS, framebuffer, zbuffer, and texture buffer.
 	init_gs(&frame, &z, &texbuff);
