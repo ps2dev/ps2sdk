@@ -91,7 +91,6 @@ void draw_vertices(texbuffer_t *t_texbuff)
 {
 	curr_vif_packet = vif_packets[context];
 	packet2_reset(curr_vif_packet, 0);
-	vu_add_flush(curr_vif_packet);
 	vu_open_unpack(curr_vif_packet);
 	vu_unpack_add_float(curr_vif_packet, 2048.0F);					 // scale
 	vu_unpack_add_float(curr_vif_packet, 2048.0F);					 // scale
