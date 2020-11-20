@@ -20,8 +20,8 @@
 #include <draw_sampling.h>
 #include <gs_gp.h>
 
-#define GS_PRIM(PRIM, IIP, TME, FGE, ABE, AA1, FST, CTXT, FIX) (u128)(((FIX << 10) | (CTXT << 9) | (FST << 8) | (AA1 << 7) | (ABE << 6) | (FGE << 5) | (TME << 4) | (IIP << 3) | (PRIM)))
-#define GS_GIFTAG(NLOOP, EOP, PRE, PRIM, FLG, NREG) (((u64)(NREG) << 60) | ((u64)(FLG) << 58) | ((u64)(PRIM) << 47) | ((u64)(PRE) << 46) | (EOP << 15) | (NLOOP << 0))
+#define VU_GS_PRIM(PRIM, IIP, TME, FGE, ABE, AA1, FST, CTXT, FIX) (u128)(((FIX << 10) | (CTXT << 9) | (FST << 8) | (AA1 << 7) | (ABE << 6) | (FGE << 5) | (TME << 4) | (IIP << 3) | (PRIM)))
+#define VU_GS_GIFTAG(NLOOP, EOP, PRE, PRIM, FLG, NREG) (((u64)(NREG) << 60) | ((u64)(FLG) << 58) | ((u64)(PRIM) << 47) | ((u64)(PRE) << 46) | (EOP << 15) | (NLOOP << 0))
 
 #ifdef __cplusplus
 extern "C"
@@ -250,11 +250,11 @@ extern "C"
     {
         vu_unpack_add_2x_s64(
             packet2,
-            GS_GIFTAG(
+            VU_GS_GIFTAG(
                 loops_count, // Information for GS. Amount of loops
                 1,
                 1,
-                GS_PRIM(
+                VU_GS_PRIM(
                     prim->type,
                     prim->shading,
                     prim->mapping,
