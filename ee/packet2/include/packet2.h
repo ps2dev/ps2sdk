@@ -27,56 +27,56 @@ extern "C"
     // ---
 
     /** 
-	 * Allocate new packet2. 
-	 * @param qwords Maximum data size in qwords (128bit). 
-	 * @param type Memory mapping type. 
-	 * @returns Pointer to packet2 on success or NULL if memory allocation fail.
-	 */
+     * Allocate new packet2. 
+     * @param qwords Maximum data size in qwords (128bit). 
+     * @param type Memory mapping type. 
+     * @returns Pointer to packet2 on success or NULL if memory allocation fail.
+     */
     packet2_t *packet2_create_normal(u16 qwords, enum Packet2Type type);
 
     /** 
-	 * Allocate new packet2 for chain/vif purpose. 
-	 * @param qwords Maximum data size in qwords (128bit). 
-	 * @param type Memory mapping type. 
-	 * @param tte Tag transfer enable. 
+     * Allocate new packet2 for chain/vif purpose. 
+     * @param qwords Maximum data size in qwords (128bit). 
+     * @param type Memory mapping type. 
+     * @param tte Tag transfer enable. 
      * If >0 transfer tag is set during packet sending and 
      * add_dma_tag (so also every open_tag()) will move buffer by DWORD,
      * so remember to align memory!
-	 * @returns Pointer to packet2 on success or NULL if memory allocation fail. 
-	 */
+     * @returns Pointer to packet2 on success or NULL if memory allocation fail. 
+     */
     packet2_t *packet2_create_chain(u16 qwords, enum Packet2Type type, u8 tte);
 
     /** 
-	 * Create new packet2 with given data pointer. 
-	 * @param base Pointer to base (start of buffer). 
-	 * @param next Pointer to next (current position of buffer). 
-	 * @param qwords Maximum data size in qwords (128bit). 
-	 * @param type Memory mapping type. 
-	 * @param mode Packet mode (normal/chain). 
-	 * @returns Pointer to packet2 on success or NULL if memory allocation fail.
-	 */
+     * Create new packet2 with given data pointer. 
+     * @param base Pointer to base (start of buffer). 
+     * @param next Pointer to next (current position of buffer). 
+     * @param qwords Maximum data size in qwords (128bit). 
+     * @param type Memory mapping type. 
+     * @param mode Packet mode (normal/chain). 
+     * @returns Pointer to packet2 on success or NULL if memory allocation fail.
+     */
     packet2_t *packet2_create_from(qword_t *base, qword_t *next, u16 qwords, enum Packet2Type type, enum Packet2Mode mode);
 
     /** 
-	 * Free packet2 memory.
+     * Free packet2 memory.
      * @param packet2 Pointer to packet2.
-	 */
+     */
     void packet2_free(packet2_t *packet2);
 
     /** 
-	 * Reset packet. 
+     * Reset packet. 
      * Move next pointer back to base pointer, 
      * Make all "openedAt" vars to NULL 
      * Do memset on data if required.
      * @param packet2 Pointer to packet.
      * @param clear_mem If >0, data is cleared via memset(). SLOW! 
-	 */
+     */
     void packet2_reset(packet2_t *packet2, u8 clear_mem);
 
     /** 
-	 * Update current position of packet buffer.
+     * Update current position of packet buffer.
      * Useful with drawlib functions. 
-	 */
+     */
     static inline void packet2_update(packet2_t *packet2, qword_t *qw) { packet2->next = qw; }
 
     // ---

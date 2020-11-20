@@ -36,8 +36,8 @@
     lq      matrixRow3,     3(vi00)
     ;/////////////////////////////////////////////
 
-	fcset   0x000000    ; VCL won't let us use CLIP without first zeroing
-                        ; the clip flags
+	fcset   0x000000	; VCL won't let us use CLIP without first zeroing
+				; the clip flags
 
     ;//////////// --- Load data 2 --- /////////////
     ; Updated dynamically
@@ -89,17 +89,17 @@
         madd        acc,    matrixRow2, vertex[z]
         madd        vertex, matrixRow3, vertex[w]
        
-        clipw.xyz	vertex, vertex                  ; Dr. Fortuna: This instruction checks if the vertex is outside
-                                                    ; the viewing frustum. If it is, then the appropriate
-                                                    ; clipping flags are set
+        clipw.xyz	vertex, vertex			; Dr. Fortuna: This instruction checks if the vertex is outside
+							; the viewing frustum. If it is, then the appropriate
+							; clipping flags are set
         fcand		VI01,   0x3FFFF                 ; Bitwise AND the clipping flags with 0x3FFFF, this makes
-                                                    ; sure that we get the clipping judgement for the last three
-                                                    ; verts (i.e. that make up the triangle we are about to draw)
+							; sure that we get the clipping judgement for the last three
+							; verts (i.e. that make up the triangle we are about to draw)
         iaddiu		iADC,   VI01,       0x7FFF      ; Add 0x7FFF. If any of the clipping flags were set this will
-                                                    ; cause the triangle not to be drawn (any values above 0x8000
-                                                    ; that are stored in the w component of XYZ2 will set the ADC
-                                                    ; bit, which tells the GS not to perform a drawing kick on this
-                                                    ; triangle.
+							; cause the triangle not to be drawn (any values above 0x8000
+							; that are stored in the w component of XYZ2 will set the ADC
+							; bit, which tells the GS not to perform a drawing kick on this
+							; triangle.
 
         isw.w		iADC,   2(destAddress)
         
@@ -126,8 +126,8 @@
         iaddiu          stqData,        stqData,        1  
         iaddiu          destAddress,    destAddress,    3
 
-        iaddi   vertexCounter,  vertexCounter,  -1 ; decrement the loop counter 
-        ibne    vertexCounter,  iBase,   vertexLoop ; and repeat if needed
+        iaddi   vertexCounter,  vertexCounter,  -1	; decrement the loop counter 
+        ibne    vertexCounter,  iBase,   vertexLoop	; and repeat if needed
 
     ;//////////////////////////////////////////// 
 

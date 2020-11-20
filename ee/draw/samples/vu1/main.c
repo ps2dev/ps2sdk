@@ -317,6 +317,16 @@ void render(framebuffer_t *t_frame, zbuffer_t *t_z, texbuffer_t *t_texbuff)
 	}
 }
 
+void vu1_set_double_buffer_settings()
+{
+	packet2_t *packet2 = packet2_create_chain(1, P2_TYPE_NORMAL, 1);
+	vu_add_double_buffer_settings(packet2, 8, 496);
+	vu_add_end_tag(packet2);
+	dma_channel_send_packet2(packet2, DMA_CHANNEL_VIF1, 1);
+	dma_channel_wait(DMA_CHANNEL_VIF1, 0);
+	packet2_free(packet2);
+}
+
 int main(int argc, char **argv)
 {
 
@@ -331,12 +341,7 @@ int main(int argc, char **argv)
 	vif_packets[1] = packet2_create_chain(11, P2_TYPE_NORMAL, 1);
 
 	vu_upload_program(0, &VU1Draw3D_CodeStart, &VU1Draw3D_CodeEnd);
-
-	packet2_t *packet2 = packet2_create_chain(1, P2_TYPE_NORMAL, 1);
-	vu_add_double_buffer_settings(packet2, 8, 496);
-	dma_channel_send_packet2(packet2, DMA_CHANNEL_VIF1, 1);
-	dma_channel_wait(DMA_CHANNEL_VIF1, 0);
-	packet2_free(packet2);
+	vu1_set_double_buffer_settings();
 
 	// The buffers to be used.
 	framebuffer_t frame;
