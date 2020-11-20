@@ -340,7 +340,7 @@ int main(int argc, char **argv)
 	vif_packets[0] = packet2_create_chain(11, P2_TYPE_NORMAL, 1);
 	vif_packets[1] = packet2_create_chain(11, P2_TYPE_NORMAL, 1);
 
-	vu_upload_program(0, &VU1Draw3D_CodeStart, &VU1Draw3D_CodeEnd);
+	vu_upload_program(0, &VU1Draw3D_CodeStart, &VU1Draw3D_CodeEnd, DMA_CHANNEL_VIF1);
 	vu1_set_double_buffer_settings();
 
 	// The buffers to be used.

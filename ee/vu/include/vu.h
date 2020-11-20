@@ -274,7 +274,7 @@ extern "C"
     // ----
 
     /** Upload micro program to VU. */
-    void vu_upload_program(u32 t_dest, u32 *t_start, u32 *t_end);
+    void vu_upload_program(u32 t_dest, u32 *t_start, u32 *t_end, int dma_channel);
 
     /** Used internally for checking micro program size. */
     u32 vu_count_program_size(u32 *t_start, u32 *t_end);

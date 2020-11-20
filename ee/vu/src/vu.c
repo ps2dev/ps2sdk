@@ -20,7 +20,7 @@ u32 vu_count_program_size(u32 *t_start, u32 *t_end)
     return size;
 }
 
-void vu_upload_program(u32 t_dest, u32 *t_start, u32 *t_end)
+void vu_upload_program(u32 t_dest, u32 *t_start, u32 *t_end, int dma_channel)
 {
     // get the size of the code as we can only send 256 instructions in each MPGtag
     int count = vu_count_program_size(t_start, t_end);
@@ -41,6 +41,6 @@ void vu_upload_program(u32 t_dest, u32 *t_start, u32 *t_end)
     packet2_vif_nop(packet2, 0);
     packet2_vif_nop(packet2, 0);
     packet2_chain_close_tag(packet2);
-    dma_channel_send_packet2(packet2, DMA_CHANNEL_VIF1, 1);
-    dma_channel_wait(DMA_CHANNEL_VIF1, 0);
+    dma_channel_send_packet2(packet2, dma_channel, 1);
+    dma_channel_wait(dma_channel, 0);
 }
