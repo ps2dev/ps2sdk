@@ -3,7 +3,7 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# (c) 2020 Sandro Sobczyński <sandro.sobczynski@gmail.com>
+# (c) 2020 h4570 Sandro Sobczyński <sandro.sobczynski@gmail.com>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 */
@@ -26,7 +26,7 @@ extern "C"
     /** 
      * Add UNPACK VIF opcode. 
      * NOTICE: packet2_vif_close_unpack() required. Qwords 
-     * are calculated automatically. 
+     * are counted automatically. 
      * For more details, check description of vif_code_t. 
      * @param packet2 Pointer to packet. 
      * @param mode Unpack mode

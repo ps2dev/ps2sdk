@@ -10,6 +10,8 @@ EE_OBJS = vu.o erl-support.o
 
 EE_INCS := $(EE_INCS) -I$(PS2SDKSRC)/ee/packet2/include
 EE_INCS := $(EE_INCS) -I$(PS2SDKSRC)/ee/dma/include
+EE_INCS := $(EE_INCS) -I$(PS2SDKSRC)/ee/draw/include
+EE_INCS := $(EE_INCS) -I$(PS2SDKSRC)/ee/math3d/include
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make

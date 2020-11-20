@@ -3,7 +3,7 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# (c) 2020 Sandro Sobczyński <sandro.sobczynski@gmail.com>
+# (c) 2020 h4570 Sandro Sobczyński <sandro.sobczynski@gmail.com>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 # Say hello to VU1!
@@ -12,16 +12,12 @@
 #include <kernel.h>
 #include <malloc.h>
 #include <tamtypes.h>
-#include <dma_tags.h>
-#include <gif_tags.h>
 #include <gs_psm.h>
 #include <dma.h>
 #include <packet2.h>
 #include <vu.h>
 #include <graph.h>
-#include <draw3d.h>
 #include <draw.h>
-#include <gs_gp.h>
 #include "zbyszek.c"
 #include "mesh_data.c"
 
@@ -88,80 +84,34 @@ VECTOR *c_verts __attribute__((aligned(128))), *c_sts __attribute__((aligned(128
 
 /** 
  * Send vertices and all required data to VU1. 
- * To get better understanding, please check out. 
+ * To understand it better, please check out 
  * draw_3D.vcl. 
  */
 void draw_vertices(texbuffer_t *t_texbuff)
 {
 	curr_vif_packet = vif_packets[context];
 	packet2_reset(curr_vif_packet, 0);
-
+	vu_add_flush(curr_vif_packet);
 	vu_open_unpack(curr_vif_packet);
 	vu_unpack_add_float(curr_vif_packet, 2048.0F);					 // scale
 	vu_unpack_add_float(curr_vif_packet, 2048.0F);					 // scale
 	vu_unpack_add_float(curr_vif_packet, ((float)0xFFFFFF) / 32.0F); // scale
 	vu_unpack_add_s32(curr_vif_packet, faces_count);				 // vertex count
-
-	vu_unpack_add_2x_s64(curr_vif_packet, GIF_SET_TAG(1, 0, 0, 0, GIF_FLG_PACKED, 1), GIF_REG_AD); // 1x set tag
-
-	vu_unpack_add_2x_s64( // tex -> lod
-		curr_vif_packet,
-		GS_SET_TEX1(
-			lod.calculation,
-			lod.max_level,
-			lod.mag_filter,
-			lod.min_filter,
-			lod.mipmap_select,
-			lod.l,
-			(int)(lod.k * 16.0F)),
-		GS_REG_TEX1);
-
-	vu_unpack_add_2x_s64( // tex -> buff + clut
-		curr_vif_packet,
-		GS_SET_TEX0(
-			t_texbuff->address >> 6,
-			t_texbuff->width >> 6,
-			t_texbuff->psm,
-			t_texbuff->info.width,
-			t_texbuff->info.height,
-			t_texbuff->info.components,
-			t_texbuff->info.function,
-			clut.address >> 6,
-			clut.psm,
-			clut.storage_mode,
-			clut.start,
-			clut.load_method),
-		GS_REG_TEX0);
-
-	vu_unpack_add_2x_s64(
-		curr_vif_packet,
-		GS_GIFTAG(
-			faces_count, // Information for GS. Amount of loops
-			1,
-			1,
-			GS_PRIM(
-				prim.type,
-				prim.shading,
-				prim.mapping,
-				prim.fogging,
-				prim.blending,
-				prim.antialiasing,
-				prim.mapping_type,
-				0, // context
-				prim.colorfix),
-			0,	// GS gif tag packed
-			3), // STQ + RGBA + XYZ
-		DRAW_STQ2_REGLIST);
-
+	vu_unpack_add_set(curr_vif_packet, 1);
+	vu_unpack_add_lod(curr_vif_packet, &lod);
+	vu_unpack_add_texbuff_clut(curr_vif_packet, t_texbuff, &clut);
+	vu_unpack_add_giftag(curr_vif_packet, &prim, faces_count, DRAW_STQ2_REGLIST, 3, 0);
 	u8 j = 0; // RGBA
 	for (j = 0; j < 4; j++)
 		vu_unpack_add_u32(curr_vif_packet, 128);
-
 	vu_close_unpack(curr_vif_packet);
-	vu_add_data(curr_vif_packet, c_verts, 2 * faces_count, 1);
-	vu_add_data(curr_vif_packet, c_sts, 2 * faces_count, 1);
+	vu_add_unpack_data(curr_vif_packet, 0, c_verts, 2 * faces_count, 1);
+	vu_add_unpack_data(curr_vif_packet, 0, c_sts, 2 * faces_count, 1);
 	vu_add_start_program(curr_vif_packet);
-	vu_send_packet(curr_vif_packet);
+
+	vu_add_end_tag(curr_vif_packet);
+	dma_channel_send_packet2(curr_vif_packet, DMA_CHANNEL_VIF1, 1);
+	dma_channel_wait(DMA_CHANNEL_VIF1, 0);
 
 	// Switch packet, so we can proceed during DMA transfer
 	context = !context;
@@ -246,8 +196,7 @@ void clear_screen(framebuffer_t *frame, zbuffer_t *z)
 	draw_wait_finish();
 }
 
-/** Draw our 3D cube. */
-void draw_zbyszek(VECTOR t_object_position, texbuffer_t *t_texbuff)
+void update_matrices_in_vu(VECTOR t_object_position)
 {
 	// Create the local_world matrix.
 	create_local_world(local_world, t_object_position, object_rotation);
@@ -258,9 +207,12 @@ void draw_zbyszek(VECTOR t_object_position, texbuffer_t *t_texbuff)
 	// Create the local_screen matrix.
 	create_local_screen(local_screen, local_world, world_view, view_screen);
 
-	vu_send_data(0, &local_screen, 8);
-
-	draw_vertices(t_texbuff);
+	packet2_t *packet2 = packet2_create_chain(2, P2_TYPE_NORMAL, 1);
+	vu_add_unpack_data(packet2, 0, &local_screen, 8, 0);
+	vu_add_end_tag(packet2);
+	dma_channel_send_packet2(packet2, DMA_CHANNEL_VIF1, 1);
+	dma_channel_wait(DMA_CHANNEL_VIF1, 0);
+	packet2_free(packet2);
 }
 
 void set_lod_clut_prim_tex_buff(texbuffer_t *t_texbuff)
@@ -357,7 +309,8 @@ void render(framebuffer_t *t_frame, zbuffer_t *t_z, texbuffer_t *t_texbuff)
 			for (j = 0; j < 8; j++)
 			{
 				c_zbyszek_position[1] = j * 40.0F;
-				draw_zbyszek(c_zbyszek_position, t_texbuff);
+				update_matrices_in_vu(c_zbyszek_position);
+				draw_vertices(t_texbuff);
 			}
 		}
 		graph_wait_vsync();
@@ -379,7 +332,11 @@ int main(int argc, char **argv)
 
 	vu_upload_program(0, &VU1Draw3D_CodeStart, &VU1Draw3D_CodeEnd);
 
-	vu_send_double_buffer_settings(8, 496);
+	packet2_t *packet2 = packet2_create_chain(1, P2_TYPE_NORMAL, 1);
+	vu_add_double_buffer_settings(packet2, 8, 496);
+	dma_channel_send_packet2(packet2, DMA_CHANNEL_VIF1, 1);
+	dma_channel_wait(DMA_CHANNEL_VIF1, 0);
+	packet2_free(packet2);
 
 	// The buffers to be used.
 	framebuffer_t frame;
@@ -397,6 +354,9 @@ int main(int argc, char **argv)
 
 	// Render textured cube
 	render(&frame, &z, &texbuff);
+
+	packet2_free(vif_packets[0]);
+	packet2_free(vif_packets[1]);
 
 	// Sleep
 	SleepThread();

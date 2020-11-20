@@ -3,7 +3,7 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# (c) 2020 Sandro Sobczyński <sandro.sobczynski@gmail.com>
+# (c) 2020 h4570 Sandro Sobczyński <sandro.sobczynski@gmail.com>
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 */
@@ -105,7 +105,7 @@ extern "C"
     /** 
      * Add CNT tag. 
      * NOTICE: packet2_chain_close_tag() required. Qwords 
-     * are calculated automatically. 
+     * are counted automatically. 
      * For more details, check description of dma_tag_t. 
      * @param packet2 Pointer to packet. 
      * @param irq Interrupt Request. False by default.
@@ -120,7 +120,7 @@ extern "C"
     /** 
      * Add END tag. 
      * NOTICE: packet2_chain_close_tag() required. Qwords 
-     * are calculated automatically. 
+     * are counted automatically. 
      * For more details, check description of dma_tag_t. 
      * NOTICE: Don't forget about close_tag()!
      * @param packet2 Pointer to packet. 
@@ -133,9 +133,9 @@ extern "C"
     }
 
     /** 
-     * Add REF tag.
-     * NOTICE: Qwords are NOT calculated automatically, so 
-     * there is NO need to use packet2_chain_close_tag();
+     * Add REF tag. 
+     * NOTICE: Qwords are NOT counted automatically, so 
+     * there is NO need to use packet2_chain_close_tag(); 
      * For more details, check description of dma_tag_t. 
      * @param packet2 Pointer to packet. 
      * @param ref_data Pointer to data. 
@@ -153,7 +153,7 @@ extern "C"
     /** 
      * Add NEXT tag. 
      * NOTICE: packet2_chain_close_tag() required. Qwords 
-     * are calculated automatically. 
+     * are counted automatically. 
      * For more details, check description of dma_tag_t. 
      * @param next_tag Pointer to next tag. 
      * @param irq Interrupt Request. False by default. 
@@ -168,7 +168,7 @@ extern "C"
 
     /** 
      * Add REFS tag.
-     * NOTICE: Qwords are NOT calculated automatically, so 
+     * NOTICE: Qwords are NOT counted automatically, so 
      * there is NO need to use packet2_chain_close_tag();
      * For more details, check description of dma_tag_t. 
      * @param packet2 Pointer to packet. 
@@ -186,7 +186,7 @@ extern "C"
 
     /** 
      * Add REFE tag.
-     * NOTICE: Qwords are NOT calculated automatically, so 
+     * NOTICE: Qwords are NOT counted automatically, so 
      * there is NO need to use packet2_chain_close_tag();
      * For more details, check description of dma_tag_t. 
      * @param packet2 Pointer to packet. 
@@ -205,7 +205,7 @@ extern "C"
     /** 
      * Add CALL tag. 
      * NOTICE: packet2_chain_close_tag() required. Qwords 
-     * are calculated automatically. 
+     * are counted automatically. 
      * For more details, check description of dma_tag_t. 
      * @param packet2 Pointer to packet. 
      * @param next_tag Pointer to next tag. 
@@ -222,7 +222,7 @@ extern "C"
     /** 
      * Add RET tag. 
      * NOTICE: packet2_chain_close_tag() required. Qwords 
-     * are calculated automatically. 
+     * are counted automatically. 
      * For more details, check description of dma_tag_t. 
      * @param packet2 Pointer to packet. 
      * @param irq Interrupt Request. False by default.
