@@ -66,14 +66,26 @@ extern "C"
     }
 
     /** 
-     * Start VU micro program. 
-     * Adds MSCAL and FLUSH VIF opcodes. 
+     * Continue VU micro program (from --cont line). 
+     * Adds FLUSH and MSCNT VIF opcodes. 
      */
-    static inline void vu_add_start_program(packet2_t *packet2)
+    static inline void vu_add_continue_program(packet2_t *packet2)
     {
         packet2_chain_open_cnt(packet2, 0, 0, 0);
-        packet2_vif_mscal(packet2, 0, 0);
         packet2_vif_flush(packet2, 0);
+        packet2_vif_mscnt(packet2, 0);
+        packet2_chain_close_tag(packet2);
+    }
+
+    /** 
+     * Start VU micro program. 
+     * Adds FLUSH and MSCAL VIF opcodes. 
+     */
+    static inline void vu_add_start_program(packet2_t *packet2, u32 addr)
+    {
+        packet2_chain_open_cnt(packet2, 0, 0, 0);
+        packet2_vif_flush(packet2, 0);
+        packet2_vif_mscal(packet2, addr, 0);
         packet2_chain_close_tag(packet2);
     }
 

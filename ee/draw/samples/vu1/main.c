@@ -107,7 +107,7 @@ void draw_vertices(texbuffer_t *t_texbuff)
 	vu_close_unpack(curr_vif_packet);
 	vu_add_unpack_data(curr_vif_packet, 0, c_verts, 2 * faces_count, 1);
 	vu_add_unpack_data(curr_vif_packet, 0, c_sts, 2 * faces_count, 1);
-	vu_add_start_program(curr_vif_packet);
+	vu_add_start_program(curr_vif_packet, 0);
 
 	vu_add_end_tag(curr_vif_packet);
 	dma_channel_send_packet2(curr_vif_packet, DMA_CHANNEL_VIF1, 1);
