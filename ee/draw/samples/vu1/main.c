@@ -17,14 +17,13 @@
 #include <gs_psm.h>
 #include <dma.h>
 #include <packet2.h>
+#include <vu.h>
 #include <graph.h>
 #include <draw3d.h>
 #include <draw.h>
+#include <gs_gp.h>
 #include "zbyszek.c"
 #include "mesh_data.c"
-
-#include "./vu1.h"
-#include <gs_gp.h>
 
 // ---
 // Variables declared as global for tutorial only!
@@ -97,15 +96,15 @@ void draw_vertices(texbuffer_t *t_texbuff)
 	curr_vif_packet = vif_packets[context];
 	packet2_reset(curr_vif_packet, 0);
 
-	vu1_open_unpack(curr_vif_packet);
-	vu1_unpack_add_float(curr_vif_packet, 2048.0F);					  // scale
-	vu1_unpack_add_float(curr_vif_packet, 2048.0F);					  // scale
-	vu1_unpack_add_float(curr_vif_packet, ((float)0xFFFFFF) / 32.0F); // scale
-	vu1_unpack_add_32(curr_vif_packet, faces_count);				  // vertex count
+	vu_open_unpack(curr_vif_packet);
+	vu_unpack_add_float(curr_vif_packet, 2048.0F);					 // scale
+	vu_unpack_add_float(curr_vif_packet, 2048.0F);					 // scale
+	vu_unpack_add_float(curr_vif_packet, ((float)0xFFFFFF) / 32.0F); // scale
+	vu_unpack_add_s32(curr_vif_packet, faces_count);				 // vertex count
 
-	vu1_unpack_add_128(curr_vif_packet, GIF_SET_TAG(1, 0, 0, 0, GIF_FLG_PACKED, 1), GIF_REG_AD); // 1x set tag
+	vu_unpack_add_2x_s64(curr_vif_packet, GIF_SET_TAG(1, 0, 0, 0, GIF_FLG_PACKED, 1), GIF_REG_AD); // 1x set tag
 
-	vu1_unpack_add_128( // tex -> lod
+	vu_unpack_add_2x_s64( // tex -> lod
 		curr_vif_packet,
 		GS_SET_TEX1(
 			lod.calculation,
@@ -117,7 +116,7 @@ void draw_vertices(texbuffer_t *t_texbuff)
 			(int)(lod.k * 16.0F)),
 		GS_REG_TEX1);
 
-	vu1_unpack_add_128( // tex -> buff + clut
+	vu_unpack_add_2x_s64( // tex -> buff + clut
 		curr_vif_packet,
 		GS_SET_TEX0(
 			t_texbuff->address >> 6,
@@ -134,7 +133,7 @@ void draw_vertices(texbuffer_t *t_texbuff)
 			clut.load_method),
 		GS_REG_TEX0);
 
-	vu1_unpack_add_128(
+	vu_unpack_add_2x_s64(
 		curr_vif_packet,
 		GS_GIFTAG(
 			faces_count, // Information for GS. Amount of loops
@@ -156,13 +155,13 @@ void draw_vertices(texbuffer_t *t_texbuff)
 
 	u8 j = 0; // RGBA
 	for (j = 0; j < 4; j++)
-		vu1_unpack_add_32(curr_vif_packet, 128);
+		vu_unpack_add_u32(curr_vif_packet, 128);
 
-	vu1_close_unpack(curr_vif_packet);
-	vu1_add_data(curr_vif_packet, c_verts, 2 * faces_count, 1);
-	vu1_add_data(curr_vif_packet, c_sts, 2 * faces_count, 1);
-	vu1_add_start_program(curr_vif_packet);
-	vu1_send_packet(curr_vif_packet);
+	vu_close_unpack(curr_vif_packet);
+	vu_add_data(curr_vif_packet, c_verts, 2 * faces_count, 1);
+	vu_add_data(curr_vif_packet, c_sts, 2 * faces_count, 1);
+	vu_add_start_program(curr_vif_packet);
+	vu_send_packet(curr_vif_packet);
 
 	// Switch packet, so we can proceed during DMA transfer
 	context = !context;
@@ -259,7 +258,7 @@ void draw_zbyszek(VECTOR t_object_position, texbuffer_t *t_texbuff)
 	// Create the local_screen matrix.
 	create_local_screen(local_screen, local_world, world_view, view_screen);
 
-	vu1_send_data(0, &local_screen, 8);
+	vu_send_data(0, &local_screen, 8);
 
 	draw_vertices(t_texbuff);
 }
@@ -378,9 +377,9 @@ int main(int argc, char **argv)
 	vif_packets[0] = packet2_create_chain(11, P2_TYPE_NORMAL, 1);
 	vif_packets[1] = packet2_create_chain(11, P2_TYPE_NORMAL, 1);
 
-	vu1_upload_program(0, &VU1Draw3D_CodeStart, &VU1Draw3D_CodeEnd);
+	vu_upload_program(0, &VU1Draw3D_CodeStart, &VU1Draw3D_CodeEnd);
 
-	vu1_set_double_buffer(8, 496);
+	vu_send_double_buffer_settings(8, 496);
 
 	// The buffers to be used.
 	framebuffer_t frame;

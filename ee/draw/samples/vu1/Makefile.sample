@@ -7,11 +7,9 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 EE_BIN = vu1.elf
-EE_OBJS =								\
-			micro_programs/draw_3D.o	\
-			vu1.o						\
-			main.o
-EE_LIBS = -ldraw -lgraph -lmath3d -lpacket2 -ldma
+EE_OBJS = micro_programs/draw_3D.o	\
+		  main.o
+EE_LIBS = -ldraw -lgraph -lmath3d -lpacket2 -ldma -lvu
 EE_DVP = dvp-as
 #EE_VCL = vcl
 
