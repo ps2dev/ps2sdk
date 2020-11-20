@@ -100,7 +100,7 @@ void draw_vertices(texbuffer_t *t_texbuff)
 	vu_unpack_add_set(curr_vif_packet, 1);
 	vu_unpack_add_lod(curr_vif_packet, &lod);
 	vu_unpack_add_texbuff_clut(curr_vif_packet, t_texbuff, &clut);
-	vu_unpack_add_giftag(curr_vif_packet, &prim, faces_count, DRAW_STQ2_REGLIST, 3, 0);
+	vu_unpack_add_prim_giftag(curr_vif_packet, &prim, faces_count, DRAW_STQ2_REGLIST, 3, 0);
 	u8 j = 0; // RGBA
 	for (j = 0; j < 4; j++)
 		vu_unpack_add_u32(curr_vif_packet, 128);

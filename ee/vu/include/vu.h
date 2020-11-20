@@ -99,7 +99,7 @@ extern "C"
     // UNPACK
     // ----
 
-    /** Open VU unpack. */
+    /** Open CNT tag + VU unpack. */
     static inline void vu_open_unpack(packet2_t *packet2)
     {
         packet2->vif_added_bytes = 0;
@@ -108,7 +108,7 @@ extern "C"
         packet2_vif_open_unpack(packet2, P2_UNPACK_V4_32, 0, 1, 0, 1, 0);
     }
 
-    /** Close VU unpack. */
+    /** Close CNT tag + VU unpack. */
     static inline void vu_close_unpack(packet2_t *packet2)
     {
         packet2_align_to_qword(packet2);
@@ -237,7 +237,18 @@ extern "C"
     }
 
     /** 
-     * Add drawing GIFTag which will be sent from VU1 via 
+     * Add draw finish event GIFTag which will be sent from VU1 via 
+     * XGKICK instruction. 
+     * Used for synchronization via draw_wait_finish() 
+     * @param packet2 Pointer to packet2. 
+     */
+    static inline void vu_unpack_add_draw_finish_giftag(packet2_t *packet2)
+    {
+        vu_unpack_add_2x_s64(packet2, 1, GS_REG_FINISH);
+    }
+
+    /** 
+     * Add drawing (prim) GIFTag which will be sent from VU1 via 
      * XGKICK instruction. 
      * @param packet2 Pointer to packet2. 
      * @param prim Pointer to prim settings. 
@@ -246,7 +257,7 @@ extern "C"
      * @param nreg_count How many types there are in nreg? 
      * @param context Drawing context 
      */
-    static inline void vu_unpack_add_giftag(packet2_t *packet2, prim_t *prim, u32 loops_count, u32 nreg, u8 nreg_count, u8 context)
+    static inline void vu_unpack_add_prim_giftag(packet2_t *packet2, prim_t *prim, u32 loops_count, u32 nreg, u8 nreg_count, u8 context)
     {
         vu_unpack_add_2x_s64(
             packet2,
