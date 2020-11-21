@@ -21,7 +21,7 @@
 // Packet2 management
 // ---
 
-packet2_t *packet2_create_normal(u16 qwords, enum Packet2Type type)
+packet2_t *packet2_create(u16 qwords, enum Packet2Type type, enum Packet2Mode mode, u8 tte)
 {
     packet2_t *packet2 = (packet2_t *)calloc(1, sizeof(packet2_t));
     if (packet2 == NULL)
@@ -29,7 +29,8 @@ packet2_t *packet2_create_normal(u16 qwords, enum Packet2Type type)
 
     packet2->max_qwords_count = qwords;
     packet2->type = type;
-    packet2->mode = P2_MODE_NORMAL;
+    packet2->mode = mode;
+    packet2->tte = tte;
     packet2->vif_added_bytes = 0;
     packet2->tag_opened_at = NULL;
     packet2->vif_code_opened_at = NULL;
@@ -56,15 +57,7 @@ packet2_t *packet2_create_normal(u16 qwords, enum Packet2Type type)
     return packet2;
 }
 
-packet2_t *packet2_create_chain(u16 qwords, enum Packet2Type type, u8 tte)
-{
-    packet2_t *packet2 = packet2_create_normal(qwords, type);
-    packet2->mode = P2_MODE_CHAIN;
-    packet2->tte = tte;
-    return packet2;
-}
-
-packet2_t *packet2_create_from(qword_t *base, qword_t *next, u16 qwords, enum Packet2Type type, enum Packet2Mode mode)
+packet2_t *packet2_create_from(qword_t *base, qword_t *next, u16 qwords, enum Packet2Type type, enum Packet2Mode mode, u8 tte)
 {
     // Dma buffer size should be a whole number of cache lines (64 bytes = 4 quads)
     assert(!((type == P2_TYPE_UNCACHED || type == P2_TYPE_UNCACHED_ACCL) && qwords & (4 - 1)));
@@ -80,6 +73,7 @@ packet2_t *packet2_create_from(qword_t *base, qword_t *next, u16 qwords, enum Pa
     packet2->next = next;
     packet2->max_qwords_count = qwords;
     packet2->type = type;
+    packet2->tte = tte;
     packet2->mode = mode;
     return packet2;
 }

@@ -30,21 +30,15 @@ extern "C"
      * Allocate new packet2. 
      * @param qwords Maximum data size in qwords (128bit). 
      * @param type Memory mapping type. 
+     * @param mode Packet mode. Normal or chain (so also vif/vu). 
+     * @param tte Tag transfer enable. 
+     * Used only for CHAIN mode! 
+     * If >0 transfer tag is set during packet sending and 
+     * add_dma_tag() (so also every open_tag()) will move buffer by DWORD,
+     * so remember to align memory!
      * @returns Pointer to packet2 on success or NULL if memory allocation fail.
      */
-    packet2_t *packet2_create_normal(u16 qwords, enum Packet2Type type);
-
-    /** 
-     * Allocate new packet2 for chain/vif purpose. 
-     * @param qwords Maximum data size in qwords (128bit). 
-     * @param type Memory mapping type. 
-     * @param tte Tag transfer enable. 
-     * If >0 transfer tag is set during packet sending and 
-     * add_dma_tag (so also every open_tag()) will move buffer by DWORD,
-     * so remember to align memory!
-     * @returns Pointer to packet2 on success or NULL if memory allocation fail. 
-     */
-    packet2_t *packet2_create_chain(u16 qwords, enum Packet2Type type, u8 tte);
+    packet2_t *packet2_create(u16 qwords, enum Packet2Type type, enum Packet2Mode mode, u8 tte);
 
     /** 
      * Create new packet2 with given data pointer. 
@@ -52,10 +46,15 @@ extern "C"
      * @param next Pointer to next (current position of buffer). 
      * @param qwords Maximum data size in qwords (128bit). 
      * @param type Memory mapping type. 
-     * @param mode Packet mode (normal/chain). 
+     * @param mode Packet mode. Normal or chain (so also vif/vu). 
+     * @param tte Tag transfer enable. 
+     * Used only for CHAIN mode! 
+     * If >0 transfer tag is set during packet sending and 
+     * add_dma_tag() (so also every open_tag()) will move buffer by DWORD,
+     * so remember to align memory!
      * @returns Pointer to packet2 on success or NULL if memory allocation fail.
      */
-    packet2_t *packet2_create_from(qword_t *base, qword_t *next, u16 qwords, enum Packet2Type type, enum Packet2Mode mode);
+    packet2_t *packet2_create_from(qword_t *base, qword_t *next, u16 qwords, enum Packet2Type type, enum Packet2Mode mode, u8 tte);
 
     /** 
      * Free packet2 memory.
