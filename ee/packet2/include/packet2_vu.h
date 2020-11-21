@@ -298,7 +298,7 @@ extern "C"
 
     /** 
      * Add VU micro program into packet2. 
-     * Packet2 MODE for micro program upload: Normal
+     * Packet2 MODE for micro program upload: Chain
      * @param dest VU destination address (divided by 16). 
      * @param start Start address. 
      * @param end End address. 
