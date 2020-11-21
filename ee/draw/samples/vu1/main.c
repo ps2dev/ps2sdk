@@ -15,7 +15,7 @@
 #include <gs_psm.h>
 #include <dma.h>
 #include <packet2.h>
-#include <vu.h>
+#include <packet2_vu.h>
 #include <graph.h>
 #include <draw.h>
 #include "zbyszek.c"
@@ -91,24 +91,24 @@ void draw_vertices(texbuffer_t *t_texbuff)
 {
 	curr_vif_packet = vif_packets[context];
 	packet2_reset(curr_vif_packet, 0);
-	vu_open_unpack(curr_vif_packet);
-	vu_unpack_add_float(curr_vif_packet, 2048.0F);					 // scale
-	vu_unpack_add_float(curr_vif_packet, 2048.0F);					 // scale
-	vu_unpack_add_float(curr_vif_packet, ((float)0xFFFFFF) / 32.0F); // scale
-	vu_unpack_add_s32(curr_vif_packet, faces_count);				 // vertex count
-	vu_unpack_add_set(curr_vif_packet, 1);
-	vu_unpack_add_lod(curr_vif_packet, &lod);
-	vu_unpack_add_texbuff_clut(curr_vif_packet, t_texbuff, &clut);
-	vu_unpack_add_prim_giftag(curr_vif_packet, &prim, faces_count, DRAW_STQ2_REGLIST, 3, 0);
+	packet2_vu_open_unpack(curr_vif_packet);
+	packet2_vu_unpack_add_float(curr_vif_packet, 2048.0F);					 // scale
+	packet2_vu_unpack_add_float(curr_vif_packet, 2048.0F);					 // scale
+	packet2_vu_unpack_add_float(curr_vif_packet, ((float)0xFFFFFF) / 32.0F); // scale
+	packet2_vu_unpack_add_s32(curr_vif_packet, faces_count);				 // vertex count
+	packet2_vu_unpack_add_set(curr_vif_packet, 1);
+	packet2_vu_unpack_add_lod(curr_vif_packet, &lod);
+	packet2_vu_unpack_add_texbuff_clut(curr_vif_packet, t_texbuff, &clut);
+	packet2_vu_unpack_add_prim_giftag(curr_vif_packet, &prim, faces_count, DRAW_STQ2_REGLIST, 3, 0);
 	u8 j = 0; // RGBA
 	for (j = 0; j < 4; j++)
-		vu_unpack_add_u32(curr_vif_packet, 128);
-	vu_close_unpack(curr_vif_packet);
-	vu_add_unpack_data(curr_vif_packet, 0, c_verts, 2 * faces_count, 1);
-	vu_add_unpack_data(curr_vif_packet, 0, c_sts, 2 * faces_count, 1);
-	vu_add_start_program(curr_vif_packet, 0);
+		packet2_vu_unpack_add_u32(curr_vif_packet, 128);
+	packet2_vu_close_unpack(curr_vif_packet);
+	packet2_vu_add_unpack_data(curr_vif_packet, 0, c_verts, 2 * faces_count, 1);
+	packet2_vu_add_unpack_data(curr_vif_packet, 0, c_sts, 2 * faces_count, 1);
+	packet2_vu_add_start_program(curr_vif_packet, 0);
 
-	vu_add_end_tag(curr_vif_packet);
+	packet2_vu_add_end_tag(curr_vif_packet);
 	dma_channel_send_packet2(curr_vif_packet, DMA_CHANNEL_VIF1, 1);
 	dma_channel_wait(DMA_CHANNEL_VIF1, 0);
 
@@ -145,7 +145,7 @@ void init_gs(framebuffer_t *t_frame, zbuffer_t *t_z, texbuffer_t *t_texbuff)
 /** Some initialization of GS 2 */
 void init_drawing_environment(framebuffer_t *t_frame, zbuffer_t *t_z)
 {
-	packet2_t *packet2 = packet2_create_normal(20, P2_TYPE_NORMAL);
+	packet2_t *packet2 = packet2_create(20, P2_TYPE_NORMAL, P2_MODE_NORMAL, 0);
 
 	// This will setup a default drawing environment.
 	packet2_update(packet2, draw_setup_environment(packet2->next, 0, t_frame, t_z));
@@ -166,7 +166,7 @@ void init_drawing_environment(framebuffer_t *t_frame, zbuffer_t *t_z)
 /** Send texture data to GS. */
 void send_texture(texbuffer_t *texbuf)
 {
-	packet2_t *packet2 = packet2_create_chain(50, P2_TYPE_NORMAL, 0);
+	packet2_t *packet2 = packet2_create(50, P2_TYPE_NORMAL, P2_MODE_CHAIN, 0);
 	packet2_update(packet2, draw_texture_transfer(packet2->next, zbyszek, 128, 128, GS_PSM_24, texbuf->address, texbuf->width));
 	packet2_update(packet2, draw_texture_flush(packet2->next));
 	dma_channel_send_packet2(packet2, DMA_CHANNEL_GIF, 1);
@@ -177,7 +177,7 @@ void send_texture(texbuffer_t *texbuf)
 /** Send packet which will clear our screen. */
 void clear_screen(framebuffer_t *frame, zbuffer_t *z)
 {
-	packet2_t *clear = packet2_create_normal(35, P2_TYPE_NORMAL);
+	packet2_t *clear = packet2_create(35, P2_TYPE_NORMAL, P2_MODE_NORMAL, 0);
 
 	// Clear framebuffer but don't update zbuffer.
 	packet2_update(clear, draw_disable_tests(clear->next, 0, z));
@@ -206,9 +206,9 @@ void update_matrices_in_vu(VECTOR t_object_position)
 	// Create the local_screen matrix.
 	create_local_screen(local_screen, local_world, world_view, view_screen);
 
-	packet2_t *packet2 = packet2_create_chain(2, P2_TYPE_NORMAL, 1);
-	vu_add_unpack_data(packet2, 0, &local_screen, 8, 0);
-	vu_add_end_tag(packet2);
+	packet2_t *packet2 = packet2_create(2, P2_TYPE_NORMAL, P2_MODE_CHAIN, 1);
+	packet2_vu_add_unpack_data(packet2, 0, &local_screen, 8, 0);
+	packet2_vu_add_end_tag(packet2);
 	dma_channel_send_packet2(packet2, DMA_CHANNEL_VIF1, 1);
 	dma_channel_wait(DMA_CHANNEL_VIF1, 0);
 	packet2_free(packet2);
@@ -318,9 +318,21 @@ void render(framebuffer_t *t_frame, zbuffer_t *t_z, texbuffer_t *t_texbuff)
 
 void vu1_set_double_buffer_settings()
 {
-	packet2_t *packet2 = packet2_create_chain(1, P2_TYPE_NORMAL, 1);
-	vu_add_double_buffer_settings(packet2, 8, 496);
-	vu_add_end_tag(packet2);
+	packet2_t *packet2 = packet2_create(1, P2_TYPE_NORMAL, P2_MODE_CHAIN, 1);
+	packet2_vu_add_double_buffer_settings(packet2, 8, 496);
+	packet2_vu_add_end_tag(packet2);
+	dma_channel_send_packet2(packet2, DMA_CHANNEL_VIF1, 1);
+	dma_channel_wait(DMA_CHANNEL_VIF1, 0);
+	packet2_free(packet2);
+}
+
+void vu1_upload_micro_program()
+{
+	u32 packet_size =
+		packet2_vu_get_packet_size_for_program(&VU1Draw3D_CodeStart, &VU1Draw3D_CodeEnd) + 1; // + 1 for end tag
+	packet2_t *packet2 = packet2_create(packet_size, P2_TYPE_NORMAL, P2_MODE_CHAIN, 1);
+	packet2_vu_add_micro_program(packet2, 0, &VU1Draw3D_CodeStart, &VU1Draw3D_CodeEnd);
+	packet2_vu_add_end_tag(packet2);
 	dma_channel_send_packet2(packet2, DMA_CHANNEL_VIF1, 1);
 	dma_channel_wait(DMA_CHANNEL_VIF1, 0);
 	packet2_free(packet2);
@@ -336,10 +348,10 @@ int main(int argc, char **argv)
 	dma_channel_fast_waits(DMA_CHANNEL_VIF1);
 
 	// Initialize vif packets
-	vif_packets[0] = packet2_create_chain(11, P2_TYPE_NORMAL, 1);
-	vif_packets[1] = packet2_create_chain(11, P2_TYPE_NORMAL, 1);
+	vif_packets[0] = packet2_create(11, P2_TYPE_NORMAL, P2_MODE_CHAIN, 1);
+	vif_packets[1] = packet2_create(11, P2_TYPE_NORMAL, P2_MODE_CHAIN, 1);
 
-	vu_upload_program(0, &VU1Draw3D_CodeStart, &VU1Draw3D_CodeEnd, DMA_CHANNEL_VIF1);
+	vu1_upload_micro_program();
 	vu1_set_double_buffer_settings();
 
 	// The buffers to be used.
