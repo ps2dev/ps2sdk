@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-EE_OBJS = packet2.o packet2_utils.o erl-support.o
+EE_OBJS = packet2.o packet2_vif.o erl-support.o
 
 EE_INCS := $(EE_INCS) -I$(PS2SDKSRC)/ee/math3d/include
 EE_INCS := $(EE_INCS) -I$(PS2SDKSRC)/ee/draw/include

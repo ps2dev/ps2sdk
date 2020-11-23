@@ -8,20 +8,16 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
-#include "packet2_utils.h"
+#include "packet2_vif.h"
+#include "packet2_chain.h"
 
-u32 packet2_vu_count_program_instructions(u32 *start, u32 *end)
-{
-    u32 size = (end - start) / 2;
-    if (size & 1)
-        size++;
-    return size;
-}
-
-void packet2_vu_add_micro_program(packet2_t *packet2, u32 dest, u32 *start, u32 *end)
+void packet2_vif_add_micro_program(packet2_t *packet2, u32 dest, u32 *start, u32 *end)
 {
     // get the size of the code as we can only send 256 instructions in each MPGtag
-    u32 count = packet2_vu_count_program_instructions(start, end);
+    u32 count = (end - start) / 2;
+    if (count & 1)
+        count++;
+
     u32 *l_start = start;
     while (count > 0)
     {
