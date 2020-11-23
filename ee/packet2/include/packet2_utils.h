@@ -10,8 +10,8 @@
 
 /** @file Helper functions for packet2. */
 
-#ifndef __PACKET2_HELPERS_H__
-#define __PACKET2_VU_H__
+#ifndef __PACKET2_UTILS_H__
+#define __PACKET2_UTILS_H__
 
 #include "packet2.h"
 #include <tamtypes.h>
@@ -269,4 +269,4 @@ extern "C"
 }
 #endif
 
-#endif /* __PACKET2_HELPERS_H__ */
+#endif /* __PACKET2_UTILS_H__ */
