@@ -55,9 +55,10 @@ extern "C"
      * In reality, get back to pointer "vif_code_opened_at" and 
      * fix immediate value with qwords counted from last packet2_vif_open_direct(). 
      * @param packet2 Pointer to packet. 
-     * @param unpack_num Amount of data written to the VU Mem (qwords) or MicroMem (dwords) 
+     * @param unpack_num Amount of data written to the VU Mem (qwords) or MicroMem (dwords). 
+     * 256 is max value! 
      */
-    static inline void packet2_vif_close_unpack(packet2_t *packet2, u32 unpack_num)
+    static inline void packet2_vif_close_unpack(packet2_t *packet2, u16 unpack_num)
     {
         assert(packet2->vif_code_opened_at != NULL);               // There is open UNPACK/DIRECT.
         assert(((u32)packet2->next & 0x3) == 0);                   // Make sure we're u32 aligned
