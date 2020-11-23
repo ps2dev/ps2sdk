@@ -8,7 +8,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
-#include "packet2_vu.h"
+#include "packet2_helpers.h"
 
 u32 packet2_vu_count_program_instructions(u32 *start, u32 *end)
 {

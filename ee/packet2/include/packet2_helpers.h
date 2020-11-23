@@ -8,9 +8,9 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
-/** @file VU related functions for packet2. */
+/** @file Helper functions for packet2. */
 
-#ifndef __PACKET2_VU_H__
+#ifndef __PACKET2_HELPERS_H__
 #define __PACKET2_VU_H__
 
 #include "packet2.h"
@@ -29,7 +29,7 @@ extern "C"
 #endif
 
     // ----
-    // Main
+    // VU
     // ----
 
     /** 
@@ -63,6 +63,23 @@ extern "C"
         packet2_vif_open_unpack(packet2, P2_UNPACK_V4_32, t_dest_address + (packet2->vif_added_bytes >> 4), t_use_top, 0, 1, 0);
         packet2_vif_close_unpack(packet2, t_size);
         packet2->vif_added_bytes += t_size * 8;
+    }
+
+    /** Open CNT tag + VU unpack. */
+    static inline void packet2_vu_open_unpack(packet2_t *packet2)
+    {
+        packet2->vif_added_bytes = 0;
+        packet2_chain_open_cnt(packet2, 0, 0, 0);
+        packet2_vif_stcycl(packet2, 0, 0x0101, 0);
+        packet2_vif_open_unpack(packet2, P2_UNPACK_V4_32, 0, 1, 0, 1, 0);
+    }
+
+    /** Close CNT tag + VU unpack. */
+    static inline void packet2_vu_close_unpack(packet2_t *packet2)
+    {
+        packet2_align_to_qword(packet2);
+        packet2_chain_close_tag(packet2);
+        packet2_vif_close_unpack(packet2, packet2->vif_added_bytes >> 4);
     }
 
     /** 
@@ -107,195 +124,6 @@ extern "C"
         packet2_chain_close_tag(packet2);
     }
 
-    // ----
-    // UNPACK
-    // ----
-
-    /** Open CNT tag + VU unpack. */
-    static inline void packet2_vu_open_unpack(packet2_t *packet2)
-    {
-        packet2->vif_added_bytes = 0;
-        packet2_chain_open_cnt(packet2, 0, 0, 0);
-        packet2_vif_stcycl(packet2, 0, 0x0101, 0);
-        packet2_vif_open_unpack(packet2, P2_UNPACK_V4_32, 0, 1, 0, 1, 0);
-    }
-
-    /** Close CNT tag + VU unpack. */
-    static inline void packet2_vu_close_unpack(packet2_t *packet2)
-    {
-        packet2_align_to_qword(packet2);
-        packet2_chain_close_tag(packet2);
-        packet2_vif_close_unpack(packet2, packet2->vif_added_bytes >> 4);
-    }
-
-    /** NOTICE: can be used only with open unpack! */
-    static inline void packet2_vu_unpack_add_u128(packet2_t *packet2, u128 v)
-    {
-        packet2_add_u128(packet2, v);
-        packet2->vif_added_bytes += 16;
-    }
-
-    /** NOTICE: can be used only with open unpack! */
-    static inline void packet2_vu_unpack_add_s128(packet2_t *packet2, u128 v)
-    {
-        packet2_add_s128(packet2, v);
-        packet2->vif_added_bytes += 16;
-    }
-
-    /** NOTICE: can be used only with open unpack! */
-    static inline void packet2_vu_unpack_add_u64(packet2_t *packet2, u64 v)
-    {
-        packet2_add_u64(packet2, v);
-        packet2->vif_added_bytes += 8;
-    }
-
-    /** NOTICE: can be used only with open unpack! */
-    static inline void packet2_vu_unpack_add_2x_s64(packet2_t *packet2, s64 v1, s64 v2)
-    {
-        packet2_add_s64(packet2, v1);
-        packet2_add_s64(packet2, v2);
-        packet2->vif_added_bytes += 16;
-    }
-
-    /** NOTICE: can be used only with open unpack! */
-    static inline void packet2_vu_unpack_add_s64(packet2_t *packet2, u64 v)
-    {
-        packet2_add_s64(packet2, v);
-        packet2->vif_added_bytes += 8;
-    }
-
-    /** NOTICE: can be used only with open unpack! */
-    static inline void packet2_vu_unpack_add_u32(packet2_t *packet2, u32 v)
-    {
-        packet2_add_u32(packet2, v);
-        packet2->vif_added_bytes += 4;
-    }
-
-    /** NOTICE: can be used only with open unpack! */
-    static inline void packet2_vu_unpack_add_s32(packet2_t *packet2, u32 v)
-    {
-        packet2_add_s32(packet2, v);
-        packet2->vif_added_bytes += 4;
-    }
-
-    /** NOTICE: can be used only with open unpack! */
-    static inline void packet2_vu_unpack_add_float(packet2_t *packet2, float v)
-    {
-        packet2_add_float(packet2, v);
-        packet2->vif_added_bytes += 4;
-    }
-
-    // ----
-    // UNPACK -- GS
-    // ----
-
-    /** 
-     * Add set GIFTag which will be 
-     * sent from VU1 via XGKICK instruction. 
-     * @param packet2 Pointer to packet2. 
-     * @param loops_count How many GIF tags there will be? 
-     */
-    static inline void packet2_vu_unpack_add_set(packet2_t *packet2, u32 loops_count)
-    {
-        packet2_vu_unpack_add_2x_s64(packet2, GIF_SET_TAG(loops_count, 0, 0, 0, GIF_FLG_PACKED, 1), GIF_REG_AD);
-    }
-
-    /** 
-     * Add lod GIFTag which will be 
-     * sent from VU1 via XGKICK instruction. 
-     * @param packet2 Pointer to packet2. 
-     * @param lod Pointer to lod settings. 
-     */
-    static inline void packet2_vu_unpack_add_lod(packet2_t *packet2, lod_t *lod)
-    {
-        packet2_vu_unpack_add_2x_s64(
-            packet2,
-            GS_SET_TEX1(
-                lod->calculation,
-                lod->max_level,
-                lod->mag_filter,
-                lod->min_filter,
-                lod->mipmap_select,
-                lod->l,
-                (int)(lod->k * 16.0F)),
-            GS_REG_TEX1);
-    }
-
-    /** 
-     * Add texture buffer / clut GIFTag which will be 
-     * sent from VU1 via XGKICK instruction. 
-     * @param packet2 Pointer to packet2. 
-     * @param texbuff Pointer to texture buffer. 
-     * @param clut Pointer to clut buffer. 
-     */
-    static inline void packet2_vu_unpack_add_texbuff_clut(packet2_t *packet2, texbuffer_t *texbuff, clutbuffer_t *clut)
-    {
-        packet2_vu_unpack_add_2x_s64(
-            packet2,
-            GS_SET_TEX0(
-                texbuff->address >> 6,
-                texbuff->width >> 6,
-                texbuff->psm,
-                texbuff->info.width,
-                texbuff->info.height,
-                texbuff->info.components,
-                texbuff->info.function,
-                clut->address >> 6,
-                clut->psm,
-                clut->storage_mode,
-                clut->start,
-                clut->load_method),
-            GS_REG_TEX0);
-    }
-
-    /** 
-     * Add draw finish event GIFTag which will be sent from VU1 via 
-     * XGKICK instruction. 
-     * Used for synchronization via draw_wait_finish() 
-     * @param packet2 Pointer to packet2. 
-     */
-    static inline void packet2_vu_unpack_add_draw_finish_giftag(packet2_t *packet2)
-    {
-        packet2_vu_unpack_add_2x_s64(packet2, 1, GS_REG_FINISH);
-    }
-
-    /** 
-     * Add drawing (prim) GIFTag which will be sent from VU1 via 
-     * XGKICK instruction. 
-     * @param packet2 Pointer to packet2. 
-     * @param prim Pointer to prim settings. 
-     * @param loops_count GIF tag loops count. 
-     * @param nreg What types of data we will use? 
-     * @param nreg_count How many types there are in nreg? 
-     * @param context Drawing context 
-     */
-    static inline void packet2_vu_unpack_add_prim_giftag(packet2_t *packet2, prim_t *prim, u32 loops_count, u32 nreg, u8 nreg_count, u8 context)
-    {
-        packet2_vu_unpack_add_2x_s64(
-            packet2,
-            VU_GS_GIFTAG(
-                loops_count, // Information for GS. Amount of loops
-                1,
-                1,
-                VU_GS_PRIM(
-                    prim->type,
-                    prim->shading,
-                    prim->mapping,
-                    prim->fogging,
-                    prim->blending,
-                    prim->antialiasing,
-                    prim->mapping_type,
-                    context, // context
-                    prim->colorfix),
-                0,
-                nreg_count),
-            nreg);
-    }
-
-    // ----
-    // Program code
-    // ----
-
     /** 
      * Add VU micro program into packet2. 
      * Packet2 MODE for micro program upload: Chain
@@ -323,8 +151,119 @@ extern "C"
         return (packet2_vu_count_program_instructions(start, end) >> 8) + 1;
     }
 
+    // ----
+    // GIF
+    // ----
+
+    /** 
+     * Add set GIFTag which will be 
+     * sent from VU1 via XGKICK instruction. 
+     * @param packet2 Pointer to packet2. 
+     * @param loops_count How many GIF tags there will be? 
+     */
+    static inline void packet2_gif_add_set(packet2_t *packet2, u32 loops_count)
+    {
+        packet2_add_2x_s64(packet2, GIF_SET_TAG(loops_count, 0, 0, 0, GIF_FLG_PACKED, 1), GIF_REG_AD);
+    }
+
+    // ----
+    // GS
+    // ----
+
+    /** 
+     * Add lod GIFTag which will be 
+     * sent from VU1 via XGKICK instruction. 
+     * @param packet2 Pointer to packet2. 
+     * @param lod Pointer to lod settings. 
+     */
+    static inline void packet2_gs_add_lod(packet2_t *packet2, lod_t *lod)
+    {
+        packet2_add_2x_s64(
+            packet2,
+            GS_SET_TEX1(
+                lod->calculation,
+                lod->max_level,
+                lod->mag_filter,
+                lod->min_filter,
+                lod->mipmap_select,
+                lod->l,
+                (int)(lod->k * 16.0F)),
+            GS_REG_TEX1);
+    }
+
+    /** 
+     * Add texture buffer / clut GIFTag which will be 
+     * sent from VU1 via XGKICK instruction. 
+     * @param packet2 Pointer to packet2. 
+     * @param texbuff Pointer to texture buffer. 
+     * @param clut Pointer to clut buffer. 
+     */
+    static inline void packet2_gs_add_texbuff_clut(packet2_t *packet2, texbuffer_t *texbuff, clutbuffer_t *clut)
+    {
+        packet2_add_2x_s64(
+            packet2,
+            GS_SET_TEX0(
+                texbuff->address >> 6,
+                texbuff->width >> 6,
+                texbuff->psm,
+                texbuff->info.width,
+                texbuff->info.height,
+                texbuff->info.components,
+                texbuff->info.function,
+                clut->address >> 6,
+                clut->psm,
+                clut->storage_mode,
+                clut->start,
+                clut->load_method),
+            GS_REG_TEX0);
+    }
+
+    /** 
+     * Add draw finish event GIFTag which will be sent from VU1 via 
+     * XGKICK instruction. 
+     * Used for synchronization via draw_wait_finish() 
+     * @param packet2 Pointer to packet2. 
+     */
+    static inline void packet2_gs_add_draw_finish_giftag(packet2_t *packet2)
+    {
+        packet2_add_2x_s64(packet2, 1, GS_REG_FINISH);
+    }
+
+    /** 
+     * Add drawing (prim) GIFTag which will be sent from VU1 via 
+     * XGKICK instruction. 
+     * @param packet2 Pointer to packet2. 
+     * @param prim Pointer to prim settings. 
+     * @param loops_count GIF tag loops count. 
+     * @param nreg What types of data we will use? 
+     * @param nreg_count How many types there are in nreg? 
+     * @param context Drawing context 
+     */
+    static inline void packet2_gs_add_prim_giftag(packet2_t *packet2, prim_t *prim, u32 loops_count, u32 nreg, u8 nreg_count, u8 context)
+    {
+        packet2_add_2x_s64(
+            packet2,
+            VU_GS_GIFTAG(
+                loops_count, // Information for GS. Amount of loops
+                1,
+                1,
+                VU_GS_PRIM(
+                    prim->type,
+                    prim->shading,
+                    prim->mapping,
+                    prim->fogging,
+                    prim->blending,
+                    prim->antialiasing,
+                    prim->mapping_type,
+                    context, // context
+                    prim->colorfix),
+                0,
+                nreg_count),
+            nreg);
+    }
+
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __PACKET2_VU_H__ */
+#endif /* __PACKET2_HELPERS_H__ */

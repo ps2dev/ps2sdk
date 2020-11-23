@@ -82,18 +82,80 @@ extern "C"
     // Basic add
     // ---
 
-    static inline void packet2_add_u128(packet2_t *packet2, const u128 val) { *((u128 *)packet2->next)++ = val; }
-    static inline void packet2_add_s128(packet2_t *packet2, const s128 val) { *((s128 *)packet2->next)++ = val; }
-    /** NOTICE: Alignment alert. Size of dword (1/2) */
-    static inline void packet2_add_u64(packet2_t *packet2, const u64 val) { *((u64 *)packet2->next)++ = val; }
-    /** NOTICE: Alignment alert. Size of dword (1/2) */
-    static inline void packet2_add_s64(packet2_t *packet2, const s64 val) { *((s64 *)packet2->next)++ = val; }
-    /** NOTICE: Alignment alert. Size of word (1/4) */
-    static inline void packet2_add_u32(packet2_t *packet2, const u32 val) { *((u32 *)packet2->next)++ = val; }
-    /** NOTICE: Alignment alert. Size of word (1/4) */
-    static inline void packet2_add_s32(packet2_t *packet2, const s32 val) { *((s32 *)packet2->next)++ = val; }
-    /** NOTICE: Alignment alert. Size of word (1/4) */
-    static inline void packet2_add_float(packet2_t *packet2, const float val) { *((float *)packet2->next)++ = val; }
+    /** NOTICE: vif_added_bytes increased by 16. */
+    static inline void packet2_add_u128(packet2_t *packet2, const u128 val)
+    {
+        *((u128 *)packet2->next)++ = val;
+        packet2->vif_added_bytes += 16;
+    }
+
+    /** NOTICE: vif_added_bytes increased by 16. */
+    static inline void packet2_add_s128(packet2_t *packet2, const s128 val)
+    {
+        *((s128 *)packet2->next)++ = val;
+        packet2->vif_added_bytes += 16;
+    }
+
+    /** 
+     * NOTICE: Alignment alert. Size of dword (1/2) 
+     * vif_added_bytes increased by 16. 
+     */
+    static inline void packet2_add_2x_s64(packet2_t *packet2, const s64 v1, const s64 v2)
+    {
+        *((s64 *)packet2->next)++ = v1;
+        *((s64 *)packet2->next)++ = v2;
+        packet2->vif_added_bytes += 16;
+    }
+
+    /** 
+     * NOTICE: Alignment alert. Size of dword (1/2) 
+     * vif_added_bytes increased by 8. 
+     */
+    static inline void packet2_add_u64(packet2_t *packet2, const u64 val)
+    {
+        *((u64 *)packet2->next)++ = val;
+        packet2->vif_added_bytes += 8;
+    }
+
+    /** 
+     * NOTICE: Alignment alert. Size of dword (1/2) 
+     * vif_added_bytes increased by 8. 
+     */
+    static inline void packet2_add_s64(packet2_t *packet2, const s64 val)
+    {
+        *((s64 *)packet2->next)++ = val;
+        packet2->vif_added_bytes += 8;
+    }
+
+    /** 
+     * NOTICE: Alignment alert. Size of word (1/4) 
+     * vif_added_bytes increased by 4. 
+     */
+    static inline void packet2_add_u32(packet2_t *packet2, const u32 val)
+    {
+        *((u32 *)packet2->next)++ = val;
+        packet2->vif_added_bytes += 4;
+    }
+
+    /** 
+     * NOTICE: Alignment alert. Size of word (1/4) 
+     * vif_added_bytes increased by 4. 
+     */
+    static inline void packet2_add_s32(packet2_t *packet2, const s32 val)
+    {
+        *((s32 *)packet2->next)++ = val;
+        packet2->vif_added_bytes += 4;
+    }
+
+    /** 
+     * NOTICE: Alignment alert. Size of word (1/4)
+     * vif_added_bytes increased by 4. 
+     */
+    static inline void packet2_add_float(packet2_t *packet2, const float val)
+    {
+        *((float *)packet2->next)++ = val;
+        packet2->vif_added_bytes += 4;
+    }
 
     // ---
     // Utils

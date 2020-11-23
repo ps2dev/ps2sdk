@@ -15,7 +15,7 @@
 #include <gs_psm.h>
 #include <dma.h>
 #include <packet2.h>
-#include <packet2_vu.h>
+#include <packet2_helpers.h>
 #include <graph.h>
 #include <draw.h>
 #include "zbyszek.c"
@@ -92,17 +92,17 @@ void draw_vertices(texbuffer_t *t_texbuff)
 	curr_vif_packet = vif_packets[context];
 	packet2_reset(curr_vif_packet, 0);
 	packet2_vu_open_unpack(curr_vif_packet);
-	packet2_vu_unpack_add_float(curr_vif_packet, 2048.0F);					 // scale
-	packet2_vu_unpack_add_float(curr_vif_packet, 2048.0F);					 // scale
-	packet2_vu_unpack_add_float(curr_vif_packet, ((float)0xFFFFFF) / 32.0F); // scale
-	packet2_vu_unpack_add_s32(curr_vif_packet, faces_count);				 // vertex count
-	packet2_vu_unpack_add_set(curr_vif_packet, 1);
-	packet2_vu_unpack_add_lod(curr_vif_packet, &lod);
-	packet2_vu_unpack_add_texbuff_clut(curr_vif_packet, t_texbuff, &clut);
-	packet2_vu_unpack_add_prim_giftag(curr_vif_packet, &prim, faces_count, DRAW_STQ2_REGLIST, 3, 0);
+	packet2_add_float(curr_vif_packet, 2048.0F);				   // scale
+	packet2_add_float(curr_vif_packet, 2048.0F);				   // scale
+	packet2_add_float(curr_vif_packet, ((float)0xFFFFFF) / 32.0F); // scale
+	packet2_add_s32(curr_vif_packet, faces_count);				   // vertex count
+	packet2_gif_add_set(curr_vif_packet, 1);
+	packet2_gs_add_lod(curr_vif_packet, &lod);
+	packet2_gs_add_texbuff_clut(curr_vif_packet, t_texbuff, &clut);
+	packet2_gs_add_prim_giftag(curr_vif_packet, &prim, faces_count, DRAW_STQ2_REGLIST, 3, 0);
 	u8 j = 0; // RGBA
 	for (j = 0; j < 4; j++)
-		packet2_vu_unpack_add_u32(curr_vif_packet, 128);
+		packet2_add_u32(curr_vif_packet, 128);
 	packet2_vu_close_unpack(curr_vif_packet);
 	packet2_vu_add_unpack_data(curr_vif_packet, 0, c_verts, 2 * faces_count, 1);
 	packet2_vu_add_unpack_data(curr_vif_packet, 0, c_sts, 2 * faces_count, 1);
