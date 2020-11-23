@@ -168,11 +168,20 @@ extern "C"
      */
     void packet2_print(packet2_t *packet2, u32 qw_count);
 
+    /** 
+     * Print amount of qwords of packet. 
+     * @param packet2 Pointer to packet.
+     */
+    void packet2_print_qw_count(packet2_t *packet2);
+
     /** Copy data from b packet into a packet with memcpy() */
     void packet2_add(packet2_t *a, packet2_t *b);
 
     /** Returns count of added qwords into packet. */
     static inline u32 packet2_get_qw_count(packet2_t *packet2) { return ((u32)packet2->next - (u32)packet2->base) >> 4; }
+
+    /** Returns count of added qwords into VU. */
+    static inline u32 packet2_get_vif_added_qws(packet2_t *packet2) { return packet2->vif_added_bytes >> 4; }
 
     /** True if packet doesnt have even number of quads. */
     static inline u8 packet2_doesnt_have_even_number_of_quads(packet2_t *packet2) { return ((u32)packet2->next & 0xF) != 0; }
