@@ -50,22 +50,25 @@ extern "C"
      * Please be sure that data is aligned, 
      * and there is no any open UNPACK/DIRECT. 
      * @param packet2 Pointer to packet2. 
-     * @param t_dest_address Destination address. 
+     * @param t_offset Offset + vif_added_bytes >> 4 will be the destination address. 
      * @param t_data Data pointer. 
      * @param t_size Size in quadwords. 
      * @param t_use_top Double buffer? 
-     * When true, data will be loaded at t_dest_address + beginning of current VU buffer. 
+     * When true, data will be loaded at destination address + beginning of current VU buffer. 
      */
-    static inline void packet2_vu_add_unpack_data(packet2_t *packet2, u32 t_dest_address, void *t_data, u32 t_size, u8 t_use_top)
+    static inline void packet2_vu_add_unpack_data(packet2_t *packet2, u32 t_offset, void *t_data, u32 t_size, u8 t_use_top)
     {
         packet2_chain_ref(packet2, t_data, t_size, 0, 0, 0);
         packet2_vif_stcycl(packet2, 0, 0x0101, 0);
-        packet2_vif_open_unpack(packet2, P2_UNPACK_V4_32, t_dest_address + (packet2->vif_added_bytes >> 4), t_use_top, 0, 1, 0);
+        packet2_vif_open_unpack(packet2, P2_UNPACK_V4_32, t_offset + (packet2->vif_added_bytes >> 4), t_use_top, 0, 1, 0);
         packet2_vif_close_unpack(packet2, t_size);
         packet2->vif_added_bytes += t_size * 8;
     }
 
-    /** Open CNT tag + VU unpack. */
+    /** 
+     * Open CNT tag + VU unpack. 
+     * NOTICE: vif_added_bytes will be reset. 
+     */
     static inline void packet2_vu_open_unpack(packet2_t *packet2)
     {
         packet2->vif_added_bytes = 0;
