@@ -13,6 +13,7 @@
 #include <assert.h>
 #include <packet2.h>
 #include <string.h>
+#include <stdio.h>
 
 #define P2_ALIGNMENT 64
 #define P2_MAKE_PTR_NORMAL(PTR) ((u32)(PTR)&0x0FFFFFFF)
@@ -103,5 +104,24 @@ void packet2_add(packet2_t *a, packet2_t *b)
 {
     assert(packet2_get_qw_count(a) + packet2_get_qw_count(b) <= a->max_qwords_count);
     memcpy(a->next, b->base, (u32)b->next - (u32)b->base);
-    a->next = a->base + packet2_get_qw_count(b);
+    a->next = a->base + packet2_get_qw_count(b) + 1;
+}
+
+void packet2_print(packet2_t *packet2, u32 qw_count)
+{
+    if (qw_count == 0)
+        qw_count = ((u32)packet2->next - (u32)packet2->base) >> 4;
+    printf("\n============================\n");
+    printf("Packet2: Dumping %d words...\n", ((u32)packet2->next - (u32)packet2->base) >> 2);
+    u32 i = 0;
+    u32 *nextWord;
+    for (nextWord = (u32 *)packet2->base; nextWord != (u32 *)packet2->next; nextWord++, i++)
+    {
+        if ((i % 4) == 0)
+            printf("\n0x%08x:  ", (u32)nextWord);
+        printf("0x%08x ", *nextWord);
+        if (i / 4 == qw_count)
+            break;
+    }
+    printf("\n============================\n");
 }

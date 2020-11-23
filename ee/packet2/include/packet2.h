@@ -158,8 +158,15 @@ extern "C"
     }
 
     // ---
-    // Utils
+    // Other
     // ---
+
+    /** 
+     * Print data of packet. 
+     * @param packet2 Pointer to packet.
+     * @param clear_mem Count of qwords, type 0 for all. 
+     */
+    void packet2_print(packet2_t *packet2, u32 qw_count);
 
     /** Copy data from b packet into a packet with memcpy() */
     void packet2_add(packet2_t *a, packet2_t *b);
