@@ -140,8 +140,8 @@ void draw_cube(VECTOR t_object_position, texbuffer_t *t_texbuff)
 	packet2_utils_vu_add_start_program(curr_vif_packet, 0);
 
 	packet2_utils_vu_add_end_tag(curr_vif_packet);
-	dma_channel_send_packet2(curr_vif_packet, DMA_CHANNEL_VIF1, 1);
 	dma_channel_wait(DMA_CHANNEL_VIF1, 0);
+	dma_channel_send_packet2(curr_vif_packet, DMA_CHANNEL_VIF1, 1);
 
 	// Switch packet, so we can proceed during DMA transfer
 	context = !context;
