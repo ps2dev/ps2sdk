@@ -8,7 +8,13 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
-/** @file Helper functions for packet2. */
+/** 
+ * @file Helper functions for packet2.
+ * @defgroup packet2_utils Utils
+ * Useful functions and examples for libpacket2.
+ * @ingroup packet2
+ * @{
+ */
 
 #ifndef __PACKET2_UTILS_H__
 #define __PACKET2_UTILS_H__
@@ -55,6 +61,7 @@ extern "C"
      * @param t_size Size in quadwords. 
      * @param t_use_top Unpack to current double buffer? 
      * When true, data will be loaded at destination address + beginning of current VU buffer. 
+     * @note vif_added_bytes increased by t_size * 16
      */
     static inline void packet2_utils_vu_add_unpack_data(packet2_t *packet2, u32 t_dest_address, void *t_data, u32 t_size, u8 t_use_top)
     {
@@ -250,3 +257,5 @@ extern "C"
 #endif
 
 #endif /* __PACKET2_UTILS_H__ */
+
+/** @} */ // end of packet2_utils subgroup

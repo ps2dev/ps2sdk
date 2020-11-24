@@ -8,7 +8,19 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
-/** @file Successor of standard packet library. */
+/** 
+ * @file Successor of standard packet library. 
+ * @defgroup packet2 Packet2 library
+ * Successor of packet_t. Main goal of this library is to
+ * create simple API for packet management. 
+ * Library is splitted into several parts:
+ * - This - core functionality of libpacket2  
+ * - "_types" - Enums and structures used in libpacket2  
+ * - "_chain" - DMA tags 
+ * - "_vif" - VU related
+ * - "_utils" - useful functions, and examples 
+ * @{
+ */
 
 #ifndef __PACKET2_H__
 #define __PACKET2_H__
@@ -30,7 +42,7 @@ extern "C"
      * Allocate new packet2. 
      * @param qwords Maximum data size in qwords (128bit). 
      * @param type Memory mapping type. 
-     * @param mode Packet mode. Normal or chain (so also vif/vu). 
+     * @param mode Packet mode. Normal or chain. 
      * @param tte Tag transfer enable. 
      * Used only for CHAIN mode! 
      * If >0 transfer tag is set during packet sending and 
@@ -82,24 +94,21 @@ extern "C"
     // Basic add
     // ---
 
-    /** NOTICE: vif_added_bytes increased by 16. */
+    /** @note vif_added_bytes increased by 16. */
     static inline void packet2_add_u128(packet2_t *packet2, const u128 val)
     {
         *((u128 *)packet2->next)++ = val;
         packet2->vif_added_bytes += 16;
     }
 
-    /** NOTICE: vif_added_bytes increased by 16. */
+    /** @note vif_added_bytes increased by 16. */
     static inline void packet2_add_s128(packet2_t *packet2, const s128 val)
     {
         *((s128 *)packet2->next)++ = val;
         packet2->vif_added_bytes += 16;
     }
 
-    /** 
-     * NOTICE: Alignment alert. Size of dword (1/2) 
-     * vif_added_bytes increased by 16. 
-     */
+    /** @note vif_added_bytes increased by 16. */
     static inline void packet2_add_2x_s64(packet2_t *packet2, const s64 v1, const s64 v2)
     {
         *((s64 *)packet2->next)++ = v1;
@@ -108,7 +117,7 @@ extern "C"
     }
 
     /** 
-     * NOTICE: Alignment alert. Size of dword (1/2) 
+     * @note Alignment alert. Size of dword (1/2) 
      * vif_added_bytes increased by 8. 
      */
     static inline void packet2_add_u64(packet2_t *packet2, const u64 val)
@@ -118,7 +127,7 @@ extern "C"
     }
 
     /** 
-     * NOTICE: Alignment alert. Size of dword (1/2) 
+     * @note Alignment alert. Size of dword (1/2) 
      * vif_added_bytes increased by 8. 
      */
     static inline void packet2_add_s64(packet2_t *packet2, const s64 val)
@@ -128,7 +137,7 @@ extern "C"
     }
 
     /** 
-     * NOTICE: Alignment alert. Size of word (1/4) 
+     * @note Alignment alert. Size of word (1/4) 
      * vif_added_bytes increased by 4. 
      */
     static inline void packet2_add_u32(packet2_t *packet2, const u32 val)
@@ -138,7 +147,7 @@ extern "C"
     }
 
     /** 
-     * NOTICE: Alignment alert. Size of word (1/4) 
+     * @note Alignment alert. Size of word (1/4) 
      * vif_added_bytes increased by 4. 
      */
     static inline void packet2_add_s32(packet2_t *packet2, const s32 val)
@@ -148,7 +157,7 @@ extern "C"
     }
 
     /** 
-     * NOTICE: Alignment alert. Size of word (1/4)
+     * @note Alignment alert. Size of word (1/4)
      * vif_added_bytes increased by 4. 
      */
     static inline void packet2_add_float(packet2_t *packet2, const float val)
@@ -204,3 +213,5 @@ extern "C"
 #endif
 
 #endif /* __PACKET2_H__ */
+
+/** @} */ // end of packet2 group

@@ -8,7 +8,13 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
-/** @file VIF related functions for packet2. */
+/** 
+ * @file VIF related functions for packet2.
+ * @defgroup packet2_vif VIF
+ * VIF related functions of libpacket2.
+ * @ingroup packet2
+ * @{
+ */
 
 #ifndef __PACKET2_VIF_H__
 #define __PACKET2_VIF_H__
@@ -25,7 +31,7 @@ extern "C"
 
     /** 
      * Add UNPACK VIF opcode. 
-     * NOTICE: packet2_vif_close_unpack() required. Qwords 
+     * @note packet2_vif_close_unpack() required. Qwords 
      * are counted automatically. 
      * For more details, check description of vif_code_t. 
      * @param packet2 Pointer to packet. 
@@ -69,7 +75,7 @@ extern "C"
 
     /** 
      * Add DIRECT VIF opcode. 
-     * NOTICE: Direct must be closed via 
+     * @note Direct must be closed via 
      * packet2_vif_close_direct_manual() or
      * packet2_vif_close_direct_auto() function!
      * @param packet2 Pointer to packet. 
@@ -110,7 +116,7 @@ extern "C"
 
     /** 
      * Add NOP VIF opcode. 
-     * NOTICE: Alignment alert. Size of word (1/4). 
+     * @note Alignment alert. Size of word (1/4). 
      * For more details, check description of VIFOpcode. 
      * @param packet2 Pointer to packet. 
      * @param irq Interrupt Request. False by default. 
@@ -122,7 +128,7 @@ extern "C"
 
     /** 
      * Add MPG VIF opcode. 
-     * NOTICE: Alignment alert. Size of word (1/4). 
+     * @note Alignment alert. Size of word (1/4). 
      * For more details, check description of VIFOpcode. 
      * @param packet2 Pointer to packet. 
      * @param num Number of 64-bit data. 
@@ -136,7 +142,7 @@ extern "C"
 
     /** 
      * Add STCYCL VIF opcode. 
-     * NOTICE: Alignment alert. Size of word (1/4). 
+     * @note Alignment alert. Size of word (1/4). 
      * For more details, check description of VIFOpcode. 
      * @param packet2 Pointer to packet. 
      * @param wl WL field. 
@@ -150,7 +156,7 @@ extern "C"
 
     /** 
      * Add OFFSET VIF opcode. 
-     * NOTICE: Alignment alert. Size of word (1/4). 
+     * @note Alignment alert. Size of word (1/4). 
      * For more details, check description of VIFOpcode. 
      * @param packet2 Pointer to packet. 
      * @param offset Offset. BASE+OFFSET will be the address of second buffer. 
@@ -163,7 +169,7 @@ extern "C"
 
     /** 
      * Add BASE VIF opcode. 
-     * NOTICE: Alignment alert. Size of word (1/4). 
+     * @note Alignment alert. Size of word (1/4). 
      * For more details, check description of VIFOpcode. 
      * @param packet2 Pointer to packet. 
      * @param base Base address of double buffer. 
@@ -176,7 +182,7 @@ extern "C"
 
     /** 
      * Add FLUSH VIF opcode. 
-     * NOTICE: Alignment alert. Size of word (1/4). 
+     * @note Alignment alert. Size of word (1/4). 
      * For more details, check description of VIFOpcode. 
      * @param packet2 Pointer to packet. 
      * @param irq Interrupt Request. False by default. 
@@ -188,7 +194,7 @@ extern "C"
 
     /** 
      * Add MSCAL VIF opcode. 
-     * NOTICE: Alignment alert. Size of word (1/4). 
+     * @note Alignment alert. Size of word (1/4). 
      * For more details, check description of VIFOpcode. 
      * @param packet2 Pointer to packet. 
      * @param addr Starting address. 
@@ -201,7 +207,7 @@ extern "C"
 
     /** 
      * Add MSCNT VIF opcode. 
-     * NOTICE: Alignment alert. Size of word (1/4). 
+     * @note Alignment alert. Size of word (1/4). 
      * For more details, check description of VIFOpcode. 
      * @param packet2 Pointer to packet. 
      * @param irq Interrupt Request. False by default. 
@@ -213,7 +219,7 @@ extern "C"
 
     /** 
      * Add ITOP VIF opcode. 
-     * NOTICE: Alignment alert. Size of word (1/4). 
+     * @note Alignment alert. Size of word (1/4). 
      * For more details, check description of VIFOpcode. 
      * @param packet2 Pointer to packet. 
      * @param itops Value for VU XITOP instruction. 
@@ -226,7 +232,7 @@ extern "C"
 
     /** 
      * Add MSKPATH3 VIF opcode. 
-     * NOTICE: Alignment alert. Size of word (1/4). 
+     * @note Alignment alert. Size of word (1/4). 
      * For more details, check description of VIFOpcode. 
      * @param packet2 Pointer to packet. 
      * @param mode Decompression mode. 
@@ -239,7 +245,7 @@ extern "C"
 
     /** 
      * Add MSKPATH3 VIF opcode. 
-     * NOTICE: Alignment alert. Size of word (1/4). 
+     * @note Alignment alert. Size of word (1/4). 
      * For more details, check description of VIFOpcode. 
      * @param packet2 Pointer to packet. 
      * @param mask Mask. 
@@ -252,7 +258,7 @@ extern "C"
 
     /** 
      * Add MARK VIF opcode. 
-     * NOTICE: Alignment alert. Size of word (1/4). 
+     * @note Alignment alert. Size of word (1/4). 
      * For more details, check description of VIFOpcode. 
      * @param packet2 Pointer to packet. 
      * @param value Value. 
@@ -265,7 +271,7 @@ extern "C"
 
     /** 
      * Add FLUSHE VIF opcode. 
-     * NOTICE: Alignment alert. Size of word (1/4). 
+     * @note Alignment alert. Size of word (1/4). 
      * For more details, check description of VIFOpcode. 
      * @param packet2 Pointer to packet. 
      * @param irq Interrupt Request. False by default. 
@@ -277,7 +283,7 @@ extern "C"
 
     /** 
      * Add FLUSHA VIF opcode. 
-     * NOTICE: Alignment alert. Size of word (1/4). 
+     * @note Alignment alert. Size of word (1/4). 
      * For more details, check description of VIFOpcode. 
      * @param packet2 Pointer to packet. 
      * @param irq Interrupt Request. False by default. 
@@ -289,7 +295,7 @@ extern "C"
 
     /** 
      * Add MSCALF VIF opcode. 
-     * NOTICE: Alignment alert. Size of word (1/4). 
+     * @note Alignment alert. Size of word (1/4). 
      * For more details, check description of VIFOpcode. 
      * @param packet2 Pointer to packet. 
      * @param addr Address. 
@@ -302,7 +308,7 @@ extern "C"
 
     /** 
      * Add STMASK VIF opcode. 
-     * NOTICE: Alignment alert. Size of dword (1/2). 
+     * @note Alignment alert. Size of dword (1/2). 
      * For more details, check description of VIFOpcode. 
      * @param packet2 Pointer to packet. 
      * @param mask Mask. 
@@ -316,7 +322,7 @@ extern "C"
 
     /** 
      * Add STROW VIF opcode. 
-     * NOTICE: Alignment alert. Size of 5 x word (1+1/4). 
+     * @note Alignment alert. Size of 5 x word (1+1/4). 
      * For more details, check description of VIFOpcode. 
      * @param packet2 Pointer to packet. 
      * @param row_arr Row array. 
@@ -333,7 +339,7 @@ extern "C"
 
     /** 
      * Add STCOL VIF opcode. 
-     * NOTICE: Alignment alert. Size of 5 x word (1+1/4). 
+     * @note Alignment alert. Size of 5 x word (1+1/4). 
      * For more details, check description of VIFOpcode. 
      * @param packet2 Pointer to packet. 
      * @param col_arr Column array. 
@@ -362,3 +368,5 @@ extern "C"
 #endif
 
 #endif /* __PACKET2_VIF_H__ */
+
+/** @} */ // end of packet2_vif subgroup
