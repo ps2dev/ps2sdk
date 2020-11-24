@@ -2,15 +2,11 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright 2001-2005, ps2dev - http://www.ps2dev.org
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-EE_OBJS = dma.o erl-support.o
-
-EE_INCS := $(EE_INCS) -I$(PS2SDKSRC)/ee/packet2/include
+SAMPLE_DIR = draw/vu1
 
 include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/ee/Rules.lib.make
-include $(PS2SDKSRC)/ee/Rules.make
-include $(PS2SDKSRC)/ee/Rules.release
+include $(PS2SDKSRC)/samples/Rules.samples

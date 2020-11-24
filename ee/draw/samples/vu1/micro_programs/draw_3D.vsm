@@ -1,0 +1,97 @@
+; _____     ___ ____     ___ ____
+;  ____|   |    ____|   |        | |____|
+; |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+;-----------------------------------------------------------------------
+; (c) 2020 h4570 Sandro Sobczyński <sandro.sobczynski@gmail.com>
+; Licenced under Academic Free License version 2.0
+; Review ps2sdk README & LICENSE files for further details.
+;
+;
+;---------------------------------------------------------------
+; draw_3D.vsm                                                  |
+;---------------------------------------------------------------
+; A VU1 microprogram to draw 3D object using XYZ2, RGBAQ and ST|
+; This program uses double buffering (xtop)                    |
+;                                                              |
+; Many thanks to:                                              |
+; - Dr Henry Fortuna                                           |
+; - Jesper Svennevid, Daniel Collin                            |
+; - Guilherme Lampert                                          |
+;---------------------------------------------------------------
+
+
+;-------------------------
+;-------------------------
+;-----VCL CODE------------
+;-------------------------
+;-------------------------
+; =================================================
+; flowMon::Emit() vcl 1.4beta7 produced this code:
+		.vu
+		.align 4
+		.global	VU1Draw3D_CodeStart
+		.global	VU1Draw3D_CodeEnd
+VU1Draw3D_CodeStart:
+__v_draw_3D_vcl_4:
+; _LNOPT_w=[ normal2 ] 23 [23 0] 23   [__v_draw_3D_vcl_4]
+         NOP                                                        lq            VF01,0(VI00)                        
+         NOP                                                        xtop          VI02                                
+         NOP                                                        lq            VF02,1(VI00)                        
+         NOP                                                        lq            VF06,1(VI02)                        
+         NOP                                                        lq            VF09,2(VI02)                        
+         NOP                                                        lq            VF08,3(VI02)                        
+         NOP                                                        lq            VF07,4(VI02)                        
+         NOP                                                        lq            VF03,2(VI00)                        
+         NOP                                                        iaddiu        VI03,VI02,0x00000006                
+         NOP                                                        ilw.w         VI07,0(VI02)                        
+         NOP                                                        lq            VF04,3(VI00)                        
+         NOP                                                        fcset         0                                   
+         NOP                                                        lq.xyz        VF05,0(VI02)                        
+         NOP                                                        iadd          VI04,VI03,VI07                      
+         NOP                                                        iadd          VI06,VI04,VI07                      
+         NOP                                                        sqi           VF06,(VI06++)                       
+         NOP                                                        sqi           VF09,(VI06++)                       
+         NOP                                                        sqi           VF06,(VI06++)                       
+         NOP                                                        sqi           VF08,(VI06++)                       
+         NOP                                                        lq            VF06,5(VI02)                        
+         NOP                                                        iadd          VI05,VI04,VI07                      
+         NOP                                                        sqi           VF07,(VI06++)                       
+         NOP                                                        iadd          VI07,VI02,VI07                      
+vertexLoop:
+; _LNOPT_w=[ normal2 ] 21 [31 14] 31   [vertexLoop]
+         NOP                                                        lq            VF07,0(VI03)                        
+         mulax         ACC,VF01,VF07x                               sq            VF06,1(VI06)                               ;	STALL_LATENCY ?3
+         madday        ACC,VF02,VF07y                               lq            VF08,0(VI04)                        
+         maddaz        ACC,VF03,VF07z                               iaddiu        VI06,VI06,0x00000003                
+         maddw         VF07,VF04,VF07w                              NOP                                               
+         clipw.xyz     VF07xyz,VF07w                                div           Q,VF00w,VF07w                              ;	STALL_LATENCY ?3
+         NOP                                                        NOP                                               
+         NOP                                                        NOP                                               
+         NOP                                                        NOP                                               
+         NOP                                                        NOP                                               
+         NOP                                                        NOP                                               
+         NOP                                                        NOP                                               
+         mulq.xyz      VF07,VF07,Q                                  fcand         VI01,262143                         
+         mulaw.xyz     ACC,VF05,VF00w                               iaddiu        VI03,VI03,0x00000001                
+         madd.xyz      VF07,VF07,VF05                               iaddiu        VI04,VI04,0x00000001                       ;	STALL_LATENCY ?2
+         mulq          VF08,VF08,Q                                  isubiu        VI07,VI07,1                         
+         ftoi4.xyz     VF07,VF07                                    iaddiu        VI01,VI01,0x00007fff                       ;	STALL_LATENCY ?2
+         NOP                                                        isw.w         VI01,-1(VI06)                       
+         NOP                                                        sq            VF08,-3(VI06)                       
+         NOP                                                        ibne          VI07,VI02,vertexLoop                
+         NOP                                                        sq.xyz        VF07,-1(VI06)                       
+; _LNOPT_w=[ normal2 ] 3 [1 0] 3   [__v_draw_3D_vcl_7]
+         NOP                                                        xgkick        VI05                                
+         NOP[E]                                                     NOP                                               
+         NOP                                                        NOP                                               
+		.align 4
+VU1Draw3D_CodeEnd:
+;	iCount=47
+; register stats:
+;   8 VU User integer
+;  10 VU User floating point
+;-------------------------
+;-------------------------
+;-------------------------
+;-------------------------
+;-------------------------

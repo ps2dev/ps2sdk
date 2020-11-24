@@ -8,7 +8,7 @@
 
 SUBDIRS = erl kernel kernel-nopatch libc rpc debug \
 	eedebug sbv dma graph math3d \
-	packet draw erl-loader mpeg libgs \
+	packet packet2 draw erl-loader mpeg libgs \
 	libvux font input inputx network iopreboot \
 	elf-loader
 

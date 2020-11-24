@@ -35,6 +35,28 @@
 	((u64)GIF_REG_ST)     << 4 | \
 	((u64)GIF_REG_XYZ2)   << 8
 
+/** 
+ * Sandro: 
+ * Similar to DRAW_STQ_REGLIST, but order of ST and RGBAQ is swapped. 
+ * Needed for REGLIST mode which is used mostly in VU1, because of nature of 128bit registers. 
+ * Without that, texture perspective correction will not work. 
+ * Bad example: 
+ * 1. RGBA -> RGBAQ (q was not set!) 
+ * 2. STQ  -> ST 
+ * 3. XYZ2 
+ * Good example: 
+ * 1. STQ  -> ST 
+ * 2. RGBA -> RGBAQ (q grabbed from STQ) 
+ * 3. XYZ2 
+ * For more details, please check: 
+ * EE_Overview_Manual.pdf - 3.3 Data transfer to GS 
+ * GS_Users_Manual.pdf - 3.4.10 Perspective correction
+ */
+#define DRAW_STQ2_REGLIST \
+	((u64)GIF_REG_ST)     << 0 | \
+	((u64)GIF_REG_RGBAQ)  << 4 | \
+	((u64)GIF_REG_XYZ2)   << 8
+
 #ifdef __cplusplus
 extern "C" {
 #endif
