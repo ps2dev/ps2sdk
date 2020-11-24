@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - hotfix/docker-ci
   repository_dispatch:
     types: [run_build]
 
