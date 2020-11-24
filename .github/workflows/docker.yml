@@ -26,7 +26,7 @@ jobs:
     - name: Send Compile action
       run: |
         export DISPATCH_ACTION="$(echo run_build)"
-        echo "{NEW_DISPATCH_ACTION}={$DISPATCH_ACTION}" >> $GITHUB_ENV
+        echo "NEW_DISPATCH_ACTION=$DISPATCH_ACTION" >> $GITHUB_ENV
 
     - name: Repository Dispatch to gsKit
       uses: peter-evans/repository-dispatch@v1
