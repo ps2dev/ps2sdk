@@ -166,6 +166,15 @@ extern "C"
         packet2->vif_added_bytes += 4;
     }
 
+    /**
+     * vif_added_bytes increased by t_size*16.
+     */
+    static inline void packet2_add_data(packet2_t *packet2, void *t_data, u32 t_size)
+    {
+        while(t_size--)
+            packet2_add_u128(packet2, *((u128 *)t_data)++);
+    }
+
     // ---
     // Other
     // ---

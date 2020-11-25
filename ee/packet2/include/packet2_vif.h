@@ -59,7 +59,7 @@ extern "C"
     /** 
      * Close UNPACK automatically. 
      * In reality, get back to pointer "vif_code_opened_at" and 
-     * fix immediate value with qwords counted from last packet2_vif_open_direct(). 
+     * fix immediate value with qwords counted from last packet2_vif_open_unpack().
      * @param packet2 Pointer to packet. 
      * @param unpack_num Amount of data written to the VU Mem (qwords) or MicroMem (dwords). 
      * 256 is max value! 
@@ -124,6 +124,26 @@ extern "C"
     static inline void packet2_vif_nop(packet2_t *packet2, u8 irq)
     {
         *((u32 *)packet2->next)++ = MAKE_VIF_CODE(0, 0, P2_VIF_NOP, irq);
+    }
+
+    /**
+     * Fill with NOP VIF opcode to align to 96bits
+     * @param packet2 Pointer to packet.
+     */
+    static inline void packet2_vif_pad96(packet2_t *packet2)
+    {
+        while ((((u32)packet2->next + 4) & 0xf) != 0)
+            packet2_vif_nop(packet2, 0);
+    }
+
+    /**
+     * Fill with NOP VIF opcode to align to 128bits
+     * @param packet2 Pointer to packet.
+     */
+    static inline void packet2_vif_pad128(packet2_t *packet2)
+    {
+        while (((u32)packet2->next & 0xf) != 0)
+            packet2_vif_nop(packet2, 0);
     }
 
     /** 
