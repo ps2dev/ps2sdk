@@ -8,7 +8,13 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
-/** @file Structs and enums used in packet2 library. */
+/** 
+ * @file Structs and enums used in packet2 library
+ * @defgroup packet2_types Types
+ * Structures and enums used in libpacket2.
+ * @ingroup packet2
+ * @{
+ */
 
 #ifndef __PACKET2_DATA_TYPES_H__
 #define __PACKET2_DATA_TYPES_H__
@@ -55,13 +61,13 @@ enum DmaTagType
     /** 
      * Transfers the QWC qword from the ADDR field while controlling stalls 
      * and reads the qword following the tag as the next tag.
-     * NOTICE: Effective only on the VIF1, GIF, and SIF1 channels. 
+     * @note Effective only on the VIF1, GIF, and SIF1 channels. 
      */
     P2_DMA_TAG_REFS = 4,
     /** 
      * Transfers the QWC qword following the tag, pushes the next field into 
      * the Dn_ASR register, and reads the qword of the ADDR field as the next tag. 
-     * NOTICE: Effective only on the VIF0, VIF1, and GIF channels. 
+     * @note Effective only on the VIF0, VIF1, and GIF channels. 
      * Addresses can be pushed up to 2 levels 
      */
     P2_DMA_TAG_CALL = 5,
@@ -72,7 +78,7 @@ enum DmaTagType
      * Transfers the QWC qword following the tag, clears the 
      * Dn_CHCR.STR to 0, and ends transfer when there is no 
      * pushed address. 
-     * NOTICE: Effective only on the VIF0, VIF1, and GIF channels. 
+     * @note Effective only on the VIF0, VIF1, and GIF channels. 
      */
     P2_DMA_TAG_RET = 6,
     /** Transfers the QWC qword following the tag, clears the Dn_CHCR.STR to 0, and ends transfer. */
@@ -300,9 +306,11 @@ typedef struct
     /** Packet mode. */
     enum Packet2Mode mode;
     /** 
-     * Tag transfer enable.
-     * If >0 transfer tag is set during packet sending.
-     * Effective only in chain mode.
+     * Tag transfer enable. 
+     * Effective only in chain mode. 
+     * If >0 transfer tag is set during packet sending and 
+     * add_dma_tag() (so also every open_tag()) will move buffer by DWORD, 
+     * so remember to align memory!
      */
     u8 tte;
     /** Start position of the buffer. */
@@ -348,3 +356,5 @@ typedef struct
 } Mask;
 
 #endif /* __PACKET2_DATA_TYPES_H__ */
+
+/** @} */ // end of packet2_types subgroup

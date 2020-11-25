@@ -8,7 +8,13 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
-/** @file Chain mode related functions for packet2. */
+/** 
+ * @file Chain mode related functions for packet2.
+ * @defgroup packet2_chain Chain
+ * Chain mode related functions of libpacket2.
+ * @ingroup packet2
+ * @{
+ */
 
 #ifndef __PACKET2_CHAIN_H__
 #define __PACKET2_CHAIN_H__
@@ -104,7 +110,7 @@ extern "C"
 
     /** 
      * Add CNT tag. 
-     * NOTICE: packet2_chain_close_tag() required. Qwords 
+     * @note packet2_chain_close_tag() required. Qwords 
      * are counted automatically. 
      * For more details, check description of dma_tag_t. 
      * @param packet2 Pointer to packet. 
@@ -119,10 +125,10 @@ extern "C"
 
     /** 
      * Add END tag. 
-     * NOTICE: packet2_chain_close_tag() required. Qwords 
+     * @note packet2_chain_close_tag() required. Qwords 
      * are counted automatically. 
      * For more details, check description of dma_tag_t. 
-     * NOTICE: Don't forget about close_tag()!
+     * @note Don't forget about close_tag()!
      * @param packet2 Pointer to packet. 
      * @param irq Interrupt Request. False by default.
      * @param pce Priority Control Enable. 0 by default.
@@ -134,7 +140,7 @@ extern "C"
 
     /** 
      * Add REF tag. 
-     * NOTICE: Qwords are NOT counted automatically, so 
+     * @note Qwords are NOT counted automatically, so 
      * there is NO need to use packet2_chain_close_tag(); 
      * For more details, check description of dma_tag_t. 
      * @param packet2 Pointer to packet. 
@@ -152,7 +158,7 @@ extern "C"
 
     /** 
      * Add NEXT tag. 
-     * NOTICE: packet2_chain_close_tag() required. Qwords 
+     * @note packet2_chain_close_tag() required. Qwords 
      * are counted automatically. 
      * For more details, check description of dma_tag_t. 
      * @param next_tag Pointer to next tag. 
@@ -168,7 +174,7 @@ extern "C"
 
     /** 
      * Add REFS tag.
-     * NOTICE: Qwords are NOT counted automatically, so 
+     * @note Qwords are NOT counted automatically, so 
      * there is NO need to use packet2_chain_close_tag();
      * For more details, check description of dma_tag_t. 
      * @param packet2 Pointer to packet. 
@@ -186,7 +192,7 @@ extern "C"
 
     /** 
      * Add REFE tag.
-     * NOTICE: Qwords are NOT counted automatically, so 
+     * @note Qwords are NOT counted automatically, so 
      * there is NO need to use packet2_chain_close_tag();
      * For more details, check description of dma_tag_t. 
      * @param packet2 Pointer to packet. 
@@ -204,7 +210,7 @@ extern "C"
 
     /** 
      * Add CALL tag. 
-     * NOTICE: packet2_chain_close_tag() required. Qwords 
+     * @note packet2_chain_close_tag() required. Qwords 
      * are counted automatically. 
      * For more details, check description of dma_tag_t. 
      * @param packet2 Pointer to packet. 
@@ -221,7 +227,7 @@ extern "C"
 
     /** 
      * Add RET tag. 
-     * NOTICE: packet2_chain_close_tag() required. Qwords 
+     * @note packet2_chain_close_tag() required. Qwords 
      * are counted automatically. 
      * For more details, check description of dma_tag_t. 
      * @param packet2 Pointer to packet. 
@@ -238,3 +244,5 @@ extern "C"
 #endif
 
 #endif /* __PACKET2_CHAIN_H__ */
+
+/** @} */ // end of packet2_chain subgroup
