@@ -43,6 +43,7 @@
    "sqc2		vf6, 0x00(%0)	\n"
 #endif
    : : "r" (output), "r" (input0), "r" (input1)
+   : "memory"
   );
  }
 
@@ -79,6 +80,7 @@
    "sqc2		vf1, 0x00(%0)	\n"
 #endif
    : : "r" (output), "r" (input0)
+   : "memory"
   );
  }
 
@@ -142,6 +144,7 @@
    "sqc2		vf1, 0x00(%0)	\n"
 #endif
    : : "r" (output), "r" (input0)
+   : "memory"
   );
  }
 
@@ -163,6 +166,7 @@
    "sqc2		vf2, 0x00(%0)	\n"
 #endif
    : : "r" (output), "r" (input0), "r" (input1)
+   : "memory"
   );
  }
 
@@ -190,6 +194,7 @@
    "sqc2		vf4, 0x30(%0)	\n"
 #endif
    : : "r" (output), "r" (input0)
+   : "memory"
   );
  }
 
@@ -273,6 +278,7 @@
    "sqc2		vf4, 0x30(%0)	\n"
 #endif
    : : "r" (output), "r" (input0), "r" (input1)
+   : "memory"
   );
  }
 
@@ -479,6 +485,7 @@
    "bne			$0, %1, 1b	\n"
 #endif
    : : "r" (output), "r" (count), "r" (normals), "r" (local_light)
+   : "memory"
   );
  }
 
@@ -599,6 +606,7 @@
    "addi		%2, 0x10	\n"
    "addi		%1, -1		\n"
    "bne			$0, %1, 1b	\n"
-   : : "r" (output), "r" (count), "r" (vertices), "r" (local_screen) : "$10"
+   : : "r" (output), "r" (count), "r" (vertices), "r" (local_screen)
+   : "$10", "memory"
   );
  }
