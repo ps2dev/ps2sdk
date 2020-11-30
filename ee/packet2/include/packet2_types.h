@@ -335,24 +335,27 @@ typedef struct
 } packet2_t;
 
 /** Mask, used in VIF's STMASK opcode. */
-typedef struct
-{
-    unsigned int m0 : 2;
-    unsigned int m1 : 2;
-    unsigned int m2 : 2;
-    unsigned int m3 : 2;
-    unsigned int m4 : 2;
-    unsigned int m5 : 2;
-    unsigned int m6 : 2;
-    unsigned int m7 : 2;
-    unsigned int m8 : 2;
-    unsigned int m9 : 2;
-    unsigned int m10 : 2;
-    unsigned int m11 : 2;
-    unsigned int m12 : 2;
-    unsigned int m13 : 2;
-    unsigned int m14 : 2;
-    unsigned int m15 : 2;
+typedef union {
+    struct
+    {
+        unsigned int m0 : 2;
+        unsigned int m1 : 2;
+        unsigned int m2 : 2;
+        unsigned int m3 : 2;
+        unsigned int m4 : 2;
+        unsigned int m5 : 2;
+        unsigned int m6 : 2;
+        unsigned int m7 : 2;
+        unsigned int m8 : 2;
+        unsigned int m9 : 2;
+        unsigned int m10 : 2;
+        unsigned int m11 : 2;
+        unsigned int m12 : 2;
+        unsigned int m13 : 2;
+        unsigned int m14 : 2;
+        unsigned int m15 : 2;
+    };
+    unsigned int m;
 } Mask;
 
 #endif /* __PACKET2_DATA_TYPES_H__ */

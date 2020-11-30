@@ -20,6 +20,9 @@
 #define __PACKET2_UTILS_H__
 
 #include "packet2.h"
+#include "packet2_chain.h"
+#include "packet2_vif.h"
+
 #include <tamtypes.h>
 #include <draw3d.h>
 #include <draw_buffers.h>
@@ -88,7 +91,7 @@ extern "C"
     /** Close CNT tag + VU unpack. */
     static inline void packet2_utils_vu_close_unpack(packet2_t *packet2)
     {
-        packet2_align_to_qword(packet2);
+        packet2_vif_pad128(packet2);
         packet2_chain_close_tag(packet2);
         packet2_vif_close_unpack(packet2, packet2_get_vif_added_qws(packet2));
     }
