@@ -14,6 +14,7 @@
  */
 
 #include <time.h>
+#include <sys/_tz_structs.h>
 #include <stdio.h>
 #include <stdlib.h>
 #define OSD_CONFIG_NO_LIBCDVD
