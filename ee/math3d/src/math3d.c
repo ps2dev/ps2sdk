@@ -457,6 +457,7 @@
    "addi		%0, 0x10	\n"
    "addi		%2, 0x10	\n"
    "addi		%1, -1		\n"
+   "bne			$0, %1, 1b	\n"
 #else
    "lqc2		vf1, 0x00(%3)	\n"
    "lqc2		vf2, 0x10(%3)	\n"
