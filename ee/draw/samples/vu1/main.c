@@ -94,7 +94,6 @@ VECTOR *c_verts __attribute__((aligned(128))), *c_sts __attribute__((aligned(128
 /** Calculate packet for cube data */
 void calculate_cube(texbuffer_t *t_texbuff)
 {
-	packet2_utils_vu_open_unpack(zbyszek_packet, 0, 1);
 	packet2_add_float(zbyszek_packet, 2048.0F);					  // scale
 	packet2_add_float(zbyszek_packet, 2048.0F);					  // scale
 	packet2_add_float(zbyszek_packet, ((float)0xFFFFFF) / 32.0F); // scale
@@ -106,7 +105,6 @@ void calculate_cube(texbuffer_t *t_texbuff)
 	u8 j = 0; // RGBA
 	for (j = 0; j < 4; j++)
 		packet2_add_u32(zbyszek_packet, 128);
-	packet2_utils_vu_close_unpack(zbyszek_packet);
 }
 
 /** Calculate cube position and add packet with cube data */
@@ -118,27 +116,26 @@ void draw_cube(VECTOR t_object_position, texbuffer_t *t_texbuff)
 	curr_vif_packet = vif_packets[context];
 	packet2_reset(curr_vif_packet, 0);
 
-	// Upload matrix
-	// packet2_utils_vu_add_unpack_data() is automatically increasing packet vif_added_bytes
+	// Add matrix at the beggining of VU mem (skip TOP)
 	packet2_utils_vu_add_unpack_data(curr_vif_packet, 0, &local_screen, 8, 0);
 
-	// Reset, because now, we will use double buffer
-	// We don't wan't to unpack at 8 + beggining of buffer, but at
-	// the beggining of buffer
-	curr_vif_packet->vif_added_bytes = 0;
+	u32 vif_added_bytes = 0; // zero because now we will use TOP register (double buffer)
+							 // we don't wan't to unpack at 8 + beggining of buffer, but at
+							 // the beggining of the buffer
 
-	// Merge packets (memcpy())
-	packet2_add(curr_vif_packet, zbyszek_packet);
+	// Merge packets
+	packet2_utils_vu_add_unpack_data(curr_vif_packet, vif_added_bytes, zbyszek_packet->base, packet2_get_qw_count(zbyszek_packet), 1);
+	vif_added_bytes += packet2_get_qw_count(zbyszek_packet);
 
-	// If you don't want to use packet2_add() and create reference:
-	// 1. Remove packet2_add();
-	// 2. Add packet2_utils_vu_add_unpack_data(curr_vif_packet, packet2_get_vif_added_qws(curr_vif_packet), zbyszek_packet->base, packet2_get_vif_added_qws(zbyszek_packet), 1);
-	// 3. In calculate_cube() remove open/close unpack.
+	// Add vertices
+	packet2_utils_vu_add_unpack_data(curr_vif_packet, vif_added_bytes, c_verts, faces_count, 1);
+	vif_added_bytes += faces_count; // one VECTOR is size of qword
 
-	packet2_utils_vu_add_unpack_data(curr_vif_packet, packet2_get_vif_added_qws(curr_vif_packet), c_verts, faces_count, 1);
-	packet2_utils_vu_add_unpack_data(curr_vif_packet, packet2_get_vif_added_qws(curr_vif_packet), c_sts, faces_count, 1);
+	// Add sts
+	packet2_utils_vu_add_unpack_data(curr_vif_packet, vif_added_bytes, c_sts, faces_count, 1);
+	vif_added_bytes += faces_count;
+
 	packet2_utils_vu_add_start_program(curr_vif_packet, 0);
-
 	packet2_utils_vu_add_end_tag(curr_vif_packet);
 	dma_channel_wait(DMA_CHANNEL_VIF1, 0);
 	dma_channel_send_packet2(curr_vif_packet, DMA_CHANNEL_VIF1, 1);

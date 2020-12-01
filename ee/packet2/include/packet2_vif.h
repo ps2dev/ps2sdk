@@ -52,27 +52,39 @@ extern "C"
         assert(packet2->vif_code_opened_at == NULL); // All previous UNPACK/DIRECT are closed.
         packet2->vif_code_opened_at = (vif_code_t *)packet2->next;
         packet2_add_u32(packet2,
-            MAKE_VIF_CODE(vuAddr | ((u32)usigned << 14) | ((u32)dblBuffered << 15),
-                          0,
-                          mode | ((u32)masked << 4) | 0x60, irq));
+                        MAKE_VIF_CODE(vuAddr | ((u32)usigned << 14) | ((u32)dblBuffered << 15),
+                                      0,
+                                      mode | ((u32)masked << 4) | 0x60, irq));
+    }
+
+    /** 
+     * Close UNPACK manually. 
+     * In reality, get back to pointer "vif_code_opened_at" and 
+     * fix num value with qwords counted from last packet2_vif_open_unpack().
+     * @param packet2 Pointer to packet.
+     * @param unpack_num Amount of data written to the VU Mem (qwords) or MicroMem (dwords). 
+     * 256 is max value! 
+     */
+    static inline void packet2_vif_close_unpack_manual(packet2_t *packet2, u32 unpack_num)
+    {
+        assert(packet2->vif_code_opened_at != NULL);               // There is open UNPACK/DIRECT.
+        assert(((u32)packet2->next & 0x3) == 0);                   // Make sure we're u32 aligned
+        assert((packet2->vif_code_opened_at->cmd & 0x60) == 0x60); // It was UNPACK
+        assert(unpack_num <= 256);
+        packet2->vif_code_opened_at->num = (unpack_num == 256) ? 0 : unpack_num;
+        packet2->vif_code_opened_at = (vif_code_t *)NULL;
     }
 
     /** 
      * Close UNPACK automatically. 
      * In reality, get back to pointer "vif_code_opened_at" and 
-     * fix immediate value with qwords counted from last packet2_vif_open_unpack().
-     * @param packet2 Pointer to packet. 
-     * @param unpack_num Amount of data written to the VU Mem (qwords) or MicroMem (dwords). 
-     * 256 is max value! 
+     * fix num value with qwords counted from last packet2_vif_open_unpack().
+     * @param packet2 Pointer to packet.
+     * @param wl WL Value (look at STCYCL)
+     * @param cl CL Value (look at STCYCL)
+     * @returns Unpacked qwords count 
      */
-    static inline void packet2_vif_close_unpack(packet2_t *packet2, u16 unpack_num)
-    {
-        assert(packet2->vif_code_opened_at != NULL);               // There is open UNPACK/DIRECT.
-        assert(((u32)packet2->next & 0x3) == 0);                   // Make sure we're u32 aligned
-        assert((packet2->vif_code_opened_at->cmd & 0x60) == 0x60); // It was UNPACK
-        packet2->vif_code_opened_at->num = (unpack_num == 256) ? 0 : unpack_num;
-        packet2->vif_code_opened_at = (vif_code_t *)NULL;
-    }
+    u32 packet2_vif_close_unpack_auto(packet2_t *packet2, u32 wl, u32 cl);
 
     /** 
      * Add DIRECT VIF opcode. 

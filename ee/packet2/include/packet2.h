@@ -91,90 +91,70 @@ extern "C"
     // ---
     // Basic add
     // ---
+
+    /** Move "next" pointer forward. */
     static inline void packet2_advance_next(packet2_t *packet2, u32 i)
     {
-        packet2->next = (qword_t *)((u8*)packet2->next + i);
-        packet2->vif_added_bytes += i;
+        packet2->next = (qword_t *)((u8 *)packet2->next + i);
     }
 
-    /** @note vif_added_bytes increased by 16. */
     static inline void packet2_add_u128(packet2_t *packet2, const u128 val)
     {
         *((u128 *)packet2->next) = val;
         packet2_advance_next(packet2, sizeof(u128));
     }
 
-    /**
-     * @note Alignment alert. Size of dword (1/2)
-     * vif_added_bytes increased by 8.
-     */
+    /** @note Alignment alert. Size of dword (1/2) */
     static inline void packet2_add_s64(packet2_t *packet2, const s64 val)
     {
         *((s64 *)packet2->next) = val;
         packet2_advance_next(packet2, sizeof(s64));
     }
 
-    /** @note vif_added_bytes increased by 16. */
     static inline void packet2_add_2x_s64(packet2_t *packet2, const s64 v1, const s64 v2)
     {
         packet2_add_s64(packet2, v1);
         packet2_add_s64(packet2, v2);
     }
 
-    /** @note vif_added_bytes increased by 16. */
     static inline void packet2_add_s128(packet2_t *packet2, const s128 val)
     {
         *((s128 *)packet2->next) = val;
         packet2_advance_next(packet2, sizeof(s128));
     }
 
-    /** 
-     * @note Alignment alert. Size of dword (1/2) 
-     * vif_added_bytes increased by 8. 
-     */
+    /** @note Alignment alert. Size of dword (1/2) */
     static inline void packet2_add_u64(packet2_t *packet2, const u64 val)
     {
         *((u64 *)packet2->next) = val;
         packet2_advance_next(packet2, sizeof(u64));
     }
 
-    /** 
-     * @note Alignment alert. Size of word (1/4) 
-     * vif_added_bytes increased by 4. 
-     */
+    /** @note Alignment alert. Size of word (1/4) */
     static inline void packet2_add_u32(packet2_t *packet2, const u32 val)
     {
         *((u32 *)packet2->next) = val;
         packet2_advance_next(packet2, sizeof(u32));
     }
 
-    /** 
-     * @note Alignment alert. Size of word (1/4) 
-     * vif_added_bytes increased by 4. 
-     */
+    /** @note Alignment alert. Size of word (1/4) */
     static inline void packet2_add_s32(packet2_t *packet2, const s32 val)
     {
         *((s32 *)packet2->next) = val;
         packet2_advance_next(packet2, sizeof(s32));
     }
 
-    /** 
-     * @note Alignment alert. Size of word (1/4)
-     * vif_added_bytes increased by 4. 
-     */
+    /** @note Alignment alert. Size of word (1/4) */
     static inline void packet2_add_float(packet2_t *packet2, const float val)
     {
         *((float *)packet2->next) = val;
         packet2_advance_next(packet2, sizeof(float));
     }
 
-    /**
-     * vif_added_bytes increased by t_size*16.
-     */
     static inline void packet2_add_data(packet2_t *packet2, void *t_data, u32 t_size)
     {
         int i;
-        for(i=0; i<t_size; i++)
+        for (i = 0; i < t_size; i++)
             packet2_add_u128(packet2, ((u128 *)t_data)[i]);
     }
 
@@ -218,9 +198,6 @@ extern "C"
 
     /** Returns count of added qwords into packet. */
     static inline u32 packet2_get_qw_count(packet2_t *packet2) { return ((u32)packet2->next - (u32)packet2->base) >> 4; }
-
-    /** Returns count of added qwords into VU. */
-    static inline u32 packet2_get_vif_added_qws(packet2_t *packet2) { return packet2->vif_added_bytes >> 4; }
 
     /** True if packet doesnt have even number of quads. */
     static inline u8 packet2_doesnt_have_even_number_of_quads(packet2_t *packet2) { return ((u32)packet2->next & 0xF) != 0; }

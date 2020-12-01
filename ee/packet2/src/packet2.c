@@ -32,7 +32,6 @@ packet2_t *packet2_create(u16 qwords, enum Packet2Type type, enum Packet2Mode mo
     packet2->type = type;
     packet2->mode = mode;
     packet2->tte = tte;
-    packet2->vif_added_bytes = 0;
     packet2->tag_opened_at = NULL;
     packet2->vif_code_opened_at = NULL;
 
@@ -91,7 +90,6 @@ void packet2_reset(packet2_t *packet2, u8 clear_mem)
     packet2->next = packet2->base;
     packet2->vif_code_opened_at = NULL;
     packet2->tag_opened_at = NULL;
-    packet2->vif_added_bytes = 0;
     if (clear_mem)
         memset(packet2->base, 0, packet2->max_qwords_count << 4);
 }
@@ -105,7 +103,6 @@ void packet2_add(packet2_t *a, packet2_t *b)
     assert(packet2_get_qw_count(a) + packet2_get_qw_count(b) <= a->max_qwords_count);
     memcpy(a->next, b->base, (u32)b->next - (u32)b->base);
     a->next = a->base + packet2_get_qw_count(b) + 1;
-    a->vif_added_bytes += b->vif_added_bytes;
 }
 
 void packet2_print(packet2_t *packet2, u32 qw_count)

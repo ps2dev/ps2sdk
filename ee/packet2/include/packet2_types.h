@@ -327,15 +327,11 @@ typedef struct
      * NULL, if no DIRECT/UNPACK is open. 
      */
     vif_code_t *vif_code_opened_at;
-    /** 
-     * Helper variable to control bytes that 
-     * was already "written" to VU. 
-     */
-    u32 vif_added_bytes;
 } packet2_t;
 
 /** Mask, used in VIF's STMASK opcode. */
-typedef union {
+typedef union
+{
     struct
     {
         unsigned int m0 : 2;
