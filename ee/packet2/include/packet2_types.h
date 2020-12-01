@@ -327,32 +327,31 @@ typedef struct
      * NULL, if no DIRECT/UNPACK is open. 
      */
     vif_code_t *vif_code_opened_at;
-    /** 
-     * Helper variable to control bytes that 
-     * was already "written" to VU. 
-     */
-    u32 vif_added_bytes;
 } packet2_t;
 
 /** Mask, used in VIF's STMASK opcode. */
-typedef struct
+typedef union
 {
-    unsigned int m0 : 2;
-    unsigned int m1 : 2;
-    unsigned int m2 : 2;
-    unsigned int m3 : 2;
-    unsigned int m4 : 2;
-    unsigned int m5 : 2;
-    unsigned int m6 : 2;
-    unsigned int m7 : 2;
-    unsigned int m8 : 2;
-    unsigned int m9 : 2;
-    unsigned int m10 : 2;
-    unsigned int m11 : 2;
-    unsigned int m12 : 2;
-    unsigned int m13 : 2;
-    unsigned int m14 : 2;
-    unsigned int m15 : 2;
+    struct
+    {
+        unsigned int m0 : 2;
+        unsigned int m1 : 2;
+        unsigned int m2 : 2;
+        unsigned int m3 : 2;
+        unsigned int m4 : 2;
+        unsigned int m5 : 2;
+        unsigned int m6 : 2;
+        unsigned int m7 : 2;
+        unsigned int m8 : 2;
+        unsigned int m9 : 2;
+        unsigned int m10 : 2;
+        unsigned int m11 : 2;
+        unsigned int m12 : 2;
+        unsigned int m13 : 2;
+        unsigned int m14 : 2;
+        unsigned int m15 : 2;
+    };
+    unsigned int m;
 } Mask;
 
 #endif /* __PACKET2_DATA_TYPES_H__ */

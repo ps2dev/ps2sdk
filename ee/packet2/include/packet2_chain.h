@@ -19,6 +19,7 @@
 #ifndef __PACKET2_CHAIN_H__
 #define __PACKET2_CHAIN_H__
 
+#include <packet2.h>
 #include <packet2_types.h>
 #include <assert.h>
 
@@ -86,9 +87,9 @@ extern "C"
             packet2->tag_opened_at = (dma_tag_t *)NULL;
         }
         if (!packet2->tte)
-            *((dma_tag_t *)packet2->next)++;
+            packet2_advance_next(packet2, sizeof(dma_tag_t));
         else
-            *((u64 *)packet2->next)++;
+            packet2_advance_next(packet2, sizeof(u64));
     }
 
     /** 

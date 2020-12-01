@@ -20,6 +20,9 @@
 #define __PACKET2_UTILS_H__
 
 #include "packet2.h"
+#include "packet2_chain.h"
+#include "packet2_vif.h"
+
 #include <tamtypes.h>
 #include <draw3d.h>
 #include <draw_buffers.h>
@@ -60,16 +63,13 @@ extern "C"
      * @param t_data Data pointer. 
      * @param t_size Size in quadwords. 
      * @param t_use_top Unpack to current double buffer? 
-     * When true, data will be loaded at destination address + beginning of current VU buffer. 
-     * @note vif_added_bytes increased by t_size * 16
      */
     static inline void packet2_utils_vu_add_unpack_data(packet2_t *packet2, u32 t_dest_address, void *t_data, u32 t_size, u8 t_use_top)
     {
         packet2_chain_ref(packet2, t_data, t_size, 0, 0, 0);
         packet2_vif_stcycl(packet2, 0, 0x0101, 0);
         packet2_vif_open_unpack(packet2, P2_UNPACK_V4_32, t_dest_address, t_use_top, 0, 1, 0);
-        packet2_vif_close_unpack(packet2, t_size);
-        packet2->vif_added_bytes += t_size << 4;
+        packet2_vif_close_unpack_manual(packet2, t_size);
     }
 
     /** 
@@ -85,12 +85,15 @@ extern "C"
         packet2_vif_open_unpack(packet2, P2_UNPACK_V4_32, t_dest_address, t_use_top, 0, 1, 0);
     }
 
-    /** Close CNT tag + VU unpack. */
-    static inline void packet2_utils_vu_close_unpack(packet2_t *packet2)
+    /** 
+     * Close CNT tag + VU unpack. 
+     * @returns Unpacked qwords count
+     */
+    static inline u32 packet2_utils_vu_close_unpack(packet2_t *packet2)
     {
-        packet2_align_to_qword(packet2);
+        packet2_vif_pad128(packet2);
         packet2_chain_close_tag(packet2);
-        packet2_vif_close_unpack(packet2, packet2_get_vif_added_qws(packet2));
+        return packet2_vif_close_unpack_auto(packet2, 0, 0x0101);
     }
 
     /** 
