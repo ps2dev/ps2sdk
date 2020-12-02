@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/ps2dev/ps2sdk/workflows/CI/badge.svg)](https://github.com/ps2dev/ps2sdk/actions?query=workflow%3ACI)
 [![CI-Docker](https://github.com/ps2dev/ps2sdk/workflows/CI-Docker/badge.svg)](https://github.com/ps2dev/ps2sdk/actions?query=workflow%3ACI-Docker)
-[![Discord](https://img.shields.io/badge/discord-PS2--Scene-green?logo=discord)](https://discord.gg/7dCr6ThSN5)
+[![Discord](https://img.shields.io/badge/discord-PS2--Scene-brightgreen?logo=discord)](https://discord.gg/7dCr6ThSN5)
 
 [PS2SDK Documentation](https://ps2dev.github.io/ps2sdk/)
 
