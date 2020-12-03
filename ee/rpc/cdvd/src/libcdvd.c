@@ -120,8 +120,6 @@ extern u32 searchFileRecvBuff;
 #ifdef F_sceCdInit
 s32 sceCdInit(s32 mode)
 {
-	int i;
-
 	if (_CdSyncS(1))
 		return 0;
 	SifInitRpc(0);
@@ -139,8 +137,7 @@ s32 sceCdInit(s32 mode)
 		} else if (clientInit.server != 0)
 			break;
 
-		i = 0x10000;
-		while (i--);
+		nopdelay();
 	}
 
 	bindInit = 0;
@@ -183,8 +180,6 @@ u32 sceCdPosToInt(sceCdlLOCCD * p)
 #ifdef F_sceCdSearchFile
 s32 sceCdSearchFile(sceCdlFILE * file, const char *name)
 {
-	int i;
-
 	_CdSemaInit();
 	if (PollSema(nCmdSemaId) != nCmdSemaId)
 		return 0;
@@ -204,8 +199,7 @@ s32 sceCdSearchFile(sceCdlFILE * file, const char *name)
 			if (clientSearchFile.server != 0)
 				break;
 
-			i = 0x10000;
-			while (i--);
+			nopdelay();
 		}
 		bindSearchFile = 0;
 	}
@@ -243,8 +237,6 @@ s32 sceCdSearchFile(sceCdlFILE * file, const char *name)
 #ifdef F_sceCdDiskReady
 s32 sceCdDiskReady(s32 mode)
 {
-	int i;
-
 	if (CdDebug > 0)
 		printf("DiskReady 0\n");
 
@@ -266,8 +258,7 @@ s32 sceCdDiskReady(s32 mode)
 			if (clientDiskReady.server != 0)
 				break;
 
-			i = 0x10000;
-			while (i--);
+			nopdelay();
 		}
 	}
 	bindDiskReady = 0;

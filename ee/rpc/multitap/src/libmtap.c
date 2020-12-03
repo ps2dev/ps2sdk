@@ -33,8 +33,6 @@ static int mtapInited = 0;
 
 int mtapInit(void)
 {
-	int i;
-
 	if(mtapInited) return -1;
 
 	while(1)
@@ -42,8 +40,7 @@ int mtapInit(void)
 		if (SifBindRpc(&clientPortOpen, MTAPSERV_PORT_OPEN, 0) < 0) return -1;
  		if (clientPortOpen.server != 0) break;
 
-    	i = 0x10000;
-    	while(i--);
+	nopdelay();
 	}
 
 	while(1)
@@ -51,8 +48,7 @@ int mtapInit(void)
 		if (SifBindRpc(&clientPortClose, MTAPSERV_PORT_CLOSE, 0) < 0) return -1;
  		if (clientPortClose.server != 0) break;
 
-    	i = 0x10000;
-    	while(i--);
+	nopdelay();
 	}
 
 	while(1)
@@ -60,8 +56,7 @@ int mtapInit(void)
 		if (SifBindRpc(&clientGetConnection, MTAPSERV_GET_CONNECTION, 0) < 0) return -1;
  		if (clientGetConnection.server != 0) break;
 
-    	i = 0x10000;
-    	while(i--);
+	nopdelay();
 	}
 
 	mtapInited = 1;

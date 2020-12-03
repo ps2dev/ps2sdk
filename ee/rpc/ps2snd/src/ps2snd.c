@@ -36,7 +36,7 @@ int sceSdInit(int flag)
  			if (sd_client.server != NULL)
 				break;
 
-			for(int i=0;i<0x10000;i++);
+			nopdelay();
 		}
 
 	}

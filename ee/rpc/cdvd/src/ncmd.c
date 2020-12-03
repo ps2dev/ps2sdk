@@ -786,7 +786,6 @@ int sceCdSync(int mode)
 #ifdef F__CdCheckNCmd
 int _CdCheckNCmd(int cmd)
 {
-	int i;
 	_CdSemaInit();
 	if (PollSema(nCmdSemaId) != nCmdSemaId) {
 		if (CdDebug > 0)
@@ -814,9 +813,7 @@ int _CdCheckNCmd(int cmd)
 		if (clientNCmd.server != 0)
 			break;
 
-		i = 0x10000;
-		while (i--)
-			;
+		nopdelay();
 	}
 
 	bindNCmd = 0;
