@@ -4,8 +4,6 @@
 #include <errno.h>
 #include <stddef.h>
 
-#define BYTE_ORDER LITTLE_ENDIAN
-
 typedef unsigned char		u8_t;
 typedef signed char		s8_t;
 typedef unsigned short int	u16_t;
