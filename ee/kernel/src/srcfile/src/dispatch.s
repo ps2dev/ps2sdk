@@ -42,6 +42,28 @@ ResumeIntrDispatch:
 	lw $sp, %lo(dispatch_sp)($k0)
 .end ResumeIntrDispatch
 
+.globl ChangeGP
+.ent ChangeGP
+ChangeGP:
+	move	$v0, $gp
+	jr	$ra
+	move	$gp, $a0
+.end ChangeGP
+
+.globl SetGP
+.ent SetGP
+SetGP:
+	jr	$ra
+	move	$gp, $a0
+.end SetGP
+
+.globl GetGP
+.ent GetGP
+GetGP:
+	jr	$ra
+	move	$v0, $gp
+.end GetGP
+
 .data
 dispatch_ra: .quad 0
 dispatch_sp: .quad 0

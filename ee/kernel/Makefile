@@ -155,7 +155,7 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o $(EXEC_SYSCALLS) \
 	SifGetReg.o $(EXECOSD_SYSCALL) Deci2Call.o PSMode.o MachineType.o GetMemorySize.o _GetGsDxDyOffset.o \
 	_InitTLB.o SetMemoryMode.o \
 	SifWriteBackDCache.o _SyncDCache.o _InvalidDCache.o __errno.o errno.o \
-	strncpy.o strlen.o memcpy.o memset.o __syscall.o
+	strncpy.o strlen.o memcpy.o memset.o __syscall.o GPfuncs.o
 
 EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(CONFIG_OBJS) \
