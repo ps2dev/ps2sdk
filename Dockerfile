@@ -6,8 +6,8 @@ COPY . /src
 
 RUN apk add build-base
 RUN cd /src && make all install clean
-RUN ln -sf "$PS2SDK/ee/lib/libps2sdkc.a" "$PS2DEV/ee/ee/lib/libps2sdkc.a"
-RUN ln -sf "$PS2SDK/ee/lib/libkernel.a"  "$PS2DEV/ee/ee/lib/libkernel.a"
+RUN ln -sf "$PS2SDK/ee/lib/libps2sdkc.a" "$PS2DEV/ee/mips64r5900el-ps2-elf/lib/libps2sdkc.a"
+RUN ln -sf "$PS2SDK/ee/lib/libkernel.a"  "$PS2DEV/ee/mips64r5900el-ps2-elf/lib/libkernel.a"
 
 # Second stage of Dockerfile
 FROM alpine:latest  
