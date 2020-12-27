@@ -83,7 +83,7 @@ GLUE_OBJS += SyncDCache.o iSyncDCache.o InvalidDCache.o iInvalidDCache.o
 ### SIO objects
 
 SIO_OBJS = sio_init.o sio_putc.o sio_getc.o sio_write.o sio_read.o sio_puts.o \
-	sio_gets.o sio_getc_block.o sio_flush.o sio_putsn.o sio_printf.o
+	sio_gets.o sio_getc_block.o sio_flush.o sio_putsn.o
 
 ### Config objects
 
