@@ -441,7 +441,6 @@ int sceCdChangeThreadPriority(int priority)
 #ifdef F__CdCheckSCmd
 int _CdCheckSCmd(int cur_cmd)
 {
-	int i;
 	_CdSemaInit();
 	if (PollSema(sCmdSemaId) != sCmdSemaId) {
 		if (CdDebug > 0)
@@ -466,9 +465,7 @@ int _CdCheckSCmd(int cur_cmd)
 		if (clientSCmd.server != 0)
 			break;
 
-		i = 0x10000;
-		while (i--)
-			;
+		nopdelay();
 	}
 
 	bindSCmd = 0;

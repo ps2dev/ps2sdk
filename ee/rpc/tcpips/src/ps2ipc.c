@@ -60,7 +60,6 @@ const ip_addr_t ip_addr_any = IPADDR4_INIT(IPADDR_ANY);
 int ps2ip_init(void)
 {
 	ee_sema_t sema;
-	int i;
 
 	while(1)
 	{
@@ -70,7 +69,7 @@ int ps2ip_init(void)
 		if(_ps2ip.server != NULL)
 			break;
 
-		for(i = 0x10000; i > 0; i--);
+		nopdelay();
 	}
 
 	sema.init_count = 1;
