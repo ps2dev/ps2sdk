@@ -20,7 +20,7 @@
 #define OSD_CONFIG_NO_LIBCDVD
 #include "osd_config.h"
 
-static char _ps2sdk_tzname[11];
+static char _ps2sdk_tzname[15];
 
 __attribute__((weak))
 void _ps2sdk_timezone_update()

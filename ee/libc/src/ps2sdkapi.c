@@ -157,16 +157,15 @@ static void fioRewinddirHelper(DIR *dir)
 
 static int fioClosedirHelper(DIR *dir)
 {
-	int rv;
-
 	if(dir == NULL) {
 		//errno = EBADF;
 		return -1;
 	}
 
-	rv = fioDclose(dir->dd_fd); // Check return value?
-        free(dir->dd_buf);
-        free(dir);
+	fioDclose(dir->dd_fd); // Check return value?
+	free(dir->dd_buf);
+	free(dir);
+
 	return 0;
 }
 
@@ -174,7 +173,7 @@ int (*_ps2sdk_close)(int) = fioClose;
 int (*_ps2sdk_open)(const char*, int, ...) = (void *)fioOpen;
 int (*_ps2sdk_read)(int, void*, int) = fioRead;
 int (*_ps2sdk_lseek)(int, int, int) = fioLseek;
-long (*_ps2sdk_lseek64)(int, long, int) = NULL;
+int64_t (*_ps2sdk_lseek64)(int, int64_t, int) = NULL;
 int (*_ps2sdk_write)(int, const void*, int) = fioWrite;
 int (*_ps2sdk_ioctl)(int, int, void*) = fioIoctl;
 int (*_ps2sdk_remove)(const char*) = fioRemove;

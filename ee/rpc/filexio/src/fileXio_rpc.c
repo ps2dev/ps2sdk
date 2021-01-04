@@ -163,14 +163,12 @@ static void fileXioRewinddirHelper(DIR *dir)
 
 static int fileXioClosedirHelper(DIR *dir)
 {
-	int rv;
-
 	if(dir == NULL) {
 		// FIXME: set errno
 		return -1;
 	}
 
-	rv = fileXioDclose(dir->dd_fd); // Check return value?
+	fileXioDclose(dir->dd_fd); // Check return value?
 	free(dir->dd_buf);
 	free(dir);
 	return 0;
