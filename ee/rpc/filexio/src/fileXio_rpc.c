@@ -81,6 +81,23 @@ static mode_t iox_to_posix_mode(unsigned int ps2mode)
         return posixmode;
 }
 
+static void fill_stat(struct stat *stat, const iox_stat_t *fiostat)
+{
+        stat->st_dev = 0;
+        stat->st_ino = 0;
+        stat->st_mode = iox_to_posix_mode(fiostat->mode);
+        stat->st_nlink = 0;
+        stat->st_uid = 0;
+        stat->st_gid = 0;
+        stat->st_rdev = 0;
+        stat->st_size = ((off_t)fiostat->hisize << 32) | (off_t)fiostat->size;
+        stat->st_atime = io_to_posix_time(fiostat->atime);
+        stat->st_mtime = io_to_posix_time(fiostat->mtime);
+        stat->st_ctime = io_to_posix_time(fiostat->ctime);
+        stat->st_blksize = 16*1024;
+        stat->st_blocks = stat->st_size / 512;
+}
+
 static int fileXioGetstatHelper(const char *path, struct stat *buf) {
         iox_stat_t fiostat;
 
@@ -89,19 +106,7 @@ static int fileXioGetstatHelper(const char *path, struct stat *buf) {
                 return -1;
         }
 
-        buf->st_dev = 0;
-        buf->st_ino = 0;
-        buf->st_mode = iox_to_posix_mode(fiostat.mode);
-        buf->st_nlink = 0;
-        buf->st_uid = 0;
-        buf->st_gid = 0;
-        buf->st_rdev = 0;
-        buf->st_size = ((off_t)fiostat.hisize << 32) | (off_t)fiostat.size;
-        buf->st_atime = io_to_posix_time(fiostat.atime);
-        buf->st_mtime = io_to_posix_time(fiostat.mtime);
-        buf->st_ctime = io_to_posix_time(fiostat.ctime);
-        buf->st_blksize = 16*1024;
-        buf->st_blocks = buf->st_size / 512;
+        fill_stat(buf, &fiostat);
 
         return 0;
 }
@@ -120,11 +125,7 @@ static DIR *fileXioOpendirHelper(const char *path)
 
 	dir = malloc(sizeof(DIR));
         dir->dd_fd = dd;
-        dir->dd_loc = 0;
-        dir->dd_size = 0;
-        dir->dd_buf = malloc(sizeof(struct dirent) + 255);
-        dir->dd_len = 0;
-        dir->dd_seek = 0;
+        dir->dd_buf = malloc(sizeof(struct dirent));
 
 	return dir;
 }
@@ -147,9 +148,7 @@ static struct dirent *fileXioReaddirHelper(DIR *dir)
 		return NULL;
 	}
 
-        de->d_ino = 0;
-        de->d_off = 0;
-        de->d_reclen = 0;
+	fill_stat(&de->d_stat, &fiode.stat);
 	strncpy(de->d_name, fiode.name, 255);
 	de->d_name[255] = 0;
 
@@ -163,14 +162,12 @@ static void fileXioRewinddirHelper(DIR *dir)
 
 static int fileXioClosedirHelper(DIR *dir)
 {
-	int rv;
-
 	if(dir == NULL) {
 		// FIXME: set errno
 		return -1;
 	}
 
-	rv = fileXioDclose(dir->dd_fd); // Check return value?
+	fileXioDclose(dir->dd_fd); // Check return value?
 	free(dir->dd_buf);
 	free(dir);
 	return 0;

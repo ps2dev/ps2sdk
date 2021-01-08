@@ -27,6 +27,7 @@
 // - compiler (gcc)
 // - libc (newlib)
 #include <stdint.h>
+#include <limits.h>
 #include <inttypes.h>
 #include <tamtypes.h>
 
@@ -76,6 +77,23 @@ static mode_t io_to_posix_mode(unsigned int ps2mode)
         return posixmode;
 }
 
+static void fill_stat(struct stat *stat, const io_stat_t *fiostat)
+{
+        stat->st_dev = 0;
+        stat->st_ino = 0;
+        stat->st_mode = io_to_posix_mode(fiostat->mode);
+        stat->st_nlink = 0;
+        stat->st_uid = 0;
+        stat->st_gid = 0;
+        stat->st_rdev = 0;
+        stat->st_size = ((off_t)fiostat->hisize << 32) | (off_t)fiostat->size;
+        stat->st_atime = io_to_posix_time(fiostat->atime);
+        stat->st_mtime = io_to_posix_time(fiostat->mtime);
+        stat->st_ctime = io_to_posix_time(fiostat->ctime);
+        stat->st_blksize = 16*1024;
+        stat->st_blocks = stat->st_size / 512;
+}
+
 static int fioGetstatHelper(const char *path, struct stat *buf) {
         io_stat_t fiostat;
 
@@ -84,19 +102,7 @@ static int fioGetstatHelper(const char *path, struct stat *buf) {
                 return -1;
         }
 
-        buf->st_dev = 0;
-        buf->st_ino = 0;
-        buf->st_mode = io_to_posix_mode(fiostat.mode);
-        buf->st_nlink = 0;
-        buf->st_uid = 0;
-        buf->st_gid = 0;
-        buf->st_rdev = 0;
-        buf->st_size = ((off_t)fiostat.hisize << 32) | (off_t)fiostat.size;
-        buf->st_atime = io_to_posix_time(fiostat.atime);
-        buf->st_mtime = io_to_posix_time(fiostat.mtime);
-        buf->st_ctime = io_to_posix_time(fiostat.ctime);
-        buf->st_blksize = 16*1024;
-        buf->st_blocks = buf->st_size / 512;
+        fill_stat(buf, &fiostat);
 
         return 0;
 }
@@ -114,11 +120,7 @@ static DIR *fioOpendirHelper(const char *path)
 
 	dir = malloc(sizeof(DIR));
         dir->dd_fd = dd;
-        dir->dd_loc = 0;
-        dir->dd_size = 0;
-        dir->dd_buf = malloc(sizeof(struct dirent) + 255);
-        dir->dd_len = 0;
-        dir->dd_seek = 0;
+        dir->dd_buf = malloc(sizeof(struct dirent));
 
 	return dir;
 }
@@ -140,9 +142,7 @@ static struct dirent *fioReaddirHelper(DIR *dir)
 		return NULL;
 	}
 
-        de->d_ino = 0;
-        de->d_off = 0;
-        de->d_reclen = 0;
+	fill_stat(&de->d_stat, &fiode.stat);
 	strncpy(de->d_name, fiode.name, 255);
 	de->d_name[255] = 0;
 
@@ -156,16 +156,15 @@ static void fioRewinddirHelper(DIR *dir)
 
 static int fioClosedirHelper(DIR *dir)
 {
-	int rv;
-
 	if(dir == NULL) {
 		//errno = EBADF;
 		return -1;
 	}
 
-	rv = fioDclose(dir->dd_fd); // Check return value?
-        free(dir->dd_buf);
-        free(dir);
+	fioDclose(dir->dd_fd); // Check return value?
+	free(dir->dd_buf);
+	free(dir);
+
 	return 0;
 }
 
@@ -173,7 +172,7 @@ int (*_ps2sdk_close)(int) = fioClose;
 int (*_ps2sdk_open)(const char*, int, ...) = (void *)fioOpen;
 int (*_ps2sdk_read)(int, void*, int) = fioRead;
 int (*_ps2sdk_lseek)(int, int, int) = fioLseek;
-long (*_ps2sdk_lseek64)(int, long, int) = NULL;
+int64_t (*_ps2sdk_lseek64)(int, int64_t, int) = NULL;
 int (*_ps2sdk_write)(int, const void*, int) = fioWrite;
 int (*_ps2sdk_ioctl)(int, int, void*) = fioIoctl;
 int (*_ps2sdk_remove)(const char*) = fioRemove;
@@ -205,27 +204,28 @@ int (*_ps2sdk_closedir)(DIR *dir) = fioClosedirHelper;
 #ifndef LONG_MAX
 	#error "LONG_MAX not defined"
 #endif
-#if LONG_MAX == 0x7fffffffL
-	#error "LONG_MAX == 0x7fffffffL"
-#endif
-#if LONG_MAX != 9223372036854775807L
-	#error "LONG_MAX != 9223372036854775807L"
+#if LONG_MAX != 0x7fffffffL
+	#error "LONG_MAX != 0x7fffffffL"
 #endif
 
 #define ct_assert(e) {enum { ct_assert_value = 1/(!!(e)) };}
 void compile_time_check() {
-	// Compiler
+	// Compiler (ABI n32)
 	ct_assert(sizeof(unsigned char)==1);
 	ct_assert(sizeof(unsigned short)==2);
 	ct_assert(sizeof(unsigned int)==4);
-	ct_assert(sizeof(unsigned long)==8);
+	ct_assert(sizeof(unsigned long)==4);
+	ct_assert(sizeof(unsigned long long)==8);
 	ct_assert(sizeof(unsigned int __attribute__(( mode(TI) )))==16);
+	ct_assert(sizeof(void *)==4);
+
 	// Defined in tamtypes.h (ps2sdk)
 	ct_assert(sizeof(u8)==1);
 	ct_assert(sizeof(u16)==2);
 	ct_assert(sizeof(u32)==4);
 	ct_assert(sizeof(u64)==8);
 	ct_assert(sizeof(u128)==16);
+
 	// Defined in inttypes.h/stdint.h (newlib)
 	ct_assert(sizeof(uint8_t)==1);
 	ct_assert(sizeof(uint16_t)==2);
@@ -432,7 +432,7 @@ int closedir(DIR *dir)
     return _ps2sdk_closedir(dir);
 }
 
-int isatty(int fd) {
+int _isatty(int fd) {
 	struct stat buf;
 
 	if (_fstat (fd, &buf) < 0) {

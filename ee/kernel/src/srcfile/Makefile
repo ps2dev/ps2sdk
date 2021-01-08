@@ -14,7 +14,7 @@ EE_SRCFILE_ELF = srcfile.elf
 EE_SRCFILE_ELF := $(EE_SRCFILE_ELF:%=$(EE_BIN_DIR)%)
 EE_OBJS = srcfile.o alarm.o dispatch.o
 
-EE_CFLAGS += -mno-gpopt
+EE_CFLAGS += -mno-gpopt -fno-tree-loop-distribute-patterns
 
 $(EE_SRCFILE_BIN): $(EE_SRCFILE_ELF)
 	$(EE_OBJCOPY) -Obinary $< $@

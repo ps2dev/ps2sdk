@@ -6,12 +6,15 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = erl kernel kernel-nopatch libc rpc startup debug \
-	eedebug sbv dma graph math3d \
-	packet packet2 draw libgs \
-	libvux font input inputx network iopreboot \
-	elf-loader
+all:
 
 include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+include $(PS2SDKSRC)/ee/Rules.make
 include $(PS2SDKSRC)/ee/Rules.release
+
+clean:
+
+release:
+	$(ECHO) Installing $(EE_SRC_DIR)linkfile into $(PS2SDK)/ee/startup
+	cp -f $(EE_SRC_DIR)linkfile $(PS2SDK)/ee/startup
+

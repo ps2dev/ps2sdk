@@ -17,7 +17,7 @@ InvokeUserModeCallback:
 	daddu $v1, $zero, $a1
 	daddu $a0, $zero, $a2
 	daddu $a1, $zero, $a3
-	daddu $a2, $zero, $t0
+	daddu $a2, $zero, $a4
 	mfc0 $k0, $12
 	ori $k0, $k0, 0x12
 	mtc0 $k0, $12
@@ -41,6 +41,28 @@ ResumeIntrDispatch:
 	jr $ra
 	lw $sp, %lo(dispatch_sp)($k0)
 .end ResumeIntrDispatch
+
+.globl ChangeGP
+.ent ChangeGP
+ChangeGP:
+	move	$v0, $gp
+	jr	$ra
+	move	$gp, $a0
+.end ChangeGP
+
+.globl SetGP
+.ent SetGP
+SetGP:
+	jr	$ra
+	move	$gp, $a0
+.end SetGP
+
+.globl GetGP
+.ent GetGP
+GetGP:
+	jr	$ra
+	move	$v0, $gp
+.end GetGP
 
 .data
 dispatch_ra: .quad 0

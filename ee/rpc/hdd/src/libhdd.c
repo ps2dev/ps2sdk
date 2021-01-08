@@ -164,7 +164,7 @@ int hddGetFilesystemList(t_hddFilesystem hddFs[], int maxEntries)
 		}
 
 		memset(&hddFs[count], 0, sizeof(t_hddFilesystem));
-		sprintf(hddFs[count].filename, "hdd0:%s", dirEnt.name);
+		snprintf(hddFs[count].filename, 40, "hdd0:%.34s", dirEnt.name);
 
 		// Work out filesystem type
 		if((dirEnt.name[0] == '_') && (dirEnt.name[1] == '_'))

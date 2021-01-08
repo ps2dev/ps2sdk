@@ -83,7 +83,7 @@ GLUE_OBJS += SyncDCache.o iSyncDCache.o InvalidDCache.o iInvalidDCache.o
 ### SIO objects
 
 SIO_OBJS = sio_init.o sio_putc.o sio_getc.o sio_write.o sio_read.o sio_puts.o \
-	sio_gets.o sio_getc_block.o sio_flush.o sio_putsn.o sio_printf.o
+	sio_gets.o sio_getc_block.o sio_flush.o sio_putsn.o
 
 ### Config objects
 
@@ -155,7 +155,7 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o $(EXEC_SYSCALLS) \
 	SifGetReg.o $(EXECOSD_SYSCALL) Deci2Call.o PSMode.o MachineType.o GetMemorySize.o _GetGsDxDyOffset.o \
 	_InitTLB.o SetMemoryMode.o \
 	SifWriteBackDCache.o _SyncDCache.o _InvalidDCache.o __errno.o errno.o \
-	strncpy.o strlen.o memcpy.o memset.o __syscall.o
+	strncpy.o strlen.o memcpy.o memset.o __syscall.o GPfuncs.o
 
 EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(CONFIG_OBJS) \

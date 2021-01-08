@@ -199,36 +199,36 @@ void ps2GetStackTrace(unsigned int* results,int max)
         }
         else if (inst == RETURN)
           ra_limit = ra + 2;
-          ra++;
+        ra++;
       }
 
       if (sp_adjust == 0 && (found_const_upper || found_const_lower))
         sp_adjust = (const_upper << 16) | const_lower;
-        rc->raOffset = ra_offset;
-        rc->spAdjust = sp_adjust;
-      }
-      /* if something went wrong, punt */
-      if (rc->spAdjust <= 0)
-      {
-        *results++ = 0;
-        break;
-      }
+      rc->raOffset = ra_offset;
+      rc->spAdjust = sp_adjust;
+    }
+    /* if something went wrong, punt */
+    if (rc->spAdjust <= 0)
+    {
+      *results++ = 0;
+      break;
+    }
 
-      ra = (unsigned int *) sp[rc->raOffset>>2];
-      sp += rc->spAdjust >> 2;
+    ra = (unsigned int *) sp[rc->raOffset>>2];
+    sp += rc->spAdjust >> 2;
 
-      if (ra == 0)
-      {
-        *results++ = 0;
-        break;
-      }
+    if (ra == 0)
+    {
+      *results++ = 0;
+      break;
+    }
 
-      *results++ = ((unsigned int) ra) - 8;
-      if (ra[-2] == mainCall)
-      {
-        *results++ = 0;
-        break;
-      }
+    *results++ = ((unsigned int) ra) - 8;
+    if (ra[-2] == mainCall)
+    {
+      *results++ = 0;
+      break;
+    }
     max--;
   }
 }

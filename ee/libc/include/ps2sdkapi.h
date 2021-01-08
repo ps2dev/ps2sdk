@@ -20,7 +20,7 @@ extern int (*_ps2sdk_close)(int);
 extern int (*_ps2sdk_open)(const char*, int, ...);
 extern int (*_ps2sdk_read)(int, void*, int);
 extern int (*_ps2sdk_lseek)(int, int, int);
-extern long (*_ps2sdk_lseek64)(int, long, int);
+extern int64_t (*_ps2sdk_lseek64)(int, int64_t, int);
 extern int (*_ps2sdk_write)(int, const void*, int);
 extern int (*_ps2sdk_ioctl)(int, int, void*);
 extern int (*_ps2sdk_remove)(const char*);
