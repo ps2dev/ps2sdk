@@ -16,6 +16,7 @@
 
 #include <iop_cop0_defs.h>
 #include "iopdebug_defs.h"
+#include "as_reg_compat.h"
 
 .set push
 .set noreorder
