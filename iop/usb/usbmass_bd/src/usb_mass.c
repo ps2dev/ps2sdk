@@ -776,7 +776,9 @@ int usb_mass_init(void)
 
         g_mass_device[i].scsi.priv        = &g_mass_device[i];
         g_mass_device[i].scsi.name        = "usb";
-        g_mass_device[i].scsi.max_sectors = 0xffff;
+        // The maximum number of sectors should be 0xffff but
+        // some usb drives seem to freeze above 128 sectors (64Kib)
+        g_mass_device[i].scsi.max_sectors = 128; // 0xffff
         g_mass_device[i].scsi.get_max_lun = usb_bulk_get_max_lun;
         g_mass_device[i].scsi.queue_cmd   = usb_queue_cmd;
     }
