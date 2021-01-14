@@ -190,8 +190,10 @@ static int scsi_read(struct block_device* bd, u32 sector, void* buffer, u16 coun
                 break;
         }
 
-        if (retries == 0)
+        if (retries == 0) {
+            M_PRINTF("ERROR: unable to read sector after %d tries (sector=%d, count=%d)\n", SCSI_MAX_RETRIES, (int)sector, count);
             return -EIO;
+        }
 
         sc_remaining -= sc;
         sector += sc;
@@ -217,8 +219,10 @@ static int scsi_write(struct block_device* bd, u32 sector, const void* buffer, u
                 break;
         }
 
-        if (retries == 0)
+        if (retries == 0) {
+            M_PRINTF("ERROR: unable to write sector after %d tries (sector=%d, count=%d)\n", SCSI_MAX_RETRIES, (int)sector, count);
             return -EIO;
+        }
 
         sc_remaining -= sc;
         sector += sc;
