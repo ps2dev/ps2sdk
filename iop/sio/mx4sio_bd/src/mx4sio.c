@@ -455,8 +455,8 @@ static void sio2_unlock()
     DisableIntr(IOP_IRQ_DMA_SIO2_OUT, &res);
     CpuResumeIntr(state);
 
-    // Restore ctrl state
-    sio2_ctrl_set(sio2man_save_crtl);
+    // Restore ctrl state, and reset STATE + FIFOS
+    sio2_ctrl_set(sio2man_save_crtl | 0xc);
 
     // Unlock sio2man driver
     sio2man_hook_sio2_unlock();
