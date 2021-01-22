@@ -14,6 +14,7 @@
 #include "scsi.h"
 #include <usbhdfsd-common.h>
 
+//#define ASYNC
 //#define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
 
@@ -89,8 +90,10 @@ static mass_dev g_mass_device[NUM_DEVICES];
 static int usb_mass_update_sema;
 
 static void usb_callback(int resultCode, int bytes, void *arg);
+#ifndef ASYNC
 static int perform_bulk_transfer(usb_transfer_callback_data* data);
 static void usb_transfer_callback(int resultCode, int bytes, void *arg);
+#endif
 static void usb_mass_release(mass_dev* dev);
 
 static void usb_callback(int resultCode, int bytes, void* arg)
