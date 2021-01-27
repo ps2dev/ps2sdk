@@ -85,45 +85,108 @@ typedef struct sppisd_r7_s {
     };
 } spisd_r7_t __attribute__((packed));
 
-typedef struct {                    /* Card Specific Data */
-    uint8_t  CSDStruct;               /* CSD structure */
-    uint8_t  SysSpecVersion;          /* System specification version */
-    uint8_t  Reserved1;               /* Reserved */
-    uint8_t  TAAC;                    /* Data read access-time 1 */
-    uint8_t  NSAC;                    /* Data read access-time 2 in CLK cycles */
-    uint8_t  MaxBusClkFrec;           /* Max. bus clock frequency */
-    uint16_t CardComdClasses;         /* Card command classes */
-    uint8_t  RdBlockLen;              /* Max. read data block length */
-    uint8_t  PartBlockRead;           /* Partial blocks for read allowed */
-    uint8_t  WrBlockMisalign;         /* Write block misalignment */
-    uint8_t  RdBlockMisalign;         /* Read block misalignment */
-    uint8_t  DSRImpl;                 /* DSR implemented */
-    uint8_t  Reserved2;               /* Reserved */
-    uint32_t DeviceSize;              /* Device Size */
-    uint8_t  MaxRdCurrentVDDMin;      /* Max. read current @ VDD min */
-    uint8_t  MaxRdCurrentVDDMax;      /* Max. read current @ VDD max */
-    uint8_t  MaxWrCurrentVDDMin;      /* Max. write current @ VDD min */
-    uint8_t  MaxWrCurrentVDDMax;      /* Max. write current @ VDD max */
-    uint8_t  DeviceSizeMul;           /* Device size multiplier */
-    uint8_t  EraseGrSize;             /* Erase group size */
-    uint8_t  EraseGrMul;              /* Erase group size multiplier */
-    uint8_t  WrProtectGrSize;         /* Write protect group size */
-    uint8_t  WrProtectGrEnable;       /* Write protect group enable */
-    uint8_t  ManDeflECC;              /* Manufacturer default ECC */
-    uint8_t  WrSpeedFact;             /* Write speed factor */
-    uint8_t  MaxWrBlockLen;           /* Max. write data block length */
-    uint8_t  WriteBlockPaPartial;     /* Partial blocks for write allowed */
-    uint8_t  Reserved3;               /* Reserded */
-    uint8_t  ContentProtectAppli;     /* Content protection application */
-    uint8_t  FileFormatGrouop;        /* File format group */
-    uint8_t  CopyFlag;                /* Copy flag (OTP) */
-    uint8_t  PermWrProtect;           /* Permanent write protection */
-    uint8_t  TempWrProtect;           /* Temporary write protection */
-    uint8_t  FileFormat;              /* File Format */
-    uint8_t  ECC;                     /* ECC code */
-    uint8_t  CSD_CRC;                 /* CSD CRC */
-    uint8_t  Reserved4;               /* always 1*/
-} spisd_csd_t;
+/*
+ * START: structures copied from wisi's implementation
+ */
+struct t_csdVer1
+{
+    u8 reserved1          : 6;
+    u8 csd_structure      : 2;
+    u8 taac               : 8;
+    u8 nsac               : 8;
+    u8 tran_speed         : 8;
+
+    u16 cccHi             : 8;
+    u16 read_bl_len       : 4;
+    u16 cccLo             : 4;
+
+    u32 c_sizeHi          : 2;
+    u8 read_bl_partial    : 1;
+    u8 write_blk_misalign : 1;
+    u8 read_blk_misalign  : 1;
+    u8 dsr_imp            : 1;
+    u8 reserved2          : 2;
+
+    u32 c_sizeMd          : 8;
+
+    u32 c_sizeLo          : 2;
+    u8 vdd_r_curr_max     : 3;
+    u8 vdd_r_curr_min     : 3;
+
+    u8 c_size_multHi      : 2;
+    u8 vdd_w_curr_max     : 3;
+    u8 vdd_w_curr_min     : 3;
+
+    u8 c_size_multLo      : 1;
+    // XXX: The folowing are not fixed to correct endianness!
+    u8 erase_blk_en       : 1;
+    u8 sector_size        : 7;
+    u8 wp_grp_size        : 7;
+    u8 ep_grp_enable      : 1;
+    u8 reserved5          : 2;
+    u8 r2w_factor         : 3;
+    u8 write_bl_len       : 4;
+    u8 write_bl_partial   : 1;
+    u8 reserved6          : 5;
+    u8 file_format_group  : 1;
+    u8 copy               : 1;
+    u8 perm_write_protect : 1;
+    u8 tmp_write_protect  : 1;
+    u8 file_format        : 2;
+    u8 reserved7          : 2;
+    u8 crc                : 7;
+    u8 fixedTo1           : 1;
+};
+
+struct t_csdVer2
+{
+    u8 reserved1          : 6;
+    u8 csd_structure      : 2;
+    u8 taac               : 8;
+    u8 nsac               : 8;
+    u8 tran_speed         : 8;
+
+    u16 cccHi             : 8;
+    u16 read_bl_len       : 4;
+    u16 cccLo             : 4;
+
+    // Not fixed!:
+    u8 read_bl_partial    : 1;
+    u8 write_blk_misalign : 1;
+    u8 read_blk_misalign  : 1;
+    u8 dsr_imp            : 1;
+    u8 reserved2          : 4;
+
+    // fixed:
+    u32 c_sizeHi          : 6;
+    u8 reserved3          : 2; // I give up - this is far too unaligned...
+    // 79:58
+    u32 c_sizeMd          : 8;
+    u32 c_sizeLo          : 8; // 16 22;
+
+    // Not fixed!:
+    u32 reserved4         : 1;
+    u8 erase_blk_en       : 1;
+    u8 sector_size        : 7;
+    u8 wp_grp_size        : 7;
+    u8 ep_grp_enable      : 1;
+    u8 reserved5          : 2;
+    u8 r2w_factor         : 3;
+    u8 write_bl_len       : 4;
+    u8 write_bl_partial   : 1;
+    u8 reserved6          : 5;
+    u8 file_format_group  : 1;
+    u8 copy               : 1;
+    u8 perm_write_protect : 1;
+    u8 tmp_write_protect  : 1;
+    u8 file_format        : 2;
+    u8 reserved7          : 2;
+    u8 crc                : 7;
+    u8 fixedTo1           : 1;
+};
+/*
+ * END: structures copied from wisi's implementation
+ */
 
 typedef struct {                    /*Card Identification Data*/
     uint8_t  ManufacturerID;          /* ManufacturerID */
@@ -139,7 +202,7 @@ typedef struct {                    /*Card Identification Data*/
 } spisd_cid_t;
 
 typedef struct {
-    spisd_csd_t csd;
+    uint8_t csd[16];
     spisd_cid_t cid;
     uint32_t capacity;                /* Card Capacity */
     uint32_t block_size;              /* Card Block Size */

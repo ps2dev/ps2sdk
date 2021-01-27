@@ -335,7 +335,7 @@ int spisd_get_card_info(spisd_info_t *cardinfo) {
 
     _io->select();
 
-    spisd_result_t ret = _read_buffer(temp, sizeof(temp));
+    spisd_result_t ret = _read_buffer(cardinfo->csd, 16);
     /* chip disable and dummy byte */
     _io->relese();
     _io->wr_rd_byte(DUMMY_BYTE);
@@ -344,83 +344,12 @@ int spisd_get_card_info(spisd_info_t *cardinfo) {
         return 1;
     }
 
-    /* Byte 0 */
-    cardinfo->csd.CSDStruct = (temp[0] & 0xC0) >> 6;
-    cardinfo->csd.SysSpecVersion = (temp[0] & 0x3C) >> 2;
-    cardinfo->csd.Reserved1 = temp[0] & 0x03;
-    /* Byte 1 */
-    cardinfo->csd.TAAC = temp[1] ;
-    /* Byte 2 */
-    cardinfo->csd.NSAC = temp[2];
-    /* Byte 3 */
-    cardinfo->csd.MaxBusClkFrec = temp[3];
-    /* Byte 4 */
-    cardinfo->csd.CardComdClasses = temp[4] << 4;
-    /* Byte 5 */
-    cardinfo->csd.CardComdClasses |= (temp[5] & 0xF0) >> 4;
-    cardinfo->csd.RdBlockLen = temp[5] & 0x0F;
-    /* Byte 6 */
-    cardinfo->csd.PartBlockRead = (temp[6] & 0x80) >> 7;
-    cardinfo->csd.WrBlockMisalign = (temp[6] & 0x40) >> 6;
-    cardinfo->csd.RdBlockMisalign = (temp[6] & 0x20) >> 5;
-    cardinfo->csd.DSRImpl = (temp[6] & 0x10) >> 4;
-    cardinfo->csd.Reserved2 = 0; /* Reserved */
-    cardinfo->csd.DeviceSize = (temp[6] & 0x03) << 10;
-    /* Byte 7 */
-    cardinfo->csd.DeviceSize |= (temp[7]) << 2;
-    /* Byte 8 */
-    cardinfo->csd.DeviceSize |= (temp[8] & 0xC0) >> 6;
-    cardinfo->csd.MaxRdCurrentVDDMin = (temp[8] & 0x38) >> 3;
-    cardinfo->csd.MaxRdCurrentVDDMax = (temp[8] & 0x07);
-    /* Byte 9 */
-    cardinfo->csd.MaxWrCurrentVDDMin = (temp[9] & 0xE0) >> 5;
-    cardinfo->csd.MaxWrCurrentVDDMax = (temp[9] & 0x1C) >> 2;
-    cardinfo->csd.DeviceSizeMul = (temp[9] & 0x03) << 1;
-    /* Byte 10 */
-    cardinfo->csd.DeviceSizeMul |= (temp[10] & 0x80) >> 7;
-    cardinfo->csd.EraseGrSize = (temp[10] & 0x7C) >> 2;
-    cardinfo->csd.EraseGrMul = (temp[10] & 0x03) << 3;
-    /* Byte 11 */
-    cardinfo->csd.EraseGrMul |= (temp[11] & 0xE0) >> 5;
-    cardinfo->csd.WrProtectGrSize = (temp[11] & 0x1F);
-    /* Byte 12 */
-    cardinfo->csd.WrProtectGrEnable = (temp[12] & 0x80) >> 7;
-    cardinfo->csd.ManDeflECC = (temp[12] & 0x60) >> 5;
-    cardinfo->csd.WrSpeedFact = (temp[12] & 0x1C) >> 2;
-    cardinfo->csd.MaxWrBlockLen = (temp[12] & 0x03) << 2;
-    /* Byte 13 */
-    cardinfo->csd.MaxWrBlockLen |= (temp[13] & 0xc0) >> 6;
-    cardinfo->csd.WriteBlockPaPartial = (temp[13] & 0x20) >> 5;
-    cardinfo->csd.Reserved3 = 0;
-    cardinfo->csd.ContentProtectAppli = (temp[13] & 0x01);
-    /* Byte 14 */
-    cardinfo->csd.FileFormatGrouop = (temp[14] & 0x80) >> 7;
-    cardinfo->csd.CopyFlag = (temp[14] & 0x40) >> 6;
-    cardinfo->csd.PermWrProtect = (temp[14] & 0x20) >> 5;
-    cardinfo->csd.TempWrProtect = (temp[14] & 0x10) >> 4;
-    cardinfo->csd.FileFormat = (temp[14] & 0x0C) >> 2;
-    cardinfo->csd.ECC = (temp[14] & 0x03);
-    /* Byte 15 */
-    cardinfo->csd.CSD_CRC = (temp[15] & 0xFE) >> 1;
-    cardinfo->csd.Reserved4 = 1;
-
-    if (cardinfo->card_type == CARD_TYPE_SDV2HC) {
-        /* Byte 7 */
-        cardinfo->csd.DeviceSize = (uint16_t)(temp[8]) * 256;
-        /* Byte 8 */
-        cardinfo->csd.DeviceSize += temp[9] ;
-    }
-
-    cardinfo->capacity = cardinfo->csd.DeviceSize * BLOCK_SIZE * 1024;
-    cardinfo->block_size = BLOCK_SIZE;
-
     /* Send CMD10, Read CID */
     response = _send_command(CMD10, 0);
 
     if (response != 0x00) {
         return response;
     }
-
 
     _io->select();
     ret = _read_buffer(temp, sizeof(temp));
@@ -431,7 +360,6 @@ int spisd_get_card_info(spisd_info_t *cardinfo) {
     if (ret != SPISD_RESULT_OK) {
         return 2;
     }
-
 
     /* Byte 0 */
     cardinfo->cid.ManufacturerID = temp[0];

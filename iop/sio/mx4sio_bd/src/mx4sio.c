@@ -761,8 +761,21 @@ static void sd_detect()
             return;
         }
 
-        // FIXME: cardinfo.csd.DeviceSize * 1024
-        bd.sectorCount = 16 * 1024 * 1024 * 2;
+        struct t_csdVer1* csdv1 = (struct t_csdVer1*)cardinfo.csd;
+        struct t_csdVer2* csdv2 = (struct t_csdVer2*)cardinfo.csd;
+        if (csdv1->csd_structure == 0) { //ver 1
+            unsigned int c_size_mult = (csdv1->c_size_multHi << 1) | csdv1->c_size_multLo;
+            unsigned int c_size      = (csdv1->c_sizeHi << 10) | (csdv1->c_sizeMd << 2) | csdv1->c_sizeLo;
+            unsigned int blockNr     = (c_size + 1) << (c_size_mult + 2);
+            unsigned int blockLen    = 1 << csdv1->read_bl_len;
+            unsigned int capacity    = blockNr * blockLen;
+
+            bd.sectorCount = capacity / 512;
+        } else if (csdv1->csd_structure == 1) { //ver 2
+            unsigned int c_size = (csdv2->c_sizeHi << 16) | (csdv2->c_sizeMd << 8) | csdv2->c_sizeLo;
+
+            bd.sectorCount = (c_size + 1) * 1024;
+        }
 
         M_PRINTF("%u %u-byte logical blocks: (%uMB / %uMiB)\n", bd.sectorCount, bd.sectorSize, bd.sectorCount / ((1000 * 1000) / bd.sectorSize), bd.sectorCount / ((1024 * 1024) / bd.sectorSize));
 
