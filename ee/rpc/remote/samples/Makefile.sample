@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-EE_BIN = remote.elf
+EE_BIN = remote_sample.elf
 EE_OBJS = remote.o SIO2MAN_irx.o RMMAN_irx.o
 EE_LIBS = -ldebug -lrm -lpatches
 
