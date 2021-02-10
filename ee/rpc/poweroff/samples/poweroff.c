@@ -9,7 +9,6 @@
 #
 */
 
-#include <tamtypes.h>
 #include <errno.h>
 #include <kernel.h>
 #include <sifrpc.h>

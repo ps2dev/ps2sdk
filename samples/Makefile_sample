@@ -18,6 +18,7 @@ SUBDIRS += draw/vu1
 #SUBDIRS += erl/cpp-hello           #TODO: missing /ps2sdk/ee/lib/libc.erl
 SUBDIRS += font
 SUBDIRS += graph
+SUBDIRS += libc/regress
 SUBDIRS += libgs/doublebuffer
 SUBDIRS += libgs/draw
 #SUBDIRS += mpeg                #TODO: not modified for updated newlib
