@@ -34,7 +34,7 @@
 
 /* Uncomment to enable debug logging */
 /*#define DEBUG*/
-#if DEBUG
+#ifdef DEBUG
 #define SMB2_LOG_URL      "smb://10.10.10.11/PS2SMB/ps2.log"
 #define SMB2_LOG_USER     "user"
 #define SMB2_LOG_PASSWORD "password"
