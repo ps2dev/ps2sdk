@@ -250,6 +250,8 @@ int SMB2_devctl(iop_file_t *f, const char *devname, int cmd,
 struct dir_fh {
         struct smb2_context *smb2;
         struct smb2dir *fh;
+        int is_root;
+        struct smb2_share_list *shares;
 };
 
 struct file_fh {
@@ -363,10 +365,16 @@ int SMB2_dopen(iop_file_t *f, const char *dirname)
                 goto out;
         }
 
-	smb_io_lock();
         dfh->smb2 = smb2;
-        dfh->fh = smb2_opendir(smb2, p);
-	smb_io_unlock();
+        if (p[0]) {
+                dfh->is_root = 0;
+                smb_io_lock();
+                dfh->fh = smb2_opendir(smb2, p);
+                smb_io_unlock();
+        } else {
+                dfh->is_root = 1;
+                dfh->shares = shares;
+        }
         if (dfh->fh == NULL) {
                 rc = -EINVAL;
                 goto out;
@@ -390,7 +398,9 @@ int SMB2_dclose(iop_file_t *f)
                 return -EBADF;
         }
 
-        smb2_closedir(dfh->smb2, dfh->fh);
+        if (!dfh->is_root) {
+                smb2_closedir(dfh->smb2, dfh->fh);
+        }
         
         free(dfh);
         f->privdata = NULL;
@@ -476,11 +486,22 @@ int SMB2_dread(iop_file_t *f, iox_dirent_t *dirent)
                 return -EBADF;
         }
 
-        de = smb2_readdir(dfh->smb2, dfh->fh);
-        if (de == NULL) {
-                return 0;
+        if (!dfh->is_root) {
+                de = smb2_readdir(dfh->smb2, dfh->fh);
+                if (de == NULL) {
+                        return 0;
+                }
+        } else {
+                if (dfh->shares == NULL) {
+                        return 0;
+                }
+                memset(&dirent->stat, 0, sizeof(iox_stat_t));
+                strncpy(dirent->name, dfh->shares->name, 256);
+                dirent->stat.mode = FIO_S_IFDIR;
+                dfh->shares = dfh->shares->next;
+                return 1;
         }
-
+                        
 	SMBLOG("SMB2_DREAD %s\n", de->name);
         strncpy(dirent->name, de->name, 256);
         smb2_statFiller(&de->st, &dirent->stat);
