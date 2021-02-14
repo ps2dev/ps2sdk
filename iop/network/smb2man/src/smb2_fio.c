@@ -163,7 +163,7 @@ static char *prepare_path(const char *path)
 	return p;
 }
 
-static void smb2_Connect(smb2Connect_in_t *in, smb2Connect_out_t *out)
+static int smb2_Connect(smb2Connect_in_t *in, smb2Connect_out_t *out)
 {
 	struct smb2_share_list *share;
 	struct smb2_url *url;
@@ -175,7 +175,9 @@ static void smb2_Connect(smb2Connect_in_t *in, smb2Connect_out_t *out)
                 smb2_set_timeout(log_smb2, 30);
 		url = smb2_parse_url(log_smb2, SMB2_LOG_URL);
 		smb2_set_password(log_smb2, SMB2_LOG_PASSWORD);
-		smb2_connect_share(log_smb2, url->server, url->share, SMB2_LOG_USER);
+		if (smb2_connect_share(log_smb2, url->server, url->share, SMB2_LOG_USER)) {
+                        return -EIO;
+                }
 		log_fh = smb2_open(log_smb2, url->path, O_RDWR|O_CREAT);
 		smb2_ftruncate(log_smb2, log_fh, 0);
 		smb2_destroy_url(url);
@@ -188,7 +190,7 @@ static void smb2_Connect(smb2Connect_in_t *in, smb2Connect_out_t *out)
 	share = malloc(sizeof(struct smb2_share_list));
 	if (share == NULL) {
 		SMBLOG("Failed to malloc share\n");
-		return;
+                return -ENOMEM;
 	}
 	memset(share, 0, sizeof(struct smb2_share_list));
 	share->next = shares;
@@ -198,13 +200,13 @@ static void smb2_Connect(smb2Connect_in_t *in, smb2Connect_out_t *out)
 	if (share->smb2 == NULL) {
 		SMBLOG("Failed to initialize smb2 context\n");
 		free(share);
-		return;
+                return -ENOMEM;
 	}
 	url = smb2_parse_url(share->smb2, in->url);
 	if (url == NULL) {
 		SMBLOG("Failed to parse URL: %s\n", in->url);
 		free(share);
-		return;
+                return -EINVAL;
 	}
 	smb2_set_password(share->smb2, in->password);
 	rc = smb2_connect_share(share->smb2, url->server, url->share,
@@ -215,10 +217,11 @@ static void smb2_Connect(smb2Connect_in_t *in, smb2Connect_out_t *out)
 		free(share);
 		SMBLOG("Failed to connect to share: %s %s\n", in->url,
 		       smb2_get_error(share->smb2));
-		return;
+                return -EIO;
 	}
 	shares = share;
 	SMBLOG("Connected to share %s\n", in->url);
+        return 0;
 }
 
 int SMB2_devctl(iop_file_t *f, const char *devname, int cmd,
@@ -233,9 +236,8 @@ int SMB2_devctl(iop_file_t *f, const char *devname, int cmd,
 
 	switch(cmd) {
 		case SMB2_DEVCTL_CONNECT:
-			smb2_Connect((smb2Connect_in_t *)arg,
-				     (smb2Connect_out_t *)bufp);
-			r = 0;
+			r = smb2_Connect((smb2Connect_in_t *)arg,
+                                         (smb2Connect_out_t *)bufp);
 			break;
 
 		default:
