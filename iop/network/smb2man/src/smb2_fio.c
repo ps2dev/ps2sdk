@@ -169,6 +169,10 @@ static int smb2_Connect(smb2Connect_in_t *in, smb2Connect_out_t *out)
 	struct smb2_url *url;
 	int rc;
 
+        if (out) {
+                out->ctx = NULL;
+        }
+        
 #ifdef DEBUG
 	if (log_smb2 == NULL) {
 		log_smb2 = smb2_init_context();
@@ -220,6 +224,9 @@ static int smb2_Connect(smb2Connect_in_t *in, smb2Connect_out_t *out)
                 return -EIO;
 	}
 	shares = share;
+        if (out) {
+                out->ctx = share->smb2;
+        }
 	SMBLOG("Connected to share %s\n", in->url);
         return 0;
 }
