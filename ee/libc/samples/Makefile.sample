@@ -15,10 +15,15 @@ ifneq ($(EE_CC),gcc)
 EE_LIBS = -lpatches
 endif
 
-all: $(EE_BIN)
+all: $(EE_BIN) input
+
+input:
+	mkdir -p testfiles/
+	echo "hello world" > testfiles/dummy
+
 
 clean:
-	rm -rf $(EE_BIN) $(EE_OBJS) dummydir testfiles/dummy2
+	rm -rf $(EE_BIN) $(EE_OBJS) dummydir testfiles
 
 run: $(EE_BIN)
 	ps2client execee host:$(EE_BIN)

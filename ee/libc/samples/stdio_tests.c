@@ -354,29 +354,6 @@ static const char *test_opendir_closedir(void *arg)
     return NULL;
 }
 
-static inline int __udelay(unsigned int usecs)
-{
-
-    register unsigned int loops_total = 0;
-    register unsigned int loops_end   = usecs * 148;
-
-    if (usecs > loops_end)
-        return -1;
-
-    __asm__ volatile(".set\tnoreorder\n\t"
-                     "0:\n\t"
-                     "beq\t%0,%2,0f\n\t"
-                     "addiu\t%0,1\n\t"
-                     "bne\t%0,%2,0b\n\t"
-                     "addiu\t%0,1\n\t"
-                     "0:\n\t"
-                     ".set\treorder\n\t"
-                     : "=r"(loops_total)
-                     : "0"(loops_total), "r"(loops_end));
-
-    return 0;
-}
-
 static const char *test_readdir_rewinddir(void *arg)
 {
     int i   = 0;
@@ -452,8 +429,8 @@ int libc_add_tests(test_suite *p)
 #endif
 
     /* If testing using usbd/usbhdfsd or ps2hdd/ps2fs, this adds a 10
-     second delay so that the devices can initialize fully.
-     __udelay(10000000); */
+       second delay so that the devices can initialize fully.
+    sleep(10); */
 
     add_test(p, "fopen, fclose\n", test_fopen_fclose, (void *)textfile);
     add_test(p, "fgets\n", test_fgets, (void *)textfile);
