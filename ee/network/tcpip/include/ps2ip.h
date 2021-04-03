@@ -29,6 +29,7 @@ void ps2ipDeinit(void);
 void ps2ipSetHsyncTicksPerMSec(unsigned char ticks);
 
 /* From include/lwip/sockets.h:  */
+struct timeval *timeout;
 int lwip_accept(int s, struct sockaddr *addr, socklen_t *addrlen);
 int lwip_bind(int s, const struct sockaddr *name, socklen_t namelen);
 int lwip_shutdown(int s, int how);
