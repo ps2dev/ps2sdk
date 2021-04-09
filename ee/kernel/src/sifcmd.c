@@ -23,8 +23,6 @@
 #define CMD_PACKET_MAX		128
 #define CMD_PACKET_DATA_MAX 	112
 #define SYS_CMD_HANDLER_MAX	32
-#define USR_CMD_HANDLER_MAX	32
-
 
 /* EE DMAC registers.  */
 #define DMAC_COMM_STAT	0x1000e010
@@ -181,7 +179,6 @@ static u8 pktbuf[CMD_PACKET_MAX] __attribute__((aligned(64)));
 static u8 sif_unused[64] __attribute__((aligned(64)));
 
 static SifCmdHandlerData_t sys_cmd_handlers[SYS_CMD_HANDLER_MAX];
-static SifCmdHandlerData_t usr_cmd_handlers[USR_CMD_HANDLER_MAX];
 static int sregs[32];
 
 struct cmd_data _sif_cmd_data;
@@ -240,8 +237,8 @@ void SifInitCmd(void)
 	_sif_cmd_data.unused = UNCACHED_SEG(sif_unused);
 	_sif_cmd_data.sys_cmd_handlers = sys_cmd_handlers;
 	_sif_cmd_data.nr_sys_handlers = SYS_CMD_HANDLER_MAX;
-	_sif_cmd_data.usr_cmd_handlers = usr_cmd_handlers;
-	_sif_cmd_data.nr_usr_handlers = USR_CMD_HANDLER_MAX;
+	_sif_cmd_data.usr_cmd_handlers = NULL;
+	_sif_cmd_data.nr_usr_handlers = 0;
 	_sif_cmd_data.sregs = sregs;
 
 	for (i = 0; i < SYS_CMD_HANDLER_MAX; i++) {
