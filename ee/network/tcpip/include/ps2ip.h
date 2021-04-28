@@ -18,6 +18,7 @@
 
 #include <stddef.h>
 #include <tcpip.h>
+#include <time.h>
 
 /** Initializes PS2IP. Specify a dummy address like "169.254.0.1" if DHCP is to be used, before enabling DHCP via ps2ip_setconfig(). */
 int ps2ipInit(struct ip4_addr *ip_address, struct ip4_addr *subnet_mask, struct ip4_addr *gateway);
