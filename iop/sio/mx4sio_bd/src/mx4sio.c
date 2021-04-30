@@ -558,15 +558,17 @@ static spisd_interface_t spi = {
     ps2_spi_read
 };
 
-static void error_recovery()
+static int spisd_init_recovery()
 {
     int rv, i;
 
-    // Flush 4KiB
-    for (i = 0; i < 1024; i++)
+    M_DEBUG("%s\n", __FUNCTION__);
+
+    // Flush 256B
+    for (i = 0; i < 64; i++)
         sendCmd_Rx_PIO((void*)&rv, 4, PORT_NR);
 
-    spisd_init(&spi);
+    return spisd_init(&spi);
 }
 
 /*
@@ -587,10 +589,8 @@ static int spi_sdcard_read(struct block_device* bd, u32 sector, void* buffer, u1
     for (i = 0; i < 10; i++) {
         // Wait idle
         rv = wait_equal(0xFF, 4000, PORT_NR);
-        if (rv != SPISD_RESULT_OK)
-            rv = wait_equal(0xFF, 4000, PORT_NR);
         if (rv != SPISD_RESULT_OK) {
-            M_PRINTF("ERROR: card is not idle after 2 tries\n");
+            M_PRINTF("ERROR: card is not idle\n");
             goto recovery;
         }
 
@@ -603,16 +603,14 @@ static int spi_sdcard_read(struct block_device* bd, u32 sector, void* buffer, u1
 
         // Wait for first start token (first one takes a long time)
         rv = wait_equal(0xFE, 100000, PORT_NR);
-        if (rv != SPISD_RESULT_OK)
-            rv = wait_equal(0xFE, 100000, PORT_NR);
         if (rv != SPISD_RESULT_OK) {
-            M_PRINTF("ERROR: no start token after 2 tries\n");
+            M_PRINTF("ERROR: no start token\n");
             goto recovery;
         }
         break;
 
 recovery:
-        error_recovery();
+        spisd_init_recovery();
     }
 
     if (rv != SPISD_RESULT_OK) {
@@ -737,6 +735,8 @@ static void sd_detect()
         rv = spisd_read_multi_block_begin(0);
         if (rv == SPISD_RESULT_OK)
             rv = spisd_read_multi_block_end();
+        if (rv != SPISD_RESULT_OK)
+            rv = spisd_init_recovery();
     }
     sio2_unlock();
 
