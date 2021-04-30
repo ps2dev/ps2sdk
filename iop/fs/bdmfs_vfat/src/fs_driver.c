@@ -789,6 +789,9 @@ int fs_ioctl(iop_file_t* fd, int cmd, void* data)
     case USBMASS_IOCTL_GET_DRIVERNAME:
         ret = *(int*)fatd->bd->name;
         break;
+    case USBMASS_IOCTL_CHECK_CHAIN:
+        ret = fat_CheckChain(fatd, ((fs_rec*)fd->privdata)->dirent.fatdir.startCluster);
+        break;
     default:
         ret = fs_dummy();
     }

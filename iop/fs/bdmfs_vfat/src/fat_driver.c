@@ -256,6 +256,34 @@ int fat_getClusterChain(fat_driver* fatd, unsigned int cluster, unsigned int* bu
 }
 
 //---------------------------------------------------------------------------
+int fat_CheckChain(fat_driver* fatd, unsigned int cluster)
+{
+    int i, chainSize, nextChain = 1;
+    int clusterChainStart = 1;
+
+    if (cluster < 2)
+        return 0;
+
+    while (nextChain) {
+        chainSize = fat_getClusterChain(fatd, cluster, fatd->cbuf, MAX_DIR_CLUSTER, clusterChainStart);
+        clusterChainStart = 0;
+        if (chainSize >= MAX_DIR_CLUSTER) { //the chain is full, but more chain parts exist
+            cluster = fatd->cbuf[MAX_DIR_CLUSTER - 1];
+        } else { //chain fits in the chain buffer completely - no next chain needed
+            nextChain = 0;
+        }
+
+        //process the cluster chain (fatd->cbuf) and skip leading clusters if needed
+        for (i = 0; i < (chainSize - 1); i++) {
+            if ((fatd->cbuf[i] + 1) != fatd->cbuf[i + 1])
+                return 0;
+        }
+    }
+
+    return 1;
+}
+
+//---------------------------------------------------------------------------
 void fat_invalidateLastChainResult(fat_driver* fatd)
 {
     fatd->lastChainCluster = 0;
