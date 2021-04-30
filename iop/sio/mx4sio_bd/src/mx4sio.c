@@ -33,7 +33,6 @@ static int sd_detect_thread_id = -1;
 static u32 sio2man_save_crtl;
 static int card_used = 0;
 static int card_inserted = 0;
-static int driver_state = 0;
 // Fast SPI clock
 static int fastDiv = 0;
 // Slave/Chip Select
@@ -585,8 +584,6 @@ static int spi_sdcard_read(struct block_device* bd, u32 sector, void* buffer, u1
 
     sio2_lock();
 
-    driver_state = 100;
-
     for (i = 0; i < 10; i++) {
         // Wait idle
         rv = wait_equal(0xFF, 4000, PORT_NR);
@@ -632,8 +629,6 @@ recovery:
     cmd.sectors_reversed    = 0;
     cmd.response            = SPISD_RESULT_OK;
 
-    driver_state = 101;
-
     // Start first DMA transfer (1 sector)
     sendCmd_Rx_DMA_start(buffer, PORT_NR);
 
@@ -641,7 +636,6 @@ recovery:
     while (1) {
         uint32_t resbits[4];
 
-        driver_state = 102;
         WaitEventFlag(event_flag, EF_SIO2_INTR_REVERSE | EF_SIO2_INTR_COMPLETE, 1, resbits);
 
         if (resbits[0] & EF_SIO2_INTR_REVERSE) {
@@ -663,8 +657,6 @@ recovery:
         }
     }
 
-    driver_state = 103;
-
     rv = spisd_read_multi_block_end();
     if (rv != SPISD_RESULT_OK) {
         M_PRINTF("ERROR: spisd_read_multi_block_end = %d\n", rv);
@@ -675,10 +667,8 @@ recovery:
     // Let detection thread know the card has been used succesfully
     card_used = 1;
 
-    driver_state = 104;
     sio2_unlock();
 
-    driver_state = 199;
     return count;
 }
 
@@ -752,7 +742,6 @@ static void sd_detect()
     if ((card_inserted == 0) && (rv == SPISD_RESULT_OK)) {
         M_PRINTF("card insertion detected\n");
         card_inserted = 1;
-        driver_state  = 1;
 
         rv = spisd_get_card_info(&cardinfo);
 
@@ -784,7 +773,6 @@ static void sd_detect()
     } else if ((card_inserted == 1) && (rv != SPISD_RESULT_OK)) {
         M_PRINTF("card removal detected\n");
         card_inserted = 0;
-        driver_state  = 0;
 
         // Disconnect from block device manager
         bdm_disconnect_bd(&bd);
@@ -800,7 +788,7 @@ static void sd_detect_thread(void* arg)
         // Sleep for 1 second
         DelayThread(1000 * 1000);
 
-        M_DEBUG("Check card, used = %d, state = %d\n", card_used, driver_state);
+        M_DEBUG("Check card, inserted=%d, used=%d\n", card_inserted, card_used);
 
         // Detect card if it has not been used recently
         if (card_used == 0) {
