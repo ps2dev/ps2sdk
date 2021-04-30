@@ -61,7 +61,7 @@ void bdm_disconnect_fs(struct file_system* fs);
 void bdm_get_bd(struct block_device** pbd, unsigned int count);
 void bdm_RegisterCallback(bdm_cb cb);
 
-#define bdm_IMPORTS_start DECLARE_IMPORT_TABLE(bdm, 1, 0)
+#define bdm_IMPORTS_start DECLARE_IMPORT_TABLE(bdm, 1, 1)
 #define bdm_IMPORTS_end END_IMPORT_TABLE
 
 #define I_bdm_connect_bd DECLARE_IMPORT(4, bdm_connect_bd)
