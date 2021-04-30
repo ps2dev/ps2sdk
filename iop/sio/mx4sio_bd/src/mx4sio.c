@@ -794,9 +794,9 @@ static void sd_detect_thread(void* arg)
         if (card_used == 0) {
             sio2_lock();
             sd_detect();
-            card_used = 0;
             sio2_unlock();
         }
+        card_used = 0;
     }
 }
 
