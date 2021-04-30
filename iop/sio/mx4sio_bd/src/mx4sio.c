@@ -695,11 +695,15 @@ static int spi_sdcard_write(struct block_device* bd, u32 sector, const void* buf
 
 static void spi_sdcard_flush(struct block_device* bd)
 {
+    //M_DEBUG("%s\n", __FUNCTION__);
+
     return;
 }
 
 static int spi_sdcard_stop(struct block_device* bd)
 {
+    //M_DEBUG("%s\n", __FUNCTION__);
+
     return 0;
 }
 
