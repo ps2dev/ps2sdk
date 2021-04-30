@@ -847,12 +847,9 @@ int module_start(int argc, char* argv[])
     /* After a reboot the SD will always respond with:
      * - 0xff 0xff 0xc1 0x3f
      * - followed by an infinite amount of 0xff
-     * Also after a reboot during transfer (OPL IGR for instance) the SD card
-     * will have many bytes to send. This is to flush these bytes so the card
-     * always works */
+     */
     sio2_lock();
-    for (i = 0; i < 1024; i++)
-        sendCmd_Rx_PIO((void*)&rv, 4, PORT_NR);
+    sendCmd_Rx_PIO((void*)&rv, 4, PORT_NR);
     sio2_unlock();
 
     // Creat SD card detection thread
