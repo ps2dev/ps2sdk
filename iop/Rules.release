@@ -30,7 +30,7 @@ release-iop-lib:
 	   cp -f $(IOP_LIB) $(PS2SDK)/iop/lib/ ; \
 	   chmod 644 $(PS2SDK)/iop/lib/`basename $(IOP_LIB)` ; \
 	   for file in $(IOP_LIB_ALTNAMES); do \
-	      ln -s `basename $(IOP_LIB)` $(PS2SDK)/iop/lib/$$file; \
+	      ln -sf `basename $(IOP_LIB)` $(PS2SDK)/iop/lib/$$file; \
 	   done; \
 	fi;
 
@@ -45,7 +45,7 @@ release-iop-bin:
 	   cp -f $(IOP_BIN) $(PS2SDK)/iop/irx/ ; \
 	   chmod 644 $(PS2SDK)/iop/irx/`basename $(IOP_BIN)` ; \
 	   for file in $(IOP_BIN_ALTNAMES); do \
-	      ln -s `basename $(IOP_BIN)` $(PS2SDK)/iop/irx/$$file; \
+	      ln -sf `basename $(IOP_BIN)` $(PS2SDK)/iop/irx/$$file; \
 	   done; \
 	fi;
 
