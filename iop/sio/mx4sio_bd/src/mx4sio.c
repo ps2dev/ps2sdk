@@ -728,6 +728,7 @@ static void sd_detect()
     //M_DEBUG("%s\n", __FUNCTION__);
 
     // Detect card
+    sio2_lock();
     if (card_inserted == 0) {
         // Try to detect a card by initializing
         rv = spisd_init(&spi);
@@ -737,13 +738,16 @@ static void sd_detect()
         if (rv == SPISD_RESULT_OK)
             rv = spisd_read_multi_block_end();
     }
+    sio2_unlock();
 
     // Change state
     if ((card_inserted == 0) && (rv == SPISD_RESULT_OK)) {
         M_PRINTF("card insertion detected\n");
         card_inserted = 1;
 
+        sio2_lock();
         rv = spisd_get_card_info(&cardinfo);
+        sio2_unlock();
 
         if (rv != 0) {
             M_PRINTF("ERROR: spisd_get_card_info returned %d\n", rv);
@@ -791,11 +795,8 @@ static void sd_detect_thread(void* arg)
         M_DEBUG("Check card, inserted=%d, used=%d\n", card_inserted, card_used);
 
         // Detect card if it has not been used recently
-        if (card_used == 0) {
-            sio2_lock();
+        if (card_used == 0)
             sd_detect();
-            sio2_unlock();
-        }
         card_used = 0;
     }
 }
