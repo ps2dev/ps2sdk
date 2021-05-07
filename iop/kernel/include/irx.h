@@ -62,10 +62,11 @@ static struct irx_import_table _imp_##modname 		\
 	name: #modname, };
 
 #define STR(val) #val
+// .word 0x03e00008 == jr $ra (return immediately), this value will be patched later
 #define DECLARE_IMPORT(ord, name) \
 	__asm__ (".section\t.text\n\t"		\
 		".globl\t"#name"\n\t"#name":\n\t"	\
-		".word 0x3e00008\n\t"			\
+		".word 0x03e00008\n\t"			\
 		".word "STR(0x24000000|ord));
 
 #define END_IMPORT_TABLE \

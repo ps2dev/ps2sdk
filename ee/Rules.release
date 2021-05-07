@@ -34,7 +34,7 @@ release-ee-lib:
 	      ln -s `basename $(EE_LIB)` $(PS2SDK)/ee/lib/$$file; \
 	   done; \
 	   for file in $(EE_LIB_ALTNAMES:%.a=%.erl); do \
-	      ln -s `basename $(EE_LIB:%.a=%.erl)` $(PS2SDK)/ee/lib/$$file; \
+	      ln -sf `basename $(EE_LIB:%.a=%.erl)` $(PS2SDK)/ee/lib/$$file; \
 	   done; \
 	fi;
 
@@ -49,7 +49,7 @@ release-ee-bin:
 	   cp -f $(EE_BIN) $(PS2SDK)/ee/bin ; \
 	   chmod 644 $(PS2SDK)/ee/bin/`basename $(EE_BIN)` ; \
 	   for file in $(EE_BIN_ALTNAMES); do \
-	      ln -s `basename $(EE_BIN)` $(PS2SDK)/ee/bin/$$file; \
+	      ln -sf `basename $(EE_BIN)` $(PS2SDK)/ee/bin/$$file; \
 	   done; \
 	fi;
 

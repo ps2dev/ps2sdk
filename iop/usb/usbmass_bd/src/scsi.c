@@ -180,7 +180,7 @@ static int scsi_read(struct block_device* bd, u32 sector, void* buffer, u16 coun
     u16 sc_remaining = count;
     int retries;
 
-    M_DEBUG("%s: sector=%d, count=%d\n", __func__, sector, count);
+    M_DEBUG("%s: sector=%d, count=%d\n", __func__, (int)sector, count);
 
     while (sc_remaining > 0) {
         u16 sc = sc_remaining > scsi->max_sectors ? scsi->max_sectors : sc_remaining;
@@ -190,8 +190,10 @@ static int scsi_read(struct block_device* bd, u32 sector, void* buffer, u16 coun
                 break;
         }
 
-        if (retries == 0)
+        if (retries == 0) {
+            M_PRINTF("ERROR: unable to read sector after %d tries (sector=%d, count=%d)\n", SCSI_MAX_RETRIES, (int)sector, count);
             return -EIO;
+        }
 
         sc_remaining -= sc;
         sector += sc;
@@ -207,7 +209,7 @@ static int scsi_write(struct block_device* bd, u32 sector, const void* buffer, u
     u16 sc_remaining = count;
     int retries;
 
-    M_DEBUG("%s: sector=%d, count=%d\n", __func__, sector, count);
+    M_DEBUG("%s: sector=%d, count=%d\n", __func__, (int)sector, count);
 
     while (sc_remaining > 0) {
         u16 sc = sc_remaining > scsi->max_sectors ? scsi->max_sectors : sc_remaining;
@@ -217,8 +219,10 @@ static int scsi_write(struct block_device* bd, u32 sector, const void* buffer, u
                 break;
         }
 
-        if (retries == 0)
+        if (retries == 0) {
+            M_PRINTF("ERROR: unable to write sector after %d tries (sector=%d, count=%d)\n", SCSI_MAX_RETRIES, (int)sector, count);
             return -EIO;
+        }
 
         sc_remaining -= sc;
         sector += sc;
@@ -230,7 +234,22 @@ static int scsi_write(struct block_device* bd, u32 sector, const void* buffer, u
 
 static void scsi_flush(struct block_device* bd)
 {
+    M_DEBUG("%s\n", __func__);
+
     // Dummy function
+}
+
+static int scsi_stop(struct block_device* bd)
+{
+    int stat;
+
+    M_DEBUG("%s\n", __func__);
+
+    if ((stat = scsi_cmd_start_stop_unit(bd, 0)) != 0) {
+        M_PRINTF("ERROR: scsi_cmd_start_stop_unit %d\n", stat);
+    }
+
+    return stat;
 }
 
 //
@@ -271,17 +290,6 @@ void scsi_disconnect(struct scsi_interface* scsi)
     }
 }
 
-static int scsi_stop(struct block_device* bd)
-{
-    int stat;
-
-    if ((stat = scsi_cmd_start_stop_unit(bd, 0)) != 0) {
-        M_PRINTF("ERROR: scsi_cmd_start_stop_unit %d\n", stat);
-    }
-
-    return stat;
-}
-
 int scsi_init(void)
 {
     int i;
@@ -296,9 +304,8 @@ int scsi_init(void)
         g_scsi_bd[i].read  = scsi_read;
         g_scsi_bd[i].write = scsi_write;
         g_scsi_bd[i].flush = scsi_flush;
-        g_scsi_bd[i].stop = scsi_stop;
+        g_scsi_bd[i].stop  = scsi_stop;
     }
 
     return 0;
 }
-

@@ -24,6 +24,8 @@
 #define USBMASS_IOCTL_GET_LBA		0x0002
 /** Returns the block device driver name */
 #define USBMASS_IOCTL_GET_DRIVERNAME	0x0003
+/** Check if fragments exist */
+#define USBMASS_IOCTL_CHECK_CHAIN	0x0004
 
 //DEVCTL function codes
 /** Issues the SCSI STOP UNIT command to the specified device. Use this to shut down devices properly. */

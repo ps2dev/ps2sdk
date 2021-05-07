@@ -14,6 +14,7 @@
 #include "scsi.h"
 #include <usbhdfsd-common.h>
 
+//#define ASYNC
 //#define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
 
@@ -89,8 +90,10 @@ static mass_dev g_mass_device[NUM_DEVICES];
 static int usb_mass_update_sema;
 
 static void usb_callback(int resultCode, int bytes, void *arg);
+#ifndef ASYNC
 static int perform_bulk_transfer(usb_transfer_callback_data* data);
 static void usb_transfer_callback(int resultCode, int bytes, void *arg);
+#endif
 static void usb_mass_release(mass_dev* dev);
 
 static void usb_callback(int resultCode, int bytes, void* arg)
@@ -409,7 +412,7 @@ static int usb_bulk_transfer(mass_dev* dev, int direction, void* buffer, unsigne
 	}
 
 	if(ret != USB_RC_OK) {
-		M_DEBUG("ERROR: bulk data transfer %d. Clearing HALT state.\n", cb_data.returnCode);
+		M_DEBUG("ERROR: bulk data transfer %d. Clearing HALT state.\n", ret);
 		usb_bulk_clear_halt(dev, direction);
 	}
 
@@ -537,14 +540,18 @@ static mass_dev* usb_mass_findDevice(int devId, int create)
 static void usb_bulk_probeEndpoint(int devId, mass_dev* dev, UsbEndpointDescriptor* endpoint)
 {
     if (endpoint->bmAttributes == USB_ENDPOINT_XFER_BULK) {
-        /* out transfer */
         if ((endpoint->bEndpointAddress & USB_ENDPOINT_DIR_MASK) == USB_DIR_OUT && dev->bulkEpO < 0) {
+            /* When sceUsbdOpenPipe() is used to work around the hardware errata that occurs when an unaligned memory address is specified,
+               some USB devices become incompatible. Hence it is preferable to do alignment correction in software instead. */
             dev->bulkEpO = sceUsbdOpenPipeAligned(devId, endpoint);
             M_DEBUG("register Output endpoint id =%i addr=%02X packetSize=%i\n", dev->bulkEpO, endpoint->bEndpointAddress, (unsigned short int)endpoint->wMaxPacketSizeHB << 8 | endpoint->wMaxPacketSizeLB);
         } else
-            /* in transfer */
+            /* Open this pipe with sceUsbdOpenPipe, to allow unaligned addresses to be used.
+               According to the Sony documentation and the USBD code,
+               there is always an alignment check if the pipe is opened with the sceUsbdOpenPipeAligned(),
+               even when there is never any correction for the bulk out pipe. */
             if ((endpoint->bEndpointAddress & USB_ENDPOINT_DIR_MASK) == USB_DIR_IN && dev->bulkEpI < 0) {
-            dev->bulkEpI = sceUsbdOpenPipeAligned(devId, endpoint);
+            dev->bulkEpI = sceUsbdOpenPipe(devId, endpoint);
             M_DEBUG("register Input endpoint id =%i addr=%02X packetSize=%i\n", dev->bulkEpI, endpoint->bEndpointAddress, (unsigned short int)endpoint->wMaxPacketSizeHB << 8 | endpoint->wMaxPacketSizeLB);
         }
     }
@@ -776,7 +783,9 @@ int usb_mass_init(void)
 
         g_mass_device[i].scsi.priv        = &g_mass_device[i];
         g_mass_device[i].scsi.name        = "usb";
-        g_mass_device[i].scsi.max_sectors = 0xffff;
+        // The maximum number of sectors should be 0xffff but
+        // some usb drives seem to freeze above 128 sectors (64Kib)
+        g_mass_device[i].scsi.max_sectors = 128; // 0xffff
         g_mass_device[i].scsi.get_max_lun = usb_bulk_get_max_lun;
         g_mass_device[i].scsi.queue_cmd   = usb_queue_cmd;
     }
