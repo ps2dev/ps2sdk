@@ -25,6 +25,7 @@
 #define MIN_HSYNC_DELAY 100
 #define MAX_PS2CLOCK_PER_HSYNC (PS2_CLOCKS_PER_SEC/MIN_HSYNC_PER_SEC)
 
+#ifdef F_nanosleep
 // Start with the highest possible value (so we sleep too short)
 static unsigned int iPS2ClockPerHSync = MAX_PS2CLOCK_PER_HSYNC;
 
@@ -94,7 +95,9 @@ int nanosleep(const struct timespec *req, struct timespec *rem)
 
 	return 0;
 }
+#endif
 
+#ifdef F_sleep
 unsigned int sleep(unsigned int seconds)
 {
     struct timespec ts;
@@ -110,3 +113,4 @@ unsigned int sleep(unsigned int seconds)
 
     return -1;
 }
+#endif

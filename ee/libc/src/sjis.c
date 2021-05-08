@@ -21,8 +21,8 @@ struct charmap_t {
 	unsigned char ascii;
 };
 
-#ifdef F__sjis_internals
-struct charmap_t sjis_conversion[] = {
+#if defined(F_isSpecialSJIS) || defined(F_isSpecialASCII)
+static struct charmap_t sjis_conversion[] = {
     { 0x4081, ' ' },
     { 0x6d81, '[' },
     { 0x6e81, ']' },
@@ -57,7 +57,9 @@ struct charmap_t sjis_conversion[] = {
     { 0x4d81, '`' },
     { 0, 0 }
 };
+#endif
 
+#ifdef F_isSpecialSJIS
 unsigned char isSpecialSJIS(short sjis)
 {
     struct charmap_t *s = &sjis_conversion[0];
@@ -67,7 +69,11 @@ unsigned char isSpecialSJIS(short sjis)
     } while (s->sjis != 0);
     return 0;
 }
+#else
+unsigned char isSpecialSJIS(short sjis);
+#endif
 
+#ifdef F_isSpecialASCII
 short isSpecialASCII(unsigned char ascii)
 {
     struct charmap_t *s = &sjis_conversion[0];
@@ -78,8 +84,6 @@ short isSpecialASCII(unsigned char ascii)
     return 0;
 }
 #else
-extern struct charmap_t * sjis_conversion;
-unsigned char isSpecialSJIS(short sjis);
 short isSpecialASCII(unsigned char ascii);
 #endif
 
