@@ -19,14 +19,16 @@ void _ps2sdk_timezone_update();
 
 int chdir(const char *path);
 
-#ifdef F_init_libc
+#ifdef F__ps2sdk_libc_init
 __attribute__((weak))
 void _ps2sdk_libc_init()
 {
     _ps2sdk_time_init();
     _ps2sdk_timezone_update();
 }
+#endif
 
+#ifdef F__ps2sdk_libc_deinit
 __attribute__((weak))
 void _ps2sdk_libc_deinit()
 {
@@ -34,7 +36,7 @@ void _ps2sdk_libc_deinit()
 }
 #endif
 
-#ifdef F_init_args
+#ifdef F__ps2sdk_args_parse
 __attribute__((weak))
 void _ps2sdk_args_parse(int argc, char ** argv)
 {

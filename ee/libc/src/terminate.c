@@ -12,6 +12,7 @@
 #include <tamtypes.h>
 #include <kernel.h>
 
+#ifdef F_abort
 __attribute__((weak))
 void abort()
 {
@@ -20,10 +21,13 @@ void abort()
 	while (1)
 		_exit(1);
 }
+#endif
 
+#ifdef F_exit
 __attribute__((weak))
 void exit(int retval)
 {
 	while (1)
 		_exit(retval);
 }
+#endif

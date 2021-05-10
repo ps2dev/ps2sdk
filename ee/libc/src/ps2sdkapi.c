@@ -38,22 +38,16 @@
 #include "ps2sdkapi.h"
 
 
-extern void *ps2_sbrk(size_t increment);
+extern void * _end;
 
-
+#ifdef F___direct_pwd
 /* the present working directory variable. */
 char __direct_pwd[256] = "";
+#else
+extern char __direct_pwd[256];
+#endif
 
-
-int fioRename(const char *old, const char *new) {
-  return -ENOSYS;
-}
-
-int fioMkdirHelper(const char *path, int mode) {
-  // Old fio mkdir has no mode argument
-  return fioMkdir(path);
-}
-
+#ifdef F___fill_stat
 static time_t io_to_posix_time(const unsigned char *ps2time)
 {
         struct tm tim;
@@ -77,7 +71,7 @@ static mode_t io_to_posix_mode(unsigned int ps2mode)
         return posixmode;
 }
 
-static void fill_stat(struct stat *stat, const io_stat_t *fiostat)
+void __fill_stat(struct stat *stat, const io_stat_t *fiostat)
 {
         stat->st_dev = 0;
         stat->st_ino = 0;
@@ -93,99 +87,13 @@ static void fill_stat(struct stat *stat, const io_stat_t *fiostat)
         stat->st_blksize = 16*1024;
         stat->st_blocks = stat->st_size / 512;
 }
+#else
+void __fill_stat(struct stat *stat, const io_stat_t *fiostat);
+#endif
 
-static int fioGetstatHelper(const char *path, struct stat *buf) {
-        io_stat_t fiostat;
-
-        if (fioGetstat(path, &fiostat) < 0) {
-                //errno = ENOENT;
-                return -1;
-        }
-
-        fill_stat(buf, &fiostat);
-
-        return 0;
-}
-
-static DIR *fioOpendirHelper(const char *path)
-{
-	int dd;
-	DIR *dir;
-
-	dd = fioDopen(path);
-	if (dd < 0) {
-		//errno = ENOENT;
-		return NULL;
-	}
-
-	dir = malloc(sizeof(DIR));
-        dir->dd_fd = dd;
-        dir->dd_buf = malloc(sizeof(struct dirent));
-
-	return dir;
-}
-
-static struct dirent *fioReaddirHelper(DIR *dir)
-{
-	int rv;
-        struct dirent *de;
-        io_dirent_t fiode;
-
-	if(dir == NULL) {
-		//errno = EBADF;
-		return NULL;
-	}
-
-        de = (struct dirent *)dir->dd_buf;
-        rv = fioDread(dir->dd_fd, &fiode);
-	if (rv <= 0) {
-		return NULL;
-	}
-
-	fill_stat(&de->d_stat, &fiode.stat);
-	strncpy(de->d_name, fiode.name, 255);
-	de->d_name[255] = 0;
-
-	return de;
-}
-
-static void fioRewinddirHelper(DIR *dir)
-{
-	printf("rewinddir not implemented\n");
-}
-
-static int fioClosedirHelper(DIR *dir)
-{
-	if(dir == NULL) {
-		//errno = EBADF;
-		return -1;
-	}
-
-	fioDclose(dir->dd_fd); // Check return value?
-	free(dir->dd_buf);
-	free(dir);
-
-	return 0;
-}
-
-int (*_ps2sdk_close)(int) = fioClose;
-int (*_ps2sdk_open)(const char*, int, ...) = (void *)fioOpen;
-int (*_ps2sdk_read)(int, void*, int) = fioRead;
-int (*_ps2sdk_lseek)(int, int, int) = fioLseek;
-int64_t (*_ps2sdk_lseek64)(int, int64_t, int) = NULL;
-int (*_ps2sdk_write)(int, const void*, int) = fioWrite;
+#ifdef F__ps2sdk_ioctl
 int (*_ps2sdk_ioctl)(int, int, void*) = fioIoctl;
-int (*_ps2sdk_remove)(const char*) = fioRemove;
-int (*_ps2sdk_rename)(const char*, const char*) = fioRename;
-int (*_ps2sdk_mkdir)(const char*, int) = fioMkdirHelper;
-int (*_ps2sdk_rmdir)(const char*) = fioRmdir;
-
-int (*_ps2sdk_stat)(const char *path, struct stat *buf) = fioGetstatHelper;
-
-DIR * (*_ps2sdk_opendir)(const char *path) = fioOpendirHelper;
-struct dirent * (*_ps2sdk_readdir)(DIR *dir) = fioReaddirHelper;
-void (*_ps2sdk_rewinddir)(DIR *dir) = fioRewinddirHelper;
-int (*_ps2sdk_closedir)(DIR *dir) = fioClosedirHelper;
+#endif
 
 #define IOP_O_RDONLY       0x0001
 #define IOP_O_WRONLY       0x0002
@@ -209,6 +117,7 @@ int (*_ps2sdk_closedir)(DIR *dir) = fioClosedirHelper;
 #endif
 
 #define ct_assert(e) {enum { ct_assert_value = 1/(!!(e)) };}
+#ifdef F_compile_time_check
 void compile_time_check() {
 	// Compiler (ABI n32)
 	ct_assert(sizeof(unsigned char)==1);
@@ -232,7 +141,9 @@ void compile_time_check() {
 	ct_assert(sizeof(uint32_t)==4);
 	ct_assert(sizeof(uint64_t)==8);
 }
+#endif
 
+#ifdef F__open
 /* Normalize a pathname by removing . and .. components, duplicated /, etc. */
 static char* normalize_path(const char *path_name)
 {
@@ -298,6 +209,8 @@ static int isCdromPath(const char *path)
 	return !strncmp(path, "cdrom0:", 7) || !strncmp(path, "cdrom:", 6);
 }
 
+int (*_ps2sdk_open)(const char*, int, ...) = (void *)fioOpen;
+
 int _open(const char *buf, int flags, ...) {
 	int iop_flags = 0;
 
@@ -362,14 +275,26 @@ int _open(const char *buf, int flags, ...) {
 
 	return _ps2sdk_open(t_fname, iop_flags);
 }
+#endif
+
+#ifdef F__close
+int (*_ps2sdk_close)(int) = fioClose;
 
 int _close(int fd) {
 	return _ps2sdk_close(fd);
 }
+#endif
+
+#ifdef F__read
+int (*_ps2sdk_read)(int, void*, int) = fioRead;
 
 int _read(int fd, void *buf, size_t nbytes) {
 	return _ps2sdk_read(fd, buf, nbytes);
 }
+#endif
+
+#ifdef F__write
+int (*_ps2sdk_write)(int, const void*, int) = fioWrite;
 
 int _write(int fd, const void *buf, size_t nbytes) {
 	// HACK: stdout and strerr to serial
@@ -378,7 +303,9 @@ int _write(int fd, const void *buf, size_t nbytes) {
 
 	return _ps2sdk_write(fd, buf, nbytes);
 }
+#endif
 
+#ifdef F__fstat
 int _fstat(int fd, struct stat *buf) {
 	if (fd >=0 && fd <= 1) {
 		// Character device
@@ -393,11 +320,32 @@ int _fstat(int fd, struct stat *buf) {
 
 	return 0;
 }
+#else
+int _fstat(int fd, struct stat *buf);
+#endif
+
+#ifdef F__stat
+static int fioGetstatHelper(const char *path, struct stat *buf) {
+        io_stat_t fiostat;
+
+        if (fioGetstat(path, &fiostat) < 0) {
+                //errno = ENOENT;
+                return -1;
+        }
+
+        __fill_stat(buf, &fiostat);
+
+        return 0;
+}
+
+int (*_ps2sdk_stat)(const char *path, struct stat *buf) = fioGetstatHelper;
 
 int _stat(const char *path, struct stat *buf) {
         return _ps2sdk_stat(path, buf);
 }
+#endif
 
+#ifdef F_access
 int access(const char *fn, int flags) {
 	struct stat s;
 	if (stat(fn, &s))
@@ -411,27 +359,106 @@ int access(const char *fn, int flags) {
 	}
 	return 0;
 }
+#endif
+
+#ifdef F_opendir
+static DIR *fioOpendirHelper(const char *path)
+{
+	int dd;
+	DIR *dir;
+
+	dd = fioDopen(path);
+	if (dd < 0) {
+		//errno = ENOENT;
+		return NULL;
+	}
+
+	dir = malloc(sizeof(DIR));
+        dir->dd_fd = dd;
+        dir->dd_buf = malloc(sizeof(struct dirent));
+
+	return dir;
+}
+
+DIR * (*_ps2sdk_opendir)(const char *path) = fioOpendirHelper;
 
 DIR *opendir(const char *path)
 {
     return _ps2sdk_opendir(path);
 }
+#endif
+
+#ifdef F_readdir
+static struct dirent *fioReaddirHelper(DIR *dir)
+{
+	int rv;
+        struct dirent *de;
+        io_dirent_t fiode;
+
+	if(dir == NULL) {
+		//errno = EBADF;
+		return NULL;
+	}
+
+        de = (struct dirent *)dir->dd_buf;
+        rv = fioDread(dir->dd_fd, &fiode);
+	if (rv <= 0) {
+		return NULL;
+	}
+
+	__fill_stat(&de->d_stat, &fiode.stat);
+	strncpy(de->d_name, fiode.name, 255);
+	de->d_name[255] = 0;
+
+	return de;
+}
+
+struct dirent * (*_ps2sdk_readdir)(DIR *dir) = fioReaddirHelper;
 
 struct dirent *readdir(DIR *dir)
 {
     return _ps2sdk_readdir(dir);
 }
+#endif
+
+#ifdef F_rewinddir
+static void fioRewinddirHelper(DIR *dir)
+{
+	printf("rewinddir not implemented\n");
+}
+
+void (*_ps2sdk_rewinddir)(DIR *dir) = fioRewinddirHelper;
 
 void rewinddir(DIR *dir)
 {
     return _ps2sdk_rewinddir(dir);
 }
+#endif
+
+#ifdef F_closedir
+static int fioClosedirHelper(DIR *dir)
+{
+	if(dir == NULL) {
+		//errno = EBADF;
+		return -1;
+	}
+
+	fioDclose(dir->dd_fd); // Check return value?
+	free(dir->dd_buf);
+	free(dir);
+
+	return 0;
+}
+
+int (*_ps2sdk_closedir)(DIR *dir) = fioClosedirHelper;
 
 int closedir(DIR *dir)
 {
     return _ps2sdk_closedir(dir);
 }
+#endif
 
+#ifdef F__isatty
 int _isatty(int fd) {
 	struct stat buf;
 
@@ -444,11 +471,19 @@ int _isatty(int fd) {
 	//errno = ENOTTY;
 	return 0;
 }
+#endif
+
+#ifdef F__lseek
+int (*_ps2sdk_lseek)(int, int, int) = fioLseek;
 
 off_t _lseek(int fd, off_t offset, int whence)
 {
 	return _ps2sdk_lseek(fd, offset, whence);
 }
+#endif
+
+#ifdef F_lseek64
+int64_t (*_ps2sdk_lseek64)(int, int64_t, int) = NULL;
 
 off64_t lseek64(int fd, off64_t offset, int whence)
 {
@@ -457,37 +492,70 @@ off64_t lseek64(int fd, off64_t offset, int whence)
 
     return _ps2sdk_lseek64(fd, offset, whence);
 }
+#endif
 
+#ifdef F_chdir
 int chdir(const char *path) {
     strcpy(__direct_pwd, path);
     return 0;
 }
+#endif
+
+#ifdef F_mkdir
+int fioMkdirHelper(const char *path, int mode) {
+  // Old fio mkdir has no mode argument
+  return fioMkdir(path);
+}
+
+int (*_ps2sdk_mkdir)(const char*, int) = fioMkdirHelper;
 
 int mkdir(const char *path, mode_t mode) {
     return _ps2sdk_mkdir(path, mode);
 }
+#endif
+
+#ifdef F_rmdir
+int (*_ps2sdk_rmdir)(const char*) = fioRmdir;
 
 int rmdir(const char *path) {
     return _ps2sdk_rmdir(path);
 }
+#endif
+
+#ifdef F__link
+int fioRename(const char *old, const char *new) {
+  return -ENOSYS;
+}
+
+int (*_ps2sdk_rename)(const char*, const char*) = fioRename;
 
 int _link(const char *old, const char *new) {
     return _ps2sdk_rename(old, new);
 }
+#endif
+
+#ifdef F__unlink
+int (*_ps2sdk_remove)(const char*) = fioRemove;
 
 int _unlink(const char *path) {
     return _ps2sdk_remove(path);
 }
+#endif
 
+#ifdef F_getcwd
 char *getcwd(char *buf, size_t len) {
 	strncpy(buf, __direct_pwd, len);
 	return buf;
 }
+#endif
 
+#ifdef F__getpid
 int _getpid(void) {
 	return GetThreadId();
 }
+#endif
 
+#ifdef F__kill
 int _kill(int pid, int sig) {
 #if 0 // needs to be tested first
 	// null signal: do error checking on pid only
@@ -503,11 +571,28 @@ int _kill(int pid, int sig) {
 	// FIXME: set errno
 	return -1;
 }
+#endif
 
+#ifdef F__sbrk
 void * _sbrk(size_t incr) {
-	return ps2_sbrk(incr);
-}
+	static void * _heap_ptr = &_end;
+	void *mp, *ret = (void *)-1;
 
+	if (incr == 0)
+		return _heap_ptr;
+
+	/* If the area we want to allocated is past the end of our heap, we have a problem. */
+	mp = _heap_ptr + incr;
+	if (mp <= EndOfHeap()) {
+		ret = _heap_ptr;
+		_heap_ptr = mp;
+	}
+
+	return ret;
+}
+#endif
+
+#ifdef F_time
 /*
  * newlib function, unfortunately depends on the 'cdvd' library.
  * In libc there is a dummy   'time' function declared as WEAK.
@@ -523,7 +608,9 @@ time_t time(time_t *t)
                 *t = -1;
 	return -1;
 }
+#endif
 
+#ifdef F__gettimeofday
 /*
  * Implement in terms of time, which means we can't
  * return the microseconds.
@@ -540,7 +627,9 @@ int _gettimeofday(struct timeval *tv, struct timezone *tz) {
 
         return 0;
 }
+#endif
 
+#ifdef F__times
 clock_t _times(struct tms *buffer) {
 	clock_t clk = ps2_clock() / (PS2_CLOCKS_PER_SEC / CLOCKS_PER_SEC);
 
@@ -553,13 +642,18 @@ clock_t _times(struct tms *buffer) {
 
 	return clk;
 }
+#endif
 
+#ifdef F_random
 long int random(void)
 {
         return rand();
 }
+#endif
 
+#ifdef F_srandom
 void srandom(unsigned int seed)
 {
         srand(seed);
 }
+#endif
