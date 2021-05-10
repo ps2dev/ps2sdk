@@ -21,7 +21,7 @@ EE_CFLAGS := -D_EE -O2 -G0 -Wall -Werror $(EE_CFLAGS)
 EE_CXXFLAGS := -D_EE -O2 -G0 -Wall -Werror $(EE_CXXFLAGS)
 
 # Linker flags
-EE_LDFLAGS := -L$(PS2SDKSRC)/ee/kernel/lib -L$(PS2SDKSRC)/ee/libc/lib $(EE_LDFLAGS)
+EE_LDFLAGS := -L$(PS2SDKSRC)/ee/kernel/lib -L$(PS2SDKSRC)/ee/libc/lib -Wl,-zmax-page-size=128 $(EE_LDFLAGS)
 
 # Assembler flags
 EE_ASFLAGS := -G0 $(EE_ASFLAGS)
