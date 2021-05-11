@@ -14,6 +14,15 @@
 #include <errno.h>
 
 //--------------------------------------------------------------
+// Redefinition of init/deinit libc:
+//--------------------------------------------------------------
+// DON'T REMOVE is for reducing binary size. 
+// These funtios are defined as weak in /libc/src/init.c
+//--------------------------------------------------------------
+   void _ps2sdk_libc_init() {}
+   void _ps2sdk_libc_deinit() {}
+
+//--------------------------------------------------------------
 //Start of function code:
 //--------------------------------------------------------------
 // Clear user memory
