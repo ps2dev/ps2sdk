@@ -18,9 +18,13 @@ STACKADDR = 0x1720000
 STACKSIZE = 0x08000
 endif
 
+EE_CFLAGS += -fdata-sections -ffunction-sections
+
 LDPARAMS := -Wl,--defsym -Wl,_stack_size=$(STACKSIZE) -Wl,--defsym -Wl,_stack=$(STACKADDR)
 
 EE_LDFLAGS += -Wl,-Ttext -Wl,$(LOADADDR) -s $(LDPARAMS)
+EE_LDFLAGS += -s -Wl,--gc-sections
+EE_LDFLAGS += -nodefaultlibs -lm_nano -Wl,--start-group -lc_nano -lps2sdkc -lkernel -Wl,--end-group -lgcc
 
 EE_BIN = loader.elf
 
