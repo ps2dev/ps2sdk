@@ -22,6 +22,7 @@ EE_LD = $(EE_TOOL_PREFIX)ld
 EE_AR = $(EE_TOOL_PREFIX)ar
 EE_OBJCOPY = $(EE_TOOL_PREFIX)objcopy
 EE_STRIP = $(EE_TOOL_PREFIX)strip
+EE_ADDR2LINE = $(EE_TOOL_PREFIX)addr2line
 
 
 #
@@ -35,6 +36,7 @@ IOP_LD = $(IOP_TOOL_PREFIX)ld
 IOP_AR = $(IOP_TOOL_PREFIX)ar
 IOP_OBJCOPY = $(IOP_TOOL_PREFIX)objcopy
 IOP_STRIP = $(IOP_TOOL_PREFIX)strip
+IOP_ADDR2LINE = $(IOP_TOOL_PREFIX)addr2line
 
 #
 # Definitions for the local toolchain
