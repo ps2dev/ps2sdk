@@ -192,6 +192,18 @@ static void part_flush(struct block_device* bd)
     return part->bd->flush(part->bd);
 }
 
+static int part_stop(struct block_device* bd)
+{
+    struct partition* part = (struct partition*)bd->priv;
+
+    M_DEBUG("%s\n", __func__);
+
+    if ((part == NULL) || (part->bd == NULL))
+        return -1;
+
+    return part->bd->stop(part->bd);
+}
+
 void part_init()
 {
     int i;
@@ -205,6 +217,7 @@ void part_init()
         g_part_bd[i].read  = part_read;
         g_part_bd[i].write = part_write;
         g_part_bd[i].flush = part_flush;
+        g_part_bd[i].stop  = part_stop;
     }
 
     g_part_fs.priv          = NULL;
