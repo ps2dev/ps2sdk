@@ -1,2 +1,3 @@
 # c representation of generated loader.elf
 loader.c
+loader/*.map
