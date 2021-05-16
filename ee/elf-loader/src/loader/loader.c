@@ -13,6 +13,18 @@
 #include <sifrpc.h>
 #include <errno.h>
 
+#define GS_BGCOLOUR *((volatile unsigned long int *)0x120000E0)
+
+#define WHITE_BG 0xFFFFFF // start main
+#define CYAN_BG 0xFFFF00 // proper argc count
+#define RED_BG  0x0000FF // wrong argc count
+#define GREEN_BG 0x00FF00 // before SifLoadELF
+#define BLUE_BG 0xFF0000 // after SifLoadELF
+#define YELLOW_BG 0x00FFFF // good SifLoadELF return
+#define MAGENTA_BG 0xFF00FF // wrong SifLoadELF return
+#define PURPBLE_BG 0x800080  // before ExecPS2
+
+
 //--------------------------------------------------------------
 // Redefinition of init/deinit libc:
 //--------------------------------------------------------------
@@ -51,9 +63,12 @@ int main(int argc, char *argv[])
 	static t_ExecData elfdata;
 	int ret;
 
+	GS_BGCOLOUR = WHITE_BG;
 	if (argc < 1) {  // arg1=path to ELF
+		GS_BGCOLOUR = RED_BG;
 		return -EINVAL;
 	}
+	GS_BGCOLOUR = CYAN_BG;
 
 	// Initialize
 	SifInitRpc(0);
@@ -61,15 +76,20 @@ int main(int argc, char *argv[])
 
 	//Writeback data cache before loading ELF.
 	FlushCache(0);
+	GS_BGCOLOUR = GREEN_BG;
 	ret = SifLoadElf(argv[0], &elfdata);
+	GS_BGCOLOUR = BLUE_BG;
 	if (ret == 0) {
+		GS_BGCOLOUR = YELLOW_BG;
 		SifExitRpc();
 		FlushCache(0);
 		FlushCache(2);
 
+		GS_BGCOLOUR = PURPBLE_BG;
 		// Following the standard the first parameter of a argv is the executable itself
 		return ExecPS2((void *)elfdata.epc, (void *)elfdata.gp, argc, argv);
 	} else {
+		GS_BGCOLOUR = MAGENTA_BG;
 		SifExitRpc();
 		return -ENOENT;
 	}
