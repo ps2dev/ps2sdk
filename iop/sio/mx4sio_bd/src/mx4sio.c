@@ -23,6 +23,8 @@ IRX_ID("mx4sio", 1, 1);
 #define PORT_NR 3
 #define MAX_SIO2_TRANSFER_SIZE 256 // 0x100
 #define SECTOR_SIZE 512
+#define MAX_SECTORS 64
+#define MAX_RETRIES 4
 
 /* Event flags */
 #define EF_SIO2_INTR_REVERSE	0x00000100
@@ -43,7 +45,7 @@ static sio2_transfer_data_t global_td;
 struct dma_command {
     uint8_t* buffer;
     u16 sector_count;
-    u16 sectors_transferred;
+    volatile u16 sectors_transferred; // written by isr, read by thread
     u16 sectors_reversed;
     u16 portNr;
     uint8_t response;
@@ -571,20 +573,9 @@ static int spisd_init_recovery()
     return spisd_init(&spi);
 }
 
-/*
- * BDM interface:
- * - BDM -> "spi_sdcard" library
- */
-static int spi_sdcard_read(struct block_device* bd, u32 sector, void* buffer, u16 count)
+static int _msread_start(struct block_device* bd, u32 sector)
 {
     int rv, i;
-
-    //M_DEBUG("%s(%d,%d)\n", __FUNCTION__, (int)sector, (int)count);
-
-    if (count == 0)
-        return 0;
-
-    sio2_lock();
 
     for (i = 0; i < 10; i++) {
         // Wait idle
@@ -613,12 +604,11 @@ recovery:
         spisd_init_recovery();
     }
 
-    if (rv != SPISD_RESULT_OK) {
-        M_PRINTF("ERROR: failed to start multi-block read after 10 tries\n");
-        sio2_unlock();
-        return 0;
-    }
+    return rv;
+}
 
+static int _msread_do(struct block_device* bd, void* buffer, u16 count)
+{
     // Setup DMA cmd struct
     cmd.buffer              = buffer;
     cmd.portNr              = PORT_NR;
@@ -632,42 +622,96 @@ recovery:
 
     // Process events from DMA completion interrupt
     while (1) {
-        uint32_t resbits[4];
+        uint32_t resbits;
 
-        WaitEventFlag(event_flag, EF_SIO2_INTR_REVERSE | EF_SIO2_INTR_COMPLETE, 1, resbits);
+        WaitEventFlag(event_flag, EF_SIO2_INTR_REVERSE | EF_SIO2_INTR_COMPLETE, 1, &resbits);
 
-        if (resbits[0] & EF_SIO2_INTR_REVERSE) {
+        if (resbits & EF_SIO2_INTR_REVERSE) {
             ClearEventFlag(event_flag, ~EF_SIO2_INTR_REVERSE);
             while (cmd.sectors_reversed < cmd.sectors_transferred) {
-                reverseBuffer32((u32*)&cmd.buffer[cmd.sectors_reversed * SECTOR_SIZE], SECTOR_SIZE / 4);
+                void *buf = (u32*)&cmd.buffer[cmd.sectors_reversed * SECTOR_SIZE];
+                reverseBuffer32(buf, SECTOR_SIZE / 4);
                 cmd.sectors_reversed++;
             }
         }
 
-        if (resbits[0] & EF_SIO2_INTR_COMPLETE) {
+        if (resbits & EF_SIO2_INTR_COMPLETE) {
             ClearEventFlag(event_flag, ~EF_SIO2_INTR_COMPLETE);
-            if (cmd.response != SPISD_RESULT_OK) {
-                M_PRINTF("ERROR: (isr)wait_equal(0xFE)\n");
-                sio2_unlock();
-                return cmd.sectors_reversed;
-            }
             break;
         }
     }
 
-    rv = spisd_read_multi_block_end();
-    if (rv != SPISD_RESULT_OK) {
-        M_PRINTF("ERROR: spisd_read_multi_block_end = %d\n", rv);
-        sio2_unlock();
+    return cmd.sectors_reversed;
+}
+
+/*
+ * BDM interface:
+ * - BDM -> "spi_sdcard" library
+ */
+static int spi_sdcard_read(struct block_device* bd, u32 sector, void* buffer, u16 count)
+{
+    int rv;
+    int count_left = count;
+    int retry_count;
+
+    //M_DEBUG("%s(%d,%d)\n", __FUNCTION__, (int)sector, (int)count);
+
+    if (count == 0)
         return 0;
+
+    sio2_lock();
+
+    for (retry_count = 0; retry_count < MAX_RETRIES; retry_count++) {
+        rv = _msread_start(bd, sector);
+        if (rv != SPISD_RESULT_OK) {
+            M_PRINTF("ERROR: failed to start multi-block read (%d)\n", rv);
+            break;
+        }
+
+        while(count_left > 0) {
+            // Read sectors
+            int count_do = (count_left < MAX_SECTORS) ? count_left : MAX_SECTORS;
+            rv = _msread_do(bd, buffer, count_do);
+
+            // Update statistics
+            count_left -= rv;
+            sector += rv;
+            buffer = (u8 *)buffer + (rv * 512);
+
+            if (rv != count_do) {
+                // Read failed, have outer loop retry
+                M_PRINTF("ERROR: _msread_do: %d != %d\n", rv, count_do);
+                M_PRINTF(" - %s(%d,%d)\n", __FUNCTION__, (int)sector, (int)count);
+                break;
+            }
+
+            if (count_left > 0) {
+                // Wait for next start token
+                if (wait_equal(0xFE, 200, PORT_NR) != SPISD_RESULT_OK) {
+                    M_PRINTF("ERROR: no start token\n");
+                    break;
+                }
+            }
+
+        }
+
+        rv = spisd_read_multi_block_end();
+        if (rv != SPISD_RESULT_OK) {
+            M_PRINTF("ERROR: spisd_read_multi_block_end = %d\n", rv);
+            break;
+        }
+
+        if (count_left <= 0)
+            break;
     }
 
     // Let detection thread know the card has been used succesfully
-    card_used = 1;
+    if (count_left == 0)
+        card_used = 1;
 
     sio2_unlock();
 
-    return count;
+    return count - count_left;
 }
 
 static int spi_sdcard_write(struct block_device* bd, u32 sector, const void* buffer, u16 count)
@@ -675,6 +719,9 @@ static int spi_sdcard_write(struct block_device* bd, u32 sector, const void* buf
     int rv;
 
     //M_DEBUG("%s(%d,%d)\n", __FUNCTION__, (int)sector, (int)count);
+
+    if (count == 0)
+        return 0;
 
     sio2_lock();
 
