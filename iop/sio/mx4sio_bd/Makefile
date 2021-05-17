@@ -9,7 +9,7 @@
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include -I$(PS2SDKSRC)/iop/system/sio2man/include
 
-IOP_OBJS = spi_sdcard_crc7.o spi_sdcard_driver.o ioplib.o sio2man_hook.o mx4sio.o imports.o
+IOP_OBJS = spi_sdcard_crc7.o spi_sdcard_driver.o crc16.o ioplib.o sio2man_hook.o mx4sio.o imports.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make

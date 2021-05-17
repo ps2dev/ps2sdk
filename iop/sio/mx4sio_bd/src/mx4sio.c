@@ -7,6 +7,7 @@
 #include <thsemap.h>
 #include <xsio2man.h>
 
+#include "crc16.h"
 #include "ioplib.h"
 #include "sio2man_hook.h"
 #include "sio2regs.h"
@@ -18,6 +19,9 @@
 IRX_ID("mx4sio", 1, 1);
 
 #define WELCOME_STR "mx4sio v1.1\n"
+
+// Options
+#define CONFIG_USE_CRC16 // A little slower ~ 1700 KB/s -> 1400 KB/s
 
 // 3 is the second memory card slot
 #define PORT_NR 3
@@ -48,12 +52,17 @@ struct dma_command {
     volatile u16 sectors_transferred; // written by isr, read by thread
     u16 sectors_reversed;
     u16 portNr;
+#ifdef CONFIG_USE_CRC16
+    u16 crc[MAX_SECTORS];
+#endif
     uint8_t response;
+    volatile uint8_t abort; // written by thread, read by isr
 };
 struct dma_command cmd;
 
 static uint8_t wait_equal(uint8_t value, int count, int portNr);
 static void sendCmd_Rx_DMA_start(uint8_t* rdBufA, int portNr);
+static inline u8 reverseByte_LUT8(u8 n);
 static inline void reverseBuffer32(u32* buffer, u32 count);
 
 int sio2_intr_handler(void* arg)
@@ -68,19 +77,24 @@ int sio2_intr_handler(void* arg)
     while ((sio2_stat6c_get() & (1 << 12)) == 0)
         ;
 
-    // Finish sector read, read 2 dummy crc bytes
+    // Finish sector read, read 2 crc bytes
+#ifdef CONFIG_USE_CRC16
+    cmd.crc[cmd.sectors_transferred]  = reverseByte_LUT8(sio2_data_in()) << 8;
+    cmd.crc[cmd.sectors_transferred] |= reverseByte_LUT8(sio2_data_in());
+#else
     sio2_data_in();
     sio2_data_in();
+#endif
     cmd.sectors_transferred++;
 
-    if (cmd.sectors_transferred < cmd.sector_count) {
+    if ((cmd.abort == 0) && (cmd.sectors_transferred < cmd.sector_count)) {
         // Start next DMA transfer ASAP
         cmd.response = wait_equal(0xFE, 200, cmd.portNr);
         if (cmd.response == SPISD_RESULT_OK)
             sendCmd_Rx_DMA_start(&cmd.buffer[cmd.sectors_transferred * SECTOR_SIZE], cmd.portNr);
     }
 
-    if ((cmd.sectors_transferred >= cmd.sector_count) || (cmd.response != SPISD_RESULT_OK)) {
+    if ((cmd.abort == 1) || (cmd.sectors_transferred >= cmd.sector_count) || (cmd.response != SPISD_RESULT_OK)) {
         // Done or error, notify user task
         eflags |= EF_SIO2_INTR_COMPLETE;
     }
@@ -616,6 +630,7 @@ static int _msread_do(struct block_device* bd, void* buffer, u16 count)
     cmd.sectors_transferred = 0;
     cmd.sectors_reversed    = 0;
     cmd.response            = SPISD_RESULT_OK;
+    cmd.abort               = 0;
 
     // Start first DMA transfer (1 sector)
     sendCmd_Rx_DMA_start(buffer, PORT_NR);
@@ -628,10 +643,22 @@ static int _msread_do(struct block_device* bd, void* buffer, u16 count)
 
         if (resbits & EF_SIO2_INTR_REVERSE) {
             ClearEventFlag(event_flag, ~EF_SIO2_INTR_REVERSE);
-            while (cmd.sectors_reversed < cmd.sectors_transferred) {
+            while (cmd.sectors_reversed < cmd.sectors_transferred && cmd.abort == 0) {
                 void *buf = (u32*)&cmd.buffer[cmd.sectors_reversed * SECTOR_SIZE];
                 reverseBuffer32(buf, SECTOR_SIZE / 4);
-                cmd.sectors_reversed++;
+#ifdef CONFIG_USE_CRC16
+                u16 crc_a = crc16(buf, SECTOR_SIZE);
+                u16 crc_b = cmd.crc[cmd.sectors_reversed];
+                if (crc_a != crc_b) {
+                    // CRC mismatch:
+                    // - Signal ISR to stop reading
+                    // - Wait for complete event from ISR
+                    cmd.abort = 1;
+                    M_PRINTF("ERROR: crc invalid (0x%x != 0x%x) @ sector %d of %d -> 0x%x\n", crc_a, crc_b, cmd.sectors_reversed, count, (int)buffer);
+                }
+#endif
+                if (cmd.abort == 0)
+                    cmd.sectors_reversed++;
             }
         }
 
