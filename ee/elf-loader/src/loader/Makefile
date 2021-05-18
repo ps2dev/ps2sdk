@@ -6,38 +6,32 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-### Adjust these three, for PS2Link compatibility tests
-### Old LaunchELF used LA=0x90000, SA=0xB0000, SS=0x08000
-LOADADDR  = 0x90000
-STACKADDR = 0xA8000
-STACKSIZE = 0x04000
-
-ifeq ($(DEBUG),1)
-LOADADDR  = 0x1700000
-STACKADDR = 0x1720000
-STACKSIZE = 0x08000
-endif
-
-EE_CFLAGS += -fdata-sections -ffunction-sections
-
-LDPARAMS := -Wl,--defsym -Wl,_stack_size=$(STACKSIZE) -Wl,--defsym -Wl,_stack=$(STACKADDR)
-
-EE_LDFLAGS += -Wl,-Ttext -Wl,$(LOADADDR) -s $(LDPARAMS)
-EE_LDFLAGS += -s -Wl,--gc-sections
-
 EE_BIN = loader.elf
 
 EE_OBJS = loader.o
+MAPFILE = loader.map
 
-EE_LIBS =
-ifeq ($(DEBUG),1)
-EE_LIBS += -ldebug
-endif
+# Include directories
+EE_INCS := $(EE_INCS) -I$(PS2SDKSRC)/ee/kernel/include -I$(PS2SDKSRC)/common/include -I$(PS2SDKSRC)/ee/libc/include
+EE_LIBS := $(EE_LIBS) -L$(PS2SDKSRC)/ee/kernel/lib -L$(PS2SDKSRC)/ee/libc/lib
+
+EE_CFLAGS = -D_EE -Os -G0 -Wall -Werror
+EE_CFLAGS += -fdata-sections -ffunction-sections
+EE_LDFLAGS = -Tlinkfile -Wl,-zmax-page-size=128 -Wl,-Map,$(MAPFILE)
+EE_LDFLAGS += -s -Wl,--gc-sections
+
+%.o: %.c
+	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
+
+$(EE_BIN) : $(EE_OBJS)
+	$(EE_CC) $(EE_CFLAGS) $(EE_LDFLAGS) -o $(EE_BIN) $(EE_OBJS) $(EE_LIBS)
 
 all: $(EE_BIN)
 
 clean:
-	rm -f -r $(EE_OBJS) $(EE_BIN)
+	rm -f -r $(EE_OBJS) $(EE_BIN) $(MAPFILE)
+
+clean_all:
+	rm -f -r $(EE_OBJS) $(EE_BIN) $(MAPFILE)
 
 include $(PS2SDKSRC)/Defs.make
-include Rules.make
