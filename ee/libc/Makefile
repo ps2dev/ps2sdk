@@ -12,7 +12,7 @@ CORE_OBJS = timezone.o
 
 INIT_OBJS = _ps2sdk_libc_init.o _ps2sdk_libc_deinit.o _ps2sdk_args_parse.o
 
-SLEEP_OBJS = nanosleep.o sleep.o 
+SLEEP_OBJS = nanosleep.o
 
 TERMINATE_OBJS = abort.o exit.o
 
