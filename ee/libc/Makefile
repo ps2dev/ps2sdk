@@ -20,7 +20,7 @@ SJIS_OBJS = isSpecialSJIS.o isSpecialASCII.o strcpy_ascii.o strcpy_sjis.o
 
 TIME_OBJS = ps2_clock.o __time_internals.o
 
-PS2SDKAPI_OBJS = __direct_pwd.o __fill_stat.o _ps2sdk_ioctl.o compile_time_check.o _open.o _close.o _read.o _write.o \
+PS2SDKAPI_OBJS = __direct_pwd.o __transform_errno.o __fill_stat.o _ps2sdk_ioctl.o compile_time_check.o _open.o _close.o _read.o _write.o \
 	_fstat.o _stat.o access.o opendir.o readdir.o rewinddir.o closedir.o _isatty.o _lseek.o lseek64.o chdir.o mkdir.o \
 	rmdir.o _link.o _unlink.o getcwd.o _getpid.o _kill.o _sbrk.o _time.o _gettimeofday.o _times.o random.o srandom.o
 

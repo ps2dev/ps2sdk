@@ -47,6 +47,19 @@ char __direct_pwd[256] = "";
 extern char __direct_pwd[256];
 #endif
 
+#ifdef F___transform_errno
+int __transform_errno(int res) {
+	/* On error, -1 is returned and errno is set to indicate the error. */
+	if (res < 0) {
+		errno = -res;
+		return -1;
+	}
+	return res;
+}
+#else
+int __transform_errno(int errorCode);
+#endif
+
 #ifdef F___fill_stat
 static time_t io_to_posix_time(const unsigned char *ps2time)
 {
@@ -273,7 +286,7 @@ int _open(const char *buf, int flags, ...) {
 		}
 	}
 
-	return _ps2sdk_open(t_fname, iop_flags);
+	return __transform_errno(_ps2sdk_open(t_fname, iop_flags));
 }
 #endif
 
@@ -281,7 +294,7 @@ int _open(const char *buf, int flags, ...) {
 int (*_ps2sdk_close)(int) = fioClose;
 
 int _close(int fd) {
-	return _ps2sdk_close(fd);
+	return __transform_errno(_ps2sdk_close(fd));
 }
 #endif
 
@@ -289,7 +302,7 @@ int _close(int fd) {
 int (*_ps2sdk_read)(int, void*, int) = fioRead;
 
 int _read(int fd, void *buf, size_t nbytes) {
-	return _ps2sdk_read(fd, buf, nbytes);
+	return __transform_errno(_ps2sdk_read(fd, buf, nbytes));
 }
 #endif
 
@@ -301,7 +314,7 @@ int _write(int fd, const void *buf, size_t nbytes) {
 	//if ((fd==1) || (fd==2))
 	//	return sio_write((void *)buf, nbytes);
 
-	return _ps2sdk_write(fd, buf, nbytes);
+	return __transform_errno(_ps2sdk_write(fd, buf, nbytes));
 }
 #endif
 
@@ -329,8 +342,8 @@ static int fioGetstatHelper(const char *path, struct stat *buf) {
         io_stat_t fiostat;
 
         if (fioGetstat(path, &fiostat) < 0) {
-                //errno = ENOENT;
-                return -1;
+			errno = ENOENT;
+			return -1;
         }
 
         __fill_stat(buf, &fiostat);
@@ -341,7 +354,7 @@ static int fioGetstatHelper(const char *path, struct stat *buf) {
 int (*_ps2sdk_stat)(const char *path, struct stat *buf) = fioGetstatHelper;
 
 int _stat(const char *path, struct stat *buf) {
-        return _ps2sdk_stat(path, buf);
+    return _ps2sdk_stat(path, buf);
 }
 #endif
 
@@ -369,7 +382,7 @@ static DIR *fioOpendirHelper(const char *path)
 
 	dd = fioDopen(path);
 	if (dd < 0) {
-		//errno = ENOENT;
+		errno = ENOENT;
 		return NULL;
 	}
 
@@ -396,7 +409,7 @@ static struct dirent *fioReaddirHelper(DIR *dir)
         io_dirent_t fiode;
 
 	if(dir == NULL) {
-		//errno = EBADF;
+		errno = EBADF;
 		return NULL;
 	}
 
@@ -439,7 +452,7 @@ void rewinddir(DIR *dir)
 static int fioClosedirHelper(DIR *dir)
 {
 	if(dir == NULL) {
-		//errno = EBADF;
+		errno = EBADF;
 		return -1;
 	}
 
@@ -463,12 +476,12 @@ int _isatty(int fd) {
 	struct stat buf;
 
 	if (_fstat (fd, &buf) < 0) {
-		//errno = EBADF;
+		errno = EBADF;
 		return 0;
 	}
 	if (S_ISCHR (buf.st_mode))
 		return 1;
-	//errno = ENOTTY;
+	errno = ENOTTY;
 	return 0;
 }
 #endif
@@ -478,7 +491,7 @@ int (*_ps2sdk_lseek)(int, int, int) = fioLseek;
 
 off_t _lseek(int fd, off_t offset, int whence)
 {
-	return _ps2sdk_lseek(fd, offset, whence);
+	return __transform_errno(_ps2sdk_lseek(fd, offset, whence));
 }
 #endif
 
@@ -510,7 +523,7 @@ int fioMkdirHelper(const char *path, int mode) {
 int (*_ps2sdk_mkdir)(const char*, int) = fioMkdirHelper;
 
 int mkdir(const char *path, mode_t mode) {
-    return _ps2sdk_mkdir(path, mode);
+    return __transform_errno(_ps2sdk_mkdir(path, mode));
 }
 #endif
 
@@ -518,7 +531,7 @@ int mkdir(const char *path, mode_t mode) {
 int (*_ps2sdk_rmdir)(const char*) = fioRmdir;
 
 int rmdir(const char *path) {
-    return _ps2sdk_rmdir(path);
+    return __transform_errno(_ps2sdk_rmdir(path));
 }
 #endif
 
@@ -538,7 +551,7 @@ int _link(const char *old, const char *new) {
 int (*_ps2sdk_remove)(const char*) = fioRemove;
 
 int _unlink(const char *path) {
-    return _ps2sdk_remove(path);
+    return __transform_errno(_ps2sdk_remove(path));
 }
 #endif
 
@@ -616,16 +629,16 @@ time_t time(time_t *t)
  * return the microseconds.
  */
 int _gettimeofday(struct timeval *tv, struct timezone *tz) {
-        if (tz) {
-                /* Timezone not supported for gettimeofday */
-                tz->tz_minuteswest = 0;
-                tz->tz_dsttime = 0;
-        }
+	if (tz) {
+		/* Timezone not supported for gettimeofday */
+		tz->tz_minuteswest = 0;
+		tz->tz_dsttime = 0;
+	}
 
-        tv->tv_usec = 0;
-        tv->tv_sec = time(0);
+	tv->tv_usec = 0;
+	tv->tv_sec = time(0);
 
-        return 0;
+	return 0;
 }
 #endif
 
@@ -647,13 +660,13 @@ clock_t _times(struct tms *buffer) {
 #ifdef F_random
 long int random(void)
 {
-        return rand();
+    return rand();
 }
 #endif
 
 #ifdef F_srandom
 void srandom(unsigned int seed)
 {
-        srand(seed);
+    srand(seed);
 }
 #endif
