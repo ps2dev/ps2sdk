@@ -21,10 +21,22 @@ At the time of writing PS2SDK includes the following libraries and features, all
 - TCP/IP stack & DNS resolution compatible with PS2 Ethernet Adapter.
 - Full PS2 compatible Hard Disk Drive file system.
 - Access to CD and DVD.
-- Mini optimised C library for most string operations.
+- Required implementation by `newlib`, for fulfilling `libc` functionality.
 - Access to sound library on all PS2 using freesd.
 - HTTP client file system.
 - Network File System to load files from HOST pc.
+
+## Standard Libraries
+
+In a countinously effort to make `PS2SDK` and the whole `PS2DEV` a `POSIX` environment; there are some libraries needed to be included inside of the [standard libraries](https://gcc.gnu.org/onlinedocs/gcc/Standard-Libraries.html), whick means, libraries than by default are included in any compilation program. From `PS2SDK` we have:
+
+- `lkernel`: Contains the calls to BIOS functions
+- `lps2sdkc`: Implements most of the required methods by `newlib`
+- `lcdvd`: Implements `ps2time` function indirectly required by `newlib`
+
+If you wanna compile a program without using the `standard libraries` take a look to the [compiler flags](https://gcc.gnu.org/onlinedocs/gcc/Link-Options.html) (`-nodefaultlibs`, `-nolibc` and `-nostdlib`).
+
+## License
 
 PS2SDK has been developed by a large number of individuals who have provided their time and effort. The `AUTHORS` file includes this list.
 

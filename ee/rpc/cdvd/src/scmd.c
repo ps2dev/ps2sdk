@@ -138,43 +138,43 @@ int sceCdReadClock(sceCdCLOCK * clock)
 }
 #endif
 
-#ifdef F_time
+#ifdef F_ps2time
 /*
  * newlib function, unfortunately depends on the 'cdvd' library.
- * In libc there is a dummy   'time' function declared as WEAK.
- * In cdvd there is a working 'time' function declared as STRONG
- * Include libcdvd if you need to use the time function.
+ * In libc there is a 'time' function wihch call the `_gettimeofday` function.
+ * `_gettimeofday` is declared in libps2sdkc (ee/libc folder inside of ps2sdk)
+ * `_gettimeofday` finally needs ps2time, to get proper time_t
  */
-time_t time(time_t *t)
+time_t ps2time(time_t *t)
 {
-        sceCdCLOCK ps2tim;
+	sceCdCLOCK ps2tim;
 	struct tm tim;
-        time_t tim2;
+    time_t tim2;
 
 	sceCdReadClock(&ps2tim);
-        configConvertToGmtTime(&ps2tim);
-        //configConvertToLocalTime(&ps2tim);
-        convertfrombcd(&ps2tim);
+	configConvertToGmtTime(&ps2tim);
+	//configConvertToLocalTime(&ps2tim);
+	convertfrombcd(&ps2tim);
 #ifdef DEBUG
-        printf("ps2time: %d-%d-%d %d:%d:%d\n",
-                ps2tim.day,
-                ps2tim.month,
-                ps2tim.year,
-                ps2tim.hour,
-                ps2tim.minute,
-                ps2tim.second);
+	printf("ps2time: %d-%d-%d %d:%d:%d\n",
+			ps2tim.day,
+			ps2tim.month,
+			ps2tim.year,
+			ps2tim.hour,
+			ps2tim.minute,
+			ps2tim.second);
 #endif
 	tim.tm_sec  = ps2tim.second;
-        tim.tm_min  = ps2tim.minute;
-        tim.tm_hour = ps2tim.hour;
-        tim.tm_mday = ps2tim.day;
-        tim.tm_mon  = ps2tim.month - 1;
-        tim.tm_year = ps2tim.year + 100;
+	tim.tm_min  = ps2tim.minute;
+	tim.tm_hour = ps2tim.hour;
+	tim.tm_mday = ps2tim.day;
+	tim.tm_mon  = ps2tim.month - 1;
+	tim.tm_year = ps2tim.year + 100;
 
-        tim2 = mktime(&tim);
+	tim2 = mktime(&tim);
 
-        if(t != NULL)
-                *t = tim2;
+	if(t != NULL)
+		*t = tim2;
 
 	return tim2;
 }

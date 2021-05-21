@@ -605,40 +605,33 @@ void * _sbrk(size_t incr) {
 }
 #endif
 
-#ifdef F_time
-/*
- * newlib function, unfortunately depends on the 'cdvd' library.
- * In libc there is a dummy   'time' function declared as WEAK.
- * In cdvd there is a working 'time' function declared as STRONG
- * Include libcdvd if you need to use the time function.
- */
-time_t time(time_t *t) __attribute__((weak));
-time_t time(time_t *t)
-{
-        printf("ERROR: include libcdvd when using the time function\n");
-
-        if(t != NULL)
-                *t = -1;
-	return -1;
-}
-#endif
-
 #ifdef F__gettimeofday
 /*
  * Implement in terms of time, which means we can't
  * return the microseconds.
  */
+
+time_t ps2time(time_t *t);
+
 int _gettimeofday(struct timeval *tv, struct timezone *tz) {
-	if (tz) {
+	if (tv == NULL) {
+      errno = EINVAL;
+      return -1;
+    }
+
+  	tv->tv_sec = (time_t) ps2time((time_t *) NULL);
+  	tv->tv_usec = 0L;
+  	if (tz != NULL) {
+		/* TODO: impplement something similar at:
+		https://code.woboq.org/userspace/glibc/sysdeps/posix/gettimeofday.c.html
+		*/
+
 		/* Timezone not supported for gettimeofday */
 		tz->tz_minuteswest = 0;
 		tz->tz_dsttime = 0;
-	}
+    }
 
-	tv->tv_usec = 0;
-	tv->tv_sec = time(0);
-
-	return 0;
+  	return 0;
 }
 #endif
 
