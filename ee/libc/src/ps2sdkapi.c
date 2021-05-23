@@ -471,21 +471,6 @@ int closedir(DIR *dir)
 }
 #endif
 
-#ifdef F__isatty
-int _isatty(int fd) {
-	struct stat buf;
-
-	if (_fstat (fd, &buf) < 0) {
-		errno = EBADF;
-		return 0;
-	}
-	if (S_ISCHR (buf.st_mode))
-		return 1;
-	errno = ENOTTY;
-	return 0;
-}
-#endif
-
 #ifdef F__lseek
 int (*_ps2sdk_lseek)(int, int, int) = fioLseek;
 
