@@ -634,17 +634,3 @@ clock_t _times(struct tms *buffer) {
 	return clk;
 }
 #endif
-
-#ifdef F_random
-long int random(void)
-{
-    return rand();
-}
-#endif
-
-#ifdef F_srandom
-void srandom(unsigned int seed)
-{
-    srand(seed);
-}
-#endif
