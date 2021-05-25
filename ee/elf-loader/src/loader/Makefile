@@ -13,7 +13,7 @@ MAPFILE = loader.map
 
 # Include directories
 EE_INCS := $(EE_INCS) -I$(PS2SDKSRC)/ee/kernel/include -I$(PS2SDKSRC)/common/include -I$(PS2SDKSRC)/ee/libc/include
-EE_LIBS := $(EE_LIBS) -L$(PS2SDKSRC)/ee/kernel/lib -L$(PS2SDKSRC)/ee/libc/lib
+EE_LIBS := $(EE_LIBS) -L$(PS2SDKSRC)/ee/kernel/lib -L$(PS2SDKSRC)/ee/libc/lib -L$(PS2SDKSRC)/ee/rpc/cdvd/lib
 
 EE_CFLAGS = -D_EE -Os -G0 -Wall -Werror
 EE_CFLAGS += -fdata-sections -ffunction-sections
