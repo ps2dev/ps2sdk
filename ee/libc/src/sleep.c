@@ -96,21 +96,3 @@ int nanosleep(const struct timespec *req, struct timespec *rem)
 	return 0;
 }
 #endif
-
-#ifdef F_sleep
-unsigned int sleep(unsigned int seconds)
-{
-    struct timespec ts;
-
-    ts.tv_sec = seconds;
-    ts.tv_nsec = 0;
-
-    if (!nanosleep(&ts, &ts))
-        return 0;
-
-    if (errno == EINTR)
-        return ts.tv_sec;
-
-    return -1;
-}
-#endif

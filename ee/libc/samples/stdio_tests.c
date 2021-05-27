@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #include "testsuite.h"
 
@@ -411,21 +413,33 @@ static const char *test_readdir_rewinddir(void *arg)
     return NULL;
 }
 
+static const char *test_failed_open(void *arg)
+{
+    int handle = open((char *)arg, O_RDONLY);
+    if (handle != -1)
+        return "wrong return error opening non existing file";
+
+    printf("\nSUCCESS: all checks passed\n");
+    return NULL;
+}
+
 int libc_add_tests(test_suite *p)
 {
-    const char *textfile, *textfile2;
+    const char *textfile, *textfile2, *invalidtextfile;
     const char *dir, *dir2;
 
 #ifdef _EE
-    textfile  = "host:testfiles/dummy";
-    textfile2 = "host:testfiles/dummy2";
-    dir       = "host:testfiles/";
-    dir2      = "host:dummydir/";
+    textfile        = "host:testfiles/dummy";
+    textfile2       = "host:testfiles/dummy2";
+    invalidtextfile = "host:testfiles/invalidtextfile"; // This file shouldn't exist
+    dir             = "host:testfiles/";
+    dir2            = "host:dummydir/";
 #else
-    textfile  = "testfiles/dummy";
-    textfile2 = "testfiles/dummy2";
-    dir       = "testfiles/";
-    dir2      = "dummydir/";
+    textfile        = "testfiles/dummy";
+    textfile2       = "testfiles/dummy2";
+    invalidtextfile = "testfiles/invalidtextfile";
+    dir             = "testfiles/";
+    dir2            = "dummydir/";
 #endif
 
     /* If testing using usbd/usbhdfsd or ps2hdd/ps2fs, this adds a 10
@@ -444,6 +458,7 @@ int libc_add_tests(test_suite *p)
     add_test(p, "rmdir\n", test_rmdir, (void *)dir2);
     add_test(p, "opendir, closedir\n", test_opendir_closedir, (void *)dir);
     add_test(p, "readdir, rewinddir\n", test_readdir_rewinddir, (void *)dir);
+    add_test(p, "failed open\n", test_failed_open, (void *)invalidtextfile);
 
     return 0;
 }
