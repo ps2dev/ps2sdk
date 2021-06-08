@@ -90,7 +90,7 @@ typedef struct {
 typedef struct {
 	u32	lba;
 	u32	nsectors;
-	u8	buf[0];
+	u8	buf[];
 } hdd_ctl_driveio_t;
 
 /** ATA device read.  */

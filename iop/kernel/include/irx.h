@@ -42,7 +42,7 @@ struct irx_import_table
 	u16	version;
 	u16	mode;
 	char	name[8];
-	void	*stubs[0];
+	void	*stubs[];
 } __attribute ((packed));
 
 struct irx_import_stub
@@ -89,7 +89,7 @@ struct irx_export_table {
 	u16	version;
 	u16	mode;
 	u8	name[8];
-	void	*fptrs[0];
+	void	*fptrs[];
 };
 
 #define DECLARE_EXPORT_TABLE(modname, major, minor)	\

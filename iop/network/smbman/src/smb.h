@@ -303,7 +303,7 @@ typedef struct {
 	int SID;
 	int EOS;
 	PathInformation_t fileInfo;
-	char FileName[0];
+	char FileName[];
 } SearchInfo_t;
 
 typedef struct {
@@ -357,7 +357,7 @@ typedef struct {
 	u8	smbWordcount;
 	u16	ByteCount;
 	u8	DialectFormat;
-	char	DialectName[0];
+	char	DialectName[];
 } __attribute__((packed)) NegotiateProtocolRequest_t;
 
 typedef struct {
@@ -375,7 +375,7 @@ typedef struct {
 	u16	ServerTimeZone;
 	u8	KeyLength;
 	u16	ByteCount;
-	u8	ByteField[0];
+	u8	ByteField[];
 } __attribute__((packed)) NegotiateProtocolResponse_t;
 
 typedef struct {
@@ -393,7 +393,7 @@ typedef struct {
 	u32	reserved;
 	u32	Capabilities;
 	u16	ByteCount;
-	u8	ByteField[0];
+	u8	ByteField[];
 } __attribute__((packed)) SessionSetupAndXRequest_t;
 
 typedef struct {
@@ -415,7 +415,7 @@ typedef struct {
 	u16	Flags;
 	u16	PasswordLength;
 	u16	ByteCount;
-	u8	ByteField[0];
+	u8	ByteField[];
 } __attribute__((packed)) TreeConnectAndXRequest_t;
 
 typedef struct {
@@ -445,7 +445,7 @@ typedef struct {
 	u8	smbWordcount;
 	SMBTransactionRequest_t smbTrans;
 	u16	ByteCount;
-	u8	ByteField[0];
+	u8	ByteField[];
 } __attribute__((packed)) NetShareEnumRequest_t;
 
 typedef struct {
@@ -453,7 +453,7 @@ typedef struct {
 	u8	smbWordcount;
 	SMBTransactionResponse_t smbTrans;
 	u16	ByteCount;
-	u8	ByteField[0];
+	u8	ByteField[];
 } __attribute__((packed)) NetShareEnumResponse_t;
 
 typedef struct {
@@ -479,7 +479,7 @@ typedef struct {
 	u8	smbWordcount;
 	u16	EchoCount;
 	u16	ByteCount;
-	u8	ByteField[0];
+	u8	ByteField[];
 } __attribute__((packed)) EchoRequest_t;
 
 typedef struct {
@@ -487,14 +487,14 @@ typedef struct {
 	u8	smbWordcount;
 	u16	SequenceNumber;
 	u16	ByteCount;
-	u8	ByteField[0];
+	u8	ByteField[];
 } __attribute__((packed)) EchoResponse_t;
 
 typedef struct {
 	SMBHeader_t smbH;
 	u8	smbWordcount;
 	u16	ByteCount;
-	u8	ByteField[0];
+	u8	ByteField[];
 } __attribute__((packed)) QueryInformationDiskRequest_t;
 
 typedef struct {
@@ -511,7 +511,7 @@ typedef struct {
 typedef struct {
 	u16	LevelOfInterest;
 	u32	Reserved;
-	char	FileName[0];
+	char	FileName[];
 } __attribute__((packed)) QueryPathInformationRequestParam_t;
 
 typedef struct {
@@ -520,7 +520,7 @@ typedef struct {
 	SMBTransactionRequest_t smbTrans;
 	u16	SubCommand;
 	u16	ByteCount;
-	u8	ByteField[0];
+	u8	ByteField[];
 } __attribute__((packed)) QueryPathInformationRequest_t;
 
 typedef struct {
@@ -528,7 +528,7 @@ typedef struct {
 	u8	smbWordcount;
 	SMBTransactionResponse_t smbTrans;
 	u16	ByteCount;
-	u8	ByteField[0];
+	u8	ByteField[];
 } __attribute__((packed)) QueryPathInformationResponse_t;
 
 typedef struct {
@@ -553,7 +553,7 @@ typedef struct {
 	u16	Flags;
 	u16	LevelOfInterest;
 	u32	StorageType;
-	char	SearchPattern[0];
+	char	SearchPattern[];
 } __attribute__((packed)) FindFirst2RequestParam_t;
 
 typedef struct {
@@ -562,7 +562,7 @@ typedef struct {
 	u16	LevelOfInterest;
 	u32	ResumeKey;
 	u16	Flags;
-	char	SearchPattern[0];
+	char	SearchPattern[];
 } __attribute__((packed)) FindNext2RequestParam_t;
 
 typedef struct {
@@ -571,7 +571,7 @@ typedef struct {
 	SMBTransactionRequest_t smbTrans;
 	u16	SubCommand;
 	u16	ByteCount;
-	u8	ByteField[0];
+	u8	ByteField[];
 } __attribute__((packed)) FindFirstNext2Request_t;
 
 typedef struct {
@@ -596,7 +596,7 @@ typedef struct {
 	u32	EAListLength;
 	u16	ShortFileNameLen;
 	u8	ShortFileName[24];
-	char	FileName[0];
+	char	FileName[];
 } __attribute__((packed)) FindFirst2ResponseData_t;
 
 typedef struct {
@@ -604,7 +604,7 @@ typedef struct {
 	u8	smbWordcount;
 	SMBTransactionResponse_t smbTrans;
 	u16	ByteCount;
-	u8	ByteField[0];
+	u8	ByteField[];
 } __attribute__((packed)) FindFirstNext2Response_t;
 
 typedef struct {
@@ -626,7 +626,7 @@ typedef struct {
 	u32	ImpersonationLevel;
 	u8	SecurityFlags;
 	u16	ByteCount;
-	char	ByteField[0];
+	char	ByteField[];
 } __attribute__((packed)) NTCreateAndXRequest_t;
 
 typedef struct {
@@ -666,7 +666,7 @@ typedef struct {
 	u32	AllocationSize;
 	u32	reserved[2];
 	u16	ByteCount;
-	u8	ByteField[0];
+	u8	ByteField[];
 } __attribute__((packed)) OpenAndXRequest_t;
 
 typedef struct {
@@ -773,7 +773,7 @@ typedef struct {
 	u16	SearchAttributes;
 	u16	ByteCount;
 	u8	BufferFormat;
-	char	FileName[0];
+	char	FileName[];
 } __attribute__((packed)) DeleteRequest_t;
 
 typedef struct {
@@ -787,7 +787,7 @@ typedef struct {
 	u8	smbWordcount;
 	u16	ByteCount;
 	u8	BufferFormat;
-	char	DirectoryName[0];
+	char	DirectoryName[];
 } __attribute__((packed)) ManageDirectoryRequest_t;
 
 typedef struct {
@@ -801,7 +801,7 @@ typedef struct {
 	u8	smbWordcount;
 	u16	SearchAttributes;
 	u16	ByteCount;
-	u8	ByteField[0];
+	u8	ByteField[];
 } __attribute__((packed)) RenameRequest_t;
 
 typedef struct {
