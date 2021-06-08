@@ -51,7 +51,7 @@ void SIF2_sync_dma(void)
 
 int SIF2_RestartDma(void)
 {
-    volatile register u32 d;
+    volatile register u32 d __attribute__((unused));
     int bc, bs;
 
     if(!(*R_LOCAL_SBUS(PS2_SBUS_REG4) & 0x80)) { *R_LOCAL_SBUS(PS2_SBUS_REG4) = 0x80; }
@@ -126,7 +126,7 @@ int _sif2_intr_handler(void)
 
 int SIF2_init(void)
 {
-    volatile register u32 d;
+    volatile register u32 d __attribute__((unused));
     int oldStat, old_irq;
 
     if(_sif2_inited) { return(-1); }
@@ -157,7 +157,7 @@ int SIF2_init(void)
 
 int SIF2_deinit(void)
 {
-    volatile register u32 d;
+    volatile register u32 d __attribute__((unused));
     int oldStat, old_irq;
 
     if(!_sif2_inited) { return(-1); }
