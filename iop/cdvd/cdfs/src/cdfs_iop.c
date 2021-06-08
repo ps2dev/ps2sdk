@@ -390,7 +390,7 @@ static int cdfs_getVolumeDescriptor(void) {
         cdfs_readSect(volDescSector, 1, (u8*)&localVolDesc);
 
         // If this is still a volume Descriptor
-        if (strncmp(localVolDesc.volID, "CD001", 5) == 0) {
+        if (memcmp(localVolDesc.volID, "CD001", 5) == 0) {
             if ((localVolDesc.filesystemType == 1) ||
                 (localVolDesc.filesystemType == 2)) {
                 memcpy(&cdVolDesc, &localVolDesc, sizeof(struct CDVolDesc));
