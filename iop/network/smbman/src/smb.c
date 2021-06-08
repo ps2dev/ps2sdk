@@ -421,7 +421,7 @@ negotiate_error:
 }
 
 //-------------------------------------------------------------------------
-static int AddPassword(char *Password, int PasswordType, int AuthType, u16 *AnsiPassLen, u16 *UnicodePassLen, u8 *Buffer)
+static int AddPassword(char *Password, int PasswordType, int AuthType, void *AnsiPassLen, void *UnicodePassLen, u8 *Buffer)
 {
 	u8 passwordhash[16];
 	u8 LMresponse[24];
