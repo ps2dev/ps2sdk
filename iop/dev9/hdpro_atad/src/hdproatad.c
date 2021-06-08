@@ -662,7 +662,7 @@ int ata_device_sce_sec_unlock(int device, void *password)
 
 static void ata_device_probe(ata_devinfo_t *devinfo)
 {
-	u16 nsector, lcyl, hcyl, sector, select;
+	u16 nsector, lcyl, hcyl, sector;
 
 	devinfo->exists = 0;
 	devinfo->has_packet = 2;
@@ -674,7 +674,7 @@ static void ata_device_probe(ata_devinfo_t *devinfo)
 	sector = hdpro_io_read(ATAreg_SECTOR_RD) & 0xff;
 	lcyl = hdpro_io_read(ATAreg_LCYL_RD) & 0xff;
 	hcyl = hdpro_io_read(ATAreg_HCYL_RD) & 0xff;
-	select = hdpro_io_read(ATAreg_SELECT_RD) & 0xff;
+	(void)(hdpro_io_read(ATAreg_SELECT_RD) & 0xff);
 
 	/*	The original HDPro driver did not check sector.
 		However, by the ATA-4 specification (9.1), sector should be 1.
