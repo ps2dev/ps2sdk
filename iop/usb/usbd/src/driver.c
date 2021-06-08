@@ -37,9 +37,13 @@ int callUsbDriverFunc(int (*func)(int devId), int devId, void *gp) {
 
 	if (func) {
 		usbdUnlock();
+#if USE_GP_REGISTER
 		ChangeGP(gp);
+#endif
 		res = func(devId);
+#if USE_GP_REGISTER
 		SetGP(&_gp);
+#endif
 		usbdLock();
 		return res;
 	} else
@@ -229,9 +233,13 @@ void callbackThreadFunc(void *arg) {
 
 				if (reqCopy.userCallbackProc)
 				{
+#if USE_GP_REGISTER
 					SetGP(req->gpSeg);
+#endif
 					reqCopy.userCallbackProc(reqCopy.resultCode, reqCopy.transferedBytes, reqCopy.userCallbackArg);
+#if USE_GP_REGISTER
 					SetGP(&_gp);
+#endif
 				}
 			}
 		} while (req);

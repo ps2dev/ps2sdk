@@ -7,7 +7,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 IOP_OBJS = hcd.o hub.o interface.o mem.o usbd.o usbio.o driver.o imports.o exports.o
-IOP_CFLAGS += -mgpopt -G16384
+IOP_PREFER_GPOPT = 16384
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make

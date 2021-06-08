@@ -29,6 +29,15 @@
 #define KSEG1		0xa0000000
 #define KSEG1ADDR(a)	((__typeof__(a))(((u32)(a) & 0x1fffffff) | KSEG1))
 
+#if !defined(USE_GP_REGISTER)
+#if __GNUC__ > 3
+#define USE_GP_REGISTER 0
+#else
+#define USE_GP_REGISTER 1
+#endif
+#endif
+
+#if USE_GP_REGISTER
 static __inline__ void *ChangeGP(void *gp)
 {
 	void *OldGP;
@@ -64,6 +73,7 @@ static __inline__ void *GetGP(void)
 
 	return gp;
 }
+#endif
 
 static inline void *iop_memcpy(void *dest, const void *src, int size)
 {

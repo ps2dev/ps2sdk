@@ -496,14 +496,18 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData){
 }
 
 static int Dev9IntrCb(int flag){
+#if USE_GP_REGISTER
 	void *OldGP;
 
 	OldGP = SetModuleGP();
+#endif
 
 	dev9IntrDisable(DEV9_SMAP_ALL_INTR_MASK);
 	iSetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_INTR);
 
+#if USE_GP_REGISTER
 	SetGP(OldGP);
+#endif
 
 	return 0;
 }
@@ -537,26 +541,34 @@ static void Dev9PostDmaCbHandler(int bcr, int dir){
 }
 
 int SMAPStart(void){
+#if USE_GP_REGISTER
 	void *OldGP;
 
 	OldGP = SetModuleGP();
+#endif
 
 	SetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_START);
 
+#if USE_GP_REGISTER
 	SetGP(OldGP);
+#endif
 
 	return 0;
 }
 
 void SMAPStop(void){
+#if USE_GP_REGISTER
 	void *OldGP;
 
 	OldGP = SetModuleGP();
+#endif
 
 	SetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_STOP);
 	SmapDriverData.NetDevStopFlag=1;
 
+#if USE_GP_REGISTER
 	SetGP(OldGP);
+#endif
 }
 
 static void ClearPacketQueue(struct SmapDriverData *SmapDrivPrivData){
@@ -575,9 +587,11 @@ static void ClearPacketQueue(struct SmapDriverData *SmapDrivPrivData){
 }
 
 void SMAPXmit(void){
+#if USE_GP_REGISTER
 	void *OldGP;
 
 	OldGP = SetModuleGP();
+#endif
 
 	if(SmapDriverData.LinkStatus){
 		if(QueryIntrContext())
@@ -589,7 +603,9 @@ void SMAPXmit(void){
 		ClearPacketQueue(&SmapDriverData);
 	}
 
+#if USE_GP_REGISTER
 	SetGP(OldGP);
+#endif
 }
 
 static int SMAPGetLinkMode(void){
@@ -663,9 +679,11 @@ static inline int SMAPGetLinkStatus(void){
 
 int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, void *output, unsigned int length){
 	int result;
+#if USE_GP_REGISTER
 	void *OldGP;
 
 	OldGP = SetModuleGP();
+#endif
 
 	switch(command){
 		case NETMAN_NETIF_IOCTL_ETH_GET_MAC:
@@ -720,7 +738,9 @@ int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, void *out
 			result=-1;
 	}
 
+#if USE_GP_REGISTER
 	SetGP(OldGP);
+#endif
 
 	return result;
 }
