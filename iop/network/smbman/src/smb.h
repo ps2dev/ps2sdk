@@ -277,7 +277,7 @@ typedef struct {
 	u16	MaxMpxCount;
 	u8	SecurityMode;		// 0 = share level, 1 = user level
 	u8	PasswordType;		// 0 = PlainText passwords, 1 = use challenge/response
-	u8	PrimaryDomainServerName[64];
+	char	PrimaryDomainServerName[64];
 	u8	EncryptionKey[8];
 } server_specs_t;
 
@@ -511,7 +511,7 @@ typedef struct {
 typedef struct {
 	u16	LevelOfInterest;
 	u32	Reserved;
-	u8	FileName[0];
+	char	FileName[0];
 } __attribute__((packed)) QueryPathInformationRequestParam_t;
 
 typedef struct {
@@ -553,7 +553,7 @@ typedef struct {
 	u16	Flags;
 	u16	LevelOfInterest;
 	u32	StorageType;
-	u8	SearchPattern[0];
+	char	SearchPattern[0];
 } __attribute__((packed)) FindFirst2RequestParam_t;
 
 typedef struct {
@@ -562,7 +562,7 @@ typedef struct {
 	u16	LevelOfInterest;
 	u32	ResumeKey;
 	u16	Flags;
-	u8	SearchPattern[0];
+	char	SearchPattern[0];
 } __attribute__((packed)) FindNext2RequestParam_t;
 
 typedef struct {
@@ -596,7 +596,7 @@ typedef struct {
 	u32	EAListLength;
 	u16	ShortFileNameLen;
 	u8	ShortFileName[24];
-	u8	FileName[0];
+	char	FileName[0];
 } __attribute__((packed)) FindFirst2ResponseData_t;
 
 typedef struct {
@@ -773,7 +773,7 @@ typedef struct {
 	u16	SearchAttributes;
 	u16	ByteCount;
 	u8	BufferFormat;
-	u8	FileName[0];
+	char	FileName[0];
 } __attribute__((packed)) DeleteRequest_t;
 
 typedef struct {
@@ -787,7 +787,7 @@ typedef struct {
 	u8	smbWordcount;
 	u16	ByteCount;
 	u8	BufferFormat;
-	u8	DirectoryName[0];
+	char	DirectoryName[0];
 } __attribute__((packed)) ManageDirectoryRequest_t;
 
 typedef struct {

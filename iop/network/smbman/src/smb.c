@@ -266,7 +266,7 @@ static int asciiToUtf16(char *out, const char *in)
 {
 	int len;
 	const char *pIn;
-	u8 *pOut;
+	char *pOut;
 
 	for(pIn = in, pOut = out, len = 0; *pIn != '\0'; pIn++, pOut += 2, len += 2)
 	{
@@ -284,7 +284,7 @@ static int asciiToUtf16(char *out, const char *in)
 static int utf16ToAscii(char *out, const char *in, int inbytes)
 {
 	int len, bytesProcessed;
-	const u8 *pIn;
+	const char *pIn;
 	char *pOut;
 	u16 wchar;
 
@@ -407,7 +407,7 @@ negotiate_retry:
 	server_specs.MaxMpxCount = NPRsp->MaxMpxCount;
 	server_specs.SessionKey = NPRsp->SessionKey;
 	memcpy(server_specs.EncryptionKey, NPRsp->ByteField, NPRsp->KeyLength);
-	getStringField(server_specs.PrimaryDomainServerName, &NPRsp->ByteField[NPRsp->KeyLength], 0);
+	getStringField(server_specs.PrimaryDomainServerName, (char *)&NPRsp->ByteField[NPRsp->KeyLength], 0);
 
 	return 0;
 
@@ -521,10 +521,10 @@ lbl_session_setup:
 	}
 
 	// Add User name
-	offset += setStringField(&SSR->ByteField[offset], User);
+	offset += setStringField((char *)&SSR->ByteField[offset], User);
 
 	// PrimaryDomain, acquired from Negotiate Protocol Response data
-	offset += setStringField(&SSR->ByteField[offset], server_specs.PrimaryDomainServerName);
+	offset += setStringField((char *)&SSR->ByteField[offset], server_specs.PrimaryDomainServerName);
 
 	// NativeOS
 	if (useUnicode && ((offset & 1) != 0))
@@ -532,7 +532,7 @@ lbl_session_setup:
 		SSR->ByteField[offset] = '\0';
 		offset++;
 	}
-	offset += setStringField(&SSR->ByteField[offset], "PlayStation 2");
+	offset += setStringField((char *)&SSR->ByteField[offset], "PlayStation 2");
 
 	// NativeLanMan
 	if (useUnicode && ((offset & 1) != 0))
@@ -540,7 +540,7 @@ lbl_session_setup:
 		SSR->ByteField[offset] = '\0';
 		offset++;
 	}
-	offset += setStringField(&SSR->ByteField[offset], "SMBMAN");
+	offset += setStringField((char *)&SSR->ByteField[offset], "SMBMAN");
 
 	SSR->ByteCount = offset;
 
@@ -614,7 +614,7 @@ lbl_tree_connect:
 	}
 
 	// Add share name
-	offset += setStringField(&TCR->ByteField[offset], ShareName);
+	offset += setStringField((char *)&TCR->ByteField[offset], ShareName);
 
 	memcpy(&TCR->ByteField[offset], "?????\0", 6); 	// Service, any type of device
 	offset += 6;
@@ -913,7 +913,7 @@ int smb_NTCreateAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	}
 
 	// Add filename
-	NTCR->NameLength = setStringField(&NTCR->ByteField[offset], filename);
+	NTCR->NameLength = setStringField((char *)&NTCR->ByteField[offset], filename);
 	offset += NTCR->NameLength;
 
 	NTCR->ByteCount = offset;
@@ -988,7 +988,7 @@ int smb_OpenAndX(int UID, int TID, char *filename, s64 *filesize, int mode)
 	}
 
 	// Add filename
-	offset += setStringField(&OR->ByteField[offset], filename);
+	offset += setStringField((char *)&OR->ByteField[offset], filename);
 	OR->ByteCount = offset;
 
 	nb_SetSessionMessage(sizeof(OpenAndXRequest_t) + offset + 1);
@@ -1323,7 +1323,7 @@ int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 	// Add oldPath
 	RR->ByteField[offset] = 0x04;			// BufferFormat
 	offset++;
-	offset += setStringField(&RR->ByteField[offset], oldPath);
+	offset += setStringField((char *)&RR->ByteField[offset], oldPath);
 
 	// Add newPath
 	RR->ByteField[offset] = 0x04;			// BufferFormat
@@ -1333,7 +1333,7 @@ int smb_Rename(int UID, int TID, char *oldPath, char *newPath)
 		RR->ByteField[offset] = '\0';
 		offset++;				// pad needed for unicode
 	}
-	offset += setStringField(&RR->ByteField[offset], newPath);
+	offset += setStringField((char *)&RR->ByteField[offset], newPath);
 
 	RR->ByteCount = offset;
 
