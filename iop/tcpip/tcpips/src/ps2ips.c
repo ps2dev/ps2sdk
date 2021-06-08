@@ -44,7 +44,7 @@ IRX_ID(MODNAME, 1, 1);
 
 static SifRpcDataQueue_t ps2ips_queue;
 static SifRpcServerData_t ps2ips_server;
-static int _rpc_buffer[512];
+static u8 _rpc_buffer[512 * 4];
 
 static char lwip_buffer[BUFF_SIZE + 32];
 static rests_pkt rests;
