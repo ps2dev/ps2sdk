@@ -32,7 +32,7 @@ struct DirTocEntry
     unsigned char fileProperties;
     unsigned char reserved2[6];
     unsigned char filenameLength;
-    unsigned char filename[128];
+    char filename[128];
 } __attribute__((packed));  // This is the internal format on the CD
 // a file with a single character filename will have a 34byte toc entry
 // (max 60 entries per sector)6
@@ -52,7 +52,7 @@ struct CacheInfoDir
     unsigned int cache_offset;  // The offset from sector_start of the cached area
     unsigned int cache_size;    // The size of the cached directory area (in sectors)
 
-    char *cache;  // The actual cached data
+    u8 *cache;  // The actual cached data
 };
 
 struct RootDirTocHeader
@@ -260,7 +260,7 @@ static int findPath(char *pathname) {
             // If we have a null toc entry, then we've either reached the end of the dir, or have reached a sector boundary
             if (tocEntryPointer->length == 0) {
                 DPRINTF("Got a null pointer entry, so either reached end of dir, or end of sector\n\n");
-                tocEntryPointer = (struct DirTocEntry *)(cacheInfoDir.cache + (((((char *)tocEntryPointer - cacheInfoDir.cache) / 2048) + 1) * 2048));
+                tocEntryPointer = (struct DirTocEntry *)(cacheInfoDir.cache + (((((u8 *)tocEntryPointer - cacheInfoDir.cache) / 2048) + 1) * 2048));
             }
 
             if (tocEntryPointer >= (struct DirTocEntry *)(cacheInfoDir.cache + (cacheInfoDir.cache_size * 2048))) {
@@ -686,7 +686,7 @@ int cdfs_prepare(void) {
     cacheInfoDir.cache_size = 0;        // The size of the cached directory area (in sectors)
 
     if (cacheInfoDir.cache == NULL)
-        cacheInfoDir.cache = (char *)AllocSysMemory(0, MAX_DIR_CACHE_SECTORS * 2048, NULL);
+        cacheInfoDir.cache = (u8 *)AllocSysMemory(0, MAX_DIR_CACHE_SECTORS * 2048, NULL);
 
      // setup the cdReadMode structure
     cdReadMode.trycount = 0;
@@ -727,7 +727,7 @@ int cdfs_findfile(const char *fname, struct TocEntry *tocEntry) {
         for (; tocEntryPointer < (struct DirTocEntry *)(cacheInfoDir.cache + (cacheInfoDir.cache_size * 2048)); tocEntryPointer = (struct DirTocEntry *)((u8 *)tocEntryPointer + tocEntryPointer->length)) {
             if (tocEntryPointer->length == 0) {
                 DPRINTF("Got a null pointer entry, so either reached end of dir, or end of sector\n");
-                tocEntryPointer = (struct DirTocEntry *)(cacheInfoDir.cache + (((((char *)tocEntryPointer - cacheInfoDir.cache) / 2048) + 1) * 2048));
+                tocEntryPointer = (struct DirTocEntry *)(cacheInfoDir.cache + (((((u8 *)tocEntryPointer - cacheInfoDir.cache) / 2048) + 1) * 2048));
             }
 
             if (tocEntryPointer >= (struct DirTocEntry *)(cacheInfoDir.cache + (cacheInfoDir.cache_size * 2048))) {
@@ -778,8 +778,8 @@ int cdfs_findfile(const char *fname, struct TocEntry *tocEntry) {
         for (; tocEntryPointer < (struct DirTocEntry *)(cacheInfoDir.cache + (cacheInfoDir.cache_size * 2048)); tocEntryPointer = (struct DirTocEntry *)((u8 *)tocEntryPointer + tocEntryPointer->length)) {
             if (tocEntryPointer->length == 0) {
                 DPRINTF("Got a null pointer entry, so either reached end of dir, or end of sector\n");
-                DPRINTF("Offset into cache = %d bytes\n", (char *)tocEntryPointer - cacheInfoDir.cache);
-                tocEntryPointer = (struct DirTocEntry *)(cacheInfoDir.cache + (((((char *)tocEntryPointer - cacheInfoDir.cache) / 2048) + 1) * 2048));
+                DPRINTF("Offset into cache = %d bytes\n", (u8 *)tocEntryPointer - cacheInfoDir.cache);
+                tocEntryPointer = (struct DirTocEntry *)(cacheInfoDir.cache + (((((u8 *)tocEntryPointer - cacheInfoDir.cache) / 2048) + 1) * 2048));
             }
 
             if (tocEntryPointer >= (struct DirTocEntry *)(cacheInfoDir.cache + (cacheInfoDir.cache_size * 2048))) {
@@ -935,7 +935,7 @@ int cdfs_getDir(const char *pathname, const char *extensions, enum CDFS_getMode 
                     // then we've either reached the end of the sector, or the end of the dir
                     // so point to next sector (if there is one - will be checked by next condition)
 
-                    tocEntryPointer = (struct DirTocEntry *)(cacheInfoDir.cache + (((((char *)tocEntryPointer - cacheInfoDir.cache) / 2048) + 1) * 2048));
+                    tocEntryPointer = (struct DirTocEntry *)(cacheInfoDir.cache + (((((u8 *)tocEntryPointer - cacheInfoDir.cache) / 2048) + 1) * 2048));
                 }
 
                 if (tocEntryPointer >= (struct DirTocEntry *)(cacheInfoDir.cache + (cacheInfoDir.cache_size * 2048))) {
@@ -1013,7 +1013,7 @@ int cdfs_getDir(const char *pathname, const char *extensions, enum CDFS_getMode 
                     // then we've either reached the end of the sector, or the end of the dir
                     // so point to next sector (if there is one - will be checked by next condition)
 
-                    tocEntryPointer = (struct DirTocEntry *)(cacheInfoDir.cache + (((((char *)tocEntryPointer - cacheInfoDir.cache) / 2048) + 1) * 2048));
+                    tocEntryPointer = (struct DirTocEntry *)(cacheInfoDir.cache + (((((u8 *)tocEntryPointer - cacheInfoDir.cache) / 2048) + 1) * 2048));
                 }
 
                 if (tocEntryPointer >= (struct DirTocEntry *)(cacheInfoDir.cache + (cacheInfoDir.cache_size * 2048))) {
