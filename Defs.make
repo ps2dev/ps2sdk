@@ -29,7 +29,7 @@ EE_ADDR2LINE = $(EE_TOOL_PREFIX)addr2line
 # Defintions for the IOP toolchain.
 #
 
-IOP_TOOL_PREFIX ?= iop-
+IOP_TOOL_PREFIX ?= mipsel-ps2-irx-
 IOP_CC = $(IOP_TOOL_PREFIX)gcc
 IOP_AS = $(IOP_TOOL_PREFIX)as
 IOP_LD = $(IOP_TOOL_PREFIX)ld
