@@ -924,7 +924,7 @@ int PS2CamGetIRXVersion(void)
 	static unsigned short	ver[2];
 	int						*ret;
 
-	ret		= (int *)&ver[2];
+	ret		= (int *)&ver[0];
 	ver[0]	=DRIVER_VERSON_MAJOR;
 	ver[1]	=DRIVER_VERSON_MINOR;
 

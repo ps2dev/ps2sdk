@@ -268,7 +268,7 @@ static int _ResolveHostname(const char *hostname , struct in_addr* ip)
  */
 const char *resolveAddress( struct sockaddr_in *server, const char * url, char *hostAddr )
 {
-	unsigned char w,x,y,z;
+	unsigned char w;
 	const char *char_ptr;
 	char addr[128];
 	char port[6] = "80"; // default port of 80(HTTP)
@@ -310,31 +310,7 @@ const char *resolveAddress( struct sockaddr_in *server, const char * url, char *
 			}
         }
     else {
-		// turn '.' characters in ip string into null characters
-		for(i = 0, w = 0; i < 16; i++)
-			if(addr[i] == '.') { addr[i] = '\0'; w++; }
-
-        if(w != 3) { // w is used as a simple error check here
-            printf("HTTP: invalid IP address '%s'\n", hostAddr);
-            return(NULL);
-            }
-
-		i = 0;
-
-		// Extract individual ip number octets from string
-		w = (int)strtol(&addr[i],NULL, 10);
-		i += (strlen(&addr[i]) + 1);
-
-		x = (int)strtol(&addr[i],NULL, 10);
-		i += (strlen(&addr[i]) + 1);
-
-		y = (int)strtol(&addr[i],NULL, 10);
-		i += (strlen(&addr[i]) + 1);
-
-		z = (int)strtol(&addr[i],NULL, 10);
-		i += (strlen(&addr[i]) + 1);
-
-		IP4_ADDR( (struct ip4_addr *)&(server->sin_addr) ,w,x,y,z );
+		server->sin_addr.s_addr = inet_addr(addr);
 	}
 
     i = (int) strtol(port, NULL, 10); // set the port

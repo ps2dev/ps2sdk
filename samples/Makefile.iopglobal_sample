@@ -41,6 +41,16 @@ IOP_IETABLE_CFLAGS := -fno-toplevel-reorder
 endif
 endif
 
+# If gpopt is requested, use it if the GCC version is compatible
+ifneq (x$(IOP_PREFER_GPOPT),x)
+ifeq ($(IOP_CC_VERSION),3.2.2)
+IOP_CFLAGS += -DUSE_GP_REGISTER=1 -mgpopt -G$(IOP_PREFER_GPOPT)
+endif
+ifeq ($(IOP_CC_VERSION),3.2.3)
+IOP_CFLAGS += -DUSE_GP_REGISTER=1 -mgpopt -G$(IOP_PREFER_GPOPT)
+endif
+endif
+
 # Assembler flags
 IOP_ASFLAGS := $(ASFLAGS_TARGET) -EL -G0 $(IOP_ASFLAGS)
 

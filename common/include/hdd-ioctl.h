@@ -122,7 +122,7 @@ typedef struct
 {
 	u32 lba;
 	u32 size;
-	u8 data[0];
+	u8 data[];
 } hddAtaTransfer_t;
 
 typedef struct

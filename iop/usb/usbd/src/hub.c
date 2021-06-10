@@ -59,7 +59,11 @@ int initHubDriver(void) {
 	}
 	hub->next = NULL;
 
+#if USE_GP_REGISTER
 	doRegisterDriver(&HubDriver, &_gp);
+#else
+	doRegisterDriver(&HubDriver, NULL);
+#endif
 	return 0;
 }
 

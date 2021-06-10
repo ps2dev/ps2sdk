@@ -99,11 +99,11 @@
 
 #define SMAP_EMAC3_SET(offset, val)			\
 		SMAP_EMAC3_WRITE(offset, val)		\
-		SMAP_EMAC3_GET(offset)
+		(void)SMAP_EMAC3_GET(offset)
 
 #define SMAP_EMAC3_SET32(offset, val)			\
 		SMAP_EMAC3_WRITE32(offset, val)		\
-		SMAP_EMAC3_GET32(offset)
+		(void)SMAP_EMAC3_GET32(offset)
 
 #define	SMAP_R_EMAC3_MODE0		0x00
 #define	  SMAP_E3_RXMAC_IDLE		(1<<31)

@@ -958,7 +958,7 @@ finish:
 static void ata_device_probe(ata_devinfo_t *devinfo)
 {
 	USE_ATA_REGS;
-	u16 nsector, sector, lcyl, hcyl, select;
+	u16 nsector, sector, lcyl, hcyl;
 
 	devinfo->exists = 0;
 	devinfo->has_packet = 2;
@@ -970,7 +970,7 @@ static void ata_device_probe(ata_devinfo_t *devinfo)
 	sector = ata_hwport->r_sector & 0xff;
 	lcyl = ata_hwport->r_lcyl & 0xff;
 	hcyl = ata_hwport->r_hcyl & 0xff;
-	select = ata_hwport->r_select;
+	(void)ata_hwport->r_select;
 
 	if ((nsector != 1) || (sector != 1))
 		return;

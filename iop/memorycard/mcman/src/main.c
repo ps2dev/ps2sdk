@@ -8,6 +8,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
+#define SIO2MAN_EXPORTS_IMPLEMENTATION
 #include <mcman.h>
 #include "mcman-internal.h"
 

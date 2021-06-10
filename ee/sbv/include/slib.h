@@ -25,7 +25,7 @@ typedef struct _slib_imp_list {
 	u16	version;
 	u16	flags;
 	u8	name[8];
-	void	*imports[0];
+	void	*imports[];
 } slib_imp_list_t;
 
 /** Describes an IRX export library.  */
@@ -35,7 +35,7 @@ typedef struct _slib_exp_lib {
 	u16	version;
 	u16	flags;
 	u8	name[8];
-	void	*exports[0];
+	void	*exports[];
 } slib_exp_lib_t;
 
 /**

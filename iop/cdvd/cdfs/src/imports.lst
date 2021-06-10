@@ -24,6 +24,7 @@ I_strrchr
 I_strcat
 I_strlen
 I_memset
+I_memcmp
 I_memcpy
 I_memmove
 sysclib_IMPORTS_end

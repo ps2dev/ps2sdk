@@ -146,7 +146,7 @@ static int fio_read(iop_file_t *f, void *buffer, int size)
     int num_sectors;
 
     int read = 0;
-    static char local_buffer[9 * 2048];
+    static u8 local_buffer[9 * 2048];
 
     DPRINTF("CDFS: fio_read called\n\n");
     DPRINTF("      kernel_fd... %p\n", f);

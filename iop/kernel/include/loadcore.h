@@ -50,7 +50,7 @@ typedef struct _iop_library {
 	u16	version;
 	u16	flags;
 	char	name[8];
-	void	*exports[0];
+	void	*exports[];
 } iop_library_t;
 
 /** Loadcore internal data structure. Based on the one from loadcore.c of the FPS2BIOS project from PCSX2. */
@@ -67,7 +67,7 @@ typedef struct {
 	u16	value;
 	u8	id;
 	u8	len;
-	u32	data[0];
+	u32	data[];
 } iop_bootmode_t;
 
 

@@ -78,7 +78,9 @@ typedef struct _ioRequest {
 	u32 waitFrames; // number of frames to wait for isochronous transfers
 	sceUsbdDoneCallback userCallbackProc;
 	void   *userCallbackArg;
+#if USE_GP_REGISTER
     void   *gpSeg;
+#endif
 } IoRequest;
 
 typedef struct _device {
