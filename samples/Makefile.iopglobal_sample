@@ -8,6 +8,10 @@
 
 IOP_CC_VERSION := $(shell $(IOP_CC) -dumpversion)
 
+IOP_OBJS_DIR ?= obj/
+IOP_SRC_DIR ?= src/
+IOP_INC_DIR ?= include/
+
 ifeq ($(IOP_CC_VERSION),3.2.2)
 ASFLAGS_TARGET = -march=r3000
 endif
@@ -17,15 +21,15 @@ ASFLAGS_TARGET = -march=r3000
 endif
 
 # include dir
-IOP_INCS := -I$(PS2SDK)/iop/include -I$(PS2SDK)/common/include \
-	-I. $(IOP_INCS)
+IOP_INCS := $(IOP_INCS) -I$(PS2SDK)/iop/include -I$(PS2SDK)/common/include \
+	-I. -I$(IOP_INC_DIR)
 
 # C compiler flags
 # -fno-builtin is required to prevent the GCC built-in functions from being included,
 #   for finer-grained control over what goes into each IRX.
 IOP_CFLAGS := -D_IOP -fno-builtin -Os -G0 -Wall $(IOP_INCS) $(IOP_CFLAGS)
 # linker flags
-IOP_LDFLAGS := -nostdlib -s -L$(PS2SDK)/iop/lib $(IOP_LDFLAGS)
+IOP_LDFLAGS := -nostdlib -s $(IOP_LDFLAGS)
 
 # Additional C compiler flags for GCC >=v5.3.0
 # -msoft-float is to "remind" GCC/Binutils that the soft-float ABI is to be used. This is due to a bug, which
@@ -54,43 +58,61 @@ endif
 # Assembler flags
 IOP_ASFLAGS := $(ASFLAGS_TARGET) -EL -G0 $(IOP_ASFLAGS)
 
+IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
+
 # Externally defined variables: IOP_BIN, IOP_OBJS, IOP_LIB
 
 # These macros can be used to simplify certain build rules.
 IOP_C_COMPILE = $(IOP_CC) $(IOP_CFLAGS)
 
-%.o: %.c
+IOP_C_COMPILE = $(IOP_CC) $(IOP_CFLAGS)
+DIR_GUARD=$(MKDIR) -p $(@D)
+
+$(IOP_OBJS_DIR)%.o: $(IOP_SRC_DIR)%.c
+	$(DIR_GUARD)
 	$(IOP_C_COMPILE) -c $< -o $@
 
-%.o: %.S
+$(IOP_OBJS_DIR)%.o: $(IOP_SRC_DIR)%.S
+	$(DIR_GUARD)
 	$(IOP_C_COMPILE) -c $< -o $@
 
-%.o: %.s
+$(IOP_OBJS_DIR)%.o: $(IOP_SRC_DIR)%.s
+	$(DIR_GUARD)
 	$(IOP_AS) $(IOP_ASFLAGS) $< -o $@
 
-.INTERMEDIATE: build-imports.c build-exports.c
+.INTERMEDIATE: $(IOP_OBJS_DIR)build-imports.c $(IOP_OBJS_DIR)build-exports.c
 
 # Rules to build imports.lst.
-build-imports.c: imports.lst
+$(IOP_OBJS_DIR)build-imports.c: $(IOP_SRC_DIR)imports.lst
+	$(DIR_GUARD)
 	$(ECHO) "#include \"irx_imports.h\"" > $@
 	cat $< >> $@
 
-imports.o: build-imports.c
-	$(IOP_C_COMPILE) $(IOP_IETABLE_CFLAGS) -I. -c $< -o $@
+$(IOP_OBJS_DIR)imports.o: $(IOP_OBJS_DIR)build-imports.c
+	$(DIR_GUARD)
+	$(IOP_C_COMPILE) $(IOP_IETABLE_CFLAGS) -c $< -o $@
 
 # Rules to build exports.tab.
-build-exports.c: exports.tab
+$(IOP_OBJS_DIR)build-exports.c: $(IOP_SRC_DIR)exports.tab
 	$(ECHO) "#include \"irx.h\"" > $@
 	cat $< >> $@
 
-exports.o: build-exports.c
-	$(IOP_C_COMPILE) $(IOP_IETABLE_CFLAGS) -I. -c $< -o $@
+$(IOP_OBJS_DIR)exports.o: $(IOP_OBJS_DIR)build-exports.c
+	$(DIR_GUARD)
+	$(IOP_C_COMPILE) $(IOP_IETABLE_CFLAGS) -c $< -o $@
 
-# link with following libraries (libs need to be defined multiple times in order for linking to work!!)
-IOP_LIBS += -lkernel -lgcc
+$(IOP_OBJS_DIR):
+$(IOP_BIN_DIR):
+$(IOP_LIB_DIR):
 
-$(IOP_BIN): $(IOP_OBJS)
+$(IOP_OBJS): | $(IOP_OBJS_DIR)
+
+$(IOP_BIN): $(IOP_OBJS) | $(IOP_BIN_DIR)
+	echo " -$@"
+	$(DIR_GUARD)
 	$(IOP_C_COMPILE) -o $(IOP_BIN) $(IOP_OBJS) $(IOP_LDFLAGS) $(IOP_LIBS)
 
-$(IOP_LIB): $(IOP_OBJS)
+$(IOP_LIB): $(IOP_OBJS) | $(IOP_LIB_DIR)
+	echo " -$@"
+	$(DIR_GUARD)
 	$(IOP_AR) cru $(IOP_LIB) $(IOP_OBJS)
