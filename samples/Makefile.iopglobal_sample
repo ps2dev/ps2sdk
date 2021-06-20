@@ -9,7 +9,7 @@
 IOP_CC_VERSION := $(shell $(IOP_CC) -dumpversion)
 
 IOP_OBJS_DIR ?= obj/
-IOP_SRC_DIR ?= src/
+IOP_SRC_DIR ?= ./
 IOP_INC_DIR ?= include/
 
 ifeq ($(IOP_CC_VERSION),3.2.2)
