@@ -20,7 +20,7 @@ EE_OBJCOPY = $(EE_PREFIX)objcopy
 EE_STRIP = $(EE_PREFIX)strip
 EE_ADDR2LINE = $(EE_PREFIX)addr2line
 
-IOP_PREFIX ?= iop-
+IOP_PREFIX ?= mipsel-ps2-irx-
 IOP_CC = $(IOP_PREFIX)gcc
 IOP_AS = $(IOP_PREFIX)as
 IOP_LD = $(IOP_PREFIX)ld
