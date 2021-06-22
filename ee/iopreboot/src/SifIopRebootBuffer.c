@@ -31,12 +31,34 @@ extern u8 iopbtconf_img[IOPBTCONF_IOP_MAX_SIZE];
 extern unsigned char _imgdrv_irx[];
 extern unsigned int size__imgdrv_irx;
 
-//If for whatever reason imgdrv changes, update these offsets.
-#define IMGDRV_IRX_PTRS		0x190
-#define IMGDRV_IRX_SIZES	0x198
+extern int imgdrv_offset_ioprpimg;
+extern int imgdrv_offset_ioprpsiz;
+
+extern void init_imgdrv_offsets(void);
 
 #ifdef F__iopcontrol_special_internals
 u8 iopbtconf_img[IOPBTCONF_IOP_MAX_SIZE] __attribute__((aligned(64)));
+int imgdrv_offset_ioprpimg = 0;
+int imgdrv_offset_ioprpsiz = 0;
+
+void init_imgdrv_offsets(void)
+{
+	int i;
+	if (imgdrv_offset_ioprpimg == 0 || imgdrv_offset_ioprpsiz == 0)
+	{
+		for (i = 0; i < size__imgdrv_irx; i += 4)
+		{
+			if (*(u32 *)((&((unsigned char *)_imgdrv_irx)[i])) == 0xDEC1DEC1)
+			{
+				imgdrv_offset_ioprpimg = i;
+			}
+			if (*(u32 *)((&((unsigned char *)_imgdrv_irx)[i])) == 0xDEC2DEC2)
+			{
+				imgdrv_offset_ioprpsiz = i;
+			}
+		}
+	}
+}
 #endif
 
 //Our LOADFILE functions are slightly different.
@@ -73,8 +95,9 @@ int SifIopRebootBufferEncrypted(const void *udnl, int size)
 
 	iopbtconf_img_size = 0;	//No support for IOPBTCONF manipulation
 
-	imgdrv_img = (void**)&_imgdrv_irx[IMGDRV_IRX_PTRS];
-	imgdrv_img_size = (int*)&_imgdrv_irx[IMGDRV_IRX_SIZES];
+	init_imgdrv_offsets();
+	imgdrv_img = (void**)&_imgdrv_irx[imgdrv_offset_ioprpimg];
+	imgdrv_img_size = (int*)&_imgdrv_irx[imgdrv_offset_ioprpsiz];
 	dmat[0].src = _imgdrv_irx;
 	dmat[0].dest = imgdrv_iop;
 	dmat[0].size = IMGDRV_IRX_SIZE;
@@ -144,8 +167,9 @@ int SifIopRebootBuffer(const void *ioprp, int size)
 
 	iopbtconf_img_size = generateIOPBTCONF_img(iopbtconf_img, ioprp);
 
-	imgdrv_img = (void**)&_imgdrv_irx[IMGDRV_IRX_PTRS];
-	imgdrv_img_size = (int*)&_imgdrv_irx[IMGDRV_IRX_SIZES];
+	init_imgdrv_offsets();
+	imgdrv_img = (void**)&_imgdrv_irx[imgdrv_offset_ioprpimg];
+	imgdrv_img_size = (int*)&_imgdrv_irx[imgdrv_offset_ioprpsiz];
 	dmat[0].src = _imgdrv_irx;
 	dmat[0].dest = imgdrv_iop;
 	dmat[0].size = IMGDRV_IRX_SIZE;

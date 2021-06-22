@@ -48,8 +48,8 @@ static iop_device_ops_short_t imgdrv_ops = {
 
 #define MAX_IMAGES	2
 //These arrays will be manipulated by the EE-side code before the module is loaded.
-const void *img[MAX_IMAGES] = {0};
-int img_size[MAX_IMAGES] = {0};
+void *img[MAX_IMAGES] = {(void *)0xDEC1DEC1, 0};
+int img_size[MAX_IMAGES] = {0xDEC2DEC2, 0};
 
 static iop_device_t img_device = {
 	"img",
