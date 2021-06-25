@@ -42,6 +42,11 @@ EE_LDFLAGS := -L$(PS2SDK)/ee/lib -Wl,-zmax-page-size=128 $(EXTRA_LDFLAGS) $(EE_L
 # Assembler flags
 EE_ASFLAGS := -G0 $(EE_ASFLAGS)
 
+# Default link file
+ifeq ($(EE_LINKFILE),)
+EE_LINKFILE := $(PS2SDK)/ee/startup/linkfile
+endif
+
 # Externally defined variables: EE_BIN, EE_OBJS, EE_LIB
 
 # These macros can be used to simplify certain build rules.
@@ -64,7 +69,7 @@ EE_CXX_COMPILE = $(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS)
 	$(EE_AS) $(EE_ASFLAGS) $< -o $@
 
 $(EE_BIN): $(EE_OBJS)
-	$(EE_CXX) -T$(PS2SDK)/ee/startup/linkfile -o $(EE_BIN) $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS)
+	$(EE_CXX) -T$(EE_LINKFILE) -o $(EE_BIN) $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS)
 
 $(EE_ERL): $(EE_OBJS)
 	$(EE_CC) -mno-crt0 -o $(EE_ERL) $(EE_OBJS) $(EE_CFLAGS) $(EE_LDFLAGS) -Wl,-r -Wl,-d
