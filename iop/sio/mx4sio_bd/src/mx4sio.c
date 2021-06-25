@@ -71,19 +71,19 @@ int sio2_intr_handler(void* arg)
     int eflags = EF_SIO2_INTR_REVERSE;
 
     // Clear interrupt?
-    sio2_stat_set(sio2_stat_get());
+    inl_sio2_stat_set(inl_sio2_stat_get());
 
     // Wait for completion
-    while ((sio2_stat6c_get() & (1 << 12)) == 0)
+    while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
         ;
 
     // Finish sector read, read 2 crc bytes
 #ifdef CONFIG_USE_CRC16
-    cmd.crc[cmd.sectors_transferred]  = reverseByte_LUT8(sio2_data_in()) << 8;
-    cmd.crc[cmd.sectors_transferred] |= reverseByte_LUT8(sio2_data_in());
+    cmd.crc[cmd.sectors_transferred]  = reverseByte_LUT8(inl_sio2_data_in()) << 8;
+    cmd.crc[cmd.sectors_transferred] |= reverseByte_LUT8(inl_sio2_data_in());
 #else
-    sio2_data_in();
-    sio2_data_in();
+    inl_sio2_data_in();
+    inl_sio2_data_in();
 #endif
     cmd.sectors_transferred++;
 
@@ -290,16 +290,16 @@ static void _init_ports(sio2_transfer_data_t* td)
     int i;
 
     for (i = 0; i < 4; i++) {
-        sio2_portN_ctrl1_set(i, td->port_ctrl1[i]);
-        sio2_portN_ctrl2_set(i, td->port_ctrl2[i]);
+        inl_sio2_portN_ctrl1_set(i, td->port_ctrl1[i]);
+        inl_sio2_portN_ctrl2_set(i, td->port_ctrl2[i]);
     }
 }
 
 static uint8_t sendCmd_Tx1_Rx1(uint8_t data, int portNr)
 {
-    sio2_ctrl_set(0x0bc); // no interrupt
+    inl_sio2_ctrl_set(0x0bc); // no interrupt
 
-    sio2_regN_set(0,
+    inl_sio2_regN_set(0,
         TR_CTRL_PORT_NR(portNr) |
         TR_CTRL_PAUSE(0) |
         TR_CTRL_TX_MODE_PIO_DMA(0) |
@@ -310,27 +310,27 @@ static uint8_t sendCmd_Tx1_Rx1(uint8_t data, int portNr)
         TR_CTRL_WAIT_ACK_FOREVER(0) |
         TR_CTRL_TX_DATA_SZ(1) |
         TR_CTRL_RX_DATA_SZ(1));
-    sio2_regN_set(1, 0);
+    inl_sio2_regN_set(1, 0);
 
     // Put byte in queue
-    sio2_data_out(reverseByte_LUT8(data));
+    inl_sio2_data_out(reverseByte_LUT8(data));
 
     // Start queue exec
-    sio2_ctrl_set(sio2_ctrl_get() | 1);
+    inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
 
     // Wait for completion
-    while ((sio2_stat6c_get() & (1 << 12)) == 0)
+    while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
         ;
 
     // Get byte from queue
-    return reverseByte_LUT8(sio2_data_in());
+    return reverseByte_LUT8(inl_sio2_data_in());
 }
 
 static void sendCmd_Tx_PIO(const uint8_t* wrBufA, int sndSz, int portNr)
 {
-    sio2_ctrl_set(0x0bc); // no interrupt
+    inl_sio2_ctrl_set(0x0bc); // no interrupt
 
-    sio2_regN_set(0,
+    inl_sio2_regN_set(0,
         TR_CTRL_PORT_NR(portNr) |
         TR_CTRL_PAUSE(0) |
         TR_CTRL_TX_MODE_PIO_DMA(0) |
@@ -341,26 +341,26 @@ static void sendCmd_Tx_PIO(const uint8_t* wrBufA, int sndSz, int portNr)
         TR_CTRL_WAIT_ACK_FOREVER(0) |
         TR_CTRL_TX_DATA_SZ(sndSz) |
         TR_CTRL_RX_DATA_SZ(0));
-    sio2_regN_set(1, 0);
+    inl_sio2_regN_set(1, 0);
 
     // PIO: IOP -> SIO2
     // Fill the queue
     while (sndSz--)
-        sio2_data_out(reverseByte_LUT8(*wrBufA++));
+        inl_sio2_data_out(reverseByte_LUT8(*wrBufA++));
 
     // Start queue exec
-    sio2_ctrl_set(sio2_ctrl_get() | 1);
+    inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
 
     // Wait for completion
-    while ((sio2_stat6c_get() & (1 << 12)) == 0)
+    while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
         ;
 }
 
 static void sendCmd_Rx_PIO(uint8_t* rdBufA, int rcvSz, int portNr)
 {
-    sio2_ctrl_set(0x0bc); // no interrupt
+    inl_sio2_ctrl_set(0x0bc); // no interrupt
 
-    sio2_regN_set(0,
+    inl_sio2_regN_set(0,
         TR_CTRL_PORT_NR(portNr) |
         TR_CTRL_PAUSE(0) |
         TR_CTRL_TX_MODE_PIO_DMA(0) |
@@ -371,19 +371,19 @@ static void sendCmd_Rx_PIO(uint8_t* rdBufA, int rcvSz, int portNr)
         TR_CTRL_WAIT_ACK_FOREVER(0) |
         TR_CTRL_TX_DATA_SZ(0) |
         TR_CTRL_RX_DATA_SZ(rcvSz));
-    sio2_regN_set(1, 0);
+    inl_sio2_regN_set(1, 0);
 
     // Start queue exec
-    sio2_ctrl_set(sio2_ctrl_get() | 1);
+    inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
 
     // Wait for completion
-    while ((sio2_stat6c_get() & (1 << 12)) == 0)
+    while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
         ;
 
     // PIO: IOP <- SIO2
     // Empty the queue
     while (rcvSz--)
-        *rdBufA++ = reverseByte_LUT8(sio2_data_in());
+        *rdBufA++ = reverseByte_LUT8(inl_sio2_data_in());
 }
 
 static uint8_t wait_equal(uint8_t value, int count, int portNr)
@@ -424,18 +424,18 @@ static void sendCmd_Rx_DMA_start(uint8_t* rdBufA, int portNr)
         TR_CTRL_BAUD_DIV(1) |
         TR_CTRL_WAIT_ACK_FOREVER(0);
 
-    sio2_ctrl_set(0x0bc); // no interrupt
+    inl_sio2_ctrl_set(0x0bc); // no interrupt
 
-    sio2_regN_set(0, trSettingsDMA | TR_CTRL_PORT_NR(portNr));
-    sio2_regN_set(1, trSettingsDMA | TR_CTRL_PORT_NR(portNr));
-    sio2_regN_set(2, trSettingsPIO | TR_CTRL_PORT_NR(portNr));
-    sio2_regN_set(3, 0);
+    inl_sio2_regN_set(0, trSettingsDMA | TR_CTRL_PORT_NR(portNr));
+    inl_sio2_regN_set(1, trSettingsDMA | TR_CTRL_PORT_NR(portNr));
+    inl_sio2_regN_set(2, trSettingsPIO | TR_CTRL_PORT_NR(portNr));
+    inl_sio2_regN_set(3, 0);
 
     dmac_request(IOP_DMAC_SIO2out, rdBufA, 0x100 >> 2, 2, DMAC_TO_MEM);
     dmac_transfer(IOP_DMAC_SIO2out);
 
     // Start queue exec
-    sio2_ctrl_set(sio2_ctrl_get() | 1);
+    inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
 }
 
 static void sio2_lock()
@@ -448,7 +448,7 @@ static void sio2_lock()
     sio2man_hook_sio2_lock();
 
     // Save ctrl state
-    sio2man_save_crtl = sio2_ctrl_get();
+    sio2man_save_crtl = inl_sio2_ctrl_get();
 
     // We're in control, setup the ports for our use
     _init_ports(&global_td);
@@ -471,7 +471,7 @@ static void sio2_unlock()
     CpuResumeIntr(state);
 
     // Restore ctrl state, and reset STATE + FIFOS
-    sio2_ctrl_set(sio2man_save_crtl | 0xc);
+    inl_sio2_ctrl_set(sio2man_save_crtl | 0xc);
 
     // Unlock sio2man driver
     sio2man_hook_sio2_unlock();

@@ -35,11 +35,11 @@ typedef union sppisd_r1_u {
         uint8_t param_error: 1;             /*<!-- The command�s argument (e.g. address, block length) was outside the allowed range for this card */
         uint8_t zero: 1;                    /*<!-- mustbe zero  */
     } fields;
-} spisd_r1_t __attribute__((packed));
+} __attribute__((packed)) spisd_r1_t;
 
 typedef struct spisd_r1b_s {
     uint8_t is_ready;                           /*<!-- A zero value indicates card is busy. A non-zero value indicates the card is ready for the next command */
-} spisd_r1b_t_ __attribute__((packed));
+} __attribute__((packed)) spisd_r1b_t_;
 
 typedef union spisd_r2_s {
 
@@ -63,13 +63,13 @@ typedef union spisd_r2_s {
         uint8_t param_error: 1;             /*<!-- The command�s argument (e.g. address, block length) was outside the allowed range for this card */
         uint8_t zero: 1;                    /*<!-- mustbe zero  */
     } fields;
-} spisd_r2_t __attribute__((packed));
+} __attribute__((packed)) spisd_r2_t;
 
 typedef struct sppisd_r3_s {
 
     spisd_r1_t r1;
     uint32_t ocr;
-} spisd_r3_t __attribute__((packed));
+} __attribute__((packed)) spisd_r3_t;
 
 typedef struct sppisd_r7_s {
 
@@ -83,7 +83,7 @@ typedef struct sppisd_r7_s {
             uint32_t ehco_back: 8;
         } fields;
     };
-} spisd_r7_t __attribute__((packed));
+} __attribute__((packed)) spisd_r7_t;
 
 /*
  * START: structures copied from wisi's implementation
@@ -136,7 +136,7 @@ struct t_csdVer1
     u8 reserved7          : 2;
     u8 crc                : 7;
     u8 fixedTo1           : 1;
-};
+} __attribute__((packed));
 
 struct t_csdVer2
 {
@@ -183,7 +183,7 @@ struct t_csdVer2
     u8 reserved7          : 2;
     u8 crc                : 7;
     u8 fixedTo1           : 1;
-};
+} __attribute__((packed));
 /*
  * END: structures copied from wisi's implementation
  */

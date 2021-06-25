@@ -147,27 +147,28 @@ normal	special
 //Any error:
 #define GET_ISTAT_TR_ERR(x) (((x) >> 1) & 1)
 
-/* 04 */ inline void sio2_ctrl_set(u32 val) { _sw(val, SIO2_REG_CTRL); }
-/* 05 */ inline u32 sio2_ctrl_get() { return _lw(SIO2_REG_CTRL); }
-/* 06 */ inline u32 sio2_stat6c_get() { return _lw(SIO2_REG_STAT6C); }
-/* 07 */ inline void sio2_portN_ctrl1_set(int N, u32 val) { _sw(val, SIO2_REG_PORT0_CTRL1 + (N * 8)); }
-/* 08 */ inline u32 sio2_portN_ctrl1_get(int N) { return _lw(SIO2_REG_PORT0_CTRL1 + (N * 8)); }
-/* 09 */ inline void sio2_portN_ctrl2_set(int N, u32 val) { _sw(val, SIO2_REG_PORT0_CTRL2 + (N * 8)); }
-/* 10 */ inline u32 sio2_portN_ctrl2_get(int N) { return _lw(SIO2_REG_PORT0_CTRL2 + (N * 8)); }
-/* 11 */ inline u32 sio2_stat70_get() { return _lw(SIO2_REG_STAT70); }
-/* 12 */ inline void sio2_regN_set(int N, u32 val) { _sw(val, SIO2_REG_BASE + (N * 4)); }
-/* 13 */ inline u32 sio2_regN_get(int N) { return _lw(SIO2_REG_BASE + (N * 4)); }
-/* 14 */ inline u32 sio2_stat74_get() { return _lw(SIO2_REG_STAT74); }
-/* 15 */ inline void sio2_unkn78_set(u32 val) { _sw(val, SIO2_REG_UNKN78); }
-/* 16 */ inline u32 sio2_unkn78_get() { return _lw(SIO2_REG_UNKN78); }
-/* 17 */ inline void sio2_unkn7c_set(u32 val) { _sw(val, SIO2_REG_UNKN7C); }
-/* 18 */ inline u32 sio2_unkn7c_get() { return _lw(SIO2_REG_UNKN7C); }
-/* 19 */ inline void sio2_data_out(u8 val) { _sb(val, SIO2_REG_DATA_OUT); }
-/* 20 */ inline u8 sio2_data_in() { return _lb(SIO2_REG_DATA_IN); }
-/* 21 */ inline void sio2_stat_set(u32 val) { _sw(val, SIO2_REG_STAT); }
-/* 22 */ inline u32 sio2_stat_get() { return _lw(SIO2_REG_STAT); }
+// Inline (faster) versions of sio2_* functions
+/* 04 */ static inline void inl_sio2_ctrl_set(u32 val) { _sw(val, SIO2_REG_CTRL); }
+/* 05 */ static inline u32 inl_sio2_ctrl_get() { return _lw(SIO2_REG_CTRL); }
+/* 06 */ static inline u32 inl_sio2_stat6c_get() { return _lw(SIO2_REG_STAT6C); }
+/* 07 */ static inline void inl_sio2_portN_ctrl1_set(int N, u32 val) { _sw(val, SIO2_REG_PORT0_CTRL1 + (N * 8)); }
+/* 08 */ static inline u32 inl_sio2_portN_ctrl1_get(int N) { return _lw(SIO2_REG_PORT0_CTRL1 + (N * 8)); }
+/* 09 */ static inline void inl_sio2_portN_ctrl2_set(int N, u32 val) { _sw(val, SIO2_REG_PORT0_CTRL2 + (N * 8)); }
+/* 10 */ static inline u32 inl_sio2_portN_ctrl2_get(int N) { return _lw(SIO2_REG_PORT0_CTRL2 + (N * 8)); }
+/* 11 */ static inline u32 inl_sio2_stat70_get() { return _lw(SIO2_REG_STAT70); }
+/* 12 */ static inline void inl_sio2_regN_set(int N, u32 val) { _sw(val, SIO2_REG_BASE + (N * 4)); }
+/* 13 */ static inline u32 inl_sio2_regN_get(int N) { return _lw(SIO2_REG_BASE + (N * 4)); }
+/* 14 */ static inline u32 inl_sio2_stat74_get() { return _lw(SIO2_REG_STAT74); }
+/* 15 */ static inline void inl_sio2_unkn78_set(u32 val) { _sw(val, SIO2_REG_UNKN78); }
+/* 16 */ static inline u32 inl_sio2_unkn78_get() { return _lw(SIO2_REG_UNKN78); }
+/* 17 */ static inline void inl_sio2_unkn7c_set(u32 val) { _sw(val, SIO2_REG_UNKN7C); }
+/* 18 */ static inline u32 inl_sio2_unkn7c_get() { return _lw(SIO2_REG_UNKN7C); }
+/* 19 */ static inline void inl_sio2_data_out(u8 val) { _sb(val, SIO2_REG_DATA_OUT); }
+/* 20 */ static inline u8 inl_sio2_data_in() { return _lb(SIO2_REG_DATA_IN); }
+/* 21 */ static inline void inl_sio2_stat_set(u32 val) { _sw(val, SIO2_REG_STAT); }
+/* 22 */ static inline u32 inl_sio2_stat_get() { return _lw(SIO2_REG_STAT); }
 
-inline u16 sio2_data_inh() { return _lh(SIO2_REG_DATA_IN); }
-inline u32 sio2_data_inw() { return _lw(SIO2_REG_DATA_IN); }
+static inline u16 inl_sio2_data_inh() { return _lh(SIO2_REG_DATA_IN); }
+static inline u32 inl_sio2_data_inw() { return _lw(SIO2_REG_DATA_IN); }
 
 #endif
