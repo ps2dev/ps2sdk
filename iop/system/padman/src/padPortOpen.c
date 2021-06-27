@@ -664,15 +664,15 @@ s32 padPortOpen(s32 port, s32 slot, s32 pad_area_ee_addr, u32 *buf)
 		return 0;
 	}
 
-	if( (openSlots[port] >> slot) & 0x1)
-	{
-		M_PRINTF("This slot is already open: (%d, %d)\n", (int)port, (int)slot);
-		return 0;
-	}
-
 	if (padman_init == 0)
 	{
 		padInit(NULL);
+	}
+
+	if( (openSlots[port] >> slot) & 0x1)
+	{
+		M_PRINTF("The slot will be refreshed: (%d, %d)\n", (int)port, (int)slot);
+		padPortClose(port, slot, 1);
 	}
 
 	padState[port][slot].port = port;
