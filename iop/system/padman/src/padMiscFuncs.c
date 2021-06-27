@@ -27,6 +27,7 @@ extern padState_t padState[2][4];
 extern u32 openSlots[2];
 extern vblankData_t vblankData;
 extern int padman_init;
+extern void *pad_ee_addr;
 
 void DeleteThreadsEventFlag(vblankData_t *s)
 {
@@ -62,6 +63,7 @@ s32 padEnd(void)
 		while(ReleaseVblankHandler(1, VblankEnd) != 0)
 			M_PRINTF("Release VB_END failed.\n");
 
+		pad_ee_addr = NULL;
 		padman_init = 0;
 	}
 

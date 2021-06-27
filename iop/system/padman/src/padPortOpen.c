@@ -25,6 +25,8 @@ extern u32 openSlots[2];
 extern int thpri_lo;
 extern int thpri_hi;
 
+extern int padman_init;
+
 static void UpdatePadThread(void *arg)
 {
 	iop_thread_info_t tstatus;
@@ -666,6 +668,11 @@ s32 padPortOpen(s32 port, s32 slot, s32 pad_area_ee_addr, u32 *buf)
 	{
 		M_PRINTF("This slot is already open: (%d, %d)\n", (int)port, (int)slot);
 		return 0;
+	}
+
+	if (padman_init == 0)
+	{
+		padInit(NULL);
 	}
 
 	padState[port][slot].port = port;
