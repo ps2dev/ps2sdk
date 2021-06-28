@@ -18,6 +18,9 @@
 
 #include <loadcore.h>
 
+#define xloadcore_IMPORTS_start DECLARE_IMPORT_TABLE(loadcore, 1, 1)
+#define xloadcore_IMPORTS_end END_IMPORT_TABLE
+
 int SetRebootTimeLibraryHandlingMode(struct irx_export_table *exports, int mode);
 #define I_SetRebootTimeLibraryHandlingMode DECLARE_IMPORT(27, SetRebootTimeLibraryHandlingMode)
 

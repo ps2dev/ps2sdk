@@ -24,6 +24,9 @@ int SetupHardTimer(int timid, int source, int mode, int prescale);
 int StartHardTimer(int timid);
 int StopHardTimer(int timid);
 
+#define xtimrman_IMPORTS_start DECLARE_IMPORT_TABLE(timrman, 1, 1)
+#define xtimrman_IMPORTS_end END_IMPORT_TABLE
+
 #define I_SetTimerHandler DECLARE_IMPORT(20, SetTimerHandler)
 #define I_SetOverflowHandler DECLARE_IMPORT(21, SetOverflowHandler)
 #define I_SetupHardTimer DECLARE_IMPORT(22, SetupHardTimer)
