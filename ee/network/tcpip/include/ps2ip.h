@@ -99,7 +99,6 @@ struct netif *netif_add(struct netif *netif,
                         const ip4_addr_t *ipaddr, const ip4_addr_t *netmask, const ip4_addr_t *gw,
 #endif /* LWIP_IPV4 */
                         void *state, netif_init_fn init, netif_input_fn input);
-#define        I_netif_add DECLARE_IMPORT(26, netif_add)
 
 /** Returns a network interface given its name. 
  * The name is of the form "et0", where the first two letters are the "name" field in the

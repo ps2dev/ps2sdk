@@ -25,6 +25,9 @@ int ReferThreadRunStatus(int thid, iop_thread_run_status_t *stat, size_t size);
 int GetThreadStackFreeSize(int thid);
 int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount);
 
+#define xthbase_IMPORTS_start DECLARE_IMPORT_TABLE(thbase, 1, 1)
+#define xthbase_IMPORTS_end END_IMPORT_TABLE
+
 #define I_GetThreadCurrentPriority DECLARE_IMPORT(42, GetThreadCurrentPriority)
 #define I_GetSystemTimeLow DECLARE_IMPORT(43, GetSystemTimeLow)
 #define I_ReferSystemStatus DECLARE_IMPORT(44, ReferSystemStatus)
