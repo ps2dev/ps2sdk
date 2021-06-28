@@ -821,14 +821,141 @@ int sceCdStatus2(void);
  */
 int sceCdRE(unsigned long int lsn,unsigned long int sectors,void *buf,sceCdRMode *mode);
 
+/** Reads a GUID.
+ * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN DNAS IOPRP ONLY
+ *
+ * @param guid u64 integer where the GUID is stored.
+ * @return 1 on success, 0 on failure.
+ */
+int sceCdReadGUID(u64 *guid);
+
 /** Controls remote-control bypass
- * SUPPORTED BY ONLY PSX CDVDMAN MODULES
+ * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
  *
  * @param mode 0 = Bypass, 1 = Normal
  * @param status Result code.
  * @return 1 on success, 0 on failure
  */
 int sceCdRcBypassCtl(int mode, u32 *status);
+
+/** Reads wake up time.
+ * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
+ *
+ * @return 1 on success, 0 on failure
+ */
+int sceCdReadWakeUpTime(sceCdCLOCK *clock, u16 *arg2, u32 *arg3, int *arg4);
+
+/** Writes wake up time.
+ * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
+ *
+ * @return 1 on success, 0 on failure
+ */
+int sceCdWriteWakeUpTime(const sceCdCLOCK *clock, u16 arg2, int arg3);
+
+/** Remote control 2_7.
+ * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
+ *
+ * @return 1 on success, 0 on failure
+ */
+int sceRemote2_7(u16 a1, u32 *a2);
+
+/** Set LEDs mode.
+ * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
+ *
+ * @return 1 on success, 0 on failure
+ */
+int sceCdSetLEDsMode(u32 arg1, u32 *result);
+
+/** Reads PS1 boot parameter.
+ * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
+ *
+ * @return 1 on success, 0 on failure
+ */
+int sceCdReadPS1BootParam(u8 *out, u32 *result);
+
+/** Sets fan profile.
+ * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
+ *
+ * @return 1 on success, 0 on failure
+ */
+int sceCdSetFanProfile(u8 arg1, u32 *result);
+
+/** Change sys.
+ * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
+ *
+ * @return 1 on success, 0 on failure
+ */
+int sceCdChgSys(u32 arg1);
+
+/** Notice game start.
+ * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
+ *
+ * @return 1 on success, 0 on failure
+ */
+int sceCdNoticeGameStart(u8 arg1, u32 *result);
+
+/** Extended LED control.
+ * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
+ *
+ * @return 1 on success, 0 on failure
+ */
+int sceCdXLEDCtl(u8 arg1, u8 arg2, u32 *result1, u32 *result2);
+
+/** Buzzer control.
+ * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
+ *
+ * @return 1 on success, 0 on failure
+ */
+int sceCdBuzzerCtl(u32 *result);
+
+/** XBS power control.
+ * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
+ *
+ * @return 1 on success, 0 on failure
+ */
+int sceCdXBSPowerCtl(u8 arg1, u8 arg2, u32 *result1, u32 *result2);
+
+/** Set medium removal.
+ * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
+ *
+ * @return 1 on success, 0 on failure
+ */
+int sceCdSetMediumRemoval(u8 arg1, u32 *result);
+
+/** Get medium removal.
+ * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
+ *
+ * @return 1 on success, 0 on failure
+ */
+int sceCdGetMediumRemoval(u32 *result1, u32 *result2);
+
+/** XDVRP reset.
+ * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
+ *
+ * @return 1 on success, 0 on failure
+ */
+int sceCdXDVRPReset(u8 arg1, u32 *result);
+
+/** Get wake up reason.
+ * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
+ *
+ * @return 1 on success, 0 on failure
+ */
+int sceCdGetWakeUpReason(void);
+
+/** Reads region parameters.
+ * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
+ *
+ * @return 1 on success, 0 on failure
+ */
+int sceCdReadRegionParams(u32 *arg1, u32 *result);
+
+/** Writes region parameters.
+ * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
+ *
+ * @return 1 on success, 0 on failure
+ */
+int sceCdWriteRegionParams(u8 arg1, u32 *arg2, u8 *arg3, u32 *result);
 
 #ifdef __cplusplus
 }
