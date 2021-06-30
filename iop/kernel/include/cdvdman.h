@@ -34,6 +34,13 @@ int sceCdSC(int code, int *param);
 int sceCdRC(sceCdCLOCK *clock);
 int sceCdRead0(u32 lsn, u32 sectors, void *buffer, sceCdRMode *mode, int csec, void *callback);
 
+/** Reads DVD video.
+ * SUPPORTED IN NEWER CDVDMAN MODULES WITHIN DVD PLAYER IOPRP ONLY
+ *
+ * @return 1 on success, 0 on failure.
+ */
+int sceCdRV(u32 lsn, u32 sectors, void *buf, sceCdRMode *mode, int arg5, void *cb);
+
 /** send an s-command by function number
  * 
  * @param cmdNum command number
@@ -91,14 +98,6 @@ int sceCdSpinCtrlIOP(u32 speed);
  */
 int sceCdReadDiskID(unsigned int *id);
 
-/** Reads a GUID.
- * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN DNAS IOPRP ONLY
- *
- * @param guid u64 integer where the GUID is stored.
- * @return 1 on success, 0 on failure.
- */
-int sceCdReadGUID(u64 *guid);
-
 #define cdvdman_IMPORTS_start DECLARE_IMPORT_TABLE(cdvdman, 1, 1)
 #define cdvdman_IMPORTS_end END_IMPORT_TABLE
 
@@ -123,7 +122,9 @@ int sceCdReadGUID(u64 *guid);
 #define I_sceCdWI DECLARE_IMPORT(23, sceCdWI)
 #define I_sceCdReadClock DECLARE_IMPORT(24, sceCdReadClock)
 #define I_sceCdWriteClock DECLARE_IMPORT(25, sceCdWriteClock)
-#define I_sceCdStatus DECLARE_IMPORT(28 , sceCdStatus)
+#define I_sceCdReadNVM DECLARE_IMPORT(26, sceCdReadNVM)
+#define I_sceCdWriteNVM DECLARE_IMPORT(27, sceCdWriteNVM)
+#define I_sceCdStatus DECLARE_IMPORT(28, sceCdStatus)
 #define I_sceCdApplySCmd DECLARE_IMPORT(29, sceCdApplySCmd)
 #define I_sceCdSetHDMode DECLARE_IMPORT(30, sceCdSetHDMode)
 #define I_sceCdOpenConfig DECLARE_IMPORT(31, sceCdOpenConfig)
@@ -182,8 +183,25 @@ int sceCdReadGUID(u64 *guid);
 #define I_sceCdReadDvdDualInfo DECLARE_IMPORT(83, sceCdReadDvdDualInfo)
 #define I_sceCdLayerSearchFile DECLARE_IMPORT(84, sceCdLayerSearchFile)
 #define I_sceCdStatus2 DECLARE_IMPORT(90, sceCdStatus2)
+#define I_sceCdReadWakeUpTime DECLARE_IMPORT(109, sceCdReadWakeUpTime)
+#define I_sceCdWriteWakeUpTime DECLARE_IMPORT(110, sceCdWriteWakeUpTime)
 #define I_sceCdApplySCmd2 DECLARE_IMPORT(112, sceCdApplySCmd2)
 #define I_sceCdRE DECLARE_IMPORT(114, sceCdRE)
 #define I_sceCdRcBypassCtl DECLARE_IMPORT(115, sceCdRcBypassCtl)
+#define I_sceRemote2_7 DECLARE_IMPORT(117, sceRemote2_7)
+#define I_sceCdSetLEDsMode DECLARE_IMPORT(120, sceCdSetLEDsMode)
+#define I_sceCdReadPS1BootParam DECLARE_IMPORT(148, sceCdReadPS1BootParam)
+#define I_sceCdSetFanProfile DECLARE_IMPORT(150, sceCdSetFanProfile)
+#define I_sceCdChgSys DECLARE_IMPORT(154, sceCdChgSys)
+#define I_sceCdNoticeGameStart DECLARE_IMPORT(156, sceCdNoticeGameStart)
+#define I_sceCdXLEDCtl DECLARE_IMPORT(163, sceCdXLEDCtl)
+#define I_sceCdBuzzerCtl DECLARE_IMPORT(165, sceCdBuzzerCtl)
+#define I_sceCdXBSPowerCtl DECLARE_IMPORT(171, sceCdXBSPowerCtl)
+#define I_sceCdSetMediumRemoval DECLARE_IMPORT(175, sceCdSetMediumRemoval)
+#define I_sceCdGetMediumRemoval DECLARE_IMPORT(177, sceCdGetMediumRemoval)
+#define I_sceCdXDVRPReset DECLARE_IMPORT(181, sceCdXDVRPReset)
+#define I_sceCdGetWakeUpReason DECLARE_IMPORT(183, sceCdGetWakeUpReason)
+#define I_sceCdReadRegionParams DECLARE_IMPORT(189, sceCdReadRegionParams)
+#define I_sceCdWriteRegionParams DECLARE_IMPORT(191, sceCdWriteRegionParams)
 
 #endif /* __CDVDMAN_H__ */
