@@ -107,8 +107,8 @@ int PS2CamInitDriver(void)
 	printf("PS2 USB Camera Driver v.%d.%d  ((C) www.ps2dev.org)\n",DRIVER_VERSON_MAJOR,DRIVER_VERSON_MINOR);
 
 
-	memset(&Camera[0],    0, sizeof(Camera)*MAX_CAM_DEVICE       );
-	memset(&CamHandle[0], 0, sizeof(Camera)*MAX_CAM_DEVICE_HANDLE);
+	memset(&Camera[0],    0, sizeof(Camera));
+	memset(&CamHandle[0], 0, sizeof(CamHandle));
 
 	for(i=0;i<MAX_CAM_DEVICE_HANDLE;i++)
 	{

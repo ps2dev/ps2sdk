@@ -1121,7 +1121,6 @@ lbl1:
 		return r;
 	}
 	else {
-		strlen(fse->name);
 		len = strlen(currentdir);
 
 		if (len >= 0) {

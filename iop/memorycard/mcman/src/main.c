@@ -1846,9 +1846,6 @@ int mcman_cachedirentry(int port, int slot, char *filename, McCacheDir *pcacheDi
 			if ((fse->mode & fmode) != fmode)
 				return sceMcResDeniedPermit;
 
-			if (mcman_chrpos(p, '/') < 0)
-				strlen(p);
-
 			pfsentry = (u8 *)fse;
 			pcache = (u8 *)&mcman_dircache[0];
 			pfseend = (u8 *)(pfsentry + sizeof(McFsEntry));

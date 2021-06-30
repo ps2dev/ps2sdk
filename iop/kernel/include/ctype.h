@@ -71,6 +71,20 @@
 #define isgraph(c)	(look_ctype_table((unsigned int)(c)) & (_P|_U|_L|_N))
 #define iscntrl(c)	(look_ctype_table((unsigned int)(c)) & (_C))
 
+#if __GNUC__ > 3
+#undef toupper
+#endif
+#ifndef toupper
+#define toupper(c) _toupper(c)
+#endif
+
+#if __GNUC__ > 3
+#undef tolower
+#endif
+#ifndef tolower
+#define tolower(c) _tolower(c)
+#endif
+
 #endif
 
 #endif /* __CTYPE_H__ */

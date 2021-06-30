@@ -4,7 +4,7 @@ I_memcpy
 I_memset
 I_strlen
 I_strcpy
-I_strncmp
+I_strcmp
 I_strncpy
 sysclib_IMPORTS_end
 

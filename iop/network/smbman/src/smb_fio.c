@@ -1003,7 +1003,7 @@ static int smb_GetShareList(smbGetShareList_in_t *getsharelist)
 static int smb_OpenShare(smbOpenShare_in_t *openshare)
 {
 	int r;
-	char tree_str[256];
+	char tree_str[274];
 	server_specs_t *specs;
 
 	specs = (server_specs_t *)getServerSpecs();

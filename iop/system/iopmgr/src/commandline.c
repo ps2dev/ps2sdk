@@ -160,33 +160,33 @@ void list_fs_devices(int mgrtype)
  */
 void cmdline_handle(char *command, char *arg1)
 {
-  if (!strncmp("modlist",command,7))
+  if (!strcmp("modlist",command))
     list_all_modules();
-  else if (!strncmp("iomanx",command,6))
+  else if (!strcmp("iomanx",command))
   {
     list_devices_iomanx();
     list_fs_devices(IOPMGR_DEVTYPE_IOMANX);
   }
-  else if (!strncmp("ioman",command,5))
+  else if (!strcmp("ioman",command))
   {
     list_devices_ioman();
     list_fs_devices(IOPMGR_DEVTYPE_IOMAN);
   }
-  else if (!strncmp("devices",command,7))
+  else if (!strcmp("devices",command))
   {
     list_devices_ioman();
     list_devices_iomanx();
     list_fs_devices(IOPMGR_DEVTYPE_ALL);
   }
-  else if (!strncmp("libs",command,4))
+  else if (!strcmp("libs",command))
     list_all_libraries();
-  else if (!strncmp("release",command,7))
+  else if (!strcmp("release",command))
     shutdown();
-  else if (!strncmp("help",command,4))
+  else if (!strcmp("help",command))
   {
     printf("\nCommands are:\n modlist - List of Loaded Modules\n iomanx  - List iomanx Devices\n ioman   - List ioman Devices\n devices - List all Devices\n libs    - List Registered Libraries\n release - release iopmgr lib if loaded\n help    - This page\n");
   }
-  else if (!strncmp("unreg",command,7))
+  else if (!strcmp("unreg",command))
   {
     if (arg1 != 0)
     {
