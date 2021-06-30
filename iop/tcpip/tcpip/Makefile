@@ -10,7 +10,7 @@
 PS2IP_DHCP = 1
 PS2IP_DNS = 1
 
-LWIP = $(PS2SDKSRC)/common/tcpip/lwip-2.0.0
+LWIP = $(PS2SDKSRC)/common/tcpip/lwip
 PS2IP_BASE = $(PS2SDKSRC)/iop/tcpip/tcpip-base
 
 IOP_BIN ?= ps2ip.irx
