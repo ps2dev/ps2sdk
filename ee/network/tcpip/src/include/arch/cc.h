@@ -2,16 +2,8 @@
 #define __CC_H__
 
 #include <errno.h>
+#include <stdlib.h>
 #include <stddef.h>
-
-typedef unsigned char		u8_t;
-typedef signed char		s8_t;
-typedef unsigned short int	u16_t;
-typedef signed short int	s16_t;
-typedef unsigned int		u32_t;
-typedef signed int		s32_t;
-
-typedef u32_t mem_ptr_t;
 
 #define PACK_STRUCT_FIELD(x) x __attribute((packed))
 #define PACK_STRUCT_STRUCT __attribute((packed))
@@ -32,22 +24,10 @@ typedef u32_t mem_ptr_t;
 #define LWIP_PLATFORM_ASSERT(args)
 #endif
 
-/* Define (sn)printf formatters for these lwIP types */
-#define U8_F "hu"
-#define S8_F "hd"
-#define X8_F "hx"
-#define U16_F "hu"
-#define S16_F "hd"
-#define X16_F "hx"
-#define U32_F "u"
-#define S32_F "d"
-#define X32_F "x"
-#define SZT_F "uz"
-
-#define LWIP_NO_STDINT_H	1	//stdint.h does not exist.
-#define LWIP_NO_INTTYPES_H	1	//inttypes.h does not exist.
-
 #define lwip_htons(x) PP_HTONS(x)
 #define lwip_htonl(x) PP_HTONL(x)
+
+// I think there is an issue in the lwip code that doesn't import stdlib properly
+#define LWIP_RAND() ((u32_t)rand())
 
 #endif /* __CC_H__ */
