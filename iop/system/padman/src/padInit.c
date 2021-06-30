@@ -266,7 +266,7 @@ static void DmaSendEE(void)
 		if (pad_ee_addr)
 		{
 			if( (sif_buffer[0] % 2) == 0)
-				sifdma_td[sifdma_count].dest = pad_ee_addr + 128;
+				sifdma_td[sifdma_count].dest = (void *)(((u8 *)pad_ee_addr) + 128);
 			else
 				sifdma_td[sifdma_count].dest = pad_ee_addr;
 
