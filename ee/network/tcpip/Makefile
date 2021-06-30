@@ -11,7 +11,7 @@ PS2IP_DHCP = 1
 PS2IP_DNS = 1
 
 # Change this to point to the version of LWIP this is being compiled with.
-LWIP = $(PS2SDKSRC)/common/tcpip/lwip-2.0.0
+LWIP = $(PS2SDKSRC)/common/tcpip/lwip
 
 EE_LIB = libps2ip.a
 
