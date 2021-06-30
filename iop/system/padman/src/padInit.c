@@ -55,23 +55,24 @@ static void TransferThread(void *arg)
 
 u32 padSetupEEButtonData(u32 port, u32 slot, padState_t *pstate)
 {
+	u8 *data = pad_ee_addr ? pstate->ee_pdata.data : pstate->ee_old_pdata.data;
 	if(padState[port][slot].buttonDataReady == 1)
 	{
 		int i;
 
-		pstate->ee_pdata.data[0] = 0;
-		pstate->ee_pdata.data[1] = padState[port][slot].modeCurId;
-		pstate->ee_pdata.data[31] = padState[port][slot].buttonStatus[2];
+		data[0] = 0;
+		data[1] = padState[port][slot].modeCurId;
+		data[31] = padState[port][slot].buttonStatus[2];
 
 		for(i=2; i < 31; i++)
-			pstate->ee_pdata.data[i] = padState[port][slot].buttonStatus[i+1];
+			data[i] = padState[port][slot].buttonStatus[i+1];
 
 		if(padState[port][slot].modeCurId == 0x12)
 		{
-			pstate->ee_pdata.data[2] = 0xFF,
-			pstate->ee_pdata.data[3] = 0xFF;
-			pstate->ee_pdata.data[4] = 0;
-			pstate->ee_pdata.data[5] = 0;
+			data[2] = 0xFF,
+			data[3] = 0xFF;
+			data[4] = 0;
+			data[5] = 0;
 		}
 
 		//New in v3.6
@@ -80,137 +81,137 @@ u32 padSetupEEButtonData(u32 port, u32 slot, padState_t *pstate)
 			int value;
 
 			//Check button status & update pressure data
-			value = ~((pstate->ee_pdata.data[2] << 8) | pstate->ee_pdata.data[3]);
+			value = ~((data[2] << 8) | data[3]);
 			if(value & 0x2000)
 			{
-				if(pstate->ee_pdata.data[8] == 0)
-					pstate->ee_pdata.data[8] = 1;
+				if(data[8] == 0)
+					data[8] = 1;
 			}
 			else
 			{
-				if(pstate->ee_pdata.data[8] != 0)
-					pstate->ee_pdata.data[8] = 0;
+				if(data[8] != 0)
+					data[8] = 0;
 			}
 
 			if(value & 0x8000)
 			{
-				if(pstate->ee_pdata.data[9] == 0)
-					pstate->ee_pdata.data[9] = 1;
+				if(data[9] == 0)
+					data[9] = 1;
 			}
 			else
 			{
-				if(pstate->ee_pdata.data[9] != 0)
-					pstate->ee_pdata.data[9] = 0;
+				if(data[9] != 0)
+					data[9] = 0;
 			}
 
 			if(value & 0x1000)
 			{
-				if(pstate->ee_pdata.data[10] == 0)
-					pstate->ee_pdata.data[10] = 1;
+				if(data[10] == 0)
+					data[10] = 1;
 			}
 			else
 			{
-				if(pstate->ee_pdata.data[10] != 0)
-					pstate->ee_pdata.data[10] = 0;
+				if(data[10] != 0)
+					data[10] = 0;
 			}
 
 			if(value & 0x4000)
 			{
-				if(pstate->ee_pdata.data[11] == 0)
-					pstate->ee_pdata.data[11] = 1;
+				if(data[11] == 0)
+					data[11] = 1;
 			}
 			else
 			{
-				if(pstate->ee_pdata.data[11] != 0)
-					pstate->ee_pdata.data[11] = 0;
+				if(data[11] != 0)
+					data[11] = 0;
 			}
 
 			if(value & 0x0010)
 			{
-				if(pstate->ee_pdata.data[12] == 0)
-					pstate->ee_pdata.data[12] = 1;
+				if(data[12] == 0)
+					data[12] = 1;
 			}
 			else
 			{
-				if(pstate->ee_pdata.data[12] != 0)
-					pstate->ee_pdata.data[12] = 0;
+				if(data[12] != 0)
+					data[12] = 0;
 			}
 
 			if(value & 0x0020)
 			{
-				if(pstate->ee_pdata.data[13] == 0)
-					pstate->ee_pdata.data[13] = 1;
+				if(data[13] == 0)
+					data[13] = 1;
 			}
 			else
 			{
-				if(pstate->ee_pdata.data[13] != 0)
-					pstate->ee_pdata.data[13] = 0;
+				if(data[13] != 0)
+					data[13] = 0;
 			}
 
 			if(value & 0x0040)
 			{
-				if(pstate->ee_pdata.data[14] == 0)
-					pstate->ee_pdata.data[14] = 1;
+				if(data[14] == 0)
+					data[14] = 1;
 			}
 			else
 			{
-				if(pstate->ee_pdata.data[14] != 0)
-					pstate->ee_pdata.data[14] = 0;
+				if(data[14] != 0)
+					data[14] = 0;
 			}
 
 			if(value & 0x0080)
 			{
-				if(pstate->ee_pdata.data[15] == 0)
-					pstate->ee_pdata.data[15] = 1;
+				if(data[15] == 0)
+					data[15] = 1;
 			}
 			else
 			{
-				if(pstate->ee_pdata.data[15] != 0)
-					pstate->ee_pdata.data[15] = 0;
+				if(data[15] != 0)
+					data[15] = 0;
 			}
 
 			if(value & 0x0004)
 			{
-				if(pstate->ee_pdata.data[16] == 0)
-					pstate->ee_pdata.data[16] = 1;
+				if(data[16] == 0)
+					data[16] = 1;
 			}
 			else
 			{
-				if(pstate->ee_pdata.data[16] != 0)
-					pstate->ee_pdata.data[16] = 0;
+				if(data[16] != 0)
+					data[16] = 0;
 			}
 
 			if(value & 0x0008)
 			{
-				if(pstate->ee_pdata.data[17] == 0)
-					pstate->ee_pdata.data[17] = 1;
+				if(data[17] == 0)
+					data[17] = 1;
 			}
 			else
 			{
-				if(pstate->ee_pdata.data[17] != 0)
-					pstate->ee_pdata.data[17] = 0;
+				if(data[17] != 0)
+					data[17] = 0;
 			}
 
 			if(value & 0x0001)
 			{
-				if(pstate->ee_pdata.data[18] == 0)
-					pstate->ee_pdata.data[18] = 1;
+				if(data[18] == 0)
+					data[18] = 1;
 			}
 			else
 			{
-				if(pstate->ee_pdata.data[18] != 0)
-					pstate->ee_pdata.data[18] = 0;
+				if(data[18] != 0)
+					data[18] = 0;
 			}
 
 			if(value & 0x0002)
 			{
-				if(pstate->ee_pdata.data[19] == 0)
-					pstate->ee_pdata.data[19] = 1;
+				if(data[19] == 0)
+					data[19] = 1;
 			}
 			else
 			{
-				if(pstate->ee_pdata.data[19] != 0)
-					pstate->ee_pdata.data[19] = 0;
+				if(data[19] != 0)
+					data[19] = 0;
 			}
 		}
 
@@ -220,10 +221,10 @@ u32 padSetupEEButtonData(u32 port, u32 slot, padState_t *pstate)
 	{
 		int i;
 
-		pstate->ee_pdata.data[0] = 0xFF;
+		data[0] = 0xFF;
 
 		for(i=1; i < 32; i++)
-			pstate->ee_pdata.data[i] = 0;
+			data[i] = 0;
 
 		return 0;
 	}
@@ -262,14 +263,18 @@ static void DmaSendEE(void)
 		sif_buffer[1] = pad_portdata[0];
 		sif_buffer[2] = pad_portdata[1];
 
-		if( (sif_buffer[0] % 2) == 0)
-			sifdma_td[0].dest = pad_ee_addr + 128;
-		else
-			sifdma_td[0].dest = pad_ee_addr;
+		if (pad_ee_addr)
+		{
+			if( (sif_buffer[0] % 2) == 0)
+				sifdma_td[sifdma_count].dest = (void *)(((u8 *)pad_ee_addr) + 128);
+			else
+				sifdma_td[sifdma_count].dest = pad_ee_addr;
 
-		sifdma_td[0].src = sif_buffer;
-		sifdma_td[0].size = 128;
-		sifdma_td[0].attr = 0;
+			sifdma_td[sifdma_count].src = sif_buffer;
+			sifdma_td[sifdma_count].size = 128;
+			sifdma_td[sifdma_count].attr = 0;
+			sifdma_count += 1;
+		}
 
 		for(port=0; port < 2; port++)
 		{
@@ -297,6 +302,14 @@ static void DmaSendEE(void)
 					p->ee_pdata.state = p->state;
 					p->ee_pdata.reqState = p->reqState;
 					p->ee_pdata.currentTask = p->currentTask;
+					p->ee_old_pdata.frame = p->frame;
+					p->ee_old_pdata.model = p->model;
+					p->ee_old_pdata.state = p->state;
+					if (p->state == PAD_STATE_ERROR && p->findPadRetries != 0)
+					{
+						p->ee_old_pdata.state = PAD_STATE_FINDPAD;
+					}
+					p->ee_old_pdata.reqState = p->reqState;
 
 					p->frame++;
 
@@ -321,22 +334,15 @@ static void DmaSendEE(void)
 
 					p->ee_pdata.stat70bit = p->stat70bit;
 
-					if( p->buttonDataReady == 1)
-					{
-						p->ee_pdata.length = padSetupEEButtonData(port, slot, p);
-					}
-					else
-					{
-						p->ee_pdata.length = 0;
-					}
+					*((pad_ee_addr) ? &(p->ee_pdata.length) : &(p->ee_old_pdata.length)) = (p->buttonDataReady == 1) ? padSetupEEButtonData(port, slot, p) : 0;
 
 					if( (p->frame & 1) == 0)
 						sifdma_td[sifdma_count].dest = (void*)p->padarea_ee_addr;
 					else
-						sifdma_td[sifdma_count].dest = (void*)(p->padarea_ee_addr + 128);
+						sifdma_td[sifdma_count].dest = (void*)(p->padarea_ee_addr + (pad_ee_addr ? 128 : 64));
 
-					sifdma_td[sifdma_count].src =  &p->ee_pdata;
-					sifdma_td[sifdma_count].size = 128;
+					sifdma_td[sifdma_count].src = pad_ee_addr ? (void *)&p->ee_pdata : (void *)&p->ee_old_pdata;
+					sifdma_td[sifdma_count].size = pad_ee_addr ? 128 : 64;
 					sifdma_td[sifdma_count].attr = 0;
 
 					sifdma_count++;

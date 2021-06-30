@@ -20,6 +20,9 @@
 #define PAD_BIND_RPC_ID1 0x80000100
 #define PAD_BIND_RPC_ID2 0x80000101
 
+#define PAD_BIND_OLD_RPC_ID1 0x8000010f
+#define PAD_BIND_OLD_RPC_ID2 0x8000011f
+
 enum PAD_RPCCMD {
 	PAD_RPCCMD_OPEN	= 0x01,
 	// 0x2 undefined
@@ -45,14 +48,14 @@ enum PAD_RPCCMD {
 // RPC Server
 static s32 ThreadIdRpcServer;
 static SifRpcDataQueue_t qd;
-static SifRpcServerData_t sd;
-static u32 sb[32]; // server buffer
+static SifRpcServerData_t sd[2];
+static u32 sb[2][32]; // server buffer
 
 // RPC Server Extended
 static s32 ThreadIdRpcServerExt;
 static SifRpcDataQueue_t qdext;
-static SifRpcServerData_t sdext;
-static u32 sbext[32]; // server buffer
+static SifRpcServerData_t sdext[2];
+static u32 sbext[2][32]; // server buffer
 
 static void* RpcPadOpen(u32 *data)
 {
@@ -173,8 +176,23 @@ static void* RpcGetModVersion(u32 *data)
 static void* RpcServer(int fno, void *buffer, int length)
 {
 	u32 *data = (u32*)buffer;
+	u32 command = data[0];
 
-	switch(data[0])
+	if ((0x00000100 & command) != 0)
+	{
+		if ((0x80000000 & command) != 0)
+		{
+			command &= 0xff;
+			command += 1;
+		}
+		else if (command == 0x00000100)
+		{
+			// Unofficial: libpad EE client from v1.3.4 has this RPC function implemented, but is not implemented within its PADMAN module.
+			return buffer;
+		}
+	}
+
+	switch(command)
 	{
 		case PAD_RPCCMD_INIT:			return RpcPadInit(data);
 		case PAD_RPCCMD_END:			return RpcPadEnd(data);
@@ -219,7 +237,8 @@ static void RpcThread(void *arg)
 
 	sceSifInitRpc(0);
 	sceSifSetRpcQueue(&qd, GetThreadId());
-	sceSifRegisterRpc(&sd, PAD_BIND_RPC_ID1, &RpcServer, sb, NULL, NULL, &qd);
+	sceSifRegisterRpc(&sd[0], PAD_BIND_RPC_ID1, &RpcServer, sb[0], NULL, NULL, &qd);
+	sceSifRegisterRpc(&sd[1], PAD_BIND_OLD_RPC_ID1, &RpcServer, sb[1], NULL, NULL, &qd);
 	sceSifRpcLoop(&qd);
 }
 
@@ -233,7 +252,8 @@ static void RpcThreadExt(void *arg)
 
 	sceSifInitRpc(0);
 	sceSifSetRpcQueue(&qdext, GetThreadId());
-	sceSifRegisterRpc(&sdext, PAD_BIND_RPC_ID2, &RpcServerExt, sbext, NULL, NULL, &qdext);
+	sceSifRegisterRpc(&sdext[0], PAD_BIND_RPC_ID2, &RpcServerExt, sbext[0], NULL, NULL, &qdext);
+	sceSifRegisterRpc(&sdext[1], PAD_BIND_OLD_RPC_ID2, &RpcServerExt, sbext[1], NULL, NULL, &qdext);
 	sceSifRpcLoop(&qdext);
 }
 

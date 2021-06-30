@@ -137,7 +137,28 @@ typedef struct
 
 typedef struct
 {
+    u32 frame;
+    u8 state;
+    u8 reqState;
+    u8 ok;
+    u8 unkn7;
+    u8 data[32];
+    u32 length;
+    u8 request;
+    /** CTP=1/no config; CTP=2/config, acts... */
+    u8 CTP;
+    /** 1, 2 or 3 */
+    u8 model;
+    /** the data in the buffer is already corrected */
+    u8 correction;
+    u8 errorCount;
+    u8 unk49[15];
+} ee_old_paddata_t;
+
+typedef struct
+{
 	ee_paddata_t ee_pdata __attribute__((aligned(4)));
+	ee_old_paddata_t ee_old_pdata __attribute__((aligned(4)));
 	u8 modeConfig;
 	u8 modeCurId;
 	u8 model;

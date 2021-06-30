@@ -20,47 +20,89 @@ IRX_ID(MODNAME, 2, 8);
 	#define DPRINTF(args...)	printf(args)
 #endif
 
-static const u8 XMCSERV_RpcCmd[2][16] =
-{	// libmc rpc cmd values for XMCMAN/XMCSERV
-	{	0xFE,	// CMD_INIT
-		0x01,	// CMD_GETINFO
-		0x02,	// CMD_OPEN
-		0x03,	// CMD_CLOSE
-		0x04,	// CMD_SEEK
-		0x05,	// CMD_READ
-		0x06,	// CMD_WRITE
-		0x0A,	// CMD_FLUSH
-		0x0C,	// CMD_CHDIR
-		0x0D,	// CMD_GETDIR
-		0x0E,	// CMD_SETFILEINFO
-		0x0F,	// CMD_DELETE
-		0x10,	// CMD_FORMAT
-		0x11,	// CMD_UNFORMAT
-		0x12,	// CMD_GETENTSPACE
-		0x33	// CMD_CHECKBLOCK (calls xmcman_funcs: 45)
+static const u8 MCSERV_RpcCmd[2][2][17] =
+{
+	{	// libmc rpc cmd values for MCMAN/MCSERV
+		{	0x70,	// CMD_INIT
+			0x78,	// CMD_GETINFO
+			0x71,	// CMD_OPEN
+			0x72,	// CMD_CLOSE
+			0x75,	// CMD_SEEK
+			0x73,	// CMD_READ
+			0x74,	// CMD_WRITE
+			0x7A,	// CMD_FLUSH
+			0x7B,	// CMD_CHDIR
+			0x76,	// CMD_GETDIR
+			0x7C,	// CMD_SETFILEINFO
+			0x79,	// CMD_DELETE
+			0x77,	// CMD_FORMAT
+			0x80,	// CMD_UNFORMAT
+			0x7D,	// CMD_ERASE_BLOCK
+			0x7E,	// CMD_READ_PAGE
+			0x7F,	// CMD_WRITE_PAGE
+		},
+		{ // corresponding internal rpc function
+			0x00,	// sceMcInit
+			0x08,	// sceMcGetInfo
+			0x01,	// sceMcOpen
+			0x02,	// sceMcClose
+			0x05,	// sceMcSeek
+			0x03,	// sceMcRead
+			0x04,	// sceMcWrite
+			0x0A,	// sceMcFlush
+			0x0B,	// sceMcChDir
+			0x06,	// sceMcGetDir
+			0x0C,	// sceMcSetFileInfo
+			0x09,	// sceMcDelete
+			0x07,	// sceMcFormat
+			0x10,	// sceMcUnformat
+			0x0D,	// sceMcEraseBlock
+			0x0E,	// sceMcReadPage
+			0x0F,	// sceMcWritePage
+		},
 	},
-	{ // corresponding internal rpc function
-		0x00,	// sceMcInit
-		0x12,	// sceMcGetInfo2
-		0x01,	// sceMcOpen
-		0x02,	// sceMcClose
-		0x05,	// sceMcSeek
-		0x11,	// sceMcRead2
-		0x04,	// sceMcWrite
-		0x0A,	// sceMcFlush
-		0x0B,	// sceMcChDir
-		0x06,	// sceMcGetDir
-		0x0C,	// sceMcSetFileInfo
-		0x09,	// sceMcDelete
-		0x07,	// sceMcFormat
-		0x10,	// sceMcUnformat
-		0x13,	// sceMcGetEntSpace
-		0x14	// sceMcCheckBlock (calls xmcman_funcs: 45)
-	}
+	{	// libmc rpc cmd values for XMCMAN/XMCSERV
+		{	0xFE,	// CMD_INIT
+			0x01,	// CMD_GETINFO
+			0x02,	// CMD_OPEN
+			0x03,	// CMD_CLOSE
+			0x04,	// CMD_SEEK
+			0x05,	// CMD_READ
+			0x06,	// CMD_WRITE
+			0x0A,	// CMD_FLUSH
+			0x0C,	// CMD_CHDIR
+			0x0D,	// CMD_GETDIR
+			0x0E,	// CMD_SETFILEINFO
+			0x0F,	// CMD_DELETE
+			0x10,	// CMD_FORMAT
+			0x11,	// CMD_UNFORMAT
+			0x12,	// CMD_GETENTSPACE
+			0x33,	// CMD_CHECKBLOCK (calls xmcman_funcs: 45)
+		},
+		{ // corresponding internal rpc function
+			0x00,	// sceMcInit
+			0x12,	// sceMcGetInfo2
+			0x01,	// sceMcOpen
+			0x02,	// sceMcClose
+			0x05,	// sceMcSeek
+			0x11,	// sceMcRead2
+			0x04,	// sceMcWrite
+			0x0A,	// sceMcFlush
+			0x0B,	// sceMcChDir
+			0x06,	// sceMcGetDir
+			0x0C,	// sceMcSetFileInfo
+			0x09,	// sceMcDelete
+			0x07,	// sceMcFormat
+			0x10,	// sceMcUnformat
+			0x13,	// sceMcGetEntSpace
+			0x14,	// sceMcCheckBlock (calls xmcman_funcs: 45)
+			0x15,	// sceMcServChangePriority
+		},
+	},
 };
 
 // rpc command handling array
-static void *rpc_funcs_array[21] = {
+static void *rpc_funcs_array[22] = {
     (void *)sceMcInit,
     (void *)sceMcOpen,
     (void *)sceMcClose,
@@ -81,10 +123,12 @@ static void *rpc_funcs_array[21] = {
     (void *)sceMcRead2,
     (void *)sceMcGetInfo2,
     (void *)sceMcGetEntSpace,
-    (void *)sceMcCheckBlock
+    (void *)sceMcCheckBlock,
+    (void *)sceMcServChangePriority
 };
 
 static int mcserv_tidS_0400;
+static int mcserv_interface_type = 0;
 
 static SifRpcDataQueue_t mcserv_qdS_0400 __attribute__((aligned(64)));
 static SifRpcServerData_t mcserv_sdS_0400 __attribute__((aligned(64)));
@@ -236,18 +280,26 @@ void *cb_rpc_S_0400(u32 fno, void *buf, int size)
 	int (*rpc_func)(void);
 	register int i;
 
-	if (mcman_type == XMCMAN) {
-		for (i=0; i<16; i++) { // retrieve correct function number for xmcserv
-			if (fno == XMCSERV_RpcCmd[0][i]) {
-				fno = XMCSERV_RpcCmd[1][i];
-				break;
-			}
+	// Determine the RPC client based on the init command.
+	if (fno == MCSERV_RpcCmd[0][0][0]) // MCSERV
+	{
+		mcserv_interface_type = 0;
+	}
+	else if (fno == MCSERV_RpcCmd[1][0][0]) // XMCSERV
+	{
+		mcserv_interface_type = 1;
+	}
+
+	for (i=0; i<sizeof(MCSERV_RpcCmd[0][0]) / sizeof(MCSERV_RpcCmd[0][0][0]); i++) { // retrieve correct function number for mcserv
+		if (fno == MCSERV_RpcCmd[mcserv_interface_type][0][i]) {
+			fno = MCSERV_RpcCmd[mcserv_interface_type][1][i];
+			break;
 		}
 	}
-	else { // retrieve correct function number for mcserv
-		fno -= 112;
-		if (fno > 16)
-			return (void *)&rpc_stat;
+	// If function is not found, return
+	if (fno >= sizeof(rpc_funcs_array) / sizeof(rpc_funcs_array[0]))
+	{
+		return (void *)&rpc_stat;
 	}
 
 	// Get function pointer
@@ -396,6 +448,12 @@ int sceMcGetEntSpace(void)
 int sceMcCheckBlock(void)
 {
 	return _McCheckBlock(&mcserv_rpc_buf);
+}
+
+//--------------------------------------------------------------
+int sceMcServChangePriority(void)
+{
+	return _McServChangePriority(&mcserv_rpc_buf);
 }
 
 //--------------------------------------------------------------
@@ -1227,6 +1285,13 @@ int _McCheckBlock(void *rpc_buf)
 #endif
 
 	return pMcCheckBlock(dP->port, dP->slot, dP->offset);
+}
+
+//--------------------------------------------------------------
+int _McServChangePriority(void *rpc_buf)
+{
+	// This function is stubbed.
+	return sceMcResSucceed;
 }
 
 //--------------------------------------------------------------
