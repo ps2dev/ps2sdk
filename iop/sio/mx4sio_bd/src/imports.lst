@@ -30,7 +30,7 @@ stdio_IMPORTS_end
 #endif
 
 sysclib_IMPORTS_start
-I_strncmp
+I_strcmp
 stdio_IMPORTS_end
 
 thbase_IMPORTS_start

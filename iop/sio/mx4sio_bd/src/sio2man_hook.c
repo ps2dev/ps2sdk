@@ -161,7 +161,7 @@ static int hookRegisterLibraryEntries(iop_library_t* lib)
 {
     M_DEBUG("RegisterLibraryEntries: %s 0x%x\n", lib->name, lib->version);
 
-    if (!strncmp(lib->name, "sio2man", 8))
+    if (!strcmp(lib->name, "sio2man"))
         _sio2man_hook(lib);
 
     return pRegisterLibraryEntries(lib);
