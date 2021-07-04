@@ -25,6 +25,9 @@ void *AllocHeapMemory(void *heap, size_t nbytes);
 int FreeHeapMemory(void *heap, void *ptr);
 int HeapTotalFreeSize(void *heap);
 
+void HeapPrepare(void* mem, int size);
+int HeapChunkSize(void* chunk);
+
 #define heaplib_IMPORTS_start DECLARE_IMPORT_TABLE(heaplib, 1, 1)
 #define heaplib_IMPORTS_end END_IMPORT_TABLE
 
@@ -33,5 +36,7 @@ int HeapTotalFreeSize(void *heap);
 #define I_AllocHeapMemory DECLARE_IMPORT(6, AllocHeapMemory)
 #define I_FreeHeapMemory DECLARE_IMPORT(7, FreeHeapMemory)
 #define I_HeapTotalFreeSize DECLARE_IMPORT(8, HeapTotalFreeSize)
+#define I_HeapPrepare DECLARE_IMPORT(11, HeapPrepare)
+#define I_HeapChunkSize DECLARE_IMPORT(15, HeapChunkSize)
 
 #endif /* __HEAPLIB_H__ */

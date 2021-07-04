@@ -56,6 +56,8 @@
 // does it really return void ?
 typedef void (*exception_handler_t)(void);
 
+void* GetExHandlersTable();
+
 /** will call RegisterPriorityExceptionHandler with prio = 2 */
 int RegisterExceptionHandler(int exception, exception_handler_t);
 int RegisterPriorityExceptionHandler(int exception, int priority, exception_handler_t);
@@ -66,6 +68,7 @@ int ReleaseDefaultExceptionHandler(exception_handler_t);
 #define excepman_IMPORTS_start DECLARE_IMPORT_TABLE(excepman, 1, 2)
 #define excepman_IMPORTS_end END_IMPORT_TABLE
 
+#define I_GetExHandlersTable DECLARE_IMPORT(3, GetExHandlersTable)
 #define I_RegisterExceptionHandler DECLARE_IMPORT(4, RegisterExceptionHandler)
 #define I_RegisterPriorityExceptionHandler DECLARE_IMPORT(5, RegisterPriorityExceptionHandler)
 #define I_RegisterDefaultExceptionHandler DECLARE_IMPORT(6, RegisterDefaultExceptionHandler)

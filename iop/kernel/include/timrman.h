@@ -61,6 +61,8 @@
 		RTC4	SYSCLOCK		None		32	256
 		RTC5	SYSCLOCK		None		32	256	*/
 
+void* GetTimersTable();
+
 int AllocHardTimer(int source, int size, int prescale);
 int ReferHardTimer(int source, int size, int mode, int modemask);
 int FreeHardTimer(int timid);
@@ -110,6 +112,7 @@ int GetHardTimerIntrCode(int timid);
 #define timrman_IMPORTS_start DECLARE_IMPORT_TABLE(timrman, 1, 1)
 #define timrman_IMPORTS_end END_IMPORT_TABLE
 
+#define I_GetTimersTable DECLARE_IMPORT(3, GetTimersTable)
 #define I_AllocHardTimer DECLARE_IMPORT(4, AllocHardTimer)
 #define I_ReferHardTimer DECLARE_IMPORT(5, ReferHardTimer)
 #define I_FreeHardTimer DECLARE_IMPORT(6, FreeHardTimer)
