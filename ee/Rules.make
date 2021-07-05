@@ -15,11 +15,17 @@ EE_SAMPLE_DIR ?= samples/
 
 EE_INCS := $(EE_INCS) -I$(EE_SRC_DIR) -I$(EE_SRC_DIR)include -I$(EE_INC_DIR) -I$(PS2SDKSRC)/ee/kernel/include -I$(PS2SDKSRC)/common/include -I$(PS2SDKSRC)/ee/libc/include -I$(PS2SDKSRC)/ee/erl/include
 
+# Optimization compiler flags
+EE_OPTFLAGS ?= -O2
+
+# Warning compiler flags
+EE_WARNFLAGS ?= -Wall -Werror
+
 # C compiler flags
-EE_CFLAGS := -D_EE -G0 -O2 -Wall -Werror $(EE_INCS) $(EE_CFLAGS)
+EE_CFLAGS := -D_EE -G0 $(EE_OPTFLAGS) $(EE_WARNFLAGS) $(EE_INCS) $(EE_CFLAGS)
 
 # C++ compiler flags
-EE_CXXFLAGS := -D_EE -G0 -O2 -Wall -Werror $(EE_INCS) $(EE_CXXFLAGS)
+EE_CXXFLAGS := -D_EE -G0 -$(EE_OPTFLAGS) $(EE_WARNFLAGS) $(EE_INCS) $(EE_CXXFLAGS)
 
 # Linker flags
 # EE_LDFLAGS := $(EE_LDFLAGS)

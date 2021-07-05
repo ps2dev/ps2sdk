@@ -23,10 +23,16 @@ endif
 # include dir
 IOP_INCS := $(IOP_INCS) -I$(IOP_SRC_DIR) -I$(IOP_SRC_DIR)include -I$(IOP_INC_DIR) -I$(PS2SDKSRC)/iop/kernel/include -I$(PS2SDKSRC)/common/include
 
+# Optimization compiler flags
+IOP_OPTFLAGS ?= -Os
+
+# Warning compiler flags
+IOP_WARNFLAGS ?= -Wall -Werror
+
 # C compiler flags
 # -fno-builtin is required to prevent the GCC built-in functions from being included,
 #   for finer-grained control over what goes into each IRX.
-IOP_CFLAGS := -D_IOP -fno-builtin -Os -G0 -Wall -Werror $(IOP_INCS) $(IOP_CFLAGS)
+IOP_CFLAGS := -D_IOP -fno-builtin -G0 $(IOP_OPTFLAGS) $(IOP_WARNFLAGS) $(IOP_INCS) $(IOP_CFLAGS)
 # Linker flags
 IOP_LDFLAGS := -nostdlib -s $(IOP_LDFLAGS)
 
