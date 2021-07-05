@@ -21,6 +21,10 @@ EE_OPTFLAGS ?= -O2
 # Warning compiler flags
 EE_WARNFLAGS ?= -Wall -Werror
 
+# These flags will generate LTO and non-LTO code in the same object file,
+# allowing the choice of using LTO or not in the final linked binary.
+EE_FATLTOFLAGS ?= -flto -ffat-lto-objects
+
 # C compiler flags
 EE_CFLAGS := -D_EE -G0 $(EE_OPTFLAGS) $(EE_WARNFLAGS) $(EE_INCS) $(EE_CFLAGS)
 
@@ -57,10 +61,10 @@ else
 endif
 
 $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.c
-	$(EE_C_COMPILE) -c $< -o $@
+	$(EE_C_COMPILE) $(EE_FATLTOFLAGS) -c $< -o $@
 
 $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.cpp
-	$(EE_CXX_COMPILE) -c $< -o $@
+	$(EE_CXX_COMPILE) $(EE_FATLTOFLAGS) -c $< -o $@
 
 $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.S
 	$(EE_C_COMPILE) -c $< -o $@
