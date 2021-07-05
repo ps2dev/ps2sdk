@@ -90,6 +90,9 @@ u32 dmac_ch_get_chcr(u32 channel);
 void dmac_ch_set_tadr(u32 channel, u32 val);
 u32 dmac_ch_get_tadr(u32 channel);
 
+void dmac_set_4_9_a(u32 channel, u32 val);
+u32 dmac_get_4_9_a(u32 channel);
+
 /* Dmac P??? Control Registers  */
 void dmac_set_dpcr(u32 val);
 u32 dmac_get_dpcr(void);
@@ -104,9 +107,19 @@ u32 dmac_get_dicr(void);
 void dmac_set_dicr2(u32 val);
 u32 dmac_get_dicr2(void);
 
+void dmac_set_BF80157C(u32 val);
+u32 dmac_get_BF80157C(void);
+
+void dmac_set_BF801578(u32 val);
+u32 dmac_get_BF801578(void);
+
 /* Initialize the given channel and start the transfer.  Returns 1 if the
    transfer was started, and 0 on error.  */
 int dmac_request(u32 channel, void * addr, u32 size, u32 count, int dir);	//sceSetSliceDMA
+
+int dmac_set_dma_chained_spu_sif0(u32 channel, u32 size, u32 tadr);
+int dmac_set_dma_sif0(u32 channel, u32 size, u32 tadr);
+int dmac_set_dma_sif1(u32 ch, u32 size);
 
 /* Start a transfer on the given channel.  */
 void dmac_transfer(u32 channel);	//sceStartDMA
@@ -128,6 +141,8 @@ void dmac_disable(u32 channel);	//sceDisableDMAChannel
 #define I_dmac_ch_get_chcr DECLARE_IMPORT(9, dmac_ch_get_chcr)
 #define I_dmac_ch_set_tadr DECLARE_IMPORT(10, dmac_ch_set_tadr)
 #define I_dmac_ch_get_tadr DECLARE_IMPORT(11, dmac_ch_get_tadr)
+#define I_dmac_set_4_9_a DECLARE_IMPORT(12, dmac_set_4_9_a)
+#define I_dmac_get_4_9_a DECLARE_IMPORT(13, dmac_get_4_9_a)
 #define I_dmac_set_dpcr DECLARE_IMPORT(14, dmac_set_dpcr)
 #define I_dmac_get_dpcr DECLARE_IMPORT(15, dmac_get_dpcr)
 #define I_dmac_set_dpcr2 DECLARE_IMPORT(16, dmac_set_dpcr2)
@@ -138,7 +153,14 @@ void dmac_disable(u32 channel);	//sceDisableDMAChannel
 #define I_dmac_get_dicr DECLARE_IMPORT(21, dmac_get_dicr)
 #define I_dmac_set_dicr2 DECLARE_IMPORT(22, dmac_set_dicr2)
 #define I_dmac_get_dicr2 DECLARE_IMPORT(23, dmac_get_dicr2)
+#define I_dmac_set_BF80157C DECLARE_IMPORT(24, dmac_set_BF80157C)
+#define I_dmac_get_BF80157C DECLARE_IMPORT(25, dmac_get_BF80157C)
+#define I_dmac_set_BF801578 DECLARE_IMPORT(26, dmac_set_BF801578)
+#define I_dmac_get_BF801578 DECLARE_IMPORT(27, dmac_get_BF801578)
 #define I_dmac_request DECLARE_IMPORT(28, dmac_request)
+#define I_dmac_set_dma_chained_spu_sif0 DECLARE_IMPORT(29, dmac_set_dma_chained_spu_sif0)
+#define I_dmac_set_dma_sif0 DECLARE_IMPORT(30, dmac_set_dma_sif0)
+#define I_dmac_set_dma_sif1 DECLARE_IMPORT(31, dmac_set_dma_sif1)
 #define I_dmac_transfer DECLARE_IMPORT(32, dmac_transfer)
 #define I_dmac_ch_set_dpcr DECLARE_IMPORT(33, dmac_ch_set_dpcr)
 #define I_dmac_enable DECLARE_IMPORT(34, dmac_enable)
