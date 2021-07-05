@@ -15,11 +15,21 @@ EE_SAMPLE_DIR ?= samples/
 
 EE_INCS := $(EE_INCS) -I$(EE_SRC_DIR) -I$(EE_SRC_DIR)include -I$(EE_INC_DIR) -I$(PS2SDKSRC)/ee/kernel/include -I$(PS2SDKSRC)/common/include -I$(PS2SDKSRC)/ee/libc/include -I$(PS2SDKSRC)/ee/erl/include
 
+# Optimization compiler flags
+EE_OPTFLAGS ?= -O2
+
+# Warning compiler flags
+EE_WARNFLAGS ?= -Wall -Werror
+
+# These flags will generate LTO and non-LTO code in the same object file,
+# allowing the choice of using LTO or not in the final linked binary.
+EE_FATLTOFLAGS ?= -flto -ffat-lto-objects
+
 # C compiler flags
-EE_CFLAGS := -D_EE -G0 -O2 -Wall -Werror $(EE_INCS) $(EE_CFLAGS)
+EE_CFLAGS := -D_EE -G0 $(EE_OPTFLAGS) $(EE_WARNFLAGS) $(EE_INCS) $(EE_CFLAGS)
 
 # C++ compiler flags
-EE_CXXFLAGS := -D_EE -G0 -O2 -Wall -Werror $(EE_INCS) $(EE_CXXFLAGS)
+EE_CXXFLAGS := -D_EE -G0 -$(EE_OPTFLAGS) $(EE_WARNFLAGS) $(EE_INCS) $(EE_CXXFLAGS)
 
 # Linker flags
 # EE_LDFLAGS := $(EE_LDFLAGS)
@@ -51,10 +61,10 @@ else
 endif
 
 $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.c
-	$(EE_C_COMPILE) -c $< -o $@
+	$(EE_C_COMPILE) $(EE_FATLTOFLAGS) -c $< -o $@
 
 $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.cpp
-	$(EE_CXX_COMPILE) -c $< -o $@
+	$(EE_CXX_COMPILE) $(EE_FATLTOFLAGS) -c $< -o $@
 
 $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.S
 	$(EE_C_COMPILE) -c $< -o $@
@@ -74,7 +84,7 @@ $(EE_OBJS_DIR):
 $(EE_OBJS): | $(EE_OBJS_DIR)
 
 $(EE_BIN): $(EE_OBJS) $(PS2SDKSRC)/ee/startup/obj/crt0.o | $(EE_BIN_DIR)
-	$(EE_CC) -nostdlib $(EE_NO_CRT) -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_CFLAGS) \
+	$(EE_CC) -nostdlib $(EE_NO_CRT) -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_OPTFLAGS) \
 		-o $(EE_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(EE_OBJS) $(CRTEND_OBJ) $(CRTN_OBJ) $(EE_LDFLAGS) $(EE_LIBS)
 
 $(EE_LIB): $(EE_OBJS) $(EE_LIB:%.a=%.erl) | $(EE_LIB_DIR)

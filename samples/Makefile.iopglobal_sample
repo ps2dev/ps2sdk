@@ -24,10 +24,16 @@ endif
 IOP_INCS := $(IOP_INCS) -I$(PS2SDK)/iop/include -I$(PS2SDK)/common/include \
 	-I. -I$(IOP_INC_DIR)
 
+# Optimization compiler flags
+IOP_OPTFLAGS ?= -Os
+
+# Warning compiler flags
+IOP_WARNFLAGS ?= -Wall
+
 # C compiler flags
 # -fno-builtin is required to prevent the GCC built-in functions from being included,
 #   for finer-grained control over what goes into each IRX.
-IOP_CFLAGS := -D_IOP -fno-builtin -Os -G0 -Wall $(IOP_INCS) $(IOP_CFLAGS)
+IOP_CFLAGS := -D_IOP -fno-builtin -G0 $(IOP_OPTFLAGS) $(IOP_WARNFLAGS) $(IOP_INCS) $(IOP_CFLAGS)
 # linker flags
 IOP_LDFLAGS := -nostdlib -s $(IOP_LDFLAGS)
 
@@ -108,11 +114,9 @@ $(IOP_LIB_DIR):
 $(IOP_OBJS): | $(IOP_OBJS_DIR)
 
 $(IOP_BIN): $(IOP_OBJS) | $(IOP_BIN_DIR)
-	echo " -$@"
 	$(DIR_GUARD)
-	$(IOP_C_COMPILE) -o $(IOP_BIN) $(IOP_OBJS) $(IOP_LDFLAGS) $(IOP_LIBS)
+	$(IOP_C_COMPILE) $(IOP_OPTFLAGS) -o $(IOP_BIN) $(IOP_OBJS) $(IOP_LDFLAGS) $(IOP_LIBS)
 
 $(IOP_LIB): $(IOP_OBJS) | $(IOP_LIB_DIR)
-	echo " -$@"
 	$(DIR_GUARD)
 	$(IOP_AR) cru $(IOP_LIB) $(IOP_OBJS)
