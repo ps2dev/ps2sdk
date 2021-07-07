@@ -53,8 +53,14 @@
 /** Hardware DeBug(aka "Hardware Breakpoint") */
 #define IOP_EXCEPTION_HDB 15
 
-// does it really return void ?
-typedef void (*exception_handler_t)(void);
+typedef struct _exception_handler_struct_t
+{
+	void* next;
+	int info;
+	u32 funccode[];
+} exception_handler_struct_t;
+
+typedef exception_handler_struct_t* exception_handler_t;
 
 void* GetExHandlersTable();
 

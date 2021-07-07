@@ -148,8 +148,8 @@ unsigned int sceSifSetDmaIntr(SifDmaTransfer_t *dmat, int len, void (*func)(), v
 #define I_sceSifSetDma DECLARE_IMPORT(7, sceSifSetDma)
 #define I_sceSifDmaStat DECLARE_IMPORT(8, sceSifDmaStat)
 #define I_sceSifSetOneDma DECLARE_IMPORT(9, sceSifSetOneDma);
-#define I_sceSendSync DECLARE_IMPORT(10, sceSendSync);
-#define I_sceIsSending DECLARE_IMPORT(11, sceIsSending);
+#define I_sceSifSendSync DECLARE_IMPORT(10, sceSifSendSync);
+#define I_sceSifIsSending DECLARE_IMPORT(11, sceSifIsSending);
 #define I_sceSifDma0Transfer DECLARE_IMPORT(12, sceSifDma0Transfer)
 #define I_sceSifDma0Sync DECLARE_IMPORT(13, sceSifDma0Sync)
 #define I_sceSifDma0Sending DECLARE_IMPORT(14, sceSifDma0Sending)
