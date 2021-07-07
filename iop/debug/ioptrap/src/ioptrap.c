@@ -201,11 +201,11 @@ int _start(int argc, char **argv)
 
     memset(handlers, 0, sizeof(trap_exception_handler_t) * 16);
     printf("ioptrap starts.\n");
-    if((rv = RegisterDefaultExceptionHandler(def_exc_handler)) < 0) {
+    if((rv = RegisterDefaultExceptionHandler((exception_handler_t)def_exc_handler)) < 0) {
         printf("RegisterDefaultExceptionHandler failed, rv=%d\n", rv);
         return 1;
     }
-    if((rv = RegisterPriorityExceptionHandler(IOP_EXCEPTION_HDB, 0, bp_exc_handler)) < 0) {
+    if((rv = RegisterPriorityExceptionHandler(IOP_EXCEPTION_HDB, 0, (exception_handler_t)bp_exc_handler)) < 0) {
 	// shouldn't we release the default exception handler here... ?
         printf("RegisterDefaultExceptionHandler failed, rv=%d\n", rv);
         return 1;
