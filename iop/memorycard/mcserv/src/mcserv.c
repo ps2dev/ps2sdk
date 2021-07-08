@@ -77,6 +77,7 @@ static const u8 MCSERV_RpcCmd[2][2][17] =
 			0x10,	// CMD_FORMAT
 			0x11,	// CMD_UNFORMAT
 			0x12,	// CMD_GETENTSPACE
+			0x14,	// CMD_CHG_PRITY
 			0x33,	// CMD_CHECKBLOCK (calls xmcman_funcs: 45)
 		},
 		{ // corresponding internal rpc function
@@ -95,8 +96,8 @@ static const u8 MCSERV_RpcCmd[2][2][17] =
 			0x07,	// sceMcFormat
 			0x10,	// sceMcUnformat
 			0x13,	// sceMcGetEntSpace
-			0x14,	// sceMcCheckBlock (calls xmcman_funcs: 45)
 			0x15,	// sceMcServChangePriority
+			0x14,	// sceMcCheckBlock (calls xmcman_funcs: 45)
 		},
 	},
 };
