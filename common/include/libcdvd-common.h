@@ -289,6 +289,14 @@ int sceCdReadCDDA(u32 lbn, u32 sectors, void *buffer, sceCdRMode *mode);
  */
 int sceCdGetToc(u8 *toc);
 
+/** Alternate TOC retrieving function with parameter
+ *
+ * @param toc buffer to hold toc (1024 bytes)
+ * @param param Parameter
+ * @return 1 on success, 0 on failure.
+ */
+int sceCdGetToc2(u8 *toc, int param);
+
 /** seek to given sector on disc
  * non-blocking, requires sceCdSync() call
  * 
@@ -599,6 +607,16 @@ int sceCdReadKey(unsigned char arg1, unsigned char arg2, unsigned int command, u
  * @return 1 on success, 0 on failure.
  */
 int sceCdSetHDMode(u32 mode);
+
+/** Opens a specified configuration block, within NVRAM. Each block is 15 bytes long.
+ *
+ * @param block Block number.
+ * @param mode Mode (0 = read, 1 = write).
+ * @param NumBlocks Number of blocks.
+ * @param status Result code.
+ * @return 1 on success, 0 on failure.
+ */
+int sceCdOpenConfig(int block, int mode, int NumBlocks, u32 *status);
 
 /** Closes the configuration block.
  *
