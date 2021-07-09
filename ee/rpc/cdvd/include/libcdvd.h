@@ -63,16 +63,6 @@ int sceCdApplySCmd(u8 cmdNum, const void* inBuff, u16 inBuffSize, void *outBuff,
  */
 int sceCdApplyNCmd(u8 cmdNum, const void* inBuff, u16 inBuffSize, void* outBuff, u16 outBuffSize);
 
-/** Opens a specified configuration block, within NVRAM. Each block is 15 bytes long.
- *
- * @param block Block number.
- * @param mode Mode (0 = read, 1 = write).
- * @param NumBlocks Number of blocks.
- * @param status Result code.
- * @return 1 on success, 0 on failure.
- */
-int sceCdOpenConfig(int block, int mode, int NumBlocks, u32 *status);
-
 /** Controls spindle speed? Not sure what it really does.
  * SUPPORTED IN XCDVDMAN/XCDVDFSV ONLY
  *
