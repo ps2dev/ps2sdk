@@ -248,7 +248,7 @@ static void DmaSendEE(void)
 	else
 	{
 		u32 port, slot;
-		u32 sifdma_count = 1;
+		u32 sifdma_count = 0;
 
 		/* This is where the 128*2 bytes of 'garbage' gets sent to EE.
 		   I believe that only 16 bytes should have been sent, used for checking
