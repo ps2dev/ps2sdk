@@ -1,0 +1,20 @@
+<map id="ee/iopreboot/src/SifIopRebootBuffer.c" name="ee/iopreboot/src/SifIopRebootBuffer.c">
+<area shape="rect" id="node1" title=" " alt="" coords="302,5,497,47"/>
+<area shape="rect" id="node2" href="$kernel_8h.html" title=" " alt="" coords="138,169,205,196"/>
+<area shape="rect" id="node5" href="$sifdma_8h.html" title=" " alt="" coords="173,244,244,271"/>
+<area shape="rect" id="node7" href="$iopcontrol_8h.html" title=" " alt="" coords="114,95,202,121"/>
+<area shape="rect" id="node8" href="$iopcontrol__special_8h.html" title=" " alt="" coords="226,95,362,121"/>
+<area shape="rect" id="node9" href="$loadfile_8h.html" title=" " alt="" coords="607,319,679,345"/>
+<area shape="rect" id="node10" href="$iopheap_8h.html" title=" " alt="" coords="437,95,514,121"/>
+<area shape="rect" id="node11" title=" " alt="" coords="538,95,602,121"/>
+<area shape="rect" id="node12" href="$string_8h_source.html" title=" " alt="" coords="26,95,90,121"/>
+<area shape="rect" id="node18" href="$sbv__patches_8h.html" title=" " alt="" coords="677,95,783,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="259,393,327,420"/>
+<area shape="rect" id="node4" title=" " alt="" coords="268,244,336,271"/>
+<area shape="rect" id="node6" href="$tamtypes_8h.html" title=" " alt="" coords="459,393,545,420"/>
+<area shape="rect" id="node13" href="$sysclib_8h.html" title=" " alt="" coords="437,169,509,196"/>
+<area shape="rect" id="node14" href="$types_8h_source.html" title=" " alt="" coords="425,319,488,345"/>
+<area shape="rect" id="node15" href="$irx_8h.html" title=" " alt="" coords="498,244,543,271"/>
+<area shape="rect" id="node16" href="$setjmp_8h.html" title=" " alt="" coords="512,319,583,345"/>
+<area shape="rect" id="node17" href="$ctype_8h.html" title=" " alt="" coords="360,244,423,271"/>
+</map>

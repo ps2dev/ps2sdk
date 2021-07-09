@@ -1,0 +1,20 @@
+<map id="ee/erl/src/erl.c" name="ee/erl/src/erl.c">
+<area shape="rect" id="node1" title=" " alt="" coords="285,5,389,32"/>
+<area shape="rect" id="node2" title=" " alt="" coords="5,80,68,107"/>
+<area shape="rect" id="node3" href="$stdio_8h.html" title=" " alt="" coords="148,229,208,256"/>
+<area shape="rect" id="node9" href="$string_8h_source.html" title=" " alt="" coords="335,155,399,181"/>
+<area shape="rect" id="node13" href="$fcntl_8h_source.html" title=" " alt="" coords="475,80,556,107"/>
+<area shape="rect" id="node14" href="$unistd_8h_source.html" title=" " alt="" coords="581,80,671,107"/>
+<area shape="rect" id="node15" href="$erl_8h.html" title=" " alt="" coords="413,379,460,405"/>
+<area shape="rect" id="node16" href="$hashtab_8h_source.html" title=" " alt="" coords="189,80,268,107"/>
+<area shape="rect" id="node18" href="$recycle_8h_source.html" title=" " alt="" coords="92,80,165,107"/>
+<area shape="rect" id="node4" title=" " alt="" coords="72,304,140,331"/>
+<area shape="rect" id="node5" href="$irx_8h.html" title=" " alt="" coords="165,304,210,331"/>
+<area shape="rect" id="node6" href="$types_8h_source.html" title=" " alt="" coords="185,379,248,405"/>
+<area shape="rect" id="node7" title=" " alt="" coords="107,453,175,480"/>
+<area shape="rect" id="node8" href="$tamtypes_8h.html" title=" " alt="" coords="311,453,397,480"/>
+<area shape="rect" id="node10" href="$sysclib_8h.html" title=" " alt="" coords="246,229,318,256"/>
+<area shape="rect" id="node11" href="$setjmp_8h.html" title=" " alt="" coords="319,379,389,405"/>
+<area shape="rect" id="node12" href="$ctype_8h.html" title=" " alt="" coords="285,304,348,331"/>
+<area shape="rect" id="node17" href="$standard_8h_source.html" title=" " alt="" coords="121,155,203,181"/>
+</map>

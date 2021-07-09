@@ -1,0 +1,21 @@
+var searchData=
+[
+  ['_2e_5f_5fattribute_5f_5f_0',['.__attribute__',['../ps2ipc_8c.html#union_8____attribute____',1,'']]],
+  ['_2efields_1',['.fields',['../struct_8fields.html',1,'']]],
+  ['_2elogin_2',['.login',['../struct_8login.html',1,'']]],
+  ['_2epadactdiralignargs_3',['.padActDirAlignArgs',['../libpad_8c.html#struct_8pad_act_dir_align_args',1,'']]],
+  ['_2epadcloseargs_4',['.padCloseArgs',['../libpad_8c.html#struct_8pad_close_args',1,'']]],
+  ['_2epadgetbuttonmaskargs_5',['.padGetButtonMaskArgs',['../libpad_8c.html#struct_8pad_get_button_mask_args',1,'']]],
+  ['_2epadinfoactargs_6',['.padInfoActArgs',['../libpad_8c.html#struct_8pad_info_act_args',1,'']]],
+  ['_2epadinfomodeargs_7',['.padInfoModeArgs',['../libpad_8c.html#struct_8pad_info_mode_args',1,'']]],
+  ['_2epadmoderesult_8',['.padModeResult',['../libpad_8c.html#struct_8pad_mode_result',1,'']]],
+  ['_2epadopenargs_9',['.padOpenArgs',['../libpad_8c.html#struct_8pad_open_args',1,'']]],
+  ['_2epadopenresult_10',['.padOpenResult',['../libpad_8c.html#struct_8pad_open_result',1,'']]],
+  ['_2epadresult_11',['.padResult',['../libpad_8c.html#struct_8pad_result',1,'']]],
+  ['_2epadsetbuttoninfoargs_12',['.padSetButtonInfoArgs',['../libpad_8c.html#struct_8pad_set_button_info_args',1,'']]],
+  ['_2epadsetbuttoninforesult_13',['.padSetButtonInfoResult',['../libpad_8c.html#struct_8pad_set_button_info_result',1,'']]],
+  ['_2epadsetmainmodeargs_14',['.padSetMainModeArgs',['../libpad_8c.html#struct_8pad_set_main_mode_args',1,'']]],
+  ['_2epadslotmaxargs_15',['.padSlotMaxArgs',['../libpad_8c.html#struct_8pad_slot_max_args',1,'']]],
+  ['_2epos_16',['.pos',['../libmouse_8c.html#struct_8pos',1,'']]],
+  ['_2esmb_17',['.smb',['../union_8smb.html',1,'']]]
+];

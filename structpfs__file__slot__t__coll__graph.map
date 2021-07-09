@@ -1,0 +1,12 @@
+<map id="pfs_file_slot_t" name="pfs_file_slot_t">
+<area shape="rect" id="node1" title=" " alt="" coords="223,395,325,421"/>
+<area shape="rect" id="node2" href="$structpfs__cache__s.html" title=" " alt="" coords="86,215,182,241"/>
+<area shape="rect" id="node10" href="$structpfs__blockpos__t.html" title=" " alt="" coords="161,305,272,332"/>
+<area shape="rect" id="node3" href="$structpfs__mount__t.html" title=" " alt="" coords="87,124,181,151"/>
+<area shape="rect" id="node4" href="$structpfs__blockinfo__t.html" title=" " alt="" coords="5,5,116,32"/>
+<area shape="rect" id="node5" href="$structpfs__block__device__t.html" title=" " alt="" coords="140,5,275,32"/>
+<area shape="rect" id="node6" href="$ioman_x_8h.html#struct__iop__file" title=" " alt="" coords="297,305,366,332"/>
+<area shape="rect" id="node7" href="$ioman_x_8h.html#struct__iop__device" title=" " alt="" coords="286,215,377,241"/>
+<area shape="rect" id="node8" href="$struct__iop__device__ops.html" title=" " alt="" coords="272,124,391,151"/>
+<area shape="rect" id="node9" href="$structpfs__unaligned__io__t.html" title=" " alt="" coords="390,305,521,332"/>
+</map>

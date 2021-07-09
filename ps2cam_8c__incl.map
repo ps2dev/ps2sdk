@@ -1,0 +1,26 @@
+<map id="iop/usb/camera/src/ps2cam.c" name="iop/usb/camera/src/ps2cam.c">
+<area shape="rect" id="node1" title=" " alt="" coords="441,5,575,47"/>
+<area shape="rect" id="node2" href="$stdio_8h.html" title=" " alt="" coords="287,169,347,196"/>
+<area shape="rect" id="node7" href="$tamtypes_8h.html" title=" " alt="" coords="36,393,121,420"/>
+<area shape="rect" id="node8" href="$sysclib_8h.html" title=" " alt="" coords="85,169,157,196"/>
+<area shape="rect" id="node11" href="$thbase_8h.html" title=" " alt="" coords="371,169,442,196"/>
+<area shape="rect" id="node12" title=" " alt="" coords="311,95,382,121"/>
+<area shape="rect" id="node13" title=" " alt="" coords="407,95,471,121"/>
+<area shape="rect" id="node14" href="$loadcore_8h.html" title=" " alt="" coords="466,169,547,196"/>
+<area shape="rect" id="node15" href="$ioman_8h.html" title=" " alt="" coords="679,169,745,196"/>
+<area shape="rect" id="node19" href="$usbd_8h.html" title=" " alt="" coords="770,169,830,196"/>
+<area shape="rect" id="node21" href="$usbd__macro_8h.html" title=" " alt="" coords="749,95,851,121"/>
+<area shape="rect" id="node22" href="$thsemap_8h.html" title=" " alt="" coords="572,169,655,196"/>
+<area shape="rect" id="node23" href="$sysmem_8h.html" title=" " alt="" coords="182,169,263,196"/>
+<area shape="rect" id="node24" href="$ps2cam_8h.html" title=" " alt="" coords="875,95,954,121"/>
+<area shape="rect" id="node3" title=" " alt="" coords="233,244,301,271"/>
+<area shape="rect" id="node4" href="$irx_8h.html" title=" " alt="" coords="427,244,472,271"/>
+<area shape="rect" id="node5" href="$types_8h_source.html" title=" " alt="" coords="387,319,450,345"/>
+<area shape="rect" id="node6" title=" " alt="" coords="385,393,453,420"/>
+<area shape="rect" id="node9" href="$setjmp_8h.html" title=" " alt="" coords="43,319,114,345"/>
+<area shape="rect" id="node10" href="$ctype_8h.html" title=" " alt="" coords="94,244,157,271"/>
+<area shape="rect" id="node16" href="$io__common_8h.html" title=" " alt="" coords="663,244,761,271"/>
+<area shape="rect" id="node17" href="$fcntl_8h_source.html" title=" " alt="" coords="726,319,807,345"/>
+<area shape="rect" id="node18" href="$unistd_8h_source.html" title=" " alt="" coords="611,319,701,345"/>
+<area shape="rect" id="node20" title=" " alt="" coords="834,244,897,271"/>
+</map>

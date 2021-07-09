@@ -1,0 +1,23 @@
+<map id="iop/system/iopmgr/src/commandline.c" name="iop/system/iopmgr/src/commandline.c">
+<area shape="rect" id="node1" title=" " alt="" coords="348,5,499,47"/>
+<area shape="rect" id="node2" href="$defs_8h.html" title=" " alt="" coords="291,95,348,121"/>
+<area shape="rect" id="node6" href="$ioman_x_8h.html" title=" " alt="" coords="135,169,211,196"/>
+<area shape="rect" id="node13" href="$stdio_8h.html" title=" " alt="" coords="620,169,680,196"/>
+<area shape="rect" id="node15" href="$sysclib_8h.html" title=" " alt="" coords="705,169,777,196"/>
+<area shape="rect" id="node18" href="$iopmgr_8h.html" title=" " alt="" coords="388,95,459,121"/>
+<area shape="rect" id="node3" href="$types_8h_source.html" title=" " alt="" coords="420,319,483,345"/>
+<area shape="rect" id="node4" title=" " alt="" coords="417,393,485,420"/>
+<area shape="rect" id="node5" href="$tamtypes_8h.html" title=" " alt="" coords="638,393,723,420"/>
+<area shape="rect" id="node7" href="$irx_8h.html" title=" " alt="" coords="429,244,474,271"/>
+<area shape="rect" id="node8" href="$io__common_8h.html" title=" " alt="" coords="109,244,207,271"/>
+<area shape="rect" id="node11" href="$iox__stat_8h.html" title=" " alt="" coords="7,244,85,271"/>
+<area shape="rect" id="node9" href="$fcntl_8h_source.html" title=" " alt="" coords="228,319,309,345"/>
+<area shape="rect" id="node10" href="$unistd_8h_source.html" title=" " alt="" coords="113,319,203,345"/>
+<area shape="rect" id="node12" href="$time_8h.html" title=" " alt="" coords="5,319,87,345"/>
+<area shape="rect" id="node14" title=" " alt="" coords="565,244,633,271"/>
+<area shape="rect" id="node16" href="$setjmp_8h.html" title=" " alt="" coords="709,319,780,345"/>
+<area shape="rect" id="node17" href="$ctype_8h.html" title=" " alt="" coords="709,244,772,271"/>
+<area shape="rect" id="node19" title=" " alt="" coords="428,169,491,196"/>
+<area shape="rect" id="node20" href="$ioman_8h.html" title=" " alt="" coords="286,169,353,196"/>
+<area shape="rect" id="node21" href="$loadcore_8h.html" title=" " alt="" coords="515,169,596,196"/>
+</map>

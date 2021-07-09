@@ -1,0 +1,5 @@
+<map id="pad_t" name="pad_t">
+<area shape="rect" id="node1" title=" " alt="" coords="79,95,134,121"/>
+<area shape="rect" id="node2" href="$input_8h.html#structactuator__t" title=" " alt="" coords="5,5,85,32"/>
+<area shape="rect" id="node3" href="$libpad_8h.html#structpad_button_status" title=" " alt="" coords="109,5,227,32"/>
+</map>

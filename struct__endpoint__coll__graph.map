@@ -1,0 +1,10 @@
+<map id="_endpoint" name="_endpoint">
+<area shape="rect" id="node1" title=" " alt="" coords="339,217,417,244"/>
+<area shape="rect" id="node2" href="$usbdpriv_8h.html#struct__device" title=" " alt="" coords="210,467,277,494"/>
+<area shape="rect" id="node5" href="$usbdpriv_8h.html#struct__io_request" title=" " alt="" coords="503,346,589,373"/>
+<area shape="rect" id="node3" href="$struct___usb_driver.html" title=" " alt="" coords="5,346,92,373"/>
+<area shape="rect" id="node4" href="$usbdpriv_8h.html#struct__timer_cb_struct" title=" " alt="" coords="146,111,255,137"/>
+<area shape="rect" id="node6" href="$usbd_8h.html#struct_usb_device_request" title=" " alt="" coords="597,217,732,244"/>
+<area shape="rect" id="node7" href="$usbdpriv_8h.html#struct__hc_ed" title=" " alt="" coords="349,111,407,137"/>
+<area shape="rect" id="node8" href="$usbdpriv_8h.html#struct__hc_td" title=" " alt="" coords="349,5,407,32"/>
+</map>

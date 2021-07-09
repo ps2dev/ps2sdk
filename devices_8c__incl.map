@@ -1,0 +1,23 @@
+<map id="iop/system/iopmgr/src/devices.c" name="iop/system/iopmgr/src/devices.c">
+<area shape="rect" id="node1" title=" " alt="" coords="166,5,317,47"/>
+<area shape="rect" id="node2" href="$defs_8h.html" title=" " alt="" coords="146,95,204,121"/>
+<area shape="rect" id="node6" href="$stdio_8h.html" title=" " alt="" coords="212,169,272,196"/>
+<area shape="rect" id="node9" href="$sysclib_8h.html" title=" " alt="" coords="64,169,136,196"/>
+<area shape="rect" id="node12" href="$ioman_x_8h.html" title=" " alt="" coords="630,169,706,196"/>
+<area shape="rect" id="node18" href="$iopmgr_8h.html" title=" " alt="" coords="380,95,450,121"/>
+<area shape="rect" id="node3" href="$types_8h_source.html" title=" " alt="" coords="286,319,349,345"/>
+<area shape="rect" id="node4" title=" " alt="" coords="284,393,352,420"/>
+<area shape="rect" id="node5" href="$tamtypes_8h.html" title=" " alt="" coords="116,393,202,420"/>
+<area shape="rect" id="node7" title=" " alt="" coords="212,244,280,271"/>
+<area shape="rect" id="node8" href="$irx_8h.html" title=" " alt="" coords="355,244,400,271"/>
+<area shape="rect" id="node10" href="$setjmp_8h.html" title=" " alt="" coords="8,319,78,345"/>
+<area shape="rect" id="node11" href="$ctype_8h.html" title=" " alt="" coords="22,244,85,271"/>
+<area shape="rect" id="node13" href="$io__common_8h.html" title=" " alt="" coords="526,244,624,271"/>
+<area shape="rect" id="node16" href="$iox__stat_8h.html" title=" " alt="" coords="648,244,726,271"/>
+<area shape="rect" id="node14" href="$fcntl_8h_source.html" title=" " alt="" coords="537,319,618,345"/>
+<area shape="rect" id="node15" href="$unistd_8h_source.html" title=" " alt="" coords="422,319,512,345"/>
+<area shape="rect" id="node17" href="$time_8h.html" title=" " alt="" coords="646,319,728,345"/>
+<area shape="rect" id="node19" title=" " alt="" coords="544,169,606,196"/>
+<area shape="rect" id="node20" href="$ioman_8h.html" title=" " alt="" coords="452,169,519,196"/>
+<area shape="rect" id="node21" href="$loadcore_8h.html" title=" " alt="" coords="296,169,377,196"/>
+</map>

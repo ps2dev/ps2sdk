@@ -1,0 +1,7 @@
+<map id="sCmdSendParams_t" name="sCmdSendParams_t">
+<area shape="rect" id="node1" title=" " alt="" coords="237,95,379,121"/>
+<area shape="rect" id="node2" href="$libcdvd-rpc_8h.html#structcdvd_dec_set_param" title=" " alt="" coords="5,5,136,32"/>
+<area shape="rect" id="node3" href="$libcdvd-rpc_8h.html#structcdvd_scmd_param" title=" " alt="" coords="160,5,283,32"/>
+<area shape="rect" id="node4" href="$libcdvd-rpc_8h.html#structcdvd_read_write_nvm_param" title=" " alt="" coords="307,5,483,32"/>
+<area shape="rect" id="node5" href="$libcdvd-common_8h.html#structsce_cd_c_l_o_c_k" title=" " alt="" coords="507,5,611,32"/>
+</map>

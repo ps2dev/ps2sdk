@@ -1,0 +1,270 @@
+/* Fonts used: DejaVu Sans, DejaVu Sans Mono, Noto Sans */
+
+body, table, div, p, dl {
+	font: 400 14px/22px DejaVu Sans,sans-serif;
+}
+
+body {
+	background-color: #FDF6E3;
+	color: #001B36;
+	margin: 0;
+}
+
+/* Disable cyan glow effect that only appears randomly. */
+h1.glow, h2.glow, h3.glow, h4.glow, h5.glow, h6.glow {
+	text-shadow: none;
+}
+
+/* Table of contents index, for larger text. */
+div.toc h3 {
+	font: bold 14px/1.2 DejaVu Sans,sans-serif;
+	color: #174E86;
+	border-bottom: 0 none;
+	margin: 0;
+}
+
+div.toc li {
+	background: url("bdwn.png") no-repeat scroll 0 5px transparent;
+	font: 12px/1.2 DejaVu Sans,Geneva,sans-serif;
+	margin-top: 5px;
+	padding-left: 10px;
+	padding-top: 2px;
+}
+
+/* These should have a white background to set them out. */
+dl.note {
+	background-color: #FFF;
+	margin-left: -7px;
+	padding-left: 3px;
+	border-left: 4px solid;
+	border-color: #D0C000;
+}
+
+dl.warning, dl.attention {
+	background-color: #FFF;
+	margin-left: -7px;
+	padding-left: 3px;
+	border-left: 4px solid;
+	border-color: #FF0000;
+}
+
+dl.bug {
+	background-color: #FFF;
+	margin-left: -7px;
+	padding-left: 3px;
+	border-left: 4px solid;
+	border-color: #C08050;
+}
+
+/* Alphabetical index letter headings don't match other headings. */
+div.ah, span.ah {
+	background-color: #10365D;
+	font-weight: bold;
+	color: #FFF;
+	margin-bottom: 3px;
+	margin-top: 3px;
+	padding: 0.3em;
+	padding-right: 50%;
+	border: solid thin #333;
+	border-radius: 0.5em;
+	-webkit-border-radius: .5em;
+	-moz-border-radius: .5em;
+	box-shadow: 2px 2px 3px #999;
+	-webkit-box-shadow: 2px 2px 3px #999;
+	-moz-box-shadow: rgba(0, 0, 0, 0.15) 2px 2px 2px;
+	background-image: none;
+
+}
+
+/* Various things that declare their color dark. */
+div.summary a {
+	white-space: nowrap;
+	color: #FFF;
+}
+
+div.ingroups a {
+	white-space: nowrap;
+	color: #FFF;
+}
+
+/* Various things that declare their background-color white. */
+div.header {
+	background-image: none;
+	background-repeat: repeat-x;
+	background-color: #10365D;
+	color: #FFF;
+	margin: 0px;
+	border-bottom: 1px solid #98C3ED;
+}
+
+
+.directory tr.even {
+	padding-left: 6px;
+	background-color: #FDF6E3;
+}
+
+.mdescLeft, .mdescRight, .memItemLeft, .memItemRight, .memTemplItemLeft, .memTemplItemRight, .memTemplParams {
+	background-color: #FEF7E4;
+	border: none;
+	margin: 4px;
+	padding: 1px 0 0 8px;
+}
+
+.memdoc, dl.reflist dd {
+	border-bottom: 1px solid #6AA7E5;
+	border-left: 1px solid #6AA7E5;
+	border-right: 1px solid #6AA7E5;
+	padding: 6px 10px 2px 10px;
+	background-color: #F8FBFD;
+	border-top-width: 0;
+	background-image: url('nav_g.png');
+	background-repeat: repeat-x;
+	background-color: #FDF6E3;
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+	box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.15);
+	-moz-border-radius-bottomleft: 4px;
+	-moz-border-radius-bottomright: 4px;
+	-moz-box-shadow: rgba(0, 0, 0, 0.15) 5px 5px 5px;
+	-webkit-border-bottom-left-radius: 4px;
+	-webkit-border-bottom-right-radius: 4px;
+	-webkit-box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.15);
+}
+
+/* Project style */
+#projectname {
+	font: 300% Noto Sans,sans-serif;
+	margin: 0px;
+	padding: 2px 0px;
+}
+
+#projectbrief {
+	font: 100% DejaVu Sans,sans-serif;
+	margin: 0px;
+	padding: 0px;
+}
+
+#projectnumber {
+	font: 75% Noto Sans,sans-serif;
+	margin: 0px;
+	padding: 0px;
+}
+
+/* Nav tree background */
+#nav-tree {
+	background-image: none;
+	background-repeat: repeat-x;
+	background-color: #FDF6E3;
+	-webkit-overflow-scrolling: touch;
+}
+
+/* @group Code Colorization
+   Based on Solarized Dark with a blue tweak. */
+div.fragment {
+	color: #93A1A1;
+	background-color: #001B36;
+	font-family: DejaVu Sans Mono, fixed;
+	font-size: 13px;
+	min-height: 13px;
+	line-height: 1.0;
+	padding: 4px 6px;
+	margin: 4px 8px 4px 2px;
+	border: 1px solid #98C3ED;
+}
+
+div.line {
+        color: #93A1A1;
+        background-color: #001B36;
+	font-family: DejaVu Sans Mono, fixed;
+	font-size: 13px;
+	min-height: 13px;
+	line-height: 1.0;
+	text-wrap: unrestricted;
+	white-space: -moz-pre-wrap;
+	white-space: -pre-wrap;
+	white-space: -o-pre-wrap;
+	white-space: pre-wrap;
+	word-wrap: break-word;
+	text-indent: -53px;
+	padding-left: 53px;
+	padding-bottom: 0px;
+	margin: 0px;
+	-webkit-transition-property: background-color, box-shadow;
+	-webkit-transition-duration: 0.5s;
+	-moz-transition-property: background-color, box-shadow;
+	-moz-transition-duration: 0.5s;
+	-ms-transition-property: background-color, box-shadow;
+	-ms-transition-duration: 0.5s;
+	-o-transition-property: background-color, box-shadow;
+	-o-transition-duration: 0.5s;
+	transition-property: background-color, box-shadow;
+	transition-duration: 0.5s;
+}
+
+span.keyword {
+	color: #B58900;
+	font-weight: bold;
+}
+
+span.keywordtype {
+	color: #B58900;
+	font-weight: bold;
+}
+
+span.keywordflow {
+	color: #DC322F;
+}
+
+span.comment {
+	color: #586E75;
+}
+
+span.preprocessor {
+	color: #6C71C4;
+}
+
+span.stringliteral {
+	color: #2AA198;
+}
+
+span.charliteral {
+	color: #2AA198;
+}
+
+span.vhdldigit { 
+	color: #859900;
+}
+
+span.vhdlchar { 
+	color: #859900;
+}
+
+span.vhdlkeyword { 
+	color: #839496;
+}
+
+span.vhdllogic { 
+	color: #839496;
+}
+
+/* Line numbers and separator. */
+span.lineno {
+	padding-right: 4px;
+	text-align: right;
+	border-right: 2px solid #DDD;
+	color: #93A1A1;
+	background-color: #072642;
+	white-space: pre;
+}
+
+span.lineno a {
+	background-color: #072642;
+}
+
+/* Color of links in code. */
+a.code, a.code:visited, a.line, a.line:visited {
+	color: #93A1A1;
+}
+
+
+/* @end */

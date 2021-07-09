@@ -1,0 +1,22 @@
+<map id="iop/usb/usbd/src/driver.c" name="iop/usb/usbd/src/driver.c">
+<area shape="rect" id="node1" title=" " alt="" coords="263,5,427,32"/>
+<area shape="rect" id="node2" href="$usbdpriv_8h.html" title=" " alt="" coords="82,155,163,181"/>
+<area shape="rect" id="node9" href="$driver_8h.html" title=" " alt="" coords="219,80,283,107"/>
+<area shape="rect" id="node10" href="$mem_8h.html" title=" " alt="" coords="5,80,67,107"/>
+<area shape="rect" id="node11" href="$hub_8h.html" title=" " alt="" coords="91,80,144,107"/>
+<area shape="rect" id="node12" href="$defs_8h.html" title=" " alt="" coords="641,155,698,181"/>
+<area shape="rect" id="node13" href="$stdio_8h.html" title=" " alt="" coords="298,229,358,256"/>
+<area shape="rect" id="node15" href="$sysclib_8h.html" title=" " alt="" coords="201,229,273,256"/>
+<area shape="rect" id="node18" href="$thbase_8h.html" title=" " alt="" coords="581,229,651,256"/>
+<area shape="rect" id="node19" href="$thevent_8h.html" title=" " alt="" coords="383,229,457,256"/>
+<area shape="rect" id="node20" href="$intrman_8h.html" title=" " alt="" coords="481,229,556,256"/>
+<area shape="rect" id="node3" href="$usbd_8h.html" title=" " alt="" coords="94,229,154,256"/>
+<area shape="rect" id="node4" title=" " alt="" coords="25,304,87,331"/>
+<area shape="rect" id="node5" href="$irx_8h.html" title=" " alt="" coords="395,304,440,331"/>
+<area shape="rect" id="node6" href="$types_8h_source.html" title=" " alt="" coords="446,379,509,405"/>
+<area shape="rect" id="node7" title=" " alt="" coords="443,453,511,480"/>
+<area shape="rect" id="node8" href="$tamtypes_8h.html" title=" " alt="" coords="271,453,356,480"/>
+<area shape="rect" id="node14" title=" " alt="" coords="302,304,370,331"/>
+<area shape="rect" id="node16" href="$setjmp_8h.html" title=" " alt="" coords="153,379,223,405"/>
+<area shape="rect" id="node17" href="$ctype_8h.html" title=" " alt="" coords="163,304,226,331"/>
+</map>

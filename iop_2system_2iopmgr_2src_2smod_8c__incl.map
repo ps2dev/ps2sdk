@@ -1,0 +1,20 @@
+<map id="iop/system/iopmgr/src/smod.c" name="iop/system/iopmgr/src/smod.c">
+<area shape="rect" id="node1" title=" " alt="" coords="208,5,359,47"/>
+<area shape="rect" id="node2" title=" " alt="" coords="64,169,127,196"/>
+<area shape="rect" id="node3" href="$defs_8h.html" title=" " alt="" coords="5,95,63,121"/>
+<area shape="rect" id="node7" href="$irx_8h.html" title=" " alt="" coords="229,244,274,271"/>
+<area shape="rect" id="node8" href="$loadcore_8h.html" title=" " alt="" coords="151,169,232,196"/>
+<area shape="rect" id="node9" href="$ioman_8h.html" title=" " alt="" coords="358,169,425,196"/>
+<area shape="rect" id="node13" href="$stdio_8h.html" title=" " alt="" coords="449,169,509,196"/>
+<area shape="rect" id="node15" href="$sysclib_8h.html" title=" " alt="" coords="538,169,610,196"/>
+<area shape="rect" id="node18" href="$iopmgr_8h.html" title=" " alt="" coords="212,95,283,121"/>
+<area shape="rect" id="node4" href="$types_8h_source.html" title=" " alt="" coords="243,319,305,345"/>
+<area shape="rect" id="node5" title=" " alt="" coords="240,393,308,420"/>
+<area shape="rect" id="node6" href="$tamtypes_8h.html" title=" " alt="" coords="438,393,523,420"/>
+<area shape="rect" id="node10" href="$io__common_8h.html" title=" " alt="" coords="349,244,447,271"/>
+<area shape="rect" id="node11" href="$fcntl_8h_source.html" title=" " alt="" coords="456,319,537,345"/>
+<area shape="rect" id="node12" href="$unistd_8h_source.html" title=" " alt="" coords="341,319,431,345"/>
+<area shape="rect" id="node14" title=" " alt="" coords="472,244,540,271"/>
+<area shape="rect" id="node16" href="$setjmp_8h.html" title=" " alt="" coords="577,319,648,345"/>
+<area shape="rect" id="node17" href="$ctype_8h.html" title=" " alt="" coords="667,244,729,271"/>
+</map>

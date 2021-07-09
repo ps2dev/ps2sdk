@@ -1,0 +1,13 @@
+<map id="ee/kernel/include/osd_config.h" name="ee/kernel/include/osd_config.h">
+<area shape="rect" id="node1" title=" " alt="" coords="762,5,907,47"/>
+<area shape="rect" id="node2" href="$scr__printf_8c.html" title=" " alt="" coords="5,102,171,129"/>
+<area shape="rect" id="node3" href="$graph__mode_8c_source.html" title=" " alt="" coords="195,95,325,136"/>
+<area shape="rect" id="node4" href="$libosd_8c.html" title=" " alt="" coords="350,102,495,129"/>
+<area shape="rect" id="node5" href="$libosd__common_8c.html" title=" " alt="" coords="519,95,654,136"/>
+<area shape="rect" id="node6" href="$libosd__full_8c.html" title=" " alt="" coords="678,95,813,136"/>
+<area shape="rect" id="node7" href="$osd__config_8c.html" title=" " alt="" coords="837,102,1011,129"/>
+<area shape="rect" id="node8" href="$osd_8c_source.html" title=" " alt="" coords="1035,95,1175,136"/>
+<area shape="rect" id="node9" href="$osdsrc_8c_source.html" title=" " alt="" coords="1199,95,1339,136"/>
+<area shape="rect" id="node10" href="$timezone_8c.html" title=" " alt="" coords="1363,102,1511,129"/>
+<area shape="rect" id="node11" href="$scmd_8c.html" title=" " alt="" coords="1535,102,1694,129"/>
+</map>
