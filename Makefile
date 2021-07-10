@@ -35,9 +35,9 @@ $(subdir_release): dummy
 	$(MAKEREC) $(patsubst release-%,%,$@) release
 
 
-build: env_build_check $(subdir_list)
+build: env_build_check download_dependencies $(subdir_list)
 
-clean: env_build_check $(subdir_clean)
+clean: env_build_check clean_dependencies $(subdir_clean)
 
 release-clean:
 	+$(MAKE) -C common release-clean
@@ -46,7 +46,7 @@ release-clean:
 	+$(MAKE) -C samples release-clean
 	+$(MAKE) -C tools release-clean
 
-rebuild: env_build_check $(subdir_clean) $(subdir_list)
+rebuild: env_build_check clean_dependencies $(subdir_clean) download_dependencies $(subdir_list)
 
 $(PS2SDK)/common/include:
 	$(MKDIR) -p $(PS2SDK)/common
@@ -88,6 +88,14 @@ env_release_check:
 	  $(ECHO) PS2SDK environment variable must be defined. ; \
 	  exit 1; \
 	fi
+
+clean_dependencies:
+	$(ECHO) Cleaning PS2SDK dependencies.
+	$(ECHO) Cleaning lwip.
+	rm -rf $(PS2SDKSRC)/common/external_deps/lwip
+
+download_dependencies:
+	./dowload_dependencies.sh
 
 docs:
 	doxygen
