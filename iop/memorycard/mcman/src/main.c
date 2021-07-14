@@ -12,6 +12,11 @@
 #include <mcman.h>
 #include "mcman-internal.h"
 
+// TODO: last sdk 3.1.0 has MCMAN module version 0x2,0x30 with significant changes.
+// Check what was changed, and maybe port changes.
+// CRC32: EC5F33F9
+// Note: currently is based on the last XMCMAN from BOOTROM:
+// 0x02,0x0a (looks like mistake, cause last XMCMAN is 0x02,0x09)
 IRX_ID(MODNAME, 2, 11);
 
 char sio2man_modname[8] = "sio2man\0";

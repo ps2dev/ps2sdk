@@ -31,6 +31,10 @@
 	#include "log.h"
 #endif
 
+// TODO: last sdk 3.1.0 and sdk 3.0.3 has SIO2MAN module version 0x03,0x11
+// Check what was changed, and maybe port changes.
+// Note: currently is based on the last XPADMAN from BOOTROM:
+// 0x02,0x01 (where is 0x02,0x04?)
 #ifdef SIO2LOG
 	IRX_ID("sio2man_logger", 2, 1);
 #else

@@ -26,6 +26,10 @@ extern struct irx_export_table _exp_mtapman;
 #define EF_UPDATE_SLOTS		0x1
 #define EF_EXIT_THREAD		0x2
 
+// TODO: last sdk 3.1.0 and sdk 3.0.3 has MTAPMAN module version 0x03,0x10
+// Check what was changed, and maybe port changes.
+// Note: currently is based on the last XMTAPMAN from BOOTROM:
+// 0x02,0x02
 IRX_ID("multitap_manager", 2, 2);
 
 static s32 event_flag;

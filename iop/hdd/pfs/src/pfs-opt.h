@@ -4,6 +4,10 @@
 #define PFS_PRINTF(format,...)	printf(format, ##__VA_ARGS__)
 #define PFS_DRV_NAME		"pfs"
 
+// TODO: last sdk 3.1.0 has PFS module with significant changes.
+// Check what was changed, and maybe port changes.
+// Note: PFS version the same: 2.2
+// CRC32: 98E62276
 #define PFS_MAJOR	2
 #define PFS_MINOR	2
 

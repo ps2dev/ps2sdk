@@ -34,6 +34,9 @@
 #include <atahw.h>
 
 #define MODNAME "atad"
+// TODO: last sdk 3.1.0 has ATAD module version 2.9 with significant changes.
+// Check what was changed, and maybe port changes.
+// CRC32: C2337807
 IRX_ID(MODNAME, 2, 7);
 
 #define M_PRINTF(format, args...)	\
@@ -239,7 +242,7 @@ int _start(int argc, char *argv[])
 		M_PRINTF("Compatible adaptor detected.\n");
 	} else {
 		ata_gamestar_workaround = 0;
-	}   
+	}
 #endif
 
 	if ((ata_evflg = ata_create_event_flag()) < 0) {

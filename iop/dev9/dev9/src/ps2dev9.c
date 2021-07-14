@@ -32,6 +32,7 @@
 
 #define MODNAME "dev9"
 #define DRIVERNAME "dev9"
+// This is version from last SDK 3.1.0
 IRX_ID(MODNAME, 2, 8);
 
 #define M_PRINTF(format, args...)	\
