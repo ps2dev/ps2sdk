@@ -6,16 +6,16 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-#Enable to perform the SCE HDD check at the end of ATA device initialization.
+# Enable to perform the SCE HDD check at the end of ATA device initialization.
 ATA_SCE_AUTH_HDD ?= 0
 
-#Enable to enable support for Multi-Word DMA (MWDMA) modes, as in early ATAD modules.
+# Enable to enable support for Multi-Word DMA (MWDMA) modes, as in early ATAD modules.
 ATA_MWDMA_MODES ?= 0
 
-#Enable to enable support for PIO modes 0-4 (as in early ATAD modules), instead of just PIO mode 0.
+# Enable to enable support for PIO modes 0-4 (as in early ATAD modules), instead of just PIO mode 0.
 ATA_ALL_PIO_MODES ?= 0
 
-#Disable to disable the workaround for bad GameStar compatible adaptors.
+# Disable to disable the workaround for bad GameStar compatible adaptors.
 ATA_GAMESTAR_WORKAROUND ?= 1
 
 IOP_BIN ?= ps2atad.irx

@@ -21,7 +21,7 @@
 
 /* IDT_R3000_20.pdf 3-11 table 3.5 */
 typedef enum {
-    EXCEPTION_Int,  /* note you can't really work with this one. */
+    EXCEPTION_Int, /* note you can't really work with this one. */
     EXCEPTION_Mod,
     EXCEPTION_TLBL,
     EXCEPTION_TLBS,
@@ -35,10 +35,11 @@ typedef enum {
     EXCEPTION_CpU,
     EXCEPTION_Ov,
     EXCEPTION_RESERVED13,
-    EXCEPTION_RESERVED14          /* would be FPE, but that's not going to happen on the IOP */
+    EXCEPTION_RESERVED14 /* would be FPE, but that's not going to happen on the IOP */
 } exception_type_t;
 
-typedef struct exception_frame {
+typedef struct exception_frame
+{
     u32 epc;
     u32 cause;
     u32 badvaddr;
@@ -53,12 +54,12 @@ typedef struct exception_frame {
    on interrupt mode, so, only i* functions. */
 typedef void (*trap_exception_handler_t)(exception_type_t, exception_frame_t *);
 
-#define DCIC_WR (1<<27)
-#define DCIC_RD (1<<26)
-#define DCIC_DA (1<<25)
-#define DCIC_PC (1<<24)
+#define DCIC_WR (1 << 27)
+#define DCIC_RD (1 << 26)
+#define DCIC_DA (1 << 25)
+#define DCIC_PC (1 << 24)
 
-const char * get_exception_name(exception_type_t type);
+const char *get_exception_name(exception_type_t type);
 
 /* Will act as a setjmp. Returns 0 to say it was the first call,
    otherwise, returns the exception number. (note that you'll never
@@ -79,17 +80,17 @@ u32 get_dbam();
 u32 get_dcic();
 
 #define ioptrap_IMPORTS_start DECLARE_IMPORT_TABLE(ioptrap, 1, 1)
-#define ioptrap_IMPORTS_end END_IMPORT_TABLE
+#define ioptrap_IMPORTS_end   END_IMPORT_TABLE
 
-#define I_get_exception_name DECLARE_IMPORT(4, get_exception_name)
-#define I_dbg_setjmp DECLARE_IMPORT(5, dbg_setjmp)
+#define I_get_exception_name    DECLARE_IMPORT(4, get_exception_name)
+#define I_dbg_setjmp            DECLARE_IMPORT(5, dbg_setjmp)
 #define I_set_exception_handler DECLARE_IMPORT(6, set_exception_handler)
 #define I_get_exception_handler DECLARE_IMPORT(7, get_exception_handler)
-#define I_set_dba DECLARE_IMPORT(8, set_dba)
-#define I_set_dbam DECLARE_IMPORT(9, set_dbam)
-#define I_set_dcic DECLARE_IMPORT(10, set_dcic)
-#define I_get_dba DECLARE_IMPORT(11, get_dba)
-#define I_get_dbam DECLARE_IMPORT(12, get_dbam)
-#define I_get_dcic DECLARE_IMPORT(13, get_dcic)
+#define I_set_dba               DECLARE_IMPORT(8, set_dba)
+#define I_set_dbam              DECLARE_IMPORT(9, set_dbam)
+#define I_set_dcic              DECLARE_IMPORT(10, set_dcic)
+#define I_get_dba               DECLARE_IMPORT(11, get_dba)
+#define I_get_dbam              DECLARE_IMPORT(12, get_dbam)
+#define I_get_dcic              DECLARE_IMPORT(13, get_dcic)
 
 #endif /* __IOPTRAP_H__ */
