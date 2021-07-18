@@ -10,6 +10,10 @@
 
 #include "mcserv.h"
 
+// TODO: last sdk 3.1.0 and sdk 3.0.3 has MCSERV module version 0x2,0x10
+// Check what was changed, and maybe port changes.
+// Note: currently is based on the last XMCSERV from BOOTROM:
+// 0x02,0x08
 IRX_ID(MODNAME, 2, 8);
 
 #ifdef SIO_DEBUG

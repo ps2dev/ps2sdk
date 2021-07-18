@@ -1,12 +1,37 @@
+#
+# NOTE! Please use 'git ls-files -i --exclude-standard -c'
+# command after changing this file, to see if there are
+# any tracked files which get ignored after the change.
+#
+# Normal rules
+#
+.*
 *.a
 *.elf
+*.ELF
 *.erl
 *.exe
 *.irx
 *.o
+*.diff
+*.map
+*.patch
+*.rej
+*.a
 *.swp
 *.tmp
 *.bin
+
+#
+# files that we don't want to ignore
+#
+!.gitignore
+!.gitattributes
+!.github
+!.editorconfig
+!.clang-format
+
+#
 obj/
 ee/erl-loader/src/exports.c
 tools/**/bin/

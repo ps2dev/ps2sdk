@@ -25,6 +25,10 @@ extern struct irx_export_table _exp_libsd;
 
 #define MODNAME "freesd"
 
+// TODO: last sdk 3.1.0 and sdk 3.0.3 has LIBSD module version 0x03,0x03
+// Check what was changed, and maybe port changes.
+// Note: looks like this LIBSD has different version numbering, cause it is too old:
+// 0x01,0x01
 IRX_ID(MODNAME, 1, 1);
 
 #define M_PRINTF(format, args...)	printf(MODNAME ": " format, ## args)

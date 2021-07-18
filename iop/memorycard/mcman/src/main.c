@@ -12,6 +12,11 @@
 #include <mcman.h>
 #include "mcman-internal.h"
 
+// TODO: last sdk 3.1.0 has MCMAN module version 0x2,0x30 with significant changes.
+// Check what was changed, and maybe port changes.
+// CRC32: EC5F33F9
+// Note: currently is based on the last XMCMAN from BOOTROM:
+// 0x02,0x0a (looks like mistake, cause last XMCMAN is 0x02,0x09)
 IRX_ID(MODNAME, 2, 11);
 
 char sio2man_modname[8] = "sio2man\0";
@@ -62,6 +67,7 @@ int (*mcman_sio2transfer)(int port, int slot, sio2_transfer_data_t *sio2data);
 int (*mc_detectcard)(int port, int slot);
 
 // mcman xor table
+// clang-format off
 static const u8 mcman_xortable[256] = {
 	0x00, 0x87, 0x96, 0x11, 0xA5, 0x22, 0x33, 0xB4,
 	0xB4, 0x33, 0x22, 0xA5, 0x11, 0x96, 0x87, 0x00,
@@ -96,6 +102,7 @@ static const u8 mcman_xortable[256] = {
 	0x00, 0x87, 0x96, 0x11, 0xA5, 0x22, 0x33, 0xB4,
 	0xB4, 0x33, 0x22, 0xA5, 0x11, 0x96, 0x87, 0x00
 };
+// clang-format on
 
 //--------------------------------------------------------------
 void long_multiply(u32 v1, u32 v2, u32 *HI, u32 *LO)

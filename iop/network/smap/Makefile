@@ -9,7 +9,7 @@
 # Build for use with a DHCP-enabled LWIP stack.
 LWIP_DHCP = 1
 
-IOP_PREFER_GPOPT = 16384 
+IOP_PREFER_GPOPT = 16384
 IOP_CFLAGS += -mno-check-zero-division
 
 ifdef LWIP_DHCP

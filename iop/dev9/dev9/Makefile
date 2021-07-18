@@ -6,13 +6,13 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-#Enable to disable initialization of SMAP within DEV9 (i.e. clone adaptor compatibility).
+# Enable to disable initialization of SMAP within DEV9 (i.e. clone adaptor compatibility).
 DEV9_SKIP_SMAP_INIT ?= 0
 
-#Enable to enable support for the PSX's devices
+# Enable to enable support for the PSX's devices
 DEV9_PSX_SUPPORT ?= 1
 
-#Disable to disable the workaround (skip SMAP initialization) for bad GameStar compatible adaptors.
+# Disable to disable the workaround (skip SMAP initialization) for bad GameStar compatible adaptors.
 DEV9_GAMESTAR_WORKAROUND ?= 1
 
 IOP_BIN ?= ps2dev9.irx

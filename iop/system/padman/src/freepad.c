@@ -23,6 +23,10 @@
 
 extern struct irx_export_table _exp_padman;
 
+// TODO: last sdk 3.1.0 and sdk 3.0.3 has PADMAN module version 0x04,0x22
+// Check what was changed, and maybe port changes.
+// Note: currently is based on the last XPADMAN from BOOTROM:
+// 0x03,0x06
 IRX_ID("padman", 3, 6);
 
 extern int padman_init;

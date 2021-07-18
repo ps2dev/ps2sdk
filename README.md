@@ -5,7 +5,7 @@
 
 [PS2SDK Documentation](https://ps2dev.github.io/ps2sdk/)
 
-Copyright 2001-2004, ps2dev - http://www.ps2dev.org  
+Copyright 2001-2004, ps2dev - <http://www.ps2dev.org>
 All rights reserved.
 
 ## Introduction
@@ -14,25 +14,25 @@ PS2SDK is a collecction of Open Source libraries used for developing application
 
 At the time of writing PS2SDK includes the following libraries and features, allowing:
 
-- Access to PS2 internal OS functions.
-- Access to PS2 control pad and multitap.
-- Access to PS2 memory card.
-- Access to USB mouse and keyboard.
-- TCP/IP stack & DNS resolution compatible with PS2 Ethernet Adapter.
-- Full PS2 compatible Hard Disk Drive file system.
-- Access to CD and DVD.
-- Required implementation by `newlib`, for fulfilling `libc` functionality.
-- Access to sound library on all PS2 using freesd.
-- HTTP client file system.
-- Network File System to load files from HOST pc.
+-   Access to PS2 internal OS functions.
+-   Access to PS2 control pad and multitap.
+-   Access to PS2 memory card.
+-   Access to USB mouse and keyboard.
+-   TCP/IP stack & DNS resolution compatible with PS2 Ethernet Adapter.
+-   Full PS2 compatible Hard Disk Drive file system.
+-   Access to CD and DVD.
+-   Required implementation by `newlib`, for fulfilling `libc` functionality.
+-   Access to sound library on all PS2 using freesd.
+-   HTTP client file system.
+-   Network File System to load files from HOST pc.
 
 ## Standard Libraries
 
 In a countinously effort to make `PS2SDK` and the whole `PS2DEV` a `POSIX` environment; there are some libraries needed to be included inside of the [standard libraries](https://gcc.gnu.org/onlinedocs/gcc/Standard-Libraries.html), whick means, libraries than by default are included in any compilation program. From `PS2SDK` we have:
 
-- `lkernel`: Contains the calls to BIOS functions
-- `lps2sdkc`: Implements most of the required methods by `newlib`
-- `lcdvd`: Implements `ps2time` function indirectly required by `newlib`
+-   `lkernel`: Contains the calls to BIOS functions
+-   `lps2sdkc`: Implements most of the required methods by `newlib`
+-   `lcdvd`: Implements `ps2time` function indirectly required by `newlib`
 
 If you wanna compile a program without using the `standard libraries` take a look to the [compiler flags](https://gcc.gnu.org/onlinedocs/gcc/Link-Options.html) (`-nodefaultlibs`, `-nolibc` and `-nostdlib`).
 
@@ -48,14 +48,14 @@ ps2sdk provides a large number of the basic software libraries required to acces
 
 A binary release of PS2SDK will include the following directories:
 
-* `sdk/ee/include`: EE include files.
-* `sdk/ee/lib`: EE library files.
-* `sdk/ee/startup`: Example crt0.o and linkfile.
-* `sdk/iop/include`: IOP include files.
-* `sdk/iop/irx`: IOP loadable modules.
-* `sdk/common/include`: Common include files between EE and IOP.
-* `sdk/samples`: Samples for both EE and IOP.
-* `sdk/tools`: Tools used during development on host PC.
+-   `sdk/ee/include`: EE include files.
+-   `sdk/ee/lib`: EE library files.
+-   `sdk/ee/startup`: Example crt0.o and linkfile.
+-   `sdk/iop/include`: IOP include files.
+-   `sdk/iop/irx`: IOP loadable modules.
+-   `sdk/common/include`: Common include files between EE and IOP.
+-   `sdk/samples`: Samples for both EE and IOP.
+-   `sdk/tools`: Tools used during development on host PC.
 
 ## Source Installation
 
@@ -65,20 +65,20 @@ The source tree is a built as a collection of seperate projects; each with their
 
 The main make file has three targets:
 
-* `all/default`: compile each of the projects in the tree.
-* `clean`: clean the tree of files created during build.
-* `release`: release the binaries to the target PS2SDK directory.
+-   `all/default`: compile each of the projects in the tree.
+-   `clean`: clean the tree of files created during build.
+-   `release`: release the binaries to the target PS2SDK directory.
 
 Each sub project has a tree structure which can include:
 
-* `src`: source code
-* `include`: include files which are exported
-* `samples`: samples of using a project. Can include multiple directories
-* `doc`: documentation files to be exported.
-* `test`: Unit Testing or other testing code.
-* `obj`: created during build to store object files
-* `lib`: created during build to store library files
-* `bin`: created during build to store binary files
+-   `src`: source code
+-   `include`: include files which are exported
+-   `samples`: samples of using a project. Can include multiple directories
+-   `doc`: documentation files to be exported.
+-   `test`: Unit Testing or other testing code.
+-   `obj`: created during build to store object files
+-   `lib`: created during build to store library files
+-   `bin`: created during build to store binary files
 
 Please review the Makefiles to see how to create your own subproject in the tree.
 
