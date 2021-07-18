@@ -94,16 +94,18 @@ int pfsGetTime(pfs_datetime_t *tm)
 	memcpy(tm, &timeBuf, sizeof(pfs_datetime_t));
 #else
 	time_t rawtime;
-	struct tm * timeinfo;
-	time (&rawtime);
-	timeinfo=localtime (&rawtime);
+	struct tm timeinfo;
+	time(&rawtime);
+	// Convert to JST
+	rawtime += (-9 * 60 * 60);
+	gmtime_r(&rawtime, &timeinfo);
 
-	tm->sec=timeinfo->tm_sec;
-	tm->min=timeinfo->tm_min;
-	tm->hour=timeinfo->tm_hour;
-	tm->day=timeinfo->tm_mday;
-	tm->month=timeinfo->tm_mon+1;
-	tm->year=timeinfo->tm_year+1900;
+	tm->sec = timeinfo.tm_sec;
+	tm->min = timeinfo.tm_min;
+	tm->hour = timeinfo.tm_hour;
+	tm->day = timeinfo.tm_mday;
+	tm->month = timeinfo.tm_mon + 1;
+	tm->year = timeinfo.tm_year + 1900;
 #endif
 
 	return 0;
