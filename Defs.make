@@ -23,7 +23,7 @@ EE_AR = $(EE_TOOL_PREFIX)ar
 EE_OBJCOPY = $(EE_TOOL_PREFIX)objcopy
 EE_STRIP = $(EE_TOOL_PREFIX)strip
 EE_ADDR2LINE = $(EE_TOOL_PREFIX)addr2line
-
+EE_RANLIB = $(EE_TOOL_PREFIX)ranlib
 
 #
 # Defintions for the IOP toolchain.
@@ -37,6 +37,7 @@ IOP_AR = $(IOP_TOOL_PREFIX)ar
 IOP_OBJCOPY = $(IOP_TOOL_PREFIX)objcopy
 IOP_STRIP = $(IOP_TOOL_PREFIX)strip
 IOP_ADDR2LINE = $(IOP_TOOL_PREFIX)addr2line
+IOP_RANLIB = $(IOP_TOOL_PREFIX)ranlib
 
 #
 # Definitions for the local toolchain

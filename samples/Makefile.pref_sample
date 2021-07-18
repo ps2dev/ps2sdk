@@ -19,6 +19,7 @@ EE_AR = $(EE_PREFIX)ar
 EE_OBJCOPY = $(EE_PREFIX)objcopy
 EE_STRIP = $(EE_PREFIX)strip
 EE_ADDR2LINE = $(EE_PREFIX)addr2line
+EE_RANLIB = $(EE_PREFIX)ranlib
 
 IOP_PREFIX ?= mipsel-ps2-irx-
 IOP_CC = $(IOP_PREFIX)gcc
@@ -28,3 +29,4 @@ IOP_AR = $(IOP_PREFIX)ar
 IOP_OBJCOPY = $(IOP_PREFIX)objcopy
 IOP_STRIP = $(IOP_PREFIX)strip
 IOP_ADDR2LINE = $(IOP_PREFIX)addr2line
+IOP_RANLIB = $(IOP_PREFIX)ranlib
