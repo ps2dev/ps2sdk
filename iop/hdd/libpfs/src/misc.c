@@ -102,7 +102,7 @@ int pfsGetTime(pfs_datetime_t *tm)
 	tm->min=timeinfo->tm_min;
 	tm->hour=timeinfo->tm_hour;
 	tm->day=timeinfo->tm_mday;
-	tm->month=timeinfo->tm_mon;
+	tm->month=timeinfo->tm_mon+1;
 	tm->year=timeinfo->tm_year+1900;
 #endif
 
