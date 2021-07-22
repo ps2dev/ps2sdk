@@ -20,12 +20,12 @@
 static _MPEGContext s_MPEG12Ctx;
 static s64*        s_pCurPTS;
 
-static void ( *LumaOp[ 8 ] ) ( _MPEGMotion* ) = {
+static void ( *LumaOp[ 8 ] ) ( unsigned char* arg1, short* arg2, int arg3, int arg4 ) = {
  _MPEG_put_luma, _MPEG_put_luma_X, _MPEG_put_luma_Y, _MPEG_put_luma_XY,
  _MPEG_avg_luma, _MPEG_avg_luma_X, _MPEG_avg_luma_Y, _MPEG_avg_luma_XY
 };
 
-static void ( *ChromaOp[ 8 ] ) ( void ) = {
+static void ( *ChromaOp[ 8 ] ) ( unsigned char* arg1, short* arg2, int arg3, int arg4 ) = {
  _MPEG_put_chroma, _MPEG_put_chroma_X, _MPEG_put_chroma_Y, _MPEG_put_chroma_XY,
  _MPEG_avg_chroma, _MPEG_avg_chroma_X, _MPEG_avg_chroma_Y, _MPEG_avg_chroma_XY
 };
