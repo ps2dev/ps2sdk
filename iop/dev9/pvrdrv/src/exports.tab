@@ -1,0 +1,19 @@
+
+DECLARE_EXPORT_TABLE(pvrdrv, 1, 1)
+    DECLARE_EXPORT(_retonly)
+    DECLARE_EXPORT(_retonly)
+    DECLARE_EXPORT(_retonly)
+    DECLARE_EXPORT(_retonly)
+    DECLARE_EXPORT(DvrdrvResetSystem)
+    DECLARE_EXPORT(DvrdrvEnableIntr)
+    DECLARE_EXPORT(DvrdrvDisableIntr)
+    DECLARE_EXPORT(DvrdrvRegisterIntrHandler)
+    DECLARE_EXPORT(DvrdrvUnregisterIntrHandler)
+    DECLARE_EXPORT(DvrdrvExecCmdAck)
+    DECLARE_EXPORT(DvrdrvExecCmdAckComp)
+    DECLARE_EXPORT(DvrdrvExecCmdAckDmaSendComp)
+    DECLARE_EXPORT(DvrdrvExecCmdAckDmaRecvComp)
+    DECLARE_EXPORT(DvrdrvExecCmdAckDma2Comp)
+END_EXPORT_TABLE
+
+void _retonly() {}
