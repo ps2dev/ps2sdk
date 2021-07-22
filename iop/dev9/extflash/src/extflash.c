@@ -22,11 +22,13 @@
 #include "dev9regs.h"
 #include "speedregs.h"
 
+#include "fls.h"
+
 #define MODNAME "flash"
 #define M_PRINTF(format, args...)	\
 	printf(MODNAME ": " format, ## args)
 
-IRX_ID(MODNAME, 1, 1);
+IRX_ID(MODNAME, 0, 0);
 
 #define FLASH_ID_64MBIT		0xe6
 #define FLASH_ID_128MBIT	0x73
@@ -46,14 +48,6 @@ IRX_ID(MODNAME, 1, 1);
 #define SM_CMD_GETSTATUS	0x70
 #define SM_CMD_READID		0x90
 
-typedef struct {
-	u32	id;
-	u32	mbits;
-	u32	page_bytes;	/* bytes/page */
-	u32	block_pages;	/* pages/block */
-	u32	blocks;
-} flash_info_t;
-
 static flash_info_t devices[] = {
 	{ FLASH_ID_64MBIT, 64, 528, 16, 1024 },
 	{ FLASH_ID_128MBIT, 128, 528, 32, 1024 },
@@ -66,10 +60,6 @@ static flash_info_t devices[] = {
 static iop_sys_clock_t timeout;
 static u32 timeout_cb(void *);
 
-int flash_detect(void);
-int flash_call5(void);
-int flash_get_info(flash_info_t *info);
-
 extern struct irx_export_table _exp_fls;
 
 int _start(int argc, char *argv[])
@@ -81,7 +71,7 @@ int _start(int argc, char *argv[])
 }
 
 /* #4: Check to see if flash is connected to the expansion bay.  */
-int flash_detect()
+int flash_detect(void)
 {
 	USE_DEV9_REGS;
 	USE_SPD_REGS;
@@ -103,7 +93,7 @@ int flash_detect()
 }
 
 /* #5: Reset the device.  */
-int flash_device_reset()
+int flash_device_reset(void)
 {
 	USE_SPD_REGS;
 	u32 has_timedout = 0;
