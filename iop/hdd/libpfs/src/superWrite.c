@@ -201,8 +201,19 @@ int pfsMountSuperBlock(pfs_mount_t *pfsMount)
 		return -EIO;
 	}
 
-	if(!pfsCheckZoneSize(superblock->zone_size))
-		result = -EIO;
+
+#ifdef PFS_SUPPORT_BHDD
+	if (strcmp(pfsMount->blockDev->devName, "bhdd") == 0)
+	{
+		if(!pfsCheckExtendedZoneSize(superblock->zone_size))
+			result = -EIO;
+	}
+	else
+#endif
+	{
+		if(!pfsCheckZoneSize(superblock->zone_size))
+			result = -EIO;
+	}
 
 	if((superblock->pfsFsckStat & PFS_FSCK_STAT_WRITE_ERROR) && (pfsMount->flags & PFS_FIO_ATTR_EXECUTABLE))
 		result = -EIO;

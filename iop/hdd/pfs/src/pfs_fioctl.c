@@ -68,7 +68,13 @@ int pfsFioDevctl(iop_file_t *f, const char *name, int cmd, void *arg, size_t arg
 
 	if(!(pfsMount=pfsFioGetMountedUnit(f->unit)))
 		return -ENODEV;
-
+#ifdef PFS_SUPPORT_BHDD
+	if (strcmp(pfsMount->blockDev->devName, "bhdd") == 0)
+	{
+		SignalSema(pfsFioSema);
+		return -ENODEV;
+	}
+#endif
 	switch(cmd)
 	{
 	case PDIOC_ZONESZ:
@@ -138,7 +144,10 @@ int pfsFioIoctl2(iop_file_t *f, int cmd, void *arg, size_t arglen,	void *buf, si
 	if((rv=pfsFioCheckFileSlot(fileSlot))<0)
 		return rv;
 	pfsMount=fileSlot->clink->pfsMount;
-
+#ifdef PFS_SUPPORT_BHDD
+	if (strcmp(pfsMount->blockDev->devName, "bhdd") == 0)
+		return -EBADF;
+#endif
 	switch(cmd)
 	{
 	case PIOCALLOC:

@@ -226,7 +226,9 @@ int _start(int argc, char *argv[])
 
 	DelDrv("pfs");
 	if(AddDrv(&pfsFioDev) == 0) {
-#ifdef PFS_OSD_VER
+#if defined(PFS_XOSD_VER)
+		PFS_PRINTF(PFS_DRV_NAME" version %04x driver start. This is OSD LBA48 VERSION !!!!!!!!!!!\n", IRX_VER(PFS_MAJOR, PFS_MINOR));
+#elif defined(PFS_OSD_VER)
 		PFS_PRINTF(PFS_DRV_NAME" version %04x driver start. This is OSD version!\n", IRX_VER(PFS_MAJOR, PFS_MINOR));
 #else
 		PFS_PRINTF(PFS_DRV_NAME" version %04x driver start.\n", IRX_VER(PFS_MAJOR, PFS_MINOR));
