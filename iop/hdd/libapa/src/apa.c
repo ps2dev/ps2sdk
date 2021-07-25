@@ -24,6 +24,10 @@
 #include "apa-opt.h"
 #include "libapa.h"
 
+#ifdef APA_SUPPORT_BHDD
+extern apa_device_t hddDevices[];
+#endif
+
 const char apaMBRMagic[]="Sony Computer Entertainment Inc.";
 
 void apaSaveError(s32 device, void *buffer, u32 lba, u32 err_lba)
@@ -168,8 +172,14 @@ apa_cache_t *apaInsertPartition(s32 device, const apa_params_t *params, u32 sect
 apa_cache_t *apaFindPartition(s32 device, const char *id, int *err)
 {
 	apa_cache_t *clink;
+	u32 sector = 0;
 
-	clink=apaCacheGetHeader(device, 0, APA_IO_MODE_READ, err);
+#ifdef APA_SUPPORT_BHDD
+	if (strcmp(id, "__xcontents") == 0 || strcmp(id, "__extend") == 0 || strcmp(id, "__xdata") == 0)
+		sector = hddDevices[device].totalLBA;
+#endif
+
+	clink=apaCacheGetHeader(device, sector, APA_IO_MODE_READ, err);
 	while(clink)
 	{
 		if(!(clink->header->flags & APA_FLAG_SUB)) {

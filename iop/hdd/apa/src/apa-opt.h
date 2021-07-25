@@ -11,6 +11,11 @@
 	4. The starting LBA of the partition will be returned in
 		the private_5 field of the stat structure (returned by getstat and dread). */
 
+#ifdef APA_XOSD_VER
+#define APA_OSD_VER
+#define APA_SUPPORT_BHDD
+#endif
+
 #ifdef APA_OSD_VER
 #define APA_STAT_RETURN_PART_LBA	1
 #define APA_FORMAT_LOCK_MBR		1

@@ -70,6 +70,15 @@ static iop_device_t hddFioDev={
 	"HDD",
 	(struct _iop_device_ops *)&hddOps,
 };
+#ifdef APA_SUPPORT_BHDD
+static iop_device_t bhddFioDev={
+	"bhdd",
+	IOP_DT_BLOCK | IOP_DT_FSEXT,
+	1,
+	"HDD",
+	(struct _iop_device_ops *)&hddOps,
+};
+#endif
 
 apa_device_t hddDevices[2]={
 	{0, 0, 0, 3},
@@ -293,14 +302,21 @@ int _start(int argc, char **argv)
 	DelDrv("hdd");
 	if(AddDrv(&hddFioDev) == 0)
 	{
-#ifdef APA_OSD_VER
-		APA_PRINTF(APA_DRV_NAME": version %04x driver start. This is OSD version!\n", IRX_VER(APA_MODVER_MAJOR, APA_MODVER_MINOR));
-#else
-		APA_PRINTF(APA_DRV_NAME": version %04x driver start.\n", IRX_VER(APA_MODVER_MAJOR, APA_MODVER_MINOR));
+#ifdef APA_SUPPORT_BHDD
+		DelDrv("bhdd");
+		if(AddDrv(&bhddFioDev) == 0)
 #endif
-		return MODULE_RESIDENT_END;
+		{
+#if defined(APA_XOSD_VER)
+			APA_PRINTF(APA_DRV_NAME": version %04x driver start. This is XOSD LBA48 VERSION !!!!!!!!!!!\n", IRX_VER(APA_MODVER_MAJOR, APA_MODVER_MINOR));
+#elif defined(APA_OSD_VER)
+			APA_PRINTF(APA_DRV_NAME": version %04x driver start. This is OSD version!\n", IRX_VER(APA_MODVER_MAJOR, APA_MODVER_MINOR));
+#else
+			APA_PRINTF(APA_DRV_NAME": version %04x driver start.\n", IRX_VER(APA_MODVER_MAJOR, APA_MODVER_MINOR));
+#endif
+			return MODULE_RESIDENT_END;
+		}
 	}
-	else
 	{
 		APA_PRINTF(APA_DRV_NAME": error: add device failed.\n");
 		return hddInitError();
