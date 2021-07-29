@@ -183,7 +183,11 @@ static u32 pfsHddGetPartSize(int fd, u32 sub/*0=main 1+=subs*/);
 static void pfsHddSetPartError(int fd);
 static int pfsHddFlushCache(int fd);
 
+#ifdef PFS_SUPPORT_BHDD
+#define NUM_SUPPORTED_DEVICES	2
+#else
 #define NUM_SUPPORTED_DEVICES	1
+#endif
 pfs_block_device_t pfsBlockDeviceCallTable[NUM_SUPPORTED_DEVICES] = {
 	{
 		"hdd",
@@ -192,7 +196,17 @@ pfs_block_device_t pfsBlockDeviceCallTable[NUM_SUPPORTED_DEVICES] = {
 		&pfsHddGetPartSize,
 		&pfsHddSetPartError,
 		&pfsHddFlushCache,
-	}
+	},
+#ifdef PFS_SUPPORT_BHDD
+	{
+		"bhdd",
+		&pfsHddTransfer,
+		&pfsHddGetSubCount,
+		&pfsHddGetPartSize,
+		&pfsHddSetPartError,
+		&pfsHddFlushCache,
+	},
+#endif
 };
 
 pfs_block_device_t *pfsGetBlockDeviceTable(const char *name)

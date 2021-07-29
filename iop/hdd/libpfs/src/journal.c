@@ -46,6 +46,11 @@ void pfsJournalWrite(pfs_mount_t *pfsMount, pfs_cache_t *clink, u32 pfsCacheNumB
 	u32 i=0;
 	u32 logSector=2;
 
+#ifdef PFS_SUPPORT_BHDD
+	if (strcmp(pfsMount->blockDev->devName, "bhdd") == 0)
+		return;
+#endif
+
 	for(i=0; i <pfsCacheNumBuffers;i++)
 	{
 		if((clink[i].flags & PFS_CACHE_FLAG_DIRTY) && clink[i].pfsMount == pfsMount) {
@@ -68,6 +73,11 @@ void pfsJournalWrite(pfs_mount_t *pfsMount, pfs_cache_t *clink, u32 pfsCacheNumB
 int pfsJournalReset(pfs_mount_t *pfsMount)
 {
 	int rv;
+
+#ifdef PFS_SUPPORT_BHDD
+	if (strcmp(pfsMount->blockDev->devName, "bhdd") == 0)
+		return 0;
+#endif
 
 	memset(&pfsJournalBuf, 0, sizeof(pfs_journal_t));
 	pfsJournalBuf.magic=PFS_JOUNRNAL_MAGIC;
@@ -92,6 +102,11 @@ int pfsJournalFlush(pfs_mount_t *pfsMount)
 {// this write any thing that in are journal buffer :)
 	int rv;
 
+#ifdef PFS_SUPPORT_BHDD
+	if (strcmp(pfsMount->blockDev->devName, "bhdd") == 0)
+		return 0;
+#endif
+
 	pfsMount->blockDev->flushCache(pfsMount->fd);
 
 	pfsJournalBuf.checksum=pfsJournalChecksum(&pfsJournalBuf);
@@ -109,6 +124,11 @@ int pfsJournalRestore(pfs_mount_t *pfsMount)
 	int result;
 	pfs_cache_t *clink;
 	u32 i;
+
+#ifdef PFS_SUPPORT_BHDD
+	if (strcmp(pfsMount->blockDev->devName, "bhdd") == 0)
+		return 0;
+#endif
 
 	// Read journal buffer from disk
 	rv = pfsMount->blockDev->transfer(pfsMount->fd, &pfsJournalBuf, 0,

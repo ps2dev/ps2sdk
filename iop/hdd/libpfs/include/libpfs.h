@@ -219,6 +219,9 @@ typedef struct
 #define PFS_SUPER_BACKUP_SECTOR		8193
 
 int pfsCheckZoneSize(u32 zone_size);
+#ifdef PFS_SUPPORT_BHDD
+int pfsCheckExtendedZoneSize(u32 zone_size);
+#endif
 u32 pfsGetBitmapSizeSectors(int zoneScale, u32 partSize);
 u32 pfsGetBitmapSizeBlocks(int scale, u32 mainsize);
 int pfsFormatSub(pfs_block_device_t *blockDev, int fd, u32 sub, u32 reserved, u32 scale, u32 fragment);

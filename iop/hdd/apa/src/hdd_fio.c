@@ -269,6 +269,11 @@ int hddFormat(iop_file_t *f, const char *dev, const char *blockdev, void *arg, i
 	u32				emptyBlocks[32];
 #endif
 
+#ifdef APA_SUPPORT_BHDD
+	if (strcmp(f->device->name, "bhdd") == 0)
+		return -ENODEV;
+#endif
+
 	if(f->unit >= 2)
 		return -ENXIO;
 
@@ -350,8 +355,13 @@ static int apaOpen(s32 device, hdd_file_slot_t *fileSlot, apa_params_t *params, 
 	apa_cache_t		*clink2;
 	u32				sector=0;
 
+#ifdef APA_SUPPORT_BHDD
+	if (strcmp(params->id, "__xcontents") == 0 || strcmp(params->id, "__extend") == 0 || strcmp(params->id, "__xdata") == 0)
+		sector = hddDevices[device].totalLBA;
+#endif
+
 	// walk all looking for any empty blocks & look for partition
-	clink=apaCacheGetHeader(device, 0, APA_IO_MODE_READ, &rv);
+	clink=apaCacheGetHeader(device, sector, APA_IO_MODE_READ, &rv);
 	memset(&emptyBlocks, 0, sizeof(emptyBlocks));
 	while(clink)
 	{
@@ -511,7 +521,10 @@ int hddRemove(iop_file_t *f, const char *name)
 
 	if((rv=fioGetInput(name, &params)) < 0)
 		return rv;
-
+#ifdef APA_SUPPORT_BHDD
+	if (strcmp(f->device->name, "bhdd") == 0)
+		return -EACCES;
+#endif
 	WaitSema(fioSema);
 	rv = apaRemove(f->unit, params.id, params.fpwd);
 	SignalSema(fioSema);
@@ -528,6 +541,12 @@ int hddOpen(iop_file_t *f, const char *name, int flags, int mode)
 	if(f->unit >= 2 || hddDevices[f->unit].status!=0)
 		return -ENODEV;
 
+#ifdef APA_SUPPORT_BHDD
+	if (strcmp(f->device->name, "bhdd") == 0)
+		if ((flags & O_CREAT) != 0)
+			return -EACCES;
+#endif
+
 	if(!(f->mode & O_DIROPEN))
 		if((rv=fioGetInput(name, &params)) < 0)
 			return rv;
@@ -542,6 +561,16 @@ int hddOpen(iop_file_t *f, const char *name, int flags, int mode)
 		}
 		else
 		{
+#ifdef APA_SUPPORT_BHDD
+			if (strcmp(f->device->name, "bhdd") == 0)
+			{
+				fileSlot->parts[0].start = hddDevices[f->unit].totalLBA;
+			}
+			else
+			{
+				fileSlot->parts[0].start = 0;
+			}
+#endif
 			fileSlot->f=f;
 			f->privdata=fileSlot;
 		}
@@ -567,6 +596,10 @@ int hddWrite(iop_file_t *f, void *buf, int size)
 {
 	if(!(f->mode & O_WRONLY))
 		return -EACCES;
+#ifdef APA_SUPPORT_BHDD
+	if (strcmp(f->device->name, "bhdd") == 0)
+		return -EACCES;
+#endif
 	return fioDataTransfer(f, buf, size, ATA_DIR_WRITE);
 }
 
@@ -825,6 +858,22 @@ int hddIoctl2(iop_file_t *f, int req, void *argp, unsigned int arglen,
 	u32 rv=0, err_lba;
 	hdd_file_slot_t *fileSlot=f->privdata;
 
+#ifdef APA_SUPPORT_BHDD
+	if (strcmp(f->device->name, "bhdd") == 0)
+	{
+		switch(req)
+		{
+			case HIOCADDSUB:
+			case HIOCDELSUB:
+			case HIOCFLUSH:
+			case HIOCSETPARTERROR:
+			case HIOCGETPARTERROR:
+				return -EACCES;
+			default:
+				break;
+		}
+	}
+#endif
 	WaitSema(fioSema);
 	switch(req)
 	{
@@ -936,6 +985,11 @@ int hddDevctl(iop_file_t *f, const char *devname, int cmd, void *arg,
 			  unsigned int arglen, void *bufp, unsigned int buflen)
 {
 	int	rv=0;
+
+#ifdef APA_SUPPORT_BHDD
+	if (strcmp(f->device->name, "bhdd") == 0)
+		return -ENODEV;
+#endif
 
 	WaitSema(fioSema);
 	switch(cmd)

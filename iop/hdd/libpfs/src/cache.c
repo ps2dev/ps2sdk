@@ -236,7 +236,12 @@ void pfsCacheClose(pfs_mount_t *pfsMount)
 {
 	unsigned int i;
 
-	pfsCacheFlushAllDirty(pfsMount);
+#ifdef PFS_SUPPORT_BHDD
+	if (strcmp(pfsMount->blockDev->devName, "bhdd") != 0)
+#endif
+	{
+		pfsCacheFlushAllDirty(pfsMount);
+	}
 	for(i=1; i < pfsCacheNumBuffers+1;i++){
 		if(pfsCacheBuf[i].pfsMount==pfsMount)
 			pfsCacheBuf[i].pfsMount=NULL;

@@ -145,6 +145,11 @@ static int openFile(pfs_mount_t *pfsMount, pfs_file_slot_t *freeSlot, const char
 
 
 	result = 0;	//no error
+#ifdef PFS_SUPPORT_BHDD
+	if (strcmp(pfsMount->blockDev->devName, "bhdd") == 0)
+		if (openFlags & O_CREAT)
+			return -EACCES;
+#endif
 	// Get the inode for the directory which contains the file (dir) in filename
 	// After this call, 'file' will contain the name of the file we're operating on.
 	if ((parentInode=pfsInodeGetParent(pfsMount, NULL, filename, file, &result))==0)
@@ -556,6 +561,11 @@ int	pfsFioFormat(iop_file_t *t, const char *dev, const char *blockdev, void *arg
 	if((blockDev = pfsGetBlockDeviceTable(blockdev)) == 0)
 		return -ENXIO;
 
+#ifdef PFS_SUPPORT_BHDD
+	if (strcmp(blockDev->devName, "bhdd") == 0)
+		return -EACCES;
+#endif
+
 	WaitSema(pfsFioSema);
 
 	fd = open(blockdev, O_RDWR);
@@ -671,7 +681,16 @@ int pfsFioWrite(iop_file_t *f, void *buf, int size)
 	if(fileSlot->position + (unsigned int)size < fileSlot->position)
 		result = -EINVAL;
 	else
-		result = fileTransfer(fileSlot, buf, size, 1);
+	{
+#ifdef PFS_SUPPORT_BHDD
+		if (strcmp(pfsMount->blockDev->devName, "bhdd") == 0)
+			return -EBADF;
+		else
+#endif
+		{
+			result = fileTransfer(fileSlot, buf, size, 1);
+		}
+	}
 
 	if (pfsMount->flags & PFS_FIO_ATTR_WRITEABLE)
 		pfsCacheFlushAllDirty(pfsMount);
@@ -765,6 +784,11 @@ static int _remove(pfs_mount_t *pfsMount, const char *path, int mode)
 	int rv=0;
 	pfs_cache_t *parent;
 	pfs_cache_t *file;
+
+#ifdef PFS_SUPPORT_BHDD
+	if (strcmp(pfsMount->blockDev->devName, "bhdd") == 0)
+		return -EACCES;
+#endif
 
 	if((parent=pfsInodeGetParent(pfsMount, NULL, path, szPath, &rv))==NULL)
 		return rv;
@@ -953,7 +977,13 @@ int	pfsFioChstat(iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int
 
 	if(!(pfsMount = pfsFioGetMountedUnit(f->unit)))
 		return -ENODEV;
-
+#ifdef PFS_SUPPORT_BHDD
+	if (strcmp(pfsMount->blockDev->devName, "bhdd") == 0)
+	{
+		SignalSema(pfsFioSema);
+		return -EBADF;
+	}
+#endif
 	clink = pfsInodeGetFile(pfsMount, NULL, name, &rv);
 	if(clink != NULL) {
 
@@ -1005,7 +1035,13 @@ int pfsFioRename(iop_file_t *ff, const char *old, const char *new)
 
 	pfsMount=pfsFioGetMountedUnit(ff->unit);
 	if (pfsMount==0)	return -ENODEV;
-
+#ifdef PFS_SUPPORT_BHDD
+	if (strcmp(pfsMount->blockDev->devName, "bhdd") == 0)
+	{
+		SignalSema(pfsFioSema);
+		return -EACCES;
+	}
+#endif
 	parentOld=pfsInodeGetParent(pfsMount, NULL, old, path1, &result);
 	if (parentOld){
 		u32 nused=parentOld->nused;
@@ -1210,7 +1246,13 @@ int pfsFioSync(iop_file_t *f, const char *dev, int flag)
 
 	if(!(pfsMount = pfsFioGetMountedUnit(f->unit)))
 		return -ENODEV;
-
+#ifdef PFS_SUPPORT_BHDD
+	if (strcmp(pfsMount->blockDev->devName, "bhdd") == 0)
+	{
+		SignalSema(pfsFioSema);
+		return -ENODEV;
+	}
+#endif
 	_sync();
 	pfsCacheFlushAllDirty(pfsMount);
 

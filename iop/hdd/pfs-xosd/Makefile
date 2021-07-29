@@ -6,7 +6,10 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = apa apa-osd apa-xosd pfs pfs-osd pfs-xosd
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/hdd/pfs/src/
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+IOP_BIN ?= ps2fs-Xosd.irx
+
+IOP_CFLAGS += -DPFS_XOSD_VER
+
+include $(PS2SDKSRC)/iop/hdd/pfs/Makefile

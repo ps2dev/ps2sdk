@@ -1008,6 +1008,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 {
     USE_ATA_REGS;
     int i, res;
+    u32 total_sectors_nonlba48, total_sectors_lba48;
 
     if ((res = ata_reset_devices()) != 0)
         return res;
@@ -1056,19 +1057,18 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
            either words(61:60) for 28-bit or words(103:100) for 48-bit.  */
         if (!ata_disable_lba48 && (ata_param[ATA_ID_COMMAND_SETS_SUPPORTED] & 0x0400)) {
             devinfo[i].lba48 = 1;
-            /* I don't think anyone would use a >2TB HDD but just in case.  */
-            if (ata_param[ATA_ID_48BIT_SECTOTAL_HI]) {
-                devinfo[i].total_sectors = 0xffffffff;
-            } else {
-                devinfo[i].total_sectors =
-                    (ata_param[ATA_ID_48BIT_SECTOTAL_MI] << 16) |
-                    ata_param[ATA_ID_48BIT_SECTOTAL_LO];
-            }
         } else {
             devinfo[i].lba48 = 0;
-            devinfo[i].total_sectors = (ata_param[ATA_ID_SECTOTAL_HI] << 16) |
-                                       ata_param[ATA_ID_SECTOTAL_LO];
         }
+
+        /* Save the total sector counts before we overwrite ata_param with the value of Sony identify drive command. */
+        total_sectors_nonlba48 = (ata_param[ATA_ID_SECTOTAL_HI] << 16) | ata_param[ATA_ID_SECTOTAL_LO];
+        if (ata_param[ATA_ID_48BIT_SECTOTAL_HI]) {
+            total_sectors_lba48 = 0xffffffff;
+        } else {
+            total_sectors_lba48 = (ata_param[ATA_ID_48BIT_SECTOTAL_MI] << 16) | ata_param[ATA_ID_48BIT_SECTOTAL_LO];
+        }
+
         devinfo[i].security_status = ata_param[ATA_ID_SECURITY_STATUS];
 
         /* Ultra DMA mode 4.  */
@@ -1076,6 +1076,17 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
         ata_device_smart_enable(i);
         /* Set standby timer to 21min 15s.  */
         ata_device_idle(i, 0xff);
+
+        if (devinfo[i].lba48 != 0) {
+            /* If this device has the Sony firmware or is emulated through the DVRP, use the non-48-bit LBA size.  */
+            if (ata_device_sce_identify_drive(i, ata_param) == 0) {
+                devinfo[i].total_sectors = total_sectors_nonlba48;
+            } else {
+                devinfo[i].total_sectors = total_sectors_lba48;
+            }
+        } else {
+            devinfo[i].total_sectors = total_sectors_nonlba48;
+        }
 
         /* Call the proprietary identify command. */
 #ifdef ATA_SCE_AUTH_HDD

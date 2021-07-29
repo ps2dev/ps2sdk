@@ -11,6 +11,11 @@
 #define PFS_MAJOR	2
 #define PFS_MINOR	2
 
+#ifdef PFS_XOSD_VER
+#define PFS_OSD_VER		1
+#define PFS_SUPPORT_BHDD	1
+#endif
+
 /*	Define PFS_OSD_VER in your Makefile to build an OSD version, which will:
 	1. Enable the PIOCINVINODE IOCTL2 function.
 	2. (Unofficial) Return the LBA of the inode in private_5 and sub number in private_4 fields of the stat structure (returned by getstat and dread). */

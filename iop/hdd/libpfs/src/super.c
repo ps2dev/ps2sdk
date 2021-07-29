@@ -36,6 +36,19 @@ int pfsCheckZoneSize(u32 zone_size)
 	return 1;
 }
 
+#ifdef PFS_SUPPORT_BHDD
+int pfsCheckExtendedZoneSize(u32 zone_size)
+{
+	if ((zone_size & (zone_size - 1)) || (zone_size < (2 * 1024)) || (zone_size > (128 * 8192)))
+	{
+		PFS_PRINTF(PFS_DRV_NAME": error: invalid  extended zone size %d,%d\n", (zone_size & (zone_size - 1)) == 0, zone_size);
+		return 0;
+	}
+	
+	return 1;
+}
+#endif
+
 // Returns the number of sectors (512 byte units) which will be used
 // for bitmaps, given the zone size and partition size
 u32 pfsGetBitmapSizeSectors(int zoneScale, u32 partSize)
