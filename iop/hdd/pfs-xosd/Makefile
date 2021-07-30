@@ -8,7 +8,7 @@
 
 IOP_SRC_DIR = $(PS2SDKSRC)/iop/hdd/pfs/src/
 
-IOP_BIN ?= ps2fs-Xosd.irx
+IOP_BIN ?= ps2fs-xosd.irx
 
 IOP_CFLAGS += -DPFS_XOSD_VER
 
