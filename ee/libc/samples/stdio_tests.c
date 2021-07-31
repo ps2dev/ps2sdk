@@ -423,6 +423,14 @@ static const char *test_failed_open(void *arg)
     return NULL;
 }
 
+static const char *test_remove(void *arg)
+{
+    remove((char *)arg);
+
+    //printf("\nSUCCESS: all checks passed\n");
+    return NULL;
+}
+
 int libc_add_tests(test_suite *p)
 {
     const char *textfile, *textfile2, *invalidtextfile;
@@ -459,6 +467,7 @@ int libc_add_tests(test_suite *p)
     add_test(p, "opendir, closedir\n", test_opendir_closedir, (void *)dir);
     add_test(p, "readdir, rewinddir\n", test_readdir_rewinddir, (void *)dir);
     add_test(p, "failed open\n", test_failed_open, (void *)invalidtextfile);
+    add_test(p, "remove\n", test_remove, (void *)textfile2);
 
     return 0;
 }
