@@ -425,9 +425,12 @@ static const char *test_failed_open(void *arg)
 
 static const char *test_remove(void *arg)
 {
-    remove((char *)arg);
+    if (remove((char *)arg) != 0)
+		perror("File deletion failed");
+	else
+		printf("File deleted successfully");
 
-    //printf("\nSUCCESS: all checks passed\n");
+    printf("\nSUCCESS: all checks passed\n");
     return NULL;
 }
 
