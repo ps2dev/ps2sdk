@@ -72,18 +72,19 @@ int main(int argc, char *argv[])
 	elfdata.epc = 0;
 
 	GS_BGCOLOUR = WHITE_BG;
-	// arg[0]=path to ELF
-	// arg[1] partition if exists otherwise is ""
+	// arg[0] partition if exists, otherwise is ""
+	// arg[1]=path to ELF
 	if (argc < 2) {  
 		GS_BGCOLOUR = RED_BG;
 		return -EINVAL;
 	}
 
 	char *new_argv[argc - 1];
-	int fullPath_length = 1 + strlen(argv[1]) + strlen(argv[0]);
+	int fullPath_length = 1 + strlen(argv[0]) + strlen(argv[1]);
 	char fullPath[fullPath_length];
-	strcpy(fullPath, argv[1]);
-	strcat(fullPath, argv[0]);
+	strcpy(fullPath, argv[0]);
+	strcat(fullPath, argv[1]);
+	// final new_argv[0] is partition + path to elf
 	new_argv[0] = fullPath;
 	for (i = 2; i < argc; i++) {
 		new_argv[i - 1] = argv[i];
@@ -99,7 +100,7 @@ int main(int argc, char *argv[])
 	FlushCache(0);
 	GS_BGCOLOUR = GREEN_BG;
 	SifLoadFileInit();
-	ret = SifLoadElf(argv[0], &elfdata);
+	ret = SifLoadElf(argv[1], &elfdata);
 	SifLoadFileExit();
 	GS_BGCOLOUR = BLUE_BG;
 	if (ret == 0 && elfdata.epc != 0) {

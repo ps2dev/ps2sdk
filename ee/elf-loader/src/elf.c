@@ -67,8 +67,8 @@ int LoadELFFromFileWithPartition(const char *filename, const char *partition, in
 
 	// Preparing filename and partition to be sent in the argv
 	char *new_argv[argc + 2];
-	new_argv[0] = (char *)filename;
-	new_argv[1] = partition != NULL ? (char *)partition : "";
+	new_argv[0] = partition != NULL ? (char *)partition : "";
+	new_argv[1] = (char *)filename;
 	for (i = 0; i < argc; i++) {
 		new_argv[i + 2] = argv[i];
 	}

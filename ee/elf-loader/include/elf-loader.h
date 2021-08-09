@@ -22,14 +22,32 @@ extern "C" {
 
 // Before call this method be sure that you have previously called sbv_patch_disable_prefix_check();
 int LoadELFFromFile(const char *filename, int argc, char *argv[]);
-/* partition is useful when you're launching an ELF from HDD. If this is the case a example could be:
-*   filename = pfs:something/myprogram.elf
-*   partition = hdd0:__common:
-* What iternally we will do is to concatenate partition + filename, and send it in the argv[0], which is used by CWD
-* So folowing the previous example. when elf is launched argv[0] = hdd0:__common:pfs:something/myprogram.elf
-* If you aren't going to load from HDD you can pass in partition either NULL or ""
-*/
 
+/** Modify argv[0] when partition info should be kept
+ *
+ * @param filename  path to the file itself
+ * @param partition block device + partition name
+ * @param argc      Number of arguments.
+ * @param argv      Pointer to array of arguments.
+ * @returns         positive on success, zero value on failure
+ *
+ * You should prepare filename and partition before parsing in function 
+ *
+ * filename should be changed to <fs_type>:/path_to_file_without_mountpoint
+ * for example `pfs3:/TEST.ELF` (where `pfs3` is mountpoint name) will become
+ * `pfs:/TEST.ELF` (where `pfs` - filesystem type)
+ *
+ * partition should be in form <block_device><partition_name>:
+ * for example `hdd0:__common:`
+ * block_device - can be `hdd0:`, `hdd1:` , `dvr_hdd0:`
+ * <partition_name> - name of APA partition on particular block device
+ * dont forget about leading ":"
+ *
+ * It is not necessary that filename should be on that partition
+ * filename - mass:/TEST.ELF
+ * partition - pfs:/__common
+ * will be valid usage
+ */
 int LoadELFFromFileWithPartition(const char *filename, const char *partition, int argc, char *argv[]);
 
 #ifdef __cplusplus
