@@ -115,6 +115,16 @@ typedef struct
 #define HDIOC_WRITESECTOR	0x6837
 /** bufp = buffer for atadSceIdentifyDrive */
 #define HDIOC_SCEIDENTIFY	0x6838
+// Only available using dvr_hdd0:
+#define HDIOC_INSTSEC	0x6839
+/** arg = u32 */
+#define HDIOC_SETMAXLBA28	0x683A
+#define HDIOC_GETMAXLBA48	0x683B
+#define HDIOC_ISLBA48	0x683C
+#define HDIOC_PRESETMAXLBA28	0x683D
+#define HDIOC_POSTSETMAXLBA28	0x683E
+#define HDIOC_ENABLEWRITECACHE	0x683F
+#define HDIOC_DISABLEWRITECACHE	0x6840
 
 // structs for DEVCTL commands
 
