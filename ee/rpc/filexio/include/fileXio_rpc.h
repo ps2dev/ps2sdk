@@ -35,6 +35,7 @@ extern "C" {
 #endif
 
 int fileXioInit(void);
+int fileXioInitSkipOverride(void);
 void fileXioExit(void);
 void fileXioSetBlockMode(int blocking);
 int fileXioWaitAsync(int mode, int *retVal);

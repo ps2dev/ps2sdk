@@ -173,7 +173,7 @@ static int fileXioClosedirHelper(DIR *dir)
 	return 0;
 }
 
-int fileXioInit(void)
+static int fileXioInitHelper(int overrideNewlibMethods)
 {
 	int res;
 	ee_sema_t sp;
@@ -212,26 +212,39 @@ int fileXioInit(void)
 	fileXioInited = 1;
 	fileXioBlockMode = FXIO_WAIT;
 
-	_ps2sdk_close = fileXioClose;
-	_ps2sdk_open = fileXioOpen;
-	_ps2sdk_read = fileXioRead;
-	_ps2sdk_lseek = fileXioLseek;
-	_ps2sdk_lseek64 = fileXioLseek64;
-	_ps2sdk_write = fileXioWrite;
-	_ps2sdk_ioctl = fileXioIoctl;
-	_ps2sdk_remove= fileXioRemove;
-	_ps2sdk_rename= fileXioRename;
-	_ps2sdk_mkdir = fileXioMkdir;
-	_ps2sdk_rmdir = fileXioRmdir;
+	if (overrideNewlibMethods) 
+	{
+		_ps2sdk_close = fileXioClose;
+		_ps2sdk_open = fileXioOpen;
+		_ps2sdk_read = fileXioRead;
+		_ps2sdk_lseek = fileXioLseek;
+		_ps2sdk_lseek64 = fileXioLseek64;
+		_ps2sdk_write = fileXioWrite;
+		_ps2sdk_ioctl = fileXioIoctl;
+		_ps2sdk_remove= fileXioRemove;
+		_ps2sdk_rename= fileXioRename;
+		_ps2sdk_mkdir = fileXioMkdir;
+		_ps2sdk_rmdir = fileXioRmdir;
 
-	_ps2sdk_stat = fileXioGetstatHelper;
+		_ps2sdk_stat = fileXioGetstatHelper;
 
-	_ps2sdk_opendir = fileXioOpendirHelper;
-	_ps2sdk_readdir = fileXioReaddirHelper;
-	_ps2sdk_rewinddir = fileXioRewinddirHelper;
-	_ps2sdk_closedir = fileXioClosedirHelper;
+		_ps2sdk_opendir = fileXioOpendirHelper;
+		_ps2sdk_readdir = fileXioReaddirHelper;
+		_ps2sdk_rewinddir = fileXioRewinddirHelper;
+		_ps2sdk_closedir = fileXioClosedirHelper;
+	}
 
 	return 0;
+}
+
+int fileXioInit(void)
+{
+	return fileXioInitHelper(1);
+}
+
+int fileXioInitSkipOverride(void)
+{
+	return fileXioInitHelper(0);
 }
 
 void fileXioExit(void)
