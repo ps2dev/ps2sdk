@@ -8,8 +8,12 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include <kernel.h>
 #include <loadfile.h>
+#include <iopcontrol.h>
 #include <sifrpc.h>
 #include <errno.h>
 
@@ -22,6 +26,7 @@
 #define BLUE_BG 0xFF0000 // after SifLoadELF
 #define YELLOW_BG 0x00FFFF // good SifLoadELF return
 #define MAGENTA_BG 0xFF00FF // wrong SifLoadELF return
+#define BROWN_BG 0x2A2AA5  // after reset IOP
 #define PURPBLE_BG 0x800080  // before ExecPS2
 
 
@@ -57,17 +62,34 @@ static void wipeUserMem(void)
 //End of func:  void wipeUserMem(void)
 //--------------------------------------------------------------
 // *** MAIN ***
+// 
 //--------------------------------------------------------------
 int main(int argc, char *argv[])
 {
 	static t_ExecData elfdata;
-	int ret;
+	int ret, i;
+
+	elfdata.epc = 0;
 
 	GS_BGCOLOUR = WHITE_BG;
-	if (argc < 1) {  // arg1=path to ELF
+	// arg[0] partition if exists, otherwise is ""
+	// arg[1]=path to ELF
+	if (argc < 2) {  
 		GS_BGCOLOUR = RED_BG;
 		return -EINVAL;
 	}
+
+	char *new_argv[argc - 1];
+	int fullPath_length = 1 + strlen(argv[0]) + strlen(argv[1]);
+	char fullPath[fullPath_length];
+	strcpy(fullPath, argv[0]);
+	strcat(fullPath, argv[1]);
+	// final new_argv[0] is partition + path to elf
+	new_argv[0] = fullPath;
+	for (i = 2; i < argc; i++) {
+		new_argv[i - 1] = argv[i];
+	}
+
 	GS_BGCOLOUR = CYAN_BG;
 
 	// Initialize
@@ -77,17 +99,36 @@ int main(int argc, char *argv[])
 	//Writeback data cache before loading ELF.
 	FlushCache(0);
 	GS_BGCOLOUR = GREEN_BG;
-	ret = SifLoadElf(argv[0], &elfdata);
+	SifLoadFileInit();
+	ret = SifLoadElf(argv[1], &elfdata);
+	SifLoadFileExit();
 	GS_BGCOLOUR = BLUE_BG;
-	if (ret == 0) {
+	if (ret == 0 && elfdata.epc != 0) {
 		GS_BGCOLOUR = YELLOW_BG;
-		SifExitRpc();
+
+		// Let's reset IOP because ELF was already loaded in memory
+		while(!SifIopReset(NULL, 0)){};
+		while (!SifIopSync()) {};
+
+		GS_BGCOLOUR = RED_BG;
+
+        SifInitRpc(0);
+        // Load modules.
+        SifLoadFileInit();
+        SifLoadModule("rom0:SIO2MAN", 0, NULL);
+        SifLoadModule("rom0:MCMAN", 0, NULL);
+        SifLoadModule("rom0:MCSERV", 0, NULL);
+        SifLoadFileExit();
+        SifExitRpc();
+
+		GS_BGCOLOUR = BROWN_BG;
+
 		FlushCache(0);
 		FlushCache(2);
 
 		GS_BGCOLOUR = PURPBLE_BG;
-		// Following the standard the first parameter of a argv is the executable itself
-		return ExecPS2((void *)elfdata.epc, (void *)elfdata.gp, argc, argv);
+		
+		return ExecPS2((void *)elfdata.epc, (void *)elfdata.gp, argc-1, new_argv);
 	} else {
 		GS_BGCOLOUR = MAGENTA_BG;
 		SifExitRpc();

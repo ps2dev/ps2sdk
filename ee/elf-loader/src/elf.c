@@ -30,25 +30,47 @@ static bool file_exists(const char *filename) {
 	return (stat (filename, &buffer) == 0);
 }
 
-int LoadELFFromFile(const char *filename, int argc, char *argv[])
-{
+/* IMPORTANT: This method wipe memory where the loader is going to be allocated 
+* This values come from the linkfile used by the loader.c
+MEMORY {
+	bios	: ORIGIN = 0x00000000, LENGTH = 528K --- 0x00000000 - 0x00084000: BIOS memory
+	bram	: ORIGIN = 0x00084000, LENGTH = 496K --- 0x00084000 - 0x00100000: BIOS unused memory
+	gram	: ORIGIN = 0x00100000, LENGTH =  31M --- 0x00100000 - 0x02000000: GAME memory
+}
+*/
+
+static void wipe_bramMem(void) {
+	int i;
+	for (i = 0x00084000; i < 0x100000; i += 64) {
+		asm volatile(
+			"\tsq $0, 0(%0) \n"
+			"\tsq $0, 16(%0) \n"
+			"\tsq $0, 32(%0) \n"
+			"\tsq $0, 48(%0) \n" ::"r"(i));
+	}
+}
+
+int LoadELFFromFileWithPartition(const char *filename, const char *partition, int argc, char *argv[]) {
 	u8 *boot_elf;
 	elf_header_t *eh;
 	elf_pheader_t *eph;
 	void *pdata;
 	int i;
-	int new_argc = argc + 1;
+	int new_argc = argc + 2;
 	
 	// We need to check that the ELF file before continue
 	if (!file_exists(filename)) {
 		return -1; // ELF file doesn't exists
 	}
 	// ELF Exists
-	char *new_argv[new_argc];
+	wipe_bramMem();
 
-	new_argv[0] = (char *)filename;
+	// Preparing filename and partition to be sent in the argv
+	char *new_argv[argc + 2];
+	new_argv[0] = partition != NULL ? (char *)partition : "";
+	new_argv[1] = (char *)filename;
 	for (i = 0; i < argc; i++) {
-		new_argv[i + 1] = argv[i];
+		new_argv[i + 2] = argv[i];
 	}
 	
 	/* NB: LOADER.ELF is embedded  */
@@ -77,4 +99,9 @@ int LoadELFFromFile(const char *filename, int argc, char *argv[])
 	FlushCache(2);
 	
 	return ExecPS2((void *)eh->entry, NULL, new_argc, new_argv);
+}
+
+int LoadELFFromFile(const char *filename, int argc, char *argv[])
+{
+	return LoadELFFromFileWithPartition(filename, NULL, argc, argv);
 }
