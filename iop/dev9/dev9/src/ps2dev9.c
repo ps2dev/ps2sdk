@@ -124,12 +124,6 @@ static int dev9x_devctl(iop_file_t *f, const char *name, int cmd, void *args, un
         case DDIOC_OFF:
             dev9Shutdown();
             return 0;
-        case DDIOC_SETPIO3:
-            dev9ControlPIO3(((u32 *)args)[0]);
-            return 0;
-        case DDIOC_LED2CTL:
-            dev9LED2Ctl(((u32 *)args)[0]);
-            return 0;
         default:
             return 0;
     }
@@ -542,47 +536,11 @@ int dev9GetEEPROM(u16 *buf)
     return 0;
 }
 
-// Exerpt from Wisi's SPEED.txt:
-// 1:0  Dev9 LED Control. 0=On/1=Off.
-// Clearing either to 0 will light the LED.
-// Each is connected to the cathode of a diode, sharing a common anode.
-// The anode has a 10kohm pull-up to Vcc, and is connected to the base of an PNP transistor,
-// with collector grounded and emitter, connecting through a 240ohm resistor to the ACS_LED
-// pin (90) of the Expansion Bay connector. It connects to the cathode of the HDD Activity LED
-// in the PS2, the anode of which connects through 180ohm resistor to +5V.  
-
-// The specific LED part used is the Citizen CITILED CL-200TLY-C, which has a "Lemon Yellow" color.
-
 /* Export 10 */
 void dev9LEDCtl(int ctl)
 {
     USE_SPD_REGS;
-    SPD_REG8(SPD_R_PIO_DIR) |= 1;
-    SPD_REG8(SPD_R_PIO_DATA) = (SPD_REG8(SPD_R_PIO_DATA) & 0xE) | (ctl ? 0 : 1);
-}
-
-/* Export 15 */
-void dev9LED2Ctl(int ctl)
-{
-    USE_SPD_REGS;
-    SPD_REG8(SPD_R_PIO_DIR) |= 2;
-    DelayThread(1);
-    SPD_REG8(SPD_R_PIO_DATA) = (SPD_REG8(SPD_R_PIO_DATA) & 0xD) | (ctl ? 0 : 2);
-    DelayThread(1);
-}
-
-// Exerpt from Wisi's SPEED.txt:
-// 3:2  On SCPH-70000, each is connected through 10kohm R to Vcc, so they were inputs once.
-// On the SCPH-10350 Network Adapter - as well.
-
-/* Export 14 */
-void dev9ControlPIO3(int ctl)
-{
-    USE_SPD_REGS;
-    SPD_REG8(SPD_R_PIO_DIR) |= 4;
-    DelayThread(1);
-    SPD_REG8(SPD_R_PIO_DATA) = (SPD_REG8(SPD_R_PIO_DATA) & 0xB) | (ctl ? 0 : 4);
-    DelayThread(1);
+    SPD_REG8(SPD_R_PIO_DATA) = (ctl == 0);
 }
 
 static void dev9RegisterIntrDispatchCb(dev9IntrDispatchCb_t callback)
@@ -636,10 +594,6 @@ static int dev9_init(int sema_attr)
 
     /* Read in the MAC address.  */
     read_eeprom_data();
-
-    dev9LED2Ctl(0);
-    dev9ControlPIO3(0);
-
     /* Turn the LED off.  */
     dev9LEDCtl(0);
     return 0;

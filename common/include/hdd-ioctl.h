@@ -26,8 +26,6 @@
 
 #define DDIOC_MODEL		0x4401
 #define DDIOC_OFF		0x4402
-#define DDIOC_SETPIO3	0x4403
-#define DDIOC_LED2CTL	0x4404
 
 ///////////////////////////////////////////////////////////////////////////////
 //	HDD.IRX
