@@ -85,6 +85,8 @@ static dev9_shutdown_cb_t dev9_shutdown_cbs[16];
 
 static dev9_dma_cb_t dev9_predma_cbs[4], dev9_postdma_cbs[4];
 
+static u8 dev9_has_dvr_capability = 0;
+
 static int dev9_intr_dispatch(int flag);
 
 static void dev9_set_stat(int stat);
@@ -557,18 +559,28 @@ int dev9GetEEPROM(u16 *buf)
 void dev9LEDCtl(int ctl)
 {
     USE_SPD_REGS;
-    SPD_REG8(SPD_R_PIO_DIR) |= 1;
-    SPD_REG8(SPD_R_PIO_DATA) = (SPD_REG8(SPD_R_PIO_DATA) & 0xE) | (ctl ? 0 : 1);
+    if (dev9_has_dvr_capability)
+    {
+        SPD_REG8(SPD_R_PIO_DIR) |= 1;
+        SPD_REG8(SPD_R_PIO_DATA) = (SPD_REG8(SPD_R_PIO_DATA) & 0xE) | (ctl ? 0 : 1);
+    }
+    else
+    {
+        SPD_REG8(SPD_R_PIO_DATA) = (ctl == 0);
+    }
 }
 
 /* Export 15 */
 void dev9LED2Ctl(int ctl)
 {
-    USE_SPD_REGS;
-    SPD_REG8(SPD_R_PIO_DIR) |= 2;
-    DelayThread(1);
-    SPD_REG8(SPD_R_PIO_DATA) = (SPD_REG8(SPD_R_PIO_DATA) & 0xD) | (ctl ? 0 : 2);
-    DelayThread(1);
+    if (dev9_has_dvr_capability)
+    {
+        USE_SPD_REGS;
+        SPD_REG8(SPD_R_PIO_DIR) |= 2;
+        DelayThread(1);
+        SPD_REG8(SPD_R_PIO_DATA) = (SPD_REG8(SPD_R_PIO_DATA) & 0xD) | (ctl ? 0 : 2);
+        DelayThread(1);
+    }
 }
 
 // Exerpt from Wisi's SPEED.txt:
@@ -578,11 +590,14 @@ void dev9LED2Ctl(int ctl)
 /* Export 14 */
 void dev9ControlPIO3(int ctl)
 {
-    USE_SPD_REGS;
-    SPD_REG8(SPD_R_PIO_DIR) |= 4;
-    DelayThread(1);
-    SPD_REG8(SPD_R_PIO_DATA) = (SPD_REG8(SPD_R_PIO_DATA) & 0xB) | (ctl ? 0 : 4);
-    DelayThread(1);
+    if (dev9_has_dvr_capability)
+    {
+        USE_SPD_REGS;
+        SPD_REG8(SPD_R_PIO_DIR) |= 4;
+        DelayThread(1);
+        SPD_REG8(SPD_R_PIO_DATA) = (SPD_REG8(SPD_R_PIO_DATA) & 0xB) | (ctl ? 0 : 4);
+        DelayThread(1);
+    }
 }
 
 static void dev9RegisterIntrDispatchCb(dev9IntrDispatchCb_t callback)
@@ -1228,6 +1243,7 @@ static int expbay_intr(void *unused)
 static int expbay_init(int sema_attr)
 {
     USE_DEV9_REGS;
+    USE_SPD_REGS;
     int flags;
 
     _sw(0x51011, SSBUS_R_1420);
@@ -1242,6 +1258,9 @@ static int expbay_init(int sema_attr)
         if (speed_device_init() != 0)
             return 1;
     }
+
+    /* Disable control of LED 2 and PIO 3 if the dev9 device does not have DVR capabilities. */
+    dev9_has_dvr_capability = (SPD_REG16(SPD_R_REV_3) & SPD_CAPS_DVR) ? 1 : 0;
 
     if (dev9_init(sema_attr) != 0)
         return 1;
