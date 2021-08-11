@@ -75,6 +75,9 @@ int McReadCluster(int port, int slot, int cluster, McCacheEntry **pmce);
 int McFlushCache(int port, int slot);
 int McSetDirEntryState(int port, int slot, int cluster, int fsindex, int flags);
 
+#define xfromman_IMPORTS_start DECLARE_IMPORT_TABLE(xfromman, 2, 3)
+#define xfromman_IMPORTS_end END_IMPORT_TABLE
+
 #define mcman_IMPORTS_start DECLARE_IMPORT_TABLE(mcman, 1, 1)
 #define mcman_IMPORTS_end END_IMPORT_TABLE
 

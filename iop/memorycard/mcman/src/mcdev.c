@@ -58,10 +58,20 @@ void *mcman_mcops[17] = {
 
 // driver descriptor
 static iop_device_t mcman_mcdev = {
+#ifndef BUILDING_XFROMMAN
 	"mc",
+#endif
+#ifdef BUILDING_XFROMMAN
+	"xfrom",
+#endif
 	IOP_DT_FS,
 	1,
+#ifndef BUILDING_XFROMMAN
 	"Memory Card",
+#endif
+#ifdef BUILDING_XFROMMAN
+	"External flash rom",
+#endif
 	(struct _iop_device_ops *)&mcman_mcops
 };
 
@@ -158,8 +168,14 @@ int mcman_modloadcb(char *filename, int *port, int *slot)
 //--------------------------------------------------------------
 void mcman_unit2card(u32 unit)
 {
+#ifndef BUILDING_XFROMMAN
  	mcman_mc_port = unit & 1;
  	mcman_mc_slot = (unit >> 1) & (MCMAN_MAXSLOT - 1);
+#endif
+#ifdef BUILDING_XFROMMAN
+	mcman_mc_port = 0;
+	mcman_mc_slot = 0;
+#endif
 
 	// original mcman/xmcman code below is silly and I doubt it
 	// can support more than 2 units anyway...

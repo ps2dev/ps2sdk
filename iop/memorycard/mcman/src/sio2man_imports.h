@@ -14,6 +14,7 @@
 #else
 #define SIO2MAN_EXPORTS_EXTERN
 #endif
+#ifndef BUILDING_XFROMMAN
 // sio2man exports
 /* 24 */ SIO2MAN_EXPORTS_EXTERN void (*psio2_mc_transfer_init)(void);
 /* 25 */ SIO2MAN_EXPORTS_EXTERN int  (*psio2_transfer)(sio2_transfer_data_t *sio2data);
@@ -21,5 +22,6 @@
 // xsio2man exports
 /* 26 */ SIO2MAN_EXPORTS_EXTERN void (*psio2_transfer_reset)(void);
 /* 55/57 */ SIO2MAN_EXPORTS_EXTERN int  (*psio2_mtap_change_slot)(s32 *arg);
+#endif
 
 #endif
