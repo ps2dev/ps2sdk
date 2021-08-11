@@ -36,8 +36,6 @@ void dev9IntrDisable(int mask);
 int dev9GetEEPROM(u16 *buf);
 
 void dev9LEDCtl(int ctl);
-void dev9LED2Ctl(int ctl);
-void dev9ControlPIO3(int ctl);
 
 int dev9RegisterShutdownCb(int idx, dev9_shutdown_cb_t cb);
 
@@ -58,7 +56,5 @@ void dev9RegisterPostDmaCb(int ctrl, dev9_dma_cb_t cb);
 #define I_dev9RegisterShutdownCb DECLARE_IMPORT(11, dev9RegisterShutdownCb)
 #define I_dev9RegisterPreDmaCb   DECLARE_IMPORT(12, dev9RegisterPreDmaCb)
 #define I_dev9RegisterPostDmaCb  DECLARE_IMPORT(13, dev9RegisterPostDmaCb)
-#define I_dev9ControlPIO3        DECLARE_IMPORT(14, dev9ControlPIO3)
-#define I_dev9LED2Ctl            DECLARE_IMPORT(15, dev9LED2Ctl)
 
 #endif /* __DEV9_H__ */
