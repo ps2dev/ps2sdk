@@ -35,6 +35,8 @@ typedef struct _ata_devinfo
     u32 security_status;
     /** Supports the 48-bit LBA command set (unofficial).  */
     u32 lba48;
+    /** Total number of 48-bit LBA user sectors (unofficial). */
+    u32 total_sectors_lba48;
 } ata_devinfo_t;
 
 /* Error definitions.  */

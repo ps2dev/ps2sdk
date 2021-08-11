@@ -58,7 +58,7 @@ static int ata_devinfo_init = 0;
 static int ata_evflg = -1;
 
 // Workarounds
-static u8 ata_disable_lba48 = 0; //Please read the comments in _start().
+static u8 ata_dvrp_workaround = 0; //Please read the comments in _start().
 #ifdef ATA_GAMESTAR_WORKAROUND
 static u8 ata_gamestar_workaround = 0;
 #endif
@@ -229,8 +229,8 @@ int _start(int argc, char *argv[])
         The problem is obviously in the DVRP's firmware, but we currently have no way to fix these bugs because the DVRP is even more heavily secured that the IOP.
         In the eyes of Sony, there isn't a problem because none of their retail PlayStation 2 software ever supported 48-bit LBA.
 
-        The obvious workaround here would be to disable 48-bit LBA support when ATAD is loaded on a PSX. */
-    ata_disable_lba48 = (SPD_REG16(SPD_R_REV_3) & SPD_CAPS_DVR) ? 1 : 0;
+        The workaround here is to return the 28-bit LBA as the total size and only use 48-bit LBA commands when required. */
+    ata_dvrp_workaround = (SPD_REG16(SPD_R_REV_3) & SPD_CAPS_DVR) ? 1 : 0;
 
 #ifdef ATA_GAMESTAR_WORKAROUND
     /*  Some compatible adaptors may malfunction if transfers are not done according to the old ps2atad design.
@@ -703,7 +703,7 @@ int ata_device_flush_cache(int device)
 {
     int res;
 
-    if (!(res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, atad_devinfo[device].lba48 ? ATA_C_FLUSH_CACHE_EXT : ATA_C_FLUSH_CACHE)))
+    if (!(res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, (atad_devinfo[device].lba48 && !ata_dvrp_workaround) ? ATA_C_FLUSH_CACHE_EXT : ATA_C_FLUSH_CACHE)))
         res = ata_io_finish();
 
     return res;
@@ -838,7 +838,7 @@ int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir)
         lcyl = (lba >> 8) & 0xff;
         hcyl = (lba >> 16) & 0xff;
 
-        if (atad_devinfo[device].lba48) {
+        if (atad_devinfo[device].lba48 && (ata_dvrp_workaround ? (lba >= atad_devinfo[device].total_sectors) : 1)) {
             /* Setup for 48-bit LBA.  */
             len = (nsectors > 65536) ? 65536 : nsectors;
 
@@ -1055,11 +1055,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
         /* This section is to detect whether the HDD supports 48-bit LBA
            (IDENITFY DEVICE bit 10 word 83) and get the total sectors from
            either words(61:60) for 28-bit or words(103:100) for 48-bit.  */
-        if (!ata_disable_lba48 && (ata_param[ATA_ID_COMMAND_SETS_SUPPORTED] & 0x0400)) {
-            devinfo[i].lba48 = 1;
-        } else {
-            devinfo[i].lba48 = 0;
-        }
+        devinfo[i].lba48 = (ata_param[ATA_ID_COMMAND_SETS_SUPPORTED] & 0x0400) != 0;
 
         /* Save the total sector counts before we overwrite ata_param with the value of Sony identify drive command. */
         total_sectors_nonlba48 = (ata_param[ATA_ID_SECTOTAL_HI] << 16) | ata_param[ATA_ID_SECTOTAL_LO];
@@ -1084,8 +1080,10 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
             } else {
                 devinfo[i].total_sectors = total_sectors_lba48;
             }
+            devinfo[i].total_sectors_lba48 = total_sectors_lba48;
         } else {
             devinfo[i].total_sectors = total_sectors_nonlba48;
+            devinfo[i].total_sectors_lba48 = total_sectors_nonlba48;
         }
 
         /* Call the proprietary identify command. */
