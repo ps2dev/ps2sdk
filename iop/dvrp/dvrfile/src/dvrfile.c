@@ -836,7 +836,6 @@ int dvrf_df_read(iop_file_t *f, void *ptr, int size)
     int retval;
     int dvrp_fd;
     int remain_size;
-    int unalign_size;
     int chunk_size;
     int read_size;
     drvdrv_exec_cmd_ack cmdack;
@@ -847,14 +846,9 @@ int dvrf_df_read(iop_file_t *f, void *ptr, int size)
     }
     WaitSema(sema_id);
     out_buf = (char *)ptr;
-    if ((size & 0x7F) != 0) {
-        printf("nbyte is not a multiple of 128.\n");
-        out_buf = (char *)RBUF;
-    }
     dvrp_fd = (int)f->privdata;
     remain_size = size;
     while (1) {
-        unalign_size = size & 0x7F;
         if (remain_size <= 0) {
             break;
         }
@@ -868,22 +862,25 @@ int dvrf_df_read(iop_file_t *f, void *ptr, int size)
         cmdack.input_word[2] = (chunk_size >> 16) & 0xFFFF;
         cmdack.input_word[3] = chunk_size;
         cmdack.input_word_count = 4;
-        cmdack.output_buffer = out_buf;
+        if ((chunk_size & 0x7F) != 0) {
+            cmdack.output_buffer = (char *)RBUF;
+        } else {
+            cmdack.output_buffer = out_buf;
+        }
         cmdack.timeout = 10000000;
         if (check_cmdack_err(&DvrdrvExecCmdAckDmaRecvComp, &cmdack, &read_size, __func__)) {
             retval = read_size;
             goto finish;
         }
+        if ((chunk_size & 0x7F) != 0) {
+            memcpy(out_buf, RBUF, chunk_size);
+        }
         if (read_size <= 0) {
-            unalign_size = size & 0x7F;
             break;
         }
         remain_size -= read_size;
         out_buf += read_size;
         total_read += read_size;
-    }
-    if (unalign_size) {
-        memcpy(ptr, RBUF, total_read);
     }
     retval = total_read;
 finish:
