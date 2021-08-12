@@ -587,6 +587,16 @@ int dvrf_df_dread(iop_file_t *f, iox_dirent_t *buf)
     buf->stat.private_3 = bswap32(buf->stat.private_3);
     buf->stat.private_4 = bswap32(buf->stat.private_4);
     buf->stat.private_5 = bswap32(buf->stat.private_5);
+    u8 tmp;
+    tmp = buf->stat.ctime[6];
+    buf->stat.ctime[6] = buf->stat.ctime[7];
+    buf->stat.ctime[7] = tmp;
+    tmp = buf->stat.atime[6];
+    buf->stat.atime[6] = buf->stat.atime[7];
+    buf->stat.atime[7] = tmp;
+    tmp = buf->stat.mtime[6];
+    buf->stat.mtime[6] = buf->stat.mtime[7];
+    buf->stat.mtime[7] = tmp;
 finish:
     SignalSema(sema_id);
     return retval;
