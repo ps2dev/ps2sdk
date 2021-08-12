@@ -57,6 +57,21 @@ char* GetRomName(char *romname)
 }
 #endif
 
+#ifdef F_IsDESRMachine
+int IsDESRMachine(void)
+{
+	int fd;
+
+	fd = open("rom0:PSXVER", O_RDONLY);
+   if (fd > 0) {
+      close(fd);
+	  return 1;
+   }
+
+   return 0;
+}
+#endif
+
 #ifdef F_IsT10K
 int IsT10K(void)
 {

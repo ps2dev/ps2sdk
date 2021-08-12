@@ -87,7 +87,7 @@ SIO_OBJS = sio_init.o sio_putc.o sio_getc.o sio_write.o sio_read.o sio_puts.o \
 
 ### Config objects
 
-CONFIG_OBJS = _config_internals.o GetRomName.o IsT10K.o IsEarlyJap.o configGetLanguage.o \
+CONFIG_OBJS = _config_internals.o GetRomName.o IsDESRMachine.o IsT10K.o IsEarlyJap.o configGetLanguage.o \
 	configSetLanguage.o configGetTvScreenType.o configSetTvScreenType.o \
 	configGetDateFormat.o configSetDateFormat.o configGetTimeFormat.o \
 	configSetTimeFormat.o configGetTimezone.o configSetTimezone.o \

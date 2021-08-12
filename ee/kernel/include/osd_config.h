@@ -203,6 +203,12 @@ void configConvertToLocalTime(sceCdCLOCK* time);
 #endif
 
 // Internal functions.
+/** check whether the PlayStation 2 is actually a DESR-XXXX machine
+ *
+ * @return 1 if DESR-XXXX machine; 0 if not
+ */
+int IsDESRMachine(void);
+
 /** check whether the PlayStation 2 is actually a TOOL DTL-T10000(H)
  *
  * @return 1 if DTL-T10000(H); 0 if not
