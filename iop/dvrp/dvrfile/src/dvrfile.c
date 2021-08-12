@@ -46,9 +46,6 @@ extern int dvrf_df_symlink(iop_file_t *f, const char *old, const char *new_1);
 extern int dvrf_df_sync(iop_file_t *f, const char *dev, int flag);
 extern int dvrf_df_umount(iop_file_t *f, const char *fsname);
 extern int dvrf_df_write(iop_file_t *f, void *ptr, int size);
-extern int RegisterFd(iop_file_t *f, int dvrp_fd);
-extern int UnregisterFd(iop_file_t *f);
-extern int GetFd(iop_file_t *f);
 extern void CopySceStat(iox_stat_t *stat, u8 *dvrp_stat);
 
 static inline u32 bswap32(u32 val)
@@ -235,12 +232,6 @@ static iop_device_ops_t dvrf_translator_functbl = {
         drvname,                                                                        \
         &dvrf_translator_functbl};
 
-typedef struct dvrp_fd_map_struct_
-{
-    int dvrp_fd;
-    iop_file_t *iop_fd;
-} dvrp_fd_map_struct;
-
 GEN_TRANSLATION_FUNCS(dvrpfs, "dvr_pfs", 1, "PFS Driver for DVR");
 GEN_TRANSLATION_FUNCS(dvrhdd, "dvr_hdd", 0, "HDD Driver for DVR");
 GEN_TRANSLATION_FUNCS(dvrhdck, "dvr_hdck", 1, "HDCK Driver for DVR");
@@ -248,8 +239,6 @@ GEN_TRANSLATION_FUNCS(dvrfssk, "dvr_fssk", 1, "FSSK Driver for DVR");
 GEN_TRANSLATION_FUNCS(dvrfsck, "dvr_fsck", 1, "FSCK Driver for DVR");
 
 s32 sema_id;
-dvrp_fd_map_struct dvrp_fd_map[32];
-int dvrp_fd_count;
 int current_chunk_size;
 int RBUF[32768];
 int SBUF[32768];
@@ -286,13 +275,8 @@ int module_start(int argc, const char **argv)
         printf("IOMAN task of DVRP is not running...\n");
         return 1;
     }
-    for (i = 0; i < 32; i += 1) {
-        dvrp_fd_map[i].dvrp_fd = -1;
-        dvrp_fd_map[i].iop_fd = 0;
-    }
     sema_id = -1;
     current_chunk_size = 0x4000;
-    dvrp_fd_count = 0;
     if (AddDrv(&dvrpfs_drv) || AddDrv(&dvrhdd_drv)) {
         goto fail;
     }
@@ -446,7 +430,7 @@ int dvrf_df_close(iop_file_t *f)
     retval = 0;
     WaitSema(sema_id);
     cmdack.command = 0x1103;
-    dvrp_fd = GetFd(f);
+    dvrp_fd = (int)f->privdata;
     cmdack.input_word[0] = (dvrp_fd >> 16) & 0xFFFF;
     cmdack.input_word[1] = dvrp_fd;
     cmdack.input_word_count = 2;
@@ -455,8 +439,7 @@ int dvrf_df_close(iop_file_t *f)
         goto finish;
     }
     retval = 0;
-    UnregisterFd(f);
-    dvrp_fd_count -= 1;
+    f->privdata = NULL;
 finish:
     SignalSema(sema_id);
     return retval;
@@ -471,7 +454,7 @@ int dvrf_df_dclose(iop_file_t *f)
     retval = 0;
     WaitSema(sema_id);
     cmdack.command = 0x1104;
-    dvrp_fd = GetFd(f);
+    dvrp_fd = (int)f->privdata;
     cmdack.input_word[0] = (dvrp_fd >> 16) & 0xFFFF;
     cmdack.input_word[1] = dvrp_fd;
     cmdack.input_word_count = 2;
@@ -480,8 +463,7 @@ int dvrf_df_dclose(iop_file_t *f)
         goto finish;
     }
     retval = 0;
-    UnregisterFd(f);
-    dvrp_fd_count -= 1;
+    f->privdata = NULL;
 finish:
     SignalSema(sema_id);
     return retval;
@@ -535,10 +517,6 @@ int dvrf_df_dopen(iop_file_t *f, const char *path)
     drvdrv_exec_cmd_ack cmdack;
 
     WaitSema(sema_id);
-    if (dvrp_fd_count >= 32) {
-        retval = -EMFILE;
-        goto finish;
-    }
     strcpy((char *)SBUF, path);
     cmdack.command = 0x1106;
     cmdack.input_word_count = 0;
@@ -552,8 +530,7 @@ int dvrf_df_dopen(iop_file_t *f, const char *path)
         printf("%s -> fd error (fd=%d)\n", __func__, retval);
         goto finish;
     }
-    RegisterFd(f, retval);
-    dvrp_fd_count += 1;
+    f->privdata = (void *)retval;
 finish:
     SignalSema(sema_id);
     return retval;
@@ -567,7 +544,7 @@ int dvrf_df_dread(iop_file_t *f, iox_dirent_t *buf)
 
     WaitSema(sema_id);
     cmdack.command = 0x1107;
-    dvrp_fd = GetFd(f);
+    dvrp_fd = (int)f->privdata;
     cmdack.input_word[0] = (dvrp_fd >> 16) & 0xFFFF;
     cmdack.input_word[1] = dvrp_fd;
     cmdack.input_word_count = 2;
@@ -664,7 +641,7 @@ int dvrf_df_ioctl(iop_file_t *f, int cmd, void *param)
     drvdrv_exec_cmd_ack cmdack;
 
     WaitSema(sema_id);
-    dvrp_fd = GetFd(f);
+    dvrp_fd = (int)f->privdata;
     cmdack.command = 0x110A;
     cmdack.input_word[0] = (dvrp_fd >> 16) & 0xFFFF;
     cmdack.input_word[1] = dvrp_fd;
@@ -689,7 +666,7 @@ int dvrf_df_ioctl2(iop_file_t *f, int cmd, void *arg, unsigned int arglen, void 
     drvdrv_exec_cmd_ack cmdack;
 
     WaitSema(sema_id);
-    dvrp_fd = GetFd(f);
+    dvrp_fd = (int)f->privdata;
     SBUF[1] = bswap32(cmd);
     SBUF[2] = bswap32(buflen);
     SBUF[0] = bswap32(dvrp_fd);
@@ -717,7 +694,7 @@ int dvrf_df_lseek(iop_file_t *f, int offset, int mode)
     drvdrv_exec_cmd_ack cmdack;
 
     WaitSema(sema_id);
-    dvrp_fd = GetFd(f);
+    dvrp_fd = (int)f->privdata;
     cmdack.command = 0x110C;
     cmdack.input_word[0] = (dvrp_fd >> 16) & 0xFFFF;
     cmdack.input_word[1] = dvrp_fd;
@@ -743,7 +720,7 @@ s64 dvrf_df_lseek64(iop_file_t *f, s64 offset, int whence)
     drvdrv_exec_cmd_ack cmdack;
 
     WaitSema(sema_id);
-    dvrp_fd = GetFd(f);
+    dvrp_fd = (int)f->privdata;
     cmdack.command = 0x110D;
     cmdack.input_word[0] = (dvrp_fd >> 16) & 0xFFFF;
     cmdack.input_word[1] = dvrp_fd;
@@ -830,10 +807,6 @@ int dvrf_df_open(iop_file_t *f, const char *name, int flags, int mode)
 
     mode_ = mode;
     WaitSema(sema_id);
-    if (dvrp_fd_count >= 32) {
-        retval = -EMFILE;
-        goto finish;
-    }
     SBUF[0] = bswap32(flags);
     mode_ = (mode_ << 8) + (mode_ >> 8);
     memcpy(&SBUF[1], &mode_, sizeof(mode_));
@@ -850,8 +823,7 @@ int dvrf_df_open(iop_file_t *f, const char *name, int flags, int mode)
         printf("%s -> fd error (fd=%d)\n", __func__, retval);
         goto finish;
     }
-    RegisterFd(f, retval);
-    dvrp_fd_count += 1;
+    f->privdata = (void *)retval;
 finish:
     SignalSema(sema_id);
     return retval;
@@ -879,7 +851,7 @@ int dvrf_df_read(iop_file_t *f, void *ptr, int size)
         printf("nbyte is not a multiple of 128.\n");
         out_buf = (char *)RBUF;
     }
-    dvrp_fd = GetFd(f);
+    dvrp_fd = (int)f->privdata;
     remain_size = size;
     while (1) {
         unalign_size = size & 0x7F;
@@ -1096,7 +1068,7 @@ int dvrf_df_write(iop_file_t *f, void *ptr, int size)
         return -EFAULT;
     }
     WaitSema(sema_id);
-    dvrp_fd = GetFd(f);
+    dvrp_fd = (int)f->privdata;
     remain_size = size;
     while (remain_size > 0) {
         chunk_size = current_chunk_size;
@@ -1126,49 +1098,6 @@ int dvrf_df_write(iop_file_t *f, void *ptr, int size)
 finish:
     SignalSema(sema_id);
     return retval;
-}
-
-int RegisterFd(iop_file_t *f, int dvrp_fd)
-{
-    int i;
-
-    for (i = 0; i < 32; i += 1) {
-        if (dvrp_fd_map[i].iop_fd == 0) {
-            dvrp_fd_map[i].iop_fd = f;
-            dvrp_fd_map[i].dvrp_fd = dvrp_fd;
-            return 0;
-        }
-    }
-    printf("RegisterFd -> NG\n");
-    return -1;
-}
-
-int UnregisterFd(iop_file_t *f)
-{
-    int i;
-
-    for (i = 0; i < 32; i += 1) {
-        if (dvrp_fd_map[i].iop_fd == f) {
-            dvrp_fd_map[i].iop_fd = 0;
-            dvrp_fd_map[i].dvrp_fd = -1;
-            return 0;
-        }
-    }
-    printf("UnregisterFd -> NG\n");
-    return -1;
-}
-
-int GetFd(iop_file_t *f)
-{
-    int i;
-
-    for (i = 0; i < 32; i += 1) {
-        if (dvrp_fd_map[i].iop_fd == f) {
-            return dvrp_fd_map[i].dvrp_fd;
-        }
-    }
-    printf("GetFd -> NG\n");
-    return -1;
 }
 
 void CopySceStat(iox_stat_t *stat, u8 *dvrp_stat)
