@@ -51,187 +51,6 @@ extern int UnregisterFd(iop_file_t *f);
 extern int GetFd(iop_file_t *f);
 extern void CopySceStat(iox_stat_t *stat, u8 *dvrp_stat);
 
-#define GEN_TRANSLATION_FUNCS(basefuncname, basedevname, shouldbswapformatarg, drvname)                                                           \
-    static int basefuncname##_df_chdir(iop_file_t *f, const char *name)                                                                           \
-    {                                                                                                                                             \
-        char translated_name[1040];                                                                                                               \
-                                                                                                                                                  \
-        sprintf(translated_name, basedevname "%d:%s", f->unit, name);                                                                             \
-        return dvrf_df_chdir(f, translated_name);                                                                                                 \
-    }                                                                                                                                             \
-                                                                                                                                                  \
-    static int basefuncname##_df_chstat(iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int statmask)                                 \
-    {                                                                                                                                             \
-        char translated_name[1040];                                                                                                               \
-                                                                                                                                                  \
-        sprintf(translated_name, basedevname "%d:%s", f->unit, name);                                                                             \
-        return dvrf_df_chstat(f, translated_name, stat, statmask);                                                                                \
-    }                                                                                                                                             \
-                                                                                                                                                  \
-    static int basefuncname##_df_devctl(iop_file_t *f, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen) \
-    {                                                                                                                                             \
-        char translated_name[1040];                                                                                                               \
-                                                                                                                                                  \
-        sprintf(translated_name, basedevname "%d:%s", f->unit, name);                                                                             \
-        return dvrf_df_devctl(f, translated_name, cmd, arg, arglen, buf, buflen);                                                                 \
-    }                                                                                                                                             \
-                                                                                                                                                  \
-    static int basefuncname##_df_dopen(iop_file_t *f, const char *path)                                                                           \
-    {                                                                                                                                             \
-        char translated_path[1040];                                                                                                               \
-                                                                                                                                                  \
-        sprintf(translated_path, basedevname "%d:%s", f->unit, path);                                                                             \
-        return dvrf_df_dopen(f, translated_path);                                                                                                 \
-    }                                                                                                                                             \
-                                                                                                                                                  \
-    static int basefuncname##_df_format(iop_file_t *f, const char *dev, const char *blockdev, void *arg, int arglen)                              \
-    {                                                                                                                                             \
-        char translated_dev[1040];                                                                                                                \
-                                                                                                                                                  \
-        if (shouldbswapformatarg) {                                                                                                               \
-            sprintf(translated_dev, basedevname ":%s", dev);                                                                                      \
-            *(u32 *)arg = bswap32(*(u32 *)arg);                                                                                                   \
-        } else {                                                                                                                                  \
-            sprintf(translated_dev, basedevname "%d:%s", f->unit, dev);                                                                           \
-        }                                                                                                                                         \
-        return dvrf_df_format(f, translated_dev, blockdev, arg, arglen);                                                                          \
-    }                                                                                                                                             \
-                                                                                                                                                  \
-    static int basefuncname##_df_getstat(iop_file_t *f, const char *name, iox_stat_t *stat)                                                       \
-    {                                                                                                                                             \
-        char translated_name[1040];                                                                                                               \
-                                                                                                                                                  \
-        sprintf(translated_name, basedevname "%d:%s", f->unit, name);                                                                             \
-        return dvrf_df_getstat(f, translated_name, stat);                                                                                         \
-    }                                                                                                                                             \
-                                                                                                                                                  \
-    static int basefuncname##_df_mkdir(iop_file_t *f, const char *path, int mode)                                                                 \
-    {                                                                                                                                             \
-        char translated_path[1040];                                                                                                               \
-                                                                                                                                                  \
-        sprintf(translated_path, basedevname "%d:%s", f->unit, path);                                                                             \
-        return dvrf_df_mkdir(f, translated_path, mode);                                                                                           \
-    }                                                                                                                                             \
-                                                                                                                                                  \
-    static int basefuncname##_df_mount(iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, int arglen)                   \
-    {                                                                                                                                             \
-        char translated_fsname[1040];                                                                                                             \
-                                                                                                                                                  \
-        sprintf(translated_fsname, basedevname "%d:%s", f->unit, fsname);                                                                         \
-        return dvrf_df_mount(f, translated_fsname, devname, flag, arg, arglen);                                                                   \
-    }                                                                                                                                             \
-                                                                                                                                                  \
-    static int basefuncname##_df_open(iop_file_t *f, const char *name, int flags, int mode)                                                       \
-    {                                                                                                                                             \
-        char translated_name[1040];                                                                                                               \
-                                                                                                                                                  \
-        sprintf(translated_name, basedevname "%d:%s", f->unit, name);                                                                             \
-        return dvrf_df_open(f, translated_name, flags, mode);                                                                                     \
-    }                                                                                                                                             \
-                                                                                                                                                  \
-    static int basefuncname##_df_readlink(iop_file_t *f, const char *path, char *buf, unsigned int buflen)                                        \
-    {                                                                                                                                             \
-        char translated_path[1040];                                                                                                               \
-                                                                                                                                                  \
-        sprintf(translated_path, basedevname "%d:%s", f->unit, path);                                                                             \
-        return dvrf_df_readlink(f, translated_path, buf, buflen);                                                                                 \
-    }                                                                                                                                             \
-                                                                                                                                                  \
-    static int basefuncname##_df_remove(iop_file_t *f, const char *name)                                                                          \
-    {                                                                                                                                             \
-        char translated_name[1040];                                                                                                               \
-                                                                                                                                                  \
-        sprintf(translated_name, basedevname "%d:%s", f->unit, name);                                                                             \
-        return dvrf_df_remove(f, translated_name);                                                                                                \
-    }                                                                                                                                             \
-                                                                                                                                                  \
-    static int basefuncname##_df_rename(iop_file_t *f, const char *old, const char *new_1)                                                        \
-    {                                                                                                                                             \
-        char translated_old[1040];                                                                                                                \
-        char translated_new[1040];                                                                                                                \
-                                                                                                                                                  \
-        sprintf(translated_old, basedevname "%d:%s", f->unit, old);                                                                               \
-        sprintf(translated_new, basedevname "%d:%s", f->unit, new_1);                                                                             \
-        return dvrf_df_rename(f, translated_old, translated_new);                                                                                 \
-    }                                                                                                                                             \
-                                                                                                                                                  \
-    static int basefuncname##_df_rmdir(iop_file_t *f, const char *path)                                                                           \
-    {                                                                                                                                             \
-        char translated_path[1040];                                                                                                               \
-                                                                                                                                                  \
-        sprintf(translated_path, basedevname "%d:%s", f->unit, path);                                                                             \
-        return dvrf_df_rmdir(f, translated_path);                                                                                                 \
-    }                                                                                                                                             \
-                                                                                                                                                  \
-    static int basefuncname##_df_symlink(iop_file_t *f, const char *old, const char *new_1)                                                       \
-    {                                                                                                                                             \
-        char translated_old[1040];                                                                                                                \
-        char translated_new[1040];                                                                                                                \
-                                                                                                                                                  \
-        sprintf(translated_old, basedevname "%d:%s", f->unit, old);                                                                               \
-        sprintf(translated_new, basedevname "%d:%s", f->unit, new_1);                                                                             \
-        return dvrf_df_symlink(f, translated_old, translated_new);                                                                                \
-    }                                                                                                                                             \
-                                                                                                                                                  \
-    static int basefuncname##_df_sync(iop_file_t *f, const char *dev, int flag)                                                                   \
-    {                                                                                                                                             \
-        char translated_dev[1040];                                                                                                                \
-                                                                                                                                                  \
-        sprintf(translated_dev, basedevname "%d:%s", f->unit, dev);                                                                               \
-        return dvrf_df_sync(f, translated_dev, flag);                                                                                             \
-    }                                                                                                                                             \
-                                                                                                                                                  \
-    static int basefuncname##_df_umount(iop_file_t *f, const char *fsname)                                                                        \
-    {                                                                                                                                             \
-        char translated_fsname[1040];                                                                                                             \
-                                                                                                                                                  \
-        sprintf(translated_fsname, basedevname "%d:%s", f->unit, fsname);                                                                         \
-        return dvrf_df_umount(f, translated_fsname);                                                                                              \
-    }                                                                                                                                             \
-                                                                                                                                                  \
-    static iop_device_ops_t basefuncname##_functbl = {                                                                                            \
-        dvrf_df_init,                                                                                                                             \
-        dvrf_df_exit,                                                                                                                             \
-        basefuncname##_df_format,                                                                                                                 \
-        basefuncname##_df_open,                                                                                                                   \
-        dvrf_df_close,                                                                                                                            \
-        dvrf_df_read,                                                                                                                             \
-        dvrf_df_write,                                                                                                                            \
-        dvrf_df_lseek,                                                                                                                            \
-        dvrf_df_ioctl,                                                                                                                            \
-        basefuncname##_df_remove,                                                                                                                 \
-        basefuncname##_df_mkdir,                                                                                                                  \
-        basefuncname##_df_rmdir,                                                                                                                  \
-        basefuncname##_df_dopen,                                                                                                                  \
-        dvrf_df_dclose,                                                                                                                           \
-        dvrf_df_dread,                                                                                                                            \
-        basefuncname##_df_getstat,                                                                                                                \
-        basefuncname##_df_chstat,                                                                                                                 \
-        basefuncname##_df_rename,                                                                                                                 \
-        basefuncname##_df_chdir,                                                                                                                  \
-        basefuncname##_df_sync,                                                                                                                   \
-        basefuncname##_df_mount,                                                                                                                  \
-        basefuncname##_df_umount,                                                                                                                 \
-        dvrf_df_lseek64,                                                                                                                          \
-        basefuncname##_df_devctl,                                                                                                                 \
-        basefuncname##_df_symlink,                                                                                                                \
-        basefuncname##_df_readlink,                                                                                                               \
-        dvrf_df_ioctl2,                                                                                                                           \
-    };                                                                                                                                            \
-                                                                                                                                                  \
-    static iop_device_t basefuncname##_drv = {                                                                                                    \
-        basedevname,                                                                                                                              \
-        (IOP_DT_FS | IOP_DT_FSEXT),                                                                                                               \
-        1,                                                                                                                                        \
-        drvname,                                                                                                                                  \
-        &basefuncname##_functbl};
-
-typedef struct dvrp_fd_map_struct_
-{
-    int dvrp_fd;
-    iop_file_t *iop_fd;
-} dvrp_fd_map_struct;
-
 static inline u32 bswap32(u32 val)
 {
 #if 0
@@ -240,6 +59,187 @@ static inline u32 bswap32(u32 val)
     return (val << 24) + ((val & 0xFF00) << 8) + ((val >> 8) & 0xFF00) + ((val >> 24) & 0xFF);
 #endif
 }
+
+static int dvrf_translator_df_chdir(iop_file_t *f, const char *name)
+{
+    char translated_name[1040];
+
+    sprintf(translated_name, "%s%d:%s", f->device->name, f->unit, name);
+    return dvrf_df_chdir(f, translated_name);
+}
+
+static int dvrf_translator_df_chstat(iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int statmask)
+{
+    char translated_name[1040];
+
+    sprintf(translated_name, "%s%d:%s", f->device->name, f->unit, name);
+    return dvrf_df_chstat(f, translated_name, stat, statmask);
+}
+
+static int dvrf_translator_df_devctl(iop_file_t *f, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
+{
+    char translated_name[1040];
+
+    sprintf(translated_name, "%s%d:%s", f->device->name, f->unit, name);
+    return dvrf_df_devctl(f, translated_name, cmd, arg, arglen, buf, buflen);
+}
+
+static int dvrf_translator_df_dopen(iop_file_t *f, const char *path)
+{
+    char translated_path[1040];
+
+    sprintf(translated_path, "%s%d:%s", f->device->name, f->unit, path);
+    return dvrf_df_dopen(f, translated_path);
+}
+
+static int dvrf_translator_df_format(iop_file_t *f, const char *dev, const char *blockdev, void *arg, int arglen)
+{
+    char translated_dev[1040];
+
+    if (strcmp(f->device->name, "dvr_hdd") != 0) {
+        sprintf(translated_dev, "%s:%s", f->device->name, dev);
+        *(u32 *)arg = bswap32(*(u32 *)arg);
+    } else {
+        sprintf(translated_dev, "%s%d:%s", f->device->name, f->unit, dev);
+    }
+    return dvrf_df_format(f, translated_dev, blockdev, arg, arglen);
+}
+
+static int dvrf_translator_df_getstat(iop_file_t *f, const char *name, iox_stat_t *stat)
+{
+    char translated_name[1040];
+
+    sprintf(translated_name, "%s%d:%s", f->device->name, f->unit, name);
+    return dvrf_df_getstat(f, translated_name, stat);
+}
+
+static int dvrf_translator_df_mkdir(iop_file_t *f, const char *path, int mode)
+{
+    char translated_path[1040];
+
+    sprintf(translated_path, "%s%d:%s", f->device->name, f->unit, path);
+    return dvrf_df_mkdir(f, translated_path, mode);
+}
+
+static int dvrf_translator_df_mount(iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, int arglen)
+{
+    char translated_fsname[1040];
+
+    sprintf(translated_fsname, "%s%d:%s", f->device->name, f->unit, fsname);
+    return dvrf_df_mount(f, translated_fsname, devname, flag, arg, arglen);
+}
+
+static int dvrf_translator_df_open(iop_file_t *f, const char *name, int flags, int mode)
+{
+    char translated_name[1040];
+
+    sprintf(translated_name, "%s%d:%s", f->device->name, f->unit, name);
+    return dvrf_df_open(f, translated_name, flags, mode);
+}
+
+static int dvrf_translator_df_readlink(iop_file_t *f, const char *path, char *buf, unsigned int buflen)
+{
+    char translated_path[1040];
+
+    sprintf(translated_path, "%s%d:%s", f->device->name, f->unit, path);
+    return dvrf_df_readlink(f, translated_path, buf, buflen);
+}
+
+static int dvrf_translator_df_remove(iop_file_t *f, const char *name)
+{
+    char translated_name[1040];
+
+    sprintf(translated_name, "%s%d:%s", f->device->name, f->unit, name);
+    return dvrf_df_remove(f, translated_name);
+}
+
+static int dvrf_translator_df_rename(iop_file_t *f, const char *old, const char *new_1)
+{
+    char translated_old[1040];
+    char translated_new[1040];
+
+    sprintf(translated_old, "%s%d:%s", f->device->name, f->unit, old);
+    sprintf(translated_new, "%s%d:%s", f->device->name, f->unit, new_1);
+    return dvrf_df_rename(f, translated_old, translated_new);
+}
+
+static int dvrf_translator_df_rmdir(iop_file_t *f, const char *path)
+{
+    char translated_path[1040];
+
+    sprintf(translated_path, "%s%d:%s", f->device->name, f->unit, path);
+    return dvrf_df_rmdir(f, translated_path);
+}
+
+static int dvrf_translator_df_symlink(iop_file_t *f, const char *old, const char *new_1)
+{
+    char translated_old[1040];
+    char translated_new[1040];
+
+    sprintf(translated_old, "%s%d:%s", f->device->name, f->unit, old);
+    sprintf(translated_new, "%s%d:%s", f->device->name, f->unit, new_1);
+    return dvrf_df_symlink(f, translated_old, translated_new);
+}
+
+static int dvrf_translator_df_sync(iop_file_t *f, const char *dev, int flag)
+{
+    char translated_dev[1040];
+
+    sprintf(translated_dev, "%s%d:%s", f->device->name, f->unit, dev);
+    return dvrf_df_sync(f, translated_dev, flag);
+}
+
+static int dvrf_translator_df_umount(iop_file_t *f, const char *fsname)
+{
+    char translated_fsname[1040];
+
+    sprintf(translated_fsname, "%s%d:%s", f->device->name, f->unit, fsname);
+    return dvrf_df_umount(f, translated_fsname);
+}
+
+static iop_device_ops_t dvrf_translator_functbl = {
+    dvrf_df_init,
+    dvrf_df_exit,
+    dvrf_translator_df_format,
+    dvrf_translator_df_open,
+    dvrf_df_close,
+    dvrf_df_read,
+    dvrf_df_write,
+    dvrf_df_lseek,
+    dvrf_df_ioctl,
+    dvrf_translator_df_remove,
+    dvrf_translator_df_mkdir,
+    dvrf_translator_df_rmdir,
+    dvrf_translator_df_dopen,
+    dvrf_df_dclose,
+    dvrf_df_dread,
+    dvrf_translator_df_getstat,
+    dvrf_translator_df_chstat,
+    dvrf_translator_df_rename,
+    dvrf_translator_df_chdir,
+    dvrf_translator_df_sync,
+    dvrf_translator_df_mount,
+    dvrf_translator_df_umount,
+    dvrf_df_lseek64,
+    dvrf_translator_df_devctl,
+    dvrf_translator_df_symlink,
+    dvrf_translator_df_readlink,
+    dvrf_df_ioctl2,
+};
+
+#define GEN_TRANSLATION_FUNCS(basefuncname, basedevname, shouldbswapformatarg, drvname) \
+    static iop_device_t basefuncname##_drv = {                                          \
+        basedevname,                                                                    \
+        (IOP_DT_FS | IOP_DT_FSEXT),                                                     \
+        1,                                                                              \
+        drvname,                                                                        \
+        &dvrf_translator_functbl};
+
+typedef struct dvrp_fd_map_struct_
+{
+    int dvrp_fd;
+    iop_file_t *iop_fd;
+} dvrp_fd_map_struct;
 
 GEN_TRANSLATION_FUNCS(dvrpfs, "dvr_pfs", 1, "PFS Driver for DVR");
 GEN_TRANSLATION_FUNCS(dvrhdd, "dvr_hdd", 0, "HDD Driver for DVR");
