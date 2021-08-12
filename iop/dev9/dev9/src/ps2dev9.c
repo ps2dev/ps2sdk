@@ -469,7 +469,7 @@ static int read_eeprom_data(void)
     if (eeprom_data[0] < 0)
         goto out;
 
-    SPD_REG8(SPD_R_PIO_DIR) = 0xe1;
+    SPD_REG8(SPD_R_PIO_DIR) = 0xe0 | (dev9_has_dvr_capability ? 7 : 1);
     DelayThread(1);
     SPD_REG8(SPD_R_PIO_DATA) = 0x80;
     DelayThread(1);
@@ -523,7 +523,7 @@ static int read_eeprom_data(void)
     res = 0;
 
 out:
-    SPD_REG8(SPD_R_PIO_DIR) = 1;
+    SPD_REG8(SPD_R_PIO_DIR) = dev9_has_dvr_capability ? 7 : 1;
     return res;
 }
 
@@ -1235,7 +1235,9 @@ static int expbay_intr(void *unused)
     if (p_dev9_intr_cb)
         p_dev9_intr_cb(0);
 
-    DEV9_REG(DEV9_R_1466) = 1;
+    if (!dev9_has_dvr_capability) {
+        DEV9_REG(DEV9_R_1466) = 1;
+    }
     DEV9_REG(DEV9_R_1466) = 0;
     return 1;
 }
