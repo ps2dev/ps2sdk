@@ -23,6 +23,7 @@ void _InitSys(void)
 	InitThread();
 	InitExecPS2();
 	InitTLBFunctions();
+	InitTLB();
 #endif
 }
 #endif

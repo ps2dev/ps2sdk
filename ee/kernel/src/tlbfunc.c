@@ -9,6 +9,8 @@
 
 #include <kernel.h>
 #include <stdio.h>
+#include <speedregs.h>
+#include <aifregs.h>
 
 #define kprintf(args...) //sio_printf(args)
 
@@ -55,6 +57,13 @@ void InitTLBFunctions(void){
 }
 
 void InitTLB(void){
+	USE_SPD_REGS;
+	int is_desr = (SPD_REG16(SPD_R_REV_3) & SPD_CAPS_DVR) ? 1 : 0;
+	
+	/* Try to use the 64 MB RAM for DESR machines */
+	if(is_desr)
+		SetMemoryMode(0);
+
 	if(GetMemorySize()==0x2000000){
 		InitTLB32MB();
 	}
