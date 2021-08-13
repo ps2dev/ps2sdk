@@ -850,6 +850,11 @@ int dvrf_df_read(iop_file_t *f, void *ptr, int size)
     out_buf = (char *)ptr;
     dvrp_fd = (int)f->privdata;
     remain_size = size;
+    cmdack.command = 0x1111;
+    cmdack.input_word[0] = (dvrp_fd >> 16) & 0xFFFF;
+    cmdack.input_word[1] = dvrp_fd;
+    cmdack.input_word_count = 4;
+    cmdack.timeout = 10000000;
     while (1) {
         if (remain_size <= 0) {
             break;
@@ -861,18 +866,13 @@ int dvrf_df_read(iop_file_t *f, void *ptr, int size)
         if (unaligned_size != 0) {
             chunk_size = unaligned_size;
         }
-        cmdack.command = 0x1111;
-        cmdack.input_word[0] = (dvrp_fd >> 16) & 0xFFFF;
-        cmdack.input_word[1] = dvrp_fd;
         cmdack.input_word[2] = (chunk_size >> 16) & 0xFFFF;
         cmdack.input_word[3] = chunk_size;
-        cmdack.input_word_count = 4;
         if ((chunk_size & 0x7F) != 0 || unaligned_size != 0) {
             cmdack.output_buffer = (char *)RBUF;
         } else {
             cmdack.output_buffer = out_buf;
         }
-        cmdack.timeout = 10000000;
         if (check_cmdack_err(&DvrdrvExecCmdAckDmaRecvComp, &cmdack, &read_size, __func__)) {
             retval = read_size;
             goto finish;
@@ -1077,6 +1077,11 @@ int dvrf_df_write(iop_file_t *f, void *ptr, int size)
     WaitSema(sema_id);
     dvrp_fd = (int)f->privdata;
     remain_size = size;
+    cmdack.command = 0x1119;
+    cmdack.input_word[0] = (dvrp_fd >> 16) & 0xFFFF;
+    cmdack.input_word[1] = dvrp_fd;
+    cmdack.input_word_count = 4;
+    cmdack.timeout = 10000000;
     while (remain_size > 0) {
         chunk_size = current_chunk_size;
         if (remain_size < current_chunk_size) {
@@ -1085,12 +1090,8 @@ int dvrf_df_write(iop_file_t *f, void *ptr, int size)
         if (unaligned_size != 0) {
             chunk_size = unaligned_size;
         }
-        cmdack.command = 0x1119;
-        cmdack.input_word[0] = (dvrp_fd >> 16) & 0xFFFF;
-        cmdack.input_word[1] = dvrp_fd;
         cmdack.input_word[2] = (chunk_size >> 16) & 0xFFFF;
         cmdack.input_word[3] = chunk_size;
-        cmdack.input_word_count = 4;
         if (unaligned_size != 0) {
             cmdack.input_buffer = (char *)RBUF;
             unaligned_size = 0;
@@ -1098,7 +1099,6 @@ int dvrf_df_write(iop_file_t *f, void *ptr, int size)
             cmdack.input_buffer = in_buffer;
         }
         cmdack.input_buffer_length = chunk_size;
-        cmdack.timeout = 10000000;
         if (check_cmdack_err(&DvrdrvExecCmdAckDmaSendComp, &cmdack, &retval, __func__)) {
             goto finish;
         }
