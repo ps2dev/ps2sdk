@@ -35,7 +35,7 @@ static unsigned char patterns[SIZE_PATTERN] = { 0xA, 0x5 };
 #endif
 
 int main(int argc, char *argv[]) {
-    int i, j;
+    int i, j, failures;
     size_t size_mb, size_kb, size_b;
     char *p_block, *block_start, *block_tmp;
 #if VERBOSE
@@ -49,6 +49,7 @@ int main(int argc, char *argv[]) {
 #endif
     
     custom_printf("Stack start at %p\n", &i);
+    failures = 0;
     size_mb = 0;
     size_kb = 0;
     size_b = 0;
@@ -91,7 +92,11 @@ int main(int argc, char *argv[]) {
             memset(block_start, patterns[j], MB_SIZE);
             for(int x = 0; x < MB_SIZE; x++) {
                 block_tmp = block_start + x; 
-                assert(block_tmp[0] == patterns[j]);
+                if(block_tmp[0] != patterns[j]) {
+                    failures++;
+                    custom_printf("Failure, mem pos: %p\n", block_tmp);
+                    custom_printf("Expected value 0x%X, readed: 0x%X\n", patterns[j], block_tmp[0]);
+                }
             }
         }
     }
@@ -108,7 +113,11 @@ int main(int argc, char *argv[]) {
             memset(block_start, patterns[j], KB_SIZE);
             for(int x = 0; x < KB_SIZE; x++) {
                 block_tmp = block_start + x; 
-                assert(block_tmp[0] == patterns[j]);
+                if(block_tmp[0] != patterns[j]) {
+                    failures++;
+                    custom_printf("Failure, mem pos: %p\n", block_tmp);
+                    custom_printf("Expected value 0x%X, readed: 0x%X\n", patterns[j], block_tmp[0]);
+                }
             }
         }
     }
@@ -123,7 +132,11 @@ int main(int argc, char *argv[]) {
             custom_printf("Checking from %p to %p with pattern 0x%X\n", block_start, block_end, patterns[j]);
 #endif
             memset(block_start, patterns[j], 1);
-            assert(block_start[0] == patterns[j]);
+            if(block_start[0] != patterns[j]) {
+                failures++;
+                custom_printf("Failure, mem pos: %p\n", block_tmp);
+                custom_printf("Expected value 0x%X, readed: 0x%X\n", patterns[j], block_start[0]);
+            }
         }
     }
     custom_printf("End of Checking Byte chunks...\n");
@@ -135,7 +148,11 @@ int main(int argc, char *argv[]) {
     custom_printf("Maximum possible MB we can allocate is %i MB\n", size_mb);
     custom_printf("Maximum possible KB we can allocate is %i KB\n", size_kb);
     custom_printf("Maximum possible Bytes we can allocate is %i Bytes\n", size_b);
-    custom_printf("Memory integrity: The memory is working as expected!\n");
+    if (failures) {
+        custom_printf("Memory integrity: Opps :'( The memory failed, %i times\n", failures);
+    } else {
+        custom_printf("Memory integrity: The memory is working as expected!\n");
+    }
     custom_printf("----------------------------\n\n\n");
 
     SleepThread();
