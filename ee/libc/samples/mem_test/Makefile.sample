@@ -6,7 +6,26 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = mem_test regress
+SCREEN_DEBUG = 1
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+EE_BIN   = mem_test.elf
+EE_OBJS  = main.o
+
+ifeq ($(SCREEN_DEBUG), 1)
+EE_LIBS += -ldebug
+EE_CFLAGS += -DSCREEN_DEBUG
+endif
+
+all: $(EE_BIN)
+
+clean:
+	rm -rf $(EE_BIN) $(EE_OBJS)
+
+run: $(EE_BIN)
+	ps2client execee host:$(EE_BIN)
+
+reset:
+	ps2client reset
+
+include $(PS2SDK)/samples/Makefile.pref
+include $(PS2SDK)/samples/Makefile.eeglobal
