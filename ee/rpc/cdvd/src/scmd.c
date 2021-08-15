@@ -907,6 +907,28 @@ int sceCdWM(const char *buffer, u32 *result){
 }
 #endif
 
+#ifdef F_sceCdNoticeGameStart
+int sceCdNoticeGameStart(u8 arg1, u32 *result){
+	int res;
+	u8 out[8];
+	u8 in[8];
+
+	if (result)
+	{
+		*result = 0;
+	}
+	{
+		in[0] = arg1;
+		res = sceCdApplySCmd(0x29u, in, 1, out, 1);
+		if (result)
+		{
+			*result = (u8)out[0];
+		}
+	}
+	return res;
+}
+#endif
+
 #ifdef F__CdSyncS
 int _CdSyncS(int mode)
 {

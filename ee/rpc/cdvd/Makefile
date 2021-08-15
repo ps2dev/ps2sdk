@@ -23,6 +23,7 @@ SCMD_OBJS += _scmd_internals.o sceCdReadClock.o ps2time.o sceCdWriteClock.o sceC
 	sceCdForbidDVDP.o sceCdAutoAdjustCtrl.o sceCdDecSet.o sceCdSetHDMode.o sceCdOpenConfig.o sceCdCloseConfig.o \
 	sceCdReadConfig.o sceCdWriteConfig.o \
 	sceCdReadNVM.o sceCdWriteNVM.o sceCdRI.o sceCdWI.o sceCdReadConsoleID.o sceCdWriteConsoleID.o \
+	sceCdNoticeGameStart.o \
 	_CdSyncS.o
 
 EE_OBJS = $(LIBCDVD_OBJS) $(NCMD_OBJS) $(SCMD_OBJS) erl-support.o
