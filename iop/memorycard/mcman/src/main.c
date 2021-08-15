@@ -1245,6 +1245,10 @@ int McReadPage(int port, int slot, int page, void *buf) // Export #18
 				if ((retries == 4) && (!(ecres < sceMcResNoFormat)))
 					break;
 			}
+			else
+			{
+				break;
+			}
 		}
 	} while (++retries < 5);
 
