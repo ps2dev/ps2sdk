@@ -85,6 +85,8 @@ static dev9_shutdown_cb_t dev9_shutdown_cbs[16];
 
 static dev9_dma_cb_t dev9_predma_cbs[4], dev9_postdma_cbs[4];
 
+static u8 dev9_has_dvr_capability = 0;
+
 static int dev9_intr_dispatch(int flag);
 
 static void dev9_set_stat(int stat);
@@ -123,6 +125,12 @@ static int dev9x_devctl(iop_file_t *f, const char *name, int cmd, void *args, un
             return dev9type;
         case DDIOC_OFF:
             dev9Shutdown();
+            return 0;
+        case DDIOC_SETPIO3:
+            dev9ControlPIO3(((u32 *)args)[0]);
+            return 0;
+        case DDIOC_LED2CTL:
+            dev9LED2Ctl(((u32 *)args)[0]);
             return 0;
         default:
             return 0;
@@ -461,7 +469,7 @@ static int read_eeprom_data(void)
     if (eeprom_data[0] < 0)
         goto out;
 
-    SPD_REG8(SPD_R_PIO_DIR) = 0xe1;
+    SPD_REG8(SPD_R_PIO_DIR) = 0xe0 | (dev9_has_dvr_capability ? 7 : 1);
     DelayThread(1);
     SPD_REG8(SPD_R_PIO_DATA) = 0x80;
     DelayThread(1);
@@ -515,7 +523,7 @@ static int read_eeprom_data(void)
     res = 0;
 
 out:
-    SPD_REG8(SPD_R_PIO_DIR) = 1;
+    SPD_REG8(SPD_R_PIO_DIR) = dev9_has_dvr_capability ? 7 : 1;
     return res;
 }
 
@@ -536,11 +544,60 @@ int dev9GetEEPROM(u16 *buf)
     return 0;
 }
 
+// Exerpt from Wisi's SPEED.txt:
+// 1:0  Dev9 LED Control. 0=On/1=Off.
+// Clearing either to 0 will light the LED.
+// Each is connected to the cathode of a diode, sharing a common anode.
+// The anode has a 10kohm pull-up to Vcc, and is connected to the base of an PNP transistor,
+// with collector grounded and emitter, connecting through a 240ohm resistor to the ACS_LED
+// pin (90) of the Expansion Bay connector. It connects to the cathode of the HDD Activity LED
+// in the PS2, the anode of which connects through 180ohm resistor to +5V.  
+
+// The specific LED part used is the Citizen CITILED CL-200TLY-C, which has a "Lemon Yellow" color.
+
 /* Export 10 */
 void dev9LEDCtl(int ctl)
 {
     USE_SPD_REGS;
-    SPD_REG8(SPD_R_PIO_DATA) = (ctl == 0);
+    if (dev9_has_dvr_capability)
+    {
+        SPD_REG8(SPD_R_PIO_DIR) |= 1;
+        SPD_REG8(SPD_R_PIO_DATA) = (SPD_REG8(SPD_R_PIO_DATA) & 0xE) | (ctl ? 0 : 1);
+    }
+    else
+    {
+        SPD_REG8(SPD_R_PIO_DATA) = (ctl == 0);
+    }
+}
+
+/* Export 15 */
+void dev9LED2Ctl(int ctl)
+{
+    if (dev9_has_dvr_capability)
+    {
+        USE_SPD_REGS;
+        SPD_REG8(SPD_R_PIO_DIR) |= 2;
+        DelayThread(1);
+        SPD_REG8(SPD_R_PIO_DATA) = (SPD_REG8(SPD_R_PIO_DATA) & 0xD) | (ctl ? 0 : 2);
+        DelayThread(1);
+    }
+}
+
+// Exerpt from Wisi's SPEED.txt:
+// 3:2  On SCPH-70000, each is connected through 10kohm R to Vcc, so they were inputs once.
+// On the SCPH-10350 Network Adapter - as well.
+
+/* Export 14 */
+void dev9ControlPIO3(int ctl)
+{
+    if (dev9_has_dvr_capability)
+    {
+        USE_SPD_REGS;
+        SPD_REG8(SPD_R_PIO_DIR) |= 4;
+        DelayThread(1);
+        SPD_REG8(SPD_R_PIO_DATA) = (SPD_REG8(SPD_R_PIO_DATA) & 0xB) | (ctl ? 0 : 4);
+        DelayThread(1);
+    }
 }
 
 static void dev9RegisterIntrDispatchCb(dev9IntrDispatchCb_t callback)
@@ -594,6 +651,10 @@ static int dev9_init(int sema_attr)
 
     /* Read in the MAC address.  */
     read_eeprom_data();
+
+    dev9LED2Ctl(0);
+    dev9ControlPIO3(0);
+
     /* Turn the LED off.  */
     dev9LEDCtl(0);
     return 0;
@@ -1174,7 +1235,9 @@ static int expbay_intr(void *unused)
     if (p_dev9_intr_cb)
         p_dev9_intr_cb(0);
 
-    DEV9_REG(DEV9_R_1466) = 1;
+    if (!dev9_has_dvr_capability) {
+        DEV9_REG(DEV9_R_1466) = 1;
+    }
     DEV9_REG(DEV9_R_1466) = 0;
     return 1;
 }
@@ -1182,6 +1245,7 @@ static int expbay_intr(void *unused)
 static int expbay_init(int sema_attr)
 {
     USE_DEV9_REGS;
+    USE_SPD_REGS;
     int flags;
 
     _sw(0x51011, SSBUS_R_1420);
@@ -1196,6 +1260,9 @@ static int expbay_init(int sema_attr)
         if (speed_device_init() != 0)
             return 1;
     }
+
+    /* Disable control of LED 2 and PIO 3 if the dev9 device does not have DVR capabilities. */
+    dev9_has_dvr_capability = (SPD_REG16(SPD_R_REV_3) & SPD_CAPS_DVR) ? 1 : 0;
 
     if (dev9_init(sema_attr) != 0)
         return 1;
