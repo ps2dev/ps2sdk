@@ -15,8 +15,10 @@
  */
 
 #include <rom0_info.h>
-#include <fcntl.h>
-#include <unistd.h>
+
+// We don't want kernel to depend newlib
+#define NEWLIB_PORT_AWARE
+#include "fileio.h"
 
 
 extern char g_RomName[];
@@ -31,9 +33,9 @@ char* GetRomName(char *romname)
 {
 	int fd;
 
-	fd = open("rom0:ROMVER", O_RDONLY);
-	read(fd, romname, 14);
-	close(fd);
+	fd = fioOpen("rom0:ROMVER", FIO_O_RDONLY);
+	fioRead(fd, romname, 14);
+	fioClose(fd);
 	return romname;
 }
 #endif
@@ -43,9 +45,9 @@ int IsDESRMachine(void)
 {
 	int fd;
 
-	fd = open("rom0:PSXVER", O_RDONLY);
+	fd = fioOpen("rom0:PSXVER", FIO_O_RDONLY);
 	if (fd > 0) {
-		close(fd);
+		fioClose(fd);
 		return 1;
 	}
 
