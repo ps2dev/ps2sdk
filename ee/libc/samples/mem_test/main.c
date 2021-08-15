@@ -22,11 +22,14 @@
 #include <debug.h>
 #endif
 
+extern void __start(void);
+extern void *_end;
+extern void *_heap_size;
+
 #define MB_SIZE 1024 * 1024
 #define KB_SIZE 1024
 
 #define SIZE_PATTERN 2
-static unsigned char patterns[SIZE_PATTERN] = { 0xA, 0x5 };
 
 #if defined(SCREEN_DEBUG)
 #define custom_printf(args...) printf(args); scr_printf(args);
@@ -34,112 +37,97 @@ static unsigned char patterns[SIZE_PATTERN] = { 0xA, 0x5 };
 #define custom_printf(args...) printf(args); 
 #endif
 
-int main(int argc, char *argv[]) {
+#if !defined(SCREEN_DEBUG)
+// sleep requires it
+void _ps2sdk_libc_init();
+void _ps2sdk_libc_deinit();
+#endif
+
+void _ps2sdk_timezone_update();
+
+static int max_malloc(size_t initial_value, int increment, const char *desc) {
+    char *p_block;
+    size_t chunk = initial_value;
+
+    custom_printf("Check maximum contigous block we can allocate (%s accurate)\n", desc);
+    while ( (p_block = malloc(++chunk * increment)) != NULL) {
+        free(p_block);
+    }
+    chunk--;
+#if defined(VERBOSE)
+    custom_printf("Maximum possible %s we can allocate is %i\n", desc, chunk);
+#endif
+
+    return chunk;
+}
+
+static int mem_integrity(char* p_block, size_t initial_value, size_t end_value, int increment, const char *desc) {
+    unsigned char patterns[SIZE_PATTERN] = { 0xA, 0x5 };
     int i, j, failures;
-    size_t size_mb, size_kb, size_b;
-    char *p_block, *block_start, *block_tmp;
-#if VERBOSE
+    char *block_start, *block_tmp;
+#if defined(VERBOSE)
     char *block_end;
 #endif
+
+    failures = 0;
+
+    custom_printf("Checking %s chunks...\n", desc);
+    for (i = initial_value; i < end_value; i++) {
+        for (j = 0; j < SIZE_PATTERN; j++) {
+            block_start = p_block + i * increment;
+#if defined(VERBOSE)
+            block_end = block_start + increment;
+            custom_printf("Checking from %p to %p with pattern 0x%X\n", block_start, block_end, patterns[j]);
+#endif
+            memset(block_start, patterns[j], increment);
+            for(int x = 0; x < increment; x++) {
+                block_tmp = block_start + x; 
+                if(block_tmp[0] != patterns[j]) {
+                    failures++;
+                    custom_printf("Failure, mem pos: %p\n", block_tmp);
+                    custom_printf("Expected value 0x%X, readed: 0x%X\n", patterns[j], block_tmp[0]);
+                }
+            }
+        }
+    }
+
+    return failures;
+}
+
+int main(int argc, char *argv[]) {
+    int failures;
+    size_t size_mb, size_kb, size_b;
+    char *p_block;
+
+    failures = 0;
+    size_mb = 0;
+    size_kb = 0;
+    size_b = 0;
 
 #if defined(SCREEN_DEBUG)
    init_scr();
    sleep(3);
    scr_printf("\n\nStarting MEM TESTS...\n");
 #endif
-    
-    custom_printf("Stack start at %p\n", &i);
-    failures = 0;
-    size_mb = 0;
-    size_kb = 0;
-    size_b = 0;
 
-    custom_printf("Check maximum contigous block we can allocate (MB accurate)\n");
-    while ( (p_block = malloc(++size_mb * MB_SIZE)) != NULL) {
-        free(p_block);
-    }
-    size_mb--;
-    custom_printf("Maximum possible MB we can allocate is %i\n", size_mb);
+    custom_printf("Program: [%p, %p], program size %i, heap size %p\n", &__start, &_end, (int)&_end - (int)&__start, &_heap_size);
+    custom_printf("EndOfHeap %p, memorySize %i, machineType %i\n", EndOfHeap(), GetMemorySize(), MachineType());
+    custom_printf("Stack start at %p\n", &failures);
 
-    custom_printf("Check maximum contigous block we can allocate (KB accurate)\n");
+    size_mb = max_malloc(size_mb, MB_SIZE, "MB");
+
     size_kb = size_mb * KB_SIZE;
-    while ( (p_block = malloc(++size_kb * KB_SIZE)) != NULL) {
-        free(p_block);
-    }
-    size_kb--;
-    custom_printf("Maximum possible KB we can allocate is %i\n", size_kb);
+    size_kb = max_malloc(size_kb, KB_SIZE, "KB");
 
-    custom_printf("Check maximum contigous block we can allocate (Byte accurate)\n");
     size_b = size_kb * KB_SIZE;
-    while ( (p_block = malloc(++size_b)) != NULL) {
-        free(p_block);
-    }
-    size_b--;
-    custom_printf("Maximum possible Bytes we can allocate is %i\n", size_b);
-
+    size_b = max_malloc(size_b, 1, "Bytes");
 
     custom_printf("Start memory integration\n");
     p_block = malloc(size_b);
 
-    custom_printf("Checking MB chunks...\n");
-    for (i = 0; i < size_mb; i++) {
-        for (j = 0; j < SIZE_PATTERN; j++) {
-            block_start = p_block + (i * MB_SIZE);
-#if VERBOSE
-            block_end = p_block + ((i+1) * MB_SIZE);
-            custom_printf("Checking from %p to %p with pattern 0x%X\n", block_start, block_end, patterns[j]);
-#endif
-            memset(block_start, patterns[j], MB_SIZE);
-            for(int x = 0; x < MB_SIZE; x++) {
-                block_tmp = block_start + x; 
-                if(block_tmp[0] != patterns[j]) {
-                    failures++;
-                    custom_printf("Failure, mem pos: %p\n", block_tmp);
-                    custom_printf("Expected value 0x%X, readed: 0x%X\n", patterns[j], block_tmp[0]);
-                }
-            }
-        }
-    }
-    custom_printf("End of Checking MB chunks...\n");
-
-    custom_printf("Checking KB chunks...\n");
-    for (i = size_mb * KB_SIZE; i < size_kb; i++) {
-        for (j = 0; j < SIZE_PATTERN; j++) {
-            block_start = p_block + (i * KB_SIZE);
-#if VERBOSE
-            block_end = p_block + ((i+1) * KB_SIZE);
-            custom_printf("Checking from %p to %p with pattern 0x%X\n", block_start, block_end, patterns[j]);
-#endif
-            memset(block_start, patterns[j], KB_SIZE);
-            for(int x = 0; x < KB_SIZE; x++) {
-                block_tmp = block_start + x; 
-                if(block_tmp[0] != patterns[j]) {
-                    failures++;
-                    custom_printf("Failure, mem pos: %p\n", block_tmp);
-                    custom_printf("Expected value 0x%X, readed: 0x%X\n", patterns[j], block_tmp[0]);
-                }
-            }
-        }
-    }
-    custom_printf("End of Checking KB chunks...\n");
-
-    custom_printf("Checking Byte chunks...\n");
-    for (i = size_kb * KB_SIZE; i < size_b; i++) {
-        for (j = 0; j < SIZE_PATTERN; j++) {
-            block_start = p_block + i;
-#if VERBOSE
-            block_end = p_block + (i+1);
-            custom_printf("Checking from %p to %p with pattern 0x%X\n", block_start, block_end, patterns[j]);
-#endif
-            memset(block_start, patterns[j], 1);
-            if(block_start[0] != patterns[j]) {
-                failures++;
-                custom_printf("Failure, mem pos: %p\n", block_tmp);
-                custom_printf("Expected value 0x%X, readed: 0x%X\n", patterns[j], block_start[0]);
-            }
-        }
-    }
-    custom_printf("End of Checking Byte chunks...\n");
+    failures += mem_integrity(p_block, 0, size_mb, MB_SIZE, "MB");
+    failures += mem_integrity(p_block, size_mb * KB_SIZE, size_kb, KB_SIZE, "KB");
+    failures += mem_integrity(p_block, size_kb * KB_SIZE, size_b, 1, "Bytes");
 
     free(p_block);
     custom_printf("End memory integration\n");
@@ -149,7 +137,7 @@ int main(int argc, char *argv[]) {
     custom_printf("Maximum possible KB we can allocate is %i KB\n", size_kb);
     custom_printf("Maximum possible Bytes we can allocate is %i Bytes\n", size_b);
     if (failures) {
-        custom_printf("Memory integrity: Opps :'( The memory failed, %i times\n", failures);
+        custom_printf("Memory integrity: Opps :'( The memory failed checking bytes, %i times\n", failures);
     } else {
         custom_printf("Memory integrity: The memory is working as expected!\n");
     }

@@ -7,13 +7,23 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 SCREEN_DEBUG = 1
+VERBOSE = 0
 
 EE_BIN   = mem_test.elf
 EE_OBJS  = main.o
 
+EE_CFLAGS = -Os -g
+# EE_CFLAGS += -fdata-sections -ffunction-sections
+# EE_LDFLAGS += -s
+# EE_LDFLAGS += -Wl,--gc-sections
+
 ifeq ($(SCREEN_DEBUG), 1)
 EE_LIBS += -ldebug
 EE_CFLAGS += -DSCREEN_DEBUG
+endif
+
+ifeq ($(VERBOSE), 1)
+EE_CFLAGS += -DVERBOSE
 endif
 
 all: $(EE_BIN)

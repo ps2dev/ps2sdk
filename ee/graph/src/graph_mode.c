@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <kernel.h>
 #include <osd_config.h>
+#include <rom0_info.h>
 
 #include <gs_privileged.h>
 
