@@ -24,6 +24,9 @@
 #include <stdio.h>
 #include <errno.h>
 #include <io_common.h>
+#ifdef BUILDING_XFROMMAN
+#include <fls.h>
+#endif
 #include "sio2man_imports.h"
 
 #ifdef SIO_DEBUG
@@ -34,7 +37,12 @@
 	#define DPRINTF(args...)	printf(args)
 #endif
 
+#ifndef BUILDING_XFROMMAN
 #define MODNAME "mcman_cex"
+#endif
+#ifdef BUILDING_XFROMMAN
+#define MODNAME "xfromman"
+#endif
 #define MODVER  0x20b
 
 typedef struct _MCCacheDir {
@@ -89,8 +97,10 @@ typedef struct {  // size = 48
 #define MAX_FDHANDLES 		3
 
 // internal functions prototypes
+#ifndef BUILDING_XFROMMAN
 int  mcsio2_transfer(int port, int slot, sio2_transfer_data_t *sio2data);
 int  mcsio2_transfer2(int port, int slot, sio2_transfer_data_t *sio2data);
+#endif
 void long_multiply(u32 v1, u32 v2, u32 *HI, u32 *LO);
 int  mcman_chrpos(char *str, int chr);
 void mcman_wmemset(void *buf, int size, int value);
@@ -104,7 +114,9 @@ int  mcman_dread(int fd, io_dirent_t *dirent);
 int  mcman_getstat(int port, int slot, char *filename, io_stat_t *stat);
 int  mcman_getmcrtime(sceMcStDateTime *time);
 void mcman_initPS2com(void);
+#ifndef BUILDING_XFROMMAN
 void sio2packet_add(int port, int slot, int cmd, u8 *buf);
+#endif
 int  mcman_eraseblock(int port, int slot, int block, void **pagebuf, void *eccbuf);
 int  mcman_readpage(int port, int slot, int page, void *buf, void *eccbuf);
 int  mcman_cardchanged(int port, int slot);

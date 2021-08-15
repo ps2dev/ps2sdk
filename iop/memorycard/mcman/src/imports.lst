@@ -57,15 +57,27 @@ I_AddDrv
 I_DelDrv
 ioman_IMPORTS_end
 
+#ifndef BUILDING_XFROMMAN
 secrman_IMPORTS_start
 I_SecrSetMcCommandHandler
 I_SecrSetMcDevIDHandler
 I_SecrAuthCard
 secrman_IMPORTS_end
+#endif
 
 cdvdman_IMPORTS_start
 I_sceCdRC
 cdvdman_IMPORTS_end
+
+#ifdef BUILDING_XFROMMAN
+fls_IMPORTS_start
+I_flash_detect
+I_flash_get_info
+I_flash_page_erase
+I_flash_page_read
+I_flash_page_write
+fls_IMPORTS_end
+#endif
 
 stdio_IMPORTS_start
 I_printf

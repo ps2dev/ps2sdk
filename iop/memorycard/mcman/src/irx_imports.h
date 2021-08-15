@@ -18,6 +18,9 @@
 /* Please keep these in alphabetical order!  */
 
 #include <cdvdman.h>
+#ifdef BUILDING_XFROMMAN
+#include <fls.h>
+#endif
 #include <intrman.h>
 #include <ioman.h>
 #include <loadcore.h>

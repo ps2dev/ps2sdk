@@ -37,7 +37,12 @@ int PS1CardFlag = 1;
 union mcman_pagebuf mcman_pagebuf;
 union mcman_PS1PDApagebuf mcman_PS1PDApagebuf;
 
+#ifndef BUILDING_XFROMMAN
 extern struct irx_export_table _exp_mcman;
+#endif
+#ifdef BUILDING_XFROMMAN
+extern struct irx_export_table _exp_xfromman;
+#endif
 extern u8 mcman_sio2outbufs_PS1PDA[0x90];
 
 static u8 mcman_cachebuf[MAX_CACHEENTRY * MCMAN_CLUSTERSIZE];
@@ -63,8 +68,10 @@ MCDevInfo mcman_devinfos[4][MCMAN_MAXSLOT];
 
 u8 mcman_eccdata[512]; // size for 32 ecc
 
+#ifndef BUILDING_XFROMMAN
 int (*mcman_sio2transfer)(int port, int slot, sio2_transfer_data_t *sio2data);
 int (*mc_detectcard)(int port, int slot);
+#endif
 
 // mcman xor table
 // clang-format off
@@ -146,9 +153,11 @@ int mcman_chrpos(char *str, int chr)
 //--------------------------------------------------------------
 int _start(int argc, const char **argv)
 {
+#ifndef BUILDING_XFROMMAN
 	iop_library_t *libptr;
 	register int i, sio2man_loaded;
 	void **export_tab;
+#endif
 
 #ifdef SIO_DEBUG
 	sio_init(38400, 0, 0, 0, 0);
@@ -157,6 +166,7 @@ int _start(int argc, const char **argv)
 	DPRINTF("mcman: _start...\n");
 #endif
 
+#ifndef BUILDING_XFROMMAN
 	// Get sio2man lib ptr
 	sio2man_loaded = 0;
 	libptr = GetLoadcoreInternalData()->let_next;
@@ -231,12 +241,19 @@ int _start(int argc, const char **argv)
 		export_tab[51] = (void *)McFlushCache;
 		export_tab[52] = (void *)McSetDirEntryState;
 	}
+#endif
 
 #ifdef DEBUG
 	DPRINTF("mcman: registering exports...\n");
 #endif
+#ifndef BUILDING_XFROMMAN
 	if (RegisterLibraryEntries(&_exp_mcman) != 0)
 		return MODULE_NO_RESIDENT_END;
+#endif
+#ifdef BUILDING_XFROMMAN
+	if (RegisterLibraryEntries(&_exp_xfromman) != 0)
+		return MODULE_NO_RESIDENT_END;
+#endif
 
 	CpuEnableIntr();
 
@@ -490,7 +507,12 @@ int McCloseAll(void) // Export #25 XMCMAN only
 //--------------------------------------------------------------
 int McDetectCard(int port, int slot) // Export #5
 {
+#ifndef BUILDING_XFROMMAN
 	return mc_detectcard(port, slot);
+#endif
+#ifdef BUILDING_XFROMMAN
+	return mcman_detectcard(port, slot);
+#endif
 }
 
 //--------------------------------------------------------------
@@ -504,6 +526,7 @@ int mcman_detectcard(int port, int slot)
 #endif
 	mcdi = (MCDevInfo *)&mcman_devinfos[port][slot];
 
+#ifndef BUILDING_XFROMMAN
 	if ((mcdi->cardtype == sceMcTypeNoCard) || (mcdi->cardtype == sceMcTypePS2)) {
 		r = mcman_probePS2Card2(port, slot);
 		if (r < -9) {
@@ -553,6 +576,14 @@ int mcman_detectcard(int port, int slot)
 			return sceMcResSucceed;
 		}
 	}
+#endif
+#ifdef BUILDING_XFROMMAN
+	r = mcman_probePS2Card2(port, slot);
+	if (r >= -9) {
+		mcdi->cardtype = sceMcTypePS2;
+		return r;
+	}
+#endif
 
 	mcdi->cardtype = 0;
 	mcdi->cardform = 0;
@@ -574,6 +605,7 @@ int McDetectCard2(int port, int slot) // Export #21 XMCMAN only
 
 	mcdi = (MCDevInfo *)&mcman_devinfos[port][slot];
 
+#ifndef BUILDING_XFROMMAN
 	if ((mcdi->cardtype == sceMcTypeNoCard) || (mcdi->cardtype == sceMcTypePS2)) {
 		r = mcman_probePS2Card(port, slot);
 		if (r < -9) {
@@ -623,6 +655,14 @@ int McDetectCard2(int port, int slot) // Export #21 XMCMAN only
 			return sceMcResSucceed;
 		}
 	}
+#endif
+#ifdef BUILDING_XFROMMAN
+	r = mcman_probePS2Card(port, slot);
+	if (r >= -9) {
+		mcdi->cardtype = sceMcTypePS2;
+		return r;
+	}
+#endif
 
 	mcdi->cardtype = 0;
 	mcdi->cardform = 0;
@@ -2529,8 +2569,10 @@ int mcman_setPS1devinfos(int port, int slot)
 	if (r < 0)
 		return -14;
 
+#ifndef BUILDING_XFROMMAN
 	if (mcman_sio2outbufs_PS1PDA[1] != 0)
 		return -15;
+#endif
 
 	if (mcman_PS1PDApagebuf.byte[0] != 0x4d)
 		return sceMcResNoFormat;
