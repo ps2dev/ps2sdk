@@ -32,7 +32,7 @@ extern int flash_page_erase(flash_info_t *info, u32 page);
 extern int flash_page_read(flash_info_t *info, u32 page, u32 count, void *buf);
 extern int flash_page_write(flash_info_t *info, u32 page, void *buf);
 
-#define fls_IMPORTS_start DECLARE_IMPORT_TABLE(fls, 0, 0)
+#define fls_IMPORTS_start DECLARE_IMPORT_TABLE(fls, 1, 1)
 #define fls_IMPORTS_end END_IMPORT_TABLE
 
 #define I_flash_detect DECLARE_IMPORT(4, flash_detect)

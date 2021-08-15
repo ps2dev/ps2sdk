@@ -164,27 +164,25 @@ static void flash_set_page(u32 id, u32 pageofs)
 	USE_SPD_REGS;
 
 	switch (id) {
+		case FLASH_ID_64MBIT:
+			SPD_REG16(0x4808) = ((pageofs >>  9) & 0xff) | 0x100;
+			SPD_REG16(0x4808) = ((pageofs >> 17) & 0x3f);
+			break;
 		case FLASH_ID_128MBIT:
-			SPD_REG16(0x4808) = ((pageofs >> 9) & 0xf0) | 0x100;
-			SPD_REG16(0x4808) = (pageofs >> 17) & 0x7f;
+			SPD_REG16(0x4808) = ((pageofs >>  9) & 0xff) | 0x100;
+			SPD_REG16(0x4808) = ((pageofs >> 17) & 0x7f);
 			break;
 		case FLASH_ID_256MBIT:
-			SPD_REG16(0x4808) = ((pageofs >> 9) & 0xf0) | 0x100;
-			SPD_REG16(0x4808) = (pageofs >> 17) & 0xff;
+			SPD_REG16(0x4808) = ((pageofs >>  9) & 0xff) | 0x100;
+			SPD_REG16(0x4808) = ((pageofs >> 17) & 0xff);
 			break;
 		case FLASH_ID_512MBIT:
-			SPD_REG16(0x4808) = ((pageofs >> 9) & 0xe0) | 0x100;
 			SPD_REG16(0x4808) = ((pageofs >> 17) & 0xff) | 0x100;
-			SPD_REG16(0x4808) = (pageofs >> 25) & 0x01;
+			SPD_REG16(0x4808) = ((pageofs >> 25) & 0x01);
 			break;
 		case FLASH_ID_1024MBIT:
-			SPD_REG16(0x4808) = ((pageofs >> 9) & 0xe0) | 0x100;
 			SPD_REG16(0x4808) = ((pageofs >> 17) & 0xff) | 0x100;
-			SPD_REG16(0x4808) = (pageofs >> 25) & 0x02;
-			break;
-		case FLASH_ID_64MBIT:
-			SPD_REG16(0x4808) = ((pageofs >> 9) & 0xf0) | 0x100;
-			SPD_REG16(0x4808) = (pageofs >> 17) & 0x3f;
+			SPD_REG16(0x4808) = ((pageofs >> 25) & 0x02);
 			break;
 	}
 }
