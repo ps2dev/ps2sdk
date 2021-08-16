@@ -30,20 +30,20 @@ s32 VoiceTransDma(s16 chan, u16 mode, u8 *iop_addr, u32 *spu_addr, u32 size)
 {
 	u32 direction;
 
-	if(*SD_CORE_ATTR(chan) & SD_DMA_IN_PROCESS)
+	if(U16_REGISTER_READ(SD_CORE_ATTR(chan)) & SD_DMA_IN_PROCESS)
 		return -1;
 
-	if(*SD_DMA_CHCR(chan) & SD_DMA_START)
+	if(U32_REGISTER_READ(SD_DMA_CHCR(chan)) & SD_DMA_START)
 		return -1;
 
-	*SD_A_TSA_HI(chan) = (u32)spu_addr >> 17;
-	*SD_A_TSA_LO(chan) = (u32)spu_addr >> 1;
+	U16_REGISTER_WRITE(SD_A_TSA_HI(chan), (u32)spu_addr >> 17);
+	U16_REGISTER_WRITE(SD_A_TSA_LO(chan), (u32)spu_addr >> 1);
 
 	if(mode == SD_TRANS_WRITE)
 	{
 		TransIntrData[chan].mode = chan;
 		direction = SD_DMA_DIR_IOP2SPU;
-		*SD_CORE_ATTR(chan) = (*SD_CORE_ATTR(chan) & ~SD_CORE_DMA) | SD_DMA_WRITE;
+		U16_REGISTER_WRITE(SD_CORE_ATTR(chan), (U16_REGISTER_READ(SD_CORE_ATTR(chan)) & ~SD_CORE_DMA) | SD_DMA_WRITE);
 		SetDmaWrite(chan);
 	}
 	else
@@ -52,7 +52,7 @@ s32 VoiceTransDma(s16 chan, u16 mode, u8 *iop_addr, u32 *spu_addr, u32 size)
 		{
 			TransIntrData[chan].mode = (chan << 2) | 0x200;
 			direction = SD_DMA_DIR_SPU2IOP;
-			*SD_CORE_ATTR(chan) = (*SD_CORE_ATTR(chan) & ~SD_CORE_DMA) | SD_DMA_READ;
+			U16_REGISTER_WRITE(SD_CORE_ATTR(chan), (U16_REGISTER_READ(SD_CORE_ATTR(chan)) & ~SD_CORE_DMA) | SD_DMA_READ);
 			SetDmaRead(chan);
 		}
 		else
@@ -61,9 +61,9 @@ s32 VoiceTransDma(s16 chan, u16 mode, u8 *iop_addr, u32 *spu_addr, u32 size)
 		}
 	}
 
-	*SD_DMA_ADDR(chan)	= (u32)iop_addr;
-	*SD_DMA_MSIZE(chan) = (((size+63)/64) << 16) | 0x10;
-	*SD_DMA_CHCR(chan)	= SD_DMA_CS | SD_DMA_START | direction;
+	U32_REGISTER_WRITE(SD_DMA_ADDR(chan), (u32)iop_addr);
+	U32_REGISTER_WRITE(SD_DMA_MSIZE(chan), (((size+63)/64) << 16) | 0x10);
+	U32_REGISTER_WRITE(SD_DMA_CHCR(chan), SD_DMA_CS | SD_DMA_START | direction);
 
 	return size;
 }
@@ -72,14 +72,14 @@ s32 VoiceTrans_Write_IOMode(u32 iopaddr, u32 spu_addr, s32 size, s16 chan)
 {
 	volatile u16 *statx;
 
-	if(*SD_CORE_ATTR(chan) & SD_DMA_IN_PROCESS)
+	if(U16_REGISTER_READ(SD_CORE_ATTR(chan)) & SD_DMA_IN_PROCESS)
 		return -1;
 
-	if(*SD_DMA_CHCR(chan) & SD_DMA_START)
+	if(U32_REGISTER_READ(SD_DMA_CHCR(chan)) & SD_DMA_START)
 		return -1;
 
-	*SD_A_TSA_HI(chan) = (u16)spu_addr >> 17;
-	*SD_A_TSA_LO(chan) = (u16)spu_addr >> 1;
+	U16_REGISTER_WRITE(SD_A_TSA_HI(chan), (u16)spu_addr >> 17);
+	U16_REGISTER_WRITE(SD_A_TSA_LO(chan), (u16)spu_addr >> 1);
 
 	TransIntrData[chan].mode = chan;
 
@@ -98,23 +98,23 @@ s32 VoiceTrans_Write_IOMode(u32 iopaddr, u32 spu_addr, s32 size, s16 chan)
 			if(count > 0)
 			{
 				for(loop = 0; loop < count; loop += 2)
-					*SD_A_STD(chan) = *iop_mem++;
+					U16_REGISTER_WRITE(SD_A_STD(chan), *iop_mem++);
 			}
 
 			// Set Transfer mode to IO
-			*SD_CORE_ATTR(chan) = (*SD_CORE_ATTR(chan) & ~SD_CORE_DMA) | SD_DMA_IO;
+			U16_REGISTER_WRITE(SD_CORE_ATTR(chan), (U16_REGISTER_READ(SD_CORE_ATTR(chan)) & ~SD_CORE_DMA) | SD_DMA_IO);
 
 			statx = U16_REGISTER(0x344 + (chan << 10));
 
 			// Wait for transfer to complete;
-			while(*statx & SD_IO_IN_PROCESS);
+			while(U16_REGISTER_READ(statx) & SD_IO_IN_PROCESS);
 
 			size -= count;
 		}
 	}
 
 	// Reset DMA settings
-	*SD_CORE_ATTR(chan) &= ~SD_CORE_DMA;
+	U16_REGISTER_WRITEAND(SD_CORE_ATTR(chan), ~SD_CORE_DMA);
 
 	return 0;
 }

@@ -71,22 +71,22 @@ const u32 ClearEffectData[256] __attribute__((aligned(16))) =
 
 u32 GetEEA(s32 core)
 {
-	return (*SD_A_EEA_HI(core) << 17) | 0x1FFFF;
+	return (U16_REGISTER_READ(SD_A_EEA_HI(core)) << 17) | 0x1FFFF;
 }
 
 void SetESA(s32 core, u32 value)
 {
 	volatile u16 *reg = SD_A_ESA_HI(core);
 
-	reg[0] = value >> 17;
-	reg[1] = value >> 1;
+	U16_REGISTER_WRITE(reg + 0, value >> 17);
+	U16_REGISTER_WRITE(reg + 1, value >> 1);
 
 }
 
 void SetEffectRegister(volatile u16* reg, u32 val)
 {
-	reg[0] = (u16)(val >> 14);
-	reg[1] = (u16)(val << 2);
+	U16_REGISTER_WRITE(reg + 0, (u16)(val >> 14));
+	U16_REGISTER_WRITE(reg + 1, (u16)(val << 2));
 }
 
 void SetEffectData(u16 *mode_data, u32 core)
@@ -97,13 +97,13 @@ void SetEffectData(u16 *mode_data, u32 core)
 	SetEffectRegister(SD_R_FB_SRC_B(core), mode_data[1]);
 
 	for(i=0; i < 8; i++)
-		*(SD_R_IIR_ALPHA(core)+i) = mode_data[2+i];
+		U16_REGISTER_WRITE(SD_R_IIR_ALPHA(core)+i, mode_data[2+i]);
 
 	for(i=0; i < 20; i++)
 		SetEffectRegister(SD_R_IIR_DEST_A0(core)+(i*2), mode_data[10+i]);
 
-	*SD_R_IN_COEF_L(core) = mode_data[30];
-	*SD_R_IN_COEF_R(core) = mode_data[31];
+	U16_REGISTER_WRITE(SD_R_IN_COEF_L(core), mode_data[30]);
+	U16_REGISTER_WRITE(SD_R_IN_COEF_R(core), mode_data[31]);
 }
 
 int sceSdSetEffectAttr(int core, sceSdEffectAttr *attr)
@@ -165,10 +165,10 @@ int sceSdSetEffectAttr(int core, sceSdEffectAttr *attr)
 	}
 
 	// Disable effects
-	if(*SD_CORE_ATTR(core) & SD_ENABLE_EFFECTS)
+	if(U16_REGISTER_READ(SD_CORE_ATTR(core)) & SD_ENABLE_EFFECTS)
 	{
 		effects_disabled = 1;
-		*SD_CORE_ATTR(core) &= ~SD_ENABLE_EFFECTS;
+		U16_REGISTER_WRITEAND(SD_CORE_ATTR(core), ~SD_ENABLE_EFFECTS);
 	}
 
 	// Clean up after last mode
@@ -190,7 +190,7 @@ int sceSdSetEffectAttr(int core, sceSdEffectAttr *attr)
 
 	// Enable effects
 	if(effects_disabled)
-		*SD_CORE_ATTR(core) |= SD_ENABLE_EFFECTS;
+		U16_REGISTER_WRITEOR(SD_CORE_ATTR(core), SD_ENABLE_EFFECTS);
 
 	return 0;
 }

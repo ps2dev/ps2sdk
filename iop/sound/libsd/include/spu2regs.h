@@ -12,6 +12,15 @@
 #define U16_REGISTER(x)					((volatile u16 *) (0xBF900000 | (x)))
 #define U32_REGISTER(x)					((volatile u32 *) (0xBF800000 | (x)))
 
+#define U16_REGISTER_READ(x)			(*((volatile u16 *) (x)))
+#define U32_REGISTER_READ(x)			(*((volatile u32 *) (x)))
+#define U16_REGISTER_WRITE(x, y)		(*((volatile u16 *) (x)) = y)
+#define U32_REGISTER_WRITE(x, y)		(*((volatile u32 *) (x)) = y)
+#define U16_REGISTER_WRITEOR(x, y)		(*((volatile u16 *) (x)) |= y)
+#define U32_REGISTER_WRITEOR(x, y)		(*((volatile u32 *) (x)) |= y)
+#define U16_REGISTER_WRITEAND(x, y)		(*((volatile u16 *) (x)) &= y)
+#define U32_REGISTER_WRITEAND(x, y)		(*((volatile u32 *) (x)) &= y)
+
 #define SD_BASE_REG(reg)				((volatile u16 *)(0xBF900000 + reg))
 
 #define SD_VP_REG(core, voice, reg)		SD_BASE_REG(((core) << 10) + ((voice) << 4) + (reg))
