@@ -55,17 +55,17 @@ void InitTLBFunctions(void){
 	_kExecArg = GetEntryAddress(3);
 }
 
-void InitTLB(void){
-	/* Try to use the 64 MB RAM for DESR machines */
-	if(IsDESRMachine())
-		SetMemoryMode(0);
+void InitTLB(void)
+{
+    /* Try to use the 64 MB RAM for DESR machines */
+    if (IsDESRMachine())
+        SetMemoryMode(0);
 
-	if(GetMemorySize()==0x2000000){
-		InitTLB32MB();
-	}
-	else{
-		_InitTLB();
-	}
+    if (GetMemorySize() == 0x2000000) {
+        InitTLB32MB();
+    } else {
+        _InitTLB();
+    }
 }
 
 struct TLBEntry{

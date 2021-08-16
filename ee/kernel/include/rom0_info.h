@@ -31,7 +31,7 @@ int IsDESRMachine(void);
  *
  * @return 1 if DTL-T10000(H); 0 if not
  */
-int  IsT10K(void);
+int IsT10K(void);
 
 /** gets the romname from the current ps2
  * 14 chars - doesnt set a null terminator
@@ -39,7 +39,7 @@ int  IsT10K(void);
  * @param romname buffer to hold romname (14 chars long)
  * @return pointer to buffer containing romname
  */
-char* GetRomName(char *romname);
+char *GetRomName(char *romname);
 
 #ifdef __cplusplus
 }

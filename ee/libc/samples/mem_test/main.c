@@ -32,9 +32,11 @@ extern void *_heap_size;
 #define SIZE_PATTERN 2
 
 #if defined(SCREEN_DEBUG)
-#define custom_printf(args...) printf(args); scr_printf(args);
+#define custom_printf(args...) \
+    printf(args);              \
+    scr_printf(args);
 #else
-#define custom_printf(args...) printf(args); 
+#define custom_printf(args...) printf(args);
 #endif
 
 #if !defined(SCREEN_DEBUG)
@@ -45,12 +47,13 @@ void _ps2sdk_libc_deinit();
 
 void _ps2sdk_timezone_update();
 
-static int max_malloc(size_t initial_value, int increment, const char *desc) {
+static int max_malloc(size_t initial_value, int increment, const char *desc)
+{
     char *p_block;
     size_t chunk = initial_value;
 
     custom_printf("Check maximum contigous block we can allocate (%s accurate)\n", desc);
-    while ( (p_block = malloc(++chunk * increment)) != NULL) {
+    while ((p_block = malloc(++chunk * increment)) != NULL) {
         free(p_block);
     }
     chunk--;
@@ -61,8 +64,9 @@ static int max_malloc(size_t initial_value, int increment, const char *desc) {
     return chunk;
 }
 
-static int mem_integrity(char* p_block, size_t initial_value, size_t end_value, int increment, const char *desc) {
-    unsigned char patterns[SIZE_PATTERN] = { 0xA, 0x5 };
+static int mem_integrity(char *p_block, size_t initial_value, size_t end_value, int increment, const char *desc)
+{
+    unsigned char patterns[SIZE_PATTERN] = {0xA, 0x5};
     int i, j, failures;
     char *block_start, *block_tmp;
 #if defined(VERBOSE)
@@ -80,9 +84,9 @@ static int mem_integrity(char* p_block, size_t initial_value, size_t end_value, 
             custom_printf("Checking from %p to %p with pattern 0x%X\n", block_start, block_end, patterns[j]);
 #endif
             memset(block_start, patterns[j], increment);
-            for(int x = 0; x < increment; x++) {
-                block_tmp = block_start + x; 
-                if(block_tmp[0] != patterns[j]) {
+            for (int x = 0; x < increment; x++) {
+                block_tmp = block_start + x;
+                if (block_tmp[0] != patterns[j]) {
                     failures++;
                     custom_printf("Failure, mem pos: %p\n", block_tmp);
                     custom_printf("Expected value 0x%X, readed: 0x%X\n", patterns[j], block_tmp[0]);
@@ -94,7 +98,8 @@ static int mem_integrity(char* p_block, size_t initial_value, size_t end_value, 
     return failures;
 }
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     int failures;
     size_t size_mb, size_kb, size_b;
     char *p_block;
@@ -105,9 +110,9 @@ int main(int argc, char *argv[]) {
     size_b = 0;
 
 #if defined(SCREEN_DEBUG)
-   init_scr();
-   sleep(3);
-   scr_printf("\n\nStarting MEM TESTS...\n");
+    init_scr();
+    sleep(3);
+    scr_printf("\n\nStarting MEM TESTS...\n");
 #endif
 
     custom_printf("Program: [%p, %p], program size %i, heap size %p\n", &__start, &_end, (int)&_end - (int)&__start, &_heap_size);

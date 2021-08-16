@@ -29,38 +29,38 @@ char g_RomName[15] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 #endif
 
 #ifdef F_GetRomName
-char* GetRomName(char *romname)
+char *GetRomName(char *romname)
 {
-	int fd;
+    int fd;
 
-	fd = fioOpen("rom0:ROMVER", FIO_O_RDONLY);
-	fioRead(fd, romname, 14);
-	fioClose(fd);
-	return romname;
+    fd = fioOpen("rom0:ROMVER", FIO_O_RDONLY);
+    fioRead(fd, romname, 14);
+    fioClose(fd);
+    return romname;
 }
 #endif
 
 #ifdef F_IsDESRMachine
 int IsDESRMachine(void)
 {
-	int fd;
+    int fd;
 
-	fd = fioOpen("rom0:PSXVER", FIO_O_RDONLY);
-	if (fd > 0) {
-		fioClose(fd);
-		return 1;
-	}
+    fd = fioOpen("rom0:PSXVER", FIO_O_RDONLY);
+    if (fd > 0) {
+        fioClose(fd);
+        return 1;
+    }
 
-return 0;
+    return 0;
 }
 #endif
 
 #ifdef F_IsT10K
 int IsT10K(void)
 {
-	// only read in the romname the first time
-	if(g_RomName[0] == 0)
-		GetRomName(g_RomName);
-	return (g_RomName[4] == 'T') ? 1 : 0;
+    // only read in the romname the first time
+    if (g_RomName[0] == 0)
+        GetRomName(g_RomName);
+    return (g_RomName[4] == 'T') ? 1 : 0;
 }
 #endif
