@@ -203,24 +203,12 @@ void configConvertToLocalTime(sceCdCLOCK* time);
 #endif
 
 // Internal functions.
-/** check whether the PlayStation 2 is actually a TOOL DTL-T10000(H)
- *
- * @return 1 if DTL-T10000(H); 0 if not
- */
-int  IsT10K(void);
 /** check if ps2 has a 'Protokernel' (Really early Japanese models)
  *
  * @param config unsigned int config value from GetOsdConfigParam() syscall
  * @return 1 if early jap model; 0 if not
  */
 int  IsEarlyJap(ConfigParam config);
-/** gets the romname from the current ps2
- * 14 chars - doesnt set a null terminator
- *
- * @param romname buffer to hold romname (14 chars long)
- * @return pointer to buffer containing romname
- */
-char* GetRomName(char *romname);
 
 #ifdef __cplusplus
 }

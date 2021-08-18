@@ -19,6 +19,7 @@ SUBDIRS += draw/vu1
 SUBDIRS += font
 SUBDIRS += graph
 SUBDIRS += libc/regress
+SUBDIRS += libc/mem_test
 SUBDIRS += libgs/doublebuffer
 SUBDIRS += libgs/draw
 #SUBDIRS += mpeg                #TODO: not modified for updated newlib

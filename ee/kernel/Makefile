@@ -85,9 +85,11 @@ GLUE_OBJS += SyncDCache.o iSyncDCache.o InvalidDCache.o iInvalidDCache.o
 SIO_OBJS = sio_init.o sio_putc.o sio_getc.o sio_write.o sio_read.o sio_puts.o \
 	sio_gets.o sio_getc_block.o sio_flush.o sio_putsn.o
 
+ROM0_OBJS = _info_internals.o GetRomName.o IsDESRMachine.o IsT10K.o
+
 ### Config objects
 
-CONFIG_OBJS = _config_internals.o GetRomName.o IsT10K.o IsEarlyJap.o configGetLanguage.o \
+CONFIG_OBJS = _config_internals.o IsEarlyJap.o configGetLanguage.o \
 	configSetLanguage.o configGetTvScreenType.o configSetTvScreenType.o \
 	configGetDateFormat.o configSetDateFormat.o configGetTimeFormat.o \
 	configSetTimeFormat.o configGetTimezone.o configSetTimezone.o \
@@ -158,7 +160,7 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o $(EXEC_SYSCALLS) \
 	strncpy.o strlen.o memcpy.o memset.o __syscall.o GPfuncs.o
 
 EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
-	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(CONFIG_OBJS) \
+	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(ROM0_OBJS) $(CONFIG_OBJS) \
 	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(GETKERNEL_OBJS) \
 	$(INITSYS_OBJS) erl-support.o
 
@@ -184,6 +186,9 @@ $(FILEIO_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)fileio.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(LOADFILE_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)loadfile.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(ROM0_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)rom0_info.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(CONFIG_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)osd_config.c

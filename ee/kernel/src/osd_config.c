@@ -23,6 +23,7 @@
 #include <sys/unistd.h>
 #include <string.h>
 #include <osd_config.h>
+#include <rom0_info.h>
 
 /** config param data as stored on a DTL-T10000(H) TOOL */
 typedef struct {
@@ -36,35 +37,9 @@ typedef struct {
 } ConfigParamT10K;
 
 extern ConfigParamT10K g_t10KConfig;
-extern char g_RomName[];
 
 #ifdef F__config_internals
 ConfigParamT10K g_t10KConfig = {540, TV_SCREEN_43, DATE_YYYYMMDD, LANGUAGE_JAPANESE, 0, 0, 0};
-
-/** stores romname of ps2 */
-char g_RomName[15] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-#endif
-
-#ifdef F_GetRomName
-char* GetRomName(char *romname)
-{
-	int fd;
-
-	fd = open("rom0:ROMVER", O_RDONLY);
-	read(fd, romname, 14);
-	close(fd);
-	return romname;
-}
-#endif
-
-#ifdef F_IsT10K
-int IsT10K(void)
-{
-	// only read in the romname the first time
-	if(g_RomName[0] == 0)
-		GetRomName(g_RomName);
-	return (g_RomName[4] == 'T') ? 1 : 0;
-}
 #endif
 
 #ifdef F_IsEarlyJap

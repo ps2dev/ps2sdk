@@ -9,6 +9,7 @@
 
 #include <kernel.h>
 #include <stdio.h>
+#include <rom0_info.h>
 
 #define kprintf(args...) //sio_printf(args)
 
@@ -54,13 +55,17 @@ void InitTLBFunctions(void){
 	_kExecArg = GetEntryAddress(3);
 }
 
-void InitTLB(void){
-	if(GetMemorySize()==0x2000000){
-		InitTLB32MB();
-	}
-	else{
-		_InitTLB();
-	}
+void InitTLB(void)
+{
+    /* Try to use the 64 MB RAM for DESR machines */
+    if (IsDESRMachine())
+        SetMemoryMode(0);
+
+    if (GetMemorySize() == 0x2000000) {
+        InitTLB32MB();
+    } else {
+        _InitTLB();
+    }
 }
 
 struct TLBEntry{

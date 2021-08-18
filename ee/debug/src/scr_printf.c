@@ -17,7 +17,7 @@
 #include <tamtypes.h>
 #include <sifcmd.h>
 #include <kernel.h>
-#include <osd_config.h>
+#include <rom0_info.h>
 #include <stdarg.h>
 #include <debug.h>
 
