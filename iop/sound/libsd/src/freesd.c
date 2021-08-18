@@ -113,12 +113,12 @@ void nopdelay()
 void InitSpu2()
 {
 
-	*U32_REGISTER(0x1404)  = 0xBF900000;
-	*U32_REGISTER(0x140C)  = 0xBF900800;
-	*U32_REGISTER(0x10F0) |= 0x80000;
-	*U32_REGISTER(0x1570) |= 8;
-	*U32_REGISTER(0x1014)  = 0x200B31E1;
-	*U32_REGISTER(0x1414)  = 0x200B31E1;
+	U32_REGISTER_WRITE(U32_REGISTER(0x1404), 0xBF900000);
+	U32_REGISTER_WRITE(U32_REGISTER(0x140C), 0xBF900800);
+	U32_REGISTER_WRITEOR(U32_REGISTER(0x10F0), 0x80000);
+	U32_REGISTER_WRITEOR(U32_REGISTER(0x1570), 8);
+	U32_REGISTER_WRITE(U32_REGISTER(0x1014), 0x200B31E1);
+	U32_REGISTER_WRITE(U32_REGISTER(0x1414), 0x200B31E1);
 }
 
 
@@ -149,11 +149,11 @@ int TransInterrupt(void *data)
 		// If done elsewise, it doesn't work, havn't figured out why yet.
 		volatile u16 *statx = U16_REGISTER(0x344 + (core * 1024));
 
-		if(!(*statx & 0x80))	while(!(*statx & 0x80));
+		if(!(U16_REGISTER_READ(statx) & 0x80))	while(!(U16_REGISTER_READ(statx) & 0x80));
 
-		*SD_CORE_ATTR(core) &= ~SD_CORE_DMA;
+		U16_REGISTER_WRITEAND(SD_CORE_ATTR(core), ~SD_CORE_DMA);
 
-		if(*SD_CORE_ATTR(core) & 0x30)	while((*SD_CORE_ATTR(core) & 0x30));
+		if(U16_REGISTER_READ(SD_CORE_ATTR(core)) & 0x30)	while((U16_REGISTER_READ(SD_CORE_ATTR(core)) & 0x30));
 
 		if(TransIntrHandlers[core])		goto intr_handler;
 		if(TransIntrCallbacks[core])	goto SdIntrCallback;
@@ -167,15 +167,15 @@ int TransInterrupt(void *data)
 			// Switch buffers
 			BlockTransBuff[core] = 1 - BlockTransBuff[core];
 			// Setup DMA & send
-			*SD_DMA_ADDR(core) = (BlockTransSize[core] * BlockTransBuff[core])+BlockTransAddr[core];
-			*SD_DMA_SIZE(core) = (BlockTransSize[core]/64)+((BlockTransSize[core]&63)>0);
-			*SD_DMA_CHCR(core) = SD_DMA_START | SD_DMA_CS | dir;
+			U32_REGISTER_WRITE(SD_DMA_ADDR(core), (BlockTransSize[core] * BlockTransBuff[core])+BlockTransAddr[core]);
+			U16_REGISTER_WRITE(SD_DMA_SIZE(core), (BlockTransSize[core]/64)+((BlockTransSize[core]&63)>0));
+			U32_REGISTER_WRITE(SD_DMA_CHCR(core), SD_DMA_START | SD_DMA_CS | dir);
 		}
 		else
 		{
-			*SD_CORE_ATTR(core) &= ~SD_CORE_DMA;
-			*SD_P_MMIX(core)	&= 0xFF3F;
-			*U16_REGISTER(0x1B0 + (core * 1024)) = 0;
+			U16_REGISTER_WRITEAND(SD_CORE_ATTR(core), ~SD_CORE_DMA);
+			U16_REGISTER_WRITEAND(SD_P_MMIX(core), 0xFF3F);
+			U16_REGISTER_WRITE(U16_REGISTER(0x1B0 + (core * 1024)), 0);
 		}
 
 		if(TransIntrHandlers[core])
@@ -202,15 +202,15 @@ int Spu2Interrupt(void *data)
 {
 	u16 val;
 
-	val = ((*SD_C_IRQINFO)&0xc)>>2;
+	val = ((U16_REGISTER_READ(SD_C_IRQINFO))&0xc)>>2;
 	if (!val)
 		return 1;
 
 	if (val&1)
-		*SD_CORE_ATTR(0) = *SD_CORE_ATTR(0) & 0xffbf;
+		U16_REGISTER_WRITE(SD_CORE_ATTR(0), U16_REGISTER_READ(SD_CORE_ATTR(0)) & 0xffbf);
 
 	if (val&2)
-		*SD_CORE_ATTR(1) = *SD_CORE_ATTR(1) & 0xffbf;
+		U16_REGISTER_WRITE(SD_CORE_ATTR(1), U16_REGISTER_READ(SD_CORE_ATTR(1)) & 0xffbf);
 
 	if(Spu2IntrHandler != NULL)
 	{
@@ -250,36 +250,36 @@ void ResetAll()
 	u32 core;
 	volatile u16 *statx;
 
-	*SD_C_SPDIF_OUT = 0;
+	U16_REGISTER_WRITE(SD_C_SPDIF_OUT, 0);
 	nopdelay();
-	*SD_C_SPDIF_OUT = 0x8000;
+	U16_REGISTER_WRITE(SD_C_SPDIF_OUT, 0x8000);
 	nopdelay();
 
-	*U32_REGISTER(0x10F0) |= 0xB0000;
+	U32_REGISTER_WRITEOR(U32_REGISTER(0x10F0), 0xB0000);
 
 	for(core=0; core < 2; core++)
 	{
 		VoiceTransIoMode[core]	= 0;
-		*U16_REGISTER(0x1B0)	= 0;
-		*SD_CORE_ATTR(core)		= 0;
+		U16_REGISTER_WRITE(U16_REGISTER(0x1B0), 0);
+		U16_REGISTER_WRITE(SD_CORE_ATTR(core), 0);
 		nopdelay();
-		*SD_CORE_ATTR(core)		= SD_SPU2_ON;
+		U16_REGISTER_WRITE(SD_CORE_ATTR(core), SD_SPU2_ON);
 
-		*SD_P_MVOLL(core)		= 0;
-		*SD_P_MVOLR(core)		= 0;
+		U16_REGISTER_WRITE(SD_P_MVOLL(core), 0);
+		U16_REGISTER_WRITE(SD_P_MVOLR(core), 0);
 
 		statx = U16_REGISTER(0x344 + (core * 1024));
 
-		while(*statx & 0x7FF);
+		while(U16_REGISTER_READ(statx) & 0x7FF);
 
-		*SD_A_KOFF_HI(core)		= 0xFFFF;
-		*SD_A_KOFF_LO(core)		= 0xFFFF; // Should probably only be 0xFF
+		U16_REGISTER_WRITE(SD_A_KOFF_HI(core), 0xFFFF);
+		U16_REGISTER_WRITE(SD_A_KOFF_LO(core), 0xFFFF); // Should probably only be 0xFF
 	}
 
-	*SD_S_PMON_HI(1)	= 0;
-	*SD_S_PMON_LO(1)	= 0;
-	*SD_S_NON_HI(1)		= 0;
-	*SD_S_NON_LO(1)		= 0;
+	U16_REGISTER_WRITE(SD_S_PMON_HI(1), 0);
+	U16_REGISTER_WRITE(SD_S_PMON_LO(1), 0);
+	U16_REGISTER_WRITE(SD_S_NON_HI(1), 0);
+	U16_REGISTER_WRITE(SD_S_NON_LO(1), 0);
 }
 
 
@@ -348,144 +348,144 @@ void InitVoices()
 	volatile u16 *statx;
 
 	// Set Start Address of data to transfer.
-	*SD_A_TSA_HI(0) = 0;
-	*SD_A_TSA_LO(0) = 0x5000 >> 1;
+	U16_REGISTER_WRITE(SD_A_TSA_HI(0), 0);
+	U16_REGISTER_WRITE(SD_A_TSA_LO(0), 0x5000 >> 1);
 
 	// Fill with data.
 	// First 16 bytes are reserved.
-	for(i = 0; i < 16; i++) *SD_A_STD(0) = VoiceDataInit[i];
+	for(i = 0; i < 16; i++) U16_REGISTER_WRITE(SD_A_STD(0), VoiceDataInit[i]);
 
 	// Set Transfer mode to IO
-	*SD_CORE_ATTR(0) = (*SD_CORE_ATTR(0) & ~SD_CORE_DMA) | SD_DMA_IO;
+	U16_REGISTER_WRITE(SD_CORE_ATTR(0), (U16_REGISTER_READ(SD_CORE_ATTR(0)) & ~SD_CORE_DMA) | SD_DMA_IO);
 
 	statx = U16_REGISTER(0x344);
 
 	// Wait for transfer to complete;
-	while(*statx & SD_IO_IN_PROCESS);
+	while(U16_REGISTER_READ(statx) & SD_IO_IN_PROCESS);
 
 	// Reset DMA settings
-	*SD_CORE_ATTR(0) &= ~SD_CORE_DMA;
+	U16_REGISTER_WRITEAND(SD_CORE_ATTR(0), ~SD_CORE_DMA);
 
 	// Init voices
 	for(voice = 0; voice < 24; voice++)
 	{
-		*SD_VP_VOLL(0, voice)	= 0;
-		*SD_VP_VOLR(0, voice)	= 0;
-		*SD_VP_PITCH(0, voice)	= 0x3FFF;
-		*SD_VP_ADSR1(0, voice)	= 0;
-		*SD_VP_ADSR2(0, voice)	= 0;
+		U16_REGISTER_WRITE(SD_VP_VOLL(0, voice), 0);
+		U16_REGISTER_WRITE(SD_VP_VOLR(0, voice), 0);
+		U16_REGISTER_WRITE(SD_VP_PITCH(0, voice), 0x3FFF);
+		U16_REGISTER_WRITE(SD_VP_ADSR1(0, voice), 0);
+		U16_REGISTER_WRITE(SD_VP_ADSR2(0, voice), 0);
 
-		*SD_VP_VOLL(1, voice)	= 0;
-		*SD_VP_VOLR(1, voice)	= 0;
-		*SD_VP_PITCH(1, voice)	= 0x3FFF;
-		*SD_VP_ADSR1(1, voice)	= 0;
-		*SD_VP_ADSR2(1, voice)	= 0;
+		U16_REGISTER_WRITE(SD_VP_VOLL(1, voice), 0);
+		U16_REGISTER_WRITE(SD_VP_VOLR(1, voice), 0);
+		U16_REGISTER_WRITE(SD_VP_PITCH(1, voice), 0x3FFF);
+		U16_REGISTER_WRITE(SD_VP_ADSR1(1, voice), 0);
+		U16_REGISTER_WRITE(SD_VP_ADSR2(1, voice), 0);
 
 		// Top address of waveform data
-		*SD_VA_SSA_HI(0, voice)	= 0;
-		*SD_VA_SSA_LO(0, voice)	= 0x5000 >> 1;
-		*SD_VA_SSA_HI(1, voice)	= 0;
-		*SD_VA_SSA_LO(1, voice)	= 0x5000 >> 1;
+		U16_REGISTER_WRITE(SD_VA_SSA_HI(0, voice), 0);
+		U16_REGISTER_WRITE(SD_VA_SSA_LO(0, voice), 0x5000 >> 1);
+		U16_REGISTER_WRITE(SD_VA_SSA_HI(1, voice), 0);
+		U16_REGISTER_WRITE(SD_VA_SSA_LO(1, voice), 0x5000 >> 1);
 	}
 
 	// Set all voices to ON
-	*SD_A_KON_HI(0) = 0xFFFF;
-	*SD_A_KON_LO(0) = 0xFF;
-	*SD_A_KON_HI(1) = 0xFFFF;
-	*SD_A_KON_LO(1) = 0xFF;
+	U16_REGISTER_WRITE(SD_A_KON_HI(0), 0xFFFF);
+	U16_REGISTER_WRITE(SD_A_KON_LO(0), 0xFF);
+	U16_REGISTER_WRITE(SD_A_KON_HI(1), 0xFFFF);
+	U16_REGISTER_WRITE(SD_A_KON_LO(1), 0xFF);
 
 	// There is no guarantee that voices will be turn on at once.
 	// So we wait to make sure.
 	nopdelay();
 
 	// Set all voices to OFF
-	*SD_A_KOFF_HI(0) = 0xFFFF;
-	*SD_A_KOFF_LO(0) = 0xFF;
-	*SD_A_KOFF_HI(1) = 0xFFFF;
-	*SD_A_KOFF_LO(1) = 0xFF;
+	U16_REGISTER_WRITE(SD_A_KOFF_HI(0), 0xFFFF);
+	U16_REGISTER_WRITE(SD_A_KOFF_LO(0), 0xFF);
+	U16_REGISTER_WRITE(SD_A_KOFF_HI(1), 0xFFFF);
+	U16_REGISTER_WRITE(SD_A_KOFF_LO(1), 0xFF);
 
 	// There is no guarantee that voices will be turn off at once.
 	// So we wait to make sure.
 	nopdelay();
 
-	*SD_S_ENDX_HI(0) = 0;
-	*SD_S_ENDX_LO(0) = 0;
+	U16_REGISTER_WRITE(SD_S_ENDX_HI(0), 0);
+	U16_REGISTER_WRITE(SD_S_ENDX_LO(0), 0);
 }
 
 // Core / Volume Registers
 void InitCoreVolume(s32 flag)
 {
-	*SD_C_SPDIF_OUT = 0xC032;
+	U16_REGISTER_WRITE(SD_C_SPDIF_OUT, 0xC032);
 
 	if(flag)
 	{
-		*SD_CORE_ATTR(0) = SD_SPU2_ON | SD_ENABLE_EFFECTS | SD_MUTE;
-		*SD_CORE_ATTR(1) = SD_SPU2_ON | SD_ENABLE_EFFECTS | SD_MUTE | SD_ENABLE_EX_INPUT;
+		U16_REGISTER_WRITE(SD_CORE_ATTR(0), SD_SPU2_ON | SD_ENABLE_EFFECTS | SD_MUTE);
+		U16_REGISTER_WRITE(SD_CORE_ATTR(1), SD_SPU2_ON | SD_ENABLE_EFFECTS | SD_MUTE | SD_ENABLE_EX_INPUT);
 	}
 	else
 	{
-		*SD_CORE_ATTR(0) = SD_SPU2_ON | SD_MUTE;
-		*SD_CORE_ATTR(1) = SD_SPU2_ON | SD_MUTE | SD_ENABLE_EX_INPUT;
+		U16_REGISTER_WRITE(SD_CORE_ATTR(0), SD_SPU2_ON | SD_MUTE);
+		U16_REGISTER_WRITE(SD_CORE_ATTR(1), SD_SPU2_ON | SD_MUTE | SD_ENABLE_EX_INPUT);
 	}
 
 	// HIgh is voices 0-15, LOw is 16-23, representing voices 0..23 (24)
-	*SD_S_VMIXL_HI(0)	= 0xFFFF;
-	*SD_S_VMIXL_LO(0)	= 0xFF;
-	*SD_S_VMIXR_HI(0)	= 0xFFFF;
-	*SD_S_VMIXR_LO(0)	= 0xFF;
-	*SD_S_VMIXEL_HI(0)	= 0xFFFF;
-	*SD_S_VMIXEL_LO(0)	= 0xFF;
-	*SD_S_VMIXER_HI(0)	= 0xFFFF;
-	*SD_S_VMIXER_LO(0)	= 0xFF;
+	U16_REGISTER_WRITE(SD_S_VMIXL_HI(0), 0xFFFF);
+	U16_REGISTER_WRITE(SD_S_VMIXL_LO(0), 0xFF);
+	U16_REGISTER_WRITE(SD_S_VMIXR_HI(0), 0xFFFF);
+	U16_REGISTER_WRITE(SD_S_VMIXR_LO(0), 0xFF);
+	U16_REGISTER_WRITE(SD_S_VMIXEL_HI(0), 0xFFFF);
+	U16_REGISTER_WRITE(SD_S_VMIXEL_LO(0), 0xFF);
+	U16_REGISTER_WRITE(SD_S_VMIXER_HI(0), 0xFFFF);
+	U16_REGISTER_WRITE(SD_S_VMIXER_LO(0), 0xFF);
 
-	*SD_S_VMIXL_HI(1)	= 0xFFFF;
-	*SD_S_VMIXL_LO(1)	= 0xFF;
-	*SD_S_VMIXR_HI(1)	= 0xFFFF;
-	*SD_S_VMIXR_LO(1)	= 0xFF;
-	*SD_S_VMIXEL_HI(1)	= 0xFFFF;
-	*SD_S_VMIXEL_LO(1)	= 0xFF;
-	*SD_S_VMIXER_HI(1)	= 0xFFFF;
-	*SD_S_VMIXER_LO(1)	= 0xFF;
+	U16_REGISTER_WRITE(SD_S_VMIXL_HI(1), 0xFFFF);
+	U16_REGISTER_WRITE(SD_S_VMIXL_LO(1), 0xFF);
+	U16_REGISTER_WRITE(SD_S_VMIXR_HI(1), 0xFFFF);
+	U16_REGISTER_WRITE(SD_S_VMIXR_LO(1), 0xFF);
+	U16_REGISTER_WRITE(SD_S_VMIXEL_HI(1), 0xFFFF);
+	U16_REGISTER_WRITE(SD_S_VMIXEL_LO(1), 0xFF);
+	U16_REGISTER_WRITE(SD_S_VMIXER_HI(1), 0xFFFF);
+	U16_REGISTER_WRITE(SD_S_VMIXER_LO(1), 0xFF);
 
-	*SD_P_MMIX(0) = 0xFF0;
-	*SD_P_MMIX(1) = 0xFFC;
+	U16_REGISTER_WRITE(SD_P_MMIX(0), 0xFF0);
+	U16_REGISTER_WRITE(SD_P_MMIX(1), 0xFFC);
 
 	if(flag == 0)
 	{
-		*SD_P_MVOLL(0) = 0;
-		*SD_P_MVOLR(0) = 0;
-		*SD_P_MVOLL(1) = 0;
-		*SD_P_MVOLR(1) = 0;
+		U16_REGISTER_WRITE(SD_P_MVOLL(0), 0);
+		U16_REGISTER_WRITE(SD_P_MVOLR(0), 0);
+		U16_REGISTER_WRITE(SD_P_MVOLL(1), 0);
+		U16_REGISTER_WRITE(SD_P_MVOLR(1), 0);
 
-		*SD_P_EVOLL(0) = 0;
-		*SD_P_EVOLL(1) = 0;
+		U16_REGISTER_WRITE(SD_P_EVOLL(0), 0);
+		U16_REGISTER_WRITE(SD_P_EVOLL(1), 0);
 
-		*SD_P_EVOLR(0) = 0;
-		*SD_P_EVOLR(1) = 0;
+		U16_REGISTER_WRITE(SD_P_EVOLR(0), 0);
+		U16_REGISTER_WRITE(SD_P_EVOLR(1), 0);
 
 		// Effect End Address, Upper part
-		*SD_A_EEA_HI(0) = 0xE;
-		*SD_A_EEA_HI(1) = 0xF;
+		U16_REGISTER_WRITE(SD_A_EEA_HI(0), 0xE);
+		U16_REGISTER_WRITE(SD_A_EEA_HI(1), 0xF);
 	}
 
-	*SD_P_AVOLL(0) = 0;
-	*SD_P_AVOLR(0) = 0;
+	U16_REGISTER_WRITE(SD_P_AVOLL(0), 0);
+	U16_REGISTER_WRITE(SD_P_AVOLR(0), 0);
 	// Core 1 External Input Volume.
 	// The external Input is Core 0's output.
-	*SD_P_AVOLL(1) = 0x7FFF;
-	*SD_P_AVOLR(1) = 0x7FFF;
+	U16_REGISTER_WRITE(SD_P_AVOLL(1), 0x7FFF);
+	U16_REGISTER_WRITE(SD_P_AVOLR(1), 0x7FFF);
 
-	*SD_P_BVOLL(0) = 0;
-	*SD_P_BVOLR(0) = 0;
-	*SD_P_BVOLL(1) = 0;
-	*SD_P_BVOLR(1) = 0;
+	U16_REGISTER_WRITE(SD_P_BVOLL(0), 0);
+	U16_REGISTER_WRITE(SD_P_BVOLR(0), 0);
+	U16_REGISTER_WRITE(SD_P_BVOLL(1), 0);
+	U16_REGISTER_WRITE(SD_P_BVOLR(1), 0);
 }
 
 void InitSpdif()
 {
-	*SD_C_SPDIF_MODE	= 0x900;
-	*SD_C_SPDIF_MEDIA	= 0x200;
-	*U16_REGISTER(0x7CA) = 8;
+	U16_REGISTER_WRITE(SD_C_SPDIF_MODE, 0x900);
+	U16_REGISTER_WRITE(SD_C_SPDIF_MEDIA, 0x200);
+	U16_REGISTER_WRITE(U16_REGISTER(0x7CA), 8);
 }
 
 int sceSdInit(int flag)
@@ -527,7 +527,7 @@ void sceSdSetParam(u16 reg, u16 val)
 	voice = (reg & 0x3E) << 2;
 	reg_p = ParamRegList[reg_index] + offs + voice;
 
-	*reg_p = val;
+	U16_REGISTER_WRITE(reg_p, val);
 }
 
 u16 sceSdGetParam(u16 reg)
@@ -550,7 +550,7 @@ u16 sceSdGetParam(u16 reg)
 	voice = (reg & 0x3E) << 2;
 	reg_p = ParamRegList[reg_index] + offs + voice;
 
-	return *reg_p;
+	return U16_REGISTER_READ(reg_p);
 }
 
 void sceSdSetSwitch(u16 reg, u32 val)
@@ -561,8 +561,8 @@ void sceSdSetSwitch(u16 reg, u32 val)
 	reg_index = (reg >> 8) & 0xFF;
 	reg_p = ParamRegList[reg_index] + ((reg & 1) << 9);
 
-	reg_p[0] = (u16)val;
-	reg_p[1] = (u16)((val >> 16) & 0xFF);
+	U16_REGISTER_WRITE(reg_p + 0, (u16)val);
+	U16_REGISTER_WRITE(reg_p + 1, (u16)((val >> 16) & 0xFF));
 }
 
 u32 sceSdGetSwitch(u16 reg)
@@ -574,8 +574,8 @@ u32 sceSdGetSwitch(u16 reg)
 	reg_index = (reg >> 8) & 0xFF;
 	reg_p = ParamRegList[reg_index] + ((reg & 1) << 9);
 
-	ret =  reg_p[0];
-	ret |= reg_p[1] << 16;
+	ret =  U16_REGISTER_READ(reg_p + 0);
+	ret |= U16_REGISTER_READ(reg_p + 1) << 16;
 
 	return ret;
 }
@@ -587,13 +587,13 @@ u32 DmaStop(u32 core)
 
 	core &= 1;
 
-	if(*U16_REGISTER(0x1B0 + (core * 1024)) == 0)
+	if(U16_REGISTER_READ(U16_REGISTER(0x1B0 + (core * 1024))) == 0)
 		retval = 0;
 	else
-		retval = *SD_DMA_ADDR(core);
+		retval = U32_REGISTER_READ(SD_DMA_ADDR(core));
 
-	*SD_DMA_CHCR(core) &= ~SD_DMA_START;
-	*U16_REGISTER(0x1B0 + (core * 1024)) = 0;
+	U32_REGISTER_WRITEAND(SD_DMA_CHCR(core), ~SD_DMA_START);
+	U16_REGISTER_WRITE(U16_REGISTER(0x1B0 + (core * 1024)), 0);
 
 	retval = (BlockTransBuff[core] << 24) | (retval & 0xFFFFFF);
 
@@ -603,13 +603,13 @@ u32 DmaStop(u32 core)
 void SetDmaWrite(s32 chan)
 {
 	volatile u32 *reg = U32_REGISTER(0x1014 + (chan << 10));
-	*reg = (*reg & 0xF0FFFFFF) | 0x20000000;
+	U32_REGISTER_WRITEOR(reg, (U32_REGISTER_READ(reg) & 0xF0FFFFFF) | 0x20000000);
 }
 
 void SetDmaRead(s32 chan)
 {
 	volatile u32 *reg = U32_REGISTER(0x1014 + (chan << 10));
-	*reg = (*reg & 0xF0FFFFFF) | 0x22000000;
+	U32_REGISTER_WRITEOR(reg, (U32_REGISTER_READ(reg) & 0xF0FFFFFF) | 0x22000000);
 }
 
 u16 sceSdNote2Pitch (u16 center_note, u16 center_fine, u16 note, short fine)
@@ -725,8 +725,8 @@ void SetSpdifMode(u16 val)
 {
 	u16 out, mode;
 
-	out  = *SD_C_SPDIF_OUT;
-	mode = *SD_C_SPDIF_MODE;
+	out  = U16_REGISTER_READ(SD_C_SPDIF_OUT);
+	mode = U16_REGISTER_READ(SD_C_SPDIF_MODE);
 
 	switch(val & 0xF)
 	{
@@ -755,21 +755,21 @@ void SetSpdifMode(u16 val)
 	switch(val & 0xF00)
 	{
 		case 0x800:
-			*SD_C_SPDIF_MEDIA = 0x200;
+			U16_REGISTER_WRITE(SD_C_SPDIF_MEDIA, 0x200);
 			mode |= 0x1800;
 			break;
 		case 0x400 :
-			*SD_C_SPDIF_MEDIA = 0;
+			U16_REGISTER_WRITE(SD_C_SPDIF_MEDIA, 0);
 			mode &= 0xE7FF;
 			break;
 		default:
-			*SD_C_SPDIF_MEDIA = 0x200;
+			U16_REGISTER_WRITE(SD_C_SPDIF_MEDIA, 0x200);
 			mode = (mode & 0xE7FF) | 0x800;
 			break;
 	}
 
-	*SD_C_SPDIF_OUT = out;
-	*SD_C_SPDIF_MODE = mode;
+	U16_REGISTER_WRITE(SD_C_SPDIF_OUT, out);
+	U16_REGISTER_WRITE(SD_C_SPDIF_MODE, mode);
 
 	SpdifSettings = val;
 }
@@ -779,12 +779,12 @@ u8 CoreAttrShifts[4] = {7, 6, 14, 8};
 
 void sceSdSetCoreAttr(u16 entry, u16 val)
 {
-	u16 core_attr = *SD_CORE_ATTR(entry & 1);
+	u16 core_attr = U16_REGISTER_READ(SD_CORE_ATTR(entry & 1));
 
 	switch(entry & ~1)
 	{
 		case SD_CORE_NOISE_CLK: // 0x8
-			*SD_CORE_ATTR(entry & 1) = (core_attr-0x3F01) | ((val & 0x3F) << 8);
+			U16_REGISTER_WRITE(SD_CORE_ATTR(entry & 1), (core_attr-0x3F01) | ((val & 0x3F) << 8));
 			break;
 		case SD_CORE_SPDIF_MODE: // 0xA
 			SetSpdifMode(val); // sub1
@@ -795,7 +795,7 @@ void sceSdSetCoreAttr(u16 entry, u16 val)
 			entry = (entry >> 1)-1;
 			core_attr &= ~(1 << CoreAttrShifts[entry]);
 			core_attr |= (val & 1) << CoreAttrShifts[entry];
-			*SD_CORE_ATTR(core) = core_attr;
+			U16_REGISTER_WRITE(SD_CORE_ATTR(core), core_attr);
 		}
 		break;
 	}
@@ -806,14 +806,14 @@ u16 sceSdGetCoreAttr(u16 entry)
 	switch(entry & ~1)
 	{
 		case SD_CORE_NOISE_CLK:
-			return (*SD_CORE_ATTR(entry & 1) >> 8) & 0x3F;
+			return (U16_REGISTER_READ(SD_CORE_ATTR(entry & 1)) >> 8) & 0x3F;
 		case SD_CORE_SPDIF_MODE:
 			return SpdifSettings;
 		default:
 		{
 			u32 core = entry & 1;
 			entry = (entry >> 1)-1;
-			return (*SD_CORE_ATTR(core) >> CoreAttrShifts[entry]) & 1;
+			return (U16_REGISTER_READ(SD_CORE_ATTR(core)) >> CoreAttrShifts[entry]) & 1;
 		}
 	}
 }
@@ -859,11 +859,11 @@ void sceSdSetAddr(u16 reg, u32 val)
 
 	reg1 += ((voice << 1) + voice);
 
-	*reg1++ = (val >> 17) & 0xFFFF;
+	U16_REGISTER_WRITE(reg1++, (val >> 17) & 0xFFFF);
 
 	if((reg & 0xFF00) != 0x1D00)
 	{
-		*reg1 = (val >> 1) & 0xFFF8;
+		U16_REGISTER_WRITE(reg1, (val >> 1) & 0xFFF8);
 	}
 }
 
@@ -877,21 +877,21 @@ u32 sceSdGetAddr(u16 reg)
 	reg1 = ParamRegList[(reg >> 8) & 0xFF] + ((reg & 1) << 9);
 	voice = reg & 0x3E;
 	reg1 += ((voice << 1) + voice);
-	rethi = *reg1 << 17;
+	rethi = U16_REGISTER_READ(reg1) << 17;
 	retlo = 0x1FFFF;
 
 	reg &= 0xFF00;
 
 	if(reg != 0x1D00)
 	{
-		retlo = *(reg1 + 1) << 1;
+		retlo = U16_REGISTER_READ(reg1 + 1) << 1;
 
 		if((reg == 0x2100) || (reg == 0x2200))
 		{
 			u32 lo, hi;
 
-			hi = *reg1 << 17;
-			lo = *(reg1 + 1) << 1;
+			hi = U16_REGISTER_READ(reg1) << 17;
+			lo = U16_REGISTER_READ(reg1 + 1) << 1;
 
 			if((rethi == hi) || (retlo != lo))
 			{
