@@ -16,7 +16,7 @@
 #ifndef __AUDSRV_H__
 #define __AUDSRV_H__
 
-#define	AUDSRV_IRX              0x870884d
+#define	AUDSRV_IRX              0x870884e
 
 /** minmum volume */
 #define MIN_VOLUME                 0

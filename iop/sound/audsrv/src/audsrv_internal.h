@@ -19,7 +19,7 @@
 #define MIN(a,b) ((a) <= (b)) ? (a) : (b)
 
 //RPC service ID
-#define	AUDSRV_IRX            0x870884d
+#define	AUDSRV_IRX            0x870884e
 
 //DMA channel allocation
 #define AUDSRV_VOICE_DMA_CH	0
