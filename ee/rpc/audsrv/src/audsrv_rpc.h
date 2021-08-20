@@ -52,6 +52,9 @@
 #define AUDSRV_PLAY_ADPCM           0x0018
 #define AUDSRV_ADPCM_SET_VOLUME     0x0019
 
+#define AUDSRV_AVAILABLE            0x001a
+#define AUDSRV_QUEUED               0x001b
+
 #define AUDSRV_FILLBUF_CALLBACK     0x0001
 #define AUDSRV_CDDA_CALLBACK        0x0002
 

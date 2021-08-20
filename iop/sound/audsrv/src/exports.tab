@@ -27,6 +27,8 @@ DECLARE_EXPORT_TABLE(audsrv, 1, 2)
 /*25*/	DECLARE_EXPORT(audsrv_load_adpcm)
 	DECLARE_EXPORT(audsrv_ch_play_adpcm)
 	DECLARE_EXPORT(audsrv_adpcm_set_volume)
+	DECLARE_EXPORT(audsrv_available)
+	DECLARE_EXPORT(audsrv_queued)
 END_EXPORT_TABLE
 
 void _retonly() {}

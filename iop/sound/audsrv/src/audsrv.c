@@ -265,7 +265,7 @@ int audsrv_init()
 }
 
 /** Returns the number of bytes that can be queued
- * @returns sample count
+ * @returns byte count
 
  * Returns the number of bytes that are available in the ring buffer. This
  * is the total bytes that can be queued, without collision of the reading
@@ -280,6 +280,23 @@ int audsrv_available()
 	else
 	{
 		return (ringbuf_size - (writepos - readpos));
+	}
+}
+
+/** Returns the number of bytes already in queue
+ * @returns byte count
+
+ * Returns the number of bytes that are already in the ring buffer.
+ */
+int audsrv_queued()
+{
+	if (writepos < readpos)
+	{
+		return (ringbuf_size - (readpos - writepos));
+	}
+	else
+	{
+		return writepos - readpos;
 	}
 }
 

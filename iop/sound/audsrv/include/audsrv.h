@@ -49,6 +49,9 @@
 #define AUDSRV_PLAY_ADPCM           0x0018
 #define AUDSRV_SET_ADPCM_VOL        0x0019
 
+#define AUDSRV_AVAILABLE            0x001a
+#define AUDSRV_QUEUED               0x001b
+
 #define AUDSRV_FILLBUF_CALLBACK     0x0001
 #define AUDSRV_CDDA_CALLBACK        0x0002
 
@@ -72,6 +75,8 @@ int audsrv_wait_audio(int buflen);
 int audsrv_play_audio(const char *buf, int buflen);
 int audsrv_stop_audio();
 int audsrv_set_volume(int vol);
+int audsrv_available();
+int audsrv_queued();
 
 /* cdda playing functions */
 int audsrv_play_cd(int track);
@@ -127,5 +132,7 @@ int audsrv_ch_play_adpcm(int ch, u32 id);
 #define I_audsrv_play_adpcm        I_audsrv_ch_play_adpcm //For backward-compatibility
 #define I_audsrv_ch_play_adpcm     DECLARE_IMPORT(26, audsrv_ch_play_adpcm)
 #define I_audsrv_adpcm_set_volume  DECLARE_IMPORT(27, audsrv_adpcm_set_volume)
+#define I_audsrv_available         DECLARE_IMPORT(28, audsrv_available)
+#define I_audsrv_queued            DECLARE_IMPORT(29, audsrv_queued)
 
 #endif /* __AUDSRV_H__ */
