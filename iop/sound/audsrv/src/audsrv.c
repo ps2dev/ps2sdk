@@ -31,8 +31,9 @@
 #include "hw.h"
 #include "spu.h"
 
-#define VERSION "0.92"
-IRX_ID("audsrv", 1, 3);
+#define MODNAME "audsrv"
+#define VERSION "0.93"
+IRX_ID(MODNAME, 1, 4);
 
 /* globals */
 /** core1 (sfx) volume */
@@ -265,7 +266,7 @@ int audsrv_init()
 }
 
 /** Returns the number of bytes that can be queued
- * @returns sample count
+ * @returns byte count
 
  * Returns the number of bytes that are available in the ring buffer. This
  * is the total bytes that can be queued, without collision of the reading
@@ -280,6 +281,23 @@ int audsrv_available()
 	else
 	{
 		return (ringbuf_size - (writepos - readpos));
+	}
+}
+
+/** Returns the number of bytes already in queue
+ * @returns byte count
+
+ * Returns the number of bytes that are already in the ring buffer.
+ */
+int audsrv_queued()
+{
+	if (writepos < readpos)
+	{
+		return (ringbuf_size - (readpos - writepos));
+	}
+	else
+	{
+		return writepos - readpos;
 	}
 }
 
@@ -524,12 +542,6 @@ int audsrv_quit()
 	return 0;
 }
 
-__attribute__((weak))
-void unittest_start()
-{
-	/* override this from a unittest */
-}
-
 /** IRX _start function
  * @returns zero on success
  *
@@ -538,6 +550,9 @@ void unittest_start()
 int _start(int argc, char *argv[])
 {
 	int err;
+
+	FlushDcache();
+	CpuEnableIntr(0);
 
 	printf("audsrv: greetings from version " VERSION " !\n");
 
@@ -550,13 +565,8 @@ int _start(int argc, char *argv[])
 
 	audsrv_adpcm_init();
 
-#ifndef NO_RPC_THREAD
 	/* create RPC listener thread */
 	initialize_rpc_thread();
-#endif
-
-	/* call unittest, if available */
-	unittest_start();
 
 	return MODULE_RESIDENT_END;
 }

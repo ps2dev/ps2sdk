@@ -485,3 +485,14 @@ int audsrv_on_fillbuf(int amount, audsrv_callback_t cb, void *arg)
 	on_fillbuf_arg = arg;
 	return AUDSRV_ERR_NOERROR;
 }
+
+int audsrv_available()
+{
+	return call_rpc_1(AUDSRV_AVAILABLE, 0);
+}
+
+int audsrv_queued()
+{
+	return call_rpc_1(AUDSRV_QUEUED, 0);
+}
+
