@@ -61,6 +61,6 @@ int IsT10K(void)
     // only read in the romname the first time
     if (g_RomName[0] == 0)
         GetRomName(g_RomName);
-    return (g_RomName[4] == 'T') ? 1 : 0;
+    return (g_RomName[4] == 'T' && g_RomName[5] != 'Z') ? 1 : 0;
 }
 #endif
