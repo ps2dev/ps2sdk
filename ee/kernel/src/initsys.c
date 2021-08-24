@@ -32,7 +32,7 @@ void _InitSys(void)
 void TerminateLibrary(void)
 {
 #ifndef KERNEL_NO_PATCHES
-	InitTLB();
+	_InitTLB();
 #endif
 }
 #endif
