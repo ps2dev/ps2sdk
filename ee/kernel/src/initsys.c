@@ -19,11 +19,11 @@
 void _InitSys(void)
 {
 #ifndef KERNEL_NO_PATCHES
-	InitAlarm();
-	InitThread();
-	InitExecPS2();
-	InitTLBFunctions();
-	InitTLB();
+    InitAlarm();
+    InitThread();
+    InitExecPS2();
+    InitTLBFunctions();
+    InitTLB();
 #endif
 }
 #endif
@@ -32,7 +32,7 @@ void _InitSys(void)
 void TerminateLibrary(void)
 {
 #ifndef KERNEL_NO_PATCHES
-	InitTLB();
+    InitTLB();
 #endif
 }
 #endif
