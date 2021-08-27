@@ -16,6 +16,7 @@
 #include <assert.h>
 
 #include <kernel.h>
+#include <rom0_info.h>
 
 #if defined(SCREEN_DEBUG)
 #include <unistd.h>
@@ -46,6 +47,18 @@ void _ps2sdk_libc_deinit();
 #endif
 
 void _ps2sdk_timezone_update();
+
+// "weak" function called by crt0.o
+void _ps2sdk_memory_init()
+{
+    if (GetMemorySize() == (32 * 1024 * 1024) && IsDESRMachine() == 1) {
+        // Switch to 64MiB mode
+        SetMemoryMode(0);
+        _InitTLB();
+        // Restart application
+        __start();
+    }
+}
 
 static int max_malloc(size_t initial_value, int increment, const char *desc)
 {
