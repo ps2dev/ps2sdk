@@ -6,6 +6,8 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+# IOP_CFLAGS += -DDEBUG -DDEBUG_EXTREME
+
 IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
 
 IOP_OBJS = fs_driver.o fat_driver.o fat_write.o scache.o main.o imports.o

@@ -179,7 +179,7 @@ static int fat_getClusterChain16(fat_driver* fatd, unsigned int cluster, unsigne
 
 			lastFatSector = fatSector;
 		}
-		cluster = getI16(sbuf + ((cluster % indexCount) * 2));
+		cluster = getUI16(sbuf + ((cluster % indexCount) * 2));
 		if ((cluster & 0xFFFF) >= 0xFFF8) {
 			cont = 0; //continue = false
 		} else {
@@ -217,7 +217,7 @@ static int fat_getClusterChain32(fat_driver* fatd, unsigned int cluster, unsigne
 
 			lastFatSector = fatSector;
 		}
-		cluster = getI32(sbuf + ((cluster % indexCount) * 4));
+		cluster = getUI32(sbuf + ((cluster % indexCount) * 4));
 		if ((cluster & 0xFFFFFFF) >= 0xFFFFFF8) {
 			cont = 0; //continue = false
 		} else {
@@ -317,17 +317,17 @@ static int fat_getPartitionBootSector(mass_dev* dev, unsigned int sector, fat_bp
 	bpb32_raw = (fat32_raw_bpb*) sbuf;
 
 	//set fat common properties
-	partBpb->sectorSize = getI16(bpb_raw->sectorSize);
+	partBpb->sectorSize = getUI16(bpb_raw->sectorSize);
 	partBpb->clusterSize = bpb_raw->clusterSize;
-	partBpb->resSectors = getI16(bpb_raw->resSectors);
+	partBpb->resSectors = getUI16(bpb_raw->resSectors);
 	partBpb->fatCount = bpb_raw->fatCount;
-	partBpb->rootSize = getI16(bpb_raw->rootSize);
-	partBpb->fatSize = getI16(bpb_raw->fatSize);
-	partBpb->trackSize = getI16(bpb_raw->trackSize);
-	partBpb->headCount = getI16(bpb_raw->headCount);
-	partBpb->sectorCount = getI16(bpb_raw->sectorCountO);
+	partBpb->rootSize = getUI16(bpb_raw->rootSize);
+	partBpb->fatSize = getUI16(bpb_raw->fatSize);
+	partBpb->trackSize = getUI16(bpb_raw->trackSize);
+	partBpb->headCount = getUI16(bpb_raw->headCount);
+	partBpb->sectorCount = getUI16(bpb_raw->sectorCountO);
 	if (partBpb->sectorCount == 0) {
-		partBpb->sectorCount = getI32(bpb_raw->sectorCount); // large partition
+		partBpb->sectorCount = getUI32(bpb_raw->sectorCount); // large partition
 	}
 	partBpb->partStart = sector;
 	partBpb->rootDirStart = partBpb->partStart + (partBpb->fatCount * partBpb->fatSize) + partBpb->resSectors;
@@ -342,15 +342,15 @@ static int fat_getPartitionBootSector(mass_dev* dev, unsigned int sector, fat_bp
 
 	//fat32 specific info
 	if (partBpb->fatType == FAT32 && partBpb->fatSize == 0) {
-		partBpb->fatSize = getI32(bpb32_raw->fatSize32);
-		partBpb->activeFat = getI16(bpb32_raw->fatStatus);
+		partBpb->fatSize = getUI32(bpb32_raw->fatSize32);
+		partBpb->activeFat = getUI16(bpb32_raw->fatStatus);
 		if (partBpb->activeFat & 0x80) { //fat not synced
 			partBpb->activeFat = (partBpb->activeFat & 0xF);
 		} else {
 			partBpb->activeFat = 0;
 		}
 		partBpb->rootDirStart = partBpb->partStart + (partBpb->fatCount * partBpb->fatSize) + partBpb->resSectors;
-		partBpb->rootDirCluster = getI32(bpb32_raw->rootDirCluster);
+		partBpb->rootDirCluster = getUI32(bpb32_raw->rootDirCluster);
 		for (ret = 0; ret < 8; ret++) {
 			partBpb->fatId[ret] = bpb32_raw->fatId[ret];
 		}
@@ -464,8 +464,8 @@ int fat_getDirentry(unsigned char fatType, fat_direntry* dir_entry, fat_direntry
 			dir->name[i] = 0;
 		}
 		dir->attr = dir_entry->sfn.attr;
-		dir->size = getI32(dir_entry->sfn.size);
-		dir->cluster = (fatType == FAT32) ? getI32_2(dir_entry->sfn.clusterL, dir_entry->sfn.clusterH) : getI16(dir_entry->sfn.clusterL);
+		dir->size = getUI32(dir_entry->sfn.size);
+		dir->cluster = (fatType == FAT32) ? getUI32_2(dir_entry->sfn.clusterL, dir_entry->sfn.clusterH) : getUI16(dir_entry->sfn.clusterL);
 
 		return 1;
 	}

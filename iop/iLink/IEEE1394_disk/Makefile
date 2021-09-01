@@ -6,6 +6,8 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+# IOP_CFLAGS += -DDEBUG -DDEBUG_EXTREME
+
 IOP_CFLAGS += -mno-check-zero-division # -DSIF_CALLBACKS_12_13
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/iLink/iLinkman/include

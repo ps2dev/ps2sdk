@@ -175,7 +175,7 @@ static int fat_readEmptyClusters32(fat_driver* fatd) {
 			return -EIO;
 		}
 		for (j = recordSkip; j < indexCount && fatd->clStackIndex < MAX_CLUSTER_STACK ; j++) {
-			cluster = getI32(sbuf + (j * 4));
+			cluster = getUI32(sbuf + (j * 4));
 			if (cluster == 0) { //the cluster is free
 				clusterValue = (i * indexCount) + j;
 				if (clusterValue < 0xFFFFFF7) {
@@ -230,7 +230,7 @@ static int fat_readEmptyClusters16(fat_driver* fatd) {
 			return -EIO;
 		}
 		for (j = recordSkip; j < indexCount && fatd->clStackIndex < MAX_CLUSTER_STACK ; j++) {
-			cluster = getI16(sbuf + (j * 2));
+			cluster = getUI16(sbuf + (j * 2));
 			if (cluster == 0) { //the cluster is free
 				fatd->clStackLast = (i * indexCount) + j;
 				fatd->clStack[fatd->clStackIndex] = fatd->clStackLast;
@@ -1590,7 +1590,7 @@ static int fat_modifyDirSpace(fat_driver* fatd, char* lname, char directory, cha
 		XPRINTF("USBHDFSD: I: new file/dir cluster=%u\n", newCluster);
 		*startCluster = newCluster;
 	}else{
-		*startCluster = (fatd->partBpb.fatType == FAT32) ? getI32_2(orig_dsfn->clusterL, orig_dsfn->clusterH) : getI16(orig_dsfn->clusterL);
+		*startCluster = (fatd->partBpb.fatType == FAT32) ? getUI32_2(orig_dsfn->clusterL, orig_dsfn->clusterH) : getUI16(orig_dsfn->clusterL);
 		newCluster = 0;
 	}
 
@@ -2095,7 +2095,7 @@ int fat_renameFile(fat_driver* fatd, fat_dir *fatdir, const char* fname) {
 
 	//If it is a directory, update the parent directory record.
 	if (srcIsDirectory) {
-		dDirCluster = (fatd->partBpb.fatType == FAT32) ? getI32_2(OriginalSFN.clusterL, OriginalSFN.clusterH) : getI16(OriginalSFN.clusterL);
+		dDirCluster = (fatd->partBpb.fatType == FAT32) ? getUI32_2(OriginalSFN.clusterL, OriginalSFN.clusterH) : getUI16(OriginalSFN.clusterL);
 		if((ret = updateDirectoryParent(fatd, dDirCluster, dParentDirCluster)) != 0) {
 			XPRINTF("USBHDFSD: E: could not update \"..\" entry! %d\n", ret);
 			return ret;
@@ -2133,7 +2133,7 @@ static int fat_writeSingleSector(mass_dev *dev, unsigned int sector, const void 
 		//Handle the partially-filled sector.
 		ret = READ_SECTOR(dev, sector, sbuf);
 		if (ret < 0) {
-			XPRINTF("USBHDFSD: Read sector failed ! sector=%u\n", startSector + j);
+			XPRINTF("USBHDFSD: Read sector failed ! sector=%u\n", sector);
 			return 0;
 		}
 
@@ -2273,7 +2273,7 @@ int fat_writeFile(fat_driver* fatd, fat_dir* fatDir, int* updateClusterIndices, 
 				while (1) {
 					if(j >= fatd->partBpb.clusterSize)
 					{
-						toWrite += fatd->partBpb.clusterSize;			
+						toWrite += fatd->partBpb.clusterSize;
 						j -= fatd->partBpb.clusterSize;
 					}
 					else

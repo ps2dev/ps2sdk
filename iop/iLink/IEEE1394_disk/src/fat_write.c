@@ -173,7 +173,7 @@ static int fat_readEmptyClusters32(fat_driver* fatd) {
 			return -EIO;
 		}
 		for (j = recordSkip; j < indexCount && fatd->clStackIndex < MAX_CLUSTER_STACK ; j++) {
-			cluster = getI32(sbuf + (j * 4));
+			cluster = getUI32(sbuf + (j * 4));
 			if (cluster == 0) { //the cluster is free
 				clusterValue = (i * indexCount) + j;
 				if (clusterValue < 0xFFFFFF7) {
@@ -228,7 +228,7 @@ static int fat_readEmptyClusters16(fat_driver* fatd) {
 			return -EIO;
 		}
 		for (j = recordSkip; j < indexCount && fatd->clStackIndex < MAX_CLUSTER_STACK ; j++) {
-			cluster = getI16(sbuf + (j * 2));
+			cluster = getUI16(sbuf + (j * 2));
 			if (cluster == 0) { //the cluster is free
 				fatd->clStackLast = (i * indexCount) + j;
 				fatd->clStack[fatd->clStackIndex] = fatd->clStackLast;

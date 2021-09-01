@@ -15,6 +15,9 @@
 
 #include <defs.h>
 #include <thbase.h>
+#ifdef DEBUG
+#include <stdio.h>
+#endif
 
 #include "usbdpriv.h"
 #include "driver.h"
@@ -90,7 +93,7 @@ int sceUsbdUnregisterLdd(sceUsbdLddOps *driver) {
 	OldGP = SetModuleGP();
 #endif
 	if (usbdLock() != 0) {
-#if USE_GP_REGISTER		
+#if USE_GP_REGISTER
 		SetGP(OldGP);
 #endif
 		return USB_RC_BADCONTEXT;
