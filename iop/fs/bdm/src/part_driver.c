@@ -6,7 +6,10 @@
 //#define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
 
-#define getI32(buf) ((int)(((u8*)(buf))[0] + (((u8*)(buf))[1] << 8) + (((u8*)(buf))[2] << 16) + (((u8*)(buf))[3] << 24)))
+#define getUI32(buf) ((unsigned int)(((u8 *)(buf))[0] +        \
+                                    (((u8 *)(buf))[1] << 8) +  \
+                                    (((u8 *)(buf))[2] << 16) + \
+                                    (((u8 *)(buf))[3] << 24)))
 
 typedef struct _part_record {
     unsigned char sid;  //system id-	4=16bit FAT (16bit sector numbers)
@@ -46,8 +49,8 @@ static int part_getPartitionRecord(struct block_device* bd, part_raw_record* raw
     M_DEBUG("%s\n", __func__);
 
     rec->sid   = raw->sid;
-    rec->start = getI32(raw->startLBA);
-    rec->count = getI32(raw->size);
+    rec->start = getUI32(raw->startLBA);
+    rec->count = getUI32(raw->size);
 
     if (rec->sid != 0x00) { /*	Windows appears to check if the start LBA is not 0 and whether the start LBA is within the disk.
 			There may be checks against the size, but I didn't manage to identify a pattern.

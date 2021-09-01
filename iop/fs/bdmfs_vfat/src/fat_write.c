@@ -159,7 +159,7 @@ static int fat_readEmptyClusters32(fat_driver* fatd)
             return -EIO;
         }
         for (j = recordSkip; j < indexCount && fatd->clStackIndex < MAX_CLUSTER_STACK; j++) {
-            cluster = getI32(sbuf + (j * 4));
+            cluster = getUI32(sbuf + (j * 4));
             if (cluster == 0) { //the cluster is free
                 clusterValue = (i * indexCount) + j;
                 if (clusterValue < 0xFFFFFF7) {
@@ -215,7 +215,7 @@ static int fat_readEmptyClusters16(fat_driver* fatd)
             return -EIO;
         }
         for (j = recordSkip; j < indexCount && fatd->clStackIndex < MAX_CLUSTER_STACK; j++) {
-            cluster = getI16(sbuf + (j * 2));
+            cluster = getUI16(sbuf + (j * 2));
             if (cluster == 0) { //the cluster is free
                 fatd->clStackLast                 = (i * indexCount) + j;
                 fatd->clStack[fatd->clStackIndex] = fatd->clStackLast;
@@ -1631,7 +1631,7 @@ static int fat_modifyDirSpace(fat_driver* fatd, char* lname, char directory, cha
         *startCluster = newCluster;
     } else {
         newCluster = 0;
-        *startCluster = (fatd->partBpb.fatType == FAT32) ? getI32_2(orig_dsfn->clusterL, orig_dsfn->clusterH) : getI16(orig_dsfn->clusterL);
+        *startCluster = (fatd->partBpb.fatType == FAT32) ? getUI32_2(orig_dsfn->clusterL, orig_dsfn->clusterH) : getUI16(orig_dsfn->clusterL);
     }
 
     //now store direntries into the directory space
@@ -2117,7 +2117,7 @@ int fat_renameFile(fat_driver* fatd, fat_dir* fatdir, const char* fname)
 
     //If it is a directory, update the parent directory record.
     if (srcIsDirectory) {
-        dDirCluster = (fatd->partBpb.fatType == FAT32) ? getI32_2(OriginalSFN.clusterL, OriginalSFN.clusterH) : getI16(OriginalSFN.clusterL);
+        dDirCluster = (fatd->partBpb.fatType == FAT32) ? getUI32_2(OriginalSFN.clusterL, OriginalSFN.clusterH) : getUI16(OriginalSFN.clusterL);
         if ((ret = updateDirectoryParent(fatd, dDirCluster, dParentDirCluster)) != 0) {
             M_DEBUG("E: could not update \"..\" entry! %d\n", ret);
             return ret;

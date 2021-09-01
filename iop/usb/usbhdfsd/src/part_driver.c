@@ -44,8 +44,8 @@ typedef struct _part_raw_record {
 static USBHD_INLINE int part_getPartitionRecord(mass_dev* dev, part_raw_record* raw, part_record* rec)
 {
 	rec->sid = raw->sid;
-	rec->start = getI32(raw->startLBA);
-	rec->count = getI32(raw->size);
+	rec->start = getUI32(raw->startLBA);
+	rec->count = getUI32(raw->size);
 
 	//Ignore partitions that have a partition type/system ID set to 0.
 	if(rec->sid != 0x00)

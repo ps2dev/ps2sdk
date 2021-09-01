@@ -6,6 +6,8 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+# IOP_CFLAGS += -DDEBUG
+
 IOP_INCS += -I$(PS2SDKSRC)/iop/usb/usbd/include
 IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
 

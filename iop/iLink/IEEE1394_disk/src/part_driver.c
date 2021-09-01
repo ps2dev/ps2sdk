@@ -42,8 +42,8 @@ typedef struct _part_raw_record {
 static void part_getPartitionRecord(part_raw_record* raw, part_record* rec)
 {
     rec->sid = raw->sid;
-    rec->start = getI32(raw->startLBA);
-    rec->count = getI32(raw->size);
+    rec->start = getUI32(raw->startLBA);
+    rec->count = getUI32(raw->size);
 }
 
 //---------------------------------------------------------------------------
