@@ -992,6 +992,12 @@ int fat_mount(struct block_device* bd)
 
     M_DEBUG("%s\n", __func__);
 
+    // Filter for supported partition IDs:
+    // - 0x0b = FAT32 with CHS addressing
+    // - 0x0c = FAT32 with LBA addressing
+    if (bd->parId != 0x0b && bd->parId != 0x0c)
+        return -1;
+
     for (i = 0; i < NUM_DRIVES && fatd == NULL; ++i) {
         if (g_fatd[i] == NULL) {
             M_DEBUG("allocate fat_driver %d!\n", sizeof(fat_driver));

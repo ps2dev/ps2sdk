@@ -299,6 +299,7 @@ int scsi_init(void)
     for (i = 0; i < NUM_DEVICES; ++i) {
         g_scsi_bd[i].devNr = i;
         g_scsi_bd[i].parNr = 0;
+        g_scsi_bd[i].parId = 0x00;
 
         g_scsi_bd[i].priv  = NULL;
         g_scsi_bd[i].read  = scsi_read;
