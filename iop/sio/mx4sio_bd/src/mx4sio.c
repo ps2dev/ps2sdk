@@ -787,6 +787,7 @@ static struct block_device bd = {
     "sdc",       /* name */
     0,           /* devNr */
     0,           /* parNr */
+    0x00,        /* parId */
     SECTOR_SIZE, /* sectorSize */
     0,           /* sectorOffset */
     0,           /* sectorCount */

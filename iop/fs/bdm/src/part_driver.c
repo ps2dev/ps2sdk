@@ -108,6 +108,7 @@ void part_create(struct block_device* bd, part_record* rec, unsigned int parNr)
             g_part_bd[i].name         = bd->name;
             g_part_bd[i].devNr        = bd->devNr;
             g_part_bd[i].parNr        = parNr + 1;
+            g_part_bd[i].parId        = rec->sid;
             g_part_bd[i].sectorSize   = bd->sectorSize;
             g_part_bd[i].sectorOffset = bd->sectorOffset + rec->start;
             g_part_bd[i].sectorCount  = rec->count;
@@ -126,6 +127,15 @@ int part_connect(struct block_device* bd)
     int rval = -1;
 
     M_DEBUG("%s\n", __func__);
+
+    // Filter for supported partition IDs:
+    // - First sector of disk can be MBR partition
+    // - 0x05 = extended MBR partition with CHS addressing
+    // - 0x0f = extended MBR partition with LBA addressing
+    if (bd->sectorOffset != 0 &&
+        bd->parId != 0x05 &&
+        bd->parId != 0x0f)
+        return rval;
 
     if ((parts = part_getPartitionTable(bd, &partTable)) <= 0)
         return rval;

@@ -28,6 +28,7 @@ struct block_device {
     char* name;
     unsigned int devNr;
     unsigned int parNr;
+    unsigned char parId;
 
     unsigned int sectorSize;
     unsigned int sectorOffset;
