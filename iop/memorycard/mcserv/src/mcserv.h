@@ -50,7 +50,6 @@ int sceMcRead2(void);
 int sceMcGetInfo2(void);
 int sceMcGetEntSpace(void);
 int sceMcCheckBlock(void);
-int sceMcServChangePriority(void);
 
 int _McInit(void *rpc_buf);
 int _McOpen(void *rpc_buf);
@@ -73,7 +72,6 @@ int _McRead2(void *rpc_buf);
 int _McGetInfo2(void *rpc_buf);
 int _McGetEntSpace(void *rpc_buf);
 int _McCheckBlock(void *rpc_buf);
-int _McServChangePriority(void *rpc_buf);
 
 // filename related mc command
 // used by: mcOpen, mcGetDir, mcChdir, mcDelete, mcSetFileInfo, mcRename, mcGetEntSpace
