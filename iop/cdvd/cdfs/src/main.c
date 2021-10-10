@@ -39,7 +39,7 @@ static struct fodtable fod_table[MAX_FOLDERS_OPENED];
 static int fod_used[MAX_FOLDERS_OPENED];
 
 // global variables
-static int lastsector;
+static int lastsector = -1;
 static int last_bk = 0;
 
 /***********************************************
@@ -76,6 +76,12 @@ static int fio_open(iop_file_t *f, const char *name, int mode)
     DPRINTF("      kernel_fd.. %p\n", f);
     DPRINTF("      name....... %s %x\n", name, (int)name);
     DPRINTF("      mode....... %d\n\n", mode);
+
+    // Invalidate last sector cache if disk changed
+    if (cdfs_checkDiskChanged(CHANGED_FIO)) {
+        lastsector = -1;
+        last_bk = 0;
+    }
 
     // check if the file exists
     if (!cdfs_findfile(name, &tocEntry)) {

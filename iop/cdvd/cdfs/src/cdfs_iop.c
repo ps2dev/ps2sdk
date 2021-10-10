@@ -134,6 +134,9 @@ static struct CDVolDesc cdVolDesc;
 static sceCdRMode cdReadMode;
 static u8 dvdvBuffer[2064];
 
+static int cdvdChangedMagic = 0;
+static int cdvdChangedMagicLast[CHANGED_MAX] = {-1};
+
 /***********************************************
 *                                              *
 *            PRIVATE FUNCTIONS                 *
@@ -490,6 +493,11 @@ static int cdfs_cacheDir(const char *pathname, enum Cache_getMode getMode) {
     int path_len;
     DPRINTF("Attempting to find, and cache, directory: %s\n", pathname);
 
+    // Invalidate table of contents cache if disk changed
+    if (cdfs_checkDiskChanged(CHANGED_TOC)) {
+        cacheInfoDir.valid = FALSE;
+    }
+
     // only take any notice of the existing cache, if it's valid
     if (cacheInfoDir.valid) {
         // Check if the requested path is already cached
@@ -717,6 +725,11 @@ int cdfs_findfile(const char *fname, struct TocEntry *tocEntry) {
 
     splitPath(fname, pathname, filename);
     DPRINTF("Trying to find file: %s in directory: %s\n", filename, pathname);
+
+    // Invalidate table of contents cache if disk changed
+    if (cdfs_checkDiskChanged(CHANGED_TOC)) {
+        cacheInfoDir.valid = FALSE;
+    }
 
     if ((cacheInfoDir.valid) && (comparePath(pathname) == MATCH)) {
         // the directory is already cached, so check through the currently
@@ -1071,4 +1084,21 @@ int cdfs_getDir(const char *pathname, const char *extensions, enum CDFS_getMode 
     // reached the end of the dir, before filling up the requested entries
 
     return (matched_entries);
+}
+
+// This function uses sceCdTrayReq to check if the disc in the disc drive has changed.
+// Once sceCdTrayReq is called it will reset the flag inside CDVDMAN.
+// Avoid using sceCdTrayReq with SCECdTrayCheck as arguemnt in other code if possible.
+
+int cdfs_checkDiskChanged(enum Cdvd_Changed_Index index) {
+    u32 res = 0;
+    sceCdTrayReq(SCECdTrayCheck, &res);
+    if (res) {
+        cdvdChangedMagic += 1;
+    }
+    if (cdvdChangedMagic != cdvdChangedMagicLast[index]) {
+        cdvdChangedMagicLast[index] = cdvdChangedMagic;
+        return TRUE;
+    }
+    return FALSE;
 }
