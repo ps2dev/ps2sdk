@@ -24,6 +24,7 @@
 static short int X = 0, Y = 0;
 static short int MX=80, MY=40;
 static u32 bgcolor = 0;
+static short int cursor = 1;
 
 struct t_setupscr
 {
@@ -290,7 +291,8 @@ void scr_printf(const char *format, ...)
                                 }
           }
        }
-    scr_putchar( X*7 , Y * 8, 0xffffff, 219);
+	if(cursor)
+		scr_putchar( X*7 , Y * 8, 0xffffff, 219);
     va_end(opt);
 }
 
@@ -316,4 +318,9 @@ void scr_clear()
 	for(y=0;y<MY;y++)
 		clear_line(y);
 	scr_setXY(0,0);
+}
+
+void scr_setCursor(int enable)
+{
+	cursor = enable;
 }
