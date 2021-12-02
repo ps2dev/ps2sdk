@@ -96,7 +96,8 @@ enum MCICON_TYPES{
 	MCICON_TYPE_SAVED_DATA		= 0,	// "Saved Data (PlayStation(r)2)"
 	MCICON_TYPE_SOFTWARE_PS2,		// "Software (PlayStation(r)2)"
 	MCICON_TYPE_SOFTWARE_PKT,		// "Software (PocketStation(r))"
-	MCICON_TYPE_SETTINGS_DATA		// "Settings File (PlayStation(r)2)"
+	MCICON_TYPE_SETTINGS_DATA,		// "Settings File (PlayStation(r)2)"
+    MCICON_TYPE_SYSTEM_DRIVER       // "System driver"; Implemented on SCPH-5XXXX, previous models can't recognize it unless HDD-OSD is active
 };
 
 typedef int iconIVECTOR[4];
