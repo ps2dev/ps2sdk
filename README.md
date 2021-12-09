@@ -10,7 +10,7 @@ All rights reserved.
 
 ## Introduction
 
-PS2SDK is a collecction of Open Source libraries used for developing applications on Sony's PlayStation 2® (PS2). ps2sdk contains the work from a number of PS2 projects which are now buildable in a single source tree. Review the history section for how ps2sdk came about.
+PS2SDK is a collection of Open Source libraries used for developing applications on Sony's PlayStation 2® (PS2). ps2sdk contains the work from a number of PS2 projects which are now buildable in a single source tree. Review the history section for how ps2sdk came about.
 
 At the time of writing PS2SDK includes the following libraries and features, allowing:
 
