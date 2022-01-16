@@ -193,7 +193,6 @@ int iplioctl2_update(iop_file_t *a1, int cmd, void *arg)
     int retval;
     int csum;
     int cmdackerr1;
-    const char *fmterr;
     int cmdackerr2;
     int cmdackerr3;
     int update_fd;
@@ -223,10 +222,8 @@ int iplioctl2_update(iop_file_t *a1, int cmd, void *arg)
     printf("dvrcmd.ack_p[0]:%x\n", cmdack.ack_status_ack);
     if (cmdackerr1)
         goto LABEL_2;
-    fmterr = "NOP -> Status error!\n";
     if (cmdack.ack_status_ack) {
-    LABEL_11:
-        printf(fmterr);
+        printf("NOP -> Status error!\n");
         return -5;
     }
     printf("VERSION\n");
@@ -263,8 +260,8 @@ int iplioctl2_update(iop_file_t *a1, int cmd, void *arg)
         return -5;
     }
     if (cmdack.ack_status_ack) {
-        fmterr = "CONFIG -> Status error!\n";
-        goto LABEL_11;
+        printf("CONFIG -> Status error!\n");
+        return -5;
     }
     update_fd = open((const char *)arg, 1, 0x124);
     if (update_fd >= 0) {
