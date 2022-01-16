@@ -54,27 +54,27 @@ struct DevctlCmdTbl_t
     int (*fn)(iop_file_t *, int, void *, unsigned int, void *, unsigned int);
 } DevctlCmdTbl[21] =
     {
-        {22038u, &avioctl2_select_position},
-        {22041u, &avioctl2_get_position},
-        {22039u, &avioctl2_position_up},
-        {22040u, &avioctl2_position_down},
-        {22034u, &avioctl2_set_d_audio_sel},
-        {22027u, &avioctl2_get_tun_offset},
-        {22028u, &avioctl2_tun_offset_up},
-        {22029u, &avioctl2_tun_offset_down},
-        {22030u, &avioctl2_tun_scan_ch},
-        {22031u, &avioctl2_get_bs_gain},
-        {22032u, &avioctl2_set_preset_info},
-        {22033u, &avioctl2_change_sound},
-        {22035u, &avioctl2_set_d_video_sel},
-        {22036u, &avioctl2_get_av_src},
-        {22037u, &avioctl2_get_preset_info},
-        {22042u, &avioctl2_set_position_info},
-        {22043u, &avioctl2_get_position_info},
-        {22044u, &avioctl2_tun_scan_mode},
-        {22045u, &avioctl2_f_select_position},
-        {22046u, &avioctl2_select_rec_src},
-        {22047u, &avioctl2_get_rec_src}};
+        {0x5616, &avioctl2_select_position},
+        {0x5619, &avioctl2_get_position},
+        {0x5617, &avioctl2_position_up},
+        {0x5618, &avioctl2_position_down},
+        {0x5612, &avioctl2_set_d_audio_sel},
+        {0x560B, &avioctl2_get_tun_offset},
+        {0x560C, &avioctl2_tun_offset_up},
+        {0x560D, &avioctl2_tun_offset_down},
+        {0x560E, &avioctl2_tun_scan_ch},
+        {0x560F, &avioctl2_get_bs_gain},
+        {0x5610, &avioctl2_set_preset_info},
+        {0x5611, &avioctl2_change_sound},
+        {0x5613, &avioctl2_set_d_video_sel},
+        {0x5614, &avioctl2_get_av_src},
+        {0x5615, &avioctl2_get_preset_info},
+        {0x561A, &avioctl2_set_position_info},
+        {0x561B, &avioctl2_get_position_info},
+        {0x561C, &avioctl2_tun_scan_mode},
+        {0x561D, &avioctl2_f_select_position},
+        {0x561E, &avioctl2_select_rec_src},
+        {0x561F, &avioctl2_get_rec_src}};
 
 struct _iop_device_ops DvrFuncTbl =
     {
