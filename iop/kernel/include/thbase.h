@@ -116,6 +116,9 @@ int ExitDeleteThread();
 int TerminateThread(int thid);
 int iTerminateThread(int thid);
 
+int DisableDispatchThread(void);
+int EnableDispatchThread(void);
+
 int ChangeThreadPriority(int thid, int priority);
 int iChangeThreadPriority(int thid, int priority);
 
@@ -135,6 +138,11 @@ int WakeupThread(int thid);
 int iWakeupThread(int thid);
 int CancelWakeupThread(int thid);
 int iCancelWakeupThread(int thid);
+
+int SuspendThread(int thid);
+int iSuspendThread(int thid);
+int ResumeThread(int thid);
+int iResumeThread(int thid);
 
 int DelayThread(int usec);
 
@@ -162,6 +170,9 @@ int GetSystemStatusFlag();
 	I_TerminateThread \
 	I_iTerminateThread \
  \
+	I_DisableDispatchThread \
+	I_EnableDispatchThread \
+ \
  	I_ChangeThreadPriority \
 	I_iChangeThreadPriority \
  \
@@ -180,6 +191,11 @@ int GetSystemStatusFlag();
 	I_iWakeupThread \
 	I_CancelWakeupThread \
 	I_iCancelWakeupThread \
+ \
+	I_SuspendThread \
+	I_iSuspendThread \
+	I_ResumeThread \
+	I_iResumeThread \
  \
  	I_DelayThread \
  \
@@ -206,6 +222,8 @@ int GetSystemStatusFlag();
 #define I_ExitDeleteThread DECLARE_IMPORT(9, ExitDeleteThread)
 #define I_TerminateThread DECLARE_IMPORT(10, TerminateThread)
 #define I_iTerminateThread DECLARE_IMPORT(11, iTerminateThread)
+#define I_DisableDispatchThread DECLARE_IMPORT(12, DisableDispatchThread)
+#define I_EnableDispatchThread DECLARE_IMPORT(13, EnableDispatchThread)
 #define I_ChangeThreadPriority DECLARE_IMPORT(14, ChangeThreadPriority)
 #define I_iChangeThreadPriority DECLARE_IMPORT(15, iChangeThreadPriority)
 #define I_RotateThreadReadyQueue DECLARE_IMPORT(16, RotateThreadReadyQueue)
@@ -221,6 +239,10 @@ int GetSystemStatusFlag();
 #define I_iWakeupThread DECLARE_IMPORT(26, iWakeupThread)
 #define I_CancelWakeupThread DECLARE_IMPORT(27, CancelWakeupThread)
 #define I_iCancelWakeupThread DECLARE_IMPORT(28, iCancelWakeupThread)
+#define I_SuspendThread DECLARE_IMPORT(29, SuspendThread)
+#define I_iSuspendThread DECLARE_IMPORT(30, iSuspendThread)
+#define I_ResumeThread DECLARE_IMPORT(31, ResumeThread)
+#define I_iResumeThread DECLARE_IMPORT(32, iResumeThread)
 #define I_DelayThread DECLARE_IMPORT(33, DelayThread)
 #define I_GetSystemTime DECLARE_IMPORT(34, GetSystemTime)
 #define I_SetAlarm DECLARE_IMPORT(35, SetAlarm)
