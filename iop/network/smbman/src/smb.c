@@ -1412,8 +1412,11 @@ int smb_FindFirstNext2(int UID, int TID, char *Path, int cmd, SearchInfo_t *info
 		FNRParam->LevelOfInterest = SMB_FIND_FILE_BOTH_DIRECTORY_INFO;
 		FNRParam->ResumeKey = 0;
 		FNRParam->Flags = CLOSE_SEARCH_IF_EOS | RESUME_SEARCH | CONTINUE_SEARCH;
-		FNRParam->SearchPattern[0] = 0;
-		FFNR->smbTrans.TotalParamCount = FFNR->smbTrans.ParamCount = sizeof(FindNext2RequestParam_t) + 1;
+
+		// Add path
+		PathLen = setStringField(FNRParam->SearchPattern, "");
+
+		FFNR->smbTrans.TotalParamCount = FFNR->smbTrans.ParamCount = sizeof(FindNext2RequestParam_t) + PathLen;
 	}
 
 	FFNR->ByteCount = 3 + FFNR->smbTrans.TotalParamCount;
