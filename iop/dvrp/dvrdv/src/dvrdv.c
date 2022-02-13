@@ -402,7 +402,7 @@ int dvrioctl2_get_dvcam_name(
 {
     drvdrv_exec_cmd_ack cmdack;
 
-    printf("dvrioctl2_get_dvcam_name(io=%p, cmd=%d  buf=%p, nbyte=%d)\n", a1, cmd, buf, buflen);
+    printf("dvrioctl2_get_dvcam_name(io=%p, cmd=%d  buf=%p, nbyte=%u)\n", a1, cmd, buf, buflen);
     cmdack.command = 0x4108;
     cmdack.input_word[0] = 0;
     cmdack.input_word[1] = 0;

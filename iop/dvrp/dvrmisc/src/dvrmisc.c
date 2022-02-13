@@ -855,7 +855,7 @@ int dvrioctl2_update_dvrp_firmware(
             retval = -68;
             printf("MISCCMD_FLASH_DATA_CHECKSUM -> COMP Status error!\n");
             printf(
-                "Check sum error! IOP:%08lX,DVRP:%08lX\n",
+                "Check sum error! IOP:%08X,DVRP:%08X\n",
                 checksum,
                 (cmdack.return_result_word[0] << 16) | cmdack.return_result_word[1]);
             goto LABEL_38;
@@ -930,7 +930,7 @@ int dvrioctl2_set_device_key(
     drvdrv_exec_cmd_ack cmdack;
 
     printf(
-        "dvrioctl2_set_device_key (io=%p,cmd=%08X,argp=%p,arglen=%d,bufp=%p,buflen=%d)\n",
+        "dvrioctl2_set_device_key (io=%p,cmd=%08X,argp=%p,arglen=%u,bufp=%p,buflen=%u)\n",
         a1,
         cmd,
         arg,
@@ -957,8 +957,8 @@ int dvrioctl2_set_device_key(
     bsize = (cmdack.return_result_word[0] << 16) + cmdack.return_result_word[1];
     if (bsize != 456)
         printf("Size of firmware is not equal to Size of buffer on DVRP memory.\n");
-    printf("FSIZE:%08lX\n", 456);
-    printf("BSIZE:%08lX\n", bsize);
+    printf("FSIZE:%08X\n", 456);
+    printf("BSIZE:%08X\n", bsize);
     cmdack.command = 0x511C;
     ((u32 *)SBUF)[0] = *(u32 *)"XESD";
     byteswap_tmp2 = (int *)&SBUF[4];
