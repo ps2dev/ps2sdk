@@ -80,33 +80,29 @@ int _start(int a1, char **argv)
 int module_start()
 {
     bool v0;
-    int result;
 
     DVRMAN.name = "dvr_ipl";
     DVRMAN.desc = "Digital Video Recorder";
     DVRMAN.ops = &DvrFuncTbl;
     DVRMAN.type = 0x10000010;
     v0 = AddDrv(&DVRMAN) == 0;
-#if 0
-    result = 2;
-#else
-    result = 0;
-#endif
     if (!v0)
         return 1;
-    return result;
+#if 0
+    return 2;
+#else
+    return 0;
+#endif
 }
 
 int module_stop()
 {
     bool v0;
-    int result;
 
     v0 = DelDrv("dvr_ipl") == 0;
-    result = 1;
     if (!v0)
         return 2;
-    return result;
+    return 1;
 }
 
 int dvripl_df_init(iop_device_t *dev)
@@ -129,14 +125,12 @@ int dvripl_df_init(iop_device_t *dev)
 int dvripl_df_exit(iop_device_t *dev)
 {
     bool v1;
-    int result;
 
     printf("dvripl_df_exit\n");
     v1 = DeleteSema(sema_id) == 0;
-    result = 0;
     if (!v1)
         return -1;
-    return result;
+    return 0;
 }
 
 int dvripl_df_ioctl(iop_file_t *f, int cmd, void *param)

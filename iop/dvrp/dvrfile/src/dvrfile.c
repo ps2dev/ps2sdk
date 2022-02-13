@@ -249,14 +249,10 @@ IRX_ID("DVRFILE", 1, 1);
 
 int _start(int argc, const char **argv)
 {
-    int result;
-
-    if (argc >= 0) {
-        result = module_start(argc, argv);
-    } else {
-        result = module_stop();
-    }
-    return result;
+    if (argc >= 0)
+        return module_start(argc, argv);
+    else
+        return module_stop(argc, argv);
 }
 
 int module_start(int argc, const char **argv)

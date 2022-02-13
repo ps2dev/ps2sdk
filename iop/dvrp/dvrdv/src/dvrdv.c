@@ -93,8 +93,6 @@ int _start(int a1, char **argv)
 int module_start()
 {
     int i;
-    bool v1;
-    int result;
 
     for (i = 0; i < 30000; ++i) {
         if (((*((vu32 *)0xB0004230)) & 4) != 0)
@@ -109,28 +107,21 @@ int module_start()
         DVR.desc = "Digital Video Recorder DVR task";
         DVR.type = 0x10000010;
         DVR.ops = &DvrFuncTbl;
-        v1 = AddDrv(&DVR) == 0;
-#if 0
-        result = 2;
-#else
-        result = 0;
-#endif
-        if (!v1)
+        if (AddDrv(&DVR) != 0)
             return 1;
     }
-    return result;
+#if 0
+    return 2;
+#else
+    return 0;
+#endif
 }
 
 int module_stop()
 {
-    bool v0;
-    int result;
-
-    v0 = DelDrv("dvr_dv") == 0;
-    result = 1;
-    if (!v0)
+    if (DelDrv("dvr_dv") != 0)
         return 2;
-    return result;
+    return 1;
 }
 
 int dvrdv_df_init(iop_device_t *dev)
@@ -151,14 +142,9 @@ int dvrdv_df_init(iop_device_t *dev)
 
 int dvrdv_df_exit(iop_device_t *dev)
 {
-    bool v1;
-    int result;
-
-    v1 = DeleteSema(sema_id) == 0;
-    result = 0;
-    if (!v1)
+    if (DeleteSema(sema_id) != 0)
         return -1;
-    return result;
+    return 0;
 }
 
 int dvrdv_df_ioctl(iop_file_t *f, int cmd, void *param)
