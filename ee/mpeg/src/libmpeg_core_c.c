@@ -18,16 +18,6 @@
 #include "libmpeg.h"
 #include "libmpeg_internal.h"
 
-#define A_EE_IPU_in_FIFO_0 (A_EE_IPU_in_FIFO + 0x0)
-#define A_EE_IPU_in_FIFO_1 (A_EE_IPU_in_FIFO + 0x4)
-#define A_EE_IPU_in_FIFO_2 (A_EE_IPU_in_FIFO + 0x8)
-#define A_EE_IPU_in_FIFO_3 (A_EE_IPU_in_FIFO + 0xC)
-
-#define R_EE_IPU_in_FIFO_0 ((vu32 *) A_EE_IPU_in_FIFO_0)
-#define R_EE_IPU_in_FIFO_1 ((vu32 *) A_EE_IPU_in_FIFO_1)
-#define R_EE_IPU_in_FIFO_2 ((vu32 *) A_EE_IPU_in_FIFO_2)
-#define R_EE_IPU_in_FIFO_3 ((vu32 *) A_EE_IPU_in_FIFO_3)
-
 static u8 s_DMAPack[128];
 static u32 s_DataBuf[2];
 static int ( * s_SetDMA_func) ( void* );
@@ -44,13 +34,10 @@ extern s32 _mpeg_dmac_handler( s32 channel, void *arg, void *addr );
 void _MPEG_Initialize ( _MPEGContext* arg0, int ( * arg1) ( void* ), void* arg2, int* arg3)
 {
 	*R_EE_IPU_CTRL = 0x40000000;
-	do {} while (*R_EE_IPU_CTRL < 0);
+	while ((s32)*R_EE_IPU_CTRL < 0);
 	*R_EE_IPU_CMD = 0;
-	u32 var2;
-	do {
-		var2 = *R_EE_IPU_CTRL;
-	} while ((s32)var2 < 0);
-	*R_EE_IPU_CTRL = var2 | 0x800000;
+	while ((s32)*R_EE_IPU_CTRL < 0);
+	*R_EE_IPU_CTRL |= 0x800000;
 	*R_EE_D3_QWC = 0;
 	*R_EE_D4_QWC = 0;
 	s_SetDMA_func = arg1;
@@ -71,7 +58,7 @@ void _MPEG_Initialize ( _MPEGContext* arg0, int ( * arg1) ( void* ), void* arg2,
 
 void _MPEG_Destroy ( void )
 {
-	do {} while (s_CSCFlag != 0);
+	while (s_CSCFlag != 0);
 	RemoveDmacHandler(3, s_CSCID);
 	DeleteSema(s_Sema);
 }
@@ -87,15 +74,13 @@ void _ipu_suspend ( void )
 		eie &= 0x10000;
 	}
 	while (eie != 0);
-	*R_EE_D_ENABLEW = *R_EE_D_ENABLER | 0x10000;
-	u32 var2 = *R_EE_D4_CHCR & 0xfffffeff;
-	*R_EE_D4_CHCR = var2;
-	*R_EE_D_ENABLEW = *R_EE_D_ENABLER & 0xfffffeff;
+	*R_EE_D4_CHCR &= ~0x100;
+	*R_EE_D_ENABLEW = *R_EE_D_ENABLER & ~0x100;
 	EI();
-	s_IPUState[0] = var2;
+	s_IPUState[0] = *R_EE_D4_CHCR;
 	s_IPUState[1] = *R_EE_D4_MADR;
 	s_IPUState[2] = *R_EE_D4_QWC;
-	do {} while ((*R_EE_IPU_CTRL & 0xf0) != 0);
+	while ((*R_EE_IPU_CTRL & 0xf0) != 0);
 	do
 	{
 		DI();
@@ -104,12 +89,10 @@ void _ipu_suspend ( void )
 		eie &= 0x10000;
 	}
 	while (eie != 0);
-	*R_EE_D_ENABLEW = *R_EE_D_ENABLER | 0x10000;
-	u32 var1 = *R_EE_D3_CHCR & 0xfffffeff;
-	*R_EE_D3_CHCR = var1;
-	*R_EE_D_ENABLEW = *R_EE_D_ENABLER & 0xfffffeff;
+	*R_EE_D3_CHCR &= ~0x100;
+	*R_EE_D_ENABLEW = *R_EE_D_ENABLER & ~0x100;
 	EI();
-	s_IPUState[3] = var1;
+	s_IPUState[3] = *R_EE_D3_CHCR;
 	s_IPUState[4] = *R_EE_D3_MADR;
 	s_IPUState[5] = *R_EE_D3_QWC;
 	s_IPUState[6] = *R_EE_IPU_CTRL;
@@ -118,7 +101,7 @@ void _ipu_suspend ( void )
 
 void _MPEG_Suspend ( void )
 {
-	do {} while (s_CSCFlag != 0);
+	while (s_CSCFlag != 0);
 	return _ipu_suspend();
 }
 
@@ -135,9 +118,9 @@ void _ipu_resume ( void )
 	if (var3 != 0)
 	{
 		*R_EE_IPU_CMD = (s_IPUState[7]) & 0x7f;
-		do {} while (*R_EE_IPU_CTRL < 0);
+		while (*R_EE_IPU_CTRL < 0);
 		*R_EE_IPU_CTRL = s_IPUState[6];
-		*R_EE_D4_MADR = (s_IPUState[1]) + var2 * -0x10;
+		*R_EE_D4_MADR = (s_IPUState[1]) - var2 * 0x10;
 		*R_EE_D4_QWC = var3;
 		*R_EE_D4_CHCR = s_IPUState[0] | 0x100;
 	}
@@ -207,33 +190,29 @@ int _MPEG_CSCImage ( void* arg0, void* arg1, int arg2 )
 
 void _ipu_sync( void )
 {
-	u32 var0 = *R_EE_IPU_BP;
-	u32 var1 = *R_EE_IPU_CTRL;
-	if ((s32)var1 >= 0)
+	if ((s32)*R_EE_IPU_CTRL >= 0)
 	{
 		return;
 	}
-	do
+	while (1)
 	{
-		do
+		while (1)
 		{
-			if ((var1 & 0x4000) != 0)
+			if ((*R_EE_IPU_CTRL & 0x4000) != 0)
 			{
 				return;
 			}
+			u32 var0 = *R_EE_IPU_BP;
 			if ((int)((((var0 & 0xff00) >> 1) + ((var0 & 0x30000) >> 9)) - (var0 & 0x7f)) < 0x20)
 			{
 				break;
 			}
 LAB_0001041c:
-			var1 = *R_EE_IPU_CTRL;
 			if (-1 < *R_EE_IPU_CTRL)
 			{
 				return;
 			}
-			var0 = *R_EE_IPU_BP;
 		}
-		while (1);
 
 		if ((int)*R_EE_D4_QWC < 1)
 		{
@@ -245,10 +224,7 @@ LAB_0001041c:
 			}
 			goto LAB_0001041c;
 		}
-		var0 = *R_EE_IPU_BP;
-		var1 = *R_EE_IPU_CTRL;
 	}
-	while (1);
 }
 
 u32 _ipu_sync_data( void )
@@ -350,43 +326,43 @@ void _MPEG_SetDefQM ( int arg0 )
 {
 	_ipu_suspend();
 	*R_EE_IPU_CMD = 0;
-	do {} while (*R_EE_IPU_CTRL < 0);
-	*R_EE_IPU_in_FIFO_0 = 0x13101008;
-	*R_EE_IPU_in_FIFO_1 = 0x16161310;
-	*R_EE_IPU_in_FIFO_2 = 0x16161616;
-	*R_EE_IPU_in_FIFO_3 = 0x1B1A181A;
-	*R_EE_IPU_in_FIFO_0 = 0x1A1A1B1B;
-	*R_EE_IPU_in_FIFO_1 = 0x1B1B1A1A;
-	*R_EE_IPU_in_FIFO_2 = 0x1D1D1D1B;
-	*R_EE_IPU_in_FIFO_3 = 0x1D222222;
-	*R_EE_IPU_in_FIFO_0 = 0x1B1B1D1D;
-	*R_EE_IPU_in_FIFO_1 = 0x20201D1D;
-	*R_EE_IPU_in_FIFO_2 = 0x26252222;
-	*R_EE_IPU_in_FIFO_3 = 0x22232325;
-	*R_EE_IPU_in_FIFO_0 = 0x28262623;
-	*R_EE_IPU_in_FIFO_1 = 0x30302828;
-	*R_EE_IPU_in_FIFO_2 = 0x38382E2E;
-	*R_EE_IPU_in_FIFO_3 = 0x5345453A;
+	while (*R_EE_IPU_CTRL < 0);
+	R_EE_IPU_in_FIFO[0] = 0x13101008;
+	R_EE_IPU_in_FIFO[1] = 0x16161310;
+	R_EE_IPU_in_FIFO[2] = 0x16161616;
+	R_EE_IPU_in_FIFO[3] = 0x1B1A181A;
+	R_EE_IPU_in_FIFO[0] = 0x1A1A1B1B;
+	R_EE_IPU_in_FIFO[1] = 0x1B1B1A1A;
+	R_EE_IPU_in_FIFO[2] = 0x1D1D1D1B;
+	R_EE_IPU_in_FIFO[3] = 0x1D222222;
+	R_EE_IPU_in_FIFO[0] = 0x1B1B1D1D;
+	R_EE_IPU_in_FIFO[1] = 0x20201D1D;
+	R_EE_IPU_in_FIFO[2] = 0x26252222;
+	R_EE_IPU_in_FIFO[3] = 0x22232325;
+	R_EE_IPU_in_FIFO[0] = 0x28262623;
+	R_EE_IPU_in_FIFO[1] = 0x30302828;
+	R_EE_IPU_in_FIFO[2] = 0x38382E2E;
+	R_EE_IPU_in_FIFO[3] = 0x5345453A;
 	*R_EE_IPU_CMD = 0x50000000;
-	do {} while (*R_EE_IPU_CTRL < 0);
-	*R_EE_IPU_in_FIFO_0 = 0x10101010;
-	*R_EE_IPU_in_FIFO_1 = 0x10101010;
-	*R_EE_IPU_in_FIFO_2 = 0x10101010;
-	*R_EE_IPU_in_FIFO_3 = 0x10101010;
-	*R_EE_IPU_in_FIFO_0 = 0x10101010;
-	*R_EE_IPU_in_FIFO_1 = 0x10101010;
-	*R_EE_IPU_in_FIFO_2 = 0x10101010;
-	*R_EE_IPU_in_FIFO_3 = 0x10101010;
-	*R_EE_IPU_in_FIFO_0 = 0x10101010;
-	*R_EE_IPU_in_FIFO_1 = 0x10101010;
-	*R_EE_IPU_in_FIFO_2 = 0x10101010;
-	*R_EE_IPU_in_FIFO_3 = 0x10101010;
-	*R_EE_IPU_in_FIFO_0 = 0x10101010;
-	*R_EE_IPU_in_FIFO_1 = 0x10101010;
-	*R_EE_IPU_in_FIFO_2 = 0x10101010;
-	*R_EE_IPU_in_FIFO_3 = 0x10101010;
+	while (*R_EE_IPU_CTRL < 0);
+	R_EE_IPU_in_FIFO[0] = 0x10101010;
+	R_EE_IPU_in_FIFO[1] = 0x10101010;
+	R_EE_IPU_in_FIFO[2] = 0x10101010;
+	R_EE_IPU_in_FIFO[3] = 0x10101010;
+	R_EE_IPU_in_FIFO[0] = 0x10101010;
+	R_EE_IPU_in_FIFO[1] = 0x10101010;
+	R_EE_IPU_in_FIFO[2] = 0x10101010;
+	R_EE_IPU_in_FIFO[3] = 0x10101010;
+	R_EE_IPU_in_FIFO[0] = 0x10101010;
+	R_EE_IPU_in_FIFO[1] = 0x10101010;
+	R_EE_IPU_in_FIFO[2] = 0x10101010;
+	R_EE_IPU_in_FIFO[3] = 0x10101010;
+	R_EE_IPU_in_FIFO[0] = 0x10101010;
+	R_EE_IPU_in_FIFO[1] = 0x10101010;
+	R_EE_IPU_in_FIFO[2] = 0x10101010;
+	R_EE_IPU_in_FIFO[3] = 0x10101010;
 	*R_EE_IPU_CMD = 0x58000000;
-	do {} while (*R_EE_IPU_CTRL < 0);
+	while (*R_EE_IPU_CTRL < 0);
 	_MPEG_Resume();
 }
 
@@ -406,11 +382,11 @@ int _MPEG_GetMBAI ( void )
 	{
 		*R_EE_IPU_CMD = 0x30000000;
 		var4 = _ipu_sync_data();
+		var4 &= 0xffff;
 		if (var4 == 0)
 		{
 			return 0;
 		}
-		var4 &= 0xffff;
 		if (var4 < 0x22)
 		{
 			break;
@@ -454,7 +430,7 @@ int _MPEG_GetMotionCode ( void )
 		s_DataBuf[0] = 0x20;
 		s_DataBuf[1] = *R_EE_IPU_TOP;
 	}
-	return (int)var4; // TODO: check "unnecessarary bit shifts": ((long)(var4 << 0x30) >> 0x30)
+	return (int)var4;
 }
 
 int _MPEG_GetDMVector ( void )
@@ -462,15 +438,16 @@ int _MPEG_GetDMVector ( void )
 	_ipu_sync();
 	*R_EE_IPU_CMD = 0x3c000000;
 	u32 var4 = _ipu_sync_data();
+	var4 &= 0xffff;
 	s_DataBuf[0] = 0x20;
 	s_DataBuf[1] = *R_EE_IPU_TOP;
-	return (int)var4; // TODO: check "unnecessarary bit shifts": ((long)(var4 << 0x30) >> 0x30)
+	return (int)var4;
 }
 
 void _MPEG_SetIDCP ( void )
 {
 	unsigned int var1 = _MPEG_GetBits(2);
-	*R_EE_IPU_CTRL = (*R_EE_IPU_CTRL & 0xfffcffff) | var1 << 0x10;
+	*R_EE_IPU_CTRL = (*R_EE_IPU_CTRL & ~0x30000) | var1 << 0x10;
 }
 
 void _MPEG_SetQSTIVFAS ( void )
@@ -478,7 +455,7 @@ void _MPEG_SetQSTIVFAS ( void )
 	unsigned int var1 = _MPEG_GetBits(1);
 	unsigned int var2 = _MPEG_GetBits(1);
 	unsigned int var3 = _MPEG_GetBits(1);
-	*R_EE_IPU_CTRL = (*R_EE_IPU_CTRL & 0xff8fffff) | var1 << 0x16 | var2 << 0x15 | var3 << 0x14;
+	*R_EE_IPU_CTRL = (*R_EE_IPU_CTRL & ~0x700000) | var1 << 0x16 | var2 << 0x15 | var3 << 0x14;
 }
 
 void _MPEG_SetPCT ( unsigned int arg0 )
@@ -486,7 +463,7 @@ void _MPEG_SetPCT ( unsigned int arg0 )
 	u32 var3 = *R_EE_IPU_CTRL;
 	if (-1 < (int)var3)
 	{
-		*R_EE_IPU_CTRL = (var3 & 0xf8ffffff) | arg0 << 0x18;
+		*R_EE_IPU_CTRL = (var3 & ~0x7000000) | arg0 << 0x18;
 		return;
 	}
 	// TODO: validate. Bugged and in wrong place?
@@ -495,11 +472,11 @@ void _MPEG_SetPCT ( unsigned int arg0 )
 
 void _MPEG_BDEC ( int arg0, int arg1, int arg2, int arg3, void* arg4 )
 {
-	*R_EE_D3_MADR = ((uint)arg4 & 0xfffffff) | 0x80000000;
+	*R_EE_D3_MADR = ((uint)arg4 & ~0xf0000000) | 0x80000000;
 	*R_EE_D3_QWC = 0x30;
 	*R_EE_D3_CHCR = 0x100;
 	_ipu_sync();
-	*R_EE_IPU_CMD = arg0 << 0x1b | 0x20000000U | arg1 << 0x1a | arg2 << 0x19 | arg3 << 0x10;
+	*R_EE_IPU_CMD = arg0 << 0x1b | 0x20000000 | arg1 << 0x1a | arg2 << 0x19 | arg3 << 0x10;
 }
 
 int _MPEG_WaitBDEC ( void )
@@ -518,7 +495,6 @@ int _MPEG_WaitBDEC ( void )
 		}
 		if (var1 == 0)
 		{
-			// XXX: check CONCAT44 order
 			s_DataBuf[0] = 0x20;
 			s_DataBuf[1] = *R_EE_IPU_TOP;
 			return 1;
@@ -539,7 +515,7 @@ int _MPEG_WaitBDEC ( void )
 	while (eie != 0);
 	*R_EE_D_ENABLEW = *R_EE_D_ENABLER | 0x10000;
 	*R_EE_D3_CHCR = 0;
-	*R_EE_D_ENABLEW = *R_EE_D_ENABLER & 0xfffeffff;
+	*R_EE_D_ENABLEW = *R_EE_D_ENABLER & ~0x10000;
 	EI();
 	*R_EE_D3_QWC = 0;
 	s_DataBuf[0] = 0;
@@ -564,9 +540,9 @@ void _MPEG_dma_ref_image ( _MPEGMacroBlock8* arg0, _MPEGMotion* arg1, int arg2, 
 	}
 	if (0 < var5)
 	{
-		do {} while ((*R_EE_D9_CHCR & 0x100) != 0);
+		while ((*R_EE_D9_CHCR & 0x100) != 0);
 		*R_EE_D9_QWC = 0;
-		*R_EE_D9_SADR = (u32)arg0 & 0xfffffff;
+		*R_EE_D9_SADR = (u32)arg0 & ~0xf0000000;
 		*R_EE_D9_SADR = (u32)&s_DMAPack;
 		u32 *var2 = (u32 *)((u32)&s_DMAPack | 0x20000000);
 		u32 *var6;
