@@ -843,16 +843,16 @@ int avioctl2_cmd_ack(
         printf(" %s  -> Handshake error!\n", a1);
         return -5;
     } else {
-        int out_count;
-        out_count = 1;
         if (cmdack.ack_status_ack) {
             printf(" %s  -> Status error!\n", a1);
             return -68;
         } else {
             u16 *input_word;
             char *buf_tmp;
+            int out_count;
             input_word = cmdack.output_word;
             buf_tmp = (char *)buf;
+            out_count = 1;
             do {
                 *(u16 *)buf_tmp = *input_word;
                 out_count += 1;

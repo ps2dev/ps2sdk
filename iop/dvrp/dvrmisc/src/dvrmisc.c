@@ -969,7 +969,7 @@ int dvrioctl2_get_device_key(
 {
     int v6;
     u16 *return_result_word;
-    int loopcount;
+    int busywait;
     drvdrv_exec_cmd_ack cmdack;
     u8 v27[8];
 
@@ -1000,9 +1000,9 @@ int dvrioctl2_get_device_key(
         v8[1] = (*return_result_word & 0x00FF);
         return_result_word += 1;
     } while (v6 < 4);
-    loopcount = 2;
+    busywait = 2;
     do {
-    } while (loopcount-- >= 0);
+    } while (busywait-- >= 0);
     if (memcmp(v27, "XESD", 4) == 0) {
         int v13;
         u16 *in_word_tmp;

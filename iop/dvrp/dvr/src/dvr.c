@@ -270,7 +270,7 @@ int dvrioctl2_rec_start(
     void *buf,
     unsigned int buflen)
 {
-    int v7;
+    int busywait;
     int cmdackerr;
     int err;
     drvdrv_exec_cmd_ack cmdack;
@@ -283,8 +283,8 @@ int dvrioctl2_rec_start(
     cmdack.input_word[4] = *((u16 *)arg + 4);
     cmdack.input_word[5] = *((u16 *)arg + 5);
     cmdack.input_word[6] = *((u16 *)arg + 6);
-    v7 = 0x4;
-    while (v7-- >= 0)
+    busywait = 0x4;
+    while (busywait-- >= 0)
         ;
     cmdack.input_word_count = 7;
     cmdack.timeout = 5000000;
@@ -1038,7 +1038,7 @@ int dvrioctl2_make_menu(
     int v17;
     u16 *input_word;
     int v19;
-    int v22;
+    int busywait;
     drvdrv_exec_cmd_ack cmdack;
 
     cmdack.command = 0x2119;
@@ -1096,8 +1096,8 @@ int dvrioctl2_make_menu(
         input_word += 1;
     } while (v16 < 11);
     *((u8 *)buf + 22) = 0;
-    v22 = 0x14;
-    while (v22-- >= 0)
+    busywait = 0x14;
+    while (busywait-- >= 0)
         ;
     return 0;
 }
