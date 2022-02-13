@@ -767,10 +767,6 @@ int dvrioctl2_update_dvrp_firmware(
     int update_fd;
     int update_size;
     int i;
-    char *v13;
-    int read_size;
-    int j;
-    int read_tmp;
     drvdrv_exec_cmd_ack cmdack;
 
     read_offset = 0;
@@ -806,6 +802,9 @@ int dvrioctl2_update_dvrp_firmware(
     if (update_size != (cmdack.return_result_word[0] << 16) + cmdack.return_result_word[1])
         printf("Size of firmware is not equal to Size of buffer on DVRP memory.\n");
     for (i = 0x3FFF;; i = 0x3FFF) {
+        char *v13;
+        int read_size;
+        int j;
         v13 = &SBUF[0x3FFF];
         do {
             *v13 = 0;
@@ -831,6 +830,7 @@ int dvrioctl2_update_dvrp_firmware(
             goto LABEL_37;
         }
         for (j = 0; j < read_size; ++j) {
+            int read_tmp;
             read_tmp = (u8)SBUF[j];
             checksum += read_tmp;
         }
@@ -922,9 +922,6 @@ int dvrioctl2_set_device_key(
     int *byteswap_tmp2;
     int *byteswap_tmp;
     int *byteswap_tmp_end;
-    int v15;
-    int v16;
-    int v17;
     int cmdack_err3;
     int cmdack_err2;
     drvdrv_exec_cmd_ack cmdack;
@@ -965,6 +962,9 @@ int dvrioctl2_set_device_key(
     byteswap_tmp = (int *)arg;
     byteswap_tmp_end = (int *)((char *)arg + 448);
     do {
+        int v15;
+        int v16;
+        int v17;
         v15 = byteswap_tmp[1];
         v16 = byteswap_tmp[2];
         v17 = byteswap_tmp[3];
@@ -1026,19 +1026,7 @@ int dvrioctl2_get_device_key(
 {
     int v6;
     u16 *return_result_word;
-    u8 *v8;
     int loopcount;
-    int v13;
-    u16 *in_word_tmp;
-    u8 *v15;
-    u16 v17;
-    int v18;
-    int v19;
-    unsigned int v20;
-    int v21;
-    int v22;
-    u16 *in_word_tmp2;
-    u8 *v24;
     drvdrv_exec_cmd_ack cmdack;
     u8 v27[8];
 
@@ -1062,6 +1050,7 @@ int dvrioctl2_get_device_key(
     v6 = 0;
     return_result_word = cmdack.return_result_word;
     do {
+        u8 *v8;
         v8 = &v27[v6];
         v6 += 2;
         v8[0] = (*return_result_word & 0xFF00) >> 8;
@@ -1072,9 +1061,16 @@ int dvrioctl2_get_device_key(
     do {
     } while (loopcount-- >= 0);
     if (memcmp(v27, "XESD", 4) == 0) {
+        int v13;
+        u16 *in_word_tmp;
+        u16 v17;
+        int v18;
+        int v19;
+        unsigned int v20;
         v13 = 0;
         in_word_tmp = &cmdack.return_result_word[2];
         do {
+            u8 *v15;
             v15 = (u8 *)buf + v13;
             v13 += 2;
             v15[0] = (*in_word_tmp & 0xFF00) >> 8;
@@ -1086,6 +1082,8 @@ int dvrioctl2_get_device_key(
         v19 = 0;
         v20 = 224;
         while (1) {
+            int v21;
+            int v22;
             v21 = v18;
             if (v20 >= 0x11)
                 v21 = 16;
@@ -1108,8 +1106,10 @@ int dvrioctl2_get_device_key(
                 return -5;
             }
             if ((u16)v21 + 1 > 1) {
+                u16 *in_word_tmp2;
                 in_word_tmp2 = cmdack.return_result_word;
                 do {
+                    u8 *v24;
                     v24 = (u8 *)buf + v19;
                     v19 += 2;
                     v22 += 1;
@@ -1137,15 +1137,15 @@ int dvrioctl2_set_dv_nodeid(
     unsigned int buflen)
 {
     unsigned int argwalked;
-    u8 *inword_tmp;
-    u8 *inword_tmp2;
     drvdrv_exec_cmd_ack cmdack;
 
     argwalked = 0;
     cmdack.command = 0x511D;
     if (arglen) {
+        u8 *inword_tmp;
         inword_tmp = ((u8 *)&cmdack.input_word[0]);
         do {
+            u8 *inword_tmp2;
             inword_tmp2 = ((u8 *)arg + argwalked);
             inword_tmp[0] = inword_tmp2[1];
             inword_tmp[1] = inword_tmp2[0];
@@ -1179,9 +1179,6 @@ int dvrioctl2_get_dv_nodeid(
     unsigned int buflen)
 {
     unsigned int bufwalked;
-    u16 *return_result_word;
-    char *buftmp;
-    int bufbusyloop;
     drvdrv_exec_cmd_ack cmdack;
 
     cmdack.command = 0x511E;
@@ -1201,8 +1198,10 @@ int dvrioctl2_get_dv_nodeid(
     }
     bufwalked = 0;
     if (buflen) {
+        u16 *return_result_word;
         return_result_word = cmdack.return_result_word;
         do {
+            char *buftmp;
             buftmp = (char *)buf + bufwalked;
             bufwalked += 2;
             buftmp[0] = (*return_result_word & 0xFF00) >> 8;
@@ -1211,6 +1210,7 @@ int dvrioctl2_get_dv_nodeid(
         } while (bufwalked < buflen);
     }
     if (buflen) {
+        int bufbusyloop;
         bufbusyloop = 0;
         while (bufbusyloop++ < buflen)
             ;
@@ -1232,7 +1232,6 @@ int dvrioctl2_diag_test(
     int testcnt_tmp;
     int outbuf_cnt;
     u16 *outbuf_tmp;
-    u16 comp_status;
     drvdrv_exec_cmd_ack cmdack;
 
     cmdack.command = 0x511F;
@@ -1276,6 +1275,7 @@ int dvrioctl2_diag_test(
     printf("---------------------------- return buffer\n");
     outbuf_tmp = (u16 *)&cmdack.return_result_word[0];
     do {
+        u16 comp_status;
         outbuf_cnt += 1;
         printf(" %4x", *outbuf_tmp);
         comp_status = *outbuf_tmp;

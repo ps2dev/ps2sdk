@@ -196,16 +196,8 @@ int iplioctl2_update(iop_file_t *a1, int cmd, void *arg)
     int cmdackerr2;
     int cmdackerr3;
     int update_fd;
-    int chunk_offset;
 #if 0
     int hard_timer;
-#endif
-    int read_size;
-    s32 chunk_size;
-    int *read_buf;
-    int read_buf_offs;
-    unsigned int read_buf_tmp;
-#if 0
     u32 system_clock;
 #endif
     int cmdackerr4;
@@ -265,6 +257,7 @@ int iplioctl2_update(iop_file_t *a1, int cmd, void *arg)
     }
     update_fd = open((const char *)arg, 1, 0x124);
     if (update_fd >= 0) {
+        int chunk_offset;
         chunk_offset = 0x10000000;
         printf("Opened \"%s\"\n", (const char *)arg);
         printf("Downloading  \"%s\"\n", (const char *)arg);
@@ -274,6 +267,10 @@ int iplioctl2_update(iop_file_t *a1, int cmd, void *arg)
         StartHardTimer(hard_timer);
 #endif
         while (1) {
+            int read_buf_offs;
+            int *read_buf;
+            s32 chunk_size;
+            int read_size;
             printf("%08X\n", chunk_offset);
             read_size = read(update_fd, SBUF, 0x8000);
             chunk_size = read_size;
@@ -287,6 +284,7 @@ int iplioctl2_update(iop_file_t *a1, int cmd, void *arg)
                 break;
             read_buf_offs = 0;
             while (read_buf_offs++ < chunk_size / 4) {
+                unsigned int read_buf_tmp;
                 read_buf_tmp = *read_buf++;
                 csum += (read_buf_tmp << 24) + ((read_buf_tmp & 0xFF00) << 8) + ((read_buf_tmp & 0xFF0000) >> 8) + ((read_buf_tmp & 0xff000000) >> 24);
             }

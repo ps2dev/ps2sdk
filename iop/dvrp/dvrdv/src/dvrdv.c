@@ -362,8 +362,6 @@ int dvrioctl2_get_dvcam_info(
     unsigned int buflen)
 {
     int cmdack_err;
-    int cpy_cnt;
-    u16 *v11;
     drvdrv_exec_cmd_ack cmdack;
 
     cmdack.command = 0x4107;
@@ -374,11 +372,13 @@ int dvrioctl2_get_dvcam_info(
         printf("dvrioctl2_get_dvcam_info -> Handshake error!,%d\n", cmdack_err);
         return -5;
     } else {
+        int cpy_cnt;
         cpy_cnt = 0;
         if (cmdack.ack_status_ack) {
             printf("dvrioctl2_get_dvcam_info -> Status error!,%04X\n", cmdack.ack_status_ack);
             return -68;
         } else {
+            u16 *v11;
             v11 = &cmdack.output_word[0];
             do {
                 cpy_cnt += 1;

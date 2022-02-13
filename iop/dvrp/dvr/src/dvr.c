@@ -330,7 +330,6 @@ int dvrioctl2_rec_pause(
 {
     int v7;
     drvdrv_exec_cmd_ack *p_cmdack;
-    u16 v9;
     int cmdackerr;
     int retval;
     drvdrv_exec_cmd_ack cmdack;
@@ -339,6 +338,7 @@ int dvrioctl2_rec_pause(
     p_cmdack = &cmdack;
     cmdack.command = 0x2102;
     do {
+        u16 v9;
         v9 = *(u16 *)arg;
         arg = (char *)arg + 2;
         ++v7;
@@ -432,13 +432,9 @@ int dvrioctl2_get_rec_info(
     void *buf,
     unsigned int buflen)
 {
-    int cmdackerr;
-    int v9;
-    int v10;
-    u16 *v11;
-    drvdrv_exec_cmd_ack cmdack;
-
     if (buflen >= 0x15) {
+        int cmdackerr;
+        drvdrv_exec_cmd_ack cmdack;
         cmdack.command = 0x2105;
         cmdack.input_word_count = 0;
         cmdackerr = DvrdrvExecCmdAck(&cmdack);
@@ -446,14 +442,17 @@ int dvrioctl2_get_rec_info(
             printf("dvrioctl2_get_rec_info -> Handshake error!,%d\n", cmdackerr);
             return -5;
         } else {
+            int v9;
             v9 = 0;
             if (cmdack.ack_status_ack) {
                 printf("dvrioctl2_get_rec_info -> Status error!,%04X\n", cmdack.ack_status_ack);
                 return -68;
             } else {
+                int v10;
                 *(u16 *)buf = 0;
                 v10 = 0;
                 do {
+                    u16 *v11;
                     v9 += 1;
                     v11 = &cmdack.output_word[v9];
                     *((u8 *)buf + v10 + 3) = (*v11 & 0xFF00) >> 8;
@@ -808,11 +807,10 @@ int dvrioctl2_tevent_buf_send(
     void *buf,
     unsigned int buflen)
 {
-    signed int i;
-    char *v8;
-
     if ((int)(tevent_data_sz + arglen) < 0x1801) {
+        signed int i;
         for (i = 0; i < (int)arglen; arg = (char *)arg + 1) {
+            char *v8;
             v8 = tevent_p;
             ++i;
             *tevent_p = *(u8 *)arg;
@@ -1110,15 +1108,11 @@ int dvrioctl2_make_menu(
     int v8;
     int v9;
     u16 *v11;
-    char *v12;
-    char *v13;
     int cmdackerr;
     int v16;
     int v17;
     u16 *input_word;
     int v19;
-    char *v20;
-    char *v21;
     int v22;
     drvdrv_exec_cmd_ack cmdack;
 
@@ -1134,6 +1128,8 @@ int dvrioctl2_make_menu(
     v9 = 0;
     v11 = &cmdack.input_word[5];
     do {
+        char *v12;
+        char *v13;
         v12 = (char *)arg + v8;
         v8 += 2;
         v13 = (char *)arg + v9;
@@ -1163,6 +1159,8 @@ int dvrioctl2_make_menu(
     input_word = cmdack.return_result_word;
     v19 = 0;
     do {
+        char *v20;
+        char *v21;
         v20 = (char *)buf + v17;
         v21 = (char *)buf + v19;
         v17 += 2;
@@ -1192,22 +1190,16 @@ int dvrioctl2_re_enc_start(
     int v8;
     int v9;
     u16 *v10;
-    u8 *v11;
-    u8 *v12;
     int v13;
     int v14;
     int v15;
     u16 *v16;
-    u8 *v17;
-    u8 *v18;
     int busywait;
     int cmdackerr;
     int v24;
     int v25;
     u16 *v26;
     int v27;
-    u8 *v28;
-    u8 *v29;
     drvdrv_exec_cmd_ack cmdack;
 
     cmdack.command = 0x211A;
@@ -1223,6 +1215,8 @@ int dvrioctl2_re_enc_start(
     v9 = 0;
     v10 = &cmdack.input_word[6];
     do {
+        u8 *v11;
+        u8 *v12;
         v11 = (u8 *)arg + v8;
         v12 = (u8 *)arg + v9;
         v10[1] = v12[14] + ((u8)v11[14] << 8);
@@ -1237,6 +1231,8 @@ int dvrioctl2_re_enc_start(
     v15 = 0;
     v16 = &cmdack.input_word[17];
     do {
+        u8 *v17;
+        u8 *v18;
         v17 = (u8 *)arg + v14;
         v18 = (u8 *)arg + v15;
         v16[1] = v18[35] + ((u8)v17[35] << 8);
@@ -1276,6 +1272,8 @@ int dvrioctl2_re_enc_start(
     v26 = &cmdack.input_word[1];
     v27 = 0;
     do {
+        u8 *v28;
+        u8 *v29;
         v28 = (u8 *)buf + v25;
         v29 = (u8 *)buf + v27;
         v29[2] = *((u8 *)v26 + 274);
@@ -1296,10 +1294,6 @@ int dvrpAuthEnc(u16 a1)
 
 int dvr_recv_dma(iop_file_t *a1, u8 *buf, int buflen)
 {
-    int err;
-    u8 *buf_tmp;
-    int buflen_tmp;
-    int ack_status_ack2;
     drvdrv_exec_cmd_ack cmdack;
 
     printf("------------------- 2 ------------------ dvr_recv_dma(io=%p, buf=%p, buflen=%d)\n", a1, buf, buflen);
@@ -1307,6 +1301,10 @@ int dvr_recv_dma(iop_file_t *a1, u8 *buf, int buflen)
         printf("dvr_recv_dma : Address is not a multiple of 4.\n");
         return -14;
     } else {
+        u8 *buf_tmp;
+        int buflen_tmp;
+        int ack_status_ack2;
+        int err;
         buf_tmp = buf;
         if ((buflen & 0x7F) != 0)
             printf("buflen is not a multiple of 128.\n");

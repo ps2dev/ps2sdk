@@ -898,17 +898,14 @@ int avioctl2_cmd_ack(
     unsigned int arglen,
     void *buf)
 {
-    unsigned int input_word_copied;
-    u16 *input_word_tmp;
-    int out_count;
-    u16 *input_word;
-    char *buf_tmp;
     drvdrv_exec_cmd_ack cmdack;
 
-    input_word_copied = 0;
     cmdack.command = cmd | 0x3100;
     if (arglen >> 1) {
+        u16 *input_word_tmp;
+        unsigned int input_word_copied;
         input_word_tmp = (u16 *)&cmdack.input_word[0];
+        input_word_copied = 0;
         do {
             *input_word_tmp = *(u16 *)arg;
             arg = (char *)arg + 2;
@@ -921,11 +918,14 @@ int avioctl2_cmd_ack(
         printf(" %s  -> Handshake error!\n", a1);
         return -5;
     } else {
+        int out_count;
         out_count = 1;
         if (cmdack.ack_status_ack) {
             printf(" %s  -> Status error!\n", a1);
             return -68;
         } else {
+            u16 *input_word;
+            char *buf_tmp;
             input_word = cmdack.output_word;
             buf_tmp = (char *)buf;
             do {
@@ -948,17 +948,14 @@ int avioctl2_cmd_ack_comp(
     unsigned int arglen,
     void *buf)
 {
-    unsigned int input_word_copied;
-    u16 *input_word_tmp;
-    int out_count;
-    u16 *input_word;
-    u16 *buf_tmp;
     drvdrv_exec_cmd_ack cmdack;
 
     cmdack.command = cmd | 0x3100;
-    input_word_copied = 0;
     if (arglen >> 1) {
+        u16 *input_word_tmp;
+        unsigned int input_word_copied;
         input_word_tmp = (u16 *)&cmdack.input_word[0];
+        input_word_copied = 0;
         do {
             *input_word_tmp = *(u16 *)arg;
             input_word_tmp += 1;
@@ -971,10 +968,14 @@ int avioctl2_cmd_ack_comp(
     if (DvrdrvExecCmdAckComp(&cmdack)) {
         printf(" %s  -> Handshake error!\n", a1);
         return -5;
-    } else if (cmdack.ack_status_ack || (out_count = 1, cmdack.comp_status)) {
+    } else if (cmdack.ack_status_ack || cmdack.comp_status) {
         printf(" %s  -> Status error!\n", a1);
         return -68;
     } else {
+        int out_count;
+        u16 *input_word;
+        u16 *buf_tmp;
+        out_count = 1;
         input_word = cmdack.return_result_word;
         buf_tmp = (u16 *)buf;
         do {
