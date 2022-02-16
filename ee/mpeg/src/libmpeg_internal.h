@@ -88,8 +88,8 @@ typedef struct _MPEGMotion {
  int            m_fInt;
  int            m_Field;
 
- void ( *MC_Luma   ) ( unsigned char* a1, short* a2, int a3, int a4 );
- void ( *MC_Chroma ) ( unsigned char* a1, short* a2, int a3, int a4 );
+ void ( *MC_Luma   ) ( u8* a1, u16* a2, int a3, int a4, int var1, int tmpa );
+ void ( *MC_Chroma ) ( u8* a1, u16* a2, int a3, int a4, int var1, int tmpa );
 
 } _MPEGMotion;
 
@@ -169,22 +169,22 @@ void         _MPEG_BDEC           ( int, int, int, int, void*                   
 int          _MPEG_WaitBDEC       ( void                                              );
 void         _MPEG_dma_ref_image  ( _MPEGMacroBlock8*, _MPEGMotion*, int, int         );
 void         _MPEG_do_mc          ( _MPEGMotion*                                      );
-void         _MPEG_put_luma       ( unsigned char* a1, short* a2, int a3, int a4      );
-void         _MPEG_put_luma_X     ( unsigned char* a1, short* a2, int a3, int a4      );
-void         _MPEG_put_luma_Y     ( unsigned char* a1, short* a2, int a3, int a4      );
-void         _MPEG_put_luma_XY    ( unsigned char* a1, short* a2, int a3, int a4      );
-void         _MPEG_put_chroma     ( unsigned char* a1, short* a2, int a3, int a4      );
-void         _MPEG_put_chroma_X   ( unsigned char* a1, short* a2, int a3, int a4      );
-void         _MPEG_put_chroma_Y   ( unsigned char* a1, short* a2, int a3, int a4      );
-void         _MPEG_put_chroma_XY  ( unsigned char* a1, short* a2, int a3, int a4      );
-void         _MPEG_avg_luma       ( unsigned char* a1, short* a2, int a3, int a4      );
-void         _MPEG_avg_luma_X     ( unsigned char* a1, short* a2, int a3, int a4      );
-void         _MPEG_avg_luma_Y     ( unsigned char* a1, short* a2, int a3, int a4      );
-void         _MPEG_avg_luma_XY    ( unsigned char* a1, short* a2, int a3, int a4      );
-void         _MPEG_avg_chroma     ( unsigned char* a1, short* a2, int a3, int a4      );
-void         _MPEG_avg_chroma_X   ( unsigned char* a1, short* a2, int a3, int a4      );
-void         _MPEG_avg_chroma_Y   ( unsigned char* a1, short* a2, int a3, int a4      );
-void         _MPEG_avg_chroma_XY  ( unsigned char* a1, short* a2, int a3, int a4      );
+void         _MPEG_put_luma       ( u8* a1, u16* a2, int a3, int a4, int var1, int ta );
+void         _MPEG_put_luma_X     ( u8* a1, u16* a2, int a3, int a4, int var1, int ta );
+void         _MPEG_put_luma_Y     ( u8* a1, u16* a2, int a3, int a4, int var1, int ta );
+void         _MPEG_put_luma_XY    ( u8* a1, u16* a2, int a3, int a4, int var1, int ta );
+void         _MPEG_put_chroma     ( u8* a1, u16* a2, int a3, int a4, int var1, int ta );
+void         _MPEG_put_chroma_X   ( u8* a1, u16* a2, int a3, int a4, int var1, int ta );
+void         _MPEG_put_chroma_Y   ( u8* a1, u16* a2, int a3, int a4, int var1, int ta );
+void         _MPEG_put_chroma_XY  ( u8* a1, u16* a2, int a3, int a4, int var1, int ta );
+void         _MPEG_avg_luma       ( u8* a1, u16* a2, int a3, int a4, int var1, int ta );
+void         _MPEG_avg_luma_X     ( u8* a1, u16* a2, int a3, int a4, int var1, int ta );
+void         _MPEG_avg_luma_Y     ( u8* a1, u16* a2, int a3, int a4, int var1, int ta );
+void         _MPEG_avg_luma_XY    ( u8* a1, u16* a2, int a3, int a4, int var1, int ta );
+void         _MPEG_avg_chroma     ( u8* a1, u16* a2, int a3, int a4, int var1, int ta );
+void         _MPEG_avg_chroma_X   ( u8* a1, u16* a2, int a3, int a4, int var1, int ta );
+void         _MPEG_avg_chroma_Y   ( u8* a1, u16* a2, int a3, int a4, int var1, int ta );
+void         _MPEG_avg_chroma_XY  ( u8* a1, u16* a2, int a3, int a4, int var1, int ta );
 void         _MPEG_put_block_fr   ( _MPEGMotions*                                     );
 void         _MPEG_put_block_fl   ( _MPEGMotions*                                     );
 void         _MPEG_put_block_il   ( _MPEGMotions*                                     );
