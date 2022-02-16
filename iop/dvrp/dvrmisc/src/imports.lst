@@ -19,6 +19,10 @@ stdio_IMPORTS_start
 I_printf
 stdio_IMPORTS_end
 
+sysclib_IMPORTS_start
+I_memcmp
+sysclib_IMPORTS_end
+
 thbase_IMPORTS_start
 I_DelayThread
 thbase_IMPORTS_end

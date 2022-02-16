@@ -80,33 +80,29 @@ int _start(int a1, char **argv)
 int module_start()
 {
     bool v0;
-    int result;
 
     DVRMAN.name = "dvr_ipl";
     DVRMAN.desc = "Digital Video Recorder";
     DVRMAN.ops = &DvrFuncTbl;
     DVRMAN.type = 0x10000010;
     v0 = AddDrv(&DVRMAN) == 0;
-#if 0
-    result = 2;
-#else
-    result = 0;
-#endif
     if (!v0)
         return 1;
-    return result;
+#if 0
+    return 2;
+#else
+    return 0;
+#endif
 }
 
 int module_stop()
 {
     bool v0;
-    int result;
 
     v0 = DelDrv("dvr_ipl") == 0;
-    result = 1;
     if (!v0)
         return 2;
-    return result;
+    return 1;
 }
 
 int dvripl_df_init(iop_device_t *dev)
@@ -129,14 +125,12 @@ int dvripl_df_init(iop_device_t *dev)
 int dvripl_df_exit(iop_device_t *dev)
 {
     bool v1;
-    int result;
 
     printf("dvripl_df_exit\n");
     v1 = DeleteSema(sema_id) == 0;
-    result = 0;
     if (!v1)
         return -1;
-    return result;
+    return 0;
 }
 
 int dvripl_df_ioctl(iop_file_t *f, int cmd, void *param)
@@ -193,20 +187,11 @@ int iplioctl2_update(iop_file_t *a1, int cmd, void *arg)
     int retval;
     int csum;
     int cmdackerr1;
-    const char *fmterr;
     int cmdackerr2;
     int cmdackerr3;
     int update_fd;
-    int chunk_offset;
 #if 0
     int hard_timer;
-#endif
-    int read_size;
-    s32 chunk_size;
-    int *read_buf;
-    int read_buf_offs;
-    unsigned int read_buf_tmp;
-#if 0
     u32 system_clock;
 #endif
     int cmdackerr4;
@@ -223,10 +208,8 @@ int iplioctl2_update(iop_file_t *a1, int cmd, void *arg)
     printf("dvrcmd.ack_p[0]:%x\n", cmdack.ack_status_ack);
     if (cmdackerr1)
         goto LABEL_2;
-    fmterr = "NOP -> Status error!\n";
     if (cmdack.ack_status_ack) {
-    LABEL_11:
-        printf(fmterr);
+        printf("NOP -> Status error!\n");
         return -5;
     }
     printf("VERSION\n");
@@ -263,11 +246,12 @@ int iplioctl2_update(iop_file_t *a1, int cmd, void *arg)
         return -5;
     }
     if (cmdack.ack_status_ack) {
-        fmterr = "CONFIG -> Status error!\n";
-        goto LABEL_11;
+        printf("CONFIG -> Status error!\n");
+        return -5;
     }
     update_fd = open((const char *)arg, 1, 0x124);
     if (update_fd >= 0) {
+        int chunk_offset;
         chunk_offset = 0x10000000;
         printf("Opened \"%s\"\n", (const char *)arg);
         printf("Downloading  \"%s\"\n", (const char *)arg);
@@ -277,6 +261,10 @@ int iplioctl2_update(iop_file_t *a1, int cmd, void *arg)
         StartHardTimer(hard_timer);
 #endif
         while (1) {
+            int read_buf_offs;
+            int *read_buf;
+            s32 chunk_size;
+            int read_size;
             printf("%08X\n", chunk_offset);
             read_size = read(update_fd, SBUF, 0x8000);
             chunk_size = read_size;
@@ -290,6 +278,7 @@ int iplioctl2_update(iop_file_t *a1, int cmd, void *arg)
                 break;
             read_buf_offs = 0;
             while (read_buf_offs++ < chunk_size / 4) {
+                unsigned int read_buf_tmp;
                 read_buf_tmp = *read_buf++;
                 csum += (read_buf_tmp << 24) + ((read_buf_tmp & 0xFF00) << 8) + ((read_buf_tmp & 0xFF0000) >> 8) + ((read_buf_tmp & 0xff000000) >> 24);
             }

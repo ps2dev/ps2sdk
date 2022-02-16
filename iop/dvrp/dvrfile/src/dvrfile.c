@@ -249,14 +249,10 @@ IRX_ID("DVRFILE", 1, 1);
 
 int _start(int argc, const char **argv)
 {
-    int result;
-
-    if (argc >= 0) {
-        result = module_start(argc, argv);
-    } else {
-        result = module_stop();
-    }
-    return result;
+    if (argc >= 0)
+        return module_start(argc, argv);
+    else
+        return module_stop(argc, argv);
 }
 
 int module_start(int argc, const char **argv)
@@ -837,7 +833,6 @@ int dvrf_df_read(iop_file_t *f, void *ptr, int size)
     int dvrp_fd;
     int remain_size;
     int chunk_size;
-    int read_size;
     int unaligned_size;
     drvdrv_exec_cmd_ack cmdack;
 
@@ -856,6 +851,7 @@ int dvrf_df_read(iop_file_t *f, void *ptr, int size)
     cmdack.input_word_count = 4;
     cmdack.timeout = 10000000;
     while (1) {
+        int read_size;
         if (remain_size <= 0) {
             break;
         }
@@ -1063,7 +1059,6 @@ int dvrf_df_write(iop_file_t *f, void *ptr, int size)
     int retval;
     int dvrp_fd;
     int remain_size;
-    u32 chunk_size;
     int unaligned_size;
     drvdrv_exec_cmd_ack cmdack;
 
@@ -1083,6 +1078,7 @@ int dvrf_df_write(iop_file_t *f, void *ptr, int size)
     cmdack.input_word_count = 4;
     cmdack.timeout = 10000000;
     while (remain_size > 0) {
+        u32 chunk_size;
         chunk_size = current_chunk_size;
         if (remain_size < current_chunk_size) {
             chunk_size = remain_size;
