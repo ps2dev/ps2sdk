@@ -71,7 +71,7 @@ release_base: env_release_check
 	fi
 	cp -f README.md $(PS2SDK)
 	cp -f CHANGELOG $(PS2SDK)
-	cp -f AUTHORS $(PS2SDK)
+	cp -f AUTHORS2004.md $(PS2SDK)
 	cp -f LICENSE $(PS2SDK)
 	cp -f ID $(PS2SDK)
 	cp -f Defs.make $(PS2SDK)

@@ -30,6 +30,7 @@
 !.github
 !.editorconfig
 !.clang-format
+!.mailmap
 
 #
 obj/
