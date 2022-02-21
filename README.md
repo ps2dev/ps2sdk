@@ -10,7 +10,7 @@ All rights reserved.
 
 ## Introduction
 
-PS2SDK is a collection of Open Source libraries used for developing applications on Sony's PlayStation 2® (PS2). ps2sdk contains the work from a number of PS2 projects which are now buildable in a single source tree. Review the history section for how ps2sdk came about.
+PS2SDK is a collection of Open Source libraries used for developing applications on Sony's PlayStation 2® (PS2). ps2sdk contains work from a number of PS2 projects which are now buildable in a single source tree. Review the history section for how ps2sdk came about.
 
 At the time of writing PS2SDK includes the following libraries and features, allowing:
 
@@ -28,7 +28,7 @@ At the time of writing PS2SDK includes the following libraries and features, all
 
 ## Standard Libraries
 
-In a countinously effort to make `PS2SDK` and the whole `PS2DEV` a `POSIX` environment; there are some libraries needed to be included inside of the [standard libraries](https://gcc.gnu.org/onlinedocs/gcc/Standard-Libraries.html), whick means, libraries than by default are included in any compilation program. From `PS2SDK` we have:
+In a countinously effort to make `PS2SDK` and the whole `PS2DEV` a `POSIX` environment; there are some libraries needed to be included inside of the [standard libraries](https://gcc.gnu.org/onlinedocs/gcc/Standard-Libraries.html), which means, libraries that are included by default in any compilation program. From `PS2SDK` we have:
 
 -   `lkernel`: Contains the calls to BIOS functions
 -   `lps2sdkc`: Implements most of the required methods by `newlib`
@@ -61,7 +61,7 @@ A binary release of PS2SDK will include the following directories:
 
 ps2sdk source tree is considerably different from the binary or release distribution. You should only use the binary release when using ps2sdk in your own projects.
 
-The source tree is a built as a collection of seperate projects; each with their own Make file. The file `Defs.make` provides the basic definitions required when building PS2SDK. The two main variables required are `PS2SDKSRC`, which points to the source base directory, and `PS2SDK`, which points to the release directory.
+The source tree is built as a collection of seperate projects; each with their own Makefile. The file `Defs.make` provides the basic definitions required when building PS2SDK. The two main variables required are `PS2SDKSRC`, which points to the source base directory, and `PS2SDK`, which points to the release directory.
 
 The main make file has three targets:
 
