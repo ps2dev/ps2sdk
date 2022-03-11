@@ -385,13 +385,18 @@ int apaDelete(apa_cache_t *clink)
     return rv;
 }
 
-int apaCheckSum(apa_header_t *header)
+int apaCheckSum(apa_header_t *header, int fullcheck)
 {
     u32 *ptr = (u32 *)header;
     u32 sum, i;
 
     for (sum = 0, i = 1; i < 256; i++) // sizeof(header)/4 = 256, start at offset +4 to omit the checksum field.
         sum += ptr[i];
+#ifdef APA_SUPPORT_GPT
+    if (!(fullcheck))
+        for (sum = 0, i = 1; i < 128; i++) // recalculate checksum only for first sector.
+            sum += ptr[i];
+#endif
     return sum;
 }
 
@@ -401,8 +406,11 @@ int apaReadHeader(s32 device, apa_header_t *header, u32 lba)
         return -EIO;
     if (header->magic != APA_MAGIC)
         return -EIO;
-    if (apaCheckSum(header) != header->checksum)
-        return -EIO;
+    if (apaCheckSum(header, 1) != header->checksum)
+        if (lba == APA_SECTOR_MBR)
+            if (apaCheckSum(header, 0) != header->checksum)
+                return -EIO;
+
     if (lba == APA_SECTOR_MBR) {
         if (strncmp(header->mbr.magic, apaMBRMagic, sizeof(header->mbr.magic)) == 0)
             return 0;

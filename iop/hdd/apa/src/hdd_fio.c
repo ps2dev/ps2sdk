@@ -102,10 +102,12 @@ static int fioGetInput(const char *arg, apa_params_t *params)
     char argBuf[32];
     int rv = 0;
     static const struct apaFsType fsTypes[] = {
+        {"EXT2SWAP", APA_TYPE_EXT2SWAP},
+        {"EXT2", APA_TYPE_EXT2},
+        {"REISER", APA_TYPE_REISER},
         {"PFS", APA_TYPE_PFS},
         {"CFS", APA_TYPE_CFS},
-        {"EXT2", APA_TYPE_EXT2},
-        {"EXT2SWAP", APA_TYPE_EXT2SWAP}};
+    };
 
     if (params == NULL)
         return -EINVAL;
@@ -151,16 +153,15 @@ static int fioGetInput(const char *arg, apa_params_t *params)
     if ((rv = fioInputBreaker(&arg, argBuf, sizeof(argBuf))) != 0)
         return rv;
 
-    for (i = 0; i < 4; i++) {
-        if (!strcmp(argBuf, fsTypes[i].desc)) {
+    // scan through fstypes if found none - error
+    for (int i = 0; i < 6; i++) {
+        if (i == 5) {
+            APA_PRINTF(APA_DRV_NAME ": error: Invalid fstype, %s.\n", argBuf);
+            return -EINVAL;
+        } else if (!strcmp(argBuf, fsTypes[i].desc)) {
             params->type = fsTypes[i].type;
             break;
         }
-    }
-
-    if (i == 4) {
-        printf("hdd: error: Invalid fstype, %s.\n", argBuf);
-        return -EINVAL;
     }
 
     return rv;
@@ -310,7 +311,23 @@ int hddFormat(iop_file_t *f, const char *dev, const char *blockdev, void *arg, i
         apaGetTime(&header->created);
         apaGetTime(&header->mbr.created);
 
-        header->checksum = apaCheckSum(header);
+#ifdef APA_SUPPORT_GPT
+        header->mbr.protective_mbr.UniqueMbrSignature = 0;
+        header->mbr.protective_mbr.Unknown = 0;
+        header->mbr.protective_mbr.partition_record1.BootIndicator = 0;
+        header->mbr.protective_mbr.partition_record1.StartHead = 0;
+        header->mbr.protective_mbr.partition_record1.StartSector = 2;
+        header->mbr.protective_mbr.partition_record1.StartTrack = 0;
+        header->mbr.protective_mbr.partition_record1.OSIndicator = 0xEE;
+        header->mbr.protective_mbr.partition_record1.EndHead = 0xFF;
+        header->mbr.protective_mbr.partition_record1.EndSector = 0xFF;
+        header->mbr.protective_mbr.partition_record1.EndTrack = 0xFF;
+        header->mbr.protective_mbr.partition_record1.StartingLBA = 1;
+        header->mbr.protective_mbr.partition_record1.SizeInLBA = hddDevices[f->unit].totalLBA - header->mbr.protective_mbr.partition_record1.StartingLBA;
+        header->mbr.protective_mbr.Signature = 0xAA55;
+#endif
+
+        header->checksum = apaCheckSum(header, 1);
         clink->flags |= APA_CACHE_FLAG_DIRTY;
         apaCacheFlushDirty(clink);
         ata_device_flush_cache(f->unit);
@@ -939,7 +956,11 @@ static int devctlSetOsdMBR(s32 device, hddSetOsdMBR_t *mbrInfo)
         return rv;
 
     APA_PRINTF(APA_DRV_NAME ": mbr start: %ld\n" APA_DRV_NAME ": mbr size : %ld\n", mbrInfo->start, mbrInfo->size);
-    clink->header->mbr.osdStart = mbrInfo->start;
+    // osdStart should not overwrite APA journal
+    if (mbrInfo->start < APA_SECTOR_MIN_OSDSTART)
+        return -EINVAL;
+    else
+        clink->header->mbr.osdStart = mbrInfo->start;
     clink->header->mbr.osdSize = mbrInfo->size;
     clink->flags |= APA_CACHE_FLAG_DIRTY;
     apaCacheFlushAllDirty(device);

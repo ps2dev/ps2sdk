@@ -15,11 +15,16 @@
 #include <hdd-ioctl.h>
 
 // Sectors for this and that ;)
-#define APA_SECTOR_MBR          0
-#define APA_SECTOR_SECTOR_ERROR 6 // use for last sector that had a error...
-#define APA_SECTOR_PART_ERROR   7 // use for last partition that had a error...
-#define APA_SECTOR_APAL         8
-#define APA_SECTOR_APAL_HEADERS 10 // 10-262
+#define APA_SECTOR_MBR 0
+#ifdef APA_SUPPORT_GPT
+#define APA_SECTOR_SECTOR_ERROR 34 // 6 use for last sector that had a error...
+#else
+#define APA_SECTOR_SECTOR_ERROR 6 // 6 use for last sector that had a error...
+#endif
+#define APA_SECTOR_PART_ERROR   APA_SECTOR_SECTOR_ERROR + 1       // 7 use for last partition that had a error...
+#define APA_SECTOR_APAL         APA_SECTOR_PART_ERROR + 1         // 8
+#define APA_SECTOR_APAL_HEADERS APA_SECTOR_APAL + 2               // 10-262
+#define APA_SECTOR_MIN_OSDSTART APA_SECTOR_APAL_HEADERS + 252 + 1 // OSD program cannot overlap the journal
 
 // APA Partition
 #define APA_MAGIC       0x00415041 // 'APA\0'
@@ -75,7 +80,27 @@ typedef struct
         apa_ps2time_t created;
         u32 osdStart;
         u32 osdSize;
-        char pading3[200];
+        char pading3[128]; // 200
+        struct
+        {
+            u32 UniqueMbrSignature;
+            u16 Unknown;
+            struct
+            {
+                u8 BootIndicator;
+                u8 StartHead;
+                u8 StartSector;
+                u8 StartTrack;
+                u8 OSIndicator;
+                u8 EndHead;
+                u8 EndSector;
+                u8 EndTrack;
+                u32 StartingLBA;
+                u32 SizeInLBA;
+            } partition_record1;
+            u8 partition_record234[48];
+            u16 Signature;
+        } protective_mbr;
     } mbr;
     apa_sub_t subs[APA_MAXSUB];
 } apa_header_t;
@@ -122,7 +147,7 @@ void apaMakeEmpty(apa_cache_t *clink);
 apa_cache_t *apaDeleteFixPrev(apa_cache_t *clink1, int *err);
 apa_cache_t *apaDeleteFixNext(apa_cache_t *clink, int *err);
 int apaDelete(apa_cache_t *clink);
-int apaCheckSum(apa_header_t *header);
+int apaCheckSum(apa_header_t *header, int fullcheck);
 int apaReadHeader(s32 device, apa_header_t *header, u32 lba);
 int apaWriteHeader(s32 device, apa_header_t *header, u32 lba);
 int apaGetFormat(s32 device, int *format);
@@ -151,7 +176,7 @@ typedef struct
     u32 sectors[126];
 } apa_journal_t;
 
-#define journalCheckSum(header) apaCheckSum((apa_header_t *)header)
+#define journalCheckSum(header) apaCheckSum((apa_header_t *)header, 1)
 int apaJournalReset(s32 device);
 int apaJournalFlush(s32 device);
 int apaJournalWrite(apa_cache_t *clink);
