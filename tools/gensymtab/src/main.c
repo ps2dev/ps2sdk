@@ -448,7 +448,6 @@ int symtab_write(const char *filename, const char *name, symbol *s)
 	shdr[5].sh_info      = 0;
 	shdr[5].sh_addralign = 1;
 	shdr[5].sh_entsize   = 0;
-	cur = shdr[5].sh_offset + shdr[5].sh_size;
 
 	fseek(file, shdr[5].sh_offset, SEEK_SET);
 	fwrite(str.Buffer, shdr[5].sh_size, 1, file);
