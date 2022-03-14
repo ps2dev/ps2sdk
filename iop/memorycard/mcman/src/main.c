@@ -2625,7 +2625,12 @@ lbl0:
 		else
 			temp = cluster + 1;
 
-		mce->wr_flag |= 1 << ((cluster + 1) - (temp & 0xfffffff8));
+		temp &= 0xfffffff8;
+		temp = (cluster + 1) - temp;
+		if (temp < 0)
+			temp = 0;
+
+		mce->wr_flag |= 1 << temp;
 
 		if (flags == 0)
 			temp = (fse->mode & 0xf) | 0xa0;
@@ -2831,7 +2836,12 @@ int mcman_FNC8ca4(int port, int slot, MC_FHANDLE *fh)
 				else
 					temp = mcfree + 1;
 
-				mce->wr_flag |= 1 << ((mcfree + 1) - (temp & 0xfffffff8));
+				temp &= 0xfffffff8;
+				temp = (mcfree + 1) - temp;
+				if (temp < 0)
+					temp = 0;
+
+				mce->wr_flag |= 1 << temp;
 
 				pfsentry = (u8 *)fse1;
 				pfsee = (u8 *)fse2;
@@ -2858,7 +2868,12 @@ int mcman_FNC8ca4(int port, int slot, MC_FHANDLE *fh)
 					else
 						temp = j + 1;
 
-					mce->wr_flag |= 1 << ((j + 1) - (temp & 0xfffffff8));
+					temp &= 0xfffffff8;
+					temp = (j + 1) - temp;
+					if (temp < 0)
+						temp = 0;
+
+					mce->wr_flag |= 1 << temp;
 					fse3->linked_block = mcfree;
 					fse3->edc = mcman_calcEDC((void *)fse3, 127);
 				}
@@ -2890,7 +2905,12 @@ int mcman_FNC8ca4(int port, int slot, MC_FHANDLE *fh)
 	else
 		temp = mcfree + 1;
 
-	mce->wr_flag |= 1 << ((mcfree + 1) - (temp & 0xfffffff8));
+	temp &= 0xfffffff8;
+	temp = (mcfree + 1) - temp;
+	if (temp < 0)
+		temp = 0;
+
+	mce->wr_flag |= 1 << temp;
 
 	mcman_wmemset((void *)fse2, sizeof(McFsEntryPS1), 0);
 
@@ -2909,7 +2929,12 @@ int mcman_FNC8ca4(int port, int slot, MC_FHANDLE *fh)
 	else
 		temp = j + 1;
 
-	mce->wr_flag |= 1 << ((j + 1) - (temp & 0xfffffff8));
+	temp &= 0xfffffff8;
+	temp = (j + 1) - temp;
+	if (temp < 0)
+		temp = 0;
+
+	mce->wr_flag |= 1 << temp;
 
 	if (fse3->mode == 0x53)
 		fse3->mode = 0x52;
@@ -3048,7 +3073,12 @@ int mcman_cachePS1dirs(int port, int slot)
 			else
 			 	temp1 = temp2;
 
-			mce[index]->wr_flag |= (1 << (temp2 - (temp1 & 0xfffffff8)));
+			temp1 &= 0xfffffff8;
+			temp1 = temp2 - temp1;
+			if (temp1 < 0)
+				temp1 = 0;
+
+			mce[index]->wr_flag |= 1 << temp1;
 
 		} while (++j < 15);
 
@@ -3077,7 +3107,12 @@ int mcman_cachePS1dirs(int port, int slot)
 		else
 		 	temp1 = temp2;
 
-		mce[index]->wr_flag |= (1 << (temp2 - (temp1 & 0xfffffff8)));
+		temp1 &= 0xfffffff8;
+		temp1 = temp2 - temp1;
+		if (temp1 < 0)
+			temp1 = 0;
+
+		mce[index]->wr_flag |= 1 << temp1;
 
 	} while (++i < 15);
 

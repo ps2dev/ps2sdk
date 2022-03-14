@@ -182,7 +182,12 @@ int mcman_open1(int port, int slot, char *filename, int flags)
 				else
 					temp = i + 1;
 
-				mce->wr_flag |= 1 << ((i + 1) - (temp & 0xfffffff8));
+				temp &= 0xfffffff8;
+				temp = (i + 1) - temp;
+				if (temp < 0)
+					temp = 0;
+
+				mce->wr_flag |= 1 << temp;
 			}
 		}
 	}
@@ -219,7 +224,12 @@ int mcman_open1(int port, int slot, char *filename, int flags)
 	else
 		temp = cluster + 1;
 
-	mce->wr_flag |= 1 << ((cluster + 1) - (temp & 0xfffffff8));
+	temp &= 0xfffffff8;
+	temp = (cluster + 1) - temp;
+	if (temp < 0)
+		temp = 0;
+
+	mce->wr_flag |= 1 << temp;
 
 	r = McFlushCache(port, slot);
 	if (r != sceMcResSucceed)
@@ -484,7 +494,12 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 	if ((r + 1) < 0)
 		temp = r + 8;
 
-	mce->wr_flag |= 1 << ((r + 1) - (temp & 0xfffffff8));
+	temp &= 0xfffffff8;
+	temp = (r + 1) - temp;
+	if (temp < 0)
+		temp = 0;
+
+	mce->wr_flag |= 1 << temp;
 
 	if (sio2man_type >= XSIO2MAN) {
 		fse2->field_7d = 0;
@@ -649,7 +664,12 @@ int mcman_close1(int fd)
 	else
 		temp = fh->freeclink + 1;
 
-	mce->wr_flag |= 1 << ((fh->freeclink + 1) - (temp & 0xfffffff8));
+	temp &= 0xfffffff8;
+	temp = (fh->freeclink + 1) - temp;
+	if (temp < 0)
+		temp = 0;
+
+	mce->wr_flag |= 1 << temp;
 
 	if (fh->filesize == 0) {
 		fse->length = 0x2000;
