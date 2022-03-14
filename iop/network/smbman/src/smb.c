@@ -1503,8 +1503,6 @@ int smb_TreeDisconnect(int UID, int TID)
 	if ((TDRsp->smbH.Eclass | (TDRsp->smbH.Ecode << 16)) != STATUS_SUCCESS)
 		return -EIO;
 
-	TID = -1;
-
 	return 0;
 }
 
@@ -1535,8 +1533,6 @@ int smb_LogOffAndX(int UID)
 	// check there's no error
 	if ((LRsp->smbH.Eclass | (LRsp->smbH.Ecode << 16)) != STATUS_SUCCESS)
 		return -EIO;
-
-	UID = -1;
 
 	return 0;
 }

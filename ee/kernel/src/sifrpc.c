@@ -51,7 +51,7 @@ void *_rpc_get_fpacket(struct rpc_data *rpc_data);
 void *_rpc_get_packet(struct rpc_data *rpc_data)
 {
 	SifRpcPktHeader_t *packet;
-	int len, pid, rid = 0;
+	int len, pid, rid;
 
 	DI();
 

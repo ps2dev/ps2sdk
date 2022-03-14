@@ -995,9 +995,9 @@ static struct erl_record_t * load_erl(const char * fname, u8 * elf_mem, u32 addr
     }
 
     if ((s = erl_find_local_symbol("_start", r))) {
-	int _start_ret;
 	dprintf("_start = %08X\n", s->address);
 #ifdef _EE
+        int _start_ret;
         if ((_start_ret = ((start_t)s->address)(argc, argv))) {
 	    dprintf("Module's _start returned %i, unloading module.\n", _start_ret);
 	    if (unload_erl(r))

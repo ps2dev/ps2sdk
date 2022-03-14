@@ -64,8 +64,9 @@ int GetConsoleIDs(u64 *guid, char *ModelName){
 			result=-1;
 			DEBUG_PRINTF("Error reading console model name.\n");
 		}
-
-		result=0;
+		else{
+			result=0;
+		}
 	}
 
 	return result;

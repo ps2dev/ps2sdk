@@ -262,15 +262,13 @@ int fontx_load_double_krom(fontx_t *fontx)
 int fontx_load(const char *path, fontx_t* fontx, int type, int wmargin, int hmargin, int bold)
 {
 
-	FILE *file = NULL;
 
-	int ret = -1;
-	long size = 0;
 
 	fontx_hdr *fontx_header = NULL;
 
 	if (!strcmp("rom0:KROM",path) || !strcmp("rom0:/KROM",path))
 	{
+		int ret = -1;
 
 		if (type == SINGLE_BYTE)
 		{
@@ -297,8 +295,9 @@ int fontx_load(const char *path, fontx_t* fontx, int type, int wmargin, int hmar
 
 	else
 	{
+		long size = 0;
 
-		file = fopen(path, "r");
+		FILE *file = fopen(path, "r");
 
 		if (file == NULL)
 		{
@@ -906,7 +905,6 @@ qword_t *fontx_print_sjis(qword_t *q, int context, const unsigned char *str, int
 	for (j = 0; j < length; j++)
 	{
 
-		wide = 0;
 
 		while(str[j] == '\n' || str[j] == '\t')
 		{

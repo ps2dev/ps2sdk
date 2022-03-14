@@ -154,7 +154,7 @@ int pad_get_num_modes(pad_t *pad)
 void pad_print_supported_modes(pad_t *pad)
 {
 
-	int i = 0;
+	int i;
 	int modes = pad_get_num_modes(pad);
 
 	printf("The device has %d modes\n", modes);

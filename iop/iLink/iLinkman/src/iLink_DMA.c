@@ -66,8 +66,6 @@ static int iLinkPHTSendData(struct TransactionContextData *trContext, unsigned c
 
 	ClearEventFlag(IntrEventFlag, ~(iLinkEventDMATransEnd|iLinkEventError));
 
-	ByteSwap=0;
-
 	PHT_ctrl_ST_R0_flags=(tCode==IEEE1394_TCODE_WRITEB)?PHT_CTRL_ST_EPCNT|PHT_CTRL_ST_EWREQ:PHT_CTRL_ST_EPCNT|PHT_CTRL_ST_ERREQ;	/* EWReq and EPCnt, OR ERReq and EPCnt. */
 	tLabel=0x3F;	/* PHT 00 */
 

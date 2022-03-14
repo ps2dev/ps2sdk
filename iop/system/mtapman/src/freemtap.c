@@ -266,14 +266,13 @@ int change_slot(s32 *arg)
 {
 	u32 loop = 0;
 	u32 count = 4;
-	u32 reg = 0;
 	s32 data[4];
 	u32 i, port;
 
 	while((loop < 10) && (count != 0))
 	{
+		u32 reg = 0;
 		count = 4;
-		reg = 0;
 
 		td.in_size = 0;
 		td.out_size = 0;
