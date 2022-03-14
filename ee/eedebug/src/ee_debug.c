@@ -150,7 +150,7 @@ void ee_dbg_clr_bpdv(void)
 void ee_dbg_clr_bpx(void)
 {
     u32 bpc = ee_dbg_get_bpc();
-    bpc &= ~(EE_BPC_IXE | EE_BPC_IUE | EE_BPC_ISE | EE_BPC_IKE | EE_BPC_IXE | EE_BPC_ITE);
+    bpc &= ~(EE_BPC_IXE | EE_BPC_IUE | EE_BPC_ISE | EE_BPC_IKE | EE_BPC_ITE);
     ee_dbg_set_bpc(bpc);
 }
 
