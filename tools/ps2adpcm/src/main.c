@@ -171,6 +171,7 @@ int main(int argc, char *argv[])
 		if (i!=pcm.ChannelCount)
 			break;
 	} while(1);
+	free(pcm.Sample);
 
 	return(0);
 }

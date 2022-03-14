@@ -198,6 +198,7 @@ int graph_load_config(char *filename)
 	if (fread(config, 1, sizeof(config), infile) < 0)
 	{
 
+		fclose(infile);
 		return -EIO;
 
 	}
