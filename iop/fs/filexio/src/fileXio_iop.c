@@ -139,7 +139,7 @@ static int fileXio_GetDeviceList_RPC(struct fileXioDevice* ee_devices, int eecou
     int device_count = 0;
     iop_device_t **devices = GetDeviceList();
     struct fileXioDevice local_devices[FILEXIO_MAX_DEVICES];
-    while (devices[device_count] && device_count < eecount)
+    while (device_count < eecount && devices[device_count])
     {
         iop_device_t *device = devices[device_count];
         strncpy(local_devices[device_count].name, device->name, 128);
