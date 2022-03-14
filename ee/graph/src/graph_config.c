@@ -187,7 +187,7 @@ int graph_load_config(char *filename)
 	FILE *infile; char config[512];
 
 	// Open the config file.
-	if ((infile = fopen(filename, "r")) < 0)
+	if ((infile = fopen(filename, "r")) == NULL)
 	{
 
 		return -ENOENT;
@@ -195,7 +195,7 @@ int graph_load_config(char *filename)
 	}
 
 	// Read the config file contents.
-	if (fread(config, 1, sizeof(config), infile) < 0)
+	if (fread(config, 1, sizeof(config), infile) != sizeof(config))
 	{
 
 		fclose(infile);
@@ -204,7 +204,7 @@ int graph_load_config(char *filename)
 	}
 
 	// Close the config file.
-	if (fclose(infile) < 0)
+	if (fclose(infile) != 0)
 	{
 
 		return -1;
@@ -225,7 +225,7 @@ int graph_save_config(char *filename)
 	graph_get_config(config);
 
 	// Open the config file.
-	if ((outfile = fopen(filename, "w")) < 0)
+	if ((outfile = fopen(filename, "w")) == NULL)
 	{
 
 		return -ENOENT;
@@ -233,7 +233,7 @@ int graph_save_config(char *filename)
 	}
 
 	// Write the config file contents.
-	if (fwrite(config, 1, strlen(config), outfile) < 0)
+	if (fwrite(config, 1, strnlen(config, sizeof(config)), outfile) == strnlen(config, sizeof(config)))
 	{
 
 		return -EIO;
@@ -241,7 +241,7 @@ int graph_save_config(char *filename)
 	}
 
 	// Close the config file.
-	if (fclose(outfile) < 0)
+	if (fclose(outfile) != 0)
 	{
 
 		return -1;
