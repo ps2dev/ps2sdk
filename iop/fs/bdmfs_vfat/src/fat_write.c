@@ -1297,6 +1297,8 @@ static int enlargeDirentryClusterSpace(fat_driver* fatd, unsigned int startClust
         unsigned char* sbuf = NULL; //sector buffer
 
         ret = ALLOC_SECTOR(fatd, startSector + i, sbuf);
+        if (ret < 0)
+            return -EIO;
         memset(sbuf, 0, fatd->partBpb.sectorSize); //fill whole sector with zeros
         ret = WRITE_SECTOR(fatd, startSector + i);
         if (ret < 0)
