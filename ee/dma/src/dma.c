@@ -138,7 +138,8 @@ int dma_channel_wait(int channel, int timeout)
 		if (timeout > 0)
 		{
 
-			if (timeout-- == 0)
+			timeout -= 1;
+			if (timeout == 0)
 			{
 
 				return -1;
