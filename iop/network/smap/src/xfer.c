@@ -150,7 +150,7 @@ int HandleTxReqs(struct SmapDriverData *SmapDrivPrivData)
         SmapDrivPrivData->packetToSend = data;
 
         if (SmapDrivPrivData->NumPacketsInTx < SMAP_BD_MAX_ENTRY) {
-            if (length > 0) {
+            {
                 SizeRounded = (length + 3) & ~3;
 
                 if (SmapDrivPrivData->TxBufferSpaceAvailable >= SizeRounded) {
@@ -171,8 +171,7 @@ int HandleTxReqs(struct SmapDriverData *SmapDrivPrivData)
                     SmapDrivPrivData->TxBufferSpaceAvailable -= SizeRounded;
                 } else
                     return result; // Out of FIFO space
-            } else
-                printf("smap: dropped\n");
+            }
         } else
             return result; // Queue full
 
