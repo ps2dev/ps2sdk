@@ -414,7 +414,6 @@ int httpOpen(iop_io_file_t *f, const char *name, int mode)
  */
 int httpRead(iop_io_file_t *f, void *buffer, int size)
 {
-	int bytesRead = 0;
 	t_fioPrivData *privData = (t_fioPrivData *)f->privdata;
 	int left = size;
 	int totalRead = 0;
@@ -425,7 +424,7 @@ int httpRead(iop_io_file_t *f, void *buffer, int size)
 	//             side has closed the connection.
 	do {
 
-		bytesRead = recv( privData->sockFd, (void *)((u8 *)buffer + totalRead), left, 0 );
+		int bytesRead = recv( privData->sockFd, (void *)((u8 *)buffer + totalRead), left, 0 );
 
 //		M_DEBUG("bytesRead = %d\n", bytesRead);
 

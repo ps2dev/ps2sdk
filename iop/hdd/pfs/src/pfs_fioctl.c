@@ -354,9 +354,7 @@ static int ioctl2AttrAdd(pfs_cache_t *clink, pfs_ioctl2attr_t *attr)
 
 static int ioctl2AttrDelete(pfs_cache_t *clink, void *arg)
 {
-	pfs_aentry_t *aentry;
-
-	if((aentry=getAentry(clink, arg, NULL, PFS_AENTRY_MODE_DELETE)) == NULL)
+	if(getAentry(clink, arg, NULL, PFS_AENTRY_MODE_DELETE) == NULL)
 		return -ENOENT;
 	clink->flags|=PFS_CACHE_FLAG_DIRTY;
 	return 0;

@@ -245,7 +245,7 @@ int hddGetFilesystemList(t_hddFilesystem hddFs[], int maxEntries)
 		rv = fileXioDread(hddFd, &dirEnt);
 	}
 
-	rv = fileXioDclose(hddFd);
+	fileXioDclose(hddFd);
 
 	return count;
 }
