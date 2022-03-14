@@ -460,7 +460,7 @@ int _McRead(void *rpc_buf)
 	left_to_read = (dP->size - eP.size1) - eP.size2;
 
 	if (eP.size2 != 0)
-		eP.dest2 = (void *)(eedata + eP.size1 + left_to_read);
+		eP.dest2 = (void *)((u8 *)eedata + eP.size1 + left_to_read);
 
 	if (eP.size1 != 0) {
 		size_readed = pMcRead(dP->fd, eP.src1, eP.size1);
@@ -473,7 +473,7 @@ int _McRead(void *rpc_buf)
 		else {
 			file_offset = size_readed;
 			eP.dest1 = eedata;
-			eedata += size_readed;
+			eedata = (void *)((u8 *)eedata + size_readed);
 
 			if (size_readed != eP.size1) {
 				eP.size1 = size_readed;
@@ -513,7 +513,7 @@ int _McRead(void *rpc_buf)
 
 		CpuResumeIntr(intStatus);
 
-		eedata += size_readed;
+		eedata = (void *)((u8 *)eedata + size_readed);
 
 		if (size_to_read != size_readed) {
 			eP.size2 = 0;
@@ -588,7 +588,7 @@ int _McRead2(void *rpc_buf)
 	left_to_read = (dP->size - eP.size1) - eP.size2;
 
 	if (eP.size2 != 0)
-		eP.dest2 = (void *)(eedata + eP.size1 + left_to_read);
+		eP.dest2 = (void *)((u8 *)eedata + eP.size1 + left_to_read);
 
 	if (eP.size1 != 0) {
 		size_readed = pMcRead(dP->fd, eP.src1, eP.size1);
@@ -601,7 +601,7 @@ int _McRead2(void *rpc_buf)
 		else {
 			file_offset = size_readed;
 			eP.dest1 = eedata;
-			eedata += size_readed;
+			eedata = (void *)((u8 *)eedata + size_readed);
 
 			if (size_readed != eP.size1) {
 				eP.size1 = size_readed;
@@ -635,7 +635,7 @@ int _McRead2(void *rpc_buf)
 
 		eP.size2 = size_readed & 0x3f;
 		if ((size_readed & 0x3f) != 0) {
-			eP.dest2 = (void *)(eedata + (size_readed & 0xffffffc0));
+			eP.dest2 = (void *)((u8 *)eedata + (size_readed & 0xffffffc0));
 			memcpy(eP.src2, (void *)(mcserv_buf + (size_readed & 0xffffffc0)), size_readed & 0x3f);
 		}
 
@@ -656,7 +656,7 @@ dma_transfer:
 skip_dma_transfer:
 		file_offset += size_readed;
 		left_to_read -= size_readed;
-		eedata += size_readed;
+		eedata = (void *)((u8 *)eedata + size_readed);
 
 		if (size_to_read != size_readed) {
 			size_readed = 0;

@@ -630,7 +630,7 @@ int devfs_ioctl2(iop_file_t *file, int cmd, void *args, unsigned int arglen, voi
          if(dev->node.desc)
          {
             strncpy(buf, dev->node.desc, buflen-1);
-            *((u8 *) (buf + buflen)) = 0;
+            *(((u8 *)buf + buflen)) = 0;
             return strlen(buf);
          }
 

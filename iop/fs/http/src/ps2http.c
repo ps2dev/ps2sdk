@@ -414,7 +414,7 @@ int httpRead(iop_io_file_t *f, void *buffer, int size)
 	//             side has closed the connection.
 	do {
 
-		bytesRead = recv( privData->sockFd, buffer + totalRead, left, 0 );
+		bytesRead = recv( privData->sockFd, (void *)((u8 *)buffer + totalRead), left, 0 );
 
 //		M_DEBUG("bytesRead = %d\n", bytesRead);
 

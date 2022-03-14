@@ -183,7 +183,7 @@ void * malloc(size_t size)
 	}
 
 	/* Check to see if there's free space at the bottom of the heap.  */
-	if ((__alloc_heap_base + mem_sz) < (void *)__alloc_heap_head) {
+	if ((void *)((u8 *)__alloc_heap_base + mem_sz) < (void *)__alloc_heap_head) {
 		new_mem = (heap_mem_header_t *)__alloc_heap_base;
 		ptr     = (void *)((u32)new_mem + sizeof(heap_mem_header_t));
 
@@ -262,7 +262,7 @@ void * realloc(void *ptr, size_t size)
 	if (prev_mem->size >= size) {
 		/* However, if this is the last block, we have to shrink the heap. */
 		if (!prev_mem->next)
-			alloc_sbrk(ptr + size - alloc_sbrk(0));
+			alloc_sbrk((u8 *)ptr + size - (u8 *)(alloc_sbrk(0)));
 		prev_mem->size = size;
 
 		alloc_unlock();
@@ -424,7 +424,7 @@ void free(void *ptr)
 		/* We need to free (heap top) - (prev->ptr + prev->size), or else
 		   we'll end up with an unallocatable block of heap.  */
 		heap_top = alloc_sbrk(0);
-		size = (u32)heap_top - (u32)(cur->prev->ptr + cur->prev->size);
+		size = (u32)heap_top - (u32)((u8 *)(cur->prev->ptr) + cur->prev->size);
 		alloc_sbrk(-size);
 	}
 

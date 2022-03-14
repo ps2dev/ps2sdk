@@ -491,13 +491,13 @@ int mcWrite(int fd, const void *buffer, int size)
 	}
 	else
 	{
-		g_descParam.size	= size        - ( ((int)(buffer-1) & 0xFFFFFFF0) - (int)(buffer-16) );
-		g_descParam.origin	=               ( ((int)(buffer-1) & 0xFFFFFFF0) - (int)(buffer-16) );
-		g_descParam.buffer	= (void*)((int)buffer + ( ((int)(buffer-1) & 0xFFFFFFF0) - (int)(buffer-16) ));
+		g_descParam.size	= size        - ( ((int)((const u8 *)buffer-1) & 0xFFFFFFF0) - (int)((const u8 *)buffer-16) );
+		g_descParam.origin	=               ( ((int)((const u8 *)buffer-1) & 0xFFFFFFF0) - (int)((const u8 *)buffer-16) );
+		g_descParam.buffer	= (void*)((int)(const u8 *)buffer + ( ((int)((const u8 *)buffer-1) & 0xFFFFFFF0) - (int)((const u8 *)buffer-16) ));
 	}
 	for(i=0; i<g_descParam.origin; i++)
 	{
-		g_descParam.data[i] = *(char*)(buffer+i);
+		g_descParam.data[i] = *(char*)((const u8 *)buffer+i);
 	}
 	FlushCache(0);
 
@@ -830,7 +830,7 @@ int mcWritePage(int port, int slot, int page, const void *buffer){
 
 	if((misaligned=(unsigned int)buffer&0xF)!=0){
 		memcpy(g_descParam.data, buffer, 16-misaligned);
-		memcpy((void*)(g_descParam.data+(16-misaligned)), (void*)(buffer+(16-misaligned)+0x1F0), misaligned);
+		memcpy((void*)(g_descParam.data+(16-misaligned)), (void*)((const u8 *)buffer+(16-misaligned)+0x1F0), misaligned);
 	}
 
 	if((result = SifCallRpc(&g_cdata, mcRpcCmd[g_mcType][MC_RPCCMD_WRITE_PAGE], SIF_RPC_M_NOWAIT, &g_descParam, sizeof(g_descParam), &g_rdata, 4, NULL, NULL))==0){

@@ -324,7 +324,7 @@ qword_t *draw_texture_transfer(qword_t *q, void *src, int width, int height, int
 		q++;
 
 		//Now increment the address by the number of qwords in bytes
-		src += (GIF_BLOCK_SIZE*16);
+		src = (void *)((u8 *)src + (GIF_BLOCK_SIZE*16));
 
 	}
 

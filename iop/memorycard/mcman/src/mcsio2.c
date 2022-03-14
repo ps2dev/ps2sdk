@@ -429,13 +429,13 @@ int mcman_eraseblock(int port, int slot, int block, void **pagebuf, void *eccbuf
 			if (ecc_offset < 0)
 				ecc_offset += 0x1f;
 			ecc_offset = ecc_offset >> 5;
-			p_ecc = (void *)(eccbuf + ecc_offset);
+			p_ecc = (void *)((u8 *)eccbuf + ecc_offset);
 			size = 0;
 			while (size < mcdi->pagesize)	{
 				if (*pagebuf)
-					McDataChecksum((void *)(*pagebuf + size), p_ecc);
+					McDataChecksum((void *)((u8 *)(*pagebuf) + size), p_ecc);
 				size += 128;
-				p_ecc += 3;
+				p_ecc = (void *)((u8 *)p_ecc + 3);
 			}
 			pagebuf++;
 			page++;

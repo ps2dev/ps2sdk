@@ -397,7 +397,7 @@ void fetchConfigDescriptors(IoRequest *req) {
 
 		if ((curDescNum > 0) && !fetchDesc) {
 			UsbConfigDescriptor *desc = dev->staticDeviceDescEndPtr;
-			dev->staticDeviceDescEndPtr += READ_UINT16(&desc->wTotalLength);
+			dev->staticDeviceDescEndPtr = (void *)((u8 *)(dev->staticDeviceDescEndPtr) + READ_UINT16(&desc->wTotalLength));
 		}
 
 		if (fetchDesc) {

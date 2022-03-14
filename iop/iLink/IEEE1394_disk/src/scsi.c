@@ -265,7 +265,7 @@ int scsiReadSector(struct SBP2Device *dev, unsigned long int lba, void *buffer, 
 
 			startingLBA+=sectorsToRead;
 			sectorsRemaining-=sectorsToRead;
-			bufferPtr+=dev->sectorSize * sectorsToRead;
+			bufferPtr = (void *)((u8 *)bufferPtr + (dev->sectorSize * sectorsToRead));
 		}
 
 		/* NULL terminate the last ORB. */
@@ -336,7 +336,7 @@ int scsiWriteSector(struct SBP2Device *dev, unsigned long int lba, void* buffer,
 
 			startingLBA+=sectorsToRead;
 			sectorsRemaining-=sectorsToRead;
-			bufferPtr+=dev->sectorSize * sectorsToRead;
+			bufferPtr=(void *)((u8 *)bufferPtr + (dev->sectorSize * sectorsToRead));
 		}
 
 		/* NULL terminate the last ORB. */

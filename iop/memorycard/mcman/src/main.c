@@ -2364,8 +2364,8 @@ int McCheckBlock(int port, int slot, int block)
 						flag = -1;
 						goto lbl_8764;
 					}
-					p_ecc += 3;
-					p_page += 128;
+					p_ecc = (void *)((u8 *)p_ecc + 3);
+					p_page = (void *)((u8 *)p_page + 128);
 				}
 			}
 		}
@@ -3530,8 +3530,8 @@ lbl2:
 
 			McDataChecksum(p_page, p_ecc);
 
-			p_ecc += 3;
-			p_page += 128;
+			p_ecc = (void *)((u8 *)p_ecc + 3);
+			p_page = (void *)((u8 *)p_page + 128);
 			i++;
 		} while (1);
 
@@ -3552,7 +3552,7 @@ lbl2:
 					goto lbl2;
 				if (r != sceMcResSucceed)
 					return -54;
-				p_ecc += sparesize;
+				p_ecc = (void *)((u8 *)p_ecc + sparesize);
 			} while (++i < mcdi->blocksize);
 		}
 
@@ -3599,7 +3599,7 @@ lbl2:
 				if (r != sceMcResSucceed)
 					return -57;
 			}
-			p_ecc += sparesize;
+			p_ecc = (void *)((u8 *)p_ecc + sparesize);
 		} while (++i < mcdi->blocksize);
 	}
 
@@ -3623,7 +3623,7 @@ lbl2:
 				if (r != sceMcResSucceed)
 					return -57;
 			}
-			p_ecc += sparesize;
+			p_ecc = (void *)((u8 *)p_ecc + sparesize);
 		} while (++i < mcdi->blocksize);
 	}
 

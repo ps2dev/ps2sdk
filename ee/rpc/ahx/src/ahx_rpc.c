@@ -40,7 +40,7 @@ void iop_readwrite(void *addr, void *buf, u32 size, u32 read)
 {
 	DI();
 	ee_kmode_enter();
-	if (read) memcpy(buf, addr + IOP_MEM, size); else memcpy(addr + IOP_MEM, buf, size);
+	if (read) memcpy(buf, (void *)((u8 *)addr + IOP_MEM), size); else memcpy((void *)((u8 *)addr + IOP_MEM), buf, size);
 	ee_kmode_exit();
 	EI();
 }

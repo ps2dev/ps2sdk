@@ -86,11 +86,11 @@ int sbv_patch_fileio(void)
 
 	//For the dump to sceRemove()
 	new_jump_op =  JMP((u32)patch_addr);
-	smem_write_word((void *)mod_info.text_start + 0x0bb8, new_jump_op);
+	smem_write_word((void *)((u8 *)mod_info.text_start + 0x0bb8), new_jump_op);
 	new_jump_op =  JAL((u32)patch_addr + 16);
 	//For the jumps to sceSifSetDma within sceGetstat() and sceDread():
-	smem_write_word((void *)mod_info.text_start + 0x09cc, new_jump_op);
-	smem_write_word((void *)mod_info.text_start + 0x0a58, new_jump_op);
+	smem_write_word((void *)((u8 *)mod_info.text_start + 0x09cc), new_jump_op);
+	smem_write_word((void *)((u8 *)mod_info.text_start + 0x0a58), new_jump_op);
 
 	return 0;
 }
