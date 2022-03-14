@@ -647,7 +647,7 @@ int setsockopt(int s, int level, int optname, const void *optval, socklen_t optl
 	WaitSema(lock_sema);
 
 	pkt->s = s;
-	pkt->s = level;
+	pkt->level = level;
 	pkt->optname = optname;
 	pkt->optlen = optlen;
 
