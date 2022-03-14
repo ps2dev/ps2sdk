@@ -95,7 +95,7 @@ int pfsFormat(pfs_block_device_t *blockDev, int fd, int zonesize, int fragment)
 		sb->zone_size = zonesize;
 		sb->num_subs = subnumber;
 		sb->log.number = pfsGetBitmapSizeBlocks(scale, mainsize) + (0x2000 >> scale) + 1;
-		sb->log.count = 0x20000 / zonesize ? 0x20000 / zonesize : 1;
+		sb->log.count = (0x20000 / zonesize) ? (0x20000 / zonesize) : 1;
 
 		PFS_PRINTF(PFS_DRV_NAME": Format: log.number = %ld, log.count = %d\n", sb->log.number << scale, sb->log.count);
 
