@@ -1252,7 +1252,7 @@ int PS2CamReadPacket(int handle)
 
 	cam = CamHandle[handle-1].cam;
 
-	if(cam			<= 0) return CAM_ERROR_INVALIDDEVICE;
+	if(cam			== NULL) return CAM_ERROR_INVALIDDEVICE;
 	if(cam->status	<  2) return CAM_ERROR_DEVNOTREADY;
 
 
