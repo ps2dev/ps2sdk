@@ -1144,7 +1144,7 @@ static int fat_fillDirentryInfo(fat_driver* fatd, const char* lname, char* sname
 					if (!(dir.attr & FAT_ATTR_VOLUME_LABEL)) { //not volume label
 						if ((strEqual(dir.sname, lname) == 0) || (strEqual(dir.name, lname) == 0) ) {
 							//file we want to create already exist - return the cluster of the file
-							if ((directory > 0) && ((dir.attr & FAT_ATTR_DIRECTORY) != directory)) {
+							if ((directory >= 0) && ((dir.attr & FAT_ATTR_DIRECTORY) != directory)) {
 								//found directory but requested is file (and vice veresa)
 								if (directory) return -ENOTDIR;
 								return -EISDIR;
