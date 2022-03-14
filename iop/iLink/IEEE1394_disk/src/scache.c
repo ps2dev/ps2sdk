@@ -156,9 +156,11 @@ int scache_readSector(cache_set* cache, unsigned int sector, void** buf) {
 	int ret;
 	unsigned int alignedSector;
 
-	XPRINTF("cache: readSector devId = %i %X sector = %i \n", cache->dev->nodeID, (int) cache, sector);
+	if (cache != NULL) {
+		XPRINTF("cache: readSector devId = %i %X sector = %i \n", cache->dev->nodeID, (int) cache, sector);
+	}
     if (cache == NULL) {
-        printf("cache: devId cache not created = %i \n", cache->dev->nodeID);
+        printf("cache: devId cache not created \n");
         return -1;
     }
 

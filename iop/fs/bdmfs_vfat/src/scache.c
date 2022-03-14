@@ -164,9 +164,11 @@ int scache_readSector(cache_set* cache, unsigned int sector, void** buf)
     int ret;
     unsigned int alignedSector;
 
-    M_DEBUG("scache: readSector devId = %i %p sector = %u \n", cache->bd->devNr, cache, sector);
+    if (cache != NULL) {
+        M_DEBUG("scache: readSector devId = %i %p sector = %u \n", cache->bd->devNr, cache, sector);
+    }
     if (cache == NULL) {
-        M_PRINTF("scache: devId cache not created = %i \n", cache->bd->devNr);
+        M_PRINTF("scache: devId cache not created \n");
         return -1;
     }
 

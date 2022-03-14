@@ -149,7 +149,9 @@ int mcman_modloadcb(char *filename, int *port, int *slot)
 	}
 
 	upos--;
-	*port += 2;
+	if (port) {
+		*port += 2;
+	}
 
 	if (slot) {
 		register int m, v;

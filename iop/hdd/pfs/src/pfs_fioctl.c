@@ -255,7 +255,11 @@ static pfs_aentry_t *getAentry(pfs_cache_t *clink, char *key, char *value, int m
 	pfs_aentry_t *end;
 
 	kLen=strlen(key);
-	fullsize=(kLen+strlen(value)+7) & ~3;
+	fullsize = 0;
+	if (value != NULL)
+	{
+		fullsize=(kLen+strlen(value)+7) & ~3;
+	}
 	for(end=(pfs_aentry_t *)((u8*)aentry+1024);aentry < end; aentry=(pfs_aentry_t *)((u8*)aentry+aentry->aLen))
 	{	//Other than critical errors, do nothing about the filesystem errors.
 		if(aentry->aLen & 3)

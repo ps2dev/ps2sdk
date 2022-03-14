@@ -454,8 +454,10 @@ SifRegisterRpc(SifRpcServerData_t *sd,
 	if (!(server = qd->link)) {
 		qd->link = sd;
 	} else {
-		while ((server = server->next))
-			;
+		while (server->next != NULL)
+		{
+			server = server->next;
+		}
 
 		server->next = sd;
 	}

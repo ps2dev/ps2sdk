@@ -712,7 +712,7 @@ void dns_setserver(u8 numdns, ip_addr_t *dnsserver)
 	WaitSema(lock_sema);
 
 	pkt->numdns = numdns;
-	pkt->dnsserver = *dnsserver;
+	pkt->dnsserver = (dnsserver != NULL) ? (*dnsserver) : *IP4_ADDR_ANY;
 
 	SifCallRpc(&_ps2ip, PS2IPS_ID_DNS_SETSERVER, 0, (void*)pkt, sizeof(dns_setserver_pkt), NULL, 0, NULL, NULL);
 

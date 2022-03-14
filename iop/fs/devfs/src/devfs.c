@@ -854,7 +854,7 @@ int devfs_dopen(iop_file_t *file, const char *name)
 {
    int dir_loop;
 
-   if((name == NULL) && (name[0] != '\\') && (name[0] != '/'))
+   if((name == NULL) || ((name[0] != '\\') && (name[0] != '/')))
    {
       M_PRINTF("dopen: Not a valid directory name\n");
       return -1;

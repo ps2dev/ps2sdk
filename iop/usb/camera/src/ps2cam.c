@@ -1021,6 +1021,10 @@ int PS2CamOpenDevice(int device_index)
 		}
 	}
 
+	if (handle == NULL)
+	{
+		return CAM_ERROR_MAXHANDLE;
+	}
 
 
 	//now we point handle attribute to the camera
