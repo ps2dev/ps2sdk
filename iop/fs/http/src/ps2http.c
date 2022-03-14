@@ -179,17 +179,24 @@ int httpConnect( struct sockaddr_in * server, char *hostAddr, const char * url, 
 
 	M_DEBUG( "send\n" );
 
-	// Needs more error checking here.....
 	rc = send( peerHandle, HTTPGET,  sizeof( HTTPGET ) - 1, 0 );
+	if (rc < 0) goto fail_send;
 	rc = send( peerHandle, (void*) url, strlen( url ), 0 );
+	if (rc < 0) goto fail_send;
 	rc = send( peerHandle, HTTPGETEND, sizeof( HTTPGETEND ) - 1, 0 );
+	if (rc < 0) goto fail_send;
 
 	rc = send( peerHandle, HTTPHOST,  sizeof( HTTPHOST ) - 1, 0 );
+	if (rc < 0) goto fail_send;
 	rc = send( peerHandle, hostAddr, strlen( hostAddr ), 0 );
+	if (rc < 0) goto fail_send;
 	rc = send( peerHandle, HTTPENDHEADER, sizeof( HTTPENDHEADER ) - 1, 0 ); // "\r\n"
+	if (rc < 0) goto fail_send;
 
 	rc = send( peerHandle, HTTPUSERAGENT, sizeof( HTTPUSERAGENT ) - 1, 0 );
+	if (rc < 0) goto fail_send;
 	rc = send( peerHandle, HTTPENDHEADER, sizeof( HTTPENDHEADER ) - 1, 0 );
+	if (rc < 0) goto fail_send;
 
 	// We now need to read the header information
 	while ( 1 )
@@ -227,6 +234,10 @@ int httpConnect( struct sockaddr_in * server, char *hostAddr, const char * url, 
 	// We've sent the request, and read the headers.  SockHandle is
 	// now at the start of the main data read for a file io read.
 	return peerHandle;
+
+fail_send:
+	printf( "HTTP: SEND FAILED %i\n", peerHandle );
+	return -1;
 }
 
 char *strnchr(char *str, char ch, int max) {
