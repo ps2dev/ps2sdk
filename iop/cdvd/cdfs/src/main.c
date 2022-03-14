@@ -362,7 +362,7 @@ static int fio_dread(iop_file_t *fd, io_dirent_t *dirent)
     DPRINTF("fio_dread: fod_table index=%i, fileIndex=%i\n\n", i, filesIndex);
     DPRINTF("fio_dread: entries=%i\n\n", fod_table[i].files);
     DPRINTF("fio_dread: reading entry\n\n");
-    DPRINTF("      entry.. %p\n", entry);
+    DPRINTF("      entry.. %p\n", &entry);
     DPRINTF("      filesize....... %i\n\n", entry.fileSize);
     DPRINTF("      filename....... %s\n\n", entry.filename);
     DPRINTF("      fileproperties.. %i\n\n", entry.fileProperties);
@@ -391,7 +391,7 @@ static int fio_getstat(iop_file_t *fd, const char *name, io_stat_t *stat)
 
     ret = cdfs_findfile(name, &entry);
 
-    DPRINTF("      entry.. %p\n", entry);
+    DPRINTF("      entry.. %p\n", &entry);
     DPRINTF("      filesize....... %i\n\n", entry.fileSize);
     DPRINTF("      filename....... %s\n\n", entry.filename);
     DPRINTF("      fileproperties.. %i\n\n", entry.fileProperties);
