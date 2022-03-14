@@ -2802,8 +2802,8 @@ int mcman_FNC8ca4(int port, int slot, MC_FHANDLE *fh)
 	mcfree = r;
 	j = -1;
 
-	if (i >= 0) {
-		do {
+	{
+		while (i >= 0) {
 			if (mcfree < i) {
 				if (cluster_size > 0) {
 					i = 0;
@@ -2891,7 +2891,7 @@ int mcman_FNC8ca4(int port, int slot, MC_FHANDLE *fh)
 					return r;
 			}
 			i = fse1->linked_block;
-		} while (i >= 0);
+		}
 	}
 
 	r = mcman_readdirentryPS1(port, slot, mcfree, &fse2);
@@ -3332,8 +3332,8 @@ int McFlushCache(int port, int slot)
 
 	i = MAX_CACHEENTRY - 1;
 
-	if (i >= 0) {
-		do {
+	{
+		while (i >= 0) {
 			mce = (McCacheEntry *)pmce[i];
 			if ((mce->mc_port == port) && (mce->mc_slot == slot) && (mce->wr_flag != 0)) {
 				r = mcman_flushcacheentry((McCacheEntry *)mce);
@@ -3341,7 +3341,7 @@ int McFlushCache(int port, int slot)
 					return r;
 			}
 			i--;
-		} while (i >= 0);
+		}
 	}
 
 	return sceMcResSucceed;
@@ -3669,7 +3669,7 @@ int McReadCluster(int port, int slot, int cluster, McCacheEntry **pmce)
 			cluster = (mcdi->backup_block1 * mcdi->clusters_per_block) + block_offset;
 		}
 		else {
-			if (mcman_badblock > 0) {
+			{
 				for (i = 0; i < mcdi->clusters_per_block; i++) {
 					if ((mcman_replacementcluster[i] != 0) && (mcman_replacementcluster[i] == cluster)) {
 						block_offset = i % mcdi->clusters_per_block;
