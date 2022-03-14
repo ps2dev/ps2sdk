@@ -128,7 +128,6 @@ static fs_rec* fs_findFreeFileSlot(void) {
 	for (i = 0; i < MAX_FILES; i++) {
 		if (fsRec[i].dirent.file_flag < 0) {
 			return &fsRec[i];
-			break;
 		}
 	}
 	return NULL;
