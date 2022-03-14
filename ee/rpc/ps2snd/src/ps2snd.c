@@ -16,13 +16,11 @@
 #include <ps2snd.h>
 
 static SifRpcClientData_t sd_client ALIGNED(64);
-static int sd_started = 0;
 
 int sceSdInit(int flag)
 {
 	s32 buf[1] ALIGNED(64);
 
-	if (!sd_started)
 	{
 
 		while(1)
