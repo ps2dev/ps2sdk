@@ -296,8 +296,8 @@ static int usb_bulk_status(mass_dev* dev, csw_packet* csw, unsigned int tag) {
 		if (cb_data.returnSize != 13)
 			printf("USBHDFSD: bulk csw.status returnSize: %i != 13\n", cb_data.returnSize);
 		if (csw->dataResidue != 0)
-			printf("USBHDFSD: bulk csw.status residue: %i\n", csw->dataResidue);
-		XPRINTF("USBHDFSD: bulk csw result: %d, csw.status: %i\n", ret, csw->status);
+			printf("USBHDFSD: bulk csw.status residue: %u\n", csw->dataResidue);
+		XPRINTF("USBHDFSD: bulk csw result: %d, csw.status: %u\n", ret, csw->status);
 	}
 
 	return ret;

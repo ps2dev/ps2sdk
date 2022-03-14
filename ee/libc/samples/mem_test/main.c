@@ -71,7 +71,7 @@ static int max_malloc(size_t initial_value, int increment, const char *desc)
     }
     chunk--;
 #if defined(VERBOSE)
-    custom_printf("Maximum possible %s we can allocate is %i\n", desc, chunk);
+    custom_printf("Maximum possible %s we can allocate is %zu\n", desc, chunk);
 #endif
 
     return chunk;
@@ -151,9 +151,9 @@ int main(int argc, char *argv[])
     custom_printf("End memory integration\n");
 
     custom_printf("\n\n\n----------SUMMARY-----------\n");
-    custom_printf("Maximum possible MB we can allocate is %i MB\n", size_mb);
-    custom_printf("Maximum possible KB we can allocate is %i KB\n", size_kb);
-    custom_printf("Maximum possible Bytes we can allocate is %i Bytes\n", size_b);
+    custom_printf("Maximum possible MB we can allocate is %zu MB\n", size_mb);
+    custom_printf("Maximum possible KB we can allocate is %zu KB\n", size_kb);
+    custom_printf("Maximum possible Bytes we can allocate is %zu Bytes\n", size_b);
     if (failures) {
         custom_printf("Memory integrity: Opps :'( The memory failed checking bytes, %i times\n", failures);
     } else {

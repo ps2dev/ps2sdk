@@ -1068,7 +1068,7 @@ int _start(int argc, char **argv)
       res = init_devfs();
    }
 
-   M_PRINTF("devfs_device_t size=%d\n", sizeof(devfs_device_t));
+   M_PRINTF("devfs_device_t size=%d\n", (int)(sizeof(devfs_device_t)));
    M_PRINTF("Driver loaded.\n");
 
    return res;

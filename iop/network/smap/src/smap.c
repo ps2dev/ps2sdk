@@ -88,7 +88,7 @@ static void _smap_write_phy(volatile u8 *emac3_regbase, unsigned int address, u1
     }
 
     if (i >= 100)
-        printf("smap: %s: > %d ms\n", "_smap_write_phy", i);
+        printf("smap: %s: > %u ms\n", "_smap_write_phy", i);
 }
 
 static u16 _smap_read_phy(volatile u8 *emac3_regbase, unsigned int address)
@@ -118,7 +118,7 @@ static u16 _smap_read_phy(volatile u8 *emac3_regbase, unsigned int address)
     } while (i < 100);
 
     if (i >= 100)
-        printf("smap: %s: > %d ms\n", "_smap_read_phy", i);
+        printf("smap: %s: > %u ms\n", "_smap_read_phy", i);
 
     return result;
 }

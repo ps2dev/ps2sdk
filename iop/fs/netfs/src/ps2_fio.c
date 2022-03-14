@@ -1216,7 +1216,7 @@ static int ps2netfs_op_dread(char *buf, int len)
       }
     }
   }
-  dbgprintf("ps2netfs: dread '%s' %d\n",dreadrly->name,dreadrly->size);
+  dbgprintf("ps2netfs: dread '%s' %u\n",dreadrly->name,dreadrly->size);
   // Build packet
   dreadrly->cmd = htonl(PS2NETFS_DREAD_RLY);
   dreadrly->len = htons((unsigned short)sizeof(ps2netfs_pkt_dread_rly));

@@ -103,7 +103,7 @@ int getIndexWrite(cache_set* cache, unsigned int sector) {
 		cache->rec[index].writeDirty = 0;
 		//TODO - error handling
 		if (ret < 0) {
-			printf("scache: ERROR writing sector to disk! sector=%d\n", sector);
+			printf("scache: ERROR writing sector to disk! sector=%u\n", sector);
 		}
 
 	}
@@ -182,7 +182,7 @@ int scache_readSector(cache_set* cache, unsigned int sector, void** buf) {
 	ret = READ_SECTOR(cache->dev, alignedSector, cache->sectorBuf + (index * cache->sectorSize), BLOCK_SIZE/cache->dev->sectorSize);
 
 	if (ret < 0) {
-		printf("scache: ERROR reading sector from disk! sector=%d\n", alignedSector);
+		printf("scache: ERROR reading sector from disk! sector=%u\n", alignedSector);
 		return ret;
 	}
 	*buf = cache->sectorBuf + (index * cache->sectorSize) + ((sector%cache->indexLimit) * cache->sectorSize);

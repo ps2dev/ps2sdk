@@ -91,7 +91,7 @@ int main (int argc, char *argv[])
 	caminfo.ssize = sizeof(caminfo);
 	PS2CamGetDeviceInfo(devid, &caminfo);
 
-	printf("info = %s (%d)\n",(char *)&caminfo.product_name[0],caminfo.ssize);
+	printf("info = %s (%u)\n",(char *)&caminfo.product_name[0],caminfo.ssize);
 
 
 
