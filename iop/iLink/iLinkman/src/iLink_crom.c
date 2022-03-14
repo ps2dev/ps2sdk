@@ -345,10 +345,10 @@ static void BuildConfigurationROM(void){
 	DirectoryHeader->CRC16=BSWAP16(iLinkCalculateCRC16(ModelName, DirectoryHeader->Directory_length));
 	DirectoryHeader->Directory_length=BSWAP16(DirectoryHeader->Directory_length);
 
-	CurrentOffset=CurrentOffset+sizeof(struct DirectoryHeader)+sizeof(struct ModelID_Textual_Descriptor);
+	CurrentOffset=sizeof(struct BusInformationBlockHeader);
 
 	/* Fill in the fields in the Bus Information Block. */
-	BusInfoBlk=(struct BusInformationBlock *)&CROM_Buffer[sizeof(struct BusInformationBlockHeader)];
+	BusInfoBlk=(struct BusInformationBlock *)&CROM_Buffer[CurrentOffset];
 	memcpy(BusInfoBlk->BusName, "1394", 4);
 	BusInfoBlk->capabilities=NodeCapabilities<<3;
 	BusInfoBlk->Cyc_Clk_Acc=CycleClkAcc;
