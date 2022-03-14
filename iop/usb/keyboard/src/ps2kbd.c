@@ -1257,6 +1257,11 @@ int ps2kbd_init()
   memcpy(alt_map, us_alt_map, PS2KBD_KEYMAP_SIZE);
 
   ret = init_fio();
+  if(ret < 0)
+    {
+      printf("PS2KBD: Error adding ioman driver\n");
+      return 1;
+    }
   //printf("ps2kbd AddDrv [%d]\n", ret);
   init_repeatthread();
 
