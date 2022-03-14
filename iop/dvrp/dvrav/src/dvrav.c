@@ -130,7 +130,12 @@ struct _iop_device_ops DvrFuncTbl =
         &dvrav_df_null,
         &dvrav_df_null,
         &dvrav_df_ioctl2};
-iop_device_t DVRAV;
+iop_device_t DVRAV = {
+    .name = "dvr_av",
+    .desc = "Digital Video Recorder AV task",
+    .type = (IOP_DT_FS | IOP_DT_FSEXT),
+    .ops = &DvrFuncTbl,
+};
 s32 sema_id;
 
 // Based off of DESR / PSX DVR system software version 1.31.
@@ -159,10 +164,6 @@ int module_start()
         printf("AV task of DVRP is not running...\n");
         return 1;
     } else {
-        DVRAV.name = "dvr_av";
-        DVRAV.desc = "Digital Video Recorder AV task";
-        DVRAV.type = 0x10000010;
-        DVRAV.ops = &DvrFuncTbl;
         if (AddDrv(&DVRAV) != 0)
             return 1;
     }
@@ -175,7 +176,7 @@ int module_start()
 
 int module_stop()
 {
-    if (DelDrv("dvr_av") != 0)
+    if (DelDrv(DVRAV.name) != 0)
         return 2;
     return 1;
 }

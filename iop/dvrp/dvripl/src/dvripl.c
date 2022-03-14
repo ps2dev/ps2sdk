@@ -61,7 +61,12 @@ struct _iop_device_ops DvrFuncTbl =
         &dvripl_df_null,
         &dvripl_df_ioctl2};
 s32 dvr_ready_flag;
-iop_device_t DVRMAN;
+iop_device_t DVRMAN = {
+    .name = "dvr_ipl",
+    .desc = "Digital Video Recorder",
+    .ops = &DvrFuncTbl,
+    .type = (IOP_DT_FS | IOP_DT_FSEXT),
+};
 s32 sema_id;
 char SBUF[32768];
 
@@ -79,14 +84,7 @@ int _start(int a1, char **argv)
 
 int module_start()
 {
-    bool v0;
-
-    DVRMAN.name = "dvr_ipl";
-    DVRMAN.desc = "Digital Video Recorder";
-    DVRMAN.ops = &DvrFuncTbl;
-    DVRMAN.type = 0x10000010;
-    v0 = AddDrv(&DVRMAN) == 0;
-    if (!v0)
+    if (AddDrv(&DVRMAN) != 0)
         return 1;
 #if 0
     return 2;
@@ -97,10 +95,7 @@ int module_start()
 
 int module_stop()
 {
-    bool v0;
-
-    v0 = DelDrv("dvr_ipl") == 0;
-    if (!v0)
+    if (DelDrv(DVRMAN.name) != 0)
         return 2;
     return 1;
 }
@@ -124,11 +119,8 @@ int dvripl_df_init(iop_device_t *dev)
 
 int dvripl_df_exit(iop_device_t *dev)
 {
-    bool v1;
-
     printf("dvripl_df_exit\n");
-    v1 = DeleteSema(sema_id) == 0;
-    if (!v1)
+    if (DeleteSema(sema_id) != 0)
         return -1;
     return 0;
 }
@@ -150,14 +142,12 @@ int dvripl_df_devctl(
     void *buf,
     unsigned int buflen)
 {
-    bool v10;
     int v11;
 
     printf("dvripl_df_devctl\n");
     WaitSema(sema_id);
-    v10 = cmd != 0x5602;
     v11 = -22;
-    if (!v10)
+    if (cmd == 0x5602)
         v11 = iplioctl2_update(a1, 0x5602, arg);
     SignalSema(sema_id);
     return v11;
