@@ -540,7 +540,7 @@ padStateInt2String(int state, char buf[16])
 void
 padReqStateInt2String(int state, char buf[16])
 {
-    if(state < 4)
+    if(state < 3)
         strcpy(buf, padReqStateString[state]);
 }
 

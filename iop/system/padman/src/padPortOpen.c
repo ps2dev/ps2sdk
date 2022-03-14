@@ -652,13 +652,13 @@ s32 padPortOpen(s32 port, s32 slot, s32 pad_area_ee_addr, u32 *buf)
 	iop_event_t event;
 	iop_thread_t thread;
 
-	if(port > 2)
+	if(port >= 2)
 	{
 		M_PRINTF("Invalid port number: %d\n", (int)port);
 		return 0;
 	}
 
-	if(slot > 4)
+	if(slot >= 4)
 	{
 		M_PRINTF("Invalid slot number: %d\n", (int)port);
 		return 0;

@@ -505,7 +505,7 @@ s32 mtapGetSlotNumber(u32 port)
 {
 	s32 res;
 
-	if(port > 4) return -1;
+	if(port >= 4) return -1;
 
 	if(state_open[port] == 0) return 1;
 
@@ -522,7 +522,7 @@ s32 mtapChangeSlot(u32 port, u32 slot)
 	s32 data[4];
 	u32 i;
 
-	if(port > 4) return 0;
+	if(port >= 4) return 0;
 
 	if(state_open[port] == 0)
 	{
