@@ -80,11 +80,11 @@ int TransInterrupt(void *data)
 		// If done elsewise, it doesn't work, havn't figured out why yet.
 		volatile u16 *statx = U16_REGISTER(0x344 + (core * 1024));
 
-		if(!(*statx & 0x80))	while(!(*statx & 0x80));
+		while((*statx & 0x80) == 0);
 
 		*SD_CORE_ATTR(core) &= ~SD_CORE_DMA;
 
-		if(*SD_CORE_ATTR(core) & 0x30)	while((*SD_CORE_ATTR(core) & 0x30));
+		while((*SD_CORE_ATTR(core) & 0x30) != 0);
 
 		if(TransIntrHandlers[core])		goto intr_handler;
 		if(TransIntrCallbacks[core])	goto SdIntrCallback;
