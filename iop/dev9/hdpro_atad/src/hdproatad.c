@@ -436,7 +436,7 @@ static int ata_device_select(int device)
 
 	/* Select the device.  */
 	hdpro_io_write(ATAreg_SELECT_WR, (device & 1) << 4);
-	res = hdpro_io_read(ATAreg_CONTROL_RD);
+	(void)(hdpro_io_read(ATAreg_CONTROL_RD));
 
 	return ata_wait_bus_busy();
 }
@@ -521,10 +521,9 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
 	suspend_intr();
 	HDPROreg_IO8 = 0x21;
 	CDVDreg_STATUS = 0;
-	unsigned int dummy __attribute__((unused)) = HDPROreg_IO8;
+	(void)(HDPROreg_IO8);
 	CDVDreg_STATUS = 0;
 	resume_intr();
-	dummy = 0;
 
 	/* Finally!  We send off the ATA command with arguments.  */
 	hdpro_io_write(ATAreg_CONTROL_WR, (using_timeout == 0) << 1);

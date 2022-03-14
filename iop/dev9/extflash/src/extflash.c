@@ -97,12 +97,11 @@ int flash_device_reset(void)
 {
 	USE_SPD_REGS;
 	u32 has_timedout = 0;
-	u16 tmp __attribute__((unused));
 
 	SPD_REG16(0x480c) = 0x100;
 	SPD_REG16(0x4804) = SM_CMD_RESET;
-	tmp = SPD_REG16(0x480c);
-	tmp = SPD_REG16(0x480c);
+	(void)(SPD_REG16(0x480c));
+	(void)(SPD_REG16(0x480c));
 
 	SetAlarm(&timeout, (void *)timeout_cb, &has_timedout);
 
@@ -133,13 +132,13 @@ int flash_get_info(flash_info_t *info)
 {
 	USE_SPD_REGS;
 	int i;
-	u16 tmp __attribute__((unused)), id;
+	u16 id;
 
 	SPD_REG16(0x480c) = 0x100;
 	SPD_REG16(0x4804) = SM_CMD_READID;
 	SPD_REG16(0x4808) = 0;
-	tmp = SPD_REG16(0x480c);
-	tmp = SPD_REG16(0x4814);
+	(void)(SPD_REG16(0x480c));
+	(void)(SPD_REG16(0x4814));
 	id = SPD_REG16(0x4814);
 	SPD_REG16(0x480c) = 0;
 
@@ -193,7 +192,6 @@ int flash_page_erase(flash_info_t *info, u32 page)
 	USE_SPD_REGS;
 	u32 pageofs = page * 512;
 	u32 has_timedout = 0;
-	u16 tmp __attribute__((unused));
 
 	SPD_REG16(0x480c) = 0x180;
 	SPD_REG16(0x4804) = SM_CMD_ERASEBLOCK;
@@ -201,8 +199,8 @@ int flash_page_erase(flash_info_t *info, u32 page)
 	flash_set_page(info->id, pageofs);
 
 	SPD_REG16(0x4804) = SM_CMD_ERASECONFIRM;
-	tmp = SPD_REG16(0x480c);
-	tmp = SPD_REG16(0x480c);
+	(void)(SPD_REG16(0x480c));
+	(void)(SPD_REG16(0x480c));
 
 	SetAlarm(&timeout, (void *)timeout_cb, &has_timedout);
 
@@ -243,7 +241,7 @@ int flash_page_read(flash_info_t *info, u32 page, u32 count, void *buf)
 	int i, j;
 	u32 byteofs, pageofs = page * 512;
 	u32 has_timedout;
-	u16 tmp __attribute__((unused)), func = 0x100;
+	u16 func = 0x100;
 
 	if (info->page_bytes == 512)
 		func = 0x1100;
@@ -266,8 +264,8 @@ int flash_page_read(flash_info_t *info, u32 page, u32 count, void *buf)
 	buf_h = (u16 *)buf;
 
 	for (i = 0; i < count; i++) {
-		tmp = SPD_REG16(0x480c);
-		tmp = SPD_REG16(0x480c);
+		(void)(SPD_REG16(0x480c));
+		(void)(SPD_REG16(0x480c));
 
 		has_timedout = 0;
 		SetAlarm(&timeout, (void *)timeout_cb, &has_timedout);
@@ -314,7 +312,6 @@ int flash_page_write(flash_info_t *info, u32 page, void *buf)
 	int i;
 	u32 pageofs = page * 512;
 	u32 has_timedout = 0;
-	u16 tmp __attribute__((unused));
 
 	SPD_REG16(0x480c) = 0x180;
 	SPD_REG16(0x4804) = SM_CMD_WRITEDATA;
@@ -326,8 +323,8 @@ int flash_page_write(flash_info_t *info, u32 page, void *buf)
 		SPD_REG16(0x4800) = *buf_h++;
 
 	SPD_REG16(0x4804) = SM_CMD_PROGRAMPAGE;
-	tmp = SPD_REG16(0x480c);
-	tmp = SPD_REG16(0x480c);
+	(void)(SPD_REG16(0x480c));
+	(void)(SPD_REG16(0x480c));
 
 	SetAlarm(&timeout, (void *)timeout_cb, &has_timedout);
 

@@ -51,13 +51,12 @@ void SIF2_sync_dma(void)
 
 int SIF2_RestartDma(void)
 {
-    volatile register u32 d __attribute__((unused));
     int bc, bs;
 
     if(!(*R_LOCAL_SBUS(PS2_SBUS_REG4) & 0x80)) { *R_LOCAL_SBUS(PS2_SBUS_REG4) = 0x80; }
 
     *R_IOP_D2_CHCR = 0;
-    d = *R_IOP_D2_CHCR;
+    (void)(*R_IOP_D2_CHCR);
 
     *R_IOP_D2_MADR = (_sif2_xfer_addr & 0x00FFFFFF);
 
@@ -71,7 +70,7 @@ int SIF2_RestartDma(void)
     *R_IOP_D2_BCR_BS = bs;
     *R_IOP_D2_BCR_BC = bc;
     *R_IOP_D2_CHCR = _sif2_xfer_attr;
-    d = *R_IOP_D2_CHCR;
+    (void)(*R_IOP_D2_CHCR);
 
     return(0);
 }
@@ -126,7 +125,6 @@ int _sif2_intr_handler(void)
 
 int SIF2_init(void)
 {
-    volatile register u32 d __attribute__((unused));
     int oldStat, old_irq;
 
     if(_sif2_inited) { return(-1); }
@@ -138,7 +136,7 @@ int SIF2_init(void)
     if(!(*R_IOP_DPCR & 0x0800))
     {
         *R_IOP_DPCR |= 0x0800;
-        d = *R_IOP_DPCR;
+        (void)(*R_IOP_DPCR);
     }
 
     DisableIntr(IOP_IRQ_DMA_SIF2, &old_irq);
@@ -157,7 +155,6 @@ int SIF2_init(void)
 
 int SIF2_deinit(void)
 {
-    volatile register u32 d __attribute__((unused));
     int oldStat, old_irq;
 
     if(!_sif2_inited) { return(-1); }
@@ -170,7 +167,7 @@ int SIF2_deinit(void)
     if((*R_IOP_DPCR & 0x0800))
     {
         *R_IOP_DPCR |= 0x0800;
-        d = *R_IOP_DPCR;
+        (void)(*R_IOP_DPCR);
     }
 
     DisableIntr(IOP_IRQ_DMA_SIF2, &old_irq);
