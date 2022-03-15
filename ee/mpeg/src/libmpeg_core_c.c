@@ -118,7 +118,7 @@ void _ipu_resume ( void )
 	if (var3 != 0)
 	{
 		*R_EE_IPU_CMD = (s_IPUState[7]) & 0x7f;
-		while (*R_EE_IPU_CTRL < 0);
+		while (((*R_EE_IPU_CTRL) & 0x80000000) != 0);
 		*R_EE_IPU_CTRL = s_IPUState[6];
 		*R_EE_D4_MADR = (s_IPUState[1]) - var2 * 0x10;
 		*R_EE_D4_QWC = var3;
@@ -326,7 +326,7 @@ void _MPEG_SetDefQM ( int arg0 )
 {
 	_ipu_suspend();
 	*R_EE_IPU_CMD = 0;
-	while (*R_EE_IPU_CTRL < 0);
+	while (((*R_EE_IPU_CTRL) & 0x80000000) != 0);
 	R_EE_IPU_in_FIFO[0] = 0x13101008;
 	R_EE_IPU_in_FIFO[1] = 0x16161310;
 	R_EE_IPU_in_FIFO[2] = 0x16161616;
@@ -344,7 +344,7 @@ void _MPEG_SetDefQM ( int arg0 )
 	R_EE_IPU_in_FIFO[2] = 0x38382E2E;
 	R_EE_IPU_in_FIFO[3] = 0x5345453A;
 	*R_EE_IPU_CMD = 0x50000000;
-	while (*R_EE_IPU_CTRL < 0);
+	while (((*R_EE_IPU_CTRL) & 0x80000000) != 0);
 	R_EE_IPU_in_FIFO[0] = 0x10101010;
 	R_EE_IPU_in_FIFO[1] = 0x10101010;
 	R_EE_IPU_in_FIFO[2] = 0x10101010;
@@ -362,7 +362,7 @@ void _MPEG_SetDefQM ( int arg0 )
 	R_EE_IPU_in_FIFO[2] = 0x10101010;
 	R_EE_IPU_in_FIFO[3] = 0x10101010;
 	*R_EE_IPU_CMD = 0x58000000;
-	while (*R_EE_IPU_CTRL < 0);
+	while (((*R_EE_IPU_CTRL) & 0x80000000) != 0);
 	_MPEG_Resume();
 }
 

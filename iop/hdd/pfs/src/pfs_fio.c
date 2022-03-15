@@ -1336,7 +1336,7 @@ int pfsFioReadlink(iop_file_t *f, const char *path, char *buf, unsigned int bufl
 	pfs_mount_t *pfsMount;
 	pfs_cache_t *clink;
 
-	if(buflen < 0)
+	if((int)buflen < 0)
 		return -EINVAL;
 	if(!(pfsMount=pfsFioGetMountedUnit(f->unit)))
 		return -ENODEV;

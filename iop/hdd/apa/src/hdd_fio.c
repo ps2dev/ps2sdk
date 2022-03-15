@@ -612,7 +612,7 @@ int hddLseek(iop_file_t *f, int post, int whence)
     WaitSema(fioSema);
     fileSlot = f->privdata;
     if (whence == SEEK_CUR) {
-        if ((fileSlot->post + post) < 0 || (fileSlot->post + post) >= 0x1FF9)
+        if (((int)fileSlot->post + post) < 0 || (fileSlot->post + post) >= 0x1FF9)
             rv = -EINVAL;
         else {
             fileSlot->post += post;

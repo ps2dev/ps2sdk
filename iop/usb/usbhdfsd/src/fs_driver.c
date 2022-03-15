@@ -378,7 +378,7 @@ static int fs_lseek(iop_file_t* fd, int offset, int whence) {
 			_fs_unlock();
 			return -1;
 	}
-	if (rec->filePos < 0) {
+	if ((int)(rec->filePos) < 0) {
 		rec->filePos = 0;
 	}
 	if (rec->filePos > rec->dirent.fatdir.size) {

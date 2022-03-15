@@ -258,7 +258,7 @@ int mcman_read1(int fd, void *buffer, int nbyte)
 	rpos = 0;
 	if (nbyte) {
 		do {
-			if (fh->position < 0)
+			if ((int)(fh->position) < 0)
 				temp = fh->position + 0x3ff;
 			else
 				temp = fh->position;
@@ -334,7 +334,7 @@ int mcman_write1(int fd, void *buffer, int nbyte)
 			if (r != sceMcResSucceed)
 				return r;
 
-			if (fh->position < 0)
+			if ((int)(fh->position) < 0)
 				temp = fh->position + 0x3ff;
 			else
 				temp = fh->position;
@@ -659,7 +659,7 @@ int mcman_close1(int fd)
 
 	mce = mcman_get1stcacheEntp();
 
-	if (fh->freeclink + 1 < 0)
+	if ((int)(fh->freeclink + 1) < 0)
 		temp = fh->freeclink + 8;
 	else
 		temp = fh->freeclink + 1;
@@ -675,7 +675,7 @@ int mcman_close1(int fd)
 		fse->length = 0x2000;
 	}
 	else {
-		if ((fh->filesize - 1) < 0)
+		if ((int)(fh->filesize - 1) < 0)
 			temp = (fh->filesize + 8190) >> 13;
 		else
 			temp = (fh->filesize - 1) >> 13;

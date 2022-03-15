@@ -2785,7 +2785,7 @@ int mcman_FNC8ca4(int port, int slot, MC_FHANDLE *fh)
 
 	DPRINTF("mcman_FNC8ca4 port%d slot%d\n", port, slot);
 
-	if (mcdi->cluster_size < 0)
+	if ((int)(mcdi->cluster_size) < 0)
 		cluster_size = mcdi->cluster_size + 1023;
 	else
 		cluster_size = mcdi->cluster_size;

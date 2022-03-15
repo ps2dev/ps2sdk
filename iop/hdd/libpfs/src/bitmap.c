@@ -227,7 +227,7 @@ int pfsBitmapAllocZones(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi, u32 amount)
 // not be allocated.
 int pfsBitmapSearchFreeZone(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi, u32 max_count)
 {
-	u32 num, count, n;
+	u32 num, count, n, i;
 
 	num = pfsMount->num_subs + 1;
 
@@ -240,7 +240,8 @@ int pfsBitmapSearchFreeZone(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi, u32 max_
 	if(count < bi->count)
 		count = bi->count;				//max(count, bi->count)
 								// => count = bound(bi->count, 32);
-	for(--num; num >= 0; num--)
+
+	for(i = num - 1; i < num; i--)
 	{
 		for (n = count; n; n /= 2)
 		{
