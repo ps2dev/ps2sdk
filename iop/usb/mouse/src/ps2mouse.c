@@ -95,7 +95,7 @@ mouse_data mouse;
 /** Holds a list of current devices */
 mouse_dev *devices[PS2MOUSE_MAXDEV];
 int dev_count;
-sceUsbdLddOps mouse_driver = { NULL, NULL, "PS2Mouse", ps2mouse_probe, ps2mouse_connect, ps2mouse_disconnect };
+sceUsbdLddOps mouse_driver = { NULL, NULL, "PS2Mouse", ps2mouse_probe, ps2mouse_connect, ps2mouse_disconnect, 0, 0, 0, 0, 0, NULL };
 
 int _start ()
 {

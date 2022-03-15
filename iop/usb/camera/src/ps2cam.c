@@ -46,7 +46,8 @@ sceUsbdLddOps					cam_driver = {NULL,
 											 "ps2cam",
 											   PS2CamProbe,
 											    PS2CamConnect,
-											     PS2CamDisconnect };
+											     PS2CamDisconnect,
+											     0, 0, 0, 0, 0, NULL };
 
 
 

@@ -820,6 +820,7 @@ static inline int SetupNetDev(void)
         &SMAPStop,
         &SMAPXmit,
         &SMAPIoctl,
+        0,
     };
 
     EventFlagData.attr = 0;

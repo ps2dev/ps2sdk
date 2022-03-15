@@ -85,7 +85,9 @@ static struct NetManNetProtStack RpcStack={
 	&FreeRxPacket,
 	&EnQRxPacket,
 	&NextTxPacket,
-	&DeQTxPacket
+	&DeQTxPacket,
+	NULL,
+	NULL,
 };
 
 static void unregisterEENetworkStack(void)

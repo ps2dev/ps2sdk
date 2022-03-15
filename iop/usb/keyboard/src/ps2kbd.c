@@ -96,7 +96,7 @@ u32 kbd_repeatrate;
 /** Holds a list of current devices */
 kbd_dev *devices[PS2KBD_MAXDEV]; 
 int dev_count;
-sceUsbdLddOps kbd_driver = { NULL, NULL, "PS2Kbd", ps2kbd_probe, ps2kbd_connect, ps2kbd_disconnect };
+sceUsbdLddOps kbd_driver = { NULL, NULL, "PS2Kbd", ps2kbd_probe, ps2kbd_connect, ps2kbd_disconnect, 0, 0, 0, 0, 0, NULL };
 u8 *lineBuffer;
 u32 lineStartP, lineEndP;
 int lineSema;

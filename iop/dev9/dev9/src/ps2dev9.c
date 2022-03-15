@@ -162,7 +162,11 @@ static iop_device_ops_t dev9x_ops =
         (void *)&dev9x_dummy,
         (void *)&dev9x_dummy,
         (void *)&dev9x_dummy,
-        &dev9x_devctl};
+        &dev9x_devctl,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+    };
 
 static iop_device_t dev9x_device =
     {
