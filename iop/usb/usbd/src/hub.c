@@ -295,11 +295,11 @@ void hubDeviceResetCallback(IoRequest *arg) {
 		dbg_printf("port reset err: %d\n", arg->resultCode);
 }
 
-int hubResetDevice(Device *dev) {
+void hubResetDevice(void *devp) {
+	Device *dev = devp;
 	UsbHub *hub;
 	if (memPool.delayResets) {
 		dev->deviceStatus = DEVICE_RESETDELAYED;
-		return 0;
 	} else {
 		memPool.delayResets = 1;
 		dev->deviceStatus = DEVICE_RESETPENDING;
@@ -314,7 +314,6 @@ int hubResetDevice(Device *dev) {
 				USB_DIR_OUT | USB_RT_PORT, USB_REQ_SET_FEATURE, PORT_RESET, dev->attachedToPortNo, 0, NULL,
 				hubDeviceResetCallback);
 		}
-		return 1;
 	}
 }
 

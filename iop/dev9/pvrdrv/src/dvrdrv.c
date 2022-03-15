@@ -67,7 +67,7 @@ s32 DvrdrvBlockPhase();
 s32 DvrdrvUnblockPhase();
 int DvrdrvEnd();
 int DVR_INTR_HANDLER(int flag);
-int INTR_DVRRDY_HANDLER(int a1, struct_dvrdrv *a2);
+void INTR_DVRRDY_HANDLER(int a1, void *a2v);
 int INTR_DVRRDY_TO_HANDLER(void *a1);
 void INTR_CMD_ACK_HANDLER(int, void *);
 int INTR_CMD_ACK_TO_HANDLER(struct_itr_sid_tbl *a1);
@@ -180,7 +180,7 @@ int DvrdrvInit()
         }
     }
     dev9RegisterIntrCb(9, DVR_INTR_HANDLER);
-    DvrdrvRegisterIntrHandler(1, &DVRDRV, (void (*)(int, void *))INTR_DVRRDY_HANDLER);
+    DvrdrvRegisterIntrHandler(1, &DVRDRV, INTR_DVRRDY_HANDLER);
     DvrdrvRegisterIntrHandler(2, &DVRDRV, INTR_CMD_ACK_HANDLER);
     DvrdrvRegisterIntrHandler(4, &DVRDRV, INTR_CMD_COMP_HANDLER);
     DvrdrvRegisterIntrHandler(8, &DVRDRV, INTR_DMAACK_HANDLER);
@@ -711,12 +711,12 @@ int DVR_INTR_HANDLER(int flag)
     return 1;
 }
 
-int INTR_DVRRDY_HANDLER(int a1, struct_dvrdrv *a2)
+void INTR_DVRRDY_HANDLER(int a1, void *a2v)
 {
+    struct_dvrdrv *a2 = (struct_dvrdrv *)a2v;
     a2->dvr_ready |= 1u;
     if (a2->mainthread_id >= 0)
         iWakeupThread(a2->mainthread_id);
-    return 0;
 }
 
 int INTR_DVRRDY_TO_HANDLER(void *a1)
