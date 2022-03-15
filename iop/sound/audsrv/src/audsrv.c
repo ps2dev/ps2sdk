@@ -97,6 +97,8 @@ static void play_thread(void *arg);
  */
 static int transfer_complete(void *arg)
 {
+	(void)arg;
+
 	iSignalSema(transfer_sema);
 	return 1;
 }
@@ -433,6 +435,8 @@ static void play_thread(void *arg)
 	struct upsample_t up;
 	upsampler_t upsampler = NULL;
 
+	(void)arg;
+
 	printf("starting play thread\n");
 	while (1)
 	{
@@ -550,6 +554,9 @@ int audsrv_quit()
 int _start(int argc, char *argv[])
 {
 	int err;
+
+	(void)argc;
+	(void)argv;
 
 	FlushDcache();
 	CpuEnableIntr(0);

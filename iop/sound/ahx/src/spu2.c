@@ -142,6 +142,8 @@ int Spu2Interrupt(void *data)
 {
 	volatile u16 *reg1 = U16_REGISTER(0x7C2);
 
+	(void)data;
+
 	if(Spu2IntrHandler != NULL)
 	{
 		Spu2IntrHandler((*reg1 & 0xC) >> 2, Spu2IntrData);
@@ -829,6 +831,8 @@ int sceSdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, ...)
 u32 sceSdBlockTransStatus(s16 chan, s16 flag)
 {
 	u32 retval;
+
+	(void)flag;
 
 	chan &= 1;
 

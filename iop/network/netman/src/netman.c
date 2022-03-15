@@ -29,6 +29,9 @@ extern struct irx_export_table _exp_netman;
 int _start(int argc, char *argv[]){
 	iop_sema_t sema;
 
+	(void)argc;
+	(void)argv;
+
 	if(RegisterLibraryEntries(&_exp_netman) == 0){
 		sema.attr = 0;
 		sema.option = 0;

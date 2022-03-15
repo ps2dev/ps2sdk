@@ -358,6 +358,8 @@ int sendto(int s, void *dataptr, int size, unsigned int flags,
 	send_pkt *pkt = &_rpc_buffer.send_pkt;
 	int miss;
 
+	(void)tolen;
+
 	WaitSema(lock_sema);
 
 	pkt->socket = s;

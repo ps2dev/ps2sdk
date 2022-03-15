@@ -323,6 +323,8 @@ static int ps2netfs_op_info(char *buf, int len)
   ps2netfs_pkt_info_rly *inforly;
   int count;
 
+  (void)buf;
+
 //  cmd = (ps2netfs_pkt_open_req *)buf;
 
   dbgprintf("ps2netfs: info\n");
@@ -684,6 +686,8 @@ static int ps2netfs_op_write(char *buf, int len)
   int retval = -1;
   fd_table_t *fdptr;
   cmd = (ps2netfs_pkt_write_req *)buf;
+
+  (void)len;
 
   dbgprintf("ps2netfs: write\n");
 
@@ -1249,6 +1253,8 @@ static int ps2netfs_op_dread(char *buf, int len)
 // int getstat(const char *name, void *stat);
 static int ps2netfs_op_getstat(char *buf, int len)
 {
+  (void)buf;
+  (void)len;
   return -1;
 }
 
@@ -1271,6 +1277,8 @@ static int ps2netfs_op_getstat(char *buf, int len)
 // int chstat(const char *name, void *stat, unsigned int statmask);
 static int ps2netfs_op_chstat(char *buf, int len)
 {
+  (void)buf;
+  (void)len;
   return -1;
 }
 
@@ -1637,6 +1645,8 @@ static int ps2netfs_op_umount(char *buf, int len)
 // int lseek64(int fd, long long offset, int whence);
 static int ps2netfs_op_lseek64(char *buf, int len)
 {
+  (void)buf;
+  (void)len;
   return -1;
 }
 
@@ -1659,6 +1669,8 @@ static int ps2netfs_op_lseek64(char *buf, int len)
 // int devctl(const char *name, int cmd, void *arg, size_t arglen, void *buf, size_t buflen);
 static int ps2netfs_op_devctl(char *buf, int len)
 {
+  (void)buf;
+  (void)len;
   return -1;
 }
 
@@ -1794,6 +1806,8 @@ static int ps2netfs_op_readlink(char *buf, int len)
 // int ioctl2(int fd, int cmd, void *arg, size_t arglen, void *buf, size_t buflen);
 static int ps2netfs_op_ioctl2(char *buf, int len)
 {
+  (void)buf;
+  (void)len;
   return -1;
 }
 
@@ -1960,6 +1974,8 @@ ps2netfs_serv(void *argv)
  int client_sock;
  int client_len;
  int ret;
+
+ (void)argv;
 
  dbgprintf(" - ps2netfs TCP Server -\n");
 

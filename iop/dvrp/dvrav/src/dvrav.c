@@ -145,6 +145,8 @@ IRX_ID(MODNAME, 1, 1);
 
 int _start(int a1, char **argv)
 {
+    (void)argv;
+
     if (a1 >= 0)
         return module_start();
     else
@@ -186,6 +188,8 @@ int dvrav_df_init(iop_device_t *dev)
     int v1;
     iop_sema_t v3;
 
+    (void)dev;
+
     v3.attr = 0;
     v3.initial = 1;
     v3.max = 1;
@@ -199,6 +203,8 @@ int dvrav_df_init(iop_device_t *dev)
 
 int dvrav_df_exit(iop_device_t *dev)
 {
+    (void)dev;
+
     if (DeleteSema(sema_id) != 0)
         return -1;
     return 0;
@@ -206,6 +212,10 @@ int dvrav_df_exit(iop_device_t *dev)
 
 int dvrav_df_ioctl(iop_file_t *f, int cmd, void *param)
 {
+    (void)f;
+    (void)cmd;
+    (void)param;
+
     WaitSema(sema_id);
     SignalSema(sema_id);
     return -22;
@@ -223,6 +233,8 @@ int dvrav_df_devctl(
     int v10;
     unsigned int v11;
     unsigned int v12;
+
+    (void)name;
 
     v10 = 0;
     v11 = 0;
@@ -243,6 +255,13 @@ LABEL_5:
 
 int dvrav_df_ioctl2(iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
+    (void)f;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     WaitSema(sema_id);
     SignalSema(sema_id);
     return -22;
@@ -268,6 +287,12 @@ int avioctl2_get_tun_offset(
 {
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
+
     cmdack.command = 0x3102;
     cmdack.input_word_count = 0;
     if (DvrdrvExecCmdAck(&cmdack)) {
@@ -292,6 +317,12 @@ int avioctl2_tun_offset_up(
     unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
 
     cmdack.command = 0x3103;
     cmdack.input_word_count = 0;
@@ -321,6 +352,12 @@ int avioctl2_tun_offset_down(
 {
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
+
     cmdack.command = 0x3104;
     cmdack.input_word_count = 0;
     if (DvrdrvExecCmdAck(&cmdack)) {
@@ -348,6 +385,11 @@ int avioctl2_tun_scan_ch(
     unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)arglen;
+    (void)buflen;
 
     cmdack.command = 0x3105;
     cmdack.input_word[0] = *(u16 *)arg;
@@ -382,6 +424,12 @@ int avioctl2_get_bs_gain(
 {
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
+
     cmdack.command = 0x3106;
     cmdack.input_word_count = 0;
     if (DvrdrvExecCmdAck(&cmdack)) {
@@ -407,6 +455,12 @@ int avioctl2_set_preset_info(
     unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     cmdack.command = 0x3107;
     cmdack.input_word[0] = *(u16 *)arg;
@@ -434,6 +488,12 @@ int avioctl2_change_sound(
 {
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
+
     cmdack.command = 0x3108;
     cmdack.input_word_count = 0;
     if (DvrdrvExecCmdAck(&cmdack)) {
@@ -459,6 +519,12 @@ int avioctl2_set_d_audio_sel(
     unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     cmdack.command = 0x3109;
     cmdack.input_word[0] = *(u16 *)arg;
@@ -488,6 +554,12 @@ int avioctl2_set_d_video_sel(
 {
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     cmdack.command = 0x310A;
     cmdack.input_word_count = 1;
     cmdack.input_word[0] = *(u16 *)arg;
@@ -513,6 +585,12 @@ int avioctl2_get_av_src(
 {
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
+
     cmdack.command = 0x310B;
     cmdack.input_word_count = 0;
     if (DvrdrvExecCmdAck(&cmdack)) {
@@ -537,6 +615,11 @@ int avioctl2_get_preset_info(
     unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)arglen;
+    (void)buflen;
 
     cmdack.command = 0x310C;
     cmdack.input_word_count = 1;
@@ -565,6 +648,12 @@ int avioctl2_select_position(
 {
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     cmdack.command = 0x310E;
     cmdack.input_word_count = 1;
     cmdack.input_word[0] = *(u16 *)arg;
@@ -589,6 +678,12 @@ int avioctl2_position_up(
     unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
 
     cmdack.command = 0x310F;
     cmdack.input_word_count = 0;
@@ -616,6 +711,12 @@ int avioctl2_position_down(
 {
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
+
     cmdack.command = 0x3110;
     cmdack.input_word_count = 0;
     if (DvrdrvExecCmdAck(&cmdack)) {
@@ -642,6 +743,12 @@ int avioctl2_get_position(
 {
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
+
     cmdack.command = 0x3111;
     cmdack.input_word_count = 0;
     if (DvrdrvExecCmdAck(&cmdack)) {
@@ -666,6 +773,12 @@ int avioctl2_set_position_info(
     unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     cmdack.command = 0x3112;
     cmdack.input_word[0] = *(u16 *)arg;
@@ -696,6 +809,11 @@ int avioctl2_get_position_info(
 {
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)cmd;
+    (void)arglen;
+    (void)buflen;
+
     cmdack.command = 0x3113;
     cmdack.input_word_count = 1;
     cmdack.input_word[0] = *(u16 *)arg;
@@ -725,6 +843,12 @@ int avioctl2_tun_scan_mode(
 {
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     cmdack.command = 0x3114;
     cmdack.input_word_count = 1;
     cmdack.input_word[0] = *(u16 *)arg;
@@ -749,6 +873,12 @@ int avioctl2_f_select_position(
     unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     cmdack.command = 0x3115;
     cmdack.input_word_count = 1;
@@ -775,6 +905,12 @@ int avioctl2_select_rec_src(
 {
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     cmdack.command = 0x3116;
     cmdack.input_word_count = 1;
     cmdack.timeout = 10000000;
@@ -798,6 +934,12 @@ int avioctl2_get_rec_src(
     unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
 
     cmdack.command = 0x3117;
     cmdack.input_word_count = 0;
@@ -825,6 +967,9 @@ int avioctl2_cmd_ack(
     void *buf)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a2;
+    (void)a3;
 
     cmdack.command = cmd | 0x3100;
     if (arglen >> 1) {
@@ -876,6 +1021,10 @@ int avioctl2_cmd_ack_comp(
 {
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)a2;
+    (void)a3;
+
     cmdack.command = cmd | 0x3100;
     if (arglen >> 1) {
         u16 *input_word_tmp;
@@ -922,6 +1071,8 @@ int avioctl2_tun_scan_mode_euro(
     void *buf,
     unsigned int buflen)
 {
+    (void)buflen;
+
     return avioctl2_cmd_ack("avioctl2_tun_scan_mode_euro", 0x8000, a1, cmd, arg, arglen, buf);
 }
 
@@ -933,6 +1084,8 @@ int avioctl2_tun_scan_ch_euro(
     void *buf,
     unsigned int buflen)
 {
+    (void)buflen;
+
     return avioctl2_cmd_ack_comp("avioctl2_tun_scan_ch_euro", 0x8000, a1, cmd, arg, arglen, buf);
 }
 
@@ -944,6 +1097,8 @@ int avioctl2_get_curfreq_info(
     void *buf,
     unsigned int buflen)
 {
+    (void)buflen;
+
     return avioctl2_cmd_ack("avioctl2_get_curfreq_info", 0x8000, a1, cmd, arg, arglen, buf);
 }
 
@@ -955,6 +1110,8 @@ int avioctl2_get_teletext_ver_no(
     void *buf,
     unsigned int buflen)
 {
+    (void)buflen;
+
     return avioctl2_cmd_ack_comp("avioctl2_get_teletext_ver_no", 0x8000, a1, cmd, arg, arglen, buf);
 }
 
@@ -966,6 +1123,8 @@ int avioctl2_set_tv_guide_page(
     void *buf,
     unsigned int buflen)
 {
+    (void)buflen;
+
     return avioctl2_cmd_ack("avioctl2_set_tv_guide_page", 0x8000, a1, cmd, arg, arglen, buf);
 }
 
@@ -977,6 +1136,8 @@ int avioctl2_get_tv_guide_page(
     void *buf,
     unsigned int buflen)
 {
+    (void)buflen;
+
     return avioctl2_cmd_ack("avioctl2_get_tv_guide_page", 0x8000, a1, cmd, arg, arglen, buf);
 }
 
@@ -988,6 +1149,8 @@ int avioctl2_change_mode_tv_to_dvd(
     void *buf,
     unsigned int buflen)
 {
+    (void)buflen;
+
     return avioctl2_cmd_ack("avioctl2_change_mode_tv_to_dvd", 0x8000, a1, cmd, arg, arglen, buf);
 }
 
@@ -999,6 +1162,8 @@ int avioctl2_get_vps_data(
     void *buf,
     unsigned int buflen)
 {
+    (void)buflen;
+
     return avioctl2_cmd_ack_comp("avioctl2_get_vps_data", 0x6B6C0, a1, cmd, arg, arglen, buf);
 }
 
@@ -1010,6 +1175,8 @@ int avioctl2_get_pdc_data(
     void *buf,
     unsigned int buflen)
 {
+    (void)buflen;
+
     return avioctl2_cmd_ack_comp("avioctl2_get_pdc_data", 0x2DC6C0, a1, cmd, arg, arglen, buf);
 }
 
@@ -1021,6 +1188,8 @@ int avioctl2_get_format1_data(
     void *buf,
     unsigned int buflen)
 {
+    (void)buflen;
+
     return avioctl2_cmd_ack_comp("avioctl2_get_format1_data", 0x2DC6C0, a1, cmd, arg, arglen, buf);
 }
 
@@ -1032,6 +1201,8 @@ int avioctl2_get_header_time_data(
     void *buf,
     unsigned int buflen)
 {
+    (void)buflen;
+
     return avioctl2_cmd_ack_comp("avioctl2_get_header_time_data", 0x2DC6C0, a1, cmd, arg, arglen, buf);
 }
 
@@ -1043,5 +1214,7 @@ int avioctl2_set_acs_position_euro(
     void *buf,
     unsigned int buflen)
 {
+    (void)buflen;
+
     return avioctl2_cmd_ack("avioctl2_set_acs_position_euro", 0x8000, a1, cmd, arg, arglen, buf);
 }

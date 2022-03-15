@@ -74,6 +74,9 @@ int _start(int argc, char *argv[])
 {
 	int result;
 
+	(void)argc;
+	(void)argv;
+
 	if(RegisterLibraryEntries(&_exp_rmman) == 0)
 	{
 		result = CreateMainThread() <= 0 ? MODULE_NO_RESIDENT_END : MODULE_RESIDENT_END;
@@ -215,6 +218,8 @@ static void MainThread(void *arg)
 {
 	iop_event_info_t evfInfo;
 	int port, slot;
+
+	(void)arg;
 
 	while(1)
 	{
@@ -496,6 +501,9 @@ static void *RpcHandler(int fno, void *buffer, int len)
 {
 	void *retBuff;
 
+	(void)fno;
+	(void)len;
+
 	switch(((struct rmRpcPacket *)buffer)->cmd.command)
 	{
 		case RMMAN_RPCFUNC_END:
@@ -523,6 +531,8 @@ static void *RpcHandler(int fno, void *buffer, int len)
 
 static void RpcThread(void *arg)
 {
+	(void)arg;
+
 	if(!sceSifCheckInit())
 	{
 		printf("yet sif hasn't been init\n");

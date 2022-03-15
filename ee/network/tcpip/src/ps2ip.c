@@ -149,6 +149,8 @@ static err_t SMapLowLevelOutput(struct netif* pNetIF, struct pbuf* pOutput)
 	struct pbuf* pbuf;
 	err_t result;
 
+	(void)pNetIF;
+
 	result = ERR_OK;
 	if(pOutput->tot_len > pOutput->len)
 	{

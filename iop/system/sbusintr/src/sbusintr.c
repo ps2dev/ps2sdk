@@ -31,8 +31,11 @@ static struct {
 
 extern struct irx_export_table _exp_sbusintr;
 
-int _start(int argc, const char **argv)
+int _start(int argc, char **argv)
 {
+	(void)argc;
+	(void)argv;
+
 	if (RegisterLibraryEntries(&_exp_sbusintr) != 0)
 		return 1;
 
@@ -42,6 +45,8 @@ int _start(int argc, const char **argv)
 static int sbus_dispatch(void *arg)
 {
 	u32 msflag, irq;
+
+	(void)arg;
 
 	if (!(msflag = sceSifGetMSFlag()))
 		return 1;

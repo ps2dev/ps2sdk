@@ -94,13 +94,16 @@ static u8 mcserv_buf[MCSERV_BUFSIZE] __attribute__((aligned(64)));
 extern struct irx_export_table _exp_mcserv;
 
 //--------------------------------------------------------------
-int _start(int argc, const char **argv)
+int _start(int argc, char **argv)
 {
 	iop_thread_t thread_param;
 	register int thread_id;
 	iop_library_t *libptr;
 	int i, mcman_loaded;
 	void **export_tab;
+
+	(void)argc;
+	(void)argv;
 
 #ifdef SIO_DEBUG
 	sio_init(38400, 0, 0, 0, 0);
@@ -202,6 +205,8 @@ err_out:
 //--------------------------------------------------------------
 void thread_rpc_S_0400(void* arg)
 {
+	(void)arg;
+
 	if (!sceSifCheckInit())
 		sceSifInit();
 
@@ -217,6 +222,9 @@ void *cb_rpc_S_0400(u32 fno, void *buf, int size)
 	// Rpc Callback function
 	int (*rpc_func)(void);
 	register int i;
+
+	(void)buf;
+	(void)size;
 
 	if (mcman_type == XMCMAN) {
 		for (i=0; i<16; i++) { // retrieve correct function number for xmcserv

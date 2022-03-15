@@ -235,6 +235,8 @@ static int scsi_write(struct block_device* bd, u32 sector, const void* buffer, u
 
 static void scsi_flush(struct block_device* bd)
 {
+    (void)bd;
+
     M_DEBUG("%s\n", __func__);
 
     // Dummy function

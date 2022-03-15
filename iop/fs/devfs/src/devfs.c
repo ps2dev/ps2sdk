@@ -374,6 +374,8 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
    int loop;
    int fn_offset = 0;
 
+   (void)unused;
+
    //printf("devfs_open file=%p name=%s mode=%d\n", file, name, mode);
    if(name == NULL)
    {
@@ -933,6 +935,8 @@ int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
    devfs_device_t *dev;
    int fn_offset = 0;
 
+   (void)file;
+
    if(name == NULL)
    {
       return -1;
@@ -1056,6 +1060,9 @@ int init_devfs(void)
 int _start(int argc, char **argv)
 {
    int res = 1;
+
+   (void)argc;
+   (void)argv;
 
    printf(BANNER, VERSION);
 

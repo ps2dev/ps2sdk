@@ -119,6 +119,7 @@ qword_t *draw_setup_environment(qword_t *q, int context, framebuffer_t *frame, z
 
 qword_t *draw_disable_tests(qword_t *q, int context, zbuffer_t *z)
 {
+	(void)z;
 
 	PACK_GIFTAG(q,GIF_SET_TAG(1,0,0,0,GIF_FLG_PACKED,1), GIF_REG_AD);
 	q++;

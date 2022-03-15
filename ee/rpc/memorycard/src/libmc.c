@@ -844,6 +844,8 @@ int mcChangeThreadPriority(int level)
 {
 	int ret;
 
+	(void)level;
+
 	// check lib is inited
 	if((!g_mclibInited)||(g_mcType==MC_TYPE_MC))
 		return -1;

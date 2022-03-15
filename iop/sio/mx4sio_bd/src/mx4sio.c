@@ -591,6 +591,8 @@ static int _msread_start(struct block_device* bd, u32 sector)
 {
     int rv, i;
 
+    (void)bd;
+
     for (i = 0; i < 10; i++) {
         // Wait idle
         rv = wait_equal(0xFF, 4000, PORT_NR);
@@ -623,6 +625,8 @@ recovery:
 
 static int _msread_do(struct block_device* bd, void* buffer, u16 count)
 {
+    (void)bd;
+
     // Setup DMA cmd struct
     cmd.buffer              = buffer;
     cmd.portNr              = PORT_NR;
@@ -745,6 +749,8 @@ static int spi_sdcard_write(struct block_device* bd, u32 sector, const void* buf
 {
     int rv;
 
+    (void)bd;
+
     //M_DEBUG("%s(%d,%d)\n", __FUNCTION__, (int)sector, (int)count);
 
     if (count == 0)
@@ -769,6 +775,8 @@ static int spi_sdcard_write(struct block_device* bd, u32 sector, const void* buf
 
 static void spi_sdcard_flush(struct block_device* bd)
 {
+    (void)bd;
+
     //M_DEBUG("%s\n", __FUNCTION__);
 
     return;
@@ -776,6 +784,8 @@ static void spi_sdcard_flush(struct block_device* bd)
 
 static int spi_sdcard_stop(struct block_device* bd)
 {
+    (void)bd;
+
     //M_DEBUG("%s\n", __FUNCTION__);
 
     return 0;
@@ -865,6 +875,8 @@ static void sd_detect()
 // SD card detection thread
 static void sd_detect_thread(void* arg)
 {
+    (void)arg;
+
     M_PRINTF("card detection thread running\n");
 
     while (1) {
@@ -888,11 +900,18 @@ int module_start(int argc, char* argv[])
     iop_library_t* lib_modload;
     iop_event_t event;
     iop_thread_t thread;
-    int i, rv;
+    int rv;
+
+#ifndef MINI_DRIVER
+    int i;
 
     M_PRINTF("Starting module\n");
     for (i = 0; i < argc; i++)
         M_PRINTF(" - argv[%d] = %s\n", i, argv[i]);
+#else
+    (void)argc;
+    (void)argv;
+#endif
 
     // Create default tranfer descriptor
     _init_td(&global_td, PORT_NR);
@@ -973,11 +992,16 @@ error1:
 
 int module_stop(int argc, char* argv[])
 {
+#ifndef MINI_DRIVER
     int i;
 
     M_PRINTF("Stopping module\n");
     for (i = 0; i < argc; i++)
         M_PRINTF(" - argv[%d] = %s\n", i, argv[i]);
+#else
+    (void)argc;
+    (void)argv;
+#endif
 
     DeleteThread(sd_detect_thread_id);
     sio2man_hook_deinit();

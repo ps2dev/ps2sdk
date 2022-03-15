@@ -221,6 +221,9 @@ ps2ip_input(PBuf* pInput,NetIF* pNetIF)
 
 int _exit(int argc, char** argv)
 {
+	(void)argc;
+	(void)argv;
+
 	return MODULE_NO_RESIDENT_END; // return "not resident"!
 }
 
@@ -322,6 +325,8 @@ SMapLowLevelOutput(struct netif *pNetIF, struct pbuf* pOutput)
 {
 	err_t result;
 	struct pbuf* pbuf;
+
+	(void)pNetIF;
 
 	result = ERR_OK;
 	if(pOutput->tot_len > pOutput->len)

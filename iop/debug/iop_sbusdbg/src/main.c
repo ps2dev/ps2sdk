@@ -78,6 +78,9 @@ int _start(int argc, char *argv[])
 {
     int i;
 
+    (void)argc;
+    (void)argv;
+
     for(i = 2; i <= 7; i++)
     {
         iop_dbg_set_handler(i, (IOP_ExceptionHandler *) _iop_ex_handler);

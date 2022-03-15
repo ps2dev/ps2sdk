@@ -49,6 +49,8 @@ static void topThread(void *arg)
 {
 	int index;
 
+	(void)arg;
+
 	while(1)
 	{
 		WaitSema(topSema);

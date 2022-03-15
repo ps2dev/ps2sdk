@@ -380,11 +380,14 @@ void update_slot_numbers()
 	SetEventFlag(event_flag, EF_UPDATE_SLOTS);
 }
 
-s32 _start(char **argv, int argc)
+int _start(int argc, char **argv)
 {
 	iop_event_t event;
 	iop_thread_t thread;
 	u32 i;
+
+	(void)argc;
+	(void)argv;
 
 	printf(BANNER,VERSION);
 

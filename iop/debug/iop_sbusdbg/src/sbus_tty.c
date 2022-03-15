@@ -43,17 +43,29 @@ static int ttyfs_deinit()
 
 static int ttyfs_open(iop_file_t *file, const char *name, int flags, int mode)
 {
+    (void)file;
+    (void)name;
+    (void)flags;
+    (void)mode;
+
     //DBG_puts("SIOTTY: FS Open()\n");
 	return 0;
 }
 
 static int ttyfs_close(iop_file_t *file, int fd)
 {
+    (void)file;
+    (void)fd;
+
     //DBG_puts("SIOTTY: FS Close()\n");
     return(0);
 }
 
 static int ttyfs_read(iop_file_t *file, void *ptr, size_t size) {
+    (void)file;
+    (void)ptr;
+    (void)size;
+
     //DBG_puts("SIOTTY: FS Read()\n");
     return(-1);
 }
@@ -61,6 +73,8 @@ static int ttyfs_read(iop_file_t *file, void *ptr, size_t size) {
 static int ttyfs_write(iop_file_t *file, u8 *ptr, size_t size) {
     char temp[65];
     int bCount = 0, toWrite;
+
+    (void)file;
 
     //DBG_puts("SIOTTY: FS Write()\n");
 
@@ -81,42 +95,77 @@ static int ttyfs_write(iop_file_t *file, u8 *ptr, size_t size) {
 }
 
 static int ttyfs_lseek(iop_file_t *file, int offset, int mode) {
+    (void)file;
+    (void)offset;
+    (void)mode;
+
     //DBG_puts("SIOTTY: FS Lseek()\n");
 
     return(-1);
 }
 
 static int ttyfs_format(iop_file_t *file, const char *dev, const char *blockdev, void *arg, size_t arglen) {
+    (void)file;
+    (void)dev;
+    (void)blockdev;
+    (void)arg;
+    (void)arglen;
+
     //DBG_puts("SIOTTY: FS Format()\n");
 
     return(-1);
 }
 
 static int ttyfs_remove(iop_file_t *file, const char *name) {
+    (void)file;
+    (void)name;
+
     //DBG_puts("SIOTTY: FS Remove()\n");
 
     return(-1);
 }
 
 static int ttyfs_dread(iop_file_t *file, iox_dirent_t *dirent) {
+    (void)file;
+    (void)dirent;
+
     //DBG_puts("SIOTTY: FS Dread()\n");
 
     return(-1);
 }
 
 static int ttyfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat) {
+    (void)file;
+    (void)name;
+    (void)stat;
+
     //DBG_puts("SIOTTY: FS GetStat()\n");
 
     return(-1);
 }
 
 static int ttyfs_devctl(iop_file_t *file, const char *name, int cmd, void *arg, size_t arglen, void *buf, size_t buflen) {
+    (void)file;
+    (void)name;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     //DBG_puts("SIOTTY: FS DEVCTL()\n");
 
     return(-1);
 }
 
 static int ttyfs_ioctl2(iop_file_t *file, int cmd, void *arg, size_t arglen, void *buf, size_t buflen) {
+    (void)file;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     //DBG_puts("SIOTTY: FS IOCTL2()\n");
 
     return(-1);
@@ -153,6 +202,8 @@ static char kprint_buffer[1024];
 
 int _kPrintf(void *context, const char * format, va_list ap)
 {
+    (void)context;
+
     int r = prnt(&sprintf_putchar, &format, format, ap);
     sbus_tty_puts(kprint_buffer);
     return r;

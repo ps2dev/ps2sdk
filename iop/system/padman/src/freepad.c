@@ -132,6 +132,9 @@ void WaitClearEvent(int eventflag, u32 bits, int mode, u32 *resbits_out)
 {
 	u32 resbits;
 
+	(void)mode;
+	(void)resbits_out;
+
 	WaitEventFlag(eventflag, bits | EF_EXIT_THREAD, WEF_OR, &resbits);
 
 	if( resbits & EF_EXIT_THREAD )

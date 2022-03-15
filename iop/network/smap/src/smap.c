@@ -551,6 +551,8 @@ static int Dev9IntrCb(int flag)
     OldGP = SetModuleGP();
 #endif
 
+    (void)flag;
+
     dev9IntrDisable(DEV9_SMAP_ALL_INTR_MASK);
     iSetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_INTR);
 
@@ -580,6 +582,8 @@ static void Dev9PreDmaCbHandler(int bcr, int dir)
 static void Dev9PostDmaCbHandler(int bcr, int dir)
 {
     volatile u8 *smap_regbase;
+
+    (void)bcr;
 
     smap_regbase = SmapDriverData.smap_regbase;
     if (dir != DMAC_TO_MEM) {
@@ -746,6 +750,9 @@ int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, void *out
 
     OldGP = SetModuleGP();
 #endif
+
+    (void)args_len;
+    (void)length;
 
     switch (command) {
         case NETMAN_NETIF_IOCTL_ETH_GET_MAC:

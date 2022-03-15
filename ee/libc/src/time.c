@@ -39,6 +39,8 @@ ps2_clock_t  __time_intr_overflow_count = 0;
 
 static int intrOverflow(int ca)
 {
+   (void)ca;
+
    __time_intr_overflow_count++;
 
    // A write to the overflow flag will clear the overflow flag

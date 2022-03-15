@@ -215,6 +215,7 @@ int dma_channel_send_chain(int channel, void *data, int data_size, int flags, in
 
 int dma_channel_send_chain_ucab(int channel, void *data, int qwc, int flags)
 {
+	(void)qwc;
 
 	// clear channel status
 	*DMA_REG_STAT = 1 << channel;

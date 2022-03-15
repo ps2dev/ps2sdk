@@ -207,6 +207,8 @@ static int fs_dummy(void)
 //---------------------------------------------------------------------------
 static int fs_init(iop_device_t* driver)
 {
+    (void)driver;
+
     M_DEBUG("%s\n", __func__);
 
     if (!fs_inited) {
@@ -225,6 +227,8 @@ static int fs_open(iop_file_t* fd, const char* name, int flags, int mode)
     int ret;
     unsigned int cluster;
     char escapeNotExist;
+
+    (void)mode;
 
     M_DEBUG("%s: %s flags=%X mode=%X\n", __func__, name, flags, mode);
 
@@ -568,6 +572,8 @@ static int fs_mkdir(iop_file_t* fd, const char* name, int mode)
     unsigned int sfnSector;
     unsigned int cluster;
 
+    (void)mode;
+
     M_DEBUG("%s\n", __func__);
 
     _fs_lock();
@@ -845,6 +851,12 @@ int fs_rename(iop_file_t *fd, const char *path, const char *newpath)
 static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
     int ret;
+
+    (void)name;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     _fs_lock();
 

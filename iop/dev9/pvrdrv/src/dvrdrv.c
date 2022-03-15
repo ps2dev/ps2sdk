@@ -412,12 +412,20 @@ int DvrdrvTransferDma(u8 *output_buffer, int a2)
 void DvrPreDmaHandler(int bcr, int dir)
 {
     USE_SPD_REGS;
+
+    (void)bcr;
+    (void)dir;
+
     SPD_REG16(0x4100) |= 2u;
 }
 
 void DvrPostDmaHandler(int bcr, int dir)
 {
     USE_SPD_REGS;
+
+    (void)bcr;
+    (void)dir;
+
     while ((SPD_REG16(0x4100) & 2) != 0)
         ;
 }
@@ -694,6 +702,8 @@ int DVR_INTR_HANDLER(int flag)
     int v4;
     USE_SPD_REGS;
 
+    (void)flag;
+
     v1 = 0;
     v4 = SPD_REG16(0x4200);
     for (i = 0; i < 32; i += 1)
@@ -714,6 +724,9 @@ int DVR_INTR_HANDLER(int flag)
 void INTR_DVRRDY_HANDLER(int a1, void *a2v)
 {
     struct_dvrdrv *a2 = (struct_dvrdrv *)a2v;
+
+    (void)a1;
+
     a2->dvr_ready |= 1u;
     if (a2->mainthread_id >= 0)
         iWakeupThread(a2->mainthread_id);
@@ -738,6 +751,9 @@ void INTR_CMD_ACK_HANDLER(int a1, void *a2)
     s32 v6;
     char v7;
     USE_SPD_REGS;
+
+    (void)a1;
+    (void)a2;
 
     v2 = GetItrSidTbl(0, SPD_REG16(0x4220));
     if (v2) {
@@ -790,6 +806,9 @@ void INTR_CMD_COMP_HANDLER(int a1, void *a2)
     char v7;
     USE_SPD_REGS;
 
+    (void)a1;
+    (void)a2;
+
     v2 = GetItrSidTbl(2, SPD_REG16(0x4220));
     if (v2) {
         v6 = v2->sema;
@@ -837,6 +856,9 @@ void INTR_DMAACK_HANDLER(int a1, void *a2)
     s32 v3;
     USE_SPD_REGS;
 
+    (void)a1;
+    (void)a2;
+
     v2 = GetItrSidTbl(0, SPD_REG16(0x4220));
     if (v2) {
         v3 = v2->sema;
@@ -868,6 +890,9 @@ void INTR_DMAEND_HANDLER(int a1, void *a2)
     struct_itr_sid_tbl *v2;
     s32 v3;
     USE_SPD_REGS;
+
+    (void)a1;
+    (void)a2;
 
     v2 = GetItrSidTbl(1, SPD_REG16(0x4220));
     if (v2) {

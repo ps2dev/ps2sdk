@@ -149,6 +149,8 @@ IRX_ID(MODNAME, 1, 1);
 
 int _start(int a1, char **argv)
 {
+    (void)argv;
+
     if (a1 >= 0)
         return module_start();
     else
@@ -190,6 +192,8 @@ int dvr_df_init(iop_device_t *dev)
     int v1;
     iop_sema_t v3;
 
+    (void)dev;
+
     v3.attr = 0;
     v3.initial = 1;
     v3.max = 1;
@@ -203,6 +207,8 @@ int dvr_df_init(iop_device_t *dev)
 
 int dvr_df_exit(iop_device_t *dev)
 {
+    (void)dev;
+
     if (DeleteSema(sema_id) != 0)
         return -1;
     return 0;
@@ -210,6 +216,10 @@ int dvr_df_exit(iop_device_t *dev)
 
 int dvr_df_ioctl(iop_file_t *f, int cmd, void *param)
 {
+    (void)f;
+    (void)cmd;
+    (void)param;
+
     WaitSema(sema_id);
     SignalSema(sema_id);
     return -22;
@@ -247,6 +257,13 @@ LABEL_5:
 
 int dvr_df_ioctl2(iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
+    (void)f;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     WaitSema(sema_id);
     SignalSema(sema_id);
     return -22;
@@ -275,6 +292,13 @@ int dvrioctl2_rec_start(
     int cmdackerr;
     int err;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     cmdack.command = 0x2101;
     cmdack.input_word[0] = *((u16 *)arg + 1);
@@ -318,6 +342,13 @@ int dvrioctl2_rec_pause(
     int cmdackerr;
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     v7 = 0;
     p_cmdack = &cmdack;
     cmdack.command = 0x2102;
@@ -353,6 +384,14 @@ int dvrioctl2_rec_stop(
     int cmdackerr;
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     cmdack.command = 0x2103;
     cmdack.input_word_count = 0;
     cmdack.timeout = 5000000;
@@ -383,6 +422,13 @@ int dvrioctl2_set_rec_end_time(
     int cmdackerr;
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     cmdack.command = 0x2104;
     cmdack.input_word[0] = (*(u32 *)arg) >> 16;
     cmdack.input_word_count = 2;
@@ -409,6 +455,12 @@ int dvrioctl2_get_rec_info(
     void *buf,
     unsigned int buflen)
 {
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+
     if (buflen >= 0x15) {
         int cmdackerr;
         drvdrv_exec_cmd_ack cmdack;
@@ -458,6 +510,13 @@ int dvrioctl2_get_rec_time(
     int cmdackerr;
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
+
     cmdack.command = 0x2106;
     cmdack.input_word_count = 0;
     cmdackerr = DvrdrvExecCmdAck(&cmdack);
@@ -487,6 +546,13 @@ int dvrioctl2_get_ifo_time_entry(
 {
     int cmdackerr;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
 
     cmdack.command = 0x2107;
     cmdack.input_word_count = 0;
@@ -519,6 +585,13 @@ int dvrioctl2_get_ifo_vobu_entry(
     int cmdackerr;
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
+
     cmdack.command = 0x2108;
     cmdack.input_word_count = 0;
     cmdackerr = DvrdrvExecCmdAck(&cmdack);
@@ -549,6 +622,14 @@ int dvrioctl2_read_resfile(
     int cmdackerr;
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     cmdack.command = 0x2109;
     cmdack.input_word_count = 0;
     cmdackerr = DvrdrvExecCmdAck(&cmdack);
@@ -576,6 +657,14 @@ int dvrioctl2_clear_resfile_flag(
     int cmdackerr;
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     cmdack.command = 0x210A;
     cmdack.input_word_count = 0;
     cmdackerr = DvrdrvExecCmdAck(&cmdack);
@@ -602,6 +691,13 @@ int dvrioctl2_rec_prohibit(
 {
     int cmdackerr;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     cmdack.command = 0x210E;
     cmdack.input_word_count = 1;
@@ -631,6 +727,13 @@ int dvrioctl2_epg_test(
     int cmdackerr;
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     cmdack.command = 0x210F;
     cmdack.input_word_count = 1;
     cmdack.input_word[0] = *(u16 *)arg;
@@ -657,6 +760,12 @@ int dvrioctl2_send_timer_event(
     unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)buf;
+    (void)buflen;
 
     cmdack.command = 0x2110;
     cmdack.input_word_count = 0;
@@ -690,6 +799,13 @@ int dvrioctl2_epg_cancel(
     int cmdackerr;
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     cmdack.command = 0x2111;
     cmdack.input_word_count = 0;
     cmdack.input_word[0] = *(u16 *)arg;
@@ -715,6 +831,13 @@ int dvrioctl2_get_status_register(
     void *buf,
     unsigned int buflen)
 {
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
+
     *(u16 *)buf = (*((vu32 *)0xB0004230));
     *((u16 *)buf + 1) = (*((vu32 *)0xB0004234));
     *((u16 *)buf + 2) = (*((vu32 *)0xB0004238));
@@ -733,6 +856,14 @@ int dvrioctl2_tevent_buf_clr(
 {
     int v7;
     char *v8;
+
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     v7 = 6143;
     v8 = &TEVENT_BUF[6143];
@@ -755,6 +886,12 @@ int dvrioctl2_tevent_buf_send(
     void *buf,
     unsigned int buflen)
 {
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)buf;
+    (void)buflen;
+
     if ((int)(tevent_data_sz + arglen) < 0x1801) {
         signed int i;
         for (i = 0; i < (int)arglen; arg = (char *)arg + 1) {
@@ -777,6 +914,14 @@ int dvrioctl2_tevent_buf_trans_dvrp(
     unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     cmdack.command = 0x2110;
     cmdack.input_word_count = 0;
@@ -810,6 +955,13 @@ int dvrioctl2_start_hdd_test(
     int cmdackerr;
     int ack_status_ack;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     cmdack.command = 0x2112;
     cmdack.input_word[0] = *(u16 *)arg;
@@ -850,6 +1002,14 @@ int dvrioctl2_stop_hdd_test(
     int ack_status_ack;
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     cmdack.command = 0x2113;
     cmdack.input_word_count = 0;
     cmdack.timeout = 30000000;
@@ -879,6 +1039,13 @@ int dvrioctl2_get_hdd_test_stat(
 {
     int cmdackerr;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
 
     cmdack.command = 0x2114;
     cmdack.input_word_count = 0;
@@ -912,6 +1079,13 @@ int dvrioctl2_pre_update_a(
     int cmdackerr;
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
+
     cmdack.command = 0x2115;
     cmdack.input_word_count = 0;
     cmdackerr = DvrdrvExecCmdAck(&cmdack);
@@ -939,6 +1113,13 @@ int dvrioctl2_pre_update_b(
     int cmdackerr;
     int ack_status_ack;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     cmdack.command = 0x2116;
     cmdack.input_word_count = 1;
@@ -971,6 +1152,13 @@ int dvrioctl2_get_rec_vro_pckn(
     int cmdackerr;
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
+
     cmdack.command = 0x2117;
     cmdack.input_word_count = 0;
     cmdackerr = DvrdrvExecCmdAck(&cmdack);
@@ -1001,6 +1189,13 @@ int dvrioctl2_enc_dec_test(
 {
     int cmdackerr;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     cmdack.command = 0x2118;
     cmdack.input_word_count = 1;
@@ -1041,6 +1236,12 @@ int dvrioctl2_make_menu(
     int v19;
     int busywait;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arglen;
+    (void)buflen;
 
     cmdack.command = 0x2119;
     cmdack.input_word[0] = *((u16 *)arg + 1);
@@ -1127,6 +1328,12 @@ int dvrioctl2_re_enc_start(
     u16 *v26;
     int v27;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arglen;
+    (void)buflen;
 
     cmdack.command = 0x211A;
     cmdack.input_word[0] = *((u16 *)arg + 1);
@@ -1283,6 +1490,10 @@ int dvrioctl2_tevent_buf_recv_first(
     void *buf,
     unsigned int buflen)
 {
+    (void)name;
+    (void)arg;
+    (void)arglen;
+
     TELTEXT_BUFOFFSET = 0;
     TELTEXT_ACTLEN = 0;
     printf("dvr_tevent_buf_recv_first(io=%p, cmd=%d  buf=%p, nbyte=%u)\n", a1, cmd, buf, buflen);
@@ -1317,6 +1528,10 @@ int dvrioctl2_tevent_buf_recv_next(
     void *buf,
     unsigned int buflen)
 {
+    (void)name;
+    (void)arg;
+    (void)arglen;
+
     printf("dvr_tevent_buf_recv_next(io=%p, cmd=%d buf=%p, nbyte=%u)\n", a1, cmd, buf, buflen);
     if (buflen == 1024) {
         if (TELTEXT_BUFOFFSET + 1024 < sizeof(TELTEXT_BUF)) {
@@ -1347,6 +1562,12 @@ int dvrioctl2_finish_auto_process(
 {
     int cmdackerr;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arglen;
+    (void)buflen;
 
     cmdack.command = 0x211C;
     cmdack.input_word_count = 1;
@@ -1381,6 +1602,13 @@ int dvrioctl2_rec_pictclip(
     int busywait;
     int cmdackerr;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     cmdack.command = 0x211D;
     cmdack.input_word[0] = *((u16 *)arg + 1);

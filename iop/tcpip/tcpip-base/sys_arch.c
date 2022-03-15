@@ -112,6 +112,8 @@ sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, 
 	iop_thread_t thp;
 	int tid, rv;
 
+	(void)name;
+
 	thp.attr = TH_C;
 	thp.option = (u32)"PS2IP";
 	thp.thread = thread;
@@ -139,6 +141,8 @@ sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, 
 err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 {
 	iop_mbx_t mbp;
+
+	(void)size;
 
 	mbp.attr = MBA_THFIFO;
 	mbp.option = (u32)"PS2IP";

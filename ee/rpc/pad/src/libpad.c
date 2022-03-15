@@ -342,6 +342,8 @@ int padPortInit(int mode)
 #endif
     int i;
 
+    (void)mode;
+
     for(i = 0; i<8; i++)
     {
         PadState[0][i].open = 0;
@@ -829,6 +831,8 @@ padGetConnection(int port, int slot)
 
     return ((oslot->openSlots[port] >> slot) & 0x1);
 #else
+    (void)port;
+    (void)slot;
     return 1;
 #endif
 }

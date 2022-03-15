@@ -903,6 +903,8 @@ int VuxClipW(VU_VECTOR *tv0)
 {
 	int	ret = 0;
 
+	(void)tv0;
+
 	return ret;
 }
 

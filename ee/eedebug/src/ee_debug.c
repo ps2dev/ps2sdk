@@ -25,6 +25,8 @@ static EE_ExceptionHandler *ee_level2_exception_handlers[4] = { 0 };
 
 void _def_ee_ex_handler(EE_RegFrame *frame)
 {
+    (void)frame;
+
     while(1);
 }
 

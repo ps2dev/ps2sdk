@@ -111,24 +111,42 @@ u16 sceSdGetCoreAttr(u16 entry)
 
 u16 sceSdNote2Pitch(u16 center_note, u16 center_fine, u16 note, s16 fine)
 {
+	(void)center_note;
+	(void)center_fine;
+	(void)note;
+	(void)fine;
+
 	/* TODO: These functions were documented for the ps1 once... */
 	return(0);
 }
 
 u16 sceSdPitch2Note(u16 center_note, u16 center_fine, u16 pitch)
 {
+	(void)center_note;
+	(void)center_fine;
+	(void)pitch;
+
 	/* TODO: These functions were documented for the ps1 once... */
 	return(0);
 }
 
 int sceSdProcBatch(sceSdBatch* batch, u32 returns[], u32 num)
 {
+	(void)batch;
+	(void)returns;
+	(void)num;
+
 	/* TODO */
 	return(-1);
 }
 
 int sceSdProcBatchEx(sceSdBatch* batch, u32 returns[], u32 num, u32 voice)
 {
+	(void)batch;
+	(void)returns;
+	(void)num;
+	(void)voice;
+
 	/* TODO */
 	return(-1);
 }
@@ -149,6 +167,11 @@ int sceSdVoiceTrans(s16 channel, u16 mode, u8 *m_addr, u32 *s_addr, u32 size)
 
 int sceSdBlockTrans(s16 channel, u16 mode, u8 *m_addr, u32 size, ...)
 {
+	(void)channel;
+	(void)mode;
+	(void)m_addr;
+	(void)size;
+
 	return(-1);
 }
 

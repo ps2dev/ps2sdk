@@ -918,6 +918,9 @@ int fat_mount(struct SBP2Device* dev, unsigned int start, unsigned int count)
 {
 	fat_driver* fatd = NULL;
 	unsigned int i;
+
+	(void)count;
+
 	for (i = 0; i < NUM_DRIVES && fatd == NULL; ++i)
 	{
 		if (g_fatd[i] == NULL)

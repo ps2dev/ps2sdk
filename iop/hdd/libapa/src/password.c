@@ -29,6 +29,8 @@ int apaPassCmp(const char *pw1, const char *pw2)
 #ifdef APA_ENABLE_PASSWORDS
 	 return memcmp(pw1, pw2, APA_PASSMAX) ? -EACCES : 0;
 #else
+	(void)pw1;
+	(void)pw2;
 	//Passwords are not supported, hence this check should always pass.
 	return 0;
 #endif

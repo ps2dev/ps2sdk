@@ -217,6 +217,8 @@ u32 sceSdBlockTransStatus(s16 chan, s16 flag)
 {
 	u32 retval;
 
+	(void)flag;
+
 	chan &= 1;
 
 	if(U16_REGISTER_READ(U16_REGISTER(0x1B0 + (chan * 1024))) == 0)

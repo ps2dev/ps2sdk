@@ -64,6 +64,9 @@ extern struct irx_export_table _exp_fls;
 
 int _start(int argc, char *argv[])
 {
+	(void)argc;
+	(void)argv;
+
 	if (flash_detect() < 0)
 		return MODULE_NO_RESIDENT_END;
 

@@ -41,6 +41,9 @@ static volatile union{
 } statusFIFO;
 
 static void ieee1394_callback(int reason, unsigned long int offset, unsigned long int size){
+	(void)offset;
+	(void)size;
+
 #if 0
 	iLinkBufferOffset=offset;
 	iLinkTransferSize=size;
@@ -247,6 +250,8 @@ static void iLinkIntrCBHandlingThread(void *arg){
 		8, /* S200; 2^(8+2)=1024 */
 		9, /* S400; 2^(9+2)=2048 */
 	};
+
+	(void)arg;
 
  while(1){
 	WaitEventFlag(sbp2_event_flag, BUS_RESET_COMPLETE, WEF_AND|WEF_CLEAR, NULL);

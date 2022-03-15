@@ -76,6 +76,8 @@ IRX_ID(MODNAME, 1, 1);
 
 int _start(int a1, char **argv)
 {
+    (void)argv;
+
     if (a1 >= 0)
         return module_start();
     else
@@ -105,6 +107,8 @@ int dvripl_df_init(iop_device_t *dev)
     int v1;
     iop_sema_t v3;
 
+    (void)dev;
+
     printf("dvripl_df_init\n");
     v3.attr = 0;
     v3.initial = 1;
@@ -119,6 +123,8 @@ int dvripl_df_init(iop_device_t *dev)
 
 int dvripl_df_exit(iop_device_t *dev)
 {
+    (void)dev;
+
     printf("dvripl_df_exit\n");
     if (DeleteSema(sema_id) != 0)
         return -1;
@@ -127,6 +133,10 @@ int dvripl_df_exit(iop_device_t *dev)
 
 int dvripl_df_ioctl(iop_file_t *f, int cmd, void *param)
 {
+    (void)f;
+    (void)cmd;
+    (void)param;
+
     printf("dvripl_df_ioctl\n");
     WaitSema(sema_id);
     SignalSema(sema_id);
@@ -144,6 +154,11 @@ int dvripl_df_devctl(
 {
     int v11;
 
+    (void)name;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     printf("dvripl_df_devctl\n");
     WaitSema(sema_id);
     v11 = -22;
@@ -155,6 +170,13 @@ int dvripl_df_devctl(
 
 int dvripl_df_ioctl2(iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
+    (void)f;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     printf("dvripl_df_ioctl2\n");
     WaitSema(sema_id);
     SignalSema(sema_id);
@@ -186,6 +208,9 @@ int iplioctl2_update(iop_file_t *a1, int cmd, void *arg)
 #endif
     int cmdackerr4;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
 
     total_size = 0;
     retval = 0;
@@ -329,6 +354,8 @@ LABEL_30:
 
 void dvr_ready(int a1, void *a2)
 {
+    (void)a1;
+
     Kprintf("DVRRDY INTERRUPT\n");
     dvr_ready_flag = 1;
     iWakeupThread(*(u32 *)a2);

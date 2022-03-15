@@ -47,6 +47,9 @@ iop_device_t **GetDeviceList(void)
 
 int _start(int argc, char **argv)
 {
+	(void)argc;
+	(void)argv;
+
 	if(RegisterLibraryEntries(&_exp_iomanx) != 0)
     {
 		return MODULE_NO_RESIDENT_END;

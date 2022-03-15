@@ -142,6 +142,8 @@ static void HandleRxEvent(void *packet, void *common)
 	u8 offset = bd->offset;
 	u16 len = bd->length;
 
+	(void)common;
+
 	FrameBufferStatus[id].length = len;
 	FrameBufferStatus[id].offset = offset;
 
@@ -152,6 +154,8 @@ static void *NETMAN_rpc_handler(int fno, void *buffer, int size)
 {
 	static int ResultValue;
 	void *result;
+
+	(void)size;
 
 	switch(fno)
 	{
@@ -220,6 +224,8 @@ static void *NETMAN_rpc_handler(int fno, void *buffer, int size)
 
 static void NETMAN_RPC_srv(void *args)
 {
+	(void)args;
+
 	sceSifSetRpcQueue(&rpc_qdata, RpcThreadID);
 
 	sceSifRegisterRpc(&rpc_sdata, NETMAN_RPC_NUMBER, &NETMAN_rpc_handler, rpc_buffer, NULL, NULL, &rpc_qdata);

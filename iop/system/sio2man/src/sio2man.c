@@ -183,6 +183,8 @@ void main_thread(void *unused)
 {
 	u32 resbits[4];
 
+	(void)unused;
+
 	while (1) {
 	#ifdef SIO2LOG
 		log_flush(0);
@@ -303,9 +305,12 @@ void shutdown(void)
 	dmac_disable(IOP_DMAC_SIO2out);
 }
 
-int _start(int argc, const char **argv)
+int _start(int argc, char **argv)
 {
 	int state;
+
+	(void)argc;
+	(void)argv;
 
 	shutdown();
 

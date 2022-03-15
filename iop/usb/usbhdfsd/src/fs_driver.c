@@ -203,6 +203,8 @@ static int fs_dummy(void)
 //---------------------------------------------------------------------------
 static int fs_init(iop_device_t *driver)
 {
+	(void)driver;
+
 	if(!fs_inited) {
 		fs_reset();
 		fs_inited = 1;
@@ -218,6 +220,8 @@ static int fs_open(iop_file_t* fd, const char *name, int flags, int mode) {
 	int ret;
 	unsigned int cluster;
 	char escapeNotExist;
+
+	(void)mode;
 
 	_fs_lock();
 
@@ -526,6 +530,8 @@ static int fs_mkdir(iop_file_t *fd, const char *name, int mode) {
 	unsigned int sfnSector;
 	unsigned int cluster;
 
+	(void)mode;
+
 	_fs_lock();
 
 	fatd = fat_getData(fd->unit);
@@ -774,6 +780,12 @@ static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsig
 {
 	fat_driver *fatd;
 	int ret;
+
+	(void)name;
+	(void)arg;
+	(void)arglen;
+	(void)buf;
+	(void)buflen;
 
 	_fs_lock();
 

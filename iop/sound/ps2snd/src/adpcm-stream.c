@@ -111,6 +111,8 @@ int fillbuf(int id, int chan)
 
 void stream_thread(void *a)
 {
+	(void)a;
+
 	while(1)
 	{
 		/* Wait for an interrupt */
@@ -142,6 +144,9 @@ void stream_thread(void *a)
 
 int stream_handler(int core, void *data)
 {
+	(void)core;
+	(void)data;
+
 	iSignalSema(stream_sema);
 	return(0); /* What should i return here? */
 }

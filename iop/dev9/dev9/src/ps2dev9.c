@@ -120,6 +120,11 @@ static int dev9x_dummy(void)
 
 static int dev9x_devctl(iop_file_t *f, const char *name, int cmd, void *args, unsigned int arglen, void *buf, unsigned int buflen)
 {
+    (void)f;
+    (void)name;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
     switch (cmd) {
         case DDIOC_MODEL:
             return dev9type;
@@ -1106,6 +1111,8 @@ static int pcmcia_intr(void *unused)
     USE_DEV9_REGS;
     u16 cstc1, cstc2;
 
+    (void)unused;
+
     cstc1 = DEV9_REG(DEV9_R_1464);
     cstc2 = DEV9_REG(DEV9_R_1466);
 
@@ -1235,6 +1242,8 @@ static int expbay_device_reset(void)
 static int expbay_intr(void *unused)
 {
     USE_DEV9_REGS;
+
+    (void)unused;
 
     if (p_dev9_intr_cb)
         p_dev9_intr_cb(0);

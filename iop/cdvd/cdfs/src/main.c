@@ -62,6 +62,8 @@ static int fio_init(iop_device_t *driver)
 
 static int fio_deinit(iop_device_t *f)
 {
+    (void)f;
+
     DPRINTF("CDFS: fio_deinit called.\n");
     DPRINTF("      kernel_fd.. %p\n", f);
     return cdfs_finish();
@@ -217,6 +219,9 @@ static int fio_read(iop_file_t *f, void *buffer, int size)
 
 static int fio_write(iop_file_t *f, void *buffer, int size)
 {
+    (void)f;
+    (void)buffer;
+
     if (size == 0)
         return 0;
     else {
@@ -385,6 +390,8 @@ static int fio_getstat(iop_file_t *fd, const char *name, io_stat_t *stat)
     struct TocEntry entry;
     int ret = -1;
 
+    (void)fd;
+
     DPRINTF("CDFS: fio_getstat called.\n");
     DPRINTF("      kernel_fd.. %p\n", fd);
     DPRINTF("      name....... %s\n\n", name);
@@ -434,6 +441,9 @@ static iop_device_ops_t fio_ops = {
 int _start(int argc, char **argv)
 {
     static iop_device_t fio_driver;
+
+    (void)argc;
+    (void)argv;
 
     // Prepare cache and read mode
     cdfs_prepare();

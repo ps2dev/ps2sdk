@@ -33,6 +33,9 @@ unsigned char IsBusRoot=1;	/* Assume that the console is the root, in case this 
 static void NoResponseHandler(unsigned int header, volatile unsigned int *buffer, unsigned int nQuads){
 	unsigned int i;
 
+	(void)header;
+	(void)buffer;
+
 	DEBUG_PRINTF("NULL response handler called.\n");
 
 	for(i=0; i<nQuads; i++){	/* Flush the buffer. */
@@ -102,6 +105,8 @@ static void ResponseHandler(unsigned int header, volatile unsigned int *buffer, 
 	struct ieee1394_TrResponsePacketHdr ResponseData;
 	unsigned char tCode;
 
+	(void)nQuads;
+
 	tCode=(header>>4)&0xF;
 
 	HeaderLength=(tCode!=IEEE1394_TCODE_WRITE_RESPONSE)?4:3;	/* Write response packets are shorter by other responses by one quadlet! */
@@ -145,6 +150,8 @@ static void WriteRequestHandler(unsigned int header, volatile unsigned int *buff
 	unsigned int QuadsToRead, data;
 	unsigned int i;
 	unsigned char rCode, tLabel;
+
+	(void)nQuads;
 
 	DEBUG_PRINTF("Incoming write request. Header: 0x%08x; Buffer: 0x%p; nQuads: 0x%08x.\n", header, buffer, nQuads);
 	rCode=0;
@@ -221,6 +228,8 @@ static void ReadRequestHandler(unsigned int header, volatile unsigned int *buffe
 	unsigned int i;
 	unsigned short int DestinationNodeID;
 	unsigned char tCode, speed, rCode, tLabel;
+
+	(void)nQuads;
 
 	rCode=0;
 	DEBUG_PRINTF("Incoming read request. Header: 0x%08x; Buffer: 0x%p; nQuads: 0x%08x.\n", header, buffer, nQuads);
@@ -318,6 +327,8 @@ int iLinkIntrHandler(void *arg){
 #ifdef REQ_CHECK_DMAC_STAT
 	unsigned int i;
 #endif
+
+	(void)arg;
 
 	while(1){
 		/* Acknowledge interrupts while determining which interrupt events have occurred. Some events need to be acknowledged as early as possible or they will prevent the hardware from working properly. */

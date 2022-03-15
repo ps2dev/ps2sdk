@@ -89,6 +89,8 @@ IRX_ID(MODNAME, 1, 0);
 
 int _start(int a1, char **argv)
 {
+    (void)argv;
+
     if (a1 >= 0)
         return module_start();
     else
@@ -130,6 +132,8 @@ int dvrdv_df_init(iop_device_t *dev)
     int v1;
     iop_sema_t v3;
 
+    (void)dev;
+
     v3.attr = 0;
     v3.initial = 1;
     v3.max = 1;
@@ -143,6 +147,8 @@ int dvrdv_df_init(iop_device_t *dev)
 
 int dvrdv_df_exit(iop_device_t *dev)
 {
+    (void)dev;
+
     if (DeleteSema(sema_id) != 0)
         return -1;
     return 0;
@@ -150,6 +156,10 @@ int dvrdv_df_exit(iop_device_t *dev)
 
 int dvrdv_df_ioctl(iop_file_t *f, int cmd, void *param)
 {
+    (void)f;
+    (void)cmd;
+    (void)param;
+
     WaitSema(sema_id);
     SignalSema(sema_id);
     return -22;
@@ -193,6 +203,14 @@ int dvrdv_df_ioctl2(
     void *buf,
     unsigned int buflen)
 {
+
+    (void)f;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     WaitSema(sema_id);
     SignalSema(sema_id);
     return -22;
@@ -219,6 +237,14 @@ int dvrioctl2_dv_dubb_start(
 {
     int cmdack_err;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     printf("------------------------------ dv dubb start!!!\n");
     cmdack.command = 0x4101;
@@ -247,6 +273,14 @@ int dvrioctl2_dv_dubb_stop(
 {
     int cmdack_err;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     printf("------------------------------ dv dubb stop!!!\n");
     cmdack.command = 0x4102;
@@ -278,6 +312,13 @@ int dvrioctl2_dv_dubb_rec_start(
     u16 *v10;
     int cmdack_err;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     cmdack.command = 0x4103;
     printf("------------------------------ dv dubb rec start!!!\n");
@@ -320,6 +361,14 @@ int dvrioctl2_dv_dubb_rec_stop(
     int cmdack_err;
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     printf("------------------------------ dv dubb rec stop!!!\n");
     cmdack.command = 0x4104;
     cmdack.input_word_count = 0;
@@ -350,6 +399,13 @@ int dvrioctl2_get_dvcam_info(
 {
     int cmdack_err;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)name;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
 
     cmdack.command = 0x4107;
     cmdack.input_word_count = 0;
@@ -388,6 +444,10 @@ int dvrioctl2_get_dvcam_name(
     unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)name;
+    (void)arg;
+    (void)arglen;
 
     printf("dvrioctl2_get_dvcam_name(io=%p, cmd=%d  buf=%p, nbyte=%u)\n", a1, cmd, buf, buflen);
     cmdack.command = 0x4108;

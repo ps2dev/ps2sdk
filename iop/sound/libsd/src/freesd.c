@@ -122,8 +122,11 @@ void InitSpu2()
 }
 
 
-s32 _start(char **argv, int argc)
+int _start(int argc, char **argv)
 {
+	(void)argc;
+	(void)argv;
+
 	printf(BANNER, VERSION);
 
 	if(RegisterLibraryEntries(&_exp_libsd) != 0) return 1;
@@ -201,6 +204,8 @@ int TransInterrupt(void *data)
 int Spu2Interrupt(void *data)
 {
 	u16 val;
+
+	(void)data;
 
 	val = ((U16_REGISTER_READ(SD_C_IRQINFO))&0xc)>>2;
 	if (!val)

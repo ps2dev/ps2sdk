@@ -45,6 +45,8 @@ s32 mainThreadCount = 0;
 
 static void TransferThread(void *arg)
 {
+	(void)arg;
+
 	while(1)
 	{
 		WaitClearEvent(vblankData.eventflag, EF_VB_TRANSFER, WEF_AND|WEF_CLEAR, NULL);
@@ -419,6 +421,8 @@ static void DeleteThreads(padState_t *state)
 
 static void MainThread(void *arg)
 {
+	(void)arg;
+
 	while(1)
 	{
 		u32 port, slot;
@@ -648,6 +652,8 @@ int VblankStart(void *arg)
 
 int VblankEnd(void *arg)
 {
+	(void)arg;
+
 	vblank_end = 1;
 	return 1;
 }

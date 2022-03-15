@@ -58,6 +58,10 @@ static int ioctl2AttrRead(pfs_cache_t *clink, pfs_ioctl2attr_t *attr, u32 *unkbu
 
 int pfsFioIoctl(iop_file_t *f, int cmd, void *param)
 {
+	(void)f;
+	(void)cmd;
+	(void)param;
+
 	return -1;
 }
 
@@ -65,6 +69,12 @@ int pfsFioDevctl(iop_file_t *f, const char *name, int cmd, void *arg, size_t arg
 {
 	pfs_mount_t *pfsMount;
 	int rv=0;
+
+	(void)name;
+	(void)arg;
+	(void)arglen;
+	(void)buf;
+	(void)buflen;
 
 	if(!(pfsMount=pfsFioGetMountedUnit(f->unit)))
 		return -ENODEV;
@@ -124,6 +134,9 @@ int pfsFioIoctl2(iop_file_t *f, int cmd, void *arg, size_t arglen,	void *buf, si
 	int rv;
 	pfs_file_slot_t *fileSlot = (pfs_file_slot_t *)f->privdata;
 	pfs_mount_t *pfsMount;
+
+	(void)arglen;
+	(void)buflen;
 
 	if(f->mode & O_DIROPEN)
 		if(cmd==PIOCATTRREAD)

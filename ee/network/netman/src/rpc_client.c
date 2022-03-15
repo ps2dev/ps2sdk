@@ -203,6 +203,8 @@ static void NETMAN_TxThread(void *arg)
 	void *payload, *payloadAligned, *payloadCacheAligned;
 	volatile struct NetManBD *bd, *bdNext;
 
+	(void)arg;
+
 	while(1)
 	{
 		SleepThread();

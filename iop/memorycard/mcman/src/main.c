@@ -159,6 +159,9 @@ int _start(int argc, const char **argv)
 	void **export_tab;
 #endif
 
+	(void)argc;
+	(void)argv;
+
 #ifdef SIO_DEBUG
 	sio_init(38400, 0, 0, 0, 0);
 #endif
@@ -3196,6 +3199,8 @@ void mcman_initcache(void)
 //--------------------------------------------------------------
 int McRetOnly(int fd) // Export #37
 {
+	(void)fd;
+
 	DPRINTF("McRetOnly param %x\n", fd);
 	return sceMcResSucceed;
 }

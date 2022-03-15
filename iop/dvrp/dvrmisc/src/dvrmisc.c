@@ -130,6 +130,8 @@ IRX_ID(MODNAME, 1, 1);
 
 int _start(int a1, char **argv)
 {
+    (void)argv;
+
     if (a1 >= 0)
         return module_start();
     else
@@ -171,6 +173,8 @@ int dvrmisc_df_init(iop_device_t *dev)
     int v1;
     iop_sema_t v3;
 
+    (void)dev;
+
     v3.attr = 0;
     v3.initial = 1;
     v3.max = 1;
@@ -184,6 +188,8 @@ int dvrmisc_df_init(iop_device_t *dev)
 
 int dvrmisc_df_exit(iop_device_t *dev)
 {
+    (void)dev;
+
     if (DeleteSema(sema_id) != 0)
         return -1;
     return 0;
@@ -191,6 +197,10 @@ int dvrmisc_df_exit(iop_device_t *dev)
 
 int dvrmisc_df_ioctl(iop_file_t *f, int cmd, void *param)
 {
+    (void)f;
+    (void)cmd;
+    (void)param;
+
     WaitSema(sema_id);
     SignalSema(sema_id);
     return -22;
@@ -208,6 +218,8 @@ int dvrmisc_df_devctl(
     int v10;
     unsigned int v11;
     unsigned int v12;
+
+    (void)name;
 
     v10 = 0;
     v11 = 0;
@@ -234,6 +246,14 @@ int dvrmisc_df_ioctl2(
     void *buf,
     unsigned int buflen)
 {
+
+    (void)f;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     WaitSema(sema_id);
     SignalSema(sema_id);
     return -22;
@@ -252,6 +272,13 @@ s64 dvrmisc_df_null_long()
 int dvrioctl2_nop(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     cmdack.command = 0x5101;
     cmdack.input_word_count = 0;
@@ -276,6 +303,12 @@ int dvrioctl2_version(
     unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
 
     cmdack.command = 0x5102;
     cmdack.input_word_count = 0;
@@ -302,6 +335,12 @@ int dvrioctl2_led_hdd_rec(
 {
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     cmdack.command = 0x5104;
     cmdack.input_word_count = 1;
     cmdack.input_word[0] = *(u16 *)arg;
@@ -327,6 +366,12 @@ int dvrioctl2_led_dvd_rec(
 {
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     cmdack.command = 0x5106;
     cmdack.input_word_count = 1;
     cmdack.input_word[0] = *(u16 *)arg;
@@ -351,6 +396,12 @@ int dvrioctl2_get_sircs(
     unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
 
     cmdack.command = 0x5107;
     cmdack.input_word_count = 0;
@@ -379,6 +430,12 @@ int dvrioctl2_get_time(
     unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
 
     cmdack.command = 0x5108;
     cmdack.input_word_count = 0;
@@ -410,6 +467,12 @@ int dvrioctl2_set_timezone(
 {
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)cmd;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     cmdack.command = 0x5109;
     cmdack.input_word[0] = *(u16 *)arg;
     cmdack.input_word_count = 2;
@@ -436,6 +499,13 @@ int dvrioctl2_save_preset_info(
 {
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     cmdack.command = 0x510A;
     cmdack.input_word_count = 0;
     cmdack.timeout = 15000000;
@@ -458,6 +528,13 @@ int dvrioctl2_load_preset_info(
     unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     cmdack.command = 0x510B;
     cmdack.input_word_count = 0;
@@ -482,6 +559,13 @@ int dvrioctl2_test_dev_rst(
 {
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     cmdack.command = 0x510C;
     cmdack.input_word_count = 0;
     cmdack.timeout = 15000000;
@@ -504,6 +588,12 @@ int dvrioctl2_test_sdram_chk(
     unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
 
     cmdack.command = 0x510D;
     cmdack.input_word_count = 0;
@@ -532,6 +622,12 @@ int dvrioctl2_test_mpe_chk(
 {
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
+
     cmdack.command = 0x510E;
     cmdack.input_word_count = 0;
     cmdack.timeout = 15000000;
@@ -556,6 +652,12 @@ int dvrioctl2_test_mpd_chk(
     unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
 
     cmdack.command = 0x510F;
     cmdack.input_word_count = 0;
@@ -582,6 +684,13 @@ int dvrioctl2_test_vdec_chk(
 {
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     cmdack.command = 0x5110;
     cmdack.input_word_count = 0;
     cmdack.timeout = 15000000;
@@ -607,6 +716,11 @@ int dvrioctl2_partition_free(
     int v8;
     int v9;
     s64 v10;
+
+    (void)a1;
+    (void)cmd;
+    (void)arglen;
+    (void)buflen;
 
     v7 = devctl((const char *)arg, 0x5002, 0, 0, 0, 0);
     v8 = v7;
@@ -641,6 +755,13 @@ int dvrioctl2_buzzer(
 {
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     cmdack.command = 0x5111;
     cmdack.input_word_count = 0;
     if (DvrdrvExecCmdAck(&cmdack)) {
@@ -664,6 +785,13 @@ int dvrioctl2_clr_preset_info(
     unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     cmdack.command = 0x5112;
     cmdack.input_word_count = 0;
@@ -689,6 +817,12 @@ int dvrioctl2_get_vbi_err_rate(
     unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
 
     cmdack.command = 0x5113;
     cmdack.input_word_count = 0;
@@ -722,6 +856,11 @@ int dvrioctl2_update_dvrp_firmware(
     int update_size;
     int i;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)buf;
+    (void)buflen;
 
     read_offset = 0;
     checksum = 0;
@@ -843,6 +982,12 @@ int dvrioctl2_flash_write_status(
     unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
 
     cmdack.command = 0x5118;
     cmdack.input_word_count = 0;
@@ -974,6 +1119,12 @@ int dvrioctl2_get_device_key(
     drvdrv_exec_cmd_ack cmdack;
     u8 v27[8];
 
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buflen;
+
     cmdack.command = 0x511A;
     cmdack.input_word[0] = 0;
     cmdack.input_word[1] = 4;
@@ -1083,6 +1234,11 @@ int dvrioctl2_set_dv_nodeid(
     unsigned int argwalked;
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)a1;
+    (void)cmd;
+    (void)buf;
+    (void)buflen;
+
     argwalked = 0;
     cmdack.command = 0x511D;
     if (arglen) {
@@ -1124,6 +1280,11 @@ int dvrioctl2_get_dv_nodeid(
 {
     unsigned int bufwalked;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
 
     cmdack.command = 0x511E;
     cmdack.input_word_count = 0;
@@ -1177,6 +1338,11 @@ int dvrioctl2_diag_test(
     int outbuf_cnt;
     u16 *outbuf_tmp;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
+    (void)arglen;
+    (void)buflen;
 
     cmdack.command = 0x511F;
     cmdack.input_word[0] = *(u16 *)arg;

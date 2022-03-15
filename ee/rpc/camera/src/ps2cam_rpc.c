@@ -289,6 +289,8 @@ int PS2CamExtractFrame(int handle, char *buffer, int bufsize)
 	static int			ret;
 	static int			pic_size;
 
+	(void)bufsize;
+
 	pos					= 0;
 	capturing			= 0;
 

@@ -49,6 +49,9 @@ int SBUS_interrupt_remote(int irq)
 
 int _start(int argc, char *argv[])
 {
+    (void)argc;
+    (void)argv;
+
     if(SBUS_init() != 0) { printf("IOP: SBUS_init() failed!\n"); return(1); }
     if(SIF2_init() != 0) { printf("IOP: SIF2_init() failed!\n"); return(1); }
     if(SIF2_init_cmd() != 0) { printf("IOP: SIF2_init_cmd() failed!\n"); return(1); }
@@ -61,6 +64,9 @@ int _start(int argc, char *argv[])
 
 int _stop(int argc, char *argv[])
 {
+    (void)argc;
+    (void)argv;
+
     ReleaseLibraryEntries(&_exp_sbus);
 
     SBUS_deinit();

@@ -171,6 +171,8 @@ static int sendFramesToEE(int mode)
 
 static unsigned int FrameSendCB(void *arg)
 {
+	(void)arg;
+
 	return(sendFramesToEE(1) == 0 ? 0 : FRAME_GROUPING_INTERVAL); //If sending failed, try again later.
 }
 

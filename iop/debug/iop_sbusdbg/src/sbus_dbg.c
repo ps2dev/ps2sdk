@@ -48,6 +48,8 @@ void _sif2_cmd_dbg_control(SIF2_CmdPkt *cmd, void *param)
     SBUS_ControlCPU_Params *params;
     IOP_RegFrame *frame;
 
+    (void)param;
+
     params = (SBUS_ControlCPU_Params *) ((((u32) cmd) + sizeof(SIF2_CmdPkt)) | 0x00000000);
 
     if(params->mode == 1)

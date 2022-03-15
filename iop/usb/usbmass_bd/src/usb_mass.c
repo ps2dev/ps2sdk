@@ -731,6 +731,8 @@ static void usb_mass_update(void* arg)
 {
     int i;
 
+    (void)arg;
+
     M_DEBUG("update thread running\n");
 
     while (1) {

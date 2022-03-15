@@ -17,6 +17,9 @@ extern void part_init();
 
 int _start(int argc, char* argv[])
 {
+    (void)argc;
+    (void)argv;
+
     printf("Block Device Manager (BDM) v%d.%d\n", MAJOR_VER, MINOR_VER);
 
     if (RegisterLibraryEntries(&_exp_bdm) != 0) {

@@ -194,12 +194,18 @@ static void ata_pre_dma_cb(int bcr, int dir)
 {
     USE_SPD_REGS;
 
+    (void)bcr;
+    (void)dir;
+
     SPD_REG16(SPD_R_XFR_CTRL) |= 0x80;
 }
 
 static void ata_post_dma_cb(int bcr, int dir)
 {
     USE_SPD_REGS;
+
+    (void)bcr;
+    (void)dir;
 
     SPD_REG16(SPD_R_XFR_CTRL) &= ~0x80;
 }
@@ -217,6 +223,9 @@ int _start(int argc, char *argv[])
 {
     USE_SPD_REGS;
     int res = 1;
+
+    (void)argc;
+    (void)argv;
 
     printf(BANNER, VERSION);
 
@@ -298,6 +307,8 @@ static int ata_intr_cb(int flag)
 
 static unsigned int ata_alarm_cb(void *unused)
 {
+    (void)unused;
+
     iSetEventFlag(ata_evflg, ATA_EV_TIMEOUT);
     return 0;
 }
@@ -1134,6 +1145,7 @@ static void ata_set_dir(int dir)
 static void ata_pio_mode(int mode)
 {
     USE_SPD_REGS;
+    (void)mode;
 #ifdef ATA_ALL_PIO_MODES
     u16 val;
 

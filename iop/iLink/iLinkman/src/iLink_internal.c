@@ -36,6 +36,8 @@ void UBUFThread(void *arg){
 	unsigned int data, DataBufferLevel;
 	u32 ef_bits;
 
+	(void)arg;
+
 	while(1){
 		WaitEventFlag(IntrEventFlag, iLinkEventBusReset|iLinkEventURx, WEF_OR, &ef_bits);
 		ClearEventFlag(IntrEventFlag, ~(iLinkEventBusReset|iLinkEventURx));

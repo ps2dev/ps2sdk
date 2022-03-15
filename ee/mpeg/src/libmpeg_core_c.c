@@ -33,6 +33,8 @@ extern s32 _mpeg_dmac_handler( s32 channel, void *arg, void *addr );
 
 void _MPEG_Initialize ( _MPEGContext* arg0, int ( * arg1) ( void* ), void* arg2, int* arg3)
 {
+	(void)arg0;
+
 	*R_EE_IPU_CTRL = 0x40000000;
 	while ((s32)*R_EE_IPU_CTRL < 0);
 	*R_EE_IPU_CMD = 0;
@@ -133,6 +135,9 @@ void _MPEG_Resume ( void )
 
 s32 _mpeg_dmac_handler( s32 channel, void *arg, void *addr )
 {
+	(void)channel;
+	(void)addr;
+
 	u32 *carg = arg;
 	u32 var1 = carg[2];
 	if (var1 == 0)
@@ -324,6 +329,8 @@ unsigned int _MPEG_NextStartCode ( void )
 
 void _MPEG_SetDefQM ( int arg0 )
 {
+	(void)arg0;
+
 	_ipu_suspend();
 	*R_EE_IPU_CMD = 0;
 	while (((*R_EE_IPU_CTRL) & 0x80000000) != 0);

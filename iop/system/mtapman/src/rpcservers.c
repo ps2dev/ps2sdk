@@ -49,6 +49,9 @@ static SifRpcServerData_t sd5;
 
 void* rpc_server_change_slot(s32 fno, u32 *data, s32 size)
 {
+	(void)fno;
+	(void)size;
+
 	data[1] = mtapChangeSlot( data[0], data[1] );
 
 	return data;
@@ -72,6 +75,9 @@ void rpc_thread_change_slot()
 
 void* rpc_server_get_slot_number(s32 fno, u32 *data, s32 size)
 {
+	(void)fno;
+	(void)size;
+
 	data[1] = mtapGetSlotNumber( data[0] );
 
 	return data;
@@ -94,6 +100,9 @@ void rpc_thread_get_slot_number()
 
 void* RpcServerGetConnection(s32 fno, u32 *data, s32 size)
 {
+	(void)fno;
+	(void)size;
+
 	data[1] = mtapGetConnection( data[0] );
 
 	return data;
@@ -115,6 +124,9 @@ void RpcThreadGetConnection()
 
 void* RpcServerPortClose(s32 fno, u32 *data, s32 size)
 {
+	(void)fno;
+	(void)size;
+
 	data[1] = mtapPortClose( data[0] );
 
 	return data;
@@ -136,6 +148,8 @@ void RpcThreadPortClose()
 
 void* RpcServerPortOpen(s32 fno, u32 *data, s32 size)
 {
+	(void)fno;
+	(void)size;
 
 	data[1] = mtapPortOpen( data[0] );
 

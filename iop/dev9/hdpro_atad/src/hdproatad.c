@@ -179,6 +179,8 @@ extern struct irx_export_table _exp_atad;
 
 static unsigned int ata_alarm_cb(void *unused)
 {
+	(void)unused;
+
 	iSetEventFlag(ata_evflg, ATA_EV_TIMEOUT);
 	return 0;
 }
@@ -212,6 +214,9 @@ static int ata_create_event_flag(void) {
 int _start(int argc, char *argv[])
 {
 	int res = MODULE_NO_RESIDENT_END;
+
+	(void)argc;
+	(void)argv;
 
 	printf(BANNER, VERSION);
 
@@ -656,6 +661,8 @@ int ata_reset_devices(void)
 /* Export 11 */
 int ata_device_sce_sec_unlock(int device, void *password)
 {	//Device can always be unlocked.
+	(void)device;
+	(void)password;
 	return 0;
 }
 

@@ -62,6 +62,8 @@ static int iLinkPHTSendData(struct TransactionContextData *trContext, unsigned c
 	unsigned char tLabel;
 	unsigned int PHT_ctrl_ST_R0_flags;
 
+	(void)ByteSwap;
+
 	if(trContext->GenerationNumber!=GenerationNumber) return(-1021);
 
 	ClearEventFlag(IntrEventFlag, ~(iLinkEventDMATransEnd|iLinkEventError));

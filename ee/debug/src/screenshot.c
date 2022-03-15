@@ -299,11 +299,16 @@ int ps2_screenshot( void *pDest, unsigned int VramAdress, unsigned int x,
 
 void ps2_screenshot_16to32_line(void *pTemp, u32 w)
 {
+  (void)pTemp;
+  (void)w;
 }
 
 /** Converts to a buffer that fits tga */
 
 void ps2_screenshot_16to32_buffer(void *pTemp, u32 w, u32 h)
 {
+  (void)pTemp;
+  (void)w;
+  (void)h;
 }
 

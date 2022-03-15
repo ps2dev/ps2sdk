@@ -218,12 +218,18 @@ ps2ip_input(PBuf* pInput,NetIF* pNetIF)
 
 int _exit(int argc, char** argv)
 {
+	(void)argc;
+	(void)argv;
+
 	return MODULE_NO_RESIDENT_END; // return "not resident"!
 }
 
 int _start(int argc, char *argv[]){
 	sys_sem_t	Sema;
 	int		result;
+
+	(void)argc;
+	(void)argv;
 
 	dbgprintf("PS2IP: Module Loaded.\n");
 

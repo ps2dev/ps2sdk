@@ -28,6 +28,8 @@ static int SmapDmaTransfer(volatile u8 *smap_regbase, void *buffer, unsigned int
     unsigned int NumBlocks;
     int result;
 
+    (void)smap_regbase;
+
     /*  Non-Sony: the original block size was (32*4 = 128) bytes.
         However, that resulted in slightly lower performance due to the IOP needing to copy more data.    */
     if ((NumBlocks = size >> 6) > 0) {

@@ -33,6 +33,8 @@ static void UpdatePadThread(void *arg)
 	padState_t *pstate;
 	u32 res = 0;
 
+	(void)arg;
+
 	ReferThreadStatus(TH_SELF, &tstatus);
 	pstate = (padState_t*)tstatus.option;
 
@@ -95,6 +97,8 @@ static void QueryPadThread(void *arg)
 	u8 count;
 	u32 res;
 	u32 modeCurId = 0xFF;
+
+	(void)arg;
 
 	ReferThreadStatus(TH_SELF, &tinfo);
 
@@ -391,6 +395,8 @@ static void SetMainModeThread(void *arg)
 	iop_thread_info_t tinfo;
 	padState_t *pstate;
 
+	(void)arg;
+
 	ReferThreadStatus(TH_SELF, &tinfo);
 
 	pstate = (padState_t*)tinfo.option;
@@ -450,6 +456,8 @@ void SetActAlignThread(void *arg)
 	u32 i, res;
 	iop_thread_info_t tinfo;
 	padState_t *pstate;
+
+	(void)arg;
 
 	ReferThreadStatus(TH_SELF, &tinfo);
 
@@ -511,6 +519,8 @@ static void SetButtonInfoThread(void *arg)
 	u32 val;
 	iop_thread_info_t tinfo;
 	padState_t *pstate;
+
+	(void)arg;
 
 	ReferThreadStatus(TH_SELF, &tinfo);
 
@@ -590,6 +600,8 @@ static void SetVrefParamThread(void *arg)
 	iop_thread_info_t tinfo;
 	padState_t *pstate;
 
+	(void)arg;
+
 	ReferThreadStatus(TH_SELF, &tinfo);
 
 	pstate = (padState_t*)tinfo.option;
@@ -651,6 +663,8 @@ s32 padPortOpen(s32 port, s32 slot, s32 pad_area_ee_addr, u32 *buf)
 {
 	iop_event_t event;
 	iop_thread_t thread;
+
+	(void)buf;
 
 	if(port >= 2)
 	{

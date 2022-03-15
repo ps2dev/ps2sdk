@@ -80,6 +80,9 @@ static void free_msg(arch_message *msg)
 }
 
 static void TimeoutHandler(s32 alarm_id, u16 time, void *pvArg){
+	(void)alarm_id;
+	(void)time;
+
 	iReleaseWaitThread((int)pvArg);
 	ExitHandler();
 }
@@ -96,6 +99,8 @@ sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, 
 {
 	ee_thread_t thp;
 	int tid, rv;
+
+	(void)name;
 
 	thp.attr = 0;
 	thp.option = 0;
@@ -127,6 +132,8 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 {
 	struct MboxData *MBox;
 	ee_sema_t sema;
+
+	(void)size;
 
 	*mbox=SYS_MBOX_NULL;
 

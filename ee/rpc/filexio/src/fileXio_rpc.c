@@ -157,6 +157,8 @@ static struct dirent *fileXioReaddirHelper(DIR *dir)
 
 static void fileXioRewinddirHelper(DIR *dir)
 {
+	(void)dir;
+
 	printf("rewinddir not implemented\n");
 }
 

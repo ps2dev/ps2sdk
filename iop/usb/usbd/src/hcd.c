@@ -302,6 +302,9 @@ static void PostIntrEnableFunction(void)
 
 void hcdIrqThread(void *arg) {
 	u32 eventRes;
+
+	(void)arg;
+
 	while (1) {
 		WaitEventFlag(hcdIrqEvent, 1, WEF_CLEAR | WEF_OR, &eventRes);
 

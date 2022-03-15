@@ -166,6 +166,8 @@ void _sif2_cmd_set_req_params(SIF2_CmdPkt *cmd, void *param)
 {
     u32 *p = &((u32 *) cmd)[4];
 
+    (void)param;
+
     _sif2_req_type = p[0];
     _sif2_req_addr = p[1];
     _sif2_req_size = p[2];

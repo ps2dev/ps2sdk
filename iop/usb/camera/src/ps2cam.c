@@ -68,6 +68,9 @@ int _start( int argc, char **argv)
 	iop_thread_t	param;
 	int				th;
 
+	(void)argc;
+	(void)argv;
+
 	PS2CamInitDriver();
 
 
@@ -353,6 +356,8 @@ void rpcMainThread(void* param)
 {
 	//int ret=-1;
 	int tid;
+
+	(void)param;
 
 	sceSifInitRpc(0);
 	tid = GetThreadId();
@@ -755,6 +760,8 @@ void camClearSnapButton(CAMERA_DEVICE *dev)
 
 int  camCheckAutoLaunch(CAMERA_DEVICE *dev)
 {
+	(void)dev;
+
 	//setReg8Mask(dev, EYETOY_CREG_SNAPSHOT, 10,10);
 	return 0;
 }
@@ -859,6 +866,8 @@ int read_byts;
 
 void PS2CamReadDataCallback(int resultCode, int bytes, void *arg)
 {
+	(void)arg;
+
 	//printf("read_data_callback: result= %d, bytes= %d, arg= %p \n", resultCode, bytes, arg);
 
 	read_rslt = resultCode;
@@ -937,6 +946,8 @@ int PS2CamGetIRXVersion(void)
 /** initalize the camera driver. must be called 1st */
 int PS2CamInit(int mode)
 {
+	(void)mode;
+
 	irx_initialized = 1;
 
 	return 0;
@@ -1438,6 +1449,8 @@ void *rpcCommandHandler(u32 command, void *buffer, int size)
 	int*	buf = (int*) buffer;
 	//char*	ptr = (char*) buffer;
 	int		ret = 0;
+
+	(void)size;
 
 	switch (command)
 	{

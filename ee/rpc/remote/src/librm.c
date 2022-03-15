@@ -36,6 +36,8 @@ static struct rmEEData *rmGetDmaStr(int port, int slot)
 {
     struct rmEEData *pdata;
 
+    (void)slot;
+
     pdata = ports[port].rmData;
     SyncDCache(pdata, (u8 *)pdata + 256);
 
