@@ -261,7 +261,9 @@ static void iLinkIntrCBHandlingThread(void *arg){
 		}
 	}
 
-	if((nNodes=iLinkGetNodeCount())<0) XPRINTF("Critical error: Failure getting the number of nodes!\n"); /* Error. */
+	if((nNodes=iLinkGetNodeCount())<0){
+		XPRINTF("Critical error: Failure getting the number of nodes!\n"); /* Error. */
+	}
 
 	XPRINTF("BUS RESET DETECTED. Nodes: %d\n", nNodes);
 	XPRINTF("Local Node: 0x%08x.\n", iLinkGetLocalNodeID());
@@ -331,7 +333,9 @@ static void iLinkIntrCBHandlingThread(void *arg){
 				targetDeviceID++;
 			}
 		}
-		else XPRINTF("Error allocating a transaction.\n");
+		else{
+			XPRINTF("Error allocating a transaction.\n");
+		}
 	}
 
 	for(; targetDeviceID<MAX_DEVICES; targetDeviceID++) SBP2Devices[targetDeviceID].IsConnected=0; /* Mark the unused device slots as being unused. */

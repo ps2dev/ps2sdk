@@ -86,7 +86,9 @@ static int scsiRequestSense(struct SBP2Device* dev, void *buffer, int size)
     	ieee1394_SendCommandBlockORB(dev, &cdb);
 	ret=ieee1394_Sync();
 
-	if(ret!=0) XPRINTF("IEEE1394_disk: scsiRequestSense error: %d\n", ret);
+	if(ret!=0){
+		XPRINTF("IEEE1394_disk: scsiRequestSense error: %d\n", ret);
+	}
 
     return ret;
 }
@@ -125,7 +127,9 @@ static int scsiInquiry(struct SBP2Device* dev, void *buffer, int size)
     	ieee1394_SendCommandBlockORB(dev, &cdb);
 	ret=ieee1394_Sync();
 
-	if(ret != 0) XPRINTF("IEEE1394_disk: scsiInquiry error %d\n", ret);
+	if(ret != 0){
+		XPRINTF("IEEE1394_disk: scsiInquiry error %d\n", ret);
+	}
 	else{
 		for(i=0; i<size/4; i++) ((unsigned int *)buffer)[i]=BSWAP32(((unsigned int *)buffer)[i]);
 	}
@@ -383,8 +387,9 @@ static inline int InitializeSCSIDevice(struct SBP2Device *dev) {
         XPRINTF("IEEE1394_disk: Error - scsiTestUnitReady %d\n", stat);
 
         stat = scsiRequestSense(dev, &sd, sizeof(sense_data));
-        if (stat != 0)
+        if (stat != 0) {
             XPRINTF("IEEE1394_disk: Error - scsiRequestSense %d\n", stat);
+        }
 
         if ((sd.error_code == 0x70) && (sd.sense_key != 0x00))
         {
