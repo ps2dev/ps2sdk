@@ -1199,7 +1199,9 @@ static int ps2netfs_op_dread(char *buf, int len)
         dreadrly->attr   = htonl(dirent.stat.attr);
         dreadrly->size   = htonl(dirent.stat.size);
         dreadrly->hisize = htonl(0);
-        memcpy(dreadrly->ctime,dirent.stat.ctime,8*3);
+        memcpy(dreadrly->ctime,dirent.stat.ctime,8);
+        memcpy(dreadrly->atime,dirent.stat.atime,8);
+        memcpy(dreadrly->mtime,dirent.stat.mtime,8);
         strncpy(dreadrly->name,dirent.name,255);
         dreadrly->name[255] = '\0';
       }
@@ -1214,7 +1216,9 @@ static int ps2netfs_op_dread(char *buf, int len)
         dreadrly->attr   = htonl(dirent.stat.attr);
         dreadrly->size   = htonl(dirent.stat.size);
         dreadrly->hisize = htonl(0);
-        memcpy(dreadrly->ctime,dirent.stat.ctime,8*3);
+        memcpy(dreadrly->ctime,dirent.stat.ctime,8);
+        memcpy(dreadrly->atime,dirent.stat.atime,8);
+        memcpy(dreadrly->mtime,dirent.stat.mtime,8);
         strncpy(dreadrly->name,dirent.name,255);
         dreadrly->name[255] = '\0';
       }
