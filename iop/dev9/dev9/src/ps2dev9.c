@@ -416,7 +416,9 @@ int dev9DmaTransfer(int device, void *buf, int bcr, int dir)
     volatile iop_dmac_chan_t *dev9_chan = (iop_dmac_chan_t *)DEV9_DMAC_BASE;
     int res, dmactrl, OldState;
 
-    if (device >= 2) {
+    if (device >= 4) {
+        return -1;
+    } else if (device >= 2) {
         if (dev9_predma_cbs[device] == NULL)
             return -1;
         if (dev9_postdma_cbs[device] == NULL)
