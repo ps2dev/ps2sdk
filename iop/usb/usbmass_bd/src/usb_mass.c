@@ -403,6 +403,7 @@ static int usb_bulk_transfer(mass_dev* dev, int direction, void* buffer, unsigne
 	cb_data.sema = dev->ioSema;
 	cb_data.pipe = (direction==USB_BLK_EP_IN) ? dev->bulkEpI : dev->bulkEpO;
 	cb_data.buffer = buffer;
+    cb_data.returnCode = 0;
 	cb_data.remaining = transferSize;
 
 	ret = perform_bulk_transfer(&cb_data);
