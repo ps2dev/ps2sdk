@@ -652,7 +652,7 @@ int	pfsFioClose(iop_file_t *f)
 
 	SignalSema(pfsFioSema);
 
-	return rv;
+	return 0;
 }
 
 int pfsFioRead(iop_file_t *f, void *buf, int size)
