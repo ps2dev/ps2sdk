@@ -148,9 +148,9 @@ static inline int convmode_to_iomanx(int stat)
 {
   int mode = 0;
 
-  if FIO_SO_ISLNK(stat) mode |= FIO_S_IFLNK; // Symbolic link
-  if FIO_SO_ISREG(stat) mode |= FIO_S_IFREG; // regular file
-  if FIO_SO_ISDIR(stat) mode |= FIO_S_IFDIR; // directory
+  if (FIO_SO_ISLNK(stat)) mode |= FIO_S_IFLNK; // Symbolic link
+  if (FIO_SO_ISREG(stat)) mode |= FIO_S_IFREG; // regular file
+  if (FIO_SO_ISDIR(stat)) mode |= FIO_S_IFDIR; // directory
 
   if (((stat) & FIO_SO_IROTH) == FIO_SO_IROTH) // read
     mode |= FIO_S_IRUSR | FIO_S_IRGRP | FIO_S_IROTH;
