@@ -351,7 +351,7 @@ int initHcdStructs(void) {
 	dbg_printf("Structs...\n");
 
 	memPool.hcHCCA = NULL;
-	memPool.hcIsoTdBuf			= (HcIsoTD *)	((u8*)memPool.hcHCCA + sizeof(HcCA));
+	memPool.hcIsoTdBuf			= (HcIsoTD *)	(sizeof(HcCA));
 	memPool.hcIsoTdBufEnd		=				 memPool.hcIsoTdBuf + usbConfig.maxIsoTransfDesc;
 	memPool.hcTdBuf				= (HcTD *)		 memPool.hcIsoTdBufEnd;
 	memPool.hcTdBufEnd			=				 memPool.hcTdBuf + usbConfig.maxTransfDesc;
