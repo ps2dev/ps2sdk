@@ -91,11 +91,11 @@ short isSpecialASCII(unsigned char ascii);
 int strcpy_ascii(char* ascii_buff, const short* sjis_buff)
 {
     int i;
-    short ascii, sjis;
 
     int len = strlen((const char *)sjis_buff)/2;
 
     for (i=0;i<len;i++) {
+    short ascii, sjis;
 	sjis = sjis_buff[i];
 	if ((ascii = isSpecialSJIS(sjis)) != 0) {
 	} else {
@@ -113,11 +113,11 @@ int strcpy_ascii(char* ascii_buff, const short* sjis_buff)
 int strcpy_sjis(short* sjis_buff, const char* ascii_buff)
 {
     int i;
-    short ascii, sjis;
 
     int len = strlen(ascii_buff);
 
     for (i=0;i<len;i++)	{
+    short ascii, sjis;
 	ascii = ascii_buff[i];
 	if ((sjis = isSpecialASCII(ascii)) != 0) {
 	} else {

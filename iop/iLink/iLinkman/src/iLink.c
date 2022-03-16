@@ -149,9 +149,10 @@ int _exit(int argc, char** argv){
 
 int iLinkTrAlloc(unsigned short int NodeID, unsigned char speed){
 	int result;
-	unsigned int i;
 
 	if(NodeID!=LocalNodeID){
+		unsigned int i;
+
 		for(i=0; i<MAX_CONCURRENT_TRANSACTIONS; i++){
 			if(TransactionContexts[i].IsConnected==0){
 				TransactionContexts[i].NodeID=NodeID;

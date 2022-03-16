@@ -605,7 +605,7 @@ int sceCdStStart(u32 lbn, sceCdRMode * mode)
 #ifdef F_sceCdStRead
 int sceCdStRead(u32 sectorType, u32 * buffer, u32 mode, u32 * error)
 {
-	int ret, i, err, sectorReadSize;
+	int ret, i;
 
 	*error = 0;
 	if (CdDebug > 0)
@@ -622,6 +622,8 @@ int sceCdStRead(u32 sectorType, u32 * buffer, u32 mode, u32 * error)
 	}
 	// do block reads until all data is read, or error occurs
 	for (i = 0; i < sectorType;) {
+		int err, sectorReadSize;
+
 		ret = sceCdStream(0, sectorType - i, (buffer + (i * 2048)), CDVD_ST_CMD_READ, &dummyMode);
 		sectorReadSize = ret & 0xFFFF;
 		i += sectorReadSize;

@@ -49,9 +49,10 @@ static char * prohibit_list[] = {
 
 static void export_symbols() {
     struct export_list_t * p;
-    int i, prohibit;
 
     for (p = export_list; p->name; p++) {
+    int i;
+    int prohibit;
 	prohibit = 0;
 	for (i = 0; prohibit_list[i]; i++) {
 	    if (!(strcmp(prohibit_list[i], p->name))) {
@@ -68,13 +69,13 @@ typedef void (*func_t)(void);
 
 int main(int argc, char ** argv) {
     struct symbol_t * s;
-    int i;
 
     parse_boot_path(argc, argv);
 
     export_symbols();
 
     if (argc >= 2) {
+    int i;
 	for (i = 1; i < argc; i++) {
 	    _init_load_erl_from_file(argv[i], 0);
 	}

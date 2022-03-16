@@ -123,7 +123,6 @@ static int perform_bulk_transfer(usb_transfer_callback_data* data)
 
 static void usb_transfer_callback(int resultCode, int bytes, void *arg)
 {
-	int ret;
 	usb_transfer_callback_data* data = (usb_transfer_callback_data*)arg;
 
 	data->returnCode = resultCode;
@@ -135,6 +134,8 @@ static void usb_transfer_callback(int resultCode, int bytes, void *arg)
 
 	if((resultCode == USB_RC_OK) && (data->remaining > 0))
 	{	//OK to continue.
+        int ret;
+
 		ret = perform_bulk_transfer(data);
 		if (ret != USB_RC_OK)
 		{

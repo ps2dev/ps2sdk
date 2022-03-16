@@ -202,9 +202,11 @@ static u32_t sys_arch_mbox_fetch_internal(sys_mbox_t pMBox, void** ppvMSG, u32_t
 	iop_sys_clock_t	ClockTicks;
 	iop_sys_clock_t	Start;
 	iop_sys_clock_t	End;
-	int result, iPID;
+	int result;
 
 	if(block){
+		int iPID;
+
 		iPID=GetThreadId();
 
 		if(TimeElaspedout > 0)

@@ -1011,12 +1011,13 @@ static struct erl_record_t * load_erl(const char * fname, u8 * elf_mem, u32 addr
 
 struct erl_record_t * _init_load_erl_from_file(const char * fname, char * erl_id) {
     char tfname[1024];
-    struct erl_record_t * r;
     char * argv[2];
 
-    if (erl_id)
+    if (erl_id) {
+        struct erl_record_t * r;
         if ((r = find_erl(erl_id)))
     	    return r;
+    }
 
     argv[0] = erl_id;
     argv[1] = 0;
@@ -1054,12 +1055,13 @@ struct erl_record_t * load_erl_from_file_to_addr(const char * fname, u32 addr, i
  */
 struct erl_record_t * _init_load_erl_from_file_to_addr(const char * fname, u32 addr, char * erl_id) {
     char tfname[1024];
-    struct erl_record_t * r;
     char * argv[2];
 
-    if (erl_id)
+    if (erl_id) {
+        struct erl_record_t * r;
         if ((r = find_erl(erl_id)))
     	    return r;
+    }
 
     argv[0] = erl_id;
     argv[1] = 0;

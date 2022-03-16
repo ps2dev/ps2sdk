@@ -64,8 +64,7 @@ static USBHD_INLINE int part_getPartitionRecord(mass_dev* dev, part_raw_record* 
 //---------------------------------------------------------------------------
 static int part_getPartitionTable(mass_dev* dev, part_table* part)
 {
-	part_raw_record* part_raw;
-	int ret, partitions;
+	int ret;
 	unsigned int i;
 	unsigned char* sbuf;
 
@@ -81,8 +80,12 @@ static int part_getPartitionTable(mass_dev* dev, part_table* part)
 	printf("USBHDFSD: boot signature %X %X\n", sbuf[0x1FE], sbuf[0x1FF]);
 	if (sbuf[0x1FE] == 0x55 && sbuf[0x1FF] == 0xAA)
 	{
+		int partitions;
+
 		for ( partitions = 0, i = 0; i < 4; i++)
 		{
+			part_raw_record* part_raw;
+
 			part_raw = ( part_raw_record* )(  sbuf + 0x01BE + ( i * 16 )  );
 			ret = part_getPartitionRecord(dev, part_raw, &part->record[i]);
 			if(ret < 0)
@@ -108,7 +111,6 @@ static int part_getPartitionTable(mass_dev* dev, part_table* part)
 int part_connect(mass_dev* dev)
 {
 	part_table partTable;
-	unsigned int count = 0, i;
 	int parts;
 	XPRINTF("USBHDFSD: part_connect devId %i \n", dev->devId);
 
@@ -117,6 +119,7 @@ int part_connect(mass_dev* dev)
 
 	if (parts > 0)
 	{
+		unsigned int count = 0, i;
 		for ( i = 0; i < parts; i++)
 		{
 			if(

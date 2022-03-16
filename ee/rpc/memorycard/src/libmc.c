@@ -865,7 +865,7 @@ int mcChangeThreadPriority(int level)
 
 int mcSync(int mode, int *cmd, int *result)
 {
-	int funcIsExecuting, i;
+	int funcIsExecuting;
 
 	// check if any functions are registered
 	if(g_currentCmd == MC_FUNC_NONE)
@@ -879,6 +879,7 @@ int mcSync(int mode, int *cmd, int *result)
 	{
 		while(SifCheckStatRpc(&g_cdata))
 		{
+			int i;
 			for(i=0; i<100000; i++)
     			;
 		}

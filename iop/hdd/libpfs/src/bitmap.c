@@ -40,10 +40,12 @@ void pfsBitmapAllocFree(pfs_cache_t *clink, u32 operation, u32 subpart, u32 chun
 {
 	int result;
 	u32 sector, bit;
-	u32 *bitmapWord, *bitmapEnd;
+	u32 *bitmapWord;
 
 	while (clink)
 	{
+		u32 *bitmapEnd;
+
 		bitmapEnd = (u32*)&((u8*)clink->u.bitmap)[pfsMetaSize];
 		for (bitmapWord = &clink->u.bitmap[index]; (bitmapWord < bitmapEnd) && count; bitmapWord++, _bit = 0)
 		{
@@ -160,13 +162,14 @@ int pfsBitmapAllocZones(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi, u32 amount)
 	u32 startBit = 0, startPos = 0, startChunk = 0, count = 0;
 	u32 sector;
 	pfs_cache_t *bitmap;
-	u32 *bitmapWord, *bitmapEnd;
+	u32 *bitmapWord;
 	u32 i, bitmapMax;
 
 	pfsBitmapSetupInfo(pfsMount, &info, bi->subpart, bi->number);
 
 	for ( ; ((info.partitionRemainder==0) && (info.chunk < info.partitionChunks))||
 	        ((info.partitionRemainder!=0) && (info.chunk < info.partitionChunks+1)); info.chunk++){
+		u32 *bitmapEnd;
 
 		sector = info.chunk + (1 << pfsMount->inode_scale);
 		if(bi->subpart==0)
@@ -292,7 +295,6 @@ int pfsBitmapCalcFreeZones(pfs_mount_t *pfsMount, int sub)
 	u32 pfsFreeZoneBitmap[16]={4, 3, 3, 2, 3, 2, 2, 1, 3, 2, 2, 1, 2, 1, 1, 0};
 	int result;
 	pfs_bitmapInfo_t info;
-	pfs_cache_t *clink;
 	u32 i, bitmapSize, zoneFree=0, sector;
 
 	pfsBitmapSetupInfo(pfsMount, &info, sub, 0);
@@ -300,6 +302,8 @@ int pfsBitmapCalcFreeZones(pfs_mount_t *pfsMount, int sub)
 	while (((info.partitionRemainder!=0) && (info.chunk<info.partitionChunks+1)) ||
 	       ((info.partitionRemainder==0) && (info.chunk<info.partitionChunks)))
 	{
+		pfs_cache_t *clink;
+
 		bitmapSize = info.chunk==info.partitionChunks ? info.partitionRemainder / 8 : pfsMetaSize;
 
 		sector = (1<<pfsMount->inode_scale) + info.chunk;

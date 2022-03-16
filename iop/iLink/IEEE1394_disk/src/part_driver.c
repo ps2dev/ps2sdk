@@ -49,7 +49,6 @@ static void part_getPartitionRecord(part_raw_record* raw, part_record* rec)
 //---------------------------------------------------------------------------
 int part_getPartitionTable(struct SBP2Device* dev, part_table* part)
 {
-    part_raw_record* part_raw;
     int              i;
     int              ret;
     unsigned char* sbuf;
@@ -66,6 +65,8 @@ int part_getPartitionTable(struct SBP2Device* dev, part_table* part)
     {
         for ( i = 0; i < 4; i++)
         {
+            part_raw_record* part_raw;
+
             part_raw = ( part_raw_record* )(  sbuf + 0x01BE + ( i * 16 )  );
             part_getPartitionRecord(part_raw, &part->record[i]);
         }

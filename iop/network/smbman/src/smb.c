@@ -176,13 +176,15 @@ static int RecvTimeout(int sock, void *buf, int bsize, int timeout_ms)
 
 static int SendData(int sock, char *buf, int size)
 {
-	int remaining, result;
+	int remaining;
 	char *ptr;
 
 	ptr = buf;
 	remaining = size;
 	while (remaining > 0)
 	{
+		int result;
+
 		result = lwip_send(sock, ptr, remaining, 0);
 		if (result <= 0)
 			return result;
@@ -196,13 +198,15 @@ static int SendData(int sock, char *buf, int size)
 
 static int RecvData(int sock, char *buf, int size, int timeout_ms)
 {
-	int remaining, result;
+	int remaining;
 	char *ptr;
 
 	ptr = buf;
 	remaining = size;
 	while (remaining > 0)
 	{
+		int result;
+
 		result = RecvTimeout(sock, ptr, remaining, timeout_ms);
 		if (result <= 0)
 			return result;
@@ -1080,7 +1084,7 @@ int smb_ReadAndX(int UID, int TID, int FID, s64 fileoffset, void *readbuf, int n
 
 int smb_ReadFile(int UID, int TID, int FID, s64 fileoffset, void *readbuf, int nbytes)
 {
-	int result, remaining, toRead;
+	int remaining;
 	char *ptr;
 	s64 pos;
 
@@ -1090,6 +1094,7 @@ int smb_ReadFile(int UID, int TID, int FID, s64 fileoffset, void *readbuf, int n
 
 	while (remaining > 0)
 	{
+		int result, toRead;
 		toRead = remaining > CLIENT_MAX_XFER_SIZE ? CLIENT_MAX_XFER_SIZE : remaining;
 
 		result = smb_ReadAndX(UID, TID, FID, pos, ptr, toRead);
@@ -1149,7 +1154,7 @@ int smb_WriteAndX(int UID, int TID, int FID, s64 fileoffset, void *writebuf, int
 
 int smb_WriteFile(int UID, int TID, int FID, s64 fileoffset, void *writebuf, int nbytes)
 {
-	int result, remaining, toWrite;
+	int remaining;
 	char *ptr;
 	s64 pos;
 
@@ -1159,6 +1164,8 @@ int smb_WriteFile(int UID, int TID, int FID, s64 fileoffset, void *writebuf, int
 
 	while (remaining > 0)
 	{
+		int result, toWrite;
+
 		toWrite = remaining > CLIENT_MAX_XFER_SIZE ? CLIENT_MAX_XFER_SIZE : remaining;
 
 		result = smb_WriteAndX(UID, TID, FID, pos, ptr, toWrite);

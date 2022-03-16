@@ -221,12 +221,13 @@ void *cb_rpc_S_0400(u32 fno, void *buf, int size)
 {
 	// Rpc Callback function
 	int (*rpc_func)(void);
-	register int i;
 
 	(void)buf;
 	(void)size;
 
 	if (mcman_type == XMCMAN) {
+		register int i;
+
 		for (i=0; i<16; i++) { // retrieve correct function number for xmcserv
 			if (fno == XMCSERV_RpcCmd[0][i]) {
 				fno = XMCSERV_RpcCmd[1][i];

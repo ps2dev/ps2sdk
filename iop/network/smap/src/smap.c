@@ -438,7 +438,7 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
 {
     unsigned int ResetCounterFlag, IntrReg;
     u32 EFBits;
-    int result, counter;
+    int counter;
     volatile u8 *smap_regbase, *emac3_regbase;
     USE_SPD_REGS;
 
@@ -446,6 +446,8 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
     emac3_regbase = SmapDrivPrivData->emac3_regbase;
     smap_regbase = SmapDrivPrivData->smap_regbase;
     while (1) {
+        int result;
+
         if ((result = WaitEventFlag(SmapDrivPrivData->Dev9IntrEventFlag, SMAP_EVENT_START | SMAP_EVENT_STOP | SMAP_EVENT_INTR | SMAP_EVENT_XMIT | SMAP_EVENT_LINK_CHECK, WEF_OR | WEF_CLEAR, &EFBits)) != 0) {
             DEBUG_PRINTF("smap: WaitEventFlag -> %d\n", result);
             break;
@@ -690,9 +692,11 @@ static int SMAPGetLinkMode(void)
 
 static int SMAPSetLinkMode(int mode)
 {
-    int result, baseMode;
+    int result;
 
     if (SmapDriverData.SmapIsInitialized) {
+        int baseMode;
+
         baseMode = mode & (~NETMAN_NETIF_ETH_LINK_DISABLE_PAUSE);
 
         if (baseMode != NETMAN_NETIF_ETH_LINK_MODE_AUTO) {

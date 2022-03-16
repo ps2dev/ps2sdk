@@ -119,10 +119,11 @@ int rmmanOpen(int port, int slot, void *buffer)
 {
 	iop_event_t evf;
 	int result;
-	struct RmData *pRmData;
 
 	if(!((portStatus[port] >> slot) & 1))
 	{
+		struct RmData *pRmData;
+
 		pRmData = &RmData[port][slot];
 		pRmData->port = port;
 		pRmData->slot = slot;
@@ -151,11 +152,12 @@ int rmmanOpen(int port, int slot, void *buffer)
 int rmmanClose(int port, int slot)
 {
 	int result;
-	struct RmData *pRmData;
 	u32 bits;
 
 	if((portStatus[port] >> slot) & 1)
 	{
+		struct RmData *pRmData;
+
 		pRmData = &RmData[port][slot];
 
 		if(pRmData->state != RM_STATE_FINDRM)
@@ -183,12 +185,14 @@ int rmmanClose(int port, int slot)
 int rmmanEnd(void)
 {
 	u32 bits;
-	int port, slot, result;
+	int result;
 
 	if(IsInitialized != 0)
 	{
+		int port;
 		for(port = 0; port < 2; port++)
 		{
+			int slot;
 			for(slot = 0; slot < 4; slot++)
 			{	//If port,slot is opened, close it.
 				if((portStatus[port] >> slot) & 1)

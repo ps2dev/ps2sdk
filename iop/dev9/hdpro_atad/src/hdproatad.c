@@ -560,7 +560,6 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
 /* Do a PIO transfer, to or from the device.  */
 static int ata_pio_transfer(ata_cmd_state_t *cmd_state)
 {
-	u8 *buf8;
 	u16 *buf16;
 	int i, type;
 	int res = 0, chk = 0;
@@ -596,6 +595,8 @@ static int ata_pio_transfer(ata_cmd_state_t *cmd_state)
 			return ATA_RES_ERR_IO;
 
 		if (cmd_state->type == 8) {
+			u8 *buf8;
+
 			buf8 = cmd_state->buf8;
 			for (i = 0; i < 4; i++) {
 				hdpro_io_write(ATAreg_DATA_WR, *buf8);

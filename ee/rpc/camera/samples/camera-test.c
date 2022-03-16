@@ -25,7 +25,6 @@ int main (int argc, char *argv[])
 {
 	static int ret;
 	static int devid;
-	static int fh;
 
 	SifInitRpc(0);
 	fioInit();
@@ -115,6 +114,8 @@ int main (int argc, char *argv[])
 
 	if(ret>0)
 	{
+		static int fh;
+
 		printf("frame captured\n");
 
 		fh = open("host:image.jpg", O_WRONLY|O_CREAT|O_TRUNC);

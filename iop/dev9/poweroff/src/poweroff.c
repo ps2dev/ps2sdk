@@ -242,7 +242,6 @@ int _start(int argc, char* argv[])
 {
 	register struct handlerTableEntry *handlers=(struct handlerTableEntry*)0x480;//iopmem
 	iop_thread_t mythread;
-	int i;
 
 	(void)argc;
 	(void)argv;
@@ -279,6 +278,8 @@ int _start(int argc, char* argv[])
 	int pid = CreateThread(&mythread);
 
 	if (pid > 0) {
+		int i;
+
 		if ((i=StartThread(pid, NULL)) < 0) {
 			M_PRINTF("StartThread failed (%d)\n", i);
 			return MODULE_NO_RESIDENT_END;

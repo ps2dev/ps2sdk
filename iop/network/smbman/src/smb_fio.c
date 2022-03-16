@@ -170,11 +170,13 @@ static void smb_io_unlock(void)
 //-------------------------------------------------------------------------
 static void keepalive_thread(void *args)
 {
-	int r, opened_share = 0;
+	int opened_share = 0;
 
 	(void)args;
 
 	while (1) {
+		int r;
+
 		// wait for keepalive mutex
 		WaitSema(keepalive_mutex);
 
@@ -243,13 +245,14 @@ int smb_init(iop_device_t *dev)
 int smb_initdev(void)
 {
 	int i;
-	FHANDLE *fh;
 
 	DelDrv(smbdev.name);
 	if (AddDrv((iop_device_t *)&smbdev))
 		return 1;
 
 	for (i=0; i<MAX_FDHANDLES; i++) {
+		FHANDLE *fh;
+
 		fh = (FHANDLE *)&smbman_fdhandles[i];
 		fh->f = NULL;
 		fh->smb_fid = -1;
@@ -281,9 +284,10 @@ int smb_deinit(iop_device_t *dev)
 static FHANDLE *smbman_getfilefreeslot(void)
 {
 	int i;
-	FHANDLE *fh;
 
 	for (i=0; i<MAX_FDHANDLES; i++) {
+		FHANDLE *fh;
+
 		fh = (FHANDLE *)&smbman_fdhandles[i];
 		if (fh->f == NULL)
 			return fh;
@@ -403,9 +407,10 @@ io_unlock:
 void smb_closeAll(void)
 {
 	int i;
-	FHANDLE *fh;
 
 	for (i=0; i<MAX_FDHANDLES; i++) {
+		FHANDLE *fh;
+
 		fh = (FHANDLE *)&smbman_fdhandles[i];
 		if (fh->smb_fid != -1)
 			smb_Close(UID, TID, fh->smb_fid);

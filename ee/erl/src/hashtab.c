@@ -100,9 +100,10 @@ htab  *t;    /* table */
   /* Walk through old table putting entries in new table */
   for (i=newsize>>1; i--;)
   {
-    register hitem *this, *that, **newplace;
+    register hitem *this, *that;
     for (this = oldtab[i]; this;)
     {
+      register hitem **newplace;
       that = this;
       this = this->next;
       newplace = &newtab[(that->hval & newmask)];

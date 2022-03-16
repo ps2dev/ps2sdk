@@ -46,13 +46,15 @@ int NetManInitRPCClient(void)
 {
 	static const char NetManID[] = "NetMan";
 	iop_sema_t sema;
-	int result, i;
+	int result;
 
 	if(FrameBuffer == NULL) FrameBuffer = malloc(NETMAN_RPC_BLOCK_SIZE * NETMAN_MAX_FRAME_SIZE);
 	if(FrameBufferStatus == NULL) FrameBufferStatus = malloc(NETMAN_RPC_BLOCK_SIZE * sizeof(struct NetManBD));
 
 	if(FrameBuffer != NULL && FrameBufferStatus != NULL)
 	{
+		int i;
+
 		memset(FrameBuffer, 0, NETMAN_RPC_BLOCK_SIZE * NETMAN_MAX_FRAME_SIZE);
 		memset(FrameBufferStatus, 0, NETMAN_RPC_BLOCK_SIZE * sizeof(struct NetManBD));
 		EEFrameBufferWrPtr = 0;
@@ -140,10 +142,12 @@ void NetManRpcNetProtStackFreeRxPacket(void *packet)
 //Only one thread can enter this critical section!
 static int sendFramesToEE(int mode)
 {
-	int OldState, res;
+	int OldState;
 
 	if (NumFramesInQueue > 0)
 	{
+		int res;
+
 		dmatReqs[(NumFramesInQueue-1) * 2 + 1].attr = SIF_DMA_INT_O;	//Mark the last entry to notify the receive thread of the incoming frame(s). This will stall SIF0.
 
 		//Transfer the frame over to the EE

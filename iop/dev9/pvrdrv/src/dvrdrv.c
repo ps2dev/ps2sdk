@@ -470,8 +470,6 @@ int DvrdrvWaitDmaEnd(struct_itr_sema *itrsema, u16 command)
     s16 v4;
     int v5;
     u8 v6;
-    int v7;
-    char *v8;
     char v10;
     USE_SPD_REGS;
 
@@ -481,6 +479,8 @@ int DvrdrvWaitDmaEnd(struct_itr_sema *itrsema, u16 command)
     v5 = -3;
     if ((v4 & 0x8000) == 0) {
         if ((v4 & 0x10) != 0) {
+            int v7;
+
             v5 = 0;
             if ((SPD_REG16(0x4228) & 1) != 0)
                 v6 = 64;
@@ -488,6 +488,8 @@ int DvrdrvWaitDmaEnd(struct_itr_sema *itrsema, u16 command)
                 v6 = (u8)(SPD_REG16(0x4228) & 0xFC) >> 2;
             v7 = 0;
             if (v6) {
+                char *v8;
+
                 v8 = &v10;
                 do {
                     ++v7;
@@ -507,12 +509,12 @@ int DvrdrvWaitDmaEnd(struct_itr_sema *itrsema, u16 command)
 int DvrdrvPrepareWaitCmdComp(struct_itr_sema *itrsema, u16 command, u32 timeout)
 {
     int v6;
-    int v7;
-    struct_itr_sid_tbl *v8;
     iop_sys_clock_t v10;
 
     BlockAPI();
     if (itrsema) {
+        int v7;
+        struct_itr_sid_tbl *v8;
         v7 = itrsema->sema;
         v6 = 0;
         v8 = SetItrSidTbl(2, command, v7);
@@ -551,10 +553,7 @@ int DvrdrvWaitCmdComp(struct_itr_sema *itrsema, u16 command, u16 *status_4220, u
 {
     struct_itr_sid_tbl *v8;
     int v9;
-    s16 v10;
-    int v11;
     s32 v12;
-    u16 *v13;
     USE_SPD_REGS;
 
     WaitSema(itrsema->sema);
@@ -562,10 +561,12 @@ int DvrdrvWaitCmdComp(struct_itr_sema *itrsema, u16 command, u16 *status_4220, u
     CancelAlarm((unsigned int (*)(void *))INTR_CMD_COMP_TO_HANDLER, v8);
     v9 = -2;
     if (!v8->timed_out) {
+        s16 v10;
         v10 = v8->error;
         v9 = -3;
         if ((v10 & 0x8000) == 0) {
             if ((v10 & 4) != 0) {
+                int v11;
                 v9 = 0;
                 if ((SPD_REG16(0x4228) & 1) != 0)
                     v11 = 64;
@@ -574,6 +575,8 @@ int DvrdrvWaitCmdComp(struct_itr_sema *itrsema, u16 command, u16 *status_4220, u
                 *status_4228 = v11;
                 v12 = 0;
                 if (*status_4228 > 0) {
+                    u16 *v13;
+
                     v13 = comp_status;
                     do {
                         ++v12;
@@ -745,9 +748,6 @@ int INTR_DVRRDY_TO_HANDLER(void *a1)
 void INTR_CMD_ACK_HANDLER(int a1, void *a2)
 {
     struct_itr_sid_tbl *v2;
-    int v3;
-    int v4;
-    char *v5;
     s32 v6;
     char v7;
     USE_SPD_REGS;
@@ -764,6 +764,9 @@ void INTR_CMD_ACK_HANDLER(int a1, void *a2)
         else
             iSignalSema(v6);
     } else {
+        int v3;
+        int v4;
+
         Kprintf("ACK:GetItrSidTbl(%04Xh) error\n", SPD_REG16(0x4220));
         Kprintf("Clear \"Reply FIFO\"\n");
         v3 = 64;
@@ -771,6 +774,8 @@ void INTR_CMD_ACK_HANDLER(int a1, void *a2)
             v3 = (u8)(SPD_REG16(0x4228) & 0xFC) >> 2;
         v4 = 0;
         if (v3) {
+            char *v5;
+
             v5 = &v7;
             do {
                 ++v4;
@@ -799,9 +804,6 @@ int INTR_CMD_ACK_TO_HANDLER(struct_itr_sid_tbl *a1)
 void INTR_CMD_COMP_HANDLER(int a1, void *a2)
 {
     struct_itr_sid_tbl *v2;
-    int v3;
-    int v4;
-    char *v5;
     s32 v6;
     char v7;
     USE_SPD_REGS;
@@ -818,6 +820,9 @@ void INTR_CMD_COMP_HANDLER(int a1, void *a2)
         else
             iSignalSema(v6);
     } else {
+        int v3;
+        int v4;
+
         Kprintf("COMP:GetItrSidTbl(%04Xh) error\n", SPD_REG16(0x4220));
         Kprintf("Clear \"Reply FIFO\"\n");
         v3 = 64;
@@ -825,6 +830,8 @@ void INTR_CMD_COMP_HANDLER(int a1, void *a2)
             v3 = (u8)(SPD_REG16(0x4228) & 0xFC) >> 2;
         v4 = 0;
         if (v3) {
+            char *v5;
+
             v5 = &v7;
             do {
                 ++v4;
@@ -1023,11 +1030,12 @@ int DvrdrvExecCmdAck(drvdrv_exec_cmd_ack *a1)
 {
     struct_itr_sema *v2;
     u16 v3;
-    int v4;
     int result;
 
     v2 = AllocItrSema();
     if (v2) {
+        int v4;
+
         DvrdrvBlockPhase();
         v3 = a1->command;
         a1->phase = 1;
@@ -1055,12 +1063,13 @@ int DvrdrvExecCmdAckComp(drvdrv_exec_cmd_ack *a1)
     struct_itr_sema *v3;
     int result;
     u16 v5;
-    int v6;
     u16 v7;
 
     v2 = AllocItrSema();
     v3 = v2;
     if (v2) {
+        int v6;
+
         DvrdrvPrepareWaitCmdComp(v2, a1->command, a1->timeout);
         DvrdrvBlockPhase();
         v5 = a1->command;

@@ -97,7 +97,6 @@ static int scsiInquiry(struct SBP2Device* dev, void *buffer, int size)
 {
 	int ret;
 	struct CommandDescriptorBlock cdb;
-	unsigned int i;
 
 	XPRINTF("IEEE1394_disk: scsiInquiry. buffer: %p\n", buffer);
 
@@ -131,6 +130,8 @@ static int scsiInquiry(struct SBP2Device* dev, void *buffer, int size)
 		XPRINTF("IEEE1394_disk: scsiInquiry error %d\n", ret);
 	}
 	else{
+		unsigned int i;
+
 		for(i=0; i<size/4; i++) ((unsigned int *)buffer)[i]=BSWAP32(((unsigned int *)buffer)[i]);
 	}
 

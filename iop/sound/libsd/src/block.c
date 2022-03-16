@@ -148,8 +148,6 @@ int sceSdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, ...)
 	int transfer_dir = mode & 3;
 	int core = chan & 1;
 	int _size = size;
-	va_list alist;
-	u8* startaddr;
 
 	switch(transfer_dir)
 	{
@@ -191,6 +189,9 @@ int sceSdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, ...)
 
 		case SD_TRANS_WRITE_FROM:
 		{
+			va_list alist;
+			u8* startaddr;
+
 			va_start(alist, size);
 			startaddr = va_arg(alist, u8*);
 			va_end(alist);

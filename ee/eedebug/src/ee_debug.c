@@ -237,7 +237,6 @@ int ee_dbg_install(int levels)
 int ee_dbg_remove(int levels)
 {
     u32 oldintr, oldop;
-    int i;
 
     if((levels < 1) || (levels > 3)) { return(-1); }
 
@@ -264,6 +263,7 @@ int ee_dbg_remove(int levels)
 
     if((levels & _installed_levels) & 1)
     {
+        int i;
         // restore the exception handlers that we previously hooked.
         for(i = 1; i <= 3; i++)
         {

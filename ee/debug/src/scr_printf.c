@@ -254,7 +254,7 @@ static void clear_line(int Y)
 void scr_printf(const char *format, ...)
 {
     va_list opt;
-    char buff[2048], c;
+    char buff[2048];
     int i, bufsz, j;
 
 
@@ -262,6 +262,7 @@ void scr_printf(const char *format, ...)
     bufsz = vsnprintf(buff, sizeof(buff), format, opt);
 
     for (i = 0; i < bufsz; i++) {
+        char c;
         c = buff[i];
         switch (c) {
             case '\n':

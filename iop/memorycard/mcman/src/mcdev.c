@@ -446,7 +446,7 @@ int mc_getstat(iop_file_t *f, char *filename, io_stat_t *stat)
 //--------------------------------------------------------------
 int mc_chstat(iop_file_t *f, char *filename, io_stat_t *stat, u32 statmask)
 {
-	register int r, flags;
+	register int r;
 	sceMcTblGetDir mctbl;
 
 	WaitSema(mcman_io_sema);
@@ -454,6 +454,8 @@ int mc_chstat(iop_file_t *f, char *filename, io_stat_t *stat, u32 statmask)
 
 	r = McDetectCard2(mcman_mc_port, mcman_mc_slot);
 	if (r >= -1) {
+		register int flags;
+
 		if (statmask & SCE_CST_ATTR) {
 			flags = 0x008;
 			mctbl.Reserve2 = stat->attr;

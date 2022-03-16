@@ -681,7 +681,6 @@ static int _msread_do(struct block_device* bd, void* buffer, u16 count)
  */
 static int spi_sdcard_read(struct block_device* bd, u32 sector, void* buffer, u16 count)
 {
-    int rv;
     int count_left = count;
     int retry_count;
 
@@ -693,6 +692,8 @@ static int spi_sdcard_read(struct block_device* bd, u32 sector, void* buffer, u1
     sio2_lock();
 
     for (retry_count = 0; retry_count < MAX_RETRIES; retry_count++) {
+        int rv;
+
         rv = _msread_start(bd, sector);
         if (rv != SPISD_RESULT_OK) {
             M_PRINTF("ERROR: failed to start multi-block read (%d)\n", rv);

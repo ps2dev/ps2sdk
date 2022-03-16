@@ -73,8 +73,7 @@ int sbv_patch_enable_lmb(void)
 	SifRpcReceiveData_t RData;
 	slib_exp_lib_t *modload_lib = (slib_exp_lib_t *)buf;
 	smod_mod_info_t loadfile_info;
-	void *pStartModule, *pLoadModuleBuffer, *patch_addr, *lf_rpc_dispatch, *lf_jump_table_end, *lf_fno_check;
-	unsigned short int JumpTableOffset_hi, JumpTableOffset_lo;
+	void *pStartModule, *pLoadModuleBuffer, *patch_addr, *lf_rpc_dispatch;
 	u32 result, *data;
 	SifDmaTransfer_t dmat;
 
@@ -115,6 +114,9 @@ int sbv_patch_enable_lmb(void)
 	if(SifRpcGetOtherData(&RData, (void*)lf_rpc_dispatch, &smem_buf, 128, 0)>=0){
 		data=smem_buf.words;
 		if(data[0]==0x27bdffe8 && data[1]==0x2c820006 && data[2]==0x14400003 && data[3]==0xafbf0010 && data[5]==0x00001021 && data[6]==0x00041080){
+			void *lf_jump_table_end, *lf_fno_check;
+			unsigned short int JumpTableOffset_hi, JumpTableOffset_lo;
+
 			lf_fno_check = (void*)((u8 *)lf_rpc_dispatch+4);
 
 			/* We need to extract the address of the jump table. */

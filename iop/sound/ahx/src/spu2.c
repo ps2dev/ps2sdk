@@ -140,12 +140,12 @@ int TransInterrupt(void *data)
 int Spu2Interrupt(void *data)
 
 {
-	volatile u16 *reg1 = U16_REGISTER(0x7C2);
-
 	(void)data;
 
 	if(Spu2IntrHandler != NULL)
 	{
+		volatile u16 *reg1 = U16_REGISTER(0x7C2);
+
 		Spu2IntrHandler((*reg1 & 0xC) >> 2, Spu2IntrData);
 	}
 	else
@@ -751,8 +751,6 @@ int sceSdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, ...)
 	#endif
 	int core = chan & 1;
 	int _size = size;
-	va_list alist;
-	u8* startaddr;
 
 	#ifndef ISJPCM
 	switch(transfer_dir)
@@ -796,6 +794,9 @@ int sceSdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, ...)
 
 		case SD_TRANS_WRITE_FROM:
 		{
+			va_list alist;
+			u8* startaddr;
+
 			va_start(alist, size);
 			startaddr = va_arg(alist, u8*);
 			va_end(alist);

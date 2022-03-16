@@ -145,7 +145,7 @@ void * malloc(size_t size)
 {
 	void *ptr = NULL, *mem_ptr;
 	heap_mem_header_t *new_mem, *prev_mem;
-	size_t mem_sz, heap_align_bytes;
+	size_t mem_sz;
 
 	mem_sz = size + sizeof(heap_mem_header_t);
 
@@ -159,6 +159,8 @@ void * malloc(size_t size)
 	if (__alloc_heap_head == NULL) {
 		/* Align the bottom of the heap to our default alignment.  */
 		if (__alloc_heap_base == NULL) {
+			size_t heap_align_bytes;
+
 			heap_align_bytes = (u32)alloc_sbrk(0) & (DEFAULT_ALIGNMENT - 1);
 			alloc_sbrk(heap_align_bytes);
 			__alloc_heap_base = alloc_sbrk(0);
@@ -370,7 +372,6 @@ void * memalign(size_t align, size_t size)
 void free(void *ptr)
 {
 	heap_mem_header_t *cur;
-	void *heap_top;
 	size_t size;
 
 	if (!ptr)
@@ -418,6 +419,8 @@ void free(void *ptr)
 	if (cur->next != NULL) {
 		cur->next->prev = cur->prev;
 	} else {
+		void *heap_top;
+
 		/* If this block was the last one in the list, shrink the heap.  */
 		__alloc_heap_tail = cur->prev;
 

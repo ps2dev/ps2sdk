@@ -63,7 +63,7 @@ void apaFreeMem(void *ptr)
 int apaGetTime(apa_ps2time_t *tm)
 {
 #ifdef _IOP
-	int ret, i;
+	int i;
 	sceCdCLOCK	cdtime;
 	static apa_ps2time_t timeBuf={
 		0, 7, 6, 5, 4, 3, 2000	// used if can not get time...
@@ -71,6 +71,8 @@ int apaGetTime(apa_ps2time_t *tm)
 
 	for(i = 0; i < 20; i++)
 	{
+		int ret;
+
 		ret = sceCdReadClock(&cdtime);
 
 		if(ret!=0 && cdtime.stat==0)

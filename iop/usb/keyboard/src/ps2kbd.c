@@ -328,8 +328,6 @@ void ps2kbd_getstring_set(int resultCode, int bytes, void *arg)
 {
   UsbStringDescriptor *str = (UsbStringDescriptor *) arg;
   string_descriptor *strBuf = (string_descriptor *) arg;
-  char string[50];
-  int strLoop;
 
 /*   printf("=========getstring=========\n"); */
 
@@ -337,6 +335,9 @@ void ps2kbd_getstring_set(int resultCode, int bytes, void *arg)
 
   if(resultCode == USB_RC_OK)
     {
+      char string[50];
+      int strLoop;
+
       memset(string, 0, 50);
       for(strLoop = 0; strLoop < ((bytes - 2) / 2); strLoop++)
 	{
@@ -353,13 +354,14 @@ void usb_getstring(int endp, int index, char *desc)
 {
   u8 *data;
   string_descriptor *str;
-  int ret;
 
   data = (u8 *) AllocSysMemory(0, sizeof(string_descriptor), NULL);
   str = (string_descriptor *) data;
 
   if(data != NULL)
     {
+      int ret;
+
       str->desc = desc;
       ret = sceUsbdControlTransfer(endp, 0x80, USB_REQ_GET_DESCRIPTOR, (USB_DT_STRING << 8) | index,
 			       0x0409, sizeof(string_descriptor) - 4, data, ps2kbd_getstring_set, data);
@@ -751,7 +753,6 @@ void ps2kbd_data_recv(int resultCode, int bytes, void *arg)
     {
       u8 uniqueKeys[PS2KBD_MAXKEYS];
       u8 missingKeys[PS2KBD_MAXKEYS];
-      int loopKey;
 
       memset(uniqueKeys, 0, PS2KBD_MAXKEYS);
       memset(missingKeys, 0, PS2KBD_MAXKEYS);
@@ -775,6 +776,7 @@ void ps2kbd_data_recv(int resultCode, int bytes, void *arg)
 
       if(kbd_readmode == PS2KBD_READMODE_NORMAL)
 	{
+    int loopKey;
 	  u8 ledStatus;
 
 	  ledStatus = dev->ledStatus;
@@ -850,12 +852,13 @@ void flushbuffer()
 void ps2kbd_ioctl_setreadmode(u32 readmode)
 
 {
-  int devLoop;
 
   if(readmode == kbd_readmode) return;
 
   if((readmode == PS2KBD_READMODE_NORMAL) || (readmode == PS2KBD_READMODE_RAW))
     {
+      int devLoop;
+
       /* Reset line buffer */
       //printf("ioctl_setreadmode %d\n", readmode);
       for(devLoop = 0; devLoop < PS2KBD_MAXDEV; devLoop++)

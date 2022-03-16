@@ -161,11 +161,12 @@ int ProbeTLBEntry(unsigned int EntryHi, unsigned int *PageMask, unsigned int *En
 
 /* 0x800751a8 */
 int ExpandScratchPad(unsigned int page){
-	int result, index;
-	unsigned int PageMask, EntryHi, EntryLo0, EntryLo1;
+	int result;
 
 	if(!(page&0xFFF)){
 		if(0xFFFFE<page-1){
+			int index;
+			unsigned int PageMask, EntryHi, EntryLo0, EntryLo1;
 			if((index=ProbeTLBEntry(0x70004000, &PageMask, &EntryLo0, &EntryLo1))>=0){
 				if(page==0){
 					EntryHi=0xE0010000+((index-1)<<13);

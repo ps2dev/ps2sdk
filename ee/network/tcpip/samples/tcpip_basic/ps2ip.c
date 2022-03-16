@@ -81,12 +81,13 @@ static int ethWaitValidNetIFLinkState(void)
 static int ethApplyIPConfig(int use_dhcp, const struct ip4_addr *ip, const struct ip4_addr *netmask, const struct ip4_addr *gateway, const struct ip4_addr *dns)
 {
 	t_ip_info ip_info;
-	const ip_addr_t *dns_curr;
 	int result;
 
 	//SMAP is registered as the "sm0" device to the TCP/IP stack.
 	if ((result = ps2ip_getconfig("sm0", &ip_info)) >= 0)
 	{
+		const ip_addr_t *dns_curr;
+
 		//Obtain the current DNS server settings.
 		dns_curr = dns_getserver(0);
 
@@ -126,12 +127,13 @@ static int ethApplyIPConfig(int use_dhcp, const struct ip4_addr *ip, const struc
 static void ethPrintIPConfig(void)
 {
 	t_ip_info ip_info;
-	const ip_addr_t *dns_curr;
 	u8 ip_address[4], netmask[4], gateway[4], dns[4];
 
 	//SMAP is registered as the "sm0" device to the TCP/IP stack.
 	if (ps2ip_getconfig("sm0", &ip_info) >= 0)
 	{
+		const ip_addr_t *dns_curr;
+
 		//Obtain the current DNS server settings.
 		dns_curr = dns_getserver(0);
 

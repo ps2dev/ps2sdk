@@ -95,7 +95,6 @@ static int getIndexRead(cache_set* cache, unsigned int sector)
 /* select the best record where to store new sector */
 static int getIndexWrite(cache_set* cache, unsigned int sector)
 {
-    int ret;
     int minTax = 0x0FFFFFFF;
     unsigned int i, index = 0;
 
@@ -108,6 +107,8 @@ static int getIndexWrite(cache_set* cache, unsigned int sector)
 
     //this sector is dirty - we need to flush it first
     if (cache->rec[index].writeDirty) {
+        int ret;
+
         M_DEBUG("scache: getIndexWrite: sector is dirty : %u   index=%d \n", cache->rec[index].sector, index);
         ret = WRITE_SECTOR(cache, cache->rec[index].sector, cache->sectorBuf + (index * BLOCK_SIZE), BLOCK_SIZE / cache->sectorSize);
         if (ret < 0) {

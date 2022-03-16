@@ -371,7 +371,6 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
 #endif
 {
    devfs_device_t *dev;
-   int loop;
    int fn_offset = 0;
 
    (void)unused;
@@ -392,6 +391,7 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
 
    if(dev != NULL)
    {
+      int loop;
       char *endp;
       int subdev;
       int name_len;
@@ -502,16 +502,17 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
 int devfs_close(iop_file_t *file)
 
 {
-   devfs_device_t *dev;
    ioman_data_t *data = (ioman_data_t *) file->privdata;
-   int loop;
 
    if((data) && (data->hDev != INVALID_HDEV)) /* Invalid HDEV is a dir listing */
    {
+      devfs_device_t *dev;
       dev = data->dev;
 
       if(dev != NULL)
       {
+         int loop;
+
          if(dev->subdevs[data->subdev].open_refcount > 0)
          {
              dev->subdevs[data->subdev].open_refcount--;
@@ -1267,12 +1268,13 @@ int DevFSDelSubDevice(HDEV hDev, u32 subdev_no)
 
 {
    devfs_device_t *dev;
-   int openfile_loop;
 
    //printf("DelSubDevice hDev=%d subdev_no=%d\n", hDev, subdev_no);
    dev = devfs_find_deviceid(hDev);
    if(dev != NULL)
    {
+      int openfile_loop;
+
       if(subdev_no >= DEVFS_MAX_SUBDEVS)
       {
          M_PRINTF("DelSubDevice: Sub device number too big\n");

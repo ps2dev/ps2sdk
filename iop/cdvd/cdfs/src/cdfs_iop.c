@@ -177,7 +177,6 @@ static int isValidDisc(void) {
 
 // Copy a TOC Entry from the CD native format to our tidier format
 static void copyToTocEntry(struct TocEntry *tocEntry, struct DirTocEntry *internalTocEntry) {
-    int i;
     int filenamelen;
 
     DPRINTF("copyToTocEntry: from=%p, to=%p\n\n", tocEntry, internalTocEntry);
@@ -199,6 +198,8 @@ static void copyToTocEntry(struct TocEntry *tocEntry, struct DirTocEntry *intern
     tocEntry->fileProperties = internalTocEntry->fileProperties;
 
     if (cdVolDesc.filesystemType == 2) {
+        int i;
+
         // This is a Joliet Filesystem, so use Unicode to ISO string copy
         filenamelen = internalTocEntry->filenameLength / 2;
 
@@ -235,10 +236,7 @@ static int findPath(char *pathname) {
     char *dirname;
     char *seperator;
 
-    int dir_entry;
-    int found_dir;
 
-    struct DirTocEntry *tocEntryPointer;
     struct TocEntry localTocEntry;
 
     dirname = strtok(pathname, "\\/");
@@ -250,6 +248,11 @@ static int findPath(char *pathname) {
     sceCdDiskReady(0);
 
     while (dirname != NULL) {
+        int dir_entry;
+        int found_dir;
+
+        struct DirTocEntry *tocEntryPointer;
+
         found_dir = FALSE;
 
         tocEntryPointer = (struct DirTocEntry *)cacheInfoDir.cache;
@@ -459,13 +462,14 @@ static int compareTocEntry(char *filename, const char *extensions) {
 
     char *token;
 
-    char *ext_point;
 
     strncpy(ext_list, extensions, 128);
     ext_list[128] = 0;
 
     token = strtok(ext_list, " ,");
     while (token != NULL) {
+        char *ext_point;
+
         // if 'token' matches extension of 'filename'
         // then return a match
         ext_point = strrchr(filename, '.');
@@ -490,7 +494,6 @@ static int cdfs_cacheDir(const char *pathname, enum Cache_getMode getMode) {
     // macke sure that the requested pathname is not directly modified
     static char dirname[1024];
 
-    int path_len;
     DPRINTF("Attempting to find, and cache, directory: %s\n", pathname);
 
     // Invalidate table of contents cache if disk changed
@@ -565,6 +568,8 @@ static int cdfs_cacheDir(const char *pathname, enum Cache_getMode getMode) {
             DPRINTF("Requested Path = %s , Cached Path = %s\n", pathname, cacheInfoDir.pathname);
 
             if (comparePath(pathname) == SUBDIR) {
+                int path_len;
+
 // If so then we can start our search for the path, from the currently cached directory
                 DPRINTF("Requested dir is a sub-dir of the cached directory,\n"
                        "so start search from current cached dir\n");

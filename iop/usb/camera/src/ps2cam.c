@@ -670,7 +670,6 @@ int setReg16(CAMERA_DEVICE *dev, unsigned char reg_id, unsigned short value)
 /** Get a string descriptor from device */
 void PS2CamGetDeviceSring(CAMERA_DEVICE* dev, int index, char *str, int strmax)
 {
-	int				i;
 	static char		buff[50];
 	UsbStringDescriptor	*sd;
 	int				ret;
@@ -687,6 +686,7 @@ void PS2CamGetDeviceSring(CAMERA_DEVICE* dev, int index, char *str, int strmax)
 	}
 	else
 	{
+		int i;
 
 
 		WaitSema(ps2cam_sema);
@@ -1352,8 +1352,6 @@ int PS2CamSetDeviceConfig(int handle, void *config)
 	CAMERA_DEVICE			*cam;
 	PS2CAM_DEVICE_CONFIG	*cfg;
 
-	unsigned char			*p;
-
 	if(! irx_initialized)
 		return CAM_ERROR_NOTINIT;
 
@@ -1388,6 +1386,7 @@ int PS2CamSetDeviceConfig(int handle, void *config)
 	//set offset
 	if(cfg->mask & CAM_CONFIG_MASK_OFFSET)
 	{
+		unsigned char *p;
 
 		p = (unsigned char *)&cfg->x_offset;
 		setReg8(cam, EYETOY_IREG_X_OFFSETL,		p[0]);

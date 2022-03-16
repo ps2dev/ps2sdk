@@ -428,7 +428,6 @@ static int apaRemove(s32 device, const char *id, const char *fpwd)
 {
     u32 nsub;
     apa_cache_t *clink;
-    apa_cache_t *clink2;
     int rv, i;
 
     for (i = 0; i < apaMaxOpen; i++) // look to see if open
@@ -452,6 +451,8 @@ static int apaRemove(s32 device, const char *id, const char *fpwd)
     clink->flags |= APA_CACHE_FLAG_DIRTY;
     apaCacheFlushAllDirty(device);
     for (i = nsub - 1; i != -1; i--) {
+        apa_cache_t *clink2;
+
         if ((clink2 = apaCacheGetHeader(device, clink->header->subs[i].start, APA_IO_MODE_READ, &rv))) {
             if ((rv = apaDelete(clink2))) {
                 apaCacheFree(clink);

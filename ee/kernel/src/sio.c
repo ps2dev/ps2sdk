@@ -120,9 +120,10 @@ size_t sio_read(void *buf, size_t size)
 {
 	u8 *p = (u8 *)buf;
 	size_t i;
-	int c;
 
 	for (i = 0; i < size; i++) {
+		int c;
+
 		if ((c = sio_getc()) == -1)
 			break;
 
@@ -162,9 +163,10 @@ int sio_putsn(const char *str)
 char *sio_gets(char *str)
 {
 	char *s = str;
-	int c;
 
 	while (1) {
+		int c;
+
 		c = sio_getc_block();
 		/* Check for newline.  */
 		if (c == '\n' || c == '\r')

@@ -223,10 +223,9 @@ static int fs_init(iop_device_t* driver)
 static int fs_open(iop_file_t* fd, const char* name, int flags, int mode)
 {
     fat_driver* fatd;
-    fs_rec *rec, *rec2;
+    fs_rec *rec;
     int ret;
     unsigned int cluster;
-    char escapeNotExist;
 
     (void)mode;
 
@@ -255,6 +254,8 @@ static int fs_open(iop_file_t* fd, const char* name, int flags, int mode)
         _fs_unlock();
         return ret;
     } else {
+        fs_rec *rec2;
+
         //File exists. Check if the file is already open
         rec2 = fs_findFileSlotByCluster(rec->dirent.fatdir.startCluster);
         if (rec2 != NULL) {
@@ -267,6 +268,8 @@ static int fs_open(iop_file_t* fd, const char* name, int flags, int mode)
     }
 
     if (flags & O_WRONLY) { //dlanor: corrected bad test condition
+        char escapeNotExist;
+
         cluster = 0;       //start from root
 
         escapeNotExist = 1;

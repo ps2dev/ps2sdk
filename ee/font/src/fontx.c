@@ -507,7 +507,7 @@ qword_t *draw_fontx_char(qword_t *q, unsigned short c, vertex_t *v0, fontx_t *fo
 	char *char_offset;
 	int i, j;
 	int x,y,z;
-	int xi,yi;
+	int xi;
 
 	x = ftoi4(v0->x);
 	y = ftoi4(v0->y);
@@ -526,6 +526,7 @@ qword_t *draw_fontx_char(qword_t *q, unsigned short c, vertex_t *v0, fontx_t *fo
 
 	for (i=0;i<fontx_header->height;i++)
 	{
+		int yi;
 
 		// Increment one row down
 		yi = y + (i << 4);

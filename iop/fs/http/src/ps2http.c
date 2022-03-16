@@ -122,12 +122,13 @@ int readLine( int socket, char * buffer, int size )
 {
 	char * ptr = buffer;
 	int count = 0;
-	int rc;
 
 	// Keep reading until we fill the buffer.
 
 	while ( count < size )
 	{
+		int rc;
+
 		rc = recv( socket, ptr, 1, 0 );
 
 		if ( rc <= 0 ) return rc;

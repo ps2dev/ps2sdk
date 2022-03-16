@@ -88,11 +88,11 @@ void NetManUpdateStackNIFLinkState(void){
 }
 
 static void UpdateNetIFStatus(void){
-	unsigned char i;
-
 	if(!(MainNetIF->flags&NETMAN_NETIF_IN_USE)) MainNetIF = NULL;
 
 	if(MainNetIF == NULL){
+		unsigned char i;
+
 		for(i=0; i<NETMAN_MAX_NETIF_COUNT; i++){
 			if(NetIFs[i].flags&NETMAN_NETIF_IN_USE){
 				MainNetIF=&NetIFs[i];
@@ -236,11 +236,11 @@ void NetManUnregisterNetIF(const char *name){
 }
 
 void NetManToggleNetIFLinkState(int NetIFID, unsigned char state){
-	struct NetManNetIF *pNetIF;
-
 	WaitSema(NetManIOSemaID);
 
 	if((NetIFID&0xFF)<NETMAN_MAX_NETIF_COUNT && NetIFID==NetIFs[NetIFID&0xFF].id && (NetIFs[NetIFID&0xFF].flags&NETMAN_NETIF_IN_USE)){
+		struct NetManNetIF *pNetIF;
+
 		pNetIF = &NetIFs[NetIFID&0xFF];
 
 		ClearEventFlag(pNetIF->EventFlagID, ~(NETMAN_NETIF_EVF_UP|NETMAN_NETIF_EVF_DOWN));

@@ -78,8 +78,6 @@ static void *sio2packet_add_funcs_array[16] = {
 void sio2packet_add(int port, int slot, int cmd, u8 *buf)
 {	// Used to build the sio2packets for all mc commands
 	register u32 regdata;
-	register int pos;
-	u8 *p;
 
 	if (cmd == 0xffffffff) {
 		mcman_sio2packet.in_dma.count = 0;
@@ -87,6 +85,8 @@ void sio2packet_add(int port, int slot, int cmd, u8 *buf)
 	}
 
 	if (mcman_sio2packet.in_dma.count < 0xb) {
+		register int pos;
+		u8 *p;
 
 		if (cmd == 0xfffffffe) {
 			mcman_sio2packet.regdata[mcman_sio2packet.in_dma.count] = 0;

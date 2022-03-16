@@ -58,7 +58,6 @@ int adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop)
 	int flags;
 	int i, j, k;
 	unsigned char d;
-	int size;
 
 	flags = 0;
 	shift_factor = 0;
@@ -67,6 +66,8 @@ int adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop)
 	// sample_len is number of 16 bit samples
   while( sample_len > 0 )
 	{
+		int size;
+
 		// Size is sample_len
 		size = ( sample_len >= BUFFER_SIZE ) ? BUFFER_SIZE : sample_len;
 
@@ -233,14 +234,15 @@ static void find_predict( short *samples, double *d_samples, int *predict_nr, in
 
 static void pack( double *d_samples, short *four_bit, int predict_nr, int shift_factor )
 {
-    double ds;
-    int di;
-    double s_0;
     static double s_1 = 0.0;
     static double s_2 = 0.0;
     int i;
 
     for ( i = 0; i < 28; i++ ) {
+        double ds;
+        int di;
+        double s_0;
+
         s_0 = d_samples[i] + s_1 * f[predict_nr][0] + s_2 * f[predict_nr][1];
         ds = s_0 * (double) ( 1 << shift_factor );
 

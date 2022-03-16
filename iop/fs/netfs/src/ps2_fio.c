@@ -226,11 +226,12 @@ static inline int ps2netfs_lwip_send(int sock, void *buf, int len, int flag)
 int ps2netfs_recv_bytes(int sock, char *buf, int bytes)
 {
   int left;
-  int len;
 
   left = bytes;
 
   while (left > 0) {
+    int len;
+
     len = recv(sock, &buf[bytes - left], left, 0);
     if (len < 0) {
       dbgprintf("ps2netfs: recv_bytes error!! (%d)\n",len);
@@ -441,9 +442,10 @@ static int ps2netfs_op_devlist(char *buf, int len)
 
   // first char of the path passed in is the delimiter
   { // so fudge in the delimiters
-    int cnt; char *ptr = &devlistrly->list[0]; int len;
+    int cnt; char *ptr = &devlistrly->list[0];
     for(cnt=0;cnt<(count-1);cnt++)
     {
+      int len;
       len = strlen(ptr);
       // ok, got a string, so replace the final 0, with delimiter
       // move onto next string
@@ -696,10 +698,12 @@ static int ps2netfs_op_write(char *buf, int len)
   if (fdptr != 0)
   {
     int left = ntohl(cmd->nbytes);
-    int towrite, written;
+    int written;
     written = retval = 0;
     while ((retval >= 0) && (left > 0))
     {
+      int towrite;
+
       towrite = left; if (towrite > FIOTRAN_MAXSIZE) towrite = FIOTRAN_MAXSIZE;
       if (ps2netfs_recv_bytes(ps2netfs_sock, ps2netfs_fiobuffer, towrite) <=0 )
       {
@@ -1828,7 +1832,6 @@ static int ps2netfs_op_ioctl2(char *buf, int len)
 static void ps2netfs_Listener(int sock)
 {
  int done;
- int len;
  unsigned int cmd;
  ps2netfs_pkt_hdr *header;
  int retval;
@@ -1836,6 +1839,8 @@ static void ps2netfs_Listener(int sock)
  done = 0;
 
  while(!done) {
+   int len;
+
    len = ps2netfs_accept_pktunknown(sock, &ps2netfs_recv_packet[0]);
 
    if (len > 0)
@@ -1975,8 +1980,6 @@ ps2netfs_serv(void *argv)
  struct sockaddr_in server_addr;
  struct sockaddr_in client_addr;
  int sock;
- int client_sock;
- int client_len;
  int ret;
 
  (void)argv;
@@ -2023,6 +2026,9 @@ ps2netfs_serv(void *argv)
  // Connection loop
  while(ps2netfs_active)
  {
+   int client_sock;
+   int client_len;
+
    dbgprintf("ps2netfs: Waiting for connection\n");
 
    client_len = sizeof(client_addr);
@@ -2075,7 +2081,6 @@ int ps2netfs_Init(void)
 {
   iop_thread_t mythread;
   int pid;
-  int i;
 
   dbgprintf("initializing ps2netfs\n");
 
@@ -2091,6 +2096,8 @@ int ps2netfs_Init(void)
 
   if (pid > 0)
   {
+    int i;
+
     if ((i=StartThread(pid, NULL)) < 0)
     {
       printf("StartThread failed (%d)\n", i);

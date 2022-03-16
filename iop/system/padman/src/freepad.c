@@ -37,20 +37,23 @@ extern int vblank_end;
 
 static int ParseParams(int argc, char *argv[])
 {
-	int i, new_thpri_hi, new_thpri_lo;
-	const char *param;
+	int new_thpri_hi, new_thpri_lo;
 
 	new_thpri_hi = PADMAN_THPRI_HI;
 	new_thpri_lo = PADMAN_THPRI_LO;
 
 	if(argc > 1)
 	{
+		int i;
+
 		argv++;
 
 		for(i = 1; i < argc; i++,argv++)
 		{
 			if(strncmp("thpri=", *argv, 6) == 0)
 			{
+				const char *param;
+
 				//Parse high priority
 				param = &(*argv)[6];
 				if(isdigit(*param))

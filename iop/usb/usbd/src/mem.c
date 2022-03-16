@@ -183,8 +183,9 @@ Endpoint *allocEndpointForDevice(Device *dev, u32 align) {
 }
 
 Device *fetchDeviceById(int devId) {
-	Device *dev;
 	if ((devId > 0) && (devId < usbConfig.maxDevices)) {
+		Device *dev;
+
 		dev = memPool.deviceTreeBuf + devId;
 		if (dev->parent)
 			return dev;
@@ -193,8 +194,9 @@ Device *fetchDeviceById(int devId) {
 }
 
 Endpoint *fetchEndpointById(int id) {
-	Endpoint *res;
 	if ((id >= 0) && (id < usbConfig.maxEndpoints)) {
+		Endpoint *res;
+
 		res = memPool.endpointBuf + id;
 		if (res->correspDevice)
 			return res;

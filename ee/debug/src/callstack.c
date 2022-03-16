@@ -129,7 +129,6 @@ void ps2GetStackTrace(unsigned int* results,int max)
   int sp_adjust;
   Bool found_ra_offset, found_sp_adjust;
   Bool found_const_upper, found_const_lower;
-  ReturnCachePtr  rc;
 
   ra = ps2GetReturnAddress();
   sp = ps2GetStackPointer();
@@ -137,6 +136,7 @@ void ps2GetStackTrace(unsigned int* results,int max)
 
   while (ra && max)
   {
+    ReturnCachePtr  rc;
     rc = &returnCache[HASH(ra)];
     if (rc->returnAddress != ra)
     {

@@ -227,14 +227,16 @@ int audsrv_get_cd_status()
 
 int audsrv_play_audio(const char *chunk, int bytes)
 {
-	int copy, maxcopy, copied;
-	int packet_size;
+	int maxcopy;
 	int sent = 0;
 
 	set_error(AUDSRV_ERR_NOERROR);
 	maxcopy = sizeof(sbuff) - sizeof(int);
 	while (bytes > 0)
 	{
+		int copy, copied;
+		int packet_size;
+
 		WaitSema(completion_sema);
 
 		copy = MIN(bytes, maxcopy);

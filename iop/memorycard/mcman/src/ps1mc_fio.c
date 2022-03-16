@@ -244,7 +244,7 @@ int mcman_open1(int port, int slot, char *filename, int flags)
 //--------------------------------------------------------------
 int mcman_read1(int fd, void *buffer, int nbyte)
 {
-	register int r, size, temp, rpos, offset, maxsize;
+	register int rpos;
 	register MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
 	McCacheEntry *mce;
 	u8 *p = (u8 *)buffer;
@@ -258,6 +258,8 @@ int mcman_read1(int fd, void *buffer, int nbyte)
 	rpos = 0;
 	if (nbyte) {
 		do {
+			register int r, size, temp, offset, maxsize;
+
 			if ((int)(fh->position) < 0)
 				temp = fh->position + 0x3ff;
 			else
@@ -293,7 +295,7 @@ int mcman_read1(int fd, void *buffer, int nbyte)
 //--------------------------------------------------------------
 int mcman_write1(int fd, void *buffer, int nbyte)
 {
-	register int r, size, temp, wpos, offset, maxsize;
+	register int r, wpos;
 	register MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
 	McCacheEntry *mce;
 	u8 *p = (u8 *)buffer;
@@ -314,6 +316,8 @@ int mcman_write1(int fd, void *buffer, int nbyte)
 	if (nbyte) {
 
 		do {
+			register int size, temp, offset, maxsize;
+
 			r = mcman_fatRseekPS1(fd);
 
 			if (r == sceMcResFullDevice) {
@@ -368,12 +372,13 @@ int mcman_write1(int fd, void *buffer, int nbyte)
 //--------------------------------------------------------------
 int mcman_dread1(int fd, io_dirent_t *dirent)
 {
-	register int r;
 	register MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
 	McFsEntryPS1 *fse;
 
 	if (fh->position < fh->filesize) {
 		do {
+			register int r;
+
 			r = mcman_readdirentryPS1(fh->port, fh->slot, fh->position, &fse);
 			if (r != sceMcResSucceed)
 				return r;

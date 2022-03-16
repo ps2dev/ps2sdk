@@ -330,8 +330,6 @@ void ps2mouse_getstring_set(int resultCode, int bytes, void *arg)
 {
   UsbStringDescriptor *str = (UsbStringDescriptor *) arg;
   string_descriptor *strBuf = (string_descriptor *) arg;
-  char string[50];
-  int strLoop;
 
 /*   printf("=========getstring=========\n"); */
 
@@ -339,6 +337,9 @@ void ps2mouse_getstring_set(int resultCode, int bytes, void *arg)
 
   if(resultCode == USB_RC_OK)
     {
+      char string[50];
+      int strLoop;
+
       memset(string, 0, 50);
       for(strLoop = 0; strLoop < ((bytes - 2) / 2); strLoop++)
 	{
@@ -355,13 +356,14 @@ void usb_getstring(int endp, int index, char *desc)
 {
   u8 *data;
   string_descriptor *str;
-  int ret;
 
   data = (u8 *) AllocSysMemory(0, sizeof(string_descriptor), NULL);
   str = (string_descriptor *) data;
 
   if(data != NULL)
     {
+      int ret;
+
       str->desc = desc;
       ret = sceUsbdControlTransfer(endp, 0x80, USB_REQ_GET_DESCRIPTOR, (USB_DT_STRING << 8) | index,
 			       0, sizeof(string_descriptor) - 4, data, ps2mouse_getstring_set, data);

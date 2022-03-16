@@ -314,8 +314,7 @@ int audsrv_cd_resume()
  */
 static void cdda_procedure(void *arg)
 {
-	int block, sz;
-	u8 *bufptr;
+	int sz;
 	int nsectors;
 	int intr_state;
 	int offset, last_read;
@@ -364,6 +363,9 @@ static void cdda_procedure(void *arg)
 
 	while (cdda_pos < cdda_play_end)
 	{
+		int block;
+		u8 *bufptr;
+
 		/* wait until it's safe to transmit */
 		WaitSema(cd_transfer_sema);
 

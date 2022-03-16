@@ -48,8 +48,9 @@ int InitFAT(void)
 
 //---------------------------------------------------------------------------
 int strEqual(const char *s1, const char* s2) {
-    char u1, u2;
     for (;;) {
+    	char u1, u2;
+
 		u1 = *s1++;
 		u2 = *s2++;
 		if (u1 >64 && u1 < 91)  u1+=32;
@@ -97,8 +98,8 @@ unsigned int fat_getClusterRecord12(unsigned char* buf, int type) {
 */
 static int fat_getClusterChain12(fat_driver* fatd, unsigned int cluster, unsigned int* buf, unsigned int bufSize, int startFlag) {
 	int ret;
-	unsigned int i, recordOffset, fatSector, lastFatSector;
-	unsigned char xbuf[4], sectorSpan, cont;
+	unsigned int i, lastFatSector;
+	unsigned char xbuf[4], cont;
 	unsigned char* sbuf = NULL; //sector buffer
 
 	cont = 1;
@@ -109,6 +110,9 @@ static int fat_getClusterChain12(fat_driver* fatd, unsigned int cluster, unsigne
 		i++;
 	}
 	while(i < bufSize && cont) {
+		unsigned int recordOffset, fatSector;
+		unsigned char sectorSpan;
+
 		recordOffset = (cluster * 3) / 2; //offset of the cluster record (in bytes) from the FAT start
 		fatSector = recordOffset / fatd->partBpb.sectorSize;
 		sectorSpan = 0;
@@ -156,7 +160,7 @@ static int fat_getClusterChain12(fat_driver* fatd, unsigned int cluster, unsigne
 //for fat16
 static int fat_getClusterChain16(fat_driver* fatd, unsigned int cluster, unsigned int* buf, unsigned int bufSize, int startFlag) {
 	int ret;
-	unsigned int i, indexCount, fatSector, lastFatSector;
+	unsigned int i, indexCount, lastFatSector;
 	unsigned char cont;
 	unsigned char* sbuf = NULL; //sector buffer
 
@@ -169,6 +173,8 @@ static int fat_getClusterChain16(fat_driver* fatd, unsigned int cluster, unsigne
 		i++;
 	}
 	while(i < bufSize && cont) {
+		unsigned int fatSector;
+
 		fatSector = cluster / indexCount;
 		if (lastFatSector !=  fatSector) {
 			ret = READ_SECTOR(fatd->dev, fatd->partBpb.partStart + fatd->partBpb.resSectors + fatSector,  sbuf);
@@ -194,7 +200,7 @@ static int fat_getClusterChain16(fat_driver* fatd, unsigned int cluster, unsigne
 //for fat32
 static int fat_getClusterChain32(fat_driver* fatd, unsigned int cluster, unsigned int* buf, unsigned int bufSize, int startFlag) {
 	int ret;
-	unsigned int i, indexCount, fatSector, lastFatSector;
+	unsigned int i, indexCount, lastFatSector;
 	unsigned char cont;
 	unsigned char* sbuf = NULL; //sector buffer
 
@@ -207,6 +213,8 @@ static int fat_getClusterChain32(fat_driver* fatd, unsigned int cluster, unsigne
 		i++;
 	}
 	while(i < bufSize && cont) {
+		unsigned int fatSector;
+
 		fatSector = cluster / indexCount;
 		if (lastFatSector !=  fatSector) {
 			ret = READ_SECTOR(fatd->dev, fatd->partBpb.partStart + fatd->partBpb.resSectors + fatSector,  sbuf);
@@ -247,13 +255,15 @@ int fat_getClusterChain(fat_driver* fatd, unsigned int cluster, unsigned int* bu
 //---------------------------------------------------------------------------
 int fat_CheckChain(fat_driver* fatd, unsigned int cluster)
 {
-    int i, chainSize, nextChain = 1;
+    int i, nextChain = 1;
     int clusterChainStart = 1;
 
     if (cluster < 2)
         return 0;
 
     while (nextChain) {
+    	int chainSize;
+
         chainSize = fat_getClusterChain(fatd, cluster, fatd->cbuf, MAX_DIR_CLUSTER, clusterChainStart);
         clusterChainStart = 0;
         if (chainSize >= MAX_DIR_CLUSTER) { //the chain is full, but more chain parts exist
@@ -371,9 +381,8 @@ static int fat_getPartitionBootSector(mass_dev* dev, unsigned int sector, fat_bp
  3 - deleted dir entry found
 */
 int fat_getDirentry(unsigned char fatType, fat_direntry* dir_entry, fat_direntry_summary* dir ) {
-	int i, j;
-	unsigned int offset;
-	unsigned char cont;
+	int i;
+
 	u16 character;
 
 	//detect last entry - all zeros (slight modification by radad)
@@ -387,6 +396,9 @@ int fat_getDirentry(unsigned char fatType, fat_direntry* dir_entry, fat_direntry
 
 	//detect long filename
 	if (dir_entry->lfn.rshv == 0x0F && dir_entry->lfn.reserved1 == 0x00 && dir_entry->lfn.reserved2[0] == 0x00) {
+		unsigned int offset;
+		unsigned char cont;
+
 		//long filename - almost whole direntry is unicode string - extract it
 		offset = dir_entry->lfn.entrySeq & 0x3f;
 		offset--;
@@ -436,6 +448,8 @@ int fat_getDirentry(unsigned char fatType, fat_direntry* dir_entry, fat_direntry
 		}
 		return 2;
 	} else {
+		int j;
+
 		//short filename
 		//copy name
 		for (i = 0; i < 8 && dir_entry->sfn.name[i]!= ' '; i++) {
@@ -781,7 +795,7 @@ static int fat_readSingleSector(mass_dev *dev, unsigned int sector, void *buffer
 }
 
 int fat_readFile(fat_driver* fatd, fat_dir* fatDir, unsigned int filePos, unsigned char* buffer, unsigned int size) {
-	int ret, chainSize;
+	int ret;
 	unsigned int i, j, startSector, clusterChainStart, bufSize, sectorSkip, clusterSkip, dataSkip, toRead;
 	unsigned char nextChain;
 	mass_dev* mass_device = fatd->dev;
@@ -806,6 +820,8 @@ int fat_readFile(fat_driver* fatd, fat_dir* fatDir, unsigned int filePos, unsign
 	clusterChainStart = 1;
 
 	while (nextChain && size > 0 ) {
+		int chainSize;
+
 		if((chainSize = fat_getClusterChain(fatd, fileCluster, fatd->cbuf, MAX_DIR_CLUSTER, clusterChainStart))<0){
 			return chainSize;
 		}

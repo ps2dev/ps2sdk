@@ -132,16 +132,17 @@ int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData)
 
 int HandleTxReqs(struct SmapDriverData *SmapDrivPrivData)
 {
-    int result, length;
+    int result;
     void *data;
     USE_SMAP_TX_BD;
-    volatile u8 *smap_regbase;
     volatile smap_bd_t *BD_ptr;
     u16 BD_data_ptr;
     unsigned int SizeRounded;
 
     result = 0;
     while (1) {
+        int length;
+
         if ((length = NetManTxPacketNext(&data)) < 1) {
             return result;
         }
@@ -152,6 +153,8 @@ int HandleTxReqs(struct SmapDriverData *SmapDrivPrivData)
                 SizeRounded = (length + 3) & ~3;
 
                 if (SmapDrivPrivData->TxBufferSpaceAvailable >= SizeRounded) {
+                    volatile u8 *smap_regbase;
+
                     smap_regbase = SmapDrivPrivData->smap_regbase;
 
                     BD_data_ptr = SMAP_REG16(SMAP_R_TXFIFO_WR_PTR) + SMAP_TX_BASE;

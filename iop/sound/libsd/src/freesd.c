@@ -253,7 +253,6 @@ void RegisterInterrupts()
 void ResetAll()
 {
 	u32 core;
-	volatile u16 *statx;
 
 	U16_REGISTER_WRITE(SD_C_SPDIF_OUT, 0);
 	nopdelay();
@@ -264,6 +263,8 @@ void ResetAll()
 
 	for(core=0; core < 2; core++)
 	{
+		volatile u16 *statx;
+
 		VoiceTransIoMode[core]	= 0;
 		U16_REGISTER_WRITE(U16_REGISTER(0x1B0), 0);
 		U16_REGISTER_WRITE(SD_CORE_ATTR(core), 0);

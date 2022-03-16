@@ -228,9 +228,7 @@ static void find_predict(AdpcmSetup *set, AdpcmBlock *adpcm, double *samples)
 
 static void pack(AdpcmSetup *set, AdpcmBlock *adpcm, double *samples)
 {
-	double ds;
-	int di;
-	double s_0, s_1, s_2;
+	double s_1, s_2;
 	short four_bit[28];
 
 	s_1 = set->ps_1;
@@ -238,6 +236,10 @@ static void pack(AdpcmSetup *set, AdpcmBlock *adpcm, double *samples)
 
 	for (int i=0;i<28;i++)
 	{
+		double ds;
+		int di;
+		double s_0;
+
 		s_0 = samples[i] + s_1 * f[adpcm->predict][0] + s_2 * f[adpcm->predict][1];
 		ds = s_0 * (double) (1<<adpcm->shift);
 

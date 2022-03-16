@@ -51,12 +51,13 @@ void *_rpc_get_fpacket(struct rpc_data *rpc_data);
 void *_rpc_get_packet(struct rpc_data *rpc_data)
 {
 	SifRpcPktHeader_t *packet;
-	int len, pid, rid;
+	int len;
 
 	DI();
 
 	len = rpc_data->pkt_table_len;
 	if (len > 0) {
+		int pid, rid;
 		packet = (SifRpcPktHeader_t *)rpc_data->pkt_table;
 
 		for (rid = 0; rid < len; rid++, packet = (SifRpcPktHeader_t *)(((unsigned char *)packet) +  RPC_PACKET_SIZE)) {
@@ -654,9 +655,9 @@ void SifExecRequest(SifRpcServerData_t *sd)
 #ifdef F_SifRpcLoop
 void SifRpcLoop(SifRpcDataQueue_t *qd)
 {
-	SifRpcServerData_t *server;
-
 	while (1) {
+		SifRpcServerData_t *server;
+
 		while ((server = SifGetNextRequest(qd)))
 			SifExecRequest(server);
 

@@ -331,9 +331,11 @@ int ata_get_error(void)
 static int gen_ata_wait_busy(int bits)
 {
     USE_ATA_REGS;
-    int i, didx, delay;
+    int i, delay;
 
     for (i = 0; i < 80; i++) {
+        int didx;
+
         if (!(ata_hwport->r_control & bits))
             return 0;
 
@@ -518,7 +520,6 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
 static int ata_pio_transfer(ata_cmd_state_t *cmd_state)
 {
     USE_ATA_REGS;
-    u8 *buf8;
     u16 *buf16;
     int i, type;
     u16 status = ata_hwport->r_status & 0xff;
@@ -542,6 +543,8 @@ static int ata_pio_transfer(ata_cmd_state_t *cmd_state)
             cmd_state->buf16 = ++buf16;
         }
         if (cmd_state->type == 8) {
+            u8 *buf8;
+
             buf8 = cmd_state->buf8;
             for (i = 0; i < 4; i++) {
                 ata_hwport->r_data = *buf8;
