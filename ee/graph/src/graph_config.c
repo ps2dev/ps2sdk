@@ -236,6 +236,7 @@ int graph_save_config(char *filename)
 	if (fwrite(config, 1, strnlen(config, sizeof(config)), outfile) == strnlen(config, sizeof(config)))
 	{
 
+		fclose(outfile);
 		return -EIO;
 
 	}
