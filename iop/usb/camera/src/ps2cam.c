@@ -245,6 +245,10 @@ int PS2CamConnect(int devId)
 		}
 	}
 
+	if (cam == NULL)
+	{
+		return 0;
+	}
 
 
 	cam->device_id			= devId;
