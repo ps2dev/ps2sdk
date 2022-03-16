@@ -4,8 +4,8 @@
  #define DEBUG_PRINTF(args...) printf(args)
  #define iDEBUG_PRINTF(args...) Kprintf(args)
 #else
- #define DEBUG_PRINTF(args...)
- #define iDEBUG_PRINTF(args...)
+ #define DEBUG_PRINTF(args...) do { } while(0)
+ #define iDEBUG_PRINTF(args...) do { } while(0)
 #endif
 
 #define REQ_CHECK_MEM_BOUNDARIES	/* Define this to enable memory address boundary checking for incoming requests. */

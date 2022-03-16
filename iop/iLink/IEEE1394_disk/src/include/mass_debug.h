@@ -5,8 +5,8 @@
 #define XPRINTF(args...) printf(args)
 #define iXPRINTF(args...) Kprintf(args)
 #else
-#define XPRINTF(args...)
-#define iXPRINTF(args...)
+#define XPRINTF(args...) do { } while(0)
+#define iXPRINTF(args...) do { } while(0)
 #endif
 
 #endif  /* _MASS_DEBUG_H */

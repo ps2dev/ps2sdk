@@ -30,8 +30,8 @@
 #endif
 #define rprintf(fmt, args...) printf(fmt, ## args)
 #else
-#define dprintf(a...)
-#define rprintf(a...)
+#define dprintf(a...) do { } while(0)
+#define rprintf(a...) do { } while(0)
 #endif
 
 #include <stdlib.h>
