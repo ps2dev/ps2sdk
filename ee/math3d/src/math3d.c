@@ -169,6 +169,38 @@
    : "memory"
   );
  }
+ 
+ void vector_add(VECTOR sum, VECTOR addend, VECTOR summand) {
+  VECTOR work;
+  work[0] = addend[0]+summand[0];
+  work[1] = addend[1]+summand[1];
+  work[2] = addend[2]+summand[2];
+  work[3] = addend[3]+summand[3];
+  vector_copy(sum, work);
+}
+
+void vector_cross_product(VECTOR product, VECTOR multiplicand, VECTOR multiplier) {
+  VECTOR work;
+  work[0] = multiplicand[1] * multiplier[2] - multiplicand[2] * multiplier[1];
+  work[1] = multiplicand[2] * multiplier[0] - multiplicand[0] * multiplier[2];
+  work[2] = multiplicand[0] * multiplier[1] - multiplicand[1] * multiplier[0];
+  work[3] = 1.0f;
+  vector_copy(product, work);
+}
+
+void vector_triangle_normal(VECTOR output, VECTOR a, VECTOR b, VECTOR c) {
+  VECTOR ac;
+  VECTOR bc;
+  VECTOR ac_bc;
+  VECTOR triangle_normal;
+
+  vector_add(ac, a, c);
+  vector_add(bc, b, c);
+  vector_cross_product(ac_bc, ac, bc);
+  vector_normalize(triangle_normal, ac_bc);
+  
+  vector_copy(output, triangle_normal);
+}
 
  /* MATRIX FUNCTIONS */
 
