@@ -48,6 +48,15 @@ void vector_normalize(VECTOR output, VECTOR input0);
 /** Calculate the outer product of two vectors. */
 void vector_outerproduct(VECTOR output, VECTOR input0, VECTOR input1);
 
+/** Add two vectors */
+void vector_add(VECTOR sum, VECTOR addend, VECTOR summand);
+
+/** Calculate the cross product of two vectors */
+void vector_cross_product(VECTOR product, VECTOR multiplicand, VECTOR multiplier);
+
+/** Calculates the normal of 3 vectors */
+void vector_triangle_normal(VECTOR output, VECTOR a, VECTOR b, VECTOR c);
+
 /* MATRIX FUNCTIONS */
 /** Copy a matrix. */
 void matrix_copy(MATRIX output, MATRIX input0);
