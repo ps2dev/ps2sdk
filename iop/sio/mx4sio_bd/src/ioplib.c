@@ -1,7 +1,7 @@
 #include "ioplib.h"
 #include <intrman.h>
 
-iop_library_t* ioplib_getByName(char* name)
+iop_library_t* ioplib_getByName(const char* name)
 {
     iop_library_t* libptr;
     int i;

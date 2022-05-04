@@ -74,7 +74,7 @@ int strEqual(const char *s1, const char* s2) {
 */
 
 //---------------------------------------------------------------------------
-unsigned int fat_getClusterRecord12(unsigned char* buf, int type) {
+unsigned int fat_getClusterRecord12(const unsigned char* buf, int type) {
 	if (type) { //1
 		return ((buf[1]<< 4) + (buf[0] >>4));
 	} else { // 0

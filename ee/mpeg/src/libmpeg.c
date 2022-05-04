@@ -723,7 +723,7 @@ static void _mpeg12_decode_motion_vector (
 
 }  /* end _mpeg12_decode_motion_vector */
 
-static void _mpeg12_dual_prime_vector ( int aDMV[][ 2 ], int* apDMVector, int aMVX, int aMVY ) {
+static void _mpeg12_dual_prime_vector ( int aDMV[][ 2 ], const int* apDMVector, int aMVX, int aMVY ) {
 
  if ( s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME ) {
 

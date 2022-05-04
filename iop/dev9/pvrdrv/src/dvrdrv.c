@@ -82,7 +82,7 @@ struct_itr_sid_tbl *SetItrSidTbl(int itrsid_index, u16 command, int sema);
 struct_itr_sid_tbl *GetItrSidTbl(int itrsid_index, u16 command);
 int ClearItrSidTbl(struct_itr_sid_tbl *a1);
 struct_itr_sema *AllocItrSema();
-int ReleaseItrSema(struct_itr_sema *itrsema);
+int ReleaseItrSema(const struct_itr_sema *itrsema);
 
 extern struct irx_export_table _exp_pvrdrv;
 struct_dvrdrv DVRDRV;
@@ -650,7 +650,7 @@ int DvrdrvRegisterIntrHandler(int a1, void *arg, void (*a3)(int, void *))
     return -1;
 }
 
-int DvrdrvUnregisterIntrHandler(void (*a1)(int, void *))
+int DvrdrvUnregisterIntrHandler(const void (*a1)(int, void *))
 {
     int i;
 
@@ -1003,7 +1003,7 @@ struct_itr_sema *AllocItrSema()
     return 0;
 }
 
-int ReleaseItrSema(struct_itr_sema *itrsema)
+int ReleaseItrSema(const struct_itr_sema *itrsema)
 {
     int i;
     int result;

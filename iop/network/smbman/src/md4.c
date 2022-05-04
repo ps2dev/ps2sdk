@@ -50,7 +50,7 @@ static unsigned int HH(int a, int b, int c, int d, int x, int s)
  *
  *    @param    block    input block
  */
-static void transform(unsigned char *block)
+static void transform(const unsigned char *block)
 {
 	int i;
 	unsigned int X[16];

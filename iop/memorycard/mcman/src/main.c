@@ -1502,7 +1502,7 @@ int mcman_reportBadBlocks(int port, int slot)
 }
 
 //--------------------------------------------------------------
-int McCreateDirentry(int port, int slot, int parent_cluster, int num_entries, int cluster, sceMcStDateTime *ctime)
+int McCreateDirentry(int port, int slot, int parent_cluster, int num_entries, int cluster, const sceMcStDateTime *ctime)
 {
 	register int r;
 	McCacheEntry *mce;

@@ -137,7 +137,7 @@ void addToHcEndpointList(u8 type, HcED *ed) {
 	memPool.hcEdBuf[type].next = ed;
 }
 
-void removeHcEdFromList(int type, HcED *hcEd) {
+void removeHcEdFromList(int type, const HcED *hcEd) {
 	HcED *prev = memPool.hcEdBuf + type;
 	HcED *pos  = prev->next;
 	while (pos) {

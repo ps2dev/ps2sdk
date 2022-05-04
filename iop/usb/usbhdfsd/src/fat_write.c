@@ -923,7 +923,7 @@ static int separatePathAndName(const char* fname, char* path, char* name) {
 /*
  get the sequence number from existing direntry name
 */
-static int getShortNameSequence(char* name, char* ext, const char* sname) {
+static int getShortNameSequence(const char* name, const char* ext, const char* sname) {
 	int i,j;
 	const char* tmp;
 	char buf[8];

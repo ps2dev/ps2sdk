@@ -776,7 +776,7 @@ padInfoAct(int port, int slot, int actuator, int cmd)
 }
 
 int
-padSetActAlign(int port, int slot, char actAlign[6])
+padSetActAlign(int port, int slot, const char actAlign[6])
 {
     int i;
     s8 *ptr;

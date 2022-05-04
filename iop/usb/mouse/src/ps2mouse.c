@@ -554,7 +554,7 @@ void do_ps2mouse_read(u8 *data, int size)
     }
 }
 
-void do_ps2mouse_setreadmode(u32 *data, int size)
+void do_ps2mouse_setreadmode(const u32 *data, int size)
 
 {
   (void)size;
@@ -589,7 +589,7 @@ void do_ps2mouse_getreadmode(u32 *data, int size)
   data[0] = mouse_readmode;
 }
 
-void do_ps2mouse_setthres(u32 *data, int size)
+void do_ps2mouse_setthres(const u32 *data, int size)
 
 {
   (void)size;
@@ -607,7 +607,7 @@ void do_ps2mouse_getthres(u32 *data, int size)
   data[0] = mouse_thres;
 }
 
-void do_ps2mouse_setaccel(u32 *data, int size)
+void do_ps2mouse_setaccel(const u32 *data, int size)
 
 {
   (void)size;
@@ -625,7 +625,7 @@ void do_ps2mouse_getaccel(u32 *data, int size)
   data[0] = mouse_accel;
 }
 
-void do_ps2mouse_setboundary(s32 *data, int size)
+void do_ps2mouse_setboundary(const s32 *data, int size)
 
 {
   (void)size;
@@ -662,7 +662,7 @@ void do_ps2mouse_getboundary(s32 *data, int size)
   data[3] = mousey_max;
 }
 
-void do_ps2mouse_setposition(s32 *data, int size)
+void do_ps2mouse_setposition(const s32 *data, int size)
 
 {
   (void)size;
@@ -720,7 +720,7 @@ void do_ps2mouse_enum(u32 *data, int size)
   data[0] = dev_count;
 }
 
-void do_ps2mouse_setdblclicktime(u32 *data, int size)
+void do_ps2mouse_setdblclicktime(const u32 *data, int size)
 
 {
   (void)size;

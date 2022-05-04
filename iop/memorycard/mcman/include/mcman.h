@@ -70,7 +70,7 @@ int  McCheckBlock(int port, int slot, int block);
 int  McSetFATentry(int port, int slot, int fat_index, int fat_entry);
 int  McReadDirEntry(int port, int slot, int cluster, int fsindex, McFsEntry **pfse);
 void Mc1stCacheEntSetWrFlagOff(void);
-int McCreateDirentry(int port, int slot, int parent_cluster, int num_entries, int cluster, sceMcStDateTime *ctime);
+int McCreateDirentry(int port, int slot, int parent_cluster, int num_entries, int cluster, const sceMcStDateTime *ctime);
 int McReadCluster(int port, int slot, int cluster, McCacheEntry **pmce);
 int McFlushCache(int port, int slot);
 int McSetDirEntryState(int port, int slot, int cluster, int fsindex, int flags);

@@ -613,7 +613,7 @@ void ps2kbd_getkeys(u8 keyMods, u8 ledStatus, const u8 *keys, kbd_dev *dev)
 }
 
 
-void ps2kbd_getkeys_raw(u8 newKeyMods, u8 oldKeyMods, u8 *new, const u8 *old)
+void ps2kbd_getkeys_raw(u8 newKeyMods, u8 oldKeyMods, const u8 *new, const u8 *old)
 
 {
   int loopKey;

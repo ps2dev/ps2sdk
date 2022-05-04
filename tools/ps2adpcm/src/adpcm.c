@@ -37,7 +37,7 @@ typedef struct
 } AdpcmBlock;
 
 static void find_predict(AdpcmSetup *set, AdpcmBlock *adpcm, double *samples);
-static void pack(AdpcmSetup *set, AdpcmBlock *adpcm, double *samples);
+static void pack(AdpcmSetup *set, AdpcmBlock *adpcm, const double *samples);
 
 
 AdpcmSetup *AdpcmCreate(AdpcmGetPCMfunc get, void *getpriv, AdpcmPutADPCMfunc put, void *putpriv, int loopstart)
@@ -226,7 +226,7 @@ static void find_predict(AdpcmSetup *set, AdpcmBlock *adpcm, double *samples)
 	}
 }
 
-static void pack(AdpcmSetup *set, AdpcmBlock *adpcm, double *samples)
+static void pack(AdpcmSetup *set, AdpcmBlock *adpcm, const double *samples)
 {
 	double s_1, s_2;
 	short four_bit[28];

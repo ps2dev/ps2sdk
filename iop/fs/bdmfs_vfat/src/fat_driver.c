@@ -68,7 +68,7 @@ int strEqual(const char* s1, const char* s2)
 */
 
 //---------------------------------------------------------------------------
-unsigned int fat_getClusterRecord12(unsigned char* buf, int type)
+unsigned int fat_getClusterRecord12(const unsigned char* buf, int type)
 {
     M_DEBUG("%s\n", __func__);
 

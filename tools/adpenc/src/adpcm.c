@@ -46,7 +46,7 @@ flags:
 static short wave[BUFFER_SIZE];
 
 static void find_predict( short *samples, double *d_samples, int *predict_nr, int *shift_factor );
-static void pack( double *d_samples, short *four_bit, int predict_nr, int shift_factor );
+static void pack( const double *d_samples, short *four_bit, int predict_nr, int shift_factor );
 
 int adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop)
 {
@@ -232,7 +232,7 @@ static void find_predict( short *samples, double *d_samples, int *predict_nr, in
 
 }
 
-static void pack( double *d_samples, short *four_bit, int predict_nr, int shift_factor )
+static void pack( const double *d_samples, short *four_bit, int predict_nr, int shift_factor )
 {
     static double s_1 = 0.0;
     static double s_2 = 0.0;
