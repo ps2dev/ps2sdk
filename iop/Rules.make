@@ -33,6 +33,9 @@ IOP_WARNFLAGS ?= -Wall -Werror
 # -fno-builtin is required to prevent the GCC built-in functions from being included,
 #   for finer-grained control over what goes into each IRX.
 IOP_CFLAGS := -D_IOP -fno-builtin -G0 $(IOP_OPTFLAGS) $(IOP_WARNFLAGS) $(IOP_INCS) $(IOP_CFLAGS)
+ifeq ($(DEBUG),1)
+IOP_CFLAGS += -DDEBUG
+endif
 # Linker flags
 IOP_LDFLAGS := -nostdlib -s $(IOP_LDFLAGS)
 

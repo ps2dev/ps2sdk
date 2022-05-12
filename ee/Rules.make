@@ -28,6 +28,9 @@ EE_FATLTOFLAGS ?= -flto -ffat-lto-objects
 # C compiler flags
 EE_CFLAGS := -D_EE -G0 $(EE_OPTFLAGS) $(EE_WARNFLAGS) $(EE_INCS) $(EE_CFLAGS)
 
+ifeq ($(DEBUG),1)
+EE_CFLAGS += -DDEBUG
+endif
 # C++ compiler flags
 EE_CXXFLAGS := -D_EE -G0 -$(EE_OPTFLAGS) $(EE_WARNFLAGS) $(EE_INCS) $(EE_CXXFLAGS)
 

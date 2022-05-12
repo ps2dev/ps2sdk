@@ -6,6 +6,8 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+DEBUG ?= 0
+
 ifeq (x$(PS2SDKSRC), x)
   export PS2SDKSRC=$(shell pwd)
 endif
@@ -36,6 +38,9 @@ $(subdir_release): dummy
 
 
 build: env_build_check download_dependencies $(subdir_list)
+
+debug:
+	$(MAKE) DEBUG=1 all
 
 clean: env_build_check clean_dependencies $(subdir_clean)
 
