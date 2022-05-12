@@ -26,6 +26,21 @@
 #define MODNAME "mcserv"
 #define MODVER  0x208
 
+#ifdef SIO_DEBUG
+	#include <sior.h>
+	#define DEBUG
+	#define DPRINTF(format, args...) \
+		sio_printf(MODNAME ": " format, ##args)
+#else
+	#ifdef DEBUG
+		#define DPRINTF(format, args...) \
+			printf(MODNAME ": " format, ##args)
+    #else
+		#define DPRINTF(format, args...)
+    #endif
+#endif
+
+
 // internal function prototypes
 void *cb_rpc_S_0400(u32 fno, void *buf, int size);
 void thread_rpc_S_0400(void* param);

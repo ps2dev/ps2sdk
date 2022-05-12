@@ -17,7 +17,7 @@
  * pukklink, regarding host and naplink printf.
  */
 
-//#define DEBUG_T
+//#define DEBUG
 
 #include "types.h"
 #include "stdio.h"
@@ -42,6 +42,15 @@
 #define FS_REPNAME "host"
 
 IRX_ID(MODNAME, 1, 1);
+
+#define M_PRINTF(format, args...) \
+    printf(MODNAME ": " format, ##args)
+
+#ifdef DEBUG
+#define M_DEBUG M_PRINTF
+#else
+#define M_DEBUG(format, args...)
+#endif
 
 // Host base location
 static char base[100];
@@ -104,9 +113,7 @@ int realfd( iop_io_file_t *f )
  */
 int dummy()
 {
-#ifdef DEBUG_T
-	printf("fakehost: dummy function called\n");
-#endif
+	M_DEBUG("dummy function called\n");
 	return -5;
 }
 
@@ -118,7 +125,7 @@ int dummy()
  */
 int fd_initialize( iop_io_device_t *driver)
 {
-	printf("fakehost: initializing '%s' file driver.\n", driver->name );
+	M_PRINTF( "initializing '%s' file driver.\n", driver->name );
 	return 0;
 }
 
@@ -135,9 +142,7 @@ int fd_open( iop_io_file_t *f, const char *name, int mode)
 	char nameBuffer[ 250 ];
 	int fd;
 
-#ifdef DEBUG_T
-	printf( "fakehost: open %i %s %s\n", f->unit, name ,base);
-#endif
+	M_DEBUG("open %i %s %s\n", f->unit, name ,base);
 	fd = open( fd_name( nameBuffer, name), mode, 0 );
 	if ( fd < 0 ) return fd;
 
@@ -213,11 +218,11 @@ int fd_lseek( iop_io_file_t *fd, int offset, int whence)
  */
 int _start( int argc, char **argv )
 {
-	printf( "fakehost: Copyright (c) 2004 adresd\n" );
+	M_PRINTF( "Copyright (c) 2004 adresd\n" );
 
 	if ( argc != 2 )
 	{
-		printf( "HOST requires based argument\n" );
+		M_PRINTF( "HOST requires based argument\n" );
 		return -1;
 	}
       else
@@ -226,7 +231,7 @@ int _start( int argc, char **argv )
 		strncpy( base, argv[1] ,sizeof(base) - 1);
 		base[sizeof(base) - 1] = '\0';
 
-      	printf("redirecting '%s:' to '%s'\n",FS_REPNAME,base);
+      	M_PRINTF( "redirecting '%s:' to '%s'\n",FS_REPNAME,base);
 		fd_global = 1;
 
 		driver.name = FS_REPNAME;
@@ -253,7 +258,7 @@ int _start( int argc, char **argv )
 		functions.io_getstat = dummy;
 		functions.io_chstat = dummy;
 
-		printf( "HOST final step, bye\n" );
+		M_PRINTF( "HOST final step, bye\n" );
 
 		// Install naplink RPC handler
 		naplinkRpcInit();
