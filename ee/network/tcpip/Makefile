@@ -18,7 +18,7 @@ EE_LIB = libps2ip.a
 EE_CFLAGS += -Wall -fno-builtin -DLWIP_NOASSERT -DLWIP_COMPAT_MUTEX -DLWIP_COMPAT_MUTEX_ALLOWED -mno-gpopt -O2 -G0 -mno-check-zero-division
 
 ifeq ($(DEBUG),1)
-EE_CFLAGS += -DDEBUG -DLWIP_DEBUG
+EE_CFLAGS += -DDEBUG -DLWIP_DEBUG -Wno-error
 endif
 
 # Turns DHCP on.

@@ -32,17 +32,15 @@ unsigned char IsBusRoot=1;	/* Assume that the console is the root, in case this 
 
 static void NoResponseHandler(unsigned int header, volatile unsigned int *buffer, unsigned int nQuads){
 	unsigned int i;
-#ifdef DEBUG_TTY_FEEDBACK
-	unsigned int data;
-#endif
 
 	DEBUG_PRINTF("NULL response handler called.\n");
 
 	for(i=0; i<nQuads; i++){	/* Flush the buffer. */
 #ifdef DEBUG_TTY_FEEDBACK
+		unsigned int data;
 		data=*buffer;
-#endif
 		DEBUG_PRINTF("Unhandled data: 0x%08x.\n", data);
+#endif
 	}
 }
 

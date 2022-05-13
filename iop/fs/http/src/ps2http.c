@@ -41,10 +41,13 @@
 
 //#define DEBUG
 
+#define M_PRINTF(format, args...) \
+    printf("PS2HTTP: " format, ##args)
+
 #ifdef DEBUG
-#define DBG_printf      printf
+#define M_DEBUG M_PRINTF
 #else
-#define DBG_printf(args...) do { } while(0)
+#define M_DEBUG(format, args...)
 #endif
 
 typedef struct
@@ -64,8 +67,8 @@ char HTTPGETEND[] = " HTTP/1.0\r\n";
 char HTTPUSERAGENT[] = "User-Agent: PS2IP HTTP Client\r\n";
 char HTTPENDHEADER[] = "\r\n";
 
-/** 
- * This function will parse the Content-Length header line and return the file size 
+/**
+ * This function will parse the Content-Length header line and return the file size
  */
 int parseContentLength(char *mimeBuffer)
 {
@@ -80,7 +83,7 @@ int parseContentLength(char *mimeBuffer)
 	return (int)strtol(line,NULL, 10);
 }
 
-/** 
+/**
  * This function will parse the initial response header line and return 0 for a "200 OK",
  * or return the error code in the event of an error (such as 404 - not found)
  */
@@ -110,7 +113,7 @@ int isErrorHeader(char *mimeBuffer)
 		return code;
 }
 
-/** 
+/**
  * When a request has been sent, we can expect mime headers to be
  * before the data.  We need to read exactly to the end of the headers
  * and no more data.  This readline reads a single char at a time.
@@ -156,27 +159,25 @@ int httpConnect( struct sockaddr_in * server, char *hostAddr, const char * url, 
 	int rc;
 	char mimeBuffer[100];
 
-#ifdef DEBUG
-	printf( "create socket\n" );
-#endif
+	M_DEBUG( "create socket\n" );
 
 	if((sockHandle = socket( PF_INET, SOCK_STREAM, IPPROTO_TCP )) < 0)
 	{
-		printf( "HTTP: SOCKET FAILED\n" );
+		M_PRINTF( "SOCKET FAILED\n" );
 		return -1;
 	}
 
-	DBG_printf( "connect\n" );
+	M_DEBUG( "connect\n" );
 
 	rc = connect( sockHandle, (struct sockaddr *) server, sizeof(*server));
 	if ( rc < 0 )
 	{
-		printf( "HTTP: CONNECT FAILED %i\n", sockHandle );
+		M_PRINTF( "CONNECT FAILED %i\n", sockHandle );
 		return -1;
 	}
 	peerHandle = sockHandle;
 
-	DBG_printf( "send\n" );
+	M_DEBUG( "send\n" );
 
 	// Needs more error checking here.....
 	rc = send( peerHandle, HTTPGET,  sizeof( HTTPGET ) - 1, 0 );
@@ -198,7 +199,7 @@ int httpConnect( struct sockaddr_in * server, char *hostAddr, const char * url, 
 		// read a line from the header information.
 		rc = readLine( peerHandle, mimeBuffer, 100 );
 
-		DBG_printf(">> %s", mimeBuffer);
+		M_DEBUG(">> %s", mimeBuffer);
 
 		if ( rc < 0 ) return rc;
 
@@ -212,14 +213,14 @@ int httpConnect( struct sockaddr_in * server, char *hostAddr, const char * url, 
 
 		if(strstr(mimeBuffer, "HTTP/1.")) // First line of header, contains status code. Check for an error code
 			if((rc = isErrorHeader(mimeBuffer))) {
-				printf("HTTP: status code = %d!\n", rc);
+				M_PRINTF("status code = %d!\n", rc);
 				return -rc;
 			}
 
 		if(strstr(mimeBuffer, "CONTENT-LENGTH:"))
 		{
 			pHandle->fileSize = parseContentLength(mimeBuffer);
-			DBG_printf("fileSize = %d\n", pHandle->fileSize);
+			M_DEBUG("fileSize = %d\n", pHandle->fileSize);
 		}
 	}
 
@@ -246,7 +247,7 @@ static int _ResolveHostname(const char *hostname , struct in_addr* ip)
 	if((HostEntry = gethostbyname(hostname)) == NULL)
 		return 1;
 
-	for(addr_list = (struct in_addr **) HostEntry->h_addr_list; addr_list != NULL; addr_list++) 
+	for(addr_list = (struct in_addr **) HostEntry->h_addr_list; addr_list != NULL; addr_list++)
 	{
 		ip->s_addr = (*addr_list)->s_addr;
 		return 0;
@@ -292,7 +293,7 @@ const char *resolveAddress( struct sockaddr_in *server, const char * url, char *
 	                port[w] = url[w + i + 1];
 	            port[w] = '\0';
 
-	            DBG_printf("HTTP: using port %s for connection\n", port);
+	            M_DEBUG("using port %s for connection\n", port);
 	            break;
 	            }
             else // it's a domain name if a non-numeric char is contained in the "server" part of the URL.
@@ -305,7 +306,7 @@ const char *resolveAddress( struct sockaddr_in *server, const char * url, char *
 		// resolve the host name.
 		rv = _ResolveHostname(addr, &server->sin_addr);
 		if(rv != 0) {
-		    printf("HTTP: failed to resolve domain '%s'\n", addr);
+		    M_PRINTF("failed to resolve domain '%s'\n", addr);
 			return NULL;
 			}
         }
@@ -333,13 +334,13 @@ const char *resolveAddress( struct sockaddr_in *server, const char * url, char *
  */
 int httpDummy()
 {
-	printf("PS2HTTP: dummy function called\n");
+	M_PRINTF("dummy function called\n");
 	return -5;
 }
 
 int httpInitialize(iop_io_device_t *driver)
 {
-	printf("PS2HTTP: filesystem driver initialized\n");
+	M_PRINTF("filesystem driver initialized\n");
 
 	return 0;
 }
@@ -361,9 +362,7 @@ int httpOpen(iop_io_file_t *f, const char *name, int mode)
 	t_fioPrivData *privData;
 	char hostAddr[100];
 
-#ifdef DEBUG
-	printf("httpOpen(-, %s, %d)\n", name, mode);
-#endif
+	M_DEBUG("httpOpen(-, %s, %d)\n", name, mode);
 
 	if((privData = AllocSysMemory(ALLOC_FIRST, sizeof(t_fioPrivData), NULL)) == NULL)
 		return -1;
@@ -385,7 +384,7 @@ int httpOpen(iop_io_file_t *f, const char *name, int mode)
 	// request header to the server, and receiving the response header
 	if((peerHandle = httpConnect( &server, hostAddr, getName, privData )) < 0)
 	{
-        printf("HTTP: failed to connect to '%s'!\n", hostAddr);
+        M_PRINTF("failed to connect to '%s'!\n", hostAddr);
 		FreeSysMemory(privData);
 		return peerHandle;
 	}
@@ -409,9 +408,7 @@ int httpRead(iop_io_file_t *f, void *buffer, int size)
 	int left = size;
 	int totalRead = 0;
 
-#ifdef DEBUG
-	printf("httpRead(-, 0x%X, %d)\n", (int)buffer, size);
-#endif
+	M_DEBUG("httpRead(-, 0x%X, %d)\n", (int)buffer, size);
 
 	// Read until: there is an error, we've read "size" bytes or the remote
 	//             side has closed the connection.
@@ -419,9 +416,7 @@ int httpRead(iop_io_file_t *f, void *buffer, int size)
 
 		bytesRead = recv( privData->sockFd, buffer + totalRead, left, 0 );
 
-#ifdef DEBUG
-//		printf("bytesRead = %d\n", bytesRead);
-#endif
+//		M_DEBUG("bytesRead = %d\n", bytesRead);
 
 		if(bytesRead <= 0) break;
 
@@ -442,9 +437,7 @@ int httpClose(iop_io_file_t *f)
 {
 	t_fioPrivData *privData = (t_fioPrivData *)f->privdata;
 
-#ifdef DEBUG
-	printf("httpClose(-)\n");
-#endif
+	M_DEBUG("httpClose(-)\n");
 
 	lwip_close(privData->sockFd);
 	FreeSysMemory(privData);
@@ -461,9 +454,7 @@ int httpLseek(iop_io_file_t *f, int offset, int mode)
 {
 	t_fioPrivData *privData = (t_fioPrivData *)f->privdata;
 
-#ifdef DEBUG
-	printf("httpLseek(-, %d, %d)\n", (int)offset, mode);
-#endif
+	M_DEBUG("httpLseek(-, %d, %d)\n", (int)offset, mode);
 
 	switch(mode)
 	{
@@ -507,9 +498,9 @@ iop_io_device_t ps2httpDev = {
  */
 int _start( int argc, char **argv)
 {
-	printf("PS2HTTP: Module Loaded\n");
+	M_PRINTF("Module Loaded\n");
 
-	printf("PS2HTTP: Adding 'http' driver into io system\n");
+	M_PRINTF("Adding 'http' driver into io system\n");
 	io_DelDrv( "http");
 	io_AddDrv(&ps2httpDev);
 

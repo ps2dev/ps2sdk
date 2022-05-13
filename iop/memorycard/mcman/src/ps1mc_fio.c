@@ -27,9 +27,7 @@ int mcman_format1(int port, int slot)
 	register int r, i;
 	register MCDevInfo *mcdi = &mcman_devinfos[port][slot];
 
-#ifdef DEBUG
-	DPRINTF("mcman: mcman_format1 port%d slot%d\n", port, slot);
-#endif
+	DPRINTF("mcman_format1 port%d slot%d\n", port, slot);
 
 	mcman_invhandles(port, slot);
 
@@ -91,9 +89,7 @@ int mcman_open1(int port, int slot, char *filename, int flags)
 	McCacheEntry *mce;
 	char *p = filename;
 
-#ifdef DEBUG
-	DPRINTF("mcman: mcman_open1 port%d slot%d filename %s flags %x\n", port, slot, filename, flags);
-#endif
+	DPRINTF("mcman_open1 port%d slot%d filename %s flags %x\n", port, slot, filename, flags);
 
 	if ((flags & sceMcFileCreateFile) != 0)
 		flags |= sceMcFileAttrWriteable;
@@ -411,9 +407,7 @@ int mcman_getstat1(int port, int slot, char *filename, io_stat_t *stat)
 	register int r;
 	McFsEntryPS1 *fse;
 
-#ifdef DEBUG
-	DPRINTF("mcman: mcman_getstat1 port%d slot%d filename %s\n", port, slot, filename);
-#endif
+	DPRINTF("mcman_getstat1 port%d slot%d filename %s\n", port, slot, filename);
 
 	r = mcman_getPS1direntry(port, slot, filename, &fse, 1);
 
@@ -453,9 +447,7 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 	McFsEntryPS1 *fse1, *fse2;
 	McCacheEntry *mce;
 
-#ifdef DEBUG
-	DPRINTF("mcman: mcman_setinfo1 port%d slot%d filename %s flags %x\n", port, slot, filename, flags);
-#endif
+	DPRINTF("mcman_setinfo1 port%d slot%d filename %s flags %x\n", port, slot, filename, flags);
 
 	ret = 0;
 	if (sio2man_type >= XSIO2MAN) {
@@ -550,9 +542,7 @@ int mcman_getdir1(int port, int slot, char *dirname, int flags, int maxent, sceM
 	char *p;
 	McFsEntryPS1 *fse;
 
-#ifdef DEBUG
-	DPRINTF("mcman: mcman_getdir1 port%d slot%d dirname %s maxent %d flags %x\n", port, slot, dirname, maxent, flags);
-#endif
+	DPRINTF("mcman_getdir1 port%d slot%d dirname %s maxent %d flags %x\n", port, slot, dirname, maxent, flags);
 
 	flags &= 0xffff;
 
@@ -627,9 +617,7 @@ int mcman_delete1(int port, int slot, char *filename, int flags)
 	register int r;
 	McFsEntryPS1 *fse;
 
-#ifdef DEBUG
-	DPRINTF("mcman: mcman_delete1 port%d slot%d filename %s flags %x\n", port, slot, filename, flags);
-#endif
+	DPRINTF("mcman_delete1 port%d slot%d filename %s flags %x\n", port, slot, filename, flags);
 
 	r = mcman_getPS1direntry(port, slot, filename, &fse, ((u32)flags < 1) ? 1 : 0);
 	if (r < 0)
@@ -648,9 +636,7 @@ int mcman_close1(int fd)
 	McFsEntryPS1 *fse;
 	McCacheEntry *mce;
 
-#ifdef DEBUG
-	DPRINTF("mcman: mcman_close1 fd %d\n", fd);
-#endif
+	DPRINTF("mcman_close1 fd %d\n", fd);
 
 	r = mcman_readdirentryPS1(fh->port, fh->slot, fh->freeclink, &fse);
 	if (r != sceMcResSucceed)
@@ -706,9 +692,7 @@ int mcman_unformat1(int port, int slot)
 	register int r, i;
 	u32 *p;
 
-#ifdef DEBUG
-	DPRINTF("mcman: mcman_unformat1 port%d slot%d\n", port, slot);
-#endif
+	DPRINTF("mcman_unformat1 port%d slot%d\n", port, slot);
 
 	p = mcman_PS1PDApagebuf.word;
 	for (i = 0; i < 32; i++)

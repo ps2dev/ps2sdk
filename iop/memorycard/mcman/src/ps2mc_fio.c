@@ -45,9 +45,7 @@ int mcman_format2(int port, int slot)
 	MCDevInfo *mcdi = &mcman_devinfos[port][slot];
 	McCacheEntry *mce;
 
-#ifdef DEBUG
-	DPRINTF("mcman: mcman_format2 port%d, slot%d cardform %d\n", port, slot, mcdi->cardform);
-#endif
+	DPRINTF("mcman_format2 port%d, slot%d cardform %d\n", port, slot, mcdi->cardform);
 
 	if (mcdi->cardform == sceMcResNoFormat) {
 		for (i = 0; i < 32; i++)
@@ -279,9 +277,7 @@ int mcman_dread2(int fd, io_dirent_t *dirent)
 	register MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
 	McFsEntry *fse;
 
-#ifdef DEBUG
-	DPRINTF("mcman: mcman_dread2 fd %d\n", fd);
-#endif
+	DPRINTF("mcman_dread2 fd %d\n", fd);
 
 	if (fh->position >= fh->filesize)
 		return sceMcResSucceed;
@@ -336,9 +332,7 @@ int mcman_getstat2(int port, int slot, char *filename, io_stat_t *stat)
 	register int r;
 	McFsEntry *fse;
 
-#ifdef DEBUG
-	DPRINTF("mcman: mcman_getstat2 port%d slot%d filename %s\n", port, slot, filename);
-#endif
+	DPRINTF("mcman_getstat2 port%d slot%d filename %s\n", port, slot, filename);
 
 	r = mcman_cachedirentry(port, slot, filename, NULL, &fse, 1);
 	if (r != sceMcResSucceed)
@@ -383,9 +377,7 @@ int mcman_setinfo2(int port, int slot, char *filename, sceMcTblGetDir *info, int
 	McFsEntry mfe;
 	u8 *pfsentry, *pfseend, *mfee;
 
-#ifdef DEBUG
-	DPRINTF("mcman: mcman_setinfo2 port%d slot%d filename %s flags %x\n", port, slot, filename, flags);
-#endif
+	DPRINTF("mcman_setinfo2 port%d slot%d filename %s flags %x\n", port, slot, filename, flags);
 
 	r = mcman_cachedirentry(port, slot, filename, &dirInfo, &fse, 1); //dirInfo=sp218 fse=sp228
 	if (r != sceMcResSucceed)
@@ -498,9 +490,7 @@ int mcman_read2(int fd, void *buffer, int nbyte)
 	register MCDevInfo *mcdi = &mcman_devinfos[fh->port][fh->slot];
 	McCacheEntry *mce;
 
-#ifdef DEBUG
-	DPRINTF("mcman: mcman_read2 fd %d buf %x size %d\n", fd, (int)buffer, nbyte);
-#endif
+	DPRINTF("mcman_read2 fd %d buf %x size %d\n", fd, (int)buffer, nbyte);
 
 	if (fh->position < fh->filesize) {
 
@@ -628,9 +618,7 @@ int mcman_close2(int fd)
 	register MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
 	McFsEntry *fse1, *fse2;
 
-#ifdef DEBUG
-	DPRINTF("mcman: mcman_close2 fd %d\n", fd);
-#endif
+	DPRINTF("mcman_close2 fd %d\n", fd);
 
 	r = McReadDirEntry(fh->port, fh->slot, fh->field_20, fh->field_24, &fse1);
 	if (r != sceMcResSucceed)
@@ -677,9 +665,7 @@ int mcman_open2(int port, int slot, char *filename, int flags)
 	char *p;
 	int fat_entry;
 
-#ifdef DEBUG
-	DPRINTF("mcman: mcman_open2 port%d slot%d name %s flags %x\n", port, slot, filename, flags);
-#endif
+	DPRINTF("mcman_open2 port%d slot%d name %s flags %x\n", port, slot, filename, flags);
 
 	if ((flags & sceMcFileCreateFile) != 0)
 		flags |= sceMcFileAttrWriteable; // s5
@@ -1048,9 +1034,7 @@ int mcman_chdir(int port, int slot, char *newdir, char *currentdir)
 	McCacheDir cacheDir;
 	McFsEntry *fse;
 
-#ifdef DEBUG
-	DPRINTF("mcman: mcman_chdir port%d slot%d newdir %s\n", port, slot, newdir);
-#endif
+	DPRINTF("mcman_chdir port%d slot%d newdir %s\n", port, slot, newdir);
 
 	//if (!mcman_checkpath(newdir))
 	//	return sceMcResNoEntry;
@@ -1144,9 +1128,7 @@ int mcman_getdir2(int port, int slot, char *dirname, int flags, int maxent, sceM
 	McFsEntry *fse;
 	char *p;
 
-#ifdef DEBUG
-	DPRINTF("mcman: mcman_getdir2 port%d slot%d dir=%s flags=%d maxent=%d\n", port, slot, dirname, flags, maxent);
-#endif
+	DPRINTF("mcman_getdir2 port%d slot%d dir=%s flags=%d maxent=%d\n", port, slot, dirname, flags, maxent);
 
 	nument = 0;
 	flags &= 0xffff;
@@ -1283,9 +1265,7 @@ int mcman_delete2(int port, int slot, char *filename, int flags)
 	McCacheDir cacheDir;
 	McFsEntry *fse1, *fse2;
 
-#ifdef DEBUG
-	DPRINTF("mcman: mcman_delete2 port%d slot%d filename %s flags %x\n",  port, slot, filename, flags);
-#endif
+	DPRINTF("mcman_delete2 port%d slot%d filename %s flags %x\n",  port, slot, filename, flags);
 
 	//if (!mcman_checkpath(filename))
 	//	return sceMcResNoEntry;
@@ -1345,9 +1325,7 @@ int mcman_unformat2(int port, int slot)
 	register u32 erase_value;
 	register MCDevInfo *mcdi = &mcman_devinfos[port][slot];
 
-#ifdef DEBUG
-	DPRINTF("mcman: mcman_unformat2 port%d slot%d\n", port, slot);
-#endif
+	DPRINTF("mcman_unformat2 port%d slot%d\n", port, slot);
 
 	pageword_cnt = mcdi->pagesize >> 2;
 	blocks_on_card = mcdi->clusters_per_card / mcdi->clusters_per_block; //sp18

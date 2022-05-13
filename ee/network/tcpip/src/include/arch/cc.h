@@ -17,6 +17,7 @@
 #define PACK_STRUCT_END
 
 #ifdef DEBUG
+#include <stdio.h>
 #define LWIP_PLATFORM_DIAG(args) printf args
 #define LWIP_PLATFORM_ASSERT(args) printf args
 #else
