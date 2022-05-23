@@ -44,7 +44,7 @@ static struct block_device g_part_bd[MAX_PARTITIONS];
 static struct file_system g_part_fs;
 
 //---------------------------------------------------------------------------
-static int part_getPartitionRecord(struct block_device* bd, part_raw_record* raw, part_record* rec)
+static int part_isPartitionRecordInvalid(struct block_device* bd, part_raw_record* raw, part_record* rec)
 {
     M_DEBUG("%s\n", __func__);
 
@@ -83,7 +83,7 @@ static int part_getPartitionTable(struct block_device* bd, part_table* part)
     if (sbuf[0x1FE] == 0x55 && sbuf[0x1FF] == 0xAA) {
         for (i = 0; i < 4; i++) {
             part_raw = (part_raw_record*)(sbuf + 0x01BE + (i * 16));
-            if (part_getPartitionRecord(bd, part_raw, &part->record[i]) != 0)
+            if (part_isPartitionRecordInvalid(bd, part_raw, &part->record[i]) != 0)
                 return 0; //Invalid record encountered, so the table is probably invalid.
         }
         return 4;
