@@ -995,8 +995,9 @@ int fat_mount(struct block_device* bd)
     // Filter for supported partition IDs:
     // - 0x0b = FAT32 with CHS addressing
     // - 0x0c = FAT32 with LBA addressing
-    if (bd->parId != 0x0b && bd->parId != 0x0c)
-        return -1;
+    // AKuHAK: dont filter partition, fat_getPartitionBootSector() will care about that, this is filtering too much
+    // if (bd->parId != 0x0b && bd->parId != 0x0c)
+    //     return -1;
 
     for (i = 0; i < NUM_DRIVES && fatd == NULL; ++i) {
         if (g_fatd[i] == NULL) {
