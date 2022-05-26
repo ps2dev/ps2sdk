@@ -262,15 +262,13 @@ int fontx_load_double_krom(fontx_t *fontx)
 int fontx_load(const char *path, fontx_t* fontx, int type, int wmargin, int hmargin, int bold)
 {
 
-	FILE *file = NULL;
 
-	int ret = -1;
-	long size = 0;
 
 	fontx_hdr *fontx_header = NULL;
 
 	if (!strcmp("rom0:KROM",path) || !strcmp("rom0:/KROM",path))
 	{
+		int ret = -1;
 
 		if (type == SINGLE_BYTE)
 		{
@@ -297,8 +295,9 @@ int fontx_load(const char *path, fontx_t* fontx, int type, int wmargin, int hmar
 
 	else
 	{
+		long size = 0;
 
-		file = fopen(path, "r");
+		FILE *file = fopen(path, "r");
 
 		if (file == NULL)
 		{
@@ -508,7 +507,7 @@ qword_t *draw_fontx_char(qword_t *q, unsigned short c, vertex_t *v0, fontx_t *fo
 	char *char_offset;
 	int i, j;
 	int x,y,z;
-	int xi,yi;
+	int xi;
 
 	x = ftoi4(v0->x);
 	y = ftoi4(v0->y);
@@ -527,6 +526,7 @@ qword_t *draw_fontx_char(qword_t *q, unsigned short c, vertex_t *v0, fontx_t *fo
 
 	for (i=0;i<fontx_header->height;i++)
 	{
+		int yi;
 
 		// Increment one row down
 		yi = y + (i << 4);
@@ -556,7 +556,7 @@ qword_t *draw_fontx_char(qword_t *q, unsigned short c, vertex_t *v0, fontx_t *fo
 
 }
 
-qword_t *fontx_print_ascii(qword_t *q, int context, const unsigned char *str, int alignment, vertex_t *v0, color_t *c0, fontx_t *fontx)
+qword_t *fontx_print_ascii(qword_t *q, int context, const unsigned char *str, int alignment, const vertex_t *v0, color_t *c0, fontx_t *fontx)
 {
 
 	int i,j;
@@ -732,7 +732,7 @@ qword_t *fontx_print_ascii(qword_t *q, int context, const unsigned char *str, in
 
 }
 
-qword_t *fontx_print_sjis(qword_t *q, int context, const unsigned char *str, int alignment, vertex_t *v0, color_t *c0, fontx_t *ascii, fontx_t *kanji)
+qword_t *fontx_print_sjis(qword_t *q, int context, const unsigned char *str, int alignment, const vertex_t *v0, color_t *c0, fontx_t *ascii, fontx_t *kanji)
 {
 
 	int i,j;
@@ -906,7 +906,6 @@ qword_t *fontx_print_sjis(qword_t *q, int context, const unsigned char *str, int
 	for (j = 0; j < length; j++)
 	{
 
-		wide = 0;
 
 		while(str[j] == '\n' || str[j] == '\t')
 		{

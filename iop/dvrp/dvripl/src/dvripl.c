@@ -61,7 +61,12 @@ struct _iop_device_ops DvrFuncTbl =
         &dvripl_df_null,
         &dvripl_df_ioctl2};
 s32 dvr_ready_flag;
-iop_device_t DVRMAN;
+iop_device_t DVRMAN = {
+    .name = "dvr_ipl",
+    .desc = "Digital Video Recorder",
+    .ops = &DvrFuncTbl,
+    .type = (IOP_DT_FS | IOP_DT_FSEXT),
+};
 s32 sema_id;
 char SBUF[32768];
 
@@ -71,6 +76,8 @@ IRX_ID(MODNAME, 1, 1);
 
 int _start(int a1, char **argv)
 {
+    (void)argv;
+
     if (a1 >= 0)
         return module_start();
     else
@@ -79,14 +86,7 @@ int _start(int a1, char **argv)
 
 int module_start()
 {
-    bool v0;
-
-    DVRMAN.name = "dvr_ipl";
-    DVRMAN.desc = "Digital Video Recorder";
-    DVRMAN.ops = &DvrFuncTbl;
-    DVRMAN.type = 0x10000010;
-    v0 = AddDrv(&DVRMAN) == 0;
-    if (!v0)
+    if (AddDrv(&DVRMAN) != 0)
         return 1;
 #if 0
     return 2;
@@ -97,10 +97,7 @@ int module_start()
 
 int module_stop()
 {
-    bool v0;
-
-    v0 = DelDrv("dvr_ipl") == 0;
-    if (!v0)
+    if (DelDrv(DVRMAN.name) != 0)
         return 2;
     return 1;
 }
@@ -109,6 +106,8 @@ int dvripl_df_init(iop_device_t *dev)
 {
     int v1;
     iop_sema_t v3;
+
+    (void)dev;
 
     printf("dvripl_df_init\n");
     v3.attr = 0;
@@ -124,17 +123,20 @@ int dvripl_df_init(iop_device_t *dev)
 
 int dvripl_df_exit(iop_device_t *dev)
 {
-    bool v1;
+    (void)dev;
 
     printf("dvripl_df_exit\n");
-    v1 = DeleteSema(sema_id) == 0;
-    if (!v1)
+    if (DeleteSema(sema_id) != 0)
         return -1;
     return 0;
 }
 
 int dvripl_df_ioctl(iop_file_t *f, int cmd, void *param)
 {
+    (void)f;
+    (void)cmd;
+    (void)param;
+
     printf("dvripl_df_ioctl\n");
     WaitSema(sema_id);
     SignalSema(sema_id);
@@ -150,14 +152,17 @@ int dvripl_df_devctl(
     void *buf,
     unsigned int buflen)
 {
-    bool v10;
     int v11;
+
+    (void)name;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     printf("dvripl_df_devctl\n");
     WaitSema(sema_id);
-    v10 = cmd != 0x5602;
     v11 = -22;
-    if (!v10)
+    if (cmd == 0x5602)
         v11 = iplioctl2_update(a1, 0x5602, arg);
     SignalSema(sema_id);
     return v11;
@@ -165,6 +170,13 @@ int dvripl_df_devctl(
 
 int dvripl_df_ioctl2(iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
+    (void)f;
+    (void)cmd;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
     printf("dvripl_df_ioctl2\n");
     WaitSema(sema_id);
     SignalSema(sema_id);
@@ -196,6 +208,9 @@ int iplioctl2_update(iop_file_t *a1, int cmd, void *arg)
 #endif
     int cmdackerr4;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)a1;
+    (void)cmd;
 
     total_size = 0;
     retval = 0;
@@ -339,6 +354,8 @@ LABEL_30:
 
 void dvr_ready(int a1, void *a2)
 {
+    (void)a1;
+
     Kprintf("DVRRDY INTERRUPT\n");
     dvr_ready_flag = 1;
     iWakeupThread(*(u32 *)a2);

@@ -115,6 +115,9 @@ int _start(int argc, char **argv)
 {
     int retries;
 
+    (void)argc;
+    (void)argv;
+
     memset(&cd0, 0, sizeof(cd0));
 
     for (retries = 0; retries < 15; retries++) {

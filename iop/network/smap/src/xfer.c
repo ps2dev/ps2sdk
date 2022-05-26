@@ -28,6 +28,8 @@ static int SmapDmaTransfer(volatile u8 *smap_regbase, void *buffer, unsigned int
     unsigned int NumBlocks;
     int result;
 
+    (void)smap_regbase;
+
     /*  Non-Sony: the original block size was (32*4 = 128) bytes.
         However, that resulted in slightly lower performance due to the IOP needing to copy more data.    */
     if ((NumBlocks = size >> 6) > 0) {
@@ -47,9 +49,7 @@ static inline void CopyFromFIFO(volatile u8 *smap_regbase, void *buffer, unsigne
 
     SMAP_REG16(SMAP_R_RXFIFO_RD_PTR) = RxBdPtr;
 
-    if ((result = SmapDmaTransfer(smap_regbase, buffer, length, DMAC_TO_MEM)) < 0) {
-        result = 0;
-    }
+    result = SmapDmaTransfer(smap_regbase, buffer, length, DMAC_TO_MEM);
 
     for (i = result; i < length; i += 4) {
         ((u32 *)buffer)[i / 4] = SMAP_REG32(SMAP_R_RXFIFO_DATA);
@@ -60,9 +60,7 @@ static inline void CopyToFIFO(volatile u8 *smap_regbase, const void *buffer, uns
 {
     int i, result;
 
-    if ((result = SmapDmaTransfer(smap_regbase, (void *)buffer, length, DMAC_FROM_MEM)) < 0) {
-        result = 0;
-    }
+    result = SmapDmaTransfer(smap_regbase, (void *)buffer, length, DMAC_FROM_MEM);
 
     for (i = result; i < length; i += 4) {
         SMAP_REG32(SMAP_R_TXFIFO_DATA) = ((u32 *)buffer)[i / 4];
@@ -134,26 +132,29 @@ int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData)
 
 int HandleTxReqs(struct SmapDriverData *SmapDrivPrivData)
 {
-    int result, length;
+    int result;
     void *data;
     USE_SMAP_TX_BD;
-    volatile u8 *smap_regbase;
     volatile smap_bd_t *BD_ptr;
     u16 BD_data_ptr;
     unsigned int SizeRounded;
 
     result = 0;
     while (1) {
+        int length;
+
         if ((length = NetManTxPacketNext(&data)) < 1) {
             return result;
         }
         SmapDrivPrivData->packetToSend = data;
 
         if (SmapDrivPrivData->NumPacketsInTx < SMAP_BD_MAX_ENTRY) {
-            if (length > 0) {
+            {
                 SizeRounded = (length + 3) & ~3;
 
                 if (SmapDrivPrivData->TxBufferSpaceAvailable >= SizeRounded) {
+                    volatile u8 *smap_regbase;
+
                     smap_regbase = SmapDrivPrivData->smap_regbase;
 
                     BD_data_ptr = SMAP_REG16(SMAP_R_TXFIFO_WR_PTR) + SMAP_TX_BASE;
@@ -171,8 +172,7 @@ int HandleTxReqs(struct SmapDriverData *SmapDrivPrivData)
                     SmapDrivPrivData->TxBufferSpaceAvailable -= SizeRounded;
                 } else
                     return result; // Out of FIFO space
-            } else
-                printf("smap: dropped\n");
+            }
         } else
             return result; // Queue full
 

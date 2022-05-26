@@ -18,7 +18,7 @@ u32 padSetupEEButtonData(u32 port, u32 slot, void *pstate);
 u32 padGetModeConfig(u32 port, u32 slot);
 u32 padSetMainMode(u32 port, u32 slot, u32 mode, u32 lock);
 u32 padSetActDirect(u32 port, u32 slot, u8 *actData);
-u32 padSetActAlign(u32 port, u32 slot, u8 *actData);
+u32 padSetActAlign(u32 port, u32 slot, const u8 *actData);
 u32 padGetButtonMask(u32 port, u32 slot);
 u32 padSetButtonInfo(u32 port, u32 slot, u32 info);
 s32 padInfoAct(u32 port, u32 slot, s32 act, u32 val);

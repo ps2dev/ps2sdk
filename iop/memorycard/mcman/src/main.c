@@ -159,6 +159,9 @@ int _start(int argc, const char **argv)
 	void **export_tab;
 #endif
 
+	(void)argc;
+	(void)argv;
+
 #ifdef SIO_DEBUG
 	sio_init(38400, 0, 0, 0, 0);
 #endif
@@ -354,12 +357,13 @@ void mcman_wmemset(void *buf, int size, int value)
 int mcman_calcEDC(void *buf, int size)
 {
 	register u32 checksum;
-	register int i;
 	u8 *p = (u8 *)buf;
 
 	checksum = 0;
 
 	if (size > 0) {
+		register int i;
+
 		size--;
 		i = 0;
 		while (size-- != -1) {
@@ -390,11 +394,12 @@ int mcman_checkpath(char *str) // check that a string do not contain special cha
 //--------------------------------------------------------------
 int mcman_checkdirpath(char *str1, char *str2)
 {
-	register int r, pos1, pos2, pos;
+	register int pos;
 	char *p1 = str1;
 	char *p2 = str2;
 
 	do {
+		register int pos1, pos2;
 		pos1 = mcman_chrpos(p2, '?');
 		pos2 = mcman_chrpos(p2, '*');
 
@@ -431,6 +436,7 @@ int mcman_checkdirpath(char *str1, char *str2)
 		p2++;
 
 	if (p2[0] != 0) {
+		register int r;
 		do {
 			pos = mcman_chrpos(p1, (u8)p2[0]);
 			p1 += pos;
@@ -669,7 +675,6 @@ int McOpen(int port, int slot, char *filename, int flag) // Export #6
 int McClose(int fd) // Export #7
 {
 	register MC_FHANDLE *fh;
-	register MCDevInfo *mcdi;
 	register int r;
 
 	if (!((u32)fd < MAX_FDHANDLES))
@@ -694,6 +699,8 @@ int McClose(int fd) // Export #7
 		return r;
 
 	if (fh->unknown2 != 0) {
+		register MCDevInfo *mcdi;
+
 		fh->unknown2 = 0;
 		mcdi = (MCDevInfo *)&mcman_devinfos[fh->port][fh->slot];
 		if (mcdi->cardtype == sceMcTypePS2)
@@ -724,7 +731,6 @@ int McFlush(int fd) // Export #14
 {
 	register int r;
 	register MC_FHANDLE *fh;
-	register MCDevInfo *mcdi;
 
 	if (!((u32)fd < MAX_FDHANDLES))
 		return sceMcResDeniedPermit;
@@ -749,6 +755,8 @@ int McFlush(int fd) // Export #14
 	}
 
 	if (fh->unknown2 != 0) {
+		register MCDevInfo *mcdi;
+
 		fh->unknown2 = 0;
 		mcdi = (MCDevInfo *)&mcman_devinfos[fh->port][fh->slot];
 		if (mcdi->cardtype == sceMcTypePS2)
@@ -1228,7 +1236,7 @@ int McReadPage(int port, int slot, int page, void *buf) // Export #18
 void McDataChecksum(void *buf, void *ecc) // Export #20
 {
 	register u8 *p, *p_ecc;
-	register int i, a2, a3, v, t0;
+	register int i, a2, a3, t0;
 
 	p = buf;
 	i = 0;
@@ -1237,6 +1245,8 @@ void McDataChecksum(void *buf, void *ecc) // Export #20
 	t0 = 0;
 
 	do {
+		register int v;
+
 		v = mcman_xortable[*p++];
 		a2 ^= v;
 		if (v & 0x80) {
@@ -1440,7 +1450,7 @@ int mcman_reportBadBlocks(int port, int slot)
 	if ((mcdi->cardflags & CF_BAD_BLOCK) == 0)
 		return sceMcResSucceed;
 
-	err_limit = (((mcdi->pagesize << 16) >> 16) + ((mcdi->pagesize << 16) >> 31)) >> 1; //s7
+	err_limit = ((mcdi->pagesize & 0xffff) + (mcdi->pagesize & 0x1)) >> 1; //s7
 
 	erase_byte = 0;
 	if ((mcdi->cardflags & CF_ERASE_ZEROES) != 0)
@@ -1492,7 +1502,7 @@ int mcman_reportBadBlocks(int port, int slot)
 }
 
 //--------------------------------------------------------------
-int McCreateDirentry(int port, int slot, int parent_cluster, int num_entries, int cluster, sceMcStDateTime *ctime)
+int McCreateDirentry(int port, int slot, int parent_cluster, int num_entries, int cluster, const sceMcStDateTime *ctime)
 {
 	register int r;
 	McCacheEntry *mce;
@@ -1566,7 +1576,7 @@ int McCreateDirentry(int port, int slot, int parent_cluster, int num_entries, in
 //--------------------------------------------------------------
 int mcman_fatRseek(int fd)
 {
-	register int r, entries_to_read, fat_index;
+	register int entries_to_read, fat_index;
 	register MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd]; //s1
 	register MCDevInfo *mcdi = &mcman_devinfos[fh->port][fh->slot];	//s2
 	int fat_entry;
@@ -1590,6 +1600,8 @@ int mcman_fatRseek(int fd)
 	}
 
 	do {
+		register int r;
+
 		r = McGetFATentry(fh->port, fh->slot, fat_index, &fat_entry);
 		if (r != sceMcResSucceed)
 			return r;
@@ -2052,7 +2064,7 @@ continue_check:
 //--------------------------------------------------------------
 int mcman_writecluster(int port, int slot, int cluster, int flag)
 {
-	register int r, i, j, page, block, pageword_cnt;
+	register int i, block;
 	register u32 erase_value;
 	register MCDevInfo *mcdi = &mcman_devinfos[port][slot];
 
@@ -2076,6 +2088,8 @@ int mcman_writecluster(int port, int slot, int cluster, int flag)
 	}
 
 	if (flag) {
+		register int r, j, page, pageword_cnt;
+
 		for (i = 1; i < mcdi->blocksize; i++)
 			mcman_pagedata[i] = 0;
 
@@ -2364,8 +2378,8 @@ int McCheckBlock(int port, int slot, int block)
 						flag = -1;
 						goto lbl_8764;
 					}
-					p_ecc += 3;
-					p_page += 128;
+					p_ecc = (void *)((u8 *)p_ecc + 3);
+					p_page = (void *)((u8 *)p_page + 128);
 				}
 			}
 		}
@@ -2625,7 +2639,12 @@ lbl0:
 		else
 			temp = cluster + 1;
 
-		mce->wr_flag |= 1 << ((cluster + 1) - ((temp >> 3) << 3));
+		temp &= 0xfffffff8;
+		temp = (cluster + 1) - temp;
+		if (temp < 0)
+			temp = 0;
+
+		mce->wr_flag |= 1 << temp;
 
 		if (flags == 0)
 			temp = (fse->mode & 0xf) | 0xa0;
@@ -2703,7 +2722,7 @@ int mcman_findfree1(int port, int slot, int reserve)
 //--------------------------------------------------------------
 int mcman_fatRseekPS1(int fd)
 {
-	register int r, rpos, numclust, clust;
+	register int rpos, numclust, clust;
 	MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
 	MCDevInfo *mcdi = &mcman_devinfos[fh->port][fh->slot];
 	McFsEntryPS1 *fse;
@@ -2714,6 +2733,8 @@ int mcman_fatRseekPS1(int fd)
 
 	if (numclust > -1) {
 		do {
+			register int r;
+
 			if (clust < 0)
 				return sceMcResFullDevice;
 
@@ -2739,7 +2760,7 @@ int mcman_fatRseekPS1(int fd)
 //--------------------------------------------------------------
 int mcman_fatWseekPS1(int fd)
 {
-	register int r, numclust, clust;
+	register int r, numclust;
 	MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
 	MCDevInfo *mcdi = &mcman_devinfos[fh->port][fh->slot];
 	McFsEntryPS1 *fse;
@@ -2747,6 +2768,8 @@ int mcman_fatWseekPS1(int fd)
 	numclust = fh->position / mcdi->cluster_size;
 
 	if (numclust > 0) {
+		register int clust;
+
 		clust = fh->freeclink;
 		do {
 			r = mcman_readdirentryPS1(fh->port, fh->slot, clust, &fse);
@@ -2780,7 +2803,7 @@ int mcman_FNC8ca4(int port, int slot, MC_FHANDLE *fh)
 
 	DPRINTF("mcman_FNC8ca4 port%d slot%d\n", port, slot);
 
-	if (mcdi->cluster_size < 0)
+	if ((int)(mcdi->cluster_size) < 0)
 		cluster_size = mcdi->cluster_size + 1023;
 	else
 		cluster_size = mcdi->cluster_size;
@@ -2797,8 +2820,8 @@ int mcman_FNC8ca4(int port, int slot, MC_FHANDLE *fh)
 	mcfree = r;
 	j = -1;
 
-	if (i >= 0) {
-		do {
+	{
+		while (i >= 0) {
 			if (mcfree < i) {
 				if (cluster_size > 0) {
 					i = 0;
@@ -2831,7 +2854,12 @@ int mcman_FNC8ca4(int port, int slot, MC_FHANDLE *fh)
 				else
 					temp = mcfree + 1;
 
-				mce->wr_flag |= 1 << ((mcfree + 1) - ((temp >> 3) << 3));
+				temp &= 0xfffffff8;
+				temp = (mcfree + 1) - temp;
+				if (temp < 0)
+					temp = 0;
+
+				mce->wr_flag |= 1 << temp;
 
 				pfsentry = (u8 *)fse1;
 				pfsee = (u8 *)fse2;
@@ -2858,7 +2886,12 @@ int mcman_FNC8ca4(int port, int slot, MC_FHANDLE *fh)
 					else
 						temp = j + 1;
 
-					mce->wr_flag |= 1 << ((j + 1) - ((temp >> 3) << 3));
+					temp &= 0xfffffff8;
+					temp = (j + 1) - temp;
+					if (temp < 0)
+						temp = 0;
+
+					mce->wr_flag |= 1 << temp;
 					fse3->linked_block = mcfree;
 					fse3->edc = mcman_calcEDC((void *)fse3, 127);
 				}
@@ -2876,7 +2909,7 @@ int mcman_FNC8ca4(int port, int slot, MC_FHANDLE *fh)
 					return r;
 			}
 			i = fse1->linked_block;
-		} while (i >= 0);
+		}
 	}
 
 	r = mcman_readdirentryPS1(port, slot, mcfree, &fse2);
@@ -2890,7 +2923,12 @@ int mcman_FNC8ca4(int port, int slot, MC_FHANDLE *fh)
 	else
 		temp = mcfree + 1;
 
-	mce->wr_flag |= 1 << ((mcfree + 1) - ((temp >> 3) << 3));
+	temp &= 0xfffffff8;
+	temp = (mcfree + 1) - temp;
+	if (temp < 0)
+		temp = 0;
+
+	mce->wr_flag |= 1 << temp;
 
 	mcman_wmemset((void *)fse2, sizeof(McFsEntryPS1), 0);
 
@@ -2909,7 +2947,12 @@ int mcman_FNC8ca4(int port, int slot, MC_FHANDLE *fh)
 	else
 		temp = j + 1;
 
-	mce->wr_flag |= 1 << ((j + 1) - ((temp >> 3) << 3));
+	temp &= 0xfffffff8;
+	temp = (j + 1) - temp;
+	if (temp < 0)
+		temp = 0;
+
+	mce->wr_flag |= 1 << temp;
 
 	if (fse3->mode == 0x53)
 		fse3->mode = 0x52;
@@ -3048,7 +3091,12 @@ int mcman_cachePS1dirs(int port, int slot)
 			else
 			 	temp1 = temp2;
 
-			mce[index]->wr_flag |= (1 << (temp2 - ((temp1 >> 3) << 3)));
+			temp1 &= 0xfffffff8;
+			temp1 = temp2 - temp1;
+			if (temp1 < 0)
+				temp1 = 0;
+
+			mce[index]->wr_flag |= 1 << temp1;
 
 		} while (++j < 15);
 
@@ -3077,7 +3125,12 @@ int mcman_cachePS1dirs(int port, int slot)
 		else
 		 	temp1 = temp2;
 
-		mce[index]->wr_flag |= (1 << (temp2 - ((temp1 >> 3) << 3)));
+		temp1 &= 0xfffffff8;
+		temp1 = temp2 - temp1;
+		if (temp1 < 0)
+			temp1 = 0;
+
+		mce[index]->wr_flag |= 1 << temp1;
 
 	} while (++i < 15);
 
@@ -3161,6 +3214,8 @@ void mcman_initcache(void)
 //--------------------------------------------------------------
 int McRetOnly(int fd) // Export #37
 {
+	(void)fd;
+
 	DPRINTF("McRetOnly param %x\n", fd);
 	return sceMcResSucceed;
 }
@@ -3297,8 +3352,8 @@ int McFlushCache(int port, int slot)
 
 	i = MAX_CACHEENTRY - 1;
 
-	if (i >= 0) {
-		do {
+	{
+		while (i >= 0) {
 			mce = (McCacheEntry *)pmce[i];
 			if ((mce->mc_port == port) && (mce->mc_slot == slot) && (mce->wr_flag != 0)) {
 				r = mcman_flushcacheentry((McCacheEntry *)mce);
@@ -3306,7 +3361,7 @@ int McFlushCache(int port, int slot)
 					return r;
 			}
 			i--;
-		} while (i >= 0);
+		}
 	}
 
 	return sceMcResSucceed;
@@ -3495,8 +3550,8 @@ lbl2:
 
 			McDataChecksum(p_page, p_ecc);
 
-			p_ecc += 3;
-			p_page += 128;
+			p_ecc = (void *)((u8 *)p_ecc + 3);
+			p_page = (void *)((u8 *)p_page + 128);
 			i++;
 		} while (1);
 
@@ -3517,7 +3572,7 @@ lbl2:
 					goto lbl2;
 				if (r != sceMcResSucceed)
 					return -54;
-				p_ecc += sparesize;
+				p_ecc = (void *)((u8 *)p_ecc + sparesize);
 			} while (++i < mcdi->blocksize);
 		}
 
@@ -3564,7 +3619,7 @@ lbl2:
 				if (r != sceMcResSucceed)
 					return -57;
 			}
-			p_ecc += sparesize;
+			p_ecc = (void *)((u8 *)p_ecc + sparesize);
 		} while (++i < mcdi->blocksize);
 	}
 
@@ -3588,7 +3643,7 @@ lbl2:
 				if (r != sceMcResSucceed)
 					return -57;
 			}
-			p_ecc += sparesize;
+			p_ecc = (void *)((u8 *)p_ecc + sparesize);
 		} while (++i < mcdi->blocksize);
 	}
 
@@ -3622,11 +3677,13 @@ lbl_exit:
 //--------------------------------------------------------------
 int McReadCluster(int port, int slot, int cluster, McCacheEntry **pmce)
 {
-	register int r, i, block, block_offset;
+	register int i;
 	register MCDevInfo *mcdi = &mcman_devinfos[port][slot];
 	McCacheEntry *mce;
 
 	if (mcman_badblock > 0) {
+		register int block, block_offset;
+
 		block = cluster / mcdi->clusters_per_block;
 		block_offset = cluster % mcdi->clusters_per_block;
 
@@ -3634,7 +3691,7 @@ int McReadCluster(int port, int slot, int cluster, McCacheEntry **pmce)
 			cluster = (mcdi->backup_block1 * mcdi->clusters_per_block) + block_offset;
 		}
 		else {
-			if (mcman_badblock > 0) {
+			{
 				for (i = 0; i < mcdi->clusters_per_block; i++) {
 					if ((mcman_replacementcluster[i] != 0) && (mcman_replacementcluster[i] == cluster)) {
 						block_offset = i % mcdi->clusters_per_block;
@@ -3647,6 +3704,8 @@ int McReadCluster(int port, int slot, int cluster, McCacheEntry **pmce)
 
 	mce = mcman_getcacheentry(port, slot, cluster);
 	if (mce == NULL) {
+		register int r;
+
 		mce = pmcman_mccache[MAX_CACHEENTRY - 1];
 
 		if (mce->wr_flag != 0) {
@@ -3833,12 +3892,13 @@ int McGetFATentry(int port, int slot, int fat_index, int *fat_entry) // Export #
 //--------------------------------------------------------------
 int mcman_readclusterPS1(int port, int slot, int cluster, McCacheEntry **pmce)
 {
-	register int r, i, pages_per_fatclust;
 	register MCDevInfo *mcdi = &mcman_devinfos[port][slot];
 	McCacheEntry *mce;
 
 	mce = mcman_getcacheentry(port, slot, cluster);
 	if (mce == NULL) {
+		register int r, i, pages_per_fatclust;
+
 		mce = pmcman_mccache[MAX_CACHEENTRY - 1];
 
 		if (mce->wr_flag != 0) {
@@ -4260,7 +4320,7 @@ lbl_e168:
 //--------------------------------------------------------------
 int mcman_clearsuperblock(int port, int slot)
 {
-	register int r, i, size, temp;
+	register int r, i;
 	register MCDevInfo *mcdi = &mcman_devinfos[port][slot];
 	McCacheEntry *mce;
 
@@ -4270,6 +4330,8 @@ int mcman_clearsuperblock(int port, int slot)
 	strcat(mcdi->magic, SUPERBLOCK_VERSION);
 
 	for (i = 0; (u32)(i < sizeof(MCDevInfo)); i += 1024) {
+		register int size, temp;
+
 		temp = i;
 		if (i < 0)
 			temp = i + 1023;

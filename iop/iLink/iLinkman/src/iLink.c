@@ -74,6 +74,9 @@ int _start(int argc, char **argv){
 	int i, result;
 	iop_thread_t ThreadData;
 
+	(void)argc;
+	(void)argv;
+
 	DEBUG_PRINTF("iLink driver version 0.98H\n");
 
 #ifdef REQ_CHECK_CONSOLE_VERSION
@@ -126,6 +129,9 @@ int _start(int argc, char **argv){
 int _exit(int argc, char** argv){
 	int result;
 
+	(void)argc;
+	(void)argv;
+
 	/* Shutdown the hardware and unregister all registered library exports. */
 	ReleaseLibraryEntries(&_exp_iLinkman);
 	DisableIntr(IOP_IRQ_ILINK, &result);
@@ -143,9 +149,10 @@ int _exit(int argc, char** argv){
 
 int iLinkTrAlloc(unsigned short int NodeID, unsigned char speed){
 	int result;
-	unsigned int i;
 
 	if(NodeID!=LocalNodeID){
+		unsigned int i;
+
 		for(i=0; i<MAX_CONCURRENT_TRANSACTIONS; i++){
 			if(TransactionContexts[i].IsConnected==0){
 				TransactionContexts[i].NodeID=NodeID;

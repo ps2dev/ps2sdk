@@ -179,6 +179,8 @@ extern struct irx_export_table _exp_atad;
 
 static unsigned int ata_alarm_cb(void *unused)
 {
+	(void)unused;
+
 	iSetEventFlag(ata_evflg, ATA_EV_TIMEOUT);
 	return 0;
 }
@@ -212,6 +214,9 @@ static int ata_create_event_flag(void) {
 int _start(int argc, char *argv[])
 {
 	int res = MODULE_NO_RESIDENT_END;
+
+	(void)argc;
+	(void)argv;
 
 	printf(BANNER, VERSION);
 
@@ -436,7 +441,7 @@ static int ata_device_select(int device)
 
 	/* Select the device.  */
 	hdpro_io_write(ATAreg_SELECT_WR, (device & 1) << 4);
-	res = hdpro_io_read(ATAreg_CONTROL_RD);
+	(void)(hdpro_io_read(ATAreg_CONTROL_RD));
 
 	return ata_wait_bus_busy();
 }
@@ -521,10 +526,9 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
 	suspend_intr();
 	HDPROreg_IO8 = 0x21;
 	CDVDreg_STATUS = 0;
-	unsigned int dummy __attribute__((unused)) = HDPROreg_IO8;
+	(void)(HDPROreg_IO8);
 	CDVDreg_STATUS = 0;
 	resume_intr();
-	dummy = 0;
 
 	/* Finally!  We send off the ATA command with arguments.  */
 	hdpro_io_write(ATAreg_CONTROL_WR, (using_timeout == 0) << 1);
@@ -556,7 +560,6 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
 /* Do a PIO transfer, to or from the device.  */
 static int ata_pio_transfer(ata_cmd_state_t *cmd_state)
 {
-	u8 *buf8;
 	u16 *buf16;
 	int i, type;
 	int res = 0, chk = 0;
@@ -592,6 +595,8 @@ static int ata_pio_transfer(ata_cmd_state_t *cmd_state)
 			return ATA_RES_ERR_IO;
 
 		if (cmd_state->type == 8) {
+			u8 *buf8;
+
 			buf8 = cmd_state->buf8;
 			for (i = 0; i < 4; i++) {
 				hdpro_io_write(ATAreg_DATA_WR, *buf8);
@@ -657,6 +662,8 @@ int ata_reset_devices(void)
 /* Export 11 */
 int ata_device_sce_sec_unlock(int device, void *password)
 {	//Device can always be unlocked.
+	(void)device;
+	(void)password;
 	return 0;
 }
 

@@ -55,7 +55,7 @@ htab *t;
   /* test that apos makes sense */
   end = (ub4)1<<(t->logsize);
   if (end < t->apos)
-    printf("error:  end %ld  apos %ld\n", end, t->apos);
+    printf("error:  end %lu  apos %lu\n", end, t->apos);
 
   /* test that ipos is in bucket apos */
   if (t->ipos)
@@ -63,7 +63,7 @@ htab *t;
     for (h=t->table[t->apos];  h && h != t->ipos;  h = h->next)
       ;
     if (h != t->ipos)
-      printf("error:ipos not in apos, apos is %ld\n", t->apos);
+      printf("error:ipos not in apos, apos is %lu\n", t->apos);
   }
 
   /* test that t->count is the number of elements in the table */
@@ -72,7 +72,7 @@ htab *t;
     for (h=t->table[i];  h;  h=h->next)
       ++counter;
   if (counter != t->count)
-    printf("error: counter %ld  t->count %ld\n", counter, t->count);
+    printf("error: counter %lu  t->count %lu\n", counter, t->count);
 }
 #endif
 
@@ -100,9 +100,10 @@ htab  *t;    /* table */
   /* Walk through old table putting entries in new table */
   for (i=newsize>>1; i--;)
   {
-    register hitem *this, *that, **newplace;
+    register hitem *this, *that;
     for (this = oldtab[i]; this;)
     {
+      register hitem **newplace;
       that = this;
       this = this->next;
       newplace = &newtab[(that->hval & newmask)];
@@ -358,7 +359,7 @@ htab  *t;
   {
     printf("items %ld:  %ld buckets\n", walk->keyl, walk->hval);
   }
-  printf("\nbuckets: %ld  items: %ld  existing: %g\n\n",
+  printf("\nbuckets: %lu  items: %ld  existing: %g\n\n",
          ((ub4)1<<t->logsize), t->count, total);
 
   /* clean up */

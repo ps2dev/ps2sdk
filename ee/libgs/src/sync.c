@@ -27,8 +27,6 @@ void GsDrawSync(int mode)
 
 void GsHSync(int mode)
 {
-	unsigned short i;
-
 	switch(mode)
 	{
 	case 0:
@@ -38,6 +36,8 @@ void GsHSync(int mode)
 	default:
 		if(mode>1)
 		{
+			unsigned short i;
+
 			for(i=0;i<mode;i++)
 			{
 				GS_SET_CSR_hsync_intrupt(1);
@@ -49,8 +49,6 @@ void GsHSync(int mode)
 
 void GsVSync(int mode)
 {
-	unsigned short i;
-
 	switch(mode)
 	{
 	case 0: //just wait
@@ -60,6 +58,7 @@ void GsVSync(int mode)
 	default: // wait for num of vsync to pass
 		if(mode>1)
 		{
+			unsigned short i;
 
 			for(i=0;i<mode;i++)
 			{

@@ -33,8 +33,7 @@ slib_exp_lib_list_t *slib_exp_lib_list(void)
 	SifRpcReceiveData_t RData;
 	slib_exp_lib_t *core_exps;
 	slib_exp_lib_list_t *exp_lib_list = NULL;
-	u32 i, addr, core_end, NextMod, *exp_func;
-	void *pGetLoadcoreInternalData;
+	u32 i, addr, core_end, NextMod;
 	smod_mod_info_t *ModInfo;
 
 	/* Read the start of the global module table - this is where we will search.  */
@@ -53,6 +52,8 @@ slib_exp_lib_list_t *slib_exp_lib_list(void)
 			   library will be.  */
 			SyncDCache(&smem_buf, smem_buf.bytes+512);
 			if(SifRpcGetOtherData(&RData, (void*)(core_end - 512), &smem_buf, 512, 0)>=0){
+				void *pGetLoadcoreInternalData;
+
 				/* Search for LOADCORE's export library.  */
 				for (i = 0; i < 512; i += 4) {
 					/* SYSMEM's export library sits at 0x830, so it should appear in
@@ -72,6 +73,7 @@ slib_exp_lib_list_t *slib_exp_lib_list(void)
 
 				SyncDCache(&smem_buf, smem_buf.bytes+8);
 				if(SifRpcGetOtherData(&RData, pGetLoadcoreInternalData, &smem_buf, 8, 0)>=0){
+					u32 *exp_func;
 					exp_func = smem_buf.words;
 
 					/* Parse the two instructions that hold the address of the table.  */

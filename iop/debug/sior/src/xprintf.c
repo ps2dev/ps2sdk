@@ -669,8 +669,11 @@ int xprintf(
   ...
 ){
   va_list ap;
+  int ret;
   va_start(ap,format);
-  return vxprintf(func,arg,format,ap);
+  ret = vxprintf(func,arg,format,ap);
+  va_end(ap);
+  return ret;
 }
 #endif
 

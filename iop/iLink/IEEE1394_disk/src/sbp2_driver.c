@@ -41,6 +41,9 @@ static volatile union{
 } statusFIFO;
 
 static void ieee1394_callback(int reason, unsigned long int offset, unsigned long int size){
+	(void)offset;
+	(void)size;
+
 #if 0
 	iLinkBufferOffset=offset;
 	iLinkTransferSize=size;
@@ -248,6 +251,8 @@ static void iLinkIntrCBHandlingThread(void *arg){
 		9, /* S400; 2^(9+2)=2048 */
 	};
 
+	(void)arg;
+
  while(1){
 	WaitEventFlag(sbp2_event_flag, BUS_RESET_COMPLETE, WEF_AND|WEF_CLEAR, NULL);
 
@@ -261,7 +266,9 @@ static void iLinkIntrCBHandlingThread(void *arg){
 		}
 	}
 
-	if((nNodes=iLinkGetNodeCount())<0) XPRINTF("Critical error: Failure getting the number of nodes!\n"); /* Error. */
+	if((nNodes=iLinkGetNodeCount())<0){
+		XPRINTF("Critical error: Failure getting the number of nodes!\n"); /* Error. */
+	}
 
 	XPRINTF("BUS RESET DETECTED. Nodes: %d\n", nNodes);
 	XPRINTF("Local Node: 0x%08x.\n", iLinkGetLocalNodeID());
@@ -331,7 +338,9 @@ static void iLinkIntrCBHandlingThread(void *arg){
 				targetDeviceID++;
 			}
 		}
-		else XPRINTF("Error allocating a transaction.\n");
+		else{
+			XPRINTF("Error allocating a transaction.\n");
+		}
 	}
 
 	for(; targetDeviceID<MAX_DEVICES; targetDeviceID++) SBP2Devices[targetDeviceID].IsConnected=0; /* Mark the unused device slots as being unused. */

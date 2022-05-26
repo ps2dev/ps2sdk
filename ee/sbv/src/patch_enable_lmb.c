@@ -73,10 +73,8 @@ int sbv_patch_enable_lmb(void)
 	SifRpcReceiveData_t RData;
 	slib_exp_lib_t *modload_lib = (slib_exp_lib_t *)buf;
 	smod_mod_info_t loadfile_info;
-	void *pStartModule, *pLoadModuleBuffer, *patch_addr, *lf_rpc_dispatch, *lf_jump_table_end, *lf_fno_check;
-	unsigned short int JumpTableOffset_hi, JumpTableOffset_lo;
+	void *pStartModule, *pLoadModuleBuffer, *patch_addr, *lf_rpc_dispatch;
 	u32 result, *data;
-	int id;
 	SifDmaTransfer_t dmat;
 
 	memset(&_slib_cur_exp_lib_list, 0, sizeof(slib_exp_lib_list_t));
@@ -89,7 +87,7 @@ int sbv_patch_enable_lmb(void)
 	pLoadModuleBuffer = modload_lib->exports[10];
 
 	/* Now we need to find the loadfile module.  */
-	if (!(id = smod_get_mod_by_name("LoadModuleByEE", &loadfile_info)))
+	if (!(smod_get_mod_by_name("LoadModuleByEE", &loadfile_info)))
 		return -1;
 
 	/*	In the Sony original, the whole text section of LOADFILE is scanned for the pattern.
@@ -116,7 +114,10 @@ int sbv_patch_enable_lmb(void)
 	if(SifRpcGetOtherData(&RData, (void*)lf_rpc_dispatch, &smem_buf, 128, 0)>=0){
 		data=smem_buf.words;
 		if(data[0]==0x27bdffe8 && data[1]==0x2c820006 && data[2]==0x14400003 && data[3]==0xafbf0010 && data[5]==0x00001021 && data[6]==0x00041080){
-			lf_fno_check = (void*)(lf_rpc_dispatch+4);
+			void *lf_jump_table_end, *lf_fno_check;
+			unsigned short int JumpTableOffset_hi, JumpTableOffset_lo;
+
+			lf_fno_check = (void*)((u8 *)lf_rpc_dispatch+4);
 
 			/* We need to extract the address of the jump table. */
 			JumpTableOffset_hi=*(unsigned short int*)&data[7];

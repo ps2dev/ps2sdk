@@ -33,6 +33,8 @@ static int powerOffThreadId = -1;
 
 static void *PowerOff_ee_rpc_handler(int fnum, void *buffer, int len)
 {
+    (void)len;
+
     switch (fnum)
     {
         case POFF_RPC_BUTTON:
@@ -51,6 +53,8 @@ static void *PowerOff_ee_rpc_handler(int fnum, void *buffer, int len)
 static void PowerOffThread(void *dat)
 {
     static unsigned char cb_rpc_buffer[64] __attribute__((aligned(64)));
+
+    (void)dat;
 
     SifSetRpcQueue(&cb_queue, powerOffThreadId);
     SifRegisterRpc(&cb_srv, PWROFF_IRX, &PowerOff_ee_rpc_handler, cb_rpc_buffer, NULL, NULL, &cb_queue);

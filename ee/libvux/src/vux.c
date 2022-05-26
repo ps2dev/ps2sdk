@@ -95,7 +95,7 @@ void VuSetProjection(float z)
 
 
 
-void VuSetProjectionMatrix(VU_MATRIX *projection)
+void VuSetProjectionMatrix(const VU_MATRIX *projection)
 {
 	VuPrjectionMatrix	= *projection;
 
@@ -113,7 +113,7 @@ void VuSetProjectionType(unsigned int type)
 
 
 
-void VuSetWorldMatrix(VU_MATRIX *world)
+void VuSetWorldMatrix(const VU_MATRIX *world)
 {
 
 	VuWorldMatrix =		*world;
@@ -122,7 +122,7 @@ void VuSetWorldMatrix(VU_MATRIX *world)
 
 
 
-void VuSetViewMatrix(VU_MATRIX *view)
+void VuSetViewMatrix(const VU_MATRIX *view)
 {
 
 	VuViewMatrix =		*view;
@@ -132,7 +132,7 @@ void VuSetViewMatrix(VU_MATRIX *view)
 
 
 
-void VuSetLocalScreenMatrix(VU_MATRIX *m)
+void VuSetLocalScreenMatrix(const VU_MATRIX *m)
 {
 
 	VuLocalScreenMatrix = *m;

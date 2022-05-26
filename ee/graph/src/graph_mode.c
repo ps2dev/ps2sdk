@@ -128,7 +128,6 @@ int graph_get_region(void)
 int graph_set_mode(int interlace, int mode, int ffmd, int flicker_filter)
 {
 
-	char romname[14];
 
 	// Reset GS.
 	*GS_REG_CSR = (u64)1<<9;
@@ -146,6 +145,7 @@ int graph_set_mode(int interlace, int mode, int ffmd, int flicker_filter)
 	// If 576P is requested, check if bios supports it.
 	if (mode == GRAPH_MODE_HDTV_576P)
 	{
+		char romname[14];
 
 		GetRomName((char *)romname);
 

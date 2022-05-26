@@ -25,6 +25,8 @@ static EE_ExceptionHandler *ee_level2_exception_handlers[4] = { 0 };
 
 void _def_ee_ex_handler(EE_RegFrame *frame)
 {
+    (void)frame;
+
     while(1);
 }
 
@@ -150,7 +152,7 @@ void ee_dbg_clr_bpdv(void)
 void ee_dbg_clr_bpx(void)
 {
     u32 bpc = ee_dbg_get_bpc();
-    bpc &= ~(EE_BPC_IXE | EE_BPC_IUE | EE_BPC_ISE | EE_BPC_IKE | EE_BPC_IXE | EE_BPC_ITE);
+    bpc &= ~(EE_BPC_IXE | EE_BPC_IUE | EE_BPC_ISE | EE_BPC_IKE | EE_BPC_ITE);
     ee_dbg_set_bpc(bpc);
 }
 
@@ -235,7 +237,6 @@ int ee_dbg_install(int levels)
 int ee_dbg_remove(int levels)
 {
     u32 oldintr, oldop;
-    int i;
 
     if((levels < 1) || (levels > 3)) { return(-1); }
 
@@ -262,6 +263,7 @@ int ee_dbg_remove(int levels)
 
     if((levels & _installed_levels) & 1)
     {
+        int i;
         // restore the exception handlers that we previously hooked.
         for(i = 1; i <= 3; i++)
         {

@@ -38,10 +38,9 @@ size_t  size;
 void  refree(r)
 struct reroot *r;
 {
-   recycle *temp;
-   if ((temp = r->list)) while (r->list)
+   while (r->list)
    {
-      temp = r->list->next;
+      recycle *temp = r->list->next;
       free((char *)r->list);
       r->list = temp;
    }

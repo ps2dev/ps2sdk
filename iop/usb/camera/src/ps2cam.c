@@ -46,7 +46,8 @@ sceUsbdLddOps					cam_driver = {NULL,
 											 "ps2cam",
 											   PS2CamProbe,
 											    PS2CamConnect,
-											     PS2CamDisconnect };
+											     PS2CamDisconnect,
+											     0, 0, 0, 0, 0, NULL };
 
 
 
@@ -66,6 +67,9 @@ int _start( int argc, char **argv)
 {
 	iop_thread_t	param;
 	int				th;
+
+	(void)argc;
+	(void)argv;
 
 	PS2CamInitDriver();
 
@@ -241,6 +245,10 @@ int PS2CamConnect(int devId)
 		}
 	}
 
+	if (cam == NULL)
+	{
+		return 0;
+	}
 
 
 	cam->device_id			= devId;
@@ -352,6 +360,8 @@ void rpcMainThread(void* param)
 {
 	//int ret=-1;
 	int tid;
+
+	(void)param;
 
 	sceSifInitRpc(0);
 	tid = GetThreadId();
@@ -660,7 +670,6 @@ int setReg16(CAMERA_DEVICE *dev, unsigned char reg_id, unsigned short value)
 /** Get a string descriptor from device */
 void PS2CamGetDeviceSring(CAMERA_DEVICE* dev, int index, char *str, int strmax)
 {
-	int				i;
 	static char		buff[50];
 	UsbStringDescriptor	*sd;
 	int				ret;
@@ -677,6 +686,7 @@ void PS2CamGetDeviceSring(CAMERA_DEVICE* dev, int index, char *str, int strmax)
 	}
 	else
 	{
+		int i;
 
 
 		WaitSema(ps2cam_sema);
@@ -754,6 +764,8 @@ void camClearSnapButton(CAMERA_DEVICE *dev)
 
 int  camCheckAutoLaunch(CAMERA_DEVICE *dev)
 {
+	(void)dev;
+
 	//setReg8Mask(dev, EYETOY_CREG_SNAPSHOT, 10,10);
 	return 0;
 }
@@ -858,6 +870,8 @@ int read_byts;
 
 void PS2CamReadDataCallback(int resultCode, int bytes, void *arg)
 {
+	(void)arg;
+
 	//printf("read_data_callback: result= %d, bytes= %d, arg= %p \n", resultCode, bytes, arg);
 
 	read_rslt = resultCode;
@@ -936,6 +950,8 @@ int PS2CamGetIRXVersion(void)
 /** initalize the camera driver. must be called 1st */
 int PS2CamInit(int mode)
 {
+	(void)mode;
+
 	irx_initialized = 1;
 
 	return 0;
@@ -1021,6 +1037,10 @@ int PS2CamOpenDevice(int device_index)
 		}
 	}
 
+	if (handle == NULL)
+	{
+		return CAM_ERROR_MAXHANDLE;
+	}
 
 
 	//now we point handle attribute to the camera
@@ -1248,7 +1268,7 @@ int PS2CamReadPacket(int handle)
 
 	cam = CamHandle[handle-1].cam;
 
-	if(cam			<= 0) return CAM_ERROR_INVALIDDEVICE;
+	if(cam			== NULL) return CAM_ERROR_INVALIDDEVICE;
 	if(cam->status	<  2) return CAM_ERROR_DEVNOTREADY;
 
 
@@ -1298,7 +1318,7 @@ int PS2CamSetLEDMode(int handle, int mode)
 
 	cam = CamHandle[handle-1].cam;
 
-	if(cam			<= 0) return CAM_ERROR_INVALIDDEVICE;
+	if(cam			== NULL) return CAM_ERROR_INVALIDDEVICE;
 	if(cam->status	<  2) return CAM_ERROR_DEVNOTREADY;
 
 
@@ -1332,8 +1352,6 @@ int PS2CamSetDeviceConfig(int handle, void *config)
 	CAMERA_DEVICE			*cam;
 	PS2CAM_DEVICE_CONFIG	*cfg;
 
-	unsigned char			*p;
-
 	if(! irx_initialized)
 		return CAM_ERROR_NOTINIT;
 
@@ -1346,7 +1364,7 @@ int PS2CamSetDeviceConfig(int handle, void *config)
 
 	cam = CamHandle[handle-1].cam;
 
-	if(cam			<= 0) return CAM_ERROR_INVALIDDEVICE;
+	if(cam			== NULL) return CAM_ERROR_INVALIDDEVICE;
 	if(cam->status	<  2) return CAM_ERROR_DEVNOTREADY;
 
 
@@ -1368,6 +1386,7 @@ int PS2CamSetDeviceConfig(int handle, void *config)
 	//set offset
 	if(cfg->mask & CAM_CONFIG_MASK_OFFSET)
 	{
+		unsigned char *p;
 
 		p = (unsigned char *)&cfg->x_offset;
 		setReg8(cam, EYETOY_IREG_X_OFFSETL,		p[0]);
@@ -1433,6 +1452,8 @@ void *rpcCommandHandler(u32 command, void *buffer, int size)
 	int*	buf = (int*) buffer;
 	//char*	ptr = (char*) buffer;
 	int		ret = 0;
+
+	(void)size;
 
 	switch (command)
 	{

@@ -13,6 +13,9 @@ int InitFS(void);
 
 int _start(int argc, char** argv)
 {
+	(void)argc;
+	(void)argv;
+
 	if(InitFAT() != 0)
 	{
 		printf("Error initializing FAT driver!\n");

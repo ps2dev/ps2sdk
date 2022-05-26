@@ -80,11 +80,11 @@ int TransInterrupt(void *data)
 		// If done elsewise, it doesn't work, havn't figured out why yet.
 		volatile u16 *statx = U16_REGISTER(0x344 + (core * 1024));
 
-		if(!(*statx & 0x80))	while(!(*statx & 0x80));
+		while((*statx & 0x80) == 0);
 
 		*SD_CORE_ATTR(core) &= ~SD_CORE_DMA;
 
-		if(*SD_CORE_ATTR(core) & 0x30)	while((*SD_CORE_ATTR(core) & 0x30));
+		while((*SD_CORE_ATTR(core) & 0x30) != 0);
 
 		if(TransIntrHandlers[core])		goto intr_handler;
 		if(TransIntrCallbacks[core])	goto SdIntrCallback;
@@ -140,10 +140,12 @@ int TransInterrupt(void *data)
 int Spu2Interrupt(void *data)
 
 {
-	volatile u16 *reg1 = U16_REGISTER(0x7C2);
+	(void)data;
 
 	if(Spu2IntrHandler != NULL)
 	{
+		volatile u16 *reg1 = U16_REGISTER(0x7C2);
+
 		Spu2IntrHandler((*reg1 & 0xC) >> 2, Spu2IntrData);
 	}
 	else
@@ -749,8 +751,6 @@ int sceSdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, ...)
 	#endif
 	int core = chan & 1;
 	int _size = size;
-	va_list alist;
-	u8* startaddr;
 
 	#ifndef ISJPCM
 	switch(transfer_dir)
@@ -794,6 +794,9 @@ int sceSdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, ...)
 
 		case SD_TRANS_WRITE_FROM:
 		{
+			va_list alist;
+			u8* startaddr;
+
 			va_start(alist, size);
 			startaddr = va_arg(alist, u8*);
 			va_end(alist);
@@ -829,6 +832,8 @@ int sceSdBlockTrans(s16 chan, u16 mode, u8 *iopaddr, u32 size, ...)
 u32 sceSdBlockTransStatus(s16 chan, s16 flag)
 {
 	u32 retval;
+
+	(void)flag;
 
 	chan &= 1;
 

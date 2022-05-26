@@ -97,6 +97,8 @@ static void play_thread(void *arg);
  */
 static int transfer_complete(void *arg)
 {
+	(void)arg;
+
 	iSignalSema(transfer_sema);
 	return 1;
 }
@@ -425,17 +427,20 @@ int audsrv_set_threshold(int amount)
  */
 static void play_thread(void *arg)
 {
-	int block;
-	u8 *bufptr;
 	int intr_state;
 	int step;
-	int available;
 	struct upsample_t up;
 	upsampler_t upsampler = NULL;
+
+	(void)arg;
 
 	printf("starting play thread\n");
 	while (1)
 	{
+		int block;
+		u8 *bufptr;
+		int available;
+
 		if (format_changed)
 		{
 			upsampler = find_upsampler(core1_freq, core1_bits, core1_channels);
@@ -550,6 +555,9 @@ int audsrv_quit()
 int _start(int argc, char *argv[])
 {
 	int err;
+
+	(void)argc;
+	(void)argv;
 
 	FlushDcache();
 	CpuEnableIntr(0);

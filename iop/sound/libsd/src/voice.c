@@ -70,8 +70,6 @@ s32 VoiceTransDma(s16 chan, u16 mode, u8 *iop_addr, u32 *spu_addr, u32 size)
 
 s32 VoiceTrans_Write_IOMode(u32 iopaddr, u32 spu_addr, s32 size, s16 chan)
 {
-	volatile u16 *statx;
-
 	if(U16_REGISTER_READ(SD_CORE_ATTR(chan)) & SD_DMA_IN_PROCESS)
 		return -1;
 
@@ -90,6 +88,8 @@ s32 VoiceTrans_Write_IOMode(u32 iopaddr, u32 spu_addr, s32 size, s16 chan)
 
 		while(size > 0)
 		{
+			volatile u16 *statx;
+
 			if(size > 64)
 				count = 64;
 			else

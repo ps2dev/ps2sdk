@@ -283,11 +283,11 @@ int PS2CamSetDeviceConfig(int handle, PS2CAM_DEVICE_CONFIG *cfg)
 
 int PS2CamExtractFrame(int handle, char *buffer, int bufsize)
 {
-	static EYETOY_FRAME_HEAD	*head;
 	static int			capturing;
 	static int			pos;
-	static int			ret;
 	static int			pic_size;
+
+	(void)bufsize;
 
 	pos					= 0;
 	capturing			= 0;
@@ -296,6 +296,9 @@ int PS2CamExtractFrame(int handle, char *buffer, int bufsize)
 
 	while(1)
 	{
+		static EYETOY_FRAME_HEAD *head;
+		static int ret;
+
 		ret  = PS2CamReadPacket(handle);
 
 	//	printf("packet =%d\n",ret);

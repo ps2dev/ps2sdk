@@ -74,6 +74,9 @@ int _start(int argc, char *argv[])
 {
 	int result;
 
+	(void)argc;
+	(void)argv;
+
 	if(RegisterLibraryEntries(&_exp_rmman) == 0)
 	{
 		result = CreateMainThread() <= 0 ? MODULE_NO_RESIDENT_END : MODULE_RESIDENT_END;
@@ -116,10 +119,11 @@ int rmmanOpen(int port, int slot, void *buffer)
 {
 	iop_event_t evf;
 	int result;
-	struct RmData *pRmData;
 
 	if(!((portStatus[port] >> slot) & 1))
 	{
+		struct RmData *pRmData;
+
 		pRmData = &RmData[port][slot];
 		pRmData->port = port;
 		pRmData->slot = slot;
@@ -148,11 +152,12 @@ int rmmanOpen(int port, int slot, void *buffer)
 int rmmanClose(int port, int slot)
 {
 	int result;
-	struct RmData *pRmData;
 	u32 bits;
 
 	if((portStatus[port] >> slot) & 1)
 	{
+		struct RmData *pRmData;
+
 		pRmData = &RmData[port][slot];
 
 		if(pRmData->state != RM_STATE_FINDRM)
@@ -180,12 +185,14 @@ int rmmanClose(int port, int slot)
 int rmmanEnd(void)
 {
 	u32 bits;
-	int port, slot, result;
+	int result;
 
 	if(IsInitialized != 0)
 	{
+		int port;
 		for(port = 0; port < 2; port++)
 		{
+			int slot;
 			for(slot = 0; slot < 4; slot++)
 			{	//If port,slot is opened, close it.
 				if((portStatus[port] >> slot) & 1)
@@ -215,6 +222,8 @@ static void MainThread(void *arg)
 {
 	iop_event_info_t evfInfo;
 	int port, slot;
+
+	(void)arg;
 
 	while(1)
 	{
@@ -496,6 +505,9 @@ static void *RpcHandler(int fno, void *buffer, int len)
 {
 	void *retBuff;
 
+	(void)fno;
+	(void)len;
+
 	switch(((struct rmRpcPacket *)buffer)->cmd.command)
 	{
 		case RMMAN_RPCFUNC_END:
@@ -523,6 +535,8 @@ static void *RpcHandler(int fno, void *buffer, int len)
 
 static void RpcThread(void *arg)
 {
+	(void)arg;
+
 	if(!sceSifCheckInit())
 	{
 		printf("yet sif hasn't been init\n");

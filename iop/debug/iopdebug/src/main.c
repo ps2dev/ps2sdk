@@ -17,6 +17,9 @@ IRX_ID("iopdebug", 1, 0);
 extern struct irx_export_table _exp_iopdebug;
 int _start(int argc, char *argv[])
 {
+    (void)argc;
+    (void)argv;
+
     // install IOP debug system.
     if(iop_dbg_install() != 0)
     {
@@ -43,6 +46,9 @@ int _start(int argc, char *argv[])
 // export 2, called when the module is being unloaded(like when IOP is being "rebooted").
 int _stop(int argc, char *argv[])
 {
+    (void)argc;
+    (void)argv;
+
     // remove IOP debug system.
     if(iop_dbg_remove() != 0)
     {

@@ -45,9 +45,9 @@ static struct SyscallData SyscallPatchEntries[]={
 };
 
 void InitExecPS2(void){
-	unsigned int i;
-
 	if(PatchIsNeeded()){
+		unsigned int i;
+
 		setup(SyscallPatchEntries[0].syscall_num, SyscallPatchEntries[0].function);
 		Copy((unsigned int*)0x80074000, (unsigned int*)osdsrc, size_osdsrc);
 

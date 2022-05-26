@@ -95,7 +95,7 @@ mouse_data mouse;
 /** Holds a list of current devices */
 mouse_dev *devices[PS2MOUSE_MAXDEV];
 int dev_count;
-sceUsbdLddOps mouse_driver = { NULL, NULL, "PS2Mouse", ps2mouse_probe, ps2mouse_connect, ps2mouse_disconnect };
+sceUsbdLddOps mouse_driver = { NULL, NULL, "PS2Mouse", ps2mouse_probe, ps2mouse_connect, ps2mouse_disconnect, 0, 0, 0, 0, 0, NULL };
 
 int _start ()
 {
@@ -121,6 +121,8 @@ int _start ()
 void rpcMainThread(void* param)
 {
   int tid;
+
+  (void)param;
 
   SifInitRpc(0);
 
@@ -328,8 +330,6 @@ void ps2mouse_getstring_set(int resultCode, int bytes, void *arg)
 {
   UsbStringDescriptor *str = (UsbStringDescriptor *) arg;
   string_descriptor *strBuf = (string_descriptor *) arg;
-  char string[50];
-  int strLoop;
 
 /*   printf("=========getstring=========\n"); */
 
@@ -337,6 +337,9 @@ void ps2mouse_getstring_set(int resultCode, int bytes, void *arg)
 
   if(resultCode == USB_RC_OK)
     {
+      char string[50];
+      int strLoop;
+
       memset(string, 0, 50);
       for(strLoop = 0; strLoop < ((bytes - 2) / 2); strLoop++)
 	{
@@ -353,13 +356,14 @@ void usb_getstring(int endp, int index, char *desc)
 {
   u8 *data;
   string_descriptor *str;
-  int ret;
 
   data = (u8 *) AllocSysMemory(0, sizeof(string_descriptor), NULL);
   str = (string_descriptor *) data;
 
   if(data != NULL)
     {
+      int ret;
+
       str->desc = desc;
       ret = sceUsbdControlTransfer(endp, 0x80, USB_REQ_GET_DESCRIPTOR, (USB_DT_STRING << 8) | index,
 			       0, sizeof(string_descriptor) - 4, data, ps2mouse_getstring_set, data);
@@ -530,6 +534,8 @@ int ps2mouse_init()
 void do_ps2mouse_read(u8 *data, int size)
 
 {
+  (void)size;
+
   //printf("PS2MOUSE read\n");
   memcpy(data, &mouse, sizeof(mouse_data));
 
@@ -548,9 +554,11 @@ void do_ps2mouse_read(u8 *data, int size)
     }
 }
 
-void do_ps2mouse_setreadmode(u32 *data, int size)
+void do_ps2mouse_setreadmode(const u32 *data, int size)
 
 {
+  (void)size;
+
   //printf("PS2MOUSE setreadmode mode %d\n", data[0]);
   if(data[0] == mouse_readmode)
     {
@@ -575,13 +583,17 @@ void do_ps2mouse_setreadmode(u32 *data, int size)
 void do_ps2mouse_getreadmode(u32 *data, int size)
 
 {
+  (void)size;
+
   //printf("PS2MOUSE getreadmode\n");
   data[0] = mouse_readmode;
 }
 
-void do_ps2mouse_setthres(u32 *data, int size)
+void do_ps2mouse_setthres(const u32 *data, int size)
 
 {
+  (void)size;
+
   //printf("PS2MOUSE setthres %d\n", data[0]);
   mouse_thres = data[0];
 }
@@ -589,13 +601,17 @@ void do_ps2mouse_setthres(u32 *data, int size)
 void do_ps2mouse_getthres(u32 *data, int size)
 
 {
+  (void)size;
+
   //printf("PS2MOUSE getthres\n");
   data[0] = mouse_thres;
 }
 
-void do_ps2mouse_setaccel(u32 *data, int size)
+void do_ps2mouse_setaccel(const u32 *data, int size)
 
 {
+  (void)size;
+
   //printf("PS2MOUSE setsense %d\n", data[0]);
   mouse_accel = data[0];
 }
@@ -603,13 +619,17 @@ void do_ps2mouse_setaccel(u32 *data, int size)
 void do_ps2mouse_getaccel(u32 *data, int size)
 
 {
+  (void)size;
+
   //printf("PS2MOUSE getsense\n");
   data[0] = mouse_accel;
 }
 
-void do_ps2mouse_setboundary(s32 *data, int size)
+void do_ps2mouse_setboundary(const s32 *data, int size)
 
 {
+  (void)size;
+
   //printf("PS2MOUSE setboundry %d %d %d %d\n", data[0], data[1], data[2], data[3]);
   if(data[0] < data[1])
     {
@@ -633,6 +653,8 @@ void do_ps2mouse_setboundary(s32 *data, int size)
 void do_ps2mouse_getboundary(s32 *data, int size)
 
 {
+  (void)size;
+
   //printf("PS2MOUSE getboundry\n");
   data[0] = mousex_min;
   data[1] = mousex_max;
@@ -640,9 +662,11 @@ void do_ps2mouse_getboundary(s32 *data, int size)
   data[3] = mousey_max;
 }
 
-void do_ps2mouse_setposition(s32 *data, int size)
+void do_ps2mouse_setposition(const s32 *data, int size)
 
 {
+  (void)size;
+
   //printf("PS2MOUSE setposition %d %d\n", data[0], data[1]);
 
   WaitSema(mouse_sema);
@@ -690,13 +714,17 @@ void do_ps2mouse_reset()
 void do_ps2mouse_enum(u32 *data, int size)
 
 {
+  (void)size;
+
   //printf("PS2MOUSE enum\n");
   data[0] = dev_count;
 }
 
-void do_ps2mouse_setdblclicktime(u32 *data, int size)
+void do_ps2mouse_setdblclicktime(const u32 *data, int size)
 
 {
+  (void)size;
+
   //printf("PS2MOUSE setdblclicktime %d\n", data[0]);
   mouse_dblclicktime = data[0];
 }
@@ -704,6 +732,8 @@ void do_ps2mouse_setdblclicktime(u32 *data, int size)
 void do_ps2mouse_getdblclicktime(u32 *data, int size)
 
 {
+  (void)size;
+
   //printf("PS2MOUSE getdblclicktime\n");
   data[0] = mouse_dblclicktime;
 }
@@ -711,6 +741,8 @@ void do_ps2mouse_getdblclicktime(u32 *data, int size)
 void do_ps2mouse_getversion(u32 *data, int size)
 
 {
+  (void)size;
+
   //printf("PS2MOUSE getversion\n");
   data[0] = PS2MOUSE_VERSION;
 }

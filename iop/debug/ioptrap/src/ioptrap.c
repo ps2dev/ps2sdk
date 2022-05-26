@@ -206,6 +206,9 @@ int _start(int argc, char **argv)
 {
     int rv;
 
+    (void)argc;
+    (void)argv;
+
     if (RegisterLibraryEntries(&_exp_ioptrap) != 0)
         return 1;
 

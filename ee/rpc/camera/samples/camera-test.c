@@ -25,7 +25,6 @@ int main (int argc, char *argv[])
 {
 	static int ret;
 	static int devid;
-	static int fh;
 
 	SifInitRpc(0);
 	fioInit();
@@ -91,7 +90,7 @@ int main (int argc, char *argv[])
 	caminfo.ssize = sizeof(caminfo);
 	PS2CamGetDeviceInfo(devid, &caminfo);
 
-	printf("info = %s (%d)\n",(char *)&caminfo.product_name[0],caminfo.ssize);
+	printf("info = %s (%u)\n",(char *)&caminfo.product_name[0],caminfo.ssize);
 
 
 
@@ -115,6 +114,8 @@ int main (int argc, char *argv[])
 
 	if(ret>0)
 	{
+		static int fh;
+
 		printf("frame captured\n");
 
 		fh = open("host:image.jpg", O_WRONLY|O_CREAT|O_TRUNC);

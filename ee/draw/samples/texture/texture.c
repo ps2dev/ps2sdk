@@ -159,9 +159,6 @@ int render(framebuffer_t *frame, zbuffer_t *z)
 	packet_t *packets[2];
 	packet_t *current;
 
-	qword_t *q;
-	u64 *dw;
-
 	MATRIX local_world;
 	MATRIX world_view;
 	MATRIX view_screen;
@@ -209,6 +206,8 @@ int render(framebuffer_t *frame, zbuffer_t *z)
 	// The main loop...
 	for (;;)
 	{
+		qword_t *q;
+		u64 *dw;
 
 		current = packets[context];
 

@@ -903,6 +903,8 @@ int VuxClipW(VU_VECTOR *tv0)
 {
 	int	ret = 0;
 
+	(void)tv0;
+
 	return ret;
 }
 
@@ -919,10 +921,8 @@ int VuxClipW(VU_VECTOR *tv0)
 
 int VuxLightNormal(VU_VECTOR *normal, VU_CVECTOR *col0, void *light, unsigned int light_type, VU_CVECTOR *out0)
 {
-	float			dot;
 	VU_FCVECTOR		final;
 	VU_FCVECTOR		c0;
-	VU_FLAT_LIGHT	*f_light;
 
 
 	c0.r = col0->r * 0.0078125f;
@@ -932,6 +932,9 @@ int VuxLightNormal(VU_VECTOR *normal, VU_CVECTOR *col0, void *light, unsigned in
 
 	if(light_type == VU_LIGHT_TYPE_FLAT)
 	{
+		float dot;
+		VU_FLAT_LIGHT *f_light;
+
 		f_light = (VU_FLAT_LIGHT *)light;
 
 		dot = -VuxDotProduct(normal, &f_light->direction);

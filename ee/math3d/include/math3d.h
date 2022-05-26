@@ -120,7 +120,7 @@ void create_local_screen(MATRIX local_screen, MATRIX local_world, MATRIX world_v
 void calculate_normals(VECTOR *output, int count, VECTOR *normals, MATRIX local_light);
 
 /** Calculate the light intensity for an array of lights given an array of normal values. */
-void calculate_lights(VECTOR *output, int count, VECTOR *normals, VECTOR *light_directions, VECTOR *light_colours, int *light_types, int light_count);
+void calculate_lights(VECTOR *output, int count, VECTOR *normals, VECTOR *light_directions, VECTOR *light_colours, const int *light_types, int light_count);
 
 /** Calculate colour values given an array of light intensity values. */
 void calculate_colours(VECTOR *output, int count, VECTOR *colours, VECTOR *lights);

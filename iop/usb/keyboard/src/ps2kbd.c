@@ -96,7 +96,7 @@ u32 kbd_repeatrate;
 /** Holds a list of current devices */
 kbd_dev *devices[PS2KBD_MAXDEV]; 
 int dev_count;
-sceUsbdLddOps kbd_driver = { NULL, NULL, "PS2Kbd", ps2kbd_probe, ps2kbd_connect, ps2kbd_disconnect };
+sceUsbdLddOps kbd_driver = { NULL, NULL, "PS2Kbd", ps2kbd_probe, ps2kbd_connect, ps2kbd_disconnect, 0, 0, 0, 0, 0, NULL };
 u8 *lineBuffer;
 u32 lineStartP, lineEndP;
 int lineSema;
@@ -119,6 +119,9 @@ int eventid;   /* Id of the repeat event */
 
 int _start (int argc, char *argv[])
 {
+  (void)argc;
+  (void)argv;
+
   ps2kbd_init();
 
   printf("PS2KBD - USB Keyboard Library\n");
@@ -325,8 +328,6 @@ void ps2kbd_getstring_set(int resultCode, int bytes, void *arg)
 {
   UsbStringDescriptor *str = (UsbStringDescriptor *) arg;
   string_descriptor *strBuf = (string_descriptor *) arg;
-  char string[50];
-  int strLoop;
 
 /*   printf("=========getstring=========\n"); */
 
@@ -334,6 +335,9 @@ void ps2kbd_getstring_set(int resultCode, int bytes, void *arg)
 
   if(resultCode == USB_RC_OK)
     {
+      char string[50];
+      int strLoop;
+
       memset(string, 0, 50);
       for(strLoop = 0; strLoop < ((bytes - 2) / 2); strLoop++)
 	{
@@ -350,13 +354,14 @@ void usb_getstring(int endp, int index, char *desc)
 {
   u8 *data;
   string_descriptor *str;
-  int ret;
 
   data = (u8 *) AllocSysMemory(0, sizeof(string_descriptor), NULL);
   str = (string_descriptor *) data;
 
   if(data != NULL)
     {
+      int ret;
+
       str->desc = desc;
       ret = sceUsbdControlTransfer(endp, 0x80, USB_REQ_GET_DESCRIPTOR, (USB_DT_STRING << 8) | index,
 			       0x0409, sizeof(string_descriptor) - 4, data, ps2kbd_getstring_set, data);
@@ -413,6 +418,10 @@ void ps2kbd_idlemode_set(int resultCode, int bytes, void *arg)
 void ps2kbd_led_set(int resultCode, int bytes, void *arg)
 
 {
+  (void)resultCode;
+  (void)bytes;
+  (void)arg;
+
   //printf("LED Set\n");
 }
 
@@ -604,7 +613,7 @@ void ps2kbd_getkeys(u8 keyMods, u8 ledStatus, const u8 *keys, kbd_dev *dev)
 }
 
 
-void ps2kbd_getkeys_raw(u8 newKeyMods, u8 oldKeyMods, u8 *new, const u8 *old)
+void ps2kbd_getkeys_raw(u8 newKeyMods, u8 oldKeyMods, const u8 *new, const u8 *old)
 
 {
   int loopKey;
@@ -744,7 +753,6 @@ void ps2kbd_data_recv(int resultCode, int bytes, void *arg)
     {
       u8 uniqueKeys[PS2KBD_MAXKEYS];
       u8 missingKeys[PS2KBD_MAXKEYS];
-      int loopKey;
 
       memset(uniqueKeys, 0, PS2KBD_MAXKEYS);
       memset(missingKeys, 0, PS2KBD_MAXKEYS);
@@ -768,6 +776,7 @@ void ps2kbd_data_recv(int resultCode, int bytes, void *arg)
 
       if(kbd_readmode == PS2KBD_READMODE_NORMAL)
 	{
+    int loopKey;
 	  u8 ledStatus;
 
 	  ledStatus = dev->ledStatus;
@@ -843,12 +852,13 @@ void flushbuffer()
 void ps2kbd_ioctl_setreadmode(u32 readmode)
 
 {
-  int devLoop;
 
   if(readmode == kbd_readmode) return;
 
   if((readmode == PS2KBD_READMODE_NORMAL) || (readmode == PS2KBD_READMODE_RAW))
     {
+      int devLoop;
+
       /* Reset line buffer */
       //printf("ioctl_setreadmode %d\n", readmode);
       for(devLoop = 0; devLoop < PS2KBD_MAXDEV; devLoop++)
@@ -973,18 +983,25 @@ int fio_dummy()
 
 int fio_init(iop_device_t *driver)
 {
+  (void)driver;
+
   //printf("fio_init()\n");
   return 0;
 }
 
 int fio_format(iop_file_t *f)
 {
+  (void)f;
+
   //printf("fio_format()\n");
   return 0;
 }
 
 int fio_open(iop_file_t *f, const char *name, int mode)
 {
+  (void)f;
+  (void)mode;
+
   //printf("fio_open() %s %d\n", name, mode);
   if(strcmp(name, PS2KBD_KBDFILE)) /* If not the keyboard file */
     {
@@ -1000,6 +1017,8 @@ int fio_read(iop_file_t *f, void *buf, int size)
   int count = 0;
   char *data = (char *) buf;
   int ret;
+
+  (void)f;
 
   //printf("fio_read() %p %d\n", buf, size);
 
@@ -1053,6 +1072,8 @@ int fio_read(iop_file_t *f, void *buf, int size)
 int fio_ioctl(iop_file_t *f, int cmd, void *param)
 
 {
+  (void)f;
+
   //printf("fio_ioctl() %ld %d\n", cmd, *((u32 *) param));
   switch(cmd)
     {
@@ -1085,6 +1106,8 @@ int fio_ioctl(iop_file_t *f, int cmd, void *param)
 int fio_close(iop_file_t *f)
 
 {
+  (void)f;
+
   //printf("fio_close()\n");
   return 0;
 }
@@ -1127,6 +1150,8 @@ void repeat_thread(void *arg)
 {
   u32 eventmask;
   int devLoop;
+
+  (void)arg;
 
   for(;;)
     {
@@ -1257,6 +1282,11 @@ int ps2kbd_init()
   memcpy(alt_map, us_alt_map, PS2KBD_KEYMAP_SIZE);
 
   ret = init_fio();
+  if(ret < 0)
+    {
+      printf("PS2KBD: Error adding ioman driver\n");
+      return 1;
+    }
   //printf("ps2kbd AddDrv [%d]\n", ret);
   init_repeatthread();
 

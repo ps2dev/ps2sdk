@@ -15,10 +15,11 @@
 extern SystemConfiguration_t SystemConfiguration;
 
 void InitSystemConfig(SystemConfiguration_t *SysConf, int SysConfLen){
-	unsigned int SysConfRegAddr, i;
+	unsigned int SysConfRegAddr;
 	vu8 *ptr;
 
 	if((SysConfRegAddr=*(vu32*)0xbc0003c0)!=0){
+		unsigned int i;
 		ptr=(vu8 *)(0xbc000000+SysConfRegAddr+0xF);
 
 		for(i=0; i<SysConfLen; i++) SysConf->data[i]=ptr[i];
@@ -56,11 +57,12 @@ void GetOsdConfigParam(ConfigParam* config){
 static u8 OSDConfig2[128];
 
 void SetOsdConfigParam2(void* config, int size, int offset){
-	unsigned int AmountToWrite, WriteEnd, i;
+	unsigned int WriteEnd, i;
 	u8 *ptr;
 
 	ptr=config;
 	if((WriteEnd=offset+size)>=0x81){
+		unsigned int AmountToWrite;
 		if(offset<0x80){
 			AmountToWrite=0x80-offset;
 		}

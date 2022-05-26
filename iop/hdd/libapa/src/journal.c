@@ -58,14 +58,16 @@ int apaJournalWrite(apa_cache_t *clink)
 
 int apaJournalRestore(s32 device)
 {	// copies the journal from the HDD and erases the original.
-	int i, ret;
+	int ret;
 	u32 sector;
-	apa_cache_t *clink;
 
 	APA_PRINTF(APA_DRV_NAME": checking log...\n");
 	ret = ata_device_sector_io(device, &journalBuf, APA_SECTOR_APAL, sizeof(apa_journal_t)/512, ATA_DIR_READ) == 0 ? 0 : -EIO;
 	if((ret == 0) && (journalBuf.magic == APAL_MAGIC))
 	{
+		int i;
+		apa_cache_t *clink;
+
 		if(journalBuf.num == 0)
 			return 0;
 

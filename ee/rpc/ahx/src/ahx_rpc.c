@@ -40,14 +40,13 @@ void iop_readwrite(void *addr, void *buf, u32 size, u32 read)
 {
 	DI();
 	ee_kmode_enter();
-	if (read) memcpy(buf, addr + IOP_MEM, size); else memcpy(addr + IOP_MEM, buf, size);
+	if (read) memcpy(buf, (void *)((u8 *)addr + IOP_MEM), size); else memcpy((void *)((u8 *)addr + IOP_MEM), buf, size);
 	ee_kmode_exit();
 	EI();
 }
 
 int AHX_Init()
 {
-	int i;
 	// struct t_SifDmaTransfer sdt;
 
 	// if already init'd, exit
@@ -55,6 +54,8 @@ int AHX_Init()
 
 	// bind rpc
 	while(1){
+		int i;
+
 		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1; // bind error
  		if (cd0.server != 0) break;
     	i = 0x10000;
@@ -72,8 +73,9 @@ int AHX_Init()
 
 int AHX_Play()
 {
-	int i;
 	while(1){
+		int i;
+
 		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
  		if (cd0.server != 0) break;
     	i = 0x10000;
@@ -85,8 +87,9 @@ int AHX_Play()
 
 int AHX_Pause()
 {
-	int i;
 	while(1){
+		int i;
+
 		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
  		if (cd0.server != 0) break;
     	i = 0x10000;
@@ -98,8 +101,9 @@ int AHX_Pause()
 
 int AHX_SubSong(int songNo)
 {
-	int i;
 	while(1){
+		int i;
+
 		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
  		if (cd0.server != 0) break;
     	i = 0x10000;
@@ -112,8 +116,9 @@ int AHX_SubSong(int songNo)
 
 int AHX_SetVolume(int volumePercentage)
 {
-	int i;
 	while(1){
+		int i;
+
 		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
  		if (cd0.server != 0) break;
     	i = 0x10000;
@@ -126,8 +131,9 @@ int AHX_SetVolume(int volumePercentage)
 
 int  AHX_SetBoost(int boostValue)
 {
-	int i;
 	while(1){
+		int i;
+
 		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
  		if (cd0.server != 0) break;
     	i = 0x10000;
@@ -140,8 +146,9 @@ int  AHX_SetBoost(int boostValue)
 
 int  AHX_ToggleOversampling()
 {
-	int i;
 	while(1){
+		int i;
+
 		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
  		if (cd0.server != 0) break;
     	i = 0x10000;
@@ -153,8 +160,9 @@ int  AHX_ToggleOversampling()
 
 int AHX_Quit()
 {
-	int i;
 	while(1){
+		int i;
+
 		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
  		if (cd0.server != 0) break;
     	i = 0x10000;
@@ -166,12 +174,12 @@ int AHX_Quit()
 
 int AHX_LoadSongBuffer(char* songdata, int songsize)
 {
-	int i;
-
 	// write song data to IOP song buffer
 	iop_readwrite(songbuffer_addr, songdata, songsize, 0);
 
 	while(1){
+		int i;
+
 		if (SifBindRpc( &cd0, AHX_IRX, 0) < 0) return -1;
  		if (cd0.server != 0) break;
     	i = 0x10000;

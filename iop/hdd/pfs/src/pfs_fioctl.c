@@ -58,6 +58,10 @@ static int ioctl2AttrRead(pfs_cache_t *clink, pfs_ioctl2attr_t *attr, u32 *unkbu
 
 int pfsFioIoctl(iop_file_t *f, int cmd, void *param)
 {
+	(void)f;
+	(void)cmd;
+	(void)param;
+
 	return -1;
 }
 
@@ -65,6 +69,12 @@ int pfsFioDevctl(iop_file_t *f, const char *name, int cmd, void *arg, size_t arg
 {
 	pfs_mount_t *pfsMount;
 	int rv=0;
+
+	(void)name;
+	(void)arg;
+	(void)arglen;
+	(void)buf;
+	(void)buflen;
 
 	if(!(pfsMount=pfsFioGetMountedUnit(f->unit)))
 		return -ENODEV;
@@ -124,6 +134,9 @@ int pfsFioIoctl2(iop_file_t *f, int cmd, void *arg, size_t arglen,	void *buf, si
 	int rv;
 	pfs_file_slot_t *fileSlot = (pfs_file_slot_t *)f->privdata;
 	pfs_mount_t *pfsMount;
+
+	(void)arglen;
+	(void)buflen;
 
 	if(f->mode & O_DIROPEN)
 		if(cmd==PIOCATTRREAD)
@@ -255,7 +268,11 @@ static pfs_aentry_t *getAentry(pfs_cache_t *clink, char *key, char *value, int m
 	pfs_aentry_t *end;
 
 	kLen=strlen(key);
-	fullsize=(kLen+strlen(value)+7) & ~3;
+	fullsize = 0;
+	if (value != NULL)
+	{
+		fullsize=(kLen+strlen(value)+7) & ~3;
+	}
 	for(end=(pfs_aentry_t *)((u8*)aentry+1024);aentry < end; aentry=(pfs_aentry_t *)((u8*)aentry+aentry->aLen))
 	{	//Other than critical errors, do nothing about the filesystem errors.
 		if(aentry->aLen & 3)
@@ -350,9 +367,7 @@ static int ioctl2AttrAdd(pfs_cache_t *clink, pfs_ioctl2attr_t *attr)
 
 static int ioctl2AttrDelete(pfs_cache_t *clink, void *arg)
 {
-	pfs_aentry_t *aentry;
-
-	if((aentry=getAentry(clink, arg, NULL, PFS_AENTRY_MODE_DELETE)) == NULL)
+	if(getAentry(clink, arg, NULL, PFS_AENTRY_MODE_DELETE) == NULL)
 		return -ENOENT;
 	clink->flags|=PFS_CACHE_FLAG_DIRTY;
 	return 0;

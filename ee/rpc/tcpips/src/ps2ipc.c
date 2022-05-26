@@ -358,6 +358,8 @@ int sendto(int s, void *dataptr, int size, unsigned int flags,
 	send_pkt *pkt = &_rpc_buffer.send_pkt;
 	int miss;
 
+	(void)tolen;
+
 	WaitSema(lock_sema);
 
 	pkt->socket = s;
@@ -647,7 +649,7 @@ int setsockopt(int s, int level, int optname, const void *optval, socklen_t optl
 	WaitSema(lock_sema);
 
 	pkt->s = s;
-	pkt->s = level;
+	pkt->level = level;
 	pkt->optname = optname;
 	pkt->optlen = optlen;
 
@@ -712,7 +714,7 @@ void dns_setserver(u8 numdns, ip_addr_t *dnsserver)
 	WaitSema(lock_sema);
 
 	pkt->numdns = numdns;
-	pkt->dnsserver = *dnsserver;
+	pkt->dnsserver = (dnsserver != NULL) ? (*dnsserver) : *IP4_ADDR_ANY;
 
 	SifCallRpc(&_ps2ip, PS2IPS_ID_DNS_SETSERVER, 0, (void*)pkt, sizeof(dns_setserver_pkt), NULL, 0, NULL, NULL);
 

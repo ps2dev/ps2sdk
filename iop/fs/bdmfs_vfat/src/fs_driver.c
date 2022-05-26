@@ -120,7 +120,6 @@ static fs_rec* fs_findFreeFileSlot(void)
     for (i = 0; i < MAX_FILES; i++) {
         if (fsRec[i].dirent.file_flag < 0) {
             return &fsRec[i];
-            break;
         }
     }
     return NULL;
@@ -208,6 +207,8 @@ static int fs_dummy(void)
 //---------------------------------------------------------------------------
 static int fs_init(iop_device_t* driver)
 {
+    (void)driver;
+
     M_DEBUG("%s\n", __func__);
 
     if (!fs_inited) {
@@ -222,10 +223,11 @@ static int fs_init(iop_device_t* driver)
 static int fs_open(iop_file_t* fd, const char* name, int flags, int mode)
 {
     fat_driver* fatd;
-    fs_rec *rec, *rec2;
+    fs_rec *rec;
     int ret;
     unsigned int cluster;
-    char escapeNotExist;
+
+    (void)mode;
 
     M_DEBUG("%s: %s flags=%X mode=%X\n", __func__, name, flags, mode);
 
@@ -252,6 +254,8 @@ static int fs_open(iop_file_t* fd, const char* name, int flags, int mode)
         _fs_unlock();
         return ret;
     } else {
+        fs_rec *rec2;
+
         //File exists. Check if the file is already open
         rec2 = fs_findFileSlotByCluster(rec->dirent.fatdir.startCluster);
         if (rec2 != NULL) {
@@ -264,6 +268,8 @@ static int fs_open(iop_file_t* fd, const char* name, int flags, int mode)
     }
 
     if (flags & O_WRONLY) { //dlanor: corrected bad test condition
+        char escapeNotExist;
+
         cluster = 0;       //start from root
 
         escapeNotExist = 1;
@@ -404,7 +410,7 @@ static int fs_lseek(iop_file_t* fd, int offset, int whence)
         _fs_unlock();
         return -1;
     }
-    if (rec->filePos < 0) {
+    if ((int)(rec->filePos) < 0) {
         rec->filePos = 0;
     }
     if (rec->filePos > rec->dirent.fatdir.size) {
@@ -568,6 +574,8 @@ static int fs_mkdir(iop_file_t* fd, const char* name, int mode)
     int sfnOffset;
     unsigned int sfnSector;
     unsigned int cluster;
+
+    (void)mode;
 
     M_DEBUG("%s\n", __func__);
 
@@ -846,6 +854,12 @@ int fs_rename(iop_file_t *fd, const char *path, const char *newpath)
 static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
     int ret;
+
+    (void)name;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     _fs_lock();
 

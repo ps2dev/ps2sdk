@@ -221,7 +221,6 @@ int render(framebuffer_t *frame, zbuffer_t *z)
 	packet_t *flip_pkt;
 
 	qword_t *q;
-	qword_t *dmatag;
 
 	prim_t prim;
 	color_t color;
@@ -268,6 +267,7 @@ int render(framebuffer_t *frame, zbuffer_t *z)
 
 	for (;;)
 	{
+		qword_t *dmatag;
 
 		current = packets[context];
 
