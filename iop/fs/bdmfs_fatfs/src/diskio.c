@@ -7,6 +7,8 @@
 /* storage control modules to the FatFs module with a defined API.       */
 /*-----------------------------------------------------------------------*/
 
+#include <stdlib.h>
+#include <bdm.h>
 #include "ff.h"			/* Obtains integer types */
 #include "diskio.h"		/* Declarations of disk functions */
 
@@ -15,6 +17,18 @@
 #define DEV_SD		1	/* Example: Map IEEE1394 to physical drive 1 */
 #define DEV_SDC		2	/* Example: Map MX4SIO to physical drive 2 */
 
+static struct block_device* mounted_bd = NULL;
+static FATFS fat_fs;
+
+int connect_bd(struct block_device* bd){
+	mounted_bd = bd;
+	f_mount(&fat_fs, "mass:", 1);
+}
+
+void disconnect_bd(struct block_device* bd){
+	f_unmount("mass:");
+	mounted_bd = NULL;
+}
 
 /*-----------------------------------------------------------------------*/
 /* Get Drive Status                                                      */
@@ -29,30 +43,6 @@ DSTATUS disk_status (
 
     result = 0;
     return result;
-
-/* 	switch (pdrv) {
-	case DEV_USB :
-		result = USB_disk_status();
-
-		// translate the reslut code here
-
-		return stat;
-
-	case DEV_SD :
-		result = SD_disk_status();
-
-		// translate the reslut code here
-
-		return stat;
-
-	case DEV_SDC :
-		result = SDC_disk_status();
-
-		// translate the reslut code here
-
-		return stat;
-	}
-	return STA_NOINIT; */
 }
 
 
@@ -70,30 +60,6 @@ DSTATUS disk_initialize (
 
     result = 0;
     return result;
-
-	/* switch (pdrv) {
-	case DEV_USB :
-		result = USB_disk_initialize();
-
-		// translate the reslut code here
-
-		return stat;
-
-	case DEV_SD :
-		result = SD_disk_initialize();
-
-		// translate the reslut code here
-
-		return stat;
-
-	case DEV_SDC :
-		result = SDC_disk_initialize();
-
-		// translate the reslut code here
-
-		return stat;
-	}
-	return STA_NOINIT; */
 }
 
 
@@ -112,36 +78,9 @@ DRESULT disk_read (
 	DRESULT res;
 	int result;
 
-	switch (pdrv) {
-	case DEV_USB :
-		// translate the arguments here
+	res = mounted_bd->read(mounted_bd, sector, buff, count);
 
-		result = USB_disk_read(buff, sector, count);
-
-		// translate the reslut code here
-
-		return res;
-
-	case DEV_SD :
-		// translate the arguments here
-
-		result = SD_disk_read(buff, sector, count);
-
-		// translate the reslut code here
-
-		return res;
-
-	case DEV_SDC :
-		// translate the arguments here
-
-		result = SDC_disk_read(buff, sector, count);
-
-		// translate the reslut code here
-
-		return res;
-	}
-
-	return RES_PARERR;
+	return res;
 }
 
 
@@ -162,36 +101,9 @@ DRESULT disk_write (
 	DRESULT res;
 	int result;
 
-	switch (pdrv) {
-	case DEV_USB :
-		// translate the arguments here
+	res = mounted_bd->write(mounted_bd, sector, buff, count);
 
-		result = USB_disk_write(buff, sector, count);
-
-		// translate the reslut code here
-
-		return res;
-
-	case DEV_SD :
-		// translate the arguments here
-
-		result = SD_disk_write(buff, sector, count);
-
-		// translate the reslut code here
-
-		return res;
-
-	case DEV_SDC :
-		// translate the arguments here
-
-		result = SDC_disk_write(buff, sector, count);
-
-		// translate the reslut code here
-
-		return res;
-	}
-
-	return RES_PARERR;
+	return res;
 }
 
 #endif

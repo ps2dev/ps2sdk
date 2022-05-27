@@ -18,12 +18,14 @@ IRX_ID("bdmff", MAJOR_VER, MINOR_VER);
 
 extern int InitFAT(void);
 extern int InitFS(void);
+extern int connect_bd();
+extern void disconnect_bd();
 
 static struct file_system g_fs = {
     .priv = NULL,
     .name = "fatfs",
-    .connect_bd = f_mount,
-    .disconnect_bd = f_unmount,
+    .connect_bd = connect_bd,
+    .disconnect_bd = disconnect_bd,
 };
 
 int _start(int argc, char *argv[])
