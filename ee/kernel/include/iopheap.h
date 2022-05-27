@@ -23,7 +23,7 @@ extern "C" {
 int SifInitIopHeap(void);
 void SifExitIopHeap(void);
 
-void * SifAllocIopHeap(int size);
+void *SifAllocIopHeap(int size);
 int SifFreeIopHeap(void *addr);
 
 int SifLoadIopHeap(const char *path, void *addr);

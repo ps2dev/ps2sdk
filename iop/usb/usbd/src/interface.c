@@ -29,412 +29,424 @@ extern UsbdConfig usbConfig;
 extern int hcdTid;
 extern int callbackTid;
 
-int sceUsbdRegisterLdd(sceUsbdLddOps *driver) {
-	int res;
+int sceUsbdRegisterLdd(sceUsbdLddOps *driver)
+{
+    int res;
 #if USE_GP_REGISTER
-	void *OldGP;
+    void *OldGP;
 
-	OldGP = SetModuleGP();
+    OldGP = SetModuleGP();
 #endif
-	if (usbdLock() != 0) {
+    if (usbdLock() != 0) {
 #if USE_GP_REGISTER
-		SetGP(OldGP);
+        SetGP(OldGP);
 #endif
-		return USB_RC_BADCONTEXT;
-	}
+        return USB_RC_BADCONTEXT;
+    }
 
 #if USE_GP_REGISTER
-	res = doRegisterDriver(driver, OldGP);
+    res = doRegisterDriver(driver, OldGP);
 #else
-	res = doRegisterDriver(driver, NULL);
+    res = doRegisterDriver(driver, NULL);
 #endif
 
-	usbdUnlock();
+    usbdUnlock();
 #if USE_GP_REGISTER
-	SetGP(OldGP);
+    SetGP(OldGP);
 #endif
 
-	return res;
+    return res;
 }
 
-int sceUsbdRegisterAutoloader(sceUsbdLddOps *drv) {
-	int res;
+int sceUsbdRegisterAutoloader(sceUsbdLddOps *drv)
+{
+    int res;
 #if USE_GP_REGISTER
-	void *OldGP;
+    void *OldGP;
 
-	OldGP = SetModuleGP();
+    OldGP = SetModuleGP();
 #endif
-	if (usbdLock() != 0) {
+    if (usbdLock() != 0) {
 #if USE_GP_REGISTER
-		SetGP(OldGP);
+        SetGP(OldGP);
 #endif
-		return USB_RC_BADCONTEXT;
-	}
+        return USB_RC_BADCONTEXT;
+    }
 
 #if USE_GP_REGISTER
-	res = doRegisterAutoLoader(drv, OldGP);
+    res = doRegisterAutoLoader(drv, OldGP);
 #else
-	res = doRegisterAutoLoader(drv, NULL);
+    res = doRegisterAutoLoader(drv, NULL);
 #endif
 
-	usbdUnlock();
+    usbdUnlock();
 #if USE_GP_REGISTER
-	SetGP(OldGP);
+    SetGP(OldGP);
 #endif
 
-	return res;
+    return res;
 }
 
-int sceUsbdUnregisterLdd(sceUsbdLddOps *driver) {
-	int res;
+int sceUsbdUnregisterLdd(sceUsbdLddOps *driver)
+{
+    int res;
 #if USE_GP_REGISTER
-	void *OldGP;
+    void *OldGP;
 
-	OldGP = SetModuleGP();
+    OldGP = SetModuleGP();
 #endif
-	if (usbdLock() != 0) {
+    if (usbdLock() != 0) {
 #if USE_GP_REGISTER
-		SetGP(OldGP);
+        SetGP(OldGP);
 #endif
-		return USB_RC_BADCONTEXT;
-	}
+        return USB_RC_BADCONTEXT;
+    }
 
-	res = doUnregisterDriver(driver);
+    res = doUnregisterDriver(driver);
 
-	usbdUnlock();
+    usbdUnlock();
 #if USE_GP_REGISTER
-	SetGP(OldGP);
+    SetGP(OldGP);
 #endif
 
-	return res;
+    return res;
 }
 
-int sceUsbdUnregisterAutoloader(void) {
-	int res;
+int sceUsbdUnregisterAutoloader(void)
+{
+    int res;
 #if USE_GP_REGISTER
-	void *OldGP;
+    void *OldGP;
 
-	OldGP = SetModuleGP();
+    OldGP = SetModuleGP();
 #endif
-	if (usbdLock() != 0) {
+    if (usbdLock() != 0) {
 #if USE_GP_REGISTER
-		SetGP(OldGP);
+        SetGP(OldGP);
 #endif
-		return USB_RC_BADCONTEXT;
-	}
+        return USB_RC_BADCONTEXT;
+    }
 
-	res = doUnregisterAutoLoader();
+    res = doUnregisterAutoLoader();
 
-	usbdUnlock();
+    usbdUnlock();
 #if USE_GP_REGISTER
-	SetGP(OldGP);
+    SetGP(OldGP);
 #endif
 
-	return res;
+    return res;
 }
 
-void *sceUsbdScanStaticDescriptor(int devId, void *data, u8 type) {
-	void *res;
+void *sceUsbdScanStaticDescriptor(int devId, void *data, u8 type)
+{
+    void *res;
 #if USE_GP_REGISTER
-	void *OldGP;
+    void *OldGP;
 
-	OldGP = SetModuleGP();
+    OldGP = SetModuleGP();
 #endif
-	if (usbdLock() != 0) {
+    if (usbdLock() != 0) {
 #if USE_GP_REGISTER
-		SetGP(OldGP);
+        SetGP(OldGP);
 #endif
-		return NULL;
-	}
+        return NULL;
+    }
 
-	res = doGetDeviceStaticDescriptor(devId, data, type);
+    res = doGetDeviceStaticDescriptor(devId, data, type);
 
-	usbdUnlock();
+    usbdUnlock();
 #if USE_GP_REGISTER
-	SetGP(OldGP);
+    SetGP(OldGP);
 #endif
 
-	return res;
+    return res;
 }
 
-int sceUsbdGetDeviceLocation(int devId, u8 *path) {
-	Device *dev;
-	int res;
+int sceUsbdGetDeviceLocation(int devId, u8 *path)
+{
+    Device *dev;
+    int res;
 #if USE_GP_REGISTER
-	void *OldGP;
+    void *OldGP;
 
-	OldGP = SetModuleGP();
+    OldGP = SetModuleGP();
 #endif
-	if (usbdLock() != 0) {
+    if (usbdLock() != 0) {
 #if USE_GP_REGISTER
-		SetGP(OldGP);
+        SetGP(OldGP);
 #endif
-		return USB_RC_BADCONTEXT;
-	}
+        return USB_RC_BADCONTEXT;
+    }
 
-	dev = fetchDeviceById(devId);
-	if (dev)
-		res = doGetDeviceLocation(dev, path);
-	else
-		res = USB_RC_BADDEV;
+    dev = fetchDeviceById(devId);
+    if (dev)
+        res = doGetDeviceLocation(dev, path);
+    else
+        res = USB_RC_BADDEV;
 
-	usbdUnlock();
+    usbdUnlock();
 #if USE_GP_REGISTER
-	SetGP(OldGP);
+    SetGP(OldGP);
 #endif
 
-	return res;
+    return res;
 }
 
-int sceUsbdSetPrivateData(int devId, void *data) {
-	Device *dev;
-	int res = USB_RC_OK;
+int sceUsbdSetPrivateData(int devId, void *data)
+{
+    Device *dev;
+    int res = USB_RC_OK;
 #if USE_GP_REGISTER
-	void *OldGP;
+    void *OldGP;
 
-	OldGP = SetModuleGP();
+    OldGP = SetModuleGP();
 #endif
-	if (usbdLock() != 0) {
+    if (usbdLock() != 0) {
 #if USE_GP_REGISTER
-		SetGP(OldGP);
+        SetGP(OldGP);
 #endif
-		return USB_RC_BADCONTEXT;
-	}
+        return USB_RC_BADCONTEXT;
+    }
 
-	dev = fetchDeviceById(devId);
-	if (dev)
-		dev->privDataField = data;
-	else
-		res = USB_RC_BADDEV;
+    dev = fetchDeviceById(devId);
+    if (dev)
+        dev->privDataField = data;
+    else
+        res = USB_RC_BADDEV;
 
-	usbdUnlock();
+    usbdUnlock();
 #if USE_GP_REGISTER
-	SetGP(OldGP);
+    SetGP(OldGP);
 #endif
 
-	return res;
+    return res;
 }
 
-void *sceUsbdGetPrivateData(int devId) {
-	Device *dev;
-	void *res = NULL;
+void *sceUsbdGetPrivateData(int devId)
+{
+    Device *dev;
+    void *res = NULL;
 #if USE_GP_REGISTER
-	void *OldGP;
+    void *OldGP;
 
-	OldGP = SetModuleGP();
+    OldGP = SetModuleGP();
 #endif
-	if (usbdLock() != 0) {
+    if (usbdLock() != 0) {
 #if USE_GP_REGISTER
-		SetGP(OldGP);
+        SetGP(OldGP);
 #endif
-		return NULL;
-	}
+        return NULL;
+    }
 
-	dev = fetchDeviceById(devId);
-	if (dev)
-		res = dev->privDataField;
+    dev = fetchDeviceById(devId);
+    if (dev)
+        res = dev->privDataField;
 
-	usbdUnlock();
+    usbdUnlock();
 #if USE_GP_REGISTER
-	SetGP(OldGP);
+    SetGP(OldGP);
 #endif
 
-	return res;
+    return res;
 }
 
-int sceUsbdOpenPipe(int devId, UsbEndpointDescriptor *desc) {
-	Device *dev;
-	Endpoint *ep;
-	int res = -1;
+int sceUsbdOpenPipe(int devId, UsbEndpointDescriptor *desc)
+{
+    Device *dev;
+    Endpoint *ep;
+    int res = -1;
 #if USE_GP_REGISTER
-	void *OldGP;
+    void *OldGP;
 
-	OldGP = SetModuleGP();
+    OldGP = SetModuleGP();
 #endif
-	if (usbdLock() != 0) {
+    if (usbdLock() != 0) {
 #if USE_GP_REGISTER
-		SetGP(OldGP);
+        SetGP(OldGP);
 #endif
-		return -1;
-	}
+        return -1;
+    }
 
-	dev = fetchDeviceById(devId);
-	if (dev) {
-		ep = doOpenEndpoint(dev, desc, 0);
-		if (ep)
-			res = ep->id;
-	}
+    dev = fetchDeviceById(devId);
+    if (dev) {
+        ep = doOpenEndpoint(dev, desc, 0);
+        if (ep)
+            res = ep->id;
+    }
 
-	usbdUnlock();
+    usbdUnlock();
 #if USE_GP_REGISTER
-	SetGP(OldGP);
+    SetGP(OldGP);
 #endif
 
-	return res;
+    return res;
 }
 
-int sceUsbdClosePipe(int id) {
-	Endpoint *ep;
-	int res;
+int sceUsbdClosePipe(int id)
+{
+    Endpoint *ep;
+    int res;
 #if USE_GP_REGISTER
-	void *OldGP;
+    void *OldGP;
 
-	OldGP = SetModuleGP();
+    OldGP = SetModuleGP();
 #endif
-	if (usbdLock() != 0) {
+    if (usbdLock() != 0) {
 #if USE_GP_REGISTER
-		SetGP(OldGP);
+        SetGP(OldGP);
 #endif
-		return -1;
-	}
+        return -1;
+    }
 
-	ep = fetchEndpointById(id);
-	if (ep)
-		res = doCloseEndpoint(ep);
-	else
-		res = USB_RC_BADPIPE;
+    ep = fetchEndpointById(id);
+    if (ep)
+        res = doCloseEndpoint(ep);
+    else
+        res = USB_RC_BADPIPE;
 
-	usbdUnlock();
+    usbdUnlock();
 #if USE_GP_REGISTER
-	SetGP(OldGP);
+    SetGP(OldGP);
 #endif
 
-	return res;
+    return res;
 }
 
-int sceUsbdTransferPipe(int id, void *data, u32 len, void *option, sceUsbdDoneCallback callback, void *cbArg) {
-	UsbDeviceRequest *ctrlPkt = (UsbDeviceRequest *)option;
-	IoRequest *req;
-	Endpoint *ep;
-	int res = 0;
+int sceUsbdTransferPipe(int id, void *data, u32 len, void *option, sceUsbdDoneCallback callback, void *cbArg)
+{
+    UsbDeviceRequest *ctrlPkt = (UsbDeviceRequest *)option;
+    IoRequest *req;
+    Endpoint *ep;
+    int res = 0;
 #if USE_GP_REGISTER
-	void *OldGP;
+    void *OldGP;
 
-	OldGP = SetModuleGP();
+    OldGP = SetModuleGP();
 #endif
-	if (usbdLock() != 0) {
+    if (usbdLock() != 0) {
 #if USE_GP_REGISTER
-		SetGP(OldGP);
+        SetGP(OldGP);
 #endif
-		return USB_RC_BADCONTEXT;
-	}
+        return USB_RC_BADCONTEXT;
+    }
 
-	ep = fetchEndpointById(id);
-	if (!ep) {
-		dbg_printf("sceUsbdTransferPipe: Endpoint %d not found\n", id);
-		res = USB_RC_BADPIPE;
-	}
+    ep = fetchEndpointById(id);
+    if (!ep) {
+        dbg_printf("sceUsbdTransferPipe: Endpoint %d not found\n", id);
+        res = USB_RC_BADPIPE;
+    }
 
-	if ((res == 0) && data && len) {
-		if ((((u32)((u8 *)data + len - 1) >> 12) - ((u32)data >> 12)) > 1)
-			res = USB_RC_BADLENGTH;
-		else if (ep->alignFlag && ((u32)data & 3))
-			res = USB_RC_BADALIGN;
-		else if ((ep->endpointType == TYPE_ISOCHRON) && ((ep->hcEd.maxPacketSize & 0x7FF) < len))
-			res = USB_RC_BADLENGTH;
-	}
-	if (res == 0) {
-		req = allocIoRequest();
-		if (!req) {
-			dbg_printf("Ran out of IoReqs\n");
-			res = USB_RC_IOREQ;
-		}
-	}
-	if (res == 0) {
-		req->userCallbackProc = callback;
-		req->userCallbackArg = cbArg;
+    if ((res == 0) && data && len) {
+        if ((((u32)((u8 *)data + len - 1) >> 12) - ((u32)data >> 12)) > 1)
+            res = USB_RC_BADLENGTH;
+        else if (ep->alignFlag && ((u32)data & 3))
+            res = USB_RC_BADALIGN;
+        else if ((ep->endpointType == TYPE_ISOCHRON) && ((ep->hcEd.maxPacketSize & 0x7FF) < len))
+            res = USB_RC_BADLENGTH;
+    }
+    if (res == 0) {
+        req = allocIoRequest();
+        if (!req) {
+            dbg_printf("Ran out of IoReqs\n");
+            res = USB_RC_IOREQ;
+        }
+    }
+    if (res == 0) {
+        req->userCallbackProc = callback;
+        req->userCallbackArg  = cbArg;
 #if USE_GP_REGISTER
-		req->gpSeg = GetGP(); // gp of the calling module
+        req->gpSeg = GetGP(); // gp of the calling module
 #endif
-		if (ep->endpointType == TYPE_CONTROL) {
-			if (!ctrlPkt) {
-				res = USB_RC_BADOPTION;
-				freeIoRequest(req);
-			} else if (ctrlPkt->length != len) {
-				res = USB_RC_BADLENGTH;
-				freeIoRequest(req);
-			} else {
-				res = doControlTransfer(ep, req,
-					ctrlPkt->requesttype, ctrlPkt->request, ctrlPkt->value, ctrlPkt->index, ctrlPkt->length,
-					data, signalCallbackThreadFunc);
-			}
-		} else {
-			if (ep->endpointType == TYPE_ISOCHRON)
-				req->waitFrames = (u32)option;
-			res = attachIoReqToEndpoint(ep, req, data, len, signalCallbackThreadFunc);
-		}
-	}
+        if (ep->endpointType == TYPE_CONTROL) {
+            if (!ctrlPkt) {
+                res = USB_RC_BADOPTION;
+                freeIoRequest(req);
+            } else if (ctrlPkt->length != len) {
+                res = USB_RC_BADLENGTH;
+                freeIoRequest(req);
+            } else {
+                res = doControlTransfer(ep, req,
+                                        ctrlPkt->requesttype, ctrlPkt->request, ctrlPkt->value, ctrlPkt->index, ctrlPkt->length,
+                                        data, signalCallbackThreadFunc);
+            }
+        } else {
+            if (ep->endpointType == TYPE_ISOCHRON)
+                req->waitFrames = (u32)option;
+            res = attachIoReqToEndpoint(ep, req, data, len, signalCallbackThreadFunc);
+        }
+    }
 
-	usbdUnlock();
+    usbdUnlock();
 #if USE_GP_REGISTER
-	SetGP(OldGP);
+    SetGP(OldGP);
 #endif
 
-	return res;
+    return res;
 }
 
-int sceUsbdOpenPipeAligned(int devId, UsbEndpointDescriptor *desc) {
-	Device *dev;
-	Endpoint *ep;
-	int res = -1;
+int sceUsbdOpenPipeAligned(int devId, UsbEndpointDescriptor *desc)
+{
+    Device *dev;
+    Endpoint *ep;
+    int res = -1;
 #if USE_GP_REGISTER
-	void *OldGP;
+    void *OldGP;
 
-	OldGP = SetModuleGP();
+    OldGP = SetModuleGP();
 #endif
-	if (usbdLock() != 0) {
+    if (usbdLock() != 0) {
 #if USE_GP_REGISTER
-		SetGP(OldGP);
+        SetGP(OldGP);
 #endif
-		return -1;
-	}
+        return -1;
+    }
 
-	dev = fetchDeviceById(devId);
-	if (dev) {
-		ep = doOpenEndpoint(dev, desc, 1);
-		if (ep)
-			res = ep->id;
-	}
+    dev = fetchDeviceById(devId);
+    if (dev) {
+        ep = doOpenEndpoint(dev, desc, 1);
+        if (ep)
+            res = ep->id;
+    }
 
-	usbdUnlock();
+    usbdUnlock();
 #if USE_GP_REGISTER
-	SetGP(OldGP);
+    SetGP(OldGP);
 #endif
 
-	return res;
+    return res;
 }
 
-int sceUsbdChangeThreadPriority(int prio1, int prio2) {
-	int res;
+int sceUsbdChangeThreadPriority(int prio1, int prio2)
+{
+    int res;
 #if USE_GP_REGISTER
-	void *OldGP;
+    void *OldGP;
 
-	OldGP = SetModuleGP();
+    OldGP = SetModuleGP();
 #endif
-	if (usbdLock() != 0) {
+    if (usbdLock() != 0) {
 #if USE_GP_REGISTER
-		SetGP(OldGP);
+        SetGP(OldGP);
 #endif
-		return USB_RC_BADCONTEXT;
-	}
+        return USB_RC_BADCONTEXT;
+    }
 
-	res = 0;
+    res = 0;
 
-	if(usbConfig.hcdThreadPrio != prio1) {
-		usbConfig.hcdThreadPrio = prio1;
-		res = ChangeThreadPriority(hcdTid, prio1);
-	}
+    if (usbConfig.hcdThreadPrio != prio1) {
+        usbConfig.hcdThreadPrio = prio1;
+        res                     = ChangeThreadPriority(hcdTid, prio1);
+    }
 
-	if(usbConfig.cbThreadPrio != prio2) {
-		usbConfig.cbThreadPrio = prio2;
-		res = ChangeThreadPriority(callbackTid, prio2);
-	}
+    if (usbConfig.cbThreadPrio != prio2) {
+        usbConfig.cbThreadPrio = prio2;
+        res                    = ChangeThreadPriority(callbackTid, prio2);
+    }
 
-	usbdUnlock();
+    usbdUnlock();
 #if USE_GP_REGISTER
-	SetGP(OldGP);
+    SetGP(OldGP);
 #endif
 
-	return res;
+    return res;
 }
-

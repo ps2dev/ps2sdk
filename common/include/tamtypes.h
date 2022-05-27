@@ -20,10 +20,10 @@
 #error Either _EE or _IOP must be defined!
 #endif
 
-typedef	unsigned char u8;
+typedef unsigned char u8;
 typedef unsigned short u16;
 
-typedef	volatile u8 vu8;
+typedef volatile u8 vu8;
 typedef volatile u16 vu16;
 
 #ifdef _EE
@@ -33,11 +33,11 @@ typedef unsigned long long u64;
 #else
 typedef unsigned long u64;
 #endif
-typedef unsigned int u128 __attribute__(( mode(TI) ));
+typedef unsigned int u128 __attribute__((mode(TI)));
 
 typedef volatile u32 vu32;
 typedef volatile u64 vu64;
-typedef volatile u128 vu128 __attribute__(( mode(TI) ));
+typedef volatile u128 vu128 __attribute__((mode(TI)));
 #endif
 
 #ifdef _IOP
@@ -61,11 +61,11 @@ typedef signed long long s64;
 #else
 typedef signed long s64;
 #endif
-typedef signed int s128 __attribute__(( mode(TI) ));
+typedef signed int s128 __attribute__((mode(TI)));
 
 typedef volatile s32 vs32;
 typedef volatile s64 vs64;
-typedef volatile s128 vs128 __attribute__(( mode(TI) ));
+typedef volatile s128 vs128 __attribute__((mode(TI)));
 #endif
 
 #ifdef _IOP
@@ -77,12 +77,13 @@ typedef volatile s64 vs64;
 #endif
 
 #ifdef _EE
-typedef union {
-	u128 qw;
-	u8   b[16];
-	u16  hw[8];
-	u32  sw[4];
-	u64  dw[2];
+typedef union
+{
+    u128 qw;
+    u8 b[16];
+    u16 hw[8];
+    u32 sw[4];
+    u64 dw[2];
 } qword_t;
 
 #endif
@@ -91,7 +92,10 @@ typedef union {
 #define NULL (void *)0
 #endif
 
-static inline u8  _lb(u32 addr) { return *(vu8 *)addr; }
+static inline u8 _lb(u32 addr)
+{
+    return *(vu8 *)addr;
+}
 static inline u16 _lh(u32 addr) { return *(vu16 *)addr; }
 static inline u32 _lw(u32 addr) { return *(vu32 *)addr; }
 
@@ -100,7 +104,10 @@ static inline void _sh(u16 val, u32 addr) { *(vu16 *)addr = val; }
 static inline void _sw(u32 val, u32 addr) { *(vu32 *)addr = val; }
 
 #ifdef _EE
-static inline u64 _ld(u32 addr) { return *(vu64 *)addr; }
+static inline u64 _ld(u32 addr)
+{
+    return *(vu64 *)addr;
+}
 static inline u128 _lq(u32 addr) { return *(vu128 *)addr; }
 static inline void _sd(u64 val, u32 addr) { *(vu64 *)addr = val; }
 static inline void _sq(u128 val, u32 addr) { *(vu128 *)addr = val; }

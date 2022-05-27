@@ -7,7 +7,7 @@
 
 #include "fat_driver.h"
 
-//#define DEBUG  //comment out this line when not debugging
+// #define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
 
 #define MAJOR_VER 1
@@ -25,7 +25,7 @@ static struct file_system g_fs = {
     .disconnect_bd = fat_forceUnmount,
 };
 
-int _start(int argc, char* argv[])
+int _start(int argc, char *argv[])
 {
     (void)argc;
     (void)argv;
@@ -51,9 +51,9 @@ int _start(int argc, char* argv[])
     return MODULE_RESIDENT_END;
 }
 
-void* malloc(int size)
+void *malloc(int size)
 {
-    void* result;
+    void *result;
     int OldState;
 
     CpuSuspendIntr(&OldState);
@@ -63,7 +63,7 @@ void* malloc(int size)
     return result;
 }
 
-void free(void* ptr)
+void free(void *ptr)
 {
     int OldState;
 

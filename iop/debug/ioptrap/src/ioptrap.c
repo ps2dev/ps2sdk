@@ -94,7 +94,7 @@ static trap_exception_handler_t handlers[16];
 trap_exception_handler_t set_exception_handler(exception_type_t type, trap_exception_handler_t handler)
 {
     trap_exception_handler_t old_handler = handlers[type];
-    handlers[type] = handler;
+    handlers[type]                       = handler;
     return old_handler;
 }
 
@@ -109,7 +109,7 @@ void trap(exception_type_t type, struct exception_frame *ex)
     if (dbg_jmp_buf_setup) {
         u32 *p = (u32 *)dbg_jmp_buf;
         /* simulate longjmp */
-        ex->epc = p[JUMP_BUF_PC];
+        ex->epc      = p[JUMP_BUF_PC];
         ex->regs[29] = p[JUMP_BUF_SP];
         ex->regs[30] = p[JUMP_BUF_FP];
         ex->regs[16] = p[JUMP_BUF_S0];
@@ -121,7 +121,7 @@ void trap(exception_type_t type, struct exception_frame *ex)
         ex->regs[22] = p[JUMP_BUF_S6];
         ex->regs[23] = p[JUMP_BUF_S7];
         ex->regs[28] = p[JUMP_BUF_GP];
-        ex->regs[2] = type; /* return value from setjmp */
+        ex->regs[2]  = type; /* return value from setjmp */
         return;
     }
     TRAP_PRINTF("IOP Exception : %s\n", exception_type_name[type]);
@@ -153,7 +153,7 @@ static void trigger()
     printf("trigger=%p\n", trigger);
     printf("badaddr\n");
     if (0 == (v = setjmp(dbg_jmp_buf))) {
-        dbg_jmp_buf_setup = 1;
+        dbg_jmp_buf_setup  = 1;
         *(u32 *)0xdeadbeef = 0xfeedface;
     } else {
         printf("exception occurred in command, v=%08x\n", v);
@@ -184,11 +184,11 @@ int create_main_thread(void)
 {
     iop_thread_t thread;
 
-    thread.attr = 0x2000000;
-    thread.option = 0;
-    thread.thread = main_thread;
+    thread.attr      = 0x2000000;
+    thread.option    = 0;
+    thread.thread    = main_thread;
     thread.stacksize = 0x8000;
-    thread.priority = 0x18;
+    thread.priority  = 0x18;
     return CreateThread(&thread);
 }
 

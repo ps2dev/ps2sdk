@@ -2,7 +2,7 @@
 #define SIO2MAN_HOOK_H
 
 
-int  sio2man_hook_init();
+int sio2man_hook_init();
 void sio2man_hook_deinit();
 
 // Lock all communication to SIO2MAN

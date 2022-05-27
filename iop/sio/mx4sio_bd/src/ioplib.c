@@ -1,9 +1,9 @@
 #include "ioplib.h"
 #include <intrman.h>
 
-iop_library_t* ioplib_getByName(const char* name)
+iop_library_t *ioplib_getByName(const char *name)
 {
-    iop_library_t* libptr;
+    iop_library_t *libptr;
     int i;
 
     // Get first loaded library
@@ -27,15 +27,14 @@ iop_library_t* ioplib_getByName(const char* name)
     return NULL;
 }
 
-unsigned int ioplib_getTableSize(iop_library_t* lib)
+unsigned int ioplib_getTableSize(iop_library_t *lib)
 {
-    void** exp;
+    void **exp;
     unsigned int size;
 
     exp = NULL;
-    if (lib != NULL)
-    {
-        exp  = lib->exports;
+    if (lib != NULL) {
+        exp = lib->exports;
     }
     size = 0;
 
@@ -46,7 +45,7 @@ unsigned int ioplib_getTableSize(iop_library_t* lib)
     return size;
 }
 
-void* ioplib_hookExportEntry(iop_library_t* lib, unsigned int entry, void* func)
+void *ioplib_hookExportEntry(iop_library_t *lib, unsigned int entry, void *func)
 {
     if (entry < ioplib_getTableSize(lib)) {
         int oldstate;
@@ -66,15 +65,15 @@ void* ioplib_hookExportEntry(iop_library_t* lib, unsigned int entry, void* func)
     return NULL;
 }
 
-void ioplib_relinkExports(iop_library_t* lib)
+void ioplib_relinkExports(iop_library_t *lib)
 {
-    struct irx_import_table* table;
-    struct irx_import_stub* stub;
+    struct irx_import_table *table;
+    struct irx_import_stub *stub;
 
     // go through each table that imports the library
     for (table = lib->caller; table != NULL; table = table->next) {
         // go through each import in the table
-        for (stub = (struct irx_import_stub*)table->stubs; stub->jump != 0; stub++) {
+        for (stub = (struct irx_import_stub *)table->stubs; stub->jump != 0; stub++) {
             // patch the stub to jump to the address specified in the library export table for "fno"
             stub->jump = 0x08000000 | (((u32)lib->exports[stub->fno] << 4) >> 6);
         }

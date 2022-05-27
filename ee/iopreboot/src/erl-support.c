@@ -12,4 +12,4 @@
 
 #include <erl.h>
 
-char * erl_id = "libiopreboot";
+char *erl_id = "libiopreboot";

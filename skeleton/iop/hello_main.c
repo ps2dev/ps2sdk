@@ -12,7 +12,8 @@ extern struct irx_export_table _exp_hello;
 
 
 // This is a bit like a "main" for IRX files.
-int _start(int argc, char * argv[]) {
+int _start(int argc, char *argv[])
+{
     if (RegisterLibraryEntries(&_exp_hello) != 0)
         return 1;
 

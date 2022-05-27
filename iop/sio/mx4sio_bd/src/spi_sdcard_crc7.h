@@ -11,6 +11,6 @@
 void crc7_generate_table(void);
 #endif
 
-uint8_t crc7(const uint8_t  message[], size_t length);
+uint8_t crc7(const uint8_t message[], size_t length);
 
 #endif //__SPI_SDCARD_CRC7_H__
