@@ -9,37 +9,39 @@
 
 #include <stdlib.h>
 #include <bdm.h>
-#include "ff.h"			/* Obtains integer types */
-#include "diskio.h"		/* Declarations of disk functions */
+#include "ff.h"     /* Obtains integer types */
+#include "diskio.h" /* Declarations of disk functions */
 
 /* Definitions of physical drive number for each drive */
-#define DEV_USB		0	/* Example: Map USB to physical drive 0 */
-#define DEV_SD		1	/* Example: Map IEEE1394 to physical drive 1 */
-#define DEV_SDC		2	/* Example: Map MX4SIO to physical drive 2 */
+#define DEV_USB 0 /* Example: Map USB to physical drive 0 */
+#define DEV_SD  1 /* Example: Map IEEE1394 to physical drive 1 */
+#define DEV_SDC 2 /* Example: Map MX4SIO to physical drive 2 */
 
-static struct block_device* mounted_bd = NULL;
+static struct block_device *mounted_bd = NULL;
 static FATFS fat_fs;
 
-int connect_bd(struct block_device* bd){
-	mounted_bd = bd;
-	f_mount(&fat_fs, "mass:", 1);
+int connect_bd(struct block_device *bd)
+{
+    mounted_bd = bd;
+    f_mount(&fat_fs, "mass:", 1);
 }
 
-void disconnect_bd(struct block_device* bd){
-	f_unmount("mass:");
-	mounted_bd = NULL;
+void disconnect_bd(struct block_device *bd)
+{
+    f_unmount("mass:");
+    mounted_bd = NULL;
 }
 
 /*-----------------------------------------------------------------------*/
 /* Get Drive Status                                                      */
 /*-----------------------------------------------------------------------*/
 
-DSTATUS disk_status (
-	BYTE pdrv		/* Physical drive number to identify the drive */
+DSTATUS disk_status(
+    BYTE pdrv /* Physical drive number to identify the drive */
 )
 {
-	DSTATUS stat;
-	int result;
+    DSTATUS stat;
+    int result;
 
     result = 0;
     return result;
@@ -51,12 +53,12 @@ DSTATUS disk_status (
 /* Inidialize a Drive                                                    */
 /*-----------------------------------------------------------------------*/
 
-DSTATUS disk_initialize (
-	BYTE pdrv				/* Physical drive nmuber to identify the drive */
+DSTATUS disk_initialize(
+    BYTE pdrv /* Physical drive nmuber to identify the drive */
 )
 {
-	DSTATUS stat;
-	int result;
+    DSTATUS stat;
+    int result;
 
     result = 0;
     return result;
@@ -68,19 +70,19 @@ DSTATUS disk_initialize (
 /* Read Sector(s)                                                        */
 /*-----------------------------------------------------------------------*/
 
-DRESULT disk_read (
-	BYTE pdrv,		/* Physical drive nmuber to identify the drive */
-	BYTE *buff,		/* Data buffer to store read data */
-	LBA_t sector,	/* Start sector in LBA */
-	UINT count		/* Number of sectors to read */
+DRESULT disk_read(
+    BYTE pdrv,    /* Physical drive nmuber to identify the drive */
+    BYTE *buff,   /* Data buffer to store read data */
+    LBA_t sector, /* Start sector in LBA */
+    UINT count    /* Number of sectors to read */
 )
 {
-	DRESULT res;
-	int result;
+    DRESULT res;
+    int result;
 
-	res = mounted_bd->read(mounted_bd, sector, buff, count);
+    res = mounted_bd->read(mounted_bd, sector, buff, count);
 
-	return res;
+    return res;
 }
 
 
@@ -91,19 +93,19 @@ DRESULT disk_read (
 
 #if FF_FS_READONLY == 0
 
-DRESULT disk_write (
-	BYTE pdrv,			/* Physical drive nmuber to identify the drive */
-	const BYTE *buff,	/* Data to be written */
-	LBA_t sector,		/* Start sector in LBA */
-	UINT count			/* Number of sectors to write */
+DRESULT disk_write(
+    BYTE pdrv,        /* Physical drive nmuber to identify the drive */
+    const BYTE *buff, /* Data to be written */
+    LBA_t sector,     /* Start sector in LBA */
+    UINT count        /* Number of sectors to write */
 )
 {
-	DRESULT res;
-	int result;
+    DRESULT res;
+    int result;
 
-	res = mounted_bd->write(mounted_bd, sector, buff, count);
+    res = mounted_bd->write(mounted_bd, sector, buff, count);
 
-	return res;
+    return res;
 }
 
 #endif
@@ -113,35 +115,34 @@ DRESULT disk_write (
 /* Miscellaneous Functions                                               */
 /*-----------------------------------------------------------------------*/
 
-DRESULT disk_ioctl (
-	BYTE pdrv,		/* Physical drive nmuber (0..) */
-	BYTE cmd,		/* Control code */
-	void *buff		/* Buffer to send/receive control data */
+DRESULT disk_ioctl(
+    BYTE pdrv, /* Physical drive nmuber (0..) */
+    BYTE cmd,  /* Control code */
+    void *buff /* Buffer to send/receive control data */
 )
 {
-	DRESULT res;
-	int result;
+    DRESULT res;
+    int result;
 
-	switch (pdrv) {
-	case DEV_USB :
+    switch (pdrv) {
+        case DEV_USB:
 
-		// Process of the command for the RAM drive
+            // Process of the command for the RAM drive
 
-		return res;
+            return res;
 
-	case DEV_SD :
+        case DEV_SD:
 
-		// Process of the command for the MMC/SD card
+            // Process of the command for the MMC/SD card
 
-		return res;
+            return res;
 
-	case DEV_SDC :
+        case DEV_SDC:
 
-		// Process of the command the USB drive
+            // Process of the command the USB drive
 
-		return res;
-	}
+            return res;
+    }
 
-	return RES_PARERR;
+    return RES_PARERR;
 }
-
