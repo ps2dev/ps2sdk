@@ -157,7 +157,7 @@ static int fs_lseek(iop_file_t* fd, int offset, int whence)
 
     int res;
 
-    if (fd->privdata == NULL) return -1;
+    if (fd->privdata == NULL) return -ENOENT;
 
     _fs_lock();
     
@@ -175,7 +175,7 @@ static int fs_lseek(iop_file_t* fd, int offset, int whence)
     res = f_lseek(file, offset);
 
     _fs_unlock();
-    return offset;
+    return (res == FR_OK)? offset : -ENOENT;
 }
 
 //---------------------------------------------------------------------------
@@ -226,7 +226,7 @@ static int fs_remove(iop_file_t* fd, const char* name)
     ret = f_unlink(name);
 
     _fs_unlock();
-    return ret; // TODO: convert return value
+    return (ret == FR_OK)? 0 : -ENOENT;
 }
 
 //---------------------------------------------------------------------------
@@ -241,7 +241,7 @@ static int fs_mkdir(iop_file_t* fd, const char* name, int mode)
     ret = f_mkdir(name);
    
     _fs_unlock();
-    return ret; // TODO: convert return value
+    return (ret == FR_OK)? 0 : -ENOENT;
 }
 
 //---------------------------------------------------------------------------
@@ -306,12 +306,12 @@ static int fs_dread(iop_file_t* fd, iox_dirent_t* buffer)
     ret = f_readdir(fd->privdata, &fno);
 
     if (ret == FR_OK){
+        ret = 0;
         strncpy(buffer->name, fno.fname, 255);
         // TODO: fill buffer->stat structure from fno
-        ret = 1;
-    } // TODO: check if return values are correct
+    }
     else{
-        ret = 0;
+        ret = -ENOENT;
     }
 
     _fs_unlock();
