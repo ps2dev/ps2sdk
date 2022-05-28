@@ -245,21 +245,6 @@ static int fs_mkdir(iop_file_t* fd, const char* name, int mode)
 }
 
 //---------------------------------------------------------------------------
-static int fs_rmdir(iop_file_t* fd, const char* name)
-{
-    M_DEBUG("%s\n", __func__);
-
-    int ret;
-
-    _fs_lock();
-
-    ret = f_rmdir(name);
-   
-    _fs_unlock();
-    return ret; // TODO: convert return value
-}
-
-//---------------------------------------------------------------------------
 static int fs_dopen(iop_file_t* fd, const char* name)
 {
     M_DEBUG("%s: unit %d name %s\n", __func__, fd->unit, name);
@@ -432,7 +417,7 @@ static iop_device_ops_t fs_functarray = {
     &fs_ioctl,
     &fs_remove,
     &fs_mkdir,
-    &fs_rmdir,
+    &fs_remove,
     &fs_dopen,
     &fs_dclose,
     &fs_dread,
