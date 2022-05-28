@@ -23,12 +23,36 @@
 
 #include <usbhdfsd-common.h>
 
-#include "ff.h"
+#include "fs_driver.h"
 
 //#define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
 
-extern struct block_device *mounted_bd;
+extern FATFS fatfs[NUM_DRIVES];
+extern struct block_devices *mounted_bd[NUM_DRIVES];
+int num_drives = 0;
+
+// TODO: if all drives have the same mount point, it will only allow for one mounted block device
+int connect_bd(struct block_device *bd)
+{
+    if (num_drives >= NUM_DRIVES)
+        return -1;
+    FATFS *fat_fs = &fatfs[num_drives++];
+    f_mount(fat_fs, "mass:", 1);
+    mounted_bd[fat_fs->pdrv] = bd;
+    return 0;
+}
+
+void disconnect_bd(struct block_device *bd)
+{
+    f_unmount("mass:");
+    for (int i = 0; i < NUM_DRIVES; i++) {
+        if (mounted_bd[i] == bd) {
+            mounted_bd[i] = NULL;
+        }
+    }
+    return 0;
+}
 
 //---------------------------------------------------------------------------
 static int _lock_sema_id = -1;
@@ -404,7 +428,10 @@ int fs_ioctl(iop_file_t *fd, int cmd, void *data)
     M_DEBUG("%s\n", __func__);
 
     int ret = 0;
-    FIL* file = ((FIL*)(fd->privdata)); 
+    FIL *file = ((FIL *)(fd->privdata));
+
+    if (file == NULL)
+        return -ENXIO;
 
     _fs_lock();
 
@@ -419,7 +446,7 @@ int fs_ioctl(iop_file_t *fd, int cmd, void *data)
             ret = file->obj.fs->database + (file->obj.fs->csize * (file->obj.sclust - 2));
             break;
         case USBMASS_IOCTL_GET_DRIVERNAME:
-            ret = *(int*)mounted_bd->name;
+            ret = *(int *)(mounted_bd[file->obj.fs->pdrv]->name);
             break;
         case USBMASS_IOCTL_CHECK_CHAIN:
             ret = (file->obj.stat != 2 && file->obj.n_frag > 0);
@@ -439,7 +466,7 @@ int fs_rename(iop_file_t *fd, const char *path, const char *newpath)
     int ret;
 
     if (fd->privdata == NULL)
-        return -ENOENT;
+        return -ENXIO;
 
     _fs_lock();
 
@@ -452,17 +479,33 @@ int fs_rename(iop_file_t *fd, const char *path, const char *newpath)
 static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
     int ret;
+    FIL *file = ((FIL *)(fd->privdata));
+
+    if (file == NULL)
+        return -ENXIO;
 
     _fs_lock();
 
+
     switch (cmd) {
         case USBMASS_DEVCTL_STOP_UNIT:
-            // TODO: more than one unit support
+            ret = mounted_bd[file->obj.fs->pdrv]->stop(mounted_bd[file->obj.fs->pdrv]);
+            mounted_bd[file->obj.fs->pdrv] = NULL;
+            f_unmount("mass:");
+            break;
         case USBMASS_DEVCTL_STOP_ALL:
-            ret = mounted_bd->stop(mounted_bd);
+            for (int i = 0; i < NUM_DRIVES; i++) {
+                if (mounted_bd[i]) {
+                    mounted_bd[i]->stop(mounted_bd[i]);
+                    mounted_bd[i] = NULL;
+                }
+            }
+            f_unmount("mass:");
+            ret = 0;
             break;
         default:
             ret = -ENXIO;
+            break;
     }
 
     _fs_unlock();

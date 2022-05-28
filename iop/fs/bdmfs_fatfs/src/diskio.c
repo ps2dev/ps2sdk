@@ -11,25 +11,7 @@
 #include "ff.h"     /* Obtains integer types */
 #include "diskio.h" /* Declarations of disk functions */
 
-/* Definitions of physical drive number for each drive */
-#define DEV_USB 0 /* Example: Map USB to physical drive 0 */
-#define DEV_SD  1 /* Example: Map IEEE1394 to physical drive 1 */
-#define DEV_SDC 2 /* Example: Map MX4SIO to physical drive 2 */
-
-static struct block_device *mounted_bd = NULL;
-static FATFS fat_fs;
-
-int connect_bd(struct block_device *bd)
-{
-    mounted_bd = bd;
-    f_mount(&fat_fs, "mass:", 1);
-}
-
-void disconnect_bd(struct block_device *bd)
-{
-    f_unmount("mass:");
-    mounted_bd = NULL;
-}
+#include "fs_driver.h"
 
 /*-----------------------------------------------------------------------*/
 /* Get Drive Status                                                      */
@@ -79,7 +61,7 @@ DRESULT disk_read(
     DRESULT res;
     int result;
 
-    res = mounted_bd->read(mounted_bd, sector, buff, count);
+    res = mounted_bd[pdrv]->read(mounted_bd[pdrv], sector, buff, count);
 
     return res;
 }
@@ -102,7 +84,7 @@ DRESULT disk_write(
     DRESULT res;
     int result;
 
-    res = mounted_bd->write(mounted_bd, sector, buff, count);
+    res = mounted_bd[pdrv]->write(mounted_bd[pdrv], sector, buff, count);
 
     return res;
 }
@@ -122,26 +104,6 @@ DRESULT disk_ioctl(
 {
     DRESULT res;
     int result;
-
-    switch (pdrv) {
-        case DEV_USB:
-
-            // Process of the command for the RAM drive
-
-            return res;
-
-        case DEV_SD:
-
-            // Process of the command for the MMC/SD card
-
-            return res;
-
-        case DEV_SDC:
-
-            // Process of the command the USB drive
-
-            return res;
-    }
 
     return RES_PARERR;
 }
