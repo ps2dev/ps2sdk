@@ -19,12 +19,16 @@
 #include <thbase.h>
 #include <thsemap.h>
 
+#include <bdm.h>
+
 #include <usbhdfsd-common.h>
 
 #include "ff.h"
 
 //#define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
+
+extern struct block_device *mounted_bd;
 
 //---------------------------------------------------------------------------
 static int _lock_sema_id = -1;
@@ -400,20 +404,25 @@ int fs_ioctl(iop_file_t *fd, int cmd, void *data)
     M_DEBUG("%s\n", __func__);
 
     int ret = 0;
+    FIL* file = ((FIL*)(fd->privdata)); 
 
     _fs_lock();
 
-    // TODO
     switch (cmd) {
         case USBMASS_IOCTL_RENAME:
+            ret = -ENOENT; // TODO
             break;
         case USBMASS_IOCTL_GET_CLUSTER:
+            ret = file->obj.sclust;
             break;
         case USBMASS_IOCTL_GET_LBA:
+            ret = file->obj.fs->database + (file->obj.fs->csize * (file->obj.sclust - 2));
             break;
         case USBMASS_IOCTL_GET_DRIVERNAME:
+            ret = *(int*)mounted_bd->name;
             break;
         case USBMASS_IOCTL_CHECK_CHAIN:
+            ret = 0; // TODO
             break;
         default:
             break;
@@ -446,12 +455,11 @@ static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsig
 
     _fs_lock();
 
-    // TODO
     switch (cmd) {
         case USBMASS_DEVCTL_STOP_UNIT:
-            break;
+            // TODO: more than one unit support
         case USBMASS_DEVCTL_STOP_ALL:
-            ret = 0;
+            ret = mounted_bd->stop(mounted_bd);
             break;
         default:
             ret = -ENXIO;
