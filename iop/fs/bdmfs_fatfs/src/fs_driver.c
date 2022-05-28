@@ -106,6 +106,7 @@ static int fs_open(iop_file_t* fd, const char* name, int flags, int mode)
     M_DEBUG("%s: %s flags=%X mode=%X\n", __func__, name, flags, mode);
 
     int ret;
+    BYTE f_mode = FA_OPEN_ALWAYS;
 
     _fs_lock();
 
@@ -113,7 +114,14 @@ static int fs_open(iop_file_t* fd, const char* name, int flags, int mode)
         fd->privdata = malloc(sizeof(FIL));
     }
 
-    ret = f_open(fd->privdata, name, mode); // TODO: check if mode matches
+    // translate mode
+    if (mode & O_RDONLY) f_mode |= FA_READ;
+    if (mode & O_WRONLY) f_mode |= FA_WRITE;
+    if (mode & O_CREAT) f_mode |= FA_CREATE_NEW;
+    if (mode & O_TRUNC) f_mode |= FA_CREATE_ALWAYS;
+    if (mode & O_APPEND) f_mode |= FA_OPEN_APPEND;
+
+    ret = f_open(fd->privdata, name, f_mode);
 
     if (ret == FR_OK){
         ret = 1;
