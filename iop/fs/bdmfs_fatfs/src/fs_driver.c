@@ -422,7 +422,7 @@ int fs_ioctl(iop_file_t *fd, int cmd, void *data)
             ret = *(int*)mounted_bd->name;
             break;
         case USBMASS_IOCTL_CHECK_CHAIN:
-            ret = 0; // TODO
+            ret = (file->obj.stat != 2 && file->obj.n_frag > 0);
             break;
         default:
             break;
