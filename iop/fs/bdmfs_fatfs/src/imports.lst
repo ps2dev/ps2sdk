@@ -30,6 +30,7 @@ I_strlen
 I_strcpy
 I_strncpy
 I_strtol
+I_strchr
 I_strrchr
 I_sprintf
 sysclib_IMPORTS_end

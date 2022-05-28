@@ -466,3 +466,10 @@ int InitFS(void)
     return (AddDrv(&fs_driver) == 0 ? 0 : -1);
 }
 
+//---------------------------------------------------------------------------
+int InitFAT(void)
+{
+    M_DEBUG("%s\n", __func__);
+
+    return 0;
+}
