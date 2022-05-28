@@ -28,8 +28,8 @@
 //#define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
 
-extern FATFS fatfs[NUM_DRIVES];
-extern struct block_devices *mounted_bd[NUM_DRIVES];
+FATFS fatfs[NUM_DRIVES];
+struct block_device *mounted_bd[NUM_DRIVES];
 int num_drives = 0;
 
 // TODO: if all drives have the same mount point, it will only allow for one mounted block device

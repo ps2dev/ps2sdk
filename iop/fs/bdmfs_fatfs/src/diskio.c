@@ -59,7 +59,6 @@ DRESULT disk_read(
 )
 {
     DRESULT res;
-    int result;
 
     res = mounted_bd[pdrv]->read(mounted_bd[pdrv], sector, buff, count);
 
@@ -82,7 +81,6 @@ DRESULT disk_write(
 )
 {
     DRESULT res;
-    int result;
 
     res = mounted_bd[pdrv]->write(mounted_bd[pdrv], sector, buff, count);
 
@@ -103,7 +101,23 @@ DRESULT disk_ioctl(
 )
 {
     DRESULT res;
-    int result;
 
-    return RES_PARERR;
+	res = FR_OK;
+
+	switch (cmd){
+		case CTRL_SYNC:
+			mounted_bd[pdrv]->flush(mounted_bd[pdrv]);
+			break;
+		case GET_SECTOR_COUNT:
+			*(unsigned int*)buff = mounted_bd[pdrv]->sectorCount;
+			break;
+		case GET_SECTOR_SIZE:
+			*(unsigned int*)buff = mounted_bd[pdrv]->sectorSize;
+			break;
+		case GET_BLOCK_SIZE:
+			*(unsigned int*)buff = 0;
+			break;
+	}
+
+    return res;
 }
