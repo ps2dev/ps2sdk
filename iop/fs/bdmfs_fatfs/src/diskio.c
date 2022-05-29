@@ -24,7 +24,8 @@ DSTATUS disk_status(
     DSTATUS stat;
     int result;
 
-    result = 0;
+    result = (mounted_bd == NULL) ? STA_NODISK : FR_OK;
+
     return result;
 }
 
@@ -41,7 +42,8 @@ DSTATUS disk_initialize(
     DSTATUS stat;
     int result;
 
-    result = 0;
+    result = (mounted_bd == NULL) ? STA_NODISK : FR_OK;
+
     return result;
 }
 
@@ -60,9 +62,9 @@ DRESULT disk_read(
 {
     DRESULT res;
 
-    res = mounted_bd[pdrv]->read(mounted_bd[pdrv], sector, buff, count);
+    res = mounted_bd->read(mounted_bd, sector, buff, count);
 
-    return res;
+    return (res==count)? FR_OK : FR_DISK_ERR;
 }
 
 
@@ -82,9 +84,9 @@ DRESULT disk_write(
 {
     DRESULT res;
 
-    res = mounted_bd[pdrv]->write(mounted_bd[pdrv], sector, buff, count);
+    res = mounted_bd->write(mounted_bd, sector, buff, count);
 
-    return res;
+    return (res==count)? FR_OK : FR_DISK_ERR;
 }
 
 #endif
@@ -106,13 +108,13 @@ DRESULT disk_ioctl(
 
 	switch (cmd){
 		case CTRL_SYNC:
-			mounted_bd[pdrv]->flush(mounted_bd[pdrv]);
+			mounted_bd->flush(mounted_bd);
 			break;
 		case GET_SECTOR_COUNT:
-			*(unsigned int*)buff = mounted_bd[pdrv]->sectorCount;
+			*(unsigned int*)buff = mounted_bd->sectorCount;
 			break;
 		case GET_SECTOR_SIZE:
-			*(unsigned int*)buff = mounted_bd[pdrv]->sectorSize;
+			*(unsigned int*)buff = mounted_bd->sectorSize;
 			break;
 		case GET_BLOCK_SIZE:
 			*(unsigned int*)buff = 0;

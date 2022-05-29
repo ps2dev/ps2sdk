@@ -28,29 +28,27 @@
 //#define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
 
-FATFS fatfs[NUM_DRIVES];
-struct block_device *mounted_bd[NUM_DRIVES];
-int num_drives = 0;
+FATFS fatfs;
+struct block_device *mounted_bd;
 
 // TODO: if all drives have the same mount point, it will only allow for one mounted block device
 int connect_bd(struct block_device *bd)
 {
-    if (num_drives >= NUM_DRIVES)
+    mounted_bd = bd;
+    if (f_mount(&fatfs, "", 0) == FR_OK) {
+        return 0;
+    }
+    else {
+        mounted_bd = NULL;
         return -1;
-    FATFS *fat_fs = &fatfs[num_drives++];
-    f_mount(fat_fs, "mass:", 1);
-    mounted_bd[fat_fs->pdrv] = bd;
-    return 0;
+    }
+
 }
 
 void disconnect_bd(struct block_device *bd)
 {
-    f_unmount("mass:");
-    for (int i = 0; i < NUM_DRIVES; i++) {
-        if (mounted_bd[i] == bd) {
-            mounted_bd[i] = NULL;
-        }
-    }
+    f_unmount("");
+    mounted_bd = NULL;
     return 0;
 }
 
@@ -446,7 +444,7 @@ int fs_ioctl(iop_file_t *fd, int cmd, void *data)
             ret = file->obj.fs->database + (file->obj.fs->csize * (file->obj.sclust - 2));
             break;
         case USBMASS_IOCTL_GET_DRIVERNAME:
-            ret = *(int *)(mounted_bd[file->obj.fs->pdrv]->name);
+            ret = *(int *)(mounted_bd->name);
             break;
         case USBMASS_IOCTL_CHECK_CHAIN:
             ret = (file->obj.stat != 2 && file->obj.n_frag > 0);
@@ -489,17 +487,9 @@ static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsig
 
     switch (cmd) {
         case USBMASS_DEVCTL_STOP_UNIT:
-            ret = mounted_bd[file->obj.fs->pdrv]->stop(mounted_bd[file->obj.fs->pdrv]);
-            mounted_bd[file->obj.fs->pdrv] = NULL;
-            f_unmount("mass:");
-            break;
         case USBMASS_DEVCTL_STOP_ALL:
-            for (int i = 0; i < NUM_DRIVES; i++) {
-                if (mounted_bd[i]) {
-                    mounted_bd[i]->stop(mounted_bd[i]);
-                    mounted_bd[i] = NULL;
-                }
-            }
+            ret = mounted_bd->stop(mounted_bd);
+            mounted_bd = NULL;
             f_unmount("mass:");
             ret = 0;
             break;
