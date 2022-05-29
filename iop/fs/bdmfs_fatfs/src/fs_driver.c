@@ -218,6 +218,35 @@ static int fs_lseek(iop_file_t *fd, int offset, int whence)
     return (res == FR_OK)? offset : -res;
 }
 
+s64	fs_lseek64(iop_file_t *fd, s64 offset, int whence){
+    M_DEBUG("%s\n", __func__);
+
+    int res;
+
+    if (fd->privdata == NULL)
+        return -ENOENT;
+
+    _fs_lock();
+
+    FIL *file = (FIL *)(fd->privdata);
+
+    FSIZE_t off = offset;
+
+    switch (whence) {
+        case SEEK_CUR:
+            off += file->fptr;
+            break;
+        case SEEK_END:
+            off = file->obj.objsize - offset;
+            break;
+    }
+
+    res = f_lseek(file, off);
+
+    _fs_unlock();
+    return (res == FR_OK)? off : -res;
+}
+
 //---------------------------------------------------------------------------
 static int fs_write(iop_file_t *fd, void *buffer, int size)
 {
@@ -530,7 +559,7 @@ static iop_device_ops_t fs_functarray = {
     (void *)&fs_dummy,
     (void *)&fs_dummy,
     (void *)&fs_dummy,
-    (void *)&fs_dummy,
+    &fs_lseek64,
     &fs_devctl,
     (void *)&fs_dummy,
     (void *)&fs_dummy,
