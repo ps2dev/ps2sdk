@@ -527,6 +527,8 @@ int	pfsFioInit(iop_device_t *f)
 {
 	iop_sema_t sema;
 
+	(void)f;
+
 	sema.attr = 1;
 	sema.option = 0;
 	sema.initial = 1;
@@ -539,6 +541,8 @@ int	pfsFioInit(iop_device_t *f)
 
 int	pfsFioDeinit(iop_device_t *f)
 {
+	(void)f;
+
 	pfsFioDevctlCloseAll();
 
 	DeleteSema(pfsFioSema);
@@ -546,13 +550,16 @@ int	pfsFioDeinit(iop_device_t *f)
 	return 0;
 }
 
-int	pfsFioFormat(iop_file_t *t, const char *dev, const char *blockdev, void *args, int arglen)
+int	pfsFioFormat(iop_file_t *f, const char *dev, const char *blockdev, void *args, int arglen)
 {
 	int *arg = (int *)args;
 	int fragment = 0;
 	int fd;
 	pfs_block_device_t *blockDev;
 	int rv;
+
+	(void)f;
+	(void)dev;
 
 	// Has a fragment bit pattern been specified ?
 	if((arglen == (3 * sizeof(int))) && (arg[1] == 0x2D66))	//arg[1] == "-f"
@@ -588,6 +595,8 @@ int	pfsFioOpen(iop_file_t *f, const char *name, int flags, int mode)
 	s32 i;
 	pfs_file_slot_t *freeSlot;
 	pfs_mount_t *pfsMount;
+
+	(void)flags;
 
 	if(!name)
 		return -ENOENT;
@@ -643,7 +652,7 @@ int	pfsFioClose(iop_file_t *f)
 
 	SignalSema(pfsFioSema);
 
-	return rv;
+	return 0;
 }
 
 int pfsFioRead(iop_file_t *f, void *buf, int size)
@@ -1244,6 +1253,9 @@ int pfsFioSync(iop_file_t *f, const char *dev, int flag)
 {
 	pfs_mount_t *pfsMount;
 
+	(void)dev;
+	(void)flag;
+
 	if(!(pfsMount = pfsFioGetMountedUnit(f->unit)))
 		return -ENODEV;
 #ifdef PFS_SUPPORT_BHDD
@@ -1265,6 +1277,10 @@ int pfsFioMount(iop_file_t *f, const char *fsname, const char *devname, int flag
 	int rv;
 	int fd;
 	pfs_block_device_t *blockDev;
+
+	(void)fsname;
+	(void)arg;
+	(void)arglen;
 
 	if(!(blockDev = pfsGetBlockDeviceTable(devname)))
 		return -ENXIO;
@@ -1288,6 +1304,8 @@ int pfsFioUmount(iop_file_t *f, const char *fsname)
 	int rv=0;
 	int	busy_flag=0;
 	pfs_mount_t *pfsMount;
+
+	(void)fsname;
 
 	if((pfsMount = pfsFioGetMountedUnit(f->unit))==NULL)
 		return -ENODEV;
@@ -1336,7 +1354,7 @@ int pfsFioReadlink(iop_file_t *f, const char *path, char *buf, unsigned int bufl
 	pfs_mount_t *pfsMount;
 	pfs_cache_t *clink;
 
-	if(buflen < 0)
+	if((int)buflen < 0)
 		return -EINVAL;
 	if(!(pfsMount=pfsFioGetMountedUnit(f->unit)))
 		return -ENODEV;

@@ -80,6 +80,9 @@ static void free_msg(arch_message *msg)
 }
 
 static void TimeoutHandler(s32 alarm_id, u16 time, void *pvArg){
+	(void)alarm_id;
+	(void)time;
+
 	iReleaseWaitThread((int)pvArg);
 	ExitHandler();
 }
@@ -96,6 +99,8 @@ sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, 
 {
 	ee_thread_t thp;
 	int tid, rv;
+
+	(void)name;
 
 	thp.attr = 0;
 	thp.option = 0;
@@ -127,6 +132,8 @@ err_t sys_mbox_new(sys_mbox_t *mbox, int size)
 {
 	struct MboxData *MBox;
 	ee_sema_t sema;
+
+	(void)size;
 
 	*mbox=SYS_MBOX_NULL;
 
@@ -218,13 +225,15 @@ static void RetrieveMbxInternal(sys_mbox_t mBox, arch_message **message)
 static int WaitSemaTimeout(int sema, unsigned int msec)
 {
 	unsigned int ticks;
-	unsigned short int ticksToWait;
-	int alarmID, threadID;
+	int threadID;
 
 	ticks = mSec2HSyncTicks(msec);
 	threadID = GetThreadId();
 	while(ticks > 0)
 	{
+		unsigned short int ticksToWait;
+		int alarmID;
+
 		ticksToWait = ticks > USHRT_MAX ? USHRT_MAX : ticks;
 		alarmID = SetAlarm(ticksToWait, &TimeoutHandler, (void*)threadID);
 		if (WaitSema(sema) == sema)
@@ -277,11 +286,12 @@ static int PollMbx(arch_message **message, sys_mbox_t mBox)
 static u32_t sys_arch_mbox_fetch_internal(sys_mbox_t pMBox, void** ppvMSG, u32_t u32Timeout, char block)
 {
 	arch_message *pmsg;
-	unsigned int TimeElasped, start;
+	unsigned int TimeElasped;
 	int result;
 
 	TimeElasped=0;
 	if(block){
+		int start;
 		start=clock()/(CLOCKS_PER_SEC/1000);
 
 		if((result=ReceiveMbx(&pmsg, pMBox, u32Timeout))==0){

@@ -122,8 +122,11 @@ void InitSpu2()
 }
 
 
-s32 _start(char **argv, int argc)
+int _start(int argc, char **argv)
 {
+	(void)argc;
+	(void)argv;
+
 	printf(BANNER, VERSION);
 
 	if(RegisterLibraryEntries(&_exp_libsd) != 0) return 1;
@@ -149,11 +152,11 @@ int TransInterrupt(void *data)
 		// If done elsewise, it doesn't work, havn't figured out why yet.
 		volatile u16 *statx = U16_REGISTER(0x344 + (core * 1024));
 
-		if(!(U16_REGISTER_READ(statx) & 0x80))	while(!(U16_REGISTER_READ(statx) & 0x80));
+		while((U16_REGISTER_READ(statx) & 0x80) == 0);
 
 		U16_REGISTER_WRITEAND(SD_CORE_ATTR(core), ~SD_CORE_DMA);
 
-		if(U16_REGISTER_READ(SD_CORE_ATTR(core)) & 0x30)	while((U16_REGISTER_READ(SD_CORE_ATTR(core)) & 0x30));
+		while((U16_REGISTER_READ(SD_CORE_ATTR(core)) & 0x30) != 0);
 
 		if(TransIntrHandlers[core])		goto intr_handler;
 		if(TransIntrCallbacks[core])	goto SdIntrCallback;
@@ -202,6 +205,8 @@ int Spu2Interrupt(void *data)
 {
 	u16 val;
 
+	(void)data;
+
 	val = ((U16_REGISTER_READ(SD_C_IRQINFO))&0xc)>>2;
 	if (!val)
 		return 1;
@@ -248,7 +253,6 @@ void RegisterInterrupts()
 void ResetAll()
 {
 	u32 core;
-	volatile u16 *statx;
 
 	U16_REGISTER_WRITE(SD_C_SPDIF_OUT, 0);
 	nopdelay();
@@ -259,6 +263,8 @@ void ResetAll()
 
 	for(core=0; core < 2; core++)
 	{
+		volatile u16 *statx;
+
 		VoiceTransIoMode[core]	= 0;
 		U16_REGISTER_WRITE(U16_REGISTER(0x1B0), 0);
 		U16_REGISTER_WRITE(SD_CORE_ATTR(core), 0);

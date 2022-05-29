@@ -116,6 +116,9 @@ int _start( int argc, char **argv)
 	struct _iop_thread param;
 	int th, result;
 
+	(void)argc;
+	(void)argv;
+
 	param.attr         = TH_C;
 	param.thread       = (void*)fileXio_Thread;
 	param.priority 	  = 40;
@@ -139,7 +142,7 @@ static int fileXio_GetDeviceList_RPC(struct fileXioDevice* ee_devices, int eecou
     int device_count = 0;
     iop_device_t **devices = GetDeviceList();
     struct fileXioDevice local_devices[FILEXIO_MAX_DEVICES];
-    while (devices[device_count] && device_count < eecount)
+    while (device_count < eecount && devices[device_count])
     {
         iop_device_t *device = devices[device_count];
         strncpy(local_devices[device_count].name, device->name, 128);
@@ -171,7 +174,7 @@ static int fileXio_GetDeviceList_RPC(struct fileXioDevice* ee_devices, int eecou
 static int fileXio_CopyFile_RPC(const char *src, const char *dest, int mode)
 {
   iox_stat_t stat;
-  int infd, outfd, size, remain, i, retval = 0;
+  int infd, outfd, size, remain, i;
 
   if ((infd = open(src, O_RDONLY, 0666)) < 0) {
     return infd;
@@ -183,7 +186,7 @@ static int fileXio_CopyFile_RPC(const char *src, const char *dest, int mode)
   size = lseek(infd, 0, SEEK_END);
   lseek(infd, 0, SEEK_SET);
   if (!size)
-    return retval;
+    return 0;
 
   remain = size % RWBufferSize;
   for (i = 0; i < (size / RWBufferSize); i++) {
@@ -304,7 +307,6 @@ static int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size, i
      SifRpcReceiveData_t rdata;
      int left;
      int wlen;
-     int writelen;
      int pos;
      int total;
 
@@ -325,6 +327,7 @@ static int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size, i
 	left-=mis;
 	pos=(int)write_buf+mis;
 	while(left){
+		int writelen;
 		writelen = MIN(RWBufferSize, left);
 		SifRpcGetOtherData(&rdata, (void *)pos, rwbuf, writelen, 0);
 		wlen=write(outfd, rwbuf, writelen);
@@ -974,6 +977,8 @@ static void fileXio_Thread(void* param)
 {
 	int OldState;
 
+	(void)param;
+
 	M_PRINTF("fileXio: fileXio RPC Server v1.00\nCopyright (c) 2003 adresd\n");
 	M_DEBUG("fileXio: RPC Initialize\n");
 
@@ -1016,6 +1021,7 @@ static void* filexioRpc_SetRWBufferSize(void *sbuff)
 
 static void* fileXio_rpc_server(int fno, void *data, int size)
 {
+	(void)size;
 
 	switch(fno) {
 		case FILEXIO_DOPEN:

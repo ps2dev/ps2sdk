@@ -32,7 +32,7 @@ void freeDevice(Device *dev);
 Device *fetchPortElemByNumber(Device *hub, int port);
 
 void addToHcEndpointList(u8 type, HcED *ed);
-void removeHcEdFromList(int type, HcED *hcEd);
+void removeHcEdFromList(int type, const HcED *hcEd);
 
 Endpoint *allocEndpointForDevice(Device *dev, u32 align);
 

@@ -39,6 +39,8 @@ int callUsbDriverFunc(int (*func)(int devId), int devId, void *gp) {
 		usbdUnlock();
 #if USE_GP_REGISTER
 		ChangeGP(gp);
+#else
+		(void)gp;
 #endif
 		res = func(devId);
 #if USE_GP_REGISTER
@@ -205,6 +207,8 @@ void callbackThreadFunc(void *arg) {
 	int intrStat;
 	IoRequest *req;
 	IoRequest reqCopy;
+
+	(void)arg;
 
 	while (1) {
 		WaitEventFlag(callbackEvent, 1, WEF_CLEAR | WEF_OR, &eventRes);

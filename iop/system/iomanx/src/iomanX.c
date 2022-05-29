@@ -47,6 +47,9 @@ iop_device_t **GetDeviceList(void)
 
 int _start(int argc, char **argv)
 {
+	(void)argc;
+	(void)argv;
+
 	if(RegisterLibraryEntries(&_exp_iomanx) != 0)
     {
 		return MODULE_NO_RESIDENT_END;
@@ -71,7 +74,7 @@ int shutdown()
 
 int AddDrv(iop_device_t *device)
 {
-	int i, res = -1;
+	int i;
     int oldIntr;
 
     CpuSuspendIntr(&oldIntr);
@@ -85,7 +88,7 @@ int AddDrv(iop_device_t *device)
 	if (i >= MAX_DEVICES)
 	{
 	    CpuResumeIntr(oldIntr);
-		return res;
+		return(-1);
 	}
 
 	dev_list[i] = device;
@@ -93,7 +96,7 @@ int AddDrv(iop_device_t *device)
 
     FlushIcache();
 
-	if ((res = device->ops->init(device)) < 0)
+	if (device->ops->init(device) < 0)
 	{
 		dev_list[i] = NULL;
 		return(-1);

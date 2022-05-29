@@ -122,12 +122,13 @@ int readLine( int socket, char * buffer, int size )
 {
 	char * ptr = buffer;
 	int count = 0;
-	int rc;
 
 	// Keep reading until we fill the buffer.
 
 	while ( count < size )
 	{
+		int rc;
+
 		rc = recv( socket, ptr, 1, 0 );
 
 		if ( rc <= 0 ) return rc;
@@ -179,17 +180,24 @@ int httpConnect( struct sockaddr_in * server, char *hostAddr, const char * url, 
 
 	M_DEBUG( "send\n" );
 
-	// Needs more error checking here.....
 	rc = send( peerHandle, HTTPGET,  sizeof( HTTPGET ) - 1, 0 );
+	if (rc < 0) goto fail_send;
 	rc = send( peerHandle, (void*) url, strlen( url ), 0 );
+	if (rc < 0) goto fail_send;
 	rc = send( peerHandle, HTTPGETEND, sizeof( HTTPGETEND ) - 1, 0 );
+	if (rc < 0) goto fail_send;
 
 	rc = send( peerHandle, HTTPHOST,  sizeof( HTTPHOST ) - 1, 0 );
+	if (rc < 0) goto fail_send;
 	rc = send( peerHandle, hostAddr, strlen( hostAddr ), 0 );
+	if (rc < 0) goto fail_send;
 	rc = send( peerHandle, HTTPENDHEADER, sizeof( HTTPENDHEADER ) - 1, 0 ); // "\r\n"
+	if (rc < 0) goto fail_send;
 
 	rc = send( peerHandle, HTTPUSERAGENT, sizeof( HTTPUSERAGENT ) - 1, 0 );
+	if (rc < 0) goto fail_send;
 	rc = send( peerHandle, HTTPENDHEADER, sizeof( HTTPENDHEADER ) - 1, 0 );
+	if (rc < 0) goto fail_send;
 
 	// We now need to read the header information
 	while ( 1 )
@@ -227,6 +235,10 @@ int httpConnect( struct sockaddr_in * server, char *hostAddr, const char * url, 
 	// We've sent the request, and read the headers.  SockHandle is
 	// now at the start of the main data read for a file io read.
 	return peerHandle;
+
+fail_send:
+	printf( "HTTP: SEND FAILED %i\n", peerHandle );
+	return -1;
 }
 
 char *strnchr(char *str, char ch, int max) {
@@ -340,6 +352,8 @@ int httpDummy()
 
 int httpInitialize(iop_io_device_t *driver)
 {
+	(void)driver;
+
 	M_PRINTF("filesystem driver initialized\n");
 
 	return 0;
@@ -361,6 +375,8 @@ int httpOpen(iop_io_file_t *f, const char *name, int mode)
 	const char *getName;
 	t_fioPrivData *privData;
 	char hostAddr[100];
+
+	(void)mode;
 
 	M_DEBUG("httpOpen(-, %s, %d)\n", name, mode);
 
@@ -403,7 +419,6 @@ int httpOpen(iop_io_file_t *f, const char *name, int mode)
  */
 int httpRead(iop_io_file_t *f, void *buffer, int size)
 {
-	int bytesRead = 0;
 	t_fioPrivData *privData = (t_fioPrivData *)f->privdata;
 	int left = size;
 	int totalRead = 0;
@@ -414,7 +429,7 @@ int httpRead(iop_io_file_t *f, void *buffer, int size)
 	//             side has closed the connection.
 	do {
 
-		bytesRead = recv( privData->sockFd, buffer + totalRead, left, 0 );
+		int bytesRead = recv( privData->sockFd, (void *)((u8 *)buffer + totalRead), left, 0 );
 
 //		M_DEBUG("bytesRead = %d\n", bytesRead);
 
@@ -498,6 +513,9 @@ iop_io_device_t ps2httpDev = {
  */
 int _start( int argc, char **argv)
 {
+	(void)argc;
+	(void)argv;
+
 	M_PRINTF("Module Loaded\n");
 
 	M_PRINTF("Adding 'http' driver into io system\n");

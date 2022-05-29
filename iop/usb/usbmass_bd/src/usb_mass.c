@@ -123,7 +123,6 @@ static int perform_bulk_transfer(usb_transfer_callback_data* data)
 
 static void usb_transfer_callback(int resultCode, int bytes, void *arg)
 {
-	int ret;
 	usb_transfer_callback_data* data = (usb_transfer_callback_data*)arg;
 
 	data->returnCode = resultCode;
@@ -135,6 +134,8 @@ static void usb_transfer_callback(int resultCode, int bytes, void *arg)
 
 	if((resultCode == USB_RC_OK) && (data->remaining > 0))
 	{	//OK to continue.
+        int ret;
+
 		ret = perform_bulk_transfer(data);
 		if (ret != USB_RC_OK)
 		{
@@ -403,6 +404,7 @@ static int usb_bulk_transfer(mass_dev* dev, int direction, void* buffer, unsigne
 	cb_data.sema = dev->ioSema;
 	cb_data.pipe = (direction==USB_BLK_EP_IN) ? dev->bulkEpI : dev->bulkEpO;
 	cb_data.buffer = buffer;
+    cb_data.returnCode = 0;
 	cb_data.remaining = transferSize;
 
 	ret = perform_bulk_transfer(&cb_data);
@@ -730,6 +732,8 @@ static int usb_mass_disconnect(int devId)
 static void usb_mass_update(void* arg)
 {
     int i;
+
+    (void)arg;
 
     M_DEBUG("update thread running\n");
 

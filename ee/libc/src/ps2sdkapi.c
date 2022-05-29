@@ -437,6 +437,8 @@ struct dirent *readdir(DIR *dir)
 #ifdef F_rewinddir
 static void fioRewinddirHelper(DIR *dir)
 {
+	(void)dir;
+
 	printf("rewinddir not implemented\n");
 }
 
@@ -502,6 +504,8 @@ int chdir(const char *path) {
 #ifdef F_mkdir
 int fioMkdirHelper(const char *path, int mode) {
   // Old fio mkdir has no mode argument
+	(void)mode;
+
   return fioMkdir(path);
 }
 
@@ -522,6 +526,9 @@ int rmdir(const char *path) {
 
 #ifdef F__link
 int fioRename(const char *old, const char *new) {
+	(void)old;
+	(void)new;
+
   return -ENOSYS;
 }
 
@@ -566,6 +573,8 @@ int _kill(int pid, int sig) {
 		return 0;
 	}
 #endif
+	(void)pid;
+	(void)sig;
 	// FIXME: set errno
 	return -1;
 }

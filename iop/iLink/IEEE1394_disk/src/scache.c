@@ -85,7 +85,7 @@ int getIndexRead(cache_set* cache, unsigned int sector) {
 //---------------------------------------------------------------------------
 /* select the best record where to store new sector */
 int getIndexWrite(cache_set* cache, unsigned int sector) {
-	int i, ret;
+	int i;
 	int minTax = 0x0FFFFFFF;
 	int index = 0;
 
@@ -98,12 +98,14 @@ int getIndexWrite(cache_set* cache, unsigned int sector) {
 
 	//this sector is dirty - we need to flush it first
 	if (cache->rec[index].writeDirty) {
+		int ret;
+
 		XPRINTF("scache: getIndexWrite: sector is dirty : %d   index=%d \n", cache->rec[index].sector, index);
 		ret = WRITE_SECTOR(cache->dev, cache->rec[index].sector, cache->sectorBuf + (index * BLOCK_SIZE), BLOCK_SIZE/cache->dev->sectorSize);
 		cache->rec[index].writeDirty = 0;
 		//TODO - error handling
 		if (ret < 0) {
-			printf("scache: ERROR writing sector to disk! sector=%d\n", sector);
+			printf("scache: ERROR writing sector to disk! sector=%u\n", sector);
 		}
 
 	}
@@ -156,9 +158,11 @@ int scache_readSector(cache_set* cache, unsigned int sector, void** buf) {
 	int ret;
 	unsigned int alignedSector;
 
-	XPRINTF("cache: readSector devId = %i %X sector = %i \n", cache->dev->nodeID, (int) cache, sector);
+	if (cache != NULL) {
+		XPRINTF("cache: readSector devId = %i %X sector = %i \n", cache->dev->nodeID, (int) cache, sector);
+	}
     if (cache == NULL) {
-        printf("cache: devId cache not created = %i \n", cache->dev->nodeID);
+        printf("cache: devId cache not created \n");
         return -1;
     }
 
@@ -180,7 +184,7 @@ int scache_readSector(cache_set* cache, unsigned int sector, void** buf) {
 	ret = READ_SECTOR(cache->dev, alignedSector, cache->sectorBuf + (index * cache->sectorSize), BLOCK_SIZE/cache->dev->sectorSize);
 
 	if (ret < 0) {
-		printf("scache: ERROR reading sector from disk! sector=%d\n", alignedSector);
+		printf("scache: ERROR reading sector from disk! sector=%u\n", alignedSector);
 		return ret;
 	}
 	*buf = cache->sectorBuf + (index * cache->sectorSize) + ((sector%cache->indexLimit) * cache->sectorSize);

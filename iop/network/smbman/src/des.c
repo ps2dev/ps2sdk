@@ -460,7 +460,7 @@ static unsigned char DES_Keys[128] __attribute__((aligned(64)));
  */
 static unsigned char *DES_createkeys(const unsigned char *key)
 {
-	unsigned int c, d, t, s;
+	unsigned int c, d, t;
  	unsigned char *in;
 	unsigned int *k;
 	unsigned char k8[8];
@@ -489,6 +489,8 @@ static unsigned char *DES_createkeys(const unsigned char *key)
 	c&=0x0fffffff;
 
 	for (i=0; i<ITERATIONS; i++) {
+		unsigned int s;
+
 		if (shifts[i]) {
 			c = ((c >> 2)|(c << 26));
 			d = ((d >> 2)|(d << 26));
@@ -524,7 +526,7 @@ static unsigned char *DES_createkeys(const unsigned char *key)
 
 unsigned char *DES(const unsigned char *key, const unsigned char *message, unsigned char *cipher)
 {
-	unsigned int l, r, t, u;
+	unsigned int l, r, t;
 	int i;
 	unsigned int *s;
 	unsigned char *keys;
@@ -557,6 +559,8 @@ unsigned char *DES(const unsigned char *key, const unsigned char *message, unsig
 	/* I don't know if it is worth the effort of loop unrolling the
 	 * inner loop */
 	for (i=0; i<32; i+=4) {
+		unsigned int u;
+
 		D_ENCRYPT(l,r,i+0); /*  1 */
 		D_ENCRYPT(r,l,i+2); /*  2 */
 	}

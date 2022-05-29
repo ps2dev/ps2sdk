@@ -23,7 +23,7 @@ u32 smem_read(void *addr, void *buf, u32 size)
 	DI();
 	ee_kmode_enter();
 
-	memcpy(buf, addr + SUB_VIRT_MEM, size);
+	memcpy(buf, (void *)((u8 *)addr + SUB_VIRT_MEM), size);
 
 	ee_kmode_exit();
 	EI();
@@ -36,7 +36,7 @@ u32 smem_write(void *addr, void *buf, u32 size)
 	DI();
 	ee_kmode_enter();
 
-	memcpy(addr + SUB_VIRT_MEM, buf, size);
+	memcpy((void *)((u8 *)addr + SUB_VIRT_MEM), buf, size);
 
 	ee_kmode_exit();
 	EI();

@@ -88,7 +88,7 @@ static void _smap_write_phy(volatile u8 *emac3_regbase, unsigned int address, u1
     }
 
     if (i >= 100)
-        printf("smap: %s: > %d ms\n", "_smap_write_phy", i);
+        printf("smap: %s: > %u ms\n", "_smap_write_phy", i);
 }
 
 static u16 _smap_read_phy(volatile u8 *emac3_regbase, unsigned int address)
@@ -118,7 +118,7 @@ static u16 _smap_read_phy(volatile u8 *emac3_regbase, unsigned int address)
     } while (i < 100);
 
     if (i >= 100)
-        printf("smap: %s: > %d ms\n", "_smap_read_phy", i);
+        printf("smap: %s: > %u ms\n", "_smap_read_phy", i);
 
     return result;
 }
@@ -438,7 +438,7 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
 {
     unsigned int ResetCounterFlag, IntrReg;
     u32 EFBits;
-    int result, counter;
+    int counter;
     volatile u8 *smap_regbase, *emac3_regbase;
     USE_SPD_REGS;
 
@@ -446,6 +446,8 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
     emac3_regbase = SmapDrivPrivData->emac3_regbase;
     smap_regbase = SmapDrivPrivData->smap_regbase;
     while (1) {
+        int result;
+
         if ((result = WaitEventFlag(SmapDrivPrivData->Dev9IntrEventFlag, SMAP_EVENT_START | SMAP_EVENT_STOP | SMAP_EVENT_INTR | SMAP_EVENT_XMIT | SMAP_EVENT_LINK_CHECK, WEF_OR | WEF_CLEAR, &EFBits)) != 0) {
             DEBUG_PRINTF("smap: WaitEventFlag -> %d\n", result);
             break;
@@ -551,6 +553,8 @@ static int Dev9IntrCb(int flag)
     OldGP = SetModuleGP();
 #endif
 
+    (void)flag;
+
     dev9IntrDisable(DEV9_SMAP_ALL_INTR_MASK);
     iSetEventFlag(SmapDriverData.Dev9IntrEventFlag, SMAP_EVENT_INTR);
 
@@ -580,6 +584,8 @@ static void Dev9PreDmaCbHandler(int bcr, int dir)
 static void Dev9PostDmaCbHandler(int bcr, int dir)
 {
     volatile u8 *smap_regbase;
+
+    (void)bcr;
 
     smap_regbase = SmapDriverData.smap_regbase;
     if (dir != DMAC_TO_MEM) {
@@ -686,9 +692,11 @@ static int SMAPGetLinkMode(void)
 
 static int SMAPSetLinkMode(int mode)
 {
-    int result, baseMode;
+    int result;
 
     if (SmapDriverData.SmapIsInitialized) {
+        int baseMode;
+
         baseMode = mode & (~NETMAN_NETIF_ETH_LINK_DISABLE_PAUSE);
 
         if (baseMode != NETMAN_NETIF_ETH_LINK_MODE_AUTO) {
@@ -746,6 +754,9 @@ int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, void *out
 
     OldGP = SetModuleGP();
 #endif
+
+    (void)args_len;
+    (void)length;
 
     switch (command) {
         case NETMAN_NETIF_IOCTL_ETH_GET_MAC:
@@ -820,6 +831,7 @@ static inline int SetupNetDev(void)
         &SMAPStop,
         &SMAPXmit,
         &SMAPIoctl,
+        0,
     };
 
     EventFlagData.attr = 0;
@@ -980,7 +992,7 @@ int smap_init(int argc, char *argv[])
 
     SmapDriverData.smap_regbase = smap_regbase;
     SmapDriverData.emac3_regbase = emac3_regbase;
-    if (!SPD_REG16(SPD_R_REV_3) & SPD_CAPS_SMAP)
+    if ((SPD_REG16(SPD_R_REV_3) & SPD_CAPS_SMAP) == 0)
         return -1;
     if (SPD_REG16(SPD_R_REV_1) < 0x11)
         return -6; // Minimum: revision 17, ES2.

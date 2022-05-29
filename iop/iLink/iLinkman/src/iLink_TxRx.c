@@ -93,6 +93,8 @@ static iop_sys_clock_t Timeout={
 };
 
 static unsigned int TimeoutCallbackFunction(void *argv){
+	(void)argv;
+
 	iSetEventFlag(IntrEventFlag, iLinkEventError);
 	return 0;
 }

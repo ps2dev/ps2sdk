@@ -78,8 +78,6 @@ static void *sio2packet_add_funcs_array[16] = {
 void sio2packet_add(int port, int slot, int cmd, u8 *buf)
 {	// Used to build the sio2packets for all mc commands
 	register u32 regdata;
-	register int pos;
-	u8 *p;
 
 	if (cmd == 0xffffffff) {
 		mcman_sio2packet.in_dma.count = 0;
@@ -87,6 +85,8 @@ void sio2packet_add(int port, int slot, int cmd, u8 *buf)
 	}
 
 	if (mcman_sio2packet.in_dma.count < 0xb) {
+		register int pos;
+		u8 *p;
 
 		if (cmd == 0xfffffffe) {
 			mcman_sio2packet.regdata[mcman_sio2packet.in_dma.count] = 0;
@@ -121,6 +121,10 @@ void sio2packet_add(int port, int slot, int cmd, u8 *buf)
 
 static void sio2packet_add_wdma_u32(int port, int slot, int cmd, u8 *buf, int pos)
 {
+	(void)port;
+	(void)slot;
+	(void)cmd;
+
 	u8 *p = mcman_sio2packet.in_dma.addr + pos;
 	p[2] = buf[0];
 	p[3] = buf[1];
@@ -133,6 +137,11 @@ static void sio2packet_add_wdma_u32(int port, int slot, int cmd, u8 *buf, int po
 
 static void sio2packet_add_pagedata_out(int port, int slot, int cmd, u8 *buf, int pos)
 {
+	(void)port;
+	(void)slot;
+	(void)cmd;
+	(void)buf;
+
 	// used for sio2 command 0x81 0x43 to read page data
 	u8 *p = mcman_sio2packet.in_dma.addr + pos;
 	p[2] = 128;
@@ -142,6 +151,10 @@ static void sio2packet_add_pagedata_out(int port, int slot, int cmd, u8 *buf, in
 
 static void sio2packet_add_pagedata_in(int port, int slot, int cmd, u8 *buf, int pos)
 {
+	(void)port;
+	(void)slot;
+	(void)cmd;
+
 	// used for sio2 command 0x81 0x42 to write page data
 	register int i;
 	u8 *p = mcman_sio2packet.in_dma.addr + pos;
@@ -181,6 +194,8 @@ static void sio2packet_add_ecc_in(int port, int slot, int cmd, u8 *buf, int pos)
 
 static void sio2packet_add_ecc_out(int port, int slot, int cmd, u8 *buf, int pos)
 {
+	(void)buf;
+
 	// used for sio2 command 0x81 0x43 to read page ecc
 	register u32 regdata;
 	u8 *p = mcman_sio2packet.in_dma.addr + pos;
@@ -199,6 +214,11 @@ static void sio2packet_add_ecc_out(int port, int slot, int cmd, u8 *buf, int pos
 
 static void sio2packet_add_wdma_5a(int port, int slot, int cmd, u8 *buf, int pos)
 {
+	(void)port;
+	(void)slot;
+	(void)cmd;
+	(void)buf;
+
 	// used for sio2 command 0x81 0x27 to set a termination code
 	u8 *p = mcman_sio2packet.in_dma.addr + pos;
 	p[2] = 0x5a;
@@ -208,6 +228,11 @@ static void sio2packet_add_wdma_5a(int port, int slot, int cmd, u8 *buf, int pos
 
 static void sio2packet_add_wdma_00(int port, int slot, int cmd, u8 *buf, int pos)
 {
+	(void)port;
+	(void)slot;
+	(void)cmd;
+	(void)buf;
+
 	u8 *p = mcman_sio2packet.in_dma.addr + pos;
 	p[2] = 0x00;
 
@@ -217,6 +242,10 @@ static void sio2packet_add_wdma_00(int port, int slot, int cmd, u8 *buf, int pos
 
 static void sio2packet_add_wdma_u8(int port, int slot, int cmd, u8 *buf, int pos)
 {
+	(void)port;
+	(void)slot;
+	(void)cmd;
+
 	u8 *p = mcman_sio2packet.in_dma.addr + pos;
 	p[2] = buf[0];
 }
@@ -225,6 +254,12 @@ static void sio2packet_add_wdma_u8(int port, int slot, int cmd, u8 *buf, int pos
 
 static void sio2packet_add_do_nothing(int port, int slot, int cmd, u8 *buf, int pos)
 {
+	(void)port;
+	(void)slot;
+	(void)cmd;
+	(void)buf;
+	(void)pos;
+
 	// do nothing
 }
 
@@ -232,6 +267,9 @@ static void sio2packet_add_do_nothing(int port, int slot, int cmd, u8 *buf, int 
 int mcsio2_transfer(int port, int slot, sio2_transfer_data_t *sio2data)
 {
 	register int r;
+
+	(void)port;
+	(void)slot;
 
 #ifdef DEBUG
 	u8 *p = (u8 *)(sio2data->in_dma.addr);
@@ -341,6 +379,9 @@ int secrman_mc_command(int port, int slot, sio2_transfer_data_t *sio2data)
 	r = mcman_sio2transfer(port, slot, sio2data);
 #endif
 #ifdef BUILDING_XFROMMAN
+	(void)port;
+	(void)slot;
+	(void)sio2data;
 	r = 0;
 #endif
 
@@ -375,6 +416,9 @@ int mcman_cardchanged(int port, int slot)
 	}
 
 	DPRINTF("mcman_cardchanged sio2cmd succeeded\n");
+#else
+	(void)port;
+	(void)slot;
 #endif
 
 	return sceMcResSucceed;
@@ -429,13 +473,13 @@ int mcman_eraseblock(int port, int slot, int block, void **pagebuf, void *eccbuf
 			if (ecc_offset < 0)
 				ecc_offset += 0x1f;
 			ecc_offset = ecc_offset >> 5;
-			p_ecc = (void *)(eccbuf + ecc_offset);
+			p_ecc = (void *)((u8 *)eccbuf + ecc_offset);
 			size = 0;
 			while (size < mcdi->pagesize)	{
 				if (*pagebuf)
-					McDataChecksum((void *)(*pagebuf + size), p_ecc);
+					McDataChecksum((void *)((u8 *)(*pagebuf) + size), p_ecc);
 				size += 128;
-				p_ecc += 3;
+				p_ecc = (void *)((u8 *)p_ecc + 3);
 			}
 			pagebuf++;
 			page++;
@@ -476,6 +520,8 @@ int McWritePage(int port, int slot, int page, void *pagebuf, void *eccbuf) // Ex
 #endif
 
 #ifdef BUILDING_XFROMMAN
+	(void)port;
+	(void)slot;
 	char page_buf[528];
 	memcpy(page_buf, pagebuf, 512);
 	memcpy(page_buf + 512, eccbuf, 16);
@@ -631,6 +677,8 @@ int mcman_readpage(int port, int slot, int page, void *buf, void *eccbuf)
 #endif
 
 #ifdef BUILDING_XFROMMAN
+	(void)port;
+	(void)slot;
 	// No retry logic here.
 	char page_buf[528];
 	if (!flash_page_read(&dev9_flash_info, page, 1, page_buf))
@@ -684,6 +732,8 @@ int McGetCardSpec(int port, int slot, s16 *pagesize, u16 *blocksize, int *cardsi
 	*flags = p[2];
 #endif
 #ifdef BUILDING_XFROMMAN
+	(void)port;
+	(void)slot;
 	flash_get_info(&dev9_flash_info);
 	*pagesize = dev9_flash_info.page_bytes;
 	*blocksize = dev9_flash_info.block_pages;
@@ -728,6 +778,9 @@ int mcman_resetauth(int port, int slot)
 	}
 
 	DPRINTF("mcman_resetauth sio2cmd succeeded\n");
+#else
+	(void)port;
+	(void)slot;
 #endif
 
 	return sceMcResSucceed;
@@ -936,6 +989,9 @@ int mcman_probePS1Card2(int port, int slot)
 	else if (mcman_sio2outbufs_PS1PDA[1] != 8) {
 		return -14;
 	}
+#else
+	(void)port;
+	(void)slot;
 #endif
 
 	return -13;
@@ -1011,6 +1067,8 @@ int mcman_probePS1Card(int port, int slot)
 	return r;
 #endif
 #ifdef BUILDING_XFROMMAN
+	(void)port;
+	(void)slot;
 	return sceMcResSucceed;
 #endif
 }
@@ -1043,6 +1101,9 @@ int mcman_probePDACard(int port, int slot)
 
 	if (retries >= 5)
 		return -11;
+#else
+	(void)port;
+	(void)slot;
 #endif
 
 	return sceMcResSucceed;
@@ -1108,6 +1169,11 @@ int McWritePS1PDACard(int port, int slot, int page, void *buf) // Export #30
 
 	if ((mcman_sio2outbufs_PS1PDA[1] != 0) && (mcman_sio2outbufs_PS1PDA[1] != 8))
 		return sceMcResFullDevice;
+#else
+	(void)port;
+	(void)slot;
+	(void)page;
+	(void)buf;
 #endif
 
 	return sceMcResSucceed;
@@ -1176,6 +1242,11 @@ int McReadPS1PDACard(int port, int slot, int page, void *buf) // Export #29
 
 	if ((mcman_sio2outbufs_PS1PDA[1] != 0) && (mcman_sio2outbufs_PS1PDA[1] != 8))
 		return sceMcResDeniedPermit;
+#else
+	(void)port;
+	(void)slot;
+	(void)page;
+	(void)buf;
 #endif
 
 	return sceMcResSucceed;

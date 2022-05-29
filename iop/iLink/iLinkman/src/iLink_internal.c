@@ -33,10 +33,14 @@ extern const void *RequestHandlers[];
 
 void UBUFThread(void *arg){
 	void (*RequestResponseHandler)(unsigned int header, volatile unsigned int *buffer, unsigned int nQuads);
-	unsigned int data, DataBufferLevel;
+	unsigned int data;
 	u32 ef_bits;
 
+	(void)arg;
+
 	while(1){
+		unsigned int DataBufferLevel;
+
 		WaitEventFlag(IntrEventFlag, iLinkEventBusReset|iLinkEventURx, WEF_OR, &ef_bits);
 		ClearEventFlag(IntrEventFlag, ~(iLinkEventBusReset|iLinkEventURx));
 
@@ -64,8 +68,9 @@ int GetConsoleIDs(u64 *guid, char *ModelName){
 			result=-1;
 			DEBUG_PRINTF("Error reading console model name.\n");
 		}
-
-		result=0;
+		else{
+			result=0;
+		}
 	}
 
 	return result;

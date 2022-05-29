@@ -177,21 +177,20 @@ static int isValidDisc(void) {
 
 // Copy a TOC Entry from the CD native format to our tidier format
 static void copyToTocEntry(struct TocEntry *tocEntry, struct DirTocEntry *internalTocEntry) {
-    int i;
     int filenamelen;
 
     DPRINTF("copyToTocEntry: from=%p, to=%p\n\n", tocEntry, internalTocEntry);
-    DPRINTF("copyToTocEntry: DirTocEntry=%i\n", internalTocEntry);
-    DPRINTF("      length......... %i\n", internalTocEntry->length);
-    DPRINTF("      fileLBA........ %i\n", internalTocEntry->fileLBA);
-    DPRINTF("      fileLBA_bigend. %i\n", internalTocEntry->fileLBA_bigend);
-    DPRINTF("      fileSize....... %i\n", internalTocEntry->fileSize);
-    DPRINTF("      fileSize_bigend %i\n", internalTocEntry->fileSize_bigend);
+    DPRINTF("copyToTocEntry: DirTocEntry=%p\n", internalTocEntry);
+    DPRINTF("      length......... %hd\n", internalTocEntry->length);
+    DPRINTF("      fileLBA........ %u\n", internalTocEntry->fileLBA);
+    DPRINTF("      fileLBA_bigend. %u\n", internalTocEntry->fileLBA_bigend);
+    DPRINTF("      fileSize....... %u\n", internalTocEntry->fileSize);
+    DPRINTF("      fileSize_bigend %u\n", internalTocEntry->fileSize_bigend);
     DPRINTF("      dateStamp...... %s\n", internalTocEntry->dateStamp);
-    DPRINTF("      reserved1...... %i\n", internalTocEntry->reserved1);
-    DPRINTF("      fileProperties. %i\n", internalTocEntry->fileProperties);
+    DPRINTF("      reserved1...... %u\n", internalTocEntry->reserved1);
+    DPRINTF("      fileProperties. %u\n", internalTocEntry->fileProperties);
     DPRINTF("      reserved2...... %s\n", internalTocEntry->reserved2);
-    DPRINTF("      filenameLength. %i\n", internalTocEntry->filenameLength);
+    DPRINTF("      filenameLength. %u\n", internalTocEntry->filenameLength);
     DPRINTF("      filename....... %s\n", internalTocEntry->filename);
 
     tocEntry->fileSize = internalTocEntry->fileSize;
@@ -199,6 +198,8 @@ static void copyToTocEntry(struct TocEntry *tocEntry, struct DirTocEntry *intern
     tocEntry->fileProperties = internalTocEntry->fileProperties;
 
     if (cdVolDesc.filesystemType == 2) {
+        int i;
+
         // This is a Joliet Filesystem, so use Unicode to ISO string copy
         filenamelen = internalTocEntry->filenameLength / 2;
 
@@ -218,11 +219,11 @@ static void copyToTocEntry(struct TocEntry *tocEntry, struct DirTocEntry *intern
         strtok(tocEntry->filename, ";");
     }
 
-    DPRINTF("copyToTocEntry: tocEntry=%i\n\n", tocEntry);
-    DPRINTF("      fileLBA........ %i\n\n", tocEntry->fileLBA);
-    DPRINTF("      fileSize....... %i\n\n", tocEntry->fileSize);
+    DPRINTF("copyToTocEntry: tocEntry=%p\n\n", tocEntry);
+    DPRINTF("      fileLBA........ %u\n\n", tocEntry->fileLBA);
+    DPRINTF("      fileSize....... %u\n\n", tocEntry->fileSize);
     DPRINTF("      filename....... %s\n\n", tocEntry->filename);
-    DPRINTF("      fileProperties. %i\n\n", tocEntry->fileProperties);
+    DPRINTF("      fileProperties. %u\n\n", tocEntry->fileProperties);
 }
 
 
@@ -235,10 +236,7 @@ static int findPath(char *pathname) {
     char *dirname;
     char *seperator;
 
-    int dir_entry;
-    int found_dir;
 
-    struct DirTocEntry *tocEntryPointer;
     struct TocEntry localTocEntry;
 
     dirname = strtok(pathname, "\\/");
@@ -250,6 +248,11 @@ static int findPath(char *pathname) {
     sceCdDiskReady(0);
 
     while (dirname != NULL) {
+        int dir_entry;
+        int found_dir;
+
+        struct DirTocEntry *tocEntryPointer;
+
         found_dir = FALSE;
 
         tocEntryPointer = (struct DirTocEntry *)cacheInfoDir.cache;
@@ -330,7 +333,7 @@ static int findPath(char *pathname) {
                         // otherwise append a seperator, and the matched directory
                         // to the pathname
                         strcat(cacheInfoDir.pathname, "/");
-                        DPRINTF("Adding '%s' to cached pathname - path depth = %d\n\n", dirname, cacheInfoDir.path_depth);
+                        DPRINTF("Adding '%s' to cached pathname - path depth = %u\n\n", dirname, cacheInfoDir.path_depth);
                         strcat(cacheInfoDir.pathname, dirname);
                         cacheInfoDir.path_depth++;
                     }
@@ -370,7 +373,7 @@ static int findPath(char *pathname) {
             cacheInfoDir.cache_size = MAX_DIR_CACHE_SECTORS;
 
         if (!cdfs_readSect(cacheInfoDir.sector_start + cacheInfoDir.cache_offset, cacheInfoDir.cache_size, cacheInfoDir.cache)) {
-            DPRINTF("Couldn't Read from CD, trying to read %d sectors, starting at sector %d !\n\n",
+            DPRINTF("Couldn't Read from CD, trying to read %u sectors, starting at sector %u !\n\n",
                    cacheInfoDir.cache_size, cacheInfoDir.sector_start + cacheInfoDir.cache_offset);
             cacheInfoDir.valid = FALSE;  // should we completely invalidate just because we couldnt read time?
             return FALSE;
@@ -459,13 +462,14 @@ static int compareTocEntry(char *filename, const char *extensions) {
 
     char *token;
 
-    char *ext_point;
 
     strncpy(ext_list, extensions, 128);
     ext_list[128] = 0;
 
     token = strtok(ext_list, " ,");
     while (token != NULL) {
+        char *ext_point;
+
         // if 'token' matches extension of 'filename'
         // then return a match
         ext_point = strrchr(filename, '.');
@@ -490,7 +494,6 @@ static int cdfs_cacheDir(const char *pathname, enum Cache_getMode getMode) {
     // macke sure that the requested pathname is not directly modified
     static char dirname[1024];
 
-    int path_len;
     DPRINTF("Attempting to find, and cache, directory: %s\n", pathname);
 
     // Invalidate table of contents cache if disk changed
@@ -565,6 +568,8 @@ static int cdfs_cacheDir(const char *pathname, enum Cache_getMode getMode) {
             DPRINTF("Requested Path = %s , Cached Path = %s\n", pathname, cacheInfoDir.pathname);
 
             if (comparePath(pathname) == SUBDIR) {
+                int path_len;
+
 // If so then we can start our search for the path, from the currently cached directory
                 DPRINTF("Requested dir is a sub-dir of the cached directory,\n"
                        "so start search from current cached dir\n");
@@ -781,7 +786,7 @@ int cdfs_findfile(const char *fname, struct TocEntry *tocEntry) {
 
     // If we've got here, then we have a block of the directory cached, and want to check
     // from this point, to the end of the dir
-    DPRINTF("cache_size = %d\n", cacheInfoDir.cache_size);
+    DPRINTF("cache_size = %u\n", cacheInfoDir.cache_size);
     while (cacheInfoDir.cache_size > 0) {
         tocEntryPointer = (struct DirTocEntry *)cacheInfoDir.cache;
 
@@ -791,7 +796,7 @@ int cdfs_findfile(const char *fname, struct TocEntry *tocEntry) {
         for (; tocEntryPointer < (struct DirTocEntry *)(cacheInfoDir.cache + (cacheInfoDir.cache_size * 2048)); tocEntryPointer = (struct DirTocEntry *)((u8 *)tocEntryPointer + tocEntryPointer->length)) {
             if (tocEntryPointer->length == 0) {
                 DPRINTF("Got a null pointer entry, so either reached end of dir, or end of sector\n");
-                DPRINTF("Offset into cache = %d bytes\n", (u8 *)tocEntryPointer - cacheInfoDir.cache);
+                DPRINTF("Offset into cache = %d bytes\n", (int)((u8 *)tocEntryPointer - cacheInfoDir.cache));
                 tocEntryPointer = (struct DirTocEntry *)(cacheInfoDir.cache + (((((u8 *)tocEntryPointer - cacheInfoDir.cache) / 2048) + 1) * 2048));
             }
 
@@ -919,7 +924,7 @@ int cdfs_getDir(const char *pathname, const char *extensions, enum CDFS_getMode 
         return -1;
     }
 
-    DPRINTF("requested directory is %d sectors\n", cacheInfoDir.sector_num);
+    DPRINTF("requested directory is %u sectors\n", cacheInfoDir.sector_num);
 
     if ((getMode == CDFS_GET_DIRS_ONLY) || (getMode == CDFS_GET_FILES_AND_DIRS)) {
         // Cache the start of the requested directory

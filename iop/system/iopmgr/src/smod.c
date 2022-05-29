@@ -135,5 +135,7 @@ int smod_get_modversion_by_name(const char *name)
  */
 int smod_unload_module(const char *name)
 {
+  (void)name;
+
   return -2;
 }

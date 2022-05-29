@@ -94,13 +94,16 @@ static u8 mcserv_buf[MCSERV_BUFSIZE] __attribute__((aligned(64)));
 extern struct irx_export_table _exp_mcserv;
 
 //--------------------------------------------------------------
-int _start(int argc, const char **argv)
+int _start(int argc, char **argv)
 {
 	iop_thread_t thread_param;
 	register int thread_id;
 	iop_library_t *libptr;
 	int i, mcman_loaded;
 	void **export_tab;
+
+	(void)argc;
+	(void)argv;
 
 #ifdef SIO_DEBUG
 	sio_init(38400, 0, 0, 0, 0);
@@ -202,6 +205,8 @@ err_out:
 //--------------------------------------------------------------
 void thread_rpc_S_0400(void* arg)
 {
+	(void)arg;
+
 	if (!sceSifCheckInit())
 		sceSifInit();
 
@@ -216,9 +221,13 @@ void *cb_rpc_S_0400(u32 fno, void *buf, int size)
 {
 	// Rpc Callback function
 	int (*rpc_func)(void);
-	register int i;
+
+	(void)buf;
+	(void)size;
 
 	if (mcman_type == XMCMAN) {
+		register int i;
+
 		for (i=0; i<16; i++) { // retrieve correct function number for xmcserv
 			if (fno == XMCSERV_RpcCmd[0][i]) {
 				fno = XMCSERV_RpcCmd[1][i];
@@ -460,7 +469,7 @@ int _McRead(void *rpc_buf)
 	left_to_read = (dP->size - eP.size1) - eP.size2;
 
 	if (eP.size2 != 0)
-		eP.dest2 = (void *)(eedata + eP.size1 + left_to_read);
+		eP.dest2 = (void *)((u8 *)eedata + eP.size1 + left_to_read);
 
 	if (eP.size1 != 0) {
 		size_readed = pMcRead(dP->fd, eP.src1, eP.size1);
@@ -473,7 +482,7 @@ int _McRead(void *rpc_buf)
 		else {
 			file_offset = size_readed;
 			eP.dest1 = eedata;
-			eedata += size_readed;
+			eedata = (void *)((u8 *)eedata + size_readed);
 
 			if (size_readed != eP.size1) {
 				eP.size1 = size_readed;
@@ -513,7 +522,7 @@ int _McRead(void *rpc_buf)
 
 		CpuResumeIntr(intStatus);
 
-		eedata += size_readed;
+		eedata = (void *)((u8 *)eedata + size_readed);
 
 		if (size_to_read != size_readed) {
 			eP.size2 = 0;
@@ -588,7 +597,7 @@ int _McRead2(void *rpc_buf)
 	left_to_read = (dP->size - eP.size1) - eP.size2;
 
 	if (eP.size2 != 0)
-		eP.dest2 = (void *)(eedata + eP.size1 + left_to_read);
+		eP.dest2 = (void *)((u8 *)eedata + eP.size1 + left_to_read);
 
 	if (eP.size1 != 0) {
 		size_readed = pMcRead(dP->fd, eP.src1, eP.size1);
@@ -601,7 +610,7 @@ int _McRead2(void *rpc_buf)
 		else {
 			file_offset = size_readed;
 			eP.dest1 = eedata;
-			eedata += size_readed;
+			eedata = (void *)((u8 *)eedata + size_readed);
 
 			if (size_readed != eP.size1) {
 				eP.size1 = size_readed;
@@ -635,7 +644,7 @@ int _McRead2(void *rpc_buf)
 
 		eP.size2 = size_readed & 0x3f;
 		if ((size_readed & 0x3f) != 0) {
-			eP.dest2 = (void *)(eedata + (size_readed & 0xffffffc0));
+			eP.dest2 = (void *)((u8 *)eedata + (size_readed & 0xffffffc0));
 			memcpy(eP.src2, (void *)(mcserv_buf + (size_readed & 0xffffffc0)), size_readed & 0x3f);
 		}
 
@@ -656,7 +665,7 @@ dma_transfer:
 skip_dma_transfer:
 		file_offset += size_readed;
 		left_to_read -= size_readed;
-		eedata += size_readed;
+		eedata = (void *)((u8 *)eedata + size_readed);
 
 		if (size_to_read != size_readed) {
 			size_readed = 0;

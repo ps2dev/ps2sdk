@@ -47,6 +47,8 @@ void GsEnableDithering(u8 enable, int mode)
 {
 	QWORD *p;
 
+	(void)mode;
+
 	p=UNCACHED_SEG(GsPrimWorkArea);
 	if(enable)
 	{

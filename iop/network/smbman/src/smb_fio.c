@@ -170,9 +170,13 @@ static void smb_io_unlock(void)
 //-------------------------------------------------------------------------
 static void keepalive_thread(void *args)
 {
-	int r, opened_share = 0;
+	int opened_share = 0;
+
+	(void)args;
 
 	while (1) {
+		int r;
+
 		// wait for keepalive mutex
 		WaitSema(keepalive_mutex);
 
@@ -213,6 +217,8 @@ int smb_init(iop_device_t *dev)
 {
 	iop_thread_t thread;
 
+	(void)dev;
+
 	// create a mutex for IO ops
 	smbman_io_sema = CreateMutex(IOP_MUTEX_UNLOCKED);
 
@@ -239,13 +245,14 @@ int smb_init(iop_device_t *dev)
 int smb_initdev(void)
 {
 	int i;
-	FHANDLE *fh;
 
 	DelDrv(smbdev.name);
 	if (AddDrv((iop_device_t *)&smbdev))
 		return 1;
 
 	for (i=0; i<MAX_FDHANDLES; i++) {
+		FHANDLE *fh;
+
 		fh = (FHANDLE *)&smbman_fdhandles[i];
 		fh->f = NULL;
 		fh->smb_fid = -1;
@@ -260,6 +267,8 @@ int smb_initdev(void)
 //--------------------------------------------------------------
 int smb_deinit(iop_device_t *dev)
 {
+	(void)dev;
+
 	keepalive_deinit();
 	DeleteThread(keepalive_tid);
 
@@ -275,9 +284,10 @@ int smb_deinit(iop_device_t *dev)
 static FHANDLE *smbman_getfilefreeslot(void)
 {
 	int i;
-	FHANDLE *fh;
 
 	for (i=0; i<MAX_FDHANDLES; i++) {
+		FHANDLE *fh;
+
 		fh = (FHANDLE *)&smbman_fdhandles[i];
 		if (fh->f == NULL)
 			return fh;
@@ -325,6 +335,8 @@ int smb_open(iop_file_t *f, const char *filename, int flags, int mode)
 	int r = 0;
 	FHANDLE *fh;
 	s64 filesize;
+
+	(void)mode;
 
 	if (!filename)
 		return -ENOENT;
@@ -395,9 +407,10 @@ io_unlock:
 void smb_closeAll(void)
 {
 	int i;
-	FHANDLE *fh;
 
 	for (i=0; i<MAX_FDHANDLES; i++) {
+		FHANDLE *fh;
+
 		fh = (FHANDLE *)&smbman_fdhandles[i];
 		if (fh->smb_fid != -1)
 			smb_Close(UID, TID, fh->smb_fid);
@@ -465,6 +478,8 @@ int smb_remove(iop_file_t *f, const char *filename)
 {
 	int r;
 
+	(void)f;
+
 	if (!filename)
 		return -ENOENT;
 
@@ -489,6 +504,9 @@ int smb_mkdir(iop_file_t *f, const char *dirname, int mode)
 {
 	int r;
 
+	(void)f;
+	(void)mode;
+
 	if (!dirname)
 		return -ENOENT;
 
@@ -511,6 +529,8 @@ int smb_rmdir(iop_file_t *f, const char *dirname)
 {
 	int r;
 	PathInformation_t info;
+
+	(void)f;
 
 	if (!dirname)
 		return -ENOENT;
@@ -717,6 +737,8 @@ int smb_getstat(iop_file_t *f, const char *filename, iox_stat_t *stat)
 	int r;
 	PathInformation_t info;
 
+	(void)f;
+
 	if (!filename)
 		return -ENOENT;
 
@@ -747,6 +769,8 @@ int smb_rename(iop_file_t *f, const char *oldname, const char *newname)
 {
 	int r;
 
+	(void)f;
+
 	if ((!oldname) || (!newname))
 		return -ENOENT;
 
@@ -772,6 +796,8 @@ int smb_chdir(iop_file_t *f, const char *dirname)
 {
 	int r = 0, i;
 	PathInformation_t info;
+
+	(void)f;
 
 	if (!dirname)
 		return -ENOENT;
@@ -1063,6 +1089,11 @@ static int smb_QueryDiskInfo(smbQueryDiskInfo_out_t *querydiskinfo)
 int smb_devctl(iop_file_t *f, const char *devname, int cmd, void *arg, unsigned int arglen, void *bufp, unsigned int buflen)
 {
 	int r = 0;
+
+	(void)f;
+	(void)devname;
+	(void)arglen;
+	(void)buflen;
 
 	smb_io_lock();
 

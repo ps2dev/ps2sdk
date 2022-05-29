@@ -46,6 +46,9 @@ int _start(int argc, char **argv)
 {
 	u32 state;
 
+	(void)argc;
+	(void)argv;
+
 	if (RegisterLibraryEntries(&_exp_siftoo) != 0)
 		return 1;
 
@@ -91,15 +94,26 @@ int sif2_exit()
 
 int sif2_control(u32 intr, void *unused)
 {
+	(void)intr;
+	(void)unused;
+
 	return 0;
 }
 
 int sif2_mem_read(u32 addr, void *buf, u32 size)
 {
+	(void)addr;
+	(void)buf;
+	(void)size;
+
 	return 0;
 }
 
 int sif2_mem_write(u32 addr, void *buf, u32 size)
 {
+	(void)addr;
+	(void)buf;
+	(void)size;
+
 	return 0;
 }

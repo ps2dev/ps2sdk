@@ -45,6 +45,8 @@ static s32 HandleRxEvent(s32 channel)
 {
 	struct NetManBD *bd;
 
+	(void)channel;
+
 	bd = UNCACHED_SEG(&FrameBufferStatus[RxBufferNextRdPtr]);
 	if(bd->length > 0)
 	{
@@ -65,10 +67,11 @@ static s32 HandleRxEvent(s32 channel)
 int NetManRPCAllocRxBuffers(void)
 {
 	int i;
-	void *packet, *payload;
 
 	for(i = 0; i < NETMAN_RPC_BLOCK_SIZE; i++)
 	{
+		void *packet, *payload;
+
 		if((packet = NetManNetProtStackAllocRxPacket(NETMAN_NETIF_FRAME_SIZE, &payload)) != NULL)
 		{
 			ClearBufferLen(i, packet, payload);
@@ -86,6 +89,8 @@ static void *NETMAN_EE_RPC_Handler(int fnum, void *buffer, int NumBytes)
 {
 	ee_thread_t thread;
 	void *result;
+
+	(void)NumBytes;
 
 	switch(fnum)
 	{
@@ -154,6 +159,8 @@ static void NETMAN_RPC_Thread(void *arg)
 {
 	static unsigned char cb_rpc_buffer[64] __attribute__((aligned(64)));
 
+	(void)arg;
+
 	SifSetRpcQueue(&cb_queue, NETMAN_RpcSvr_threadID);
 	SifRegisterRpc(&cb_srv, NETMAN_RPC_NUMBER, &NETMAN_EE_RPC_Handler, cb_rpc_buffer, NULL, NULL, &cb_queue);
 	SifRpcLoop(&cb_queue);
@@ -162,13 +169,16 @@ static void NETMAN_RPC_Thread(void *arg)
 static void NETMAN_RxThread(void *arg)
 {
 	volatile struct NetManBD *bd;
-	void *payload, *payloadNext;
 	u32 PacketLength, PacketLengthAligned;
-	void *packet, *packetNext;
 	u8 run;
+
+	(void)arg;
 
 	while(1)
 	{
+		void *payload, *payloadNext;
+		void *packet, *packetNext;
+
 		bd = UNCACHED_SEG(&FrameBufferStatus[RxBufferRdPtr]);
 
 		do {

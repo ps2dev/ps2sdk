@@ -419,13 +419,15 @@ static int up_24000_16_stereo(struct upsample_t *up)
 
 static void up_generic_16_stereo(struct upsample_t *up, const short *lut)
 {
-	int q, p;
+	int p;
 	short *left = up->left;
 	short *right = up->right;
 	short *src = (short *)up->src;
 
 	for (p=0; p<512; p++)
 	{
+		int q;
+
 		q = lut[p] << 1;
 		*left++ = src[q + 0];
 		*right++ = src[q + 1];
@@ -434,13 +436,15 @@ static void up_generic_16_stereo(struct upsample_t *up, const short *lut)
 
 static void up_generic_16_mono(struct upsample_t *up, const short *lut)
 {
-	int q, p;
+	int p;
 	short *left = up->left;
 	short *right = up->right;
 	short *src = (short *)up->src;
 
 	for (p=0; p<512; p++)
 	{
+		int q;
+
 		q = lut[p];
 		*left++ = *right++ = src[q];
 	}
@@ -448,14 +452,16 @@ static void up_generic_16_mono(struct upsample_t *up, const short *lut)
 
 static void up_generic_8_mono(struct upsample_t *up, const short *lut)
 {
-	int q, p;
-	signed char b;
+	int p;
 	short *left = up->left;
 	short *right = up->right;
 	char *src = (char *)up->src;
 
 	for (p=0; p<512; p++)
 	{
+		int q;
+		signed char b;
+
 		q = lut[p];
 		b = src[q];
 		*left++ = *right++ = (short)((b + (b << 8)) - 32768);
@@ -464,14 +470,16 @@ static void up_generic_8_mono(struct upsample_t *up, const short *lut)
 
 static void up_generic_8_stereo(struct upsample_t *up, const short *lut)
 {
-	int q, p;
-	signed char b;
+	int p;
 	short *left = up->left;
 	short *right = up->right;
 	char *src = (char *)up->src;
 
 	for (p=0; p<512; p++)
 	{
+		int q;
+		signed char b;
+
 		q = lut[p] << 1;
 		b = src[q + 0];
 		*left++ = (short)((b + (b << 8)) - 32768);

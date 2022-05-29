@@ -153,6 +153,8 @@ static void bdm_thread(void* arg)
     u32 EFBits;
     int i;
 
+    (void)arg;
+
     M_PRINTF("BDM event thread running\n");
 
     while (1) {

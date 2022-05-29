@@ -145,7 +145,7 @@ void * malloc(size_t size)
 {
 	void *ptr = NULL, *mem_ptr;
 	heap_mem_header_t *new_mem, *prev_mem;
-	size_t mem_sz, heap_align_bytes;
+	size_t mem_sz;
 
 	mem_sz = size + sizeof(heap_mem_header_t);
 
@@ -159,6 +159,8 @@ void * malloc(size_t size)
 	if (__alloc_heap_head == NULL) {
 		/* Align the bottom of the heap to our default alignment.  */
 		if (__alloc_heap_base == NULL) {
+			size_t heap_align_bytes;
+
 			heap_align_bytes = (u32)alloc_sbrk(0) & (DEFAULT_ALIGNMENT - 1);
 			alloc_sbrk(heap_align_bytes);
 			__alloc_heap_base = alloc_sbrk(0);
@@ -183,7 +185,7 @@ void * malloc(size_t size)
 	}
 
 	/* Check to see if there's free space at the bottom of the heap.  */
-	if ((__alloc_heap_base + mem_sz) < (void *)__alloc_heap_head) {
+	if ((void *)((u8 *)__alloc_heap_base + mem_sz) < (void *)__alloc_heap_head) {
 		new_mem = (heap_mem_header_t *)__alloc_heap_base;
 		ptr     = (void *)((u32)new_mem + sizeof(heap_mem_header_t));
 
@@ -262,7 +264,7 @@ void * realloc(void *ptr, size_t size)
 	if (prev_mem->size >= size) {
 		/* However, if this is the last block, we have to shrink the heap. */
 		if (!prev_mem->next)
-			alloc_sbrk(ptr + size - alloc_sbrk(0));
+			alloc_sbrk((u8 *)ptr + size - (u8 *)(alloc_sbrk(0)));
 		prev_mem->size = size;
 
 		alloc_unlock();
@@ -370,7 +372,6 @@ void * memalign(size_t align, size_t size)
 void free(void *ptr)
 {
 	heap_mem_header_t *cur;
-	void *heap_top;
 	size_t size;
 
 	if (!ptr)
@@ -418,13 +419,15 @@ void free(void *ptr)
 	if (cur->next != NULL) {
 		cur->next->prev = cur->prev;
 	} else {
+		void *heap_top;
+
 		/* If this block was the last one in the list, shrink the heap.  */
 		__alloc_heap_tail = cur->prev;
 
 		/* We need to free (heap top) - (prev->ptr + prev->size), or else
 		   we'll end up with an unallocatable block of heap.  */
 		heap_top = alloc_sbrk(0);
-		size = (u32)heap_top - (u32)(cur->prev->ptr + cur->prev->size);
+		size = (u32)heap_top - (u32)((u8 *)(cur->prev->ptr) + cur->prev->size);
 		alloc_sbrk(-size);
 	}
 

@@ -377,9 +377,6 @@ qword_t *draw_arc_outline(qword_t *q, int context, point_t *center, float radius
 
 	int __xi0 = ftoi4(center->v0.x + OFFSET);
 	int __yi0 = ftoi4(center->v0.y + OFFSET);
-	int __xi1;
-	int __yi1;
-	float __arc_radians;
 
 	// Start primitive
 	PACK_GIFTAG(q,GIF_SET_TAG(2,0,0,0,GIF_FLG_PACKED,1),GIF_REG_AD);
@@ -399,6 +396,9 @@ qword_t *draw_arc_outline(qword_t *q, int context, point_t *center, float radius
 	// Fill vertex information
 	for( ; angle_start <= angle_end; angle_start++)
 	{
+		int __xi1;
+		int __yi1;
+		float __arc_radians;
 		__arc_radians = angle_start * 0.017453293f;
 		__xi1 = (int)((cosf(__arc_radians) * radius) * 16.0f);
 		__yi1 = (int)((sinf(__arc_radians) * radius) * 16.0f);
@@ -432,9 +432,6 @@ qword_t *draw_arc_filled(qword_t *q, int context, point_t *center, float radius,
 
 	int __xi0 = ftoi4(center->v0.x + OFFSET);
 	int __yi0 = ftoi4(center->v0.y + OFFSET);
-	int __xi1;
-	int __yi1;
-	float __arc_radians;
 
 	// Start primitive
 	PACK_GIFTAG(q,GIF_SET_TAG(2,0,0,0,GIF_FLG_PACKED,1),GIF_REG_AD);
@@ -456,6 +453,9 @@ qword_t *draw_arc_filled(qword_t *q, int context, point_t *center, float radius,
 
 	for( ; angle_start <= angle_end; angle_start++)
 	{
+		int __xi1;
+		int __yi1;
+		float __arc_radians;
 		__arc_radians = 0.017453293f * angle_start;
 		__xi1 = (int)((cosf(__arc_radians) * radius) * 16.0f);
 		__yi1 = (int)((sinf(__arc_radians) * radius) * 16.0f);

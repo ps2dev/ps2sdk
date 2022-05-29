@@ -32,6 +32,10 @@ static unsigned int iPS2ClockPerHSync = MAX_PS2CLOCK_PER_HSYNC;
 static void _sleep_waker(s32 alarm_id, u16 time, void *arg2)
 {
     s32 *pSema = (s32 *)arg2;
+
+    (void)alarm_id;
+    (void)time;
+
     iSignalSema(*pSema);
     ExitHandler();
 }

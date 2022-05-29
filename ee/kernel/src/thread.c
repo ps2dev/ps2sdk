@@ -47,10 +47,12 @@ struct topArg topArg = {0};
 
 static void topThread(void *arg)
 {
-	int index;
+	(void)arg;
 
 	while(1)
 	{
+		int index;
+
 		WaitSema(topSema);
 		index = topArg.requestOut & 0x1FF;
 		topArg.requestOut = index + 1;
@@ -109,12 +111,12 @@ int InitThread(void)
 //The original iWakeupThread cannot wake up threads in THS_RUN state.
 s32 iWakeupThread(s32 thread_id)
 {
-	int index;
-
 	if(_iGetThreadId() == thread_id)
 	{
 		if(thread_id < 256 && topId != 0)
 		{
+			int index;
+
 			index = topArg.requestIn & 0x1FF;
 			topArg.requestIn = index + 1;
 			topArg.request[index].mode = TOP_REQ_WAKEUP;
@@ -134,10 +136,10 @@ s32 iWakeupThread(s32 thread_id)
 //The original iRotateThreadReadyQueue will not change the current thread ID.
 s32 iRotateThreadReadyQueue(s32 priority)
 {
-	int index;
-
 	if(priority < 128 && topId != 0)
 	{
+		int index;
+
 		index = topArg.requestIn & 0x1FF;
 		topArg.requestIn = index + 1;
 		topArg.request[index].mode = TOP_REQ_ROTATE;
@@ -154,12 +156,12 @@ s32 iRotateThreadReadyQueue(s32 priority)
 //The original iSuspendThread allows a thread to suspend itself, but won't change the current thread ID.
 s32 iSuspendThread(s32 thread_id)
 {
-	int index;
-
 	if(_iGetThreadId() == thread_id)
 	{
 		if(thread_id < 256 && topId != 0)
 		{
+			int index;
+
 			index = topArg.requestIn & 0x1FF;
 			topArg.requestIn = index + 1;
 			topArg.request[index].mode = TOP_REQ_SUSPEND;

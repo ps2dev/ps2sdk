@@ -146,12 +146,15 @@ static void EnQTxPacket(struct pbuf *tx)
 
 static err_t SMapLowLevelOutput(struct netif* pNetIF, struct pbuf* pOutput)
 {
-	struct pbuf* pbuf;
 	err_t result;
+
+	(void)pNetIF;
 
 	result = ERR_OK;
 	if(pOutput->tot_len > pOutput->len)
 	{
+		struct pbuf* pbuf;
+
 		pbuf_ref(pOutput);	//Increment reference count because LWIP must free the PBUF, not the driver!
 		if((pbuf = pbuf_coalesce(pOutput, PBUF_RAW)) != pOutput)
 		{	//No need to increase reference count because pbuf_coalesce() does it.

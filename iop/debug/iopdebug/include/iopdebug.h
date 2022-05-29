@@ -22,7 +22,7 @@
 #include <iop_cop0_defs.h>
 #include <ps2_debug.h>
 
-typedef int (IOP_ExceptionHandler)(struct st_IOP_RegFrame *);
+typedef void (IOP_ExceptionHandler)(IOP_RegFrame *);
 
 int iop_dbg_install(void);
 int iop_dbg_remove(void);

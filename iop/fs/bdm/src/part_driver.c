@@ -67,7 +67,6 @@ static int part_isPartitionRecordInvalid(struct block_device* bd, part_raw_recor
 static unsigned char sbuf[512];
 static int part_getPartitionTable(struct block_device* bd, part_table* part)
 {
-    part_raw_record* part_raw;
     int ret;
     unsigned int i;
 
@@ -82,6 +81,8 @@ static int part_getPartitionTable(struct block_device* bd, part_table* part)
     M_DEBUG("boot signature %X %X\n", sbuf[0x1FE], sbuf[0x1FF]);
     if (sbuf[0x1FE] == 0x55 && sbuf[0x1FF] == 0xAA) {
         for (i = 0; i < 4; i++) {
+            part_raw_record* part_raw;
+
             part_raw = (part_raw_record*)(sbuf + 0x01BE + (i * 16));
             if (part_isPartitionRecordInvalid(bd, part_raw, &part->record[i]) != 0)
                 return 0; //Invalid record encountered, so the table is probably invalid.

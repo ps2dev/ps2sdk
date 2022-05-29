@@ -148,9 +148,9 @@ static inline int convmode_to_iomanx(int stat)
 {
   int mode = 0;
 
-  if FIO_SO_ISLNK(stat) mode |= FIO_S_IFLNK; // Symbolic link
-  if FIO_SO_ISREG(stat) mode |= FIO_S_IFREG; // regular file
-  if FIO_SO_ISDIR(stat) mode |= FIO_S_IFDIR; // directory
+  if (FIO_SO_ISLNK(stat)) mode |= FIO_S_IFLNK; // Symbolic link
+  if (FIO_SO_ISREG(stat)) mode |= FIO_S_IFREG; // regular file
+  if (FIO_SO_ISDIR(stat)) mode |= FIO_S_IFDIR; // directory
 
   if (((stat) & FIO_SO_IROTH) == FIO_SO_IROTH) // read
     mode |= FIO_S_IRUSR | FIO_S_IRGRP | FIO_S_IROTH;
@@ -226,11 +226,12 @@ static inline int ps2netfs_lwip_send(int sock, void *buf, int len, int flag)
 int ps2netfs_recv_bytes(int sock, char *buf, int bytes)
 {
   int left;
-  int len;
 
   left = bytes;
 
   while (left > 0) {
+    int len;
+
     len = recv(sock, &buf[bytes - left], left, 0);
     if (len < 0) {
       dbgprintf("ps2netfs: recv_bytes error!! (%d)\n",len);
@@ -322,6 +323,8 @@ static int ps2netfs_op_info(char *buf, int len)
 //  ps2netfs_pkt_open_req *cmd;
   ps2netfs_pkt_info_rly *inforly;
   int count;
+
+  (void)buf;
 
 //  cmd = (ps2netfs_pkt_open_req *)buf;
 
@@ -439,9 +442,10 @@ static int ps2netfs_op_devlist(char *buf, int len)
 
   // first char of the path passed in is the delimiter
   { // so fudge in the delimiters
-    int cnt; char *ptr = &devlistrly->list[0]; int len;
+    int cnt; char *ptr = &devlistrly->list[0];
     for(cnt=0;cnt<(count-1);cnt++)
     {
+      int len;
       len = strlen(ptr);
       // ok, got a string, so replace the final 0, with delimiter
       // move onto next string
@@ -685,6 +689,8 @@ static int ps2netfs_op_write(char *buf, int len)
   fd_table_t *fdptr;
   cmd = (ps2netfs_pkt_write_req *)buf;
 
+  (void)len;
+
   dbgprintf("ps2netfs: write\n");
 
   // do the stuff here
@@ -692,10 +698,12 @@ static int ps2netfs_op_write(char *buf, int len)
   if (fdptr != 0)
   {
     int left = ntohl(cmd->nbytes);
-    int towrite, written;
+    int written;
     written = retval = 0;
     while ((retval >= 0) && (left > 0))
     {
+      int towrite;
+
       towrite = left; if (towrite > FIOTRAN_MAXSIZE) towrite = FIOTRAN_MAXSIZE;
       if (ps2netfs_recv_bytes(ps2netfs_sock, ps2netfs_fiobuffer, towrite) <=0 )
       {
@@ -1195,7 +1203,9 @@ static int ps2netfs_op_dread(char *buf, int len)
         dreadrly->attr   = htonl(dirent.stat.attr);
         dreadrly->size   = htonl(dirent.stat.size);
         dreadrly->hisize = htonl(0);
-        memcpy(dreadrly->ctime,dirent.stat.ctime,8*3);
+        memcpy(dreadrly->ctime,dirent.stat.ctime,8);
+        memcpy(dreadrly->atime,dirent.stat.atime,8);
+        memcpy(dreadrly->mtime,dirent.stat.mtime,8);
         strncpy(dreadrly->name,dirent.name,255);
         dreadrly->name[255] = '\0';
       }
@@ -1210,13 +1220,15 @@ static int ps2netfs_op_dread(char *buf, int len)
         dreadrly->attr   = htonl(dirent.stat.attr);
         dreadrly->size   = htonl(dirent.stat.size);
         dreadrly->hisize = htonl(0);
-        memcpy(dreadrly->ctime,dirent.stat.ctime,8*3);
+        memcpy(dreadrly->ctime,dirent.stat.ctime,8);
+        memcpy(dreadrly->atime,dirent.stat.atime,8);
+        memcpy(dreadrly->mtime,dirent.stat.mtime,8);
         strncpy(dreadrly->name,dirent.name,255);
         dreadrly->name[255] = '\0';
       }
     }
   }
-  dbgprintf("ps2netfs: dread '%s' %d\n",dreadrly->name,dreadrly->size);
+  dbgprintf("ps2netfs: dread '%s' %u\n",dreadrly->name,dreadrly->size);
   // Build packet
   dreadrly->cmd = htonl(PS2NETFS_DREAD_RLY);
   dreadrly->len = htons((unsigned short)sizeof(ps2netfs_pkt_dread_rly));
@@ -1249,6 +1261,8 @@ static int ps2netfs_op_dread(char *buf, int len)
 // int getstat(const char *name, void *stat);
 static int ps2netfs_op_getstat(char *buf, int len)
 {
+  (void)buf;
+  (void)len;
   return -1;
 }
 
@@ -1271,6 +1285,8 @@ static int ps2netfs_op_getstat(char *buf, int len)
 // int chstat(const char *name, void *stat, unsigned int statmask);
 static int ps2netfs_op_chstat(char *buf, int len)
 {
+  (void)buf;
+  (void)len;
   return -1;
 }
 
@@ -1637,6 +1653,8 @@ static int ps2netfs_op_umount(char *buf, int len)
 // int lseek64(int fd, long long offset, int whence);
 static int ps2netfs_op_lseek64(char *buf, int len)
 {
+  (void)buf;
+  (void)len;
   return -1;
 }
 
@@ -1659,6 +1677,8 @@ static int ps2netfs_op_lseek64(char *buf, int len)
 // int devctl(const char *name, int cmd, void *arg, size_t arglen, void *buf, size_t buflen);
 static int ps2netfs_op_devctl(char *buf, int len)
 {
+  (void)buf;
+  (void)len;
   return -1;
 }
 
@@ -1794,6 +1814,8 @@ static int ps2netfs_op_readlink(char *buf, int len)
 // int ioctl2(int fd, int cmd, void *arg, size_t arglen, void *buf, size_t buflen);
 static int ps2netfs_op_ioctl2(char *buf, int len)
 {
+  (void)buf;
+  (void)len;
   return -1;
 }
 
@@ -1810,7 +1832,6 @@ static int ps2netfs_op_ioctl2(char *buf, int len)
 static void ps2netfs_Listener(int sock)
 {
  int done;
- int len;
  unsigned int cmd;
  ps2netfs_pkt_hdr *header;
  int retval;
@@ -1818,6 +1839,8 @@ static void ps2netfs_Listener(int sock)
  done = 0;
 
  while(!done) {
+   int len;
+
    len = ps2netfs_accept_pktunknown(sock, &ps2netfs_recv_packet[0]);
 
    if (len > 0)
@@ -1957,9 +1980,9 @@ ps2netfs_serv(void *argv)
  struct sockaddr_in server_addr;
  struct sockaddr_in client_addr;
  int sock;
- int client_sock;
- int client_len;
  int ret;
+
+ (void)argv;
 
  dbgprintf(" - ps2netfs TCP Server -\n");
 
@@ -2003,6 +2026,9 @@ ps2netfs_serv(void *argv)
  // Connection loop
  while(ps2netfs_active)
  {
+   int client_sock;
+   int client_len;
+
    dbgprintf("ps2netfs: Waiting for connection\n");
 
    client_len = sizeof(client_addr);
@@ -2055,7 +2081,6 @@ int ps2netfs_Init(void)
 {
   iop_thread_t mythread;
   int pid;
-  int i;
 
   dbgprintf("initializing ps2netfs\n");
 
@@ -2071,6 +2096,8 @@ int ps2netfs_Init(void)
 
   if (pid > 0)
   {
+    int i;
+
     if ((i=StartThread(pid, NULL)) < 0)
     {
       printf("StartThread failed (%d)\n", i);

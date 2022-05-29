@@ -96,7 +96,6 @@ static void create_elf(FILE * dest, const unsigned char * source, u32 size, cons
     struct elf_symbol_t symbol;
     u32 strtab_size;
     char strtab[512];
-    u32 data_size[4];
     unsigned int shrtabSectionNameLength, NumSections;
     const char *pshstrtab_ptr;
 
@@ -250,6 +249,8 @@ static void create_elf(FILE * dest, const unsigned char * source, u32 size, cons
     fwrite(strtab, 1, strtab_size, dest);
 
     if (have_size) {
+        u32 data_size[4];
+
         data_size[0] = LE32(size);
         data_size[1] = 0;
         data_size[2] = 0;

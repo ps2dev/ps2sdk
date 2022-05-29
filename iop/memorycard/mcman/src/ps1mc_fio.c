@@ -182,7 +182,12 @@ int mcman_open1(int port, int slot, char *filename, int flags)
 				else
 					temp = i + 1;
 
-				mce->wr_flag |= 1 << ((i + 1) - ((temp >> 3) << 3));
+				temp &= 0xfffffff8;
+				temp = (i + 1) - temp;
+				if (temp < 0)
+					temp = 0;
+
+				mce->wr_flag |= 1 << temp;
 			}
 		}
 	}
@@ -219,7 +224,12 @@ int mcman_open1(int port, int slot, char *filename, int flags)
 	else
 		temp = cluster + 1;
 
-	mce->wr_flag |= 1 << ((cluster + 1) - ((temp >> 3) << 3));
+	temp &= 0xfffffff8;
+	temp = (cluster + 1) - temp;
+	if (temp < 0)
+		temp = 0;
+
+	mce->wr_flag |= 1 << temp;
 
 	r = McFlushCache(port, slot);
 	if (r != sceMcResSucceed)
@@ -234,7 +244,7 @@ int mcman_open1(int port, int slot, char *filename, int flags)
 //--------------------------------------------------------------
 int mcman_read1(int fd, void *buffer, int nbyte)
 {
-	register int r, size, temp, rpos, offset, maxsize;
+	register int rpos;
 	register MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
 	McCacheEntry *mce;
 	u8 *p = (u8 *)buffer;
@@ -248,12 +258,14 @@ int mcman_read1(int fd, void *buffer, int nbyte)
 	rpos = 0;
 	if (nbyte) {
 		do {
-			if (fh->position < 0)
+			register int r, size, temp, offset, maxsize;
+
+			if ((int)(fh->position) < 0)
 				temp = fh->position + 0x3ff;
 			else
 				temp = fh->position;
 
-			offset = (fh->position - ((temp >> 10) << 10));
+			offset = (fh->position - (temp & 0xfffffc00));
 			maxsize = MCMAN_CLUSTERSIZE - offset;
 			if (maxsize < nbyte)
 				size = maxsize;
@@ -283,7 +295,7 @@ int mcman_read1(int fd, void *buffer, int nbyte)
 //--------------------------------------------------------------
 int mcman_write1(int fd, void *buffer, int nbyte)
 {
-	register int r, size, temp, wpos, offset, maxsize;
+	register int r, wpos;
 	register MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
 	McCacheEntry *mce;
 	u8 *p = (u8 *)buffer;
@@ -304,6 +316,8 @@ int mcman_write1(int fd, void *buffer, int nbyte)
 	if (nbyte) {
 
 		do {
+			register int size, temp, offset, maxsize;
+
 			r = mcman_fatRseekPS1(fd);
 
 			if (r == sceMcResFullDevice) {
@@ -324,12 +338,12 @@ int mcman_write1(int fd, void *buffer, int nbyte)
 			if (r != sceMcResSucceed)
 				return r;
 
-			if (fh->position < 0)
+			if ((int)(fh->position) < 0)
 				temp = fh->position + 0x3ff;
 			else
 				temp = fh->position;
 
-			offset = fh->position - ((temp >> 10) << 10);
+			offset = fh->position - (temp & 0xfffffc00);
 			maxsize = MCMAN_CLUSTERSIZE - offset;
 			if (maxsize < nbyte)
 				size = maxsize;
@@ -358,12 +372,13 @@ int mcman_write1(int fd, void *buffer, int nbyte)
 //--------------------------------------------------------------
 int mcman_dread1(int fd, io_dirent_t *dirent)
 {
-	register int r;
 	register MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
 	McFsEntryPS1 *fse;
 
 	if (fh->position < fh->filesize) {
 		do {
+			register int r;
+
 			r = mcman_readdirentryPS1(fh->port, fh->slot, fh->position, &fse);
 			if (r != sceMcResSucceed)
 				return r;
@@ -484,7 +499,12 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 	if ((r + 1) < 0)
 		temp = r + 8;
 
-	mce->wr_flag |= 1 << ((r + 1) - ((temp >> 3) << 3));
+	temp &= 0xfffffff8;
+	temp = (r + 1) - temp;
+	if (temp < 0)
+		temp = 0;
+
+	mce->wr_flag |= 1 << temp;
 
 	if (sio2man_type >= XSIO2MAN) {
 		fse2->field_7d = 0;
@@ -644,18 +664,23 @@ int mcman_close1(int fd)
 
 	mce = mcman_get1stcacheEntp();
 
-	if (fh->freeclink + 1 < 0)
+	if ((int)(fh->freeclink + 1) < 0)
 		temp = fh->freeclink + 8;
 	else
 		temp = fh->freeclink + 1;
 
-	mce->wr_flag |= 1 << ((fh->freeclink + 1) - ((temp >> 3) << 3));
+	temp &= 0xfffffff8;
+	temp = (fh->freeclink + 1) - temp;
+	if (temp < 0)
+		temp = 0;
+
+	mce->wr_flag |= 1 << temp;
 
 	if (fh->filesize == 0) {
 		fse->length = 0x2000;
 	}
 	else {
-		if ((fh->filesize - 1) < 0)
+		if ((int)(fh->filesize - 1) < 0)
 			temp = (fh->filesize + 8190) >> 13;
 		else
 			temp = (fh->filesize - 1) >> 13;

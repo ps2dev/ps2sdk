@@ -138,7 +138,8 @@ int dma_channel_wait(int channel, int timeout)
 		if (timeout > 0)
 		{
 
-			if (timeout-- == 0)
+			timeout -= 1;
+			if (timeout == 0)
 			{
 
 				return -1;
@@ -189,11 +190,11 @@ int dma_channel_send_chain(int channel, void *data, int data_size, int flags, in
 
 	if (flags & DMA_FLAG_INTERRUPTSAFE)
 	{
-		iSyncDCache(data, data + (data_size<<4));
+		iSyncDCache(data, (void *)((u8 *)data + (data_size<<4)));
 	}
 	else
 	{
-		SyncDCache(data, data + (data_size<<4));
+		SyncDCache(data, (void *)((u8 *)data + (data_size<<4)));
 	}
 
 	// Set the size of the data, in quadwords.
@@ -214,6 +215,7 @@ int dma_channel_send_chain(int channel, void *data, int data_size, int flags, in
 
 int dma_channel_send_chain_ucab(int channel, void *data, int qwc, int flags)
 {
+	(void)qwc;
 
 	// clear channel status
 	*DMA_REG_STAT = 1 << channel;
@@ -244,11 +246,11 @@ int dma_channel_send_normal(int channel, void *data, int qwc, int flags, int spr
 	// Not sure if this should be here.
 	if (flags & DMA_FLAG_INTERRUPTSAFE)
 	{
-		iSyncDCache(data, data + (qwc<<4));
+		iSyncDCache(data, (void *)((u8 *)data + (qwc<<4)));
 	}
 	else
 	{
-		SyncDCache(data, data + (qwc<<4));
+		SyncDCache(data, (void *)((u8 *)data + (qwc<<4)));
 	}
 
 	// Set the size of the data, in quadwords.
@@ -273,11 +275,11 @@ int dma_channel_send_normal_ucab(int channel, void *data, int qwc, int flags)
 	// Not sure if this should be here.
 	if (flags & DMA_FLAG_INTERRUPTSAFE)
 	{
-		iSyncDCache(data, data + (qwc<<4));
+		iSyncDCache(data, (void *)((u8 *)data + (qwc<<4)));
 	}
 	else
 	{
-		SyncDCache(data, data + (qwc<<4));
+		SyncDCache(data, (void *)((u8 *)data + (qwc<<4)));
 	}
 
 	// Set the size of the data, in quadwords.

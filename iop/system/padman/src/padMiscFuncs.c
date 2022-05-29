@@ -313,7 +313,7 @@ u32 padSetActDirect(u32 port, u32 slot, u8 *actData)
 	return 0;
 }
 
-u32 padSetActAlign(u32 port, u32 slot, u8 *actData)
+u32 padSetActAlign(u32 port, u32 slot, const u8 *actData)
 {
 	if( (padState[port][slot].currentTask != TASK_UPDATE_PAD) || ( padState[port][slot].modeConfig < MODE_CONFIG_READY) )
 		return 0;
@@ -386,7 +386,7 @@ u32 padSetButtonInfo(u32 port, u32 slot, u32 info)
 	return 0;
 }
 
-u32 padSetVrefParam(u32 port, u32 slot, u8 *vparam)
+u32 padSetVrefParam(u32 port, u32 slot, const u8 *vparam)
 {
 	if( (padState[port][slot].currentTask != TASK_UPDATE_PAD) || ( padState[port][slot].modeConfig < MODE_CONFIG_READY) )
 		return 0;

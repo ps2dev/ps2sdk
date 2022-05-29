@@ -125,9 +125,9 @@ static int getIndexWrite(cache_set* cache, unsigned int sector) {
 	flush dirty sectors
  */
 static int scache_flushSector(cache_set* cache, int index) {
-	int ret;
-
 	if (cache->rec[index].writeDirty) {
+		int ret;
+
 		XPRINTF("scache: flushSector dirty index=%d sector=%u \n", index, cache->rec[index].sector);
 		ret = WRITE_SECTOR(cache->dev, cache->rec[index].sector, cache->sectorBuf + (index * BLOCK_SIZE), BLOCK_SIZE/cache->sectorSize);
 		if (ret < 0) {
@@ -142,7 +142,7 @@ static int scache_flushSector(cache_set* cache, int index) {
 
 int scache_flushSectors(cache_set* cache) {
 	unsigned int i;
-	int counter = 0, ret;
+	int counter = 0;
 
 	XPRINTF("cache: flushSectors devId = %i \n", cache->dev->devId);
 
@@ -153,6 +153,8 @@ int scache_flushSectors(cache_set* cache) {
 	}
 
 	for (i = 0; i < CACHE_SIZE; i++) {
+		int ret;
+
 		if((ret = scache_flushSector(cache, i)) >= 0)
 			counter ++;
 		else
@@ -168,9 +170,11 @@ int scache_readSector(cache_set* cache, unsigned int sector, void** buf) {
 	int ret;
 	unsigned int alignedSector;
 
-	XPRINTF("cache: readSector devId = %i %p sector = %u \n", cache->dev->devId, cache, sector);
+	if (cache != NULL) {
+		XPRINTF("cache: readSector devId = %i %p sector = %u \n", cache->dev->devId, cache, sector);
+	}
 	if (cache == NULL) {
-		printf("cache: devId cache not created = %i \n", cache->dev->devId);
+		printf("cache: devId cache not created \n");
 		return -1;
 	}
 
@@ -277,13 +281,14 @@ int scache_writeSector(cache_set* cache, unsigned int sector) {
 }
 
 void scache_invalidate(cache_set* cache, unsigned int sector, int count) {
-	int index; //index is given in single sectors not octal sectors
 	int i;
 
 	XPRINTF("cache: invalidate devId = %i sector = %u count = %d \n", cache->dev->devId, sector, count);
 
 	for(i = 0; i < count; i++, sector++)
 	{
+		int index; //index is given in single sectors not octal sectors
+
 		index = getSlot(cache, sector);
 		if (index >=  0) { //sector found in cache. Write back and invalidate the block it belongs to.
 			scache_flushSector(cache, index);

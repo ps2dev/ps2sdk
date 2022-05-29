@@ -24,6 +24,9 @@ IRX_ID(MODNAME, VER_MAJOR, VER_MINOR);
 //-------------------------------------------------------------------------
 int _start(int argc, char** argv)
 {
+	(void)argc;
+	(void)argv;
+
 	DPRINTF("%s version 0x%01x%02x start!\n", MODNAME, VER_MAJOR, VER_MINOR);
 
 	smb_initdev();

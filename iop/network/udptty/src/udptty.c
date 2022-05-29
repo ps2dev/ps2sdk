@@ -184,6 +184,9 @@ static void kprtty_init(void)
 
 int _start(int argc, char **argv)
 {
+    (void)argc;
+    (void)argv;
+
     // register exports
     RegisterLibraryEntries(&_exp_udptty);
 
@@ -238,6 +241,8 @@ static int udp_send(void *buf, size_t size)
 
 static int tty_init(iop_device_t *device)
 {
+    (void)device;
+
     if ((tty_sema = CreateMutex(IOP_MUTEX_UNLOCKED)) < 0)
         return -1;
 
@@ -246,6 +251,8 @@ static int tty_init(iop_device_t *device)
 
 static int tty_deinit(iop_device_t *device)
 {
+    (void)device;
+
     DeleteSema(tty_sema);
     return 0;
 }
@@ -258,6 +265,8 @@ static int tty_stdout_fd(void)
 static int tty_write(iop_file_t *file, void *buf, size_t size)
 {
     int res = 0;
+
+    (void)file;
 
     WaitSema(tty_sema);
     res = udp_send(buf, size);

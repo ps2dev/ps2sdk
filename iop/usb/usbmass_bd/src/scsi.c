@@ -142,8 +142,9 @@ static int scsi_warmup(struct block_device* bd)
         M_PRINTF("ERROR: scsi_cmd_test_unit_ready %d\n", stat);
 
         stat = scsi_cmd_request_sense(bd, &sd, sizeof(sense_data));
-        if (stat != 0)
+        if (stat != 0) {
             M_PRINTF("ERROR: scsi_cmd_request_sense %d\n", stat);
+        }
 
         if ((sd.error_code == 0x70) && (sd.sense_key != 0x00)) {
             M_PRINTF("Sense Data key: %02X code: %02X qual: %02X\n", sd.sense_key, sd.add_sense_code, sd.add_sense_qual);
@@ -234,6 +235,8 @@ static int scsi_write(struct block_device* bd, u32 sector, const void* buffer, u
 
 static void scsi_flush(struct block_device* bd)
 {
+    (void)bd;
+
     M_DEBUG("%s\n", __func__);
 
     // Dummy function

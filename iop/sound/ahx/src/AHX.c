@@ -140,7 +140,6 @@ void GenerateSawtooth(char* Buffer, int Len)
 
 void GenerateWhiteNoise(char* Buffer, int Len)
 {
-	unsigned int tmp, tmp2;
 	unsigned int Seed = 0x41595321;
 
 	while(Len--) {
@@ -149,12 +148,12 @@ void GenerateWhiteNoise(char* Buffer, int Len)
 		else *Buffer = 0x7f;
 
 		Buffer++;
-		tmp = Seed;		// ror 5
+		unsigned int tmp = Seed;		// ror 5
 		Seed >>= 5;
 		tmp <<= 31-5;
 		Seed |= tmp;
 		Seed = Seed ^ 0x9a;
-		tmp2 = tmp = Seed;		// rol 2
+		unsigned int tmp2 = tmp = Seed;		// rol 2
 		Seed <<= 2;
 		tmp >>= 31-2;
 		Seed |= tmp;
@@ -203,24 +202,21 @@ void clipint(int* x)
 
 void GenerateFilterWaveforms(char* Buffer, char* Low, char* High)
 {
-	char *a0;
 	int LengthTable[] = { 3, 7, 0xf, 0x1f, 0x3f, 0x7f, 3, 7, 0xf, 0x1f, 0x3f, 0x7f,
 		0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,
 		0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,
 		(0x280*3)-1
 		};
-    int temp, freq, waves, i, freint, highint, midint, lowint;
+    int temp, freq, waves, i, highint, midint, lowint;
 
     for(temp = 0, freq = 8; temp < 31; temp++, freq += 3 )
 	{
-		int v125;
-		a0 = Buffer;
+		char *a0 = Buffer;
 		//fre = ((freq*1.25f)/100);
-		v125 = (1<<FIXEDPOINT)+((1<<FIXEDPOINT)/4);
-		freint = ((freq*v125)/100); // 0x14000 ~ 1.25
+		int v125 = (1<<FIXEDPOINT)+((1<<FIXEDPOINT)/4);
+		int freint = ((freq*v125)/100); // 0x14000 ~ 1.25
 		for(waves = 0; waves < 6+6+0x20+1; waves++)
 		{ // 0 - 44
-			char low_,high_;
 			//mid = 0.f;
 				//low = 0.f;
 			midint = 0;
@@ -248,8 +244,8 @@ void GenerateFilterWaveforms(char* Buffer, char* Low, char* High)
 				midint += (highint*(freint>>(FIXEDPOINT/2))>>(FIXEDPOINT/2)); clipint(&midint);
 				lowint += (midint*(freint>>(FIXEDPOINT/2))>>(FIXEDPOINT/2)); clipint(&lowint);
 
-				low_ = (lowint>>FIXEDPOINT);
-				high_ = (highint>>FIXEDPOINT);
+				char low_ = (lowint>>FIXEDPOINT);
+				char high_ = (highint>>FIXEDPOINT);
 
 				*Low++ = low_;
 				*High++ = high_;
@@ -262,13 +258,15 @@ void GenerateFilterWaveforms(char* Buffer, char* Low, char* High)
 
 int AHXOutput_SetOption(int Option, int Value)
 {
-    int i, j;
+    
 	switch(Option) {
 		case AHXOF_BOOST: {
 			// Initialize volume table
-			for (i = 0; i < 65; i++)
-				for (j = -128; j < 128; j++)
+			for (int i = 0; i < 65; i++) {
+				for (int j = -128; j < 128; j++) {
 					VolumeTable[i][j+128] = (int)(i * j * Value) / 64;
+				}
+			}
 			Boost = Value;
 		} return 1;
 		default: return 0;
@@ -754,8 +752,8 @@ void AHXPlayer_PListCommandParse(int v, int FX, int FXParam)
 
 void AHXPlayer_ProcessFrame(int v)
 {
-    int d0, d1, d2, d3, Cur, FMax, i, X, Delta;
-    char* SquarePtr, *AudioSource;
+    int i;
+    char* AudioSource;
 
 	if(!Voices[v].TrackOn) return;
 
@@ -768,7 +766,7 @@ void AHXPlayer_ProcessFrame(int v)
 		if(NoteNr+1 < Song.TrackLength) NextInstrument = Tracks[Voices[v].Track][NoteNr+1].Instrument;
 						           else NextInstrument = Tracks[Voices[v].NextTrack][0].Instrument;
 		if(NextInstrument) {
-			d1 = Tempo - Voices[v].HardCut;
+			int d1 = Tempo - Voices[v].HardCut;
 			if(d1 < 0) d1 = 0;
 			if(!Voices[v].NoteCutOn) {
 				Voices[v].NoteCutOn = 1;
@@ -807,11 +805,11 @@ void AHXPlayer_ProcessFrame(int v)
 	//Portamento
 	if(Voices[v].PeriodSlideOn) {
 		if(Voices[v].PeriodSlideWithLimit) {
-			d0 = Voices[v].PeriodSlidePeriod - Voices[v].PeriodSlideLimit;
-			d2 = Voices[v].PeriodSlideSpeed;
+			int d0 = Voices[v].PeriodSlidePeriod - Voices[v].PeriodSlideLimit;
+			int d2 = Voices[v].PeriodSlideSpeed;
 			if(d0 > 0) d2 = -d2;
 			if(d0) {
-				d3 = (d0 + d2) ^ d0;
+				int d3 = (d0 + d2) ^ d0;
 				if(d3 >= 0) d0 = Voices[v].PeriodSlidePeriod + d2;
 				       else d0 = Voices[v].PeriodSlideLimit;
 				Voices[v].PeriodSlidePeriod = d0;
@@ -833,7 +831,7 @@ void AHXPlayer_ProcessFrame(int v)
 	//PList
 	if(Voices[v].Instrument && Voices[v].PerfCurrent < Voices[v].Instrument->PList.Length) {
 		if(--Voices[v].PerfWait <= 0) {
-			Cur = Voices[v].PerfCurrent++;
+			int Cur = Voices[v].PerfCurrent++;
 			Voices[v].PerfWait = Voices[v].PerfSpeed;
 			if(Voices[v].PerfList->Entries[Cur].Waveform) {
 				Voices[v].Waveform = Voices[v].PerfList->Entries[Cur].Waveform-1;
@@ -889,9 +887,9 @@ void AHXPlayer_ProcessFrame(int v)
 		}
 	}
 	if(Voices[v].FilterOn && --Voices[v].FilterWait <= 0) {
-		d1 = Voices[v].FilterLowerLimit;
-		d2 = Voices[v].FilterUpperLimit;
-		d3 = Voices[v].FilterPos;
+		int d1 = Voices[v].FilterLowerLimit;
+		int d2 = Voices[v].FilterUpperLimit;
+		int d3 = Voices[v].FilterPos;
 		if(Voices[v].FilterInit) {
 			Voices[v].FilterInit = 0;
 			if(d3 <= d1) {
@@ -903,7 +901,7 @@ void AHXPlayer_ProcessFrame(int v)
 			}
 		}
 		//NoFilterInit
-		FMax = (Voices[v].FilterSpeed < 3)?(5-Voices[v].FilterSpeed):1;
+		int FMax = (Voices[v].FilterSpeed < 3)?(5-Voices[v].FilterSpeed):1;
 		for(i = 0; i < FMax; i++) {
 			if(d1 == d3 || d2 == d3) {
 				if(Voices[v].FilterSlidingIn) {
@@ -920,16 +918,18 @@ void AHXPlayer_ProcessFrame(int v)
 		if(Voices[v].FilterWait < 1) Voices[v].FilterWait = 1;
 	}
 	if(Voices[v].Waveform == 3-1 || Voices[v].PlantSquare) {
+		char *SquarePtr;
+
 		//CalcSquare
 		SquarePtr = &Waves->Squares[(Voices[v].FilterPos-0x20)*(0xfc+0xfc+0x80*0x1f+0x80+0x280*3)];
-		X = Voices[v].SquarePos << (5 - Voices[v].WaveLength);
+		int X = Voices[v].SquarePos << (5 - Voices[v].WaveLength);
 		if(X > 0x20) {
 			X = 0x40 - X;
 			Voices[v].SquareReverse = 1;
 		}
 		//OkDownSquare
 		if(--X) SquarePtr += X << 7;
-		Delta = 32 >> Voices[v].WaveLength;
+		int Delta = 32 >> Voices[v].WaveLength;
 		WaveformTab[2] = Voices[v].SquareTempBuffer;
 		for(i = 0; i < (1 << Voices[v].WaveLength)*4; i++) {
 			Voices[v].SquareTempBuffer[i] = *SquarePtr;
@@ -975,8 +975,6 @@ void AHXPlayer_ProcessFrame(int v)
 
 void AHXPlayer_SetAudio(int v)
 {
-    int i, WaveLoops;
-
 	if(!Voices[v].TrackOn) {
 		Voices[v].VoiceVolume = 0;
 		return;
@@ -991,6 +989,8 @@ void AHXPlayer_SetAudio(int v)
 		if(Voices[v].Waveform == 4-1) {
 			memcpy(Voices[v].VoiceBuffer, Voices[v].AudioSource, 0x280);
 		} else {
+			int i, WaveLoops;
+
 			WaveLoops = (1 << (5-Voices[v].WaveLength))*5;
 			for(i = 0; i < WaveLoops; i++) memcpy(&Voices[v].VoiceBuffer[i*4*(1 << Voices[v].WaveLength)], Voices[v].AudioSource, 4*(1 << Voices[v].WaveLength));
 		}
@@ -1009,9 +1009,11 @@ void AHXPlayer_VoiceOnOff(int Voice, int OnOff)
 
 void AHXPlayer_PlayIRQ()
 {
-    int NextPos, i, a;
+    int i, a;
 	if(StepWaitFrames <= 0) {
 		if(GetNewPosition) {
+			int NextPos;
+
 			NextPos = (PosNr+1==Song.PositionNr)?0:(PosNr+1);
 			for(i = 0; i < 4; i++) {
 				Voices[i].Track = Positions[PosNr].Track[i];
@@ -1111,7 +1113,6 @@ void AHXOutput_MixBuffer(short* target)
     int f;
 	int NrSamples = Frequency / Hz / Song.SpeedMultiplier;
 	int* mb = MixingBuffer;
-	int thissample;
     int s;
 
 	memset(MixingBuffer, 0, MixLen*Frequency/Hz*sizeof(int));
@@ -1122,6 +1123,8 @@ void AHXOutput_MixBuffer(short* target)
 
 	for(s = 0; s < BlockLen /(16/8); s++)
 	{
+		int thissample;
+
 		thissample = *(MixingBuffer+s) << 6; // 16 bit
         target[s] = thissample < LOW_CLIP16 ? LOW_CLIP16 : thissample > HI_CLIP16 ? HI_CLIP16 : thissample;
     }

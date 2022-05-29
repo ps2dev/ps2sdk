@@ -42,10 +42,12 @@ static void ieee1394Swab32(void *dest, void *src, unsigned int nQuads){
 
 unsigned short int iLinkCalculateCRC16(void *data, unsigned int nQuads){
 	int i, lShift;
-	unsigned int lData, lSum;
+	unsigned int lSum;
 	unsigned short int lCRC = 0;
 
 	for ( i = 0; i < nQuads; ++i ) {
+		unsigned int lData;
+
 		lData = ((unsigned int *)data)[i];
 		for ( lShift = 28; lShift >= 0; lShift -= 4 ) {
 			lSum = (  ( lCRC >> 12 ) ^ ( lData >> lShift )  ) & 15;
@@ -174,12 +176,13 @@ static inline int ParseUnitCROM(unsigned short NodeID, unsigned int *UnitSpec, u
 int iLinkFindUnit(int UnitInList, unsigned int UnitSpec, unsigned int UnitSW_Version){
 	int result;
 	unsigned int CurrentUnitSW_Version, CurrentUnitSpec;
-	unsigned short int NodeID;
 
 	DEBUG_PRINTF("iLinkFindUnit() %d UnitSpec: 0x%08x; UnitSW Version: 0x%08x.\n", UnitInList, UnitSpec, UnitSW_Version);
 
 	result=-1;
 	if(UnitInList<nNodes){
+		unsigned short int NodeID;
+
 		NodeID=(unsigned short int)SELF_ID_NODEID(NodeData[UnitInList])|(LocalNodeID&0xFFC0);
 		CurrentUnitSW_Version=CurrentUnitSpec=0;
 
@@ -193,7 +196,7 @@ int iLinkFindUnit(int UnitInList, unsigned int UnitSpec, unsigned int UnitSW_Ver
 
 int iLinkReadCROM(unsigned short int NodeID, unsigned int Offset, unsigned int nQuads, unsigned int *buffer){
 	unsigned int i;
-	int result, trContext, retries;
+	int result, trContext;
 
 	DEBUG_PRINTF("Reading CROM of node 0x%04x, offset: %u, nquads: %u.\n", NodeID, Offset, nQuads);
 
@@ -201,6 +204,8 @@ int iLinkReadCROM(unsigned short int NodeID, unsigned int Offset, unsigned int n
 	if((trContext=iLinkTrAlloc(NodeID, S100))<0) return trContext;
 
 	for(i=0; i<nQuads; i++){
+		int retries;
+
 		retries=10;
 		do{
 			if((result=iLinkTrRead(trContext, 0x0000FFFF, 0xF0000400+(Offset<<2), buffer, 4))>=0){
@@ -345,10 +350,10 @@ static void BuildConfigurationROM(void){
 	DirectoryHeader->CRC16=BSWAP16(iLinkCalculateCRC16(ModelName, DirectoryHeader->Directory_length));
 	DirectoryHeader->Directory_length=BSWAP16(DirectoryHeader->Directory_length);
 
-	CurrentOffset=CurrentOffset+sizeof(struct DirectoryHeader)+sizeof(struct ModelID_Textual_Descriptor);
+	CurrentOffset=sizeof(struct BusInformationBlockHeader);
 
 	/* Fill in the fields in the Bus Information Block. */
-	BusInfoBlk=(struct BusInformationBlock *)&CROM_Buffer[sizeof(struct BusInformationBlockHeader)];
+	BusInfoBlk=(struct BusInformationBlock *)&CROM_Buffer[CurrentOffset];
 	memcpy(BusInfoBlk->BusName, "1394", 4);
 	BusInfoBlk->capabilities=NodeCapabilities<<3;
 	BusInfoBlk->Cyc_Clk_Acc=CycleClkAcc;

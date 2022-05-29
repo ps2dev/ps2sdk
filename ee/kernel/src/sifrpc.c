@@ -51,12 +51,13 @@ void *_rpc_get_fpacket(struct rpc_data *rpc_data);
 void *_rpc_get_packet(struct rpc_data *rpc_data)
 {
 	SifRpcPktHeader_t *packet;
-	int len, pid, rid = 0;
+	int len;
 
 	DI();
 
 	len = rpc_data->pkt_table_len;
 	if (len > 0) {
+		int pid, rid;
 		packet = (SifRpcPktHeader_t *)rpc_data->pkt_table;
 
 		for (rid = 0; rid < len; rid++, packet = (SifRpcPktHeader_t *)(((unsigned char *)packet) +  RPC_PACKET_SIZE)) {
@@ -281,6 +282,8 @@ static void _request_end(SifRpcRendPkt_t *request, void *data)
 {
 	SifRpcClientData_t *client = request->client;
 
+	(void)data;
+
 	if (request->cid == SIF_CMD_RPC_CALL) {
 		if (client->end_function)
 			client->end_function(client->end_param);
@@ -351,6 +354,8 @@ static void _request_call(SifRpcCallPkt_t *request, void *data)
 	SifRpcServerData_t *server = request->server;
 	SifRpcDataQueue_t *base = server->base;
 
+	(void)data;
+
 	if (base->start)
 		base->end->link = server;
 	else
@@ -388,6 +393,9 @@ static void _request_rdata(SifRpcOtherDataPkt_t *rdata, void *data)
 void SifInitRpc(int mode)
 {
 	u32 *cmdp;
+
+	(void)mode;
+
 	static int _rb_count = 0;
 	if(_rb_count != _iop_reboot_count)
 	{
@@ -454,8 +462,10 @@ SifRegisterRpc(SifRpcServerData_t *sd,
 	if (!(server = qd->link)) {
 		qd->link = sd;
 	} else {
-		while ((server = server->next))
-			;
+		while (server->next != NULL)
+		{
+			server = server->next;
+		}
 
 		server->next = sd;
 	}
@@ -645,9 +655,9 @@ void SifExecRequest(SifRpcServerData_t *sd)
 #ifdef F_SifRpcLoop
 void SifRpcLoop(SifRpcDataQueue_t *qd)
 {
-	SifRpcServerData_t *server;
-
 	while (1) {
+		SifRpcServerData_t *server;
+
 		while ((server = SifGetNextRequest(qd)))
 			SifExecRequest(server);
 

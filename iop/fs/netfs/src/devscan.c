@@ -147,11 +147,10 @@ int devscan_setup(int devtype)
 int devscan_gettype(char *name)
 {
   int count = 0;
-  int ret = 0;
   dbgprintf("devscan: gettype '%s'\n",name);
   while (dev_info_list[count].name[0] != 0)
   {
-    ret = strncmp(dev_info_list[count].name,name,dev_info_list[count].len );
+    int ret = strncmp(dev_info_list[count].name,name,dev_info_list[count].len );
     dbgprintf("'%s'",dev_info_list[count].name);
     if (!ret)
       return dev_info_list[count].devtype;

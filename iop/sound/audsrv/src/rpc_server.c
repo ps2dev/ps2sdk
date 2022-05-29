@@ -47,6 +47,8 @@ static void *rpc_command(int func, unsigned *data, int size)
 {
 	int ret;
 
+	(void)size;
+
 	/* printf("audsrv: rpc command %d\n", func); */
 	switch(func)
 	{
@@ -170,6 +172,8 @@ static void *rpc_command(int func, unsigned *data, int size)
  */
 static void rpc_server_thread(void *arg)
 {
+	(void)arg;
+
 	SifInitRpc(0);
 
 	printf("audsrv: creating rpc server\n");

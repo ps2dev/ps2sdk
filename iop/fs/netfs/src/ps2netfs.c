@@ -46,6 +46,9 @@ IRX_ID(PS2NETFS_MODNAME, PS2NETFS_VERSION_HIGH, PS2NETFS_VERSION_LOW);
  */
 int _start(int argc, char *argv[])
 {
+  (void)argc;
+  (void)argv;
+
   printf("%s - v%d.%d - Copyright (c) 2004 adresd\n",
     PS2NETFS_MODNAME,PS2NETFS_VERSION_HIGH,PS2NETFS_VERSION_LOW);
 

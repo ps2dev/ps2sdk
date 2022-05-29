@@ -36,8 +36,6 @@ static void swapClStack(fat_driver* fatd, int startIndex, int endIndex)
 {
     int i;
     int size;
-    int offset1, offset2;
-    unsigned int tmp;
 
     size = endIndex - startIndex;
     if (size < 2) {
@@ -46,6 +44,8 @@ static void swapClStack(fat_driver* fatd, int startIndex, int endIndex)
 
     size /= 2;
     for (i = 0; i < size; i++) {
+        int offset1, offset2;
+        unsigned int tmp;
         offset1                = startIndex + i;
         offset2                = endIndex - 1 - i;
         tmp                    = fatd->clStack[offset1];
@@ -62,9 +62,6 @@ static void swapClStack(fat_driver* fatd, int startIndex, int endIndex)
 static int fat_readEmptyClusters12(fat_driver* fatd)
 {
     int ret;
-    int recordOffset;
-    int sectorSpan;
-    int fatSector;
     int lastFatSector;
     unsigned int cluster;
     unsigned int clusterValue;
@@ -78,6 +75,9 @@ static int fat_readEmptyClusters12(fat_driver* fatd)
     cluster       = fatd->clStackLast;
 
     while (fatd->clStackIndex < MAX_CLUSTER_STACK) {
+        int recordOffset;
+        int sectorSpan;
+        int fatSector;
         recordOffset = (cluster * 3) / 2; //offset of the cluster record (in bytes) from the FAT start
         fatSector    = recordOffset / fatd->partBpb.sectorSize;
         sectorSpan   = 0;
@@ -131,7 +131,6 @@ static int fat_readEmptyClusters12(fat_driver* fatd)
 static int fat_readEmptyClusters32(fat_driver* fatd)
 {
     unsigned int i, j;
-    int ret;
     unsigned int indexCount;
     unsigned int fatStartSector;
     unsigned int cluster;
@@ -151,6 +150,8 @@ static int fat_readEmptyClusters32(fat_driver* fatd)
     fatStartSector = fatd->partBpb.partStart + fatd->partBpb.resSectors;
 
     for (i = sectorSkip; i < fatd->partBpb.fatSize && fatd->clStackIndex < MAX_CLUSTER_STACK; i++) {
+        int ret;
+
         unsigned char* sbuf = NULL; //sector buffer
 
         ret = READ_SECTOR(fatd, fatStartSector + i, sbuf);
@@ -186,7 +187,6 @@ static int fat_readEmptyClusters32(fat_driver* fatd)
 static int fat_readEmptyClusters16(fat_driver* fatd)
 {
     unsigned int i, j;
-    int ret;
     unsigned int indexCount;
     unsigned int fatStartSector;
     unsigned int cluster;
@@ -207,6 +207,8 @@ static int fat_readEmptyClusters16(fat_driver* fatd)
     fatStartSector = fatd->partBpb.partStart + fatd->partBpb.resSectors;
 
     for (i = sectorSkip; i < fatd->partBpb.fatSize && fatd->clStackIndex < MAX_CLUSTER_STACK; i++) {
+        int ret;
+
         unsigned char* sbuf = NULL; //sector buffer
 
         ret = READ_SECTOR(fatd, fatStartSector + i, sbuf);
@@ -303,11 +305,8 @@ static void fat_setClusterRecord12part2(unsigned char* buf, unsigned int cluster
 static int fat_saveClusterRecord12(fat_driver* fatd, unsigned int currentCluster, unsigned int value)
 {
     int ret;
-    int sectorSpan;
     int recordOffset;
-    int recordType;
     int fatNumber;
-    unsigned int fatSector;
 
     ret = -1;
     //recordOffset is byte offset of the record from the start of the fat table
@@ -315,6 +314,10 @@ static int fat_saveClusterRecord12(fat_driver* fatd, unsigned int currentCluster
 
     //save both fat tables
     for (fatNumber = 0; fatNumber < fatd->partBpb.fatCount; fatNumber++) {
+        int sectorSpan;
+        int recordType;
+        unsigned int fatSector;
+
         unsigned char* sbuf = NULL; //sector buffer
 
         fatSector = fatd->partBpb.partStart + fatd->partBpb.resSectors + (fatNumber * fatd->partBpb.fatSize);
@@ -372,11 +375,9 @@ static int fat_saveClusterRecord12(fat_driver* fatd, unsigned int currentCluster
 */
 static int fat_saveClusterRecord16(fat_driver* fatd, unsigned int currentCluster, unsigned int value)
 {
-    int i;
     int ret;
     int indexCount;
     int fatNumber;
-    unsigned int fatSector;
 
     ret = -1;
     //indexCount is numer of cluster indices per sector
@@ -384,6 +385,9 @@ static int fat_saveClusterRecord16(fat_driver* fatd, unsigned int currentCluster
 
     //save both fat tables
     for (fatNumber = 0; fatNumber < fatd->partBpb.fatCount; fatNumber++) {
+        int i;
+        unsigned int fatSector;
+
         unsigned char* sbuf = NULL; //sector buffer
 
         fatSector = fatd->partBpb.partStart + fatd->partBpb.resSectors + (fatNumber * fatd->partBpb.fatSize);
@@ -413,11 +417,9 @@ static int fat_saveClusterRecord16(fat_driver* fatd, unsigned int currentCluster
 */
 static int fat_saveClusterRecord32(fat_driver* fatd, unsigned int currentCluster, unsigned int value)
 {
-    int i;
     int ret;
     int indexCount;
     int fatNumber;
-    unsigned int fatSector;
 
     ret = -1;
     //indexCount is numer of cluster indices per sector
@@ -425,6 +427,9 @@ static int fat_saveClusterRecord32(fat_driver* fatd, unsigned int currentCluster
 
     //save both fat tables
     for (fatNumber = 0; fatNumber < fatd->partBpb.fatCount; fatNumber++) {
+        int i;
+        unsigned int fatSector;
+
         unsigned char* sbuf = NULL; //sector buffer
 
         fatSector = fatd->partBpb.partStart + fatd->partBpb.resSectors + (fatNumber * fatd->partBpb.fatSize);
@@ -549,9 +554,7 @@ static int fat_modifyClusterChain(fat_driver* fatd, unsigned int cluster, unsign
 static int fat_deleteClusterChain(fat_driver* fatd, unsigned int cluster)
 {
     int ret;
-    int size;
     int cont;
-    int end;
     int i;
 
     if (cluster < 2) {
@@ -562,6 +565,9 @@ static int fat_deleteClusterChain(fat_driver* fatd, unsigned int cluster)
     cont = 1;
 
     while (cont) {
+        int size;
+        int end;
+
         size = fat_getClusterChain(fatd, cluster, fatd->cbuf, MAX_DIR_CLUSTER, 1);
 
         end = size - 1; //do not delete last cluster in the chain buffer
@@ -944,7 +950,7 @@ static int separatePathAndName(const char* fname, char* path, char* name)
 /*
  get the sequence number from existing direntry name
 */
-static int getShortNameSequence(char* name, char* ext, const char* sname)
+static int getShortNameSequence(const char* name, const char* ext, const char* sname)
 {
     int i, j;
     const char* tmp;
@@ -992,7 +998,6 @@ static int setShortNameSequence(fat_driver* fatd, char* sname)
     char* buf;
     int i, j;
     int seq;
-    unsigned char mask;
 
     //dlanor: The code below was bugged in several ways, as it treated the high seq
     //values stored in long_name records as separate seqs, and also failed to accept
@@ -1001,6 +1006,7 @@ static int setShortNameSequence(fat_driver* fatd, char* sname)
 
     seq = SEQ_MASK_SIZE;
     for (i = 0; (i < (SEQ_MASK_SIZE >> 3)); i++) { //for each mask byte
+        unsigned char mask;
         if ((mask = fatd->seq_mask[i]) != 0xFF) {  //if mask byte has any bit free
             for (j = 0; j < 8; j++, mask >>= 1) {  //for each bit in byte
                 if ((mask & 1) == 0) {             //if free bit found
@@ -1128,10 +1134,8 @@ static int fat_fillDirentryInfo(fat_driver* fatd, const char* lname, const char*
 {
     fat_direntry_summary dir;
     int i, j;
-    unsigned int startSector, dirSector, theSector;
+    unsigned int startSector, dirSector;
     int cont;
-    int ret;
-    unsigned int dirPos;
     int seq;
     int mask_ix, mask_sh;
 
@@ -1154,6 +1158,10 @@ static int fat_fillDirentryInfo(fat_driver* fatd, const char* lname, const char*
     //go through first directory sector till the max number of directory sectors
     //or stop when no more direntries detected
     for (i = 0; i < dirSector && cont; i++) {
+        unsigned int theSector;
+        int ret;
+        unsigned int dirPos;
+
         unsigned char* sbuf = NULL; //sector buffer
 
         //At cluster borders, get correct sector from cluster chain buffer
@@ -1243,7 +1251,6 @@ static int fat_fillDirentryInfo(fat_driver* fatd, const char* lname, const char*
 
 static int enlargeDirentryClusterSpace(fat_driver* fatd, unsigned int startCluster, int entryCount, int entryIndex, int direntrySize)
 {
-    int ret;
     unsigned int startSector, dirSector;
     int i;
     int maxSector;
@@ -1294,9 +1301,13 @@ static int enlargeDirentryClusterSpace(fat_driver* fatd, unsigned int startClust
     // now clean the directory space
     startSector = fat_cluster2sector(&fatd->partBpb, newCluster);
     for (i = 0; i < fatd->partBpb.clusterSize; i++) {
+        int ret;
+
         unsigned char* sbuf = NULL; //sector buffer
 
         ret = ALLOC_SECTOR(fatd, startSector + i, sbuf);
+        if (ret < 0)
+            return -EIO;
         memset(sbuf, 0, fatd->partBpb.sectorSize); //fill whole sector with zeros
         ret = WRITE_SECTOR(fatd, startSector + i);
         if (ret < 0)
@@ -1315,7 +1326,6 @@ static int enlargeDirentryClusterSpace(fat_driver* fatd, unsigned int startClust
 static int createDirectorySpace(fat_driver* fatd, unsigned int dirCluster, unsigned int parentDirCluster)
 {
     int i, j;
-    int ret;
     unsigned int startSector;
 
     //we do not mess with root directory
@@ -1330,6 +1340,8 @@ static int createDirectorySpace(fat_driver* fatd, unsigned int dirCluster, unsig
 
     //go through all sectors of the cluster
     for (i = 0; i < fatd->partBpb.clusterSize; i++) {
+        int ret;
+
         unsigned char* sbuf = NULL; //sector buffer
 
         ret = ALLOC_SECTOR(fatd, startSector + i, sbuf);
@@ -1364,7 +1376,6 @@ static int createDirectorySpace(fat_driver* fatd, unsigned int dirCluster, unsig
 static int updateDirectoryParent(fat_driver* fatd, unsigned int dirCluster, unsigned int parentDirCluster)
 {
     int i, j;
-    int ret;
     unsigned int startSector;
 
     //we do not mess with root directory
@@ -1379,6 +1390,8 @@ static int updateDirectoryParent(fat_driver* fatd, unsigned int dirCluster, unsi
 
     //go through all sectors of the cluster
     for (i = 0; i < fatd->partBpb.clusterSize; i++) {
+        int ret;
+
         unsigned char* sbuf = NULL; //sector buffer
 
         ret = READ_SECTOR(fatd, startSector + i, sbuf);
@@ -1434,12 +1447,8 @@ static int saveDirentry(fat_driver* fatd, unsigned int startCluster,
     int i, j;
     unsigned int dirSector;
     unsigned int startSector;
-    unsigned int theSector;
     int cont;
-    int ret;
-    unsigned int dirPos;
     int entryEndIndex;
-    int writeFlag;
     int part = entrySize - 1;
     int nameSize;
     unsigned char chsum;
@@ -1460,6 +1469,11 @@ static int saveDirentry(fat_driver* fatd, unsigned int startCluster,
     //go through first directory sector till the max number of directory sectors
     //or stop when no more direntries detected
     for (i = 0; i < dirSector && cont; i++) {
+        unsigned int theSector;
+        int ret;
+        unsigned int dirPos;
+        int writeFlag;
+
         unsigned char* sbuf = NULL; //sector buffer
 
         //At cluster borders, get correct sector from cluster chain buffer
@@ -2151,7 +2165,6 @@ int fat_writeFile(fat_driver* fatd, fat_dir* fatDir, int* updateClusterIndices, 
 {
     int ret;
     int i, j;
-    int chainSize;
     int nextChain;
     int startSector;
     unsigned int bufSize;
@@ -2164,7 +2177,6 @@ int fat_writeFile(fat_driver* fatd, fat_dir* fatDir, int* updateClusterIndices, 
     unsigned int clusterPos;
     unsigned int endPosFile;
     unsigned int endPosCluster;
-    unsigned int lastCluster;
 
     int clusterChainStart;
 
@@ -2184,6 +2196,8 @@ int fat_writeFile(fat_driver* fatd, fat_dir* fatDir, int* updateClusterIndices, 
 
     //allocate additional cluster(s)
     if (endPosFile > endPosCluster) {
+        unsigned int lastCluster;
+
         ret = endPosFile - endPosCluster; //additional space needed in bytes
         j   = ret / i;                    //additional space needed (given in number of clusters)
         if (ret % i) {
@@ -2226,6 +2240,8 @@ int fat_writeFile(fat_driver* fatd, fat_dir* fatDir, int* updateClusterIndices, 
     clusterChainStart = 1;
 
     while (nextChain && size > 0) {
+        int chainSize;
+
         chainSize         = fat_getClusterChain(fatd, fileCluster, fatd->cbuf, MAX_DIR_CLUSTER, clusterChainStart);
         clusterChainStart = 0;
         if (chainSize >= MAX_DIR_CLUSTER) { //the chain is full, but more chain parts exist

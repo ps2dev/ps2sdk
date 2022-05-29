@@ -23,6 +23,9 @@ extern struct irx_export_table _exp_usbmass;
 
 int _start( int argc, char *argv[])
 {
+	(void)argc;
+	(void)argv;
+
 	printf("USB HDD FileSystem Driver v%d.%d\n", MAJOR_VER, MINOR_VER);
 
 	if (RegisterLibraryEntries(&_exp_usbmass) != 0) {

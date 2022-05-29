@@ -164,9 +164,9 @@ iop_device_t *iopmgr_get_device(char *device)
 {
   iop_device_t *devptr;
   devptr = iopmgr_get_iomandev(device);
-  if (devptr > 0) return(devptr);
+  if (devptr != NULL) return(devptr);
   devptr = iopmgr_get_iomanxdev(device);
-  if (devptr > 0) return(devptr);
+  if (devptr != NULL) return(devptr);
   return 0;
 }
 
@@ -183,9 +183,9 @@ iop_device_t *iopmgr_get_device(char *device)
  */
 int iopmgr_get_devicetype(char *device)
 {
-  if (iopmgr_get_iomandev(device) > 0)
+  if (iopmgr_get_iomandev(device) != NULL)
     return(IOPMGR_DEVTYPE_IOMAN);
-  if (iopmgr_get_iomanxdev(device) > 0)
+  if (iopmgr_get_iomanxdev(device) != NULL)
     return(IOPMGR_DEVTYPE_IOMANX);
   return IOPMGR_DEVTYPE_INVALID;
 }

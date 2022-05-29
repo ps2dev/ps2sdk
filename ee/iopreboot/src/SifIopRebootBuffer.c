@@ -43,9 +43,10 @@ int imgdrv_offset_ioprpsiz = 0;
 
 void init_imgdrv_offsets(void)
 {
-	int i;
 	if (imgdrv_offset_ioprpimg == 0 || imgdrv_offset_ioprpsiz == 0)
 	{
+		int i;
+
 		for (i = 0; i < size__imgdrv_irx; i += 4)
 		{
 			if (*(u32 *)((&((unsigned char *)_imgdrv_irx)[i])) == 0xDEC1DEC1)

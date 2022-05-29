@@ -33,6 +33,9 @@ unsigned char IsBusRoot=1;	/* Assume that the console is the root, in case this 
 static void NoResponseHandler(unsigned int header, volatile unsigned int *buffer, unsigned int nQuads){
 	unsigned int i;
 
+	(void)header;
+	(void)buffer;
+
 	DEBUG_PRINTF("NULL response handler called.\n");
 
 	for(i=0; i<nQuads; i++){	/* Flush the buffer. */
@@ -63,7 +66,9 @@ static void PHYPacketHandler(unsigned int header, volatile unsigned int *buffer,
 					NodeData[nNodes]=data;
 					nNodes++;
 				}
-				else DEBUG_PRINTF("Unknown quad received in SELF-ID phase: 0x%08x.\n", data);
+				else{
+					DEBUG_PRINTF("Unknown quad received in SELF-ID phase: 0x%08x.\n", data);
+				}
 			}
 			else{	/* End of SELF ID packet receival. */
 				/* The local node ID should be already valid at this point in execution. */
@@ -85,7 +90,9 @@ static void PHYPacketHandler(unsigned int header, volatile unsigned int *buffer,
 		/* For monitoring only. It seems like the PHY will automatically configure itself with the data from the PHY packet. */
 /*		if(PHY_CONFIG_R(data)) iLinkPHY_SetRootBit(PHY_CONFIG_ROOT_ID(data)==(LocalNodeID&0x3F));
 		if(PHY_CONFIG_T(data)) iLinkPHY_SetGapCount(PHY_CONFIG_GAP_CNT(data)); */
-		if(PHY_CONFIG_T(data)) DEBUG_PRINTF("gap count: %d.\n", PHY_CONFIG_GAP_CNT(data));
+		if(PHY_CONFIG_T(data)){
+			DEBUG_PRINTF("gap count: %d.\n", PHY_CONFIG_GAP_CNT(data));
+		}
 	}
 	else{
 		DEBUG_PRINTF("DEBUG: Unknown PHY packet type: 0x%8x.\n", header);
@@ -97,7 +104,8 @@ static void ResponseHandler(unsigned int header, volatile unsigned int *buffer, 
 	unsigned int i, HeaderLength;
 	struct ieee1394_TrResponsePacketHdr ResponseData;
 	unsigned char tCode;
-	unsigned int data __attribute__((unused));
+
+	(void)nQuads;
 
 	tCode=(header>>4)&0xF;
 
@@ -133,7 +141,7 @@ static void ResponseHandler(unsigned int header, volatile unsigned int *buffer, 
 	    }
 	}
 
-	data=*buffer;	/* Read the last quadlet of the read response that contains only the speed. */
+	(void)(*buffer);	/* Read the last quadlet of the read response that contains only the speed. */
 	SetEventFlag(IntrEventFlag, iLinkEventDataReceived);
 }
 
@@ -142,6 +150,8 @@ static void WriteRequestHandler(unsigned int header, volatile unsigned int *buff
 	unsigned int QuadsToRead, data;
 	unsigned int i;
 	unsigned char rCode, tLabel;
+
+	(void)nQuads;
 
 	DEBUG_PRINTF("Incoming write request. Header: 0x%08x; Buffer: 0x%p; nQuads: 0x%08x.\n", header, buffer, nQuads);
 	rCode=0;
@@ -154,7 +164,9 @@ static void WriteRequestHandler(unsigned int header, volatile unsigned int *buff
 		WriteReqHeader.misc=4;	/* nBytes=4 */
 		DEBUG_PRINTF("Quadlet");
 	}
-	else DEBUG_PRINTF("Block");
+	else{
+		DEBUG_PRINTF("Block");
+	}
 
 	for(i=1; i<QuadsToRead; i++){
 		data=*buffer;
@@ -216,6 +228,8 @@ static void ReadRequestHandler(unsigned int header, volatile unsigned int *buffe
 	unsigned int i;
 	unsigned short int DestinationNodeID;
 	unsigned char tCode, speed, rCode, tLabel;
+
+	(void)nQuads;
 
 	rCode=0;
 	DEBUG_PRINTF("Incoming read request. Header: 0x%08x; Buffer: 0x%p; nQuads: 0x%08x.\n", header, buffer, nQuads);
@@ -313,6 +327,8 @@ int iLinkIntrHandler(void *arg){
 #ifdef REQ_CHECK_DMAC_STAT
 	unsigned int i;
 #endif
+
+	(void)arg;
 
 	while(1){
 		/* Acknowledge interrupts while determining which interrupt events have occurred. Some events need to be acknowledged as early as possible or they will prevent the hardware from working properly. */
