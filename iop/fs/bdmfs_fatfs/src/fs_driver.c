@@ -172,7 +172,7 @@ static int fs_close(iop_file_t *fd)
 
     M_DEBUG("%s\n", __func__);
 
-    int ret;
+    int ret = FR_OK;
 
     _fs_lock();
 
