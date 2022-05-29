@@ -480,8 +480,8 @@ static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsig
         case USBMASS_DEVCTL_STOP_UNIT:
         case USBMASS_DEVCTL_STOP_ALL:
             ret = mounted_bd->stop(mounted_bd);
-            mounted_bd = NULL;
             f_unmount("");
+            mounted_bd = NULL;
             ret = FR_OK;
             break;
         default:
