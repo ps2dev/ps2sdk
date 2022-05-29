@@ -230,7 +230,7 @@ static int fs_write(iop_file_t *fd, void *buffer, int size)
     ret = f_write(fd->privdata, buffer, size, &bw);
 
     _fs_unlock();
-    return (ret == FR_OK) ? bw : 0;
+    return (ret == FR_OK) ? bw : -ENOENT;
 }
 
 //---------------------------------------------------------------------------
@@ -249,7 +249,7 @@ static int fs_read(iop_file_t *fd, void *buffer, int size)
     ret = f_read(fd->privdata, buffer, size, &br);
 
     _fs_unlock();
-    return (ret == FR_OK) ? br : 0;
+    return (ret == FR_OK) ? br : -ENOENT;
 }
 
 //---------------------------------------------------------------------------
