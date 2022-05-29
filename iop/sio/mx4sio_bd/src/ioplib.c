@@ -1,7 +1,7 @@
 #include "ioplib.h"
 #include <intrman.h>
 
-iop_library_t* ioplib_getByName(char* name)
+iop_library_t* ioplib_getByName(const char* name)
 {
     iop_library_t* libptr;
     int i;
@@ -32,7 +32,11 @@ unsigned int ioplib_getTableSize(iop_library_t* lib)
     void** exp;
     unsigned int size;
 
-    exp  = lib->exports;
+    exp = NULL;
+    if (lib != NULL)
+    {
+        exp  = lib->exports;
+    }
     size = 0;
 
     if (exp != NULL)

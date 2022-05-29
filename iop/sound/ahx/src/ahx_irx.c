@@ -116,6 +116,8 @@ void AHX_Thread(void* param)
 	// int i;
 	iop_sema_t sema; // semaphore
 
+	(void)param;
+
 	// set sema properties and create...
 	sema.attr = 0; // SA_THFIFO;
 	sema.initial = 0;
@@ -169,6 +171,8 @@ void AHX_PlayThread(void* param)
 {
 	int i;
 	int chunk; // we transfer to 2 blocks of SPU mem, are we working chunk 1 or 2?
+
+	(void)param;
 
 	// reset position and flags etc
 	AHX_ResetPlayThread();
@@ -238,6 +242,8 @@ void AHX_PlayThread(void* param)
  */
 static int AHX_TransCallback(void* param)
 {
+	(void)param;
+
 	// signal our semaphore to indicate that SPU2 has finished
 	// processing current sound data and that it's time to
 	// xfer some more data across...
@@ -293,6 +299,8 @@ void AHX_ClearSoundBuffers()
  */
 void* AHX_rpc_server(unsigned int funcno, void *data, int size)
 {
+	(void)size;
+
 	switch(funcno) {
 		case AHX_INIT:
 			return AHX_Init((unsigned*)data);

@@ -16,6 +16,9 @@ extern int usb_mass_init(void);
 
 int _start(int argc, char* argv[])
 {
+    (void)argc;
+    (void)argv;
+
     M_PRINTF("USB MASS Driver v%d.%d\n", MAJOR_VER, MINOR_VER);
 
     // initialize the SCSI driver

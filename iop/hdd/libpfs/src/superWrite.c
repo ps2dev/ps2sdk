@@ -29,9 +29,7 @@ extern u32 pfsMetaSize;
 int pfsFormatSub(pfs_block_device_t *blockDev, int fd, u32 sub, u32 reserved, u32 scale, u32 fragment)
 {
 	pfs_cache_t *cache;
-	int i;
-	unsigned int j;
-	u32 sector, count, size, *b;
+	u32 sector, count, size;
 	int result = 0;
 
 	size = blockDev->getSize(fd, sub);
@@ -43,6 +41,10 @@ int pfsFormatSub(pfs_block_device_t *blockDev, int fd, u32 sub, u32 reserved, u3
 
 	if((cache = pfsCacheAllocClean(&result)))
 	{
+		int i;
+		unsigned int j;
+		u32 *b;
+
 		// fill with fragment pattern
 		for (i=127; i>=0; i--)
 			cache->u.bitmap[i]=fragment;
@@ -74,7 +76,7 @@ int pfsFormatSub(pfs_block_device_t *blockDev, int fd, u32 sub, u32 reserved, u3
 int pfsFormat(pfs_block_device_t *blockDev, int fd, int zonesize, int fragment)
 {
 	int result, result2;
-	pfs_cache_t *clink, *cache;
+	pfs_cache_t *clink;
 	pfs_super_block_t *sb;
 	int scale;
 	u32 i, mainsize, subnumber = blockDev->getSubNumber(fd);
@@ -95,7 +97,7 @@ int pfsFormat(pfs_block_device_t *blockDev, int fd, int zonesize, int fragment)
 		sb->zone_size = zonesize;
 		sb->num_subs = subnumber;
 		sb->log.number = pfsGetBitmapSizeBlocks(scale, mainsize) + (0x2000 >> scale) + 1;
-		sb->log.count = 0x20000 / zonesize ? 0x20000 / zonesize : 1;
+		sb->log.count = (0x20000 / zonesize) ? (0x20000 / zonesize) : 1;
 
 		PFS_PRINTF(PFS_DRV_NAME": Format: log.number = %ld, log.count = %d\n", sb->log.number << scale, sb->log.count);
 
@@ -103,6 +105,7 @@ int pfsFormat(pfs_block_device_t *blockDev, int fd, int zonesize, int fragment)
 		sb->root.number = sb->log.number + sb->log.count;
 		if((result = pfsJournalResetThis(blockDev, fd, sb->log.number<<scale)) >= 0)
 		{
+			pfs_cache_t *cache;
 			if((cache = pfsCacheAllocClean(&result2)))
 			{
 				pfsFillSelfAndParentDentries(cache, &sb->root, &sb->root);

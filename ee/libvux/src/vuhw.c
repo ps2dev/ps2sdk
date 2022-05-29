@@ -213,7 +213,10 @@ void Vu0MulMatrix(VU_MATRIX *m0, VU_MATRIX *m1, VU_MATRIX *out)
 }
 
 void Vu0InverseMatrix(VU_MATRIX *in, VU_MATRIX *out)
-{}
+{
+  (void)in;
+  (void)out;
+}
 
 void Vu0ApplyMatrix(VU_MATRIX *m, VU_VECTOR *v0, VU_VECTOR *out)
 {

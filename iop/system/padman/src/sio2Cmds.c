@@ -114,6 +114,8 @@ static void FindPadsReadData(u8 *a)
 
 static u32 FindPadsGetPortCtrl1(u32 a, u32 b)
 {
+	(void)b;
+
 	if(a == 0)
 		return 0xFFC00505;
 	else
@@ -155,6 +157,8 @@ static u32 FindPadsRegData(void)
 
 static u32 FindPadsEnterConfigMode(u8 *a)
 {
+	(void)a;
+
 	return 0;
 }
 
@@ -202,6 +206,8 @@ static void MouseReadData(u8* a)
 
 static u32 MouseGetPortCtrl1(u32 a, u32 b)
 {
+	(void)b;
+
 	if(a == 0)
 		return 0xFFC00505;
 	else
@@ -291,6 +297,8 @@ static void NegiconReadData(u8* a)
 
 static u32 NegiconGetPortCtrl1(u32 a, u32 b)
 {
+	(void)b;
+
 	if(a == 0)
 		return 0xFFC00505;
 	else
@@ -378,6 +386,8 @@ static void KonamiGunReadData(u8* a)
 
 static u32 KonamiGunGetPortCtrl1(u32 a, u32 b)
 {
+	(void)b;
+
 	if(a == 0)
 		return 0xFFC00505;
 	else
@@ -460,6 +470,8 @@ static void DigitalReadData(u8* a)
 
 static u32 DigitalGetPortCtrl1(u32 a, u32 b)
 {
+	(void)b;
+
 	if(a == 0)
 		return 0xFFC00505;
 	else
@@ -546,6 +558,8 @@ static void JoystickReadData(u8* a)
 
 static u32 JoystickGetPortCtrl1(u32 a, u32 b)
 {
+	(void)b;
+
 	if(a == 0)
 		return 0xFFC00505;
 	else
@@ -636,6 +650,8 @@ static void NamcoGunReadData(u8* a)
 
 static u32 NamcoGunGetPortCtrl1(u32 a, u32 b)
 {
+	(void)b;
+
 	if(a == 0)
 		return 0xFFC00505;
 	else
@@ -843,6 +859,8 @@ static void JogconReadData(u8* a)
 
 static u32 JogconGetPortCtrl1(u32 a, u32 b)
 {
+	(void)b;
+
 	if(a == 0)
 		return 0xFFC00505;
 	else
@@ -937,6 +955,8 @@ static void ConfigReadData(u8* a)
 
 static u32 ConfigGetPortCtrl1(u32 a, u32 b)
 {
+	(void)b;
+
 	if(a == 0)
 		return 0xFFC00505;
 	else

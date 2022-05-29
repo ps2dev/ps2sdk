@@ -247,7 +247,7 @@ unsigned char padInfoAct(int port, int slot, int word, int byte);
  * act_align[1] = 1 enables 'big' engine
  * set act_align[2-5] to 0xff (disable)
  */
-int padSetActAlign(int port, int slot, char act_align[6]);
+int padSetActAlign(int port, int slot, const char act_align[6]);
 
 /** Set actuator status on dual shock controller,
  * act_align[0] = 0/1 turns off/on 'small' engine

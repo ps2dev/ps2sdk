@@ -126,6 +126,8 @@ int _SifCmdIntHandler(int channel)
 	SifCmdHandlerData_t *cmd_handlers;
 	int size, pktquads, id, i = 0;
 
+	(void)channel;
+
 	EI();
 
 	header = (SifCmdHeader_t *)cmd_data->pktbuf;

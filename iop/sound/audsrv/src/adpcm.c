@@ -100,7 +100,7 @@ static adpcm_list_t *adpcm_loaded(int id)
  * @param adpcm   node entry
  * @param buffer  pointer to adpcm header
  */
-static void audsrv_read_adpcm_header(adpcm_list_t *adpcm, u32 *buffer)
+static void audsrv_read_adpcm_header(adpcm_list_t *adpcm, const u32 *buffer)
 {
 	adpcm->pitch = buffer[2];
 	adpcm->loop = (buffer[1] >> 16) & 0xFF;

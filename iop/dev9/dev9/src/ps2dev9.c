@@ -120,6 +120,11 @@ static int dev9x_dummy(void)
 
 static int dev9x_devctl(iop_file_t *f, const char *name, int cmd, void *args, unsigned int arglen, void *buf, unsigned int buflen)
 {
+    (void)f;
+    (void)name;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
     switch (cmd) {
         case DDIOC_MODEL:
             return dev9type;
@@ -162,7 +167,11 @@ static iop_device_ops_t dev9x_ops =
         (void *)&dev9x_dummy,
         (void *)&dev9x_dummy,
         (void *)&dev9x_dummy,
-        &dev9x_devctl};
+        &dev9x_devctl,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+        (void *)&dev9x_dummy,
+    };
 
 static iop_device_t dev9x_device =
     {
@@ -407,7 +416,9 @@ int dev9DmaTransfer(int device, void *buf, int bcr, int dir)
     volatile iop_dmac_chan_t *dev9_chan = (iop_dmac_chan_t *)DEV9_DMAC_BASE;
     int res, dmactrl, OldState;
 
-    if (device >= 2) {
+    if (device >= 4) {
+        return -1;
+    } else if (device >= 2) {
         if (dev9_predma_cbs[device] == NULL)
             return -1;
         if (dev9_postdma_cbs[device] == NULL)
@@ -1102,6 +1113,8 @@ static int pcmcia_intr(void *unused)
     USE_DEV9_REGS;
     u16 cstc1, cstc2;
 
+    (void)unused;
+
     cstc1 = DEV9_REG(DEV9_R_1464);
     cstc2 = DEV9_REG(DEV9_R_1466);
 
@@ -1231,6 +1244,8 @@ static int expbay_device_reset(void)
 static int expbay_intr(void *unused)
 {
     USE_DEV9_REGS;
+
+    (void)unused;
 
     if (p_dev9_intr_cb)
         p_dev9_intr_cb(0);

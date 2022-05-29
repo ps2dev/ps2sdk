@@ -45,6 +45,9 @@ static volatile union {
 
 static void ieee1394_callback(int reason, unsigned long int offset, unsigned long int size)
 {
+    (void)offset;
+    (void)size;
+
 #if 0
 	iLinkBufferOffset=offset;
 	iLinkTransferSize=size;
@@ -237,6 +240,8 @@ static void iLinkIntrCBHandlingThread(void* arg)
         9, /* S400; 2^(9+2)=2048 */
     };
 
+    (void)arg;
+
     while (1) {
         WaitEventFlag(sbp2_event_flag, BUS_RESET_COMPLETE, WEF_AND | WEF_CLEAR, NULL);
 
@@ -250,8 +255,9 @@ static void iLinkIntrCBHandlingThread(void* arg)
             }
         }
 
-        if ((nNodes = iLinkGetNodeCount()) < 0)
+        if ((nNodes = iLinkGetNodeCount()) < 0) {
             M_DEBUG("Critical error: Failure getting the number of nodes!\n"); /* Error. */
+        }
 
         M_PRINTF("BUS RESET DETECTED. Nodes: %d\n", nNodes);
         M_PRINTF("Local Node: 0x%08x.\n", iLinkGetLocalNodeID());
@@ -320,8 +326,9 @@ static void iLinkIntrCBHandlingThread(void* arg)
                     SBP2Devices[targetDeviceID].IsConnected = 1;
                     targetDeviceID++;
                 }
-            } else
+            } else {
                 M_DEBUG("Error allocating a transaction.\n");
+            }
         }
 
         for (; targetDeviceID < MAX_DEVICES; targetDeviceID++)
@@ -517,6 +524,8 @@ int ieee1394_SendCommandBlockORB(struct SBP2Device* dev, struct CommandDescripto
 
 static int sbp2_get_max_lun(struct scsi_interface* scsi)
 {
+    (void)scsi;
+
     return 0;
 }
 

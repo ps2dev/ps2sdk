@@ -46,7 +46,8 @@ extern int tid;
 void _sif2_cmd_dbg_control(SIF2_CmdPkt *cmd, void *param)
 {
     SBUS_ControlCPU_Params *params;
-    IOP_RegFrame *frame;
+
+    (void)param;
 
     params = (SBUS_ControlCPU_Params *) ((((u32) cmd) + sizeof(SIF2_CmdPkt)) | 0x00000000);
 
@@ -57,6 +58,8 @@ void _sif2_cmd_dbg_control(SIF2_CmdPkt *cmd, void *param)
     }
     else
     {
+        IOP_RegFrame *frame;
+
         if(_iop_exception_state == 0) { return; }
 
         if(_iop_exception_state == 1) { frame = _iop_ex_def_frame; }

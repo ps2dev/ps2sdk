@@ -194,12 +194,18 @@ static void ata_pre_dma_cb(int bcr, int dir)
 {
     USE_SPD_REGS;
 
+    (void)bcr;
+    (void)dir;
+
     SPD_REG16(SPD_R_XFR_CTRL) |= 0x80;
 }
 
 static void ata_post_dma_cb(int bcr, int dir)
 {
     USE_SPD_REGS;
+
+    (void)bcr;
+    (void)dir;
 
     SPD_REG16(SPD_R_XFR_CTRL) &= ~0x80;
 }
@@ -217,6 +223,9 @@ int _start(int argc, char *argv[])
 {
     USE_SPD_REGS;
     int res = 1;
+
+    (void)argc;
+    (void)argv;
 
     printf(BANNER, VERSION);
 
@@ -298,6 +307,8 @@ static int ata_intr_cb(int flag)
 
 static unsigned int ata_alarm_cb(void *unused)
 {
+    (void)unused;
+
     iSetEventFlag(ata_evflg, ATA_EV_TIMEOUT);
     return 0;
 }
@@ -320,9 +331,11 @@ int ata_get_error(void)
 static int gen_ata_wait_busy(int bits)
 {
     USE_ATA_REGS;
-    int i, didx, delay;
+    int i, delay;
 
     for (i = 0; i < 80; i++) {
+        int didx;
+
         if (!(ata_hwport->r_control & bits))
             return 0;
 
@@ -367,8 +380,8 @@ static int ata_device_select(int device)
 
     /* Select the device.  */
     ata_hwport->r_select = (device & 1) << 4;
-    res = ata_hwport->r_control;
-    res = ata_hwport->r_control; //Only done once in v1.04.
+    (void)(ata_hwport->r_control);
+    (void)(ata_hwport->r_control); //Only done once in v1.04.
 
     return ata_wait_bus_busy();
 }
@@ -507,7 +520,6 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
 static int ata_pio_transfer(ata_cmd_state_t *cmd_state)
 {
     USE_ATA_REGS;
-    u8 *buf8;
     u16 *buf16;
     int i, type;
     u16 status = ata_hwport->r_status & 0xff;
@@ -531,6 +543,8 @@ static int ata_pio_transfer(ata_cmd_state_t *cmd_state)
             cmd_state->buf16 = ++buf16;
         }
         if (cmd_state->type == 8) {
+            u8 *buf8;
+
             buf8 = cmd_state->buf8;
             for (i = 0; i < 4; i++) {
                 ata_hwport->r_data = *buf8;
@@ -1134,6 +1148,7 @@ static void ata_set_dir(int dir)
 static void ata_pio_mode(int mode)
 {
     USE_SPD_REGS;
+    (void)mode;
 #ifdef ATA_ALL_PIO_MODES
     u16 val;
 

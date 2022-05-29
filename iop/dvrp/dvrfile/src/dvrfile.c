@@ -17,7 +17,7 @@
 #include "speedregs.h"
 #include "errno.h"
 
-extern int module_start(int argc, const char **argv);
+extern int module_start(int argc, char **argv);
 extern int module_stop();
 extern int dvrf_df_init(iop_device_t *f);
 extern int dvrf_df_exit(iop_device_t *f);
@@ -247,7 +247,7 @@ int SBUF[32768];
 #define MODNAME "DVRFILE"
 IRX_ID("DVRFILE", 1, 1);
 
-int _start(int argc, const char **argv)
+int _start(int argc, char **argv)
 {
     if (argc >= 0)
         return module_start(argc, argv);
@@ -255,7 +255,7 @@ int _start(int argc, const char **argv)
         return module_stop(argc, argv);
 }
 
-int module_start(int argc, const char **argv)
+int module_start(int argc, char **argv)
 {
     int i;
     USE_SPD_REGS;
@@ -347,6 +347,8 @@ int dvrf_df_init(iop_device_t *f)
     int this_sema_id;
     iop_sema_t sema_struct;
 
+    (void)f;
+
     if (sema_id >= 0) {
         return 0;
     }
@@ -364,6 +366,8 @@ int dvrf_df_init(iop_device_t *f)
 
 int dvrf_df_exit(iop_device_t *f)
 {
+    (void)f;
+
     if (sema_id < 0) {
         return 0;
     }
@@ -378,6 +382,8 @@ int dvrf_df_chdir(iop_file_t *f, const char *name)
 {
     int retval;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)f;
 
     WaitSema(sema_id);
     strcpy((char *)SBUF, name);
@@ -398,6 +404,8 @@ int dvrf_df_chstat(iop_file_t *f, const char *name, iox_stat_t *stat, unsigned i
 {
     int retval;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)f;
 
     WaitSema(sema_id);
     SBUF[0] = statmask;
@@ -470,6 +478,8 @@ int dvrf_df_devctl(iop_file_t *f, const char *name, int cmd, void *arg, unsigned
     int retval;
     u32 argoffset;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)f;
 
     retval = 0;
     WaitSema(sema_id);
@@ -584,6 +594,8 @@ int dvrf_df_format(iop_file_t *f, const char *dev, const char *blockdev, void *a
     int retval;
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)f;
+
     WaitSema(sema_id);
     dev_len = strlen(dev) + 13;
     blockdev_len = strlen(blockdev);
@@ -612,6 +624,8 @@ int dvrf_df_getstat(iop_file_t *f, const char *name, iox_stat_t *stat)
 {
     int retval;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)f;
 
     WaitSema(sema_id);
     strcpy((char *)SBUF, name);
@@ -715,6 +729,8 @@ s64 dvrf_df_lseek64(iop_file_t *f, s64 offset, int whence)
     int rretval;
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)f;
+
     WaitSema(sema_id);
     dvrp_fd = (int)f->privdata;
     cmdack.command = 0x110D;
@@ -744,6 +760,8 @@ int dvrf_df_mkdir(iop_file_t *f, const char *path, int mode)
     int retval;
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)f;
+
     WaitSema(sema_id);
     SBUF[0] = bswap32(mode);
     strcpy((char *)&SBUF[1], path);
@@ -768,6 +786,8 @@ int dvrf_df_mount(iop_file_t *f, const char *fsname, const char *devname, int fl
     unsigned int arg_offs;
     int retval;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)f;
 
     WaitSema(sema_id);
     SBUF[0] = bswap32(flag);
@@ -897,6 +917,8 @@ int dvrf_df_readlink(iop_file_t *f, const char *path, char *buf, unsigned int bu
     int retval;
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)f;
+
     WaitSema(sema_id);
     SBUF[0] = bswap32(buflen);
     strcpy((char *)&SBUF[1], path);
@@ -920,6 +942,8 @@ int dvrf_df_remove(iop_file_t *f, const char *name)
     int retval;
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)f;
+
     WaitSema(sema_id);
     strcpy((char *)SBUF, name);
     cmdack.command = 0x1113;
@@ -942,6 +966,8 @@ int dvrf_df_rename(iop_file_t *f, const char *old, const char *new_1)
     size_t new_offs;
     int retval;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)f;
 
     WaitSema(sema_id);
     old_strlen = strlen(old);
@@ -968,6 +994,8 @@ int dvrf_df_rmdir(iop_file_t *f, const char *path)
     int retval;
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)f;
+
     WaitSema(sema_id);
     strcpy((char *)SBUF, path);
     cmdack.command = 0x1115;
@@ -990,6 +1018,8 @@ int dvrf_df_symlink(iop_file_t *f, const char *old, const char *new_1)
     size_t new_offs;
     int retval;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)f;
 
     WaitSema(sema_id);
     old_len = strlen(old);
@@ -1016,6 +1046,8 @@ int dvrf_df_sync(iop_file_t *f, const char *dev, int flag)
     int retval;
     drvdrv_exec_cmd_ack cmdack;
 
+    (void)f;
+
     WaitSema(sema_id);
     SBUF[0] = bswap32(flag);
     strcpy((char *)&SBUF[1], dev);
@@ -1036,6 +1068,8 @@ int dvrf_df_umount(iop_file_t *f, const char *fsname)
 {
     int retval;
     drvdrv_exec_cmd_ack cmdack;
+
+    (void)f;
 
     WaitSema(sema_id);
     strcpy((char *)SBUF, fsname);

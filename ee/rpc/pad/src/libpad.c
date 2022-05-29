@@ -342,6 +342,8 @@ int padPortInit(int mode)
 #endif
     int i;
 
+    (void)mode;
+
     for(i = 0; i<8; i++)
     {
         PadState[0][i].open = 0;
@@ -540,7 +542,7 @@ padStateInt2String(int state, char buf[16])
 void
 padReqStateInt2String(int state, char buf[16])
 {
-    if(state < 4)
+    if(state < 3)
         strcpy(buf, padReqStateString[state]);
 }
 
@@ -774,7 +776,7 @@ padInfoAct(int port, int slot, int actuator, int cmd)
 }
 
 int
-padSetActAlign(int port, int slot, char actAlign[6])
+padSetActAlign(int port, int slot, const char actAlign[6])
 {
     int i;
     s8 *ptr;
@@ -829,6 +831,8 @@ padGetConnection(int port, int slot)
 
     return ((oslot->openSlots[port] >> slot) & 0x1);
 #else
+    (void)port;
+    (void)slot;
     return 1;
 #endif
 }

@@ -123,7 +123,7 @@ void MPEG_Destroy ( void ) {
 
 static void* _init_seq ( void ) {
 
- int i, lSize, lMBWidth, lMBHeight;
+ int lMBWidth, lMBHeight;
 
  if ( !s_MPEG12Ctx.m_fMPEG2 ) {
   s_MPEG12Ctx.m_fProgSeq   = 1;
@@ -138,6 +138,8 @@ static void* _init_seq ( void ) {
  if ( lMBWidth  != s_MPEG12Ctx.m_MBWidth ||
       lMBHeight != s_MPEG12Ctx.m_MBHeight
  ) {
+
+  int i, lSize;
 
   if ( s_MPEG12Ctx.m_pFwdFrame ) _destroy_seq ();
 
@@ -200,10 +202,9 @@ static void _destroy_seq ( void ) {
 
 static int _get_hdr ( void ) {
 
- unsigned int lCode;
-
  while ( 1 ) {
 
+  unsigned int lCode;
   lCode = _MPEG_NextStartCode (); _MPEG_GetBits ( 32 );
 
   switch ( lCode ) {
@@ -722,7 +723,7 @@ static void _mpeg12_decode_motion_vector (
 
 }  /* end _mpeg12_decode_motion_vector */
 
-static void _mpeg12_dual_prime_vector ( int aDMV[][ 2 ], int* apDMVector, int aMVX, int aMVY ) {
+static void _mpeg12_dual_prime_vector ( int aDMV[][ 2 ], const int* apDMVector, int aMVX, int aMVY ) {
 
  if ( s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME ) {
 
@@ -977,8 +978,6 @@ static void _mpeg12_get_refs (
              int aMVFS[ 2 ][ 2 ], int aDMVector[ 2 ]
             ) {
 
- int lCurField;
- int lDMV[ 2 ][ 2 ];
  int lfAdd = 0;
 
  s_MPEG12Ctx.m_pCurMotions -> m_nMotions = 0;
@@ -986,6 +985,8 @@ static void _mpeg12_get_refs (
  if (  ( aMBType & _MPEG_MBT_MOTION_FORWARD    ) ||
        ( s_MPEG12Ctx.m_PictCodingType == _MPEG_PT_P )
  ) {
+
+  int lDMV[ 2 ][ 2 ];
 
   if ( s_MPEG12Ctx.m_PictStruct == _MPEG_PS_FRAME ) {
 
@@ -1034,6 +1035,7 @@ static void _mpeg12_get_refs (
 
   } else {
 
+   int lCurField;
    _MPEGMacroBlock8* lpMBSrc;
 
    lCurField = ( s_MPEG12Ctx.m_PictStruct == _MPEG_PS_BOTTOM_FIELD );

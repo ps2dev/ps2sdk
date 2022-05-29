@@ -78,11 +78,11 @@ int __local_sbus_irq_handler(void)
 // API call
 void *SBUS_set_irq_handler(int irq, SBUS_IrqHandlerFunc func, void *param)
 {
-	int oldi = 0;
     void *rv = NULL;
 
     if(irq < 32)
     {
+        int oldi = 0;
     	M_SuspendIntr(&oldi);
         rv = _sbus_irq_handlers[irq].func;
         _sbus_irq_handlers[irq].func = func;
@@ -97,10 +97,10 @@ void *SBUS_set_irq_handler(int irq, SBUS_IrqHandlerFunc func, void *param)
 // API call
 int SBUS_rem_irq_handler(int irq)
 {
-	int oldi = 0;
 
     if(irq < 32)
     {
+        int oldi = 0;
         M_SuspendIntr(&oldi);
         _sbus_irq_handlers[irq].func = NULL;
         _sbus_irq_handlers[irq].param = NULL;

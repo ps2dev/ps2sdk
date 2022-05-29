@@ -221,6 +221,9 @@ ps2ip_input(PBuf* pInput,NetIF* pNetIF)
 
 int _exit(int argc, char** argv)
 {
+	(void)argc;
+	(void)argv;
+
 	return MODULE_NO_RESIDENT_END; // return "not resident"!
 }
 
@@ -321,11 +324,14 @@ static err_t
 SMapLowLevelOutput(struct netif *pNetIF, struct pbuf* pOutput)
 {
 	err_t result;
-	struct pbuf* pbuf;
+
+	(void)pNetIF;
 
 	result = ERR_OK;
 	if(pOutput->tot_len > pOutput->len)
 	{
+		struct pbuf* pbuf;
+
 		pbuf_ref(pOutput);	//Increment reference count because LWIP must free the PBUF, not the driver!
 		if((pbuf = pbuf_coalesce(pOutput, PBUF_RAW)) != pOutput)
 		{	//No need to increase reference count because pbuf_coalesce() does it.

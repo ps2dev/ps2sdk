@@ -80,10 +80,10 @@ int fontx_load(const char *path, fontx_t* fontx, int type, int wmargin, int hmar
 void fontx_unload(fontx_t *fontx);
 
 /** Prints an ascii/JISX201 formatted string */
-qword_t *fontx_print_ascii(qword_t *q, int context, const unsigned char *str, int alignment, vertex_t *v0, color_t *c0, fontx_t *fontx);
+qword_t *fontx_print_ascii(qword_t *q, int context, const unsigned char *str, int alignment, const vertex_t *v0, color_t *c0, fontx_t *fontx);
 
 /** Prints a SJIS formatted string */
-qword_t *fontx_print_sjis(qword_t *q, int context, const unsigned char *str, int alignment, vertex_t *v0, color_t *c0, fontx_t *ascii, fontx_t *kanji);
+qword_t *fontx_print_sjis(qword_t *q, int context, const unsigned char *str, int alignment, const vertex_t *v0, color_t *c0, fontx_t *ascii, fontx_t *kanji);
 
 // FontStudio type fonts
 
@@ -105,7 +105,7 @@ char *fontstudio_load_ini(const char *path);
 void fontstudio_unload_ini(fsfont_t *font);
 
 /** Prints a unicode formatted string (UTF+8) */
-qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *string, int alignment, vertex_t *v0, color_t *c0, fsfont_t *font);
+qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *string, int alignment, const vertex_t *v0, color_t *c0, fsfont_t *font);
 
 #ifdef __cplusplus
 }

@@ -147,7 +147,6 @@ static int perform_bulk_transfer(usb_transfer_callback_data* data)
 
 static void usb_transfer_callback(int resultCode, int bytes, void *arg)
 {
-	int ret;
 	usb_transfer_callback_data* data = (usb_transfer_callback_data*)arg;
 
 	data->returnCode = resultCode;
@@ -159,6 +158,8 @@ static void usb_transfer_callback(int resultCode, int bytes, void *arg)
 
 	if((resultCode == USB_RC_OK) && (data->remaining > 0))
 	{	//OK to continue.
+		int ret;
+
 		ret = perform_bulk_transfer(data);
 		if (ret != USB_RC_OK)
 		{
@@ -296,8 +297,8 @@ static int usb_bulk_status(mass_dev* dev, csw_packet* csw, unsigned int tag) {
 		if (cb_data.returnSize != 13)
 			printf("USBHDFSD: bulk csw.status returnSize: %i != 13\n", cb_data.returnSize);
 		if (csw->dataResidue != 0)
-			printf("USBHDFSD: bulk csw.status residue: %i\n", csw->dataResidue);
-		XPRINTF("USBHDFSD: bulk csw result: %d, csw.status: %i\n", ret, csw->status);
+			printf("USBHDFSD: bulk csw.status residue: %u\n", csw->dataResidue);
+		XPRINTF("USBHDFSD: bulk csw result: %d, csw.status: %u\n", ret, csw->status);
 	}
 
 	return ret;
@@ -408,6 +409,7 @@ static int usb_bulk_transfer(mass_dev* dev, int direction, void* buffer, unsigne
 	cb_data.sema = dev->ioSema;
 	cb_data.pipe = (direction==USB_BLK_EP_IN) ? dev->bulkEpI : dev->bulkEpO;
 	cb_data.buffer = buffer;
+	cb_data.returnCode = 0;
 	cb_data.remaining = transferSize;
 
 	ret = perform_bulk_transfer(&cb_data);
@@ -640,7 +642,7 @@ static int cbw_scsi_read_capacity(mass_dev* dev, void *buffer, int size)
 
 static int cbw_scsi_read_sector(mass_dev* dev, unsigned int lba, void* buffer, unsigned short int sectorCount)
 {
-	int rcode, result;
+	int result;
 	static cbw_packet cbw={
 		CBW_TAG, 		// cbw.signature
 		-TAG_READ,		// cbw.tag
@@ -679,6 +681,8 @@ static int cbw_scsi_read_sector(mass_dev* dev, unsigned int lba, void* buffer, u
 
 	result = -EIO;
 	if(usb_bulk_command(dev, &cbw) == USB_RC_OK){
+		int rcode;
+
 		rcode = usb_bulk_transfer(dev, USB_BLK_EP_IN, buffer, dev->sectorSize * sectorCount);
 		result = usb_bulk_manage_status(dev, -TAG_READ);
 
@@ -690,7 +694,7 @@ static int cbw_scsi_read_sector(mass_dev* dev, unsigned int lba, void* buffer, u
 
 static int cbw_scsi_write_sector(mass_dev* dev, unsigned int lba, const void* buffer, unsigned short int sectorCount)
 {
-	int rcode, result;
+	int result;
 	static cbw_packet cbw={
 		CBW_TAG, 		// cbw.signature
 		-TAG_WRITE,		// cbw.tag
@@ -729,6 +733,8 @@ static int cbw_scsi_write_sector(mass_dev* dev, unsigned int lba, const void* bu
 
 	result = -EIO;
 	if(usb_bulk_command(dev, &cbw) == USB_RC_OK){
+		int rcode;
+
 		rcode = usb_bulk_transfer(dev, USB_BLK_EP_OUT, (void*)buffer, dev->sectorSize * sectorCount);
 		result = usb_bulk_manage_status(dev, -TAG_WRITE);
 

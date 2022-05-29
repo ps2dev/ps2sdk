@@ -37,6 +37,9 @@
  */
 static void *naplinkRpcHandler(int cmd, void *buffer, int size)
 {
+    (void)cmd;
+    (void)size;
+
     return buffer;
 }
 
@@ -53,6 +56,8 @@ static unsigned char rpc_buffer[512] __attribute((aligned(16)));
 static void napThread(void *arg)
 {
     int pid;
+
+    (void)arg;
 
     SifInitRpc(0);
     pid = GetThreadId();

@@ -57,6 +57,9 @@ static void * sior_rpc_server(u32 funcno, void * data, int size) {
     size_t s;
     char * p;
     struct init_arguments_t * i;
+
+    (void)size;
+
     switch(funcno) {
     case SIOR_INIT:
 	i = (struct init_arguments_t *) data;

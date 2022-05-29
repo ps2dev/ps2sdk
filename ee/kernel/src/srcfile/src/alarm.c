@@ -167,7 +167,6 @@ static void SetupTIM3(u16 ticks)
 void Intc12Handler(void)
 {
 	struct alarm alarm;
-	void *gp;
 	int i;
 
 	for(i = 0; i < AlarmCount; i++)
@@ -180,6 +179,8 @@ void Intc12Handler(void)
 	}
 
 	do{
+		void *gp;
+
 		alarm = alarms[0];
 		AlarmCount--;
 		for(i = 0; i < AlarmCount; i++)

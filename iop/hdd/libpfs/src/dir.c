@@ -119,13 +119,13 @@ _exit:		pfsCacheFree(dentCache);
 int pfsGetNextDentry(pfs_cache_t *clink, pfs_blockpos_t *blockpos, u32 *position, char *name, pfs_blockinfo_t *bi)
 {
 	int result;
-	pfs_cache_t *dcache;
 	pfs_dentry_t *dentry;
 	u32 len=0;
 
 	// loop until a non-empty entry is found or until the end of the dentry chunk is reached
 	while((len == 0) && (*position < clink->u.inode->size))
 	{
+		pfs_cache_t *dcache;
 
 		if (!(dcache=pfsGetDentriesChunk(blockpos, &result)))
 		{
@@ -200,11 +200,12 @@ pfs_cache_t *pfsDirRemoveEntry(pfs_cache_t *clink, char *path)
 	pfs_dentry_t *dentry;
 	u32 size;
 	u16 aLen;
-	int i=0, val;
 	pfs_dentry_t *dlast=NULL, *dnext;
 	pfs_cache_t *c;
 
 	if ((c=pfsGetDentry(clink, path, &dentry, &size, 0)) != NULL){
+		int i=0, val;
+
 		val=(int)dentry-(int)c->u.dentry;
 		if (val<0)	val +=511;
 		val /=512;
@@ -320,10 +321,12 @@ pfs_cache_t *pfsInodeGetFileInDir(pfs_cache_t *dirInode, char *path, int *result
 pfs_cache_t *pfsInodeGetFile(pfs_mount_t *pfsMount, pfs_cache_t *clink,
 			const char *name, int *result) {
 	char path[256];
-	pfs_cache_t *c,*fileInode;
+	pfs_cache_t *c;
 
 	c=pfsInodeGetParent(pfsMount, clink, name, path, result);
 	if (c){
+		pfs_cache_t *fileInode;
+
 		fileInode=pfsInodeGetFileInDir(c, path, result);
 		pfsCacheFree(c);
 		return fileInode;

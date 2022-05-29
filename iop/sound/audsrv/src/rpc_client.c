@@ -31,6 +31,8 @@ void deinitialize_rpc_client(void)
 
 static void call_end_callback(void *end_param)
 {
+	(void)end_param;
+
 	iSignalSema(rpc_sema);
 }
 

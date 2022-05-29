@@ -248,7 +248,7 @@ void pfsCacheClose(pfs_mount_t *pfsMount)
 	}
 }
 
-void pfsCacheMarkClean(pfs_mount_t *pfsMount, u32 subpart, u32 blockStart, u32 blockEnd)
+void pfsCacheMarkClean(const pfs_mount_t *pfsMount, u32 subpart, u32 blockStart, u32 blockEnd)
 {
 	u32 i;
 

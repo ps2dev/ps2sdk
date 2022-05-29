@@ -39,6 +39,8 @@ void *rpc_server(u32 func, void *data, u32 size)
 	u32 *ru = rpc_buffer[1];
 	s32 *rs = (s32*)rpc_buffer[1];
 
+	(void)size;
+
 	switch(func)
 	{
 	case PS2SND_Init:             *rs = sceSdInit       (DS[0]); break;
@@ -86,6 +88,8 @@ void *rpc_server(u32 func, void *data, u32 size)
 
 void rpc_thread(void *d)
 {
+	(void)d;
+
 	printf(BANNER, VER_MAJOR, VER_MINOR);
 	sceSifInitRpc(0);
 	sceSifSetRpcQueue(&queue, GetThreadId());

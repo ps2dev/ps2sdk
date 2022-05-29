@@ -227,14 +227,16 @@ int audsrv_get_cd_status()
 
 int audsrv_play_audio(const char *chunk, int bytes)
 {
-	int copy, maxcopy, copied;
-	int packet_size;
+	int maxcopy;
 	int sent = 0;
 
 	set_error(AUDSRV_ERR_NOERROR);
 	maxcopy = sizeof(sbuff) - sizeof(int);
 	while (bytes > 0)
 	{
+		int copy, copied;
+		int packet_size;
+
 		WaitSema(completion_sema);
 
 		copy = MIN(bytes, maxcopy);
@@ -270,6 +272,8 @@ int audsrv_stop_audio()
 
 static void *audsrv_ee_rpc_handler(int fnum, void *buffer, int len)
 {
+	(void)len;
+
 	switch(fnum){
 		case AUDSRV_FILLBUF_CALLBACK:
 			if (on_fillbuf != NULL)
@@ -287,6 +291,8 @@ static void *audsrv_ee_rpc_handler(int fnum, void *buffer, int len)
 static void rpc_server_thread(void *arg)
 {
 	static unsigned char cb_rpc_buffer[64] __attribute__((aligned(64)));
+
+	(void)arg;
 
 	SifSetRpcQueue(&cb_queue, GetThreadId());
 	SifRegisterRpc(&cb_srv, AUDSRV_IRX, &audsrv_ee_rpc_handler, cb_rpc_buffer, NULL, NULL, &cb_queue);

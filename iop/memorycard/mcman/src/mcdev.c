@@ -78,6 +78,8 @@ static iop_device_t mcman_mcdev = {
 //--------------------------------------------------------------
 int mc_init(iop_device_t *dev)
 {
+	(void)dev;
+
 	return 0;
 }
 
@@ -149,7 +151,9 @@ int mcman_modloadcb(char *filename, int *port, int *slot)
 	}
 
 	upos--;
-	*port += 2;
+	if (port) {
+		*port += 2;
+	}
 
 	if (slot) {
 		register int m, v;
@@ -173,6 +177,7 @@ void mcman_unit2card(u32 unit)
  	mcman_mc_slot = (unit >> 1) & (MCMAN_MAXSLOT - 1);
 #endif
 #ifdef BUILDING_XFROMMAN
+ 	(void)unit;
 	mcman_mc_port = 0;
 	mcman_mc_slot = 0;
 #endif
@@ -226,6 +231,8 @@ int mcman_initdev(void)
 //--------------------------------------------------------------
 int mc_deinit(iop_device_t *dev)
 {
+	(void)dev;
+
 	DeleteSema(mcman_io_sema);
 	McCloseAll();
 
@@ -236,6 +243,8 @@ int mc_deinit(iop_device_t *dev)
 int mc_open(iop_file_t *f, char *filename, int mode, int flags)
 {
 	register int r;
+
+	(void)flags;
 
 	WaitSema(mcman_io_sema);
 	mcman_unit2card(f->unit);
@@ -303,6 +312,11 @@ int mc_write(iop_file_t *f, void *buf, int size)
 int mc_format(iop_file_t *f, char *a1, char *a2, void *a3, int a4)
 {
 	register int r;
+
+	(void)a1;
+	(void)a2;
+	(void)a3;
+	(void)a4;
 
 	WaitSema(mcman_io_sema);
 	mcman_unit2card(f->unit);
@@ -432,7 +446,7 @@ int mc_getstat(iop_file_t *f, char *filename, io_stat_t *stat)
 //--------------------------------------------------------------
 int mc_chstat(iop_file_t *f, char *filename, io_stat_t *stat, u32 statmask)
 {
-	register int r, flags;
+	register int r;
 	sceMcTblGetDir mctbl;
 
 	WaitSema(mcman_io_sema);
@@ -440,6 +454,8 @@ int mc_chstat(iop_file_t *f, char *filename, io_stat_t *stat, u32 statmask)
 
 	r = McDetectCard2(mcman_mc_port, mcman_mc_slot);
 	if (r >= -1) {
+		register int flags;
+
 		if (statmask & SCE_CST_ATTR) {
 			flags = 0x008;
 			mctbl.Reserve2 = stat->attr;
@@ -487,6 +503,10 @@ int mc_chstat(iop_file_t *f, char *filename, io_stat_t *stat, u32 statmask)
 //--------------------------------------------------------------
 int mc_ioctl(iop_file_t *f, int a1, void* a2)
 {
+	(void)f;
+	(void)a1;
+	(void)a2;
+
 	WaitSema(mcman_io_sema);
 	return 0;
 }

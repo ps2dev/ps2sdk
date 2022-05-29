@@ -326,7 +326,7 @@ int sceUsbdTransferPipe(int id, void *data, u32 len, void *option, sceUsbdDoneCa
 	}
 
 	if ((res == 0) && data && len) {
-		if ((((u32)(data + len - 1) >> 12) - ((u32)data >> 12)) > 1)
+		if ((((u32)((u8 *)data + len - 1) >> 12) - ((u32)data >> 12)) > 1)
 			res = USB_RC_BADLENGTH;
 		else if (ep->alignFlag && ((u32)data & 3))
 			res = USB_RC_BADALIGN;

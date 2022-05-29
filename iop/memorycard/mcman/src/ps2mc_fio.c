@@ -518,7 +518,7 @@ int mcman_read2(int fd, void *buffer, int nbyte)
 				if (r != sceMcResSucceed)
 					return r;
 
-				memcpy((void *)(buffer + rpos), (void *)(mce->cl_data + offset), size);
+				memcpy((void *)((u8 *)buffer + rpos), (void *)((u8 *)(mce->cl_data) + offset), size);
 
 				rpos += size;
 				mce->rd_flag = 1;
@@ -536,7 +536,7 @@ int mcman_read2(int fd, void *buffer, int nbyte)
 //--------------------------------------------------------------
 int mcman_write2(int fd, void *buffer, int nbyte)
 {
-	register int r, r2, wpos, size, offset;
+	register int r, wpos;
 	register MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
 	register MCDevInfo *mcdi = &mcman_devinfos[fh->port][fh->slot];
 	McCacheEntry *mce;
@@ -556,6 +556,8 @@ int mcman_write2(int fd, void *buffer, int nbyte)
 	wpos = 0;
 	if (nbyte) {
 		do {
+			register int r2, size, offset;
+
 			r = mcman_fatRseek(fd);
 			if (r == sceMcResFullDevice) {
 
@@ -586,7 +588,7 @@ int mcman_write2(int fd, void *buffer, int nbyte)
 			else
 				size = nbyte;
 
-			memcpy((void *)(mce->cl_data + offset), (void *)(buffer + wpos), size);
+			memcpy((void *)((u8 *)(mce->cl_data) + offset), (void *)((u8 *)buffer + wpos), size);
 
 			mce->wr_flag = 1;
 
@@ -1101,8 +1103,6 @@ lbl1:
 
 		if (r == sceMcResSucceed)
 			goto lbl1;
-
-		return r;
 	}
 	else {
 		len = strlen(currentdir);
@@ -1117,7 +1117,7 @@ lbl1:
 		r = sceMcResSucceed;
 	}
 
-	return sceMcResSucceed;
+	return r;
 }
 
 //--------------------------------------------------------------

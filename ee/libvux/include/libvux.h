@@ -121,11 +121,11 @@ extern void  VuInit(void);
 
 extern void  VuSetGeometryXYOffset(unsigned short x, unsigned short y);
 extern void  VuSetProjection(float z);
-extern void  VuSetProjectionMatrix(VU_MATRIX	*projection);
+extern void  VuSetProjectionMatrix(const VU_MATRIX	*projection);
 extern void  VuSetProjectionType(unsigned int type);
-extern void  VuSetWorldMatrix(VU_MATRIX			*world);
-extern void  VuSetViewMatrix(VU_MATRIX			*view);
-extern void  VuSetLocalScreenMatrix(VU_MATRIX	*m);
+extern void  VuSetWorldMatrix(const VU_MATRIX			*world);
+extern void  VuSetViewMatrix(const VU_MATRIX			*view);
+extern void  VuSetLocalScreenMatrix(const VU_MATRIX	*m);
 extern void  VuSetProjectionNearPlaneWH(unsigned int w, unsigned int h);
 extern void  VuSetAmbientLight(float r, float g, float b);
 

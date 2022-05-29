@@ -27,8 +27,8 @@ definitions for use inside the PS2 sbus project.
 #include <stdio.h>
 
 #ifdef _KMODE
-#define M_SuspendIntr(__stat_ptr) { }
-#define M_ResumeIntr(__stat) { }
+#define M_SuspendIntr(__stat_ptr) do { } while(0)
+#define M_ResumeIntr(__stat) do { } while(0)
 #else
 #define M_SuspendIntr(__stat_ptr) *(int *) (__stat_ptr) = DIntr(); *(int *) (__stat_ptr) |= ((((ee_kmode_enter() >> 3) & 3) != 0) << 1)
 #define M_ResumeIntr(__stat) { if(__stat & 2) { ee_kmode_exit(); } if(__stat & 1) { EIntr(); } }
@@ -38,7 +38,7 @@ definitions for use inside the PS2 sbus project.
 #define M_EnableIrq(__irq) EnableIntc(__irq)
 
 // TODO: FIX ME!!!
-#define M_ReleaseIrqHandler(__irq) if(0) { }
+#define M_ReleaseIrqHandler(__irq) do { } while(0)
 
 #define M_RegisterIrqHandler(__irq, __handler, __param) AddIntcHandler((__irq), (__handler), 0)
 

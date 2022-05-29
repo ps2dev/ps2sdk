@@ -266,14 +266,13 @@ int change_slot(s32 *arg)
 {
 	u32 loop = 0;
 	u32 count = 4;
-	u32 reg = 0;
 	s32 data[4];
 	u32 i, port;
 
 	while((loop < 10) && (count != 0))
 	{
+		u32 reg = 0;
 		count = 4;
-		reg = 0;
 
 		td.in_size = 0;
 		td.out_size = 0;
@@ -381,11 +380,14 @@ void update_slot_numbers()
 	SetEventFlag(event_flag, EF_UPDATE_SLOTS);
 }
 
-s32 _start(char **argv, int argc)
+int _start(int argc, char **argv)
 {
 	iop_event_t event;
 	iop_thread_t thread;
 	u32 i;
+
+	(void)argc;
+	(void)argv;
 
 	printf(BANNER,VERSION);
 
@@ -505,7 +507,7 @@ s32 mtapGetSlotNumber(u32 port)
 {
 	s32 res;
 
-	if(port > 4) return -1;
+	if(port >= 4) return -1;
 
 	if(state_open[port] == 0) return 1;
 
@@ -522,7 +524,7 @@ s32 mtapChangeSlot(u32 port, u32 slot)
 	s32 data[4];
 	u32 i;
 
-	if(port > 4) return 0;
+	if(port >= 4) return 0;
 
 	if(state_open[port] == 0)
 	{

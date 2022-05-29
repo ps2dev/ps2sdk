@@ -22,25 +22,43 @@
 int sif2_pipe_create(u32 id, void *buf, u32 size, u32 flags,
 		sif2_pipe_handler_t phandler)
 {
+	(void)id;
+	(void)buf;
+	(void)size;
+	(void)flags;
+	(void)phandler;
+
 	return 0;
 }
 
 int sif2_pipe_open(u32 id)
 {
+	(void)id;
+
 	return 0;
 }
 
 int sif2_pipe_close(int pd)
 {
+	(void)pd;
+
 	return 0;
 }
 
 int sif2_pipe_read(int pd, void *buf, u32 size)
 {
+	(void)pd;
+	(void)buf;
+	(void)size;
+
 	return 0;
 }
 
 int sif2_pipe_write(int pd, void *buf, u32 size)
 {
+	(void)pd;
+	(void)buf;
+	(void)size;
+
 	return 0;
 }

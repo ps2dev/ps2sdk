@@ -57,12 +57,14 @@ int usbdUnlock(void) {
 
 int doGetDeviceLocation(Device *dev, u8 *path) {
 	u8 tempPath[6];
-	int count, cpCount;
+	int count;
 	for (count = 0; (count < 6) && (dev != memPool.deviceTreeRoot); count++) {
 		tempPath[count] = dev->attachedToPortNo;
 		dev = dev->parent;
 	}
 	if (dev == memPool.deviceTreeRoot) {
+		int cpCount;
+
 		for (cpCount = 0; cpCount < 7; cpCount++) {
 			if (cpCount < count)
 				path[cpCount] = tempPath[count - (cpCount + 1)];

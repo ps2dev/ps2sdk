@@ -521,8 +521,8 @@ void vector_triangle_normal(VECTOR output, VECTOR a, VECTOR b, VECTOR c) {
   );
  }
 
- void calculate_lights(VECTOR *output, int count, VECTOR *normals, VECTOR *light_direction, VECTOR *light_colour, int *light_type, int light_count) {
-  int loop0, loop1; float intensity = 0.00f;
+ void calculate_lights(VECTOR *output, int count, VECTOR *normals, VECTOR *light_direction, VECTOR *light_colour, const int *light_type, int light_count) {
+  int loop0, loop1; float intensity;
 
   // Clear the output values.
   memset(output, 0, sizeof(VECTOR) * count);

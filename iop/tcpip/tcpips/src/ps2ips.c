@@ -56,6 +56,8 @@ static void do_accept( void * rpcBuffer, int size )
 	struct sockaddr addr;
 	int addrlen, ret;
 
+	(void)size;
+
 	ret = accept(pkt->socket, &addr, &addrlen);
 
 	pkt->socket = ret;
@@ -69,6 +71,8 @@ static void do_bind( void * rpcBuffer, int size )
 	cmd_pkt *pkt = (cmd_pkt *)rpcBuffer;
 	int ret;
 
+	(void)size;
+
 	ret = bind(pkt->socket, &pkt->sockaddr, pkt->len);
 
 	ptr[0] = ret;
@@ -78,6 +82,8 @@ static void do_disconnect( void * rpcBuffer, int size )
 {
 	int *ptr = rpcBuffer;
 	int ret;
+
+	(void)size;
 
 	ret = disconnect(ptr[0]);
 
@@ -90,6 +96,8 @@ static void do_connect( void * rpcBuffer, int size )
 	cmd_pkt *pkt = (cmd_pkt *)_rpc_buffer;
 	int ret;
 
+	(void)size;
+
 	ret = connect(pkt->socket, &pkt->sockaddr, pkt->len);
 
 	ptr[0] = ret;
@@ -99,6 +107,8 @@ static void do_listen( void * rpcBuffer, int size )
 {
 	int *ptr = rpcBuffer;
 	int ret;
+
+	(void)size;
 
 	ret = listen(ptr[0], ptr[1]);
 
@@ -116,6 +126,8 @@ static void do_recv( void * rpcBuffer, int size )
 	s_recv_pkt *recv_pkt = (s_recv_pkt *)rpcBuffer;
 	r_recv_pkt *ret_pkt = (r_recv_pkt *)rpcBuffer;
 	struct t_SifDmaTransfer sifdma;
+
+	(void)size;
 
 	if(recv_pkt->length <= 64)
 	{
@@ -211,6 +223,8 @@ static void do_recvfrom( void * rpcBuffer, int size )
 	static struct sockaddr sockaddr;
 	int fromlen;
 
+	(void)size;
+
 	if(recv_pkt->length <= 64)
 	{
 		srest = recv_pkt->length;
@@ -303,6 +317,8 @@ static void do_send( void * rpcBuffer, int size )
 	void *ee_pos;
 	SifRpcReceiveData_t rdata;
 
+	(void)size;
+
 	if(pkt->malign)
 	{
 //		printf("send: misaligned = %d\n", pkt->malign);
@@ -334,6 +350,8 @@ static void do_sendto( void * rpcBuffer, int size )
 	void *ee_pos;
 	SifRpcReceiveData_t rdata;
 
+	(void)size;
+
 	if(pkt->malign)
 	{
 //		printf("send: misaligned = %d\n", pkt->malign);
@@ -360,6 +378,8 @@ static void do_socket( void * rpcBuffer, int size )
 	int *ptr = rpcBuffer;
 	int ret;
 
+	(void)size;
+
 	ret = socket(ptr[0], ptr[1], ptr[2]);
 
 	ptr[0] = ret;
@@ -367,17 +387,24 @@ static void do_socket( void * rpcBuffer, int size )
 
 static void do_getconfig(void *rpcBuffer, int size)
 {
+	(void)size;
+
 	ps2ip_getconfig((char *)rpcBuffer, (t_ip_info *)rpcBuffer);
 }
 
 static void do_setconfig(void *rpcBuffer, int size)
 {
+	(void)size;
+
 	ps2ip_setconfig((t_ip_info *)rpcBuffer);
 }
 
 static void do_select( void * rpcBuffer, int size )
 {
 	select_pkt *pkt = (select_pkt*)_rpc_buffer;
+
+	(void)rpcBuffer;
+	(void)size;
 
 	pkt->result = select(	pkt->maxfdp1,
 				pkt->readset_p != NULL ? &pkt->readset : NULL,
@@ -390,6 +417,9 @@ static void do_ioctlsocket( void *rpcBuffer, int size )
 {
 	ioctl_pkt *pkt = (ioctl_pkt*)_rpc_buffer;
 
+	(void)rpcBuffer;
+	(void)size;
+
 	pkt->result = ioctlsocket(	pkt->s,
 					pkt->cmd,
 					pkt->argp != NULL ? &pkt->value : NULL );
@@ -400,6 +430,8 @@ static void do_getsockname( void *rpcBuffer, int size )
 	cmd_pkt *pkt = (cmd_pkt *)ptr;
 	struct sockaddr addr;
 	int addrlen, ret;
+
+	(void)size;
 
 	ret = getsockname(pkt->socket, &addr, &addrlen);
 
@@ -415,6 +447,8 @@ static void do_getpeername( void *rpcBuffer, int size )
 	struct sockaddr addr;
 	int addrlen, ret;
 
+	(void)size;
+
 	ret = getpeername(pkt->socket, &addr, &addrlen);
 
 	pkt->socket = ret;
@@ -426,6 +460,8 @@ static void do_getsockopt( void *rpcBuffer, int size )
 {
 	int ret, s, level, optname, optlen;
 	unsigned char optval[128];
+
+	(void)size;
 
 	s	= ((getsockopt_pkt*)rpcBuffer)->s;
 	level	= ((getsockopt_pkt*)rpcBuffer)->level;
@@ -448,6 +484,8 @@ static void do_setsockopt( void *rpcBuffer, int size )
 	int optlen;
 	unsigned char optval[128];
 
+	(void)size;
+
 	s	= ((setsockopt_pkt*)rpcBuffer)->s;
 	level	= ((setsockopt_pkt*)rpcBuffer)->level;
 	optname	= ((setsockopt_pkt*)rpcBuffer)->optname;
@@ -464,6 +502,8 @@ static void do_gethostbyname( void *rpcBuffer, int size )
 	struct hostent *ret;
 	gethostbyname_res_pkt *resPtr = rpcBuffer;
 
+	(void)size;
+
 	if((ret = gethostbyname((char*)_rpc_buffer)) != NULL)
 	{
 		resPtr->result = 0;
@@ -477,12 +517,18 @@ static void do_gethostbyname( void *rpcBuffer, int size )
 
 static void do_dns_setserver( void *rpcBuffer, int size )
 {
+	(void)rpcBuffer;
+	(void)size;
+
 	dns_setserver(((dns_setserver_pkt*)_rpc_buffer)->numdns, &((dns_setserver_pkt*)_rpc_buffer)->dnsserver);
 }
 
 static void do_dns_getserver( void *rpcBuffer, int size )
 {
 	const ip_addr_t *dns;
+
+	(void)size;
+
 	dns = dns_getserver(*(u8*)_rpc_buffer);
 	ip_addr_copy(((dns_getserver_res_pkt*)rpcBuffer)->dnsserver, *dns);
 }
@@ -567,6 +613,8 @@ static void * rpcHandlerFunction(unsigned int command, void * rpcBuffer, int siz
 
 static void threadRpcFunction(void *arg)
 {
+	(void)arg;
+
 	printf("PS2IPS: RPC Thread Started\n");
 
 	SifSetRpcQueue( &ps2ips_queue , GetThreadId() );
@@ -578,6 +626,9 @@ int _start( int argc, char *argv[])
 {
 	int		threadId;
 	iop_thread_t	t;
+
+	(void)argc;
+	(void)argv;
 
 	printf( "PS2IPS: Module Loaded.\n" );
 

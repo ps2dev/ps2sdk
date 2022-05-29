@@ -199,12 +199,15 @@ static void NETMAN_TxThread(void *arg)
 	static SifCmdHeader_t cmd ALIGNED(64);
 	SifDmaTransfer_t dmat[2];
 	struct NetManPktCmd *npcmd;
-	int dmat_id, length, unaligned, unalignedCache, NumTx;
+	int dmat_id, unaligned, unalignedCache;
 	void *payload, *payloadAligned, *payloadCacheAligned;
 	volatile struct NetManBD *bd, *bdNext;
 
+	(void)arg;
+
 	while(1)
 	{
+		int length, NumTx;
 		SleepThread();
 
 		NumTx = 0;

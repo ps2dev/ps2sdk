@@ -178,6 +178,9 @@ static void* RpcServer(int fno, void *buffer, int length)
 	u32 *data = (u32*)buffer;
 	u32 command = data[0];
 
+	(void)fno;
+	(void)length;
+
 	if ((0x00000100 & command) != 0)
 	{
 		if ((0x80000000 & command) != 0)
@@ -221,6 +224,9 @@ static void* RpcServer(int fno, void *buffer, int length)
 
 static void* RpcServerExt(int fno, void *buffer, int length)
 {
+	(void)fno;
+	(void)length;
+
 	M_PRINTF("Extend Service: This service is not supported.\n");
 
 	return buffer;
@@ -229,6 +235,8 @@ static void* RpcServerExt(int fno, void *buffer, int length)
 
 static void RpcThread(void *arg)
 {
+	(void)arg;
+
 	if( sceSifCheckInit() == 0)
 	{
 		M_PRINTF("Sif not initialized.\n");
@@ -244,6 +252,8 @@ static void RpcThread(void *arg)
 
 static void RpcThreadExt(void *arg)
 {
+	(void)arg;
+
 	if( sceSifCheckInit() == 0)
 	{
 		M_PRINTF("Sif not initialized.\n");

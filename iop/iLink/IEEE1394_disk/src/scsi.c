@@ -86,7 +86,9 @@ static int scsiRequestSense(struct SBP2Device* dev, void *buffer, int size)
     	ieee1394_SendCommandBlockORB(dev, &cdb);
 	ret=ieee1394_Sync();
 
-	if(ret!=0) XPRINTF("IEEE1394_disk: scsiRequestSense error: %d\n", ret);
+	if(ret!=0){
+		XPRINTF("IEEE1394_disk: scsiRequestSense error: %d\n", ret);
+	}
 
     return ret;
 }
@@ -95,7 +97,6 @@ static int scsiInquiry(struct SBP2Device* dev, void *buffer, int size)
 {
 	int ret;
 	struct CommandDescriptorBlock cdb;
-	unsigned int i;
 
 	XPRINTF("IEEE1394_disk: scsiInquiry. buffer: %p\n", buffer);
 
@@ -125,8 +126,12 @@ static int scsiInquiry(struct SBP2Device* dev, void *buffer, int size)
     	ieee1394_SendCommandBlockORB(dev, &cdb);
 	ret=ieee1394_Sync();
 
-	if(ret != 0) XPRINTF("IEEE1394_disk: scsiInquiry error %d\n", ret);
+	if(ret != 0){
+		XPRINTF("IEEE1394_disk: scsiInquiry error %d\n", ret);
+	}
 	else{
+		unsigned int i;
+
 		for(i=0; i<size/4; i++) ((unsigned int *)buffer)[i]=BSWAP32(((unsigned int *)buffer)[i]);
 	}
 
@@ -265,7 +270,7 @@ int scsiReadSector(struct SBP2Device *dev, unsigned long int lba, void *buffer, 
 
 			startingLBA+=sectorsToRead;
 			sectorsRemaining-=sectorsToRead;
-			bufferPtr+=dev->sectorSize * sectorsToRead;
+			bufferPtr = (void *)((u8 *)bufferPtr + (dev->sectorSize * sectorsToRead));
 		}
 
 		/* NULL terminate the last ORB. */
@@ -336,7 +341,7 @@ int scsiWriteSector(struct SBP2Device *dev, unsigned long int lba, void* buffer,
 
 			startingLBA+=sectorsToRead;
 			sectorsRemaining-=sectorsToRead;
-			bufferPtr+=dev->sectorSize * sectorsToRead;
+			bufferPtr=(void *)((u8 *)bufferPtr + (dev->sectorSize * sectorsToRead));
 		}
 
 		/* NULL terminate the last ORB. */
@@ -383,8 +388,9 @@ static inline int InitializeSCSIDevice(struct SBP2Device *dev) {
         XPRINTF("IEEE1394_disk: Error - scsiTestUnitReady %d\n", stat);
 
         stat = scsiRequestSense(dev, &sd, sizeof(sense_data));
-        if (stat != 0)
+        if (stat != 0) {
             XPRINTF("IEEE1394_disk: Error - scsiRequestSense %d\n", stat);
+        }
 
         if ((sd.error_code == 0x70) && (sd.sense_key != 0x00))
         {

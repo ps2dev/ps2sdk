@@ -453,7 +453,7 @@ qword_t *draw_fontstudio_char(qword_t *q, unsigned int c, vertex_t *v0, fsfont_t
 
 }
 
-qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *str, int alignment, vertex_t *v0, color_t *c0, fsfont_t *font)
+qword_t *fontstudio_print_string(qword_t *q, int context, const unsigned char *str, int alignment, const vertex_t *v0, color_t *c0, fsfont_t *font)
 {
 
 	int i = 0,j;
