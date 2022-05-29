@@ -209,7 +209,7 @@ static int fs_lseek(iop_file_t *fd, int offset, int whence)
     res = f_lseek(file, offset);
 
     _fs_unlock();
-    return res;
+    return file->fptr;
 }
 
 //---------------------------------------------------------------------------
@@ -426,7 +426,10 @@ int fs_ioctl(iop_file_t *fd, int cmd, void *data)
 
     switch (cmd) {
         case USBMASS_IOCTL_RENAME:
-            ret = -ENOENT; // TODO
+            // TODO
+            // f_rename() requires two string parameters (newpath, oldpath)
+            // figure out how to get the path from the current entry object
+            ret = -ENOENT;
             break;
         case USBMASS_IOCTL_GET_CLUSTER:
             ret = file->obj.sclust;
