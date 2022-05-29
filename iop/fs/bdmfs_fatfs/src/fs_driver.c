@@ -154,12 +154,9 @@ static int fs_open(iop_file_t *fd, const char *name, int flags, int mode)
 
     ret = f_open(fd->privdata, name, f_mode);
 
-    if (ret == FR_OK) {
-        ret = 1;
-    } else {
+    if (ret != FR_OK) {
         free(fd->privdata);
         fd->privdata = NULL;
-        ret = -ENOENT;
     }
 
     _fs_unlock();
@@ -184,7 +181,7 @@ static int fs_close(iop_file_t *fd)
     }
 
     _fs_unlock();
-    return 0;
+    return ret;
 }
 
 //---------------------------------------------------------------------------
@@ -214,7 +211,7 @@ static int fs_lseek(iop_file_t *fd, int offset, int whence)
     res = f_lseek(file, offset);
 
     _fs_unlock();
-    return (res == FR_OK) ? offset : -ENOENT;
+    return res;
 }
 
 //---------------------------------------------------------------------------
@@ -267,7 +264,7 @@ static int fs_remove(iop_file_t *fd, const char *name)
     ret = f_unlink(name);
 
     _fs_unlock();
-    return (ret == FR_OK) ? 0 : -ENOENT;
+    return ret;
 }
 
 //---------------------------------------------------------------------------
@@ -282,7 +279,7 @@ static int fs_mkdir(iop_file_t *fd, const char *name, int mode)
     ret = f_mkdir(name);
 
     _fs_unlock();
-    return (ret == FR_OK) ? 0 : -ENOENT;
+    return ret;
 }
 
 //---------------------------------------------------------------------------
@@ -300,12 +297,9 @@ static int fs_dopen(iop_file_t *fd, const char *name)
 
     ret = f_opendir(fd->privdata, name);
 
-    if (ret == FR_OK) {
-        ret = 1;
-    } else {
+    if (ret != FR_OK) {
         free(fd->privdata);
         fd->privdata = NULL;
-        ret = -ENOENT;
     }
 
     _fs_unlock();
@@ -328,7 +322,7 @@ static int fs_dclose(iop_file_t *fd)
     }
 
     _fs_unlock();
-    return 0;
+    return ret;
 }
 
 //--------------------------------------------------------------------------
@@ -387,8 +381,6 @@ static int fs_dread(iop_file_t *fd, iox_dirent_t *buffer)
     if (ret == FR_OK) {
         strncpy(buffer->name, fno.fname, 255);
         fileInfoToStat(&fno, &(buffer->stat));
-    } else {
-        ret = -ENOENT;
     }
 
     _fs_unlock();
@@ -412,8 +404,6 @@ static int fs_getstat(iop_file_t *fd, const char *name, iox_stat_t *stat)
 
     if (ret == FR_OK) {
         fileInfoToStat(&fno, stat);
-    } else {
-        ret = -ENOENT;
     }
 
     _fs_unlock();
@@ -471,7 +461,7 @@ int fs_rename(iop_file_t *fd, const char *path, const char *newpath)
     ret = f_rename(path, newpath);
 
     _fs_unlock();
-    return (ret == FR_OK) ? 0 : -ENOENT;
+    return ret;
 }
 
 static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
@@ -490,8 +480,8 @@ static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsig
         case USBMASS_DEVCTL_STOP_ALL:
             ret = mounted_bd->stop(mounted_bd);
             mounted_bd = NULL;
-            f_unmount("mass:");
-            ret = 0;
+            f_unmount("");
+            ret = FR_OK;
             break;
         default:
             ret = -ENXIO;
