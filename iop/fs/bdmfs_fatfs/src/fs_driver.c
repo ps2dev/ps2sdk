@@ -141,15 +141,15 @@ static int fs_open(iop_file_t *fd, const char *name, int flags, int mode)
     }
 
     // translate mode
-    if (mode & O_RDONLY)
+    if (flags & O_RDONLY)
         f_mode |= FA_READ;
-    if (mode & O_WRONLY)
+    if (flags & O_WRONLY)
         f_mode |= FA_WRITE;
-    if (mode & O_CREAT)
+    if (flags & O_CREAT)
         f_mode |= FA_CREATE_NEW;
-    if (mode & O_TRUNC)
+    if (flags & O_TRUNC)
         f_mode |= FA_CREATE_ALWAYS;
-    if (mode & O_APPEND)
+    if (flags & O_APPEND)
         f_mode |= FA_OPEN_APPEND;
 
     ret = f_open(fd->privdata, name, f_mode);
@@ -223,14 +223,14 @@ static int fs_write(iop_file_t *fd, void *buffer, int size)
     UINT bw;
 
     if (fd->privdata == NULL)
-        return 0;
+        return -ENOENT;
 
     _fs_lock();
 
     ret = f_write(fd->privdata, buffer, size, &bw);
 
     _fs_unlock();
-    return (ret == FR_OK) ? bw : -ENOENT;
+    return (ret == FR_OK) ? bw : 0;
 }
 
 //---------------------------------------------------------------------------
@@ -242,14 +242,14 @@ static int fs_read(iop_file_t *fd, void *buffer, int size)
     UINT br;
 
     if (fd->privdata == NULL)
-        return 0;
+        return -ENOENT;
 
     _fs_lock();
 
     ret = f_read(fd->privdata, buffer, size, &br);
 
     _fs_unlock();
-    return (ret == FR_OK) ? br : -ENOENT;
+    return (ret == FR_OK) ? br : 0;
 }
 
 //---------------------------------------------------------------------------
@@ -372,15 +372,19 @@ static int fs_dread(iop_file_t *fd, iox_dirent_t *buffer)
     FILINFO fno;
 
     if (fd->privdata == NULL)
-        return 0;
+        return -ENOENT;
 
     _fs_lock();
 
     ret = f_readdir(fd->privdata, &fno);
 
-    if (ret == FR_OK) {
+    if (ret == FR_OK && fno.fname[0]) {
         strncpy(buffer->name, fno.fname, 255);
         fileInfoToStat(&fno, &(buffer->stat));
+        ret = 1;
+    }
+    else{
+        ret = 0;
     }
 
     _fs_unlock();
@@ -437,7 +441,7 @@ int fs_ioctl(iop_file_t *fd, int cmd, void *data)
             ret = *(int *)(mounted_bd->name);
             break;
         case USBMASS_IOCTL_CHECK_CHAIN:
-            ret = (file->obj.stat != 2 && file->obj.n_frag > 0);
+            ret = (file->obj.n_frag < 2);
             break;
         default:
             break;
