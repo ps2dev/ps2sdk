@@ -158,7 +158,7 @@ static int fs_open(iop_file_t *fd, const char *name, int flags, int mode)
     }
 
     _fs_unlock();
-    return ret;
+    return -ret;
 }
 
 //---------------------------------------------------------------------------
@@ -179,7 +179,7 @@ static int fs_close(iop_file_t *fd)
     }
 
     _fs_unlock();
-    return ret;
+    return -ret;
 }
 
 //---------------------------------------------------------------------------
@@ -262,7 +262,7 @@ static int fs_remove(iop_file_t *fd, const char *name)
     ret = f_unlink(name);
 
     _fs_unlock();
-    return ret;
+    return -ret;
 }
 
 //---------------------------------------------------------------------------
@@ -277,7 +277,7 @@ static int fs_mkdir(iop_file_t *fd, const char *name, int mode)
     ret = f_mkdir(name);
 
     _fs_unlock();
-    return ret;
+    return -ret;
 }
 
 //---------------------------------------------------------------------------
@@ -301,7 +301,7 @@ static int fs_dopen(iop_file_t *fd, const char *name)
     }
 
     _fs_unlock();
-    return ret;
+    return -ret;
 }
 
 //---------------------------------------------------------------------------
@@ -320,7 +320,7 @@ static int fs_dclose(iop_file_t *fd)
     }
 
     _fs_unlock();
-    return ret;
+    return -ret;
 }
 
 //--------------------------------------------------------------------------
@@ -385,7 +385,7 @@ static int fs_dread(iop_file_t *fd, iox_dirent_t *buffer)
     }
 
     _fs_unlock();
-    return ret;
+    return -ret;
 }
 
 //---------------------------------------------------------------------------
@@ -408,7 +408,7 @@ static int fs_getstat(iop_file_t *fd, const char *name, iox_stat_t *stat)
     }
 
     _fs_unlock();
-    return ret;
+    return -ret;
 }
 
 //---------------------------------------------------------------------------
@@ -465,7 +465,7 @@ int fs_rename(iop_file_t *fd, const char *path, const char *newpath)
     ret = f_rename(path, newpath);
 
     _fs_unlock();
-    return ret;
+    return -ret;
 }
 
 static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
