@@ -201,19 +201,21 @@ static int fs_lseek(iop_file_t *fd, int offset, int whence)
 
     FIL *file = (FIL *)(fd->privdata);
 
+    FSIZE_t off = offset;
+
     switch (whence) {
         case SEEK_CUR:
-            offset += file->fptr;
+            off += file->fptr;
             break;
         case SEEK_END:
-            offset = file->obj.objsize - offset;
+            off = file->obj.objsize - offset;
             break;
     }
 
-    res = f_lseek(file, offset);
+    res = f_lseek(file, off);
 
     _fs_unlock();
-    return (res == FR_OK)? file->fptr : -res;
+    return (res == FR_OK)? offset : -res;
 }
 
 //---------------------------------------------------------------------------
