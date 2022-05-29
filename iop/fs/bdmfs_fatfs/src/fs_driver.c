@@ -155,10 +155,14 @@ static int fs_open(iop_file_t *fd, const char *name, int flags, int mode)
     if (ret != FR_OK) {
         free(fd->privdata);
         fd->privdata = NULL;
+        ret = -ret;
+    }
+    else{
+        ret = 1;
     }
 
     _fs_unlock();
-    return -ret;
+    return ret;
 }
 
 //---------------------------------------------------------------------------
@@ -209,7 +213,7 @@ static int fs_lseek(iop_file_t *fd, int offset, int whence)
     res = f_lseek(file, offset);
 
     _fs_unlock();
-    return file->fptr;
+    return (res == FR_OK)? file->fptr : -res;
 }
 
 //---------------------------------------------------------------------------
@@ -298,10 +302,11 @@ static int fs_dopen(iop_file_t *fd, const char *name)
     if (ret != FR_OK) {
         free(fd->privdata);
         fd->privdata = NULL;
+        ret = -ret;
     }
 
     _fs_unlock();
-    return -ret;
+    return ret;
 }
 
 //---------------------------------------------------------------------------
@@ -309,7 +314,7 @@ static int fs_dclose(iop_file_t *fd)
 {
     M_DEBUG("%s\n", __func__);
 
-    int ret;
+    int ret = ENOENT;
 
     _fs_lock();
 
@@ -385,7 +390,7 @@ static int fs_dread(iop_file_t *fd, iox_dirent_t *buffer)
     }
 
     _fs_unlock();
-    return -ret;
+    return ret;
 }
 
 //---------------------------------------------------------------------------
@@ -406,9 +411,12 @@ static int fs_getstat(iop_file_t *fd, const char *name, iox_stat_t *stat)
     if (ret == FR_OK) {
         fileInfoToStat(&fno, stat);
     }
+    else{
+        ret = -ret;
+    }
 
     _fs_unlock();
-    return -ret;
+    return ret;
 }
 
 //---------------------------------------------------------------------------
@@ -482,7 +490,7 @@ static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsig
     switch (cmd) {
         case USBMASS_DEVCTL_STOP_UNIT:
         case USBMASS_DEVCTL_STOP_ALL:
-            ret = mounted_bd->stop(mounted_bd);
+            mounted_bd->stop(mounted_bd);
             f_unmount("");
             mounted_bd = NULL;
             ret = FR_OK;
