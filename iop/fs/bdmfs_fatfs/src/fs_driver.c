@@ -144,7 +144,7 @@ static int fs_open(iop_file_t *fd, const char *name, int flags, int mode)
     if (flags & O_WRONLY)
         f_mode |= FA_WRITE;
     if (flags & O_CREAT)
-        f_mode |= FA_CREATE_NEW;
+        f_mode |= FA_OPEN_ALWAYS;
     if (flags & O_TRUNC)
         f_mode |= FA_CREATE_ALWAYS;
     if (flags & O_APPEND)
