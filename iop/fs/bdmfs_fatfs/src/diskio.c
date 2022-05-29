@@ -66,7 +66,7 @@ DRESULT disk_read(
 
     res = mounted_bd->read(mounted_bd, sector, buff, count);
 
-    return (res==count)? FR_OK : FR_DISK_ERR;
+    return (res == count) ? FR_OK : FR_DISK_ERR;
 }
 
 
@@ -88,7 +88,7 @@ DRESULT disk_write(
 
     res = mounted_bd->write(mounted_bd, sector, buff, count);
 
-    return (res==count)? FR_OK : FR_DISK_ERR;
+    return (res == count) ? FR_OK : FR_DISK_ERR;
 }
 
 #endif
@@ -106,22 +106,22 @@ DRESULT disk_ioctl(
 {
     DRESULT res;
 
-	res = FR_OK;
+    res = FR_OK;
 
-	switch (cmd){
-		case CTRL_SYNC:
-			mounted_bd->flush(mounted_bd);
-			break;
-		case GET_SECTOR_COUNT:
-			*(unsigned int*)buff = mounted_bd->sectorCount;
-			break;
-		case GET_SECTOR_SIZE:
-			*(unsigned int*)buff = mounted_bd->sectorSize;
-			break;
-		case GET_BLOCK_SIZE:
-			*(unsigned int*)buff = 0;
-			break;
-	}
+    switch (cmd) {
+        case CTRL_SYNC:
+            mounted_bd->flush(mounted_bd);
+            break;
+        case GET_SECTOR_COUNT:
+            *(unsigned int *)buff = mounted_bd->sectorCount;
+            break;
+        case GET_SECTOR_SIZE:
+            *(unsigned int *)buff = mounted_bd->sectorSize;
+            break;
+        case GET_BLOCK_SIZE:
+            *(unsigned int *)buff = 0;
+            break;
+    }
 
     return res;
 }

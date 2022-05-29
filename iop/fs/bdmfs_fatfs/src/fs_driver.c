@@ -37,12 +37,10 @@ int connect_bd(struct block_device *bd)
     mounted_bd = bd;
     if (f_mount(&fatfs, "", 0) == FR_OK) {
         return 0;
-    }
-    else {
+    } else {
         mounted_bd = NULL;
         return -1;
     }
-
 }
 
 void disconnect_bd(struct block_device *bd)
@@ -382,8 +380,7 @@ static int fs_dread(iop_file_t *fd, iox_dirent_t *buffer)
         strncpy(buffer->name, fno.fname, 255);
         fileInfoToStat(&fno, &(buffer->stat));
         ret = 1;
-    }
-    else{
+    } else {
         ret = 0;
     }
 
