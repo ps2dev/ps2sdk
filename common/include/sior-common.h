@@ -18,7 +18,7 @@
 
 #include <tamtypes.h>
 
-#define	SIOR_IRX              0xC001510
+#define SIOR_IRX 0xC001510
 
 enum {
     SIOR_INIT = 1,
@@ -33,7 +33,8 @@ enum {
     SIOR_FLUSH
 };
 
-struct siorInitArgs {
+struct siorInitArgs
+{
     u32 baudrate;
     u8 lcr_ueps;
     u8 lcr_upen;
@@ -41,25 +42,28 @@ struct siorInitArgs {
     u8 lcr_umode;
 };
 
-struct siorReadArgs {
-	char *buf;
-	s32 len;
+struct siorReadArgs
+{
+    char *buf;
+    s32 len;
 };
 
-struct siorWriteArgs {
-	const char *buf;
-	s32 len;
+struct siorWriteArgs
+{
+    const char *buf;
+    s32 len;
 };
 
-union siorCommsData {
-	u8 data[64];
-	int result;
-	struct siorInitArgs init;
-	struct siorReadArgs read;
-	struct siorWriteArgs write;
-	const char *cstr;
-	char *str;
-	int c;
+union siorCommsData
+{
+    u8 data[64];
+    int result;
+    struct siorInitArgs init;
+    struct siorReadArgs read;
+    struct siorWriteArgs write;
+    const char *cstr;
+    char *str;
+    int c;
 };
 
 #endif /* __SIOR_COMMON_H__ */

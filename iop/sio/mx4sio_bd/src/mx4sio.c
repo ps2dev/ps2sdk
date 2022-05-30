@@ -13,7 +13,7 @@
 #include "sio2regs.h"
 #include "spi_sdcard_driver.h"
 
-//#define DEBUG  //comment out this line when not debugging
+// #define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
 
 IRX_ID("mx4sio", 1, 1);
@@ -24,20 +24,20 @@ IRX_ID("mx4sio", 1, 1);
 #define CONFIG_USE_CRC16 // A little slower ~ 1700 KB/s -> 1400 KB/s
 
 // 3 is the second memory card slot
-#define PORT_NR 3
+#define PORT_NR                3
 #define MAX_SIO2_TRANSFER_SIZE 256 // 0x100
-#define SECTOR_SIZE 512
-#define MAX_SECTORS 64
-#define MAX_RETRIES 4
+#define SECTOR_SIZE            512
+#define MAX_SECTORS            64
+#define MAX_RETRIES            4
 
 /* Event flags */
-#define EF_SIO2_INTR_REVERSE	0x00000100
-#define EF_SIO2_INTR_COMPLETE	0x00000200
+#define EF_SIO2_INTR_REVERSE  0x00000100
+#define EF_SIO2_INTR_COMPLETE 0x00000200
 
-static int event_flag = -1;
+static int event_flag          = -1;
 static int sd_detect_thread_id = -1;
 static u32 sio2man_save_crtl;
-static int card_used = 0;
+static int card_used     = 0;
 static int card_inserted = 0;
 // Fast SPI clock
 static int fastDiv = 0;
@@ -46,8 +46,9 @@ static int spi_ss = 0;
 // SIO tranfer data, only 1 transfer at a time possible
 static sio2_transfer_data_t global_td;
 
-struct dma_command {
-    uint8_t* buffer;
+struct dma_command
+{
+    uint8_t *buffer;
     u16 sector_count;
     volatile u16 sectors_transferred; // written by isr, read by thread
     u16 sectors_reversed;
@@ -61,13 +62,13 @@ struct dma_command {
 struct dma_command cmd;
 
 static uint8_t wait_equal(uint8_t value, int count, int portNr);
-static void sendCmd_Rx_DMA_start(uint8_t* rdBufA, int portNr);
+static void sendCmd_Rx_DMA_start(uint8_t *rdBufA, int portNr);
 static inline u8 reverseByte_LUT8(u8 n);
-static inline void reverseBuffer32(u32* buffer, u32 count);
+static inline void reverseBuffer32(u32 *buffer, u32 count);
 
-int sio2_intr_handler(void* arg)
+int sio2_intr_handler(void *arg)
 {
-    int ef = *(int *)arg;
+    int ef     = *(int *)arg;
     int eflags = EF_SIO2_INTR_REVERSE;
 
     // Clear interrupt?
@@ -77,9 +78,9 @@ int sio2_intr_handler(void* arg)
     while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
         ;
 
-    // Finish sector read, read 2 crc bytes
+        // Finish sector read, read 2 crc bytes
 #ifdef CONFIG_USE_CRC16
-    cmd.crc[cmd.sectors_transferred]  = reverseByte_LUT8(inl_sio2_data_in()) << 8;
+    cmd.crc[cmd.sectors_transferred] = reverseByte_LUT8(inl_sio2_data_in()) << 8;
     cmd.crc[cmd.sectors_transferred] |= reverseByte_LUT8(inl_sio2_data_in());
 #else
     inl_sio2_data_in();
@@ -136,8 +137,7 @@ static unsigned char reverseByte_LUT8_table[256] = {
     0x07, 0x87, 0x47, 0xc7, 0x27, 0xa7, 0x67, 0xe7,
     0x17, 0x97, 0x57, 0xd7, 0x37, 0xb7, 0x77, 0xf7,
     0x0f, 0x8f, 0x4f, 0xcf, 0x2f, 0xaf, 0x6f, 0xef,
-    0x1f, 0x9f, 0x5f, 0xdf, 0x3f, 0xbf, 0x7f, 0xff
-};
+    0x1f, 0x9f, 0x5f, 0xdf, 0x3f, 0xbf, 0x7f, 0xff};
 
 static inline u8 reverseByte_LUT8(u8 n)
 {
@@ -161,35 +161,35 @@ static inline u32 reverseByteInWord(u32 n)
  * This extra function makes sure gcc 3.2.3 generates an efficient function
  * Inner loop with 19 instructions:
         $L38:
-            and	$2,$2,$10
-            sll	$3,$3,4
-            srl	$2,$2,4
-            or	$2,$2,$3
-            and	$4,$2,$7
-            and	$2,$2,$9
-            srl	$2,$2,2
-            sll	$4,$4,2
-            or	$2,$2,$4
-            and	$3,$2,$12
-            and	$2,$2,$5
-            srl	$2,$2,1
-            sll	$3,$3,1
-            or	$2,$2,$3
-            sw	$2,0($8)
-            addu	$8,$8,4
-            lw	$2,0($8)
-            bne	$8,$11,$L38
-            and	$3,$2,$6
+            and    $2,$2,$10
+            sll    $3,$3,4
+            srl    $2,$2,4
+            or     $2,$2,$3
+            and    $4,$2,$7
+            and    $2,$2,$9
+            srl    $2,$2,2
+            sll    $4,$4,2
+            or     $2,$2,$4
+            and    $3,$2,$12
+            and    $2,$2,$5
+            srl    $2,$2,1
+            sll    $3,$3,1
+            or     $2,$2,$3
+            sw     $2,0($8)
+            addu   $8,$8,4
+            lw     $2,0($8)
+            bne    $8,$11,$L38
+            and    $3,$2,$6
 */
-static void reverseBuffer32_mask(u32* buffer, u32 count, u32 maskF, u32 mask3, u32 mask5)
+static void reverseBuffer32_mask(u32 *buffer, u32 count, u32 maskF, u32 mask3, u32 mask5)
 {
-    u32 n = *buffer;
-    u32* end = buffer + count;
+    u32 n    = *buffer;
+    u32 *end = buffer + count;
 
     while (buffer != end) {
-        n = ((n & (maskF <<4)) >>4) | ((n & maskF) <<4);
-        n = ((n & (mask3 <<2)) >>2) | ((n & mask3) <<2);
-        n = ((n & (mask5 <<1)) >>1) | ((n & mask5) <<1);
+        n = ((n & (maskF << 4)) >> 4) | ((n & maskF) << 4);
+        n = ((n & (mask3 << 2)) >> 2) | ((n & mask3) << 2);
+        n = ((n & (mask5 << 1)) >> 1) | ((n & mask5) << 1);
 
         *buffer = n;
         buffer++;
@@ -199,16 +199,16 @@ static void reverseBuffer32_mask(u32* buffer, u32 count, u32 maskF, u32 mask3, u
 
 //  7037KB/s (FAT  PS2, GCC 3.2.3, -O3)
 // 12052KB/s (slim PS2, GCC 3.2.3, -O3)
-static inline void reverseBuffer32(u32* buffer, u32 count)
+static inline void reverseBuffer32(u32 *buffer, u32 count)
 {
     reverseBuffer32_mask(buffer, count, 0x0F0F0F0F, 0x33333333, 0x55555555);
 }
 
 // 4194KB/s (FAT  PS2, GCC 3.2.3, -O3)
 // 3771KB/s (slim PS2, GCC 3.2.3, -O3)
-static inline void reverseBuffer8x1_LUT(u8* buffer, u32 count)
+static inline void reverseBuffer8x1_LUT(u8 *buffer, u32 count)
 {
-    u8* end = buffer + count;
+    u8 *end = buffer + count;
 
     while (buffer != end) {
         *buffer = reverseByte_LUT8(*buffer);
@@ -216,7 +216,7 @@ static inline void reverseBuffer8x1_LUT(u8* buffer, u32 count)
     }
 }
 
-static void _init_td(sio2_transfer_data_t* td, int portNr)
+static void _init_td(sio2_transfer_data_t *td, int portNr)
 {
     static const uint8_t TxByte = 0xff;
     static uint8_t RxByte;
@@ -235,7 +235,7 @@ static void _init_td(sio2_transfer_data_t* td, int portNr)
      */
     const int slowDivVal   = 0x78;
     const int fastDivVal   = 2;
-    const int interBytePer = 0; //2;
+    const int interBytePer = 0; // 2;
 
     for (i = 0; i < 4; i++) {
         td->port_ctrl1[i] = 0;
@@ -272,7 +272,7 @@ static void _init_td(sio2_transfer_data_t* td, int portNr)
 
     // Tx 1 byte PIO
     td->in_size      = 1;
-    td->in           = (void*)&TxByte;
+    td->in           = (void *)&TxByte;
     td->in_dma.addr  = NULL;
     td->in_dma.size  = 0;
     td->in_dma.count = 0;
@@ -285,7 +285,7 @@ static void _init_td(sio2_transfer_data_t* td, int portNr)
     td->out_dma.count = 0;
 }
 
-static void _init_ports(sio2_transfer_data_t* td)
+static void _init_ports(sio2_transfer_data_t *td)
 {
     int i;
 
@@ -300,16 +300,16 @@ static uint8_t sendCmd_Tx1_Rx1(uint8_t data, int portNr)
     inl_sio2_ctrl_set(0x0bc); // no interrupt
 
     inl_sio2_regN_set(0,
-        TR_CTRL_PORT_NR(portNr) |
-        TR_CTRL_PAUSE(0) |
-        TR_CTRL_TX_MODE_PIO_DMA(0) |
-        TR_CTRL_RX_MODE_PIO_DMA(0) |
-        TR_CTRL_NORMAL_TR(1) |
-        TR_CTRL_SPECIAL_TR(0) |
-        TR_CTRL_BAUD_DIV(fastDiv) |
-        TR_CTRL_WAIT_ACK_FOREVER(0) |
-        TR_CTRL_TX_DATA_SZ(1) |
-        TR_CTRL_RX_DATA_SZ(1));
+                      TR_CTRL_PORT_NR(portNr) |
+                          TR_CTRL_PAUSE(0) |
+                          TR_CTRL_TX_MODE_PIO_DMA(0) |
+                          TR_CTRL_RX_MODE_PIO_DMA(0) |
+                          TR_CTRL_NORMAL_TR(1) |
+                          TR_CTRL_SPECIAL_TR(0) |
+                          TR_CTRL_BAUD_DIV(fastDiv) |
+                          TR_CTRL_WAIT_ACK_FOREVER(0) |
+                          TR_CTRL_TX_DATA_SZ(1) |
+                          TR_CTRL_RX_DATA_SZ(1));
     inl_sio2_regN_set(1, 0);
 
     // Put byte in queue
@@ -326,21 +326,21 @@ static uint8_t sendCmd_Tx1_Rx1(uint8_t data, int portNr)
     return reverseByte_LUT8(inl_sio2_data_in());
 }
 
-static void sendCmd_Tx_PIO(const uint8_t* wrBufA, int sndSz, int portNr)
+static void sendCmd_Tx_PIO(const uint8_t *wrBufA, int sndSz, int portNr)
 {
     inl_sio2_ctrl_set(0x0bc); // no interrupt
 
     inl_sio2_regN_set(0,
-        TR_CTRL_PORT_NR(portNr) |
-        TR_CTRL_PAUSE(0) |
-        TR_CTRL_TX_MODE_PIO_DMA(0) |
-        TR_CTRL_RX_MODE_PIO_DMA(0) |
-        TR_CTRL_NORMAL_TR(1) |
-        TR_CTRL_SPECIAL_TR(0) |
-        TR_CTRL_BAUD_DIV(fastDiv) |
-        TR_CTRL_WAIT_ACK_FOREVER(0) |
-        TR_CTRL_TX_DATA_SZ(sndSz) |
-        TR_CTRL_RX_DATA_SZ(0));
+                      TR_CTRL_PORT_NR(portNr) |
+                          TR_CTRL_PAUSE(0) |
+                          TR_CTRL_TX_MODE_PIO_DMA(0) |
+                          TR_CTRL_RX_MODE_PIO_DMA(0) |
+                          TR_CTRL_NORMAL_TR(1) |
+                          TR_CTRL_SPECIAL_TR(0) |
+                          TR_CTRL_BAUD_DIV(fastDiv) |
+                          TR_CTRL_WAIT_ACK_FOREVER(0) |
+                          TR_CTRL_TX_DATA_SZ(sndSz) |
+                          TR_CTRL_RX_DATA_SZ(0));
     inl_sio2_regN_set(1, 0);
 
     // PIO: IOP -> SIO2
@@ -356,21 +356,21 @@ static void sendCmd_Tx_PIO(const uint8_t* wrBufA, int sndSz, int portNr)
         ;
 }
 
-static void sendCmd_Rx_PIO(uint8_t* rdBufA, int rcvSz, int portNr)
+static void sendCmd_Rx_PIO(uint8_t *rdBufA, int rcvSz, int portNr)
 {
     inl_sio2_ctrl_set(0x0bc); // no interrupt
 
     inl_sio2_regN_set(0,
-        TR_CTRL_PORT_NR(portNr) |
-        TR_CTRL_PAUSE(0) |
-        TR_CTRL_TX_MODE_PIO_DMA(0) |
-        TR_CTRL_RX_MODE_PIO_DMA(0) |
-        TR_CTRL_NORMAL_TR(1) |
-        TR_CTRL_SPECIAL_TR(0) |
-        TR_CTRL_BAUD_DIV(fastDiv) |
-        TR_CTRL_WAIT_ACK_FOREVER(0) |
-        TR_CTRL_TX_DATA_SZ(0) |
-        TR_CTRL_RX_DATA_SZ(rcvSz));
+                      TR_CTRL_PORT_NR(portNr) |
+                          TR_CTRL_PAUSE(0) |
+                          TR_CTRL_TX_MODE_PIO_DMA(0) |
+                          TR_CTRL_RX_MODE_PIO_DMA(0) |
+                          TR_CTRL_NORMAL_TR(1) |
+                          TR_CTRL_SPECIAL_TR(0) |
+                          TR_CTRL_BAUD_DIV(fastDiv) |
+                          TR_CTRL_WAIT_ACK_FOREVER(0) |
+                          TR_CTRL_TX_DATA_SZ(0) |
+                          TR_CTRL_RX_DATA_SZ(rcvSz));
     inl_sio2_regN_set(1, 0);
 
     // Start queue exec
@@ -400,7 +400,7 @@ static uint8_t wait_equal(uint8_t value, int count, int portNr)
     return (response != value) ? SPISD_RESULT_ERROR : SPISD_RESULT_OK;
 }
 
-static void sendCmd_Rx_DMA_start(uint8_t* rdBufA, int portNr)
+static void sendCmd_Rx_DMA_start(uint8_t *rdBufA, int portNr)
 {
     const uint32_t trSettingsDMA =
         TR_CTRL_PAUSE(0) |
@@ -442,7 +442,7 @@ static void sio2_lock()
 {
     int state;
 
-    //M_DEBUG("%s()\n", __FUNCTION__);
+    // M_DEBUG("%s()\n", __FUNCTION__);
 
     // Lock sio2man driver so we can use it exclusively
     sio2man_hook_sio2_lock();
@@ -476,7 +476,7 @@ static void sio2_unlock()
     // Unlock sio2man driver
     sio2man_hook_sio2_unlock();
 
-    //M_DEBUG("%s()\n", __FUNCTION__);
+    // M_DEBUG("%s()\n", __FUNCTION__);
 }
 
 /*
@@ -487,7 +487,7 @@ static void ps2_spi_set_speed(uint32_t freq)
 {
     int newFastDiv = freq > 400000;
 
-    //M_DEBUG("%s(%d)\n", __FUNCTION__, (int)freq);
+    // M_DEBUG("%s(%d)\n", __FUNCTION__, (int)freq);
 
     if (fastDiv != newFastDiv) {
         M_DEBUG("%s(%d)\n", __FUNCTION__, (int)freq);
@@ -500,19 +500,19 @@ static void ps2_spi_set_speed(uint32_t freq)
 
 static void ps2_spi_select(void)
 {
-    //M_DEBUG("%s()\n", __FUNCTION__);
+    // M_DEBUG("%s()\n", __FUNCTION__);
     spi_ss = 1;
 }
 
 static void ps2_spi_relese(void)
 {
-    //M_DEBUG("%s()\n", __FUNCTION__);
+    // M_DEBUG("%s()\n", __FUNCTION__);
     spi_ss = 0;
 }
 
 static bool ps2_spi_is_present(void)
 {
-    //M_DEBUG("%s()\n", __FUNCTION__);
+    // M_DEBUG("%s()\n", __FUNCTION__);
     return true;
 }
 
@@ -520,15 +520,15 @@ static uint8_t ps2_spi_wr_rd_byte(uint8_t byte)
 {
     if (spi_ss == 0) {
         // We're ignoring a lot of dummy read/writes, this is not an error
-        //M_DEBUG("%s(%d) - ignoring, not selected\n", __FUNCTION__, byte);
+        // M_DEBUG("%s(%d) - ignoring, not selected\n", __FUNCTION__, byte);
         return 0;
     }
 
-    //M_DEBUG("%s(%d)\n", __FUNCTION__, byte);
+    // M_DEBUG("%s(%d)\n", __FUNCTION__, byte);
     return sendCmd_Tx1_Rx1(byte, PORT_NR);
 }
 
-static void ps2_spi_write(uint8_t const* buffer, uint32_t size)
+static void ps2_spi_write(uint8_t const *buffer, uint32_t size)
 {
     uint32_t ts;
 
@@ -537,7 +537,7 @@ static void ps2_spi_write(uint8_t const* buffer, uint32_t size)
         return;
     }
 
-    //M_DEBUG("%s(..., %d)\n", __FUNCTION__, (int)size);
+    // M_DEBUG("%s(..., %d)\n", __FUNCTION__, (int)size);
     while (size > 0) {
         ts = size > MAX_SIO2_TRANSFER_SIZE ? MAX_SIO2_TRANSFER_SIZE : size;
         sendCmd_Tx_PIO(buffer, ts, PORT_NR);
@@ -546,7 +546,7 @@ static void ps2_spi_write(uint8_t const* buffer, uint32_t size)
     }
 }
 
-static void ps2_spi_read(uint8_t* buffer, uint32_t size)
+static void ps2_spi_read(uint8_t *buffer, uint32_t size)
 {
     uint32_t ts;
 
@@ -555,10 +555,10 @@ static void ps2_spi_read(uint8_t* buffer, uint32_t size)
         return;
     }
 
-    //M_DEBUG("%s(..., %d)\n", __FUNCTION__, (int)size);
+    // M_DEBUG("%s(..., %d)\n", __FUNCTION__, (int)size);
     while (size > 0) {
         ts = size > MAX_SIO2_TRANSFER_SIZE ? MAX_SIO2_TRANSFER_SIZE : size;
-        sendCmd_Rx_PIO((uint8_t*)buffer, ts, PORT_NR);
+        sendCmd_Rx_PIO((uint8_t *)buffer, ts, PORT_NR);
         buffer += ts;
         size -= ts;
     }
@@ -571,8 +571,7 @@ static spisd_interface_t spi = {
     ps2_spi_is_present,
     ps2_spi_wr_rd_byte,
     ps2_spi_write,
-    ps2_spi_read
-};
+    ps2_spi_read};
 
 static int spisd_init_recovery()
 {
@@ -582,12 +581,12 @@ static int spisd_init_recovery()
 
     // Flush 256B
     for (i = 0; i < 64; i++)
-        sendCmd_Rx_PIO((void*)&rv, 4, PORT_NR);
+        sendCmd_Rx_PIO((void *)&rv, 4, PORT_NR);
 
     return spisd_init(&spi);
 }
 
-static int _msread_start(struct block_device* bd, u32 sector)
+static int _msread_start(struct block_device *bd, u32 sector)
 {
     int rv, i;
 
@@ -616,14 +615,14 @@ static int _msread_start(struct block_device* bd, u32 sector)
         }
         break;
 
-recovery:
+    recovery:
         spisd_init_recovery();
     }
 
     return rv;
 }
 
-static int _msread_do(struct block_device* bd, void* buffer, u16 count)
+static int _msread_do(struct block_device *bd, void *buffer, u16 count)
 {
     (void)bd;
 
@@ -648,7 +647,7 @@ static int _msread_do(struct block_device* bd, void* buffer, u16 count)
         if (resbits & EF_SIO2_INTR_REVERSE) {
             ClearEventFlag(event_flag, ~EF_SIO2_INTR_REVERSE);
             while (cmd.sectors_reversed < cmd.sectors_transferred && cmd.abort == 0) {
-                void *buf = (u32*)&cmd.buffer[cmd.sectors_reversed * SECTOR_SIZE];
+                void *buf = (u32 *)&cmd.buffer[cmd.sectors_reversed * SECTOR_SIZE];
                 reverseBuffer32(buf, SECTOR_SIZE / 4);
 #ifdef CONFIG_USE_CRC16
                 u16 crc_a = crc16(buf, SECTOR_SIZE);
@@ -679,12 +678,12 @@ static int _msread_do(struct block_device* bd, void* buffer, u16 count)
  * BDM interface:
  * - BDM -> "spi_sdcard" library
  */
-static int spi_sdcard_read(struct block_device* bd, u32 sector, void* buffer, u16 count)
+static int spi_sdcard_read(struct block_device *bd, u32 sector, void *buffer, u16 count)
 {
     int count_left = count;
     int retry_count;
 
-    //M_DEBUG("%s(%d,%d)\n", __FUNCTION__, (int)sector, (int)count);
+    // M_DEBUG("%s(%d,%d)\n", __FUNCTION__, (int)sector, (int)count);
 
     if (count == 0)
         return 0;
@@ -700,10 +699,10 @@ static int spi_sdcard_read(struct block_device* bd, u32 sector, void* buffer, u1
             break;
         }
 
-        while(count_left > 0) {
+        while (count_left > 0) {
             // Read sectors
             int count_do = (count_left < MAX_SECTORS) ? count_left : MAX_SECTORS;
-            rv = _msread_do(bd, buffer, count_do);
+            rv           = _msread_do(bd, buffer, count_do);
 
             // Update statistics
             count_left -= rv;
@@ -724,7 +723,6 @@ static int spi_sdcard_read(struct block_device* bd, u32 sector, void* buffer, u1
                     break;
                 }
             }
-
         }
 
         rv = spisd_read_multi_block_end();
@@ -746,13 +744,13 @@ static int spi_sdcard_read(struct block_device* bd, u32 sector, void* buffer, u1
     return count - count_left;
 }
 
-static int spi_sdcard_write(struct block_device* bd, u32 sector, const void* buffer, u16 count)
+static int spi_sdcard_write(struct block_device *bd, u32 sector, const void *buffer, u16 count)
 {
     int rv;
 
     (void)bd;
 
-    //M_DEBUG("%s(%d,%d)\n", __FUNCTION__, (int)sector, (int)count);
+    // M_DEBUG("%s(%d,%d)\n", __FUNCTION__, (int)sector, (int)count);
 
     if (count == 0)
         return 0;
@@ -774,20 +772,20 @@ static int spi_sdcard_write(struct block_device* bd, u32 sector, const void* buf
     return count;
 }
 
-static void spi_sdcard_flush(struct block_device* bd)
+static void spi_sdcard_flush(struct block_device *bd)
 {
     (void)bd;
 
-    //M_DEBUG("%s\n", __FUNCTION__);
+    // M_DEBUG("%s\n", __FUNCTION__);
 
     return;
 }
 
-static int spi_sdcard_stop(struct block_device* bd)
+static int spi_sdcard_stop(struct block_device *bd)
 {
     (void)bd;
 
-    //M_DEBUG("%s\n", __FUNCTION__);
+    // M_DEBUG("%s\n", __FUNCTION__);
 
     return 0;
 }
@@ -805,15 +803,14 @@ static struct block_device bd = {
     spi_sdcard_read,
     spi_sdcard_write,
     spi_sdcard_flush,
-    spi_sdcard_stop
-};
+    spi_sdcard_stop};
 
 static void sd_detect()
 {
     spisd_info_t cardinfo;
     int rv = SPISD_RESULT_ERROR;
 
-    //M_DEBUG("%s\n", __FUNCTION__);
+    // M_DEBUG("%s\n", __FUNCTION__);
 
     // Detect card
     sio2_lock();
@@ -844,9 +841,9 @@ static void sd_detect()
             return;
         }
 
-        struct t_csdVer1* csdv1 = (struct t_csdVer1*)cardinfo.csd;
-        struct t_csdVer2* csdv2 = (struct t_csdVer2*)cardinfo.csd;
-        if (csdv1->csd_structure == 0) { //ver 1
+        struct t_csdVer1 *csdv1 = (struct t_csdVer1 *)cardinfo.csd;
+        struct t_csdVer2 *csdv2 = (struct t_csdVer2 *)cardinfo.csd;
+        if (csdv1->csd_structure == 0) { // ver 1
             unsigned int c_size_mult = (csdv1->c_size_multHi << 1) | csdv1->c_size_multLo;
             unsigned int c_size      = (csdv1->c_sizeHi << 10) | (csdv1->c_sizeMd << 2) | csdv1->c_sizeLo;
             unsigned int blockNr     = (c_size + 1) << (c_size_mult + 2);
@@ -854,7 +851,7 @@ static void sd_detect()
             unsigned int capacity    = blockNr * blockLen;
 
             bd.sectorCount = capacity / 512;
-        } else if (csdv1->csd_structure == 1) { //ver 2
+        } else if (csdv1->csd_structure == 1) { // ver 2
             unsigned int c_size = (csdv2->c_sizeHi << 16) | (csdv2->c_sizeMd << 8) | csdv2->c_sizeLo;
 
             bd.sectorCount = (c_size + 1) * 1024;
@@ -874,7 +871,7 @@ static void sd_detect()
 }
 
 // SD card detection thread
-static void sd_detect_thread(void* arg)
+static void sd_detect_thread(void *arg)
 {
     (void)arg;
 
@@ -896,9 +893,9 @@ static void sd_detect_thread(void* arg)
 /*
  * Module start/stop
  */
-int module_start(int argc, char* argv[])
+int module_start(int argc, char *argv[])
 {
-    iop_library_t* lib_modload;
+    iop_library_t *lib_modload;
     iop_event_t event;
     iop_thread_t thread;
     int rv;
@@ -944,7 +941,7 @@ int module_start(int argc, char* argv[])
      * - followed by an infinite amount of 0xff
      */
     sio2_lock();
-    sendCmd_Rx_PIO((void*)&rv, 4, PORT_NR);
+    sendCmd_Rx_PIO((void *)&rv, 4, PORT_NR);
     sio2_unlock();
 
     // Creat SD card detection thread
@@ -991,7 +988,7 @@ error1:
     return MODULE_NO_RESIDENT_END;
 }
 
-int module_stop(int argc, char* argv[])
+int module_stop(int argc, char *argv[])
 {
 #ifndef MINI_DRIVER
     int i;
@@ -1011,7 +1008,7 @@ int module_stop(int argc, char* argv[])
     return MODULE_NO_RESIDENT_END;
 }
 
-int _start(int argc, char* argv[])
+int _start(int argc, char *argv[])
 {
     M_PRINTF(WELCOME_STR);
 

@@ -6,31 +6,31 @@
 #include "sio2man.h"
 #include "sio2man_hook.h"
 
-//#define DEBUG  //comment out this line when not debugging
+// #define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
 
 #define PORT_NR 3
 
-static int lock_sema = -1;
-static int lock_sema2 = -1;
+static int lock_sema      = -1;
+static int lock_sema2     = -1;
 static u16 hooked_version = 0;
 
 
 // sio2man function typedefs
 typedef void (*psio2_transfer_init)(void);
-typedef int  (*psio2_transfer)(sio2_transfer_data_t *td);
+typedef int (*psio2_transfer)(sio2_transfer_data_t *td);
 typedef void (*psio2_transfer_reset)(void);
 
 // Original sio2man function pointers
-psio2_transfer_init  _23_psio2_pad_transfer_init;
-psio2_transfer_init  _24_psio2_mc_transfer_init;
-psio2_transfer_init  _46_psio2_pad_transfer_init;
-psio2_transfer_init  _47_psio2_mc_transfer_init;
-psio2_transfer_init  _48_psio2_mtap_transfer_init;
-psio2_transfer_init  _49_psio2_rm_transfer_init;
-psio2_transfer_init  _50_psio2_unk_transfer_init;
-psio2_transfer       _25_psio2_transfer;
-psio2_transfer       _51_psio2_transfer;
+psio2_transfer_init _23_psio2_pad_transfer_init;
+psio2_transfer_init _24_psio2_mc_transfer_init;
+psio2_transfer_init _46_psio2_pad_transfer_init;
+psio2_transfer_init _47_psio2_mc_transfer_init;
+psio2_transfer_init _48_psio2_mtap_transfer_init;
+psio2_transfer_init _49_psio2_rm_transfer_init;
+psio2_transfer_init _50_psio2_unk_transfer_init;
+psio2_transfer _25_psio2_transfer;
+psio2_transfer _51_psio2_transfer;
 psio2_transfer_reset _26_psio2_transfer_reset;
 psio2_transfer_reset _52_psio2_transfer_reset;
 
@@ -42,7 +42,7 @@ static void _sio2_transfer_init(psio2_transfer_init init_func)
 }
 
 // Generic sio2man transfer function
-static int _sio2_transfer(psio2_transfer transfer_func, sio2_transfer_data_t* td)
+static int _sio2_transfer(psio2_transfer transfer_func, sio2_transfer_data_t *td)
 {
     int rv, i;
 
@@ -72,19 +72,19 @@ static void _sio2_transfer_reset(psio2_transfer_reset reset_func)
 }
 
 // Hooked sio2man functions
-static void _23_sio2_pad_transfer_init (){ _sio2_transfer_init (_23_psio2_pad_transfer_init ); }
-static void _24_sio2_mc_transfer_init  (){ _sio2_transfer_init (_24_psio2_mc_transfer_init  ); }
-static void _46_sio2_pad_transfer_init (){ _sio2_transfer_init (_46_psio2_pad_transfer_init ); }
-static void _47_sio2_mc_transfer_init  (){ _sio2_transfer_init (_47_psio2_mc_transfer_init  ); }
-static void _48_sio2_mtap_transfer_init(){ _sio2_transfer_init (_48_psio2_mtap_transfer_init); }
-static void _49_sio2_rm_transfer_init  (){ _sio2_transfer_init (_49_psio2_rm_transfer_init  ); }
-static void _50_sio2_unk_transfer_init (){ _sio2_transfer_init (_50_psio2_unk_transfer_init ); }
-static void _26_sio2_transfer_reset    (){ _sio2_transfer_reset(_26_psio2_transfer_reset    ); }
-static void _52_sio2_transfer_reset    (){ _sio2_transfer_reset(_52_psio2_transfer_reset    ); }
-static void _25_sio2_transfer(sio2_transfer_data_t* td){ _sio2_transfer(_25_psio2_transfer, td); }
-static void _51_sio2_transfer(sio2_transfer_data_t* td){ _sio2_transfer(_51_psio2_transfer, td); }
+static void _23_sio2_pad_transfer_init() { _sio2_transfer_init(_23_psio2_pad_transfer_init); }
+static void _24_sio2_mc_transfer_init() { _sio2_transfer_init(_24_psio2_mc_transfer_init); }
+static void _46_sio2_pad_transfer_init() { _sio2_transfer_init(_46_psio2_pad_transfer_init); }
+static void _47_sio2_mc_transfer_init() { _sio2_transfer_init(_47_psio2_mc_transfer_init); }
+static void _48_sio2_mtap_transfer_init() { _sio2_transfer_init(_48_psio2_mtap_transfer_init); }
+static void _49_sio2_rm_transfer_init() { _sio2_transfer_init(_49_psio2_rm_transfer_init); }
+static void _50_sio2_unk_transfer_init() { _sio2_transfer_init(_50_psio2_unk_transfer_init); }
+static void _26_sio2_transfer_reset() { _sio2_transfer_reset(_26_psio2_transfer_reset); }
+static void _52_sio2_transfer_reset() { _sio2_transfer_reset(_52_psio2_transfer_reset); }
+static void _25_sio2_transfer(sio2_transfer_data_t *td) { _sio2_transfer(_25_psio2_transfer, td); }
+static void _51_sio2_transfer(sio2_transfer_data_t *td) { _sio2_transfer(_51_psio2_transfer, td); }
 
-static void _sio2man_unhook(iop_library_t* lib)
+static void _sio2man_unhook(iop_library_t *lib)
 {
     if (hooked_version == 0) {
         M_DEBUG("Warning: trying to unhook sio2man while not hooked\n");
@@ -116,7 +116,7 @@ static void _sio2man_unhook(iop_library_t* lib)
     hooked_version = 0;
 }
 
-static void _sio2man_hook(iop_library_t* lib)
+static void _sio2man_hook(iop_library_t *lib)
 {
     if (hooked_version != 0) {
         M_DEBUG("Warning: trying to hook sio2man version 0x%x\n", lib->version);
@@ -139,8 +139,8 @@ static void _sio2man_hook(iop_library_t* lib)
         if ((lib->version >= IRX_VER(1, 2)) && (lib->version < IRX_VER(2, 0))) {
             // Only for the newer rom0:XSIO2MAN
             // Assume all v1.x libraries to use this interface (reset at 50)
-            _51_psio2_transfer          = ioplib_hookExportEntry(lib, 49, _51_sio2_transfer);
-            _52_psio2_transfer_reset    = ioplib_hookExportEntry(lib, 50, _52_sio2_transfer_reset);
+            _51_psio2_transfer       = ioplib_hookExportEntry(lib, 49, _51_sio2_transfer);
+            _52_psio2_transfer_reset = ioplib_hookExportEntry(lib, 50, _52_sio2_transfer_reset);
         } else /*if (lib->version >= IRX_VER(2, 3))*/ {
             // Only for the newer rom1:SIO2MAN
             // Assume all v2.x libraries to use this interface (reset at 52)
@@ -156,8 +156,8 @@ static void _sio2man_hook(iop_library_t* lib)
     }
 }
 
-int (*pRegisterLibraryEntries)(iop_library_t* lib);
-static int hookRegisterLibraryEntries(iop_library_t* lib)
+int (*pRegisterLibraryEntries)(iop_library_t *lib);
+static int hookRegisterLibraryEntries(iop_library_t *lib)
 {
     M_DEBUG("RegisterLibraryEntries: %s 0x%x\n", lib->name, lib->version);
 
@@ -170,7 +170,7 @@ static int hookRegisterLibraryEntries(iop_library_t* lib)
 int sio2man_hook_init()
 {
     iop_sema_t sema;
-    iop_library_t* lib;
+    iop_library_t *lib;
 
     M_DEBUG("%s\n", __FUNCTION__);
 
@@ -203,7 +203,7 @@ int sio2man_hook_init()
 
 void sio2man_hook_deinit()
 {
-    iop_library_t* lib;
+    iop_library_t *lib;
 
     M_DEBUG("%s\n", __FUNCTION__);
 

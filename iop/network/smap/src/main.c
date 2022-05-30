@@ -12,7 +12,7 @@
 // SMAP module is the same as "2.25.0"
 IRX_ID("SMAP_driver", 0x2, 0x1A);
 
-//While the header of the export table is small, the large size of the export table (as a whole) places it in data instead of sdata.
+// While the header of the export table is small, the large size of the export table (as a whole) places it in data instead of sdata.
 extern struct irx_export_table _exp_smap __attribute__((section("data")));
 
 int _start(int argc, char *argv[])
@@ -28,8 +28,8 @@ int _start(int argc, char *argv[])
 
     // This code was present in SMAP, but cannot be implemented with the default IOP kernel due to MODLOAD missing these functions.
     // It may be necessary to prevent SMAP from linking with an old DEV9 module.
-    /*
-    if ((ModuleID = SearchModuleByName("dev9")) < 0) {
+
+    /* if ((ModuleID = SearchModuleByName("dev9")) < 0) {
         sceInetPrintf("smap: dev9 module not found\n");
         return MODULE_NO_RESIDENT_END;
     }
@@ -41,8 +41,8 @@ int _start(int argc, char *argv[])
     if (ModStatus.version < 0x204) {
         sceInetPrintf("smap: dev9 module version must be 2.4 or later\n");
         return MODULE_NO_RESIDENT_END;
-    }
-    */
+    } */
+
 
     if ((result = smap_init(argc, argv)) < 0) {
         DEBUG_PRINTF("smap: smap_init -> %d\n", result);

@@ -11,19 +11,18 @@ IRX_ID(MODNAME, 0x01, 0x07);
 
 int InitFS(void);
 
-int _start(int argc, char** argv)
+int _start(int argc, char **argv)
 {
-	(void)argc;
-	(void)argv;
+    (void)argc;
+    (void)argv;
 
-	if(InitFAT() != 0)
-	{
-		printf("Error initializing FAT driver!\n");
-		return MODULE_NO_RESIDENT_END;
-	}
+    if (InitFAT() != 0) {
+        printf("Error initializing FAT driver!\n");
+        return MODULE_NO_RESIDENT_END;
+    }
 
-	init_ieee1394DiskDriver();
-	InitFS();
+    init_ieee1394DiskDriver();
+    InitFS();
 
-	return MODULE_RESIDENT_END;
+    return MODULE_RESIDENT_END;
 }

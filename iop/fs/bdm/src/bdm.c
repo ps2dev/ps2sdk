@@ -3,25 +3,26 @@
 #include <thbase.h>
 #include <thevent.h>
 
-//#define DEBUG  //comment out this line when not debugging
+// #define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
 
-struct bdm_mounts {
-    struct block_device* bd;
-    struct file_system* fs;
+struct bdm_mounts
+{
+    struct block_device *bd;
+    struct file_system *fs;
 };
 
 #define MAX_CONNECTIONS 20
 static struct bdm_mounts g_mount[MAX_CONNECTIONS];
-static struct file_system* g_fs[MAX_CONNECTIONS];
+static struct file_system *g_fs[MAX_CONNECTIONS];
 static bdm_cb g_cb       = NULL;
 static int bdm_event     = -1;
 static int bdm_thread_id = -1;
 
 /* Event flag bits */
-#define BDM_EVENT_CB_MOUNT 0x01
+#define BDM_EVENT_CB_MOUNT  0x01
 #define BDM_EVENT_CB_UMOUNT 0x02
-#define BDM_EVENT_MOUNT 0x04
+#define BDM_EVENT_MOUNT     0x04
 
 void bdm_RegisterCallback(bdm_cb cb)
 {
@@ -43,7 +44,7 @@ void bdm_RegisterCallback(bdm_cb cb)
     }
 }
 
-void bdm_connect_bd(struct block_device* bd)
+void bdm_connect_bd(struct block_device *bd)
 {
     int i;
 
@@ -59,7 +60,7 @@ void bdm_connect_bd(struct block_device* bd)
     }
 }
 
-void bdm_disconnect_bd(struct block_device* bd)
+void bdm_disconnect_bd(struct block_device *bd)
 {
     int i;
 
@@ -77,7 +78,7 @@ void bdm_disconnect_bd(struct block_device* bd)
     }
 }
 
-void bdm_connect_fs(struct file_system* fs)
+void bdm_connect_fs(struct file_system *fs)
 {
     int i;
 
@@ -94,7 +95,7 @@ void bdm_connect_fs(struct file_system* fs)
     SetEventFlag(bdm_event, BDM_EVENT_MOUNT);
 }
 
-void bdm_disconnect_fs(struct file_system* fs)
+void bdm_disconnect_fs(struct file_system *fs)
 {
     int i;
 
@@ -118,7 +119,7 @@ void bdm_disconnect_fs(struct file_system* fs)
     }
 }
 
-void bdm_get_bd(struct block_device** pbd, unsigned int count)
+void bdm_get_bd(struct block_device **pbd, unsigned int count)
 {
     int i;
 
@@ -129,7 +130,7 @@ void bdm_get_bd(struct block_device** pbd, unsigned int count)
         pbd[i] = g_mount[i].bd;
 }
 
-static void bdm_try_mount(struct bdm_mounts* mount)
+static void bdm_try_mount(struct bdm_mounts *mount)
 {
     int i;
 
@@ -148,7 +149,7 @@ static void bdm_try_mount(struct bdm_mounts* mount)
     }
 }
 
-static void bdm_thread(void* arg)
+static void bdm_thread(void *arg)
 {
     u32 EFBits;
     int i;

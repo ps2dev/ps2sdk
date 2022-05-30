@@ -83,12 +83,12 @@ int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData)
     /*  Non-Sony: Workaround for the hardware BUG whereby the Rx FIFO of the MAL becomes unresponsive or loses frames when under load.
         Check that there are frames to process, before accessing the BD registers. */
     while (SMAP_REG8(SMAP_R_RXFIFO_FRAME_CNT) > 0) {
-        PktBdPtr = &rx_bd[SmapDrivPrivData->RxBDIndex % SMAP_BD_MAX_ENTRY];
+        PktBdPtr  = &rx_bd[SmapDrivPrivData->RxBDIndex % SMAP_BD_MAX_ENTRY];
         ctrl_stat = PktBdPtr->ctrl_stat;
         if (!(ctrl_stat & SMAP_BD_RX_EMPTY)) {
-            length = PktBdPtr->length;
+            length        = PktBdPtr->length;
             LengthRounded = (length + 3) & ~3;
-            pointer = PktBdPtr->pointer;
+            pointer       = PktBdPtr->pointer;
 
             if (ctrl_stat & (SMAP_BD_RX_INRANGE | SMAP_BD_RX_OUTRANGE | SMAP_BD_RX_FRMTOOLONG | SMAP_BD_RX_BADFCS | SMAP_BD_RX_ALIGNERR | SMAP_BD_RX_SHORTEVNT | SMAP_BD_RX_RUNTFRM | SMAP_BD_RX_OVERRUN)) {
                 for (i = 0; i < 16; i++)
@@ -121,7 +121,7 @@ int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData)
             }
 
             SMAP_REG8(SMAP_R_RXFIFO_FRAME_DEC) = 0;
-            PktBdPtr->ctrl_stat = SMAP_BD_RX_EMPTY;
+            PktBdPtr->ctrl_stat                = SMAP_BD_RX_EMPTY;
             SmapDrivPrivData->RxBDIndex++;
         } else
             break;
@@ -158,15 +158,15 @@ int HandleTxReqs(struct SmapDriverData *SmapDrivPrivData)
                     smap_regbase = SmapDrivPrivData->smap_regbase;
 
                     BD_data_ptr = SMAP_REG16(SMAP_R_TXFIFO_WR_PTR) + SMAP_TX_BASE;
-                    BD_ptr = &tx_bd[SmapDrivPrivData->TxBDIndex % SMAP_BD_MAX_ENTRY];
+                    BD_ptr      = &tx_bd[SmapDrivPrivData->TxBDIndex % SMAP_BD_MAX_ENTRY];
 
                     CopyToFIFO(SmapDrivPrivData->smap_regbase, data, length);
 
                     result++;
-                    BD_ptr->length = length;
-                    BD_ptr->pointer = BD_data_ptr;
+                    BD_ptr->length                     = length;
+                    BD_ptr->pointer                    = BD_data_ptr;
                     SMAP_REG8(SMAP_R_TXFIFO_FRAME_INC) = 0;
-                    BD_ptr->ctrl_stat = SMAP_BD_TX_READY | SMAP_BD_TX_GENFCS | SMAP_BD_TX_GENPAD;
+                    BD_ptr->ctrl_stat                  = SMAP_BD_TX_READY | SMAP_BD_TX_GENFCS | SMAP_BD_TX_GENPAD;
                     SmapDrivPrivData->TxBDIndex++;
                     SmapDrivPrivData->NumPacketsInTx++;
                     SmapDrivPrivData->TxBufferSpaceAvailable -= SizeRounded;

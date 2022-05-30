@@ -5,51 +5,51 @@
 
 #define DBG_CMD_PUTS (1)
 
-u32 _dbg_cmd_dma_buf[128] __attribute__ ((aligned(128)));
+u32 _dbg_cmd_dma_buf[128] __attribute__((aligned(128)));
 
 #ifdef _EE
 
 void sio_write(char *buf, int size)
 {
-    while(size--) { sio_putc(*(buf++)); }
+    while (size--) {
+        sio_putc(*(buf++));
+    }
 }
 
 void _sif2_cmd_puts(SIF2_CmdPkt *cmd, void *param)
 {
     char *str;
 
-    if(cmd->extra)
-    {
+    if (cmd->extra) {
         int left;
-//        sio_printf("getting %d extra bytes\n", cmd->extra_size);
+        // sio_printf("getting %d extra bytes\n", cmd->extra_size);
         left = cmd->extra_size;
 
-        while(left > 0)
-        {
+        while (left > 0) {
             int toget;
             toget = left;
-            if(toget > sizeof(_dbg_cmd_dma_buf)) { toget = sizeof(_dbg_cmd_dma_buf); }
+            if (toget > sizeof(_dbg_cmd_dma_buf)) {
+                toget = sizeof(_dbg_cmd_dma_buf);
+            }
 
-//            sio_printf("getting %d of %d bytes left\n", toget, left);
+            // sio_printf("getting %d of %d bytes left\n", toget, left);
 
-            SIF2_set_dma((u32) &_dbg_cmd_dma_buf, toget, PS2_DMA_TO_MEM);
+            SIF2_set_dma((u32)&_dbg_cmd_dma_buf, toget, PS2_DMA_TO_MEM);
 
             // wait for transfer to complete.
             SIF2_sync_dma();
 
-//            sio_printf("sunk!\n");
+            // sio_printf("sunk!\n");
 
-            str = (char *) ((((u32) _dbg_cmd_dma_buf)) | 0x20000000);
+            str = (char *)((((u32)_dbg_cmd_dma_buf)) | 0x20000000);
             sio_write(str, toget);
-//            str[toget] = '\0';
-//            sio_puts(str);
+            // str[toget] = '\0';
+            // sio_puts(str);
 
             left -= toget;
         }
-    }
-    else
-    {
-        str = (char *) (((u32) cmd) + sizeof(SIF2_CmdPkt));
+    } else {
+        str = (char *)(((u32)cmd) + sizeof(SIF2_CmdPkt));
         sio_puts(str);
     }
 }
@@ -58,7 +58,7 @@ void _sif2_cmd_puts(SIF2_CmdPkt *cmd, void *param)
 int dbg_puts(char *str)
 {
     SIF2_send_cmd(DBG_CMD_PUTS, str, strlen(str) + 1);
-    return(0);
+    return (0);
 }
 
 int dbg_init(void)
@@ -68,5 +68,5 @@ int dbg_init(void)
     SIF2_set_cmd_handler(DBG_CMD_PUTS, &_sif2_cmd_puts, NULL);
 #endif
 
-    return(0);
+    return (0);
 }

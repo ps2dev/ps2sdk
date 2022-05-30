@@ -159,15 +159,15 @@ static void kprtty_init(void)
 
     kpa = &g_kprarg;
 
-    efp.attr = EA_SINGLE;
+    efp.attr   = EA_SINGLE;
     efp.option = 0;
-    efp.bits = 0;
+    efp.bits   = 0;
 
-    thp.attr = TH_C;
-    thp.option = 0;
-    thp.thread = &KPRTTY_Thread;
+    thp.attr      = TH_C;
+    thp.option    = 0;
+    thp.thread    = &KPRTTY_Thread;
     thp.stacksize = 0x800;
-    thp.priority = 8;
+    thp.priority  = 8;
 
     kpa->eflag = CreateEventFlag(&efp);
     kpa->bsize = KPR_BUFFER_SIZE;
@@ -228,8 +228,8 @@ static int udp_send(void *buf, size_t size)
 {
     struct sockaddr_in peer;
 
-    peer.sin_family = AF_INET;
-    peer.sin_port = htons(18194);
+    peer.sin_family      = AF_INET;
+    peer.sin_port        = htons(18194);
     peer.sin_addr.s_addr = inet_addr("255.255.255.255");
 
     lwip_sendto(udp_socket, buf, size, 0, (struct sockaddr *)&peer, sizeof(peer));

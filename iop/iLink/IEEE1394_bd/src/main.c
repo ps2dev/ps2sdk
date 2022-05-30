@@ -1,6 +1,6 @@
 #define MAJOR_VER 1
 #define MINOR_VER 1
-#define MODNAME "IEEE1394_bd"
+#define MODNAME   "IEEE1394_bd"
 
 #include "sbp2_disk.h"
 #include "scsi.h"
@@ -12,10 +12,10 @@
 
 IRX_ID(MODNAME, MAJOR_VER, MINOR_VER);
 
-int _start(int argc, char** argv)
+int _start(int argc, char **argv)
 {
-	(void)argc;
-	(void)argv;
+    (void)argc;
+    (void)argv;
 
     M_PRINTF("IEEE1394 Driver v%d.%d\n", MAJOR_VER, MINOR_VER);
 
