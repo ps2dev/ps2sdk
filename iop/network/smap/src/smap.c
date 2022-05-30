@@ -56,13 +56,13 @@
 
 struct SmapDriverData SmapDriverData;
 
-static const char VersionString[] = "Version 2.26.0";
-static unsigned int ThreadPriority = 0x28;
-static unsigned int ThreadStackSize = 0x1000;
-static unsigned int EnableVerboseOutput = 0;
+static const char VersionString[]         = "Version 2.26.0";
+static unsigned int ThreadPriority        = 0x28;
+static unsigned int ThreadStackSize       = 0x1000;
+static unsigned int EnableVerboseOutput   = 0;
 static unsigned int EnableAutoNegotiation = 1;
-static unsigned int EnablePinStrapConfig = 0;
-static unsigned int SmapConfiguration = 0x5E0;
+static unsigned int EnablePinStrapConfig  = 0;
+static unsigned int SmapConfiguration     = 0x5E0;
 
 int DisplayBanner(void)
 {
@@ -99,7 +99,7 @@ static u16 _smap_read_phy(volatile u8 *emac3_regbase, unsigned int address)
 
     PHYRegisterValue = (address & SMAP_E3_PHY_REG_ADDR_MSK) | SMAP_E3_PHY_READ | ((SMAP_DsPHYTER_ADDRESS & SMAP_E3_PHY_ADDR_MSK) << SMAP_E3_PHY_ADDR_BITSFT);
 
-    i = 0;
+    i      = 0;
     result = 0;
     SMAP_EMAC3_SET32(SMAP_R_EMAC3_STA_CTRL, PHYRegisterValue);
 
@@ -174,7 +174,7 @@ static int InitPHY(struct SmapDriverData *SmapDrivPrivData)
             DEBUG_PRINTF("smap: no auto mode (conf=0x%x)\n", SmapConfiguration);
 
         LinkSpeed100M = 0 < (SmapConfiguration & 0x180); /* Toggles between SMAP_PHY_BMCR_10M and SMAP_PHY_BMCR_100M. */
-        value = LinkSpeed100M << 13;
+        value         = LinkSpeed100M << 13;
         if (SmapConfiguration & 0x140)
             value |= SMAP_PHY_BMCR_DUPM;
         _smap_write_phy(SmapDrivPrivData->emac3_regbase, SMAP_DsPHYTER_BMCR, value);
@@ -308,7 +308,7 @@ static int InitPHY(struct SmapDriverData *SmapDrivPrivData)
             _smap_read_phy(SmapDrivPrivData->emac3_regbase, SMAP_DsPHYTER_FCSCR);
             _smap_read_phy(SmapDrivPrivData->emac3_regbase, SMAP_DsPHYTER_RECR);
             DelayThread(500000);
-            value = _smap_read_phy(SmapDrivPrivData->emac3_regbase, SMAP_DsPHYTER_FCSCR);
+            value  = _smap_read_phy(SmapDrivPrivData->emac3_regbase, SMAP_DsPHYTER_FCSCR);
             value2 = _smap_read_phy(SmapDrivPrivData->emac3_regbase, SMAP_DsPHYTER_RECR);
             if ((value2 != 0) || (value >= 0x11)) {
                 if (EnableVerboseOutput)
@@ -342,14 +342,14 @@ static int InitPHY(struct SmapDriverData *SmapDrivPrivData)
     /* Determine what was negotiated for. */
     FlowControlEnabled = 0;
     if (RegDump[SMAP_DsPHYTER_BMCR] & SMAP_PHY_BMCR_ANEN) {
-        value = RegDump[SMAP_DsPHYTER_ANAR] & RegDump[SMAP_DsPHYTER_ANLPAR];
+        value         = RegDump[SMAP_DsPHYTER_ANAR] & RegDump[SMAP_DsPHYTER_ANLPAR];
         LinkSpeed100M = 0 < (value & 0x180);
-        LinkFDX = 0 < (value & 0x140);
+        LinkFDX       = 0 < (value & 0x140);
         if (LinkFDX)
             FlowControlEnabled = 0 < (value & 0x400);
     } else {
-        LinkSpeed100M = RegDump[SMAP_DsPHYTER_BMCR] >> 13 & 1;
-        LinkFDX = RegDump[SMAP_DsPHYTER_BMCR] >> 8 & 1;
+        LinkSpeed100M      = RegDump[SMAP_DsPHYTER_BMCR] >> 13 & 1;
+        LinkFDX            = RegDump[SMAP_DsPHYTER_BMCR] >> 8 & 1;
         FlowControlEnabled = SmapConfiguration >> 10 & 1;
     }
 
@@ -365,7 +365,7 @@ static int InitPHY(struct SmapDriverData *SmapDrivPrivData)
     DEBUG_PRINTF("smap: %s %s Duplex Mode %s Flow Control\n", LinkSpeed100M ? "100BaseTX" : "10BaseT", LinkFDX ? "Full" : "Half", FlowControlEnabled ? "with" : "without");
 
     emac3_regbase = SmapDrivPrivData->emac3_regbase;
-    emac3_value = SMAP_EMAC3_GET32(SMAP_R_EMAC3_MODE1) & 0x67FFFFFF;
+    emac3_value   = SMAP_EMAC3_GET32(SMAP_R_EMAC3_MODE1) & 0x67FFFFFF;
     if (LinkFDX)
         emac3_value |= SMAP_E3_FDX_ENABLE;
     if (FlowControlEnabled)
@@ -442,9 +442,9 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
     volatile u8 *smap_regbase, *emac3_regbase;
     USE_SPD_REGS;
 
-    counter = 3;
+    counter       = 3;
     emac3_regbase = SmapDrivPrivData->emac3_regbase;
-    smap_regbase = SmapDrivPrivData->smap_regbase;
+    smap_regbase  = SmapDrivPrivData->smap_regbase;
     while (1) {
         int result;
 
@@ -457,8 +457,8 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
             if (SmapDrivPrivData->SmapIsInitialized) {
                 dev9IntrDisable(DEV9_SMAP_INTR_MASK2);
                 SMAP_EMAC3_SET32(SMAP_R_EMAC3_MODE0, 0);
-                SmapDrivPrivData->NetDevStopFlag = 0;
-                SmapDrivPrivData->LinkStatus = 0;
+                SmapDrivPrivData->NetDevStopFlag    = 0;
+                SmapDrivPrivData->LinkStatus        = 0;
                 SmapDrivPrivData->SmapIsInitialized = 0;
                 SmapDrivPrivData->SmapDriverStarted = 0;
                 NetManToggleNetIFLinkState(SmapDrivPrivData->NetIFID, NETMAN_NETIF_ETH_LINK_STATE_DOWN);
@@ -504,7 +504,7 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
                     }
                     if (IntrReg & SMAP_INTR_RXEND) {
                         SMAP_REG16(SMAP_R_INTR_CLR) = SMAP_INTR_RXEND;
-                        ResetCounterFlag = HandleRxIntr(SmapDrivPrivData);
+                        ResetCounterFlag            = HandleRxIntr(SmapDrivPrivData);
                     }
                     if (IntrReg & SMAP_INTR_RXDNV) {
                         SMAP_REG16(SMAP_R_INTR_CLR) = SMAP_INTR_RXDNV;
@@ -571,13 +571,13 @@ static void Dev9PreDmaCbHandler(int bcr, int dir)
     u16 SliceCount;
 
     smap_regbase = SmapDriverData.smap_regbase;
-    SliceCount = bcr >> 16;
+    SliceCount   = bcr >> 16;
     if (dir != DMAC_TO_MEM) {
         SMAP_REG16(SMAP_R_TXFIFO_SIZE) = SliceCount;
-        SMAP_REG8(SMAP_R_TXFIFO_CTRL) = SMAP_TXFIFO_DMAEN;
+        SMAP_REG8(SMAP_R_TXFIFO_CTRL)  = SMAP_TXFIFO_DMAEN;
     } else {
         SMAP_REG16(SMAP_R_RXFIFO_SIZE) = SliceCount;
-        SMAP_REG8(SMAP_R_RXFIFO_CTRL) = SMAP_RXFIFO_DMAEN;
+        SMAP_REG8(SMAP_R_RXFIFO_CTRL)  = SMAP_RXFIFO_DMAEN;
     }
 }
 
@@ -634,7 +634,7 @@ static void ClearPacketQueue(struct SmapDriverData *SmapDrivPrivData)
     void *pkt;
 
     CpuSuspendIntr(&OldState);
-    pkt = SmapDrivPrivData->packetToSend;
+    pkt                            = SmapDrivPrivData->packetToSend;
     SmapDrivPrivData->packetToSend = NULL;
     CpuResumeIntr(OldState);
 
@@ -705,27 +705,27 @@ static int SMAPSetLinkMode(int mode)
             switch (baseMode) {
                 case NETMAN_NETIF_ETH_LINK_MODE_10M_HDX:
                     SmapConfiguration = 0x020;
-                    result = 0;
+                    result            = 0;
                     break;
                 case NETMAN_NETIF_ETH_LINK_MODE_10M_FDX:
                     SmapConfiguration = 0x040;
-                    result = 0;
+                    result            = 0;
                     break;
                 case NETMAN_NETIF_ETH_LINK_MODE_100M_HDX:
                     SmapConfiguration = 0x080;
-                    result = 0;
+                    result            = 0;
                     break;
                 case NETMAN_NETIF_ETH_LINK_MODE_100M_FDX:
                     SmapConfiguration = 0x0100;
-                    result = 0;
+                    result            = 0;
                     break;
                 default:
                     result = -1;
             }
         } else {
-            SmapConfiguration = 0x1E0;
+            SmapConfiguration     = 0x1E0;
             EnableAutoNegotiation = 1;
-            result = 0;
+            result                = 0;
         }
 
         if (result == 0) {
@@ -802,10 +802,10 @@ int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, void *out
             result = SMAPSetLinkMode(*(int *)args);
             break;
         case NETMAN_NETIF_IOCTL_ETH_GET_STATUS:
-            ((struct NetManEthStatus *)output)->LinkMode = SMAPGetLinkMode();
+            ((struct NetManEthStatus *)output)->LinkMode   = SMAPGetLinkMode();
             ((struct NetManEthStatus *)output)->LinkStatus = SMAPGetLinkStatus();
-            ((struct NetManEthStatus *)output)->stats = SmapDriverData.RuntimeStats;
-            result = 0;
+            ((struct NetManEthStatus *)output)->stats      = SmapDriverData.RuntimeStats;
+            result                                         = 0;
             break;
         default:
             result = -1;
@@ -834,19 +834,19 @@ static inline int SetupNetDev(void)
         0,
     };
 
-    EventFlagData.attr = 0;
+    EventFlagData.attr   = 0;
     EventFlagData.option = 0;
-    EventFlagData.bits = 0;
+    EventFlagData.bits   = 0;
 
     if ((result = SmapDriverData.Dev9IntrEventFlag = CreateEventFlag(&EventFlagData)) < 0) {
         DEBUG_PRINTF("smap: CreateEventFlag -> %d\n", result);
         return -6;
     }
 
-    ThreadData.attr = TH_C;
-    ThreadData.thread = (void *)&IntrHandlerThread;
-    ThreadData.option = 0;
-    ThreadData.priority = ThreadPriority;
+    ThreadData.attr      = TH_C;
+    ThreadData.thread    = (void *)&IntrHandlerThread;
+    ThreadData.option    = 0;
+    ThreadData.priority  = ThreadPriority;
     ThreadData.stacksize = ThreadStackSize;
     if ((result = SmapDriverData.IntrHandlerThreadID = CreateThread(&ThreadData)) < 0) {
         DEBUG_PRINTF("smap: CreateThread -> %d\n", result);
@@ -878,7 +878,7 @@ static int ParseSmapConfiguration(const char *cmd, unsigned int *configuration)
     unsigned int result, base, character, value;
 
     DigitStart = CmdStart = cmd;
-    base = 10;
+    base                  = 10;
 
     if (CmdStart[0] == '0') {
         if (CmdStart[1] != '\0') {
@@ -894,7 +894,7 @@ static int ParseSmapConfiguration(const char *cmd, unsigned int *configuration)
         goto fail_end;
     }
 
-    result = 0;
+    result    = 0;
     character = DigitStart[0];
     do {
         if (character - '0' < 10) {
@@ -990,7 +990,7 @@ int smap_init(int argc, char *argv[])
     if (argc != 0)
         return DisplayHelpMessage();
 
-    SmapDriverData.smap_regbase = smap_regbase;
+    SmapDriverData.smap_regbase  = smap_regbase;
     SmapDriverData.emac3_regbase = emac3_regbase;
     if ((SPD_REG16(SPD_R_REV_3) & SPD_CAPS_SMAP) == 0)
         return -1;
@@ -1024,16 +1024,16 @@ int smap_init(int argc, char *argv[])
     SMAP_REG8(SMAP_R_BD_MODE) = 0;
     for (i = 0; i < SMAP_BD_MAX_ENTRY; i++) {
         tx_bd[i].ctrl_stat = 0;
-        tx_bd[i].reserved = 0;
-        tx_bd[i].length = 0;
-        tx_bd[i].pointer = 0;
+        tx_bd[i].reserved  = 0;
+        tx_bd[i].length    = 0;
+        tx_bd[i].pointer   = 0;
     }
 
     for (i = 0; i < SMAP_BD_MAX_ENTRY; i++) {
         rx_bd[i].ctrl_stat = SMAP_BD_RX_EMPTY;
-        rx_bd[i].reserved = 0;
-        rx_bd[i].length = 0;
-        rx_bd[i].pointer = 0;
+        rx_bd[i].reserved  = 0;
+        rx_bd[i].length    = 0;
+        rx_bd[i].pointer   = 0;
     }
 
     SmapDriverData.TxBufferSpaceAvailable = SMAP_TX_BUFSIZE;

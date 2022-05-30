@@ -6,13 +6,14 @@
 #include "scsi.h"
 #include <bdm.h>
 
-//#define DEBUG  //comment out this line when not debugging
+// #define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
 
-#define getBI32(__buf) ((((u8*)(__buf))[3] << 0) | (((u8*)(__buf))[2] << 8) | (((u8*)(__buf))[1] << 16) | (((u8*)(__buf))[0] << 24))
+#define getBI32(__buf)   ((((u8 *)(__buf))[3] << 0) | (((u8 *)(__buf))[2] << 8) | (((u8 *)(__buf))[1] << 16) | (((u8 *)(__buf))[0] << 24))
 #define SCSI_MAX_RETRIES 16
 
-typedef struct _inquiry_data {
+typedef struct _inquiry_data
+{
     u8 peripheral_device_type; // 00h - Direct access (Floppy), 1Fh none (no FDD connected)
     u8 removable_media;        // 80h - removeable
     u8 iso_ecma_ansi;
@@ -24,7 +25,8 @@ typedef struct _inquiry_data {
     u8 revision[4];
 } inquiry_data;
 
-typedef struct _sense_data {
+typedef struct _sense_data
+{
     u8 error_code;
     u8 res1;
     u8 sense_key;
@@ -36,7 +38,8 @@ typedef struct _sense_data {
     u8 res4[4];
 } sense_data;
 
-typedef struct _read_capacity_data {
+typedef struct _read_capacity_data
+{
     u8 last_lba[4];
     u8 block_length[4];
 } read_capacity_data;
@@ -47,12 +50,12 @@ static struct block_device g_scsi_bd[NUM_DEVICES];
 //
 // Private Low level SCSI commands
 //
-static int scsi_cmd(struct block_device* bd, unsigned char cmd, void* buffer, int buf_size, int cmd_size)
+static int scsi_cmd(struct block_device *bd, unsigned char cmd, void *buffer, int buf_size, int cmd_size)
 {
-    unsigned char comData[12]   = { 0x00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    struct scsi_interface* scsi = (struct scsi_interface*)bd->priv;
+    unsigned char comData[12]   = {0x00, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    struct scsi_interface *scsi = (struct scsi_interface *)bd->priv;
 
-    //M_DEBUG("%s\n", __func__);
+    // M_DEBUG("%s\n", __func__);
 
     comData[0] = cmd;
     comData[4] = cmd_size;
@@ -60,64 +63,64 @@ static int scsi_cmd(struct block_device* bd, unsigned char cmd, void* buffer, in
     return scsi->queue_cmd(scsi, comData, 12, buffer, buf_size, 0);
 }
 
-static inline int scsi_cmd_test_unit_ready(struct block_device* bd)
+static inline int scsi_cmd_test_unit_ready(struct block_device *bd)
 {
     M_DEBUG("%s\n", __func__);
 
     return scsi_cmd(bd, 0x00, NULL, 0, 0);
 }
 
-static inline int scsi_cmd_request_sense(struct block_device* bd, void* buffer, int size)
+static inline int scsi_cmd_request_sense(struct block_device *bd, void *buffer, int size)
 {
     M_DEBUG("%s\n", __func__);
 
     return scsi_cmd(bd, 0x03, buffer, size, size);
 }
 
-static inline int scsi_cmd_inquiry(struct block_device* bd, void* buffer, int size)
+static inline int scsi_cmd_inquiry(struct block_device *bd, void *buffer, int size)
 {
     M_DEBUG("%s\n", __func__);
 
     return scsi_cmd(bd, 0x12, buffer, size, size);
 }
 
-static int scsi_cmd_start_stop_unit(struct block_device* bd, u8 param)
+static int scsi_cmd_start_stop_unit(struct block_device *bd, u8 param)
 {
     M_DEBUG("%s\n", __func__);
 
     return scsi_cmd(bd, 0x1b, NULL, 0, param);
 }
 
-static inline int scsi_cmd_read_capacity(struct block_device* bd, void* buffer, int size)
+static inline int scsi_cmd_read_capacity(struct block_device *bd, void *buffer, int size)
 {
     M_DEBUG("%s\n", __func__);
 
     return scsi_cmd(bd, 0x25, buffer, size, 0);
 }
 
-static int scsi_cmd_rw_sector(struct block_device* bd, unsigned int lba, const void* buffer, unsigned short int sectorCount, unsigned int write)
+static int scsi_cmd_rw_sector(struct block_device *bd, unsigned int lba, const void *buffer, unsigned short int sectorCount, unsigned int write)
 {
-    unsigned char comData[12]   = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-    struct scsi_interface* scsi = (struct scsi_interface*)bd->priv;
+    unsigned char comData[12]   = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    struct scsi_interface *scsi = (struct scsi_interface *)bd->priv;
 
     M_DEBUG("scsi_cmd_rw_sector - 0x%08x %p 0x%04x\n", lba, buffer, sectorCount);
 
     comData[0] = write ? 0x2a : 0x28;
-    comData[2] = (lba & 0xFF000000) >> 24;    //lba 1 (MSB)
-    comData[3] = (lba & 0xFF0000) >> 16;      //lba 2
-    comData[4] = (lba & 0xFF00) >> 8;         //lba 3
-    comData[5] = (lba & 0xFF);                //lba 4 (LSB)
-    comData[7] = (sectorCount & 0xFF00) >> 8; //Transfer length MSB
-    comData[8] = (sectorCount & 0xFF);        //Transfer length LSB
-    return scsi->queue_cmd(scsi, comData, 12, (void*)buffer, bd->sectorSize * sectorCount, write);
+    comData[2] = (lba & 0xFF000000) >> 24;    // lba 1 (MSB)
+    comData[3] = (lba & 0xFF0000) >> 16;      // lba 2
+    comData[4] = (lba & 0xFF00) >> 8;         // lba 3
+    comData[5] = (lba & 0xFF);                // lba 4 (LSB)
+    comData[7] = (sectorCount & 0xFF00) >> 8; // Transfer length MSB
+    comData[8] = (sectorCount & 0xFF);        // Transfer length LSB
+    return scsi->queue_cmd(scsi, comData, 12, (void *)buffer, bd->sectorSize * sectorCount, write);
 }
 
 //
 // Private
 //
-static int scsi_warmup(struct block_device* bd)
+static int scsi_warmup(struct block_device *bd)
 {
-    struct scsi_interface* scsi = (struct scsi_interface*)bd->priv;
+    struct scsi_interface *scsi = (struct scsi_interface *)bd->priv;
     inquiry_data id;
     sense_data sd;
     read_capacity_data rcd;
@@ -175,10 +178,10 @@ static int scsi_warmup(struct block_device* bd)
 //
 // Block device interface
 //
-static int scsi_read(struct block_device* bd, u32 sector, void* buffer, u16 count)
+static int scsi_read(struct block_device *bd, u32 sector, void *buffer, u16 count)
 {
-    struct scsi_interface* scsi = (struct scsi_interface*)bd->priv;
-    u16 sc_remaining = count;
+    struct scsi_interface *scsi = (struct scsi_interface *)bd->priv;
+    u16 sc_remaining            = count;
     int retries;
 
     M_DEBUG("%s: sector=%d, count=%d\n", __func__, (int)sector, count);
@@ -196,16 +199,16 @@ static int scsi_read(struct block_device* bd, u32 sector, void* buffer, u16 coun
 
         sc_remaining -= sc;
         sector += sc;
-        buffer = (u8*)buffer + (sc * bd->sectorSize);
+        buffer = (u8 *)buffer + (sc * bd->sectorSize);
     }
 
     return count;
 }
 
-static int scsi_write(struct block_device* bd, u32 sector, const void* buffer, u16 count)
+static int scsi_write(struct block_device *bd, u32 sector, const void *buffer, u16 count)
 {
-    struct scsi_interface* scsi = (struct scsi_interface*)bd->priv;
-    u16 sc_remaining = count;
+    struct scsi_interface *scsi = (struct scsi_interface *)bd->priv;
+    u16 sc_remaining            = count;
     int retries;
 
     M_DEBUG("%s: sector=%d, count=%d\n", __func__, (int)sector, count);
@@ -223,13 +226,13 @@ static int scsi_write(struct block_device* bd, u32 sector, const void* buffer, u
 
         sc_remaining -= sc;
         sector += sc;
-        buffer = (u8*)buffer + (sc * bd->sectorSize);
+        buffer = (u8 *)buffer + (sc * bd->sectorSize);
     }
 
     return count;
 }
 
-static void scsi_flush(struct block_device* bd)
+static void scsi_flush(struct block_device *bd)
 {
     (void)bd;
 
@@ -238,7 +241,7 @@ static void scsi_flush(struct block_device* bd)
     // Dummy function
 }
 
-static int scsi_stop(struct block_device* bd)
+static int scsi_stop(struct block_device *bd)
 {
     int stat;
 
@@ -254,7 +257,7 @@ static int scsi_stop(struct block_device* bd)
 //
 // Public functions
 //
-void scsi_connect(struct scsi_interface* scsi)
+void scsi_connect(struct scsi_interface *scsi)
 {
     int i;
 
@@ -262,7 +265,7 @@ void scsi_connect(struct scsi_interface* scsi)
 
     for (i = 0; i < NUM_DEVICES; ++i) {
         if (g_scsi_bd[i].priv == NULL) {
-            struct block_device* bd = &g_scsi_bd[i];
+            struct block_device *bd = &g_scsi_bd[i];
 
             bd->priv = scsi;
             bd->name = scsi->name;
@@ -273,7 +276,7 @@ void scsi_connect(struct scsi_interface* scsi)
     }
 }
 
-void scsi_disconnect(struct scsi_interface* scsi)
+void scsi_disconnect(struct scsi_interface *scsi)
 {
     int i;
 
@@ -281,7 +284,7 @@ void scsi_disconnect(struct scsi_interface* scsi)
 
     for (i = 0; i < NUM_DEVICES; ++i) {
         if (g_scsi_bd[i].priv == scsi) {
-            struct block_device* bd = &g_scsi_bd[i];
+            struct block_device *bd = &g_scsi_bd[i];
             bdm_disconnect_bd(bd);
             bd->priv = NULL;
             break;

@@ -1,20 +1,20 @@
 #define MAJOR_VER 1
 #define MINOR_VER 1
-#define MODNAME "usbmass_bd"
+#define MODNAME   "usbmass_bd"
 
 #include "scsi.h"
 #include <irx.h>
 #include <loadcore.h>
 #include <stdio.h>
 
-//#define DEBUG  //comment out this line when not debugging
+// #define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
 
 IRX_ID(MODNAME, MAJOR_VER, MINOR_VER);
 
 extern int usb_mass_init(void);
 
-int _start(int argc, char* argv[])
+int _start(int argc, char *argv[])
 {
     (void)argc;
     (void)argv;

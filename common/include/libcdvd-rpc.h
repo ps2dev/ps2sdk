@@ -20,37 +20,42 @@
 
 /* S-command parameters */
 
-struct cdvdScmdParam{
-	u16 cmdNum;
-	u16 inBuffSize;
-	u8 inBuff[16];
+struct cdvdScmdParam
+{
+    u16 cmdNum;
+    u16 inBuffSize;
+    u8 inBuff[16];
 };
 
-struct cdvdDecSetParam{
-	u8 arg1;
-	u8 arg2;
-	u8 shift;
-	u8 pad;
+struct cdvdDecSetParam
+{
+    u8 arg1;
+    u8 arg2;
+    u8 shift;
+    u8 pad;
 };
 
-struct cdvdReadWriteNvmParam{
-	u32 address;
-	u16 value;
-	u16 pad;
+struct cdvdReadWriteNvmParam
+{
+    u32 address;
+    u16 value;
+    u16 pad;
 };
 
 /* N-command parameters */
 
-struct cdvdNcmdParam{
-	u16 cmdNum;
-	u16 inBuffSize;
-	u8 inBuff[16];
+struct cdvdNcmdParam
+{
+    u16 cmdNum;
+    u16 inBuffSize;
+    u8 inBuff[16];
 };
 
-struct cdvdReadKeyParam{
-	u32 arg1;
-	u32 arg2;
-	u32 command;
+struct cdvdReadKeyParam
+{
+    u32 arg1;
+    u32 arg2;
+    u32 command;
 };
 
 #endif /* _LIBCDVD_RPC_H_ */

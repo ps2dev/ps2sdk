@@ -7,7 +7,7 @@
 
 IOPCONTROL_SPECIAL_EE_OBJS = _iopcontrol_special_internals.o SifIopRebootBufferEncrypted.o SifIopRebootBuffer.o
 IOPCONTROL_SPECIAL_IOP_OBJS = imgdrv_irx.o
-IOPCONTROL_SPECIAL_OBJS = 
+IOPCONTROL_SPECIAL_OBJS =
 
 EE_OBJS = $(IOPCONTROL_SPECIAL_EE_OBJS) $(IOPCONTROL_SPECIAL_IOP_OBJS) erl-support.o
 

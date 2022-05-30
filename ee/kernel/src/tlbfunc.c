@@ -10,7 +10,7 @@
 #include <kernel.h>
 #include <stdio.h>
 
-#define kprintf(args...) //sio_printf(args)
+#define kprintf(args...) // sio_printf(args)
 
 static int InitTLB32MB(void);
 
@@ -23,12 +23,12 @@ struct SyscallData
 static const struct SyscallData SysEntry[] = {
     {0x5A, &kCopy},
     {0x5B, (void *)0x80075000},
-    {0x54, NULL}, //???
-    {0x55, NULL}, //PutTLBEntry
-    {0x56, NULL}, //SetTLBEntry
-    {0x57, NULL}, //GetTLBEntry
-    {0x58, NULL}, //ProbeTLBEntry
-    {0x59, NULL}, //ExpandScratchPad
+    {0x54, NULL}, // ???
+    {0x55, NULL}, // PutTLBEntry
+    {0x56, NULL}, // SetTLBEntry
+    {0x57, NULL}, // GetTLBEntry
+    {0x58, NULL}, // ProbeTLBEntry
+    {0x59, NULL}, // ExpandScratchPad
 };
 
 extern char **_kExecArg;
@@ -88,7 +88,7 @@ struct TLBInfo
 #define TLB_NUM_DEFAULT_ENTRIES  0x12
 #define TLB_NUM_EXTENDED_ENTRIES 0x08
 
-//Compile-time sanity checks.
+// Compile-time sanity checks.
 #if (TLB_NUM_KERNEL_ENTRIES + TLB_NUM_DEFAULT_ENTRIES + TLB_NUM_EXTENDED_ENTRIES >= 0x31)
 #error TLB over flow
 #endif
