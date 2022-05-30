@@ -156,8 +156,7 @@ static int fs_open(iop_file_t *fd, const char *name, int flags, int mode)
         free(fd->privdata);
         fd->privdata = NULL;
         ret = -ret;
-    }
-    else{
+    } else {
         ret = 1;
     }
 
@@ -188,7 +187,8 @@ static int fs_close(iop_file_t *fd)
 
 //---------------------------------------------------------------------------
 
-s64	fs_lseek64(iop_file_t *fd, s64 offset, int whence){
+s64 fs_lseek64(iop_file_t *fd, s64 offset, int whence)
+{
     M_DEBUG("%s\n", __func__);
 
     int res;
@@ -214,7 +214,7 @@ s64	fs_lseek64(iop_file_t *fd, s64 offset, int whence){
     res = f_lseek(file, off);
 
     _fs_unlock();
-    return (res == FR_OK)? file->fptr : -res;
+    return (res == FR_OK) ? file->fptr : -res;
 }
 
 static int fs_lseek(iop_file_t *fd, int offset, int whence)
@@ -416,8 +416,7 @@ static int fs_getstat(iop_file_t *fd, const char *name, iox_stat_t *stat)
 
     if (ret == FR_OK) {
         fileInfoToStat(&fno, stat);
-    }
-    else{
+    } else {
         ret = -ret;
     }
 
@@ -482,6 +481,20 @@ int fs_rename(iop_file_t *fd, const char *path, const char *newpath)
     return -ret;
 }
 
+int fs_chdir(iop_file_t *fd, const char *path)
+{
+    M_DEBUG("%s\n", __func__);
+
+    int ret;
+
+    _fs_lock();
+
+    ret = f_chdir(path);
+
+    _fs_unlock();
+    return -ret;
+}
+
 static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
     int ret;
@@ -530,7 +543,7 @@ static iop_device_ops_t fs_functarray = {
     &fs_getstat,
     (void *)&fs_dummy,
     &fs_rename,
-    (void *)&fs_dummy,
+    &fs_chdir,
     (void *)&fs_dummy,
     (void *)&fs_dummy,
     (void *)&fs_dummy,
