@@ -481,20 +481,6 @@ int fs_rename(iop_file_t *fd, const char *path, const char *newpath)
     return -ret;
 }
 
-int fs_chdir(iop_file_t *fd, const char *path)
-{
-    M_DEBUG("%s\n", __func__);
-
-    int ret;
-
-    _fs_lock();
-
-    ret = f_chdir(path);
-
-    _fs_unlock();
-    return -ret;
-}
-
 static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
     int ret;
@@ -543,7 +529,7 @@ static iop_device_ops_t fs_functarray = {
     &fs_getstat,
     (void *)&fs_dummy,
     &fs_rename,
-    &fs_chdir,
+    (void *)&fs_dummy,
     (void *)&fs_dummy,
     (void *)&fs_dummy,
     (void *)&fs_dummy,
