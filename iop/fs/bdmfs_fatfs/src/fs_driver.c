@@ -130,7 +130,7 @@ static int fs_open(iop_file_t *fd, const char *name, int flags, int mode)
     M_DEBUG("%s: %s flags=%X mode=%X\n", __func__, name, flags, mode);
 
     int ret;
-    BYTE f_mode = FA_OPEN_ALWAYS;
+    BYTE f_mode = FA_OPEN_EXISTING;
 
     _fs_lock();
 
