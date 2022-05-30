@@ -7,4 +7,8 @@
 extern FATFS fatfs;
 extern struct block_device *mounted_bd;
 
+extern int InitFS(void);
+extern int connect_bd();
+extern void disconnect_bd();
+
 #endif

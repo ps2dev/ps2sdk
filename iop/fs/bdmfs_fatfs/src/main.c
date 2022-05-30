@@ -7,6 +7,7 @@
 #include <cdvdman.h>
 
 #include "ff.h"
+#include "fs_driver.h"
 
 //#define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
@@ -15,11 +16,6 @@
 #define MINOR_VER 4
 
 IRX_ID("bdmff", MAJOR_VER, MINOR_VER);
-
-extern int InitFAT(void);
-extern int InitFS(void);
-extern int connect_bd();
-extern void disconnect_bd();
 
 static struct file_system g_fs = {
     .priv = NULL,
@@ -31,12 +27,6 @@ static struct file_system g_fs = {
 int _start(int argc, char *argv[])
 {
     printf("BDM FatFs driver (FAT/exFAT) v%d.%d\n", MAJOR_VER, MINOR_VER);
-
-    // initialize the FAT driver
-    if (InitFAT() != 0) {
-        M_DEBUG("Error initializing FatFs driver!\n");
-        return MODULE_NO_RESIDENT_END;
-    }
 
     // initialize the file system driver
     if (InitFS() != 0) {

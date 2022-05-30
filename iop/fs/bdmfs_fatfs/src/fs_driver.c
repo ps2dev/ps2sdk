@@ -187,36 +187,6 @@ static int fs_close(iop_file_t *fd)
 }
 
 //---------------------------------------------------------------------------
-static int fs_lseek(iop_file_t *fd, int offset, int whence)
-{
-
-    M_DEBUG("%s\n", __func__);
-
-    int res;
-
-    if (fd->privdata == NULL)
-        return -ENOENT;
-
-    _fs_lock();
-
-    FIL *file = (FIL *)(fd->privdata);
-
-    FSIZE_t off = offset;
-
-    switch (whence) {
-        case SEEK_CUR:
-            off += file->fptr;
-            break;
-        case SEEK_END:
-            off = file->obj.objsize - offset;
-            break;
-    }
-
-    res = f_lseek(file, off);
-
-    _fs_unlock();
-    return (res == FR_OK)? offset : -res;
-}
 
 s64	fs_lseek64(iop_file_t *fd, s64 offset, int whence){
     M_DEBUG("%s\n", __func__);
@@ -244,7 +214,12 @@ s64	fs_lseek64(iop_file_t *fd, s64 offset, int whence){
     res = f_lseek(file, off);
 
     _fs_unlock();
-    return (res == FR_OK)? off : -res;
+    return (res == FR_OK)? file->fptr : -res;
+}
+
+static int fs_lseek(iop_file_t *fd, int offset, int whence)
+{
+    return fs_lseek64(fd, (s64)offset, whence);
 }
 
 //---------------------------------------------------------------------------
@@ -579,12 +554,4 @@ int InitFS(void)
 
     DelDrv("mass");
     return (AddDrv(&fs_driver) == 0 ? 0 : -1);
-}
-
-//---------------------------------------------------------------------------
-int InitFAT(void)
-{
-    M_DEBUG("%s\n", __func__);
-
-    return 0;
 }
