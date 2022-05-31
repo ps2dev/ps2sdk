@@ -26,4 +26,3 @@ int doCloseEndpoint(Endpoint *ep);
 int hcdInit(void);
 
 #endif // __HCD_H__
-

@@ -3,7 +3,7 @@
 #include <loadcore.h>
 #include <stdio.h>
 
-//#define DEBUG  //comment out this line when not debugging
+// #define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
 
 #define MAJOR_VER 1
@@ -15,7 +15,7 @@ extern struct irx_export_table _exp_bdm;
 extern int bdm_init();
 extern void part_init();
 
-int _start(int argc, char* argv[])
+int _start(int argc, char *argv[])
 {
     (void)argc;
     (void)argv;

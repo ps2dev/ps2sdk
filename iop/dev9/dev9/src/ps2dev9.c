@@ -48,7 +48,7 @@ IRX_ID(MODNAME, 2, 8);
 
 static int semaAttrGlobal;   /* Semaphore attribute value to use. */
 static const char *mod_name; /* Module name. */
-static int dev9type = -1;    /* 0 for PCMCIA, 1 for expansion bay */
+static int dev9type  = -1;   /* 0 for PCMCIA, 1 for expansion bay */
 static int using_aif = 0;    /* 1 if using AIF on a T10K */
 
 static int dma_lock_sem; /* used to arbitrate DMA */
@@ -171,7 +171,7 @@ static iop_device_ops_t dev9x_ops =
         (void *)&dev9x_dummy,
         (void *)&dev9x_dummy,
         (void *)&dev9x_dummy,
-    };
+};
 
 static iop_device_t dev9x_device =
     {
@@ -364,11 +364,11 @@ void dev9Shutdown(void)
 
     if (dev9type == DEV9_TYPE_PCMCIA) { /* PCMCIA */
         DEV9_REG(DEV9_R_POWER) = 0;
-        DEV9_REG(DEV9_R_1474) = 0;
+        DEV9_REG(DEV9_R_1474)  = 0;
     } else if (dev9type == DEV9_TYPE_EXPBAY) {
-        DEV9_REG(DEV9_R_1466) = 1;
-        DEV9_REG(DEV9_R_1464) = 0;
-        DEV9_REG(DEV9_R_1460) = DEV9_REG(DEV9_R_1464);
+        DEV9_REG(DEV9_R_1466)  = 1;
+        DEV9_REG(DEV9_R_1464)  = 0;
+        DEV9_REG(DEV9_R_1460)  = DEV9_REG(DEV9_R_1464);
         DEV9_REG(DEV9_R_POWER) = DEV9_REG(DEV9_R_POWER) & ~4;
         DEV9_REG(DEV9_R_POWER) = DEV9_REG(DEV9_R_POWER) & ~1;
     }
@@ -457,7 +457,7 @@ int dev9DmaTransfer(int device, void *buf, int bcr, int dir)
 
     /* Older versions of DEV9 do not suspend interrupts. Not sure why this must be done though. */
     CpuSuspendIntr(&OldState);
-    dev9_chan->bcr = bcr;
+    dev9_chan->bcr  = bcr;
     dev9_chan->chcr = DMAC_CHCR_30 | DMAC_CHCR_TR | DMAC_CHCR_CO | (dir & DMAC_CHCR_DR);
     CpuResumeIntr(OldState);
 
@@ -505,7 +505,7 @@ static int read_eeprom_data(void)
     if (val & 0x10) { /* Error.  */
         SPD_REG8(SPD_R_PIO_DATA) = 0;
         DelayThread(1);
-        res = -1;
+        res            = -1;
         eeprom_data[0] = 0;
         goto out;
     }
@@ -531,7 +531,7 @@ static int read_eeprom_data(void)
     SPD_REG8(SPD_R_PIO_DATA) = 0;
     DelayThread(1);
     eeprom_data[0] = 1; /* The EEPROM data is valid.  */
-    res = 0;
+    res            = 0;
 
 out:
     SPD_REG8(SPD_R_PIO_DIR) = dev9_has_dvr_capability ? 7 : 1;
@@ -562,7 +562,7 @@ int dev9GetEEPROM(u16 *buf)
 // The anode has a 10kohm pull-up to Vcc, and is connected to the base of an PNP transistor,
 // with collector grounded and emitter, connecting through a 240ohm resistor to the ACS_LED
 // pin (90) of the Expansion Bay connector. It connects to the cathode of the HDD Activity LED
-// in the PS2, the anode of which connects through 180ohm resistor to +5V.  
+// in the PS2, the anode of which connects through 180ohm resistor to +5V.
 
 // The specific LED part used is the Citizen CITILED CL-200TLY-C, which has a "Lemon Yellow" color.
 
@@ -570,13 +570,10 @@ int dev9GetEEPROM(u16 *buf)
 void dev9LEDCtl(int ctl)
 {
     USE_SPD_REGS;
-    if (dev9_has_dvr_capability)
-    {
+    if (dev9_has_dvr_capability) {
         SPD_REG8(SPD_R_PIO_DIR) |= 1;
         SPD_REG8(SPD_R_PIO_DATA) = (SPD_REG8(SPD_R_PIO_DATA) & 0xE) | (ctl ? 0 : 1);
-    }
-    else
-    {
+    } else {
         SPD_REG8(SPD_R_PIO_DATA) = (ctl == 0);
     }
 }
@@ -584,8 +581,7 @@ void dev9LEDCtl(int ctl)
 /* Export 15 */
 void dev9LED2Ctl(int ctl)
 {
-    if (dev9_has_dvr_capability)
-    {
+    if (dev9_has_dvr_capability) {
         USE_SPD_REGS;
         SPD_REG8(SPD_R_PIO_DIR) |= 2;
         DelayThread(1);
@@ -601,8 +597,7 @@ void dev9LED2Ctl(int ctl)
 /* Export 14 */
 void dev9ControlPIO3(int ctl)
 {
-    if (dev9_has_dvr_capability)
-    {
+    if (dev9_has_dvr_capability) {
         USE_SPD_REGS;
         SPD_REG8(SPD_R_PIO_DIR) |= 4;
         DelayThread(1);
@@ -631,9 +626,9 @@ static int dev9_init(int sema_attr)
     iop_sema_t sema;
     int i, flags;
 
-    sema.attr = sema_attr;
+    sema.attr    = sema_attr;
     sema.initial = 1;
-    sema.max = 1;
+    sema.max     = 1;
     if ((dma_lock_sem = CreateSema(&sema)) < 0)
         return -1;
 
@@ -656,7 +651,7 @@ static int dev9_init(int sema_attr)
         dev9_intr_cbs[i] = NULL;
 
     for (i = 0; i < 4; i++) {
-        dev9_predma_cbs[i] = NULL;
+        dev9_predma_cbs[i]  = NULL;
         dev9_postdma_cbs[i] = NULL;
     }
 
@@ -679,7 +674,7 @@ static int dev9_smap_read_phy(volatile u8 *emac3_regbase, unsigned int address, 
 
     PHYRegisterValue = (address & SMAP_E3_PHY_REG_ADDR_MSK) | SMAP_E3_PHY_READ | ((SMAP_DsPHYTER_ADDRESS & SMAP_E3_PHY_ADDR_MSK) << SMAP_E3_PHY_ADDR_BITSFT);
 
-    i = 0;
+    i      = 0;
     result = 0;
     SMAP_EMAC3_SET(SMAP_R_EMAC3_STA_CTRL, PHYRegisterValue);
 
@@ -773,16 +768,16 @@ static int dev9_smap_init(void)
 
     for (i = 0; i < SMAP_BD_MAX_ENTRY; i++) {
         tx_bd[i].ctrl_stat = 0;
-        tx_bd[i].reserved = 0;
-        tx_bd[i].length = 0;
-        tx_bd[i].pointer = 0;
+        tx_bd[i].reserved  = 0;
+        tx_bd[i].length    = 0;
+        tx_bd[i].pointer   = 0;
     }
 
     for (i = 0; i < SMAP_BD_MAX_ENTRY; i++) {
         rx_bd[i].ctrl_stat = 0x80; // SMAP_BD_RX_EMPTY
-        rx_bd[i].reserved = 0;
-        rx_bd[i].length = 0;
-        rx_bd[i].pointer = 0;
+        rx_bd[i].reserved  = 0;
+        rx_bd[i].length    = 0;
+        rx_bd[i].pointer   = 0;
     }
 
     SMAP_REG16(SMAP_R_INTR_CLR) = SMAP_INTR_BITMSK;
@@ -819,10 +814,10 @@ static int dev9_smap_init(void)
     for (i = 0; i < 0x5EA; i += 4)
         SMAP_REG32(SMAP_R_TXFIFO_DATA) = i;
 
-    tx_bd[0].length = 0xEA05;
-    tx_bd[0].pointer = (value >> 8) | (value << 8);
+    tx_bd[0].length                    = 0xEA05;
+    tx_bd[0].pointer                   = (value >> 8) | (value << 8);
     SMAP_REG8(SMAP_R_TXFIFO_FRAME_INC) = 0;
-    tx_bd[0].ctrl_stat = 0x83; // SMAP_BD_TX_READY|SMAP_BD_TX_GENFCS|SMAP_BD_TX_GENPAD
+    tx_bd[0].ctrl_stat                 = 0x83; // SMAP_BD_TX_READY|SMAP_BD_TX_GENFCS|SMAP_BD_TX_GENPAD
 
     SMAP_EMAC3_SET(SMAP_R_EMAC3_TxMODE0, SMAP_E3_TX_GNP_0);
     for (i = 9;; i--) {
@@ -892,7 +887,7 @@ static int speed_device_init(void)
 
     /* Print out the SPEED chip revision.  */
     spdrev = SPD_REG16(SPD_R_REV_1);
-    idx = (spdrev & 0xffff) - 14;
+    idx    = (spdrev & 0xffff) - 14;
     if (spdrev == 9)
         idx = 1; /* TS */
     else if (spdrev < 9 || (spdrev < 16 || spdrev > 17))
@@ -995,12 +990,12 @@ static int pcic_ssbus_mode(int mode)
     if (mode == 3) {
         DEV9_REG(DEV9_R_1474) = 1;
         DEV9_REG(DEV9_R_1460) = 1;
-        SPD_REG8(0x20) = 1;
+        SPD_REG8(0x20)        = 1;
         DEV9_REG(DEV9_R_1474) = mode;
     } else if (mode == 5) {
         DEV9_REG(DEV9_R_1474) = mode;
         DEV9_REG(DEV9_R_1460) = 1;
-        SPD_REG8(0x20) = 1;
+        SPD_REG8(0x20)        = 1;
         DEV9_REG(DEV9_R_1474) = 7;
     }
     _sw(0xe01a3043, SSBUS_R_1418);
@@ -1015,9 +1010,9 @@ static int pcmcia_device_probe(void)
     const char *pcic_ct_names[] = {"No", "16-bit", "CardBus"};
     int voltage;
 
-    pcic_voltage = pcic_get_voltage();
+    pcic_voltage  = pcic_get_voltage();
     pcic_cardtype = pcic_get_cardtype();
-    voltage = (pcic_voltage == PC_CARD_VOLTAGE_5V ? 5 : (pcic_voltage == PC_CARD_VOLTAGE_3V ? 3 : 0));
+    voltage       = (pcic_voltage == PC_CARD_VOLTAGE_5V ? 5 : (pcic_voltage == PC_CARD_VOLTAGE_3V ? 3 : 0));
 
     M_PRINTF("%s PCMCIA card detected. Vcc = %dV\n",
              pcic_ct_names[pcic_cardtype], voltage);
@@ -1062,7 +1057,7 @@ static int card_find_manfid(u32 manfid)
 
     /* Scan the card for the MANFID tuple.  */
     spdaddr = 0;
-    spdend = 0x1000;
+    spdend  = 0x1000;
     /* I hate this code, and it hates me.  */
     while (spdaddr < spdend) {
         hdr = SPD_REG8(spdaddr) & 0xff;
@@ -1134,7 +1129,7 @@ static int pcmcia_intr(void *unused)
 
         /* Shutdown the card.  */
         DEV9_REG(DEV9_R_POWER) = 0;
-        DEV9_REG(DEV9_R_1474) = 0;
+        DEV9_REG(DEV9_R_1474)  = 0;
 
         pcmcia_device_probe();
     }
@@ -1167,7 +1162,7 @@ static int pcmcia_init(int sema_attr)
 
             if (aif_regs[AIF_IDENT] == 0xa1) {
                 aif_regs[AIF_INTEN] = AIF_INTR_PCMCIA;
-                using_aif = 1;
+                using_aif           = 1;
             } else {
                 M_PRINTF("AIF not detected.\n");
                 return 1;
@@ -1177,17 +1172,17 @@ static int pcmcia_init(int sema_attr)
 
     if (DEV9_REG(DEV9_R_POWER) == 0) {
         DEV9_REG(DEV9_R_POWER) = 0;
-        DEV9_REG(DEV9_R_147E) = 1;
-        DEV9_REG(DEV9_R_1460) = 0;
-        DEV9_REG(DEV9_R_1474) = 0;
+        DEV9_REG(DEV9_R_147E)  = 1;
+        DEV9_REG(DEV9_R_1460)  = 0;
+        DEV9_REG(DEV9_R_1474)  = 0;
         DEV9_REG(DEV9_R_1464) = cstc1 = DEV9_REG(DEV9_R_1464);
         DEV9_REG(DEV9_R_1466) = cstc2 = DEV9_REG(DEV9_R_1466);
-        DEV9_REG(DEV9_R_1468) = 0x10;
-        DEV9_REG(DEV9_R_146A) = 0x90;
-        DEV9_REG(DEV9_R_147C) = 1;
-        DEV9_REG(DEV9_R_147A) = DEV9_REG(DEV9_R_147C);
+        DEV9_REG(DEV9_R_1468)         = 0x10;
+        DEV9_REG(DEV9_R_146A)         = 0x90;
+        DEV9_REG(DEV9_R_147C)         = 1;
+        DEV9_REG(DEV9_R_147A)         = DEV9_REG(DEV9_R_147C);
 
-        pcic_voltage = pcic_get_voltage();
+        pcic_voltage  = pcic_get_voltage();
         pcic_cardtype = pcic_get_cardtype();
 
         if (speed_device_init() != 0)
@@ -1235,7 +1230,7 @@ static int expbay_device_reset(void)
     DEV9_REG(DEV9_R_POWER) = (DEV9_REG(DEV9_R_POWER) & ~1) | 0x04; // power on
     DelayThread(500000);
 
-    DEV9_REG(DEV9_R_1460) = DEV9_REG(DEV9_R_1460) | 0x01;
+    DEV9_REG(DEV9_R_1460)  = DEV9_REG(DEV9_R_1460) | 0x01;
     DEV9_REG(DEV9_R_POWER) = DEV9_REG(DEV9_R_POWER) | 0x01;
     DelayThread(500000);
     return 0;

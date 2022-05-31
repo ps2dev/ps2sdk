@@ -20,7 +20,7 @@
 #include <intrman.h>
 #include <loadcore.h>
 #ifdef LIBSD
-	#include <libsd.h>
+#include <libsd.h>
 #endif
 #include <stdio.h>
 #include <sifcmd.h>

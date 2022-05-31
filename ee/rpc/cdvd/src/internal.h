@@ -14,7 +14,7 @@
  *
  * NOTE: These functions will work with the CDVDMAN/CDVDFSV or XCDVDMAN/XCDVDFSV
  * modules stored in rom0.
- *		
+ *
  * NOTE: not all functions work with each set of modules!
  */
 
@@ -46,11 +46,10 @@ extern "C" {
 
 void _CdSemaInit(void);
 void _CdGenericCallbackFunction(void *funcNum);
-int  _CdSyncS(int mode);
+int _CdSyncS(int mode);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif	// _LIBCDVD_INTERNAL_H_
-
+#endif // _LIBCDVD_INTERNAL_H_
