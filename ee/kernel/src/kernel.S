@@ -100,7 +100,7 @@ SYSCALL(SetGsCrt)
 #ifdef KERNEL_NO_PATCHES
 
 #ifdef F_Exit
-SYSCALL_SPECIAL(Exit, _Exit)
+SYSCALL_SPECIAL(Exit, KExit)
 #endif
 
 #ifdef F_LoadExecPS2
@@ -113,8 +113,8 @@ SYSCALL_SPECIAL(ExecPS2, _ExecPS2)
 
 #else	/* KERNEL_NO_PATCHES */
 
-#ifdef F__Exit
-SYSCALL(_Exit)
+#ifdef F_KExit
+SYSCALL(KExit)
 #endif
 
 #ifdef F__LoadExecPS2

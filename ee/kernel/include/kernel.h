@@ -340,7 +340,7 @@ void iInvalidDCache(void *start, void *end);
 /* System call prototypes */
 void ResetEE(u32 init_bitfield);
 void SetGsCrt(s16 interlace, s16 pal_ntsc, s16 field);
-void _Exit(s32 exit_code) __attribute__((noreturn));
+void KExit(s32 exit_code) __attribute__((noreturn));
 void _LoadExecPS2(const char *filename, s32 num_args, char *args[]) __attribute__((noreturn));
 s32 _ExecPS2(void *entry, void *gp, int num_args, char *args[]);
 void RFU009(u32 arg0, u32 arg1);

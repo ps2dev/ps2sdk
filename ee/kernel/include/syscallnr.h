@@ -8,7 +8,7 @@
 
 #define __NR_ResetEE                  1
 #define __NR_SetGsCrt                 2
-#define __NR__Exit                    4
+#define __NR_KExit                    4
 #define __NR_ResumeIntrDispatch       5 // Arbitrarily named
 #define __NR__LoadExecPS2             6
 #define __NR__ExecPS2                 7

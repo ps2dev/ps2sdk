@@ -65,7 +65,7 @@ const char *SetArg(const char *filename, int argc, char *argv[])
 void Exit(s32 exit_code)
 {
     TerminateLibrary();
-    _Exit(exit_code);
+    KExit(exit_code);
 }
 #endif
 
