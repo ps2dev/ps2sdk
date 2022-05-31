@@ -8,16 +8,6 @@
 #define TRUE 1
 #define FALSE 0
 
-// Macros for READ Data pattan
-#define CdSecS2048 0  // sector size 2048
-#define CdSecS2328 1  // sector size 2328
-#define CdSecS2340 2  // sector size 2340
-
-// Macros for Spindle control
-#define CdSpinMax 0
-#define CdSpinNom 1  // Starts reading data at maximum rotational velocity and if a read error occurs, the rotational velocity is reduced.
-#define CdSpinStm 0  // Recommended stream rotation speed.
-
 #define MAX_DIR_CACHE_SECTORS 32
 
 struct DirTocEntry
