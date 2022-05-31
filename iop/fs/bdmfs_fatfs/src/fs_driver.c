@@ -476,6 +476,38 @@ int fs_ioctl(iop_file_t *fd, int cmd, void *data)
     return ret;
 }
 
+void buildFragmentTable(){
+    struct Fragment{
+        u32 cluster; // cluster start
+        u32 count; // cluster count
+    };
+
+    struct Fragment list[USBMASS_IOCTL_NUM_FRAGS];
+    u32 n_frags = 0;
+
+    u32 cur_cluster = USBMASS_IOCTL_START_CLUSTER;
+    u32 start_cluster = USBMASS_IOCTL_START_CLUSTER;
+
+    u32 count = 0;
+
+    while (1){
+        if (cur_cluster < 2 || cur_cluster == (u32)-1){
+            break;
+        }
+        u32 next_cluster = USBMASS_IOCTL_NEXT_CLUSTER;
+        if (next_cluster != cur_cluster+1){
+            struct Fragment* fragment = &list[n_frags++];
+            fragment->cluster = start_cluster;
+            fragment->count = count;
+            start_cluster = next_cluster;
+            count = 0;
+        }
+        count++;
+        cur_cluster = next_cluster;
+    }
+
+}
+
 int fs_rename(iop_file_t *fd, const char *path, const char *newpath)
 {
     M_DEBUG("%s\n", __func__);
