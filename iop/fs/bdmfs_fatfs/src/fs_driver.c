@@ -459,8 +459,8 @@ int fs_ioctl(iop_file_t *fd, int cmd, void *data)
         case USBMASS_IOCTL_NUM_FRAGS:
             ret = file->obj.n_frag;
             break;
-        case USBMASS_IOCTL_START_CLUSTER:
-            ret = file->obj.sclust;
+        case USBMASS_IOCTL_DATA_BASE:
+            ret = file->obj.fs->database;
             break;
         case USBMASS_IOCTL_NEXT_CLUSTER:
             ret = get_fat(&file->obj, (DWORD)data);

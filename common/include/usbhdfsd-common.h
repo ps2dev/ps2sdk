@@ -29,7 +29,7 @@
 /** Return number of fragments **/
 #define USBMASS_IOCTL_NUM_FRAGS      0x0005
 /** Return first cluster **/
-#define USBMASS_IOCTL_START_CLUSTER  0x0006
+#define USBMASS_IOCTL_DATA_BASE      0x0006
 /** Return next cluster **/
 #define USBMASS_IOCTL_NEXT_CLUSTER   0x0007
 /** Return cluster size **/
