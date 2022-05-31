@@ -4746,7 +4746,7 @@ FRESULT f_stat (
 /*-----------------------------------------------------------------------*/
 /* Get Number of Free Clusters                                           */
 /*-----------------------------------------------------------------------*/
-
+#if 0
 FRESULT f_getfree (
 	const TCHAR* path,	/* Logical drive number */
 	DWORD* nclst,		/* Pointer to a variable to return number of free clusters */
@@ -4831,14 +4831,14 @@ FRESULT f_getfree (
 
 	LEAVE_FF(fs, res);
 }
-
+#endif
 
 
 
 /*-----------------------------------------------------------------------*/
 /* Truncate File                                                         */
 /*-----------------------------------------------------------------------*/
-
+#if 0
 FRESULT f_truncate (
 	FIL* fp		/* Pointer to the file object */
 )
@@ -4881,14 +4881,14 @@ FRESULT f_truncate (
 
 	LEAVE_FF(fs, res);
 }
-
+#endif
 
 
 
 /*-----------------------------------------------------------------------*/
 /* Delete a File/Directory                                               */
 /*-----------------------------------------------------------------------*/
-
+#if 0
 FRESULT f_unlink (
 	const TCHAR* path		/* Pointer to the file or directory path */
 )
@@ -4975,7 +4975,7 @@ FRESULT f_unlink (
 
 	LEAVE_FF(fs, res);
 }
-
+#endif
 
 
 

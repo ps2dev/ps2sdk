@@ -26,6 +26,8 @@
 #define USBMASS_IOCTL_GET_DRIVERNAME	0x0003
 /** Check if fragments exist */
 #define USBMASS_IOCTL_CHECK_CHAIN	0x0004
+/** Return absolute LBA of all file fragments **/
+#define USBMASS_IOCTL_GET_CHAIN     0x0005
 
 //DEVCTL function codes
 /** Issues the SCSI STOP UNIT command to the specified device. Use this to shut down devices properly. */

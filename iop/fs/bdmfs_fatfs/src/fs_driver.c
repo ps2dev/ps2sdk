@@ -424,6 +424,27 @@ static int fs_getstat(iop_file_t *fd, const char *name, iox_stat_t *stat)
     return ret;
 }
 
+static void buildFragmentTable(FIL *file, u32* table){
+    memset(table, 0, sizeof(u32)*12);
+
+    // set number of fragments
+    table[0] = file->obj.n_frag;
+    if (table[0] > 10) return;
+
+    // set cluster size
+    table[1] = file->obj.fs->csize;
+
+    // get start cluster    
+    u32 clust = table[2] = file->obj.sclust;
+    
+    // follow fat chain
+    for (int i=0; i<file->obj.n_frag; i++){
+        clust = get_fat(&file->obj, clust);
+        if (clust < 2) break;
+        table[i+3] = clust;
+    }
+}
+
 //---------------------------------------------------------------------------
 int fs_ioctl(iop_file_t *fd, int cmd, void *data)
 {
@@ -455,6 +476,9 @@ int fs_ioctl(iop_file_t *fd, int cmd, void *data)
             break;
         case USBMASS_IOCTL_CHECK_CHAIN:
             ret = (file->obj.n_frag < 2);
+            break;
+        case USBMASS_IOCTL_GET_CHAIN:
+            buildFragmentTable(file, data);
             break;
         default:
             break;
