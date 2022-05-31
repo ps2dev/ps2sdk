@@ -61,9 +61,9 @@ static int _fs_init_lock(void)
     M_DEBUG("%s\n", __func__);
 
     sp.initial = 1;
-    sp.max = 1;
-    sp.option = 0;
-    sp.attr = 0;
+    sp.max     = 1;
+    sp.option  = 0;
+    sp.attr    = 0;
     if ((_lock_sema_id = CreateSema(&sp)) < 0) {
         return (-1);
     }
@@ -155,7 +155,7 @@ static int fs_open(iop_file_t *fd, const char *name, int flags, int mode)
     if (ret != FR_OK) {
         free(fd->privdata);
         fd->privdata = NULL;
-        ret = -ret;
+        ret          = -ret;
     } else {
         ret = 1;
     }
@@ -308,7 +308,7 @@ static int fs_dopen(iop_file_t *fd, const char *name)
     if (ret != FR_OK) {
         free(fd->privdata);
         fd->privdata = NULL;
-        ret = -ret;
+        ret          = -ret;
     }
 
     _fs_unlock();
@@ -340,9 +340,9 @@ static int fileInfoToStat(FILINFO *fno, iox_stat_t *stat)
 {
     unsigned char *cdate = (unsigned char *)&(fno->fdate);
     unsigned char *ctime = (unsigned char *)&(fno->ftime);
-    stat->mode = O_RDWR;
-    stat->attr = 0777;
-    stat->size = fno->fsize;
+    stat->mode           = O_RDWR;
+    stat->attr           = 0777;
+    stat->size           = fno->fsize;
     // set created Date: Day, Month, Year
     stat->ctime[4] = cdate[0];
     stat->ctime[5] = cdate[1];
@@ -429,7 +429,7 @@ int fs_ioctl(iop_file_t *fd, int cmd, void *data)
 {
     M_DEBUG("%s\n", __func__);
 
-    int ret = 0;
+    int ret   = 0;
     FIL *file = ((FIL *)(fd->privdata));
 
     if (file == NULL)
@@ -476,38 +476,6 @@ int fs_ioctl(iop_file_t *fd, int cmd, void *data)
     return ret;
 }
 
-void buildFragmentTable(){
-    struct Fragment{
-        u32 cluster; // cluster start
-        u32 count; // cluster count
-    };
-
-    struct Fragment list[USBMASS_IOCTL_NUM_FRAGS];
-    u32 n_frags = 0;
-
-    u32 cur_cluster = USBMASS_IOCTL_START_CLUSTER;
-    u32 start_cluster = USBMASS_IOCTL_START_CLUSTER;
-
-    u32 count = 0;
-
-    while (1){
-        if (cur_cluster < 2 || cur_cluster == (u32)-1){
-            break;
-        }
-        u32 next_cluster = USBMASS_IOCTL_NEXT_CLUSTER;
-        if (next_cluster != cur_cluster+1){
-            struct Fragment* fragment = &list[n_frags++];
-            fragment->cluster = start_cluster;
-            fragment->count = count;
-            start_cluster = next_cluster;
-            count = 0;
-        }
-        count++;
-        cur_cluster = next_cluster;
-    }
-
-}
-
 int fs_rename(iop_file_t *fd, const char *path, const char *newpath)
 {
     M_DEBUG("%s\n", __func__);
@@ -542,7 +510,7 @@ static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsig
             mounted_bd->stop(mounted_bd);
             f_unmount("");
             mounted_bd = NULL;
-            ret = FR_OK;
+            ret        = FR_OK;
             break;
         default:
             ret = -ENXIO;
