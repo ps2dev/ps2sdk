@@ -28,8 +28,11 @@ int LoadStartModule(const char *name, int arglen, const char *args, int *result)
 int StartModule(int, const char *name, int arglen, const char *args, int *result);
 int LoadModuleBufferAddress(void *buffer, int, int);
 int LoadModuleBuffer(void *buffer);
+int LoadStartKelfModule(const char *name, int arglen, const char *args, int *result);
 void SetSecrmanCallbacks(void *SecrCardBootFile_fnc, void *SecrDiskBootFile_fnc, void *SetLoadfileCallbacks_fnc);
 void SetCheckKelfPathCallback(void *CheckKelfPath_fnc);
+void GetLoadfileCallbacks(void **CheckKelfPath_fnc, void **SetLoadfileCallbacks_fnc);
+int LoadfileCheckDevicePathValid(const char *path);
 
 #define modload_IMPORTS_start DECLARE_IMPORT_TABLE(modload, 1, 1)
 #define modload_IMPORTS_end END_IMPORT_TABLE
@@ -42,7 +45,10 @@ void SetCheckKelfPathCallback(void *CheckKelfPath_fnc);
 #define I_StartModule DECLARE_IMPORT(8, StartModule)
 #define I_LoadModuleBufferAddress DECLARE_IMPORT(9, LoadModuleBufferAddress)
 #define I_LoadModuleBuffer DECLARE_IMPORT(10, LoadModuleBuffer)
+#define I_LoadStartKelfModule DECLARE_IMPORT(11, LoadStartKelfModule)
 #define I_SetSecrmanCallbacks DECLARE_IMPORT(12, SetSecrmanCallbacks)
 #define I_SetCheckKelfPathCallback DECLARE_IMPORT(13, SetCheckKelfPathCallback)
+#define I_GetLoadfileCallbacks DECLARE_IMPORT(14, GetLoadfileCallbacks)
+#define I_CheckDevicePathValid DECLARE_IMPORT(15, CheckDevicePathValid)
 
 #endif /* __MODLOAD_H__ */
