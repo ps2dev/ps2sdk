@@ -20,7 +20,7 @@ ifeq ($(KERNEL_NO_PATCHES),1)
 	ISUSPEND_THREAD_SYSCALL = iSuspendThread.o
 	TLB_SYSCALLS =
 else
-	EXEC_SYSCALLS = _Exit.o _LoadExecPS2.o _ExecPS2.o
+	EXEC_SYSCALLS = KExit.o _LoadExecPS2.o _ExecPS2.o
 	EXECOSD_SYSCALL = _ExecOSD.o
 	ALARM_SYSCALLS = _SetAlarm.o SetAlarm.o _ReleaseAlarm.o ReleaseAlarm.o
 	ALARM_INTR_SYSCALLS = _iSetAlarm.o iSetAlarm.o _iReleaseAlarm.o iReleaseAlarm.o
