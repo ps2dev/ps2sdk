@@ -108,21 +108,32 @@ enum SCECdvdErrorCode {
 
 enum SCECdvdMediaType {
     SCECdGDTFUNCFAIL = -1,
+    /** No Disc inserted */
     SCECdNODISC      = 0x00,
+    /** Detecting disc type */
     SCECdDETCT,
     SCECdDETCTCD,
     SCECdDETCTDVDS,
     SCECdDETCTDVDD,
+    /** Unknown disc type */
     SCECdUNKNOWN,
 
+    /** PS1 CD with no CDDA tracks */
     SCECdPSCD = 0x10,
+    /** PS1 CD with CDDA tracks */
     SCECdPSCDDA,
+    /** PS2 CD with no CDDA tracks */
     SCECdPS2CD,
+    /** PS2 CD with CDDA tracks */
     SCECdPS2CDDA,
+    /** PS2 DVD */
     SCECdPS2DVD,
 
+    /** CDDA */
     SCECdCDDA = 0xFD,
+    /** DVD Video */
     SCECdDVDV,
+    /** Illegal disk type */
     SCECdIllegalMedia
 };
 
@@ -146,39 +157,61 @@ enum SCECdvdInterruptCode {
 
 // Tray request modes
 enum SCECdvdTrayReqMode {
+    /** Tray Open */
     SCECdTrayOpen = 0,
+    /** Tray Close */
     SCECdTrayClose,
+    /** Tray Check */
     SCECdTrayCheck
 };
 
 // Drive states
 enum SCECdvdDriveState {
+    /** disc has stopped spinning */
     SCECdStatStop = 0x00,
+    /** tray is open */
     SCECdStatShellOpen,
+    /** disc is spinning */
     SCECdStatSpin,
+    /** reading from disc */
     SCECdStatRead  = 0x06,
+    /** disc is paused */
     SCECdStatPause = 0x0A,
+    /** disc is seeking */
     SCECdStatSeek  = 0x12,
+    /** error occurred */
     SCECdStatEmg   = 0x20,
 };
 
 typedef struct
 {
+    /** status */
     u8 stat;
+    /** second */
     u8 second;
+    /** minute */
     u8 minute;
+    /** hour */
     u8 hour;
+    /** padding */
     u8 pad;
+    /** day */
     u8 day;
+    /** month */
     u8 month;
+    /** year */
     u8 year;
 } sceCdCLOCK;
 
 typedef struct
 {
+    /** file location */
     u32 lsn;
+    /** file size */
     u32 size;
+    /** file name (body) */
     char name[16];
+    /** date (1=secs, 2=mins, 3=hours, 4=day, 5=mon, 6,7=year,   0=iso file flags) */
     u8 date[8];
 } sceCdlFILE;
 
@@ -197,9 +230,13 @@ typedef struct
 
 typedef struct
 {
+    /** number of times to retry reads when an error occurs */
     u8 trycount;
+    /** speed to read at SCECdvdSpinValue enumeration values (also speed to spin at) */
     u8 spindlctrl;
+    /** sector size value SCECdvdSectorType enumeration values */
     u8 datapattern;
+    /** padding */
     u8 pad;
 } sceCdRMode;
 
@@ -979,6 +1016,213 @@ int sceCdReadRegionParams(u32 *arg1, u32 *result);
  * @return 1 on success, 0 on failure
  */
 int sceCdWriteRegionParams(u8 arg1, u32 *arg2, u8 *arg3, u32 *result);
+
+// Compatibility names for older ps2sdk versions.
+
+// sceCdlFILE renames
+#define CdvdFileSpec_t sceCdlFILE
+#define cd_file_t      sceCdlFILE
+// Structure member names are the same
+
+// sceCdRMode renames
+#define CdvdReadMode_t sceCdRMode
+#define cd_read_mode_t sceCdRMode
+// Structure member names differ:
+// retries -> trycount
+// readSpeed -> spindlctrl
+// sectorType -> datapattern
+
+// SCECdvdSectorType renames
+#define SCECdvdSectorTypes SCECdvdSectorType
+#define CdvdSectorType_t   SCECdvdSectorType
+#define CDVD_SECTOR_2048   SCECdSecS2048
+#define CDVD_SECTOR_2328   SCECdSecS2328
+#define CDVD_SECTOR_2340   SCECdSecS2340
+#define CDVD_SECTOR_2352   SCECdSecS2352
+#define CDVD_SECTOR_2368   SCECdSecS2368
+#define CDVD_SECTOR_2448   SCECdSecS2448
+#define CdSecS2048         SCECdSecS2048
+#define CdSecS2328         SCECdSecS2328
+#define CdSecS2340         SCECdSecS2340
+
+// SCECdvdSpinValue renames
+#define SCECdvdSpinValues SCECdvdSpinValue
+#define CDVD_SPIN_MAX     SCECdSpinMax
+#define CDVD_SPIN_NORMAL  SCECdSpinNom
+#define CDVD_SPIN_STREAM  SCECdSpinStm
+#define CDVD_SPIN_DVD0    SCECdSpinDvdDL0
+#define CdSpinMax         SCECdSpinMax
+#define CdSpinNom         SCECdSpinNom
+#define CdSpinStm         SCECdSpinStm
+
+// SCECdvdErrorCode renames
+#define SCECdvdErrorCodes SCECdvdErrorCode
+#define CDVD_ERR_FAIL     SCECdErFAIL
+#define CDVD_ERR_NO       SCECdErNO
+#define CDVD_ERR_ABRT     SCECdErABRT
+#define CDVD_ERR_CMD      SCECdErCMD
+#define CDVD_ERR_OPENS    SCECdErOPENS
+#define CDVD_ERR_NODISC   SCECdErNODISC
+#define CDVD_ERR_NORDY    SCECdErNORDY
+#define CDVD_ERR_CUD      SCECdErCUD
+#define CDVD_ERR_IPI      SCECdErIPI
+#define CDVD_ERR_ILI      SCECdErILI
+#define CDVD_ERR_PRM      SCECdErPRM
+#define CDVD_ERR_READ     SCECdErREAD
+#define CDVD_ERR_TRMOPN   SCECdErTRMOPN
+#define CDVD_ERR_EOM      SCECdErEOM
+#define CDVD_ERR_READCF   SCECdErREADCF
+#define CDVD_ERR_READCFR  SCECdErREADCFR
+
+// SCECdvdMediaType renames
+#define SCECdvdMediaTypes          SCECdvdMediaType
+#define CdvdDiscType_t             SCECdvdMediaType
+#define CDVD_TYPE_NODISK           SCECdNODISC
+#define CDVD_TYPE_DETECT           SCECdDETCT
+#define CDVD_TYPE_DETECT_CD        SCECdDETCTCD
+#define CDVD_TYPE_DETECT_DVDSINGLE SCECdDETCTDVDS
+#define CDVD_TYPE_DETECT_DVDDUAL   SCECdDETCTDVDD
+#define CDVD_TYPE_UNKNOWN          SCECdUNKNOWN
+#define CDVD_TYPE_PS1CD            SCECdPSCD
+#define CDVD_TYPE_PS1CDDA          SCECdPSCDDA
+#define CDVD_TYPE_PS2CD            SCECdPS2CD
+#define CDVD_TYPE_PS2CDDA          SCECdPS2CDDA
+#define CDVD_TYPE_PS2DVD           SCECdPS2DVD
+#define CDVD_TYPE_CDDA             SCECdCDDA
+#define CDVD_TYPE_DVDVIDEO         SCECdDVDV
+#define CDVD_TYPE_ILLEGAL          SCECdIllegalMedia
+
+// SCECdvdDriveState renames
+#define SCECdvdDriveStates SCECdvdDriveState
+#define CDVD_STAT_STOP     SCECdStatStop
+#define CDVD_STAT_OPEN     SCECdStatShellOpen
+#define CDVD_STAT_SPIN     SCECdStatSpin
+#define CDVD_STAT_READ     SCECdStatRead
+#define CDVD_STAT_PAUSE    SCECdStatPause
+#define CDVD_STAT_SEEK     SCECdStatSeek
+#define CDVD_STAT_ERROR    SCECdStatEmg
+
+// SCECdvdMModeMediaType renames
+#define SCECdvdMModeMediaTypes SCECdvdMModeMediaType
+#define CdvdMediaMode_t        SCECdvdMModeMediaType
+#define CDVD_MEDIA_MODE_CD     SCECdMmodeCd
+#define CDVD_MEDIA_MODE_DVD    SCECdMmodeDvd
+#define CdMmodeCd              SCECdMmodeCd
+#define CdMmodeDvd             SCECdMmodeDvd
+
+// sceCdlLOCCD renames
+#define CdvdLocation_t sceCdlLOCCD
+#define cd_location_t  sceCdlLOCCD
+// Structure member names are the same
+
+// SCECdvdInitMode renames
+#define SCECdvdInitModes  SCECdvdInitMode
+#define CDVD_INIT_INIT    SCECdINIT
+#define CDVD_INIT_NOCHECK SCECdINoD
+#define CDVD_INIT_EXIT    SCECdEXIT
+
+// SCECdvdInterruptCode renames
+#define SCECdvdInterruptCodes SCECdvdInterruptCode
+#define CDVD_READY_READY      SCECdComplete
+#define CDVD_READY_NOTREADY   SCECdNotReady
+
+// sceCdCLOCK renames
+#define CdvdClock_t sceCdCLOCK
+#define cd_clock_t  sceCdCLOCK
+// Structure member names differ:
+// status -> stat
+// week -> pad
+
+// SCECdvdStreamMode renames
+#define SCECdvdStreamModes   SCECdvdStreamMode
+#define CDVD_STREAM_NONBLOCK STMNBLK
+#define CDVD_STREAM_BLOCK    STMBLK
+
+// SCECdvdTrayReqMode renames
+#define SCECdvdTrayReqModes SCECdvdTrayReqMode
+#define CDVD_TRAY_OPEN      SCECdTrayOpen
+#define CDVD_TRAY_CLOSE     SCECdTrayClose
+#define CDVD_TRAY_CHECK     SCECdTrayCheck
+
+// sceCdCBFunc rename
+#define CdCBFunc sceCdCBFunc
+
+// SCECdvdCallbackReason rename
+#define SCECdvdCallbackReasons SCECdvdCallbackReason
+
+
+// function renames
+#define CdInit         sceCdInit
+#define cdInit         sceCdInit
+#define CdStandby      sceCdStandby
+#define cdStandby      sceCdStandby
+#define CdRead         sceCdRead
+#define cdRead         sceCdRead
+#define CdSeek         sceCdSeek
+#define cdSeek         sceCdSeek
+#define CdGetError     sceCdGetError
+#define cdGetError     sceCdGetError
+#define CdGetToc       sceCdGetToc
+#define cdGetToc       sceCdGetToc
+#define CdSearchFile   sceCdSearchFile
+#define cdSearchFile   sceCdSearchFile
+#define CdSync         sceCdSync
+#define cdSync         sceCdSync
+#define CdGetDiskType  sceCdGetDiskType
+#define cdGetDiscType  sceCdGetDiskType
+#define CdDiskReady    sceCdDiskReady
+#define cdDiskReady    sceCdDiskReady
+#define CdTrayReq      sceCdTrayReq
+#define cdTrayReq      sceCdTrayReq
+#define CdStop         sceCdStop
+#define cdStop         sceCdStop
+#define CdPosToInt     sceCdPosToInt
+#define cdPosToInt     sceCdPosToInt
+#define CdIntToPos     sceCdIntToPos
+#define cdIntToPos     sceCdIntToPos
+#define CdReadClock    sceCdReadClock
+#define cdReadClock    sceCdReadClock
+#define CdStatus       sceCdStatus
+#define cdStatus       sceCdStatus
+#define CdCallback     sceCdCallback
+#define cdSetCallback  sceCdCallback
+#define CdPause        sceCdPause
+#define cdPause        sceCdPause
+#define CdBreak        sceCdBreak
+#define cdBreak        sceCdBreak
+#define CdReadCdda     sceCdReadCdda
+#define cdCddaRead     sceCdReadCdda
+#define CdGetReadPos   sceCdGetReadPos
+#define cdGetReadPos   sceCdGetReadPos
+#define CdMmode        sceCdMmode
+#define cdSetMediaMode sceCdMmode
+
+#define cdDvdRead              sceCdReadDVDV
+#define cdApplyNCmd            sceCdApplyNCmd
+#define cdReadIOPMem           sceCdReadIOPMem
+#define cdNCmdDiskReady        sceCdNCmdDiskReady
+#define cdReadChain            sceCdReadChain
+#define cdWriteClock           sceCdWriteClock
+#define cdApplySCmd            sceCdApplySCmd
+#define cdCancelPowerOff       sceCdCancelPOffRdy
+#define cdBlueLedCtrl          sceCdBlueLEDCtl
+#define sceCdBlueLedCtrl       sceCdBlueLEDCtl
+#define cdPowerOff             sceCdPowerOff
+#define cdChangeThreadPriority sceCdChangeThreadPriority
+#define cdStStart              sceCdStStart
+#define cdStRead               sceCdStRead
+#define cdStStop               sceCdStStop
+#define cdStSeek               sceCdStSeek
+#define cdStInit               sceCdStInit
+#define cdStStat               sceCdStStat
+#define cdStPause              sceCdStPause
+#define cdStResume             sceCdStResume
+#define CdRC                   sceCdRC
+
+// Internal definitions no longer exposed:
+// cdStream
+// cdCddaStream
+// cdInitCallbackThread
 
 #ifdef __cplusplus
 }
