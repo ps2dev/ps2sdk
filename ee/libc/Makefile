@@ -14,8 +14,6 @@ INIT_OBJS = _ps2sdk_libc_init.o _ps2sdk_libc_deinit.o _ps2sdk_args_parse.o
 
 SLEEP_OBJS = nanosleep.o
 
-TERMINATE_OBJS = abort.o exit.o
-
 SJIS_OBJS = isSpecialSJIS.o isSpecialASCII.o strcpy_ascii.o strcpy_sjis.o
 
 TIME_OBJS = ps2_clock.o __time_internals.o
@@ -35,9 +33,6 @@ $(SJIS_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)sjis.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(SLEEP_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)sleep.c
-	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
-
-$(TERMINATE_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)terminate.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(PS2SDKAPI_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)ps2sdkapi.c
