@@ -506,17 +506,6 @@ int SetMemoryMode(int mode); // Arbitrarily named.
 void _SyncDCache(void *start, void *end);
 void _InvalidDCache(void *start, void *end);
 
-/* stdlib - program termination */
-void abort(void) __attribute__((noreturn));
-void exit(int retval) __attribute__((noreturn));
-void _exit(int retval) __attribute__((noreturn));
-
-/* errno.h */
-#ifndef errno
-extern int errno __attribute__((section("data")));
-int *__errno(void);
-#endif
-
 void *GetSyscallHandler(int syscall_no);
 void *GetExceptionHandler(int except_no);
 void *GetInterruptHandler(int intr_no);
