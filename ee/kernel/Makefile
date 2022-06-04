@@ -114,7 +114,53 @@ endif
 
 ### Timer objects
 
-TIMER_OBJS = cpu_ticks.o
+TIMER_OBJS = \
+	timer_data.o \
+	SetT2.o \
+	SetT2_COUNT.o \
+	SetT2_MODE.o \
+	SetT2_COMP.o \
+	InitTimer.o \
+	EndTimer.o \
+	GetTimerPreScaleFactor.o \
+	StartTimerSystemTime.o \
+	StopTimerSystemTime.o \
+	SetNextComp.o \
+	InsertAlarm_ForTimer.o \
+	UnlinkAlarm_ForTimer.o \
+	timer_intc_handler_callback.o \
+	iGetTimerSystemTime.o \
+	GetTimerSystemTime.o \
+	iAllocTimerCounter.o \
+	AllocTimerCounter.o \
+	iFreeTimerCounter.o \
+	FreeTimerCounter.o \
+	iGetTimerUsedUnusedCounters.o \
+	GetTimerUsedUnusedCounters.o \
+	iStartTimerCounter.o \
+	StartTimerCounter.o \
+	iStopTimerCounter.o \
+	StopTimerCounter.o \
+	SetTimerCount.o \
+	iGetTimerBaseTime.o \
+	GetTimerBaseTime.o \
+	iGetTimerCount.o \
+	GetTimerCount.o \
+	iSetTimerHandler.o \
+	SetTimerHandler.o \
+	TimerBusClock2USec.o \
+	TimerUSec2BusClock.o \
+	TimerBusClock2Freq.o \
+	TimerFreq2BusClock.o \
+	ForTimer_InitAlarm.o \
+	AlarmHandler.o \
+	SetTimerAlarm.o \
+	iSetTimerAlarm.o \
+	ReleaseTimerAlarm.o \
+	iReleaseTimerAlarm.o \
+	DelayThreadHandler_callback.o \
+	DelayThread.o \
+	cpu_ticks.o
 
 ### Getter objects
 

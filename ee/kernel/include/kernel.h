@@ -528,6 +528,92 @@ int Copy(void *dest, const void *src, int size);
 void setup(int syscall_num, void *handler); // alias of "SetSyscall"
 void *GetEntryAddress(int syscall);
 
+// Timer related definitions
+typedef u64 (*timer_alarm_handler_t)(s32 alarm_id, u64 scheduled_time, u64 actual_time, void *arg, void *pc_value);
+
+typedef struct timer_ee_entry_struct_
+{
+    struct timer_ee_entry_struct_ *counter_buf_next;
+    struct timer_ee_entry_struct_ *counter_buf_previous;
+    u32 timer_id_check_guard;
+    u32 timer_flags;
+    u64 timer_system_time;
+    u64 timer_count;
+    u64 comparison_value; 
+    timer_alarm_handler_t callback_handler;
+    void *last_gp;
+    void *callback_handler_argument;
+    u32 padding34;
+    u32 padding38;
+    u32 padding3c;
+} timer_ee_entry_struct;
+
+
+typedef struct alarm_ee_entry_struct_
+{
+    struct alarm_ee_entry_struct_ *next_alarm_ptr;
+    s32 timer_counter_id;
+    timer_alarm_handler_t callback_handler;
+    void *callback_handler_argument;
+} alarm_ee_entry_struct;
+
+typedef struct timer_ee_global_struct_
+{
+    u64 timer_handled_count;
+    s32 intc_handler;
+    u32 timer_counter_total;
+    u32 timer_counter;
+    timer_ee_entry_struct *current_counter_buf;
+    timer_ee_entry_struct *timer_struct_head;
+    s32 last_handled_timer_id;
+} timer_ee_global_struct;
+
+// Timer related functions
+extern s32 SetT2(volatile void *a1, u32 a2);
+extern void SetT2_COUNT(u32 a1);
+extern void SetT2_MODE(u32 a1);
+extern void SetT2_COMP(u32 a1);
+extern s32 InitTimer(s32 a1);
+extern s32 EndTimer(void);
+extern s32 GetTimerPreScaleFactor(void);
+extern s32 StartTimerSystemTime(void);
+extern s32 StopTimerSystemTime(void);
+extern void SetNextComp(u64 time);
+extern void InsertAlarm_ForTimer(timer_ee_entry_struct *a1);
+extern timer_ee_entry_struct *UnlinkAlarm_ForTimer(timer_ee_entry_struct *a1);
+extern s32 timer_intc_handler_callback(s32 cause, void *arg, void *addr);
+extern u64 iGetTimerSystemTime(void);
+extern u64 GetTimerSystemTime(void);
+extern s32 iAllocTimerCounter(void);
+extern s32 AllocTimerCounter(void);
+extern s32 iFreeTimerCounter(s32 id);
+extern s32 FreeTimerCounter(s32 id);
+extern s32 iGetTimerUsedUnusedCounters(u32 *used_counters, u32 *unused_counters);
+extern s32 GetTimerUsedUnusedCounters(u32 *used_counters, u32 *unused_counters);
+extern s32 iStartTimerCounter(s32 id);
+extern s32 StartTimerCounter(s32 id);
+extern s32 iStopTimerCounter(s32 id);
+extern s32 StopTimerCounter(s32 id);
+extern u64 SetTimerCount(s32 id, u64 timer_count);
+extern u64 iGetTimerBaseTime(s32 id);
+extern u64 GetTimerBaseTime(s32 id);
+extern u64 iGetTimerCount(s32 id);
+extern u64 GetTimerCount(s32 id);
+extern s32 iSetTimerHandler(s32 id, u64 scheduled_time, timer_alarm_handler_t callback_handler, void *arg);
+extern s32 SetTimerHandler(s32 id, u64 scheduled_time, timer_alarm_handler_t callback_handler, void *arg);
+extern void TimerBusClock2USec(u64 clocks, u32 *seconds_result, u32 *microseconds_result);
+extern u64 TimerUSec2BusClock(u32 seconds, u32 microseconds);
+extern float TimerBusClock2Freq(s64 clocks);
+extern u64 TimerFreq2BusClock(float timer_frequency);
+extern void ForTimer_InitAlarm(void);
+extern u64 AlarmHandler(s32 alarm_id, u64 scheduled_time, u64 actual_time, void *arg, void *last_pc);
+extern s32 SetTimerAlarm(u64 clock_cycles, timer_alarm_handler_t callback_handler, void *arg);
+extern s32 iSetTimerAlarm(u64 clock_cycles, timer_alarm_handler_t callback_handler, void *arg);
+extern s32 ReleaseTimerAlarm(s32 id);
+extern s32 iReleaseTimerAlarm(s32 id);
+extern u64 DelayThreadHandler_callback(s32 alarm_id, u64 scheduled_time, u64 actual_time, void *arg, void *pc_value);
+extern s32 DelayThread(s32 microseconds);
+
 #ifdef __cplusplus
 }
 #endif

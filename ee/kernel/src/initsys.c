@@ -20,6 +20,8 @@ void _InitSys(void)
 {
 #ifndef KERNEL_NO_PATCHES
     InitAlarm();
+    InitTimer(2);
+    StartTimerSystemTime();
     InitThread();
     InitExecPS2();
     InitTLBFunctions();
