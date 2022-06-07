@@ -114,7 +114,7 @@ endif
 
 ### Timer objects
 
-TIMER_OBJS = cpu_ticks.o
+TIMER_OBJS = __time_internals.o StartTimerSystemTime.o StopTimerSystemTime.o iGetTimerSystemTime.o GetTimerSystemTime.o cpu_ticks.o
 
 ### Getter objects
 

@@ -14,6 +14,7 @@
 #include <dirent.h>
 #include <inttypes.h>
 #include <sys/stat.h>
+#include <timer.h>
 
 /** Inter-library helpers */
 extern int (*_ps2sdk_close)(int);
@@ -39,7 +40,10 @@ extern int (*_ps2sdk_closedir)(DIR *dir);
 #define PS2_CLOCKS_PER_MSEC (PS2_CLOCKS_PER_SEC / 1000) // 576
 
 typedef uint64_t ps2_clock_t;
-ps2_clock_t ps2_clock(void);
+static inline ps2_clock_t ps2_clock(void) {
+    // DEPRECATED VERSION USE INSTEAD GetTimerSystemTime
+    return (ps2_clock_t)(GetTimerSystemTime() >> 8);
+}
 
 extern void _ps2sdk_timezone_update();
 
