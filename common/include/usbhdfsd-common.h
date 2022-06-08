@@ -15,6 +15,20 @@
 #ifndef __USBHDFSD_COMMON_H__
 #define __USBHDFSD_COMMON_H__
 
+#include <tamtypes.h>
+
+#define BD_MAX_FRAGMENTS 10
+
+typedef struct bd_fragment {
+    u32 sector; /// start sector of fragmented bd/file
+    u32 count;  /// number of sector in this fragment
+} __attribute__((packed)) bd_fragment_t;
+
+typedef struct bd_fraglist {
+    u32 count;                            /// number of fragments
+    bd_fragment_t list[BD_MAX_FRAGMENTS]; /// pointer to fragment list
+} __attribute__((packed)) bd_fraglist_t;
+
 // IOCTL function codes
 /** Rename opened file. Data input to ioctl() -> new, full filename of file. */
 #define USBMASS_IOCTL_RENAME         0x0000
@@ -25,7 +39,9 @@
 /** Returns the block device driver name */
 #define USBMASS_IOCTL_GET_DRIVERNAME 0x0003
 /** Check if fragments exist */
-#define USBMASS_IOCTL_CHECK_CHAIN	 0x0004
+#define USBMASS_IOCTL_CHECK_CHAIN    0x0004
+/** Return fragment table **/
+#define USBMASS_IOCTL_GET_FRAGLIST   0x0005
 
 // DEVCTL function codes
 /** Issues the SCSI STOP UNIT command to the specified device. Use this to shut down devices properly. */

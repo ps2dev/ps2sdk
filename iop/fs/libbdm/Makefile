@@ -6,7 +6,14 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = bdm libbdm bdmfs_vfat bdmfs_fatfs devfs fakehost filexio http netfs
+# IOP_CFLAGS += -DDEBUG
+
+IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
+
+IOP_OBJS = bd_defrag.o
+IOP_LIB = libbdm.a
 
 include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+include $(PS2SDKSRC)/iop/Rules.lib.make
+include $(PS2SDKSRC)/iop/Rules.make
+include $(PS2SDKSRC)/iop/Rules.release
