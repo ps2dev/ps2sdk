@@ -6,13 +6,8 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-# Helpers to make easy the use of lkernel-nopatch and newlib-nano
+# Helpers to make easy the use of newlib-nano
 NODEFAULTLIBS = 0
-LKERNEL = -lkernel
-ifeq ($(KERNEL_NOPATCH), 1)
-   NODEFAULTLIBS = 1
-   LKERNEL = -lkernel-nopatch
-endif
 
 LIBC = -lc
 LIBM = -lm
@@ -24,7 +19,7 @@ endif
 
 EXTRA_LDFLAGS =
 ifeq ($(NODEFAULTLIBS), 1)
-   EXTRA_LDFLAGS = -nodefaultlibs $(LIBM) -Wl,--start-group $(LIBC) -lps2sdkc $(LKERNEL) -Wl,--end-group -lgcc
+   EXTRA_LDFLAGS = -nodefaultlibs $(LIBM) -lgcc -Wl,--start-group $(LIBC) -lps2sdkc -lkernel -Wl,--end-group
 endif
 
 # Include directories
@@ -43,7 +38,7 @@ EE_CFLAGS := -D_EE -G0 $(EE_OPTFLAGS) $(EE_WARNFLAGS) $(EE_CFLAGS)
 EE_CXXFLAGS := -D_EE -G0 $(EE_OPTFLAGS) $(EE_WARNFLAGS) $(EE_CXXFLAGS)
 
 # Linker flags
-EE_LDFLAGS := -L$(PS2SDK)/ee/lib -Wl,-zmax-page-size=128 $(EXTRA_LDFLAGS) $(EE_LDFLAGS)
+EE_LDFLAGS := -L$(PS2SDK)/ee/lib -Wl,-zmax-page-size=128 $(EE_LDFLAGS)
 
 # Assembler flags
 EE_ASFLAGS := -G0 $(EE_ASFLAGS)
@@ -75,10 +70,10 @@ EE_CXX_COMPILE = $(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS)
 	$(EE_AS) $(EE_ASFLAGS) $< -o $@
 
 $(EE_BIN): $(EE_OBJS)
-	$(EE_CXX) -T$(EE_LINKFILE) $(EE_OPTFLAGS) -o $(EE_BIN) $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS)
+	$(EE_CXX) -T$(EE_LINKFILE) $(EE_OPTFLAGS) -o $(EE_BIN) $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIBS) $(EXTRA_LDFLAGS)
 
 $(EE_ERL): $(EE_OBJS)
-	$(EE_CC) -mno-crt0 $(EE_OPTFLAGS) -o $(EE_ERL) $(EE_OBJS) $(EE_LDFLAGS) -Wl,-r -Wl,-d
+	$(EE_CC) -mno-crt0 $(EE_OPTFLAGS) -o $(EE_ERL) $(EE_OBJS) $(EE_LDFLAGS) $(EXTRA_LDFLAGS) -Wl,-r -Wl,-d
 	$(EE_STRIP) --strip-unneeded -R .mdebug.eabi64 -R .reginfo -R .comment $(EE_ERL)
 
 $(EE_LIB): $(EE_OBJS)

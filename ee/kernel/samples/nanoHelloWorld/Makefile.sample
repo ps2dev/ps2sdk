@@ -6,7 +6,22 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = systemTime timer_alarm timer_alarm_sleep timer_alarm_stop noPatchedHelloWorld nanoHelloWorld
+EE_BIN = nanoHelloWorld.elf
+EE_OBJS = nanoHelloWorld.o
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+# This is forcing to use newlib_nano for saving space
+NEWLIB_NANO = 1
+
+all: $(EE_BIN)
+
+clean:
+	rm -f $(EE_BIN) $(EE_OBJS)
+
+run: $(EE_BIN)
+	ps2client execee host:$(EE_BIN)
+
+reset:
+	ps2client reset
+
+include $(PS2SDK)/samples/Makefile.pref
+include $(PS2SDK)/samples/Makefile.eeglobal

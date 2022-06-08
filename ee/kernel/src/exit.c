@@ -62,6 +62,7 @@ const char *SetArg(const char *filename, int argc, char *argv[])
 #endif
 
 #ifdef F_Exit
+__attribute__((weak))
 void Exit(s32 exit_code)
 {
     TerminateLibrary();
@@ -70,6 +71,7 @@ void Exit(s32 exit_code)
 #endif
 
 #ifdef F_ExecPS2
+__attribute__((weak))
 s32 ExecPS2(void *entry, void *gp, int num_args, char *args[])
 {
     SetArg("", num_args, args);
@@ -79,6 +81,7 @@ s32 ExecPS2(void *entry, void *gp, int num_args, char *args[])
 #endif
 
 #ifdef F_LoadExecPS2
+__attribute__((weak))
 void LoadExecPS2(const char *filename, s32 num_args, char *args[])
 {
     const char *pFilename;
@@ -90,6 +93,7 @@ void LoadExecPS2(const char *filename, s32 num_args, char *args[])
 #endif
 
 #ifdef F_ExecOSD
+__attribute__((weak))
 void ExecOSD(int num_args, char *args[])
 {
     SetArg("", num_args, args);

@@ -33,6 +33,7 @@ static int __alarm_timer_intc_id = -1;
 
 static int timOverflow(int ca);
 
+__attribute__((weak))
 void InitTimerAlarm() {
     if (__alarm_timer_intc_id < 0)
         __alarm_timer_intc_id = AddIntcHandler(INTC_TIM, timOverflow, 0);
@@ -41,6 +42,7 @@ void InitTimerAlarm() {
     EnableIntc(INTC_TIM);
 }
 
+__attribute__((weak))
 void DeinitTimerAlarm() {
     DisableIntc(INTC_TIM);
     if (__alarm_timer_intc_id >= 0)

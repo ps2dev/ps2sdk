@@ -54,6 +54,7 @@ static s32 intrOverflow(int ca)
  * Start the interruption handler for getting the system time
  * This function should be called at beginning of your program
  */
+__attribute__((weak))
 void StartTimerSystemTime(void)
 {
     u32 oldintr;
@@ -88,6 +89,7 @@ void StartTimerSystemTime(void)
  * Stops the interruption handler for getting the  system time
  * This function should be called when ending your program
  */
+__attribute__((weak))
 void StopTimerSystemTime(void)
 {
     u32 oldintr;

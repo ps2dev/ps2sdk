@@ -517,6 +517,54 @@ int Copy(void *dest, const void *src, int size);
 void setup(int syscall_num, void *handler); // alias of "SetSyscall"
 void *GetEntryAddress(int syscall);
 
+// Helpers marcos for no-patch versions 
+// Useful to build a special version of libkernel that does not contain any runtime patches (useful for loaders/resident programs).
+#define DISABLE_PATCHED_Exit() \
+    void Exit(s32 exit_code) { KExit(exit_code); }
+    
+#define DISABLE_PATCHED_LoadExecPS2() \
+    void LoadExecPS2(const char *filename, s32 num_args, char *args[]) { _LoadExecPS2(filename, num_args, args); }
+
+#define NO_PATCHED_ExecOSD() \
+    void ExecOSD(int num_args, char *args[]) { _ExecOSD(num_args, args); }
+
+#define DISABLE_TimerSystemTime() \
+    void StartTimerSystemTime(void) {} \
+    void StopTimerSystemTime(void) {}
+
+#define DISABLE_TimerAlarm() \
+    void InitTimerAlarm(void) {} \
+    void DeinitTimerAlarm(void) {}
+
+#define DISABLE_PATCHED_ALARMS() \
+    void InitAlarm(void) {}
+
+#define DISABLE_PATCHED_THREADS() \
+    int InitThread(void) { return 0; } \
+    s32 iRotateThreadReadyQueue(s32 priority) { return _iRotateThreadReadyQueue(priority); } \
+    s32 iWakeupThread(s32 thread_id) { return _iWakeupThread(thread_id); } \
+    s32 iSuspendThread(s32 thread_id) { return _iSuspendThread(thread_id); }
+
+#define DISABLE_PATCHED_ExecPS2() \
+    void InitExecPS2(void) {} \
+    s32 ExecPS2(void *entry, void *gp, int num_args, char *args[]) { return _ExecPS2(entry, gp, num_args, args); }
+
+#define DISABLE_PATCHED_TLBFunctions() \
+    void InitTLBFunctions(void) {} \
+    void InitTLB(void) {}
+
+#define DISABLE_PATCHED_FUNCTIONS() \
+    DISABLE_PATCHED_ALARMS() \
+    DISABLE_PATCHED_THREADS() \
+    DISABLE_PATCHED_ExecPS2() \
+    DISABLE_PATCHED_TLBFunctions() \
+    DISABLE_PATCHED_Exit() \
+    DISABLE_PATCHED_LoadExecPS2()
+
+#define DISABLE_EXTRA_TIMERS_FUNCTIONS() \
+    DISABLE_TimerSystemTime() \
+    DISABLE_TimerAlarm()
+
 #ifdef __cplusplus
 }
 #endif

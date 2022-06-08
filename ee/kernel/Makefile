@@ -6,29 +6,15 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-#Define to 1, to build a special version of libkernel that does not contain any runtime patches (useful for loaders/resident programs).
-KERNEL_NO_PATCHES ?= 0
 
-ifeq ($(KERNEL_NO_PATCHES),1)
-	EE_CFLAGS += -DKERNEL_NO_PATCHES=1
-	EXEC_SYSCALLS = Exit.o LoadExecPS2.o ExecPS2.o
-	EXECOSD_SYSCALL = ExecOSD.o
-	ALARM_SYSCALLS = _SetAlarm.o _ReleaseAlarm.o
-	ALARM_INTR_SYSCALLS = _iSetAlarm.o _iReleaseAlarm.o
-	ROTATE_THREAD_READY_QUEUE_SYSCALL = iRotateThreadReadyQueue.o
-	IWAKEUP_THREAD_SYSCALL = iWakeupThread.o
-	ISUSPEND_THREAD_SYSCALL = iSuspendThread.o
-	TLB_SYSCALLS =
-else
-	EXEC_SYSCALLS = KExit.o _LoadExecPS2.o _ExecPS2.o
-	EXECOSD_SYSCALL = _ExecOSD.o
-	ALARM_SYSCALLS = _SetAlarm.o SetAlarm.o _ReleaseAlarm.o ReleaseAlarm.o
-	ALARM_INTR_SYSCALLS = _iSetAlarm.o iSetAlarm.o _iReleaseAlarm.o iReleaseAlarm.o
-	ROTATE_THREAD_READY_QUEUE_SYSCALL = _iRotateThreadReadyQueue.o
-	IWAKEUP_THREAD_SYSCALL = _iWakeupThread.o
-	ISUSPEND_THREAD_SYSCALL = _iSuspendThread.o
-	TLB_SYSCALLS = PutTLBEntry.o iPutTLBEntry.o _SetTLBEntry.o iSetTLBEntry.o GetTLBEntry.o iGetTLBEntry.o ProbeTLBEntry.o iProbeTLBEntry.o ExpandScratchPad.o
-endif
+EXEC_SYSCALLS = KExit.o _LoadExecPS2.o _ExecPS2.o
+EXECOSD_SYSCALL = _ExecOSD.o
+ALARM_SYSCALLS = _SetAlarm.o SetAlarm.o _ReleaseAlarm.o ReleaseAlarm.o
+ALARM_INTR_SYSCALLS = _iSetAlarm.o iSetAlarm.o _iReleaseAlarm.o iReleaseAlarm.o
+ROTATE_THREAD_READY_QUEUE_SYSCALL = _iRotateThreadReadyQueue.o
+IWAKEUP_THREAD_SYSCALL = _iWakeupThread.o
+ISUSPEND_THREAD_SYSCALL = _iSuspendThread.o
+TLB_SYSCALLS = PutTLBEntry.o iPutTLBEntry.o _SetTLBEntry.o iSetTLBEntry.o GetTLBEntry.o iGetTLBEntry.o ProbeTLBEntry.o iProbeTLBEntry.o ExpandScratchPad.o
 
 ### SIFCMD objects objects
 
@@ -71,13 +57,7 @@ IOPCONTROL_OBJS = SifIopReboot.o SifIopReset.o SifIopIsAlive.o SifIopSync.o __io
 ### Glue objects
 
 GLUE_OBJS = DIntr.o EIntr.o EnableIntc.o DisableIntc.o EnableDmac.o DisableDmac.o
-ifeq ($(KERNEL_NO_PATCHES),1)
-	GLUE_OBJS += SetAlarm.o ReleaseAlarm.o
-endif
 GLUE_OBJS += iEnableIntc.o iDisableIntc.o iEnableDmac.o iDisableDmac.o
-ifeq ($(KERNEL_NO_PATCHES),1)
-	GLUE_OBJS += iSetAlarm.o iReleaseAlarm.o
-endif
 GLUE_OBJS += SyncDCache.o iSyncDCache.o InvalidDCache.o iInvalidDCache.o
 
 ### SIO objects
@@ -98,19 +78,17 @@ CONFIG_OBJS = _config_internals.o IsEarlyJap.o configGetLanguage.o \
 
 ### Patch objects
 
-ifneq ($(KERNEL_NO_PATCHES),1)
-	LIBOSD_OBJS = libosd.o libosd_full.o libosd_common.o osdsrc_bin.o
+LIBOSD_OBJS = libosd.o libosd_full.o libosd_common.o osdsrc_bin.o
 
-	TLBFUNC_OBJS = tlbfunc.o tlbsrc_bin.o
+TLBFUNC_OBJS = tlbfunc.o tlbsrc_bin.o
 
-	ALARM_OBJS = alarm.o srcfile_bin.o eenull_bin.o
+ALARM_OBJS = alarm.o srcfile_bin.o eenull_bin.o
 
-	THREAD_OBJS = _thread_internals.o iWakeupThread.o iRotateThreadReadyQueue.o iSuspendThread.o
+THREAD_OBJS = _thread_internals.o iWakeupThread.o iRotateThreadReadyQueue.o iSuspendThread.o
 
-	SETUP_OBJS = kCopy.o kCopyBytes.o
+SETUP_OBJS = kCopy.o kCopyBytes.o
 
-	EXIT_OBJS += _exit_internals.o SetArg.o Exit.o ExecPS2.o LoadExecPS2.o ExecOSD.o
-endif
+EXIT_OBJS += _exit_internals.o SetArg.o Exit.o ExecPS2.o LoadExecPS2.o ExecOSD.o
 
 ### Timer objects
 
@@ -165,9 +143,8 @@ EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(TIMER_ALARM_OBJS) $(GETKERNEL_OBJS) \
 	$(INITSYS_OBJS) erl-support.o
 
-ifneq ($(KERNEL_NO_PATCHES),1)
-	EE_OBJS += $(THREAD_OBJS) $(LIBOSD_OBJS) $(TLBFUNC_OBJS) $(ALARM_OBJS) $(EXIT_OBJS) $(SETUP_OBJS) setup_syscalls.o
-endif
+
+EE_OBJS += $(THREAD_OBJS) $(LIBOSD_OBJS) $(TLBFUNC_OBJS) $(ALARM_OBJS) $(EXIT_OBJS) $(SETUP_OBJS) setup_syscalls.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make
