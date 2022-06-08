@@ -59,6 +59,10 @@
 extern "C" {
 #endif
 
+void StartTimerSystemTime(void);
+void StopTimerSystemTime(void);
+u64 GetTimerSystemTime(void);
+u64 iGetTimerSystemTime(void);
 u32 cpu_ticks(void);
 
 #ifdef __cplusplus

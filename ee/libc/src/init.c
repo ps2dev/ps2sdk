@@ -13,8 +13,6 @@
  * The global init/deinit code for our crt0.
  */
 
-void _ps2sdk_time_init();
-void _ps2sdk_time_deinit();
 void _ps2sdk_timezone_update();
 
 int chdir(const char *path);
@@ -23,7 +21,6 @@ int chdir(const char *path);
 __attribute__((weak))
 void _ps2sdk_libc_init()
 {
-    _ps2sdk_time_init();
     _ps2sdk_timezone_update();
 }
 #endif
@@ -32,7 +29,6 @@ void _ps2sdk_libc_init()
 __attribute__((weak))
 void _ps2sdk_libc_deinit()
 {
-    _ps2sdk_time_deinit();
 }
 #endif
 

@@ -18,6 +18,7 @@ SUBDIRS += draw/vu1
 #SUBDIRS += erl/cpp-hello           #TODO: missing /ps2sdk/ee/lib/libc.erl
 SUBDIRS += font
 SUBDIRS += graph
+SUBDIRS += kernel/systemTime
 SUBDIRS += libc/regress
 SUBDIRS += libc/mem_test
 SUBDIRS += libgs/doublebuffer
