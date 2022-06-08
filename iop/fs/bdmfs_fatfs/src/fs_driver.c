@@ -456,18 +456,6 @@ int fs_ioctl(iop_file_t *fd, int cmd, void *data)
         case USBMASS_IOCTL_CHECK_CHAIN:
             ret = (file->obj.n_frag < 2);
             break;
-        case USBMASS_IOCTL_NUM_FRAGS:
-            ret = file->obj.n_frag;
-            break;
-        case USBMASS_IOCTL_DATA_BASE:
-            ret = file->obj.fs->database;
-            break;
-        case USBMASS_IOCTL_NEXT_CLUSTER:
-            ret = get_fat(&file->obj, (DWORD)data);
-            break;
-        case USBMASS_IOCTL_SIZE_CLUSTER:
-            ret = file->obj.fs->csize;
-            break;
         default:
             break;
     }
