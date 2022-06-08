@@ -26,14 +26,6 @@
 #define USBMASS_IOCTL_GET_DRIVERNAME 0x0003
 /** Check if fragments exist */
 #define USBMASS_IOCTL_CHECK_CHAIN	 0x0004
-/** Return number of fragments **/
-#define USBMASS_IOCTL_NUM_FRAGS      0x0005
-/** Return first cluster **/
-#define USBMASS_IOCTL_DATA_BASE      0x0006
-/** Return next cluster **/
-#define USBMASS_IOCTL_NEXT_CLUSTER   0x0007
-/** Return cluster size **/
-#define USBMASS_IOCTL_SIZE_CLUSTER   0x0008
 
 // DEVCTL function codes
 /** Issues the SCSI STOP UNIT command to the specified device. Use this to shut down devices properly. */
