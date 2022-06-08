@@ -23,7 +23,6 @@ DSTATUS disk_status(
     BYTE pdrv /* Physical drive number to identify the drive */
 )
 {
-    DSTATUS stat;
     int result;
 
     result = (mounted_bd == NULL) ? STA_NODISK : FR_OK;
@@ -41,7 +40,6 @@ DSTATUS disk_initialize(
     BYTE pdrv /* Physical drive nmuber to identify the drive */
 )
 {
-    DSTATUS stat;
     int result;
 
     result = (mounted_bd == NULL) ? STA_NODISK : FR_OK;
