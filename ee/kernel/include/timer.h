@@ -39,6 +39,11 @@
 #define T3_MODE  ((volatile unsigned int *)0x10001810)
 #define T3_COMP  ((volatile unsigned int *)0x10001820)
 
+// Pointers to the kernel segment (uncached)
+#define K_T2_COUNT  ((volatile unsigned int *)0xB0001000)
+#define K_T2_MODE   ((volatile unsigned int *)0xB0001010)
+#define K_T2_COMP   ((volatile unsigned int *)0xB0001020)
+
 #define Tn_MODE(CLKS, GATE, GATS, GATM, ZRET, CUE, CMPE, OVFE, EQUF, OVFF) \
     (u32)((u32)(CLKS) | ((u32)(GATE) << 2) |                               \
           ((u32)(GATS) << 3) | ((u32)(GATM) << 4) |                        \
