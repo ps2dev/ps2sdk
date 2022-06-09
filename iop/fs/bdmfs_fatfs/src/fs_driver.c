@@ -342,7 +342,8 @@ static int fileInfoToStat(FILINFO *fno, iox_stat_t *stat)
     unsigned char *ctime = (unsigned char *)&(fno->ftime);
     stat->mode           = O_RDWR;
     stat->attr           = 0777;
-    stat->size           = fno->fsize;
+    stat->size           = (unsigned int)(fno->fsize);
+    stat->hisize         = (unsigned int)(fno->fsize>>32);
     // set created Date: Day, Month, Year
     stat->ctime[4] = cdate[0];
     stat->ctime[5] = cdate[1];
