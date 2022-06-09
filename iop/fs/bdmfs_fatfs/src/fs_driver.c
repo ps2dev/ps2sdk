@@ -340,10 +340,21 @@ static int fileInfoToStat(FILINFO *fno, iox_stat_t *stat)
 {
     unsigned char *cdate = (unsigned char *)&(fno->fdate);
     unsigned char *ctime = (unsigned char *)&(fno->ftime);
-    stat->mode           = O_RDWR;
+
     stat->attr           = 0777;
     stat->size           = (unsigned int)(fno->fsize);
     stat->hisize         = (unsigned int)(fno->fsize>>32);
+
+    stat->mode = FIO_S_IROTH | FIO_S_IXOTH;
+    if (fno->fattrib & AM_DIR) {
+        stat->mode |= FIO_S_IFDIR;
+    } else {
+        stat->mode |= FIO_S_IFREG;
+    }
+    if (!(fno->fattrib & AM_RDO)) {
+        stat->mode |= FIO_S_IWOTH;
+    }
+
     // set created Date: Day, Month, Year
     stat->ctime[4] = cdate[0];
     stat->ctime[5] = cdate[1];
