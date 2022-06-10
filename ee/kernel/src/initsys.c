@@ -15,12 +15,14 @@
 #include "kernel.h"
 #include "timer.h"
 #include "string.h"
+#include <timer_alarm.h>
 
 #ifdef F__InitSys
 void _InitSys(void)
 {
 #ifndef KERNEL_NO_PATCHES
     StartTimerSystemTime();
+    InitTimerAlarm();
     InitAlarm();
     InitThread();
     InitExecPS2();
@@ -33,6 +35,7 @@ void _InitSys(void)
 void TerminateLibrary(void)
 {
 #ifndef KERNEL_NO_PATCHES
+    DeinitTimerAlarm();
     StopTimerSystemTime();
     InitTLB();
 #endif

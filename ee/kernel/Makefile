@@ -115,6 +115,7 @@ endif
 ### Timer objects
 
 TIMER_OBJS = __time_internals.o StartTimerSystemTime.o StopTimerSystemTime.o iGetTimerSystemTime.o GetTimerSystemTime.o cpu_ticks.o
+TIMER_ALARM_OBJS = timer_alarm.o
 
 ### Getter objects
 
@@ -161,7 +162,7 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o $(EXEC_SYSCALLS) \
 
 EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(ROM0_OBJS) $(CONFIG_OBJS) \
-	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(GETKERNEL_OBJS) \
+	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(TIMER_ALARM_OBJS) $(GETKERNEL_OBJS) \
 	$(INITSYS_OBJS) erl-support.o
 
 ifneq ($(KERNEL_NO_PATCHES),1)
@@ -195,6 +196,9 @@ $(CONFIG_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)osd_config.c
 	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(TIMER_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)timer.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(TIMER_ALARM_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)timer_alarm.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(GETKERNEL_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)getkernel.c
