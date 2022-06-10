@@ -91,7 +91,7 @@ static int timOverflow(int ca) {
 
     // Check if we actually triggered an alarm
     if (event_queue) {
-        if (ps2_clock() > (event_queue->scheduled_time >> 8)) {
+        if (GetTimerSystemTime() > (event_queue->scheduled_time)) {
             // Remove the top of the queue
             struct timer_alarm_t *gone = event_queue;
             event_queue = event_queue->next;
