@@ -16,17 +16,12 @@
 #include <timer.h>
 #include <kernel.h>
 
-#ifdef TIME_USE_T0
-#define INTC_TIM       INTC_TIM0
-#define T_COUNT        T0_COUNT
-#define T_MODE         T0_MODE
-#define T_COMP         T0_COMP
-#else
-#define INTC_TIM       INTC_TIM1
-#define T_COUNT        T1_COUNT
-#define T_MODE         T1_MODE
-#define T_COMP         T1_COMP
-#endif
+#define INTC_TIM       INTC_TIM2
+#define T_COUNT_RD     T2_COUNT
+#define T_COUNT_WR     K_T2_COUNT
+#define T_MODE_RD      T2_MODE
+#define T_MODE_WR      K_T2_MODE
+#define T_COMP         K_T2_COMP
 
 #ifdef F___time_internals
 s32  __time_intr_overflow_id = -1;
@@ -45,7 +40,9 @@ static s32 intrOverflow(int ca)
 
     // A write to the overflow flag will clear the overflow flag
     // ---------------------------------------------------------
-    *T_MODE |= (1 << 11);
+    ee_kmode_enter();
+    *T_MODE_WR |= (1 << 11);
+    ee_kmode_exit();
 
     ExitHandler();
     return -1;
@@ -62,22 +59,23 @@ void StartTimerSystemTime(void)
     u32 oldintr;
 
     oldintr = DIntr();
+    __time_intr_overflow_count = 0;
 
-    *T_MODE = 0x0000; // Disable T_MODE
+    ee_kmode_enter();
+    *T_MODE_WR = 0x0000; // Disable T_MODE
+    // Initialize the timer registers
+    // CLKS: 0x02 - 1/256 of the BUSCLK (0x01 is 1/16th)
+    //  CUE: 0x01 - Start/Restart the counting
+    // OVFE: 0x01 - An interrupt is generated when an overflow occurs
+    *T_COUNT_WR = 0;
+    *T_MODE_WR = Tn_MODE(0x02, 0, 0, 0, 0, 0x01, 0, 0x01, 0, 0);
+    ee_kmode_exit();
+
     if (__time_intr_overflow_id == -1)
     {
         __time_intr_overflow_id = AddIntcHandler(INTC_TIM, intrOverflow, 0);
         EnableIntc(INTC_TIM);
     }
-
-    __time_intr_overflow_count = 0;
-
-    // Initialize the timer registers
-    // CLKS: 0x02 - 1/256 of the BUSCLK (0x01 is 1/16th)
-    //  CUE: 0x01 - Start/Restart the counting
-    // OVFE: 0x01 - An interrupt is generated when an overflow occurs
-    *T_COUNT = 0;
-    *T_MODE = Tn_MODE(0x02, 0, 0, 0, 0, 0x01, 0, 0x01, 0, 0);
 
     if(oldintr) { EIntr(); }
 }
@@ -95,7 +93,9 @@ void StopTimerSystemTime(void)
     u32 oldintr;
     oldintr = DIntr();
 
-    *T_MODE = 0x0000; // Stop the timer
+    ee_kmode_enter();
+    *T_MODE_WR = 0x0000; // Stop the timer
+    ee_kmode_exit();
 
     if (__time_intr_overflow_id >= 0)
     {
@@ -123,10 +123,10 @@ u64 iGetTimerSystemTime(void)
     u64 t;
 
     // Tn_COUNT is 16 bit precision. Therefore, each __time_intr_overflow_count is 65536 ticks
-    t = *T_COUNT + (__time_intr_overflow_count << 16);
+    t = *T_COUNT_RD + (__time_intr_overflow_count << 16);
 
     // check if the overflow was produced but the interruption callback isn't be executed yet
-    if (((*T_MODE) & (1 << 11)) != 0) {
+    if (((*T_MODE_RD) & (1 << 11)) != 0) {
         t += (1 << 16);
     }
 
