@@ -31,6 +31,9 @@
 FATFS fatfs;
 struct block_device *mounted_bd;
 
+void *malloc(int size);
+void free(void *ptr);
+
 // TODO: if all drives have the same mount point, it will only allow for one mounted block device
 int connect_bd(struct block_device *bd)
 {
@@ -47,7 +50,6 @@ void disconnect_bd(struct block_device *bd)
 {
     f_unmount("");
     mounted_bd = NULL;
-    return 0;
 }
 
 //---------------------------------------------------------------------------
@@ -90,8 +92,6 @@ static void _fs_unlock(void)
 //---------------------------------------------------------------------------
 static void fs_reset(void)
 {
-    int i;
-
     M_DEBUG("%s\n", __func__);
 
     if (_lock_sema_id >= 0)
@@ -336,7 +336,7 @@ static int fs_dclose(iop_file_t *fd)
 
 //--------------------------------------------------------------------------
 
-static int fileInfoToStat(FILINFO *fno, iox_stat_t *stat)
+static void fileInfoToStat(FILINFO *fno, iox_stat_t *stat)
 {
     unsigned char *cdate = (unsigned char *)&(fno->fdate);
     unsigned char *ctime = (unsigned char *)&(fno->ftime);
@@ -436,10 +436,41 @@ static int fs_getstat(iop_file_t *fd, const char *name, iox_stat_t *stat)
     return ret;
 }
 
-//---------------------------------------------------------------------------
-int fs_ioctl(iop_file_t *fd, int cmd, void *data)
+static int get_frag_list(FIL *file, void *rdata, unsigned int rdatalen)
 {
-    M_DEBUG("%s\n", __func__);
+    bd_fraglist_t *l = (bd_fraglist_t*)rdata;
+    DWORD iClusterStart = file->obj.sclust;
+    DWORD iClusterCurrent = iClusterStart;
+
+    if (rdatalen < sizeof(bd_fraglist_t)) {
+        M_DEBUG("ERROR: rdatalen=%d\n", rdatalen);
+        return -1;
+    }
+
+    l->count = 0;
+    do {
+        DWORD iClusterNext = get_fat(&file->obj, iClusterCurrent);
+        if (iClusterNext != (iClusterCurrent + 1)) {
+            // Fragment or file end
+            M_DEBUG("fragment: %uc - %uc + 1\n", iClusterStart, iClusterCurrent + 1);
+            if (l->count < 10) {
+                l->list[l->count].sector = clst2sect(file->obj.fs, iClusterStart);
+                l->list[l->count].count  = clst2sect(file->obj.fs, iClusterCurrent) - clst2sect(file->obj.fs, iClusterStart) + file->obj.fs->csize;
+                M_DEBUG(" - sectors: %us count %us\n", l->list[l->count].sector, l->list[l->count].count);
+            }
+            l->count++;
+            iClusterStart = iClusterNext;
+        }
+        iClusterCurrent = iClusterNext;
+    } while(iClusterCurrent < file->obj.fs->n_fatent);
+
+    return l->count;
+}
+
+//---------------------------------------------------------------------------
+int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, void *rdata, unsigned int rdatalen)
+{
+    M_DEBUG("%s cmd=%d\n", __func__, cmd);
 
     int ret   = 0;
     FIL *file = ((FIL *)(fd->privdata));
@@ -460,7 +491,7 @@ int fs_ioctl(iop_file_t *fd, int cmd, void *data)
             ret = file->obj.sclust;
             break;
         case USBMASS_IOCTL_GET_LBA:
-            ret = file->obj.fs->database + (file->obj.fs->csize * (file->obj.sclust - 2));
+            ret = clst2sect(file->obj.fs, file->obj.sclust);
             break;
         case USBMASS_IOCTL_GET_DRIVERNAME:
             ret = *(int *)(mounted_bd->name);
@@ -468,12 +499,21 @@ int fs_ioctl(iop_file_t *fd, int cmd, void *data)
         case USBMASS_IOCTL_CHECK_CHAIN:
             ret = (file->obj.n_frag < 2);
             break;
+        case USBMASS_IOCTL_GET_FRAGLIST:
+            ret = get_frag_list(file, rdata, rdatalen);
+            break;
         default:
             break;
     }
 
     _fs_unlock();
     return ret;
+}
+
+//---------------------------------------------------------------------------
+int fs_ioctl(iop_file_t *fd, int cmd, void *data)
+{
+    return fs_ioctl2(fd, cmd, data, 1024, NULL, 0);
 }
 
 int fs_rename(iop_file_t *fd, const char *path, const char *newpath)
@@ -549,7 +589,7 @@ static iop_device_ops_t fs_functarray = {
     &fs_devctl,
     (void *)&fs_dummy,
     (void *)&fs_dummy,
-    (void *)&fs_dummy,
+    &fs_ioctl2,
 };
 static iop_device_t fs_driver = {
     "mass",
