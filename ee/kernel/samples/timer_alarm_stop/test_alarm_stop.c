@@ -34,8 +34,8 @@ int main(int argc, char **argv)
 {
     InitializeTimerAlarm(&alarm);
     InitializeTimerAlarm(&alarm2);
-    SetTimerAlarm(&alarm, SecToCycles(2), &usercb1, &flag);
-    SetTimerAlarm(&alarm2, SecToCycles(5), &usercb2, &flag2);
+    SetTimerAlarm(&alarm, Sec2TimerBusClock(2), &usercb1, &flag);
+    SetTimerAlarm(&alarm2, Sec2TimerBusClock(5), &usercb2, &flag2);
     StartTimerAlarm(&alarm);
     StartTimerAlarm(&alarm2);
 

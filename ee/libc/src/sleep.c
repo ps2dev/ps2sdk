@@ -15,21 +15,18 @@
 
 #include <kernel.h>
 #include <unistd.h>
+#include <stdint.h>
 #include <errno.h>
 #include <time.h>
 #include <timer_alarm.h>
 
 #ifdef F_nanosleep
-static inline u64 timespec_to_nanosecs(const struct timespec *pts) {
-    return (pts->tv_sec * 1000000000ULL) + pts->tv_nsec;
-}
 
 int nanosleep(const struct timespec *req, struct timespec *rem)
 {
-    u64 nano_secs, cycles;
+    uint64_t cycles;
 
-    nano_secs = timespec_to_nanosecs(req);
-    cycles = NSecToCycles(nano_secs);
+    cycles = TimerUSec2BusClock(req->tv_sec, req->tv_nsec * 1000);
     ThreadWaitClock(cycles);
 
     if (rem != NULL) {

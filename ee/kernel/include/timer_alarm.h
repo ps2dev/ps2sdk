@@ -46,22 +46,31 @@ void StopTimerAlarm(struct timer_alarm_t *alarm);
 void ThreadWaitClock(u64 clock_cycles);
 
 // Conversion functions, from time to bus cycles
-static inline u64 NSecToCycles(u64 usec) {
+static inline u64 NSec2TimerBusClock(u64 usec) {
     // Approximate, avoid 64 bit division
     return ((((kBUSCLK / 1000) * 65536ULL) / 1000000) * usec) >> 16;
 }
 
-static inline u64 USecToCycles(u64 usec) {
+static inline u64 USec2TimerBusClock(u64 usec) {
     // Approximate, avoid 64 bit division
     return ((((kBUSCLK / 1000) * 1024) / 1000) * usec) >> 10;
 }
 
-static inline u64 MSecToCycles(u64 msec) {
+static inline u64 MSec2TimerBusClock(u64 msec) {
     return (kBUSCLK / 1000) * msec;
 }
 
-static inline u64 SecToCycles(u64 sec) {
+static inline u64 Sec2TimerBusClock(u64 sec) {
     return kBUSCLK * sec;
+}
+
+static inline void TimerBusClock2USec (u64 ulClock, u32 *pSec, u32 *pUsec) {
+    *pSec = ulClock/kBUSCLK;
+    *pUsec = ulClock - (*pSec * kBUSCLK);
+}
+
+static inline u64 TimerUSec2BusClock (u32 sec, u32 usec) {
+    return USec2TimerBusClock(sec * 1000000 + usec);
 }
 
 #endif

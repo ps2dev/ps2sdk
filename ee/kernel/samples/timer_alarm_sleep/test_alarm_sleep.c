@@ -20,7 +20,7 @@ volatile int flag = 0;
 int main(int argc, char **argv)
 {
     while (1) {
-        ThreadWaitClock(MSecToCycles(350));
+        ThreadWaitClock(MSec2TimerBusClock(350));
         printf("Hello there, 350ms tick!\n");
     }
 
