@@ -153,7 +153,7 @@ extern "C"
 
     static inline void packet2_add_data(packet2_t *packet2, void *t_data, u32 t_size)
     {
-        int i;
+        u32 i;
         for (i = 0; i < t_size; i++)
             packet2_add_u128(packet2, ((u128 *)t_data)[i]);
     }
