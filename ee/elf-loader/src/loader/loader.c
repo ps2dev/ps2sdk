@@ -39,6 +39,9 @@
    void _ps2sdk_libc_init() {}
    void _ps2sdk_libc_deinit() {}
 
+   DISABLE_PATCHED_FUNCTIONS();
+   DISABLE_EXTRA_TIMERS_FUNCTIONS();
+
 //--------------------------------------------------------------
 //Start of function code:
 //--------------------------------------------------------------

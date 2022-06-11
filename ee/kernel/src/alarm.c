@@ -41,6 +41,7 @@ extern unsigned int size_srcfile;
 extern unsigned char eenull[];
 extern unsigned int size_eenull;
 
+__attribute__((weak))
 void InitAlarm(void)
 {
     int i;

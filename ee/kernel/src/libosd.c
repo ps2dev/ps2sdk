@@ -39,6 +39,7 @@ static struct SyscallData SyscallPatchEntries[] = {
      NULL},
 };
 
+__attribute__((weak))
 void InitExecPS2(void)
 {
     if (PatchIsNeeded()) {
