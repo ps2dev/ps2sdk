@@ -65,12 +65,13 @@ static inline u64 Sec2TimerBusClock(u64 sec) {
 }
 
 static inline void TimerBusClock2USec (u64 ulClock, u32 *pSec, u32 *pUsec) {
-    *pSec = ulClock/kBUSCLK;
-    *pUsec = ulClock - (*pSec * kBUSCLK);
+    u64 sec = ulClock/kBUSCLK;
+    *pSec = (u32)sec;
+    *pUsec = ulClock - (sec * kBUSCLK);
 }
 
 static inline u64 TimerUSec2BusClock (u32 sec, u32 usec) {
-    return USec2TimerBusClock(sec * 1000000 + usec);
+    return Sec2TimerBusClock(sec) + USec2TimerBusClock(usec);
 }
 
 #endif
