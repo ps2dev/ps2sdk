@@ -27,30 +27,17 @@
 #endif
 
 
+#ifdef F_TimerAlarmInternals
 // Event queue sorted from next to last.
-static struct timer_alarm_t *event_queue = NULL;
-static int __alarm_timer_intc_id = -1;
+struct timer_alarm_t *__event_queue = NULL;
+int __alarm_timer_intc_id = -1;
+#else
+extern struct timer_alarm_t *__event_queue;
+extern int __alarm_timer_intc_id;
+#endif
 
-static int timOverflow(int ca);
-
-__attribute__((weak))
-void InitTimerAlarm() {
-    if (__alarm_timer_intc_id < 0)
-        __alarm_timer_intc_id = AddIntcHandler(INTC_TIM, timOverflow, 0);
-
-    *T_MODE = 0x0000;
-    EnableIntc(INTC_TIM);
-}
-
-__attribute__((weak))
-void DeinitTimerAlarm() {
-    DisableIntc(INTC_TIM);
-    if (__alarm_timer_intc_id >= 0)
-        RemoveIntcHandler(INTC_TIM, __alarm_timer_intc_id);
-    __alarm_timer_intc_id = -1;
-}
-
-static void Timer2Resched(struct timer_alarm_t *alarm) {
+#ifdef F___Timer2Resched
+void __Timer2Resched(struct timer_alarm_t *alarm) {
     if (!alarm) {
         // Disable the counter, no alarms are queued
         *T_MODE = 0x0000;
@@ -85,28 +72,32 @@ static void Timer2Resched(struct timer_alarm_t *alarm) {
         }
     }
 }
+#else
+extern void __Timer2Resched(struct timer_alarm_t *alarm);
+#endif
 
+#ifdef F_InitTimerAlarm
 static int timOverflow(int ca) {
     (void)ca;
 
     // Check if we actually triggered an alarm
-    if (event_queue) {
-        if (GetTimerSystemTime() > (event_queue->scheduled_time)) {
+    if (__event_queue) {
+        if (GetTimerSystemTime() > (__event_queue->scheduled_time)) {
             // Remove the top of the queue
-            struct timer_alarm_t *gone = event_queue;
-            event_queue = event_queue->next;
-            if (event_queue)
-                event_queue->prev = NULL;
+            struct timer_alarm_t *gone = __event_queue;
+            __event_queue = __event_queue->next;
+            if (__event_queue)
+                __event_queue->prev = NULL;
             gone->prev = NULL;
             gone->next = NULL;
             gone->scheduled_time = 0;
-            Timer2Resched(event_queue);
+            __Timer2Resched(__event_queue);
 
             if (gone->callback)
                 gone->callback(gone, gone->usr_arg);
         }
         else  // Timer might require several IRQs (for timers over ~100ms)
-            Timer2Resched(event_queue);
+            __Timer2Resched(__event_queue);
     }
 
     // Clear both compare and overflow flags (since we can use either)
@@ -116,6 +107,27 @@ static int timOverflow(int ca) {
     return -1;
 }
 
+__attribute__((weak))
+void InitTimerAlarm() {
+    if (__alarm_timer_intc_id < 0)
+        __alarm_timer_intc_id = AddIntcHandler(INTC_TIM, timOverflow, 0);
+
+    *T_MODE = 0x0000;
+    EnableIntc(INTC_TIM);
+}
+#endif
+
+#ifdef F_DeinitTimerAlarm
+__attribute__((weak))
+void DeinitTimerAlarm() {
+    DisableIntc(INTC_TIM);
+    if (__alarm_timer_intc_id >= 0)
+        RemoveIntcHandler(INTC_TIM, __alarm_timer_intc_id);
+    __alarm_timer_intc_id = -1;
+}
+#endif
+
+#ifdef F_InitializeTimerAlarm
 /** Initializes a timer alarm struct so that it can be used.
  *
  * @param alarm Alarm object to initialize.
@@ -132,7 +144,9 @@ void InitializeTimerAlarm(struct timer_alarm_t *alarm) {
     alarm->callback = NULL;
     alarm->usr_arg = NULL;
 }
+#endif
 
+#ifdef F_iStopTimerAlarm
 /** Same as StopTimerAlarm but for IRQ handlers
  *
  */
@@ -142,14 +156,14 @@ void iStopTimerAlarm(struct timer_alarm_t *alarm) {
         return;
 
     // Check if the event is the next event in the queue.
-    if (event_queue == alarm) {
+    if (__event_queue == alarm) {
         // Remove it from the front of the queue
         if (alarm->next)
             alarm->next->prev = NULL;
-        event_queue = alarm->next;
+        __event_queue = alarm->next;
 
         // Reschedule next event
-        Timer2Resched(event_queue);
+        __Timer2Resched(__event_queue);
     }
     else {
         // Simply remove it, since it is not yet scheduled.
@@ -163,7 +177,9 @@ void iStopTimerAlarm(struct timer_alarm_t *alarm) {
     alarm->prev = NULL;
     alarm->scheduled_time = 0;
 }
+#endif
 
+#ifdef F_StopTimerAlarm
 /** Stop an alarm
  *
  * @param alarm Alarm object to be stopped.
@@ -178,7 +194,9 @@ void StopTimerAlarm(struct timer_alarm_t *alarm) {
     if (oldintr)
         EIntr();
 }
+#endif
 
+#ifdef F_iStartTimerAlarm
 /** Same as StartTimerAlarm but for IRQ handlers.
  *
  */
@@ -191,23 +209,23 @@ void iStartTimerAlarm(struct timer_alarm_t *alarm) {
     u64 sched_time = iGetTimerSystemTime() + alarm->timer_cycles;
     alarm->scheduled_time = sched_time;
 
-    if (!event_queue) {
+    if (!__event_queue) {
         // No alarm was set
-        event_queue = alarm;
+        __event_queue = alarm;
         alarm->next = alarm->prev = NULL;
-        Timer2Resched(alarm);
+        __Timer2Resched(alarm);
     }
-    else if (event_queue->scheduled_time > alarm->scheduled_time) {
+    else if (__event_queue->scheduled_time > alarm->scheduled_time) {
         // This alarm is the next alarm to trigger
-        alarm->next = event_queue;
+        alarm->next = __event_queue;
         alarm->prev = NULL;
-        event_queue->prev = alarm;
-        event_queue = alarm;
-        Timer2Resched(alarm);
+        __event_queue->prev = alarm;
+        __event_queue = alarm;
+        __Timer2Resched(alarm);
     }
     else {
         // Just queue it at the right place (keep the list sorted)
-        struct timer_alarm_t *it = event_queue;
+        struct timer_alarm_t *it = __event_queue;
         for (; it != NULL; it = it->next) {
             if (!it->next || it->next->scheduled_time > alarm->scheduled_time) {
                 alarm->next = it->next;
@@ -221,7 +239,9 @@ void iStartTimerAlarm(struct timer_alarm_t *alarm) {
         // No need to update the alarm at all
     }
 }
+#endif
 
+#ifdef F_StartTimerAlarm
 /** Starts (arms) an alarm.
  *
  * @param alarm Alarm object to be started.
@@ -234,7 +254,9 @@ void StartTimerAlarm(struct timer_alarm_t *alarm) {
     if (oldintr)
         EIntr();
 }
+#endif
 
+#ifdef F_SetTimerAlarm
 /** Sets up alarm paramenters.
  *
  * @param alarm Alarm object to be updated
@@ -253,7 +275,9 @@ void SetTimerAlarm(struct timer_alarm_t *alarm, u64 clock_cycles, timer_alarm_ca
     alarm->callback = user_callback;
     alarm->usr_arg = user_arg;
 }
+#endif
 
+#ifdef F_ThreadWaitClock
 static void _wake_sema_cb(struct timer_alarm_t *alarm, void *userptr) {
     (void)alarm;
 
@@ -274,5 +298,5 @@ void ThreadWaitClock(u64 clock_cycles) {
 
     DeleteSema(sema_id);
 }
-
+#endif
 
