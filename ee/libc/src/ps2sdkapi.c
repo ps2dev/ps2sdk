@@ -14,6 +14,7 @@
 #include <errno.h>
 #include <string.h>
 #include <kernel.h>
+#include <timer.h>
 #include <malloc.h>
 #include <sio.h>
 
@@ -631,12 +632,12 @@ int _gettimeofday(struct timeval *tv, struct timezone *tz) {
 
 #ifdef F__times
 clock_t _times(struct tms *buffer) {
-	clock_t clk = ps2_clock() / (PS2_CLOCKS_PER_SEC / CLOCKS_PER_SEC);
+	clock_t clk = GetTimerSystemTime() / (kBUSCLK / CLOCKS_PER_SEC);
 
 	if (buffer != NULL) {
 		buffer->tms_utime  = clk;
 		buffer->tms_stime  = 0;
-		buffer->tms_cutime = clk;
+		buffer->tms_cutime = 0;
 		buffer->tms_cstime = 0;
 	}
 

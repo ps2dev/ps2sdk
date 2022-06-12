@@ -28,8 +28,8 @@ int main(int argc, char **argv)
     struct timer_alarm_t alarm, alarm2;
     InitializeTimerAlarm(&alarm);
     InitializeTimerAlarm(&alarm2);
-    SetTimerAlarm(&alarm, SecToCycles(2), &usercb, &flag);
-    SetTimerAlarm(&alarm2, MSecToCycles(1414), &usercb, &flag2);
+    SetTimerAlarm(&alarm, Sec2TimerBusClock(2), &usercb, &flag);
+    SetTimerAlarm(&alarm2, MSec2TimerBusClock(1414), &usercb, &flag2);
     StartTimerAlarm(&alarm);
     StartTimerAlarm(&alarm2);
 

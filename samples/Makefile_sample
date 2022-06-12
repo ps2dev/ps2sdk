@@ -26,6 +26,7 @@ SUBDIRS += kernel/noPatchedHelloWorld
 SUBDIRS += kernel/nanoHelloWorld
 SUBDIRS += libc/regress
 SUBDIRS += libc/mem_test
+SUBDIRS += libc/nanosleep
 SUBDIRS += libgs/doublebuffer
 SUBDIRS += libgs/draw
 #SUBDIRS += mpeg                #TODO: not modified for updated newlib

@@ -36,7 +36,7 @@ extern struct dirent * (*_ps2sdk_readdir)(DIR *dir);
 extern void (*_ps2sdk_rewinddir)(DIR *dir);
 extern int (*_ps2sdk_closedir)(DIR *dir);
 
-#define PS2_CLOCKS_PER_SEC (147456000 / 256) // 576.000
+#define PS2_CLOCKS_PER_SEC kBUSCLKBY256 // 576.000
 #define PS2_CLOCKS_PER_MSEC (PS2_CLOCKS_PER_SEC / 1000) // 576
 
 typedef uint64_t ps2_clock_t;

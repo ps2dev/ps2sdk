@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 {
     uint64_t current, previous;
 
-    printf("\n\nStarting ps2_clock example!\n");
+    printf("\n\nStarting GetTimerSystemTime example!\n");
     previous = GetTimerSystemTime();
     
     while (1)
