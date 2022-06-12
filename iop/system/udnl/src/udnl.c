@@ -194,9 +194,10 @@ static struct RomdirFileStat *GetFileStatFromImage(const struct RomImgData *Imag
 static void ScanImagesForFile(const struct ImageData *ImageDataBuffer, unsigned int NumFiles, struct RomdirFileStat *stat, const char *filename)
 {
     const struct ImageData *ImageData;
-    int i;
 
     if (NumFiles > 0) {
+        int i;
+
         /*
             Let f(x)=((x-1)*2+(x-1))*8;
                 f(1)=((1-1)*2+(1-1))*8=0
@@ -570,12 +571,13 @@ static void BeginBootupSequence(struct ResetData *ResetData)
 static void *ParseStartAddress(const char **line)
 {
     const char *ptr;
-    unsigned char character;
     void *address;
 
     ptr = *line;
     address = 0;
     while (*ptr >= 0x30) {
+        unsigned char character;
+
         character = *ptr;
         ptr++;
         if (character < ':') {
@@ -606,13 +608,14 @@ static const struct ExtInfoField *GetFileInfo(const struct RomdirFileStat *stat,
     const struct RomDirEntry *RomDirEnt;
     const void *extinfo_end;
     const struct ExtInfoField *ExtInfoField;
-    unsigned int ExtInfoHeader;
 
     RomDirEnt = stat->romdirent;
     extinfo_end = (unsigned char *)stat->extinfo + (RomDirEnt->ExtInfoEntrySize >> 2 << 2);
     ExtInfoField = stat->extinfo;
 
     while ((unsigned int)ExtInfoField < (unsigned int)extinfo_end) {
+        unsigned int ExtInfoHeader;
+
         ExtInfoHeader = *(unsigned int *)ExtInfoField;
 
         if (ExtInfoHeader >> 24 == mode) {
@@ -635,7 +638,6 @@ static struct RomdirFileStat *SelectModuleFromImages(const struct ImageData *Ima
     struct RomdirFileStat stat;
     const struct ExtInfoField *ExtInfofield;
     unsigned int HighestFileVersionNum;
-    unsigned short int FileVersionNum;
 
     count = 0;
     if (*line >= 0x21) {
@@ -656,6 +658,8 @@ static struct RomdirFileStat *SelectModuleFromImages(const struct ImageData *Ima
         do {
             if (ImageDataPtr->filename != NULL) {
                 if (GetFileStatFromImage(&ImageDataPtr->stat, filename, &stat) != NULL) {
+                    unsigned short int FileVersionNum;
+
                     ExtInfofield = GetFileInfo(&stat, 2);
                     FileVersionNum = 0;
                     GetFileInfo(&stat, 3);
