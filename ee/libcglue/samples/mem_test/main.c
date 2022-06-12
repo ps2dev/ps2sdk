@@ -46,7 +46,7 @@ void _ps2sdk_libc_init();
 void _ps2sdk_libc_deinit();
 #endif
 
-void _ps2sdk_timezone_update();
+void _libcglue_timezone_update() {}
 
 // "weak" function called by crt0.o
 void _ps2sdk_memory_init()

@@ -45,7 +45,7 @@ static inline ps2_clock_t ps2_clock(void) {
     return (ps2_clock_t)(GetTimerSystemTime() >> 8);
 }
 
-extern void _ps2sdk_timezone_update();
+extern void _libcglue_timezone_update();
 
 // The newlib port does not support 64bit
 // this should have been defined in unistd.h

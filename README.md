@@ -32,7 +32,7 @@ At the time of writing, PS2SDK includes the following libraries and features, al
 In a continuous effort to make `PS2SDK` and the whole `PS2DEV` a `POSIX` environment; there are some libraries needed to be included inside of the [standard libraries](https://gcc.gnu.org/onlinedocs/gcc/Standard-Libraries.html), which means, libraries than by default are included in any compilation program. From `PS2SDK` we have:
 
 -   `lkernel`: Contains the calls to BIOS functions
--   `lps2sdkc`: Implements most of the required methods by `newlib`
+-   `lcglue`: Implements most of the required methods by `newlib`
 -   `lcdvd`: Implements `ps2time` function indirectly required by `newlib`
 
 If you wanna compile a program without using the `standard libraries` take a look at the [compiler flags](https://gcc.gnu.org/onlinedocs/gcc/Link-Options.html) (`-nodefaultlibs`, `-nolibc` and `-nostdlib`).

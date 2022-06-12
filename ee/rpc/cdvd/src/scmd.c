@@ -143,7 +143,7 @@ int sceCdReadClock(sceCdCLOCK *clock)
 /*
  * newlib function, unfortunately depends on the 'cdvd' library.
  * In libc there is a 'time' function wihch call the `_gettimeofday` function.
- * `_gettimeofday` is declared in libps2sdkc (ee/libc folder inside of ps2sdk)
+ * `_gettimeofday` is declared in glue.c (ee/libcglue folder inside of ps2sdk)
  * `_gettimeofday` finally needs ps2time, to get proper time_t
  */
 time_t ps2time(time_t *t)

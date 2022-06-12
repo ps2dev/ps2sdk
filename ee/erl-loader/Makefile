@@ -13,9 +13,9 @@ LOADER_BIN = $(EE_BIN_DIR)erl-loader.elf
 
 # Since we are using non-builtin symbols
 NO_BUILTIN = memcmp memcpy memset printf strcat strchr strcmp strcpy strlen strncpy strrchr strncmp
-EE_CFLAGS += $(NO_BUILTIN:%=-fno-builtin-%) -L$(PS2SDKSRC)/ee/rpc/cdvd/lib -L$(PS2SDKSRC)/ee/libc/lib -L$(PS2SDKSRC)/ee/kernel/lib
+EE_CFLAGS += $(NO_BUILTIN:%=-fno-builtin-%) -L$(PS2SDKSRC)/ee/rpc/cdvd/lib -L$(PS2SDKSRC)/ee/libcglue/lib -L$(PS2SDKSRC)/ee/kernel/lib
 
-EE_INCS += -I$(PS2SDKSRC)/ee/erl/include -I$(PS2SDKSRC)/ee/libc/include -I$(PS2SDKSRC)/ee/erl-loader/src
+EE_INCS += -I$(PS2SDKSRC)/ee/erl/include -I$(PS2SDKSRC)/ee/libcglue/include -I$(PS2SDKSRC)/ee/erl-loader/src
 
 EE_LIBS += $(PS2SDKSRC)/ee/erl/lib/liberl.a
 

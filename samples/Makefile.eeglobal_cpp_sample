@@ -19,7 +19,7 @@ endif
 
 EXTRA_LDFLAGS =
 ifeq ($(NODEFAULTLIBS), 1)
-   EXTRA_LDFLAGS = -nodefaultlibs $(LIBM) -lgcc -Wl,--start-group $(LIBC) -lps2sdkc -lkernel -Wl,--end-group
+   EXTRA_LDFLAGS = -nodefaultlibs $(LIBM) -lgcc -Wl,--start-group $(LIBC) -lcdvd -lcglue -lkernel -Wl,--end-group
 endif
 
 # Include directories

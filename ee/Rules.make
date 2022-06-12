@@ -13,7 +13,7 @@ EE_SRC_DIR ?= src/
 EE_INC_DIR ?= include/
 EE_SAMPLE_DIR ?= samples/
 
-EE_INCS := $(EE_INCS) -I$(EE_SRC_DIR) -I$(EE_SRC_DIR)include -I$(EE_INC_DIR) -I$(PS2SDKSRC)/ee/kernel/include -I$(PS2SDKSRC)/common/include -I$(PS2SDKSRC)/ee/libc/include -I$(PS2SDKSRC)/ee/erl/include
+EE_INCS := $(EE_INCS) -I$(EE_SRC_DIR) -I$(EE_SRC_DIR)include -I$(EE_INC_DIR) -I$(PS2SDKSRC)/ee/kernel/include -I$(PS2SDKSRC)/common/include -I$(PS2SDKSRC)/ee/libcglue/include -I$(PS2SDKSRC)/ee/erl/include
 
 # Optimization compiler flags
 EE_OPTFLAGS ?= -O2
