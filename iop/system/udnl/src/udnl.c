@@ -938,7 +938,7 @@ int _start(int argc, char *argv[])
 
         do {
             if (read(ImageData->fd, IoprpBuffer, ImageData->size) == ImageData->size) {
-                if (GetIOPRPStat(IoprpBuffer, (void *)((u8 *)IoprpBuffer) + 0x4000, &ImageData->stat) != NULL) {
+                if (GetIOPRPStat(IoprpBuffer, (void *)((u8 *)IoprpBuffer + 0x4000), &ImageData->stat) != NULL) {
                     /* 0x00000420 */
                     IoprpBuffer = (void *)((u8 *)IoprpBuffer + ((ImageData->size + 0xF) & ~0xF));
                 }
