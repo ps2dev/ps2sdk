@@ -93,7 +93,8 @@ EXIT_OBJS += _exit_internals.o SetArg.o Exit.o ExecPS2.o LoadExecPS2.o ExecOSD.o
 ### Timer objects
 
 TIMER_OBJS = __time_internals.o StartTimerSystemTime.o StopTimerSystemTime.o iGetTimerSystemTime.o GetTimerSystemTime.o cpu_ticks.o
-TIMER_ALARM_OBJS = timer_alarm.o
+TIMER_ALARM_OBJS = TimerAlarmInternals.o __Timer2Resched.o InitTimerAlarm.o DeinitTimerAlarm.o InitializeTimerAlarm.o \
+	iStopTimerAlarm.o StopTimerAlarm.o iStartTimerAlarm.o StartTimerAlarm.o SetTimerAlarm.o ThreadWaitClock.o
 
 ### Getter objects
 
