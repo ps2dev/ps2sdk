@@ -6,7 +6,7 @@ COPY . /src
 
 RUN apk add build-base git bash
 RUN cd /src && make all install clean
-RUN ln -sf "$PS2SDK/ee/lib/libps2sdkc.a" "$PS2DEV/ee/mips64r5900el-ps2-elf/lib/libps2sdkc.a"
+RUN ln -sf "$PS2SDK/ee/lib/libcglue.a" "$PS2DEV/ee/mips64r5900el-ps2-elf/lib/libcglue.a"
 RUN ln -sf "$PS2SDK/ee/lib/libkernel.a"  "$PS2DEV/ee/mips64r5900el-ps2-elf/lib/libkernel.a"
 RUN ln -sf "$PS2SDK/ee/lib/libcdvd.a"  "$PS2DEV/ee/mips64r5900el-ps2-elf/lib/libcdvd.a"
 

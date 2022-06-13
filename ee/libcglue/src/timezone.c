@@ -23,7 +23,7 @@
 static char _ps2sdk_tzname[15];
 
 __attribute__((weak))
-void _ps2sdk_timezone_update()
+void _libcglue_timezone_update()
 {
 	// Set TZ and call tzset to ensure that timezone information won't get overwritten when tszet is called multiple times
 	setenv("TZ", "", 0);

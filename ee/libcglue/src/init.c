@@ -13,28 +13,28 @@
  * The global init/deinit code for our crt0.
  */
 
-void _ps2sdk_timezone_update();
+void _libcglue_timezone_update();
 
 int chdir(const char *path);
 
-#ifdef F__ps2sdk_libc_init
+#ifdef F__libcglue_init
 __attribute__((weak))
-void _ps2sdk_libc_init()
+void _libcglue_init()
 {
-    _ps2sdk_timezone_update();
+    _libcglue_timezone_update();
 }
 #endif
 
-#ifdef F__ps2sdk_libc_deinit
+#ifdef F__libcglue_deinit
 __attribute__((weak))
-void _ps2sdk_libc_deinit()
+void _libcglue_deinit()
 {
 }
 #endif
 
-#ifdef F__ps2sdk_args_parse
+#ifdef F__libcglue_args_parse
 __attribute__((weak))
-void _ps2sdk_args_parse(int argc, char ** argv)
+void _libcglue_args_parse(int argc, char ** argv)
 {
     if (argc == 0) // naplink!
     {

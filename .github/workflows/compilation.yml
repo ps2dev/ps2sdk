@@ -23,7 +23,7 @@ jobs:
       - name: Compile project ${{ matrix.debug }}
         run: |
           make clean ${{ matrix.debug }} install
-          ln -sf "$PS2SDK/ee/lib/libps2sdkc.a" "$PS2DEV/ee/mips64r5900el-ps2-elf/lib/libps2sdkc.a"
+          ln -sf "$PS2SDK/ee/lib/libcglue.a" "$PS2DEV/ee/mips64r5900el-ps2-elf/lib/libcglue.a"
           ln -sf "$PS2SDK/ee/lib/libkernel.a"  "$PS2DEV/ee/mips64r5900el-ps2-elf/lib/libkernel.a"
           ln -sf "$PS2SDK/ee/lib/libcdvd.a"  "$PS2DEV/ee/mips64r5900el-ps2-elf/lib/libcdvd.a"
 
