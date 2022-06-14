@@ -4,7 +4,7 @@
 #include "module_debug.h"
 
 
-int bd_defrag(struct block_device* bd, struct bd_fraglist* fl, u32 sector, void* buffer, u16 count)
+int bd_defrag(struct block_device* bd, u32 fragcount, struct bd_fragment* fraglist, u32 sector, void* buffer, u16 count)
 {
     u32 sector_start = sector;
     u16 count_left = count;
@@ -16,8 +16,8 @@ int bd_defrag(struct block_device* bd, struct bd_fraglist* fl, u32 sector, void*
         int i;
 
         // Locate fragment containing start sector
-        for (i=0; i<fl->count; i++) {
-            f = &fl->list[i];
+        for (i=0; i<fragcount; i++) {
+            f = &fraglist[i];
             if (offset <= sector_start && (offset + f->count) > sector_start) {
                 // Fragment found
                 break;
@@ -25,7 +25,7 @@ int bd_defrag(struct block_device* bd, struct bd_fraglist* fl, u32 sector, void*
             offset += f->count;
         }
 
-        if (i == fl->count) {
+        if (i == fragcount) {
             M_PRINTF("%s: ERROR: fragment not found!\n", __FUNCTION__);
             return -1;
         }
