@@ -17,17 +17,10 @@
 
 #include <tamtypes.h>
 
-#define BD_MAX_FRAGMENTS 10
-
 typedef struct bd_fragment {
     u32 sector; /// start sector of fragmented bd/file
     u32 count;  /// number of sector in this fragment
 } __attribute__((packed)) bd_fragment_t;
-
-typedef struct bd_fraglist {
-    u32 count;                            /// number of fragments
-    bd_fragment_t list[BD_MAX_FRAGMENTS]; /// pointer to fragment list
-} __attribute__((packed)) bd_fraglist_t;
 
 // IOCTL function codes
 /** Rename opened file. Data input to ioctl() -> new, full filename of file. */
