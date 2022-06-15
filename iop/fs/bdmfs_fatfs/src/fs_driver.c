@@ -438,33 +438,30 @@ static int fs_getstat(iop_file_t *fd, const char *name, iox_stat_t *stat)
 
 static int get_frag_list(FIL *file, void *rdata, unsigned int rdatalen)
 {
-    bd_fraglist_t *l = (bd_fraglist_t*)rdata;
+    bd_fragment_t *f = (bd_fragment_t*)rdata;
+    int iMaxFragments = rdatalen / sizeof(bd_fragment_t);
+    int iFragCount = 0;
+
     DWORD iClusterStart = file->obj.sclust;
     DWORD iClusterCurrent = iClusterStart;
 
-    if (rdatalen < sizeof(bd_fraglist_t)) {
-        M_DEBUG("ERROR: rdatalen=%d\n", rdatalen);
-        return -1;
-    }
-
-    l->count = 0;
     do {
         DWORD iClusterNext = get_fat(&file->obj, iClusterCurrent);
         if (iClusterNext != (iClusterCurrent + 1)) {
             // Fragment or file end
             M_DEBUG("fragment: %uc - %uc + 1\n", iClusterStart, iClusterCurrent + 1);
-            if (l->count < 10) {
-                l->list[l->count].sector = clst2sect(file->obj.fs, iClusterStart);
-                l->list[l->count].count  = clst2sect(file->obj.fs, iClusterCurrent) - clst2sect(file->obj.fs, iClusterStart) + file->obj.fs->csize;
-                M_DEBUG(" - sectors: %us count %us\n", l->list[l->count].sector, l->list[l->count].count);
+            if (iFragCount < iMaxFragments) {
+                f[iFragCount].sector = clst2sect(file->obj.fs, iClusterStart);
+                f[iFragCount].count  = clst2sect(file->obj.fs, iClusterCurrent) - clst2sect(file->obj.fs, iClusterStart) + file->obj.fs->csize;
+                M_DEBUG(" - sectors: %us count %us\n", f[iFragCount].sector, f[iFragCount].count);
             }
-            l->count++;
+            iFragCount++;
             iClusterStart = iClusterNext;
         }
         iClusterCurrent = iClusterNext;
     } while(iClusterCurrent < file->obj.fs->n_fatent);
 
-    return l->count;
+    return iFragCount;
 }
 
 //---------------------------------------------------------------------------
