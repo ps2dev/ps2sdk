@@ -6,22 +6,11 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = \
-	alloc \
-	iomanx \
-	iopmgr \
-	mtapman \
-	padman \
-	rmman \
-	rmtapman \
-	rpadman \
-	rsio2man \
-	sbusintr \
-	siftoo \
-	sio2log \
-	sio2man \
-	udnl \
-	udnl-t300
+IOP_BIN_ALTNAMES =
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/system/udnl/src/
+IOP_INC_DIR = $(PS2SDKSRC)/iop/system/udnl/include/
+
+IOP_CFLAGS += -DUDNL_T300
+
+include $(PS2SDKSRC)/iop/system/udnl/Makefile
