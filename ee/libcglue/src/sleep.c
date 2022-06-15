@@ -26,7 +26,7 @@ int nanosleep(const struct timespec *req, struct timespec *rem)
 {
     uint64_t cycles;
 
-    cycles = TimerUSec2BusClock(req->tv_sec, req->tv_nsec * 1000);
+    cycles = TimerUSec2BusClock(req->tv_sec, req->tv_nsec / 1000);
     ThreadWaitClock(cycles);
 
     if (rem != NULL) {
