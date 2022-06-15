@@ -118,8 +118,10 @@ static int var_00001850 = 0; /* 0x00001850 - Not sure what this is, but it's pro
 #endif
 #endif
 
+#ifdef USE_EMBEDDED_IOPRP
 extern unsigned char IOPRP_img[];
 extern unsigned int size_IOPRP_img;
+#endif
 
 struct RomImgData
 { /* 12 bytes */
@@ -1056,7 +1058,10 @@ int _start(int argc, char *argv[])
     ImageDataBuffer = alloca(ImageDataTotalSize);
     memset(ImageDataBuffer, 0, ImageDataTotalSize);
 
-    TotalSize = MAX_MODULES * sizeof(void *) + sizeof(struct ResetData) + ((size_IOPRP_img + 0xF) & ~0xF); // Unlike the ROM UDNL module, allocate space for the embedded IOPRP image as well like the DVD player UDNL module does.
+    TotalSize = MAX_MODULES * sizeof(void *) + sizeof(struct ResetData);
+#ifdef USE_EMBEDDED_IOPRP
+    TotalSize += ((size_IOPRP_img + 0xF) & ~0xF); // Unlike the ROM UDNL module, allocate space for the embedded IOPRP image as well like the DVD player UDNL module does.
+#endif
 
 #ifdef FULL_UDNL
     i = 1;
@@ -1177,11 +1182,14 @@ int _start(int argc, char *argv[])
     }
 #endif
     /* 0x00000398 */
-    /*    Originally, the Sony boot ROM UDNL module did this. However, it doesn't work well because the rest of the data used in the reset will go unprotected. The Sony DVD player UDNL modules allocate memory for the embedded IOPRP image and copies the IOPRP image into the buffer, like if it was read in from a file.
-    if(size_IOPRP_img>=0x10 && GetIOPRPStat(IOPRP_img, &IOPRP_img[size_IOPRP_img], &ImageDataBuffer[1].stat)!=NULL){
-        ImageDataBuffer[1].filename="DATA";
-        ResetData->IOPRPBuffer=(void*)((unsigned int)IOPRP_img&~0xF);
-    } */
+    /*    Originally, the Sony boot ROM UDNL module did this. However, it doesn't work well because the rest of the data used in the reset will go unprotected. The Sony DVD player UDNL modules allocate memory for the embedded IOPRP image and copies the IOPRP image into the buffer, like if it was read in from a file. */
+#ifdef USE_EMBEDDED_IOPRP
+#if 0
+    if (size_IOPRP_img >= 0x10 && GetIOPRPStat(IOPRP_img, &IOPRP_img[size_IOPRP_img], &ImageDataBuffer[1].stat) != NULL) {
+        ImageDataBuffer[1].filename = "DATA";
+        ResetData->IOPRPBuffer = (void*)((unsigned int)IOPRP_img & ~0xF);
+    }
+#endif
     if (size_IOPRP_img >= 0x10) { // Hence, do this instead:
         memcpy(IoprpBuffer, IOPRP_img, size_IOPRP_img);
         if (GetIOPRPStat(IoprpBuffer, (void *)((unsigned int)IoprpBuffer + size_IOPRP_img), &ImageDataBuffer[1].stat) != NULL) {
@@ -1189,6 +1197,7 @@ int _start(int argc, char *argv[])
             IoprpBuffer = (void *)((u8 *)IoprpBuffer + ((size_IOPRP_img + 0xF) & ~0xF));
         }
     }
+#endif
 
 #ifdef FULL_UDNL
     /* 0x000003dc */
