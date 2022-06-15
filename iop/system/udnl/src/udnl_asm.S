@@ -11,16 +11,64 @@
 
 .text
 
-.globl func_00001440
-.ent func_00001440
-func_00001440:
+#ifdef UDNL_T300
+.globl CpuExecuteKmode
+.ent CpuExecuteKmode
+CpuExecuteKmode:
+    li      $v0, 0x0C
+    syscall
+    jr      $ra
+    nop
+.end CpuExecuteKmode
+
+.globl func_00001b38
+.ent func_00001b38
+func_00001b38:
     mfc0    $t0, $12
     nop
-    la      $t4, func_00001440_main
+    la      $t4, func_00001b38_main
     lui     $at, 0xA000
     or      $t4, $t4, $at
     jr      $t4
+    mtc0    $zero, $12
+func_00001b38_main:
+    nop
+    lui     $at, 0xFFFE
+    sw      $a0, 0x0130($at)
+    lui     $at, 0xFFFE
+    lw      $zero, 0x0130($at)
+    nop
+    mtc0    $t0, $12
+    nop
+    jr      $ra
+    nop
+.end func_00001b38
+#endif
+
+#ifdef UDNL_T300
+.globl func_00001930
+.ent func_00001930
+func_00001930:
+#else
+.globl func_00001440
+.ent func_00001440
+func_00001440:
+#endif
+    mfc0    $t0, $12
+    nop
+#ifdef UDNL_T300
+    la      $t4, func_00001930_main
+#else
+    la      $t4, func_00001440_main
+#endif
+    lui     $at, 0xA000
+    or      $t4, $t4, $at
+    jr      $t4
+#ifdef UDNL_T300
+func_00001930_main:
+#else
 func_00001440_main:
+#endif
     mtc0    $zero, $12
     nop
     nop
@@ -50,7 +98,11 @@ func_00001440_main:
     nop
     addiu   $t2, $zero, 0x0000
     addiu   $t3, $zero, 0x0f80
+#ifdef UDNL_T300
+func_00001930_loop:
+#else
 func_00001440_loop:
+#endif
     sw      $zero, 0x0000($t2)
     sw      $zero, 0x0010($t2)
     sw      $zero, 0x0020($t2)
@@ -59,7 +111,11 @@ func_00001440_loop:
     sw      $zero, 0x0050($t2)
     sw      $zero, 0x0060($t2)
     sw      $zero, 0x0070($t2)
+#ifdef UDNL_T300
+    bne     $t2, $t3, func_00001930_loop
+#else
     bne     $t2, $t3, func_00001440_loop
+#endif
     addi    $t2, $t2, 0x0080
     mtc0    $zero, $12
     nop
@@ -80,19 +136,37 @@ func_00001440_loop:
     nop
     jr      $ra
     nop
+#ifdef UDNL_T300
+.end func_00001930
+#else
 .end func_00001440
+#endif
 
 # Note: This doesn't seem to be used.
+#ifdef UDNL_T300
+# .globl func_00001a34
+# .ent func_00001a34
+# func_00001a34:
+#else
 # .globl func_00001544
 # .ent func_00001544
 # func_00001544:
+#endif
 #    mfc0     $t0, $12
 #    nop
+#ifdef UDNL_T300
+#    la       $t4, func_00001a34_main
+#else
 #    la       $t4, func_00001544_main
+#endif
 #    lui      $at, 0xa000
 #    or       $t4, $t4, $at
 #    jr       $t4
+#ifdef UDNL_T300
+# func_00001a34_main:
+#else
 # func_00001544_main:
+#endif
 #    mtc0     $zero, $12
 #    nop
 #    nop
@@ -122,7 +196,11 @@ func_00001440_loop:
 #    nop
 #    addiu    $t2, $zero, 0x0000
 #    addiu    $t3, $zero, 0x0380
+#ifdef UDNL_T300
+# func_00001a34_loop:
+#else
 # func_00001544_loop:
+#endif
 #    sw       $zero, 0x0000($t2)
 #    sw       $zero, 0x0010($t2)
 #    sw       $zero, 0x0020($t2)
@@ -131,7 +209,11 @@ func_00001440_loop:
 #    sw       $zero, 0x0050($t2)
 #    sw       $zero, 0x0060($t2)
 #    sw       $zero, 0x0070($t2)
+#ifdef UDNL_T300
+#    bne      $t2, $t3, func_00001a34_loop
+#else
 #    bne      $t2, $t3, func_00001544_loop
+#endif
 #    addi     $t2, $t2, 0x0080
 #    mtc0     $zero, $12
 #    nop
@@ -152,4 +234,8 @@ func_00001440_loop:
 #    nop
 #    jr       $ra
 #    nop
+#ifdef UDNL_T300
+# .end func_00001a34
+#else
 # .end func_00001544
+#endif

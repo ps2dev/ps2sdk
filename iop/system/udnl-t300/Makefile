@@ -6,9 +6,11 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_OBJS = udnl.o udnl_asm.o imports.o IOPRP_img.o
+IOP_BIN_ALTNAMES =
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/iop/Rules.bin.make
-include $(PS2SDKSRC)/iop/Rules.make
-include $(PS2SDKSRC)/iop/Rules.release
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/system/udnl/src/
+IOP_INC_DIR = $(PS2SDKSRC)/iop/system/udnl/include/
+
+IOP_CFLAGS += -DUDNL_T300
+
+include $(PS2SDKSRC)/iop/system/udnl/Makefile

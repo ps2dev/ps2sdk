@@ -10,6 +10,10 @@
 #include "ELF.h"
 #include "COFF.h"
 
+#ifdef UDNL_T300
+int CpuExecuteKmode(void *function, ...); // Exactly the same function as INTRMAN's export 14.
+#endif
+
 //#define DEBUG 1 //Comment out to disable debug messages.
 #ifdef DEBUG
 #define DEBUG_PRINTF(args...) printf(args)
@@ -32,6 +36,27 @@ static void *AllocMemory(int nbytes);
 /*
 int isIllegalBootDevice(const char *arg1)
 {
+#ifdef UDNL_T300
+    unsigned int temp1, temp2, temp3, DeviceHash;
+
+    while (*path == ' ')
+        path++;
+
+    temp1 = *path++;
+    temp2 = *path++;
+    temp3 = *path++;
+
+    DeviceHash = (((((temp1 << 8) | temp2) << 8) | temp3) << 8) ^ 0x72e7c42f;
+
+    // "rom", "host" and "cdrom".
+    if ((DeviceHash >> 8 == 0x000088A9) || (DeviceHash == 0x1A88B75B) || ((DeviceHash == 0x1183b640)) && (*path++) == 'm'))
+        {
+            return ((*path - 0x30) < 0x0b ? 1 : 0);
+        }
+    else {
+        return 1;
+    }
+#else
     // Eliminate spaces from the path.
     if (arg1[0] == ' ') {
         arg1++;
@@ -59,6 +84,7 @@ int isIllegalBootDevice(const char *arg1)
 
 end_func1:
     return ((*arg1 - 0x30 < 0x0b) ? 1 : 0); // '0' to '9' and ':'
+#endif
 }
 */
 #endif
@@ -85,7 +111,11 @@ struct ResetData
 };
 
 #ifdef FULL_UDNL
+#ifdef UDNL_T300
+static int var_00001e20 = 0; /* 0x00001e20 - Not sure what this is, but it's probably a verbosity level flag, although unused. */
+#else
 static int var_00001850 = 0; /* 0x00001850 - Not sure what this is, but it's probably a verbosity level flag, although unused. */
+#endif
 #endif
 
 extern unsigned char IOPRP_img[];
@@ -153,6 +183,9 @@ static struct RomdirFileStat *GetFileStatFromImage(const struct RomImgData *Imag
     unsigned int i, offset, ExtInfoOffset;
     unsigned char filename_temp[12];
     const struct RomDirEntry *RomdirEntry;
+#ifdef UDNL_T300
+    struct RomdirFileStat *result;
+#endif
 
     offset = 0;
     ExtInfoOffset = 0;
@@ -176,18 +209,38 @@ static struct RomdirFileStat *GetFileStatFromImage(const struct RomImgData *Imag
 
                 if (RomdirEntry->ExtInfoEntrySize > 0) {
                     stat->extinfo = (void *)((unsigned int)ImageStat->RomdirEnd + ExtInfoOffset);
+#ifdef UDNL_T300
+                    result = stat;
+                    goto end;
+#endif
                 }
 
+#ifndef UDNL_T300
                 return stat;
+#endif
             }
 
             offset += (RomdirEntry->size + 0xF) & 0xFFFFFFF0;
             ExtInfoOffset += RomdirEntry->ExtInfoEntrySize;
             RomdirEntry++;
         } while (((unsigned int *)RomdirEntry->name)[0] != 0x00000000);
-    }
 
+#ifdef UDNL_T300
+        result = NULL;
+#endif
+    }
+#ifdef UDNL_T300
+    else {
+        result = NULL;
+    }
+#endif
+
+#ifdef UDNL_T300
+end:
+    return result;
+#else
     return NULL;
+#endif
 }
 
 /* 0x0000055c */
@@ -223,9 +276,116 @@ static void ScanImagesForFile(const struct ImageData *ImageDataBuffer, unsigned 
         } while (i >= 0);
     }
 
+#ifdef UDNL_T300
+    printf("kupdate: panic ! \'%s\' not found\n", filename);
+#else
     printf("panic ! \'%s\' not found\n", filename);
+#endif
     __asm("break\n");
 }
+
+#ifdef UDNL_T300
+static void TerminateResidentLibraries(const char *message, unsigned int options, int mode)
+{
+    lc_internals_t *LoadcoreData;
+    iop_library_t *ModuleData, *NextModule;
+    void **ExportTable;
+
+    if ((LoadcoreData = GetLoadcoreInternalData()) != NULL) {
+        ModuleData = LoadcoreData->let_next;
+        while (ModuleData != NULL) {
+            NextModule = ModuleData->prev;
+
+            if (mode == 2) {
+                if (!(ModuleData->flags & 6)) {
+                    ModuleData = NextModule;
+                    continue;
+                }
+            } else if ((ModuleData->flags & 6) == 2) { // Won't ever happen?
+                ModuleData = NextModule;
+                continue;
+            }
+
+            ExportTable = ModuleData->exports;
+            if (ExportTable[1] != NULL && ExportTable[2] != NULL) {
+                int (*pexit)(int arg1);
+
+                pexit = ExportTable[2];
+                pexit(0);
+            }
+
+            ModuleData = NextModule;
+        }
+    }
+}
+
+struct ssbus_regs
+{
+    volatile unsigned int *address, *delay;
+};
+
+static struct ssbus_regs ssbus_regs[] = { // 0x00001e24
+    {
+        (volatile unsigned int *)0xbf801000,
+        (volatile unsigned int *)0xbf801008},
+    {(volatile unsigned int *)0xbf801400,
+     (volatile unsigned int *)0xbf80100C},
+    {(volatile unsigned int *)0xbf801404,
+     (volatile unsigned int *)0xbf801014},
+    {(volatile unsigned int *)0xbf801408,
+     (volatile unsigned int *)0xbf801018},
+    {(volatile unsigned int *)0xbf80140C,
+     (volatile unsigned int *)0xbf801414},
+    {(volatile unsigned int *)0xbf801410,
+     (volatile unsigned int *)0xbf80141C},
+    {NULL,
+     NULL}};
+
+// 0x00000f80
+static volatile unsigned int *func_00000f80(volatile unsigned int *address)
+{
+    struct ssbus_regs *pSSBUS_regs;
+
+    pSSBUS_regs = ssbus_regs;
+    while (pSSBUS_regs->address != NULL) {
+        if (pSSBUS_regs->address == address)
+            break;
+        pSSBUS_regs++;
+    }
+
+    return pSSBUS_regs->delay;
+}
+
+// 0x00001b38
+void func_00001b38(unsigned int arg1);
+
+// 0x00000c98
+static void TerminateResidentEntriesDI(unsigned int options)
+{
+    int prid;
+    volatile unsigned int **pReg;
+
+    TerminateResidentLibraries(" kupdate:di: Terminate resident Libraries\n", options, 0);
+
+    asm volatile("mfc0 %0, $15"
+                 : "=r"(prid)
+                 :);
+
+    if (!(options & 1)) {
+        pReg = (prid < 0x10 || ((*(volatile unsigned int *)0xbf801450) & 8)) ? *(volatile unsigned int ***)0xbfc02008 : *(volatile unsigned int ***)0xbfc0200C;
+
+        while (pReg[0] != 0) {
+            if (func_00000f80(pReg[0]) != 0)
+                pReg[0] = (void *)0xFF;
+            pReg[0] = pReg[1];
+            pReg += 2;
+        }
+    }
+    if (!(options & 2)) {
+        func_00001b38((prid < 0x10 || ((*(volatile unsigned int *)0xbf801450) & 8)) ? *(volatile unsigned int *)0xbfc02010 : *(volatile unsigned int *)0xbfc02014);
+    }
+}
+#endif
 
 struct ModuleInfo
 {
@@ -241,7 +401,11 @@ struct ModuleInfo
     unsigned int unknown_24;  // 0x24
 };
 
+#ifdef UDNL_T300
+void func_00001930(void);
+#else
 void func_00001440(void);
+#endif
 
 enum IOP_MODULE_TYPES {
     IOP_MOD_TYPE_COFF = 1,
@@ -515,12 +679,24 @@ static int LoadModule(const void *module, struct ModuleInfo *ModuleInfo)
 }
 
 /* 0x000009d0 */
+#ifdef UDNL_T300
+static void BeginBootupSequence(struct ResetData *ResetData, unsigned int options)
+#else
 static void BeginBootupSequence(struct ResetData *ResetData)
+#endif
 {
     struct ModuleInfo LoadedModules[2];
     int MemSizeInBytes;
     int (*ModuleEntryPoint)(int arg1);
     void *FreeMemStart;
+
+#ifdef UDNL_T300
+    TerminateResidentEntriesDI(options);
+
+    dmac_set_dpcr(0);
+    dmac_set_dpcr2(0);
+    dmac_set_dpcr3(0);
+#endif
 
     MemSizeInBytes = ResetData->MemSize << 20;
 
@@ -537,7 +713,11 @@ static void BeginBootupSequence(struct ResetData *ResetData)
     }
 
     /* 0x00000a58 */
+#ifdef UDNL_T300
+    func_00001930();
+#else
     func_00001440();
+#endif
 
     ModuleEntryPoint = LoadedModules[0].EntryPoint;
     FreeMemStart = (void *)ModuleEntryPoint(MemSizeInBytes);
@@ -555,7 +735,11 @@ static void BeginBootupSequence(struct ResetData *ResetData)
     }
 
     /* 0x00000ad0 */
+#ifdef UDNL_T300
+    func_00001930();
+#else
     func_00001440();
+#endif
 
     ResetData->StartAddress = LoadedModules[0].text_start;
 
@@ -835,6 +1019,21 @@ int _start(int argc, char *argv[])
 #endif
     struct RomdirFileStat FileStat;
 
+#ifdef UDNL_T300
+    unsigned int BootMode4, BootMode3, options;
+    void *BootModePtr;
+    struct RomdirFileStat ROMStat;
+
+    BootMode4 = 0xFFFFFFFF;
+    BootMode3 = 0;
+    if ((BootModePtr = QueryBootMode(4)) != NULL) {
+        BootMode4 = *(unsigned char *)BootModePtr;
+    }
+    if ((BootModePtr = QueryBootMode(3)) != NULL) {
+        BootMode3 = *(unsigned int *)((unsigned char *)BootModePtr + 4);
+    }
+#endif
+
     /*
         Let f(x)=((x+2)*2+(x+2))*8, where x>0
             f(1)=((1+2)*2+(1+2))*8=72
@@ -863,17 +1062,49 @@ int _start(int argc, char *argv[])
     i = 1;
     NumFiles = 2;
     ImageData = &ImageDataBuffer[2];
+#ifdef UDNL_T300
+    options = 0;
+#endif
     while (i < argc) {
-        if (strcmp(argv[i], "-v") != 0) {
+#ifdef UDNL_T300
+        if (strcmp(argv[i], "-v") == 0) {
+            var_00001e20++;
+        }
+#else
+        if (strcmp(argv[i], "-v") != 0)
+#endif
+#ifdef UDNL_T300
+        else if (strcmp(argv[i], "-nobusini") == 0 || strcmp(argv[i], "-nb") == 0) {
+            options |= 1;
+        } else if (strcmp(argv[i], "-nocacheini") == 0 || strcmp(argv[i], "-nc") == 0) {
+            options |= 2;
+        } else
+#endif
+        {
             /*
             if (isIllegalBootDevice(argv[i])) { //This block of commented-out code (and the commented-out isIllegalBootDevice() function) is what all Sony UDNL modules have, to prevent the loading of IOPRP images from unsecured devices.
+#ifdef UDNL_T300
+                if (BootMode4 & 2) {
+                    goto end;
+                }
+#endif
                 SleepThread();
                 __asm("break");
+            }
             }
             */
 
             if ((fd = open(argv[i], O_RDONLY)) < 0) {
+#ifdef UDNL_T300
+                printf("kupdate: pannic ! file \'%s\' can't open\n", argv[i]);
+#else
                 printf("file \'%s\' can't open\n", argv[i]);
+#endif
+#ifdef UDNL_T300
+                if (BootMode4 & 2) {
+                    goto end;
+                }
+#endif
                 SleepThread();
                 __asm("break");
             }
@@ -891,8 +1122,12 @@ int _start(int argc, char *argv[])
                 NumFiles++;
                 ImageData++;
             }
-        } else
+        }
+#ifndef UDNL_T300
+        else {
             var_00001850++;
+        }
+#endif
 
         i++;
     }
@@ -900,7 +1135,16 @@ int _start(int argc, char *argv[])
 
     /* 0x000002f8 */
     if ((buffer = AllocMemory(TotalSize)) == NULL) {
+#ifdef UDNL_T300
+        printf("kupdate: pannic ! can not alloc memory\n");
+#else
         printf("pannic ! can not alloc memory\n");
+#endif
+#ifdef UDNL_T300
+        if (BootMode4 & 2) {
+            goto end;
+        }
+#endif
         SleepThread();
         __asm("break");
     }
@@ -911,11 +1155,27 @@ int _start(int argc, char *argv[])
     IoprpBuffer = (void *)((unsigned int)buffer + MAX_MODULES * sizeof(void *) + sizeof(struct ResetData));
     ResetData->IOPRPBuffer = (void *)((unsigned int)IoprpBuffer & 0x1FFFFF00);
     ResetData->MemSize = QueryMemSize() >> 20;
+#ifdef UDNL_T300
+    if (ResetData->MemSize == 8) {
+        if (BootMode3 & 0x00000080) {
+            printf("  Logical memory size 8MB ---> 2MB\n");
+            ResetData->MemSize = 2;
+        }
+    }
+#endif
     ResetData->BootMode = 3;
     ResetData->command = NULL;
     if (GetIOPRPStat((void *)0xbfc00000, (void *)0xbfc10000, &ImageDataBuffer[0].stat) != NULL) {
         ImageDataBuffer[0].filename = "ROM";
     }
+#ifdef UDNL_T300
+    if (BootMode3 & 0x00000100) {
+        if (GetFileStatFromImage(&ImageDataBuffer[0].stat, "OLDROM", &ROMStat) != 0 && GetIOPRPStat(ROMStat.data, (const void *)((const u8 *)(ROMStat.data) + 0x40000), &ImageDataBuffer[1].stat)) {
+            memcpy(&ImageDataBuffer[0].stat, &ImageDataBuffer[1].stat, sizeof(ImageDataBuffer[0].stat));
+            printf("  use alternate ROM image\n");
+        }
+    }
+#endif
     /* 0x00000398 */
     /*    Originally, the Sony boot ROM UDNL module did this. However, it doesn't work well because the rest of the data used in the reset will go unprotected. The Sony DVD player UDNL modules allocate memory for the embedded IOPRP image and copies the IOPRP image into the buffer, like if it was read in from a file.
     if(size_IOPRP_img>=0x10 && GetIOPRPStat(IOPRP_img, &IOPRP_img[size_IOPRP_img], &ImageDataBuffer[1].stat)!=NULL){
@@ -943,6 +1203,9 @@ int _start(int argc, char *argv[])
                     IoprpBuffer = (void *)((u8 *)IoprpBuffer + ((ImageData->size + 0xF) & ~0xF));
                 }
             }
+#ifdef UDNL_T300
+            close(ImageData->fd);
+#endif
             i++;
             ImageData++;
         } while (i < NumFiles);
@@ -961,13 +1224,23 @@ int _start(int argc, char *argv[])
 
     DEBUG_PRINTF("Beginning IOP bootup sequence.\n");
 
+#ifdef UDNL_T300
+    TerminateResidentLibraries(" kupdate:ei: Terminate resident Libraries\n", options, 2);
+    CpuExecuteKmode(&BeginBootupSequence, ResetData, options);
+#else
     CpuDisableIntr();
     dmac_set_dpcr(0);
     dmac_set_dpcr2(0);
     dmac_set_dpcr3(0);
     BeginBootupSequence(ResetData);
+#endif
 
+#ifdef UDNL_T300
+end:
+    return MODULE_NO_RESIDENT_END;
+#else
     return MODULE_RESIDENT_END;
+#endif
 }
 
 /* 0x000004cc */

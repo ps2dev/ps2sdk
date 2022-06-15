@@ -15,6 +15,13 @@ I_close
 I_lseek
 ioman_IMPORTS_end
 
+#ifdef UDNL_T300
+loadcore_IMPORTS_start
+I_GetLoadcoreInternalData
+I_QueryBootMode
+loadcore_IMPORTS_end
+#endif
+
 stdio_IMPORTS_start
 I_printf
 stdio_IMPORTS_end
