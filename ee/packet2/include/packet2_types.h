@@ -214,7 +214,7 @@ enum VIFOpcode
      * FLUSHA waits for the state in which there is no transfer request from PATH3 after the end of micro 
      * program in VU1 and end of transfer to the GIF from PATH1 and PATH2. 
      */
-    P2_VIF_FLUSHA = 18,
+    P2_VIF_FLUSHA = 19,
     /** 
      * Activates the microprogram. 
      * MSCAL waits for the end of the microprogram under execution and activates the micro program with the 
