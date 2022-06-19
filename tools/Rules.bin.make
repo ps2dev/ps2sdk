@@ -6,9 +6,12 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-TOOLS_OBJS = main.o adpcm.o
+TOOLS_BIN_DIR ?= bin/
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/tools/Rules.bin.make
-include $(PS2SDKSRC)/tools/Rules.make
-include $(PS2SDKSRC)/tools/Rules.release
+TOOLS_BIN ?= $(shell basename $(CURDIR))
+TOOLS_BIN := $(TOOLS_BIN:%=$(TOOLS_BIN_DIR)%)
+
+all:: $(TOOLS_BIN)
+
+clean::
+	rm -f -r $(TOOLS_OBJS_DIR) $(TOOLS_BIN_DIR)

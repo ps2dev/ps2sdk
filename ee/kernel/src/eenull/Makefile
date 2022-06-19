@@ -17,6 +17,7 @@ EE_OBJS = eenull.o
 EE_CFLAGS += -mno-gpopt
 
 $(EE_EENULL_BIN): $(EE_EENULL_ELF)
+	$(DIR_GUARD)
 	$(EE_OBJCOPY) -Obinary $< $@
 
 clean:
@@ -25,5 +26,6 @@ clean:
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make
 
-$(EE_EENULL_ELF): $(EE_OBJS) | $(EE_BIN_DIR)
+$(EE_EENULL_ELF): $(EE_OBJS)
+	$(DIR_GUARD)
 	$(EE_CC) $(EE_CFLAGS) -o $@ $^ -nostdlib -nostartfiles -Tlinkfile -s $(EE_LIBS)

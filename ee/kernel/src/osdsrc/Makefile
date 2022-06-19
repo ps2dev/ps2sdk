@@ -18,6 +18,7 @@ EE_INCS += -I$(PS2SDKSRC)/ee/rpc/cdvd/include
 EE_CFLAGS += -mno-gpopt -DREUSE_EXECPS2 -fno-tree-loop-distribute-patterns
 
 $(EE_OSDSRC_BIN): $(EE_OSDSRC_ELF)
+	$(DIR_GUARD)
 	$(EE_OBJCOPY) -Obinary $< $@
 
 clean:
@@ -26,5 +27,6 @@ clean:
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make
 
-$(EE_OSDSRC_ELF): $(EE_OBJS) | $(EE_BIN_DIR)
+$(EE_OSDSRC_ELF): $(EE_OBJS)
+	$(DIR_GUARD)
 	$(EE_CC) $(EE_CFLAGS) -o $@ $^ -nostdlib -nostartfiles -Tlinkfile -s $(EE_LIBS)

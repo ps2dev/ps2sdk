@@ -17,6 +17,7 @@ EE_OBJS = srcfile.o alarm.o dispatch.o
 EE_CFLAGS += -mno-gpopt -fno-tree-loop-distribute-patterns
 
 $(EE_SRCFILE_BIN): $(EE_SRCFILE_ELF)
+	$(DIR_GUARD)
 	$(EE_OBJCOPY) -Obinary $< $@
 
 clean:
@@ -25,5 +26,6 @@ clean:
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make
 
-$(EE_SRCFILE_ELF): $(EE_OBJS) | $(EE_BIN_DIR)
+$(EE_SRCFILE_ELF): $(EE_OBJS)
+	$(DIR_GUARD)
 	$(EE_CC) $(EE_CFLAGS) -o $@ $^ -nostdlib -nostartfiles -Tlinkfile -s $(EE_LIBS)

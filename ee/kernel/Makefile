@@ -153,84 +153,111 @@ include $(PS2SDKSRC)/ee/Rules.make
 include $(PS2SDKSRC)/ee/Rules.release
 
 $(KERNEL_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)kernel.S
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(SIFCMD_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)sifcmd.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(SIFRPC_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)sifrpc.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(FILEIO_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)fileio.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(LOADFILE_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)loadfile.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(ROM0_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)rom0_info.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(CONFIG_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)osd_config.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(TIMER_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)timer.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(TIMER_ALARM_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)timer_alarm.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(GETKERNEL_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)getkernel.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(SETUP_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)setup.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(IOPHEAP_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)iopheap.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(IOPCONTROL_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)iopcontrol.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(GLUE_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)glue.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(THREAD_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)thread.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(SIO_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)sio.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(INITSYS_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)initsys.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(EXIT_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)exit.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(EE_OBJS_DIR)libosd.o: $(EE_SRC_DIR)libosd.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
 
 $(EE_OBJS_DIR)libosd_full.o: $(EE_SRC_DIR)libosd_full.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
 
 $(EE_OBJS_DIR)libosd_common.o: $(EE_SRC_DIR)libosd_common.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
 
 $(EE_OBJS_DIR)osdsrc_bin.o: $(EE_OBJS_DIR)osdsrc_bin.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
 
 $(EE_OBJS_DIR)libosd_syscalls.o: $(EE_SRC_DIR)libosd_syscalls.S
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
 
 $(EE_OBJS_DIR)tibfunc.o: $(EE_SRC_DIR)tlbfunc.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) $< -c -o $@
 
 $(EE_OBJS_DIR)tlbsrc_bin.o: $(EE_OBJS_DIR)tlbsrc_bin.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) $< -c -o $@
 
 $(EE_OBJS_DIR)srcfile_bin.o: $(EE_OBJS_DIR)srcfile_bin.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) $< -c -o $@
 
 $(EE_OBJS_DIR)eenull_bin.o: $(EE_OBJS_DIR)eenull_bin.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) $< -c -o $@
 
 $(PS2SDKSRC)/tools/bin2c/bin/bin2c: $(PS2SDKSRC)/tools/bin2c
@@ -240,24 +267,28 @@ $(EE_SRC_DIR)osdsrc/bin/osdsrc.bin: $(EE_SRC_DIR)osdsrc
 	$(MAKEREC) $<
 
 $(EE_OBJS_DIR)osdsrc_bin.c: $(EE_SRC_DIR)osdsrc/bin/osdsrc.bin $(PS2SDKSRC)/tools/bin2c/bin/bin2c
+	$(DIR_GUARD)
 	$(PS2SDKSRC)/tools/bin2c/bin/bin2c $< $@ osdsrc
 
 $(EE_SRC_DIR)tlbsrc/bin/tlbsrc.bin: $(EE_SRC_DIR)tlbsrc
 	$(MAKEREC) $<
 
 $(EE_OBJS_DIR)tlbsrc_bin.c: $(EE_SRC_DIR)tlbsrc/bin/tlbsrc.bin $(PS2SDKSRC)/tools/bin2c/bin/bin2c
+	$(DIR_GUARD)
 	$(PS2SDKSRC)/tools/bin2c/bin/bin2c $< $@ tlbsrc
 
 $(EE_SRC_DIR)srcfile/bin/srcfile.bin: $(EE_SRC_DIR)srcfile
 	$(MAKEREC) $<
 
 $(EE_OBJS_DIR)srcfile_bin.c: $(EE_SRC_DIR)srcfile/bin/srcfile.bin $(PS2SDKSRC)/tools/bin2c/bin/bin2c
+	$(DIR_GUARD)
 	$(PS2SDKSRC)/tools/bin2c/bin/bin2c $< $@ srcfile
 
 $(EE_SRC_DIR)eenull/bin/eenull.bin: $(EE_SRC_DIR)eenull
 	$(MAKEREC) $<
 
 $(EE_OBJS_DIR)eenull_bin.c: $(EE_SRC_DIR)eenull/bin/eenull.bin $(PS2SDKSRC)/tools/bin2c/bin/bin2c
+	$(DIR_GUARD)
 	$(PS2SDKSRC)/tools/bin2c/bin/bin2c $< $@ eenull
 
 clean::
