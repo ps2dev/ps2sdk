@@ -47,7 +47,7 @@ ifdef PS2IP_DNS
 ps2ip_OBJECTS += dns.o netdb.o
 endif
 
-EE_OBJS = ps2ip.o sys_arch.o $(ps2ip_OBJECTS) erl-support.o
+EE_OBJS = ps2ip.o ps2ip_shims.o sys_arch.o $(ps2ip_OBJECTS) erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make
