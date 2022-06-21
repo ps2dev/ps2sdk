@@ -13,6 +13,8 @@ PS2IP_DNS = 1
 # Change this to point to the version of LWIP this is being compiled with.
 LWIP = $(PS2SDKSRC)/common/external_deps/lwip
 
+EE_LIB_ALTNAMES ?= libsocket.a
+
 EE_LIB = libps2ip.a
 
 EE_CFLAGS += -Wall -fno-builtin -DLWIP_NOASSERT -DLWIP_COMPAT_MUTEX -DLWIP_COMPAT_MUTEX_ALLOWED -mno-gpopt -O2 -G0 -mno-check-zero-division
