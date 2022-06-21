@@ -132,6 +132,11 @@ int lwip_getaddrinfo(const char *nodename,
        const struct addrinfo *hints,
        struct addrinfo **res);
 
+#define gethostbyname lwip_gethostbyname
+#define gethostbyname_r lwip_gethostbyname_r
+#define freeaddrinfo lwip_freeaddrinfo
+#define getaddrinfo lwip_getaddrinfo
+
 /* From include/lwip/dns.h:  */
 void           dns_setserver(u8 numdns, const ip_addr_t *dnsserver);
 const ip_addr_t* dns_getserver(u8 numdns);
