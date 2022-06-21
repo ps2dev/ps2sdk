@@ -58,15 +58,19 @@ int lwip_fcntl(int s, int cmd, int val);
 #define getsockname lwip_getsockname
 #define getsockopt lwip_getsockopt
 #define setsockopt lwip_setsockopt
+#define closesocket lwip_close
 #define connect lwip_connect
 #define listen lwip_listen
 #define recv lwip_recv
+#define readsocket lwip_read
 #define recvfrom lwip_recvfrom
 #define send lwip_send
 #define sendto lwip_sendto
 #define socket lwip_socket
+#define writesocket lwip_write
 #define select lwip_select
 #define ioctlsocket lwip_ioctl
+#define fcntlsocket lwip_fcntl
 
 int	ps2ip_setconfig(const t_ip_info* ip_info);
 int	ps2ip_getconfig(char* netif_name,t_ip_info* ip_info);
