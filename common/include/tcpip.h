@@ -1964,4 +1964,6 @@ typedef struct
     u8 hw_addr[8];
 } t_ip_info;
 
+struct timeval;
+
 #endif /* __TCPIP_H__ */
