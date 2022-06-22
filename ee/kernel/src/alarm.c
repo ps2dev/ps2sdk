@@ -16,6 +16,7 @@
  */
 
 #include <kernel.h>
+#include <timer.h>
 #include <stdio.h>
 
 struct SyscallData
@@ -46,13 +47,19 @@ void InitAlarm(void)
 {
     int i;
 
-    setup(SysEntry[0].syscall, SysEntry[0].function);
-    Copy((void *)0x80076000, srcfile, size_srcfile);
-    Copy((void *)0x00082000, eenull, size_eenull);
-    FlushCache(0);
-    FlushCache(2);
-    setup(SysEntry[1].syscall, SysEntry[1].function);
+    // Only apply the kernel patch if T3 has not already started
+    if (((*T3_MODE) & 0x100) == 0)
+    {
+        setup(SysEntry[0].syscall, SysEntry[0].function);
+        Copy((void *)0x80076000, srcfile, size_srcfile);
+        Copy((void *)0x00082000, eenull, size_eenull);
+        FlushCache(0);
+        FlushCache(2);
+        setup(SysEntry[1].syscall, SysEntry[1].function);
 
-    for (i = 2; i < 8; i++)
-        setup(SysEntry[i].syscall, GetEntryAddress(SysEntry[i].syscall));
+        for (i = 2; i < 8; i++)
+        {
+            setup(SysEntry[i].syscall, GetEntryAddress(SysEntry[i].syscall));
+        }
+    }
 }
