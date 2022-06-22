@@ -616,7 +616,7 @@ int sceCdStRead(u32 sectorType, u32 *buffer, u32 mode, u32 *error)
     SifWriteBackDCache(buffer, sectorType * 2048);
 
     // read only data currently in stream buffer
-    if (mode == STMBLK) {
+    if (mode == STMNBLK) {
         ret    = sceCdStream(0, sectorType, buffer, CDVD_ST_CMD_READ, &dummyMode);
         *error = ret >> 16;
         return ret & 0xFFFF;
