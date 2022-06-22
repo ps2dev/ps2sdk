@@ -38,6 +38,9 @@ enum _dev9_regnames {
     DEV9_R_MAX
 };
 
+#define DEV9_R_146C DEV9_R_POWER
+#define DEV9_R_146E DEV9_R_REV
+
 typedef struct _dev9_regs
 {
     u16 val[DEV9_R_MAX];

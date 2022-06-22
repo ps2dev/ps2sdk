@@ -336,4 +336,26 @@ int sceUsbdMultiIsochronousTransfer(int pipeId, sceUsbdMultiIsochronousRequest *
 #define I_sceUsbdGetReportDescriptor      DECLARE_IMPORT(17, sceUsbdGetReportDescriptor)
 #define I_sceUsbdMultiIsochronousTransfer DECLARE_IMPORT(18, sceUsbdMultiIsochronousTransfer)
 
+// For backwards compatibility:
+#define I_UsbCallbackProc                 I_sceUsbdDoneCallback
+#define I_UsbDriver                       I_sceUsbdLddOps
+#define I_UsbIsochronousPswLen            I_sceUsbdIsochronousPswLen
+#define I_UsbMultiIsochronousRequest      I_sceUsbdMultiIsochronousRequest
+#define I_UsbMultiIsochronousDoneCallback I_sceUsbdMultiIsochronousDoneCallback
+#define I_UsbRegisterDriver               I_sceUsbdRegisterLdd
+#define I_UsbUnregisterDriver             I_sceUsbdUnregisterLdd
+#define I_UsbGetDeviceStaticDescriptor    I_sceUsbdScanStaticDescriptor
+#define I_UsbGetDeviceLocation            I_sceUsbdGetDeviceLocation
+#define I_UsbSetDevicePrivateData         I_sceUsbdSetPrivateData
+#define I_UsbGetDevicePrivateData         I_sceUsbdGetPrivateData
+#define I_UsbOpenEndpoint                 I_sceUsbdOpenPipe
+#define I_UsbOpenEndpointAligned          I_sceUsbdOpenPipeAligned
+#define I_UsbCloseEndpoint                I_sceUsbdClosePipe
+#define I_UsbTransfer                     I_sceUsbdTransferPipe
+#define I_UsbRegisterAutoloader           I_sceUsbdRegisterAutoloader
+#define I_UsbUnregisterAutoloader         I_sceUsbdUnregisterAutoloader
+#define I_UsbChangeThreadPriority         I_sceUsbdChangeThreadPriority
+#define I_UsbGetReportDescriptor          I_sceUsbdGetReportDescriptor
+#define I_UsbMultiIsochronousTransfer     I_sceUsbdMultiIsochronousTransfer
+
 #endif /* __USBD_H__ */
