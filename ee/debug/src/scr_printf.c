@@ -254,11 +254,17 @@ static void clear_line(int Y)
 void scr_printf(const char *format, ...)
 {
     va_list opt;
+    va_start(opt, format);
+    scr_vprintf(format, opt);
+    va_end(opt);
+}
+
+void scr_vprintf(const char *format, va_list opt)
+{
     char buff[2048];
     int i, bufsz, j;
 
 
-    va_start(opt, format);
     bufsz = vsnprintf(buff, sizeof(buff), format, opt);
 
     for (i = 0; i < bufsz; i++) {
@@ -292,7 +298,6 @@ void scr_printf(const char *format, ...)
     }
     if (cursor)
         scr_putchar(X * 7, Y * 8, 0xffffff, 219);
-    va_end(opt);
 }
 
 void scr_setXY(int x, int y)
