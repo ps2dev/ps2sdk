@@ -6,11 +6,26 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+TOOLS_CC_VERSION := $(shell $(CC) -dumpversion)
+
+TOOLS_OBJS_DIR ?= obj/
+TOOLS_SRC_DIR ?= src/
+TOOLS_INC_DIR ?= include/
+TOOLS_SAMPLE_DIR ?= samples/
+
+TOOLS_INCS := $(TOOLS_INCS) -I$(TOOLS_SRC_DIR) -I$(TOOLS_SRC_DIR)include -I$(TOOLS_INC_DIR)
+
+# Optimization compiler flags
+TOOLS_OPTFLAGS ?= -O2
+
+# Warning compiler flags
+TOOLS_WARNFLAGS ?= -Wall
+
 # C compiler flags
-TOOLS_CFLAGS := -O2 -Wall $(TOOLS_CFLAGS)
+TOOLS_CFLAGS := $(TOOLS_OPTFLAGS) $(TOOLS_WARNFLAGS) $(TOOLS_INCS) $(TOOLS_CFLAGS)
 
 # C++ compiler flags
-TOOLS_CXXFLAGS := -O2 -Wall $(TOOLS_CXXFLAGS)
+TOOLS_CXXFLAGS := $(TOOLS_OPTFLAGS) $(TOOLS_WARNFLAGS) $(TOOLS_INCS) $(TOOLS_CXXFLAGS)
 
 # Linker flags
 #TOOLS_LDFLAGS := $(TOOLS_LDFLAGS)
@@ -18,34 +33,37 @@ TOOLS_CXXFLAGS := -O2 -Wall $(TOOLS_CXXFLAGS)
 # Assembler flags
 #TOOLS_ASFLAGS := $(TOOLS_ASFLAGS)
 
+TOOLS_OBJS := $(TOOLS_OBJS:%=$(TOOLS_OBJS_DIR)%)
+
 # Externally defined variables: TOOLS_BIN, TOOLS_OBJS, TOOLS_LIB
 
 # These macros can be used to simplify certain build rules.
 TOOLS_C_COMPILE = $(TOOLS_CC) $(TOOLS_CFLAGS) $(TOOLS_INCS)
 TOOLS_CXX_COMPILE = $(TOOLS_CC) $(TOOLS_CXXFLAGS) $(TOOLS_INCS)
 
+# Command for ensuring the output directory for the rule exists.
+DIR_GUARD = @$(MKDIR) -p $(@D)
 
 $(TOOLS_OBJS_DIR)%.o : $(TOOLS_SRC_DIR)%.c
+	$(DIR_GUARD)
 	$(CC) $(TOOLS_CFLAGS) $(TOOLS_INCS) -c $< -o $@
 
 $(TOOLS_OBJS_DIR)%.o : $(TOOLS_SRC_DIR)%.cpp
+	$(DIR_GUARD)
 	$(CXX) $(TOOLS_CXXFLAGS) $(TOOLS_INCS) -c $< -o $@
 
 $(TOOLS_OBJS_DIR)%.o : $(TOOLS_SRC_DIR)%.S
+	$(DIR_GUARD)
 	$(CC) $(TOOLS_CFLAGS) $(TOOLS_INCS) -c $< -o $@
 
 $(TOOLS_OBJS_DIR)%.o : $(TOOLS_SRC_DIR)%.s
+	$(DIR_GUARD)
 	$(AS) $(TOOLS_ASFLAGS) $< -o $@
 
-$(TOOLS_BIN_DIR):
-	$(MKDIR) -p $(TOOLS_BIN_DIR)
-
-$(TOOLS_OBJS_DIR):
-	$(MKDIR) -p $(TOOLS_OBJS_DIR)
-
 $(TOOLS_BIN) : $(TOOLS_OBJS)
+	$(DIR_GUARD)
 	$(CC) $(TOOLS_LDFLAGS) -o $(TOOLS_BIN) $(TOOLS_OBJS) $(TOOLS_LIBS)
 
 $(TOOLS_LIB) : $(TOOLS_OBJS)
+	$(DIR_GUARD)
 	$(AR) cru $(TOOLS_LIB) $<
-

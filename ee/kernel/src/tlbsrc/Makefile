@@ -18,6 +18,7 @@ EE_INCS += -I$(PS2SDKSRC)/ee/rpc/cdvd/include
 EE_CFLAGS += -mno-gpopt
 
 $(EE_TLBSRC_BIN): $(EE_TLBSRC_ELF)
+	$(DIR_GUARD)
 	$(EE_OBJCOPY) -Obinary $< $@
 
 clean:
@@ -26,5 +27,6 @@ clean:
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.make
 
-$(EE_TLBSRC_ELF): $(EE_OBJS) | $(EE_BIN_DIR)
+$(EE_TLBSRC_ELF): $(EE_OBJS)
+	$(DIR_GUARD)
 	$(EE_CC) $(EE_CFLAGS) -o $@ $^ -nostdlib -nostartfiles -Tlinkfile -s $(EE_LIBS)

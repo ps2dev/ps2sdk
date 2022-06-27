@@ -20,6 +20,9 @@ SUBDIRS = \
 	siftoo \
 	sio2log \
 	sio2man \
+	sysclib \
+	sysclib-full \
+	sysclib-nano \
 	udnl \
 	udnl-t300
 

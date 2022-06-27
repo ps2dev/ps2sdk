@@ -63,36 +63,35 @@ else
 	CRTN_OBJ := $(shell $(EE_CC) $(CFLAGS) -print-file-name=crtn.o)
 endif
 
+# Command for ensuring the output directory for the rule exists.
+DIR_GUARD = @$(MKDIR) -p $(@D)
+
 $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) $(EE_FATLTOFLAGS) -c $< -o $@
 
 $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.cpp
+	$(DIR_GUARD)
 	$(EE_CXX_COMPILE) $(EE_FATLTOFLAGS) -c $< -o $@
 
 $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.S
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -c $< -o $@
 
 $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.s
+	$(DIR_GUARD)
 	$(EE_AS) $(EE_ASFLAGS) $< -o $@
 
-$(EE_LIB_DIR):
-	$(MKDIR) -p $(EE_LIB_DIR)
-
-$(EE_BIN_DIR):
-	$(MKDIR) -p $(EE_BIN_DIR)
-
-$(EE_OBJS_DIR):
-	$(MKDIR) -p $(EE_OBJS_DIR)
-
-$(EE_OBJS): | $(EE_OBJS_DIR)
-
-$(EE_BIN): $(EE_OBJS) $(PS2SDKSRC)/ee/startup/obj/crt0.o | $(EE_BIN_DIR)
+$(EE_BIN): $(EE_OBJS) $(PS2SDKSRC)/ee/startup/obj/crt0.o
+	$(DIR_GUARD)
 	$(EE_CC) -nostdlib $(EE_NO_CRT) -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_OPTFLAGS) \
 		-o $(EE_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(EE_OBJS) $(CRTEND_OBJ) $(CRTN_OBJ) $(EE_LDFLAGS) $(EE_LIBS)
 
-$(EE_LIB): $(EE_OBJS) $(EE_LIB:%.a=%.erl) | $(EE_LIB_DIR)
+$(EE_LIB): $(EE_OBJS) $(EE_LIB:%.a=%.erl)
+	$(DIR_GUARD)
 	$(EE_AR) cru $(EE_LIB) $(EE_OBJS)
 
-$(EE_LIB:%.a=%.erl): $(EE_OBJS) | $(EE_LIB_DIR)
+$(EE_LIB:%.a=%.erl): $(EE_OBJS)
+	$(DIR_GUARD)
 	$(EE_CC) -nostdlib $(EE_NO_CRT) -Wl,-r -Wl,-d -o $(EE_LIB:%.a=%.erl) $(EE_OBJS)
 	$(EE_STRIP) --strip-unneeded -R .mdebug.eabi64 -R .reginfo -R .comment $(EE_LIB:%.a=%.erl)

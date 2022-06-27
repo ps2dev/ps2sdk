@@ -54,27 +54,38 @@ endif
 EE_C_COMPILE = $(EE_CC) $(EE_CFLAGS) $(EE_INCS)
 EE_CXX_COMPILE = $(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS)
 
+# Command for ensuring the output directory for the rule exists.
+DIR_GUARD = @$(MKDIR) -p $(@D)
+
 %.o: %.c
+	$(DIR_GUARD)
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
 %.o: %.cc
+	$(DIR_GUARD)
 	$(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS) -c $< -o $@
 
 %.o: %.cpp
+	$(DIR_GUARD)
 	$(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS) -c $< -o $@
 
 %.o: %.S
+	$(DIR_GUARD)
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
 %.o: %.s
+	$(DIR_GUARD)
 	$(EE_AS) $(EE_ASFLAGS) $< -o $@
 
 $(EE_BIN): $(EE_OBJS)
+	$(DIR_GUARD)
 	$(EE_CC) -T$(EE_LINKFILE) $(EE_OPTFLAGS) -o $(EE_BIN) $(EE_OBJS) $(EE_LDFLAGS) $(EXTRA_LDFLAGS) $(EE_LIBS)
 
 $(EE_ERL): $(EE_OBJS)
+	$(DIR_GUARD)
 	$(EE_CC) -mno-crt0 $(EE_OPTFLAGS) -o $(EE_ERL) $(EE_OBJS) $(EE_LDFLAGS) $(EXTRA_LDFLAGS) -Wl,-r -Wl,-d
 	$(EE_STRIP) --strip-unneeded -R .mdebug.eabi64 -R .reginfo -R .comment $(EE_ERL)
 
 $(EE_LIB): $(EE_OBJS)
+	$(DIR_GUARD)
 	$(EE_AR) cru $(EE_LIB) $(EE_OBJS)
