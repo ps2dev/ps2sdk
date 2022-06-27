@@ -7,16 +7,31 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 # Build for use with a DHCP-enabled LWIP stack.
-LWIP_DHCP = 1
+LWIP_DHCP ?= 1
+
+# Build against the netman library.
+SMAP_NETMAN ?= 1
+
+# Build against the ps2ip library.
+SMAP_PS2IP ?= 0
 
 IOP_PREFER_GPOPT = 16384
 IOP_CFLAGS += -mno-check-zero-division
 
-ifdef LWIP_DHCP
+ifneq (x$(LWIP_DHCP),x0)
 IOP_CFLAGS += -DLWIP_DHCP=1
 endif
 
-IOP_INCS = -I$(PS2SDKSRC)/iop/dev9/dev9/include
+ifneq (x$(SMAP_NETMAN),x0)
+IOP_CFLAGS += -DBUILDING_SMAP_NETMAN=1
+endif
+
+ifneq (x$(SMAP_PS2IP),x0)
+IOP_CFLAGS += -DBUILDING_SMAP_PS2IP=1
+IOP_INCS += -I$(PS2SDKSRC)/iop/tcpip/tcpip/include
+endif
+
+IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include
 
 IOP_OBJS = main.o smap.o xfer.o imports.o exports.o
 
