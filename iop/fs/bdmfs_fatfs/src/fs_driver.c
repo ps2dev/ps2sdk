@@ -494,7 +494,7 @@ int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, void *r
             ret = *(int *)(mounted_bd->name);
             break;
         case USBMASS_IOCTL_CHECK_CHAIN:
-            ret = (file->obj.n_frag < 2);
+            ret = get_frag_list(file, NULL, 0) == 1 ? 1 : 0;
             break;
         case USBMASS_IOCTL_GET_FRAGLIST:
             ret = get_frag_list(file, rdata, rdatalen);
