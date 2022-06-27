@@ -32,7 +32,7 @@ int LoadStartKelfModule(const char *name, int arglen, const char *args, int *res
 void SetSecrmanCallbacks(void *SecrCardBootFile_fnc, void *SecrDiskBootFile_fnc, void *SetLoadfileCallbacks_fnc);
 void SetCheckKelfPathCallback(void *CheckKelfPath_fnc);
 void GetLoadfileCallbacks(void **CheckKelfPath_fnc, void **SetLoadfileCallbacks_fnc);
-int LoadfileCheckDevicePathValid(const char *path);
+int IsIllegalBootDevice(const char *path);
 
 #define modload_IMPORTS_start DECLARE_IMPORT_TABLE(modload, 1, 1)
 #define modload_IMPORTS_end END_IMPORT_TABLE
@@ -49,6 +49,6 @@ int LoadfileCheckDevicePathValid(const char *path);
 #define I_SetSecrmanCallbacks DECLARE_IMPORT(12, SetSecrmanCallbacks)
 #define I_SetCheckKelfPathCallback DECLARE_IMPORT(13, SetCheckKelfPathCallback)
 #define I_GetLoadfileCallbacks DECLARE_IMPORT(14, GetLoadfileCallbacks)
-#define I_CheckDevicePathValid DECLARE_IMPORT(15, CheckDevicePathValid)
+#define I_IsIllegalBootDevice DECLARE_IMPORT(15, IsIllegalBootDevice)
 
 #endif /* __MODLOAD_H__ */
