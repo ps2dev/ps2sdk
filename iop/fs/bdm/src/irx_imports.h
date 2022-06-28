@@ -19,6 +19,8 @@
 #include <bdm.h>
 #include <loadcore.h>
 #include <stdio.h>
+#include <sysclib.h>
+#include <sysmem.h>
 #include <thbase.h>
 #include <thevent.h>
 
