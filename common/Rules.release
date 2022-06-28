@@ -10,7 +10,7 @@
 # Creates the base common directory structure in target directory.
 #
 
-RELEASE_COMMON_DIRS = common/ common/include/ common/include/sys
+RELEASE_COMMON_DIRS = common/ common/include/ common/include/arpa common/include/netinet common/include/sys
 RELEASE_COMMON_DIRS := $(RELEASE_COMMON_DIRS:%=$(PS2SDK)/%)
 
 release-dirs:
@@ -26,6 +26,20 @@ release-include:
 	   if test -f $$file ; then \
 	     $(ECHO) Installing $$file to $(PS2SDK)/common/include ; \
 	     cp -f $$file $(PS2SDK)/common/include ; \
+	     chmod 644 $(PS2SDK)/common/$$file ; \
+	   fi \
+	done;
+	@for file in include/arpa/* ; do \
+	   if test -f $$file ; then \
+	     $(ECHO) Installing $$file to $(PS2SDK)/common/include/arpa ; \
+	     cp -f $$file $(PS2SDK)/common/include/arpa ; \
+	     chmod 644 $(PS2SDK)/common/$$file ; \
+	   fi \
+	done;
+	@for file in include/netinet/* ; do \
+	   if test -f $$file ; then \
+	     $(ECHO) Installing $$file to $(PS2SDK)/common/include/netinet ; \
+	     cp -f $$file $(PS2SDK)/common/include/netinet ; \
 	     chmod 644 $(PS2SDK)/common/$$file ; \
 	   fi \
 	done;

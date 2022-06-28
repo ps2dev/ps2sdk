@@ -29,17 +29,47 @@
 #ifndef PS2IP_DHCP
 #define PS2IP_DHCP 1
 #endif
+#ifndef LWIP_IPV4
+#define LWIP_IPV4 1
+#endif
+#ifndef LWIP_IPV6
+#define LWIP_IPV6 0
+#endif
+#ifndef LWIP_IPV6_MLD
+#define LWIP_IPV6_MLD 0
+#endif
+#ifndef LWIP_CHECKSUM_CTRL_PER_NETIF
+#define LWIP_CHECKSUM_CTRL_PER_NETIF 0
+#endif
+#ifndef LWIP_NETIF_REMOVE_CALLBACK
+#define LWIP_NETIF_REMOVE_CALLBACK 0
+#endif
+#ifndef LWIP_IPV6_AUTOCONFIG
+#define LWIP_IPV6_AUTOCONFIG 0
+#endif
+#ifndef LWIP_MULTICAST_TX_OPTIONS
+#define LWIP_MULTICAST_TX_OPTIONS 0
+#endif
 #ifndef LWIP_DHCP
 #define LWIP_DHCP 1
-#endif
-#if (!defined(LWIP_IPV4) && !defined(LWIP_IPV6))
-#define LWIP_IPV4 1
 #endif
 #ifndef LWIP_TCP
 #define LWIP_TCP 1
 #endif
 #ifndef LWIP_UDP
 #define LWIP_UDP 1
+#endif
+#ifndef LWIP_UDPLITE
+#define LWIP_UDPLITE 0
+#endif
+#ifndef MIB2_STATS
+#define MIB2_STATS 0
+#endif
+#ifndef ENABLE_LOOPBACK
+#define ENABLE_LOOPBACK 0
+#endif
+#ifndef DNS_LOCAL_HOSTLIST
+#define DNS_LOCAL_HOSTLIST 0
 #endif
 
 /*** Taken from src/include/lwip/opt.h. If changes were made to lwipopts.h, please update this section.
@@ -1933,5 +1963,7 @@ typedef struct
     u32 dhcp_status;
     u8 hw_addr[8];
 } t_ip_info;
+
+struct timeval;
 
 #endif /* __TCPIP_H__ */

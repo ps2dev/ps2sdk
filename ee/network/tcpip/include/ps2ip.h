@@ -51,24 +51,26 @@ int lwip_select(int maxfdp1, fd_set *readset, fd_set *writeset, fd_set *exceptse
 int lwip_ioctl(int s, long cmd, void *argp);
 int lwip_fcntl(int s, int cmd, int val);
 
-#define accept(a,b,c)		lwip_accept(a,b,c)
-#define bind(a,b,c)		lwip_bind(a,b,c)
-#define shutdown(a,b)		lwip_shutdown(a,b)
-#define disconenct(s)		lwip_close(s)
-#define closesocket(s)		lwip_close(s)
-#define connect(a,b,c)		lwip_connect(a,b,c)
-#define getsockname(a,b,c)	lwip_getsockname(a,b,c)
-#define getpeername(a,b,c)	lwip_getpeername(a,b,c)
-#define setsockopt(a,b,c,d,e)	lwip_setsockopt(a,b,c,d,e)
-#define getsockopt(a,b,c,d,e)	lwip_getsockopt(a,b,c,d,e)
-#define listen(a,b)		lwip_listen(a,b)
-#define recv(a,b,c,d)		lwip_recv(a,b,c,d)
-#define recvfrom(a,b,c,d,e,f)	lwip_recvfrom(a,b,c,d,e,f)
-#define send(a,b,c,d)		lwip_send(a,b,c,d)
-#define sendto(a,b,c,d,e,f)	lwip_sendto(a,b,c,d,e,f)
-#define socket(a,b,c)		lwip_socket(a,b,c)
-#define select(a,b,c,d,e)	lwip_select(a,b,c,d,e)
-#define ioctlsocket(a,b,c)	lwip_ioctl(a,b,c)
+#define accept lwip_accept
+#define bind lwip_bind
+#define shutdown lwip_shutdown
+#define getpeername lwip_getpeername
+#define getsockname lwip_getsockname
+#define getsockopt lwip_getsockopt
+#define setsockopt lwip_setsockopt
+#define closesocket lwip_close
+#define connect lwip_connect
+#define listen lwip_listen
+#define recv lwip_recv
+#define readsocket lwip_read
+#define recvfrom lwip_recvfrom
+#define send lwip_send
+#define sendto lwip_sendto
+#define socket lwip_socket
+#define writesocket lwip_write
+#define select lwip_select
+#define ioctlsocket lwip_ioctl
+#define fcntlsocket lwip_fcntl
 
 int	ps2ip_setconfig(const t_ip_info* ip_info);
 int	ps2ip_getconfig(char* netif_name,t_ip_info* ip_info);
@@ -133,6 +135,11 @@ int lwip_getaddrinfo(const char *nodename,
        const char *servname,
        const struct addrinfo *hints,
        struct addrinfo **res);
+
+#define gethostbyname lwip_gethostbyname
+#define gethostbyname_r lwip_gethostbyname_r
+#define freeaddrinfo lwip_freeaddrinfo
+#define getaddrinfo lwip_getaddrinfo
 
 /* From include/lwip/dns.h:  */
 void           dns_setserver(u8 numdns, const ip_addr_t *dnsserver);
