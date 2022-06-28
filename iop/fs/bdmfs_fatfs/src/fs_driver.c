@@ -29,7 +29,7 @@
 #include "module_debug.h"
 
 FATFS fatfs;
-struct block_device *mounted_bd;
+struct block_device *mounted_bd = NULL;
 
 void *malloc(int size);
 void free(void *ptr);
@@ -472,7 +472,7 @@ int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, void *r
     int ret   = 0;
     FIL *file = ((FIL *)(fd->privdata));
 
-    if (file == NULL)
+    if ((file == NULL) || (mounted_bd == NULL))
         return -ENXIO;
 
     _fs_lock();
@@ -494,7 +494,7 @@ int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, void *r
             ret = *(int *)(mounted_bd->name);
             break;
         case USBMASS_IOCTL_CHECK_CHAIN:
-            ret = (file->obj.n_frag < 2);
+            ret = get_frag_list(file, NULL, 0) == 1 ? 1 : 0;
             break;
         case USBMASS_IOCTL_GET_FRAGLIST:
             ret = get_frag_list(file, rdata, rdatalen);
@@ -535,7 +535,7 @@ static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsig
     int ret;
     FIL *file = ((FIL *)(fd->privdata));
 
-    if (file == NULL)
+    if ((file == NULL) || (mounted_bd == NULL))
         return -ENXIO;
 
     _fs_lock();
