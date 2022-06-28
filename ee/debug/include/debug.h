@@ -17,6 +17,7 @@
 #define __DEBUG_H__
 
 #include <tamtypes.h>
+#include <stdarg.h>
 
 #define DEBUG_BGCOLOR(col) *((u64 *) 0x120000e0) = (u64) (col)
 
