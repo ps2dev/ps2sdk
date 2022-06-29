@@ -5,21 +5,20 @@
 //#define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
 
-
-#define SECTORS_PER_BLOCK 8 // 8 * 512b =  4KiB
-#define BLOCK_COUNT       8 // 8 * 4KiB = 32KiB
-
+#define SECTORS_PER_BLOCK     8 //  8 * 512b =   4KiB
+#define BLOCK_COUNT          32 // 32 * 4KiB = 128KiB
+#define BLOCK_WEIGHT_FACTOR 256 // Fixed point math (24.8)
 
 struct bd_cache
 {
     struct block_device *bd;
-    u32 lru_current;
-    u32 lru[BLOCK_COUNT];
+    int weight[BLOCK_COUNT];
     u32 sector[BLOCK_COUNT];
     u8 cache[BLOCK_COUNT][SECTORS_PER_BLOCK*512];
 #ifdef DEBUG
     u32 sectors_read;
     u32 sectors_cache;
+    u32 sectors_dev;
 #endif
 };
 
@@ -57,56 +56,71 @@ static int _read(struct block_device *bd, u32 sector, void *buffer, u16 count)
 {
     struct bd_cache *c = bd->priv;
 
-    M_DEBUG("%s(%d, %d)\n", __FUNCTION__, sector, count);
+    //M_DEBUG("%s(%d, %d)\n", __FUNCTION__, sector, count);
 
     if (count >= SECTORS_PER_BLOCK) {
         // Do a direct read
         return c->bd->read(c->bd, sector, buffer, count);
     }
-    else {
-        // Do a cached read
-        int blkidx;
-        for (blkidx = 0; blkidx < BLOCK_COUNT; blkidx++) {
-            if (_contains(c->sector[blkidx], sector, count)) {
-#ifdef DEBUG
-                c->sectors_cache += 1;
-                M_DEBUG("- CACHE HIT [block %d] [stats: read %ds, cache %ds]\n", blkidx, c->sectors_read, c->sectors_cache);
-#endif
-                // Read from cache
-                u32 offset = (sector - c->sector[blkidx]) * 512;
-                c->lru[blkidx] = c->lru_current++;
-                memcpy(buffer, &c->cache[blkidx][offset], count * 512);
-                return count;
-            }
-        }
-
-        // Find the LRU block
-        u32 blkidx_best_lru = 0xffffffff;
-        int blkidx_best = 0;
-        for (blkidx = 0; blkidx < BLOCK_COUNT; blkidx++) {
-            if (c->lru[blkidx] < blkidx_best_lru) {
-                // Better block found
-                blkidx_best_lru = c->lru[blkidx];
-                blkidx_best = blkidx;
-            }
-        }
 
 #ifdef DEBUG
-        c->sectors_read  += 1; // number of reads from device
-        c->sectors_cache += 1; // number of reads from cache
-        M_DEBUG("- CACHE READ -> [block %d] [stats: read %d, cache %d]\n", blkidx_best, c->sectors_read, c->sectors_cache);
+    c->sectors_read += count;
 #endif
 
-        // Fill the block
-        c->bd->read(c->bd, sector, c->cache[blkidx_best], SECTORS_PER_BLOCK);
-        c->sector[blkidx_best] = sector;
+    // Do a cached read
+    int blkidx;
+    for (blkidx = 0; blkidx < BLOCK_COUNT; blkidx++) {
+        if (_contains(c->sector[blkidx], sector, count)) {
+#ifdef DEBUG
+            c->sectors_cache += count;
+            //M_DEBUG("- CACHE HIT[%d] [block %d] [devread %ds, hit-ratio %d%%]\n", sector, blkidx, c->sectors_dev, (c->sectors_cache * 100) / c->sectors_read);
+#endif
+            // Minimum weight
+            if (c->weight[blkidx] < 0)
+                c->weight[blkidx] = 0;
 
-        // Read from cache
-        u32 offset = (sector - c->sector[blkidx_best]) * 512;
-        c->lru[blkidx_best] = c->lru_current++;
-        memcpy(buffer, &c->cache[blkidx_best][offset], count * 512);
-        return count;
+            c->weight[blkidx] += count * BLOCK_WEIGHT_FACTOR;
+
+            // Read from cache
+            u32 offset = (sector - c->sector[blkidx]) * 512;
+            memcpy(buffer, &c->cache[blkidx][offset], count * 512);
+            return count;
+        }
     }
+
+    // Find block with the lowest weight
+    int blkidx_best_weight = 0x7fffffff;
+    int blkidx_best = 0;
+    M_DEBUG("- list: ");
+    for (blkidx = 0; blkidx < BLOCK_COUNT; blkidx++) {
+#ifdef DEBUG
+        printf("%*d ", 3, c->weight[blkidx] / BLOCK_WEIGHT_FACTOR);
+#endif
+
+        // Dynamic aging
+        c->weight[blkidx] -= (SECTORS_PER_BLOCK * BLOCK_WEIGHT_FACTOR / BLOCK_COUNT) + (c->weight[blkidx] / 32);
+
+        if (c->weight[blkidx] < blkidx_best_weight) {
+            // Better block found
+            blkidx_best_weight = c->weight[blkidx];
+            blkidx_best = blkidx;
+        }
+    }
+#ifdef DEBUG
+    printf(" devread: %*d, evict %*d [%*d], add [%*d]\n", 4, c->sectors_dev, 2, blkidx_best, 8, c->sector[blkidx_best], 8, sector);
+    c->sectors_dev += SECTORS_PER_BLOCK;
+    //M_DEBUG("- CACHE READ[%d] -> [block %d] [devread %ds, hit-ratio %d%%]\n", sector, blkidx_best, c->sectors_dev, (c->sectors_cache * 100) / c->sectors_read);
+#endif
+
+    // Fill the block
+    c->bd->read(c->bd, sector, c->cache[blkidx_best], SECTORS_PER_BLOCK);
+    c->sector[blkidx_best] = sector;
+
+    // Read from cache
+    u32 offset = (sector - c->sector[blkidx_best]) * 512;
+    c->weight[blkidx_best] = count * BLOCK_WEIGHT_FACTOR;
+    memcpy(buffer, &c->cache[blkidx_best][offset], count * 512);
+    return count;
 }
 
 static int _write(struct block_device *bd, u32 sector, const void *buffer, u16 count)
@@ -150,14 +164,14 @@ struct block_device *bd_cache_create(struct block_device *bd)
     M_DEBUG("%s\n", __FUNCTION__);
 
     c->bd = bd;
-    c->lru_current = 1;
     for (blkidx = 0; blkidx < BLOCK_COUNT; blkidx++) {
-        c->lru[blkidx] = 0;
+        c->weight[blkidx] = 0;
         c->sector[blkidx] = 0xffffffff;
     }
 #ifdef DEBUG
     c->sectors_read = 0;
     c->sectors_cache = 0;
+    c->sectors_dev = 0;
 #endif
 
     // copy all parameters becouse we are the same blocks device
