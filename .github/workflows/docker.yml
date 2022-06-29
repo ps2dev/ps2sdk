@@ -50,13 +50,25 @@ jobs:
         export DISPATCH_ACTION="$(echo run_build)"
         echo "NEW_DISPATCH_ACTION=$DISPATCH_ACTION" >> $GITHUB_ENV
 
+    - name: "create payload with this repository payload"
+      if: ${{ github.event_name }} != 'repository_dispatch'
+      run: |
+        export REPO_PAYLOAD="$(echo {\"ref\": \"${{ github.ref }}\", \"parent\": \"${{ github.repository }}\", \"parent_sha\": \"${{ steps.slug.outputs.sha8 }}\"})"
+        echo "NEW_REPO_PAYLOAD=$REPO_PAYLOAD" >> $GITHUB_ENV
+
+    - name: "create payload with parent repository payload"
+      if: ${{ github.event_name }} == 'repository_dispatch'
+      run: |
+        export REPO_PAYLOAD="$(echo {\"ref\": \"${{ github.ref }}\", \"parent:\" \"${{ github.event.client_payload.parent }}\", \"parent_sha\": \"${{ github.event.client_payload.parent_sha }}\"})"
+        echo "NEW_REPO_PAYLOAD=$REPO_PAYLOAD" >> $GITHUB_ENV
+
     - name: Repository Dispatch to gsKit
       uses: peter-evans/repository-dispatch@v1
       with:
         repository: ${{ github.repository_owner }}/gskit
         token: ${{ secrets.DISPATCH_TOKEN }}
         event-type: ${{ env.NEW_DISPATCH_ACTION }}
-        client-payload: '{"ref": "${{ github.ref }}"}'
+        client-payload: '${{ env.NEW_REPO_PAYLOAD }}'
 
     - name: Repository Dispatch to ps2-packer
       uses: peter-evans/repository-dispatch@v1
@@ -64,7 +76,7 @@ jobs:
         repository: ${{ github.repository_owner }}/ps2-packer
         token: ${{ secrets.DISPATCH_TOKEN }}
         event-type: ${{ env.NEW_DISPATCH_ACTION }}
-        client-payload: '{"ref": "${{ github.ref }}"}'
+        client-payload: '${{ env.NEW_REPO_PAYLOAD }}'
 
     - name: Repository Dispatch to ps2link
       uses: peter-evans/repository-dispatch@v1
@@ -72,4 +84,4 @@ jobs:
         repository: ${{ github.repository_owner }}/ps2link
         token: ${{ secrets.DISPATCH_TOKEN }}
         event-type: ${{ env.NEW_DISPATCH_ACTION }}
-        client-payload: '{"ref": "${{ github.ref }}"}'
+        client-payload: '${{ env.NEW_REPO_PAYLOAD }}'
