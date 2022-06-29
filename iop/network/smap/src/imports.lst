@@ -32,6 +32,7 @@ I_RegisterLibraryEntries
 I_ReleaseLibraryEntries
 loadcore_IMPORTS_end
 
+#ifdef BUILDING_SMAP_NETMAN
 netman_IMPORTS_start
 I_NetManNetProtStackAllocPacket
 I_NetManNetProtStackFreePacket
@@ -42,6 +43,26 @@ I_NetManToggleNetIFLinkState
 I_NetManTxPacketNext
 I_NetManTxPacketDeQ
 netman_IMPORTS_end
+#endif
+
+#ifdef BUILDING_SMAP_PS2IP
+ps2ip_IMPORTS_start
+I_pbuf_alloc
+I_pbuf_free
+I_pbuf_coalesce
+I_pbuf_ref
+I_netif_add
+I_netif_set_default
+I_netif_set_up
+I_ps2ip_input
+I_etharp_output
+I_inet_addr
+I_tcpip_input
+I_netif_set_link_up
+I_netif_set_link_down
+I_tcpip_callback_with_block
+ps2ip_IMPORTS_end
+#endif
 
 thevent_IMPORTS_start
 I_CreateEventFlag

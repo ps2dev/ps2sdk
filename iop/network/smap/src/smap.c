@@ -1,4 +1,6 @@
+#ifdef BUILDING_SMAP_NETMAN
 #include <defs.h>
+#endif
 #include <errno.h>
 #include <stdio.h>
 #include <dmacman.h>
@@ -14,7 +16,12 @@
 #include <thsemap.h>
 #include <irx.h>
 
+#ifdef BUILDING_SMAP_NETMAN
 #include <netman.h>
+#endif
+#ifdef BUILDING_SMAP_PS2IP
+#include <ps2ip.h>
+#endif
 
 #include <smapregs.h>
 #include <speedregs.h>
@@ -425,12 +432,22 @@ static void CheckLinkStatus(struct SmapDriverData *SmapDrivPrivData)
     if (!(_smap_read_phy(SmapDrivPrivData->emac3_regbase, SMAP_DsPHYTER_BMSR) & SMAP_PHY_BMSR_LINK)) {
         // Link lost
         SmapDrivPrivData->LinkStatus = 0;
+#ifdef BUILDING_SMAP_NETMAN
         NetManToggleNetIFLinkState(SmapDrivPrivData->NetIFID, NETMAN_NETIF_ETH_LINK_STATE_DOWN);
+#endif
+#ifdef BUILDING_SMAP_PS2IP
+        PS2IPLinkStateDown();
+#endif
         InitPHY(SmapDrivPrivData);
 
         // Link established
         if (SmapDrivPrivData->LinkStatus)
+#ifdef BUILDING_SMAP_NETMAN
             NetManToggleNetIFLinkState(SmapDrivPrivData->NetIFID, NETMAN_NETIF_ETH_LINK_STATE_UP);
+#endif
+#ifdef BUILDING_SMAP_PS2IP
+            PS2IPLinkStateUp();
+#endif
     }
 }
 
@@ -461,7 +478,12 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
                 SmapDrivPrivData->LinkStatus        = 0;
                 SmapDrivPrivData->SmapIsInitialized = 0;
                 SmapDrivPrivData->SmapDriverStarted = 0;
+#ifdef BUILDING_SMAP_NETMAN
                 NetManToggleNetIFLinkState(SmapDrivPrivData->NetIFID, NETMAN_NETIF_ETH_LINK_STATE_DOWN);
+#endif
+#ifdef BUILDING_SMAP_PS2IP
+                PS2IPLinkStateDown();
+#endif
             }
         }
         if (EFBits & SMAP_EVENT_START) {
@@ -479,7 +501,12 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
                 DelayThread(10000);
                 SmapDrivPrivData->SmapIsInitialized = 1;
 
+#ifdef BUILDING_SMAP_NETMAN
                 NetManToggleNetIFLinkState(SmapDrivPrivData->NetIFID, NETMAN_NETIF_ETH_LINK_STATE_UP);
+#endif
+#ifdef BUILDING_SMAP_PS2IP
+                PS2IPLinkStateUp();
+#endif
 
                 if (!SmapDrivPrivData->EnableLinkCheckTimer) {
                     USec2SysClock(1000000, &SmapDrivPrivData->LinkCheckTimer);
@@ -520,6 +547,7 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
 
             if (EFBits & SMAP_EVENT_XMIT)
                 HandleTxReqs(SmapDrivPrivData);
+            // This was added in later versions.
             HandleTxIntr(SmapDrivPrivData);
 
             // TXDNV is not enabled here, but only when frames are transmitted.
@@ -595,6 +623,46 @@ static void Dev9PostDmaCbHandler(int bcr, int dir)
     }
 }
 
+#ifdef BUILDING_SMAP_PS2IP
+// For the initial startup, as legacy programs expect the Ethernet interface to be ready once SMAP finishes initialization.
+int SMAPInitStart(void)
+{
+    volatile u8 *emac3_regbase;
+
+#if USE_GP_REGISTER
+    void *OldGP;
+
+    OldGP = SetModuleGP();
+#endif
+
+    if (!SmapDriverData.SmapIsInitialized) {
+        emac3_regbase = SmapDriverData.emac3_regbase;
+
+        dev9IntrEnable(DEV9_SMAP_INTR_MASK2);
+        if (InitPHY(&SmapDriverData) == 0 && !SmapDriverData.NetDevStopFlag) {
+            SMAP_EMAC3_SET32(SMAP_R_EMAC3_MODE0, SMAP_E3_TXMAC_ENABLE | SMAP_E3_RXMAC_ENABLE);
+            DelayThread(10000);
+            SmapDriverData.SmapIsInitialized = 1;
+
+            PS2IPLinkStateUp();
+
+            if (!SmapDriverData.EnableLinkCheckTimer) {
+                USec2SysClock(1000000, &SmapDriverData.LinkCheckTimer);
+                SetAlarm(&SmapDriverData.LinkCheckTimer, (void *)&LinkCheckTimerCB, &SmapDriverData);
+                SmapDriverData.EnableLinkCheckTimer = 1;
+            }
+        } else
+            SmapDriverData.NetDevStopFlag = 0;
+    }
+
+#if USE_GP_REGISTER
+    SetGP(OldGP);
+#endif
+
+    return 0;
+}
+#endif
+
 int SMAPStart(void)
 {
 #if USE_GP_REGISTER
@@ -639,8 +707,14 @@ static void ClearPacketQueue(struct SmapDriverData *SmapDrivPrivData)
     CpuResumeIntr(OldState);
 
     if (pkt != NULL) {
+#ifdef BUILDING_SMAP_NETMAN
         while (NetManTxPacketNext(&pkt) > 0)
             NetManTxPacketDeQ();
+#endif
+#ifdef BUILDING_SMAP_PS2IP
+        while (SMapTxPacketNext(&pkt) > 0)
+            SMapTxPacketDeQ();
+#endif
     }
 }
 
@@ -667,6 +741,7 @@ void SMAPXmit(void)
 #endif
 }
 
+#ifdef BUILDING_SMAP_NETMAN
 static int SMAPGetLinkMode(void)
 {
     u16 value;
@@ -817,12 +892,14 @@ int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, void *out
 
     return result;
 }
+#endif
 
 static inline int SetupNetDev(void)
 {
     int result;
     iop_event_t EventFlagData;
     iop_thread_t ThreadData;
+#ifdef BUILDING_SMAP_NETMAN
     static struct NetManNetIF device = {
         "SMAP",
         0,
@@ -833,6 +910,7 @@ static inline int SetupNetDev(void)
         &SMAPIoctl,
         0,
     };
+#endif
 
     EventFlagData.attr   = 0;
     EventFlagData.option = 0;
@@ -861,6 +939,7 @@ static inline int SetupNetDev(void)
         return result;
     }
 
+#ifdef BUILDING_SMAP_NETMAN
     if ((SmapDriverData.NetIFID = NetManRegisterNetIF(&device)) < 0) {
         printf("smap: NetManRegisterNetIF -> %d\n", result);
         TerminateThread(SmapDriverData.IntrHandlerThreadID);
@@ -868,6 +947,7 @@ static inline int SetupNetDev(void)
         DeleteEventFlag(SmapDriverData.Dev9IntrEventFlag);
         return -6;
     }
+#endif
 
     return 0;
 }
@@ -930,8 +1010,10 @@ int smap_init(int argc, char *argv[])
     USE_SMAP_RX_BD;
 
     checksum16 = 0;
+#ifdef BUILDING_SMAP_NETMAN
     argc--;
     argv++;
+#endif
     while (argc > 0) {
         if (strcmp("-help", *argv) == 0) {
             return DisplayHelpMessage();
