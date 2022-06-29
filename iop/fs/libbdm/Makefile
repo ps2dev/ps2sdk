@@ -10,7 +10,7 @@
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
 
-IOP_OBJS = bd_defrag.o
+IOP_OBJS = bd_defrag.o bd_cache.o
 IOP_LIB = libbdm.a
 
 include $(PS2SDKSRC)/Defs.make
