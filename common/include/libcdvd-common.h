@@ -301,6 +301,16 @@ enum SCECdvdFanSpeed {
     SCECdvdFanSpeedMaximum,
 };
 
+// LED definitions for sceCdSetLEDsMode()
+/** Light up the red LED on the power button. */
+#define CdlLEDPowerRed 1
+/** Light up the green LED on the power button. */
+#define CdlLEDPowerGreen 2
+/** Light up the yellow LED on the power button. */
+#define CdlLEDPowerYellow 4
+/** Light up the blue LED on the eject button. */
+#define CdlLEDEjectBlue 8
+
 // For streaming operations (Use with sceCdStRead())
 enum SCECdvdStreamMode {
     /** Stream without blocking. */
@@ -927,12 +937,14 @@ int sceCdWriteWakeUpTime(const sceCdCLOCK *clock, u16 arg2, int arg3);
  */
 int sceRemote2_7(u16 a1, u32 *a2);
 
-/** Set LEDs mode.
+/** Set the LED state of the face buttons of the console.
+ * The state of the buttons will be reset when the power or eject button is pressed.
  * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
  *
+ * @param param The LED state to set.
  * @return 1 on success, 0 on failure
  */
-int sceCdSetLEDsMode(u32 arg1, u32 *result);
+int sceCdSetLEDsMode(u32 param, u32 *result);
 
 /** Reads PS1 boot parameter.
  * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
