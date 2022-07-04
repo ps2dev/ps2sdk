@@ -452,7 +452,7 @@ int sceCdStatus(void);
 int sceCdBreak(void);
 
 /** cancel power off
- *
+ * Minimum Mechacon firmware version: 20400
  * SUPPORTED IN XCDVDMAN/XCDVDFSV ONLY
  *
  * @param result result
@@ -908,6 +908,7 @@ int sceCdRE(unsigned long int lsn, unsigned long int sectors, void *buf, sceCdRM
 int sceCdReadGUID(u64 *guid);
 
 /** Controls remote-control bypass
+ * Minimum Mechacon firmware version: 50000
  * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
  *
  * @param mode 0 = Bypass, 1 = Normal
@@ -917,6 +918,7 @@ int sceCdReadGUID(u64 *guid);
 int sceCdRcBypassCtl(int mode, u32 *status);
 
 /** Reads wake up time.
+ * Minimum Mechacon firmware version: 50000
  * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
  *
  * @return 1 on success, 0 on failure
@@ -924,6 +926,7 @@ int sceCdRcBypassCtl(int mode, u32 *status);
 int sceCdReadWakeUpTime(sceCdCLOCK *clock, u16 *arg2, u32 *arg3, int *arg4);
 
 /** Writes wake up time.
+ * Minimum Mechacon firmware version: 50000
  * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
  *
  * @return 1 on success, 0 on failure
@@ -931,6 +934,7 @@ int sceCdReadWakeUpTime(sceCdCLOCK *clock, u16 *arg2, u32 *arg3, int *arg4);
 int sceCdWriteWakeUpTime(const sceCdCLOCK *clock, u16 arg2, int arg3);
 
 /** Remote control 2_7.
+ * Minimum Mechacon firmware version: 50000
  * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
  *
  * @return 1 on success, 0 on failure
@@ -939,6 +943,7 @@ int sceRemote2_7(u16 a1, u32 *a2);
 
 /** Set the LED state of the face buttons of the console.
  * The state of the buttons will be reset when the power or eject button is pressed.
+ * Minimum Mechacon firmware version: 50000
  * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
  *
  * @param param The LED state to set.
@@ -947,6 +952,7 @@ int sceRemote2_7(u16 a1, u32 *a2);
 int sceCdSetLEDsMode(u32 param, u32 *result);
 
 /** Reads PS1 boot parameter.
+ * Minimum Mechacon firmware version: 50200
  * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
  *
  * @return 1 on success, 0 on failure
@@ -954,6 +960,7 @@ int sceCdSetLEDsMode(u32 param, u32 *result);
 int sceCdReadPS1BootParam(u8 *out, u32 *result);
 
 /** Sets fan profile.
+ * Minimum Mechacon firmware version: 50400
  * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
  *
  * @param param param (SCECdvdFanSpeed)
@@ -969,6 +976,7 @@ int sceCdSetFanProfile(u8 param, u32 *result);
 int sceCdChgSys(u32 arg1);
 
 /** Notice game start.
+ * Minimum Mechacon firmware version: 50400
  * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
  *
  * @return 1 on success, 0 on failure
@@ -976,6 +984,7 @@ int sceCdChgSys(u32 arg1);
 int sceCdNoticeGameStart(u8 arg1, u32 *result);
 
 /** Extended LED control.
+ * Minimum Mechacon firmware version: 50600
  * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
  *
  * @return 1 on success, 0 on failure
@@ -983,6 +992,7 @@ int sceCdNoticeGameStart(u8 arg1, u32 *result);
 int sceCdXLEDCtl(u8 arg1, u8 arg2, u32 *result1, u32 *result2);
 
 /** Buzzer control.
+ * Minimum Mechacon firmware version: 50600
  * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
  *
  * @return 1 on success, 0 on failure
@@ -990,6 +1000,7 @@ int sceCdXLEDCtl(u8 arg1, u8 arg2, u32 *result1, u32 *result2);
 int sceCdBuzzerCtl(u32 *result);
 
 /** XBS power control.
+ * Minimum Mechacon firmware version: 50600
  * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
  *
  * @return 1 on success, 0 on failure
@@ -997,6 +1008,7 @@ int sceCdBuzzerCtl(u32 *result);
 int sceCdXBSPowerCtl(u8 arg1, u8 arg2, u32 *result1, u32 *result2);
 
 /** Set medium removal.
+ * Minimum Mechacon firmware version: 50600
  * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
  *
  * @return 1 on success, 0 on failure
@@ -1004,6 +1016,7 @@ int sceCdXBSPowerCtl(u8 arg1, u8 arg2, u32 *result1, u32 *result2);
 int sceCdSetMediumRemoval(u8 arg1, u32 *result);
 
 /** Get medium removal.
+ * Minimum Mechacon firmware version: 50600
  * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
  *
  * @return 1 on success, 0 on failure
@@ -1011,6 +1024,7 @@ int sceCdSetMediumRemoval(u8 arg1, u32 *result);
 int sceCdGetMediumRemoval(u32 *result1, u32 *result2);
 
 /** XDVRP reset.
+ * Minimum Mechacon firmware version: 50600
  * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
  *
  * @return 1 on success, 0 on failure
@@ -1025,6 +1039,7 @@ int sceCdXDVRPReset(u8 arg1, u32 *result);
 int sceCdGetWakeUpReason(void);
 
 /** Reads region parameters.
+ * Minimum Mechacon firmware version: 60000
  * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
  *
  * @return 1 on success, 0 on failure
@@ -1032,6 +1047,7 @@ int sceCdGetWakeUpReason(void);
 int sceCdReadRegionParams(u32 *arg1, u32 *result);
 
 /** Writes region parameters.
+ * Minimum Mechacon firmware version: 60600
  * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
  *
  * @return 1 on success, 0 on failure
