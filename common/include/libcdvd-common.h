@@ -292,6 +292,14 @@ enum SCECdvdInitMode {
 /** Maximum levels of directories. */
 #define CdlMAXLEVEL 8
 
+enum SCECdvdFanSpeed {
+    /** The fan will spin at the minimum speed. */
+    SCECdvdFanSpeedMinimum = 0x00,
+    /** The fan will spin at a medium speed. */
+    SCECdvdFanSpeedMedium,
+    /** The fan will spin at the maximum speed. */
+    SCECdvdFanSpeedMaximum,
+};
 
 // For streaming operations (Use with sceCdStRead())
 enum SCECdvdStreamMode {
@@ -936,9 +944,10 @@ int sceCdReadPS1BootParam(u8 *out, u32 *result);
 /** Sets fan profile.
  * SUPPORTED IN XCDVDMAN INCLUDED WITHIN NEWER BOOT ROMS ONLY
  *
+ * @param param param (SCECdvdFanSpeed)
  * @return 1 on success, 0 on failure
  */
-int sceCdSetFanProfile(u8 arg1, u32 *result);
+int sceCdSetFanProfile(u8 param, u32 *result);
 
 /** Change sys.
  * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
