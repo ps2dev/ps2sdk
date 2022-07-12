@@ -291,7 +291,7 @@ int render(framebuffer_t *frame, zbuffer_t *z)
 
 }
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
 
 	// The buffers to be used.

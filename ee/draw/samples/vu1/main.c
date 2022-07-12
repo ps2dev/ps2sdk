@@ -347,7 +347,7 @@ void vu1_upload_micro_program()
 	packet2_free(packet2);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
 
 	// Init DMA channels.

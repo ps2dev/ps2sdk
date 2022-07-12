@@ -46,7 +46,6 @@ extern struct irx_export_table _exp_poweroff;
 
 //---------------------------------------------------------------------
 
-int  _start(int, char**);
 static void Shutdown();
 static void SendCmd(void* data);
 
@@ -238,7 +237,7 @@ void poweroff_rpc_Thread(void* param)
 	SifRpcLoop(&qd);
 }
 
-int _start(int argc, char* argv[])
+int _start(int argc, char *argv[])
 {
 	register struct handlerTableEntry *handlers=(struct handlerTableEntry*)0x480;//iopmem
 	iop_thread_t mythread;

@@ -1161,7 +1161,7 @@ void erl_flush_symbols(struct erl_record_t * erl) {
 
 #ifdef STANDALONE
 
-int main(int argc, char ** argv) {
+int main(int argc, char *argv[]) {
     struct erl_record_t * erl;
     char * fname;
 

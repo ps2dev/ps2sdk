@@ -42,7 +42,7 @@ int sif2_control(u32 intr, void *unused);
 
 extern struct irx_export_table _exp_siftoo;
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
 	u32 state;
 

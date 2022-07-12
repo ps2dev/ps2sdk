@@ -93,7 +93,7 @@ static void padStopAct(int port, int act)
 	padStartAct(port, act, 0);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
 	u32 port;
 	struct padButtonStatus buttons;

@@ -82,10 +82,14 @@ void *AHX_Quit(unsigned int *sbuff);
  *     is loaded. We simply set up the AHX Setup thread and
  * 	exit...
  */
-int _start()
+int _start(int argc, char *argv[])
 {
     iop_thread_t param;
     int th;
+
+    (void)argc;
+    (void)argv;
+
     FlushDcache();
     CpuEnableIntr(0);
     EnableIntr(40); // Enables SPU DMA (channel 1) interrupt.

@@ -27,7 +27,7 @@ static void cdda_stopped(void *arg)
 	track_ended = 1;
 }
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
 	int ret;
 	int track;

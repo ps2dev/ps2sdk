@@ -94,7 +94,7 @@ static u8 mcserv_buf[MCSERV_BUFSIZE] __attribute__((aligned(64)));
 extern struct irx_export_table _exp_mcserv;
 
 //--------------------------------------------------------------
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
 	iop_thread_t thread_param;
 	register int thread_id;

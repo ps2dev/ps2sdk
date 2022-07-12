@@ -151,7 +151,7 @@ int mcman_chrpos(char *str, int chr)
 	return p - str;
 }
 //--------------------------------------------------------------
-int _start(int argc, const char **argv)
+int _start(int argc, char *argv[])
 {
 #ifndef BUILDING_XFROMMAN
 	iop_library_t *libptr;

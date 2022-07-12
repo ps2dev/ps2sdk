@@ -122,7 +122,7 @@ void InitSpu2()
 }
 
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
 	(void)argc;
 	(void)argv;

@@ -1067,7 +1067,7 @@ int init_devfs(void)
  * @param argv: Unused
  * @returns 0 on success, -1 on error
  */
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
    int res = 1;
 

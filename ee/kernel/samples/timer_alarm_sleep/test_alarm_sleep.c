@@ -17,7 +17,7 @@
 
 volatile int flag = 0;
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
     while (1) {
         ThreadWaitClock(MSec2TimerBusClock(350));

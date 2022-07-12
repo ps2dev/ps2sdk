@@ -305,7 +305,7 @@ void shutdown(void)
 	dmac_disable(IOP_DMAC_SIO2out);
 }
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
 	int state;
 

@@ -17,8 +17,8 @@
 #include "speedregs.h"
 #include "errno.h"
 
-extern int module_start(int argc, char **argv);
-extern int module_stop();
+extern int module_start(int argc, char *argv[]);
+extern int module_stop(int argc, char *argv[]);
 extern int dvrf_df_init(iop_device_t *f);
 extern int dvrf_df_exit(iop_device_t *f);
 extern int dvrf_df_chdir(iop_file_t *f, const char *name);
@@ -248,7 +248,7 @@ int SBUF[32768];
 #define MODNAME "DVRFILE"
 IRX_ID("DVRFILE", 1, 1);
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
     if (argc >= 0)
         return module_start(argc, argv);
@@ -256,7 +256,7 @@ int _start(int argc, char **argv)
         return module_stop(argc, argv);
 }
 
-int module_start(int argc, char **argv)
+int module_start(int argc, char *argv[])
 {
     int i;
     USE_SPD_REGS;
@@ -315,8 +315,11 @@ fail:
     return 1;
 }
 
-int module_stop()
+int module_stop(int argc, char *argv[])
 {
+    (void)argc;
+    (void)argv;
+
     if (DelDrv(dvrpfs_drv.name) || DelDrv(dvrhdd_drv.name)) {
 #if 0
         return 2;

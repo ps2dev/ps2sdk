@@ -46,7 +46,7 @@ static void alloc_unlock() {
     }
 }
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
     iop_sema_t sem_info;
 

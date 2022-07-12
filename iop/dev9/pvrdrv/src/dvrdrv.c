@@ -48,7 +48,6 @@ typedef struct struct_dvrdrv_
     u16 dvr_ready;
 } struct_dvrdrv;
 
-int _start(int a1);
 int module_start();
 int module_stop();
 int DvrdrvInit();
@@ -94,11 +93,13 @@ void *intrhandler_callbacksarg[32];
 struct_itr_sid_tbl itrsid_table[3][32];
 struct_itr_sema itr_sema_table[32];
 
-int _start(int a1)
+int _start(int argc, char *argv[])
 {
     int result;
 
-    if (a1 >= 0)
+    (void)argv;
+
+    if (argc >= 0)
         result = module_start();
     else
         result = module_stop();

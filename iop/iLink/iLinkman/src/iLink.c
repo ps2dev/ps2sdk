@@ -71,7 +71,7 @@ static inline unsigned int GetBIOSVersion(void)
 }
 #endif
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
     int i, result;
     iop_thread_t ThreadData;
@@ -129,7 +129,7 @@ int _start(int argc, char **argv)
     return ((RegisterLibraryEntries(&_exp_iLinkman) != 0) ? MODULE_NO_RESIDENT_END : MODULE_RESIDENT_END);
 }
 
-int _exit(int argc, char **argv)
+int _exit(int argc, char *argv[])
 {
     int result;
 

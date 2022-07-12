@@ -240,7 +240,7 @@ static iop_io_device_t driver = {
  *   MODULE_RESIDENT_END if loaded and registered as library.
  *   MODULE_NO_RESIDENT_END if just exiting normally.
  */
-int _start( int argc, char **argv )
+int _start( int argc, char *argv[] )
 {
 	M_PRINTF( "Copyright (c) 2004 adresd\n" );
 

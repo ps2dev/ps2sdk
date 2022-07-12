@@ -525,7 +525,7 @@ static iop_io_device_t ps2httpDev = {
 /**
  * Main..  registers the File driver.
  */
-int _start( int argc, char **argv)
+int _start( int argc, char *argv[])
 {
 	(void)argc;
 	(void)argv;

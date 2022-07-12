@@ -194,7 +194,7 @@ static int print_help(void)
     return MODULE_NO_RESIDENT_END;
 }
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
     USE_DEV9_REGS;
     const char *pModName;

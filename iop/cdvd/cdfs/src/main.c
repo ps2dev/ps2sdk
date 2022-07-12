@@ -447,7 +447,7 @@ static iop_device_t fio_driver = {
     &fio_ops,
 };
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
     (void)argc;
     (void)argv;

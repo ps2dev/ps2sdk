@@ -111,7 +111,7 @@ static void DirEntryCopy(struct fileXioDirEntry* dirEntry, iox_dirent_t* interna
 static void* fileXio_rpc_server(int fno, void *data, int size);
 static void fileXio_Thread(void* param);
 
-int _start( int argc, char **argv)
+int _start( int argc, char *argv[])
 {
 	struct _iop_thread param;
 	int th, result;

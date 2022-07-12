@@ -202,7 +202,7 @@ void do_tests()
 #define do_tests()
 #endif
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
     int rv;
 

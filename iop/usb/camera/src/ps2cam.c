@@ -63,7 +63,7 @@ PS2CAM_DEVICE_HANDLE		CamHandle[MAX_CAM_DEVICE_HANDLE];
 
 
 
-int _start( int argc, char **argv)
+int _start( int argc, char *argv[])
 {
 	iop_thread_t	param;
 	int				th;

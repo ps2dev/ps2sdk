@@ -12,7 +12,7 @@
 
 IRX_ID(MODNAME, MAJOR_VER, MINOR_VER);
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
     (void)argc;
     (void)argv;

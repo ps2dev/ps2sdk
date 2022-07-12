@@ -22,7 +22,7 @@
 IRX_ID(MODNAME, VER_MAJOR, VER_MINOR);
 
 //-------------------------------------------------------------------------
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
     (void)argc;
     (void)argv;

@@ -184,7 +184,7 @@ static void kprtty_init(void)
 }
 #endif
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
     (void)argc;
     (void)argv;

@@ -129,11 +129,11 @@ char SBUF[16384];
 #define MODNAME "DVRMISC"
 IRX_ID(MODNAME, 1, 1);
 
-int _start(int a1, char **argv)
+int _start(int argc, char *argv[])
 {
     (void)argv;
 
-    if (a1 >= 0)
+    if (argc >= 0)
         return module_start();
     else
         return module_stop();

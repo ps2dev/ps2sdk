@@ -97,10 +97,13 @@ mouse_dev *devices[PS2MOUSE_MAXDEV];
 int dev_count;
 sceUsbdLddOps mouse_driver = { NULL, NULL, "PS2Mouse", ps2mouse_probe, ps2mouse_connect, ps2mouse_disconnect, 0, 0, 0, 0, 0, NULL };
 
-int _start ()
+int _start (int argc, char *argv[])
 {
   iop_thread_t param;
   int th;
+
+  (void)argc;
+  (void)argv;
 
   ps2mouse_init();
 

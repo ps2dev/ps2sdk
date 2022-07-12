@@ -14,7 +14,7 @@
 #include <stdio.h>
 #include <timer.h>
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
     uint64_t current, previous;
 
