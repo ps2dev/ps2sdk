@@ -62,7 +62,7 @@ static iop_device_t img_device = {
 
 int _start(int argc, char *argv[])
 {
-    return AddDrv(&img_device) < 0;
+    return (AddDrv(&img_device) < 0) ? MODULE_NO_RESIDENT_END : MODULE_RESIDENT_END;
 }
 
 static int imgdrv_dummy(void)

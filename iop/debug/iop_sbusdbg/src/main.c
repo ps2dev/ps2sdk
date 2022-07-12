@@ -96,7 +96,7 @@ int _start(int argc, char *argv[])
     if(sbus_tty_init() != 0)
     {
         printf("Failed initializing SBUS TTY system!\n");
-        return(1);
+        return MODULE_NO_RESIDENT_END;
     }
 
     SBUS_dbg_init();
@@ -106,5 +106,5 @@ int _start(int argc, char *argv[])
 
     printf("IOP SBUS Debug installed!\n");
 
-    return(0); // return resident!
+    return MODULE_RESIDENT_END;
 }

@@ -10,6 +10,7 @@
 
 #include <stdbool.h>
 #include "iomanX.h"
+#include "loadcore.h"
 #include "pvrdrv.h"
 #include "stdio.h"
 #include "thbase.h"
@@ -109,23 +110,23 @@ int module_start()
     }
     if (i == 30000) {
         printf("DVR task of DVRP is not running...\n");
-        return 1;
+        return MODULE_NO_RESIDENT_END;
     } else {
         if (AddDrv(&DVR) != 0)
-            return 1;
+            return MODULE_NO_RESIDENT_END;
     }
 #if 0
-    return 2;
+    return MODULE_REMOVABLE_END;
 #else
-    return 0;
+    return MODULE_RESIDENT_END;
 #endif
 }
 
 int module_stop()
 {
     if (DelDrv(DVR.name) != 0)
-        return 2;
-    return 1;
+        return MODULE_REMOVABLE_END;
+    return MODULE_NO_RESIDENT_END;
 }
 
 int dvrdv_df_init(iop_device_t *dev)

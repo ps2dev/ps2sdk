@@ -129,11 +129,11 @@ int _start(int argc, char *argv[])
 
 	printf(BANNER, VERSION);
 
-	if(RegisterLibraryEntries(&_exp_libsd) != 0) return 1;
+	if(RegisterLibraryEntries(&_exp_libsd) != 0) return MODULE_NO_RESIDENT_END;
 
 	InitSpu2();
 
-	return 0;
+	return MODULE_RESIDENT_END;
 }
 
 int TransInterrupt(void *data)

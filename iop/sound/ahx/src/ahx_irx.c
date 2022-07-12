@@ -101,9 +101,9 @@ int _start(int argc, char *argv[])
     th              = CreateThread(&param);
     if (th > 0) {
         StartThread(th, 0);
-        return 0;
+        return MODULE_RESIDENT_END;
     } else {
-        return 1;
+        return MODULE_NO_RESIDENT_END;
     }
 }
 

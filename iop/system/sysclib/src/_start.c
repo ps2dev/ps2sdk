@@ -21,9 +21,9 @@ int _start(int argc, char *argv[]) {
 	(void)argv;
 
     if (RegisterLibraryEntries(&_exp_sysclib) != 0)
-        return 1;
+        return MODULE_NO_RESIDENT_END;
     if (RegisterLibraryEntries(&_exp_stdio) != 0)
-        return 1;
+        return MODULE_NO_RESIDENT_END;
 
-    return 0;
+    return MODULE_RESIDENT_END;
 }

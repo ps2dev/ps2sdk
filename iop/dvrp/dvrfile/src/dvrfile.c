@@ -9,6 +9,7 @@
 */
 
 #include "iomanX.h"
+#include "loadcore.h"
 #include "pvrdrv.h"
 #include "stdio.h"
 #include "sysclib.h"
@@ -270,7 +271,7 @@ int module_start(int argc, char *argv[])
 
     if (i == 30000) {
         printf("IOMAN task of DVRP is not running...\n");
-        return 1;
+        return MODULE_NO_RESIDENT_END;
     }
     sema_id = -1;
     current_chunk_size = 0x4000;
@@ -282,9 +283,9 @@ int module_start(int argc, char *argv[])
             goto setup_fschk;
     }
 #if 0
-    return 2;
+    return MODULE_REMOVABLE_END;
 #else
-    return 0;
+    return MODULE_RESIDENT_END;
 #endif
 setup_fschk:
     printf("dvrfile.irx : FILE SYSTEM CHECK MODE\n");
@@ -302,9 +303,9 @@ setup_fschk:
         goto fail;
     }
 #if 0
-    return 2;
+    return MODULE_REMOVABLE_END;
 #else
-    return 0;
+    return MODULE_RESIDENT_END;
 #endif
 fail:
     DelDrv(dvrpfs_drv.name);
@@ -312,7 +313,7 @@ fail:
     DelDrv(dvrhdck_drv.name);
     DelDrv(dvrfssk_drv.name);
     DelDrv(dvrfsck_drv.name);
-    return 1;
+    return MODULE_NO_RESIDENT_END;
 }
 
 int module_stop(int argc, char *argv[])
@@ -322,12 +323,12 @@ int module_stop(int argc, char *argv[])
 
     if (DelDrv(dvrpfs_drv.name) || DelDrv(dvrhdd_drv.name)) {
 #if 0
-        return 2;
+        return MODULE_REMOVABLE_END;
 #else
-        return 0;
+        return MODULE_RESIDENT_END;
 #endif
     }
-    return 1;
+    return MODULE_NO_RESIDENT_END;
 }
 
 static int check_cmdack_err(int (*func)(drvdrv_exec_cmd_ack *cmdack), drvdrv_exec_cmd_ack *cmdack, int *retval, const char *funcname)

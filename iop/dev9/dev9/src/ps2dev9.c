@@ -258,7 +258,7 @@ int _start(int argc, char *argv[])
     return MODULE_RESIDENT_END;
 }
 
-int _exit(void) { return 0; }
+int _exit(void) { return MODULE_RESIDENT_END; }
 
 /* Export 4 */
 void dev9RegisterIntrCb(int intr, dev9_intr_cb_t cb)

@@ -70,7 +70,7 @@ int _start(int argc, char *argv[])
 	if (flash_detect() < 0)
 		return MODULE_NO_RESIDENT_END;
 
-	return RegisterLibraryEntries(&_exp_fls) != 0;
+	return (RegisterLibraryEntries(&_exp_fls) != 0) ? MODULE_NO_RESIDENT_END : MODULE_RESIDENT_END;
 }
 
 /* #4: Check to see if flash is connected to the expansion bay.  */

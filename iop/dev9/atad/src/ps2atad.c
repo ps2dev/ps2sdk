@@ -222,12 +222,14 @@ static int ata_create_event_flag(void)
 int _start(int argc, char *argv[])
 {
     USE_SPD_REGS;
-    int res = 1;
+    int res;
 
     (void)argc;
     (void)argv;
 
     printf(BANNER, VERSION);
+
+    res = MODULE_NO_RESIDENT_END;
 
     if (!(SPD_REG16(SPD_R_REV_3) & SPD_CAPS_ATA) || !(SPD_REG16(SPD_R_REV_8) & 0x02)) {
         M_PRINTF("HDD is not connected, exiting.\n");
@@ -262,7 +264,6 @@ int _start(int argc, char *argv[])
 
     if ((ata_evflg = ata_create_event_flag()) < 0) {
         M_PRINTF("Couldn't create event flag, exiting.\n");
-        res = 1;
         goto out;
     }
 
@@ -280,18 +281,18 @@ int _start(int argc, char *argv[])
     /* Register this at the last position, as it should be the last thing done before shutdown. */
     dev9RegisterShutdownCb(15, &ata_shutdown_cb);
 
-    if ((res = RegisterLibraryEntries(&_exp_atad)) != 0) {
+    if (RegisterLibraryEntries(&_exp_atad) != 0) {
         M_PRINTF("Library is already registered, exiting.\n");
         goto out;
     }
 
-    res = 0;
+    res = MODULE_RESIDENT_END;
     M_PRINTF("Driver loaded.\n");
 out:
     return res;
 }
 
-int _exit(void) { return 0; }
+int _exit(void) { return MODULE_RESIDENT_END; }
 
 static int ata_intr_cb(int flag)
 {

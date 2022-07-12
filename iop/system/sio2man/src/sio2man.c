@@ -315,10 +315,10 @@ int _start(int argc, char *argv[])
 	shutdown();
 
 	if (RegisterLibraryEntries(&_exp_sio2man) != 0)
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 
 	if (init)
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 
 	init = 1;
 
@@ -342,7 +342,7 @@ int _start(int argc, char *argv[])
 #ifdef SIO2LOG
 	EPRINTF("Logging started.\n");
 #endif
-	return 0;
+	return MODULE_RESIDENT_END;
 }
 
 void sio2_pad_transfer_init(void)

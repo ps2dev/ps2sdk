@@ -37,9 +37,9 @@ int _start(int argc, char *argv[])
 	(void)argv;
 
 	if (RegisterLibraryEntries(&_exp_sbusintr) != 0)
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 
-	return 0;
+	return MODULE_RESIDENT_END;
 }
 
 static int sbus_dispatch(void *arg)

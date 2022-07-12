@@ -10,6 +10,7 @@
 
 #include <stdbool.h>
 #include "iomanX.h"
+#include "loadcore.h"
 #include "pvrdrv.h"
 #include "stdio.h"
 #include "thbase.h"
@@ -88,19 +89,19 @@ int _start(int argc, char *argv[])
 int module_start()
 {
     if (AddDrv(&DVRMAN) != 0)
-        return 1;
+        return MODULE_NO_RESIDENT_END;
 #if 0
-    return 2;
+    return MODULE_REMOVABLE_END;
 #else
-    return 0;
+    return MODULE_RESIDENT_END;
 #endif
 }
 
 int module_stop()
 {
     if (DelDrv(DVRMAN.name) != 0)
-        return 2;
-    return 1;
+        return MODULE_REMOVABLE_END;
+    return MODULE_NO_RESIDENT_END;
 }
 
 int dvripl_df_init(iop_device_t *dev)

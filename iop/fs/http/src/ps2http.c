@@ -31,6 +31,7 @@
 
 #include <types.h>
 #include <irx.h>
+#include <loadcore.h>
 #include <stdio.h>
 #include <thbase.h>
 #include <sysclib.h>
@@ -536,6 +537,6 @@ int _start( int argc, char *argv[])
 	io_DelDrv( "http");
 	io_AddDrv(&ps2httpDev);
 
-	return 0;
+	return MODULE_RESIDENT_END;
 }
 

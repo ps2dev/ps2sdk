@@ -56,24 +56,24 @@ int _start(int argc, char *argv[])
 
     if (SBUS_init() != 0) {
         printf("IOP: SBUS_init() failed!\n");
-        return (1);
+        return MODULE_NO_RESIDENT_END;
     }
     if (SIF2_init() != 0) {
         printf("IOP: SIF2_init() failed!\n");
-        return (1);
+        return MODULE_NO_RESIDENT_END;
     }
     if (SIF2_init_cmd() != 0) {
         printf("IOP: SIF2_init_cmd() failed!\n");
-        return (1);
+        return MODULE_NO_RESIDENT_END;
     }
     if (RegisterLibraryEntries(&_exp_sbus) != 0) {
         printf("IOP: Error registering SBUS library!\n");
-        return (1);
+        return MODULE_NO_RESIDENT_END;
     }
 
     printf("IOP: SBUS driver loaded!\n");
 
-    return (0);
+    return MODULE_RESIDENT_END;
 }
 
 int _stop(int argc, char *argv[])
@@ -85,5 +85,5 @@ int _stop(int argc, char *argv[])
 
     SBUS_deinit();
     SIF2_deinit();
-    return (1);
+    return MODULE_NO_RESIDENT_END;
 }

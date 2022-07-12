@@ -1069,20 +1069,21 @@ int init_devfs(void)
  */
 int _start(int argc, char *argv[])
 {
-   int res = 1;
+   int res = MODULE_NO_RESIDENT_END;
+   int err;
 
    (void)argc;
    (void)argv;
 
    printf(BANNER, VERSION);
 
-   if ((res = RegisterLibraryEntries(&_exp_devfs)) != 0) {
+   if ((err = RegisterLibraryEntries(&_exp_devfs)) != 0) {
       M_PRINTF("Library is already registered, exiting.\n");
-      printf("res=%d\n", res);
+      printf("err=%d\n", err);
    }
    else
    {
-      res = init_devfs();
+      res = init_devfs() ? MODULE_NO_RESIDENT_END : MODULE_RESIDENT_END;
    }
 
    M_PRINTF("devfs_device_t size=%d\n", (int)(sizeof(devfs_device_t)));

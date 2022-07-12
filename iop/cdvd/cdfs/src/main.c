@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <ioman.h>
 #include <iox_stat.h>
+#include <loadcore.h>
 #include <sysclib.h>
 
 #include "cdfs_iop.h"
@@ -456,7 +457,7 @@ int _start(int argc, char *argv[])
     cdfs_prepare();
 
     DelDrv(DRIVER_UNIT_NAME);
-    if(AddDrv(&fio_driver) != 0) { return(-1); }
+    if(AddDrv(&fio_driver) != 0) { return MODULE_NO_RESIDENT_END; }
 
-    return(0);
+    return MODULE_RESIDENT_END;
 }

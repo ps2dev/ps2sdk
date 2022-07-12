@@ -248,19 +248,19 @@ int _start(int argc, char *argv[])
 	if(RegisterLibraryEntries(&_exp_poweroff) != 0)
 	{
 		M_PRINTF("Poweroff already registered\n");
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 	}
 
 	SetPowerButtonHandler(Shutdown, 0);
 
 	if (handlers[IOP_IRQ_CDVD].handler==0) {
 		M_PRINTF("No CDROM handler. Run CDVDMAN first\n");
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 	}
 
 	if (((int)handlers[IOP_IRQ_CDVD].handler & 3) != TYPE_C){
 		M_PRINTF("Cannot chain to non-C handler\n");
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 	}
 
 	oldCdHandler=(intrhandler)((int)handlers[IOP_IRQ_CDVD].handler & ~3);

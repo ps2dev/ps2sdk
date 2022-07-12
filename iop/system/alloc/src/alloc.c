@@ -51,7 +51,7 @@ int _start(int argc, char *argv[])
     iop_sema_t sem_info;
 
     if (RegisterLibraryEntries(&_exp_alloc) != 0)
-	return 1;
+	return MODULE_NO_RESIDENT_END;
 
     // check arguments for a heap_size parameter.
     if (argc > 1) {
@@ -59,7 +59,7 @@ int _start(int argc, char *argv[])
     }
 
     if (!(heap_start = AllocSysMemory(ALLOC_FIRST, heap_size, NULL)))
-	return -1;
+	return MODULE_NO_RESIDENT_END;
     heap_end = heap_start + heap_size;
     _heap_ptr = heap_start;
 
@@ -70,7 +70,7 @@ int _start(int argc, char *argv[])
 
     alloc_sema = CreateSema(&sem_info);
 
-    return 0;
+    return MODULE_RESIDENT_END;
 }
 
 

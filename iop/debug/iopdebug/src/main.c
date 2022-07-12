@@ -24,7 +24,7 @@ int _start(int argc, char *argv[])
     if(iop_dbg_install() != 0)
     {
         //printf("Failed installing IOP debug system!\n");
-        return(1); // return "non-resident"
+        return MODULE_NO_RESIDENT_END;
     }
 
     // register our IRX exports.
@@ -33,7 +33,7 @@ int _start(int argc, char *argv[])
         iop_dbg_remove();
 
         //printf("Error registering library!\n");
-        return(1);
+        return MODULE_NO_RESIDENT_END;
     }
 
     FlushIcache();
@@ -41,7 +41,7 @@ int _start(int argc, char *argv[])
 
     //printf("IOPDEBUG installed!\n");
 
-    return(0); // return "resident"
+    return MODULE_RESIDENT_END;
 }
 // export 2, called when the module is being unloaded(like when IOP is being "rebooted").
 int _stop(int argc, char *argv[])
@@ -55,6 +55,6 @@ int _stop(int argc, char *argv[])
         //printf("Failed removing IOP debug handlers!\n");
     }
 
-    return(1); // return "non-resident"
+    return MODULE_NO_RESIDENT_END;
 }
 

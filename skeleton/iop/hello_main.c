@@ -15,9 +15,9 @@ extern struct irx_export_table _exp_hello;
 int _start(int argc, char *argv[])
 {
     if (RegisterLibraryEntries(&_exp_hello) != 0)
-        return 1;
+        return MODULE_NO_RESIDENT_END;
 
     hello();
 
-    return 0;
+    return MODULE_RESIDENT_END;
 }

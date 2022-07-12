@@ -148,7 +148,7 @@ int _exit(int argc, char *argv[])
 
     FreeSysMemory(ConfigurationROM); /* Free the memory allocated for storing the configuration ROM. */
 
-    return 0;
+    return MODULE_RESIDENT_END;
 }
 
 int iLinkTrAlloc(unsigned short int NodeID, unsigned char speed)

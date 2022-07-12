@@ -234,7 +234,7 @@ int _start(int argc, char *argv[])
         goto out;
     }
 
-    if ((res = RegisterLibraryEntries(&_exp_atad)) != 0) {
+    if (RegisterLibraryEntries(&_exp_atad) != 0) {
         M_PRINTF("Library is already registered, exiting.\n");
         goto out;
     }

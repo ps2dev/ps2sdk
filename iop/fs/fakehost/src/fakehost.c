@@ -20,6 +20,7 @@
 //#define DEBUG
 
 #include "types.h"
+#include "loadcore.h"
 #include "stdio.h"
 #include "sysclib.h"
 #include "thbase.h"
@@ -247,7 +248,7 @@ int _start( int argc, char *argv[] )
 	if ( argc != 2 )
 	{
 		M_PRINTF( "HOST requires based argument\n" );
-		return -1;
+		return MODULE_NO_RESIDENT_END;
 	}
       else
       {
@@ -267,7 +268,7 @@ int _start( int argc, char *argv[] )
 		io_DelDrv( FS_REPNAME );
 		io_AddDrv( &driver );
 	}
-	return 0;
+	return MODULE_RESIDENT_END;
 }
 
 
