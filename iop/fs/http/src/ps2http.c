@@ -493,18 +493,32 @@ int httpLseek(iop_io_file_t *f, int offset, int mode)
 }
 
 
-iop_io_device_ops_t ps2httpOps = {
-	httpInitialize, httpDummy, httpDummy, httpOpen, httpClose, httpRead, httpDummy, httpLseek,
-	httpDummy, httpDummy, httpDummy, httpDummy, httpDummy, httpDummy, httpDummy, httpDummy,
-	httpDummy
+static iop_io_device_ops_t ps2httpOps = {
+	&httpInitialize,
+	(void *)&httpDummy,
+	(void *)&httpDummy,
+	&httpOpen,
+	&httpClose,
+	&httpRead,
+	(void *)&httpDummy,
+	&httpLseek,
+	(void *)&httpDummy,
+	(void *)&httpDummy,
+	(void *)&httpDummy,
+	(void *)&httpDummy,
+	(void *)&httpDummy,
+	(void *)&httpDummy,
+	(void *)&httpDummy,
+	(void *)&httpDummy,
+	(void *)&httpDummy,
 };
 
-iop_io_device_t ps2httpDev = {
+static iop_io_device_t ps2httpDev = {
 	"http",
 	IOP_DT_FS,
 	1,
 	"HTTP client file driver",
-	&ps2httpOps
+	&ps2httpOps,
 };
 
 

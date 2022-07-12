@@ -179,7 +179,8 @@ static iop_device_t dev9x_device =
         IOP_DT_FS | IOP_DT_FSEXT,
         1,
         "DEV9",
-        &dev9x_ops};
+        &dev9x_ops,
+    };
 
 static int print_help(void)
 { // The original made a printf() call for each line.

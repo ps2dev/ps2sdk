@@ -85,7 +85,7 @@ struct DevctlCmdTbl_t
         {0x567B, &dvrioctl2_get_dv_nodeid},
         {0x5682, &dvrioctl2_diag_test},
 };
-struct _iop_device_ops DvrFuncTbl =
+static iop_device_ops_t DvrFuncTbl =
     {
         &dvrmisc_df_init,
         &dvrmisc_df_exit,
@@ -113,8 +113,9 @@ struct _iop_device_ops DvrFuncTbl =
         &dvrmisc_df_devctl,
         &dvrmisc_df_null,
         &dvrmisc_df_null,
-        &dvrmisc_df_ioctl2};
-iop_device_t DVRMISC = {
+        &dvrmisc_df_ioctl2,
+    };
+static iop_device_t DVRMISC = {
     .name = "dvr_misc",
     .desc = "Digital Video Recorder MISC task",
     .type = (IOP_DT_FS | IOP_DT_FSEXT),

@@ -19,7 +19,6 @@ Of course this requires that the EE-side code accept this command and output the
 #include <excepman.h>
 #include <intrman.h>
 #include <ioman.h>
-#include <fileXio.h>
 #include <ps2_debug.h>
 #include <ps2_sbus.h>
 
@@ -41,36 +40,34 @@ static int ttyfs_deinit()
 	return 0;
 }
 
-static int ttyfs_open(iop_file_t *file, const char *name, int flags, int mode)
+static int ttyfs_open(iop_file_t *file, const char *name, int flags)
 {
     (void)file;
     (void)name;
     (void)flags;
-    (void)mode;
 
     //DBG_puts("SIOTTY: FS Open()\n");
 	return 0;
 }
 
-static int ttyfs_close(iop_file_t *file, int fd)
+static int ttyfs_dopen(iop_file_t *file, const char *name)
 {
     (void)file;
-    (void)fd;
+    (void)name;
+
+    //DBG_puts("SIOTTY: FS Dopen()\n");
+    return 0;
+}
+
+static int ttyfs_close(iop_file_t *file)
+{
+    (void)file;
 
     //DBG_puts("SIOTTY: FS Close()\n");
     return(0);
 }
 
-static int ttyfs_read(iop_file_t *file, void *ptr, size_t size) {
-    (void)file;
-    (void)ptr;
-    (void)size;
-
-    //DBG_puts("SIOTTY: FS Read()\n");
-    return(-1);
-}
-
-static int ttyfs_write(iop_file_t *file, u8 *ptr, size_t size) {
+static int ttyfs_write(iop_file_t *file, void *ptr, int size) {
     char temp[65];
     int bCount = 0;
 
@@ -86,7 +83,7 @@ static int ttyfs_write(iop_file_t *file, u8 *ptr, size_t size) {
         if(toWrite > 64)
             toWrite = 64;
 
-        memcpy(temp, &ptr[bCount], toWrite);
+        memcpy(temp, &(((u8 *)ptr)[bCount]), toWrite);
         temp[toWrite] = '\0';
         sbus_tty_puts(temp);
 
@@ -96,98 +93,34 @@ static int ttyfs_write(iop_file_t *file, u8 *ptr, size_t size) {
     return(bCount);
 }
 
-static int ttyfs_lseek(iop_file_t *file, int offset, int mode) {
-    (void)file;
-    (void)offset;
-    (void)mode;
-
-    //DBG_puts("SIOTTY: FS Lseek()\n");
-
-    return(-1);
-}
-
-static int ttyfs_format(iop_file_t *file, const char *dev, const char *blockdev, void *arg, size_t arglen) {
-    (void)file;
-    (void)dev;
-    (void)blockdev;
-    (void)arg;
-    (void)arglen;
-
-    //DBG_puts("SIOTTY: FS Format()\n");
-
-    return(-1);
-}
-
-static int ttyfs_remove(iop_file_t *file, const char *name) {
-    (void)file;
-    (void)name;
-
-    //DBG_puts("SIOTTY: FS Remove()\n");
-
-    return(-1);
-}
-
-static int ttyfs_dread(iop_file_t *file, iox_dirent_t *dirent) {
-    (void)file;
-    (void)dirent;
-
-    //DBG_puts("SIOTTY: FS Dread()\n");
-
-    return(-1);
-}
-
-static int ttyfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat) {
-    (void)file;
-    (void)name;
-    (void)stat;
-
-    //DBG_puts("SIOTTY: FS GetStat()\n");
-
-    return(-1);
-}
-
-static int ttyfs_devctl(iop_file_t *file, const char *name, int cmd, void *arg, size_t arglen, void *buf, size_t buflen) {
-    (void)file;
-    (void)name;
-    (void)cmd;
-    (void)arg;
-    (void)arglen;
-    (void)buf;
-    (void)buflen;
-
-    //DBG_puts("SIOTTY: FS DEVCTL()\n");
-
-    return(-1);
-}
-
-static int ttyfs_ioctl2(iop_file_t *file, int cmd, void *arg, size_t arglen, void *buf, size_t buflen) {
-    (void)file;
-    (void)cmd;
-    (void)arg;
-    (void)arglen;
-    (void)buf;
-    (void)buflen;
-
-    //DBG_puts("SIOTTY: FS IOCTL2()\n");
-
-    return(-1);
-}
-
-
-static void *fsd_ops[] = { ttyfs_init, ttyfs_deinit, ttyfs_format, ttyfs_open, ttyfs_close,
-	ttyfs_read, ttyfs_write, ttyfs_lseek, ttyfs_error, ttyfs_remove, ttyfs_error, ttyfs_error,
-	ttyfs_open, ttyfs_close, ttyfs_dread, ttyfs_getstat, ttyfs_error, ttyfs_error, ttyfs_error,
-	ttyfs_error, ttyfs_error, ttyfs_error, ttyfs_error, ttyfs_devctl, ttyfs_error, ttyfs_error,
-	ttyfs_ioctl2
+static iop_device_ops_t fsd_ops =
+{
+    &ttyfs_init,
+    &ttyfs_deinit,
+    (void *)&ttyfs_error,
+    &ttyfs_open,
+    &ttyfs_close,
+	(void *)&ttyfs_error,
+    &ttyfs_write,
+    (void *)&ttyfs_error,
+    (void *)&ttyfs_error,
+    (void *)&ttyfs_error,
+    (void *)&ttyfs_error,
+    (void *)&ttyfs_error,
+	&ttyfs_dopen,
+    &ttyfs_close,
+    (void *)&ttyfs_error,
+    (void *)&ttyfs_error,
+    (void *)&ttyfs_error,
 };
 
-iop_device_t tty_fsd =
+static iop_device_t tty_fsd =
 {
 	"tty",
-	0x10,
+	IOP_DT_FS,
 	1,
 	"TTY via EE SIO",
-	(iop_device_ops_t *) &fsd_ops
+	&fsd_ops,
 };
 
 void sprintf_putchar(void *context, int c)

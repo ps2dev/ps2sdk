@@ -19,41 +19,41 @@ static int mcman_io_sema = 0;
 // mc driver ops functions prototypes
 int mc_init(iop_device_t *iop_dev);
 int mc_deinit(iop_device_t *dev);
-int mc_open(iop_file_t *f, char *filename, int mode, int flags);
+int mc_open(iop_file_t *f, const char *filename, int mode);
 int mc_close(iop_file_t *f);
 int mc_lseek(iop_file_t *f, int pos, int where);
 int mc_read(iop_file_t *f, void *buf, int size);
 int mc_write(iop_file_t *f, void *buf, int size);
-int mc_format(iop_file_t *f, char *a1, char *a2, void *a3, int a4);
-int mc_remove(iop_file_t *f, char *filename);
-int mc_mkdir(iop_file_t *f, char *dirname);
-int mc_rmdir(iop_file_t *f, char *dirname);
-int mc_dopen(iop_file_t *f, char *dirname);
+int mc_format(iop_file_t *f);
+int mc_remove(iop_file_t *f, const char *filename);
+int mc_mkdir(iop_file_t *f, const char *dirname);
+int mc_rmdir(iop_file_t *f, const char *dirname);
+int mc_dopen(iop_file_t *f, const char *dirname);
 int mc_dclose(iop_file_t *f);
 int mc_dread(iop_file_t *f, io_dirent_t *dirent);
-int mc_getstat(iop_file_t *f, char *filename, io_stat_t *stat);
-int mc_chstat(iop_file_t *f, char *filename, io_stat_t *stat, u32 statmask);
+int mc_getstat(iop_file_t *f, const char *filename, io_stat_t *stat);
+int mc_chstat(iop_file_t *f, const char *filename, io_stat_t *stat, unsigned int statmask);
 int mc_ioctl(iop_file_t *f, int a1, void* a2);
 
 // driver ops func tab
-void *mcman_mcops[17] = {
-	(void*)mc_init,
-	(void*)mc_deinit,
-	(void*)mc_format,
-	(void*)mc_open,
-	(void*)mc_close,
-	(void*)mc_read,
-	(void*)mc_write,
-	(void*)mc_lseek,
-	(void*)mc_ioctl,
-	(void*)mc_remove,
-	(void*)mc_mkdir,
-	(void*)mc_rmdir,
-	(void*)mc_dopen,
-	(void*)mc_dclose,
-	(void*)mc_dread,
-	(void*)mc_getstat,
-	(void*)mc_chstat
+static iop_device_ops_t mcman_mcops = {
+	&mc_init,
+	&mc_deinit,
+	&mc_format,
+	&mc_open,
+	&mc_close,
+	&mc_read,
+	&mc_write,
+	&mc_lseek,
+	&mc_ioctl,
+	&mc_remove,
+	&mc_mkdir,
+	&mc_rmdir,
+	&mc_dopen,
+	&mc_dclose,
+	&mc_dread,
+	&mc_getstat,
+	&mc_chstat,
 };
 
 // driver descriptor
@@ -72,7 +72,7 @@ static iop_device_t mcman_mcdev = {
 #ifdef BUILDING_XFROMMAN
 	"External flash rom",
 #endif
-	(struct _iop_device_ops *)&mcman_mcops
+	&mcman_mcops,
 };
 
 //--------------------------------------------------------------
@@ -240,18 +240,16 @@ int mc_deinit(iop_device_t *dev)
 }
 
 //--------------------------------------------------------------
-int mc_open(iop_file_t *f, char *filename, int mode, int flags)
+int mc_open(iop_file_t *f, const char *filename, int mode)
 {
 	register int r;
-
-	(void)flags;
 
 	WaitSema(mcman_io_sema);
 	mcman_unit2card(f->unit);
 
 	r = McDetectCard2(mcman_mc_port, mcman_mc_slot);
 	if (r >= -1) {
-		r = McOpen(mcman_mc_port, mcman_mc_slot, filename, mode);
+		r = McOpen(mcman_mc_port, mcman_mc_slot, (char *)filename, mode);
 		if (r >= 0)
 			f->privdata = (void*)r;
 	}
@@ -309,14 +307,9 @@ int mc_write(iop_file_t *f, void *buf, int size)
 }
 
 //--------------------------------------------------------------
-int mc_format(iop_file_t *f, char *a1, char *a2, void *a3, int a4)
+int mc_format(iop_file_t *f)
 {
 	register int r;
-
-	(void)a1;
-	(void)a2;
-	(void)a3;
-	(void)a4;
 
 	WaitSema(mcman_io_sema);
 	mcman_unit2card(f->unit);
@@ -331,7 +324,7 @@ int mc_format(iop_file_t *f, char *a1, char *a2, void *a3, int a4)
 }
 
 //--------------------------------------------------------------
-int mc_remove(iop_file_t *f, char *filename)
+int mc_remove(iop_file_t *f, const char *filename)
 {
 	register int r;
 
@@ -340,7 +333,7 @@ int mc_remove(iop_file_t *f, char *filename)
 
 	r = McDetectCard2(mcman_mc_port, mcman_mc_slot);
 	if (r >= -1) {
-		r = McDelete(mcman_mc_port, mcman_mc_slot, filename, 0);
+		r = McDelete(mcman_mc_port, mcman_mc_slot, (char *)filename, 0);
 	}
 	SignalSema(mcman_io_sema);
 
@@ -348,7 +341,7 @@ int mc_remove(iop_file_t *f, char *filename)
 }
 
 //--------------------------------------------------------------
-int mc_mkdir(iop_file_t *f, char *dirname)
+int mc_mkdir(iop_file_t *f, const char *dirname)
 {
 	register int r;
 
@@ -357,7 +350,7 @@ int mc_mkdir(iop_file_t *f, char *dirname)
 
 	r = McDetectCard2(mcman_mc_port, mcman_mc_slot);
 	if (r >= -1) {
-		r = McOpen(mcman_mc_port, mcman_mc_slot, dirname, 0x40);
+		r = McOpen(mcman_mc_port, mcman_mc_slot, (char *)dirname, 0x40);
 	}
 	SignalSema(mcman_io_sema);
 
@@ -365,7 +358,7 @@ int mc_mkdir(iop_file_t *f, char *dirname)
 }
 
 //--------------------------------------------------------------
-int mc_rmdir(iop_file_t *f, char *dirname)
+int mc_rmdir(iop_file_t *f, const char *dirname)
 {
 	register int r;
 
@@ -374,7 +367,7 @@ int mc_rmdir(iop_file_t *f, char *dirname)
 
 	r = McDetectCard2(mcman_mc_port, mcman_mc_slot);
 	if (r >= -1) {
-		r = McDelete(mcman_mc_port, mcman_mc_slot, dirname, 0);
+		r = McDelete(mcman_mc_port, mcman_mc_slot, (char *)dirname, 0);
 	}
 	SignalSema(mcman_io_sema);
 
@@ -382,7 +375,7 @@ int mc_rmdir(iop_file_t *f, char *dirname)
 }
 
 //--------------------------------------------------------------
-int mc_dopen(iop_file_t *f, char *dirname)
+int mc_dopen(iop_file_t *f, const char *dirname)
 {
 	register int r;
 
@@ -391,7 +384,7 @@ int mc_dopen(iop_file_t *f, char *dirname)
 
 	r = McDetectCard2(mcman_mc_port, mcman_mc_slot);
 	if (r >= -1) {
-		r = McOpen(mcman_mc_port, mcman_mc_slot, dirname, 0);
+		r = McOpen(mcman_mc_port, mcman_mc_slot, (char *)dirname, 0);
 		if (r >= 0)
 			f->privdata = (void*)r;
 	}
@@ -426,7 +419,7 @@ int mc_dread(iop_file_t *f, io_dirent_t *dirent)
 }
 
 //--------------------------------------------------------------
-int mc_getstat(iop_file_t *f, char *filename, io_stat_t *stat)
+int mc_getstat(iop_file_t *f, const char *filename, io_stat_t *stat)
 {
 	register int r;
 
@@ -435,7 +428,7 @@ int mc_getstat(iop_file_t *f, char *filename, io_stat_t *stat)
 
 	r = McDetectCard2(mcman_mc_port, mcman_mc_slot);
 	if (r >= -1) {
-		r = mcman_getstat(mcman_mc_port, mcman_mc_slot, filename, stat);
+		r = mcman_getstat(mcman_mc_port, mcman_mc_slot, (char *)filename, stat);
 	}
 
 	SignalSema(mcman_io_sema);
@@ -444,7 +437,7 @@ int mc_getstat(iop_file_t *f, char *filename, io_stat_t *stat)
 }
 
 //--------------------------------------------------------------
-int mc_chstat(iop_file_t *f, char *filename, io_stat_t *stat, u32 statmask)
+int mc_chstat(iop_file_t *f, const char *filename, io_stat_t *stat, unsigned int statmask)
 {
 	register int r;
 	sceMcTblGetDir mctbl;
@@ -493,7 +486,7 @@ int mc_chstat(iop_file_t *f, char *filename, io_stat_t *stat, u32 statmask)
 			memcpy(&mctbl._Modify, stat->mtime, sizeof(sceMcStDateTime));
 		}
 
-		r = McSetFileInfo(mcman_mc_port, mcman_mc_slot, filename, &mctbl, flags);
+		r = McSetFileInfo(mcman_mc_port, mcman_mc_slot, (char *)filename, &mctbl, flags);
 	}
 	SignalSema(mcman_io_sema);
 

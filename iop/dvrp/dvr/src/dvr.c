@@ -102,39 +102,40 @@ struct DevctlCmdTbl_t
         {0x5650, &dvrioctl2_rec_pictclip},
 };
 
-struct _iop_device_ops DvrFuncTbl =
+static iop_device_ops_t DvrFuncTbl =
     {
         &dvr_df_init,
         &dvr_df_exit,
-        &dvr_df_null,
-        &dvr_df_null,
-        &dvr_df_null,
-        &dvr_df_null,
-        &dvr_df_null,
-        &dvr_df_null,
+        (void *)&dvr_df_null,
+        (void *)&dvr_df_null,
+        (void *)&dvr_df_null,
+        (void *)&dvr_df_null,
+        (void *)&dvr_df_null,
+        (void *)&dvr_df_null,
         &dvr_df_ioctl,
-        &dvr_df_null,
-        &dvr_df_null,
-        &dvr_df_null,
-        &dvr_df_null,
-        &dvr_df_null,
-        &dvr_df_null,
-        &dvr_df_null,
-        &dvr_df_null,
-        &dvr_df_null,
-        &dvr_df_null,
-        &dvr_df_null,
-        &dvr_df_null,
-        &dvr_df_null,
-        &dvr_df_null_long,
+        (void *)&dvr_df_null,
+        (void *)&dvr_df_null,
+        (void *)&dvr_df_null,
+        (void *)&dvr_df_null,
+        (void *)&dvr_df_null,
+        (void *)&dvr_df_null,
+        (void *)&dvr_df_null,
+        (void *)&dvr_df_null,
+        (void *)&dvr_df_null,
+        (void *)&dvr_df_null,
+        (void *)&dvr_df_null,
+        (void *)&dvr_df_null,
+        (void *)&dvr_df_null,
+        (void *)&dvr_df_null_long,
         &dvr_df_devctl,
-        &dvr_df_null,
-        &dvr_df_null,
-        &dvr_df_ioctl2};
+        (void *)&dvr_df_null,
+        (void *)&dvr_df_null,
+        &dvr_df_ioctl2,
+    };
 char TEVENT_BUF[6144];
 char *tevent_p;
 int tevent_data_sz;
-iop_device_t DVR = {
+static iop_device_t DVR = {
     .name = "dvr",
     .desc = "Digital Video Recorder DVR task",
     .type = (IOP_DT_FS | IOP_DT_FSEXT),

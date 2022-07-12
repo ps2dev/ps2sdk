@@ -112,7 +112,6 @@ u8 special_keys[PS2KBD_KEYMAP_SIZE];
 u8 control_map[PS2KBD_KEYMAP_SIZE];
 u8 alt_map[PS2KBD_KEYMAP_SIZE];
 //static struct fileio_driver kbd_fdriver;
-iop_device_t kbd_filedrv;
 u8 keyModValue[8] = { 0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7 };
 int repeat_tid;
 int eventid;   /* Id of the repeat event */
@@ -1112,36 +1111,40 @@ int fio_close(iop_file_t *f)
   return 0;
 }
 
-iop_device_ops_t fio_ops =
+static iop_device_ops_t fio_ops =
 
   {
-    fio_init,
-    fio_dummy,
-    fio_format,
-    fio_open,
-    fio_close,
-    fio_read,
-    fio_dummy,
-    fio_dummy,
-    fio_ioctl,
-    fio_dummy,
-    fio_dummy,
-    fio_dummy,
-    fio_dummy,
-    fio_dummy,
-    fio_dummy,
-    fio_dummy,
-    fio_dummy
+    &fio_init,
+    (void *)&fio_dummy,
+    &fio_format,
+    &fio_open,
+    &fio_close,
+    &fio_read,
+    (void *)&fio_dummy,
+    (void *)&fio_dummy,
+    &fio_ioctl,
+    (void *)&fio_dummy,
+    (void *)&fio_dummy,
+    (void *)&fio_dummy,
+    (void *)&fio_dummy,
+    (void *)&fio_dummy,
+    (void *)&fio_dummy,
+    (void *)&fio_dummy,
+    (void *)&fio_dummy,
   };
+
+static iop_device_t kbd_filedrv = {
+  PS2KBD_FSNAME,
+  IOP_DT_CHAR,
+  0,
+  "USB Keyboard FIO driver",
+  &fio_ops,
+};
+
 
 int init_fio()
 
 {
-  kbd_filedrv.name = PS2KBD_FSNAME;
-  kbd_filedrv.type = IOP_DT_CHAR;
-  kbd_filedrv.version = 0;
-  kbd_filedrv.desc = "USB Keyboard FIO driver";
-  kbd_filedrv.ops = &fio_ops;
   return AddDrv(&kbd_filedrv);
 }
 

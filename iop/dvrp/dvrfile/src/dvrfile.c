@@ -230,7 +230,8 @@ static iop_device_ops_t dvrf_translator_functbl = {
         (IOP_DT_FS | IOP_DT_FSEXT),                                                     \
         1,                                                                              \
         drvname,                                                                        \
-        &dvrf_translator_functbl};
+        &dvrf_translator_functbl,                                                       \
+    };
 
 GEN_TRANSLATION_FUNCS(dvrpfs, "dvr_pfs", 1, "PFS Driver for DVR");
 GEN_TRANSLATION_FUNCS(dvrhdd, "dvr_hdd", 0, "HDD Driver for DVR");

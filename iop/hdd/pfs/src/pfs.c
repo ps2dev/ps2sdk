@@ -36,42 +36,42 @@ IRX_ID("pfs_driver", PFS_MAJOR, PFS_MINOR);
 ///////////////////////////////////////////////////////////////////////////////
 //	Globals
 
-iop_device_ops_t pfsOps = {
-	pfsFioInit,
-	pfsFioDeinit,
-	pfsFioFormat,
-	pfsFioOpen,
-	pfsFioClose,
-	pfsFioRead,
-	pfsFioWrite,
-	pfsFioLseek,
-	pfsFioIoctl,
-	pfsFioRemove,
-	pfsFioMkdir,
-	pfsFioRmdir,
-	pfsFioDopen,
-	pfsFioClose,
-	pfsFioDread,
-	pfsFioGetstat,
-	pfsFioChstat,
-	pfsFioRename,
-	pfsFioChdir,
-	pfsFioSync,
-	pfsFioMount,
-	pfsFioUmount,
-	pfsFioLseek64,
-	pfsFioDevctl,
-	pfsFioSymlink,
-	pfsFioReadlink,
-	pfsFioIoctl2
+static iop_device_ops_t pfsOps = {
+	&pfsFioInit,
+	&pfsFioDeinit,
+	&pfsFioFormat,
+	&pfsFioOpen,
+	&pfsFioClose,
+	&pfsFioRead,
+	&pfsFioWrite,
+	&pfsFioLseek,
+	&pfsFioIoctl,
+	&pfsFioRemove,
+	&pfsFioMkdir,
+	&pfsFioRmdir,
+	&pfsFioDopen,
+	&pfsFioClose,
+	&pfsFioDread,
+	&pfsFioGetstat,
+	&pfsFioChstat,
+	&pfsFioRename,
+	&pfsFioChdir,
+	&pfsFioSync,
+	&pfsFioMount,
+	&pfsFioUmount,
+	&pfsFioLseek64,
+	&pfsFioDevctl,
+	&pfsFioSymlink,
+	&pfsFioReadlink,
+	&pfsFioIoctl2,
 };
 
-iop_device_t pfsFioDev = {
+static iop_device_t pfsFioDev = {
 	"pfs",
 	(IOP_DT_FS | IOP_DT_FSEXT),
 	1,
 	"PFS",
-	&pfsOps
+	&pfsOps,
 };
 
 pfs_config_t pfsConfig = { 1, 2 };

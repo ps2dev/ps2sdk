@@ -61,7 +61,8 @@ static iop_device_ops_t tty_ops = {
     (void *)tty_error,
     (void *)tty_error,
     (void *)tty_error,
-    (void *)tty_error};
+    (void *)tty_error,
+};
 
 /* device descriptor */
 static iop_device_t tty_device = {
@@ -69,7 +70,8 @@ static iop_device_t tty_device = {
     IOP_DT_CHAR | IOP_DT_CONS,
     1,
     "TTY via SMAP UDP",
-    &tty_ops};
+    &tty_ops,
+};
 
 
 /* KPRTTY */
