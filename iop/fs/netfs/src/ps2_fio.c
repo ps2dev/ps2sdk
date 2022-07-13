@@ -445,12 +445,12 @@ static int ps2netfs_op_devlist(char *buf, int len)
     int cnt; char *ptr = &devlistrly->list[0];
     for(cnt=0;cnt<(count-1);cnt++)
     {
-      int len;
-      len = strlen(ptr);
+      int ptr_len;
+      ptr_len = strlen(ptr);
       // ok, got a string, so replace the final 0, with delimiter
       // move onto next string
-      *(ptr+len) = cmd->path[0];
-      ptr += len + 1;
+      *(ptr+ptr_len) = cmd->path[0];
+      ptr += ptr_len + 1;
     }
   }
 
