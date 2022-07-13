@@ -199,7 +199,7 @@ int _start(int argc, char *argv[])
 
     close(0);
     close(1);
-    DelDrv(DEVNAME);
+    DelDrv(tty_device.name);
 
     if (AddDrv(&tty_device) < 0)
         return MODULE_NO_RESIDENT_END;

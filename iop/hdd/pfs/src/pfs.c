@@ -224,7 +224,7 @@ int _start(int argc, char *argv[])
 	if(pfsCacheInit(numBuf, pfsMetaSize) < 0)
 		return MODULE_NO_RESIDENT_END;
 
-	DelDrv("pfs");
+	DelDrv(pfsFioDev.name);
 	if(AddDrv(&pfsFioDev) == 0) {
 #if defined(PFS_XOSD_VER)
 		PFS_PRINTF(PFS_DRV_NAME" version %04x driver start. This is OSD LBA48 VERSION !!!!!!!!!!!\n", IRX_VER(PFS_MAJOR, PFS_MINOR));

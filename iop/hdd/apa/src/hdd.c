@@ -299,11 +299,11 @@ int _start(int argc, char *argv[])
 				hddDevices[i].status, hddDevices[i].format);
 		}
 	}
-	DelDrv("hdd");
+	DelDrv(hddFioDev.name);
 	if(AddDrv(&hddFioDev) == 0)
 	{
 #ifdef APA_SUPPORT_BHDD
-		DelDrv("bhdd");
+		DelDrv(bhddFioDev.name);
 		if(AddDrv(&bhddFioDev) == 0)
 #endif
 		{

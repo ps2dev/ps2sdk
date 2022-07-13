@@ -148,7 +148,7 @@ int sbus_tty_init(void)
 {
     close(0);
     close(1);
-	DelDrv("tty");
+	DelDrv(tty_fsd.name);
 	DelDrv("dummytty");
 
 	if(AddDrv(&tty_fsd) != 0) { return(-1); }

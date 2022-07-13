@@ -250,7 +250,7 @@ int _start(int argc, char *argv[])
     if (res)
         return res;
 
-    DelDrv("dev9x");
+    DelDrv(dev9x_device.name);
     if (AddDrv(&dev9x_device) != 0) {
         return MODULE_NO_RESIDENT_END;
     }

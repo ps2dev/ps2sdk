@@ -1057,7 +1057,7 @@ int init_devfs(void)
 
    memset(open_dirfiles, 0, sizeof(directory_file_t) * MAX_OPEN_DIRFILES);
 
-   DelDrv("devfs");
+   DelDrv(devfs_device.name);
 
    return AddDrv(&devfs_device);
 }

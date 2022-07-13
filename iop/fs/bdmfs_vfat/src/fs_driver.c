@@ -922,6 +922,6 @@ int InitFS(void)
 {
     M_DEBUG("%s\n", __func__);
 
-    DelDrv("mass");
+    DelDrv(fs_driver.name);
     return (AddDrv(&fs_driver) == 0 ? 0 : -1);
 }

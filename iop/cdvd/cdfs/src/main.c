@@ -456,7 +456,7 @@ int _start(int argc, char *argv[])
     // Prepare cache and read mode
     cdfs_prepare();
 
-    DelDrv(DRIVER_UNIT_NAME);
+    DelDrv(fio_driver.name);
     if(AddDrv(&fio_driver) != 0) { return MODULE_NO_RESIDENT_END; }
 
     return MODULE_RESIDENT_END;
