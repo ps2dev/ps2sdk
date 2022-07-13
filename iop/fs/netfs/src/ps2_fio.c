@@ -265,7 +265,7 @@ int ps2netfs_accept_pktunknown(int sock, char *buf)
     return -1;
   }
 
-  if (length < sizeof(ps2netfs_pkt_hdr)) {
+  if ((unsigned int)length < sizeof(ps2netfs_pkt_hdr)) {
     dbgprintf("ps2netfs: XXX: did not receive a full header!!!! "
               "Fix this! (%d)\n", length);
     return -1;
@@ -295,7 +295,7 @@ int ps2netfs_accept_pktunknown(int sock, char *buf)
     return -1;
   }
 
-  if (length < (hlen - sizeof(ps2netfs_pkt_hdr))) {
+  if ((unsigned int)length < (hlen - sizeof(ps2netfs_pkt_hdr))) {
     dbgprintf("ps2netfs: Did not receive full packet!!! "
               "Fix this! (%d)\n", length);
   }
@@ -1850,7 +1850,7 @@ static void ps2netfs_Listener(int sock)
      dbgprintf("ps2netfs_Listener: recvfrom error (%d)\n", len);
      return;
    }
-   if (len >= sizeof(ps2netfs_pkt_hdr))
+   if ((unsigned int)len >= sizeof(ps2netfs_pkt_hdr))
    {
      header = (ps2netfs_pkt_hdr *)ps2netfs_recv_packet;
      cmd = ntohl(header->cmd);

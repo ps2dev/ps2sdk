@@ -145,7 +145,7 @@ int part_connect(struct block_device *bd)
     if ((parts = part_getPartitionTable(bd, &partTable)) <= 0)
         return rval;
 
-    for (i = 0; i < parts; i++) {
+    for (i = 0; i < (unsigned int)parts; i++) {
         if (partTable.record[i].sid != 0x00) {
             M_DEBUG("mount partition %d id %02x\n", i, partTable.record[i].sid);
             part_create(bd, &partTable.record[i], i);

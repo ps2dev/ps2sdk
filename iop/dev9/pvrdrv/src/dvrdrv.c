@@ -325,7 +325,7 @@ LABEL_26:
             if ((SPD_REG16(0x4228) & 1) == 0)
                 v25 = (u8)(SPD_REG16(0x4228) & 0xFC) >> 2;
             *status_4228 = v25;
-            for (i = 0; i < *status_4228; ++ack_status) {
+            for (i = 0; (u32)i < *status_4228; ++ack_status) {
                 ++i;
                 *ack_status = SPD_REG16(0x4224);
             }
@@ -582,7 +582,7 @@ int DvrdrvWaitCmdComp(struct_itr_sema *itrsema, u16 command, u16 *status_4220, u
                     do {
                         ++v12;
                         *v13++ = SPD_REG16(0x4224);
-                    } while (v12 < *status_4228);
+                    } while ((u32)v12 < *status_4228);
                 }
                 *status_4220 = SPD_REG16(0x4220);
             } else {
@@ -1315,7 +1315,7 @@ int DvrdrvExecCmdAckDma2Comp(drvdrv_exec_cmd_ack *a1)
     DvrdrvBlockPhase();
     DvrdrvSetDmaDirection(1u);
     v6 = a1->input_buffer_length;
-    v20 = (v6 & 0x7F) != 0 ? (v6 / 128 + 1) << 7 : a1->input_buffer_length;
+    v20 = (v6 & 0x7F) != 0 ? (u32)((v6 / 128 + 1) << 7) : a1->input_buffer_length;
     v7 = a1->command;
     input_word_count = 2;
     v14 = (v7 & 0xF0FF) | 0x200;

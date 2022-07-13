@@ -122,7 +122,7 @@ void SIF2_send_cmd(u32 cid, void *extra, int extra_size)
     cmd->extra_size = 0;
 
     if (extra) {
-        if (extra_size <= (sizeof(_sif2_dma_cmd_buf) - sizeof(SIF2_CmdPkt))) {
+        if ((unsigned int)extra_size <= (sizeof(_sif2_dma_cmd_buf) - sizeof(SIF2_CmdPkt))) {
             memcpy((u32 *)(((u32)&_sif2_dma_cmd_buf) + sizeof(SIF2_CmdPkt)), extra, extra_size);
             cmd->size += extra_size;
         } else {

@@ -45,7 +45,7 @@ int sceSdProcBatch(sceSdBatch *batch, u32 *rets, u32 num)
 	s32 loop;
 	s32 ret;
 
-	for(loop = 0; loop < num; loop++)
+	for(loop = 0; (u32)loop < num; loop++)
 	{
 		ret = 0;
 
@@ -104,7 +104,7 @@ int sceSdProcBatchEx(sceSdBatch *batch, u32 *rets, u32 num, u32 voice)
 
 	cmd_count = 0;
 
-	for(loop = 0; loop < num; loop++)
+	for(loop = 0; (u32)loop < num; loop++)
 	{
 		ret = 0;
 		switch(batch[loop].func)

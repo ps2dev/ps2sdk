@@ -39,7 +39,7 @@ s32 BlockTransWriteFrom(u8 *iopaddr, u32 size, s32 chan, u16 mode, u8 *startaddr
 
 	offset = startaddr - iopaddr;
 
-	if(offset > size)
+	if((u32)offset > size)
 	{
 		if(mode & SD_TRANS_LOOP)
 		{

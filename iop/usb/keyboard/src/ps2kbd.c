@@ -264,7 +264,7 @@ int ps2kbd_connect(int devId)
   currDev->dataEndp = sceUsbdOpenPipe(devId, endp);
   currDev->packetSize = endp->wMaxPacketSizeLB | ((int) endp->wMaxPacketSizeHB << 8);
   currDev->eventmask = (1 << devLoop);
-  if(currDev->packetSize > sizeof(kbd_data_recv))
+  if((unsigned int)(currDev->packetSize) > sizeof(kbd_data_recv))
     {
       currDev->packetSize = sizeof(kbd_data_recv);
     }
@@ -493,7 +493,7 @@ void ps2kbd_getkeys(u8 keyMods, u8 ledStatus, const u8 *keys, kbd_dev *dev)
       currChars[0] = 0;
       currChars[1] = 0;
 
-      if(lineEndP == (tempPos - 1))
+      if(lineEndP == (u32)(tempPos - 1))
 	{
 	  break;
 	}
@@ -571,7 +571,7 @@ void ps2kbd_getkeys(u8 keyMods, u8 ledStatus, const u8 *keys, kbd_dev *dev)
 
       if((currChars[0] == PS2KBD_ESCAPE_KEY) && (currChars[1] != 0))
 	{
-	  if(lineEndP != (tempPos - 2))
+	  if(lineEndP != (u32)(tempPos - 2))
 	    {
 	      lineBuffer[lineEndP++] = currChars[0];
 	      lineEndP %= lineSize;
@@ -636,7 +636,7 @@ void ps2kbd_getkeys_raw(u8 newKeyMods, u8 oldKeyMods, const u8 *new, const u8 *o
       int currMod = (1 << loopKey);
       if(keyMods & currMod)
 	{
-	  if(lineEndP == (tempPos - 2))
+	  if(lineEndP == (u32)(tempPos - 2))
 	    {
 	      return;
 	    }
@@ -664,7 +664,7 @@ void ps2kbd_getkeys_raw(u8 newKeyMods, u8 oldKeyMods, const u8 *new, const u8 *o
 
   for(loopKey = 0; loopKey < PS2KBD_MAXKEYS; loopKey++)
     {
-      if(lineEndP == (tempPos - 2))
+      if(lineEndP == (u32)(tempPos - 2))
 	{
 	  return;
 	}
@@ -683,7 +683,7 @@ void ps2kbd_getkeys_raw(u8 newKeyMods, u8 oldKeyMods, const u8 *new, const u8 *o
 
   for(loopKey = 0; loopKey < PS2KBD_MAXKEYS; loopKey++)
     {
-      if(lineEndP == (tempPos - 2))
+      if(lineEndP == (u32)(tempPos - 2))
 	{
 	  return;
 	}
@@ -852,7 +852,7 @@ void ps2kbd_ioctl_setreadmode(u32 readmode)
 
 {
 
-  if(readmode == kbd_readmode) return;
+  if(readmode == (u32)kbd_readmode) return;
 
   if((readmode == PS2KBD_READMODE_NORMAL) || (readmode == PS2KBD_READMODE_RAW))
     {
@@ -1178,7 +1178,7 @@ void repeat_thread(void *arg)
 
 	      if((devices[devLoop]->repeatkeys[0]) && (devices[devLoop]->repeatkeys[1]))
 		{
-		  if(lineEndP != (tempPos - 2))
+		  if(lineEndP != (u32)(tempPos - 2))
 		    {
 		      lineBuffer[lineEndP++] = devices[devLoop]->repeatkeys[0];
 		      lineEndP %= lineSize;
@@ -1190,7 +1190,7 @@ void repeat_thread(void *arg)
 		}
 	      else if(devices[devLoop]->repeatkeys[0])
 		{
-		  if(lineEndP != (tempPos - 1))
+		  if(lineEndP != (u32)(tempPos - 1))
 		    {
 		      lineBuffer[lineEndP++] = devices[devLoop]->repeatkeys[0];
 		      lineEndP %= lineSize;

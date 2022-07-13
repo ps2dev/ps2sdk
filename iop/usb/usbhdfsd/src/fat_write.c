@@ -1184,7 +1184,7 @@ static int fat_fillDirentryInfo(fat_driver *fatd, const char *lname, const char 
 
     // go through first directory sector till the max number of directory sectors
     // or stop when no more direntries detected
-    for (i = 0; i < dirSector && cont; i++) {
+    for (i = 0; (unsigned int)i < dirSector && cont; i++) {
         unsigned char *sbuf = NULL; // sector buffer
 
         // At cluster borders, get correct sector from cluster chain buffer
@@ -1298,7 +1298,7 @@ static int enlargeDirentryClusterSpace(fat_driver *fatd, unsigned int startClust
 
     XPRINTF("USBHDFSD: maxSector=%u  dirSector=%u\n", maxSector, dirSector);
 
-    if (maxSector <= dirSector)
+    if ((unsigned int)maxSector <= dirSector)
         return 0;
 
     // Root directory of FAT12 or FAT16 - space can't be enlarged!
@@ -1423,7 +1423,7 @@ static int updateDirectoryParent(fat_driver *fatd, unsigned int dirCluster, unsi
             return -EIO;
         }
         fat_direntry_sfn *dsfn = (fat_direntry_sfn *)sbuf;
-        for (j = 0; j < fatd->partBpb.sectorSize; j += sizeof(fat_direntry_sfn), dsfn++) {
+        for (j = 0; (unsigned int)j < fatd->partBpb.sectorSize; j += sizeof(fat_direntry_sfn), dsfn++) {
             if (memcmp(dsfn->name, "..      ", sizeof(dsfn->name)) == 0) {
                 dsfn->clusterH[0] = (parentDirCluster & 0xFF0000) >> 16;
                 dsfn->clusterH[1] = (parentDirCluster & 0xFF000000) >> 24;
@@ -1498,7 +1498,7 @@ static int saveDirentry(fat_driver *fatd, unsigned int startCluster,
 
     // go through first directory sector till the max number of directory sectors
     // or stop when no more direntries detected
-    for (i = 0; i < dirSector && cont; i++) {
+    for (i = 0; (unsigned int)i < dirSector && cont; i++) {
         unsigned char *sbuf = NULL; // sector buffer
 
         // At cluster borders, get correct sector from cluster chain buffer
@@ -1752,7 +1752,7 @@ static int fat_wipeDirEntries(fat_driver *fatd)
     // now mark direntries as deleted
     theSector = 0;
     ret       = 0;
-    for (i = 0; i < fatd->deIdx; i++) {
+    for (i = 0; i < (unsigned int)(fatd->deIdx); i++) {
         if (fatd->deSec[i] != theSector) {
             if (theSector > 0) {
                 ret = WRITE_SECTOR(fatd->dev, theSector);
@@ -2195,7 +2195,7 @@ static int fat_writeSingleSector(mass_dev *dev, unsigned int sector, const void 
     unsigned char *sbuf = NULL; // sector buffer
     int ret;
 
-    if ((dataSkip > 0) || (size < dev->sectorSize) || (((int)buffer & 3) != 0)) {
+    if ((dataSkip > 0) || ((unsigned int)size < dev->sectorSize) || (((int)buffer & 3) != 0)) {
         // Handle the partially-filled sector.
         ret = READ_SECTOR(dev, sector, sbuf);
         if (ret < 0) {

@@ -90,7 +90,7 @@ void log_data(int type, u8 *data, u32 size)
 
 	log_write32(size);
 
-	for (i = 0; i < size; i++)
+	for (i = 0; (u32)i < size; i++)
 		log_write8(data[i]);
 }
 

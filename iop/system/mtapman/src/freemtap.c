@@ -288,7 +288,7 @@ int change_slot(s32 *arg)
 			{
 				if((state_open[port] == 1) && (state_getcon[port] == 1))
 				{
-					if(state_slots[port] > arg[port])
+					if(state_slots[port] > (u32)(arg[port]))
 					{
 						change_slot_setup_td(port, arg[port], reg);
 

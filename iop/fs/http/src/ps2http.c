@@ -217,7 +217,7 @@ int httpConnect( struct sockaddr_in * server, char *hostAddr, const char * url, 
 		if ( (rc == 1) && (mimeBuffer[0] == '\r') ) break;
 
 		// Convert mimeBuffer to upper case, so we can do string comps
-		for(i = 0; i < strlen(mimeBuffer); i++)
+		for(i = 0; (unsigned int)i < strlen(mimeBuffer); i++)
 			mimeBuffer[i] = toupper(mimeBuffer[i]);
 
 		if(strstr(mimeBuffer, "HTTP/1.")) // First line of header, contains status code. Check for an error code

@@ -214,7 +214,7 @@ s64 fs_lseek64(iop_file_t *fd, s64 offset, int whence)
     res = f_lseek(file, off);
 
     _fs_unlock();
-    return (res == FR_OK) ? file->fptr : -res;
+    return (res == FR_OK) ? (s64)(file->fptr) : -res;
 }
 
 static int fs_lseek(iop_file_t *fd, int offset, int whence)

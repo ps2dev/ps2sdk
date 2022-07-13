@@ -148,7 +148,7 @@ int mcman_open1(int port, int slot, char *filename, int flags)
 	for (i = 0; i < MAX_FDHANDLES; i++) {
 		if ((mcman_fdhandles[i].status != 0) && \
 			(mcman_fdhandles[i].port == port) && (mcman_fdhandles[i].slot == slot) && \
-			 	(mcman_fdhandles[i].freeclink == r) && (fh->wrflag != 0))
+			 	(mcman_fdhandles[i].freeclink == (u32)r) && (fh->wrflag != 0))
 			return sceMcResDeniedPermit;
 	}
 
@@ -252,7 +252,7 @@ int mcman_read1(int fd, void *buffer, int nbyte)
 	if (fh->position >= fh->filesize)
 		return 0;
 
-	if (nbyte >= (fh->filesize - fh->position))
+	if ((u32)nbyte >= (fh->filesize - fh->position))
 		nbyte = fh->filesize - fh->position;
 
 	rpos = 0;

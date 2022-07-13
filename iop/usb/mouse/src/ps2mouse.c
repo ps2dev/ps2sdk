@@ -255,7 +255,7 @@ int ps2mouse_connect(int devId)
   currDev->configEndp = sceUsbdOpenPipe(devId, NULL);
   currDev->dataEndp = sceUsbdOpenPipe(devId, endp);
   currDev->packetSize = endp->wMaxPacketSizeLB | ((int) endp->wMaxPacketSizeHB << 8);
-  if(currDev->packetSize > sizeof(mouse_data_recv))
+  if((unsigned int)(currDev->packetSize) > sizeof(mouse_data_recv))
     {
       currDev->packetSize = sizeof(mouse_data_recv);
     }
@@ -462,7 +462,7 @@ void ps2mouse_data_recv(int resultCode, int bytes, void *arg)
 
 	      if(dev->timer[buttonLoop])
 		{
-		  if((msec - dev->timer[buttonLoop]) < mouse_dblclicktime)
+		  if((msec - dev->timer[buttonLoop]) < (u32)mouse_dblclicktime)
 		    {
 		      //printf("Double click\n");
 		      buttonData |= (1 << (buttonLoop + 8));
@@ -563,7 +563,7 @@ void do_ps2mouse_setreadmode(const u32 *data, int size)
   (void)size;
 
   //printf("PS2MOUSE setreadmode mode %d\n", data[0]);
-  if(data[0] == mouse_readmode)
+  if(data[0] == (u32)mouse_readmode)
     {
       return;
     }

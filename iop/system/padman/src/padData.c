@@ -166,7 +166,7 @@ static u32 setupTransferData(u32 index, u32 port, u32 slot)
 	{
 		int i;
 
-		for(i=0; i < padData[port][slot].in_size; i++)
+		for(i=0; (u32)i < padData[port][slot].in_size; i++)
 		{
 			sio2_td.in[sio2_td.in_size] = padData[port][slot].in_buffer[i];
 			sio2_td.in_size++;
@@ -211,7 +211,7 @@ u32 readSio2OutBuffer(u32 bit, u32 port, u32 slot)
 			{
 				int i;
 
-				for(i=0; i < padData[port][slot].out_size; i++)
+				for(i=0; (u32)i < padData[port][slot].out_size; i++)
 				{
 					padData[port][slot].out_buffer[i] = sio2_td.out[sio2_td.out_size];
 					sio2_td.out_size++;
@@ -495,7 +495,7 @@ u32 pdSetInBuffer(u32 port, u32 slot, u32 size, const u8 *buf)
 		{
 			int i;
 
-			for(i=0; i < size; i++)
+			for(i=0; (u32)i < size; i++)
 				padData[port][slot].in_buffer[i] = buf[i];
 		}
 
@@ -515,7 +515,7 @@ u32 pdGetOutBuffer(u32 port, u32 slot, u32 size, u8 *buf)
 		{
 			int i;
 
-			for(i=0; i < size; i++)
+			for(i=0; (u32)i < size; i++)
 				buf[i] = padData[port][slot].out_buffer[i];
 		}
 

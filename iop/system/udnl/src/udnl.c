@@ -804,7 +804,7 @@ static const struct ExtInfoField *GetFileInfo(const struct RomdirFileStat *stat,
 
         ExtInfoHeader = *(unsigned int *)ExtInfoField;
 
-        if (ExtInfoHeader >> 24 == mode) {
+        if (ExtInfoHeader >> 24 == (unsigned int)mode) {
             return ExtInfoField;
         }
 

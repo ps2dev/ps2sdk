@@ -58,7 +58,7 @@ int checkModelVersion(void)
 	{
 		int i;
 		char *pData;
-		for(pData=data,i=0; i<sizeof(data); i++)
+		for(pData=data,i=0; (unsigned int)i<sizeof(data); i++)
 		{
 			read(fd, pData, 1);
 			if(*pData++=='\0') break;

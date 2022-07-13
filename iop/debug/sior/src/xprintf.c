@@ -309,7 +309,7 @@ int vxprintf(func,arg,format,ap)
     }
     /* Fetch the info entry for the field */
     infop = 0;
-    for(idx=0; idx<NINFO; idx++){
+    for(idx=0; (unsigned int)idx<NINFO; idx++){
       if( c==fmtinfo[idx].fmttype ){
         infop = &fmtinfo[idx];
         break;
@@ -626,7 +626,7 @@ int vxprintf(func,arg,format,ap)
           flag_leftjustify = 1;
 	}
         count += nspace;
-        while( nspace>=SPACESIZE ){
+        while( (unsigned int)nspace>=SPACESIZE ){
           (*func)(spaces,SPACESIZE,arg);
           nspace -= SPACESIZE;
         }
@@ -646,7 +646,7 @@ int vxprintf(func,arg,format,ap)
       nspace = width-length;
       if( nspace>0 ){
         count += nspace;
-        while( nspace>=SPACESIZE ){
+        while( (unsigned int)nspace>=SPACESIZE ){
           (*func)(spaces,SPACESIZE,arg);
           nspace -= SPACESIZE;
         }

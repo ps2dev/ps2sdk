@@ -144,7 +144,7 @@ int devfs_fill_dirent(iox_dirent_t *dirent, int devno)
 
    while(dev_scan != NULL)
    {
-     if((curr_no + dev_scan->subdev_count) > devno)
+     if((curr_no + dev_scan->subdev_count) > (u32)devno)
      {
         for(subdev_loop = 0; subdev_loop < DEVFS_MAX_SUBDEVS; subdev_loop++)
         {
@@ -394,7 +394,7 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
 
       name_len = strlen(dev->node.name);
 
-      if(name_len == strlen(name)) /* If this is has not got a subnumber */
+      if((unsigned int)name_len == strlen(name)) /* If this is has not got a subnumber */
       {
         M_PRINTF("open: No subdevice number in filename %s\n", name);
         return -1;
@@ -778,7 +778,7 @@ int devfs_lseek(iop_file_t *file, long loc, int whence)
                        break;
         case SEEK_CUR: if(loc > 0)
                          data->loc.loc64 += (u64) loc;
-                       else if(((s64) -loc) < data->loc.loc64)
+                       else if((u64)((s64) -loc) < data->loc.loc64)
                          data->loc.loc64 += (s64) loc;
                        break;
         case SEEK_END: if((loc > 0)
@@ -826,7 +826,7 @@ int devfs_lseek64(iop_file_t *file, long long loc, int whence)
                        break;
         case SEEK_CUR: if(loc > 0)
                          data->loc.loc64 += (u64) loc;
-                       else if(((s64) -loc) < data->loc.loc64)
+                       else if((u64)((s64) -loc) < data->loc.loc64)
                          data->loc.loc64 += (s64) loc;
                        break;
         case SEEK_END: if((loc > 0)                                                                                  && (dev->subdevs[data->subdev].extent.loc64 >= (u64) loc))
@@ -959,7 +959,7 @@ int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
 
       name_len = strlen(dev->node.name);
 
-      if(name_len == strlen(name)) /* If this is has not got a subnumber */
+      if((unsigned int)name_len == strlen(name)) /* If this is has not got a subnumber */
       {
         M_PRINTF("getstat: No subdevice number in filename %s\n", name);
         return -1;

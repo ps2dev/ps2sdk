@@ -168,7 +168,7 @@ int iLinkTrAlloc(unsigned short int NodeID, unsigned char speed)
             }
         }
 
-        result = (i == MAX_CONCURRENT_TRANSACTIONS) ? -1002 : i;
+        result = (i == MAX_CONCURRENT_TRANSACTIONS) ? (unsigned int)(-1002) : i;
     } else
         result = -1;
 

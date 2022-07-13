@@ -312,7 +312,7 @@ static void *search_svdata(u32 sid, struct rpc_data *rpc_data)
     while (queue) {
         server = queue->link;
         while (server) {
-            if (server->sid == sid)
+            if ((u32)(server->sid) == sid)
                 return server;
 
             server = server->link;
@@ -668,7 +668,7 @@ int SifCheckStatRpc(SifRpcClientData_t *cd)
     if (!packet)
         return 0;
 
-    if (cd->hdr.rpc_id != packet->rpc_id)
+    if (cd->hdr.rpc_id != (u32)(packet->rpc_id))
         return 0;
 
     if (!(packet->rec_id & PACKET_F_ALLOC))

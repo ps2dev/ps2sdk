@@ -60,7 +60,7 @@ static void _sync(void);
 
 int pfsFioCheckForLastError(pfs_mount_t *pfsMount, int rv)
 {
-	return pfsMount->lastError ? pfsMount->lastError : rv;
+	return pfsMount->lastError ? pfsMount->lastError : (u32)rv;
 }
 
 int pfsFioCheckFileSlot(pfs_file_slot_t *fileSlot)
@@ -112,13 +112,13 @@ static int mountDevice(pfs_block_device_t *blockDev, int fd, int unit, int flag)
 	s32 i;
 	int rv;
 
-	if(unit >= pfsConfig.maxMount)
+	if((u32)unit >= pfsConfig.maxMount)
 		return -EMFILE;
 
 	if(pfsMountBuf[unit].flags & PFS_MOUNT_BUSY)
 		return -EBUSY;
 
-	for(i = 0; i < pfsConfig.maxMount; i++)
+	for(i = 0; (u32)i < pfsConfig.maxMount; i++)
 		if((pfsMountBuf[i].flags & PFS_MOUNT_BUSY) &&
 			(blockDev == pfsMountBuf[i].blockDev) &&
 			(fd == pfsMountBuf[i].fd)) // Cant mount the same partition more than once
@@ -328,7 +328,7 @@ static int fileTransferRemainder(pfs_file_slot_t *fileSlot, void *buf, int size,
 
 	if(operation == 0)
 	{	//If READ, copy latest data from the buffer of any FD that was opened for writing.
-		for(i = 0; i < pfsConfig.maxOpen; i++)
+		for(i = 0; (u32)i < pfsConfig.maxOpen; i++)
 		{
 			if((pfsFileSlots[i].clink != NULL)
 				&& (pfsFileSlots[i].clink->pfsMount == pfsMount)
@@ -384,7 +384,7 @@ static int fileTransferRemainder(pfs_file_slot_t *fileSlot, void *buf, int size,
 				return result;
 
 			//In late modules, sync data with all other FDs that were opened for reading.
-			for(i = 0; i < pfsConfig.maxOpen; i++)
+			for(i = 0; (u32)i < pfsConfig.maxOpen; i++)
 			{
 				if((pfsFileSlots[i].clink != NULL)
 					&& (pfsFileSlots[i].clink->pfsMount == pfsMount)
@@ -607,7 +607,7 @@ int	pfsFioOpen(iop_file_t *f, const char *name, int flags, int mode)
 	}
 
 	// Find free file slot
-	for(i = 0; i < pfsConfig.maxOpen; i++)
+	for(i = 0; (u32)i < pfsConfig.maxOpen; i++)
 	{
 		if(!pfsFileSlots[i].fd) {
 			freeSlot = &pfsFileSlots[i];
@@ -1223,7 +1223,7 @@ static void _sync(void)
 {
 	s32 i, j;
 
-	for(i=0;i<pfsConfig.maxOpen;i++)
+	for(i=0;(u32)i<pfsConfig.maxOpen;i++)
 	{
 		pfs_unaligned_io_t *unaligned=&pfsFileSlots[i].unaligned;
 		if(unaligned->dirty) {
@@ -1232,7 +1232,7 @@ static void _sync(void)
 				unaligned->sub, unaligned->sector, 1, PFS_IO_MODE_WRITE);
 
 			//In late modules, sync data with all other FDs that were opened for reading.
-			for(j = 0; j < pfsConfig.maxOpen; j++)
+			for(j = 0; (u32)j < pfsConfig.maxOpen; j++)
 			{
 				if((pfsFileSlots[j].clink != NULL)
 					&& (pfsFileSlots[i].clink->pfsMount == pfsFileSlots[j].clink->pfsMount)
@@ -1310,7 +1310,7 @@ int pfsFioUmount(iop_file_t *f, const char *fsname)
 	if((pfsMount = pfsFioGetMountedUnit(f->unit))==NULL)
 		return -ENODEV;
 
-	for(i = 0; i < pfsConfig.maxOpen; i++)
+	for(i = 0; (u32)i < pfsConfig.maxOpen; i++)
 	{
 		if((pfsFileSlots[i].clink!=NULL) && (pfsFileSlots[i].clink->pfsMount==pfsMount))
 		{

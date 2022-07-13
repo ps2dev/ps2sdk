@@ -354,7 +354,7 @@ unsigned char draw_log2(unsigned int x)
 	__asm__ __volatile__ ("plzcw %0, %1\n\t" : "=r" (res) : "r" (x));
 
 	res = 31 - (res + 1);
-	res += (x > (1<<res) ? 1 : 0);
+	res += (x > (unsigned int)(1<<res) ? 1 : 0);
 
 	return res;
 }

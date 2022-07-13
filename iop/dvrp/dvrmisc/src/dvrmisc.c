@@ -1319,7 +1319,7 @@ int dvrioctl2_get_dv_nodeid(
     if (buflen) {
         int bufbusyloop;
         bufbusyloop = 0;
-        while (bufbusyloop++ < buflen)
+        while ((unsigned int)(bufbusyloop++) < buflen)
             ;
     }
     return 0;

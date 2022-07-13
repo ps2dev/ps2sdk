@@ -1415,14 +1415,14 @@ int mcman_setdevinfos(int port, int slot)
 	current_allocatable_cluster = mcdi->alloc_offset;
 
 	while (cluster_cnt < allocatable_clusters_per_card) {
-		if (current_allocatable_cluster >= mcdi->clusters_per_card)
+		if ((u32)current_allocatable_cluster >= mcdi->clusters_per_card)
 			break;
 
 		if (((current_allocatable_cluster % mcdi->clusters_per_block) == 0) \
-			|| (mcdi->alloc_offset == current_allocatable_cluster)) {
+			|| (mcdi->alloc_offset == (u32)current_allocatable_cluster)) {
 			iscluster_valid = 1;
 			for (r=0; r<16; r++) {
-				if ((current_allocatable_cluster / mcdi->clusters_per_block) == mcdi->bad_block_list[r])
+				if (current_allocatable_cluster / mcdi->clusters_per_block == (u32)(mcdi->bad_block_list[r]))
 					iscluster_valid = 0;
 			}
 		}
@@ -1495,7 +1495,7 @@ int mcman_reportBadBlocks(int port, int slot)
 				}
 			} while (++page < 2);
 
-		} while (++block < (mcdi->clusters_per_card / mcdi->clusters_per_block));
+		} while ((u32)(++block) < (mcdi->clusters_per_card / mcdi->clusters_per_block));
 	}
 
 	return sceMcResSucceed;
@@ -1585,7 +1585,7 @@ int mcman_fatRseek(int fd)
 
 	//s5 = 0
 
-	if (entries_to_read < fh->clust_offset) //v1 = fh->fh->clust_offset
+	if ((u32)entries_to_read < fh->clust_offset) //v1 = fh->fh->clust_offset
 		fat_index = fh->freeclink;
 	else {
 		fat_index = fh->clink; // a2
@@ -1633,7 +1633,7 @@ int mcman_fatWseek(int fd) // modify FAT to hold new content for a file
 
 	entries_to_write = fh->position / mcdi->cluster_size;
 
-	if ((fh->clust_offset == 0) || (entries_to_write < fh->clust_offset)) {
+	if ((fh->clust_offset == 0) || ((u32)entries_to_write < fh->clust_offset)) {
 		fat_index = fh->freeclink;
 
 		if (fat_index < 0) {
@@ -1664,7 +1664,7 @@ int mcman_fatWseek(int fd) // modify FAT to hold new content for a file
 			if (r != sceMcResSucceed)
 				return r;
 
-			if (fat_entry >= 0xffffffff) {
+			if ((unsigned int)fat_entry >= 0xffffffff) {
 				r = mcman_findfree2(fh->port, fh->slot, 1);
 				if (r < 0)
 						return r;
@@ -1703,12 +1703,12 @@ int mcman_findfree2(int port, int slot, int reserve)
 	fat_index = mcdi->unknown2;
 	rfree = 0;
 
-	for (fat_index = mcdi->unknown2; fat_index < mcdi->max_allocatable_clusters; fat_index++) {
+	for (fat_index = mcdi->unknown2; (u32)fat_index < mcdi->max_allocatable_clusters; fat_index++) {
 
 		indirect_index = fat_index / mcdi->FATentries_per_cluster;
 		fat_offset = fat_index % mcdi->FATentries_per_cluster;
 
-		if ((fat_offset == 0) || (fat_index == mcdi->unknown2)) {
+		if ((fat_offset == 0) || ((u32)fat_index == mcdi->unknown2)) {
 
 			ifc_index = indirect_index / mcdi->FATentries_per_cluster;
 			r = McReadCluster(port, slot, mcdi->ifc_list[ifc_index], &mce1);
@@ -1777,7 +1777,7 @@ int mcman_getentspace(int port, int slot, char *dirname)
 
 	entspace = mfe.length & 1;
 
-	for (i = 0; i < mfe.length; i++) {
+	for (i = 0; (u32)i < mfe.length; i++) {
 
 		r = McReadDirEntry(port, slot, mfe.cluster, i, &fse);
 		if (r != sceMcResSucceed)
@@ -2020,14 +2020,14 @@ int mcman_getdirinfo(int port, int slot, McFsEntry *pfse, char *filename, McCach
 
 			if ((pos >= 11) && (!strncmp(&filename[10], &fse->name[10], pos-10))) {
 				len = pos;
-				if (strlen(fse->name) >= pos)
+				if (strlen(fse->name) >= (unsigned int)pos)
 					len = strlen(fse->name);
 
 				if (!strncmp(filename, fse->name, len))
 					goto continue_check;
 			}
 
-			if (strlen(fse->name) >= pos)
+			if (strlen(fse->name) >= (unsigned int)pos)
 				len = strlen(fse->name);
 			else
 				len = pos;
@@ -2052,7 +2052,7 @@ continue_check:
 			if (pcd->maxent < 0)
 				break;
 
-		} while (++i < pfse->length);
+		} while ((u32)(++i) < pfse->length);
 	}
 
 	if (ret == 2)
@@ -2209,10 +2209,10 @@ int McSetDirEntryState(int port, int slot, int cluster, int fsindex, int flags)
 		if ((mcman_fdhandles[i].port != port) || (mcman_fdhandles[i].slot != slot))
 			continue;
 
-		if (mcman_fdhandles[i].field_20 != cluster)
+		if (mcman_fdhandles[i].field_20 != (u32)cluster)
 			continue;
 
-		if (mcman_fdhandles[i].field_24 == fsindex)
+		if (mcman_fdhandles[i].field_24 == (u32)fsindex)
 			return sceMcResDeniedPermit;
 
 	} while (++i < MAX_FDHANDLES);
@@ -2227,7 +2227,7 @@ int McSetDirEntryState(int port, int slot, int cluster, int fsindex, int flags)
 	fat_index = fse->cluster;
 
 	if (fat_index >= 0) {
-		if (fat_index < mcdi->unknown2)
+		if ((u32)fat_index < mcdi->unknown2)
 			mcdi->unknown2 = fat_index;
 		mcdi->unknown5 = -1;
 
@@ -2238,7 +2238,7 @@ int McSetDirEntryState(int port, int slot, int cluster, int fsindex, int flags)
 
 			if (flags == 0)	{
 				fat_entry &= 0x7fffffff;
-				if (fat_index < mcdi->unknown2)
+				if ((u32)fat_index < mcdi->unknown2)
 					mcdi->unknown2 = fat_entry;
 			}
 			else
@@ -2292,7 +2292,7 @@ int mcman_checkBackupBlocks(int port, int slot)
 
 	// bachup block2 is not erased, so programming is assumed to have not been completed
 	// reads content of backup block1
-	for (r1 = 0; r1 < mcdi->clusters_per_block; r1++) {
+	for (r1 = 0; (u32)r1 < mcdi->clusters_per_block; r1++) {
 
 		McReadCluster(port, slot, (mcdi->backup_block1 * mcdi->clusters_per_block) + r1, &mce);
 		mce->rd_flag = 1;
@@ -2323,7 +2323,7 @@ int mcman_checkBackupBlocks(int port, int slot)
 			return r;
 	}
 
-	for (r1 = 0; r1 < mcdi->clusters_per_block; r1++)
+	for (r1 = 0; (u32)r1 < mcdi->clusters_per_block; r1++)
 		mcman_freecluster(port, slot, (mcdi->backup_block1 * mcdi->clusters_per_block) + r1);
 
 check_done:
@@ -2614,7 +2614,7 @@ int mcman_clearPS1direntry(int port, int slot, int cluster, int flags)
 
 	for (i = 0; i < MAX_FDHANDLES; i++) {
 		if ((fh->status != 0) && (fh->port == port) && (fh->slot == slot)) {
-			if (fh->freeclink == cluster)
+			if (fh->freeclink == (u32)cluster)
 				return sceMcResDeniedPermit;
 
 		}
@@ -3692,7 +3692,7 @@ int McReadCluster(int port, int slot, int cluster, McCacheEntry **pmce)
 		}
 		else {
 			{
-				for (i = 0; i < mcdi->clusters_per_block; i++) {
+				for (i = 0; (u32)i < mcdi->clusters_per_block; i++) {
 					if ((mcman_replacementcluster[i] != 0) && (mcman_replacementcluster[i] == cluster)) {
 						block_offset = i % mcdi->clusters_per_block;
 						cluster = (mcdi->backup_block1 * mcdi->clusters_per_block) + block_offset;
@@ -3775,7 +3775,7 @@ int McReadDirEntry(int port, int slot, int cluster, int fsindex, McFsEntry **pfs
 			if (r != sceMcResSucceed)
 				return -70;
 
-			if (clust == 0xffffffff)
+			if ((unsigned int)clust == 0xffffffff)
 				return sceMcResNoEntry;
 			clust &= 0x7fffffff;
 
@@ -3972,7 +3972,7 @@ int mcman_fillbackupblock1(int port, int slot, int block, void **pagedata, void 
 			return sceMcResFailReplace;
 	}
 
-	if ((mcdi->alloc_offset / mcdi->clusters_per_block) == block) // Appparently this refuse to take care of a bad rootdir cluster
+	if ((mcdi->alloc_offset / mcdi->clusters_per_block) == (u32)block) // Appparently this refuse to take care of a bad rootdir cluster
 		return sceMcResFailReplace;
 
 	r = mcman_eraseblock(port, slot, mcdi->backup_block2, NULL, NULL);
@@ -4057,7 +4057,7 @@ int McReplaceBadBlock(void)
 		value = ~(-1 << mcdi->clusters_per_block);
 		do {
 			clust = (mcman_badblock * mcdi->clusters_per_block) + i;
-			if (clust < mcdi->alloc_offset) {
+			if ((u32)clust < mcdi->alloc_offset) {
 				fat_entry[i] = 0;
 			}
 			else {
@@ -4068,7 +4068,7 @@ int McReplaceBadBlock(void)
 				if (((fat_entry[i] & 0x80000000) == 0) || ((fat_entry[i] < -1) && (fat_entry[i] >= -9)))
 					value &= ~(1 << i);
 			}
-		} while (++i < mcdi->clusters_per_block);
+		} while ((u32)(++i) < mcdi->clusters_per_block);
 
 		if (mcdi->clusters_per_block > 0) {
 			i = 0;
@@ -4082,7 +4082,7 @@ int McReplaceBadBlock(void)
 					r += mcdi->alloc_offset;
 					mcman_replacementcluster[i] = r;
 				}
-			} while (++i < mcdi->clusters_per_block);
+			} while ((u32)(++i) < mcdi->clusters_per_block);
 		}
 
 		if (mcdi->clusters_per_block > 0) {
@@ -4097,7 +4097,7 @@ int McReplaceBadBlock(void)
 						}
 					}
 				}
-			} while (++i < mcdi->clusters_per_block);
+			} while ((u32)(++i) < mcdi->clusters_per_block);
 		}
 
 		if (mcdi->clusters_per_block > 0) {
@@ -4108,7 +4108,7 @@ int McReplaceBadBlock(void)
 					if (r != sceMcResSucceed)
 						goto lbl_e168;
 				}
-			} while (++i < mcdi->clusters_per_block);
+			} while ((u32)(++i) < mcdi->clusters_per_block);
 		}
 
 		for (i = 0; i < numifc; i++) {
@@ -4152,7 +4152,7 @@ int McReplaceBadBlock(void)
 
 		value2 = value;
 
-		for (i = 0; i < mcdi->alloc_end; i++) {
+		for (i = 0; (u32)i < mcdi->alloc_end; i++) {
 			r = McGetFATentry(mcman_badblock_port, mcman_badblock_slot, i, &fat_entry2);
 			if (r != sceMcResSucceed)
 				goto lbl_e168;
@@ -4217,7 +4217,7 @@ lbl_dd8c:
 			goto lbl_dd8c;
 		}
 
-		if (fse->dir_entry != curentry) {
+		if ((int)(fse->dir_entry) != curentry) {
 			curentry++;
 			goto lbl_dd8c;
 		}
@@ -4276,12 +4276,12 @@ lbl_e030:
 			i = 0;
 			do {
 				clust = (mcman_badblock * mcdi->clusters_per_block) + i;
-				if (clust >= mcdi->alloc_offset) {
+				if ((u32)clust >= mcdi->alloc_offset) {
 					r = McSetFATentry(mcman_badblock_port, mcman_badblock_slot, clust - mcdi->alloc_offset, 0xfffffffd);
 					if (r != sceMcResSucceed)
 						goto lbl_e168;
 				}
-			} while (++i < mcdi->clusters_per_block);
+			} while ((u32)(++i) < mcdi->clusters_per_block);
 		}
 
 		McFlushCache(mcman_badblock_port, mcman_badblock_slot);
@@ -4300,7 +4300,7 @@ lbl_e030:
 					mce->cluster = mcman_replacementcluster[i];
 					mce->wr_flag = 1;
 				}
-			} while (++i < mcdi->clusters_per_block);
+			} while ((u32)(++i) < mcdi->clusters_per_block);
 		}
 
 		McFlushCache(mcman_badblock_port, mcman_badblock_slot);
@@ -4329,7 +4329,7 @@ int mcman_clearsuperblock(int port, int slot)
 	strcpy(mcdi->magic, SUPERBLOCK_MAGIC);
 	strcat(mcdi->magic, SUPERBLOCK_VERSION);
 
-	for (i = 0; (u32)(i < sizeof(MCDevInfo)); i += 1024) {
+	for (i = 0; (u32)((unsigned int)i < sizeof(MCDevInfo)); i += 1024) {
 		register int size, temp;
 
 		temp = i;

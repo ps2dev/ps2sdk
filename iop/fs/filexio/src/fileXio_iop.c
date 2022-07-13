@@ -189,7 +189,7 @@ static int fileXio_CopyFile_RPC(const char *src, const char *dest, int mode)
     return 0;
 
   remain = size % RWBufferSize;
-  for (i = 0; i < (size / RWBufferSize); i++) {
+  for (i = 0; (unsigned int)i < (size / RWBufferSize); i++) {
     read(infd, rwbuf, RWBufferSize);
     write(outfd, rwbuf, RWBufferSize);
   }
@@ -253,7 +253,7 @@ static int fileXio_Read_RPC(int infd, char *read_buf, int read_size, void *intr_
 	status=0;
 	while (asize>0)
 	{
-		readlen=MIN(RWBufferSize, asize);
+		readlen=MIN(RWBufferSize, (unsigned int)asize);
 
 		while(SifDmaStat(status)>=0);
 
@@ -328,7 +328,7 @@ static int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size, i
 	pos=(int)write_buf+mis;
 	while(left){
 		int writelen;
-		writelen = MIN(RWBufferSize, left);
+		writelen = MIN(RWBufferSize, (unsigned int)left);
 		SifRpcGetOtherData(&rdata, (void *)pos, rwbuf, writelen, 0);
 		wlen=write(outfd, rwbuf, writelen);
 		if (wlen != writelen){
@@ -378,7 +378,7 @@ static int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEn
           if (res > 0)
           {
 		// check for too many entries
-		if (matched_entries == req_entries)
+		if ((unsigned int)matched_entries == req_entries)
 		{
 			close(fd);
 			return (matched_entries);

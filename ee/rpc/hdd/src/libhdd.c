@@ -207,7 +207,7 @@ int hddGetFilesystemList(t_hddFilesystem hddFs[], int maxEntries)
 			continue;
 		}
 
-		for(i = 0, size = 0; i < dirEnt.stat.private_0 + 1; i++)
+		for(i = 0, size = 0; (unsigned int)i < dirEnt.stat.private_0 + 1; i++)
 		{
 			rv = fileXioIoctl2(partitionFd, HIOCGETSIZE, &i, 4, NULL, 0);
 			size += (u32)rv / 2048; //Equal to, but avoids overflows of: rv * 512 / 1024 / 1024;
@@ -333,7 +333,7 @@ int hddMakeFilesystem(int fsSizeMB, char *name, int type)
 
 	// Get index for max partition size
 	for(maxIndex = 0; maxIndex < 9; maxIndex++)
-		if(sizesMB[maxIndex] == hddMaxPartitionSize)
+		if((u32)(sizesMB[maxIndex]) == hddMaxPartitionSize)
 			break;
 
 	// Get index of size we will use to create main partition
@@ -487,7 +487,7 @@ int hddExpandFilesystem(t_hddFilesystem *fs, int extraMB)
 
 	// Get index for max partition size
 	for(maxIndex = 0; maxIndex < 9; maxIndex++)
-		if(sizesMB[maxIndex] == hddMaxPartitionSize)
+		if((u32)(sizesMB[maxIndex]) == hddMaxPartitionSize)
 			break;
 
 	// Get index of size we will use to create new subs

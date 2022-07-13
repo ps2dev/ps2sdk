@@ -622,7 +622,7 @@ int sceCdStRead(u32 sectorType, u32 *buffer, u32 mode, u32 *error)
         return ret & 0xFFFF;
     }
     // do block reads until all data is read, or error occurs
-    for (i = 0; i < sectorType;) {
+    for (i = 0; (u32)i < sectorType;) {
         int err, sectorReadSize;
 
         ret            = sceCdStream(0, sectorType - i, (buffer + (i * 2048)), CDVD_ST_CMD_READ, &dummyMode);

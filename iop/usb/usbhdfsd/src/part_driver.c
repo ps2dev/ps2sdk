@@ -115,7 +115,7 @@ int part_connect(mass_dev *dev)
 
     if (parts > 0) {
         unsigned int count = 0, i;
-        for (i = 0; i < parts; i++) {
+        for (i = 0; i < (unsigned int)parts; i++) {
             if (
                 partTable.record[i].sid == 6 ||
                 partTable.record[i].sid == 4 ||

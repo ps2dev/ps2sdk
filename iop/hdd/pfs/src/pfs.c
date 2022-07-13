@@ -118,7 +118,7 @@ void pfsClearMount(pfs_mount_t *pfsMount)
 
 pfs_mount_t *pfsGetMountedUnit(s32 unit)
 {	// get mounted unit
-	if(unit>=pfsConfig.maxMount)
+	if((u32)unit>=pfsConfig.maxMount)
 		return NULL;
 
 	if(!(pfsMountBuf[unit].flags & PFS_MOUNT_BUSY))

@@ -147,7 +147,7 @@ int flash_get_info(flash_info_t *info)
 
 	memset(info, 0, sizeof(flash_info_t));
 
-	for (i = 0; i < NUM_DEVICES; i++) {
+	for (i = 0; (u32)i < NUM_DEVICES; i++) {
 		if (id != devices[i].id)
 			continue;
 
@@ -266,7 +266,7 @@ int flash_page_read(flash_info_t *info, u32 page, u32 count, void *buf)
 	buf_w = (u32 *)buf;
 	buf_h = (u16 *)buf;
 
-	for (i = 0; i < count; i++) {
+	for (i = 0; (u32)i < count; i++) {
 		(void)(SPD_REG16(0x480c));
 		(void)(SPD_REG16(0x480c));
 
@@ -289,11 +289,11 @@ int flash_page_read(flash_info_t *info, u32 page, u32 count, void *buf)
 
 		if (byteofs == 0) {
 			/* 32-bit copy.  */
-			for (j = 0; j < (info->page_bytes / 4); j++)
+			for (j = 0; (u32)j < (info->page_bytes / 4); j++)
 				*buf_w++ = SPD_REG32(0x4800);
 		} else {
 			/* 16-bit copy.  */
-			for (j = (byteofs + (byteofs >> 31)) / 2; j < (info->page_bytes / 2); j++)
+			for (j = (byteofs + (byteofs >> 31)) / 2; (u32)j < (info->page_bytes / 2); j++)
 				*buf_h++ = SPD_REG16(0x4800);
 		}
 
@@ -322,7 +322,7 @@ int flash_page_write(flash_info_t *info, u32 page, void *buf)
 	SPD_REG16(0x4808) = 0x100;
 	flash_set_page(info->id, pageofs);
 
-	for (i = 0; i < (info->page_bytes / 2); i++)
+	for (i = 0; (u32)i < (info->page_bytes / 2); i++)
 		SPD_REG16(0x4800) = *buf_h++;
 
 	SPD_REG16(0x4804) = SM_CMD_PROGRAMPAGE;

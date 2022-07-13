@@ -209,7 +209,7 @@ s32 padInfoMode(u32 port, u32 slot, s32 term, u32 offs)
 				return 0;
 			else
 			{
-				if(offs == -1)
+				if(offs == (u32)(-1))
 				{
 					return padState[port][slot].numModes;
 				}

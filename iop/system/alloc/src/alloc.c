@@ -286,7 +286,7 @@ void * realloc(void *ptr, size_t size)
 	}
 
 	/* Is the next block far enough so we can extend the current block ? */
-	if ((prev_mem->next->ptr - ptr) > size) {
+	if ((size_t)(prev_mem->next->ptr - ptr) > size) {
 		prev_mem->size = size;
 
 		alloc_unlock();
