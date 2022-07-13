@@ -21,7 +21,6 @@ int clutaddress = 0;
 fsfont_t impress;
 fontx_t krom_u;
 fontx_t krom_k;
-packet_t packet;
 
 void draw_init_env()
 {
@@ -185,6 +184,7 @@ void run_demo(packet_t *packet)
 int main(void)
 {
 	char *ini;
+	packet_t packet;
 
 	dma_channel_initialize(DMA_CHANNEL_GIF,NULL,0);
 	dma_channel_fast_waits(DMA_CHANNEL_GIF);
