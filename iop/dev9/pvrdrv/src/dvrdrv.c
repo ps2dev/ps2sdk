@@ -651,7 +651,7 @@ int DvrdrvRegisterIntrHandler(int a1, void *arg, void (*a3)(int, void *))
     return -1;
 }
 
-int DvrdrvUnregisterIntrHandler(const void (*a1)(int, void *))
+int DvrdrvUnregisterIntrHandler(void (*a1)(int, void *))
 {
     int i;
 
