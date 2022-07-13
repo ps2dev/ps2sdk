@@ -27,7 +27,7 @@ DSTATUS disk_status(
 
     (void)pdrv;
 
-    result = (mounted_bd == NULL) ? STA_NODISK : FR_OK;
+    result = (mounted_bd == NULL) ? STA_NODISK : 0;
 
     return result;
 }
@@ -46,7 +46,7 @@ DSTATUS disk_initialize(
 
     (void)pdrv;
 
-    result = (mounted_bd == NULL) ? STA_NODISK : FR_OK;
+    result = (mounted_bd == NULL) ? STA_NODISK : 0;
 
     return result;
 }
@@ -70,7 +70,7 @@ DRESULT disk_read(
 
     res = mounted_bd->read(mounted_bd, sector, buff, count);
 
-    return (res == count) ? FR_OK : FR_DISK_ERR;
+    return (res == count) ? RES_OK : RES_ERROR;
 }
 
 
@@ -94,7 +94,7 @@ DRESULT disk_write(
 
     res = mounted_bd->write(mounted_bd, sector, buff, count);
 
-    return (res == count) ? FR_OK : FR_DISK_ERR;
+    return (res == count) ? RES_OK : RES_ERROR;
 }
 
 #endif
@@ -110,11 +110,7 @@ DRESULT disk_ioctl(
     void *buff /* Buffer to send/receive control data */
 )
 {
-    DRESULT res;
-
     (void)pdrv;
-
-    res = FR_OK;
 
     switch (cmd) {
         case CTRL_SYNC:
@@ -131,7 +127,7 @@ DRESULT disk_ioctl(
             break;
     }
 
-    return res;
+    return RES_OK;
 }
 
 DWORD get_fattime(void)
