@@ -1306,6 +1306,8 @@ int dvrioctl2_get_dv_nodeid(
     bufwalked = 0;
     if (buflen) {
         u16 *return_result_word;
+        int bufbusyloop;
+
         return_result_word = cmdack.return_result_word;
         do {
             char *buftmp;
@@ -1315,9 +1317,7 @@ int dvrioctl2_get_dv_nodeid(
             buftmp[1] = (*return_result_word & 0x00FF);
             return_result_word += 1;
         } while (bufwalked < buflen);
-    }
-    if (buflen) {
-        int bufbusyloop;
+
         bufbusyloop = 0;
         while ((unsigned int)(bufbusyloop++) < buflen)
             ;
