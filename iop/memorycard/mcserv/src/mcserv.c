@@ -1091,7 +1091,7 @@ fullpage:
 
 dma_transfer:
 	CpuSuspendIntr(&intStatus);
-	status = sceSifSetDma(&dmaStruct, 1);
+	sceSifSetDma(&dmaStruct, 1);
 	CpuResumeIntr(intStatus);
 
 	dmaStruct.src = (void *)&eP;

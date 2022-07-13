@@ -1706,7 +1706,6 @@ int mcman_findfree2(int port, int slot, int reserve)
 
 	DPRINTF("mcman_findfree2 port%d slot%d reserve%d\n", port, slot, reserve);
 
-	fat_index = mcdi->unknown2;
 	rfree = 0;
 
 	for (fat_index = mcdi->unknown2; (u32)fat_index < mcdi->max_allocatable_clusters; fat_index++) {
@@ -3784,11 +3783,9 @@ int McReadDirEntry(int port, int slot, int cluster, int fsindex, McFsEntry **pfs
 	i = 0; // s0
 	if ((cluster == 0) && (index != 0)) {
 		if (index < maxent) {
-			i = index;
 			if ((fci->entry[index]) >= 0 )
 				clust = fci->entry[index];
 		}
-		i = 0;
 		if (index > 0) {
 			do {
 				if (i >= maxent)
