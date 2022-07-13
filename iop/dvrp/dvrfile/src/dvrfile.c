@@ -900,9 +900,7 @@ int dvrf_df_read(iop_file_t *f, void *ptr, int size)
         }
         if ((chunk_size & 0x7F) != 0 || unaligned_size != 0) {
             memcpy(out_buf, RBUF, chunk_size);
-            if (unaligned_size != 0) {
-                unaligned_size = 0;
-            }
+            unaligned_size = 0;
         }
         if (read_size <= 0) {
             break;
