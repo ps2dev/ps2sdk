@@ -68,6 +68,8 @@ SMapLowLevelOutput(NetIF *pNetIF, PBuf *pOutput)
     OldGP = SetModuleGP();
 #endif
 
+    (void)pNetIF;
+
     result = ERR_OK;
     if (pOutput->tot_len > pOutput->len) {
         pbuf_ref(pOutput);                                          // Increment reference count because LWIP must free the PBUF, not the driver!

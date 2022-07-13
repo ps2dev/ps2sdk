@@ -293,6 +293,9 @@ static void TerminateResidentLibraries(const char *message, unsigned int options
     iop_library_t *ModuleData, *NextModule;
     void **ExportTable;
 
+    (void)message;
+    (void)options;
+
     if ((LoadcoreData = GetLoadcoreInternalData()) != NULL) {
         ModuleData = LoadcoreData->let_next;
         while (ModuleData != NULL) {

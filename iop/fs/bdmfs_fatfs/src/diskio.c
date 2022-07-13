@@ -25,6 +25,8 @@ DSTATUS disk_status(
 {
     int result;
 
+    (void)pdrv;
+
     result = (mounted_bd == NULL) ? STA_NODISK : FR_OK;
 
     return result;
@@ -41,6 +43,8 @@ DSTATUS disk_initialize(
 )
 {
     int result;
+
+    (void)pdrv;
 
     result = (mounted_bd == NULL) ? STA_NODISK : FR_OK;
 
@@ -61,6 +65,8 @@ DRESULT disk_read(
 )
 {
     DRESULT res;
+
+    (void)pdrv;
 
     res = mounted_bd->read(mounted_bd, sector, buff, count);
 
@@ -84,6 +90,8 @@ DRESULT disk_write(
 {
     DRESULT res;
 
+    (void)pdrv;
+
     res = mounted_bd->write(mounted_bd, sector, buff, count);
 
     return (res == count) ? FR_OK : FR_DISK_ERR;
@@ -103,6 +111,8 @@ DRESULT disk_ioctl(
 )
 {
     DRESULT res;
+
+    (void)pdrv;
 
     res = FR_OK;
 

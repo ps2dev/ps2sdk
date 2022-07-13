@@ -48,6 +48,8 @@ int connect_bd(struct block_device *bd)
 
 void disconnect_bd(struct block_device *bd)
 {
+    (void)bd;
+
     f_unmount("");
     mounted_bd = NULL;
 }
@@ -116,6 +118,8 @@ static int fs_init(iop_device_t *driver)
 {
     M_DEBUG("%s\n", __func__);
 
+    (void)driver;
+
     if (!fs_inited) {
         fs_reset();
         fs_inited = 1;
@@ -131,6 +135,8 @@ static int fs_open(iop_file_t *fd, const char *name, int flags, int mode)
 
     int ret;
     BYTE f_mode = FA_OPEN_EXISTING;
+
+    (void)mode;
 
     _fs_lock();
 
@@ -267,6 +273,8 @@ static int fs_remove(iop_file_t *fd, const char *name)
 
     int ret;
 
+    (void)fd;
+
     _fs_lock();
 
     ret = f_unlink(name);
@@ -281,6 +289,9 @@ static int fs_mkdir(iop_file_t *fd, const char *name, int mode)
     M_DEBUG("%s\n", __func__);
 
     int ret;
+
+    (void)fd;
+    (void)mode;
 
     _fs_lock();
 
@@ -472,6 +483,9 @@ int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, void *r
     int ret   = 0;
     FIL *file = ((FIL *)(fd->privdata));
 
+    (void)data;
+    (void)datalen;
+
     if ((file == NULL) || (mounted_bd == NULL))
         return -ENXIO;
 
@@ -534,6 +548,12 @@ static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsig
 {
     int ret;
     FIL *file = ((FIL *)(fd->privdata));
+
+    (void)name;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
 
     if ((file == NULL) || (mounted_bd == NULL))
         return -ENXIO;

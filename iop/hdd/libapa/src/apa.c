@@ -400,6 +400,8 @@ int apaCheckSum(apa_header_t *header, int fullcheck)
     if (!(fullcheck))
         for (sum = 0, i = 1; i < 128; i++) // recalculate checksum only for first sector.
             sum += ptr[i];
+#else
+    (void)fullcheck;
 #endif
     return sum;
 }

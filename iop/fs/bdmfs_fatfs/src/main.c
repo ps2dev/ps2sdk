@@ -26,6 +26,9 @@ static struct file_system g_fs = {
 
 int _start(int argc, char *argv[])
 {
+    (void)argc;
+    (void)argv;
+
     printf("BDM FatFs driver (FAT/exFAT) v%d.%d\n", MAJOR_VER, MINOR_VER);
 
     // initialize the file system driver
