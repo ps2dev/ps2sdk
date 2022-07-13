@@ -167,7 +167,7 @@ void         _MPEG_SetQSTIVFAS    ( void                                        
 void         _MPEG_SetPCT         ( unsigned int                                      );
 void         _MPEG_BDEC           ( int, int, int, int, void*                         );
 int          _MPEG_WaitBDEC       ( void                                              );
-void         _MPEG_dma_ref_image  ( _MPEGMacroBlock8*, _MPEGMotion*, int, int         );
+void         _MPEG_dma_ref_image  ( _MPEGMacroBlock8*, _MPEGMotion*, s64, int         );
 void         _MPEG_do_mc          ( _MPEGMotion*                                      );
 void         _MPEG_put_luma       ( u8* a1, u16* a2, int a3, int a4, int var1, int ta );
 void         _MPEG_put_luma_X     ( u8* a1, u16* a2, int a3, int a4, int var1, int ta );

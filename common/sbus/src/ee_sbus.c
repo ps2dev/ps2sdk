@@ -81,11 +81,11 @@ int SBUS_interrupt_remote(int irq)
     M_SuspendIntr(&oldi);
 
     // wait for remote to clear irq bit
-    while (SBUS_get_reg(PS2_SBUS_MS_FLAG) & (1 << irq))
+    while (SBUS_get_reg(PS2_SBUS_MS_FLAG) & (((u32)1) << irq))
         ;
 
     // set the "irq" bit for the SBUS interrupt.
-    SBUS_set_reg(PS2_SBUS_MS_FLAG, (1 << irq));
+    SBUS_set_reg(PS2_SBUS_MS_FLAG, (((u32)1) << irq));
 
     SBUS_set_reg(PS2_SBUS_REG4, 0x00040100);
     SBUS_set_reg(PS2_SBUS_REG4, 0x00000100);

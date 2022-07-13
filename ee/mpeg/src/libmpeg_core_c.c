@@ -530,7 +530,7 @@ int _MPEG_WaitBDEC ( void )
 	return 0;
 }
 
-void _MPEG_dma_ref_image ( _MPEGMacroBlock8* arg0, _MPEGMotion* arg1, int arg2, int arg3 )
+void _MPEG_dma_ref_image ( _MPEGMacroBlock8* arg0, _MPEGMotion* arg1, s64 arg2, int arg3 )
 {
 	u8* var00 = (u8*)arg0;
 	_MPEGMotion* var01 = (_MPEGMotion*)arg1;
