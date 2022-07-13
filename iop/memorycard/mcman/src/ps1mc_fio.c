@@ -559,7 +559,6 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 int mcman_getdir1(int port, int slot, char *dirname, int flags, int maxent, sceMcTblGetDir *info)
 {
 	register int r, i;
-	char *p;
 	McFsEntryPS1 *fse;
 
 	DPRINTF("mcman_getdir1 port%d slot%d dirname %s maxent %d flags %x\n", port, slot, dirname, maxent, flags);
@@ -569,6 +568,8 @@ int mcman_getdir1(int port, int slot, char *dirname, int flags, int maxent, sceM
 	i = 0;
 
 	if (!flags) {
+		char *p;
+
 		mcman_PS1curcluster = 0;
 		p = dirname;
 		do {

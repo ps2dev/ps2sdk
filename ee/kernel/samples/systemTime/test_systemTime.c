@@ -16,13 +16,15 @@
 
 int main(int argc, char *argv[])
 {
-    uint64_t current, previous;
+    uint64_t previous;
 
     printf("\n\nStarting GetTimerSystemTime example!\n");
     previous = GetTimerSystemTime();
     
     while (1)
     {
+        uint64_t current;
+
         current = GetTimerSystemTime();
         printf("Diff: %llu clocks\n", current - previous);
         previous = current;

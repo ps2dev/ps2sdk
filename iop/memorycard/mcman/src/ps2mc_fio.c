@@ -273,7 +273,6 @@ lbl1:
 //--------------------------------------------------------------
 int mcman_dread2(int fd, io_dirent_t *dirent)
 {
-	register int r;
 	register MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
 	McFsEntry *fse;
 
@@ -283,6 +282,8 @@ int mcman_dread2(int fd, io_dirent_t *dirent)
 		return sceMcResSucceed;
 
 	do {
+		register int r;
+
 		r = McReadDirEntry(fh->port, fh->slot, fh->freeclink, fh->position, &fse);
 		if (r != sceMcResSucceed)
 			return r;
@@ -375,7 +376,6 @@ int mcman_setinfo2(int port, int slot, char *filename, sceMcTblGetDir *info, int
 	McFsEntry *fse;
 	McCacheDir dirInfo;
 	McFsEntry mfe;
-	u8 *pfsentry, *pfseend, *mfee;
 
 	DPRINTF("mcman_setinfo2 port%d slot%d filename %s flags %x\n", port, slot, filename, flags);
 
@@ -384,6 +384,8 @@ int mcman_setinfo2(int port, int slot, char *filename, sceMcTblGetDir *info, int
 		return r;
 
 	if ((flags & sceMcFileAttrFile) != 0)	{
+		u8 *pfsentry, *pfseend, *mfee;
+
 		if ((!strcmp(".", (char*)info->EntryName)) || (!strcmp("..", (char*)info->EntryName)))
 			return sceMcResNoEntry;
 
@@ -485,7 +487,6 @@ int mcman_setinfo2(int port, int slot, char *filename, sceMcTblGetDir *info, int
 //--------------------------------------------------------------
 int mcman_read2(int fd, void *buffer, int nbyte)
 {
-	register int r, temp, rpos, size, offset;
 	register MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
 	register MCDevInfo *mcdi = &mcman_devinfos[fh->port][fh->slot];
 	McCacheEntry *mce;
@@ -493,6 +494,7 @@ int mcman_read2(int fd, void *buffer, int nbyte)
 	DPRINTF("mcman_read2 fd %d buf %x size %d\n", fd, (int)buffer, nbyte);
 
 	if (fh->position < fh->filesize) {
+		register int temp, rpos;
 
 		temp = fh->filesize - fh->position;
 		if (nbyte > temp)
@@ -502,6 +504,8 @@ int mcman_read2(int fd, void *buffer, int nbyte)
 		if (nbyte > 0) {
 
 			do {
+				register int r, size, offset;
+
 				offset = fh->position % mcdi->cluster_size;  // file pointer offset % cluster size
 				temp = mcdi->cluster_size - offset;
 				if (temp < nbyte)
@@ -657,8 +661,8 @@ int mcman_close2(int fd)
 //--------------------------------------------------------------
 int mcman_open2(int port, int slot, char *filename, int flags)
 {
-	register int fd, i, r, fsindex, fsoffset, fat_index, rdflag, wrflag, pos, mcfree;
-	register MC_FHANDLE *fh, *fh2;
+	register int fd, i, r, rdflag, wrflag, pos, mcfree;
+	register MC_FHANDLE *fh;
 	register MCDevInfo *mcdi;
 	McCacheDir cacheDir;
 	McFsEntry *fse1, *fse2;
@@ -791,6 +795,8 @@ int mcman_open2(int port, int slot, char *filename, int flags)
 		if ((flags & sceMcFileAttrWriteable) != 0) {
 			i = 0;
 			do {
+				register MC_FHANDLE *fh2;
+
 				fh2 = (MC_FHANDLE *)&mcman_fdhandles[i];
 
 				if ((fh2->status == 0) || (fh2->port != port) || (fh2->slot != slot) \
@@ -857,11 +863,14 @@ int mcman_open2(int port, int slot, char *filename, int flags)
 
 	i = -1;
 	if (mcman_dircache[2].length == (u32)(cacheDir.maxent)) {
+		register int fsindex, fsoffset;
 
 		fsindex = mcman_dircache[2].length / (mcdi->cluster_size >> 9); //v1
 		fsoffset = mcman_dircache[2].length % (mcdi->cluster_size >> 9); //v0
 
 		if (fsoffset == 0) {
+			register int fat_index;
+
 			fat_index = mcman_dircache[2].cluster;
 			i = fsindex;
 
@@ -1123,7 +1132,7 @@ lbl1:
 //--------------------------------------------------------------
 int mcman_getdir2(int port, int slot, char *dirname, int flags, int maxent, sceMcTblGetDir *info)
 {
-	register int r, pos, nument;
+	register int r, nument;
 	register MCDevInfo *mcdi = &mcman_devinfos[port][slot];
 	McFsEntry *fse;
 	char *p;
@@ -1134,6 +1143,7 @@ int mcman_getdir2(int port, int slot, char *dirname, int flags, int maxent, sceM
 	flags &= 0xffff;
 
 	if (!flags) {
+		register int pos;
 
 		p = mcman_curdirpath;
 		strncpy(p, dirname, 1023);

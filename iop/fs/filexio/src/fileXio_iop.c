@@ -349,14 +349,11 @@ static int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size, i
 static int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEntry[], unsigned int req_entries)
 {
 	int matched_entries;
-      int fd, res;
+      int fd;
   	iox_dirent_t dirbuf;
 	struct fileXioDirEntry localDirEntry;
 	int intStatus;	// interrupt status - for dis/en-abling interrupts
 	struct t_SifDmaTransfer dmaStruct;
-	int dmaID;
-
-	dmaID = 0;
 
 	M_DEBUG("GetDir Request\n");
 	M_DEBUG("dirname: %s\n",pathname);
@@ -369,6 +366,7 @@ static int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEn
         return fd;
       }
 	{
+		int res;
 
         res = 1;
         while (res > 0)
@@ -377,6 +375,10 @@ static int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEn
           res = dread(fd, &dirbuf);
           if (res > 0)
           {
+		  int dmaID;
+
+		  dmaID = 0;
+
 		// check for too many entries
 		if ((unsigned int)matched_entries == req_entries)
 		{
