@@ -422,7 +422,7 @@ static void DESEncryptPassword(u32 id_lo, u32 id_hi, char *password_out, const c
 			eVal_hi >>= 6;
 
 			input_hi = 0;
-			if((shift << 26) >= 0)
+			if((s32)((u32)shift << 26) >= 0)
 			{	//0 to 31-bit shift
 				if((shift << 26) > 0)	//Shift all bits right by shift (hi,lo >> shift)
 					key3 = (input_hi << shift) | (input_lo >> (-shift));

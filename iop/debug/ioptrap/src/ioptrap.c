@@ -138,8 +138,8 @@ void trap(exception_type_t type, struct exception_frame *ex)
     if (type == EXCEPTION_Bp) {
         ex->dcic = 0;
     } else {
-        if (ex->cause & (1 << 31)) {
-            ex->cause &= ~(1 << 31); /* clear BD */
+        if (ex->cause & (((u32)1) << 31)) {
+            ex->cause &= ~(((u32)1) << 31); /* clear BD */
         } else {
             ex->epc += 4;
         }
