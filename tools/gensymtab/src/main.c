@@ -363,9 +363,9 @@ int symtab_write(const char *filename, const char *name, symbol *s)
 	fwrite(&sym, shdr[2].sh_entsize, 1, file);
 
 
-	for (symbol_ll *cur=s->First;cur!=NULL;cur=cur->Next)
+	for (symbol_ll *cur_sym=s->First;cur_sym!=NULL;cur_sym=cur_sym->Next)
 	{
-		sym.st_name  = elf_str_add(&str, "%s", cur->Name);
+		sym.st_name  = elf_str_add(&str, "%s", cur_sym->Name);
 		sym.st_info  = ELF32_ST_INFO(STB_GLOBAL, STT_NOTYPE);
 		sym.st_other = 0;
 		sym.st_shndx = 0;
@@ -391,12 +391,12 @@ int symtab_write(const char *filename, const char *name, symbol *s)
 
 	fseek(file, shdr[3].sh_offset, SEEK_SET);
 	unsigned int dat = 0;
-	for (symbol_ll *cur=s->First;cur!=NULL;cur=cur->Next)
+	for (symbol_ll *cur_sym=s->First;cur_sym!=NULL;cur_sym=cur_sym->Next)
 	{
 		dat = 0x00000000;
 		fwrite(&dat, 4, 1, file);
 
-		dat = (8*(s->Count+1))+elf_str_add(&prgstr, "%s", cur->Name);
+		dat = (8*(s->Count+1))+elf_str_add(&prgstr, "%s", cur_sym->Name);
 		fwrite(&dat, 4, 1, file);
 	}
 	dat = 0;

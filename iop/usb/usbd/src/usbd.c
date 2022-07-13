@@ -135,7 +135,7 @@ void processDoneQueue_IsoTd(HcIsoTD *arg)
             HcIsoTD *nextTd = curTd->next;
             freeIsoTd(curTd);
 
-            IoRequest *req = memPool.hcIsoTdToIoReqLUT[curTd - memPool.hcIsoTdBuf];
+            req = memPool.hcIsoTdToIoReqLUT[curTd - memPool.hcIsoTdBuf];
             if (req) {
                 memPool.hcIsoTdToIoReqLUT[arg - memPool.hcIsoTdBuf] = NULL;
                 IoRequest *listPos;
@@ -213,7 +213,7 @@ void processDoneQueue_GenTd(HcTD *arg)
                 HcTD *nextTd = tdListPos->next;
                 freeTd(tdListPos);
 
-                IoRequest *req = memPool.hcTdToIoReqLUT[tdListPos - memPool.hcTdBuf];
+                req = memPool.hcTdToIoReqLUT[tdListPos - memPool.hcTdBuf];
                 if (req) {
                     memPool.hcTdToIoReqLUT[tdListPos - memPool.hcTdBuf] = NULL;
 
