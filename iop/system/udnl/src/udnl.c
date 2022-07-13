@@ -841,7 +841,8 @@ static struct RomdirFileStat *SelectModuleFromImages(const struct ImageData *Ima
     /* 0x000008e0 */
     ImageFileIndexNumber = -1;
     HighestFileVersionNum = 0;
-    if ((NumFilesRemaining = NumFiles - 1) >= 0) {
+    NumFilesRemaining = NumFiles - 1;
+    {
         ImageDataPtr = &ImageDataBuffer[NumFilesRemaining];
 
         do {

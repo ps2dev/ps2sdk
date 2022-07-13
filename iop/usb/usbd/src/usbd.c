@@ -198,10 +198,17 @@ void processDoneQueue_GenTd(HcTD *arg)
 
         if (hcRes || ((tdHcArea & 0xE00000) != 0xE00000)) { // E00000: interrupts disabled
             req->prev = lastElem;
+#if 0
+            // lastElem is NULL, so this condition is always false
             if (lastElem)
+            {
                 lastElem->next = req;
+            }
             else
+#endif
+            {
                 firstElem = req;
+            }
             req->next = NULL;
             lastElem  = req;
         }

@@ -2893,10 +2893,17 @@ int mcman_FNC8ca4(int port, int slot, MC_FHANDLE *fh)
 
 					mce = mcman_get1stcacheEntp();
 
+#if 0
+					// This condition is always false due to the preceding check on "j" variable.
 					if ((j + 1) < 0)
+					{
 						temp = j + 8;
+					}
 					else
+#endif
+					{
 						temp = j + 1;
+					}
 
 					temp &= 0xfffffff8;
 					temp = (j + 1) - temp;
@@ -3339,8 +3346,11 @@ void mcman_addcacheentry(McCacheEntry *mce)
 
 	i = MAX_CACHEENTRY - 1;
 
+#if 0
+	// This condition is always false because MAX_CACHEENTRY is always bigger than 0
 	if (i < 0)
 		goto lbl1;
+#endif
 
 	do {
 		if (pmce[i] == mce)
@@ -3348,7 +3358,10 @@ void mcman_addcacheentry(McCacheEntry *mce)
 	} while (--i >= 0);
 
 	if (i != 0) {
+#if 0
+	// This label is not used.
 lbl1:
+#endif
 		do {
 			pmce[i] = pmce[i-1];
 		} while (--i != 0);
