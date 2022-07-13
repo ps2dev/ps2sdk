@@ -813,7 +813,7 @@ int ata_device_smart_get_status(int device)
         return 1;
     }
 
-    return res;
+    return 0;
 }
 
 /* Set features - set transfer mode.  */
