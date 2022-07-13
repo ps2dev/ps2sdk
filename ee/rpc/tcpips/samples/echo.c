@@ -41,7 +41,7 @@ char buffer[100];
 
 int HandleClient( int cs )
 {
-   int rcvSize,sntSize;
+   int rcvSize;
    // fd_set rd_set;
 
    rcvSize = recv( cs, buffer, 100, 0);
@@ -50,7 +50,7 @@ int HandleClient( int cs )
       printf( "PS2ECHO: recv returned %i\n", rcvSize );
       return -1;
    }
-   sntSize = send( cs, buffer, rcvSize, 0 );
+   send( cs, buffer, rcvSize, 0 );
 
    return 0;
 }

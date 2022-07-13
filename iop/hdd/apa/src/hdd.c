@@ -136,7 +136,6 @@ apa_cache_t *hddAddPartitionHere(s32 device, const apa_params_t *params, u32 *em
 		return NULL;
 	}
 
-	tempSize=params->size;
 	while(part_end%params->size)
 	{
 		tempSize=params->size>>1;
