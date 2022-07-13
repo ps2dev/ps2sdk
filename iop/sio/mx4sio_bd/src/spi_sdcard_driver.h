@@ -129,12 +129,14 @@ struct t_csdVer1
     u8 c_size_multLo      : 1;
     // XXX: The folowing are not fixed to correct endianness!
     u8 erase_blk_en       : 1;
-    u8 sector_size        : 7;
+    u8 sector_size_high   : 6;
+    u8 sector_size_low    : 1;
     u8 wp_grp_size        : 7;
     u8 ep_grp_enable      : 1;
     u8 reserved5          : 2;
     u8 r2w_factor         : 3;
-    u8 write_bl_len       : 4;
+    u8 write_bl_len_high  : 2;
+    u8 write_bl_len_low   : 2;
     u8 write_bl_partial   : 1;
     u8 reserved6          : 5;
     u8 file_format_group  : 1;
@@ -176,12 +178,14 @@ struct t_csdVer2
     // Not fixed!:
     u32 reserved4         : 1;
     u8 erase_blk_en       : 1;
-    u8 sector_size        : 7;
+    u8 sector_size_high   : 6;
+    u8 sector_size_low    : 1;
     u8 wp_grp_size        : 7;
     u8 ep_grp_enable      : 1;
     u8 reserved5          : 2;
     u8 r2w_factor         : 3;
-    u8 write_bl_len       : 4;
+    u8 write_bl_len_high  : 2;
+    u8 write_bl_len_low   : 2;
     u8 write_bl_partial   : 1;
     u8 reserved6          : 5;
     u8 file_format_group  : 1;
