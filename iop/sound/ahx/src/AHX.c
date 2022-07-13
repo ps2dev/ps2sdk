@@ -201,12 +201,12 @@ void AHXVoice_CalcADSR(struct AHXVoice *pVoice)
 
 void clipint(int *x)
 {
-    if (*x > 127 << FIXEDPOINT) {
-        *x = 127 << FIXEDPOINT;
+    if (*x > (int)((u32)(127) << FIXEDPOINT)) {
+        *x = (int)((u32)(127) << FIXEDPOINT);
         return;
     }
-    if (*x < -128 << FIXEDPOINT) {
-        *x = -128 << FIXEDPOINT;
+    if (*x < (int)((u32)(-128) << FIXEDPOINT)) {
+        *x = (int)((u32)(-128) << FIXEDPOINT);
         return;
     }
 }
