@@ -87,7 +87,7 @@ void render(packet_t *packet, framebuffer_t *frame)
 	int loop0;
 
 	// Used for the qword pointer.
-	qword_t *q = packet->data;
+	qword_t *q;
 
 	// Since we only have one packet, we need to wait until the dmac is done
 	// before reusing our pointer;

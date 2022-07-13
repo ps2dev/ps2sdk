@@ -62,7 +62,7 @@ void init_texture()
 {
 	packet_t *packet = packet_init(50,PACKET_NORMAL);
 
-	qword_t *q = packet->data;
+	qword_t *q;
 
 	myaddress = graph_vram_allocate(512,256,GS_PSM_4, GRAPH_ALIGN_BLOCK);
 	clutaddress = graph_vram_allocate(8,2,GS_PSM_32, GRAPH_ALIGN_BLOCK);

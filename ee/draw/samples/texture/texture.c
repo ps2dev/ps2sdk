@@ -96,7 +96,7 @@ void load_texture(texbuffer_t *texbuf)
 
 	packet_t *packet = packet_init(50,PACKET_NORMAL);
 
-	qword_t *q = packet->data;
+	qword_t *q;
 
 	q = packet->data;
 
