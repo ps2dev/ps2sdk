@@ -1,0 +1,40 @@
+
+#ifdef EESYNC_SECRMAN_DUMMY
+ioman_IMPORTS_start
+I_open
+I_lseek
+I_close
+ioman_IMPORTS_end
+#endif
+
+loadcore_IMPORTS_start
+#ifdef EESYNC_REGISTER_EXPORTS
+I_RegisterLibraryEntries
+#endif
+#ifdef EESYNC_CHECK_ILOADP
+I_QueryBootMode
+#endif
+I_RegisterPostBootCallback
+loadcore_IMPORTS_end
+
+sifman_IMPORTS_start
+#ifdef EESYNC_WIPE_EE_KERNEL_SPACE
+I_sceSifSetDma
+#endif
+I_sceSifSetSMFlag
+sifman_IMPORTS_end
+
+#if defined(EESYNC_WIPE_EE_KERNEL_SPACE) || defined(EESYNC_SECRMAN_DUMMY)
+sysmem_IMPORTS_start
+I_AllocSysMemory
+#ifdef EESYNC_WIPE_EE_KERNEL_SPACE
+I_FreeSysMemory
+#endif
+sysmem_IMPORTS_end
+#endif
+
+#ifdef EESYNC_WIPE_EE_KERNEL_SPACE
+sysclib_IMPORTS_start
+I_memset
+sysclib_IMPORTS_end
+#endif
