@@ -6,8 +6,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_BIN = sysclib.irx
-
 IOP_OBJS = _start.o imports.o exports.o
 
 # Use MIPS or C version?
