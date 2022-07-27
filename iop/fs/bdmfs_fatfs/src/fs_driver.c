@@ -31,9 +31,6 @@
 FATFS fatfs;
 struct block_device *mounted_bd = NULL;
 
-void *malloc(int size);
-void free(void *ptr);
-
 // TODO: if all drives have the same mount point, it will only allow for one mounted block device
 int connect_bd(struct block_device *bd)
 {
@@ -50,6 +47,42 @@ void disconnect_bd(struct block_device *bd)
 {
     f_unmount("");
     mounted_bd = NULL;
+}
+
+//---------------------------------------------------------------------------
+
+#define MAX_FILES 16
+static FIL fil_structures[MAX_FILES];
+
+#define MAX_DIRS 16
+static DIR dir_structures[MAX_DIRS];
+
+static FIL *fs_find_free_fil_structure(void)
+{
+    int i;
+
+    M_DEBUG("%s\n", __func__);
+
+    for (i = 0; i < MAX_FILES; i++) {
+        if (fil_structures[i].obj.fs == NULL) {
+            return &fil_structures[i];
+        }
+    }
+    return NULL;
+}
+
+static DIR *fs_find_free_dir_structure(void)
+{
+    int i;
+
+    M_DEBUG("%s\n", __func__);
+
+    for (i = 0; i < MAX_DIRS; i++) {
+        if (dir_structures[i].obj.fs == NULL) {
+            return &dir_structures[i];
+        }
+    }
+    return NULL;
 }
 
 //---------------------------------------------------------------------------
@@ -134,8 +167,11 @@ static int fs_open(iop_file_t *fd, const char *name, int flags, int mode)
 
     _fs_lock();
 
+    // check if the slot is free
+    fd->privdata = fs_find_free_fil_structure();
     if (fd->privdata == NULL) {
-        fd->privdata = malloc(sizeof(FIL));
+        _fs_unlock();
+        return -EMFILE;
     }
 
     // translate mode
@@ -153,7 +189,6 @@ static int fs_open(iop_file_t *fd, const char *name, int flags, int mode)
     ret = f_open(fd->privdata, name, f_mode);
 
     if (ret != FR_OK) {
-        free(fd->privdata);
         fd->privdata = NULL;
         ret          = -ret;
     } else {
@@ -177,7 +212,6 @@ static int fs_close(iop_file_t *fd)
 
     if (fd->privdata) {
         ret = f_close(fd->privdata);
-        free(fd->privdata);
         fd->privdata = NULL;
     }
 
@@ -299,14 +333,16 @@ static int fs_dopen(iop_file_t *fd, const char *name)
 
     _fs_lock();
 
+    // check if the slot is free
+    fd->privdata = fs_find_free_dir_structure();
     if (fd->privdata == NULL) {
-        fd->privdata = malloc(sizeof(DIR));
+        _fs_unlock();
+        return -EMFILE;
     }
 
     ret = f_opendir(fd->privdata, name);
 
     if (ret != FR_OK) {
-        free(fd->privdata);
         fd->privdata = NULL;
         ret          = -ret;
     }
@@ -326,7 +362,6 @@ static int fs_dclose(iop_file_t *fd)
 
     if (fd->privdata) {
         ret = f_closedir(fd->privdata);
-        free(fd->privdata);
         fd->privdata = NULL;
     }
 
