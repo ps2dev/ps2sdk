@@ -15,7 +15,6 @@
 #include <stdio.h>
 
 #ifdef WIN32
-#include <malloc.h>
 #include <memory.h>
 #include <string.h>
 #include <stdlib.h>

@@ -16,7 +16,7 @@
 #include <sifrpc.h>
 #include <loadfile.h>
 #include <iopheap.h>
-#include <malloc.h>
+#include <stdlib.h>
 
 // PS2DRV includes
 #include "sys/fcntl.h"

@@ -18,7 +18,7 @@
 #include <sifrpc.h>
 #include <stdarg.h>
 #include <string.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdio.h>

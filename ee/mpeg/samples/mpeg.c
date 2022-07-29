@@ -26,7 +26,7 @@
 #include <dma.h>
 #include <draw.h>
 #include <fileio.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <graph.h>
 #include <packet.h>
 #include <stdio.h>

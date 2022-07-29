@@ -20,7 +20,7 @@
 #else
 #include <string.h>
 #include <time.h>
-#include <malloc.h>
+#include <stdlib.h>
 #endif
 #include <iomanX.h>
 #include <stdio.h>

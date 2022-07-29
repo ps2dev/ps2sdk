@@ -21,7 +21,7 @@
 #include <cdvdman.h>
 #else
 #include <string.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <time.h>
 #endif
 #include <ctype.h>

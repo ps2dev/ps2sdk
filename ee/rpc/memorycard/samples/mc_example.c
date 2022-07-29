@@ -15,7 +15,7 @@
 #include <sifrpc.h>
 #include <loadfile.h>
 #include <fileio.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <libmc.h>
 #include <stdio.h>
 #include <string.h>
