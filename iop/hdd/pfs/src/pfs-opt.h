@@ -11,6 +11,10 @@
 #define PFS_MAJOR	2
 #define PFS_MINOR	2
 
+#ifdef PFS_POSIX_VER
+#define PFS_IOCTL2_INC_CHECKSUM 1
+#define PFS_STAT_RETURN_INODE_LBA 1
+#else
 #ifdef PFS_XOSD_VER
 #define PFS_OSD_VER		1
 #define PFS_SUPPORT_BHDD	1
@@ -22,6 +26,7 @@
 #ifdef PFS_OSD_VER
 #define PFS_IOCTL2_INC_CHECKSUM		1
 #define PFS_STAT_RETURN_INODE_LBA	1
+#endif
 #endif
 
 #ifdef _IOP
