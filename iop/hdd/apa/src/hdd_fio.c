@@ -928,6 +928,13 @@ int hddIoctl2(iop_file_t *f, int req, void *argp, unsigned int arglen,
             }
             break;
 
+#ifdef APA_SUPPORT_IOCTL_GETPARTSTART
+        // Special HDD.IRX IOCTL2 command for supporting HDLFS
+        case HIOCGETPARTSTART:
+            rv = fileSlot->parts[*(u32 *)argp].start;
+            break;
+#endif
+
         default:
             rv = -EINVAL;
             break;

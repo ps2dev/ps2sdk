@@ -68,6 +68,9 @@
 /** Get (sector of a partition) that has an error */
 #define HIOCGETPARTERROR 0x6835
 
+// HDLFS addition
+#define HIOCGETPARTSTART 0x6836 // Get the sector number of the first sector of the partition.
+
 // I/O direction
 #define APA_IO_MODE_READ  0x00
 #define APA_IO_MODE_WRITE 0x01
