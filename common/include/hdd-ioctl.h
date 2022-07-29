@@ -41,6 +41,7 @@
 #define APA_TYPE_REISER   0x0088
 #define APA_TYPE_PFS      0x0100
 #define APA_TYPE_CFS      0x0101
+#define APA_TYPE_HDL      0x1337
 
 #define APA_IDMAX    32
 /** Maximum # of sub-partitions */
