@@ -29,4 +29,10 @@
 #define APA_MODVER_MAJOR 2
 #define APA_MODVER_MINOR 5
 
+#ifdef _IOP
+#define APA_ENTRYPOINT _start
+#else
+#define APA_ENTRYPOINT apa_start
+#endif
+
 #endif

@@ -127,7 +127,7 @@ pfs_mount_t *pfsGetMountedUnit(s32 unit)
 	return &pfsMountBuf[unit];
 }
 
-int _start(int argc, char *argv[])
+int PFS_ENTRYPOINT(int argc, char *argv[])
 {
 	char *filename;
 	int number;

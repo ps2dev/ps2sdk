@@ -24,4 +24,10 @@
 #define PFS_STAT_RETURN_INODE_LBA	1
 #endif
 
+#ifdef _IOP
+#define PFS_ENTRYPOINT _start
+#else
+#define PFS_ENTRYPOINT pfs_start
+#endif
+
 #endif
