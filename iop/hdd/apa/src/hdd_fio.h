@@ -20,7 +20,7 @@ int hddClose(iop_file_t *f);
 int hddRead(iop_file_t *f, void *buf, int size);
 int hddWrite(iop_file_t *f, void *buf, int size);
 int hddLseek(iop_file_t *f, int post, int whence);
-int hddIoctl2(iop_file_t *f, int request, void *argp, unsigned int arglen, void *bufp, unsigned intbuflen);
+int hddIoctl2(iop_file_t *f, int request, void *argp, unsigned int arglen, void *bufp, unsigned int buflen);
 int hddRemove(iop_file_t *f, const char *name);
 int hddDopen(iop_file_t *f, const char *name);
 int hddDread(iop_file_t *f, iox_dirent_t *dirent);
