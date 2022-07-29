@@ -449,8 +449,10 @@ static int apaRemove(s32 device, const char *id, const char *fpwd)
                 return -EBUSY;
         }
     }
+#ifndef APA_ALLOW_REMOVE_PARTITION_WITH_LEADING_UNDERSCORE
     if (id[0] == '_' && id[1] == '_')
         return -EACCES;
+#endif
     if ((clink = apaFindPartition(device, id, &rv)) == NULL)
         return rv;
     if (apaPassCmp(clink->header->fpwd, fpwd)) {
