@@ -129,7 +129,7 @@ int configGetDateFormat(void)
     GetOsdConfigParam(&config);
     if (IsEarlyJap(config))
         return 0;
-    GetOsdConfigParam2(&config2, 1, 1);
+    GetOsdConfigParam2(&config2, sizeof(config2), 0);
     return config2.dateFormat;
 }
 #endif
@@ -150,9 +150,9 @@ void configSetDateFormat(int dateFormat)
     GetOsdConfigParam(&config);
     if (IsEarlyJap(config))
         return;
-    GetOsdConfigParam2(&config2, 1, 1);
+    GetOsdConfigParam2(&config2, sizeof(config2), 0);
     config2.dateFormat = dateFormat;
-    SetOsdConfigParam2(&config2, 1, 1);
+    SetOsdConfigParam2(&config2, sizeof(config2), 0);
 }
 #endif
 
@@ -168,7 +168,7 @@ int configGetTimeFormat(void)
     GetOsdConfigParam(&config);
     if (IsEarlyJap(config))
         return 0;
-    GetOsdConfigParam2(&config2, 1, 1);
+    GetOsdConfigParam2(&config2, sizeof(config2), 0);
     return config2.timeFormat;
 }
 #endif
@@ -189,9 +189,9 @@ void configSetTimeFormat(int timeFormat)
     GetOsdConfigParam(&config);
     if (IsEarlyJap(config))
         return;
-    GetOsdConfigParam2(&config2, 1, 1);
+    GetOsdConfigParam2(&config2, sizeof(config2), 0);
     config2.timeFormat = timeFormat;
-    SetOsdConfigParam2(&config2, 1, 1);
+    SetOsdConfigParam2(&config2, sizeof(config2), 0);
 }
 #endif
 
@@ -309,7 +309,7 @@ int configIsDaylightSavingEnabled(void)
     GetOsdConfigParam(&config);
     if (IsEarlyJap(config))
         return 0;
-    GetOsdConfigParam2(&config2, 1, 1);
+    GetOsdConfigParam2(&config2, sizeof(config2), 0);
 
     return config2.daylightSaving;
 }
@@ -327,9 +327,9 @@ void configSetDaylightSavingEnabled(int daylightSaving)
     GetOsdConfigParam(&config);
     if (IsEarlyJap(config))
         return;
-    GetOsdConfigParam2(&config2, 1, 1);
+    GetOsdConfigParam2(&config2, sizeof(config2), 0);
     config2.daylightSaving = daylightSaving;
-    SetOsdConfigParam2(&config2, 1, 1);
+    SetOsdConfigParam2(&config2, sizeof(config2), 0);
     _libcglue_timezone_update();
 }
 #endif
