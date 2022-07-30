@@ -33,7 +33,8 @@ void _libcglue_timezone_update()
 
 	// _timezone is in seconds, while the return value of configGetTimezone is in minutes
 	// Add one hour if configIsDaylightSavingEnabled is 1
-	_timezone = (configGetTimezone() + (configIsDaylightSavingEnabled() * 60)) * 60;
+	// _timezone is offset from local time to UTC (not UTC to local time), so flip the sign
+	_timezone = -((configGetTimezone() + (configIsDaylightSavingEnabled() * 60)) * 60);
 	tz->__tzrule[0].offset = _timezone;
 	snprintf(_ps2sdk_tzname, sizeof(_ps2sdk_tzname), "Etc/GMT%+ld", _timezone / 3600);
 	_tzname[0] = _ps2sdk_tzname;
