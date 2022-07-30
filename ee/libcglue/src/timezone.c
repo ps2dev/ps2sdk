@@ -26,8 +26,13 @@ __attribute__((weak))
 void _libcglue_timezone_update()
 {
 	// Set TZ and call tzset to ensure that timezone information won't get overwritten when tszet is called multiple times
+	// The TZ environment variable parsing in newlib is broken in various ways:
+	// * It doesn't support arbritary characters in the timezone name using angle brackets
+	// * The timezone offset sign is inverted
 	setenv("TZ", "", 0);
 	tzset();
+
+	// Set tzinfo manually instead.
 
 	__tzinfo_type *tz = __gettzinfo();
 
