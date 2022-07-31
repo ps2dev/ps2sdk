@@ -3,8 +3,12 @@
 #define MAIN_H
 
 #include <thbase.h>
+
 #ifdef BUILDING_SMAP_NETMAN
 #include <netman.h>
+#endif
+#ifdef BUILDING_SMAP_PS2IP
+#include <ps2ip.h>
 #endif
 
 // In the SONY original, all the calls to DEBUG_PRINTF() were to sceInetPrintf().

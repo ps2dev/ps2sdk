@@ -1,6 +1,4 @@
-#ifdef BUILDING_SMAP_NETMAN
-#include <defs.h>
-#endif
+
 #include <errno.h>
 #include <stdio.h>
 #include <dmacman.h>
@@ -16,18 +14,12 @@
 #include <thsemap.h>
 #include <irx.h>
 
-#ifdef BUILDING_SMAP_NETMAN
-#include <netman.h>
-#endif
-#ifdef BUILDING_SMAP_PS2IP
-#include <ps2ip.h>
-#endif
-
 #include <smapregs.h>
 #include <speedregs.h>
 
 #include "main.h"
 #include "xfer.h"
+#include "ipstack.h"
 
 /*  There is a difference in how the transmissions are made,
     between this driver and the SONY original.
@@ -432,22 +424,12 @@ static void CheckLinkStatus(struct SmapDriverData *SmapDrivPrivData)
     if (!(_smap_read_phy(SmapDrivPrivData->emac3_regbase, SMAP_DsPHYTER_BMSR) & SMAP_PHY_BMSR_LINK)) {
         // Link lost
         SmapDrivPrivData->LinkStatus = 0;
-#ifdef BUILDING_SMAP_NETMAN
-        NetManToggleNetIFLinkState(SmapDrivPrivData->NetIFID, NETMAN_NETIF_ETH_LINK_STATE_DOWN);
-#endif
-#ifdef BUILDING_SMAP_PS2IP
-        PS2IPLinkStateDown();
-#endif
+        SMapCommonLinkStateDown(SmapDrivPrivData);
         InitPHY(SmapDrivPrivData);
 
         // Link established
         if (SmapDrivPrivData->LinkStatus)
-#ifdef BUILDING_SMAP_NETMAN
-            NetManToggleNetIFLinkState(SmapDrivPrivData->NetIFID, NETMAN_NETIF_ETH_LINK_STATE_UP);
-#endif
-#ifdef BUILDING_SMAP_PS2IP
-            PS2IPLinkStateUp();
-#endif
+            SMapCommonLinkStateUp(SmapDrivPrivData);
     }
 }
 
@@ -478,12 +460,7 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
                 SmapDrivPrivData->LinkStatus        = 0;
                 SmapDrivPrivData->SmapIsInitialized = 0;
                 SmapDrivPrivData->SmapDriverStarted = 0;
-#ifdef BUILDING_SMAP_NETMAN
-                NetManToggleNetIFLinkState(SmapDrivPrivData->NetIFID, NETMAN_NETIF_ETH_LINK_STATE_DOWN);
-#endif
-#ifdef BUILDING_SMAP_PS2IP
-                PS2IPLinkStateDown();
-#endif
+                SMapCommonLinkStateDown(SmapDrivPrivData);
             }
         }
         if (EFBits & SMAP_EVENT_START) {
@@ -501,12 +478,7 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
                 DelayThread(10000);
                 SmapDrivPrivData->SmapIsInitialized = 1;
 
-#ifdef BUILDING_SMAP_NETMAN
-                NetManToggleNetIFLinkState(SmapDrivPrivData->NetIFID, NETMAN_NETIF_ETH_LINK_STATE_UP);
-#endif
-#ifdef BUILDING_SMAP_PS2IP
-                PS2IPLinkStateUp();
-#endif
+                SMapCommonLinkStateUp(SmapDrivPrivData);
 
                 if (!SmapDrivPrivData->EnableLinkCheckTimer) {
                     USec2SysClock(1000000, &SmapDrivPrivData->LinkCheckTimer);
@@ -644,7 +616,7 @@ int SMAPInitStart(void)
             DelayThread(10000);
             SmapDriverData.SmapIsInitialized = 1;
 
-            PS2IPLinkStateUp();
+            SMapCommonLinkStateUp(&SmapDriverData);
 
             if (!SmapDriverData.EnableLinkCheckTimer) {
                 USec2SysClock(1000000, &SmapDriverData.LinkCheckTimer);
@@ -707,14 +679,8 @@ static void ClearPacketQueue(struct SmapDriverData *SmapDrivPrivData)
     CpuResumeIntr(OldState);
 
     if (pkt != NULL) {
-#ifdef BUILDING_SMAP_NETMAN
-        while (NetManTxPacketNext(&pkt) > 0)
-            NetManTxPacketDeQ();
-#endif
-#ifdef BUILDING_SMAP_PS2IP
-        while (SMapTxPacketNext(&pkt) > 0)
-            SMapTxPacketDeQ();
-#endif
+        while (SMAPCommonTxPacketNext(&pkt) > 0)
+            SMAPCommonTxPacketDeQ(&pkt);
     }
 }
 
