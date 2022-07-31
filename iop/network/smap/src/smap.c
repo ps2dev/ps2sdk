@@ -453,7 +453,7 @@ static void CheckLinkStatus(struct SmapDriverData *SmapDrivPrivData)
 
 static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
 {
-    unsigned int ResetCounterFlag, IntrReg;
+    unsigned int PacketCount, IntrReg;
     u32 EFBits;
     int counter;
     volatile u8 *smap_regbase, *emac3_regbase;
@@ -517,7 +517,7 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
         }
 
         if (SmapDrivPrivData->SmapIsInitialized) {
-            ResetCounterFlag = 0;
+            PacketCount = 0;
             if (EFBits & SMAP_EVENT_INTR) {
                 if ((IntrReg = SPD_REG16(SPD_R_INTR_STAT) & DEV9_SMAP_INTR_MASK) != 0) {
                     /*    Original order/priority:
@@ -531,7 +531,7 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
                     }
                     if (IntrReg & SMAP_INTR_RXEND) {
                         SMAP_REG16(SMAP_R_INTR_CLR) = SMAP_INTR_RXEND;
-                        ResetCounterFlag            = HandleRxIntr(SmapDrivPrivData);
+                        PacketCount                 = HandleRxIntr(SmapDrivPrivData);
                     }
                     if (IntrReg & SMAP_INTR_RXDNV) {
                         SMAP_REG16(SMAP_R_INTR_CLR) = SMAP_INTR_RXDNV;
@@ -560,7 +560,7 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
             }
 
             // Do the link check, only if there has not been any incoming traffic in a while.
-            if (ResetCounterFlag) {
+            if (PacketCount) {
                 counter = 3;
                 continue;
             }
