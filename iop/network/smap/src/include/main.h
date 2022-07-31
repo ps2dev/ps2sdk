@@ -1,3 +1,12 @@
+
+#ifndef MAIN_H
+#define MAIN_H
+
+#include <thbase.h>
+#ifdef BUILDING_SMAP_NETMAN
+#include <netman.h>
+#endif
+
 // In the SONY original, all the calls to DEBUG_PRINTF() were to sceInetPrintf().
 #define DEBUG_PRINTF(args...) printf(args)
 
@@ -74,4 +83,4 @@ int SMapTxPacketNext(void **payload);
 void SMapTxPacketDeQ(void);
 #endif
 
-#include "xfer.h"
+#endif
