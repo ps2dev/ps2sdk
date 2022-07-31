@@ -433,6 +433,14 @@ static void CheckLinkStatus(struct SmapDriverData *SmapDrivPrivData)
     }
 }
 
+#ifdef SMAP_RX_PACKETS_POLLING_MODE
+static unsigned int RxIntrPollingTimerCB(struct SmapDriverData *SmapDrivPrivData)
+{
+    iSetEventFlag(SmapDrivPrivData->Dev9IntrEventFlag, SMAP_EVENT_INTR);
+    return 0;
+}
+#endif
+
 static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
 {
     unsigned int PacketCount, IntrReg;
@@ -523,7 +531,25 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
             HandleTxIntr(SmapDrivPrivData);
 
             // TXDNV is not enabled here, but only when frames are transmitted.
+#ifdef SMAP_RX_PACKETS_POLLING_MODE
+           dev9IntrEnable(SMAP_INTR_EMAC3 | SMAP_INTR_RXDNV);
+
+           if (PacketCount >= 1) {
+               // Receive packets in polling mode
+
+               // We're receiving packets at a maximum rate of 100 bits/us or 12.5 bytes/us
+#define ETH_KB_TO_US(B) (B*80)
+
+               USec2SysClock(ETH_KB_TO_US(12), &SmapDrivPrivData->RxIntrPollingTimer);
+#undef ETH_KB_TO_US
+               SetAlarm(&SmapDrivPrivData->RxIntrPollingTimer, (void*)&RxIntrPollingTimerCB, SmapDrivPrivData);
+           } else {
+               // Receive packets in interrupt mode
+               dev9IntrEnable(SMAP_INTR_RXEND);
+           }
+#else
             dev9IntrEnable(DEV9_SMAP_INTR_MASK2);
+#endif
 
             // If there are frames to send out, let Tx channel 0 know and enable TXDNV.
             if (SmapDrivPrivData->NumPacketsInTx > 0) {

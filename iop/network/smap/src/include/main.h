@@ -52,6 +52,9 @@ struct SmapDriverData
     unsigned char LinkStatus; // Ethernet link is initialized (hardware)
     unsigned char LinkMode;
     iop_sys_clock_t LinkCheckTimer;
+#ifdef SMAP_RX_PACKETS_POLLING_MODE
+    iop_sys_clock_t RxIntrPollingTimer;
+#endif
 #ifdef BUILDING_SMAP_NETMAN
     struct NetManEthRuntimeStats RuntimeStats;
     int NetIFID;

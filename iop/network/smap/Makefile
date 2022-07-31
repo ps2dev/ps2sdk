@@ -15,6 +15,10 @@ SMAP_NETMAN ?= 1
 # Build against the ps2ip library.
 SMAP_PS2IP ?= 0
 
+# Poll instead of relying on interrupts when receiving multiple packets.
+# This will avoid the IOP locking up due to the large amount of interrupts.
+SMAP_RX_PACKETS_POLLING_MODE ?= 1
+
 IOP_PREFER_GPOPT = 16384
 IOP_CFLAGS += -mno-check-zero-division
 
@@ -29,6 +33,10 @@ endif
 ifneq (x$(SMAP_PS2IP),x0)
 IOP_CFLAGS += -DBUILDING_SMAP_PS2IP=1
 IOP_INCS += -I$(PS2SDKSRC)/iop/tcpip/tcpip/include
+endif
+
+ifneq (x$(SMAP_RX_PACKETS_POLLING_MODE),x0)
+IOP_CFLAGS += -DSMAP_RX_PACKETS_POLLING_MODE=1
 endif
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include
