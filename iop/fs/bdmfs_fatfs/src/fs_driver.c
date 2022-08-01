@@ -373,8 +373,10 @@ static int fs_dclose(iop_file_t *fd)
 
 static void fileInfoToStat(FILINFO *fno, iox_stat_t *stat)
 {
-    unsigned char *cdate = (unsigned char *)&(fno->fdate);
-    unsigned char *ctime = (unsigned char *)&(fno->ftime);
+    WORD fdate = fno->fdate;
+    WORD ftime = fno->ftime;
+    unsigned char stime[8];
+    u16 year;
 
     stat->attr           = 0777;
     stat->size           = (unsigned int)(fno->fsize);
@@ -390,33 +392,27 @@ static void fileInfoToStat(FILINFO *fno, iox_stat_t *stat)
         stat->mode |= FIO_S_IWOTH;
     }
 
-    // set created Date: Day, Month, Year
-    stat->ctime[4] = cdate[0];
-    stat->ctime[5] = cdate[1];
-    stat->ctime[6] = cdate[2];
-    stat->ctime[7] = cdate[3];
+    // Since the VFAT file system does not support timezones, the timezone offset will not be applied.
+    // exFAT does support timezones, but the feature is not used/exposed in the FatFs library.
+    // Thus, conversion to/from JST may be incorrect.
+    // For simplicity's sake, the timezone is not read from the system configuration and timezone conversion is not done.
 
-    // set created Time: Hours, Minutes, Seconds
-    stat->ctime[3] = ctime[0];
-    stat->ctime[2] = ctime[1];
-    stat->ctime[1] = ctime[2];
+    stime[0] = 0; // Padding
 
-    // set accessed Date: Day, Month, Year
-    stat->atime[4] = cdate[0];
-    stat->atime[5] = cdate[1];
-    stat->atime[6] = cdate[2];
-    stat->atime[7] = cdate[3];
+    stime[4] = (fdate & 31); // Day
+    stime[5] = (fdate >> 5) & 15; // Month
 
-    // set modified Date: Day, Month, Year
-    stat->mtime[4] = cdate[0];
-    stat->mtime[5] = cdate[1];
-    stat->mtime[6] = cdate[2];
-    stat->mtime[7] = cdate[3];
+    year = (fdate >> 9) + 1980;
+    stime[6] = year & 0xff; // Year (low bits)
+    stime[7] = (year >> 8) & 0xff; // Year (high bits)
 
-    // set modified Time: Hours, Minutes, Seconds
-    stat->mtime[3] = ctime[0];
-    stat->mtime[2] = ctime[1];
-    stat->mtime[1] = ctime[2];
+    stime[3] = (ftime >> 11); // Hours
+    stime[2] = (ftime >> 5) & 63; // Minutes
+    stime[1] = (ftime << 1) & 31; // Seconds (multiplied by 2)
+
+    memcpy(stat->ctime, stime, sizeof(stime));
+    memcpy(stat->atime, stime, sizeof(stime));
+    memcpy(stat->mtime, stime, sizeof(stime));
 }
 
 //---------------------------------------------------------------------------
