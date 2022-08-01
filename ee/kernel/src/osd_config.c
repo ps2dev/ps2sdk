@@ -28,7 +28,7 @@
 /** config param data as stored on a DTL-T10000(H) TOOL */
 typedef struct
 {
-    u16 timezoneOffset;
+    s16 timezoneOffset;
     u8 screenType;
     u8 dateFormat;
     u8 language;
@@ -129,7 +129,7 @@ int configGetDateFormat(void)
     GetOsdConfigParam(&config);
     if (IsEarlyJap(config))
         return 0;
-    GetOsdConfigParam2(&config2, 1, 1);
+    GetOsdConfigParam2(&config2, sizeof(config2), 0);
     return config2.dateFormat;
 }
 #endif
@@ -150,9 +150,9 @@ void configSetDateFormat(int dateFormat)
     GetOsdConfigParam(&config);
     if (IsEarlyJap(config))
         return;
-    GetOsdConfigParam2(&config2, 1, 1);
+    GetOsdConfigParam2(&config2, sizeof(config2), 0);
     config2.dateFormat = dateFormat;
-    SetOsdConfigParam2(&config2, 1, 1);
+    SetOsdConfigParam2(&config2, sizeof(config2), 0);
 }
 #endif
 
@@ -168,7 +168,7 @@ int configGetTimeFormat(void)
     GetOsdConfigParam(&config);
     if (IsEarlyJap(config))
         return 0;
-    GetOsdConfigParam2(&config2, 1, 1);
+    GetOsdConfigParam2(&config2, sizeof(config2), 0);
     return config2.timeFormat;
 }
 #endif
@@ -189,9 +189,9 @@ void configSetTimeFormat(int timeFormat)
     GetOsdConfigParam(&config);
     if (IsEarlyJap(config))
         return;
-    GetOsdConfigParam2(&config2, 1, 1);
+    GetOsdConfigParam2(&config2, sizeof(config2), 0);
     config2.timeFormat = timeFormat;
-    SetOsdConfigParam2(&config2, 1, 1);
+    SetOsdConfigParam2(&config2, sizeof(config2), 0);
 }
 #endif
 
@@ -199,14 +199,35 @@ void configSetTimeFormat(int timeFormat)
 int configGetTimezone(void)
 {
     ConfigParam config;
+    int timezoneOffset;
 
     if (IsT10K())
-        return g_t10KConfig.timezoneOffset;
-
-    GetOsdConfigParam(&config);
-    if (IsEarlyJap(config))
-        return 540;
-    return config.timezoneOffset;
+    {
+        timezoneOffset = g_t10KConfig.timezoneOffset;
+    }
+    else
+    {
+        GetOsdConfigParam(&config);
+        if (IsEarlyJap(config))
+        {
+            timezoneOffset = 540;
+        }
+        else
+        {
+            timezoneOffset = config.timezoneOffset;
+            // Check if this is negative, and manually make it positive using bit manipulation
+            if ((timezoneOffset & 0x400) != 0)
+            {
+                // Flip bits
+                timezoneOffset ^= 0x7ff;
+                // Add one
+                timezoneOffset += 1;
+                // Make it negative
+                timezoneOffset *= -1;
+            }
+        }
+    }
+    return timezoneOffset;
 }
 #endif
 
@@ -222,7 +243,28 @@ void configSetTimezone(int timezoneOffset)
     GetOsdConfigParam(&config);
     if (IsEarlyJap(config))
         return;
-    config.timezoneOffset = timezoneOffset;
+
+    {
+        u32 wantedTimezoneOffset;
+
+        // Reduce it to signed 11 bits if it is negative using bit manipulation
+        if (timezoneOffset < 0)
+        {
+            // Make it positive
+            wantedTimezoneOffset = -timezoneOffset;
+            // Subtract one
+            wantedTimezoneOffset -= 1;
+            // Flip bits
+            wantedTimezoneOffset ^= 0x7ff;
+        }
+        else
+        {
+            wantedTimezoneOffset = timezoneOffset;
+        }
+
+        config.timezoneOffset = wantedTimezoneOffset;
+    }
+
     SetOsdConfigParam(&config);
     _libcglue_timezone_update();
 }
@@ -267,7 +309,7 @@ int configIsDaylightSavingEnabled(void)
     GetOsdConfigParam(&config);
     if (IsEarlyJap(config))
         return 0;
-    GetOsdConfigParam2(&config2, 1, 1);
+    GetOsdConfigParam2(&config2, sizeof(config2), 0);
 
     return config2.daylightSaving;
 }
@@ -285,9 +327,9 @@ void configSetDaylightSavingEnabled(int daylightSaving)
     GetOsdConfigParam(&config);
     if (IsEarlyJap(config))
         return;
-    GetOsdConfigParam2(&config2, 1, 1);
+    GetOsdConfigParam2(&config2, sizeof(config2), 0);
     config2.daylightSaving = daylightSaving;
-    SetOsdConfigParam2(&config2, 1, 1);
+    SetOsdConfigParam2(&config2, sizeof(config2), 0);
     _libcglue_timezone_update();
 }
 #endif

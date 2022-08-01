@@ -617,12 +617,7 @@ int _gettimeofday(struct timeval *tv, struct timezone *tz) {
   	tv->tv_sec = (time_t) ps2time((time_t *) NULL);
   	tv->tv_usec = 0L;
   	if (tz != NULL) {
-		/* TODO: impplement something similar at:
-		https://code.woboq.org/userspace/glibc/sysdeps/posix/gettimeofday.c.html
-		*/
-
-		/* Timezone not supported for gettimeofday */
-		tz->tz_minuteswest = 0;
+		tz->tz_minuteswest = _timezone / 60;
 		tz->tz_dsttime = 0;
     }
 
