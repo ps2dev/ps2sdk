@@ -18,7 +18,6 @@
 /* Please keep these in alphabetical order!  */
 #include "excepman.h"
 #include "loadcore.h"
-#include "intrman.h"
 #include "sifman.h"
 #include "stdio.h"
 #include "sysclib.h"
