@@ -7,6 +7,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 # IOP_CFLAGS += -DTEST_TRAP
+IOP_CFLAGS += -DIOPTRAP_PRINT_MODULE_NAME
 
 IOP_OBJS = ioptrap.o handler.o breakpoint.o exports.o imports.o
 
