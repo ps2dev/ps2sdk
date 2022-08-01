@@ -140,7 +140,7 @@ char *ExceptionGetModuleName(u32 epc, u32 *r_epc)
 #define JUMP_BUF_GP 11
 
 // Define this to something else if you want... maybe some ee_sio stuff :P
-#define TRAP_PRINTF(args...)
+#define TRAP_PRINTF(args...) printf(args)
 
 static trap_exception_handler_t handlers[16];
 
