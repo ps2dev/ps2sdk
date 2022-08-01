@@ -5,6 +5,9 @@ I_DelayThread
 I_TerminateThread
 I_DeleteThread
 I_SetAlarm
+#ifdef SMAP_RX_PACKETS_POLLING_MODE
+I_CancelAlarm
+#endif
 I_USec2SysClock
 thbase_IMPORTS_end
 

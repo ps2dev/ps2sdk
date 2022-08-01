@@ -1,3 +1,4 @@
+
 #include <errno.h>
 #include <stdio.h>
 #include <dmacman.h>
@@ -15,16 +16,10 @@
 #include <smapregs.h>
 #include <speedregs.h>
 
-#ifdef BUILDING_SMAP_NETMAN
-#include <netman.h>
-#endif
-#ifdef BUILDING_SMAP_PS2IP
-#include <ps2ip.h>
-#endif
-
 #include "main.h"
 
 #include "xfer.h"
+#include "ipstack.h"
 
 extern struct SmapDriverData SmapDriverData;
 
@@ -78,12 +73,6 @@ int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData)
     int NumPacketsReceived, i;
     volatile smap_bd_t *PktBdPtr;
     volatile u8 *smap_regbase;
-#ifdef BUILDING_SMAP_NETMAN
-    void *pbuf, *payload;
-#endif
-#ifdef BUILDING_SMAP_PS2IP
-    struct pbuf *pbuf;
-#endif
     u16 ctrl_stat, length, pointer, LengthRounded;
 
     smap_regbase = SmapDrivPrivData->smap_regbase;
@@ -119,22 +108,13 @@ int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData)
                 // Original did this whenever a frame is dropped.
                 SMAP_REG16(SMAP_R_RXFIFO_RD_PTR) = pointer + LengthRounded;
             } else {
-#ifdef BUILDING_SMAP_NETMAN
-                if ((pbuf = NetManNetProtStackAllocRxPacket(LengthRounded, &payload)) != NULL) {
-                    CopyFromFIFO(SmapDrivPrivData->smap_regbase, payload, length, pointer);
-                    NetManNetProtStackEnQRxPacket(pbuf);
-                    NumPacketsReceived++;
-                } else
-#endif
-#ifdef BUILDING_SMAP_PS2IP
-                if ((pbuf = pbuf_alloc(PBUF_RAW, LengthRounded, PBUF_POOL)) != NULL) {
-                    CopyFromFIFO(SmapDrivPrivData->smap_regbase, pbuf->payload, length, pointer);
+                void *pbuf, *payload;
 
-                    // Inform ps2ip that we've received data.
-                    SMapLowLevelInput(pbuf);
-                } else
-#endif
-                {
+                if ((pbuf = SMapCommonStackAllocRxPacket(LengthRounded, &payload)) != NULL) {
+                    CopyFromFIFO(SmapDrivPrivData->smap_regbase, payload, length, pointer);
+                    SMapStackEnQRxPacket(pbuf);
+                    NumPacketsReceived++;
+                } else {
                     SmapDrivPrivData->RuntimeStats.RxAllocFail++;
                     // Original did this whenever a frame is dropped.
                     SMAP_REG16(SMAP_R_RXFIFO_RD_PTR) = pointer + LengthRounded;
@@ -165,13 +145,7 @@ int HandleTxReqs(struct SmapDriverData *SmapDrivPrivData)
         int length;
 
         data = NULL;
-#ifdef BUILDING_SMAP_NETMAN
-        if ((length = NetManTxPacketNext(&data)) < 1)
-#endif
-#ifdef BUILDING_SMAP_PS2IP
-        if ((length = SMapTxPacketNext(&data)) < 1)
-#endif
-        {
+        if ((length = SMAPCommonTxPacketNext(&data)) < 1) {
             return result;
         }
         SmapDrivPrivData->packetToSend = data;
@@ -205,11 +179,6 @@ int HandleTxReqs(struct SmapDriverData *SmapDrivPrivData)
             return result; // Queue full
 
         SmapDrivPrivData->packetToSend = NULL;
-#ifdef BUILDING_SMAP_NETMAN
-        NetManTxPacketDeQ();
-#endif
-#ifdef BUILDING_SMAP_PS2IP
-        SMapTxPacketDeQ();
-#endif
+        SMAPCommonTxPacketDeQ(&data);
     }
 }

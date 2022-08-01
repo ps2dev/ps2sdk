@@ -1,3 +1,16 @@
+
+#ifndef MAIN_H
+#define MAIN_H
+
+#include <thbase.h>
+
+#ifdef BUILDING_SMAP_NETMAN
+#include <netman.h>
+#endif
+#ifdef BUILDING_SMAP_PS2IP
+#include <ps2ip.h>
+#endif
+
 // In the SONY original, all the calls to DEBUG_PRINTF() were to sceInetPrintf().
 #define DEBUG_PRINTF(args...) printf(args)
 
@@ -39,6 +52,9 @@ struct SmapDriverData
     unsigned char LinkStatus; // Ethernet link is initialized (hardware)
     unsigned char LinkMode;
     iop_sys_clock_t LinkCheckTimer;
+#ifdef SMAP_RX_PACKETS_POLLING_MODE
+    iop_sys_clock_t RxIntrPollingTimer;
+#endif
 #ifdef BUILDING_SMAP_NETMAN
     struct NetManEthRuntimeStats RuntimeStats;
     int NetIFID;
@@ -74,4 +90,4 @@ int SMapTxPacketNext(void **payload);
 void SMapTxPacketDeQ(void);
 #endif
 
-#include "xfer.h"
+#endif
