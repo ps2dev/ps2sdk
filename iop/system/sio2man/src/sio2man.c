@@ -130,7 +130,7 @@ void send_td(sio2_transfer_data_t *td)
 #endif
 
 	if (td->in_size) {
-		for (i = 0; i < td->in_size; i++)
+		for (i = 0; (u32)i < td->in_size; i++)
 			sio2_data_out(td->in[i]);
 #ifdef SIO2LOG
 		log_data(LOG_TRS_DATA, td->in, td->in_size);
@@ -171,7 +171,7 @@ void recv_td(sio2_transfer_data_t *td)
 	log_stat(td->stat6c, td->stat70, td->stat74);
 #endif
 	if (td->out_size) {
-		for (i = 0; i < td->out_size; i++)
+		for (i = 0; (u32)i < td->out_size; i++)
 			td->out[i] = sio2_data_in();
 #ifdef SIO2LOG
 		log_data(LOG_TRR_DATA, td->out, td->out_size);
@@ -305,7 +305,7 @@ void shutdown(void)
 	dmac_disable(IOP_DMAC_SIO2out);
 }
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
 	int state;
 
@@ -315,10 +315,10 @@ int _start(int argc, char **argv)
 	shutdown();
 
 	if (RegisterLibraryEntries(&_exp_sio2man) != 0)
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 
 	if (init)
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 
 	init = 1;
 
@@ -342,7 +342,7 @@ int _start(int argc, char **argv)
 #ifdef SIO2LOG
 	EPRINTF("Logging started.\n");
 #endif
-	return 0;
+	return MODULE_RESIDENT_END;
 }
 
 void sio2_pad_transfer_init(void)

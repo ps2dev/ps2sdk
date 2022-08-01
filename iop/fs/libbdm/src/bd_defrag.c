@@ -16,7 +16,7 @@ int bd_defrag(struct block_device* bd, u32 fragcount, struct bd_fragment* fragli
         int i;
 
         // Locate fragment containing start sector
-        for (i=0; i<fragcount; i++) {
+        for (i=0; (u32)i<fragcount; i++) {
             f = &fraglist[i];
             if (offset <= sector_start && (offset + f->count) > sector_start) {
                 // Fragment found
@@ -25,7 +25,7 @@ int bd_defrag(struct block_device* bd, u32 fragcount, struct bd_fragment* fragli
             offset += f->count;
         }
 
-        if (i == fragcount) {
+        if ((u32)i == fragcount) {
             M_PRINTF("%s: ERROR: fragment not found!\n", __FUNCTION__);
             return -1;
         }

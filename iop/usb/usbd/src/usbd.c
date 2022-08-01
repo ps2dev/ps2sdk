@@ -135,7 +135,7 @@ void processDoneQueue_IsoTd(HcIsoTD *arg)
             HcIsoTD *nextTd = curTd->next;
             freeIsoTd(curTd);
 
-            IoRequest *req = memPool.hcIsoTdToIoReqLUT[curTd - memPool.hcIsoTdBuf];
+            req = memPool.hcIsoTdToIoReqLUT[curTd - memPool.hcIsoTdBuf];
             if (req) {
                 memPool.hcIsoTdToIoReqLUT[arg - memPool.hcIsoTdBuf] = NULL;
                 IoRequest *listPos;
@@ -198,10 +198,17 @@ void processDoneQueue_GenTd(HcTD *arg)
 
         if (hcRes || ((tdHcArea & 0xE00000) != 0xE00000)) { // E00000: interrupts disabled
             req->prev = lastElem;
+#if 0
+            // lastElem is NULL, so this condition is always false
             if (lastElem)
+            {
                 lastElem->next = req;
+            }
             else
+#endif
+            {
                 firstElem = req;
+            }
             req->next = NULL;
             lastElem  = req;
         }
@@ -213,7 +220,7 @@ void processDoneQueue_GenTd(HcTD *arg)
                 HcTD *nextTd = tdListPos->next;
                 freeTd(tdListPos);
 
-                IoRequest *req = memPool.hcTdToIoReqLUT[tdListPos - memPool.hcTdBuf];
+                req = memPool.hcTdToIoReqLUT[tdListPos - memPool.hcTdBuf];
                 if (req) {
                     memPool.hcTdToIoReqLUT[tdListPos - memPool.hcTdBuf] = NULL;
 

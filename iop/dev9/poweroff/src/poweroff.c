@@ -46,7 +46,6 @@ extern struct irx_export_table _exp_poweroff;
 
 //---------------------------------------------------------------------
 
-int  _start(int, char**);
 static void Shutdown();
 static void SendCmd(void* data);
 
@@ -238,7 +237,7 @@ void poweroff_rpc_Thread(void* param)
 	SifRpcLoop(&qd);
 }
 
-int _start(int argc, char* argv[])
+int _start(int argc, char *argv[])
 {
 	register struct handlerTableEntry *handlers=(struct handlerTableEntry*)0x480;//iopmem
 	iop_thread_t mythread;
@@ -249,19 +248,19 @@ int _start(int argc, char* argv[])
 	if(RegisterLibraryEntries(&_exp_poweroff) != 0)
 	{
 		M_PRINTF("Poweroff already registered\n");
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 	}
 
 	SetPowerButtonHandler(Shutdown, 0);
 
 	if (handlers[IOP_IRQ_CDVD].handler==0) {
 		M_PRINTF("No CDROM handler. Run CDVDMAN first\n");
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 	}
 
 	if (((int)handlers[IOP_IRQ_CDVD].handler & 3) != TYPE_C){
 		M_PRINTF("Cannot chain to non-C handler\n");
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 	}
 
 	oldCdHandler=(intrhandler)((int)handlers[IOP_IRQ_CDVD].handler & ~3);

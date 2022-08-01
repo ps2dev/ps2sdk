@@ -94,7 +94,7 @@ static u8 mcserv_buf[MCSERV_BUFSIZE] __attribute__((aligned(64)));
 extern struct irx_export_table _exp_mcserv;
 
 //--------------------------------------------------------------
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
 	iop_thread_t thread_param;
 	register int thread_id;
@@ -393,11 +393,12 @@ int sceMcCheckBlock(void)
 int _McInit(void *rpc_buf)
 {
 	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
-	int ps1flag = 0;
 
 	DPRINTF("_McInit fd %d offset %d\n", dP->fd, dP->offset);
 
 	if (mcman_type == MCMAN) {
+		int ps1flag = 0;
+
 		if (dP->offset == -217)
 			ps1flag = 1;
 
@@ -712,7 +713,7 @@ int _McWrite(void *rpc_buf)
 {
 	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
 	SifRpcReceiveData_t	rD;
-	register int size_to_write, size_written, r;
+	register int size_written;
 
 	DPRINTF("_McWrite fd %d ee buffer addr %x size %d\n", dP->fd, (int)dP->buffer, dP->size);
 
@@ -726,6 +727,7 @@ int _McWrite(void *rpc_buf)
 	}
 
 	while (dP->size > 0) {
+		register int size_to_write, r;
 
 		size_to_write = dP->size;
 
@@ -988,7 +990,7 @@ int _McFlush(void *rpc_buf)
 int _McEraseBlock(void *rpc_buf)
 {
 	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
-	register int pagenum, r;
+	register int r;
 	u8 eccbuf[16];
 
 	DPRINTF("_McEraseBlock port%d slot%d offset %d\n", dP->port, dP->slot, dP->offset);
@@ -996,6 +998,8 @@ int _McEraseBlock(void *rpc_buf)
 	dP->port = (dP->port & 1) + 2;
 
 	if (pMcGetMcType(dP->port, dP->slot) == 2) {
+		register int pagenum;
+
 		r = pMcEraseBlock(dP->port, dP->offset, NULL, NULL);
 		if (r != 0)
 			return r;
@@ -1087,7 +1091,7 @@ fullpage:
 
 dma_transfer:
 	CpuSuspendIntr(&intStatus);
-	status = sceSifSetDma(&dmaStruct, 1);
+	sceSifSetDma(&dmaStruct, 1);
 	CpuResumeIntr(intStatus);
 
 	dmaStruct.src = (void *)&eP;

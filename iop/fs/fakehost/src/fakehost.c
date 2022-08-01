@@ -20,6 +20,7 @@
 //#define DEBUG
 
 #include "types.h"
+#include "loadcore.h"
 #include "stdio.h"
 #include "sysclib.h"
 #include "thbase.h"
@@ -54,12 +55,6 @@ IRX_ID(MODNAME, 1, 1);
 
 // Host base location
 static char base[100];
-
-// FileIO structure.
-static iop_io_device_t driver;
-
-// Function array for fileio structure.
-static iop_io_device_ops_t functions;
 
 static int fd_global;
 
@@ -199,6 +194,36 @@ int fd_lseek( iop_io_file_t *fd, int offset, int whence)
 	return lseek( realfd(fd), offset, whence );
 }
 
+// Function array for fileio structure.
+static iop_io_device_ops_t functions = {
+	&fd_initialize,
+	(void *)&dummy,
+	(void *)&dummy,
+	&fd_open,
+	&fd_close,
+	&fd_read,
+	(void *)&dummy,
+	&fd_lseek,
+	(void *)&dummy,
+	(void *)&dummy,
+	(void *)&dummy,
+	(void *)&dummy,
+	(void *)&dummy,
+	(void *)&dummy,
+	(void *)&dummy,
+	(void *)&dummy,
+	(void *)&dummy,
+};
+
+// FileIO structure.
+static iop_io_device_t driver = {
+	FS_REPNAME,
+	16,
+	1,
+	"host redirection driver",
+	&functions,
+};
+
 /** Entry point for IRX.
  * @ingroup fakehost
  *
@@ -216,14 +241,14 @@ int fd_lseek( iop_io_file_t *fd, int offset, int whence)
  *   MODULE_RESIDENT_END if loaded and registered as library.
  *   MODULE_NO_RESIDENT_END if just exiting normally.
  */
-int _start( int argc, char **argv )
+int _start( int argc, char *argv[] )
 {
 	M_PRINTF( "Copyright (c) 2004 adresd\n" );
 
 	if ( argc != 2 )
 	{
 		M_PRINTF( "HOST requires based argument\n" );
-		return -1;
+		return MODULE_NO_RESIDENT_END;
 	}
       else
       {
@@ -234,30 +259,6 @@ int _start( int argc, char **argv )
       	M_PRINTF( "redirecting '%s:' to '%s'\n",FS_REPNAME,base);
 		fd_global = 1;
 
-		driver.name = FS_REPNAME;
-		driver.type = 16;
-		driver.version = 1;
-		driver.desc = "host redirection driver";
-		driver.ops = &functions;
-
-		functions.io_init = fd_initialize;
-		functions.io_deinit = dummy;
-		functions.io_format = dummy;
-		functions.io_open = fd_open;
-		functions.io_close = fd_close;
-		functions.io_read = fd_read;
-		functions.io_write = dummy;
-		functions.io_lseek = fd_lseek;
-		functions.io_ioctl = dummy;
-		functions.io_remove = dummy;
-		functions.io_mkdir = dummy;
-		functions.io_rmdir = dummy;
-		functions.io_dopen =  dummy;
-		functions.io_dclose = dummy;
-		functions.io_dread = dummy;
-		functions.io_getstat = dummy;
-		functions.io_chstat = dummy;
-
 		M_PRINTF( "HOST final step, bye\n" );
 
 		// Install naplink RPC handler
@@ -267,7 +268,7 @@ int _start( int argc, char **argv )
 		io_DelDrv( FS_REPNAME );
 		io_AddDrv( &driver );
 	}
-	return 0;
+	return MODULE_RESIDENT_END;
 }
 
 

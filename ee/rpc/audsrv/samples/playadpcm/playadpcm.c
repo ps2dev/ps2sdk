@@ -19,7 +19,7 @@
 
 #include <audsrv.h>
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
 	/* Uncomment to hear two samples played simultaenously
 	int i;

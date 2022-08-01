@@ -292,7 +292,7 @@ void pfsBitmapFreeBlockSegment(pfs_mount_t *pfsMount, pfs_blockinfo_t *bi)
 int pfsBitmapCalcFreeZones(pfs_mount_t *pfsMount, int sub)
 {
 	// "Free zone" map. Used to get number of free zone in bitmap, 4-bits at a time
-	u32 pfsFreeZoneBitmap[16]={4, 3, 3, 2, 3, 2, 2, 1, 3, 2, 2, 1, 2, 1, 1, 0};
+	const u32 pfsFreeZoneBitmap[16]={4, 3, 3, 2, 3, 2, 2, 1, 3, 2, 2, 1, 2, 1, 1, 0};
 	int result;
 	pfs_bitmapInfo_t info;
 	u32 i, bitmapSize, zoneFree=0, sector;

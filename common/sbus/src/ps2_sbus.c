@@ -77,7 +77,7 @@ void *SBUS_set_irq_handler(int irq, SBUS_IrqHandlerFunc func, void *param)
     void *rv = NULL;
 
     if (irq < 32) {
-        int oldi = 0;
+        int oldi;
         M_SuspendIntr(&oldi);
         rv                            = _sbus_irq_handlers[irq].func;
         _sbus_irq_handlers[irq].func  = func;
@@ -94,7 +94,7 @@ int SBUS_rem_irq_handler(int irq)
 {
 
     if (irq < 32) {
-        int oldi = 0;
+        int oldi;
         M_SuspendIntr(&oldi);
         _sbus_irq_handlers[irq].func  = NULL;
         _sbus_irq_handlers[irq].param = NULL;

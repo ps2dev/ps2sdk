@@ -123,7 +123,7 @@ void find_controllers()
 
 		if((mtapcon == 0) && (mtapConnected[port] == 1))
 		{
-			printf("Multitap (%i) disconnected(int argc, char **argv)\n", (int)port);
+			printf("Multitap (%i) disconnected(int argc, char *argv[])\n", (int)port);
 		}
 
 		mtapConnected[port] = mtapcon;
@@ -190,7 +190,7 @@ void find_controllers()
 
 
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
 	u32 i;
 

@@ -552,12 +552,12 @@ static int sbp2_queue_cmd(struct scsi_interface *scsi, const unsigned char *cmd,
     cdb.NextOrb.reserved = NULL_POINTER;
 
     // Copy and BSWAP32 the SCSI command
-    for (i = 0; i < cmd_len / 4; i++)
+    for (i = 0; (unsigned int)i < cmd_len / 4; i++)
         ((unsigned int *)cdb.CDBs)[i] = BSWAP32(((unsigned int *)cmd)[i]);
 
     if ((data_len > 0) && (data_wr == 1)) {
         // BSWAP32 all data we write
-        for (i = 0; i < data_len / 4; i++)
+        for (i = 0; (unsigned int)i < data_len / 4; i++)
             ((unsigned int *)writeBuffer)[i] = BSWAP32(((unsigned int *)data)[i]);
     }
 
@@ -568,7 +568,7 @@ static int sbp2_queue_cmd(struct scsi_interface *scsi, const unsigned char *cmd,
         M_DEBUG("sbp2_queue_cmd error %d\n", ret);
     } else if ((data_len > 0) && (data_wr == 0)) {
         // BSWAP32 all data we read
-        for (i = 0; i < data_len / 4; i++)
+        for (i = 0; (unsigned int)i < data_len / 4; i++)
             ((unsigned int *)data)[i] = BSWAP32(((unsigned int *)data)[i]);
     }
 

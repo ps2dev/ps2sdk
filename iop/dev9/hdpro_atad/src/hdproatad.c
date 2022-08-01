@@ -234,7 +234,7 @@ int _start(int argc, char *argv[])
         goto out;
     }
 
-    if ((res = RegisterLibraryEntries(&_exp_atad)) != 0) {
+    if (RegisterLibraryEntries(&_exp_atad) != 0) {
         M_PRINTF("Library is already registered, exiting.\n");
         goto out;
     }
@@ -897,7 +897,7 @@ int ata_io_finish(void)
             goto finish;
 
         /* Transfer each PIO data block.  */
-        while (--cmd_state->blkcount != -1) {
+        while ((int)(--cmd_state->blkcount) != -1) {
             if ((res = ata_pio_transfer(cmd_state)) < 0)
                 goto finish;
             if ((res = ata_wait_busy()) < 0)

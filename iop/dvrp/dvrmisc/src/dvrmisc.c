@@ -10,6 +10,7 @@
 
 #include <stdbool.h>
 #include "iomanX.h"
+#include "loadcore.h"
 #include "pvrdrv.h"
 #include "stdio.h"
 #include "sysclib.h"
@@ -85,7 +86,7 @@ struct DevctlCmdTbl_t
         {0x567B, &dvrioctl2_get_dv_nodeid},
         {0x5682, &dvrioctl2_diag_test},
 };
-struct _iop_device_ops DvrFuncTbl =
+static iop_device_ops_t DvrFuncTbl =
     {
         &dvrmisc_df_init,
         &dvrmisc_df_exit,
@@ -113,8 +114,9 @@ struct _iop_device_ops DvrFuncTbl =
         &dvrmisc_df_devctl,
         &dvrmisc_df_null,
         &dvrmisc_df_null,
-        &dvrmisc_df_ioctl2};
-iop_device_t DVRMISC = {
+        &dvrmisc_df_ioctl2,
+    };
+static iop_device_t DVRMISC = {
     .name = "dvr_misc",
     .desc = "Digital Video Recorder MISC task",
     .type = (IOP_DT_FS | IOP_DT_FSEXT),
@@ -128,11 +130,11 @@ char SBUF[16384];
 #define MODNAME "DVRMISC"
 IRX_ID(MODNAME, 1, 1);
 
-int _start(int a1, char **argv)
+int _start(int argc, char *argv[])
 {
     (void)argv;
 
-    if (a1 >= 0)
+    if (argc >= 0)
         return module_start();
     else
         return module_stop();
@@ -149,23 +151,23 @@ int module_start()
     }
     if (i == 30000) {
         printf("MISC task of DVRP is not running...\n");
-        return 1;
+        return MODULE_NO_RESIDENT_END;
     } else {
         if (AddDrv(&DVRMISC) != 0)
-            return 1;
+            return MODULE_NO_RESIDENT_END;
     }
 #if 0
-    return 2;
+    return MODULE_REMOVABLE_END;
 #else
-    return 0;
+    return MODULE_RESIDENT_END;
 #endif
 }
 
 int module_stop()
 {
     if (DelDrv(DVRMISC.name) != 0)
-        return 2;
-    return 1;
+        return MODULE_REMOVABLE_END;
+    return MODULE_NO_RESIDENT_END;
 }
 
 int dvrmisc_df_init(iop_device_t *dev)
@@ -1304,6 +1306,8 @@ int dvrioctl2_get_dv_nodeid(
     bufwalked = 0;
     if (buflen) {
         u16 *return_result_word;
+        int bufbusyloop;
+
         return_result_word = cmdack.return_result_word;
         do {
             char *buftmp;
@@ -1313,11 +1317,9 @@ int dvrioctl2_get_dv_nodeid(
             buftmp[1] = (*return_result_word & 0x00FF);
             return_result_word += 1;
         } while (bufwalked < buflen);
-    }
-    if (buflen) {
-        int bufbusyloop;
+
         bufbusyloop = 0;
-        while (bufbusyloop++ < buflen)
+        while ((unsigned int)(bufbusyloop++) < buflen)
             ;
     }
     return 0;

@@ -112,7 +112,6 @@ u8 special_keys[PS2KBD_KEYMAP_SIZE];
 u8 control_map[PS2KBD_KEYMAP_SIZE];
 u8 alt_map[PS2KBD_KEYMAP_SIZE];
 //static struct fileio_driver kbd_fdriver;
-iop_device_t kbd_filedrv;
 u8 keyModValue[8] = { 0xE0, 0xE1, 0xE2, 0xE3, 0xE4, 0xE5, 0xE6, 0xE7 };
 int repeat_tid;
 int eventid;   /* Id of the repeat event */
@@ -265,7 +264,7 @@ int ps2kbd_connect(int devId)
   currDev->dataEndp = sceUsbdOpenPipe(devId, endp);
   currDev->packetSize = endp->wMaxPacketSizeLB | ((int) endp->wMaxPacketSizeHB << 8);
   currDev->eventmask = (1 << devLoop);
-  if(currDev->packetSize > sizeof(kbd_data_recv))
+  if((unsigned int)(currDev->packetSize) > sizeof(kbd_data_recv))
     {
       currDev->packetSize = sizeof(kbd_data_recv);
     }
@@ -494,7 +493,7 @@ void ps2kbd_getkeys(u8 keyMods, u8 ledStatus, const u8 *keys, kbd_dev *dev)
       currChars[0] = 0;
       currChars[1] = 0;
 
-      if(lineEndP == (tempPos - 1))
+      if(lineEndP == (u32)(tempPos - 1))
 	{
 	  break;
 	}
@@ -572,7 +571,7 @@ void ps2kbd_getkeys(u8 keyMods, u8 ledStatus, const u8 *keys, kbd_dev *dev)
 
       if((currChars[0] == PS2KBD_ESCAPE_KEY) && (currChars[1] != 0))
 	{
-	  if(lineEndP != (tempPos - 2))
+	  if(lineEndP != (u32)(tempPos - 2))
 	    {
 	      lineBuffer[lineEndP++] = currChars[0];
 	      lineEndP %= lineSize;
@@ -637,7 +636,7 @@ void ps2kbd_getkeys_raw(u8 newKeyMods, u8 oldKeyMods, const u8 *new, const u8 *o
       int currMod = (1 << loopKey);
       if(keyMods & currMod)
 	{
-	  if(lineEndP == (tempPos - 2))
+	  if(lineEndP == (u32)(tempPos - 2))
 	    {
 	      return;
 	    }
@@ -665,7 +664,7 @@ void ps2kbd_getkeys_raw(u8 newKeyMods, u8 oldKeyMods, const u8 *new, const u8 *o
 
   for(loopKey = 0; loopKey < PS2KBD_MAXKEYS; loopKey++)
     {
-      if(lineEndP == (tempPos - 2))
+      if(lineEndP == (u32)(tempPos - 2))
 	{
 	  return;
 	}
@@ -684,7 +683,7 @@ void ps2kbd_getkeys_raw(u8 newKeyMods, u8 oldKeyMods, const u8 *new, const u8 *o
 
   for(loopKey = 0; loopKey < PS2KBD_MAXKEYS; loopKey++)
     {
-      if(lineEndP == (tempPos - 2))
+      if(lineEndP == (u32)(tempPos - 2))
 	{
 	  return;
 	}
@@ -853,7 +852,7 @@ void ps2kbd_ioctl_setreadmode(u32 readmode)
 
 {
 
-  if(readmode == kbd_readmode) return;
+  if(readmode == (u32)kbd_readmode) return;
 
   if((readmode == PS2KBD_READMODE_NORMAL) || (readmode == PS2KBD_READMODE_RAW))
     {
@@ -1112,36 +1111,40 @@ int fio_close(iop_file_t *f)
   return 0;
 }
 
-iop_device_ops_t fio_ops =
+static iop_device_ops_t fio_ops =
 
   {
-    fio_init,
-    fio_dummy,
-    fio_format,
-    fio_open,
-    fio_close,
-    fio_read,
-    fio_dummy,
-    fio_dummy,
-    fio_ioctl,
-    fio_dummy,
-    fio_dummy,
-    fio_dummy,
-    fio_dummy,
-    fio_dummy,
-    fio_dummy,
-    fio_dummy,
-    fio_dummy
+    &fio_init,
+    (void *)&fio_dummy,
+    &fio_format,
+    &fio_open,
+    &fio_close,
+    &fio_read,
+    (void *)&fio_dummy,
+    (void *)&fio_dummy,
+    &fio_ioctl,
+    (void *)&fio_dummy,
+    (void *)&fio_dummy,
+    (void *)&fio_dummy,
+    (void *)&fio_dummy,
+    (void *)&fio_dummy,
+    (void *)&fio_dummy,
+    (void *)&fio_dummy,
+    (void *)&fio_dummy,
   };
+
+static iop_device_t kbd_filedrv = {
+  PS2KBD_FSNAME,
+  IOP_DT_CHAR,
+  0,
+  "USB Keyboard FIO driver",
+  &fio_ops,
+};
+
 
 int init_fio()
 
 {
-  kbd_filedrv.name = PS2KBD_FSNAME;
-  kbd_filedrv.type = IOP_DT_CHAR;
-  kbd_filedrv.version = 0;
-  kbd_filedrv.desc = "USB Keyboard FIO driver";
-  kbd_filedrv.ops = &fio_ops;
   return AddDrv(&kbd_filedrv);
 }
 
@@ -1175,7 +1178,7 @@ void repeat_thread(void *arg)
 
 	      if((devices[devLoop]->repeatkeys[0]) && (devices[devLoop]->repeatkeys[1]))
 		{
-		  if(lineEndP != (tempPos - 2))
+		  if(lineEndP != (u32)(tempPos - 2))
 		    {
 		      lineBuffer[lineEndP++] = devices[devLoop]->repeatkeys[0];
 		      lineEndP %= lineSize;
@@ -1187,7 +1190,7 @@ void repeat_thread(void *arg)
 		}
 	      else if(devices[devLoop]->repeatkeys[0])
 		{
-		  if(lineEndP != (tempPos - 1))
+		  if(lineEndP != (u32)(tempPos - 1))
 		    {
 		      lineBuffer[lineEndP++] = devices[devLoop]->repeatkeys[0];
 		      lineEndP %= lineSize;

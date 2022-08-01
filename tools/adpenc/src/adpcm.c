@@ -240,7 +240,7 @@ static void pack( const double *d_samples, short *four_bit, int predict_nr, int 
 
     for ( i = 0; i < 28; i++ ) {
         double ds;
-        int di;
+        int di, di_shift_tmp;
         double s_0;
 
         s_0 = d_samples[i] + s_1 * f[predict_nr][0] + s_2 * f[predict_nr][1];
@@ -255,7 +255,9 @@ static void pack( const double *d_samples, short *four_bit, int predict_nr, int 
 
         four_bit[i] = (short) di;
 
-        di = di >> shift_factor;
+        // This is a portable implementation of arithmetic right shift.
+        di_shift_tmp = -((unsigned int) di >> 31);
+        di = (di_shift_tmp ^ di) >> shift_factor ^ di_shift_tmp;
         s_2 = s_1;
         s_1 = (double) di - s_0;
 

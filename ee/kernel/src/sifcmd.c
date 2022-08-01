@@ -154,12 +154,12 @@ int _SifCmdIntHandler(int channel)
     id = header->cid & ~SIF_CMD_ID_SYSTEM;
 
     if (header->cid & SIF_CMD_ID_SYSTEM) {
-        if (id < cmd_data->nr_sys_handlers)
+        if ((u32)id < cmd_data->nr_sys_handlers)
             cmd_handlers = cmd_data->sys_cmd_handlers;
         else
             goto out;
     } else {
-        if (id < cmd_data->nr_usr_handlers)
+        if ((u32)id < cmd_data->nr_usr_handlers)
             cmd_handlers = cmd_data->usr_cmd_handlers;
         else
             goto out;

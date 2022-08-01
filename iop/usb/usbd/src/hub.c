@@ -128,7 +128,7 @@ void hubStatusChangeCallback(IoRequest *req)
                     return;
                 }
             } else {
-                for (port = 1; port <= dev->numChildDevices; port++) {
+                for (port = 1; (u32)port <= dev->numChildDevices; port++) {
                     if (dev->statusChangeInfo[port >> 3] & BIT(port & 7)) {
                         dev->statusChangeInfo[port >> 3] &= ~BIT(port & 7);
                         dev->portCounter = port;

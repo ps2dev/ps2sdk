@@ -93,7 +93,7 @@ static void padStopAct(int port, int act)
 	padStartAct(port, act, 0);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
 	u32 port;
 	struct padButtonStatus buttons;
@@ -198,7 +198,6 @@ int main(int argc, char **argv)
 				if(acts[port] > 0)
 				{
 					u8 actAlign[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
-					u32 i;
 
 					/* Set offsets for motor parameters for SetActDirect. */
 					for(i=0; i < acts[port]; i++)

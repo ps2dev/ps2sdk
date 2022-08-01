@@ -28,7 +28,7 @@ int poll(struct pollfd *fds, unsigned long nfds, int timeout)
     FD_ZERO(&wfd);
     FD_ZERO(&efd);
 
-    for (i = 0; i < nfds; i++) {
+    for (i = 0; (unsigned long)i < nfds; i++) {
         int events = fds[i].events;
         int fd     = fds[i].fd;
 
@@ -63,7 +63,7 @@ int poll(struct pollfd *fds, unsigned long nfds, int timeout)
 
     count = 0;
 
-    for (i = 0; i < nfds; i++) {
+    for (i = 0; (unsigned long)i < nfds; i++) {
         int revents = (fds[i].events & POLL_EVENTS_MASK);
         int fd      = fds[i].fd;
 

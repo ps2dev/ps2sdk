@@ -148,7 +148,7 @@ int mcman_open1(int port, int slot, char *filename, int flags)
 	for (i = 0; i < MAX_FDHANDLES; i++) {
 		if ((mcman_fdhandles[i].status != 0) && \
 			(mcman_fdhandles[i].port == port) && (mcman_fdhandles[i].slot == slot) && \
-			 	(mcman_fdhandles[i].freeclink == r) && (fh->wrflag != 0))
+			 	(mcman_fdhandles[i].freeclink == (u32)r) && (fh->wrflag != 0))
 			return sceMcResDeniedPermit;
 	}
 
@@ -177,15 +177,25 @@ int mcman_open1(int port, int slot, char *filename, int flags)
 
 				mce = mcman_get1stcacheEntp();
 
+#if 0
+				// This condition is always false because "i" starts at 0 and increments.
 				if ((i + 1) < 0)
+				{
 					temp = i + 8;
+				}
 				else
+#endif
+				{
 					temp = i + 1;
+				}
 
 				temp &= 0xfffffff8;
 				temp = (i + 1) - temp;
+#if 0
+				// This condition is always false due to the preceding set of assignments on "temp" variable.
 				if (temp < 0)
 					temp = 0;
+#endif
 
 				mce->wr_flag |= 1 << temp;
 			}
@@ -219,10 +229,17 @@ int mcman_open1(int port, int slot, char *filename, int flags)
 
 	mce = mcman_get1stcacheEntp();
 
+#if 0
+	// This condition is always false due to the preceding check on "cluster" variable.
 	if ((cluster + 1) < 0)
+	{
 		temp = cluster + 8;
+	}
 	else
+#endif
+	{
 		temp = cluster + 1;
+	}
 
 	temp &= 0xfffffff8;
 	temp = (cluster + 1) - temp;
@@ -252,7 +269,7 @@ int mcman_read1(int fd, void *buffer, int nbyte)
 	if (fh->position >= fh->filesize)
 		return 0;
 
-	if (nbyte >= (fh->filesize - fh->position))
+	if ((u32)nbyte >= (fh->filesize - fh->position))
 		nbyte = fh->filesize - fh->position;
 
 	rpos = 0;
@@ -496,8 +513,11 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 	mce = mcman_get1stcacheEntp();
 
 	temp = r + 1;
+#if 0
+	// This condition is always false due to the preceding check on "r" variable.
 	if ((r + 1) < 0)
 		temp = r + 8;
+#endif
 
 	temp &= 0xfffffff8;
 	temp = (r + 1) - temp;
@@ -559,7 +579,6 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 int mcman_getdir1(int port, int slot, char *dirname, int flags, int maxent, sceMcTblGetDir *info)
 {
 	register int r, i;
-	char *p;
 	McFsEntryPS1 *fse;
 
 	DPRINTF("mcman_getdir1 port%d slot%d dirname %s maxent %d flags %x\n", port, slot, dirname, maxent, flags);
@@ -569,6 +588,8 @@ int mcman_getdir1(int port, int slot, char *dirname, int flags, int maxent, sceM
 	i = 0;
 
 	if (!flags) {
+		char *p;
+
 		mcman_PS1curcluster = 0;
 		p = dirname;
 		do {

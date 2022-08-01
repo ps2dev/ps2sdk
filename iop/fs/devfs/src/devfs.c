@@ -45,10 +45,6 @@ IRX_ID(MODNAME, 1, 1);
 
 extern struct irx_export_table _exp_devfs;
 
-iop_device_t devfs_device;
-iop_device_ops_t devfs_ops;
-typedef int (*dummy_func)(void);
-
 typedef struct
 
 {
@@ -148,7 +144,7 @@ int devfs_fill_dirent(iox_dirent_t *dirent, int devno)
 
    while(dev_scan != NULL)
    {
-     if((curr_no + dev_scan->subdev_count) > devno)
+     if((curr_no + dev_scan->subdev_count) > (u32)devno)
      {
         for(subdev_loop = 0; subdev_loop < DEVFS_MAX_SUBDEVS; subdev_loop++)
         {
@@ -398,7 +394,7 @@ int devfs_open(iop_file_t *file, const char *name, int mode, int unused)
 
       name_len = strlen(dev->node.name);
 
-      if(name_len == strlen(name)) /* If this is has not got a subnumber */
+      if((unsigned int)name_len == strlen(name)) /* If this is has not got a subnumber */
       {
         M_PRINTF("open: No subdevice number in filename %s\n", name);
         return -1;
@@ -782,7 +778,7 @@ int devfs_lseek(iop_file_t *file, long loc, int whence)
                        break;
         case SEEK_CUR: if(loc > 0)
                          data->loc.loc64 += (u64) loc;
-                       else if(((s64) -loc) < data->loc.loc64)
+                       else if((u64)((s64) -loc) < data->loc.loc64)
                          data->loc.loc64 += (s64) loc;
                        break;
         case SEEK_END: if((loc > 0)
@@ -830,7 +826,7 @@ int devfs_lseek64(iop_file_t *file, long long loc, int whence)
                        break;
         case SEEK_CUR: if(loc > 0)
                          data->loc.loc64 += (u64) loc;
-                       else if(((s64) -loc) < data->loc.loc64)
+                       else if((u64)((s64) -loc) < data->loc.loc64)
                          data->loc.loc64 += (s64) loc;
                        break;
         case SEEK_END: if((loc > 0)                                                                                  && (dev->subdevs[data->subdev].extent.loc64 >= (u64) loc))
@@ -963,7 +959,7 @@ int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
 
       name_len = strlen(dev->node.name);
 
-      if(name_len == strlen(name)) /* If this is has not got a subnumber */
+      if((unsigned int)name_len == strlen(name)) /* If this is has not got a subnumber */
       {
         M_PRINTF("getstat: No subdevice number in filename %s\n", name);
         return -1;
@@ -1011,6 +1007,44 @@ int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
 
    return 0;
 }
+ 
+static iop_device_ops_t devfs_ops = {
+  &devfs_init,
+  &devfs_deinit,
+  (void *)&devfs_dummy,
+  &devfs_open,
+  &devfs_close,
+  &devfs_read,
+  (void *)&devfs_dummy,
+  (void *)&devfs_dummy,
+  &devfs_ioctl,
+  (void *)&devfs_dummy,
+  (void *)&devfs_dummy,
+  (void *)&devfs_dummy,
+  &devfs_dopen,
+  &devfs_dclose,
+  &devfs_dread,
+  &devfs_getstat,
+  (void *)&devfs_dummy,
+  (void *)&devfs_dummy,
+  (void *)&devfs_dummy,
+  (void *)&devfs_dummy,
+  (void *)&devfs_dummy,
+  (void *)&devfs_dummy,
+  (void *)&devfs_dummy,
+  (void *)&devfs_dummy,
+  (void *)&devfs_dummy,
+  (void *)&devfs_dummy,
+  &devfs_ioctl2,
+};
+
+static iop_device_t devfs_device = {
+  "devfs",
+  IOP_DT_FS | IOP_DT_FSEXT,
+  0x100,
+  "PS2 Device FS Driver",
+  &devfs_ops,
+};
 
 /** DevFS initialise function
  * @returns >= 0 on success, -1 on error
@@ -1018,37 +1052,12 @@ int devfs_getstat(iop_file_t *file, const char *name, iox_stat_t *stat)
 int init_devfs(void)
 
 {
-   int dummy_loop;
-   dummy_func *dummy;
-
    root_device = NULL;
    dev_count = 0;
 
-   /* Set all io handlers to dummy values */
-   dummy = (dummy_func *) &devfs_ops;
-   for(dummy_loop = 0; dummy_loop < (sizeof(iop_device_ops_t) / sizeof(dummy)); dummy_loop++)
-   {
-      dummy[dummy_loop] = devfs_dummy;
-   }
    memset(open_dirfiles, 0, sizeof(directory_file_t) * MAX_OPEN_DIRFILES);
 
-   devfs_device.name = "devfs";
-   devfs_device.type = IOP_DT_FS | IOP_DT_FSEXT;
-   devfs_device.version = 0x100;
-   devfs_device.desc = "PS2 Device FS Driver";
-   devfs_device.ops = &devfs_ops;
-   devfs_ops.init = devfs_init;
-   devfs_ops.deinit = devfs_deinit;
-   devfs_ops.open = devfs_open;
-   devfs_ops.read = devfs_read;
-   devfs_ops.close = devfs_close;
-   devfs_ops.dopen = devfs_dopen;
-   devfs_ops.dclose = devfs_dclose;
-   devfs_ops.dread = devfs_dread;
-   devfs_ops.ioctl = devfs_ioctl;
-   devfs_ops.ioctl2 = devfs_ioctl2;
-   devfs_ops.getstat = devfs_getstat;
-   DelDrv("devfs");
+   DelDrv(devfs_device.name);
 
    return AddDrv(&devfs_device);
 }
@@ -1058,22 +1067,23 @@ int init_devfs(void)
  * @param argv: Unused
  * @returns 0 on success, -1 on error
  */
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
-   int res = 1;
+   int res = MODULE_NO_RESIDENT_END;
+   int err;
 
    (void)argc;
    (void)argv;
 
    printf(BANNER, VERSION);
 
-   if ((res = RegisterLibraryEntries(&_exp_devfs)) != 0) {
+   if ((err = RegisterLibraryEntries(&_exp_devfs)) != 0) {
       M_PRINTF("Library is already registered, exiting.\n");
-      printf("res=%d\n", res);
+      printf("err=%d\n", err);
    }
    else
    {
-      res = init_devfs();
+      res = init_devfs() ? MODULE_NO_RESIDENT_END : MODULE_RESIDENT_END;
    }
 
    M_PRINTF("devfs_device_t size=%d\n", (int)(sizeof(devfs_device_t)));

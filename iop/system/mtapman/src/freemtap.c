@@ -288,7 +288,7 @@ int change_slot(s32 *arg)
 			{
 				if((state_open[port] == 1) && (state_getcon[port] == 1))
 				{
-					if(state_slots[port] > arg[port])
+					if(state_slots[port] > (u32)(arg[port]))
 					{
 						change_slot_setup_td(port, arg[port], reg);
 
@@ -380,7 +380,7 @@ void update_slot_numbers()
 	SetEventFlag(event_flag, EF_UPDATE_SLOTS);
 }
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
 	iop_event_t event;
 	iop_thread_t thread;
@@ -394,13 +394,13 @@ int _start(int argc, char **argv)
 	if(RegisterLibraryEntries(&_exp_mtapman) != 0)
 	{
 		M_PRINTF("RegisterLibraryEntries failed.\n");
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 	}
 
 	if(InitRpcServers() == 0)
 	{
 		M_PRINTF("Failed to setup RPC Servers.\n");
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 	}
 
 	event.attr = 2;
@@ -411,7 +411,7 @@ int _start(int argc, char **argv)
 	if(event_flag < 0)
 	{
 		M_PRINTF("Could not create event flag (%i)\n.", (int)event_flag);
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 	}
 
 	thread.attr = TH_C;
@@ -424,7 +424,7 @@ int _start(int argc, char **argv)
 	if(threadid_main < 0)
 	{
 		M_PRINTF("Could not create thread (%i)\n.", (int)threadid_main);
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 	}
 
 	StartThread(threadid_main, 0);
@@ -444,7 +444,7 @@ int _start(int argc, char **argv)
 	td.in = in_buffer;
 	td.out = out_buffer;
 
-	return 0;
+	return MODULE_RESIDENT_END;
 }
 
 

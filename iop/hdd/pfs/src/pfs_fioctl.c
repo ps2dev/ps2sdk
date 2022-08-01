@@ -234,12 +234,12 @@ void pfsFioDevctlCloseAll(void)
 {
 	s32 i;
 
-	for(i=0;i < pfsConfig.maxOpen;i++)
+	for(i=0;(u32)i < pfsConfig.maxOpen;i++)
 	{
 		if(pfsFileSlots[i].fd)
 			pfsFioCloseFileSlot(&pfsFileSlots[i]);
 	}
-	for(i=0;i < pfsConfig.maxOpen;i++)
+	for(i=0;(u32)i < pfsConfig.maxOpen;i++)
 	{
 		pfs_mount_t *pfsMount;
 		if((pfsMount=pfsGetMountedUnit(i))!=NULL)

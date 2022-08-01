@@ -170,7 +170,7 @@ u32 ReadData(padState_t *pstate)
 
 	sio2CmdSetReadData(pstate->modeCurId, pstate->inbuffer);
 
-	for(i=0; i < pstate->ee_actDirectSize; i++)
+	for(i=0; i < (u32)(pstate->ee_actDirectSize); i++)
 	{
 		if(pstate->ee_actAlignData.data[i] == 0xFF)
 			pstate->inbuffer[i+3] = pstate->ee_actAlignData.data[i];

@@ -11,7 +11,7 @@ IRX_ID(MODNAME, 0x01, 0x07);
 
 int InitFS(void);
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
     (void)argc;
     (void)argv;

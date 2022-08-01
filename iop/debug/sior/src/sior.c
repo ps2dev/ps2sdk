@@ -111,7 +111,7 @@ int sio_printf(const char * str, ...) {
     return res;
 }
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
     int retries;
 

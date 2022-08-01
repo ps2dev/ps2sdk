@@ -88,7 +88,7 @@ int pfsCacheTransfer(pfs_cache_t* clink, int mode)
 				if(clink->flags & PFS_CACHE_FLAG_SEGI && ((pfs_inode_t *)clink->u.inode)->magic!=PFS_SEGI_MAGIC)
 					err=-EIO;
 				if(clink->flags & (PFS_CACHE_FLAG_SEGD|PFS_CACHE_FLAG_SEGI)) {
-					if(((pfs_inode_t *)clink->u.inode)->checksum!=pfsInodeCheckSum(clink->u.inode))
+					if(((pfs_inode_t *)clink->u.inode)->checksum!=(u32)(pfsInodeCheckSum(clink->u.inode)))
 						err=-EIO;
 				}
 			}

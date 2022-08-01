@@ -23,7 +23,7 @@ void usercb(struct timer_alarm_t *alarm, void *arg) {
     iStartTimerAlarm(alarm);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
     struct timer_alarm_t alarm, alarm2;
     InitializeTimerAlarm(&alarm);

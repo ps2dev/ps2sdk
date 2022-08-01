@@ -194,7 +194,7 @@ void apaAddEmptyBlock(apa_header_t *header, u32 *emptyBlocks)
 
     if (header->type == APA_TYPE_FREE) {
         for (i = 0; i < 32; i++) {
-            if (header->length == (1 << i)) {
+            if (header->length == (u32)(((u32)1) << i)) {
                 if (emptyBlocks[i] == APA_TYPE_FREE) {
                     emptyBlocks[i] = header->start;
                     return;
@@ -400,6 +400,8 @@ int apaCheckSum(apa_header_t *header, int fullcheck)
     if (!(fullcheck))
         for (sum = 0, i = 1; i < 128; i++) // recalculate checksum only for first sector.
             sum += ptr[i];
+#else
+    (void)fullcheck;
 #endif
     return sum;
 }
@@ -410,9 +412,9 @@ int apaReadHeader(s32 device, apa_header_t *header, u32 lba)
         return -EIO;
     if (header->magic != APA_MAGIC)
         return -EIO;
-    if (apaCheckSum(header, 1) != header->checksum)
+    if ((u32)(apaCheckSum(header, 1)) != header->checksum)
         if (lba == APA_SECTOR_MBR)
-            if (apaCheckSum(header, 0) != header->checksum)
+            if ((u32)(apaCheckSum(header, 0)) != header->checksum)
                 return -EIO;
 
     if (lba == APA_SECTOR_MBR) {
@@ -462,9 +464,9 @@ u32 apaGetPartitionMax(u32 totalLBA)
     u32 i, size;
 
     totalLBA >>= 6; // totalLBA/64
-    size = (1 << 0x1F);
+    size = (((u32)1) << 0x1F);
     for (i = 31; i != 0; i--) {
-        size = 1 << i;
+        size = ((u32)1) << i;
         if (size & totalLBA)
             break;
     }

@@ -61,7 +61,8 @@ static iop_device_ops_t tty_ops = {
     (void *)tty_error,
     (void *)tty_error,
     (void *)tty_error,
-    (void *)tty_error};
+    (void *)tty_error,
+};
 
 /* device descriptor */
 static iop_device_t tty_device = {
@@ -69,7 +70,8 @@ static iop_device_t tty_device = {
     IOP_DT_CHAR | IOP_DT_CONS,
     1,
     "TTY via SMAP UDP",
-    &tty_ops};
+    &tty_ops,
+};
 
 
 /* KPRTTY */
@@ -182,7 +184,7 @@ static void kprtty_init(void)
 }
 #endif
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
     (void)argc;
     (void)argv;
@@ -197,7 +199,7 @@ int _start(int argc, char **argv)
 
     close(0);
     close(1);
-    DelDrv(DEVNAME);
+    DelDrv(tty_device.name);
 
     if (AddDrv(&tty_device) < 0)
         return MODULE_NO_RESIDENT_END;

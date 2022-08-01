@@ -358,13 +358,13 @@ int decode_unicode(const unsigned char *in, unsigned short *out)
 				out[j] = (in[i++] & 0x1f)<<6;
 				out[j++] += (in[i] & 0x3f);
 			}
-			else if ((in[i] > 0xDF) && (in[i] < 0xF0))
+			else if (in[i] < 0xF0)
 			{
 				out[j] = (in[i++] & 0xF)<<12;
 				out[j] += (in[i++] & 0x3f)<<6;
 				out[j++] += (in[i] & 0x3f);
 			}
-			else if ((in[i] > 0xEF) && (in[i] < 0xF5))
+			else if (in[i] < 0xF5)
 			{
 				// Supports only up to U+FFFF
 				i+=3;

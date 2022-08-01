@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <ioman.h>
 #include <iox_stat.h>
+#include <loadcore.h>
 #include <sysclib.h>
 
 #include "cdfs_iop.h"
@@ -13,6 +14,7 @@
 
 #define DRIVER_UNIT_NAME "cdfs"
 #define DRIVER_UNIT_VERSION 2
+#define VERSION_STRINGIFY(x) #x
 
 struct fdtable
 {
@@ -419,47 +421,43 @@ static int cdfs_dummy() {
 }
 
 static iop_device_ops_t fio_ops = {
-    fio_init,
-    fio_deinit,
-    cdfs_dummy,
-    fio_open,
-    fio_close,
-    fio_read,
-    fio_write,
-    fio_lseek,
-    cdfs_dummy,
-    cdfs_dummy,
-    cdfs_dummy,
-    cdfs_dummy,
-    fio_openDir,
-    fio_closeDir,
-    fio_dread,
-    fio_getstat,
-    cdfs_dummy
+    &fio_init,
+    &fio_deinit,
+    (void *)&cdfs_dummy,
+    &fio_open,
+    &fio_close,
+    &fio_read,
+    &fio_write,
+    &fio_lseek,
+    (void *)&cdfs_dummy,
+    (void *)&cdfs_dummy,
+    (void *)&cdfs_dummy,
+    (void *)&cdfs_dummy,
+    &fio_openDir,
+    &fio_closeDir,
+    &fio_dread,
+    &fio_getstat,
+    (void *)&cdfs_dummy,
 };
 
-int _start(int argc, char **argv)
-{
-    static iop_device_t fio_driver;
+static iop_device_t fio_driver = {
+    DRIVER_UNIT_NAME,
+    IOP_DT_FS,
+    DRIVER_UNIT_VERSION,
+    DRIVER_UNIT_NAME " Filedriver v" VERSION_STRINGIFY(DRIVER_UNIT_VERSION),
+    &fio_ops,
+};
 
+int _start(int argc, char *argv[])
+{
     (void)argc;
     (void)argv;
 
     // Prepare cache and read mode
     cdfs_prepare();
 
-    char driverDesc[50];
-    sprintf(driverDesc, "%s Filedriver v%i", DRIVER_UNIT_NAME, DRIVER_UNIT_VERSION);
+    DelDrv(fio_driver.name);
+    if(AddDrv(&fio_driver) != 0) { return MODULE_NO_RESIDENT_END; }
 
-    // setup the fio_driver structure
-    fio_driver.name = DRIVER_UNIT_NAME;
-    fio_driver.type = IOP_DT_FS;
-    fio_driver.version = DRIVER_UNIT_VERSION;
-    fio_driver.desc = driverDesc;
-    fio_driver.ops = &fio_ops;
-
-    DelDrv(DRIVER_UNIT_NAME);
-    if(AddDrv(&fio_driver) != 0) { return(-1); }
-
-    return(0);
+    return MODULE_RESIDENT_END;
 }

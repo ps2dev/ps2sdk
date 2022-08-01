@@ -849,12 +849,13 @@ static iop_device_t fs_driver = {
     IOP_DT_FS | IOP_DT_FSEXT,
     2,
     "IEEE1394_disk",
-    &fs_functarray};
+    &fs_functarray,
+};
 
 /* init file system driver */
 int InitFS(void)
 {
-    DelDrv("sd");
+    DelDrv(fs_driver.name);
     return (AddDrv(&fs_driver) == 0 ? 0 : -1);
 }
 #endif

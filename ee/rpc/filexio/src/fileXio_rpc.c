@@ -705,7 +705,7 @@ int fileXioWrite(int fd, const void *buf, int size)
 	if((unsigned int)buf & 0x3F)
 	{
 		miss = 64 - ((unsigned int)buf & 0x3F);
-		if(miss > size) miss = size;
+		if(miss > (unsigned int)size) miss = size;
 	} else {
 		miss = 0;
 	}
@@ -870,7 +870,7 @@ int fileXioFormat(const char *dev, const char *blockdev, const void *args, int a
 	if(blockdev)
 		strncpy(packet->blockDevice, blockdev, sizeof(packet->blockDevice));
 
-	if(arglen > sizeof(packet->args)) arglen = sizeof(packet->args);
+	if((unsigned int)arglen > sizeof(packet->args)) arglen = sizeof(packet->args);
 	memcpy(packet->args, args, arglen);
 	packet->arglen = arglen;
 

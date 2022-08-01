@@ -518,7 +518,6 @@ pfs_cache_t *pfsInodeCreate(pfs_cache_t *clink, u16 mode, u16 uid, u16 gid, int 
 	}else{
 		a.number=clink->u.inode->inode_block.number;
 		a.subpart=clink->u.inode->inode_block.subpart;
-		a.count=clink->u.inode->inode_block.count;
 	}
 	a.count=1;
 

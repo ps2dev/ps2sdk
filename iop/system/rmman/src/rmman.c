@@ -428,7 +428,7 @@ static int DmaSendEE(struct RmData *RmData)
 
 	RmData->eeData.frame = RmData->frame;
 	RmData->frame++;
-	for(i = 0; i < sizeof(RmData->eeData.data); i++)
+	for(i = 0; (unsigned int)i < sizeof(RmData->eeData.data); i++)
 		RmData->eeData.data[i] = RmData->outBuffer[i];
 
 	RmData->eeData.state = RmData->state;

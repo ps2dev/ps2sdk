@@ -126,11 +126,11 @@ int _start(int argc, char *argv[])
 	if (threadid < 0)
 	{
 		dprintf(OUT_ERROR, "Failed to make thread\n");
-		return(1);
+		return MODULE_NO_RESIDENT_END;
 	}
 
   	StartThread(threadid, 0);
 
-	return(0);
+	return MODULE_RESIDENT_END;
 }
 

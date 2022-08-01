@@ -69,7 +69,7 @@ int PS2KbdReadRaw(PS2KbdRawKey *key)
 
 int PS2KbdSetReadmode(u32 readmode)
 {
-  if((kbd_fd >= 0) && (curr_readmode != readmode))
+  if((kbd_fd >= 0) && ((u32)curr_readmode != readmode))
     {
       curr_readmode = readmode;
       return _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETREADMODE, &readmode);
@@ -79,7 +79,7 @@ int PS2KbdSetReadmode(u32 readmode)
 
 int PS2KbdSetBlockingMode(u32 blockmode)
 {
-  if((kbd_fd >= 0) && (curr_blockmode != blockmode))
+  if((kbd_fd >= 0) && ((u32)curr_blockmode != blockmode))
     {
       return _ps2sdk_ioctl(kbd_fd, PS2KBD_IOCTL_SETBLOCKMODE, &blockmode);
     }

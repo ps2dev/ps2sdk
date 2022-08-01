@@ -17,7 +17,7 @@
 // Disable all the patched functions
 DISABLE_PATCHED_FUNCTIONS();
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {    
     while (1)
     {

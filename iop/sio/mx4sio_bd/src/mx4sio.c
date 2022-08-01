@@ -391,7 +391,7 @@ static uint8_t wait_equal(uint8_t value, int count, int portNr)
     uint32_t i;
     uint8_t response = 0;
 
-    for (i = 0; i < count; i++) {
+    for (i = 0; i < (uint32_t)count; i++) {
         response = sendCmd_Tx1_Rx1(0xff, portNr);
         if (response == value)
             break;

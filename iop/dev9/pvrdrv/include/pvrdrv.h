@@ -45,7 +45,7 @@ extern int DvrdrvResetSystem();
 extern int DvrdrvEnableIntr(u16 a1);
 extern int DvrdrvDisableIntr(s16 a1);
 extern int DvrdrvRegisterIntrHandler(int a1, void *arg, void (*a3)(int, void *));
-extern int DvrdrvUnregisterIntrHandler(const void (*a1)(int, void *));
+extern int DvrdrvUnregisterIntrHandler(void (*a1)(int, void *));
 extern int DvrdrvExecCmdAck(drvdrv_exec_cmd_ack *a1);
 extern int DvrdrvExecCmdAckComp(drvdrv_exec_cmd_ack *a1);
 extern int DvrdrvExecCmdAckDmaSendComp(drvdrv_exec_cmd_ack *a1);

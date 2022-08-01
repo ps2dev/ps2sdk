@@ -138,8 +138,8 @@ void trap(exception_type_t type, struct exception_frame *ex)
     if (type == EXCEPTION_Bp) {
         ex->dcic = 0;
     } else {
-        if (ex->cause & (1 << 31)) {
-            ex->cause &= ~(1 << 31); /* clear BD */
+        if (ex->cause & (((u32)1) << 31)) {
+            ex->cause &= ~(((u32)1) << 31); /* clear BD */
         } else {
             ex->epc += 4;
         }
@@ -202,7 +202,7 @@ void do_tests()
 #define do_tests()
 #endif
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
     int rv;
 
@@ -210,21 +210,21 @@ int _start(int argc, char **argv)
     (void)argv;
 
     if (RegisterLibraryEntries(&_exp_ioptrap) != 0)
-        return 1;
+        return MODULE_NO_RESIDENT_END;
 
     memset(handlers, 0, sizeof(trap_exception_handler_t) * 16);
     printf("ioptrap starts.\n");
     if ((rv = RegisterDefaultExceptionHandler((exception_handler_t)def_exc_handler)) < 0) {
         printf("RegisterDefaultExceptionHandler failed, rv=%d\n", rv);
-        return 1;
+        return MODULE_NO_RESIDENT_END;
     }
     if ((rv = RegisterPriorityExceptionHandler(IOP_EXCEPTION_HDB, 0, (exception_handler_t)bp_exc_handler)) < 0) {
         // shouldn't we release the default exception handler here... ?
         printf("RegisterDefaultExceptionHandler failed, rv=%d\n", rv);
-        return 1;
+        return MODULE_NO_RESIDENT_END;
     }
     do_tests();
-    return 0;
+    return MODULE_RESIDENT_END;
 }
 
 int shutdown()

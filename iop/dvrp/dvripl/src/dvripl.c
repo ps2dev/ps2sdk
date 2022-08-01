@@ -10,6 +10,7 @@
 
 #include <stdbool.h>
 #include "iomanX.h"
+#include "loadcore.h"
 #include "pvrdrv.h"
 #include "stdio.h"
 #include "thbase.h"
@@ -31,7 +32,7 @@ extern s64 dvripl_df_null_long();
 extern int iplioctl2_update(iop_file_t *a1, int cmd, void *arg);
 extern void dvr_ready(int a1, void *a2);
 
-struct _iop_device_ops DvrFuncTbl =
+static iop_device_ops_t DvrFuncTbl =
     {
         &dvripl_df_init,
         &dvripl_df_exit,
@@ -59,9 +60,10 @@ struct _iop_device_ops DvrFuncTbl =
         &dvripl_df_devctl,
         &dvripl_df_null,
         &dvripl_df_null,
-        &dvripl_df_ioctl2};
+        &dvripl_df_ioctl2,
+    };
 s32 dvr_ready_flag;
-iop_device_t DVRMAN = {
+static iop_device_t DVRMAN = {
     .name = "dvr_ipl",
     .desc = "Digital Video Recorder",
     .ops = &DvrFuncTbl,
@@ -74,11 +76,11 @@ char SBUF[32768];
 #define MODNAME "DVRIPL"
 IRX_ID(MODNAME, 1, 1);
 
-int _start(int a1, char **argv)
+int _start(int argc, char *argv[])
 {
     (void)argv;
 
-    if (a1 >= 0)
+    if (argc >= 0)
         return module_start();
     else
         return module_stop();
@@ -87,19 +89,19 @@ int _start(int a1, char **argv)
 int module_start()
 {
     if (AddDrv(&DVRMAN) != 0)
-        return 1;
+        return MODULE_NO_RESIDENT_END;
 #if 0
-    return 2;
+    return MODULE_REMOVABLE_END;
 #else
-    return 0;
+    return MODULE_RESIDENT_END;
 #endif
 }
 
 int module_stop()
 {
     if (DelDrv(DVRMAN.name) != 0)
-        return 2;
-    return 1;
+        return MODULE_REMOVABLE_END;
+    return MODULE_NO_RESIDENT_END;
 }
 
 int dvripl_df_init(iop_device_t *dev)

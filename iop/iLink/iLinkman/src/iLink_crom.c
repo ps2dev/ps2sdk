@@ -48,7 +48,7 @@ unsigned short int iLinkCalculateCRC16(void *data, unsigned int nQuads)
     unsigned int lSum;
     unsigned short int lCRC = 0;
 
-    for (i = 0; i < nQuads; ++i) {
+    for (i = 0; (unsigned int)i < nQuads; ++i) {
         unsigned int lData;
 
         lData = ((unsigned int *)data)[i];
@@ -118,7 +118,7 @@ int iLinkGetNodeMaxSpeed(unsigned short int NodeID)
     int result;
 
     result = -1;
-    for (i = 0; i < nNodes; i++) {
+    for (i = 0; i < (unsigned int)nNodes; i++) {
         if (SELF_ID_NODEID(NodeData[i]) == (NodeID & 0x3F)) {
             result = SELF_ID_SPEED(NodeData[i]);
             break;

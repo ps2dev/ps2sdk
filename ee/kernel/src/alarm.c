@@ -45,11 +45,11 @@ extern unsigned int size_eenull;
 __attribute__((weak))
 void InitAlarm(void)
 {
-    int i;
-
     // Only apply the kernel patch if T3 has not already started
     if (((*T3_MODE) & 0x100) == 0)
     {
+        int i;
+
         setup(SysEntry[0].syscall, SysEntry[0].function);
         Copy((void *)0x80076000, srcfile, size_srcfile);
         Copy((void *)0x00082000, eenull, size_eenull);

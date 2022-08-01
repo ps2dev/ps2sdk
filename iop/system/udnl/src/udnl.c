@@ -293,6 +293,9 @@ static void TerminateResidentLibraries(const char *message, unsigned int options
     iop_library_t *ModuleData, *NextModule;
     void **ExportTable;
 
+    (void)message;
+    (void)options;
+
     if ((LoadcoreData = GetLoadcoreInternalData()) != NULL) {
         ModuleData = LoadcoreData->let_next;
         while (ModuleData != NULL) {
@@ -560,7 +563,7 @@ static void LoadIRXModule(const void *module, struct ModuleInfo *ModuleInfo)
     ModuleInfo->gp = (void *)((u8 *)ModuleInfo->gp + (unsigned int)ModuleInfo->text_start);
     ModuleInfo->EntryPoint = (void *)((u8 *)ModuleInfo->EntryPoint + (unsigned int)ModuleInfo->text_start);
 
-    if (ModuleInfo->mod_id + 1 != 0) {
+    if (ModuleInfo->mod_id != (void *)0xFFFFFFFF) {
         ModuleInfo->mod_id = (struct iopmod_id *)((u8 *)ModuleInfo->mod_id + (unsigned int)ModuleInfo->text_start);
     }
 
@@ -644,7 +647,7 @@ static void InitLoadedModInfo(struct ModuleInfo *ModuleInfo, struct ModInfo *Mod
     ModInfo->newflags = 0;
     ModInfo->id = 0;
 
-    if (ModuleInfo->mod_id + 1 != 0) {
+    if (ModuleInfo->mod_id != (void *)0xFFFFFFFF) {
         ModInfo->name = ModuleInfo->mod_id->name;
         ModInfo->version = ModuleInfo->mod_id->version;
     }
@@ -804,7 +807,7 @@ static const struct ExtInfoField *GetFileInfo(const struct RomdirFileStat *stat,
 
         ExtInfoHeader = *(unsigned int *)ExtInfoField;
 
-        if (ExtInfoHeader >> 24 == mode) {
+        if (ExtInfoHeader >> 24 == (unsigned int)mode) {
             return ExtInfoField;
         }
 
@@ -838,7 +841,8 @@ static struct RomdirFileStat *SelectModuleFromImages(const struct ImageData *Ima
     /* 0x000008e0 */
     ImageFileIndexNumber = -1;
     HighestFileVersionNum = 0;
-    if ((NumFilesRemaining = NumFiles - 1) >= 0) {
+    NumFilesRemaining = NumFiles - 1;
+    {
         ImageDataPtr = &ImageDataBuffer[NumFilesRemaining];
 
         do {

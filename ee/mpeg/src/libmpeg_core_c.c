@@ -213,7 +213,7 @@ void _ipu_sync( void )
 				break;
 			}
 LAB_0001041c:
-			if (-1 < *R_EE_IPU_CTRL)
+			if ((u32)(-1) < *R_EE_IPU_CTRL)
 			{
 				return;
 			}
@@ -234,7 +234,7 @@ LAB_0001041c:
 
 u32 _ipu_sync_data( void )
 {
-	if (-1 < *R_EE_IPU_CMD)
+	if ((u64)(-1) < *R_EE_IPU_CMD)
 	{
 		return *R_EE_IPU_BP;
 	}
@@ -244,7 +244,7 @@ u32 _ipu_sync_data( void )
 		while (0x1f < (((var3 & 0xff00) >> 1) + ((var3 & 0x30000) >> 9)) - (var3 & 0x7f))
 		{
 LAB_000104b8:
-			if (-1 < *R_EE_IPU_CMD)
+			if ((u64)(-1) < *R_EE_IPU_CMD)
 			{
 				return var3;
 			}
@@ -267,7 +267,7 @@ LAB_000104b8:
 unsigned int _ipu_get_bits( unsigned int arg0 )
 {
 	_ipu_sync();
-	if (s_DataBuf[0] < (int)arg0)
+	if (s_DataBuf[0] < arg0)
 	{
 		*R_EE_IPU_CMD = 0x40000000;
 		s_DataBuf[1] = _ipu_sync_data();
@@ -287,7 +287,7 @@ unsigned int _MPEG_GetBits ( unsigned int arg0 )
 
 unsigned int _ipu_show_bits ( unsigned int arg0 )
 {
-	if (s_DataBuf[0] < (int)arg0)
+	if (s_DataBuf[0] < arg0)
 	{
 		_ipu_sync();
 		*R_EE_IPU_CMD = 0x40000000;
@@ -530,7 +530,7 @@ int _MPEG_WaitBDEC ( void )
 	return 0;
 }
 
-void _MPEG_dma_ref_image ( _MPEGMacroBlock8* arg0, _MPEGMotion* arg1, int arg2, int arg3 )
+void _MPEG_dma_ref_image ( _MPEGMacroBlock8* arg0, _MPEGMotion* arg1, s64 arg2, int arg3 )
 {
 	u8* var00 = (u8*)arg0;
 	_MPEGMotion* var01 = (_MPEGMotion*)arg1;

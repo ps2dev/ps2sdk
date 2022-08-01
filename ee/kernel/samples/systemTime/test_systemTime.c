@@ -12,19 +12,22 @@
 #include <kernel.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <inttypes.h>
 #include <timer.h>
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
-    uint64_t current, previous;
+    uint64_t previous;
 
     printf("\n\nStarting GetTimerSystemTime example!\n");
     previous = GetTimerSystemTime();
     
     while (1)
     {
+        uint64_t current;
+
         current = GetTimerSystemTime();
-        printf("Diff: %llu clocks\n", current - previous);
+        printf("Diff: %" PRIu64 " clocks\n", current - previous);
         previous = current;
     }
     return 0;

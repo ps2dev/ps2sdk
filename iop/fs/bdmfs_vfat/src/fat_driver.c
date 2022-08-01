@@ -867,7 +867,7 @@ int fat_readFile(fat_driver *fatd, fat_dir *fatDir, unsigned int filePos, unsign
         }
 
         // process the cluster chain (fatd->cbuf) and skip leading clusters if needed
-        for (i = 0 + clusterSkip; i < chainSize && size > 0; i++) {
+        for (i = 0 + clusterSkip; i < (unsigned int)chainSize && size > 0; i++) {
             // read cluster and save cluster content
             startSector = fat_cluster2sector(&fatd->partBpb, fatd->cbuf[i]);
             // process all sectors of the cluster (and skip leading sectors if needed)
@@ -934,7 +934,7 @@ int fat_getNextDirentry(fat_driver *fatd, fat_dir_list *fatdlist, fat_dir *fatDi
     cont      = 1;
     new_entry = 1;
     dirPos    = (fatdlist->direntryIndex * 32) % fatd->partBpb.sectorSize;
-    for (i = ((fatdlist->direntryIndex * 32) / fatd->partBpb.sectorSize); (i < dirSector) && cont; i++) {
+    for (i = ((fatdlist->direntryIndex * 32) / fatd->partBpb.sectorSize); ((unsigned int)i < dirSector) && cont; i++) {
         unsigned char *sbuf = NULL; // sector buffer
 
         // At cluster borders, get correct sector from cluster chain buffer

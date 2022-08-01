@@ -182,6 +182,8 @@ int ExpandScratchPad(unsigned int page)
             int index;
             unsigned int PageMask, EntryHi, EntryLo0, EntryLo1;
             if ((index = ProbeTLBEntry(0x70004000, &PageMask, &EntryLo0, &EntryLo1)) >= 0) {
+#if 0
+                // This condition is always false due to the preceding check on the "page" variable.
                 if (page == 0) {
                     EntryHi = 0xE0010000 + ((index - 1) << 13);
 
@@ -197,7 +199,9 @@ int ExpandScratchPad(unsigned int page)
                                    "tlbwi\n"
                                    "sync.p\n" ::"r"(index),
                                    "r"(EntryHi));
-                } else {
+                } else
+#endif
+                {
                     __asm volatile("mfc0 %0, $6\n"
                                    "addiu $v0, %0, 1\n"
                                    "mtc0 $v0, $6\n" ::"r"(index));

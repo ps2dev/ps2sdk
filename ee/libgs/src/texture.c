@@ -61,7 +61,7 @@ int GsLoadImage(const void *source_addr, GS_IMAGE *dest)
 	remainder	= img_qwc % 16384;
 	current		= 16384;
 	pTexSrc = (const unsigned char *)source_addr;
-	for(i=0;i<max;i++)
+	for(i=0;(unsigned int)i<max;i++)
 	{
 		//1st we signal gs we are about to send
 		//16384 qwords

@@ -64,7 +64,7 @@ Let's put an example of how to disable the patched functionality:
 // With this line we disabled the patched functionalities
 DISABLE_PATCHED_FUNCTIONS();
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
     printf("Hello world!\n");
     return 0;
@@ -81,7 +81,7 @@ Let's put another example where we disable the extra timer functionality:
 // With this line we disabled the extra functionalities for timers
 DISABLE_EXTRA_TIMERS_FUNCTIONS();
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
     printf("Hello world!\n");
     return 0;
@@ -101,7 +101,7 @@ DISABLE_PATCHED_FUNCTIONS();
 // With this line we disabled the extra functionalities for timers
 DISABLE_EXTRA_TIMERS_FUNCTIONS();
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
     printf("Hello world!\n");
     return 0;

@@ -273,7 +273,7 @@ typedef struct _memPool
 #define C_PORT_OVER_CURRENT 19
 #define C_PORT_RESET        20
 
-#define BIT(x) (1 << (x))
+#define BIT(x) (((u32)1) << (x))
 
 #define C_PORT_FLAGS (BIT(C_PORT_CONNECTION) | BIT(C_PORT_ENABLE) | BIT(C_PORT_SUSPEND) | BIT(C_PORT_OVER_CURRENT) | BIT(C_PORT_RESET))
 

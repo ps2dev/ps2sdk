@@ -10,6 +10,7 @@
 
 #include <stdbool.h>
 #include "iomanX.h"
+#include "loadcore.h"
 #include "pvrdrv.h"
 #include "stdio.h"
 #include "thbase.h"
@@ -46,36 +47,37 @@ struct DevctlCmdTbl_t
         {0x5607, &dvrioctl2_get_dvcam_info},
         {0x5608, &dvrioctl2_get_dvcam_name},
 };
-struct _iop_device_ops DvrFuncTbl =
+static iop_device_ops_t DvrFuncTbl =
     {
         &dvrdv_df_init,
         &dvrdv_df_exit,
-        &dvrdv_df_null,
-        &dvrdv_df_null,
-        &dvrdv_df_null,
-        &dvrdv_df_null,
-        &dvrdv_df_null,
-        &dvrdv_df_null,
+        (void *)&dvrdv_df_null,
+        (void *)&dvrdv_df_null,
+        (void *)&dvrdv_df_null,
+        (void *)&dvrdv_df_null,
+        (void *)&dvrdv_df_null,
+        (void *)&dvrdv_df_null,
         &dvrdv_df_ioctl,
-        &dvrdv_df_null,
-        &dvrdv_df_null,
-        &dvrdv_df_null,
-        &dvrdv_df_null,
-        &dvrdv_df_null,
-        &dvrdv_df_null,
-        &dvrdv_df_null,
-        &dvrdv_df_null,
-        &dvrdv_df_null,
-        &dvrdv_df_null,
-        &dvrdv_df_null,
-        &dvrdv_df_null,
-        &dvrdv_df_null,
-        &dvrdv_df_null_long,
+        (void *)&dvrdv_df_null,
+        (void *)&dvrdv_df_null,
+        (void *)&dvrdv_df_null,
+        (void *)&dvrdv_df_null,
+        (void *)&dvrdv_df_null,
+        (void *)&dvrdv_df_null,
+        (void *)&dvrdv_df_null,
+        (void *)&dvrdv_df_null,
+        (void *)&dvrdv_df_null,
+        (void *)&dvrdv_df_null,
+        (void *)&dvrdv_df_null,
+        (void *)&dvrdv_df_null,
+        (void *)&dvrdv_df_null,
+        (void *)&dvrdv_df_null_long,
         &dvrdv_df_devctl,
-        &dvrdv_df_null,
-        &dvrdv_df_null,
-        &dvrdv_df_ioctl2};
-iop_device_t DVR = {
+        (void *)&dvrdv_df_null,
+        (void *)&dvrdv_df_null,
+        &dvrdv_df_ioctl2,
+    };
+static iop_device_t DVR = {
     .name = "dvr_dv",
     .desc = "Digital Video Recorder DVR task",
     .type = (IOP_DT_FS | IOP_DT_FSEXT),
@@ -87,11 +89,11 @@ s32 sema_id;
 #define MODNAME "DVRDV"
 IRX_ID(MODNAME, 1, 0);
 
-int _start(int a1, char **argv)
+int _start(int argc, char *argv[])
 {
     (void)argv;
 
-    if (a1 >= 0)
+    if (argc >= 0)
         return module_start();
     else
         return module_stop();
@@ -108,23 +110,23 @@ int module_start()
     }
     if (i == 30000) {
         printf("DVR task of DVRP is not running...\n");
-        return 1;
+        return MODULE_NO_RESIDENT_END;
     } else {
         if (AddDrv(&DVR) != 0)
-            return 1;
+            return MODULE_NO_RESIDENT_END;
     }
 #if 0
-    return 2;
+    return MODULE_REMOVABLE_END;
 #else
-    return 0;
+    return MODULE_RESIDENT_END;
 #endif
 }
 
 int module_stop()
 {
     if (DelDrv(DVR.name) != 0)
-        return 2;
-    return 1;
+        return MODULE_REMOVABLE_END;
+    return MODULE_NO_RESIDENT_END;
 }
 
 int dvrdv_df_init(iop_device_t *dev)

@@ -79,7 +79,7 @@ void sio2packet_add(int port, int slot, int cmd, u8 *buf)
 {	// Used to build the sio2packets for all mc commands
 	register u32 regdata;
 
-	if (cmd == 0xffffffff) {
+	if ((unsigned int)cmd == 0xffffffff) {
 		mcman_sio2packet.in_dma.count = 0;
 		return;
 	}
@@ -88,7 +88,7 @@ void sio2packet_add(int port, int slot, int cmd, u8 *buf)
 		register int pos;
 		u8 *p;
 
-		if (cmd == 0xfffffffe) {
+		if ((unsigned int)cmd == 0xfffffffe) {
 			mcman_sio2packet.regdata[mcman_sio2packet.in_dma.count] = 0;
 			mcman_sio2packet.out_dma.count = mcman_sio2packet.in_dma.count;
 			return;
@@ -963,7 +963,7 @@ int mcman_probePS1Card2(int port, int slot)
 		u32 hi, lo;
 		long_multiply(mcman_timercount, 0x3e0f83e1, &hi, &lo);
 
-		if ((u32)((hi >> 3) < mcman_timerthick))
+		if (((u32)(hi >> 3) < (u32)mcman_timerthick))
 			DelayThread(mcman_timerthick - (hi >> 3));
 
 		mcman_sio2transfer(port, slot, &mcman_sio2packet_PS1PDA);
@@ -1023,7 +1023,7 @@ int mcman_probePS1Card(int port, int slot)
 		u32 hi, lo;
 		long_multiply(mcman_timercount, 0x3e0f83e1, &hi, &lo);
 
-		if ((u32)((hi >> 3) < mcman_timerthick))
+		if (((u32)(hi >> 3) < (u32)mcman_timerthick))
 			DelayThread(mcman_timerthick - (hi >> 3));
 
 		mcman_sio2transfer(port, slot, &mcman_sio2packet_PS1PDA);
@@ -1148,7 +1148,7 @@ int McWritePS1PDACard(int port, int slot, int page, void *buf) // Export #30
 		u32 hi, lo;
 		long_multiply(mcman_timercount, 0x3e0f83e1, &hi, &lo);
 
-		if ((u32)((hi >> 3) < mcman_timerthick))
+		if (((u32)(hi >> 3) < (u32)mcman_timerthick))
 			DelayThread(mcman_timerthick - (hi >> 3));
 
 		mcman_sio2transfer(port, slot, &mcman_sio2packet_PS1PDA);
@@ -1212,7 +1212,7 @@ int McReadPS1PDACard(int port, int slot, int page, void *buf) // Export #29
 		u32 hi, lo;
 		long_multiply(mcman_timercount, 0x3e0f83e1, &hi, &lo);
 
-		if ((u32)((hi >> 3) < mcman_timerthick))
+		if (((u32)(hi >> 3) < (u32)mcman_timerthick))
 			DelayThread(mcman_timerthick - (hi >> 3));
 
 		mcman_sio2transfer(port, slot, &mcman_sio2packet_PS1PDA);

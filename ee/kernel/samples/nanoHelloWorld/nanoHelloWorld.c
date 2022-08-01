@@ -18,7 +18,7 @@ DISABLE_PATCHED_FUNCTIONS();
 // Disable extra timer functionality
 DISABLE_TimerSystemTime();
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {    
     while (1)
     {

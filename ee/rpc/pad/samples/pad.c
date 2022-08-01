@@ -182,7 +182,6 @@ main()
 {
     int ret;
     int port, slot;
-    int i;
     struct padButtonStatus buttons;
     u32 paddata;
     u32 old_pad = 0;
@@ -226,16 +225,12 @@ main()
 
     for (;;) {      // We are phorever people
 
-        i=0;
         ret=padGetState(port, slot);
         while((ret != PAD_STATE_STABLE) && (ret != PAD_STATE_FINDCTP1)) {
             if(ret==PAD_STATE_DISCONN) {
                 printf("Pad(%d, %d) is disconnected\n", port, slot);
             }
             ret=padGetState(port, slot);
-        }
-        if(i==1) {
-            printf("Pad: OK!\n");
         }
 
         ret = padRead(port, slot, &buttons); // port, slot, buttons
@@ -308,18 +303,8 @@ main()
             }
 
             // Test the press mode
-            /* Calling SetActAlign repetedly will kill the iop :P
-             * (guess the EE is to fast for IOP to handle..)
-             * So I'd recommend to change the actuator values only once per
-             * vblank or so..
-             */
             if(buttons.triangle_p) {
-#if 0
-                actAlign[1] = (i >> 3); buttons.triangle_p;  // Big engine
-                padSetActDirect(port, slot, actAlign);
-#else
                 printf("TRIANGLE %d\n", buttons.triangle_p);
-#endif
             }
             // Start little engine if we move right analogue stick right
             if(buttons.rjoy_h > 0xf0)

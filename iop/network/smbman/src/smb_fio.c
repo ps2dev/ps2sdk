@@ -60,7 +60,8 @@ static iop_device_t smbdev = {
     IOP_DT_FS | IOP_DT_FSEXT,
     1,
     "SMB",
-    &smbman_ops};
+    &smbman_ops,
+};
 
 #define SMB_NAME_MAX 256
 

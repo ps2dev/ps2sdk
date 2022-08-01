@@ -71,7 +71,7 @@ static inline unsigned int GetBIOSVersion(void)
 }
 #endif
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
     int i, result;
     iop_thread_t ThreadData;
@@ -129,7 +129,7 @@ int _start(int argc, char **argv)
     return ((RegisterLibraryEntries(&_exp_iLinkman) != 0) ? MODULE_NO_RESIDENT_END : MODULE_RESIDENT_END);
 }
 
-int _exit(int argc, char **argv)
+int _exit(int argc, char *argv[])
 {
     int result;
 
@@ -148,7 +148,7 @@ int _exit(int argc, char **argv)
 
     FreeSysMemory(ConfigurationROM); /* Free the memory allocated for storing the configuration ROM. */
 
-    return 0;
+    return MODULE_RESIDENT_END;
 }
 
 int iLinkTrAlloc(unsigned short int NodeID, unsigned char speed)
@@ -168,7 +168,7 @@ int iLinkTrAlloc(unsigned short int NodeID, unsigned char speed)
             }
         }
 
-        result = (i == MAX_CONCURRENT_TRANSACTIONS) ? -1002 : i;
+        result = (i == MAX_CONCURRENT_TRANSACTIONS) ? (unsigned int)(-1002) : i;
     } else
         result = -1;
 

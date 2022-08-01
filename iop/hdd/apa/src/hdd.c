@@ -35,40 +35,40 @@ IRX_ID("hdd_driver", APA_MODVER_MAJOR, APA_MODVER_MINOR);
 #endif
 
 static iop_device_ops_t hddOps={
-	hddInit,
-	hddDeinit,
-	hddFormat,
-	hddOpen,
-	hddClose,
-	hddRead,
-	hddWrite,
-	hddLseek,
-	(void*)hddUnsupported,
-	hddRemove,
-	(void*)hddUnsupported,
-	(void*)hddUnsupported,
-	hddDopen,
-	hddClose,
-	hddDread,
-	hddGetStat,
-	(void*)hddUnsupported,
-	hddReName,
-	(void*)hddUnsupported,
-	(void*)hddUnsupported,
-	(void*)hddUnsupported,
-	(void*)hddUnsupported,
-	(void*)hddUnsupported,
-	hddDevctl,
-	(void*)hddUnsupported,
-	(void*)hddUnsupported,
-	hddIoctl2,
+	&hddInit,
+	&hddDeinit,
+	&hddFormat,
+	&hddOpen,
+	&hddClose,
+	&hddRead,
+	&hddWrite,
+	&hddLseek,
+	(void*)&hddUnsupported,
+	&hddRemove,
+	(void*)&hddUnsupported,
+	(void*)&hddUnsupported,
+	&hddDopen,
+	&hddClose,
+	&hddDread,
+	&hddGetStat,
+	(void*)&hddUnsupported,
+	&hddReName,
+	(void*)&hddUnsupported,
+	(void*)&hddUnsupported,
+	(void*)&hddUnsupported,
+	(void*)&hddUnsupported,
+	(void*)&hddUnsupported,
+	&hddDevctl,
+	(void*)&hddUnsupported,
+	(void*)&hddUnsupported,
+	&hddIoctl2,
 };
 static iop_device_t hddFioDev={
 	"hdd",
 	IOP_DT_BLOCK | IOP_DT_FSEXT,
 	1,
 	"HDD",
-	(struct _iop_device_ops *)&hddOps,
+	&hddOps,
 };
 #ifdef APA_SUPPORT_BHDD
 static iop_device_t bhddFioDev={
@@ -76,7 +76,7 @@ static iop_device_t bhddFioDev={
 	IOP_DT_BLOCK | IOP_DT_FSEXT,
 	1,
 	"HDD",
-	(struct _iop_device_ops *)&hddOps,
+	&hddOps,
 };
 #endif
 
@@ -136,7 +136,6 @@ apa_cache_t *hddAddPartitionHere(s32 device, const apa_params_t *params, u32 *em
 		return NULL;
 	}
 
-	tempSize=params->size;
 	while(part_end%params->size)
 	{
 		tempSize=params->size>>1;
@@ -194,7 +193,7 @@ static int unlockDrive(s32 device)
 	return rv;
 }
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
 	int 	i, ret;
 	char	*input;
@@ -299,11 +298,11 @@ int _start(int argc, char **argv)
 				hddDevices[i].status, hddDevices[i].format);
 		}
 	}
-	DelDrv("hdd");
+	DelDrv(hddFioDev.name);
 	if(AddDrv(&hddFioDev) == 0)
 	{
 #ifdef APA_SUPPORT_BHDD
-		DelDrv("bhdd");
+		DelDrv(bhddFioDev.name);
 		if(AddDrv(&bhddFioDev) == 0)
 #endif
 		{

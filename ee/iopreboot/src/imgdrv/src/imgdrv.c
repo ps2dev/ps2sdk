@@ -37,14 +37,14 @@ typedef struct _iop_device_ops_short
 } iop_device_ops_short_t;
 
 static iop_device_ops_short_t imgdrv_ops = {
-    (void *)imgdrv_dummy, // init
-    (void *)imgdrv_dummy, // deinit
-    NULL,                 // format
-    (void *)imgdrv_dummy, // open
-    (void *)imgdrv_dummy, // close
-    &imgdrv_read,         // read
-    NULL,                 // write
-    &imgdrv_lseek,        // lseek
+    (void *)&imgdrv_dummy, // init
+    (void *)&imgdrv_dummy, // deinit
+    NULL,                  // format
+    (void *)&imgdrv_dummy, // open
+    (void *)&imgdrv_dummy, // close
+    &imgdrv_read,          // read
+    NULL,                  // write
+    &imgdrv_lseek,         // lseek
 };
 
 #define MAX_IMAGES 2
@@ -57,11 +57,12 @@ static iop_device_t img_device = {
     IOP_DT_FS,
     1,
     "img",
-    (iop_device_ops_t *)&imgdrv_ops};
+    (iop_device_ops_t *)&imgdrv_ops,
+};
 
 int _start(int argc, char *argv[])
 {
-    return AddDrv(&img_device) < 0;
+    return (AddDrv(&img_device) < 0) ? MODULE_NO_RESIDENT_END : MODULE_RESIDENT_END;
 }
 
 static int imgdrv_dummy(void)

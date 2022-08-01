@@ -130,7 +130,7 @@ int ps2_screenshot_file( const char* pFilename,unsigned int VramAdress,
 	 u32 r = (p_in[x] & 31) << 3;
 	 u32 g = ((p_in[x] >> 5) & 31) << 3;
 	 u32 b = ((p_in[x] >> 10) & 31) << 3;
-         p_out[x] = (0xff<<24)|(r<<16)|(g<<8)|b;
+         p_out[x] = (((u8)0xff)<<24)|(r<<16)|(g<<8)|b;
       }
     }
     else
@@ -144,7 +144,7 @@ int ps2_screenshot_file( const char* pFilename,unsigned int VramAdress,
         u8 r =  *p_in++;
         u8 g =  *p_in++;
         u8 b =  *p_in++;
-        p_out[x] = (0xff<<24)|(r<<16)|(g<<8)|b;
+        p_out[x] = (((u8)0xff)<<24)|(r<<16)|(g<<8)|b;
       }
     }
     else

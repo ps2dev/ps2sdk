@@ -141,7 +141,7 @@ void bdm_get_bd(struct block_device **pbd, unsigned int count)
     M_DEBUG("%s\n", __func__);
 
     // Fill pointer array with block device pointers
-    for (i = 0; i < count && i < MAX_CONNECTIONS; i++)
+    for (i = 0; (unsigned int)i < count && i < MAX_CONNECTIONS; i++)
         pbd[i] = g_mount[i].bd;
 }
 

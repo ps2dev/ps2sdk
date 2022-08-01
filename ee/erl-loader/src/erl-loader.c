@@ -18,7 +18,7 @@ extern struct export_list_t {
     void * pointer;
 } export_list[];
 
-static void parse_boot_path(int argc, char ** argv) {
+static void parse_boot_path(int argc, char *argv[]) {
     char * p;
 
     if (argc == 0) // Are people still using naplink ? :P
@@ -67,7 +67,7 @@ static void export_symbols() {
 
 typedef void (*func_t)(void);
 
-int main(int argc, char ** argv) {
+int main(int argc, char *argv[]) {
     struct symbol_t * s;
 
     parse_boot_path(argc, argv);

@@ -31,6 +31,7 @@
 
 #include <types.h>
 #include <irx.h>
+#include <loadcore.h>
 #include <stdio.h>
 #include <thbase.h>
 #include <sysclib.h>
@@ -216,7 +217,7 @@ int httpConnect( struct sockaddr_in * server, char *hostAddr, const char * url, 
 		if ( (rc == 1) && (mimeBuffer[0] == '\r') ) break;
 
 		// Convert mimeBuffer to upper case, so we can do string comps
-		for(i = 0; i < strlen(mimeBuffer); i++)
+		for(i = 0; (unsigned int)i < strlen(mimeBuffer); i++)
 			mimeBuffer[i] = toupper(mimeBuffer[i]);
 
 		if(strstr(mimeBuffer, "HTTP/1.")) // First line of header, contains status code. Check for an error code
@@ -493,25 +494,39 @@ int httpLseek(iop_io_file_t *f, int offset, int mode)
 }
 
 
-iop_io_device_ops_t ps2httpOps = {
-	httpInitialize, httpDummy, httpDummy, httpOpen, httpClose, httpRead, httpDummy, httpLseek,
-	httpDummy, httpDummy, httpDummy, httpDummy, httpDummy, httpDummy, httpDummy, httpDummy,
-	httpDummy
+static iop_io_device_ops_t ps2httpOps = {
+	&httpInitialize,
+	(void *)&httpDummy,
+	(void *)&httpDummy,
+	&httpOpen,
+	&httpClose,
+	&httpRead,
+	(void *)&httpDummy,
+	&httpLseek,
+	(void *)&httpDummy,
+	(void *)&httpDummy,
+	(void *)&httpDummy,
+	(void *)&httpDummy,
+	(void *)&httpDummy,
+	(void *)&httpDummy,
+	(void *)&httpDummy,
+	(void *)&httpDummy,
+	(void *)&httpDummy,
 };
 
-iop_io_device_t ps2httpDev = {
+static iop_io_device_t ps2httpDev = {
 	"http",
 	IOP_DT_FS,
 	1,
 	"HTTP client file driver",
-	&ps2httpOps
+	&ps2httpOps,
 };
 
 
 /**
  * Main..  registers the File driver.
  */
-int _start( int argc, char **argv)
+int _start( int argc, char *argv[])
 {
 	(void)argc;
 	(void)argv;
@@ -522,6 +537,6 @@ int _start( int argc, char **argv)
 	io_DelDrv( "http");
 	io_AddDrv(&ps2httpDev);
 
-	return 0;
+	return MODULE_RESIDENT_END;
 }
 

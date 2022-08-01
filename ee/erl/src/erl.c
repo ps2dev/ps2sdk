@@ -834,7 +834,7 @@ return code
 
        // We found one relocation section, let's parse it to relocate.
 	dprintf("   Num: Offset   Type           Symbol\n");
-	for (j = 0; j < (sec[i].sh_size / sec[i].sh_entsize); j++) {
+	for (j = 0; (u32)j < (sec[i].sh_size / sec[i].sh_entsize); j++) {
 	    int sym_n;
 
 	    reloc = *((struct elf_reloc_t *) (reloc_section + j * sec[i].sh_entsize));
@@ -893,7 +893,7 @@ return code
     }
 
     dprintf("   Num: Value    Size     Type    Bind      Ndx Name\n");
-    for (i = 0; i < sec[symtab].sh_size / sec[symtab].sh_entsize; i++) {
+    for (i = 0; (u32)i < sec[symtab].sh_size / sec[symtab].sh_entsize; i++) {
 	if (((sym[i].st_info >> 4) == GLOBAL) || ((sym[i].st_info >> 4) == WEAK)) {
 	    if ((sym[i].st_info & 15) != NOTYPE) {
 		dprintf("Export symbol:\n");
@@ -1161,7 +1161,7 @@ void erl_flush_symbols(struct erl_record_t * erl) {
 
 #ifdef STANDALONE
 
-int main(int argc, char ** argv) {
+int main(int argc, char *argv[]) {
     struct erl_record_t * erl;
     char * fname;
 

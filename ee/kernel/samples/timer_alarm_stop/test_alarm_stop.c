@@ -30,7 +30,7 @@ void usercb2(struct timer_alarm_t *trigalarm, void *arg) {
     iStopTimerAlarm(&alarm);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
     InitializeTimerAlarm(&alarm);
     InitializeTimerAlarm(&alarm2);

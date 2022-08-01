@@ -36,7 +36,7 @@ cpp_hello::~cpp_hello() {
 }
 
 extern "C" {
-int _start(int argc, char ** argv) {
+int _start(int argc, char *argv[]) {
     return 1;
 }
 }

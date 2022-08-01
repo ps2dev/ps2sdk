@@ -21,7 +21,6 @@ int clutaddress = 0;
 fsfont_t impress;
 fontx_t krom_u;
 fontx_t krom_k;
-packet_t packet;
 
 void draw_init_env()
 {
@@ -62,7 +61,7 @@ void init_texture()
 {
 	packet_t *packet = packet_init(50,PACKET_NORMAL);
 
-	qword_t *q = packet->data;
+	qword_t *q;
 
 	myaddress = graph_vram_allocate(512,256,GS_PSM_4, GRAPH_ALIGN_BLOCK);
 	clutaddress = graph_vram_allocate(8,2,GS_PSM_32, GRAPH_ALIGN_BLOCK);
@@ -147,10 +146,9 @@ void run_demo(packet_t *packet)
 	unsigned char str1[] = {0x81, 0xBC, 0x93, 0xF1, 0x93, 0xF1, 0x93, 0xF1, 0x81, 0x69, 0x81, 0x40, 0x81,
 							0x4F, 0x83, 0xD6, 0x81, 0x4F, 0x81, 0x6A, 0x93, 0xF1, 0x81, 0xBD, 0x0D, '\0' };
 
-	qword_t *q = packet->data;
-
 	while(1)
 	{
+		qword_t *q;
 
 		current = packets[context];
 		q = current->data;
@@ -185,6 +183,7 @@ void run_demo(packet_t *packet)
 int main(void)
 {
 	char *ini;
+	packet_t packet;
 
 	dma_channel_initialize(DMA_CHANNEL_GIF,NULL,0);
 	dma_channel_fast_waits(DMA_CHANNEL_GIF);

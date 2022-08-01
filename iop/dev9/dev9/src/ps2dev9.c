@@ -179,7 +179,8 @@ static iop_device_t dev9x_device =
         IOP_DT_FS | IOP_DT_FSEXT,
         1,
         "DEV9",
-        &dev9x_ops};
+        &dev9x_ops,
+    };
 
 static int print_help(void)
 { // The original made a printf() call for each line.
@@ -193,7 +194,7 @@ static int print_help(void)
     return MODULE_NO_RESIDENT_END;
 }
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
     USE_DEV9_REGS;
     const char *pModName;
@@ -249,7 +250,7 @@ int _start(int argc, char **argv)
     if (res)
         return res;
 
-    DelDrv("dev9x");
+    DelDrv(dev9x_device.name);
     if (AddDrv(&dev9x_device) != 0) {
         return MODULE_NO_RESIDENT_END;
     }
@@ -257,7 +258,7 @@ int _start(int argc, char **argv)
     return MODULE_RESIDENT_END;
 }
 
-int _exit(void) { return 0; }
+int _exit(void) { return MODULE_RESIDENT_END; }
 
 /* Export 4 */
 void dev9RegisterIntrCb(int intr, dev9_intr_cb_t cb)

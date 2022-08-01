@@ -45,7 +45,7 @@ iop_device_t **GetDeviceList(void)
     return(dev_list);
 }
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
 	(void)argc;
 	(void)argv;
@@ -208,7 +208,7 @@ int open(const char *name, int flags, ...)
 	iop_file_t *f = get_new_file();
 	char *filename;
 	va_list alist;
-	int res = -ENOSYS, mode;
+	int res, mode;
 
 	va_start(alist, flags);
 	mode = va_arg(alist, int);

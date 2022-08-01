@@ -42,7 +42,7 @@ int sif2_control(u32 intr, void *unused);
 
 extern struct irx_export_table _exp_siftoo;
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
 	u32 state;
 
@@ -50,24 +50,24 @@ int _start(int argc, char **argv)
 	(void)argv;
 
 	if (RegisterLibraryEntries(&_exp_siftoo) != 0)
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 
 	/* Add our SBUS interrupt handler.  */
 	if (sbus_intr_init() < 0) {
 		printf("Unable to initialize SBUS interrupt driver, exiting.\n");
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 	}
 
 	if (sbus_intr_handler_add(SIF2_SBUS_IRQ, sif2_control, NULL) < 0) {
 		printf("Unable to register SIFToo Control handler, exiting.\n");
-		return 1;
+		return MODULE_NO_RESIDENT_END;
 	}
 
 	CpuSuspendIntr((int *)&state);
 	sceSifDma2Init();
 	CpuResumeIntr(state);
 
-	return 0;
+	return MODULE_RESIDENT_END;
 }
 
 int shutdown()

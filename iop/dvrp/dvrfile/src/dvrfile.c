@@ -9,6 +9,7 @@
 */
 
 #include "iomanX.h"
+#include "loadcore.h"
 #include "pvrdrv.h"
 #include "stdio.h"
 #include "sysclib.h"
@@ -17,8 +18,8 @@
 #include "speedregs.h"
 #include "errno.h"
 
-extern int module_start(int argc, char **argv);
-extern int module_stop();
+extern int module_start(int argc, char *argv[]);
+extern int module_stop(int argc, char *argv[]);
 extern int dvrf_df_init(iop_device_t *f);
 extern int dvrf_df_exit(iop_device_t *f);
 extern int dvrf_df_chdir(iop_file_t *f, const char *name);
@@ -230,7 +231,8 @@ static iop_device_ops_t dvrf_translator_functbl = {
         (IOP_DT_FS | IOP_DT_FSEXT),                                                     \
         1,                                                                              \
         drvname,                                                                        \
-        &dvrf_translator_functbl};
+        &dvrf_translator_functbl,                                                       \
+    };
 
 GEN_TRANSLATION_FUNCS(dvrpfs, "dvr_pfs", 1, "PFS Driver for DVR");
 GEN_TRANSLATION_FUNCS(dvrhdd, "dvr_hdd", 0, "HDD Driver for DVR");
@@ -247,7 +249,7 @@ int SBUF[32768];
 #define MODNAME "DVRFILE"
 IRX_ID("DVRFILE", 1, 1);
 
-int _start(int argc, char **argv)
+int _start(int argc, char *argv[])
 {
     if (argc >= 0)
         return module_start(argc, argv);
@@ -255,7 +257,7 @@ int _start(int argc, char **argv)
         return module_stop(argc, argv);
 }
 
-int module_start(int argc, char **argv)
+int module_start(int argc, char *argv[])
 {
     int i;
     USE_SPD_REGS;
@@ -269,7 +271,7 @@ int module_start(int argc, char **argv)
 
     if (i == 30000) {
         printf("IOMAN task of DVRP is not running...\n");
-        return 1;
+        return MODULE_NO_RESIDENT_END;
     }
     sema_id = -1;
     current_chunk_size = 0x4000;
@@ -281,9 +283,9 @@ int module_start(int argc, char **argv)
             goto setup_fschk;
     }
 #if 0
-    return 2;
+    return MODULE_REMOVABLE_END;
 #else
-    return 0;
+    return MODULE_RESIDENT_END;
 #endif
 setup_fschk:
     printf("dvrfile.irx : FILE SYSTEM CHECK MODE\n");
@@ -301,9 +303,9 @@ setup_fschk:
         goto fail;
     }
 #if 0
-    return 2;
+    return MODULE_REMOVABLE_END;
 #else
-    return 0;
+    return MODULE_RESIDENT_END;
 #endif
 fail:
     DelDrv(dvrpfs_drv.name);
@@ -311,19 +313,22 @@ fail:
     DelDrv(dvrhdck_drv.name);
     DelDrv(dvrfssk_drv.name);
     DelDrv(dvrfsck_drv.name);
-    return 1;
+    return MODULE_NO_RESIDENT_END;
 }
 
-int module_stop()
+int module_stop(int argc, char *argv[])
 {
+    (void)argc;
+    (void)argv;
+
     if (DelDrv(dvrpfs_drv.name) || DelDrv(dvrhdd_drv.name)) {
 #if 0
-        return 2;
+        return MODULE_REMOVABLE_END;
 #else
-        return 0;
+        return MODULE_RESIDENT_END;
 #endif
     }
-    return 1;
+    return MODULE_NO_RESIDENT_END;
 }
 
 static int check_cmdack_err(int (*func)(drvdrv_exec_cmd_ack *cmdack), drvdrv_exec_cmd_ack *cmdack, int *retval, const char *funcname)
@@ -895,9 +900,7 @@ int dvrf_df_read(iop_file_t *f, void *ptr, int size)
         }
         if ((chunk_size & 0x7F) != 0 || unaligned_size != 0) {
             memcpy(out_buf, RBUF, chunk_size);
-            if (unaligned_size != 0) {
-                unaligned_size = 0;
-            }
+            unaligned_size = 0;
         }
         if (read_size <= 0) {
             break;

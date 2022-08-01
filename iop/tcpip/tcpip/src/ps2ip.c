@@ -216,7 +216,7 @@ ps2ip_input(PBuf* pInput,NetIF* pNetIF)
 	return result;
 }
 
-int _exit(int argc, char** argv)
+int _exit(int argc, char *argv[])
 {
 	(void)argc;
 	(void)argv;

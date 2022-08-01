@@ -29,9 +29,11 @@ definitions for use inside the PS2 sbus project.
 #ifdef _KMODE
 #define M_SuspendIntr(__stat_ptr) \
     do {                          \
+        (void)__stat_ptr;         \
     } while (0)
 #define M_ResumeIntr(__stat) \
     do {                     \
+        (void)__stat;        \
     } while (0)
 #else
 #define M_SuspendIntr(__stat_ptr)   \

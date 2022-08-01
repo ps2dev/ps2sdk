@@ -36,42 +36,42 @@ IRX_ID("pfs_driver", PFS_MAJOR, PFS_MINOR);
 ///////////////////////////////////////////////////////////////////////////////
 //	Globals
 
-iop_device_ops_t pfsOps = {
-	pfsFioInit,
-	pfsFioDeinit,
-	pfsFioFormat,
-	pfsFioOpen,
-	pfsFioClose,
-	pfsFioRead,
-	pfsFioWrite,
-	pfsFioLseek,
-	pfsFioIoctl,
-	pfsFioRemove,
-	pfsFioMkdir,
-	pfsFioRmdir,
-	pfsFioDopen,
-	pfsFioClose,
-	pfsFioDread,
-	pfsFioGetstat,
-	pfsFioChstat,
-	pfsFioRename,
-	pfsFioChdir,
-	pfsFioSync,
-	pfsFioMount,
-	pfsFioUmount,
-	pfsFioLseek64,
-	pfsFioDevctl,
-	pfsFioSymlink,
-	pfsFioReadlink,
-	pfsFioIoctl2
+static iop_device_ops_t pfsOps = {
+	&pfsFioInit,
+	&pfsFioDeinit,
+	&pfsFioFormat,
+	&pfsFioOpen,
+	&pfsFioClose,
+	&pfsFioRead,
+	&pfsFioWrite,
+	&pfsFioLseek,
+	&pfsFioIoctl,
+	&pfsFioRemove,
+	&pfsFioMkdir,
+	&pfsFioRmdir,
+	&pfsFioDopen,
+	&pfsFioClose,
+	&pfsFioDread,
+	&pfsFioGetstat,
+	&pfsFioChstat,
+	&pfsFioRename,
+	&pfsFioChdir,
+	&pfsFioSync,
+	&pfsFioMount,
+	&pfsFioUmount,
+	&pfsFioLseek64,
+	&pfsFioDevctl,
+	&pfsFioSymlink,
+	&pfsFioReadlink,
+	&pfsFioIoctl2,
 };
 
-iop_device_t pfsFioDev = {
+static iop_device_t pfsFioDev = {
 	"pfs",
 	(IOP_DT_FS | IOP_DT_FSEXT),
 	1,
 	"PFS",
-	&pfsOps
+	&pfsOps,
 };
 
 pfs_config_t pfsConfig = { 1, 2 };
@@ -118,7 +118,7 @@ void pfsClearMount(pfs_mount_t *pfsMount)
 
 pfs_mount_t *pfsGetMountedUnit(s32 unit)
 {	// get mounted unit
-	if(unit>=pfsConfig.maxMount)
+	if((u32)unit>=pfsConfig.maxMount)
 		return NULL;
 
 	if(!(pfsMountBuf[unit].flags & PFS_MOUNT_BUSY))
@@ -224,7 +224,7 @@ int _start(int argc, char *argv[])
 	if(pfsCacheInit(numBuf, pfsMetaSize) < 0)
 		return MODULE_NO_RESIDENT_END;
 
-	DelDrv("pfs");
+	DelDrv(pfsFioDev.name);
 	if(AddDrv(&pfsFioDev) == 0) {
 #if defined(PFS_XOSD_VER)
 		PFS_PRINTF(PFS_DRV_NAME" version %04x driver start. This is OSD LBA48 VERSION !!!!!!!!!!!\n", IRX_VER(PFS_MAJOR, PFS_MINOR));

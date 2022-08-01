@@ -265,7 +265,7 @@ int ps2netfs_accept_pktunknown(int sock, char *buf)
     return -1;
   }
 
-  if (length < sizeof(ps2netfs_pkt_hdr)) {
+  if ((unsigned int)length < sizeof(ps2netfs_pkt_hdr)) {
     dbgprintf("ps2netfs: XXX: did not receive a full header!!!! "
               "Fix this! (%d)\n", length);
     return -1;
@@ -295,7 +295,7 @@ int ps2netfs_accept_pktunknown(int sock, char *buf)
     return -1;
   }
 
-  if (length < (hlen - sizeof(ps2netfs_pkt_hdr))) {
+  if ((unsigned int)length < (hlen - sizeof(ps2netfs_pkt_hdr))) {
     dbgprintf("ps2netfs: Did not receive full packet!!! "
               "Fix this! (%d)\n", length);
   }
@@ -445,12 +445,12 @@ static int ps2netfs_op_devlist(char *buf, int len)
     int cnt; char *ptr = &devlistrly->list[0];
     for(cnt=0;cnt<(count-1);cnt++)
     {
-      int len;
-      len = strlen(ptr);
+      int ptr_len;
+      ptr_len = strlen(ptr);
       // ok, got a string, so replace the final 0, with delimiter
       // move onto next string
-      *(ptr+len) = cmd->path[0];
-      ptr += len + 1;
+      *(ptr+ptr_len) = cmd->path[0];
+      ptr += ptr_len + 1;
     }
   }
 
@@ -1831,14 +1831,11 @@ static int ps2netfs_op_ioctl2(char *buf, int len)
  */
 static void ps2netfs_Listener(int sock)
 {
- int done;
  unsigned int cmd;
  ps2netfs_pkt_hdr *header;
  int retval;
 
- done = 0;
-
- while(!done) {
+ while(1) {
    int len;
 
    len = ps2netfs_accept_pktunknown(sock, &ps2netfs_recv_packet[0]);
@@ -1850,7 +1847,7 @@ static void ps2netfs_Listener(int sock)
      dbgprintf("ps2netfs_Listener: recvfrom error (%d)\n", len);
      return;
    }
-   if (len >= sizeof(ps2netfs_pkt_hdr))
+   if ((unsigned int)len >= sizeof(ps2netfs_pkt_hdr))
    {
      header = (ps2netfs_pkt_hdr *)ps2netfs_recv_packet;
      cmd = ntohl(header->cmd);
