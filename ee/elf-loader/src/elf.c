@@ -13,7 +13,7 @@
 #include <kernel.h>
 #include <sys/stat.h>
 #include <stdbool.h>
-#include <malloc.h>
+#include <stdlib.h>
 
 #include "elf.h"
 

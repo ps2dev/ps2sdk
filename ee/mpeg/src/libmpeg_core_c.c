@@ -9,7 +9,7 @@
 # Based on refernce software of MSSG
 */
 
-#include <malloc.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <kernel.h>

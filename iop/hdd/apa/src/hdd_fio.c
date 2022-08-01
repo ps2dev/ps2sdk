@@ -102,11 +102,17 @@ static int fioGetInput(const char *arg, apa_params_t *params)
     char argBuf[32];
     int rv = 0;
     static const struct apaFsType fsTypes[] = {
+#ifdef APA_SUPPORT_MBR
+        {"MBR", APA_TYPE_MBR},
+#endif
         {"EXT2SWAP", APA_TYPE_EXT2SWAP},
         {"EXT2", APA_TYPE_EXT2},
         {"REISER", APA_TYPE_REISER},
         {"PFS", APA_TYPE_PFS},
         {"CFS", APA_TYPE_CFS},
+#ifdef APA_SUPPORT_HDL
+        {"HDL", APA_TYPE_HDL},
+#endif
     };
 
     if (params == NULL)
@@ -154,13 +160,19 @@ static int fioGetInput(const char *arg, apa_params_t *params)
         return rv;
 
     // scan through fstypes if found none - error
-    for (int i = 0; i < 6; i++) {
-        if (i == 5) {
+    {
+        int i;
+
+        for (i = 0; (unsigned int)i < (sizeof(fsTypes))/(sizeof(fsTypes[0])); i++) {
+            if (!strcmp(argBuf, fsTypes[i].desc)) {
+                params->type = fsTypes[i].type;
+                break;
+            }
+        }
+
+        if ((unsigned int)i == (sizeof(fsTypes))/(sizeof(fsTypes[0]))) {
             APA_PRINTF(APA_DRV_NAME ": error: Invalid fstype, %s.\n", argBuf);
             return -EINVAL;
-        } else if (!strcmp(argBuf, fsTypes[i].desc)) {
-            params->type = fsTypes[i].type;
-            break;
         }
     }
 
@@ -437,8 +449,10 @@ static int apaRemove(s32 device, const char *id, const char *fpwd)
                 return -EBUSY;
         }
     }
+#ifndef APA_ALLOW_REMOVE_PARTITION_WITH_LEADING_UNDERSCORE
     if (id[0] == '_' && id[1] == '_')
         return -EACCES;
+#endif
     if ((clink = apaFindPartition(device, id, &rv)) == NULL)
         return rv;
     if (apaPassCmp(clink->header->fpwd, fpwd)) {
@@ -913,6 +927,13 @@ int hddIoctl2(iop_file_t *f, int req, void *argp, unsigned int arglen,
                 }
             }
             break;
+
+#ifdef APA_SUPPORT_IOCTL_GETPARTSTART
+        // Special HDD.IRX IOCTL2 command for supporting HDLFS
+        case HIOCGETPARTSTART:
+            rv = fileSlot->parts[*(u32 *)argp].start;
+            break;
+#endif
 
         default:
             rv = -EINVAL;

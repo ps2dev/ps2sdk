@@ -41,6 +41,7 @@
 #define APA_TYPE_REISER   0x0088
 #define APA_TYPE_PFS      0x0100
 #define APA_TYPE_CFS      0x0101
+#define APA_TYPE_HDL      0x1337
 
 #define APA_IDMAX    32
 /** Maximum # of sub-partitions */
@@ -66,6 +67,9 @@
 #define HIOCSETPARTERROR 0x6834
 /** Get (sector of a partition) that has an error */
 #define HIOCGETPARTERROR 0x6835
+
+// HDLFS addition
+#define HIOCGETPARTSTART 0x6836 // Get the sector number of the first sector of the partition.
 
 // I/O direction
 #define APA_IO_MODE_READ  0x00

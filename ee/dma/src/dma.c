@@ -12,7 +12,7 @@
 
 #include <dma.h>
 #include <kernel.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <dma_registers.h>

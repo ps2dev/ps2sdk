@@ -15,7 +15,7 @@
 #include <string.h>
 #include <kernel.h>
 #include <timer.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <sio.h>
 
 #include <time.h>

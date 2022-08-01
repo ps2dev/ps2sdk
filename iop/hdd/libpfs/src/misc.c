@@ -21,7 +21,7 @@
 #include <cdvdman.h>
 #else
 #include <string.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <time.h>
 #endif
 #include <ctype.h>
@@ -100,7 +100,11 @@ int pfsGetTime(pfs_datetime_t *tm)
 	time(&rawtime);
 	// Convert to JST
 	rawtime += (-9 * 60 * 60);
+#ifdef _WIN32
+	gmtime_s(&timeinfo, &rawtime);
+#else
 	gmtime_r(&rawtime, &timeinfo);
+#endif
 
 	tm->sec = timeinfo.tm_sec;
 	tm->min = timeinfo.tm_min;

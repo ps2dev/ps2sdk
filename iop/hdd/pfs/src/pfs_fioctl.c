@@ -65,7 +65,7 @@ int pfsFioIoctl(iop_file_t *f, int cmd, void *param)
 	return -1;
 }
 
-int pfsFioDevctl(iop_file_t *f, const char *name, int cmd, void *arg, size_t arglen, void *buf, size_t buflen)
+int pfsFioDevctl(iop_file_t *f, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
 	pfs_mount_t *pfsMount;
 	int rv=0;
@@ -129,7 +129,7 @@ static int ioctl2InvalidateInode(pfs_cache_t *clink)
 }
 #endif
 
-int pfsFioIoctl2(iop_file_t *f, int cmd, void *arg, size_t arglen,	void *buf, size_t buflen)
+int pfsFioIoctl2(iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
 	int rv;
 	pfs_file_slot_t *fileSlot = (pfs_file_slot_t *)f->privdata;

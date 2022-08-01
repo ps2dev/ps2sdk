@@ -463,6 +463,11 @@ u32 apaGetPartitionMax(u32 totalLBA)
 {
     u32 i, size;
 
+#ifdef APA_WORKAROUND_LESS_THAN_40GB_CAPACITY
+    if (totalLBA < 0x04ffffff)
+        totalLBA = 0x04ffffff; // workaround for disks less then 40Gb
+#endif
+
     totalLBA >>= 6; // totalLBA/64
     size = (((u32)1) << 0x1F);
     for (i = 31; i != 0; i--) {

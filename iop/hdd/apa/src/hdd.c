@@ -193,7 +193,7 @@ static int unlockDrive(s32 device)
 	return rv;
 }
 
-int _start(int argc, char *argv[])
+int APA_ENTRYPOINT(int argc, char *argv[])
 {
 	int 	i, ret;
 	char	*input;

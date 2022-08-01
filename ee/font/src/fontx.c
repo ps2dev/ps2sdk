@@ -5,7 +5,7 @@
 #include <gs_gp.h>
 
 #include <stdio.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <sys/fcntl.h>
 #include <string.h>
 
