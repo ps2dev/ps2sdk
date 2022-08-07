@@ -37,6 +37,8 @@ psio2_transfer_reset _52_psio2_transfer_reset;
 // Generic sio2man init function
 static void _sio2_transfer_init(psio2_transfer_init init_func)
 {
+    //M_DEBUG("%s\n", __FUNCTION__);
+
     WaitSema(lock_sema);
     init_func();
 }
@@ -45,6 +47,8 @@ static void _sio2_transfer_init(psio2_transfer_init init_func)
 static int _sio2_transfer(psio2_transfer transfer_func, sio2_transfer_data_t *td)
 {
     int rv, i;
+
+    //M_DEBUG("%s\n", __FUNCTION__);
 
     // Do not allow transfers to/from our used port
     for (i = 0; i < 16; i++) {
@@ -67,6 +71,8 @@ static int _sio2_transfer(psio2_transfer transfer_func, sio2_transfer_data_t *td
 // Generic sio2man transfer_reset function
 static void _sio2_transfer_reset(psio2_transfer_reset reset_func)
 {
+    //M_DEBUG("%s\n", __FUNCTION__);
+
     reset_func();
     SignalSema(lock_sema);
 }
@@ -129,6 +135,9 @@ static void _sio2man_hook(iop_library_t *lib)
         M_DEBUG("Installing sio2man hooks for version 0x%x\n", lib->version);
 
         _23_psio2_pad_transfer_init  = ioplib_hookExportEntry(lib, 23, _23_sio2_pad_transfer_init);
+        // Lock sio2 to prevent race conditions with MC/PAD libraries
+        _23_psio2_pad_transfer_init();
+
         _24_psio2_mc_transfer_init   = ioplib_hookExportEntry(lib, 24, _24_sio2_mc_transfer_init);
         _25_psio2_transfer           = ioplib_hookExportEntry(lib, 25, _25_sio2_transfer);
         _26_psio2_transfer_reset     = ioplib_hookExportEntry(lib, 26, _26_sio2_transfer_reset);
@@ -149,6 +158,9 @@ static void _sio2man_hook(iop_library_t *lib)
             _51_psio2_transfer          = ioplib_hookExportEntry(lib, 51, _51_sio2_transfer);
             _52_psio2_transfer_reset    = ioplib_hookExportEntry(lib, 52, _52_sio2_transfer_reset);
         }
+
+        // Unlock sio2
+        _26_psio2_transfer_reset();
 
         hooked_version = lib->version;
     } else {
