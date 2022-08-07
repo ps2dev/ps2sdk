@@ -13,8 +13,6 @@
 
 extern union mcman_PS1PDApagebuf mcman_PS1PDApagebuf;
 
-extern int sio2man_type;
-
 extern MC_FHANDLE mcman_fdhandles[MAX_FDHANDLES];
 extern MCDevInfo mcman_devinfos[4][MCMAN_MAXSLOT];
 
@@ -482,17 +480,15 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 	DPRINTF("mcman_setinfo1 port%d slot%d filename %s flags %x\n", port, slot, filename, flags);
 
 	ret = 0;
-	if (sio2man_type >= XSIO2MAN) {
-		if ((flags & sceMcFileAttrFile) != 0) {
-			r = mcman_getPS1direntry(port, slot, (char*)info->EntryName, &fse1, 1);
-			if (r < 0) {
-				if (r != sceMcResNoEntry) {
-					ret = r;
-				}
-				else {
-					if ((!strcmp(".", (char*)info->EntryName)) || (!strcmp("..", (char*)info->EntryName)) || (info->EntryName[0] == 0))
-						ret = sceMcResNoEntry;
-				}
+	if ((flags & sceMcFileAttrFile) != 0) {
+		r = mcman_getPS1direntry(port, slot, (char*)info->EntryName, &fse1, 1);
+		if (r < 0) {
+			if (r != sceMcResNoEntry) {
+				ret = r;
+			}
+			else {
+				if ((!strcmp(".", (char*)info->EntryName)) || (!strcmp("..", (char*)info->EntryName)) || (info->EntryName[0] == 0))
+					ret = sceMcResNoEntry;
 			}
 		}
 	}
@@ -505,10 +501,8 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 	if (r < 0)
 		return r;
 
-	if (sio2man_type >= XSIO2MAN) {
-		if (ret != sceMcResSucceed)
-			return sceMcResNoEntry;
-	}
+	if (ret != sceMcResSucceed)
+		return sceMcResNoEntry;
 
 	mce = mcman_get1stcacheEntp();
 
@@ -526,17 +520,9 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 
 	mce->wr_flag |= 1 << temp;
 
-	if (sio2man_type >= XSIO2MAN) {
-		fse2->field_7d = 0;
-		fse2->field_2c = 0;
-		flags &= -12;
-	}
-	else {
-		if(fse2->field_7d != 1) {
-			fse2->field_7d = 1;
-			fse2->field_38 = fse2->length;
-		}
-	}
+	fse2->field_7d = 0;
+	fse2->field_2c = 0;
+	flags &= -12;
 
 	if ((flags & sceMcFileAttrExecutable) != 0) {
 		if ((info->AttrFile & sceMcFileAttrPDAExec) != 0)
@@ -710,18 +696,11 @@ int mcman_close1(int fd)
 		fse->length = temp << 13;
 	}
 
-	if (sio2man_type >= XSIO2MAN) {
-		fse->field_7d = 0; // <--- To preserve for XMCMAN
-		fse->field_2c = 0; //
-		fse->field_38 = 0; //
-		memset((void *)&fse->created, 0, 8);  //
-		memset((void *)&fse->modified, 0, 8); //
-	}
-	else { // MCMAN does as following
-		fse->field_7d = 1;
-		fse->field_38 = fh->filesize;
-		mcman_getmcrtime(&fse->modified);
-	}
+	fse->field_7d = 0; // <--- To preserve for XMCMAN
+	fse->field_2c = 0; //
+	fse->field_38 = 0; //
+	memset((void *)&fse->created, 0, 8);  //
+	memset((void *)&fse->modified, 0, 8); //
 
 	fse->edc = mcman_calcEDC((void *)fse, 127);
 

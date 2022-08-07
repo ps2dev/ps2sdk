@@ -10,6 +10,23 @@ I_sio_printf
 sior_IMPORTS_end
 #endif
 
+#ifndef BUILDING_XFROMMAN
+#ifndef SIO2MAN_V2
+xsio2man_IMPORTS_start
+#else
+rsio2man_IMPORTS_start
+#endif
+I_sio2_mc_transfer_init
+I_sio2_transfer
+I_sio2_transfer_reset
+I_sio2_mtap_change_slot
+#ifndef SIO2MAN_V2
+xsio2man_IMPORTS_end
+#else
+rsio2man_IMPORTS_end
+#endif
+#endif
+
 loadcore_IMPORTS_start
 I_RegisterLibraryEntries
 I_GetLoadcoreInternalData

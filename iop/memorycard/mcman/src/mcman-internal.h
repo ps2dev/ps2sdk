@@ -26,8 +26,13 @@
 #include <io_common.h>
 #ifdef BUILDING_XFROMMAN
 #include <fls.h>
+#else
+#ifndef SIO2MAN_V2
+#include <xsio2man.h>
+#else
+#include <rsio2man.h>
 #endif
-#include "sio2man_imports.h"
+#endif
 
 #ifndef BUILDING_XFROMMAN
 #define MODNAME "mcman_cex"
@@ -104,7 +109,6 @@ typedef struct {  // size = 48
 
 // internal functions prototypes
 #ifndef BUILDING_XFROMMAN
-int  mcsio2_transfer(int port, int slot, sio2_transfer_data_t *sio2data);
 int  mcsio2_transfer2(int port, int slot, sio2_transfer_data_t *sio2data);
 #endif
 void long_multiply(u32 v1, u32 v2, u32 *HI, u32 *LO);
