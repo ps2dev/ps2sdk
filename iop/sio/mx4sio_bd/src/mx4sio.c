@@ -747,6 +747,7 @@ static int spi_sdcard_read(struct block_device *bd, u32 sector, void *buffer, u1
 static int spi_sdcard_write(struct block_device *bd, u32 sector, const void *buffer, u16 count)
 {
     int rv;
+    u16 cs;
 
     (void)bd;
 
@@ -757,12 +758,24 @@ static int spi_sdcard_write(struct block_device *bd, u32 sector, const void *buf
 
     sio2_lock();
 
+#if 1
+    for (cs = 0; cs < count; cs++) {
+        rv = spisd_write_block(sector + cs, buffer);
+        if (rv != SPISD_RESULT_OK) {
+            M_PRINTF("ERROR: spisd_write_block = %d\n", rv);
+            sio2_unlock();
+            return 0;
+        }
+        buffer = (const u8*)buffer + 512;
+    }
+#else
     rv = spisd_write_multi_block(sector, buffer, count);
     if (rv != SPISD_RESULT_OK) {
         M_PRINTF("ERROR: spisd_write_multi_block = %d\n", rv);
         sio2_unlock();
         return 0;
     }
+#endif
 
     // Let detection thread know the card has been used succesfully
     card_used = 1;
