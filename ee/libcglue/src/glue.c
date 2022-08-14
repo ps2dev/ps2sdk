@@ -639,3 +639,33 @@ clock_t _times(struct tms *buffer) {
 	return clk;
 }
 #endif
+
+#ifdef F_truncate
+int truncate(const char *path, off_t length)
+{
+	ssize_t bytes_read;
+    int fd;
+    char buff[length];
+
+	fd = open(path, O_RDONLY);
+	if (fd < 0) {
+		return -1;
+	}
+
+	bytes_read = read(fd, &buff, length);
+	close(fd);
+	if (bytes_read < length) {
+		errno = EFBIG;
+		return -1;
+	}
+
+	fd = open (path, O_TRUNC|O_WRONLY);
+	if (fd < 0) {
+		return -1;
+	}
+
+	write(fd, &buff, length);
+	close(fd);
+	return 0;
+}
+#endif
