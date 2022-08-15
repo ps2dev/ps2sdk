@@ -1,0 +1,109 @@
+/*
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2022, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+#
+# Linkfile script for iop-ld
+*/
+
+OUTPUT_FORMAT("elf32-littlemips")
+SEARCH_DIR("");
+ENTRY(_start)
+PHDRS
+{
+	irxhdr 0x70000080 FLAGS (PF_R); /* 0x70000080 -> PT_SCE_IOPMOD */
+	defhdr PT_LOAD FLAGS (PF_X | PF_W | PF_R);
+}
+SECTIONS
+{
+	. = SIZEOF_HEADERS;
+	/*
+	 * This is the .iopmod section for the IRX, it contains information that
+	 * the IOP uses when loading the IRX.
+	 * This section is placed in its own segment.
+	 */
+	.iopmod 0 (COPY) : ALIGN(4) {
+		/*
+		 * The linker will replace this first LONG with a pointer to _irx_id
+		 * if the symbol has been defined.
+		 */
+		LONG (DEFINED(_irx_id) ? ABSOLUTE(_irx_id) : 0xffffffff) ;
+		LONG (ABSOLUTE(_start)) ;
+		LONG (_gp) ;
+		LONG (SIZEOF(.text)) ;
+		LONG (SIZEOF(.data)) ;
+		LONG (SIZEOF(.bss)) ;
+		/*
+		 * The linker will put a SHORT here with the version of the IRX
+		 * (or zero if there is no version).
+		 */
+		/*
+		 * The linker will put a null terminated string here containing the
+		 * name of the IRX (or an empty string if the name is not known).
+		 */
+		KEEP (* ( .iopmod )) ;
+		FILL(0x00000000);
+	} :irxhdr = 0
+
+	.text 0 : ALIGN(16) {
+		CREATE_OBJECT_SYMBOLS
+		PROVIDE (_ftext = .) ;
+		KEEP (* ( .module.imports )) ;
+		* ( .text )
+		* ( .text.* )
+		* ( .init )
+		* ( .fini )
+		KEEP (* ( .module.exports )) ;
+		PROVIDE (_etext = .) ;
+	} :defhdr = 0
+
+	.rodata : ALIGN(16) {
+		* ( .rdata )
+		* ( .rodata )
+		* ( .rodata1 )
+		* ( .rodata.* )
+	} :defhdr = 0
+
+	.data : ALIGN(16) {
+		* ( .data )
+		* ( .data1 )
+		* ( .data.* )
+		CONSTRUCTORS
+	} :defhdr = 0
+
+	.bss : ALIGN(16) {
+		* ( .bss )
+		* ( .bss.* )
+		* ( COMMON )
+		. = ALIGN(4) ;
+	} :defhdr
+	_gp = ALIGN(16) ;
+
+	/*
+	 * These are the stuff that we don't want to be put in an IRX.
+	 */
+	/DISCARD/ : {
+		* ( .MIPS.abiflags )
+		* ( .comment )
+		* ( .debug_* )
+		* ( .gnu.attributes )
+		* ( .mdebug.* )
+		* ( .reginfo )
+		* ( .symtab )
+		* ( .strtab )
+		* ( .shstrtab )
+		/*
+		 * This must go because it confuses the IOP kernel (treated as a reloc section).
+		 */
+		* ( .pdr )
+		/*
+		 * Until I can figure out if there's a better way to rid ourselves of
+		 * .rel.dyn this will have to do.  - MRB
+		 */
+		* ( .rel.dyn )
+	}
+}

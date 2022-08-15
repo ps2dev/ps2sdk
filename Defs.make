@@ -29,7 +29,7 @@ EE_RANLIB ?= $(EE_TOOL_PREFIX)ranlib
 # Defintions for the IOP toolchain.
 #
 
-IOP_TOOL_PREFIX ?= mipsel-ps2-irx-
+IOP_TOOL_PREFIX ?= mipsel-ps2-elf-
 IOP_CC ?= $(IOP_TOOL_PREFIX)gcc
 IOP_AS ?= $(IOP_TOOL_PREFIX)as
 IOP_LD ?= $(IOP_TOOL_PREFIX)ld

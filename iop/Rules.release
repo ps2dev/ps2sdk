@@ -11,7 +11,7 @@
 # Creates the base iop directory structure in target directory.
 #
 
-RELEASE_IOP_DIRS = iop/ iop/include/sys/ iop/irx/ iop/lib
+RELEASE_IOP_DIRS = iop/ iop/include/sys/ iop/irx/ iop/lib iop/startup
 RELEASE_IOP_DIRS := $(RELEASE_IOP_DIRS:%=$(PS2SDK)/%)
 
 

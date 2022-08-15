@@ -28,7 +28,9 @@ struct irx_id {
 #define IRX_ID(name, major, minor) \
 struct irx_id _irx_id = { \
 	name, IRX_VER(major, minor) \
-};
+}; \
+const u16 _irx_version __attribute__((section(".iopmod"))) = IRX_VER(major, minor); \
+const char _irx_name[] __attribute__((aligned(1),section(".iopmod"))) = name;
 
 /*
  * Module imports
@@ -57,20 +59,20 @@ struct irx_import_stub
  */
 #define DECLARE_IMPORT_TABLE(modname, major, minor)	\
 static struct irx_import_table _imp_##modname 		\
-	__attribute__((section(".text\n\t#"), unused))= {	\
+	__attribute__((section(".module.imports\n\t#"), unused))= {	\
 	magic: IMPORT_MAGIC, version: IRX_VER(major, minor),	\
 	name: #modname, };
 
 #define STR(val) #val
 // .word 0x03e00008 == jr $ra (return immediately), this value will be patched later
 #define DECLARE_IMPORT(ord, name) \
-	__asm__ (".section\t.text\n\t"		\
+	__asm__ (".section\t.module.imports\n\t"		\
 		".globl\t"#name"\n\t"#name":\n\t"	\
 		".word 0x03e00008\n\t"			\
 		".word "STR(0x24000000|ord));
 
 #define END_IMPORT_TABLE \
-	__asm__ (".section\t.text\n\t.word\t0, 0");
+	__asm__ (".section\t.module.imports\n\t.word\t0, 0");
 
 /*
  * Module exports
@@ -94,13 +96,13 @@ struct irx_export_table {
 
 #define DECLARE_EXPORT_TABLE(modname, major, minor)	\
 struct irx_export_table _exp_##modname			\
-	__attribute__((section(".text\n\t#"), unused)) = {	\
+	__attribute__((section(".module.exports\n\t#"), unused)) = {	\
 	magic: EXPORT_MAGIC, version: IRX_VER(major, minor),	\
 	name: #modname, };
 
 #define DECLARE_EXPORT(fptr) \
-	__asm__ (".section\t.text\n\t.word\t"STR(fptr));
+	__asm__ (".section\t.module.exports\n\t.word\t"STR(fptr));
 
-#define END_EXPORT_TABLE __asm__ (".section\t.text\n\t.word\t0");
+#define END_EXPORT_TABLE __asm__ (".section\t.module.exports\n\t.word\t0");
 
 #endif /* __IRX_H__ */
