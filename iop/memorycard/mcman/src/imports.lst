@@ -11,6 +11,7 @@ sior_IMPORTS_end
 #endif
 
 #ifndef BUILDING_XFROMMAN
+#ifdef BUILDING_XMCMAN
 #ifndef SIO2MAN_V2
 xsio2man_IMPORTS_start
 #else
@@ -24,6 +25,12 @@ I_sio2_mtap_change_slot
 xsio2man_IMPORTS_end
 #else
 rsio2man_IMPORTS_end
+#endif
+#else
+sio2man_IMPORTS_start
+I_sio2_mc_transfer_init
+I_sio2_transfer
+sio2man_IMPORTS_end
 #endif
 #endif
 

@@ -12,6 +12,13 @@ IOP_INCS += -I$(PS2SDKSRC)/iop/memorycard/mcman/include
 
 IOP_OBJS = mcserv.o imports.o exports.o
 
+# Build the newer version of the memory card server module?
+MCMAN_BUILDING_XMCSERV ?= 1
+
+ifneq (x$(MCMAN_BUILDING_XMCSERV),x0)
+IOP_CFLAGS += -DBUILDING_XMCSERV
+endif
+
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make
 include $(PS2SDKSRC)/iop/Rules.make

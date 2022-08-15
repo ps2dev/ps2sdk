@@ -27,10 +27,14 @@
 #include <modload.h>
 #include <secrman.h>
 #ifndef BUILDING_XFROMMAN
+#ifdef BUILDING_XMCMAN
 #ifndef SIO2MAN_V2
 #include <xsio2man.h>
 #else
 #include <rsio2man.h>
+#endif
+#else
+#include <sio2man.h>
 #endif
 #endif
 #ifdef SIO_DEBUG

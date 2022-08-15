@@ -6,11 +6,11 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_SRC_DIR = $(PS2SDKSRC)/iop/memorycard/mcman/src/
-IOP_INC_DIR = $(PS2SDKSRC)/iop/memorycard/mcman/include/
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/memorycard/mcserv/src/
+IOP_INC_DIR = $(PS2SDKSRC)/iop/memorycard/mcserv/include/
 
-IOP_BIN ?= xfromman.irx
+IOP_BIN ?= mcserv-old.irx
 
-MCMAN_BUILDING_XFROMMAN ?= 1
+MCMAN_BUILDING_XMCSERV ?= 0
 
-include $(PS2SDKSRC)/iop/memorycard/mcman/Makefile
+include $(PS2SDKSRC)/iop/memorycard/mcserv/Makefile
