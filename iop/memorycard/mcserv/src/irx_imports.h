@@ -19,6 +19,7 @@
 
 #include <intrman.h>
 #include <loadcore.h>
+#include <mcman.h>
 #include <sifcmd.h>
 #include <sifman.h>
 #ifdef SIO_DEBUG

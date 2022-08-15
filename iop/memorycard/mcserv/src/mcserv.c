@@ -16,6 +16,7 @@
 // 0x02,0x08
 IRX_ID(MODNAME, 2, 8);
 
+#ifdef BUILDING_XMCSERV
 static const u8 XMCSERV_RpcCmd[2][16] =
 {	// libmc rpc cmd values for XMCMAN/XMCSERV
 	{	0xFE,	// CMD_INIT
@@ -54,6 +55,7 @@ static const u8 XMCSERV_RpcCmd[2][16] =
 		0x14	// sceMcCheckBlock (calls xmcman_funcs: 45)
 	}
 };
+#endif
 
 // rpc command handling array
 static void *rpc_funcs_array[21] = {
@@ -75,9 +77,21 @@ static void *rpc_funcs_array[21] = {
     (void *)sceMcWritePage,
     (void *)sceMcUnformat,
     (void *)sceMcRead2,
+#ifdef BUILDING_XMCSERV
     (void *)sceMcGetInfo2,
+#else
+    (void *)NULL,
+#endif
+#ifdef BUILDING_XMCSERV
     (void *)sceMcGetEntSpace,
-    (void *)sceMcCheckBlock
+#else
+    (void *)NULL,
+#endif
+#ifdef BUILDING_XMCSERV
+    (void *)sceMcCheckBlock,
+#else
+    (void *)NULL,
+#endif
 };
 
 static int mcserv_tidS_0400;
@@ -98,9 +112,6 @@ int _start(int argc, char *argv[])
 {
 	iop_thread_t thread_param;
 	register int thread_id;
-	iop_library_t *libptr;
-	int i, mcman_loaded;
-	void **export_tab;
 
 	(void)argc;
 	(void)argv;
@@ -109,68 +120,6 @@ int _start(int argc, char *argv[])
 	sio_init(38400, 0, 0, 0, 0);
 #endif
 	DPRINTF("_start...\n");
-
-	// Get mcman lib ptr
-	mcman_loaded = 0;
-	libptr = GetLoadcoreInternalData()->let_next;
-	while (libptr != 0) {
-		for (i=0; i<8; i++) {
-			if (libptr->name[i] != mcman_modname[i])
-				break;
-		}
-		if (i == 8) {
-			mcman_loaded = 1;
-			break;
-		}
-		libptr = libptr->prev;
-	}
-
-	if (!mcman_loaded) {
-		DPRINTF("mcman module is not loaded...\n");
-		goto err_out;
-	}
-
-	DPRINTF("mcman version=%03x\n", libptr->version);
-	if (libptr->version > 0x200)
-		mcman_type = XMCMAN;
-
-	// Get mcman export table
-	export_tab = (void **)(((struct irx_export_table *)libptr)->fptrs);
-
-	// Set functions pointers to match MCMAN exports
-	pMcDetectCard = export_tab[5];
-	pMcOpen = export_tab[6];
-	pMcClose = export_tab[7];
-	pMcRead = export_tab[8];
-	pMcWrite = export_tab[9];
-	pMcSeek = export_tab[10];
-	pMcFormat = export_tab[11];
-	pMcGetDir = export_tab[12];
-	pMcDelete = export_tab[13];
-	pMcFlush = export_tab[14];
-	pMcChDir = export_tab[15];
-	pMcSetFileInfo = export_tab[16];
-	pMcEraseBlock = export_tab[17];
-	pMcReadPage = export_tab[18];
-	pMcWritePage = export_tab[19];
-	pMcDataChecksum = export_tab[20];
-	pMcReplaceBadBlock = export_tab[24]; // dummy in MCMAN !!!
-	pMcReadPS1PDACard = export_tab[29];
-	pMcWritePS1PDACard = export_tab[30];
-	pMcUnformat = export_tab[36];
-	pMcRetOnly = export_tab[37];
-	pMcGetFreeClusters = export_tab[38];
-	pMcGetMcType = export_tab[39];
-	pMcSetPS1CardFlag = export_tab[40];
-
-	// Set functions pointers to match XMCMAN exports if needed
-	if (mcman_type == XMCMAN) {
-	pMcDetectCard2 = export_tab[21];
-	pMcGetFormat = export_tab[22];
-	pMcGetEntSpace = export_tab[23];
-	pMcGetModuleInfo = export_tab[42];
-	pMcCheckBlock = export_tab[45];
-	}
 
 	// Register mcserv dummy export table
 	DPRINTF("registering exports...\n");
@@ -225,7 +174,8 @@ void *cb_rpc_S_0400(u32 fno, void *buf, int size)
 	(void)buf;
 	(void)size;
 
-	if (mcman_type == XMCMAN) {
+#ifdef BUILDING_XMCSERV
+	{
 		register int i;
 
 		for (i=0; i<16; i++) { // retrieve correct function number for xmcserv
@@ -235,11 +185,13 @@ void *cb_rpc_S_0400(u32 fno, void *buf, int size)
 			}
 		}
 	}
-	else { // retrieve correct function number for mcserv
+#else
+	{ // retrieve correct function number for mcserv
 		fno -= 112;
 		if (fno > 16)
 			return (void *)&rpc_stat;
 	}
+#endif
 
 	// Get function pointer
 	rpc_func = (void *)rpc_funcs_array[fno];
@@ -247,7 +199,7 @@ void *cb_rpc_S_0400(u32 fno, void *buf, int size)
 	// Call needed rpc func
 	rpc_stat.result = rpc_func();
 
-	pMcReplaceBadBlock();
+	McReplaceBadBlock();
 
 	return (void *)&rpc_stat;
 }
@@ -256,15 +208,19 @@ void *cb_rpc_S_0400(u32 fno, void *buf, int size)
 int sceMcInit(void)
 {
 	register int r;
+#ifdef BUILDING_XMCSERV
 	struct irx_id *ModuleInfo;
+#endif
 
 	r = _McInit(&mcserv_rpc_buf);
 
-	if (mcman_type == XMCMAN) {
-		ModuleInfo = pMcGetModuleInfo();
+#ifdef BUILDING_XMCSERV
+	{
+		ModuleInfo = McGetModuleInfo();
 		rpc_stat.mcserv_version = MODVER;
 		rpc_stat.mcman_version = ModuleInfo->v;
 	}
+#endif
 
 	return r;
 }
@@ -330,10 +286,12 @@ int sceMcGetInfo(void)
 }
 
 //--------------------------------------------------------------
+#ifdef BUILDING_XMCSERV
 int sceMcGetInfo2(void)
 {
 	return _McGetInfo2(&mcserv_rpc_buf);
 }
+#endif
 
 //--------------------------------------------------------------
 int sceMcDelete(void)
@@ -378,16 +336,20 @@ int sceMcSetFileInfo(void)
 }
 
 //--------------------------------------------------------------
+#ifdef BUILDING_XMCSERV
 int sceMcGetEntSpace(void)
 {
 	return _McGetEntSpace(&mcserv_rpc_buf);
 }
+#endif
 
 //--------------------------------------------------------------
+#ifdef BUILDING_XMCSERV
 int sceMcCheckBlock(void)
 {
 	return _McCheckBlock(&mcserv_rpc_buf);
 }
+#endif
 
 //--------------------------------------------------------------
 int _McInit(void *rpc_buf)
@@ -396,16 +358,18 @@ int _McInit(void *rpc_buf)
 
 	DPRINTF("_McInit fd %d offset %d\n", dP->fd, dP->offset);
 
-	if (mcman_type == MCMAN) {
+#ifndef BUILDING_XMCSERV
+	{
 		int ps1flag = 0;
 
 		if (dP->offset == -217)
 			ps1flag = 1;
 
-		pMcSetPS1CardFlag(ps1flag);
+		McSetPS1CardFlag(ps1flag);
 	}
+#endif
 
-	return pMcRetOnly(dP->fd);
+	return McRetOnly(dP->fd);
 }
 
 //--------------------------------------------------------------
@@ -415,7 +379,7 @@ int _McOpen(void *rpc_buf)
 
 	DPRINTF("_McOpen port%d slot%d file %s flags %d\n", nP->port, nP->slot, nP->name, nP->flags);
 
-	return pMcOpen(nP->port, nP->slot, nP->name, nP->flags);
+	return McOpen(nP->port, nP->slot, nP->name, nP->flags);
 }
 
 //--------------------------------------------------------------
@@ -425,7 +389,7 @@ int _McClose(void *rpc_buf)
 
 	DPRINTF("_McClose fd %d\n", dP->fd);
 
-	return pMcClose(dP->fd);
+	return McClose(dP->fd);
 }
 
 //--------------------------------------------------------------
@@ -435,7 +399,7 @@ int _McSeek(void *rpc_buf)
 
 	DPRINTF("_McSeek fd %d offset %d origin %d\n", dP->fd, dP->offset, dP->origin);
 
-	return pMcSeek(dP->fd, dP->offset, dP->origin);
+	return McSeek(dP->fd, dP->offset, dP->origin);
 }
 
 //--------------------------------------------------------------
@@ -473,7 +437,7 @@ int _McRead(void *rpc_buf)
 		eP.dest2 = (void *)((u8 *)eedata + eP.size1 + left_to_read);
 
 	if (eP.size1 != 0) {
-		size_readed = pMcRead(dP->fd, eP.src1, eP.size1);
+		size_readed = McRead(dP->fd, eP.src1, eP.size1);
 
 		if (size_readed < 0) {
 			eP.size1 = 0;
@@ -503,7 +467,7 @@ int _McRead(void *rpc_buf)
 		if (left_to_read > MCSERV_BUFSIZE)
 			size_to_read = MCSERV_BUFSIZE;
 
-		size_readed = pMcRead(dP->fd, mcserv_buf, size_to_read);
+		size_readed = McRead(dP->fd, mcserv_buf, size_to_read);
 
 		if (size_readed < 0) {
 			eP.size2 = 0;
@@ -536,7 +500,7 @@ int _McRead(void *rpc_buf)
 	if (eP.size2 == 0)
 		goto dma_transfer2;
 
-	size_readed = pMcRead(dP->fd, eP.src2, eP.size2);
+	size_readed = McRead(dP->fd, eP.src2, eP.size2);
 
 	if (size_readed < 0) {
 		eP.size2 = 0;
@@ -601,7 +565,7 @@ int _McRead2(void *rpc_buf)
 		eP.dest2 = (void *)((u8 *)eedata + eP.size1 + left_to_read);
 
 	if (eP.size1 != 0) {
-		size_readed = pMcRead(dP->fd, eP.src1, eP.size1);
+		size_readed = McRead(dP->fd, eP.src1, eP.size1);
 
 		if (size_readed < 0) {
 			eP.size1 = 0;
@@ -631,7 +595,7 @@ int _McRead2(void *rpc_buf)
 		if (left_to_read > MCSERV_BUFSIZE)
 			size_to_read = MCSERV_BUFSIZE;
 
-		size_readed = pMcRead(dP->fd, mcserv_buf, size_to_read);
+		size_readed = McRead(dP->fd, mcserv_buf, size_to_read);
 
 		if (size_readed < 0) {
 			eP.size2 = 0;
@@ -678,7 +642,7 @@ skip_dma_transfer:
 	if (eP.size2 == 0)
 		goto dma_transfer2;
 
-	size_readed = pMcRead(dP->fd, eP.src2, eP.size2);
+	size_readed = McRead(dP->fd, eP.src2, eP.size2);
 
 	if (size_readed < 0) {
 		eP.size2 = 0;
@@ -720,7 +684,7 @@ int _McWrite(void *rpc_buf)
 	size_written = 0;
 
 	if (dP->origin != 0) {
-		size_written = pMcWrite(dP->fd, dP->data, dP->origin);
+		size_written = McWrite(dP->fd, dP->data, dP->origin);
 
 		if (size_written != dP->origin)
 			return size_written;
@@ -736,7 +700,7 @@ int _McWrite(void *rpc_buf)
 
 		sceSifGetOtherData(&rD, dP->buffer, &mcserv_buf, size_to_write, 0);
 
-		r = pMcWrite(dP->fd, &mcserv_buf, size_to_write);
+		r = McWrite(dP->fd, &mcserv_buf, size_to_write);
 		if (r != size_to_write) {
 			if (r < 0)
 				return r;
@@ -770,7 +734,7 @@ int _McGetDir(void *rpc_buf)
 
 	while (nP->maxent > -1) {
 
-		r = pMcGetDir(nP->port, nP->slot, nP->name, flags & 0xffff, 1, (sceMcTblGetDir *)mcserv_buf);
+		r = McGetDir(nP->port, nP->slot, nP->name, flags & 0xffff, 1, (sceMcTblGetDir *)mcserv_buf);
 		if (r < 0)
 			return r;
 		if (r == 0)
@@ -812,7 +776,7 @@ int _McChDir(void *rpc_buf)
 
 	DPRINTF("_McChDir port%d slot%d newdir %s\n", nP->port, nP->slot, nP->name);
 
-	r = pMcChDir(nP->port, nP->slot, nP->name, (char *)mcserv_buf);
+	r = McChDir(nP->port, nP->slot, nP->name, (char *)mcserv_buf);
 
 	dmaStruct.src = (void *)mcserv_buf;
 	dmaStruct.dest = (void *)nP->curdir;
@@ -836,7 +800,7 @@ int _McFormat(void *rpc_buf)
 
 	DPRINTF("_McFormat port%d slot%d\n", dP->port, dP->slot);
 
-	return pMcFormat(dP->port, dP->slot);
+	return McFormat(dP->port, dP->slot);
 }
 
 //--------------------------------------------------------------
@@ -846,7 +810,7 @@ int _McUnformat(void *rpc_buf)
 
 	DPRINTF("_McUnformat port%d slot%d\n", dP->port, dP->slot);
 
-	return pMcUnformat(dP->port, dP->slot);
+	return McUnformat(dP->port, dP->slot);
 }
 
 //--------------------------------------------------------------
@@ -862,17 +826,17 @@ int _McGetInfo(void *rpc_buf)
 
 	mc_free = 0;
 
-	r = pMcDetectCard(dP->port, dP->slot);
+	r = McDetectCard(dP->port, dP->slot);
 
 	if (dP->size > 0)
-		eP.type = pMcGetMcType(dP->port, dP->slot);
+		eP.type = McGetMcType(dP->port, dP->slot);
 
 	eP.free = 0;
 	if (r >= -1) {
 		if (dP->offset == 0)
 			goto dma_transfer;
 
-		mc_free = pMcGetFreeClusters(dP->port, dP->slot);
+		mc_free = McGetFreeClusters(dP->port, dP->slot);
 		if (mc_free >= 0)
 			eP.free = mc_free;
 	}
@@ -898,6 +862,7 @@ dma_transfer:
 }
 
 //--------------------------------------------------------------
+#ifdef BUILDING_XMCSERV
 int _McGetInfo2(void *rpc_buf)
 {
 	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
@@ -910,10 +875,10 @@ int _McGetInfo2(void *rpc_buf)
 
 	mc_free = 0;
 
-	r = pMcDetectCard2(dP->port, dP->slot);
+	r = McDetectCard2(dP->port, dP->slot);
 
 	if (dP->origin > 0)
-		eP.type = pMcGetMcType(dP->port, dP->slot);
+		eP.type = McGetMcType(dP->port, dP->slot);
 
 	if (r < -1) {
 		eP.free = 0;
@@ -922,7 +887,7 @@ int _McGetInfo2(void *rpc_buf)
 	}
 
 	if (dP->offset > 0) {
-		mc_free = pMcGetFreeClusters(dP->port, dP->slot);
+		mc_free = McGetFreeClusters(dP->port, dP->slot);
 
 		if (mc_free < 0)
 			eP.free = 0;
@@ -932,7 +897,7 @@ int _McGetInfo2(void *rpc_buf)
 
 	if (dP->size > 0) {
 		eP.formatted = 0;
-		if (pMcGetFormat(dP->port, dP->slot) > 0)
+		if (McGetFormat(dP->port, dP->slot) > 0)
 			eP.formatted = 1;
 	}
 
@@ -955,16 +920,19 @@ dma_transfer:
 
 	return r;
 }
+#endif
 
 //--------------------------------------------------------------
+#ifdef BUILDING_XMCSERV
 int _McGetEntSpace(void *rpc_buf)
 {
 	mcNameParam_t *nP = (mcNameParam_t *)rpc_buf;
 
 	DPRINTF("_McGetEntSpace port%d slot%d dirname %s\n", nP->port, nP->slot, nP->name);
 
-	return pMcGetEntSpace(nP->port, nP->slot, nP->name);
+	return McGetEntSpace(nP->port, nP->slot, nP->name);
 }
+#endif
 
 //--------------------------------------------------------------
 int _McDelete(void *rpc_buf)
@@ -973,7 +941,7 @@ int _McDelete(void *rpc_buf)
 
 	DPRINTF("_McDelete port%d slot%d file %s flags %d\n", nP->port, nP->slot, nP->name, nP->flags);
 
-	return pMcDelete(nP->port, nP->slot, nP->name, nP->flags);
+	return McDelete(nP->port, nP->slot, nP->name, nP->flags);
 }
 
 //--------------------------------------------------------------
@@ -983,7 +951,7 @@ int _McFlush(void *rpc_buf)
 
 	DPRINTF("_McFlush fd %d\n", dP->fd);
 
-	return pMcFlush(dP->fd);
+	return McFlush(dP->fd);
 }
 
 //--------------------------------------------------------------
@@ -997,10 +965,10 @@ int _McEraseBlock(void *rpc_buf)
 
 	dP->port = (dP->port & 1) + 2;
 
-	if (pMcGetMcType(dP->port, dP->slot) == 2) {
+	if (McGetMcType(dP->port, dP->slot) == 2) {
 		register int pagenum;
 
-		r = pMcEraseBlock(dP->port, dP->offset, NULL, NULL);
+		r = McEraseBlock(dP->port, dP->offset, NULL, NULL);
 		if (r != 0)
 			return r;
 
@@ -1009,15 +977,15 @@ int _McEraseBlock(void *rpc_buf)
 
 		memset(mcserv_buf, dP->origin, 512);
 
-		pMcDataChecksum(&mcserv_buf[0], &eccbuf[0]);
-		pMcDataChecksum(&mcserv_buf[128], &eccbuf[3]);
-		pMcDataChecksum(&mcserv_buf[256], &eccbuf[6]);
-		pMcDataChecksum(&mcserv_buf[384], &eccbuf[9]);
+		McDataChecksum(&mcserv_buf[0], &eccbuf[0]);
+		McDataChecksum(&mcserv_buf[128], &eccbuf[3]);
+		McDataChecksum(&mcserv_buf[256], &eccbuf[6]);
+		McDataChecksum(&mcserv_buf[384], &eccbuf[9]);
 
 		pagenum = 0;
 
 		do {
-			r = pMcWritePage(dP->port, dP->slot, (dP->offset << 4) + pagenum, mcserv_buf, eccbuf);
+			r = McWritePage(dP->port, dP->slot, (dP->offset << 4) + pagenum, mcserv_buf, eccbuf);
 
 		} while (++pagenum < 16);   // <-- and the last page of the block ???
 
@@ -1027,7 +995,7 @@ int _McEraseBlock(void *rpc_buf)
 
 	memset(mcserv_buf, dP->origin, 128);
 
-	r = pMcWritePS1PDACard(dP->port, dP->slot, dP->offset, mcserv_buf);
+	r = McWritePS1PDACard(dP->port, dP->slot, dP->offset, mcserv_buf);
 
 	return r;
 }
@@ -1048,13 +1016,13 @@ int _McReadPage(void *rpc_buf)
 	fastsize = ((u32)dP->buffer) & 0xf;
 	dP->port = (dP->port & 1) + 2;
 
-	if (pMcGetMcType(dP->port, dP->slot) == 2) {
+	if (McGetMcType(dP->port, dP->slot) == 2) {
 		r = 0;
-		pMcReadPage(dP->port, dP->slot, dP->fd, (void *)(mcserv_buf + fastsize));
+		McReadPage(dP->port, dP->slot, dP->fd, (void *)(mcserv_buf + fastsize));
 	}
 	else {
 		memset((void *)(mcserv_buf + fastsize), 0, 512);
-		r = pMcReadPS1PDACard(dP->port, dP->slot, dP->fd, (void *)(mcserv_buf + fastsize));
+		r = McReadPS1PDACard(dP->port, dP->slot, dP->fd, (void *)(mcserv_buf + fastsize));
 	}
 
 	if (fastsize == 0)
@@ -1151,12 +1119,12 @@ fullpage:
 
 ecc_calc:
 
-	pMcDataChecksum((void *)(mcserv_buf + fastsize), &eccbuf[0]);
-	pMcDataChecksum(&mcserv_buf[128], &eccbuf[3]);
-	pMcDataChecksum(&mcserv_buf[256], &eccbuf[6]);
-	pMcDataChecksum(&mcserv_buf[384], &eccbuf[9]);
+	McDataChecksum((void *)(mcserv_buf + fastsize), &eccbuf[0]);
+	McDataChecksum(&mcserv_buf[128], &eccbuf[3]);
+	McDataChecksum(&mcserv_buf[256], &eccbuf[6]);
+	McDataChecksum(&mcserv_buf[384], &eccbuf[9]);
 
-	return pMcWritePage((dP->port & 1) | 2, dP->slot, dP->fd, (void *)(mcserv_buf + fastsize), eccbuf);
+	return McWritePage((dP->port & 1) | 2, dP->slot, dP->fd, (void *)(mcserv_buf + fastsize), eccbuf);
 }
 
 //--------------------------------------------------------------
@@ -1169,17 +1137,19 @@ int _McSetFileInfo(void *rpc_buf)
 
 	sceSifGetOtherData(&rD, (void *)nP->mcT, &mcserv_buf, sizeof (sceMcTblGetDir), 0);
 
-	return pMcSetFileInfo(nP->port, nP->slot, nP->name, (sceMcTblGetDir *)mcserv_buf, nP->flags);
+	return McSetFileInfo(nP->port, nP->slot, nP->name, (sceMcTblGetDir *)mcserv_buf, nP->flags);
 }
 
 //--------------------------------------------------------------
+#ifdef BUILDING_XMCSERV
 int _McCheckBlock(void *rpc_buf)
 {
 	mcDescParam_t *dP = (mcDescParam_t *)rpc_buf;
 
 	DPRINTF("_McCheckBlock port%d slot%d block %d\n", dP->port, dP->slot, dP->offset);
 
-	return pMcCheckBlock(dP->port, dP->slot, dP->offset);
+	return McCheckBlock(dP->port, dP->slot, dP->offset);
 }
+#endif
 
 //--------------------------------------------------------------
