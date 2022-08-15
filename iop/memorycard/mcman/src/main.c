@@ -145,10 +145,6 @@ int mcman_chrpos(char *str, int chr)
 //--------------------------------------------------------------
 int _start(int argc, char *argv[])
 {
-#ifndef BUILDING_XFROMMAN
-	void **export_tab;
-#endif
-
 	(void)argc;
 	(void)argv;
 
@@ -156,30 +152,6 @@ int _start(int argc, char *argv[])
 	sio_init(38400, 0, 0, 0, 0);
 #endif
 	DPRINTF("_start...\n");
-
-#ifndef BUILDING_XFROMMAN
-	// Modify mcman export ver
-	_exp_mcman.version = 0x203;
-	// Get mcman export table
-	export_tab = (void **)(struct irx_export_table *)&_exp_mcman.fptrs;
-	export_tab[17] = (void *)McEraseBlock2;
-	export_tab[21] = (void *)McDetectCard2;
-	export_tab[22] = (void *)McGetFormat;
-	export_tab[23] = (void *)McGetEntSpace;
-	export_tab[24] = (void *)McReplaceBadBlock;
-	export_tab[25] = (void *)McCloseAll;
-	export_tab[42] = (void *)McGetModuleInfo;
-	export_tab[43] = (void *)McGetCardSpec;
-	export_tab[44] = (void *)McGetFATentry;
-	export_tab[45] = (void *)McCheckBlock;
-	export_tab[46] = (void *)McSetFATentry;
-	export_tab[47] = (void *)McReadDirEntry;
-	export_tab[48] = (void *)Mc1stCacheEntSetWrFlagOff;
-	export_tab[49] = (void *)McCreateDirentry;
-	export_tab[50] = (void *)McReadCluster;
-	export_tab[51] = (void *)McFlushCache;
-	export_tab[52] = (void *)McSetDirEntryState;
-#endif
 
 	DPRINTF("registering exports...\n");
 #ifndef BUILDING_XFROMMAN
@@ -426,7 +398,11 @@ int McCloseAll(void) // Export #25 XMCMAN only
 //--------------------------------------------------------------
 int McDetectCard(int port, int slot) // Export #5
 {
+#ifdef BUILDING_XMCMAN
 	return mcman_detectcard(port, slot);
+#else
+	return McDetectCard2(port, slot);
+#endif
 }
 
 //--------------------------------------------------------------
@@ -3783,8 +3759,10 @@ int mcman_readdirentryPS1(int port, int slot, int cluster, McFsEntryPS1 **pfse)
 
 	*pfse = (void *)&mce->cl_data[offset << 7];
 
+#ifdef BUILDING_XMCMAN
 	McFsEntryPS1 *fse = (McFsEntryPS1 *)*pfse; // <--- XMCMAN seems to work with this
 	fse->field_7d = 0;						   //
+#endif
 
 	return sceMcResSucceed;
 }

@@ -9,8 +9,8 @@
 IOP_SRC_DIR = $(PS2SDKSRC)/iop/memorycard/mcman/src/
 IOP_INC_DIR = $(PS2SDKSRC)/iop/memorycard/mcman/include/
 
-IOP_BIN ?= xfromman.irx
+IOP_BIN ?= mcman-old.irx
 
-MCMAN_BUILDING_XFROMMAN ?= 1
+MCMAN_BUILDING_XMCMAN ?= 0
 
 include $(PS2SDKSRC)/iop/memorycard/mcman/Makefile

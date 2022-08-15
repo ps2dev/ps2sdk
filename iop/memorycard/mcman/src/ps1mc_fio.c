@@ -474,12 +474,16 @@ int mcman_getstat1(int port, int slot, char *filename, io_stat_t *stat)
 int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int flags)
 {
 	register int r, temp, ret;
-	McFsEntryPS1 *fse1, *fse2;
+#ifdef BUILDING_XMCMAN
+	McFsEntryPS1 *fse1;
+#endif
+	McFsEntryPS1 *fse2;
 	McCacheEntry *mce;
 
 	DPRINTF("mcman_setinfo1 port%d slot%d filename %s flags %x\n", port, slot, filename, flags);
 
 	ret = 0;
+#ifdef BUILDING_XMCMAN
 	if ((flags & sceMcFileAttrFile) != 0) {
 		r = mcman_getPS1direntry(port, slot, (char*)info->EntryName, &fse1, 1);
 		if (r < 0) {
@@ -492,6 +496,7 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 			}
 		}
 	}
+#endif
 
 	r = mcman_getPS1direntry(port, slot, filename, &fse2, 1);
 
@@ -520,9 +525,16 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 
 	mce->wr_flag |= 1 << temp;
 
+#ifdef BUILDING_XMCMAN
 	fse2->field_7d = 0;
 	fse2->field_2c = 0;
 	flags &= -12;
+#else
+	if(fse2->field_7d != 1) {
+		fse2->field_7d = 1;
+		fse2->field_38 = fse2->length;
+	}
+#endif
 
 	if ((flags & sceMcFileAttrExecutable) != 0) {
 		if ((info->AttrFile & sceMcFileAttrPDAExec) != 0)
@@ -666,8 +678,10 @@ int mcman_close1(int fd)
 	DPRINTF("mcman_close1 fd %d\n", fd);
 
 	r = mcman_readdirentryPS1(fh->port, fh->slot, fh->freeclink, &fse);
+#ifdef BUILDING_XMCMAN
 	if (r != sceMcResSucceed)
 		return -31;
+#endif
 
 	mce = mcman_get1stcacheEntp();
 
@@ -696,11 +710,18 @@ int mcman_close1(int fd)
 		fse->length = temp << 13;
 	}
 
+#ifdef BUILDING_XMCMAN
 	fse->field_7d = 0; // <--- To preserve for XMCMAN
 	fse->field_2c = 0; //
 	fse->field_38 = 0; //
 	memset((void *)&fse->created, 0, 8);  //
 	memset((void *)&fse->modified, 0, 8); //
+#else
+	// MCMAN does as following
+	fse->field_7d = 1;
+	fse->field_38 = fh->filesize;
+	mcman_getmcrtime(&fse->modified);
+#endif
 
 	fse->edc = mcman_calcEDC((void *)fse, 127);
 

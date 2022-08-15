@@ -6,7 +6,11 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = mcman mcserv xfromman
+SUBDIRS = \
+	mcman \
+	mcman-old \
+	mcserv \
+	xfromman
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
