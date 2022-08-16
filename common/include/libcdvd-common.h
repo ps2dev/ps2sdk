@@ -399,6 +399,15 @@ int sceCdPause(void);
  */
 int sceCdReadChain(sceCdRChain *tag, sceCdRMode *mode);
 
+/** send an n-command by function number
+ *
+ * @param cmdNum command number
+ * @param inBuff input buffer  (can be null)
+ * @param inBuffSize size of input buffer  (0 - 16 bytes)
+ * @return 1 on success, 0 on failure.
+ */
+int sceCdApplyNCmd(u8 cmdNum, const void* inBuff, u16 inBuffSize);
+
 // **** S-Command functions ****
 
 /** Reads the PlayStation clock.

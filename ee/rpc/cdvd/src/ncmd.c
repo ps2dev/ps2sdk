@@ -433,7 +433,7 @@ int sceCdPause(void)
 #endif
 
 #ifdef F_sceCdApplyNCmd
-int sceCdApplyNCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff, u16 outBuffSize)
+int sceCdApplyNCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize)
 {
     if (sceCdNCmdDiskReady() == SCECdNotReady)
         return 0;
@@ -450,9 +450,6 @@ int sceCdApplyNCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff,
         SignalSema(nCmdSemaId);
         return 0;
     }
-
-    if (outBuff)
-        memcpy((void *)outBuff, UNCACHED_SEG(nCmdRecvBuff), outBuffSize);
 
     SignalSema(nCmdSemaId);
     return *(int *)UNCACHED_SEG(nCmdRecvBuff);
