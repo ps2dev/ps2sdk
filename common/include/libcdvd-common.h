@@ -414,10 +414,12 @@ int sceCdReadClock(sceCdCLOCK *clock);
 /** Sets the PlayStation 2 clock.
  * (time value is in BCD)
  *
+ * NOTE: The normalized value will be written back to the buffer specified.
+ *
  * @param clock time/date struct to set clocks time with
  * @return 1 on success, 0 on failure.
  */
-int sceCdWriteClock(const sceCdCLOCK *clock);
+int sceCdWriteClock(sceCdCLOCK *clock);
 
 /** gets the type of the currently inserted disc
  *
