@@ -506,6 +506,15 @@ int sceCdMmode(int media);
  */
 int sceCdChangeThreadPriority(int priority);
 
+/** send an s-command by function number
+ *
+ * @param command number
+ * @param input buffer  (can be null)
+ * @param size of input buffer  (0 - 16 bytes)
+ * @param output buffer (16 bytes, can be null)
+ * @return 1 if successful, 0 if error
+ */
+int sceCdApplySCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff);
 
 // **** Streaming Functions ****
 

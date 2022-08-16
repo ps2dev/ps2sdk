@@ -41,17 +41,6 @@ int sceCdReadIOPMem(u32 lbn, u32 sectors, void *buf, sceCdRMode *mode);
  */
 int sceCdNCmdDiskReady(void);
 
-/** send an s-command by function number
- *
- * @param command number
- * @param input buffer  (can be null)
- * @param size of input buffer  (0 - 16 bytes)
- * @param output buffer (can be null)
- * @param size of output buffer (0 - 16 bytes)
- * @return 1 if successful, 0 if error
- */
-int sceCdApplySCmd(u8 cmdNum, const void *inBuff, u16 inBuffSize, void *outBuff, u16 outBuffSize);
-
 /** Controls spindle speed? Not sure what it really does.
  * SUPPORTED IN XCDVDMAN/XCDVDFSV ONLY
  *
