@@ -193,7 +193,7 @@ time_t ps2time(time_t *t)
 #endif
 
 #ifdef F_sceCdWriteClock
-int sceCdWriteClock(const sceCdCLOCK *clock)
+int sceCdWriteClock(sceCdCLOCK *clock)
 {
     int result;
 
@@ -207,7 +207,7 @@ int sceCdWriteClock(const sceCdCLOCK *clock)
         return 0;
     }
 
-    memcpy((sceCdCLOCK *)clock, UNCACHED_SEG(sCmdRecvBuff + 4), 8);
+    memcpy(clock, UNCACHED_SEG(sCmdRecvBuff + 4), 8);
     result = *(int *)UNCACHED_SEG(sCmdRecvBuff);
 
     SignalSema(sCmdSemaId);
