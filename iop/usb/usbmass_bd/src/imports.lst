@@ -18,6 +18,7 @@ thbase_IMPORTS_start
 I_CreateThread
 I_StartThread
 I_DeleteThread
+I_DelayThread
 thbase_IMPORTS_end
 
 thsemap_IMPORTS_start
