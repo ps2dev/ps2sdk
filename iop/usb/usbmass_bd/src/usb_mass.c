@@ -681,9 +681,11 @@ static int usb_mass_connect(int devId)
     }
 
     /*store current configuration id - can't call set_configuration here */
-    dev->devId    = devId;
     dev->configId = config->bConfigurationValue;
     dev->status   = USBMASS_DEV_STAT_CONN;
+    // Set this last, with a memory barrier, in order to avoid a race condition in usb_mass_update with partially updated data
+    __asm__ __volatile__("" : : : "memory");
+    dev->devId    = devId;
     M_DEBUG("connect ok: epI=%i, epO=%i\n", dev->bulkEpI, dev->bulkEpO);
 
     SignalSema(usb_mass_update_sema);
@@ -740,13 +742,28 @@ static void usb_mass_update(void *arg)
     M_DEBUG("update thread running\n");
 
     while (1) {
+        mass_dev *new_devs[NUM_DEVICES];
+        int new_devs_count;
+
         // Wait for event from USBD thread
         WaitSema(usb_mass_update_sema);
 
+        // Determine which devices are new and need to be connected.
+        {
+            new_devs_count = 0;
+            for (i = 0; i < NUM_DEVICES; i += 1) {
+                mass_dev *dev = &g_mass_device[i];
+                if (dev->devId != -1 && (dev->status & USBMASS_DEV_STAT_CONN) && !(dev->status & USBMASS_DEV_STAT_CONF)) {
+                    new_devs[new_devs_count] = dev;
+                    new_devs_count += 1;
+                }
+            }
+        }
+
         // Connect new devices
-        for (i = 0; i < NUM_DEVICES; ++i) {
-            mass_dev *dev = &g_mass_device[i];
-            if (dev->devId != -1 && (dev->status & USBMASS_DEV_STAT_CONN) && !(dev->status & USBMASS_DEV_STAT_CONF)) {
+        for (i = 0; i < new_devs_count; i += 1) {
+            mass_dev *dev = new_devs[i];
+            {
                 int ret;
                 if ((ret = usb_set_configuration(dev, dev->configId)) != USB_RC_OK) {
                     M_PRINTF("ERROR: sending set_configuration %d\n", ret);
@@ -769,6 +786,10 @@ static void usb_mass_update(void *arg)
 
                 dev->status |= USBMASS_DEV_STAT_CONF;
                 scsi_connect(&dev->scsi);
+
+                // This is the same wait amount as done in fat_getData in usbhdfsd.
+                // This is a workaround to avoid incorrect initialization when attaching multiple drives at the same time.
+                DelayThread(5000);
             }
         }
     }
