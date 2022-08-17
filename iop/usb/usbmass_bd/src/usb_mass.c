@@ -681,9 +681,11 @@ static int usb_mass_connect(int devId)
     }
 
     /*store current configuration id - can't call set_configuration here */
-    dev->devId    = devId;
     dev->configId = config->bConfigurationValue;
     dev->status   = USBMASS_DEV_STAT_CONN;
+    // Set this last, with a memory barrier, in order to avoid a race condition in usb_mass_update with partially updated data
+    __asm__ __volatile__("" : : : "memory");
+    dev->devId    = devId;
     M_DEBUG("connect ok: epI=%i, epO=%i\n", dev->bulkEpI, dev->bulkEpO);
 
     SignalSema(usb_mass_update_sema);
