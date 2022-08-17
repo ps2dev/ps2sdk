@@ -6,7 +6,23 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = kernel dev9 fs hdd sound tcpip usb system debug memorycard network iLink cdvd sio dvrp
+SUBDIRS = \
+	cdvd \
+	debug \
+	dev9 \
+	dvrp \
+	fs \
+	hdd \
+	iLink \
+	kernel \
+	memorycard \
+	network \
+	sio \
+	sound \
+	startup \
+	system \
+	tcpip \
+	usb
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
