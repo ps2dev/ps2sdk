@@ -25,9 +25,7 @@ DSTATUS disk_status(
 {
     int result;
 
-    (void)pdrv;
-
-    result = (mounted_bd == NULL) ? STA_NODISK : 0;
+    result = (fatfs_fs_driver_get_mounted_bd_from_index(pdrv) == NULL) ? (STA_NOINIT | STA_NODISK) : 0;
 
     return result;
 }
@@ -44,9 +42,7 @@ DSTATUS disk_initialize(
 {
     int result;
 
-    (void)pdrv;
-
-    result = (mounted_bd == NULL) ? STA_NODISK : 0;
+    result = (fatfs_fs_driver_get_mounted_bd_from_index(pdrv) == NULL) ? (STA_NOINIT | STA_NODISK) : 0;
 
     return result;
 }
@@ -65,8 +61,13 @@ DRESULT disk_read(
 )
 {
     DRESULT res;
+    struct block_device *mounted_bd;
 
-    (void)pdrv;
+    mounted_bd = fatfs_fs_driver_get_mounted_bd_from_index(pdrv);
+
+    if (mounted_bd == NULL) {
+        return RES_NOTRDY;
+    }
 
     res = mounted_bd->read(mounted_bd, sector, buff, count);
 
@@ -89,8 +90,13 @@ DRESULT disk_write(
 )
 {
     DRESULT res;
+    struct block_device *mounted_bd;
 
-    (void)pdrv;
+    mounted_bd = fatfs_fs_driver_get_mounted_bd_from_index(pdrv);
+
+    if (mounted_bd == NULL) {
+        return RES_NOTRDY;
+    }
 
     res = mounted_bd->write(mounted_bd, sector, buff, count);
 
@@ -110,7 +116,13 @@ DRESULT disk_ioctl(
     void *buff /* Buffer to send/receive control data */
 )
 {
-    (void)pdrv;
+    struct block_device *mounted_bd;
+
+    mounted_bd = fatfs_fs_driver_get_mounted_bd_from_index(pdrv);
+
+    if (mounted_bd == NULL) {
+        return RES_NOTRDY;
+    }
 
     switch (cmd) {
         case CTRL_SYNC:
