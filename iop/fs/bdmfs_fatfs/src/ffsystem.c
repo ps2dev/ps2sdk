@@ -5,6 +5,7 @@
 
 
 #include "ff.h"
+#include <thsemap.h>
 
 
 #if FF_USE_LFN == 3	/* Dynamic memory allocation */
@@ -54,6 +55,7 @@ int ff_cre_syncobj (	/* 1:Function succeeded, 0:Could not create the sync object
 	FF_SYNC_t* sobj		/* Pointer to return the created sync object */
 )
 {
+#if 0
 	/* Win32 */
 	*sobj = CreateMutex(NULL, FALSE, NULL);
 	return (int)(*sobj != INVALID_HANDLE_VALUE);
@@ -75,6 +77,19 @@ int ff_cre_syncobj (	/* 1:Function succeeded, 0:Could not create the sync object
 	/* CMSIS-RTOS */
 //	*sobj = osMutexCreate(&Mutex[vol]);
 //	return (int)(*sobj != NULL);
+#endif
+	/* IOP kernel */
+    iop_sema_t sp;
+
+    sp.initial = 1;
+    sp.max     = 1;
+    sp.option  = 0;
+    sp.attr    = 0;
+    if ((*sobj = CreateSema(&sp)) < 0) {
+        return 0;
+    }
+
+    return 1;
 }
 
 
@@ -90,6 +105,7 @@ int ff_del_syncobj (	/* 1:Function succeeded, 0:Could not delete due to an error
 	FF_SYNC_t sobj		/* Sync object tied to the logical drive to be deleted */
 )
 {
+#if 0
 	/* Win32 */
 	return (int)CloseHandle(sobj);
 
@@ -107,6 +123,13 @@ int ff_del_syncobj (	/* 1:Function succeeded, 0:Could not delete due to an error
 
 	/* CMSIS-RTOS */
 //	return (int)(osMutexDelete(sobj) == osOK);
+#endif
+	/* IOP kernel */
+    if (sobj >= 0) {
+        DeleteSema(sobj);
+        return 1;
+    }
+    return 0;
 }
 
 
@@ -121,6 +144,7 @@ int ff_req_grant (	/* 1:Got a grant to access the volume, 0:Could not get a gran
 	FF_SYNC_t sobj	/* Sync object to wait */
 )
 {
+#if 0
 	/* Win32 */
 	return (int)(WaitForSingleObject(sobj, FF_FS_TIMEOUT) == WAIT_OBJECT_0);
 
@@ -137,6 +161,9 @@ int ff_req_grant (	/* 1:Got a grant to access the volume, 0:Could not get a gran
 
 	/* CMSIS-RTOS */
 //	return (int)(osMutexWait(sobj, FF_FS_TIMEOUT) == osOK);
+#endif
+	WaitSema(sobj);
+	return 1;
 }
 
 
@@ -150,6 +177,7 @@ void ff_rel_grant (
 	FF_SYNC_t sobj	/* Sync object to be signaled */
 )
 {
+#if 0
 	/* Win32 */
 	ReleaseMutex(sobj);
 
@@ -164,6 +192,8 @@ void ff_rel_grant (
 
 	/* CMSIS-RTOS */
 //	osMutexRelease(sobj);
+#endif
+	SignalSema(sobj);
 }
 
 #endif
