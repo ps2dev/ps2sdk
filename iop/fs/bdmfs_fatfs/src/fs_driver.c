@@ -34,16 +34,31 @@ fatfs_fs_driver_mount_info fs_driver_mount_info[FF_VOLUMES];
 
 // Macros for defining the modified path on stack.
 #define FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_DEFINITIONS(varname) \
-    int strlen_##varname; \
-    char *modified_##varname;
+    const char *modified_##varname;
 
 #define FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_IMPLEMENTATION(varname, fd) \
-    strlen_##varname = strlen(varname); \
-    modified_##varname = __builtin_alloca(3 + strlen_##varname + 1); \
-    modified_##varname[0] = '0' + (fd)->unit; \
-    modified_##varname[1] = ':'; \
-    modified_##varname[2] = '/'; \
-    modified_##varname[3 + strlen_##varname] = '\x00';
+    { \
+        if ((fd)->unit != 0) \
+        { \
+            int strlen_##varname; \
+            char *modified_scope_##varname; \
+            \
+            strlen_##varname = strlen(varname); \
+            modified_scope_##varname = __builtin_alloca(3 + strlen_##varname + 1); \
+            modified_scope_##varname[0] = '0' + (fd)->unit; \
+            modified_scope_##varname[1] = ':'; \
+            modified_scope_##varname[2] = '/'; \
+            memcpy((modified_scope_##varname) + 3, varname, strlen_##varname); \
+            modified_scope_##varname[3 + strlen_##varname] = '\x00'; \
+            modified_##varname = modified_scope_##varname; \
+        } \
+        else \
+        { \
+            modified_##varname = varname; \
+        } \
+    }
+
+
 
 //---------------------------------------------------------------------------
 static int _fs_lock_sema_id = -1;
