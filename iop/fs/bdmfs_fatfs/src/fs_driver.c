@@ -38,6 +38,7 @@ fatfs_fs_driver_mount_info fs_driver_mount_info[FF_VOLUMES];
 
 #define FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_IMPLEMENTATION(varname, fd) \
     { \
+        if ((fd)->unit != 0) \
         { \
             int strlen_##varname; \
             char *modified_scope_##varname; \
@@ -50,6 +51,10 @@ fatfs_fs_driver_mount_info fs_driver_mount_info[FF_VOLUMES];
             memcpy((modified_scope_##varname) + 3, varname, strlen_##varname); \
             modified_scope_##varname[3 + strlen_##varname] = '\x00'; \
             modified_##varname = modified_scope_##varname; \
+        } \
+        else \
+        { \
+            modified_##varname = varname; \
         } \
     }
 
