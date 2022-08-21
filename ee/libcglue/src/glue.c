@@ -312,8 +312,9 @@ int (*_ps2sdk_write)(int, const void*, int) = fioWrite;
 
 int _write(int fd, const void *buf, size_t nbytes) {
 	// HACK: stdout and strerr to serial
-	//if ((fd==1) || (fd==2))
-	//	return sio_write((void *)buf, nbytes);
+	// meanwhile https://github.com/ps2dev/ps2sdk/issues/332 is fixed
+	if (((fd==1) || (fd==2)) && (_ps2sdk_write != fioWrite))
+		sio_write((void *)buf, nbytes);
 
 	return __transform_errno(_ps2sdk_write(fd, buf, nbytes));
 }
