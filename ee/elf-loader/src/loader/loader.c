@@ -16,6 +16,7 @@
 #include <iopcontrol.h>
 #include <sifrpc.h>
 #include <errno.h>
+#include <ps2sdkapi.h>
 
 #define GS_BGCOLOUR *((volatile unsigned long int *)0x120000E0)
 
@@ -41,6 +42,7 @@
 
    DISABLE_PATCHED_FUNCTIONS();
    DISABLE_EXTRA_TIMERS_FUNCTIONS();
+   PS2_DISABLE_AUTOSTART_PTHREAD();
 
 //--------------------------------------------------------------
 //Start of function code:

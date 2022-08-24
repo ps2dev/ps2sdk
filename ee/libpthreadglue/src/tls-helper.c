@@ -1,24 +1,14 @@
 /*
- * PSP Software Development Kit - https://github.com/pspdev
- * -----------------------------------------------------------------------
- * Licensed under the BSD license, see LICENSE in PSPSDK root for details.
- *
- * tls-helper.c - Pthread compatible system calls.
- *
- * Copyright (c) 2021 Francisco J Trujillo <fjtrujy@gmail.com>
- *
- */
+# _____     ___ ____     ___ ____
+#  ____|   |    ____|   |        | |____|
+# |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
+#-----------------------------------------------------------------------
+# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Licenced under Academic Free License version 2.0
+# Review ps2sdk README & LICENSE files for further details.
+*/
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#include <pspkerneltypes.h>
-#include <pspthreadman.h>
-
-typedef int pte_osThreadHandle;
-typedef int pte_osSemaphoreHandle;
-typedef int pte_osMutexHandle;
-#include <sys/pte_generic_osal.h>
+#include <ps2_osal.h>
 
 #ifdef F___keysUsed
 int *__keysUsed;
@@ -148,33 +138,25 @@ pte_osResult __pteTlsSetValue(void *pTlsThreadStruct, unsigned int index, void *
 #endif
 
 #ifdef F___getTlsStructFromThread
-void *__getTlsStructFromThread(SceUID thid)
+void *__getTlsStructFromThread(s32 thid)
 {
-  SceKernelThreadInfo thinfo;
-  unsigned int ptr;
-  unsigned int thrNum;
-  void *pTls;
-  int numMatches;
+    struct OsalThreadInfo *threadInfo = &__threadInfo[thid];
+    void *pTls;
 
-
-  thinfo.size = sizeof(SceKernelThreadInfo);
-  sceKernelReferThreadStatus(thid, &thinfo);
-  numMatches = sscanf(thinfo.name,"pthread%04d__%x", &thrNum, &ptr);
-
-  /* If we were called from a pthread, use the TLS allocated when the thread
-   * was created.  Otherwise, we were called from a non-pthread, so use the
-   * "global".  This is a pretty bad hack, but necessary due to lack of TLS on PSP.
-   */
-  if (numMatches == 2) {
-    pTls = (void *) ptr;
-  } else {
-    pTls = __globalTls;
-  }
+    /* If we were called from a pthread, use the TLS allocated when the thread
+    * was created.  Otherwise, we were called from a non-pthread, so use the
+    * "global".  This is a pretty bad hack, but necessary due to lack of TLS on PS2.
+    */
+    if (threadInfo->tlsPtr) {
+        pTls = threadInfo->tlsPtr;
+    } else {
+        pTls = __globalTls;
+    }
 
   return pTls;
 }
 #else
-void *__getTlsStructFromThread(SceUID thid);
+void *__getTlsStructFromThread(s32 thid);
 #endif
 
 #ifdef F_pteTlsFree
@@ -218,7 +200,7 @@ pte_osResult pte_osTlsSetValue(unsigned int key, void * value)
 {
   void *pTls;
 
-  pTls = __getTlsStructFromThread(sceKernelGetThreadId());
+  pTls = __getTlsStructFromThread(GetThreadId());
 
   return __pteTlsSetValue(pTls, key, value);
 }
@@ -229,7 +211,7 @@ void * pte_osTlsGetValue(unsigned int index)
 {
   void *pTls;
 
-  pTls = __getTlsStructFromThread(sceKernelGetThreadId());
+  pTls = __getTlsStructFromThread(GetThreadId());
 
   return (void *) pteTlsGetValue(pTls, index);
 
@@ -239,7 +221,7 @@ void * pte_osTlsGetValue(unsigned int index)
 #ifdef F_pte_osTlsAlloc
 pte_osResult pte_osTlsAlloc(unsigned int *pKey)
 {
-  __getTlsStructFromThread(sceKernelGetThreadId());
+  __getTlsStructFromThread(GetThreadId());
 
   return __pteTlsAlloc(pKey);
 
