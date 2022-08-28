@@ -253,6 +253,8 @@ int _start(int argc, char *argv[])
 
 	SetPowerButtonHandler(Shutdown, 0);
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warray-bounds"
 	if (handlers[IOP_IRQ_CDVD].handler==0) {
 		M_PRINTF("No CDROM handler. Run CDVDMAN first\n");
 		return MODULE_NO_RESIDENT_END;
@@ -265,6 +267,7 @@ int _start(int argc, char *argv[])
 
 	oldCdHandler=(intrhandler)((int)handlers[IOP_IRQ_CDVD].handler & ~3);
 	handlers[IOP_IRQ_CDVD].handler=(intrhandler)((int)myCdHandler | TYPE_C);
+#pragma GCC diagnostic pop
 
 	memset(CallbackTable, 0, sizeof(struct CallbackEntry) * MAX_CALLBACKS);
 
