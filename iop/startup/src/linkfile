@@ -21,34 +21,6 @@ PHDRS
 SECTIONS
 {
 	. = SIZEOF_HEADERS;
-	/*
-	 * This is the .iopmod section for the IRX, it contains information that
-	 * the IOP uses when loading the IRX.
-	 * This section is placed in its own segment.
-	 */
-	.iopmod 0 (COPY) : ALIGN(4) {
-		/*
-		 * The linker will replace this first LONG with a pointer to _irx_id
-		 * if the symbol has been defined.
-		 */
-		LONG (DEFINED(_irx_id) ? ABSOLUTE(_irx_id) : 0xffffffff) ;
-		LONG (ABSOLUTE(_start)) ;
-		LONG (_gp) ;
-		LONG (SIZEOF(.text)) ;
-		LONG (SIZEOF(.data)) ;
-		LONG (SIZEOF(.bss)) ;
-		/*
-		 * The linker will put a SHORT here with the version of the IRX
-		 * (or zero if there is no version).
-		 */
-		/*
-		 * The linker will put a null terminated string here containing the
-		 * name of the IRX (or an empty string if the name is not known).
-		 */
-		KEEP (* ( .iopmod.version )) ;
-		KEEP (* ( .iopmod.name )) ;
-		FILL(0x00000000);
-	} :irxhdr = 0
 
 	.text 0 : ALIGN(16) {
 		CREATE_OBJECT_SYMBOLS
@@ -83,6 +55,35 @@ SECTIONS
 		. = ALIGN(4) ;
 	} :defhdr
 	_gp = ALIGN(16) ;
+
+	/*
+	 * This is the .iopmod section for the IRX, it contains information that
+	 * the IOP uses when loading the IRX.
+	 * This section is placed in its own segment.
+	 */
+	.iopmod 0 (COPY) : ALIGN(4) {
+		/*
+		 * The linker will replace this first LONG with a pointer to _irx_id
+		 * if the symbol has been defined.
+		 */
+		LONG (DEFINED(_irx_id) ? ABSOLUTE(_irx_id) : 0xffffffff) ;
+		LONG (ABSOLUTE(_start)) ;
+		LONG (_gp) ;
+		LONG (SIZEOF(.text)) ;
+		LONG (SIZEOF(.data)) ;
+		LONG (SIZEOF(.bss)) ;
+		/*
+		 * The linker will put a SHORT here with the version of the IRX
+		 * (or zero if there is no version).
+		 */
+		/*
+		 * The linker will put a null terminated string here containing the
+		 * name of the IRX (or an empty string if the name is not known).
+		 */
+		KEEP (* ( .iopmod.version )) ;
+		KEEP (* ( .iopmod.name )) ;
+		FILL(0x00000000);
+	} :irxhdr = 0
 
 	/*
 	 * These are the stuff that we don't want to be put in an IRX.
