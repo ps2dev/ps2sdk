@@ -10,6 +10,10 @@
 #include "ELF.h"
 #include "COFF.h"
 
+#define MODNAME "UpDate DownLoader"
+
+IRX_ID(MODNAME, 1, 1);
+
 #ifdef UDNL_T300
 int CpuExecuteKmode(void *function, ...); // Exactly the same function as INTRMAN's export 14.
 #endif

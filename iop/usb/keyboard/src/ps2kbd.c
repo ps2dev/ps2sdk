@@ -30,6 +30,10 @@
 #include "ps2kbd.h"
 #include "us_keymap.h"
 
+#define MODNAME "PS2 USB keyboard driver"
+
+IRX_ID(MODNAME, 1, 1);
+
 #define PS2KBD_VERSION 0x100
 
 #define USB_SUBCLASS_BOOT 1

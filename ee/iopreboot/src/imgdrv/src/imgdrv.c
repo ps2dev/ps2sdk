@@ -17,6 +17,10 @@
 #include <irx.h>
 #include <loadcore.h>
 
+#define MODNAME "imgdrv"
+
+IRX_ID(MODNAME, 1, 1);
+
 // Function prototypes
 static int imgdrv_dummy(void);
 static int imgdrv_read(iop_file_t *f, void *buf, int size);
