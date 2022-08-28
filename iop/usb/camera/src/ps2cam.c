@@ -27,6 +27,9 @@
 
 #include "ps2cam.h"
 
+#define MODNAME "PS2 USB camera driver"
+
+IRX_ID(MODNAME, 1, 1);
 
 #define BIND_RPC_ID				0x00FD000 +2
 #define DRIVER_VERSON_MAJOR		1

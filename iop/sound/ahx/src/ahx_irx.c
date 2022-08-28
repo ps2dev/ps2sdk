@@ -20,6 +20,8 @@
 #define MODAUTHOR                 "Raizor"                            // module author
 #define M_PRINTF(format, args...) printf(MODNAME ": " format, ##args) // module printf
 
+IRX_ID(MODNAME, 1, 1);
+
 // LIBSD defines
 #define SD_CORE_1    1
 #define SD_INIT_COLD 0

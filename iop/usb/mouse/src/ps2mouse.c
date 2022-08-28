@@ -29,6 +29,10 @@
 
 #include "ps2mouse.h"
 
+#define MODNAME "PS2 USB mouse driver"
+
+IRX_ID(MODNAME, 1, 1);
+
 #define PS2MOUSE_VERSION 0x100
 
 #define USB_SUBCLASS_BOOT 1

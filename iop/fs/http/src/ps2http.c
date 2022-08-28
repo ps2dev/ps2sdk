@@ -51,6 +51,10 @@
 #define M_DEBUG(format, args...)
 #endif
 
+#define MODNAME "ps2http"
+
+IRX_ID(MODNAME, 1, 1);
+
 typedef struct
 {
 	int sockFd;
