@@ -29,8 +29,8 @@ struct irx_id {
 struct irx_id _irx_id = { \
 	name, IRX_VER(major, minor) \
 }; \
-const u16 _irx_version __attribute__((section(".iopmod"))) = IRX_VER(major, minor); \
-const char _irx_name[] __attribute__((aligned(1),section(".iopmod"))) = name;
+const u16 _irx_version __attribute__((aligned(1),section(".iopmod.version"))) = IRX_VER(major, minor); \
+const char _irx_name[] __attribute__((aligned(1),section(".iopmod.name"))) = name;
 
 /*
  * Module imports

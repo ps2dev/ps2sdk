@@ -45,7 +45,8 @@ SECTIONS
 		 * The linker will put a null terminated string here containing the
 		 * name of the IRX (or an empty string if the name is not known).
 		 */
-		KEEP (* ( .iopmod )) ;
+		KEEP (* ( .iopmod.version )) ;
+		KEEP (* ( .iopmod.name )) ;
 		FILL(0x00000000);
 	} :irxhdr = 0
 
