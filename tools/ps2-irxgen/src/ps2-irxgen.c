@@ -48,8 +48,8 @@ static int g_str_size = 1;
 
 /* Base addresses in the Elf */
 static int g_phbase = 0;
-static int g_iopmodbase = 0;
 static int g_allocbase = 0;
+static int g_iopmodbase = 0;
 static int g_shbase = 0;
 static int g_relocbase = 0;
 static int g_shstrbase = 0;
@@ -558,7 +558,7 @@ int calculate_outsize(void)
 	int i;
 
 	/* Calculate how big our output file needs to be */
-	/* We have elf header + 1 PH + allocated data + section headers + relocation data */
+	/* We have elf header + 2 PH + allocated data + iopmod section + section headers + relocation data */
 
 	/* Note that the ELF should be based from 0, we use this to calculate the alloc and mem sizes */
 
@@ -627,17 +627,25 @@ int calculate_outsize(void)
 
 	/* Lets build the offsets */
 	g_phbase = sizeof(Elf32_Ehdr);
-	/* The allocated data needs to be 4 byte aligned */
-	g_iopmodbase = (g_phbase + (2 * sizeof(Elf32_Phdr)) + 0x3) & ~0x3;
+	g_allocbase = g_phbase + (2 * sizeof(Elf32_Phdr));
 	/* The allocated data needs to be 16 byte aligned */
-	g_allocbase = (g_iopmodbase + g_iopmod->iSize + 0xF) & ~0xF;
-	g_shbase = g_allocbase + g_alloc_size;
+	g_allocbase = (g_allocbase + 0xF) & ~0xF;
+	g_iopmodbase = (g_allocbase + g_alloc_size + 0x3) & ~0x3;
+	/* The allocated data needs to be 4 byte aligned */
+	g_iopmodbase = (g_iopmodbase + 0x3) & ~0x3;
+	g_shbase = g_iopmodbase + g_iopmod->iSize;
+	/* The allocated data needs to be 4 byte aligned */
+	g_shbase = (g_shbase + 0x3) & ~0x3;
 	g_relocbase = g_shbase + (g_out_sects * sizeof(Elf32_Shdr));
+	/* The allocated data needs to be 4 byte aligned */
+	g_relocbase = (g_relocbase + 0x3) & ~0x3;
 	g_shstrbase = g_relocbase + g_reloc_size;
+	/* The allocated data needs to be 4 byte aligned */
+	g_shstrbase = (g_shstrbase + 0x3) & ~0x3;
 
 	if(g_verbose)
 	{
-		fprintf(stderr, "PHBase %08X, AllocBase %08X, SHBase %08X\n", g_phbase, g_allocbase, g_shbase);
+		fprintf(stderr, "PHBase %08X, AllocBase %08X, IopmodBase %08X, SHBase %08X\n", g_phbase, g_allocbase, g_iopmodbase, g_shbase);
 		fprintf(stderr, "Relocbase %08X, Shstrbase %08X\n", g_relocbase, g_shstrbase);
 		fprintf(stderr, "Total size %d\n", g_shstrbase + g_str_size);
 	}
@@ -872,8 +880,8 @@ int output_irx(const char *irxfile)
 		output_header(data);
 		output_ph_iopmod(data + g_phbase);
 		output_ph(data + g_phbase + sizeof(Elf32_Phdr));
-		output_iopmod(data + g_iopmodbase);
 		output_alloc(data + g_allocbase);
+		output_iopmod(data + g_iopmodbase);
 		output_sh(data + g_shbase);
 		output_relocs(data + g_relocbase);
 		output_shstrtab(data + g_shstrbase);
