@@ -157,7 +157,7 @@ static struct t_SifRpcServerData cb_srv;
 
 static void NETMAN_RPC_Thread(void *arg)
 {
-	static unsigned char cb_rpc_buffer[64] __attribute__((aligned(64)));
+	static unsigned char cb_rpc_buffer[64] __attribute__((__aligned__(64)));
 
 	(void)arg;
 

@@ -41,7 +41,7 @@ IRX_ID(MODNAME, 1, 1);
 
 static SifRpcDataQueue_t	rpc_queue			__attribute((aligned(64)));
 static SifRpcServerData_t	rpc_server			__attribute((aligned(64)));
-static int					_rpc_buffer[1024]	__attribute((aligned(64)));
+static int					_rpc_buffer[1024]	 __attribute__((__aligned__(4)));
 //static int					threadId;
 static int					maintain_thread;
 sceUsbdLddOps					cam_driver = {NULL,

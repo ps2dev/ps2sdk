@@ -46,7 +46,7 @@ static void *naplinkRpcHandler(int cmd, void *buffer, int size)
 ////////////////////////////////////////////////////////////////////////
 static SifRpcServerData_t server __attribute((aligned(16)));
 static SifRpcDataQueue_t  queue __attribute((aligned(16)));
-static unsigned char rpc_buffer[512] __attribute((aligned(16)));
+static unsigned char rpc_buffer[512] __attribute__((__aligned__(4)));
 
 /** naplink compatbile RPC handler thread.
  * @ingroup fakehost

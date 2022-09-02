@@ -290,7 +290,7 @@ static void *audsrv_ee_rpc_handler(int fnum, void *buffer, int len)
 
 static void rpc_server_thread(void *arg)
 {
-	static unsigned char cb_rpc_buffer[64] __attribute__((aligned(64)));
+	static unsigned char cb_rpc_buffer[64] __attribute__((__aligned__(64)));
 
 	(void)arg;
 

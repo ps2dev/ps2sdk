@@ -26,7 +26,7 @@
 
 static SifRpcDataQueue_t qd __attribute__((aligned(64)));
 static SifRpcServerData_t Sd0 __attribute__((aligned(64)));
-static u32 buffer[32] __attribute__((aligned(64)));
+static u32 buffer[32] __attribute__((__aligned__(64)));
 
 /** EE mapped IOP mem */
 #define IOP_MEM	0xbc000000

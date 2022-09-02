@@ -24,7 +24,7 @@
 #define MTAPSERV_CHANGE_SLOT		0x800009FF
 
 
-static u32 sb[4]; // Server buffer
+static u32 sb[4] __attribute__((__aligned__(4))); // Server buffer
 
 static s32 threadid_rpc1;
 static SifRpcDataQueue_t qd1;

@@ -54,7 +54,7 @@ static unsigned int RWBufferSize=DEFAULT_RWSIZE;
 
 // 0x4800 bytes for DirEntry structures
 // 0x400 bytes for the filename string
-static unsigned char fileXio_rpc_buffer[0x4C00]; // RPC send/receive buffer
+static unsigned char fileXio_rpc_buffer[0x4C00] __attribute__((__aligned__(4))); // RPC send/receive buffer
 struct t_SifRpcDataQueue qd;
 struct t_SifRpcServerData sd0;
 
