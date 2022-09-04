@@ -49,13 +49,13 @@ enum PAD_RPCCMD {
 static s32 ThreadIdRpcServer;
 static SifRpcDataQueue_t qd;
 static SifRpcServerData_t sd[2];
-static u32 sb[2][32]; // server buffer
+static u32 sb[2][32] __attribute__((__aligned__(4))); // server buffer
 
 // RPC Server Extended
 static s32 ThreadIdRpcServerExt;
 static SifRpcDataQueue_t qdext;
 static SifRpcServerData_t sdext[2];
-static u32 sbext[2][32]; // server buffer
+static u32 sbext[2][32] __attribute__((__aligned__(4))); // server buffer
 
 static void* RpcPadOpen(u32 *data)
 {

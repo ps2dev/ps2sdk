@@ -58,7 +58,7 @@ SifRpcDataQueue_t qd;
 SifRpcServerData_t Sd0;
 
 extern void wmemcpy(void *dest, void *src, int numwords);
-static unsigned int buffer[0x80];
+static unsigned int buffer[0x80] __attribute__((__aligned__(4)));
 
 // function prototypes
 void AHX_Thread(void *param);

@@ -52,7 +52,7 @@ static void *PowerOff_ee_rpc_handler(int fnum, void *buffer, int len)
 
 static void PowerOffThread(void *dat)
 {
-    static unsigned char cb_rpc_buffer[64] __attribute__((aligned(64)));
+    static unsigned char cb_rpc_buffer[64] __attribute__((__aligned__(64)));
 
     (void)dat;
 

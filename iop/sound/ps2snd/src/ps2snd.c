@@ -27,7 +27,7 @@ int debug_level = OUT_WARNING;
 static SifRpcDataQueue_t  queue;
 static SifRpcServerData_t server;
 
-static u32 rpc_buffer[2][32] ALIGNED(16); /* XXX: how big should this be? */
+static u32 rpc_buffer[2][32] __attribute__((__aligned__(4))); /* XXX: how big should this be? */
 
 
 #define DS ((u32*)data)

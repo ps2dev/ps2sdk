@@ -99,7 +99,7 @@ static int mcserv_tidS_0400;
 static SifRpcDataQueue_t mcserv_qdS_0400 __attribute__((aligned(64)));
 static SifRpcServerData_t mcserv_sdS_0400 __attribute__((aligned(64)));
 
-static u8 mcserv_rpc_buf[2048] __attribute__((aligned(64)));
+static u8 mcserv_rpc_buf[2048] __attribute__((__aligned__(4)));
 static mcRpcStat_t rpc_stat __attribute__((aligned(64)));
 
 #define MCSERV_BUFSIZE 8192
