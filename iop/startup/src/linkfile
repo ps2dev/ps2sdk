@@ -98,6 +98,7 @@ SECTIONS
 		* ( .symtab )
 		* ( .strtab )
 		* ( .shstrtab )
+		* ( .eh_frame )
 		/*
 		 * This must go because it confuses the IOP kernel (treated as a reloc section).
 		 */
