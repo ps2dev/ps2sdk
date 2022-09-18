@@ -35,7 +35,7 @@ IOP_WARNFLAGS ?= -Wall
 #   for finer-grained control over what goes into each IRX.
 IOP_CFLAGS := -D_IOP -fno-builtin -G0 $(IOP_OPTFLAGS) $(IOP_WARNFLAGS) $(IOP_INCS) $(IOP_CFLAGS)
 # linker flags
-IOP_LDFLAGS := -Wl,--gpsize=0 -Wl,-G0 -Wl,--nmagic -Wl,--orphan-handling=error -Wl,--discard-all -Wl,--gc-sections -Wl,--emit-relocs -nostdlib -Wl,-z,max-page-size=128 -Wl,--no-relax $(IOP_LDFLAGS)
+IOP_LDFLAGS := -nostdlib -s $(IOP_LDFLAGS)
 
 # Additional C compiler flags for GCC >=v5.3.0
 # -msoft-float is to "remind" GCC/Binutils that the soft-float ABI is to be used. This is due to a bug, which
@@ -64,14 +64,7 @@ endif
 # Assembler flags
 IOP_ASFLAGS := $(ASFLAGS_TARGET) -EL -G0 $(IOP_ASFLAGS)
 
-# Default link file
-ifeq ($(IOP_LINKFILE),)
-IOP_LINKFILE := $(PS2SDK)/iop/startup/linkfile
-endif
-
 IOP_OBJS := $(IOP_OBJS:%=$(IOP_OBJS_DIR)%)
-
-IOP_BIN_ELF := $(IOP_BIN:.irx=.notiopmod.elf)
 
 # Externally defined variables: IOP_BIN, IOP_OBJS, IOP_LIB
 
@@ -114,13 +107,9 @@ $(IOP_OBJS_DIR)exports.o: $(IOP_OBJS_DIR)build-exports.c
 	$(DIR_GUARD)
 	$(IOP_C_COMPILE) $(IOP_IETABLE_CFLAGS) -c $< -o $@
 
-$(IOP_BIN_ELF): $(IOP_OBJS)
+$(IOP_BIN): $(IOP_OBJS)
 	$(DIR_GUARD)
-	$(IOP_C_COMPILE) -T$(IOP_LINKFILE) $(IOP_OPTFLAGS) -o $@ $(IOP_OBJS) $(IOP_LDFLAGS) $(IOP_LIBS)
-
-$(IOP_BIN): $(IOP_BIN_ELF)
-	$(DIR_GUARD)
-	ps2-irxgen $< $@
+	$(IOP_C_COMPILE) $(IOP_OPTFLAGS) -o $(IOP_BIN) $(IOP_OBJS) $(IOP_LDFLAGS) $(IOP_LIBS)
 
 $(IOP_LIB): $(IOP_OBJS)
 	$(DIR_GUARD)
