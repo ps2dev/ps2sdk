@@ -99,7 +99,7 @@ static inline int SemWaitTimeout(s32 semHandle, uint32_t timeout)
         return 0;
     }
 
-    if (timeout > 0) {
+    if (timeout > 0 && timeout != UINT32_MAX) {
         SetTimerAlarm(&alarm, MSec2TimerBusClock(timeout), &usercb, (void *)GetThreadId());
     }
 
@@ -545,7 +545,7 @@ pte_osResult pte_osMutexCreate(pte_osMutexHandle *pHandle)
 #ifdef F_pte_osMutexDelete
 pte_osResult pte_osMutexDelete(pte_osMutexHandle handle)
 {
-  DeleteThread(handle);
+  DeleteSema(handle);
 
   return PTE_OS_OK;
 }
@@ -554,7 +554,7 @@ pte_osResult pte_osMutexDelete(pte_osMutexHandle handle)
 #ifdef F_pte_osMutexLock
 pte_osResult pte_osMutexLock(pte_osMutexHandle handle)
 {
-  SemWaitTimeout(handle, 0);
+  SemWaitTimeout(handle, UINT32_MAX);
 
   return PTE_OS_OK;
 }
@@ -638,7 +638,7 @@ pte_osResult pte_osSemaphorePend(pte_osSemaphoreHandle handle, unsigned int *pTi
   pte_osResult osResult;
   
   if (pTimeoutMsecs == NULL) {
-    timeout = 0;
+    timeout = UINT32_MAX;
   } else {
     timeout = *pTimeoutMsecs;
   }
@@ -690,7 +690,7 @@ pte_osResult pte_osSemaphoreCancellablePend(pte_osSemaphoreHandle semHandle, uns
     int status;
 
     /* Poll semaphore */
-    status = SemWaitTimeout(semHandle, 0);
+    status = SemWaitTimeout(semHandle, UINT32_MAX);
 
     if (status == 0) {
       /* User semaphore posted to */
