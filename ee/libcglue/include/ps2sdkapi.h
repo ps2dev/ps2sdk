@@ -39,6 +39,11 @@ extern int (*_ps2sdk_closedir)(DIR *dir);
 #define PS2_CLOCKS_PER_SEC kBUSCLKBY256 // 576.000
 #define PS2_CLOCKS_PER_MSEC (PS2_CLOCKS_PER_SEC / 1000) // 576
 
+/* Disable the auto start of pthread on init for reducing binary size if not used. */
+#define PS2_DISABLE_AUTOSTART_PTHREAD() \
+	void __libpthreadglue_init() {} \
+    void __libpthreadglue_deinit() {}
+
 typedef uint64_t ps2_clock_t;
 static inline ps2_clock_t ps2_clock(void) {
     // DEPRECATED VERSION USE INSTEAD GetTimerSystemTime

@@ -14,13 +14,44 @@
  */
 
 void _libcglue_timezone_update();
+void pthread_init();
+void pthread_terminate();
 
 int chdir(const char *path);
+
+#ifdef F___libpthreadglue_init
+/* Note: This function is being called from __libcglue_init.
+* It is a weak function because can be override by user program
+*/
+__attribute__((weak))
+void __libpthreadglue_init()
+{
+    pthread_init();
+}
+#else
+void __libpthreadglue_init();
+#endif
+
+#ifdef F___libpthreadglue_deinit
+/* Note: This function is being called from __libcglue_deinit.
+* It is a weak function because can be override by user program
+*/
+__attribute__((weak))
+void __libpthreadglue_deinit()
+{
+	pthread_terminate();
+}
+#else
+void __libpthreadglue_deinit();
+#endif
 
 #ifdef F__libcglue_init
 __attribute__((weak))
 void _libcglue_init()
 {
+	/* Initialize pthread library */
+	__libpthreadglue_init();
+
     _libcglue_timezone_update();
 }
 #endif
@@ -29,6 +60,7 @@ void _libcglue_init()
 __attribute__((weak))
 void _libcglue_deinit()
 {
+	__libpthreadglue_deinit();
 }
 #endif
 

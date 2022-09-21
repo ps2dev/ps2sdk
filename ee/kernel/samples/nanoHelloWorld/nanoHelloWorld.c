@@ -12,11 +12,14 @@
 #include <kernel.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <ps2sdkapi.h>
 
 // Disable all the patched functions
 DISABLE_PATCHED_FUNCTIONS();
 // Disable extra timer functionality
 DISABLE_TimerSystemTime();
+// Disable pthread functionality
+PS2_DISABLE_AUTOSTART_PTHREAD();
 
 int main(int argc, char *argv[])
 {    
