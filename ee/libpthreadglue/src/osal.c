@@ -29,7 +29,7 @@
 struct OsalThreadInfo __threadInfo[MAX_THREADS];
 #endif
 
-/* TLS key used to access pspThreadData struct for reach thread. */
+/* TLS key used to access ps2ThreadData struct for reach thread. */
 #ifdef F___threadDataKey
 unsigned int __threadDataKey;
 #else
@@ -42,7 +42,7 @@ extern void *__globalTls;
  * Data stored on a per-thread basis - allocated in pte_osThreadCreate
  * and freed in pte_osThreadDelete.
  */
-typedef struct pspThreadData
+typedef struct ps2ThreadData
   {
     /* Entry point and parameters to thread's main function */
     pte_osThreadEntryPoint entryPoint;
@@ -52,7 +52,7 @@ typedef struct pspThreadData
        polled in pte_osSemaphoreCancellablePend */
     s32 cancelSem;
 
-  } pspThreadData;
+  } ps2ThreadData;
 
 
 /****************************************************************************
@@ -61,18 +61,18 @@ typedef struct pspThreadData
  *
  ***************************************************************************/
 #ifdef F___getThreadData
-pspThreadData *__getThreadData(s32 threadHandle)
+ps2ThreadData *__getThreadData(s32 threadHandle)
 {
-  pspThreadData *pThreadData;
+  ps2ThreadData *pThreadData;
   void *pTls;
 
   pTls = __getTlsStructFromThread(threadHandle);
-  pThreadData = (pspThreadData *) pteTlsGetValue(pTls, __threadDataKey);
+  pThreadData = (ps2ThreadData *) pteTlsGetValue(pTls, __threadDataKey);
 
   return pThreadData;
 }
 #else
-pspThreadData *__getThreadData(s32 threadHandle);
+ps2ThreadData *__getThreadData(s32 threadHandle);
 #endif
 
 static void usercb(struct timer_alarm_t *alarm, void *arg) {
@@ -118,7 +118,7 @@ static inline int SemWaitTimeout(s32 semHandle, uint32_t timeout)
 int __ps2StubThreadEntry(void *argv)
 {
   int result;
-  pspThreadData *pThreadData;
+  ps2ThreadData *pThreadData;
 
   pThreadData = __getThreadData(GetThreadId());
   result = (*(pThreadData->entryPoint))(pThreadData->argv);
@@ -139,7 +139,7 @@ pte_osResult pte_osInit(void)
 {
   ee_sema_t sema;
   pte_osResult result;
-  pspThreadData *pThreadData;
+  ps2ThreadData *pThreadData;
 
   /* Allocate and initialize TLS support */
   result = pteTlsGlobalInit(PS2_MAX_TLS);
@@ -160,7 +160,7 @@ pte_osResult pte_osInit(void)
         * 1. Entry point and parameters for the user thread's main function.
         * 2. Semaphore used for thread cancellation.
         */
-      pThreadData = (pspThreadData *) malloc(sizeof(pspThreadData));
+      pThreadData = (ps2ThreadData *) malloc(sizeof(ps2ThreadData));
 
       if (pThreadData == NULL) {
         result = PTE_OS_NO_RESOURCES;
@@ -209,7 +209,7 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
   void *pTls;
   s32 threadId;
   pte_osResult result;
-  pspThreadData *pThreadData;
+  ps2ThreadData *pThreadData;
 
   if (threadNum++ > MAX_PS2_UID) {
     threadNum = 0;
@@ -232,12 +232,12 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
    * 1. Entry point and parameters for the user thread's main function.
    * 2. Semaphore used for thread cancellation.
    */
-  pThreadData = (pspThreadData *) malloc(sizeof(pspThreadData));
+  pThreadData = (ps2ThreadData *) malloc(sizeof(ps2ThreadData));
 
   if (pThreadData == NULL) {
     pteTlsThreadDestroy(pTls);
 
-    PS2_DEBUG("malloc(pspThreadData): PTE_OS_NO_RESOURCES\n");
+    PS2_DEBUG("malloc(ps2ThreadData): PTE_OS_NO_RESOURCES\n");
     result = PTE_OS_NO_RESOURCES;
     goto FAIL0;
   }
@@ -308,7 +308,7 @@ pte_osResult pte_osThreadStart(pte_osThreadHandle osThreadHandle)
 #ifdef F_pte_osThreadDelete
 pte_osResult pte_osThreadDelete(pte_osThreadHandle handle)
 {
-  pspThreadData *pThreadData;
+  ps2ThreadData *pThreadData;
   void *pTls;
   ee_thread_status_t info;
   struct OsalThreadInfo *threadInfo;
@@ -361,7 +361,7 @@ void pte_osThreadExit()
 pte_osResult pte_osThreadWaitForEnd(pte_osThreadHandle threadHandle)
 {
   pte_osResult result;
-  pspThreadData *pThreadData;
+  ps2ThreadData *pThreadData;
 
   pThreadData = __getThreadData(GetThreadId());
 
@@ -435,7 +435,7 @@ pte_osResult pte_osThreadCancel(pte_osThreadHandle threadHandle)
 {
   s32 osResult;
   pte_osResult result;
-  pspThreadData *pThreadData;
+  ps2ThreadData *pThreadData;
 
   pThreadData = __getThreadData(threadHandle);
   osResult = SignalSema(pThreadData->cancelSem);
@@ -453,7 +453,7 @@ pte_osResult pte_osThreadCancel(pte_osThreadHandle threadHandle)
 #ifdef F_pte_osThreadCheckCancel
 pte_osResult pte_osThreadCheckCancel(pte_osThreadHandle threadHandle)
 {
-  pspThreadData *pThreadData;
+  ps2ThreadData *pThreadData;
   ee_sema_t semInfo;
   s32 osResult;
   pte_osResult result;
@@ -660,13 +660,13 @@ pte_osResult pte_osSemaphorePend(pte_osSemaphoreHandle handle, unsigned int *pTi
 /*
  * Pend on a semaphore- and allow the pend to be cancelled.
  *
- * PSP OS provides no functionality to asynchronously interrupt a blocked call.  We simulte
+ * PS2 OS provides no functionality to asynchronously interrupt a blocked call.  We simulte
  * this by polling on the main semaphore and the cancellation semaphore and sleeping in a loop.
  */
 #ifdef F_pte_osSemaphoreCancellablePend
 pte_osResult pte_osSemaphoreCancellablePend(pte_osSemaphoreHandle semHandle, unsigned int *pTimeout)
 {
-  pspThreadData *pThreadData;
+  ps2ThreadData *pThreadData;
 
   pThreadData = __getThreadData(GetThreadId());
 
