@@ -260,148 +260,148 @@
 #define error_to_string(errnum) ("")
 #else
 char *file_errors[] = {
-    "",                                   //    0
-    "Not super-user",                     //    1
-    "No such file or directory",          //    2
-    "No such process",                    //    3
-    "Interrupted system call",            //    4
-    "I/O error",                          //    5
-    "No such device or address",          //    6
-    "Arg list too long",                  //    7
-    "Exec format error",                  //    8
-    "Bad file number",                    //    9
-    "No children",                        //    10
-    "No more processes",                  //    11
-    "Not enough core",                    //    12
-    "Permission denied",                  //    13
-    "Bad address",                        //    14
-    "Block device required",              //    15
-    "Mount device busy",                  //    16
-    "File exists",                        //    17
-    "Cross-device link",                  //    18
-    "No such device",                     //    19
-    "Not a directory",                    //    20
-    "Is a directory",                     //    21
-    "Invalid argument",                   //    22
-    "Too many open files in system",      //    23
-    "Too many open files",                //    24
-    "Not a typewriter",                   //    25
-    "Text file busy",                     //    26
-    "File too large",                     //    27
-    "No space left on device",            //    28
-    "Illegal seek",                       //    29
-    "Read only file system",              //    30
-    "Too many links",                     //    31
-    "Broken pipe",                        //    32
-    "Math arg out of domain of func",     //    33
-    "Math result not representable",      //    34
-    "No message of desired type",         //    35
-    "Identifier removed",                 //    36
-    "Channel number out of range",        //    37
-    "Level 2 not synchronized",           //    38
-    "Level 3 halted",                     //    39
-    "Level 3 reset",                      //    40
-    "Link number out of range",           //    41
-    "Protocol driver not attached",       //    42
-    "No CSI structure available",         //    43
-    "Level 2 halted",                     //    44
-    "Deadlock condition",                 //    45
-    "No record locks available",          //    46
-    "",                                   //    47
-    "",                                   //    48
-    "",                                   //    49
-    "Invalid exchange",                   //    50
-    "Invalid request descriptor",         //    51
-    "Exchange full",                      //    52
-    "No anode",                           //    53
-    "Invalid request code",               //    54
-    "Invalid slot",                       //    55
-    "File locking deadlock error",        //    56
-    "Bad font file fmt",                  //    57
-    "",                                   //    58
-    "",                                   //    59
-    "Device not a stream",                //    60
-    "No data (for no delay io)",          //    61
-    "Timer expired",                      //    62
-    "Out of streams resources",           //    63
-    "Machine is not on the network",      //    64
-    "Package not installed",              //    65
-    "The object is remote",               //    66
-    "The link has been severed",          //    67
-    "Advertise error",                    //    68
-    "Srmount error",                      //    69
-    "Communication error on send",        //    70
-    "Protocol error",                     //    71
-    "",                                   //    72
-    "",                                   //    73
-    "Multihop attempted",                 //    74
-    "Inode is remote (not really error)", //    75
+    "",                                   /*   0     */
+    "Not super-user",                     /*   1     */
+    "No such file or directory",          /*   2     */
+    "No such process",                    /*   3     */
+    "Interrupted system call",            /*   4     */
+    "I/O error",                          /*   5     */
+    "No such device or address",          /*   6     */
+    "Arg list too long",                  /*   7     */
+    "Exec format error",                  /*   8     */
+    "Bad file number",                    /*   9     */
+    "No children",                        /*   10     */
+    "No more processes",                  /*   11     */
+    "Not enough core",                    /*   12     */
+    "Permission denied",                  /*   13     */
+    "Bad address",                        /*   14     */
+    "Block device required",              /*   15     */
+    "Mount device busy",                  /*   16     */
+    "File exists",                        /*   17     */
+    "Cross-device link",                  /*   18     */
+    "No such device",                     /*   19     */
+    "Not a directory",                    /*   20     */
+    "Is a directory",                     /*   21     */
+    "Invalid argument",                   /*   22     */
+    "Too many open files in system",      /*   23     */
+    "Too many open files",                /*   24     */
+    "Not a typewriter",                   /*   25     */
+    "Text file busy",                     /*   26     */
+    "File too large",                     /*   27     */
+    "No space left on device",            /*   28     */
+    "Illegal seek",                       /*   29     */
+    "Read only file system",              /*   30     */
+    "Too many links",                     /*   31     */
+    "Broken pipe",                        /*   32     */
+    "Math arg out of domain of func",     /*   33     */
+    "Math result not representable",      /*   34     */
+    "No message of desired type",         /*   35     */
+    "Identifier removed",                 /*   36     */
+    "Channel number out of range",        /*   37     */
+    "Level 2 not synchronized",           /*   38     */
+    "Level 3 halted",                     /*   39     */
+    "Level 3 reset",                      /*   40     */
+    "Link number out of range",           /*   41     */
+    "Protocol driver not attached",       /*   42     */
+    "No CSI structure available",         /*   43     */
+    "Level 2 halted",                     /*   44     */
+    "Deadlock condition",                 /*   45     */
+    "No record locks available",          /*   46     */
+    "",                                   /*   47     */
+    "",                                   /*   48     */
+    "",                                   /*   49     */
+    "Invalid exchange",                   /*   50     */
+    "Invalid request descriptor",         /*   51     */
+    "Exchange full",                      /*   52     */
+    "No anode",                           /*   53     */
+    "Invalid request code",               /*   54     */
+    "Invalid slot",                       /*   55     */
+    "File locking deadlock error",        /*   56     */
+    "Bad font file fmt",                  /*   57     */
+    "",                                   /*   58     */
+    "",                                   /*   59     */
+    "Device not a stream",                /*   60     */
+    "No data (for no delay io)",          /*   61     */
+    "Timer expired",                      /*   62     */
+    "Out of streams resources",           /*   63     */
+    "Machine is not on the network",      /*   64     */
+    "Package not installed",              /*   65     */
+    "The object is remote",               /*   66     */
+    "The link has been severed",          /*   67     */
+    "Advertise error",                    /*   68     */
+    "Srmount error",                      /*   69     */
+    "Communication error on send",        /*   70     */
+    "Protocol error",                     /*   71     */
+    "",                                   /*   72     */
+    "",                                   /*   73     */
+    "Multihop attempted",                 /*   74     */
+    "Inode is remote (not really error)", /*   75     */
 
 
-    "Cross mount point (not really error)",            //    76
-    "Trying to read unreadable message",               //    77
-    "",                                                //    78
-    "Inappropriate file type or format",               //    79
-    "Given log. name not unique",                      //    80
-    "f.d. invalid for this operation",                 //    81
-    "Remote address changed",                          //    82
-    "Can't access a needed shared lib",                //    83
-    "Accessing a corrupted shared lib",                //    84
-    ".lib section in a.out corrupted",                 //    85
-    "Attempting to link in too many libs",             //    86
-    "Attempting to exec a shared library",             //    87
-    "Function not implemented",                        //    88
-    "No more files",                                   //    89
-    "Directory not empty",                             //    90
-    "File or path name too long",                      //    91
-    "Too many symbolic links",                         //    92
-    "",                                                //    93
-    "",                                                //    94
-    "Operation not supported on transport endpoint",   //    95
-    "Protocol family not supported",                   //    96
-    "",                                                //    97
-    "",                                                //    98
-    "",                                                //    99
-    "",                                                //    100
-    "",                                                //    101
-    "",                                                //    102
-    "",                                                //    103
-    "Connection reset by peer",                        //    104
-    "No buffer space available",                       //    105
-    "Address family not supported by protocol family", //    106
-    "Protocol wrong type for socket",                  //    107
-    "Socket operation on non-socket",                  //    108
-    "Protocol not available",                          //    109
-    "Can't send after socket shutdown",                //    110
-    "Connection refused",                              //    111
-    "Address already in use",                          //    112
-    "Connection aborted",                              //    113
-    "Network is unreachable",                          //    114
-    "Network interface is not configured",             //    115
-    "Connection timed out",                            //    116
-    "Host is down",                                    //    117
-    "Host is unreachable",                             //    118
-    "Connection already in progress",                  //    119
-    "Socket already connected",                        //    120
-    "Destination address required",                    //    121
-    "Message too long",                                //    122
-    "Unknown protocol",                                //    123
-    "Socket type not supported",                       //    124
-    "Address not available",                           //    125
-    "",                                                //    126
-    "Socket is already connected",                     //    127
-    "Socket is not connected",                         //    128
-    "",                                                //    129
-    "EPROCLIM",                                        //    130
-    "EUSERS",                                          //    131
-    "EDQUOT",                                          //    132
-    "ESTALE",                                          //    133
-    "Not supported",                                   //    134
-    "No medium (in tape drive)",                       //    135
-    "No such host or network path",                    //    136
-    "Filename exists with different case",             //    137
-    "EILSEQ",                                          //    138
-    "Value too large for defined data type",           //    139
+    "Cross mount point (not really error)",            /*   76     */
+    "Trying to read unreadable message",               /*   77     */
+    "",                                                /*   78     */
+    "Inappropriate file type or format",               /*   79     */
+    "Given log. name not unique",                      /*   80     */
+    "f.d. invalid for this operation",                 /*   81     */
+    "Remote address changed",                          /*   82     */
+    "Can't access a needed shared lib",                /*   83     */
+    "Accessing a corrupted shared lib",                /*   84     */
+    ".lib section in a.out corrupted",                 /*   85     */
+    "Attempting to link in too many libs",             /*   86     */
+    "Attempting to exec a shared library",             /*   87     */
+    "Function not implemented",                        /*   88     */
+    "No more files",                                   /*   89     */
+    "Directory not empty",                             /*   90     */
+    "File or path name too long",                      /*   91     */
+    "Too many symbolic links",                         /*   92     */
+    "",                                                /*   93     */
+    "",                                                /*   94     */
+    "Operation not supported on transport endpoint",   /*   95     */
+    "Protocol family not supported",                   /*   96     */
+    "",                                                /*   97     */
+    "",                                                /*   98     */
+    "",                                                /*   99     */
+    "",                                                /*   100     */
+    "",                                                /*   101     */
+    "",                                                /*   102     */
+    "",                                                /*   103     */
+    "Connection reset by peer",                        /*   104     */
+    "No buffer space available",                       /*   105     */
+    "Address family not supported by protocol family", /*   106     */
+    "Protocol wrong type for socket",                  /*   107     */
+    "Socket operation on non-socket",                  /*   108     */
+    "Protocol not available",                          /*   109     */
+    "Can't send after socket shutdown",                /*   110     */
+    "Connection refused",                              /*   111     */
+    "Address already in use",                          /*   112     */
+    "Connection aborted",                              /*   113     */
+    "Network is unreachable",                          /*   114     */
+    "Network interface is not configured",             /*   115     */
+    "Connection timed out",                            /*   116     */
+    "Host is down",                                    /*   117     */
+    "Host is unreachable",                             /*   118     */
+    "Connection already in progress",                  /*   119     */
+    "Socket already connected",                        /*   120     */
+    "Destination address required",                    /*   121     */
+    "Message too long",                                /*   122     */
+    "Unknown protocol",                                /*   123     */
+    "Socket type not supported",                       /*   124     */
+    "Address not available",                           /*   125     */
+    "",                                                /*   126     */
+    "Socket is already connected",                     /*   127     */
+    "Socket is not connected",                         /*   128     */
+    "",                                                /*   129     */
+    "EPROCLIM",                                        /*   130     */
+    "EUSERS",                                          /*   131     */
+    "EDQUOT",                                          /*   132     */
+    "ESTALE",                                          /*   133     */
+    "Not supported",                                   /*   134     */
+    "No medium (in tape drive)",                       /*   135     */
+    "No such host or network path",                    /*   136     */
+    "Filename exists with different case",             /*   137     */
+    "EILSEQ",                                          /*   138     */
+    "Value too large for defined data type",           /*   139     */
     ""};
 #define error_to_string(errnum) (file_errors[errnum * -1])
 #endif
