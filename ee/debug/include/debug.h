@@ -35,6 +35,8 @@ int scr_getX(void);
 int scr_getY(void);
 void scr_clear(void);
 void scr_setbgcolor(u32 color);
+void scr_setfontcolor(u32 color);
+void scr_setcursorcolor(u32 color);
 void scr_setCursor(int enable);
 int scr_getCursor(void);
 #ifdef __cplusplus
