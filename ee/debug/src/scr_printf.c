@@ -23,7 +23,7 @@
 
 static short int X = 0, Y = 0;
 static short int MX = 80, MY = 40;
-static u32 bgcolor = 0;
+static u32 bgcolor = 0, fontcolor = 0xffffff, cursorcolor = 0xffffff;
 static short int cursor = 1;
 
 struct t_setupscr
@@ -183,6 +183,16 @@ void scr_setbgcolor(u32 color)
     bgcolor = color;
 }
 
+void scr_setfontcolor(u32 color)
+{
+	fontcolor = color;
+}
+
+void scr_setcursorcolor(u32 color)
+{
+	cursorcolor = color;
+}
+
 void init_scr(void)
 {
     static struct t_setupscr setupscr __attribute__((aligned(16))) = {
@@ -280,12 +290,12 @@ void scr_vprintf(const char *format, va_list opt)
                 break;
             case '\t':
                 for (j = 0; j < 5; j++) {
-                    scr_putchar(X * 7, Y * 8, 0xffffff, ' ');
+                    scr_putchar(X * 7, Y * 8, fontcolor, ' ');
                     X++;
                 }
                 break;
             default:
-                scr_putchar(X * 7, Y * 8, 0xffffff, c);
+                scr_putchar(X * 7, Y * 8, fontcolor, c);
                 X++;
                 if (X == MX) {
                     X = 0;
@@ -297,7 +307,7 @@ void scr_vprintf(const char *format, va_list opt)
         }
     }
     if (cursor)
-        scr_putchar(X * 7, Y * 8, 0xffffff, 219);
+        scr_putchar(X * 7, Y * 8, cursorcolor, 219);
 }
 
 void scr_setXY(int x, int y)
