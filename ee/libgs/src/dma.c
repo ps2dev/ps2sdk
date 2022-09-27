@@ -112,6 +112,11 @@ void GsDmaSend(const void *addr, u32 qwords)
 	chcr.tag		=0;
 	chcr.pad1		=0;
 	chcr.pad2		=0;
+
+	// This prevents the compiler from assuming the values in addr are unused,
+	// and that the writes to addr can be delayed until after this function call
+	asm("":::"memory");
+
 	*((volatile DMA_CHCR *)(gif_chcr)) = chcr;
 }
 
@@ -142,10 +147,16 @@ void GsDmaSend_tag(const void *addr, u32 qwords, const GS_GIF_DMACHAIN_TAG *tag)
 	chcr.tag		=0;
 	chcr.pad1		=0;
 	chcr.pad2		=0;
+
+	// This prevents the compiler from assuming the values in addr are unused,
+	// and that the writes to addr can be delayed until after this function call
+	asm("":::"memory");
+
 	*((volatile DMA_CHCR *)(gif_chcr)) = chcr;
 }
 
 void GsDmaWait(void)
 {
 	while(*((vu32 *)(0x1000a000)) & ((u32)1<<8));
+	asm("":::"memory");
 }
