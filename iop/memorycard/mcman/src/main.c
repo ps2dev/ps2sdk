@@ -398,11 +398,11 @@ int McCloseAll(void) // Export #25 XMCMAN only
 //--------------------------------------------------------------
 int McDetectCard(int port, int slot) // Export #5
 {
-#ifdef BUILDING_XMCMAN
+	// This function will always use mcman_detectcard to detect the card.
+	// In older versions of this module, McDetectCard2 was used.
+	// The flaw with using McDetectCard2 is that it will only detect that the card was unformatted the first time.
+	// Subsequent calls to McDetectCard2 will return the incorrect value.
 	return mcman_detectcard(port, slot);
-#else
-	return McDetectCard2(port, slot);
-#endif
 }
 
 //--------------------------------------------------------------
