@@ -15,15 +15,23 @@
  */
 
 #include "types.h"
-#include "defs.h"
+#ifdef _IOP
 #include "loadcore.h"
+#endif
 #include "iomanX.h"
+#ifdef _IOP
 #include "sysclib.h"
+#else
+#include <string.h>
+#define index strchr
+#endif
 #include "stdarg.h"
 #include "intrman.h"
 
 #define MODNAME "iomanx"
+#ifdef _IOP
 IRX_ID("IOX/File_Manager", 1, 1);
+#endif
 
 #include "errno.h"
 
@@ -35,7 +43,9 @@ iomanX_iop_file_t file_table[MAX_FILES];
 
 #define isnum(c) ((c) >= '0' && (c) <= '9')
 
+#ifdef _IOP
 extern struct irx_export_table _exp_iomanx;
+#endif
 
 #ifdef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
 extern int hook_ioman();
@@ -52,10 +62,12 @@ int _start(int argc, char *argv[])
 	(void)argc;
 	(void)argv;
 
+#ifdef _IOP
 	if(RegisterLibraryEntries(&_exp_iomanx) != 0)
     {
 		return MODULE_NO_RESIDENT_END;
 	}
+#endif
 
     memset(dev_list, 0, sizeof(dev_list));
     memset(file_table, 0, sizeof(file_table));
@@ -100,7 +112,9 @@ int iomanX_AddDrv(iomanX_iop_device_t *device)
 	dev_list[i] = device;
     CpuResumeIntr(oldIntr);
 
+#ifdef _IOP
     FlushIcache();
+#endif
 
 	if (device->ops->init(device) < 0)
 	{

@@ -17,7 +17,9 @@
 #define __IOMANX_H__
 
 #include <types.h>
+#ifdef _IOP
 #include <irx.h>
+#endif
 #include <stdarg.h>
 #include <io_common.h>
 #include <iox_stat.h>
@@ -157,6 +159,7 @@ extern int iomanX_DelDrv(const char *name);
 
 extern void iomanX_StdioInit(int mode);
 
+#ifdef _IOP
 #define iomanX_IMPORTS_start DECLARE_IMPORT_TABLE(iomanx, 1, 1)
 #define iomanX_IMPORTS_end END_IMPORT_TABLE
 
@@ -189,6 +192,7 @@ extern void iomanX_StdioInit(int mode);
 #define I_iomanX_AddDrv DECLARE_IMPORT(20, iomanX_AddDrv)
 #define I_iomanX_DelDrv DECLARE_IMPORT(21, iomanX_DelDrv)
 #define I_iomanX_StdioInit DECLARE_IMPORT(23, iomanX_StdioInit)
+#endif
 
 #if IOMANX_OLD_NAME_COMPATIBILITY
 
@@ -334,6 +338,7 @@ static inline void StdioInit(int mode)
 	return iomanX_StdioInit(mode);
 }
 
+#ifdef _IOP
 #define I_GetDeviceList I_iomanX_GetDeviceList
 #define I_open I_iomanX_open
 #define I_close I_iomanX_close
@@ -363,6 +368,7 @@ static inline void StdioInit(int mode)
 #define I_AddDrv I_iomanX_AddDrv
 #define I_DelDrv I_iomanX_DelDrv
 #define I_StdioInit I_iomanX_StdioInit
+#endif
 
 #endif /* IOMANX_OLD_NAME_COMPATIBILITY */
 
