@@ -9,10 +9,6 @@ loadcore_IMPORTS_start
 I_FlushDcache
 loadcore_IMPORTS_end
 
-iomanX_IMPORTS_start
-I_AddDrv
-iomanX_IMPORTS_end
-
 sifcmd_IMPORTS_start
 I_sceSifInitRpc
 I_sceSifSetRpcQueue
