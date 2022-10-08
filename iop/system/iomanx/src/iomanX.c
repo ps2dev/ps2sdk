@@ -37,8 +37,10 @@ iomanX_iop_file_t file_table[MAX_FILES];
 
 extern struct irx_export_table _exp_iomanx;
 
+#ifdef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
 extern int hook_ioman();
 extern int unhook_ioman();
+#endif
 
 iomanX_iop_device_t **iomanX_GetDeviceList(void)
 {
@@ -58,17 +60,21 @@ int _start(int argc, char *argv[])
     memset(dev_list, 0, sizeof(dev_list));
     memset(file_table, 0, sizeof(file_table));
 
+#ifdef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
     if(hook_ioman() != 0)
     {
         return MODULE_NO_RESIDENT_END;
     }
+#endif
 
 	return MODULE_RESIDENT_END;
 }
 
 int shutdown()
 {
+#ifdef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
     unhook_ioman();
+#endif
 	return MODULE_NO_RESIDENT_END;
 }
 
@@ -437,6 +443,7 @@ int iomanX_dread(int fd, iox_dirent_t *iox_dirent)
     if (f == NULL ||  !(f->mode & 8))
             return -EBADF;
 
+#ifdef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
     /* If this is a legacy device (such as mc:) then we need to convert the mode
        variable of the stat structure to iomanX's extended format.  */
     if ((f->device->type & 0xf0000000) != IOP_DT_FSEXT)
@@ -458,7 +465,10 @@ int iomanX_dread(int fd, iox_dirent_t *iox_dirent)
         strncpy(iox_dirent->name, io_dirent.name, sizeof(iox_dirent->name));
     }
     else
+#endif
+    {
         res = f->device->ops->dread(f, iox_dirent);
+    }
 
     return res;
 }

@@ -14,6 +14,7 @@
  * Advanced I/O library.
  */
 
+#ifdef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
 #include <stdarg.h>
 
 #include "types.h"
@@ -344,3 +345,4 @@ int unhook_ioman()
 
 	return 0;
 }
+#endif
