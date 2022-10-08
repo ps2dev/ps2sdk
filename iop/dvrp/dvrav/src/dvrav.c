@@ -20,51 +20,51 @@
 
 extern int module_start();
 extern int module_stop();
-extern int dvrav_df_init(iop_device_t *dev);
-extern int dvrav_df_exit(iop_device_t *dev);
-extern int dvrav_df_ioctl(iop_file_t *f, int cmd, void *param);
-extern int dvrav_df_devctl(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrav_df_ioctl2(iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrav_df_init(iomanX_iop_device_t *dev);
+extern int dvrav_df_exit(iomanX_iop_device_t *dev);
+extern int dvrav_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param);
+extern int dvrav_df_devctl(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrav_df_ioctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int dvrav_df_null();
 extern s64 dvrav_df_null_long();
-extern int avioctl2_select_position(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_get_position(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_position_up(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_position_down(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_set_d_audio_sel(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_get_tun_offset(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_tun_offset_up(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_tun_offset_down(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_tun_scan_ch(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_get_bs_gain(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_set_preset_info(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_change_sound(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_set_d_video_sel(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_get_av_src(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_get_preset_info(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_set_position_info(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_get_position_info(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_tun_scan_mode(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_f_select_position(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_select_rec_src(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_get_rec_src(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_tun_scan_mode_euro(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_tun_scan_ch_euro(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_get_curfreq_info(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_get_teletext_ver_no(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_set_tv_guide_page(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_get_tv_guide_page(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_change_mode_tv_to_dvd(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_get_vps_data(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_get_pdc_data(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_get_format1_data(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_get_header_time_data(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int avioctl2_set_acs_position_euro(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_select_position(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_get_position(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_position_up(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_position_down(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_set_d_audio_sel(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_get_tun_offset(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_tun_offset_up(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_tun_offset_down(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_tun_scan_ch(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_get_bs_gain(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_set_preset_info(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_change_sound(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_set_d_video_sel(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_get_av_src(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_get_preset_info(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_set_position_info(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_get_position_info(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_tun_scan_mode(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_f_select_position(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_select_rec_src(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_get_rec_src(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_tun_scan_mode_euro(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_tun_scan_ch_euro(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_get_curfreq_info(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_get_teletext_ver_no(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_set_tv_guide_page(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_get_tv_guide_page(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_change_mode_tv_to_dvd(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_get_vps_data(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_get_pdc_data(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_get_format1_data(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_get_header_time_data(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int avioctl2_set_acs_position_euro(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 
 struct DevctlCmdTbl_t
 {
     u16 cmd;
-    int (*fn)(iop_file_t *, int, void *, unsigned int, void *, unsigned int);
+    int (*fn)(iomanX_iop_file_t *, int, void *, unsigned int, void *, unsigned int);
 } DevctlCmdTbl[33] =
     {
         {0x5616, &avioctl2_select_position},
@@ -102,7 +102,7 @@ struct DevctlCmdTbl_t
         {0x5623, &avioctl2_set_acs_position_euro},
 };
 
-static iop_device_ops_t DvrFuncTbl =
+static iomanX_iop_device_ops_t DvrFuncTbl =
     {
         &dvrav_df_init,
         &dvrav_df_exit,
@@ -132,7 +132,7 @@ static iop_device_ops_t DvrFuncTbl =
         (void *)&dvrav_df_null,
         &dvrav_df_ioctl2,
     };
-static iop_device_t DVRAV = {
+static iomanX_iop_device_t DVRAV = {
     .name = "dvr_av",
     .desc = "Digital Video Recorder AV task",
     .type = (IOP_DT_FS | IOP_DT_FSEXT),
@@ -168,7 +168,7 @@ int module_start()
         printf("AV task of DVRP is not running...\n");
         return MODULE_NO_RESIDENT_END;
     } else {
-        if (AddDrv(&DVRAV) != 0)
+        if (iomanX_AddDrv(&DVRAV) != 0)
             return MODULE_NO_RESIDENT_END;
     }
 #if 0
@@ -180,12 +180,12 @@ int module_start()
 
 int module_stop()
 {
-    if (DelDrv(DVRAV.name) != 0)
+    if (iomanX_DelDrv(DVRAV.name) != 0)
         return MODULE_REMOVABLE_END;
     return MODULE_NO_RESIDENT_END;
 }
 
-int dvrav_df_init(iop_device_t *dev)
+int dvrav_df_init(iomanX_iop_device_t *dev)
 {
     int v1;
     iop_sema_t v3;
@@ -203,7 +203,7 @@ int dvrav_df_init(iop_device_t *dev)
     return 0;
 }
 
-int dvrav_df_exit(iop_device_t *dev)
+int dvrav_df_exit(iomanX_iop_device_t *dev)
 {
     (void)dev;
 
@@ -212,7 +212,7 @@ int dvrav_df_exit(iop_device_t *dev)
     return 0;
 }
 
-int dvrav_df_ioctl(iop_file_t *f, int cmd, void *param)
+int dvrav_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param)
 {
     (void)f;
     (void)cmd;
@@ -224,7 +224,7 @@ int dvrav_df_ioctl(iop_file_t *f, int cmd, void *param)
 }
 
 int dvrav_df_devctl(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -255,7 +255,7 @@ LABEL_5:
     return v10;
 }
 
-int dvrav_df_ioctl2(iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
+int dvrav_df_ioctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
     (void)f;
     (void)cmd;
@@ -280,7 +280,7 @@ s64 dvrav_df_null_long()
 }
 
 int avioctl2_get_tun_offset(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -311,7 +311,7 @@ int avioctl2_get_tun_offset(
 }
 
 int avioctl2_tun_offset_up(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -345,7 +345,7 @@ int avioctl2_tun_offset_up(
 }
 
 int avioctl2_tun_offset_down(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -379,7 +379,7 @@ int avioctl2_tun_offset_down(
 }
 
 int avioctl2_tun_scan_ch(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -417,7 +417,7 @@ int avioctl2_tun_scan_ch(
 }
 
 int avioctl2_get_bs_gain(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -449,7 +449,7 @@ int avioctl2_get_bs_gain(
 }
 
 int avioctl2_set_preset_info(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -481,7 +481,7 @@ int avioctl2_set_preset_info(
 }
 
 int avioctl2_change_sound(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -513,7 +513,7 @@ int avioctl2_change_sound(
 }
 
 int avioctl2_set_d_audio_sel(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -547,7 +547,7 @@ int avioctl2_set_d_audio_sel(
 }
 
 int avioctl2_set_d_video_sel(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -578,7 +578,7 @@ int avioctl2_set_d_video_sel(
 }
 
 int avioctl2_get_av_src(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -609,7 +609,7 @@ int avioctl2_get_av_src(
 }
 
 int avioctl2_get_preset_info(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -641,7 +641,7 @@ int avioctl2_get_preset_info(
 }
 
 int avioctl2_select_position(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -672,7 +672,7 @@ int avioctl2_select_position(
 }
 
 int avioctl2_position_up(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -704,7 +704,7 @@ int avioctl2_position_up(
 }
 
 int avioctl2_position_down(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -736,7 +736,7 @@ int avioctl2_position_down(
 }
 
 int avioctl2_get_position(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -767,7 +767,7 @@ int avioctl2_get_position(
 }
 
 int avioctl2_set_position_info(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -802,7 +802,7 @@ int avioctl2_set_position_info(
 }
 
 int avioctl2_get_position_info(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -836,7 +836,7 @@ int avioctl2_get_position_info(
 }
 
 int avioctl2_tun_scan_mode(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -867,7 +867,7 @@ int avioctl2_tun_scan_mode(
 }
 
 int avioctl2_f_select_position(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -898,7 +898,7 @@ int avioctl2_f_select_position(
 }
 
 int avioctl2_select_rec_src(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -928,7 +928,7 @@ int avioctl2_select_rec_src(
 }
 
 int avioctl2_get_rec_src(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -962,7 +962,7 @@ int avioctl2_get_rec_src(
 int avioctl2_cmd_ack(
     const char *a1,
     u32 a2,
-    iop_file_t *a3,
+    iomanX_iop_file_t *a3,
     u8 cmd,
     void *arg,
     unsigned int arglen,
@@ -1015,7 +1015,7 @@ int avioctl2_cmd_ack(
 int avioctl2_cmd_ack_comp(
     const char *a1,
     u32 a2,
-    iop_file_t *a3,
+    iomanX_iop_file_t *a3,
     u8 cmd,
     void *arg,
     unsigned int arglen,
@@ -1066,7 +1066,7 @@ int avioctl2_cmd_ack_comp(
 }
 
 int avioctl2_tun_scan_mode_euro(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -1079,7 +1079,7 @@ int avioctl2_tun_scan_mode_euro(
 }
 
 int avioctl2_tun_scan_ch_euro(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -1092,7 +1092,7 @@ int avioctl2_tun_scan_ch_euro(
 }
 
 int avioctl2_get_curfreq_info(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -1105,7 +1105,7 @@ int avioctl2_get_curfreq_info(
 }
 
 int avioctl2_get_teletext_ver_no(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -1118,7 +1118,7 @@ int avioctl2_get_teletext_ver_no(
 }
 
 int avioctl2_set_tv_guide_page(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -1131,7 +1131,7 @@ int avioctl2_set_tv_guide_page(
 }
 
 int avioctl2_get_tv_guide_page(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -1144,7 +1144,7 @@ int avioctl2_get_tv_guide_page(
 }
 
 int avioctl2_change_mode_tv_to_dvd(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -1157,7 +1157,7 @@ int avioctl2_change_mode_tv_to_dvd(
 }
 
 int avioctl2_get_vps_data(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -1170,7 +1170,7 @@ int avioctl2_get_vps_data(
 }
 
 int avioctl2_get_pdc_data(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -1183,7 +1183,7 @@ int avioctl2_get_pdc_data(
 }
 
 int avioctl2_get_format1_data(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -1196,7 +1196,7 @@ int avioctl2_get_format1_data(
 }
 
 int avioctl2_get_header_time_data(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -1209,7 +1209,7 @@ int avioctl2_get_header_time_data(
 }
 
 int avioctl2_set_acs_position_euro(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,

@@ -22,17 +22,17 @@
 
 extern int module_start();
 extern int module_stop();
-extern int dvripl_df_init(iop_device_t *dev);
-extern int dvripl_df_exit(iop_device_t *dev);
-extern int dvripl_df_ioctl(iop_file_t *f, int cmd, void *param);
-extern int dvripl_df_devctl(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvripl_df_ioctl2(iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvripl_df_init(iomanX_iop_device_t *dev);
+extern int dvripl_df_exit(iomanX_iop_device_t *dev);
+extern int dvripl_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param);
+extern int dvripl_df_devctl(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvripl_df_ioctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int dvripl_df_null();
 extern s64 dvripl_df_null_long();
-extern int iplioctl2_update(iop_file_t *a1, int cmd, void *arg);
+extern int iplioctl2_update(iomanX_iop_file_t *a1, int cmd, void *arg);
 extern void dvr_ready(int a1, void *a2);
 
-static iop_device_ops_t DvrFuncTbl =
+static iomanX_iop_device_ops_t DvrFuncTbl =
     {
         &dvripl_df_init,
         &dvripl_df_exit,
@@ -63,7 +63,7 @@ static iop_device_ops_t DvrFuncTbl =
         &dvripl_df_ioctl2,
     };
 s32 dvr_ready_flag;
-static iop_device_t DVRMAN = {
+static iomanX_iop_device_t DVRMAN = {
     .name = "dvr_ipl",
     .desc = "Digital Video Recorder",
     .ops = &DvrFuncTbl,
@@ -88,7 +88,7 @@ int _start(int argc, char *argv[])
 
 int module_start()
 {
-    if (AddDrv(&DVRMAN) != 0)
+    if (iomanX_AddDrv(&DVRMAN) != 0)
         return MODULE_NO_RESIDENT_END;
 #if 0
     return MODULE_REMOVABLE_END;
@@ -99,12 +99,12 @@ int module_start()
 
 int module_stop()
 {
-    if (DelDrv(DVRMAN.name) != 0)
+    if (iomanX_DelDrv(DVRMAN.name) != 0)
         return MODULE_REMOVABLE_END;
     return MODULE_NO_RESIDENT_END;
 }
 
-int dvripl_df_init(iop_device_t *dev)
+int dvripl_df_init(iomanX_iop_device_t *dev)
 {
     int v1;
     iop_sema_t v3;
@@ -123,7 +123,7 @@ int dvripl_df_init(iop_device_t *dev)
     return 0;
 }
 
-int dvripl_df_exit(iop_device_t *dev)
+int dvripl_df_exit(iomanX_iop_device_t *dev)
 {
     (void)dev;
 
@@ -133,7 +133,7 @@ int dvripl_df_exit(iop_device_t *dev)
     return 0;
 }
 
-int dvripl_df_ioctl(iop_file_t *f, int cmd, void *param)
+int dvripl_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param)
 {
     (void)f;
     (void)cmd;
@@ -146,7 +146,7 @@ int dvripl_df_ioctl(iop_file_t *f, int cmd, void *param)
 }
 
 int dvripl_df_devctl(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -170,7 +170,7 @@ int dvripl_df_devctl(
     return v11;
 }
 
-int dvripl_df_ioctl2(iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
+int dvripl_df_ioctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
     (void)f;
     (void)cmd;
@@ -195,7 +195,7 @@ s64 dvripl_df_null_long()
     return -48LL;
 }
 
-int iplioctl2_update(iop_file_t *a1, int cmd, void *arg)
+int iplioctl2_update(iomanX_iop_file_t *a1, int cmd, void *arg)
 {
     int total_size;
     int retval;
@@ -266,7 +266,7 @@ int iplioctl2_update(iop_file_t *a1, int cmd, void *arg)
         printf("CONFIG -> Status error!\n");
         return -5;
     }
-    update_fd = open((const char *)arg, 1, 0x124);
+    update_fd = iomanX_open((const char *)arg, 1, 0x124);
     if (update_fd >= 0) {
         int chunk_offset;
         chunk_offset = 0x10000000;
@@ -283,7 +283,7 @@ int iplioctl2_update(iop_file_t *a1, int cmd, void *arg)
             s32 chunk_size;
             int read_size;
             printf("%08X\n", chunk_offset);
-            read_size = read(update_fd, SBUF, 0x8000);
+            read_size = iomanX_read(update_fd, SBUF, 0x8000);
             chunk_size = read_size;
             if (read_size < 0) {
                 retval = -5;
@@ -348,7 +348,7 @@ int iplioctl2_update(iop_file_t *a1, int cmd, void *arg)
         retval = -89;
     }
 LABEL_30:
-    close(update_fd);
+    iomanX_close(update_fd);
     DvrdrvUnregisterIntrHandler(dvr_ready);
     printf("done.\n");
     return retval;

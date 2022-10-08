@@ -12,22 +12,22 @@
 #define _HDD_FIO_H
 
 // I/O functions
-int hddInit(iop_device_t *f);
-int hddDeinit(iop_device_t *f);
-int hddFormat(iop_file_t *f, const char *dev, const char *blockdev, void *arg, int arglen);
-int hddOpen(iop_file_t *f, const char *name, int flags, int mode);
-int hddClose(iop_file_t *f);
-int hddRead(iop_file_t *f, void *buf, int size);
-int hddWrite(iop_file_t *f, void *buf, int size);
-int hddLseek(iop_file_t *f, int post, int whence);
-int hddIoctl2(iop_file_t *f, int request, void *argp, unsigned int arglen, void *bufp, unsigned int buflen);
-int hddRemove(iop_file_t *f, const char *name);
-int hddDopen(iop_file_t *f, const char *name);
-int hddDread(iop_file_t *f, iox_dirent_t *dirent);
-int hddGetStat(iop_file_t *f, const char *name, iox_stat_t *stat);
-int hddReName(iop_file_t *f, const char *oldname, const char *newname);
-int hddDevctl(iop_file_t *f, const char *devname, int cmd, void *arg, unsigned int arglen, void *bufp, unsigned int buflen);
+int hddInit(iomanX_iop_device_t *f);
+int hddDeinit(iomanX_iop_device_t *f);
+int hddFormat(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void *arg, int arglen);
+int hddOpen(iomanX_iop_file_t *f, const char *name, int flags, int mode);
+int hddClose(iomanX_iop_file_t *f);
+int hddRead(iomanX_iop_file_t *f, void *buf, int size);
+int hddWrite(iomanX_iop_file_t *f, void *buf, int size);
+int hddLseek(iomanX_iop_file_t *f, int post, int whence);
+int hddIoctl2(iomanX_iop_file_t *f, int request, void *argp, unsigned int arglen, void *bufp, unsigned int buflen);
+int hddRemove(iomanX_iop_file_t *f, const char *name);
+int hddDopen(iomanX_iop_file_t *f, const char *name);
+int hddDread(iomanX_iop_file_t *f, iox_dirent_t *dirent);
+int hddGetStat(iomanX_iop_file_t *f, const char *name, iox_stat_t *stat);
+int hddReName(iomanX_iop_file_t *f, const char *oldname, const char *newname);
+int hddDevctl(iomanX_iop_file_t *f, const char *devname, int cmd, void *arg, unsigned int arglen, void *bufp, unsigned int buflen);
 
-int hddUnsupported(iop_file_t *f);
+int hddUnsupported(iomanX_iop_file_t *f);
 
 #endif /* _HDD_FIO_H */

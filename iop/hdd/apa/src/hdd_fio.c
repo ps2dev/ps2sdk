@@ -50,7 +50,7 @@ static const char *sizeList[APA_NUMBER_OF_SIZES] = {
 // Function declarations
 static int fioPartitionSizeLookUp(char *str);
 static int fioInputBreaker(char const **arg, char *outBuf, int maxout);
-static int fioDataTransfer(iop_file_t *f, void *buf, int size, int mode);
+static int fioDataTransfer(iomanX_iop_file_t *f, void *buf, int size, int mode);
 static int getFileSlot(apa_params_t *params, hdd_file_slot_t **fileSlot);
 static int ioctl2Transfer(s32 device, hdd_file_slot_t *fileSlot, hddIoctl2Transfer_t *arg);
 static void fioGetStatFiller(apa_cache_t *clink1, iox_stat_t *stat);
@@ -197,7 +197,7 @@ static int getFileSlot(apa_params_t *params, hdd_file_slot_t **fileSlot)
     return -EMFILE; // no file slots free :(
 }
 
-static int fioDataTransfer(iop_file_t *f, void *buf, int size, int mode)
+static int fioDataTransfer(iomanX_iop_file_t *f, void *buf, int size, int mode)
 {
     hdd_file_slot_t *fileSlot = (hdd_file_slot_t *)f->privdata;
 
@@ -247,7 +247,7 @@ static int ioctl2Transfer(s32 device, hdd_file_slot_t *fileSlot, hddIoctl2Transf
     return 0;
 }
 
-int hddInit(iop_device_t *f)
+int hddInit(iomanX_iop_device_t *f)
 {
     iop_sema_t sema;
     (void)f;
@@ -261,7 +261,7 @@ int hddInit(iop_device_t *f)
     return 0;
 }
 
-int hddDeinit(iop_device_t *f)
+int hddDeinit(iomanX_iop_device_t *f)
 {
     (void)f;
 
@@ -269,7 +269,7 @@ int hddDeinit(iop_device_t *f)
     return 0;
 }
 
-int hddFormat(iop_file_t *f, const char *dev, const char *blockdev, void *arg, int arglen)
+int hddFormat(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void *arg, int arglen)
 {
     int rv = 0;
     apa_cache_t *clink;
@@ -407,7 +407,7 @@ static int apaOpen(s32 device, hdd_file_slot_t *fileSlot, apa_params_t *params, 
         return rv;
     rv = -ENOENT;
 
-    if (clink == NULL && (mode & O_CREAT)) {
+    if (clink == NULL && (mode & FIO_O_CREAT)) {
         if ((rv = hddCheckPartitionMax(device, params->size)) >= 0) {
             if ((clink = hddAddPartitionHere(device, params, emptyBlocks, sector, &rv)) != NULL) {
                 sector = clink->header->start;
@@ -429,7 +429,7 @@ static int apaOpen(s32 device, hdd_file_slot_t *fileSlot, apa_params_t *params, 
     memcpy(&fileSlot->id, &clink->header->id, APA_IDMAX);
     apaCacheFree(clink);
     if (apaPassCmp(clink->header->fpwd, params->fpwd) != 0) {
-        rv = (!(mode & O_WRONLY)) ? apaPassCmp(clink->header->rpwd, params->rpwd) : -EACCES;
+        rv = (!(mode & FIO_O_WRONLY)) ? apaPassCmp(clink->header->rpwd, params->rpwd) : -EACCES;
     } else
         rv = 0;
 
@@ -535,7 +535,7 @@ static int apaRename(s32 device, const apa_params_t *oldParams, const apa_params
     return 0;
 }
 
-int hddRemove(iop_file_t *f, const char *name)
+int hddRemove(iomanX_iop_file_t *f, const char *name)
 {
     int rv;
     apa_params_t params;
@@ -553,7 +553,7 @@ int hddRemove(iop_file_t *f, const char *name)
     return rv;
 }
 
-int hddOpen(iop_file_t *f, const char *name, int flags, int mode)
+int hddOpen(iomanX_iop_file_t *f, const char *name, int flags, int mode)
 {
     int rv;
     apa_params_t params;
@@ -566,17 +566,17 @@ int hddOpen(iop_file_t *f, const char *name, int flags, int mode)
 
 #ifdef APA_SUPPORT_BHDD
     if (strcmp(f->device->name, "bhdd") == 0)
-        if ((flags & O_CREAT) != 0)
+        if ((flags & FIO_O_CREAT) != 0)
             return -EACCES;
 #endif
 
-    if (!(f->mode & O_DIROPEN))
+    if (!(f->mode & FIO_O_DIROPEN))
         if ((rv = fioGetInput(name, &params)) < 0)
             return rv;
 
     WaitSema(fioSema);
     if ((rv = getFileSlot(&params, &fileSlot)) == 0) {
-        if (!(f->mode & O_DIROPEN)) {
+        if (!(f->mode & FIO_O_DIROPEN)) {
             if ((rv = apaOpen(f->unit, fileSlot, &params, flags)) == 0) {
                 fileSlot->f = f;
                 f->privdata = fileSlot;
@@ -597,7 +597,7 @@ int hddOpen(iop_file_t *f, const char *name, int flags, int mode)
     return rv;
 }
 
-int hddClose(iop_file_t *f)
+int hddClose(iomanX_iop_file_t *f)
 {
     WaitSema(fioSema);
     memset(f->privdata, 0, sizeof(hdd_file_slot_t));
@@ -605,14 +605,14 @@ int hddClose(iop_file_t *f)
     return 0;
 }
 
-int hddRead(iop_file_t *f, void *buf, int size)
+int hddRead(iomanX_iop_file_t *f, void *buf, int size)
 {
     return fioDataTransfer(f, buf, size, ATA_DIR_READ);
 }
 
-int hddWrite(iop_file_t *f, void *buf, int size)
+int hddWrite(iomanX_iop_file_t *f, void *buf, int size)
 {
-    if (!(f->mode & O_WRONLY))
+    if (!(f->mode & FIO_O_WRONLY))
         return -EACCES;
 #ifdef APA_SUPPORT_BHDD
     if (strcmp(f->device->name, "bhdd") == 0)
@@ -621,13 +621,13 @@ int hddWrite(iop_file_t *f, void *buf, int size)
     return fioDataTransfer(f, buf, size, ATA_DIR_WRITE);
 }
 
-int hddLseek(iop_file_t *f, int post, int whence)
+int hddLseek(iomanX_iop_file_t *f, int post, int whence)
 {
     int rv = 0;
     hdd_file_slot_t *fileSlot;
 
     // test input( no seeking to end point less :P )
-    if (whence == SEEK_END)
+    if (whence == FIO_SEEK_END)
         return -EINVAL;
     if ((post & 0x1FF))
         return -EINVAL;
@@ -636,14 +636,14 @@ int hddLseek(iop_file_t *f, int post, int whence)
 
     WaitSema(fioSema);
     fileSlot = f->privdata;
-    if (whence == SEEK_CUR) {
+    if (whence == FIO_SEEK_CUR) {
         if (((int)fileSlot->post + post) < 0 || (fileSlot->post + post) >= 0x1FF9)
             rv = -EINVAL;
         else {
             fileSlot->post += post;
             rv = fileSlot->post << 9;
         }
-    } else if (whence == SEEK_SET) {
+    } else if (whence == FIO_SEEK_SET) {
         if (post < 0 || post >= 0x1FF9)
             rv = -EINVAL;
         else {
@@ -679,7 +679,7 @@ static void fioGetStatFiller(apa_cache_t *clink, iox_stat_t *stat)
 #endif
 }
 
-int hddGetStat(iop_file_t *f, const char *name, iox_stat_t *stat)
+int hddGetStat(iomanX_iop_file_t *f, const char *name, iox_stat_t *stat)
 {
     apa_cache_t *clink;
     apa_params_t params;
@@ -698,18 +698,18 @@ int hddGetStat(iop_file_t *f, const char *name, iox_stat_t *stat)
     return rv;
 }
 
-int hddDopen(iop_file_t *f, const char *name)
+int hddDopen(iomanX_iop_file_t *f, const char *name)
 {
     return hddOpen(f, name, 0, 0);
 }
 
-int hddDread(iop_file_t *f, iox_dirent_t *dirent)
+int hddDread(iomanX_iop_file_t *f, iox_dirent_t *dirent)
 {
     int rv;
     hdd_file_slot_t *fileSlot = f->privdata;
     apa_cache_t *clink;
 
-    if (!(f->mode & O_DIROPEN))
+    if (!(f->mode & FIO_O_DIROPEN))
         return -ENOTDIR;
 
     if (fileSlot->parts[0].start == (u32)(-1))
@@ -755,7 +755,7 @@ int hddDread(iop_file_t *f, iox_dirent_t *dirent)
 
     The full-access password (fpwd) is required.
     System partitions (__*) cannot be renamed. */
-int hddReName(iop_file_t *f, const char *oldname, const char *newname)
+int hddReName(iomanX_iop_file_t *f, const char *oldname, const char *newname)
 {
     apa_params_t oldParams;
     apa_params_t newParams;
@@ -783,7 +783,7 @@ static int ioctl2AddSub(hdd_file_slot_t *fileSlot, char *argp)
     u32 sector = 0;
     u32 length;
 
-    if (!(fileSlot->f->mode & O_WRONLY))
+    if (!(fileSlot->f->mode & FIO_O_WRONLY))
         return -EACCES;
 
     if (!(fileSlot->nsub < APA_MAXSUB))
@@ -841,7 +841,7 @@ static int ioctl2DeleteLastSub(hdd_file_slot_t *fileSlot)
     apa_cache_t *mainPart;
     apa_cache_t *subPart;
 
-    if (!(fileSlot->f->mode & O_WRONLY))
+    if (!(fileSlot->f->mode & FIO_O_WRONLY))
         return -EACCES;
 
     if (fileSlot->nsub == 0)
@@ -862,7 +862,7 @@ static int ioctl2DeleteLastSub(hdd_file_slot_t *fileSlot)
     return rv;
 }
 
-int hddIoctl2(iop_file_t *f, int req, void *argp, unsigned int arglen,
+int hddIoctl2(iomanX_iop_file_t *f, int req, void *argp, unsigned int arglen,
               void *bufp, unsigned int buflen)
 {
     u32 rv = 0, err_lba;
@@ -1004,7 +1004,7 @@ static int devctlSetOsdMBR(s32 device, hddSetOsdMBR_t *mbrInfo)
     return rv;
 }
 
-int hddDevctl(iop_file_t *f, const char *devname, int cmd, void *arg,
+int hddDevctl(iomanX_iop_file_t *f, const char *devname, int cmd, void *arg,
               unsigned int arglen, void *bufp, unsigned int buflen)
 {
     int rv = 0;
@@ -1108,7 +1108,7 @@ int hddDevctl(iop_file_t *f, const char *devname, int cmd, void *arg,
     return rv;
 }
 
-int hddUnsupported(iop_file_t *f)
+int hddUnsupported(iomanX_iop_file_t *f)
 {
 	(void)f;
 

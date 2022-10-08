@@ -1,7 +1,7 @@
 
 iomanX_IMPORTS_start
-I_AddDrv
-I_DelDrv
+I_iomanX_AddDrv
+I_iomanX_DelDrv
 iomanX_IMPORTS_end
 
 pvrdrv_IMPORTS_start

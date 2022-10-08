@@ -140,11 +140,11 @@ int _start( int argc, char *argv[])
 static int fileXio_GetDeviceList_RPC(struct fileXioDevice* ee_devices, int eecount)
 {
     int device_count = 0;
-    iop_device_t **devices = GetDeviceList();
+    iomanX_iop_device_t **devices = iomanX_GetDeviceList();
     struct fileXioDevice local_devices[FILEXIO_MAX_DEVICES];
     while (device_count < eecount && devices[device_count])
     {
-        iop_device_t *device = devices[device_count];
+        iomanX_iop_device_t *device = devices[device_count];
         strncpy(local_devices[device_count].name, device->name, 128);
         local_devices[device_count].name[15] = '\0';
         local_devices[device_count].type = device->type;
@@ -176,30 +176,30 @@ static int fileXio_CopyFile_RPC(const char *src, const char *dest, int mode)
   iox_stat_t stat;
   int infd, outfd, size, remain, i;
 
-  if ((infd = open(src, O_RDONLY, 0666)) < 0) {
+  if ((infd = iomanX_open(src, FIO_O_RDONLY, 0666)) < 0) {
     return infd;
   }
-  if ((outfd = open(dest, O_RDWR|O_CREAT|O_TRUNC, 0666)) < 0) {
-    close(infd);
+  if ((outfd = iomanX_open(dest, FIO_O_RDWR|FIO_O_CREAT|FIO_O_TRUNC, 0666)) < 0) {
+    iomanX_close(infd);
     return outfd;
   }
-  size = lseek(infd, 0, SEEK_END);
-  lseek(infd, 0, SEEK_SET);
+  size = iomanX_lseek(infd, 0, FIO_SEEK_END);
+  iomanX_lseek(infd, 0, FIO_SEEK_SET);
   if (!size)
     return 0;
 
   remain = size % RWBufferSize;
   for (i = 0; (unsigned int)i < (size / RWBufferSize); i++) {
-    read(infd, rwbuf, RWBufferSize);
-    write(outfd, rwbuf, RWBufferSize);
+    iomanX_read(infd, rwbuf, RWBufferSize);
+    iomanX_write(outfd, rwbuf, RWBufferSize);
   }
-  read(infd, rwbuf, remain);
-  write(outfd, rwbuf, remain);
-  close(infd);
-  close(outfd);
+  iomanX_read(infd, rwbuf, remain);
+  iomanX_write(outfd, rwbuf, remain);
+  iomanX_close(infd);
+  iomanX_close(outfd);
 
   stat.mode = mode;
-  chstat(dest, &stat, 1);
+  iomanX_chstat(dest, &stat, 1);
 
   return size;
 }
@@ -241,7 +241,7 @@ static int fileXio_Read_RPC(int infd, char *read_buf, int read_size, void *intr_
 	}
 	if (srest>0)
 	{
-		if (srest!=(rlen=read(infd, rests.sbuffer, srest)))
+		if (srest!=(rlen=iomanX_read(infd, rests.sbuffer, srest)))
 		{
 			total += srest = (rlen>0 ? rlen:0);
 			goto EXIT;
@@ -257,7 +257,7 @@ static int fileXio_Read_RPC(int infd, char *read_buf, int read_size, void *intr_
 
 		while(SifDmaStat(status)>=0);
 
-		rlen=read(infd, rwbuf, readlen);
+		rlen=iomanX_read(infd, rwbuf, readlen);
 		if (readlen!=rlen){
 			if (rlen<=0)goto EXIT;
 			dmaStruct.dest=(void *)abuffer;
@@ -284,7 +284,7 @@ static int fileXio_Read_RPC(int infd, char *read_buf, int read_size, void *intr_
 	}
 	if (erest>0)
 	{
-		rlen = read(infd, rests.ebuffer, erest);
+		rlen = iomanX_read(infd, rests.ebuffer, erest);
 		total += (rlen>0 ? rlen : 0);
 	}
 EXIT:
@@ -314,7 +314,7 @@ static int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size, i
 	total = 0;
 	if (mis > 0)
       {
-		wlen=write(outfd, misbuf, mis);
+		wlen=iomanX_write(outfd, misbuf, mis);
 		if (wlen != mis)
             {
 			if (wlen > 0)
@@ -330,7 +330,7 @@ static int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size, i
 		int writelen;
 		writelen = MIN(RWBufferSize, (unsigned int)left);
 		SifRpcGetOtherData(&rdata, (void *)pos, rwbuf, writelen, 0);
-		wlen=write(outfd, rwbuf, writelen);
+		wlen=iomanX_write(outfd, rwbuf, writelen);
 		if (wlen != writelen){
 			if (wlen>0)
 				total+=wlen;
@@ -360,7 +360,7 @@ static int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEn
 
 	matched_entries = 0;
 
-      fd = dopen(pathname);
+      fd = iomanX_dopen(pathname);
       if (fd <= 0)
       {
         return fd;
@@ -372,7 +372,7 @@ static int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEn
         while (res > 0)
         {
           memset(&dirbuf, 0, sizeof(dirbuf));
-          res = dread(fd, &dirbuf);
+          res = iomanX_dread(fd, &dirbuf);
           if (res > 0)
           {
 		  int dmaID;
@@ -382,7 +382,7 @@ static int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEn
 		// check for too many entries
 		if ((unsigned int)matched_entries == req_entries)
 		{
-			close(fd);
+			iomanX_close(fd);
 			return (matched_entries);
 		}
 		// wait for any previous DMA to complete
@@ -406,7 +406,7 @@ static int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEn
       } // if dirs and files
 
       // cleanup and return # of entries
-      close(fd);
+      iomanX_close(fd);
 	return (matched_entries);
 }
 
@@ -416,7 +416,7 @@ static int fileXio_Mount_RPC(const char* mountstring, const char* mountpoint, in
 	int res=0;
 	M_DEBUG("Mount Request\n");
 	M_DEBUG("mountpoint: %s - %s - %d\n",mountpoint,mountstring,flag);
-	res = mount(mountpoint, mountstring, flag, NULL, 0);
+	res = iomanX_mount(mountpoint, mountstring, flag, NULL, 0);
 	return(res);
 }
 
@@ -428,7 +428,7 @@ static int fileXio_chstat_RPC(char *filename, void* eeptr, int mask)
 
 	SifRpcGetOtherData(&rdata, (void *)eeptr, &localStat, 64, 0);
 
-	res = chstat(filename, &localStat, mask);
+	res = iomanX_chstat(filename, &localStat, mask);
       return(res);
 }
 
@@ -439,7 +439,7 @@ static int fileXio_getstat_RPC(char *filename, void* eeptr)
 	struct t_SifDmaTransfer dmaStruct;
 	int intStatus;	// interrupt status - for dis/en-abling interrupts
 
-	res = getstat(filename, &localStat);
+	res = iomanX_getstat(filename, &localStat);
 
 	if(res >= 0)
 	{
@@ -465,7 +465,7 @@ static int fileXio_dread_RPC(int fd, void* eeptr)
       struct t_SifDmaTransfer dmaStruct;
       int intStatus;	// interrupt status - for dis/en-abling interrupts
 
-	res = dread(fd, &localDir);
+	res = iomanX_dread(fd, &localDir);
       if (res > 0)
       {
 	  // DMA localStat to the address specified by eeptr
@@ -551,7 +551,7 @@ static void* fileXioRpc_uMount(unsigned int* sbuff)
 	struct fxio_unmount_packet *packet=(struct fxio_unmount_packet*)sbuff;
 
 	M_DEBUG("uMount Request\n");
-	ret=umount(packet->mountpoint);
+	ret=iomanX_umount(packet->mountpoint);
 	sbuff[0] = ret;
 	return sbuff;
 }
@@ -583,7 +583,7 @@ static void* fileXioRpc_MkDir(unsigned int* sbuff)
 	struct fxio_mkdir_packet *packet=(struct fxio_mkdir_packet*)sbuff;
 
 	M_DEBUG("MkDir Request\n");
-	ret=mkdir(packet->pathname, packet->mode);
+	ret=iomanX_mkdir(packet->pathname, packet->mode);
 	sbuff[0] = ret;
 	return sbuff;
 }
@@ -596,7 +596,7 @@ static void* fileXioRpc_RmDir(unsigned int* sbuff)
 	struct fxio_pathsel_packet *packet=(struct fxio_pathsel_packet*)sbuff;
 
 	M_DEBUG("RmDir Request\n");
-	ret=rmdir(packet->pathname);
+	ret=iomanX_rmdir(packet->pathname);
 	sbuff[0] = ret;
 	return sbuff;
 }
@@ -609,7 +609,7 @@ static void* fileXioRpc_Remove(unsigned int* sbuff)
 	struct fxio_pathsel_packet *packet=(struct fxio_pathsel_packet*)sbuff;
 
 	M_DEBUG("Remove Request\n");
-	ret=remove(packet->pathname);
+	ret=iomanX_remove(packet->pathname);
 	sbuff[0] = ret;
 	return sbuff;
 }
@@ -623,7 +623,7 @@ static void* fileXioRpc_Rename(unsigned int* sbuff)
 	struct fxio_rename_packet *packet=(struct fxio_rename_packet*)sbuff;
 
 	M_DEBUG("Rename Request\n");
-	ret=rename(packet->source, packet->dest);
+	ret=iomanX_rename(packet->source, packet->dest);
 	sbuff[0] = ret;
 	return sbuff;
 }
@@ -637,7 +637,7 @@ static void* fileXioRpc_SymLink(unsigned int* sbuff)
 	struct fxio_rename_packet *packet=(struct fxio_rename_packet*)sbuff;
 
 	M_DEBUG("SymLink Request\n");
-	ret=symlink(packet->source, packet->dest);
+	ret=iomanX_symlink(packet->source, packet->dest);
 	sbuff[0] = ret;
 	return sbuff;
 }
@@ -652,7 +652,7 @@ static void* fileXioRpc_ReadLink(unsigned int* sbuff)
 	struct fxio_readlink_packet *packet=(struct fxio_readlink_packet*)sbuff;
 
 	M_DEBUG("ReadLink Request\n");
-	ret=readlink(packet->source, packet->buffer, packet->buflen);
+	ret=iomanX_readlink(packet->source, packet->buffer, packet->buflen);
 	sbuff[0] = ret;
 	return sbuff;
 }
@@ -663,7 +663,7 @@ void* fileXioRpc_ChDir(unsigned int* sbuff)
 {
 	int ret;
 	M_DEBUG("ChDir Request\n");
-	ret=chdir((char*)sbuff);
+	ret=iomanX_chdir((char*)sbuff);
 	sbuff[0] = ret;
 	return sbuff;
 }
@@ -678,7 +678,7 @@ static void* fileXioRpc_Open(unsigned int* sbuff)
 	struct fxio_open_packet *packet=(struct fxio_open_packet*)sbuff;
 
 	M_DEBUG("Open Request\n");
-	ret=open(packet->pathname, packet->flags, packet->mode);
+	ret=iomanX_open(packet->pathname, packet->flags, packet->mode);
 	sbuff[0] = ret;
 	return sbuff;
 }
@@ -691,7 +691,7 @@ static void* fileXioRpc_Close(unsigned int* sbuff)
 	struct fxio_close_packet *packet=(struct fxio_close_packet*)sbuff;
 
 	M_DEBUG("Close Request\n");
-	ret=close(packet->fd);
+	ret=iomanX_close(packet->fd);
 	sbuff[0] = ret;
 	return sbuff;
 }
@@ -738,7 +738,7 @@ static void* fileXioRpc_Lseek(unsigned int* sbuff)
 	struct fxio_lseek_packet *packet=(struct fxio_lseek_packet*)sbuff;
 
 	M_DEBUG("Lseek Request\n");
-	ret=lseek(packet->fd, (long int)packet->offset, packet->whence);
+	ret=iomanX_lseek(packet->fd, (long int)packet->offset, packet->whence);
 	sbuff[0] = ret;
 	return sbuff;
 }
@@ -759,7 +759,7 @@ static void* fileXioRpc_Lseek64(unsigned int* sbuff)
 	offsetHI = offsetHI << 32;
 	long long offset = offsetHI | packet->offset_lo;
 
-	ret=lseek64(packet->fd, offset, packet->whence);
+	ret=iomanX_lseek64(packet->fd, offset, packet->whence);
 	ret_packet->pos_lo = (u32)(ret & 0xffffffff);
 	ret_packet->pos_hi = (u32)((ret >> 32) & 0xffffffff);
 
@@ -806,12 +806,12 @@ static void* fileXioRpc_Format(unsigned int* sbuff)
 	struct fxio_format_packet *packet=(struct fxio_format_packet*)sbuff;
 
 	M_DEBUG("Format Request\n");
-	ret=format(packet->device, packet->blockDevice, packet->args, packet->arglen);
+	ret=iomanX_format(packet->device, packet->blockDevice, packet->args, packet->arglen);
 	sbuff[0] = ret;
 	return sbuff;
 }
 
-//int io_AddDrv(iop_device_t *device);
+//int io_AddDrv(iomanX_iop_device_t *device);
 static void* fileXioRpc_AddDrv(unsigned int* sbuff)
 {
 	int ret=-1;
@@ -841,7 +841,7 @@ static void* fileXioRpc_Sync(unsigned int* sbuff)
 	struct fxio_sync_packet *packet=(struct fxio_sync_packet*)sbuff;
 
 	M_DEBUG("Sync Request\n");
-	ret=sync(packet->device, packet->flags);
+	ret=iomanX_sync(packet->device, packet->flags);
 	sbuff[0] = ret;
 	return sbuff;
 }
@@ -858,7 +858,7 @@ static void* fileXioRpc_Devctl(unsigned int* sbuff)
 
 	M_DEBUG("Devctl Request\n");
 
-	ret = devctl(packet->name, packet->cmd, packet->arg, packet->arglen, ret_buf->buf, packet->buflen);
+	ret = iomanX_devctl(packet->name, packet->cmd, packet->arg, packet->arglen, ret_buf->buf, packet->buflen);
 
 	// Transfer buffer back to EE
 	if(packet->buflen != 0)
@@ -894,7 +894,7 @@ static void* fileXioRpc_Ioctl(unsigned int* sbuff)
 	M_DEBUG("Ioctl Request\n");
 
 	//	BODY
-	ret=ioctl(packet->fd, packet->cmd, packet->arg);
+	ret=iomanX_ioctl(packet->fd, packet->cmd, packet->arg);
 	sbuff[0] = ret;
 	return sbuff;
 }
@@ -910,7 +910,7 @@ static void* fileXioRpc_Ioctl2(unsigned int* sbuff)
 
 	M_DEBUG("ioctl2 Request\n");
 
-	ret = ioctl2(packet->fd, packet->cmd, packet->arg, packet->arglen, ret_buf->buf, packet->buflen);
+	ret = iomanX_ioctl2(packet->fd, packet->cmd, packet->arg, packet->arglen, ret_buf->buf, packet->buflen);
 
 	// Transfer buffer back to EE
 	if(packet->buflen != 0)
@@ -943,7 +943,7 @@ static void* fileXioRpc_Dopen(unsigned int* sbuff)
 	struct fxio_pathsel_packet *packet=(struct fxio_pathsel_packet*)sbuff;
 
 	M_DEBUG("Dopen Request\n");
-	ret=dopen(packet->pathname);
+	ret=iomanX_dopen(packet->pathname);
 	sbuff[0] = ret;
 	return sbuff;
 }
@@ -965,7 +965,7 @@ static void* fileXioRpc_Dclose(unsigned int* sbuff)
 	struct fxio_close_packet *packet=(struct fxio_close_packet*)sbuff;
 
 	M_DEBUG("Dclose Request\n");
-	ret=dclose(packet->fd);
+	ret=iomanX_dclose(packet->fd);
 	sbuff[0] = ret;
 	return sbuff;
 }

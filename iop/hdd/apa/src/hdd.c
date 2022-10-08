@@ -34,7 +34,7 @@
 IRX_ID("hdd_driver", APA_MODVER_MAJOR, APA_MODVER_MINOR);
 #endif
 
-static iop_device_ops_t hddOps={
+static iomanX_iop_device_ops_t hddOps={
 	&hddInit,
 	&hddDeinit,
 	&hddFormat,
@@ -63,7 +63,7 @@ static iop_device_ops_t hddOps={
 	(void*)&hddUnsupported,
 	&hddIoctl2,
 };
-static iop_device_t hddFioDev={
+static iomanX_iop_device_t hddFioDev={
 	"hdd",
 	IOP_DT_BLOCK | IOP_DT_FSEXT,
 	1,
@@ -71,7 +71,7 @@ static iop_device_t hddFioDev={
 	&hddOps,
 };
 #ifdef APA_SUPPORT_BHDD
-static iop_device_t bhddFioDev={
+static iomanX_iop_device_t bhddFioDev={
 	"bhdd",
 	IOP_DT_BLOCK | IOP_DT_FSEXT,
 	1,
@@ -298,12 +298,12 @@ int APA_ENTRYPOINT(int argc, char *argv[])
 				hddDevices[i].status, hddDevices[i].format);
 		}
 	}
-	DelDrv(hddFioDev.name);
-	if(AddDrv(&hddFioDev) == 0)
+	iomanX_DelDrv(hddFioDev.name);
+	if(iomanX_AddDrv(&hddFioDev) == 0)
 	{
 #ifdef APA_SUPPORT_BHDD
-		DelDrv(bhddFioDev.name);
-		if(AddDrv(&bhddFioDev) == 0)
+		iomanX_DelDrv(bhddFioDev.name);
+		if(iomanX_AddDrv(&bhddFioDev) == 0)
 #endif
 		{
 #if defined(APA_XOSD_VER)

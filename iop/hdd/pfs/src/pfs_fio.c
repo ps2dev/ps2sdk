@@ -80,7 +80,7 @@ void pfsFioCloseFileSlot(pfs_file_slot_t *fileSlot)
 {
 	pfs_mount_t *pfsMount=fileSlot->clink->pfsMount;
 
-	if(fileSlot->fd->mode & O_WRONLY)
+	if(fileSlot->fd->mode & FIO_O_WRONLY)
 	{
 		if(fileSlot->unaligned.dirty!=0)
 		{
@@ -147,7 +147,7 @@ static int openFile(pfs_mount_t *pfsMount, pfs_file_slot_t *freeSlot, const char
 	result = 0;	//no error
 #ifdef PFS_SUPPORT_BHDD
 	if (strcmp(pfsMount->blockDev->devName, "bhdd") == 0)
-		if (openFlags & O_CREAT)
+		if (openFlags & FIO_O_CREAT)
 			return -EACCES;
 #endif
 	// Get the inode for the directory which contains the file (dir) in filename
@@ -167,11 +167,11 @@ static int openFile(pfs_mount_t *pfsMount, pfs_file_slot_t *freeSlot, const char
 		u32 count;
 
 		// Setup flags
-		flags=openFlagArray[openFlags & O_RDWR];
-		if (openFlags & O_TRUNC)	flags |= 2;
+		flags=openFlagArray[openFlags & FIO_O_RDWR];
+		if (openFlags & FIO_O_TRUNC)	flags |= 2;
 		if (openFlags & PFS_FDIRO)		flags |= 4;
 		if ((mode & 0x10000) ||
-		   ((openFlags & (O_CREAT|O_EXCL)) == (O_CREAT|O_EXCL))){
+		   ((openFlags & (FIO_O_CREAT|FIO_O_EXCL)) == (FIO_O_CREAT|FIO_O_EXCL))){
 			result=-EEXIST;
 		}
 		else
@@ -209,7 +209,7 @@ static int openFile(pfs_mount_t *pfsMount, pfs_file_slot_t *freeSlot, const char
 			// Truncate file if required
 			if ((result==0) &&
 			    ((result=pfsCheckAccess(fileInode, flags & 0xFFFF))==0) &&
-			    (openFlags & O_TRUNC))
+			    (openFlags & FIO_O_TRUNC))
 			{
 				cached=pfsCacheGetData(fileInode->pfsMount, fileInode->sub, fileInode->block+1, PFS_CACHE_FLAG_NOLOAD | PFS_CACHE_FLAG_NOTHING, &result2);
 				if (cached)
@@ -231,7 +231,7 @@ static int openFile(pfs_mount_t *pfsMount, pfs_file_slot_t *freeSlot, const char
 
 	// Otherwise, if file doesnt already exist..
 	}else{
-		if ((openFlags & O_CREAT) && (result==-ENOENT) &&
+		if ((openFlags & FIO_O_CREAT) && (result==-ENOENT) &&
 		    ((result=pfsCheckAccess(parentInode, 2))==0) &&
 		    (fileInode=pfsInodeCreate(parentInode, mode, PFS_UID,
 						  PFS_GID, &result)))
@@ -285,7 +285,7 @@ label:
 	if ((result==0) && freeSlot && fileInode)
 	{
 		freeSlot->clink=fileInode;
-		if (openFlags & O_APPEND)
+		if (openFlags & FIO_O_APPEND)
 			freeSlot->position = fileInode->u.inode->size;
 		else
 			freeSlot->position = 0;
@@ -293,7 +293,7 @@ label:
 		result=pfsBlockInitPos(freeSlot->clink, &freeSlot->block_pos, freeSlot->position);
 		if (result==0)
 		{
-			if ((openFlags & O_WRONLY) &&
+			if ((openFlags & FIO_O_WRONLY) &&
 			    (fileInode->u.inode->attr & PFS_FIO_ATTR_CLOSED)){
 				fileInode->u.inode->attr &= ~PFS_FIO_ATTR_CLOSED;
 				fileInode->flags |= PFS_CACHE_FLAG_DIRTY;
@@ -523,7 +523,7 @@ static int fileTransfer(pfs_file_slot_t *fileSlot, u8 *buf, int size, int operat
 	return result < 0 ? result : total;
 }
 
-int	pfsFioInit(iop_device_t *f)
+int	pfsFioInit(iomanX_iop_device_t *f)
 {
 	iop_sema_t sema;
 
@@ -539,7 +539,7 @@ int	pfsFioInit(iop_device_t *f)
 	return 0;
 }
 
-int	pfsFioDeinit(iop_device_t *f)
+int	pfsFioDeinit(iomanX_iop_device_t *f)
 {
 	(void)f;
 
@@ -550,7 +550,7 @@ int	pfsFioDeinit(iop_device_t *f)
 	return 0;
 }
 
-int	pfsFioFormat(iop_file_t *f, const char *dev, const char *blockdev, void *args, int arglen)
+int	pfsFioFormat(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void *args, int arglen)
 {
 	int *arg = (int *)args;
 	int fragment = 0;
@@ -575,13 +575,13 @@ int	pfsFioFormat(iop_file_t *f, const char *dev, const char *blockdev, void *arg
 
 	WaitSema(pfsFioSema);
 
-	fd = open(blockdev, O_RDWR);
+	fd = iomanX_open(blockdev, FIO_O_RDWR);
 
 	if(fd < 0)
 		rv = fd;
 	else {
 		rv = pfsFormat(blockDev, fd, arg[0], fragment);
-		close(fd);
+		iomanX_close(fd);
 	}
 
 	SignalSema(pfsFioSema);
@@ -589,7 +589,7 @@ int	pfsFioFormat(iop_file_t *f, const char *dev, const char *blockdev, void *arg
 	return rv;
 }
 
-int	pfsFioOpen(iop_file_t *f, const char *name, int flags, int mode)
+int	pfsFioOpen(iomanX_iop_file_t *f, const char *name, int flags, int mode)
 {
 	int rv = 0;
 	s32 i;
@@ -639,7 +639,7 @@ pfsOpen_end:
 	return rv;
 }
 
-int	pfsFioClose(iop_file_t *f)
+int	pfsFioClose(iomanX_iop_file_t *f)
 {
 	pfs_file_slot_t *fileSlot = (pfs_file_slot_t *)f->privdata;
 	int rv;
@@ -655,7 +655,7 @@ int	pfsFioClose(iop_file_t *f)
 	return 0;
 }
 
-int pfsFioRead(iop_file_t *f, void *buf, int size)
+int pfsFioRead(iomanX_iop_file_t *f, void *buf, int size)
 {
 	pfs_file_slot_t *fileSlot = (pfs_file_slot_t*)f->privdata;
 	int result = pfsFioCheckFileSlot(fileSlot);
@@ -676,7 +676,7 @@ int pfsFioRead(iop_file_t *f, void *buf, int size)
 	return result;
 }
 
-int pfsFioWrite(iop_file_t *f, void *buf, int size)
+int pfsFioWrite(iomanX_iop_file_t *f, void *buf, int size)
 {
 	pfs_mount_t *pfsMount;
 	pfs_file_slot_t *fileSlot = (pfs_file_slot_t*)f->privdata;
@@ -714,20 +714,20 @@ static s64 _seek(pfs_file_slot_t *fileSlot, s64 offset, int whence, int mode)
 	int rv;
 	s64 startPos, newPos;
 
-	if (mode & O_DIROPEN)
+	if (mode & FIO_O_DIROPEN)
 	{
 		return -EISDIR;
 	}
 
 	switch (whence)
 	{
-	case SEEK_SET:
+	case FIO_SEEK_SET:
 		startPos = 0;
 		break;
-	case SEEK_CUR:
+	case FIO_SEEK_CUR:
 		startPos= fileSlot->position;
 		break;
-	case SEEK_END:
+	case FIO_SEEK_END:
 		startPos = fileSlot->clink->u.inode->size;
 		break;
 	default:
@@ -759,7 +759,7 @@ static s64 _seek(pfs_file_slot_t *fileSlot, s64 offset, int whence, int mode)
 	return newPos;
 }
 
-int pfsFioLseek(iop_file_t *f, int pos, int whence)
+int pfsFioLseek(iomanX_iop_file_t *f, int pos, int whence)
 {
 	pfs_file_slot_t *fileSlot = (pfs_file_slot_t*)f->privdata;
 	int result = pfsFioCheckFileSlot(fileSlot);
@@ -773,7 +773,7 @@ int pfsFioLseek(iop_file_t *f, int pos, int whence)
 	return result;
 }
 
-s64 pfsFioLseek64(iop_file_t *f, s64 offset, int whence)
+s64 pfsFioLseek64(iomanX_iop_file_t *f, s64 offset, int whence)
 {
 	pfs_file_slot_t *fileSlot = (pfs_file_slot_t *)f->privdata;
 	u64 rv;
@@ -836,7 +836,7 @@ static int _remove(pfs_mount_t *pfsMount, const char *path, int mode)
 	return pfsFioCheckForLastError(pfsMount, rv);
 }
 
-int	pfsFioRemove(iop_file_t *f, const char *name)
+int	pfsFioRemove(iomanX_iop_file_t *f, const char *name)
 {
 	pfs_mount_t *pfsMount;
 	int rv;
@@ -851,7 +851,7 @@ int	pfsFioRemove(iop_file_t *f, const char *name)
 	return rv;
 }
 
-int	pfsFioMkdir(iop_file_t *f, const char *path, int mode)
+int	pfsFioMkdir(iomanX_iop_file_t *f, const char *path, int mode)
 {
 	pfs_mount_t *pfsMount;
 	int rv;
@@ -861,14 +861,14 @@ int	pfsFioMkdir(iop_file_t *f, const char *path, int mode)
 	if(!(pfsMount = pfsFioGetMountedUnit(f->unit)))
 		return -ENODEV;
 
-	rv = openFile(pfsMount, NULL, path, O_CREAT | O_WRONLY, mode);
+	rv = openFile(pfsMount, NULL, path, FIO_O_CREAT | FIO_O_WRONLY, mode);
 
 	SignalSema(pfsFioSema);
 
 	return rv;
 }
 
-int	pfsFioRmdir(iop_file_t *f, const char *path)
+int	pfsFioRmdir(iomanX_iop_file_t *f, const char *path)
 {
 	pfs_mount_t *pfsMount;
 	const char *temp;
@@ -888,12 +888,12 @@ int	pfsFioRmdir(iop_file_t *f, const char *path)
 	return rv;
 }
 
-int pfsFioDopen(iop_file_t *f, const char *name)
+int pfsFioDopen(iomanX_iop_file_t *f, const char *name)
 {
     return pfsFioOpen(f, name, 0, 0);
 }
 
-int	pfsFioDread(iop_file_t *f, iox_dirent_t *dirent)
+int	pfsFioDread(iomanX_iop_file_t *f, iox_dirent_t *dirent)
 {
 	pfs_file_slot_t *fileSlot = (pfs_file_slot_t *)f->privdata;
 	pfs_mount_t *pfsMount;
@@ -958,7 +958,7 @@ static void fioStatFiller(pfs_cache_t *clink, iox_stat_t *stat)
 #endif
 }
 
-int	pfsFioGetstat(iop_file_t *f, const char *name, iox_stat_t *stat)
+int	pfsFioGetstat(iomanX_iop_file_t *f, const char *name, iox_stat_t *stat)
 {
 	pfs_mount_t *pfsMount;
 	pfs_cache_t *clink;
@@ -978,7 +978,7 @@ int	pfsFioGetstat(iop_file_t *f, const char *name, iox_stat_t *stat)
 	return pfsFioCheckForLastError(pfsMount, rv);
 }
 
-int	pfsFioChstat(iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int statmask)
+int	pfsFioChstat(iomanX_iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int statmask)
 {
 	pfs_mount_t *pfsMount;
 	pfs_cache_t *clink;
@@ -1031,7 +1031,7 @@ int	pfsFioChstat(iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int
 	return pfsFioCheckForLastError(pfsMount, rv);
 }
 
-int pfsFioRename(iop_file_t *ff, const char *old, const char *new)
+int pfsFioRename(iomanX_iop_file_t *ff, const char *old, const char *new)
 {
 	char path1[256], path2[256];
 	int result=0;
@@ -1191,7 +1191,7 @@ exit:
 	return pfsFioCheckForLastError(pfsMount, result);
 }
 
-int pfsFioChdir(iop_file_t *f, const char *name)
+int pfsFioChdir(iomanX_iop_file_t *f, const char *name)
 {
 	pfs_mount_t *pfsMount;
 	pfs_cache_t *clink;
@@ -1249,7 +1249,7 @@ static void _sync(void)
 	}
 }
 
-int pfsFioSync(iop_file_t *f, const char *dev, int flag)
+int pfsFioSync(iomanX_iop_file_t *f, const char *dev, int flag)
 {
 	pfs_mount_t *pfsMount;
 
@@ -1272,7 +1272,7 @@ int pfsFioSync(iop_file_t *f, const char *dev, int flag)
 	return pfsFioCheckForLastError(pfsMount, 0);
 }
 
-int pfsFioMount(iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, int arglen)
+int pfsFioMount(iomanX_iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, int arglen)
 {
 	int rv;
 	int fd;
@@ -1287,18 +1287,18 @@ int pfsFioMount(iop_file_t *f, const char *fsname, const char *devname, int flag
 
 	WaitSema(pfsFioSema);
 
-	fd = open(devname, (flag & FIO_MT_RDONLY) ? O_RDONLY : O_RDWR); // ps2hdd.irx fd
+	fd = iomanX_open(devname, (flag & FIO_MT_RDONLY) ? FIO_O_RDONLY : FIO_O_RDWR); // ps2hdd.irx fd
 	if(fd < 0)
 		rv = fd;
 	else {
 		if((rv=mountDevice(blockDev, fd, f->unit, flag)) < 0)
-			close(fd);
+			iomanX_close(fd);
 	}
 	SignalSema(pfsFioSema);
 	return rv;
 }
 
-int pfsFioUmount(iop_file_t *f, const char *fsname)
+int pfsFioUmount(iomanX_iop_file_t *f, const char *fsname)
 {
 	s32 i;
 	int rv=0;
@@ -1321,7 +1321,7 @@ int pfsFioUmount(iop_file_t *f, const char *fsname)
 	if(busy_flag==0)
 	{
 		pfsCacheClose(pfsMount);
-		close(pfsMount->fd);
+		iomanX_close(pfsMount->fd);
 		pfsClearMount(pfsMount);
 	}
 	else
@@ -1331,7 +1331,7 @@ int pfsFioUmount(iop_file_t *f, const char *fsname)
 	return rv;
 }
 
-int pfsFioSymlink(iop_file_t *f, const char *old, const char *new)
+int pfsFioSymlink(iomanX_iop_file_t *f, const char *old, const char *new)
 {
 	int rv;
 	pfs_mount_t *pfsMount;
@@ -1343,12 +1343,12 @@ int pfsFioSymlink(iop_file_t *f, const char *old, const char *new)
 	if(!(pfsMount=pfsFioGetMountedUnit(f->unit)))
 		return -ENODEV;
 
-	rv = openFile(pfsMount, (pfs_file_slot_t *)old, (const char *)new, O_CREAT|O_WRONLY, mode);
+	rv = openFile(pfsMount, (pfs_file_slot_t *)old, (const char *)new, FIO_O_CREAT|FIO_O_WRONLY, mode);
 	SignalSema(pfsFioSema);
 	return rv;
 }
 
-int pfsFioReadlink(iop_file_t *f, const char *path, char *buf, unsigned int buflen)
+int pfsFioReadlink(iomanX_iop_file_t *f, const char *path, char *buf, unsigned int buflen)
 {
 	int rv=0;
 	pfs_mount_t *pfsMount;

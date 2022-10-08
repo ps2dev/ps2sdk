@@ -14,6 +14,8 @@ IOP_BIN ?= ps2hdd.irx
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/poweroff/include -I$(PS2SDKSRC)/iop/dev9/dev9/include -I$(PS2SDKSRC)/iop/dev9/atad/include -I$(LIBAPA_PATH)include
 
+IOP_CFLAGS += -DIOMANX_OLD_NAME_COMPATIBILITY=0 -DIOMANX_OLD_NAME_ADDDELDRV=0
+
 APA_OBJS = password.o misc.o cache.o apa.o journal.o free.o
 IOP_OBJS = hdd_fio.o hdd.o imports.o $(APA_OBJS)
 

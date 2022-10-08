@@ -557,7 +557,7 @@ int pfsCheckAccess(pfs_cache_t *clink, int flags)
 	int mode;
 
 	// Bail if trying to write to read-only mount
-	if ((clink->pfsMount->flags & FIO_MT_RDONLY) && (flags & O_WRONLY))
+	if ((clink->pfsMount->flags & FIO_MT_RDONLY) && (flags & FIO_O_WRONLY))
 		return -EROFS;
 
 	if (((clink->u.inode->mode & FIO_S_IFMT) != FIO_S_IFDIR) &&
