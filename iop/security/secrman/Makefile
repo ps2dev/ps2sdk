@@ -6,25 +6,18 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = \
-	cdvd \
-	debug \
-	dev9 \
-	dvrp \
-	fs \
-	hdd \
-	iLink \
-	kernel \
-	memorycard \
-	network \
-	security \
-	sio \
-	sound \
-	startup \
-	system \
-	tcpip \
-	usb
+IOP_INCS += -I$(PS2SDKSRC)/iop/system/sio2man/include/
+
+IOP_OBJS = secrman.o MechaAuth.o CardAuth.o keyman.o imports.o exports.o
+
+# Define to 1, to enable runtime support for both CEX and DEX units.
+DEX_SUPPORT ?= 1
+
+ifneq (x$(DEX_SUPPORT),x9)
+IOP_CFLAGS += -DDEX_SUPPORT=1
+endif
 
 include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+include $(PS2SDKSRC)/iop/Rules.bin.make
+include $(PS2SDKSRC)/iop/Rules.make
 include $(PS2SDKSRC)/iop/Rules.release

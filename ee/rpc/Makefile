@@ -7,9 +7,9 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 SUBDIRS  = ahx
+SUBDIRS += audsrv
 SUBDIRS += camera
 SUBDIRS += cdvd
-SUBDIRS += xcdvd
 SUBDIRS += filexio
 SUBDIRS += hdd
 SUBDIRS += keyboard
@@ -17,13 +17,14 @@ SUBDIRS += memorycard
 SUBDIRS += mouse
 SUBDIRS += multitap
 SUBDIRS += pad
+SUBDIRS += padx
 SUBDIRS += poweroff
+SUBDIRS += ps2snd
+SUBDIRS += remote
+SUBDIRS += secr
 SUBDIRS += sior
 SUBDIRS += tcpips
-SUBDIRS += padx
-SUBDIRS += remote
-SUBDIRS += audsrv
-SUBDIRS += ps2snd
+SUBDIRS += xcdvd
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make

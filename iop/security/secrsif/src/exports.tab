@@ -1,0 +1,8 @@
+void _funcret(){};
+
+DECLARE_EXPORT_TABLE(secrsif, 1, 1)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_funcret)
+	DECLARE_EXPORT(_funcret)
+	DECLARE_EXPORT(_funcret)
+END_EXPORT_TABLE

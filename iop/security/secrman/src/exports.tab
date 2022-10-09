@@ -1,0 +1,24 @@
+void _funcret(){};
+
+DECLARE_EXPORT_TABLE(secrman, 0x01, 0x03)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_funcret)
+	DECLARE_EXPORT(_exit)
+	DECLARE_EXPORT(_funcret)
+	DECLARE_EXPORT(SecrSetMcCommandHandler)		/* 004 */
+	DECLARE_EXPORT(SecrSetMcDevIDHandler)		/* 005 */
+	DECLARE_EXPORT(SecrAuthCard)			/* 006 */
+	DECLARE_EXPORT(SecrResetAuthCard)		/* 007 */
+	DECLARE_EXPORT(SecrCardBootHeader)		/* 008 */
+	DECLARE_EXPORT(SecrCardBootBlock)		/* 009 */
+	DECLARE_EXPORT(SecrCardBootFile)		/* 010 */
+	DECLARE_EXPORT(SecrDiskBootHeader)		/* 011 */
+	DECLARE_EXPORT(SecrDiskBootBlock)		/* 012 */
+	DECLARE_EXPORT(SecrDiskBootFile)		/* 013 */
+	DECLARE_EXPORT(SecrDownloadHeader)		/* 014 */
+	DECLARE_EXPORT(SecrDownloadBlock)		/* 015 */
+	DECLARE_EXPORT(SecrDownloadFile)		/* 016 */
+	DECLARE_EXPORT(SecrDownloadGetKbit)		/* 017 */
+	DECLARE_EXPORT(SecrDownloadGetKc)		/* 018 */
+	DECLARE_EXPORT(SecrDownloadGetICVPS2)		/* 019 */
+END_EXPORT_TABLE

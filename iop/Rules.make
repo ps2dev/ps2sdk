@@ -27,7 +27,7 @@ IOP_INCS := $(IOP_INCS) -I$(IOP_SRC_DIR) -I$(IOP_SRC_DIR)include -I$(IOP_INC_DIR
 IOP_OPTFLAGS ?= -Os
 
 # Warning compiler flags
-IOP_WARNFLAGS ?= -Wall -Werror
+IOP_WARNFLAGS ?= -Wall -W
 
 # C compiler flags
 # -fno-builtin is required to prevent the GCC built-in functions from being included,

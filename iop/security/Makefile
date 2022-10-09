@@ -7,23 +7,8 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 SUBDIRS = \
-	cdvd \
-	debug \
-	dev9 \
-	dvrp \
-	fs \
-	hdd \
-	iLink \
-	kernel \
-	memorycard \
-	network \
-	security \
-	sio \
-	sound \
-	startup \
-	system \
-	tcpip \
-	usb
+	secrman \
+	secrsif
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
