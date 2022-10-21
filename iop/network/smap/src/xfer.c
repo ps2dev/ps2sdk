@@ -47,6 +47,10 @@ static inline void CopyFromFIFO(volatile u8 *smap_regbase, void *buffer, unsigne
 {
     int i, result;
 
+    if (buffer == NULL) {
+        return;
+    }
+
     SMAP_REG16(SMAP_R_RXFIFO_RD_PTR) = RxBdPtr;
 
     result = SmapDmaTransfer(smap_regbase, buffer, length, DMAC_TO_MEM);
@@ -59,6 +63,10 @@ static inline void CopyFromFIFO(volatile u8 *smap_regbase, void *buffer, unsigne
 static inline void CopyToFIFO(volatile u8 *smap_regbase, const void *buffer, unsigned int length)
 {
     int i, result;
+
+    if (buffer == NULL) {
+        return;
+    }
 
     result = SmapDmaTransfer(smap_regbase, (void *)buffer, length, DMAC_FROM_MEM);
 
