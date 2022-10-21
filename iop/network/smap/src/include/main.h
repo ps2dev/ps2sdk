@@ -14,7 +14,7 @@
 // In the SONY original, all the calls to DEBUG_PRINTF() were to sceInetPrintf().
 #define DEBUG_PRINTF(args...) printf(args)
 
-#ifdef BUILDING_SMAP_PS2IP
+#ifndef BUILDING_SMAP_NETMAN
 struct RuntimeStats
 {
     u32 RxDroppedFrameCount;
@@ -58,8 +58,7 @@ struct SmapDriverData
 #ifdef BUILDING_SMAP_NETMAN
     struct NetManEthRuntimeStats RuntimeStats;
     int NetIFID;
-#endif
-#ifdef BUILDING_SMAP_PS2IP
+#else
     struct RuntimeStats RuntimeStats;
 #endif
 };
