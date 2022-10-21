@@ -14,7 +14,7 @@
 // In the SONY original, all the calls to DEBUG_PRINTF() were to sceInetPrintf().
 #define DEBUG_PRINTF(args...) printf(args)
 
-#ifndef BUILDING_SMAP_NETMAN
+// This struct needs to be the exact same layout as struct NetManEthRuntimeStats!
 struct RuntimeStats
 {
     u32 RxDroppedFrameCount;
@@ -31,7 +31,6 @@ struct RuntimeStats
     u16 TxFrameUnderrunCount;
     u16 RxAllocFail;
 };
-#endif
 
 struct SmapDriverData
 {
@@ -55,11 +54,9 @@ struct SmapDriverData
 #ifdef SMAP_RX_PACKETS_POLLING_MODE
     iop_sys_clock_t RxIntrPollingTimer;
 #endif
-#ifdef BUILDING_SMAP_NETMAN
-    struct NetManEthRuntimeStats RuntimeStats;
-    int NetIFID;
-#else
     struct RuntimeStats RuntimeStats;
+#ifdef BUILDING_SMAP_NETMAN
+    int NetIFID;
 #endif
 };
 

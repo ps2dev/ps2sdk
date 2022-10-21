@@ -871,7 +871,7 @@ int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, void *out
         case NETMAN_NETIF_IOCTL_ETH_GET_STATUS:
             ((struct NetManEthStatus *)output)->LinkMode   = SMAPGetLinkMode();
             ((struct NetManEthStatus *)output)->LinkStatus = SMAPGetLinkStatus();
-            ((struct NetManEthStatus *)output)->stats      = SmapDriverData.RuntimeStats;
+            memcpy(&(((struct NetManEthStatus *)output)->stats), &(SmapDriverData.RuntimeStats), sizeof(SmapDriverData.RuntimeStats));
             result                                         = 0;
             break;
         default:
