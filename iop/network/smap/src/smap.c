@@ -532,21 +532,21 @@ static void IntrHandlerThread(struct SmapDriverData *SmapDrivPrivData)
 
             // TXDNV is not enabled here, but only when frames are transmitted.
 #ifdef SMAP_RX_PACKETS_POLLING_MODE
-           dev9IntrEnable(SMAP_INTR_EMAC3 | SMAP_INTR_RXDNV);
+            dev9IntrEnable(SMAP_INTR_EMAC3 | SMAP_INTR_RXDNV);
 
-           if (PacketCount >= 1) {
-               // Receive packets in polling mode
+            if (PacketCount >= 1) {
+                // Receive packets in polling mode
 
-               // We're receiving packets at a maximum rate of 100 bits/us or 12.5 bytes/us
-#define ETH_KB_TO_US(B) (B*80)
+                // We're receiving packets at a maximum rate of 100 bits/us or 12.5 bytes/us
+#define ETH_KB_TO_US(B) (B * 80)
 
-               USec2SysClock(ETH_KB_TO_US(12), &SmapDrivPrivData->RxIntrPollingTimer);
+                USec2SysClock(ETH_KB_TO_US(12), &SmapDrivPrivData->RxIntrPollingTimer);
 #undef ETH_KB_TO_US
-               SetAlarm(&SmapDrivPrivData->RxIntrPollingTimer, (void*)&RxIntrPollingTimerCB, SmapDrivPrivData);
-           } else {
-               // Receive packets in interrupt mode
-               dev9IntrEnable(SMAP_INTR_RXEND);
-           }
+                SetAlarm(&SmapDrivPrivData->RxIntrPollingTimer, (void *)&RxIntrPollingTimerCB, SmapDrivPrivData);
+            } else {
+                // Receive packets in interrupt mode
+                dev9IntrEnable(SMAP_INTR_RXEND);
+            }
 #else
             dev9IntrEnable(DEV9_SMAP_INTR_MASK2);
 #endif
@@ -705,8 +705,8 @@ static void ClearPacketQueue(struct SmapDriverData *SmapDrivPrivData)
     CpuResumeIntr(OldState);
 
     if (pkt != NULL) {
-        while (SMAPCommonTxPacketNext(&pkt) > 0)
-            SMAPCommonTxPacketDeQ(&pkt);
+        while (SMAPCommonTxPacketNext(SmapDrivPrivData, &pkt) > 0)
+            SMAPCommonTxPacketDeQ(SmapDrivPrivData, &pkt);
     }
 }
 
@@ -872,7 +872,7 @@ int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, void *out
             ((struct NetManEthStatus *)output)->LinkMode   = SMAPGetLinkMode();
             ((struct NetManEthStatus *)output)->LinkStatus = SMAPGetLinkStatus();
             memcpy(&(((struct NetManEthStatus *)output)->stats), &(SmapDriverData.RuntimeStats), sizeof(SmapDriverData.RuntimeStats));
-            result                                         = 0;
+            result = 0;
             break;
         default:
             result = -1;
@@ -883,6 +883,88 @@ int SMAPIoctl(unsigned int command, void *args, unsigned int args_len, void *out
 #endif
 
     return result;
+}
+#endif
+
+void SMAPOutputDebugInformation(void)
+{
+#ifdef SMAP_ENABLE_DEBUG_INFORMATION
+    USE_SMAP_EMAC3_REGS;
+    USE_SMAP_REGS;
+    USE_SMAP_RX_BD;
+    int i;
+    char bdidx;
+
+    DEBUG_PRINTF("smap: SMAP_R_RXFIFO_CTRL:       0x%x\n", SMAP_REG8(SMAP_R_RXFIFO_CTRL));
+    DEBUG_PRINTF("smap: SMAP_R_RXFIFO_RD_PTR:     0x%x\n", SMAP_REG16(SMAP_R_RXFIFO_RD_PTR));
+    DEBUG_PRINTF("smap: SMAP_R_RXFIFO_SIZE:       %d\n", SMAP_REG16(SMAP_R_RXFIFO_SIZE));
+    DEBUG_PRINTF("smap: SMAP_R_RXFIFO_FRAME_CNT:  %d\n", SMAP_REG8(SMAP_R_RXFIFO_FRAME_CNT));
+    DEBUG_PRINTF("smap: SMAP_R_RXFIFO_FRAME_DEC:  %d\n", SMAP_REG8(SMAP_R_RXFIFO_FRAME_DEC));
+    DEBUG_PRINTF("smap: SMAP_R_EMAC3_RxMODE:      0x%x\n", (unsigned int)SMAP_EMAC3_GET32(SMAP_R_EMAC3_RxMODE));
+    DEBUG_PRINTF("smap: SMAP_R_EMAC3_INTR_STAT:   0x%x\n", (unsigned int)SMAP_EMAC3_GET32(SMAP_R_EMAC3_INTR_STAT));
+    DEBUG_PRINTF("smap: SMAP_R_EMAC3_INTR_ENABLE: 0x%x\n", (unsigned int)SMAP_EMAC3_GET32(SMAP_R_EMAC3_INTR_ENABLE));
+    bdidx = SmapDriverData.RxBDIndex % SMAP_BD_MAX_ENTRY;
+    for (i = 0; i < SMAP_BD_MAX_ENTRY; i += 1) {
+        if (rx_bd[i].ctrl_stat != SMAP_BD_RX_EMPTY ||
+            rx_bd[i].reserved != 0 ||
+            rx_bd[i].length != 0 ||
+            rx_bd[i].pointer != 0 ||
+            i == bdidx) {
+            if (i == bdidx)
+                DEBUG_PRINTF()
+                (" - rx_bd[%d]: 0x%x / 0x%x / %d / 0x%x <--\n", i, rx_bd[i].ctrl_stat, rx_bd[i].reserved, rx_bd[i].length, rx_bd[i].pointer);
+            else
+                DEBUG_PRINTF()
+                (" - rx_bd[%d]: 0x%x / 0x%x / %d / 0x%x\n", i, rx_bd[i].ctrl_stat, rx_bd[i].reserved, rx_bd[i].length, rx_bd[i].pointer);
+        }
+    }
+
+    DEBUG_PRINTF("smap: RxDroppedFrameCount:      %d\n", (int)SmapDriverData.RuntimeStats.RxDroppedFrameCount);
+    DEBUG_PRINTF("smap: RxErrorCount:             %d\n", (int)SmapDriverData.RuntimeStats.RxErrorCount);
+    DEBUG_PRINTF("smap: RxFrameOverrunCount:      %d\n", SmapDriverData.RuntimeStats.RxFrameOverrunCount);
+    DEBUG_PRINTF("smap: RxFrameBadLengthCount:    %d\n", SmapDriverData.RuntimeStats.RxFrameBadLengthCount);
+    DEBUG_PRINTF("smap: RxFrameBadFCSCount:       %d\n", SmapDriverData.RuntimeStats.RxFrameBadFCSCount);
+    DEBUG_PRINTF("smap: RxFrameBadAlignmentCount: %d\n", SmapDriverData.RuntimeStats.RxFrameBadAlignmentCount);
+    DEBUG_PRINTF("smap: TxDroppedFrameCount:      %d\n", (int)SmapDriverData.RuntimeStats.TxDroppedFrameCount);
+    DEBUG_PRINTF("smap: TxErrorCount:             %d\n", (int)SmapDriverData.RuntimeStats.TxErrorCount);
+    DEBUG_PRINTF("smap: TxFrameLOSSCRCount:       %d\n", SmapDriverData.RuntimeStats.TxFrameLOSSCRCount);
+    DEBUG_PRINTF("smap: TxFrameEDEFERCount:       %d\n", SmapDriverData.RuntimeStats.TxFrameEDEFERCount);
+    DEBUG_PRINTF("smap: TxFrameCollisionCount:    %d\n", SmapDriverData.RuntimeStats.TxFrameCollisionCount);
+    DEBUG_PRINTF("smap: TxFrameUnderrunCount:     %d\n", SmapDriverData.RuntimeStats.TxFrameUnderrunCount);
+    DEBUG_PRINTF("smap: RxAllocFail:              %d\n", SmapDriverData.RuntimeStats.RxAllocFail);
+#endif
+}
+
+#ifdef BUILDING_SMAP_MODULAR
+int SMapRegisterHook(const SmapModularHookTable_t *hooktbl, int priority)
+{
+    // Only 0 priority is supported at this time
+    if (priority != 0) {
+        return 1;
+    }
+    // Check version of hook table
+    if (hooktbl != NULL) {
+        if (hooktbl->Version != 1) {
+            return 1;
+        }
+    }
+    SmapDriverData.HookTable[priority] = hooktbl;
+    return 0;
+}
+
+static const SmapModularExportTable_t SmapModularExportTable = {
+    .Version                = 1,
+    .GetMACAddress          = &SMAPGetMACAddress,
+    .Xmit                   = &SMAPXmit,
+    .OutputDebugInformation = &SMAPOutputDebugInformation,
+    .RegisterHook           = &SMapRegisterHook,
+    .RxBDIndexPtr           = &(SmapDriverData.RxBDIndex),
+    .RuntimeStatsPtr        = (SmapModularRuntimeStats_t *)&(SmapDriverData.RuntimeStats),
+};
+
+const SmapModularExportTable_t *SmapModularGetExportTable(void)
+{
+    return &SmapModularExportTable;
 }
 #endif
 

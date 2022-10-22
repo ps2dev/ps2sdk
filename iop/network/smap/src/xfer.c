@@ -21,8 +21,6 @@
 #include "xfer.h"
 #include "ipstack.h"
 
-extern struct SmapDriverData SmapDriverData;
-
 static int SmapDmaTransfer(volatile u8 *smap_regbase, void *buffer, unsigned int size, int direction)
 {
     unsigned int NumBlocks;
@@ -118,9 +116,9 @@ int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData)
             } else {
                 void *pbuf, *payload;
 
-                if ((pbuf = SMapCommonStackAllocRxPacket(LengthRounded, &payload)) != NULL) {
+                if ((pbuf = SMapCommonStackAllocRxPacket(SmapDrivPrivData, LengthRounded, &payload)) != NULL) {
                     CopyFromFIFO(SmapDrivPrivData->smap_regbase, payload, length, pointer);
-                    SMapStackEnQRxPacket(pbuf);
+                    SMapStackEnQRxPacket(SmapDrivPrivData, pbuf);
                     NumPacketsReceived++;
                 } else {
                     SmapDrivPrivData->RuntimeStats.RxAllocFail++;
@@ -153,7 +151,7 @@ int HandleTxReqs(struct SmapDriverData *SmapDrivPrivData)
         int length;
 
         data = NULL;
-        if ((length = SMAPCommonTxPacketNext(&data)) < 1) {
+        if ((length = SMAPCommonTxPacketNext(SmapDrivPrivData, &data)) < 1) {
             return result;
         }
         SmapDrivPrivData->packetToSend = data;
@@ -187,6 +185,6 @@ int HandleTxReqs(struct SmapDriverData *SmapDrivPrivData)
             return result; // Queue full
 
         SmapDrivPrivData->packetToSend = NULL;
-        SMAPCommonTxPacketDeQ(&data);
+        SMAPCommonTxPacketDeQ(SmapDrivPrivData, &data);
     }
 }

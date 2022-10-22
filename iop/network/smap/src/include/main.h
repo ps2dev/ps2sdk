@@ -10,6 +10,9 @@
 #ifdef BUILDING_SMAP_PS2IP
 #include <ps2ip.h>
 #endif
+#ifdef BUILDING_SMAP_MODULAR
+#include <smap_modular.h>
+#endif
 
 // In the SONY original, all the calls to DEBUG_PRINTF() were to sceInetPrintf().
 #define DEBUG_PRINTF(args...) printf(args)
@@ -58,6 +61,9 @@ struct SmapDriverData
 #ifdef BUILDING_SMAP_NETMAN
     int NetIFID;
 #endif
+#ifdef BUILDING_SMAP_MODULAR
+    const SmapModularHookTable_t *HookTable[1];
+#endif
 };
 
 /* Event flag bits */
@@ -85,5 +91,8 @@ void SMapLowLevelInput(struct pbuf *pBuf);
 int SMapTxPacketNext(void **payload);
 void SMapTxPacketDeQ(void);
 #endif
+
+/* Data prototypes */
+extern struct SmapDriverData SmapDriverData;
 
 #endif
