@@ -29,6 +29,8 @@ int mcman_format1(int port, int slot)
 
 	mcman_invhandles(port, slot);
 
+	mcdi->cardform = -1;
+
 	for (i = 0; i < 56; i++) {
 		r = mcman_PS1pagetest(port, slot, i);
 		if (r == 0)

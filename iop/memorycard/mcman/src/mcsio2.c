@@ -808,14 +808,14 @@ int mcman_probePS2Card2(int port, int slot)
 
 	if (p[3] == 0x5a) {
 		r = McGetFormat(port, slot);
-		if (r > 0) {
+		if (r > 0)
+		{
 			DPRINTF("mcman_probePS2Card2 succeeded\n");
 
 			return sceMcResSucceed;
 		}
-
-		r = McGetFormat(port, slot);
-		if (r < 0) {
+		else if (r < 0)
+		{
 			DPRINTF("mcman_probePS2Card2 sio2cmd failed (no format)\n");
 
 			return sceMcResNoFormat;
@@ -842,7 +842,6 @@ int mcman_probePS2Card2(int port, int slot)
 int mcman_probePS2Card(int port, int slot) //2
 {
 	register int r;
-	register MCDevInfo *mcdi;
 #ifndef BUILDING_XFROMMAN
 	register int retries;
 	u8 *p = mcman_sio2packet.out_dma.addr;
@@ -853,10 +852,17 @@ int mcman_probePS2Card(int port, int slot) //2
 	r = mcman_cardchanged(port, slot);
 	if (r == sceMcResSucceed) {
 		r = McGetFormat(port, slot);
-		if (r != 0) {
+		if (r > 0)
+		{
 			DPRINTF("mcman_probePS2Card sio2cmd succeeded\n");
 
 			return sceMcResSucceed;
+		}
+		else if (r < 0)
+		{
+			DPRINTF("mcman_probePS2Card sio2cmd failed (no format)\n");
+
+			return sceMcResNoFormat;
 		}
 	}
 
@@ -926,9 +932,6 @@ int mcman_probePS2Card(int port, int slot) //2
 		return sceMcResFailDetect2;
 	}
 
-	mcdi = &mcman_devinfos[port][slot];
-	mcdi->cardform = r;
-
 	DPRINTF("mcman_probePS2Card sio2cmd succeeded\n");
 
 	return r;
@@ -979,7 +982,7 @@ int mcman_probePS1Card2(int port, int slot)
 	if (mcman_sio2outbufs_PS1PDA[1] == 0) {
 		if (mcdi->cardform > 0)
 			return sceMcResSucceed;
-		if (mcdi->cardform < 0)
+		else if (mcdi->cardform < 0)
 			return sceMcResNoFormat;
 	}
 	else if (mcman_sio2outbufs_PS1PDA[1] != 8) {
@@ -1039,6 +1042,8 @@ int mcman_probePS1Card(int port, int slot)
 	if (mcman_sio2outbufs_PS1PDA[1] == 0) {
 		if (mcdi->cardform != 0)
 			return sceMcResSucceed;
+		else
+			return sceMcResNoFormat;
 	}
 	else if (mcman_sio2outbufs_PS1PDA[1] != 8) {
 		return -12;
@@ -1057,8 +1062,6 @@ int mcman_probePS1Card(int port, int slot)
 	r = mcman_setPS1devinfos(port, slot);
 	if (r == 0)
 		return sceMcResChangedCard;
-
-	mcdi->cardform = r;
 
 	return r;
 #endif

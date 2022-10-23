@@ -47,7 +47,7 @@ int mcman_format2(int port, int slot)
 
 	DPRINTF("mcman_format2 port%d, slot%d cardform %d\n", port, slot, mcdi->cardform);
 
-	if (mcdi->cardform == sceMcResNoFormat) {
+	if (mcdi->cardform < 0) {
 		for (i = 0; i < 32; i++)
 			mcdi->bad_block_list[i] = -1;
 		mcdi->rootdir_cluster = 0;
