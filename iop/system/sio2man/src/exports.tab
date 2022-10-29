@@ -1,7 +1,7 @@
-#ifndef SIO2MAN_V2
-DECLARE_EXPORT_TABLE(sio2man, 1, 2)
-#else
+#ifdef SIO2MAN_V2
 DECLARE_EXPORT_TABLE(sio2man, 2, 3)
+#else
+DECLARE_EXPORT_TABLE(sio2man, 1, 2)
 #endif
 	DECLARE_EXPORT(_start)
 	DECLARE_EXPORT(_retonly)

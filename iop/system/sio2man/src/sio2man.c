@@ -38,10 +38,10 @@
 #ifdef SIO2LOG
 	IRX_ID("sio2man_logger", 2, 1);
 #else
-#ifndef SIO2MAN_V2
-	IRX_ID("sio2man", 2, 1);
-#else
+#ifdef SIO2MAN_V2
 	IRX_ID("sio2man", 2, 4);
+#else
+	IRX_ID("sio2man", 2, 1);
 #endif
 #endif
 
@@ -67,12 +67,7 @@ extern struct irx_export_table _exp_sio2man;
 #define EF_MC_TRANSFER_READY	0x00000008
 #define EF_MTAP_TRANSFER_INIT	0x00000010
 #define EF_MTAP_TRANSFER_READY	0x00000020
-#ifndef SIO2MAN_V2
-	#define EF_TRANSFER_START	0x00000040
-	#define EF_TRANSFER_FINISH	0x00000080
-	#define EF_TRANSFER_RESET	0x00000100
-	#define EF_SIO2_INTR_COMPLETE	0x00000200
-#else
+#ifdef SIO2MAN_V2
 	#define EF_RM_TRANSFER_INIT	0x00000040
 	#define EF_RM_TRANSFER_READY	0x00000080
 	#define EF_UNK_TRANSFER_INIT	0x00000100
@@ -81,6 +76,11 @@ extern struct irx_export_table _exp_sio2man;
 	#define EF_TRANSFER_FINISH	0x00000800
 	#define EF_TRANSFER_RESET	0x00001000
 	#define EF_SIO2_INTR_COMPLETE	0x00002000
+#else
+	#define EF_TRANSFER_START	0x00000040
+	#define EF_TRANSFER_FINISH	0x00000080
+	#define EF_TRANSFER_RESET	0x00000100
+	#define EF_SIO2_INTR_COMPLETE	0x00000200
 #endif
 
 #define EPRINTF(format, args...) printf("%s: " format, _irx_id.n , ## args)
