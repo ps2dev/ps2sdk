@@ -672,7 +672,11 @@ s32 padPortOpen(s32 port, s32 slot, s32 pad_area_ee_addr, u32 *buf)
 		return 0;
 	}
 
+#ifdef BUILDING_XPADMAN
 	if(slot >= 4)
+#else
+	if(slot >= 1)
+#endif
 	{
 		M_PRINTF("Invalid slot number: %d\n", (int)port);
 		return 0;

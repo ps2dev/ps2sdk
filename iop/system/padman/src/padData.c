@@ -12,7 +12,9 @@
 #include "irx.h"
 #include "types.h"
 #include "sio2man.h"
+#ifdef BUILDING_XPADMAN
 #include "xsio2man.h"
+#endif
 #include "sifman.h"
 #include "sio2Cmds.h"
 #include "padData.h"
@@ -43,6 +45,24 @@ static u8 sio2_out_buffer[256];
 static s32 change_slot_buffer[8];
 
 static int transferCount;
+
+#ifndef BUILDING_XPADMAN
+static int pd_set_change_slot_buffer(s32 *status)
+{
+	int i, ret = 1;
+
+	for (i = 0; i < 4; i++, status++) {
+		if ((*status + 1) < 2)
+			status[4] = 1;
+		else {
+			status[4] = 0;
+			ret = 0;
+		}
+	}
+
+	return ret;
+}
+#endif
 
 u32 pdGetInSize(u8 id)
 {
@@ -145,7 +165,11 @@ static u32 mtapChangeSlot(u32 slot)
 	if(padData[1][slot].active == 1)
 		change_slot_buffer[1] = slot;
 
+#ifdef BUILDING_XPADMAN
 	sio2_mtap_change_slot(change_slot_buffer);
+#else
+	pd_set_change_slot_buffer(change_slot_buffer);
+#endif
 
 	return 1;
 }
@@ -276,7 +300,15 @@ u32 padTransfer(u32 slot)
 
 	if(trans_count != 0)
 	{
+#ifndef BUILDING_XPADMAN
+		sio2_pad_transfer_init();
+#endif
+
+#ifdef BUILDING_XPADMAN
 		sio2_transfer2( &sio2_td );
+#else
+		sio2_transfer( &sio2_td );
+#endif
 
 		sio2_td.out_size = 0;
 
@@ -302,7 +334,9 @@ void pdTransfer(void)
 {
 	u32 slot;
 
+#ifdef BUILDING_XPADMAN
 	sio2_pad_transfer_init();
+#endif
 
 	transferCount++;
 
@@ -318,7 +352,9 @@ void pdTransfer(void)
 
 	mtapChangeSlot(0);
 
+#ifdef BUILDING_XPADMAN
 	sio2_transfer_reset2();
+#endif
 }
 
 u32 pdGetStat70bit(u32 port, u32 slot)
@@ -356,7 +392,12 @@ static u32 SlotCheckConnection(u32 port, u32 slot)
 	sio2_td.in_dma.addr = 0;
 
 	if(change_slot_buffer[4+port] == 1)
-	{	//In versions before v3.6, this outer check did not exist.
+	{
+#ifndef BUILDING_XPADMAN
+		sio2_pad_transfer_init();
+#endif
+
+		//In versions before v3.6, this outer check did not exist.
 		stat70 = sio2_stat70_get();
 
 		//In versions before v3.6, stat70 is always set regardless of the slot selected.
@@ -374,7 +415,11 @@ static u32 SlotCheckConnection(u32 port, u32 slot)
 		setupTransferData(0, port, slot);
 
 		//As a result, there is neither a check on whether there is data to send.
+#ifdef BUILDING_XPADMAN
 		sio2_transfer2( &sio2_td );
+#else
+		sio2_transfer( &sio2_td );
+#endif
 
 		sio2_td.out_size = 0;
 
@@ -397,14 +442,27 @@ u32 pdCheckConnection(u32 port, u32 slot)
 	u32 res;
 	u32 ret = 0;
 
+#ifndef BUILDING_XPADMAN
+	if (slot > 0)
+	{
+		return 0;
+	}
+#endif
+
+#ifdef BUILDING_XPADMAN
 	sio2_pad_transfer_init();
+#endif
 
 	change_slot_buffer[0] = slot;
 	change_slot_buffer[1] = slot;
 	change_slot_buffer[2] = -1;
 	change_slot_buffer[3] = -1;
 
+#ifdef BUILDING_XPADMAN
 	sio2_mtap_change_slot(change_slot_buffer);
+#else
+	pd_set_change_slot_buffer(change_slot_buffer);
+#endif
 
 	res = pdGetStat70bit(0, slot);
 	setupReadData(0, slot, res);
@@ -424,9 +482,15 @@ u32 pdCheckConnection(u32 port, u32 slot)
 	change_slot_buffer[2] = -1;
 	change_slot_buffer[3] = -1;
 
+#ifdef BUILDING_XPADMAN
 	sio2_mtap_change_slot(change_slot_buffer);
+#else
+	pd_set_change_slot_buffer(change_slot_buffer);
+#endif
 
+#ifdef BUILDING_XPADMAN
 	sio2_transfer_reset2();
+#endif
 
 	return ret;
 }

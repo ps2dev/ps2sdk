@@ -24,10 +24,14 @@
 #include <thbase.h>
 #include <thevent.h>
 #include <vblank.h>
-#ifndef SIO2MAN_V2
-#include <xsio2man.h>
-#else
+#ifdef BUILDING_XPADMAN
+#ifdef BUILDING_XPADMAN_V2
 #include <rsio2man.h>
+#else
+#include <xsio2man.h>
+#endif
+#else
+#include <sio2man.h>
 #endif
 #include <sysmem.h>
 

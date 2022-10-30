@@ -16,7 +16,9 @@
 #include "thbase.h"
 #include "intrman.h"
 #include "vblank.h"
+#ifdef BUILDING_XPADMAN
 #include "xsio2man.h"
+#endif
 #include "sifman.h"
 #include "sio2Cmds.h"
 #include "sysmem.h"
@@ -441,7 +443,9 @@ static void MainThread(void *arg)
 
 		mainThreadCount++;
 
+#ifdef BUILDING_XPADMAN
 		if( mainThreadCount % 30 == 0 ) sio2_mtap_update_slots();
+#endif
 
 		for(port=0; port < 2; port++)
 		{

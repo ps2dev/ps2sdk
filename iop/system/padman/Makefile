@@ -14,6 +14,21 @@ IOP_INCS += -I$(PS2SDKSRC)/iop/system/sio2man/include
 
 IOP_OBJS = freepad.o rpcserver.o exports.o imports.o padInit.o padPortOpen.o padMiscFuncs.o sio2Cmds.o padData.o padCmds.o
 
+# Build the newer version of the gamepad module?
+PADMAN_BUILDING_XPADMAN ?= 1
+
+# Build the newer version of the gamepad module that links against the remote-compatible SIO2MAN?
+PADMAN_BUILDING_XPADMAN_V2 ?= 0
+
+ifneq (x$(PADMAN_BUILDING_XPADMAN),x0)
+IOP_CFLAGS += -DBUILDING_XPADMAN
+endif
+
+ifneq (x$(PADMAN_BUILDING_XPADMAN_V2),x0)
+IOP_CFLAGS += -DBUILDING_XPADMAN_V2
+IOP_INCS += -I$(PS2SDKSRC)/iop/system/rsio2man/include
+endif
+
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make
 include $(PS2SDKSRC)/iop/Rules.make
