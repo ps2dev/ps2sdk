@@ -38,10 +38,14 @@
 #ifdef SIO2LOG
 	IRX_ID("sio2man_logger", 2, 1);
 #else
-#ifdef SIO2MAN_V2
+#ifdef BUILDING_XSIO2MAN
+#ifdef BUILDING_XSIO2MAN_V2
 	IRX_ID("sio2man", 2, 4);
 #else
 	IRX_ID("sio2man", 2, 1);
+#endif
+#else
+	IRX_ID("sio2man", 1, 1);
 #endif
 #endif
 
@@ -65,9 +69,10 @@ extern struct irx_export_table _exp_sio2man;
 #define EF_PAD_TRANSFER_READY	0x00000002
 #define EF_MC_TRANSFER_INIT	0x00000004
 #define EF_MC_TRANSFER_READY	0x00000008
+#ifdef BUILDING_XSIO2MAN
 #define EF_MTAP_TRANSFER_INIT	0x00000010
 #define EF_MTAP_TRANSFER_READY	0x00000020
-#ifdef SIO2MAN_V2
+#ifdef BUILDING_XSIO2MAN_V2
 	#define EF_RM_TRANSFER_INIT	0x00000040
 	#define EF_RM_TRANSFER_READY	0x00000080
 	#define EF_UNK_TRANSFER_INIT	0x00000100
@@ -81,6 +86,12 @@ extern struct irx_export_table _exp_sio2man;
 	#define EF_TRANSFER_FINISH	0x00000080
 	#define EF_TRANSFER_RESET	0x00000100
 	#define EF_SIO2_INTR_COMPLETE	0x00000200
+#endif
+#else
+	#define EF_TRANSFER_START	0x00000010
+	#define EF_TRANSFER_FINISH	0x00000020
+	#define EF_TRANSFER_RESET	0x00000040
+	#define EF_SIO2_INTR_COMPLETE	0x00000080
 #endif
 
 #define EPRINTF(format, args...) printf("%s: " format, _irx_id.n , ## args)
@@ -190,9 +201,12 @@ void main_thread(void *unused)
 		log_flush(0);
 	#endif
 		WaitEventFlag(event_flag, EF_PAD_TRANSFER_INIT |
-				EF_MC_TRANSFER_INIT | EF_MTAP_TRANSFER_INIT
-#ifdef SIO2MAN_V2
+				EF_MC_TRANSFER_INIT
+#ifdef BUILDING_XSIO2MAN
+				| EF_MTAP_TRANSFER_INIT
+#ifdef BUILDING_XSIO2MAN_V2
 				| EF_RM_TRANSFER_INIT | EF_UNK_TRANSFER_INIT
+#endif
 #endif
 				, 1, resbits);
 
@@ -208,14 +222,17 @@ void main_thread(void *unused)
 #ifdef SIO2LOG
 			log_default(LOG_MC_READY);
 #endif
-		} else if (resbits[0] & EF_MTAP_TRANSFER_INIT) {
+		}
+#ifdef BUILDING_XSIO2MAN
+		else if (resbits[0] & EF_MTAP_TRANSFER_INIT) {
 			ClearEventFlag(event_flag, ~EF_MTAP_TRANSFER_INIT);
 			SetEventFlag(event_flag, EF_MTAP_TRANSFER_READY);
 #ifdef SIO2LOG
 			log_default(LOG_MTAP_READY);
 #endif
-#ifdef SIO2MAN_V2
-		} else if (resbits[0] & EF_RM_TRANSFER_INIT) {
+		}
+#ifdef BUILDING_XSIO2MAN_V2
+		else if (resbits[0] & EF_RM_TRANSFER_INIT) {
 			ClearEventFlag(event_flag, ~EF_RM_TRANSFER_INIT);
 			SetEventFlag(event_flag, EF_RM_TRANSFER_READY);
 #ifdef SIO2LOG
@@ -227,15 +244,28 @@ void main_thread(void *unused)
 #ifdef SIO2LOG
 			log_default(LOG_UNK_READY);
 #endif
+		}
 #endif
-		} else {
+#endif
+		else {
+#ifdef BUILDING_XSIO2MAN
 			EPRINTF("Unknown event %08lx. Exiting.\n", resbits[0]);
+#else
+			EPRINTF("SIO2_BASIC_THREAD : why I wakeup ? %08lx\n", resbits[0]);
+#endif
 			return;
 		}
 
+#ifdef BUILDING_XSIO2MAN
 transfer_loop:
-		WaitEventFlag(event_flag, EF_TRANSFER_START | EF_TRANSFER_RESET, 1, resbits);
+#endif
+		WaitEventFlag(event_flag, EF_TRANSFER_START
+#ifdef BUILDING_XSIO2MAN
+				 | EF_TRANSFER_RESET
+#endif
+				 , 1, resbits);
 
+#ifdef BUILDING_XSIO2MAN
 		if (resbits[0] & EF_TRANSFER_RESET) {
 			ClearEventFlag(event_flag, ~EF_TRANSFER_RESET);
 #ifdef SIO2LOG
@@ -243,6 +273,7 @@ transfer_loop:
 #endif
 			continue;
 		}
+#endif
 
 		ClearEventFlag(event_flag, ~EF_TRANSFER_START);
 
@@ -255,6 +286,10 @@ transfer_loop:
 
 		recv_td(transfer_data);
 		SetEventFlag(event_flag, EF_TRANSFER_FINISH);
+#ifndef BUILDING_XSIO2MAN
+		WaitEventFlag(event_flag, EF_TRANSFER_RESET, 0, NULL);
+		ClearEventFlag(event_flag, ~EF_TRANSFER_RESET);
+#endif
 
 		/* Bah... this is needed to get the initial dump from XMCMAN,
 		   but it will kill the IOP when XPADMAN is spamming...
@@ -264,7 +299,9 @@ transfer_loop:
 		   dedicated thread.  */
 //		log_flush(1);
 
+#ifdef BUILDING_XSIO2MAN
 		goto transfer_loop;
+#endif
 	}
 }
 
@@ -361,6 +398,7 @@ void sio2_mc_transfer_init(void)
 	ClearEventFlag(event_flag, ~EF_MC_TRANSFER_READY);
 }
 
+#ifdef BUILDING_XSIO2MAN
 void sio2_mtap_transfer_init(void)
 {
 	SetEventFlag(event_flag, EF_MTAP_TRANSFER_INIT);
@@ -368,6 +406,7 @@ void sio2_mtap_transfer_init(void)
 	WaitEventFlag(event_flag, EF_MTAP_TRANSFER_READY, 0, NULL);
 	ClearEventFlag(event_flag, ~EF_MTAP_TRANSFER_READY);
 }
+#endif
 
 int sio2_transfer(sio2_transfer_data_t *td)
 {
@@ -376,10 +415,15 @@ int sio2_transfer(sio2_transfer_data_t *td)
 
 	WaitEventFlag(event_flag, EF_TRANSFER_FINISH, 0, NULL);
 	ClearEventFlag(event_flag, ~EF_TRANSFER_FINISH);
+
+#ifndef BUILDING_XSIO2MAN
+	SetEventFlag(event_flag, EF_TRANSFER_RESET);
+#endif
 	return 1;
 }
 
-#ifdef SIO2MAN_V2
+#ifdef BUILDING_XSIO2MAN
+#ifdef BUILDING_XSIO2MAN_V2
 void sio2_rm_transfer_init(void)
 {
 	SetEventFlag(event_flag, EF_RM_TRANSFER_INIT);
@@ -396,7 +440,9 @@ void sio2_unk_transfer_init(void)
 	ClearEventFlag(event_flag, ~EF_UNK_TRANSFER_READY);
 }
 #endif
+#endif
 
+#ifdef BUILDING_XSIO2MAN
 void sio2_transfer_reset(void)
 {
 	SetEventFlag(event_flag, EF_TRANSFER_RESET);
@@ -442,11 +488,14 @@ void sio2_mtap_update_slots(void)
 	if (mtap_update_slots_cb)
 		mtap_update_slots_cb();
 }
+#endif
 
+#ifdef BUILDING_XSIO2MAN
 void sio2_mtap_change_slot_set(sio2_mtap_change_slot_cb_t cb) { mtap_change_slot_cb = cb; }
 void sio2_mtap_get_slot_max_set(sio2_mtap_get_slot_max_cb_t cb) { mtap_get_slot_max_cb = cb; }
 void sio2_mtap_get_slot_max2_set(sio2_mtap_get_slot_max2_cb_t cb) { mtap_get_slot_max2_cb = cb; }
 void sio2_mtap_update_slots_set(sio2_mtap_update_slots_t cb) { mtap_update_slots_cb = cb; }
+#endif
 
 void sio2_ctrl_set(u32 val) { _sw(val, SIO2_REG_CTRL); }
 u32  sio2_ctrl_get() { return _lw(SIO2_REG_CTRL); }

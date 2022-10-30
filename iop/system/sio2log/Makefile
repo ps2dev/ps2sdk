@@ -11,6 +11,8 @@ IOP_BIN_ALTNAMES =
 IOP_SRC_DIR = $(PS2SDKSRC)/iop/system/sio2man/src/
 IOP_INC_DIR = $(PS2SDKSRC)/iop/system/sio2man/include/
 
-IOP_CFLAGS += -DSIO2LOG
+IOP_BIN ?= sio2log.irx
+
+SIO2MAN_ENABLE_LOGGING ?= 1
 
 include $(PS2SDKSRC)/iop/system/sio2man/Makefile
