@@ -6,29 +6,12 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = \
-	alloc \
-	eesync \
-	eesync-nano \
-	iomanx \
-	iopmgr \
-	mtapman \
-	padman \
-	padman-old \
-	rmman \
-	rmtapman \
-	rpadman \
-	rsio2man \
-	sbusintr \
-	siftoo \
-	sio2log \
-	sio2man \
-	sio2man-old \
-	sysclib \
-	sysclib-full \
-	sysclib-nano \
-	udnl \
-	udnl-t300
+IOP_BIN_ALTNAMES =
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/system/padman/src/
+
+IOP_BIN ?= padman-old.irx
+
+PADMAN_BUILDING_XPADMAN ?= 0
+
+include $(PS2SDKSRC)/iop/system/padman/Makefile
