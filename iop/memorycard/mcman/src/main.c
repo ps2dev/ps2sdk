@@ -229,7 +229,7 @@ int McGetFreeClusters(int port, int slot) // Export #38
 	DPRINTF("McGetFreeClusters port%d slot%d\n", port, slot);
 
 	mcfree = 0;
-	if (mcdi->cardform)	{
+	if (mcdi->cardform > 0)	{
 		switch (mcdi->cardtype) {
    			case sceMcTypePS2:
    				mcfree = mcman_findfree2(port, slot, 0);
@@ -1268,9 +1268,13 @@ int mcman_setdevinfos(int port, int slot)
 
 	mcman_wmemset((void *)mcdi, sizeof(MCDevInfo), 0);
 
+	mcdi->cardform = 0;
+
 	r = mcman_setdevspec(port, slot);
 	if (r != sceMcResSucceed)
 		return -49;
+
+	mcdi->cardform = -1;
 
 	r = McReadPage(port, slot, 0, &mcman_pagebuf);
 	if (r == sceMcResNoFormat)
@@ -2453,6 +2457,8 @@ int mcman_setPS1devinfos(int port, int slot)
 	if (mcman_sio2outbufs_PS1PDA[1] != 0)
 		return -15;
 #endif
+
+	mcdi->cardform = -1;
 
 	if (mcman_PS1PDApagebuf.byte[0] != 0x4d)
 		return sceMcResNoFormat;
