@@ -14,6 +14,7 @@ SUBDIRS = \
 	iopmgr \
 	mtapman \
 	padman \
+	padman-old \
 	rmman \
 	rmtapman \
 	rpadman \
@@ -22,6 +23,7 @@ SUBDIRS = \
 	siftoo \
 	sio2log \
 	sio2man \
+	sio2man-old \
 	sysclib \
 	sysclib-full \
 	sysclib-nano \

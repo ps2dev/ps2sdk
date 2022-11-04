@@ -12,7 +12,9 @@
 #include "types.h"
 #include "freepad.h"
 #include "stdio.h"
+#ifdef BUILDING_XPADMAN
 #include "xsio2man.h"
+#endif
 #include "sio2Cmds.h"
 #include "sysmem.h"
 #include "thevent.h"
@@ -418,7 +420,11 @@ u32 padGetPortMax(void)
 
 u32 padGetSlotMax(u32 port)
 {
+#ifdef BUILDING_XPADMAN
 	return sio2_mtap_get_slot_max(port);
+#else
+	return 1;
+#endif
 }
 
 u32 padGetModVersion(void)

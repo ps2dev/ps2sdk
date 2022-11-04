@@ -24,6 +24,7 @@
 #define PAD_BIND_OLD_RPC_ID2 0x8000011f
 
 enum PAD_RPCCMD {
+#ifdef BUILDING_XPADMAN
 	PAD_RPCCMD_OPEN	= 0x01,
 	// 0x2 undefined
 	PAD_RPCCMD_INFO_ACT	= 0x03,
@@ -43,6 +44,23 @@ enum PAD_RPCCMD {
 	// 0x11 undefined
 	PAD_RPCCMD_GET_MODVER	= 0x12,
 	PAD_RPCCMD_13
+#else
+	PAD_RPCCMD_OPEN	= 0x80000100,
+	// 0x80000101 undefined
+	PAD_RPCCMD_INFO_ACT	= 0x80000102,
+	PAD_RPCCMD_INFO_COMB,
+	PAD_RPCCMD_INFO_MODE,
+	PAD_RPCCMD_SET_MMODE,
+	PAD_RPCCMD_SET_ACTDIR,
+	PAD_RPCCMD_SET_ACTALIGN,
+	PAD_RPCCMD_GET_BTNMASK,
+	PAD_RPCCMD_SET_BTNINFO,
+	PAD_RPCCMD_SET_VREF,
+	PAD_RPCCMD_GET_PORTMAX,
+	PAD_RPCCMD_GET_SLOTMAX,
+	PAD_RPCCMD_CLOSE,
+	PAD_RPCCMD_END,
+#endif
 };
 
 // RPC Server
@@ -159,19 +177,23 @@ static void* RpcPadEnd(u32 *data)
 	return data;
 }
 
+#ifdef BUILDING_XPADMAN
 static void* RpcPadInit(u32 *data)
 {
 	data[3] = padInit((void*)data[4]);
 
 	return data;
 }
+#endif
 
+#ifdef BUILDING_XPADMAN
 static void* RpcGetModVersion(u32 *data)
 {
 	data[3] = padGetModVersion();
 
 	return data;
 }
+#endif
 
 static void* RpcServer(int fno, void *buffer, int length)
 {
@@ -181,6 +203,7 @@ static void* RpcServer(int fno, void *buffer, int length)
 	(void)fno;
 	(void)length;
 
+#ifdef BUILDING_XPADMAN
 	if ((0x00000100 & command) != 0)
 	{
 		if ((0x80000000 & command) != 0)
@@ -194,12 +217,17 @@ static void* RpcServer(int fno, void *buffer, int length)
 			return buffer;
 		}
 	}
+#endif
 
 	switch(command)
 	{
+#ifdef BUILDING_XPADMAN
 		case PAD_RPCCMD_INIT:			return RpcPadInit(data);
+#endif
 		case PAD_RPCCMD_END:			return RpcPadEnd(data);
+#ifdef BUILDING_XPADMAN
 		case PAD_RPCCMD_GET_MODVER:		return RpcGetModVersion(data);
+#endif
 		case PAD_RPCCMD_OPEN:			return RpcPadOpen(data);
 		case PAD_RPCCMD_CLOSE:			return RpcPadClose(data);
 		case PAD_RPCCMD_INFO_ACT:		return RpcPadInfoAct(data);
@@ -245,7 +273,9 @@ static void RpcThread(void *arg)
 
 	sceSifInitRpc(0);
 	sceSifSetRpcQueue(&qd, GetThreadId());
+#ifdef BUILDING_XPADMAN
 	sceSifRegisterRpc(&sd[0], PAD_BIND_RPC_ID1, &RpcServer, sb[0], NULL, NULL, &qd);
+#endif
 	sceSifRegisterRpc(&sd[1], PAD_BIND_OLD_RPC_ID1, &RpcServer, sb[1], NULL, NULL, &qd);
 	sceSifRpcLoop(&qd);
 }
@@ -262,7 +292,9 @@ static void RpcThreadExt(void *arg)
 
 	sceSifInitRpc(0);
 	sceSifSetRpcQueue(&qdext, GetThreadId());
+#ifdef BUILDING_XPADMAN
 	sceSifRegisterRpc(&sdext[0], PAD_BIND_RPC_ID2, &RpcServerExt, sbext[0], NULL, NULL, &qdext);
+#endif
 	sceSifRegisterRpc(&sdext[1], PAD_BIND_OLD_RPC_ID2, &RpcServerExt, sbext[1], NULL, NULL, &qdext);
 	sceSifRpcLoop(&qdext);
 }

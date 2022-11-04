@@ -10,8 +10,8 @@ IOP_BIN_ALTNAMES =
 
 IOP_SRC_DIR = $(PS2SDKSRC)/iop/system/padman/src/
 
-IOP_BIN ?= rpadman.irx
+IOP_BIN ?= padman-old.irx
 
-PADMAN_BUILDING_XPADMAN_V2 ?= 1
+PADMAN_BUILDING_XPADMAN ?= 0
 
 include $(PS2SDKSRC)/iop/system/padman/Makefile
