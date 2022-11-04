@@ -80,7 +80,8 @@ typedef struct
         apa_ps2time_t created;
         u32 osdStart;
         u32 osdSize;
-        char pading3[128]; // 200
+#ifdef APA_SUPPORT_GPT
+        char pading3[128];
         struct
         {
             u32 UniqueMbrSignature;
@@ -101,6 +102,9 @@ typedef struct
             u8 partition_record234[48];
             u16 Signature;
         } protective_mbr;
+#else
+        char pading3[200];
+#endif
     } mbr;
     apa_sub_t subs[APA_MAXSUB];
 } apa_header_t;

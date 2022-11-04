@@ -992,11 +992,12 @@ static int devctlSetOsdMBR(s32 device, hddSetOsdMBR_t *mbrInfo)
         return rv;
 
     APA_PRINTF(APA_DRV_NAME ": mbr start: %ld\n" APA_DRV_NAME ": mbr size : %ld\n", mbrInfo->start, mbrInfo->size);
+#ifdef APA_SUPPORT_GPT
     // osdStart should not overwrite APA journal
     if (mbrInfo->start < APA_SECTOR_MIN_OSDSTART)
         return -EINVAL;
-    else
-        clink->header->mbr.osdStart = mbrInfo->start;
+#endif
+    clink->header->mbr.osdStart = mbrInfo->start;
     clink->header->mbr.osdSize = mbrInfo->size;
     clink->flags |= APA_CACHE_FLAG_DIRTY;
     apaCacheFlushAllDirty(device);

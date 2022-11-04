@@ -412,10 +412,15 @@ int apaReadHeader(s32 device, apa_header_t *header, u32 lba)
         return -EIO;
     if (header->magic != APA_MAGIC)
         return -EIO;
+#ifdef APA_SUPPORT_GPT
     if ((u32)(apaCheckSum(header, 1)) != header->checksum)
         if (lba == APA_SECTOR_MBR)
             if ((u32)(apaCheckSum(header, 0)) != header->checksum)
                 return -EIO;
+#else
+    if ((u32)(apaCheckSum(header, 1)) != header->checksum)
+        return -EIO;
+#endif
 
     if (lba == APA_SECTOR_MBR) {
         if (strncmp(header->mbr.magic, apaMBRMagic, sizeof(header->mbr.magic)) == 0)
