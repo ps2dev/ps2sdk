@@ -14,6 +14,8 @@ IOP_BIN ?= ps2fs.irx
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/atad/include -I$(PS2SDKSRC)/iop/dev9/poweroff/include -I$(LIBPFS_PATH)include
 
+IOP_CFLAGS += -DIOMANX_OLD_NAME_COMPATIBILITY=0 -DIOMANX_OLD_NAME_ADDDELDRV=0
+
 IOP_LIBS += -lgcc
 
 PFS_OBJS = bitmap.o dir.o inode.o journal.o misc.o super.o superWrite.o cache.o block.o blockWrite.o

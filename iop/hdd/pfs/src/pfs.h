@@ -36,7 +36,7 @@ typedef struct
 } pfs_ioctl2attr_t;
 
 typedef struct {
-	iop_file_t *fd;			//
+	iomanX_iop_file_t *fd;			//
 	pfs_cache_t *clink;		//
 	u32 aentryOffset;		// used for read offset
 	u64 position;			//

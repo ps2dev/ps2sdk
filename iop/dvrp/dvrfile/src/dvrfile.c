@@ -20,33 +20,33 @@
 
 extern int module_start(int argc, char *argv[]);
 extern int module_stop(int argc, char *argv[]);
-extern int dvrf_df_init(iop_device_t *f);
-extern int dvrf_df_exit(iop_device_t *f);
-extern int dvrf_df_chdir(iop_file_t *f, const char *name);
-extern int dvrf_df_chstat(iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int statmask);
-extern int dvrf_df_close(iop_file_t *f);
-extern int dvrf_df_dclose(iop_file_t *f);
-extern int dvrf_df_devctl(iop_file_t *f, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrf_df_dopen(iop_file_t *f, const char *path);
-extern int dvrf_df_dread(iop_file_t *f, iox_dirent_t *buf);
-extern int dvrf_df_format(iop_file_t *f, const char *dev, const char *blockdev, void *arg, int arglen);
-extern int dvrf_df_getstat(iop_file_t *f, const char *name, iox_stat_t *stat);
-extern int dvrf_df_ioctl(iop_file_t *f, int cmd, void *param);
-extern int dvrf_df_ioctl2(iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrf_df_lseek(iop_file_t *f, int offset, int mode);
-extern s64 dvrf_df_lseek64(iop_file_t *f, s64 offset, int whence);
-extern int dvrf_df_mkdir(iop_file_t *f, const char *path, int mode);
-extern int dvrf_df_mount(iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, int arglen);
-extern int dvrf_df_open(iop_file_t *f, const char *name, int flags, int mode);
-extern int dvrf_df_read(iop_file_t *f, void *ptr, int size);
-extern int dvrf_df_readlink(iop_file_t *f, const char *path, char *buf, unsigned int buflen);
-extern int dvrf_df_remove(iop_file_t *f, const char *name);
-extern int dvrf_df_rename(iop_file_t *f, const char *old, const char *new_1);
-extern int dvrf_df_rmdir(iop_file_t *f, const char *path);
-extern int dvrf_df_symlink(iop_file_t *f, const char *old, const char *new_1);
-extern int dvrf_df_sync(iop_file_t *f, const char *dev, int flag);
-extern int dvrf_df_umount(iop_file_t *f, const char *fsname);
-extern int dvrf_df_write(iop_file_t *f, void *ptr, int size);
+extern int dvrf_df_init(iomanX_iop_device_t *f);
+extern int dvrf_df_exit(iomanX_iop_device_t *f);
+extern int dvrf_df_chdir(iomanX_iop_file_t *f, const char *name);
+extern int dvrf_df_chstat(iomanX_iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int statmask);
+extern int dvrf_df_close(iomanX_iop_file_t *f);
+extern int dvrf_df_dclose(iomanX_iop_file_t *f);
+extern int dvrf_df_devctl(iomanX_iop_file_t *f, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrf_df_dopen(iomanX_iop_file_t *f, const char *path);
+extern int dvrf_df_dread(iomanX_iop_file_t *f, iox_dirent_t *buf);
+extern int dvrf_df_format(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void *arg, int arglen);
+extern int dvrf_df_getstat(iomanX_iop_file_t *f, const char *name, iox_stat_t *stat);
+extern int dvrf_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param);
+extern int dvrf_df_ioctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrf_df_lseek(iomanX_iop_file_t *f, int offset, int mode);
+extern s64 dvrf_df_lseek64(iomanX_iop_file_t *f, s64 offset, int whence);
+extern int dvrf_df_mkdir(iomanX_iop_file_t *f, const char *path, int mode);
+extern int dvrf_df_mount(iomanX_iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, int arglen);
+extern int dvrf_df_open(iomanX_iop_file_t *f, const char *name, int flags, int mode);
+extern int dvrf_df_read(iomanX_iop_file_t *f, void *ptr, int size);
+extern int dvrf_df_readlink(iomanX_iop_file_t *f, const char *path, char *buf, unsigned int buflen);
+extern int dvrf_df_remove(iomanX_iop_file_t *f, const char *name);
+extern int dvrf_df_rename(iomanX_iop_file_t *f, const char *old, const char *new_1);
+extern int dvrf_df_rmdir(iomanX_iop_file_t *f, const char *path);
+extern int dvrf_df_symlink(iomanX_iop_file_t *f, const char *old, const char *new_1);
+extern int dvrf_df_sync(iomanX_iop_file_t *f, const char *dev, int flag);
+extern int dvrf_df_umount(iomanX_iop_file_t *f, const char *fsname);
+extern int dvrf_df_write(iomanX_iop_file_t *f, void *ptr, int size);
 extern void CopySceStat(iox_stat_t *stat, u8 *dvrp_stat);
 
 static inline u32 bswap32(u32 val)
@@ -58,7 +58,7 @@ static inline u32 bswap32(u32 val)
 #endif
 }
 
-static int dvrf_translator_df_chdir(iop_file_t *f, const char *name)
+static int dvrf_translator_df_chdir(iomanX_iop_file_t *f, const char *name)
 {
     char translated_name[1040];
 
@@ -66,7 +66,7 @@ static int dvrf_translator_df_chdir(iop_file_t *f, const char *name)
     return dvrf_df_chdir(f, translated_name);
 }
 
-static int dvrf_translator_df_chstat(iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int statmask)
+static int dvrf_translator_df_chstat(iomanX_iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int statmask)
 {
     char translated_name[1040];
 
@@ -74,7 +74,7 @@ static int dvrf_translator_df_chstat(iop_file_t *f, const char *name, iox_stat_t
     return dvrf_df_chstat(f, translated_name, stat, statmask);
 }
 
-static int dvrf_translator_df_devctl(iop_file_t *f, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
+static int dvrf_translator_df_devctl(iomanX_iop_file_t *f, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
     char translated_name[1040];
 
@@ -82,7 +82,7 @@ static int dvrf_translator_df_devctl(iop_file_t *f, const char *name, int cmd, v
     return dvrf_df_devctl(f, translated_name, cmd, arg, arglen, buf, buflen);
 }
 
-static int dvrf_translator_df_dopen(iop_file_t *f, const char *path)
+static int dvrf_translator_df_dopen(iomanX_iop_file_t *f, const char *path)
 {
     char translated_path[1040];
 
@@ -90,7 +90,7 @@ static int dvrf_translator_df_dopen(iop_file_t *f, const char *path)
     return dvrf_df_dopen(f, translated_path);
 }
 
-static int dvrf_translator_df_format(iop_file_t *f, const char *dev, const char *blockdev, void *arg, int arglen)
+static int dvrf_translator_df_format(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void *arg, int arglen)
 {
     char translated_dev[1040];
 
@@ -103,7 +103,7 @@ static int dvrf_translator_df_format(iop_file_t *f, const char *dev, const char 
     return dvrf_df_format(f, translated_dev, blockdev, arg, arglen);
 }
 
-static int dvrf_translator_df_getstat(iop_file_t *f, const char *name, iox_stat_t *stat)
+static int dvrf_translator_df_getstat(iomanX_iop_file_t *f, const char *name, iox_stat_t *stat)
 {
     char translated_name[1040];
 
@@ -111,7 +111,7 @@ static int dvrf_translator_df_getstat(iop_file_t *f, const char *name, iox_stat_
     return dvrf_df_getstat(f, translated_name, stat);
 }
 
-static int dvrf_translator_df_mkdir(iop_file_t *f, const char *path, int mode)
+static int dvrf_translator_df_mkdir(iomanX_iop_file_t *f, const char *path, int mode)
 {
     char translated_path[1040];
 
@@ -119,7 +119,7 @@ static int dvrf_translator_df_mkdir(iop_file_t *f, const char *path, int mode)
     return dvrf_df_mkdir(f, translated_path, mode);
 }
 
-static int dvrf_translator_df_mount(iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, int arglen)
+static int dvrf_translator_df_mount(iomanX_iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, int arglen)
 {
     char translated_fsname[1040];
 
@@ -127,7 +127,7 @@ static int dvrf_translator_df_mount(iop_file_t *f, const char *fsname, const cha
     return dvrf_df_mount(f, translated_fsname, devname, flag, arg, arglen);
 }
 
-static int dvrf_translator_df_open(iop_file_t *f, const char *name, int flags, int mode)
+static int dvrf_translator_df_open(iomanX_iop_file_t *f, const char *name, int flags, int mode)
 {
     char translated_name[1040];
 
@@ -135,7 +135,7 @@ static int dvrf_translator_df_open(iop_file_t *f, const char *name, int flags, i
     return dvrf_df_open(f, translated_name, flags, mode);
 }
 
-static int dvrf_translator_df_readlink(iop_file_t *f, const char *path, char *buf, unsigned int buflen)
+static int dvrf_translator_df_readlink(iomanX_iop_file_t *f, const char *path, char *buf, unsigned int buflen)
 {
     char translated_path[1040];
 
@@ -143,7 +143,7 @@ static int dvrf_translator_df_readlink(iop_file_t *f, const char *path, char *bu
     return dvrf_df_readlink(f, translated_path, buf, buflen);
 }
 
-static int dvrf_translator_df_remove(iop_file_t *f, const char *name)
+static int dvrf_translator_df_remove(iomanX_iop_file_t *f, const char *name)
 {
     char translated_name[1040];
 
@@ -151,7 +151,7 @@ static int dvrf_translator_df_remove(iop_file_t *f, const char *name)
     return dvrf_df_remove(f, translated_name);
 }
 
-static int dvrf_translator_df_rename(iop_file_t *f, const char *old, const char *new_1)
+static int dvrf_translator_df_rename(iomanX_iop_file_t *f, const char *old, const char *new_1)
 {
     char translated_old[1040];
     char translated_new[1040];
@@ -161,7 +161,7 @@ static int dvrf_translator_df_rename(iop_file_t *f, const char *old, const char 
     return dvrf_df_rename(f, translated_old, translated_new);
 }
 
-static int dvrf_translator_df_rmdir(iop_file_t *f, const char *path)
+static int dvrf_translator_df_rmdir(iomanX_iop_file_t *f, const char *path)
 {
     char translated_path[1040];
 
@@ -169,7 +169,7 @@ static int dvrf_translator_df_rmdir(iop_file_t *f, const char *path)
     return dvrf_df_rmdir(f, translated_path);
 }
 
-static int dvrf_translator_df_symlink(iop_file_t *f, const char *old, const char *new_1)
+static int dvrf_translator_df_symlink(iomanX_iop_file_t *f, const char *old, const char *new_1)
 {
     char translated_old[1040];
     char translated_new[1040];
@@ -179,7 +179,7 @@ static int dvrf_translator_df_symlink(iop_file_t *f, const char *old, const char
     return dvrf_df_symlink(f, translated_old, translated_new);
 }
 
-static int dvrf_translator_df_sync(iop_file_t *f, const char *dev, int flag)
+static int dvrf_translator_df_sync(iomanX_iop_file_t *f, const char *dev, int flag)
 {
     char translated_dev[1040];
 
@@ -187,7 +187,7 @@ static int dvrf_translator_df_sync(iop_file_t *f, const char *dev, int flag)
     return dvrf_df_sync(f, translated_dev, flag);
 }
 
-static int dvrf_translator_df_umount(iop_file_t *f, const char *fsname)
+static int dvrf_translator_df_umount(iomanX_iop_file_t *f, const char *fsname)
 {
     char translated_fsname[1040];
 
@@ -195,7 +195,7 @@ static int dvrf_translator_df_umount(iop_file_t *f, const char *fsname)
     return dvrf_df_umount(f, translated_fsname);
 }
 
-static iop_device_ops_t dvrf_translator_functbl = {
+static iomanX_iop_device_ops_t dvrf_translator_functbl = {
     dvrf_df_init,
     dvrf_df_exit,
     dvrf_translator_df_format,
@@ -226,7 +226,7 @@ static iop_device_ops_t dvrf_translator_functbl = {
 };
 
 #define GEN_TRANSLATION_FUNCS(basefuncname, basedevname, shouldbswapformatarg, drvname) \
-    static iop_device_t basefuncname##_drv = {                                          \
+    static iomanX_iop_device_t basefuncname##_drv = {                                          \
         basedevname,                                                                    \
         (IOP_DT_FS | IOP_DT_FSEXT),                                                     \
         1,                                                                              \
@@ -275,7 +275,7 @@ int module_start(int argc, char *argv[])
     }
     sema_id = -1;
     current_chunk_size = 0x4000;
-    if (AddDrv(&dvrpfs_drv) || AddDrv(&dvrhdd_drv)) {
+    if (iomanX_AddDrv(&dvrpfs_drv) || iomanX_AddDrv(&dvrhdd_drv)) {
         goto fail;
     }
     for (i = 0; i < argc; i += 1) {
@@ -290,15 +290,15 @@ int module_start(int argc, char *argv[])
 setup_fschk:
     printf("dvrfile.irx : FILE SYSTEM CHECK MODE\n");
 
-    if (AddDrv(&dvrhdck_drv)) {
+    if (iomanX_AddDrv(&dvrhdck_drv)) {
         printf("hdck\n");
         goto fail;
     }
-    if (AddDrv(&dvrfssk_drv)) {
+    if (iomanX_AddDrv(&dvrfssk_drv)) {
         printf("fssk\n");
         goto fail;
     }
-    if (AddDrv(&dvrfsck_drv)) {
+    if (iomanX_AddDrv(&dvrfsck_drv)) {
         printf("fsck\n");
         goto fail;
     }
@@ -308,11 +308,11 @@ setup_fschk:
     return MODULE_RESIDENT_END;
 #endif
 fail:
-    DelDrv(dvrpfs_drv.name);
-    DelDrv(dvrhdd_drv.name);
-    DelDrv(dvrhdck_drv.name);
-    DelDrv(dvrfssk_drv.name);
-    DelDrv(dvrfsck_drv.name);
+    iomanX_DelDrv(dvrpfs_drv.name);
+    iomanX_DelDrv(dvrhdd_drv.name);
+    iomanX_DelDrv(dvrhdck_drv.name);
+    iomanX_DelDrv(dvrfssk_drv.name);
+    iomanX_DelDrv(dvrfsck_drv.name);
     return MODULE_NO_RESIDENT_END;
 }
 
@@ -321,7 +321,7 @@ int module_stop(int argc, char *argv[])
     (void)argc;
     (void)argv;
 
-    if (DelDrv(dvrpfs_drv.name) || DelDrv(dvrhdd_drv.name)) {
+    if (iomanX_DelDrv(dvrpfs_drv.name) || iomanX_DelDrv(dvrhdd_drv.name)) {
 #if 0
         return MODULE_REMOVABLE_END;
 #else
@@ -347,7 +347,7 @@ static int check_cmdack_err(int (*func)(drvdrv_exec_cmd_ack *cmdack), drvdrv_exe
     return 0;
 }
 
-int dvrf_df_init(iop_device_t *f)
+int dvrf_df_init(iomanX_iop_device_t *f)
 {
     int this_sema_id;
     iop_sema_t sema_struct;
@@ -369,7 +369,7 @@ int dvrf_df_init(iop_device_t *f)
     return 0;
 }
 
-int dvrf_df_exit(iop_device_t *f)
+int dvrf_df_exit(iomanX_iop_device_t *f)
 {
     (void)f;
 
@@ -383,7 +383,7 @@ int dvrf_df_exit(iop_device_t *f)
     return 0;
 }
 
-int dvrf_df_chdir(iop_file_t *f, const char *name)
+int dvrf_df_chdir(iomanX_iop_file_t *f, const char *name)
 {
     int retval;
     drvdrv_exec_cmd_ack cmdack;
@@ -405,7 +405,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_chstat(iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int statmask)
+int dvrf_df_chstat(iomanX_iop_file_t *f, const char *name, iox_stat_t *stat, unsigned int statmask)
 {
     int retval;
     drvdrv_exec_cmd_ack cmdack;
@@ -430,7 +430,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_close(iop_file_t *f)
+int dvrf_df_close(iomanX_iop_file_t *f)
 {
     int retval;
     int dvrp_fd;
@@ -454,7 +454,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_dclose(iop_file_t *f)
+int dvrf_df_dclose(iomanX_iop_file_t *f)
 {
     int retval;
     int dvrp_fd;
@@ -478,7 +478,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_devctl(iop_file_t *f, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
+int dvrf_df_devctl(iomanX_iop_file_t *f, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
     int retval;
     u32 argoffset;
@@ -522,7 +522,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_dopen(iop_file_t *f, const char *path)
+int dvrf_df_dopen(iomanX_iop_file_t *f, const char *path)
 {
     int retval;
     drvdrv_exec_cmd_ack cmdack;
@@ -547,7 +547,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_dread(iop_file_t *f, iox_dirent_t *buf)
+int dvrf_df_dread(iomanX_iop_file_t *f, iox_dirent_t *buf)
 {
     int dvrp_fd;
     int retval;
@@ -590,7 +590,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_format(iop_file_t *f, const char *dev, const char *blockdev, void *arg, int arglen)
+int dvrf_df_format(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void *arg, int arglen)
 {
     size_t blockdev_len;
     u32 dev_len;
@@ -625,7 +625,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_getstat(iop_file_t *f, const char *name, iox_stat_t *stat)
+int dvrf_df_getstat(iomanX_iop_file_t *f, const char *name, iox_stat_t *stat)
 {
     int retval;
     drvdrv_exec_cmd_ack cmdack;
@@ -649,7 +649,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_ioctl(iop_file_t *f, int cmd, void *param)
+int dvrf_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param)
 {
     int dvrp_fd;
     int retval;
@@ -674,7 +674,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_ioctl2(iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
+int dvrf_df_ioctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
     int dvrp_fd;
     int retval;
@@ -702,7 +702,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_lseek(iop_file_t *f, int offset, int mode)
+int dvrf_df_lseek(iomanX_iop_file_t *f, int offset, int mode)
 {
     int dvrp_fd;
     int retval;
@@ -727,7 +727,7 @@ finish:
     return retval;
 }
 
-s64 dvrf_df_lseek64(iop_file_t *f, s64 offset, int whence)
+s64 dvrf_df_lseek64(iomanX_iop_file_t *f, s64 offset, int whence)
 {
     int dvrp_fd;
     s64 retval;
@@ -760,7 +760,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_mkdir(iop_file_t *f, const char *path, int mode)
+int dvrf_df_mkdir(iomanX_iop_file_t *f, const char *path, int mode)
 {
     int retval;
     drvdrv_exec_cmd_ack cmdack;
@@ -783,7 +783,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_mount(iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, int arglen)
+int dvrf_df_mount(iomanX_iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, int arglen)
 {
     size_t devname_len;
     u32 fsname_len;
@@ -820,7 +820,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_open(iop_file_t *f, const char *name, int flags, int mode)
+int dvrf_df_open(iomanX_iop_file_t *f, const char *name, int flags, int mode)
 {
     u16 mode_;
     int retval;
@@ -850,7 +850,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_read(iop_file_t *f, void *ptr, int size)
+int dvrf_df_read(iomanX_iop_file_t *f, void *ptr, int size)
 {
     size_t total_read;
     char *out_buf;
@@ -915,7 +915,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_readlink(iop_file_t *f, const char *path, char *buf, unsigned int buflen)
+int dvrf_df_readlink(iomanX_iop_file_t *f, const char *path, char *buf, unsigned int buflen)
 {
     int retval;
     drvdrv_exec_cmd_ack cmdack;
@@ -940,7 +940,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_remove(iop_file_t *f, const char *name)
+int dvrf_df_remove(iomanX_iop_file_t *f, const char *name)
 {
     int retval;
     drvdrv_exec_cmd_ack cmdack;
@@ -962,7 +962,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_rename(iop_file_t *f, const char *old, const char *new_1)
+int dvrf_df_rename(iomanX_iop_file_t *f, const char *old, const char *new_1)
 {
     size_t old_strlen;
     const char *old_;
@@ -992,7 +992,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_rmdir(iop_file_t *f, const char *path)
+int dvrf_df_rmdir(iomanX_iop_file_t *f, const char *path)
 {
     int retval;
     drvdrv_exec_cmd_ack cmdack;
@@ -1014,7 +1014,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_symlink(iop_file_t *f, const char *old, const char *new_1)
+int dvrf_df_symlink(iomanX_iop_file_t *f, const char *old, const char *new_1)
 {
     size_t old_len;
     const char *old_;
@@ -1044,7 +1044,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_sync(iop_file_t *f, const char *dev, int flag)
+int dvrf_df_sync(iomanX_iop_file_t *f, const char *dev, int flag)
 {
     int retval;
     drvdrv_exec_cmd_ack cmdack;
@@ -1067,7 +1067,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_umount(iop_file_t *f, const char *fsname)
+int dvrf_df_umount(iomanX_iop_file_t *f, const char *fsname)
 {
     int retval;
     drvdrv_exec_cmd_ack cmdack;
@@ -1089,7 +1089,7 @@ finish:
     return retval;
 }
 
-int dvrf_df_write(iop_file_t *f, void *ptr, int size)
+int dvrf_df_write(iomanX_iop_file_t *f, void *ptr, int size)
 {
     int total_write;
     char *in_buffer;

@@ -8,6 +8,8 @@
 
 IOP_BIN ?= iomanX.irx
 
+IOP_CFLAGS += -DIOMANX_OLD_NAME_ADDDELDRV=0 -DIOMANX_OLD_NAME_COMPATIBILITY=0 -DIOMANX_ENABLE_LEGACY_IOMAN_HOOK
+
 IOP_OBJS = iomanX.o ioman_sbv.o exports.o imports.o
 
 include $(PS2SDKSRC)/Defs.make

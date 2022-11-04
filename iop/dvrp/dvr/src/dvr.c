@@ -21,44 +21,44 @@
 
 extern int module_start();
 extern int module_stop();
-extern int dvr_df_init(iop_device_t *dev);
-extern int dvr_df_exit(iop_device_t *dev);
-extern int dvr_df_ioctl(iop_file_t *f, int cmd, void *param);
-extern int dvr_df_devctl(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvr_df_ioctl2(iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvr_df_init(iomanX_iop_device_t *dev);
+extern int dvr_df_exit(iomanX_iop_device_t *dev);
+extern int dvr_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param);
+extern int dvr_df_devctl(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvr_df_ioctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int dvr_df_null();
 extern s64 dvr_df_null_long();
-extern int dvrioctl2_rec_start(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_rec_pause(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_rec_stop(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_set_rec_end_time(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_get_rec_info(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_get_rec_time(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_read_resfile(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_clear_resfile_flag(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_rec_prohibit(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_get_status_register(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_get_ifo_time_entry(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_get_ifo_vobu_entry(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_epg_test(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_send_timer_event(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_epg_cancel(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_tevent_buf_clr(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_tevent_buf_send(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_tevent_buf_trans_dvrp(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_start_hdd_test(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_stop_hdd_test(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_get_hdd_test_stat(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_pre_update_a(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_pre_update_b(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_get_rec_vro_pckn(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_enc_dec_test(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_tevent_buf_recv_first(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_tevent_buf_recv_next(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_finish_auto_process(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_make_menu(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_re_enc_start(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_rec_pictclip(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_rec_start(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_rec_pause(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_rec_stop(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_set_rec_end_time(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_get_rec_info(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_get_rec_time(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_read_resfile(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_clear_resfile_flag(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_rec_prohibit(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_get_status_register(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_get_ifo_time_entry(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_get_ifo_vobu_entry(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_epg_test(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_send_timer_event(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_epg_cancel(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_tevent_buf_clr(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_tevent_buf_send(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_tevent_buf_trans_dvrp(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_start_hdd_test(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_stop_hdd_test(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_get_hdd_test_stat(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_pre_update_a(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_pre_update_b(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_get_rec_vro_pckn(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_enc_dec_test(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_tevent_buf_recv_first(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_tevent_buf_recv_next(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_finish_auto_process(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_make_menu(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_re_enc_start(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_rec_pictclip(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int dvrpAuthEnc(u16);
 
 // The following has been excluded.
@@ -67,7 +67,7 @@ unsigned char dvrpAuth_tbl[256] = {0x00};
 struct DevctlCmdTbl_t
 {
     u16 cmd;
-    int (*fn)(iop_file_t *, const char *, int, void *, unsigned int, void *, unsigned int);
+    int (*fn)(iomanX_iop_file_t *, const char *, int, void *, unsigned int, void *, unsigned int);
 } DevctlCmdTbl[31] =
     {
         {0x5663, &dvrioctl2_get_status_register},
@@ -103,7 +103,7 @@ struct DevctlCmdTbl_t
         {0x5650, &dvrioctl2_rec_pictclip},
 };
 
-static iop_device_ops_t DvrFuncTbl =
+static iomanX_iop_device_ops_t DvrFuncTbl =
     {
         &dvr_df_init,
         &dvr_df_exit,
@@ -136,7 +136,7 @@ static iop_device_ops_t DvrFuncTbl =
 char TEVENT_BUF[6144];
 char *tevent_p;
 int tevent_data_sz;
-static iop_device_t DVR = {
+static iomanX_iop_device_t DVR = {
     .name = "dvr",
     .desc = "Digital Video Recorder DVR task",
     .type = (IOP_DT_FS | IOP_DT_FSEXT),
@@ -172,7 +172,7 @@ int module_start()
         printf("DVR task of DVRP is not running...\n");
         return MODULE_NO_RESIDENT_END;
     } else {
-        if (AddDrv(&DVR) != 0)
+        if (iomanX_AddDrv(&DVR) != 0)
             return MODULE_NO_RESIDENT_END;
     }
 #if 0
@@ -184,12 +184,12 @@ int module_start()
 
 int module_stop()
 {
-    if (DelDrv(DVR.name) != 0)
+    if (iomanX_DelDrv(DVR.name) != 0)
         return MODULE_REMOVABLE_END;
     return MODULE_NO_RESIDENT_END;
 }
 
-int dvr_df_init(iop_device_t *dev)
+int dvr_df_init(iomanX_iop_device_t *dev)
 {
     int v1;
     iop_sema_t v3;
@@ -207,7 +207,7 @@ int dvr_df_init(iop_device_t *dev)
     return 0;
 }
 
-int dvr_df_exit(iop_device_t *dev)
+int dvr_df_exit(iomanX_iop_device_t *dev)
 {
     (void)dev;
 
@@ -216,7 +216,7 @@ int dvr_df_exit(iop_device_t *dev)
     return 0;
 }
 
-int dvr_df_ioctl(iop_file_t *f, int cmd, void *param)
+int dvr_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param)
 {
     (void)f;
     (void)cmd;
@@ -228,7 +228,7 @@ int dvr_df_ioctl(iop_file_t *f, int cmd, void *param)
 }
 
 int dvr_df_devctl(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -257,7 +257,7 @@ LABEL_5:
     return v11;
 }
 
-int dvr_df_ioctl2(iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
+int dvr_df_ioctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
     (void)f;
     (void)cmd;
@@ -282,7 +282,7 @@ s64 dvr_df_null_long()
 }
 
 int dvrioctl2_rec_start(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -331,7 +331,7 @@ int dvrioctl2_rec_start(
 }
 
 int dvrioctl2_rec_pause(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -375,7 +375,7 @@ int dvrioctl2_rec_pause(
 }
 
 int dvrioctl2_rec_stop(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -413,7 +413,7 @@ int dvrioctl2_rec_stop(
 }
 
 int dvrioctl2_set_rec_end_time(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -449,7 +449,7 @@ int dvrioctl2_set_rec_end_time(
 }
 
 int dvrioctl2_get_rec_info(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -501,7 +501,7 @@ int dvrioctl2_get_rec_info(
 }
 
 int dvrioctl2_get_rec_time(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -538,7 +538,7 @@ int dvrioctl2_get_rec_time(
 }
 
 int dvrioctl2_get_ifo_time_entry(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -576,7 +576,7 @@ int dvrioctl2_get_ifo_time_entry(
 }
 
 int dvrioctl2_get_ifo_vobu_entry(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -613,7 +613,7 @@ int dvrioctl2_get_ifo_vobu_entry(
 }
 
 int dvrioctl2_read_resfile(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -648,7 +648,7 @@ int dvrioctl2_read_resfile(
 }
 
 int dvrioctl2_clear_resfile_flag(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -683,7 +683,7 @@ int dvrioctl2_clear_resfile_flag(
 }
 
 int dvrioctl2_rec_prohibit(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -718,7 +718,7 @@ int dvrioctl2_rec_prohibit(
 }
 
 int dvrioctl2_epg_test(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -753,7 +753,7 @@ int dvrioctl2_epg_test(
 }
 
 int dvrioctl2_send_timer_event(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -790,7 +790,7 @@ int dvrioctl2_send_timer_event(
 }
 
 int dvrioctl2_epg_cancel(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -825,7 +825,7 @@ int dvrioctl2_epg_cancel(
 }
 
 int dvrioctl2_get_status_register(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -848,7 +848,7 @@ int dvrioctl2_get_status_register(
 }
 
 int dvrioctl2_tevent_buf_clr(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -880,7 +880,7 @@ int dvrioctl2_tevent_buf_clr(
 }
 
 int dvrioctl2_tevent_buf_send(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -907,7 +907,7 @@ int dvrioctl2_tevent_buf_send(
 }
 
 int dvrioctl2_tevent_buf_trans_dvrp(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -946,7 +946,7 @@ int dvrioctl2_tevent_buf_trans_dvrp(
 }
 
 int dvrioctl2_start_hdd_test(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -992,7 +992,7 @@ int dvrioctl2_start_hdd_test(
 }
 
 int dvrioctl2_stop_hdd_test(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -1031,7 +1031,7 @@ int dvrioctl2_stop_hdd_test(
 }
 
 int dvrioctl2_get_hdd_test_stat(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -1070,7 +1070,7 @@ int dvrioctl2_get_hdd_test_stat(
 }
 
 int dvrioctl2_pre_update_a(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -1104,7 +1104,7 @@ int dvrioctl2_pre_update_a(
 }
 
 int dvrioctl2_pre_update_b(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -1143,7 +1143,7 @@ int dvrioctl2_pre_update_b(
 }
 
 int dvrioctl2_get_rec_vro_pckn(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -1181,7 +1181,7 @@ int dvrioctl2_get_rec_vro_pckn(
 }
 
 int dvrioctl2_enc_dec_test(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -1219,7 +1219,7 @@ int dvrioctl2_enc_dec_test(
 }
 
 int dvrioctl2_make_menu(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -1307,7 +1307,7 @@ int dvrioctl2_make_menu(
 }
 
 int dvrioctl2_re_enc_start(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -1427,7 +1427,7 @@ int dvrpAuthEnc(u16 a1)
     return (u8)dvrpAuth_tbl[(u8)a1] | ((u8)dvrpAuth_tbl[a1 >> 8] << 8);
 }
 
-int dvr_recv_dma(iop_file_t *a1, u8 *buf, int buflen)
+int dvr_recv_dma(iomanX_iop_file_t *a1, u8 *buf, int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
 
@@ -1484,7 +1484,7 @@ unsigned int TELTEXT_ACTLEN;
 unsigned int TELTEXT_BUFOFFSET;
 
 int dvrioctl2_tevent_buf_recv_first(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -1522,7 +1522,7 @@ int dvrioctl2_tevent_buf_recv_first(
 }
 
 int dvrioctl2_tevent_buf_recv_next(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -1554,7 +1554,7 @@ int dvrioctl2_tevent_buf_recv_next(
 }
 
 int dvrioctl2_finish_auto_process(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -1593,7 +1593,7 @@ int dvrioctl2_finish_auto_process(
 }
 
 int dvrioctl2_rec_pictclip(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,

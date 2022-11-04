@@ -15,32 +15,44 @@
  */
 
 #include "types.h"
-#include "defs.h"
+#ifdef _IOP
 #include "loadcore.h"
+#endif
 #include "iomanX.h"
+#ifdef _IOP
 #include "sysclib.h"
+#else
+#include <string.h>
+#define index strchr
+#endif
 #include "stdarg.h"
 #include "intrman.h"
 
 #define MODNAME "iomanx"
+#ifdef _IOP
 IRX_ID("IOX/File_Manager", 1, 1);
+#endif
 
 #include "errno.h"
 
 #define MAX_DEVICES 32
 #define MAX_FILES   32
 
-static iop_device_t *dev_list[MAX_DEVICES];
-iop_file_t file_table[MAX_FILES];
+static iomanX_iop_device_t *dev_list[MAX_DEVICES];
+iomanX_iop_file_t file_table[MAX_FILES];
 
 #define isnum(c) ((c) >= '0' && (c) <= '9')
 
+#ifdef _IOP
 extern struct irx_export_table _exp_iomanx;
+#endif
 
+#ifdef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
 extern int hook_ioman();
 extern int unhook_ioman();
+#endif
 
-iop_device_t **GetDeviceList(void)
+iomanX_iop_device_t **iomanX_GetDeviceList(void)
 {
     return(dev_list);
 }
@@ -50,29 +62,35 @@ int _start(int argc, char *argv[])
 	(void)argc;
 	(void)argv;
 
+#ifdef _IOP
 	if(RegisterLibraryEntries(&_exp_iomanx) != 0)
     {
 		return MODULE_NO_RESIDENT_END;
 	}
+#endif
 
     memset(dev_list, 0, sizeof(dev_list));
     memset(file_table, 0, sizeof(file_table));
 
+#ifdef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
     if(hook_ioman() != 0)
     {
         return MODULE_NO_RESIDENT_END;
     }
+#endif
 
 	return MODULE_RESIDENT_END;
 }
 
 int shutdown()
 {
+#ifdef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
     unhook_ioman();
+#endif
 	return MODULE_NO_RESIDENT_END;
 }
 
-int AddDrv(iop_device_t *device)
+int iomanX_AddDrv(iomanX_iop_device_t *device)
 {
 	int i;
     int oldIntr;
@@ -94,7 +112,9 @@ int AddDrv(iop_device_t *device)
 	dev_list[i] = device;
     CpuResumeIntr(oldIntr);
 
+#ifdef _IOP
     FlushIcache();
+#endif
 
 	if (device->ops->init(device) < 0)
 	{
@@ -105,7 +125,7 @@ int AddDrv(iop_device_t *device)
 	return(0);
 }
 
-int DelDrv(const char *name)
+int iomanX_DelDrv(const char *name)
 {
 	int i;
 
@@ -121,7 +141,7 @@ int DelDrv(const char *name)
 }
 
 
-static char * find_iop_device(const char *dev, int *unit, iop_device_t **device)
+static char * find_iop_device(const char *dev, int *unit, iomanX_iop_device_t **device)
 {
 	char canon[16];
 	char *filename, *tail, *d = (char *)dev;
@@ -167,7 +187,7 @@ static char * find_iop_device(const char *dev, int *unit, iop_device_t **device)
 	return (char *)-1;
 }
 
-iop_file_t *get_file(int fd)
+iomanX_iop_file_t *get_file(int fd)
 {
 	if (fd >= MAX_FILES)
 		return NULL;
@@ -178,10 +198,10 @@ iop_file_t *get_file(int fd)
 	return NULL;
 }
 
-iop_file_t *get_new_file(void)
+iomanX_iop_file_t *get_new_file(void)
 {
 	int i;
-	iop_file_t *fd = NULL;
+	iomanX_iop_file_t *fd = NULL;
 	int oldIntr;
 
 	CpuSuspendIntr(&oldIntr);
@@ -193,7 +213,7 @@ iop_file_t *get_new_file(void)
 			fd = &file_table[i];
 
 			// fill in "device" temporarily to mark the fd as allocated.
-			fd->device = (iop_device_t *) 0xFFFFFFFF;
+			fd->device = (iomanX_iop_device_t *) 0xFFFFFFFF;
 			break;
 		}
 	}
@@ -203,9 +223,9 @@ iop_file_t *get_new_file(void)
 	return fd;
 }
 
-int open(const char *name, int flags, ...)
+int iomanX_open(const char *name, int flags, ...)
 {
-	iop_file_t *f = get_new_file();
+	iomanX_iop_file_t *f = get_new_file();
 	char *filename;
 	va_list alist;
 	int res, mode;
@@ -239,9 +259,9 @@ int open(const char *name, int flags, ...)
 	return res;
 }
 
-int close(int fd)
+int iomanX_close(int fd)
 {
-	iop_file_t *f;
+	iomanX_iop_file_t *f;
 	int res;
 
 	if ((f = get_file(fd)) == NULL)
@@ -263,42 +283,42 @@ int close(int fd)
 	return res;
 }
 
-int read(int fd, void *ptr, int size)
+int iomanX_read(int fd, void *ptr, int size)
 {
-	iop_file_t *f = get_file(fd);
+	iomanX_iop_file_t *f = get_file(fd);
 
-	if (f == NULL || !(f->mode & O_RDONLY))
+	if (f == NULL || !(f->mode & FIO_O_RDONLY))
 		return -EBADF;
 
 	return f->device->ops->read(f, ptr, size);
 }
 
-int write(int fd, void *ptr, int size)
+int iomanX_write(int fd, void *ptr, int size)
 {
-	iop_file_t *f = get_file(fd);
+	iomanX_iop_file_t *f = get_file(fd);
 
-	if (f == NULL || !(f->mode & O_WRONLY))
+	if (f == NULL || !(f->mode & FIO_O_WRONLY))
 		return -EBADF;
 
 	return f->device->ops->write(f, ptr, size);
 }
 
-int lseek(int fd, int offset, int whence)
+int iomanX_lseek(int fd, int offset, int whence)
 {
-	iop_file_t *f = get_file(fd);
+	iomanX_iop_file_t *f = get_file(fd);
 
 	if (f == NULL)
 		return -EBADF;
 
-	if (whence < SEEK_SET || whence > SEEK_END)
+	if (whence < FIO_SEEK_SET || whence > FIO_SEEK_END)
 		return -EINVAL;
 
 	return f->device->ops->lseek(f, offset, whence);
 }
 
-int ioctl(int fd, int cmd, void *arg)
+int iomanX_ioctl(int fd, int cmd, void *arg)
 {
-	iop_file_t *f = get_file(fd);
+	iomanX_iop_file_t *f = get_file(fd);
 
 	if (f == NULL)
 		return -EBADF;
@@ -306,9 +326,9 @@ int ioctl(int fd, int cmd, void *arg)
 	return f->device->ops->ioctl(f, cmd, arg);
 }
 
-int remove(const char *name)
+int iomanX_remove(const char *name)
 {
-	iop_file_t file;
+	iomanX_iop_file_t file;
 	char *filename;
 
 	if ((filename = find_iop_device(name, &file.unit, &file.device)) == (char *)-1)
@@ -322,8 +342,8 @@ int remove(const char *name)
    handle all of them.  */
 static int path_common(const char *name, int arg, int code)
 {
-	iop_file_t file;
-	iop_device_ops_t *dops;
+	iomanX_iop_file_t file;
+	iomanX_iop_device_ops_t *dops;
 	char *filename;
 
 	if ((filename = find_iop_device(name, &file.unit, &file.device)) == (char *)-1)
@@ -333,7 +353,7 @@ static int path_common(const char *name, int arg, int code)
 		if ((file.device->type & 0xf0000000) != IOP_DT_FSEXT)
 			return -48;
 
-	dops = (iop_device_ops_t *)file.device->ops;
+	dops = (iomanX_iop_device_ops_t *)file.device->ops;
 	switch (code) {
 		case 4:		/* mkdir() */
 			return dops->mkdir(&file, filename, arg);
@@ -348,19 +368,19 @@ static int path_common(const char *name, int arg, int code)
 	return -EINVAL;
 }
 
-int mkdir(const char *name, int mode)
+int iomanX_mkdir(const char *name, int mode)
 {
 	return path_common(name, mode, 4);
 }
 
-int rmdir(const char *name)
+int iomanX_rmdir(const char *name)
 {
 	return path_common(name, 0, 5);
 }
 
-int dopen(const char *name)
+int iomanX_dopen(const char *name)
 {
-	iop_file_t *f = get_new_file();
+	iomanX_iop_file_t *f = get_new_file();
 	char *filename;
 	int res;
 
@@ -429,19 +449,20 @@ int modex2mode(int modex)
 	return mode;
 }
 
-int dread(int fd, iox_dirent_t *iox_dirent)
+int iomanX_dread(int fd, iox_dirent_t *iox_dirent)
 {
-    iop_file_t *f = get_file(fd);
+    iomanX_iop_file_t *f = get_file(fd);
     int res;
 
     if (f == NULL ||  !(f->mode & 8))
             return -EBADF;
 
+#ifdef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
     /* If this is a legacy device (such as mc:) then we need to convert the mode
        variable of the stat structure to iomanX's extended format.  */
     if ((f->device->type & 0xf0000000) != IOP_DT_FSEXT)
     {
-        typedef int	io_dread_t(iop_file_t *, io_dirent_t *);
+        typedef int	io_dread_t(iomanX_iop_file_t *, io_dirent_t *);
         io_dirent_t io_dirent;
         io_dread_t *io_dread = (io_dread_t*) f->device->ops->dread;
         res = io_dread(f, &io_dirent);
@@ -458,14 +479,17 @@ int dread(int fd, iox_dirent_t *iox_dirent)
         strncpy(iox_dirent->name, io_dirent.name, sizeof(iox_dirent->name));
     }
     else
+#endif
+    {
         res = f->device->ops->dread(f, iox_dirent);
+    }
 
     return res;
 }
 
-int getstat(const char *name, iox_stat_t *stat)
+int iomanX_getstat(const char *name, iox_stat_t *stat)
 {
-	iop_file_t file;
+	iomanX_iop_file_t file;
 	char *filename;
 	int res;
 
@@ -485,9 +509,9 @@ int getstat(const char *name, iox_stat_t *stat)
 	return res;
 }
 
-int chstat(const char *name, iox_stat_t *stat, unsigned int mask)
+int iomanX_chstat(const char *name, iox_stat_t *stat, unsigned int mask)
 {
-	iop_file_t file;
+	iomanX_iop_file_t file;
 	char *filename;
 
 	if ((filename = find_iop_device(name, &file.unit, &file.device)) == (char *)-1)
@@ -501,9 +525,9 @@ int chstat(const char *name, iox_stat_t *stat, unsigned int mask)
     return file.device->ops->chstat(&file, filename, stat, mask);
 }
 
-int format(const char *dev, const char *blockdev, void *arg, int arglen)
+int iomanX_format(const char *dev, const char *blockdev, void *arg, int arglen)
 {
-	iop_file_t file;
+	iomanX_iop_file_t file;
 	char *filename;
 
 	if ((filename = find_iop_device(dev, &file.unit, &file.device)) == (char *)-1)
@@ -514,8 +538,8 @@ int format(const char *dev, const char *blockdev, void *arg, int arglen)
 
 static int link_common(const char *old, const char *new, int code)
 {
-	iop_file_t file;
-	iop_device_t *new_device;
+	iomanX_iop_file_t file;
+	iomanX_iop_device_t *new_device;
 	char *filename, *new_filename = (char *)new;
 	int new_unit;
 
@@ -540,24 +564,24 @@ static int link_common(const char *old, const char *new, int code)
 	return file.device->ops->symlink(&file, filename, new_filename);
 }
 
-int rename(const char *old, const char *new)
+int iomanX_rename(const char *old, const char *new)
 {
 	return link_common(old, new, 7);
 }
 
-int chdir(const char *name)
+int iomanX_chdir(const char *name)
 {
 	return path_common(name, 0, 0x103);
 }
 
-int sync(const char *dev, int flag)
+int iomanX_sync(const char *dev, int flag)
 {
 	return path_common(dev, flag, 0x106);
 }
 
-int mount(const char *fsname, const char *devname, int flag, void *arg, int arglen)
+int iomanX_mount(const char *fsname, const char *devname, int flag, void *arg, int arglen)
 {
-	iop_file_t file;
+	iomanX_iop_file_t file;
 	char *filename;
 
 	if ((filename = find_iop_device(fsname, &file.unit, &file.device)) == (char *)-1)
@@ -570,9 +594,9 @@ int mount(const char *fsname, const char *devname, int flag, void *arg, int argl
 	return file.device->ops->mount(&file, filename, devname, flag, arg, arglen);
 }
 
-int umount(const char *fsname)
+int iomanX_umount(const char *fsname)
 {
-	iop_file_t file;
+	iomanX_iop_file_t file;
 	char *filename;
 
 	if ((filename = find_iop_device(fsname, &file.unit, &file.device)) == (char *)-1)
@@ -585,14 +609,14 @@ int umount(const char *fsname)
 	return file.device->ops->umount(&file, filename);
 }
 
-long long lseek64(int fd, long long offset, int whence)
+long long iomanX_lseek64(int fd, long long offset, int whence)
 {
-	iop_file_t *f = get_file(fd);
+	iomanX_iop_file_t *f = get_file(fd);
 
 	if (f == NULL)
 		return -EBADF;
 
-	if (whence < SEEK_SET || whence > SEEK_END)
+	if (whence < FIO_SEEK_SET || whence > FIO_SEEK_END)
 		return -EINVAL;
 
 	if ((f->device->type & 0xf0000000) != IOP_DT_FSEXT)
@@ -601,9 +625,9 @@ long long lseek64(int fd, long long offset, int whence)
 	return f->device->ops->lseek64(f, offset, whence);
 }
 
-int devctl(const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
+int iomanX_devctl(const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
-	iop_file_t file;
+	iomanX_iop_file_t file;
 	char *filename;
 
 	if ((filename = find_iop_device(name, &file.unit, &file.device)) == (char *)-1)
@@ -616,14 +640,14 @@ int devctl(const char *name, int cmd, void *arg, unsigned int arglen, void *buf,
 	return file.device->ops->devctl(&file, filename, cmd, arg, arglen, buf, buflen);
 }
 
-int symlink(const char *old, const char *new)
+int iomanX_symlink(const char *old, const char *new)
 {
 	return link_common(old, new, 8);
 }
 
-int readlink(const char *name, char *buf, unsigned int buflen)
+int iomanX_readlink(const char *name, char *buf, unsigned int buflen)
 {
-	iop_file_t file;
+	iomanX_iop_file_t file;
 	char *filename;
 
 	if ((filename = find_iop_device(name, &file.unit, &file.device)) == (char *)-1)
@@ -637,9 +661,9 @@ int readlink(const char *name, char *buf, unsigned int buflen)
 }
 
 
-int ioctl2(int fd, int command, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
+int iomanX_ioctl2(int fd, int command, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
-	iop_file_t *f;
+	iomanX_iop_file_t *f;
 
 	if ((f = get_file(fd)) == NULL)
 		return -EBADF;

@@ -14,9 +14,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 //	Function declarations
 
-int pfsFioIoctl(iop_file_t *f, int cmd, void *param);
-int pfsFioIoctl2(iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-int pfsFioDevctl(iop_file_t *f, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+int pfsFioIoctl(iomanX_iop_file_t *f, int cmd, void *param);
+int pfsFioIoctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+int pfsFioDevctl(iomanX_iop_file_t *f, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 
 void pfsFioDevctlCloseAll(void);
 

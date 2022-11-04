@@ -138,7 +138,7 @@ int fd_open( iop_io_file_t *f, const char *name, int mode)
 	int fd;
 
 	M_DEBUG("open %i %s %s\n", f->unit, name ,base);
-	fd = open( fd_name( nameBuffer, name), mode, 0 );
+	fd = iomanX_open( fd_name( nameBuffer, name), mode, 0 );
 	if ( fd < 0 ) return fd;
 
 	return fd_save( fd, f );
@@ -152,7 +152,7 @@ int fd_open( iop_io_file_t *f, const char *name, int mode)
  */
 int fd_close( iop_io_file_t *f )
 {
-	return close( realfd(f) );
+	return iomanX_close( realfd(f) );
 }
 
 /** Handle read request.
@@ -165,7 +165,7 @@ int fd_close( iop_io_file_t *f )
  */
 int fd_read( iop_io_file_t *f, void * buffer, int size )
 {
-	return read( realfd(f), buffer, size );
+	return iomanX_read( realfd(f), buffer, size );
 }
 
 /** Handle write request.
@@ -178,7 +178,7 @@ int fd_read( iop_io_file_t *f, void * buffer, int size )
  */
 int fd_write( iop_io_file_t *fd, void *buffer, int size )
 {
-	return write( realfd(fd), buffer, size );
+	return iomanX_write( realfd(fd), buffer, size );
 }
 
 /** Handle lseek request.
@@ -191,7 +191,7 @@ int fd_write( iop_io_file_t *fd, void *buffer, int size )
  */
 int fd_lseek( iop_io_file_t *fd, int offset, int whence)
 {
-	return lseek( realfd(fd), offset, whence );
+	return iomanX_lseek( realfd(fd), offset, whence );
 }
 
 // Function array for fileio structure.

@@ -56,7 +56,7 @@ static int ioctl2AttrDelete(pfs_cache_t *clink, void *arg);
 static int ioctl2AttrLookUp(pfs_cache_t *clink, char *key, char *value);
 static int ioctl2AttrRead(pfs_cache_t *clink, pfs_ioctl2attr_t *attr, u32 *unkbuf);
 
-int pfsFioIoctl(iop_file_t *f, int cmd, void *param)
+int pfsFioIoctl(iomanX_iop_file_t *f, int cmd, void *param)
 {
 	(void)f;
 	(void)cmd;
@@ -65,7 +65,7 @@ int pfsFioIoctl(iop_file_t *f, int cmd, void *param)
 	return -1;
 }
 
-int pfsFioDevctl(iop_file_t *f, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
+int pfsFioDevctl(iomanX_iop_file_t *f, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
 	pfs_mount_t *pfsMount;
 	int rv=0;
@@ -129,7 +129,7 @@ static int ioctl2InvalidateInode(pfs_cache_t *clink)
 }
 #endif
 
-int pfsFioIoctl2(iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
+int pfsFioIoctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
 	int rv;
 	pfs_file_slot_t *fileSlot = (pfs_file_slot_t *)f->privdata;
@@ -138,11 +138,11 @@ int pfsFioIoctl2(iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *b
 	(void)arglen;
 	(void)buflen;
 
-	if(f->mode & O_DIROPEN)
+	if(f->mode & FIO_O_DIROPEN)
 		if(cmd==PIOCATTRREAD)
 			return -EISDIR;
 
-	if(!(f->mode & O_WRONLY))
+	if(!(f->mode & FIO_O_WRONLY))
 	{
 		switch(cmd)
 		{

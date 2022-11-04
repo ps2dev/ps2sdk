@@ -21,43 +21,43 @@
 
 extern int module_start();
 extern int module_stop();
-extern int dvrmisc_df_init(iop_device_t *dev);
-extern int dvrmisc_df_exit(iop_device_t *dev);
-extern int dvrmisc_df_ioctl(iop_file_t *f, int cmd, void *param);
-extern int dvrmisc_df_devctl(iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrmisc_df_ioctl2(iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrmisc_df_init(iomanX_iop_device_t *dev);
+extern int dvrmisc_df_exit(iomanX_iop_device_t *dev);
+extern int dvrmisc_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param);
+extern int dvrmisc_df_devctl(iomanX_iop_file_t *a1, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrmisc_df_ioctl2(iomanX_iop_file_t *f, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int dvrmisc_df_null();
 extern s64 dvrmisc_df_null_long();
-extern int dvrioctl2_nop(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_version(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_led_hdd_rec(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_led_dvd_rec(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_get_sircs(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_get_time(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_set_timezone(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_save_preset_info(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_load_preset_info(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_test_dev_rst(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_test_sdram_chk(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_test_mpe_chk(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_test_mpd_chk(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_test_vdec_chk(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_partition_free(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_buzzer(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_clr_preset_info(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_get_vbi_err_rate(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_update_dvrp_firmware(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_flash_write_status(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_set_device_key(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_get_device_key(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_set_dv_nodeid(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_get_dv_nodeid(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
-extern int dvrioctl2_diag_test(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_nop(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_version(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_led_hdd_rec(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_led_dvd_rec(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_get_sircs(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_get_time(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_set_timezone(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_save_preset_info(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_load_preset_info(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_test_dev_rst(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_test_sdram_chk(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_test_mpe_chk(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_test_mpd_chk(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_test_vdec_chk(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_partition_free(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_buzzer(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_clr_preset_info(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_get_vbi_err_rate(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_update_dvrp_firmware(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_flash_write_status(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_set_device_key(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_get_device_key(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_set_dv_nodeid(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_get_dv_nodeid(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+extern int dvrioctl2_diag_test(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 
 struct DevctlCmdTbl_t
 {
     u16 cmd;
-    int (*fn)(iop_file_t *, int, void *, unsigned int, void *, unsigned int);
+    int (*fn)(iomanX_iop_file_t *, int, void *, unsigned int, void *, unsigned int);
 } DevctlCmdTbl[25] =
     {
         {0x5668, &dvrioctl2_get_sircs},
@@ -86,7 +86,7 @@ struct DevctlCmdTbl_t
         {0x567B, &dvrioctl2_get_dv_nodeid},
         {0x5682, &dvrioctl2_diag_test},
 };
-static iop_device_ops_t DvrFuncTbl =
+static iomanX_iop_device_ops_t DvrFuncTbl =
     {
         &dvrmisc_df_init,
         &dvrmisc_df_exit,
@@ -116,7 +116,7 @@ static iop_device_ops_t DvrFuncTbl =
         &dvrmisc_df_null,
         &dvrmisc_df_ioctl2,
     };
-static iop_device_t DVRMISC = {
+static iomanX_iop_device_t DVRMISC = {
     .name = "dvr_misc",
     .desc = "Digital Video Recorder MISC task",
     .type = (IOP_DT_FS | IOP_DT_FSEXT),
@@ -153,7 +153,7 @@ int module_start()
         printf("MISC task of DVRP is not running...\n");
         return MODULE_NO_RESIDENT_END;
     } else {
-        if (AddDrv(&DVRMISC) != 0)
+        if (iomanX_AddDrv(&DVRMISC) != 0)
             return MODULE_NO_RESIDENT_END;
     }
 #if 0
@@ -165,12 +165,12 @@ int module_start()
 
 int module_stop()
 {
-    if (DelDrv(DVRMISC.name) != 0)
+    if (iomanX_DelDrv(DVRMISC.name) != 0)
         return MODULE_REMOVABLE_END;
     return MODULE_NO_RESIDENT_END;
 }
 
-int dvrmisc_df_init(iop_device_t *dev)
+int dvrmisc_df_init(iomanX_iop_device_t *dev)
 {
     int v1;
     iop_sema_t v3;
@@ -188,7 +188,7 @@ int dvrmisc_df_init(iop_device_t *dev)
     return 0;
 }
 
-int dvrmisc_df_exit(iop_device_t *dev)
+int dvrmisc_df_exit(iomanX_iop_device_t *dev)
 {
     (void)dev;
 
@@ -197,7 +197,7 @@ int dvrmisc_df_exit(iop_device_t *dev)
     return 0;
 }
 
-int dvrmisc_df_ioctl(iop_file_t *f, int cmd, void *param)
+int dvrmisc_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param)
 {
     (void)f;
     (void)cmd;
@@ -209,7 +209,7 @@ int dvrmisc_df_ioctl(iop_file_t *f, int cmd, void *param)
 }
 
 int dvrmisc_df_devctl(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     const char *name,
     int cmd,
     void *arg,
@@ -241,7 +241,7 @@ LABEL_5:
 }
 
 int dvrmisc_df_ioctl2(
-    iop_file_t *f,
+    iomanX_iop_file_t *f,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -271,7 +271,7 @@ s64 dvrmisc_df_null_long()
     return -48LL;
 }
 
-int dvrioctl2_nop(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
+int dvrioctl2_nop(iomanX_iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
 {
     drvdrv_exec_cmd_ack cmdack;
 
@@ -297,7 +297,7 @@ int dvrioctl2_nop(iop_file_t *a1, int cmd, void *arg, unsigned int arglen, void 
 }
 
 int dvrioctl2_version(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -328,7 +328,7 @@ int dvrioctl2_version(
 }
 
 int dvrioctl2_led_hdd_rec(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -359,7 +359,7 @@ int dvrioctl2_led_hdd_rec(
 }
 
 int dvrioctl2_led_dvd_rec(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -390,7 +390,7 @@ int dvrioctl2_led_dvd_rec(
 }
 
 int dvrioctl2_get_sircs(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -424,7 +424,7 @@ int dvrioctl2_get_sircs(
 }
 
 int dvrioctl2_get_time(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -460,7 +460,7 @@ int dvrioctl2_get_time(
 }
 
 int dvrioctl2_set_timezone(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -492,7 +492,7 @@ int dvrioctl2_set_timezone(
 }
 
 int dvrioctl2_save_preset_info(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -522,7 +522,7 @@ int dvrioctl2_save_preset_info(
 }
 
 int dvrioctl2_load_preset_info(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -552,7 +552,7 @@ int dvrioctl2_load_preset_info(
 }
 
 int dvrioctl2_test_dev_rst(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -582,7 +582,7 @@ int dvrioctl2_test_dev_rst(
 }
 
 int dvrioctl2_test_sdram_chk(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -615,7 +615,7 @@ int dvrioctl2_test_sdram_chk(
 }
 
 int dvrioctl2_test_mpe_chk(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -646,7 +646,7 @@ int dvrioctl2_test_mpe_chk(
 }
 
 int dvrioctl2_test_mpd_chk(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -677,7 +677,7 @@ int dvrioctl2_test_mpd_chk(
 }
 
 int dvrioctl2_test_vdec_chk(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -707,7 +707,7 @@ int dvrioctl2_test_vdec_chk(
 }
 
 int dvrioctl2_partition_free(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -724,13 +724,13 @@ int dvrioctl2_partition_free(
     (void)arglen;
     (void)buflen;
 
-    v7 = devctl((const char *)arg, 0x5002, 0, 0, 0, 0);
+    v7 = iomanX_devctl((const char *)arg, 0x5002, 0, 0, 0, 0);
     v8 = v7;
     if (v7 < 0) {
         printf("dvrioctl2_partition_free : Cannot execute PDIOC_ZONEFREE.,%d\n", v7);
         return -5;
     }
-    v9 = devctl((const char *)arg, 0x5001, 0, 0, 0, 0);
+    v9 = iomanX_devctl((const char *)arg, 0x5001, 0, 0, 0, 0);
     v10 = v8 * (s64)v9;
     if (v9 < 0) {
         printf("dvrioctl2_partition_free : Cannot execute PDIOC_ZONESZ.,%d\n", v9);
@@ -748,7 +748,7 @@ int dvrioctl2_partition_free(
 }
 
 int dvrioctl2_buzzer(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -779,7 +779,7 @@ int dvrioctl2_buzzer(
 }
 
 int dvrioctl2_clr_preset_info(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -811,7 +811,7 @@ int dvrioctl2_clr_preset_info(
 }
 
 int dvrioctl2_get_vbi_err_rate(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -844,7 +844,7 @@ int dvrioctl2_get_vbi_err_rate(
 }
 
 int dvrioctl2_update_dvrp_firmware(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -867,13 +867,13 @@ int dvrioctl2_update_dvrp_firmware(
     read_offset = 0;
     checksum = 0;
     retval = -1;
-    update_fd = open((const char *)arg, 1, 0x49, arglen);
+    update_fd = iomanX_open((const char *)arg, 1, 0x49, arglen);
     if (update_fd < 0) {
         retval = -2;
         goto LABEL_38;
     }
-    update_size = lseek(update_fd, 0, 2);
-    if (lseek(update_fd, 0, 0) < 0)
+    update_size = iomanX_lseek(update_fd, 0, 2);
+    if (iomanX_lseek(update_fd, 0, 0) < 0)
         goto LABEL_38;
     cmdack.command = 0x5114;
     cmdack.input_word[0] = update_size >> 16;
@@ -906,7 +906,7 @@ int dvrioctl2_update_dvrp_firmware(
             --i;
             --v13;
         } while (i >= 0);
-        read_size = read(update_fd, SBUF, 0x4000);
+        read_size = iomanX_read(update_fd, SBUF, 0x4000);
         if (read_size <= 0)
             break;
         cmdack.command = 0x5115;
@@ -971,12 +971,12 @@ int dvrioctl2_update_dvrp_firmware(
     }
     retval = -68;
 LABEL_38:
-    close(update_fd);
+    iomanX_close(update_fd);
     return retval;
 }
 
 int dvrioctl2_flash_write_status(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -1007,7 +1007,7 @@ int dvrioctl2_flash_write_status(
 }
 
 int dvrioctl2_set_device_key(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -1108,7 +1108,7 @@ int dvrioctl2_set_device_key(
 }
 
 int dvrioctl2_get_device_key(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -1226,7 +1226,7 @@ int dvrioctl2_get_device_key(
 }
 
 int dvrioctl2_set_dv_nodeid(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -1273,7 +1273,7 @@ int dvrioctl2_set_dv_nodeid(
 }
 
 int dvrioctl2_get_dv_nodeid(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,
@@ -1328,7 +1328,7 @@ int dvrioctl2_get_dv_nodeid(
 int test_count = 0;
 
 int dvrioctl2_diag_test(
-    iop_file_t *a1,
+    iomanX_iop_file_t *a1,
     int cmd,
     void *arg,
     unsigned int arglen,

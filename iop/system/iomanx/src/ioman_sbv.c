@@ -14,6 +14,7 @@
  * Advanced I/O library.
  */
 
+#ifdef IOMANX_ENABLE_LEGACY_IOMAN_HOOK
 #include <stdarg.h>
 
 #include "types.h"
@@ -30,8 +31,8 @@
 #define MAX_DEVICES 32
 #define MAX_FILES   32
 
-iop_device_t **dev_list;
-extern iop_file_t file_table[MAX_FILES];
+iomanX_iop_device_t **dev_list;
+extern iomanX_iop_file_t file_table[MAX_FILES];
 
 static const char *ioman_modname = "IO/File_Manager";
 
@@ -113,7 +114,7 @@ static u32 Addr_IOMAN_DelDrv = 0;
 #ifndef FULL_IOMAN
 
 /* This is called by a module wanting to add a device to legacy ioman.  */
-static int sbv_AddDrv(iop_device_t *device)
+static int sbv_AddDrv(iomanX_iop_device_t *device)
 {
 	int res;
 
@@ -121,7 +122,7 @@ static int sbv_AddDrv(iop_device_t *device)
 	res = AddDrv(device);
 
 	if (Addr_IOMAN_AddDrv)
-        return(((int (*)(iop_device_t *device)) (Addr_IOMAN_AddDrv))(device));
+        return(((int (*)(iomanX_iop_device_t *device)) (Addr_IOMAN_AddDrv))(device));
 
 	return res;
 }
@@ -147,21 +148,21 @@ static int sbv_DelDrv(const char *name)
 
 int ioman_open(const char *name, u32 flags)
 {
-    return(open(name, flags, 0644));
+    return(iomanX_open(name, flags, 0644));
 }
 
 int ioman_mkdir(const char *name)
 {
-    return(mkdir(name, 0755));
+    return(iomanX_mkdir(name, 0755));
 }
 
 // legacy format only takes one arg
 int ioman_format(const char *dev)
 {
-    return(format(dev, NULL, NULL, 0));
+    return(iomanX_format(dev, NULL, NULL, 0));
 }
 
-iop_file_t *get_file(int fd);
+iomanX_iop_file_t *get_file(int fd);
 
 int mode2modex(int mode);
 int modex2mode(int mode);
@@ -190,7 +191,7 @@ static void stat2statx(io_stat_t* stat, iox_stat_t *iox_stat)
 
 int ioman_dread(int fd, io_dirent_t *io_dirent)
 {
-    iop_file_t *f = get_file(fd);
+    iomanX_iop_file_t *f = get_file(fd);
     int res;
 
     if (f == NULL ||  !(f->mode & 8))
@@ -209,7 +210,7 @@ int ioman_dread(int fd, io_dirent_t *io_dirent)
     }
     else
     {
-        typedef int	io_dread_t(iop_file_t *, io_dirent_t *);
+        typedef int	io_dread_t(iomanX_iop_file_t *, io_dirent_t *);
         io_dread_t *io_dread = (io_dread_t*) f->device->ops->dread;
         res = io_dread(f, io_dirent);
     }
@@ -220,7 +221,7 @@ int ioman_dread(int fd, io_dirent_t *io_dirent)
 int ioman_getstat(const char *name, io_stat_t *stat)
 {
     iox_stat_t iox_stat;
-    int res = getstat(name, &iox_stat);
+    int res = iomanX_getstat(name, &iox_stat);
     if (res == 0)
         statx2stat(&iox_stat, stat);
     return res;
@@ -230,7 +231,7 @@ int ioman_chstat(const char *name, io_stat_t *stat, unsigned int mask)
 {
     iox_stat_t iox_stat;
     stat2statx(stat, &iox_stat);
-    return chstat(name, &iox_stat, mask);
+    return iomanX_chstat(name, &iox_stat, mask);
 }
 
 #endif
@@ -240,15 +241,15 @@ int hook_ioman(void)
 	iop_library_t ioman_library = { NULL, NULL, 0x102, 0, "ioman\0\0" };
 	ModuleInfo_t info;
 
-    dev_list = GetDeviceList();
+    dev_list = iomanX_GetDeviceList();
 
 	if (smod_get_mod_by_name(ioman_modname, &info))
 	{
         // steal the original IOMAN's 16 registered device entries
-        memcpy(dev_list, (void *) (info.text_start + info.text_size + info.data_size + 0x10), sizeof(iop_device_t *) * 16);
+        memcpy(dev_list, (void *) (info.text_start + info.text_size + info.data_size + 0x10), sizeof(iomanX_iop_device_t *) * 16);
 
         // steal the original IOMAN's 16 file descriptors
-        memcpy(file_table, (void *) (info.text_start + info.text_size + info.data_size + 0x50), sizeof(iop_file_t) * 16);
+        memcpy(file_table, (void *) (info.text_start + info.text_size + info.data_size + 0x50), sizeof(iomanX_iop_file_t) * 16);
 	}
 	else { return(-1); }
 
@@ -276,22 +277,22 @@ int hook_ioman(void)
 
 #ifdef FULL_IOMAN
 		ioman_exports[4] = (u32) ioman_open;
-		ioman_exports[5] = (u32) close;
-		ioman_exports[6] = (u32) read;
-		ioman_exports[7] = (u32) write;
-		ioman_exports[8] = (u32) lseek;
-		ioman_exports[9] = (u32) ioctl;
-		ioman_exports[10] = (u32) remove;
+		ioman_exports[5] = (u32) iomanX_close;
+		ioman_exports[6] = (u32) iomanX_read;
+		ioman_exports[7] = (u32) iomanX_write;
+		ioman_exports[8] = (u32) iomanX_lseek;
+		ioman_exports[9] = (u32) iomanX_ioctl;
+		ioman_exports[10] = (u32) iomanX_remove;
 		ioman_exports[11] = (u32) ioman_mkdir;
-		ioman_exports[12] = (u32) rmdir;
-		ioman_exports[13] = (u32) dopen;
-		ioman_exports[14] = (u32) close;
+		ioman_exports[12] = (u32) iomanX_rmdir;
+		ioman_exports[13] = (u32) iomanX_dopen;
+		ioman_exports[14] = (u32) iomanX_close;
 		ioman_exports[15] = (u32) ioman_dread;
 		ioman_exports[16] = (u32) ioman_getstat;
 		ioman_exports[17] = (u32) ioman_chstat;
 		ioman_exports[18] = (u32) ioman_format;
-		ioman_exports[20] = (u32) AddDrv;
-		ioman_exports[21] = (u32) DelDrv;
+		ioman_exports[20] = (u32) iomanX_AddDrv;
+		ioman_exports[21] = (u32) iomanX_DelDrv;
 #else
 		ioman_exports[20] = (u32) sbv_AddDrv;
 		ioman_exports[21] = (u32) sbv_DelDrv;
@@ -309,7 +310,7 @@ int unhook_ioman()
 {
 	int i;
 
-    dev_list = GetDeviceList();
+    dev_list = iomanX_GetDeviceList();
 
 	/* Remove all registered devices.  */
 	for (i = 0; i < MAX_DEVICES; i++) {
@@ -344,3 +345,4 @@ int unhook_ioman()
 
 	return 0;
 }
+#endif

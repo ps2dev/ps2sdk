@@ -36,7 +36,7 @@ IRX_ID("pfs_driver", PFS_MAJOR, PFS_MINOR);
 ///////////////////////////////////////////////////////////////////////////////
 //	Globals
 
-static iop_device_ops_t pfsOps = {
+static iomanX_iop_device_ops_t pfsOps = {
 	&pfsFioInit,
 	&pfsFioDeinit,
 	&pfsFioFormat,
@@ -66,7 +66,7 @@ static iop_device_ops_t pfsOps = {
 	&pfsFioIoctl2,
 };
 
-static iop_device_t pfsFioDev = {
+static iomanX_iop_device_t pfsFioDev = {
 	"pfs",
 	(IOP_DT_FS | IOP_DT_FSEXT),
 	1,
@@ -224,8 +224,8 @@ int PFS_ENTRYPOINT(int argc, char *argv[])
 	if(pfsCacheInit(numBuf, pfsMetaSize) < 0)
 		return MODULE_NO_RESIDENT_END;
 
-	DelDrv(pfsFioDev.name);
-	if(AddDrv(&pfsFioDev) == 0) {
+	iomanX_DelDrv(pfsFioDev.name);
+	if(iomanX_AddDrv(&pfsFioDev) == 0) {
 #if defined(PFS_XOSD_VER)
 		PFS_PRINTF(PFS_DRV_NAME" version %04x driver start. This is OSD LBA48 VERSION !!!!!!!!!!!\n", IRX_VER(PFS_MAJOR, PFS_MINOR));
 #elif defined(PFS_OSD_VER)
