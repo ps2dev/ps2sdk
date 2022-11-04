@@ -24,11 +24,11 @@
 typedef int (*McCommandHandler_t)(int port, int slot, sio2_transfer_data_t *sio2_trans_data);
 typedef int (*McDevIDHandler_t)(int port, int slot);
 
-void SecrSetMcCommandHandler(McCommandHandler_t handler);
-void SecrSetMcDevIDHandler(McDevIDHandler_t handler);
+extern void SecrSetMcCommandHandler(McCommandHandler_t handler);
+extern void SecrSetMcDevIDHandler(McDevIDHandler_t handler);
 
-int SecrAuthCard(int port, int slot, int cnum);
-void SecrResetAuthCard(int port, int slot, int cnum);
+extern int SecrAuthCard(int port, int slot, int cnum);
+extern void SecrResetAuthCard(int port, int slot, int cnum);
 
 #define secrman_IMPORTS_start DECLARE_IMPORT_TABLE(secrman, 1, 3)
 #define secrman_IMPORTS_end END_IMPORT_TABLE

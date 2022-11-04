@@ -6,25 +6,11 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = \
-	cdvd \
-	debug \
-	dev9 \
-	dvrp \
-	fs \
-	hdd \
-	iLink \
-	kernel \
-	memorycard \
-	network \
-	security \
-	sio \
-	sound \
-	startup \
-	system \
-	tcpip \
-	usb
+EE_LIB = libsecr.a
+
+EE_OBJS = libsecr.o erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
-include $(PS2SDKSRC)/iop/Rules.release
+include $(PS2SDKSRC)/ee/Rules.lib.make
+include $(PS2SDKSRC)/ee/Rules.make
+include $(PS2SDKSRC)/ee/Rules.release

@@ -63,19 +63,19 @@ typedef struct KELF_Header
     u32 mg_zones;
 } SecrKELFHeader_t;
 
-int SecrCardBootHeader(int port, int slot, void *buffer, SecrBitTable_t *BitTable, s32 *pSize);
-int SecrCardBootBlock(void *src, void *dst, unsigned int size);
-void *SecrCardBootFile(int port, int slot, void *buffer);
-int SecrDiskBootHeader(void *buffer, SecrBitTable_t *BitTable, s32 *pSize);
-int SecrDiskBootBlock(void *src, void *dst, unsigned int size);
-void *SecrDiskBootFile(void *buffer);
+extern int SecrCardBootHeader(int port, int slot, void *buffer, SecrBitTable_t *BitTable, s32 *pSize);
+extern int SecrCardBootBlock(void *src, void *dst, unsigned int size);
+extern void *SecrCardBootFile(int port, int slot, void *buffer);
+extern int SecrDiskBootHeader(void *buffer, SecrBitTable_t *BitTable, s32 *pSize);
+extern int SecrDiskBootBlock(void *src, void *dst, unsigned int size);
+extern void *SecrDiskBootFile(void *buffer);
 
 /* FOLLOWING EXPORTS ARE ONLY AVAILABLE IN SPECIAL SECRMAN OR FREESECR */
-int SecrDownloadHeader(int port, int slot, void *buffer, SecrBitTable_t *BitTable, s32 *pSize);
-int SecrDownloadBlock(void *src, unsigned int size);
-void *SecrDownloadFile(int port, int slot, void *buffer);
-int SecrDownloadGetKbit(int port, int slot, void *kbit);
-int SecrDownloadGetKc(int port, int slot, void *kbit);
-int SecrDownloadGetICVPS2(void *icvps2);
+extern int SecrDownloadHeader(int port, int slot, void *buffer, SecrBitTable_t *BitTable, s32 *pSize);
+extern int SecrDownloadBlock(void *src, unsigned int size);
+extern void *SecrDownloadFile(int port, int slot, void *buffer);
+extern int SecrDownloadGetKbit(int port, int slot, void *kbit);
+extern int SecrDownloadGetKc(int port, int slot, void *kbit);
+extern int SecrDownloadGetICVPS2(void *icvps2);
 
 #endif /* __LIBSECR_COMMON_H__ */
