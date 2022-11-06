@@ -30,6 +30,8 @@ extern int (*_ps2sdk_mkdir)(const char*, int);
 extern int (*_ps2sdk_rmdir)(const char*);
 
 extern int (*_ps2sdk_stat)(const char *path, struct stat *buf);
+extern int (*_ps2sdk_readlink)(const char *path, char *buf, size_t bufsiz);
+extern int (*_ps2sdk_symlink)(const char *target, const char *linkpath);
 
 extern DIR * (*_ps2sdk_opendir)(const char *path);
 extern struct dirent * (*_ps2sdk_readdir)(DIR *dir);
