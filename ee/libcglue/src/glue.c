@@ -669,3 +669,71 @@ int truncate(const char *path, off_t length)
 	return 0;
 }
 #endif
+
+#ifdef F_symlink
+static int _default_symlink(const char *target, const char *linkpath)
+{
+	return link(target, linkpath);
+}
+
+int (*_ps2sdk_symlink)(const char *target, const char *linkpath) = _default_symlink;
+
+int symlink(const char *target, const char *linkpath)
+{
+  return _ps2sdk_symlink(target, linkpath);
+}
+#endif
+
+#ifdef F_readlink
+static ssize_t _default_readlink(const char *path, char *buf, size_t bufsiz)
+{
+	errno = ENOSYS;
+	return -1; /* not supported */
+}
+
+int (*_ps2sdk_readlink)(const char *path, char *buf, size_t bufsiz) = _default_readlink;
+
+ssize_t readlink(const char *path, char *buf, size_t bufsiz)
+{
+	return 	_ps2sdk_readlink(path, buf, bufsiz);
+}
+#endif
+
+#ifdef F__isatty
+int _isatty(int fd)
+{
+	errno = ENOTTY;
+	return -1; /* not supported */
+}
+#endif
+
+#ifdef F_chmod
+int chmod(const char *pathname, mode_t mode)
+{
+	errno = ENOTTY;
+	return -1; /* not supported */
+}
+#endif
+
+#ifdef F_fchmod
+int fchmod(int fd, mode_t mode)
+{
+	errno = ENOTTY;
+	return -1; /* not supported */
+}
+#endif
+
+#ifdef F_fchmodat
+int fchmodat(int fd, const char *path, mode_t mode, int flag)
+{
+	return chmod(path, mode);
+}
+#endif
+
+#ifdef F_pathconf
+long int pathconf(const char *path, int name)
+{
+	errno = ENOSYS;
+	return -1; /* not supported */
+}
+#endif
