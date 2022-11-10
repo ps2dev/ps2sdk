@@ -12,6 +12,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
+    - name: clone custom doxygen CSS
+      run: |
+         git clone https://github.com/jothepro/doxygen-awesome-css
+
     - name: Doxygen documentation generation
       uses: mattnotmitt/doxygen-action@v1
 
