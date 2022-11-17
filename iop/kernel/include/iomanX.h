@@ -189,8 +189,13 @@ extern void iomanX_StdioInit(int mode);
 #define I_iomanX_symlink DECLARE_IMPORT(32, iomanX_symlink)
 #define I_iomanX_readlink DECLARE_IMPORT(33, iomanX_readlink)
 #define I_iomanX_ioctl2 DECLARE_IMPORT(34, iomanX_ioctl2)
+#if IOMANX_OLD_NAME_ADDDELDRV
+#define I_AddDrv DECLARE_IMPORT(20, AddDrv)
+#define I_DelDrv DECLARE_IMPORT(21, DelDrv)
+#else
 #define I_iomanX_AddDrv DECLARE_IMPORT(20, iomanX_AddDrv)
 #define I_iomanX_DelDrv DECLARE_IMPORT(21, iomanX_DelDrv)
+#endif
 #define I_iomanX_StdioInit DECLARE_IMPORT(23, iomanX_StdioInit)
 #endif
 
@@ -365,8 +370,10 @@ static inline void StdioInit(int mode)
 #define I_symlink I_iomanX_symlink
 #define I_readlink I_iomanX_readlink
 #define I_ioctl2 I_iomanX_ioctl2
+#if !IOMANX_OLD_NAME_ADDDELDRV
 #define I_AddDrv I_iomanX_AddDrv
 #define I_DelDrv I_iomanX_DelDrv
+#endif
 #define I_StdioInit I_iomanX_StdioInit
 #endif
 
