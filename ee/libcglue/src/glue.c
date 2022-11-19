@@ -18,9 +18,12 @@
 #include <stdlib.h>
 #include <sio.h>
 
+#include <pwd.h>
 #include <time.h>
 #include <sys/time.h>
+#include <sys/timeb.h>
 #include <sys/times.h>
+#include <sys/utime.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -46,6 +49,13 @@ extern void * _end;
 char __direct_pwd[256] = "";
 #else
 extern char __direct_pwd[256];
+#endif
+
+#ifdef F___dummy_passwd
+/* the present working directory variable. */
+struct passwd __dummy_passwd = { "ps2_user", "xxx", 1000, 1000, "", "", "/", "" };
+#else
+extern struct passwd __dummy_passwd;
 #endif
 
 #ifdef F___transform_errno
@@ -359,6 +369,12 @@ int _stat(const char *path, struct stat *buf) {
 }
 #endif
 
+#ifdef F_lstat
+int lstat(const char *path, struct stat *buf) {
+    return stat(path, buf);
+}
+#endif
+
 #ifdef F_access
 int access(const char *fn, int flags) {
 	struct stat s;
@@ -581,6 +597,20 @@ int _kill(int pid, int sig) {
 }
 #endif
 
+#ifdef F__fork
+pid_t _fork(void) {
+	errno = ENOSYS;
+	return (pid_t) -1; /* not supported */
+}
+#endif
+
+#ifdef F__wait
+pid_t _wait(int *unused) {
+	errno = ENOSYS;
+	return (pid_t) -1; /* not supported */
+}
+#endif
+
 #ifdef F__sbrk
 void * _sbrk(size_t incr) {
 	static void * _heap_ptr = &_end;
@@ -637,6 +667,57 @@ clock_t _times(struct tms *buffer) {
 	}
 
 	return clk;
+}
+#endif
+
+#ifdef F_ftime
+int ftime(struct timeb *tb) {
+	struct timeval tv;
+	struct timezone tz;
+
+	gettimeofday(&tv, &tz);
+
+	tb->time = tv.tv_sec;
+	tb->millitm = tv.tv_usec / 1000;
+	tb->timezone = tz.tz_minuteswest;
+	tb->dstflag = tz.tz_dsttime;
+
+	return 0;
+}
+#endif
+
+#ifdef F_clock_getres
+int clock_getres(clockid_t clk_id, struct timespec *res) {
+	struct timeval tv;
+
+	gettimeofday(&tv, NULL);
+
+	/* Return the actual time since epoch */
+	res->tv_sec = tv.tv_sec;
+	res->tv_nsec = 0;
+
+	return 0;
+}
+#endif
+
+#ifdef F_clock_gettime
+int clock_gettime(clockid_t clk_id, struct timespec *tp) {
+	struct timeval tv;
+
+	gettimeofday(&tv, NULL);
+
+	/* Return the actual time since epoch */
+	tp->tv_sec = tv.tv_sec;
+	tp->tv_nsec = 0;
+
+	return 0;
+}
+#endif
+
+#ifdef F_clock_settime
+int clock_settime(clockid_t clk_id, const struct timespec *tp) {
+	// TODO: implement using sceCdWriteClock
+	return 0;
 }
 #endif
 
@@ -699,6 +780,42 @@ ssize_t readlink(const char *path, char *buf, size_t bufsiz)
 }
 #endif
 
+#ifdef F_utime
+int utime(const char *pathname, const struct utimbuf *times)
+{
+	// TODO: implement in terms of chstat
+	errno = ENOSYS;
+	return -1; /* not supported */
+}
+#endif
+
+#ifdef F_fchown
+int fchown(int fd, uid_t owner, gid_t group)
+{
+	errno = ENOSYS;
+	return -1; /* not supported */
+}
+#endif
+
+#ifdef F_getentropy
+int getentropy(void *buf, size_t buflen)
+{
+	// Restrict buffer size as documented in the man page
+	if (buflen > 256)
+	{
+		errno = EIO;
+		return -1;
+	}
+	// TODO: get proper entropy from e.g.
+	// * RTC
+	// * performance counter
+	// * uninitialized memory
+	// * Mechacon temperature
+	memset(buf, 13, buflen);
+	return 0;
+}
+#endif
+
 #ifdef F__isatty
 int _isatty(int fd)
 {
@@ -735,5 +852,38 @@ long int pathconf(const char *path, int name)
 {
 	errno = ENOSYS;
 	return -1; /* not supported */
+}
+#endif
+
+#ifdef F_fsync
+int fsync(int fd) {
+	// TODO: implement in terms of sync
+	return 0;
+}
+#endif
+
+#ifdef F_getuid
+uid_t getuid(void) {
+	return __dummy_passwd.pw_uid;
+}
+#endif
+
+#ifdef F_geteuid
+uid_t geteuid(void) {
+	return __dummy_passwd.pw_uid;
+}
+#endif
+
+#ifdef F_getpwuid
+struct passwd *getpwuid(uid_t uid) {
+	/* There's no support for users */
+	return &__dummy_passwd;
+}
+#endif
+
+#ifdef F_getpwnam
+struct passwd *getpwnam(const char *name) {
+	/* There's no support for users */
+	return &__dummy_passwd;
 }
 #endif
