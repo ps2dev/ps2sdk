@@ -53,6 +53,13 @@ include $(PS2SDKSRC)/iop/Rules.bin.make
 include $(PS2SDKSRC)/iop/Rules.make
 include $(PS2SDKSRC)/iop/Rules.release
 
+$(LWIP):
+	$(MAKEREC) $(PS2SDKSRC)/common/external_deps all
+
+$(IOP_OBJS_DIR)ps2ip.o $(IOP_OBJS_DIR)sys_arch.o: $(LWIP)
+
+$(LWIP)/%.c: $(LWIP)
+
 $(IOP_OBJS_DIR)def.o: $(LWIP)/src/core/def.c
 	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
