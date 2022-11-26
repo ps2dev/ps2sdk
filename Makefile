@@ -21,7 +21,7 @@ all: build
 
 # Common rules shared by all build targets.
 
-.PHONY: dummy
+.PHONY: dummy build clean_dependencies docs download_dependencies env_build_check env_release_check install rebuild release release_base subdirs
 
 # Use SUBDIRS to descend into subdirectories.
 subdir_list  = $(patsubst %,all-%,$(SUBDIRS))
@@ -37,12 +37,12 @@ $(subdir_release): dummy
 	$(MAKEREC) $(patsubst release-%,%,$@) release
 
 
-build: env_build_check download_dependencies $(subdir_list)
+build: $(subdir_list) | env_build_check download_dependencies
 
 debug:
 	$(MAKE) DEBUG=1 all
 
-clean: env_build_check clean_dependencies $(subdir_clean)
+clean: $(subdir_clean) | env_build_check clean_dependencies
 
 release-clean:
 	+$(MAKE) -C common release-clean
@@ -51,7 +51,7 @@ release-clean:
 	+$(MAKE) -C samples release-clean
 	+$(MAKE) -C tools release-clean
 
-rebuild: env_build_check clean_dependencies $(subdir_clean) download_dependencies $(subdir_list)
+rebuild: build | clean
 
 $(PS2SDK)/common/include:
 	$(MKDIR) -p $(PS2SDK)/common
@@ -61,7 +61,7 @@ $(PS2SDK)/common/include:
 $(PS2SDK)/ports:
 	$(MKDIR) -p $(PS2SDK)/ports
 
-install: release
+install: | release
 
 release: | build
 	$(MAKE) release_base
@@ -70,7 +70,7 @@ release: | build
 	$(MAKE) $(PS2SDK)/ports
 	$(MAKE) $(subdir_release)
 
-release_base: env_release_check
+release_base: | env_release_check
 	@if test ! -d $(PS2SDK) ; then \
 	  $(MKDIR) -p $(PS2SDK) ; \
 	fi
@@ -94,13 +94,11 @@ env_release_check:
 	  exit 1; \
 	fi
 
-clean_dependencies:
-	$(ECHO) Cleaning PS2SDK dependencies.
-	$(ECHO) Cleaning lwip.
-	rm -rf $(PS2SDKSRC)/common/external_deps/lwip
-
 download_dependencies:
-	./dowload_dependencies.sh
+	$(MAKEREC) $(PS2SDKSRC)/common/external_deps all
+
+clean_dependencies:
+	$(MAKEREC) $(PS2SDKSRC)/common/external_deps clean
 
 docs:
 	doxygen

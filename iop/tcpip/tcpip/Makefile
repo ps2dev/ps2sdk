@@ -10,6 +10,7 @@
 PS2IP_DHCP = 1
 PS2IP_DNS = 1
 
+# Change this to point to the version of LWIP this is being compiled with.
 LWIP = $(PS2SDKSRC)/common/external_deps/lwip
 PS2IP_BASE = $(PS2SDKSRC)/iop/tcpip/tcpip-base
 
@@ -33,7 +34,9 @@ endif
 
 IOP_INCS += -I$(LWIP)/src/include -I$(LWIP)/src/include/ipv4 -I$(PS2IP_BASE)/include
 
-ps2ip_OBJECTS = ps2ip.o sys.o sys_arch.o init.o exports.o imports.o mem.o netif.o pbuf.o stats.o tcp_in.o tcp_out.o udp.o memp.o tcp.o etharp.o ethernet.o raw.o def.o timeouts.o
+ps2api_OBJECTS = api_lib.o api_msg.o api_netbuf.o err.o sockets.o tcpip.o
+ps2api_IPV4 = icmp.o ip.o ip4.o ip4_addr.o ip4_frag.o inet_chksum.o
+ps2ip_OBJECTS = sys.o lwip_init.o mem.o netif.o pbuf.o stats.o tcp_in.o tcp_out.o udp.o memp.o tcp.o ethernet.o etharp.o raw.o def.o timeouts.o $(ps2api_IPV4) $(ps2api_OBJECTS)
 
 ifdef PS2IP_DHCP
 ps2ip_OBJECTS += dhcp.o
@@ -43,27 +46,33 @@ ifdef PS2IP_DNS
 ps2ip_OBJECTS += dns.o netdb.o
 endif
 
-ps2api_OBJECTS = api_lib.o api_msg.o err.o sockets.o tcpip.o netbuf.o
-
-ps2api_IPV4 = icmp.o ip.o ip4.o ip4_addr.o ip4_frag.o inet_chksum.o
-
-IOP_OBJS = $(ps2ip_OBJECTS) $(ps2api_OBJECTS) $(ps2api_IPV4)
+IOP_OBJS = ps2ip.o sys_arch.o exports.o imports.o $(ps2ip_OBJECTS)
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make
 include $(PS2SDKSRC)/iop/Rules.make
 include $(PS2SDKSRC)/iop/Rules.release
 
+$(LWIP):
+	$(MAKEREC) $(PS2SDKSRC)/common/external_deps all
+
+$(IOP_OBJS_DIR)ps2ip.o $(IOP_OBJS_DIR)sys_arch.o: $(LWIP)
+
+$(LWIP)/%.c: $(LWIP)
+
 $(IOP_OBJS_DIR)def.o: $(LWIP)/src/core/def.c
 	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
-$(IOP_OBJS_DIR)init.o: $(LWIP)/src/core/init.c
+$(IOP_OBJS_DIR)lwip_init.o: $(LWIP)/src/core/init.c
 	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 $(IOP_OBJS_DIR)api_lib.o: $(LWIP)/src/api/api_lib.c
 	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 $(IOP_OBJS_DIR)api_msg.o: $(LWIP)/src/api/api_msg.c
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
+
+$(IOP_OBJS_DIR)api_netbuf.o: $(LWIP)/src/api/netbuf.c
 	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 $(IOP_OBJS_DIR)icmp.o: $(LWIP)/src/core/ipv4/icmp.c
@@ -97,9 +106,6 @@ $(IOP_OBJS_DIR)mem.o: $(LWIP)/src/core/mem.c
 	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 $(IOP_OBJS_DIR)memp.o: $(LWIP)/src/core/memp.c
-	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
-
-$(IOP_OBJS_DIR)netbuf.o: $(LWIP)/src/api/netbuf.c
 	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
 $(IOP_OBJS_DIR)netif.o: $(LWIP)/src/core/netif.c
@@ -153,3 +159,4 @@ $(IOP_OBJS_DIR)udp.o: $(LWIP)/src/core/udp.c
 
 $(IOP_OBJS_DIR)sys_arch.o: $(PS2IP_BASE)/sys_arch.c
 	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
+
