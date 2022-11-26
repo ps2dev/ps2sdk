@@ -34,6 +34,8 @@
 
 #
 obj/
+ee_obj/
+iop_obj/
 ee/erl-loader/src/exports.c
 tools/**/bin/
 docs/
