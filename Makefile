@@ -94,13 +94,11 @@ env_release_check:
 	  exit 1; \
 	fi
 
-clean_dependencies:
-	$(ECHO) Cleaning PS2SDK dependencies.
-	$(ECHO) Cleaning lwip.
-	rm -rf $(PS2SDKSRC)/common/external_deps/lwip
-
 download_dependencies:
-	./dowload_dependencies.sh
+	$(MAKEREC) $(PS2SDKSRC)/common/external_deps all
+
+clean_dependencies:
+	$(MAKEREC) $(PS2SDKSRC)/common/external_deps clean
 
 docs:
 	doxygen
