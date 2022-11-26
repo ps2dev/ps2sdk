@@ -1,6 +1,18 @@
 #!/bin/bash
 # download_depdencies.sh by Francisco Javier Trujillo Mata (fjtrujy@gmail.com)
 
+## Protect reentrancy of this script if possible
+if [ "x$1" != "xlocked" ]; then
+  if command -v flock > /dev/null; then
+    flock "$0" "$BASH" "$0" locked
+    exit $?
+  fi
+  if command -v perl > /dev/null; then
+    perl -MFcntl=:flock -e '$|=1; $f=shift; open(FH,$f) || die($!); flock(FH,LOCK_EX); my $exit_value = system(@ARGV); flock(FH,LOCK_UN); exit($exit_value);' "$0" "$BASH" "$0" locked
+    exit $?
+  fi
+fi
+
 ## Download LWIP
 REPO_URL="https://github.com/ps2dev/lwip.git"
 REPO_FOLDER="common/external_deps/lwip"
