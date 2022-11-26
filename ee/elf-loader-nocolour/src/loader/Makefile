@@ -6,13 +6,13 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = erl kernel libcglue libpthreadglue rpc startup debug \
-	eedebug sbv dma graph math3d \
-	packet packet2 draw libgs \
-	libvux font input inputx network iopreboot \
-	mpeg \
-	elf-loader elf-loader-nocolour
+EE_SRC_DIR = $(PS2SDKSRC)/ee/elf-loader/src/loader/src/
+EE_INC_DIR = $(PS2SDKSRC)/ee/elf-loader/src/loader/include/
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
-include $(PS2SDKSRC)/ee/Rules.release
+LOADER_ENABLE_DEBUG_COLORS ?= 0
+
+EE_LINKFILE ?= $(PS2SDKSRC)/ee/elf-loader/src/loader/linkfile
+
+EE_BIN ?= loader.elf
+
+include $(PS2SDKSRC)/ee/elf-loader/src/loader/Makefile

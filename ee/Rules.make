@@ -13,7 +13,21 @@ EE_SRC_DIR ?= src/
 EE_INC_DIR ?= include/
 EE_SAMPLE_DIR ?= samples/
 
+# Helpers to make easy the use of newlib-nano
+EE_NEWLIB_NANO ?= 0
+EE_COMPACT_EXECUTABLE ?= 0
+
+EE_NANO_NEWLIB_LIBS ?= $(PS2SDKSRC)/ee/rpc/cdvd/lib/libcdvd.a $(PS2SDKSRC)/ee/libcglue/lib/libcglue.a $(PS2SDKSRC)/ee/kernel/lib/libkernel.a
+
+ifneq (x$(EE_NEWLIB_NANO), x0)
+EE_ADDITIONAL_DEPS := $(EE_ADDITIONAL_DEPS) $(EE_NANO_NEWLIB_LIBS)
+endif
+
 EE_INCS := $(EE_INCS) -I$(EE_SRC_DIR) -I$(EE_SRC_DIR)include -I$(EE_INC_DIR) -I$(PS2SDKSRC)/ee/kernel/include -I$(PS2SDKSRC)/common/include -I$(PS2SDKSRC)/ee/libcglue/include -I$(PS2SDKSRC)/ee/erl/include
+
+ifneq (x$(EE_COMPACT_EXECUTABLE), x0)
+EE_OPTFLAGS ?= -Os
+endif
 
 # Optimization compiler flags
 EE_OPTFLAGS ?= -O2
@@ -44,24 +58,24 @@ EE_SAMPLES := $(EE_SAMPLES:%=$(EE_SAMPLE_DIR)%)
 
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
+EE_LINKFILE ?= $(PS2SDKSRC)/ee/startup/src/linkfile
+
+EE_BIN_MAPFILE ?= $(shell basename $(CURDIR)).map
+
+ifneq (x$(EE_COMPACT_EXECUTABLE), x0)
+EE_LDFLAGS += -Wl,-zmax-page-size=128 -s -Wl,--gc-sections
+EE_CFLAGS += -fdata-sections -ffunction-sections
+endif
+
+ifneq (x$(EE_NEWLIB_NANO), x0)
+EE_LDFLAGS := $(EE_LDFLAGS) -nodefaultlibs -lm_nano -lgcc -Wl,--start-group -lc_nano $(EE_NANO_NEWLIB_LIBS) -Wl,--end-group
+endif
+
 # Externally defined variables: EE_BIN, EE_OBJS, EE_LIB
 
 # These macros can be used to simplify certain build rules.
 EE_C_COMPILE = $(EE_CC) $(EE_CFLAGS)
 EE_CXX_COMPILE = $(EE_CXX) $(EE_CXXFLAGS)
-
-# Extra macro for disabling the automatic inclusion of the built-in CRT object(s)
-ifeq ($(EE_CC_VERSION),3.2.2)
-	EE_NO_CRT = -mno-crt0
-else ifeq ($(EE_CC_VERSION),3.2.3)
-	EE_NO_CRT = -mno-crt0
-else
-	EE_NO_CRT = -nostartfiles
-	CRTBEGIN_OBJ := $(shell $(EE_CC) $(CFLAGS) -print-file-name=crtbegin.o)
-	CRTEND_OBJ := $(shell $(EE_CC) $(CFLAGS) -print-file-name=crtend.o)
-	CRTI_OBJ := $(shell $(EE_CC) $(CFLAGS) -print-file-name=crti.o)
-	CRTN_OBJ := $(shell $(EE_CC) $(CFLAGS) -print-file-name=crtn.o)
-endif
 
 # Command for ensuring the output directory for the rule exists.
 DIR_GUARD = @$(MKDIR) -p $(@D)
@@ -82,10 +96,10 @@ $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.s
 	$(DIR_GUARD)
 	$(EE_AS) $(EE_ASFLAGS) $< -o $@
 
-$(EE_BIN): $(EE_OBJS) $(EE_LIB_ARCHIVES) $(EE_ADDITIONAL_DEPS) $(PS2SDKSRC)/ee/startup/obj/crt0.o
+$(EE_BIN): $(EE_OBJS) $(EE_LIB_ARCHIVES) $(EE_ADDITIONAL_DEPS)
 	$(DIR_GUARD)
-	$(EE_CC) -nostdlib $(EE_NO_CRT) -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_OPTFLAGS) \
-		-o $(EE_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(EE_OBJS) $(CRTEND_OBJ) $(CRTN_OBJ) $(EE_LDFLAGS) $(EE_LIB_ARCHIVES) $(EE_LIBS)
+	$(EE_CC) -T$(EE_LINKFILE) -Wl,-Map,$(EE_BIN_MAPFILE) $(EE_OPTFLAGS) \
+		-o $(EE_BIN) $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIB_ARCHIVES) $(EE_LIBS)
 
 $(EE_LIB): $(EE_OBJS) $(EE_LIB:%.a=%.erl)
 	$(DIR_GUARD)
