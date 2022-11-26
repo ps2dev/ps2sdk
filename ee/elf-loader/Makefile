@@ -8,18 +8,23 @@
 
 EE_OBJS = elf.o loader.o
 
-all:: prepareLoader $(EE_LIB)
-
-clean:: cleanLoader
-
-prepareLoader:
-	$(MAKE) -C src/loader
-	$(PS2SDKSRC)/tools/bin2c/bin/bin2c src/loader/loader.elf src/loader.c loader_elf
-
-cleanLoader:
-	$(MAKE) -C src/loader clean
-
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make
 include $(PS2SDKSRC)/ee/Rules.make
 include $(PS2SDKSRC)/ee/Rules.release
+
+$(PS2SDKSRC)/tools/bin2c/bin/bin2c: $(PS2SDKSRC)/tools/bin2c
+	$(MAKEREC) $<
+
+src/loader/bin/loader.elf:
+	$(MAKEREC) src/loader
+
+$(EE_OBJS_DIR)loader.c: src/loader/bin/loader.elf $(PS2SDKSRC)/tools/bin2c/bin/bin2c
+	$(PS2SDKSRC)/tools/bin2c/bin/bin2c $< $@ loader_elf
+
+$(EE_OBJS_DIR)loader.o: $(EE_OBJS_DIR)loader.c
+	$(DIR_GUARD)
+	$(EE_C_COMPILE) $< -c -o $@
+
+clean::
+	$(MAKEREC) src/loader clean
