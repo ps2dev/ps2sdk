@@ -90,29 +90,35 @@ $(IOP_OBJS_DIR)%.o: $(IOP_SRC_DIR)%.s
 
 .INTERMEDIATE: $(IOP_OBJS_DIR)build-imports.c $(IOP_OBJS_DIR)build-exports.c
 
-# Rules to build imports.lst.
-$(IOP_OBJS_DIR)build-imports.c: $(IOP_SRC_DIR)imports.lst
+$(IOP_OBJS_DIR)template-imports.h:
 	$(DIR_GUARD)
 	$(ECHO) "#include \"irx_imports.h\"" > $@
-	cat $< >> $@
+
+# Rules to build imports.lst.
+$(IOP_OBJS_DIR)build-imports.c: $(IOP_OBJS_DIR)template-imports.h $(IOP_SRC_DIR)imports.lst
+	$(DIR_GUARD)
+	cat $^ > $@
 
 $(IOP_OBJS_DIR)imports.o: $(IOP_OBJS_DIR)build-imports.c
 	$(DIR_GUARD)
 	$(IOP_C_COMPILE) $(IOP_IETABLE_CFLAGS) -c $< -o $@
 
-# Rules to build exports.tab.
-$(IOP_OBJS_DIR)build-exports.c: $(IOP_SRC_DIR)exports.tab
+$(IOP_OBJS_DIR)template-exports.h:
 	$(DIR_GUARD)
 	$(ECHO) "#include \"irx.h\"" > $@
-	cat $< >> $@
+
+# Rules to build exports.tab.
+$(IOP_OBJS_DIR)build-exports.c: $(IOP_OBJS_DIR)template-exports.h $(IOP_SRC_DIR)exports.tab
+	$(DIR_GUARD)
+	cat $^ > $@
 
 $(IOP_OBJS_DIR)exports.o: $(IOP_OBJS_DIR)build-exports.c
 	$(DIR_GUARD)
 	$(IOP_C_COMPILE) $(IOP_IETABLE_CFLAGS) -c $< -o $@
 
-$(IOP_BIN): $(IOP_OBJS)
+$(IOP_BIN): $(IOP_OBJS) $(IOP_LIB_ARCHIVES) $(IOP_ADDITIONAL_DEPS)
 	$(DIR_GUARD)
-	$(IOP_C_COMPILE) $(IOP_OPTFLAGS) -o $(IOP_BIN) $(IOP_OBJS) $(IOP_LDFLAGS) $(IOP_LIBS)
+	$(IOP_C_COMPILE) $(IOP_OPTFLAGS) -o $(IOP_BIN) $(IOP_OBJS) $(IOP_LDFLAGS) $(IOP_LIB_ARCHIVES) $(IOP_LIBS)
 
 $(IOP_LIB): $(IOP_OBJS)
 	$(DIR_GUARD)

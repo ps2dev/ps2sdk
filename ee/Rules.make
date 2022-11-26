@@ -82,10 +82,10 @@ $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.s
 	$(DIR_GUARD)
 	$(EE_AS) $(EE_ASFLAGS) $< -o $@
 
-$(EE_BIN): $(EE_OBJS) $(PS2SDKSRC)/ee/startup/obj/crt0.o
+$(EE_BIN): $(EE_OBJS) $(EE_LIB_ARCHIVES) $(EE_ADDITIONAL_DEPS) $(PS2SDKSRC)/ee/startup/obj/crt0.o
 	$(DIR_GUARD)
 	$(EE_CC) -nostdlib $(EE_NO_CRT) -T$(PS2SDKSRC)/ee/startup/src/linkfile $(EE_OPTFLAGS) \
-		-o $(EE_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(EE_OBJS) $(CRTEND_OBJ) $(CRTN_OBJ) $(EE_LDFLAGS) $(EE_LIBS)
+		-o $(EE_BIN) $(PS2SDKSRC)/ee/startup/obj/crt0.o $(CRTI_OBJ) $(CRTBEGIN_OBJ) $(EE_OBJS) $(CRTEND_OBJ) $(CRTN_OBJ) $(EE_LDFLAGS) $(EE_LIB_ARCHIVES) $(EE_LIBS)
 
 $(EE_LIB): $(EE_OBJS) $(EE_LIB:%.a=%.erl)
 	$(DIR_GUARD)
