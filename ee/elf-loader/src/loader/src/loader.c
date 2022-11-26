@@ -41,8 +41,8 @@
 // DON'T REMOVE is for reducing binary size. 
 // These funtios are defined as weak in /libc/src/init.c
 //--------------------------------------------------------------
-   void _ps2sdk_libc_init() {}
-   void _ps2sdk_libc_deinit() {}
+   void _libcglue_init() {}
+   void _libcglue_deinit() {}
 
    DISABLE_PATCHED_FUNCTIONS();
    DISABLE_EXTRA_TIMERS_FUNCTIONS();
