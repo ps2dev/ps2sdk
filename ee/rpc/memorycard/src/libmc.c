@@ -142,8 +142,8 @@ static int* g_pType = NULL;
 static int* g_pFree = NULL;
 static int* g_pFormat = NULL;
 
-static int  endParameter[48];
-static char curDir[1024];
+static int  endParameter[48] __attribute__((aligned(64)));
+static char curDir[1024] __attribute__((aligned(64)));
 static sceMcTblGetDir g_fileInfoBuff __attribute__((aligned(64)));	// used by mcSetFileInfo and mcRename
 
 
@@ -775,7 +775,7 @@ struct libmc_PageReadAlignData{
 	unsigned char padding[16];
 };
 
-static struct libmc_PageReadAlignData libmc_ReadPageAlignData;
+static struct libmc_PageReadAlignData libmc_ReadPageAlignData __attribute__((aligned(64)));
 
 static void libmc_ReadAlignFunction(struct libmc_PageReadAlignData *data){
 	unsigned int misaligned;
