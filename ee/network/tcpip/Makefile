@@ -59,7 +59,13 @@ $(LWIP):
 
 $(EE_OBJS_DIR)ps2ip.o $(EE_OBJS_DIR)ps2ip_shims.o $(EE_OBJS_DIR)sys_arch.o: $(LWIP)
 
-$(LWIP)/%.c: $(LWIP)
+$(LWIP)/src/api/%.c: $(LWIP)
+
+$(LWIP)/src/core/%.c: $(LWIP)
+
+$(LWIP)/src/core/ipv4/%.c: $(LWIP)
+
+$(LWIP)/src/core/netif/%.c: $(LWIP)
 
 $(EE_OBJS_DIR)def.o: $(LWIP)/src/core/def.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
