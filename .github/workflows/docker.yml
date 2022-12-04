@@ -90,12 +90,3 @@ jobs:
         token: ${{ secrets.DISPATCH_TOKEN }}
         event-type: ${{ env.NEW_DISPATCH_ACTION }}
         client-payload: '{"ref": "${{ github.ref }}"}'
-
-    - name: Repository Dispatch to ps2link
-      uses: peter-evans/repository-dispatch@v1
-      if: env.DISPATCH_TOKEN != null
-      with:
-        repository: ${{ github.repository_owner }}/ps2link
-        token: ${{ secrets.DISPATCH_TOKEN }}
-        event-type: ${{ env.NEW_DISPATCH_ACTION }}
-        client-payload: '{"ref": "${{ github.ref }}"}'
