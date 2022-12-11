@@ -24,6 +24,7 @@
 #define SET_GS_BGCOLOUR(colour)
 #endif
 
+// Color status helper in BGR format
 #define WHITE_BG 0xFFFFFF // start main
 #define CYAN_BG 0xFFFF00 // proper argc count
 #define RED_BG  0x0000FF // wrong argc count
@@ -31,7 +32,8 @@
 #define BLUE_BG 0xFF0000 // after SifLoadELF
 #define YELLOW_BG 0x00FFFF // good SifLoadELF return
 #define MAGENTA_BG 0xFF00FF // wrong SifLoadELF return
-#define BROWN_BG 0x2A2AA5  // after reset IOP
+#define ORANGE_BG 0x00A5FF  // after reset IOP
+#define BROWN_BG 0x2A2AA5  // before FlushCache
 #define PURPBLE_BG 0x800080  // before ExecPS2
 
 
@@ -119,7 +121,7 @@ int main(int argc, char *argv[])
 		while(!SifIopReset(NULL, 0)){};
 		while (!SifIopSync()) {};
 
-		SET_GS_BGCOLOUR(RED_BG);
+		SET_GS_BGCOLOUR(ORANGE_BG);
 
         SifInitRpc(0);
         // Load modules.
