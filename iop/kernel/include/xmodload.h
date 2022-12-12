@@ -60,15 +60,15 @@ typedef struct {
 } LMWOoption;
 
 int LoadModuleWithOption(const char *filename, const LMWOoption *option);
-int StopModule(int, int arglen, const char *args, int *result);
-int UnloadModule(int);
+int StopModule(int modid, int arglen, const char *args, int *result);
+int UnloadModule(int modid);
 int SearchModuleByName(const char *name);
 int SearchModuleByAddress(const void *addr);
 int SelfStopModule(int arglen, const char *args, int *result);
 void SelfUnloadModule(void);
 void *AllocLoadMemory(int type, unsigned long size, void *addr);
 int FreeLoadMemory(void *area);
-int SetModuleFlags(int, int flag);
+int SetModuleFlags(int modid, int flag);
 
 #define xmodload_IMPORTS_start DECLARE_IMPORT_TABLE(modload, 1, 1)
 #define xmodload_IMPORTS_end END_IMPORT_TABLE
