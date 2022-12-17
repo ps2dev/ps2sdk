@@ -7,6 +7,8 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 SUBDIRS = \
+	adddrv \
+	addrom2 \
 	bdm \
 	bdmfs_fatfs \
 	bdmfs_vfat \
@@ -16,7 +18,8 @@ SUBDIRS = \
 	filexio \
 	http \
 	libbdm \
-	netfs
+	netfs \
+	romdrv
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
