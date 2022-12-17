@@ -21,40 +21,9 @@
 #define NEWLIB_PORT_AWARE
 #include <fileio.h>
 #include <string.h>
+#include <fileio-common.h>
 
 #define D(fmt, args...) printf("(%s:%s:%i):" #fmt, __FILE__, __FUNCTION__, __LINE__, ##args)
-
-enum _fio_functions {
-    FIO_F_OPEN = 0,
-    FIO_F_CLOSE,
-    FIO_F_READ,
-    FIO_F_WRITE,
-    FIO_F_LSEEK,
-    FIO_F_IOCTL,
-    FIO_F_REMOVE,
-    FIO_F_MKDIR,
-    FIO_F_RMDIR,
-    FIO_F_DOPEN,
-    FIO_F_DCLOSE,
-    FIO_F_DREAD,
-    FIO_F_GETSTAT,
-    FIO_F_CHSTAT,
-    FIO_F_FORMAT,
-    FIO_F_ADDDRV,
-    FIO_F_DELDRV
-};
-
-/** Shared between _fio_read_intr and fio_read.  The updated modules shipped
-   with licensed games changed the size of the buffers from 16 to 64.  */
-struct _fio_read_data
-{
-    u32 size1;
-    u32 size2;
-    void *dest1;
-    void *dest2;
-    u8 buf1[16];
-    u8 buf2[16];
-};
 
 extern int _iop_reboot_count;
 extern SifRpcClientData_t _fio_cd;
@@ -177,7 +146,6 @@ void fioSetBlockMode(int blocking)
 {
     _fio_block_mode = blocking;
 }
-
 #endif
 
 #ifdef F_fio_exit
@@ -197,12 +165,6 @@ void fioExit(void)
 #endif
 
 #ifdef F_fio_open
-struct _fio_open_arg
-{
-    int mode;
-    char name[FIO_PATH_MAX];
-} ALIGNED(16);
-
 int fioOpen(const char *name, int mode)
 {
     struct _fio_open_arg arg;
@@ -282,14 +244,6 @@ void _fio_read_intr(struct _fio_read_data *data)
 #endif
 
 #ifdef F_fio_read
-struct _fio_read_arg
-{
-    int fd;
-    void *ptr;
-    int size;
-    struct _fio_read_data *read_data;
-} ALIGNED(16);
-
 int fioRead(int fd, void *ptr, int size)
 {
     struct _fio_read_arg arg;
@@ -324,15 +278,6 @@ int fioRead(int fd, void *ptr, int size)
 #endif
 
 #ifdef F_fio_write
-struct _fio_write_arg
-{
-    int fd;
-    const void *ptr;
-    u32 size;
-    u32 mis;
-    u8 aligned[16];
-} ALIGNED(16);
-
 int fioWrite(int fd, const void *ptr, int size)
 {
     struct _fio_write_arg arg;
@@ -378,17 +323,6 @@ int fioWrite(int fd, const void *ptr, int size)
 #endif
 
 #ifdef F_fio_lseek
-struct _fio_lseek_arg
-{
-    union
-    {
-        int fd;
-        int result;
-    } p;
-    int offset;
-    int whence;
-} ALIGNED(16);
-
 int fioLseek(int fd, int offset, int whence)
 {
     struct _fio_lseek_arg arg;
@@ -419,17 +353,6 @@ int fioLseek(int fd, int offset, int whence)
 #endif
 
 #ifdef F_fio_ioctl
-struct _fio_ioctl_arg
-{
-    union
-    {
-        int fd;
-        int result;
-    } p;
-    int request;
-    u8 data[1024]; // Will this be ok ?
-} ALIGNED(16);
-
 int fioIoctl(int fd, int request, void *data)
 {
     struct _fio_ioctl_arg arg;
@@ -670,16 +593,6 @@ int fioDclose(int fd)
 #endif
 
 #ifdef F_fio_dread
-struct _fio_dread_arg
-{
-    union
-    {
-        int fd;
-        int result;
-    } p;
-    io_dirent_t *buf;
-} ALIGNED(16);
-
 int fioDread(int fd, io_dirent_t *buf)
 {
     struct _fio_dread_arg arg;
@@ -712,16 +625,6 @@ int fioDread(int fd, io_dirent_t *buf)
 #endif
 
 #ifdef F_fio_getstat
-struct _fio_getstat_arg
-{
-    union
-    {
-        io_stat_t *buf;
-        int result;
-    } p;
-    char name[FIO_PATH_MAX];
-} ALIGNED(16);
-
 int fioGetstat(const char *name, io_stat_t *buf)
 {
     struct _fio_getstat_arg arg;
@@ -755,17 +658,6 @@ int fioGetstat(const char *name, io_stat_t *buf)
 #endif
 
 #ifdef F_fio_chstat
-struct _fio_chstat_arg
-{
-    union
-    {
-        int cbit;
-        int result;
-    } p;
-    io_stat_t stat;
-    char name[FIO_PATH_MAX];
-};
-
 int fioChstat(const char *name, io_stat_t *buf, u32 cbit)
 {
     struct _fio_chstat_arg arg;
