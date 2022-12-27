@@ -22,11 +22,11 @@
 void *GetModloadInternalData(void **pInternalData);
 
 int ReBootStart(const char *command, unsigned int flags);
-int LoadModuleAddress(const char *name, int, int);
+int LoadModuleAddress(const char *name, void *addr, int offset);
 int LoadModule(const char *name);
 int LoadStartModule(const char *name, int arglen, const char *args, int *result);
-int StartModule(int, const char *name, int arglen, const char *args, int *result);
-int LoadModuleBufferAddress(void *buffer, int, int);
+int StartModule(int modid, const char *name, int arglen, const char *args, int *result);
+int LoadModuleBufferAddress(void *buffer, void *addr, int offset);
 int LoadModuleBuffer(void *buffer);
 int LoadStartKelfModule(const char *name, int arglen, const char *args, int *result);
 void SetSecrmanCallbacks(void *SecrCardBootFile_fnc, void *SecrDiskBootFile_fnc, void *SetLoadfileCallbacks_fnc);
