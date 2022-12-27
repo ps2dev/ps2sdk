@@ -28,39 +28,6 @@ extern struct irx_export_table _exp_secrman;
 static void _printf(const char *format, ...);
 #endif
 
-struct arg2struct
-{                   // sp+0x48 to 0x98 in LOADFILE of boot ROM v1.01J.
-    int fd;         // 0x00
-    int unknown_04; // 0x04
-    int unknown_08; // 0x08
-    int unknown_0C; // 0x0C
-    int unknown_10; // 0x10
-    int unknown_14; // 0x14
-    int unknown_18; // 0x18
-    int unknown_1C; // 0x1C
-    int unknown_20; // 0x20
-    int unknown_24; // 0x24
-    int unknown_28; // 0x28
-    int unknown_2C; // 0x2C
-};
-
-struct ModloadUnk2_entry
-{
-    void *buffer;            // 0x00
-    unsigned int length;     // 0x04
-    unsigned int unknown_08; // 0x08
-    unsigned int unknown_0C; // 0x0C
-};
-
-struct ModloadUnk2
-{
-    unsigned int ReadBufferLength; // 0x00	- Read buffer.
-    unsigned int ReadBufferOffset; // 0x04	- Read buffer offset into the file.
-    struct ModloadUnk2_entry entries[2];
-    unsigned int unknown_28; // 0x28
-    unsigned int unknown_2C; // 0x2C
-};
-
 struct ModloadBitTableDescriptor
 {
     SecrBitTableHeader_t header;
@@ -68,41 +35,23 @@ struct ModloadBitTableDescriptor
     unsigned int padding; // Doesn't seem to be used.
 };
 
-typedef int (*ProgramDecryptionFunction)(int fd, struct ModloadUnk2 *ModloadUnk2, const struct ModloadBitTableDescriptor *ModloadBitTableDescriptor);
-typedef int (*ModloadCb_d20)(const struct ModloadUnk2 *ModloadUnk2, struct arg2struct *arg2, const struct ModloadBitTableDescriptor *ModloadBitTableDescriptor, ProgramDecryptionFunction DecryptFunction);
-typedef int (*ModloadCb_d24)(const struct ModloadUnk2 *ModloadUnk2, struct arg2struct *arg2);
-typedef int (*ModloadCb_d28)(const struct ModloadUnk2 *ModloadUnk2);
-typedef void *(*ModloadCb_d2c)(unsigned int size);
-typedef void (*ModloadCb_d30)(void *buffer);
-
-static ModloadCb_d20 var_00003d20; // 0x00003d20
-static ModloadCb_d24 var_00003d24; // 0x00003d24
-static ModloadCb_d28 var_00003d28; // 0x00003d28
-static ModloadCb_d2c var_00003d2c; // 0x00003d2c
-static ModloadCb_d30 var_00003d30; // 0x00003d30
-
-struct ModloadUnknown
-{
-    ModloadCb_d20 unknown_00;
-    ModloadCb_d24 unknown_04;
-    ModloadCb_d28 unknown_08;
-    ModloadCb_d2c unknown_0C;
-    ModloadCb_d30 unknown_10;
-    void *unknown_14;
-    void *unknown_18;
-};
+static loadfile_elf_load_proc_callback_t loadfile_elf_load_proc; // 0x00003d20
+static loadfile_check_valid_ee_elf_callback_t loadfile_check_valid_ee_elf; // 0x00003d24
+static loadfile_elf_get_program_header_callback_t loadfile_elf_get_program_header; // 0x00003d28
+static loadfile_elf_load_alloc_buffer_from_heap_callback_t loadfile_elf_load_alloc_buffer_from_heap; // 0x00003d2c
+static loadfile_elf_load_dealloc_buffer_from_heap_callback_t loadfile_elf_load_dealloc_buffer_from_heap; // 0x00003d30
 
 // Function prototypes.
 static int func_0000077c(int port, int slot, void *buffer);
 static int func_00000bfc(void *dest, unsigned int size);
 static int func_00002eb0(struct ModloadBitTableDescriptor *ModloadBitTableDescriptor, int fd, int port, int slot, int device);
-static int func_0000306c(int fd, struct ModloadUnk2 *ModloadUnk2, const struct ModloadBitTableDescriptor *ModloadBitTableDescriptor, int (*DecryptBlockFunction)(void *src, void *dest, unsigned int size));
-static int func_00003364(int fd, struct ModloadUnk2 *ModloadUnk2, const struct ModloadBitTableDescriptor *ModloadBitTableDescriptor);
-static int func_00003230(struct ModloadUnk2 *ModloadUnk2, struct arg2struct *arg2, int port, int slot, int *arg5, int *arg6, int device, ProgramDecryptionFunction decrypt);
-static int func_0000338c(struct ModloadUnk2 *ModloadUnk2, struct arg2struct *arg2, int port, int slot, int *arg5, int *arg6);
-static int func_000033c8(int fd, struct ModloadUnk2 *ModloadUnk2, const struct ModloadBitTableDescriptor *ModloadBitTableDescriptor);
-static int func_000033f0(struct ModloadUnk2 *ModloadUnk2, struct arg2struct *arg2, int *arg3, int *arg4);
-static void func_00003430(struct ModloadUnknown *unknown);
+static int secrman_loadfile_read_callback_common(int fd, loadfile_allocate_handler_struct_t *allocate_info, const struct ModloadBitTableDescriptor *ModloadBitTableDescriptor, int (*DecryptBlockFunction)(void *src, void *dest, unsigned int size));
+static int secrman_loadfile_read_callback_card(int fd, loadfile_allocate_handler_struct_t *allocate_info, void *read_callback_userdata);
+static int secrman_load_kelf_common(loadfile_allocate_handler_struct_t *allocate_info, loadfile_file_load_handler_struct_t *flhs, int port, int slot, int *result_out, int *result_module_out, int device, loadfile_read_chunk_callback_t decrypt);
+static int secrman_load_kelf_from_card(loadfile_allocate_handler_struct_t *allocate_info, loadfile_file_load_handler_struct_t *flhs, int port, int slot, int *result_out, int *result_module_out);
+static int secrman_loadfile_read_callback_disk(int fd, loadfile_allocate_handler_struct_t *allocate_info, void *read_callback_userdata);
+static int secrman_load_kelf_from_disk(loadfile_allocate_handler_struct_t *allocate_info, loadfile_file_load_handler_struct_t *flhs, int *result_out, int *result_module_out);
+static void SecrGetLoadfileCallbacks(SetLoadfileCallbacks_struct_t *unknown);
 static void RegisterSecrCallbackHandlers(void);
 static int card_encrypt(int port, int slot, void *buffer);
 static unsigned short int GetHeaderLength(const void *buffer);
@@ -376,7 +325,7 @@ static int func_00002eb0(struct ModloadBitTableDescriptor *ModloadBitTableDescri
             void *HeaderBuffer;
 
             HeaderLength = GetHeaderLength(&header);
-            if ((HeaderBuffer = var_00003d2c(HeaderLength)) != NULL) {
+            if ((HeaderBuffer = loadfile_elf_load_alloc_buffer_from_heap(HeaderLength)) != NULL) {
                 if (lseek(fd, 0, SEEK_SET) == 0) {
                     if (read(fd, HeaderBuffer, HeaderLength) == HeaderLength) {
                         BitTableData = (SecrBitTable_t *)((unsigned int)HeaderBuffer + get_BitTableOffset(HeaderBuffer));
@@ -394,15 +343,15 @@ static int func_00002eb0(struct ModloadBitTableDescriptor *ModloadBitTableDescri
                             memcpy(&ModloadBitTableDescriptor->header, &BitTableData->header, sizeof(ModloadBitTableDescriptor->header));
                             ModloadBitTableDescriptor->blocks = BitTableData->blocks;
                         } else {
-                            var_00003d30(HeaderBuffer);
+                            loadfile_elf_load_dealloc_buffer_from_heap(HeaderBuffer);
                             result = -201;
                         }
                     } else {
-                        var_00003d30(HeaderBuffer);
+                        loadfile_elf_load_dealloc_buffer_from_heap(HeaderBuffer);
                         result = -204;
                     }
                 } else {
-                    var_00003d30(HeaderBuffer);
+                    loadfile_elf_load_dealloc_buffer_from_heap(HeaderBuffer);
                     result = -201;
                 }
             } else {
@@ -418,29 +367,29 @@ static int func_00002eb0(struct ModloadBitTableDescriptor *ModloadBitTableDescri
 
 /* 0x0000306c	- Reads a block of encrypted data and decrypts it.
     This is one really irritating function. Since nobody has ever completed and released a disassembly of MODLOAD, there were a whole load of structures that I had to figure out by cross-referencing LOADFILE, MODLOAD and SECRMAN. */
-static int func_0000306c(int fd, struct ModloadUnk2 *ModloadUnk2, const struct ModloadBitTableDescriptor *ModloadBitTableDescriptor, int (*DecryptBlockFunction)(void *src, void *dest, unsigned int size))
+static int secrman_loadfile_read_callback_common(int fd, loadfile_allocate_handler_struct_t *allocate_info, const struct ModloadBitTableDescriptor *ModloadBitTableDescriptor, int (*DecryptBlockFunction)(void *src, void *dest, unsigned int size))
 {
     unsigned int i, PayloadLength, excess;
-    struct ModloadUnk2_entry *entry;
+    loadfile_ee_elf_ringbuffer_content_t *entry;
     int result;
 
 #if 0
-	printf(	"func_0000306c:\n"
-		"\tModloadUnk2->unknown_28:\t%d\n"
-		"\tModloadUnk2->ReadBufferOffset:\t%d\n"
-		"\tModloadUnk2->ReadBufferLength:\t%d\n", ModloadUnk2->unknown_28, ModloadUnk2->ReadBufferOffset, ModloadUnk2->ReadBufferLength);
+	printf(	"secrman_loadfile_read_callback_common:\n"
+		"\tModloadUnk2->ring_buffer_index:\t%d\n"
+		"\tModloadUnk2->read_buffer_offset:\t%d\n"
+		"\tModloadUnk2->read_buffer_length:\t%d\n", allocate_info->ring_buffer_index, allocate_info->read_buffer_offset, allocate_info->read_buffer_length);
 #endif
 
-    entry         = &ModloadUnk2->entries[ModloadUnk2->unknown_28];
-    entry->length = ModloadUnk2->ReadBufferOffset;
+    entry         = &allocate_info->ring_buffer_contents[allocate_info->ring_buffer_index];
+    entry->buffer_offset = allocate_info->read_buffer_offset;
     for (i = 0, PayloadLength = 0; i < ModloadBitTableDescriptor->header.block_count; PayloadLength += ModloadBitTableDescriptor->blocks[i].size, i++) {
-        if (ModloadUnk2->ReadBufferOffset < PayloadLength + ModloadBitTableDescriptor->blocks[i].size) {
+        if (allocate_info->read_buffer_offset < PayloadLength + ModloadBitTableDescriptor->blocks[i].size) {
             break;
         }
     }
 
     // 0x000030fc - Partially decrypting blocks is not possible.
-    if (((excess = PayloadLength - entry->length) != 0) && (ModloadBitTableDescriptor->blocks[i].flags & 3)) {
+    if (((excess = PayloadLength - entry->buffer_offset) != 0) && (ModloadBitTableDescriptor->blocks[i].flags & 3)) {
 #if 0
 		printf("WIP function 0x0000306c: can't partially decrypt block.\n");
 #endif
@@ -450,21 +399,21 @@ static int func_0000306c(int fd, struct ModloadUnk2 *ModloadUnk2, const struct M
         void *BlockExcessRegionPtr;
 
         ExcessBlockNum       = i;
-        BlockExcessRegionPtr = (void *)((unsigned int)entry->buffer + excess);
+        BlockExcessRegionPtr = (void *)((unsigned int)entry->buffer_base + excess);
 
         for (; i < ModloadBitTableDescriptor->header.block_count; excess += ModloadBitTableDescriptor->blocks[i].size, i++) {
             // 0x00003140
-            if (ModloadBitTableDescriptor->blocks[i].size + excess >= ModloadUnk2->ReadBufferLength) {
+            if (ModloadBitTableDescriptor->blocks[i].size + excess >= allocate_info->read_buffer_length) {
                 if (!(ModloadBitTableDescriptor->blocks[i].flags & 3)) {
-                    excess = ModloadUnk2->ReadBufferLength;
+                    excess = allocate_info->read_buffer_length;
                 }
 
                 break;
             }
         }
 
-        if (((unsigned int)read(fd, entry->buffer, excess)) == excess) {
-            ModloadUnk2->ReadBufferOffset += excess;
+        if (((unsigned int)read(fd, entry->buffer_base, excess)) == excess) {
+            allocate_info->read_buffer_offset += excess;
 
             for (; ExcessBlockNum < i; BlockExcessRegionPtr = (void *)((u8 *)BlockExcessRegionPtr + ModloadBitTableDescriptor->blocks[ExcessBlockNum].size), ExcessBlockNum++) {
                 if (ModloadBitTableDescriptor->blocks[ExcessBlockNum].flags & 3) {
@@ -485,28 +434,28 @@ static int func_0000306c(int fd, struct ModloadUnk2 *ModloadUnk2, const struct M
 }
 
 // 0x00003364
-static int func_00003364(int fd, struct ModloadUnk2 *ModloadUnk2, const struct ModloadBitTableDescriptor *ModloadBitTableDescriptor)
+static int secrman_loadfile_read_callback_card(int fd, loadfile_allocate_handler_struct_t *allocate_info, void *read_callback_userdata)
 {
-    return func_0000306c(fd, ModloadUnk2, ModloadBitTableDescriptor, &SecrCardBootBlock);
+    return secrman_loadfile_read_callback_common(fd, allocate_info, (const struct ModloadBitTableDescriptor *)read_callback_userdata, &SecrCardBootBlock);
 }
 
 // 0x00003230
-static int func_00003230(struct ModloadUnk2 *ModloadUnk2, struct arg2struct *arg2, int port, int slot, int *arg5, int *arg6, int device, ProgramDecryptionFunction decrypt)
+static int secrman_load_kelf_common(loadfile_allocate_handler_struct_t *allocate_info, loadfile_file_load_handler_struct_t *flhs, int port, int slot, int *result_out, int *result_module_out, int device, loadfile_read_chunk_callback_t decrypt)
 {
     int result;
     struct ModloadBitTableDescriptor ModloadBitTableDescriptor;
 
-    if (func_00002eb0(&ModloadBitTableDescriptor, arg2->fd, port, slot, device) == 0) {
-        if (((u32)lseek(arg2->fd, ModloadBitTableDescriptor.header.headersize, SEEK_SET)) == ModloadBitTableDescriptor.header.headersize) {
-            if (decrypt(arg2->fd, ModloadUnk2, &ModloadBitTableDescriptor) == 0) {
-                if (var_00003d24(ModloadUnk2, arg2) == 0) {
-                    if (var_00003d28(ModloadUnk2) == 0) {
-                        if (var_00003d20(ModloadUnk2, arg2, &ModloadBitTableDescriptor, decrypt) == 0) {
+    if (func_00002eb0(&ModloadBitTableDescriptor, flhs->fd, port, slot, device) == 0) {
+        if (((u32)lseek(flhs->fd, ModloadBitTableDescriptor.header.headersize, SEEK_SET)) == ModloadBitTableDescriptor.header.headersize) {
+            if (decrypt(flhs->fd, allocate_info, &ModloadBitTableDescriptor) == 0) {
+                if (loadfile_check_valid_ee_elf(allocate_info, flhs) == 0) {
+                    if (loadfile_elf_get_program_header(allocate_info) == 0) {
+                        if (loadfile_elf_load_proc(allocate_info, flhs, &ModloadBitTableDescriptor, decrypt) == 0) {
                             result = 0;
 
                             // 0x00003318
-                            *arg5 = arg2->unknown_28;
-                            *arg6 = 0;
+                            *result_out = flhs->elf_header.e_entry;
+                            *result_module_out = 0;
                         } else {
                             printf("load elf error\n");
                             result = -201;
@@ -530,40 +479,40 @@ static int func_00003230(struct ModloadUnk2 *ModloadUnk2, struct arg2struct *arg
 }
 
 // 0x0000338c
-static int func_0000338c(struct ModloadUnk2 *ModloadUnk2, struct arg2struct *arg2, int port, int slot, int *arg5, int *arg6)
+static int secrman_load_kelf_from_card(loadfile_allocate_handler_struct_t *allocate_info, loadfile_file_load_handler_struct_t *flhs, int port, int slot, int *result_out, int *result_module_out)
 {
-    return func_00003230(ModloadUnk2, arg2, port, slot, arg5, arg6, 0, &func_00003364);
+    return secrman_load_kelf_common(allocate_info, flhs, port, slot, result_out, result_module_out, 0, &secrman_loadfile_read_callback_card);
 }
 
 // 0x000033c8
-static int func_000033c8(int fd, struct ModloadUnk2 *ModloadUnk2, const struct ModloadBitTableDescriptor *ModloadBitTableDescriptor)
+static int secrman_loadfile_read_callback_disk(int fd, loadfile_allocate_handler_struct_t *allocate_info, void *read_callback_userdata)
 {
-    return func_0000306c(fd, ModloadUnk2, ModloadBitTableDescriptor, &SecrDiskBootBlock);
+    return secrman_loadfile_read_callback_common(fd, allocate_info, (const struct ModloadBitTableDescriptor *)read_callback_userdata, &SecrDiskBootBlock);
 }
 
 // 0x000033f0
-static int func_000033f0(struct ModloadUnk2 *ModloadUnk2, struct arg2struct *arg2, int *arg3, int *arg4)
+static int secrman_load_kelf_from_disk(loadfile_allocate_handler_struct_t *allocate_info, loadfile_file_load_handler_struct_t *flhs, int *result_out, int *result_module_out)
 {
-    return func_00003230(ModloadUnk2, arg2, 0, 0, arg3, arg4, 1, &func_000033c8);
+    return secrman_load_kelf_common(allocate_info, flhs, 0, 0, result_out, result_module_out, 1, &secrman_loadfile_read_callback_disk);
 }
 
 // 0x00003430
-static void func_00003430(struct ModloadUnknown *unknown)
+static void SecrGetLoadfileCallbacks(SetLoadfileCallbacks_struct_t *callbackinfo)
 {
-    var_00003d20 = unknown->unknown_00;
-    var_00003d24 = unknown->unknown_04;
-    var_00003d28 = unknown->unknown_08;
-    var_00003d2c = unknown->unknown_0C;
-    var_00003d30 = unknown->unknown_10;
+    loadfile_elf_load_proc = callbackinfo->elf_load_proc;
+    loadfile_check_valid_ee_elf = callbackinfo->check_valid_ee_elf;
+    loadfile_elf_get_program_header = callbackinfo->elf_get_program_header;
+    loadfile_elf_load_alloc_buffer_from_heap = callbackinfo->elf_load_alloc_buffer_from_heap;
+    loadfile_elf_load_dealloc_buffer_from_heap = callbackinfo->elf_load_dealloc_buffer_from_heap;
 
-    unknown->unknown_14 = &func_0000338c;
-    unknown->unknown_18 = &func_000033f0;
+    callbackinfo->load_kelf_from_card = &secrman_load_kelf_from_card;
+    callbackinfo->load_kelf_from_disk = &secrman_load_kelf_from_disk;
 }
 
 // 0x0000348c
 static void RegisterSecrCallbackHandlers(void)
 {
-    SetSecrmanCallbacks(&SecrCardBootFile, &SecrDiskBootFile, &func_00003430);
+    SetSecrmanCallbacks(&SecrCardBootFile, &SecrDiskBootFile, &SecrGetLoadfileCallbacks);
 }
 
 // 0x00000018
