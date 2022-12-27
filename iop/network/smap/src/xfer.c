@@ -21,8 +21,6 @@
 #include "xfer.h"
 #include "ipstack.h"
 
-extern struct SmapDriverData SmapDriverData;
-
 static int SmapDmaTransfer(volatile u8 *smap_regbase, void *buffer, unsigned int size, int direction)
 {
     unsigned int NumBlocks;
@@ -47,6 +45,10 @@ static inline void CopyFromFIFO(volatile u8 *smap_regbase, void *buffer, unsigne
 {
     int i, result;
 
+    if (buffer == NULL) {
+        return;
+    }
+
     SMAP_REG16(SMAP_R_RXFIFO_RD_PTR) = RxBdPtr;
 
     result = SmapDmaTransfer(smap_regbase, buffer, length, DMAC_TO_MEM);
@@ -59,6 +61,10 @@ static inline void CopyFromFIFO(volatile u8 *smap_regbase, void *buffer, unsigne
 static inline void CopyToFIFO(volatile u8 *smap_regbase, const void *buffer, unsigned int length)
 {
     int i, result;
+
+    if (buffer == NULL) {
+        return;
+    }
 
     result = SmapDmaTransfer(smap_regbase, (void *)buffer, length, DMAC_FROM_MEM);
 
@@ -110,9 +116,9 @@ int HandleRxIntr(struct SmapDriverData *SmapDrivPrivData)
             } else {
                 void *pbuf, *payload;
 
-                if ((pbuf = SMapCommonStackAllocRxPacket(LengthRounded, &payload)) != NULL) {
+                if ((pbuf = SMapCommonStackAllocRxPacket(SmapDrivPrivData, LengthRounded, &payload)) != NULL) {
                     CopyFromFIFO(SmapDrivPrivData->smap_regbase, payload, length, pointer);
-                    SMapStackEnQRxPacket(pbuf);
+                    SMapStackEnQRxPacket(SmapDrivPrivData, pbuf);
                     NumPacketsReceived++;
                 } else {
                     SmapDrivPrivData->RuntimeStats.RxAllocFail++;
@@ -145,7 +151,7 @@ int HandleTxReqs(struct SmapDriverData *SmapDrivPrivData)
         int length;
 
         data = NULL;
-        if ((length = SMAPCommonTxPacketNext(&data)) < 1) {
+        if ((length = SMAPCommonTxPacketNext(SmapDrivPrivData, &data)) < 1) {
             return result;
         }
         SmapDrivPrivData->packetToSend = data;
@@ -179,6 +185,6 @@ int HandleTxReqs(struct SmapDriverData *SmapDrivPrivData)
             return result; // Queue full
 
         SmapDrivPrivData->packetToSend = NULL;
-        SMAPCommonTxPacketDeQ(&data);
+        SMAPCommonTxPacketDeQ(SmapDrivPrivData, &data);
     }
 }

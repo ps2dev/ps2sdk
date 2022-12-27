@@ -10,11 +10,14 @@
 #ifdef BUILDING_SMAP_PS2IP
 #include <ps2ip.h>
 #endif
+#ifdef BUILDING_SMAP_MODULAR
+#include <smap_modular.h>
+#endif
 
 // In the SONY original, all the calls to DEBUG_PRINTF() were to sceInetPrintf().
 #define DEBUG_PRINTF(args...) printf(args)
 
-#ifdef BUILDING_SMAP_PS2IP
+// This struct needs to be the exact same layout as struct NetManEthRuntimeStats!
 struct RuntimeStats
 {
     u32 RxDroppedFrameCount;
@@ -31,7 +34,6 @@ struct RuntimeStats
     u16 TxFrameUnderrunCount;
     u16 RxAllocFail;
 };
-#endif
 
 struct SmapDriverData
 {
@@ -55,12 +57,12 @@ struct SmapDriverData
 #ifdef SMAP_RX_PACKETS_POLLING_MODE
     iop_sys_clock_t RxIntrPollingTimer;
 #endif
+    struct RuntimeStats RuntimeStats;
 #ifdef BUILDING_SMAP_NETMAN
-    struct NetManEthRuntimeStats RuntimeStats;
     int NetIFID;
 #endif
-#ifdef BUILDING_SMAP_PS2IP
-    struct RuntimeStats RuntimeStats;
+#ifdef BUILDING_SMAP_MODULAR
+    const SmapModularHookTable_t *HookTable[1];
 #endif
 };
 
@@ -89,5 +91,8 @@ void SMapLowLevelInput(struct pbuf *pBuf);
 int SMapTxPacketNext(void **payload);
 void SMapTxPacketDeQ(void);
 #endif
+
+/* Data prototypes */
+extern struct SmapDriverData SmapDriverData;
 
 #endif

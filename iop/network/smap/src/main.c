@@ -156,7 +156,7 @@ SMapIFInit(NetIF *pNetIF)
     // Get MAC address.
     SMAPGetMACAddress(pNetIF->hwaddr);
     DEBUG_PRINTF("MAC address : %02x:%02x:%02x:%02x:%02x:%02x\n", pNetIF->hwaddr[0], pNetIF->hwaddr[1], pNetIF->hwaddr[2],
-              pNetIF->hwaddr[3], pNetIF->hwaddr[4], pNetIF->hwaddr[5]);
+                 pNetIF->hwaddr[3], pNetIF->hwaddr[4], pNetIF->hwaddr[5]);
 
     // Enable sending and receiving of data.
     SMAPInitStart();
@@ -273,6 +273,10 @@ void PS2IPLinkStateDown(void)
 extern struct irx_export_table _exp_smap __attribute__((section("data")));
 #endif
 
+#ifdef BUILDING_SMAP_MODULAR
+extern struct irx_export_table _exp_smapmodu;
+#endif
+
 int _start(int argc, char *argv[])
 {
 #ifdef BUILDING_SMAP_PS2IP
@@ -288,6 +292,13 @@ int _start(int argc, char *argv[])
 
 #ifdef BUILDING_SMAP_NETMAN
     if (RegisterLibraryEntries(&_exp_smap) != 0) {
+        DEBUG_PRINTF("smap: module already loaded\n");
+        return MODULE_NO_RESIDENT_END;
+    }
+#endif
+
+#ifdef BUILDING_SMAP_MODULAR
+    if (RegisterLibraryEntries(&_exp_smapmodu) != 0) {
         DEBUG_PRINTF("smap: module already loaded\n");
         return MODULE_NO_RESIDENT_END;
     }
