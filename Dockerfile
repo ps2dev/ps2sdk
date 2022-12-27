@@ -5,6 +5,7 @@ FROM $BASE_DOCKER_IMAGE
 COPY . /src
 
 RUN apk add build-base git bash
+
 # Still compilation is not fully compatible with multi-thread
 RUN cd /src && \
     make -j $(getconf _NPROCESSORS_ONLN) clean && \
