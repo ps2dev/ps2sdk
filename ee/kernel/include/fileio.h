@@ -24,8 +24,6 @@
 #error "Use posix function calls instead."
 #endif
 
-#define FIO_PATH_MAX 256
-
 #define FIO_WAIT   0
 #define FIO_NOWAIT 1
 

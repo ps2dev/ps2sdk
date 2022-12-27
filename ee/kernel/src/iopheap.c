@@ -15,6 +15,7 @@
 #include "sifrpc.h"
 #include "sifcmd.h"
 #include "string.h"
+#include "iopheap-common.h"
 
 #include "iopheap.h"
 
@@ -108,19 +109,6 @@ int SifFreeIopHeap(void *addr)
 #endif
 
 #ifdef F_SifLoadIopHeap
-
-#define LIH_PATH_MAX 252
-
-struct _iop_load_heap_arg
-{
-    union
-    {
-        void *addr;
-        int result;
-    } p;
-    char path[LIH_PATH_MAX];
-};
-
 int SifLoadIopHeap(const char *path, void *addr)
 {
     struct _iop_load_heap_arg arg;

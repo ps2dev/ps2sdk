@@ -6,17 +6,11 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = \
-	bdm \
-	bdmfs_fatfs \
-	bdmfs_vfat \
-	devfs \
-	fakehost \
-	fileio \
-	filexio \
-	http \
-	libbdm \
-	netfs
+IOP_BIN ?= fileio.irx
+
+IOP_OBJS = fileio.o imports.o
 
 include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+include $(PS2SDKSRC)/iop/Rules.bin.make
+include $(PS2SDKSRC)/iop/Rules.make
+include $(PS2SDKSRC)/iop/Rules.release
