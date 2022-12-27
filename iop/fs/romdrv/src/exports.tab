@@ -1,0 +1,23 @@
+void _retonly(void) {}
+
+DECLARE_EXPORT_TABLE(romdrv, 2, 1)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(romAddDevice)
+	DECLARE_EXPORT(romDelDevice)
+#ifdef ROMDRV_EXPORT_DEVICES
+	DECLARE_EXPORT(romGetDevice)
+#endif
+END_EXPORT_TABLE
+
+#ifdef ROMDRV_EXPORT_DEVICES
+DECLARE_EXPORT_TABLE(romdrvX, 1, 1)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(romGetDevice)
+END_EXPORT_TABLE
+#endif

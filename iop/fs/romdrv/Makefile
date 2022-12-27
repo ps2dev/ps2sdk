@@ -6,20 +6,16 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = \
-	adddrv \
-	addrom2 \
-	bdm \
-	bdmfs_fatfs \
-	bdmfs_vfat \
-	devfs \
-	fakehost \
-	fileio \
-	filexio \
-	http \
-	libbdm \
-	netfs \
-	romdrv
+IOP_OBJS = romdrv.o imports.o exports.o
+
+# Enable the romGetDevice function?
+ROMDRV_EXPORT_DEVICES ?= 1
+
+ifneq (x$(ROMDRV_EXPORT_DEVICES),x0)
+IOP_CFLAGS += -DROMDRV_EXPORT_DEVICES
+endif
 
 include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+include $(PS2SDKSRC)/iop/Rules.bin.make
+include $(PS2SDKSRC)/iop/Rules.make
+include $(PS2SDKSRC)/iop/Rules.release
