@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ps2dev/ps2toolchain:latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install dependencies
         run: |
@@ -36,11 +36,11 @@ jobs:
 
       - name: Get short SHA
         id: slug
-        run: echo "::set-output name=sha8::$(echo ${GITHUB_SHA} | cut -c1-8)"
+        run: echo "sha8=$(echo ${GITHUB_SHA} | cut -c1-8)" >> $GITHUB_OUTPUT
 
       - name: Upload artifacts
         if: ${{ success() }}
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: ps2sdk-samples-${{ matrix.debug }}-${{ steps.slug.outputs.sha8 }}
           path: ~/samples
