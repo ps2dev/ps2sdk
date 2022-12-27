@@ -67,11 +67,11 @@ jobs:
         export DISPATCH_ACTION="$(echo run_build)"
         echo "NEW_DISPATCH_ACTION=$DISPATCH_ACTION" >> $GITHUB_ENV
 
-    - name: Repository Dispatch to gsKit
+    - name: Repository Dispatch to ps2sdk-ports
       uses: peter-evans/repository-dispatch@v2
       if: env.DISPATCH_TOKEN != null
       with:
-        repository: ${{ github.repository_owner }}/gskit
+        repository: ${{ github.repository_owner }}/ps2sdk-ports
         token: ${{ secrets.DISPATCH_TOKEN }}
         event-type: ${{ env.NEW_DISPATCH_ACTION }}
         client-payload: '{"ref": "${{ github.ref }}"}'
