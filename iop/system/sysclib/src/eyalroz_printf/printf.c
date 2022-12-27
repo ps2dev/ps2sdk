@@ -1435,7 +1435,14 @@ static inline void prnt_wrapper(char c, void* extra_arg)
 int prnt(print_callback_t out, void *context, const char * format, va_list ap)
 {
   const out_prnt_wrap_type out_prnt_wrap = { out, context };
-  return vfctprintf(&prnt_wrapper, (void *)&out_prnt_wrap, format, ap);
+  int ret;
+
+  ret = vfctprintf(&prnt_wrapper, (void *)&out_prnt_wrap, format, ap);
+  // In STDIO module, this flushes the current contents of the 64-byte temporary buffer to the output.
+  out(context, 513);
+  // In STDIO module, this sets the amount of bytes currently in the 64-byte temporary buffer to 0.
+  out(context, 512);
+  return ret;
 }
 
 #ifdef __cplusplus
