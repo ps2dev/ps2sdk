@@ -1,0 +1,21 @@
+
+DECLARE_EXPORT_TABLE(stdio, 1, 2)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+
+	DECLARE_EXPORT(printf)
+/*05*/	DECLARE_EXPORT(getchar)
+	DECLARE_EXPORT(putchar)
+	DECLARE_EXPORT(puts)
+	DECLARE_EXPORT(gets)
+	DECLARE_EXPORT(fdprintf)
+/*10*/	DECLARE_EXPORT(fdgetc)
+	DECLARE_EXPORT(fdputc)
+	DECLARE_EXPORT(fdputs)
+	DECLARE_EXPORT(fdgets)
+	DECLARE_EXPORT(vfdprintf)
+END_EXPORT_TABLE
+
+void _retonly() {}

@@ -1,0 +1,14 @@
+
+loadcore_IMPORTS_start
+I_RegisterLibraryEntries
+loadcore_IMPORTS_end
+
+sysclib_IMPORTS_start
+I_look_ctype_table
+I_prnt
+sysclib_IMPORTS_end
+
+ioman_mod_IMPORTS_start
+I_io_read
+I_io_write
+ioman_mod_IMPORTS_end
