@@ -13,6 +13,7 @@
 #include <stdint.h>
 #include <stdnoreturn.h>  // noreturn
 #include <string.h>
+#include <startup.h>
 
 extern char* _end;
 extern char* _heap_size;
@@ -29,37 +30,25 @@ void _libcglue_init();
 void _libcglue_deinit();
 int main(int argc, char** argv);
 
-// System provided arguments when loaded normally
-struct sargs {
-    int32_t argc;
-    char* argv[16];
-    char payload[256];
-};
-struct sargs _args;
+static struct sargs args;
+static struct sargs_start *args_start;
 
-// ps2link provided arguments
-struct sargs_ps2link {
-    int32_t pid;
-    struct sargs args;
-};
-struct sargs_ps2link *pargs_ps2link;
-
-// We need to do a backup of pargs_ps2link and _args because memset will wipe it up.
+// We need to do a backup of args_start and _args because memset will wipe it up.
 static void clear_bss_area()
 {
-	struct sargs _args_backup;
-	struct sargs_ps2link pargs_ps2link_backup;
+	struct sargs args_backup;
+	struct sargs_start args_start_backup;
 
 	// Backup
-	memcpy(&_args_backup, &_args, sizeof(struct sargs));
-	memcpy(&pargs_ps2link_backup, pargs_ps2link, sizeof(struct sargs_ps2link));
+	memcpy(&args_backup, &args, sizeof(struct sargs));
+	memcpy(&args_start_backup, args_start, sizeof(struct sargs_start));
 
 	// Wipe
 	memset(&_fbss, 0, &_end - &_fbss);
 
 	// Restore
-	memcpy(&_args, &_args_backup, sizeof(struct sargs));
-	memcpy(pargs_ps2link, &pargs_ps2link_backup, sizeof(struct sargs_ps2link));
+	memcpy(&args, &args_backup, sizeof(struct sargs));
+	memcpy(args_start, &args_start_backup, sizeof(struct sargs_start));
 }
 
 /*
@@ -84,10 +73,10 @@ noreturn void _main()
     if (_ps2sdk_memory_init)
         _ps2sdk_memory_init();
     
-    // Use ps2link arguments if loaded by ps2link
-    pa = &_args;
-    if (_args.argc == 0 && pargs_ps2link != NULL && pargs_ps2link->args.argc != 0)
-        pa = &pargs_ps2link->args;
+    // Use arguments sent through start if sent (by ps2link for instance)
+    pa = &args;
+    if (args.argc == 0 && args_start != NULL && args_start->args.argc != 0)
+        pa = &args_start->args;
 
     // call libcglue argument parsing
 	_libcglue_args_parse(pa->argc, pa->argv);
@@ -137,7 +126,7 @@ noreturn void _exit(int status)
  * This function sets up the stack and heap.
  * DO NOT USE THE STACK IN THIS FUNCTION!
  */
-noreturn void __start(struct sargs_ps2link *pargs)
+noreturn void __start(struct sargs_start *pargs)
 {
     asm volatile(
         "# Save first argument  \n"
@@ -158,7 +147,7 @@ noreturn void __start(struct sargs_ps2link *pargs)
         "# Jump to _main      	\n"
         "j      %2           \n"
 		: /* No outputs. */
-		: "R"(pargs_ps2link), "R"(_args), "Csy"(_main));
+		: "R"(args_start), "R"(args), "Csy"(_main));
 
     // Prevent gcc noreturn warning
     while(1){}
