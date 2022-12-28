@@ -699,7 +699,7 @@ int clock_getres(clockid_t clk_id, struct timespec *res) {
 
 	/* Return the actual time since epoch */
 	res->tv_sec = tv.tv_sec;
-	res->tv_nsec = 0;
+	res->tv_nsec = tv.tv_usec * 1000;
 
 	return 0;
 }
@@ -713,7 +713,7 @@ int clock_gettime(clockid_t clk_id, struct timespec *tp) {
 
 	/* Return the actual time since epoch */
 	tp->tv_sec = tv.tv_sec;
-	tp->tv_nsec = 0;
+	tp->tv_nsec = tv.tv_usec * 1000;
 
 	return 0;
 }
