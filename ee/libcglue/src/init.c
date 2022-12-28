@@ -14,6 +14,7 @@
  */
 
 void _libcglue_timezone_update();
+void _libcglue_rtc_update();
 void pthread_init();
 void pthread_terminate();
 
@@ -53,6 +54,7 @@ void _libcglue_init()
 	__libpthreadglue_init();
 
     _libcglue_timezone_update();
+    _libcglue_rtc_update();
 }
 #endif
 

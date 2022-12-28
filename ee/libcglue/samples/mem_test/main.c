@@ -47,6 +47,7 @@ void _libcglue_deinit() {}
 #endif
 
 void _libcglue_timezone_update() {}
+void _libcglue_rtc_update() {}
 
 // "weak" function called by crt0.o
 void _ps2sdk_memory_init()

@@ -8,7 +8,7 @@
 
 EE_LIB = libcglue.a
 
-CORE_OBJS = timezone.o
+CORE_OBJS = timezone.o rtc.o
 
 INIT_OBJS = __libpthreadglue_init.o __libpthreadglue_deinit.o _libcglue_init.o _libcglue_deinit.o _libcglue_args_parse.o
 
