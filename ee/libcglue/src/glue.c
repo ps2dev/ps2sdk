@@ -26,6 +26,7 @@
 #include <sys/utime.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/random.h>
 
 // Include all integer types for compile time checking of:
 // - compiler (gcc)
@@ -794,6 +795,16 @@ int fchown(int fd, uid_t owner, gid_t group)
 {
 	errno = ENOSYS;
 	return -1; /* not supported */
+}
+#endif
+
+#ifdef F_getrandom
+ssize_t getrandom(void *buf, size_t buflen, unsigned int flags)
+{
+	(void)flags;
+
+	arc4random_buf(buf, buflen);
+	return buflen;
 }
 #endif
 
