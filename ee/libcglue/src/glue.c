@@ -800,6 +800,8 @@ int fchown(int fd, uid_t owner, gid_t group)
 #ifdef F_getentropy
 int getentropy(void *buf, size_t buflen)
 {
+	u8 *buf_cur = buf;
+	int i;
 	// Restrict buffer size as documented in the man page
 	if (buflen > 256)
 	{
@@ -808,10 +810,13 @@ int getentropy(void *buf, size_t buflen)
 	}
 	// TODO: get proper entropy from e.g.
 	// * RTC
-	// * performance counter
 	// * uninitialized memory
 	// * Mechacon temperature
-	memset(buf, 13, buflen);
+	for (i = 0; i < buflen; i += 1)
+	{
+		// Performance counter low buts should be changed for each call to cpu_ticks
+		buf_cur[i] = (u8)(cpu_ticks() & 0xff);
+	}
 	return 0;
 }
 #endif
