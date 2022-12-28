@@ -20,7 +20,7 @@ GLUE_OBJS = __dummy_passwd.o __direct_pwd.o __transform_errno.o __fill_stat.o _p
 	_fstat.o _stat.o lstat.o access.o opendir.o readdir.o rewinddir.o closedir.o _lseek.o lseek64.o chdir.o mkdir.o \
 	rmdir.o _link.o _unlink.o getcwd.o _getpid.o _kill.o _fork.o _wait.o _sbrk.o _gettimeofday.o _times.o ftime.o clock_getres.o clock_gettime.o clock_settime.o \
 	_isatty.o symlink.o truncate.o chmod.o fchmod.o fchmodat.o pathconf.o \
-	readlink.o utime.o fchown.o getentropy.o getpwuid.o fsync.o getpwnam.o getuid.o geteuid.o
+	readlink.o utime.o fchown.o getrandom.o getentropy.o getpwuid.o fsync.o getpwnam.o getuid.o geteuid.o
 
 EE_OBJS = $(CORE_OBJS) $(SJIS_OBJS) $(TIME_OBJS) $(INIT_OBJS) $(SLEEP_OBJS) $(TERMINATE_OBJS) $(GLUE_OBJS)
 
