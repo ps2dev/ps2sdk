@@ -54,7 +54,7 @@ static void clear_bss_area()
 /*
  * Intermediate function between _start and main, stack can be used as normal.
  */
-noreturn void _main()
+static void _main()
 {
     int retval;
     struct sargs *pa;
@@ -126,7 +126,7 @@ noreturn void _exit(int status)
  * This function sets up the stack and heap.
  * DO NOT USE THE STACK IN THIS FUNCTION!
  */
-noreturn void __start(struct sargs_start *pargs)
+void __start(struct sargs_start *pargs)
 {
     asm volatile(
         "# Save first argument  \n"
