@@ -31,25 +31,7 @@ void _libcglue_deinit();
 int main(int argc, char** argv);
 
 static struct sargs args;
-static struct sargs_start *args_start;
-
-// We need to do a backup of args_start and _args because memset will wipe it up.
-static void clear_bss_area()
-{
-	struct sargs args_backup;
-	struct sargs_start args_start_backup;
-
-	// Backup
-	memcpy(&args_backup, &args, sizeof(struct sargs));
-	memcpy(&args_start_backup, args_start, sizeof(struct sargs_start));
-
-	// Wipe
-	memset(&_fbss, 0, &_end - &_fbss);
-
-	// Restore
-	memcpy(&args, &args_backup, sizeof(struct sargs));
-	memcpy(args_start, &args_start_backup, sizeof(struct sargs_start));
-}
+struct sargs_start *args_start;
 
 /*
  * Intermediate function between _start and main, stack can be used as normal.
@@ -58,9 +40,6 @@ static void _main()
 {
     int retval;
     struct sargs *pa;
-
-    // clear bss area
-    clear_bss_area();
 
     // initialize heap
     SetupHeap(&_end, (int)&_heap_size);
@@ -129,6 +108,18 @@ noreturn void _exit(int status)
 void __start(struct sargs_start *pargs)
 {
     asm volatile(
+   		"# clear bss area"
+   		"la   $2, _fbss"
+   		"la   $3, _end"
+		"1:"
+   		"sltu   $1, $2, $3"
+   		"beq   $1, $0, 2f"
+   		"nop"
+   		"sq   $0, ($2)"
+   		"addiu   $2, $2, 16"
+   		"j   1b"
+   		"nop"
+		"2:"
         "# Save first argument  \n"
         "la     $2, %0 \n"
         "sw     $4, ($2)        \n"
@@ -148,7 +139,4 @@ void __start(struct sargs_start *pargs)
         "j      %2           \n"
 		: /* No outputs. */
 		: "R"(args_start), "R"(args), "Csy"(_main));
-
-    // Prevent gcc noreturn warning
-    while(1){}
 }
