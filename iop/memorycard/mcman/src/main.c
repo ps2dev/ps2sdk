@@ -125,9 +125,9 @@ void long_multiply(u32 v1, u32 v2, u32 *HI, u32 *LO)
 }
 
 //--------------------------------------------------------------
-int mcman_chrpos(char *str, int chr)
+int mcman_chrpos(const char *str, int chr)
 {
-	char *p;
+	const char *p;
 
 	p = str;
 	if (*str) {

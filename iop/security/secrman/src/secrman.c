@@ -449,7 +449,7 @@ static int secrman_load_kelf_common(loadfile_allocate_handler_struct_t *allocate
         if (((u32)lseek(flhs->fd, ModloadBitTableDescriptor.header.headersize, SEEK_SET)) == ModloadBitTableDescriptor.header.headersize) {
             if (decrypt(flhs->fd, allocate_info, &ModloadBitTableDescriptor) == 0) {
                 if (loadfile_check_valid_ee_elf(allocate_info, flhs) == 0) {
-                    if (loadfile_elf_get_program_header(allocate_info) == 0) {
+                    if (loadfile_elf_get_program_header(allocate_info, flhs) == 0) {
                         if (loadfile_elf_load_proc(allocate_info, flhs, &ModloadBitTableDescriptor, decrypt) == 0) {
                             result = 0;
 

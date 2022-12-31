@@ -95,8 +95,8 @@ typedef struct loadfile_allocate_handler_struct_
 typedef int (*loadfile_read_chunk_callback_t)(int fd, loadfile_allocate_handler_struct_t *allocate_info, void *read_callback_userdata);
 typedef int (*loadfile_elf_load_proc_callback_t)(loadfile_allocate_handler_struct_t *allocate_info, loadfile_file_load_handler_struct_t *flhs, void *read_callback_userdata, loadfile_read_chunk_callback_t read_callback);
 typedef int (*loadfile_check_valid_ee_elf_callback_t)(loadfile_allocate_handler_struct_t *allocate_info, loadfile_file_load_handler_struct_t *flhs);
-typedef int (*loadfile_elf_get_program_header_callback_t)(loadfile_allocate_handler_struct_t *allocate_info);
-typedef void *(*loadfile_elf_load_alloc_buffer_from_heap_callback_t)(int size);
+typedef int (*loadfile_elf_get_program_header_callback_t)(loadfile_allocate_handler_struct_t *allocate_info, loadfile_file_load_handler_struct_t *flhs);
+typedef void *(*loadfile_elf_load_alloc_buffer_from_heap_callback_t)(u32 size);
 typedef void (*loadfile_elf_load_dealloc_buffer_from_heap_callback_t)(void *buffer);
 typedef int (*loadfile_load_kelf_from_card_callback_t)(loadfile_allocate_handler_struct_t *allocate_info, loadfile_file_load_handler_struct_t *flhs, int port, int slot, int *result_out, int *result_module_out);
 typedef int (*loadfile_load_kelf_from_disk_callback_t)(loadfile_allocate_handler_struct_t *allocate_info, loadfile_file_load_handler_struct_t *flhs, int *result_out, int *result_module_out);
@@ -115,7 +115,7 @@ typedef struct SetLoadfileCallbacks_struct_
 typedef void *(*SecrCardBootFile_callback_t)(int port, int slot, void *buffer);
 typedef void *(*SecrDiskBootFile_callback_t)(void *buffer);
 typedef void (*SetLoadfileCallbacks_callback_t)(SetLoadfileCallbacks_struct_t *callbackinfo);
-typedef int (*CheckKelfPath_callback_t)(char *filename, int *port, int *slot);
+typedef int (*CheckKelfPath_callback_t)(const char *filename, int *port, int *slot);
 
 void *GetModloadInternalData(void **pInternalData);
 
