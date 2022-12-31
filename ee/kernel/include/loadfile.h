@@ -18,41 +18,7 @@
 
 #include <tamtypes.h>
 
-#define LF_PATH_MAX 252
-#define LF_ARG_MAX  252
-
-enum _lf_val_types {
-    LF_VAL_BYTE = 0,
-    LF_VAL_SHORT,
-    LF_VAL_LONG
-};
-
-enum _lf_functions {
-    LF_F_MOD_LOAD = 0,
-    LF_F_ELF_LOAD,
-
-    LF_F_SET_ADDR,
-    LF_F_GET_ADDR,
-
-    LF_F_MG_MOD_LOAD,
-    LF_F_MG_ELF_LOAD,
-
-    LF_F_MOD_BUF_LOAD,
-
-    LF_F_MOD_STOP,
-    LF_F_MOD_UNLOAD,
-
-    LF_F_SEARCH_MOD_BY_NAME,
-    LF_F_SEARCH_MOD_BY_ADDRESS,
-};
-
-typedef struct
-{
-    u32 epc;
-    u32 gp;
-    u32 sp;
-    u32 dummy;
-} t_ExecData;
+#include <loadfile-common.h>
 
 /* Extended error codes */
 /** Could not bind with RPC server */
