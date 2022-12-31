@@ -25,5 +25,6 @@ Alias    | Real Name         | Github profile or e-mail
  TyRaNiD | That Guy          | [tyranid](https://github.com/tyranid)
  ooPo    | Naomi Peori       | [ooPo](https://github.com/ooPo)
  gawd    | Gil Megidish      | [gmegidish](https://github.com/gmegidish)
+ pixel   | Nicolas Noble     | [nicolasnoble](https://github.com/nicolasnoble)
 
 .. and many others from the ps2dev community for feedback and fixes :)
