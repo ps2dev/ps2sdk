@@ -30,8 +30,52 @@ void _libcglue_init();
 void _libcglue_deinit();
 int main(int argc, char** argv);
 
+static void _main();
+
 static struct sargs args;
-struct sargs_start *args_start;
+static struct sargs_start *args_start;
+
+/*
+ * First function to be called by the loader
+ * This function sets up the stack and heap.
+ * DO NOT USE THE STACK IN THIS FUNCTION!
+ */
+void __start(struct sargs_start *pargs)
+{
+    asm volatile(
+   		"# Clear bss area"
+   		"la   $2, _fbss"
+   		"la   $3, _end"
+		"1:"
+   		"sltu   $1, $2, $3"
+   		"beq   $1, $0, 2f"
+   		"nop"
+   		"sq   $0, ($2)"
+   		"addiu   $2, $2, 16"
+   		"j   1b"
+   		"nop"
+		"2:"
+		"                       \n"
+        "# Save first argument  \n"
+        "la     $2, %0 \n"
+        "sw     $4, ($2)        \n"
+        "                       \n"
+        "# SetupThread          \n"
+        "la     $4, _gp         \n"
+        "la     $5, _stack      \n"
+        "la     $6, _stack_size \n"
+        "la     $7, %1	        \n"
+        "la     $8, ExitThread  \n"
+        "move   $gp, $4         \n"
+        "addiu  $3, $0, 60      \n"
+        "syscall                \n"
+        "move   $sp, $2         \n"
+        "                       \n"
+        "# Jump to _main      	\n"
+        "j      %2           \n"
+		: /* No outputs. */
+		: "R"(args_start), "R"(args), "Csy"(_main));
+}
 
 /*
  * Intermediate function between _start and main, stack can be used as normal.
@@ -98,45 +142,4 @@ noreturn void _exit(int status)
 
     // Exit
     Exit(status);
-}
-
-/*
- * First function to be called by the loader
- * This function sets up the stack and heap.
- * DO NOT USE THE STACK IN THIS FUNCTION!
- */
-void __start(struct sargs_start *pargs)
-{
-    asm volatile(
-   		"# clear bss area"
-   		"la   $2, _fbss"
-   		"la   $3, _end"
-		"1:"
-   		"sltu   $1, $2, $3"
-   		"beq   $1, $0, 2f"
-   		"nop"
-   		"sq   $0, ($2)"
-   		"addiu   $2, $2, 16"
-   		"j   1b"
-   		"nop"
-		"2:"
-        "# Save first argument  \n"
-        "la     $2, %0 \n"
-        "sw     $4, ($2)        \n"
-        "                       \n"
-        "# SetupThread          \n"
-        "la     $4, _gp         \n"
-        "la     $5, _stack      \n"
-        "la     $6, _stack_size \n"
-        "la     $7, %1	        \n"
-        "la     $8, ExitThread  \n"
-        "move   $gp, $4         \n"
-        "addiu  $3, $0, 60      \n"
-        "syscall                \n"
-        "move   $sp, $2         \n"
-        "                       \n"
-        "# Jump to _main      	\n"
-        "j      %2           \n"
-		: /* No outputs. */
-		: "R"(args_start), "R"(args), "Csy"(_main));
 }
