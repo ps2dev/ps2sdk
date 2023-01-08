@@ -116,7 +116,7 @@ typedef struct {  // size = 48
 int  mcsio2_transfer(int port, int slot, sio2_transfer_data_t *sio2data);
 #endif
 void long_multiply(u32 v1, u32 v2, u32 *HI, u32 *LO);
-int  mcman_chrpos(char *str, int chr);
+int  mcman_chrpos(const char *str, int chr);
 void mcman_wmemset(void *buf, int size, int value);
 int  mcman_calcEDC(void *buf, int size);
 int  mcman_checkpath(char *str);
@@ -203,7 +203,7 @@ int  mcman_replaceBackupBlock(int port, int slot, int block);
 int  mcman_fillbackupblock1(int port, int slot, int block, void **pagedata, void *eccdata);
 int  mcman_clearsuperblock(int port, int slot);
 int  mcman_ioerrcode(int errcode);
-int  mcman_modloadcb(char *filename, int *port, int *slot); // used as callback by modload
+int  mcman_modloadcb(const char *filename, int *port, int *slot); // used as callback by modload
 void mcman_unit2card(u32 unit);
 int  mcman_initdev(void);
 

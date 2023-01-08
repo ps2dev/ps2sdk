@@ -26,22 +26,6 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-struct _lf_iop_val_arg
-{
-    union
-    {
-        u32 iop_addr;
-        int result;
-    } p;
-    int type;
-    union
-    {
-        u8 b;
-        u16 s;
-        u32 l;
-    } val;
-} ALIGNED(16);
-
 extern int _iop_reboot_count;
 extern SifRpcClientData_t _lf_cd;
 extern int _lf_init;
@@ -88,18 +72,6 @@ void SifLoadFileExit()
 #endif
 
 #ifdef F__SifLoadModule
-struct _lf_module_load_arg
-{
-    union
-    {
-        int arg_len;
-        int result;
-    } p;
-    int modres;
-    char path[LF_PATH_MAX];
-    char args[LF_ARG_MAX];
-} ALIGNED(16);
-
 int _SifLoadModule(const char *path, int arg_len, const char *args, int *modres,
                    int fno, int dontwait)
 {
@@ -152,22 +124,6 @@ int SifLoadModuleEncrypted(const char *path, int arg_len, const char *args)
 #endif
 
 #ifdef F_SifStopModule
-struct _lf_module_stop_arg
-{
-    union
-    {
-        int id;
-        int result;
-    } p;
-    union
-    {
-        int arg_len;
-        int modres;
-    } q;
-    char dummy[LF_PATH_MAX];
-    char args[LF_ARG_MAX];
-} ALIGNED(16);
-
 int SifStopModule(int id, int arg_len, const char *args, int *mod_res)
 {
     struct _lf_module_stop_arg arg;
@@ -195,12 +151,6 @@ int SifStopModule(int id, int arg_len, const char *args, int *mod_res)
 #endif
 
 #ifdef F_SifUnloadModule
-union _lf_module_unload_arg
-{
-    int id;
-    int result;
-} ALIGNED(16);
-
 int SifUnloadModule(int id)
 {
     union _lf_module_unload_arg arg;
@@ -218,14 +168,6 @@ int SifUnloadModule(int id)
 #endif
 
 #ifdef F_SifSearchModuleByName
-struct _lf_search_module_by_name_arg
-{
-    int id;
-    int dummy1;
-    char name[LF_PATH_MAX];
-    char dummy2[LF_ARG_MAX];
-} ALIGNED(16);
-
 int SifSearchModuleByName(const char *name)
 {
     struct _lf_search_module_by_name_arg arg;
@@ -243,15 +185,6 @@ int SifSearchModuleByName(const char *name)
 #endif
 
 #ifdef F_SifSearchModuleByAddress
-struct _lf_search_module_by_address_arg
-{
-    union
-    {
-        const void *ptr;
-        int id;
-    } p;
-} ALIGNED(16);
-
 int SifSearchModuleByAddress(const void *ptr)
 {
     struct _lf_search_module_by_address_arg arg;
@@ -268,14 +201,6 @@ int SifSearchModuleByAddress(const void *ptr)
 #endif
 
 #ifdef F__SifLoadElfPart
-struct _lf_elf_load_arg
-{
-    u32 epc;
-    u32 gp;
-    char path[LF_PATH_MAX];
-    char secname[LF_ARG_MAX];
-} ALIGNED(16);
-
 int _SifLoadElfPart(const char *path, const char *secname, t_ExecData *data, int fno)
 {
     struct _lf_elf_load_arg arg;
@@ -392,22 +317,6 @@ int SifIopGetVal(u32 iop_addr, void *val, int type)
 #endif
 
 #ifdef F__SifLoadModuleBuffer
-struct _lf_module_buffer_load_arg
-{
-    union
-    {
-        void *ptr;
-        int result;
-    } p;
-    union
-    {
-        int arg_len;
-        int modres;
-    } q;
-    char unused[LF_PATH_MAX];
-    char args[LF_ARG_MAX];
-} ALIGNED(16);
-
 int _SifLoadModuleBuffer(void *ptr, int arg_len, const char *args, int *modres)
 {
     struct _lf_module_buffer_load_arg arg;

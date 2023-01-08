@@ -120,9 +120,9 @@ int mcman_ioerrcode(int errcode)
 }
 
 //--------------------------------------------------------------
-int mcman_modloadcb(char *filename, int *port, int *slot)
+int mcman_modloadcb(const char *filename, int *port, int *slot)
 {
-	register char *path = filename;
+	register const char *path = filename;
 	register int   upos;
 
 	if (*path == 0x20) {
