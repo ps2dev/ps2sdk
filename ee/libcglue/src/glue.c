@@ -41,6 +41,7 @@
 #include "io_common.h"
 #include "iox_stat.h"
 #include "ps2sdkapi.h"
+#include "timer_alarm.h"
 
 
 extern void * _end;
@@ -632,27 +633,30 @@ void * _sbrk(size_t incr) {
 #endif
 
 #ifdef F__gettimeofday
-/*
- * Implement in terms of time, which means we can't
- * return the microseconds.
- */
+int _gettimeofday(struct timeval *tv, struct timezone *tz)
+{
+	if (tv == NULL)
+	{
+		errno = EINVAL;
+		return -1;
+	}
 
-time_t ps2time(time_t *t);
+	{
+		u32 busclock_sec;
+		u32 busclock_usec;
 
-int _gettimeofday(struct timeval *tv, struct timezone *tz) {
-	if (tv == NULL) {
-      errno = EINVAL;
-      return -1;
-    }
+		TimerBusClock2USec(GetTimerSystemTime(), &busclock_sec, &busclock_usec);
+		tv->tv_sec = (time_t)(_ps2sdk_rtc_offset_from_busclk + ((s64)busclock_sec));
+		tv->tv_usec = busclock_usec;
+	}
 
-  	tv->tv_sec = (time_t) ps2time((time_t *) NULL);
-  	tv->tv_usec = 0L;
-  	if (tz != NULL) {
+	if (tz != NULL)
+	{
 		tz->tz_minuteswest = _timezone / 60;
 		tz->tz_dsttime = 0;
-    }
+	}
 
-  	return 0;
+	return 0;
 }
 #endif
 
@@ -695,7 +699,7 @@ int clock_getres(clockid_t clk_id, struct timespec *res) {
 
 	/* Return the actual time since epoch */
 	res->tv_sec = tv.tv_sec;
-	res->tv_nsec = 0;
+	res->tv_nsec = tv.tv_usec * 1000;
 
 	return 0;
 }
@@ -709,7 +713,7 @@ int clock_gettime(clockid_t clk_id, struct timespec *tp) {
 
 	/* Return the actual time since epoch */
 	tp->tv_sec = tv.tv_sec;
-	tp->tv_nsec = 0;
+	tp->tv_nsec = tv.tv_usec * 1000;
 
 	return 0;
 }
