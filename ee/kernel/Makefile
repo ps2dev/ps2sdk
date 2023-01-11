@@ -244,7 +244,7 @@ $(EE_OBJS_DIR)libosd_syscalls.o: $(EE_SRC_DIR)libosd_syscalls.S
 	$(DIR_GUARD)
 	$(EE_C_COMPILE) -I$(PS2SDKSRC)/ee/rpc/cdvd/include $< -c -o $@
 
-$(EE_OBJS_DIR)tibfunc.o: $(EE_SRC_DIR)tlbfunc.c
+$(EE_OBJS_DIR)tlbfunc.o: $(EE_SRC_DIR)tlbfunc.c
 	$(DIR_GUARD)
 	$(EE_C_COMPILE) $< -c -o $@
 
