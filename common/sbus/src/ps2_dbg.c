@@ -5,7 +5,13 @@
 
 #define DBG_CMD_PUTS (1)
 
-u32 _dbg_cmd_dma_buf[128] __attribute__((aligned(128)));
+#ifdef _EE
+#define DMA_BUF_ALIGNMENT 128
+#else
+#define DMA_BUF_ALIGNMENT 16
+#endif
+
+u32 _dbg_cmd_dma_buf[128] __attribute__((aligned(DMA_BUF_ALIGNMENT)));
 
 #ifdef _EE
 

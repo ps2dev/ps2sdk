@@ -56,10 +56,10 @@ static unsigned char raw_toc[3000];
 static int cd_transfer_sema = -1;
 
 /** cdda ring buffer */
-static u8 cd_ringbuf[SECTOR_SIZE*8] __attribute__((aligned (64)));
+static u8 cd_ringbuf[SECTOR_SIZE*8] __attribute__((aligned (16)));
 /** used upon overflow */
-static u8 cd_sparebuf[1880] __attribute__((aligned (64)));
-static u8 core0_buf[0x1000] __attribute__((aligned (64)));
+static u8 cd_sparebuf[1880] __attribute__((aligned (16)));
+static u8 core0_buf[0x1000] __attribute__((aligned (16)));
 
 static short cd_rendered_left[512];
 static short cd_rendered_right[512];
