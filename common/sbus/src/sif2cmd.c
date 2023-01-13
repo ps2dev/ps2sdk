@@ -18,6 +18,12 @@ This file contains all common code for both EE and IOP SIF management.
 #include <sysclib.h>
 #endif
 
+#ifdef _EE
+#define DMA_BUF_ALIGNMENT 128
+#else
+#define DMA_BUF_ALIGNMENT 16
+#endif
+
 #define SBUS_IRQ_XFER (30)
 #define SBUS_IRQ_EXEC (31)
 
@@ -37,7 +43,7 @@ static int __sif2_cmd_inited = 0;
 static SIF2_CmdHandler _sif2_cmd_handlers[SIF2_MAX_CMD_HANDLERS];
 
 // 512 byte command buffer(aligned 16 bytes)
-static u32 _sif2_dma_cmd_buf[128] __attribute__((aligned(128)));
+static u32 _sif2_dma_cmd_buf[128] __attribute__((aligned(DMA_BUF_ALIGNMENT)));
 
 int SIF2_set_cmd_handler(int cid, SIF2_CmdHandlerFunc func, void *param)
 {

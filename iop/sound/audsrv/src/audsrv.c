@@ -77,7 +77,7 @@ static int fillbuf_threshold = 0;
 static int format_changed = 0;
 
 /** double buffer for streaming */
-static u8 core1_buf[0x1000] __attribute__((aligned (64)));
+static u8 core1_buf[0x1000] __attribute__((aligned (16)));
 
 static short rendered_left [ 512 ];
 static short rendered_right[ 512 ];

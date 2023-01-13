@@ -39,8 +39,8 @@ IRX_ID(MODNAME, 1, 1);
 #define MAX_CAM_DEVICE_HANDLE	2
 
 
-static SifRpcDataQueue_t	rpc_queue			__attribute((aligned(64)));
-static SifRpcServerData_t	rpc_server			__attribute((aligned(64)));
+static SifRpcDataQueue_t	rpc_queue			__attribute__((__aligned__(16)));
+static SifRpcServerData_t	rpc_server			__attribute__((__aligned__(16)));
 static int					_rpc_buffer[1024]	 __attribute__((__aligned__(4)));
 //static int					threadId;
 static int					maintain_thread;
@@ -54,7 +54,7 @@ sceUsbdLddOps					cam_driver = {NULL,
 
 
 
-char						campacket[896]		__attribute((aligned(64)));
+char						campacket[896]		__attribute__((__aligned__(16)));
 char						irx_initialized	= 0;
 int							ps2cam_sema=0;
 CAMERA_DEVICE				Camera[MAX_CAM_DEVICE];
