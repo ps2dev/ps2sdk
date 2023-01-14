@@ -86,10 +86,10 @@ struct remote_data
 #define RM_DVD_SUBTITLE  0x0030D649
 #define RM_DVD_AUDIO     0x0040D649 /* 100 */
 #define RM_DVD_ANGLE     0x0050D649
-#define RM_DVD_UP        0x00A0D749 /* 122 */
-#define RM_DVD_DOWN      0x00B0D749
-#define RM_DVD_LEFT      0x00C0D749
-#define RM_DVD_RIGHT     0x00D0D749
+#define RM_DVD_UP        0x0090D749 /* 122 */
+#define RM_DVD_DOWN      0x00A0D749
+#define RM_DVD_LEFT      0x00B0D749
+#define RM_DVD_RIGHT     0x00C0D749
 /** @}*/
 
 /** @name Commands that works only on Dragon models

@@ -44,7 +44,7 @@ PS2 will accept any 20 bit IR code and will convert it into its own format. For 
 DAD5F
 ```
 PS2 will add trailing Zeroes and change endian:
-DAD5F -> DAD5F000 -> 00 0F 5D DA
+DAD5F -> DAD5F000 -> 00 F0 D5 DA
 In short - 3 bytes can get only 2 values (0xDAD or 0x49D) for PS2 and DVD side.
 2 bytes: button number (higher bit always zero)
 
