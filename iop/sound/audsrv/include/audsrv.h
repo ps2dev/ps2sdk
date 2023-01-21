@@ -94,7 +94,7 @@ int audsrv_get_cd_type();
 
 /* adpcm functions */
 int audsrv_adpcm_init();
-int audsrv_adpcm_set_volume(int ch, int vol);
+int audsrv_adpcm_set_volume(int ch, int voll, int volr);
 void *audsrv_load_adpcm(u32 *buffer, int size, int id);
 #define audsrv_play_adpcm(id)      audsrv_ch_play_adpcm(-1, id) //For backward-compatibility
 int audsrv_ch_play_adpcm(int ch, u32 id);

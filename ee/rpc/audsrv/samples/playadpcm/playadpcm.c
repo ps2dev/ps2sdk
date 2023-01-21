@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 
 	audsrv_adpcm_init();
 	audsrv_set_volume(MAX_VOLUME);
-	audsrv_adpcm_set_volume(0, MAX_VOLUME);
+	audsrv_adpcm_set_volume_and_pan(0, MAX_VOLUME, 0);
 	audsrv_load_adpcm(&sample, buffer, size);
 	audsrv_ch_play_adpcm(0, &sample);
 
@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 		nopdelay();
 	}
 
-	audsrv_adpcm_set_volume(1, MAX_VOLUME);
+	audsrv_adpcm_set_volume_and_pan(1, MAX_VOLUME, 0);
 	audsrv_ch_play_adpcm(1, &sample);
 	*/
 
