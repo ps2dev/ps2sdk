@@ -6,7 +6,7 @@
 
 #define VERSION	"1.2"
 
-extern int adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop);
+extern int adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop, int bytes_per_sample);
 
 enum{ monoF = (1 << 0), stereo = (1 << 1), loopF = (1 << 2) } sad_flag;
 
@@ -27,6 +27,7 @@ static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_l
 	int chunk_data;
 	short e;
 	char channels;
+	char bytes_per_sample;
 	struct AdpcmHeader AdpcmHeader;
 
 	result=0;
@@ -84,12 +85,13 @@ static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_l
 
 		if(fread( &sample_freq, 4, 1, fp )==1){
 			fseek( fp, 4 + 2, SEEK_CUR );
-			if (fread( &e, 2, 1, fp )!=1 || e != 16 )
+			if (fread( &e, 2, 1, fp )!=1 || (e != 8 && e != 16) )
 			{
-				printf( "Error: WAVE-file must 16 bit\n" );
+				printf( "Error: WAVE-file must 8 or 16 bit\n" );
 				result=-6;
 	 			goto InputFileIOEnd;
 			}
+			bytes_per_sample = e / 8;
 		}
 		else{
 			printf("Error: Can't read SAMPLE FREQUENCY in WAVE-file\n");
@@ -125,7 +127,7 @@ static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_l
 		}
 
 		if(fread( &sample_len, 4, 1, fp )==1){
-			sample_len /= (channels*2);
+			sample_len /= (channels*bytes_per_sample);
 		}
 		else{
 			printf("Error: Can't read SAMPLE LENGTH in WAVE-file\n");
@@ -149,17 +151,17 @@ static int ConvertFile(const char *InputFile, const char *OutputFile, int flag_l
 
 			if(channels == 1)
 			{
-				result=adpcm_encode(fp, sad, 0, sample_len, flag_loop);
+				result=adpcm_encode(fp, sad, 0, sample_len, flag_loop, bytes_per_sample);
 			}
 			else
 			{
 				int data_offset = ftell(fp);
 
 				// Encode left
-				if((result=adpcm_encode(fp, sad, 2, sample_len, flag_loop))==0){
-					fseek(fp, data_offset+2, SEEK_SET);
+				if((result=adpcm_encode(fp, sad, bytes_per_sample, sample_len, flag_loop, bytes_per_sample))==0){
+					fseek(fp, data_offset+bytes_per_sample, SEEK_SET);
 					// Encode right
-					result=adpcm_encode(fp, sad, 2, sample_len, flag_loop);
+					result=adpcm_encode(fp, sad, bytes_per_sample, sample_len, flag_loop, bytes_per_sample);
 				}
 			}
 
