@@ -196,7 +196,7 @@ static int audsrv_adpcm_alloc_channel(void)
 }
 
 /** Plays an adpcm sample already uploaded with audsrv_load_adpcm()
- * @param ch    channel identifier. Specifies one of the 24 voice channel to play the ADPCM channel on. If set to an invalid channel ID, an unoccupied channel will be selected. 
+ * @param ch    channel identifier. Specifies one of the 24 voice channel to play the ADPCM channel on. If set to an invalid channel ID, an unoccupied channel will be selected.
  * @param id    sample identifier, as specified in load()
  * @returns zero on success, negative value on error
  *
@@ -271,19 +271,20 @@ int audsrv_adpcm_init()
 
 /** Sets output volume for the specified voice channel.
  * @param ch       Voice channel ID
- * @param vol      volume in SPU2 units [0 .. 0x3fff]
+ * @param voll     left volume in SPU2 units [0 .. 0x3fff]
+ * @param volr     right volume in SPU2 units [0 .. 0x3fff]
  * @returns 0 on success, negative otherwise
  */
-int audsrv_adpcm_set_volume(int ch, int vol)
+int audsrv_adpcm_set_volume(int ch, int voll, int volr)
 {
-	if (vol < 0 || vol > MAX_VOLUME)
+	if (voll < 0 || voll > MAX_VOLUME || volr < 0 || volr > MAX_VOLUME)
 	{
 		/* bad joke */
 		return AUDSRV_ERR_ARGS;
 	}
 
-	sceSdSetParam(SD_CORE_1 | (ch << 1) | SD_VPARAM_VOLL, vol);
-	sceSdSetParam(SD_CORE_1 | (ch << 1) | SD_VPARAM_VOLR, vol);
+	sceSdSetParam(SD_CORE_1 | (ch << 1) | SD_VPARAM_VOLL, voll);
+	sceSdSetParam(SD_CORE_1 | (ch << 1) | SD_VPARAM_VOLR, volr);
 
 	return AUDSRV_ERR_NOERROR;
 }

@@ -221,9 +221,11 @@ int audsrv_adpcm_init();
 /** Sets output volume for the specified voice channel.
  * @param ch       Voice channel ID
  * @param vol      volume in percentage (0-100)
+ * @param pan      left/right offset [-100 .. 0 .. 100]
  * @returns 0 on success, negative otherwise
  */
-int audsrv_adpcm_set_volume(int ch, int vol);
+int audsrv_adpcm_set_volume_and_pan(int ch, int vol, int pan);
+#define audsrv_adpcm_set_volume(ch, vol) audsrv_adpcm_set_volume_and_pan(ch, vol, 0) //For backward-compatibility
 
 /** Uploads a sample to SPU2 memory
  * @param adpcm    adpcm descriptor structure
