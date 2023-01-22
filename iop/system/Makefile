@@ -13,9 +13,11 @@ SUBDIRS = \
 	iomanx \
 	iopmgr \
 	loadfile \
+	modload \
 	mtapman \
 	padman \
 	padman-old \
+	reboot \
 	rmman \
 	rmtapman \
 	rpadman \
