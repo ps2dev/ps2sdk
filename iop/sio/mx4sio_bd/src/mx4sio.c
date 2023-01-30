@@ -518,11 +518,25 @@ static bool ps2_spi_is_present(void)
 
 static uint8_t ps2_spi_wr_rd_byte(uint8_t byte)
 {
+    /* This check renders all instances of the following useless:
+     * 
+     *   _io->wr_rd_byte(DUMMY_BYTE);
+     *   _io->select();
+     *
+     *  _io->relese();
+     *  _io->wr_rd_byte(DUMMY_BYTE);
+     * 
+     * As a result the clock is not toggled when it should be
+     * this leads to incompatibity with sandisk sdcards
+    */
+
+    /*
     if (spi_ss == 0) {
         // We're ignoring a lot of dummy read/writes, this is not an error
         // M_DEBUG("%s(%d) - ignoring, not selected\n", __FUNCTION__, byte);
         return 0;
     }
+    */
 
     // M_DEBUG("%s(%d)\n", __FUNCTION__, byte);
     return sendCmd_Tx1_Rx1(byte, PORT_NR);
