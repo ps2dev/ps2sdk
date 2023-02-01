@@ -29,6 +29,10 @@
 #include <sysclib.h>
 #include <dev9.h>
 #include <atad.h>
+#ifdef ATA_ENABLE_BDM
+#include <bdm.h>
+#include <errno.h>
+#endif
 
 #include <speedregs.h>
 #include <atahw.h>
@@ -175,6 +179,12 @@ typedef struct _ata_cmd_state
 
 static ata_cmd_state_t atad_cmd_state;
 
+#ifdef ATA_ENABLE_BDM
+#define NUM_DEVICES 2
+#define ATA_BD_SECTOR_SIZE 512
+static struct block_device g_ata_bd[NUM_DEVICES];
+#endif
+
 static int ata_intr_cb(int flag);
 static unsigned int ata_alarm_cb(void *unused);
 
@@ -186,6 +196,13 @@ static void ata_multiword_dma_mode(int mode);
 #endif
 static void ata_ultra_dma_mode(int mode);
 static void ata_shutdown_cb(void);
+
+#ifdef ATA_ENABLE_BDM
+static int ata_bd_read(struct block_device *bd, u32 sector, void *buffer, u16 count);
+static int ata_bd_write(struct block_device *bd, u32 sector, const void *buffer, u16 count);
+static void ata_bd_flush(struct block_device *bd);
+static int ata_bd_stop(struct block_device *bd);
+#endif
 
 extern struct irx_export_table _exp_atad;
 
@@ -280,6 +297,28 @@ int _start(int argc, char *argv[])
 #endif
     /* Register this at the last position, as it should be the last thing done before shutdown. */
     dev9RegisterShutdownCb(15, &ata_shutdown_cb);
+
+#ifdef ATA_ENABLE_BDM
+    {
+        int i;
+
+        for (i = 0; i < NUM_DEVICES; ++i) {
+            g_ata_bd[i].priv  = (void *)&atad_devinfo[i];
+            g_ata_bd[i].name  = "ata";
+            g_ata_bd[i].devNr = i;
+            g_ata_bd[i].parNr = 0;
+            g_ata_bd[i].parId = 0x00;
+            g_ata_bd[i].sectorSize = 512;
+            g_ata_bd[i].sectorOffset = 0;
+            g_ata_bd[i].sectorCount = 0;
+            
+            g_ata_bd[i].read  = ata_bd_read;
+            g_ata_bd[i].write = ata_bd_write;
+            g_ata_bd[i].flush = ata_bd_flush;
+            g_ata_bd[i].stop  = ata_bd_stop;
+        }
+    }
+#endif
 
     if (RegisterLibraryEntries(&_exp_atad) != 0) {
         M_PRINTF("Library is already registered, exiting.\n");
@@ -1114,6 +1153,11 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
             memset(&devinfo[i], 0, sizeof(devinfo[i]));
         }
 #endif
+
+#ifdef ATA_ENABLE_BDM
+        g_ata_bd[i].sectorCount = devinfo[i].total_sectors_lba48;
+        bdm_connect_bd(&g_ata_bd[i]);
+#endif
     }
     return 0;
 }
@@ -1255,3 +1299,38 @@ static void ata_shutdown_cb(void)
             ata_device_standby_immediate(i);
     }
 }
+
+#ifdef ATA_ENABLE_BDM
+//
+// Block device interface
+//
+static int ata_bd_read(struct block_device *bd, u32 sector, void *buffer, u16 count)
+{
+    if (ata_device_sector_io(bd->devNr, buffer, sector, count, ATA_DIR_READ) != 0) {
+        return -EIO;
+    }
+
+    return count;
+}
+
+static int ata_bd_write(struct block_device *bd, u32 sector, const void *buffer, u16 count)
+{
+    if (ata_device_sector_io(bd->devNr, (void *)buffer, sector, count, ATA_DIR_WRITE) != 0) {
+        return -EIO;
+    }
+
+    return count;
+}
+
+static void ata_bd_flush(struct block_device *bd)
+{
+    ata_device_flush_cache(bd->devNr);
+}
+
+static int ata_bd_stop(struct block_device *bd)
+{
+    ata_device_standby_immediate(bd->devNr);
+
+    return 0;
+}
+#endif
