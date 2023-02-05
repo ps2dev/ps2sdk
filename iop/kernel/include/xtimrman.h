@@ -18,19 +18,23 @@
 
 #include <timrman.h>
 
-int SetTimerHandler(int timid, unsigned long comparevalue, unsigned int (*timeuphandler)(void*), void *common);
-int SetOverflowHandler(int timid, unsigned int (*handler)(void*), void *common);
+#define TC_SYSCLOCK 1
+#define TC_PIXEL    2
+#define TC_HLINE    4
+
+int SetTimerHandler(int timid, unsigned long comparevalue, unsigned int (*timeuphandler)(void *), void *common);
+int SetOverflowHandler(int timid, unsigned int (*handler)(void *), void *common);
 int SetupHardTimer(int timid, int source, int mode, int prescale);
 int StartHardTimer(int timid);
 int StopHardTimer(int timid);
 
 #define xtimrman_IMPORTS_start DECLARE_IMPORT_TABLE(timrman, 1, 1)
-#define xtimrman_IMPORTS_end END_IMPORT_TABLE
+#define xtimrman_IMPORTS_end   END_IMPORT_TABLE
 
-#define I_SetTimerHandler DECLARE_IMPORT(20, SetTimerHandler)
+#define I_SetTimerHandler    DECLARE_IMPORT(20, SetTimerHandler)
 #define I_SetOverflowHandler DECLARE_IMPORT(21, SetOverflowHandler)
-#define I_SetupHardTimer DECLARE_IMPORT(22, SetupHardTimer)
-#define I_StartHardTimer DECLARE_IMPORT(23, StartHardTimer)
-#define I_StopHardTimer DECLARE_IMPORT(24, StopHardTimer)
+#define I_SetupHardTimer     DECLARE_IMPORT(22, SetupHardTimer)
+#define I_StartHardTimer     DECLARE_IMPORT(23, StartHardTimer)
+#define I_StopHardTimer      DECLARE_IMPORT(24, StopHardTimer)
 
 #endif /* __XTIMRMAN_H__ */
