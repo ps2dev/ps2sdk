@@ -120,31 +120,34 @@ void *audsrv_load_adpcm(u32 *buffer, int size, int id)
 	adpcm = adpcm_loaded(id);
 	if (adpcm == NULL)
 	{
+		int spu2_addr = 0x5010; /* Need to change this so it considers to PCM streaming space usage :) */
+		if (adpcm_list_tail != NULL)
+		{
+			spu2_addr = adpcm_list_tail->spu2_addr + adpcm_list_tail->size;
+		}
+		if (spu2_addr + size - 16 > 2097152)
+		{
+			sbuffer[0] = -AUDSRV_ERR_OUT_OF_MEMORY;
+			return sbuffer;
+		}
+
+		adpcm = alloc_new_sample();
+		adpcm->id = id;
+		adpcm->spu2_addr = spu2_addr;
+		adpcm->size = size - 16; /* header is 16 bytes */
+		adpcm->next = NULL;
+
+		audsrv_read_adpcm_header(adpcm, buffer);
+
 		if (adpcm_list_head == NULL)
 		{
 			/* first entry ever! yay! */
-			adpcm = alloc_new_sample();
-			adpcm->id = id;
-			adpcm->spu2_addr = 0x5010; /* Need to change this so it considers to PCM streaming space usage :) */
-			adpcm->size = size - 16; /* header is 16 bytes */
-			adpcm->next = NULL;
-
-			audsrv_read_adpcm_header(adpcm, buffer);
-
 			adpcm_list_head = adpcm;
 			adpcm_list_tail = adpcm_list_head;
 		}
 		else
 		{
 			/* add at the end of the list */
-			adpcm = alloc_new_sample();
-			adpcm->id = id;
-			adpcm->spu2_addr = adpcm_list_tail->spu2_addr + adpcm_list_tail->size;
-			adpcm->size = size - 16; /* header is 16 bytes */
-			adpcm->next = NULL;
-
-			audsrv_read_adpcm_header(adpcm, buffer);
-
 			adpcm_list_tail->next = adpcm;
 			adpcm_list_tail = adpcm;
 		}
