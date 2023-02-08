@@ -75,9 +75,6 @@ struct Timer
     void *overflow_common;
 };
 
-// TODO
-// Should be statically initialised
-// with addresses
 static struct Timer sTimerTable[NUM_TIMERS] = {
     {
         .addr         = TMR0_COUNT,
@@ -300,7 +297,7 @@ void SetTimerMode(int timid, int mode)
     _sh(mode, (timid << 4) + 4);
 }
 
-int GetTimerMode(int timid)
+u32 GetTimerMode(int timid)
 {
     u32 timer = (timid >> 28) - 1;
     if (timer >= NUM_TIMERS) {

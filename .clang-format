@@ -61,7 +61,7 @@ DerivePointerAlignment: false
 DisableFormat:   false
 EmptyLineBeforeAccessModifier: LogicalBlock
 FixNamespaceComments: true
-ForEachMacros:   []
+ForEachMacros:   ['list_for_each', 'list_for_each_safe']
 IncludeBlocks: Preserve
 IndentExternBlock: NoIndent
 IndentCaseBlocks: false
