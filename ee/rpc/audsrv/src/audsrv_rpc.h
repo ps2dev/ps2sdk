@@ -51,6 +51,7 @@
 #define AUDSRV_LOAD_ADPCM           0x0017
 #define AUDSRV_PLAY_ADPCM           0x0018
 #define AUDSRV_ADPCM_SET_VOLUME     0x0019
+#define AUDSRV_FREE_ADPCM           0x001c
 
 #define AUDSRV_AVAILABLE            0x001a
 #define AUDSRV_QUEUED               0x001b
