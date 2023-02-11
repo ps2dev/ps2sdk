@@ -81,13 +81,13 @@ int mcman_format1(int port, int slot)
 }
 
 //--------------------------------------------------------------
-int mcman_open1(int port, int slot, char *filename, int flags)
+int mcman_open1(int port, int slot, const char *filename, int flags)
 {
 	register int r, i, fd = 0, cluster, temp;
 	register MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
 	McFsEntryPS1 *fse; //sp18
 	McCacheEntry *mce;
-	char *p = filename;
+	const char *p = filename;
 
 	DPRINTF("mcman_open1 port%d slot%d filename %s flags %x\n", port, slot, filename, flags);
 
@@ -434,7 +434,7 @@ int mcman_dread1(int fd, io_dirent_t *dirent)
 }
 
 //--------------------------------------------------------------
-int mcman_getstat1(int port, int slot, char *filename, io_stat_t *stat)
+int mcman_getstat1(int port, int slot, const char *filename, io_stat_t *stat)
 {
 	register int r;
 	McFsEntryPS1 *fse;
@@ -473,7 +473,7 @@ int mcman_getstat1(int port, int slot, char *filename, io_stat_t *stat)
 }
 
 //--------------------------------------------------------------
-int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int flags)
+int mcman_setinfo1(int port, int slot, const char *filename, sceMcTblGetDir *info, int flags)
 {
 	register int r, temp, ret;
 #ifdef BUILDING_XMCMAN
@@ -576,7 +576,7 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 }
 
 //--------------------------------------------------------------
-int mcman_getdir1(int port, int slot, char *dirname, int flags, int maxent, sceMcTblGetDir *info)
+int mcman_getdir1(int port, int slot, const char *dirname, int flags, int maxent, sceMcTblGetDir *info)
 {
 	register int r, i;
 	McFsEntryPS1 *fse;
@@ -588,7 +588,7 @@ int mcman_getdir1(int port, int slot, char *dirname, int flags, int maxent, sceM
 	i = 0;
 
 	if (!flags) {
-		char *p;
+		const char *p;
 
 		mcman_PS1curcluster = 0;
 		p = dirname;
@@ -653,7 +653,7 @@ int mcman_getdir1(int port, int slot, char *dirname, int flags, int maxent, sceM
 }
 
 //--------------------------------------------------------------
-int mcman_delete1(int port, int slot, char *filename, int flags)
+int mcman_delete1(int port, int slot, const char *filename, int flags)
 {
 	register int r;
 	McFsEntryPS1 *fse;

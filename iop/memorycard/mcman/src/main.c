@@ -288,7 +288,7 @@ int mcman_calcEDC(void *buf, int size)
 }
 
 //--------------------------------------------------------------
-int mcman_checkpath(char *str) // check that a string do not contain special chars ( chr<32, ?, *)
+int mcman_checkpath(const char *str) // check that a string do not contain special chars ( chr<32, ?, *)
 {
 	register int i;
 	u8 *p = (u8 *)str;
@@ -305,11 +305,11 @@ int mcman_checkpath(char *str) // check that a string do not contain special cha
 }
 
 //--------------------------------------------------------------
-int mcman_checkdirpath(char *str1, char *str2)
+int mcman_checkdirpath(const char *str1, const char *str2)
 {
 	register int pos;
-	char *p1 = str1;
-	char *p2 = str2;
+	const char *p1 = str1;
+	const char *p2 = str2;
 
 	do {
 		register int pos1, pos2;
@@ -559,7 +559,7 @@ int McDetectCard2(int port, int slot) // Export #21 XMCMAN only
 }
 
 //--------------------------------------------------------------
-int McOpen(int port, int slot, char *filename, int flag) // Export #6
+int McOpen(int port, int slot, const char *filename, int flag) // Export #6
 {
 	register int r;
 
@@ -807,7 +807,7 @@ int McWrite(int fd, void *buf, int length) // Export #9
 }
 
 //--------------------------------------------------------------
-int McGetEntSpace(int port, int slot, char *dirname) // Export #23 XMCMAN only
+int McGetEntSpace(int port, int slot, const char *dirname) // Export #23 XMCMAN only
 {
 	register int r;
 
@@ -828,7 +828,7 @@ int McGetEntSpace(int port, int slot, char *dirname) // Export #23 XMCMAN only
 }
 
 //--------------------------------------------------------------
-int McGetDir(int port, int slot, char *dirname, int flags, int maxent, sceMcTblGetDir *info) // Export #12
+int McGetDir(int port, int slot, const char *dirname, int flags, int maxent, sceMcTblGetDir *info) // Export #12
 {
 	register int r;
 
@@ -886,7 +886,7 @@ int mcman_dread(int fd, io_dirent_t *dirent)
 }
 
 //--------------------------------------------------------------
-int mcman_getstat(int port, int slot, char *filename, io_stat_t *stat)
+int mcman_getstat(int port, int slot, const char *filename, io_stat_t *stat)
 {
 	register int r;
 
@@ -908,7 +908,7 @@ int mcman_getstat(int port, int slot, char *filename, io_stat_t *stat)
 }
 
 //--------------------------------------------------------------
-int McSetFileInfo(int port, int slot, char *filename, sceMcTblGetDir *info, int flags) // Export #16
+int McSetFileInfo(int port, int slot, const char *filename, sceMcTblGetDir *info, int flags) // Export #16
 {
 	register int r;
 
@@ -938,7 +938,7 @@ int McSetFileInfo(int port, int slot, char *filename, sceMcTblGetDir *info, int 
 }
 
 //--------------------------------------------------------------
-int McChDir(int port, int slot, char *newdir, char *currentdir) // Export #15
+int McChDir(int port, int slot, const char *newdir, char *currentdir) // Export #15
 {
 	register int r;
 
@@ -962,7 +962,7 @@ int McChDir(int port, int slot, char *newdir, char *currentdir) // Export #15
 }
 
 //--------------------------------------------------------------
-int McDelete(int port, int slot, char *filename, int flags) // Export #13
+int McDelete(int port, int slot, const char *filename, int flags) // Export #13
 {
 	register int r;
 
@@ -1668,7 +1668,7 @@ int mcman_findfree2(int port, int slot, int reserve)
 }
 
 //--------------------------------------------------------------
-int mcman_getentspace(int port, int slot, char *dirname)
+int mcman_getentspace(int port, int slot, const char *dirname)
 {
 	register int r, i, entspace;
 	McCacheDir cacheDir;
@@ -1712,14 +1712,14 @@ int mcman_getentspace(int port, int slot, char *dirname)
 }
 
 //--------------------------------------------------------------
-int mcman_cachedirentry(int port, int slot, char *filename, McCacheDir *pcacheDir, McFsEntry **pfse, int unknown_flag)
+int mcman_cachedirentry(int port, int slot, const char *filename, McCacheDir *pcacheDir, McFsEntry **pfse, int unknown_flag)
 {
 	register int r, fsindex, cluster, fmode;
 	register MCDevInfo *mcdi = &mcman_devinfos[port][slot];
 	McFsEntry *fse;
 	McCacheDir cacheDir;
 	u8 *pfsentry, *pcache, *pfseend;
-	char *p;
+	const char *p;
 
 	DPRINTF("mcman_cachedirentry port%d slot%d name %s\n", port, slot, filename);
 
@@ -1825,7 +1825,7 @@ int mcman_cachedirentry(int port, int slot, char *filename, McCacheDir *pcacheDi
 }
 
 //--------------------------------------------------------------
-int mcman_getdirinfo(int port, int slot, McFsEntry *pfse, char *filename, McCacheDir *pcd, int unknown_flag)
+int mcman_getdirinfo(int port, int slot, McFsEntry *pfse, const char *filename, McCacheDir *pcd, int unknown_flag)
 {
 	register int i, r, ret, len, pos;
 	McFsEntry *fse;
@@ -2487,10 +2487,10 @@ int mcman_setPS1devinfos(int port, int slot)
 }
 
 //--------------------------------------------------------------
-int mcman_getPS1direntry(int port, int slot, char *filename, McFsEntryPS1 **pfse, int flag)
+int mcman_getPS1direntry(int port, int slot, const char *filename, McFsEntryPS1 **pfse, int flag)
 {
 	register int i;
-	char *p = filename;
+	const char *p = filename;
 
 	DPRINTF("mcman_getPS1direntry port%d slot%d file %s flag %x\n", port, slot, filename, flag);
 

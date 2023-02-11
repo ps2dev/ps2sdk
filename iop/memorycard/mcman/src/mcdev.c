@@ -249,7 +249,7 @@ int mc_open(iop_file_t *f, const char *filename, int mode)
 
 	r = McDetectCard2(mcman_mc_port, mcman_mc_slot);
 	if (r >= -1) {
-		r = McOpen(mcman_mc_port, mcman_mc_slot, (char *)filename, mode);
+		r = McOpen(mcman_mc_port, mcman_mc_slot, filename, mode);
 		if (r >= 0)
 			f->privdata = (void*)r;
 	}
@@ -333,7 +333,7 @@ int mc_remove(iop_file_t *f, const char *filename)
 
 	r = McDetectCard2(mcman_mc_port, mcman_mc_slot);
 	if (r >= -1) {
-		r = McDelete(mcman_mc_port, mcman_mc_slot, (char *)filename, 0);
+		r = McDelete(mcman_mc_port, mcman_mc_slot, filename, 0);
 	}
 	SignalSema(mcman_io_sema);
 
@@ -350,7 +350,7 @@ int mc_mkdir(iop_file_t *f, const char *dirname)
 
 	r = McDetectCard2(mcman_mc_port, mcman_mc_slot);
 	if (r >= -1) {
-		r = McOpen(mcman_mc_port, mcman_mc_slot, (char *)dirname, 0x40);
+		r = McOpen(mcman_mc_port, mcman_mc_slot, dirname, 0x40);
 	}
 	SignalSema(mcman_io_sema);
 
@@ -367,7 +367,7 @@ int mc_rmdir(iop_file_t *f, const char *dirname)
 
 	r = McDetectCard2(mcman_mc_port, mcman_mc_slot);
 	if (r >= -1) {
-		r = McDelete(mcman_mc_port, mcman_mc_slot, (char *)dirname, 0);
+		r = McDelete(mcman_mc_port, mcman_mc_slot, dirname, 0);
 	}
 	SignalSema(mcman_io_sema);
 
@@ -384,7 +384,7 @@ int mc_dopen(iop_file_t *f, const char *dirname)
 
 	r = McDetectCard2(mcman_mc_port, mcman_mc_slot);
 	if (r >= -1) {
-		r = McOpen(mcman_mc_port, mcman_mc_slot, (char *)dirname, 0);
+		r = McOpen(mcman_mc_port, mcman_mc_slot, dirname, 0);
 		if (r >= 0)
 			f->privdata = (void*)r;
 	}
@@ -428,7 +428,7 @@ int mc_getstat(iop_file_t *f, const char *filename, io_stat_t *stat)
 
 	r = McDetectCard2(mcman_mc_port, mcman_mc_slot);
 	if (r >= -1) {
-		r = mcman_getstat(mcman_mc_port, mcman_mc_slot, (char *)filename, stat);
+		r = mcman_getstat(mcman_mc_port, mcman_mc_slot, filename, stat);
 	}
 
 	SignalSema(mcman_io_sema);
@@ -486,7 +486,7 @@ int mc_chstat(iop_file_t *f, const char *filename, io_stat_t *stat, unsigned int
 			memcpy(&mctbl._Modify, stat->mtime, sizeof(sceMcStDateTime));
 		}
 
-		r = McSetFileInfo(mcman_mc_port, mcman_mc_slot, (char *)filename, &mctbl, flags);
+		r = McSetFileInfo(mcman_mc_port, mcman_mc_slot, filename, &mctbl, flags);
 	}
 	SignalSema(mcman_io_sema);
 

@@ -33,7 +33,7 @@ extern u8 mcman_eccdata[512]; // size for 32 ecc
 static int mcman_curdirmaxent;
 static int mcman_curdirlength;
 static char mcman_curdirpath[1024];
-static char *mcman_curdirname;
+static const char *mcman_curdirname;
 static sceMcStDateTime mcman_fsmodtime;
 
 //--------------------------------------------------------------
@@ -328,7 +328,7 @@ int mcman_dread2(int fd, io_dirent_t *dirent)
 }
 
 //--------------------------------------------------------------
-int mcman_getstat2(int port, int slot, char *filename, io_stat_t *stat)
+int mcman_getstat2(int port, int slot, const char *filename, io_stat_t *stat)
 {
 	register int r;
 	McFsEntry *fse;
@@ -370,7 +370,7 @@ int mcman_getstat2(int port, int slot, char *filename, io_stat_t *stat)
 }
 
 //--------------------------------------------------------------
-int mcman_setinfo2(int port, int slot, char *filename, sceMcTblGetDir *info, int flags)
+int mcman_setinfo2(int port, int slot, const char *filename, sceMcTblGetDir *info, int flags)
 {
 	register int r, fmode;
 	McFsEntry *fse;
@@ -659,7 +659,7 @@ int mcman_close2(int fd)
 }
 
 //--------------------------------------------------------------
-int mcman_open2(int port, int slot, char *filename, int flags)
+int mcman_open2(int port, int slot, const char *filename, int flags)
 {
 	register int fd, i, r, rdflag, wrflag, pos, mcfree;
 	register MC_FHANDLE *fh;
@@ -668,7 +668,7 @@ int mcman_open2(int port, int slot, char *filename, int flags)
 	McFsEntry *fse1, *fse2;
 	McCacheEntry *mce;
 	u8 *pfsentry, *pcache, *pfseend;
-	char *p;
+	const char *p;
 	int fat_entry;
 
 	DPRINTF("mcman_open2 port%d slot%d name %s flags %x\n", port, slot, filename, flags);
@@ -1038,7 +1038,7 @@ int mcman_open2(int port, int slot, char *filename, int flags)
 }
 
 //--------------------------------------------------------------
-int mcman_chdir(int port, int slot, char *newdir, char *currentdir)
+int mcman_chdir(int port, int slot, const char *newdir, char *currentdir)
 {
 	register int r, len, len2, cluster;
 	register MCDevInfo *mcdi = &mcman_devinfos[port][slot];
@@ -1130,7 +1130,7 @@ lbl1:
 }
 
 //--------------------------------------------------------------
-int mcman_getdir2(int port, int slot, char *dirname, int flags, int maxent, sceMcTblGetDir *info)
+int mcman_getdir2(int port, int slot, const char *dirname, int flags, int maxent, sceMcTblGetDir *info)
 {
 	register int r, nument;
 	register MCDevInfo *mcdi = &mcman_devinfos[port][slot];
@@ -1269,7 +1269,7 @@ int mcman_getdir2(int port, int slot, char *dirname, int flags, int maxent, sceM
 }
 
 //--------------------------------------------------------------
-int mcman_delete2(int port, int slot, char *filename, int flags)
+int mcman_delete2(int port, int slot, const char *filename, int flags)
 {
 	register int r, i;
 	McCacheDir cacheDir;
