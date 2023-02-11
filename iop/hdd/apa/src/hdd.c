@@ -95,6 +95,7 @@ static int hddInitError(void);
 
 int hddCheckPartitionMax(s32 device, u32 size)
 {
+	// TODO: In DVRP firmware, this check always succeeds
 	return (hddDevices[device].partitionMaxSize >= size) ? 0 : -EINVAL;
 }
 

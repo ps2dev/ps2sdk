@@ -38,6 +38,7 @@ extern const char apaMBRMagic[];
 extern apa_device_t hddDevices[];
 
 #ifdef APA_FORMAT_MAKE_PARTITIONS
+// TODO: For DVRP firmware 48-bit, __xdata and __xcontents partitions are created
 static const char *formatPartList[] = {
     "__net", "__system", "__sysconf", "__common", NULL};
 #endif
@@ -304,6 +305,8 @@ int hddFormat(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void 
         return -EIO;
     }
     // clear apa headers
+    // TODO: Why does DVRP firmware start clearing at 1024 * 4104 when not 48-bit?
+    // TODO: DVRP firmware 48-bit clears offset_24+0x2000, offset_24+0x42000, offset_24+0x242000
     for (i = 1024 * 8; i < hddDevices[f->unit].totalLBA; i += (1024 * 256)) {
         ata_device_sector_io(f->unit, clink->header, i, sizeof(apa_header_t) / 512,
                              ATA_DIR_WRITE);
@@ -317,8 +320,10 @@ int hddFormat(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void 
         apa_header_t *header = clink->header;
         memset(header, 0, sizeof(apa_header_t));
         header->magic = APA_MAGIC;
+        // TODO: DVRP firmware sets this to 0x400 bytes
         header->length = (1024 * 256); // 128MB
         header->type = APA_TYPE_MBR;
+        // TODO: DVRP firmware 48-bit sets this to __extend
         strcpy(header->id, "__mbr");
 #ifdef APA_FORMAT_LOCK_MBR
         apaEncryptPassword(header->id, header->fpwd, "sce_mbr");
@@ -355,12 +360,15 @@ int hddFormat(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void 
         hddDevices[f->unit].status = 0;
         hddDevices[f->unit].format = APA_MBR_VERSION;
     }
+    // TODO: DVRP firmware 48-bit creates __extend partition at offset_24_bit, with same params as __mbr except content is empty
 #ifdef APA_FORMAT_MAKE_PARTITIONS
     memset(&emptyBlocks, 0, sizeof(emptyBlocks));
     memset(&params, 0, sizeof(apa_params_t));
     params.size = (1024 * 256);
     params.type = APA_TYPE_PFS;
 
+    // TODO: For DVRP firmware 48-bit, __xdata is created with size 1024 * 2048
+    // TODO: For DVRP firmware 48-bit, __xcontents is created with size (offset_48_bit - offset_24_bit) - 0x240000 & 0xfffff7ff
     // add __net, __system....
     for (i = 0; formatPartList[i]; i++) {
         memset(params.id, 0, APA_IDMAX);
@@ -386,6 +394,7 @@ static int apaOpen(s32 device, hdd_file_slot_t *fileSlot, apa_params_t *params, 
     u32 sector = 0;
 
 #ifdef APA_SUPPORT_BHDD
+    // TODO: start sector usually is at either 0x4A817C8 (40GB offset) or 0x400000 (2GiB offset)
     if (strcmp(params->id, "__xcontents") == 0 || strcmp(params->id, "__extend") == 0 || strcmp(params->id, "__xdata") == 0)
         sector = hddDevices[device].totalLBA;
 #endif
@@ -1099,6 +1108,15 @@ int hddDevctl(iomanX_iop_file_t *f, const char *devname, int cmd, void *arg,
         case HDIOC_SCEIDENTIFY:
             rv = ata_device_sce_identify_drive(f->unit, (u16 *)bufp);
             break;
+
+        // HDIOC_INSTSEC is not implemented in DVRP firmware
+        // HDIOC_SETMAXLBA28 is implemented in DVRP firmware
+        // HDIOC_GETMAXLBA48 is implemented in DVRP firmware
+        // HDIOC_ISLBA48 is implemented in DVRP firmware
+        // HDIOC_PRESETMAXLBA28 is not implemented in DVRP firmware
+        // HDIOC_POSTSETMAXLBA28 is not implemented in DVRP firmware
+        // HDIOC_ENABLEWRITECACHE is implemented in DVRP firmware -> ATA 0xEF subcommand 0x02
+        // HDIOC_DISABLEWRITECACHE is implemented in DVRP firmware -> ATA 0xEF subcommand 0x82
 
         default:
             rv = -EINVAL;
