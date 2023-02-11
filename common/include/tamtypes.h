@@ -76,6 +76,13 @@ typedef volatile s32 vs32;
 typedef volatile s64 vs64;
 #endif
 
+/* Pointers are 32-bit on both EE and IOP. */
+typedef u32 uiptr;
+typedef s32 siptr;
+
+typedef volatile u32 vuiptr;
+typedef volatile s32 vsiptr;
+
 #ifdef _EE
 typedef union
 {
