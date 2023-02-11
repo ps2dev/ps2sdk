@@ -201,7 +201,7 @@ static int audsrv_adpcm_alloc_channel(void)
 /** Plays an adpcm sample already uploaded with audsrv_load_adpcm()
  * @param ch    channel identifier. Specifies one of the 24 voice channel to play the ADPCM channel on. If set to an invalid channel ID, an unoccupied channel will be selected.
  * @param id    sample identifier, as specified in load()
- * @returns zero on success, negative value on error
+ * @returns channel identifier on success, negative value on error
  *
  * When ch is set to an invalid channel ID, the sample will be played in an unoccupied channel.
  * If all 24 channels are used, then -AUDSRV_ERR_NO_MORE_CHANNELS is returned.
@@ -243,7 +243,7 @@ int audsrv_ch_play_adpcm(int ch, u32 id)
 	sceSdSetParam(SD_CORE_1 | (channel << 1) | SD_VPARAM_PITCH, a->pitch);
 	sceSdSetAddr(SD_CORE_1 | (channel << 1) | SD_VOICE_START, a->spu2_addr);
 	sceSdSetSwitch(SD_CORE_1 | SD_SWITCH_KON, (1 << channel));
-	return AUDSRV_ERR_NOERROR;
+	return channel;
 }
 
 /** Initializes adpcm unit of audsrv
