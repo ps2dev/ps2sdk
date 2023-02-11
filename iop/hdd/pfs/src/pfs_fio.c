@@ -485,7 +485,7 @@ static int fileTransfer(pfs_file_slot_t *fileSlot, u8 *buf, int size, int operat
 		// If we are transferring size not a multiple of 512, under 512, or to
 		// an unaligned buffer we need to use a special function rather than
 		// just doing a ATA sector transfer.
-		if ((blockpos->byte_offset & 0x1FF) || (size < 512) || ((u32)buf & 3))
+		if ((blockpos->byte_offset & 0x1FF) || (size < 512) || ((uiptr)buf & 3))
 		{
 			if ((result=fileTransferRemainder(fileSlot, buf, size, operation)) < 0)
 				break;
