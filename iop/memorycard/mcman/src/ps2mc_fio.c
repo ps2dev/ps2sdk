@@ -386,13 +386,13 @@ int mcman_setinfo2(int port, int slot, char *filename, sceMcTblGetDir *info, int
 	if ((flags & sceMcFileAttrFile) != 0)	{
 		u8 *pfsentry, *pfseend, *mfee;
 
-		if ((!strcmp(".", (char*)info->EntryName)) || (!strcmp("..", (char*)info->EntryName)))
+		if ((!strcmp(".", info->EntryName)) || (!strcmp("..", info->EntryName)))
 			return sceMcResNoEntry;
 
 		if (info->EntryName[0] == 0)
 			return sceMcResNoEntry;
 
-		r = mcman_chrpos((char*)info->EntryName, '/');
+		r = mcman_chrpos(info->EntryName, '/');
 		if (r >= 0)
 			return sceMcResNoEntry;
 
@@ -420,7 +420,7 @@ int mcman_setinfo2(int port, int slot, char *filename, sceMcTblGetDir *info, int
 			mfee += 16;
 		} while (pfsentry < pfseend);
 
-		r = mcman_getdirinfo(port, slot, &mfe, (char*)info->EntryName, NULL, 1);
+		r = mcman_getdirinfo(port, slot, &mfe, info->EntryName, NULL, 1);
 		if (r != 1) {
 			if (r < 2) {
 				if (r == 0)
@@ -477,7 +477,7 @@ int mcman_setinfo2(int port, int slot, char *filename, sceMcTblGetDir *info, int
 		fse->modified = info->_Modify;
 
 	if ((flags & sceMcFileAttrFile) != 0) {
-		strncpy(fse->name, (char*)info->EntryName, 32);
+		strncpy(fse->name, info->EntryName, 32);
 		fse->name[31] = 0;
 	}
 
@@ -1246,7 +1246,7 @@ int mcman_getdir2(int port, int slot, char *dirname, int flags, int maxent, sceM
 				info->EntryName[1] = '\0';
 			}
 			else {
-				strncpy((char*)info->EntryName, fse->name, 32);
+				strncpy(info->EntryName, fse->name, 32);
 			}
 
 			info->AttrFile = fse->mode;

@@ -487,13 +487,13 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 	ret = 0;
 #ifdef BUILDING_XMCMAN
 	if ((flags & sceMcFileAttrFile) != 0) {
-		r = mcman_getPS1direntry(port, slot, (char*)info->EntryName, &fse1, 1);
+		r = mcman_getPS1direntry(port, slot, info->EntryName, &fse1, 1);
 		if (r < 0) {
 			if (r != sceMcResNoEntry) {
 				ret = r;
 			}
 			else {
-				if ((!strcmp(".", (char*)info->EntryName)) || (!strcmp("..", (char*)info->EntryName)) || (info->EntryName[0] == 0))
+				if ((!strcmp(".", info->EntryName)) || (!strcmp("..", info->EntryName)) || (info->EntryName[0] == 0))
 					ret = sceMcResNoEntry;
 			}
 		}
@@ -566,7 +566,7 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 		fse2->modified = info->_Modify;
 
 	if ((flags & sceMcFileAttrFile) != 0)
-		strncpy(fse2->name, (char*)info->EntryName, 20);
+		strncpy(fse2->name, info->EntryName, 20);
 
 	fse2->field_1e = 0;
 
@@ -641,7 +641,7 @@ int mcman_getdir1(int port, int slot, char *dirname, int flags, int maxent, sceM
 				info->FileSizeByte = fse->length;
 			}
 
-			strncpy((char*)info->EntryName, fse->name, 20);
+			strncpy(info->EntryName, fse->name, 20);
 			info->EntryName[20] = 0;
 
 			i++;

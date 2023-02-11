@@ -29,7 +29,7 @@ typedef struct _sceMcTblGetDir {	// size = 64
 	u16 Reserve1;			// 22
 	u32 Reserve2;			// 24
 	u32 PdaAplNo;			// 28
-	unsigned char EntryName[32];	// 32
+	char EntryName[32];	// 32
 } sceMcTblGetDir;
 
 int  McDetectCard(int port, int slot);
