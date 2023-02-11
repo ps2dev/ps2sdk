@@ -206,7 +206,7 @@ lbl1:
 					fat_entry = 0xffffffff; // marking rootdir end
 				}
 				else
-					fat_entry = 0x7fffffff;	// marking free cluster
+					fat_entry = ~0x80000000;	// marking free cluster
 				z++;
 				if (z == allocatable_clusters_per_card)
 					mcdi->max_allocatable_clusters = (j - mcdi->alloc_offset) + 1;
@@ -906,7 +906,7 @@ int mcman_open2(int port, int slot, const char *filename, int flags)
 						mcman_addcacheentry(mce);
 					}
 					i--;
-					fat_index = fat_entry & 0x7fffffff;
+					fat_index = fat_entry & ~0x80000000;
 
 				} while (i != -1);
 			}

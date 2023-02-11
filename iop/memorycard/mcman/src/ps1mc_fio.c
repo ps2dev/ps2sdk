@@ -189,7 +189,7 @@ int mcman_open1(int port, int slot, const char *filename, int flags)
 					temp = i + 1;
 				}
 
-				temp &= 0xfffffff8;
+				temp &= ~0x00000007;
 				temp = (i + 1) - temp;
 #if 0
 				// This condition is always false due to the preceding set of assignments on "temp" variable.
@@ -241,7 +241,7 @@ int mcman_open1(int port, int slot, const char *filename, int flags)
 		temp = cluster + 1;
 	}
 
-	temp &= 0xfffffff8;
+	temp &= ~0x00000007;
 	temp = (cluster + 1) - temp;
 	if (temp < 0)
 		temp = 0;
@@ -282,7 +282,7 @@ int mcman_read1(int fd, void *buffer, int nbyte)
 			else
 				temp = fh->position;
 
-			offset = (fh->position - (temp & 0xfffffc00));
+			offset = (fh->position - (temp & ~0x000003ff));
 			maxsize = MCMAN_CLUSTERSIZE - offset;
 			if (maxsize < nbyte)
 				size = maxsize;
@@ -360,7 +360,7 @@ int mcman_write1(int fd, void *buffer, int nbyte)
 			else
 				temp = fh->position;
 
-			offset = fh->position - (temp & 0xfffffc00);
+			offset = fh->position - (temp & ~0x000003ff);
 			maxsize = MCMAN_CLUSTERSIZE - offset;
 			if (maxsize < nbyte)
 				size = maxsize;
@@ -520,7 +520,7 @@ int mcman_setinfo1(int port, int slot, const char *filename, sceMcTblGetDir *inf
 		temp = r + 8;
 #endif
 
-	temp &= 0xfffffff8;
+	temp &= ~0x00000007;
 	temp = (r + 1) - temp;
 	if (temp < 0)
 		temp = 0;
@@ -692,7 +692,7 @@ int mcman_close1(int fd)
 	else
 		temp = fh->freeclink + 1;
 
-	temp &= 0xfffffff8;
+	temp &= ~0x00000007;
 	temp = (fh->freeclink + 1) - temp;
 	if (temp < 0)
 		temp = 0;

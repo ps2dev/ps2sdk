@@ -196,8 +196,8 @@ static void sio2packet_add_ecc_in(int port, int slot, int cmd, u8 *buf, int pos)
 	p[3 + p[2]] = mcman_calcEDC(&buf[0], p[2]);
 
 	regdata  = (p[2] + mcman_cmdtable[(cmd << 1) + 1]) << 18;
-	regdata |= mcman_sio2packet.regdata[mcman_sio2packet.in_dma.count-1] & 0xf803ffff;
-	regdata &= 0xfffe00ff;
+	regdata |= mcman_sio2packet.regdata[mcman_sio2packet.in_dma.count-1] & ~0x07fc0000;
+	regdata &= ~0x0001ff00;
 	regdata |= (p[2] + mcman_cmdtable[(cmd << 1) + 1]) << 8;
 
 	mcman_sio2packet.regdata[mcman_sio2packet.in_dma.count-1] = regdata;
@@ -216,8 +216,8 @@ static void sio2packet_add_ecc_out(int port, int slot, int cmd, u8 *buf, int pos
 	p[2] = mcman_sparesize(port, slot);
 
 	regdata  = (p[2] + mcman_cmdtable[(cmd << 1) + 1]) << 18;
-	regdata |= mcman_sio2packet.regdata[mcman_sio2packet.in_dma.count-1] & 0xf803ffff;
-	regdata &= 0xfffe00ff;
+	regdata |= mcman_sio2packet.regdata[mcman_sio2packet.in_dma.count-1] & ~0x07fc0000;
+	regdata &= ~0x0001ff00;
 	regdata |= (p[2] + mcman_cmdtable[(cmd << 1) + 1]) << 8;
 
 	mcman_sio2packet.regdata[mcman_sio2packet.in_dma.count-1] = regdata;
@@ -336,8 +336,8 @@ void mcman_initPS2com(void)
 
 	mcman_sio2packet.port_ctrl1[2] = 0xff020405;
 	mcman_sio2packet.port_ctrl1[3] = 0xff020405;
-	mcman_sio2packet.port_ctrl2[2] = 0x0005ffff & 0xfcffffff;
-	mcman_sio2packet.port_ctrl2[3] = 0x0005ffff & 0xfcffffff;
+	mcman_sio2packet.port_ctrl2[2] = 0x0005ffff & ~0x03000000;
+	mcman_sio2packet.port_ctrl2[3] = 0x0005ffff & ~0x03000000;
 
 	mcman_sio2packet.in_dma.addr = &mcman_wdmabufs;
 	mcman_sio2packet.in_dma.size = 0x24;
@@ -369,10 +369,10 @@ void mcman_initPS1PDAcom(void)
 	mcman_sio2packet_PS1PDA.port_ctrl1[2] = 0xffc00505;
 	mcman_sio2packet_PS1PDA.port_ctrl1[3] = 0xffc00505;
 
-	mcman_sio2packet_PS1PDA.port_ctrl2[0] = 0x000201f4 & 0xfcffffff;
-	mcman_sio2packet_PS1PDA.port_ctrl2[1] = 0x000201f4 & 0xfcffffff;
-	mcman_sio2packet_PS1PDA.port_ctrl2[2] = 0x000201f4 & 0xfcffffff;
-	mcman_sio2packet_PS1PDA.port_ctrl2[3] = 0x000201f4 & 0xfcffffff;
+	mcman_sio2packet_PS1PDA.port_ctrl2[0] = 0x000201f4 & ~0x03000000;
+	mcman_sio2packet_PS1PDA.port_ctrl2[1] = 0x000201f4 & ~0x03000000;
+	mcman_sio2packet_PS1PDA.port_ctrl2[2] = 0x000201f4 & ~0x03000000;
+	mcman_sio2packet_PS1PDA.port_ctrl2[3] = 0x000201f4 & ~0x03000000;
 
 	mcman_sio2packet_PS1PDA.in = (u8 *)&mcman_sio2inbufs_PS1PDA;
 	mcman_sio2packet_PS1PDA.out = (u8 *)&mcman_sio2outbufs_PS1PDA;
