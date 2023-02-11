@@ -50,7 +50,7 @@ int apaGetFreeSectors(s32 device, u32 *free, apa_device_t *deviceinfo)
 
 	sectors = 0;
 	*free = 0;
-	if((clink = apaCacheGetHeader(device, 0, APA_IO_MODE_READ, &rv)) != NULL)
+	if((clink = apaCacheGetHeader(device, APA_SECTOR_MBR, APA_IO_MODE_READ, &rv)) != NULL)
 	{
 		do{
 			if(clink->header->type == 0)

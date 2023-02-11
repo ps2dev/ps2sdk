@@ -73,7 +73,7 @@ int apaGetPartErrorName(s32 device, char *name)
 
     if ((rv = apaGetPartErrorSector(device, APA_SECTOR_PART_ERROR, &lba)) <= 0)
         return rv;
-    if (!(clink = apaCacheGetHeader(device, 0, APA_IO_MODE_READ, &rv)))
+    if (!(clink = apaCacheGetHeader(device, APA_SECTOR_MBR, APA_IO_MODE_READ, &rv)))
         return rv;
 
     while (clink) {
@@ -355,7 +355,7 @@ int apaDelete(apa_cache_t *clink)
     if (clink->header->next == 0) {
         apa_cache_t *clink_mbr;
 
-        if ((clink_mbr = apaCacheGetHeader(device, 0, APA_IO_MODE_READ, &rv)) == NULL) {
+        if ((clink_mbr = apaCacheGetHeader(device, APA_SECTOR_MBR, APA_IO_MODE_READ, &rv)) == NULL) {
             apaCacheFree(clink);
             return rv;
         }

@@ -313,7 +313,7 @@ int hddFormat(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void 
         return rv;
 
     // set up mbr :)
-    if ((clink = apaCacheGetHeader(f->unit, 0, APA_IO_MODE_WRITE, &rv))) {
+    if ((clink = apaCacheGetHeader(f->unit, APA_SECTOR_MBR, APA_IO_MODE_WRITE, &rv))) {
         apa_header_t *header = clink->header;
         memset(header, 0, sizeof(apa_header_t));
         header->magic = APA_MAGIC;
@@ -804,7 +804,7 @@ static int ioctl2AddSub(hdd_file_slot_t *fileSlot, char *argp)
 
     // walk all looking for any empty blocks
     memset(&emptyBlocks, 0, sizeof(emptyBlocks));
-    clink = apaCacheGetHeader(device, 0, APA_IO_MODE_READ, &rv);
+    clink = apaCacheGetHeader(device, APA_SECTOR_MBR, APA_IO_MODE_READ, &rv);
     while (clink) {
         sector = clink->sector;
         apaAddEmptyBlock(clink->header, emptyBlocks);
