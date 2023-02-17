@@ -75,6 +75,49 @@ static void free_all_samples()
 	CpuResumeIntr(OldState);
 }
 
+/** Remove an adpcm sample uploaded with audsrv_load_adpcm() from the list of loaded sounds
+ * @param id    sample identifier, as specified in load()
+ *
+ * SPU memory is freed only when there are no sounds in the list that where loaded after the ones that have been freed
+ */
+int free_sample(u32 id)
+{
+	adpcm_list_t *adpcm = adpcm_list_head;
+	adpcm_list_t *parent = NULL;
+
+	while (adpcm != NULL)
+	{
+		if (adpcm->id == id)
+		{
+			break;
+		}
+
+		parent = adpcm;
+		adpcm = adpcm->next;
+	}
+
+	if (adpcm == NULL)
+	{
+		return AUDSRV_ERR_NOERROR;
+	}
+
+	if (parent != NULL)
+		parent->next = adpcm->next;
+
+	if (adpcm_list_head == adpcm)
+		adpcm_list_head = adpcm->next;
+
+	if (adpcm_list_tail == adpcm)
+		adpcm_list_tail = parent;
+
+	int OldState;
+	CpuSuspendIntr(&OldState);
+	FreeSysMemory(adpcm);
+	CpuResumeIntr(OldState);
+
+	return AUDSRV_ERR_NOERROR;
+}
+
 /** Looks up the given identifier in list of loaded samples
  * @param id    sample identifier
  * @returns node entry from container, NULL on failure

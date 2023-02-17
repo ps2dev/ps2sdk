@@ -484,6 +484,12 @@ int audsrv_ch_play_adpcm(int ch, audsrv_adpcm_t *adpcm)
 	return call_rpc_2(AUDSRV_PLAY_ADPCM, ch, (u32)adpcm);
 }
 
+int audsrv_free_adpcm(audsrv_adpcm_t *adpcm)
+{
+	/* on iop side, the sample id is like the pointer on ee side */
+	return call_rpc_1(AUDSRV_FREE_ADPCM, (u32)adpcm);
+}
+
 const char *audsrv_get_error_string()
 {
 	switch(audsrv_get_error())
