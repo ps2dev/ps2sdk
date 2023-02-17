@@ -248,6 +248,11 @@ int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size);
 int audsrv_ch_play_adpcm(int ch, audsrv_adpcm_t *adpcm);
 #define audsrv_play_adpcm(adpcm) audsrv_ch_play_adpcm(-1, adpcm) //For backward-compatibility
 
+/** Check if a sample is currently playing on the given channel
+ * @returns 1 if playing, 0 if not
+ */
+int audsrv_is_adpcm_playing(int ch, audsrv_adpcm_t *adpcm);
+
 /** Remove an adpcm sample uploaded with audsrv_load_adpcm() from the list of loaded sounds
  * @param id    sample identifier, as specified in load()
  *
