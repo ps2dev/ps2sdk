@@ -238,7 +238,7 @@ int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size);
 /** Plays an adpcm sample already uploaded with audsrv_load_adpcm()
  * @param ch    channel identifier. Specifies one of the 24 voice channel to play the ADPCM channel on.
  * @param id    sample identifier, as specified in load()
- * @returns zero on success, negative value on error
+ * @returns channel identifier on success, negative value on error
  *
  * When ch is set to an invalid channel ID, the sample will be played in an unoccupied channel.
  * If all 24 channels are used, then -AUDSRV_ERR_NO_MORE_CHANNELS is returned.
