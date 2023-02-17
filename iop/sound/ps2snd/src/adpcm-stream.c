@@ -210,11 +210,21 @@ int sndStreamOpen(char *file, u32 voices, u32 flags, u32 bufaddr, u32 bufsize)
 	stream_bufspu[0] = bufaddr;
 	stream_bufspu[1] = bufaddr + (stream_buflen*2);
 
+	u32 buffer[3];
+	int size = read(stream_fd, buffer, sizeof(buffer));
+	if (size<0)  /* Error */
+	{
+		dprintf(OUT_ERROR, "read error: %d\n", size);
+		return(-1);
+	}
+
+	int pitch = buffer[2];
+	stream_chans = (buffer[1] >> 8) & 0xFF;
+
 	/* Setup SPU2 voice volumes.... */
-	if (stream_flags&FLAG_STEREO)
+	if (stream_chans == 2)
 	{
 		dprintf(OUT_INFO, "stereo...\n");
-		stream_chans = 2;
 		sceSdSetParam(stream_voice[0] | SD_VPARAM_VOLL,  0x1fff);
 		sceSdSetParam(stream_voice[0] | SD_VPARAM_VOLR,  0);
 		sceSdSetParam(stream_voice[1] | SD_VPARAM_VOLL,  0);
@@ -223,7 +233,6 @@ int sndStreamOpen(char *file, u32 voices, u32 flags, u32 bufaddr, u32 bufsize)
 	else
 	{
 		dprintf(OUT_INFO, "mono...\n");
-		stream_chans = 1;
 		sceSdSetParam(stream_voice[0] | SD_VPARAM_VOLL,  0x1fff);
 		sceSdSetParam(stream_voice[0] | SD_VPARAM_VOLR,  0x1fff);
 	}
@@ -231,7 +240,7 @@ int sndStreamOpen(char *file, u32 voices, u32 flags, u32 bufaddr, u32 bufsize)
 	/* Setup other SPU2 voice stuff... */
 	for (int i=0;(u32)i<stream_chans;i++) /* XXX */
 	{
-		sceSdSetParam(stream_voice[i] | SD_VPARAM_PITCH, 0x1000); /* 0x1000 = normal pitch */
+		sceSdSetParam(stream_voice[i] | SD_VPARAM_PITCH, pitch); /* 0x1000 = normal pitch */
 		sceSdSetParam(stream_voice[i] | SD_VPARAM_ADSR1, SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0, 0xf, 0xf));
 		sceSdSetParam(stream_voice[i] | SD_VPARAM_ADSR2, SD_SET_ADSR2(SD_ADSR_SR_EXPd, 127, SD_ADSR_RR_EXPd, 0));
 	}
