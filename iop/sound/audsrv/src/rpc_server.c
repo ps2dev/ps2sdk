@@ -144,6 +144,10 @@ static void *rpc_command(int func, unsigned *data, int size)
 		ret = audsrv_ch_play_adpcm(data[0], data[1]);
 		break;
 
+		case AUDSRV_IS_ADPCM_PLAYING:
+		ret = audsrv_is_adpcm_playing(data[0], data[1]);
+		break;
+
 		case AUDSRV_FREE_ADPCM:
 		ret = free_sample(data[0]);
 		break;

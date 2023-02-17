@@ -126,7 +126,7 @@ static adpcm_list_t *adpcm_loaded(int id)
 {
 	adpcm_list_t *cur = adpcm_list_head;
 
-	while (cur != 0)
+	while (cur != NULL)
 	{
 		if (cur->id == id)
 		{
@@ -207,6 +207,28 @@ void *audsrv_load_adpcm(u32 *buffer, int size, int id)
 	return sbuffer;
 }
 
+int audsrv_is_adpcm_playing(int ch, u32 id)
+{
+	u32 endx;
+	adpcm_list_t *a;
+
+	if (ch > 24)
+		return 0;
+
+	endx = sceSdGetSwitch(SD_CORE_1 | SD_SWITCH_ENDX);
+	if ((endx & (1 << ch)) != 0)
+		return 0;
+
+	a = adpcm_loaded(id);
+	if (a == NULL)
+	{
+		/* bad joke */
+		return AUDSRV_ERR_ARGS;
+	}
+
+	return a->spu2_addr == sceSdGetAddr(SD_CORE_1 | (ch << 1) | SD_VOICE_START);
+}
+
 static int audsrv_adpcm_alloc_channel(void)
 {
 	int i, channel;
@@ -229,7 +251,7 @@ static int audsrv_adpcm_alloc_channel(void)
 			channel = i;
 		}
 
-        	i++;
+		i++;
 	}
 
 	if (channel == -1)
