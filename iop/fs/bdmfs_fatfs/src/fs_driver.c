@@ -358,7 +358,7 @@ s64 fs_lseek64(iop_file_t *fd, s64 offset, int whence)
             off += file->fptr;
             break;
         case SEEK_END:
-            off = file->obj.objsize - offset;
+            off = file->obj.objsize + offset;
             break;
     }
 
