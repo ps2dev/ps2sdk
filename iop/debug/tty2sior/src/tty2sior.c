@@ -7,7 +7,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 #
-# IOP exception handling.
+# IOP Printf redirection to EE serial port.
 */
 
 #include <stdarg.h>
@@ -25,7 +25,7 @@
 #include "irx_imports.h"
 #define MAJOR 1
 #define MINOR 0
-#define MODNAME "SIOTTY"
+#define MODNAME "TTY2SIOR"
 IRX_ID(MODNAME, MAJOR, MINOR);
 
 #define DPRINTF(x...) sio_printf(MODNAME": "x)//, printf("IOP: "x)
