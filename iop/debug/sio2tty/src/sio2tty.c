@@ -43,7 +43,7 @@ static int tty_sema = -1;
 static int tty_init(iop_device_t *device);
 static int tty_deinit(iop_device_t *device);
 static int tty_stdout_fd(void);
-static int tty_write(iop_file_t *file, void *buf, size_t size);
+static int tty_write(iop_file_t *file, void *buf, int size);
 static int tty_error(void);
 
 
@@ -360,7 +360,7 @@ static int tty_stdout_fd(void)
     return 1;
 }
  
-static int tty_write(iop_file_t *file, void *buf, size_t size)
+static int tty_write(iop_file_t *file, void *buf, int size)
 {
     (void)file;
 
