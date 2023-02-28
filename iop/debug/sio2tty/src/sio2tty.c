@@ -360,7 +360,7 @@ static int tty_stdout_fd(void)
     return 1;
 }
  
-static int tty_write(iop_file_t *file, void *buf, size_t size)
+static int tty_write(iop_file_t *file, void *buf, int size)
 {
     (void)file;
 
