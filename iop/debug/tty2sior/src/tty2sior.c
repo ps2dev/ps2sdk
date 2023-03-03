@@ -319,9 +319,9 @@ int _start(int argc, char *argv[])
         DPRINTF("failed to AddDrv()\n");
         return MODULE_NO_RESIDENT_END;
     }
-    open(DEVNAME":", O_WRONLY /*0x1000 | O_RDWR*/);
-    open(DEVNAME":", O_WRONLY);
-    open(DEVNAME":", O_WRONLY);
+    open(DEVNAME"00:", O_RDONLY);
+    open(DEVNAME"00:", O_WRONLY);
+    open(DEVNAME"00:", O_WRONLY);
  
     DPRINTF("%s v%i.%s loaded and ready!\n", MODNAME, MAJOR, MINOR);
  
