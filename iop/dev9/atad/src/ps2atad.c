@@ -198,8 +198,8 @@ static void ata_ultra_dma_mode(int mode);
 static void ata_shutdown_cb(void);
 
 #ifdef ATA_ENABLE_BDM
-static int ata_bd_read(struct block_device *bd, u32 sector, void *buffer, u16 count);
-static int ata_bd_write(struct block_device *bd, u32 sector, const void *buffer, u16 count);
+static int ata_bd_read(struct block_device *bd, u64 sector, void *buffer, u16 count);
+static int ata_bd_write(struct block_device *bd, u64 sector, const void *buffer, u16 count);
 static void ata_bd_flush(struct block_device *bd);
 static int ata_bd_stop(struct block_device *bd);
 #endif
@@ -899,6 +899,9 @@ int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir)
         hcyl = (lba >> 16) & 0xff;
 
         if (atad_devinfo[device].lba48 && (ata_dvrp_workaround ? (lba >= atad_devinfo[device].total_sectors) : 1)) {
+            // Note: this only supports up to 32bit LBAs. For full 64bit LBA support you must use ata_io_start
+            // directly or use bdm block device to access the hdd.
+
             /* Setup for 48-bit LBA.  */
             len = (nsectors > 65536) ? 65536 : nsectors;
 
@@ -1301,23 +1304,55 @@ static void ata_shutdown_cb(void)
 }
 
 #ifdef ATA_ENABLE_BDM
+static int ata_bd_io_common(struct block_device* bd, u64 lba, void* buf, u16 nsectors, int dir)
+{
+    USE_SPD_REGS;
+    int res = 0;
+    
+    // Setup the LBA parameters.
+    u16 sector = (u16)((u16)((lba >> 24) & 0xFF) | (u16)(lba & 0xFF));
+    u16 lcyl = (u16)((u16)((lba >> 32) & 0xFF) | (u16)((lba >> 8) & 0xFF));
+    u16 hcyl = (u16)((u16)((lba >> 40) & 0xFF) | (u16)((lba >> 16) & 0xFF));
+
+    u16 select  = (bd->devNr << 4) & 0xffff;
+    u16 command = (dir == 1) ? ATA_C_WRITE_DMA_EXT : ATA_C_READ_DMA_EXT;
+
+    // Retry a maximum of 3 times before failing out.
+    for (int i = 0; i < 3; i++)
+    {
+        if ((res = ata_io_start(buf, nsectors, 0, nsectors, sector, lcyl, hcyl, select, command)) != 0)
+            break;
+
+        /* Set up (part of) the transfer here. In v1.04, this was called at the top of the outer loop. */
+        ata_set_dir(dir);
+
+        res = ata_io_finish();
+
+        /* In v1.04, this was not done. Neither was there a mechanism to retry if a non-permanent error occurs. */
+        SPD_REG16(SPD_R_IF_CTRL) &= ~SPD_IF_DMA_ENABLE;
+
+        if (res != ATA_RES_ERR_ICRC)
+            break;
+    }
+
+    return res;
+}
+
 //
 // Block device interface
 //
-static int ata_bd_read(struct block_device *bd, u32 sector, void *buffer, u16 count)
+static int ata_bd_read(struct block_device *bd, u64 sector, void *buffer, u16 count)
 {
-    if (ata_device_sector_io(bd->devNr, buffer, sector, count, ATA_DIR_READ) != 0) {
+    if (ata_bd_io_common(bd, sector, buffer, count, 0) != 0)
         return -EIO;
-    }
 
     return count;
 }
 
-static int ata_bd_write(struct block_device *bd, u32 sector, const void *buffer, u16 count)
+static int ata_bd_write(struct block_device *bd, u64 sector, const void *buffer, u16 count)
 {
-    if (ata_device_sector_io(bd->devNr, (void *)buffer, sector, count, ATA_DIR_WRITE) != 0) {
+    if (ata_bd_io_common(bd, sector, (void*)buffer, count, 1) != 0)
         return -EIO;
-    }
 
     return count;
 }
