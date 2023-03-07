@@ -98,12 +98,15 @@ static inline int scsi_cmd_read_capacity(struct block_device *bd, void *buffer, 
     return scsi_cmd(bd, 0x25, buffer, size, 0);
 }
 
-static int scsi_cmd_rw_sector(struct block_device *bd, unsigned int lba, const void *buffer, unsigned short int sectorCount, unsigned int write)
+static int scsi_cmd_rw_sector(struct block_device *bd, u64 lba, const void *buffer, unsigned short int sectorCount, unsigned int write)
 {
     unsigned char comData[12]   = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     struct scsi_interface *scsi = (struct scsi_interface *)bd->priv;
 
-    M_DEBUG("scsi_cmd_rw_sector - 0x%08x %p 0x%04x\n", lba, buffer, sectorCount);
+    M_DEBUG("scsi_cmd_rw_sector - 0x%08x%08x %p 0x%04x\n", U64_2XU32(&lba), buffer, sectorCount);
+
+    // Note: LBA from bdm is 64bit but SCSI commands being used are 32bit. These need to be updated to 64bit LBA SCSI
+    // commands to work with large capacity drives. For now the 32bit LBA will only support up to 2TB drives.
 
     comData[0] = write ? 0x2a : 0x28;
     comData[2] = (lba & 0xFF000000) >> 24;    // lba 1 (MSB)
@@ -178,13 +181,13 @@ static int scsi_warmup(struct block_device *bd)
 //
 // Block device interface
 //
-static int scsi_read(struct block_device *bd, u32 sector, void *buffer, u16 count)
+static int scsi_read(struct block_device *bd, u64 sector, void *buffer, u16 count)
 {
     struct scsi_interface *scsi = (struct scsi_interface *)bd->priv;
     u16 sc_remaining            = count;
     int retries;
 
-    M_DEBUG("%s: sector=%d, count=%d\n", __func__, (int)sector, count);
+    M_DEBUG("%s: sector=0x%08x%08x, count=%d\n", __func__, U64_2XU32(&sector), count);
 
     while (sc_remaining > 0) {
         u16 sc = sc_remaining > scsi->max_sectors ? scsi->max_sectors : sc_remaining;
@@ -205,13 +208,13 @@ static int scsi_read(struct block_device *bd, u32 sector, void *buffer, u16 coun
     return count;
 }
 
-static int scsi_write(struct block_device *bd, u32 sector, const void *buffer, u16 count)
+static int scsi_write(struct block_device *bd, u64 sector, const void *buffer, u16 count)
 {
     struct scsi_interface *scsi = (struct scsi_interface *)bd->priv;
     u16 sc_remaining            = count;
     int retries;
 
-    M_DEBUG("%s: sector=%d, count=%d\n", __func__, (int)sector, count);
+    M_DEBUG("%s: sector=0x%08x%08x, count=%d\n", __func__, U64_2XU32(&sector), count);
 
     while (sc_remaining > 0) {
         u16 sc = sc_remaining > scsi->max_sectors ? scsi->max_sectors : sc_remaining;

@@ -11,6 +11,10 @@ IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include -I$(PS2SDKSRC)/iop/system/sio2man/
 
 IOP_OBJS = spi_sdcard_crc7.o spi_sdcard_driver.o crc16.o ioplib.o sio2man_hook.o mx4sio.o imports.o
 
+IOP_CFLAGS = -Wno-strict-aliasing
+
+IOP_LDFLAGS = -lgcc
+
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make
 include $(PS2SDKSRC)/iop/Rules.make

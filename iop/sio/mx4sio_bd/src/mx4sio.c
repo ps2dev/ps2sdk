@@ -678,7 +678,7 @@ static int _msread_do(struct block_device *bd, void *buffer, u16 count)
  * BDM interface:
  * - BDM -> "spi_sdcard" library
  */
-static int spi_sdcard_read(struct block_device *bd, u32 sector, void *buffer, u16 count)
+static int spi_sdcard_read(struct block_device *bd, u64 sector, void *buffer, u16 count)
 {
     int count_left = count;
     int retry_count;
@@ -693,7 +693,7 @@ static int spi_sdcard_read(struct block_device *bd, u32 sector, void *buffer, u1
     for (retry_count = 0; retry_count < MAX_RETRIES; retry_count++) {
         int rv;
 
-        rv = _msread_start(bd, sector);
+        rv = _msread_start(bd, (u32)sector);
         if (rv != SPISD_RESULT_OK) {
             M_PRINTF("ERROR: failed to start multi-block read (%d)\n", rv);
             break;
@@ -712,7 +712,7 @@ static int spi_sdcard_read(struct block_device *bd, u32 sector, void *buffer, u1
             if (rv != count_do) {
                 // Read failed, have outer loop retry
                 M_PRINTF("ERROR: _msread_do: %d != %d\n", rv, count_do);
-                M_PRINTF(" - %s(%d,%d)\n", __FUNCTION__, (int)sector, (int)count);
+                M_PRINTF(" - %s(0x%08x%08x,%d)\n", __FUNCTION__, U64_2XU32(&sector), (int)count);
                 break;
             }
 
@@ -744,7 +744,7 @@ static int spi_sdcard_read(struct block_device *bd, u32 sector, void *buffer, u1
     return count - count_left;
 }
 
-static int spi_sdcard_write(struct block_device *bd, u32 sector, const void *buffer, u16 count)
+static int spi_sdcard_write(struct block_device *bd, u64 sector, const void *buffer, u16 count)
 {
     int rv;
     u16 cs;
@@ -760,7 +760,7 @@ static int spi_sdcard_write(struct block_device *bd, u32 sector, const void *buf
 
 #if 1
     for (cs = 0; cs < count; cs++) {
-        rv = spisd_write_block(sector + cs, buffer);
+        rv = spisd_write_block((u32)sector + cs, buffer);
         if (rv != SPISD_RESULT_OK) {
             M_PRINTF("ERROR: spisd_write_block = %d\n", rv);
             sio2_unlock();

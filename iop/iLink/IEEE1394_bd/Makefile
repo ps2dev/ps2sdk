@@ -15,6 +15,8 @@ IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
 
 IOP_OBJS = sbp2_driver.o imports.o main.o scsi.o
 
+IOP_LDFLAGS = -lgcc
+
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make
 include $(PS2SDKSRC)/iop/Rules.make
