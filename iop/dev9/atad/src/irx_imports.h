@@ -16,6 +16,9 @@
 #include <irx.h>
 
 /* Please keep these in alphabetical order!  */
+#ifdef ATA_ENABLE_BDM
+#include <bdm.h>
+#endif
 #include <dev9.h>
 #include <loadcore.h>
 #include <stdio.h>

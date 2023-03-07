@@ -36,7 +36,7 @@ IRX_ID("IOX/File_Manager", 1, 1);
 #include "errno.h"
 
 #define MAX_DEVICES 32
-#define MAX_FILES   32
+#define MAX_FILES   128
 
 static iomanX_iop_device_t *dev_list[MAX_DEVICES];
 iomanX_iop_file_t file_table[MAX_FILES];

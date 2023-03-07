@@ -18,6 +18,9 @@ ATA_ALL_PIO_MODES ?= 0
 # Disable to disable the workaround for bad GameStar compatible adaptors.
 ATA_GAMESTAR_WORKAROUND ?= 1
 
+# Enable to enable support for the BDM interface.
+ATA_ENABLE_BDM ?= 0
+
 IOP_BIN ?= ps2atad.irx
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include
@@ -37,6 +40,11 @@ endif
 
 ifeq ($(ATA_GAMESTAR_WORKAROUND),1)
 IOP_CFLAGS += -DATA_GAMESTAR_WORKAROUND=1
+endif
+
+ifeq ($(ATA_ENABLE_BDM),1)
+IOP_CFLAGS += -DATA_ENABLE_BDM=1
+IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
 endif
 
 include $(PS2SDKSRC)/Defs.make

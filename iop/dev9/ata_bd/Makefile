@@ -6,32 +6,9 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = \
-	alloc \
-	eesync \
-	eesync-nano \
-	timrman \
-	iomanx \
-	iopmgr \
-	loadfile \
-	mtapman \
-	padman \
-	padman-old \
-	rmman \
-	rmtapman \
-	rpadman \
-	rsio2man \
-	sbusintr \
-	siftoo \
-	sio2log \
-	sio2man \
-	sio2man-old \
-	stdio \
-	sysclib \
-	sysclib-full \
-	sysclib-nano \
-	udnl \
-	udnl-t300
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/dev9/atad/src/
+IOP_INC_DIR = $(PS2SDKSRC)/iop/dev9/atad/include/
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+ATA_ENABLE_BDM ?= 1
+
+include $(PS2SDKSRC)/iop/dev9/atad/Makefile

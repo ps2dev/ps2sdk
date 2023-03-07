@@ -35,3 +35,10 @@ I_dev9RegisterShutdownCb
 I_dev9RegisterPreDmaCb
 I_dev9RegisterPostDmaCb
 dev9_IMPORTS_end
+
+#ifdef ATA_ENABLE_BDM
+bdm_IMPORTS_start
+I_bdm_connect_bd
+I_bdm_disconnect_bd
+bdm_IMPORTS_end
+#endif

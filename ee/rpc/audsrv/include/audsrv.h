@@ -221,9 +221,11 @@ int audsrv_adpcm_init();
 /** Sets output volume for the specified voice channel.
  * @param ch       Voice channel ID
  * @param vol      volume in percentage (0-100)
+ * @param pan      left/right offset [-100 .. 0 .. 100]
  * @returns 0 on success, negative otherwise
  */
-int audsrv_adpcm_set_volume(int ch, int vol);
+int audsrv_adpcm_set_volume_and_pan(int ch, int vol, int pan);
+#define audsrv_adpcm_set_volume(ch, vol) audsrv_adpcm_set_volume_and_pan(ch, vol, 0) //For backward-compatibility
 
 /** Uploads a sample to SPU2 memory
  * @param adpcm    adpcm descriptor structure
@@ -236,7 +238,7 @@ int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size);
 /** Plays an adpcm sample already uploaded with audsrv_load_adpcm()
  * @param ch    channel identifier. Specifies one of the 24 voice channel to play the ADPCM channel on.
  * @param id    sample identifier, as specified in load()
- * @returns zero on success, negative value on error
+ * @returns channel identifier on success, negative value on error
  *
  * When ch is set to an invalid channel ID, the sample will be played in an unoccupied channel.
  * If all 24 channels are used, then -AUDSRV_ERR_NO_MORE_CHANNELS is returned.
@@ -245,6 +247,18 @@ int audsrv_load_adpcm(audsrv_adpcm_t *adpcm, void *buffer, int size);
  */
 int audsrv_ch_play_adpcm(int ch, audsrv_adpcm_t *adpcm);
 #define audsrv_play_adpcm(adpcm) audsrv_ch_play_adpcm(-1, adpcm) //For backward-compatibility
+
+/** Check if a sample is currently playing on the given channel
+ * @returns 1 if playing, 0 if not
+ */
+int audsrv_is_adpcm_playing(int ch, audsrv_adpcm_t *adpcm);
+
+/** Remove an adpcm sample uploaded with audsrv_load_adpcm() from the list of loaded sounds
+ * @param id    sample identifier, as specified in load()
+ *
+ * SPU memory is freed only when there are no sounds in the list that where loaded after the ones that have been freed
+ */
+int audsrv_free_adpcm(audsrv_adpcm_t *adpcm);
 
 /** Installs a callback function upon completion of a cdda track
  * @param cb your callback
