@@ -219,7 +219,7 @@ void disconnect_bd(struct block_device *bd)
 
 //---------------------------------------------------------------------------
 
-#define MAX_FILES 16
+#define MAX_FILES 128
 static FIL fil_structures[MAX_FILES];
 
 #define MAX_DIRS 16
