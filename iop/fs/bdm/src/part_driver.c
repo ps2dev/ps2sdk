@@ -190,11 +190,11 @@ int ParseMBRPartitionTable(struct block_device *bd, master_boot_record* pMbrBloc
     printf("Found MBR disk\n");
     for (int i = 0; i < 4; i++)
     {
-        // Check if the partition is active.
-        if (pMbrBlock->primary_partitions[i].status == 0)
+        // Check if the partition is active, checking the status bit is not reliable so check if the sector_count is greater than zero instead.
+        if (pMbrBlock->primary_partitions[i].sector_count == 0)
             continue;
 
-        printf("Found partition type 0x%02x\n", pMbrBlock->primary_partitions[i].status);
+        printf("Found partition type 0x%02x\n", pMbrBlock->primary_partitions[i].partition_type);
         
         // TODO: Filter out unsupported partition types.
 
@@ -210,9 +210,9 @@ int ParseMBRPartitionTable(struct block_device *bd, master_boot_record* pMbrBloc
         g_part_bd[partIndex].name         = bd->name;
         g_part_bd[partIndex].devNr        = bd->devNr;
         g_part_bd[partIndex].parNr        = i + 1;
-        g_part_bd[partIndex].parId        = pMbrBlock->primary_partitions[i].status;
+        g_part_bd[partIndex].parId        = pMbrBlock->primary_partitions[i].partition_type;
         g_part_bd[partIndex].sectorSize   = bd->sectorSize;
-        g_part_bd[partIndex].sectorOffset = pMbrBlock->primary_partitions[i].first_lba;
+        g_part_bd[partIndex].sectorOffset = bd->sectorOffset + (u64)pMbrBlock->primary_partitions[i].first_lba;
         g_part_bd[partIndex].sectorCount  = pMbrBlock->primary_partitions[i].sector_count;
         bdm_connect_bd(&g_part_bd[partIndex]);
         mountCount++;
@@ -296,6 +296,7 @@ int part_connect(struct block_device *bd)
         rval = rval > 0 ? 0 : -1;
     }
 
+    FreeSysMemory(pMbrBlock);
     return rval;
 }
 
@@ -321,10 +322,11 @@ static int part_read(struct block_device *bd, u64 sector, void *buffer, u16 coun
 {
     struct partition *part = (struct partition *)bd->priv;
 
-    M_DEBUG("%s\n", __func__);
-
     if ((part == NULL) || (part->bd == NULL))
         return -1;
+
+    u64 finalSector = sector + bd->sectorOffset;
+    M_DEBUG("%s (%s %d %d) 0x%08x%08x %d\n", __func__, bd->name, bd->devNr, bd->parNr, U64_2XU32(&finalSector), count);
 
     return part->bd->read(part->bd, sector + bd->sectorOffset, buffer, count);
 }

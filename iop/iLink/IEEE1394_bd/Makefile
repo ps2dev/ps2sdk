@@ -8,7 +8,7 @@
 
 # IOP_CFLAGS += -DDEBUG
 
-IOP_CFLAGS += -mno-check-zero-division # -DSIF_CALLBACKS_12_13
+IOP_CFLAGS += -mno-check-zero-division -Wno-strict-aliasing # -DSIF_CALLBACKS_12_13
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/iLink/iLinkman/include
 IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include

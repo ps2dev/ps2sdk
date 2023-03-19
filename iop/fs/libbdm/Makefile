@@ -9,6 +9,7 @@
 # IOP_CFLAGS += -DDEBUG
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
+IOP_CFLAGS += -Wno-strict-aliasing
 
 IOP_OBJS = bd_defrag.o bd_cache.o
 IOP_LIB = libbdm.a

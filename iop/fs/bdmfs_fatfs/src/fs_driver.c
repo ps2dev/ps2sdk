@@ -28,6 +28,8 @@
 //#define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
 
+#define U64_2XU32(val)  ((u32*)val)[1], ((u32*)val)[0]
+
 fatfs_fs_driver_mount_info fs_driver_mount_info[FF_VOLUMES];
 
 #define FATFS_FS_DRIVER_MOUNT_INFO_MAX ((int)(sizeof(fs_driver_mount_info) / sizeof(fs_driver_mount_info[0])))
@@ -84,7 +86,7 @@ static int _fs_init_lock(void)
 //---------------------------------------------------------------------------
 static void _fs_lock(void)
 {
-    M_DEBUG("%s\n", __func__);
+    //M_DEBUG("%s\n", __func__);
 
     WaitSema(_fs_lock_sema_id);
 }
@@ -92,7 +94,7 @@ static void _fs_lock(void)
 //---------------------------------------------------------------------------
 static void _fs_unlock(void)
 {
-    M_DEBUG("%s\n", __func__);
+    //M_DEBUG("%s\n", __func__);
 
     SignalSema(_fs_lock_sema_id);
 }
@@ -147,6 +149,9 @@ static FRESULT fatfs_fs_driver_mount_bd(int mount_info_index, struct block_devic
 {
     int ret;
     char mount_point[3];
+
+    M_DEBUG("%s\n", __func__);
+
     mount_point[0] = '0' + mount_info_index;
     mount_point[1] = ':';
     mount_point[2] = '\x00';
@@ -193,15 +198,19 @@ int connect_bd(struct block_device *bd)
 {
     int mount_info_index;
 
+    M_DEBUG("%s\n", __func__);
+
     _fs_lock();
     mount_info_index = fatfs_fs_driver_find_mount_info_index_free();
     if (mount_info_index != -1) {
+        M_DEBUG("connect_bd: trying to mount to index %d\n", mount_info_index);
         if (fatfs_fs_driver_mount_bd(mount_info_index, bd) == FR_OK) {
             _fs_unlock();
             return 0;
         }
     }
     _fs_unlock();
+    M_DEBUG("connect_bd: failed to mount device\n");
     return -1;
 }
 
@@ -340,7 +349,7 @@ static int fs_close(iop_file_t *fd)
 
 s64 fs_lseek64(iop_file_t *fd, s64 offset, int whence)
 {
-    M_DEBUG("%s\n", __func__);
+    M_DEBUG("%s 0x%08x%08x %d\n", __func__, U64_2XU32(&offset), whence);
 
     int res;
 
@@ -618,6 +627,9 @@ static int get_frag_list(FIL *file, void *rdata, unsigned int rdatalen)
     int iMaxFragments = rdatalen / sizeof(bd_fragment_t);
     int iFragCount = 0;
 
+    // Get the block device backing the file so we can get the starting LBA of the file system.
+    struct block_device* bd = fatfs_fs_driver_get_mounted_bd_from_index(file->obj.fs->pdrv);
+
     DWORD iClusterStart = file->obj.sclust;
     DWORD iClusterCurrent = iClusterStart;
 
@@ -627,9 +639,9 @@ static int get_frag_list(FIL *file, void *rdata, unsigned int rdatalen)
             // Fragment or file end
             M_DEBUG("fragment: %uc - %uc + 1\n", iClusterStart, iClusterCurrent + 1);
             if (iFragCount < iMaxFragments) {
-                f[iFragCount].sector = clst2sect(file->obj.fs, iClusterStart);
+                f[iFragCount].sector = clst2sect(file->obj.fs, iClusterStart) + bd->sectorOffset;
                 f[iFragCount].count  = clst2sect(file->obj.fs, iClusterCurrent) - clst2sect(file->obj.fs, iClusterStart) + file->obj.fs->csize;
-                M_DEBUG(" - sectors: %us count %us\n", f[iFragCount].sector, f[iFragCount].count);
+                M_DEBUG(" - sectors: 0x%08x%08x count %u\n", U64_2XU32(&f[iFragCount].sector), f[iFragCount].count);
             }
             iFragCount++;
             iClusterStart = iClusterNext;
@@ -667,12 +679,23 @@ int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, void *r
             ret = file->obj.sclust;
             break;
         case USBMASS_IOCTL_GET_LBA:
-            ret = clst2sect(file->obj.fs, file->obj.sclust);
+            // Check for a return buffer and copy the 64bit LBA. If no buffer is provided return an error.
+            if (rdata == NULL || rdatalen < sizeof(u64))
+                return -EINVAL;
+
+            // Get the block device backing the file so we can get the starting LBA of the file system.
+            struct block_device* bd = fatfs_fs_driver_get_mounted_bd_from_index(file->obj.fs->pdrv);
+            
+            *(u64*)rdata = clst2sect(file->obj.fs, file->obj.sclust) + bd->sectorOffset;
+            ret = 0;
             break;
         case USBMASS_IOCTL_GET_DRIVERNAME: {
-            struct block_device *mounted_bd;
-            mounted_bd = fatfs_fs_driver_get_mounted_bd_from_index(fd->unit);
+            struct block_device *mounted_bd = fatfs_fs_driver_get_mounted_bd_from_index(fd->unit);
             ret = (mounted_bd == NULL) ? -ENXIO : *(int *)(mounted_bd->name);
+
+            // Check for a return buffer and copy the whole name.
+            if (rdata != NULL)
+                strncpy(rdata, mounted_bd->name, rdatalen);
             break;
         }
         case USBMASS_IOCTL_CHECK_CHAIN:
@@ -680,6 +703,14 @@ int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, void *r
             break;
         case USBMASS_IOCTL_GET_FRAGLIST:
             ret = get_frag_list(file, rdata, rdatalen);
+            break;
+        case BDM_GET_DEVICE_INDEX:
+            if (rdata == NULL || rdatalen < sizeof(u32))
+                return -EINVAL;
+            
+            struct block_device *mounted_bd = fatfs_fs_driver_get_mounted_bd_from_index(fd->unit);
+            *(u32*)rdata = mounted_bd->devNr;
+            ret = 0;
             break;
         default:
             break;
