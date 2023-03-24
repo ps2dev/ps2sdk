@@ -681,7 +681,10 @@ int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, void *r
         case USBMASS_IOCTL_GET_LBA:
             // Check for a return buffer and copy the 64bit LBA. If no buffer is provided return an error.
             if (rdata == NULL || rdatalen < sizeof(u64))
-                return -EINVAL;
+            {
+                ret = -EINVAL;
+                break;
+            }
 
             // Get the block device backing the file so we can get the starting LBA of the file system.
             struct block_device* bd = fatfs_fs_driver_get_mounted_bd_from_index(file->obj.fs->pdrv);
@@ -704,14 +707,18 @@ int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, void *r
         case USBMASS_IOCTL_GET_FRAGLIST:
             ret = get_frag_list(file, rdata, rdatalen);
             break;
-        case BDM_GET_DEVICE_INDEX:
-            if (rdata == NULL || rdatalen < sizeof(u32))
-                return -EINVAL;
-            
+        case BDM_IOCTL_GET_DEVICE_INDEX:
+        case BDM_IOCTL_GET_LBA_BITS:
+        {
             struct block_device *mounted_bd = fatfs_fs_driver_get_mounted_bd_from_index(fd->unit);
-            *(u32*)rdata = mounted_bd->devNr;
-            ret = 0;
+            if (mounted_bd == NULL)
+                ret = -ENXIO;
+            else if (mounted_bd->ioctl == NULL)
+                ret = -ENOTSUP;
+            else
+                ret = mounted_bd->ioctl(mounted_bd, cmd, data, datalen, rdata, rdatalen);
             break;
+        }
         default:
             break;
     }

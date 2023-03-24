@@ -199,11 +199,14 @@ static void ata_multiword_dma_mode(int mode);
 static void ata_ultra_dma_mode(int mode);
 static void ata_shutdown_cb(void);
 
+int ata_device_sector_io_internal(int device, void *buf, u64 lba, u32 nsectors, int dir);
+
 #ifdef ATA_ENABLE_BDM
 static int ata_bd_read(struct block_device *bd, u64 sector, void *buffer, u16 count);
 static int ata_bd_write(struct block_device *bd, u64 sector, const void *buffer, u16 count);
 static void ata_bd_flush(struct block_device *bd);
 static int ata_bd_stop(struct block_device *bd);
+static int ata_bd_ioctl(struct block_device *bd, int ioctl, void* inp, u32 inpsize, void* outp, u32 outpsize);
 #endif
 
 extern struct irx_export_table _exp_atad;
@@ -318,6 +321,7 @@ int _start(int argc, char *argv[])
             g_ata_bd[i].write = ata_bd_write;
             g_ata_bd[i].flush = ata_bd_flush;
             g_ata_bd[i].stop  = ata_bd_stop;
+            g_ata_bd[i].ioctl = ata_bd_ioctl;
         }
     }
 #endif
@@ -891,31 +895,37 @@ static int ata_device_set_transfer_mode(int device, int type, int mode)
 /* Note: this can only support DMA modes, due to the commands issued. */
 int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir)
 {
+    return ata_device_sector_io_internal(device, buf, (u64)lba, nsectors, dir);
+}
+
+int ata_device_sector_io_internal(int device, void *buf, u64 lba, u32 nsectors, int dir)
+{
     USE_SPD_REGS;
     int res = 0, retries;
     u16 sector, lcyl, hcyl, select, command, len;
 
     while (res == 0 && nsectors > 0) {
-        /* Variable lba is only 32 bits so no change for lcyl and hcyl.  */
-        lcyl = (lba >> 8) & 0xff;
-        hcyl = (lba >> 16) & 0xff;
 
         if (atad_devinfo[device].lba48 && (ata_dvrp_workaround ? (lba >= atad_devinfo[device].total_sectors) : 1)) {
-            // Note: this only supports up to 32bit LBAs. For full 64bit LBA support you must use ata_io_start
-            // directly or use bdm block device to access the hdd.
 
             /* Setup for 48-bit LBA.  */
             len = (nsectors > 65536) ? 65536 : nsectors;
 
             /* Combine bits 24-31 and bits 0-7 of lba into sector.  */
-            sector = ((lba >> 16) & 0xff00) | (lba & 0xff);
+            sector =    ((lba >> 16) & 0xff00) | (lba & 0xff);
+            lcyl =      ((lba >> 24) & 0xff00) | ((lba >> 8) & 0xff);
+            hcyl =      ((lba >> 32) & 0xff00) | ((lba >> 16) & 0xff);
+
             /* In v1.04, LBA was enabled here.  */
             select  = (device << 4) & 0xffff;
             command = (dir == 1) ? ATA_C_WRITE_DMA_EXT : ATA_C_READ_DMA_EXT;
         } else {
             /* Setup for 28-bit LBA.  */
             len    = (nsectors > 256) ? 256 : nsectors;
-            sector = lba & 0xff;
+            sector =    lba & 0xff;
+            lcyl =      (lba >> 8) & 0xff;
+            hcyl =      (lba >> 16) & 0xff;
+
             /* In v1.04, LBA was enabled here.  */
             select  = ((device << 4) | ((lba >> 24) & 0xf)) & 0xffff;
             command = (dir == 1) ? ATA_C_WRITE_DMA : ATA_C_READ_DMA;
@@ -1308,38 +1318,7 @@ static void ata_shutdown_cb(void)
 #ifdef ATA_ENABLE_BDM
 static int ata_bd_io_common(struct block_device* bd, u64 lba, void* buf, u16 nsectors, int dir)
 {
-    USE_SPD_REGS;
-    int res = 0;
-    
-    // Setup the LBA parameters.
-    u16 sector = (u16)((u16)((lba >> (24 - 8)) & 0xFF00) | (u16)(lba & 0xFF));
-    u16 lcyl = (u16)((u16)((lba >> (32 - 8)) & 0xFF00) | (u16)((lba >> 8) & 0xFF));
-    u16 hcyl = (u16)((u16)((lba >> (40 - 8)) & 0xFF00) | (u16)((lba >> 16) & 0xFF));
-
-    u16 select  = (bd->devNr << 4) & 0xffff;
-    u16 command = (dir == 1) ? ATA_C_WRITE_DMA_EXT : ATA_C_READ_DMA_EXT;
-
-    M_PRINTF("ata_bd_io_common: lba=0x%08x%08x sector=0x%04x lcyl=0x%04x hcyl=0x%04x\n", U64_2XU32(&lba), sector, lcyl, hcyl);
-
-    // Retry a maximum of 3 times before failing out.
-    for (int i = 0; i < 3; i++)
-    {
-        if ((res = ata_io_start(buf, nsectors, 0, nsectors, sector, lcyl, hcyl, select, command)) != 0)
-            break;
-
-        /* Set up (part of) the transfer here. In v1.04, this was called at the top of the outer loop. */
-        ata_set_dir(dir);
-
-        res = ata_io_finish();
-
-        /* In v1.04, this was not done. Neither was there a mechanism to retry if a non-permanent error occurs. */
-        SPD_REG16(SPD_R_IF_CTRL) &= ~SPD_IF_DMA_ENABLE;
-
-        if (res != ATA_RES_ERR_ICRC)
-            break;
-    }
-
-    return res;
+    return ata_device_sector_io_internal(bd->devNr, buf, lba, nsectors, dir);
 }
 
 //
@@ -1371,5 +1350,40 @@ static int ata_bd_stop(struct block_device *bd)
     ata_device_standby_immediate(bd->devNr);
 
     return 0;
+}
+
+static int ata_bd_ioctl(struct block_device *bd, int ioctl, void* inp, u32 inpsize, void* outp, u32 outpsize)
+{
+    (void)inp;
+    (void)inpsize;
+
+    M_PRINTF("ata_bd_ioctl: %d\n", ioctl);
+
+    // Check the IOCTL code and handle accordingly.
+    switch (ioctl)
+    {
+    case BDM_IOCTL_GET_DEVICE_INDEX:
+    {
+        if (outp == NULL || outpsize < sizeof(u32))
+            return -EINVAL;
+
+        *(u32*)outp = bd->devNr;
+        return 0;
+    }
+    case BDM_IOCTL_GET_LBA_BITS:
+    {
+        if (outp == NULL || outpsize < sizeof(u32))
+            return -EINVAL;
+
+        ata_devinfo_t* pDevInfo = (ata_devinfo_t*)bd->priv;
+        *(u32*)outp = pDevInfo->lba48 == 0 ? 28 : 48;
+        return 0;
+    }
+    default:
+    {
+        M_PRINTF("ata_bd_ioctl: unsupported ioctl code %d\n", ioctl);
+        return -EINVAL;
+    }
+    }
 }
 #endif

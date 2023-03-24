@@ -36,10 +36,6 @@ typedef struct bd_fragment {
 /** Return fragment table **/
 #define USBMASS_IOCTL_GET_FRAGLIST   0x0005
 
-// Get the device index for the device backing the current partition
-// Ex: usb0 = 0, usb1 = 1, ata master = 0, ata slave = 1, etc.
-#define BDM_GET_DEVICE_INDEX         0x0006
-
 // DEVCTL function codes
 /** Issues the SCSI STOP UNIT command to the specified device. Use this to shut down devices properly. */
 #define USBMASS_DEVCTL_STOP_UNIT 0x0000

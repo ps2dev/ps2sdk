@@ -1,6 +1,7 @@
 #include <bd_cache.h>
 #include <string.h>
 #include <sysmem.h>
+#include <errno.h>
 
 //#define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
@@ -156,6 +157,18 @@ static int _stop(struct block_device *bd)
     return c->bd->stop(c->bd);
 }
 
+static int _ioctl(struct block_device *bd, int ioctl, void* inp, u32 inpsize, void* outp, u32 outpsize)
+{
+    struct bd_cache *c = bd->priv;
+
+    M_DEBUG("%s\n", __FUNCTION__);
+
+    if (c->bd->ioctl == NULL)
+        return -ENOTSUP;
+
+    return c->bd->ioctl(c->bd, ioctl, inp, inpsize, outp, outpsize);
+}
+
 struct block_device *bd_cache_create(struct block_device *bd)
 {
     int blkidx;
@@ -193,6 +206,7 @@ struct block_device *bd_cache_create(struct block_device *bd)
     cbd->write = _write;
     cbd->flush = _flush;
     cbd->stop = _stop;
+    cbd->ioctl = _ioctl;
 
     return cbd;
 }

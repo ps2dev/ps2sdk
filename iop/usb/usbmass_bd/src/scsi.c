@@ -261,6 +261,39 @@ static int scsi_stop(struct block_device *bd)
     return stat;
 }
 
+static int scsi_ioctl(struct block_device *bd, int ioctl, void* inp, u32 inpsize, void* outp, u32 outpsize)
+{
+    (void)inp;
+    (void)inpsize;
+
+    // Check the IOCTL code and handle accordingly.
+    switch (ioctl)
+    {
+    case BDM_IOCTL_GET_DEVICE_INDEX:
+    {
+        if (outp == NULL || outpsize < sizeof(u32))
+            return -EINVAL;
+
+        *(u32*)outp = bd->devNr;
+        return 0;
+    }
+    case BDM_IOCTL_GET_LBA_BITS:
+    {
+        if (outp == NULL || outpsize < sizeof(u32))
+            return -EINVAL;
+
+        // SCSI commands currently being used are for 32bit LBAs.
+        *(u32*)outp = 32;
+        return 0;
+    }
+    default:
+    {
+        M_PRINTF("scsi_ioctl: unsupported ioctl code %d\n", ioctl);
+        return -EINVAL;
+    }
+    }
+}
+
 //
 // Public functions
 //
@@ -315,6 +348,7 @@ int scsi_init(void)
         g_scsi_bd[i].write = scsi_write;
         g_scsi_bd[i].flush = scsi_flush;
         g_scsi_bd[i].stop  = scsi_stop;
+        g_scsi_bd[i].ioctl = scsi_ioctl;
     }
 
     return 0;

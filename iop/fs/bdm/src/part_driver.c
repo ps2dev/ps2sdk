@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sysmem.h>
+#include <errno.h>
 
 #include <bdm.h>
 #include "mbr_types.h"
@@ -367,6 +368,21 @@ static int part_stop(struct block_device *bd)
     return part->bd->stop(part->bd);
 }
 
+static int part_ioctl(struct block_device *bd, int ioctl, void* inp, u32 inpsize, void* outp, u32 outpsize)
+{
+    struct partition *part = (struct partition *)bd->priv;
+
+    M_DEBUG("%s\n", __func__);
+
+    if ((part == NULL) || (part->bd == NULL))
+        return -1;
+
+    if (part->bd->ioctl == NULL)
+        return -ENOTSUP;
+
+    return part->bd->ioctl(part->bd, ioctl, inp, inpsize, outp, outpsize);
+}
+
 void part_init()
 {
     int i;
@@ -381,6 +397,7 @@ void part_init()
         g_part_bd[i].write = part_write;
         g_part_bd[i].flush = part_flush;
         g_part_bd[i].stop  = part_stop;
+        g_part_bd[i].ioctl = part_ioctl;
     }
 
     // Setup MBR/GPT file system driver:

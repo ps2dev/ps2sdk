@@ -6,6 +6,7 @@
 #include <thevent.h>
 #include <thsemap.h>
 #include <xsio2man.h>
+#include <errno.h>
 
 #include "crc16.h"
 #include "ioplib.h"
@@ -803,6 +804,39 @@ static int spi_sdcard_stop(struct block_device *bd)
     return 0;
 }
 
+static int spi_sdcard_ioctl(struct block_device *bd, int ioctl, void* inp, u32 inpsize, void* outp, u32 outpsize)
+{
+    (void)inp;
+    (void)inpsize;
+    
+    // Check the IOCTL code and handle accordingly.
+    switch (ioctl)
+    {
+    case BDM_IOCTL_GET_DEVICE_INDEX:
+    {
+        if (outp == NULL || outpsize < sizeof(u32))
+            return -EINVAL;
+
+        *(u32*)outp = bd->devNr;
+        return 0;
+    }
+    case BDM_IOCTL_GET_LBA_BITS:
+    {
+        if (outp == NULL || outpsize < sizeof(u32))
+            return -EINVAL;
+
+        // SD card commands currently being used are for 32bit LBAs.
+        *(u32*)outp = 32;
+        return 0;
+    }
+    default:
+    {
+        M_DEBUG("spi_sdcard_ioctl: unsupported ioctl code %d\n", ioctl);
+        return -EINVAL;
+    }
+    }
+}
+
 // BDM interface
 static struct block_device bd = {
     NULL,        /* priv */
@@ -816,7 +850,8 @@ static struct block_device bd = {
     spi_sdcard_read,
     spi_sdcard_write,
     spi_sdcard_flush,
-    spi_sdcard_stop};
+    spi_sdcard_stop,
+    spi_sdcard_ioctl};
 
 static void sd_detect()
 {
