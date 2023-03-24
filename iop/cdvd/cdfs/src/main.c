@@ -16,7 +16,6 @@
 #define DRIVER_UNIT_VERSION 2
 #define VERSION_STRINGIFY(x) #x
 
-#define MODNAME "cdfs_driver"
 
 IRX_ID(MODNAME, 1, 1);
 

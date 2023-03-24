@@ -1,8 +1,9 @@
 #ifndef _MODULE_DEBUG_H
 #define _MODULE_DEBUG_H
 
+#define MODNAME   "usbmass_bd"
 #ifndef MINI_DRIVER
-#define M_PRINTF(format, args...) printf("USBMASS: " format, ##args)
+#define M_PRINTF(format, args...) printf(MODNAME ": " format, ##args)
 #else
 #define M_PRINTF(format, args...) \
     do {                          \

@@ -18,6 +18,13 @@
 #include "speedregs.h"
 #include "errno.h"
 
+#define MODNAME "DVRFILE"
+#ifdef DEBUG
+#define DPRINTF(x...) printf(MODNAME ": " x)
+#else
+#define DPRINTF(x...)
+#endif
+
 extern int module_start(int argc, char *argv[]);
 extern int module_stop(int argc, char *argv[]);
 extern int dvrf_df_init(iomanX_iop_device_t *f);
@@ -246,8 +253,7 @@ int RBUF[32768];
 int SBUF[32768];
 
 // Based off of DESR / PSX DVR system software version 1.31.
-#define MODNAME "DVRFILE"
-IRX_ID("DVRFILE", 1, 1);
+IRX_ID(MODNAME, 1, 1);
 
 int _start(int argc, char *argv[])
 {
@@ -270,7 +276,7 @@ int module_start(int argc, char *argv[])
     }
 
     if (i == 30000) {
-        printf("IOMAN task of DVRP is not running...\n");
+        DPRINTF("IOMAN task of DVRP is not running...\n");
         return MODULE_NO_RESIDENT_END;
     }
     sema_id = -1;
@@ -288,18 +294,18 @@ int module_start(int argc, char *argv[])
     return MODULE_RESIDENT_END;
 #endif
 setup_fschk:
-    printf("dvrfile.irx : FILE SYSTEM CHECK MODE\n");
+    DPRINTF("dvrfile.irx : FILE SYSTEM CHECK MODE\n");
 
     if (iomanX_AddDrv(&dvrhdck_drv)) {
-        printf("hdck\n");
+        DPRINTF("hdck\n");
         goto fail;
     }
     if (iomanX_AddDrv(&dvrfssk_drv)) {
-        printf("fssk\n");
+        DPRINTF("fssk\n");
         goto fail;
     }
     if (iomanX_AddDrv(&dvrfsck_drv)) {
-        printf("fsck\n");
+        DPRINTF("fsck\n");
         goto fail;
     }
 #if 0
@@ -335,12 +341,12 @@ static int check_cmdack_err(int (*func)(drvdrv_exec_cmd_ack *cmdack), drvdrv_exe
 {
     if (func(cmdack)) {
         *retval = -EIO;
-        printf("%s -> IO error (phase %d)\n", funcname, cmdack->phase);
+        DPRINTF("%s -> IO error (phase %d)\n", funcname, cmdack->phase);
         return 1;
     }
     if (cmdack->comp_status) {
         *retval = -EIO;
-        printf("%s -> Complete parameter error (phase %d), %04X\n", funcname, cmdack->phase, cmdack->comp_status);
+        DPRINTF("%s -> Complete parameter error (phase %d), %04X\n", funcname, cmdack->phase, cmdack->comp_status);
         return 1;
     }
     *retval = (cmdack->return_result_word[0] << 16) + cmdack->return_result_word[1];
@@ -538,7 +544,7 @@ int dvrf_df_dopen(iomanX_iop_file_t *f, const char *path)
         goto finish;
     }
     if (retval < 0) {
-        printf("%s -> fd error (fd=%d)\n", __func__, retval);
+        DPRINTF("%s -> fd error (fd=%d)\n", __func__, retval);
         goto finish;
     }
     f->privdata = (void *)retval;
@@ -841,7 +847,7 @@ int dvrf_df_open(iomanX_iop_file_t *f, const char *name, int flags, int mode)
         goto finish;
     }
     if (retval < 0) {
-        printf("%s -> fd error (fd=%d)\n", __func__, retval);
+        DPRINTF("%s -> fd error (fd=%d)\n", __func__, retval);
         goto finish;
     }
     f->privdata = (void *)retval;

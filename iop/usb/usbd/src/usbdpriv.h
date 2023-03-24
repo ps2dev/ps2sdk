@@ -21,8 +21,9 @@
 
 #define OHCI_REG_BASE 0xBF801600
 
+#define MODNAME "usbd"
 #ifdef DEBUG
-#define dbg_printf printf
+#define dbg_printf(a...) printf(MODNAME ": " a)
 #else
 #define dbg_printf(a...) (void)0
 #endif

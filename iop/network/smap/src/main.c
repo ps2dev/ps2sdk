@@ -292,14 +292,14 @@ int _start(int argc, char *argv[])
 
 #ifdef BUILDING_SMAP_NETMAN
     if (RegisterLibraryEntries(&_exp_smap) != 0) {
-        DEBUG_PRINTF("smap: module already loaded\n");
+        DEBUG_PRINTF("module already loaded\n");
         return MODULE_NO_RESIDENT_END;
     }
 #endif
 
 #ifdef BUILDING_SMAP_MODULAR
     if (RegisterLibraryEntries(&_exp_smapmodu) != 0) {
-        DEBUG_PRINTF("smap: module already loaded\n");
+        DEBUG_PRINTF("module already loaded\n");
         return MODULE_NO_RESIDENT_END;
     }
 #endif
@@ -310,25 +310,25 @@ int _start(int argc, char *argv[])
     // It may be necessary to prevent SMAP from linking with an old DEV9 module.
 
     /* if ((ModuleID = SearchModuleByName("dev9")) < 0) {
-        sceInetPrintf("smap: dev9 module not found\n");
+        sceInetPrintf("dev9 module not found\n");
         return MODULE_NO_RESIDENT_END;
     }
     if (ReferModuleStatus(ModuleID, &ModStatus) < 0) {
-        sceInetPrintf("smap: can't get dev9 module status\n");
+        sceInetPrintf("can't get dev9 module status\n");
         return MODULE_NO_RESIDENT_END;
     }
 
     if (ModStatus.version < 0x204) {
-        sceInetPrintf("smap: dev9 module version must be 2.4 or later\n");
+        sceInetPrintf("dev9 module version must be 2.4 or later\n");
         return MODULE_NO_RESIDENT_END;
     } */
 
 #ifdef BUILDING_SMAP_PS2IP
     // Parse IP args.
-    DEBUG_PRINTF("SMAP: argc %d\n", argc);
+    DEBUG_PRINTF("argc %d\n", argc);
 
     if (argc >= 4) {
-        DEBUG_PRINTF("SMAP: %s %s %s\n", argv[1], argv[2], argv[3]);
+        DEBUG_PRINTF("%s %s %s\n", argv[1], argv[2], argv[3]);
         IP.addr = inet_addr(argv[1]);
         NM.addr = inet_addr(argv[2]);
         GW.addr = inet_addr(argv[3]);
@@ -349,7 +349,7 @@ int _start(int argc, char *argv[])
 
 #ifdef BUILDING_SMAP_NETMAN
     if ((result = smap_init(argc, argv)) < 0) {
-        DEBUG_PRINTF("smap: smap_init -> %d\n", result);
+        DEBUG_PRINTF("smap_init -> %d\n", result);
         ReleaseLibraryEntries(&_exp_smap);
         return MODULE_NO_RESIDENT_END;
     }
@@ -362,7 +362,7 @@ int _start(int argc, char *argv[])
         return MODULE_NO_RESIDENT_END;
     }
 
-    printf("SMap: Initialized OK, IP: ");
+    printf("Initialized OK, IP: ");
     PrintIP(&IP);
     printf(", NM: ");
     PrintIP(&NM);

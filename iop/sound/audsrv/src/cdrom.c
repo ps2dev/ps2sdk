@@ -31,6 +31,7 @@
 #include "upsamplers.h"
 #include "spu.h"
 #include "hw.h"
+#include "debug_printf.h"
 
 /* cdda */
 /** initialization status */
@@ -149,7 +150,7 @@ static int process_toc()
 	toc.tracks[toc.num_tracks].second = btoi(raw_toc[35]);
 	toc.tracks[toc.num_tracks].sector = btoi(raw_toc[36]);
 
-	printf("audsrv: found %d tracks\n", toc.num_tracks);
+	DPRINTF("found %d tracks\n", toc.num_tracks);
 	return 0;
 }
 
@@ -182,19 +183,19 @@ static int initialize_cdda()
 	sceCdSync(0);
 
 	type = audsrv_get_cd_type();
-	printf("audsrv: disc type: %d\n", type);
+	DPRINTF("disc type: %d\n", type);
 
 	if (type != 0x11 && type != 0x13 && type != 0xfd)
 	{
 		/* not a cdda disc, or a ps1/ps2 with cdda tracks */
-		printf("audsrv: not a cdda disc!\n");
+		DPRINTF("not a cdda disc!\n");
 		return -AUDSRV_ERR_ARGS;
 	}
 
 	process_toc();
 
 	cdda_initialized = 1;
-	printf("audsrv: cdda initialization completed successfully\n");
+	DPRINTF("cdda initialization completed successfully\n");
 	return 0;
 }
 
@@ -470,11 +471,11 @@ int audsrv_get_trackpos()
  */
 int audsrv_cd_play_sectors(int start, int end)
 {
-	printf("audsrv: cd_play_sectors: %d %d\n", start, end);
+	DPRINTF("cd_play_sectors: %d %d\n", start, end);
 
 	if (initialize_cdda() < 0)
 	{
-		printf("audsrv: initialized cdda failed\n");
+		DPRINTF("initialized cdda failed\n");
 		return AUDSRV_ERR_NOT_INITIALIZED; //FIXME
 	}
 
@@ -485,7 +486,7 @@ int audsrv_cd_play_sectors(int start, int end)
 	cdda_play_end = end;
 	cdda_pos = start;
 
-	printf("audsrv: creating cdda feed thread\n");
+	DPRINTF("creating cdda feed thread\n");
 
 	/* .. and start a new one! */
 	cdda_play_tid = create_thread(cdda_procedure, 48, 0);
@@ -514,7 +515,7 @@ int audsrv_play_cd(int track)
 
 	if (initialize_cdda() < 0)
 	{
-		printf("audsrv: initialized cdda failed\n");
+		DPRINTF("initialized cdda failed\n");
 		return AUDSRV_ERR_NOT_INITIALIZED; //FIXME
 	}
 
@@ -528,7 +529,7 @@ int audsrv_play_cd(int track)
 	if (track == 1 && (type == 11 || type == 0x13))
 	{
 		/* first track is data */
-		printf("audsrv: request to play data track\n");
+		DPRINTF("request to play data track\n");
 		return AUDSRV_ERR_ARGS;
 	}
 
@@ -537,7 +538,7 @@ int audsrv_play_cd(int track)
 
 	if (start < 0 || end < 0 || end < start)
 	{
-		printf("audsrv: invalid track offsets %d, %d\n", start, end);
+		DPRINTF("invalid track offsets %d, %d\n", start, end);
 		return AUDSRV_ERR_ARGS; //FIXME:
 	}
 

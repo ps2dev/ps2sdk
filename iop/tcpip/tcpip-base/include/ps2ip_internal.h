@@ -15,7 +15,7 @@
 #include "lwip/sockets.h"
 
 #ifdef DEBUG
-#define	dbgprintf(args...)	printf(args)
+#define	dbgprintf(args...)	printf("PS2IP: "args)
 #else
 #define	dbgprintf(args...)
 #endif

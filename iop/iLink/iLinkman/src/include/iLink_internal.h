@@ -1,8 +1,8 @@
 // #define DEBUG_TTY_FEEDBACK /* Comment out to disable generation of debug TTY messages */
 
 #ifdef DEBUG_TTY_FEEDBACK
-#define DEBUG_PRINTF(args...)  printf(args)
-#define iDEBUG_PRINTF(args...) Kprintf(args)
+#define DEBUG_PRINTF(args...)  printf("ILINKMAN: "args)
+#define iDEBUG_PRINTF(args...) Kprintf("ILINKMAN: "args)
 #else
 #define DEBUG_PRINTF(args...) \
     do {                      \

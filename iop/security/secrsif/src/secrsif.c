@@ -12,6 +12,12 @@
 #define MODNAME "secrsif"
 IRX_ID(MODNAME, 1, 2);
 
+#ifdef DEBUG
+#define DPRINTF(x...) printf("SECRSIF: " x)
+#else
+#define DPRINTF(x...)
+#endif
+
 extern struct irx_export_table _exp_secrsif;
 
 static SifRpcDataQueue_t SifSecrDownloadHeaderQD;
@@ -99,7 +105,7 @@ static void *SifSecrDiskBootBlockHandler(int function, void *buffer, int nbytes)
     (void)nbytes;
 
     ((struct SecrSifDiskBootBlockParams *)buffer)->result = SecrDiskBootBlock(((struct SecrSifDiskBootBlockParams *)buffer)->source, ((struct SecrSifDiskBootBlockParams *)buffer)->destination, ((struct SecrSifDiskBootBlockParams *)buffer)->size);
-    printf("sif_disk_boot_block %p %ld\n", ((struct SecrSifDiskBootBlockParams *)buffer)->source, ((struct SecrSifDiskBootBlockParams *)buffer)->result);
+    DPRINTF("sif_disk_boot_block %p %ld\n", ((struct SecrSifDiskBootBlockParams *)buffer)->source, ((struct SecrSifDiskBootBlockParams *)buffer)->result);
 
     return buffer;
 }
@@ -109,7 +115,7 @@ static void SifSecrDownloadHeaderThread(void *parameters)
     (void)parameters;
 
     if (!sceSifCheckInit()) {
-        printf("yet sif hasn't been init\n");
+        DPRINTF("yet sif hasn't been init\n");
         sceSifInit();
     }
 
@@ -124,7 +130,7 @@ static void SifSecrDownloadBlockThread(void *parameters)
     (void)parameters;
 
     if (!sceSifCheckInit()) {
-        printf("yet sif hasn't been init\n");
+        DPRINTF("yet sif hasn't been init\n");
         sceSifInit();
     }
 
@@ -139,7 +145,7 @@ static void SifSecrDownloadGetKbitThread(void *parameters)
     (void)parameters;
 
     if (!sceSifCheckInit()) {
-        printf("yet sif hasn't been init\n");
+        DPRINTF("yet sif hasn't been init\n");
         sceSifInit();
     }
 
@@ -154,7 +160,7 @@ static void SifSecrDownloadGetKcThread(void *parameters)
     (void)parameters;
 
     if (!sceSifCheckInit()) {
-        printf("yet sif hasn't been init\n");
+        DPRINTF("yet sif hasn't been init\n");
         sceSifInit();
     }
 
@@ -169,7 +175,7 @@ static void SifSecrDownloadGetICVPS2Thread(void *parameters)
     (void)parameters;
 
     if (!sceSifCheckInit()) {
-        printf("yet sif hasn't been init\n");
+        DPRINTF("yet sif hasn't been init\n");
         sceSifInit();
     }
 
@@ -184,7 +190,7 @@ static void SifSecrDiskBootHeaderThread(void *parameters)
     (void)parameters;
 
     if (!sceSifCheckInit()) {
-        printf("yet sif hasn't been init\n");
+        DPRINTF("yet sif hasn't been init\n");
         sceSifInit();
     }
 
@@ -199,7 +205,7 @@ static void SifSecrDiskBootBlockThread(void *parameters)
     (void)parameters;
 
     if (!sceSifCheckInit()) {
-        printf("yet sif hasn't been init\n");
+        DPRINTF("yet sif hasn't been init\n");
         sceSifInit();
     }
 

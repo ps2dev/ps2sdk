@@ -5,8 +5,7 @@
 
 #include "sbp2_disk.h"
 #include "fat_driver.h"
-
-#define MODNAME "IEEE1394_disk"
+#include "mass_debug.h"
 IRX_ID(MODNAME, 0x01, 0x07);
 
 int InitFS(void);
