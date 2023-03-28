@@ -130,8 +130,6 @@ int ParseGPTPartitionTable(struct block_device* bd)
                 // Perform some sanity checks on the partition.
                 if (pGptPartitionEntry[x].first_lba < pGptHeader->first_lba || pGptPartitionEntry[x].last_lba > pGptHeader->last_lba)
                 {
-                    // TODO: If one partition is borked we should bail out from mounting any partitions.
-
                     // Partition entry data appears to be corrupt.
                     M_DEBUG("Partition entry %d appears to be corrupt (lba bounds incorrect)\n", i);
                     continue;
@@ -173,7 +171,6 @@ int ParseGPTPartitionTable(struct block_device* bd)
             }
         }
     }
-    printf("Done parsing GPT disk\n");
 
     // Free our scratch buffer.
     FreeSysMemory(buffer);
@@ -230,15 +227,7 @@ int part_connect(struct block_device *bd)
     int ret;
 
     M_DEBUG("%s\n", __func__);
-
-    // Filter for supported partition IDs:
-    // - First sector of disk can be MBR partition
-    // - 0x05 = extended MBR partition with CHS addressing
-    // - 0x0f = extended MBR partition with LBA addressing
-    //if (bd->sectorOffset != 0 && bd->parId != 0x05 && bd->parId != 0x0f)
-    //    return rval;
-
-    // I don't really understand what the filter above is trying to accomplish...
+    
     // Filter out any block device where sectorOffset != 0, as this will be a block device for a file system partition and not
     // the raw device.
     if (bd->sectorOffset != 0)
@@ -326,8 +315,10 @@ static int part_read(struct block_device *bd, u64 sector, void *buffer, u16 coun
     if ((part == NULL) || (part->bd == NULL))
         return -1;
 
+#ifdef DEBUG
     u64 finalSector = sector + bd->sectorOffset;
     M_DEBUG("%s (%s %d %d) 0x%08x%08x %d\n", __func__, bd->name, bd->devNr, bd->parNr, U64_2XU32(&finalSector), count);
+#endif
 
     return part->bd->read(part->bd, sector + bd->sectorOffset, buffer, count);
 }
@@ -336,10 +327,13 @@ static int part_write(struct block_device *bd, u64 sector, const void *buffer, u
 {
     struct partition *part = (struct partition *)bd->priv;
 
-    M_DEBUG("%s\n", __func__);
-
     if ((part == NULL) || (part->bd == NULL))
         return -1;
+
+#ifdef DEBUG
+    u64 finalSector = sector + bd->sectorOffset;
+    M_DEBUG("%s (%s %d %d) 0x%08x%08x %d\n", __func__, bd->name, bd->devNr, bd->parNr, U64_2XU32(&finalSector), count);
+#endif
 
     return part->bd->write(part->bd, sector + bd->sectorOffset, buffer, count);
 }

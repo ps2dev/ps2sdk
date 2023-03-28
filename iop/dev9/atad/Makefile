@@ -43,7 +43,7 @@ IOP_CFLAGS += -DATA_GAMESTAR_WORKAROUND=1
 endif
 
 ifeq ($(ATA_ENABLE_BDM),1)
-IOP_CFLAGS += -DATA_ENABLE_BDM=1
+IOP_CFLAGS += -DATA_ENABLE_BDM=1 -Wno-strict-aliasing
 IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
 endif
 

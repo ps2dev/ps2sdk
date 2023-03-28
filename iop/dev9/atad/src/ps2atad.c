@@ -1316,17 +1316,12 @@ static void ata_shutdown_cb(void)
 }
 
 #ifdef ATA_ENABLE_BDM
-static int ata_bd_io_common(struct block_device* bd, u64 lba, void* buf, u16 nsectors, int dir)
-{
-    return ata_device_sector_io_internal(bd->devNr, buf, lba, nsectors, dir);
-}
-
 //
 // Block device interface
 //
 static int ata_bd_read(struct block_device *bd, u64 sector, void *buffer, u16 count)
 {
-    if (ata_bd_io_common(bd, sector, buffer, count, 0) != 0)
+    if (ata_device_sector_io_internal(bd->devNr, buffer, sector, count, 0) != 0)
         return -EIO;
 
     return count;
@@ -1334,7 +1329,7 @@ static int ata_bd_read(struct block_device *bd, u64 sector, void *buffer, u16 co
 
 static int ata_bd_write(struct block_device *bd, u64 sector, const void *buffer, u16 count)
 {
-    if (ata_bd_io_common(bd, sector, (void*)buffer, count, 1) != 0)
+    if (ata_device_sector_io_internal(bd->devNr, (void*)buffer, sector, count, 1) != 0)
         return -EIO;
 
     return count;
