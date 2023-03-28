@@ -64,7 +64,7 @@ typedef struct _fs_dir
     fat_dir current_fatdir;
 } fs_dir;
 
-#define MAX_FILES 16
+#define MAX_FILES 128
 static fs_rec fsRec[MAX_FILES]; // file info record
 
 static void fillStat(iox_stat_t *stat, const fat_dir *fatdir)

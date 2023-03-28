@@ -228,7 +228,7 @@ void disconnect_bd(struct block_device *bd)
 
 //---------------------------------------------------------------------------
 
-#define MAX_FILES 16
+#define MAX_FILES 128
 static FIL fil_structures[MAX_FILES];
 
 #define MAX_DIRS 16
@@ -367,7 +367,7 @@ s64 fs_lseek64(iop_file_t *fd, s64 offset, int whence)
             off += file->fptr;
             break;
         case SEEK_END:
-            off = file->obj.objsize - offset;
+            off = file->obj.objsize + offset;
             break;
     }
 
