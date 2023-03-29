@@ -3387,29 +3387,12 @@ static FRESULT mount_volume (	/* FR_OK(0): successful, !=0: an error occurred */
 	if (SS(fs) > FF_MAX_SS || SS(fs) < FF_MIN_SS || (SS(fs) & (SS(fs) - 1))) return FR_DISK_ERR;
 #endif
 
-	/*
-		find_volume returns the following values:
-			0: FAT/FAT32 volume
-			1: exFAT volume
-			2: no FAT volume but valid boot sector
-			3: no FAT volume no valid boot sector
-			4: IO error
-
-		We only care about 0 and 1 right now, 2 and 3 can be considered "unformatted disk". The check_fs function will detect the file system
-		type for the partition if given the starting LBA of the partition.
-	*/
-
-	/* Find an FAT volume on the drive */
-	//fmt = find_volume(fs, LD2PT(vol));
-	//if (fmt == 4) return FR_DISK_ERR;		/* An error occured in the disk I/O layer */
-	//if (fmt >= 2) return FR_NO_FILESYSTEM;	/* No FAT volume is found */
-	//bsect = fs->winsect;					/* Volume offset */
-
+	/* Check for a valid file system on the device. */
 	fmt = check_fs(fs, 0);
 	M_DEBUG("check_fs returned %d at LBA 0x%08x%08x\n", fmt, U64_2XU32(&fs->winsect));
 	if (fmt == 4) return FR_DISK_ERR;		/* An error occured in the disk I/O layer */
 	if (fmt >= 2) return FR_NO_FILESYSTEM;	/* No FAT volume is found */
-	bsect = fs->winsect;
+	bsect = fs->winsect;					/* Volume offset */
 
 	/* An FAT volume is found (bsect). Following code initializes the filesystem object */
 

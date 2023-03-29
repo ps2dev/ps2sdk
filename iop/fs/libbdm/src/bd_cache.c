@@ -6,10 +6,6 @@
 //#define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
 
-// Note: The block device cache is based on the assumption that the device's native sector size is 512. While this
-// is currently always true there may come a day where there's performance gains to be had by using larger
-// sector sizes, ex: 2048, 4096, etc.
-
 #define SECTORS_PER_BLOCK     8 //  8 * 512b =   4KiB
 #define BLOCK_COUNT          32 // 32 * 4KiB = 128KiB
 #define BLOCK_WEIGHT_FACTOR 256 // Fixed point math (24.8)

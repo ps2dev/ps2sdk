@@ -907,7 +907,6 @@ int ata_device_sector_io_internal(int device, void *buf, u64 lba, u32 nsectors, 
     while (res == 0 && nsectors > 0) {
 
         if (atad_devinfo[device].lba48 && (ata_dvrp_workaround ? (lba >= atad_devinfo[device].total_sectors) : 1)) {
-
             /* Setup for 48-bit LBA.  */
             len = (nsectors > 65536) ? 65536 : nsectors;
 
@@ -1321,16 +1320,18 @@ static void ata_shutdown_cb(void)
 //
 static int ata_bd_read(struct block_device *bd, u64 sector, void *buffer, u16 count)
 {
-    if (ata_device_sector_io_internal(bd->devNr, buffer, sector, count, 0) != 0)
+    if (ata_device_sector_io_internal(bd->devNr, buffer, sector, count, ATA_DIR_READ) != 0) {
         return -EIO;
+    }
 
     return count;
 }
 
 static int ata_bd_write(struct block_device *bd, u64 sector, const void *buffer, u16 count)
 {
-    if (ata_device_sector_io_internal(bd->devNr, (void*)buffer, sector, count, 1) != 0)
+    if (ata_device_sector_io_internal(bd->devNr, (void*)buffer, sector, count, ATA_DIR_WRITE) != 0) {
         return -EIO;
+    }
 
     return count;
 }

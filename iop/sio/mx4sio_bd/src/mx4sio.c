@@ -697,6 +697,8 @@ static int spi_sdcard_read(struct block_device *bd, u64 sector, void *buffer, u1
             if (rv != count_do) {
                 // Read failed, have outer loop retry
                 M_PRINTF("ERROR: _msread_do: %d != %d\n", rv, count_do);
+                // U64_2XU32 expands to 2 arguments
+                // cppcheck-suppress wrongPrintfScanfArgNum
                 M_PRINTF(" - %s(0x%08x%08x,%d)\n", __FUNCTION__, U64_2XU32(&sector), (int)count);
                 break;
             }
