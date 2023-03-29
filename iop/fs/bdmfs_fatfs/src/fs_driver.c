@@ -349,7 +349,7 @@ static int fs_close(iop_file_t *fd)
 
 s64 fs_lseek64(iop_file_t *fd, s64 offset, int whence)
 {
-    M_DEBUG("%s 0x%08x%08x %d\n", __func__, U64_2XU32(&offset), whence);
+    M_DEBUG("%s\n", __func__);
 
     int res;
 
