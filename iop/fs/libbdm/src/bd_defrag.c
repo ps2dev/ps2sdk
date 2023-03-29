@@ -9,8 +9,6 @@ int bd_defrag(struct block_device* bd, u32 fragcount, struct bd_fragment* fragli
     u64 sector_start = sector;
     u16 count_left = count;
 
-    //M_PRINTF("%s: sector=0x%08x%08x count=%d\n", __FUNCTION__, U64_2XU32(&sector), count);
-
     while (count_left > 0) {
         u16 count_read;
         u64 offset = 0; // offset of fragment in bd/file
