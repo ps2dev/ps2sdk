@@ -880,7 +880,6 @@ static void sd_detect_thread(void *arg)
     while (1) {
         // Sleep for 1 second
         DelayThread(1000 * 1000);
-        
         M_DEBUG("Check card, inserted=%d, used=%d\n", card_inserted, card_used);
 
         // Detect card if it has not been used recently
