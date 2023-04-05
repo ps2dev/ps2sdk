@@ -6,7 +6,6 @@
 #include <thevent.h>
 #include <thsemap.h>
 #include <xsio2man.h>
-#include <errno.h>
 
 #include "crc16.h"
 #include "ioplib.h"

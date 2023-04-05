@@ -1,7 +1,6 @@
 #include <bd_cache.h>
 #include <string.h>
 #include <sysmem.h>
-#include <errno.h>
 
 //#define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
