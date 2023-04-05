@@ -17,7 +17,6 @@
 
 #include <irx.h>
 #include <types.h>
-#include <bdm-common.h>
 
 struct block_device
 {
@@ -40,7 +39,6 @@ struct block_device
     int (*write)(struct block_device *bd, u64 sector, const void *buffer, u16 count);
     void (*flush)(struct block_device *bd);
     int (*stop)(struct block_device *bd);
-    int (*ioctl)(struct block_device *bd, int ioctl, void* inp, u32 inpsize, void* outp, u32 outpsize);
 };
 
 struct file_system

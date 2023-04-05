@@ -790,39 +790,6 @@ static int spi_sdcard_stop(struct block_device *bd)
     return 0;
 }
 
-static int spi_sdcard_ioctl(struct block_device *bd, int ioctl, void* inp, u32 inpsize, void* outp, u32 outpsize)
-{
-    (void)inp;
-    (void)inpsize;
-    
-    // Check the IOCTL code and handle accordingly.
-    switch (ioctl)
-    {
-    case BDM_IOCTL_GET_DEVICE_INDEX:
-    {
-        if (outp == NULL || outpsize < sizeof(u32))
-            return -EINVAL;
-
-        *(u32*)outp = bd->devNr;
-        return 0;
-    }
-    case BDM_IOCTL_GET_LBA_BITS:
-    {
-        if (outp == NULL || outpsize < sizeof(u32))
-            return -EINVAL;
-
-        // SD card commands currently being used are for 32bit LBAs.
-        *(u32*)outp = 32;
-        return 0;
-    }
-    default:
-    {
-        M_DEBUG("spi_sdcard_ioctl: unsupported ioctl code %d\n", ioctl);
-        return -EINVAL;
-    }
-    }
-}
-
 // BDM interface
 static struct block_device bd = {
     NULL,        /* priv */
@@ -836,8 +803,7 @@ static struct block_device bd = {
     spi_sdcard_read,
     spi_sdcard_write,
     spi_sdcard_flush,
-    spi_sdcard_stop,
-    spi_sdcard_ioctl};
+    spi_sdcard_stop};
 
 static void sd_detect()
 {
@@ -912,15 +878,15 @@ static void sd_detect_thread(void *arg)
     M_PRINTF("card detection thread running\n");
 
     while (1) {
+        // Sleep for 1 second
+        DelayThread(1000 * 1000);
+        
         M_DEBUG("Check card, inserted=%d, used=%d\n", card_inserted, card_used);
 
         // Detect card if it has not been used recently
         if (card_used == 0)
             sd_detect();
         card_used = 0;
-
-        // Sleep for 1 second
-        DelayThread(1000 * 1000);
     }
 }
 

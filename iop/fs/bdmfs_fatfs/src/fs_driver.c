@@ -707,16 +707,23 @@ int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, void *r
         case USBMASS_IOCTL_GET_FRAGLIST:
             ret = get_frag_list(file, rdata, rdatalen);
             break;
-        case BDM_IOCTL_GET_DEVICE_INDEX:
-        case BDM_IOCTL_GET_LBA_BITS:
+        case USBMASS_IOCTL_GET_DEVICE_NUMBER:
         {
-            struct block_device *mounted_bd = fatfs_fs_driver_get_mounted_bd_from_index(fd->unit);
-            if (mounted_bd == NULL)
+            // Check for a return buffer and copy the device number. If no buffer is provided return an error.
+            if (rdata == NULL || rdatalen < sizeof(u32))
+            {
+                ret = -EINVAL;
+                break;
+            }
+
+            struct block_device* bd = fatfs_fs_driver_get_mounted_bd_from_index(file->obj.fs->pdrv);
+            if (bd == NULL)
                 ret = -ENXIO;
-            else if (mounted_bd->ioctl == NULL)
-                ret = -ENOTSUP;
             else
-                ret = mounted_bd->ioctl(mounted_bd, cmd, data, datalen, rdata, rdatalen);
+            {
+                *(u32*)rdata = bd->devNr;
+                ret = 0;
+            }
             break;
         }
         default:

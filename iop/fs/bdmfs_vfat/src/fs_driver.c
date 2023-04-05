@@ -903,6 +903,7 @@ static int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, 
 
     switch (cmd) {
         case USBMASS_IOCTL_GET_LBA:
+        {
             // Check for a return buffer and copy the 64bit LBA. If no buffer is provided return an error.
             if (rdata == NULL || rdatalen < sizeof(u64))
             {
@@ -916,15 +917,26 @@ static int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, 
             *(u64*)rdata = (u64)fat_cluster2sector(&fatd->partBpb, ((fs_rec *)fd->privdata)->dirent.fatdir.startCluster) + bd->sectorOffset;
             ret = 0;
             break;
-        case BDM_IOCTL_GET_DEVICE_INDEX:
-        case BDM_IOCTL_GET_LBA_BITS:
+        }
+        case USBMASS_IOCTL_GET_DEVICE_NUMBER:
+        {
+            // Check for a return buffer and copy the device number. If no buffer is provided return an error.
             if (rdata == NULL || rdatalen < sizeof(u32))
+            {
                 ret = -EINVAL;
-            else if (fatd->cache->bd->ioctl == NULL)
-                ret = -ENOTSUP;
+                break;
+            }
+
+            struct block_device* bd = fatd->cache->bd;
+            if (bd == NULL)
+                ret = -ENXIO;
             else
-                ret = fatd->cache->bd->ioctl(fatd->cache->bd, cmd, data, datalen, rdata, rdatalen);
+            {
+                *(u32*)rdata = bd->devNr;
+                ret = 0;
+            }
             break;
+        }
         default:
             ret = fs_dummy();
     }

@@ -199,14 +199,13 @@ static void ata_multiword_dma_mode(int mode);
 static void ata_ultra_dma_mode(int mode);
 static void ata_shutdown_cb(void);
 
-int ata_device_sector_io_internal(int device, void *buf, u64 lba, u32 nsectors, int dir);
+int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir);
 
 #ifdef ATA_ENABLE_BDM
 static int ata_bd_read(struct block_device *bd, u64 sector, void *buffer, u16 count);
 static int ata_bd_write(struct block_device *bd, u64 sector, const void *buffer, u16 count);
 static void ata_bd_flush(struct block_device *bd);
 static int ata_bd_stop(struct block_device *bd);
-static int ata_bd_ioctl(struct block_device *bd, int ioctl, void* inp, u32 inpsize, void* outp, u32 outpsize);
 #endif
 
 extern struct irx_export_table _exp_atad;
@@ -321,7 +320,6 @@ int _start(int argc, char *argv[])
             g_ata_bd[i].write = ata_bd_write;
             g_ata_bd[i].flush = ata_bd_flush;
             g_ata_bd[i].stop  = ata_bd_stop;
-            g_ata_bd[i].ioctl = ata_bd_ioctl;
         }
     }
 #endif
@@ -895,10 +893,10 @@ static int ata_device_set_transfer_mode(int device, int type, int mode)
 /* Note: this can only support DMA modes, due to the commands issued. */
 int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir)
 {
-    return ata_device_sector_io_internal(device, buf, (u64)lba, nsectors, dir);
+    return ata_device_sector_io64(device, buf, (u64)lba, nsectors, dir);
 }
 
-int ata_device_sector_io_internal(int device, void *buf, u64 lba, u32 nsectors, int dir)
+int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir)
 {
     USE_SPD_REGS;
     int res = 0, retries;
@@ -1320,7 +1318,7 @@ static void ata_shutdown_cb(void)
 //
 static int ata_bd_read(struct block_device *bd, u64 sector, void *buffer, u16 count)
 {
-    if (ata_device_sector_io_internal(bd->devNr, buffer, sector, count, ATA_DIR_READ) != 0) {
+    if (ata_device_sector_io64(bd->devNr, buffer, sector, count, ATA_DIR_READ) != 0) {
         return -EIO;
     }
 
@@ -1329,7 +1327,7 @@ static int ata_bd_read(struct block_device *bd, u64 sector, void *buffer, u16 co
 
 static int ata_bd_write(struct block_device *bd, u64 sector, const void *buffer, u16 count)
 {
-    if (ata_device_sector_io_internal(bd->devNr, (void*)buffer, sector, count, ATA_DIR_WRITE) != 0) {
+    if (ata_device_sector_io64(bd->devNr, (void*)buffer, sector, count, ATA_DIR_WRITE) != 0) {
         return -EIO;
     }
 
@@ -1346,40 +1344,5 @@ static int ata_bd_stop(struct block_device *bd)
     ata_device_standby_immediate(bd->devNr);
 
     return 0;
-}
-
-static int ata_bd_ioctl(struct block_device *bd, int ioctl, void* inp, u32 inpsize, void* outp, u32 outpsize)
-{
-    (void)inp;
-    (void)inpsize;
-
-    M_PRINTF("ata_bd_ioctl: %d\n", ioctl);
-
-    // Check the IOCTL code and handle accordingly.
-    switch (ioctl)
-    {
-    case BDM_IOCTL_GET_DEVICE_INDEX:
-    {
-        if (outp == NULL || outpsize < sizeof(u32))
-            return -EINVAL;
-
-        *(u32*)outp = bd->devNr;
-        return 0;
-    }
-    case BDM_IOCTL_GET_LBA_BITS:
-    {
-        if (outp == NULL || outpsize < sizeof(u32))
-            return -EINVAL;
-
-        ata_devinfo_t* pDevInfo = (ata_devinfo_t*)bd->priv;
-        *(u32*)outp = pDevInfo->lba48 == 0 ? 28 : 48;
-        return 0;
-    }
-    default:
-    {
-        M_PRINTF("ata_bd_ioctl: unsupported ioctl code %d\n", ioctl);
-        return -EINVAL;
-    }
-    }
 }
 #endif
