@@ -13,7 +13,7 @@ struct bd_cache
 {
     struct block_device *bd;
     int weight[BLOCK_COUNT];
-    u32 sector[BLOCK_COUNT];
+    u64 sector[BLOCK_COUNT];
     u8 cache[BLOCK_COUNT][SECTORS_PER_BLOCK*512];
 #ifdef DEBUG
     u32 sectors_read;
@@ -23,7 +23,7 @@ struct bd_cache
 };
 
 /* cache overlaps with requested area ? */
-static int _overlaps(u32 csector, u32 sector, u16 count)
+static int _overlaps(u64 csector, u64 sector, u16 count)
 {
     if ((sector < (csector + SECTORS_PER_BLOCK)) && ((sector + count) > csector))
         return 1;
@@ -32,7 +32,7 @@ static int _overlaps(u32 csector, u32 sector, u16 count)
 }
 
 /* cache contains requested area ? */
-static int _contains(u32 csector, u32 sector, u16 count)
+static int _contains(u64 csector, u64 sector, u16 count)
 {
     if ((sector >= csector) && ((sector + count) <= (csector + SECTORS_PER_BLOCK)))
         return 1;
@@ -40,19 +40,19 @@ static int _contains(u32 csector, u32 sector, u16 count)
         return 0;
 }
 
-static void _invalidate(struct bd_cache *c, u32 sector, u16 count)
+static void _invalidate(struct bd_cache *c, u64 sector, u16 count)
 {
     int blkidx;
 
     for (blkidx = 0; blkidx < BLOCK_COUNT; blkidx++) {
         if (_overlaps(c->sector[blkidx], sector, count)) {
             // Invalidate cache entry
-            c->sector[blkidx] = 0xffffffff;
+            c->sector[blkidx] = 0xffffffffffffffff;
         }
     }
 }
 
-static int _read(struct block_device *bd, u32 sector, void *buffer, u16 count)
+static int _read(struct block_device *bd, u64 sector, void *buffer, u16 count)
 {
     struct bd_cache *c = bd->priv;
 
@@ -82,7 +82,7 @@ static int _read(struct block_device *bd, u32 sector, void *buffer, u16 count)
             c->weight[blkidx] += count * BLOCK_WEIGHT_FACTOR;
 
             // Read from cache
-            u32 offset = (sector - c->sector[blkidx]) * 512;
+            u64 offset = (sector - c->sector[blkidx]) * 512;
             memcpy(buffer, &c->cache[blkidx][offset], count * 512);
             return count;
         }
@@ -117,13 +117,13 @@ static int _read(struct block_device *bd, u32 sector, void *buffer, u16 count)
     c->sector[blkidx_best] = sector;
 
     // Read from cache
-    u32 offset = (sector - c->sector[blkidx_best]) * 512;
+    u64 offset = (sector - c->sector[blkidx_best]) * 512;
     c->weight[blkidx_best] = count * BLOCK_WEIGHT_FACTOR;
     memcpy(buffer, &c->cache[blkidx_best][offset], count * 512);
     return count;
 }
 
-static int _write(struct block_device *bd, u32 sector, const void *buffer, u16 count)
+static int _write(struct block_device *bd, u64 sector, const void *buffer, u16 count)
 {
     struct bd_cache *c = bd->priv;
 
@@ -166,7 +166,7 @@ struct block_device *bd_cache_create(struct block_device *bd)
     c->bd = bd;
     for (blkidx = 0; blkidx < BLOCK_COUNT; blkidx++) {
         c->weight[blkidx] = 0;
-        c->sector[blkidx] = 0xffffffff;
+        c->sector[blkidx] = 0xffffffffffffffff;
     }
 #ifdef DEBUG
     c->sectors_read = 0;

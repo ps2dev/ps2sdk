@@ -8,6 +8,8 @@ stdio_IMPORTS_end
 
 sysclib_IMPORTS_start
 I_memcpy
+I_memcmp
+I_memset
 sysclib_IMPORTS_end
 
 sysmem_IMPORTS_start

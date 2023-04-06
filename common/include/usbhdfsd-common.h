@@ -18,7 +18,7 @@
 #include <tamtypes.h>
 
 typedef struct bd_fragment {
-    u32 sector; /// start sector of fragmented bd/file
+    u64 sector; /// start sector of fragmented bd/file
     u32 count;  /// number of sector in this fragment
 } __attribute__((packed)) bd_fragment_t;
 
@@ -35,6 +35,8 @@ typedef struct bd_fragment {
 #define USBMASS_IOCTL_CHECK_CHAIN    0x0004
 /** Return fragment table **/
 #define USBMASS_IOCTL_GET_FRAGLIST   0x0005
+/** Get the device number for the block device backing the mass partition */
+#define USBMASS_IOCTL_GET_DEVICE_NUMBER     0x0006
 
 // DEVCTL function codes
 /** Issues the SCSI STOP UNIT command to the specified device. Use this to shut down devices properly. */

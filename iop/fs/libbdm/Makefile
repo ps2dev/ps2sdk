@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-# IOP_CFLAGS += -DDEBUG
+# IOP_CFLAGS += -DDEBUG -Wno-strict-aliasing
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
 

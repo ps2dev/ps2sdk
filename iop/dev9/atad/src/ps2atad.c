@@ -46,6 +46,8 @@ IRX_ID(MODNAME, 2, 7);
 #define M_PRINTF(format, args...) \
     printf(MODNAME ": " format, ##args)
 
+#define U64_2XU32(val)  ((u32*)val)[1], ((u32*)val)[0]
+
 #define BANNER  "ATA device driver %s - Copyright (c) 2003 Marcus R. Brown\n"
 #define VERSION "v1.2"
 
@@ -197,9 +199,11 @@ static void ata_multiword_dma_mode(int mode);
 static void ata_ultra_dma_mode(int mode);
 static void ata_shutdown_cb(void);
 
+int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir);
+
 #ifdef ATA_ENABLE_BDM
-static int ata_bd_read(struct block_device *bd, u32 sector, void *buffer, u16 count);
-static int ata_bd_write(struct block_device *bd, u32 sector, const void *buffer, u16 count);
+static int ata_bd_read(struct block_device *bd, u64 sector, void *buffer, u16 count);
+static int ata_bd_write(struct block_device *bd, u64 sector, const void *buffer, u16 count);
 static void ata_bd_flush(struct block_device *bd);
 static int ata_bd_stop(struct block_device *bd);
 #endif
@@ -889,28 +893,36 @@ static int ata_device_set_transfer_mode(int device, int type, int mode)
 /* Note: this can only support DMA modes, due to the commands issued. */
 int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir)
 {
+    return ata_device_sector_io64(device, buf, (u64)lba, nsectors, dir);
+}
+
+int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir)
+{
     USE_SPD_REGS;
     int res = 0, retries;
     u16 sector, lcyl, hcyl, select, command, len;
 
     while (res == 0 && nsectors > 0) {
-        /* Variable lba is only 32 bits so no change for lcyl and hcyl.  */
-        lcyl = (lba >> 8) & 0xff;
-        hcyl = (lba >> 16) & 0xff;
 
         if (atad_devinfo[device].lba48 && (ata_dvrp_workaround ? (lba >= atad_devinfo[device].total_sectors) : 1)) {
             /* Setup for 48-bit LBA.  */
             len = (nsectors > 65536) ? 65536 : nsectors;
 
             /* Combine bits 24-31 and bits 0-7 of lba into sector.  */
-            sector = ((lba >> 16) & 0xff00) | (lba & 0xff);
+            sector =    ((lba >> 16) & 0xff00) | (lba & 0xff);
+            lcyl =      ((lba >> 24) & 0xff00) | ((lba >> 8) & 0xff);
+            hcyl =      ((lba >> 32) & 0xff00) | ((lba >> 16) & 0xff);
+
             /* In v1.04, LBA was enabled here.  */
             select  = (device << 4) & 0xffff;
             command = (dir == 1) ? ATA_C_WRITE_DMA_EXT : ATA_C_READ_DMA_EXT;
         } else {
             /* Setup for 28-bit LBA.  */
             len    = (nsectors > 256) ? 256 : nsectors;
-            sector = lba & 0xff;
+            sector =    lba & 0xff;
+            lcyl =      (lba >> 8) & 0xff;
+            hcyl =      (lba >> 16) & 0xff;
+
             /* In v1.04, LBA was enabled here.  */
             select  = ((device << 4) | ((lba >> 24) & 0xf)) & 0xffff;
             command = (dir == 1) ? ATA_C_WRITE_DMA : ATA_C_READ_DMA;
@@ -1304,18 +1316,18 @@ static void ata_shutdown_cb(void)
 //
 // Block device interface
 //
-static int ata_bd_read(struct block_device *bd, u32 sector, void *buffer, u16 count)
+static int ata_bd_read(struct block_device *bd, u64 sector, void *buffer, u16 count)
 {
-    if (ata_device_sector_io(bd->devNr, buffer, sector, count, ATA_DIR_READ) != 0) {
+    if (ata_device_sector_io64(bd->devNr, buffer, sector, count, ATA_DIR_READ) != 0) {
         return -EIO;
     }
 
     return count;
 }
 
-static int ata_bd_write(struct block_device *bd, u32 sector, const void *buffer, u16 count)
+static int ata_bd_write(struct block_device *bd, u64 sector, const void *buffer, u16 count)
 {
-    if (ata_device_sector_io(bd->devNr, (void *)buffer, sector, count, ATA_DIR_WRITE) != 0) {
+    if (ata_device_sector_io64(bd->devNr, (void*)buffer, sector, count, ATA_DIR_WRITE) != 0) {
         return -EIO;
     }
 

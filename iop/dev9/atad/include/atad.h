@@ -73,6 +73,8 @@ int ata_device_smart_save_attr(int device);
 int ata_device_flush_cache(int device);
 int ata_device_idle_immediate(int device);
 
+int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir);
+
 #define atad_IMPORTS_start DECLARE_IMPORT_TABLE(atad, 1, 3)
 #define atad_IMPORTS_end   END_IMPORT_TABLE
 
@@ -92,5 +94,6 @@ int ata_device_idle_immediate(int device);
 #define I_ata_device_smart_save_attr      DECLARE_IMPORT(16, ata_device_smart_save_attr)
 #define I_ata_device_flush_cache          DECLARE_IMPORT(17, ata_device_flush_cache)
 #define I_ata_device_idle_immediate       DECLARE_IMPORT(18, ata_device_idle_immediate)
+#define I_ata_device_sector_io64          DECLARE_IMPORT(19, ata_device_sector_io64)
 
 #endif /* __ATAD_H__ */

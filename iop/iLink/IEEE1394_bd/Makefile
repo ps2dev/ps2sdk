@@ -8,12 +8,14 @@
 
 # IOP_CFLAGS += -DDEBUG
 
-IOP_CFLAGS += -mno-check-zero-division # -DSIF_CALLBACKS_12_13
+IOP_CFLAGS += -mno-check-zero-division -Wno-strict-aliasing # -DSIF_CALLBACKS_12_13
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/iLink/iLinkman/include
 IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
 
 IOP_OBJS = sbp2_driver.o imports.o main.o scsi.o
+
+IOP_LDFLAGS = -lgcc
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make

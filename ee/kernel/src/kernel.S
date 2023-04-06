@@ -597,9 +597,9 @@ SYSCALL(SetVSyncFlag)
 SYSCALL(SetSyscall)
 #endif
 
-//#ifdef F_print
-//SYSCALL(_print)
-//#endif
+#ifdef F__print
+SYSCALL(_print)
+#endif
 
 #ifdef F_SifDmaStat
 SYSCALL(SifDmaStat)
