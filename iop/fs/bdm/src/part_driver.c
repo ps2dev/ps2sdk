@@ -10,6 +10,8 @@
 
 #include "module_debug.h"
 
+#define U64_2XU32(val)  ((u32*)val)[1], ((u32*)val)[0]
+
 struct partition g_part[MAX_PARTITIONS];
 struct block_device g_part_bd[MAX_PARTITIONS];
 
