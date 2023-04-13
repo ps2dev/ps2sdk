@@ -157,7 +157,7 @@ static FRESULT fatfs_fs_driver_mount_bd(int mount_info_index, struct block_devic
     mount_point[2] = '\x00';
 
     fs_driver_mount_info[mount_info_index].mounted_bd = bd;
-    ret = f_mount(&(fs_driver_mount_info[mount_info_index].fatfs), mount_point, 0);
+    ret = f_mount(&(fs_driver_mount_info[mount_info_index].fatfs), mount_point, 1);
     if (ret != FR_OK) {
         fs_driver_mount_info[mount_info_index].mounted_bd = NULL;
     }
