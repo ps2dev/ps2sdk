@@ -75,7 +75,7 @@ static iop_device_ops_t tty_ops = {
 /* device descriptor */
 static iop_device_t tty_device = {
     DEVNAME,
-     IOP_DT_FS, //IOP_DT_CHAR | IOP_DT_CONS,
+    IOP_DT_CHAR | IOP_DT_CONS,
     1,
     "TTY via EE SIO",
     &tty_ops,
@@ -284,7 +284,7 @@ int _start(int argc, char *argv[])
 
     (void)argc;
     (void)argv;
-
+    PPRINTF(MODNAME "v%d.%d\n By El_isra. Based on UDPTTY and SIOR modules", MAJOR,  MINOR);
     memset(&cd0, 0, sizeof(cd0));
 
     for (retries = 0; retries < 15; retries++) {
@@ -308,7 +308,6 @@ int _start(int argc, char *argv[])
     PPRINTF("Giving up.\n");
     return MODULE_NO_RESIDENT_END;
     SIOR_BIND_SUCCESS:
-    DPRINTF("\n\t%s By El_isra\nBased on SIOR.IRX and UDPTTY.IRX\n", MODNAME);
     close(0);
     close(1);
     close(2);
