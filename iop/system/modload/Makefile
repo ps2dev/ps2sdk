@@ -6,34 +6,11 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = \
-	alloc \
-	eesync \
-	eesync-nano \
-	timrman \
-	iomanx \
-	iopmgr \
-	loadfile \
-	modload \
-	mtapman \
-	padman \
-	padman-old \
-	reboot \
-	rmman \
-	rmtapman \
-	rpadman \
-	rsio2man \
-	sbusintr \
-	siftoo \
-	sio2log \
-	sio2man \
-	sio2man-old \
-	stdio \
-	sysclib \
-	sysclib-full \
-	sysclib-nano \
-	udnl \
-	udnl-t300
+IOP_BIN ?= modload.irx
+
+IOP_OBJS = modload.o modload_asm.o imports.o exports.o
 
 include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+include $(PS2SDKSRC)/iop/Rules.bin.make
+include $(PS2SDKSRC)/iop/Rules.make
+include $(PS2SDKSRC)/iop/Rules.release

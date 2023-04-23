@@ -1,0 +1,21 @@
+
+DECLARE_EXPORT_TABLE(modload, 1, 1)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(ReBootStart)
+	DECLARE_EXPORT(LoadModuleAddress)
+	DECLARE_EXPORT(LoadModule)
+	DECLARE_EXPORT(LoadStartModule)
+	DECLARE_EXPORT(StartModule)
+	DECLARE_EXPORT(LoadModuleBufferAddress)
+	DECLARE_EXPORT(LoadModuleBuffer)
+	DECLARE_EXPORT(LoadStartKelfModule)
+	DECLARE_EXPORT(SetSecrmanCallbacks)
+	DECLARE_EXPORT(SetCheckKelfPathCallback)
+	DECLARE_EXPORT(GetLoadfileCallbacks)
+	DECLARE_EXPORT(IsIllegalBootDevice)
+END_EXPORT_TABLE
+
+void _retonly() {}
