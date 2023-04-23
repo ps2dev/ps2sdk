@@ -36,6 +36,28 @@ static int fileXioInited = 0;
 static int fileXioBlockMode;
 static int fileXioCompletionSema = -1;
 
+/* Backup pointer functions to restore after exit fileXio */
+static int (*_backup_ps2sdk_close)(int);
+static int (*_backup_ps2sdk_open)(const char*, int, ...);
+static int (*_backup_ps2sdk_read)(int, void*, int);
+static int (*_backup_ps2sdk_lseek)(int, int, int);
+static int64_t (*_backup_ps2sdk_lseek64)(int, int64_t, int);
+static int (*_backup_ps2sdk_write)(int, const void*, int);
+static int (*_backup_ps2sdk_ioctl)(int, int, void*);
+static int (*_backup_ps2sdk_remove)(const char*);
+static int (*_backup_ps2sdk_rename)(const char*, const char*);
+static int (*_backup_ps2sdk_mkdir)(const char*, int);
+static int (*_backup_ps2sdk_rmdir)(const char*);
+
+static int (*_backup_ps2sdk_stat)(const char *path, struct stat *buf);
+static int (*_backup_ps2sdk_readlink)(const char *path, char *buf, size_t bufsiz);
+static int (*_backup_ps2sdk_symlink)(const char *target, const char *linkpath);
+
+static DIR * (*_backup_ps2sdk_opendir)(const char *path);
+static struct dirent * (*_backup_ps2sdk_readdir)(DIR *dir);
+static void (*_backup_ps2sdk_rewinddir)(DIR *dir);
+static int (*_backup_ps2sdk_closedir)(DIR *dir);
+
 static void _fxio_intr(void)
 {
 	iSignalSema(fileXioCompletionSema);
@@ -216,25 +238,43 @@ static int fileXioInitHelper(int overrideNewlibMethods)
 
 	if (overrideNewlibMethods) 
 	{
+		_backup_ps2sdk_close = _ps2sdk_close;
 		_ps2sdk_close = fileXioClose;
+		_backup_ps2sdk_open = _ps2sdk_open;
 		_ps2sdk_open = fileXioOpen;
+		_backup_ps2sdk_read = _ps2sdk_read;
 		_ps2sdk_read = fileXioRead;
+		_backup_ps2sdk_lseek = _ps2sdk_lseek;
 		_ps2sdk_lseek = fileXioLseek;
+		_backup_ps2sdk_lseek64 = _ps2sdk_lseek64;
 		_ps2sdk_lseek64 = fileXioLseek64;
+		_backup_ps2sdk_write = _ps2sdk_write;
 		_ps2sdk_write = fileXioWrite;
+		_backup_ps2sdk_ioctl = _ps2sdk_ioctl;
 		_ps2sdk_ioctl = fileXioIoctl;
+		_backup_ps2sdk_remove = _ps2sdk_remove;
 		_ps2sdk_remove= fileXioRemove;
+		_backup_ps2sdk_rename = _ps2sdk_rename;
 		_ps2sdk_rename= fileXioRename;
+		_backup_ps2sdk_mkdir = _ps2sdk_mkdir;
 		_ps2sdk_mkdir = fileXioMkdir;
+		_backup_ps2sdk_rmdir = _ps2sdk_rmdir;
 		_ps2sdk_rmdir = fileXioRmdir;
+		_backup_ps2sdk_readlink = _ps2sdk_readlink;
 		_ps2sdk_readlink = fileXioReadlink;
+		_backup_ps2sdk_symlink = _ps2sdk_symlink;
 		_ps2sdk_symlink = fileXioSymlink;
 
+		_backup_ps2sdk_stat = _ps2sdk_stat;
 		_ps2sdk_stat = fileXioGetstatHelper;
 
+		_backup_ps2sdk_opendir = _ps2sdk_opendir;
 		_ps2sdk_opendir = fileXioOpendirHelper;
+		_backup_ps2sdk_readdir = _ps2sdk_readdir;
 		_ps2sdk_readdir = fileXioReaddirHelper;
+		_backup_ps2sdk_rewinddir = _ps2sdk_rewinddir;
 		_ps2sdk_rewinddir = fileXioRewinddirHelper;
+		_backup_ps2sdk_closedir = _ps2sdk_closedir;
 		_ps2sdk_closedir = fileXioClosedirHelper;
 	}
 
@@ -261,6 +301,81 @@ void fileXioExit(void)
 		memset(&cd0, 0, sizeof(cd0));
 
 		fileXioInited = 0;
+	}
+
+	if (_backup_ps2sdk_close) {
+		_ps2sdk_close = _backup_ps2sdk_close;
+		_backup_ps2sdk_close = NULL;	
+	} 
+	if (_backup_ps2sdk_open) {
+		_ps2sdk_open = _backup_ps2sdk_open;
+		_backup_ps2sdk_open = NULL;	
+	} 
+	if (_backup_ps2sdk_read) {
+		_ps2sdk_read = _backup_ps2sdk_read;
+		_backup_ps2sdk_read = NULL;	
+	} 
+	if (_backup_ps2sdk_lseek) {
+		_ps2sdk_lseek = _backup_ps2sdk_lseek;
+		_backup_ps2sdk_lseek = NULL;	
+	} 
+	if (_backup_ps2sdk_lseek64) {
+		_ps2sdk_lseek64 = _backup_ps2sdk_lseek64;
+		_backup_ps2sdk_lseek64 = NULL;	
+	} 
+	if (_backup_ps2sdk_write) {
+		_ps2sdk_write = _backup_ps2sdk_write;
+		_backup_ps2sdk_write = NULL;	
+	} 
+	if (_backup_ps2sdk_ioctl) {
+		_ps2sdk_ioctl = _backup_ps2sdk_ioctl;
+		_backup_ps2sdk_ioctl = NULL;	
+	} 
+	if (_backup_ps2sdk_remove) {
+		_ps2sdk_remove = _backup_ps2sdk_remove;
+		_backup_ps2sdk_remove = NULL;	
+	} 
+	if (_backup_ps2sdk_rename) {
+		_ps2sdk_rename = _backup_ps2sdk_rename;
+		_backup_ps2sdk_rename = NULL;	
+	} 
+	if (_backup_ps2sdk_mkdir) {
+		_ps2sdk_mkdir = _backup_ps2sdk_mkdir;
+		_backup_ps2sdk_mkdir = NULL;	
+	} 
+	if (_backup_ps2sdk_rmdir) {
+		_ps2sdk_rmdir = _backup_ps2sdk_rmdir;
+		_backup_ps2sdk_rmdir = NULL;	
+	} 
+	if (_backup_ps2sdk_readlink) {
+		_ps2sdk_readlink = _backup_ps2sdk_readlink;
+		_backup_ps2sdk_readlink = NULL;	
+	} 
+	if (_backup_ps2sdk_symlink) {
+		_ps2sdk_symlink = _backup_ps2sdk_symlink;
+		_backup_ps2sdk_symlink = NULL;	
+	} 
+
+	if (_backup_ps2sdk_stat) {
+		_ps2sdk_stat = _backup_ps2sdk_stat;
+		_backup_ps2sdk_stat = NULL;
+	}
+
+	if (_backup_ps2sdk_opendir) {
+		_ps2sdk_opendir = _backup_ps2sdk_opendir;
+		_backup_ps2sdk_opendir = NULL;
+	}
+	if (_backup_ps2sdk_readdir) {
+		_ps2sdk_readdir = _backup_ps2sdk_readdir;
+		_backup_ps2sdk_readdir = NULL;
+	}
+	if (_backup_ps2sdk_rewinddir) {
+		_ps2sdk_rewinddir = _backup_ps2sdk_rewinddir;
+		_backup_ps2sdk_rewinddir = NULL;
+	}
+	if (_backup_ps2sdk_closedir) {
+		_ps2sdk_closedir = _backup_ps2sdk_closedir;
+		_backup_ps2sdk_closedir = NULL;
 	}
 }
 
