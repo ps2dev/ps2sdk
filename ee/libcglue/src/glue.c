@@ -45,6 +45,7 @@
 
 
 extern void * _end;
+extern int __malloc_sema_id;
 
 #ifdef F___direct_pwd
 /* the present working directory variable. */
@@ -912,5 +913,17 @@ struct passwd *getpwuid(uid_t uid) {
 struct passwd *getpwnam(const char *name) {
 	/* There's no support for users */
 	return &__dummy_passwd;
+}
+#endif
+
+#ifdef F__internal_malloc_lock
+void _internal_malloc_lock(struct _reent *ptr) {
+	WaitSema(__malloc_sema_id);
+}
+#endif
+
+#ifdef F__internal_malloc_unlock
+void _internal_malloc_unlock(struct _reent *ptr) {
+	SignalSema(__malloc_sema_id);
 }
 #endif

@@ -13,12 +13,20 @@
  * The global init/deinit code for our crt0.
  */
 
+#include <kernel.h>
+
 void _libcglue_timezone_update();
 void _libcglue_rtc_update();
 void pthread_init();
 void pthread_terminate();
 
 int chdir(const char *path);
+
+#ifdef F___malloc_sema_id
+int __malloc_sema_id;
+#else
+extern int __malloc_sema_id;
+#endif
 
 #ifdef F___libpthreadglue_init
 /* Note: This function is being called from __libcglue_init.
@@ -50,6 +58,13 @@ void __libpthreadglue_deinit();
 __attribute__((weak))
 void _libcglue_init()
 {
+	/* Initialize malloc semaphore */
+	ee_sema_t sema;
+	sema.init_count = 1;
+	sema.max_count = 1;
+    sema.option = 0;
+    __malloc_sema_id = CreateSema(&sema);
+
 	/* Initialize pthread library */
 	__libpthreadglue_init();
 
@@ -62,6 +77,8 @@ void _libcglue_init()
 __attribute__((weak))
 void _libcglue_deinit()
 {
+	/* Deinitialize malloc semaphore */
+	DeleteSema(__malloc_sema_id);
 	__libpthreadglue_deinit();
 }
 #endif
