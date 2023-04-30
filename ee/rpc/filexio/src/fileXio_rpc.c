@@ -124,8 +124,8 @@ static int fileXioGetstatHelper(const char *path, struct stat *buf) {
         iox_stat_t fiostat;
 
         if (fileXioGetStat(path, &fiostat) < 0) {
-                // FIXME: set errno
-                return -1;
+            errno = ENOENT;
+            return -1;
         }
 
         fill_stat(buf, &fiostat);
@@ -140,14 +140,13 @@ static DIR *fileXioOpendirHelper(const char *path)
 
 	dd = fileXioDopen(path);
 	if (dd < 0) {
-		// FIXME: set errno
-		//printf("%s: ERROR: fileXioDopen\n", __FUNCTION__);
+		errno = ENOENT;
 		return NULL;
 	}
 
 	dir = malloc(sizeof(DIR));
-        dir->dd_fd = dd;
-        dir->dd_buf = malloc(sizeof(struct dirent));
+	dir->dd_fd = dd;
+	dir->dd_buf = malloc(sizeof(struct dirent));
 
 	return dir;
 }
@@ -159,14 +158,14 @@ static struct dirent *fileXioReaddirHelper(DIR *dir)
         iox_dirent_t fiode;
 
 	if(dir == NULL) {
-		// FIXME: set errno
+		errno = EBADF;
 		return NULL;
 	}
 
-        de = (struct dirent *)dir->dd_buf;
-        rv = fileXioDread(dir->dd_fd, &fiode);
+    de = (struct dirent *)dir->dd_buf;
+    rv = fileXioDread(dir->dd_fd, &fiode);
 	if (rv <= 0) {
-		// FIXME: set errno
+		errno = -rv;
 		return NULL;
 	}
 
@@ -180,21 +179,23 @@ static struct dirent *fileXioReaddirHelper(DIR *dir)
 static void fileXioRewinddirHelper(DIR *dir)
 {
 	(void)dir;
+	errno = ENOSYS;
 
 	printf("rewinddir not implemented\n");
 }
 
 static int fileXioClosedirHelper(DIR *dir)
 {
+	int res;
+
 	if(dir == NULL) {
-		// FIXME: set errno
-		return -1;
+		return -EBADF;
 	}
 
-	fileXioDclose(dir->dd_fd); // Check return value?
+	res = fileXioDclose(dir->dd_fd);
 	free(dir->dd_buf);
 	free(dir);
-	return 0;
+	return res;
 }
 
 static int fileXioInitHelper(int overrideNewlibMethods)
