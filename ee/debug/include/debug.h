@@ -34,6 +34,8 @@ void scr_setXY(int x, int y);
 int scr_getX(void);
 int scr_getY(void);
 void scr_clear(void);
+void scr_clearline(int Y);
+void scr_clearchar(int X, int Y);
 void scr_setbgcolor(u32 color);
 void scr_setfontcolor(u32 color);
 void scr_setcursorcolor(u32 color);

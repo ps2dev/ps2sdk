@@ -254,7 +254,12 @@ void scr_putchar(int x, int y, u32 color, int ch)
     Dma02Wait();
 }
 
-static void clear_line(int Y)
+void scr_clearchar(int X, int Y)
+{
+    scr_putchar(X * 8, Y * 8, bgcolor, ' ');
+}
+
+void scr_clearline(int Y)
 {
     int i;
     for (i = 0; i < MX; i++)
@@ -286,7 +291,7 @@ void scr_vprintf(const char *format, va_list opt)
                 Y++;
                 if (Y == MY)
                     Y = 0;
-                clear_line(Y);
+                scr_clearline(Y);
                 break;
             case '\t':
                 for (j = 0; j < 5; j++) {
@@ -302,7 +307,7 @@ void scr_vprintf(const char *format, va_list opt)
                     Y++;
                     if (Y == MY)
                         Y = 0;
-                    clear_line(Y);
+                    scr_clearline(Y);
                 }
         }
     }
@@ -332,7 +337,7 @@ void scr_clear()
 {
     int y;
     for (y = 0; y < MY; y++)
-        clear_line(y);
+        scr_clearline(y);
     scr_setXY(0, 0);
 }
 

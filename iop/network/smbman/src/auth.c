@@ -11,7 +11,7 @@
 #include "des.h"
 #include "md4.h"
 
-static u8 passwd_buf[512] __attribute__((aligned(64)));
+static u8 passwd_buf[512] __attribute__((aligned(16)));
 
 /*
  * LM_Password_Hash: this function create a LM password hash from a given password

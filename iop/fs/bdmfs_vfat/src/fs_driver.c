@@ -24,6 +24,7 @@
 #include "fat_driver.h"
 #include "fat_write.h"
 #include <usbhdfsd-common.h>
+#include <bdm.h>
 
 // #define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
@@ -63,7 +64,7 @@ typedef struct _fs_dir
     fat_dir current_fatdir;
 } fs_dir;
 
-#define MAX_FILES 16
+#define MAX_FILES 128
 static fs_rec fsRec[MAX_FILES]; // file info record
 
 static void fillStat(iox_stat_t *stat, const fat_dir *fatdir)
@@ -791,9 +792,6 @@ int fs_ioctl(iop_file_t *fd, int cmd, void *data)
         case USBMASS_IOCTL_GET_CLUSTER:
             ret = ((fs_rec *)fd->privdata)->dirent.fatdir.startCluster;
             break;
-        case USBMASS_IOCTL_GET_LBA:
-            ret = fat_cluster2sector(&fatd->partBpb, ((fs_rec *)fd->privdata)->dirent.fatdir.startCluster);
-            break;
         case USBMASS_IOCTL_GET_DRIVERNAME:
             ret = *(int *)fatd->bd->name;
             break;
@@ -880,6 +878,73 @@ static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsig
     return ret;
 }
 
+static int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, void *rdata, unsigned int rdatalen)
+{
+    fat_driver *fatd;
+    int ret;
+
+    if (fd == NULL)
+        return -ENXIO;
+    
+    struct fs_dirent *dirent = (struct fs_dirent *)fd->privdata; // Remember to re-cast this to the right structure (either fs_rec or fs_dir)!
+
+    M_DEBUG("%s\n", __func__);
+
+    if (dirent == NULL)
+        return -EBADF;
+
+    _fs_lock();
+
+    fatd = fat_getData(fd->unit);
+    if (fatd == NULL) {
+        _fs_unlock();
+        return -ENODEV;
+    }
+
+    switch (cmd) {
+        case USBMASS_IOCTL_GET_LBA:
+        {
+            // Check for a return buffer and copy the 64bit LBA. If no buffer is provided return an error.
+            if (rdata == NULL || rdatalen < sizeof(u64))
+            {
+                ret = -EINVAL;
+                break;
+            }
+
+            // Get the block device backing the file so we can get the starting LBA of the file system.
+            struct block_device* bd = fatd->cache->bd;
+
+            *(u64*)rdata = (u64)fat_cluster2sector(&fatd->partBpb, ((fs_rec *)fd->privdata)->dirent.fatdir.startCluster) + bd->sectorOffset;
+            ret = 0;
+            break;
+        }
+        case USBMASS_IOCTL_GET_DEVICE_NUMBER:
+        {
+            // Check for a return buffer and copy the device number. If no buffer is provided return an error.
+            if (rdata == NULL || rdatalen < sizeof(u32))
+            {
+                ret = -EINVAL;
+                break;
+            }
+
+            struct block_device* bd = fatd->cache->bd;
+            if (bd == NULL)
+                ret = -ENXIO;
+            else
+            {
+                *(u32*)rdata = bd->devNr;
+                ret = 0;
+            }
+            break;
+        }
+        default:
+            ret = fs_dummy();
+    }
+
+    _fs_unlock();
+    return ret;
+}
+
 static iop_device_ops_t fs_functarray = {
     &fs_init,
     (void *)&fs_dummy,
@@ -907,7 +972,7 @@ static iop_device_ops_t fs_functarray = {
     &fs_devctl,
     (void *)&fs_dummy,
     (void *)&fs_dummy,
-    (void *)&fs_dummy,
+    &fs_ioctl2,
 };
 static iop_device_t fs_driver = {
     "mass",

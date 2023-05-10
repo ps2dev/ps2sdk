@@ -318,6 +318,9 @@ void InitOsd(void);     // ExecPS2 + System Configuration patches. Please refer 
 
 int PatchIsNeeded(void); // Indicates whether the patch is required.
 
+// Debug (print) update functions:
+void InitDebug(void);
+
 /* Glue routines.  */
 int DIntr(void);
 int EIntr(void);
@@ -471,7 +474,7 @@ u64 iGsPutIMR(u64 imr);
 void SetPgifHandler(void *handler);
 void SetVSyncFlag(u32 *, u64 *);
 void SetSyscall(s32 syscall_num, void *handler);
-// void _print(const char *fmt, ...);		// null function
+void _print(const char *fmt, ...);		// Disabled by default, must call InitDebug() to enable
 
 void SifStopDma(void); // Disables SIF0 (IOP -> EE).
 

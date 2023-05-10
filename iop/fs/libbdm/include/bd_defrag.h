@@ -21,7 +21,7 @@
 #include <usbhdfsd-common.h>
 
 
-int bd_defrag(struct block_device* bd, u32 fragcount, struct bd_fragment* fraglist, u32 sector, void* buffer, u16 count);
+int bd_defrag(struct block_device* bd, u32 fragcount, struct bd_fragment* fraglist, u64 sector, void* buffer, u16 count);
 
 
 

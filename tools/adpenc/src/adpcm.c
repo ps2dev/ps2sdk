@@ -43,12 +43,13 @@ flags:
 
 #define BUFFER_SIZE 128*28
 
-static short wave[BUFFER_SIZE];
+static short samples[BUFFER_SIZE];
+static char wave[BUFFER_SIZE * 2];
 
 static void find_predict( short *samples, double *d_samples, int *predict_nr, int *shift_factor );
 static void pack( const double *d_samples, short *four_bit, int predict_nr, int shift_factor );
 
-int adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop)
+int adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop, int bytes_per_sample)
 {
 	short *ptr;
 	double d_samples[28];
@@ -75,7 +76,7 @@ int adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop)
 		{
 			for(i = 0; i < size; i++)
 			{
-				if(fread( wave+i, sizeof( short ), 1, fp )==1){
+				if(fread( wave+i, bytes_per_sample, 1, fp )==1){
 					fseek(fp, offset, SEEK_CUR);
 				}
 				else{
@@ -86,10 +87,21 @@ int adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop)
 		}
 		else
 		{
-			if(fread(wave, sizeof( short ), size, fp)!=size){
+			if(fread(wave, bytes_per_sample, size, fp)!=size){
 				printf("Error: Can't read SAMPLE DATA in WAVE-file.\n");
 				return EIO;
 			}
+		}
+
+		if (bytes_per_sample == 1) {
+			for(i = 0; i < size; i++)
+			{
+				samples[i] = wave[i];
+				samples[i] ^= 0x80;
+				samples[i] <<= 8;
+			}
+		} else {
+			memcpy(samples, wave, BUFFER_SIZE*2);
 		}
 
 		// i = num of samples with size 28
@@ -98,14 +110,14 @@ int adpcm_encode(FILE* fp, FILE* sad, int offset, int sample_len, int flag_loop)
 		// Add blanks
 		if ( size % 28 )
 		{
-			for ( j = size % 28; j < 28; j++ ) wave[28*i+j] = 0;
+			for ( j = size % 28; j < 28; j++ ) samples[28*i+j] = 0;
 			i++;
 		}
 
 		// pack 28 samples
 		for ( j = 0; j < i; j++ )
 		{
-			ptr = wave + j * 28;
+			ptr = samples + j * 28;
 
 			find_predict( ptr, d_samples, &predict_nr, &shift_factor );
 

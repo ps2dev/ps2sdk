@@ -29,6 +29,10 @@
 #include <sysclib.h>
 #include <dev9.h>
 #include <atad.h>
+#ifdef ATA_ENABLE_BDM
+#include <bdm.h>
+#include <errno.h>
+#endif
 
 #include <speedregs.h>
 #include <atahw.h>
@@ -41,6 +45,8 @@ IRX_ID(MODNAME, 2, 7);
 
 #define M_PRINTF(format, args...) \
     printf(MODNAME ": " format, ##args)
+
+#define U64_2XU32(val)  ((u32*)val)[1], ((u32*)val)[0]
 
 #define BANNER  "ATA device driver %s - Copyright (c) 2003 Marcus R. Brown\n"
 #define VERSION "v1.2"
@@ -175,6 +181,12 @@ typedef struct _ata_cmd_state
 
 static ata_cmd_state_t atad_cmd_state;
 
+#ifdef ATA_ENABLE_BDM
+#define NUM_DEVICES 2
+#define ATA_BD_SECTOR_SIZE 512
+static struct block_device g_ata_bd[NUM_DEVICES];
+#endif
+
 static int ata_intr_cb(int flag);
 static unsigned int ata_alarm_cb(void *unused);
 
@@ -186,6 +198,15 @@ static void ata_multiword_dma_mode(int mode);
 #endif
 static void ata_ultra_dma_mode(int mode);
 static void ata_shutdown_cb(void);
+
+int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir);
+
+#ifdef ATA_ENABLE_BDM
+static int ata_bd_read(struct block_device *bd, u64 sector, void *buffer, u16 count);
+static int ata_bd_write(struct block_device *bd, u64 sector, const void *buffer, u16 count);
+static void ata_bd_flush(struct block_device *bd);
+static int ata_bd_stop(struct block_device *bd);
+#endif
 
 extern struct irx_export_table _exp_atad;
 
@@ -280,6 +301,28 @@ int _start(int argc, char *argv[])
 #endif
     /* Register this at the last position, as it should be the last thing done before shutdown. */
     dev9RegisterShutdownCb(15, &ata_shutdown_cb);
+
+#ifdef ATA_ENABLE_BDM
+    {
+        int i;
+
+        for (i = 0; i < NUM_DEVICES; ++i) {
+            g_ata_bd[i].priv  = (void *)&atad_devinfo[i];
+            g_ata_bd[i].name  = "ata";
+            g_ata_bd[i].devNr = i;
+            g_ata_bd[i].parNr = 0;
+            g_ata_bd[i].parId = 0x00;
+            g_ata_bd[i].sectorSize = 512;
+            g_ata_bd[i].sectorOffset = 0;
+            g_ata_bd[i].sectorCount = 0;
+            
+            g_ata_bd[i].read  = ata_bd_read;
+            g_ata_bd[i].write = ata_bd_write;
+            g_ata_bd[i].flush = ata_bd_flush;
+            g_ata_bd[i].stop  = ata_bd_stop;
+        }
+    }
+#endif
 
     if (RegisterLibraryEntries(&_exp_atad) != 0) {
         M_PRINTF("Library is already registered, exiting.\n");
@@ -850,28 +893,36 @@ static int ata_device_set_transfer_mode(int device, int type, int mode)
 /* Note: this can only support DMA modes, due to the commands issued. */
 int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir)
 {
+    return ata_device_sector_io64(device, buf, (u64)lba, nsectors, dir);
+}
+
+int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir)
+{
     USE_SPD_REGS;
     int res = 0, retries;
     u16 sector, lcyl, hcyl, select, command, len;
 
     while (res == 0 && nsectors > 0) {
-        /* Variable lba is only 32 bits so no change for lcyl and hcyl.  */
-        lcyl = (lba >> 8) & 0xff;
-        hcyl = (lba >> 16) & 0xff;
 
         if (atad_devinfo[device].lba48 && (ata_dvrp_workaround ? (lba >= atad_devinfo[device].total_sectors) : 1)) {
             /* Setup for 48-bit LBA.  */
             len = (nsectors > 65536) ? 65536 : nsectors;
 
             /* Combine bits 24-31 and bits 0-7 of lba into sector.  */
-            sector = ((lba >> 16) & 0xff00) | (lba & 0xff);
+            sector =    ((lba >> 16) & 0xff00) | (lba & 0xff);
+            lcyl =      ((lba >> 24) & 0xff00) | ((lba >> 8) & 0xff);
+            hcyl =      ((lba >> 32) & 0xff00) | ((lba >> 16) & 0xff);
+
             /* In v1.04, LBA was enabled here.  */
             select  = (device << 4) & 0xffff;
             command = (dir == 1) ? ATA_C_WRITE_DMA_EXT : ATA_C_READ_DMA_EXT;
         } else {
             /* Setup for 28-bit LBA.  */
             len    = (nsectors > 256) ? 256 : nsectors;
-            sector = lba & 0xff;
+            sector =    lba & 0xff;
+            lcyl =      (lba >> 8) & 0xff;
+            hcyl =      (lba >> 16) & 0xff;
+
             /* In v1.04, LBA was enabled here.  */
             select  = ((device << 4) | ((lba >> 24) & 0xf)) & 0xffff;
             command = (dir == 1) ? ATA_C_WRITE_DMA : ATA_C_READ_DMA;
@@ -1114,6 +1165,11 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
             memset(&devinfo[i], 0, sizeof(devinfo[i]));
         }
 #endif
+
+#ifdef ATA_ENABLE_BDM
+        g_ata_bd[i].sectorCount = devinfo[i].total_sectors_lba48;
+        bdm_connect_bd(&g_ata_bd[i]);
+#endif
     }
     return 0;
 }
@@ -1255,3 +1311,38 @@ static void ata_shutdown_cb(void)
             ata_device_standby_immediate(i);
     }
 }
+
+#ifdef ATA_ENABLE_BDM
+//
+// Block device interface
+//
+static int ata_bd_read(struct block_device *bd, u64 sector, void *buffer, u16 count)
+{
+    if (ata_device_sector_io64(bd->devNr, buffer, sector, count, ATA_DIR_READ) != 0) {
+        return -EIO;
+    }
+
+    return count;
+}
+
+static int ata_bd_write(struct block_device *bd, u64 sector, const void *buffer, u16 count)
+{
+    if (ata_device_sector_io64(bd->devNr, (void*)buffer, sector, count, ATA_DIR_WRITE) != 0) {
+        return -EIO;
+    }
+
+    return count;
+}
+
+static void ata_bd_flush(struct block_device *bd)
+{
+    ata_device_flush_cache(bd->devNr);
+}
+
+static int ata_bd_stop(struct block_device *bd)
+{
+    ata_device_standby_immediate(bd->devNr);
+
+    return 0;
+}
+#endif

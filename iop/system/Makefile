@@ -10,12 +10,15 @@ SUBDIRS = \
 	alloc \
 	eesync \
 	eesync-nano \
+	timrman \
 	iomanx \
 	iopmgr \
 	loadfile \
+	modload \
 	mtapman \
 	padman \
 	padman-old \
+	reboot \
 	rmman \
 	rmtapman \
 	rpadman \

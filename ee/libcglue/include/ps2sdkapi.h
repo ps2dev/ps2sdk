@@ -54,6 +54,9 @@ static inline ps2_clock_t ps2_clock(void) {
 
 extern void _libcglue_timezone_update();
 
+extern s64 _ps2sdk_rtc_offset_from_busclk;
+extern void _libcglue_rtc_update();
+
 // The newlib port does not support 64bit
 // this should have been defined in unistd.h
 typedef int64_t off64_t;

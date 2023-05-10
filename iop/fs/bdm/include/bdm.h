@@ -31,12 +31,12 @@ struct block_device
     unsigned int parNr;
     unsigned char parId;
 
-    unsigned int sectorSize;
-    unsigned int sectorOffset;
-    unsigned int sectorCount;
+    unsigned int sectorSize;        // Size of a sector in bytes
+    u64 sectorOffset;               // Starting sector number
+    u64 sectorCount;                // Maximum number of sectors usable
 
-    int (*read)(struct block_device *bd, u32 sector, void *buffer, u16 count);
-    int (*write)(struct block_device *bd, u32 sector, const void *buffer, u16 count);
+    int (*read)(struct block_device *bd, u64 sector, void *buffer, u16 count);
+    int (*write)(struct block_device *bd, u64 sector, const void *buffer, u16 count);
     void (*flush)(struct block_device *bd);
     int (*stop)(struct block_device *bd);
 };

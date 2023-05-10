@@ -48,6 +48,8 @@
 #define AUDSRV_LOAD_ADPCM           0x0017
 #define AUDSRV_PLAY_ADPCM           0x0018
 #define AUDSRV_SET_ADPCM_VOL        0x0019
+#define AUDSRV_FREE_ADPCM           0x001c
+#define AUDSRV_IS_ADPCM_PLAYING     0x001d
 
 #define AUDSRV_AVAILABLE            0x001a
 #define AUDSRV_QUEUED               0x001b
@@ -94,10 +96,12 @@ int audsrv_get_cd_type();
 
 /* adpcm functions */
 int audsrv_adpcm_init();
-int audsrv_adpcm_set_volume(int ch, int vol);
+int audsrv_adpcm_set_volume(int ch, int voll, int volr);
 void *audsrv_load_adpcm(u32 *buffer, int size, int id);
 #define audsrv_play_adpcm(id)      audsrv_ch_play_adpcm(-1, id) //For backward-compatibility
 int audsrv_ch_play_adpcm(int ch, u32 id);
+int audsrv_is_adpcm_playing(int ch, u32 id);
+int free_sample(u32 id);
 
 #define audsrv_IMPORTS_start DECLARE_IMPORT_TABLE(audsrv, 1, 4)
 #define audsrv_IMPORTS_end END_IMPORT_TABLE

@@ -20,8 +20,12 @@
 
 
 #include <string.h>
+#include <stdio.h>
 #include "ff.h"			/* Declarations of FatFs API */
 #include "diskio.h"		/* Declarations of device I/O functions */
+#include "module_debug.h"
+
+#define U64_2XU32(val)  ((u32*)val)[1], ((u32*)val)[0]
 
 
 /*--------------------------------------------------------------------------
@@ -3323,8 +3327,6 @@ static UINT find_volume (	/* Returns BS status found in the hosting drive */
 }
 
 
-
-
 /*-----------------------------------------------------------------------*/
 /* Determine logical drive number and mount the volume if needed         */
 /*-----------------------------------------------------------------------*/
@@ -3385,8 +3387,9 @@ static FRESULT mount_volume (	/* FR_OK(0): successful, !=0: an error occurred */
 	if (SS(fs) > FF_MAX_SS || SS(fs) < FF_MIN_SS || (SS(fs) & (SS(fs) - 1))) return FR_DISK_ERR;
 #endif
 
-	/* Find an FAT volume on the drive */
-	fmt = find_volume(fs, LD2PT(vol));
+	/* Check for a valid file system on the device. */
+	fmt = check_fs(fs, 0);
+	M_DEBUG("check_fs returned %d at LBA 0x%08x%08x\n", fmt, U64_2XU32(&fs->winsect));
 	if (fmt == 4) return FR_DISK_ERR;		/* An error occured in the disk I/O layer */
 	if (fmt >= 2) return FR_NO_FILESYSTEM;	/* No FAT volume is found */
 	bsect = fs->winsect;					/* Volume offset */

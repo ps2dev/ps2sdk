@@ -20,4 +20,6 @@
     } while (0)
 #endif
 
+#define U64_2XU32(val)  ((u32*)val)[1], ((u32*)val)[0]
+
 #endif
