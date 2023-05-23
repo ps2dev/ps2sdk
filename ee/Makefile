@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = erl kernel libcglue libpthreadglue rpc startup debug \
+SUBDIRS = startup erl kernel libcglue libpthreadglue rpc debug \
 	eedebug sbv dma graph math3d \
 	packet packet2 draw libgs \
 	libvux font input inputx network iopreboot \
