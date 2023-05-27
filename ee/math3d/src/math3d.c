@@ -600,6 +600,10 @@ void vector_triangle_normal(VECTOR output, VECTOR a, VECTOR b, VECTOR c) {
    "vmadday		$ACC, $vf2, $vf6\n"
    "vmaddz		$vf7, $vf3, $vf6\n"
    "vclipw.xyz		$vf7, $vf7	\n" // FIXME: Clip detection is still kinda broken.
+   "vnop                                \n"
+   "vnop                                \n"
+   "vnop                                \n"
+   "vnop                                \n"
    "cfc2		$10, $18	\n"
    "beq			$10, $0, 3f	\n"
    "2:					\n"
@@ -621,7 +625,11 @@ void vector_triangle_normal(VECTOR output, VECTOR a, VECTOR b, VECTOR c) {
    "vmaddax		ACC, vf1, vf6	\n"
    "vmadday		ACC, vf2, vf6	\n"
    "vmaddz		vf7, vf3, vf6	\n"
-   "vclipw.xyz		vf7, vf7	\n" // FIXME: Clip detection is still kinda broken.
+   "vclipw.xyz		vf7, vf7	\n"
+   "vnop                                \n"
+   "vnop                                \n"
+   "vnop                                \n"
+   "vnop                                \n" // FIXME: Clip detection is still kinda broken.
    "cfc2		$10, $18	\n"
    "beq			$10, $0, 3f	\n"
    "2:					\n"
