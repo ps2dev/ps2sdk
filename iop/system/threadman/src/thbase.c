@@ -224,7 +224,7 @@ int ExitThread()
 
     CpuSuspendIntr(&state);
     thctx.current_thread->status = THS_DORMANT;
-    list_insert(&thctx.thread_dormant, &thctx.current_thread->queue);
+    list_insert(&thctx.dormant_queue, &thctx.current_thread->queue);
     thctx.run_next = NULL;
     thread_leave(0, 0, state, 1);
 
@@ -244,7 +244,7 @@ int ExitDeleteThread()
 
     CpuSuspendIntr(&state);
     thctx.current_thread->status = THS_DORMANT;
-    list_insert(&thctx.thread_delete, &thctx.current_thread->queue);
+    list_insert(&thctx.delete_queue, &thctx.current_thread->queue);
     thctx.run_next = NULL;
     thread_leave(0, 0, state, 1);
 
@@ -288,7 +288,7 @@ int TerminateThread(int thid)
     }
 
     thread->status = THS_DORMANT;
-    list_insert(&thctx.thread_dormant, &thread->queue);
+    list_insert(&thctx.dormant_queue, &thread->queue);
 
     CpuResumeIntr(state);
     return KE_OK;
@@ -334,7 +334,7 @@ int iTerminateThread(int thid)
     }
 
     thread->status = THS_DORMANT;
-    list_insert(&thctx.thread_dormant, &thread->queue);
+    list_insert(&thctx.dormant_queue, &thread->queue);
 
     return KE_OK;
 }
@@ -722,7 +722,7 @@ int SleepThread(void)
     // thread->wait_return = 0;
     thctx.run_next = NULL;
 
-    list_insert(&thctx.thread_sleep, &thread->queue);
+    list_insert(&thctx.sleep_queue, &thread->queue);
 
     return thread_leave(KE_OK, 0, state, 1);
 }
@@ -904,7 +904,7 @@ int DelayThread(int usec)
     // thread->wait_return = 0;
 
     thctx.run_next = NULL;
-    list_insert(&thctx.thread_delay, &thread->queue);
+    list_insert(&thctx.delay_queue, &thread->queue);
 
     return thread_leave(KE_OK, 0, state, 1);
 }
@@ -1269,7 +1269,7 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
         } break;
         case TMID_SleepThread: {
             struct thread *thread;
-            list_for_each (thread, &thctx.thread_sleep, queue) {
+            list_for_each (thread, &thctx.sleep_queue, queue) {
                 if (write_count < readbufsize) {
                     *readbuf++ = MAKE_HANDLE(thread);
                     write_count++;
@@ -1279,7 +1279,7 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
         } break;
         case TMID_DelayThread: {
             struct thread *thread;
-            list_for_each (thread, &thctx.thread_delay, queue) {
+            list_for_each (thread, &thctx.delay_queue, queue) {
                 if (write_count < readbufsize) {
                     *readbuf++ = MAKE_HANDLE(thread);
                     write_count++;
@@ -1289,7 +1289,7 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
         } break;
         case TMID_DormantThread: {
             struct thread *thread;
-            list_for_each (thread, &thctx.thread_dormant, queue) {
+            list_for_each (thread, &thctx.dormant_queue, queue) {
                 if (write_count < readbufsize) {
                     *readbuf++ = MAKE_HANDLE(thread);
                     write_count++;

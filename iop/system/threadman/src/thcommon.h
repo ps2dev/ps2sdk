@@ -207,12 +207,12 @@ struct thread_context
     u32 unused_or_padding;
     u32 alarm_id;
     u32 alarm_count;
-    struct list_head thread_sleep;
-    struct list_head thread_delay;
-    struct list_head thread_dormant;
+    struct list_head sleep_queue;
+    struct list_head delay_queue;
+    struct list_head dormant_queue;
     // struct list_head unused_list1;
     // struct list_head unused_list2;
-    struct list_head thread_delete;
+    struct list_head delete_queue;
     void *heap;
     s32 sytem_status_flag;
     u32 thread_switch_count;

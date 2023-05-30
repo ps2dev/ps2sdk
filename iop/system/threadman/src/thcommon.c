@@ -321,8 +321,8 @@ void do_delete_thread()
 {
     struct thread *thread;
 
-    while (!list_empty(&thctx.thread_delete)) {
-        thread = list_first_entry(&thctx.thread_delete, struct thread, queue);
+    while (!list_empty(&thctx.delete_queue)) {
+        thread = list_first_entry(&thctx.delete_queue, struct thread, queue);
         if (thread->attr & TH_CLEAR_STACK) {
             memset(thread->stack_top, 0, thread->stack_size);
         }
@@ -417,7 +417,7 @@ struct regctx *new_context_cb(struct regctx *ctx)
     }
 
     if (!thctx.run_next) {
-        if (!list_empty(&thctx.thread_delete)) {
+        if (!list_empty(&thctx.delete_queue)) {
             do_delete_thread();
         }
 
@@ -624,12 +624,12 @@ int _start(int argc, char **argv)
     list_init(&thctx.mbox);
     list_init(&thctx.vpool);
     list_init(&thctx.fpool);
-    list_init(&thctx.thread_sleep);
-    list_init(&thctx.thread_delay);
+    list_init(&thctx.sleep_queue);
+    list_init(&thctx.delay_queue);
     // list_init(&thctx.unused_list1);
     // list_init(&thctx.unused_list2);
-    list_init(&thctx.thread_dormant);
-    list_init(&thctx.thread_delete);
+    list_init(&thctx.dormant_queue);
+    list_init(&thctx.delete_queue);
     list_init(&thctx.thread_list);
 
     for (int i = 0; i < 128; i++) {
