@@ -26,26 +26,28 @@
 #include <types.h>
 #include <irx.h>
 
-//Semaphore attributes
-#define SA_THFIFO	0x000
-#define SA_THPRI	0x001
-#define SA_IHTHPRI	0x100
+// Semaphore attributes
+#define SA_THFIFO  0x000
+#define SA_THPRI   0x001
+#define SA_IHTHPRI 0x100
 
-typedef struct {
-	u32	attr;
-	u32	option;
-	int	initial;
-	int	max;
+typedef struct
+{
+    u32 attr;
+    u32 option;
+    int initial;
+    int max;
 } iop_sema_t;
 
-typedef struct {
-	u32 attr;
-	u32 option;
-	int initial;
-	int max;
-	int current;
-	int numWaitThreads;
-	int reserved[2];
+typedef struct
+{
+    u32 attr;
+    u32 option;
+    int initial;
+    int max;
+    int current;
+    int numWaitThreads;
+    int reserved[2];
 } iop_sema_info_t;
 
 int CreateSema(iop_sema_t *sema);
@@ -59,29 +61,29 @@ int PollSema(int semid);
 int ReferSemaStatus(int semid, iop_sema_info_t *info);
 int iReferSemaStatus(int semid, iop_sema_info_t *info);
 
-#define IOP_MUTEX_LOCKED	0
-#define IOP_MUTEX_UNLOCKED	1
+#define IOP_MUTEX_LOCKED   0
+#define IOP_MUTEX_UNLOCKED 1
 
 static inline int CreateMutex(int state)
 {
-	iop_sema_t sema;
-	sema.attr = 0;
-	sema.option = 0;
-	sema.initial = state;
-	sema.max = 1;
-	return CreateSema(&sema);
+    iop_sema_t sema;
+    sema.attr    = 0;
+    sema.option  = 0;
+    sema.initial = state;
+    sema.max     = 1;
+    return CreateSema(&sema);
 }
 
 #define thsemap_IMPORTS_start DECLARE_IMPORT_TABLE(thsemap, 1, 2)
-#define thsemap_IMPORTS_end END_IMPORT_TABLE
+#define thsemap_IMPORTS_end   END_IMPORT_TABLE
 
-#define I_CreateSema DECLARE_IMPORT(4, CreateSema)
-#define I_DeleteSema DECLARE_IMPORT(5, DeleteSema)
-#define I_SignalSema DECLARE_IMPORT(6, SignalSema)
-#define I_iSignalSema DECLARE_IMPORT(7, iSignalSema)
-#define I_WaitSema DECLARE_IMPORT(8, WaitSema);
-#define I_PollSema DECLARE_IMPORT(9, PollSema);
-#define I_ReferSemaStatus DECLARE_IMPORT(11, ReferSemaStatus)
+#define I_CreateSema       DECLARE_IMPORT(4, CreateSema)
+#define I_DeleteSema       DECLARE_IMPORT(5, DeleteSema)
+#define I_SignalSema       DECLARE_IMPORT(6, SignalSema)
+#define I_iSignalSema      DECLARE_IMPORT(7, iSignalSema)
+#define I_WaitSema         DECLARE_IMPORT(8, WaitSema);
+#define I_PollSema         DECLARE_IMPORT(9, PollSema);
+#define I_ReferSemaStatus  DECLARE_IMPORT(11, ReferSemaStatus)
 #define I_iReferSemaStatus DECLARE_IMPORT(12, iReferSemaStatus)
 
 #endif /* __THSEMAP_H__ */

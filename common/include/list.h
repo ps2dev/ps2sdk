@@ -27,6 +27,15 @@ typedef struct _list
         &(name), &(name) \
     }
 
+#define LIST_HEAD(name) \
+    struct list_t(name) = LIST_INIT(name);
+
+static inline void list_init(list_t *l)
+{
+    l->next = l;
+    l->prev = l;
+}
+
 static inline int list_empty(void *l)
 {
     list_t *list = (list_t *)l;
@@ -54,7 +63,6 @@ static inline list_t *list_remove(void *i)
     item->next->prev = item->prev;
     return item;
 }
-
 
 /** Iterate over a list.  Dir is 'next' to iterate forward and 'prev' to iterate in reverse.  */
 #define list_for_each(dir, pos, head) \
