@@ -30,8 +30,8 @@ struct alarm *alarm_alloc()
         thctx.alarm_id++;
         alarm->tag.id = thctx.alarm_id;
     } else {
-        alarm = (struct alarm *)thctx.alarm_pool.next;
-        list_remove(&alarm->tag.list);
+        alarm = list_first_entry(&thctx.alarm_pool, struct alarm, alarm_list);
+        list_remove(&alarm->alarm_list);
     }
 
     return alarm;
@@ -42,7 +42,7 @@ void alarm_free(struct alarm *alarm)
     if (alarm->tag.id >= 33) {
         heap_free(&alarm->tag);
     } else {
-        list_insert(&thctx.alarm_pool, &alarm->tag.list);
+        list_insert(&thctx.alarm_pool, &alarm->alarm_list);
     }
 }
 
@@ -50,29 +50,29 @@ void alarm_insert(struct list_head *list, struct alarm *alarm)
 {
     struct alarm *i;
 
-    list_for_each (i, list, tag.list) {
+    list_for_each (i, list, alarm_list) {
         if (alarm->target < i->target) {
             break;
         }
     }
 
-    list_insert(&i->tag.list, &alarm->tag.list);
+    list_insert(&i->alarm_list, &alarm->alarm_list);
 }
 
-void waitlist_insert(struct thread *thread, struct event_base *event, s32 priority)
+void waitlist_insert(struct thread *thread, struct event *event, s32 priority)
 {
     struct thread *weaker;
 
-    list_remove(&thread->tag.list);
+    list_remove(&thread->queue);
 
-    weaker = (struct thread *)event->waiters.next;
-    list_for_each (weaker, &event->waiters, tag.list) {
+    weaker = list_first_entry(&event->waiters, struct thread, queue);
+    list_for_each (weaker, &event->waiters, queue) {
         if (priority < weaker->priority) {
             break;
         }
     }
 
-    list_insert(&weaker->tag.list, &thread->tag.list);
+    list_insert(&weaker->queue, &thread->queue);
 }
 
 void update_timer_compare(int timid, u64 time, struct list_head *alarm_list)
@@ -81,10 +81,10 @@ void update_timer_compare(int timid, u64 time, struct list_head *alarm_list)
     u32 counter, new_compare = 0;
 
     // what if list is empty? (luckily its not but....)
-    prev = (struct alarm *)alarm_list->next;
+    prev = list_first_entry(alarm_list, struct alarm, alarm_list);
 
     if (!list_empty(alarm_list)) {
-        list_for_each (i, alarm_list, tag.list) {
+        list_for_each (i, alarm_list, alarm_list) {
             if (i->target >= prev->target + thctx.unk4c8) {
                 break;
             }
@@ -107,7 +107,7 @@ unsigned int thread_delay_cb(void *user)
 {
     struct thread *thread = user;
 
-    list_remove(&thread->tag.list);
+    list_remove(&thread->queue);
     thread->status = THS_READY;
     readyq_insert_back(thread);
     thctx.run_next = NULL;
@@ -131,7 +131,7 @@ int check_thread_stack()
 
 void *heap_alloc(u16 tag, u32 bytes)
 {
-    struct tag_entry *ptr = AllocHeapMemory(thctx.heap, bytes);
+    struct heaptag *ptr = AllocHeapMemory(thctx.heap, bytes);
     if (ptr) {
         memset(ptr, 0, bytes);
         ptr->tag = tag;
@@ -140,12 +140,11 @@ void *heap_alloc(u16 tag, u32 bytes)
     return ptr;
 }
 
-int heap_free(struct tag_entry *tag)
+int heap_free(struct heaptag *tag)
 {
     tag->tag = 0;
     return FreeHeapMemory(thctx.heap, tag);
 }
-
 
 /**
  * Exit the current thread, intrman will call us back to get a new context to switch to.
@@ -212,7 +211,7 @@ int thread_init_and_start(struct thread *thread, int intr_state)
     thread->saved_regs->pc     = (u32)thread->entry;
     thread->saved_regs->I_CTRL = 1;
 
-    list_remove(&thread->tag.list);
+    list_remove(&thread->queue);
 
     return thread_start(thread, intr_state);
 }
@@ -323,13 +322,13 @@ void do_delete_thread()
     struct thread *thread;
 
     while (!list_empty(&thctx.thread_delete)) {
-        thread = (struct thread *)thctx.thread_delete.next;
+        thread = list_first_entry(&thctx.thread_delete, struct thread, queue);
         if (thread->attr & TH_CLEAR_STACK) {
             memset(thread->stack_top, 0, thread->stack_size);
         }
 
         FreeSysMemory(thread->stack_top);
-        list_remove(&thread->tag.list);
+        list_remove(&thread->queue);
         list_remove(&thread->thread_list);
         heap_free(&thread->tag);
     }
@@ -343,21 +342,21 @@ void schedule_next()
     cur            = thctx.current_thread;
     thctx.run_next = thctx.current_thread;
 
+    prio = readyq_highest();
+
+    // originally would fall down and hit the bottom kprintf
+    // but i don't want the nesting
+    if (prio >= 128) {
+        Kprintf("Panic: not found ready Thread\n");
+        return;
+    }
+
+    new = list_first_entry(&thctx.ready_queue[prio], struct thread, queue);
+
     if (thctx.current_thread->status == THS_RUN) {
-        prio = readyq_highest();
-
-        // originally would fall down and hit the bottom kprintf
-        // but i don't want the nesting
-        if (prio >= 128) {
-            Kprintf("Panic: not found ready Thread\n");
-            return;
-        }
-
         if (thctx.debug_flags & 4) {
             Kprintf("    THS_RUN cp=%d : hp=%d ", cur->priority, prio);
         }
-
-        new = (struct thread *)thctx.ready_queue[prio].next;
 
         if (prio < cur->priority) {
             if (thctx.debug_flags & 4) {
@@ -377,17 +376,7 @@ void schedule_next()
     } else {
         if (thctx.debug_flags & 4) {
             Kprintf("    not THS_RUN ");
-        }
 
-        prio = readyq_highest();
-        if (prio >= 128) {
-            Kprintf("Panic: not found ready Thread\n");
-            return;
-        }
-
-        new = (struct thread *)thctx.ready_queue[prio].next;
-
-        if (thctx.debug_flags & 4) {
             Kprintf(" readyq = %x, newrun = %x:%d, prio = %d",
                     &thctx.ready_queue[prio],
                     new,
@@ -504,7 +493,7 @@ int timer_handler(void *user)
 
     // compare
     if (status & 0x800) {
-        list_for_each_safe (alarm, &thctx->alarm, tag.list) {
+        list_for_each_safe (alarm, &thctx->alarm, alarm_list) {
             counter = GetTimerCounter(thctx->timer_id);
             status  = GetTimerStatus(thctx->timer_id);
             if (counter < thctx->time_lo && (status & 0x1000)) {
@@ -518,7 +507,7 @@ int timer_handler(void *user)
             }
 
             // alarm has fired, remove, update, and reschedule
-            list_remove(&alarm->tag.list);
+            list_remove(&alarm->alarm_list);
 
             if (alarm->tag.id == 1) {
                 alarm->target += 0x100000000;
@@ -581,7 +570,7 @@ void init_timer()
     thctx.alarm_id = 0;
     CpuSuspendIntr(&state);
     alarm = alarm_alloc();
-    list_insert(&thctx.alarm, &alarm->tag.list);
+    list_insert(&thctx.alarm, &alarm->alarm_list);
     USec2SysClock(2000, &compare);
     // hmm
     alarm->target = 0x100000000LL - compare.lo;
@@ -695,10 +684,10 @@ int _start(int argc, char **argv)
                      : "=r"(current->gp)::);
 
     list_insert(&thctx.thread_list, &current->thread_list);
-    thctx.current_thread   = current;
-    thctx.run_next         = current;
-    current->tag.list.next = NULL;
-    current->tag.list.prev = NULL;
+    thctx.current_thread = current;
+    thctx.run_next       = current;
+    current->queue.next  = NULL;
+    current->queue.prev  = NULL;
 
     SetNewCtxCb(new_context_cb);
     SetShouldPreemptCb(preempt_cb);

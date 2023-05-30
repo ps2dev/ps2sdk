@@ -120,7 +120,7 @@ int DeleteThread(int thid)
     }
 
     FreeSysMemory(thread->stack_top);
-    list_remove(&thread->tag.list);
+    list_remove(&thread->queue);
     list_remove(&thread->thread_list);
     heap_free(&thread->tag);
 
@@ -224,7 +224,7 @@ int ExitThread()
 
     CpuSuspendIntr(&state);
     thctx.current_thread->status = THS_DORMANT;
-    list_insert(&thctx.thread_dormant, &thctx.current_thread->tag.list);
+    list_insert(&thctx.thread_dormant, &thctx.current_thread->queue);
     thctx.run_next = NULL;
     thread_leave(0, 0, state, 1);
 
@@ -244,7 +244,7 @@ int ExitDeleteThread()
 
     CpuSuspendIntr(&state);
     thctx.current_thread->status = THS_DORMANT;
-    list_insert(&thctx.thread_delete, &thctx.current_thread->tag.list);
+    list_insert(&thctx.thread_delete, &thctx.current_thread->queue);
     thctx.run_next = NULL;
     thread_leave(0, 0, state, 1);
 
@@ -279,7 +279,7 @@ int TerminateThread(int thid)
     if (thread->status == THS_READY) {
         readyq_remove(thread, thread->priority);
     } else {
-        list_remove(&thread->tag.list);
+        list_remove(&thread->queue);
         if (thread->wait_type == TSW_DELAY) {
             CancelAlarm(thread_delay_cb, thread);
         } else if (thread->wait_type >= TSW_DELAY && thread->wait_type <= TSW_FPL) {
@@ -288,7 +288,7 @@ int TerminateThread(int thid)
     }
 
     thread->status = THS_DORMANT;
-    list_insert(&thctx.thread_dormant, &thread->tag.list);
+    list_insert(&thctx.thread_dormant, &thread->queue);
 
     CpuResumeIntr(state);
     return KE_OK;
@@ -321,7 +321,7 @@ int iTerminateThread(int thid)
         if (thread->status == THS_READY) {
             readyq_remove(thread, thread->priority);
         } else {
-            list_remove(&thread->tag.list);
+            list_remove(&thread->queue);
 
             if (thread->status == THS_WAIT) {
                 if (thread->wait_type == TSW_DELAY) {
@@ -334,7 +334,7 @@ int iTerminateThread(int thid)
     }
 
     thread->status = THS_DORMANT;
-    list_insert(&thctx.thread_dormant, &thread->tag.list);
+    list_insert(&thctx.thread_dormant, &thread->queue);
 
     return KE_OK;
 }
@@ -499,9 +499,9 @@ int RotateThreadReadyQueue(int priority)
     }
 
     if (priority != thread->priority) {
-        thread = list_first_entry(&thctx.ready_queue[priority], struct thread, tag.list);
-        list_remove(&thread->tag.list);
-        list_insert(&thctx.ready_queue[priority], &thread->tag.list);
+        thread = list_first_entry(&thctx.ready_queue[priority], struct thread, queue);
+        list_remove(&thread->queue);
+        list_insert(&thctx.ready_queue[priority], &thread->queue);
 
         CpuResumeIntr(state);
         return KE_OK;
@@ -543,9 +543,9 @@ int iRotateThreadReadyQueue(int priority)
         readyq_insert_back(thread);
         thctx.run_next = NULL;
     } else {
-        thread = list_first_entry(&thctx.ready_queue[priority], struct thread, tag.list);
-        list_remove(&thread->tag.list);
-        list_insert(&thctx.ready_queue[priority], &thread->tag.list);
+        thread = list_first_entry(&thctx.ready_queue[priority], struct thread, queue);
+        list_remove(&thread->queue);
+        list_insert(&thctx.ready_queue[priority], &thread->queue);
     }
 
     return KE_OK;
@@ -583,7 +583,7 @@ int ReleaseWaitThread(int thid)
     }
 
     thread->saved_regs->v0 = KE_RELEASE_WAIT;
-    list_remove(&thread->tag.list);
+    list_remove(&thread->queue);
     thread->status = THS_READY;
 
     if (thread->wait_type == TSW_DELAY) {
@@ -618,7 +618,7 @@ int iReleaseWaitThread(int thid)
     }
 
     thread->saved_regs->v0 = KE_RELEASE_WAIT;
-    list_remove(&thread->tag.list);
+    list_remove(&thread->queue);
     thread->status = THS_READY;
 
     if (thread->wait_type == TSW_DELAY) {
@@ -722,7 +722,7 @@ int SleepThread(void)
     // thread->wait_return = 0;
     thctx.run_next = NULL;
 
-    list_insert(&thctx.thread_sleep, &thread->tag.list);
+    list_insert(&thctx.thread_sleep, &thread->queue);
 
     return thread_leave(KE_OK, 0, state, 1);
 }
@@ -757,7 +757,7 @@ int WakeupThread(int thid)
     }
 
     if (thread->status == THS_WAIT && thread->wait_type == TSW_SLEEP) {
-        list_remove(&thread->tag.list);
+        list_remove(&thread->queue);
         thread->status = THS_READY;
 
         return thread_start(thread, state);
@@ -792,7 +792,7 @@ int iWakeupThread(int thid)
     }
 
     if (thread->status == THS_WAIT && thread->wait_type == TSW_SLEEP) {
-        list_remove(&thread->tag.list);
+        list_remove(&thread->queue);
         thread->status = THS_READY;
         readyq_insert_back(thread);
         thctx.run_next = NULL;
@@ -904,7 +904,7 @@ int DelayThread(int usec)
     // thread->wait_return = 0;
 
     thctx.run_next = NULL;
-    list_insert(&thctx.thread_delay, &thread->tag.list);
+    list_insert(&thctx.thread_delay, &thread->queue);
 
     return thread_leave(KE_OK, 0, state, 1);
 }
@@ -929,7 +929,7 @@ int SetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *), void 
     CpuSuspendIntr(&state);
 
     if (!list_empty(&thctx.alarm)) {
-        list_for_each (alarm, &thctx.alarm, tag.list) {
+        list_for_each (alarm, &thctx.alarm, alarm_list) {
             if (alarm->cb == alarm_cb && alarm->userptr == arg) {
                 CpuResumeIntr(state);
                 return KE_FOUND_HANDLER;
@@ -975,7 +975,7 @@ int iSetAlarm(iop_sys_clock_t *sys_clock, unsigned int (*alarm_cb)(void *), void
         return KE_ILLEGAL_CONTEXT;
     }
 
-    list_for_each (alarm, &thctx.alarm, tag.list) {
+    list_for_each (alarm, &thctx.alarm, alarm_list) {
         if (alarm->cb == alarm_cb && alarm->userptr == arg) {
             return KE_FOUND_HANDLER;
         }
@@ -1020,9 +1020,9 @@ int CancelAlarm(unsigned int (*alarm_cb)(void *), void *arg)
         return KE_NOTFOUND_HANDLER;
     }
 
-    list_for_each (alarm, &thctx.alarm, tag.list) {
+    list_for_each (alarm, &thctx.alarm, alarm_list) {
         if (alarm->cb == alarm_cb && alarm->userptr == arg) {
-            list_remove(&alarm->tag.list);
+            list_remove(&alarm->alarm_list);
             alarm_free(alarm);
             thctx.alarm_count--;
 
@@ -1048,9 +1048,9 @@ int iCancelAlarm(unsigned int (*alarm_cb)(void *), void *arg)
         return KE_NOTFOUND_HANDLER;
     }
 
-    list_for_each (alarm, &thctx.alarm, tag.list) {
+    list_for_each (alarm, &thctx.alarm, alarm_list) {
         if (alarm->cb == alarm_cb && alarm->userptr == arg) {
-            list_remove(&alarm->tag.list);
+            list_remove(&alarm->alarm_list);
             alarm_free(alarm);
             thctx.alarm_count--;
 
@@ -1193,11 +1193,6 @@ int GetThreadStackFreeSize(int thid)
 }
 
 
-/*
-** TODO this function can be reduced in code size quite a bit
-** all the loops where the list member is base.tag.node can be
-** done using the same loop because MAKE_HANDLE will do the right thing
-*/
 int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount)
 {
     int state, write_count, obj_count;
@@ -1224,7 +1219,7 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
         } break;
         case TMID_Semaphore: {
             struct semaphore *sema;
-            list_for_each (sema, &thctx.event_flag, base.tag.list) {
+            list_for_each (sema, &thctx.semaphore, sema_list) {
                 if (write_count < readbufsize) {
                     *readbuf++ = MAKE_HANDLE(sema);
                     write_count++;
@@ -1232,9 +1227,9 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
                 obj_count++;
             }
         } break;
-        case TMID_Mbox: {
+        case TMID_EventFlag: {
             struct event_flag *evf;
-            list_for_each (evf, &thctx.mbox, base.tag.list) {
+            list_for_each (evf, &thctx.event_flag, evf_list) {
                 if (write_count < readbufsize) {
                     *readbuf++ = MAKE_HANDLE(evf);
                     write_count++;
@@ -1242,9 +1237,9 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
                 obj_count++;
             }
         } break;
-        case TMID_EventFlag: {
+        case TMID_Mbox: {
             struct mbox *mbx;
-            list_for_each (mbx, &thctx.mbox, base.tag.list) {
+            list_for_each (mbx, &thctx.mbox, mbox_list) {
                 if (write_count < readbufsize) {
                     *readbuf++ = MAKE_HANDLE(mbx);
                     write_count++;
@@ -1254,7 +1249,7 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
         } break;
         case TMID_Vpl: {
             struct vpool *vpl;
-            list_for_each (vpl, &thctx.vpool, base.tag.list) {
+            list_for_each (vpl, &thctx.vpool, vpl_list) {
                 if (write_count < readbufsize) {
                     *readbuf++ = MAKE_HANDLE(vpl);
                     write_count++;
@@ -1264,7 +1259,7 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
         } break;
         case TMID_Fpl: {
             struct fpool *fpl;
-            list_for_each (fpl, &thctx.mbox, base.tag.list) {
+            list_for_each (fpl, &thctx.fpool, fpl_list) {
                 if (write_count < readbufsize) {
                     *readbuf++ = MAKE_HANDLE(fpl);
                     write_count++;
@@ -1274,7 +1269,7 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
         } break;
         case TMID_SleepThread: {
             struct thread *thread;
-            list_for_each (thread, &thctx.thread_sleep, tag.list) {
+            list_for_each (thread, &thctx.thread_sleep, queue) {
                 if (write_count < readbufsize) {
                     *readbuf++ = MAKE_HANDLE(thread);
                     write_count++;
@@ -1284,7 +1279,7 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
         } break;
         case TMID_DelayThread: {
             struct thread *thread;
-            list_for_each (thread, &thctx.thread_delay, tag.list) {
+            list_for_each (thread, &thctx.thread_delay, queue) {
                 if (write_count < readbufsize) {
                     *readbuf++ = MAKE_HANDLE(thread);
                     write_count++;
@@ -1294,7 +1289,7 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
         } break;
         case TMID_DormantThread: {
             struct thread *thread;
-            list_for_each (thread, &thctx.thread_dormant, tag.list) {
+            list_for_each (thread, &thctx.thread_dormant, queue) {
                 if (write_count < readbufsize) {
                     *readbuf++ = MAKE_HANDLE(thread);
                     write_count++;
@@ -1303,14 +1298,34 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
             }
         } break;
         default: {
-            struct event_base *evt = HANDLE_PTR(type);
+            struct heaptag *tag = HANDLE_PTR(type);
             struct thread *thread;
-            if (type < 0 || evt->tag.tag < TAG_SEMA || evt->tag.tag > TAG_FPL || evt->tag.id != HANDLE_ID(type)) {
+            struct event *event;
+
+            if (type < 0 || tag->tag < TAG_SEMA || tag->tag > TAG_FPL || tag->id != HANDLE_ID(type)) {
                 CpuResumeIntr(state);
                 return KE_ILLEGAL_TYPE;
             }
 
-            list_for_each (thread, &evt->waiters, tag.list) {
+            switch (tag->tag) {
+                case TAG_SEMA:
+                    event = &((struct semaphore *)tag)->event;
+                    break;
+                case TAG_EVF:
+                    event = &((struct event_flag *)tag)->event;
+                    break;
+                case TAG_MBX:
+                    event = &((struct mbox *)tag)->event;
+                    break;
+                case TAG_VPL:
+                    event = &((struct vpool *)tag)->event;
+                    break;
+                case TAG_FPL:
+                    event = &((struct fpool *)tag)->event;
+                    break;
+            }
+
+            list_for_each (thread, &event->waiters, queue) {
                 if (write_count < readbufsize) {
                     *readbuf++ = MAKE_HANDLE(thread);
                     write_count++;
@@ -1328,7 +1343,6 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
 
     return write_count;
 }
-
 
 static void clock_mul(iop_sys_clock_t *dst, iop_sys_clock_t *src, u32 mul)
 {
@@ -1414,8 +1428,25 @@ static void thread_get_status(struct thread *thread, iop_thread_info_t *info)
         if (thread->wait_type == TSW_DELAY) {
             info->waitId = thread->wait_usecs;
         } else {
-            if (thread->wait_event) {
-                info->waitId = MAKE_HANDLE(thread->wait_event);
+            switch (thread->wait_type) {
+                case TSW_SEMA:
+                    info->waitId = MAKE_HANDLE(container_of(thread->wait_event, struct semaphore, event));
+                    break;
+                case TSW_EVENTFLAG:
+                    info->waitId = MAKE_HANDLE(container_of(thread->wait_event, struct event_flag, event));
+                    break;
+                case TSW_MBX:
+                    info->waitId = MAKE_HANDLE(container_of(thread->wait_event, struct mbox, event));
+                    break;
+                case TSW_FPL:
+                    info->waitId = MAKE_HANDLE(container_of(thread->wait_event, struct fpool, event));
+                    break;
+                case TSW_VPL:
+                    info->waitId = MAKE_HANDLE(container_of(thread->wait_event, struct vpool, event));
+                    break;
+                default:
+                    // shouldn't happen
+                    break;
             }
         }
     }
@@ -1438,8 +1469,25 @@ static void thread_get_run_stats(struct thread *thread, iop_thread_run_status_t 
         if (thread->wait_type == TSW_DELAY) {
             stat->waitId = thread->wait_usecs;
         } else {
-            if (thread->wait_event) {
-                stat->waitId = MAKE_HANDLE(thread->wait_event);
+            switch (thread->wait_type) {
+                case TSW_SEMA:
+                    stat->waitId = MAKE_HANDLE(container_of(thread->wait_event, struct semaphore, event));
+                    break;
+                case TSW_EVENTFLAG:
+                    stat->waitId = MAKE_HANDLE(container_of(thread->wait_event, struct event_flag, event));
+                    break;
+                case TSW_MBX:
+                    stat->waitId = MAKE_HANDLE(container_of(thread->wait_event, struct mbox, event));
+                    break;
+                case TSW_FPL:
+                    stat->waitId = MAKE_HANDLE(container_of(thread->wait_event, struct fpool, event));
+                    break;
+                case TSW_VPL:
+                    stat->waitId = MAKE_HANDLE(container_of(thread->wait_event, struct vpool, event));
+                    break;
+                default:
+                    // shouldn't happen
+                    break;
             }
         }
     }

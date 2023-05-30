@@ -27,15 +27,15 @@ int CreateEventFlag(iop_event_t *event_params)
         return KE_NO_MEMORY;
     }
 
-    event->base.tag.id = ++thctx.evflag_id;
-    event->base.attr   = event_params->attr;
-    event->base.option = event_params->option;
-    event->init_bits   = event_params->bits;
-    event->bits        = event_params->bits;
+    event->tag.id       = ++thctx.evflag_id;
+    event->event.attr   = event_params->attr;
+    event->event.option = event_params->option;
+    event->init_bits    = event_params->bits;
+    event->bits         = event_params->bits;
 
-    list_init(&event->base.waiters);
+    list_init(&event->event.waiters);
 
-    list_insert(&thctx.event_flag, &event->base.tag.list);
+    list_insert(&thctx.event_flag, &event->evf_list);
 
     CpuResumeIntr(state);
 
@@ -61,16 +61,16 @@ int DeleteEventFlag(int ef)
         return KE_UNKNOWN_EVFID;
     }
 
-    list_for_each_safe (waiter, &event->base.waiters, tag.list) {
+    list_for_each_safe (waiter, &event->event.waiters, queue) {
         waiter->saved_regs->v0 = KE_WAIT_DELETE;
-        list_remove(&waiter->tag.list);
+        list_remove(&waiter->queue);
         waiter->status = THS_READY;
         readyq_insert_back(waiter);
     }
 
-    waiter_count = event->base.waiter_count;
-    list_remove(&event->base.tag.list);
-    heap_free(&event->base.tag);
+    waiter_count = event->event.waiter_count;
+    list_remove(&event->evf_list);
+    heap_free(&event->tag);
 
     if (waiter_count) {
         thctx.run_next = NULL;
@@ -108,7 +108,7 @@ int SetEventFlag(int ef, u32 bits)
     evt->bits |= bits;
     num_wakeups = 0;
 
-    list_for_each_safe (thread, &evt->base.waiters, tag.list) {
+    list_for_each_safe (thread, &evt->event.waiters, queue) {
         if (!evt->bits) {
             break;
         }
@@ -133,8 +133,8 @@ int SetEventFlag(int ef, u32 bits)
 
             num_wakeups++;
 
-            evt->base.waiter_count--;
-            list_remove(&thread->tag.list);
+            evt->event.waiter_count--;
+            list_remove(&thread->queue);
             thread->status = THS_READY;
             readyq_insert_back(thread);
         }
@@ -176,7 +176,7 @@ int iSetEventFlag(int ef, u32 bits)
 
     evt->bits |= bits;
 
-    list_for_each_safe (thread, &evt->base.waiters, tag.list) {
+    list_for_each_safe (thread, &evt->event.waiters, queue) {
         if (!evt->bits) {
             break;
         }
@@ -199,8 +199,8 @@ int iSetEventFlag(int ef, u32 bits)
                 evt->bits = 0;
             }
 
-            evt->base.waiter_count--;
-            list_remove(&thread->tag.list);
+            evt->event.waiter_count--;
+            list_remove(&thread->queue);
             thread->status = THS_READY;
             readyq_insert_back(thread);
             thctx.run_next = NULL;
@@ -284,7 +284,7 @@ int WaitEventFlag(int ef, u32 bits, int mode, u32 *resbits)
         return KE_UNKNOWN_EVFID;
     }
 
-    if ((evt->base.attr & EA_MULTI) == 0 && evt->base.waiter_count >= 0) {
+    if ((evt->event.attr & EA_MULTI) == 0 && evt->event.waiter_count >= 0) {
         CpuResumeIntr(state);
         return KE_EVF_MULTI;
     }
@@ -311,12 +311,12 @@ int WaitEventFlag(int ef, u32 bits, int mode, u32 *resbits)
     thread             = thctx.current_thread;
     thread->status     = THS_WAIT;
     thread->wait_type  = TSW_EVENTFLAG;
-    thread->wait_event = &evt->base;
+    thread->wait_event = &evt->event;
     thread->event_bits = bits;
     thread->event_mode = bits;
     thctx.run_next     = NULL;
-    evt->base.waiter_count++;
-    list_insert(&evt->base.waiters, &thread->tag.list);
+    evt->event.waiter_count++;
+    list_insert(&evt->event.waiters, &thread->queue);
 
     // put resbits in the return value
     // so we can grab it in SetEventFlag
@@ -349,7 +349,7 @@ int PollEventFlag(int ef, u32 bits, int mode, u32 *resbits)
         return KE_UNKNOWN_EVFID;
     }
 
-    if ((evt->base.attr & EA_MULTI) == 0 && evt->base.waiter_count >= 0) {
+    if ((evt->event.attr & EA_MULTI) == 0 && evt->event.waiter_count >= 0) {
         CpuResumeIntr(state);
         return KE_EVF_MULTI;
     }
@@ -422,9 +422,9 @@ int iReferEventFlagStatus(int ef, iop_event_info_t *info)
 
 static void event_get_status(struct event_flag *event, iop_event_info_t *info)
 {
-    info->attr       = event->base.attr;
+    info->attr       = event->event.attr;
     info->currBits   = event->bits;
     info->initBits   = event->init_bits;
-    info->numThreads = event->base.waiter_count;
-    info->option     = event->base.option;
+    info->numThreads = event->event.waiter_count;
+    info->option     = event->event.option;
 }

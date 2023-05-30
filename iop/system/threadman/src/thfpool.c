@@ -44,15 +44,15 @@ int CreateFpl(iop_fpl_param *param)
         return KE_NO_MEMORY;
     }
 
-    fpl->memory      = mem;
-    fpl->block_size  = param->block_size;
-    fpl->blocks      = param->blocks;
-    fpl->mem_size    = mem_size;
-    fpl->base.attr   = param->attr;
-    fpl->base.option = param->option;
+    fpl->memory       = mem;
+    fpl->block_size   = param->block_size;
+    fpl->blocks       = param->blocks;
+    fpl->mem_size     = mem_size;
+    fpl->event.attr   = param->attr;
+    fpl->event.option = param->option;
 
-    list_init(&fpl->base.waiters);
-    list_insert(&thctx.fpool, &fpl->base.tag.list);
+    list_init(&fpl->event.waiters);
+    list_insert(&thctx.fpool, &fpl->fpl_list);
 
     fpl->free = NULL;
     for (int i = 0; i < param->blocks; i++, mem += block_size) {
@@ -82,17 +82,17 @@ int DeleteFpl(int fplId)
         return KE_UNKNOWN_FPLID;
     }
 
-    list_for_each_safe (waiter, &fpl->base.waiters, tag.list) {
+    list_for_each_safe (waiter, &fpl->event.waiters, queue) {
         waiter->saved_regs->v0 = KE_WAIT_DELETE;
         waiter->status         = THS_READY;
-        list_remove(&waiter->tag.list);
+        list_remove(&waiter->queue);
         readyq_insert_back(waiter);
     }
 
-    waiter_count = fpl->base.waiter_count;
+    waiter_count = fpl->event.waiter_count;
     FreeSysMemory(fpl->memory);
-    list_remove(&fpl->base.tag.list);
-    heap_free(&fpl->base.tag);
+    list_remove(&fpl->fpl_list);
+    heap_free(&fpl->tag);
 
     if (waiter_count) {
         thctx.run_next = NULL;
@@ -135,15 +135,15 @@ void *AllocateFpl(int fplId)
 
     thread->status     = THS_WAIT;
     thread->wait_type  = TSW_FPL;
-    thread->wait_event = &fpl->base;
+    thread->wait_event = &fpl->event;
     thctx.run_next     = NULL;
 
-    fpl->base.waiter_count++;
+    fpl->event.waiter_count++;
 
-    if (fpl->base.attr & FA_THPRI) {
-        waitlist_insert(thread, &fpl->base, thread->priority);
+    if (fpl->event.attr & FA_THPRI) {
+        waitlist_insert(thread, &fpl->event, thread->priority);
     } else {
-        list_insert(&fpl->base.waiters, &thread->tag.list);
+        list_insert(&fpl->event.waiters, &thread->queue);
     }
 
     return (void *)thread_leave(KE_OK, 0, state, 1);
@@ -219,10 +219,10 @@ int FreeFpl(int fplId, void *memory)
         return KE_ILLEGAL_MEMBLOCK;
     }
 
-    if (fpl->base.waiter_count) {
-        waiter = list_first_entry(&fpl->base.waiters, struct thread, tag.list);
-        fpl->base.waiter_count--;
-        list_remove(&waiter->tag.list);
+    if (fpl->event.waiter_count) {
+        waiter = list_first_entry(&fpl->event.waiters, struct thread, queue);
+        fpl->event.waiter_count--;
+        list_remove(&waiter->queue);
         waiter->status         = THS_READY;
         waiter->saved_regs->v0 = (u32)memory;
 
@@ -315,10 +315,10 @@ static void fpl_block_free(struct fpool *fpl, struct fpl_block *block)
 
 static void fpl_get_info(struct fpool *fpl, iop_fpl_info_t *info)
 {
-    info->attr           = fpl->base.attr;
-    info->option         = fpl->base.option;
+    info->attr           = fpl->event.attr;
+    info->option         = fpl->event.option;
     info->blockSize      = fpl->block_size;
     info->numBlocks      = fpl->blocks;
     info->freeBlocks     = fpl->free_blocks;
-    info->numWaitThreads = fpl->base.waiter_count;
+    info->numWaitThreads = fpl->event.waiter_count;
 }

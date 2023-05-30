@@ -26,16 +26,16 @@ int CreateSema(iop_sema_t *sema_params)
         return KE_NO_MEMORY;
     }
 
-    sema->base.tag.id   = ++thctx.sema_id;
-    sema->base.attr     = sema_params->attr;
-    sema->base.option   = sema_params->option;
+    sema->tag.id        = ++thctx.sema_id;
+    sema->event.attr    = sema_params->attr;
+    sema->event.option  = sema_params->option;
     sema->count         = sema_params->initial;
     sema->initial_count = sema_params->initial;
     sema->max_count     = sema_params->max;
 
-    list_init(&sema->base.waiters);
+    list_init(&sema->event.waiters);
 
-    list_insert(&thctx.semaphore, &sema->base.tag.list);
+    list_insert(&thctx.semaphore, &sema->sema_list);
 
     CpuResumeIntr(state);
 
@@ -61,16 +61,16 @@ int DeleteSema(int semid)
         return KE_UNKNOWN_SEMID;
     }
 
-    list_for_each_safe (waiter, &sema->base.waiters, tag.list) {
+    list_for_each_safe (waiter, &sema->event.waiters, queue) {
         waiter->saved_regs->v0 = KE_WAIT_DELETE;
         waiter->status         = THS_READY;
-        list_remove(&waiter->tag.list);
+        list_remove(&waiter->queue);
         readyq_insert_back(waiter);
     }
 
-    waiter_count = sema->base.waiter_count;
-    list_remove(&sema->base.tag.list);
-    heap_free(&sema->base.tag);
+    waiter_count = sema->event.waiter_count;
+    list_remove(&sema->sema_list);
+    heap_free(&sema->tag);
 
     if (waiter_count) {
         thctx.run_next = NULL;
@@ -100,10 +100,10 @@ int SignalSema(int semid)
         return KE_UNKNOWN_SEMID;
     }
 
-    if (sema->base.waiter_count > 0) {
-        thread = list_first_entry(&sema->base.waiters, struct thread, tag.list);
-        sema->base.waiter_count--;
-        list_remove(&thread->tag.list);
+    if (sema->event.waiter_count > 0) {
+        thread = list_first_entry(&sema->event.waiters, struct thread, queue);
+        sema->event.waiter_count--;
+        list_remove(&thread->queue);
         thread->status = THS_READY;
 
         return thread_start(thread, state);
@@ -135,10 +135,10 @@ int iSignalSema(int semid)
         return KE_UNKNOWN_SEMID;
     }
 
-    if (sema->base.waiter_count > 0) {
-        thread = list_first_entry(&sema->base.waiters, struct thread, tag.list);
-        sema->base.waiter_count--;
-        list_remove(&thread->tag.list);
+    if (sema->event.waiter_count > 0) {
+        thread = list_first_entry(&sema->event.waiters, struct thread, queue);
+        sema->event.waiter_count--;
+        list_remove(&thread->queue);
         thread->saved_regs->v0 = KE_OK;
         thread->status         = THS_READY;
         readyq_insert_back(thread);
@@ -188,16 +188,16 @@ int WaitSema(int semid)
 
     thread->status     = THS_WAIT;
     thread->wait_type  = TSW_SEMA;
-    thread->wait_event = &sema->base;
+    thread->wait_event = &sema->event;
     thctx.run_next     = NULL;
-    sema->base.waiter_count++;
+    sema->event.waiter_count++;
 
-    if (sema->base.attr & SA_THPRI) {
+    if (sema->event.attr & SA_THPRI) {
         // originally just a loop (or inlined)
         // i don't see why not to use this function though
-        waitlist_insert(thread, &sema->base, thread->priority);
+        waitlist_insert(thread, &sema->event, thread->priority);
     } else {
-        list_insert(&sema->base.waiters, &thread->tag.list);
+        list_insert(&sema->event.waiters, &thread->queue);
     }
 
     return thread_leave(KE_OK, 0, state, 1);
@@ -275,10 +275,10 @@ int iReferSemaStatus(int semid, iop_sema_info_t *info)
 
 static void sema_get_status(struct semaphore *sema, iop_sema_info_t *info)
 {
-    info->attr           = sema->base.attr;
+    info->attr           = sema->event.attr;
     info->current        = sema->count;
     info->max            = sema->max_count;
     info->initial        = sema->initial_count;
-    info->numWaitThreads = sema->base.waiter_count;
-    info->option         = sema->base.option;
+    info->numWaitThreads = sema->event.waiter_count;
+    info->option         = sema->event.option;
 }

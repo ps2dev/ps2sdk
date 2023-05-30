@@ -31,13 +31,13 @@ int CreateVpl(iop_vpl_param *param)
         return KE_NO_MEMORY;
     }
 
-    vpl->heap        = CreateHeap(param->size, (param->attr & VA_MEMBTM) << 1);
-    vpl->free_size   = HeapTotalFreeSize(vpl->heap);
-    vpl->base.attr   = param->attr;
-    vpl->base.option = param->option;
+    vpl->heap         = CreateHeap(param->size, (param->attr & VA_MEMBTM) << 1);
+    vpl->free_size    = HeapTotalFreeSize(vpl->heap);
+    vpl->event.attr   = param->attr;
+    vpl->event.option = param->option;
 
-    list_init(&vpl->base.waiters);
-    list_insert(&thctx.vpool, &vpl->base.tag.list);
+    list_init(&vpl->event.waiters);
+    list_insert(&thctx.vpool, &vpl->vpl_list);
 
     CpuResumeIntr(state);
 
@@ -62,17 +62,17 @@ int DeleteVpl(int vplId)
         return KE_UNKNOWN_VPLID;
     }
 
-    list_for_each_safe (waiter, &vpl->base.waiters, tag.list) {
+    list_for_each_safe (waiter, &vpl->event.waiters, queue) {
         waiter->saved_regs->v0 = KE_WAIT_DELETE;
         waiter->status         = THS_READY;
-        list_remove(&waiter->tag.list);
+        list_remove(&waiter->queue);
         readyq_insert_back(waiter);
     }
 
-    waiter_count = vpl->base.waiter_count;
+    waiter_count = vpl->event.waiter_count;
     DeleteHeap(vpl->heap);
-    list_remove(&vpl->base.tag.list);
-    heap_free(&vpl->base.tag);
+    list_remove(&vpl->vpl_list);
+    heap_free(&vpl->tag);
 
     if (waiter_count) {
         thctx.run_next = NULL;
@@ -119,15 +119,15 @@ void *AllocateVpl(int vplId, int size)
     thread             = thctx.current_thread;
     thread->status     = THS_WAIT;
     thread->wait_type  = TSW_FPL;
-    thread->wait_event = &vpl->base;
+    thread->wait_event = &vpl->event;
 
     thctx.run_next = NULL;
-    vpl->base.waiter_count++;
+    vpl->event.waiter_count++;
 
-    if (vpl->base.attr & VA_THPRI) {
-        waitlist_insert(thread, &vpl->base, thread->priority);
+    if (vpl->event.attr & VA_THPRI) {
+        waitlist_insert(thread, &vpl->event, thread->priority);
     } else {
-        list_insert(&vpl->base.waiters, &thread->tag.list);
+        list_insert(&vpl->event.waiters, &thread->queue);
     }
 
     return (void *)thread_leave(size, 0, state, 1);
@@ -212,12 +212,12 @@ int FreeVpl(int vplId, void *memory)
         return KE_ERROR;
     }
 
-    if (vpl->base.waiter_count) {
-        thread  = list_first_entry(&vpl->base.waiters, struct thread, tag.list);
+    if (vpl->event.waiter_count) {
+        thread  = list_first_entry(&vpl->event.waiters, struct thread, queue);
         new_mem = AllocHeapMemory(vpl->heap, thread->saved_regs->v0);
         if (new_mem) {
-            vpl->base.waiter_count--;
-            list_remove(&thread->tag.list);
+            vpl->event.waiter_count--;
+            list_remove(&thread->queue);
             thread->status         = THS_READY;
             thread->saved_regs->v0 = (u32)new_mem;
 
@@ -273,9 +273,9 @@ int iReferVplStatus(int vplId, iop_vpl_info_t *info)
 
 static void vpl_get_info(struct vpool *vpl, iop_vpl_info_t *info)
 {
-    info->attr           = vpl->base.attr;
-    info->option         = vpl->base.option;
+    info->attr           = vpl->event.attr;
+    info->option         = vpl->event.option;
     info->size           = vpl->free_size;
     info->freeSize       = HeapTotalFreeSize(vpl->heap);
-    info->numWaitThreads = vpl->base.waiter_count;
+    info->numWaitThreads = vpl->event.waiter_count;
 }

@@ -18,11 +18,11 @@
 #define TAG_VPL    0x7f05
 #define TAG_FPL    0x7f06
 
-#define MAKE_HANDLE(ptr)         (((u32)(ptr) << 5) | ((((struct tag_entry *)(ptr))->id & 0x3f) << 1) | 1)
+#define MAKE_HANDLE(ptr)         (((u32)(ptr) << 5) | ((((struct heaptag *)(ptr))->id & 0x3f) << 1) | 1)
 #define HANDLE_PTR(handle)       ((void *)((((u32)handle) >> 7) << 2))
 #define HANDLE_ID(handle)        (((handle) >> 1) & 0x3f)
-#define HANDLE_VERIFY(handle, t) (((struct tag_entry *)(HANDLE_PTR(handle)))->tag == (t) && \
-                                  HANDLE_ID(handle) == ((struct tag_entry *)(HANDLE_PTR(handle)))->id)
+#define HANDLE_VERIFY(handle, t) (((struct heaptag *)(HANDLE_PTR(handle)))->tag == (t) && \
+                                  HANDLE_ID(handle) == ((struct heaptag *)(HANDLE_PTR(handle)))->id)
 
 #define ALIGN(i)     (((i) + 3) & (~3))
 #define ALIGN_256(i) (((i) + 0xff) & (~0xff))
@@ -59,16 +59,14 @@ struct regctx
         pc, I_CTRL, unk2;
 };
 
-struct tag_entry
+struct heaptag
 {
-    struct list_head list;
     u16 tag;
     u16 id;
 };
 
-struct event_base
+struct event
 {
-    struct tag_entry tag;
     u32 attr;
     u32 waiter_count;
     struct list_head waiters;
@@ -77,14 +75,18 @@ struct event_base
 
 struct event_flag
 {
-    struct event_base base;
+    struct heaptag tag;
+    struct list_head evf_list;
+    struct event event;
     u32 bits;
     u32 init_bits;
 };
 
 struct semaphore
 {
-    struct event_base base;
+    struct heaptag tag;
+    struct list_head sema_list;
+    struct event event;
     u32 count;
     u32 max_count;
     u32 initial_count;
@@ -92,7 +94,9 @@ struct semaphore
 
 struct mbox
 {
-    struct event_base base;
+    struct heaptag tag;
+    struct list_head mbox_list;
+    struct event event;
     u32 msg_count;
     iop_message_t *newest_msg;
 };
@@ -104,7 +108,9 @@ struct fpl_block
 
 struct fpool
 {
-    struct event_base base;
+    struct heaptag tag;
+    struct list_head fpl_list;
+    struct event event;
     void *memory;
     struct fpl_block *free;
     u32 free_blocks;
@@ -115,14 +121,17 @@ struct fpool
 
 struct vpool
 {
-    struct event_base base;
+    struct heaptag tag;
+    struct list_head vpl_list;
+    struct event event;
     void *heap;
     u32 free_size;
 };
 
 struct alarm
 {
-    struct tag_entry tag;
+    struct heaptag tag;
+    struct list_head alarm_list;
     u64 target;
     unsigned int (*cb)(void *);
     void *userptr;
@@ -130,7 +139,8 @@ struct alarm
 
 struct thread
 {
-    struct tag_entry tag;
+    struct heaptag tag;
+    struct list_head queue;
     u8 status;
     u16 priority;
     struct regctx *saved_regs;
@@ -140,7 +150,7 @@ struct thread
     u16 wakeup_count;
     union
     {
-        struct event_base *wait_event;
+        struct event *wait_event;
         u32 wait_usecs;
     };
     // originally singly linked list of all threads
@@ -237,7 +247,7 @@ static inline void readyq_insert_back(struct thread *thread)
 {
     u32 prio = thread->priority;
     thctx.queue_map[prio >> 5] |= 1 << (prio & 0x1f);
-    list_insert(&thctx.ready_queue[prio], &thread->tag.list);
+    list_insert(&thctx.ready_queue[prio], &thread->queue);
 }
 
 /*
@@ -247,7 +257,7 @@ static inline void readyq_insert_front(struct thread *thread)
 {
     u32 prio = thread->priority;
     thctx.queue_map[prio >> 5] |= 1 << (prio & 0x1f);
-    list_insert(thctx.ready_queue[prio].next, &thread->tag.list);
+    list_insert(thctx.ready_queue[prio].next, &thread->queue);
 }
 
 /*
@@ -255,11 +265,11 @@ static inline void readyq_insert_front(struct thread *thread)
 */
 static inline void readyq_remove(struct thread *thread, u32 prio)
 {
-    if (list_node_is_last(&thread->tag.list)) {
+    if (list_node_is_last(&thread->queue)) {
         thctx.queue_map[prio >> 5] &= ~(1 << (prio & 0x1f));
     }
 
-    list_remove(&thread->tag.list);
+    list_remove(&thread->queue);
 }
 
 u32 readyq_highest();
@@ -271,7 +281,7 @@ void alarm_insert(struct list_head *list, struct alarm *alarm);
 void update_timer_compare(int timid, u64 time, struct list_head *alarm_list);
 
 void *heap_alloc(u16 tag, u32 bytes);
-int heap_free(struct tag_entry *tag);
+int heap_free(struct heaptag *tag);
 
 int thread_start(struct thread *thread, int intr_state);
 int thread_init_and_start(struct thread *thread, int intr_state);
@@ -281,7 +291,7 @@ unsigned int thread_delay_cb(void *user);
 
 int read_sys_time(iop_sys_clock_t *clock);
 
-void waitlist_insert(struct thread *thread, struct event_base *event, s32 priority);
+void waitlist_insert(struct thread *thread, struct event *event, s32 priority);
 
 int check_thread_stack();
 

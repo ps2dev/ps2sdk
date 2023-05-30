@@ -27,11 +27,11 @@ int CreateMbx(iop_mbx_t *mbx_param)
         return KE_NO_MEMORY;
     }
 
-    mbx->base.tag.id = ++thctx.mbox_id;
-    mbx->base.attr   = mbx_param->attr;
-    mbx->base.option = mbx_param->option;
-    list_init(&mbx->base.waiters);
-    list_insert(&thctx.mbox, &mbx->base.tag.list);
+    mbx->tag.id       = ++thctx.mbox_id;
+    mbx->event.attr   = mbx_param->attr;
+    mbx->event.option = mbx_param->option;
+    list_init(&mbx->event.waiters);
+    list_insert(&thctx.mbox, &mbx->mbox_list);
 
     CpuResumeIntr(state);
 
@@ -57,16 +57,16 @@ int DeleteMbx(int mbxid)
         return KE_UNKNOWN_MBXID;
     }
 
-    list_for_each_safe (waiter, &mbx->base.waiters, tag.list) {
+    list_for_each_safe (waiter, &mbx->event.waiters, queue) {
         waiter->saved_regs->v0 = KE_WAIT_DELETE;
-        list_remove(&waiter->tag.list);
+        list_remove(&waiter->queue);
         waiter->status = THS_READY;
         readyq_insert_back(waiter);
     }
 
-    waiter_count = mbx->base.waiter_count;
-    list_remove(&mbx->base.tag.list);
-    heap_free(&mbx->base.tag);
+    waiter_count = mbx->event.waiter_count;
+    list_remove(&mbx->mbox_list);
+    heap_free(&mbx->tag);
 
     if (waiter_count) {
         thctx.run_next = NULL;
@@ -97,15 +97,15 @@ int SendMbx(int mbxid, void *msg)
         return KE_UNKNOWN_MBXID;
     }
 
-    if (mbx->base.waiter_count == 0) {
+    if (mbx->event.waiter_count == 0) {
         mbx_send(mbx, msg);
         CpuResumeIntr(state);
         return KE_OK;
     }
 
-    thread = (struct thread *)mbx->base.waiters.next;
-    mbx->base.waiter_count--;
-    list_remove(&thread->tag.list);
+    thread = list_first_entry(&mbx->event.waiters, struct thread, queue);
+    mbx->event.waiter_count--;
+    list_remove(&thread->queue);
 
     msg_dest = (void **)thread->saved_regs->v0;
 
@@ -133,14 +133,14 @@ int iSendMbx(int mbxid, void *msg)
         return KE_UNKNOWN_MBXID;
     }
 
-    if (mbx->base.waiter_count == 0) {
+    if (mbx->event.waiter_count == 0) {
         mbx_send(mbx, msg);
         return KE_OK;
     }
 
-    thread = list_first_entry(&mbx->base.waiters, struct thread, tag.list);
-    mbx->base.waiter_count--;
-    list_remove(&thread->tag.list);
+    thread = list_first_entry(&mbx->event.waiters, struct thread, queue);
+    mbx->event.waiter_count--;
+    list_remove(&thread->queue);
     msg_dest               = (void **)thread->saved_regs->v0;
     thread->saved_regs->v0 = KE_OK;
 
@@ -179,13 +179,13 @@ int ReceiveMbx(void **msgvar, int mbxid)
         thread             = thctx.current_thread;
         thread->status     = THS_WAIT;
         thread->wait_type  = TSW_MBX;
-        thread->wait_event = &mbx->base;
+        thread->wait_event = &mbx->event;
         thctx.run_next     = NULL;
 
-        if (mbx->base.attr & MBA_THPRI) {
-            waitlist_insert(thread, &mbx->base, thread->priority);
+        if (mbx->event.attr & MBA_THPRI) {
+            waitlist_insert(thread, &mbx->event, thread->priority);
         } else {
-            list_insert(&mbx->base.waiters, &thread->tag.list);
+            list_insert(&mbx->event.waiters, &thread->queue);
         }
 
         return thread_leave((int)msgvar, 0, state, 1);
@@ -301,7 +301,7 @@ static void mbx_send(struct mbox *mbx, iop_message_t *new_msg)
         return;
     }
 
-    if ((mbx->base.attr & MBA_MSPRI) == 0) {
+    if ((mbx->event.attr & MBA_MSPRI) == 0) {
         new_msg->next   = oldest;
         latest->next    = new_msg;
         mbx->newest_msg = new_msg;
@@ -339,9 +339,9 @@ static void mbx_send(struct mbox *mbx, iop_message_t *new_msg)
 
 static void mbx_get_status(struct mbox *mbx, iop_mbx_status_t *info)
 {
-    info->attr           = mbx->base.attr;
-    info->option         = mbx->base.option;
-    info->numWaitThreads = mbx->base.waiter_count;
+    info->attr           = mbx->event.attr;
+    info->option         = mbx->event.option;
+    info->numWaitThreads = mbx->event.waiter_count;
     info->numMessage     = mbx->msg_count;
     info->topPacket      = mbx->newest_msg->next;
 }
