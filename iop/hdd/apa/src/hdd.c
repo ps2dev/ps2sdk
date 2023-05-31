@@ -95,6 +95,7 @@ static int hddInitError(void);
 
 int hddCheckPartitionMax(s32 device, u32 size)
 {
+	// TODO: In DVRP firmware, this check always succeeds
 	return (hddDevices[device].partitionMaxSize >= size) ? 0 : -EINVAL;
 }
 
@@ -130,7 +131,7 @@ apa_cache_t *hddAddPartitionHere(s32 device, const apa_params_t *params, u32 *em
 		return NULL;
 	}
 
-	if((clink_next=apaCacheGetHeader(device, 0, APA_IO_MODE_READ, err))==NULL)
+	if((clink_next=apaCacheGetHeader(device, APA_SECTOR_MBR, APA_IO_MODE_READ, err))==NULL)
 	{
 		apaCacheFree(clink_this);
 		return NULL;

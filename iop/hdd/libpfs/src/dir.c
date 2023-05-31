@@ -206,7 +206,7 @@ pfs_cache_t *pfsDirRemoveEntry(pfs_cache_t *clink, char *path)
 	if ((c=pfsGetDentry(clink, path, &dentry, &size, 0)) != NULL){
 		int i=0, val;
 
-		val=(int)dentry-(int)c->u.dentry;
+		val=(u8*)dentry-(u8*)c->u.dentry;
 		if (val<0)	val +=511;
 		val /=512;
 		val *=512;

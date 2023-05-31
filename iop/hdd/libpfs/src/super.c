@@ -39,7 +39,8 @@ int pfsCheckZoneSize(u32 zone_size)
 #ifdef PFS_SUPPORT_BHDD
 int pfsCheckExtendedZoneSize(u32 zone_size)
 {
-	if ((zone_size & (zone_size - 1)) || (zone_size < (2 * 1024)) || (zone_size > (128 * 8192)))
+	// Note: in XOSD pfs IRX (compared to DVRP firmware), zone size upper bound is 1024 * 1024
+	if ((zone_size & (zone_size - 1)) || (zone_size < (2 * 1024)) || (zone_size > (16384 * 1024)))
 	{
 		PFS_PRINTF(PFS_DRV_NAME": error: invalid  extended zone size %d,%d\n", (zone_size & (zone_size - 1)) == 0, zone_size);
 		return 0;

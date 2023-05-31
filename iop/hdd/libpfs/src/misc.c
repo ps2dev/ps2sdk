@@ -232,7 +232,7 @@ pfs_block_device_t *pfsGetBlockDeviceTable(const char *name)
 		return NULL;
 	}
 
-	len = (u32)end - (u32)name;
+	len = (u8*)end - (u8*)name;
 	strncpy(devname, name, len);
 	devname[len] = '\0';
 
