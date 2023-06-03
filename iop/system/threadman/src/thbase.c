@@ -1210,11 +1210,13 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
         case TMID_Thread: {
             struct thread *thread;
             list_for_each (thread, &thctx.thread_list, thread_list) {
-                if (thread != thctx.idle_thread && write_count < readbufsize) {
-                    *readbuf++ = MAKE_HANDLE(thread);
-                    write_count++;
+                if (thread != thctx.idle_thread) {
+                    if (write_count < readbufsize) {
+                        *readbuf++ = MAKE_HANDLE(thread);
+                        write_count++;
+                    }
+                    obj_count++;
                 }
-                obj_count++;
             }
         } break;
         case TMID_Semaphore: {
