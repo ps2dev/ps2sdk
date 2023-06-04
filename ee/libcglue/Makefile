@@ -22,7 +22,10 @@ GLUE_OBJS = __dummy_passwd.o __direct_pwd.o __transform_errno.o __fill_stat.o _p
 	_isatty.o symlink.o truncate.o chmod.o fchmod.o fchmodat.o pathconf.o \
 	readlink.o utime.o fchown.o getrandom.o getentropy.o getpwuid.o fsync.o getpwnam.o getuid.o geteuid.o
 
-EE_OBJS = $(CORE_OBJS) $(SJIS_OBJS) $(TIME_OBJS) $(INIT_OBJS) $(SLEEP_OBJS) $(TERMINATE_OBJS) $(GLUE_OBJS)
+LOCK_OBJS = __retarget_lock_init.o __retarget_lock_acquire.o __retarget_lock_release.o __retarget_lock_try_acquire.o __retarget_lock_close.o \
+	__retarget_lock_init_recursive.o __retarget_lock_acquire_recursive.o __retarget_lock_release_recursive.o __retarget_lock_try_acquire_recursive.o __retarget_lock_close_recursive.o
+
+EE_OBJS = $(CORE_OBJS) $(SJIS_OBJS) $(TIME_OBJS) $(INIT_OBJS) $(SLEEP_OBJS) $(TERMINATE_OBJS) $(GLUE_OBJS) $(LOCK_OBJS)
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make
@@ -39,5 +42,8 @@ $(GLUE_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)glue.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(INIT_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)init.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(LOCK_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)lock.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
