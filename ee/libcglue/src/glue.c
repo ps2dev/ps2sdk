@@ -70,7 +70,20 @@ int __transform_errno(int res) {
 	return res;
 }
 #else
-int __transform_errno(int errorCode);
+int __transform_errno(int res);
+#endif
+
+#ifdef F___transform64_errno
+int64_t __transform64_errno(int64_t res) {
+	/* On error, -1 is returned and errno is set to indicate the error. */
+	if (res < 0) {
+		errno = -res;
+		return -1;
+	}
+	return res;
+}
+#else
+int64_t __transform64_errno(int64_t res);
 #endif
 
 #ifdef F___fill_stat
@@ -511,7 +524,7 @@ off64_t lseek64(int fd, off64_t offset, int whence)
     if (_ps2sdk_lseek64 == NULL)
         return EOVERFLOW;
 
-    return __transform_errno(_ps2sdk_lseek64(fd, offset, whence));
+    return __transform64_errno(_ps2sdk_lseek64(fd, offset, whence));
 }
 #endif
 
