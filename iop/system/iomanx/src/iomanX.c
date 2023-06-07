@@ -57,7 +57,11 @@ iomanX_iop_device_t **iomanX_GetDeviceList(void)
     return(dev_list);
 }
 
-int _start(int argc, char *argv[])
+#ifndef IOMANX_ENTRYPOINT
+#define IOMANX_ENTRYPOINT _start
+#endif
+
+int IOMANX_ENTRYPOINT(int argc, char *argv[])
 {
 	(void)argc;
 	(void)argv;
