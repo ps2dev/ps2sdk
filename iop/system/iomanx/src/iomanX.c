@@ -609,7 +609,7 @@ int iomanX_umount(const char *fsname)
 	return file.device->ops->umount(&file, filename);
 }
 
-long long iomanX_lseek64(int fd, long long offset, int whence)
+s64 iomanX_lseek64(int fd, s64 offset, int whence)
 {
 	iomanX_iop_file_t *f = get_file(fd);
 
