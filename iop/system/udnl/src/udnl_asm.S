@@ -6,6 +6,7 @@
 .module softfloat
 .module nooddspreg
 .endif
+.set push
 .set noat
 .set noreorder
 
@@ -239,3 +240,5 @@ func_00001440_loop:
 #else
 # .end func_00001544
 #endif
+
+.set pop

@@ -10,6 +10,7 @@
 
 
 .text
+.set push
 .set noreorder
 
 	.globl	wmemcpy
@@ -32,3 +33,4 @@ wmemcopy_end:
 	nop
 	.end	wmemcpy
 
+.set pop

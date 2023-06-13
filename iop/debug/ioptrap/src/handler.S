@@ -17,6 +17,7 @@
     .global def_exc_handler
     .ent    def_exc_handler
 def_exc_handler:
+    .set    push
     .set    noreorder
     .set    noat
     .word   0
@@ -148,11 +149,13 @@ def_exc_handler:
     jr      $k1
     cop0    0x10
     nop
+    .set pop
     .end def_exc_handler
 
     .global bp_exc_handler
     .ent bp_exc_handler
 bp_exc_handler:
+    .set push
     .set noreorder
     .set noat
     .word 0
@@ -287,5 +290,6 @@ bp_exc_handler:
     jr      $k1
     cop0    0x10
     nop
+    .set    pop
     .end    bp_exc_handler
 

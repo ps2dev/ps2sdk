@@ -947,6 +947,7 @@ static void _mpeg12_get_ref (
  afAvg <<= 2;
 
  __asm__ __volatile__(
+  ".set push\n\t"
   ".set noat\n\t"
   "pnor     $v0, $zero, $zero\n\t"
   "ld       $at, %4\n\t"
@@ -956,7 +957,7 @@ static void _mpeg12_get_ref (
   "pminw    %0, %0, $at\n\t"
   "dsrl32   %1, %0, 0\n\t"
   "sll      %0, %0, 0\n\t"
-  ".set at\n\t"
+  ".set pop\n\t"
   : "=r"( lMBX ), "=r"( lMBY ) : "r"( lMBX ), "r"( lMBY ), "m"( s_MPEG12Ctx.m_MBWidth ) : "at", "v0"
  );
 

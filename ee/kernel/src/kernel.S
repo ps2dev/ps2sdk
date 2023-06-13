@@ -695,6 +695,7 @@ GetGP:
 
 	.globl	SifWriteBackDCache
 	.ent	SifWriteBackDCache
+	.set	push
 	.set	noreorder
 
 SifWriteBackDCache:	/* DHWBIN: Data cache Hit WriteBack INvalidate.  */
@@ -748,6 +749,7 @@ last:
 	jr	$31
 	nop
 
+	.set	pop
 	.end	SifWriteBackDCache
 #endif
 
@@ -871,21 +873,21 @@ strlen:
    perform checking for null terminator one byte at a time. */
 
 	andi	$2,$4,0x7
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	bne	$2,$0,$L15
 	move	$7,$4
-	.set	macro
-	.set	reorder
+	.set	pop
 
 	andi	$3,$4,0xf
 	dli	$2,0x0101010101010101
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	bne	$3,$0,$L12
 	move	$5,$4
-	.set	macro
-	.set	reorder
+	.set	pop
 
 /* src is quadword aligned.  Load a quadword at a time and check for null terminator.
    If null terminator is found, go and find exact position by looking at each byte
@@ -901,12 +903,12 @@ strlen:
 	pand	$2,$2,$9
 	pcpyud	$3,$2,$8
 	or	$6,$3,$2
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	bnel	$6,$0,$L15
 	move	$4,$5
-	.set	macro
-	.set	reorder
+	.set	pop
 
 	addu	$5,$5,16
 $L14:
@@ -918,19 +920,19 @@ $L14:
 	pand	$4,$2,$9
 	pcpyud	$3,$4,$6
 	or	$3,$3,$4
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	beql	$3,$0,$L14
 	addu	$5,$5,16
-	.set	macro
-	.set	reorder
+	.set	pop
 
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	b	$L15
 	move	$4,$5
-	.set	macro
-	.set	reorder
+	.set	pop
 
 /* src is doubleword aligned.  Load a doubleword at a time and check for null terminator.
    If null terminator is found, go and find exact position by looking at each byte
@@ -944,12 +946,12 @@ $L12:
 	nor	$3,$0,$3
 	and	$2,$2,$3
 	and	$2,$2,$4
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	bnel	$2,$0,$L15
 	move	$4,$5
-	.set	macro
-	.set	reorder
+	.set	pop
 
 	dli	$6,0x0101010101010101
 	addu	$5,$5,8
@@ -960,12 +962,12 @@ $L16:
 	dsubu	$2,$2,$6
 	and	$2,$2,$3
 	and	$2,$2,$4
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	beql	$2,$0,$L16
 	addu	$5,$5,8
-	.set	macro
-	.set	reorder
+	.set	pop
 
 	move	$4,$5
 
@@ -980,6 +982,7 @@ $L16:
 
 $L9:
 $L15:
+	.set	push
 	.set	noreorder
 	.set	nomacro
 
@@ -995,15 +998,14 @@ $L15:
 1:
 	subu	$4,$4,1
 
-	.set	macro
-	.set	reorder
+	.set	pop
 
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	j	$31
 	subu	$2,$4,$7
-	.set	macro
-	.set	reorder
+	.set	pop
 
 	.end	strlen
 #endif
@@ -1043,19 +1045,19 @@ strncpy:
 	li	$10,0x10
 	andi	$2,$7,0x7
 	li	$9,0x8
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	bne	$2,$0,$L9
 	andi	$2,$7,0xf
-	.set	macro
-	.set	reorder
+	.set	pop
 	movz	$9,$10,$2
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	bne	$2,$0,$L17
 	sltu	$2,$6,$9
-	.set	macro
-	.set	reorder
+	.set	pop
 
 /* src and dest are quadword aligned.  Check a quadword at a time looking for a
    null terminator or until the nth byte is reached.  Otherwise, copy the
@@ -1075,12 +1077,12 @@ $L31:
 	pand	$2,$2,$10
 	pcpyud	$3,$2,$4
 	or	$3,$2,$3
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	bne	$3,$0,$L5
 	move	$7,$8
-	.set	macro
-	.set	reorder
+	.set	pop
 	lq	$3,0($5)
 	.p2align 3
 $L39:
@@ -1088,12 +1090,12 @@ $L39:
 	addu	$5,$5,16
 	sltu	$2,$6,16
 	sq	$3,0($7)
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	bne	$2,$0,$L5
 	addu	$7,$7,16
-	.set	macro
-	.set	reorder
+	.set	pop
 
 	lq	$2,0($5)
 	#nop
@@ -1103,14 +1105,14 @@ $L39:
 	pand	$2,$2,$10
 	pcpyud	$3,$2,$4
 	or	$2,$2,$3
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	beql	$2,$0,$L19
 	lq	$3,0($5)
 	b	$L9
 	move	$4,$7
-	.set	macro
-	.set	reorder
+	.set	pop
 
 /* src and dest are quadword aligned.  Check a quadword at a time looking for a
    null terminator or until the nth byte is reached.  Otherwise, copy the
@@ -1126,12 +1128,12 @@ $L17:
 	nor	$3,$0,$3
 	and	$2,$2,$3
 	and	$2,$2,$10
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	bne	$2,$0,$L5
 	move	$7,$8
-	.set	macro
-	.set	reorder
+	.set	pop
 	ld	$3,0($5)
 	.p2align 3
 $L19:
@@ -1139,12 +1141,12 @@ $L19:
 	addu	$5,$5,8
 	sltu	$2,$6,8
 	sd	$3,0($7)
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	bne	$2,$0,$L5
 	addu	$7,$7,8
-	.set	macro
-	.set	reorder
+	.set	pop
 
 	ld	$2,0($5)
 	#nop
@@ -1152,12 +1154,12 @@ $L19:
 	dsubu	$2,$2,$9
 	and	$2,$2,$3
 	and	$2,$2,$10
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	beql	$2,$0,$L19
 	ld	$3,0($5)
-	.set	macro
-	.set	reorder
+	.set	pop
 
 $L5:
 	move	$4,$7
@@ -1170,55 +1172,55 @@ $L5:
 
 	.p2align 3
 $L9:
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	beq	$6,$0,$L18
 	move	$2,$6
-	.set	macro
-	.set	reorder
+	.set	pop
 
 	lbu	$2,0($5)
 	addu	$6,$6,-1
 	addu	$5,$5,1
 	sb	$2,0($4)
 	sll	$2,$2,24
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	bne	$2,$0,$L9
 	addu	$4,$4,1
-	.set	macro
-	.set	reorder
+	.set	pop
 
 	move	$2,$6
 $L20:
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	beq	$2,$0,$L18
 	addu	$6,$6,-1
-	.set	macro
-	.set	reorder
+	.set	pop
 
 	.p2align 3
 $L16:
 	sb	$0,0($4)
 	move	$2,$6
 	addu	$4,$4,1
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	nop
 	nop
 	bne	$2,$0,$L16
 	addu	$6,$6,-1
-	.set	macro
-	.set	reorder
+	.set	pop
 
 $L18:
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	j	$31
 	move	$2,$8
-	.set	macro
-	.set	reorder
+	.set	pop
 
 	.end	strncpy
 #endif
@@ -1254,21 +1256,21 @@ memcpy:
    code that moves one byte at a time */
 
 	sltu	$2,$6,32
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	bne	$2,$0,$L2
 	move	$3,$8
-	.set	macro
-	.set	reorder
+	.set	pop
 
 	or	$2,$5,$8
 	andi	$2,$2,0xF
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	bnel	$2,$0,$L20
 	addu	$6,$6,-1
-	.set	macro
-	.set	reorder
+	.set	pop
 
 	move	$7,$8
 
@@ -1285,20 +1287,20 @@ $L5:
 	lq	$2,0($5)
 	addu	$5,$5,16
 	sq	$2,0($7)
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	beq	$4,$0,$L5
 	addu	$7,$7,16
-	.set	macro
-	.set	reorder
+	.set	pop
 
 	sltu	$2,$6,8
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	bne	$2,$0,$L2
 	move	$3,$7
-	.set	macro
-	.set	reorder
+	.set	pop
 
 /* while remainder to move is >= 8 bytes, use LD/SD doubleword instructions
    to move data */
@@ -1309,12 +1311,12 @@ $L9:
 	addu	$5,$5,8
 	sltu	$2,$6,8
 	sd	$3,0($7)
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	beq	$2,$0,$L9
 	addu	$7,$7,8
-	.set	macro
-	.set	reorder
+	.set	pop
 
 	move	$3,$7
 
@@ -1330,33 +1332,33 @@ $L2:
 	addu	$6,$6,-1
 $L20:
 	li	$2,-1			# 0xffffffffffffffff
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	beq	$6,$2,$L12
 	move	$4,$2
-	.set	macro
-	.set	reorder
+	.set	pop
 
 $L13:
 	lbu	$2,0($5)
 	addu	$6,$6,-1
 	addu	$5,$5,1
 	sb	$2,0($3)
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	nop
 	bne	$6,$4,$L13
 	addu	$3,$3,1
-	.set	macro
-	.set	reorder
+	.set	pop
 
 $L12:
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	j	$31
 	move	$2,$8
-	.set	macro
-	.set	reorder
+	.set	pop
 
 	.end	memcpy
 #endif
@@ -1390,22 +1392,22 @@ memset:
 /* if not setting a double word or more, go and set one byte at a time */
 
 	sltu	$2,$6,8
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	bne	$2,$0,$L2
 	move	$3,$4
-	.set	macro
-	.set	reorder
+	.set	pop
 
 /* if not aligned on a quadword boundary, set one byte at a time */
 
 	andi	$2,$4,0xf
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	bne	$2,$0,$L2
 	move	$7,$4
-	.set	macro
-	.set	reorder
+	.set	pop
 
 /* otherwise, build a double word containing the bytes to set */
 
@@ -1415,15 +1417,15 @@ memset:
 	dsll	$3,$8,8
 	or	$8,$3,$9
 	pcpyh	$3,$8
-	.set	noreorder
-	.set	nomacro
 
 /* check if setting 32 bytes or more, otherwise set 8 bytes at a time */
 
+	.set	push
+	.set	noreorder
+	.set	nomacro
 	bne	$10,$0,$L31
 	sltu	$2,$6,8
-	.set	macro
-	.set	reorder
+	.set	pop
 
 /* take double word built from the byte to set and make a quadword */
 
@@ -1437,33 +1439,33 @@ $L12:
 	addu	$7,$7,16
 	sltu	$2,$6,32
 	sq	$8,0($7)
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	beq	$2,$0,$L12
 	addu	$7,$7,16
-	.set	macro
-	.set	reorder
+	.set	pop
 
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	b	$L31
 	sltu	$2,$6,8
-	.set	macro
-	.set	reorder
+	.set	pop
 
 $L16:
 	addu	$6,$6,-8
 	addu	$7,$7,8
 	sltu	$2,$6,8
 $L31:
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	nop
 	nop
 	beql	$2,$0,$L16
 	sd	$3,0($7)
-	.set	macro
-	.set	reorder
+	.set	pop
 
 	move	$3,$7
 
@@ -1486,6 +1488,7 @@ $L2:
 $L20:
 	sb	$5,0($3)
 	addu	$6,$6,-1
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	nop
@@ -1493,16 +1496,15 @@ $L20:
 	nop
 	bne	$6,$2,$L20
 	addu	$3,$3,1
-	.set	macro
-	.set	reorder
+	.set	pop
 
 $L19:
+	.set	push
 	.set	noreorder
 	.set	nomacro
 	j	$31
 	move	$2,$4
-	.set	macro
-	.set	reorder
+	.set	pop
 
 	.end	memset
 #endif
