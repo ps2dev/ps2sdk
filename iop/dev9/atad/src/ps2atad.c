@@ -315,13 +315,16 @@ int _start(int argc, char *argv[])
             g_ata_bd[i].sectorSize = 512;
             g_ata_bd[i].sectorOffset = 0;
             g_ata_bd[i].sectorCount = 0;
-            
+
             g_ata_bd[i].read  = ata_bd_read;
             g_ata_bd[i].write = ata_bd_write;
             g_ata_bd[i].flush = ata_bd_flush;
             g_ata_bd[i].stop  = ata_bd_stop;
         }
     }
+
+    ata_get_devinfo(0);
+    ata_get_devinfo(1);
 #endif
 
     if (RegisterLibraryEntries(&_exp_atad) != 0) {

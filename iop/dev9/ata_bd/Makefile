@@ -11,4 +11,6 @@ IOP_INC_DIR = $(PS2SDKSRC)/iop/dev9/atad/include/
 
 ATA_ENABLE_BDM ?= 1
 
+IOP_BIN ?= ata_bd.irx
+
 include $(PS2SDKSRC)/iop/dev9/atad/Makefile
