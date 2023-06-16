@@ -57,7 +57,11 @@ iomanX_iop_device_t **iomanX_GetDeviceList(void)
     return(dev_list);
 }
 
-int _start(int argc, char *argv[])
+#ifndef IOMANX_ENTRYPOINT
+#define IOMANX_ENTRYPOINT _start
+#endif
+
+int IOMANX_ENTRYPOINT(int argc, char *argv[])
 {
 	(void)argc;
 	(void)argv;
@@ -609,7 +613,7 @@ int iomanX_umount(const char *fsname)
 	return file.device->ops->umount(&file, filename);
 }
 
-long long iomanX_lseek64(int fd, long long offset, int whence)
+s64 iomanX_lseek64(int fd, s64 offset, int whence)
 {
 	iomanX_iop_file_t *f = get_file(fd);
 
