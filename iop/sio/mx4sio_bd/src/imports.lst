@@ -23,6 +23,13 @@ loadcore_IMPORTS_start
 I_GetLoadcoreInternalData
 loadcore_IMPORTS_end
 
+#ifdef RPC_PRINTF
+sifcmd_IMPORTS_start
+I_sceSifCallRpc
+I_sceSifBindRpc
+sifcmd_IMPORTS_end
+#endif
+
 #ifndef MINI_DRIVER
 stdio_IMPORTS_start
 I_printf
@@ -31,6 +38,10 @@ stdio_IMPORTS_end
 
 sysclib_IMPORTS_start
 I_strcmp
+#ifdef RPC_PRINTF
+I_strlen
+I_look_ctype_table
+#endif
 stdio_IMPORTS_end
 
 thbase_IMPORTS_start

@@ -4,13 +4,22 @@
 // #define MINI_DRIVER
 
 #ifndef MINI_DRIVER
+
+#ifdef RPC_PRINTF
 #include "stdio.h"
-#define M_PRINTF(format, args...) printf("MX4SIO: " format, ##args)
+#include "rpc_printf.h"
+#define M_PRINTF(format, args...) do {printf("MX4SIO: " format, ##args); \
+                                        rpc_printf("MX4SIO: " format, ##args); } while(0)
+#else
+#include "stdio.h"
+#define M_PRINTF(format, args...)  printf("MX4SIO: " format, ##args); 
+#endif
 #else
 #define M_PRINTF(format, args...) \
-    do {                          \
+    do {                         \
     } while (0)
 #endif
+
 
 #ifdef DEBUG
 #define M_DEBUG M_PRINTF
