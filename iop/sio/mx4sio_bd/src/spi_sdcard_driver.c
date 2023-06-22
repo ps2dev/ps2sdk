@@ -13,7 +13,7 @@
 
 #define CMD0   (0  | 0x40)  /* Reset */
 #define CMD1   (1  | 0x40)  /* Send Operator Condition - SEND_OP_COND */
-#define CMD8   (8  | 0x40)  /* Send Interface Condition - SEND_IF_COND    */
+#define CMD8   (8  | 0x40)  /* Send Interface Condition - SEND_IF_COND */
 #define CMD9   (9  | 0x40)  /* Read CSD */
 #define CMD10  (10 | 0x40)  /* Read CID */
 #define CMD12  (12 | 0x40)  /* Stop data transmit */
@@ -61,7 +61,7 @@ struct block_device bd = {
     spisd_read,
     spisd_write,
     spisd_flush,
-    spisd_stop};
+    spisd_stop };
 
 /* NOTE: SIO2 does *NOT* allow for direct control of /CS line.
  * It's controlled by the SIO2 hardware and automatically asserted at the start 
@@ -191,7 +191,7 @@ int spisd_init_card()
                     M_DEBUG("ERROR: CMD55 returned 0x%x, exp: 0x1\n", response);
                     return SPISD_RESULT_TIMEOUT;
                 }
-                
+
                 response = spisd_send_cmd(ACMD41, 0x40000000);
                 if (response == 0x00) {
                     break;
@@ -215,7 +215,7 @@ int spisd_init_card()
 
             /* set baud to 25MHz */
             mx_sio2_set_baud(SIO2_BAUD_DIV_FAST);
-        
+
         } else {
             M_DEBUG("ERROR: CMD8 check pattern failed, got 0x%x, 0x%x\n", buffer[2], buffer[3]);
             return SPISD_RESULT_ERROR;
@@ -224,10 +224,10 @@ int spisd_init_card()
     /* if CMD8 response is illegal, card is CSD v1 / MMC */
     } else if (response & SPISD_R1_ILLEGAL_CMD_FLAG) {
         M_DEBUG("CMD8 illegal, trying CSD v1.0 init\n");
-        
+
         /* end of CMD8, dummy write */
         mx_sio2_write_dummy();
-        
+
         /* CMD55 / ACMD41 pairs */
         for (int i = 0; i < 0xFFF; i++) {
             response = spisd_send_cmd(CMD55, 0);
@@ -378,7 +378,7 @@ int spisd_get_card_info()
         unsigned int c_size = (csdv2->c_sizeHi << 16) | (csdv2->c_sizeMd << 8) | csdv2->c_sizeLo;
         bd.sectorCount = (c_size + 1) * 1024;
     }
-    
+
     M_PRINTF("%lu %u-byte logical blocks: (%luMB / %luMiB)\n", (u32)bd.sectorCount, bd.sectorSize, (u32)bd.sectorCount / ((1000 * 1000) / bd.sectorSize), (u32)bd.sectorCount / ((1024 * 1024) / bd.sectorSize));
 
     return SPISD_RESULT_OK;
@@ -645,10 +645,10 @@ int spisd_write(struct block_device *bd, uint64_t sector, const void *buffer, ui
 
     /* recast */
     void *write_buffer = (uint32_t*)buffer;
-    
+
     /* pre-reverse the entire buffer */
     reverse_buffer(write_buffer, ((count * SECTOR_SIZE) / 4)); 
-    
+
     mx_sio2_lock(INTR_TX);
 
     while (sectors_left > 0 && retries < MAX_RETRIES) {
@@ -659,7 +659,7 @@ int spisd_write(struct block_device *bd, uint64_t sector, const void *buffer, ui
             M_DEBUG("ERROR: failed to start multi-block write\n");
             break;
         }
-        
+
         /* start writing blocks */
         results = spisd_write_multi_do(write_buffer, sectors_left);
         sectors_left = sectors_left - results;

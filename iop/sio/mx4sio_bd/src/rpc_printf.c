@@ -19,7 +19,7 @@ static uint8_t rpc_init = 0;
 
 int rpc_printf_init()
 {
-	while(sceSifBindRpc(&client, RPC_ID, 0) < 0 || client.server == NULL) {
+    while(sceSifBindRpc(&client, RPC_ID, 0) < 0 || client.server == NULL) {
         DelayThread(1000 * 1000);
     }
 
@@ -31,14 +31,14 @@ int rpc_printf_init()
 int rpc_printf(const char *format, ...)
 {
     int msg_len;
-    
+
     if (rpc_init != 1) {
         rpc_printf_init();
     }
 
     va_list args;
     va_start(args, format);
-    
+
     /* use vsnprintf from xprintf to create the formated msg */
     msg_len = vsnprintf(msg_buff, 128, format, args);
     va_end(args);

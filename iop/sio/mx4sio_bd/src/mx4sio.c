@@ -245,10 +245,10 @@ uint8_t mx_sio2_write_byte(uint8_t byte)
     inl_sio2_regN_set(1, 0);
     
     /* put byte in TX FIFO */
-    inl_sio2_data_out(reverse_byte_LUT8[byte]);              
+    inl_sio2_data_out(reverse_byte_LUT8[byte]);
     
     /* start queue exec */
-    inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);         
+    inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
     
     /* wait for completion */
     while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
@@ -261,7 +261,7 @@ uint8_t mx_sio2_write_byte(uint8_t byte)
 #endif
 
     /* get byte from RX FIFO */
-    return reverse_byte_LUT8[inl_sio2_data_in()];            
+    return reverse_byte_LUT8[inl_sio2_data_in()];
 }
 
 uint8_t mx_sio2_write_dummy(void)
@@ -325,17 +325,17 @@ uint8_t mx_sio2_wait_equal(uint8_t value, uint32_t count)
                             TR_CTRL_TX_DATA_SZ(0) |
                             TR_CTRL_RX_DATA_SZ(1));
         inl_sio2_regN_set(1, 0);
-        
+
         /* start queue exec */
-        inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);   
-        
+        inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
+
         /* wait for completion */
         while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
             ;
-        
+
         in_byte = inl_sio2_data_in();
-    
-#ifdef DEBUG_VERBOSE    
+
+#ifdef DEBUG_VERBOSE
         M_DEBUG("WE: 0x%x, EX: 0x%x\n", reverse_byte_LUT8[in_byte], value);
 #endif
 
@@ -374,7 +374,7 @@ uint8_t mx_sio2_wait_not_equal(uint8_t value, uint32_t count)
         /* wait for completion */
         while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
             ;
-        
+
         /* get byte from RX FIFO */
         in_byte = inl_sio2_data_in();
 
@@ -392,7 +392,7 @@ uint8_t mx_sio2_wait_equal_masked(uint8_t value, uint8_t mask, uint32_t count)
     uint8_t exp_byte = reverse_byte_LUT8[value];
     uint8_t rev_mask = reverse_byte_LUT8[mask];
     uint8_t in_byte = 0;
-               
+
     while (count > 0 && in_byte != exp_byte) {
         /* reset SIO2 + FIFO pointers, disable interrupts */
         inl_sio2_ctrl_set(0x0bc);
@@ -411,15 +411,15 @@ uint8_t mx_sio2_wait_equal_masked(uint8_t value, uint8_t mask, uint32_t count)
         inl_sio2_regN_set(1, 0);
 
         /* start queue exec */
-        inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);   
-        
+        inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
+
         /* wait for completion */
         while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
             ;
-        
+
         in_byte = inl_sio2_data_in();
 
-#ifdef DEBUG_VERBOSE    
+#ifdef DEBUG_VERBOSE
         M_DEBUG("WEM: 0x%x M:\n", reverse_byte_LUT8[in_byte], reverse_byte_LUT8[in_byte & rev_mask]);
 #endif
         in_byte = in_byte & rev_mask;
@@ -492,7 +492,7 @@ void mx_sio2_tx_pio(uint8_t *buffer, uint32_t size)
 
         /* reset SIO2 + FIFO pointers, disable interrupts */
         inl_sio2_ctrl_set(0x0bc);
-        
+
         /* add transfer to queue */
         inl_sio2_regN_set(0,
                         TR_CTRL_PORT_NR(PORT_NR) |
@@ -675,7 +675,7 @@ inline void reverse_buffer(uint32_t *buffer, uint32_t count)
     const uint32_t maskAA = 0xAAAAAAAA;
     uint32_t n;
 
-    #pragma GCC unroll 2    
+    #pragma GCC unroll 2
     for (int i = 0; i < count; i++) {
         n = buffer[i];
         n = ((n & maskF0) >> 4) | ((n & mask0F) << 4);
