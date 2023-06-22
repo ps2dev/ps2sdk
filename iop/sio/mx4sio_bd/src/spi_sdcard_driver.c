@@ -156,10 +156,15 @@ int spisd_init_card()
     mx_sio2_set_baud(SIO2_BAUD_DIV_SLOW);
 
     /* send at least 74 dummy clocks */
+    /*
     uint8_t dummy_clks[10] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
                               0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
-    mx_sio2_tx_pio(dummy_clks, 10);
+    mx_sio2_tx_pio(dummy_clks, 10);*/
+
+    for (int i = 0; i < 16; i++) {
+        mx_sio2_write_dummy();
+    }
 
     do {
         response = spisd_send_cmd(CMD0, 0);
@@ -286,7 +291,7 @@ int spisd_init_card()
 }
 
 /* get card info and attach to bdm driver */
-int spisd_init_driver()
+int spisd_get_card_info()
 {
     /* 16 bytes + 2 byte CRC16 */
     uint8_t reg_data[18];
@@ -357,7 +362,6 @@ int spisd_init_driver()
 
     struct t_csdVer1 *csdv1 = (struct t_csdVer1 *)sdcard.csd;
     struct t_csdVer2 *csdv2 = (struct t_csdVer2 *)sdcard.csd;
-    uint32_t sector_count = 0;
     
     /* CSD v1 - SDSC */
     if (csdv1->csd_structure == 0) {
@@ -367,28 +371,12 @@ int spisd_init_driver()
         unsigned int blockLen    = 1 << csdv1->read_bl_len;
         unsigned int capacity    = blockNr * blockLen;
 
-        sector_count = capacity / 512;
+        bd.sectorCount = capacity / 512;
 
     /* CSD v2 - SDHC, SDXC */
     } else if (csdv1->csd_structure == 1) {
         unsigned int c_size = (csdv2->c_sizeHi << 16) | (csdv2->c_sizeMd << 8) | csdv2->c_sizeLo;
-        sector_count = (c_size + 1) * 1024;
-    }
-
-    /* first init, connect to BDM */
-    if (sdcard.initialized != 1) {
-        M_DEBUG("connecting to bdm\n");
-        bd.sectorCount = sector_count;
-        bdm_connect_bd(&bd);
-    }
-
-    /* card hot swapped, sector count is the only detail BDM cares about */
-    if (sdcard.initialized == 1 && sector_count != bd.sectorCount) {
-        M_DEBUG("hot swap detected, reconnecting bdm!\n");
-        bd.sectorCount = sector_count;
-        bdm_disconnect_bd(&bd);
-        DelayThread(200*200);
-        bdm_connect_bd(&bd);
+        bd.sectorCount = (c_size + 1) * 1024;
     }
     
     M_PRINTF("%lu %u-byte logical blocks: (%luMB / %luMiB)\n", (u32)bd.sectorCount, bd.sectorSize, (u32)bd.sectorCount / ((1000 * 1000) / bd.sectorSize), (u32)bd.sectorCount / ((1024 * 1024) / bd.sectorSize));
@@ -408,8 +396,8 @@ int spisd_recover()
         return SPISD_RESULT_ERROR;
     }
 
-    if (spisd_init_driver() != SPISD_RESULT_OK) {
-        M_DEBUG("recovery failed to reinit driver!\n");
+    if (spisd_get_card_info() != SPISD_RESULT_OK) {
+        M_DEBUG("recovery failed to get card info!\n");
         return SPISD_RESULT_ERROR;
     }
 

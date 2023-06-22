@@ -10,6 +10,6 @@ IOP_SRC_DIR = $(PS2SDKSRC)/iop/sio/mx4sio_bd/src/
 
 IOP_OBJS += xprintf.o rpc_printf.o
 
-IOP_CFLAGS += -DDEBUG -DRPC_PRINTF
+IOP_CFLAGS += -DDEBUG -DRPC_PRINTF -Wno-unused-variable
 
 include $(PS2SDKSRC)/iop/sio/mx4sio_bd/Makefile

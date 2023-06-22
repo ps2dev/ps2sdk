@@ -164,7 +164,7 @@ uint16_t spisd_read_status_register();
 
 /* init */
 int spisd_init_card();   /* bring card up from identification mode to data-transfer mode */
-int spisd_init_driver(); /* get card info and reattach to bdm if card capacity changed */
+int spisd_get_card_info(); /* get card info and reattach to bdm if card capacity changed */
 int spisd_recover();
 
 /* BDM functions */

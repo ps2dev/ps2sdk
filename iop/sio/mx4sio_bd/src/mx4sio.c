@@ -33,6 +33,9 @@ int mx_sio2_dma_isr_rx(void *arg)
     int ef     = *(int *)arg;
     int eflags = EF_SIO2_INTR_REVERSE;
 
+    /* clear SIO2 stat reg */
+    inl_sio2_stat_set(inl_sio2_stat_get());
+
     /* wait for PIO portion of transfer to complete */
     while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
         ;
@@ -83,6 +86,9 @@ int mx_sio2_dma_isr_tx(void *arg)
 {
     int ef     = *(int *)arg;
     int eflags = 0;
+
+    /* clear SIO2 stat reg */
+    inl_sio2_stat_set(inl_sio2_stat_get());
 
     /* SIO2 requires all data to be sent to be present in the TX FIFO
      * prior to starting the transfer. As such, SIO2 will not 
@@ -303,24 +309,23 @@ uint8_t mx_sio2_wait_equal(uint8_t value, uint32_t count)
     uint8_t exp_byte = reverse_byte_LUT8[value];
     uint8_t in_byte = 0;
     
-    /* reset SIO2 + FIFO pointers, disable interrupts */
-    inl_sio2_ctrl_set(0x0bc);   
+    while (count > 0 && in_byte != exp_byte) { 
+        /* reset SIO2 + FIFO pointers, disable interrupts */
+        inl_sio2_ctrl_set(0x0bc);
 
-    inl_sio2_regN_set(0,
-                      TR_CTRL_PORT_NR(PORT_NR) |
-                          TR_CTRL_PAUSE(0) |
-                          TR_CTRL_TX_MODE_PIO_DMA(0) |
-                          TR_CTRL_RX_MODE_PIO_DMA(0) |
-                          TR_CTRL_NORMAL_TR(1) |
-                          TR_CTRL_SPECIAL_TR(0) |
-                          TR_CTRL_BAUD_DIV(1) |
-                          TR_CTRL_WAIT_ACK_FOREVER(0) |
-                          TR_CTRL_TX_DATA_SZ(0) |
-                          TR_CTRL_RX_DATA_SZ(1));
-    inl_sio2_regN_set(1, 0);
-
-    while (count > 0 && in_byte != exp_byte) {
-
+        inl_sio2_regN_set(0,
+                        TR_CTRL_PORT_NR(PORT_NR) |
+                            TR_CTRL_PAUSE(0) |
+                            TR_CTRL_TX_MODE_PIO_DMA(0) |
+                            TR_CTRL_RX_MODE_PIO_DMA(0) |
+                            TR_CTRL_NORMAL_TR(1) |
+                            TR_CTRL_SPECIAL_TR(0) |
+                            TR_CTRL_BAUD_DIV(1) |
+                            TR_CTRL_WAIT_ACK_FOREVER(0) |
+                            TR_CTRL_TX_DATA_SZ(0) |
+                            TR_CTRL_RX_DATA_SZ(1));
+        inl_sio2_regN_set(1, 0);
+        
         /* start queue exec */
         inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);   
         
@@ -329,7 +334,7 @@ uint8_t mx_sio2_wait_equal(uint8_t value, uint32_t count)
             ;
         
         in_byte = inl_sio2_data_in();
-
+    
 #ifdef DEBUG_VERBOSE    
         M_DEBUG("WE: 0x%x, EX: 0x%x\n", reverse_byte_LUT8[in_byte], value);
 #endif
@@ -345,24 +350,23 @@ uint8_t mx_sio2_wait_not_equal(uint8_t value, uint32_t count)
     uint8_t exp_byte = reverse_byte_LUT8[value];
     uint8_t in_byte = exp_byte;
     
-    /* reset SIO2 + FIFO pointers, disable interrupts */
-    inl_sio2_ctrl_set(0x0bc);   
-
-    /* add transfer to queue */
-    inl_sio2_regN_set(0,
-                      TR_CTRL_PORT_NR(PORT_NR) |
-                          TR_CTRL_PAUSE(0) |
-                          TR_CTRL_TX_MODE_PIO_DMA(0) |
-                          TR_CTRL_RX_MODE_PIO_DMA(0) |
-                          TR_CTRL_NORMAL_TR(1) |
-                          TR_CTRL_SPECIAL_TR(0) |
-                          TR_CTRL_BAUD_DIV(1) |
-                          TR_CTRL_WAIT_ACK_FOREVER(0) |
-                          TR_CTRL_TX_DATA_SZ(0) |
-                          TR_CTRL_RX_DATA_SZ(1));
-    inl_sio2_regN_set(1, 0);
-
     while (count > 0 && in_byte == exp_byte) {
+        /* reset SIO2 + FIFO pointers, disable interrupts */
+        inl_sio2_ctrl_set(0x0bc);   
+
+        /* add transfer to queue */
+        inl_sio2_regN_set(0,
+                        TR_CTRL_PORT_NR(PORT_NR) |
+                            TR_CTRL_PAUSE(0) |
+                            TR_CTRL_TX_MODE_PIO_DMA(0) |
+                            TR_CTRL_RX_MODE_PIO_DMA(0) |
+                            TR_CTRL_NORMAL_TR(1) |
+                            TR_CTRL_SPECIAL_TR(0) |
+                            TR_CTRL_BAUD_DIV(1) |
+                            TR_CTRL_WAIT_ACK_FOREVER(0) |
+                            TR_CTRL_TX_DATA_SZ(0) |
+                            TR_CTRL_RX_DATA_SZ(1));
+        inl_sio2_regN_set(1, 0);
 
         /* start queue exec */
         inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);   
@@ -388,24 +392,23 @@ uint8_t mx_sio2_wait_equal_masked(uint8_t value, uint8_t mask, uint32_t count)
     uint8_t exp_byte = reverse_byte_LUT8[value];
     uint8_t rev_mask = reverse_byte_LUT8[mask];
     uint8_t in_byte = 0;
-    
-    /* reset SIO2 + FIFO pointers, disable interrupts */
-    inl_sio2_ctrl_set(0x0bc);   
-
-    inl_sio2_regN_set(0,
-                      TR_CTRL_PORT_NR(PORT_NR) |
-                          TR_CTRL_PAUSE(0) |
-                          TR_CTRL_TX_MODE_PIO_DMA(0) |
-                          TR_CTRL_RX_MODE_PIO_DMA(0) |
-                          TR_CTRL_NORMAL_TR(1) |
-                          TR_CTRL_SPECIAL_TR(0) |
-                          TR_CTRL_BAUD_DIV(1) |
-                          TR_CTRL_WAIT_ACK_FOREVER(0) |
-                          TR_CTRL_TX_DATA_SZ(0) |
-                          TR_CTRL_RX_DATA_SZ(1));
-    inl_sio2_regN_set(1, 0);
-
+               
     while (count > 0 && in_byte != exp_byte) {
+        /* reset SIO2 + FIFO pointers, disable interrupts */
+        inl_sio2_ctrl_set(0x0bc);
+
+        inl_sio2_regN_set(0,
+                        TR_CTRL_PORT_NR(PORT_NR) |
+                            TR_CTRL_PAUSE(0) |
+                            TR_CTRL_TX_MODE_PIO_DMA(0) |
+                            TR_CTRL_RX_MODE_PIO_DMA(0) |
+                            TR_CTRL_NORMAL_TR(1) |
+                            TR_CTRL_SPECIAL_TR(0) |
+                            TR_CTRL_BAUD_DIV(1) |
+                            TR_CTRL_WAIT_ACK_FOREVER(0) |
+                            TR_CTRL_TX_DATA_SZ(0) |
+                            TR_CTRL_RX_DATA_SZ(1));
+        inl_sio2_regN_set(1, 0);
 
         /* start queue exec */
         inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);   
@@ -430,7 +433,9 @@ uint8_t mx_sio2_wait_equal_masked(uint8_t value, uint8_t mask, uint32_t count)
 void mx_sio2_rx_pio(uint8_t *buffer, uint32_t size)
 {
     uint32_t transfer_size;
-
+#ifdef DEBUG_VERBOSE
+    uint8_t *buffer_start = buffer;
+#endif
     while (size > 0) {
         /* SIO2 can only transfer 256 bytes at a time */
         transfer_size = size > SIO2_MAX_TRANSFER_SIZE ? SIO2_MAX_TRANSFER_SIZE : size;
@@ -464,10 +469,8 @@ void mx_sio2_rx_pio(uint8_t *buffer, uint32_t size)
         }
 
 #ifdef DEBUG_VERBOSE
-        uint8_t *buffer_start = buffer - transfer_size;
-    
         for (int i = 0; i < transfer_size; i++) {
-            M_DEBUG("W:0xFF, R:0x%x\n", *buffer_start++);
+            M_DEBUG("W:0xFF, R:0x%x\n", buffer_start[i]);
         }
 #endif
 
@@ -478,6 +481,10 @@ void mx_sio2_rx_pio(uint8_t *buffer, uint32_t size)
 void mx_sio2_tx_pio(uint8_t *buffer, uint32_t size)
 {
     uint32_t transfer_size;
+
+#ifdef DEBUG_VERBOSE
+    uint8_t *buffer_start = buffer;
+#endif
 
     while (size > 0) {
         /* SIO2 can only transfer 256 bytes at a time */
@@ -517,10 +524,8 @@ void mx_sio2_tx_pio(uint8_t *buffer, uint32_t size)
         while ((inl_sio2_stat6c_get() & (1 << 12)) == 0);
 
 #ifdef DEBUG_VERBOSE
-        uint8_t *buffer_start = buffer - transfer_size;
-
         for (int i = 0; i < transfer_size; i++) {
-            M_DEBUG("W:0x%x, R:0x%x\n", *buffer_start++, reverse_byte_LUT8[inl_sio2_data_in()]);
+            M_DEBUG("W:0x%x, R:0x%x\n", buffer_start[i], reverse_byte_LUT8[inl_sio2_data_in()]);
         }
 #endif
         size -= transfer_size;
@@ -613,7 +618,8 @@ static void sd_detect()
         if (spisd_init_card() == SPISD_RESULT_OK) {
 
             /* get card capacity and attach to BDM */
-            if (spisd_init_driver() == SPISD_RESULT_OK) {
+            if (spisd_get_card_info() == SPISD_RESULT_OK) {
+                bdm_connect_bd(&bd);
                 sdcard.initialized = 1;
             }
         }
@@ -622,10 +628,18 @@ static void sd_detect()
         results = spisd_read_status_register();
         /* comparing without a mask might be a bit overkill */
         if (results != 0x0) {
-            spisd_recover();
+            /* try to recover */
+            results = spisd_recover();
+            /* maybe add a var to keep track of capacity */
+            if ((sdcard.initialized == 1) && (results != SPISD_RESULT_OK)) {
+                /* recovery failed, disconnect from BDM */
+                M_DEBUG("Recovery failed, disconnecting from bdm.\n");
+                bdm_disconnect_bd(&bd);
+                sdcard.initialized = 0;
+            }
         }
     }
-    
+
     mx_sio2_unlock(INTR_NONE);
     
 }
