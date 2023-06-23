@@ -13,6 +13,7 @@
  * The lock API functions required by newlib.
  */
 
+#include <stdint.h>
 #include <stdio.h>
 #include <sys/lock.h>
 #include <kernel.h>
