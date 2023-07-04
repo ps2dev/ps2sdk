@@ -9,7 +9,7 @@
 # tty2sior made by Matias Israelson (2023) based on UDPTTY.IRX and SIOR.IRX
 
 IOP_OBJS = tty2sior.o xprintf.o exports.o imports.o
-KPRTTY ?= 1
+KPRTTY ?= 0
 
 ifneq ($(KPRTTY), 0)
 	IOP_CFLAGS += -DKPRTTY
