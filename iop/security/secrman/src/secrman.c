@@ -218,7 +218,7 @@ void *SecrCardBootFile(int port, int slot, void *buffer)
     SecrBitTable_t *BitTableData;
     unsigned int offset, i;
 
-    BitTableData = (SecrBitTable_t *)((unsigned int)buffer + get_BitTableOffset(buffer));
+    BitTableData = (SecrBitTable_t *)((u8 *)buffer + get_BitTableOffset(buffer));
     if (SecrCardBootHeader(port, slot, buffer, BitTableData, NULL) == 0) {
         _printf("SecrCardBootFile: Cannot decrypt header\n");
         return NULL;
@@ -227,7 +227,7 @@ void *SecrCardBootFile(int port, int slot, void *buffer)
     offset = BitTableData->header.headersize;
     for (i = 0; i < BitTableData->header.block_count; i++) {
         if (BitTableData->blocks[i].flags & 3) {
-            if (!SecrCardBootBlock((void *)((unsigned int)buffer + offset), (void *)((unsigned int)buffer + offset), BitTableData->blocks[i].size)) {
+            if (!SecrCardBootBlock((void *)((u8 *)buffer + offset), (void *)((u8 *)buffer + offset), BitTableData->blocks[i].size)) {
                 _printf("SecrCardBootFile: failed\n");
                 return NULL;
             }
@@ -235,7 +235,7 @@ void *SecrCardBootFile(int port, int slot, void *buffer)
         offset += BitTableData->blocks[i].size;
     }
 
-    return (void *)((unsigned int)buffer + GetHeaderLength(buffer));
+    return (void *)((u8 *)buffer + GetHeaderLength(buffer));
 }
 
 // 0x000010dc - export #11
@@ -279,7 +279,7 @@ void *SecrDiskBootFile(void *buffer)
     SecrBitTable_t *BitTableData;
     unsigned int offset, i;
 
-    BitTableData = (SecrBitTable_t *)((unsigned int)buffer + get_BitTableOffset(buffer));
+    BitTableData = (SecrBitTable_t *)((u8 *)buffer + get_BitTableOffset(buffer));
     if (SecrDiskBootHeader(buffer, BitTableData, NULL) == 0) {
         _printf("SecrDiskBootFile: Cannot decrypt header\n");
         return NULL;
@@ -288,7 +288,7 @@ void *SecrDiskBootFile(void *buffer)
     offset = BitTableData->header.headersize;
     for (i = 0; i < BitTableData->header.block_count; i++) {
         if (BitTableData->blocks[i].flags & 3) {
-            if (!SecrDiskBootBlock((void *)((unsigned int)buffer + offset), (void *)((unsigned int)buffer + offset), BitTableData->blocks[i].size)) {
+            if (!SecrDiskBootBlock((void *)((u8 *)buffer + offset), (void *)((u8 *)buffer + offset), BitTableData->blocks[i].size)) {
                 _printf("SecrDiskBootFile: failed\n");
                 return NULL;
             }
@@ -296,7 +296,7 @@ void *SecrDiskBootFile(void *buffer)
         offset += BitTableData->blocks[i].size;
     }
 
-    return (void *)((unsigned int)buffer + GetHeaderLength(buffer));
+    return (void *)((u8 *)buffer + GetHeaderLength(buffer));
 }
 
 // 0x00002eb0
@@ -385,7 +385,7 @@ static int secrman_loadfile_read_callback_common(int fd, loadfile_allocate_handl
     }
 
     ExcessBlockNum       = i;
-    BlockExcessRegionPtr = (void *)((unsigned int)entry->buffer_base + excess);
+    BlockExcessRegionPtr = (void *)((u8 *)(entry->buffer_base) + excess);
 
     for (; i < ModloadBitTableDescriptor->header.block_count; excess += ModloadBitTableDescriptor->blocks[i].size, i++) {
         // 0x00003140
@@ -951,7 +951,7 @@ static int func_00000c94(void *kbit)
         return 0;
     }
 
-    if (func_00001d64((void *)((unsigned int)kbit + 8)) != 1) {
+    if (func_00001d64((void *)((u8 *)kbit + 8)) != 1) {
         return 0;
     }
 
@@ -966,7 +966,7 @@ static int func_00000cd4(void *kc)
         return 0;
     }
 
-    if (func_00001e5c((void *)((unsigned int)kc + 8)) != 1) {
+    if (func_00001e5c((void *)((u8 *)kc + 8)) != 1) {
         return 0;
     }
 
@@ -1088,7 +1088,7 @@ void *SecrDownloadFile(int port, int slot, void *buffer)
     offset = BitTableData.header.headersize;
     for (i = 0; i < BitTableData.header.block_count; i++) {
         if (BitTableData.blocks[i].flags & 2) {
-            if (!SecrDownloadBlock((void *)((unsigned int)buffer + offset), BitTableData.blocks[i].size)) {
+            if (!SecrDownloadBlock((void *)((u8 *)buffer + offset), BitTableData.blocks[i].size)) {
                 _printf("SecrDownloadFile: failed\n");
                 return NULL;
             }
