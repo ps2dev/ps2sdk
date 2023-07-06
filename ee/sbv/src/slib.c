@@ -82,7 +82,7 @@ slib_exp_lib_list_t *slib_exp_lib_list(void)
 					if ((exp_func[1] & 0xffff0000) != 0x24420000)	/* addiu v0, v0, XXXX */
 						return NULL;
 
-					addr = ((exp_func[0] & 0xffff) << 16) | (exp_func[1] & 0xffff);
+					addr = (uint32_t) ((exp_func[0] & 0xFFFF) << 16) + (int16_t) (exp_func[1] & 0xFFFF);
 
 					SyncDCache(&smem_buf, smem_buf.bytes+8);
 					if(SifRpcGetOtherData(&RData, (void*)addr, &smem_buf, 8, 0)>=0){
