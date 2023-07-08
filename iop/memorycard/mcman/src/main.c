@@ -164,7 +164,9 @@ int MCMAN_ENTRYPOINT(int argc, char *argv[])
 		return MODULE_NO_RESIDENT_END;
 #endif
 
+#ifdef _IOP
 	CpuEnableIntr();
+#endif
 
 	DPRINTF("initPS2com...\n");
 	mcman_initPS2com();
