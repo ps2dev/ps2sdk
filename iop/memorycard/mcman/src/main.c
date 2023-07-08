@@ -209,12 +209,14 @@ int McGetMcType(int port, int slot) // Export #39
 	return mcman_devinfos[port][slot].cardtype;
 }
 
+#ifdef _IOP
 //--------------------------------------------------------------
 struct irx_id *McGetModuleInfo(void) // Export #42 XMCMAN only
 {
 	DPRINTF("McGetModuleInfo\n");
 	return &_irx_id;
 }
+#endif
 
 //--------------------------------------------------------------
 void McSetPS1CardFlag(int flag) // Export #40

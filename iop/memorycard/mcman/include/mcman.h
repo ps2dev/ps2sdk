@@ -63,7 +63,9 @@ int  McGetFormat(int port, int slot);
 int  McGetEntSpace(int port, int slot, const char *dirname);
 int  McReplaceBadBlock(void);
 int  McCloseAll(void);
+#ifdef _IOP
 struct irx_id *McGetModuleInfo(void);
+#endif
 int  McGetCardSpec(int port, int slot, s16 *pagesize, u16 *blocksize, int *cardsize, u8 *flags);
 int  McGetFATentry(int port, int slot, int fat_index, int *fat_entry);
 int  McCheckBlock(int port, int slot, int block);
