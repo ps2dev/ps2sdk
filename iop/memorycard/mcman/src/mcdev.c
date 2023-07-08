@@ -253,7 +253,7 @@ int mc_open(iop_file_t *f, const char *filename, int mode)
 	if (r >= -1) {
 		r = McOpen(mcman_mc_port, mcman_mc_slot, filename, mode);
 		if (r >= 0)
-			f->privdata = (void*)r;
+			f->privdata = (void*)(uiptr)(int)r;
 	}
 	SignalSema(mcman_io_sema);
 
@@ -266,7 +266,7 @@ int mc_close(iop_file_t *f)
 	register int r;
 
 	WaitSema(mcman_io_sema);
-	r = McClose((int)f->privdata);
+	r = McClose((int)(uiptr)f->privdata);
 	SignalSema(mcman_io_sema);
 
 	return mcman_ioerrcode(r);
@@ -278,7 +278,7 @@ int mc_lseek(iop_file_t *f, int pos, int where)
 	register int r;
 
 	WaitSema(mcman_io_sema);
-	r = McSeek((int)f->privdata, pos, where);
+	r = McSeek((int)(uiptr)f->privdata, pos, where);
 	SignalSema(mcman_io_sema);
 
 	return mcman_ioerrcode(r);
@@ -290,7 +290,7 @@ int mc_read(iop_file_t *f, void *buf, int size)
 	register int r;
 
 	WaitSema(mcman_io_sema);
-	r = McRead((int)f->privdata, buf, size);
+	r = McRead((int)(uiptr)f->privdata, buf, size);
 	SignalSema(mcman_io_sema);
 
 	return mcman_ioerrcode(r);
@@ -302,7 +302,7 @@ int mc_write(iop_file_t *f, void *buf, int size)
 	register int r;
 
 	WaitSema(mcman_io_sema);
-	r = McWrite((int)f->privdata, buf, size);
+	r = McWrite((int)(uiptr)f->privdata, buf, size);
 	SignalSema(mcman_io_sema);
 
 	return mcman_ioerrcode(r);
@@ -388,7 +388,7 @@ int mc_dopen(iop_file_t *f, const char *dirname)
 	if (r >= -1) {
 		r = McOpen(mcman_mc_port, mcman_mc_slot, dirname, 0);
 		if (r >= 0)
-			f->privdata = (void*)r;
+			f->privdata = (void*)(uiptr)(int)r;
 	}
 
 	SignalSema(mcman_io_sema);
@@ -402,7 +402,7 @@ int mc_dclose(iop_file_t *f)
 	register int r;
 
 	WaitSema(mcman_io_sema);
-	r = McClose((int)f->privdata);
+	r = McClose((int)(uiptr)f->privdata);
 	SignalSema(mcman_io_sema);
 
 	return mcman_ioerrcode(r);
@@ -414,7 +414,7 @@ int mc_dread(iop_file_t *f, io_dirent_t *dirent)
 	register int r;
 
 	WaitSema(mcman_io_sema);
-	r = mcman_dread((int)f->privdata, dirent);
+	r = mcman_dread((int)(uiptr)f->privdata, dirent);
 	SignalSema(mcman_io_sema);
 
 	return mcman_ioerrcode(r);
