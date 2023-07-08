@@ -742,13 +742,12 @@ int McGetCardSpec(int port, int slot, s16 *pagesize, u16 *blocksize, int *cardsi
 	(void)port;
 	(void)slot;
 	flash_get_info(&dev9_flash_info);
-	*pagesize = dev9_flash_info.page_bytes;
+	*pagesize = 512; /* Yes, this is hardcoded to 512 bytes */
 	*blocksize = dev9_flash_info.block_pages;
 	*cardsize = dev9_flash_info.blocks * dev9_flash_info.block_pages;
-	*flags = 43;
-	if ( *pagesize == 512 )
-		*flags = 42;
-	*pagesize = 512;
+	*flags = 0x22 | CF_BAD_BLOCK;
+	if (dev9_flash_info.page_bytes != 512)
+		*flags |= CF_USE_ECC;
 #endif
 
 	DPRINTF("McGetCardSpec sio2cmd pagesize=%d blocksize=%u cardsize=%d flags%x\n", *pagesize, *blocksize, *cardsize, *flags);
