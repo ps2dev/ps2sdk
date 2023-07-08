@@ -252,7 +252,7 @@ lbl1:
 }
 
 //--------------------------------------------------------------
-int mcman_dread2(int fd, io_dirent_t *dirent)
+int mcman_dread2(int fd, MC_IO_DRE_T *dirent)
 {
 	register MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
 	McFsEntry *fse;
@@ -279,26 +279,28 @@ int mcman_dread2(int fd, io_dirent_t *dirent)
 		return sceMcResSucceed;
 
 	fh->position++;
-	mcman_wmemset((void *)dirent, sizeof (io_dirent_t), 0);
+	mcman_wmemset((void *)dirent, sizeof (MC_IO_DRE_T), 0);
 	strcpy(dirent->name, fse->name);
 	*(u8 *)&dirent->name[32] = 0;
 
 	if (fse->mode & sceMcFileAttrReadable)
-		dirent->stat.mode |= sceMcFileAttrReadable;
+		dirent->stat.mode |= MC_IO_S_RD;
 	if (fse->mode & sceMcFileAttrWriteable)
-		dirent->stat.mode |= sceMcFileAttrWriteable;
+		dirent->stat.mode |= MC_IO_S_WR;
 	if (fse->mode & sceMcFileAttrExecutable)
-		dirent->stat.mode |= sceMcFileAttrExecutable;
+		dirent->stat.mode |= MC_IO_S_EX;
+#if !MCMAN_ENABLE_EXTENDED_DEV_OPS
 	if (fse->mode & sceMcFileAttrPS1)
 		dirent->stat.mode |= sceMcFileAttrPS1;
 	if (fse->mode & sceMcFileAttrPDAExec)
 		dirent->stat.mode |= sceMcFileAttrPDAExec;
 	if (fse->mode & sceMcFileAttrDupProhibit)
 		dirent->stat.mode |= sceMcFileAttrDupProhibit;
+#endif
 	if (fse->mode & sceMcFileAttrSubdir)
-		dirent->stat.mode |= sceMcFileAttrSubdir;
+		dirent->stat.mode |= MC_IO_S_DR;
 	else
-		dirent->stat.mode |= sceMcFileAttrFile;
+		dirent->stat.mode |= MC_IO_S_FL;
 
 	dirent->stat.attr = fse->attr;
 	dirent->stat.size = fse->length;
@@ -309,7 +311,7 @@ int mcman_dread2(int fd, io_dirent_t *dirent)
 }
 
 //--------------------------------------------------------------
-int mcman_getstat2(int port, int slot, const char *filename, io_stat_t *stat)
+int mcman_getstat2(int port, int slot, const char *filename, MC_IO_STA_T *stat)
 {
 	register int r;
 	McFsEntry *fse;
@@ -320,24 +322,26 @@ int mcman_getstat2(int port, int slot, const char *filename, io_stat_t *stat)
 	if (r != sceMcResSucceed)
 		return r;
 
-	mcman_wmemset((void *)stat, sizeof (io_stat_t), 0);
+	mcman_wmemset((void *)stat, sizeof (MC_IO_STA_T), 0);
 
 	if (fse->mode & sceMcFileAttrReadable)
-		stat->mode |= sceMcFileAttrReadable;
+		stat->mode |= MC_IO_S_RD;
 	if (fse->mode & sceMcFileAttrWriteable)
-		stat->mode |= sceMcFileAttrWriteable;
+		stat->mode |= MC_IO_S_WR;
 	if (fse->mode & sceMcFileAttrExecutable)
-		stat->mode |= sceMcFileAttrExecutable;
+		stat->mode |= MC_IO_S_EX;
+#if !MCMAN_ENABLE_EXTENDED_DEV_OPS
 	if (fse->mode & sceMcFileAttrPS1)
 		stat->mode |= sceMcFileAttrPS1;
 	if (fse->mode & sceMcFileAttrPDAExec)
 		stat->mode |= sceMcFileAttrPDAExec;
 	if (fse->mode & sceMcFileAttrDupProhibit)
 		stat->mode |= sceMcFileAttrDupProhibit;
+#endif
 	if (fse->mode & sceMcFileAttrSubdir)
-		stat->mode |= sceMcFileAttrSubdir;
+		stat->mode |= MC_IO_S_DR;
 	else
-		stat->mode |= sceMcFileAttrFile;
+		stat->mode |= MC_IO_S_FL;
 
 	stat->attr = fse->attr;
 

@@ -11,6 +11,10 @@
 #ifndef __MCMAN_INTERNAL_H__
 #define __MCMAN_INTERNAL_H__
 
+#ifndef MCMAN_ENABLE_EXTENDED_DEV_OPS
+#define MCMAN_ENABLE_EXTENDED_DEV_OPS 0
+#endif
+
 #include <loadcore.h>
 #include <intrman.h>
 #include <sysclib.h>
@@ -21,7 +25,11 @@
 #include <modload.h>
 #include <secrman.h>
 #endif
+#if MCMAN_ENABLE_EXTENDED_DEV_OPS
+#include <iomanX.h>
+#else
 #include <ioman.h>
+#endif
 #ifdef _IOP
 #include <cdvdman.h>
 #else
@@ -29,7 +37,6 @@
 #endif
 #include <stdio.h>
 #include <errno.h>
-#include <io_common.h>
 #ifdef BUILDING_XFROMMAN
 #include <fls.h>
 #else
@@ -125,6 +132,43 @@ typedef struct {  // size = 48
 
 #define MAX_FDHANDLES 		3
 
+#if MCMAN_ENABLE_EXTENDED_DEV_OPS
+#define MC_IO_DEV_T iomanX_iop_device_t
+#define MC_IO_FIL_T iomanX_iop_file_t
+#define MC_IO_DRE_T iox_dirent_t
+#define MC_IO_STA_T iox_stat_t
+#define MC_IO_OPS_T iomanX_iop_device_ops_t
+
+// FIXME: The r/w/x flag order is opposite from iomanX
+#define MC_IO_S_RD (FIO_S_IRUSR | FIO_S_IRGRP | FIO_S_IROTH)
+#define MC_IO_S_WR (FIO_S_IWUSR | FIO_S_IWGRP | FIO_S_IWOTH)
+#define MC_IO_S_EX (FIO_S_IXUSR | FIO_S_IXGRP | FIO_S_IXOTH)
+#define MC_IO_S_FL FIO_S_IFREG
+#define MC_IO_S_DR FIO_S_IFDIR
+
+#define MC_IO_CST_ATTR FIO_CST_ATTR
+#define MC_IO_CST_MODE FIO_CST_MODE
+#define MC_IO_CST_CT FIO_CST_CT
+#define MC_IO_CST_MT FIO_CST_MT
+#else
+#define MC_IO_DEV_T iop_device_t
+#define MC_IO_FIL_T iop_file_t
+#define MC_IO_DRE_T io_dirent_t
+#define MC_IO_STA_T io_stat_t
+#define MC_IO_OPS_T iop_device_ops_t
+
+#define MC_IO_S_RD SCE_STM_R
+#define MC_IO_S_WR SCE_STM_W
+#define MC_IO_S_EX SCE_STM_X
+#define MC_IO_S_FL SCE_STM_F
+#define MC_IO_S_DR SCE_STM_D
+
+#define MC_IO_CST_ATTR SCE_CST_ATTR
+#define MC_IO_CST_MODE SCE_CST_MODE
+#define MC_IO_CST_CT SCE_CST_CT
+#define MC_IO_CST_MT SCE_CST_MT
+#endif
+
 // internal functions prototypes
 #ifndef BUILDING_XFROMMAN
 int  mcsio2_transfer(int port, int slot, sio2_transfer_data_t *sio2data);
@@ -138,8 +182,8 @@ int  mcman_checkdirpath(const char *str1, const char *str2);
 void mcman_invhandles(int port, int slot);
 int  McCloseAll(void);
 int  mcman_detectcard(int port, int slot);
-int  mcman_dread(int fd, io_dirent_t *dirent);
-int  mcman_getstat(int port, int slot, const char *filename, io_stat_t *stat);
+int  mcman_dread(int fd, MC_IO_DRE_T *dirent);
+int  mcman_getstat(int port, int slot, const char *filename, MC_IO_STA_T *stat);
 int  mcman_getmcrtime(sceMcStDateTime *tm);
 void mcman_initPS2com(void);
 #ifndef BUILDING_XFROMMAN
@@ -164,8 +208,8 @@ int  mcman_format2(int port, int slot);
 int  mcman_fatRseek(int fd);
 int  mcman_fatWseek(int fd);
 int  mcman_findfree2(int port, int slot, int reserve);
-int  mcman_dread2(int fd, io_dirent_t *dirent);
-int  mcman_getstat2(int port, int slot, const char *filename, io_stat_t *stat);
+int  mcman_dread2(int fd, MC_IO_DRE_T *dirent);
+int  mcman_getstat2(int port, int slot, const char *filename, MC_IO_STA_T *stat);
 int  mcman_setinfo2(int port, int slot, const char *filename, sceMcTblGetDir *info, int flags);
 int  mcman_read2(int fd, void *buffer, int nbyte);
 int  mcman_write2(int fd, void *buffer, int nbyte);
@@ -190,8 +234,8 @@ int  mcman_open1(int port, int slot, const char *filename, int flags);
 int  mcman_read1(int fd, void *buffer, int nbyte);
 int  mcman_write1(int fd, void *buffer, int nbyte);
 int  mcman_getPS1direntry(int port, int slot, const char *filename, McFsEntryPS1 **pfse, int flag);
-int  mcman_dread1(int fd, io_dirent_t *dirent);
-int  mcman_getstat1(int port, int slot, const char *filename, io_stat_t *stat);
+int  mcman_dread1(int fd, MC_IO_DRE_T *dirent);
+int  mcman_getstat1(int port, int slot, const char *filename, MC_IO_STA_T *stat);
 int  mcman_setinfo1(int port, int slot, const char *filename, sceMcTblGetDir *info, int flags);
 int  mcman_getdir1(int port, int slot, const char *dirname, int flags, int maxent, sceMcTblGetDir *info);
 int  mcman_clearPS1direntry(int port, int slot, int cluster, int flags);

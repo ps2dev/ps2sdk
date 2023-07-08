@@ -857,7 +857,7 @@ int McGetDir(int port, int slot, const char *dirname, int flags, int maxent, sce
 }
 
 //--------------------------------------------------------------
-int mcman_dread(int fd, io_dirent_t *dirent)
+int mcman_dread(int fd, MC_IO_DRE_T *dirent)
 {
 	register int r;
 	register MC_FHANDLE *fh;
@@ -893,7 +893,7 @@ int mcman_dread(int fd, io_dirent_t *dirent)
 }
 
 //--------------------------------------------------------------
-int mcman_getstat(int port, int slot, const char *filename, io_stat_t *stat)
+int mcman_getstat(int port, int slot, const char *filename, MC_IO_STA_T *stat)
 {
 	register int r;
 

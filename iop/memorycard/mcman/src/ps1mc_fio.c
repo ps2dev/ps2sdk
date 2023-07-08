@@ -382,7 +382,7 @@ int mcman_write1(int fd, void *buffer, int nbyte)
 }
 
 //--------------------------------------------------------------
-int mcman_dread1(int fd, io_dirent_t *dirent)
+int mcman_dread1(int fd, MC_IO_DRE_T *dirent)
 {
 	register MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
 	McFsEntryPS1 *fse;
@@ -405,15 +405,19 @@ int mcman_dread1(int fd, io_dirent_t *dirent)
 		return 0;
 
 	fh->position++;
-	mcman_wmemset((void *)dirent, sizeof(io_dirent_t), 0);
+	mcman_wmemset((void *)dirent, sizeof(MC_IO_DRE_T), 0);
 
 	strncpy(dirent->name, fse->name, 20);
 	dirent->name[20] = 0;
 
-	dirent->stat.mode = sceMcFileAttrReadable | sceMcFileAttrWriteable | sceMcFileAttrExecutable | sceMcFileAttrFile | sceMcFileAttrDupProhibit | sceMcFileAttrPS1;
+	dirent->stat.mode = MC_IO_S_RD | MC_IO_S_WR | MC_IO_S_EX | MC_IO_S_FL;
+
+#if !MCMAN_ENABLE_EXTENDED_DEV_OPS
+	dirent->stat.mode |= sceMcFileAttrDupProhibit | sceMcFileAttrPS1;
 
 	if (fse->field_7e == 1)
 		dirent->stat.mode |= sceMcFileAttrPDAExec;
+#endif
 
 	if (fse->field_7d == 1) {
 		memcpy(dirent->stat.ctime, &fse->created, sizeof(sceMcStDateTime));
@@ -429,7 +433,7 @@ int mcman_dread1(int fd, io_dirent_t *dirent)
 }
 
 //--------------------------------------------------------------
-int mcman_getstat1(int port, int slot, const char *filename, io_stat_t *stat)
+int mcman_getstat1(int port, int slot, const char *filename, MC_IO_STA_T *stat)
 {
 	register int r;
 	McFsEntryPS1 *fse;
@@ -444,14 +448,20 @@ int mcman_getstat1(int port, int slot, const char *filename, io_stat_t *stat)
 	if (r < 0)
 		return sceMcResNoEntry;
 
-	mcman_wmemset(stat, sizeof(io_stat_t), 0);
+	mcman_wmemset(stat, sizeof(MC_IO_STA_T), 0);
 
-	stat->mode = sceMcFileAttrReadable | sceMcFileAttrWriteable | sceMcFileAttrExecutable | sceMcFileAttrFile | sceMcFileAttrDupProhibit;
+	stat->mode = MC_IO_S_RD | MC_IO_S_WR | MC_IO_S_EX | MC_IO_S_FL;
+
+#if !MCMAN_ENABLE_EXTENDED_DEV_OPS
+	stat->mode |= sceMcFileAttrDupProhibit;
+#endif
 
 	if (fse->field_7d == 1) {
 
+#if !MCMAN_ENABLE_EXTENDED_DEV_OPS
 		if ((fse->field_2c & sceMcFileAttrClosed) != 0)
 			stat->mode |= sceMcFileAttrClosed;
+#endif
 
 		memcpy(stat->ctime, &fse->created, sizeof(sceMcStDateTime));
 		memcpy(stat->mtime, &fse->modified, sizeof(sceMcStDateTime));
