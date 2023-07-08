@@ -28,7 +28,9 @@ int mcman_wr_block = -1;
 int mcman_wr_flag3 = -10;
 int mcman_curdircluster = -1;
 
+#ifndef BUILDING_XFROMMAN
 int timer_ID;
+#endif
 int PS1CardFlag = 1;
 
 union mcman_pagebuf mcman_pagebuf;
@@ -177,6 +179,7 @@ int _start(int argc, char *argv[])
 	DPRINTF("initdev...\n");
 	mcman_initdev();
 
+#ifndef BUILDING_XFROMMAN
 	timer_ID = ReferHardTimer(1, 32, 0, 0x6309);
 
 	if (timer_ID != -150)
@@ -186,6 +189,7 @@ int _start(int argc, char *argv[])
 
 	if (timer_ID > 0)
 		SetTimerMode(timer_ID, 0);
+#endif
 
 	DPRINTF("_start returns MODULE_RESIDENT_END...\n");
 

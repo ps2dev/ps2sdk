@@ -16,10 +16,12 @@
 #include <sysclib.h>
 #include <thbase.h>
 #include <thsemap.h>
+#ifndef BUILDING_XFROMMAN
 #include <timrman.h>
 #include <modload.h>
-#include <ioman.h>
 #include <secrman.h>
+#endif
+#include <ioman.h>
 #include <cdvdman.h>
 #include <stdio.h>
 #include <errno.h>
@@ -137,7 +139,9 @@ int  mcman_cardchanged(int port, int slot);
 int  mcman_resetauth(int port, int slot);
 int  mcman_probePS2Card2(int port, int slot);
 int  mcman_probePS2Card(int port, int slot);
+#ifndef BUILDING_XFROMMAN
 int  secrman_mc_command(int port, int slot, sio2_transfer_data_t *sio2data);
+#endif
 int  mcman_getcnum (int port, int slot);
 int  mcman_correctdata(void *buf, void *ecc);
 int  mcman_sparesize(int port, int slot);

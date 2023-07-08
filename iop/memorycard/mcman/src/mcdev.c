@@ -211,7 +211,9 @@ int mcman_initdev(void)
 {
 	iop_sema_t smp;
 
+#ifndef BUILDING_XFROMMAN
 	SetCheckKelfPathCallback(mcman_modloadcb);
+#endif
 
 	DelDrv(mcman_mcdev.name);
 	if (AddDrv(&mcman_mcdev)) {

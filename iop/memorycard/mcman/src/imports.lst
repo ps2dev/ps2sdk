@@ -65,16 +65,20 @@ I_SignalSema
 I_WaitSema
 thsemap_IMPORTS_end
 
+#ifndef BUILDING_XFROMMAN
 timrman_IMPORTS_start
 I_AllocHardTimer
 I_ReferHardTimer
 I_SetTimerMode
 I_GetTimerCounter
 timrman_IMPORTS_end
+#endif
 
+#ifndef BUILDING_XFROMMAN
 modload_IMPORTS_start
 I_SetCheckKelfPathCallback
 modload_IMPORTS_end
+#endif
 
 ioman_IMPORTS_start
 I_AddDrv

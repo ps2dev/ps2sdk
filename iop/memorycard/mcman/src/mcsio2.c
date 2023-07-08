@@ -11,7 +11,9 @@
 #include <mcman.h>
 #include "mcman-internal.h"
 
+#ifndef BUILDING_XFROMMAN
 extern int timer_ID;
+#endif
 
 extern MCDevInfo mcman_devinfos[4][MCMAN_MAXSLOT];
 
@@ -379,6 +381,7 @@ void mcman_initPS1PDAcom(void)
 #endif
 }
 
+#ifndef BUILDING_XFROMMAN
 //--------------------------------------------------------------
 int secrman_mc_command(int port, int slot, sio2_transfer_data_t *sio2data)
 {
@@ -386,18 +389,11 @@ int secrman_mc_command(int port, int slot, sio2_transfer_data_t *sio2data)
 
 	DPRINTF("secrman_mc_command port%d slot%d\n", port, slot);
 
-#ifndef BUILDING_XFROMMAN
 	r = mcsio2_transfer(port, slot, sio2data);
-#endif
-#ifdef BUILDING_XFROMMAN
-	(void)port;
-	(void)slot;
-	(void)sio2data;
-	r = 0;
-#endif
 
 	return r;
 }
+#endif
 
 //--------------------------------------------------------------
 int mcman_cardchanged(int port, int slot)

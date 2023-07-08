@@ -24,9 +24,9 @@
 #include <intrman.h>
 #include <ioman.h>
 #include <loadcore.h>
+#ifndef BUILDING_XFROMMAN
 #include <modload.h>
 #include <secrman.h>
-#ifndef BUILDING_XFROMMAN
 #ifdef BUILDING_XMCMAN
 #ifndef SIO2MAN_V2
 #include <xsio2man.h>
@@ -42,7 +42,9 @@
 #endif
 #include <stdio.h>
 #include <sysclib.h>
+#ifndef BUILDING_XFROMMAN
 #include <timrman.h>
+#endif
 #include <thbase.h>
 #include <thsemap.h>
 
