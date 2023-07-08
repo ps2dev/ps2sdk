@@ -12,7 +12,11 @@
 #define __MCMAN_INTERNAL_H__
 
 #ifndef MCMAN_ENABLE_EXTENDED_DEV_OPS
+#if defined(BUILDING_VMCMAN)
+#define MCMAN_ENABLE_EXTENDED_DEV_OPS 1
+#else
 #define MCMAN_ENABLE_EXTENDED_DEV_OPS 0
+#endif
 #endif
 
 #include <loadcore.h>
@@ -20,7 +24,7 @@
 #include <sysclib.h>
 #include <thbase.h>
 #include <thsemap.h>
-#ifndef BUILDING_XFROMMAN
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 #include <timrman.h>
 #include <modload.h>
 #include <secrman.h>
@@ -37,6 +41,7 @@
 #endif
 #include <stdio.h>
 #include <errno.h>
+#ifndef BUILDING_VMCMAN
 #ifdef BUILDING_XFROMMAN
 #include <fls.h>
 #else
@@ -50,11 +55,13 @@
 #include <sio2man.h>
 #endif
 #endif
-
-#ifndef BUILDING_XFROMMAN
-#define MODNAME "mcman_cex"
 #endif
-#ifdef BUILDING_XFROMMAN
+
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
+#define MODNAME "mcman_cex"
+#elif defined(BUILDING_VMCMAN)
+#define MODNAME "vmcman"
+#elif defined(BUILDING_XFROMMAN)
 #define MODNAME "xfromman"
 #endif
 #define MODVER  0x20b
@@ -93,7 +100,11 @@ typedef struct _MCCacheDir {
 #define CF_BAD_BLOCK 				0x08
 #define CF_ERASE_ZEROES 			0x10
 
+#ifdef BUILDING_VMCMAN
+#define MCMAN_MAXSLOT				10
+#else
 #define MCMAN_MAXSLOT				4
+#endif
 #define MCMAN_CLUSTERSIZE 			1024
 #define MCMAN_CLUSTERFATENTRIES		256
 
@@ -170,7 +181,7 @@ typedef struct {  // size = 48
 #endif
 
 // internal functions prototypes
-#ifndef BUILDING_XFROMMAN
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 int  mcsio2_transfer(int port, int slot, sio2_transfer_data_t *sio2data);
 #endif
 void long_multiply(u32 v1, u32 v2, u32 *HI, u32 *LO);
@@ -186,7 +197,7 @@ int  mcman_dread(int fd, MC_IO_DRE_T *dirent);
 int  mcman_getstat(int port, int slot, const char *filename, MC_IO_STA_T *stat);
 int  mcman_getmcrtime(sceMcStDateTime *tm);
 void mcman_initPS2com(void);
-#ifndef BUILDING_XFROMMAN
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 void sio2packet_add(int port, int slot, int cmd, u8 *buf);
 #endif
 int  mcman_eraseblock(int port, int slot, int block, void **pagebuf, void *eccbuf);
@@ -195,7 +206,7 @@ int  mcman_cardchanged(int port, int slot);
 int  mcman_resetauth(int port, int slot);
 int  mcman_probePS2Card2(int port, int slot);
 int  mcman_probePS2Card(int port, int slot);
-#ifndef BUILDING_XFROMMAN
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 int  secrman_mc_command(int port, int slot, sio2_transfer_data_t *sio2data);
 #endif
 int  mcman_getcnum (int port, int slot);
@@ -266,6 +277,15 @@ int  mcman_ioerrcode(int errcode);
 int  mcman_modloadcb(const char *filename, int *port, int *slot); // used as callback by modload
 void mcman_unit2card(u32 unit);
 int  mcman_initdev(void);
+
+#if defined(BUILDING_VMCMAN)
+int mcman_iomanx_backing_mount(int port, int slot, const char *filename);
+int mcman_iomanx_backing_umount(int port, int slot);
+int mcman_iomanx_backing_getcardspec(int port, int slot, s16 *pagesize, u16 *blocksize, int *cardsize, u8 *flags);
+int mcman_iomanx_backing_erase(int port, int slot, int page);
+int mcman_iomanx_backing_write(int port, int slot, int page, void *pagebuf, void *eccbuf);
+int mcman_iomanx_backing_read(int port, int slot, int page, void *pagebuf, void *eccbuf);
+#endif
 
 typedef struct { 				// size = 384
     char  magic[28];				// Superblock magic, on PS2 MC : "Sony PS2 Memory Card Format "

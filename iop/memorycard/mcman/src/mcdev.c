@@ -95,10 +95,11 @@ static MC_IO_OPS_T mcman_mcops = {
 
 // driver descriptor
 static MC_IO_DEV_T mcman_mcdev = {
-#ifndef BUILDING_XFROMMAN
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 	"mc",
-#endif
-#ifdef BUILDING_XFROMMAN
+#elif defined(BUILDING_VMCMAN)
+	"vmc",
+#elif defined(BUILDING_XFROMMAN)
 	"xfrom",
 #endif
 	IOP_DT_FS
@@ -107,10 +108,11 @@ static MC_IO_DEV_T mcman_mcdev = {
 #endif
 	,
 	1,
-#ifndef BUILDING_XFROMMAN
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 	"Memory Card",
-#endif
-#ifdef BUILDING_XFROMMAN
+#elif defined(BUILDING_VMCMAN)
+	"Virtual Memory Card",
+#elif defined(BUILDING_XFROMMAN)
 	"External flash rom",
 #endif
 	&mcman_mcops,
@@ -213,12 +215,14 @@ int mcman_modloadcb(const char *filename, int *port, int *slot)
 //--------------------------------------------------------------
 void mcman_unit2card(u32 unit)
 {
-#ifndef BUILDING_XFROMMAN
- 	mcman_mc_port = unit & 1;
- 	mcman_mc_slot = (unit >> 1) & (MCMAN_MAXSLOT - 1);
-#endif
-#ifdef BUILDING_XFROMMAN
- 	(void)unit;
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
+	mcman_mc_port = unit & 1;
+	mcman_mc_slot = (unit >> 1) & (MCMAN_MAXSLOT - 1);
+#elif defined(BUILDING_VMCMAN)
+	mcman_mc_port = 0;
+	mcman_mc_slot = unit & (MCMAN_MAXSLOT - 1);
+#elif defined(BUILDING_XFROMMAN)
+	(void)unit;
 	mcman_mc_port = 0;
 	mcman_mc_slot = 0;
 #endif
@@ -252,7 +256,7 @@ int mcman_initdev(void)
 {
 	iop_sema_t smp;
 
-#ifndef BUILDING_XFROMMAN
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 	SetCheckKelfPathCallback(mcman_modloadcb);
 #endif
 
@@ -644,7 +648,11 @@ int mc_mount(MC_IO_FIL_T *f, const char *fsname, const char *devname, int flag, 
 
 	WaitSema(mcman_io_sema);
 	mcman_unit2card(f->unit);
+#if defined(BUILDING_VMCMAN)
+	r = mcman_iomanx_backing_mount(mcman_mc_port, mcman_mc_slot, devname);
+#else
 	r = 0;
+#endif
 	SignalSema(mcman_io_sema);
 	return r;
 }
@@ -658,7 +666,11 @@ int mc_umount(MC_IO_FIL_T *f, const char *fsname)
 
 	WaitSema(mcman_io_sema);
 	mcman_unit2card(f->unit);
+#if defined(BUILDING_VMCMAN)
+	r = mcman_iomanx_backing_umount(mcman_mc_port, mcman_mc_slot);
+#else
 	r = 0;
+#endif
 	SignalSema(mcman_io_sema);
 	return r;
 }

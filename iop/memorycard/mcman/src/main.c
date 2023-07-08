@@ -28,7 +28,7 @@ int mcman_wr_block = -1;
 int mcman_wr_flag3 = -10;
 int mcman_curdircluster = -1;
 
-#ifndef BUILDING_XFROMMAN
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 int timer_ID;
 #endif
 int PS1CardFlag = 1;
@@ -36,10 +36,9 @@ int PS1CardFlag = 1;
 union mcman_pagebuf mcman_pagebuf;
 union mcman_PS1PDApagebuf mcman_PS1PDApagebuf;
 
-#ifndef BUILDING_XFROMMAN
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 extern struct irx_export_table _exp_mcman;
-#endif
-#ifdef BUILDING_XFROMMAN
+#elif defined(BUILDING_XFROMMAN)
 extern struct irx_export_table _exp_xfromman;
 #endif
 
@@ -155,11 +154,10 @@ int MCMAN_ENTRYPOINT(int argc, char *argv[])
 	DPRINTF("_start...\n");
 
 	DPRINTF("registering exports...\n");
-#ifndef BUILDING_XFROMMAN
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 	if (RegisterLibraryEntries(&_exp_mcman) != 0)
 		return MODULE_NO_RESIDENT_END;
-#endif
-#ifdef BUILDING_XFROMMAN
+#elif defined(BUILDING_XFROMMAN)
 	if (RegisterLibraryEntries(&_exp_xfromman) != 0)
 		return MODULE_NO_RESIDENT_END;
 #endif
@@ -180,7 +178,7 @@ int MCMAN_ENTRYPOINT(int argc, char *argv[])
 	DPRINTF("initdev...\n");
 	mcman_initdev();
 
-#ifndef BUILDING_XFROMMAN
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 	timer_ID = ReferHardTimer(1, 32, 0, 0x6309);
 
 	if (timer_ID != -150)
@@ -421,7 +419,7 @@ int mcman_detectcard(int port, int slot)
 	DPRINTF("mcman_detectcard port%d slot%d\n", port, slot);
 	mcdi = (MCDevInfo *)&mcman_devinfos[port][slot];
 
-#ifndef BUILDING_XFROMMAN
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 	if ((mcdi->cardtype == sceMcTypeNoCard) || (mcdi->cardtype == sceMcTypePS2)) {
 		r = mcman_probePS2Card2(port, slot);
 		if (r < -9) {
@@ -471,8 +469,7 @@ int mcman_detectcard(int port, int slot)
 			return sceMcResSucceed;
 		}
 	}
-#endif
-#ifdef BUILDING_XFROMMAN
+#else
 	r = mcman_probePS2Card2(port, slot);
 	if (r >= -9) {
 		mcdi->cardtype = sceMcTypePS2;
@@ -498,7 +495,7 @@ int McDetectCard2(int port, int slot) // Export #21 XMCMAN only
 
 	mcdi = (MCDevInfo *)&mcman_devinfos[port][slot];
 
-#ifndef BUILDING_XFROMMAN
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 	if ((mcdi->cardtype == sceMcTypeNoCard) || (mcdi->cardtype == sceMcTypePS2)) {
 		r = mcman_probePS2Card(port, slot);
 		if (r < -9) {
@@ -548,8 +545,7 @@ int McDetectCard2(int port, int slot) // Export #21 XMCMAN only
 			return sceMcResSucceed;
 		}
 	}
-#endif
-#ifdef BUILDING_XFROMMAN
+#else
 	r = mcman_probePS2Card(port, slot);
 	if (r >= -9) {
 		mcdi->cardtype = sceMcTypePS2;
@@ -2480,7 +2476,7 @@ int mcman_setPS1devinfos(int port, int slot)
 	if (r < 0)
 		return -14;
 
-#ifndef BUILDING_XFROMMAN
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 	if (mcman_sio2outbufs_PS1PDA[1] != 0)
 		return -15;
 #endif
