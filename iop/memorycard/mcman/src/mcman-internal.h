@@ -263,4 +263,33 @@ union mcman_PS1PDApagebuf {
 	u8 byte[128/sizeof(u8)];
 };
 
+// Defined in main.c
+
+extern char SUPERBLOCK_MAGIC[];
+extern char SUPERBLOCK_VERSION[];
+
+extern int mcman_wr_port;
+extern int mcman_wr_slot;
+extern int mcman_wr_block;
+extern int mcman_wr_flag3;
+extern int mcman_curdircluster;
+
+extern union mcman_pagebuf mcman_pagebuf;
+extern union mcman_PS1PDApagebuf mcman_PS1PDApagebuf;
+
+#ifndef BUILDING_XFROMMAN
+extern int timer_ID;
+#endif
+extern int PS1CardFlag;
+
+extern McFsEntry mcman_dircache[MAX_CACHEDIRENTRY];
+
+extern MC_FHANDLE mcman_fdhandles[MAX_FDHANDLES];
+extern MCDevInfo mcman_devinfos[4][MCMAN_MAXSLOT];
+
+extern u8 mcman_eccdata[512]; // size for 32 ecc
+
+// Defined in mcsio2.c
+extern u8 mcman_sio2outbufs_PS1PDA[0x90];
+
 #endif	// __MCMAN_INTERNAL_H__

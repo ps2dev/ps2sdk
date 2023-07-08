@@ -11,11 +11,6 @@
 #include <mcman.h>
 #include "mcman-internal.h"
 
-extern union mcman_PS1PDApagebuf mcman_PS1PDApagebuf;
-
-extern MC_FHANDLE mcman_fdhandles[MAX_FDHANDLES];
-extern MCDevInfo mcman_devinfos[4][MCMAN_MAXSLOT];
-
 static int mcman_PS1curcluster;
 static char mcman_PS1curdir[64];
 

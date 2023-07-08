@@ -11,12 +11,6 @@
 #include <mcman.h>
 #include "mcman-internal.h"
 
-#ifndef BUILDING_XFROMMAN
-extern int timer_ID;
-#endif
-
-extern MCDevInfo mcman_devinfos[4][MCMAN_MAXSLOT];
-
 #ifdef BUILDING_XFROMMAN
 static flash_info_t dev9_flash_info;
 #endif

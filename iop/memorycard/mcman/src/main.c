@@ -42,7 +42,6 @@ extern struct irx_export_table _exp_mcman;
 #ifdef BUILDING_XFROMMAN
 extern struct irx_export_table _exp_xfromman;
 #endif
-extern u8 mcman_sio2outbufs_PS1PDA[0x90];
 
 static u8 mcman_cachebuf[MAX_CACHEENTRY * MCMAN_CLUSTERSIZE];
 static McCacheEntry mcman_entrycache[MAX_CACHEENTRY];
