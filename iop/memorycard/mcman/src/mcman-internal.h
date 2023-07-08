@@ -22,7 +22,11 @@
 #include <secrman.h>
 #endif
 #include <ioman.h>
+#ifdef _IOP
 #include <cdvdman.h>
+#else
+#include <time.h>
+#endif
 #include <stdio.h>
 #include <errno.h>
 #include <io_common.h>
@@ -136,7 +140,7 @@ int  McCloseAll(void);
 int  mcman_detectcard(int port, int slot);
 int  mcman_dread(int fd, io_dirent_t *dirent);
 int  mcman_getstat(int port, int slot, const char *filename, io_stat_t *stat);
-int  mcman_getmcrtime(sceMcStDateTime *time);
+int  mcman_getmcrtime(sceMcStDateTime *tm);
 void mcman_initPS2com(void);
 #ifndef BUILDING_XFROMMAN
 void sio2packet_add(int port, int slot, int cmd, u8 *buf);

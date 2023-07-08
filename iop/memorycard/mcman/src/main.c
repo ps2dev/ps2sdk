@@ -1041,8 +1041,9 @@ int McUnformat(int port, int slot) // Export #36
 }
 
 //--------------------------------------------------------------
-int mcman_getmcrtime(sceMcStDateTime *time)
+int mcman_getmcrtime(sceMcStDateTime *tm)
 {
+#ifdef _IOP
 	register int retries;
 	sceCdCLOCK cdtime;
 
@@ -1054,28 +1055,47 @@ int mcman_getmcrtime(sceMcStDateTime *time)
 	} while (--retries > 0);
 
 	if (cdtime.stat & 0x80) {
-		time->Year = 2000;
-		time->Month = 3;
-		time->Day = 4;
-		time->Hour = 0;
-		time->Min = 0;
-		time->Sec = 0;
-		time->Resv2 = 0;
+		tm->Year = 2000;
+		tm->Month = 3;
+		tm->Day = 4;
+		tm->Hour = 0;
+		tm->Min = 0;
+		tm->Sec = 0;
+		tm->Resv2 = 0;
 	}
 	else {
-		time->Resv2 = 0;
-		time->Sec = btoi(cdtime.second);
-		time->Min = btoi(cdtime.minute);
-		time->Hour = btoi(cdtime.hour);
-		time->Day = btoi(cdtime.day);
+		tm->Resv2 = 0;
+		tm->Sec = btoi(cdtime.second);
+		tm->Min = btoi(cdtime.minute);
+		tm->Hour = btoi(cdtime.hour);
+		tm->Day = btoi(cdtime.day);
 
 		if ((cdtime.month & 0x10) != 0) //Keep only valid bits: 0x1f (for month values 1-12 in BCD)
-			time->Month = (cdtime.month & 0xf) + 0xa;
+			tm->Month = (cdtime.month & 0xf) + 0xa;
 		else
-			time->Month = cdtime.month & 0xf;
+			tm->Month = cdtime.month & 0xf;
 
-		time->Year = btoi(cdtime.year) + 2000;
+		tm->Year = btoi(cdtime.year) + 2000;
 	}
+#else
+	time_t rawtime;
+	struct tm timeinfo;
+	time(&rawtime);
+	// Convert to JST
+	rawtime += (-9 * 60 * 60);
+#ifdef _WIN32
+	gmtime_s(&timeinfo, &rawtime);
+#else
+	gmtime_r(&rawtime, &timeinfo);
+#endif
+
+	tm->Sec = timeinfo.tm_sec;
+	tm->Min = timeinfo.tm_min;
+	tm->Hour = timeinfo.tm_hour;
+	tm->Day = timeinfo.tm_mday;
+	tm->Month = timeinfo.tm_mon + 1;
+	tm->Year = timeinfo.tm_year + 1900;
+#endif
 
 	return 0;
 }
