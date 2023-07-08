@@ -503,6 +503,7 @@ int mc_ioctl(iop_file_t *f, int a1, void* a2)
 	(void)a2;
 
 	WaitSema(mcman_io_sema);
+	SignalSema(mcman_io_sema);
 	return 0;
 }
 
