@@ -48,6 +48,14 @@
 #endif
 #define MODVER  0x20b
 
+#ifndef MCMAN_ENTRYPOINT
+#ifdef _IOP
+#define MCMAN_ENTRYPOINT _start
+#else
+#define MCMAN_ENTRYPOINT mcman_start
+#endif
+#endif
+
 #ifdef SIO_DEBUG
 	#include <sior.h>
 	#define DEBUG

@@ -145,7 +145,7 @@ int mcman_chrpos(const char *str, int chr)
 	return p - str;
 }
 //--------------------------------------------------------------
-int _start(int argc, char *argv[])
+int MCMAN_ENTRYPOINT(int argc, char *argv[])
 {
 	(void)argc;
 	(void)argv;
