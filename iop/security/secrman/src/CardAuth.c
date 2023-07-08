@@ -54,14 +54,11 @@ McDevIDHandler_t GetMcDevIDHandler(void)
 // 0x00002a40
 int McDeviceIDToCNum(int port, int slot)
 {
-    int result;
+    if (McDevIDHandler == NULL) {
+        return -1;
+    }
 
-    if (McDevIDHandler != NULL) {
-        result = McDevIDHandler(port, slot);
-    } else
-        result = -1;
-
-    return result;
+    return McDevIDHandler(port, slot);
 }
 
 // 0x00001f78
@@ -84,7 +81,7 @@ unsigned char calculate_sio2_buffer_checksum(const void *buffer, unsigned int le
 // 0x00002814
 int card_auth_write(int port, int slot, const void *buffer, int arg3, int command)
 {
-    int i, result;
+    int i;
     sio2_transfer_data_t sio2packet;
     unsigned char wrbuf[14], rdbuf[14];
 
@@ -108,35 +105,33 @@ int card_auth_write(int port, int slot, const void *buffer, int arg3, int comman
     sio2packet.out_dma.addr = NULL;
     sio2packet.in_dma.addr  = NULL;
 
-    if (SendMcCommand(port, slot, &sio2packet) != 0) {
-        if (!((sio2packet.stat6c >> 13) & 1) && !((sio2packet.stat6c >> 14) & 3)) {
-            if (rdbuf[12] == 0x2B) {
-                if (rdbuf[13] != 0x66) {
-                    result = 1;
-                } else {
-                    _printf4("result failed %d\n", (unsigned char)command);
-                    result = 0;
-                }
-            } else {
-                _printf4("ID error %d\n", (unsigned char)command);
-                result = 0;
-            }
-        } else {
-            _printf4("sio2 command error %d\n", (unsigned char)command);
-            result = 0;
-        }
-    } else {
+    if (SendMcCommand(port, slot, &sio2packet) == 0) {
         _printf4("card_command error %d\n", (unsigned char)command);
-        result = 0;
+        return 0;
     }
 
-    return result;
+    if ((!((sio2packet.stat6c >> 13) & 1) && !((sio2packet.stat6c >> 14) & 3)) == 0) {
+        _printf4("sio2 command error %d\n", (unsigned char)command);
+        return 0;
+    }
+
+    if (rdbuf[12] != 0x2B) {
+        _printf4("ID error %d\n", (unsigned char)command);
+        return 0;
+    }
+
+    if (rdbuf[13] == 0x66) {
+        _printf4("result failed %d\n", (unsigned char)command);
+        return 0;
+    }
+
+    return 1;
 }
 
 // 0x00002620
 int card_auth_read(int port, int slot, void *buffer, int arg3, int command)
 {
-    int result;
+    int i;
     sio2_transfer_data_t sio2packet;
     u8 wrbuf[14];
     u8 rdbuf[14];
@@ -158,44 +153,40 @@ int card_auth_read(int port, int slot, void *buffer, int arg3, int command)
     sio2packet.out_dma.addr = NULL;
     sio2packet.in_dma.addr  = NULL;
 
-    if (SendMcCommand(port, slot, &sio2packet) != 0) {
-        if (!((sio2packet.stat6c >> 13) & 1) && !((sio2packet.stat6c >> 14) & 3)) {
-            if (rdbuf[3] == 0x2B) {
-                if (rdbuf[13] != 0x66) {
-                    if ((unsigned char)calculate_sio2_buffer_checksum(&rdbuf[4], 8) == rdbuf[12]) {
-                        int i;
-
-                        for (i = 0; i < 8; i++)
-                            ((unsigned char *)buffer)[7 - i] = rdbuf[4 + i];
-                        result = 1;
-                    } else {
-                        _printf4("check sum error %d\n", (unsigned char)command);
-                        result = 0;
-                    }
-                } else {
-                    _printf4("result failed %d\n", (unsigned char)command);
-                    result = 0;
-                }
-            } else {
-                _printf4("ID error %d\n", (unsigned char)command);
-                result = 0;
-            }
-        } else {
-            _printf4("sio2 command error %d\n", (unsigned char)command);
-            result = 0;
-        }
-    } else {
+    if (SendMcCommand(port, slot, &sio2packet) == 0) {
         _printf4("card_command error %d\n", (unsigned char)command);
-        result = 0;
+        return 0;
     }
 
-    return result;
+    if ((!((sio2packet.stat6c >> 13) & 1) && !((sio2packet.stat6c >> 14) & 3)) == 0) {
+        _printf4("sio2 command error %d\n", (unsigned char)command);
+        return 0;
+    }
+
+    if (rdbuf[3] != 0x2B) {
+        _printf4("ID error %d\n", (unsigned char)command);
+        return 0;
+    }
+
+    if (rdbuf[13] == 0x66) {
+        _printf4("result failed %d\n", (unsigned char)command);
+        return 0;
+    }
+
+    if ((unsigned char)calculate_sio2_buffer_checksum(&rdbuf[4], 8) != rdbuf[12]) {
+        _printf4("check sum error %d\n", (unsigned char)command);
+        return 0;
+    }
+
+    for (i = 0; i < 8; i++)
+        ((unsigned char *)buffer)[7 - i] = rdbuf[4 + i];
+
+    return 1;
 }
 
 // 0x00001fe4
 int card_auth_60(int port, int slot)
 {
-    int result;
     sio2_transfer_data_t sio2packet;
     unsigned char wrbuf[5], rdbuf[5];
 
@@ -215,35 +206,32 @@ int card_auth_60(int port, int slot)
     sio2packet.out_dma.addr = NULL;
     sio2packet.in_dma.addr  = NULL;
 
-    if (SendMcCommand(port, slot, &sio2packet) != 0) {
-        if (!((sio2packet.stat6c >> 13) & 1) && !((sio2packet.stat6c >> 14) & 3)) {
-            if (rdbuf[3] == 0x2B) {
-                if (rdbuf[4] != 0x66) {
-                    result = 1;
-                } else {
-                    _printf4("result failed 0\n");
-                    result = 0;
-                }
-            } else {
-                _printf4("ID error 0\n");
-                result = 0;
-            }
-        } else {
-            _printf4("sio2 command error 0\n");
-            result = 0;
-        }
-    } else {
+    if (SendMcCommand(port, slot, &sio2packet) == 0) {
         _printf4("card_command error 0\n");
-        result = 0;
+        return 0;
     }
 
-    return result;
+    if ((!((sio2packet.stat6c >> 13) & 1) && !((sio2packet.stat6c >> 14) & 3)) == 0) {
+        _printf4("sio2 command error 0\n");
+        return 0;
+    }
+
+    if (rdbuf[3] != 0x2B) {
+        _printf4("ID error 0\n");
+        return 0;
+    }
+
+    if (rdbuf[4] == 0x66) {
+        _printf4("result failed 0\n");
+        return 0;
+    }
+
+    return 1;
 }
 
 // 0x00002168
 int card_auth_key_change(int port, int slot, int command)
 {
-    int result;
     sio2_transfer_data_t sio2packet;
     unsigned char wrbuf[5], rdbuf[5];
 
@@ -264,35 +252,32 @@ int card_auth_key_change(int port, int slot, int command)
     sio2packet.out_dma.addr = NULL;
     sio2packet.in_dma.addr  = NULL;
 
-    if (SendMcCommand(port, slot, &sio2packet) != 0) {
-        if (!((sio2packet.stat6c >> 13) & 1) && !((sio2packet.stat6c >> 14) & 3)) {
-            if (rdbuf[3] == 0x2B) {
-                if (rdbuf[4] != 0x66) {
-                    result = 1;
-                } else {
-                    _printf4("result failed 0\n");
-                    result = 0;
-                }
-            } else {
-                _printf4("ID error 0\n");
-                result = 0;
-            }
-        } else {
-            _printf4("sio2 command error 0\n");
-            result = 0;
-        }
-    } else {
+    if (SendMcCommand(port, slot, &sio2packet) == 0) {
         _printf4("card_command error 0\n");
-        result = 0;
+        return 0;
     }
 
-    return result;
+    if ((!((sio2packet.stat6c >> 13) & 1) && !((sio2packet.stat6c >> 14) & 3)) == 0) {
+        _printf4("sio2 command error 0\n");
+        return 0;
+    }
+
+    if (rdbuf[3] != 0x2B) {
+        _printf4("ID error 0\n");
+        return 0;
+    }
+
+    if (rdbuf[4] == 0x66) {
+        _printf4("result failed 0\n");
+        return 0;
+    }
+
+    return 1;
 }
 
 // 0x0000248c
 int card_auth2(int port, int slot, int arg3, int command)
 {
-    int result;
     sio2_transfer_data_t sio2packet;
     unsigned char wrbuf[5], rdbuf[5];
 
@@ -313,29 +298,27 @@ int card_auth2(int port, int slot, int arg3, int command)
     sio2packet.out_dma.addr = NULL;
     sio2packet.in_dma.addr  = NULL;
 
-    if (SendMcCommand(port, slot, &sio2packet) != 0) {
-        if (!((sio2packet.stat6c >> 13) & 1) && !((sio2packet.stat6c >> 14) & 3)) {
-            if (rdbuf[3] == 0x2B) {
-                if (rdbuf[4] != 0x66) {
-                    result = 1;
-                } else {
-                    _printf4("result failed %d\n", (unsigned char)command);
-                    result = 0;
-                }
-            } else {
-                _printf4("ID error %d\n", (unsigned char)command);
-                result = 0;
-            }
-        } else {
-            _printf4("sio2 command error %d\n", (unsigned char)command);
-            result = 0;
-        }
-    } else {
+    if (SendMcCommand(port, slot, &sio2packet) == 0) {
         _printf4("card_command error %d\n", (unsigned char)command);
-        result = 0;
+        return 0;
     }
 
-    return result;
+    if ((!((sio2packet.stat6c >> 13) & 1) && !((sio2packet.stat6c >> 14) & 3)) == 0) {
+        _printf4("sio2 command error %d\n", (unsigned char)command);
+        return 0;
+    }
+
+    if (rdbuf[3] != 0x2B) {
+        _printf4("ID error %d\n", (unsigned char)command);
+        return 0;
+    }
+
+    if (rdbuf[4] == 0x66) {
+        _printf4("result failed %d\n", (unsigned char)command);
+        return 0;
+    }
+
+    return 1;
 }
 
 // 0x000022f8
@@ -343,7 +326,6 @@ int card_auth(int port, int slot, int arg3, int command)
 {
     sio2_transfer_data_t sio2packet;
     unsigned char wrbuf[5], rdbuf[5];
-    int result;
 
     sio2packet.in  = wrbuf;
     sio2packet.out = rdbuf;
@@ -362,27 +344,25 @@ int card_auth(int port, int slot, int arg3, int command)
     sio2packet.out_dma.addr = NULL;
     sio2packet.in_dma.addr  = NULL;
 
-    if (SendMcCommand(port, slot, &sio2packet) != 0) {
-        if (!((sio2packet.stat6c >> 13) & 1) && !((sio2packet.stat6c >> 14) & 3)) {
-            if (rdbuf[3] == 0x2B) {
-                if (rdbuf[4] != 0x66) {
-                    result = 1;
-                } else {
-                    _printf4("result failed %d\n", (unsigned char)command);
-                    result = 0;
-                }
-            } else {
-                _printf4("ID error %d\n", (unsigned char)command);
-                result = 0;
-            }
-        } else {
-            _printf4("sio2 command error %d\n", (unsigned char)command);
-            result = 0;
-        }
-    } else {
+    if (SendMcCommand(port, slot, &sio2packet) == 0) {
         _printf4("card_command error %d\n", (unsigned char)command);
-        result = 0;
+        return 0;
     }
 
-    return result;
+    if ((!((sio2packet.stat6c >> 13) & 1) && !((sio2packet.stat6c >> 14) & 3)) == 0) {
+        _printf4("sio2 command error %d\n", (unsigned char)command);
+        return 0;
+    }
+
+    if (rdbuf[3] != 0x2B) {
+        _printf4("ID error %d\n", (unsigned char)command);
+        return 0;
+    }
+
+    if (rdbuf[4] == 0x66) {
+        _printf4("result failed %d\n", (unsigned char)command);
+        return 0;
+    }
+
+    return 1;
 }

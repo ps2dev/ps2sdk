@@ -211,61 +211,67 @@ static void SifSecrDiskBootBlockThread(void *parameters)
 
 int _start(int argc, char *argv[])
 {
-    int result;
     iop_thread_t thread;
 
     (void)argc;
     (void)argv;
 
-    if (RegisterLibraryEntries(&_exp_secrsif) == 0) {
-        thread.attr      = TH_C;
-        thread.thread    = &SifSecrDownloadHeaderThread;
-        thread.priority  = 0x28;
-        thread.stacksize = 0x800;
-        if ((SifSecrDownloadHeaderThreadID = CreateThread(&thread)) != 0) {
-            StartThread(SifSecrDownloadHeaderThreadID, NULL);
+    if (RegisterLibraryEntries(&_exp_secrsif) != 0) {
+        return MODULE_NO_RESIDENT_END;
+    }
 
-            thread.thread = &SifSecrDownloadBlockThread;
-            if ((SifSecrDownloadBlockThreadID = CreateThread(&thread)) != 0) {
-                StartThread(SifSecrDownloadBlockThreadID, NULL);
+    thread.attr      = TH_C;
+    thread.priority  = 0x28;
+    thread.stacksize = 0x800;
 
-                thread.thread = &SifSecrDownloadGetKbitThread;
-                if ((SifSecrDownloadGetKbitThreadID = CreateThread(&thread)) != 0) {
-                    StartThread(SifSecrDownloadGetKbitThreadID, NULL);
+    thread.thread = &SifSecrDownloadHeaderThread;
+    if ((SifSecrDownloadHeaderThreadID = CreateThread(&thread)) == 0) {
+        return MODULE_NO_RESIDENT_END;
+    }
 
-                    thread.thread = &SifSecrDownloadGetKcThread;
-                    if ((SifSecrDownloadGetKcThreadID = CreateThread(&thread)) != 0) {
-                        StartThread(SifSecrDownloadGetKcThreadID, NULL);
+    StartThread(SifSecrDownloadHeaderThreadID, NULL);
 
-                        thread.thread = &SifSecrDownloadGetICVPS2Thread;
-                        if ((SifSecrDownloadGetICVPS2ThreadID = CreateThread(&thread)) != 0) {
-                            StartThread(SifSecrDownloadGetICVPS2ThreadID, NULL);
+    thread.thread = &SifSecrDownloadBlockThread;
+    if ((SifSecrDownloadBlockThreadID = CreateThread(&thread)) == 0) {
+        return MODULE_NO_RESIDENT_END;
+    }
 
-                            thread.thread = &SifSecrDiskBootHeaderThread;
-                            if ((SifSecrDiskBootHeaderThreadID = CreateThread(&thread)) != 0) {
-                                StartThread(SifSecrDiskBootHeaderThreadID, NULL);
+    StartThread(SifSecrDownloadBlockThreadID, NULL);
 
-                                thread.thread = &SifSecrDiskBootBlockThread;
-                                if ((SifSecrDiskBootBlockThreadID = CreateThread(&thread)) != 0) {
-                                    StartThread(SifSecrDiskBootBlockThreadID, NULL);
+    thread.thread = &SifSecrDownloadGetKbitThread;
+    if ((SifSecrDownloadGetKbitThreadID = CreateThread(&thread)) == 0) {
+        return MODULE_NO_RESIDENT_END;
+    }
 
-                                    result = MODULE_RESIDENT_END;
-                                } else
-                                    result = MODULE_NO_RESIDENT_END;
-                            } else
-                                result = MODULE_NO_RESIDENT_END;
-                        } else
-                            result = MODULE_NO_RESIDENT_END;
-                    } else
-                        result = MODULE_NO_RESIDENT_END;
-                } else
-                    result = MODULE_NO_RESIDENT_END;
-            } else
-                result = MODULE_NO_RESIDENT_END;
-        } else
-            result = MODULE_NO_RESIDENT_END;
-    } else
-        result = MODULE_NO_RESIDENT_END;
+    StartThread(SifSecrDownloadGetKbitThreadID, NULL);
 
-    return result;
+    thread.thread = &SifSecrDownloadGetKcThread;
+    if ((SifSecrDownloadGetKcThreadID = CreateThread(&thread)) == 0) {
+        return MODULE_NO_RESIDENT_END;
+    }
+
+    StartThread(SifSecrDownloadGetKcThreadID, NULL);
+
+    thread.thread = &SifSecrDownloadGetICVPS2Thread;
+    if ((SifSecrDownloadGetICVPS2ThreadID = CreateThread(&thread)) == 0) {
+        return MODULE_NO_RESIDENT_END;
+    }
+
+    StartThread(SifSecrDownloadGetICVPS2ThreadID, NULL);
+
+    thread.thread = &SifSecrDiskBootHeaderThread;
+    if ((SifSecrDiskBootHeaderThreadID = CreateThread(&thread)) == 0) {
+        return MODULE_NO_RESIDENT_END;
+    }
+
+    StartThread(SifSecrDiskBootHeaderThreadID, NULL);
+
+    thread.thread = &SifSecrDiskBootBlockThread;
+    if ((SifSecrDiskBootBlockThreadID = CreateThread(&thread)) == 0) {
+        return MODULE_NO_RESIDENT_END;
+    }
+
+    StartThread(SifSecrDiskBootBlockThreadID, NULL);
+
+    return MODULE_RESIDENT_END;
 }
