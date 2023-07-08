@@ -451,31 +451,22 @@ int mc_chstat(iop_file_t *f, const char *filename, io_stat_t *stat, unsigned int
 	if (r >= -1) {
 		register int flags;
 
+		flags = 0x000;
+
 		if (statmask & SCE_CST_ATTR) {
 			flags = 0x008;
 			mctbl.Reserve2 = stat->attr;
 		}
-		else flags = 0x000;
 
 		if (statmask & SCE_CST_MODE) {
 			flags |= 0x200;
+			mctbl.AttrFile = 0;
 			if (stat->mode & SCE_STM_R) mctbl.AttrFile |= sceMcFileAttrReadable;
-			else mctbl.AttrFile &= (unsigned short)~sceMcFileAttrReadable;
-
 			if (stat->mode & SCE_STM_W) mctbl.AttrFile |= sceMcFileAttrWriteable;
-			else mctbl.AttrFile &= (unsigned short)~sceMcFileAttrWriteable;
-
 			if (stat->mode & SCE_STM_X) mctbl.AttrFile |= sceMcFileAttrExecutable;
-			else mctbl.AttrFile &= (unsigned short)~sceMcFileAttrExecutable;
-
 			if (stat->mode & SCE_STM_C) mctbl.AttrFile |= sceMcFileAttrDupProhibit;
-			else mctbl.AttrFile &= (unsigned short)~sceMcFileAttrDupProhibit;
-
 			if (stat->mode & sceMcFileAttrPS1) mctbl.AttrFile |= sceMcFileAttrPS1;
-			else mctbl.AttrFile &= (unsigned short)~sceMcFileAttrPS1;
-
 			if (stat->mode & sceMcFileAttrPDAExec) mctbl.AttrFile |= sceMcFileAttrPDAExec;
-			else mctbl.AttrFile &= (unsigned short)~sceMcFileAttrPDAExec;
 		}
 
 		if (statmask & SCE_CST_CT) {
