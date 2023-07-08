@@ -410,10 +410,10 @@ int mcman_dread1(int fd, io_dirent_t *dirent)
 	strncpy(dirent->name, fse->name, 20);
 	dirent->name[20] = 0;
 
-	dirent->stat.mode = 0x101f;
+	dirent->stat.mode = sceMcFileAttrReadable | sceMcFileAttrWriteable | sceMcFileAttrExecutable | sceMcFileAttrFile | sceMcFileAttrDupProhibit | sceMcFileAttrPS1;
 
 	if (fse->field_7e == 1)
-		dirent->stat.mode = 0x181f;
+		dirent->stat.mode |= sceMcFileAttrPDAExec;
 
 	if (fse->field_7d == 1) {
 		memcpy(dirent->stat.ctime, &fse->created, sizeof(sceMcStDateTime));
@@ -446,12 +446,12 @@ int mcman_getstat1(int port, int slot, const char *filename, io_stat_t *stat)
 
 	mcman_wmemset(stat, sizeof(io_stat_t), 0);
 
-	stat->mode = 0x1f;
+	stat->mode = sceMcFileAttrReadable | sceMcFileAttrWriteable | sceMcFileAttrExecutable | sceMcFileAttrFile | sceMcFileAttrDupProhibit;
 
 	if (fse->field_7d == 1) {
 
 		if ((fse->field_2c & sceMcFileAttrClosed) != 0)
-			stat->mode = 0x9f;
+			stat->mode |= sceMcFileAttrClosed;
 
 		memcpy(stat->ctime, &fse->created, sizeof(sceMcStDateTime));
 		memcpy(stat->mtime, &fse->modified, sizeof(sceMcStDateTime));

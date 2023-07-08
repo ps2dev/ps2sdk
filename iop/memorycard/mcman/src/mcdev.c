@@ -454,7 +454,7 @@ int mc_chstat(iop_file_t *f, const char *filename, io_stat_t *stat, unsigned int
 		flags = 0x000;
 
 		if (statmask & SCE_CST_ATTR) {
-			flags = 0x008;
+			flags |= 0x008;
 			mctbl.Reserve2 = stat->attr;
 		}
 
