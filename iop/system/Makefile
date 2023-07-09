@@ -8,6 +8,7 @@
 
 SUBDIRS = \
 	alloc \
+	dmacman \
 	eesync \
 	eesync-nano \
 	threadman \
