@@ -29,6 +29,7 @@ SUBDIRS = \
 	sio2log \
 	sio2man \
 	sio2man-old \
+	ssbusc \
 	stdio \
 	sysclib \
 	sysclib-full \
