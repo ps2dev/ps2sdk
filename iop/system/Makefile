@@ -12,6 +12,7 @@ SUBDIRS = \
 	eesync-nano \
 	threadman \
 	timrman \
+	ioman \
 	iomanx \
 	iopmgr \
 	loadfile \
