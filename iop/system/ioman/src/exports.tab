@@ -1,0 +1,31 @@
+
+DECLARE_EXPORT_TABLE(ioman, 1, 1)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+
+	DECLARE_EXPORT(io_open)
+/*05*/	DECLARE_EXPORT(io_close)
+	DECLARE_EXPORT(io_read)
+	DECLARE_EXPORT(io_write)
+	DECLARE_EXPORT(io_lseek)
+	DECLARE_EXPORT(io_ioctl)
+/*10*/	DECLARE_EXPORT(io_remove)
+	DECLARE_EXPORT(io_mkdir)
+	DECLARE_EXPORT(io_rmdir)
+	DECLARE_EXPORT(io_dopen)
+	DECLARE_EXPORT(io_dclose)
+/*15*/	DECLARE_EXPORT(io_dread)
+	DECLARE_EXPORT(io_getstat)
+	DECLARE_EXPORT(io_chstat)
+	DECLARE_EXPORT(io_format)
+	DECLARE_EXPORT(_retonly)
+/*20*/	DECLARE_EXPORT(io_AddDrv)
+	DECLARE_EXPORT(io_DelDrv)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+END_EXPORT_TABLE
+
+void _retonly() {}
