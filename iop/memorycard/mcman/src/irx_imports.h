@@ -22,11 +22,15 @@
 #include <fls.h>
 #endif
 #include <intrman.h>
+#ifdef BUILDING_VMCMAN
+#include <iomanX.h>
+#else
 #include <ioman.h>
+#endif
 #include <loadcore.h>
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 #include <modload.h>
 #include <secrman.h>
-#ifndef BUILDING_XFROMMAN
 #ifdef BUILDING_XMCMAN
 #ifndef SIO2MAN_V2
 #include <xsio2man.h>
@@ -42,7 +46,9 @@
 #endif
 #include <stdio.h>
 #include <sysclib.h>
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 #include <timrman.h>
+#endif
 #include <thbase.h>
 #include <thsemap.h>
 

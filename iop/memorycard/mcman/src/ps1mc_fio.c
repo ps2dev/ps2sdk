@@ -11,11 +11,6 @@
 #include <mcman.h>
 #include "mcman-internal.h"
 
-extern union mcman_PS1PDApagebuf mcman_PS1PDApagebuf;
-
-extern MC_FHANDLE mcman_fdhandles[MAX_FDHANDLES];
-extern MCDevInfo mcman_devinfos[4][MCMAN_MAXSLOT];
-
 static int mcman_PS1curcluster;
 static char mcman_PS1curdir[64];
 
@@ -81,13 +76,13 @@ int mcman_format1(int port, int slot)
 }
 
 //--------------------------------------------------------------
-int mcman_open1(int port, int slot, char *filename, int flags)
+int mcman_open1(int port, int slot, const char *filename, int flags)
 {
 	register int r, i, fd = 0, cluster, temp;
 	register MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
 	McFsEntryPS1 *fse; //sp18
 	McCacheEntry *mce;
-	char *p = filename;
+	const char *p = filename;
 
 	DPRINTF("mcman_open1 port%d slot%d filename %s flags %x\n", port, slot, filename, flags);
 
@@ -189,7 +184,7 @@ int mcman_open1(int port, int slot, char *filename, int flags)
 					temp = i + 1;
 				}
 
-				temp &= 0xfffffff8;
+				temp &= ~0x00000007;
 				temp = (i + 1) - temp;
 #if 0
 				// This condition is always false due to the preceding set of assignments on "temp" variable.
@@ -241,7 +236,7 @@ int mcman_open1(int port, int slot, char *filename, int flags)
 		temp = cluster + 1;
 	}
 
-	temp &= 0xfffffff8;
+	temp &= ~0x00000007;
 	temp = (cluster + 1) - temp;
 	if (temp < 0)
 		temp = 0;
@@ -282,7 +277,7 @@ int mcman_read1(int fd, void *buffer, int nbyte)
 			else
 				temp = fh->position;
 
-			offset = (fh->position - (temp & 0xfffffc00));
+			offset = (fh->position - (temp & ~0x000003ff));
 			maxsize = MCMAN_CLUSTERSIZE - offset;
 			if (maxsize < nbyte)
 				size = maxsize;
@@ -360,7 +355,7 @@ int mcman_write1(int fd, void *buffer, int nbyte)
 			else
 				temp = fh->position;
 
-			offset = fh->position - (temp & 0xfffffc00);
+			offset = fh->position - (temp & ~0x000003ff);
 			maxsize = MCMAN_CLUSTERSIZE - offset;
 			if (maxsize < nbyte)
 				size = maxsize;
@@ -387,7 +382,7 @@ int mcman_write1(int fd, void *buffer, int nbyte)
 }
 
 //--------------------------------------------------------------
-int mcman_dread1(int fd, io_dirent_t *dirent)
+int mcman_dread1(int fd, MC_IO_DRE_T *dirent)
 {
 	register MC_FHANDLE *fh = (MC_FHANDLE *)&mcman_fdhandles[fd];
 	McFsEntryPS1 *fse;
@@ -410,15 +405,19 @@ int mcman_dread1(int fd, io_dirent_t *dirent)
 		return 0;
 
 	fh->position++;
-	mcman_wmemset((void *)dirent, sizeof(io_dirent_t), 0);
+	mcman_wmemset((void *)dirent, sizeof(MC_IO_DRE_T), 0);
 
 	strncpy(dirent->name, fse->name, 20);
 	dirent->name[20] = 0;
 
-	dirent->stat.mode = 0x101f;
+	dirent->stat.mode = MC_IO_S_RD | MC_IO_S_WR | MC_IO_S_EX | MC_IO_S_FL;
+
+#if !MCMAN_ENABLE_EXTENDED_DEV_OPS
+	dirent->stat.mode |= sceMcFileAttrDupProhibit | sceMcFileAttrPS1;
 
 	if (fse->field_7e == 1)
-		dirent->stat.mode = 0x181f;
+		dirent->stat.mode |= sceMcFileAttrPDAExec;
+#endif
 
 	if (fse->field_7d == 1) {
 		memcpy(dirent->stat.ctime, &fse->created, sizeof(sceMcStDateTime));
@@ -434,7 +433,7 @@ int mcman_dread1(int fd, io_dirent_t *dirent)
 }
 
 //--------------------------------------------------------------
-int mcman_getstat1(int port, int slot, char *filename, io_stat_t *stat)
+int mcman_getstat1(int port, int slot, const char *filename, MC_IO_STA_T *stat)
 {
 	register int r;
 	McFsEntryPS1 *fse;
@@ -449,14 +448,20 @@ int mcman_getstat1(int port, int slot, char *filename, io_stat_t *stat)
 	if (r < 0)
 		return sceMcResNoEntry;
 
-	mcman_wmemset(stat, sizeof(io_stat_t), 0);
+	mcman_wmemset(stat, sizeof(MC_IO_STA_T), 0);
 
-	stat->mode = 0x1f;
+	stat->mode = MC_IO_S_RD | MC_IO_S_WR | MC_IO_S_EX | MC_IO_S_FL;
+
+#if !MCMAN_ENABLE_EXTENDED_DEV_OPS
+	stat->mode |= sceMcFileAttrDupProhibit;
+#endif
 
 	if (fse->field_7d == 1) {
 
+#if !MCMAN_ENABLE_EXTENDED_DEV_OPS
 		if ((fse->field_2c & sceMcFileAttrClosed) != 0)
-			stat->mode = 0x9f;
+			stat->mode |= sceMcFileAttrClosed;
+#endif
 
 		memcpy(stat->ctime, &fse->created, sizeof(sceMcStDateTime));
 		memcpy(stat->mtime, &fse->modified, sizeof(sceMcStDateTime));
@@ -473,7 +478,7 @@ int mcman_getstat1(int port, int slot, char *filename, io_stat_t *stat)
 }
 
 //--------------------------------------------------------------
-int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int flags)
+int mcman_setinfo1(int port, int slot, const char *filename, sceMcTblGetDir *info, int flags)
 {
 	register int r, temp, ret;
 #ifdef BUILDING_XMCMAN
@@ -487,13 +492,13 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 	ret = 0;
 #ifdef BUILDING_XMCMAN
 	if ((flags & sceMcFileAttrFile) != 0) {
-		r = mcman_getPS1direntry(port, slot, (char*)info->EntryName, &fse1, 1);
+		r = mcman_getPS1direntry(port, slot, info->EntryName, &fse1, 1);
 		if (r < 0) {
 			if (r != sceMcResNoEntry) {
 				ret = r;
 			}
 			else {
-				if ((!strcmp(".", (char*)info->EntryName)) || (!strcmp("..", (char*)info->EntryName)) || (info->EntryName[0] == 0))
+				if ((!strcmp(".", info->EntryName)) || (!strcmp("..", info->EntryName)) || (info->EntryName[0] == 0))
 					ret = sceMcResNoEntry;
 			}
 		}
@@ -520,7 +525,7 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 		temp = r + 8;
 #endif
 
-	temp &= 0xfffffff8;
+	temp &= ~0x00000007;
 	temp = (r + 1) - temp;
 	if (temp < 0)
 		temp = 0;
@@ -566,7 +571,7 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 		fse2->modified = info->_Modify;
 
 	if ((flags & sceMcFileAttrFile) != 0)
-		strncpy(fse2->name, (char*)info->EntryName, 20);
+		strncpy(fse2->name, info->EntryName, 20);
 
 	fse2->field_1e = 0;
 
@@ -576,7 +581,7 @@ int mcman_setinfo1(int port, int slot, char *filename, sceMcTblGetDir *info, int
 }
 
 //--------------------------------------------------------------
-int mcman_getdir1(int port, int slot, char *dirname, int flags, int maxent, sceMcTblGetDir *info)
+int mcman_getdir1(int port, int slot, const char *dirname, int flags, int maxent, sceMcTblGetDir *info)
 {
 	register int r, i;
 	McFsEntryPS1 *fse;
@@ -588,7 +593,7 @@ int mcman_getdir1(int port, int slot, char *dirname, int flags, int maxent, sceM
 	i = 0;
 
 	if (!flags) {
-		char *p;
+		const char *p;
 
 		mcman_PS1curcluster = 0;
 		p = dirname;
@@ -641,7 +646,7 @@ int mcman_getdir1(int port, int slot, char *dirname, int flags, int maxent, sceM
 				info->FileSizeByte = fse->length;
 			}
 
-			strncpy((char*)info->EntryName, fse->name, 20);
+			strncpy(info->EntryName, fse->name, 20);
 			info->EntryName[20] = 0;
 
 			i++;
@@ -653,7 +658,7 @@ int mcman_getdir1(int port, int slot, char *dirname, int flags, int maxent, sceM
 }
 
 //--------------------------------------------------------------
-int mcman_delete1(int port, int slot, char *filename, int flags)
+int mcman_delete1(int port, int slot, const char *filename, int flags)
 {
 	register int r;
 	McFsEntryPS1 *fse;
@@ -692,7 +697,7 @@ int mcman_close1(int fd)
 	else
 		temp = fh->freeclink + 1;
 
-	temp &= 0xfffffff8;
+	temp &= ~0x00000007;
 	temp = (fh->freeclink + 1) - temp;
 	if (temp < 0)
 		temp = 0;

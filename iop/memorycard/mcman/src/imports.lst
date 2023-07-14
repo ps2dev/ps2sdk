@@ -10,6 +10,7 @@ I_sio_printf
 sior_IMPORTS_end
 #endif
 
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 #ifndef BUILDING_XFROMMAN
 #ifdef BUILDING_XMCMAN
 #ifndef SIO2MAN_V2
@@ -31,6 +32,7 @@ sio2man_IMPORTS_start
 I_sio2_mc_transfer_init
 I_sio2_transfer
 sio2man_IMPORTS_end
+#endif
 #endif
 #endif
 
@@ -65,23 +67,39 @@ I_SignalSema
 I_WaitSema
 thsemap_IMPORTS_end
 
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 timrman_IMPORTS_start
 I_AllocHardTimer
 I_ReferHardTimer
 I_SetTimerMode
 I_GetTimerCounter
 timrman_IMPORTS_end
+#endif
 
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 modload_IMPORTS_start
 I_SetCheckKelfPathCallback
 modload_IMPORTS_end
+#endif
 
+#if defined(BUILDING_VMCMAN)
+iomanX_IMPORTS_start
+I_iomanX_AddDrv
+I_iomanX_DelDrv
+I_iomanX_open
+I_iomanX_close
+I_iomanX_lseek
+I_iomanX_read
+I_iomanX_write
+iomanX_IMPORTS_end
+#else
 ioman_IMPORTS_start
 I_AddDrv
 I_DelDrv
 ioman_IMPORTS_end
+#endif
 
-#ifndef BUILDING_XFROMMAN
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 secrman_IMPORTS_start
 I_SecrSetMcCommandHandler
 I_SecrSetMcDevIDHandler
