@@ -29,9 +29,10 @@
 .ent _ee_save_frame
 _ee_save_frame:
                         sq          $zero, 0x000($s0)
+.set push
 .set noat
                         sq          $at,   0x010($s0)
-.set at
+.set pop
                         sq          $v0,   0x020($s0)
                         sq          $v1,   0x030($s0)
                         sq          $a0,   0x040($s0)
@@ -130,9 +131,10 @@ _ee_save_frame:
 .ent _ee_load_frame
 _ee_load_frame:
                         lq          $zero, 0x000($s0)
+.set push
 .set noat
                         lq          $at,   0x010($s0)
-.set at
+.set pop
 
                         lq          $v0,   0x020($s0)
                         lq          $v1,   0x030($s0)

@@ -5,6 +5,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+.set push
 .set noreorder
 
 #Will be executed in user mode, but with interrupts disabled.
@@ -21,3 +22,5 @@ UModeCallbackDispatcher:
 	syscall
 .end UModeCallbackDispatcher
 .p2align 4
+
+.set pop

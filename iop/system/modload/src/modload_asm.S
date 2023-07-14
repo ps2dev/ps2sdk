@@ -6,6 +6,7 @@
 .module softfloat
 .module nooddspreg
 .endif
+.set push
 .set noat
 .set noreorder
 
@@ -19,3 +20,5 @@ CpuExecuteKmode:
     jr      $ra
     nop
 .end CpuExecuteKmode
+
+.set pop

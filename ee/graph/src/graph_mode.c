@@ -94,14 +94,16 @@ static inline int __udelay(unsigned int usecs)
 
 	}
 
-	asm volatile (".set noreorder\n\t"
+	asm volatile (
+				  ".set push\n\t"
+				  ".set noreorder\n\t"
 				  "0:\n\t"
 				  "beq %0,%2,0f\n\t"
 				  "addiu %0,1\n\t"
 				  "bne %0,%2,0b\n\t"
 				  "addiu %0,1\n\t"
 				  "0:\n\t"
-				  ".set reorder\n\t"
+				  ".set pop\n\t"
 				  :"=r" (loops_total)
 				  :"0" (loops_total), "r" (loops_end));
 

@@ -1,3 +1,5 @@
+
+.set push
 .set noat
 .set noreorder
 
@@ -63,6 +65,8 @@ GetGP:
 	jr	$ra
 	move	$v0, $gp
 .end GetGP
+
+.set pop
 
 .data
 dispatch_ra: .quad 0

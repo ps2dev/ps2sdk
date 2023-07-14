@@ -9,6 +9,7 @@
 #define ABI_EABI64 // force all register names to EABI64 (legacy toolchain)
 #include "as_reg_compat.h"
 
+.set push
 .set noreorder
 .set nomacro
 .set noat
@@ -2268,3 +2269,4 @@ _MPEG_avg_chroma_XY:
     jr      $ra
     nop
 
+.set pop
