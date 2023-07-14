@@ -197,14 +197,18 @@ int _start(int argc, char *argv[])
     if (udp_socket < 0)
         return MODULE_NO_RESIDENT_END;
 
-    close(0);
-    close(1);
     DelDrv(tty_device.name);
 
     if (AddDrv(&tty_device) < 0)
         return MODULE_NO_RESIDENT_END;
 
+    close(0);
     open(DEVNAME "00:", 0x1000 | O_RDWR);
+    
+    close(1);
+    open(DEVNAME "00:", O_WRONLY);
+
+    close(2);
     open(DEVNAME "00:", O_WRONLY);
 
     printf("UDPTTY loaded!\n");
