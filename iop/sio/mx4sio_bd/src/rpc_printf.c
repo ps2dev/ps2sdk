@@ -2,24 +2,24 @@
 #include <thbase.h>
 #include <sifrpc.h>
 
-#include "xprintf.h"    /* needed for vsnprintf, other implementation appears to be broken */
+#include "xprintf.h" /* needed for vsnprintf, other implementation appears to be broken */
 #include "rpc_printf.h"
 
 #define RPC_ID 0x1a1a1a1b
 
-static char msg_buff[128] __attribute__((aligned (64)));
+static char msg_buff[128] __attribute__((aligned(64)));
 static SifRpcClientData_t client;
-static uint8_t rpc_init = 0; 
+static uint8_t rpc_init = 0;
 
 /* This is ONLY built in _rpc and _rpc_v builds and currently only used for the sdcard test app */
 
 /* It's purpose is to pipe messages from the mx4sio driver over to the EE
- * in a way that doesn't require any special print statements, conditions, or 
+ * in a way that doesn't require any special print statements, conditions, or
  * changes to the behavior of the driver itself. */
 
 int rpc_printf_init()
 {
-    while(sceSifBindRpc(&client, RPC_ID, 0) < 0 || client.server == NULL) {
+    while (sceSifBindRpc(&client, RPC_ID, 0) < 0 || client.server == NULL) {
         DelayThread(1000 * 1000);
     }
 

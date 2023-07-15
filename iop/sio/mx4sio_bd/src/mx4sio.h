@@ -4,16 +4,16 @@
 #include <stdint.h>
 
 /*
-* Clock divider for 48MHz clock:
-* 1 = 48  MHz - Invalid setting
-* 2 = 24  MHz - Fastest usable speed
-* 3 = 16  MHz
-* 4 = 12  MHz
-* 5 =  9.6MHz
-* 6 =  6  MHz
-* ...
-* 0x78 = 400KHz - Initialization speed
-*/
+ * Clock divider for 48MHz clock:
+ * 1 = 48  MHz - Invalid setting
+ * 2 = 24  MHz - Fastest usable speed
+ * 3 = 16  MHz
+ * 4 = 12  MHz
+ * 5 =  9.6MHz
+ * 6 =  6  MHz
+ * ...
+ * 0x78 = 400KHz - Initialization speed
+ */
 
 /* baud dividers */
 #define SIO2_BAUD_DIV_SLOW 0x78
@@ -28,26 +28,26 @@
 
 /* interrupt types */
 #define INTR_NONE 0x0
-#define INTR_RX 0x1
-#define INTR_TX 0x2
+#define INTR_RX   0x1
+#define INTR_TX   0x2
 
 /* mem slot 2 */
 #define PORT_NR 3
 
-//#define CONFIG_USE_CRC16
+// #define CONFIG_USE_CRC16
 
 typedef struct dma_command_t
 {
     uint8_t *buffer;
     uint16_t sector_count;
-    volatile uint16_t sectors_transferred; 
+    volatile uint16_t sectors_transferred;
     uint16_t sectors_reversed;
 #ifdef CONFIG_USE_CRC16
     uint16_t crc[512]; /*FIXME*/
 #endif
     uint8_t response;
     volatile uint8_t abort;
-}dma_command_t;
+} dma_command_t;
 
 /* globals */
 extern dma_command_t cmd;
@@ -62,10 +62,10 @@ void mx_sio2_set_baud(uint8_t baud);
 uint8_t mx_sio2_write_byte(uint8_t byte);
 uint8_t mx_sio2_write_dummy(void);
 
-void mx_sio2_rx_pio(uint8_t *buffer, uint32_t size);   /* PIO only used for sending commands */
-void mx_sio2_tx_pio(uint8_t *buffer, uint32_t size);   
+void mx_sio2_rx_pio(uint8_t *buffer, uint32_t size); /* PIO only used for sending commands */
+void mx_sio2_tx_pio(uint8_t *buffer, uint32_t size);
 
-void mx_sio2_start_rx_dma(uint8_t *buffer);            /* DMA used for all other transfers */
+void mx_sio2_start_rx_dma(uint8_t *buffer); /* DMA used for all other transfers */
 void mx_sio2_start_tx_dma(uint8_t *buffer);
 
 uint8_t mx_sio2_wait_equal(uint8_t value, uint32_t count);
