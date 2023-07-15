@@ -27,6 +27,14 @@
 /** Set if the packet has been allocated */
 #define PACKET_F_ALLOC 0x01
 
+static inline void rpc_packet_free(void *packet)
+{
+    SifRpcRendPkt_t *rendpkt = (SifRpcRendPkt_t *)packet;
+
+    rendpkt->rpc_id = 0;
+    rendpkt->rec_id &= (~PACKET_F_ALLOC);
+}
+
 struct rpc_data
 {
     int pid;
@@ -122,8 +130,10 @@ int SifBindRpc(SifRpcClientData_t *cd, int sid, int mode)
     bind->client   = cd;
 
     if (mode & SIF_RPC_M_NOWAIT) {
-        if (!SifSendCmd(SIF_CMD_RPC_BIND, bind, RPC_PACKET_SIZE, NULL, NULL, 0))
+        if (!SifSendCmd(SIF_CMD_RPC_BIND, bind, RPC_PACKET_SIZE, NULL, NULL, 0)) {
+            rpc_packet_free(bind);
             return -E_SIF_PKT_SEND;
+        }
 
         return 0;
     }
@@ -131,11 +141,15 @@ int SifBindRpc(SifRpcClientData_t *cd, int sid, int mode)
     sema.max_count  = 1;
     sema.init_count = 0;
     cd->hdr.sema_id = CreateSema(&sema);
-    if (cd->hdr.sema_id < 0)
+    if (cd->hdr.sema_id < 0) {
+        rpc_packet_free(bind);
         return -E_LIB_SEMA_CREATE;
+    }
 
-    if (!SifSendCmd(SIF_CMD_RPC_BIND, bind, RPC_PACKET_SIZE, NULL, NULL, 0))
+    if (!SifSendCmd(SIF_CMD_RPC_BIND, bind, RPC_PACKET_SIZE, NULL, NULL, 0)) {
+        rpc_packet_free(bind);
         return -E_SIF_PKT_SEND;
+    }
 
     WaitSema(cd->hdr.sema_id);
     DeleteSema(cd->hdr.sema_id);
@@ -182,9 +196,10 @@ int SifCallRpc(SifRpcClientData_t *cd, int rpc_number, int mode,
         if (!endfunc)
             call->rmode = 0;
 
-        if (!SifSendCmd(SIF_CMD_RPC_CALL, call, RPC_PACKET_SIZE, sendbuf,
-                        cd->buff, ssize))
+        if (!SifSendCmd(SIF_CMD_RPC_CALL, call, RPC_PACKET_SIZE, sendbuf, cd->buff, ssize)) {
+            rpc_packet_free(call);
             return -E_SIF_PKT_SEND;
+        }
 
         return 0;
     }
@@ -192,12 +207,15 @@ int SifCallRpc(SifRpcClientData_t *cd, int rpc_number, int mode,
     sema.max_count  = 1;
     sema.init_count = 0;
     cd->hdr.sema_id = CreateSema(&sema);
-    if (cd->hdr.sema_id < 0)
+    if (cd->hdr.sema_id < 0) {
+        rpc_packet_free(call);
         return -E_LIB_SEMA_CREATE;
+    }
 
-    if (!SifSendCmd(SIF_CMD_RPC_CALL, call, RPC_PACKET_SIZE, sendbuf,
-                    cd->buff, ssize))
+    if (!SifSendCmd(SIF_CMD_RPC_CALL, call, RPC_PACKET_SIZE, sendbuf, cd->buff, ssize)) {
+        rpc_packet_free(call);
         return -E_SIF_PKT_SEND;
+    }
 
     WaitSema(cd->hdr.sema_id);
     DeleteSema(cd->hdr.sema_id);
@@ -227,8 +245,10 @@ int SifRpcGetOtherData(SifRpcReceiveData_t *rd, void *src, void *dest,
     other->receive = rd;
 
     if (mode & SIF_RPC_M_NOWAIT) {
-        if (!SifSendCmd(SIF_CMD_RPC_RDATA, other, RPC_PACKET_SIZE, NULL, NULL, 0))
+        if (!SifSendCmd(SIF_CMD_RPC_RDATA, other, RPC_PACKET_SIZE, NULL, NULL, 0)) {
+            rpc_packet_free(other);
             return -E_SIF_PKT_SEND;
+        }
 
         return 0;
     }
@@ -236,11 +256,15 @@ int SifRpcGetOtherData(SifRpcReceiveData_t *rd, void *src, void *dest,
     sema.max_count  = 1;
     sema.init_count = 0;
     rd->hdr.sema_id = CreateSema(&sema);
-    if (rd->hdr.sema_id < 0)
+    if (rd->hdr.sema_id < 0) {
+        rpc_packet_free(other);
         return -E_LIB_SEMA_CREATE;
+    }
 
-    if (!SifSendCmd(SIF_CMD_RPC_RDATA, other, RPC_PACKET_SIZE, NULL, NULL, 0))
+    if (!SifSendCmd(SIF_CMD_RPC_RDATA, other, RPC_PACKET_SIZE, NULL, NULL, 0)) {
+        rpc_packet_free(other);
         return -E_SIF_PKT_SEND;
+    }
 
     WaitSema(rd->hdr.sema_id);
     DeleteSema(rd->hdr.sema_id);
@@ -270,13 +294,6 @@ struct rpc_data _sif_rpc_data = {
 
 static int init = 0;
 
-static void rpc_packet_free(void *packet)
-{
-    SifRpcRendPkt_t *rendpkt = (SifRpcRendPkt_t *)packet;
-
-    rendpkt->rpc_id = 0;
-    rendpkt->rec_id &= (~PACKET_F_ALLOC);
-}
 
 /* Command 0x80000008 */
 static void _request_end(SifRpcRendPkt_t *request, void *data)
@@ -414,6 +431,19 @@ void SifInitRpc(int mode)
     _sif_rpc_data.pkt_table    = UNCACHED_SEG(_sif_rpc_data.pkt_table);
     _sif_rpc_data.rdata_table  = UNCACHED_SEG(_sif_rpc_data.rdata_table);
     _sif_rpc_data.client_table = UNCACHED_SEG(_sif_rpc_data.client_table);
+
+    _sif_rpc_data.rdata_table_idx = 0;
+    struct rpc_data *rpc_data     = (struct rpc_data *)(&_sif_rpc_data);
+
+    int len = rpc_data->pkt_table_len;
+    if (len > 0) {
+        int rid;
+        SifRpcPktHeader_t *packet = (SifRpcPktHeader_t *)rpc_data->pkt_table;
+
+        for (rid = 0; rid < len; rid++, packet = (SifRpcPktHeader_t *)(((unsigned char *)packet) + RPC_PACKET_SIZE)) {
+            rpc_packet_free(packet);
+        }
+    }
 
     SifAddCmdHandler(SIF_CMD_RPC_END, (void *)_request_end, &_sif_rpc_data);
     SifAddCmdHandler(SIF_CMD_RPC_BIND, (void *)_request_bind, &_sif_rpc_data);
