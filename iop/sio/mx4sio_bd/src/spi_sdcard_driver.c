@@ -1,601 +1,700 @@
-/* Includes ------------------------------------------------------------------*/
+#include <bdm.h>
+#include <stdint.h>
+#include <thevent.h>
+#include <thbase.h>
+
 #include "spi_sdcard_driver.h"
-#include "spi_sdcard_driver_config.h"
 #include "spi_sdcard_crc7.h"
+#include "crc16.h"
+#include "mx4sio.h"
+#include "sio2regs.h"
 
-// #define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
-#define SPISD_LOG M_PRINTF
 
-/* Private types -------------------------------------------------------------*/
-typedef enum card_type_e {
-    CARD_TYPE_MMC    = 0x00,
-    CARD_TYPE_SDV1   = 0x01,
-    CARD_TYPE_SDV2   = 0x02,
-    CARD_TYPE_SDV2HC = 0x04
-} card_type_t;
+#define CMD0   (0  | 0x40)  /* Reset */
+#define CMD1   (1  | 0x40)  /* Send Operator Condition - SEND_OP_COND */
+#define CMD8   (8  | 0x40)  /* Send Interface Condition - SEND_IF_COND */
+#define CMD9   (9  | 0x40)  /* Read CSD */
+#define CMD10  (10 | 0x40)  /* Read CID */
+#define CMD12  (12 | 0x40)  /* Stop data transmit */
+#define CMD13  (13 | 0x40)  /* SEND_STATUS */
+#define CMD16  (16 | 0x40)  /* Set block size, should return 0x00 */
+#define CMD17  (17 | 0x40)  /* Read single block */
+#define CMD18  (18 | 0x40)  /* Read multi block */
+#define ACMD23 (23 | 0x40)  /* Prepare erase N-blocks before multi block write */
+#define CMD24  (24 | 0x40)  /* Write single block */
+#define CMD25  (25 | 0x40)  /* Write multi block */
+#define ACMD41 (41 | 0x40)  /* should return 0x00 */
+#define CMD55  (55 | 0x40)  /* should return 0x01 */
+#define CMD58  (58 | 0x40)  /* Read OCR */
+#define CMD59  (59 | 0x40)  /* CRC disable/enable, should return 0x00 */
 
-/* Private define ------------------------------------------------------------*/
-
-#define DUMMY_BYTE 0xFF
-#define BLOCK_SIZE 512
-
-#define CMD0   0  /* Reset */
-#define CMD1   1  /* Send Operator Condition - SEND_OP_COND */
-#define CMD8   8  /* Send Interface Condition - SEND_IF_COND    */
-#define CMD9   9  /* Read CSD */
-#define CMD10  10 /* Read CID */
-#define CMD12  12 /* Stop data transmit */
-#define CMD16  16 /* Set block size, should return 0x00 */
-#define CMD17  17 /* Read single block */
-#define CMD18  18 /* Read multi block */
-#define ACMD23 23 /* Prepare erase N-blokcs before multi block write */
-#define CMD24  24 /* Write single block */
-#define CMD25  25 /* Write multi block */
-#define ACMD41 41 /* should return 0x00 */
-#define CMD55  55 /* should return 0x01 */
-#define CMD58  58 /* Read OCR */
-#define CMD59  59 /* CRC disable/enbale, should return 0x00 */
+#define SPISD_R1_IDLE_FLAG            (0x01)
+#define SPISD_R1_ERASE_RESET_FLAG     (0x02)
+#define SPISD_R1_ILLEGAL_CMD_FLAG     (0x04)
+#define SPISD_R1_CMD_CRC_FLAG         (0x08)
+#define SPISD_R1_ERASE_SEQ_ERROR_FLAG (0x10)
+#define SPISD_R1_ADDR_ERROR_FLAG      (0x20)
+#define SPISD_R1_PARAM_ERROR_FLAG     (0x40)
+#define SPISD_R1_ZERO_FLAG            (0x80)
 
 #define CMD_WAIT_RESP_TIMEOUT (100U)
 #define WAIT_IDLE_TIMEOUT     (50U)
-
-#define SPI_SPEED_NO_INIT_HZ (400000U)
-#define SPI_SPEED_MAX_HZ     (25000000U)
+#define MAX_RETRIES            4
 
 #define CMD_CRC_OFFSET        5
 #define CRC7_SHIFT_MASK(crc7) ((crc7) << 1U | 1U)
 
-/* Private variables ---------------------------------------------------------*/
-static card_type_t _card_type;
-static spisd_interface_t const *_io = NULL;
+/* globals */
+spisd_t sdcard;
 
-static uint8_t _send_command(uint8_t cmd, uint32_t arg)
+/* BDM interface */
+struct block_device bd = {
+    NULL,        /* priv */
+    "sdc",       /* name */
+    0,           /* devNr */
+    0,           /* parNr */
+    0x00,        /* parId */
+    SECTOR_SIZE, /* sectorSize */
+    0,           /* sectorOffset */
+    0,           /* sectorCount */
+    spisd_read,
+    spisd_write,
+    spisd_flush,
+    spisd_stop };
+
+/* NOTE: SIO2 does *NOT* allow for direct control of /CS line.
+ * It's controlled by the SIO2 hardware and automatically asserted at the start 
+ * of a transfer and deasserted at the end. This has lead to the need for some
+ * conditions surrounding dummy writes to avoid timing disruption. */
+static uint8_t spisd_send_cmd(uint8_t cmd, uint32_t arg)
 {
-    uint32_t i;
     uint8_t response = 0xFF;
 
-    /* Send 8 CLKs before sending CMD */
-    _io->wr_rd_byte(DUMMY_BYTE);
-    
-    uint8_t packet[]       = {cmd | 0x40, arg >> 24, arg >> 16, arg >> 8, arg, 0};
+    /* avoid disrupting CMD12 alignment */
+    if (cmd != CMD12 && cmd != CMD0)
+        mx_sio2_write_dummy();
+
+    uint8_t packet[]       = {cmd, arg >> 24, arg >> 16, arg >> 8, arg, 0};
     packet[CMD_CRC_OFFSET] = CRC7_SHIFT_MASK(crc7(packet, CMD_CRC_OFFSET));
 
-    _io->write(packet, sizeof(packet));
+    /* begin SIO2 PIO TX transfer */
+    mx_sio2_tx_pio(packet, sizeof(packet));
 
-    /* Discard stuff byte for CMD12 */
-    if (cmd == CMD12) {
-        _io->wr_rd_byte(DUMMY_BYTE);
-    }
+    /* discard extra data on CMD12 */
+    if (cmd == CMD12)
+        mx_sio2_write_dummy();
 
-    /* Wait response, quit till timeout */
-    for (i = 0; i < CMD_WAIT_RESP_TIMEOUT; i++) {
-        response = _io->wr_rd_byte(DUMMY_BYTE);
+    /* wait for card to respond */
+    response = mx_sio2_wait_not_equal(0xFF, CMD_WAIT_RESP_TIMEOUT);
 
-        if (response != 0xFF) {
-            break;
-        }
-    }
-    
-    /* When performing block commands, some cards are ready to send the 0xFE token
-     * immediately after sending 0x0. By performing a dummy write after recieving 0x0
-     * we risk discarding 0xFE these cards causing the operation to fail completely. 
-    */
-
-    /* Sidenote: When in SPI Mode CMD9 and CMD10 function like other block commands */
-
-    switch(cmd){
-        case CMD9:
-        case CMD10:
-        case CMD18:
-        case CMD24:
-        case CMD25:
-        break;
-
-        default:
-        _io->wr_rd_byte(DUMMY_BYTE);
+    /* avoid disrupting alignment on commands with mutli byte responses */
+    if (cmd != CMD9 && cmd != CMD10 && cmd != CMD13 && cmd != CMD18 && cmd != CMD25) {
+        mx_sio2_write_dummy();
     }
 
     return response;
 }
 
-static uint8_t _send_command_recv_response(uint8_t cmd, uint32_t arg, uint8_t *data, size_t size)
+static uint8_t spisd_send_cmd_recv_data(uint8_t cmd, uint32_t arg, uint8_t *data, size_t size)
 {
-    uint32_t i;
+    uint8_t response = 0xFF;
 
-    /* Send 8 CLKs before sending CMD */
-    _io->wr_rd_byte(DUMMY_BYTE);
-    
-    uint8_t packet[]       = {cmd | 0x40, arg >> 24, arg >> 16, arg >> 8, arg, 0};
+    mx_sio2_write_dummy();
+
+    uint8_t packet[]       = {cmd, arg >> 24, arg >> 16, arg >> 8, arg, 0};
     packet[CMD_CRC_OFFSET] = CRC7_SHIFT_MASK(crc7(packet, CMD_CRC_OFFSET));
-    
-    _io->write(packet, sizeof(packet));
 
-    uint8_t response = DUMMY_BYTE;
+    /* begin SIO2 PIO TX transfer */
+    mx_sio2_tx_pio(packet, sizeof(packet));
 
-    /* Wait response, quit till timeout */
-    for (i = 0; i < CMD_WAIT_RESP_TIMEOUT; i++) {
-
-        response = _io->wr_rd_byte(DUMMY_BYTE);
-
-        if (response != DUMMY_BYTE) {
-            _io->read(data, size);
-            break;
-        }
+    /* wait for card to respond */
+    response = mx_sio2_wait_not_equal(0xFF, CMD_WAIT_RESP_TIMEOUT);
+    if (response != 0xFF) {
+        /* start SIO2 PIO RX transfer */
+        mx_sio2_rx_pio(data, size);
     }
 
-    /* Send 8 CLKs after sending CMD */
-    _io->wr_rd_byte(DUMMY_BYTE);
+    mx_sio2_write_dummy();
 
     return response;
 }
 
-static uint8_t _send_command_hold(uint8_t cmd, uint32_t arg)
+static uint8_t spisd_read_register(uint8_t *buff, uint32_t len)
 {
-    uint32_t i;
-
-    /* Send 8 CLKs before sending CMD */
-    _io->wr_rd_byte(DUMMY_BYTE);
-
-    uint8_t packet[]       = {cmd | 0x40, arg >> 24, arg >> 16, arg >> 8, arg, 0};
-    packet[CMD_CRC_OFFSET] = CRC7_SHIFT_MASK(crc7(packet, CMD_CRC_OFFSET));
+    uint8_t results = SPISD_RESULT_ERROR;
     
-    _io->write(packet, sizeof(packet));
+    results = mx_sio2_wait_equal(0xFE, 2000);
+    if (results == SPISD_RESULT_OK) {
+        /* got read token, start SIO2 PIO RX transfer */
+        mx_sio2_rx_pio(buff, len);
+    } 
 
-    /* Wait response, quit till timeout */
-    for (i = 0; i < 200; i++) {
-
-        uint8_t response = _io->wr_rd_byte(DUMMY_BYTE);
-
-        if (response != 0xFF) {
-            return response;
-        }
-    }
-
-    return 0xFF;
+    return results;
 }
 
-static spisd_result_t _read_buffer(uint8_t *buff, uint32_t len)
+/* TODO: use this to verify writes */
+uint16_t spisd_read_status_register()
 {
-    uint32_t i;
-    uint8_t response = 0;
+    uint16_t response;
 
-    /* Wait start-token 0xFE */
-    for (i = 0; i < 2000; i++) {
-        response = _io->wr_rd_byte(DUMMY_BYTE);
+    response = spisd_send_cmd(CMD13, 0) << 8;
+    response |= mx_sio2_write_dummy();
 
-        if (response == 0xFE) {
-            break;
-        }
-    }
+    mx_sio2_write_dummy();
 
-    if (response != 0xFE) {
-        return SPISD_RESULT_ERROR;
-    }
-
-    _io->read(buff, len);
-
-    /* 2bytes dummy CRC */
-    _io->wr_rd_byte(DUMMY_BYTE);
-    _io->wr_rd_byte(DUMMY_BYTE);
-
-    return SPISD_RESULT_OK;
+    return response;
 }
 
-spisd_result_t spisd_init(spisd_interface_t const *const io)
+int spisd_init_card()
 {
-    uint32_t i;
-    SPISD_ASSERT(io);
-
-    _io = io;
-
-    if (!_io->is_present()) {
-        SPISD_LOG("There is no card detected! \r\n");
-        return SPISD_RESULT_NO_CARD;
-    }
-
-#if CRC7_RAM_TABLE == 1
-    crc7_generate_table();
-#endif // CRC7_RAM_TABLE == 1
-
-    
-    _io->set_speed(SPI_SPEED_NO_INIT_HZ);
-
-    /* Start send 74 CLKs at least */
-    for (i = 0; i < 20; i++) {
-        _io->wr_rd_byte(DUMMY_BYTE);
-    }
-
-    uint32_t timeout = WAIT_IDLE_TIMEOUT;
+    uint16_t timeout = WAIT_IDLE_TIMEOUT;
     uint8_t response = 0;
+    uint8_t buffer[6];
+
+    /* set baud to (400kHZ) for init */
+    mx_sio2_set_baud(SIO2_BAUD_DIV_SLOW);
+
+    /* send at least 74 dummy clocks */
+    /*
+    uint8_t dummy_clks[10] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+                              0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+
+    mx_sio2_tx_pio(dummy_clks, 10);*/
+
+    for (int i = 0; i < 16; i++) {
+        mx_sio2_write_dummy();
+    }
 
     do {
-        response = _send_command(CMD0, 0);
+        response = spisd_send_cmd(CMD0, 0);
         timeout--;
     } while ((response != SPISD_R1_IDLE_FLAG) && timeout > 0);
 
     if (!timeout) {
-        // SPISD_LOG("Reset card into IDLE state failed!\r\n");
+        M_DEBUG("ERROR: CMD0 returned 0x%x, exp: 0x1\n", response);
         return SPISD_RESULT_TIMEOUT;
     }
 
-    /* The response to CMD8 is R7, which is 6 bytes if you include the CRC and other bits
-     * Not reading all 6 bytes causes issues on some cards, so its best to just read them all.
-     *
-     * This buffer is shared with CMD58, fortunately CMD58's response (R3) is also 6 bytes long. 
-    */
+    /* send CMD8 with check pattern, store R3 response in buffer */
+    response = spisd_send_cmd_recv_data(CMD8, 0x1AA, buffer, sizeof(buffer));
 
-    uint8_t buff[6];
-    response = _send_command_recv_response(CMD8, 0x1AA, buff, sizeof(buff));
-
+    /* if CMD8 response is idle, card is CSD v2 */  
     if (response == SPISD_R1_IDLE_FLAG) {
-
-        /* Check voltage range be 2.7-3.6V    */
-        if (buff[2] == 0x01 && buff[3] == 0xAA) {
-
-            for (i = 0; i < 0xFFF; i++) {
-                response = _send_command(CMD55, 0); /* should be return 0x01 */
-
+        
+        /* valid check pattern */
+        if (buffer[2] == 0x01 && buffer[3] == 0xAA) {          
+            /* CMD55 / ACMD41 pairs */
+            for (int i = 0; i < 0xFFF; i++) {
+                response = spisd_send_cmd(CMD55, 0);
                 if (response != 0x01) {
-                    SPISD_LOG("Send CMD55 should return 0x01, response=0x%02x\r\n", response);
+                    M_DEBUG("ERROR: CMD55 returned 0x%x, exp: 0x1\n", response);
                     return SPISD_RESULT_TIMEOUT;
                 }
 
-                response = _send_command(ACMD41, 0x40000000); /* should be return 0x00 */
-
+                response = spisd_send_cmd(ACMD41, 0x40000000);
                 if (response == 0x00) {
                     break;
                 }
             }
 
             if (response != 0x00) {
-                SPISD_LOG("Send ACMD41 should return 0x00, response=0x%02x\r\n", response);
+                M_DEBUG("ERROR: ACMD41 returned 0x%x, exp: 0x1\n", response);
                 return SPISD_RESULT_TIMEOUT;
             }
 
-            /* Read OCR by CMD58 */
-            response = _send_command_recv_response(CMD58, 0, buff, sizeof(buff));
-
+            /* read OCR by CMD58 */
+            response = spisd_send_cmd_recv_data(CMD58, 0, buffer, sizeof(buffer));
             if (response != 0x00) {
-                SPISD_LOG("Send CMD58 should return 0x00, response=0x%02x\r\n", response);
+                M_DEBUG("ERROR: CMD58 returned 0x%x, exp 0x0\n", response);
                 return SPISD_RESULT_TIMEOUT;
             }
 
             /* OCR -> CCS(bit30)  1: SDV2HC     0: SDV2 */
-            _card_type = (buff[0] & 0x40) ? CARD_TYPE_SDV2HC : CARD_TYPE_SDV2;
+            sdcard.card_type = (buffer[0] & 0x40) ? CARD_TYPE_SDV2HC : CARD_TYPE_SDV2;
 
-            _io->set_speed(SPI_SPEED_MAX_HZ);
+            /* set baud to 25MHz */
+            mx_sio2_set_baud(SIO2_BAUD_DIV_FAST);
+
+        } else {
+            M_DEBUG("ERROR: CMD8 check pattern failed, got 0x%x, 0x%x\n", buffer[2], buffer[3]);
+            return SPISD_RESULT_ERROR;
         }
 
-#if USE_MMC_CARD == 1
+    /* if CMD8 response is illegal, card is CSD v1 / MMC */
     } else if (response & SPISD_R1_ILLEGAL_CMD_FLAG) {
+        M_DEBUG("CMD8 illegal, trying CSD v1.0 init\n");
 
-        _card_type = CARD_TYPE_SDV1;
+        /* end of CMD8, dummy write */
+        mx_sio2_write_dummy();
 
-        /* End of CMD8, chip disable and dummy byte */
-        
-        _io->wr_rd_byte(DUMMY_BYTE);
-
-        /* SD1.0/MMC start initialize */
-        /* Send CMD55+ACMD41, No-response is a MMC card, otherwise is a SD1.0 card */
-        for (i = 0; i < 0xFFF; i++) {
-            response = _send_command(CMD55, 0);
-
+        /* CMD55 / ACMD41 pairs */
+        for (int i = 0; i < 0xFFF; i++) {
+            response = spisd_send_cmd(CMD55, 0);
             if (response != 0x01) {
-                SPISD_LOG("Send CMD55 should return 0x01, response=0x%02x\r\n", response);
+                M_DEBUG("ERROR: CMD55 returned 0x%x, exp 0x1\n", response);
                 return SPISD_RESULT_TIMEOUT;
             }
 
-            response = _send_command(ACMD41, 0);
-
+            response = spisd_send_cmd(ACMD41, 0);
             if (response == 0x00) {
                 break;
             }
         }
 
-        /* MMC card initialize start */
+        /* no response to CMD55 / ACMD41 means MMC card */
         if (response != 0x00) {
-            for (i = 0; i < 0xFFF; i++) {
-                response = _send_command(CMD1, 0);
-
+            for (int i = 0; i < 0xFFF; i++) {
+                response = spisd_send_cmd(CMD1, 0);
                 if (response == 0x00) {
                     break;
                 }
             }
 
-            /* Timeout return */
             if (response != 0x00) {
-                SPISD_LOG("Send CMD1 should return 0x00, response=0x%02x\r\n", response);
+                M_DEBUG("ERROR: CMD1 returned 0x%x, exp 0x0\n", response);
                 return SPISD_RESULT_TIMEOUT;
             }
 
-            _card_type = CARD_TYPE_MMC;
-            SPISD_LOG("Card Type : MMC\r\n");
+            sdcard.card_type = CARD_TYPE_MMC;
+            M_DEBUG("Card Type : MMC\r\n");
         } else {
-            SPISD_LOG("Card Type : SD V1\r\n");
+            sdcard.card_type = CARD_TYPE_SDV1;
+            M_DEBUG("Card Type : CSD v1\r\n");
         }
-
-        _io->set_speed(true);
+        
+        /* set baud to 25MHz */
+        mx_sio2_set_baud(SIO2_BAUD_DIV_FAST);
 
         /* CRC disable */
-        response = _send_command(CMD59, 0);
+        response = spisd_send_cmd(CMD59, 0);
 
         if (response != 0x00) {
-            SPISD_LOG("Send CMD59 should return 0x00, response=0x%02x\r\n", response);
+            M_DEBUG("Send CMD59 should return 0x00, response=0x%02x\r\n", response);
             return SPISD_RESULT_TIMEOUT;
         }
 
-        /* Set the block size */
-        response = _send_command(CMD16, BLOCK_SIZE);
-
+        /* set the block size */
+        response = spisd_send_cmd(CMD16, 512);
         if (response != 0x00) {
-            SPISD_LOG("Send CMD16 should return 0x00, response=0x%02x\r\n", response);
+            M_DEBUG("ERROR: CMD16 returned 0x%x, exp 0x0\n", response);
             return SPISD_RESULT_TIMEOUT;
         }
-
-#endif 
+    
+    /* CMD8 response invalid */
     } else {
-        SPISD_LOG("Send CMD8 should return 0x01, response=0x%02x\r\n", response);
+        M_DEBUG("ERROR: CMD8 returned 0x%x, exp 0x1 or 0x4\n", response);
         return SPISD_RESULT_ERROR;
     }
 
     return SPISD_RESULT_OK;
 }
 
-int spisd_get_card_info(spisd_info_t *cardinfo)
+/* get card info and attach to bdm driver */
+int spisd_get_card_info()
 {
-
-    /* Send CMD9, Read CSD */
-    uint8_t response = _send_command(CMD9, 0);
-
-    if (response != 0x00) {
-        return response;
-    }
-
-    /* CMD9 and CMD10 have R2 responses which are 16 bytes long + 2 bytes CRC.
-     * The 2 CRC16 bytes are read and discarded by _read_buffer */
-    uint8_t temp[16];
-
-    spisd_result_t ret = _read_buffer(cardinfo->csd, sizeof(temp));
+    /* 16 bytes + 2 byte CRC16 */
+    uint8_t reg_data[18];
     
-    /* _read_buffer will only send two dummy bytes for CRC
-     * send another 8 clks just to be safe */
-    _io->wr_rd_byte(DUMMY_BYTE);
-
-    if (ret != SPISD_RESULT_OK) {
-        return 1;
+    /* send CMD9, read CSD */
+    uint8_t result = spisd_send_cmd(CMD9, 0);
+    if (result != 0x0) {
+        return result;
     }
 
-    /* Send CMD10, Read CID */
-    response = _send_command(CMD10, 0);
-
-    if (response != 0x00) {
-        return response;
-    }
-
-    ret = _read_buffer(temp, sizeof(temp));
+    result = spisd_read_register(sdcard.csd, sizeof(reg_data));
     
-    _io->wr_rd_byte(DUMMY_BYTE);
+    /* dummy write between reg reads */
+    mx_sio2_write_dummy();
 
-    if (ret != SPISD_RESULT_OK) {
-        return 2;
+    if (result != 0x0) {
+        return SPISD_RESULT_ERROR;
     }
 
-    /* Byte 0 */
-    cardinfo->cid.ManufacturerID = temp[0];
+    /* send CMD10, read CID */
+    result = spisd_send_cmd(CMD10, 0);
+
+    if (result != 0x0) {
+        return SPISD_RESULT_ERROR;
+    }
+
+    result = spisd_read_register(reg_data, sizeof(reg_data));
+    
+    mx_sio2_write_dummy();
+
+    if (result != 0x0) {
+        return SPISD_RESULT_ERROR;
+    }
+
+    sdcard.cid.ManufacturerID = reg_data[0];
     /* Byte 1 */
-    cardinfo->cid.OEM_AppliID = temp[1] << 8;
+    sdcard.cid.OEM_AppliID = reg_data[1] << 8;
     /* Byte 2 */
-    cardinfo->cid.OEM_AppliID |= temp[2];
+    sdcard.cid.OEM_AppliID |= reg_data[2];
     /* Byte 3 */
-    cardinfo->cid.ProdName1 = temp[3] << 24;
+    sdcard.cid.ProdName1 = reg_data[3] << 24;
     /* Byte 4 */
-    cardinfo->cid.ProdName1 |= temp[4] << 16;
+    sdcard.cid.ProdName1 |= reg_data[4] << 16;
     /* Byte 5 */
-    cardinfo->cid.ProdName1 |= temp[5] << 8;
+    sdcard.cid.ProdName1 |= reg_data[5] << 8;
     /* Byte 6 */
-    cardinfo->cid.ProdName1 |= temp[6];
+    sdcard.cid.ProdName1 |= reg_data[6];
     /* Byte 7 */
-    cardinfo->cid.ProdName2 = temp[7];
+    sdcard.cid.ProdName2 = reg_data[7];
     /* Byte 8 */
-    cardinfo->cid.ProdRev = temp[8];
+    sdcard.cid.ProdRev = reg_data[8];
     /* Byte 9 */
-    cardinfo->cid.ProdSN = temp[9] << 24;
+    sdcard.cid.ProdSN = reg_data[9] << 24;
     /* Byte 10 */
-    cardinfo->cid.ProdSN |= temp[10] << 16;
+    sdcard.cid.ProdSN |= reg_data[10] << 16;
     /* Byte 11 */
-    cardinfo->cid.ProdSN |= temp[11] << 8;
+    sdcard.cid.ProdSN |= reg_data[11] << 8;
     /* Byte 12 */
-    cardinfo->cid.ProdSN |= temp[12];
+    sdcard.cid.ProdSN |= reg_data[12];
     /* Byte 13 */
-    cardinfo->cid.Reserved1 |= (temp[13] & 0xF0) >> 4;
+    sdcard.cid.Reserved1 |= (reg_data[13] & 0xF0) >> 4;
     /* Byte 14 */
-    cardinfo->cid.ManufactDate = (temp[13] & 0x0F) << 8;
+    sdcard.cid.ManufactDate = (reg_data[13] & 0x0F) << 8;
     /* Byte 15 */
-    cardinfo->cid.ManufactDate |= temp[14];
+    sdcard.cid.ManufactDate |= reg_data[14];
     /* Byte 16 */
-    cardinfo->cid.CID_CRC   = (temp[15] & 0xFE) >> 1;
-    cardinfo->cid.Reserved2 = 1;
+    sdcard.cid.CID_CRC   = (reg_data[15] & 0xFE) >> 1;
 
-    return 0;
+    struct t_csdVer1 *csdv1 = (struct t_csdVer1 *)sdcard.csd;
+    struct t_csdVer2 *csdv2 = (struct t_csdVer2 *)sdcard.csd;
+    
+    /* CSD v1 - SDSC */
+    if (csdv1->csd_structure == 0) {
+        unsigned int c_size_mult = (csdv1->c_size_multHi << 1) | csdv1->c_size_multLo;
+        unsigned int c_size      = (csdv1->c_sizeHi << 10) | (csdv1->c_sizeMd << 2) | csdv1->c_sizeLo;
+        unsigned int blockNr     = (c_size + 1) << (c_size_mult + 2);
+        unsigned int blockLen    = 1 << csdv1->read_bl_len;
+        unsigned int capacity    = blockNr * blockLen;
+
+        bd.sectorCount = capacity / 512;
+
+    /* CSD v2 - SDHC, SDXC */
+    } else if (csdv1->csd_structure == 1) {
+        unsigned int c_size = (csdv2->c_sizeHi << 16) | (csdv2->c_sizeMd << 8) | csdv2->c_sizeLo;
+        bd.sectorCount = (c_size + 1) * 1024;
+    }
+
+    M_PRINTF("%lu %u-byte logical blocks: (%luMB / %luMiB)\n", (u32)bd.sectorCount, bd.sectorSize, (u32)bd.sectorCount / ((1000 * 1000) / bd.sectorSize), (u32)bd.sectorCount / ((1024 * 1024) / bd.sectorSize));
+
+    return SPISD_RESULT_OK;
 }
 
-spisd_result_t spisd_read_block(uint32_t sector, uint8_t *buffer)
+int spisd_recover()
 {
+    int rv;
+    /* flush 256 bytes */
+    for (int i = 0; i < 64; i++)
+        mx_sio2_rx_pio((void *)&rv, 4);
 
-    if (_card_type != CARD_TYPE_SDV2HC) {
-        sector = sector << 9;
+    if (spisd_init_card() != SPISD_RESULT_OK) {
+        M_DEBUG("recovery failed to reinit card!\n");
+        return SPISD_RESULT_ERROR;
     }
 
-    spisd_result_t ret = SPISD_RESULT_ERROR;
-
-    if (_send_command_hold(CMD17, sector) == 0x00) {
-        ret = _read_buffer(buffer, BLOCK_SIZE);
-    }
-
-    _io->wr_rd_byte(DUMMY_BYTE);
-
-    return ret;
-}
-
-spisd_result_t spisd_write_block(uint32_t sector, const uint8_t *buffer)
-{
-    uint32_t i;
-    spisd_result_t ret = SPISD_RESULT_ERROR;
-
-    if (_card_type != CARD_TYPE_SDV2HC) {
-        sector = sector << 9;
-    }
-
-    if (_send_command(CMD24, sector) != 0x00) {
-        return ret;
-    }
-
-    _io->wr_rd_byte(DUMMY_BYTE);
-    _io->wr_rd_byte(DUMMY_BYTE);
-    _io->wr_rd_byte(DUMMY_BYTE);
-
-    /* Start data write token: 0xFE */
-    _io->wr_rd_byte(0xFE);
-
-    _io->write(buffer, BLOCK_SIZE);
-
-    /* 2Bytes dummy CRC */
-    _io->wr_rd_byte(DUMMY_BYTE);
-    _io->wr_rd_byte(DUMMY_BYTE);
-
-    /* MSD card accept the data */
-    uint8_t response = _io->wr_rd_byte(DUMMY_BYTE);
-
-    if ((response & 0x1F) == 0x05) {
-
-        /* Wait all the data programm finished */
-        for (i = 0; i < 0x40000; i++) {
-            if (_io->wr_rd_byte(DUMMY_BYTE) != 0x00) {
-                ret = SPISD_RESULT_OK;
-                break;
-            }
-        }
-    }
-
-    _io->wr_rd_byte(DUMMY_BYTE);
-
-    return ret;
-}
-
-spisd_result_t spisd_read_multi_block_begin(uint32_t sector)
-{
-    /* if ver = SD2.0 HC, sector need <<9 */
-    if (_card_type != CARD_TYPE_SDV2HC) {
-        sector = sector << 9;
-    }
-
-    if (_send_command(CMD18, sector) != 0x00) {
+    if (spisd_get_card_info() != SPISD_RESULT_OK) {
+        M_DEBUG("recovery failed to get card info!\n");
         return SPISD_RESULT_ERROR;
     }
 
     return SPISD_RESULT_OK;
 }
 
-spisd_result_t spisd_read_multi_block_read(uint8_t *buffer, uint32_t num_sectors)
+/* read functions */
+static int spisd_read_multi_begin(uint32_t sector)
 {
-    uint32_t i;
+    uint8_t results = SPISD_RESULT_ERROR;
+    /* get idle */
+    results = mx_sio2_wait_equal(0xFF, 4000);
 
-    for (i = 0; i < num_sectors; i++) {
-        spisd_result_t ret = _read_buffer(&buffer[i * BLOCK_SIZE], BLOCK_SIZE);
+    if (results == SPISD_RESULT_OK) {
+        /* non SDHC/SDXC are addressed in 1-byte units */
+        if (sdcard.card_type != CARD_TYPE_SDV2HC) {
+            sector = sector << 9;
+        }
 
-        if (ret != SPISD_RESULT_OK) {
-            /* Send stop data transmit command - CMD12    */
-            spisd_read_multi_block_end();
-            return SPISD_RESULT_ERROR;
+        /* send CMD18 to being multi block read */
+        results = spisd_send_cmd(CMD18, sector); 
+        if (results == SPISD_RESULT_OK) {
+            /* wait for first read token (0xFE) */
+            results = mx_sio2_wait_equal(0xFE, 100000);
         }
     }
 
-    _io->wr_rd_byte(DUMMY_BYTE);
-
-    return SPISD_RESULT_OK;
+    return results;
 }
 
-spisd_result_t spisd_read_multi_block_end(void)
+static int spisd_read_multi_do(void *buffer, uint16_t count)
 {
-    /* Send stop data transmit command - CMD12 */
-    _send_command(CMD12, 0);
+    /* setup DMA cmd struct */
+    cmd.buffer              = buffer;
+    cmd.sector_count        = count;
+    cmd.sectors_transferred = 0;
+    cmd.sectors_reversed    = 0;
+    cmd.response            = SPISD_RESULT_OK;
+    cmd.abort               = 0;
 
-    return SPISD_RESULT_OK;
-}
+    /* start first DMA transfer */
+    mx_sio2_start_rx_dma(buffer);
 
-spisd_result_t spisd_write_multi_block(uint32_t sector, uint8_t const *buffer, uint32_t num_sectors)
-{
-    uint32_t i, j;
-    /* if ver = SD2.0 HC, sector need <<9 */
-    if (_card_type != CARD_TYPE_SDV2HC) {
-        sector = sector << 9;
-    }
+    /* process events from DMA completion interrupt */
+    while (1) {
+        uint32_t resbits;
 
-    /* Send command ACMD23 berfore multi write if is not a MMC card */
-    if (_card_type != CARD_TYPE_MMC) {
-        _send_command(CMD55, 0);
-        _send_command(ACMD23, num_sectors);
-    }
-    //M_DEBUG("Multiblock write\n");
-    if (_send_command(CMD25, sector) != 0x00) {
-        return SPISD_RESULT_ERROR;
-    }
+        WaitEventFlag(sio2_event_flag, EF_SIO2_INTR_REVERSE | EF_SIO2_INTR_COMPLETE, 1, &resbits);
 
-    _io->wr_rd_byte(DUMMY_BYTE);
-    _io->wr_rd_byte(DUMMY_BYTE);
-    _io->wr_rd_byte(DUMMY_BYTE);
+        if (resbits & EF_SIO2_INTR_REVERSE) {
+            ClearEventFlag(sio2_event_flag, ~EF_SIO2_INTR_REVERSE);
+            
+            while (cmd.sectors_reversed < cmd.sectors_transferred && cmd.abort == 0) {
+                void *buf = (uint32_t *)&cmd.buffer[cmd.sectors_reversed * SECTOR_SIZE]; 
+                reverse_buffer(buf, SECTOR_SIZE / 4);
 
-    for (i = 0; i < num_sectors; i++) {
-
-        /* Start multi block write token: 0xFC */
-        _io->wr_rd_byte(0xFC);
-
-        _io->write(&buffer[i * BLOCK_SIZE], BLOCK_SIZE);
-
-        /* 2Bytes dummy CRC */
-        _io->wr_rd_byte(DUMMY_BYTE);
-        _io->wr_rd_byte(DUMMY_BYTE);
-
-        /* MSD card accept the data */
-        if ((_io->wr_rd_byte(DUMMY_BYTE) & 0x1F) != 0x05) {
-            _io->wr_rd_byte(DUMMY_BYTE);
-            return SPISD_RESULT_ERROR;
-        }
-
-        /* Wait all the data programm finished    */
-        uint32_t timeout = 0;
-
-        while (_io->wr_rd_byte(DUMMY_BYTE) != 0xFF) {
-            /* Timeout return */
-            if (timeout++ == 0x40000) {
-                _io->wr_rd_byte(DUMMY_BYTE);
-                return SPISD_RESULT_ERROR;
+#ifdef CONFIG_USE_CRC16
+                uint16_t crc_a = crc16(buf, SECTOR_SIZE);
+                uint16_t crc_b = cmd.crc[cmd.sectors_reversed];
+                if (crc_a != crc_b) {
+                    // CRC mismatch:
+                    // - Signal ISR to stop reading
+                    // - Wait for complete event from ISR
+                    M_DEBUG("CRC mismatch on sector %i, got: 0x%x, exp 0x%x\n", cmd.sectors_reversed, crc_b, crc_a);
+                    cmd.abort = CMD_ERROR_CRC16_INVALID;
+                }
+#endif
+                if (cmd.abort == 0)
+                    cmd.sectors_reversed++;
             }
         }
+
+        if (resbits & EF_SIO2_INTR_COMPLETE) {
+            ClearEventFlag(sio2_event_flag, ~EF_SIO2_INTR_COMPLETE);
+            break;
+        }
     }
 
-    /* Send end of transmit token: 0xFD */
-    if (_io->wr_rd_byte(0xFD) != 0x00) {
+    return cmd.sectors_reversed;
+}
 
-        _io->wr_rd_byte(DUMMY_BYTE);
-        _io->wr_rd_byte(DUMMY_BYTE);
+static void spisd_read_multi_end()
+{
+    /* 0xFE token will be received in the ISR prior to this function being called
+     * ensuring the start of CMD12 is aligned with the end of 0xFE
+     * See 7.5.2.2 Stop Transmission Timing of the SD Physical Layer Specification
+     * for more details */
+    spisd_send_cmd(CMD12, 0);
+}
 
-        /* Wait all the data programm finished */
-        for (i = 0; i < 0x40000; i++) {
-            if (_io->wr_rd_byte(DUMMY_BYTE) == 0xFF) {
-                _io->wr_rd_byte(DUMMY_BYTE);
+/* write functions */
+static int spisd_write_multi_begin(uint32_t sector, uint16_t count)
+{
+    uint8_t results = SPISD_RESULT_ERROR;
+    
+    /* get idle */
+    results = mx_sio2_wait_equal(0xFF, 4000);
 
-                for (j = 0; j < 0x40000; j++) {
-                    if (_io->wr_rd_byte(DUMMY_BYTE) == 0xFF) {
-                        return SPISD_RESULT_OK;
-                    }
+    if (results == SPISD_RESULT_OK) {
+        /* non SDHC/SDXC are addressed in 1-byte units */
+        if (sdcard.card_type != CARD_TYPE_SDV2HC) {
+            sector = sector << 9;
+        }
+
+        /* issue ACMD23 to pre-erase sectors on non MMC cards */
+        if (sdcard.card_type != CARD_TYPE_MMC) {
+            results = spisd_send_cmd(CMD55, 0);
+            results = spisd_send_cmd(ACMD23, count);
+        }
+
+        /* send CMD25 to begin multi block write */
+        results = spisd_send_cmd(CMD25, sector);
+    }
+
+    mx_sio2_write_dummy();
+    mx_sio2_write_dummy();
+    mx_sio2_write_dummy();
+
+    return results;
+} 
+
+static int spisd_write_multi_do(void* buffer, uint16_t count)
+{
+    uint32_t resbits;
+
+    /* setup DMA cmd struct */
+    cmd.buffer              = buffer;
+    cmd.sector_count        = count;
+    cmd.sectors_transferred = 0;
+    cmd.sectors_reversed    = 0;
+    cmd.response            = SPISD_RESULT_OK;
+    cmd.abort               = 0;
+
+    /* send initial write token */
+    mx_sio2_write_byte(0xFC);
+    
+    /* start transfer */
+    mx_sio2_start_tx_dma(buffer);
+
+    /* wait for transfer to complete */
+    WaitEventFlag(sio2_event_flag, EF_SIO2_INTR_COMPLETE, 1, &resbits);
+
+    if (resbits & EF_SIO2_INTR_COMPLETE) {
+        ClearEventFlag(sio2_event_flag, ~EF_SIO2_INTR_COMPLETE);
+    }
+
+    return cmd.sectors_transferred;
+}
+
+static int spisd_write_multi_end()
+{
+    uint8_t results = SPISD_RESULT_ERROR;
+
+    /* issue stop transmission token */
+    results = mx_sio2_write_byte(0xFD);
+    if (results != 0x0) {
+        mx_sio2_write_dummy();
+        mx_sio2_write_dummy();
+
+        /* give card time to finish programming */
+        results = mx_sio2_wait_equal(0xFF, 0x800000);
+        if (results == SPISD_RESULT_OK) {
+            mx_sio2_write_dummy();
+            mx_sio2_write_dummy();
+        }
+    } else {
+        M_DEBUG("ERROR: failed to end write, 0xFD response 0x%x\n", results);
+    }
+
+    mx_sio2_write_dummy();
+
+    return results;
+}
+
+/*
+ * BDM interface:
+ * - BDM -> "spisd" library
+ */
+int spisd_read(struct block_device *bd, uint64_t sector, void *buffer, uint16_t count)
+{
+    uint16_t sectors_left = count;
+    uint16_t results = 0;
+    uint16_t retries = 0;
+
+    (void)bd;
+
+    if (count == 0)
+        return 0;
+
+    M_DEBUG("%s: sector %i, count: %i \n", __FUNCTION__, (u32)sector, count);
+
+    mx_sio2_lock(INTR_RX);
+
+    while (sectors_left > 0 && retries < MAX_RETRIES) {
+
+        /* issue CMD18 to begin transfer */
+        results = spisd_read_multi_begin((uint32_t)sector);
+        if (results != SPISD_RESULT_OK) {
+            M_DEBUG("ERROR: failed to start multi-block read\n");
+            break;
+        }
+
+        /* start reading blocks */
+        results = spisd_read_multi_do(buffer, sectors_left);
+        sectors_left = sectors_left - results;
+        
+        /* fail condition */
+        if (sectors_left > 0) {
+            buffer = (uint8_t *)buffer + (results * 512); 
+            M_DEBUG("ERROR: failed to read all sectors, read:%i, abort:%i\n", sectors_left, cmd.abort);
+
+            if (cmd.abort == CMD_ABORT_NO_READ_TOKEN) {
+                /* this can only be resolved by resetting the card */
+                if (spisd_recover() != SPISD_RESULT_OK) {
+                    /* if recovery fails, do not try to continue  */
+                    break;
                 }
             }
         }
+        /* send CMD12, end transfer */
+        spisd_read_multi_end();
+
+        retries++;
     }
 
-    _io->wr_rd_byte(DUMMY_BYTE);
+    sdcard.used = 1;
 
-    return SPISD_RESULT_ERROR;
+    mx_sio2_unlock(INTR_RX);
+
+    return count - sectors_left;
+}
+
+int spisd_write(struct block_device *bd, uint64_t sector, const void *buffer, uint16_t count)
+{
+    (void)bd;
+    
+    uint16_t sectors_left = count;
+    uint16_t results = 0;
+    uint16_t retries = 0;
+
+    if (count == 0)
+        return 0;
+
+    M_DEBUG("%s: sector %i, count: %i \n", __FUNCTION__, (u32)sector, count);
+
+    /* recast */
+    void *write_buffer = (uint32_t*)buffer;
+
+    /* pre-reverse the entire buffer */
+    reverse_buffer(write_buffer, ((count * SECTOR_SIZE) / 4)); 
+
+    mx_sio2_lock(INTR_TX);
+
+    while (sectors_left > 0 && retries < MAX_RETRIES) {
+
+        /* issue CMD25 to begin transfer */
+        results = spisd_write_multi_begin(sector, count);
+        if (results != SPISD_RESULT_OK) {
+            M_DEBUG("ERROR: failed to start multi-block write\n");
+            break;
+        }
+
+        /* start writing blocks */
+        results = spisd_write_multi_do(write_buffer, sectors_left);
+        sectors_left = sectors_left - results;
+
+        /* fail condition */
+        if (sectors_left > 0) {
+            write_buffer = (uint8_t *)write_buffer + (results * 512); /* update buffer for next attempt */
+            M_DEBUG("ERROR: failed to write all sectors, wrote: %i\n", results);
+        }
+
+        /* send 0xFD, end transfer */
+        results = spisd_write_multi_end();
+        if (results != SPISD_RESULT_OK) {
+            M_DEBUG("ERROR: failed to end multi-block write\n");
+            break;
+        }
+
+        retries++;
+    }
+
+    sdcard.used = 1;
+    
+    mx_sio2_unlock(INTR_TX);
+
+    return count - sectors_left;
+}
+
+void spisd_flush(struct block_device *bd)
+{
+    (void)bd;
+    return;
+}
+
+int spisd_stop(struct block_device *bd)
+{   
+    (void)bd;
+    return 0;
 }

@@ -7,105 +7,688 @@
 #include <thsemap.h>
 #include <xsio2man.h>
 
+#include "mx4sio.h"
 #include "crc16.h"
 #include "ioplib.h"
 #include "sio2man_hook.h"
 #include "sio2regs.h"
 #include "spi_sdcard_driver.h"
 
-// #define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
 
-IRX_ID("mx4sio", 1, 1);
+IRX_ID("mx4sio", 1, 2);
 
-#define WELCOME_STR "mx4sio v1.1\n"
+/* globals */
+dma_command_t cmd;
+int sio2_event_flag;
 
-// Options
-#define CONFIG_USE_CRC16 // A little slower ~ 1700 KB/s -> 1400 KB/s
-
-// 3 is the second memory card slot
-#define PORT_NR                3
-#define MAX_SIO2_TRANSFER_SIZE 256 // 0x100
-#define SECTOR_SIZE            512
-#define MAX_SECTORS            64
-#define MAX_RETRIES            4
-
-/* Event flags */
-#define EF_SIO2_INTR_REVERSE  0x00000100
-#define EF_SIO2_INTR_COMPLETE 0x00000200
-
-static int event_flag          = -1;
 static int sd_detect_thread_id = -1;
-static u32 sio2man_save_crtl;
-static int card_used     = 0;
-static int card_inserted = 0;
-// Fast SPI clock
-static int fastDiv = 0;
-// Slave/Chip Select
-static int spi_ss = 0;
-// SIO tranfer data, only 1 transfer at a time possible
 static sio2_transfer_data_t global_td;
+static uint8_t sio2_current_baud = SIO2_BAUD_DIV_SLOW;
+static uint32_t sio2_save_crtl;
 
-struct dma_command
-{
-    uint8_t *buffer;
-    u16 sector_count;
-    volatile u16 sectors_transferred; // written by isr, read by thread
-    u16 sectors_reversed;
-    u16 portNr;
-#ifdef CONFIG_USE_CRC16
-    u16 crc[MAX_SECTORS];
-#endif
-    uint8_t response;
-    volatile uint8_t abort; // written by thread, read by isr
-};
-struct dma_command cmd;
-
-static uint8_t wait_equal(uint8_t value, int count, int portNr);
-static void sendCmd_Rx_DMA_start(uint8_t *rdBufA, int portNr);
-static inline u8 reverseByte_LUT8(u8 n);
-static inline void reverseBuffer32(u32 *buffer, u32 count);
-
-int sio2_intr_handler(void *arg)
+/* ISR triggered by the completion of DMA transfer: SIO2 RX FIFO -> MEM */
+int mx_sio2_dma_isr_rx(void *arg)
 {
     int ef     = *(int *)arg;
     int eflags = EF_SIO2_INTR_REVERSE;
 
-    // Clear interrupt?
+    /* clear SIO2 stat reg */
     inl_sio2_stat_set(inl_sio2_stat_get());
 
-    // Wait for completion
+    /* wait for PIO portion of transfer to complete */
     while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
         ;
 
-        // Finish sector read, read 2 crc bytes
 #ifdef CONFIG_USE_CRC16
-    cmd.crc[cmd.sectors_transferred] = reverseByte_LUT8(inl_sio2_data_in()) << 8;
-    cmd.crc[cmd.sectors_transferred] |= reverseByte_LUT8(inl_sio2_data_in());
+    /* get CRC16 bytes from RX FIFO */
+    cmd.crc[cmd.sectors_transferred] = reverse_byte_LUT8[inl_sio2_data_in()] << 8;
+    cmd.crc[cmd.sectors_transferred] |= reverse_byte_LUT8[inl_sio2_data_in()];
 #else
     inl_sio2_data_in();
     inl_sio2_data_in();
 #endif
+
+    /* NOTE: Some cards respond with 0xFE immediately after the CRC16, others do not.
+     * Try to get 0xFE regardless of whether the transfers complete as it's
+     * needed for correct alignment of CMD12 (STOP_TRANSMISSION) later */
+    if (inl_sio2_data_in() != 0xFE) {
+        cmd.response = mx_sio2_wait_equal(0xFE, READ_TOKEN_TIMEOUT);
+    } else {
+        cmd.response = SPISD_RESULT_OK;
+    }
+
     cmd.sectors_transferred++;
 
-    if ((cmd.abort == 0) && (cmd.sectors_transferred < cmd.sector_count)) {
-        // Start next DMA transfer ASAP
-        cmd.response = wait_equal(0xFE, 200, cmd.portNr);
-        if (cmd.response == SPISD_RESULT_OK)
-            sendCmd_Rx_DMA_start(&cmd.buffer[cmd.sectors_transferred * SECTOR_SIZE], cmd.portNr);
+    if (cmd.sectors_transferred < cmd.sector_count && cmd.abort == 0) {
+
+        if (cmd.response == SPISD_RESULT_OK) {
+            /* start next DMA transfer */
+            mx_sio2_start_rx_dma(&cmd.buffer[cmd.sectors_transferred * SECTOR_SIZE]);
+            /* notify thread data is ready to be reversed */
+            iSetEventFlag(ef, eflags);
+            /* return from ISR */
+            return 1;
+        }
+
+        cmd.abort = CMD_ABORT_NO_READ_TOKEN;
     }
 
-    if ((cmd.abort == 1) || (cmd.sectors_transferred >= cmd.sector_count) || (cmd.response != SPISD_RESULT_OK)) {
-        // Done or error, notify user task
-        eflags |= EF_SIO2_INTR_COMPLETE;
-    }
-
+    /* done or error, notify thread */
+    eflags |= EF_SIO2_INTR_COMPLETE;
     iSetEventFlag(ef, eflags);
 
     return 1;
 }
 
-static unsigned char reverseByte_LUT8_table[256] = {
+/* ISR triggered by the completetion of DMA transfer: MEM -> SIO2 TX FIFO */
+int mx_sio2_dma_isr_tx(void *arg)
+{
+    int ef     = *(int *)arg;
+    int eflags = 0;
+
+    /* clear SIO2 stat reg */
+    inl_sio2_stat_set(inl_sio2_stat_get());
+
+    /* SIO2 requires all data to be sent to be present in the TX FIFO
+     * prior to starting the transfer. As such, SIO2 will not
+     * have completed the transfer prior to reaching this ISR */
+
+    /* wait for transfer to complete */
+    while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
+        ;
+
+    /* CRC16 not yet implemented for writes */
+    mx_sio2_write_dummy();
+    mx_sio2_write_dummy();
+
+    cmd.sectors_transferred++;
+
+    /* get data response token */
+    /* 0101 = data accepted */
+    /* 1011 = data rejected, CRC error */
+    /* 1101 = data rejected, write error */
+    cmd.response = mx_sio2_wait_equal_masked(0x5, 0x1F, 10);
+    if (cmd.response != 0x5) {
+        M_DEBUG("ERROR: write data rejected, token 0x%x\n", cmd.response);
+        cmd.abort = 1;
+    }
+
+    /* wait for card to finish programming */
+    cmd.response = mx_sio2_wait_equal(0xFF, 0x80000);
+    if (cmd.response != SPISD_RESULT_OK) {
+        M_DEBUG("ERROR: failed to finish programming\n");
+        cmd.abort = 1;
+    }
+
+    if (cmd.sectors_transferred < cmd.sector_count && cmd.abort == 0) {
+        /* send write token */
+        mx_sio2_write_byte(0xFC);
+        /* start next DMA transfer */
+        mx_sio2_start_tx_dma(&cmd.buffer[cmd.sectors_transferred * SECTOR_SIZE]);
+        /* return from ISR */
+        return 1;
+    }
+
+    /* done or error, notify thread */
+    eflags = EF_SIO2_INTR_COMPLETE;
+    iSetEventFlag(ef, eflags);
+
+    return 1;
+}
+
+void mx_sio2_init_ports(sio2_transfer_data_t *td)
+{
+    for (uint8_t i = 0; i < 4; i++) {
+        inl_sio2_portN_ctrl1_set(i, td->port_ctrl1[i]);
+        inl_sio2_portN_ctrl2_set(i, td->port_ctrl2[i]);
+    }
+}
+
+void mx_sio2_init_td(sio2_transfer_data_t *td)
+{
+    for (uint8_t i = 0; i < 4; i++) {
+        td->port_ctrl1[i] = 0;
+        td->port_ctrl2[i] = 0;
+    }
+
+    td->port_ctrl1[PORT_NR] =
+        PCTRL0_ATT_LOW_PER(0x5) |
+        PCTRL0_ATT_MIN_HIGH_PER(0x5) |
+        PCTRL0_BAUD0_DIV(0x78) |             /* BAUD0 is unused */
+        PCTRL0_BAUD1_DIV(sio2_current_baud); /* BAUD1 is used for every transfer */
+
+    td->port_ctrl2[PORT_NR] =
+        PCTRL1_ACK_TIMEOUT_PER(0x12C) |
+        PCTRL1_INTER_BYTE_PER(0x0) |
+        PCTRL1_UNK24(0x0) |
+        PCTRL1_IF_MODE_SPI_DIFF(0x0);
+}
+
+void mx_sio2_lock(uint8_t intr_type)
+{
+    int state;
+
+    /* lock sio2man driver so we can use it exclusively */
+    sio2man_hook_sio2_lock();
+
+    /* save ctrl state */
+    sio2_save_crtl = inl_sio2_ctrl_get();
+
+    /* we're in control, setup the ports for our use */
+    mx_sio2_init_ports(&global_td);
+
+    /* enable DMA interrupts */
+    CpuSuspendIntr(&state);
+
+    if (intr_type == INTR_RX) {
+        RegisterIntrHandler(IOP_IRQ_DMA_SIO2_OUT, 1, mx_sio2_dma_isr_rx, &sio2_event_flag);
+        EnableIntr(IOP_IRQ_DMA_SIO2_OUT);
+    }
+
+    if (intr_type == INTR_TX) {
+        RegisterIntrHandler(IOP_IRQ_DMA_SIO2_IN, 1, mx_sio2_dma_isr_tx, &sio2_event_flag);
+        EnableIntr(IOP_IRQ_DMA_SIO2_IN);
+    }
+
+    CpuResumeIntr(state);
+}
+
+void mx_sio2_unlock(uint8_t intr_type)
+{
+    int state;
+    int res;
+
+    /* disable DMA interrupts */
+    CpuSuspendIntr(&state);
+
+    if (intr_type == INTR_RX)
+        DisableIntr(IOP_IRQ_DMA_SIO2_OUT, &res);
+
+    if (intr_type == INTR_TX)
+        DisableIntr(IOP_IRQ_DMA_SIO2_IN, &res);
+
+    CpuResumeIntr(state);
+
+    /* restore ctrl state, and reset STATE + FIFOS */
+    inl_sio2_ctrl_set(sio2_save_crtl | 0xc);
+
+    /* unlock sio2man driver */
+    sio2man_hook_sio2_unlock();
+}
+
+void mx_sio2_set_baud(uint8_t baud)
+{
+    sio2_current_baud = baud;
+
+    mx_sio2_init_td(&global_td);
+    mx_sio2_init_ports(&global_td);
+}
+
+uint8_t mx_sio2_write_byte(uint8_t byte)
+{
+    /* reset SIO2 + FIFO pointers, disable interrupts */
+    inl_sio2_ctrl_set(0x0bc);
+
+    inl_sio2_regN_set(0,
+                      TR_CTRL_PORT_NR(PORT_NR) |
+                          TR_CTRL_PAUSE(0) |
+                          TR_CTRL_TX_MODE_PIO_DMA(0) |
+                          TR_CTRL_RX_MODE_PIO_DMA(0) |
+                          TR_CTRL_NORMAL_TR(1) |
+                          TR_CTRL_SPECIAL_TR(0) |
+                          TR_CTRL_BAUD_DIV(1) |
+                          TR_CTRL_WAIT_ACK_FOREVER(0) |
+                          TR_CTRL_TX_DATA_SZ(1) |
+                          TR_CTRL_RX_DATA_SZ(1));
+    inl_sio2_regN_set(1, 0);
+
+    /* put byte in TX FIFO */
+    inl_sio2_data_out(reverse_byte_LUT8[byte]);
+
+    /* start queue exec */
+    inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
+
+    /* wait for completion */
+    while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
+        ;
+
+#ifdef DEBUG_VERBOSE
+    uint8_t rx = reverse_byte_LUT8[inl_sio2_data_in()];
+    M_DEBUG("W:0x%x, R:0x%x\n", byte, rx);
+    return rx;
+#endif
+
+    /* get byte from RX FIFO */
+    return reverse_byte_LUT8[inl_sio2_data_in()];
+}
+
+uint8_t mx_sio2_write_dummy(void)
+{
+    /* reset SIO2 + FIFO pointers, disable interrupts */
+    inl_sio2_ctrl_set(0x0bc);
+
+    /* add transfer to queue */
+    inl_sio2_regN_set(0,
+                      TR_CTRL_PORT_NR(PORT_NR) |
+                          TR_CTRL_PAUSE(0) |
+                          TR_CTRL_TX_MODE_PIO_DMA(0) |
+                          TR_CTRL_RX_MODE_PIO_DMA(0) |
+                          TR_CTRL_NORMAL_TR(1) |
+                          TR_CTRL_SPECIAL_TR(0) |
+                          TR_CTRL_BAUD_DIV(1) |
+                          TR_CTRL_WAIT_ACK_FOREVER(0) |
+                          TR_CTRL_TX_DATA_SZ(1) |
+                          TR_CTRL_RX_DATA_SZ(1));
+    inl_sio2_regN_set(1, 0);
+
+    /* put byte in TX FIFO */
+    inl_sio2_data_out(0xFF);
+
+    /* start queue exec */
+    inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
+
+    /* wait for completion */
+    while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
+        ;
+
+#ifdef DEBUG_VERBOSE
+    uint8_t rx = reverse_byte_LUT8[inl_sio2_data_in()];
+    M_DEBUG("R:0x%x\n", rx);
+    return rx;
+#endif
+
+    /* get byte from RX FIFO */
+    return reverse_byte_LUT8[inl_sio2_data_in()];
+}
+
+/* 1.440uS delay between bytes with clk div 0x2 */
+uint8_t mx_sio2_wait_equal(uint8_t value, uint32_t count)
+{
+    uint8_t exp_byte = reverse_byte_LUT8[value];
+    uint8_t in_byte  = 0;
+
+    while (count > 0 && in_byte != exp_byte) {
+        /* reset SIO2 + FIFO pointers, disable interrupts */
+        inl_sio2_ctrl_set(0x0bc);
+
+        inl_sio2_regN_set(0,
+                          TR_CTRL_PORT_NR(PORT_NR) |
+                              TR_CTRL_PAUSE(0) |
+                              TR_CTRL_TX_MODE_PIO_DMA(0) |
+                              TR_CTRL_RX_MODE_PIO_DMA(0) |
+                              TR_CTRL_NORMAL_TR(1) |
+                              TR_CTRL_SPECIAL_TR(0) |
+                              TR_CTRL_BAUD_DIV(1) |
+                              TR_CTRL_WAIT_ACK_FOREVER(0) |
+                              TR_CTRL_TX_DATA_SZ(0) |
+                              TR_CTRL_RX_DATA_SZ(1));
+        inl_sio2_regN_set(1, 0);
+
+        /* start queue exec */
+        inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
+
+        /* wait for completion */
+        while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
+            ;
+
+        in_byte = inl_sio2_data_in();
+
+#ifdef DEBUG_VERBOSE
+        M_DEBUG("WE: 0x%x, EX: 0x%x\n", reverse_byte_LUT8[in_byte], value);
+#endif
+
+        count--;
+    }
+
+    return (exp_byte != in_byte) ? SPISD_RESULT_ERROR : SPISD_RESULT_OK;
+}
+
+uint8_t mx_sio2_wait_not_equal(uint8_t value, uint32_t count)
+{
+    uint8_t exp_byte = reverse_byte_LUT8[value];
+    uint8_t in_byte  = exp_byte;
+
+    while (count > 0 && in_byte == exp_byte) {
+        /* reset SIO2 + FIFO pointers, disable interrupts */
+        inl_sio2_ctrl_set(0x0bc);
+
+        /* add transfer to queue */
+        inl_sio2_regN_set(0,
+                          TR_CTRL_PORT_NR(PORT_NR) |
+                              TR_CTRL_PAUSE(0) |
+                              TR_CTRL_TX_MODE_PIO_DMA(0) |
+                              TR_CTRL_RX_MODE_PIO_DMA(0) |
+                              TR_CTRL_NORMAL_TR(1) |
+                              TR_CTRL_SPECIAL_TR(0) |
+                              TR_CTRL_BAUD_DIV(1) |
+                              TR_CTRL_WAIT_ACK_FOREVER(0) |
+                              TR_CTRL_TX_DATA_SZ(0) |
+                              TR_CTRL_RX_DATA_SZ(1));
+        inl_sio2_regN_set(1, 0);
+
+        /* start queue exec */
+        inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
+
+        /* wait for completion */
+        while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
+            ;
+
+        /* get byte from RX FIFO */
+        in_byte = inl_sio2_data_in();
+
+#ifdef DEBUG_VERBOSE
+        M_DEBUG("WNE: 0x%x, EX: !0x%x\n", reverse_byte_LUT8[in_byte], value);
+#endif
+        count--;
+    }
+
+    return reverse_byte_LUT8[in_byte];
+}
+
+uint8_t mx_sio2_wait_equal_masked(uint8_t value, uint8_t mask, uint32_t count)
+{
+    uint8_t exp_byte = reverse_byte_LUT8[value];
+    uint8_t rev_mask = reverse_byte_LUT8[mask];
+    uint8_t in_byte  = 0;
+
+    while (count > 0 && in_byte != exp_byte) {
+        /* reset SIO2 + FIFO pointers, disable interrupts */
+        inl_sio2_ctrl_set(0x0bc);
+
+        inl_sio2_regN_set(0,
+                          TR_CTRL_PORT_NR(PORT_NR) |
+                              TR_CTRL_PAUSE(0) |
+                              TR_CTRL_TX_MODE_PIO_DMA(0) |
+                              TR_CTRL_RX_MODE_PIO_DMA(0) |
+                              TR_CTRL_NORMAL_TR(1) |
+                              TR_CTRL_SPECIAL_TR(0) |
+                              TR_CTRL_BAUD_DIV(1) |
+                              TR_CTRL_WAIT_ACK_FOREVER(0) |
+                              TR_CTRL_TX_DATA_SZ(0) |
+                              TR_CTRL_RX_DATA_SZ(1));
+        inl_sio2_regN_set(1, 0);
+
+        /* start queue exec */
+        inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
+
+        /* wait for completion */
+        while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
+            ;
+
+        in_byte = inl_sio2_data_in();
+
+#ifdef DEBUG_VERBOSE
+        M_DEBUG("WEM: 0x%x M:\n", reverse_byte_LUT8[in_byte], reverse_byte_LUT8[in_byte & rev_mask]);
+#endif
+        in_byte = in_byte & rev_mask;
+
+        count--;
+    }
+
+    return reverse_byte_LUT8[in_byte];
+}
+
+void mx_sio2_rx_pio(uint8_t *buffer, uint32_t size)
+{
+    uint32_t transfer_size;
+#ifdef DEBUG_VERBOSE
+    uint8_t *buffer_start = buffer;
+#endif
+    while (size > 0) {
+        /* SIO2 can only transfer 256 bytes at a time */
+        transfer_size = size > SIO2_MAX_TRANSFER_SIZE ? SIO2_MAX_TRANSFER_SIZE : size;
+
+        /* reset SIO2 + FIFO pointers, disable interrupts */
+        inl_sio2_ctrl_set(0x0bc);
+
+        /* add transfer to queue */
+        inl_sio2_regN_set(0,
+                          TR_CTRL_PORT_NR(PORT_NR) |
+                              TR_CTRL_PAUSE(0) |
+                              TR_CTRL_TX_MODE_PIO_DMA(0) |
+                              TR_CTRL_RX_MODE_PIO_DMA(0) |
+                              TR_CTRL_NORMAL_TR(1) |
+                              TR_CTRL_SPECIAL_TR(0) |
+                              TR_CTRL_BAUD_DIV(1) |
+                              TR_CTRL_WAIT_ACK_FOREVER(0) |
+                              TR_CTRL_TX_DATA_SZ(0) |
+                              TR_CTRL_RX_DATA_SZ(transfer_size));
+        inl_sio2_regN_set(1, 0);
+
+        /* start queue exec */
+        inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
+
+        /* wait for completion */
+        while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
+            ;
+
+        /* PIO: IOP <- SIO2 */
+        for (int i = 0; i < transfer_size; i++) {
+            *buffer++ = reverse_byte_LUT8[inl_sio2_data_in()];
+        }
+
+#ifdef DEBUG_VERBOSE
+        for (int i = 0; i < transfer_size; i++) {
+            M_DEBUG("W:0xFF, R:0x%x\n", buffer_start[i]);
+        }
+#endif
+
+        size -= transfer_size;
+    }
+}
+
+void mx_sio2_tx_pio(uint8_t *buffer, uint32_t size)
+{
+    uint32_t transfer_size;
+
+#ifdef DEBUG_VERBOSE
+    uint8_t *buffer_start = buffer;
+#endif
+
+    while (size > 0) {
+        /* SIO2 can only transfer 256 bytes at a time */
+        transfer_size = size > SIO2_MAX_TRANSFER_SIZE ? SIO2_MAX_TRANSFER_SIZE : size;
+
+        /* reset SIO2 + FIFO pointers, disable interrupts */
+        inl_sio2_ctrl_set(0x0bc);
+
+        /* add transfer to queue */
+        inl_sio2_regN_set(0,
+                          TR_CTRL_PORT_NR(PORT_NR) |
+                              TR_CTRL_PAUSE(0) |
+                              TR_CTRL_TX_MODE_PIO_DMA(0) |
+                              TR_CTRL_RX_MODE_PIO_DMA(0) |
+                              TR_CTRL_NORMAL_TR(1) |
+                              TR_CTRL_SPECIAL_TR(0) |
+                              TR_CTRL_BAUD_DIV(1) |
+                              TR_CTRL_WAIT_ACK_FOREVER(0) |
+                              TR_CTRL_TX_DATA_SZ(transfer_size) |
+#ifdef DEBUG_VERBOSE
+                              TR_CTRL_RX_DATA_SZ(transfer_size));
+#else
+                              TR_CTRL_RX_DATA_SZ(0));
+#endif
+
+        inl_sio2_regN_set(1, 0);
+
+        /* PIO: IOP -> SIO2 */
+        for (int i = 0; i < transfer_size; i++) {
+            inl_sio2_data_out(reverse_byte_LUT8[*buffer++]);
+        }
+
+        /* start queue exec */
+        inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
+
+        /* wait for completion */
+        while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
+            ;
+
+#ifdef DEBUG_VERBOSE
+        for (int i = 0; i < transfer_size; i++) {
+            M_DEBUG("W:0x%x, R:0x%x\n", buffer_start[i], reverse_byte_LUT8[inl_sio2_data_in()]);
+        }
+#endif
+        size -= transfer_size;
+    }
+}
+
+void mx_sio2_start_rx_dma(uint8_t *buffer)
+{
+    /* DMA: 256 bytes */
+    const uint32_t tr_ctrl_dma =
+        TR_CTRL_PAUSE(0) |
+        TR_CTRL_TX_MODE_PIO_DMA(0) |
+        TR_CTRL_RX_MODE_PIO_DMA(1) |
+        TR_CTRL_NORMAL_TR(1) |
+        TR_CTRL_SPECIAL_TR(0) |
+        TR_CTRL_TX_DATA_SZ(0) |
+        TR_CTRL_RX_DATA_SZ(0x100) |
+        TR_CTRL_BAUD_DIV(1) |
+        TR_CTRL_WAIT_ACK_FOREVER(0);
+
+    /* PIO: CRC16 (2 bytes) + 0xFE token (1 byte) */
+    const uint32_t tr_ctrl_pio =
+        TR_CTRL_PAUSE(0) |
+        TR_CTRL_TX_MODE_PIO_DMA(0) |
+        TR_CTRL_RX_MODE_PIO_DMA(0) |
+        TR_CTRL_NORMAL_TR(1) |
+        TR_CTRL_SPECIAL_TR(0) |
+        TR_CTRL_TX_DATA_SZ(0) |
+        TR_CTRL_RX_DATA_SZ(3) |
+        TR_CTRL_BAUD_DIV(1) |
+        TR_CTRL_WAIT_ACK_FOREVER(0);
+
+    /* reset SIO2 + FIFO pointers, disable interrupts */
+    inl_sio2_ctrl_set(0x0bc);
+
+    /* add transfers to queue */
+    inl_sio2_regN_set(0, tr_ctrl_dma | TR_CTRL_PORT_NR(PORT_NR));
+    inl_sio2_regN_set(1, tr_ctrl_dma | TR_CTRL_PORT_NR(PORT_NR));
+    inl_sio2_regN_set(2, tr_ctrl_pio | TR_CTRL_PORT_NR(PORT_NR));
+    inl_sio2_regN_set(3, 0);
+
+    /* enable dmac transfer */
+    dmac_request(IOP_DMAC_SIO2out, buffer, 0x100 >> 2, 2, DMAC_TO_MEM);
+    dmac_transfer(IOP_DMAC_SIO2out);
+
+    /* start queue exec */
+    inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
+}
+
+void mx_sio2_start_tx_dma(uint8_t *buffer)
+{
+    /* DMA: 256 bytes */
+    const uint32_t tr_ctrl_dma =
+        TR_CTRL_PAUSE(0) |
+        TR_CTRL_TX_MODE_PIO_DMA(1) |
+        TR_CTRL_RX_MODE_PIO_DMA(0) |
+        TR_CTRL_NORMAL_TR(1) |
+        TR_CTRL_SPECIAL_TR(0) |
+        TR_CTRL_TX_DATA_SZ(0x100) |
+        TR_CTRL_RX_DATA_SZ(0) |
+        TR_CTRL_BAUD_DIV(1) |
+        TR_CTRL_WAIT_ACK_FOREVER(0);
+
+    /* reset SIO2 + FIFO pointers, disable interrupts */
+    inl_sio2_ctrl_set(0x0bc);
+
+    /* add transfers to queue */
+    inl_sio2_regN_set(0, tr_ctrl_dma | TR_CTRL_PORT_NR(PORT_NR));
+    inl_sio2_regN_set(1, tr_ctrl_dma | TR_CTRL_PORT_NR(PORT_NR));
+    inl_sio2_regN_set(2, 0);
+    inl_sio2_regN_set(3, 0);
+
+    /* enable dmac transfer */
+    dmac_request(IOP_DMAC_SIO2in, buffer, 0x100 >> 2, 2, DMAC_FROM_MEM);
+    dmac_transfer(IOP_DMAC_SIO2in);
+
+    /* start queue exec */
+    inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
+}
+
+static void sd_detect()
+{
+    uint16_t results;
+
+    mx_sio2_lock(INTR_NONE);
+
+    if (sdcard.initialized == 0) {
+        M_PRINTF("Trying to init card\n");
+        /* bring card up from identification mode to data-transfer mode */
+        if (spisd_init_card() == SPISD_RESULT_OK) {
+
+            /* get card capacity and attach to BDM */
+            if (spisd_get_card_info() == SPISD_RESULT_OK) {
+                bdm_connect_bd(&bd);
+                sdcard.initialized = 1;
+            }
+        }
+    } else {
+        /* try to detect card removal by requesting card status (CMD13) */
+        results = spisd_read_status_register();
+        /* comparing without a mask might be a bit overkill */
+        if (results != 0x0) {
+            /* try to recover */
+            results = spisd_recover();
+            /* maybe add a var to keep track of capacity */
+            if ((sdcard.initialized == 1) && (results != SPISD_RESULT_OK)) {
+                /* recovery failed, disconnect from BDM */
+                M_DEBUG("Recovery failed, disconnecting from bdm.\n");
+                bdm_disconnect_bd(&bd);
+                sdcard.initialized = 0;
+            }
+        }
+    }
+
+    mx_sio2_unlock(INTR_NONE);
+}
+
+static void sd_detect_thread(void *arg)
+{
+    (void)arg;
+
+    M_PRINTF("card detection thread running\n");
+
+    while (1) {
+        DelayThread(1000 * 1000);
+
+        /* try to detect card removal if it hasn't been used recently */
+        if (sdcard.used == 0)
+            sd_detect();
+        sdcard.used = 0;
+    }
+}
+
+
+/* Maximus32's C r3000 optimized byte reversal */
+/* 58-59uS avg on DECKARD */
+#pragma GCC push_options
+#pragma GCC optimize("-O3")
+inline void reverse_buffer(uint32_t *buffer, uint32_t count)
+{
+    const uint32_t mask0F = 0x0F0F0F0F;
+    const uint32_t maskF0 = 0xF0F0F0F0;
+    const uint32_t mask33 = 0x33333333;
+    const uint32_t maskCC = 0xCCCCCCCC;
+    const uint32_t mask55 = 0x55555555;
+    const uint32_t maskAA = 0xAAAAAAAA;
+    uint32_t n;
+
+#pragma GCC unroll 2
+    for (int i = 0; i < count; i++) {
+        n = buffer[i];
+        n = ((n & maskF0) >> 4) | ((n & mask0F) << 4);
+        n = ((n & maskCC) >> 2) | ((n & mask33) << 2);
+        n = ((n & maskAA) >> 1) | ((n & mask55) << 1);
+
+        buffer[i] = n;
+    }
+}
+#pragma GCC pop_options
+
+/* LUT for single byte reversal */
+const uint8_t reverse_byte_LUT8[256] = {
     0x00, 0x80, 0x40, 0xc0, 0x20, 0xa0, 0x60, 0xe0,
     0x10, 0x90, 0x50, 0xd0, 0x30, 0xb0, 0x70, 0xf0,
     0x08, 0x88, 0x48, 0xc8, 0x28, 0xa8, 0x68, 0xe8,
@@ -139,758 +722,7 @@ static unsigned char reverseByte_LUT8_table[256] = {
     0x0f, 0x8f, 0x4f, 0xcf, 0x2f, 0xaf, 0x6f, 0xef,
     0x1f, 0x9f, 0x5f, 0xdf, 0x3f, 0xbf, 0x7f, 0xff};
 
-static inline u8 reverseByte_LUT8(u8 n)
-{
-    return reverseByte_LUT8_table[n];
-}
-
-static u32 reverseByteInWord_mask(u32 n, u32 maskF, u32 mask3, u32 mask5)
-{
-    n = ((n & (maskF << 4)) >> 4) | ((n & maskF) << 4);
-    n = ((n & (mask3 << 2)) >> 2) | ((n & mask3) << 2);
-    n = ((n & (mask5 << 1)) >> 1) | ((n & mask5) << 1);
-    return n;
-}
-
-static inline u32 reverseByteInWord(u32 n)
-{
-    return reverseByteInWord_mask(n, 0x0F0F0F0F, 0x33333333, 0x55555555);
-}
-
-/* The masks need to be defined as registers outside of the loop
- * This extra function makes sure gcc 3.2.3 generates an efficient function
- * Inner loop with 19 instructions:
-        $L38:
-            and    $2,$2,$10
-            sll    $3,$3,4
-            srl    $2,$2,4
-            or     $2,$2,$3
-            and    $4,$2,$7
-            and    $2,$2,$9
-            srl    $2,$2,2
-            sll    $4,$4,2
-            or     $2,$2,$4
-            and    $3,$2,$12
-            and    $2,$2,$5
-            srl    $2,$2,1
-            sll    $3,$3,1
-            or     $2,$2,$3
-            sw     $2,0($8)
-            addu   $8,$8,4
-            lw     $2,0($8)
-            bne    $8,$11,$L38
-            and    $3,$2,$6
-*/
-static void reverseBuffer32_mask(u32 *buffer, u32 count, u32 maskF, u32 mask3, u32 mask5)
-{
-    u32 n    = *buffer;
-    u32 *end = buffer + count;
-
-    while (buffer != end) {
-        n = ((n & (maskF << 4)) >> 4) | ((n & maskF) << 4);
-        n = ((n & (mask3 << 2)) >> 2) | ((n & mask3) << 2);
-        n = ((n & (mask5 << 1)) >> 1) | ((n & mask5) << 1);
-
-        *buffer = n;
-        buffer++;
-        n = *buffer;
-    }
-}
-
-//  7037KB/s (FAT  PS2, GCC 3.2.3, -O3)
-// 12052KB/s (slim PS2, GCC 3.2.3, -O3)
-static inline void reverseBuffer32(u32 *buffer, u32 count)
-{
-    reverseBuffer32_mask(buffer, count, 0x0F0F0F0F, 0x33333333, 0x55555555);
-}
-
-// 4194KB/s (FAT  PS2, GCC 3.2.3, -O3)
-// 3771KB/s (slim PS2, GCC 3.2.3, -O3)
-static inline void reverseBuffer8x1_LUT(u8 *buffer, u32 count)
-{
-    u8 *end = buffer + count;
-
-    while (buffer != end) {
-        *buffer = reverseByte_LUT8(*buffer);
-        buffer++;
-    }
-}
-
-static void _init_td(sio2_transfer_data_t *td, int portNr)
-{
-    static const uint8_t TxByte = 0xff;
-    static uint8_t RxByte;
-    int i;
-
-    /*
-     * Clock divider for 48MHz clock:
-     * 1 = 48  MHz - Damaged data
-     * 2 = 24  MHz - Fastest usable speed
-     * 3 = 16  MHz
-     * 4 = 12  MHz
-     * 5 =  9.6MHz
-     * 6 =  6  MHz
-     * ...
-     * 0x78 = 400KHz - Initialization speed
-     */
-    const int slowDivVal   = 0x78;
-    const int fastDivVal   = 0x2;
-    const int interBytePer = 0; // 2;
-
-    for (i = 0; i < 4; i++) {
-        td->port_ctrl1[i] = 0;
-        td->port_ctrl2[i] = 0;
-    }
-
-    td->port_ctrl1[portNr] =
-        PCTRL0_ATT_LOW_PER(0x5) |
-        PCTRL0_ATT_MIN_HIGH_PER(0x5) |
-        PCTRL0_BAUD0_DIV(slowDivVal) |
-        PCTRL0_BAUD1_DIV(fastDivVal);
-
-    td->port_ctrl2[portNr] =
-        PCTRL1_ACK_TIMEOUT_PER(0x12C) |
-        PCTRL1_INTER_BYTE_PER(interBytePer) |
-        PCTRL1_UNK24(0) |
-        PCTRL1_IF_MODE_SPI_DIFF(0);
-
-    // create dummy transfer to unlock old rom0:SIO2MAN
-    // - Tx 1 byte PIO
-    // - Rx 1 byte PIO
-    td->regdata[0] =
-        TR_CTRL_PORT_NR(portNr) |
-        TR_CTRL_PAUSE(0) |
-        TR_CTRL_TX_MODE_PIO_DMA(0) |
-        TR_CTRL_RX_MODE_PIO_DMA(0) |
-        TR_CTRL_NORMAL_TR(1) |
-        TR_CTRL_SPECIAL_TR(0) |
-        TR_CTRL_TX_DATA_SZ(1) |
-        TR_CTRL_RX_DATA_SZ(1) |
-        TR_CTRL_BAUD_DIV(fastDiv) |
-        TR_CTRL_WAIT_ACK_FOREVER(0);
-    td->regdata[1] = 0;
-
-    // Tx 1 byte PIO
-    td->in_size      = 1;
-    td->in           = (void *)&TxByte;
-    td->in_dma.addr  = NULL;
-    td->in_dma.size  = 0;
-    td->in_dma.count = 0;
-
-    // Rx 1 byte PIO
-    td->out_size      = 1;
-    td->out           = &RxByte;
-    td->out_dma.addr  = NULL;
-    td->out_dma.size  = 0;
-    td->out_dma.count = 0;
-}
-
-static void _init_ports(sio2_transfer_data_t *td)
-{
-    int i;
-
-    for (i = 0; i < 4; i++) {
-        inl_sio2_portN_ctrl1_set(i, td->port_ctrl1[i]);
-        inl_sio2_portN_ctrl2_set(i, td->port_ctrl2[i]);
-    }
-}
-
-static uint8_t sendCmd_Tx1_Rx1(uint8_t data, int portNr)
-{
-    inl_sio2_ctrl_set(0x0bc); // no interrupt
-
-    inl_sio2_regN_set(0,
-                      TR_CTRL_PORT_NR(portNr) |
-                          TR_CTRL_PAUSE(0) |
-                          TR_CTRL_TX_MODE_PIO_DMA(0) |
-                          TR_CTRL_RX_MODE_PIO_DMA(0) |
-                          TR_CTRL_NORMAL_TR(1) |
-                          TR_CTRL_SPECIAL_TR(0) |
-                          TR_CTRL_BAUD_DIV(fastDiv) |
-                          TR_CTRL_WAIT_ACK_FOREVER(0) |
-                          TR_CTRL_TX_DATA_SZ(1) |
-                          TR_CTRL_RX_DATA_SZ(1));
-    inl_sio2_regN_set(1, 0);
-
-    // Put byte in queue
-    inl_sio2_data_out(reverseByte_LUT8(data));
-
-    // Start queue exec
-    inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
-
-    // Wait for completion
-    while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
-        ;
-
-    // Get byte from queue
-    return reverseByte_LUT8(inl_sio2_data_in());
-}
-
-static void sendCmd_Tx_PIO(const uint8_t *wrBufA, int sndSz, int portNr)
-{
-    inl_sio2_ctrl_set(0x0bc); // no interrupt
-
-    inl_sio2_regN_set(0,
-                      TR_CTRL_PORT_NR(portNr) |
-                          TR_CTRL_PAUSE(0) |
-                          TR_CTRL_TX_MODE_PIO_DMA(0) |
-                          TR_CTRL_RX_MODE_PIO_DMA(0) |
-                          TR_CTRL_NORMAL_TR(1) |
-                          TR_CTRL_SPECIAL_TR(0) |
-                          TR_CTRL_BAUD_DIV(fastDiv) |
-                          TR_CTRL_WAIT_ACK_FOREVER(0) |
-                          TR_CTRL_TX_DATA_SZ(sndSz) |
-                          TR_CTRL_RX_DATA_SZ(0));
-    inl_sio2_regN_set(1, 0);
-
-    // PIO: IOP -> SIO2
-    // Fill the queue
-    while (sndSz--)
-        inl_sio2_data_out(reverseByte_LUT8(*wrBufA++));
-
-    // Start queue exec
-    inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
-
-    // Wait for completion
-    while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
-        ;
-}
-
-static void sendCmd_Rx_PIO(uint8_t *rdBufA, int rcvSz, int portNr)
-{
-    inl_sio2_ctrl_set(0x0bc); // no interrupt
-
-    inl_sio2_regN_set(0,
-                      TR_CTRL_PORT_NR(portNr) |
-                          TR_CTRL_PAUSE(0) |
-                          TR_CTRL_TX_MODE_PIO_DMA(0) |
-                          TR_CTRL_RX_MODE_PIO_DMA(0) |
-                          TR_CTRL_NORMAL_TR(1) |
-                          TR_CTRL_SPECIAL_TR(0) |
-                          TR_CTRL_BAUD_DIV(fastDiv) |
-                          TR_CTRL_WAIT_ACK_FOREVER(0) |
-                          TR_CTRL_TX_DATA_SZ(0) |
-                          TR_CTRL_RX_DATA_SZ(rcvSz));
-    inl_sio2_regN_set(1, 0);
-
-    // Start queue exec
-    inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
-
-    // Wait for completion
-    while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
-        ;
-
-    // PIO: IOP <- SIO2
-    // Empty the queue
-    while (rcvSz--)
-        *rdBufA++ = reverseByte_LUT8(inl_sio2_data_in());
-}
-
-static uint8_t wait_equal(uint8_t value, int count, int portNr)
-{
-    uint32_t i;
-    uint8_t response = 0;
-
-    for (i = 0; i < (uint32_t)count; i++) {
-        response = sendCmd_Tx1_Rx1(0xff, portNr);
-        if (response == value)
-            break;
-    }
-
-    return (response != value) ? SPISD_RESULT_ERROR : SPISD_RESULT_OK;
-}
-
-static void sendCmd_Rx_DMA_start(uint8_t *rdBufA, int portNr)
-{
-    const uint32_t trSettingsDMA =
-        TR_CTRL_PAUSE(0) |
-        TR_CTRL_TX_MODE_PIO_DMA(0) |
-        TR_CTRL_RX_MODE_PIO_DMA(1) |
-        TR_CTRL_NORMAL_TR(1) |
-        TR_CTRL_SPECIAL_TR(0) |
-        TR_CTRL_TX_DATA_SZ(0) |
-        TR_CTRL_RX_DATA_SZ(0x100) |
-        TR_CTRL_BAUD_DIV(1) |
-        TR_CTRL_WAIT_ACK_FOREVER(0);
-
-    const uint32_t trSettingsPIO =
-        TR_CTRL_PAUSE(0) |
-        TR_CTRL_TX_MODE_PIO_DMA(0) |
-        TR_CTRL_RX_MODE_PIO_DMA(0) |
-        TR_CTRL_NORMAL_TR(1) |
-        TR_CTRL_SPECIAL_TR(0) |
-        TR_CTRL_TX_DATA_SZ(0) |
-        TR_CTRL_RX_DATA_SZ(2) |
-        TR_CTRL_BAUD_DIV(1) |
-        TR_CTRL_WAIT_ACK_FOREVER(0);
-
-    inl_sio2_ctrl_set(0x0bc); // no interrupt
-
-    inl_sio2_regN_set(0, trSettingsDMA | TR_CTRL_PORT_NR(portNr));
-    inl_sio2_regN_set(1, trSettingsDMA | TR_CTRL_PORT_NR(portNr));
-    inl_sio2_regN_set(2, trSettingsPIO | TR_CTRL_PORT_NR(portNr));
-    inl_sio2_regN_set(3, 0);
-
-    dmac_request(IOP_DMAC_SIO2out, rdBufA, 0x100 >> 2, 2, DMAC_TO_MEM);
-    dmac_transfer(IOP_DMAC_SIO2out);
-
-    // Start queue exec
-    inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
-}
-
-static void sio2_lock()
-{
-    int state;
-
-    // M_DEBUG("%s()\n", __FUNCTION__);
-
-    // Lock sio2man driver so we can use it exclusively
-    sio2man_hook_sio2_lock();
-
-    // Save ctrl state
-    sio2man_save_crtl = inl_sio2_ctrl_get();
-
-    // We're in control, setup the ports for our use
-    _init_ports(&global_td);
-
-    // Enable DMA interrupts
-    CpuSuspendIntr(&state);
-    RegisterIntrHandler(IOP_IRQ_DMA_SIO2_OUT, 1, sio2_intr_handler, &event_flag);
-    EnableIntr(IOP_IRQ_DMA_SIO2_OUT);
-    CpuResumeIntr(state);
-}
-
-static void sio2_unlock()
-{
-    int state;
-    int res;
-
-    // Disable DMA interrupts
-    CpuSuspendIntr(&state);
-    DisableIntr(IOP_IRQ_DMA_SIO2_OUT, &res);
-    CpuResumeIntr(state);
-
-    // Restore ctrl state, and reset STATE + FIFOS
-    inl_sio2_ctrl_set(sio2man_save_crtl | 0xc);
-
-    // Unlock sio2man driver
-    sio2man_hook_sio2_unlock();
-
-    // M_DEBUG("%s()\n", __FUNCTION__);
-}
-
-/*
- * SPI interface:
- * - "spi_sdcard" library -> SPI
- */
-static void ps2_spi_set_speed(uint32_t freq)
-{
-    int newFastDiv = freq > 400000;
-
-    // M_DEBUG("%s(%d)\n", __FUNCTION__, (int)freq);
-
-    if (fastDiv != newFastDiv) {
-        M_DEBUG("%s(%d)\n", __FUNCTION__, (int)freq);
-
-        fastDiv = newFastDiv;
-        _init_td(&global_td, PORT_NR);
-        _init_ports(&global_td);
-    }
-}
-
-static void ps2_spi_select(void)
-{
-    // M_DEBUG("%s()\n", __FUNCTION__);
-    spi_ss = 1;
-}
-
-static void ps2_spi_relese(void)
-{
-    // M_DEBUG("%s()\n", __FUNCTION__);
-    spi_ss = 0;
-}
-
-static bool ps2_spi_is_present(void)
-{
-    // M_DEBUG("%s()\n", __FUNCTION__);
-    return true;
-}
-
-static uint8_t ps2_spi_wr_rd_byte(uint8_t byte)
-{
-    // M_DEBUG("%s(%d)\n", __FUNCTION__, byte);
-    return sendCmd_Tx1_Rx1(byte, PORT_NR);
-}
-
-static void ps2_spi_write(uint8_t const *buffer, uint32_t size)
-{
-    uint32_t ts;
-
-    // M_DEBUG("%s(..., %d)\n", __FUNCTION__, (int)size);
-    while (size > 0) {
-        ts = size > MAX_SIO2_TRANSFER_SIZE ? MAX_SIO2_TRANSFER_SIZE : size;
-        sendCmd_Tx_PIO(buffer, ts, PORT_NR);
-        buffer += ts;
-        size -= ts;
-    }
-}
-
-static void ps2_spi_read(uint8_t *buffer, uint32_t size)
-{
-    uint32_t ts;
-
-    // M_DEBUG("%s(..., %d)\n", __FUNCTION__, (int)size);
-    while (size > 0) {
-        ts = size > MAX_SIO2_TRANSFER_SIZE ? MAX_SIO2_TRANSFER_SIZE : size;
-        sendCmd_Rx_PIO((uint8_t *)buffer, ts, PORT_NR);
-        buffer += ts;
-        size -= ts;
-    }
-}
-
-static spisd_interface_t spi = {
-    ps2_spi_set_speed,
-    ps2_spi_select,
-    ps2_spi_relese,
-    ps2_spi_is_present,
-    ps2_spi_wr_rd_byte,
-    ps2_spi_write,
-    ps2_spi_read};
-
-static int spisd_init_recovery()
-{
-    int rv, i;
-
-    M_DEBUG("%s\n", __FUNCTION__);
-
-    // Flush 256B
-    for (i = 0; i < 64; i++)
-        sendCmd_Rx_PIO((void *)&rv, 4, PORT_NR);
-
-    return spisd_init(&spi);
-}
-
-static int _msread_start(struct block_device *bd, u32 sector)
-{
-    int rv, i;
-
-    (void)bd;
-
-    for (i = 0; i < 10; i++) {
-        // Wait idle
-        rv = wait_equal(0xFF, 4000, PORT_NR);
-        if (rv != SPISD_RESULT_OK) {
-            M_PRINTF("ERROR: card is not idle\n");
-            goto recovery;
-        }
-
-        // Send multi block read command
-        rv = spisd_read_multi_block_begin(sector);
-        if (rv != SPISD_RESULT_OK) {
-            M_PRINTF("ERROR: failed to start multi-block read\n");
-            goto recovery;
-        }
-
-        // Wait for first start token (first one takes a long time)
-        rv = wait_equal(0xFE, 100000, PORT_NR);
-        if (rv != SPISD_RESULT_OK) {
-            M_PRINTF("ERROR: no start token\n");
-            goto recovery;
-        }
-        break;
-
-    recovery:
-        spisd_init_recovery();
-    }
-
-    return rv;
-}
-
-static int _msread_do(struct block_device *bd, void *buffer, u16 count)
-{
-    (void)bd;
-
-    // Setup DMA cmd struct
-    cmd.buffer              = buffer;
-    cmd.portNr              = PORT_NR;
-    cmd.sector_count        = count;
-    cmd.sectors_transferred = 0;
-    cmd.sectors_reversed    = 0;
-    cmd.response            = SPISD_RESULT_OK;
-    cmd.abort               = 0;
-
-    // Start first DMA transfer (1 sector)
-    sendCmd_Rx_DMA_start(buffer, PORT_NR);
-
-    // Process events from DMA completion interrupt
-    while (1) {
-        uint32_t resbits;
-
-        WaitEventFlag(event_flag, EF_SIO2_INTR_REVERSE | EF_SIO2_INTR_COMPLETE, 1, &resbits);
-
-        if (resbits & EF_SIO2_INTR_REVERSE) {
-            ClearEventFlag(event_flag, ~EF_SIO2_INTR_REVERSE);
-            while (cmd.sectors_reversed < cmd.sectors_transferred && cmd.abort == 0) {
-                void *buf = (u32 *)&cmd.buffer[cmd.sectors_reversed * SECTOR_SIZE];
-                reverseBuffer32(buf, SECTOR_SIZE / 4);
-#ifdef CONFIG_USE_CRC16
-                u16 crc_a = crc16(buf, SECTOR_SIZE);
-                u16 crc_b = cmd.crc[cmd.sectors_reversed];
-                if (crc_a != crc_b) {
-                    // CRC mismatch:
-                    // - Signal ISR to stop reading
-                    // - Wait for complete event from ISR
-                    cmd.abort = 1;
-                    M_PRINTF("ERROR: crc invalid (0x%x != 0x%x) @ sector %d of %d -> 0x%x\n", crc_a, crc_b, cmd.sectors_reversed, count, (int)buffer);
-                }
-#endif
-                if (cmd.abort == 0)
-                    cmd.sectors_reversed++;
-            }
-        }
-
-        if (resbits & EF_SIO2_INTR_COMPLETE) {
-            ClearEventFlag(event_flag, ~EF_SIO2_INTR_COMPLETE);
-            break;
-        }
-    }
-
-    return cmd.sectors_reversed;
-}
-
-/*
- * BDM interface:
- * - BDM -> "spi_sdcard" library
- */
-static int spi_sdcard_read(struct block_device *bd, u64 sector, void *buffer, u16 count)
-{
-    int count_left = count;
-    int retry_count;
-
-    // M_DEBUG("%s(%d,%d)\n", __FUNCTION__, (int)sector, (int)count);
-
-    if (count == 0)
-        return 0;
-
-    sio2_lock();
-
-    for (retry_count = 0; retry_count < MAX_RETRIES; retry_count++) {
-        int rv;
-
-        rv = _msread_start(bd, (u32)sector);
-        if (rv != SPISD_RESULT_OK) {
-            M_PRINTF("ERROR: failed to start multi-block read (%d)\n", rv);
-            break;
-        }
-
-        while (count_left > 0) {
-            // Read sectors
-            int count_do = (count_left < MAX_SECTORS) ? count_left : MAX_SECTORS;
-            rv           = _msread_do(bd, buffer, count_do);
-
-            // Update statistics
-            count_left -= rv;
-            sector += rv;
-            buffer = (u8 *)buffer + (rv * 512);
-
-            if (rv != count_do) {
-                // Read failed, have outer loop retry
-                M_PRINTF("ERROR: _msread_do: %d != %d\n", rv, count_do);
-                // U64_2XU32 expands to 2 arguments
-                // cppcheck-suppress wrongPrintfScanfArgNum
-                M_PRINTF(" - %s(0x%08x%08x,%d)\n", __FUNCTION__, U64_2XU32(&sector), (int)count);
-                break;
-            }
-
-            if (count_left > 0) {
-                // Wait for next start token
-                if (wait_equal(0xFE, 200, PORT_NR) != SPISD_RESULT_OK) {
-                    M_PRINTF("ERROR: no start token\n");
-                    break;
-                }
-            }
-        }
-
-        rv = spisd_read_multi_block_end();
-        if (rv != SPISD_RESULT_OK) {
-            M_PRINTF("ERROR: spisd_read_multi_block_end = %d\n", rv);
-            break;
-        }
-
-        if (count_left <= 0)
-            break;
-    }
-
-    // Let detection thread know the card has been used succesfully
-    if (count_left == 0)
-        card_used = 1;
-
-    sio2_unlock();
-
-    return count - count_left;
-}
-
-static int spi_sdcard_write(struct block_device *bd, u64 sector, const void *buffer, u16 count)
-{
-    int rv;
-    u16 cs;
-
-    (void)bd;
-
-    // M_DEBUG("%s(%d,%d)\n", __FUNCTION__, (int)sector, (int)count);
-
-    if (count == 0)
-        return 0;
-
-    sio2_lock();
-
-#if 1
-    for (cs = 0; cs < count; cs++) {
-        rv = spisd_write_block((u32)sector + cs, buffer);
-        if (rv != SPISD_RESULT_OK) {
-            M_PRINTF("ERROR: spisd_write_block = %d\n", rv);
-            sio2_unlock();
-            return 0;
-        }
-        buffer = (const u8*)buffer + 512;
-    }
-#else
-    rv = spisd_write_multi_block(sector, buffer, count);
-    if (rv != SPISD_RESULT_OK) {
-        M_PRINTF("ERROR: spisd_write_multi_block = %d\n", rv);
-        sio2_unlock();
-        return 0;
-    }
-#endif
-
-    // Let detection thread know the card has been used succesfully
-    card_used = 1;
-
-    sio2_unlock();
-
-    return count;
-}
-
-static void spi_sdcard_flush(struct block_device *bd)
-{
-    (void)bd;
-
-    // M_DEBUG("%s\n", __FUNCTION__);
-
-    return;
-}
-
-static int spi_sdcard_stop(struct block_device *bd)
-{
-    (void)bd;
-
-    // M_DEBUG("%s\n", __FUNCTION__);
-
-    return 0;
-}
-
-// BDM interface
-static struct block_device bd = {
-    NULL,        /* priv */
-    "sdc",       /* name */
-    0,           /* devNr */
-    0,           /* parNr */
-    0x00,        /* parId */
-    SECTOR_SIZE, /* sectorSize */
-    0,           /* sectorOffset */
-    0,           /* sectorCount */
-    spi_sdcard_read,
-    spi_sdcard_write,
-    spi_sdcard_flush,
-    spi_sdcard_stop};
-
-static void sd_detect()
-{
-    spisd_info_t cardinfo;
-    int rv = SPISD_RESULT_ERROR;
-
-    // M_DEBUG("%s\n", __FUNCTION__);
-
-    // Detect card
-    sio2_lock();
-    if (card_inserted == 0) {
-        // Try to detect a card by initializing
-        rv = spisd_init(&spi);
-    } else {
-        // Try to detect card removal by sending a dummy command
-        rv = spisd_read_multi_block_begin(0);
-        if (rv == SPISD_RESULT_OK)
-            rv = spisd_read_multi_block_end();
-        if (rv != SPISD_RESULT_OK)
-            rv = spisd_init_recovery();
-    }
-    sio2_unlock();
-
-    // Change state
-    if ((card_inserted == 0) && (rv == SPISD_RESULT_OK)) {
-        M_PRINTF("card insertion detected\n");
-        card_inserted = 1;
-
-        sio2_lock();
-        rv = spisd_get_card_info(&cardinfo);
-        sio2_unlock();
-
-        if (rv != 0) {
-            M_PRINTF("ERROR: spisd_get_card_info returned %d\n", rv);
-            return;
-        }
-
-        struct t_csdVer1 *csdv1 = (struct t_csdVer1 *)cardinfo.csd;
-        struct t_csdVer2 *csdv2 = (struct t_csdVer2 *)cardinfo.csd;
-        if (csdv1->csd_structure == 0) { // ver 1
-            unsigned int c_size_mult = (csdv1->c_size_multHi << 1) | csdv1->c_size_multLo;
-            unsigned int c_size      = (csdv1->c_sizeHi << 10) | (csdv1->c_sizeMd << 2) | csdv1->c_sizeLo;
-            unsigned int blockNr     = (c_size + 1) << (c_size_mult + 2);
-            unsigned int blockLen    = 1 << csdv1->read_bl_len;
-            unsigned int capacity    = blockNr * blockLen;
-
-            bd.sectorCount = capacity / 512;
-        } else if (csdv1->csd_structure == 1) { // ver 2
-            unsigned int c_size = (csdv2->c_sizeHi << 16) | (csdv2->c_sizeMd << 8) | csdv2->c_sizeLo;
-
-            bd.sectorCount = (c_size + 1) * 1024;
-        }
-
-        M_PRINTF("%u %u-byte logical blocks: (%uMB / %uMiB)\n", bd.sectorCount, bd.sectorSize, bd.sectorCount / ((1000 * 1000) / bd.sectorSize), bd.sectorCount / ((1024 * 1024) / bd.sectorSize));
-
-        // Connect to block device manager
-        bdm_connect_bd(&bd);
-    } else if ((card_inserted == 1) && (rv != SPISD_RESULT_OK)) {
-        M_PRINTF("card removal detected\n");
-        card_inserted = 0;
-
-        // Disconnect from block device manager
-        bdm_disconnect_bd(&bd);
-    }
-}
-
-// SD card detection thread
-static void sd_detect_thread(void *arg)
-{
-    (void)arg;
-
-    M_PRINTF("card detection thread running\n");
-
-    while (1) {
-        // Sleep for 1 second
-        DelayThread(1000 * 1000);
-        M_DEBUG("Check card, inserted=%d, used=%d\n", card_inserted, card_used);
-
-        // Detect card if it has not been used recently
-        if (card_used == 0)
-            sd_detect();
-        card_used = 0;
-    }
-}
-
-/*
- * Module start/stop
- */
+/* module */
 int module_start(int argc, char *argv[])
 {
     iop_library_t *lib_modload;
@@ -909,16 +741,16 @@ int module_start(int argc, char *argv[])
     (void)argv;
 #endif
 
-    // Create default tranfer descriptor
-    _init_td(&global_td, PORT_NR);
+    /* create default transfer descriptor */
+    mx_sio2_init_td(&global_td);
 
-    // Create event flag
-    event.attr   = 2;
-    event.option = 0;
-    event.bits   = 0;
-    rv = event_flag = CreateEventFlag(&event);
-    if (rv < 0) {
-        M_PRINTF("ERROR: CreateEventFlag returned %d\n", rv);
+    /* create event flag */
+    event.attr      = 2;
+    event.option    = 0;
+    event.bits      = 0;
+    sio2_event_flag = CreateEventFlag(&event);
+    if (sio2_event_flag < 0) {
+        M_PRINTF("ERROR: CreateEventFlag returned %d\n", sio2_event_flag);
         goto error1;
     }
 
@@ -928,7 +760,7 @@ int module_start(int argc, char *argv[])
         goto error2;
     }
 
-    // Just in case sio2man was not loaded, we initialize the dmac channels too
+    /* Just in case sio2man was not loaded, we initialize the dmac channels too */
     dmac_ch_set_dpcr(IOP_DMAC_SIO2in, 3);
     dmac_ch_set_dpcr(IOP_DMAC_SIO2out, 3);
     dmac_enable(IOP_DMAC_SIO2in);
@@ -938,11 +770,11 @@ int module_start(int argc, char *argv[])
      * - 0xff 0xff 0xc1 0x3f
      * - followed by an infinite amount of 0xff
      */
-    sio2_lock();
-    sendCmd_Rx_PIO((void *)&rv, 4, PORT_NR);
-    sio2_unlock();
+    mx_sio2_lock(INTR_NONE);
+    mx_sio2_rx_pio((void *)&rv, 4);
+    mx_sio2_unlock(INTR_NONE);
 
-    // Creat SD card detection thread
+    /* create SD card detection thread */
     thread.attr      = TH_C;
     thread.thread    = sd_detect_thread;
     thread.option    = 0;
@@ -954,14 +786,12 @@ int module_start(int argc, char *argv[])
         goto error3;
     }
 
-    // Start thread
+    /* Start thread */
     rv = StartThread(sd_detect_thread_id, NULL);
     if (rv < 0) {
         M_PRINTF("ERROR: StartThread returned %d\n", rv);
         goto error4;
     }
-
-    M_DEBUG("Loaded succesfully!\n");
 
     lib_modload = ioplib_getByName("modload");
     if (lib_modload != NULL) {
@@ -981,7 +811,7 @@ error4:
 error3:
     sio2man_hook_deinit();
 error2:
-    DeleteEventFlag(event_flag);
+    DeleteEventFlag(sio2_event_flag);
 error1:
     return MODULE_NO_RESIDENT_END;
 }
@@ -1001,14 +831,14 @@ int module_stop(int argc, char *argv[])
 
     DeleteThread(sd_detect_thread_id);
     sio2man_hook_deinit();
-    DeleteEventFlag(event_flag);
+    DeleteEventFlag(sio2_event_flag);
 
     return MODULE_NO_RESIDENT_END;
 }
 
 int _start(int argc, char *argv[])
 {
-    M_PRINTF(WELCOME_STR);
+    M_PRINTF("MX4SIO v1.2\n");
 
     if (argc >= 0)
         return module_start(argc, argv);
