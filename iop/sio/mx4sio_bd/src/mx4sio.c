@@ -23,7 +23,7 @@ dma_command_t cmd;
 int sio2_event_flag;
 
 static int sd_detect_thread_id = -1;
-static sio2_transfer_data_t global_td; 
+static sio2_transfer_data_t global_td;
 static uint8_t sio2_current_baud = SIO2_BAUD_DIV_SLOW;
 static uint32_t sio2_save_crtl;
 
@@ -40,8 +40,8 @@ int mx_sio2_dma_isr_rx(void *arg)
     while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
         ;
 
-    /* get CRC16 bytes from RX FIFO */
 #ifdef CONFIG_USE_CRC16
+    /* get CRC16 bytes from RX FIFO */
     cmd.crc[cmd.sectors_transferred] = reverse_byte_LUT8[inl_sio2_data_in()] << 8;
     cmd.crc[cmd.sectors_transferred] |= reverse_byte_LUT8[inl_sio2_data_in()];
 #else
@@ -50,7 +50,7 @@ int mx_sio2_dma_isr_rx(void *arg)
 #endif
 
     /* NOTE: Some cards respond with 0xFE immediately after the CRC16, others do not.
-     * Try to get 0xFE regardless of whether the transfers complete as it's 
+     * Try to get 0xFE regardless of whether the transfers complete as it's
      * needed for correct alignment of CMD12 (STOP_TRANSMISSION) later */
     if (inl_sio2_data_in() != 0xFE) {
         cmd.response = mx_sio2_wait_equal(0xFE, READ_TOKEN_TIMEOUT);
@@ -61,8 +61,8 @@ int mx_sio2_dma_isr_rx(void *arg)
     cmd.sectors_transferred++;
 
     if (cmd.sectors_transferred < cmd.sector_count && cmd.abort == 0) {
-        
-        if (cmd.response == SPISD_RESULT_OK){
+
+        if (cmd.response == SPISD_RESULT_OK) {
             /* start next DMA transfer */
             mx_sio2_start_rx_dma(&cmd.buffer[cmd.sectors_transferred * SECTOR_SIZE]);
             /* notify thread data is ready to be reversed */
@@ -77,7 +77,7 @@ int mx_sio2_dma_isr_rx(void *arg)
     /* done or error, notify thread */
     eflags |= EF_SIO2_INTR_COMPLETE;
     iSetEventFlag(ef, eflags);
-    
+
     return 1;
 }
 
@@ -91,7 +91,7 @@ int mx_sio2_dma_isr_tx(void *arg)
     inl_sio2_stat_set(inl_sio2_stat_get());
 
     /* SIO2 requires all data to be sent to be present in the TX FIFO
-     * prior to starting the transfer. As such, SIO2 will not 
+     * prior to starting the transfer. As such, SIO2 will not
      * have completed the transfer prior to reaching this ISR */
 
     /* wait for transfer to complete */
@@ -126,7 +126,7 @@ int mx_sio2_dma_isr_tx(void *arg)
         mx_sio2_write_byte(0xFC);
         /* start next DMA transfer */
         mx_sio2_start_tx_dma(&cmd.buffer[cmd.sectors_transferred * SECTOR_SIZE]);
-         /* return from ISR */
+        /* return from ISR */
         return 1;
     }
 
@@ -155,15 +155,14 @@ void mx_sio2_init_td(sio2_transfer_data_t *td)
     td->port_ctrl1[PORT_NR] =
         PCTRL0_ATT_LOW_PER(0x5) |
         PCTRL0_ATT_MIN_HIGH_PER(0x5) |
-        PCTRL0_BAUD0_DIV(0x78) |              /* BAUD0 is unused */
-        PCTRL0_BAUD1_DIV(sio2_current_baud);  /* BAUD1 is used for every transfer */
+        PCTRL0_BAUD0_DIV(0x78) |             /* BAUD0 is unused */
+        PCTRL0_BAUD1_DIV(sio2_current_baud); /* BAUD1 is used for every transfer */
 
     td->port_ctrl2[PORT_NR] =
         PCTRL1_ACK_TIMEOUT_PER(0x12C) |
         PCTRL1_INTER_BYTE_PER(0x0) |
         PCTRL1_UNK24(0x0) |
         PCTRL1_IF_MODE_SPI_DIFF(0x0);
-
 }
 
 void mx_sio2_lock(uint8_t intr_type)
@@ -181,7 +180,7 @@ void mx_sio2_lock(uint8_t intr_type)
 
     /* enable DMA interrupts */
     CpuSuspendIntr(&state);
-    
+
     if (intr_type == INTR_RX) {
         RegisterIntrHandler(IOP_IRQ_DMA_SIO2_OUT, 1, mx_sio2_dma_isr_rx, &sio2_event_flag);
         EnableIntr(IOP_IRQ_DMA_SIO2_OUT);
@@ -191,7 +190,7 @@ void mx_sio2_lock(uint8_t intr_type)
         RegisterIntrHandler(IOP_IRQ_DMA_SIO2_IN, 1, mx_sio2_dma_isr_tx, &sio2_event_flag);
         EnableIntr(IOP_IRQ_DMA_SIO2_IN);
     }
-    
+
     CpuResumeIntr(state);
 }
 
@@ -202,10 +201,10 @@ void mx_sio2_unlock(uint8_t intr_type)
 
     /* disable DMA interrupts */
     CpuSuspendIntr(&state);
-    
+
     if (intr_type == INTR_RX)
         DisableIntr(IOP_IRQ_DMA_SIO2_OUT, &res);
-    
+
     if (intr_type == INTR_TX)
         DisableIntr(IOP_IRQ_DMA_SIO2_IN, &res);
 
@@ -243,17 +242,17 @@ uint8_t mx_sio2_write_byte(uint8_t byte)
                           TR_CTRL_TX_DATA_SZ(1) |
                           TR_CTRL_RX_DATA_SZ(1));
     inl_sio2_regN_set(1, 0);
-    
+
     /* put byte in TX FIFO */
     inl_sio2_data_out(reverse_byte_LUT8[byte]);
-    
+
     /* start queue exec */
     inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
-    
+
     /* wait for completion */
     while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
-        ;   
-    
+        ;
+
 #ifdef DEBUG_VERBOSE
     uint8_t rx = reverse_byte_LUT8[inl_sio2_data_in()];
     M_DEBUG("W:0x%x, R:0x%x\n", byte, rx);
@@ -307,23 +306,23 @@ uint8_t mx_sio2_write_dummy(void)
 uint8_t mx_sio2_wait_equal(uint8_t value, uint32_t count)
 {
     uint8_t exp_byte = reverse_byte_LUT8[value];
-    uint8_t in_byte = 0;
-    
-    while (count > 0 && in_byte != exp_byte) { 
+    uint8_t in_byte  = 0;
+
+    while (count > 0 && in_byte != exp_byte) {
         /* reset SIO2 + FIFO pointers, disable interrupts */
         inl_sio2_ctrl_set(0x0bc);
 
         inl_sio2_regN_set(0,
-                        TR_CTRL_PORT_NR(PORT_NR) |
-                            TR_CTRL_PAUSE(0) |
-                            TR_CTRL_TX_MODE_PIO_DMA(0) |
-                            TR_CTRL_RX_MODE_PIO_DMA(0) |
-                            TR_CTRL_NORMAL_TR(1) |
-                            TR_CTRL_SPECIAL_TR(0) |
-                            TR_CTRL_BAUD_DIV(1) |
-                            TR_CTRL_WAIT_ACK_FOREVER(0) |
-                            TR_CTRL_TX_DATA_SZ(0) |
-                            TR_CTRL_RX_DATA_SZ(1));
+                          TR_CTRL_PORT_NR(PORT_NR) |
+                              TR_CTRL_PAUSE(0) |
+                              TR_CTRL_TX_MODE_PIO_DMA(0) |
+                              TR_CTRL_RX_MODE_PIO_DMA(0) |
+                              TR_CTRL_NORMAL_TR(1) |
+                              TR_CTRL_SPECIAL_TR(0) |
+                              TR_CTRL_BAUD_DIV(1) |
+                              TR_CTRL_WAIT_ACK_FOREVER(0) |
+                              TR_CTRL_TX_DATA_SZ(0) |
+                              TR_CTRL_RX_DATA_SZ(1));
         inl_sio2_regN_set(1, 0);
 
         /* start queue exec */
@@ -348,28 +347,28 @@ uint8_t mx_sio2_wait_equal(uint8_t value, uint32_t count)
 uint8_t mx_sio2_wait_not_equal(uint8_t value, uint32_t count)
 {
     uint8_t exp_byte = reverse_byte_LUT8[value];
-    uint8_t in_byte = exp_byte;
-    
+    uint8_t in_byte  = exp_byte;
+
     while (count > 0 && in_byte == exp_byte) {
         /* reset SIO2 + FIFO pointers, disable interrupts */
-        inl_sio2_ctrl_set(0x0bc);   
+        inl_sio2_ctrl_set(0x0bc);
 
         /* add transfer to queue */
         inl_sio2_regN_set(0,
-                        TR_CTRL_PORT_NR(PORT_NR) |
-                            TR_CTRL_PAUSE(0) |
-                            TR_CTRL_TX_MODE_PIO_DMA(0) |
-                            TR_CTRL_RX_MODE_PIO_DMA(0) |
-                            TR_CTRL_NORMAL_TR(1) |
-                            TR_CTRL_SPECIAL_TR(0) |
-                            TR_CTRL_BAUD_DIV(1) |
-                            TR_CTRL_WAIT_ACK_FOREVER(0) |
-                            TR_CTRL_TX_DATA_SZ(0) |
-                            TR_CTRL_RX_DATA_SZ(1));
+                          TR_CTRL_PORT_NR(PORT_NR) |
+                              TR_CTRL_PAUSE(0) |
+                              TR_CTRL_TX_MODE_PIO_DMA(0) |
+                              TR_CTRL_RX_MODE_PIO_DMA(0) |
+                              TR_CTRL_NORMAL_TR(1) |
+                              TR_CTRL_SPECIAL_TR(0) |
+                              TR_CTRL_BAUD_DIV(1) |
+                              TR_CTRL_WAIT_ACK_FOREVER(0) |
+                              TR_CTRL_TX_DATA_SZ(0) |
+                              TR_CTRL_RX_DATA_SZ(1));
         inl_sio2_regN_set(1, 0);
 
         /* start queue exec */
-        inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);   
+        inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
 
         /* wait for completion */
         while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
@@ -378,7 +377,7 @@ uint8_t mx_sio2_wait_not_equal(uint8_t value, uint32_t count)
         /* get byte from RX FIFO */
         in_byte = inl_sio2_data_in();
 
-#ifdef DEBUG_VERBOSE    
+#ifdef DEBUG_VERBOSE
         M_DEBUG("WNE: 0x%x, EX: !0x%x\n", reverse_byte_LUT8[in_byte], value);
 #endif
         count--;
@@ -391,23 +390,23 @@ uint8_t mx_sio2_wait_equal_masked(uint8_t value, uint8_t mask, uint32_t count)
 {
     uint8_t exp_byte = reverse_byte_LUT8[value];
     uint8_t rev_mask = reverse_byte_LUT8[mask];
-    uint8_t in_byte = 0;
+    uint8_t in_byte  = 0;
 
     while (count > 0 && in_byte != exp_byte) {
         /* reset SIO2 + FIFO pointers, disable interrupts */
         inl_sio2_ctrl_set(0x0bc);
 
         inl_sio2_regN_set(0,
-                        TR_CTRL_PORT_NR(PORT_NR) |
-                            TR_CTRL_PAUSE(0) |
-                            TR_CTRL_TX_MODE_PIO_DMA(0) |
-                            TR_CTRL_RX_MODE_PIO_DMA(0) |
-                            TR_CTRL_NORMAL_TR(1) |
-                            TR_CTRL_SPECIAL_TR(0) |
-                            TR_CTRL_BAUD_DIV(1) |
-                            TR_CTRL_WAIT_ACK_FOREVER(0) |
-                            TR_CTRL_TX_DATA_SZ(0) |
-                            TR_CTRL_RX_DATA_SZ(1));
+                          TR_CTRL_PORT_NR(PORT_NR) |
+                              TR_CTRL_PAUSE(0) |
+                              TR_CTRL_TX_MODE_PIO_DMA(0) |
+                              TR_CTRL_RX_MODE_PIO_DMA(0) |
+                              TR_CTRL_NORMAL_TR(1) |
+                              TR_CTRL_SPECIAL_TR(0) |
+                              TR_CTRL_BAUD_DIV(1) |
+                              TR_CTRL_WAIT_ACK_FOREVER(0) |
+                              TR_CTRL_TX_DATA_SZ(0) |
+                              TR_CTRL_RX_DATA_SZ(1));
         inl_sio2_regN_set(1, 0);
 
         /* start queue exec */
@@ -445,23 +444,24 @@ void mx_sio2_rx_pio(uint8_t *buffer, uint32_t size)
 
         /* add transfer to queue */
         inl_sio2_regN_set(0,
-                        TR_CTRL_PORT_NR(PORT_NR) |
-                            TR_CTRL_PAUSE(0) |
-                            TR_CTRL_TX_MODE_PIO_DMA(0) |
-                            TR_CTRL_RX_MODE_PIO_DMA(0) |
-                            TR_CTRL_NORMAL_TR(1) |
-                            TR_CTRL_SPECIAL_TR(0) |
-                            TR_CTRL_BAUD_DIV(1) |
-                            TR_CTRL_WAIT_ACK_FOREVER(0) |
-                            TR_CTRL_TX_DATA_SZ(0) |
-                            TR_CTRL_RX_DATA_SZ(transfer_size));
+                          TR_CTRL_PORT_NR(PORT_NR) |
+                              TR_CTRL_PAUSE(0) |
+                              TR_CTRL_TX_MODE_PIO_DMA(0) |
+                              TR_CTRL_RX_MODE_PIO_DMA(0) |
+                              TR_CTRL_NORMAL_TR(1) |
+                              TR_CTRL_SPECIAL_TR(0) |
+                              TR_CTRL_BAUD_DIV(1) |
+                              TR_CTRL_WAIT_ACK_FOREVER(0) |
+                              TR_CTRL_TX_DATA_SZ(0) |
+                              TR_CTRL_RX_DATA_SZ(transfer_size));
         inl_sio2_regN_set(1, 0);
 
         /* start queue exec */
         inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
 
         /* wait for completion */
-        while ((inl_sio2_stat6c_get() & (1 << 12)) == 0);
+        while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
+            ;
 
         /* PIO: IOP <- SIO2 */
         for (int i = 0; i < transfer_size; i++) {
@@ -495,19 +495,19 @@ void mx_sio2_tx_pio(uint8_t *buffer, uint32_t size)
 
         /* add transfer to queue */
         inl_sio2_regN_set(0,
-                        TR_CTRL_PORT_NR(PORT_NR) |
-                            TR_CTRL_PAUSE(0) |
-                            TR_CTRL_TX_MODE_PIO_DMA(0) |
-                            TR_CTRL_RX_MODE_PIO_DMA(0) |
-                            TR_CTRL_NORMAL_TR(1) |
-                            TR_CTRL_SPECIAL_TR(0) |
-                            TR_CTRL_BAUD_DIV(1) |
-                            TR_CTRL_WAIT_ACK_FOREVER(0) |
-                            TR_CTRL_TX_DATA_SZ(transfer_size) |
+                          TR_CTRL_PORT_NR(PORT_NR) |
+                              TR_CTRL_PAUSE(0) |
+                              TR_CTRL_TX_MODE_PIO_DMA(0) |
+                              TR_CTRL_RX_MODE_PIO_DMA(0) |
+                              TR_CTRL_NORMAL_TR(1) |
+                              TR_CTRL_SPECIAL_TR(0) |
+                              TR_CTRL_BAUD_DIV(1) |
+                              TR_CTRL_WAIT_ACK_FOREVER(0) |
+                              TR_CTRL_TX_DATA_SZ(transfer_size) |
 #ifdef DEBUG_VERBOSE
-                            TR_CTRL_RX_DATA_SZ(transfer_size));
+                              TR_CTRL_RX_DATA_SZ(transfer_size));
 #else
-                            TR_CTRL_RX_DATA_SZ(0));
+                              TR_CTRL_RX_DATA_SZ(0));
 #endif
 
         inl_sio2_regN_set(1, 0);
@@ -521,7 +521,8 @@ void mx_sio2_tx_pio(uint8_t *buffer, uint32_t size)
         inl_sio2_ctrl_set(inl_sio2_ctrl_get() | 1);
 
         /* wait for completion */
-        while ((inl_sio2_stat6c_get() & (1 << 12)) == 0);
+        while ((inl_sio2_stat6c_get() & (1 << 12)) == 0)
+            ;
 
 #ifdef DEBUG_VERBOSE
         for (int i = 0; i < transfer_size; i++) {
@@ -641,7 +642,6 @@ static void sd_detect()
     }
 
     mx_sio2_unlock(INTR_NONE);
-    
 }
 
 static void sd_detect_thread(void *arg)
@@ -653,7 +653,7 @@ static void sd_detect_thread(void *arg)
     while (1) {
         DelayThread(1000 * 1000);
 
-        /* try to detect card removal if it hasn't been used recently */ 
+        /* try to detect card removal if it hasn't been used recently */
         if (sdcard.used == 0)
             sd_detect();
         sdcard.used = 0;
@@ -664,7 +664,7 @@ static void sd_detect_thread(void *arg)
 /* Maximus32's C r3000 optimized byte reversal */
 /* 58-59uS avg on DECKARD */
 #pragma GCC push_options
-#pragma GCC optimize ("-O3")
+#pragma GCC optimize("-O3")
 inline void reverse_buffer(uint32_t *buffer, uint32_t count)
 {
     const uint32_t mask0F = 0x0F0F0F0F;
@@ -675,7 +675,7 @@ inline void reverse_buffer(uint32_t *buffer, uint32_t count)
     const uint32_t maskAA = 0xAAAAAAAA;
     uint32_t n;
 
-    #pragma GCC unroll 2
+#pragma GCC unroll 2
     for (int i = 0; i < count; i++) {
         n = buffer[i];
         n = ((n & maskF0) >> 4) | ((n & mask0F) << 4);
@@ -743,11 +743,11 @@ int module_start(int argc, char *argv[])
 
     /* create default transfer descriptor */
     mx_sio2_init_td(&global_td);
-    
+
     /* create event flag */
-    event.attr   = 2;
-    event.option = 0;
-    event.bits   = 0;
+    event.attr      = 2;
+    event.option    = 0;
+    event.bits      = 0;
     sio2_event_flag = CreateEventFlag(&event);
     if (sio2_event_flag < 0) {
         M_PRINTF("ERROR: CreateEventFlag returned %d\n", sio2_event_flag);

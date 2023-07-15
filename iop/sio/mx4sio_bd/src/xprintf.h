@@ -16,9 +16,9 @@
 #define NOFLOATINGPOINT /* won't compile without it */
 #define F___sout
 
-//#define F_sprintf
-//#define F_snprintf
-//#define F_vsprintf
+// #define F_sprintf
+// #define F_snprintf
+// #define F_vsprintf
 #define F_vsnprintf
 
 #ifdef F_sprintf
