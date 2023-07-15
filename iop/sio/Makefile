@@ -6,7 +6,6 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-#add mx4sio_bd_rpc mx4sio_bd_rpc_v to build modules for sdcard debugger
 SUBDIRS = mx4sio_bd mx4sio_bd_mini
 
 include $(PS2SDKSRC)/Defs.make

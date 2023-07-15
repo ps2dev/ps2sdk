@@ -21,9 +21,6 @@
 #include "dmacman.h"
 #include "intrman.h"
 #include "loadcore.h"
-#ifdef RPC_PRINTF
-#include "sifcmd.h"
-#endif
 #include "stdio.h"
 #include "sysclib.h"
 #include "thbase.h"
