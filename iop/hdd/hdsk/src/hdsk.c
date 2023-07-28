@@ -700,7 +700,7 @@ static int HdskDevctl(iomanX_iop_file_t *fd, const char *name, int cmd, void *ar
                 result = hdskGetStat(fd->unit, buf, HddInfo);
             break;
         case HDSK_DEVCTL_START:
-            result = StartThread(hdskThreadID, (void *)fd->unit);
+            result = StartThread(hdskThreadID, (void *)(uiptr)fd->unit);
             break;
         case HDSK_DEVCTL_WAIT:
             result = WaitEventFlag(hdskEventFlagID, 1, WEF_CLEAR | WEF_OR, &bits);
