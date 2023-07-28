@@ -25,7 +25,9 @@
 #include "fssk.h"
 #include "misc_fssk.h"
 
+#ifdef _IOP
 IRX_ID("fssk", PFS_MAJOR, PFS_MINOR);
+#endif
 
 struct fsskRuntimeData
 {

@@ -30,7 +30,9 @@
 #include "hdl.h"
 #endif
 
+#ifdef _IOP
 IRX_ID("hdsk", APA_MODVER_MAJOR, APA_MODVER_MINOR);
+#endif
 
 static apa_device_t HddInfo[2] = {
     {0, 0, 0, 3},

@@ -26,7 +26,9 @@
 
 #include "fsck-ioctl.h"
 
+#ifdef _IOP
 IRX_ID("fsck", PFS_MAJOR, PFS_MINOR);
+#endif
 
 struct fsckRuntimeData
 {

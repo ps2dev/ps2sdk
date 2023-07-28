@@ -22,7 +22,9 @@
 
 #include "misc_hdck.h"
 
+#ifdef _IOP
 IRX_ID("hdck", APA_MODVER_MAJOR, APA_MODVER_MINOR);
+#endif
 
 // Function prototypes
 static int HdckInit(iomanX_iop_device_t *device);
