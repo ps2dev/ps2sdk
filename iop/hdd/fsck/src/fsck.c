@@ -1294,7 +1294,7 @@ int _start(int argc, char **argv)
 
     iomanX_DelDrv(FsckDevice.name);
     if (iomanX_AddDrv(&FsckDevice) == 0) {
-        PFS_PRINTF("version %04x driver start.\n", _irx_id.v);
+        PFS_PRINTF("version %04x driver start.\n", IRX_VER(PFS_MAJOR, PFS_MINOR));
         return MODULE_RESIDENT_END;
     }
 

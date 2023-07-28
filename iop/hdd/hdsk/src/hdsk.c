@@ -354,7 +354,7 @@ static int SwapPartition(int device, apa_cache_t *dest, apa_cache_t *start)
     start->header->next   = next;
     start->header->prev   = prev;
     start->header->length = dest->header->length;
-    start->header->modver = _irx_id.v;
+    start->header->modver = APA_MODVER;
     start->header->type   = dest->header->type;
     strcpy(start->header->id, "_tmp");
 
