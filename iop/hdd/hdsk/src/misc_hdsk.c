@@ -23,24 +23,6 @@
 #include "libapa.h"
 #include "misc_hdsk.h"
 
-int HdskReadClock(apa_ps2time_t *time)
-{
-    static apa_ps2time_t CurrentTime = {0, 7, 6, 5, 4, 3, 2000};
-    sceCdCLOCK CdClock;
-
-    if (sceCdReadClock(&CdClock) != 0) {
-        CurrentTime.sec   = btoi(CdClock.second);
-        CurrentTime.min   = btoi(CdClock.minute);
-        CurrentTime.hour  = btoi(CdClock.hour);
-        CurrentTime.day   = btoi(CdClock.day);
-        CurrentTime.month = btoi(CdClock.month & 0x7F); // NOTE: the newer CDVDMAN module automatically file off the highest bit of this field.
-        CurrentTime.year  = btoi(CdClock.year) + 2000;
-    }
-    memcpy(time, &CurrentTime, sizeof(apa_ps2time_t));
-
-    return 0;
-}
-
 void *AllocMemory(int size)
 {
     int OldState;
@@ -57,29 +39,12 @@ void *AllocMemory(int size)
     return result;
 }
 
-int HdskRI(unsigned char *id)
-{
-    u32 stat;
-    int result;
-
-    memset(id, 0, 32);
-    stat = 0;
-    if (sceCdRI(id, &stat) == 0 || stat) {
-        printf("hdsk: error: cannot get ilink id\n");
-        result = -EIO;
-    } else {
-        result = 0;
-    }
-
-    return result;
-}
-
 int HdskUnlockHdd(int unit)
 {
     unsigned char id[32];
     int result;
 
-    if ((result = HdskRI(id)) == 0) {
+    if ((result = apaGetIlinkID(id)) == 0) {
         result = ata_device_sce_sec_unlock(unit, id);
     }
 

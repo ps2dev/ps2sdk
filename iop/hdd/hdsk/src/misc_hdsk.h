@@ -11,9 +11,7 @@
 #ifndef __MISC_HDSK_H__
 #define __MISC_HDSK_H__
 
-extern int HdskReadClock(apa_ps2time_t *time);
 extern void *AllocMemory(int size);
-extern int HdskRI(unsigned char *id);
 extern int HdskUnlockHdd(int unit);
 extern int HdskCreateEventFlag(void);
 extern int HdskCreateThread(void (*function)(void *arg), int StackSize);

@@ -774,7 +774,7 @@ int _start(int argc, char **argv)
     (void)argc;
     (void)argv;
 
-    if (HdskReadClock(&time) != 0) {
+    if (apaGetTime(&time) != 0) {
         APA_PRINTF("error: could not get date\n");
         return MODULE_NO_RESIDENT_END;
     }
