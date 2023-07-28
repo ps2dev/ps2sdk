@@ -8,4 +8,10 @@
 #define APA_MODVER_MAJOR 1
 #define APA_MODVER_MINOR 4
 
+#ifdef _IOP
+#define APA_ENTRYPOINT _start
+#else
+#define APA_ENTRYPOINT hdsk_start
+#endif
+
 #endif

@@ -764,7 +764,7 @@ static iomanX_iop_device_t HdskDevice = {
     "HDSK",
     &HdskDeviceOps};
 
-int _start(int argc, char **argv)
+int APA_ENTRYPOINT(int argc, char **argv)
 {
     apa_ps2time_t time;
     ata_devinfo_t *pDevInfo;

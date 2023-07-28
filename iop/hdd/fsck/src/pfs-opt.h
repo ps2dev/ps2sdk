@@ -11,4 +11,10 @@
 #define PFS_MAJOR 1
 #define PFS_MINOR 4
 
+#ifdef _IOP
+#define PFS_ENTRYPOINT _start
+#else
+#define PFS_ENTRYPOINT fsck_start
+#endif
+
 #endif

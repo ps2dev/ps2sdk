@@ -760,7 +760,7 @@ static int DisplayUsageHelp(void)
     return MODULE_NO_RESIDENT_END;
 }
 
-int _start(int argc, char **argv)
+int PFS_ENTRYPOINT(int argc, char **argv)
 {
     int buffers;
 

@@ -672,7 +672,7 @@ static int HdckDevctl(iomanX_iop_file_t *fd, const char *name, int cmd, void *ar
     return result;
 }
 
-int _start(int argc, char **argv)
+int APA_ENTRYPOINT(int argc, char **argv)
 {
     apa_ps2time_t time;
     ata_devinfo_t *pDevInfo;

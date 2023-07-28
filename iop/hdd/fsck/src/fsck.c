@@ -1252,7 +1252,7 @@ static iomanX_iop_device_t FsckDevice = {
     &FsckDeviceOps};
 
 // 0x0000267c
-int _start(int argc, char **argv)
+int PFS_ENTRYPOINT(int argc, char **argv)
 {
     int buffers;
 
