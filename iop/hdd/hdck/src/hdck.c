@@ -9,7 +9,6 @@
 */
 
 #include <atad.h>
-#include <cdvdman.h>
 #include <errno.h>
 #include <iomanX.h>
 #include <loadcore.h>

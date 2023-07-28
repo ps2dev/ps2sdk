@@ -8,14 +8,8 @@
 # Review ps2sdk README & LICENSE files for further details.
 */
 
-#include <cdvdman.h>
-#include <errno.h>
-#include <intrman.h>
-#include <thevent.h>
 #include <thbase.h>
-#include <sysmem.h>
-#include <sysclib.h>
-#include <stdio.h>
+#include <thevent.h>
 
 #include "pfs-opt.h"
 #include "libpfs.h"
