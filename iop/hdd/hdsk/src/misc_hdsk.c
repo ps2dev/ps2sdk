@@ -23,22 +23,6 @@
 #include "libapa.h"
 #include "misc_hdsk.h"
 
-void *AllocMemory(int size)
-{
-    int OldState;
-    void *result;
-
-    CpuSuspendIntr(&OldState);
-
-    if ((result = AllocSysMemory(ALLOC_FIRST, size, NULL)) == NULL) {
-        printf("hdsk: error: out of memory\n");
-    }
-
-    CpuResumeIntr(OldState);
-
-    return result;
-}
-
 int HdskUnlockHdd(int unit)
 {
     unsigned char id[32];

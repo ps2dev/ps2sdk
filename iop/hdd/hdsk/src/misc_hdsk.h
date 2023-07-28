@@ -11,7 +11,6 @@
 #ifndef __MISC_HDSK_H__
 #define __MISC_HDSK_H__
 
-extern void *AllocMemory(int size);
 extern int HdskUnlockHdd(int unit);
 extern int HdskCreateEventFlag(void);
 extern int HdskCreateThread(void (*function)(void *arg), int StackSize);
