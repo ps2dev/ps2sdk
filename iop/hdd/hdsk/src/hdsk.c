@@ -9,7 +9,6 @@
 */
 
 #include <atad.h>
-#include <cdvdman.h>
 #include <errno.h>
 #include <iomanX.h>
 #include <loadcore.h>
@@ -31,7 +30,9 @@
 #include "hdl.h"
 #endif
 
+#ifdef _IOP
 IRX_ID("hdsk", APA_MODVER_MAJOR, APA_MODVER_MINOR);
+#endif
 
 static apa_device_t HddInfo[2] = {
     {0, 0, 0, 3},
@@ -355,7 +356,7 @@ static int SwapPartition(int device, apa_cache_t *dest, apa_cache_t *start)
     start->header->next   = next;
     start->header->prev   = prev;
     start->header->length = dest->header->length;
-    start->header->modver = _irx_id.v;
+    start->header->modver = APA_MODVER;
     start->header->type   = dest->header->type;
     strcpy(start->header->id, "_tmp");
 
@@ -701,7 +702,7 @@ static int HdskDevctl(iomanX_iop_file_t *fd, const char *name, int cmd, void *ar
                 result = hdskGetStat(fd->unit, buf, HddInfo);
             break;
         case HDSK_DEVCTL_START:
-            result = StartThread(hdskThreadID, (void *)fd->unit);
+            result = StartThread(hdskThreadID, (void *)(uiptr)fd->unit);
             break;
         case HDSK_DEVCTL_WAIT:
             result = WaitEventFlag(hdskEventFlagID, 1, WEF_CLEAR | WEF_OR, &bits);
@@ -765,7 +766,7 @@ static iomanX_iop_device_t HdskDevice = {
     "HDSK",
     &HdskDeviceOps};
 
-int _start(int argc, char **argv)
+int APA_ENTRYPOINT(int argc, char **argv)
 {
     apa_ps2time_t time;
     ata_devinfo_t *pDevInfo;
@@ -774,7 +775,7 @@ int _start(int argc, char **argv)
     (void)argc;
     (void)argv;
 
-    if (HdskReadClock(&time) != 0) {
+    if (apaGetTime(&time) != 0) {
         APA_PRINTF("error: could not get date\n");
         return MODULE_NO_RESIDENT_END;
     }

@@ -26,7 +26,9 @@
 
 #include "fsck-ioctl.h"
 
+#ifdef _IOP
 IRX_ID("fsck", PFS_MAJOR, PFS_MINOR);
+#endif
 
 struct fsckRuntimeData
 {
@@ -65,8 +67,13 @@ const char *fsckGetChar(void)
     static char buffer[80];
     const char *pChar;
 
+#ifdef _IOP
     // cppcheck-suppress getsCalled
-    if (gets(buffer) != NULL) {
+    if (gets(buffer) != NULL)
+#else
+    if (fgets(buffer, sizeof(buffer), stdin) != NULL)
+#endif
+    {
         for (pChar = buffer; *pChar != '\0'; pChar++) {
             if (isgraph(*(const unsigned char *)pChar)) {
                 break;
@@ -1247,7 +1254,7 @@ static iomanX_iop_device_t FsckDevice = {
     &FsckDeviceOps};
 
 // 0x0000267c
-int _start(int argc, char **argv)
+int PFS_ENTRYPOINT(int argc, char **argv)
 {
     int buffers;
 
@@ -1289,7 +1296,7 @@ int _start(int argc, char **argv)
 
     iomanX_DelDrv(FsckDevice.name);
     if (iomanX_AddDrv(&FsckDevice) == 0) {
-        PFS_PRINTF("version %04x driver start.\n", _irx_id.v);
+        PFS_PRINTF("version %04x driver start.\n", IRX_VER(PFS_MAJOR, PFS_MINOR));
         return MODULE_RESIDENT_END;
     }
 

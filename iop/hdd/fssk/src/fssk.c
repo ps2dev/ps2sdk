@@ -25,7 +25,9 @@
 #include "fssk.h"
 #include "misc_fssk.h"
 
+#ifdef _IOP
 IRX_ID("fssk", PFS_MAJOR, PFS_MINOR);
+#endif
 
 struct fsskRuntimeData
 {
@@ -760,7 +762,7 @@ static int DisplayUsageHelp(void)
     return MODULE_NO_RESIDENT_END;
 }
 
-int _start(int argc, char **argv)
+int PFS_ENTRYPOINT(int argc, char **argv)
 {
     int buffers;
 
@@ -797,7 +799,7 @@ int _start(int argc, char **argv)
 
     iomanX_DelDrv(FsskDevice.name);
     if (iomanX_AddDrv(&FsskDevice) == 0) {
-        PFS_PRINTF("version %04x driver start.\n", _irx_id.v);
+        PFS_PRINTF("version %04x driver start.\n", IRX_VER(PFS_MAJOR, PFS_MINOR));
         return MODULE_RESIDENT_END;
     }
 

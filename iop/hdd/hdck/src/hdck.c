@@ -9,7 +9,6 @@
 */
 
 #include <atad.h>
-#include <cdvdman.h>
 #include <errno.h>
 #include <iomanX.h>
 #include <loadcore.h>
@@ -23,7 +22,9 @@
 
 #include "misc_hdck.h"
 
+#ifdef _IOP
 IRX_ID("hdck", APA_MODVER_MAJOR, APA_MODVER_MINOR);
+#endif
 
 // Function prototypes
 static int HdckInit(iomanX_iop_device_t *device);
@@ -673,7 +674,7 @@ static int HdckDevctl(iomanX_iop_file_t *fd, const char *name, int cmd, void *ar
     return result;
 }
 
-int _start(int argc, char **argv)
+int APA_ENTRYPOINT(int argc, char **argv)
 {
     apa_ps2time_t time;
     ata_devinfo_t *pDevInfo;
