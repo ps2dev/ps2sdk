@@ -751,6 +751,11 @@ int fs_rename(iop_file_t *fd, const char *path, const char *newpath)
     FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_IMPLEMENTATION(path, fd);
     FATFS_FS_DRIVER_NAME_ALLOC_ON_STACK_IMPLEMENTATION(newpath, fd);
 
+    // If old and new path are the same, no need to do anything
+    if (strcmp(modified_path, modified_newpath) == 0) {
+        return 0;
+    }
+
     _fs_lock();
 
     ret = f_rename(modified_path, modified_newpath);
