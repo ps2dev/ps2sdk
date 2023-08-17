@@ -1148,9 +1148,9 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
         /* Set standby timer to 21min 15s.  */
         ata_device_idle(i, 0xff);
 
-        if (devinfo[i].lba48 != 0) {
-            /* If this device has the Sony firmware or is emulated through the DVRP, use the non-48-bit LBA size.  */
-            if (ata_device_sce_identify_drive(i, ata_param) == 0) {
+        if (devinfo[i].lba48) {
+            /* If this device is emulated through the DVRP, use the non-48-bit LBA size.  */
+            if (ata_dvrp_workaround) {
                 devinfo[i].total_sectors = total_sectors_nonlba48;
             } else {
                 devinfo[i].total_sectors = total_sectors_lba48;
