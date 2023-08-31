@@ -13,6 +13,13 @@ IOP->PPC TTY
 #include <intrman.h>
 #include <ioman.h>
 #include <thsemap.h>
+
+#ifdef DEBUG
+#define DPRINTF(fmt, x...) printf("ppctty: "fmt, ##x)
+#else
+#define DPRINTF(x...)
+#endif
+
 static int tty_sema = -1;
 
 extern void tty_puts(const char *str);
@@ -21,7 +28,7 @@ static int ttyfs_error() { return -1; }
 
 static int ttyfs_init()
 {
-    //DBG_puts("SIOTTY: FS Init()\n");
+    DPRINTF("FS Init()\n");
     if ((tty_sema = CreateMutex(IOP_MUTEX_UNLOCKED)) < 0)
     {
         DPRINTF("Failed to create mutex\n");
@@ -32,7 +39,7 @@ static int ttyfs_init()
 
 static int ttyfs_deinit()
 {
-    //DBG_puts("SIOTTY: FS Deinit()\n");
+    DPRINTF("FS Deinit()\n");
     DeleteSema(tty_sema);
 	return 0;
 }
@@ -43,7 +50,7 @@ static int ttyfs_open(iop_file_t *file, const char *name, int flags)
     (void)name;
     (void)flags;
 
-    //DBG_puts("SIOTTY: FS Open()\n");
+    DPRINTF("FS Open()\n");
 	return 0;
 }
 
@@ -52,7 +59,7 @@ static int ttyfs_dopen(iop_file_t *file, const char *name)
     (void)file;
     (void)name;
 
-    //DBG_puts("SIOTTY: FS Dopen()\n");
+    DPRINTF("FS Dopen()\n");
     return 0;
 }
 
@@ -60,7 +67,7 @@ static int ttyfs_close(iop_file_t *file)
 {
     (void)file;
 
-    //DBG_puts("SIOTTY: FS Close()\n");
+    DPRINTF("FS Close()\n");
     return(0);
 }
 
@@ -70,7 +77,7 @@ static int ttyfs_write(iop_file_t *file, void *ptr, int size) {
 
     (void)file;
 
-    //DBG_puts("SIOTTY: FS Write()\n");
+    DPRINTF("FS Write()\n");
 
     WaitSema(tty_sema);
     while(bCount < size)
