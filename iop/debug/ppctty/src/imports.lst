@@ -3,26 +3,27 @@ I_FlushIcache
 I_FlushDcache
 loadcore_IMPORTS_end
 
+
+#ifdef KPRINTF
 sysmem_IMPORTS_start
 I_Kprintf
 I_KprintfSet
 sysmem_IMPORTS_end
+#endif
 
 stdio_IMPORTS_start
 I_printf
 stdio_IMPORTS_end
 
 sysclib_IMPORTS_start
+#ifdef KPRINTF
 I_prnt
-I_strcpy
+#endif
 I_memcpy
-I_strlen
-I_memcmp
 sysclib_IMPORTS_end
 
 ioman_IMPORTS_start
 I_open
-I_read
 I_close
 I_AddDrv
 I_DelDrv

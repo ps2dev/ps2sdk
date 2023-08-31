@@ -129,7 +129,7 @@ static iop_device_t tty_fsd =
 	&fsd_ops,
 };
 
-#ifdef KRPINTF
+#ifdef KPRINTF
 void sprintf_putchar(void *context, int c)
 {
     char **string = (char **)context;
@@ -165,7 +165,7 @@ int tty_init(void)
     // open stdout
     close(1);
     open("tty:", O_WRONLY);
-#ifdef KRPINTF
+#ifdef KPRINTF
     printf("PPCTTY: KprintfSet\n");
     KprintfSet(&_kPrintf, NULL);
 #endif
