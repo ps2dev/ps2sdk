@@ -10,6 +10,10 @@ IOP_INCS +=
 
 IOP_OBJS = main.o tty.o imports.o
 
+ifeq ($(KRPINTF), 1)
+  IOP_CFLAGS += -DKPRINTF
+endif
+
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make
 include $(PS2SDKSRC)/iop/Rules.make

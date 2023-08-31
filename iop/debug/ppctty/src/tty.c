@@ -112,6 +112,7 @@ static iop_device_t tty_fsd =
 	&fsd_ops,
 };
 
+#ifdef KRPINTF
 void sprintf_putchar(void *context, int c)
 {
     char **string = (char **)context;
@@ -132,22 +133,24 @@ int _kPrintf(void *context, const char * format, va_list ap)
     tty_puts(kprint_buffer);
     return r;
 }
+#endif
 
 int tty_init(void)
 {
-    close(0);
-    close(1);
 	DelDrv(tty_fsd.name);
 	DelDrv("dummytty");
 
 	if(AddDrv(&tty_fsd) != 0) { return(-1); }
 
     // open stdin
+    close(0);
     open("tty:", O_RDONLY);
     // open stdout
+    close(1);
     open("tty:", O_WRONLY);
-
-//    KprintfSet(&_kPrintf, NULL);
-
+#ifdef KRPINTF
+    printf("PPCTTY: KprintfSet\n");
+    KprintfSet(&_kPrintf, NULL);
+#endif
     return(0);
 }
