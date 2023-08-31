@@ -27,3 +27,10 @@ I_close
 I_AddDrv
 I_DelDrv
 ioman_IMPORTS_end
+
+thsemap_IMPORTS_start
+I_CreateSema
+I_DeleteSema
+I_SignalSema
+I_WaitSema
+thsemap_IMPORTS_end

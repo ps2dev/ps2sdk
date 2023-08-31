@@ -12,6 +12,8 @@ IOP->PPC TTY
 #include <excepman.h>
 #include <intrman.h>
 #include <ioman.h>
+#include <thsemap.h>
+static int tty_sema = -1;
 
 extern void tty_puts(const char *str);
 
@@ -20,12 +22,18 @@ static int ttyfs_error() { return -1; }
 static int ttyfs_init()
 {
     //DBG_puts("SIOTTY: FS Init()\n");
+    if ((tty_sema = CreateMutex(IOP_MUTEX_UNLOCKED)) < 0)
+    {
+        DPRINTF("Failed to create mutex\n");
+        return -1;
+    }
 	return 0;
 }
 
 static int ttyfs_deinit()
 {
     //DBG_puts("SIOTTY: FS Deinit()\n");
+    DeleteSema(tty_sema);
 	return 0;
 }
 
@@ -64,6 +72,7 @@ static int ttyfs_write(iop_file_t *file, void *ptr, int size) {
 
     //DBG_puts("SIOTTY: FS Write()\n");
 
+    WaitSema(tty_sema);
     while(bCount < size)
     {
         int toWrite;
@@ -78,6 +87,7 @@ static int ttyfs_write(iop_file_t *file, void *ptr, int size) {
 
         bCount += toWrite;
     }
+    SignalSema(tty_sema);
 
     return(bCount);
 }

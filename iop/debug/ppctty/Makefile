@@ -10,8 +10,12 @@ IOP_INCS +=
 
 IOP_OBJS = main.o tty.o imports.o
 
-ifeq ($(KRPINTF), 1)
+ifeq ($(KPRINTF), 1)
   IOP_CFLAGS += -DKPRINTF
+endif
+
+ifeq ($(DEBUG), 1)
+  IOP_CFLAGS += -DDEBUG
 endif
 
 include $(PS2SDKSRC)/Defs.make

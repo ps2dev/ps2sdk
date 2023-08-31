@@ -16,5 +16,6 @@
 #include "sysclib.h"
 #include "ioman.h"
 #include "modload.h"
+#include "thsemap.h"
 
 #endif /* IOP_IRX_IMPORTS_H */
