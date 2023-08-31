@@ -13,9 +13,10 @@ IOP->PPC TTY
 #include <intrman.h>
 #include <ioman.h>
 #include <thsemap.h>
+#include "tty.h"
 
 #ifdef DEBUG
-#define DPRINTF(fmt, x...) printf("ppctty: "fmt, ##x)
+#define DPRINTF(fmt, x...) printf(MODNAME ": " fmt, ##x)
 #else
 #define DPRINTF(x...)
 #endif

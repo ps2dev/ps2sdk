@@ -3,7 +3,7 @@
 
 #include "tamtypes.h"
 #include <stdint.h>
-
+#define MODNAME "ppctty"
 // Prototypes
 int tty_init(void);
 
