@@ -221,14 +221,14 @@
     (u64)((ID)&0xFFFFFFFF) << 0 | (u64)((MSK)&0xFFFFFFFF) << 32
 
 #define GS_SET_MIPTBP1(TBA1, TBW1, TBA2, TBW2, TBA3, TBW3)                \
-    (u64)((TBA1)&0x000003FF) << 0 | (u64)((TBW1)&0x0000003F) << 14 |      \
-        (u64)((TBA2)&0x000003FF) << 20 | (u64)((TBW2)&0x0000003F) << 34 | \
-        (u64)((TBA3)&0x000003FF) << 40 | (u64)((TBW3)&0x0000003F) << 54
+    (u64)((TBA1)&0x00003FFF) << 0 | (u64)((TBW1)&0x0000003F) << 14 |      \
+        (u64)((TBA2)&0x00003FFF) << 20 | (u64)((TBW2)&0x0000003F) << 34 | \
+        (u64)((TBA3)&0x00003FFF) << 40 | (u64)((TBW3)&0x0000003F) << 54
 
 #define GS_SET_MIPTBP2(TBA4, TBW4, TBA5, TBW5, TBA6, TBW6)                \
-    (u64)((TBA4)&0x000003FF) << 0 | (u64)((TBW4)&0x0000003F) << 14 |      \
-        (u64)((TBA5)&0x000003FF) << 20 | (u64)((TBW5)&0x0000003F) << 34 | \
-        (u64)((TBA6)&0x000003FF) << 40 | (u64)((TBW6)&0x0000003F) << 54
+    (u64)((TBA4)&0x00003FFF) << 0 | (u64)((TBW4)&0x0000003F) << 14 |      \
+        (u64)((TBA5)&0x00003FFF) << 20 | (u64)((TBW5)&0x0000003F) << 34 | \
+        (u64)((TBA6)&0x00003FFF) << 40 | (u64)((TBW6)&0x0000003F) << 54
 
 #define GS_SET_NOP(A) (u64)((A)&0xFFFFFFFF)
 
