@@ -1,7 +1,8 @@
 /*
   SMB2MAN
   Ronnie Sahlberg <ronniesahlberg@gmail.com> 2021
-
+  André Guilherme <andregui17@outlook.com> 2023
+  
   Based on SMBMAN:
   Copyright 2009-2010, jimmikaelkael
   Licenced under Academic Free License version 3.0
@@ -19,7 +20,7 @@
 
 #include "smb2_fio.h"
 
-#define MODNAME 	"smbman"
+#define MODNAME 	"smb2man"
 #define VER_MAJOR	2
 #define VER_MINOR	2
 
