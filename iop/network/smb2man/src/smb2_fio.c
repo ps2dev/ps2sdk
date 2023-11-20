@@ -8,6 +8,7 @@
   Copyright 2009-2010, jimmikaelkael
   Licenced under Academic Free License version 3.0
 */
+
 #include "types.h"
 #include "defs.h"
 #include "irx.h"
@@ -24,7 +25,7 @@
 
 #include "smb2_fio.h"
 
-#define  int64_t u64
+#define int64_t u64
 #define uint64_t u64
 #define uint32_t u32
 #define uint16_t u16
