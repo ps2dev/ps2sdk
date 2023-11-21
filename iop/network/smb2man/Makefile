@@ -8,7 +8,7 @@
 
 # IOP_CFLAGS += -DDEBUG
 
-IOP_CFLAGS += -DPS2_IOP_PLATFORM -DHAVE_CONFIG_H -D_U_=/**/
+IOP_CFLAGS += -DPS2_IOP_PLATFORM -DHAVE_CONFIG_H -DPS2SDK_IOP -D_U_=/**/
 
 IOP_INCS += -I. -I$(PS2SDK)/iop/include -I$(PS2SDKSRC)/iop/tcpip/tcpip/include -Isrc/lib -Isrc/lib/ps2 -Isrc/lib/smb2
 

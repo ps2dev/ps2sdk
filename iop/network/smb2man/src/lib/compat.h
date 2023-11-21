@@ -94,7 +94,10 @@ ssize_t readv(int fd, const struct iovec *iov, int iovcnt);
 
 #ifdef PS2_IOP_PLATFORM
 
+#ifndef PS2SDK_IOP
 #include <alloc.h>
+#endif
+
 #include <errno.h>
 #include <types.h>
 #include <sys/time.h>
@@ -102,6 +105,11 @@ ssize_t readv(int fd, const struct iovec *iov, int iovcnt);
 #include <stdint.h>
 #include <ps2ip.h>
 #include <loadcore.h>
+#ifdef PS2SDK_IOP
+#include "sysclib.h"
+#include "sysmem.h"
+#include "intrman.h"
+#endif
 
 typedef uint32_t UWORD32;
 typedef size_t ssize_t;
@@ -148,6 +156,14 @@ int iop_connect(int sockfd, struct sockaddr *addr, socklen_t addrlen);
 
 ssize_t writev(int fd, const struct iovec *iov, int iovcnt);
 ssize_t readv(int fd, const struct iovec *iov, int iovcnt);
+
+#ifdef PS2SDK_IOP
+void *malloc(int size);
+
+void free(void *ptr);
+
+void *calloc(size_t nmemb, size_t size);
+#endif
 
 #define SOL_TCP IPPROTO_TCP
 #define EAI_AGAIN EAGAIN
