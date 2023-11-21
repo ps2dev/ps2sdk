@@ -50,7 +50,7 @@ char log_buf[1024];
     int l;					\
     if (log_fh) {				\
       l = sprintf(log_buf, __VA_ARGS__);	\
-      smb2_write(log_smb2, log_fh, log_buf, l);	\
+      smb2_write(log_smb2, log_fh, (const uint8_t*)log_buf, l);	\
     }						\
   }
 #else
