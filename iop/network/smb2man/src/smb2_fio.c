@@ -426,13 +426,13 @@ static void FileTimeToDate(u64 t, u8 *datetime)
 	u16 years, days;
 	u8 leapdays, months, hours, minutes, seconds;
 
-	time = t / 10000000;	// convert to seconds from 100-nanosecond intervals
+	time = t / 10000000;	/* convert to seconds from 100-nanosecond intervals */
 
-	years = (u16)(time / ((u64)60 * 60 * 24 * 365));	// hurray for interger division
-	time -= years *	((u64)60 * 60 * 24 *365);	// truncate off the years
+	years = (u16)(time / ((u64)60 * 60 * 24 * 365));	/* hurray for interger division */
+	time -= years *	((u64)60 * 60 * 24 *365);	/* truncate off the years */
 
 	leapdays = (years / 4) - (years / 100) + (years / 400);
-	years += 1601; // add base year from FILETIME struct;
+	years += 1601; /* add base year from FILETIME struct; */
 
 	days = (u16)(time / (60 * 60 * 24));
 	time -= (unsigned int)days * (60 * 60 * 24);
