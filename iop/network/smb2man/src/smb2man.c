@@ -27,8 +27,13 @@
 
 IRX_ID(MODNAME, VER_MAJOR, VER_MINOR);
 
-int _start(int argc, char** argv)
+int _start(int argc, char *argv[])
 {
+    (void)argc;
+    (void)argv;
+
+    printf("%s version 0x%01x%02x - Copyright(c) 2021-2023 Ronnie Sahlberg and André Guilherme\n", MODNAME, VER_MAJOR, VER_MINOR);
+
 	SMB2_initdev();
 
 	return MODULE_RESIDENT_END;
