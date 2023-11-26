@@ -10,6 +10,9 @@ EE_LIB = libcglue.a
 
 CORE_OBJS = timezone.o rtc.o
 
+FDMAN_OBJS = __fdman_sema.o __descriptor_data_pool.o __descriptormap.o __fdman_init.o __fdman_deinit.o __fdman_get_new_descriptor.o \
+	__fdman_get_dup_descriptor.o __fdman_release_descriptor.o
+
 INIT_OBJS = __libpthreadglue_init.o __libpthreadglue_deinit.o _libcglue_init.o _libcglue_deinit.o _libcglue_args_parse.o
 
 SLEEP_OBJS = nanosleep.o
@@ -25,7 +28,7 @@ GLUE_OBJS = __dummy_passwd.o __direct_pwd.o __transform_errno.o __transform64_er
 LOCK_OBJS = __retarget_lock_init.o __retarget_lock_acquire.o __retarget_lock_release.o __retarget_lock_try_acquire.o __retarget_lock_close.o \
 	__retarget_lock_init_recursive.o __retarget_lock_acquire_recursive.o __retarget_lock_release_recursive.o __retarget_lock_try_acquire_recursive.o __retarget_lock_close_recursive.o
 
-EE_OBJS = $(CORE_OBJS) $(SJIS_OBJS) $(TIME_OBJS) $(INIT_OBJS) $(SLEEP_OBJS) $(TERMINATE_OBJS) $(GLUE_OBJS) $(LOCK_OBJS)
+EE_OBJS = $(CORE_OBJS) $(SJIS_OBJS) $(TIME_OBJS) $(FDMAN_OBJS) $(INIT_OBJS) $(SLEEP_OBJS) $(TERMINATE_OBJS) $(GLUE_OBJS) $(LOCK_OBJS)
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make
@@ -39,6 +42,9 @@ $(SLEEP_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)sleep.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(GLUE_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)glue.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(FDMAN_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)fdman.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(INIT_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)init.c
