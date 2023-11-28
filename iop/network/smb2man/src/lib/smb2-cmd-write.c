@@ -114,7 +114,7 @@ smb2_cmd_write_async(struct smb2_context *smb2,
 
         /* Adjust credit charge for large payloads */
         if (smb2->supports_multi_credit) {
-                pdu->header.credit_charge = (req->length - 1) / 65536 + 1; // 3.1.5.2 of [MS-SMB2]
+                pdu->header.credit_charge = (req->length - 1) / 65536 + 1; /* 3.1.5.2 of [MS-SMB2] */
         }
 
         return pdu;

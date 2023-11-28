@@ -37,7 +37,7 @@
 
 #include <errno.h>
 
-#if defined(HAVE_SYS_POLL_H)
+#ifdef HAVE_SYS_POLL_H
 #include <sys/poll.h>
 #endif
 

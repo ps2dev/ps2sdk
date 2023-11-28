@@ -174,7 +174,7 @@ smb2_cmd_query_directory_async(struct smb2_context *smb2,
         /* Adjust credit charge for large payloads */
         if (smb2->supports_multi_credit) {
                 pdu->header.credit_charge =
-                        (req->output_buffer_length - 1) / 65536 + 1; // 3.1.5.2 of [MS-SMB2]
+                        (req->output_buffer_length - 1) / 65536 + 1; /* 3.1.5.2 of [MS-SMB2] */
         }
 
         return pdu;

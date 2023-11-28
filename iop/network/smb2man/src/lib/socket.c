@@ -103,6 +103,12 @@
  * timeout of 100ms. */
 #define HAPPY_EYEBALLS_TIMEOUT 100
 
+struct LingerStruct 
+{
+	int		l_onoff;	/* Linger active		*/
+	int		l_linger;	/* How long to linger for	*/
+};
+
 static int
 smb2_connect_async_next_addr(struct smb2_context *smb2, const struct addrinfo *base);
 
@@ -864,8 +870,7 @@ connect_async_ai(struct smb2_context *smb2, const struct addrinfo *ai, int *fd_o
         struct sockaddr_storage ss;
 #if 0 == CONFIGURE_OPTION_TCP_LINGER
         int const yes = 1;
-        struct LingerStruct { int l_onoff; /* linger active */ int l_linger; /* how many seconds to linger for */ };
-        struct LingerStruct const lin = { .l_onoff  = 1, .l_linger = 0 };   /*  if l_linger is zero, sends RST after FIN */
+        struct LingerStruct const lin = { 1, 0 };   /*  if l_linger is zero, sends RST after FIN */
 #endif
         memset(&ss, 0, sizeof(ss));
         switch (ai->ai_family) {
@@ -958,28 +963,32 @@ static void interleave_addrinfo(struct addrinfo *base)
         struct addrinfo **next = &base->ai_next;
         while (*next) {
                 struct addrinfo *cur = *next;
-                // Iterate forward until we find an entry of a different family.
+                /* Iterate forward until we find an entry of a different family. */
                 if (cur->ai_family == base->ai_family) {
                         next = &cur->ai_next;
                         continue;
                 }
                 if (cur == base->ai_next) {
-                        // If the first one following base is of a different family, just
-                        // move base forward one step and continue.
+                        /* 
+                        ** If the first one following base is of a different family, just
+                        ** move base forward one step and continue.
+                        */
                         base = cur;
                         next = &base->ai_next;
                         continue;
                 }
-                // Unchain cur from the rest of the list from its current spot.
+                /* Unchain cur from the rest of the list from its current spot. */
                 *next = cur->ai_next;
-                // Hook in cur directly after base.
+                /* Hook in cur directly after base. */
                 cur->ai_next = base->ai_next;
                 base->ai_next = cur;
-                // Restart with a new base. We know that before moving the cur element,
-                // everything between the previous base and cur had the same family,
-                // different from cur->ai_family. Therefore, we can keep next pointing
-                // where it was, and continue from there with base at the one after
-                // cur.
+                /* 
+                ** Restart with a new base. We know that before moving the cur element,
+                ** everything between the previous base and cur had the same family,
+                ** different from cur->ai_family. Therefore, we can keep next pointing
+                ** where it was, and continue from there with base at the one after
+                ** cur.
+                */
                 base = cur->ai_next;
         }
 }

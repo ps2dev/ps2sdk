@@ -44,27 +44,17 @@
 
 #ifdef PS2_EE_PLATFORM
 
-#define NEED_READV
-#define NEED_WRITEV
-#define NEED_POLL
-#define NEED_BE64TOH
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
 
+#include <sys/time.h>
 
 #endif /* PS2_EE_PLATFORM */
 
 #ifdef PS2_IOP_PLATFORM
 #include <sysclib.h>
-
-
-#define NEED_BE64TOH
-#define NEED_STRDUP
-#define NEED_READV
-#define NEED_WRITEV
-#define NEED_POLL
 
 static unsigned long int next = 1; 
 
@@ -165,9 +155,6 @@ void *calloc(size_t nmemb, size_t size)
 
 #ifdef PS3_PPU_PLATFORM
 
-#define NEED_READV
-#define NEED_WRITEV
-
 #include <stdlib.h>
 
 int smb2_getaddrinfo(const char *node, const char*service,
@@ -214,6 +201,7 @@ ssize_t writev(int fd, const struct iovec *vector, int count)
         char *buffer;
         size_t to_copy;
         char *bp;
+		ssize_t bytes_written;
 
         for (i = 0; i < count; ++i) {
                 /* Check for ssize_t overflow.  */
@@ -244,7 +232,7 @@ ssize_t writev(int fd, const struct iovec *vector, int count)
                         break;
         }
 
-        ssize_t bytes_written = write(fd, buffer, bytes);
+        bytes_written = write(fd, buffer, bytes);
 
         free(buffer);
         return bytes_written;

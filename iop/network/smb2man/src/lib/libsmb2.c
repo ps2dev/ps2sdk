@@ -64,7 +64,7 @@
 #include <time.h>
 #endif
 
-#if defined(HAVE_FCNTL_H)
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 
@@ -118,15 +118,15 @@ static const char SMBAppKey[] = "SMBAppKey";
 
 #ifndef O_ACCMODE
 #define O_ACCMODE (O_RDWR|O_WRONLY|O_RDONLY)
-#endif // !O_ACCMODE
+#endif /* !O_ACCMODE */
 
 #ifndef O_SYNC
 #ifndef O_DSYNC
 #define O_DSYNC		040000
-#endif // !O_DSYNC
+#endif /* !O_DSYNC */
 #define __O_SYNC	020000000
 #define O_SYNC		(__O_SYNC|O_DSYNC)
-#endif // !O_SYNC
+#endif /* !O_SYNC */
 
 const smb2_file_id compound_file_id = {
         0xff, 0xff, 0xff, 0xff,  0xff, 0xff, 0xff, 0xff,
@@ -2337,7 +2337,7 @@ smb2_ftruncate_async(struct smb2_context *smb2, struct smb2fh *fh,
 {
         struct create_cb_data *create_data;
         struct smb2_set_info_request req;
-        struct smb2_file_end_of_file_info eofi;
+        struct smb2_file_end_of_file_info eofi _U_;
         struct smb2_pdu *pdu;
 
         if (smb2 == NULL) {

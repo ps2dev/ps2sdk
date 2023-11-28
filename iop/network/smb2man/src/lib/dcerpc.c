@@ -1299,8 +1299,8 @@ dcerpc_decode_response(struct dcerpc_context *ctx,
 #else
         const char* __mptr = rsp;
         struct dcerpc_pdu *pdu = (struct dcerpc_pdu*)((char *)__mptr - offsetof(struct dcerpc_pdu, rsp));
-#endif // !_MSC_VER
-   
+#endif /* !_MSC_VER */
+    
         if (offset < 0) {
                 return offset;
         }
@@ -1761,7 +1761,7 @@ dcerpc_get_error(struct dcerpc_context *dce)
 void
 dcerpc_free_data(struct dcerpc_context *dce, void *data)
 {
-        return smb2_free_data(dcerpc_get_smb2_context(dce), data);
+        smb2_free_data(dcerpc_get_smb2_context(dce), data);
 }
 
 int

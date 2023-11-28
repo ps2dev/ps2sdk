@@ -1,7 +1,6 @@
 
 #ifndef _ASPRINTF_H_
 #define _ASPRINTF_H_
-
 #ifndef PS2SDK_IOP
 #include <malloc.h>
 #endif
@@ -20,7 +19,7 @@ static inline int _vscprintf_so(const char * format, va_list pargs) {
   va_end(argcopy);
   return retval;
 }
-#endif // _vscprintf
+#endif /* _vscprintf */
 
 #ifndef vasprintf
 static inline int vasprintf(char **strp, const char *fmt, va_list ap) {
@@ -33,7 +32,7 @@ static inline int vasprintf(char **strp, const char *fmt, va_list ap) {
   *strp = str;
   return r;
 }
-#endif // vasprintf
+#endif /* vasprintf */
 
 #ifndef asprintf
 static inline int asprintf(char *strp[], const char *fmt, ...) {
@@ -43,6 +42,6 @@ static inline int asprintf(char *strp[], const char *fmt, ...) {
   va_end(ap);
   return r;
 }
-#endif // asprintf
+#endif /* asprintf */
 
-#endif // ! _ASPRINTF_H_
+#endif /* ! _ASPRINTF_H_ */
