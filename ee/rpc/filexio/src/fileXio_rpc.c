@@ -53,10 +53,9 @@ static int (*_backup_ps2sdk_stat)(const char *path, struct stat *buf);
 static int (*_backup_ps2sdk_readlink)(const char *path, char *buf, size_t bufsiz);
 static int (*_backup_ps2sdk_symlink)(const char *target, const char *linkpath);
 
-static DIR * (*_backup_ps2sdk_opendir)(const char *path);
-static struct dirent * (*_backup_ps2sdk_readdir)(DIR *dir);
-static void (*_backup_ps2sdk_rewinddir)(DIR *dir);
-static int (*_backup_ps2sdk_closedir)(DIR *dir);
+static int (*_backup_ps2sdk_dopen)(const char *path);
+static int (*_backup_ps2sdk_dread)(int fd, struct dirent *dir);
+static int (*_backup_ps2sdk_dclose)(int fd);
 
 static void _fxio_intr(void)
 {
@@ -133,69 +132,31 @@ static int fileXioGetstatHelper(const char *path, struct stat *buf) {
         return 0;
 }
 
-static DIR *fileXioOpendirHelper(const char *path)
-{
-	int dd;
-	DIR *dir;
-
-	dd = fileXioDopen(path);
-	if (dd < 0) {
-		errno = ENOENT;
-		return NULL;
-	}
-
-	dir = malloc(sizeof(DIR));
-	dir->dd_fd = dd;
-	dir->dd_buf = malloc(sizeof(struct dirent));
-
-	return dir;
-}
-
-static struct dirent *fileXioReaddirHelper(DIR *dir)
-{
+static int fileXioDreadHelper(int fd, struct dirent *dir) {
 	int rv;
-        struct dirent *de;
-        iox_dirent_t fiode;
+	iox_dirent_t ioxdir;
 
-	if(dir == NULL) {
-		errno = EBADF;
-		return NULL;
+	// Took from iox_dirent_t
+	#define __MAXNAMLEN 256
+
+	rv = fileXioDread(fd, &ioxdir);
+	if (rv < 0) {
+		errno = ENOENT;
+		return -1;
 	}
 
-    de = (struct dirent *)dir->dd_buf;
-    rv = fileXioDread(dir->dd_fd, &fiode);
-	if (rv <= 0) {
-		errno = -rv;
-		return NULL;
+	dir->d_fileno = rv; // TODO: This number should be in theory a unique number per file
+	strncpy(dir->d_name, ioxdir.name, __MAXNAMLEN);
+	dir->d_name[__MAXNAMLEN - 1] = 0;
+	dir->d_reclen = 0;
+	switch (ioxdir.stat.mode & FIO_S_IFMT) {
+		case FIO_S_IFLNK: dir->d_type = DT_LNK;     break;
+		case FIO_S_IFDIR: dir->d_type = DT_DIR;     break;
+		case FIO_S_IFREG: dir->d_type = DT_REG;     break;
+		default:          dir->d_type = DT_UNKNOWN; break;
 	}
 
-	fill_stat(&de->d_stat, &fiode.stat);
-	strncpy(de->d_name, fiode.name, 255);
-	de->d_name[255] = 0;
-
-	return de;
-}
-
-static void fileXioRewinddirHelper(DIR *dir)
-{
-	(void)dir;
-	errno = ENOSYS;
-
-	printf("rewinddir not implemented\n");
-}
-
-static int fileXioClosedirHelper(DIR *dir)
-{
-	int res;
-
-	if(dir == NULL) {
-		return -EBADF;
-	}
-
-	res = fileXioDclose(dir->dd_fd);
-	free(dir->dd_buf);
-	free(dir);
-	return res;
+	return rv;
 }
 
 static int fileXioInitHelper(int overrideNewlibMethods)
@@ -261,22 +222,18 @@ static int fileXioInitHelper(int overrideNewlibMethods)
 		_ps2sdk_mkdir = fileXioMkdir;
 		_backup_ps2sdk_rmdir = _ps2sdk_rmdir;
 		_ps2sdk_rmdir = fileXioRmdir;
+		_backup_ps2sdk_stat = _ps2sdk_stat;
+		_ps2sdk_stat = fileXioGetstatHelper;
 		_backup_ps2sdk_readlink = _ps2sdk_readlink;
 		_ps2sdk_readlink = fileXioReadlink;
 		_backup_ps2sdk_symlink = _ps2sdk_symlink;
 		_ps2sdk_symlink = fileXioSymlink;
-
-		_backup_ps2sdk_stat = _ps2sdk_stat;
-		_ps2sdk_stat = fileXioGetstatHelper;
-
-		_backup_ps2sdk_opendir = _ps2sdk_opendir;
-		_ps2sdk_opendir = fileXioOpendirHelper;
-		_backup_ps2sdk_readdir = _ps2sdk_readdir;
-		_ps2sdk_readdir = fileXioReaddirHelper;
-		_backup_ps2sdk_rewinddir = _ps2sdk_rewinddir;
-		_ps2sdk_rewinddir = fileXioRewinddirHelper;
-		_backup_ps2sdk_closedir = _ps2sdk_closedir;
-		_ps2sdk_closedir = fileXioClosedirHelper;
+		_backup_ps2sdk_dopen = _ps2sdk_dopen;
+		_ps2sdk_dopen = fileXioDopen;
+		_backup_ps2sdk_dread = _ps2sdk_dread;
+		_ps2sdk_dread = fileXioDreadHelper;
+		_backup_ps2sdk_dclose = _ps2sdk_dclose;
+		_ps2sdk_dclose = fileXioDclose;
 	}
 
 	return 0;
@@ -348,6 +305,10 @@ void fileXioExit(void)
 		_ps2sdk_rmdir = _backup_ps2sdk_rmdir;
 		_backup_ps2sdk_rmdir = NULL;	
 	} 
+	if (_backup_ps2sdk_stat) {
+		_ps2sdk_stat = _backup_ps2sdk_stat;
+		_backup_ps2sdk_stat = NULL;
+	}
 	if (_backup_ps2sdk_readlink) {
 		_ps2sdk_readlink = _backup_ps2sdk_readlink;
 		_backup_ps2sdk_readlink = NULL;	
@@ -356,27 +317,17 @@ void fileXioExit(void)
 		_ps2sdk_symlink = _backup_ps2sdk_symlink;
 		_backup_ps2sdk_symlink = NULL;	
 	} 
-
-	if (_backup_ps2sdk_stat) {
-		_ps2sdk_stat = _backup_ps2sdk_stat;
-		_backup_ps2sdk_stat = NULL;
+	if (_backup_ps2sdk_dopen) {
+		_ps2sdk_dopen = _backup_ps2sdk_dopen;
+		_backup_ps2sdk_dopen = NULL;	
 	}
-
-	if (_backup_ps2sdk_opendir) {
-		_ps2sdk_opendir = _backup_ps2sdk_opendir;
-		_backup_ps2sdk_opendir = NULL;
+	if (_backup_ps2sdk_dread) {
+		_ps2sdk_dread = _backup_ps2sdk_dread;
+		_backup_ps2sdk_dread = NULL;	
 	}
-	if (_backup_ps2sdk_readdir) {
-		_ps2sdk_readdir = _backup_ps2sdk_readdir;
-		_backup_ps2sdk_readdir = NULL;
-	}
-	if (_backup_ps2sdk_rewinddir) {
-		_ps2sdk_rewinddir = _backup_ps2sdk_rewinddir;
-		_backup_ps2sdk_rewinddir = NULL;
-	}
-	if (_backup_ps2sdk_closedir) {
-		_ps2sdk_closedir = _backup_ps2sdk_closedir;
-		_backup_ps2sdk_closedir = NULL;
+	if (_backup_ps2sdk_dclose) {
+		_ps2sdk_dclose = _backup_ps2sdk_dclose;
+		_backup_ps2sdk_dclose = NULL;	
 	}
 }
 

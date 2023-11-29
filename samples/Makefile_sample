@@ -27,6 +27,7 @@ SUBDIRS += kernel/nanoHelloWorld
 SUBDIRS += libcglue/regress
 SUBDIRS += libcglue/mem_test
 SUBDIRS += libcglue/nanosleep
+SUBDIRS += libcglue/rewinddir
 SUBDIRS += libgs/doublebuffer
 SUBDIRS += libgs/draw
 #SUBDIRS += mpeg                #TODO: not modified for updated newlib

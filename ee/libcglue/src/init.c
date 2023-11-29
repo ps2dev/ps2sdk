@@ -15,8 +15,10 @@
 
 void _libcglue_timezone_update();
 void _libcglue_rtc_update();
+void __fdman_init();
 void pthread_init();
 void pthread_terminate();
+void __fdman_deinit();
 
 int chdir(const char *path);
 
@@ -41,6 +43,7 @@ __attribute__((weak))
 void __libpthreadglue_deinit()
 {
 	pthread_terminate();
+	__fdman_deinit();
 }
 #else
 void __libpthreadglue_deinit();
@@ -50,6 +53,9 @@ void __libpthreadglue_deinit();
 __attribute__((weak))
 void _libcglue_init()
 {
+	/* Initialize filedescriptor management */
+	__fdman_init();
+
 	/* Initialize pthread library */
 	__libpthreadglue_init();
 
