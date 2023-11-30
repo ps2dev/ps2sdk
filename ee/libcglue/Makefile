@@ -23,7 +23,7 @@ PS2SDKAPI_OBJS = _ps2sdk_close.o _ps2sdk_open.o _ps2sdk_read.o _ps2sdk_lseek.o _
 	_ps2sdk_remove.o _ps2sdk_rename.o _ps2sdk_mkdir.o _ps2sdk_rmdir.o _ps2sdk_stat.o _ps2sdk_readlink.o _ps2sdk_symlink.o \
 	_ps2sdk_dopen.o _ps2sdk_dread.o _ps2sdk_dclose.o
 
-GLUE_OBJS = __direct_pwd.o __dummy_passwd.o __transform_errno.o __transform64_errno.o compile_time_check.o _open.o _close.o _read.o _write.o \
+GLUE_OBJS = __direct_pwd.o __dummy_passwd.o __transform_errno.o __transform64_errno.o compile_time_check.o __normalized_path.o _open.o _close.o _read.o _write.o \
 	_stat.o lstat.o _fstat.o access.o _fcntl.o getdents.o _lseek.o lseek64.o chdir.o mkdir.o \
 	rmdir.o _link.o _unlink.o _rename.o  getcwd.o _getpid.o _kill.o _fork.o _wait.o _sbrk.o _gettimeofday.o _times.o ftime.o clock_getres.o clock_gettime.o clock_settime.o \
 	truncate.o symlink.o readlink.o utime.o fchown.o getrandom.o getentropy.o _isatty.o chmod.o fchmod.o fchmodat.o pathconf.o \
