@@ -134,9 +134,9 @@ void compile_time_check() {
 }
 #endif
 
-#ifdef F__open
-/* Normalize a pathname by removing . and .. components, duplicated /, etc. */
-static char* normalize_path(const char *path_name)
+#ifdef F___normalized_path
+/* Sanitize a pathname by removing . and .. components, duplicated /, etc. */
+static char* sanitize_path(const char *path_name)
 {
 	int i, j;
 	int first, next;
@@ -200,31 +200,12 @@ static int isCdromPath(const char *path)
 	return !strncmp(path, "cdrom0:", 7) || !strncmp(path, "cdrom:", 6);
 }
 
-int _open(const char *buf, int flags, ...) {
-	int iop_flags = 0;
-	int is_dir = 0;
-	int iop_fd, fd;
-
-	// newlib frags differ from iop flags
-	if ((flags & 3) == O_RDONLY) iop_flags |= IOP_O_RDONLY;
-	if ((flags & 3) == O_WRONLY) iop_flags |= IOP_O_WRONLY;
-	if ((flags & 3) == O_RDWR  ) iop_flags |= IOP_O_RDWR;
-	if (flags & O_NONBLOCK)      iop_flags |= IOP_O_NBLOCK;
-	if (flags & O_APPEND)        iop_flags |= IOP_O_APPEND;
-	if (flags & O_CREAT)         iop_flags |= IOP_O_CREAT;
-	if (flags & O_TRUNC)         iop_flags |= IOP_O_TRUNC;
-	if (flags & O_EXCL)          iop_flags |= IOP_O_EXCL;
-	//if (flags & O_???)           iop_flags |= IOP_O_NOWAIT;
-	if (flags & O_DIRECTORY) {
-		iop_flags |= IOP_O_DIROPEN;
-		is_dir = 1;
-	}
-
-	char *t_fname = normalize_path(buf);
-	char b_fname[FILENAME_MAX];
+char *__normalized_path(const char *originalPath)
+{
+	const char *buf = sanitize_path(originalPath);
+	static char b_fname[FILENAME_MAX];
 
 	if (!strchr(buf, ':')) { // filename doesn't contain device
-		t_fname = b_fname;
 		if (buf[0] == '/' || buf[0] == '\\') {   // does it contain root ?
 			char *device_end = strchr(__direct_pwd, ':');
 			if (device_end) {      // yes, let's strip pwd a bit to keep device only
@@ -268,6 +249,34 @@ int _open(const char *buf, int flags, ...) {
 		}
 	}
 
+	return (char *)b_fname;
+}
+#else
+extern char *__normalized_path(const char *path_name);
+#endif
+
+#ifdef F__open
+int _open(const char *buf, int flags, ...) {
+	int iop_flags = 0;
+	int is_dir = 0;
+	int iop_fd, fd;
+
+	// newlib frags differ from iop flags
+	if ((flags & 3) == O_RDONLY) iop_flags |= IOP_O_RDONLY;
+	if ((flags & 3) == O_WRONLY) iop_flags |= IOP_O_WRONLY;
+	if ((flags & 3) == O_RDWR  ) iop_flags |= IOP_O_RDWR;
+	if (flags & O_NONBLOCK)      iop_flags |= IOP_O_NBLOCK;
+	if (flags & O_APPEND)        iop_flags |= IOP_O_APPEND;
+	if (flags & O_CREAT)         iop_flags |= IOP_O_CREAT;
+	if (flags & O_TRUNC)         iop_flags |= IOP_O_TRUNC;
+	if (flags & O_EXCL)          iop_flags |= IOP_O_EXCL;
+	//if (flags & O_???)           iop_flags |= IOP_O_NOWAIT;
+	if (flags & O_DIRECTORY) {
+		iop_flags |= IOP_O_DIROPEN;
+		is_dir = 1;
+	}
+
+	char *t_fname = __normalized_path(buf);
 	iop_fd = is_dir ? _ps2sdk_dopen(t_fname) : _ps2sdk_open(t_fname, iop_flags);
 	if (iop_fd >= 0) {
 		fd = __fdman_get_new_descriptor();
@@ -385,13 +394,15 @@ int _write(int fd, const void *buf, size_t nbytes) {
 
 #ifdef F__stat
 int _stat(const char *path, struct stat *buf) {
-    return __transform_errno(_ps2sdk_stat(path, buf));
+	const char *normalized = __normalized_path(path);
+    return __transform_errno(_ps2sdk_stat(normalized, buf));
 }
 #endif
 
 #ifdef F_lstat
 int lstat(const char *path, struct stat *buf) {
-    return __transform_errno(stat(path, buf));
+	const char *normalized = __normalized_path(path);
+    return __transform_errno(stat(normalized, buf));
 }
 #endif
 
@@ -580,20 +591,23 @@ off64_t lseek64(int fd, off64_t offset, int whence)
 
 #ifdef F_chdir
 int chdir(const char *path) {
-    strcpy(__direct_pwd, path);
+	const char *normalized = __normalized_path(path);
+    strcpy(__direct_pwd, normalized);
     return 0;
 }
 #endif
 
 #ifdef F_mkdir
 int mkdir(const char *path, mode_t mode) {
-    return __transform_errno(_ps2sdk_mkdir(path, mode));
+	const char *normalized = __normalized_path(path);
+    return __transform_errno(_ps2sdk_mkdir(normalized, mode));
 }
 #endif
 
 #ifdef F_rmdir
 int rmdir(const char *path) {
-    return __transform_errno(_ps2sdk_rmdir(path));
+	const char *normalized = __normalized_path(path);
+    return __transform_errno(_ps2sdk_rmdir(normalized));
 }
 #endif
 
@@ -606,14 +620,16 @@ int _link(const char *old, const char *new) {
 
 #ifdef F__unlink
 int _unlink(const char *path) {
-    errno = ENOSYS;
-	return -1; /* not supported */
+	const char *normalized = __normalized_path(path);
+    return __transform_errno(_ps2sdk_remove(normalized));
 }
 #endif
 
 #ifdef F__rename
 int _rename(const char *old, const char *new) {
-    return __transform_errno(_ps2sdk_rename(old, new));
+	const char *normalized_old = __normalized_path(old);
+	const char *normalized_new = __normalized_path(new);
+    return __transform_errno(_ps2sdk_rename(normalized_old, normalized_new));
 }
 #endif
 
@@ -815,14 +831,17 @@ int truncate(const char *path, off_t length)
 #ifdef F_symlink
 int symlink(const char *target, const char *linkpath)
 {
-  return __transform_errno(_ps2sdk_symlink(target, linkpath));
+	const char *normalized_target = __normalized_path(target);
+	const char *normalized_linkpath = __normalized_path(linkpath);
+	return __transform_errno(_ps2sdk_symlink(normalized_target, normalized_linkpath));
 }
 #endif
 
 #ifdef F_readlink
 ssize_t readlink(const char *path, char *buf, size_t bufsiz)
 {
-	return 	_ps2sdk_readlink(path, buf, bufsiz);
+	const char *normalized = __normalized_path(path);
+	return 	__transform_errno(_ps2sdk_readlink(normalized, buf, bufsiz));
 }
 #endif
 
