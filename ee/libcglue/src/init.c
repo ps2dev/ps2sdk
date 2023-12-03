@@ -13,6 +13,7 @@
  * The global init/deinit code for our crt0.
  */
 
+void __init_cwd(int argc, char ** argv);
 void _libcglue_timezone_update();
 void _libcglue_rtc_update();
 void __fdman_init();
@@ -76,27 +77,8 @@ void _libcglue_deinit()
 __attribute__((weak))
 void _libcglue_args_parse(int argc, char ** argv)
 {
-    if (argc == 0) // naplink!
-    {
-	chdir("host:");
-    } else {
-	char * p, * s = 0;
-	// let's find the last slash, or at worst, the :
-	for (p = argv[0]; *p; p++) {
-	    if ((*p == '/') || (*p == '\\') || (*p == ':')) {
-		s = p;
-	    }
-	}
-	// Nothing?! strange, let's use host.
-	if (!s) {
-	    chdir("host:");
-	} else {
-	    char backup = *(++s);
-	    *s = 0;
-	    chdir(argv[0]);
-	    *s = backup;
-	}
-    }
+    /* Initialize cwd from this program's path */
+	__init_cwd(argc, argv);
 }
 #endif
 
