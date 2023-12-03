@@ -16,6 +16,7 @@
 #include <kernel.h>
 #include <timer.h>
 #include <stdlib.h>
+#include <stdarg.h>
 #include <sio.h>
 
 #include <pwd.h>
@@ -37,11 +38,10 @@
 #include <tamtypes.h>
 
 #define NEWLIB_PORT_AWARE
-#include "fileio.h"
 #include "io_common.h"
-#include "iox_stat.h"
 #include "ps2sdkapi.h"
 #include "timer_alarm.h"
+#include "fdman.h"
 
 
 extern void * _end;
@@ -84,54 +84,6 @@ int64_t __transform64_errno(int64_t res) {
 }
 #else
 int64_t __transform64_errno(int64_t res);
-#endif
-
-#ifdef F___fill_stat
-static time_t io_to_posix_time(const unsigned char *ps2time)
-{
-        struct tm tim;
-        tim.tm_sec  = ps2time[1];
-        tim.tm_min  = ps2time[2];
-        tim.tm_hour = ps2time[3];
-        tim.tm_mday = ps2time[4];
-        tim.tm_mon  = ps2time[5] - 1;
-        tim.tm_year = ((u16)ps2time[6] | ((u16)ps2time[7] << 8)) - 1900;
-        return mktime(&tim);
-}
-
-static mode_t io_to_posix_mode(unsigned int ps2mode)
-{
-        mode_t posixmode = 0;
-        if (ps2mode & FIO_SO_IFREG) posixmode |= S_IFREG;
-        if (ps2mode & FIO_SO_IFDIR) posixmode |= S_IFDIR;
-        if (ps2mode & FIO_SO_IROTH) posixmode |= S_IRUSR|S_IRGRP|S_IROTH;
-        if (ps2mode & FIO_SO_IWOTH) posixmode |= S_IWUSR|S_IWGRP|S_IWOTH;
-        if (ps2mode & FIO_SO_IXOTH) posixmode |= S_IXUSR|S_IXGRP|S_IXOTH;
-        return posixmode;
-}
-
-void __fill_stat(struct stat *stat, const io_stat_t *fiostat)
-{
-        stat->st_dev = 0;
-        stat->st_ino = 0;
-        stat->st_mode = io_to_posix_mode(fiostat->mode);
-        stat->st_nlink = 0;
-        stat->st_uid = 0;
-        stat->st_gid = 0;
-        stat->st_rdev = 0;
-        stat->st_size = ((off_t)fiostat->hisize << 32) | (off_t)fiostat->size;
-        stat->st_atime = io_to_posix_time(fiostat->atime);
-        stat->st_mtime = io_to_posix_time(fiostat->mtime);
-        stat->st_ctime = io_to_posix_time(fiostat->ctime);
-        stat->st_blksize = 16*1024;
-        stat->st_blocks = stat->st_size / 512;
-}
-#else
-void __fill_stat(struct stat *stat, const io_stat_t *fiostat);
-#endif
-
-#ifdef F__ps2sdk_ioctl
-int (*_ps2sdk_ioctl)(int, int, void*) = fioIoctl;
 #endif
 
 #define IOP_O_RDONLY       0x0001
@@ -182,9 +134,9 @@ void compile_time_check() {
 }
 #endif
 
-#ifdef F__open
-/* Normalize a pathname by removing . and .. components, duplicated /, etc. */
-static char* normalize_path(const char *path_name)
+#ifdef F___normalized_path
+/* Sanitize a pathname by removing . and .. components, duplicated /, etc. */
+static char* sanitize_path(const char *path_name)
 {
 	int i, j;
 	int first, next;
@@ -248,27 +200,12 @@ static int isCdromPath(const char *path)
 	return !strncmp(path, "cdrom0:", 7) || !strncmp(path, "cdrom:", 6);
 }
 
-int (*_ps2sdk_open)(const char*, int, ...) = (void *)fioOpen;
-
-int _open(const char *buf, int flags, ...) {
-	int iop_flags = 0;
-
-	// newlib frags differ from iop flags
-	if ((flags & 3) == O_RDONLY) iop_flags |= IOP_O_RDONLY;
-	if ((flags & 3) == O_WRONLY) iop_flags |= IOP_O_WRONLY;
-	if ((flags & 3) == O_RDWR  ) iop_flags |= IOP_O_RDWR;
-	if (flags & O_NONBLOCK)      iop_flags |= IOP_O_NBLOCK;
-	if (flags & O_APPEND)        iop_flags |= IOP_O_APPEND;
-	if (flags & O_CREAT)         iop_flags |= IOP_O_CREAT;
-	if (flags & O_TRUNC)         iop_flags |= IOP_O_TRUNC;
-	if (flags & O_EXCL)          iop_flags |= IOP_O_EXCL;
-	//if (flags & O_???)           iop_flags |= IOP_O_NOWAIT;
-
-	char *t_fname = normalize_path(buf);
-	char b_fname[FILENAME_MAX];
+char *__normalized_path(const char *originalPath)
+{
+	const char *buf = sanitize_path(originalPath);
+	static char b_fname[FILENAME_MAX];
 
 	if (!strchr(buf, ':')) { // filename doesn't contain device
-		t_fname = b_fname;
 		if (buf[0] == '/' || buf[0] == '\\') {   // does it contain root ?
 			char *device_end = strchr(__direct_pwd, ':');
 			if (device_end) {      // yes, let's strip pwd a bit to keep device only
@@ -312,81 +249,192 @@ int _open(const char *buf, int flags, ...) {
 		}
 	}
 
-	return __transform_errno(_ps2sdk_open(t_fname, iop_flags));
+	return (char *)b_fname;
+}
+#else
+extern char *__normalized_path(const char *path_name);
+#endif
+
+#ifdef F__open
+int _open(const char *buf, int flags, ...) {
+	int iop_flags = 0;
+	int is_dir = 0;
+	int iop_fd, fd;
+
+	// newlib frags differ from iop flags
+	if ((flags & 3) == O_RDONLY) iop_flags |= IOP_O_RDONLY;
+	if ((flags & 3) == O_WRONLY) iop_flags |= IOP_O_WRONLY;
+	if ((flags & 3) == O_RDWR  ) iop_flags |= IOP_O_RDWR;
+	if (flags & O_NONBLOCK)      iop_flags |= IOP_O_NBLOCK;
+	if (flags & O_APPEND)        iop_flags |= IOP_O_APPEND;
+	if (flags & O_CREAT)         iop_flags |= IOP_O_CREAT;
+	if (flags & O_TRUNC)         iop_flags |= IOP_O_TRUNC;
+	if (flags & O_EXCL)          iop_flags |= IOP_O_EXCL;
+	//if (flags & O_???)           iop_flags |= IOP_O_NOWAIT;
+	if (flags & O_DIRECTORY) {
+		iop_flags |= IOP_O_DIROPEN;
+		is_dir = 1;
+	}
+
+	char *t_fname = __normalized_path(buf);
+	iop_fd = is_dir ? _ps2sdk_dopen(t_fname) : _ps2sdk_open(t_fname, iop_flags);
+	if (iop_fd >= 0) {
+		fd = __fdman_get_new_descriptor();
+		if (fd != -1) {
+			__descriptormap[fd]->descriptor = iop_fd;
+			__descriptormap[fd]->type = is_dir ? __DESCRIPTOR_TYPE_FOLDER : __DESCRIPTOR_TYPE_FILE;
+			__descriptormap[fd]->flags = flags;
+			__descriptormap[fd]->filename = strdup(t_fname);
+			return fd;
+		}
+		else {
+			is_dir ? _ps2sdk_dclose(iop_fd) : _ps2sdk_close(iop_fd);
+			errno = ENOMEM;
+			return -1;
+		}
+	} 
+	else {
+		return __transform_errno(iop_fd);
+	}
 }
 #endif
 
 #ifdef F__close
-int (*_ps2sdk_close)(int) = fioClose;
-
 int _close(int fd) {
-	return __transform_errno(_ps2sdk_close(fd));
+	int ret = 0;
+
+	if (!__IS_FD_VALID(fd)) {
+		errno = EBADF;
+		return -1;
+	}
+
+	switch(__descriptormap[fd]->type)
+	{
+		case __DESCRIPTOR_TYPE_FILE:
+		case __DESCRIPTOR_TYPE_TTY:
+			if (__descriptormap[fd]->ref_count == 1) {
+				ret = __transform_errno(_ps2sdk_close(__descriptormap[fd]->descriptor));
+			}
+			__fdman_release_descriptor(fd);
+			return ret;
+			break;
+		case __DESCRIPTOR_TYPE_FOLDER:
+			if (__descriptormap[fd]->ref_count == 1) {
+				ret = __transform_errno(_ps2sdk_dclose(__descriptormap[fd]->descriptor));
+			}
+			__fdman_release_descriptor(fd);
+			return ret;
+			break;
+		case __DESCRIPTOR_TYPE_PIPE:
+			// Not supported yet
+			break;
+		case __DESCRIPTOR_TYPE_SOCKET:
+			// Not supported yet
+			break;
+		default:
+			break;
+	}
+
+	errno = EBADF;
+	return -1;
 }
 #endif
 
 #ifdef F__read
-int (*_ps2sdk_read)(int, void*, int) = fioRead;
-
 int _read(int fd, void *buf, size_t nbytes) {
-	return __transform_errno(_ps2sdk_read(fd, buf, nbytes));
+	if (!__IS_FD_VALID(fd)) {
+		errno = EBADF;
+		return -1;
+	}
+
+	switch(__descriptormap[fd]->type)
+	{
+		case __DESCRIPTOR_TYPE_FILE:
+		case __DESCRIPTOR_TYPE_TTY:
+			return __transform_errno(_ps2sdk_read(__descriptormap[fd]->descriptor, buf, nbytes));
+			break;
+		case __DESCRIPTOR_TYPE_PIPE:
+			break;
+		case __DESCRIPTOR_TYPE_SOCKET:
+			break;
+		default:
+			break;
+	}
+
+	errno = EBADF;
+	return -1;
 }
 #endif
 
 #ifdef F__write
-int (*_ps2sdk_write)(int, const void*, int) = fioWrite;
-
 int _write(int fd, const void *buf, size_t nbytes) {
-	// HACK: stdout and strerr to serial
-	//if ((fd==1) || (fd==2))
-	//	return sio_write((void *)buf, nbytes);
-
-	return __transform_errno(_ps2sdk_write(fd, buf, nbytes));
-}
-#endif
-
-#ifdef F__fstat
-int _fstat(int fd, struct stat *buf) {
-	if (fd >=0 && fd <= 1) {
-		// Character device
-		buf->st_mode = S_IFCHR;
-		buf->st_blksize = 0;
-	}
-	else {
-		// Block device
-		buf->st_mode = S_IFBLK;
-		buf->st_blksize = 16*1024;
+	if (!__IS_FD_VALID(fd)) {
+		errno = EBADF;
+		return -1;
 	}
 
-	return 0;
+	switch(__descriptormap[fd]->type)
+	{
+		case __DESCRIPTOR_TYPE_FILE:
+		case __DESCRIPTOR_TYPE_TTY:
+			return __transform_errno(_ps2sdk_write(__descriptormap[fd]->descriptor, buf, nbytes));
+			break;
+		case __DESCRIPTOR_TYPE_PIPE:
+			break;
+		case __DESCRIPTOR_TYPE_SOCKET:
+			break;
+		default:
+			break;
+	}
+
+	errno = EBADF;
+	return -1;
 }
-#else
-int _fstat(int fd, struct stat *buf);
 #endif
 
 #ifdef F__stat
-static int fioGetstatHelper(const char *path, struct stat *buf) {
-        io_stat_t fiostat;
-
-        if (fioGetstat(path, &fiostat) < 0) {
-			errno = ENOENT;
-			return -1;
-        }
-
-        __fill_stat(buf, &fiostat);
-
-        return 0;
-}
-
-int (*_ps2sdk_stat)(const char *path, struct stat *buf) = fioGetstatHelper;
-
 int _stat(const char *path, struct stat *buf) {
-    return __transform_errno(_ps2sdk_stat(path, buf));
+	const char *normalized = __normalized_path(path);
+    return __transform_errno(_ps2sdk_stat(normalized, buf));
 }
 #endif
 
 #ifdef F_lstat
 int lstat(const char *path, struct stat *buf) {
-    return __transform_errno(stat(path, buf));
+	const char *normalized = __normalized_path(path);
+    return __transform_errno(stat(normalized, buf));
+}
+#endif
+
+#ifdef F__fstat
+int _fstat(int fd, struct stat *buf) {
+	int ret;
+	if (!__IS_FD_VALID(fd)) {
+		errno = EBADF;
+		return -1;
+	}
+
+	switch(__descriptormap[fd]->type)
+	{
+		case __DESCRIPTOR_TYPE_TTY:
+			memset(buf, '\0', sizeof(struct stat));
+			buf->st_mode = S_IFCHR;
+			return 0;
+			break;		
+		case __DESCRIPTOR_TYPE_FILE:
+			if (__descriptormap[fd]->filename != NULL) {
+				ret = stat(__descriptormap[fd]->filename, buf);
+				return ret;
+			}
+			break;
+		case __DESCRIPTOR_TYPE_PIPE:
+		case __DESCRIPTOR_TYPE_SOCKET:
+		default:
+			break;
+	}
+
+	errno = EBADF;
+	return -1;
 }
 #endif
 
@@ -400,184 +448,188 @@ int access(const char *fn, int flags) {
 	if (flags & W_OK) {
 		if (s.st_mode & S_IWRITE)
 			return 0;
+		errno = EACCES;
 		return -1;
 	}
 	return 0;
 }
 #endif
 
-#ifdef F_opendir
-static DIR *fioOpendirHelper(const char *path)
+#ifdef F__fcntl
+int _fcntl(int fd, int cmd, ...)
 {
-	int dd;
-	DIR *dir;
-
-	dd = fioDopen(path);
-	if (dd < 0) {
-		errno = ENOENT;
-		return NULL;
-	}
-
-	dir = malloc(sizeof(DIR));
-	dir->dd_fd = dd;
-	dir->dd_buf = malloc(sizeof(struct dirent));
-
-	return dir;
-}
-
-DIR * (*_ps2sdk_opendir)(const char *path) = fioOpendirHelper;
-
-DIR *opendir(const char *path)
-{
-    return _ps2sdk_opendir(path);
-}
-#endif
-
-#ifdef F_readdir
-static struct dirent *fioReaddirHelper(DIR *dir)
-{
-	int rv;
-	struct dirent *de;
-	io_dirent_t fiode;
-
-	if(dir == NULL) {
+	if (!__IS_FD_VALID(fd)) {
 		errno = EBADF;
-		return NULL;
+		return -1;
 	}
 
-	de = (struct dirent *)dir->dd_buf;
-	rv = fioDread(dir->dd_fd, &fiode);
-	if (rv <= 0) {
-		errno = -rv;
-		return NULL;
+	switch (cmd)
+	{
+		case F_DUPFD:
+		{
+			return __fdman_get_dup_descriptor(fd);
+			break;
+		}
+		case F_GETFL:
+		{
+			return __descriptormap[fd]->flags;
+			break;
+		}
+		case F_SETFL:
+		{
+			int newfl;
+			va_list args;
+	
+			va_start (args, cmd);         /* Initialize the argument list. */
+			newfl =  va_arg(args, int);
+			va_end (args);                /* Clean up. */
+
+			__descriptormap[fd]->flags = newfl;
+
+			switch(__descriptormap[fd]->type)
+			{
+				case __DESCRIPTOR_TYPE_FILE:
+					break;
+				case __DESCRIPTOR_TYPE_PIPE:
+					break;
+				case __DESCRIPTOR_TYPE_SOCKET:
+					break;
+				default:
+					break;
+			}
+			return 0;
+			break;
+		}
 	}
 
-	__fill_stat(&de->d_stat, &fiode.stat);
-	strncpy(de->d_name, fiode.name, 255);
-	de->d_name[255] = 0;
-
-	return de;
+	errno = EBADF;
+	return -1;
 }
+#endif /* F__fcntl */
 
-struct dirent * (*_ps2sdk_readdir)(DIR *dir) = fioReaddirHelper;
-
-struct dirent *readdir(DIR *dir)
+#ifdef F_getdents
+int getdents(int fd, void *dd_buf, int count)
 {
-    return _ps2sdk_readdir(dir);
+	struct dirent *dirp;
+	int rv, read;
+
+	read = 0;
+	dirp = (struct dirent *)dd_buf;
+
+   rv = _ps2sdk_dread(__descriptormap[fd]->descriptor, dirp);
+   if (rv < 0) {
+      return __transform_errno(rv);
+   } else if (rv == 0) {
+      return read;
+   }
+
+   read += sizeof(struct dirent);	
+   dirp->d_reclen = count;
+
+	return read;
 }
 #endif
 
-#ifdef F_rewinddir
-static void fioRewinddirHelper(DIR *dir)
-{
-	(void)dir;
-	errno = ENOSYS;
-	printf("rewinddir not implemented\n");
-}
 
-void (*_ps2sdk_rewinddir)(DIR *dir) = fioRewinddirHelper;
-
-void rewinddir(DIR *dir)
-{
-    return _ps2sdk_rewinddir(dir);
-}
-#endif
-
-#ifdef F_closedir
-static int fioClosedirHelper(DIR *dir)
-{
-	int res;
-
-	if(dir == NULL) {
-		return -EBADF;
-	}
-
-	res = fioDclose(dir->dd_fd);
-	free(dir->dd_buf);
-	free(dir);
-
-	return res;
-}
-
-int (*_ps2sdk_closedir)(DIR *dir) = fioClosedirHelper;
-
-int closedir(DIR *dir)
-{
-    return __transform_errno(_ps2sdk_closedir(dir));
-}
-#endif
 
 #ifdef F__lseek
-int (*_ps2sdk_lseek)(int, int, int) = fioLseek;
+static off_t _lseekDir(int fd, off_t offset, int whence)
+{
+	int i;
+	int uid;
+	struct dirent dir;
+
+	if (whence != SEEK_SET || __descriptormap[fd]->filename == NULL) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	_ps2sdk_dclose(__descriptormap[fd]->descriptor);
+	uid = _ps2sdk_dopen(__descriptormap[fd]->filename);
+	__descriptormap[fd]->descriptor = uid;
+	for (i = 0; i < offset; i++) {
+		_ps2sdk_dread(uid, &dir);
+	}
+
+	return offset;
+}
 
 off_t _lseek(int fd, off_t offset, int whence)
 {
-	return __transform_errno(_ps2sdk_lseek(fd, offset, whence));
+	if (!__IS_FD_VALID(fd)) {
+		errno = EBADF;
+		return -1;
+	}
+
+	switch(__descriptormap[fd]->type)
+	{
+		case __DESCRIPTOR_TYPE_FILE:
+			return __transform_errno(_ps2sdk_lseek(__descriptormap[fd]->descriptor, offset, whence));
+			break;
+		case __DESCRIPTOR_TYPE_FOLDER:
+			return _lseekDir(fd, offset, whence);
+			break;
+		case __DESCRIPTOR_TYPE_PIPE:
+			break;
+		case __DESCRIPTOR_TYPE_SOCKET:
+			break;
+		default:
+			break;
+	}
+
+	errno = EBADF;
+	return -1;
 }
 #endif
 
 #ifdef F_lseek64
-int64_t (*_ps2sdk_lseek64)(int, int64_t, int) = NULL;
-
 off64_t lseek64(int fd, off64_t offset, int whence)
 {
-    if (_ps2sdk_lseek64 == NULL)
-        return EOVERFLOW;
-
     return __transform64_errno(_ps2sdk_lseek64(fd, offset, whence));
 }
 #endif
 
 #ifdef F_chdir
 int chdir(const char *path) {
-    strcpy(__direct_pwd, path);
+	const char *normalized = __normalized_path(path);
+    strcpy(__direct_pwd, normalized);
     return 0;
 }
 #endif
 
 #ifdef F_mkdir
-int fioMkdirHelper(const char *path, int mode) {
-  // Old fio mkdir has no mode argument
-	(void)mode;
-
-  return fioMkdir(path);
-}
-
-int (*_ps2sdk_mkdir)(const char*, int) = fioMkdirHelper;
-
 int mkdir(const char *path, mode_t mode) {
-    return __transform_errno(_ps2sdk_mkdir(path, mode));
+	const char *normalized = __normalized_path(path);
+    return __transform_errno(_ps2sdk_mkdir(normalized, mode));
 }
 #endif
 
 #ifdef F_rmdir
-int (*_ps2sdk_rmdir)(const char*) = fioRmdir;
-
 int rmdir(const char *path) {
-    return __transform_errno(_ps2sdk_rmdir(path));
+	const char *normalized = __normalized_path(path);
+    return __transform_errno(_ps2sdk_rmdir(normalized));
 }
 #endif
 
 #ifdef F__link
-int fioRename(const char *old, const char *new) {
-	(void)old;
-	(void)new;
-
-  return -ENOSYS;
-}
-
-int (*_ps2sdk_rename)(const char*, const char*) = fioRename;
-
 int _link(const char *old, const char *new) {
-    return __transform_errno(_ps2sdk_rename(old, new));
+    errno = ENOSYS;
+	return -1; /* not supported */
 }
 #endif
 
 #ifdef F__unlink
-int (*_ps2sdk_remove)(const char*) = fioRemove;
-
 int _unlink(const char *path) {
-    return __transform_errno(_ps2sdk_remove(path));
+	const char *normalized = __normalized_path(path);
+    return __transform_errno(_ps2sdk_remove(normalized));
+}
+#endif
+
+#ifdef F__rename
+int _rename(const char *old, const char *new) {
+	const char *normalized_old = __normalized_path(old);
+	const char *normalized_new = __normalized_path(new);
+    return __transform_errno(_ps2sdk_rename(normalized_old, normalized_new));
 }
 #endif
 
@@ -777,31 +829,19 @@ int truncate(const char *path, off_t length)
 #endif
 
 #ifdef F_symlink
-static int _default_symlink(const char *target, const char *linkpath)
-{
-	return link(target, linkpath);
-}
-
-int (*_ps2sdk_symlink)(const char *target, const char *linkpath) = _default_symlink;
-
 int symlink(const char *target, const char *linkpath)
 {
-  return __transform_errno(_ps2sdk_symlink(target, linkpath));
+	const char *normalized_target = __normalized_path(target);
+	const char *normalized_linkpath = __normalized_path(linkpath);
+	return __transform_errno(_ps2sdk_symlink(normalized_target, normalized_linkpath));
 }
 #endif
 
 #ifdef F_readlink
-static ssize_t _default_readlink(const char *path, char *buf, size_t bufsiz)
-{
-	errno = ENOSYS;
-	return -1; /* not supported */
-}
-
-int (*_ps2sdk_readlink)(const char *path, char *buf, size_t bufsiz) = _default_readlink;
-
 ssize_t readlink(const char *path, char *buf, size_t bufsiz)
 {
-	return 	_ps2sdk_readlink(path, buf, bufsiz);
+	const char *normalized = __normalized_path(path);
+	return 	__transform_errno(_ps2sdk_readlink(normalized, buf, bufsiz));
 }
 #endif
 

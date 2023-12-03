@@ -20,6 +20,25 @@ static const char *test_fopen_fclose(void *arg)
     return NULL;
 }
 
+static const char *test_create_remove(void *arg)
+{
+    FILE *fp = fopen((char *)arg, "wt");
+    if (fp == NULL)
+    {
+        return "failed to create test file";
+    }
+
+    fclose(fp);
+
+    if (remove((char *)arg) != 0)
+    {
+        return "failed to remove test file";
+    }
+
+    printf("\nSUCCESS: all checks passed\n");
+    return NULL;
+}
+
 static const char *test_fgets(void *arg)
 {
     char buf[64], *ret;
@@ -428,25 +447,18 @@ int libc_add_tests(test_suite *p)
     const char *textfile, *textfile2, *invalidtextfile;
     const char *dir, *dir2;
 
-#ifdef _EE
-    textfile        = "host:testfiles/dummy";
-    textfile2       = "host:testfiles/dummy2";
-    invalidtextfile = "host:testfiles/invalidtextfile"; // This file shouldn't exist
-    dir             = "host:testfiles/";
-    dir2            = "host:dummydir/";
-#else
     textfile        = "testfiles/dummy";
     textfile2       = "testfiles/dummy2";
     invalidtextfile = "testfiles/invalidtextfile";
     dir             = "testfiles/";
     dir2            = "dummydir/";
-#endif
 
     /* If testing using usbd/usbhdfsd or ps2hdd/ps2fs, this adds a 10
        second delay so that the devices can initialize fully.
     sleep(10); */
 
     add_test(p, "fopen, fclose\n", test_fopen_fclose, (void *)textfile);
+    add_test(p, "create, remove\n", test_create_remove, (void *)textfile2);
     add_test(p, "fgets\n", test_fgets, (void *)textfile);
     add_test(p, "fread\n", test_fread, (void *)textfile);
     add_test(p, "fwrite\n", test_fwrite, (void *)textfile2);

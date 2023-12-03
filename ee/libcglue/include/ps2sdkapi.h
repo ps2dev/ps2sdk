@@ -33,10 +33,9 @@ extern int (*_ps2sdk_stat)(const char *path, struct stat *buf);
 extern int (*_ps2sdk_readlink)(const char *path, char *buf, size_t bufsiz);
 extern int (*_ps2sdk_symlink)(const char *target, const char *linkpath);
 
-extern DIR * (*_ps2sdk_opendir)(const char *path);
-extern struct dirent * (*_ps2sdk_readdir)(DIR *dir);
-extern void (*_ps2sdk_rewinddir)(DIR *dir);
-extern int (*_ps2sdk_closedir)(DIR *dir);
+extern int (*_ps2sdk_dopen)(const char *path);
+extern int (*_ps2sdk_dread)(int fd, struct dirent *dir);
+extern int (*_ps2sdk_dclose)(int fd);
 
 #define PS2_CLOCKS_PER_SEC kBUSCLKBY256 // 576.000
 #define PS2_CLOCKS_PER_MSEC (PS2_CLOCKS_PER_SEC / 1000) // 576
