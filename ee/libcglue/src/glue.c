@@ -43,15 +43,11 @@
 #include "timer_alarm.h"
 #include "fdman.h"
 
+/* Functions from cwd.c */
+extern char __cwd[MAXNAMLEN + 1];
+int __path_absolute(const char *in, char *out, int len);
 
 extern void * _end;
-
-#ifdef F___direct_pwd
-/* the present working directory variable. */
-char __direct_pwd[256] = "";
-#else
-extern char __direct_pwd[256];
-#endif
 
 #ifdef F___dummy_passwd
 /* the present working directory variable. */
@@ -134,132 +130,17 @@ void compile_time_check() {
 }
 #endif
 
-#ifdef F___normalized_path
-/* Sanitize a pathname by removing . and .. components, duplicated /, etc. */
-static char* sanitize_path(const char *path_name)
-{
-	int i, j;
-	int first, next;
-	static char out[255];
-
-	/* First copy the path into our temp buffer */
-	strcpy(out, path_name);
-	/* Then append "/" to make the rest easier */
-	strcat(out,"/");
-
-	/* Convert "//" to "/" */
-	for(i=0; out[i+1]; i++) {
-		if(out[i]=='/' && out[i+1]=='/') {
-			for(j=i+1; out[j]; j++)
-					out[j] = out[j+1];
-			i--;
-		;}
-	}
-
-	/* Convert "/./" to "/" */
-	for(i=0; out[i] && out[i+1] && out[i+2]; i++) {
-		if(out[i]=='/' && out[i+1]=='.' && out[i+2]=='/') {
-			for(j=i+1; out[j]; j++)
-					out[j] = out[j+2];
-			i--;
-		}
-	}
-
-	/* Convert "/path/../" to "/" until we can't anymore.  Also convert leading
-	 * "/../" to "/" */
-	first = next = 0;
-	while(1) {
-		/* If a "../" follows, remove it and the parent */
-		if(out[next+1] && out[next+1]=='.' &&
-			out[next+2] && out[next+2]=='.' &&
-			out[next+3] && out[next+3]=='/') {
-			for(j=0; out[first+j+1]; j++)
-				out[first+j+1] = out[next+j+4];
-			first = next = 0;
-			continue;
-		}
-
-		/* Find next slash */
-		first = next;
-		for(next=first+1; out[next] && out[next] != '/'; next++)
-			continue;
-		if(!out[next]) break;
-	}
-
-	/* Remove trailing "/" */
-	for(i=1; out[i]; i++)
-		continue;
-	if(i >= 1 && out[i-1] == '/')
-		out[i-1] = 0;
-
-	return (char*)out;
-}
-
-static int isCdromPath(const char *path)
-{
-	return !strncmp(path, "cdrom0:", 7) || !strncmp(path, "cdrom:", 6);
-}
-
-char *__normalized_path(const char *originalPath)
-{
-	const char *buf = sanitize_path(originalPath);
-	static char b_fname[FILENAME_MAX];
-
-	if (!strchr(buf, ':')) { // filename doesn't contain device
-		if (buf[0] == '/' || buf[0] == '\\') {   // does it contain root ?
-			char *device_end = strchr(__direct_pwd, ':');
-			if (device_end) {      // yes, let's strip pwd a bit to keep device only
-				strncpy(b_fname, __direct_pwd, device_end - __direct_pwd);
-				strcpy(b_fname + (device_end - __direct_pwd), buf);
-			} else {               // but pwd doesn't contain any device, let's default to host
-				strcpy(b_fname, "host:");
-				strcpy(b_fname + 5, buf);
-			}
-		} else {                 // otherwise, it's relative directory, let's copy pwd straight
-			int b_fname_len = strlen(__direct_pwd);
-			if (!strchr(__direct_pwd, ':')) { // check if pwd contains device name
-				strcpy(b_fname, "host:");
-				strcpy(b_fname + 5, __direct_pwd);
-				if (!(__direct_pwd[b_fname_len - 1] == '/' || __direct_pwd[b_fname_len - 1] == '\\')) { // does it has trailing slash ?
-					if(isCdromPath(b_fname)) {
-						b_fname[b_fname_len + 5] = '\\';
-						b_fname_len++;
-					} else {
-						b_fname[b_fname_len + 5] = '/';
-						b_fname_len++;
-					}
-				}
-				b_fname_len += 5;
-				strcpy(b_fname + b_fname_len, buf);
-			} else {                          // device name is here
-				if (b_fname_len) {
-				strcpy(b_fname, __direct_pwd);
-				if (!(b_fname[b_fname_len - 1] == '/' || b_fname[b_fname_len - 1] == '\\')) {
-					if(isCdromPath(b_fname)) {
-						b_fname[b_fname_len] = '\\';
-						b_fname_len++;
-					} else {
-						b_fname[b_fname_len] = '/';
-						b_fname_len++;
-					}
-				}
-				strcpy(b_fname + b_fname_len, buf);
-				}
-			}
-		}
-	}
-
-	return (char *)b_fname;
-}
-#else
-extern char *__normalized_path(const char *path_name);
-#endif
-
 #ifdef F__open
 int _open(const char *buf, int flags, ...) {
 	int iop_flags = 0;
 	int is_dir = 0;
 	int iop_fd, fd;
+	char t_fname[MAXNAMLEN + 1];
+
+	if(__path_absolute(buf, t_fname, MAXNAMLEN) < 0) {
+		errno = ENAMETOOLONG;
+		return -1;
+	}
 
 	// newlib frags differ from iop flags
 	if ((flags & 3) == O_RDONLY) iop_flags |= IOP_O_RDONLY;
@@ -276,7 +157,6 @@ int _open(const char *buf, int flags, ...) {
 		is_dir = 1;
 	}
 
-	char *t_fname = __normalized_path(buf);
 	iop_fd = is_dir ? _ps2sdk_dopen(t_fname) : _ps2sdk_open(t_fname, iop_flags);
 	if (iop_fd >= 0) {
 		fd = __fdman_get_new_descriptor();
@@ -394,15 +274,27 @@ int _write(int fd, const void *buf, size_t nbytes) {
 
 #ifdef F__stat
 int _stat(const char *path, struct stat *buf) {
-	const char *normalized = __normalized_path(path);
-    return __transform_errno(_ps2sdk_stat(normalized, buf));
+	char dest[MAXNAMLEN + 1];
+
+	if(__path_absolute(path, dest, MAXNAMLEN) < 0) {
+		errno = ENAMETOOLONG;
+		return -1;
+	}
+
+	return __transform_errno(_ps2sdk_stat(dest, buf));
 }
 #endif
 
 #ifdef F_lstat
 int lstat(const char *path, struct stat *buf) {
-	const char *normalized = __normalized_path(path);
-    return __transform_errno(stat(normalized, buf));
+	char dest[MAXNAMLEN + 1];
+
+	if(__path_absolute(path, dest, MAXNAMLEN) < 0) {
+		errno = ENAMETOOLONG;
+		return -1;
+	}
+	
+	return __transform_errno(stat(dest, buf));
 }
 #endif
 
@@ -518,9 +410,9 @@ int getdents(int fd, void *dd_buf, int count)
 
    rv = _ps2sdk_dread(__descriptormap[fd]->descriptor, dirp);
    if (rv < 0) {
-      return __transform_errno(rv);
+		return __transform_errno(rv);
    } else if (rv == 0) {
-      return read;
+		return read;
    }
 
    read += sizeof(struct dirent);	
@@ -585,58 +477,85 @@ off_t _lseek(int fd, off_t offset, int whence)
 #ifdef F_lseek64
 off64_t lseek64(int fd, off64_t offset, int whence)
 {
-    return __transform64_errno(_ps2sdk_lseek64(fd, offset, whence));
+	return __transform64_errno(_ps2sdk_lseek64(fd, offset, whence));
 }
 #endif
 
 #ifdef F_chdir
 int chdir(const char *path) {
-	const char *normalized = __normalized_path(path);
-    strcpy(__direct_pwd, normalized);
-    return 0;
+	char dest[MAXNAMLEN + 1];
+
+	if(__path_absolute(path, dest, MAXNAMLEN) < 0) {
+		errno = ENAMETOOLONG;
+		return -1;
+	}
+
+	strcpy(__cwd, dest);
+	return 0;
 }
 #endif
 
 #ifdef F_mkdir
 int mkdir(const char *path, mode_t mode) {
-	const char *normalized = __normalized_path(path);
-    return __transform_errno(_ps2sdk_mkdir(normalized, mode));
+	char dest[MAXNAMLEN + 1];
+
+	if(__path_absolute(path, dest, MAXNAMLEN) < 0) {
+		errno = ENAMETOOLONG;
+		return -1;
+	}
+
+	return __transform_errno(_ps2sdk_mkdir(dest, mode));
 }
 #endif
 
 #ifdef F_rmdir
 int rmdir(const char *path) {
-	const char *normalized = __normalized_path(path);
-    return __transform_errno(_ps2sdk_rmdir(normalized));
+	char dest[MAXNAMLEN + 1];
+
+	if(__path_absolute(path, dest, MAXNAMLEN) < 0) {
+		errno = ENAMETOOLONG;
+		return -1;
+	}
+
+	return __transform_errno(_ps2sdk_rmdir(dest));
 }
 #endif
 
 #ifdef F__link
 int _link(const char *old, const char *new) {
-    errno = ENOSYS;
+	errno = ENOSYS;
 	return -1; /* not supported */
 }
 #endif
 
 #ifdef F__unlink
 int _unlink(const char *path) {
-	const char *normalized = __normalized_path(path);
-    return __transform_errno(_ps2sdk_remove(normalized));
+	char dest[MAXNAMLEN + 1];
+	if(__path_absolute(path, dest, MAXNAMLEN) < 0) {
+		errno = ENAMETOOLONG;
+		return -1;
+	}
+
+	return __transform_errno(_ps2sdk_remove(dest));
 }
 #endif
 
 #ifdef F__rename
 int _rename(const char *old, const char *new) {
-	const char *normalized_old = __normalized_path(old);
-	const char *normalized_new = __normalized_path(new);
-    return __transform_errno(_ps2sdk_rename(normalized_old, normalized_new));
-}
-#endif
+	char oldname[MAXNAMLEN + 1];
+	char newname[MAXNAMLEN + 1];
 
-#ifdef F_getcwd
-char *getcwd(char *buf, size_t len) {
-	strncpy(buf, __direct_pwd, len);
-	return buf;
+	if(__path_absolute(old, oldname, MAXNAMLEN) < 0) {
+		errno = ENAMETOOLONG;
+		return -1;
+	}
+
+	if(__path_absolute(new, newname, MAXNAMLEN) < 0) {
+		errno = ENAMETOOLONG;
+		return -1;
+	}
+
+	return __transform_errno(_ps2sdk_rename(oldname, newname));
 }
 #endif
 
@@ -800,8 +719,8 @@ int clock_settime(clockid_t clk_id, const struct timespec *tp) {
 int truncate(const char *path, off_t length)
 {
 	ssize_t bytes_read;
-    int fd, res;
-    char buff[length];
+	int fd, res;
+	char buff[length];
 
 	fd = open(path, O_RDONLY);
 	if (fd < 0) {
@@ -831,17 +750,33 @@ int truncate(const char *path, off_t length)
 #ifdef F_symlink
 int symlink(const char *target, const char *linkpath)
 {
-	const char *normalized_target = __normalized_path(target);
-	const char *normalized_linkpath = __normalized_path(linkpath);
-	return __transform_errno(_ps2sdk_symlink(normalized_target, normalized_linkpath));
+	char dest_target[MAXNAMLEN + 1];
+	char dest_linkpath[MAXNAMLEN + 1];
+
+	if(__path_absolute(target, dest_target, MAXNAMLEN) < 0) {
+		errno = ENAMETOOLONG;
+		return -1;
+	}
+
+	if(__path_absolute(linkpath, dest_linkpath, MAXNAMLEN) < 0) {
+		errno = ENAMETOOLONG;
+		return -1;
+	}
+
+	return __transform_errno(_ps2sdk_symlink(dest_target, dest_linkpath));
 }
 #endif
 
 #ifdef F_readlink
 ssize_t readlink(const char *path, char *buf, size_t bufsiz)
 {
-	const char *normalized = __normalized_path(path);
-	return 	__transform_errno(_ps2sdk_readlink(normalized, buf, bufsiz));
+	char dest[MAXNAMLEN + 1];
+
+	if(__path_absolute(path, dest, MAXNAMLEN) < 0) {
+		errno = ENAMETOOLONG;
+		return -1;
+	}
+	return 	__transform_errno(_ps2sdk_readlink(dest, buf, bufsiz));
 }
 #endif
 
