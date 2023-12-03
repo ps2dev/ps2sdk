@@ -18,7 +18,6 @@
 #include <string.h>
 #endif
 #include <stdio.h>
-#include <atad.h>
 #include <hdd-ioctl.h>
 
 #include "apa-opt.h"

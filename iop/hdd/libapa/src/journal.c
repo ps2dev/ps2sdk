@@ -12,7 +12,6 @@
 
 #include <errno.h>
 #include <iomanX.h>
-#include <atad.h>
 #ifdef _IOP
 #include <sysclib.h>
 #else
@@ -23,17 +22,18 @@
 
 #include "apa-opt.h"
 #include "libapa.h"
+#include "hdd_blkio.h"
 
 //  Globals
 static apa_journal_t journalBuf;
 
 int apaJournalFlush(s32 device)
 {// this write any thing that in are journal buffer :)
-	if(ata_device_flush_cache(device))
+	if(blkIoFlushCache(device))
 		return -EIO;
-	if(ata_device_sector_io(device, &journalBuf, APA_SECTOR_APAL, 1, ATA_DIR_WRITE))
+	if(blkIoDmaTransfer(device, &journalBuf, APA_SECTOR_APAL, 1, BLKIO_DIR_WRITE))
 		return -EIO;
-	if(ata_device_flush_cache(device))
+	if(blkIoFlushCache(device))
 		return -EIO;
 	return 0;
 }
@@ -48,8 +48,8 @@ int apaJournalReset(s32 device)
 int apaJournalWrite(apa_cache_t *clink)
 {
 	clink->header->checksum=journalCheckSum(clink->header);
-	if(ata_device_sector_io(clink->device, clink->header,
-		(journalBuf.num << 1)+APA_SECTOR_APAL_HEADERS, 2, ATA_DIR_WRITE))
+	if(blkIoDmaTransfer(clink->device, clink->header,
+		(journalBuf.num << 1)+APA_SECTOR_APAL_HEADERS, 2, BLKIO_DIR_WRITE))
 			return -EIO;
 	journalBuf.sectors[journalBuf.num]=clink->sector;
 	journalBuf.num++;
@@ -62,7 +62,7 @@ int apaJournalRestore(s32 device)
 	u32 sector;
 
 	APA_PRINTF(APA_DRV_NAME": checking log...\n");
-	ret = ata_device_sector_io(device, &journalBuf, APA_SECTOR_APAL, sizeof(apa_journal_t)/512, ATA_DIR_READ) == 0 ? 0 : -EIO;
+	ret = blkIoDmaTransfer(device, &journalBuf, APA_SECTOR_APAL, sizeof(apa_journal_t)/512, BLKIO_DIR_READ) == 0 ? 0 : -EIO;
 	if((ret == 0) && (journalBuf.magic == APAL_MAGIC))
 	{
 		int i;
@@ -74,11 +74,11 @@ int apaJournalRestore(s32 device)
 		clink=apaCacheAlloc();
 		for(i=0, sector=APA_SECTOR_APAL_HEADERS;i<journalBuf.num;i++, sector+=2)
 		{
-			ret = (ata_device_sector_io(device, clink->header, sector, 2, ATA_DIR_READ) == 0) ? 0 : -EIO;
+			ret = (blkIoDmaTransfer(device, clink->header, sector, 2, BLKIO_DIR_READ) == 0) ? 0 : -EIO;
 			if(ret != 0)
 				break;
 
-			ret = (ata_device_sector_io(device, clink->header, journalBuf.sectors[i], 2, ATA_DIR_WRITE) == 0) ? 0 : -EIO;
+			ret = (blkIoDmaTransfer(device, clink->header, journalBuf.sectors[i], 2, BLKIO_DIR_WRITE) == 0) ? 0 : -EIO;
 			if(ret != 0)
 				break;
 		}
