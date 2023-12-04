@@ -30,6 +30,7 @@ int __get_drive(const char *d)
 	int i;
 	for(i=0; d[i]; i++) {
 		if(! ((d[i] >= 'a' && d[i] <= 'z') ||
+			  (d[i] >= 'A' && d[i] <= 'Z') ||
 		      (d[i] >= '0' && d[i] <= '9') ))
 			break;
 	}
