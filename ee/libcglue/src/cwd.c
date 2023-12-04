@@ -147,6 +147,11 @@ int __path_absolute(const char *in, char *out, int len)
 		/* It starts with "drive:/", so it's already absolute */
 		if(!__safe_strcpy(out, in, len))
 			return -1;
+	} else if(dr > 0 && in[dr - 1] == ':') {
+		/* It starts with "drive:", so it's already absoulte, however it misses the "/" after unit */
+		strncpy(out, in, dr);
+		out[dr] = '/';
+		strncpy(out + dr + 1, in + dr, len - dr - 1);
 	} else if(in[0] == '/') {
 		/* It's absolute, but missing the drive, so use cwd's drive */
 		if(strlen(__cwd) >= len)
