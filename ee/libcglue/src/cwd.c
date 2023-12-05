@@ -127,10 +127,10 @@ static int __path_normalize(char *out, int len)
 		if(!out[next]) break;
 	}
 
-	/* Remove trailing "/" */
+	/* Remove trailing "/" just if it's not the root */
 	for(i=1; out[i]; i++)
 		continue;
-	if(i >= 1 && out[i-1] == '/') 
+	if(i > 1 && out[i-1] == '/') 
 		out[i-1] = 0;
 
 	return 0;
