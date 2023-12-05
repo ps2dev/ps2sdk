@@ -30,6 +30,7 @@ int __get_drive(const char *d)
 	int i;
 	for(i=0; d[i]; i++) {
 		if(! ((d[i] >= 'a' && d[i] <= 'z') ||
+			  (d[i] >= 'A' && d[i] <= 'Z') ||
 		      (d[i] >= '0' && d[i] <= '9') ))
 			break;
 	}
@@ -126,10 +127,10 @@ static int __path_normalize(char *out, int len)
 		if(!out[next]) break;
 	}
 
-	/* Remove trailing "/" */
+	/* Remove trailing "/" just if it's not the root */
 	for(i=1; out[i]; i++)
 		continue;
-	if(i >= 1 && out[i-1] == '/') 
+	if(i > 1 && out[i-1] == '/') 
 		out[i-1] = 0;
 
 	return 0;
@@ -146,6 +147,11 @@ int __path_absolute(const char *in, char *out, int len)
 		/* It starts with "drive:/", so it's already absolute */
 		if(!__safe_strcpy(out, in, len))
 			return -1;
+	} else if(dr > 0 && in[dr - 1] == ':') {
+		/* It starts with "drive:", so it's already absoulte, however it misses the "/" after unit */
+		strncpy(out, in, dr);
+		out[dr] = '/';
+		strncpy(out + dr + 1, in + dr, len - dr - 1);
 	} else if(in[0] == '/') {
 		/* It's absolute, but missing the drive, so use cwd's drive */
 		if(strlen(__cwd) >= len)
