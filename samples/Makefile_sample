@@ -40,6 +40,7 @@ SUBDIRS += rpc/audsrv/playcdda
 SUBDIRS += rpc/audsrv/playwav
 SUBDIRS += rpc/audsrv/playwav2
 SUBDIRS += rpc/audsrv/testcd
+SUBDIRS += rpc/filexio
 #SUBDIRS += rpc/camera          #TODO: not modified for updated newlib
 #SUBDIRS += rpc/memorycard      #TODO: not modified for updated newlib
 SUBDIRS += rpc/mtap
