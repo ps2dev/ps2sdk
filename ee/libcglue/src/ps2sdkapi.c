@@ -24,53 +24,153 @@
 
 /** Inter-library helpers, default value */
 #ifdef F__ps2sdk_close
-int (*_ps2sdk_close)(int) = fioClose;
+int (*_ps2sdk_close)(int) = NULL;
 #endif
 
 #ifdef F__ps2sdk_open
-int (*_ps2sdk_open)(const char*, int, ...) = (void *)fioOpen;
+int (*_ps2sdk_open)(const char*, int, ...) = NULL;
 #endif
 
 #ifdef F__ps2sdk_read
-int (*_ps2sdk_read)(int, void*, int) = fioRead;
+int (*_ps2sdk_read)(int, void*, int) = NULL;
 #endif
 
 #ifdef F__ps2sdk_lseek
-int (*_ps2sdk_lseek)(int, int, int) = fioLseek;
+int (*_ps2sdk_lseek)(int, int, int) = NULL;
 #endif
 
 #ifdef F__ps2sdk_lseek64
+int64_t (*_ps2sdk_lseek64)(int, int64_t, int) = NULL;
+#endif
+
+#ifdef F__ps2sdk_write
+int (*_ps2sdk_write)(int, const void*, int) = NULL;
+#endif
+
+#ifdef F__ps2sdk_ioctl
+int (*_ps2sdk_ioctl)(int, int, void*) = NULL;
+#endif
+
+#ifdef F__ps2sdk_remove
+int (*_ps2sdk_remove)(const char*) = NULL;
+#endif
+
+#ifdef F__ps2sdk_rename
+int (*_ps2sdk_rename)(const char*, const char*) = NULL;
+#endif
+
+#ifdef F__ps2sdk_mkdir
+int (*_ps2sdk_mkdir)(const char*, int) = NULL;
+#endif
+
+#ifdef F__ps2sdk_rmdir
+int (*_ps2sdk_rmdir)(const char*) = NULL;
+#endif
+
+#ifdef F__ps2sdk_stat
+int (*_ps2sdk_stat)(const char *path, struct stat *buf) = NULL;
+#endif
+
+#ifdef F__ps2sdk_readlink
+int (*_ps2sdk_readlink)(const char *path, char *buf, size_t bufsiz) = NULL;
+#endif
+
+#ifdef F__ps2sdk_symlink
+int (*_ps2sdk_symlink)(const char *target, const char *linkpath) = NULL;
+#endif
+
+#ifdef F__ps2sdk_dopen
+int (*_ps2sdk_dopen)(const char *path) = NULL;
+#endif
+
+#ifdef F__ps2sdk_dread
+int (*_ps2sdk_dread)(int fd, struct dirent *dir) = NULL;
+#endif
+
+#ifdef F__ps2sdk_dclose
+int (*_ps2sdk_dclose)(int fd) = NULL;
+#endif
+
+/** Setting default weak fio functions */
+#ifdef F__set_ps2sdk_close
+__attribute__((weak))
+void _set_ps2sdk_close() {
+    _ps2sdk_close = fioClose;
+}
+#endif
+
+#ifdef F__set_ps2sdk_open
+static int fioOpenHelper(const char* path, int flags, ...) {
+  return fioOpen(path, flags);
+}
+
+__attribute__((weak))
+void _set_ps2sdk_open() {
+    _ps2sdk_open = fioOpenHelper;
+}
+#endif
+
+#ifdef F__set_ps2sdk_read
+__attribute__((weak))
+void _set_ps2sdk_read() {
+    _ps2sdk_read = fioRead;
+}
+#endif
+
+#ifdef F__set_ps2sdk_lseek
+__attribute__((weak))
+void _set_ps2sdk_lseek() {
+    _ps2sdk_lseek = fioLseek;
+}
+#endif
+
+#ifdef F__set_ps2sdk_lseek64
 static off64_t _default_lseek64(int fd, off64_t offset, int whence)
 {
 	errno = ENOSYS;
 	return -1; /* not supported */
 }
 
-int64_t (*_ps2sdk_lseek64)(int, int64_t, int) = _default_lseek64;
+__attribute__((weak))
+void _set_ps2sdk_lseek64() {
+    _ps2sdk_lseek64 = _default_lseek64;
+}
 #endif
 
-#ifdef F__ps2sdk_write
-int (*_ps2sdk_write)(int, const void*, int) = fioWrite;
+#ifdef F__set_ps2sdk_write
+__attribute__((weak))
+void _set_ps2sdk_write() {
+    _ps2sdk_write = fioWrite;
+}
 #endif
 
-#ifdef F__ps2sdk_ioctl
-int (*_ps2sdk_ioctl)(int, int, void*) = fioIoctl;
+#ifdef F__set_ps2sdk_ioctl
+__attribute__((weak))
+void _set_ps2sdk_ioctl() {
+    _ps2sdk_ioctl = fioIoctl;
+}
 #endif
 
-#ifdef F__ps2sdk_remove
-int (*_ps2sdk_remove)(const char*) = fioRemove;
+#ifdef F__set_ps2sdk_remove
+__attribute__((weak))
+void _set_ps2sdk_remove() {
+    _ps2sdk_remove = fioRemove;
+}
 #endif
 
-#ifdef F__ps2sdk_rename
+#ifdef F__set_ps2sdk_rename
 static int fioRename(const char *old, const char *new) {
 	errno = ENOSYS;
 	return -1; /* not supported */
 }
 
-int (*_ps2sdk_rename)(const char*, const char*) = fioRename;
+__attribute__((weak))
+void _set_ps2sdk_rename() {
+    _ps2sdk_rename = fioRename;
+}
 #endif
 
-#ifdef F__ps2sdk_mkdir
+#ifdef F__set_ps2sdk_mkdir
 static int fioMkdirHelper(const char *path, int mode) {
   // Old fio mkdir has no mode argument
 	(void)mode;
@@ -78,14 +178,20 @@ static int fioMkdirHelper(const char *path, int mode) {
   return fioMkdir(path);
 }
 
-int (*_ps2sdk_mkdir)(const char*, int) = fioMkdirHelper;
+__attribute__((weak))
+void _set_ps2sdk_mkdir() {
+    _ps2sdk_mkdir = fioMkdirHelper;
+}
 #endif
 
-#ifdef F__ps2sdk_rmdir
-int (*_ps2sdk_rmdir)(const char*) = fioRmdir;
+#ifdef F__set_ps2sdk_rmdir
+__attribute__((weak))
+void _set_ps2sdk_rmdir() {
+    _ps2sdk_rmdir = fioRmdir;
+}
 #endif
 
-#ifdef F__ps2sdk_stat
+#ifdef F__set_ps2sdk_stat
 static time_t io_to_posix_time(const unsigned char *ps2time)
 {
         struct tm tim;
@@ -139,34 +245,46 @@ static int fioGetstatHelper(const char *path, struct stat *buf) {
         return 0;
 }
 
-int (*_ps2sdk_stat)(const char *path, struct stat *buf) = fioGetstatHelper;
+__attribute__((weak))
+void _set_ps2sdk_stat() {
+    _ps2sdk_stat = fioGetstatHelper;
+}
 #endif
 
-#ifdef F__ps2sdk_readlink
-static ssize_t _default_readlink(const char *path, char *buf, size_t bufsiz)
+#ifdef F__set_ps2sdk_readlink
+static ssize_t default_readlink(const char *path, char *buf, size_t bufsiz)
 {
 	errno = ENOSYS;
 	return -1; /* not supported */
 }
 
-int (*_ps2sdk_readlink)(const char *path, char *buf, size_t bufsiz) = _default_readlink;
+__attribute__((weak))
+void _set_ps2sdk_readlink() {
+    _ps2sdk_readlink = default_readlink;
+}
 #endif
 
-#ifdef F__ps2sdk_symlink
-static int _default_symlink(const char *target, const char *linkpath)
+#ifdef F__set_ps2sdk_symlink
+static int default_symlink(const char *target, const char *linkpath)
 {
 	errno = ENOSYS;
 	return -1; /* not supported */
 }
 
-int (*_ps2sdk_symlink)(const char *target, const char *linkpath) = _default_symlink;
+__attribute__((weak))
+void _set_ps2sdk_symlink() {
+    _ps2sdk_symlink = default_symlink;
+}
 #endif
 
-#ifdef F__ps2sdk_dopen
-int (*_ps2sdk_dopen)(const char *path) = fioDopen;
+#ifdef F__set_ps2sdk_dopen
+__attribute__((weak))
+void _set_ps2sdk_dopen() {
+    _ps2sdk_dopen = fioDopen;
+}
 #endif
 
-#ifdef F__ps2sdk_dread
+#ifdef F__set_ps2sdk_dread
 static int fioDreadHelper(int fd, struct dirent *dir) {
 	int rv;
 	io_dirent_t iodir;
@@ -195,9 +313,15 @@ static int fioDreadHelper(int fd, struct dirent *dir) {
 	return rv;
 }
 
-int (*_ps2sdk_dread)(int fd, struct dirent *dir) = fioDreadHelper;
+__attribute__((weak))
+void _set_ps2sdk_dread() {
+    _ps2sdk_dread = fioDreadHelper;
+}
 #endif
 
-#ifdef F__ps2sdk_dclose
-int (*_ps2sdk_dclose)(int fd) = fioDclose;
+#ifdef F__set_ps2sdk_dclose
+__attribute__((weak))
+void _set_ps2sdk_dclose() {
+    _ps2sdk_dclose = fioDclose;
+}
 #endif

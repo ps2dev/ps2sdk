@@ -37,6 +37,25 @@ extern int (*_ps2sdk_dopen)(const char *path);
 extern int (*_ps2sdk_dread)(int fd, struct dirent *dir);
 extern int (*_ps2sdk_dclose)(int fd);
 
+// Functions to set the inter-library helpers
+void _set_ps2sdk_close();
+void _set_ps2sdk_open();
+void _set_ps2sdk_read();
+void _set_ps2sdk_lseek();
+void _set_ps2sdk_lseek64();
+void _set_ps2sdk_write();
+void _set_ps2sdk_ioctl();
+void _set_ps2sdk_remove();
+void _set_ps2sdk_rename();
+void _set_ps2sdk_mkdir();
+void _set_ps2sdk_rmdir();
+void _set_ps2sdk_stat();
+void _set_ps2sdk_readlink();
+void _set_ps2sdk_symlink();
+void _set_ps2sdk_dopen();
+void _set_ps2sdk_dread();
+void _set_ps2sdk_dclose();
+
 #define PS2_CLOCKS_PER_SEC kBUSCLKBY256 // 576.000
 #define PS2_CLOCKS_PER_MSEC (PS2_CLOCKS_PER_SEC / 1000) // 576
 

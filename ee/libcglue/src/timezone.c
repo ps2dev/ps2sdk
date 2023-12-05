@@ -26,6 +26,12 @@ void _libcglue_timezone_update()
 {
     /* Initialize timezone from PS2 OSD configuration */
     int tzOffset = 0;
+	
+	// Set ps2sdk functions
+	if (_ps2sdk_open == NULL) _set_ps2sdk_open();
+	if (_ps2sdk_close == NULL) _set_ps2sdk_close();
+	if (_ps2sdk_read == NULL) _set_ps2sdk_read();
+
 	_io_driver driver = { _ps2sdk_open, _ps2sdk_close, _ps2sdk_read };
 	configGetTimezoneWithIODriver(&driver);
     int tzOffsetAbs = tzOffset < 0 ? -tzOffset : tzOffset;
