@@ -46,19 +46,13 @@ extern ConfigParamT10K g_t10KConfig;
 ConfigParamT10K g_t10KConfig = {540, TV_SCREEN_43, DATE_YYYYMMDD, LANGUAGE_JAPANESE, 0, 0, 0};
 #endif
 
-// the following functions are all used in time conversion
-#ifdef F___adjustTime
-static unsigned char frombcd(unsigned char bcd)
-{
-    return bcd - (bcd >> 4) * 6;
-}
-
-static unsigned char tobcd(unsigned char dec)
+#ifdef F_converttobcd
+static inline unsigned char tobcd(unsigned char dec)
 {
     return dec + (dec / 10) * 6;
 }
 
-static void converttobcd(sceCdCLOCK *time)
+void converttobcd(sceCdCLOCK *time)
 {
     time->second = tobcd(time->second);
     time->minute = tobcd(time->minute);
@@ -67,8 +61,18 @@ static void converttobcd(sceCdCLOCK *time)
     time->month  = tobcd(time->month);
     time->year   = tobcd(time->year);
 }
+#else
+extern void converttobcd(sceCdCLOCK *time);
+#endif
 
-static void convertfrombcd(sceCdCLOCK *time)
+#ifdef F_convertfrombcd
+static inline unsigned char frombcd(unsigned char bcd)
+{
+    return bcd - (bcd >> 4) * 6;
+}
+
+
+void convertfrombcd(sceCdCLOCK *time)
 {
     time->second = frombcd(time->second);
     time->minute = frombcd(time->minute);
@@ -77,7 +81,11 @@ static void convertfrombcd(sceCdCLOCK *time)
     time->month  = frombcd(time->month);
     time->year   = frombcd(time->year);
 }
+#else
+extern void convertfrombcd(sceCdCLOCK *time);
+#endif
 
+#ifdef F___adjustTime
 static const unsigned char gDaysInMonths[12] = {
     31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
 
@@ -486,8 +494,8 @@ void configSetTimezone(int timezoneOffset)
 }
 #endif
 
-#ifdef F_configGetSpdifEnabledWithIODriver
-int configGetSpdifEnabledWithIODriver(_io_driver *driver)
+#ifdef F_configIsSpdifEnabledWithIODriver
+int configIsSpdifEnabledWithIODriver(_io_driver *driver)
 {
     ConfigParam config;
 

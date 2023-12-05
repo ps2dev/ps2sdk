@@ -217,11 +217,6 @@ void configSetDaylightSavingEnabledWithIODriver(int daylightSaving, _io_driver *
  * (ps2 clock is in JST time)
  */
 void configConvertToGmtTime(sceCdCLOCK *time);
-
-/** converts the time returned from the ps2's clock into LOCAL time
- * (ps2 clock is in JST time)
- */
-void configConvertToLocalTime(sceCdCLOCK *time);
 void configConvertToLocalTimeWithIODriver(sceCdCLOCK *time, _io_driver *driver);
 #endif
 

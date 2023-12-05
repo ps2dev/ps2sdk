@@ -69,7 +69,7 @@ ROM0_OBJS = _info_internals.o GetRomNameWithIODriver.o GetRomName.o IsDESRMachin
 
 ### Config objects
 
-CONFIG_OBJS = _config_internals.o __adjustTime.o IsEarlyJap.o \
+CONFIG_OBJS = _config_internals.o converttobcd.o convertfrombcd.o __adjustTime.o IsEarlyJap.o \
 	configGetLanguageWithIODriver.o configGetLanguage.o \
 	configSetLanguageWithIODriver.o configSetLanguage.o \
 	configGetTvScreenTypeWithIODriver.o configGetTvScreenType.o \
@@ -80,10 +80,11 @@ CONFIG_OBJS = _config_internals.o __adjustTime.o IsEarlyJap.o \
 	configSetTimeFormatWithIODriver.o configSetTimeFormat.o \
 	configGetTimezoneWithIODriver.o configGetTimezone.o \
 	configSetTimezoneWithIODriver.o configSetTimezone.o \
-	configGetSpdifEnabledWithIODriver.o configIsSpdifEnabled.o \
+	configIsSpdifEnabledWithIODriver.o configIsSpdifEnabled.o \
 	configSetSpdifEnabledWithIODriver.o configSetSpdifEnabled.o \
 	configIsDaylightSavingEnabledWithIODriver.o configIsDaylightSavingEnabled.o \
-	configSetDaylightSavingEnabledWithIODriver.o configSetDaylightSavingEnabled.o
+	configSetDaylightSavingEnabledWithIODriver.o configSetDaylightSavingEnabled.o \
+	configConvertToGmtTime.o configConvertToLocalTimeWithIODriver.o configConvertToLocalTime.o
 
 ### Patch objects
 
