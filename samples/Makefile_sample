@@ -28,6 +28,7 @@ SUBDIRS += libcglue/regress
 SUBDIRS += libcglue/mem_test
 SUBDIRS += libcglue/nanosleep
 SUBDIRS += libcglue/rewinddir
+SUBDIRS += libcglue/timezone
 SUBDIRS += libgs/doublebuffer
 SUBDIRS += libgs/draw
 #SUBDIRS += mpeg                #TODO: not modified for updated newlib
