@@ -11,7 +11,6 @@
 #include <tamtypes.h>
 #include <kernel.h>
 #include <timer.h>
-#include <ps2sdkapi.h>
 #include <timer_alarm.h>
 
 #ifdef TIME_USE_T0

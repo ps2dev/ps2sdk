@@ -21,17 +21,25 @@
 extern "C" {
 #endif
 
+typedef struct {
+    int (*open)(const char *name, int flags, ...);
+    int (*close)(int fd);
+    int (*read)(int fd, void *buf, int nbyte);
+} _io_driver;
+
 /** check whether the PlayStation 2 is actually a DESR-XXXX machine
  *
  * @return 1 if DESR-XXXX machine; 0 if not
  */
 int IsDESRMachine(void);
+int IsDESRMachineWithIODriver(_io_driver *driver);
 
 /** check whether the PlayStation 2 is actually a TOOL DTL-T10000(H)
  *
  * @return 1 if DTL-T10000(H); 0 if not
  */
 int IsT10K(void);
+int IsT10KWithIODriver(_io_driver *driver);
 
 /** gets the romname from the current ps2
  * 14 chars - doesnt set a null terminator
@@ -40,6 +48,7 @@ int IsT10K(void);
  * @return pointer to buffer containing romname
  */
 char *GetRomName(char *romname);
+char *GetRomNameWithIODriver(char *romname, _io_driver *driver);
 
 #ifdef __cplusplus
 }
