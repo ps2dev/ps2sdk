@@ -70,8 +70,6 @@ static inline ps2_clock_t ps2_clock(void) {
     return (ps2_clock_t)(GetTimerSystemTime() >> 8);
 }
 
-extern void _libcglue_timezone_update();
-
 extern s64 _ps2sdk_rtc_offset_from_busclk;
 extern void _libcglue_rtc_update();
 
@@ -79,6 +77,12 @@ extern void _libcglue_rtc_update();
 // this should have been defined in unistd.h
 typedef int64_t off64_t;
 off64_t lseek64(int fd, off64_t offset, int whence);
+
+// Functions to be used related to timezone
+extern void _libcglue_timezone_update();
+
+void ps2sdk_setTimezone(int timezone);
+void ps2sdk_setDaylightSaving(int daylightSaving);
 
 /* The fd we provide to final user aren't actually the same than IOP's fd
 * so this function allow you to get actual IOP's fd from public fd

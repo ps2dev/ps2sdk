@@ -8,7 +8,9 @@
 
 EE_LIB = libcglue.a
 
-CORE_OBJS = timezone.o rtc.o
+CORE_OBJS = rtc.o
+
+TIMEZONE_OBJS = _libcglue_timezone_update.o ps2sdk_setTimezone.o ps2sdk_setDaylightSaving.o
 
 FDMAN_OBJS = __fdman_sema.o __descriptor_data_pool.o __descriptormap.o __fdman_init.o __fdman_deinit.o __fdman_get_new_descriptor.o \
 	__fdman_get_dup_descriptor.o __fdman_release_descriptor.o
@@ -37,12 +39,15 @@ GLUE_OBJS = __dummy_passwd.o __transform_errno.o __transform64_errno.o compile_t
 LOCK_OBJS = __retarget_lock_init.o __retarget_lock_acquire.o __retarget_lock_release.o __retarget_lock_try_acquire.o __retarget_lock_close.o \
 	__retarget_lock_init_recursive.o __retarget_lock_acquire_recursive.o __retarget_lock_release_recursive.o __retarget_lock_try_acquire_recursive.o __retarget_lock_close_recursive.o
 
-EE_OBJS = $(CORE_OBJS) $(SJIS_OBJS) $(TIME_OBJS) $(FDMAN_OBJS) $(INIT_OBJS) $(SLEEP_OBJS) $(TERMINATE_OBJS) $(CWD_OBJS) $(PS2SDKAPI_OBJS) $(GLUE_OBJS) $(LOCK_OBJS)
+EE_OBJS = $(CORE_OBJS) $(TIMEZONE_OBJS) $(SJIS_OBJS) $(TIME_OBJS) $(FDMAN_OBJS) $(INIT_OBJS) $(SLEEP_OBJS) $(TERMINATE_OBJS) $(CWD_OBJS) $(PS2SDKAPI_OBJS) $(GLUE_OBJS) $(LOCK_OBJS)
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make
 include $(PS2SDKSRC)/ee/Rules.make
 include $(PS2SDKSRC)/ee/Rules.release
+
+$(TIMEZONE_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)timezone.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(SJIS_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)sjis.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
