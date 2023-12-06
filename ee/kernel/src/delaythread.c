@@ -3,25 +3,23 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright 2001-2005, ps2dev - http://www.ps2dev.org
+# Copyright ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 */
 
 /**
  * @file
- * sleep implementation
+ * Some routines to do some thread delay work
  */
 
 #include <kernel.h>
-#include <unistd.h>
-#include <stdint.h>
-#include <errno.h>
-#include <time.h>
+#include <timer.h>
 #include <timer_alarm.h>
+#include <delaythread.h>
 
-#ifdef F_nanosleep
-static u64 nanosleep_wakeup_callback(s32 alarm_id, u64 scheduled_time, u64 actual_time, void *arg, void *pc_value)
+#ifdef F_DelayThread
+static u64 DelayThreadWakeup_callback(s32 alarm_id, u64 scheduled_time, u64 actual_time, void *arg, void *pc_value)
 {
 	(void)alarm_id;
 	(void)scheduled_time;
@@ -33,7 +31,7 @@ static u64 nanosleep_wakeup_callback(s32 alarm_id, u64 scheduled_time, u64 actua
 	return 0;
 }
 
-int nanosleep(const struct timespec *req, struct timespec *rem)
+s32 DelayThread(s32 microseconds)
 {
 	u32 eie;
 	s32 sema_id;
@@ -43,31 +41,24 @@ int nanosleep(const struct timespec *req, struct timespec *rem)
 	__asm__ __volatile__ ("mfc0\t%0, $12" : "=r" (eie));
 	if ((eie & 0x10000) == 0)
 	{
-		return 0;
+		return 0x80008008; // ECPUDI
 	}
 	sema.max_count = 1;
-	sema.option = (u32)"nanosleep";
+	sema.option = (u32)"DelayThread";
 	sema.init_count = 0;
 	sema_id = CreateSema(&sema);
 	if (sema_id < 0)
 	{
-		return 0;
+		return 0x80008003; // ESEMAPHORE
 	}
-	timer_alarm_id = SetTimerAlarm(Sec2TimerBusClock(req->tv_sec) + NSec2TimerBusClock(req->tv_nsec), nanosleep_wakeup_callback, (void *)sema_id);
+	timer_alarm_id = SetTimerAlarm(TimerUSec2BusClock(0, microseconds), DelayThreadWakeup_callback, (void *)sema_id);
 	if (timer_alarm_id < 0)
 	{
 		DeleteSema(sema_id);
-		return 0;
+		return timer_alarm_id;
 	}
 	WaitSema(sema_id);
 	DeleteSema(sema_id);
-
-    if (rem != NULL)
-    {
-        rem->tv_sec = 0;
-        rem->tv_nsec = 0;
-    }
-
 	return 0;
 }
 #endif

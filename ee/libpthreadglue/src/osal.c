@@ -10,6 +10,8 @@
 
 #include <ps2_osal.h>
 #include <time.h>
+#include <kernel_util.h>
+#include <delaythread.h>
 
 #define MAX_PS2_UID 2048 // SWAG
 #define DEFAULT_STACK_SIZE_BYTES 4096
@@ -73,13 +75,6 @@ ps2ThreadData *__getThreadData(s32 threadHandle)
 #else
 ps2ThreadData *__getThreadData(s32 threadHandle);
 #endif
-
-static inline void DelayThread(uint32_t usecs) {
-  struct timespec tv = {0};
-  tv.tv_sec          = usecs / 1000000;
-  tv.tv_nsec         = (usecs % 1000000) * 1000;
-  nanosleep(&tv, NULL);
-}
 
 static inline int SemWaitTimeout(s32 semHandle, uint32_t timeout)
 {

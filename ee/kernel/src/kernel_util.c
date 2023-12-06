@@ -13,26 +13,33 @@
 #include <kernel_util.h>
 
 #ifdef F_WaitSemaEx
-static void WaitSemaEx_callback(struct timer_alarm_t *alarm, void *arg)
+static u64 WaitSemaEx_callback(s32 id, u64 scheduled_time, u64 actual_time, void *arg, void *pc_value)
 {
-	iReleaseWaitThread((s32)arg);
+    (void)id;
+    (void)scheduled_time;
+    (void)actual_time;
+    (void)pc_value;
+    iReleaseWaitThread((s32)arg);
+    return 0;
 }
 
 /** Semaphore wait function similar to newer platforms */
 s32 WaitSemaEx(s32 semaid, int signal, u64 *timeout)
 {
     int ret;
-    struct timer_alarm_t alarm;
+    int timerid;
+
+    timerid = -1;
 
     // TODO: other values NYI
     if (signal != 1)
     {
-    	return -1;
+        return -1;
     }
 
     if (timeout != NULL && *timeout == 0)
     {
-    	ret = PollSema(semaid);
+        ret = PollSema(semaid);
         if (ret < 0)
         {
             return ret;
@@ -42,21 +49,21 @@ s32 WaitSemaEx(s32 semaid, int signal, u64 *timeout)
 
     if (timeout != NULL)
     {
-		InitializeTimerAlarm(&alarm);
-        SetTimerAlarm(&alarm, USec2TimerBusClock(*timeout), &WaitSemaEx_callback, (void *)GetThreadId());
+        timerid = SetTimerAlarm(USec2TimerBusClock(*timeout), &WaitSemaEx_callback, (void *)GetThreadId());
     }
 
     ret = WaitSema(semaid);
 
-    if (timeout != NULL)
-    {
-    	StopTimerAlarm(&alarm);
-    }
-    
     if (ret < 0)
     {
         return ret;
     }
+
+    if (timerid >= 0)
+    {
+        ReleaseTimerAlarm(timerid);
+    }
+
     return semaid;
 }
 #endif
