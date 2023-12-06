@@ -6,20 +6,12 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = \
-	apa \
-	apa-bdm \
-	apa-gpt \
-	apa-iomanx \
-	apa-osd \
-	apa-xosd \
-	pfs \
-	pfs-osd \
-	pfs-xosd \
-	hdck \
-	hdsk \
-	fsck \
-	fssk
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/hdd/apa/src/
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+IOP_BIN ?= ps2hdd-iomanx.irx
+
+APA_USE_DEV9 ?= 0
+APA_USE_ATAD ?= 0
+APA_USE_IOMANX ?= 1
+
+include $(PS2SDKSRC)/iop/hdd/apa/Makefile

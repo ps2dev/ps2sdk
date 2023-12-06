@@ -18,8 +18,12 @@
 #include <string.h>
 #include <stdlib.h>
 #endif
+#ifdef APA_USE_ATAD
 #include <atad.h>
+#endif
+#ifdef APA_USE_DEV9
 #include <dev9.h>
+#endif
 #include <errno.h>
 #include <irx.h>
 #include <iomanX.h>
@@ -29,6 +33,7 @@
 #include <libapa.h>
 #include "hdd.h"
 #include "hdd_fio.h"
+#include "hdd_blkio.h"
 
 #ifdef _IOP
 IRX_ID("hdd_driver", APA_MODVER_MAJOR, APA_MODVER_MINOR);
@@ -55,8 +60,8 @@ static iomanX_iop_device_ops_t hddOps={
 	&hddReName,
 	(void*)&hddUnsupported,
 	(void*)&hddUnsupported,
-	(void*)&hddUnsupported,
-	(void*)&hddUnsupported,
+	hddMount,
+	hddUmount,
 	(void*)&hddUnsupported,
 	&hddDevctl,
 	(void*)&hddUnsupported,
@@ -80,17 +85,18 @@ static iomanX_iop_device_t bhddFioDev={
 };
 #endif
 
-apa_device_t hddDevices[2]={
-	{0, 0, 0, 3},
-	{0, 0, 0, 3}
-};
+apa_device_t hddDevices[BLKIO_MAX_VOLUMES];
 
 extern int apaMaxOpen;
 extern hdd_file_slot_t *hddFileSlots;
 
 static int inputError(char *input);
+#ifdef APA_USE_ATAD
 static int unlockDrive(s32 device);
+#endif
+#ifdef APA_USE_DEV9
 static void hddShutdownCb(void);
+#endif
 static int hddInitError(void);
 
 int hddCheckPartitionMax(s32 device, u32 size)
@@ -185,14 +191,16 @@ static void printStartup(void)
 	return;
 }
 
+#ifdef APA_USE_ATAD
 static int unlockDrive(s32 device)
 {
-	u8 id[32];
 	int rv;
+	u8 id[32];
 	if((rv=apaGetIlinkID(id))==0)
 		return ata_device_sce_sec_unlock(device, id);
 	return rv;
 }
+#endif
 
 int APA_ENTRYPOINT(int argc, char *argv[])
 {
@@ -200,7 +208,9 @@ int APA_ENTRYPOINT(int argc, char *argv[])
 	char	*input;
 	int		cacheSize=3;
 	apa_ps2time_t tm;
+#ifdef APA_USE_ATAD
 	ata_devinfo_t *hddInfo;
+#endif
 
 	printStartup();
 
@@ -236,11 +246,13 @@ int APA_ENTRYPOINT(int argc, char *argv[])
 	}
 
 	APA_PRINTF(APA_DRV_NAME": max open = %d, %d buffers\n", apaMaxOpen, cacheSize);
+#ifdef APA_USE_DEV9
 	if(dev9RegisterShutdownCb(0, &hddShutdownCb) != 0)
 	{
 		APA_PRINTF(APA_DRV_NAME": error: dev9 may not be resident.\n");
 		return hddInitError();
 	}
+#endif
 
 	if(apaGetTime(&tm) != 0)
 	{
@@ -250,8 +262,11 @@ int APA_ENTRYPOINT(int argc, char *argv[])
 
 	APA_PRINTF(APA_DRV_NAME": %02d:%02d:%02d %02d/%02d/%d\n",
 		tm.hour, tm.min, tm.sec, tm.month, tm.day, tm.year);
-	for(i=0;i < 2;i++)
+	memset(&hddDevices, 0, sizeof(hddDevices));
+	for(i = 0; i < BLKIO_MAX_VOLUMES; i++)
 	{
+		hddDevices[i].status = 3;
+#ifdef APA_USE_ATAD
 		if(!(hddInfo=ata_get_devinfo(i)))
 		{
 			APA_PRINTF(APA_DRV_NAME": Error: ata initialization failed.\n");
@@ -267,6 +282,7 @@ int APA_ENTRYPOINT(int argc, char *argv[])
 				APA_PRINTF(APA_DRV_NAME": disk%d: 0x%08lx sectors, max 0x%08lx\n", i,
 					hddDevices[i].totalLBA, hddDevices[i].partitionMaxSize);
 		}
+#endif
 	}
 	hddFileSlots=apaAllocMem(apaMaxOpen*sizeof(hdd_file_slot_t));
 	ret = (hddFileSlots == NULL) ? -ENOMEM : 0;
@@ -284,7 +300,8 @@ int APA_ENTRYPOINT(int argc, char *argv[])
 		return hddInitError();
 	}
 
-	for(i=0;i < 2;i++)
+#ifdef APA_USE_ATAD
+	for(i=0;i < BLKIO_MAX_VOLUMES;i++)
 	{
 		if(hddDevices[i].status<2)
 		{
@@ -299,6 +316,8 @@ int APA_ENTRYPOINT(int argc, char *argv[])
 				hddDevices[i].status, hddDevices[i].format);
 		}
 	}
+#endif
+	blkIoInit();
 	iomanX_DelDrv(hddFioDev.name);
 	if(iomanX_AddDrv(&hddFioDev) == 0)
 	{
@@ -323,19 +342,23 @@ int APA_ENTRYPOINT(int argc, char *argv[])
 	}
 }
 
+#ifdef APA_USE_DEV9
 static void hddShutdownCb(void)
 {
 	int i;
 
-	for(i = 0; i < 2; i++)
+	for(i = 0; i < BLKIO_MAX_VOLUMES; i++)
 	{
 		if(hddDevices[i].status == 0)
-			ata_device_smart_save_attr(i);
+			blkIoSmartSaveAttr(i);
 	}
 }
+#endif
 
 static int hddInitError(void)
 {
+#ifdef APA_USE_DEV9
 	dev9RegisterShutdownCb(0, NULL);
+#endif
 	return MODULE_NO_RESIDENT_END;
 }

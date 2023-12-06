@@ -12,7 +12,6 @@
 
 #include <errno.h>
 #include <iomanX.h>
-#include <atad.h>
 #ifdef _IOP
 #include <sysclib.h>
 #else

@@ -18,11 +18,14 @@
 #include <string.h>
 #endif
 #include <stdio.h>
+#ifdef APA_USE_ATAD
 #include <atad.h>
+#endif
 #include <hdd-ioctl.h>
 
 #include "apa-opt.h"
 #include "libapa.h"
+#include "hdd_blkio.h"
 
 #ifdef APA_SUPPORT_BHDD
 extern apa_device_t hddDevices[];
@@ -34,8 +37,8 @@ void apaSaveError(s32 device, void *buffer, u32 lba, u32 err_lba)
 {
     memset(buffer, 0, 512);
     *(u32 *)buffer = err_lba;
-    ata_device_sector_io(device, buffer, lba, 1, ATA_DIR_WRITE);
-    ata_device_flush_cache(device);
+    blkIoDmaTransfer(device, buffer, lba, 1, BLKIO_DIR_WRITE);
+    blkIoFlushCache(device);
 }
 
 void apaSetPartErrorSector(s32 device, u32 lba)
@@ -54,7 +57,7 @@ int apaGetPartErrorSector(s32 device, u32 lba, u32 *lba_out)
     if (!(clink = apaCacheAlloc()))
         return -ENOMEM;
 
-    if (ata_device_sector_io(device, clink->header, lba, 1, ATA_DIR_READ))
+    if (blkIoDmaTransfer(device, clink->header, lba, 1, BLKIO_DIR_READ))
         return -EIO;
 
     if (lba_out)
@@ -408,7 +411,7 @@ int apaCheckSum(apa_header_t *header, int fullcheck)
 
 int apaReadHeader(s32 device, apa_header_t *header, u32 lba)
 {
-    if (ata_device_sector_io(device, header, lba, 2, ATA_DIR_READ) != 0)
+    if (blkIoDmaTransfer(device, header, lba, 2, BLKIO_DIR_READ) != 0)
         return -EIO;
     if (header->magic != APA_MAGIC)
         return -EIO;
@@ -433,7 +436,7 @@ int apaReadHeader(s32 device, apa_header_t *header, u32 lba)
 
 int apaWriteHeader(s32 device, apa_header_t *header, u32 lba)
 {
-    if (ata_device_sector_io(device, header, lba, 2, ATA_DIR_WRITE))
+    if (blkIoDmaTransfer(device, header, lba, 2, BLKIO_DIR_WRITE))
         return -EIO;
     return 0;
 }
@@ -448,7 +451,7 @@ int apaGetFormat(s32 device, int *format)
     *format = 0;
     if ((rv = apaReadHeader(device, clink->header, 0)) == 0) {
         *format = clink->header->mbr.version;
-        if (ata_device_sector_io(device, clink->header, APA_SECTOR_SECTOR_ERROR, 2, ATA_DIR_READ))
+        if (blkIoDmaTransfer(device, clink->header, APA_SECTOR_SECTOR_ERROR, 2, BLKIO_DIR_READ))
             rv = -EIO; // return -EIO;
         if (rv == 0) {
             u32 *pDW;
