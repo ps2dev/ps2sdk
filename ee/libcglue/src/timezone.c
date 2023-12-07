@@ -42,7 +42,10 @@ void _libcglue_timezone_update()
     int minutes = tzOffsetAbs - hours * 60;
     int daylight = configIsDaylightSavingEnabledWithIODriver(&driver);
     static char tz[15];
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wformat-overflow"
     sprintf(tz, "GMT%s%02i:%02i%s", tzOffset < 0 ? "+" : "-", hours, minutes, daylight ? "DST" : "");
+	#pragma GCC diagnostic pop
     setenv("TZ", tz, 1);
 }
 #endif
