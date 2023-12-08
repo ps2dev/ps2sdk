@@ -112,7 +112,7 @@ typedef struct
 {
     iox_stat_t stat;
     char name[256];
-    unsigned int unknown;
+    void *privdata;
 } iox_dirent_t __attribute__((aligned(64)));
 
 /* The following defines are only supported by ioman.  */
