@@ -61,4 +61,9 @@ extern void _libcglue_rtc_update();
 typedef int64_t off64_t;
 off64_t lseek64(int fd, off64_t offset, int whence);
 
+/* The fd we provide to final user aren't actually the same than IOP's fd
+* so this function allow you to get actual IOP's fd from public fd
+*/
+int ps2sdk_get_iop_fd(int fd);
+ 
 #endif /* __PS2SDKAPI_H__ */

@@ -902,3 +902,14 @@ struct passwd *getpwnam(const char *name) {
 	return &__dummy_passwd;
 }
 #endif
+
+#ifdef F_ps2sdk_get_iop_fd
+int ps2sdk_get_iop_fd(int fd) {
+	if (!__IS_FD_VALID(fd)) {
+		errno = EBADF;
+		return -1;
+	}
+
+	return __descriptormap[fd]->descriptor;
+}
+#endif
