@@ -104,6 +104,10 @@ GETKERNEL_OBJS = GetSyscallHandler.o GetSyscall.o GetExceptionHandler.o GetInter
 
 INITSYS_OBJS = _InitSys.o TerminateLibrary.o
 
+### Kernel utility objects
+
+KERNEL_UTIL_OBJS = WaitSemaEx.o
+
 ### SYSCALL OBJECTS
 
 KERNEL_OBJS = ResetEE.o SetGsCrt.o $(EXEC_SYSCALLS) \
@@ -142,7 +146,7 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o $(EXEC_SYSCALLS) \
 EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(ROM0_OBJS) $(CONFIG_OBJS) \
 	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(TIMER_ALARM_OBJS) $(GETKERNEL_OBJS) \
-	$(INITSYS_OBJS) erl-support.o
+	$(INITSYS_OBJS) $(KERNEL_UTIL_OBJS) erl-support.o
 
 
 EE_OBJS += $(THREAD_OBJS) $(LIBOSD_OBJS) $(TLBFUNC_OBJS) $(ALARM_OBJS) $(EXIT_OBJS) $(SETUP_OBJS) setup_syscalls.o debug.o
@@ -217,6 +221,10 @@ $(SIO_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)sio.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(INITSYS_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)initsys.c
+	$(DIR_GUARD)
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(KERNEL_UTIL_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)kernel_util.c
 	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
