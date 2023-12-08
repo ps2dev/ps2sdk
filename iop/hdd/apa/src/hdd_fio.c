@@ -1034,7 +1034,7 @@ int hddDevctl(iomanX_iop_file_t *f, const char *devname, int cmd, void *arg,
     switch (cmd) {
         // Command set 1 ('H')
         case HDIOC_DEV9OFF:
-            // Early versions called ata_device_smart_save_attr() here, when their old dev9 versions did not support the pre-shutdown callback.
+            // Early versions called sceAtaSmartSaveAttr() here, when their old dev9 versions did not support the pre-shutdown callback.
 #ifdef APA_USE_DEV9
             dev9Shutdown();
 #else

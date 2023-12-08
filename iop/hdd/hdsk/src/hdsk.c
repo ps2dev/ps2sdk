@@ -94,7 +94,7 @@ static int hdskRemoveTmp(int device)
         apaDelete(clink);
         clink = apaCacheAlloc();
         memset(clink->header, 0, sizeof(apa_header_t));
-        ata_device_sector_io(device, clink->header, start, 2, ATA_DIR_WRITE);
+        sceAtaDmaTransfer(device, clink->header, start, 2, ATA_DIR_WRITE);
         apaCacheFree(clink);
     }
 
@@ -294,19 +294,19 @@ static int CopyPartition(int device, apa_header_t *dest, apa_header_t *start)
     APA_PRINTF("copy start...");
 
     // Copy data, but skip the APA header.
-    result = ata_device_sector_io(device, IOBuffer, start->start + 2, IOBUFFER_SIZE_SECTORS - 2, ATA_DIR_READ) == 0 ? 0 : -EIO;
+    result = sceAtaDmaTransfer(device, IOBuffer, start->start + 2, IOBUFFER_SIZE_SECTORS - 2, ATA_DIR_READ) == 0 ? 0 : -EIO;
 
     if (result == 0) {
-        result = ata_device_sector_io(device, IOBuffer, dest->start + 2, IOBUFFER_SIZE_SECTORS - 2, ATA_DIR_WRITE) == 0 ? 0 : -EIO;
+        result = sceAtaDmaTransfer(device, IOBuffer, dest->start + 2, IOBUFFER_SIZE_SECTORS - 2, ATA_DIR_WRITE) == 0 ? 0 : -EIO;
 
         if (result == 0) {
             hdskProgress += IOBUFFER_SIZE_SECTORS;
 
             for (i = 1; i < blocks; i++) {
-                result = ata_device_sector_io(device, IOBuffer, start->start + i * IOBUFFER_SIZE_SECTORS, IOBUFFER_SIZE_SECTORS, ATA_DIR_READ) == 0 ? 0 : -EIO;
+                result = sceAtaDmaTransfer(device, IOBuffer, start->start + i * IOBUFFER_SIZE_SECTORS, IOBUFFER_SIZE_SECTORS, ATA_DIR_READ) == 0 ? 0 : -EIO;
 
                 if (result == 0) {
-                    result = ata_device_sector_io(device, IOBuffer, dest->start + i * IOBUFFER_SIZE_SECTORS, IOBUFFER_SIZE_SECTORS, ATA_DIR_WRITE) == 0 ? 0 : -EIO;
+                    result = sceAtaDmaTransfer(device, IOBuffer, dest->start + i * IOBUFFER_SIZE_SECTORS, IOBUFFER_SIZE_SECTORS, ATA_DIR_WRITE) == 0 ? 0 : -EIO;
 
                     if (result == 0) {
                         hdskProgress += IOBUFFER_SIZE_SECTORS;
@@ -783,7 +783,7 @@ int APA_ENTRYPOINT(int argc, char **argv)
     APA_PRINTF("%02d:%02d:%02d %02d/%02d/%d\n", time.hour, time.min, time.sec, time.month, time.day, time.year);
 
     for (i = 0; i < 2; i++) {
-        if ((pDevInfo = ata_get_devinfo(i)) == NULL) {
+        if ((pDevInfo = sceAtaInit(i)) == NULL) {
             APA_PRINTF("error: ata initialization failed.\n");
             return MODULE_NO_RESIDENT_END;
         }

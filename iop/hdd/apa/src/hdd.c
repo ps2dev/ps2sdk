@@ -197,7 +197,7 @@ static int unlockDrive(s32 device)
 	int rv;
 	u8 id[32];
 	if((rv=apaGetIlinkID(id))==0)
-		return ata_device_sce_sec_unlock(device, id);
+		return sceAtaSecurityUnLock(device, id);
 	return rv;
 }
 #endif
@@ -267,7 +267,7 @@ int APA_ENTRYPOINT(int argc, char *argv[])
 	{
 		hddDevices[i].status = 3;
 #ifdef APA_USE_ATAD
-		if(!(hddInfo=ata_get_devinfo(i)))
+		if(!(hddInfo=sceAtaInit(i)))
 		{
 			APA_PRINTF(APA_DRV_NAME": Error: ata initialization failed.\n");
 			return hddInitError();
