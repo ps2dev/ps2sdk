@@ -23,9 +23,9 @@
 
 static inline void setPS2SDKFunctions() {
 	// Set ps2sdk functions
-	if (_ps2sdk_open == NULL) _set_ps2sdk_open();
-	if (_ps2sdk_close == NULL) _set_ps2sdk_close();
-	if (_ps2sdk_read == NULL) _set_ps2sdk_read();
+	_glue_ps2sdk_open();
+	_glue_ps2sdk_close();
+	_glue_ps2sdk_read();
 }
 
 #ifdef F__libcglue_timezone_update

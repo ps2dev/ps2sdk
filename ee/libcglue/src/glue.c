@@ -143,10 +143,10 @@ int _open(const char *buf, int flags, ...) {
 	}
 
 	// Set ps2sdk functions
-	if (_ps2sdk_dopen == NULL) _set_ps2sdk_dopen();
-	if (_ps2sdk_open == NULL) _set_ps2sdk_open();
-	if (_ps2sdk_dclose == NULL) _set_ps2sdk_dclose();
-	if (_ps2sdk_close == NULL) _set_ps2sdk_close();
+	_glue_ps2sdk_dopen();
+	_glue_ps2sdk_open();
+	_glue_ps2sdk_dclose();
+	_glue_ps2sdk_close();
 
 	// newlib frags differ from iop flags
 	if ((flags & 3) == O_RDONLY) iop_flags |= IOP_O_RDONLY;
@@ -195,7 +195,7 @@ int _close(int fd) {
 	}
 
 	// Set ps2sdk functions
-	if (_ps2sdk_close == NULL) _set_ps2sdk_close();
+	_glue_ps2sdk_close();
 
 	switch(__descriptormap[fd]->type)
 	{
@@ -237,7 +237,7 @@ int _read(int fd, void *buf, size_t nbytes) {
 	}
 
 	// Set ps2sdk functions
-	if (_ps2sdk_read == NULL) _set_ps2sdk_read();
+	_glue_ps2sdk_read();
 
 	switch(__descriptormap[fd]->type)
 	{
@@ -266,7 +266,7 @@ int _write(int fd, const void *buf, size_t nbytes) {
 	}
 
 	// Set ps2sdk functions
-	if (_ps2sdk_write == NULL) _set_ps2sdk_write();
+	_glue_ps2sdk_write();
 
 	switch(__descriptormap[fd]->type)
 	{
@@ -297,7 +297,7 @@ int _stat(const char *path, struct stat *buf) {
 	}
 
 	// Set ps2sdk functions
-	if (_ps2sdk_stat == NULL) _set_ps2sdk_stat();
+	_glue_ps2sdk_stat();
 
 	return __transform_errno(_ps2sdk_stat(dest, buf));
 }
@@ -427,7 +427,7 @@ int getdents(int fd, void *dd_buf, int count)
 	dirp = (struct dirent *)dd_buf;
 
 	// Set ps2sdk functions
-	if (_ps2sdk_dread == NULL) _set_ps2sdk_dread();
+	_glue_ps2sdk_dread();
 
 	rv = _ps2sdk_dread(__descriptormap[fd]->descriptor, dirp);
 	if (rv < 0) {
@@ -458,9 +458,9 @@ static off_t _lseekDir(int fd, off_t offset, int whence)
 	}
 
 	// Set ps2sdk functions
-	if (_ps2sdk_close == NULL) _set_ps2sdk_close();
-	if (_ps2sdk_dopen == NULL) _set_ps2sdk_dopen();
-	if (_ps2sdk_dread == NULL) _set_ps2sdk_dread();
+	_glue_ps2sdk_close();
+	_glue_ps2sdk_dopen();
+	_glue_ps2sdk_dread();
 
 	_ps2sdk_dclose(__descriptormap[fd]->descriptor);
 	uid = _ps2sdk_dopen(__descriptormap[fd]->filename);
@@ -480,7 +480,7 @@ off_t _lseek(int fd, off_t offset, int whence)
 	}
 
 	// Set ps2sdk functions
-	if (_ps2sdk_lseek == NULL) _set_ps2sdk_lseek();
+	_glue_ps2sdk_lseek();
 
 	switch(__descriptormap[fd]->type)
 	{
@@ -512,7 +512,7 @@ off64_t lseek64(int fd, off64_t offset, int whence)
 	}
 
 	// Set ps2sdk functions
-	if (_ps2sdk_lseek64 == NULL) _set_ps2sdk_lseek64();
+	_glue_ps2sdk_lseek64();
 
 	switch(__descriptormap[fd]->type)
 	{
@@ -558,7 +558,7 @@ int mkdir(const char *path, mode_t mode) {
 	}
 
 	// Set ps2sdk functions
-	if (_ps2sdk_mkdir == NULL) _set_ps2sdk_mkdir();
+	_glue_ps2sdk_mkdir();
 
 	return __transform_errno(_ps2sdk_mkdir(dest, mode));
 }
@@ -574,7 +574,7 @@ int rmdir(const char *path) {
 	}
 
 	// Set ps2sdk functions
-	if (_ps2sdk_rmdir == NULL) _set_ps2sdk_rmdir();
+	_glue_ps2sdk_rmdir();
 
 	return __transform_errno(_ps2sdk_rmdir(dest));
 }
@@ -596,7 +596,7 @@ int _unlink(const char *path) {
 	}
 
 	// Set ps2sdk functions
-	if (_ps2sdk_remove == NULL) _set_ps2sdk_remove();
+	_glue_ps2sdk_remove();
 
 	return __transform_errno(_ps2sdk_remove(dest));
 }
@@ -618,7 +618,7 @@ int _rename(const char *old, const char *new) {
 	}
 
 	// Set ps2sdk functions
-	if (_ps2sdk_rename == NULL) _set_ps2sdk_rename();
+	_glue_ps2sdk_rename();
 
 	return __transform_errno(_ps2sdk_rename(oldname, newname));
 }
@@ -829,7 +829,7 @@ int symlink(const char *target, const char *linkpath)
 	}
 
 	// Set ps2sdk functions
-	if (_ps2sdk_symlink == NULL) _set_ps2sdk_symlink();
+	_glue_ps2sdk_symlink();
 
 	return __transform_errno(_ps2sdk_symlink(dest_target, dest_linkpath));
 }
@@ -846,7 +846,7 @@ ssize_t readlink(const char *path, char *buf, size_t bufsiz)
 	}
 
 	// Set ps2sdk functions
-	if (_ps2sdk_readlink == NULL) _set_ps2sdk_readlink();
+	_glue_ps2sdk_readlink();
 
 	return 	__transform_errno(_ps2sdk_readlink(dest, buf, bufsiz));
 }

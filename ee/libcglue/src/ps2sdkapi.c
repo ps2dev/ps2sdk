@@ -325,3 +325,293 @@ void _set_ps2sdk_dclose() {
     _ps2sdk_dclose = fioDclose;
 }
 #endif
+
+
+#ifdef F__predefined_ps2sdk_close
+__attribute__((weak))
+void _predefined_ps2sdk_close() {}
+#endif
+
+#ifdef F__glue_ps2sdk_close
+void _predefined_ps2sdk_close();
+void _set_ps2sdk_close();
+
+void _glue_ps2sdk_close() {
+    // Check if predefined values are set
+    _predefined_ps2sdk_close();
+
+    if (_ps2sdk_close == NULL) _set_ps2sdk_close();
+}
+#endif
+
+#ifdef F__predefined_ps2sdk_open
+__attribute__((weak))
+void _predefined_ps2sdk_open() {}
+#endif
+
+#ifdef F__glue_ps2sdk_open
+void _predefined_ps2sdk_open();
+void _set_ps2sdk_open();
+
+void _glue_ps2sdk_open() {
+    // Check if predefined values are set
+    _predefined_ps2sdk_open();
+
+    if (_ps2sdk_open == NULL) _set_ps2sdk_open();
+}
+#endif
+
+#ifdef F__predefined_ps2sdk_read
+__attribute__((weak))
+void _predefined_ps2sdk_read() {}
+#endif
+
+#ifdef F__glue_ps2sdk_read
+void _predefined_ps2sdk_read();
+void _set_ps2sdk_read();
+
+void _glue_ps2sdk_read() {
+    // Check if predefined values are set
+    _predefined_ps2sdk_read();
+
+    if (_ps2sdk_read == NULL) _set_ps2sdk_read();
+}
+#endif
+
+#ifdef F__predefined_ps2sdk_lseek
+__attribute__((weak))
+void _predefined_ps2sdk_lseek() {}
+#endif
+
+#ifdef F__glue_ps2sdk_lseek
+void _predefined_ps2sdk_lseek();
+void _set_ps2sdk_lseek();
+
+void _glue_ps2sdk_lseek() {
+    // Check if predefined values are set
+    _predefined_ps2sdk_lseek();
+
+    if (_ps2sdk_lseek == NULL) _set_ps2sdk_lseek();
+}
+#endif
+
+#ifdef F__predefined_ps2sdk_lseek64
+__attribute__((weak))
+void _predefined_ps2sdk_lseek64() {}
+#endif
+
+#ifdef F__glue_ps2sdk_lseek64
+void _predefined_ps2sdk_lseek64();
+void _set_ps2sdk_lseek64();
+
+void _glue_ps2sdk_lseek64() {
+    // Check if predefined values are set
+    _predefined_ps2sdk_lseek64();
+
+    if (_ps2sdk_lseek64 == NULL) _set_ps2sdk_lseek64();
+}
+#endif
+
+#ifdef F__predefined_ps2sdk_write
+__attribute__((weak))
+void _predefined_ps2sdk_write() {}
+#endif
+
+#ifdef F__glue_ps2sdk_write
+void _predefined_ps2sdk_write();
+void _set_ps2sdk_write();
+
+void _glue_ps2sdk_write() {
+    // Check if predefined values are set
+    _predefined_ps2sdk_write();
+
+    if (_ps2sdk_write == NULL) _set_ps2sdk_write();
+}
+#endif
+
+#ifdef F__predefined_ps2sdk_ioctl
+__attribute__((weak))
+void _predefined_ps2sdk_ioctl() {}
+#endif
+
+#ifdef F__glue_ps2sdk_ioctl
+void _predefined_ps2sdk_ioctl();
+void _set_ps2sdk_ioctl();
+
+void _glue_ps2sdk_ioctl() {
+    // Check if predefined values are set
+    _predefined_ps2sdk_ioctl();
+
+    if (_ps2sdk_ioctl == NULL) _set_ps2sdk_ioctl();
+}
+#endif
+
+#ifdef F__predefined_ps2sdk_remove
+__attribute__((weak))
+void _predefined_ps2sdk_remove() {}
+#endif
+
+#ifdef F__glue_ps2sdk_remove
+void _predefined_ps2sdk_remove();
+void _set_ps2sdk_remove();
+
+void _glue_ps2sdk_remove() {
+    // Check if predefined values are set
+    _predefined_ps2sdk_remove();
+
+    if (_ps2sdk_remove == NULL) _set_ps2sdk_remove();
+}
+#endif
+
+#ifdef F__predefined_ps2sdk_rename
+__attribute__((weak))
+void _predefined_ps2sdk_rename() {}
+#endif
+
+#ifdef F__glue_ps2sdk_rename
+void _predefined_ps2sdk_rename();
+void _set_ps2sdk_rename();
+
+void _glue_ps2sdk_rename() {
+    // Check if predefined values are set
+    _predefined_ps2sdk_rename();
+
+    if (_ps2sdk_rename == NULL) _set_ps2sdk_rename();
+}
+#endif
+
+#ifdef F__predefined_ps2sdk_mkdir
+__attribute__((weak))
+void _predefined_ps2sdk_mkdir() {}
+#endif
+
+#ifdef F__glue_ps2sdk_mkdir
+void _predefined_ps2sdk_mkdir();
+void _set_ps2sdk_mkdir();
+
+void _glue_ps2sdk_mkdir() {
+    // Check if predefined values are set
+    _predefined_ps2sdk_mkdir();
+
+    if (_ps2sdk_mkdir == NULL) _set_ps2sdk_mkdir();
+}
+#endif
+
+#ifdef F__predefined_ps2sdk_rmdir
+__attribute__((weak))
+void _predefined_ps2sdk_rmdir() {}
+#endif
+
+#ifdef F__glue_ps2sdk_rmdir
+void _predefined_ps2sdk_rmdir();
+void _set_ps2sdk_rmdir();
+
+void _glue_ps2sdk_rmdir() {
+    // Check if predefined values are set
+    _predefined_ps2sdk_rmdir();
+
+    if (_ps2sdk_rmdir == NULL) _set_ps2sdk_rmdir();
+}
+#endif
+
+#ifdef F__predefined_ps2sdk_stat
+__attribute__((weak))
+void _predefined_ps2sdk_stat() {}
+#endif
+
+#ifdef F__glue_ps2sdk_stat
+void _predefined_ps2sdk_stat();
+void _set_ps2sdk_stat();
+
+void _glue_ps2sdk_stat() {
+    // Check if predefined values are set
+    _predefined_ps2sdk_stat();
+
+    if (_ps2sdk_stat == NULL) _set_ps2sdk_stat();
+}
+#endif
+
+#ifdef F__predefined_ps2sdk_readlink
+__attribute__((weak))
+void _predefined_ps2sdk_readlink() {}
+#endif
+
+#ifdef F__glue_ps2sdk_readlink
+void _predefined_ps2sdk_readlink();
+void _set_ps2sdk_readlink();
+
+void _glue_ps2sdk_readlink() {
+    // Check if predefined values are set
+    _predefined_ps2sdk_readlink();
+
+    if (_ps2sdk_readlink == NULL) _set_ps2sdk_readlink();
+}
+#endif
+
+#ifdef F__predefined_ps2sdk_symlink
+__attribute__((weak))
+void _predefined_ps2sdk_symlink() {}
+#endif
+
+#ifdef F__glue_ps2sdk_symlink
+void _predefined_ps2sdk_symlink();
+void _set_ps2sdk_symlink();
+
+void _glue_ps2sdk_symlink() {
+    // Check if predefined values are set
+    _predefined_ps2sdk_symlink();
+
+    if (_ps2sdk_symlink == NULL) _set_ps2sdk_symlink();
+}
+#endif
+
+#ifdef F__predefined_ps2sdk_dopen
+__attribute__((weak))
+void _predefined_ps2sdk_dopen() {}
+#endif
+
+#ifdef F__glue_ps2sdk_dopen
+void _predefined_ps2sdk_dopen();
+void _set_ps2sdk_dopen();
+
+void _glue_ps2sdk_dopen() {
+    // Check if predefined values are set
+    _predefined_ps2sdk_dopen();
+
+    if (_ps2sdk_dopen == NULL) _set_ps2sdk_dopen();
+}
+#endif
+
+#ifdef F__predefined_ps2sdk_dread
+__attribute__((weak))
+void _predefined_ps2sdk_dread() {}
+#endif
+
+#ifdef F__glue_ps2sdk_dread
+void _predefined_ps2sdk_dread();
+void _set_ps2sdk_dread();
+
+void _glue_ps2sdk_dread() {
+    // Check if predefined values are set
+    _predefined_ps2sdk_dread();
+
+    if (_ps2sdk_dread == NULL) _set_ps2sdk_dread();
+}
+#endif
+
+#ifdef F__predefined_ps2sdk_dclose
+__attribute__((weak))
+void _predefined_ps2sdk_dclose() {}
+#endif
+
+#ifdef F__glue_ps2sdk_dclose
+void _predefined_ps2sdk_dclose();
+void _set_ps2sdk_dclose();
+
+void _glue_ps2sdk_dclose() {
+    // Check if predefined values are set
+    _predefined_ps2sdk_dclose();
+
+    if (_ps2sdk_dclose == NULL) _set_ps2sdk_dclose();
+}
+#endif
