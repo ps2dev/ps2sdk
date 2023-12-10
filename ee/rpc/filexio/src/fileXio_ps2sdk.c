@@ -100,7 +100,7 @@ void _set_ps2sdk_rmdir() {
 }
 #endif
 
-#ifdef F__set_ps2sdk_stat
+#ifdef F___fileXioGetstatHelper
 static time_t io_to_posix_time(const unsigned char *ps2time)
 {
         struct tm tim;
@@ -147,7 +147,7 @@ static void fill_stat(struct stat *stat, const iox_stat_t *fiostat)
         stat->st_blocks = stat->st_size / 512;
 }
 
-static int fileXioGetstatHelper(const char *path, struct stat *buf) {
+int __fileXioGetstatHelper(const char *path, struct stat *buf) {
         iox_stat_t fiostat;
 
         if (fileXioGetStat(path, &fiostat) < 0) {
@@ -159,10 +159,14 @@ static int fileXioGetstatHelper(const char *path, struct stat *buf) {
 
         return 0;
 }
+#else
+int __fileXioGetstatHelper(const char *path, struct stat *buf);
+#endif
 
+#ifdef F__set_ps2sdk_stat
 uint8_t __ps2sdk_fileXio_stat = 0;
 void _set_ps2sdk_stat() {
-    _ps2sdk_stat = fileXioGetstatHelper;
+    _ps2sdk_stat = __fileXioGetstatHelper;
 }
 #endif
 
@@ -187,8 +191,8 @@ void _set_ps2sdk_dopen() {
 }
 #endif
 
-#ifdef F__set_ps2sdk_dread
-static int fileXioDreadHelper(int fd, struct dirent *dir) {
+#ifdef F___fileXioDreadHelper
+int __fileXioDreadHelper(int fd, struct dirent *dir) {
 	int rv;
 	iox_dirent_t ioxdir;
 
@@ -214,10 +218,14 @@ static int fileXioDreadHelper(int fd, struct dirent *dir) {
 
 	return rv;
 }
+#else
+int __fileXioDreadHelper(int fd, struct dirent *dir);
+#endif
 
+#ifdef F__set_ps2sdk_dread
 uint8_t __ps2sdk_fileXio_dread = 0;
 void _set_ps2sdk_dread() {
-    _ps2sdk_dread = fileXioDreadHelper;
+    _ps2sdk_dread = __fileXioDreadHelper;
 }
 #endif
 

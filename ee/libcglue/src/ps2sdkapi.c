@@ -99,14 +99,18 @@ void _set_ps2sdk_close() {
 }
 #endif
 
-#ifdef F__set_ps2sdk_open
-static int fioOpenHelper(const char* path, int flags, ...) {
+#ifdef F___fioOpenHelper
+int __fioOpenHelper(const char* path, int flags, ...) {
   return fioOpen(path, flags);
 }
+#else
+int __fioOpenHelper(const char* path, int flags, ...);
+#endif
 
+#ifdef F__set_ps2sdk_open
 __attribute__((weak))
 void _set_ps2sdk_open() {
-    _ps2sdk_open = fioOpenHelper;
+    _ps2sdk_open = __fioOpenHelper;
 }
 #endif
 
@@ -124,16 +128,20 @@ void _set_ps2sdk_lseek() {
 }
 #endif
 
-#ifdef F__set_ps2sdk_lseek64
-static off64_t _default_lseek64(int fd, off64_t offset, int whence)
+#ifdef F___fioLseek64Helper
+off64_t __fioLseek64Helper(int fd, off64_t offset, int whence)
 {
 	errno = ENOSYS;
 	return -1; /* not supported */
 }
+#else
+off64_t __fioLseek64Helper(int fd, off64_t offset, int whence);
+#endif
 
+#ifdef F__set_ps2sdk_lseek64
 __attribute__((weak))
 void _set_ps2sdk_lseek64() {
-    _ps2sdk_lseek64 = _default_lseek64;
+    _ps2sdk_lseek64 = __fioLseek64Helper;
 }
 #endif
 
@@ -158,29 +166,37 @@ void _set_ps2sdk_remove() {
 }
 #endif
 
-#ifdef F__set_ps2sdk_rename
-static int fioRename(const char *old, const char *new) {
+#ifdef F___fioRenameHelper
+int __fioRenameHelper(const char *old, const char *new) {
 	errno = ENOSYS;
 	return -1; /* not supported */
 }
+#else
+int __fioRenameHelper(const char *old, const char *new);
+#endif
 
+#ifdef F__set_ps2sdk_rename
 __attribute__((weak))
 void _set_ps2sdk_rename() {
-    _ps2sdk_rename = fioRename;
+    _ps2sdk_rename = __fioRenameHelper;
 }
 #endif
 
-#ifdef F__set_ps2sdk_mkdir
-static int fioMkdirHelper(const char *path, int mode) {
+#ifdef F___fioMkdirHelper
+int __fioMkdirHelper(const char *path, int mode) {
   // Old fio mkdir has no mode argument
 	(void)mode;
 
   return fioMkdir(path);
 }
+#else
+int __fioMkdirHelper(const char *path, int mode);
+#endif
 
+#ifdef F__set_ps2sdk_mkdir
 __attribute__((weak))
 void _set_ps2sdk_mkdir() {
-    _ps2sdk_mkdir = fioMkdirHelper;
+    _ps2sdk_mkdir = __fioMkdirHelper;
 }
 #endif
 
@@ -191,7 +207,7 @@ void _set_ps2sdk_rmdir() {
 }
 #endif
 
-#ifdef F__set_ps2sdk_stat
+#ifdef F___fioGetstatHelper
 static time_t io_to_posix_time(const unsigned char *ps2time)
 {
         struct tm tim;
@@ -232,7 +248,7 @@ static void __fill_stat(struct stat *stat, const io_stat_t *fiostat)
         stat->st_blocks = stat->st_size / 512;
 }
 
-static int fioGetstatHelper(const char *path, struct stat *buf) {
+int __fioGetstatHelper(const char *path, struct stat *buf) {
         io_stat_t fiostat;
 
         if (fioGetstat(path, &fiostat) < 0) {
@@ -244,36 +260,48 @@ static int fioGetstatHelper(const char *path, struct stat *buf) {
 
         return 0;
 }
+#else
+int __fioGetstatHelper(const char *path, struct stat *buf);
+#endif
 
+#ifdef F__set_ps2sdk_stat
 __attribute__((weak))
 void _set_ps2sdk_stat() {
-    _ps2sdk_stat = fioGetstatHelper;
+    _ps2sdk_stat = __fioGetstatHelper;
 }
+#endif
+
+#ifdef F___fioReadlinkHelper
+ssize_t __fioReadlinkHelper(const char *path, char *buf, size_t bufsiz)
+{
+	errno = ENOSYS;
+	return -1; /* not supported */
+}
+#else
+ssize_t __fioReadlinkHelper(const char *path, char *buf, size_t bufsiz);
 #endif
 
 #ifdef F__set_ps2sdk_readlink
-static ssize_t default_readlink(const char *path, char *buf, size_t bufsiz)
-{
-	errno = ENOSYS;
-	return -1; /* not supported */
-}
-
 __attribute__((weak))
 void _set_ps2sdk_readlink() {
-    _ps2sdk_readlink = default_readlink;
+    _ps2sdk_readlink = __fioReadlinkHelper;
 }
 #endif
 
-#ifdef F__set_ps2sdk_symlink
-static int default_symlink(const char *target, const char *linkpath)
+#ifdef F___fioSymlinkHelper
+int __fioSymlinkHelper(const char *target, const char *linkpath)
 {
 	errno = ENOSYS;
 	return -1; /* not supported */
 }
+#else
+int __fioSymlinkHelper(const char *target, const char *linkpath);
+#endif
 
+#ifdef F__set_ps2sdk_symlink
 __attribute__((weak))
 void _set_ps2sdk_symlink() {
-    _ps2sdk_symlink = default_symlink;
+    _ps2sdk_symlink = __fioSymlinkHelper;
 }
 #endif
 
@@ -284,8 +312,8 @@ void _set_ps2sdk_dopen() {
 }
 #endif
 
-#ifdef F__set_ps2sdk_dread
-static int fioDreadHelper(int fd, struct dirent *dir) {
+#ifdef F___fioDreadHelper
+int __fioDreadHelper(int fd, struct dirent *dir) {
 	int rv;
 	io_dirent_t iodir;
 
@@ -312,10 +340,14 @@ static int fioDreadHelper(int fd, struct dirent *dir) {
 
 	return rv;
 }
+#else
+int __fioDreadHelper(int fd, struct dirent *dir);
+#endif
 
+#ifdef F__set_ps2sdk_dread
 __attribute__((weak))
 void _set_ps2sdk_dread() {
-    _ps2sdk_dread = fioDreadHelper;
+    _ps2sdk_dread = __fioDreadHelper;
 }
 #endif
 
