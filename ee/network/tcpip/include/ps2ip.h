@@ -26,6 +26,7 @@ void ps2ipDeinit(void);
 /**
  * Use to specify the number of H-sync ticks per milisecond (Default: 16). 
  * Use this function to keep timings accurate, if a mode like 480P (~31KHz H-sync) is used instead of NTSC/PAL (~16KHz H-sync).	
+ * This function is obsolete, so it is stubbed for compatibility purposes.
  */
 void ps2ipSetHsyncTicksPerMSec(unsigned char ticks);
 

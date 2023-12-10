@@ -10,7 +10,6 @@
 
 #include <ps2_osal.h>
 #include <time.h>
-#include <timer_alarm.h>
 
 #define MAX_PS2_UID 2048 // SWAG
 #define DEFAULT_STACK_SIZE_BYTES 4096
@@ -75,10 +74,6 @@ ps2ThreadData *__getThreadData(s32 threadHandle)
 ps2ThreadData *__getThreadData(s32 threadHandle);
 #endif
 
-static void usercb(struct timer_alarm_t *alarm, void *arg) {
-  iReleaseWaitThread((int)arg);
-}
-
 static inline void DelayThread(uint32_t usecs) {
   struct timespec tv = {0};
   tv.tv_sec          = usecs / 1000000;
@@ -89,8 +84,8 @@ static inline void DelayThread(uint32_t usecs) {
 static inline int SemWaitTimeout(s32 semHandle, uint32_t timeout)
 {
     int ret;
-    struct timer_alarm_t alarm;
-    InitializeTimerAlarm(&alarm);
+    u64 timeoutUsec;
+    u64 *timeoutPtr;
 
     if (timeout == 0) {
         if (PollSema(semHandle) < 0) {
@@ -99,12 +94,14 @@ static inline int SemWaitTimeout(s32 semHandle, uint32_t timeout)
         return 0;
     }
 
+    timeoutPtr = NULL;
+
     if (timeout > 0 && timeout != UINT32_MAX) {
-        SetTimerAlarm(&alarm, MSec2TimerBusClock(timeout), &usercb, (void *)GetThreadId());
+        timeoutUsec = timeout * 1000;
+        timeoutPtr = &timeoutUsec;
     }
 
-    ret = WaitSema(semHandle);
-    StopTimerAlarm(&alarm);
+    ret = WaitSemaEx(semHandle, 1, timeoutPtr);
 
     if (ret < 0)
         return -2;

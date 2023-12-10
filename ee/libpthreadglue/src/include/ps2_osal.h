@@ -17,6 +17,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <kernel.h>
+#include <kernel_util.h>
 
 typedef int pte_osThreadHandle;
 typedef int pte_osSemaphoreHandle;
