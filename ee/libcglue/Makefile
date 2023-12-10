@@ -29,7 +29,7 @@ GLUE_OBJS = __dummy_passwd.o __transform_errno.o __transform64_errno.o compile_t
 	_stat.o lstat.o _fstat.o access.o _fcntl.o getdents.o _lseek.o lseek64.o chdir.o mkdir.o \
 	rmdir.o _link.o _unlink.o _rename.o _getpid.o _kill.o _fork.o _wait.o _sbrk.o _gettimeofday.o _times.o ftime.o clock_getres.o clock_gettime.o clock_settime.o \
 	truncate.o symlink.o readlink.o utime.o fchown.o getrandom.o getentropy.o _isatty.o chmod.o fchmod.o fchmodat.o pathconf.o \
-	fsync.o getuid.o geteuid.o getpwuid.o getpwnam.o
+	fsync.o getuid.o geteuid.o getpwuid.o getpwnam.o ps2sdk_get_iop_fd.o
 
 LOCK_OBJS = __retarget_lock_init.o __retarget_lock_acquire.o __retarget_lock_release.o __retarget_lock_try_acquire.o __retarget_lock_close.o \
 	__retarget_lock_init_recursive.o __retarget_lock_acquire_recursive.o __retarget_lock_release_recursive.o __retarget_lock_try_acquire_recursive.o __retarget_lock_close_recursive.o

@@ -27,6 +27,13 @@ int hddDread(iomanX_iop_file_t *f, iox_dirent_t *dirent);
 int hddGetStat(iomanX_iop_file_t *f, const char *name, iox_stat_t *stat);
 int hddReName(iomanX_iop_file_t *f, const char *oldname, const char *newname);
 int hddDevctl(iomanX_iop_file_t *f, const char *devname, int cmd, void *arg, unsigned int arglen, void *bufp, unsigned int buflen);
+#ifdef APA_USE_IOMANX
+int hddMount(iomanX_iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, int arglen);
+int hddUmount(iomanX_iop_file_t *f, const char *fsname);
+#else
+#define hddMount ((void*)&hddUnsupported)
+#define hddUmount ((void*)&hddUnsupported)
+#endif
 
 int hddUnsupported(iomanX_iop_file_t *f);
 

@@ -18,8 +18,9 @@
 #else
 #include <string.h>
 #endif
-#include <atad.h>
+#ifdef APA_USE_DEV9
 #include <dev9.h>
+#endif
 #include <errno.h>
 #include <iomanX.h>
 #include <thsemap.h>
@@ -29,6 +30,7 @@
 #include <libapa.h>
 #include "hdd.h"
 #include "hdd_fio.h"
+#include "hdd_blkio.h"
 
 hdd_file_slot_t *hddFileSlots;
 int fioSema;
@@ -213,7 +215,7 @@ static int fioDataTransfer(iomanX_iop_file_t *f, void *buf, int size, int mode)
         int rv = 0;
 
         WaitSema(fioSema);
-        if (ata_device_sector_io(f->unit, buf, fileSlot->post + fileSlot->parts[0].start + 8, size, mode))
+        if (blkIoDmaTransfer(f->unit, buf, fileSlot->post + fileSlot->parts[0].start + 8, size, mode))
             rv = -EIO;
         SignalSema(fioSema);
         if (rv == 0) {
@@ -241,7 +243,7 @@ static int ioctl2Transfer(s32 device, hdd_file_slot_t *fileSlot, hddIoctl2Transf
     if (fileSlot->parts[arg->sub].length < arg->sector + arg->size)
         return -ENXIO;
 
-    if (ata_device_sector_io(device, arg->buffer,
+    if (blkIoDmaTransfer(device, arg->buffer,
                              fileSlot->parts[arg->sub].start + arg->sector, arg->size, arg->mode))
         return -EIO;
 
@@ -290,17 +292,17 @@ int hddFormat(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void 
         return -ENODEV;
 #endif
 
-    if (f->unit >= 2)
+    if (f->unit >= BLKIO_MAX_VOLUMES)
         return -ENXIO;
 
     // clear all errors on hdd
     clink = apaCacheAlloc();
     memset(clink->header, 0, sizeof(apa_header_t));
-    if (ata_device_sector_io(f->unit, clink->header, APA_SECTOR_SECTOR_ERROR, 1, ATA_DIR_WRITE)) {
+    if (blkIoDmaTransfer(f->unit, clink->header, APA_SECTOR_SECTOR_ERROR, 1, BLKIO_DIR_WRITE)) {
         apaCacheFree(clink);
         return -EIO;
     }
-    if (ata_device_sector_io(f->unit, clink->header, APA_SECTOR_PART_ERROR, 1, ATA_DIR_WRITE)) {
+    if (blkIoDmaTransfer(f->unit, clink->header, APA_SECTOR_PART_ERROR, 1, BLKIO_DIR_WRITE)) {
         apaCacheFree(clink);
         return -EIO;
     }
@@ -308,8 +310,8 @@ int hddFormat(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void 
     // TODO: Why does DVRP firmware start clearing at 1024 * 4104 when not 48-bit?
     // TODO: DVRP firmware 48-bit clears offset_24+0x2000, offset_24+0x42000, offset_24+0x242000
     for (i = 1024 * 8; i < hddDevices[f->unit].totalLBA; i += (1024 * 256)) {
-        ata_device_sector_io(f->unit, clink->header, i, sizeof(apa_header_t) / 512,
-                             ATA_DIR_WRITE);
+        blkIoDmaTransfer(f->unit, clink->header, i, sizeof(apa_header_t) / 512,
+                             BLKIO_DIR_WRITE);
     }
     apaCacheFree(clink);
     if ((rv = apaJournalReset(f->unit)) != 0)
@@ -355,7 +357,7 @@ int hddFormat(iomanX_iop_file_t *f, const char *dev, const char *blockdev, void 
         header->checksum = apaCheckSum(header, 1);
         clink->flags |= APA_CACHE_FLAG_DIRTY;
         apaCacheFlushDirty(clink);
-        ata_device_flush_cache(f->unit);
+        blkIoFlushCache(f->unit);
         apaCacheFree(clink);
         hddDevices[f->unit].status = 0;
         hddDevices[f->unit].format = APA_MBR_VERSION;
@@ -422,8 +424,8 @@ static int apaOpen(s32 device, hdd_file_slot_t *fileSlot, apa_params_t *params, 
                 sector = clink->header->start;
                 clink2 = apaCacheAlloc();
                 memset(clink2->header, 0, sizeof(apa_header_t));
-                ata_device_sector_io(device, clink2->header, sector + 8, 2, ATA_DIR_WRITE);
-                ata_device_sector_io(device, clink2->header, sector + 0x2000, 2, ATA_DIR_WRITE);
+                blkIoDmaTransfer(device, clink2->header, sector + 8, 2, BLKIO_DIR_WRITE);
+                blkIoDmaTransfer(device, clink2->header, sector + 0x2000, 2, BLKIO_DIR_WRITE);
                 apaCacheFree(clink2);
             }
         }
@@ -570,7 +572,7 @@ int hddOpen(iomanX_iop_file_t *f, const char *name, int flags, int mode)
 
     (void)mode;
 
-    if (f->unit >= 2 || hddDevices[f->unit].status != 0)
+    if (f->unit >= BLKIO_MAX_VOLUMES || hddDevices[f->unit].status != 0)
         return -ENODEV;
 
 #ifdef APA_SUPPORT_BHDD
@@ -616,7 +618,7 @@ int hddClose(iomanX_iop_file_t *f)
 
 int hddRead(iomanX_iop_file_t *f, void *buf, int size)
 {
-    return fioDataTransfer(f, buf, size, ATA_DIR_READ);
+    return fioDataTransfer(f, buf, size, BLKIO_DIR_READ);
 }
 
 int hddWrite(iomanX_iop_file_t *f, void *buf, int size)
@@ -627,7 +629,7 @@ int hddWrite(iomanX_iop_file_t *f, void *buf, int size)
     if (strcmp(f->device->name, "bhdd") == 0)
         return -EACCES;
 #endif
-    return fioDataTransfer(f, buf, size, ATA_DIR_WRITE);
+    return fioDataTransfer(f, buf, size, BLKIO_DIR_WRITE);
 }
 
 int hddLseek(iomanX_iop_file_t *f, int post, int whence)
@@ -911,7 +913,7 @@ int hddIoctl2(iomanX_iop_file_t *f, int req, void *argp, unsigned int arglen,
             break;
 
         case HIOCFLUSH:
-            ata_device_flush_cache(f->unit);
+            blkIoFlushCache(f->unit);
             break;
 
         // cmd set 2
@@ -1033,11 +1035,15 @@ int hddDevctl(iomanX_iop_file_t *f, const char *devname, int cmd, void *arg,
         // Command set 1 ('H')
         case HDIOC_DEV9OFF:
             // Early versions called ata_device_smart_save_attr() here, when their old dev9 versions did not support the pre-shutdown callback.
+#ifdef APA_USE_DEV9
             dev9Shutdown();
+#else
+            blkIoSmartSaveAttr(f->unit);
+#endif
             break;
 
         case HDIOC_IDLE:
-            rv = ata_device_idle(f->unit, *(char *)arg);
+            rv = blkIoIdle(f->unit, *(char *)arg);
             break;
 
         case HDIOC_MAXSECTOR:
@@ -1049,7 +1055,7 @@ int hddDevctl(iomanX_iop_file_t *f, const char *devname, int cmd, void *arg,
             break;
 
         case HDIOC_FLUSH:
-            if (ata_device_flush_cache(f->unit))
+            if (blkIoFlushCache(f->unit))
                 rv = -EIO;
             break;
 
@@ -1058,7 +1064,7 @@ int hddDevctl(iomanX_iop_file_t *f, const char *devname, int cmd, void *arg,
             break;
 
         case HDIOC_SMARTSTAT:
-            rv = ata_device_smart_get_status(f->unit);
+            rv = blkIoSmartReturnStatus(f->unit);
             break;
 
         case HDIOC_STATUS:
@@ -1074,7 +1080,7 @@ int hddDevctl(iomanX_iop_file_t *f, const char *devname, int cmd, void *arg,
             break;
 
         case HDIOC_IDLEIMM:
-            rv = ata_device_idle_immediate(f->unit);
+            rv = blkIoIdleImmediate(f->unit);
             break;
 
         // Command set 2 ('h')
@@ -1095,18 +1101,18 @@ int hddDevctl(iomanX_iop_file_t *f, const char *devname, int cmd, void *arg,
             break;
 
         case HDIOC_READSECTOR:
-            rv = ata_device_sector_io(f->unit, (void *)bufp, ((hddAtaTransfer_t *)arg)->lba,
-                                      ((hddAtaTransfer_t *)arg)->size, ATA_DIR_READ);
+            rv = blkIoDmaTransfer(f->unit, (void *)bufp, ((hddAtaTransfer_t *)arg)->lba,
+                                      ((hddAtaTransfer_t *)arg)->size, BLKIO_DIR_READ);
             break;
 
         case HDIOC_WRITESECTOR:
-            rv = ata_device_sector_io(f->unit, ((hddAtaTransfer_t *)arg)->data,
+            rv = blkIoDmaTransfer(f->unit, ((hddAtaTransfer_t *)arg)->data,
                                       ((hddAtaTransfer_t *)arg)->lba, ((hddAtaTransfer_t *)arg)->size,
-                                      ATA_DIR_WRITE);
+                                      BLKIO_DIR_WRITE);
             break;
 
         case HDIOC_SCEIDENTIFY:
-            rv = ata_device_sce_identify_drive(f->unit, (u16 *)bufp);
+            rv = blkIoGetSceId(f->unit, (u16 *)bufp);
             break;
 
         // HDIOC_INSTSEC is not implemented in DVRP firmware
@@ -1126,6 +1132,46 @@ int hddDevctl(iomanX_iop_file_t *f, const char *devname, int cmd, void *arg,
 
     return rv;
 }
+
+#ifdef APA_USE_IOMANX
+int hddMount(iomanX_iop_file_t *f, const char *fsname, const char *devname, int flag, void *arg, int arglen)
+{
+    int rv = 0;
+
+    (void)flag;
+    (void)arg;
+    (void)arglen;
+
+#ifdef APA_SUPPORT_BHDD
+    if (strcmp(f->device->name, "bhdd") == 0)
+        return -ENODEV;
+#endif
+
+    WaitSema(fioSema);
+    rv = hdd_blkio_vhdd_mount(f->unit, devname);
+    SignalSema(fioSema);
+
+    return rv;
+}
+
+int hddUmount(iomanX_iop_file_t *f, const char *fsname)
+{
+    int rv = 0;
+
+    (void)fsname;
+
+#ifdef APA_SUPPORT_BHDD
+    if (strcmp(f->device->name, "bhdd") == 0)
+        return -ENODEV;
+#endif
+
+    WaitSema(fioSema);
+    rv = hdd_blkio_vhdd_umount(f->unit);
+    SignalSema(fioSema);
+
+    return rv;
+}
+#endif
 
 int hddUnsupported(iomanX_iop_file_t *f)
 {

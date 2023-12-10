@@ -16,9 +16,16 @@
 #include <irx.h>
 
 /* Please keep these in alphabetical order!  */
+#ifdef APA_USE_ATAD
 #include <atad.h>
+#endif
+#ifdef APA_USE_BDM
+#include <bdm.h>
+#endif
 #include <cdvdman.h>
+#ifdef APA_USE_DEV9
 #include <dev9.h>
+#endif
 #include <intrman.h>
 #include <iomanX.h>
 #include <stdio.h>
