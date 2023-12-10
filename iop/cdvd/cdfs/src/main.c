@@ -385,7 +385,6 @@ static int fio_dread(iop_file_t *fd, io_dirent_t *dirent)
     memcpy(dirent->stat.atime, entry.dateStamp, 8);
     memcpy(dirent->stat.mtime, entry.dateStamp, 8);
     strncpy(dirent->name, entry.filename, 128);
-    dirent->unknown = 0;
     
     fod_table[i].filesIndex++;
     return fod_table[i].filesIndex;
