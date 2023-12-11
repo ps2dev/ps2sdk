@@ -26,7 +26,7 @@ static int scsiTestUnitReady(struct SBP2Device *dev)
 {
     struct CommandDescriptorBlock cdb;
 
-    XPRINTF("IEEE1394_disk: scsiTestUnitReady.\n");
+    XPRINTF("scsiTestUnitReady.\n");
 
     cdb.misc = (u32)(ORB_NOTIFY | ORB_REQUEST_FORMAT(0) | CDB_MAX_PAYLOAD(dev->max_payload) | CDB_DIRECTION(WRITE_TRANSACTION) | CDB_SPEED(dev->speed));
 
@@ -59,7 +59,7 @@ static int scsiRequestSense(struct SBP2Device *dev, void *buffer, int size)
     int ret;
     struct CommandDescriptorBlock cdb;
 
-    XPRINTF("IEEE1394_disk: scsiRequestSense.\n");
+    XPRINTF("scsiRequestSense.\n");
 
     cdb.misc = (ORB_NOTIFY | ORB_REQUEST_FORMAT(0) | CDB_MAX_PAYLOAD(dev->max_payload) | CDB_DIRECTION(WRITE_TRANSACTION) | CDB_SPEED(dev->speed) | CDB_DATA_SIZE(size));
 
@@ -88,7 +88,7 @@ static int scsiRequestSense(struct SBP2Device *dev, void *buffer, int size)
     ret = ieee1394_Sync();
 
     if (ret != 0) {
-        XPRINTF("IEEE1394_disk: scsiRequestSense error: %d\n", ret);
+        XPRINTF("scsiRequestSense error: %d\n", ret);
     }
 
     return ret;
@@ -99,7 +99,7 @@ static int scsiInquiry(struct SBP2Device *dev, void *buffer, int size)
     int ret;
     struct CommandDescriptorBlock cdb;
 
-    XPRINTF("IEEE1394_disk: scsiInquiry. buffer: %p\n", buffer);
+    XPRINTF("scsiInquiry. buffer: %p\n", buffer);
 
     cdb.misc = (ORB_NOTIFY | ORB_REQUEST_FORMAT(0) | CDB_MAX_PAYLOAD(dev->max_payload) | CDB_DIRECTION(WRITE_TRANSACTION) | CDB_SPEED(dev->speed) | CDB_DATA_SIZE(size));
 
@@ -128,7 +128,7 @@ static int scsiInquiry(struct SBP2Device *dev, void *buffer, int size)
     ret = ieee1394_Sync();
 
     if (ret != 0) {
-        XPRINTF("IEEE1394_disk: scsiInquiry error %d\n", ret);
+        XPRINTF("scsiInquiry error %d\n", ret);
     } else {
         unsigned int i;
 
@@ -143,7 +143,7 @@ static int scsiStartStopUnit(struct SBP2Device *dev)
 {
     struct CommandDescriptorBlock cdb;
 
-    XPRINTF("IEEE1394_disk: scsiStartStopUnit.\n");
+    XPRINTF("scsiStartStopUnit.\n");
 
     cdb.misc = (ORB_NOTIFY | ORB_REQUEST_FORMAT(0) | CDB_MAX_PAYLOAD(dev->max_payload) | CDB_DIRECTION(WRITE_TRANSACTION) | CDB_SPEED(dev->speed));
 
@@ -175,7 +175,7 @@ static int scsiReadCapacity(struct SBP2Device *dev, void *buffer, int size)
 {
     struct CommandDescriptorBlock cdb;
 
-    XPRINTF("IEEE1394_disk: scsiReadCapacity.\n");
+    XPRINTF("scsiReadCapacity.\n");
 
     cdb.misc = (ORB_NOTIFY | ORB_REQUEST_FORMAT(0) | CDB_MAX_PAYLOAD(dev->max_payload) | CDB_DIRECTION(WRITE_TRANSACTION) | CDB_SPEED(dev->speed) | CDB_DATA_SIZE(size));
 
@@ -215,7 +215,7 @@ int scsiReadSector(struct SBP2Device *dev, unsigned long int lba, void *buffer, 
     void *bufferPtr, *PreviousReqBufferPtr;
     int result;
 
-    XPRINTF("IEEE1394_disk: scsiReadSector. buffer: %p, lba: 0x%08lx, numsectors: %d.\n", buffer, lba, sectorCount);
+    XPRINTF("scsiReadSector. buffer: %p, lba: 0x%08lx, numsectors: %d.\n", buffer, lba, sectorCount);
     SectorsPerBlock = XFER_BLOCK_SIZE / dev->sectorSize;
     OrbsRemaining   = sectorCount / SectorsPerBlock;
     if ((sectorCount % SectorsPerBlock) != 0)
@@ -288,7 +288,7 @@ int scsiReadSector(struct SBP2Device *dev, unsigned long int lba, void *buffer, 
     for (i = 0; i < sectorsToRead << 7; i++)
         ((unsigned int *)PreviousReqBufferPtr)[i] = BSWAP32(((unsigned int *)PreviousReqBufferPtr)[i]);
 
-    XPRINTF("IEEE1394_disk: scsiReadSector done.\n");
+    XPRINTF("scsiReadSector done.\n");
 
     return result;
 }
@@ -300,7 +300,7 @@ int scsiWriteSector(struct SBP2Device *dev, unsigned long int lba, void *buffer,
     void *bufferPtr;
     int result, max_payload;
 
-    XPRINTF("IEEE1394_disk: scsiWriteSector.\n");
+    XPRINTF("scsiWriteSector.\n");
     SectorsPerBlock = XFER_BLOCK_SIZE / dev->sectorSize;
     OrbsRemaining   = sectorCount / SectorsPerBlock;
     if ((sectorCount % SectorsPerBlock) != 0)
@@ -367,43 +367,43 @@ static inline int InitializeSCSIDevice(struct SBP2Device *dev)
     read_capacity_data rcd;
     int stat;
 
-    XPRINTF("IEEE1394_disk: InitializeSCSIDevice.\n");
+    XPRINTF("InitializeSCSIDevice.\n");
 
     memset(&id, 0, sizeof(inquiry_data));
     if ((stat = scsiInquiry(dev, &id, sizeof(inquiry_data))) < 0) {
-        XPRINTF("IEEE1394_disk: Error - scsiInquiry returned %d.\n", stat);
+        XPRINTF("Error - scsiInquiry returned %d.\n", stat);
         return -1;
     }
 
-    printf("IEEE1394_disk: Vendor: %.8s\n", id.vendor);
-    printf("IEEE1394_disk: Product: %.16s\n", id.product);
-    printf("IEEE1394_disk: Revision: %.4s\n", id.revision);
+    printf("Vendor: %.8s\n", id.vendor);
+    printf("Product: %.16s\n", id.product);
+    printf("Revision: %.4s\n", id.revision);
 
     if ((stat = scsiReadCapacity(dev, &rcd, sizeof(read_capacity_data))) != 0) {
-        XPRINTF("IEEE1394_disk: Error - scsiReadCapacity %d\n", stat);
+        XPRINTF("Error - scsiReadCapacity %d\n", stat);
         return -1;
     }
 
     dev->sectorSize = rcd.block_length;
     dev->maxLBA     = rcd.last_lba;
 
-    printf("IEEE1394_disk: sectorSize %lu maxLBA %lu\n", dev->sectorSize, dev->maxLBA);
+    printf("sectorSize %lu maxLBA %lu\n", dev->sectorSize, dev->maxLBA);
 
     while ((stat = scsiTestUnitReady(dev)) != 0) {
-        XPRINTF("IEEE1394_disk: Error - scsiTestUnitReady %d\n", stat);
+        XPRINTF("Error - scsiTestUnitReady %d\n", stat);
 
         stat = scsiRequestSense(dev, &sd, sizeof(sense_data));
         if (stat != 0) {
-            XPRINTF("IEEE1394_disk: Error - scsiRequestSense %d\n", stat);
+            XPRINTF("Error - scsiRequestSense %d\n", stat);
         }
 
         if ((sd.error_code == 0x70) && (sd.sense_key != 0x00)) {
-            XPRINTF("IEEE1394_disk: Sense Data key: %02X code: %02X qual: %02X\n", sd.sense_key, sd.add_sense_code, sd.add_sense_qual);
+            XPRINTF("Sense Data key: %02X code: %02X qual: %02X\n", sd.sense_key, sd.add_sense_code, sd.add_sense_qual);
 
             if ((sd.sense_key == 0x02) && (sd.add_sense_code == 0x04) && (sd.add_sense_qual == 0x02)) {
-                XPRINTF("IEEE1394_disk: Error - Additional initalization is required for this device!\n");
+                XPRINTF("Error - Additional initalization is required for this device!\n");
                 if ((stat = scsiStartStopUnit(dev)) != 0) {
-                    XPRINTF("IEEE1394_disk: Error - scsiStartStopUnit %d\n", stat);
+                    XPRINTF("Error - scsiStartStopUnit %d\n", stat);
                     return -1;
                 }
             }
@@ -424,12 +424,12 @@ int ConfigureSBP2Device(struct SBP2Device *dev)
     int ret;
 
     if ((ret = InitializeSCSIDevice(dev)) < 0) {
-        XPRINTF("IEEE1394_disk: Error - failed to warmup device 0x%08x\n", dev->nodeID);
+        XPRINTF("Error - failed to warmup device 0x%08x\n", dev->nodeID);
         return ret;
     }
 
     if ((dev->cache = scache_init(dev, dev->sectorSize)) == NULL) {
-        XPRINTF("IEEE1394_disk: Error - scache_init failed \n");
+        XPRINTF("Error - scache_init failed \n");
         return ret;
     }
 

@@ -11,12 +11,20 @@
 #include "irx_imports.h"
 #include "fileio-common.h"
 #include "iopheap-common.h"
-
+#define MODNAME "FILEIO_service"
 #ifdef _IOP
-IRX_ID("FILEIO_service", 1, 1);
+IRX_ID(MODNAME, 1, 1);
 #endif
 // Mostly based on the module from SCE SDK 1.3.4.
 // Additions from XFILEIO from ROM version 1.1.0a have been added, but disabled.
+
+
+#ifdef DEBUG
+#define DPRINTF(x...) printf(MODNAME ": " x)
+#else
+#define DPRINTF(x...)
+#endif
+
 
 static struct _fio_read_data read_data_out __attribute__((aligned(16)));
 static void *xfer_buffer;
@@ -40,11 +48,11 @@ int _start(int argc, char *argv[])
 
         iop_boot_param = BootMode[1];
         if ((iop_boot_param & 1) != 0) {
-            printf(" No SIF service(fileio)\n");
+            DPRINTF(" No SIF service(fileio)\n");
             return MODULE_NO_RESIDENT_END;
         }
         if ((iop_boot_param & 2) != 0) {
-            printf(" No FILEIO service\n");
+            DPRINTF(" No FILEIO service\n");
             return MODULE_NO_RESIDENT_END;
         }
     }
@@ -89,7 +97,7 @@ static void *fileio_allocate_buffer_memory()
             return xfer_buffer;
         }
     }
-    printf("read/write allocate memory %x\n", xfer_size);
+    DPRINTF("read/write allocate memory %x\n", xfer_size);
     return xfer_buffer;
 }
 
@@ -98,12 +106,12 @@ static void fileio_rpc_open(struct _fio_open_arg *buffer, int length, int *outbu
     if ((xfer_buffer != NULL) || ((xfer_buffer = fileio_allocate_buffer_memory()) != NULL)) {
         int fd;
 
-        printf("open name %s flag %x data %x\n", buffer->name, buffer->mode, (u32)(buffer));
+        DPRINTF("open name %s flag %x data %x\n", buffer->name, buffer->mode, (u32)(buffer));
         fd = io_open(buffer->name, buffer->mode);
-        printf("open fd = %d\n", fd);
+        DPRINTF("open fd = %d\n", fd);
         *outbuffer = fd;
     } else {
-        printf("Error:Cannot alloc r/w buffer\n");
+        DPRINTF("Error:Cannot alloc r/w buffer\n");
         *outbuffer = -1;
     }
 }
@@ -337,37 +345,37 @@ static void fileio_rpc_ioctl(struct _fio_ioctl_arg *buffer, int length, int *out
 
 static void fileio_rpc_remove(const char *buffer, int length, int *outbuffer)
 {
-    printf("remove file %s \n", buffer);
+    DPRINTF("remove file %s \n", buffer);
     *outbuffer = io_remove(buffer);
 }
 
 static void fileio_rpc_mkdir(const char *buffer, int length, int *outbuffer)
 {
-    printf("mkdir name %s \n", buffer);
+    DPRINTF("mkdir name %s \n", buffer);
     *outbuffer = io_mkdir(buffer);
 }
 
 static void fileio_rpc_rmdir(const char *buffer, int length, int *outbuffer)
 {
-    printf("rmdir name %s \n", buffer);
+    DPRINTF("rmdir name %s \n", buffer);
     *outbuffer = io_rmdir(buffer);
 }
 
 static void fileio_rpc_format(const char *buffer, int length, int *outbuffer)
 {
-    printf("format name %s \n", buffer);
+    DPRINTF("format name %s \n", buffer);
     *outbuffer = io_format(buffer);
 }
 
 static void fileio_rpc_adddrv(iop_io_device_t **buffer, int length, int *outbuffer)
 {
-    printf("adddrv device addr %x\n", *buffer);
+    DPRINTF("adddrv device addr %x\n", *buffer);
     *outbuffer = io_AddDrv(*buffer);
 }
 
 static void fileio_rpc_deldrv(const char *buffer, int length, int *outbuffer)
 {
-    printf("deldrv device name %s \n", buffer);
+    DPRINTF("deldrv device name %s \n", buffer);
     *outbuffer = io_DelDrv(buffer);
 }
 
@@ -375,10 +383,10 @@ static void fileio_rpc_dopen(const char *buffer, int length, int *outbuffer)
 {
     int fd;
 
-    printf("dopen name %s \n", buffer);
+    DPRINTF("dopen name %s \n", buffer);
     // FIXME: mode parameter is not passed
     fd = io_dopen(buffer, 0);
-    printf("dopen fd = %d\n", fd);
+    DPRINTF("dopen fd = %d\n", fd);
     *outbuffer = fd;
 }
 
@@ -486,7 +494,7 @@ static int *fileio_rpc_service_handler(int fno, void *buffer, int length)
             fileio_rpc_deldrv((const char *)buffer, length, fileio_rpc_outbuf);
             break;
         default:
-            printf("sce_fileio: unrecognized code %x\n", fno);
+            DPRINTF("sce_fileio: unrecognized code %x\n", fno);
             break;
     }
     return fileio_rpc_outbuf;
@@ -502,7 +510,7 @@ static void fileio_rpc_start_thread(void *param)
 
     if (!sceSifCheckInit())
         sceSifInit();
-    printf("Multi Threaded Fileio module.(99/11/15) \n");
+    DPRINTF("Multi Threaded Fileio module.(99/11/15) \n");
     xfer_buffer = NULL;
     sceSifInitRpc(0);
     sceSifSetRpcQueue(&fileio_rpc_service_queue, GetThreadId());
@@ -531,7 +539,7 @@ static void heap_rpc_load_iop_heap(struct _iop_load_heap_arg *buffer, int length
         io_close(fd);
         *outbuffer = 0;
     } else {
-        printf("load heap :error \n");
+        DPRINTF("load heap :error \n");
         *outbuffer = -1;
     }
 }
@@ -561,7 +569,7 @@ static int *heap_rpc_service_handler(int fno, void *buffer, int length)
             heap_rpc_load_iop_heap((struct _iop_load_heap_arg *)buffer, length, heap_rpc_outbuf);
             break;
         default:
-            printf("sce_iopmem: unrecognized code %x\n", fno);
+            DPRINTF("sce_iopmem: unrecognized code %x\n", fno);
             break;
     }
     return heap_rpc_outbuf;
@@ -577,7 +585,7 @@ static void heap_rpc_start_thread(void *param)
 
     if (!sceSifCheckInit())
         sceSifInit();
-    printf("iop heap service (99/11/03)\n");
+    DPRINTF("iop heap service (99/11/03)\n");
     sceSifInitRpc(0);
     sceSifSetRpcQueue(&heap_rpc_service_queue, GetThreadId());
     sceSifRegisterRpc(
@@ -610,7 +618,7 @@ static int *iopinfo_rpc_service_handler(int fno, void *buffer, int length)
             iopinfo_rpc_querybootmode(buffer, length, iopinfo_rpc_outbuf);
             break;
         default:
-            printf("sce_iopinfo: unrecognized code %x\n", fno);
+            DPRINTF("sce_iopinfo: unrecognized code %x\n", fno);
             break;
     }
     return iopinfo_rpc_outbuf;
@@ -626,7 +634,7 @@ static void iopinfo_rpc_service_start_thread(void *param)
 
     if (!sceSifCheckInit())
         sceSifInit();
-    printf("iop infomation service (00/02/29)\n");
+    DPRINTF("iop infomation service (00/02/29)\n");
     sceSifInitRpc(0);
     sceSifSetRpcQueue(&iopinfo_rpc_service_queue, GetThreadId());
     sceSifRegisterRpc(

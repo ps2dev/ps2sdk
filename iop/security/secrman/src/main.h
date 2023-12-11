@@ -6,13 +6,13 @@
   */
 
 #ifdef DEBUG
-#define _printf(args...) printf(args)
-#define _printf2(args...) printf(args)
-#define _printf3(args...) printf(args)
-#define _printf4(args...) printf(args)
+#define _printf(args...) printf("SECRMAN: "args)
+#define _printf2(args...) printf("SECRMAN: "args)
+#define _printf3(args...) printf("SECRMAN: "args)
+#define _printf4(args...) printf("SECRMAN: "args)
 #else
-#define _printf(args...)  // printf(args)
-#define _printf2(args...) // printf(args)
-#define _printf3(args...) // printf(args)
-#define _printf4(args...) // printf(args)
+#define _printf(args...)
+#define _printf2(args...)
+#define _printf3(args...)
+#define _printf4(args...)
 #endif

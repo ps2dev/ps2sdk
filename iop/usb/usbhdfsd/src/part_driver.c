@@ -72,7 +72,7 @@ static int part_getPartitionTable(mass_dev *dev, part_table *part)
 
     ret = READ_SECTOR(dev, 0, sbuf); // read sector 0 - Disk MBR or boot sector
     if (ret < 0) {
-        XPRINTF("USBHDFSD: part_getPartitionTable read failed %d!\n", ret);
+        XPRINTF("part_getPartitionTable read failed %d!\n", ret);
         return -EIO;
     }
 
@@ -108,7 +108,7 @@ int part_connect(mass_dev *dev)
 {
     part_table partTable;
     int parts;
-    XPRINTF("USBHDFSD: part_connect devId %i \n", dev->devId);
+    XPRINTF("part_connect devId %i \n", dev->devId);
 
     if ((parts = part_getPartitionTable(dev, &partTable)) < 0)
         return -1;
@@ -124,7 +124,7 @@ int part_connect(mass_dev *dev)
                 partTable.record[i].sid == 0x0C || // fat 32
                 partTable.record[i].sid == 0x0E)   // fat 16 LBA
             {
-                XPRINTF("USBHDFSD: mount partition %d id %02x\n", i, partTable.record[i].sid);
+                XPRINTF("mount partition %d id %02x\n", i, partTable.record[i].sid);
                 if (fat_mount(dev, partTable.record[i].start, partTable.record[i].count) >= 0)
                     count++;
             }

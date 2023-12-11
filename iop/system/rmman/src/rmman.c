@@ -13,6 +13,12 @@
 
 IRX_ID("rmman", 1, 16);
 
+#ifdef DEBUG
+#define DPRINTF(x...) printf("RMMAN: "x)
+#else
+#define DPRINTF(x...)
+#endif
+
 #define RM_EF_EXIT_THREAD		1
 #define RM_EF_EXIT_THREAD_DONE		2
 #define RM_EF_CLOSE_PORT		4
@@ -526,7 +532,7 @@ static void *RpcHandler(int fno, void *buffer, int len)
 			retBuff = RmmanRpc_version((struct rmRpcPacket *)buffer);
 			break;
 		default:
-			printf("invalid function code (%03x)\n", (unsigned int)((struct rmRpcPacket *)buffer)->cmd.command);
+			DPRINTF("invalid function code (%03x)\n", (unsigned int)((struct rmRpcPacket *)buffer)->cmd.command);
 			retBuff = buffer;
 	}
 
@@ -539,7 +545,7 @@ static void RpcThread(void *arg)
 
 	if(!sceSifCheckInit())
 	{
-		printf("yet sif hasn't been init\n");
+		DPRINTF("yet sif hasn't been init\n");
 		sceSifInit();
 	}
 

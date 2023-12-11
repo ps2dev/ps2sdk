@@ -1,6 +1,5 @@
 #define MAJOR_VER 1
 #define MINOR_VER 1
-#define MODNAME   "usbmass_bd"
 
 #include "scsi.h"
 #include <irx.h>

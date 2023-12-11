@@ -12,8 +12,8 @@
 #include <usbhdfsd.h>
 
 #include <irx.h>
-
-IRX_ID("usbhdfsd", MAJOR_VER, MINOR_VER);
+#include "mass_debug.h"
+IRX_ID(MODNAME, MAJOR_VER, MINOR_VER);
 
 extern int InitFAT();
 extern int InitFS();

@@ -27,13 +27,7 @@
 #include <iopmgr.h>
 
 #include "devscan.h"
-
-//#define DEBUG
-#ifdef DEBUG
-#define dbgprintf(args...) printf(args)
-#else
-#define dbgprintf(args...) do { } while(0)
-#endif
+#include "debug_printf.h"
 
 /** Device type structure.
  * @ingroup ps2netfs
@@ -83,7 +77,7 @@ int devscan_setup(int devtype)
   int i;
   int  count = 0;
 
-  dbgprintf("devscan: setup\n");
+  DPRINTF("%s\n", __func__);
   // clear device list
   memset(&dev_info_list,0,sizeof(dev_info_list));
 
@@ -103,7 +97,7 @@ int devscan_setup(int devtype)
           strncpy(dev_info_list[count].name,devinfo_table[i]->name,255);
           dev_info_list[count].name[255] = '\0';
           dev_info_list[count].len = strlen(dev_info_list[count].name);
-          dbgprintf("devscan: ioman '%s'\n",dev_info_list[count].name);
+          DPRINTF("ioman '%s'\n",dev_info_list[count].name);
           count++;
         }
     }
@@ -126,7 +120,7 @@ int devscan_setup(int devtype)
           strncpy(dev_info_list[count].name,devinfo_table[i]->name,255);
           dev_info_list[count].name[255] = '\0';
           dev_info_list[count].len = strlen(dev_info_list[count].name);
-          dbgprintf("devscan: iomanx '%s'\n",dev_info_list[count].name);
+          DPRINTF("iomanx '%s'\n",dev_info_list[count].name);
           count++;
         }
     }
@@ -147,11 +141,11 @@ int devscan_setup(int devtype)
 int devscan_gettype(char *name)
 {
   int count = 0;
-  dbgprintf("devscan: gettype '%s'\n",name);
+  DPRINTF("gettype '%s'\n",name);
   while (dev_info_list[count].name[0] != 0)
   {
     int ret = strncmp(dev_info_list[count].name,name,dev_info_list[count].len );
-    dbgprintf("'%s'",dev_info_list[count].name);
+    DPRINTF("'%s'",dev_info_list[count].name);
     if (!ret)
       return dev_info_list[count].devtype;
     count++;
@@ -171,7 +165,7 @@ int devscan_getdevlist(char *buffer)
   int i;
   char *bufptr = buffer;
 
-  dbgprintf("devscan: getdevlist\n");
+  DPRINTF("getdevlist\n");
   /* rescan for devices, before returning list */
   count = devscan_setup(DEVSCAN_MASK);
 
@@ -179,7 +173,7 @@ int devscan_getdevlist(char *buffer)
   for (i=0;i<count;i++)
   {
     strcpy(bufptr,dev_info_list[i].name);
-    dbgprintf("devscan: '%s'\n",bufptr);
+    DPRINTF("'%s'\n",bufptr);
     bufptr += strlen(bufptr)+1;
   }
   return count;

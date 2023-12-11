@@ -1,8 +1,9 @@
 #ifndef _CDFS_IOP_H
 #define _CDFS_IOP_H
 
+#define MODNAME "cdfs_driver"
 #ifdef DEBUG
-#define DPRINTF(args...)	printf(args)
+#define DPRINTF(args...)	printf(MODNAME ": "args)
 #else
 #define DPRINTF(args...)	do { } while(0)
 #endif

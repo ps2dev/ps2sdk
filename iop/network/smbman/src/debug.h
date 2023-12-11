@@ -7,7 +7,7 @@
 #define __DEBUG_H__
 
 #ifdef DEBUG
-#define DPRINTF(args...) printf(args)
+#define DPRINTF(args...) printf("SMBMAN: "args)
 #else
 #define DPRINTF(args...) \
     do {                 \

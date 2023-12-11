@@ -32,14 +32,7 @@
 #include "ps2fs.h"
 #include "byteorder.h"
 #include "devscan.h"
-
-//#define DEBUG
-//#define DEBUG
-#ifdef DEBUG
-#define dbgprintf(args...) printf(args)
-#else
-#define dbgprintf(args...) do { } while(0)
-#endif
+#include "debug_printf.h"
 
 //////////////////////////////////////////////////////////////////////////
 // How about a header file?..
@@ -181,7 +174,7 @@ int ps2netfs_close_socket(void)
 
   ret = disconnect(ps2netfs_sock);
   if (ret < 0)
-    printf("ps2netfs: disconnect returned error %d\n", ret);
+    DPRINTF("disconnect returned error %d\n", ret);
   ps2netfs_sock = -1;
   return ret;
 }
@@ -210,13 +203,13 @@ static inline int ps2netfs_lwip_send(int sock, void *buf, int len, int flag)
   ret = send(sock, buf, len, flag);
   if (ret < 0)
   {
-    dbgprintf("ps2netfs: lwip_send() error %d\n", ret);
+    DPRINTF("ps2netfs: lwip_send() error %d\n", ret);
     ps2netfs_close_socket();
     return -1;
   }
   else if (len == 0)
   { // send is blocking, so 0 means error
-    dbgprintf("ps2netfs: lwip_send() - disconnected\n");
+    DPRINTF("ps2netfs: lwip_send() - disconnected\n");
     return -2;
   }
   else return ret;
@@ -234,12 +227,12 @@ int ps2netfs_recv_bytes(int sock, char *buf, int bytes)
 
     len = recv(sock, &buf[bytes - left], left, 0);
     if (len < 0) {
-      dbgprintf("ps2netfs: recv_bytes error!! (%d)\n",len);
+      DPRINTF("ps2netfs: recv_bytes error!! (%d)\n",len);
       return -1;
     }
     if (len == 0)
     { // recv is blocking, so 0 means error
-      dbgprintf("ps2netfs: recv_bytes - disconnected\n");
+      DPRINTF("ps2netfs: recv_bytes - disconnected\n");
       return -2;
     }
     left -= len;
@@ -257,16 +250,16 @@ int ps2netfs_accept_pktunknown(int sock, char *buf)
 #endif
   unsigned short hlen;
 
-  dbgprintf("ps2netfs: accept_pkt\n");
+  DPRINTF("ps2netfs: accept_pkt\n");
   length = ps2netfs_recv_bytes(sock, buf, sizeof(ps2netfs_pkt_hdr));
   if (length == 0) return 0;
   if (length < 0) {
-    dbgprintf("ps2netfs: accept_pkt recv error\n");
+    DPRINTF("ps2netfs: accept_pkt recv error\n");
     return -1;
   }
 
   if ((unsigned int)length < sizeof(ps2netfs_pkt_hdr)) {
-    dbgprintf("ps2netfs: XXX: did not receive a full header!!!! "
+    DPRINTF("ps2netfs: XXX: did not receive a full header!!!! "
               "Fix this! (%d)\n", length);
     return -1;
   }
@@ -277,11 +270,11 @@ int ps2netfs_accept_pktunknown(int sock, char *buf)
 #endif
   hlen = ntohs(hdr->len);
 
-  dbgprintf("ps2netfs: accept_pkt: got 0x%x , hlen: %d, length: %d\n", hcmd,hlen,length);
+  DPRINTF("ps2netfs: accept_pkt: got 0x%x , hlen: %d, length: %d\n", hcmd,hlen,length);
 
   if ((length > PACKET_MAXSIZE) || (hlen > PACKET_MAXSIZE))
   {
-    dbgprintf("ps2netfs: accept_pkt: hlen is too large!! "
+    DPRINTF("ps2netfs: accept_pkt: hlen is too large!! "
               "(%d,%d can only receive %d)\n", length,hlen, PACKET_MAXSIZE);
     return -1;
   }
@@ -291,12 +284,12 @@ int ps2netfs_accept_pktunknown(int sock, char *buf)
                                hlen - sizeof(ps2netfs_pkt_hdr));
 
   if (length < 0) {
-    dbgprintf("ps2netfs: accept recv2 error!!\n");
+    DPRINTF("ps2netfs: accept recv2 error!!\n");
     return -1;
   }
 
   if ((unsigned int)length < (hlen - sizeof(ps2netfs_pkt_hdr))) {
-    dbgprintf("ps2netfs: Did not receive full packet!!! "
+    DPRINTF("ps2netfs: Did not receive full packet!!! "
               "Fix this! (%d)\n", length);
   }
 
@@ -328,11 +321,11 @@ static int ps2netfs_op_info(char *buf, int len)
 
 //  cmd = (ps2netfs_pkt_open_req *)buf;
 
-  dbgprintf("ps2netfs: info\n");
+  DPRINTF("ps2netfs: info\n");
 
   if (len != sizeof(ps2netfs_pkt_open_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
   inforly = (ps2netfs_pkt_info_rly *)&ps2netfs_send_packet[0];
@@ -350,7 +343,7 @@ static int ps2netfs_op_info(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, inforly, sizeof(ps2netfs_pkt_info_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1;
   }
   return 0;
@@ -379,11 +372,11 @@ static int ps2netfs_op_fstype(char *buf, int len)
 
   cmd = (ps2netfs_pkt_open_req *)buf;
 
-  dbgprintf("ps2netfs: fstype\n");
+  DPRINTF("ps2netfs: fstype\n");
 
   if (len != sizeof(ps2netfs_pkt_open_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
   // do the stuff here
@@ -399,7 +392,7 @@ static int ps2netfs_op_fstype(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, openrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1;
   }
   return 0;
@@ -428,11 +421,11 @@ static int ps2netfs_op_devlist(char *buf, int len)
 
   cmd = (ps2netfs_pkt_open_req *)buf;
 
-  dbgprintf("ps2netfs: devlist\n");
+  DPRINTF("ps2netfs: devlist\n");
 
   if (len != sizeof(ps2netfs_pkt_open_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
   devlistrly = (ps2netfs_pkt_devlist_rly *)&ps2netfs_send_packet[0];
@@ -464,7 +457,7 @@ static int ps2netfs_op_devlist(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, devlistrly, sizeof(ps2netfs_pkt_devlist_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1;
   }
   return 0;
@@ -497,11 +490,11 @@ static int ps2netfs_op_open(char *buf, int len)
 
   cmd = (ps2netfs_pkt_open_req *)buf;
 
-  dbgprintf("ps2netfs: open\n");
+  DPRINTF("ps2netfs: open\n");
 
   if (len != sizeof(ps2netfs_pkt_open_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
   // do the stuff here
@@ -526,7 +519,7 @@ static int ps2netfs_op_open(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, openrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1;
   }
   return 0;
@@ -557,11 +550,11 @@ static int ps2netfs_op_close(char *buf, int len)
   fd_table_t *fdptr;
   cmd = (ps2netfs_pkt_close_req *)buf;
 
-  dbgprintf("ps2netfs: close\n");
+  DPRINTF("ps2netfs: close\n");
 
   if (len != sizeof(ps2netfs_pkt_close_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
 
@@ -586,7 +579,7 @@ static int ps2netfs_op_close(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, closerly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1;
   }
   return 0;
@@ -618,11 +611,11 @@ static int ps2netfs_op_read(char *buf, int len)
   fd_table_t *fdptr;
   cmd = (ps2netfs_pkt_read_req *)buf;
 
-  dbgprintf("ps2netfs: read\n");
+  DPRINTF("ps2netfs: read\n");
 
   if (len != sizeof(ps2netfs_pkt_read_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
   // limit read request to 64k
@@ -651,14 +644,14 @@ static int ps2netfs_op_read(char *buf, int len)
   // send the response
   if (ps2netfs_lwip_send(ps2netfs_sock, readrly, sizeof(ps2netfs_pkt_read_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1;
   }
   // now send the data
   if (retval > 0)
     if (ps2netfs_lwip_send(ps2netfs_sock, ps2netfs_fiobuffer, ntohl(readrly->retval), 0) < 0)
     {
-      dbgprintf("ps2netfs: error sending data!\n");
+      DPRINTF("ps2netfs: error sending data!\n");
       return -1;
     }
   return 0;
@@ -691,7 +684,7 @@ static int ps2netfs_op_write(char *buf, int len)
 
   (void)len;
 
-  dbgprintf("ps2netfs: write\n");
+  DPRINTF("ps2netfs: write\n");
 
   // do the stuff here
   fdptr = fdh_get(ntohl(cmd->fd));
@@ -707,7 +700,7 @@ static int ps2netfs_op_write(char *buf, int len)
       towrite = left; if (towrite > FIOTRAN_MAXSIZE) towrite = FIOTRAN_MAXSIZE;
       if (ps2netfs_recv_bytes(ps2netfs_sock, ps2netfs_fiobuffer, towrite) <=0 )
       {
-        dbgprintf("ps2netfs: error reading data!\n");
+        DPRINTF("ps2netfs: error reading data!\n");
         return -1;
       }
 
@@ -732,7 +725,7 @@ static int ps2netfs_op_write(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, writerly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1;
   }
   return 0;
@@ -763,11 +756,11 @@ static int ps2netfs_op_lseek(char *buf, int len)
   int retval = -ENODEV;
   cmd = (ps2netfs_pkt_lseek_req *)buf;
 
-  dbgprintf("ps2netfs: lseek\n");
+  DPRINTF("ps2netfs: lseek\n");
 
   if (len != sizeof(ps2netfs_pkt_lseek_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
   // do the stuff here
@@ -790,7 +783,7 @@ static int ps2netfs_op_lseek(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, lseekrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1;
   }
   return 0;
@@ -821,11 +814,11 @@ static int ps2netfs_op_ioctl(char *buf, int len)
   int retval = -ENODEV;
   cmd = (ps2netfs_pkt_ioctl_req *)buf;
 
-  dbgprintf("ps2netfs: ioctl\n");
+  DPRINTF("ps2netfs: ioctl\n");
 
   if (len != sizeof(ps2netfs_pkt_ioctl_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
   // now build the response
@@ -848,7 +841,7 @@ static int ps2netfs_op_ioctl(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, ioctlrly, sizeof(ps2netfs_pkt_ioctl_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1;
   }
   return 0;
@@ -879,11 +872,11 @@ static int ps2netfs_op_remove(char *buf, int len)
   int devtype;
   cmd = (ps2netfs_pkt_open_req *)buf;
 
-  dbgprintf("ps2netfs: remove\n");
+  DPRINTF("ps2netfs: remove\n");
 
   if (len != sizeof(ps2netfs_pkt_open_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
 
@@ -907,7 +900,7 @@ static int ps2netfs_op_remove(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, removerly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1;
   }
   return 0;
@@ -938,11 +931,11 @@ static int ps2netfs_op_mkdir(char *buf, int len)
   int devtype;
   cmd = (ps2netfs_pkt_open_req *)buf;
 
-  dbgprintf("ps2netfs: mkdir\n");
+  DPRINTF("ps2netfs: mkdir\n");
 
   if (len != sizeof(ps2netfs_pkt_open_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
 
@@ -966,7 +959,7 @@ static int ps2netfs_op_mkdir(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, mkdirrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1;
   }
   return 0;
@@ -997,11 +990,11 @@ static int ps2netfs_op_rmdir(char *buf, int len)
   int devtype;
   cmd = (ps2netfs_pkt_open_req *)buf;
 
-  dbgprintf("ps2netfs: remove\n");
+  DPRINTF("ps2netfs: remove\n");
 
   if (len != sizeof(ps2netfs_pkt_open_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
 
@@ -1025,7 +1018,7 @@ static int ps2netfs_op_rmdir(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, rmdirrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1;
   }
   return 0;
@@ -1056,11 +1049,11 @@ static int ps2netfs_op_dopen(char *buf, int len)
   int devtype;
   cmd = (ps2netfs_pkt_open_req *)buf;
 
-  dbgprintf("ps2netfs: dopen\n");
+  DPRINTF("ps2netfs: dopen\n");
 
   if (len != sizeof(ps2netfs_pkt_open_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
 
@@ -1086,7 +1079,7 @@ static int ps2netfs_op_dopen(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, dopenrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1;
   }
   return 0;
@@ -1117,11 +1110,11 @@ static int ps2netfs_op_dclose(char *buf, int len)
   int retval = -ENODEV;
   cmd = (ps2netfs_pkt_close_req *)buf;
 
-  dbgprintf("ps2netfs: dclose\n");
+  DPRINTF("ps2netfs: dclose\n");
 
   if (len != sizeof(ps2netfs_pkt_close_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
 
@@ -1146,7 +1139,7 @@ static int ps2netfs_op_dclose(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, closerly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1;
   }
   return 0;
@@ -1177,11 +1170,11 @@ static int ps2netfs_op_dread(char *buf, int len)
   int retval = -ENODEV;
   cmd = (ps2netfs_pkt_dread_req *)buf;
 
-  dbgprintf("ps2netfs: dread\n");
+  DPRINTF("ps2netfs: dread\n");
 
   if (len != sizeof(ps2netfs_pkt_dread_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
 
@@ -1228,7 +1221,7 @@ static int ps2netfs_op_dread(char *buf, int len)
       }
     }
   }
-  dbgprintf("ps2netfs: dread '%s' %u\n",dreadrly->name,dreadrly->size);
+  DPRINTF("ps2netfs: dread '%s' %u\n",dreadrly->name,dreadrly->size);
   // Build packet
   dreadrly->cmd = htonl(PS2NETFS_DREAD_RLY);
   dreadrly->len = htons((unsigned short)sizeof(ps2netfs_pkt_dread_rly));
@@ -1236,7 +1229,7 @@ static int ps2netfs_op_dread(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, dreadrly, sizeof(ps2netfs_pkt_dread_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1;
   }
   return 0;
@@ -1323,11 +1316,11 @@ static int ps2netfs_op_format(char *buf, int len)
 
   cmd = (ps2netfs_pkt_format_req *)buf;
 
-  dbgprintf("ps2netfs: format\n");
+  DPRINTF("ps2netfs: format\n");
 
   if (len != sizeof(ps2netfs_pkt_format_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
   // do the stuff here
@@ -1352,7 +1345,7 @@ static int ps2netfs_op_format(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, formatrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1;
   }
   return 0;
@@ -1385,11 +1378,11 @@ static int ps2netfs_op_rename(char *buf, int len)
   int devtype;
   cmd = (ps2netfs_pkt_symlink_req *)buf;
 
-  dbgprintf("ps2netfs: rename\n");
+  DPRINTF("ps2netfs: rename\n");
 
   if (len != sizeof(ps2netfs_pkt_symlink_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
 
@@ -1412,7 +1405,7 @@ static int ps2netfs_op_rename(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, renamerly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1 ;
   }
   return 0;
@@ -1443,11 +1436,11 @@ static int ps2netfs_op_chdir(char *buf, int len)
   int devtype;
   cmd = (ps2netfs_pkt_open_req *)buf;
 
-  dbgprintf("ps2netfs: chdir\n");
+  DPRINTF("ps2netfs: chdir\n");
 
   if (len != sizeof(ps2netfs_pkt_open_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
 
@@ -1466,7 +1459,7 @@ static int ps2netfs_op_chdir(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, chdirrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1;
   }
   return 0;
@@ -1497,11 +1490,11 @@ static int ps2netfs_op_sync(char *buf, int len)
   int devtype;
   cmd = (ps2netfs_pkt_open_req *)buf;
 
-  dbgprintf("ps2netfs: sync\n");
+  DPRINTF("ps2netfs: sync\n");
 
   if (len != sizeof(ps2netfs_pkt_open_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
 
@@ -1520,7 +1513,7 @@ static int ps2netfs_op_sync(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, syncrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1;
   }
   return 0;
@@ -1551,11 +1544,11 @@ static int ps2netfs_op_mount(char *buf, int len)
   int devtype;
   cmd = (ps2netfs_pkt_mount_req *)buf;
 
-  dbgprintf("ps2netfs: mount\n");
+  DPRINTF("ps2netfs: mount\n");
 
   if (len != sizeof(ps2netfs_pkt_mount_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
 
@@ -1574,7 +1567,7 @@ static int ps2netfs_op_mount(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, mountrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1 ;
   }
   return 0;
@@ -1605,11 +1598,11 @@ static int ps2netfs_op_umount(char *buf, int len)
   int devtype;
   cmd = (ps2netfs_pkt_open_req *)buf;
 
-  dbgprintf("ps2netfs: umount\n");
+  DPRINTF("ps2netfs: umount\n");
 
   if (len != sizeof(ps2netfs_pkt_open_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
 
@@ -1628,7 +1621,7 @@ static int ps2netfs_op_umount(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, umountrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1 ;
   }
   return 0;
@@ -1707,11 +1700,11 @@ static int ps2netfs_op_symlink(char *buf, int len)
   int devtype;
   cmd = (ps2netfs_pkt_symlink_req *)buf;
 
-  dbgprintf("ps2netfs: symlink\n");
+  DPRINTF("ps2netfs: symlink\n");
 
   if (len != sizeof(ps2netfs_pkt_symlink_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
 
@@ -1734,7 +1727,7 @@ static int ps2netfs_op_symlink(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, symlinkrly, sizeof(ps2netfs_pkt_file_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1 ;
   }
   return 0;
@@ -1765,11 +1758,11 @@ static int ps2netfs_op_readlink(char *buf, int len)
   int devtype;
   cmd = (ps2netfs_pkt_open_req *)buf;
 
-  dbgprintf("ps2netfs: readlink\n");
+  DPRINTF("ps2netfs: readlink\n");
 
   if (len != sizeof(ps2netfs_pkt_open_req))
   {
-    dbgprintf("ps2netfs: got a broken packet (%d)!\n", len);
+    DPRINTF("ps2netfs: got a broken packet (%d)!\n", len);
     return -1;
   }
 
@@ -1789,7 +1782,7 @@ static int ps2netfs_op_readlink(char *buf, int len)
 
   if (ps2netfs_lwip_send(ps2netfs_sock, readlinkrly, sizeof(ps2netfs_pkt_readlink_rly), 0) < 0)
   {
-    dbgprintf("ps2netfs: error sending reply!\n");
+    DPRINTF("ps2netfs: error sending reply!\n");
     return -1 ;
   }
   return 0;
@@ -1841,10 +1834,10 @@ static void ps2netfs_Listener(int sock)
    len = ps2netfs_accept_pktunknown(sock, &ps2netfs_recv_packet[0]);
 
    if (len > 0)
-     dbgprintf("ps2netfs: received packet (%d)\n", len);
+     DPRINTF("ps2netfs: received packet (%d)\n", len);
 
    if (len < 0) {
-     dbgprintf("ps2netfs_Listener: recvfrom error (%d)\n", len);
+     DPRINTF("ps2netfs_Listener: recvfrom error (%d)\n", len);
      return;
    }
    if ((unsigned int)len >= sizeof(ps2netfs_pkt_hdr))
@@ -1940,7 +1933,7 @@ static void ps2netfs_Listener(int sock)
          break;
 
        default:
-         dbgprintf("ps2netfs: Unknown cmd received\n");
+         DPRINTF("ps2netfs: Unknown cmd received\n");
          retval = 0;
          break;
       }
@@ -1949,10 +1942,10 @@ static void ps2netfs_Listener(int sock)
     }
     else
     {
-      dbgprintf("ps2netfs: packet too small (%d)\n", len);
+      DPRINTF("ps2netfs: packet too small (%d)\n", len);
       return;
     }
-    dbgprintf("ps2netfs: waiting for next pkt\n");
+    DPRINTF("ps2netfs: waiting for next pkt\n");
   }
 }
 
@@ -1981,7 +1974,7 @@ ps2netfs_serv(void *argv)
 
  (void)argv;
 
- dbgprintf(" - ps2netfs TCP Server -\n");
+ DPRINTF(" - ps2netfs TCP Server -\n");
 
  devscan_setup(DEVSCAN_MASK);
  fdh_setup();
@@ -1994,7 +1987,7 @@ ps2netfs_serv(void *argv)
 
  while ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
  {
-   dbgprintf("ps2netfs: socket creation error (%d)\n", sock);
+   DPRINTF("ps2netfs: socket creation error (%d)\n", sock);
    return -1;
  }
 
@@ -2002,7 +1995,7 @@ ps2netfs_serv(void *argv)
          sizeof(server_addr));
  if (ret < 0)
  {
-   dbgprintf("ps2netfs: bind error (%d)\n", ret);
+   DPRINTF("ps2netfs: bind error (%d)\n", ret);
    ps2netfs_close_socket();
    return -1;
  }
@@ -2011,7 +2004,7 @@ ps2netfs_serv(void *argv)
 
  if (ret < 0)
  {
-   dbgprintf("ps2netfs: listen error (%d)\n", ret);
+   DPRINTF("ps2netfs: listen error (%d)\n", ret);
    disconnect(sock);
    return -1;
  }
@@ -2026,25 +2019,25 @@ ps2netfs_serv(void *argv)
    int client_sock;
    int client_len;
 
-   dbgprintf("ps2netfs: Waiting for connection\n");
+   DPRINTF("ps2netfs: Waiting for connection\n");
 
    client_len = sizeof(client_addr);
    client_sock = accept(sock, (struct sockaddr *)&client_addr,
                         &client_len);
    if (client_sock < 0)
    {
-     dbgprintf("ps2netfs: accept error (%d)", client_sock);
+     DPRINTF("ps2netfs: accept error (%d)", client_sock);
      continue;
    }
 
-   dbgprintf("Client connected from %x\n",
+   DPRINTF("Client connected from %x\n",
              client_addr.sin_addr.s_addr);
 
    if (ps2netfs_sock > 0)
    {
-     dbgprintf("ps2netfs: Client reconnected\n");
+     DPRINTF("ps2netfs: Client reconnected\n");
      ret = ps2netfs_close_socket();
-     dbgprintf("ps2netfs: close ret %d\n", ret);
+     DPRINTF("ps2netfs: close ret %d\n", ret);
      continue;
    }
    ps2netfs_sock = client_sock;
@@ -2053,7 +2046,7 @@ ps2netfs_serv(void *argv)
    {
      ps2netfs_Listener(ps2netfs_sock);
      ret = ps2netfs_close_socket();
-     dbgprintf("ps2netfs: close2 ret %d\n", ret);
+     DPRINTF("ps2netfs: close2 ret %d\n", ret);
      continue;
    }
  }
@@ -2079,7 +2072,7 @@ int ps2netfs_Init(void)
   iop_thread_t mythread;
   int pid;
 
-  dbgprintf("initializing ps2netfs\n");
+  DPRINTF("initializing ps2netfs\n");
 
   // Start socket server thread
 
@@ -2097,18 +2090,18 @@ int ps2netfs_Init(void)
 
     if ((i=StartThread(pid, NULL)) < 0)
     {
-      printf("StartThread failed (%d)\n", i);
+      DPRINTF("StartThread failed (%d)\n", i);
       return -1;
     }
   }
   else
   {
-    printf("ps2netfs: CreateThread failed (%d)\n", pid);
+    DPRINTF("CreateThread failed (%d)\n", pid);
     return -1;
   }
 
   ps2netfs_pid = pid;
-  dbgprintf("ps2netfs: Thread id: %x\n", pid);
+  DPRINTF("Thread id: %x\n", pid);
   return 0;
 }
 
