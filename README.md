@@ -97,4 +97,4 @@ libhdd was started by Nick Van Veen (Sjeep) in 2003 to provide a Hard Disk Drive
 
 ps2hid was started by [Tyranid](https://github.com/tyranid) in October 2003 to provide USB mouse and keyboard drivers compatible with the Sony USB Driver.
 
-[AUTHORS](AUTHORS_2004.md)
+[AUTHORS](AUTHORS2004.md)
