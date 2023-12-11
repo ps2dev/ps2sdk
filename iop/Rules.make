@@ -29,10 +29,13 @@ IOP_OPTFLAGS ?= -Os
 # Warning compiler flags
 IOP_WARNFLAGS ?= -Wall -Werror
 
+# Debug information flags
+IOP_DBGINFOFLAGS ?= -gdwarf-2 -gz
+
 # C compiler flags
 # -fno-builtin is required to prevent the GCC built-in functions from being included,
 #   for finer-grained control over what goes into each IRX.
-IOP_CFLAGS := -D_IOP -fno-builtin -G0 $(IOP_OPTFLAGS) $(IOP_WARNFLAGS) $(IOP_INCS) $(IOP_CFLAGS)
+IOP_CFLAGS := -D_IOP -fno-builtin -G0 $(IOP_OPTFLAGS) $(IOP_WARNFLAGS) $(IOP_DBGINFOFLAGS) $(IOP_INCS) $(IOP_CFLAGS)
 ifeq ($(DEBUG),1)
 IOP_CFLAGS += -DDEBUG
 endif
