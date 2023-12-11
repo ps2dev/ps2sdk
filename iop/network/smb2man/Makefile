@@ -6,9 +6,13 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-# IOP_CFLAGS += -DDEBUG
+DEBUG ?= 0
 
 IOP_CFLAGS += -DPS2_IOP_PLATFORM -DHAVE_CONFIG_H -DPS2SDK_IOP -DNEED_BE64TOH -DNEED_STRDUP -DNEED_READV -DNEED_WRITEV -DNEED_POLL -D_U_=/**/
+
+ifeq ($(DEBUG),1)
+	IOP_CFLAGS += -DDEBUG
+endif
 
 IOP_INCS += -I. -I$(PS2SDK)/iop/include -I$(PS2SDKSRC)/iop/tcpip/tcpip/include -Isrc/lib -Isrc/lib/ps2 -Isrc/lib/smb2
 
