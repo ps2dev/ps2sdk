@@ -24,6 +24,11 @@ static inline void swapToFileXio() {
     __usingFileXIO = 1;
 }
 
+static inline void swapToFileIO() {
+    fileXioExit();
+    __usingFileXIO = 0;
+}
+
 #define FILE_SWAP_PS2SDK_FUNCTIONS() \
     uint8_t __usingFileXIO = 0; \
     int __fileXioGetstatHelper(const char *path, struct stat *buf); \
