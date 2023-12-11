@@ -23,8 +23,7 @@
 #include "sysclib.h"
 #include "thsemap.h"
 #include "loadcore.h"
-
-IRX_ID("usbd", 1, 1);
+IRX_ID(MODNAME, 1, 1);
 
 #define WELCOME_STR "FreeUsbd v.0.1.2\n"
 

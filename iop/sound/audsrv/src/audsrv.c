@@ -30,6 +30,7 @@
 #include "upsamplers.h"
 #include "hw.h"
 #include "spu.h"
+#include "debug_printf.h"
 
 #define MODNAME "audsrv"
 #define VERSION "0.93"
@@ -206,7 +207,7 @@ int audsrv_set_format(int freq, int bits, int channels)
 	writepos = 0;
 	readpos = (feed_size * 5) & ~3;
 
-	printf("audsrv: freq %d bits %d channels %d ringbuf_sz %d feed_size %d shift %d\n", freq, bits, channels, ringbuf_size, feed_size, core1_sample_shift);
+	DPRINTF("freq %d bits %d channels %d ringbuf_sz %d feed_size %d shift %d\n", freq, bits, channels, ringbuf_size, feed_size, core1_sample_shift);
 
 	format_changed = 1;
 	return AUDSRV_ERR_NOERROR;
@@ -225,7 +226,7 @@ int audsrv_init()
 	/* initialize libsd */
 	if (sceSdInit(SD_INIT_COLD) < 0)
 	{
-		printf("audsrv: failed to initialize libsd\n");
+		DPRINTF("failed to initialize libsd\n");
 		return -1;
 	}
 
@@ -259,9 +260,9 @@ int audsrv_init()
 	audsrv_set_format(48000, 16, 2);
 
 	play_tid = create_thread(play_thread, 39, 0);
-	printf("audsrv: playing thread 0x%x started\n", play_tid);
+	DPRINTF("playing thread 0x%x started\n", play_tid);
 
-	printf("audsrv: kickstarted\n");
+	DPRINTF("kickstarted\n");
 
 	initialized = 1;
 	return AUDSRV_ERR_NOERROR;
@@ -356,7 +357,7 @@ int audsrv_play_audio(const char *buf, int buflen)
 		update_volume();
 	}
 
-	//printf("play audio %d bytes, readpos %d, writepos %d avail %d\n", buflen, readpos, writepos, audsrv_available());
+	//DPRINTF("play audio %d bytes, readpos %d, writepos %d avail %d\n", buflen, readpos, writepos, audsrv_available());
 
 	/* limit to what's available, no crossing possible */
 	buflen = MIN(buflen, audsrv_available());
@@ -410,7 +411,7 @@ int audsrv_set_threshold(int amount)
 		return AUDSRV_ERR_ARGS;
 	}
 
-	printf("audsrv: callback threshold: %d\n", amount);
+	DPRINTF("callback threshold: %d\n", amount);
 	fillbuf_threshold = amount;
 	return 0;
 }
@@ -434,7 +435,7 @@ static void play_thread(void *arg)
 
 	(void)arg;
 
-	printf("starting play thread\n");
+	DPRINTF("starting play thread\n");
 	while (1)
 	{
 		int block;
@@ -501,7 +502,7 @@ static void play_thread(void *arg)
 			call_client_callback(AUDSRV_FILLBUF_CALLBACK);
 		}
 
-		//printf("avaiable: %d, queued: %d\n", available, ringbuf_size - available);
+		//DPRINTF("avaiable: %d, queued: %d\n", available, ringbuf_size - available);
 	}
 }
 
@@ -562,12 +563,12 @@ int _start(int argc, char *argv[])
 	FlushDcache();
 	CpuEnableIntr(0);
 
-	printf("audsrv: greetings from version " VERSION " !\n");
+	printf("greetings from version " VERSION " !\n");
 
 	err = RegisterLibraryEntries(&_exp_audsrv);
 	if (err != 0)
 	{
-		printf("audsrv: couldn't register library entries. Error %d\n", err);
+		DPRINTF("couldn't register library entries. Error %d\n", err);
 		return MODULE_NO_RESIDENT_END;
 	}
 

@@ -58,11 +58,11 @@ int part_getPartitionTable(struct SBP2Device *dev, part_table *part)
 
     ret = READ_SECTOR(dev, 0, sbuf); // read sector 0 - Disk MBR or boot sector
     if (ret < 0) {
-        printf("USBHDFSD: part_getPartitionTable read failed %d!\n", ret);
+        XPRINTF("part_getPartitionTable read failed %d!\n", ret);
         return -1;
     }
 
-    printf("USBHDFSD: boot signature %X %X\n", sbuf[0x1FE], sbuf[0x1FF]);
+    XPRINTF("boot signature %X %X\n", sbuf[0x1FE], sbuf[0x1FF]);
     if (sbuf[0x1FE] == 0x55 && sbuf[0x1FF] == 0xAA) {
         for (i = 0; i < 4; i++) {
             part_raw_record *part_raw;
@@ -86,7 +86,7 @@ int part_connect(struct SBP2Device *dev)
     part_table partTable;
     int count = 0;
     int i;
-    XPRINTF("USBHDFSD: part_connect devId %i \n", dev->nodeID);
+    XPRINTF("part_connect devId %i \n", dev->nodeID);
 
     if (part_getPartitionTable(dev, &partTable) < 0)
         return -1;
@@ -100,7 +100,7 @@ int part_connect(struct SBP2Device *dev)
             partTable.record[i].sid == 0x0C || // fat 32
             partTable.record[i].sid == 0x0E)   // fat 16 LBA
         {
-            XPRINTF("USBHDFSD: mount partition %d\n", i);
+            XPRINTF("mount partition %d\n", i);
             if (fat_mount(dev, partTable.record[i].start, partTable.record[i].count) >= 0)
                 count++;
         }
@@ -108,7 +108,7 @@ int part_connect(struct SBP2Device *dev)
 
     if (count == 0) { // no partition table detected
         // try to use "floppy" option
-        printf("USBHDFSD: mount drive\n");
+        XPRINTF("mount drive\n");
         if (fat_mount(dev, 0, dev->maxLBA) < 0)
             return -1;
     }
@@ -119,7 +119,7 @@ int part_connect(struct SBP2Device *dev)
 //---------------------------------------------------------------------------
 void part_disconnect(struct SBP2Device *dev)
 {
-    printf("USBHDFSD: part_disconnect devId %i \n", dev->nodeID);
+    XPRINTF("part_disconnect devId %i \n", dev->nodeID);
     fat_forceUnmount(dev);
 }
 

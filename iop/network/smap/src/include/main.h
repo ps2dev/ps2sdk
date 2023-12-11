@@ -15,7 +15,7 @@
 #endif
 
 // In the SONY original, all the calls to DEBUG_PRINTF() were to sceInetPrintf().
-#define DEBUG_PRINTF(args...) printf(args)
+#define DEBUG_PRINTF(args...) printf("SMAP: "args)
 
 // This struct needs to be the exact same layout as struct NetManEthRuntimeStats!
 struct RuntimeStats

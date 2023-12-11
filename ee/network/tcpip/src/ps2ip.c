@@ -346,6 +346,5 @@ void ps2ipDeinit(void){
 	NetManUnregisterNetworkStack();
 }
 
-void ps2ipSetHsyncTicksPerMSec(unsigned char ticks){
-	hsyncTicksPerMSec = ticks;
-}
+// Stubbed for compatibility purposes
+void ps2ipSetHsyncTicksPerMSec(unsigned char ticks) {}

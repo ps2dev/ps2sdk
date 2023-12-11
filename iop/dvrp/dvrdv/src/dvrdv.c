@@ -18,6 +18,13 @@
 #include "speedregs.h"
 #include "errno.h"
 
+#define MODNAME "DVRDV"
+#ifdef DEBUG
+#define DPRINTF(x...) printf(MODNAME ": " x)
+#else
+#define DPRINTF(x...)
+#endif
+
 extern int module_start();
 extern int module_stop();
 extern int dvrdv_df_init(iomanX_iop_device_t *dev);
@@ -86,7 +93,6 @@ static iomanX_iop_device_t DVR = {
 s32 sema_id;
 
 // Based off of DESR / PSX DVR system software version 2.11.
-#define MODNAME "DVRDV"
 IRX_ID(MODNAME, 1, 0);
 
 int _start(int argc, char *argv[])
@@ -109,7 +115,7 @@ int module_start()
         DelayThread(1000);
     }
     if (i == 30000) {
-        printf("DVR task of DVRP is not running...\n");
+        DPRINTF("DVR task of DVRP is not running...\n");
         return MODULE_NO_RESIDENT_END;
     } else {
         if (iomanX_AddDrv(&DVR) != 0)
@@ -248,16 +254,16 @@ int dvrioctl2_dv_dubb_start(
     (void)buf;
     (void)buflen;
 
-    printf("------------------------------ dv dubb start!!!\n");
+    DPRINTF("------------------------------ dv dubb start!!!\n");
     cmdack.command = 0x4101;
     cmdack.input_word_count = 0;
     cmdack_err = DvrdrvExecCmdAck(&cmdack);
     if (cmdack_err) {
-        printf("dvrioctl2_dv_dubb_start -> Handshake error!,%d\n", cmdack_err);
+        DPRINTF("dvrioctl2_dv_dubb_start -> Handshake error!,%d\n", cmdack_err);
         return -5;
     } else {
         if (cmdack.ack_status_ack) {
-            printf("dvrioctl2_dv_dubb_start -> Status error!,%04X\n", cmdack.ack_status_ack);
+            DPRINTF("dvrioctl2_dv_dubb_start -> Status error!,%04X\n", cmdack.ack_status_ack);
             return -68;
         }
     }
@@ -284,16 +290,16 @@ int dvrioctl2_dv_dubb_stop(
     (void)buf;
     (void)buflen;
 
-    printf("------------------------------ dv dubb stop!!!\n");
+    DPRINTF("------------------------------ dv dubb stop!!!\n");
     cmdack.command = 0x4102;
     cmdack.input_word_count = 0;
     cmdack_err = DvrdrvExecCmdAck(&cmdack);
     if (cmdack_err) {
-        printf("dvrioctl2_dv_dubb_stop -> Handshake error!,%d\n", cmdack_err);
+        DPRINTF("dvrioctl2_dv_dubb_stop -> Handshake error!,%d\n", cmdack_err);
         return -5;
     } else {
         if (cmdack.ack_status_ack) {
-            printf("dvrioctl2_dv_dubb_stop -> Status error!,%04X\n", cmdack.ack_status_ack);
+            DPRINTF("dvrioctl2_dv_dubb_stop -> Status error!,%04X\n", cmdack.ack_status_ack);
             return -68;
         }
     }
@@ -323,7 +329,7 @@ int dvrioctl2_dv_dubb_rec_start(
     (void)buflen;
 
     cmdack.command = 0x4103;
-    printf("------------------------------ dv dubb rec start!!!\n");
+    DPRINTF("------------------------------ dv dubb rec start!!!\n");
     v8 = 4;
     v9 = (u16 *)((u8 *)arg + 8);
     v10 = &cmdack.input_word[4];
@@ -340,11 +346,11 @@ int dvrioctl2_dv_dubb_rec_start(
     cmdack.input_word_count = 7;
     cmdack_err = DvrdrvExecCmdAck(&cmdack);
     if (cmdack_err) {
-        printf("dvrioctl2_dv_dubb_rec_start -> Handshake error!,%d\n", cmdack_err);
+        DPRINTF("dvrioctl2_dv_dubb_rec_start -> Handshake error!,%d\n", cmdack_err);
         return -5;
     } else {
         if (cmdack.ack_status_ack) {
-            printf("dvrioctl2_dv_dubb_rec_start -> Status error!,%04X\n", cmdack.ack_status_ack);
+            DPRINTF("dvrioctl2_dv_dubb_rec_start -> Status error!,%04X\n", cmdack.ack_status_ack);
             return -68;
         }
     }
@@ -371,19 +377,19 @@ int dvrioctl2_dv_dubb_rec_stop(
     (void)buf;
     (void)buflen;
 
-    printf("------------------------------ dv dubb rec stop!!!\n");
+    DPRINTF("------------------------------ dv dubb rec stop!!!\n");
     cmdack.command = 0x4104;
     cmdack.input_word_count = 0;
     cmdack.timeout = 5000000;
     cmdack_err = DvrdrvExecCmdAckComp(&cmdack);
     if (cmdack_err) {
-        printf("phase %d\n", cmdack.phase);
-        printf("dvrioctl2_dv_dubb_rec_stop -> Handshake error!,%d\n", cmdack_err);
+        DPRINTF("phase %d\n", cmdack.phase);
+        DPRINTF("dvrioctl2_dv_dubb_rec_stop -> Handshake error!,%d\n", cmdack_err);
         return -5;
     } else {
         if (cmdack.ack_status_ack) {
-            printf("phase %d\n", cmdack.phase);
-            printf("dvrioctl2_dv_dubb_rec_stop -> Status error!,%04X\n", cmdack.ack_status_ack);
+            DPRINTF("phase %d\n", cmdack.phase);
+            DPRINTF("dvrioctl2_dv_dubb_rec_stop -> Status error!,%04X\n", cmdack.ack_status_ack);
             return -68;
         }
     }
@@ -413,12 +419,12 @@ int dvrioctl2_get_dvcam_info(
     cmdack.input_word_count = 0;
     cmdack_err = DvrdrvExecCmdAck(&cmdack);
     if (cmdack_err) {
-        printf("phase %d\n", cmdack.phase);
-        printf("dvrioctl2_get_dvcam_info -> Handshake error!,%d\n", cmdack_err);
+        DPRINTF("phase %d\n", cmdack.phase);
+        DPRINTF("dvrioctl2_get_dvcam_info -> Handshake error!,%d\n", cmdack_err);
         return -5;
     } else {
         if (cmdack.ack_status_ack) {
-            printf("dvrioctl2_get_dvcam_info -> Status error!,%04X\n", cmdack.ack_status_ack);
+            DPRINTF("dvrioctl2_get_dvcam_info -> Status error!,%04X\n", cmdack.ack_status_ack);
             return -68;
         } else {
             u16 *v11;
@@ -451,7 +457,7 @@ int dvrioctl2_get_dvcam_name(
     (void)arg;
     (void)arglen;
 
-    printf("dvrioctl2_get_dvcam_name(io=%p, cmd=%d  buf=%p, nbyte=%u)\n", a1, cmd, buf, buflen);
+    DPRINTF("dvrioctl2_get_dvcam_name(io=%p, cmd=%d  buf=%p, nbyte=%u)\n", a1, cmd, buf, buflen);
     cmdack.command = 0x4108;
     cmdack.input_word[0] = 0;
     cmdack.input_word[1] = 0;
@@ -461,11 +467,11 @@ int dvrioctl2_get_dvcam_name(
     cmdack.output_buffer = buf;
     cmdack.timeout = 5000000;
     if (DvrdrvExecCmdAckDmaRecvComp(&cmdack)) {
-        printf("dvrioctl2_get_dvcam_name : IO error (phase %d)\n", cmdack.phase);
+        DPRINTF("dvrioctl2_get_dvcam_name : IO error (phase %d)\n", cmdack.phase);
         return -5;
     } else {
         if (cmdack.comp_status) {
-            printf("dvrioctl2_get_dvcam_name : Complete parameter error (phase %d), %04X\n", cmdack.phase, cmdack.comp_status);
+            DPRINTF("dvrioctl2_get_dvcam_name : Complete parameter error (phase %d), %04X\n", cmdack.phase, cmdack.comp_status);
             return -5;
         }
     }

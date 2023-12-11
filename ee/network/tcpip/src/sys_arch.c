@@ -12,6 +12,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <kernel.h>
+#include <kernel_util.h>
 #include <time.h>
 #include <limits.h>
 
@@ -77,14 +78,6 @@ static void free_msg(arch_message *msg)
 
 	EI();
 	SignalSema(MsgCountSema);
-}
-
-static void TimeoutHandler(s32 alarm_id, u16 time, void *pvArg){
-	(void)alarm_id;
-	(void)time;
-
-	iReleaseWaitThread((int)pvArg);
-	ExitHandler();
 }
 
 static inline u32_t ComputeTimeDiff(u32 start, u32 end)
@@ -195,13 +188,6 @@ void sys_mbox_set_invalid(sys_mbox_t *mbox)
 	*mbox=SYS_MBOX_NULL;
 }
 
-extern unsigned short int hsyncTicksPerMSec;
-
-static inline unsigned int mSec2HSyncTicks(unsigned int msec)
-{
-	return msec*hsyncTicksPerMSec;
-}
-
 static void RetrieveMbxInternal(sys_mbox_t mBox, arch_message **message)
 {
 	arch_message *NextMessage;
@@ -224,29 +210,29 @@ static void RetrieveMbxInternal(sys_mbox_t mBox, arch_message **message)
 
 static int WaitSemaTimeout(int sema, unsigned int msec)
 {
-	unsigned int ticks;
-	int threadID;
+	int ret;
+	u64 timeoutUsec;
+	u64 *timeoutPtr;
 
-	ticks = mSec2HSyncTicks(msec);
-	threadID = GetThreadId();
-	while(ticks > 0)
-	{
-		unsigned short int ticksToWait;
-		int alarmID;
-
-		ticksToWait = ticks > USHRT_MAX ? USHRT_MAX : ticks;
-		alarmID = SetAlarm(ticksToWait, &TimeoutHandler, (void*)threadID);
-		if (WaitSema(sema) == sema)
-		{
-			ReleaseAlarm(alarmID);
-			return sema; //Wait condition satisfied.
+	if (msec == 0) {
+		if (PollSema(sema) < 0) {
+			return -1;
 		}
-
-		//Otherwise, continue waiting.
-		ticks -= ticksToWait;
+		return sema;
 	}
 
-	return -1; //Timed out.
+	timeoutPtr = NULL;
+
+	if (msec > 0 && msec != UINT32_MAX) {
+		timeoutUsec = msec * 1000;
+		timeoutPtr = &timeoutUsec;
+	}
+
+	ret = WaitSemaEx(sema, 1, timeoutPtr);
+
+	if (ret < 0)
+		return -1; //Timed out.
+	return sema; //Wait condition satisfied.
 }
 
 static int ReceiveMbx(arch_message **message, sys_mbox_t mBox, u32_t timeout)

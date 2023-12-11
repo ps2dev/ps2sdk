@@ -24,8 +24,8 @@
 
 #include "ps2_fio.h"
 #include "devscan.h"
+#include "debug_printf.h"
 
-#define PS2NETFS_MODNAME "PS2_TcpFileDriver"
 #define PS2NETFS_VERSION_HIGH 1
 #define PS2NETFS_VERSION_LOW  0
 
@@ -54,21 +54,21 @@ int _start(int argc, char *argv[])
 
   if (!devscan_getmodule(IOPMGR_IOMAN_IDENT))
   {
-    printf("ioman not found\n");
+    DPRINTF("ioman not found\n");
     return MODULE_NO_RESIDENT_END;
   }
   if (!devscan_getmodule(IOPMGR_IOMANX_IDENT))
   {
-    printf("iomanx not found\n");
+    DPRINTF("iomanx not found\n");
     return MODULE_NO_RESIDENT_END;
   }
 
   if (ps2netfs_Init() == 0)
   {
-    printf("\nServer Started\n");
+    DPRINTF("\nServer Started\n");
     return MODULE_RESIDENT_END;
   }
 
-  printf("\nExiting.\n");
+  DPRINTF("\nExiting.\n");
   return MODULE_NO_RESIDENT_END;
 }

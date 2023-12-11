@@ -26,6 +26,7 @@
 #include "common.h"
 #include "rpc_server.h"
 #include "spu.h"
+#include "debug_printf.h"
 
 typedef struct adpcm_list_t
 {

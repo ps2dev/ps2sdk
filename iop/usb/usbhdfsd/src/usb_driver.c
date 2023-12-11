@@ -133,7 +133,7 @@ static void usb_callback(int resultCode, int bytes, void *arg)
     usb_callback_data *data = (usb_callback_data *)arg;
     data->returnCode        = resultCode;
     data->returnSize        = bytes;
-    XPRINTF("USBHDFSD: callback: res %d, bytes %d, arg %p \n", resultCode, bytes, arg);
+    XPRINTF("callback: res %d, bytes %d, arg %p \n", resultCode, bytes, arg);
     SignalSema(data->sema);
 }
 
@@ -181,7 +181,7 @@ static int usb_set_configuration(mass_dev *dev, int configNumber)
 
     cb_data.sema = dev->ioSema;
 
-    XPRINTF("USBHDFSD: setting configuration controlEp=%i, confNum=%i \n", dev->controlEp, configNumber);
+    XPRINTF("setting configuration controlEp=%i, confNum=%i \n", dev->controlEp, configNumber);
     ret = sceUsbdSetConfiguration(dev->controlEp, configNumber, usb_callback, (void *)&cb_data);
 
     if (ret == USB_RC_OK) {
@@ -199,7 +199,7 @@ static int usb_set_interface(mass_dev *dev, int interface, int altSetting)
 
     cb_data.sema = dev->ioSema;
 
-    XPRINTF("USBHDFSD: setting interface controlEp=%i, interface=%i altSetting=%i\n", dev->controlEp, interface, altSetting);
+    XPRINTF("setting interface controlEp=%i, interface=%i altSetting=%i\n", dev->controlEp, interface, altSetting);
     ret = sceUsbdSetInterface(dev->controlEp, interface, altSetting, usb_callback, (void *)&cb_data);
 
     if (ret == USB_RC_OK) {
@@ -301,7 +301,7 @@ static int usb_bulk_status(mass_dev *dev, csw_packet *csw, unsigned int tag)
             printf("USBHDFSD: bulk csw.status returnSize: %i != 13\n", cb_data.returnSize);
         if (csw->dataResidue != 0)
             printf("USBHDFSD: bulk csw.status residue: %u\n", csw->dataResidue);
-        XPRINTF("USBHDFSD: bulk csw result: %d, csw.status: %u\n", ret, csw->status);
+        XPRINTF("bulk csw result: %d, csw.status: %u\n", ret, csw->status);
     }
 
     return ret;
@@ -320,7 +320,7 @@ static int usb_bulk_manage_status(mass_dev *dev, unsigned int tag)
     int ret;
     csw_packet csw;
 
-    // XPRINTF("USBHDFSD: usb_bulk_manage_status 1 ...\n");
+    // XPRINTF("usb_bulk_manage_status 1 ...\n");
     ret = usb_bulk_status(dev, &csw, tag);       /* Attempt to read CSW from bulk in endpoint */
     if (ret != USB_RC_OK) {                      /* STALL bulk in  -OR- Bulk error */
         usb_bulk_clear_halt(dev, USB_BLK_EP_IN); /* clear the stall condition for bulk in */
@@ -458,7 +458,7 @@ static int cbw_scsi_test_unit_ready(mass_dev *dev)
             0,    // reserved
         }};
 
-    XPRINTF("USBHDFSD: cbw_scsi_test_unit_ready\n");
+    XPRINTF("cbw_scsi_test_unit_ready\n");
 
     for (result = -EIO, retries = USB_XFER_MAX_RETRIES; retries > 0; retries--) {
         if (usb_bulk_command(dev, &cbw) == USB_RC_OK) {
@@ -500,7 +500,7 @@ static int cbw_scsi_request_sense(mass_dev *dev, void *buffer, int size)
     cbw.dataTransferLength = size;
     cbw.comData[4]         = size;
 
-    XPRINTF("USBHDFSD: cbw_scsi_request_sense\n");
+    XPRINTF("cbw_scsi_request_sense\n");
 
     for (retries = USB_XFER_MAX_RETRIES; retries > 0; retries--) {
         if (usb_bulk_command(dev, &cbw) == USB_RC_OK) {
@@ -542,7 +542,7 @@ static int cbw_scsi_inquiry(mass_dev *dev, void *buffer, int size)
             0,    // reserved
         }};
 
-    XPRINTF("USBHDFSD: cbw_scsi_inquiry\n");
+    XPRINTF("cbw_scsi_inquiry\n");
 
     cbw.dataTransferLength = size; // INQUIRY_REPLY_LENGTH
     cbw.comData[4]         = size; // inquiry reply length
@@ -587,7 +587,7 @@ static int cbw_scsi_start_stop_unit(mass_dev *dev, u8 param)
             0,    // reserved
         }};
 
-    XPRINTF("USBHDFSD: cbw_scsi_start_stop_unit. param: %02x\n", param);
+    XPRINTF("cbw_scsi_start_stop_unit. param: %02x\n", param);
 
     cbw.comData[4] = param;
 
@@ -630,7 +630,7 @@ static int cbw_scsi_read_capacity(mass_dev *dev, void *buffer, int size)
 
     cbw.dataTransferLength = size;
 
-    XPRINTF("USBHDFSD: cbw_scsi_read_capacity\n");
+    XPRINTF("cbw_scsi_read_capacity\n");
 
     for (retries = USB_XFER_MAX_RETRIES; retries > 0; retries--) {
         if (usb_bulk_command(dev, &cbw) == USB_RC_OK) {
@@ -671,7 +671,7 @@ static int cbw_scsi_read_sector(mass_dev *dev, unsigned int lba, void *buffer, u
             0,    // reserved
             0,    // reserved
         }};
-    XPRINTF("USBHDFSD: cbw_scsi_read_sector - 0x%08x %p 0x%04x\n", lba, buffer, sectorCount);
+    XPRINTF("cbw_scsi_read_sector - 0x%08x %p 0x%04x\n", lba, buffer, sectorCount);
 
     cbw.dataTransferLength = dev->sectorSize * sectorCount;
 
@@ -723,7 +723,7 @@ static int cbw_scsi_write_sector(mass_dev *dev, unsigned int lba, const void *bu
             0,    // reserved
             0,    // reserved
         }};
-    XPRINTF("USBHDFSD: cbw_scsi_write_sector - 0x%08x %p 0x%04x\n", lba, buffer, sectorCount);
+    XPRINTF("cbw_scsi_write_sector - 0x%08x %p 0x%04x\n", lba, buffer, sectorCount);
 
     cbw.dataTransferLength = dev->sectorSize * sectorCount;
 
@@ -753,10 +753,10 @@ static mass_dev *mass_stor_findDevice(int devId, int create)
 {
     mass_dev *dev = NULL;
     int i;
-    XPRINTF("USBHDFSD: mass_stor_findDevice devId %i\n", devId);
+    XPRINTF("mass_stor_findDevice devId %i\n", devId);
     for (i = 0; i < NUM_DEVICES; ++i) {
         if (g_mass_device[i].devId == devId) {
-            XPRINTF("USBHDFSD: mass_stor_findDevice exists %i\n", i);
+            XPRINTF("mass_stor_findDevice exists %i\n", i);
             dev = &g_mass_device[i];
             break;
         } else if (create && dev == NULL && g_mass_device[i].devId == -1) {
@@ -800,7 +800,7 @@ static void usb_bulk_probeEndpoint(int devId, mass_dev *dev, UsbEndpointDescript
             /* When sceUsbdOpenPipe() is used to work around the hardware errata that occurs when an unaligned memory address is specified,
                some USB devices become incompatible. Hence it is preferable to do alignment correction in software instead. */
             dev->bulkEpO = sceUsbdOpenPipeAligned(devId, endpoint);
-            XPRINTF("USBHDFSD: register Output endpoint id =%i addr=%02X packetSize=%i\n", dev->bulkEpO, endpoint->bEndpointAddress, (unsigned short int)endpoint->wMaxPacketSizeHB << 8 | endpoint->wMaxPacketSizeLB);
+            XPRINTF("register Output endpoint id =%i addr=%02X packetSize=%i\n", dev->bulkEpO, endpoint->bEndpointAddress, (unsigned short int)endpoint->wMaxPacketSizeHB << 8 | endpoint->wMaxPacketSizeLB);
         } else
             /* in transfer */
             if ((endpoint->bEndpointAddress & USB_ENDPOINT_DIR_MASK) == USB_DIR_IN && dev->bulkEpI < 0) {
@@ -809,7 +809,7 @@ static void usb_bulk_probeEndpoint(int devId, mass_dev *dev, UsbEndpointDescript
                    there is always an alignment check if the pipe is opened with the sceUsbdOpenPipeAligned(),
                    even when there is never any correction for the bulk out pipe. */
                 dev->bulkEpI = sceUsbdOpenPipe(devId, endpoint);
-                XPRINTF("USBHDFSD: register Input endpoint id =%i addr=%02X packetSize=%i\n", dev->bulkEpI, endpoint->bEndpointAddress, (unsigned short int)endpoint->wMaxPacketSizeHB << 8 | endpoint->wMaxPacketSizeLB);
+                XPRINTF("register Input endpoint id =%i addr=%02X packetSize=%i\n", dev->bulkEpI, endpoint->bEndpointAddress, (unsigned short int)endpoint->wMaxPacketSizeHB << 8 | endpoint->wMaxPacketSizeLB);
             }
     }
 }
@@ -820,7 +820,7 @@ int mass_stor_probe(int devId)
     UsbConfigDescriptor *config  = NULL;
     UsbInterfaceDescriptor *intf = NULL;
 
-    XPRINTF("USBHDFSD: probe: devId=%i\n", devId);
+    XPRINTF("probe: devId=%i\n", devId);
 
     mass_dev *mass_device = mass_stor_findDevice(devId, 0);
 
@@ -849,7 +849,7 @@ int mass_stor_probe(int devId)
         return 0;
     }
     /* check that at least one interface exists */
-    XPRINTF("USBHDFSD: bNumInterfaces %d\n", config->bNumInterfaces);
+    XPRINTF("bNumInterfaces %d\n", config->bNumInterfaces);
     if ((config->bNumInterfaces < 1) ||
         (config->wTotalLength < (sizeof(UsbConfigDescriptor) + sizeof(UsbInterfaceDescriptor)))) {
         printf("USBHDFSD: Error - No interfaces available\n");
@@ -857,7 +857,7 @@ int mass_stor_probe(int devId)
     }
     /* get interface */
     intf = (UsbInterfaceDescriptor *)((char *)config + config->bLength); /* Get first interface */
-    XPRINTF("USBHDFSD: bInterfaceClass %X bInterfaceSubClass %X bInterfaceProtocol %X\n",
+    XPRINTF("bInterfaceClass %X bInterfaceSubClass %X bInterfaceProtocol %X\n",
             intf->bInterfaceClass, intf->bInterfaceSubClass, intf->bInterfaceProtocol);
 
     if ((intf->bInterfaceClass != USB_CLASS_MASS_STORAGE) ||
@@ -944,7 +944,7 @@ int mass_stor_connect(int devId)
     dev->devId    = devId;
     dev->configId = config->bConfigurationValue;
     dev->status   = USBMASS_DEV_STAT_CONN;
-    XPRINTF("USBHDFSD: connect ok: epI=%i, epO=%i \n", dev->bulkEpI, dev->bulkEpO);
+    XPRINTF("connect ok: epI=%i, epO=%i \n", dev->bulkEpI, dev->bulkEpO);
 
     if (dev->callback != NULL)
         dev->callback(USBMASS_DEV_EV_CONN);
@@ -1003,7 +1003,7 @@ static int mass_stor_warmup(mass_dev *dev)
     read_capacity_data rcd;
     int stat;
 
-    XPRINTF("USBHDFSD: mass_stor_warmup\n");
+    XPRINTF("mass_stor_warmup\n");
 
     if (!(dev->status & USBMASS_DEV_STAT_CONN)) {
         printf("USBHDFSD: Error - no mass storage device found!\n");
@@ -1083,7 +1083,7 @@ int mass_stor_configureNextDevice(void)
 {
     int i;
 
-    XPRINTF("USBHDFSD: configuring devices... \n");
+    XPRINTF("configuring devices... \n");
 
     for (i = 0; i < NUM_DEVICES; ++i) {
         mass_dev *dev = &g_mass_device[i];
@@ -1134,7 +1134,7 @@ int InitUSB(void)
     driver.disconnect = mass_stor_disconnect;
 
     ret = sceUsbdRegisterLdd(&driver);
-    XPRINTF("USBHDFSD: registerDriver=%i \n", ret);
+    XPRINTF("registerDriver=%i \n", ret);
     if (ret < 0) {
         printf("USBHDFSD: register driver failed! ret=%d\n", ret);
         return (-1);

@@ -24,6 +24,7 @@
 #include "audsrv_internal.h"
 #include "common.h"
 #include "rpc_client.h"
+#include "debug_printf.h"
 
 /* rpc server variables */
 /** buffer for RPC DMA */
@@ -49,7 +50,7 @@ static void *rpc_command(int func, unsigned *data, int size)
 
 	(void)size;
 
-	/* printf("audsrv: rpc command %d\n", func); */
+	/* DPRINTF("rpc command %d\n", func); */
 	switch(func)
 	{
 		case AUDSRV_INIT:
@@ -184,7 +185,7 @@ static void rpc_server_thread(void *arg)
 
 	SifInitRpc(0);
 
-	printf("audsrv: creating rpc server\n");
+	DPRINTF("creating rpc server\n");
 
 	SifSetRpcQueue(&qd, GetThreadId());
 	SifRegisterRpc(&sd0, AUDSRV_IRX, (void *)rpc_command, rpc_buffer, NULL, NULL, &qd);
@@ -193,9 +194,7 @@ static void rpc_server_thread(void *arg)
 
 int initialize_rpc_thread()
 {
-	int rpc_tid;
-
-	rpc_tid = create_thread(rpc_server_thread, 40, 0);
-	printf("audsrv: rpc server thread 0x%x started\n", rpc_tid);
-	return 0;
+	int rpc_tid = create_thread(rpc_server_thread, 40, 0);
+	DPRINTF("rpc server thread 0x%x started\n", rpc_tid);
+	return (rpc_tid > 0);
 }

@@ -59,7 +59,7 @@ typedef struct
 {
     io_stat_t stat;
     char name[256];
-    unsigned int unknown;
+    void *privdata;
 } io_dirent_t;
 
 #endif /* __IO_COMMON_H__ */

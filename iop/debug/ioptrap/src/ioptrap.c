@@ -25,8 +25,8 @@
 #include "stdio.h"
 #include "sysclib.h"
 #include "thbase.h"
-
-IRX_ID("ioptrap_driver", 1, 1);
+#define MODNAME "ioptrap_driver"
+IRX_ID(MODNAME, 1, 1);
 
 extern struct irx_export_table _exp_ioptrap;
 
@@ -140,7 +140,7 @@ char *ExceptionGetModuleName(u32 epc, u32 *r_epc)
 #define JUMP_BUF_GP 11
 
 // Define this to something else if you want... maybe some ee_sio stuff :P
-#define TRAP_PRINTF(args...) printf(args)
+#define TRAP_PRINTF(args...) printf(MODNAME ": " args)
 
 static trap_exception_handler_t handlers[16];
 
