@@ -14,7 +14,7 @@
 
 #define _FDMAN_H_
 
-#define __FILENO_MAX 1024
+#define __FILENO_MAX 64
 
 #define __IS_FD_VALID(FD) \
 		( (FD >= 0) && (FD < __FILENO_MAX) && (__descriptormap[FD] != NULL) )
