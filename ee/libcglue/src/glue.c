@@ -477,7 +477,28 @@ off_t _lseek(int fd, off_t offset, int whence)
 #ifdef F_lseek64
 off64_t lseek64(int fd, off64_t offset, int whence)
 {
-	return __transform64_errno(_ps2sdk_lseek64(fd, offset, whence));
+	if (!__IS_FD_VALID(fd)) {
+		errno = EBADF;
+		return -1;
+	}
+
+	switch(__descriptormap[fd]->type)
+	{
+		case __DESCRIPTOR_TYPE_FILE:
+			return __transform64_errno(_ps2sdk_lseek64(__descriptormap[fd]->descriptor, offset, whence));
+			break;
+		case __DESCRIPTOR_TYPE_FOLDER:
+			break;
+		case __DESCRIPTOR_TYPE_PIPE:
+			break;
+		case __DESCRIPTOR_TYPE_SOCKET:
+			break;
+		default:
+			break;
+	}
+
+	errno = EBADF;
+	return -1;
 }
 #endif
 
