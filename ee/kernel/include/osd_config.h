@@ -25,6 +25,7 @@
 #define __OSD_CONFIG_H__
 
 #include <tamtypes.h>
+#include <rom0_info.h>
 #ifndef OSD_CONFIG_NO_LIBCDVD
 #include <libcdvd.h>
 #endif
@@ -128,80 +129,95 @@ extern "C" {
  * @return Language value (See OSD_LANGUAGES above)
  */
 int configGetLanguage(void);
+int configGetLanguageWithIODriver(_io_driver *driver);
+
 /** sets the default language of the ps2
  * @param language Language value (See OSD_LANGUAGES above)
  */
 void configSetLanguage(int language);
+void configSetLanguageWithIODriver(int language, _io_driver *driver);
 
 
 /** get the tv screen type the ps2 is setup for
  * @return 0 = 4:3; 1 = fullscreen; 2 = 16:9
  */
 int configGetTvScreenType(void);
+int configGetTvScreenTypeWithIODriver(_io_driver *driver);
+
 /** set the tv screen type
  * @param screenType 0 = 4:3; 1 = fullscreen; 2 = 16:9
  */
 void configSetTvScreenType(int screenType);
-
+void configSetTvScreenTypeWithIODriver(int screenType, _io_driver *driver);
 
 /** gets the date display format
  * @return 0 = yyyy/mm/dd; 1 = mm/dd/yyyy; 2 = dd/mm/yyyy
  */
 int configGetDateFormat(void);
+int configGetDateFormatWithIODriver(_io_driver *driver);
+
 /** sets the date display format
  * @param dateFormat 0 = yyyy/mm/dd; 1 = mm/dd/yyyy; 2 = dd/mm/yyyy
  */
 void configSetDateFormat(int dateFormat);
-
+void configSetDateFormatWithIODriver(int dateFormat, _io_driver *driver);
 
 /** gets the time display format
  * (whether 24hour time or not)
  * @return 0 = 24hour; 1 = 12hour
  */
 int configGetTimeFormat(void);
+int configGetTimeFormatWithIODriver(_io_driver *driver);
+
 /** sets the time display format
  * (whether 24hour time or not)
  * @param timeFormat 0 = 24hour; 1 = 12hour
  */
 void configSetTimeFormat(int timeFormat);
+void configSetTimeFormatWithIODriver(int timeFormat, _io_driver *driver);
 
 /** get timezone
  * @return offset in minutes from GMT
  */
 int configGetTimezone(void);
+int configGetTimezoneWithIODriver(_io_driver *driver);
+
 /** set timezone
  * @param offset offset in minutes from GMT
  */
 void configSetTimezone(int offset);
+void configSetTimezoneWithIODriver(int timezoneOffset, _io_driver *driver, void (*finishedCallback)(void));
 
 /** checks whether the spdif is enabled or not
  * @return 1 = on; 0 = off
  */
 int configIsSpdifEnabled(void);
+int configIsSpdifEnabledWithIODriver(_io_driver *driver);
+
 /** sets whether the spdif is enabled or not
  * @param enabled 1 = on; 0 = off
  */
 void configSetSpdifEnabled(int enabled);
+void configSetSpdifEnabledWithIODriver(int enabled, _io_driver *driver);
 
 /** checks whether daylight saving is currently set
  * @return 1 = on; 0 = off
  */
 int configIsDaylightSavingEnabled(void);
+int configIsDaylightSavingEnabledWithIODriver(_io_driver *driver);
+
 /** sets daylight saving
  * @param enabled 1 = on; 0 = off
  */
 void configSetDaylightSavingEnabled(int enabled);
+void configSetDaylightSavingEnabledWithIODriver(int daylightSaving, _io_driver *driver, void (*finishedCallback)(void));
 
 #ifndef OSD_CONFIG_NO_LIBCDVD
 /** converts the time returned from the ps2's clock into GMT time
  * (ps2 clock is in JST time)
  */
 void configConvertToGmtTime(sceCdCLOCK *time);
-
-/** converts the time returned from the ps2's clock into LOCAL time
- * (ps2 clock is in JST time)
- */
-void configConvertToLocalTime(sceCdCLOCK *time);
+void configConvertToLocalTimeWithIODriver(sceCdCLOCK *time, _io_driver *driver);
 #endif
 
 // Internal functions.

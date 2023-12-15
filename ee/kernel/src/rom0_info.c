@@ -20,6 +20,7 @@
 #define NEWLIB_PORT_AWARE
 #include "fileio.h"
 
+#define defaultIODriver { (void *)fioOpen, fioClose, fioRead }
 
 extern char g_RomName[];
 
@@ -28,26 +29,34 @@ extern char g_RomName[];
 char g_RomName[15] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 #endif
 
-#ifdef F_GetRomName
-char *GetRomName(char *romname)
+#ifdef F_GetRomNameWithIODriver
+char *GetRomNameWithIODriver(char *romname, _io_driver *driver)
 {
     int fd;
 
-    fd = fioOpen("rom0:ROMVER", FIO_O_RDONLY);
-    fioRead(fd, romname, 14);
-    fioClose(fd);
+    fd = driver->open("rom0:ROMVER", FIO_O_RDONLY);
+    driver->read(fd, romname, 14);
+    driver->close(fd);
     return romname;
 }
 #endif
 
-#ifdef F_IsDESRMachine
-int IsDESRMachine(void)
+#ifdef F_GetRomName
+char *GetRomName(char *romname)
+{
+    _io_driver driver = defaultIODriver;
+    return GetRomNameWithIODriver(romname, &driver);
+}
+#endif
+
+#ifdef F_IsDESRMachineWithIODriver
+int IsDESRMachineWithIODriver(_io_driver *driver)
 {
     int fd;
 
-    fd = fioOpen("rom0:PSXVER", FIO_O_RDONLY);
+    fd = driver->open("rom0:PSXVER", FIO_O_RDONLY);
     if (fd > 0) {
-        fioClose(fd);
+        driver->close(fd);
         return 1;
     }
 
@@ -55,12 +64,28 @@ int IsDESRMachine(void)
 }
 #endif
 
-#ifdef F_IsT10K
-int IsT10K(void)
+#ifdef F_IsDESRMachine
+int IsDESRMachine(void)
+{
+    _io_driver driver = defaultIODriver;
+    return IsDESRMachineWithIODriver(&driver);
+}
+#endif
+
+#ifdef F_IsT10KWithIODriver
+int IsT10KWithIODriver(_io_driver *driver)
 {
     // only read in the romname the first time
     if (g_RomName[0] == 0)
-        GetRomName(g_RomName);
+        GetRomNameWithIODriver(g_RomName, driver);
     return (g_RomName[4] == 'T' && g_RomName[5] != 'Z') ? 1 : 0;
+}
+#endif
+
+#ifdef F_IsT10K
+int IsT10K(void)
+{
+    _io_driver driver = defaultIODriver;
+    return IsT10KWithIODriver(&driver);
 }
 #endif
