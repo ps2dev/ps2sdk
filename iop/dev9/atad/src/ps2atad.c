@@ -46,7 +46,7 @@ IRX_ID(MODNAME, 2, 7);
 #define M_PRINTF(format, args...) \
     printf(MODNAME ": " format, ##args)
 
-#define U64_2XU32(val)  ((u32*)val)[1], ((u32*)val)[0]
+#define U64_2XU32(val) ((u32 *)val)[1], ((u32 *)val)[0]
 
 #define BANNER  "ATA device driver %s - Copyright (c) 2003 Marcus R. Brown\n"
 #define VERSION "v1.2"
@@ -182,7 +182,7 @@ typedef struct _ata_cmd_state
 static ata_cmd_state_t atad_cmd_state;
 
 #ifdef ATA_ENABLE_BDM
-#define NUM_DEVICES 2
+#define NUM_DEVICES        2
 #define ATA_BD_SECTOR_SIZE 512
 static struct block_device g_ata_bd[NUM_DEVICES];
 #endif
@@ -307,14 +307,14 @@ int _start(int argc, char *argv[])
         int i;
 
         for (i = 0; i < NUM_DEVICES; ++i) {
-            g_ata_bd[i].priv  = (void *)&atad_devinfo[i];
-            g_ata_bd[i].name  = "ata";
-            g_ata_bd[i].devNr = i;
-            g_ata_bd[i].parNr = 0;
-            g_ata_bd[i].parId = 0x00;
-            g_ata_bd[i].sectorSize = 512;
+            g_ata_bd[i].priv         = (void *)&atad_devinfo[i];
+            g_ata_bd[i].name         = "ata";
+            g_ata_bd[i].devNr        = i;
+            g_ata_bd[i].parNr        = 0;
+            g_ata_bd[i].parId        = 0x00;
+            g_ata_bd[i].sectorSize   = 512;
             g_ata_bd[i].sectorOffset = 0;
-            g_ata_bd[i].sectorCount = 0;
+            g_ata_bd[i].sectorCount  = 0;
 
             g_ata_bd[i].read  = ata_bd_read;
             g_ata_bd[i].write = ata_bd_write;
@@ -912,9 +912,9 @@ int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir
             len = (nsectors > 65536) ? 65536 : nsectors;
 
             /* Combine bits 24-31 and bits 0-7 of lba into sector.  */
-            sector =    ((lba >> 16) & 0xff00) | (lba & 0xff);
-            lcyl =      ((lba >> 24) & 0xff00) | ((lba >> 8) & 0xff);
-            hcyl =      ((lba >> 32) & 0xff00) | ((lba >> 16) & 0xff);
+            sector = ((lba >> 16) & 0xff00) | (lba & 0xff);
+            lcyl   = ((lba >> 24) & 0xff00) | ((lba >> 8) & 0xff);
+            hcyl   = ((lba >> 32) & 0xff00) | ((lba >> 16) & 0xff);
 
             /* In v1.04, LBA was enabled here.  */
             select  = (device << 4) & 0xffff;
@@ -922,9 +922,9 @@ int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir
         } else {
             /* Setup for 28-bit LBA.  */
             len    = (nsectors > 256) ? 256 : nsectors;
-            sector =    lba & 0xff;
-            lcyl =      (lba >> 8) & 0xff;
-            hcyl =      (lba >> 16) & 0xff;
+            sector = lba & 0xff;
+            lcyl   = (lba >> 8) & 0xff;
+            hcyl   = (lba >> 16) & 0xff;
 
             /* In v1.04, LBA was enabled here.  */
             select  = ((device << 4) | ((lba >> 24) & 0xf)) & 0xffff;
@@ -1142,8 +1142,22 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 
         devinfo[i].security_status = ata_param[ATA_ID_SECURITY_STATUS];
 
+        u8 maxUDMA = 4;
+#ifdef ATA_ENABLE_MAXUDMA
+        maxUDMA = 6;
+#endif
+
         /* Ultra DMA mode 4.  */
-        ata_device_set_transfer_mode(i, ATA_XFER_MODE_UDMA, 4);
+        u8 udmaMode = 4;
+        /* Check the highest UDMA mode supported */
+        for (int j = maxUDMA; j >= 0; j--) {
+            /* Check if the current UDMA mode is supported, store it and exit from the loop. */
+            if (((ata_param[ATA_ID_UDMA_CONTROL] & 0xFF) & (1 << j)) != 0) {
+                udmaMode = j;
+                break;
+            }
+        }
+        ata_device_set_transfer_mode(i, ATA_XFER_MODE_UDMA, udmaMode);
         ata_device_smart_enable(i);
         /* Set standby timer to 21min 15s.  */
         ata_device_idle(i, 0xff);
@@ -1330,7 +1344,7 @@ static int ata_bd_read(struct block_device *bd, u64 sector, void *buffer, u16 co
 
 static int ata_bd_write(struct block_device *bd, u64 sector, const void *buffer, u16 count)
 {
-    if (ata_device_sector_io64(bd->devNr, (void*)buffer, sector, count, ATA_DIR_WRITE) != 0) {
+    if (ata_device_sector_io64(bd->devNr, (void *)buffer, sector, count, ATA_DIR_WRITE) != 0) {
         return -EIO;
     }
 

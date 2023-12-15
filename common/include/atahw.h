@@ -166,6 +166,7 @@ enum _ata_identify_offsets {
     ATA_ID_SECTOTAL_LO            = 60,
     ATA_ID_SECTOTAL_HI            = 61,
     ATA_ID_COMMAND_SETS_SUPPORTED = 83,
+    ATA_ID_UDMA_CONTROL           = 88,
     ATA_ID_48BIT_SECTOTAL_LO      = 100,
     ATA_ID_48BIT_SECTOTAL_MI      = 101,
     ATA_ID_48BIT_SECTOTAL_HI      = 102,
