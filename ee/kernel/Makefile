@@ -65,16 +65,26 @@ GLUE_OBJS += SyncDCache.o iSyncDCache.o InvalidDCache.o iInvalidDCache.o
 SIO_OBJS = sio_init.o sio_putc.o sio_getc.o sio_write.o sio_read.o sio_puts.o \
 	sio_gets.o sio_getc_block.o sio_flush.o sio_putsn.o
 
-ROM0_OBJS = _info_internals.o GetRomName.o IsDESRMachine.o IsT10K.o
+ROM0_OBJS = _info_internals.o GetRomNameWithIODriver.o GetRomName.o IsDESRMachineWithIODriver.o IsDESRMachine.o IsT10KWithIODriver.o IsT10K.o
 
 ### Config objects
 
-CONFIG_OBJS = _config_internals.o IsEarlyJap.o configGetLanguage.o \
-	configSetLanguage.o configGetTvScreenType.o configSetTvScreenType.o \
-	configGetDateFormat.o configSetDateFormat.o configGetTimeFormat.o \
-	configSetTimeFormat.o configGetTimezone.o configSetTimezone.o \
-	configIsSpdifEnabled.o configSetSpdifEnabled.o configGetTime.o \
-	configIsDaylightSavingEnabled.o configSetDaylightSavingEnabled.o
+CONFIG_OBJS = _config_internals.o converttobcd.o convertfrombcd.o __adjustTime.o IsEarlyJap.o \
+	configGetLanguageWithIODriver.o configGetLanguage.o \
+	configSetLanguageWithIODriver.o configSetLanguage.o \
+	configGetTvScreenTypeWithIODriver.o configGetTvScreenType.o \
+	configSetTvScreenTypeWithIODriver.o configSetTvScreenType.o \
+	configGetDateFormatWithIODriver.o configGetDateFormat.o \
+	configSetDateFormatWithIODriver.o configSetDateFormat.o \
+	configGetTimeFormatWithIODriver.o configGetTimeFormat.o \
+	configSetTimeFormatWithIODriver.o configSetTimeFormat.o \
+	configGetTimezoneWithIODriver.o configGetTimezone.o \
+	configSetTimezoneWithIODriver.o configSetTimezone.o \
+	configIsSpdifEnabledWithIODriver.o configIsSpdifEnabled.o \
+	configSetSpdifEnabledWithIODriver.o configSetSpdifEnabled.o \
+	configIsDaylightSavingEnabledWithIODriver.o configIsDaylightSavingEnabled.o \
+	configSetDaylightSavingEnabledWithIODriver.o configSetDaylightSavingEnabled.o \
+	configConvertToGmtTime.o configConvertToLocalTimeWithIODriver.o configConvertToLocalTime.o
 
 ### Patch objects
 

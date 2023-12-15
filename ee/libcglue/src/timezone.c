@@ -14,37 +14,54 @@
  */
 
 #include <time.h>
-#include <sys/_tz_structs.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+#include <ps2sdkapi.h>
 #define OSD_CONFIG_NO_LIBCDVD
 #include "osd_config.h"
 
-static char _ps2sdk_tzname[15];
+static inline void setPS2SDKFunctions() {
+	// Set ps2sdk functions
+	_glue_ps2sdk_open();
+	_glue_ps2sdk_close();
+	_glue_ps2sdk_read();
+}
 
+#ifdef F__libcglue_timezone_update
 __attribute__((weak))
 void _libcglue_timezone_update()
 {
-	// Set TZ and call tzset to ensure that timezone information won't get overwritten when tszet is called multiple times
-	// The TZ environment variable parsing in newlib is broken in various ways:
-	// * It doesn't support arbritary characters in the timezone name using angle brackets
-	// * The timezone offset sign is inverted
-	setenv("TZ", "", 0);
-	tzset();
+    /* Initialize timezone from PS2 OSD configuration */
+    setPS2SDKFunctions();
 
-	// Set tzinfo manually instead.
-
-	__tzinfo_type *tz = __gettzinfo();
-
-	// _timezone is in seconds, while the return value of configGetTimezone is in minutes
-	// Add one hour if configIsDaylightSavingEnabled is 1
-	// _timezone is offset from local time to UTC (not UTC to local time), so flip the sign
-	_timezone = -((configGetTimezone() + (configIsDaylightSavingEnabled() * 60)) * 60);
-	tz->__tzrule[0].offset = _timezone;
-	snprintf(_ps2sdk_tzname, sizeof(_ps2sdk_tzname), "Etc/GMT%+ld", _timezone / 3600);
-	_tzname[0] = _ps2sdk_tzname;
-	_tzname[1] = _ps2sdk_tzname;
-
-	// Don't perform DST conversion
-	_daylight = 0;
+	_io_driver driver = { _ps2sdk_open, _ps2sdk_close, _ps2sdk_read };
+	int tzOffset = configGetTimezoneWithIODriver(&driver);
+    int tzOffsetAbs = tzOffset < 0 ? -tzOffset : tzOffset;
+    int hours = tzOffsetAbs / 60;
+    int minutes = tzOffsetAbs - hours * 60;
+    int daylight = configIsDaylightSavingEnabledWithIODriver(&driver);
+    static char tz[15];
+	#pragma GCC diagnostic push
+	#pragma GCC diagnostic ignored "-Wformat-overflow"
+    sprintf(tz, "GMT%s%02i:%02i%s", tzOffset < 0 ? "+" : "-", hours, minutes, daylight ? "DST" : "");
+	#pragma GCC diagnostic pop
+    setenv("TZ", tz, 1);
 }
+#endif
+
+#ifdef F_ps2sdk_setTimezone
+void ps2sdk_setTimezone(int timezone) {
+	setPS2SDKFunctions();
+	_io_driver driver = { _ps2sdk_open, _ps2sdk_close, _ps2sdk_read };
+	configSetTimezoneWithIODriver(timezone, &driver, _libcglue_timezone_update);
+}
+#endif
+
+#ifdef F_ps2sdk_setDaylightSaving
+void ps2sdk_setDaylightSaving(int daylightSaving) {
+	setPS2SDKFunctions();
+	_io_driver driver = { _ps2sdk_open, _ps2sdk_close, _ps2sdk_read };
+	configSetDaylightSavingEnabledWithIODriver(daylightSaving, &driver, _libcglue_timezone_update);
+}
+#endif

@@ -21,6 +21,9 @@ ATA_GAMESTAR_WORKAROUND ?= 1
 # Enable to enable support for the BDM interface.
 ATA_ENABLE_BDM ?= 0
 
+# Enable to enable support for the BDM interface.
+ATA_ENABLE_MAXUDMA ?= 0
+
 IOP_BIN ?= ps2atad.irx
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include
@@ -45,6 +48,10 @@ endif
 ifeq ($(ATA_ENABLE_BDM),1)
 IOP_CFLAGS += -DATA_ENABLE_BDM=1 -Wno-strict-aliasing
 IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
+endif
+
+ifeq ($(ATA_ENABLE_MAXUDMA),1)
+IOP_CFLAGS += -DATA_ENABLE_MAXUDMA=1
 endif
 
 include $(PS2SDKSRC)/Defs.make

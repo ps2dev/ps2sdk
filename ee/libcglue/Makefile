@@ -8,7 +8,9 @@
 
 EE_LIB = libcglue.a
 
-CORE_OBJS = timezone.o rtc.o
+CORE_OBJS = rtc.o
+
+TIMEZONE_OBJS = _libcglue_timezone_update.o ps2sdk_setTimezone.o ps2sdk_setDaylightSaving.o
 
 FDMAN_OBJS = __fdman_sema.o __descriptor_data_pool.o __descriptormap.o __fdman_init.o __fdman_deinit.o __fdman_get_new_descriptor.o \
 	__fdman_get_dup_descriptor.o __fdman_release_descriptor.o
@@ -21,9 +23,21 @@ SJIS_OBJS = isSpecialSJIS.o isSpecialASCII.o strcpy_ascii.o strcpy_sjis.o
 
 CWD_OBJS = __cwd.o __get_drive.o getcwd.o __path_absolute.o __init_cwd.o
 
-PS2SDKAPI_OBJS = _ps2sdk_close.o _ps2sdk_open.o _ps2sdk_read.o _ps2sdk_lseek.o _ps2sdk_lseek64.o _ps2sdk_write.o _ps2sdk_ioctl.o \
+PS2SDKAPI_OBJS = \
+	__fioOpenHelper.o __fioLseek64Helper.o __fioRenameHelper.o __fioMkdirHelper.o __fioGetstatHelper.o __fioReadlinkHelper.o __fioSymlinkHelper.o __fioDreadHelper.o \
+	_ps2sdk_close.o _ps2sdk_open.o _ps2sdk_read.o _ps2sdk_lseek.o _ps2sdk_lseek64.o _ps2sdk_write.o _ps2sdk_ioctl.o \
 	_ps2sdk_remove.o _ps2sdk_rename.o _ps2sdk_mkdir.o _ps2sdk_rmdir.o _ps2sdk_stat.o _ps2sdk_readlink.o _ps2sdk_symlink.o \
-	_ps2sdk_dopen.o _ps2sdk_dread.o _ps2sdk_dclose.o
+	_ps2sdk_dopen.o _ps2sdk_dread.o _ps2sdk_dclose.o \
+	_set_ps2sdk_close.o _set_ps2sdk_open.o _set_ps2sdk_read.o _set_ps2sdk_lseek.o _set_ps2sdk_lseek64.o _set_ps2sdk_write.o _set_ps2sdk_ioctl.o \
+	_set_ps2sdk_remove.o _set_ps2sdk_rename.o _set_ps2sdk_mkdir.o _set_ps2sdk_rmdir.o _set_ps2sdk_stat.o _set_ps2sdk_readlink.o _set_ps2sdk_symlink.o \
+	_set_ps2sdk_dopen.o _set_ps2sdk_dread.o _set_ps2sdk_dclose.o \
+	_glue_ps2sdk_close.o _glue_ps2sdk_open.o _glue_ps2sdk_read.o _glue_ps2sdk_lseek.o _glue_ps2sdk_lseek64.o _glue_ps2sdk_write.o _glue_ps2sdk_ioctl.o \
+	_glue_ps2sdk_remove.o _glue_ps2sdk_rename.o _glue_ps2sdk_mkdir.o _glue_ps2sdk_rmdir.o _glue_ps2sdk_stat.o _glue_ps2sdk_readlink.o _glue_ps2sdk_symlink.o \
+	_glue_ps2sdk_dopen.o _glue_ps2sdk_dread.o _glue_ps2sdk_dclose.o \
+	_predefined_ps2sdk_close.o _predefined_ps2sdk_open.o _predefined_ps2sdk_read.o _predefined_ps2sdk_lseek.o _predefined_ps2sdk_lseek64.o _predefined_ps2sdk_write.o _predefined_ps2sdk_ioctl.o \
+	_predefined_ps2sdk_remove.o _predefined_ps2sdk_rename.o _predefined_ps2sdk_mkdir.o _predefined_ps2sdk_rmdir.o _predefined_ps2sdk_stat.o _predefined_ps2sdk_readlink.o _predefined_ps2sdk_symlink.o \
+	_predefined_ps2sdk_dopen.o _predefined_ps2sdk_dread.o _predefined_ps2sdk_dclose.o 
+
 
 GLUE_OBJS = __dummy_passwd.o __transform_errno.o __transform64_errno.o compile_time_check.o __normalized_path.o _open.o _close.o _read.o _write.o \
 	_stat.o lstat.o _fstat.o access.o _fcntl.o getdents.o _lseek.o lseek64.o chdir.o mkdir.o \
@@ -34,12 +48,15 @@ GLUE_OBJS = __dummy_passwd.o __transform_errno.o __transform64_errno.o compile_t
 LOCK_OBJS = __retarget_lock_init.o __retarget_lock_acquire.o __retarget_lock_release.o __retarget_lock_try_acquire.o __retarget_lock_close.o \
 	__retarget_lock_init_recursive.o __retarget_lock_acquire_recursive.o __retarget_lock_release_recursive.o __retarget_lock_try_acquire_recursive.o __retarget_lock_close_recursive.o
 
-EE_OBJS = $(CORE_OBJS) $(SJIS_OBJS) $(TIME_OBJS) $(FDMAN_OBJS) $(INIT_OBJS) $(SLEEP_OBJS) $(TERMINATE_OBJS) $(CWD_OBJS) $(PS2SDKAPI_OBJS) $(GLUE_OBJS) $(LOCK_OBJS)
+EE_OBJS = $(CORE_OBJS) $(TIMEZONE_OBJS) $(SJIS_OBJS) $(TIME_OBJS) $(FDMAN_OBJS) $(INIT_OBJS) $(SLEEP_OBJS) $(TERMINATE_OBJS) $(CWD_OBJS) $(PS2SDKAPI_OBJS) $(GLUE_OBJS) $(LOCK_OBJS)
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make
 include $(PS2SDKSRC)/ee/Rules.make
 include $(PS2SDKSRC)/ee/Rules.release
+
+$(TIMEZONE_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)timezone.c
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(SJIS_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)sjis.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
