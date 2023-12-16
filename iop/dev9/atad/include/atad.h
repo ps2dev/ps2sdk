@@ -49,7 +49,7 @@ typedef struct _ata_devinfo
 #define ATA_RES_ERR_LOCKED   -509
 #define ATA_RES_ERR_ICRC     -510
 
-ata_devinfo_t *ata_get_devinfo(int device);
+ata_devinfo_t *sceAtaInit(int device);
 
 int ata_reset_devices(void);
 
@@ -58,42 +58,63 @@ int ata_io_finish(void);
 
 int ata_get_error(void);
 
-#define ata_device_dma_transfer ata_device_sector_io // Backward-compatibility
-int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir);
+int sceAtaDmaTransfer(int device, void *buf, u32 lba, u32 nsectors, int dir);
 
 // DRM functions that were meant to keep users from sharing disks (and hence the contained content). Supported by only Sony-modified HDDs (e.g. the SCPH-20400).
 int ata_device_sce_sec_set_password(int device, void *password);
-int ata_device_sce_sec_unlock(int device, void *password);
+int sceAtaSecurityUnLock(int device, void *password);
 int ata_device_sce_sec_erase(int device);
 
-int ata_device_idle(int device, int period);
-int ata_device_sce_identify_drive(int device, void *data);
-int ata_device_smart_get_status(int device);
-int ata_device_smart_save_attr(int device);
-int ata_device_flush_cache(int device);
-int ata_device_idle_immediate(int device);
+int sceAtaIdle(int device, int period);
+int sceAtaGetSceId(int device, void *data);
+int sceAtaSmartReturnStatus(int device);
+int sceAtaSmartSaveAttr(int device);
+int sceAtaFlushCache(int device);
+int sceAtaIdleImmediate(int device);
 
 int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir);
 
 #define atad_IMPORTS_start DECLARE_IMPORT_TABLE(atad, 1, 3)
 #define atad_IMPORTS_end   END_IMPORT_TABLE
 
-#define I_ata_get_devinfo                 DECLARE_IMPORT(4, ata_get_devinfo)
+#define I_sceAtaInit                      DECLARE_IMPORT(4, sceAtaInit)
 #define I_ata_reset_devices               DECLARE_IMPORT(5, ata_reset_devices)
 #define I_ata_io_start                    DECLARE_IMPORT(6, ata_io_start)
 #define I_ata_io_finish                   DECLARE_IMPORT(7, ata_io_finish)
 #define I_ata_get_error                   DECLARE_IMPORT(8, ata_get_error)
-#define I_ata_device_dma_transfer         I_ata_device_sector_io // Backward-compatibility
-#define I_ata_device_sector_io            DECLARE_IMPORT(9, ata_device_sector_io)
+#define I_sceAtaDmaTransfer               DECLARE_IMPORT(9, sceAtaDmaTransfer)
 #define I_ata_device_sce_sec_set_password DECLARE_IMPORT(10, ata_device_sce_sec_set_password)
-#define I_ata_device_sce_sec_unlock       DECLARE_IMPORT(11, ata_device_sce_sec_unlock)
+#define I_sceAtaSecurityUnLock            DECLARE_IMPORT(11, sceAtaSecurityUnLock)
 #define I_ata_device_sce_sec_erase        DECLARE_IMPORT(12, ata_device_sce_sec_erase)
-#define I_ata_device_idle                 DECLARE_IMPORT(13, ata_device_idle)
-#define I_ata_device_sce_identify_drive   DECLARE_IMPORT(14, ata_device_sce_identify_drive)
-#define I_ata_device_smart_get_status     DECLARE_IMPORT(15, ata_device_smart_get_status)
-#define I_ata_device_smart_save_attr      DECLARE_IMPORT(16, ata_device_smart_save_attr)
-#define I_ata_device_flush_cache          DECLARE_IMPORT(17, ata_device_flush_cache)
-#define I_ata_device_idle_immediate       DECLARE_IMPORT(18, ata_device_idle_immediate)
+#define I_sceAtaIdle                      DECLARE_IMPORT(13, sceAtaIdle)
+#define I_sceAtaGetSceId                  DECLARE_IMPORT(14, sceAtaGetSceId)
+#define I_sceAtaSmartReturnStatus         DECLARE_IMPORT(15, sceAtaSmartReturnStatus)
+#define I_sceAtaSmartSaveAttr             DECLARE_IMPORT(16, sceAtaSmartSaveAttr)
+#define I_sceAtaFlushCache                DECLARE_IMPORT(17, sceAtaFlushCache)
+#define I_sceAtaIdleImmediate             DECLARE_IMPORT(18, sceAtaIdleImmediate)
 #define I_ata_device_sector_io64          DECLARE_IMPORT(19, ata_device_sector_io64)
+
+// Backward-compatibility definitions
+#define ata_get_devinfo sceAtaInit
+#define ata_device_sector_io sceAtaDmaTransfer
+#define ata_device_sce_sec_unlock sceAtaSecurityUnLock
+#define ata_device_idle sceAtaIdle
+#define ata_device_sce_identify_drive sceAtaGetSceId
+#define ata_device_smart_get_status sceAtaSmartReturnStatus
+#define ata_device_smart_save_attr sceAtaSmartSaveAttr
+#define ata_device_flush_cache sceAtaFlushCache
+#define ata_device_idle_immediate sceAtaIdleImmediate
+#define ata_device_dma_transfer sceAtaDmaTransfer
+
+#define I_ata_get_devinfo I_sceAtaInit
+#define I_ata_device_sector_io I_sceAtaDmaTransfer
+#define I_ata_device_sce_sec_unlock I_sceAtaSecurityUnLock
+#define I_ata_device_idle I_sceAtaIdle
+#define I_ata_device_sce_identify_drive I_sceAtaGetSceId
+#define I_ata_device_smart_get_status I_sceAtaSmartReturnStatus
+#define I_ata_device_smart_save_attr I_sceAtaSmartSaveAttr
+#define I_ata_device_flush_cache I_sceAtaFlushCache
+#define I_ata_device_idle_immediate I_sceAtaIdleImmediate
+#define I_ata_device_dma_transfer I_sceAtaDmaTransfer
 
 #endif /* __ATAD_H__ */

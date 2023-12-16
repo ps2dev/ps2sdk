@@ -22,7 +22,7 @@ int HdskUnlockHdd(int unit)
     int result;
 
     if ((result = apaGetIlinkID(id)) == 0) {
-        result = ata_device_sce_sec_unlock(unit, id);
+        result = sceAtaSecurityUnLock(unit, id);
     }
 
     return result;

@@ -26,37 +26,37 @@ static inline int blkIoInit(void)
 
 static inline int blkIoDmaTransfer(int device, void *buf, u32 lba, u32 nsectors, int dir)
 {
-    return ata_device_sector_io(device, buf, lba, nsectors, dir);
+    return sceAtaDmaTransfer(device, buf, lba, nsectors, dir);
 }
 
 static inline int blkIoIdle(int device, int period)
 {
-    return ata_device_idle(device, period);
+    return sceAtaIdle(device, period);
 }
 
 static inline int blkIoGetSceId(int device, void *data)
 {
-    return ata_device_sce_identify_drive(device, data);
+    return sceAtaGetSceId(device, data);
 }
 
 static inline int blkIoSmartReturnStatus(int device)
 {
-    return ata_device_smart_get_status(device);
+    return sceAtaSmartReturnStatus(device);
 }
 
 static inline int blkIoSmartSaveAttr(int device)
 {
-    return ata_device_smart_save_attr(device);
+    return sceAtaSmartSaveAttr(device);
 }
 
 static inline int blkIoFlushCache(int device)
 {
-    return ata_device_flush_cache(device);
+    return sceAtaFlushCache(device);
 }
 
 static inline int blkIoIdleImmediate(int device)
 {
-    return ata_device_idle_immediate(device);
+    return sceAtaIdleImmediate(device);
 }
 #else
 #define BLKIO_MAX_VOLUMES 10

@@ -239,8 +239,8 @@ static int CheckAPAPartitionLinks(int device, apa_cache_t *clink)
 static void EraseSector(int unit, void *buffer, u32 lba)
 {
     memset(buffer, 0, 512);
-    ata_device_sector_io(unit, buffer, lba, 1, ATA_DIR_WRITE);
-    ata_device_flush_cache(unit);
+    sceAtaDmaTransfer(unit, buffer, lba, 1, ATA_DIR_WRITE);
+    sceAtaFlushCache(unit);
 }
 
 static void RemoveBadPartitions(int device, apa_cache_t *clink)
@@ -691,7 +691,7 @@ int APA_ENTRYPOINT(int argc, char **argv)
     APA_PRINTF("%02d:%02d:%02d %02d/%02d/%d\n", time.hour, time.min, time.sec, time.month, time.day, time.year);
 
     for (i = 0; i < 2; i++) {
-        if ((pDevInfo = ata_get_devinfo(i)) == NULL) {
+        if ((pDevInfo = sceAtaInit(i)) == NULL) {
             APA_PRINTF("error: ata initialization failed.\n");
             return MODULE_NO_RESIDENT_END;
         }

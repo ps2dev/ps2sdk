@@ -42,7 +42,7 @@ typedef struct
     u32 lba;
     /** Number of sectors.  */
     u32 nsectors;
-    /** Transfer direction, same as ata_device_dma_transfer(). */
+    /** Transfer direction, same as sceAtaDmaTransfer(). */
     int dir;
     /** Data buffer.  */
     void *buf;
