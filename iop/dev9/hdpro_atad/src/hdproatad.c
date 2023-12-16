@@ -552,7 +552,7 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
     hdpro_io_write(ATAreg_LCYL_WR, lcyl & 0xff);
     hdpro_io_write(ATAreg_HCYL_WR, hcyl & 0xff);
 
-    hdpro_io_write(ATAreg_SELECT_WR, (select | ATA_SEL_LBA) & 0xff); // In v1.04, LBA was enabled in the ata_device_sector_io function.
+    hdpro_io_write(ATAreg_SELECT_WR, (select | ATA_SEL_LBA) & 0xff); // In v1.04, LBA was enabled in the sceAtaDmaTransfer function.
     hdpro_io_write(ATAreg_COMMAND_WR, command & 0xff);
 
     return 0;
@@ -661,7 +661,7 @@ int ata_reset_devices(void)
 }
 
 /* Export 11 */
-int ata_device_sce_sec_unlock(int device, void *password)
+int sceAtaSecurityUnLock(int device, void *password)
 { // Device can always be unlocked.
     (void)device;
     (void)password;
@@ -708,7 +708,7 @@ static void ata_device_probe(ata_devinfo_t *devinfo)
 }
 
 /* Export 17 */
-int ata_device_flush_cache(int device)
+int sceAtaFlushCache(int device)
 {
     int res;
 
@@ -924,7 +924,7 @@ finish:
 }
 
 /* Export 9 */
-int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir)
+int sceAtaDmaTransfer(int device, void *buf, u32 lba, u32 nsectors, int dir)
 {
     int res = 0;
     u16 sector, lcyl, hcyl, select, command, len;
@@ -973,7 +973,7 @@ int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir)
 }
 
 /* Export 4 */
-ata_devinfo_t *ata_get_devinfo(int device)
+ata_devinfo_t *sceAtaInit(int device)
 {
     if (!ata_devinfo_init) {
         ata_devinfo_init = 1;
