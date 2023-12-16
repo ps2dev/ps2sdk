@@ -323,8 +323,8 @@ int _start(int argc, char *argv[])
         }
     }
 
-    ata_get_devinfo(0);
-    ata_get_devinfo(1);
+    sceAtaInit(0);
+    sceAtaInit(1);
 #endif
 
     if (RegisterLibraryEntries(&_exp_atad) != 0) {
@@ -554,7 +554,7 @@ int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, 
     ata_hwport->r_sector  = sector & 0xff;
     ata_hwport->r_lcyl    = lcyl & 0xff;
     ata_hwport->r_hcyl    = hcyl & 0xff;
-    ata_hwport->r_select  = (select | ATA_SEL_LBA) & 0xff; // In v1.04, LBA was enabled in the ata_device_sector_io function.
+    ata_hwport->r_select  = (select | ATA_SEL_LBA) & 0xff; // In v1.04, LBA was enabled in the sceAtaDmaTransfer function.
     ata_hwport->r_command = command & 0xff;
 
     /* Turn on the LED.  */
@@ -766,7 +766,7 @@ int ata_reset_devices(void)
 }
 
 /* Export 17 */
-int ata_device_flush_cache(int device)
+int sceAtaFlushCache(int device)
 {
     int res;
 
@@ -777,7 +777,7 @@ int ata_device_flush_cache(int device)
 }
 
 /* Export 13 */
-int ata_device_idle(int device, int period)
+int sceAtaIdle(int device, int period)
 {
     int res;
 
@@ -808,7 +808,7 @@ static int ata_device_pkt_identify(int device, void *info)
 }
 
 /* Export 14 */
-int ata_device_sce_identify_drive(int device, void *data)
+int sceAtaGetSceId(int device, void *data)
 {
     int res;
 
@@ -829,7 +829,7 @@ static int ata_device_smart_enable(int device)
 }
 
 /* Export 16 */
-int ata_device_smart_save_attr(int device)
+int sceAtaSmartSaveAttr(int device)
 {
     int res;
 
@@ -840,7 +840,7 @@ int ata_device_smart_save_attr(int device)
 }
 
 /* Export 15 */
-int ata_device_smart_get_status(int device)
+int sceAtaSmartReturnStatus(int device)
 {
     USE_ATA_REGS;
     int res;
@@ -894,7 +894,7 @@ static int ata_device_set_transfer_mode(int device, int type, int mode)
 
 /* Export 9 */
 /* Note: this can only support DMA modes, due to the commands issued. */
-int ata_device_sector_io(int device, void *buf, u32 lba, u32 nsectors, int dir)
+int sceAtaDmaTransfer(int device, void *buf, u32 lba, u32 nsectors, int dir)
 {
     return ata_device_sector_io64(device, buf, (u64)lba, nsectors, dir);
 }
@@ -994,7 +994,7 @@ int ata_device_sce_sec_set_password(int device, void *password)
 }
 
 /* Export 11 */
-int ata_device_sce_sec_unlock(int device, void *password)
+int sceAtaSecurityUnLock(int device, void *password)
 {
     ata_devinfo_t *devinfo = atad_devinfo;
     u16 *param             = ata_param;
@@ -1160,7 +1160,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
         ata_device_set_transfer_mode(i, ATA_XFER_MODE_UDMA, udmaMode);
         ata_device_smart_enable(i);
         /* Set standby timer to 21min 15s.  */
-        ata_device_idle(i, 0xff);
+        sceAtaIdle(i, 0xff);
 
         if (devinfo[i].lba48) {
             /* If this device is emulated through the DVRP, use the non-48-bit LBA size.  */
@@ -1177,7 +1177,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 
         /* Call the proprietary identify command. */
 #ifdef ATA_SCE_AUTH_HDD
-        if (ata_device_sce_identify_drive(i, ata_param) != 0) {
+        if (sceAtaGetSceId(i, ata_param) != 0) {
             M_PRINTF("error: This is not SCE genuine HDD.\n");
             memset(&devinfo[i], 0, sizeof(devinfo[i]));
         }
@@ -1192,7 +1192,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 }
 
 /* Export 4 */
-ata_devinfo_t *ata_get_devinfo(int device)
+ata_devinfo_t *sceAtaInit(int device)
 {
     if (!ata_devinfo_init) {
         ata_devinfo_init = 1;
@@ -1299,7 +1299,7 @@ static void ata_ultra_dma_mode(int mode)
 }
 
 /* Export 18 */
-int ata_device_idle_immediate(int device)
+int sceAtaIdleImmediate(int device)
 {
     int res;
 
@@ -1353,7 +1353,7 @@ static int ata_bd_write(struct block_device *bd, u64 sector, const void *buffer,
 
 static void ata_bd_flush(struct block_device *bd)
 {
-    ata_device_flush_cache(bd->devNr);
+    sceAtaFlushCache(bd->devNr);
 }
 
 static int ata_bd_stop(struct block_device *bd)

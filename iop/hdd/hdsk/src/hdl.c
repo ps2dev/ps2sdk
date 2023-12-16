@@ -66,11 +66,11 @@ int hdlUpdateGameSliceInfo(int device, u32 main, int part, u32 OldPartStart, u32
             before the extended attribute area. */
     InfoLBA = main + (HDL_GAME_DATA_OFFSET + 4096) / 512;
 
-    if ((result = ata_device_sector_io(device, IOBuffer, InfoLBA, sizeof(hdl_game_info_t) / 512, ATA_DIR_READ)) == 0) {
+    if ((result = sceAtaDmaTransfer(device, IOBuffer, InfoLBA, sizeof(hdl_game_info_t) / 512, ATA_DIR_READ)) == 0) {
         if (((hdl_game_info_t *)IOBuffer)->magic == HDL_INFO_MAGIC) {
             DataOffset                                                 = ((hdl_game_info_t *)IOBuffer)->part_specs[part].data_start - OldPartStart;
             ((hdl_game_info_t *)IOBuffer)->part_specs[part].data_start = NewPartStart + DataOffset;
-            result                                                     = ata_device_sector_io(device, IOBuffer, InfoLBA, sizeof(hdl_game_info_t) / 512, ATA_DIR_WRITE);
+            result                                                     = sceAtaDmaTransfer(device, IOBuffer, InfoLBA, sizeof(hdl_game_info_t) / 512, ATA_DIR_WRITE);
         } else {
             result = -1;
         }
