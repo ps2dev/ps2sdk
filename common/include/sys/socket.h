@@ -11,6 +11,10 @@
 #ifndef __PS2SDK_SYS_SOCKET_H__
 #define __PS2SDK_SYS_SOCKET_H__
 
-#include <ps2ip.h>
+#ifdef _PS2IPS
+#include <ps2ips.h>
+#else
+#include <ps2ip.h> 
+#endif
 
 #endif
