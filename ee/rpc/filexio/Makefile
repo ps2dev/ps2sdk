@@ -32,7 +32,9 @@ include $(PS2SDKSRC)/ee/Rules.make
 include $(PS2SDKSRC)/ee/Rules.release
 
 $(FILEXIO_RPC_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)fileXio_rpc.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(FILEXIO_PS2SDK_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)fileXio_ps2sdk.c
+	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
