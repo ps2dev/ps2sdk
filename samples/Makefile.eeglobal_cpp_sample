@@ -44,7 +44,7 @@ EE_CXXFLAGS := -D_EE -G0 $(EE_OPTFLAGS) $(EE_WARNFLAGS) $(EE_DBGINFOFLAGS) $(EE_
 EE_LDFLAGS := -L$(PS2SDK)/ee/lib -Wl,-zmax-page-size=128 $(EE_LDFLAGS)
 
 # Assembler flags
-EE_ASFLAGS := -G0 $(EE_ASFLAGS)
+EE_ASFLAGS := -G0 -call_shared $(EE_ASFLAGS)
 
 # Default link file
 ifeq ($(EE_LINKFILE),)
