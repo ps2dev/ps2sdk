@@ -23,7 +23,7 @@
 #include "config.h"
 #endif
 
-#if defined(HAVE_TIME_H)
+#ifdef HAVE_TIME_H
 /* We need this for time_t */
 #include <time.h>
 #endif

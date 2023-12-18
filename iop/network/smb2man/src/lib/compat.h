@@ -33,7 +33,14 @@ long long int be64toh(long long int x);
 #ifdef PS2_EE_PLATFORM
 
 #include <errno.h>
-#include <ps2ip.h>
+#ifdef PS2IPS
+#include <ps2ips.h>
+#if 0
+#define close(a) disconnect(a)
+#define write(a,b,c) send(a,b,c,0)
+#define read(a,b,c) recv(a,b,c,MSG_DONTWAIT)
+#endif
+#endif
 #include <unistd.h>
 
 #define getlogin_r(a,b) ENXIO
@@ -90,6 +97,7 @@ ssize_t readv(int fd, const struct iovec *iov, int iovcnt);
 #endif /* DC_KOS_PLATFORM */
 
 #ifdef PS2_IOP_PLATFORM
+
 #ifndef PS2SDK_IOP
 #include <alloc.h>
 #endif
