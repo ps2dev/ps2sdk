@@ -22,11 +22,6 @@ TLS_HELPER_OBJS = __keysUsed.o __maxTlsValues.o __globalTlsLock.o __globalTls.o 
 
 EE_OBJS = $(OSAL_OBJS) $(TLS_HELPER_OBJS)
 
-# all:: prepareFolder $(EE_LIB)
-
-# prepareFolder:
-# 	$(MKDIR) -p obj
-
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make
 include $(PS2SDKSRC)/ee/Rules.make
