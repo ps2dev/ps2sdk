@@ -1,8 +1,10 @@
 #ifndef _FAT_DRIVER_H
-#define _FAT_DRIVER_H
+#define _FAT_DRIVER_H 1
 
+#if !defined(BUILDING_IEEE1394_DISK) && !defined(BUILDING_USBHDFSD)
 #include "scache.h"
 #include <bdm.h>
+#endif
 
 #define DIR_CHAIN_SIZE 32
 
@@ -15,6 +17,62 @@
 #define FAT_ATTR_VOLUME_LABEL 0x08
 #define FAT_ATTR_DIRECTORY    0x10
 #define FAT_ATTR_ARCHIVE      0x20
+
+#ifndef BUILDING_USBHDFSD
+typedef struct _fat_bpb
+{
+    unsigned int sectorSize;     // bytes per sector - should be 512
+    unsigned char clusterSize;   // sectors per cluster - power of two
+    unsigned int resSectors;     // reserved sectors - typically 1 (boot sector)
+    unsigned char fatCount;      // number of FATs - must be 2
+    unsigned int rootSize;       // number of rootdirectory entries - typically 512
+    unsigned int fatSize;        // sectors per FAT - varies
+    unsigned int trackSize;      // sectors per track
+    unsigned int headCount;      // number of heads
+    unsigned int sectorCount;    // number of sectors
+    unsigned int partStart;      // sector where partition starts (boot sector)
+    unsigned int rootDirStart;   // sector where root directory starts
+    unsigned int rootDirCluster; // fat32 - cluster of the root directory
+    unsigned int activeFat;      // fat32 - current active fat number
+    unsigned char fatType;       // 12-FAT16, 16-FAT16, 32-FAT32
+    unsigned char fatId[9];      // File system ID. "FAT12", "FAT16" or "FAT  " - for debug only
+    unsigned int dataStart;      // sector where data starts
+} fat_bpb;
+
+typedef struct _fat_driver
+{
+#if !defined(BUILDING_IEEE1394_DISK) && !defined(BUILDING_USBHDFSD)
+    struct block_device *bd;
+    cache_set *cache;
+#else
+    struct SBP2Device *dev;
+#endif
+    fat_bpb partBpb; // partition bios parameter block
+
+    // modified by Hermes
+#define MAX_DIR_CLUSTER 512
+    unsigned int cbuf[MAX_DIR_CLUSTER]; // cluster index buffer // 2048 by Hermes
+
+    unsigned int lastChainCluster;
+    int lastChainResult;
+
+/* enough for long filename of length 260 characters (20*13) and one short filename */
+#define MAX_DE_STACK 21
+    unsigned int deSec[MAX_DE_STACK]; // direntry sector
+    int deOfs[MAX_DE_STACK];          // direntry offset
+    int deIdx;                        // direntry index
+
+#define SEQ_MASK_SIZE 2048               // Allow 2K files per directory
+    u8 seq_mask[SEQ_MASK_SIZE / 8];      // bitmask for consumed seq numbers
+#define DIR_MASK_SIZE 2048 * 11          // Allow 2K maxed fullnames per directory
+    u8 dir_used_mask[DIR_MASK_SIZE / 8]; // bitmask for used directory entries
+
+#define MAX_CLUSTER_STACK 128
+    unsigned int clStack[MAX_CLUSTER_STACK]; // cluster allocation stack
+    int clStackIndex;
+    unsigned int clStackLast; // last free cluster of the fat table
+} fat_driver;
+#endif /* BUILDING_USBHDFSD */
 
 typedef struct _fat_dir_list
 {
@@ -46,60 +104,24 @@ typedef struct _fat_dir
     fat_dir_chain_record chain[DIR_CHAIN_SIZE]; // cluser/offset cache - for seeking purpose
 } fat_dir;
 
-typedef struct _fat_bpb
-{
-    unsigned int sectorSize;     // bytes per sector - should be 512
-    unsigned char clusterSize;   // sectors per cluster - power of two
-    unsigned int resSectors;     // reserved sectors - typically 1 (boot sector)
-    unsigned char fatCount;      // number of FATs - must be 2
-    unsigned int rootSize;       // number of rootdirectory entries - typically 512
-    unsigned int fatSize;        // sectors per FAT - varies
-    unsigned int trackSize;      // sectors per track
-    unsigned int headCount;      // number of heads
-    unsigned int sectorCount;    // number of sectors
-    unsigned int partStart;      // sector where partition starts (boot sector)
-    unsigned int rootDirStart;   // sector where root directory starts
-    unsigned int rootDirCluster; // fat32 - cluster of the root directory
-    unsigned int activeFat;      // fat32 - current active fat number
-    unsigned char fatType;       // 12-FAT16, 16-FAT16, 32-FAT32
-    unsigned char fatId[9];      // File system ID. "FAT12", "FAT16" or "FAT  " - for debug only
-    unsigned int dataStart;      // sector where data starts
-} fat_bpb;
-
-typedef struct _fat_driver
-{
-    struct block_device *bd;
-    cache_set *cache;
-    fat_bpb partBpb; // partition bios parameter block
-
-    // modified by Hermes
-#define MAX_DIR_CLUSTER 512
-    unsigned int cbuf[MAX_DIR_CLUSTER]; // cluster index buffer // 2048 by Hermes
-
-    unsigned int lastChainCluster;
-    int lastChainResult;
-
-/* enough for long filename of length 260 characters (20*13) and one short filename */
-#define MAX_DE_STACK 21
-    unsigned int deSec[MAX_DE_STACK]; // direntry sector
-    int deOfs[MAX_DE_STACK];          // direntry offset
-    int deIdx;                        // direntry index
-
-#define SEQ_MASK_SIZE 2048               // Allow 2K files per directory
-    u8 seq_mask[SEQ_MASK_SIZE / 8];      // bitmask for consumed seq numbers
-#define DIR_MASK_SIZE 2048 * 11          // Allow 2K maxed fullnames per directory
-    u8 dir_used_mask[DIR_MASK_SIZE / 8]; // bitmask for used directory entries
-
-#define MAX_CLUSTER_STACK 128
-    unsigned int clStack[MAX_CLUSTER_STACK]; // cluster allocation stack
-    int clStackIndex;
-    unsigned int clStackLast; // last free cluster of the fat table
-} fat_driver;
-
+#ifdef BUILDING_IEEE1394_DISK
+int InitFAT(void);
+#endif /* BUILDING_IEEE1394_DISK */
 int strEqual(const char *s1, const char *s2);
 
+#ifdef BUILDING_USBHDFSD
+int fat_mount(mass_dev *dev, unsigned int start, unsigned int count);
+void fat_forceUnmount(mass_dev *dev);
+#endif /* BUILDING_USBHDFSD */
+#ifdef BUILDING_IEEE1394_DISK
+int fat_mount(struct SBP2Device *dev, unsigned int start, unsigned int count);
+void fat_forceUnmount(struct SBP2Device *dev);
+#endif /* BUILDING_IEEE1394_DISK */
+#if !defined(BUILDING_IEEE1394_DISK) && !defined(BUILDING_USBHDFSD)
 int fat_mount(struct block_device *bd);
 void fat_forceUnmount(struct block_device *bd);
+#endif
+
 void fat_setFatDirChain(fat_driver *fatd, fat_dir *fatDir);
 int fat_readFile(fat_driver *fatd, fat_dir *fatDir, unsigned int filePos, unsigned char *buffer, unsigned int size);
 int fat_getFirstDirentry(fat_driver *fatd, const char *dirName, fat_dir_list *fatdlist, fat_dir *fatDir_host, fat_dir *fatDir);
@@ -108,9 +130,13 @@ int fat_getNextDirentry(fat_driver *fatd, fat_dir_list *fatdlist, fat_dir *fatDi
 fat_driver *fat_getData(int device);
 int fat_getFileStartCluster(fat_driver *fatd, const char *fname, unsigned int *startCluster, fat_dir *fatDir);
 int fat_getClusterChain(fat_driver *fatd, unsigned int cluster, unsigned int *buf, unsigned int bufSize, int startFlag);
+#ifndef BUILDING_IEEE1394_DISK
 int fat_CheckChain(fat_driver *fatd, unsigned int cluster);
+#endif /* BUILDING_USBHDFSD */
 
+#if !defined(BUILDING_IEEE1394_DISK) && !defined(BUILDING_USBHDFSD)
 int fat_stopUnit(int device);
 void fat_stopAll(void);
+#endif
 
 #endif
