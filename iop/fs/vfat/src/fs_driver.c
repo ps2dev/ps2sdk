@@ -28,12 +28,21 @@
 #include <sysmem.h>
 #endif
 
+#ifdef BUILDING_USBHDFSD
+#include <usbhdfsd.h>
+#else
 #include <usbhdfsd-common.h>
+#endif /* BUILDING_USBHDFSD */
 #include "usbhd_common.h"
 #include "fat_driver.h"
 #include "fat_write.h"
 #include "fat.h"
+#ifdef BUILDING_USBHDFSD
+#include "mass_stor.h"
+#endif /* BUILDING_USBHDFSD */
+#ifdef BUILDING_IEEE1394_DISK
 #include "sbp2_disk.h"
+#endif /* BUILDING_IEEE1394_DISK */
 
 // #define DEBUG  //comment out this line when not debugging
 
@@ -128,6 +137,9 @@ static void fillStat(iox_stat_t *stat, const fat_dir *fatdir)
 static fs_rec *fs_findFreeFileSlot(void)
 {
     int i;
+
+    M_DEBUG("%s\n", __func__);
+
     for (i = 0; i < MAX_FILES; i++) {
         if (fsRec[i].dirent.file_flag < 0) {
             return &fsRec[i];
@@ -140,6 +152,8 @@ static fs_rec *fs_findFreeFileSlot(void)
 static fs_rec *fs_findFileSlotByCluster(unsigned int startCluster)
 {
     int i;
+
+    M_DEBUG("%s\n", __func__);
 
     for (i = 0; i < MAX_FILES; i++) {
         if (fsRec[i].dirent.file_flag >= 0 && fsRec[i].dirent.fatdir.startCluster == startCluster) {
@@ -155,6 +169,8 @@ static int _lock_sema_id = -1;
 //---------------------------------------------------------------------------
 static int _fs_init_lock(void)
 {
+    M_DEBUG("%s\n", __func__);
+
 #ifndef WIN32
     iop_sema_t sp;
 
@@ -173,6 +189,8 @@ static int _fs_init_lock(void)
 //---------------------------------------------------------------------------
 static void _fs_lock(void)
 {
+    M_DEBUG("%s\n", __func__);
+
 #ifndef WIN32
     WaitSema(_lock_sema_id);
 #endif
@@ -181,6 +199,8 @@ static void _fs_lock(void)
 //---------------------------------------------------------------------------
 static void _fs_unlock(void)
 {
+    M_DEBUG("%s\n", __func__);
+
 #ifndef WIN32
     SignalSema(_lock_sema_id);
 #endif
@@ -190,6 +210,9 @@ static void _fs_unlock(void)
 static void fs_reset(void)
 {
     int i;
+
+    M_DEBUG("%s\n", __func__);
+
     for (i = 0; i < MAX_FILES; i++) {
         fsRec[i].dirent.file_flag = -1;
     }
@@ -207,6 +230,8 @@ static int fs_inited = 0;
 //---------------------------------------------------------------------------
 static int fs_dummy(void)
 {
+    M_DEBUG("%s\n", __func__);
+
     return -5;
 }
 
@@ -214,6 +239,8 @@ static int fs_dummy(void)
 static int fs_init(iop_device_t *driver)
 {
     (void)driver;
+
+    M_DEBUG("%s\n", __func__);
 
     if (!fs_inited) {
         fs_reset();
@@ -232,6 +259,8 @@ static int fs_open(iop_file_t *fd, const char *name, int flags, int mode)
     unsigned int cluster;
 
     (void)mode;
+
+    M_DEBUG("%s: %s flags=%X mode=%X\n", __func__, name, flags, mode);
 
     _fs_lock();
 
@@ -286,13 +315,20 @@ static int fs_open(iop_file_t *fd, const char *name, int flags, int mode)
         rec->sfnOffset = 0;
         ret            = fat_createFile(fatd, name, 0, escapeNotExist, &cluster, &rec->sfnSector, &rec->sfnOffset);
         if (ret < 0) {
+            FLUSH_SECTORS(fatd);
             _fs_unlock();
             return ret;
         }
         // the file already exist but flags is set to truncate
-        if (ret == 2 && (flags & O_TRUNC)) {
+        if (ret == EEXIST && (flags & O_TRUNC)) {
             XPRINTF("FAT I: O_TRUNC detected!\n");
-            fat_truncateFile(fatd, cluster, rec->sfnSector, rec->sfnOffset);
+            ret = fat_truncateFile(fatd, cluster, rec->sfnSector, rec->sfnOffset);
+            if (ret < 0) {
+                FLUSH_SECTORS(fatd);
+                XPRINTF("FAT E: failed to truncate!\n");
+                _fs_unlock();
+                return ret;
+            }
         }
 
         // find the file
@@ -335,6 +371,8 @@ static int fs_close(iop_file_t *fd)
     fat_driver *fatd;
     fs_rec *rec = (fs_rec *)fd->privdata;
 
+    M_DEBUG("%s\n", __func__);
+
     if (rec == NULL)
         return -EBADF;
 
@@ -372,6 +410,8 @@ static int fs_lseek(iop_file_t *fd, int offset, int whence)
 {
     fat_driver *fatd;
     fs_rec *rec = (fs_rec *)fd->privdata;
+
+    M_DEBUG("%s\n", __func__);
 
     if (rec == NULL)
         return -EBADF;
@@ -422,6 +462,8 @@ static int fs_write(iop_file_t *fd, void *buffer, int size)
     int result;
     int updateClusterIndices = 0;
 
+    M_DEBUG("%s\n", __func__);
+
     if (rec == NULL)
         return -EBADF;
 
@@ -448,7 +490,7 @@ static int fs_write(iop_file_t *fd, void *buffer, int size)
         return 0;
     }
 
-    result = fat_writeFile(fatd, &rec->dirent.fatdir, &updateClusterIndices, rec->filePos, buffer, size);
+    result = fat_writeFile(fatd, &rec->dirent.fatdir, &updateClusterIndices, rec->filePos, (unsigned char *)buffer, size);
     if (result > 0) { // write succesful
         rec->filePos += result;
         if (rec->filePos > rec->dirent.fatdir.size) {
@@ -471,6 +513,8 @@ static int fs_read(iop_file_t *fd, void *buffer, int size)
     fat_driver *fatd;
     fs_rec *rec = (fs_rec *)fd->privdata;
     int result;
+
+    M_DEBUG("%s\n", __func__);
 
     if (rec == NULL)
         return -EBADF;
@@ -502,7 +546,7 @@ static int fs_read(iop_file_t *fd, void *buffer, int size)
         size = rec->dirent.fatdir.size - rec->filePos;
     }
 
-    result = fat_readFile(fatd, &rec->dirent.fatdir, rec->filePos, buffer, size);
+    result = fat_readFile(fatd, &rec->dirent.fatdir, rec->filePos, (unsigned char *)buffer, size);
     if (result > 0) { // read succesful
         rec->filePos += result;
     }
@@ -519,6 +563,8 @@ static int fs_remove(iop_file_t *fd, const char *name)
     int result;
     unsigned int cluster;
     fat_dir fatdir;
+
+    M_DEBUG("%s\n", __func__);
 
     _fs_lock();
 
@@ -562,6 +608,8 @@ static int fs_mkdir(iop_file_t *fd, const char *name, int mode)
     unsigned int sfnSector;
     unsigned int cluster;
 
+    M_DEBUG("%s\n", __func__);
+
     (void)mode;
 
     _fs_lock();
@@ -591,6 +639,8 @@ static int fs_rmdir(iop_file_t *fd, const char *name)
     fat_driver *fatd;
     int ret;
 
+    M_DEBUG("%s\n", __func__);
+
     _fs_lock();
 
     fatd = fat_getData(fd->unit);
@@ -611,6 +661,8 @@ static int fs_dopen(iop_file_t *fd, const char *name)
     fat_driver *fatd;
     int is_root = 0;
     fs_dir *rec;
+
+    M_DEBUG("%s: unit %d name %s\n", __func__, fd->unit, name);
 
     _fs_lock();
 
@@ -649,6 +701,8 @@ static int fs_dclose(iop_file_t *fd)
 {
     fs_dir *rec = (fs_dir *)fd->privdata;
 
+    M_DEBUG("%s\n", __func__);
+
     if (fd->privdata == NULL)
         return -EBADF;
 
@@ -671,6 +725,8 @@ static int fs_dread(iop_file_t *fd, iox_dirent_t *buffer)
     fat_driver *fatd;
     int ret;
     fs_dir *rec = (fs_dir *)fd->privdata;
+
+    M_DEBUG("%s\n", __func__);
 
     if (rec == NULL)
         return -EBADF;
@@ -715,6 +771,8 @@ static int fs_getstat(iop_file_t *fd, const char *name, iox_stat_t *stat)
     unsigned int cluster = 0;
     fat_dir fatdir;
 
+    M_DEBUG("%s: unit %d name %s\n", __func__, fd->unit, name);
+
     _fs_lock();
 
     XPRINTF("fs_getstat called: unit %d name %s\n", fd->unit, name);
@@ -746,6 +804,8 @@ int fs_ioctl(iop_file_t *fd, int cmd, void *data)
     struct fs_dirent *dirent = (struct fs_dirent *)fd->privdata; // Remember to re-cast this to the right structure (either fs_rec or fs_dir)!
     int ret;
 
+    M_DEBUG("%s\n", __func__);
+
     if (dirent == NULL)
         return -EBADF;
 
@@ -762,6 +822,22 @@ int fs_ioctl(iop_file_t *fd, int cmd, void *data)
             ret = fat_renameFile(fatd, &dirent->fatdir, data); // No need to re-cast since this inner structure is a common one.
             FLUSH_SECTORS(fatd);
             break;
+#ifdef BUILDING_USBHDFSD
+        case USBMASS_IOCTL_GET_CLUSTER:
+            ret = ((fs_rec *)fd->privdata)->dirent.fatdir.startCluster;
+            break;
+        case USBMASS_IOCTL_GET_LBA:
+            ret = fat_cluster2sector(&fatd->partBpb, ((fs_rec *)fd->privdata)->dirent.fatdir.startCluster);
+            break;
+        case USBMASS_IOCTL_CHECK_CHAIN:
+            ret = fat_CheckChain(fatd, ((fs_rec *)fd->privdata)->dirent.fatdir.startCluster);
+            break;
+#endif /* BUILDING_USBHDFSD */
+#if !defined(BUILDING_IEEE1394_DISK) && !defined(BUILDING_USBHDFSD)
+        case USBMASS_IOCTL_GET_DRIVERNAME:
+            ret = *(int *)fatd->bd->name;
+            break;
+#endif
         default:
             ret = fs_dummy();
     }
@@ -813,6 +889,118 @@ int fs_rename(iop_file_t *fd, const char *path, const char *newpath)
     return ret;
 }
 
+#ifndef BUILDING_IEEE1394_DISK
+static int fs_devctl(iop_file_t *fd, const char *name, int cmd, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
+{
+#ifdef BUILDING_USBHDFSD
+    fat_driver *fatd;
+#endif
+    int ret;
+
+    (void)name;
+    (void)arg;
+    (void)arglen;
+    (void)buf;
+    (void)buflen;
+
+    _fs_lock();
+
+    switch (cmd) {
+        case USBMASS_DEVCTL_STOP_UNIT:
+#ifdef BUILDING_USBHDFSD
+            fatd = fat_getData(fd->unit);
+            ret  = (fatd != NULL) ? mass_stor_stop_unit(fatd->dev) : -ENODEV;
+#else
+            ret = fat_stopUnit(fd->unit);
+#endif
+            break;
+        case USBMASS_DEVCTL_STOP_ALL:
+#ifdef BUILDING_USBHDFSD
+            mass_store_stop_all();
+#else
+            fat_stopAll();
+#endif
+            ret = 0;
+            break;
+        default:
+            ret = -ENXIO;
+    }
+
+    _fs_unlock();
+
+    return ret;
+}
+#endif /* BUILDING_USBHDFSD */
+
+#if !defined(BUILDING_IEEE1394_DISK) && !defined(BUILDING_USBHDFSD)
+static int fs_ioctl2(iop_file_t *fd, int cmd, void *data, unsigned int datalen, void *rdata, unsigned int rdatalen)
+{
+    fat_driver *fatd;
+    int ret;
+
+    if (fd == NULL)
+        return -ENXIO;
+    
+    struct fs_dirent *dirent = (struct fs_dirent *)fd->privdata; // Remember to re-cast this to the right structure (either fs_rec or fs_dir)!
+
+    M_DEBUG("%s\n", __func__);
+
+    if (dirent == NULL)
+        return -EBADF;
+
+    _fs_lock();
+
+    fatd = fat_getData(fd->unit);
+    if (fatd == NULL) {
+        _fs_unlock();
+        return -ENODEV;
+    }
+
+    switch (cmd) {
+        case USBMASS_IOCTL_GET_LBA:
+        {
+            // Check for a return buffer and copy the 64bit LBA. If no buffer is provided return an error.
+            if (rdata == NULL || rdatalen < sizeof(u64))
+            {
+                ret = -EINVAL;
+                break;
+            }
+
+            // Get the block device backing the file so we can get the starting LBA of the file system.
+            struct block_device* bd = fatd->cache->bd;
+
+            *(u64*)rdata = (u64)fat_cluster2sector(&fatd->partBpb, ((fs_rec *)fd->privdata)->dirent.fatdir.startCluster) + bd->sectorOffset;
+            ret = 0;
+            break;
+        }
+        case USBMASS_IOCTL_GET_DEVICE_NUMBER:
+        {
+            // Check for a return buffer and copy the device number. If no buffer is provided return an error.
+            if (rdata == NULL || rdatalen < sizeof(u32))
+            {
+                ret = -EINVAL;
+                break;
+            }
+
+            struct block_device* bd = fatd->cache->bd;
+            if (bd == NULL)
+                ret = -ENXIO;
+            else
+            {
+                *(u32*)rdata = bd->devNr;
+                ret = 0;
+            }
+            break;
+        }
+        default:
+            ret = fs_dummy();
+    }
+
+    _fs_unlock();
+    return ret;
+}
+#endif
+
 #ifndef WIN32
 static iop_device_ops_t fs_functarray = {
     &fs_init,
@@ -838,22 +1026,44 @@ static iop_device_ops_t fs_functarray = {
     (void *)&fs_dummy,
     (void *)&fs_dummy,
     (void *)&fs_dummy,
+#ifndef BUILDING_IEEE1394_DISK
+    &fs_devctl,
+#else
+    (void *)&fs_dummy,
+#endif /* BUILDING_IEEE1394_DISK */
     (void *)&fs_dummy,
     (void *)&fs_dummy,
+#if !defined(BUILDING_IEEE1394_DISK) && !defined(BUILDING_USBHDFSD)
+    &fs_ioctl2,
+#else
     (void *)&fs_dummy,
-    (void *)&fs_dummy,
+#endif /* BUILDING_IEEE1394_DISK */
 };
 static iop_device_t fs_driver = {
+#ifdef BUILDING_IEEE1394_DISK
     "sd",
+#else
+    "mass",
+#endif /* BUILDING_IEEE1394_DISK */
     IOP_DT_FS | IOP_DT_FSEXT,
     2,
+#ifdef BUILDING_USBHDFSD
+    "USB mass storage driver",
+#endif /* BUILDING_USBHDFSD */
+#ifdef BUILDING_IEEE1394_DISK
     "IEEE1394_disk",
+#endif /* BUILDING_IEEE1394_DISK */
+#if !defined(BUILDING_IEEE1394_DISK) && !defined(BUILDING_USBHDFSD)
+    "VFAT driver",
+#endif
     &fs_functarray,
 };
 
 /* init file system driver */
 int InitFS(void)
 {
+    M_DEBUG("%s\n", __func__);
+
     DelDrv(fs_driver.name);
     return (AddDrv(&fs_driver) == 0 ? 0 : -1);
 }

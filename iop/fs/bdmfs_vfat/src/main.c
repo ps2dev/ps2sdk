@@ -8,7 +8,7 @@
 #include "fat_driver.h"
 
 // #define DEBUG  //comment out this line when not debugging
-#include "module_debug.h"
+#include "mass_debug.h"
 
 #define MAJOR_VER 1
 #define MINOR_VER 1
