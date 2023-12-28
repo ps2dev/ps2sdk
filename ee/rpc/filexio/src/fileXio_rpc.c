@@ -108,6 +108,27 @@ static inline int _unlock(void)
 }
 
 #ifdef F_fileXioInit
+/* Symbols to help fileXio override weak methods for fileXio_ps2sdk */
+/* More info here: https://stackoverflow.com/a/22178564 */
+static void forceStrongMethods() {
+	__ps2sdk_fileXio_close = 1;
+	__ps2sdk_fileXio_open = 1;
+	__ps2sdk_fileXio_read = 1;
+	__ps2sdk_fileXio_lseek = 1;
+	__ps2sdk_fileXio_lseek64 = 1;
+	__ps2sdk_fileXio_write = 1;
+	__ps2sdk_fileXio_ioctl = 1;
+	__ps2sdk_fileXio_remove = 1;
+	__ps2sdk_fileXio_rename = 1;
+	__ps2sdk_fileXio_mkdir = 1;
+	__ps2sdk_fileXio_rmdir = 1;
+	__ps2sdk_fileXio_stat = 1;
+	__ps2sdk_fileXio_readlink = 1;
+	__ps2sdk_fileXio_symlink = 1;
+	__ps2sdk_fileXio_dopen = 1;
+	__ps2sdk_fileXio_dread = 1;
+	__ps2sdk_fileXio_dclose = 1;
+}
 int fileXioInit(void)
 {
 	int res;
@@ -125,6 +146,8 @@ int fileXioInit(void)
 	{
 		return 0;
 	}
+
+	forceStrongMethods();
 
 	sp.init_count = 1;
 	sp.max_count = 1;
@@ -332,8 +355,6 @@ int fileXioMkdir(const char* pathname, int mode)
 	int rv;
 	struct fxio_mkdir_packet *packet=(struct fxio_mkdir_packet*)__sbuff;
 
-	__ps2sdk_fileXio_mkdir = 1;
-
 	if(fileXioInit() < 0)
 		return -ENOPKG;
 
@@ -362,8 +383,6 @@ int fileXioRmdir(const char* pathname)
 	int rv;
 	struct fxio_pathsel_packet *packet=(struct fxio_pathsel_packet*)__sbuff;
 
-	__ps2sdk_fileXio_rmdir = 1;
-
 	if(fileXioInit() < 0)
 		return -ENOPKG;
 
@@ -391,8 +410,6 @@ int fileXioRemove(const char* pathname)
 	int rv;
 	struct fxio_pathsel_packet *packet=(struct fxio_pathsel_packet*)__sbuff;
 
-	__ps2sdk_fileXio_remove = 1;
-
 	if(fileXioInit() < 0)
 		return -ENOPKG;
 
@@ -419,8 +436,6 @@ int fileXioRename(const char* source, const char* dest)
 {
 	int rv;
 	struct fxio_rename_packet *packet=(struct fxio_rename_packet*)__sbuff;
-
-	__ps2sdk_fileXio_rename = 1;
 
 	if(fileXioInit() < 0)
 		return -ENOPKG;
@@ -450,8 +465,6 @@ int fileXioSymlink(const char* source, const char* dest)
 	int rv;
 	struct fxio_rename_packet *packet=(struct fxio_rename_packet*)__sbuff;
 
-	__ps2sdk_fileXio_symlink = 1;
-
 	if(fileXioInit() < 0)
 		return -ENOPKG;
 
@@ -479,8 +492,6 @@ int fileXioReadlink(const char* source, char* buf, unsigned int buflen)
 {
 	int rv;
 	struct fxio_readlink_packet *packet=(struct fxio_readlink_packet*)__sbuff;
-
-	__ps2sdk_fileXio_readlink = 1;
 
 	if(fileXioInit() < 0)
 		return -ENOPKG;
@@ -546,8 +557,6 @@ int fileXioOpen(const char* source, int flags, ...)
 	mode = va_arg(alist, int);	//Retrieve the mode argument, regardless of whether it is expected or not.
 	va_end(alist);
 
-	__ps2sdk_fileXio_open = 1;
-
 	if(fileXioInit() < 0)
 		return -ENOPKG;
 
@@ -575,8 +584,6 @@ int fileXioClose(int fd)
 {
 	int rv;
 	struct fxio_close_packet *packet=(struct fxio_close_packet*)__sbuff;
-
-	__ps2sdk_fileXio_close = 1;
 
 	if(fileXioInit() < 0)
 		return -ENOPKG;
@@ -615,8 +622,6 @@ int fileXioRead(int fd, void *buf, int size)
 	int rv;
 	struct fxio_read_packet *packet=(struct fxio_read_packet*)__sbuff;
 
-	__ps2sdk_fileXio_read = 1;
-
 	if(fileXioInit() < 0)
 		return -ENOPKG;
 
@@ -650,8 +655,6 @@ int fileXioWrite(int fd, const void *buf, int size)
 	unsigned int miss;
 	int rv;
 	struct fxio_write_packet *packet=(struct fxio_write_packet*)__sbuff;
-
-	__ps2sdk_fileXio_write = 1;
 
 	if(fileXioInit() < 0)
 		return -ENOPKG;
@@ -696,8 +699,6 @@ int fileXioLseek(int fd, int offset, int whence)
 	int rv;
 	struct fxio_lseek_packet *packet=(struct fxio_lseek_packet*)__sbuff;
 
-	__ps2sdk_fileXio_lseek = 1;
-
 	if(fileXioInit() < 0)
 		return -ENOPKG;
 
@@ -730,8 +731,6 @@ s64 fileXioLseek64(int fd, s64 offset, int whence)
 	s64 rv;
 	struct fxio_lseek64_packet *packet=(struct fxio_lseek64_packet*)__sbuff;
 	struct fxio_lseek64_return_pkt *ret_packet=(struct fxio_lseek64_return_pkt*)__sbuff;
-
-	__ps2sdk_fileXio_lseek64 = 1;
 
 	if(fileXioInit() < 0)
 		return -ENOPKG;
@@ -799,8 +798,6 @@ int fileXioGetStat(const char *name, iox_stat_t *stat)
 {
 	int rv;
 	struct fxio_getstat_packet *packet=(struct fxio_getstat_packet*)__sbuff;
-
-	__ps2sdk_fileXio_stat = 1;
 
 	if(fileXioInit() < 0)
 		return -ENOPKG;
@@ -894,8 +891,6 @@ int fileXioDopen(const char *name)
 	int rv;
 	struct fxio_pathsel_packet *packet=(struct fxio_pathsel_packet*)__sbuff;
 
-	__ps2sdk_fileXio_dopen = 1;
-
 	if(fileXioInit() < 0)
 		return -ENOPKG;
 
@@ -922,8 +917,6 @@ int fileXioDclose(int fd)
 	int rv;
 	struct fxio_close_packet *packet=(struct fxio_close_packet*)__sbuff;
 
-	__ps2sdk_fileXio_dclose = 1;
-
 	if(fileXioInit() < 0)
 		return -ENOPKG;
 
@@ -949,8 +942,6 @@ int fileXioDread(int fd, iox_dirent_t *dirent)
 {
 	int rv;
 	struct fxio_dread_packet *packet=(struct fxio_dread_packet*)__sbuff;
-
-	__ps2sdk_fileXio_dread = 1;
 
 	if(fileXioInit() < 0)
 		return -ENOPKG;
@@ -1034,8 +1025,6 @@ int fileXioDevctl(const char *name, int cmd, void *arg, unsigned int arglen, voi
 int fileXioIoctl(int fd, int cmd, void *arg){
 	struct fxio_ioctl_packet *packet = (struct fxio_ioctl_packet *)__sbuff;
 	int rv;
-
-	__ps2sdk_fileXio_ioctl = 1;
 
 	if(fileXioInit() < 0)
 		return -ENOPKG;
