@@ -59,9 +59,6 @@ static int init_fileXio_driver() {
     return __fileXio_init_status;
 }
 
-void _libcglue_timezone_update() {}
-void _libcglue_rtc_update() {}
-
 int main(int argc, char *argv[])
 {
     reset_IOP();

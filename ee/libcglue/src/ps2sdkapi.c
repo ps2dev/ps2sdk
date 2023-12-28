@@ -92,6 +92,11 @@ int (*_ps2sdk_dclose)(int fd) = NULL;
 #endif
 
 /** Setting default weak fio functions */
+#ifdef F__ps2sdk_io_ready
+__attribute__((weak))
+uint8_t _ps2sdk_io_ready = 1;
+#endif
+
 #ifdef F__set_ps2sdk_close
 __attribute__((weak))
 void _set_ps2sdk_close() {

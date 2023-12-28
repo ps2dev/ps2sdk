@@ -49,6 +49,10 @@ extern uint8_t __ps2sdk_fileXio_symlink;
 extern uint8_t __ps2sdk_fileXio_dopen;
 extern uint8_t __ps2sdk_fileXio_dread;
 extern uint8_t __ps2sdk_fileXio_dclose;
+extern uint8_t __ps2sdk_fileXio_ready;
+extern uint8_t _ps2sdk_io_ready;
+
+extern void _libcglue_timezone_update();
 
 #ifdef F___cd0
 SifRpcClientData_t __cd0;
@@ -128,6 +132,11 @@ static void forceStrongMethods() {
 	__ps2sdk_fileXio_dopen = 1;
 	__ps2sdk_fileXio_dread = 1;
 	__ps2sdk_fileXio_dclose = 1;
+	__ps2sdk_fileXio_ready = 1;
+	_ps2sdk_io_ready = 1;
+
+	// Previously it wasn't executed becasue _ps2sdk_io_ready was 0
+	_libcglue_timezone_update();
 }
 int fileXioInit(void)
 {
@@ -146,8 +155,6 @@ int fileXioInit(void)
 	{
 		return 0;
 	}
-
-	forceStrongMethods();
 
 	sp.init_count = 1;
 	sp.max_count = 1;
@@ -169,6 +176,8 @@ int fileXioInit(void)
 
 	__fileXioInited = 1;
 	__fileXioBlockMode = FXIO_WAIT;
+
+	forceStrongMethods();
 
 	return 0;
 }

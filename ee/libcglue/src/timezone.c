@@ -21,6 +21,8 @@
 #define OSD_CONFIG_NO_LIBCDVD
 #include "osd_config.h"
 
+extern uint8_t _ps2sdk_io_ready;
+
 static inline void setPS2SDKFunctions() {
 	// Set ps2sdk functions
 	_glue_ps2sdk_open();
@@ -33,6 +35,8 @@ __attribute__((weak))
 void _libcglue_timezone_update()
 {
     /* Initialize timezone from PS2 OSD configuration */
+	if (!_ps2sdk_io_ready) return;
+	
     setPS2SDKFunctions();
 
 	_io_driver driver = { _ps2sdk_open, _ps2sdk_close, _ps2sdk_read };

@@ -27,7 +27,7 @@ PS2SDKAPI_OBJS = \
 	__fioOpenHelper.o __fioLseek64Helper.o __fioRenameHelper.o __fioMkdirHelper.o __fioGetstatHelper.o __fioReadlinkHelper.o __fioSymlinkHelper.o __fioDreadHelper.o \
 	_ps2sdk_close.o _ps2sdk_open.o _ps2sdk_read.o _ps2sdk_lseek.o _ps2sdk_lseek64.o _ps2sdk_write.o _ps2sdk_ioctl.o \
 	_ps2sdk_remove.o _ps2sdk_rename.o _ps2sdk_mkdir.o _ps2sdk_rmdir.o _ps2sdk_stat.o _ps2sdk_readlink.o _ps2sdk_symlink.o \
-	_ps2sdk_dopen.o _ps2sdk_dread.o _ps2sdk_dclose.o \
+	_ps2sdk_dopen.o _ps2sdk_dread.o _ps2sdk_dclose.o _ps2sdk_io_ready.o \
 	_set_ps2sdk_close.o _set_ps2sdk_open.o _set_ps2sdk_read.o _set_ps2sdk_lseek.o _set_ps2sdk_lseek64.o _set_ps2sdk_write.o _set_ps2sdk_ioctl.o \
 	_set_ps2sdk_remove.o _set_ps2sdk_rename.o _set_ps2sdk_mkdir.o _set_ps2sdk_rmdir.o _set_ps2sdk_stat.o _set_ps2sdk_readlink.o _set_ps2sdk_symlink.o \
 	_set_ps2sdk_dopen.o _set_ps2sdk_dread.o _set_ps2sdk_dclose.o \

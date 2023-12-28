@@ -23,6 +23,11 @@
 #include "iox_stat.h"
 
 /** Setting fileXio functions */
+#ifdef F__ps2sdk_io_ready
+uint8_t __ps2sdk_fileXio_ready = 0;
+uint8_t _ps2sdk_io_ready = 0;
+#endif
+
 #ifdef F__set_ps2sdk_close
 uint8_t __ps2sdk_fileXio_close = 0;
 void _set_ps2sdk_close() {
