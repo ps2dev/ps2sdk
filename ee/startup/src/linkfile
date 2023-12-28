@@ -97,6 +97,10 @@ SECTIONS {
 	_end = . ;
 	PROVIDE(end = .);
 
+	.spad 0x70000000: {
+		*(.spad)
+	}
+
 	/* Symbols needed by crt0.s.  */
 	PROVIDE(_heap_size = -1);
 	PROVIDE(_stack = -1);
