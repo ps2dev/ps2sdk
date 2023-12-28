@@ -142,12 +142,6 @@ int _open(const char *buf, int flags, ...) {
 		return -1;
 	}
 
-	// Set ps2sdk functions
-	_glue_ps2sdk_dopen();
-	_glue_ps2sdk_open();
-	_glue_ps2sdk_dclose();
-	_glue_ps2sdk_close();
-
 	// newlib frags differ from iop flags
 	if ((flags & 3) == O_RDONLY) iop_flags |= IOP_O_RDONLY;
 	if ((flags & 3) == O_WRONLY) iop_flags |= IOP_O_WRONLY;
@@ -194,9 +188,6 @@ int _close(int fd) {
 		return -1;
 	}
 
-	// Set ps2sdk functions
-	_glue_ps2sdk_close();
-
 	switch(__descriptormap[fd]->type)
 	{
 		case __DESCRIPTOR_TYPE_FILE:
@@ -236,9 +227,6 @@ int _read(int fd, void *buf, size_t nbytes) {
 		return -1;
 	}
 
-	// Set ps2sdk functions
-	_glue_ps2sdk_read();
-
 	switch(__descriptormap[fd]->type)
 	{
 		case __DESCRIPTOR_TYPE_FILE:
@@ -264,9 +252,6 @@ int _write(int fd, const void *buf, size_t nbytes) {
 		errno = EBADF;
 		return -1;
 	}
-
-	// Set ps2sdk functions
-	_glue_ps2sdk_write();
 
 	switch(__descriptormap[fd]->type)
 	{
@@ -295,9 +280,6 @@ int _stat(const char *path, struct stat *buf) {
 		errno = ENAMETOOLONG;
 		return -1;
 	}
-
-	// Set ps2sdk functions
-	_glue_ps2sdk_stat();
 
 	return __transform_errno(_ps2sdk_stat(dest, buf));
 }
@@ -426,9 +408,6 @@ int getdents(int fd, void *dd_buf, int count)
 	read = 0;
 	dirp = (struct dirent *)dd_buf;
 
-	// Set ps2sdk functions
-	_glue_ps2sdk_dread();
-
 	rv = _ps2sdk_dread(__descriptormap[fd]->descriptor, dirp);
 	if (rv < 0) {
 		return __transform_errno(rv);
@@ -457,11 +436,6 @@ static off_t _lseekDir(int fd, off_t offset, int whence)
 		return -1;
 	}
 
-	// Set ps2sdk functions
-	_glue_ps2sdk_close();
-	_glue_ps2sdk_dopen();
-	_glue_ps2sdk_dread();
-
 	_ps2sdk_dclose(__descriptormap[fd]->descriptor);
 	uid = _ps2sdk_dopen(__descriptormap[fd]->filename);
 	__descriptormap[fd]->descriptor = uid;
@@ -478,9 +452,6 @@ off_t _lseek(int fd, off_t offset, int whence)
 		errno = EBADF;
 		return -1;
 	}
-
-	// Set ps2sdk functions
-	_glue_ps2sdk_lseek();
 
 	switch(__descriptormap[fd]->type)
 	{
@@ -510,9 +481,6 @@ off64_t lseek64(int fd, off64_t offset, int whence)
 		errno = EBADF;
 		return -1;
 	}
-
-	// Set ps2sdk functions
-	_glue_ps2sdk_lseek64();
 
 	switch(__descriptormap[fd]->type)
 	{
@@ -557,9 +525,6 @@ int mkdir(const char *path, mode_t mode) {
 		return -1;
 	}
 
-	// Set ps2sdk functions
-	_glue_ps2sdk_mkdir();
-
 	return __transform_errno(_ps2sdk_mkdir(dest, mode));
 }
 #endif
@@ -572,9 +537,6 @@ int rmdir(const char *path) {
 		errno = ENAMETOOLONG;
 		return -1;
 	}
-
-	// Set ps2sdk functions
-	_glue_ps2sdk_rmdir();
 
 	return __transform_errno(_ps2sdk_rmdir(dest));
 }
@@ -595,9 +557,6 @@ int _unlink(const char *path) {
 		return -1;
 	}
 
-	// Set ps2sdk functions
-	_glue_ps2sdk_remove();
-
 	return __transform_errno(_ps2sdk_remove(dest));
 }
 #endif
@@ -616,9 +575,6 @@ int _rename(const char *old, const char *new) {
 		errno = ENAMETOOLONG;
 		return -1;
 	}
-
-	// Set ps2sdk functions
-	_glue_ps2sdk_rename();
 
 	return __transform_errno(_ps2sdk_rename(oldname, newname));
 }
@@ -828,9 +784,6 @@ int symlink(const char *target, const char *linkpath)
 		return -1;
 	}
 
-	// Set ps2sdk functions
-	_glue_ps2sdk_symlink();
-
 	return __transform_errno(_ps2sdk_symlink(dest_target, dest_linkpath));
 }
 #endif
@@ -844,9 +797,6 @@ ssize_t readlink(const char *path, char *buf, size_t bufsiz)
 		errno = ENAMETOOLONG;
 		return -1;
 	}
-
-	// Set ps2sdk functions
-	_glue_ps2sdk_readlink();
 
 	return 	__transform_errno(_ps2sdk_readlink(dest, buf, bufsiz));
 }

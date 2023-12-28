@@ -24,19 +24,9 @@ SJIS_OBJS = isSpecialSJIS.o isSpecialASCII.o strcpy_ascii.o strcpy_sjis.o
 CWD_OBJS = __cwd.o __get_drive.o getcwd.o __path_absolute.o __init_cwd.o
 
 PS2SDKAPI_OBJS = \
-	__fioOpenHelper.o __fioLseek64Helper.o __fioRenameHelper.o __fioMkdirHelper.o __fioGetstatHelper.o __fioReadlinkHelper.o __fioSymlinkHelper.o __fioDreadHelper.o \
 	_ps2sdk_close.o _ps2sdk_open.o _ps2sdk_read.o _ps2sdk_lseek.o _ps2sdk_lseek64.o _ps2sdk_write.o _ps2sdk_ioctl.o \
 	_ps2sdk_remove.o _ps2sdk_rename.o _ps2sdk_mkdir.o _ps2sdk_rmdir.o _ps2sdk_stat.o _ps2sdk_readlink.o _ps2sdk_symlink.o \
-	_ps2sdk_dopen.o _ps2sdk_dread.o _ps2sdk_dclose.o \
-	_set_ps2sdk_close.o _set_ps2sdk_open.o _set_ps2sdk_read.o _set_ps2sdk_lseek.o _set_ps2sdk_lseek64.o _set_ps2sdk_write.o _set_ps2sdk_ioctl.o \
-	_set_ps2sdk_remove.o _set_ps2sdk_rename.o _set_ps2sdk_mkdir.o _set_ps2sdk_rmdir.o _set_ps2sdk_stat.o _set_ps2sdk_readlink.o _set_ps2sdk_symlink.o \
-	_set_ps2sdk_dopen.o _set_ps2sdk_dread.o _set_ps2sdk_dclose.o \
-	_glue_ps2sdk_close.o _glue_ps2sdk_open.o _glue_ps2sdk_read.o _glue_ps2sdk_lseek.o _glue_ps2sdk_lseek64.o _glue_ps2sdk_write.o _glue_ps2sdk_ioctl.o \
-	_glue_ps2sdk_remove.o _glue_ps2sdk_rename.o _glue_ps2sdk_mkdir.o _glue_ps2sdk_rmdir.o _glue_ps2sdk_stat.o _glue_ps2sdk_readlink.o _glue_ps2sdk_symlink.o \
-	_glue_ps2sdk_dopen.o _glue_ps2sdk_dread.o _glue_ps2sdk_dclose.o \
-	_predefined_ps2sdk_close.o _predefined_ps2sdk_open.o _predefined_ps2sdk_read.o _predefined_ps2sdk_lseek.o _predefined_ps2sdk_lseek64.o _predefined_ps2sdk_write.o _predefined_ps2sdk_ioctl.o \
-	_predefined_ps2sdk_remove.o _predefined_ps2sdk_rename.o _predefined_ps2sdk_mkdir.o _predefined_ps2sdk_rmdir.o _predefined_ps2sdk_stat.o _predefined_ps2sdk_readlink.o _predefined_ps2sdk_symlink.o \
-	_predefined_ps2sdk_dopen.o _predefined_ps2sdk_dread.o _predefined_ps2sdk_dclose.o 
+	_ps2sdk_dopen.o _ps2sdk_dread.o _ps2sdk_dclose.o
 
 
 GLUE_OBJS = __dummy_passwd.o __transform_errno.o __transform64_errno.o compile_time_check.o __normalized_path.o _open.o _close.o _read.o _write.o \

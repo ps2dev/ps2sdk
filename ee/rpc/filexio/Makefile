@@ -19,10 +19,7 @@ FILEXIO_RPC_OBJS = \
 	fileXioIoctl.o fileXioIoctl2.o fileXioWaitAsync.o fileXioSetBlockMode.o fileXioSetRWBufferSize.o
 
 FILEXIO_PS2SDK_OBJS = \
-	__fileXioGetstatHelper.o __fileXioDreadHelper.o \
-	_set_ps2sdk_close.o _set_ps2sdk_open.o _set_ps2sdk_read.o _set_ps2sdk_lseek.o _set_ps2sdk_lseek64.o _set_ps2sdk_write.o _set_ps2sdk_ioctl.o \
-	_set_ps2sdk_remove.o _set_ps2sdk_rename.o _set_ps2sdk_mkdir.o _set_ps2sdk_rmdir.o _set_ps2sdk_stat.o _set_ps2sdk_readlink.o _set_ps2sdk_symlink.o \
-	_set_ps2sdk_dopen.o _set_ps2sdk_dread.o _set_ps2sdk_dclose.o
+	__fileXioGetstatHelper.o __fileXioDreadHelper.o _ps2sdk_fileXio_init_deinit.o
 
 EE_OBJS = $(CORE_OBJS) $(FILEXIO_RPC_OBJS) $(FILEXIO_PS2SDK_OBJS) 
 
