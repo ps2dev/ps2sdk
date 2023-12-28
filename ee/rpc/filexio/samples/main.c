@@ -8,6 +8,8 @@
 int __iomanX_id = -1;
 int __fileXio_id = -1;
 
+int __dummy = 0;
+
 /* References to IOMANX.IRX */
 extern unsigned char iomanX_irx[] __attribute__((aligned(16)));
 extern unsigned int size_iomanX_irx;
@@ -15,6 +17,19 @@ extern unsigned int size_iomanX_irx;
 /* References to FILEXIO.IRX */
 extern unsigned char fileXio_irx[] __attribute__((aligned(16)));
 extern unsigned int size_fileXio_irx;
+
+static void reset_IOP() {
+    SifInitRpc(0);
+#if !defined(DEBUG) || defined(BUILD_FOR_PCSX2)
+    /* Comment this line if you don't wanna debug the output */
+    while (!SifIopReset(NULL, 0)) {};
+#endif
+
+    while (!SifIopSync()) {};
+    SifInitRpc(0);
+    sbv_patch_enable_lmb();
+    sbv_patch_disable_prefix_check();
+}
 
 static int loadIRXs(void) {
     /* IOMANX.IRX */
@@ -44,8 +59,12 @@ static int init_fileXio_driver() {
     return __fileXio_init_status;
 }
 
+void _libcglue_timezone_update() {}
+void _libcglue_rtc_update() {}
+
 int main(int argc, char *argv[])
 {
+    reset_IOP();
 	init_fileXio_driver();
 
 	while (1)
