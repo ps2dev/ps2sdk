@@ -22,84 +22,6 @@
 #include <fileXio_rpc.h>
 #include "iox_stat.h"
 
-/** Setting fileXio functions */
-#ifdef F__set_ps2sdk_close
-uint8_t __ps2sdk_fileXio_close = 0;
-void _set_ps2sdk_close() {
-    _ps2sdk_close = fileXioClose;
-}
-#endif
-
-#ifdef F__set_ps2sdk_open
-uint8_t __ps2sdk_fileXio_open = 0;
-void _set_ps2sdk_open() {
-    _ps2sdk_open = fileXioOpen;
-}
-#endif
-
-#ifdef F__set_ps2sdk_read
-uint8_t __ps2sdk_fileXio_read = 0;
-void _set_ps2sdk_read() {
-    _ps2sdk_read = fileXioRead;
-}
-#endif
-
-#ifdef F__set_ps2sdk_lseek
-uint8_t __ps2sdk_fileXio_lseek = 0;
-void _set_ps2sdk_lseek() {
-    _ps2sdk_lseek = fileXioLseek;
-}
-#endif
-
-#ifdef F__set_ps2sdk_lseek64
-uint8_t __ps2sdk_fileXio_lseek64 = 0;
-void _set_ps2sdk_lseek64() {
-    _ps2sdk_lseek64 = fileXioLseek64;
-}
-#endif
-
-#ifdef F__set_ps2sdk_write
-uint8_t __ps2sdk_fileXio_write = 0;
-void _set_ps2sdk_write() {
-    _ps2sdk_write = fileXioWrite;
-}
-#endif
-
-#ifdef F__set_ps2sdk_ioctl
-uint8_t __ps2sdk_fileXio_ioctl = 0;
-void _set_ps2sdk_ioctl() {
-    _ps2sdk_ioctl = fileXioIoctl;
-}
-#endif
-
-#ifdef F__set_ps2sdk_remove
-uint8_t __ps2sdk_fileXio_remove = 0;
-void _set_ps2sdk_remove() {
-    _ps2sdk_remove = fileXioRemove;
-}
-#endif
-
-#ifdef F__set_ps2sdk_rename
-uint8_t __ps2sdk_fileXio_rename = 0;
-void _set_ps2sdk_rename() {
-    _ps2sdk_rename = fileXioRename;
-}
-#endif
-
-#ifdef F__set_ps2sdk_mkdir
-uint8_t __ps2sdk_fileXio_mkdir = 0;
-void _set_ps2sdk_mkdir() {
-    _ps2sdk_mkdir = fileXioMkdir;
-}
-#endif
-
-#ifdef F__set_ps2sdk_rmdir
-uint8_t __ps2sdk_fileXio_rmdir = 0;
-void _set_ps2sdk_rmdir() {
-    _ps2sdk_rmdir = fileXioRmdir;
-}
-#endif
-
 #ifdef F___fileXioGetstatHelper
 static time_t io_to_posix_time(const unsigned char *ps2time)
 {
@@ -163,34 +85,6 @@ int __fileXioGetstatHelper(const char *path, struct stat *buf) {
 int __fileXioGetstatHelper(const char *path, struct stat *buf);
 #endif
 
-#ifdef F__set_ps2sdk_stat
-uint8_t __ps2sdk_fileXio_stat = 0;
-void _set_ps2sdk_stat() {
-    _ps2sdk_stat = __fileXioGetstatHelper;
-}
-#endif
-
-#ifdef F__set_ps2sdk_readlink
-uint8_t __ps2sdk_fileXio_readlink = 0;
-void _set_ps2sdk_readlink() {
-    _ps2sdk_readlink = fileXioReadlink;
-}
-#endif
-
-#ifdef F__set_ps2sdk_symlink
-uint8_t __ps2sdk_fileXio_symlink = 0;
-void _set_ps2sdk_symlink() {
-    _ps2sdk_symlink = fileXioSymlink;
-}
-#endif
-
-#ifdef F__set_ps2sdk_dopen
-uint8_t __ps2sdk_fileXio_dopen = 0;
-void _set_ps2sdk_dopen() {
-    _ps2sdk_dopen = fileXioDopen;
-}
-#endif
-
 #ifdef F___fileXioDreadHelper
 int __fileXioDreadHelper(int fd, struct dirent *dir) {
 	int rv;
@@ -222,16 +116,82 @@ int __fileXioDreadHelper(int fd, struct dirent *dir) {
 int __fileXioDreadHelper(int fd, struct dirent *dir);
 #endif
 
-#ifdef F__set_ps2sdk_dread
-uint8_t __ps2sdk_fileXio_dread = 0;
-void _set_ps2sdk_dread() {
-    _ps2sdk_dread = __fileXioDreadHelper;
-}
-#endif
+#ifdef F__ps2sdk_fileXio_init_deinit
+/* Backup pointer functions to restore after exit fileXio */
+static int (*_backup_ps2sdk_close)(int);
+static int (*_backup_ps2sdk_open)(const char*, int, ...);
+static int (*_backup_ps2sdk_read)(int, void*, int);
+static int (*_backup_ps2sdk_lseek)(int, int, int);
+static int64_t (*_backup_ps2sdk_lseek64)(int, int64_t, int);
+static int (*_backup_ps2sdk_write)(int, const void*, int);
+static int (*_backup_ps2sdk_ioctl)(int, int, void*);
+static int (*_backup_ps2sdk_remove)(const char*);
+static int (*_backup_ps2sdk_rename)(const char*, const char*);
+static int (*_backup_ps2sdk_mkdir)(const char*, int);
+static int (*_backup_ps2sdk_rmdir)(const char*);
 
-#ifdef F__set_ps2sdk_dclose
-uint8_t __ps2sdk_fileXio_dclose = 0;
-void _set_ps2sdk_dclose() {
+static int (*_backup_ps2sdk_stat)(const char *path, struct stat *buf);
+static int (*_backup_ps2sdk_readlink)(const char *path, char *buf, size_t bufsiz);
+static int (*_backup_ps2sdk_symlink)(const char *target, const char *linkpath);
+
+static int (*_backup_ps2sdk_dopen)(const char *path);
+static int (*_backup_ps2sdk_dread)(int fd, struct dirent *dir);
+static int (*_backup_ps2sdk_dclose)(int fd);
+
+void _ps2sdk_fileXio_init() {
+    _backup_ps2sdk_close = _ps2sdk_close;
+    _ps2sdk_close = fileXioClose;
+    _backup_ps2sdk_open = _ps2sdk_open;
+    _ps2sdk_open = fileXioOpen;
+    _backup_ps2sdk_read = _ps2sdk_read;
+    _ps2sdk_read = fileXioRead;
+    _backup_ps2sdk_lseek = _ps2sdk_lseek;
+    _ps2sdk_lseek = fileXioLseek;
+    _backup_ps2sdk_lseek64 = _ps2sdk_lseek64;
+    _ps2sdk_lseek64 = fileXioLseek64;
+    _backup_ps2sdk_write = _ps2sdk_write;
+    _ps2sdk_write = fileXioWrite;
+    _backup_ps2sdk_ioctl = _ps2sdk_ioctl;
+    _ps2sdk_ioctl = fileXioIoctl;
+    _backup_ps2sdk_remove = _ps2sdk_remove;
+    _ps2sdk_remove = fileXioRemove;
+    _backup_ps2sdk_rename = _ps2sdk_rename;
+    _ps2sdk_rename = fileXioRename;
+    _backup_ps2sdk_mkdir = _ps2sdk_mkdir;
+    _ps2sdk_mkdir = fileXioMkdir;
+    _backup_ps2sdk_rmdir = _ps2sdk_rmdir;
+    _ps2sdk_rmdir = fileXioRmdir;
+    _backup_ps2sdk_stat = _ps2sdk_stat;
+    _ps2sdk_stat = __fileXioGetstatHelper;
+    _backup_ps2sdk_readlink = _ps2sdk_readlink;
+    _ps2sdk_readlink = fileXioReadlink;
+    _backup_ps2sdk_symlink = _ps2sdk_symlink;
+    _ps2sdk_symlink = fileXioSymlink;
+    _backup_ps2sdk_dopen = _ps2sdk_dopen;
+    _ps2sdk_dopen = fileXioDopen;
+    _backup_ps2sdk_dread = _ps2sdk_dread;
+    _ps2sdk_dread = __fileXioDreadHelper;
+    _backup_ps2sdk_dclose = _ps2sdk_dclose;
     _ps2sdk_dclose = fileXioDclose;
+}
+
+void _ps2sdk_fileXio_deinit() {
+    _ps2sdk_close = _backup_ps2sdk_close;
+    _ps2sdk_open = _backup_ps2sdk_open;
+    _ps2sdk_read = _backup_ps2sdk_read;
+    _ps2sdk_lseek = _backup_ps2sdk_lseek;
+    _ps2sdk_lseek64 = _backup_ps2sdk_lseek64;
+    _ps2sdk_write = _backup_ps2sdk_write;
+    _ps2sdk_ioctl = _backup_ps2sdk_ioctl;
+    _ps2sdk_remove = _backup_ps2sdk_remove;
+    _ps2sdk_rename = _backup_ps2sdk_rename;
+    _ps2sdk_mkdir = _backup_ps2sdk_mkdir;
+    _ps2sdk_rmdir = _backup_ps2sdk_rmdir;
+    _ps2sdk_stat = _backup_ps2sdk_stat;
+    _ps2sdk_readlink = _backup_ps2sdk_readlink;
+    _ps2sdk_symlink = _backup_ps2sdk_symlink;
+    _ps2sdk_dopen = _backup_ps2sdk_dopen;
+    _ps2sdk_dread = _backup_ps2sdk_dread;
+    _ps2sdk_dclose = _backup_ps2sdk_dclose;
 }
 #endif
