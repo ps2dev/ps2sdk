@@ -149,9 +149,15 @@ int __path_absolute(const char *in, char *out, int len)
 			return -1;
 	} else if(dr > 0 && in[dr - 1] == ':') {
 		/* It starts with "drive:", so it's already absoulte, however it misses the "/" after unit */
-		strncpy(out, in, dr);
-		out[dr] = '/';
-		strncpy(out + dr + 1, in + dr, len - dr - 1);
+		/* Just do it if drive: is different than rom0:, rom1:, rom2: .. rom9: */
+		if (strncmp(in, "rom", 3) == 0 && in[3] >= '0' && in[3] <= '9' && in[4] == ':') {
+			if(!__safe_strcpy(out, in, len))
+				return -1;
+		} else {
+			strncpy(out, in, dr);
+			out[dr] = '/';
+			strncpy(out + dr + 1, in + dr, len - dr - 1);
+		}
 	} else if(in[0] == '/') {
 		/* It's absolute, but missing the drive, so use cwd's drive */
 		if(strlen(__cwd) >= len)
