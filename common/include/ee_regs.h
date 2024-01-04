@@ -204,6 +204,7 @@
 #define A_EE_GS_CSR          (0x12001000)
 #define A_EE_GS_IMR          (0x12001010)
 #define A_EE_GS_BUSDIR       (0x12001040)
+#define A_EE_GS_SIGLBLID     (0x12001080)
 
 /** Timer 0 counter value */
 #define R_EE_T0_COUNT     ((vu32 *)A_EE_T0_COUNT)
@@ -598,6 +599,8 @@
 #define R_EE_GS_IMR      ((vu64 *)A_EE_GS_IMR)
 /** Host I/F switching */
 #define R_EE_GS_BUSDIR   ((vu64 *)A_EE_GS_BUSDIR)
+/** Signal ID value read */
+#define R_EE_GS_SIGLBLID ((vu64 *)A_EE_GS_SIGLBLID)
 
 #define EE_CHCR_MOD_NORM  (0)
 #define EE_CHCR_MOD_CHAIN (1)
