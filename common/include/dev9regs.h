@@ -43,12 +43,12 @@ enum _dev9_regnames {
 
 typedef struct _dev9_regs
 {
-    u16 val[DEV9_R_MAX];
+    vu16 val[DEV9_R_MAX];
 } dev9_regs_t;
 
 #define DEV9_REGBASE  0xbf801460
-#define USE_DEV9_REGS volatile dev9_regs_t *dev9_regs = \
-                          (volatile dev9_regs_t *)DEV9_REGBASE
+#define USE_DEV9_REGS dev9_regs_t *dev9_regs = \
+                          (dev9_regs_t *)DEV9_REGBASE
 #define DEV9_REG(reg) dev9_regs->val[(reg)]
 
 /* DEV9 DMAC registers.  */
