@@ -511,7 +511,7 @@ int chdir(const char *path) {
 		return -1;
 	}
 
-	strcpy(__cwd, dest);
+	strncpy(__cwd, dest, sizeof(__cwd));
 	return 0;
 }
 #endif
