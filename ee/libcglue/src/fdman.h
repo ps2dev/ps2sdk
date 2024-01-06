@@ -11,6 +11,7 @@
 #ifndef _FDMAN_H_
 
 #include <sys/types.h>
+#include <ps2sdkapi.h>
 
 #define _FDMAN_H_
 
@@ -19,23 +20,10 @@
 #define __IS_FD_VALID(FD) \
 		( (FD >= 0) && (FD < __FILENO_MAX) && (__descriptormap[FD] != NULL) )
 
-#define __IS_FD_OF_TYPE(FD, TYPE) \
-		( (__IS_FD_VALID(FD)) && (__descriptormap[FD]->type == TYPE) )
-		
-typedef enum {
-	__DESCRIPTOR_TYPE_FILE,
-	__DESCRIPTOR_TYPE_FOLDER,
-	__DESCRIPTOR_TYPE_PIPE,
-	__DESCRIPTOR_TYPE_SOCKET,
-	__DESCRIPTOR_TYPE_TTY
-} __fdman_fd_types;
-
 typedef struct {
-	uint32_t descriptor;
 	uint32_t flags;
 	uint32_t ref_count;
-	char *filename;
-	uint8_t type;
+	_libcglue_fdman_fd_info_t info;
 } __descriptormap_type;
 	
 extern __descriptormap_type *__descriptormap[__FILENO_MAX];
