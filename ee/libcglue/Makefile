@@ -32,7 +32,7 @@ PS2SDKAPI_OBJS = \
 GLUE_OBJS = __dummy_passwd.o __transform_errno.o __transform64_errno.o compile_time_check.o __normalized_path.o _open.o _close.o _read.o _write.o \
 	_stat.o lstat.o _fstat.o access.o _fcntl.o getdents.o _lseek.o lseek64.o chdir.o mkdir.o \
 	rmdir.o _link.o _unlink.o _rename.o _getpid.o _kill.o _fork.o _wait.o _sbrk.o _gettimeofday.o _times.o ftime.o clock_getres.o clock_gettime.o clock_settime.o \
-	truncate.o symlink.o readlink.o utime.o fchown.o getrandom.o getentropy.o _isatty.o chmod.o fchmod.o fchmodat.o pathconf.o \
+	truncate.o symlink.o readlink.o utime.o fchown.o getrandom.o _getentropy.o _isatty.o chmod.o fchmod.o fchmodat.o pathconf.o \
 	fsync.o getuid.o geteuid.o getpwuid.o getpwnam.o ps2sdk_get_iop_fd.o
 
 LOCK_OBJS = __retarget_lock_init.o __retarget_lock_acquire.o __retarget_lock_release.o __retarget_lock_try_acquire.o __retarget_lock_close.o \
