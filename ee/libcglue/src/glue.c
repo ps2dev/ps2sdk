@@ -829,8 +829,8 @@ ssize_t getrandom(void *buf, size_t buflen, unsigned int flags)
 }
 #endif
 
-#ifdef F_getentropy
-int getentropy(void *buf, size_t buflen)
+#ifdef F__getentropy
+int _getentropy(void *buf, size_t buflen)
 {
 	u8 *buf_cur = buf;
 	int i;
