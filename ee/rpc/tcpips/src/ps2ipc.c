@@ -57,6 +57,10 @@ static ip_addr_t dns_servers[DNS_MAX_SERVERS];
 /* used by IP4_ADDR_ANY and IP_ADDR_BROADCAST in ip_addr.h */
 const ip_addr_t ip_addr_any = IPADDR4_INIT(IPADDR_ANY);
 
+/* The following are defined in ps2ipc_ps2sdk.c */
+extern void _ps2sdk_ps2ipc_init(void);
+extern void _ps2sdk_ps2ipc_deinit(void);
+
 int ps2ip_init(void)
 {
 	ee_sema_t sema;
@@ -78,6 +82,8 @@ int ps2ip_init(void)
 	sema.attr = 0;
 	lock_sema = CreateSema(&sema);
 
+	_ps2sdk_ps2ipc_init();
+
 	_init_check = 1;
 
 	return 0;
@@ -85,6 +91,8 @@ int ps2ip_init(void)
 
 void ps2ip_deinit(void)
 {
+	_ps2sdk_ps2ipc_deinit();
+
 	if (lock_sema >= 0)
 		DeleteSema(lock_sema);
 	lock_sema = -1;
@@ -92,7 +100,7 @@ void ps2ip_deinit(void)
 	_init_check = 0;
 }
 
-int accept(int s, struct sockaddr *addr, int *addrlen)
+int ps2ipc_accept(int s, struct sockaddr *addr, int *addrlen)
 {
 	int result;
 	cmd_pkt *pkt = &_rpc_buffer.cmd_pkt;
@@ -122,7 +130,7 @@ int accept(int s, struct sockaddr *addr, int *addrlen)
 	return result;
 }
 
-int bind(int s, struct sockaddr *name, int namelen)
+int ps2ipc_bind(int s, const struct sockaddr *name, int namelen)
 {
 	cmd_pkt *pkt = &_rpc_buffer.cmd_pkt;
 	int result;
@@ -148,7 +156,7 @@ int bind(int s, struct sockaddr *name, int namelen)
 	return result;
 }
 
-int disconnect(int s)
+int ps2ipc_disconnect(int s)
 {
 	int result;
 
@@ -171,7 +179,7 @@ int disconnect(int s)
 	return result;
 }
 
-int connect(int s, struct sockaddr *name, int namelen)
+int ps2ipc_connect(int s, const struct sockaddr *name, int namelen)
 {
 	int result;
 	cmd_pkt *pkt = &_rpc_buffer.cmd_pkt;
@@ -197,7 +205,7 @@ int connect(int s, struct sockaddr *name, int namelen)
 	return result;
 }
 
-int listen(int s, int backlog)
+int ps2ipc_listen(int s, int backlog)
 {
 	int result;
 	listen_pkt *pkt = &_rpc_buffer.listen_pkt;
@@ -237,7 +245,7 @@ static void recv_intr(void *data_raw)
 }
 
 
-int recv(int s, void *mem, int len, unsigned int flags)
+int ps2ipc_recv(int s, void *mem, int len, unsigned int flags)
 {
 	int result;
 	s_recv_pkt *send_pkt = &_rpc_buffer.s_recv_pkt;
@@ -270,7 +278,7 @@ int recv(int s, void *mem, int len, unsigned int flags)
 	return result;
 }
 
-int recvfrom(int s, void *mem, int len, unsigned int flags,
+int ps2ipc_recvfrom(int s, void *mem, int len, unsigned int flags,
 		  struct sockaddr *from, int *fromlen)
 {
 	int result;
@@ -307,7 +315,7 @@ int recvfrom(int s, void *mem, int len, unsigned int flags,
 	return result;
 }
 
-int send(int s, void *dataptr, int size, unsigned int flags)
+int ps2ipc_send(int s, const void *dataptr, int size, unsigned int flags)
 {
 	int result;
 	send_pkt *pkt = &_rpc_buffer.send_pkt;
@@ -318,7 +326,7 @@ int send(int s, void *dataptr, int size, unsigned int flags)
 	pkt->socket = s;
 	pkt->length = size;
 	pkt->flags = flags;
-	pkt->ee_addr = dataptr;
+	pkt->ee_addr = (void *)dataptr;
 
 	if((u32)dataptr & 0x3f)
 	{
@@ -333,7 +341,7 @@ int send(int s, void *dataptr, int size, unsigned int flags)
 	pkt->malign = miss;
 
 	if( !IS_UNCACHED_SEG(dataptr))
-		SifWriteBackDCache(dataptr, size);
+		SifWriteBackDCache((void *)dataptr, size);
 
 	memcpy((void *)pkt->malign_buff, UNCACHED_SEG(dataptr), miss);
 
@@ -351,8 +359,8 @@ int send(int s, void *dataptr, int size, unsigned int flags)
 	return result;
 }
 
-int sendto(int s, void *dataptr, int size, unsigned int flags,
-		struct sockaddr *to, int tolen)
+int ps2ipc_sendto(int s, const void *dataptr, int size, unsigned int flags,
+		const struct sockaddr *to, int tolen)
 {
 	int result;
 	send_pkt *pkt = &_rpc_buffer.send_pkt;
@@ -365,7 +373,7 @@ int sendto(int s, void *dataptr, int size, unsigned int flags,
 	pkt->socket = s;
 	pkt->length = size;
 	pkt->flags = flags;
-	pkt->ee_addr = dataptr;
+	pkt->ee_addr = (void *)dataptr;
 	memcpy((void *)&pkt->sockaddr, (void *)to, sizeof(struct sockaddr));
 
 	if((u32)dataptr & 0x3f)
@@ -381,7 +389,7 @@ int sendto(int s, void *dataptr, int size, unsigned int flags,
 	pkt->malign = miss;
 
 	if( !IS_UNCACHED_SEG(dataptr))
-		SifWriteBackDCache(dataptr, size);
+		SifWriteBackDCache((void *)dataptr, size);
 
 	memcpy((void *)pkt->malign_buff, UNCACHED_SEG(dataptr), miss);
 
@@ -399,7 +407,7 @@ int sendto(int s, void *dataptr, int size, unsigned int flags,
 	return result;
 }
 
-int socket(int domain, int type, int protocol)
+int ps2ipc_socket(int domain, int type, int protocol)
 {
 	int result;
 	socket_pkt *pkt = &_rpc_buffer.socket_pkt;
@@ -425,7 +433,7 @@ int socket(int domain, int type, int protocol)
 	return result;
 }
 
-int ps2ip_setconfig(t_ip_info *ip_info)
+int ps2ipc_ps2ip_setconfig(const t_ip_info *ip_info)
 {
 	int result;
 
@@ -449,7 +457,7 @@ int ps2ip_setconfig(t_ip_info *ip_info)
 	return result;
 }
 
-int ps2ip_getconfig(char *netif_name, t_ip_info *ip_info)
+int ps2ipc_ps2ip_getconfig(char *netif_name, t_ip_info *ip_info)
 {
 	if(!_init_check) return -1;
 
@@ -473,7 +481,7 @@ int ps2ip_getconfig(char *netif_name, t_ip_info *ip_info)
 	return 1;
 }
 
-int select(int maxfdp1, struct fd_set *readset, struct fd_set *writeset, struct fd_set *exceptset, struct timeval *timeout)
+int ps2ipc_select(int maxfdp1, struct fd_set *readset, struct fd_set *writeset, struct fd_set *exceptset, struct timeval *timeout)
 {
 	int result;
 	select_pkt *pkt = &_rpc_buffer.select_pkt;
@@ -524,7 +532,7 @@ int select(int maxfdp1, struct fd_set *readset, struct fd_set *writeset, struct 
 	return result;
 }
 
-int ioctlsocket(int s, long cmd, void *argp)
+int ps2ipc_ioctl(int s, long cmd, void *argp)
 {
 	int result;
 	ioctl_pkt *pkt = &_rpc_buffer.ioctl_pkt;
@@ -555,7 +563,7 @@ int ioctlsocket(int s, long cmd, void *argp)
 	return result;
 }
 
-int getsockname(int s, struct sockaddr *name, int *namelen)
+int ps2ipc_getsockname(int s, struct sockaddr *name, int *namelen)
 {
 	int result;
 	cmd_pkt *pkt = &_rpc_buffer.cmd_pkt;
@@ -582,7 +590,7 @@ int getsockname(int s, struct sockaddr *name, int *namelen)
 	return result;
 }
 
-int getpeername(int s, struct sockaddr *name, int *namelen)
+int ps2ipc_getpeername(int s, struct sockaddr *name, int *namelen)
 {
 	int result;
 	cmd_pkt *pkt = &_rpc_buffer.cmd_pkt;
@@ -609,7 +617,7 @@ int getpeername(int s, struct sockaddr *name, int *namelen)
 	return result;
 }
 
-int getsockopt(int s, int level, int optname, void* optval, socklen_t* optlen)
+int ps2ipc_getsockopt(int s, int level, int optname, void* optval, socklen_t* optlen)
 {
 	getsockopt_pkt *pkt = &_rpc_buffer.getsockopt_pkt;
 	getsockopt_res_pkt *res_pkt = &_rpc_buffer.getsockopt_res_pkt;
@@ -639,7 +647,7 @@ int getsockopt(int s, int level, int optname, void* optval, socklen_t* optlen)
 	return result;
 }
 
-int setsockopt(int s, int level, int optname, const void *optval, socklen_t optlen)
+int ps2ipc_setsockopt(int s, int level, int optname, const void *optval, socklen_t optlen)
 {
 	setsockopt_pkt *pkt = &_rpc_buffer.setsockopt_pkt;
 	int result;
@@ -669,7 +677,7 @@ int setsockopt(int s, int level, int optname, const void *optval, socklen_t optl
 }
 
 #ifdef PS2IP_DNS
-struct hostent *gethostbyname(const char *name)
+struct hostent *ps2ipc_gethostbyname(const char *name)
 {
 	gethostbyname_res_pkt *res_pkt = &_rpc_buffer.gethostbyname_res_pkt;
 	struct hostent *result;
@@ -705,7 +713,7 @@ struct hostent *gethostbyname(const char *name)
 	return result;
 }
 
-void dns_setserver(u8 numdns, ip_addr_t *dnsserver)
+void ps2ipc_dns_setserver(u8 numdns, const ip_addr_t *dnsserver)
 {
 	dns_setserver_pkt *pkt = &_rpc_buffer.dns_setserver_pkt;
 
@@ -724,7 +732,7 @@ void dns_setserver(u8 numdns, ip_addr_t *dnsserver)
 	SignalSema(lock_sema);
 }
 
-const ip_addr_t *dns_getserver(u8 numdns)
+const ip_addr_t *ps2ipc_dns_getserver(u8 numdns)
 {
 	dns_getserver_res_pkt *res_pkt = &_rpc_buffer.dns_getserver_res_pkt;
 	ip_addr_t *dns;

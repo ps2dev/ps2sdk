@@ -320,16 +320,28 @@ int _fcntl(int fd, int cmd, ...)
 		}
 		case F_SETFL:
 		{
-			int newfl;
+			int newfl, rv;
 			va_list args;
 	
+			rv = 0;
+
 			va_start (args, cmd);         /* Initialize the argument list. */
 			newfl =  va_arg(args, int);
 			va_end (args);                /* Clean up. */
 
 			__descriptormap[fd]->flags = newfl;
 
-			return 0;
+			{
+				_libcglue_fdman_fd_info_t *fdinfo;
+
+				fdinfo = &(__descriptormap[fd]->info);
+				
+				if (fdinfo->ops != NULL && fdinfo->ops->fcntl_f_setfl != NULL)
+				{
+					rv = __transform_errno(fdinfo->ops->fcntl_f_setfl(fdinfo->userdata, newfl));
+				}
+			}
+			return rv;
 		}
 	}
 

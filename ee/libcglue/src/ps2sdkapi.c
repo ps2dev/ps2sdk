@@ -502,3 +502,11 @@ void __fioOpsInitializeImpl(void)
 #ifdef F__libcglue_fdman_path_ops
 _libcglue_fdman_path_ops_t *_libcglue_fdman_path_ops = &__fio_fdman_path_ops;
 #endif
+
+#ifdef F__libcglue_fdman_socket_ops
+_libcglue_fdman_socket_ops_t *_libcglue_fdman_socket_ops = NULL;
+#endif
+
+#ifdef F__libcglue_fdman_inet_ops
+_libcglue_fdman_inet_ops_t *_libcglue_fdman_inet_ops = NULL;
+#endif

@@ -17,6 +17,10 @@
 #define __TCPIP_H__
 
 #include <tamtypes.h>
+#ifdef _EE
+/* Use the select related definitions fron newlib. */
+#include <sys/select.h>
+#endif
 
 /* Some portions of this header fall under the following copyright.  The license
    is compatible with that of ps2sdk.

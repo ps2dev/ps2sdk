@@ -16,8 +16,12 @@
 #include <sys/stat.h>
 #include <timer.h>
 #include <errno.h>
+#include <sys/socket.h>
 
 /** Inter-library helpers */
+
+struct _libcglue_fdman_fd_info_;
+
 typedef int (*_libcglue_fdman_getfd_cb_t)(void *userdata);
 typedef char *(*_libcglue_fdman_getfilename_cb_t)(void *userdata);
 typedef int (*_libcglue_fdman_close_cb_t)(void *userdata);
@@ -27,6 +31,20 @@ typedef int64_t (*_libcglue_fdman_lseek64_cb_t)(void *userdata, int64_t offset, 
 typedef int (*_libcglue_fdman_write_cb_t)(void *userdata, const void *buf, int nbytes);
 typedef int (*_libcglue_fdman_ioctl_cb_t)(void *userdata, int request, void *data);
 typedef int (*_libcglue_fdman_dread_cb_t)(void *userdata, struct dirent *dir);
+typedef int (*_libcglue_fdman_fcntl_f_setfl_cb_t)(void *userdata, int newfl);
+typedef int (*_libcglue_fdman_accept_cb_t)(void *userdata, struct _libcglue_fdman_fd_info_ *info, struct sockaddr *addr, socklen_t *addrlen);
+typedef int (*_libcglue_fdman_bind_cb_t)(void *userdata, const struct sockaddr *my_addr, socklen_t addrlen);
+typedef int (*_libcglue_fdman_connect_cb_t)(void *userdata, const struct sockaddr *serv_addr, socklen_t addrlen);
+typedef int (*_libcglue_fdman_listen_cb_t)(void *userdata, int backlog);
+typedef ssize_t (*_libcglue_fdman_recv_cb_t)(void *userdata, void *buf, size_t len, int flags);
+typedef ssize_t (*_libcglue_fdman_recvfrom_cb_t)(void *userdata, void *buf, size_t len, int flags, struct sockaddr *from, socklen_t *fromlen);
+typedef ssize_t (*_libcglue_fdman_send_cb_t)(void *userdata, const void *buf, size_t len, int flags);
+typedef ssize_t (*_libcglue_fdman_sendto_cb_t)(void *userdata, const void *buf, size_t len, int flags, const struct sockaddr *to, socklen_t tolen);
+typedef int (*_libcglue_fdman_getsockopt_cb_t)(void *userdata, int level, int optname, void *optval, socklen_t *optlen);
+typedef int (*_libcglue_fdman_setsockopt_cb_t)(void *userdata, int level, int optname, const void *optval, socklen_t optlen);
+typedef int (*_libcglue_fdman_shutdown_cb_t)(void *userdata, int how);
+typedef int (*_libcglue_fdman_getpeername_cb_t)(void *userdata, struct sockaddr *name, socklen_t *namelen);
+typedef int (*_libcglue_fdman_getsockname_cb_t)(void *userdata, struct sockaddr *name, socklen_t *namelen);
 
 typedef struct _libcglue_fdman_fd_ops_
 {
@@ -39,6 +57,20 @@ typedef struct _libcglue_fdman_fd_ops_
 	_libcglue_fdman_write_cb_t write;
 	_libcglue_fdman_ioctl_cb_t ioctl;
 	_libcglue_fdman_dread_cb_t dread;
+	_libcglue_fdman_fcntl_f_setfl_cb_t fcntl_f_setfl;
+	_libcglue_fdman_accept_cb_t accept;
+	_libcglue_fdman_bind_cb_t bind;
+	_libcglue_fdman_connect_cb_t connect;
+	_libcglue_fdman_listen_cb_t listen;
+	_libcglue_fdman_recv_cb_t recv;
+	_libcglue_fdman_recvfrom_cb_t recvfrom;
+	_libcglue_fdman_send_cb_t send;
+	_libcglue_fdman_sendto_cb_t sendto;
+	_libcglue_fdman_getsockopt_cb_t getsockopt;
+	_libcglue_fdman_setsockopt_cb_t setsockopt;
+	_libcglue_fdman_shutdown_cb_t shutdown;
+	_libcglue_fdman_getpeername_cb_t getpeername;
+	_libcglue_fdman_getsockname_cb_t getsockname;
 } _libcglue_fdman_fd_ops_t;
 
 typedef struct _libcglue_fdman_fd_info_
@@ -69,6 +101,48 @@ typedef struct _libcglue_fdman_path_ops_
 } _libcglue_fdman_path_ops_t;
 
 extern _libcglue_fdman_path_ops_t *_libcglue_fdman_path_ops;
+
+typedef int (*_libcglue_fdman_setconfig_cb_t)(const t_ip_info *ip_info);
+typedef int (*_libcglue_fdman_getconfig_cb_t)(char *netif_name, t_ip_info *ip_info);
+typedef void (*_libcglue_fdman_dns_setserver_cb_t)(u8 numdns, const ip_addr_t *dnsserver);
+typedef const ip_addr_t *(*_libcglue_fdman_dns_getserver_cb_t)(u8 numdns);
+typedef int (*_libcglue_fdman_socket_cb_t)(_libcglue_fdman_fd_info_t *info, int domain, int type, int protocol);
+typedef int (*_libcglue_fdman_select_cb_t)(int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds, struct timeval *timeout);
+typedef struct hostent *(*_libcglue_fdman_gethostbyname_cb_t)(const char *name);
+typedef int (*_libcglue_fdman_gethostbyname_r_cb_t)(const char *name, struct hostent *ret, char *buf, size_t buflen, struct hostent **result, int *h_errnop);
+typedef void (*_libcglue_fdman_freeaddrinfo_cb_t)(struct addrinfo *ai);
+typedef int (*_libcglue_fdman_getaddrinfo_cb_t)(const char *nodename, const char *servname, const struct addrinfo *hints, struct addrinfo **res);
+
+typedef struct _libcglue_fdman_socket_ops_
+{
+	_libcglue_fdman_setconfig_cb_t setconfig;
+	_libcglue_fdman_getconfig_cb_t getconfig;
+	_libcglue_fdman_dns_setserver_cb_t dns_setserver;
+	_libcglue_fdman_dns_getserver_cb_t dns_getserver;
+	_libcglue_fdman_socket_cb_t socket;
+	_libcglue_fdman_select_cb_t select;
+	_libcglue_fdman_gethostbyname_cb_t gethostbyname;
+	_libcglue_fdman_gethostbyname_r_cb_t gethostbyname_r;
+	_libcglue_fdman_freeaddrinfo_cb_t freeaddrinfo;
+	_libcglue_fdman_getaddrinfo_cb_t getaddrinfo;
+} _libcglue_fdman_socket_ops_t;
+
+extern _libcglue_fdman_socket_ops_t *_libcglue_fdman_socket_ops;
+
+typedef u32 (*_libcglue_fdman_inet_addr_cb_t)(const char *cp);
+typedef char *(*_libcglue_fdman_inet_ntoa_cb_t)(const ip4_addr_t *addr);
+typedef char *(*_libcglue_fdman_inet_ntoa_r_cb_t)(const ip4_addr_t *addr, char *buf, int buflen);
+typedef int (*_libcglue_fdman_inet_aton_cb_t)(const char *cp, ip4_addr_t *addr);
+
+typedef struct _libcglue_fdman_inet_ops_
+{
+	_libcglue_fdman_inet_addr_cb_t inet_addr;
+	_libcglue_fdman_inet_ntoa_cb_t inet_ntoa;
+	_libcglue_fdman_inet_ntoa_r_cb_t inet_ntoa_r;
+	_libcglue_fdman_inet_aton_cb_t inet_aton;
+} _libcglue_fdman_inet_ops_t;
+
+extern _libcglue_fdman_inet_ops_t *_libcglue_fdman_inet_ops;
 
 /* Functions from cwd.c */
 extern char __cwd[MAXNAMLEN + 1];

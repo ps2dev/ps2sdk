@@ -316,6 +316,10 @@ static inline void InitializeLWIP(void)
 	dbgprintf("PS2IP: System Initialised\n");
 }
 
+/* The following are defined in ps2ip_ps2sdk.c */
+extern void _ps2sdk_ps2ipee_init(void);
+extern void _ps2sdk_ps2ipee_deinit(void);
+
 int ps2ipInit(struct ip4_addr *ip_address, struct ip4_addr *subnet_mask, struct ip4_addr *gateway){
 	static struct NetManNetProtStack stack={
 		&LinkStateUp,
@@ -339,10 +343,14 @@ int ps2ipInit(struct ip4_addr *ip_address, struct ip4_addr *subnet_mask, struct 
 	NetManRegisterNetworkStack(&stack);
 	netif_set_up(&NIF);
 
+	_ps2sdk_ps2ipee_init();
+
 	return 0;
 }
 
 void ps2ipDeinit(void){
+	_ps2sdk_ps2ipee_deinit();
+
 	NetManUnregisterNetworkStack();
 }
 
