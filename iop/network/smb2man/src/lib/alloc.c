@@ -47,6 +47,10 @@
 #include <unistd.h>
 #endif
 
+#ifdef HAVE_SYS_UNISTD_H
+#include <sys/unistd.h>
+#endif
+
 #include "compat.h"
 
 #include <smb2.h>

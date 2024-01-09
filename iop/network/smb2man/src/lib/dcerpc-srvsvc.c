@@ -51,6 +51,10 @@
 #include <unistd.h>
 #endif
 
+#ifdef HAVE_SYS_UNISTD_H
+#include <sys/unistd.h>
+#endif
+
 #include <errno.h>
 #include <stdio.h>
 
@@ -72,13 +76,14 @@ p_syntax_id_t srvsvc_interface = {
 /*
  * SRVSVC BEGIN:  DEFINITIONS FROM SRVSVC.IDL
  */
-/*
-	typedef struct {
-		[string,charset(UTF16)] uint16 *name;
-		srvsvc_ShareType type;
-		[string,charset(UTF16)] uint16 *comment;
-	} srvsvc_NetShareInfo1;
-*/
+#if 0
+typedef struct {
+	[string,charset(UTF16)] uint16 *name;
+	srvsvc_ShareType type;
+	[string,charset(UTF16)] uint16 *comment;
+} srvsvc_NetShareInfo1;
+#endif
+
 static int
 srvsvc_NetShareInfo1_coder(struct dcerpc_context *ctx,
                            struct dcerpc_pdu *pdu,
@@ -120,12 +125,13 @@ srvsvc_NetShareInfo1_array_coder(struct dcerpc_context *ctx,
         return offset;
 }
 
-/*
-	typedef struct {
-		uint32 count;
-		[size_is(count)] srvsvc_NetShareInfo1 *array;
-	} srvsvc_NetShareCtr1;
-*/
+#if 0
+typedef struct {
+	uint32 count;
+	[size_is(count)] srvsvc_NetShareInfo1 *array;
+} srvsvc_NetShareCtr1;
+#endif
+
 static int
 srvsvc_NetShareCtr1_coder(struct dcerpc_context *dce, struct dcerpc_pdu *pdu,
                           struct smb2_iovec *iov, int offset,
@@ -152,21 +158,22 @@ srvsvc_NetShareCtr1_coder(struct dcerpc_context *dce, struct dcerpc_pdu *pdu,
         return offset;
 }
 
-/*
-	typedef union {
-		[case(0)] srvsvc_NetShareCtr0 *ctr0;
-		[case(1)] srvsvc_NetShareCtr1 *ctr1;
-		[case(2)] srvsvc_NetShareCtr2 *ctr2;
-		[case(501)] srvsvc_NetShareCtr501 *ctr501;
-		[case(502)] srvsvc_NetShareCtr502 *ctr502;
-		[case(1004)] srvsvc_NetShareCtr1004 *ctr1004;
-		[case(1005)] srvsvc_NetShareCtr1005 *ctr1005;
-		[case(1006)] srvsvc_NetShareCtr1006 *ctr1006;
-		[case(1007)] srvsvc_NetShareCtr1007 *ctr1007;
-		[case(1501)] srvsvc_NetShareCtr1501 *ctr1501;
-		[default] ;
-	} srvsvc_NetShareCtr;
-*/
+#if 0
+typedef union {
+	[case(0)] srvsvc_NetShareCtr0 *ctr0;
+	[case(1)] srvsvc_NetShareCtr1 *ctr1;
+	[case(2)] srvsvc_NetShareCtr2 *ctr2;
+	[case(501)] srvsvc_NetShareCtr501 *ctr501;
+	[case(502)] srvsvc_NetShareCtr502 *ctr502;
+	[case(1004)] srvsvc_NetShareCtr1004 *ctr1004;
+	[case(1005)] srvsvc_NetShareCtr1005 *ctr1005;
+	[case(1006)] srvsvc_NetShareCtr1006 *ctr1006;
+	[case(1007)] srvsvc_NetShareCtr1007 *ctr1007;
+	[case(1501)] srvsvc_NetShareCtr1501 *ctr1501;
+	[default] ;
+} srvsvc_NetShareCtr;
+#endif
+
 static int
 srvsvc_NetShareCtr_coder(struct dcerpc_context *ctx, struct dcerpc_pdu *pdu,
                          struct smb2_iovec *iov, int offset,

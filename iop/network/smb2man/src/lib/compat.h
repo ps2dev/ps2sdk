@@ -19,31 +19,187 @@
 #ifndef _COMPAT_H_
 #define _COMPAT_H_
 
+#ifdef _XBOX
+
+/* XBOX Defs begin */
+#include <xtl.h>
+#include <winsockx.h>
+
+#ifdef XBOX_PLATFORM /* MSVC 2003 Doesn´t have stdint.h header */
+typedef char int8_t;
+typedef short int16_t;
+typedef short int_least16_t;
+typedef int int32_t;
+typedef long long int64_t;
+typedef int intptr_t;
+
+typedef unsigned char uint8_t;
+typedef unsigned short uint16_t;
+typedef unsigned int uint32_t;
+typedef unsigned long long uint64_t;
+typedef unsigned int uint_t;
+typedef unsigned int uintptr_t;
+#endif
+
+#include <errno.h>
+
+#ifndef ENETRESET
+#define ENETRESET WSAENETRESET
+#endif
+
+#ifndef ECONNREFUSED
+#define ECONNREFUSED WSAECONNREFUSED
+#endif
+
+#ifndef ETIMEDOUT
+#define ETIMEDOUT WSAETIMEDOUT
+#endif
+
+#ifndef ECONNRESET
+#define ECONNRESET WSAECONNRESET
+#endif
+
+#ifndef ENODATA
+#define ENODATA WSANO_DATA
+#endif
+
+#ifndef ETXTBSY 
+#define ETXTBSY         139
+#endif
+
+#ifndef ENOLINK
+#define ENOLINK         121
+#endif
+
+#ifndef EWOULDBLOCK 
+#define EWOULDBLOCK     WSAEWOULDBLOCK
+#endif
+
+#define snprintf _snprintf
+
+#define EAI_AGAIN EAGAIN
+#define EAI_FAIL        4
+#define EAI_MEMORY      6
+#define EAI_NONAME      8
+#define EAI_SERVICE     9
+
+typedef int socklen_t;
+
+#ifndef POLLIN
+#define POLLIN      0x0001    /* There is data to read */
+#endif
+#ifndef POLLPRI
+#define POLLPRI     0x0002    /* There is urgent data to read */
+#endif
+#ifndef POLLOUT
+#define POLLOUT     0x0004    /* Writing now will not block */
+#endif
+#ifndef POLLERR
+#define POLLERR     0x0008    /* Error condition */
+#endif
+#ifndef POLLHUP
+#define POLLHUP     0x0010    /* Hung up */
+#endif
+
+#ifndef SO_ERROR
+#define SO_ERROR 0x1007
+#endif
+
+struct sockaddr_storage {
+#ifdef HAVE_SOCKADDR_SA_LEN
+	unsigned char ss_len;
+#endif /* HAVE_SOCKADDR_SA_LEN */
+	unsigned char ss_family;
+	unsigned char fill[127];
+};
+
+struct addrinfo {
+	int	ai_flags;	/* AI_PASSIVE, AI_CANONNAME */
+	int	ai_family;	/* PF_xxx */
+	int	ai_socktype;	/* SOCK_xxx */
+	int	ai_protocol;	/* 0 or IPPROTO_xxx for IPv4 and IPv6 */
+	size_t	ai_addrlen;	/* length of ai_addr */
+	char	*ai_canonname;	/* canonical name for hostname */
+	struct sockaddr *ai_addr;	/* binary address */
+	struct addrinfo *ai_next;	/* next structure in linked list */
+};
+
+/* XBOX Defs end */
+struct pollfd {
+        int fd;
+        short events;
+        short revents;
+};
+
+#define SOL_TCP 6
+
+#define inline __inline 
+
+int poll(struct pollfd *fds, unsigned int nfds, int timo);
+
+int smb2_getaddrinfo(const char *node, const char*service,
+                const struct addrinfo *hints,
+                struct addrinfo **res);
+void smb2_freeaddrinfo(struct addrinfo *res);
+
+#define getaddrinfo smb2_getaddrinfo
+#define freeaddrinfo smb2_freeaddrinfo
+
+void srandom(unsigned int seed);
+int random(void);
+
+/* just pretend they are the same so we compile */
+#define sockaddr_in6 sockaddr_in
+
+int getlogin_r(char *buf, size_t size);
+
+int getpid();
+
+#endif /* _XBOX */
+
+#if defined(_MSC_VER) && defined(_WINDOWS)
+void srandom(unsigned int seed);
+int random(void);
+#include <stddef.h>
+int getlogin_r(char *buf, size_t size);	
+int getpid();
+#endif /* _MSC_VER */
+
 #ifdef PICO_PLATFORM
 
 #include "lwip/netdb.h"
 #include "lwip/sockets.h"
 
-long long int be64toh(long long int x);
-#define getlogin_r(x,y) 1
 #define EAI_AGAIN EAGAIN
+long long int be64toh(long long int x);
+int getlogin_r(char *buf, size_t size);
 
 #endif /* PICO_PLATFORM */
 
-#ifdef PS2_EE_PLATFORM
+#ifdef DC_KOS_PLATFORM
 
-#include <errno.h>
-#ifdef PS2IPS
-#include <ps2ips.h>
-#if 0
-#define close(a) disconnect(a)
-#define write(a,b,c) send(a,b,c,0)
-#define read(a,b,c) recv(a,b,c,MSG_DONTWAIT)
-#endif
-#endif
+#include <netdb.h>
+#include <netinet/in.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/errno.h>
 #include <unistd.h>
 
-#define getlogin_r(a,b) ENXIO
+#define TCP_NODELAY     1  /* Don't delay send to coalesce packets  */
+#define SOL_TCP IPPROTO_TCP
+
+ssize_t writev(int fd, const struct iovec *iov, int iovcnt);
+ssize_t readv(int fd, const struct iovec *iov, int iovcnt);
+
+int getlogin_r(char *buf, size_t size);
+
+#endif /* DC_KOS_PLATFORM */
+
+#ifdef PS2_EE_PLATFORM
+
+#include <unistd.h>
+
+int getlogin_r(char *buf, size_t size);
 
 #define POLLIN      0x0001    /* There is data to read */
 #define POLLPRI     0x0002    /* There is urgent data to read */
@@ -77,34 +233,10 @@ long long int be64toh(long long int x);
 
 #endif /* PS2_EE_PLATFORM */
 
-#ifdef DC_KOS_PLATFORM
-
-#include <netdb.h>
-#include <netinet/in.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/errno.h>
-#include <unistd.h>
-
-#define getlogin_r(a,b) ENXIO
-
-#define TCP_NODELAY     1  /* Don't delay send to coalesce packets  */
-#define SOL_TCP IPPROTO_TCP
-
-ssize_t writev(int fd, const struct iovec *iov, int iovcnt);
-ssize_t readv(int fd, const struct iovec *iov, int iovcnt);
-
-#endif /* DC_KOS_PLATFORM */
-
 #ifdef PS2_IOP_PLATFORM
-
 #ifndef PS2SDK_IOP
 #include <alloc.h>
 #endif
-#include <errno.h>
-#include <types.h>
-#include <sys/time.h>
-#include <sys/fcntl.h>
 #include <stdint.h>
 #include <ps2ip.h>
 #include <loadcore.h>
@@ -113,7 +245,6 @@ ssize_t readv(int fd, const struct iovec *iov, int iovcnt);
 #include "sysmem.h"
 #include "intrman.h"
 #endif
-
 typedef uint32_t UWORD32;
 typedef size_t ssize_t;
 
@@ -125,10 +256,11 @@ void srandom(unsigned int seed);
 time_t time(time_t *tloc);
 int asprintf(char **strp, const char *fmt, ...);
 
-#define getlogin_r(a,b) ENXIO
+int getlogin_r(char *buf, size_t size);
+int getpid();
+
 #define close(x) lwip_close(x)
 #define snprintf(format, n, ...) sprintf(format, __VA_ARGS__)
-#define getpid() 27
 #define fcntl(a,b,c) lwip_fcntl(a,b,c)
 
 #define POLLIN      0x0001    /* There is data to read */
@@ -177,27 +309,15 @@ void *calloc(size_t nmemb, size_t size);
 
 #endif /* PS2_IOP_PLATFORM */
 
-#ifdef PS4_PLATFORM
-
-#include <netdb.h>
-#include <poll.h>
-#include <sys/uio.h>
-
-#define TCP_NODELAY     1  /* Don't delay send to coalesce packets  */
-
-#endif /* PS4_PLATFORM */
-
 #ifdef PS3_PPU_PLATFORM
 
-#include <errno.h>
 #include <sys/time.h>
-#include <netinet/in.h>
 #include <netdb.h>
 #include <net/poll.h>
 
-#define getlogin_r(a,b) ENXIO
-#define srandom srand
-#define random rand
+int getlogin_r(char *buf, size_t size);
+void srandom(unsigned int seed);
+int random(void);
 #define getaddrinfo smb2_getaddrinfo
 #define freeaddrinfo smb2_freeaddrinfo
 
@@ -247,5 +367,30 @@ struct sockaddr_storage {
 #define sockaddr_in6 sockaddr_in
 
 #endif
+
+#ifdef PS4_PLATFORM
+
+#include <netdb.h>
+#include <poll.h>
+#include <sys/uio.h>
+
+#define TCP_NODELAY     1  /* Don't delay send to coalesce packets  */
+
+#endif /* PS4_PLATFORM */
+
+#ifdef ESP_PLATFORM
+#include <stddef.h>
+void srandom(unsigned int seed);
+int random(void);
+int getlogin_r(char *buf, size_t size);
+#endif
+
+#ifdef __ANDROID__
+#include <stddef.h>
+/* getlogin_r() was added in API 28 */
+#if __ANDROID_API__ < 28
+int getlogin_r(char *buf, size_t size);
+#endif
+#endif /* __ANDROID__ */
 
 #endif /* _COMPAT_H_ */

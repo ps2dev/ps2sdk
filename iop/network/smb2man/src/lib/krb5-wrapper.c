@@ -53,6 +53,10 @@
 #include <unistd.h>
 #endif
 
+#ifdef HAVE_SYS_UNISTD_H
+#include <sys/unistd.h>
+#endif
+
 #include <krb5/krb5.h>
 #include <gssapi/gssapi_krb5.h>
 #include <gssapi/gssapi.h>

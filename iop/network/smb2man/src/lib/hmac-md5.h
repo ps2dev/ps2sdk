@@ -15,7 +15,7 @@
 #include <stdint.h>
 #endif
 
-#if (__BYTE_ORDER == __BIG_ENDIAN)
+#if (__BYTE_ORDER == __BIG_ENDIAN) || defined(XBOX_360_PLATFORM)
 #  define WORDS_BIGENDIAN 1
 #endif
 

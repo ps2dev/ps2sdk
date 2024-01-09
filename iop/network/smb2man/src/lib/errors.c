@@ -1176,7 +1176,7 @@ int nterror_to_errno(uint32_t status) {
         case SMB2_STATUS_INSUFFICIENT_RESOURCES:
                 return EBUSY;
         case SMB2_STATUS_INTERNAL_ERROR:
-                // Fall through.
+                /* Fall through. */
         default:
                 return EIO;
         }

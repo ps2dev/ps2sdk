@@ -39,6 +39,10 @@
 #include <time.h>
 #endif
 
+#ifdef HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
+
 #include "compat.h"
 
 #include "portable-endian.h"

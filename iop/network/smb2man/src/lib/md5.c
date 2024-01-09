@@ -144,9 +144,11 @@ MD5Final(md5byte digest[16], struct MD5Context *ctx)
 #ifndef ASM_MD5
 
 /* The four core functions - F1 is optimized somewhat */
-
-/* #define F1(x, y, z) (x & y | ~x & z) */
+#if 0
+#define F1(x, y, z) (x & y | ~x & z) 
+#else
 #define F1(x, y, z) (z ^ (x & (y ^ z)))
+#endif
 #define F2(x, y, z) F1(z, x, y)
 #define F3(x, y, z) (x ^ y ^ z)
 #define F4(x, y, z) (y ^ (x | ~z))

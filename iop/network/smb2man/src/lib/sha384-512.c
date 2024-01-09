@@ -816,18 +816,18 @@ SHA384_512ProcessMessageBlock (SHA512Context * context)
 
   for (t = t2 = 0; t < 80; t++, t2 += 2)
     {
-      /*
-       * temp1 = H + SHA512_SIGMA1(E) + SHA_Ch(E,F,G) + K[t] + W[t];
-       */
+#if 0 
+      temp1 = H + SHA512_SIGMA1(E) + SHA_Ch(E,F,G) + K[t] + W[t];
+#endif       
       SHA512_SIGMA1 (E, temp1);
       SHA512_ADD (H, temp1, temp2);
       SHA_Ch (E, F, G, temp3);
       SHA512_ADD (temp2, temp3, temp4);
       SHA512_ADD (&K[t2], &W[t2], temp5);
       SHA512_ADD (temp4, temp5, temp1);
-      /*
-       * temp2 = SHA512_SIGMA0(A) + SHA_Maj(A,B,C);
-       */
+#if 0    
+      temp2 = SHA512_SIGMA0(A) + SHA_Maj(A,B,C);
+#endif 
       SHA512_SIGMA0 (A, temp3);
       SHA_Maj (A, B, C, temp4);
       SHA512_ADD (temp3, temp4, temp2);

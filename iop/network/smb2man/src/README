@@ -209,16 +209,25 @@ point and adjusted as needed for your applications.
 The only define needed for libsmb2 on the RP2040, other than the RP2040
 defines such as PICO_BOARD=pico_w, is PICO_PLATFORM.
 
-Playstation2
+Playstation 2
 ------------
 EE, Emotion-Engine, is the main CPU for the PS2.
 To compile libsmb2 for the PS2 EE, first install the PS2 toolchain and
 PS2 SDK and set it up.
 
-To build libsmb2.a, a version of libsmb2 for the EE tcpip stack:
+To build libsmb2_ip.a, a version of libsmb2 for the EE tcpip stack:
   $ cd lib
   $ make -f Makefile.PS2_EE clean
   $ make -f Makefile.PS2_EE install
+
+EE Using IOP Stack, It´s a different of EE
+version for when the LWIP stack is running on the IOP (libsmb2_ips and linking
+with -lps2ips)
+
+To build libsmb2_ips.a, a version of libsmb2 for the IOP tcpip stack:
+  $ cd lib
+  $ make -f Makefile.PS2_EE_IPS clean
+  $ make -f Makefile.PS2_EE_IPS install
 
 IOP, IO-Processor is the secondary CPU for the PS2.
 To compile libsmb2 for the PS2 IOP, first install the PS2 toolchain and
@@ -271,3 +280,27 @@ KallistiOS toolchain install location addons folder.
 NOTE: There is not yet a kos-ports entry for libsmb2 but once a versioned release
 that includes Dreamcast support is created installing from kos-ports will become
 the preferred method of installation.
+
+Xbox (Xbox XDK)
+----------------------
+Xbox CPU is acustom Intel Pentium III Coppermine-based processor which only supports litlle endian values.
+To compile libsmb2 for the Xbox, first install the Xbox XDK(with all features), Microsoft Visual C++ 2003 Professional and Windows XP.
+
+Then to build libsmb2, go to Xbox folder 
+and open the provided .sln file, Then hit the green button to build:
+
+The process will result a libsmb2.lib. So you can copy the include files
+and the .lib file to your Xbox project.
+
+Xbox 360 (Xbox 360 SDK)
+----------------------
+Xbox 360 CPU is a PPC(PowerPC) Xenon which only supports only big endian values.
+To compile libsmb2 for the Xbox 360, first install the Xbox 360 SDK(with all features), Microsoft Visual C++ 2010 Ultimate and Windows XP(Recommended) or Windows 7.
+
+Then to build libsmb2, go to Xbox 360 folder 
+and open the provided .sln file, Then hit the green button to build:
+
+The process will result a libsmb2.lib. So you can copy the include files
+and the .lib file to your Xbox 360 project.
+
+NOTE: Both ports was based on XBMC-360 port by BDC(Brent De Cartet) and now being updated to libsmb2 standards to best performance.
