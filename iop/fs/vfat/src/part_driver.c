@@ -3,12 +3,18 @@
 //---------------------------------------------------------------------------
 #include <stdio.h>
 #include <errno.h>
-
+#ifdef BUILDING_USBHDFSD
 #include <usbhdfsd.h>
+#endif /* BUILDING_USBHDFSD */
 #include "usbhd_common.h"
 #include "scache.h"
 #include "part_driver.h"
+#ifdef BUILDING_USBHDFSD
 #include "mass_stor.h"
+#endif /* BUILDING_USBHDFSD */
+#ifdef BUILDING_IEEE1394_DISK
+#include "sbp2_disk.h"
+#endif /* BUILDING_IEEE1394_DISK */
 #include "fat_driver.h"
 
 // #define DEBUG  //comment out this line when not debugging
@@ -44,7 +50,13 @@ typedef struct _part_raw_record
 } part_raw_record;
 
 //---------------------------------------------------------------------------
+#if defined(BUILDING_USBHDFSD)
 static USBHD_INLINE int part_getPartitionRecord(mass_dev *dev, part_raw_record *raw, part_record *rec)
+#elif defined(BUILDING_IEEE1394_DISK)
+static USBHD_INLINE int part_getPartitionRecord(struct SBP2Device *dev, part_raw_record *raw, part_record *rec)
+#else
+static USBHD_INLINE int part_getPartitionRecord(void *dev, part_raw_record *raw, part_record *rec)
+#endif
 {
     rec->sid   = raw->sid;
     rec->start = getUI32(raw->startLBA);
@@ -64,7 +76,13 @@ static USBHD_INLINE int part_getPartitionRecord(mass_dev *dev, part_raw_record *
 }
 
 //---------------------------------------------------------------------------
+#if defined(BUILDING_USBHDFSD)
 static int part_getPartitionTable(mass_dev *dev, part_table *part)
+#elif defined(BUILDING_IEEE1394_DISK)
+static int part_getPartitionTable(struct SBP2Device *dev, part_table *part)
+#else
+static int part_getPartitionTable(void *dev, part_table *part)
+#endif
 {
     int ret;
     unsigned int i;
@@ -104,11 +122,22 @@ static int part_getPartitionTable(mass_dev *dev, part_table *part)
 }
 
 //---------------------------------------------------------------------------
+#if defined(BUILDING_USBHDFSD)
 int part_connect(mass_dev *dev)
+#elif defined(BUILDING_IEEE1394_DISK)
+int part_connect(struct SBP2Device *dev)
+#else
+int part_connect(void *dev)
+#endif
 {
     part_table partTable;
     int parts;
+#ifdef BUILDING_USBHDFSD
     XPRINTF("part_connect devId %i \n", dev->devId);
+#endif /* BUILDING_USBHDFSD */
+#ifdef BUILDING_IEEE1394_DISK
+    XPRINTF("part_connect devId %i \n", dev->nodeID);
+#endif /* BUILDING_IEEE1394_DISK */
 
     if ((parts = part_getPartitionTable(dev, &partTable)) < 0)
         return -1;
@@ -144,9 +173,20 @@ int part_connect(mass_dev *dev)
 }
 
 //---------------------------------------------------------------------------
+#if defined(BUILDING_USBHDFSD)
 void part_disconnect(mass_dev *dev)
+#elif defined(BUILDING_IEEE1394_DISK)
+void part_disconnect(struct SBP2Device *dev)
+#else
+int part_connect(void *dev)
+#endif
 {
+#ifdef BUILDING_USBHDFSD
     printf("USBHDFSD: part_disconnect devId %i \n", dev->devId);
+#endif /* BUILDING_USBHDFSD */
+#ifdef BUILDING_IEEE1394_DISK
+    XPRINTF("part_disconnect devId %i \n", dev->nodeID);
+#endif /* BUILDING_IEEE1394_DISK */
     fat_forceUnmount(dev);
 }
 

@@ -25,6 +25,7 @@ typedef struct {
     int (*open)(const char *name, int flags, ...);
     int (*close)(int fd);
     int (*read)(int fd, void *buf, int nbyte);
+    int openFlags;
 } _io_driver;
 
 /** check whether the PlayStation 2 is actually a DESR-XXXX machine

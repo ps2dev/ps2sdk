@@ -20,7 +20,7 @@
 #define NEWLIB_PORT_AWARE
 #include "fileio.h"
 
-#define defaultIODriver { (void *)fioOpen, fioClose, fioRead }
+#define defaultIODriver { (void *)fioOpen, fioClose, fioRead, FIO_O_RDONLY }
 
 extern char g_RomName[];
 
@@ -34,7 +34,7 @@ char *GetRomNameWithIODriver(char *romname, _io_driver *driver)
 {
     int fd;
 
-    fd = driver->open("rom0:ROMVER", FIO_O_RDONLY);
+    fd = driver->open("rom0:ROMVER", driver->openFlags);
     driver->read(fd, romname, 14);
     driver->close(fd);
     return romname;
@@ -54,7 +54,7 @@ int IsDESRMachineWithIODriver(_io_driver *driver)
 {
     int fd;
 
-    fd = driver->open("rom0:PSXVER", FIO_O_RDONLY);
+    fd = driver->open("rom0:PSXVER", driver->openFlags);
     if (fd > 0) {
         driver->close(fd);
         return 1;

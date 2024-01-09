@@ -16,26 +16,21 @@
 #include <time.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #include <ps2sdkapi.h>
 #define OSD_CONFIG_NO_LIBCDVD
 #include "osd_config.h"
 
-static inline void setPS2SDKFunctions() {
-	// Set ps2sdk functions
-	_glue_ps2sdk_open();
-	_glue_ps2sdk_close();
-	_glue_ps2sdk_read();
-}
+#define posixIODriver { open, close, (int (*)(int, void *, int))read, O_RDONLY }
 
 #ifdef F__libcglue_timezone_update
 __attribute__((weak))
 void _libcglue_timezone_update()
 {
     /* Initialize timezone from PS2 OSD configuration */
-    setPS2SDKFunctions();
-
-	_io_driver driver = { _ps2sdk_open, _ps2sdk_close, _ps2sdk_read };
+	_io_driver driver = posixIODriver;
 	int tzOffset = configGetTimezoneWithIODriver(&driver);
     int tzOffsetAbs = tzOffset < 0 ? -tzOffset : tzOffset;
     int hours = tzOffsetAbs / 60;
@@ -52,16 +47,14 @@ void _libcglue_timezone_update()
 
 #ifdef F_ps2sdk_setTimezone
 void ps2sdk_setTimezone(int timezone) {
-	setPS2SDKFunctions();
-	_io_driver driver = { _ps2sdk_open, _ps2sdk_close, _ps2sdk_read };
+	_io_driver driver = posixIODriver;
 	configSetTimezoneWithIODriver(timezone, &driver, _libcglue_timezone_update);
 }
 #endif
 
 #ifdef F_ps2sdk_setDaylightSaving
 void ps2sdk_setDaylightSaving(int daylightSaving) {
-	setPS2SDKFunctions();
-	_io_driver driver = { _ps2sdk_open, _ps2sdk_close, _ps2sdk_read };
+	_io_driver driver = posixIODriver;
 	configSetDaylightSavingEnabledWithIODriver(daylightSaving, &driver, _libcglue_timezone_update);
 }
 #endif

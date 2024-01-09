@@ -8,7 +8,7 @@
 
 EE_BIN = filexio_sample.elf
 EE_OBJS = main.o
-EE_LIBS = -lfileXio
+EE_LIBS = -lfileXio -lpatches
 EE_CFLAGS = -fdata-sections -ffunction-sections -flto
 EE_LDFLAGS = -fdata-sections -ffunction-sections -flto -Wl,--gc-sections
 

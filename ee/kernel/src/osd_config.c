@@ -38,7 +38,7 @@ typedef struct
     u8 timeFormat;
 } ConfigParamT10K;
 
-#define defaultIODriver { (void *)fioOpen, fioClose, fioRead }
+#define defaultIODriver { (void *)fioOpen, fioClose, fioRead, FIO_O_RDONLY }
 
 extern ConfigParamT10K g_t10KConfig;
 

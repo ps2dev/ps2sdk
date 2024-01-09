@@ -10,6 +10,11 @@ void *malloc(int size);
 void free(void *ptr);
 #endif
 
+#ifdef BUILDING_IEEE1394_DISK
+struct _cache_set;
+typedef struct _cache_set cache_set;
+#endif /* BUILDING_IEEE1394_DISK */
+
 //---------------------------------------------------------------------------
 #define getUI32(buf) ((unsigned int)(((u8 *)(buf))[0] +         \
                                      (((u8 *)(buf))[1] << 8) +  \
