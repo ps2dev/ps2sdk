@@ -76,30 +76,12 @@ char *getcwd(char *buf, size_t size)
 		return NULL;
 	}
 
-	strcpy(buf, __cwd);
+	strncpy(buf, __cwd, size);
 	return buf;
 }
 #endif
 
 #ifdef F___path_absolute
-/* Like strcpy, but returns 0 if the string doesn't fit */
-static int __safe_strcpy(char *out, const char *in, int maxlen)
-{
-	for( ; maxlen > 0 && *in ; maxlen-- )
-		*(out++) = *(in++);
-	if(maxlen < 1) return 0;
-	*out = 0;
-	return 1;
-}
-
-/* Like strcat, but returns 0 if the string doesn't fit */
-static int __safe_strcat(char *out, const char *in, int maxlen)
-{
-	for( ; *out ; out++,maxlen-- )
-		continue;
-	return __safe_strcpy(out, in, maxlen);
-}
-
 /* Normalize a pathname (without leading "drive:") by removing
    . and .. components, duplicated /, etc. */
 static int __path_normalize(char *out, int len, int posixSeparator)
@@ -116,11 +98,14 @@ static int __path_normalize(char *out, int len, int posixSeparator)
     }
 
 	/* First append "/" to make the rest easier */
-	if(!__safe_strcat(out, &separator, len)) return -10;
+	if (strlen(out) + 1 >= len) return -10;
+	out[strlen(out)] = separator;
+	out[strlen(out)] = 0;
+
 
 	/* Convert "//" to "/" */
-	for(i=0; out[i+1]; i++) {
-		if(out[i]==separator && out[i+1]==separator) {
+	for(i = 0; out[i+1]; i++) {
+		if(out[i] == separator && out[i+1] == separator) {
 			for(j=i+1; out[j]; j++)
 				out[j] = out[j+1];
 			i--;
@@ -128,9 +113,9 @@ static int __path_normalize(char *out, int len, int posixSeparator)
 	}
 
 	/* Convert "/./" to "/" */
-	for(i=0; out[i] && out[i+1] && out[i+2]; i++) {
-		if(out[i]==separator && out[i+1]=='.' && out[i+2]==separator) {
-			for(j=i+1; out[j]; j++)
+	for(i = 0; out[i] && out[i+1] && out[i+2]; i++) {
+		if(out[i] == separator && out[i+1] == '.' && out[i+2] == separator) {
+			for(j = i+1; out[j]; j++)
 				out[j] = out[j+2];
 			i--;
 		}
@@ -141,9 +126,9 @@ static int __path_normalize(char *out, int len, int posixSeparator)
 	first = next = 0;
 	while(1) {
 		/* If a "../" follows, remove it and the parent */
-		if(out[next+1] && out[next+1]=='.' && 
-		   out[next+2] && out[next+2]=='.' &&
-		   out[next+3] && out[next+3]==separator) {
+		if(out[next+1] && out[next+1] == '.' && 
+		   out[next+2] && out[next+2] == '.' &&
+		   out[next+3] && out[next+3] == separator) {
 			for(j=0; out[first+j+1]; j++)
 				out[first+j+1] = out[next+j+4];
 			first = next = 0;
@@ -152,13 +137,13 @@ static int __path_normalize(char *out, int len, int posixSeparator)
 
 		/* Find next slash */
 		first = next;
-		for(next=first+1; out[next] && out[next] != separator; next++)
+		for(next= first+1; out[next] && out[next] != separator; next++)
 			continue;
 		if(!out[next]) break;
 	}
 
 	/* Remove trailing "/" just if it's not the root */
-	for(i=1; out[i]; i++)
+	for(i = 1; out[i]; i++)
 		continue;
 	if(i > 1 && out[i-1] == separator) 
 		out[i-1] = 0;
@@ -176,37 +161,29 @@ int __path_absolute(const char *in, char *out, int len)
 	dr = __get_drive(in, &separatorType);
 	char separator = separatorType == SeparatorTypePOSIX ? '/' : '\\';
 
-	if(dr > 0 && separatorType == SeparatorTypeNone) {
-		/* It starts with "drive:" and has no separator, so it's already absolute */
-		if(!__safe_strcpy(out, in, len))
-			return -1;
-	} else if(dr > 0 && in[dr] == separator) {
-		/* It starts with "drive:/", so it's already absolute */
-		if(!__safe_strcpy(out, in, len))
-			return -1;
+	if(dr > 0 && (separatorType == SeparatorTypeNone || in[dr] == separator)) {
+		/* It starts with "drive:" and has no separator or "drive:/", so it's already absolute */
+		if (strlen(in) >= len) return -1;
+		strncpy(out, in, len);
 	} else if(dr > 0 && in[dr - 1] == ':') {
 		/* It starts with "drive:", so it's already absoulte, however it misses the "/" after unit */
+		if (strlen(in) + 1 >= len) return -2;
 		strncpy(out, in, dr);
 		out[dr] = separator;
 		strncpy(out + dr + 1, in + dr, len - dr - 1);
 	} else if(in[0] == '\\' || in[0] == '/') {
 		/* It's absolute, but missing the drive, so use cwd's drive */
-		if(strlen(__cwd) >= len)
-			return -2;
-		strcpy(out, __cwd);
+		if(strlen(__cwd) + strlen(in) >= len) return -3;
+		strncpy(out, __cwd, len);
 		dr = __get_drive(out, &separatorType);
 		out[dr] = 0;
-		if(!__safe_strcat(out, in, len))
-			return -3;
+		strncat(out, in, len);
 	} else {
 		/* It's not absolute, so append it to the current cwd */
-		if(strlen(__cwd) >= len)
-			return -4;
-		strcpy(out, __cwd);
-		if(!__safe_strcat(out, &separator, len)) 
-			return -6;
-		if(!__safe_strcat(out, in, len)) 
-			return -7;
+		if(strlen(__cwd) + 1 + strlen(in) >= len) return -5;
+		strncpy(out, __cwd, len);
+		strncat(out, &separator, 1); 
+		strncat(out, in, len);
 	}
 
 	/* Now normalize the pathname portion */
