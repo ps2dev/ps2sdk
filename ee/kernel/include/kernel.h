@@ -532,12 +532,13 @@ void *GetEntryAddress(int syscall);
     void ExecOSD(int num_args, char *args[]) { _ExecOSD(num_args, args); }
 
 #define DISABLE_TimerSystemTime() \
-    void StartTimerSystemTime(void) {} \
-    void StopTimerSystemTime(void) {}
+    s32 InitTimer(s32 in_mode) {(void)in_mode; return 0;} \
+    s32 EndTimer(void) {return 0;} \
+    s32 StartTimerSystemTime(void) {return 0;} \
+    s32 StopTimerSystemTime(void) {return 0;}
 
 #define DISABLE_TimerAlarm() \
-    void InitTimerAlarm(void) {} \
-    void DeinitTimerAlarm(void) {}
+    void ForTimer_InitAlarm(void) {}
 
 #define DISABLE_PATCHED_ALARMS() \
     void InitAlarm(void) {}

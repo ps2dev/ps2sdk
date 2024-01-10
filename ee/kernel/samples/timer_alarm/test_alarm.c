@@ -15,32 +15,32 @@
 #include <timer.h>
 #include <timer_alarm.h>
 
-int flag = 0, flag2 = 0;
+int flag = 2, flag2 = 2;
 
-void usercb(struct timer_alarm_t *alarm, void *arg) {
+static u64 usercb(s32 id, u64 scheduled_time, u64 actual_time, void *arg, void *pc_value)
+{
     *(int*)arg = 1;
-    // The alarm does not trigger again unless we re-enable it manually
-    iStartTimerAlarm(alarm);
+    return 0;
 }
 
 int main(int argc, char *argv[])
 {
-    struct timer_alarm_t alarm, alarm2;
-    InitializeTimerAlarm(&alarm);
-    InitializeTimerAlarm(&alarm2);
-    SetTimerAlarm(&alarm, Sec2TimerBusClock(2), &usercb, &flag);
-    SetTimerAlarm(&alarm2, MSec2TimerBusClock(1414), &usercb, &flag2);
-    StartTimerAlarm(&alarm);
-    StartTimerAlarm(&alarm2);
-
     while (1) {
         if (flag) {
-            printf("Hello there, 2 second tick!\n");
+            if (flag != 2)
+            {
+                printf("Hello there, 2 second tick!\n");
+            }
             flag = 0;
+            SetTimerAlarm(Sec2TimerBusClock(2), &usercb, &flag);
         }
         if (flag2) {
-            printf("Hello there, sqrt(2) second tick!\n");
+            if (flag2 != 2)
+            {
+                printf("Hello there, sqrt(2) second tick!\n");
+            }
             flag2 = 0;
+            SetTimerAlarm(MSec2TimerBusClock(1414), &usercb, &flag2);
         }
     }
 

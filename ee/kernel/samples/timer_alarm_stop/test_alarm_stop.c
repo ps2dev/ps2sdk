@@ -15,38 +15,38 @@
 #include <timer.h>
 #include <timer_alarm.h>
 
-struct timer_alarm_t alarm, alarm2;
-int flag = 0, flag2 = 0;
+volatile s32 alarm1 = -1, alarm2 = -1;
+int flag = 2, flag2 = 2;
 
-void usercb1(struct timer_alarm_t *trigalarm, void *arg) {
+static u64 usercb(s32 id, u64 scheduled_time, u64 actual_time, void *arg, void *pc_value) {
     *(int*)arg = 1;
-    iStartTimerAlarm(trigalarm);
-}
-
-void usercb2(struct timer_alarm_t *trigalarm, void *arg) {
-    *(int*)arg = 1;
-    iStartTimerAlarm(trigalarm);
     // Disable the 2s alarm
-    iStopTimerAlarm(&alarm);
+    if (alarm2 == id)
+    {
+        iReleaseTimerAlarm(alarm1);
+        alarm1 = -1;
+    }
+    return 0;
 }
 
 int main(int argc, char *argv[])
 {
-    InitializeTimerAlarm(&alarm);
-    InitializeTimerAlarm(&alarm2);
-    SetTimerAlarm(&alarm, Sec2TimerBusClock(2), &usercb1, &flag);
-    SetTimerAlarm(&alarm2, Sec2TimerBusClock(5), &usercb2, &flag2);
-    StartTimerAlarm(&alarm);
-    StartTimerAlarm(&alarm2);
-
     while (1) {
         if (flag) {
-            printf("2s alarm triggered!\n");
+            if (flag != 2)
+            {
+                printf("2s alarm triggered!\n");
+            }
             flag = 0;
+            alarm1 = SetTimerAlarm(Sec2TimerBusClock(2), &usercb, &flag);
         }
         if (flag2) {
-            printf("5s alarm triggered!\n");
+            if (flag2 != 2)
+            {
+                printf("5s alarm triggered!\n");
+            }
             flag2 = 0;
+            alarm2 = SetTimerAlarm(Sec2TimerBusClock(5), &usercb, &flag2);
         }
     }
 
