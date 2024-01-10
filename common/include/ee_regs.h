@@ -204,6 +204,7 @@
 #define A_EE_GS_CSR          (0x12001000)
 #define A_EE_GS_IMR          (0x12001010)
 #define A_EE_GS_BUSDIR       (0x12001040)
+#define A_EE_GS_SIGLBLID     (0x12001080)
 
 /** Timer 0 counter value */
 #define R_EE_T0_COUNT     ((vu32 *)A_EE_T0_COUNT)
@@ -598,6 +599,398 @@
 #define R_EE_GS_IMR      ((vu64 *)A_EE_GS_IMR)
 /** Host I/F switching */
 #define R_EE_GS_BUSDIR   ((vu64 *)A_EE_GS_BUSDIR)
+/** Signal ID value read */
+#define R_EE_GS_SIGLBLID ((vu64 *)A_EE_GS_SIGLBLID)
+
+#define RD_EE_T0_COUNT(x) (*R_EE_T0_COUNT)
+#define RD_EE_T0_MODE(x) (*R_EE_T0_MODE)
+#define RD_EE_T0_COMP(x) (*R_EE_T0_COMP)
+#define RD_EE_T0_HOLD(x) (*R_EE_T0_HOLD)
+#define RD_EE_T1_COUNT(x) (*R_EE_T1_COUNT)
+#define RD_EE_T1_MODE(x) (*R_EE_T1_MODE)
+#define RD_EE_T1_COMP(x) (*R_EE_T1_COMP)
+#define RD_EE_T1_HOLD(x) (*R_EE_T1_HOLD)
+#define RD_EE_T2_COUNT(x) (*R_EE_T2_COUNT)
+#define RD_EE_T2_MODE(x) (*R_EE_T2_MODE)
+#define RD_EE_T2_COMP(x) (*R_EE_T2_COMP)
+#define RD_EE_T3_COUNT(x) (*R_EE_T3_COUNT)
+#define RD_EE_T3_MODE(x) (*R_EE_T3_MODE)
+#define RD_EE_T3_COMP(x) (*R_EE_T3_COMP)
+#define RD_EE_IPU_CMD(x) (*R_EE_IPU_CMD)
+#define RD_EE_IPU_CTRL(x) (*R_EE_IPU_CTRL)
+#define RD_EE_IPU_BP(x) (*R_EE_IPU_BP)
+/* No getter for R_EE_IPU_TOP */
+/* No getter for R_EE_GIF_CTRL */
+/* No getter for R_EE_GIF_MODE */
+#define RD_EE_GIF_STAT(x) (*R_EE_GIF_STAT)
+#define RD_EE_GIF_TAG0(x) (*R_EE_GIF_TAG0)
+#define RD_EE_GIF_TAG1(x) (*R_EE_GIF_TAG1)
+#define RD_EE_GIF_TAG2(x) (*R_EE_GIF_TAG2)
+#define RD_EE_GIF_TAG3(x) (*R_EE_GIF_TAG3)
+#define RD_EE_GIF_CNT(x) (*R_EE_GIF_CNT)
+#define RD_EE_GIF_P3CNT(x) (*R_EE_GIF_P3CNT)
+#define RD_EE_GIF_P3TAG(x) (*R_EE_GIF_P3TAG)
+#define RD_EE_VIF0_STAT(x) (*R_EE_VIF0_STAT)
+/* No getter for R_EE_VIF0_FBRST */
+#define RD_EE_VIF0_ERR(x) (*R_EE_VIF0_ERR)
+#define RD_EE_VIF0_MARK(x) (*R_EE_VIF0_MARK)
+#define RD_EE_VIF0_CYCLE(x) (*R_EE_VIF0_CYCLE)
+#define RD_EE_VIF0_MODE(x) (*R_EE_VIF0_MODE)
+#define RD_EE_VIF0_NUM(x) (*R_EE_VIF0_NUM)
+#define RD_EE_VIF0_MASK(x) (*R_EE_VIF0_MASK)
+#define RD_EE_VIF0_CODE(x) (*R_EE_VIF0_CODE)
+#define RD_EE_VIF0_ITOPS(x) (*R_EE_VIF0_ITOPS)
+#define RD_EE_VIF0_ITOP(x) (*R_EE_VIF0_ITOP)
+#define RD_EE_VIF0_R0(x) (*R_EE_VIF0_R0)
+#define RD_EE_VIF0_R1(x) (*R_EE_VIF0_R1)
+#define RD_EE_VIF0_R2(x) (*R_EE_VIF0_R2)
+#define RD_EE_VIF0_R3(x) (*R_EE_VIF0_R3)
+#define RD_EE_VIF0_C0(x) (*R_EE_VIF0_C0)
+#define RD_EE_VIF0_C1(x) (*R_EE_VIF0_C1)
+#define RD_EE_VIF0_C2(x) (*R_EE_VIF0_C2)
+#define RD_EE_VIF0_C3(x) (*R_EE_VIF0_C3)
+#define RD_EE_VIF1_STAT(x) (*R_EE_VIF1_STAT)
+/* No getter for RD_EE_VIF1_FBRST */
+#define RD_EE_VIF1_ERR(x) (*R_EE_VIF1_ERR)
+#define RD_EE_VIF1_MARK(x) (*R_EE_VIF1_MARK)
+#define RD_EE_VIF1_CYCLE(x) (*R_EE_VIF1_CYCLE)
+#define RD_EE_VIF1_MODE(x) (*R_EE_VIF1_MODE)
+#define RD_EE_VIF1_NUM(x) (*R_EE_VIF1_NUM)
+#define RD_EE_VIF1_MASK(x) (*R_EE_VIF1_MASK)
+#define RD_EE_VIF1_CODE(x) (*R_EE_VIF1_CODE)
+#define RD_EE_VIF1_ITOPS(x) (*R_EE_VIF1_ITOPS)
+#define RD_EE_VIF1_BASE(x) (*R_EE_VIF1_BASE)
+#define RD_EE_VIF1_OFST(x) (*R_EE_VIF1_OFST)
+#define RD_EE_VIF1_TOPS(x) (*R_EE_VIF1_TOPS)
+#define RD_EE_VIF1_ITOP(x) (*R_EE_VIF1_ITOP)
+#define RD_EE_VIF1_TOP(x) (*R_EE_VIF1_TOP)
+#define RD_EE_VIF1_R0(x) (*R_EE_VIF1_R0)
+#define RD_EE_VIF1_R1(x) (*R_EE_VIF1_R1)
+#define RD_EE_VIF1_R2(x) (*R_EE_VIF1_R2)
+#define RD_EE_VIF1_R3(x) (*R_EE_VIF1_R3)
+#define RD_EE_VIF1_C0(x) (*R_EE_VIF1_C0)
+#define RD_EE_VIF1_C1(x) (*R_EE_VIF1_C1)
+#define RD_EE_VIF1_C2(x) (*R_EE_VIF1_C2)
+#define RD_EE_VIF1_C3(x) (*R_EE_VIF1_C3)
+/* No getter for R_EE_VIF0_FIFO */
+#define RD_EE_VIF1_FIFO(x) (*R_EE_VIF1_FIFO)
+/* No getter for R_EE_GIF_FIFO */
+#define RD_EE_IPU_out_FIFO(x) (*R_EE_IPU_out_FIFO)
+/* No getter for R_EE_IPU_in_FIFO */
+#define RD_EE_D0_CHCR(x) (*R_EE_D0_CHCR)
+#define RD_EE_D0_MADR(x) (*R_EE_D0_MADR)
+#define RD_EE_D0_QWC(x) (*R_EE_D0_QWC)
+#define RD_EE_D0_TADR(x) (*R_EE_D0_TADR)
+#define RD_EE_D0_ASR0(x) (*R_EE_D0_ASR0)
+#define RD_EE_D0_ASR1(x) (*R_EE_D0_ASR1)
+#define RD_EE_D1_CHCR(x) (*R_EE_D1_CHCR)
+#define RD_EE_D1_MADR(x) (*R_EE_D1_MADR)
+#define RD_EE_D1_QWC(x) (*R_EE_D1_QWC)
+#define RD_EE_D1_TADR(x) (*R_EE_D1_TADR)
+#define RD_EE_D1_ASR0(x) (*R_EE_D1_ASR0)
+#define RD_EE_D1_ASR1(x) (*R_EE_D1_ASR1)
+#define RD_EE_D2_CHCR(x) (*R_EE_D2_CHCR)
+#define RD_EE_D2_MADR(x) (*R_EE_D2_MADR)
+#define RD_EE_D2_QWC(x) (*R_EE_D2_QWC)
+#define RD_EE_D2_TADR(x) (*R_EE_D2_TADR)
+#define RD_EE_D2_ASR0(x) (*R_EE_D2_ASR0)
+#define RD_EE_D2_ASR1(x) (*R_EE_D2_ASR1)
+#define RD_EE_D3_CHCR(x) (*R_EE_D3_CHCR)
+#define RD_EE_D3_MADR(x) (*R_EE_D3_MADR)
+#define RD_EE_D3_QWC(x) (*R_EE_D3_QWC)
+#define RD_EE_D4_CHCR(x) (*R_EE_D4_CHCR)
+#define RD_EE_D4_MADR(x) (*R_EE_D4_MADR)
+#define RD_EE_D4_QWC(x) (*R_EE_D4_QWC)
+#define RD_EE_D4_TADR(x) (*R_EE_D4_TADR)
+#define RD_EE_D5_CHCR(x) (*R_EE_D5_CHCR)
+#define RD_EE_D5_MADR(x) (*R_EE_D5_MADR)
+#define RD_EE_D5_QWC(x) (*R_EE_D5_QWC)
+#define RD_EE_D6_CHCR(x) (*R_EE_D6_CHCR)
+#define RD_EE_D6_MADR(x) (*R_EE_D6_MADR)
+#define RD_EE_D6_QWC(x) (*R_EE_D6_QWC)
+#define RD_EE_D6_TADR(x) (*R_EE_D6_TADR)
+#define RD_EE_D7_CHCR(x) (*R_EE_D7_CHCR)
+#define RD_EE_D7_MADR(x) (*R_EE_D7_MADR)
+#define RD_EE_D7_QWC(x) (*R_EE_D7_QWC)
+#define RD_EE_D8_CHCR(x) (*R_EE_D8_CHCR)
+#define RD_EE_D8_MADR(x) (*R_EE_D8_MADR)
+#define RD_EE_D8_QWC(x) (*R_EE_D8_QWC)
+#define RD_EE_D8_SADR(x) (*R_EE_D8_SADR)
+#define RD_EE_D9_CHCR(x) (*R_EE_D9_CHCR)
+#define RD_EE_D9_MADR(x) (*R_EE_D9_MADR)
+#define RD_EE_D9_QWC(x) (*R_EE_D9_QWC)
+#define RD_EE_D9_TADR(x) (*R_EE_D9_TADR)
+#define RD_EE_D9_SADR(x) (*R_EE_D9_SADR)
+#define RD_EE_D_CTRL(x) (*R_EE_D_CTRL)
+#define RD_EE_D_STAT(x) (*R_EE_D_STAT)
+#define RD_EE_D_PCR(x) (*R_EE_D_PCR)
+#define RD_EE_D_SQWC(x) (*R_EE_D_SQWC)
+#define RD_EE_D_RBSR(x) (*R_EE_D_RBSR)
+#define RD_EE_D_RBOR(x) (*R_EE_D_RBOR)
+#define RD_EE_D_STADR(x) (*R_EE_D_STADR)
+#define RD_EE_I_STAT(x) (*R_EE_I_STAT)
+#define RD_EE_I_MASK(x) (*R_EE_I_MASK)
+/* No getter for R_EE_SIO_LCR */
+/* No getter for R_EE_SIO_LSR */
+/* No getter for R_EE_SIO_IER */
+/* No getter for R_EE_SIO_ISR */
+/* No getter for R_EE_SIO_FCR */
+/* No getter for R_EE_SIO_BRC */
+/* No getter for R_EE_SIO_REG60 */
+/* No getter for R_EE_SIO_REG70 */
+/* No getter for R_EE_SIO_TXFIFO */
+/* No getter for R_EE_SIO_REG90 */
+/* No getter for R_EE_SIO_REGA0 */
+/* No getter for R_EE_SIO_REGB0 */
+/* No getter for R_EE_SIO_RXFIFO */
+/* No getter for R_EE_SBUS_MADDR */
+/* No getter for R_EE_SBUS_SADDR */
+/* No getter for R_EE_SBUS_MSFLAG */
+/* No getter for R_EE_SBUS_SMFLAG */
+/* No getter for R_EE_SBUS_REG40 */
+/* No getter for R_EE_SBUS_REG50 */
+/* No getter for R_EE_SBUS_REG60 */
+/* No getter for R_EE_SBUS_REG70 */
+/* No getter for R_EE_SBUS_REG80 */
+/* No getter for R_EE_SBUS_REG90 */
+/* No getter for R_EE_SBUS_REGA0 */
+/* No getter for R_EE_SBUS_REGB0 */
+/* No getter for R_EE_SBUS_REGC0 */
+/* No getter for R_EE_SBUS_REGD0 */
+/* No getter for R_EE_SBUS_REGE0 */
+/* No getter for R_EE_SBUS_REGF0 */
+/* No getter for R_EE_PGIF_GPU_STAT */
+/* No getter for R_EE_PGIF_REG10 */
+/* No getter for R_EE_PGIF_REG20 */
+/* No getter for R_EE_PGIF_REG30 */
+/* No getter for R_EE_PGIF_REG40 */
+/* No getter for R_EE_PGIF_REG50 */
+/* No getter for R_EE_PGIF_REG60 */
+/* No getter for R_EE_PGIF_REG70 */
+/* No getter for R_EE_PGIF_CFIFO_STAT */
+/* No getter for R_EE_PGIF_REG90 */
+/* No getter for R_EE_PGIF_REGA0 */
+/* No getter for R_EE_PGIF_REGB0 */
+/* No getter for R_EE_PGIF_CFIFO_DATA */
+/* No getter for R_EE_PGIF_REGD0 */
+/* No getter for R_EE_PGIF_REGE0 */
+/* No getter for R_EE_PGIF_REGF0 */
+#define RD_EE_D_ENABLER(x) (*R_EE_D_ENABLER)
+#define RD_EE_D_ENABLEW(x) (*R_EE_D_ENABLEW)
+/* No getter for R_EE_GS_PMODE */
+#define RD_EE_GS_SMODE1(x) (*R_EE_GS_SMODE1)
+/* No getter for R_EE_GS_SMODE2 */
+#define RD_EE_GS_SRFSH(x) (*R_EE_GS_SRFSH)
+#define RD_EE_GS_SYNCH1(x) (*R_EE_GS_SYNCH1)
+#define RD_EE_GS_SYNCH2(x) (*R_EE_GS_SYNCH2)
+#define RD_EE_GS_SYNCV(x) (*R_EE_GS_SYNCV)
+/* No getter for R_EE_GS_DISPFB1 */
+/* No getter for R_EE_GS_DISPLAY1 */
+/* No getter for R_EE_GS_DISPFB2 */
+/* No getter for R_EE_GS_DISPLAY2 */
+/* No getter for R_EE_GS_EXTBUF */
+/* No getter for R_EE_GS_EXTDATA */
+/* No getter for R_EE_GS_EXTWRITE */
+/* No getter for R_EE_GS_BGCOLOR */
+/* No getter for R_EE_GS_CSR */
+/* No getter for R_EE_GS_IMR */
+/* No getter for R_EE_GS_BUSDIR */
+#define RD_EE_GS_SIGLBLID(x) (*R_EE_GS_SIGLBLID)
+
+#define WR_EE_T0_COUNT(x) (*R_EE_T0_COUNT = (x))
+#define WR_EE_T0_MODE(x) (*R_EE_T0_MODE = (x))
+#define WR_EE_T0_COMP(x) (*R_EE_T0_COMP = (x))
+#define WR_EE_T0_HOLD(x) (*R_EE_T0_HOLD = (x))
+#define WR_EE_T1_COUNT(x) (*R_EE_T1_COUNT = (x))
+#define WR_EE_T1_MODE(x) (*R_EE_T1_MODE = (x))
+#define WR_EE_T1_COMP(x) (*R_EE_T1_COMP = (x))
+#define WR_EE_T1_HOLD(x) (*R_EE_T1_HOLD = (x))
+#define WR_EE_T2_COUNT(x) (*R_EE_T2_COUNT = (x))
+#define WR_EE_T2_MODE(x) (*R_EE_T2_MODE = (x))
+#define WR_EE_T2_COMP(x) (*R_EE_T2_COMP = (x))
+#define WR_EE_T3_COUNT(x) (*R_EE_T3_COUNT = (x))
+#define WR_EE_T3_MODE(x) (*R_EE_T3_MODE = (x))
+#define WR_EE_T3_COMP(x) (*R_EE_T3_COMP = (x))
+#define WR_EE_IPU_CMD(x) (*R_EE_IPU_CMD = (x))
+#define WR_EE_IPU_CTRL(x) (*R_EE_IPU_CTRL = (x))
+/* No setter for R_EE_IPU_BP */
+#define WR_EE_IPU_TOP(x) (*R_EE_IPU_TOP = (x))
+#define WR_EE_GIF_CTRL(x) (*R_EE_GIF_CTRL = (x))
+#define WR_EE_GIF_MODE(x) (*R_EE_GIF_MODE = (x))
+/* No setter for R_EE_GIF_STAT */
+/* No setter for R_EE_GIF_TAG0 */
+/* No setter for R_EE_GIF_TAG1 */
+/* No setter for R_EE_GIF_TAG2 */
+/* No setter for R_EE_GIF_TAG3 */
+/* No setter for R_EE_GIF_CNT */
+/* No setter for R_EE_GIF_P3CNT */
+/* No setter for R_EE_GIF_P3TAG */
+/* No setter for R_EE_VIF0_STAT */
+#define WR_EE_VIF0_FBRST(x) (*R_EE_VIF0_FBRST = (x))
+#define WR_EE_VIF0_ERR(x) (*R_EE_VIF0_ERR = (x))
+#define WR_EE_VIF0_MARK(x) (*R_EE_VIF0_MARK = (x))
+/* No setter for R_EE_VIF0_CYCLE */
+/* No setter for R_EE_VIF0_MODE */
+/* No setter for R_EE_VIF0_NUM */
+/* No setter for R_EE_VIF0_MASK */
+/* No setter for R_EE_VIF0_CODE */
+/* No setter for R_EE_VIF0_ITOPS */
+/* No setter for R_EE_VIF0_ITOP */
+/* No setter for R_EE_VIF0_R0 */
+/* No setter for R_EE_VIF0_R1 */
+/* No setter for R_EE_VIF0_R2 */
+/* No setter for R_EE_VIF0_R3 */
+/* No setter for R_EE_VIF0_C0 */
+/* No setter for R_EE_VIF0_C1 */
+/* No setter for R_EE_VIF0_C2 */
+/* No setter for R_EE_VIF0_C3 */
+/* No setter for R_EE_VIF1_STAT */
+#define WR_EE_VIF1_FBRST(x) (*R_EE_VIF1_FBRST = (x))
+#define WR_EE_VIF1_ERR(x) (*R_EE_VIF1_ERR = (x))
+#define WR_EE_VIF1_MARK(x) (*R_EE_VIF1_MARK = (x))
+/* No setter for R_EE_VIF1_CYCLE */
+/* No setter for R_EE_VIF1_MODE */
+/* No setter for R_EE_VIF1_NUM */
+/* No setter for R_EE_VIF1_MASK */
+/* No setter for R_EE_VIF1_CODE */
+/* No setter for R_EE_VIF1_ITOPS */
+/* No setter for R_EE_VIF1_BASE */
+/* No setter for R_EE_VIF1_OFST */
+/* No setter for R_EE_VIF1_TOPS */
+/* No setter for R_EE_VIF1_ITOP */
+/* No setter for R_EE_VIF1_TOP */
+/* No setter for R_EE_VIF1_R0 */
+/* No setter for R_EE_VIF1_R1 */
+/* No setter for R_EE_VIF1_R2 */
+/* No setter for R_EE_VIF1_R3 */
+/* No setter for R_EE_VIF1_C0 */
+/* No setter for R_EE_VIF1_C1 */
+/* No setter for R_EE_VIF1_C2 */
+/* No setter for R_EE_VIF1_C3 */
+#define WR_EE_VIF0_FIFO(x) (*R_EE_VIF0_FIFO = (x))
+#define WR_EE_VIF1_FIFO(x) (*R_EE_VIF1_FIFO = (x))
+#define WR_EE_GIF_FIFO(x) (*R_EE_GIF_FIFO = (x))
+#define WR_EE_IPU_out_FIFO(x) (*R_EE_IPU_out_FIFO = (x))
+/* No setter for R_EE_IPU_in_FIFO */
+#define WR_EE_D0_CHCR(x) (*R_EE_D0_CHCR = (x))
+#define WR_EE_D0_MADR(x) (*R_EE_D0_MADR = (x))
+#define WR_EE_D0_QWC(x) (*R_EE_D0_QWC = (x))
+#define WR_EE_D0_TADR(x) (*R_EE_D0_TADR = (x))
+#define WR_EE_D0_ASR0(x) (*R_EE_D0_ASR0 = (x))
+#define WR_EE_D0_ASR1(x) (*R_EE_D0_ASR1 = (x))
+#define WR_EE_D1_CHCR(x) (*R_EE_D1_CHCR = (x))
+#define WR_EE_D1_MADR(x) (*R_EE_D1_MADR = (x))
+#define WR_EE_D1_QWC(x) (*R_EE_D1_QWC = (x))
+#define WR_EE_D1_TADR(x) (*R_EE_D1_TADR = (x))
+#define WR_EE_D1_ASR0(x) (*R_EE_D1_ASR0 = (x))
+#define WR_EE_D1_ASR1(x) (*R_EE_D1_ASR1 = (x))
+#define WR_EE_D2_CHCR(x) (*R_EE_D2_CHCR = (x))
+#define WR_EE_D2_MADR(x) (*R_EE_D2_MADR = (x))
+#define WR_EE_D2_QWC(x) (*R_EE_D2_QWC = (x))
+#define WR_EE_D2_TADR(x) (*R_EE_D2_TADR = (x))
+#define WR_EE_D2_ASR0(x) (*R_EE_D2_ASR0 = (x))
+#define WR_EE_D2_ASR1(x) (*R_EE_D2_ASR1 = (x))
+#define WR_EE_D3_CHCR(x) (*R_EE_D3_CHCR = (x))
+#define WR_EE_D3_MADR(x) (*R_EE_D3_MADR = (x))
+#define WR_EE_D3_QWC(x) (*R_EE_D3_QWC = (x))
+#define WR_EE_D4_CHCR(x) (*R_EE_D4_CHCR = (x))
+#define WR_EE_D4_MADR(x) (*R_EE_D4_MADR = (x))
+#define WR_EE_D4_QWC(x) (*R_EE_D4_QWC = (x))
+#define WR_EE_D4_TADR(x) (*R_EE_D4_TADR = (x))
+#define WR_EE_D5_CHCR(x) (*R_EE_D5_CHCR = (x))
+#define WR_EE_D5_MADR(x) (*R_EE_D5_MADR = (x))
+#define WR_EE_D5_QWC(x) (*R_EE_D5_QWC = (x))
+#define WR_EE_D6_CHCR(x) (*R_EE_D6_CHCR = (x))
+#define WR_EE_D6_MADR(x) (*R_EE_D6_MADR = (x))
+#define WR_EE_D6_QWC(x) (*R_EE_D6_QWC = (x))
+#define WR_EE_D6_TADR(x) (*R_EE_D6_TADR = (x))
+#define WR_EE_D7_CHCR(x) (*R_EE_D7_CHCR = (x))
+#define WR_EE_D7_MADR(x) (*R_EE_D7_MADR = (x))
+#define WR_EE_D7_QWC(x) (*R_EE_D7_QWC = (x))
+#define WR_EE_D8_CHCR(x) (*R_EE_D8_CHCR = (x))
+#define WR_EE_D8_MADR(x) (*R_EE_D8_MADR = (x))
+#define WR_EE_D8_QWC(x) (*R_EE_D8_QWC = (x))
+#define WR_EE_D8_SADR(x) (*R_EE_D8_SADR = (x))
+#define WR_EE_D9_CHCR(x) (*R_EE_D9_CHCR = (x))
+#define WR_EE_D9_MADR(x) (*R_EE_D9_MADR = (x))
+#define WR_EE_D9_QWC(x) (*R_EE_D9_QWC = (x))
+#define WR_EE_D9_TADR(x) (*R_EE_D9_TADR = (x))
+#define WR_EE_D9_SADR(x) (*R_EE_D9_SADR = (x))
+#define WR_EE_D_CTRL(x) (*R_EE_D_CTRL = (x))
+#define WR_EE_D_STAT(x) (*R_EE_D_STAT = (x))
+#define WR_EE_D_PCR(x) (*R_EE_D_PCR = (x))
+#define WR_EE_D_SQWC(x) (*R_EE_D_SQWC = (x))
+#define WR_EE_D_RBSR(x) (*R_EE_D_RBSR = (x))
+#define WR_EE_D_RBOR(x) (*R_EE_D_RBOR = (x))
+#define WR_EE_D_STADR(x) (*R_EE_D_STADR = (x))
+#define WR_EE_I_STAT(x) (*R_EE_I_STAT = (x))
+#define WR_EE_I_MASK(x) (*R_EE_I_MASK = (x))
+/* No setter for R_EE_SIO_LCR */
+/* No setter for R_EE_SIO_LSR */
+/* No setter for R_EE_SIO_IER */
+/* No setter for R_EE_SIO_ISR */
+/* No setter for R_EE_SIO_FCR */
+/* No setter for R_EE_SIO_BRC */
+/* No setter for R_EE_SIO_REG60 */
+/* No setter for R_EE_SIO_REG70 */
+/* No setter for R_EE_SIO_TXFIFO */
+/* No setter for R_EE_SIO_REG90 */
+/* No setter for R_EE_SIO_REGA0 */
+/* No setter for R_EE_SIO_REGB0 */
+/* No setter for R_EE_SIO_RXFIFO */
+/* No setter for R_EE_SBUS_MADDR */
+/* No setter for R_EE_SBUS_SADDR */
+/* No setter for R_EE_SBUS_MSFLAG */
+/* No setter for R_EE_SBUS_SMFLAG */
+/* No setter for R_EE_SBUS_REG40 */
+/* No setter for R_EE_SBUS_REG50 */
+/* No setter for R_EE_SBUS_REG60 */
+/* No setter for R_EE_SBUS_REG70 */
+/* No setter for R_EE_SBUS_REG80 */
+/* No setter for R_EE_SBUS_REG90 */
+/* No setter for R_EE_SBUS_REGA0 */
+/* No setter for R_EE_SBUS_REGB0 */
+/* No setter for R_EE_SBUS_REGC0 */
+/* No setter for R_EE_SBUS_REGD0 */
+/* No setter for R_EE_SBUS_REGE0 */
+/* No setter for R_EE_SBUS_REGF0 */
+/* No setter for R_EE_PGIF_GPU_STAT */
+/* No setter for R_EE_PGIF_REG10 */
+/* No setter for R_EE_PGIF_REG20 */
+/* No setter for R_EE_PGIF_REG30 */
+/* No setter for R_EE_PGIF_REG40 */
+/* No setter for R_EE_PGIF_REG50 */
+/* No setter for R_EE_PGIF_REG60 */
+/* No setter for R_EE_PGIF_REG70 */
+/* No setter for R_EE_PGIF_CFIFO_STAT */
+/* No setter for R_EE_PGIF_REG90 */
+/* No setter for R_EE_PGIF_REGA0 */
+/* No setter for R_EE_PGIF_REGB0 */
+/* No setter for R_EE_PGIF_CFIFO_DATA */
+/* No setter for R_EE_PGIF_REGD0 */
+/* No setter for R_EE_PGIF_REGE0 */
+/* No setter for R_EE_PGIF_REGF0 */
+#define WR_EE_D_ENABLER(x) (*R_EE_D_ENABLER = (x))
+#define WR_EE_D_ENABLEW(x) (*R_EE_D_ENABLEW = (x))
+#define WR_EE_GS_PMODE(x) (*R_EE_GS_PMODE = (x))
+/* No setter for R_EE_GS_SMODE1 */
+#define WR_EE_GS_SMODE2(x) (*R_EE_GS_SMODE2 = (x))
+/* No setter for R_EE_GS_SRFSH */
+/* No setter for R_EE_GS_SYNCH1 */
+/* No setter for R_EE_GS_SYNCH2 */
+/* No setter for R_EE_GS_SYNCV */
+#define WR_EE_GS_DISPFB1(x) (*R_EE_GS_DISPFB1 = (x))
+#define WR_EE_GS_DISPLAY1(x) (*R_EE_GS_DISPLAY1 = (x))
+#define WR_EE_GS_DISPFB2(x) (*R_EE_GS_DISPFB2 = (x))
+#define WR_EE_GS_DISPLAY2(x) (*R_EE_GS_DISPLAY2 = (x))
+#define WR_EE_GS_EXTBUF(x) (*R_EE_GS_EXTBUF = (x))
+#define WR_EE_GS_EXTDATA(x) (*R_EE_GS_EXTDATA = (x))
+#define WR_EE_GS_EXTWRITE(x) (*R_EE_GS_EXTWRITE = (x))
+#define WR_EE_GS_BGCOLOR(x) (*R_EE_GS_BGCOLOR = (x))
+#define WR_EE_GS_CSR(x) (*R_EE_GS_CSR = (x))
+#define WR_EE_GS_IMR(x) (*R_EE_GS_IMR = (x))
+#define WR_EE_GS_BUSDIR(x) (*R_EE_GS_BUSDIR = (x))
+/* No setter for R_EE_GS_SIGLBLID */
 
 #define EE_CHCR_MOD_NORM  (0)
 #define EE_CHCR_MOD_CHAIN (1)

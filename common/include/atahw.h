@@ -27,25 +27,25 @@
 /** A port contains all of the ATA controller registers.  */
 typedef struct _ata_hwport
 {
-    u16 r_data;  /* 00 */
-    u16 r_error; /* 02 */
+    vu16 r_data;  /* 00 */
+    vu16 r_error; /* 02 */
 #define r_feature r_error
-    u16 r_nsector; /* 04 */
-    u16 r_sector;  /* 06 */
-    u16 r_lcyl;    /* 08 */
-    u16 r_hcyl;    /* 0a */
-    u16 r_select;  /* 0c */
-    u16 r_status;  /* 0e */
+    vu16 r_nsector; /* 04 */
+    vu16 r_sector;  /* 06 */
+    vu16 r_lcyl;    /* 08 */
+    vu16 r_hcyl;    /* 0a */
+    vu16 r_select;  /* 0c */
+    vu16 r_status;  /* 0e */
 #define r_command r_status
-    u16 pad[6];
-    u16 r_control; /* 1c */
+    vu16 pad[6];
+    vu16 r_control; /* 1c */
 } ata_hwport_t;
 
-#define USE_ATA_REGS volatile ata_hwport_t *ata_hwport = \
-                         (volatile ata_hwport_t *)ATA_DEV9_HDD_BASE
+#define USE_ATA_REGS ata_hwport_t *ata_hwport = \
+                         (ata_hwport_t *)ATA_DEV9_HDD_BASE
 
-#define USE_AIF_ATA_REGS volatile ata_hwport_t *ata_hwport = \
-                             (volatile ata_hwport_t *)ATA_AIF_HDD_BASE
+#define USE_AIF_ATA_REGS ata_hwport_t *ata_hwport = \
+                             (ata_hwport_t *)ATA_AIF_HDD_BASE
 
 /* r_error bits.  */
 #define ATA_ERR_MARK   0x01
