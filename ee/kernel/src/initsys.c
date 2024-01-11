@@ -20,9 +20,9 @@
 #ifdef F__InitSys
 void _InitSys(void)
 {
-    StartTimerSystemTime();
-    InitTimerAlarm();
     InitAlarm();
+    InitTimer(2);
+    StartTimerSystemTime();
     InitThread();
     InitExecPS2();
     InitTLBFunctions();
@@ -32,8 +32,8 @@ void _InitSys(void)
 #ifdef F_TerminateLibrary
 void TerminateLibrary(void)
 {
-    DeinitTimerAlarm();
     StopTimerSystemTime();
+    EndTimer();
     InitTLB();
 }
 #endif

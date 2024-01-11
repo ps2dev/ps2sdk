@@ -30,8 +30,6 @@ SECTIONS {
 	PROVIDE(_etext = .);
 	PROVIDE(etext = .);
 
-	.reginfo : { *(.reginfo) }
-
 	/* Global/static constructors and deconstructors. */
 	.ctors ALIGN(16): {
 		KEEP(*crtbegin*.o(.ctors))
@@ -46,12 +44,7 @@ SECTIONS {
 		KEEP(*(.dtors))
 	}
 
-	/* Static data.  */
-	.rodata ALIGN(128): {
-		*(.rodata)
-		*(.rodata.*)
-		*(.gnu.linkonce.r*)
-	}
+	.reginfo : { *(.reginfo) }
 
 	.data ALIGN(128): {
 		_fdata = . ;
@@ -59,6 +52,13 @@ SECTIONS {
 		*(.data.*)
 		*(.gnu.linkonce.d*)
 		SORT(CONSTRUCTORS)
+	}
+
+	/* Static data.  */
+	.rodata ALIGN(128): {
+		*(.rodata)
+		*(.rodata.*)
+		*(.gnu.linkonce.r*)
 	}
 
 	.rdata ALIGN(128): { *(.rdata) }
@@ -96,6 +96,10 @@ SECTIONS {
 
 	_end = . ;
 	PROVIDE(end = .);
+
+	.spad 0x70000000: {
+		*(.spad)
+	}
 
 	/* Symbols needed by crt0.s.  */
 	PROVIDE(_heap_size = -1);

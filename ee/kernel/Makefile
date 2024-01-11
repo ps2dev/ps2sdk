@@ -102,9 +102,55 @@ EXIT_OBJS += _exit_internals.o SetArg.o Exit.o ExecPS2.o LoadExecPS2.o ExecOSD.o
 
 ### Timer objects
 
-TIMER_OBJS = __time_internals.o StartTimerSystemTime.o StopTimerSystemTime.o iGetTimerSystemTime.o GetTimerSystemTime.o cpu_ticks.o
-TIMER_ALARM_OBJS = TimerAlarmInternals.o __Timer2Resched.o InitTimerAlarm.o DeinitTimerAlarm.o InitializeTimerAlarm.o \
-	iStopTimerAlarm.o StopTimerAlarm.o iStartTimerAlarm.o StartTimerAlarm.o SetTimerAlarm.o ThreadWaitClock.o
+TIMER_OBJS = \
+	timer_data.o \
+	SetT2.o \
+	SetT2_COUNT.o \
+	SetT2_MODE.o \
+	SetT2_COMP.o \
+	InitTimer.o \
+	EndTimer.o \
+	GetTimerPreScaleFactor.o \
+	StartTimerSystemTime.o \
+	StopTimerSystemTime.o \
+	SetNextComp.o \
+	InsertAlarm_ForTimer.o \
+	UnlinkAlarm_ForTimer.o \
+	TimerHandler_callback.o \
+	iGetTimerSystemTime.o \
+	GetTimerSystemTime.o \
+	iAllocTimerCounter.o \
+	AllocTimerCounter.o \
+	iFreeTimerCounter.o \
+	FreeTimerCounter.o \
+	iGetTimerUsedUnusedCounters.o \
+	GetTimerUsedUnusedCounters.o \
+	iStartTimerCounter.o \
+	StartTimerCounter.o \
+	iStopTimerCounter.o \
+	StopTimerCounter.o \
+	SetTimerCount.o \
+	iGetTimerBaseTime.o \
+	GetTimerBaseTime.o \
+	iGetTimerCount.o \
+	GetTimerCount.o \
+	iSetTimerHandler.o \
+	SetTimerHandler.o \
+	TimerBusClock2USec.o \
+	TimerUSec2BusClock.o \
+	TimerBusClock2Freq.o \
+	TimerFreq2BusClock.o \
+	cpu_ticks.o
+TIMER_ALARM_OBJS = \
+	alarm_data.o \
+	ForTimer_InitAlarm.o \
+	AlarmHandler.o \
+	iSetTimerAlarm.o \
+	SetTimerAlarm.o \
+	iReleaseTimerAlarm.o \
+	ReleaseTimerAlarm.o
+DELAYTHREAD_OBJS = \
+	DelayThread.o
 
 ### Getter objects
 
@@ -155,7 +201,7 @@ KERNEL_OBJS = ResetEE.o SetGsCrt.o $(EXEC_SYSCALLS) \
 
 EE_OBJS = $(KERNEL_OBJS) $(SIFCMD_OBJS) $(SIFRPC_OBJS) $(FILEIO_OBJS) \
 	$(LOADFILE_OBJS) $(IOPHEAP_OBJS) $(IOPCONTROL_OBJS) $(ROM0_OBJS) $(CONFIG_OBJS) \
-	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(TIMER_ALARM_OBJS) $(GETKERNEL_OBJS) \
+	$(GLUE_OBJS) $(SIO_OBJS) $(TIMER_OBJS) $(TIMER_ALARM_OBJS) $(DELAYTHREAD_OBJS) $(GETKERNEL_OBJS) \
 	$(INITSYS_OBJS) $(KERNEL_UTIL_OBJS) erl-support.o
 
 
@@ -199,6 +245,10 @@ $(TIMER_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)timer.c
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 
 $(TIMER_ALARM_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)timer_alarm.c
+	$(DIR_GUARD)
+	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
+
+$(DELAYTHREAD_OBJS:%=$(EE_OBJS_DIR)%): $(EE_SRC_DIR)delaythread.c
 	$(DIR_GUARD)
 	$(EE_C_COMPILE) -DF_$(*:$(EE_OBJS_DIR)%=%) $< -c -o $@
 

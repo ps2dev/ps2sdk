@@ -60,15 +60,61 @@
 #define kHBLNK_DTV480p  (31469)
 #define kHBLNK_DTV1080i (33750)
 
+typedef u64 (*timer_alarm_handler_t)(s32 id, u64 scheduled_time, u64 actual_time, void *arg, void *pc_value);
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void StartTimerSystemTime(void);
-void StopTimerSystemTime(void);
-u64 GetTimerSystemTime(void);
-u64 iGetTimerSystemTime(void);
-u32 cpu_ticks(void);
+extern s32 InitTimer(s32 in_mode);
+extern s32 EndTimer(void);
+extern s32 GetTimerPreScaleFactor(void);
+extern s32 StartTimerSystemTime(void);
+extern s32 StopTimerSystemTime(void);
+extern void SetNextComp(u64 time);
+extern u64 iGetTimerSystemTime(void);
+extern u64 GetTimerSystemTime(void);
+extern s32 iAllocTimerCounter(void);
+extern s32 AllocTimerCounter(void);
+extern s32 iFreeTimerCounter(s32 id);
+extern s32 FreeTimerCounter(s32 id);
+extern s32 iGetTimerUsedUnusedCounters(u32 *used_counters, u32 *unused_counters);
+extern s32 GetTimerUsedUnusedCounters(u32 *used_counters, u32 *unused_counters);
+extern s32 iStartTimerCounter(s32 id);
+extern s32 StartTimerCounter(s32 id);
+extern s32 iStopTimerCounter(s32 id);
+extern s32 StopTimerCounter(s32 id);
+extern u64 SetTimerCount(s32 id, u64 timer_count);
+extern u64 iGetTimerBaseTime(s32 id);
+extern u64 GetTimerBaseTime(s32 id);
+extern u64 iGetTimerCount(s32 id);
+extern u64 GetTimerCount(s32 id);
+extern s32 iSetTimerHandler(s32 id, u64 scheduled_time, timer_alarm_handler_t callback_handler, void *arg);
+extern s32 SetTimerHandler(s32 id, u64 scheduled_time, timer_alarm_handler_t callback_handler, void *arg);
+extern void TimerBusClock2USec(u64 clocks, u32 *seconds_result, u32 *microseconds_result);
+extern u64 TimerUSec2BusClock(u32 seconds, u32 microseconds);
+extern float TimerBusClock2Freq(s64 clocks);
+extern u64 TimerFreq2BusClock(float timer_frequency);
+extern u32 cpu_ticks(void);
+
+// Additional conversion functions, from time to bus cycles
+static inline u64 NSec2TimerBusClock(u64 usec) {
+    // Approximate, avoid 64 bit division
+    return ((((kBUSCLK / 1000) * 65536ULL) / 1000000) * usec) >> 16;
+}
+
+static inline u64 USec2TimerBusClock(u64 usec) {
+    // Approximate, avoid 64 bit division
+    return ((((kBUSCLK / 1000) * 1024) / 1000) * usec) >> 10;
+}
+
+static inline u64 MSec2TimerBusClock(u64 msec) {
+    return (kBUSCLK / 1000) * msec;
+}
+
+static inline u64 Sec2TimerBusClock(u64 sec) {
+    return kBUSCLK * sec;
+}
 
 #ifdef __cplusplus
 }

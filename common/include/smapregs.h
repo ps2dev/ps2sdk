@@ -283,12 +283,12 @@
 /** Buffer descriptors.  */
 typedef struct _smap_bd
 {
-    u16 ctrl_stat;
+    vu16 ctrl_stat;
     /** must be zero */
-    u16 reserved;
+    vu16 reserved;
     /** number of bytes in pkt */
-    u16 length;
-    u16 pointer;
+    vu16 length;
+    vu16 pointer;
 } smap_bd_t;
 
 #define SMAP_BD_REGBASE   0x2f00
@@ -303,10 +303,10 @@ typedef struct _smap_bd
 #define SMAP_BD_SIZE      512
 #define SMAP_BD_MAX_ENTRY 64
 
-#define USE_SMAP_TX_BD volatile smap_bd_t *tx_bd = \
-                           (volatile smap_bd_t *)(SMAP_REGBASE + SMAP_BD_TX_BASE)
-#define USE_SMAP_RX_BD volatile smap_bd_t *rx_bd = \
-                           (volatile smap_bd_t *)(SMAP_REGBASE + SMAP_BD_RX_BASE)
+#define USE_SMAP_TX_BD smap_bd_t *tx_bd = \
+                           (smap_bd_t *)(SMAP_REGBASE + SMAP_BD_TX_BASE)
+#define USE_SMAP_RX_BD smap_bd_t *rx_bd = \
+                           (smap_bd_t *)(SMAP_REGBASE + SMAP_BD_RX_BASE)
 
 /* TX Control */
 /** set:driver, clear:HW */

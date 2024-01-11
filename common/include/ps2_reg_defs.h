@@ -10,25 +10,25 @@
 #include <ee_regs.h>
 #include <iop_regs.h>
 
-typedef volatile struct st_PS2_SBUS_Registers
+typedef struct st_PS2_SBUS_Registers
 {
-    u32 main_addr;
-    u32 pad0[3];
-    u32 sub_addr;
-    u32 pad1[3];
-    u32 ms_flag;
-    u32 pad2[3];
-    u32 sm_flag;
-    u32 pad3[3];
+    vu32 main_addr;
+    vu32 pad0[3];
+    vu32 sub_addr;
+    vu32 pad1[3];
+    vu32 ms_flag;
+    vu32 pad2[3];
+    vu32 sm_flag;
+    vu32 pad3[3];
 
-    u32 reg_40;
-    u32 pad4[3];
-    u32 reg_50;
-    u32 pad5[3];
-    u32 reg_60;
-    u32 pad6[3];
-    u32 reg_70;
-    u32 pad7[3];
+    vu32 reg_40;
+    vu32 pad4[3];
+    vu32 reg_50;
+    vu32 pad5[3];
+    vu32 reg_60;
+    vu32 pad6[3];
+    vu32 reg_70;
+    vu32 pad7[3];
 } PS2_SBUS_Registers;
 
 // "modes" for SIF transfers.
