@@ -55,16 +55,17 @@ release-ee-bin:
 
 #
 # Any file in the include directory will be copied to the ee/include
-# directory.  This does not currently handle subdirectories.
+# directory.
 #
 
 release-ee-include:
 	@if test -d include ; then \
-	   for file in include/*; do \
-	      if test -f $$file ; then \
-	         $(ECHO) Installing $$file to $(PS2SDK)/ee/include ; \
-	         cp -f $$file $(PS2SDK)/ee/include ; \
-	         chmod 644 $(PS2SDK)/ee/include/`basename $$file` ; \
+	   for file in $$(find include -type f | cut -d'/' -f2-); do \
+	      if test -f include/$$file ; then \
+	         $(ECHO) Installing include/$$file to $(PS2SDK)/ee/include ; \
+	         mkdir -p $(PS2SDK)/ee/include/$$(dirname $$file) ; \
+	         cp -t $(PS2SDK)/ee/include/$$(dirname $$file) -f include/$$file ; \
+	         chmod 644 $(PS2SDK)/ee/include/$$file ; \
 	      fi \
 	   done; \
 	fi;
@@ -85,7 +86,7 @@ release-ee-samples:
 release: release-ee-dirs release-ee-lib release-ee-bin release-ee-include release-ee-samples
 
 release-ee-clean:
-	rm -f $(PS2SDK)/ee/include/*
-	rm -f $(PS2SDK)/ee/bin/*
-	rm -f $(PS2SDK)/ee/startup/*
-	rm -f $(PS2SDK)/ee/lib/*
+	rm -rf $(PS2SDK)/ee/include/
+	rm -rf $(PS2SDK)/ee/bin/
+	rm -rf $(PS2SDK)/ee/startup/
+	rm -rf $(PS2SDK)/ee/lib/

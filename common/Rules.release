@@ -7,51 +7,23 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 #
-# Creates the base common directory structure in target directory.
-#
-
-RELEASE_COMMON_DIRS = common/ common/include/ common/include/arpa common/include/netinet common/include/sys
-RELEASE_COMMON_DIRS := $(RELEASE_COMMON_DIRS:%=$(PS2SDK)/%)
-
-release-dirs:
-	$(MKDIR) -p $(RELEASE_COMMON_DIRS)
-
-#
 # Any file in the include directory will be copied to the common/include
 # directory.
 #
 
 release-include:
-	@for file in include/* ; do \
-	   if test -f $$file ; then \
-	     $(ECHO) Installing $$file to $(PS2SDK)/common/include ; \
-	     cp -f $$file $(PS2SDK)/common/include ; \
-	     chmod 644 $(PS2SDK)/common/$$file ; \
-	   fi \
-	done;
-	@for file in include/arpa/* ; do \
-	   if test -f $$file ; then \
-	     $(ECHO) Installing $$file to $(PS2SDK)/common/include/arpa ; \
-	     cp -f $$file $(PS2SDK)/common/include/arpa ; \
-	     chmod 644 $(PS2SDK)/common/$$file ; \
-	   fi \
-	done;
-	@for file in include/netinet/* ; do \
-	   if test -f $$file ; then \
-	     $(ECHO) Installing $$file to $(PS2SDK)/common/include/netinet ; \
-	     cp -f $$file $(PS2SDK)/common/include/netinet ; \
-	     chmod 644 $(PS2SDK)/common/$$file ; \
-	   fi \
-	done;
-	@for file in include/sys/* ; do \
-	   if test -f $$file ; then \
-	     $(ECHO) Installing $$file to $(PS2SDK)/common/include/sys ; \
-	     cp -f $$file $(PS2SDK)/common/include/sys ; \
-	     chmod 644 $(PS2SDK)/common/$$file ; \
-	   fi \
-	done;
+	@if test -d include ; then \
+	   for file in $$(find include -type f | cut -d'/' -f2-); do \
+	      if test -f include/$$file ; then \
+	         $(ECHO) Installing include/$$file to $(PS2SDK)/common/include ; \
+	         mkdir -p $(PS2SDK)/common/include/$$(dirname $$file) ; \
+	         cp -t $(PS2SDK)/common/include/$$(dirname $$file) -f include/$$file ; \
+	         chmod 644 $(PS2SDK)/common/include/$$file ; \
+	      fi \
+	   done; \
+	fi;
 
-release: release-dirs release-include
+release: release-include
 
 release-clean:
-	rm -f -r $(PS2SDK)/common
+	rm -rf $(PS2SDK)/common/
