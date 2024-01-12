@@ -19,7 +19,11 @@
 #ifndef _SMB2_H_
 #define _SMB2_H_
 
+#ifdef __APPLE__
+#include <smb2-errors.h>
+#else
 #include <smb2/smb2-errors.h>
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -586,12 +590,21 @@ struct smb2_set_info_request {
  */
 #define SID_ID_AUTH_LEN 6
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning( disable : 4200 ) /* Silence c4200 warning. */
+#endif
+
 struct smb2_sid {
         uint8_t revision;
         uint8_t sub_auth_count;
         uint8_t id_auth[SID_ID_AUTH_LEN];
         uint32_t sub_auth[0];
 };
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 /*
  * ACE

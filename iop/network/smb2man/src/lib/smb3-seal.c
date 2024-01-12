@@ -19,16 +19,6 @@
 #include "config.h"
 #endif
 
-#ifdef ESP_PLATFORM
-#include <esp_system.h>
-#include <sys/types.h>
-#include <esp_idf_version.h>
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-#include <esp_random.h>
-#endif
-#define random esp_random
-#endif
-
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
@@ -48,10 +38,6 @@
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
-
-#ifdef _MSC_VER
-#define random rand
-#endif /* _MSC_VER */
 
 #include <stdio.h>
 

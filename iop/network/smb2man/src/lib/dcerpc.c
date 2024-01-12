@@ -85,11 +85,11 @@ struct dcerpc_deferred_pointer {
  */
 
 p_syntax_id_t ndr32_syntax = {
-        {NDR32_UUID}, 2
+        {NDR32_UUID}, 2, 0
 };
 
 p_syntax_id_t ndr64_syntax = {
-        {NDR64_UUID}, 1
+        {NDR64_UUID}, 1, 0
 };
 
 struct dcerpc_context {

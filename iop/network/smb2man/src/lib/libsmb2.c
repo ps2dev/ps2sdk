@@ -84,7 +84,7 @@
 #include <sys/socket.h>
 #endif
 
-#if defined(_WIN32) || defined(_XBOX)
+#if defined(_WIN32) || defined(_XBOX) || defined(__AROS__)
 #include "asprintf.h"
 #endif
 
@@ -1028,7 +1028,7 @@ connect_cb(struct smb2_context *smb2, int status,
 int
 smb2_connect_share_async(struct smb2_context *smb2,
                          const char *server,
-                         const char *share, const char *user,
+                         const char *share, const char *user,                        
                          smb2_command_cb cb, void *cb_data)
 {
         struct connect_data *c_data;
@@ -1056,7 +1056,6 @@ smb2_connect_share_async(struct smb2_context *smb2,
         if (user) {
                 smb2_set_user(smb2, user);
         }
-
         c_data = calloc(1, sizeof(struct connect_data));
         if (c_data == NULL) {
                 smb2_set_error(smb2, "Failed to allocate connect_data");

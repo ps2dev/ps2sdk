@@ -192,8 +192,8 @@ struct smb2_url *smb2_parse_url(struct smb2_context *smb2, const char *url)
                 smb2_set_error(smb2, "URL is too long");
                 return NULL;
         }
+        
         strncpy(str, url + 6, MAX_URL_SIZE);
-
         args = strchr(str, '?');
         if (args) {
                 *(args++) = '\0';
@@ -225,7 +225,7 @@ struct smb2_url *smb2_parse_url(struct smb2_context *smb2, const char *url)
         }
         /* user */
         if ((tmp = strchr(ptr, '@')) != NULL && strlen(tmp) > len_shared_folder) {
-                *(tmp++) = '\0';
+                *(tmp++) = '\0';              
                 u->user = strdup(ptr);
                 ptr = tmp;
         }
@@ -470,7 +470,7 @@ void smb2_set_security_mode(struct smb2_context *smb2, uint16_t security_mode)
         smb2->security_mode = security_mode;
 }
 
-#if !defined(_XBOX) && !defined(PS2_IOP_PLATFORM)
+#if !defined(_XBOX) && !defined(PS2_IOP_PLATFORM) && !defined(__amigaos4__) && !defined(__AMIGA__) && !defined(__AROS__)
 static void smb2_set_password_from_file(struct smb2_context *smb2)
 {
         char *name = NULL;
@@ -558,7 +558,7 @@ void smb2_set_user(struct smb2_context *smb2, const char *user)
                 return;
         }
         smb2->user = strdup(user);
-#if !defined(_XBOX) && !defined(PS2_IOP_PLATFORM)
+#if !defined(_XBOX) && !defined(PS2_IOP_PLATFORM) && !defined(__amigaos4__) && !defined(__AMIGA__) && !defined(__AROS__)
         smb2_set_password_from_file(smb2);
 #endif
 }

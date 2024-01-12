@@ -32,11 +32,15 @@
 extern "C" {
 #endif
 
+#if __APPLE__
+#import <GSS/GSS.h>
+#else
 #include <gssapi/gssapi.h>
 
 static const gss_OID_desc gss_mech_spnego = {
     6, "\x2b\x06\x01\x05\x05\x02"
 };
+#endif
 
 static const gss_OID_desc spnego_mech_krb5 = {
     9, "\x2a\x86\x48\x86\xf7\x12\x01\x02\x02"

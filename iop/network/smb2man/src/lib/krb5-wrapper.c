@@ -58,8 +58,12 @@
 #endif
 
 #include <krb5/krb5.h>
+#if __APPLE__
+#include <GSS/GSS.h>
+#else
 #include <gssapi/gssapi_krb5.h>
 #include <gssapi/gssapi.h>
+#endif
 #include <stdio.h>
 
 #include "slist.h"
@@ -216,13 +220,21 @@ krb5_negotiate_reply(struct smb2_context *smb2,
 
         /* TODO: the proper mechanism (SPNEGO vs NTLM vs KRB5) should be
          * selected based on the SMB negotiation flags */
+        #ifdef __APPLE__
+        auth_data->mech_type = GSS_SPNEGO_MECHANISM;
+        #else
         auth_data->mech_type = &gss_mech_spnego;
+        #endif
         auth_data->cred = GSS_C_NO_CREDENTIAL;
 
         /* Create creds for the user */
         mechOidSet.count = 1;
+        #ifdef __APPLE__
+        mechOidSet.elements = discard_const(GSS_SPNEGO_MECHANISM);
+        #else
         mechOidSet.elements = discard_const(&gss_mech_spnego);
-
+        #endif
+        
         if (smb2->use_cached_creds) {
                 krb5_error_code ret = 0;
                 const char *cname = NULL;
@@ -270,6 +282,7 @@ krb5_negotiate_reply(struct smb2_context *smb2,
                 return NULL;
         }
 
+        #ifndef __APPLE__ /* gss_set_neg_mechs is not defined on macOS/iOS. */
         if (smb2->sec != SMB2_SEC_UNDEFINED) {
                 wantMech.count = 1;
                 if (smb2->sec == SMB2_SEC_KRB5) {
@@ -284,6 +297,7 @@ krb5_negotiate_reply(struct smb2_context *smb2,
                         return NULL;
                 }
         }
+        #endif
 
         if (nc_password) {
                 free(nc_password);

@@ -22,7 +22,7 @@
 #include "thsemap.h"
 #include "errno.h"
 #include "ps2smb2.h"
-
+#include <stdbool.h>
 #include "smb2_fio.h"
 
 #define int64_t u64
@@ -118,8 +118,9 @@ static char *prepare_path(const char *path)
 {
 	int i, len;
 	char *p, *p2;
-
-	len = strlen(path) + 1 + smb2_curdir ? strlen(smb2_curdir) + 1 : 0;
+	bool smb2_dir = smb2_curdir ? strlen(smb2_curdir) + 1 : 0;
+	/* TODO: len = strlen(path) + 1 + smb2_curdir ? strlen(smb2_curdir) + 1 : 0;*/
+	len = strlen(path) + 1 + smb2_dir;
 
 	p = malloc(len);
 	if (p == NULL) {
