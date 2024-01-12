@@ -14,7 +14,7 @@ ifeq ($(PS2IP_DNS),1)
 EE_CFLAGS += -DPS2IP_DNS
 endif
 
-EE_OBJS = ps2ipc.o erl-support.o
+EE_OBJS = ps2ipc.o ps2ipc_ps2sdk.o erl-support.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/ee/Rules.lib.make
