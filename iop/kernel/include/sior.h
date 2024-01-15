@@ -21,6 +21,10 @@
 
 #include <sior-common.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void sio_init(u32 baudrate, u8 lcr_ueps, u8 lcr_upen, u8 lcr_usbl, u8 lcr_umode);
 int sio_putc(int c);
 int sio_getc(void);
@@ -53,5 +57,9 @@ int sio_vprintf(const char *format, va_list);
 #define I_sio_flush DECLARE_IMPORT(13, sio_flush)
 #define I_sio_printf DECLARE_IMPORT(14, sio_printf)
 #define I_sio_vprintf DECLARE_IMPORT(15, sio_vprintf)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __SIOR_H__ */

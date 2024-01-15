@@ -18,6 +18,10 @@
 
 #include <irx.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*	Extract of the SSBUSC control registers by wisi.
 	For more information, refer to the SSBUSC documentation by Wisi.
 
@@ -217,5 +221,9 @@ int GetCommonDelay(void);
 #define I_GetStrobeTime DECLARE_IMPORT(15, GetStrobeTime)
 #define I_SetCommonDelay DECLARE_IMPORT(16, SetCommonDelay)
 #define I_GetCommonDelay DECLARE_IMPORT(17, GetCommonDelay)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __SSBUSC_H__ */

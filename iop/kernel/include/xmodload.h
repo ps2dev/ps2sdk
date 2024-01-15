@@ -18,6 +18,10 @@
 
 #include <modload.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int GetModuleIdList(int *readbuf, int readbufsize, int *modulecount);
 
 typedef struct {
@@ -86,5 +90,9 @@ int SetModuleFlags(int modid, int flag);
 #define I_AllocLoadMemory DECLARE_IMPORT(26, AllocLoadMemory)
 #define I_FreeLoadMemory DECLARE_IMPORT(27, FreeLoadMemory)
 #define I_SetModuleFlags DECLARE_IMPORT(28, SetModuleFlags)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __XMODLOAD_H__ */

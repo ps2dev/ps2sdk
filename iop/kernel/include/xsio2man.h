@@ -18,6 +18,10 @@
 
 #include <sio2man.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef int (*sio2_mtap_change_slot_cb_t)(s32 *status);
 typedef int (*sio2_mtap_get_slot_max_cb_t)(int port);
 typedef int (*sio2_mtap_get_slot_max2_cb_t)(int port);
@@ -52,6 +56,10 @@ void sio2_mtap_update_slots(void);
 #define I_sio2_mtap_get_slot_max DECLARE_IMPORT(56, sio2_mtap_get_slot_max)
 #define I_sio2_mtap_get_slot_max2 DECLARE_IMPORT(57, sio2_mtap_get_slot_max2)
 #define I_sio2_mtap_update_slots DECLARE_IMPORT(58, sio2_mtap_update_slots)
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* __XSIO2MAN_H__ */

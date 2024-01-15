@@ -23,6 +23,10 @@
 #define MODULE_NO_RESIDENT_END	1
 #define MODULE_REMOVABLE_END	2 // Only for 'modload' > v1.2
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** Module info entry. Taken from iopmgr. */
 typedef struct _ModuleInfo {
 	struct _ModuleInfo *next;
@@ -177,5 +181,9 @@ ModuleInfo_t *FindImageInfo(void* addr);
 #define I_ReadModuleHeader DECLARE_IMPORT(22, ReadModuleHeader)
 #define I_LoadModuleImage DECLARE_IMPORT(23, LoadModuleImage)
 #define I_FindImageInfo DECLARE_IMPORT(24, FindImageInfo)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __LOADCORE_H__ */

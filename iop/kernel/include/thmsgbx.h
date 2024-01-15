@@ -19,6 +19,10 @@
 #include <types.h>
 #include <irx.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Message box attributes
 #define MBA_THFIFO 0x000
 #define MBA_THPRI  0x001
@@ -83,5 +87,9 @@ int iReferMbxStatus(int mbxid, iop_mbx_status_t *info);
 #define I_PollMbx         DECLARE_IMPORT(9, PollMbx)
 #define I_ReferMbxStatus  DECLARE_IMPORT(11, ReferMbxStatus)
 #define I_iReferMbxStatus DECLARE_IMPORT(12, iReferMbxStatus)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __THMSGBX_H__ */

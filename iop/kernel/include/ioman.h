@@ -20,6 +20,10 @@
 #include <irx.h>
 #include <io_common.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int open(const char *name, int mode);
 int close(int fd);
 int read(int fd, void *ptr, size_t size);
@@ -109,5 +113,9 @@ int DelDrv(const char *name);
 #define I_format DECLARE_IMPORT(18, format)
 #define I_AddDrv DECLARE_IMPORT(20, AddDrv);
 #define I_DelDrv DECLARE_IMPORT(21, DelDrv);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __IOMAN_H__ */

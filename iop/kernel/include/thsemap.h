@@ -26,6 +26,10 @@
 #include <types.h>
 #include <irx.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Semaphore attributes
 #define SA_THFIFO  0x000
 #define SA_THPRI   0x001
@@ -85,5 +89,9 @@ static inline int CreateMutex(int state)
 #define I_PollSema         DECLARE_IMPORT(9, PollSema);
 #define I_ReferSemaStatus  DECLARE_IMPORT(11, ReferSemaStatus)
 #define I_iReferSemaStatus DECLARE_IMPORT(12, iReferSemaStatus)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __THSEMAP_H__ */
