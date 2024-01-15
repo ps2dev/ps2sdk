@@ -67,7 +67,7 @@ static struct irx_import_table _imp_##modname 		\
 	__asm__ (".section\t.text\n\t"		\
 		".globl\t"#name"\n\t"#name":\n\t"	\
 		".word 0x03e00008\n\t"			\
-		".word "STR(0x24000000|ord));
+		".word " STR(0x24000000|ord));
 
 #define END_IMPORT_TABLE \
 	__asm__ (".section\t.text\n\t.word\t0, 0");
@@ -99,7 +99,7 @@ struct irx_export_table _exp_##modname			\
 	name: #modname, };
 
 #define DECLARE_EXPORT(fptr) \
-	__asm__ (".section\t.text\n\t.word\t"STR(fptr));
+	__asm__ (".section\t.text\n\t.word\t" STR(fptr));
 
 #define END_EXPORT_TABLE  __asm__ (".section\t.text\n\t.word\t0");
 
