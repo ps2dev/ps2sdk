@@ -20,6 +20,10 @@
 #include <irx.h>
 #include <stdarg.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Allocation strategies
 #define ALLOC_FIRST	0
 #define ALLOC_LAST	1
@@ -56,5 +60,9 @@ void KprintfSet(KprintfHandler_t *, void *context);
 #define I_QueryBlockSize DECLARE_IMPORT(10, QueryBlockSize)
 #define I_Kprintf DECLARE_IMPORT(14, Kprintf)
 #define I_KprintfSet DECLARE_IMPORT(15, KprintfSet)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* IOP_SYSMEM_H */

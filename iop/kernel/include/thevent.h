@@ -19,6 +19,10 @@
 #include <types.h>
 #include <irx.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* Defines for WaitEventFlag */
 #define WEF_AND   0
 #define WEF_OR    1
@@ -105,5 +109,9 @@ int iReferEventFlagStatus(int ef, iop_event_info_t *info);
 #define I_PollEventFlag         DECLARE_IMPORT(11, PollEventFlag)
 #define I_ReferEventFlagStatus  DECLARE_IMPORT(13, ReferEventFlagStatus)
 #define I_iReferEventFlagStatus DECLARE_IMPORT(14, iReferEventFlagStatus)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __THEVENT_H__ */

@@ -18,6 +18,10 @@
 
 #include <thbase.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define TSS_THREAD      0
 #define TSS_DISABLEINTR 3
 #define TSS_NOTHREAD    4
@@ -50,5 +54,9 @@ int GetThreadmanIdList(int type, int *readbuf, int readbufsize, int *objectcount
 #define I_ReferThreadRunStatus     DECLARE_IMPORT(45, ReferThreadRunStatus)
 #define I_GetThreadStackFreeSize   DECLARE_IMPORT(46, GetThreadStackFreeSize)
 #define I_GetThreadmanIdList       DECLARE_IMPORT(47, GetThreadmanIdList)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __XTHBASE_H__ */

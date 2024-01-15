@@ -18,6 +18,10 @@
 
 #include <loadcore.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define xloadcore_IMPORTS_start DECLARE_IMPORT_TABLE(loadcore, 1, 1)
 #define xloadcore_IMPORTS_end END_IMPORT_TABLE
 
@@ -27,5 +31,9 @@ void InitLoadedModInfo(FileInfo_t *ModuleInfo, ModuleInfo_t *ModInfo);
 #define I_InitLoadedModInfo DECLARE_IMPORT(26, InitLoadedModInfo)
 int SetRebootTimeLibraryHandlingMode(struct irx_export_table *exports, int mode);
 #define I_SetRebootTimeLibraryHandlingMode DECLARE_IMPORT(27, SetRebootTimeLibraryHandlingMode)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __XLOADCORE_H__ */

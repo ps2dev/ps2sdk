@@ -19,11 +19,19 @@
 #include <types.h>
 #include <irx.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int sceCdChangeThreadPriority(int priority);
 
 #define cdvdfsv_IMPORTS_start DECLARE_IMPORT_TABLE(cdvdfsv, 1, 1)
 #define cdvdfsv_IMPORTS_end END_IMPORT_TABLE
 
 #define I_sceCdChangeThreadPriority DECLARE_IMPORT(5, sceCdChangeThreadPriority)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __CDVDFSV_H__ */

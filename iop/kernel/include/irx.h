@@ -18,6 +18,10 @@
 
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define IRX_VER(major, minor)	((((major) & 0xff) << 8) + ((minor) & 0xff))
 
 struct irx_id {
@@ -102,5 +106,9 @@ struct irx_export_table _exp_##modname			\
 	__asm__ (".section\t.text\n\t.word\t" STR(fptr));
 
 #define END_EXPORT_TABLE  __asm__ (".section\t.text\n\t.word\t0");
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __IRX_H__ */

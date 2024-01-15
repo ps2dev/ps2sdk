@@ -22,6 +22,10 @@
 #include <setjmp.h>
 #include <ctype.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef void (*print_callback_t)(void *context, int c);
 
 /* setjmp/longjmp are already defined in setjmp.h */
@@ -192,5 +196,9 @@ char *strtok_r(char *s, const char *delim, char **lasts);
 #define I_wmemset DECLARE_IMPORT(41, _wmemset)
 #define I_vsprintf DECLARE_IMPORT(42, vsprintf)
 #define I_strtok_r DECLARE_IMPORT(43, strtok_r)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __SYSCLIB_H__ */

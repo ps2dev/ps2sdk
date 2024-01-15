@@ -22,6 +22,10 @@
 #include <io_common.h>
 #include <iox_stat.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int io_open(const char *name, int mode);
 int io_close(int fd);
 int io_read(int fd, void *ptr, size_t size);
@@ -111,5 +115,9 @@ int io_DelDrv(const char *name);
 #define I_io_format DECLARE_IMPORT(18, io_format)
 #define I_io_AddDrv DECLARE_IMPORT(20, io_AddDrv);
 #define I_io_DelDrv DECLARE_IMPORT(21, io_DelDrv);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __IOMAN_MOD_H__ */

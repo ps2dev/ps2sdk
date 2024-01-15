@@ -19,6 +19,10 @@
 #include <types.h>
 #include <irx.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Fixed-length pool attributes
 #define FA_THFIFO 0x000
 #define FA_THPRI  0x001
@@ -114,5 +118,9 @@ int iReferVplStatus(int vplId, iop_vpl_info_t *info);
 #define I_FreeVpl         DECLARE_IMPORT(9, FreeVpl)
 #define I_ReferVplStatus  DECLARE_IMPORT(11, ReferVplStatus)
 #define I_iReferVplStatus DECLARE_IMPORT(12, iReferVplStatus)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __THPOOL_H__ */

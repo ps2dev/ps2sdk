@@ -9,6 +9,10 @@
 #include <types.h>
 #include <defs.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 s32 padInit(void * ee_addr);
 s32 padEnd();
 s32 padPortClose(s32 port, s32 slot, s32 wait);
@@ -43,5 +47,9 @@ s32 padInfoMode(u32 port, u32 slot, s32 val1, u32 val2);
 #define I_padSetActAlign DECLARE_IMPORT(16, padSetActAlign)
 #define I_padGetButtonMask DECLARE_IMPORT(17, padGetButtonMask)
 #define I_padGetButtonInfo DECLARE_IMPORT(18, padGetButtonInfo)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __XPADMAN_H__ */

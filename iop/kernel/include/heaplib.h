@@ -19,6 +19,10 @@
 #include <types.h>
 #include <irx.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void *CreateHeap(int heapblocksize, int flag);
 void DeleteHeap(void *heap);
 void *AllocHeapMemory(void *heap, size_t nbytes);
@@ -38,5 +42,9 @@ int HeapChunkSize(void* chunk);
 #define I_HeapTotalFreeSize DECLARE_IMPORT(8, HeapTotalFreeSize)
 #define I_HeapPrepare DECLARE_IMPORT(11, HeapPrepare)
 #define I_HeapChunkSize DECLARE_IMPORT(15, HeapChunkSize)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __HEAPLIB_H__ */

@@ -19,6 +19,10 @@
 #include <types.h>
 #include <irx.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct t_SifDmaTransfer
 {
 	void	*src;
@@ -171,5 +175,9 @@ unsigned int sceSifSetDmaIntr(SifDmaTransfer_t *dmat, int len, void (*func)(), v
 #define I_sceSifSetDmaIntrHandler DECLARE_IMPORT(30, sceSifSetDmaIntrHandler)
 #define I_sceSifResetDmaIntrHandler DECLARE_IMPORT(31, sceSifResetDmaIntrHandler)
 #define I_sceSifSetDmaIntr DECLARE_IMPORT(32, sceSifSetDmaIntr)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __SIFMAN_H__ */

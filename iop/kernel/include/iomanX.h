@@ -24,6 +24,10 @@
 #include <io_common.h>
 #include <iox_stat.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Rename prototype names in order to avoid clashes with other standard I/O libraries.
 #ifndef IOMANX_OLD_NAME_COMPATIBILITY
 #ifdef _IOP
@@ -378,5 +382,9 @@ static inline void StdioInit(int mode)
 #endif
 
 #endif /* IOMANX_OLD_NAME_COMPATIBILITY */
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __IOMANX_H__ */
