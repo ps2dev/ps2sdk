@@ -2,7 +2,7 @@
 /*
   SMB2MAN
   Ronnie Sahlberg <ronniesahlberg@gmail.com> 2021
-  André Guilherme <andregui17@outlook.com> 2023
+  André Guilherme <andregui17@outlook.com> 2023-2024
 
   Based on SMBMAN:
   Copyright 2009-2010, jimmikaelkael
@@ -31,8 +31,8 @@
 #define uint16_t u16
 #define uint8_t  u8
 
-#include "smb2/smb2.h"
-#include "smb2/libsmb2.h"
+#include <smb2/smb2.h>
+#include <smb2/libsmb2.h>
 
 /* Uncomment to enable debug logging */
 /*#define DEBUG*/
@@ -118,7 +118,7 @@ static char *prepare_path(const char *path)
 {
 	int i, len;
 	char *p, *p2;
-	bool smb2_dir = smb2_curdir ? strlen(smb2_curdir) + 1 : 0;
+	bool smb2_dir = smb2_curdir ? strlen(smb2_curdir) + true : false;
 	/* TODO: len = strlen(path) + 1 + smb2_curdir ? strlen(smb2_curdir) + 1 : 0;*/
 	len = strlen(path) + 1 + smb2_dir;
 

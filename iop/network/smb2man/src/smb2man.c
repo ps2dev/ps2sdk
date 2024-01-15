@@ -1,7 +1,7 @@
 /*
   SMB2MAN
   Ronnie Sahlberg <ronniesahlberg@gmail.com> 2021
-  André Guilherme <andregui17@outlook.com> 2023
+  André Guilherme <andregui17@outlook.com> 2023-2024
   
   Based on SMBMAN:
   Copyright 2009-2010, jimmikaelkael
@@ -32,7 +32,7 @@ int _start(int argc, char *argv[])
     (void)argc;
     (void)argv;
 
-    printf("%s version 0x%01x%02x - Copyright(c) 2021-2023 Ronnie Sahlberg and André Guilherme\n", MODNAME, VER_MAJOR, VER_MINOR);
+    printf("%s version 0x%01x%02x - Copyright(c) 2021-2024 Ronnie Sahlberg and André Guilherme\n", MODNAME, VER_MAJOR, VER_MINOR);
 
 	SMB2_initdev();
 

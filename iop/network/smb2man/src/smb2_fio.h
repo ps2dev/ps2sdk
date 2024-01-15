@@ -1,7 +1,7 @@
 /*
   SMB2MAN
   Ronnie Sahlberg <ronniesahlberg@gmail.com> 2021
-  André Guilherme <andregui17@outlook.com> 2023
+  André Guilherme <andregui17@outlook.com> 2023-2024
 
   Based on SMBMAN:
   Copyright 2009-2010, jimmikaelkael
