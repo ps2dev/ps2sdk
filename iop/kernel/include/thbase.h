@@ -19,6 +19,10 @@
 #include <types.h>
 #include <irx.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 // Thread attribute definitions
 #define TH_ASM          0x01000000
 #define TH_C            0x02000000
@@ -259,5 +263,9 @@ int GetSystemStatusFlag();
 #define I_USec2SysClock           DECLARE_IMPORT(39, USec2SysClock)
 #define I_SysClock2USec           DECLARE_IMPORT(40, SysClock2USec)
 #define I_GetSystemStatusFlag     DECLARE_IMPORT(41, GetSystemStatusFlag)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __THBASE_H__ */

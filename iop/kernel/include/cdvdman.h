@@ -21,6 +21,10 @@
 
 #include <libcdvd-common.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 //IOP-only libcdvd function prototypes.
 int sceCdCheckCmd(void);
 int sceCdNop(void);
@@ -174,5 +178,9 @@ int sceCdReadDiskID(unsigned int *id);
 #define I_sceCdGetWakeUpReason DECLARE_IMPORT(183, sceCdGetWakeUpReason)
 #define I_sceCdReadRegionParams DECLARE_IMPORT(189, sceCdReadRegionParams)
 #define I_sceCdWriteRegionParams DECLARE_IMPORT(191, sceCdWriteRegionParams)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __CDVDMAN_H__ */

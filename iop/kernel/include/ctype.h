@@ -16,6 +16,10 @@
 #ifndef __CTYPE_H__
 #define __CTYPE_H__
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define isascii(c)	((unsigned int)(c) <= 127)
 #define toascii(c)	((unsigned char)(c) & 127)
 
@@ -85,6 +89,10 @@
 #define tolower(c) _tolower(c)
 #endif
 
+#endif
+
+#ifdef __cplusplus
+}
 #endif
 
 #endif /* __CTYPE_H__ */

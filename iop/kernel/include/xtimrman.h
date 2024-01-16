@@ -18,6 +18,10 @@
 
 #include <timrman.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #define TC_SYSCLOCK 1
 #define TC_PIXEL    2
 #define TC_HLINE    4
@@ -36,5 +40,9 @@ int StopHardTimer(int timid);
 #define I_SetupHardTimer     DECLARE_IMPORT(22, SetupHardTimer)
 #define I_StartHardTimer     DECLARE_IMPORT(23, StartHardTimer)
 #define I_StopHardTimer      DECLARE_IMPORT(24, StopHardTimer)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __XTIMRMAN_H__ */

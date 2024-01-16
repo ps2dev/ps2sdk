@@ -18,6 +18,10 @@
 
 #include <irx.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void WaitVblankStart();
 void WaitVblankEnd();
 void WaitVblank();
@@ -36,5 +40,9 @@ int ReleaseVblankHandler(int startend, int (*handler)(void *));
 #define I_WaitNonVblank DECLARE_IMPORT(7, WaitNonVblank)
 #define I_RegisterVblankHandler DECLARE_IMPORT(8, RegisterVblankHandler)
 #define I_ReleaseVblankHandler DECLARE_IMPORT(9, ReleaseVblankHandler)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __VBLANK_H__ */

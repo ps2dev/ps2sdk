@@ -19,6 +19,10 @@
 #include <types.h>
 #include <irx.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /** SIF command.  */
 typedef struct t_SifCmdHeader {
 	/** Packet size. Min: 1x16 (header only), max: 7*16 */
@@ -218,5 +222,9 @@ unsigned int isceSifSendCmdIntr(unsigned int, void *, int, void *, void *, int,
 #define I_sceSifClearSif1CB DECLARE_IMPORT(27, sceSifClearSif1CB)
 #define I_sceSifSendCmdIntr DECLARE_IMPORT(28, sceSifSendCmdIntr)
 #define I_isceSifSendCmdIntr DECLARE_IMPORT(29, isceSifSendCmdIntr)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif	/* __SIFCMD_H__ */

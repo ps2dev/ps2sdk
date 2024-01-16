@@ -19,6 +19,10 @@
 #include <types.h>
 #include <irx.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*	Documentation on the old module's SetTimerCompare() and SetTimerMode() functions is difficult because SCE had replaced them
         with a single function within later SDK versions: SetupHardTimer().
 
@@ -133,5 +137,9 @@ u32 (*GetTimerReadFunc(int timid))();
 #define I_GetHardTimerIntrCode DECLARE_IMPORT(16, GetHardTimerIntrCode)
 #define I_GetTimerMode         DECLARE_IMPORT(17, GetTimerMode)
 #define I_GetTimerReadFunc     DECLARE_IMPORT(18, GetTimerReadFunc)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __TIMRMAN_H__ */

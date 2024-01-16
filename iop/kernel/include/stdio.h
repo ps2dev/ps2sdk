@@ -19,6 +19,10 @@
 #include <stdarg.h>
 #include <irx.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 int printf(const char *format, ...);
 int getchar(void);
 int putchar(int c);
@@ -45,5 +49,9 @@ int vfdprintf(int fd, const char *format, va_list ap);
 #define I_fdputs DECLARE_IMPORT(12, fdputs)
 #define I_fdgets DECLARE_IMPORT(13, fdgets)
 #define I_vfdprintf DECLARE_IMPORT(14, vfdprintf)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __STDIO_H__ */

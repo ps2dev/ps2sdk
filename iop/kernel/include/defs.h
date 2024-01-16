@@ -18,6 +18,10 @@
 
 #include <types.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef NULL
 #define NULL	((void *)0)
 #endif
@@ -83,5 +87,9 @@ static inline void *iop_memcpy(void *dest, const void *src, int size)
 		*d++ = *s++;
 	return dest;
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __DEFS_H__ */

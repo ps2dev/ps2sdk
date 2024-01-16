@@ -19,6 +19,10 @@
 #include <types.h>
 #include <irx.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 enum iop_irq_list {
     IOP_IRQ_VBLANK = 0,
     /** INUM_GM */
@@ -221,5 +225,9 @@ int SetShouldPreemptCb(void *cb);
 #define I_iCatchMultiIntr     DECLARE_IMPORT(25, iCatchMultiIntr)
 #define I_SetNewCtxCb         DECLARE_IMPORT(28, SetNewCtxCb)
 #define I_SetShouldPreemptCb  DECLARE_IMPORT(30, SetShouldPreemptCb)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __INTRMAN_H__ */

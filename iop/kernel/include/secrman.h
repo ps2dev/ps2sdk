@@ -21,6 +21,10 @@
 #include <sio2man.h>
 #include <libsecr-common.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef int (*McCommandHandler_t)(int port, int slot, sio2_transfer_data_t *sio2_trans_data);
 typedef int (*McDevIDHandler_t)(int port, int slot);
 
@@ -52,5 +56,9 @@ extern void SecrResetAuthCard(int port, int slot, int cnum);
 #define I_SecrDownloadGetKbit DECLARE_IMPORT(17, SecrDownloadGetKbit)
 #define I_SecrDownloadGetKc DECLARE_IMPORT(18, SecrDownloadGetKc)
 #define I_SecrDownloadGetICVPS2 DECLARE_IMPORT(19, SecrDownloadGetICVPS2)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* IOP_SECRMAN_H */

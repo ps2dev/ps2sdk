@@ -19,6 +19,10 @@
 #include <types.h>
 #include <irx.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct _iop_dmac_chan {
 	u32	madr;
 	u32	bcr;
@@ -165,5 +169,9 @@ void dmac_disable(u32 channel);	//sceDisableDMAChannel
 #define I_dmac_ch_set_dpcr DECLARE_IMPORT(33, dmac_ch_set_dpcr)
 #define I_dmac_enable DECLARE_IMPORT(34, dmac_enable)
 #define I_dmac_disable DECLARE_IMPORT(35, dmac_disable)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __DMACMAN_H__ */

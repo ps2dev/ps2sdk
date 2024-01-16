@@ -19,6 +19,10 @@
 #include <types.h>
 #include <irx.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* From any r3000's cop0 documentation */
 /** External Interrupt */
 #define IOP_EXCEPTION_INT	0
@@ -80,5 +84,9 @@ int ReleaseDefaultExceptionHandler(exception_handler_t);
 #define I_RegisterDefaultExceptionHandler DECLARE_IMPORT(6, RegisterDefaultExceptionHandler)
 #define I_ReleaseExceptionHandler DECLARE_IMPORT(7, ReleaseExceptionHandler)
 #define I_ReleaseDefaultExceptionHandler DECLARE_IMPORT(8, ReleaseDefaultExceptionHandler)
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __EXCEPMAN_H__ */
