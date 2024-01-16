@@ -25,7 +25,7 @@ all: $(EE_BIN) input
 
 input:
 	mkdir -p testfiles/
-	echo "hello world" > testfiles/dummy
+	$(PRINTF) '%s\n' "hello world" > testfiles/dummy
 
 clean:
 	rm -rf $(EE_BIN) $(EE_OBJS)

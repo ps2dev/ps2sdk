@@ -57,5 +57,6 @@ STRIP ?= strip
 MKDIR ?= mkdir
 RMDIR ?= rmdir
 ECHO ?= echo
+PRINTF ?= printf
 
 MAKEREC ?= $(MAKE) -C

@@ -26,15 +26,15 @@ release-ee-dirs:
 
 release-ee-lib:
 	@if test $(EE_LIB) ; then \
-	   $(ECHO) Installing $(EE_LIB) to $(PS2SDK)/ee/lib ; \
+	   $(PRINTF) 'Installing %s to %s/ee/lib\n' $(EE_LIB) $(PS2SDK) ; \
 	   cp -f $(EE_LIB) $(PS2SDK)/ee/lib ; \
 	   cp -f $(EE_LIB:%.a=%.erl) $(PS2SDK)/ee/lib ; \
-	   chmod 644 $(PS2SDK)/ee/lib/`basename $(EE_LIB)` $(PS2SDK)/ee/lib/`basename $(EE_LIB:%.a=%.erl)`; \
+	   chmod 644 $(PS2SDK)/ee/lib/$$(basename $(EE_LIB)) $(PS2SDK)/ee/lib/$$(basename $(EE_LIB:%.a=%.erl)); \
 	   for file in $(EE_LIB_ALTNAMES); do \
-	      ln -s `basename $(EE_LIB)` $(PS2SDK)/ee/lib/$$file; \
+	      ln -s $$(basename $(EE_LIB)) $(PS2SDK)/ee/lib/$$file; \
 	   done; \
 	   for file in $(EE_LIB_ALTNAMES:%.a=%.erl); do \
-	      ln -sf `basename $(EE_LIB:%.a=%.erl)` $(PS2SDK)/ee/lib/$$file; \
+	      ln -sf $$(basename $(EE_LIB:%.a=%.erl)) $(PS2SDK)/ee/lib/$$file; \
 	   done; \
 	fi;
 
@@ -45,11 +45,11 @@ release-ee-lib:
 
 release-ee-bin:
 	@if test $(EE_BIN) ; then \
-	   $(ECHO) Installing $(EE_BIN) to $(PS2SDK)/ee/bin ; \
+	   $(PRINTF) 'Installing %s to %s/ee/bin\n' $(EE_BIN) $(PS2SDK) ; \
 	   cp -f $(EE_BIN) $(PS2SDK)/ee/bin ; \
-	   chmod 644 $(PS2SDK)/ee/bin/`basename $(EE_BIN)` ; \
+	   chmod 644 $(PS2SDK)/ee/bin/$$(basename $(EE_BIN)) ; \
 	   for file in $(EE_BIN_ALTNAMES); do \
-	      ln -sf `basename $(EE_BIN)` $(PS2SDK)/ee/bin/$$file; \
+	      ln -sf $$(basename $(EE_BIN)) $(PS2SDK)/ee/bin/$$file; \
 	   done; \
 	fi;
 
@@ -62,9 +62,9 @@ release-ee-include:
 	@if test -d include ; then \
 	   for file in $$(find include -type f | cut -d'/' -f2-); do \
 	      if test -f include/$$file ; then \
-	         $(ECHO) Installing include/$$file to $(PS2SDK)/ee/include ; \
+	         $(PRINTF) 'Installing include/%s to %s/ee/include\n' $$file $(PS2SDK) ; \
 	         mkdir -p $(PS2SDK)/ee/include/$$(dirname $$file) ; \
-	         cp -t $(PS2SDK)/ee/include/$$(dirname $$file) -f include/$$file ; \
+	         cp -f include/$$file $(PS2SDK)/ee/include/$$(dirname $$file) ; \
 	         chmod 644 $(PS2SDK)/ee/include/$$file ; \
 	      fi \
 	   done; \

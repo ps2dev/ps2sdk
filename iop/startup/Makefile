@@ -15,6 +15,6 @@ include $(PS2SDKSRC)/iop/Rules.release
 clean:
 
 release:
-	$(ECHO) Installing $(IOP_SRC_DIR)linkfile into $(PS2SDK)/iop/startup
+	@$(PRINTF) 'Installing %slinkfile into %s/iop/startup\n' $(IOP_SRC_DIR) $(PS2SDK)
 	cp -f $(IOP_SRC_DIR)linkfile $(PS2SDK)/iop/startup
 

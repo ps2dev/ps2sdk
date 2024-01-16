@@ -10,13 +10,13 @@ SAMPLES_TARGET = $(PS2SDK)/samples
 SHARE_TARGET = $(PS2DEV)/share
 
 all:
-	@$(ECHO) Nothing to do in samples
+	@$(PRINTF) 'Nothing to do in samples\n'
 
 clean:
-	@$(ECHO) Nothing to clean in samples
+	@$(PRINTF) 'Nothing to clean in samples\n'
 
 release: release-samples
-	@$(ECHO) Released samples dir.
+	@$(PRINTF) 'Released samples dir.\n'
 
 release-samples:
 	$(MKDIR) -p $(SAMPLES_TARGET)

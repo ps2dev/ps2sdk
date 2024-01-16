@@ -15,9 +15,9 @@ release-include:
 	@if test -d include ; then \
 	   for file in $$(find include -type f | cut -d'/' -f2-); do \
 	      if test -f include/$$file ; then \
-	         $(ECHO) Installing include/$$file to $(PS2SDK)/common/include ; \
+	         $(PRINTF) 'Installing include/%s to %s/common/include\n' $$file $(PS2SDK) ; \
 	         mkdir -p $(PS2SDK)/common/include/$$(dirname $$file) ; \
-	         cp -t $(PS2SDK)/common/include/$$(dirname $$file) -f include/$$file ; \
+	         cp -f include/$$file $(PS2SDK)/common/include/$$(dirname $$file) ; \
 	         chmod 644 $(PS2SDK)/common/include/$$file ; \
 	      fi \
 	   done; \
