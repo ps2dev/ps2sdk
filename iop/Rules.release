@@ -60,7 +60,7 @@ release-iop-include:
 	      if test -f include/$$file ; then \
 	         $(PRINTF) 'Installing include/%s to %s/iop/include\n' $$file $(PS2SDK) ; \
 	         mkdir -p $(PS2SDK)/iop/include/$$(dirname $$file) ; \
-	         cp -t $(PS2SDK)/iop/include/$$(dirname $$file) -f include/$$file ; \
+	         cp -f include/$$file $(PS2SDK)/iop/include/$$(dirname $$file) ; \
 	         chmod 644 $(PS2SDK)/iop/include/$$file ; \
 	      fi \
 	   done; \
