@@ -26,7 +26,7 @@ release-iop-dirs:
 
 release-iop-lib:
 	@if test $(IOP_LIB) ; then \
-	   $(ECHO) Installing $(IOP_LIB) to $(PS2SDK)/iop/lib ; \
+	   $(PRINTF) 'Installing %s to %s/iop/lib\n' $(IOP_LIB) $(PS2SDK) ; \
 	   cp -f $(IOP_LIB) $(PS2SDK)/iop/lib/ ; \
 	   chmod 644 $(PS2SDK)/iop/lib/$$(basename $(IOP_LIB)) ; \
 	   for file in $(IOP_LIB_ALTNAMES); do \
@@ -41,7 +41,7 @@ release-iop-lib:
 
 release-iop-bin:
 	@if test $(IOP_BIN) ; then \
-	   $(ECHO) Installing $(IOP_BIN) to $(PS2SDK)/iop/irx ; \
+	   $(PRINTF) 'Installing %s to %s/iop/irx\n' $(IOP_BIN) $(PS2SDK) ; \
 	   cp -f $(IOP_BIN) $(PS2SDK)/iop/irx/ ; \
 	   chmod 644 $(PS2SDK)/iop/irx/$$(basename $(IOP_BIN)) ; \
 	   for file in $(IOP_BIN_ALTNAMES); do \
@@ -58,7 +58,7 @@ release-iop-include:
 	@if test -d include ; then \
 	   for file in $$(find include -type f | cut -d'/' -f2-); do \
 	      if test -f include/$$file ; then \
-	         $(ECHO) Installing include/$$file to $(PS2SDK)/iop/include ; \
+	         $(PRINTF) 'Installing include/%s to %s/iop/include\n' $$file $(PS2SDK) ; \
 	         mkdir -p $(PS2SDK)/iop/include/$$(dirname $$file) ; \
 	         cp -t $(PS2SDK)/iop/include/$$(dirname $$file) -f include/$$file ; \
 	         chmod 644 $(PS2SDK)/iop/include/$$file ; \

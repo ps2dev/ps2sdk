@@ -15,9 +15,7 @@ endif
 SUBDIRS = tools iop ee common samples
 
 all: build
-	@$(ECHO) .;
-	@$(ECHO) .PS2SDK Built.;
-	@$(ECHO) .;
+	@$(PRINTF) '.\n.PS2SDK Built.\n.\n'
 
 # Common rules shared by all build targets.
 
@@ -84,13 +82,13 @@ release_base: | env_release_check
 env_build_check:
 	@if test -z $(PS2SDKSRC) ; \
 	then \
-	  $(ECHO) PS2SDKSRC environment variable should be defined. ; \
+	  $(PRINTF) 'PS2SDKSRC environment variable should be defined.\n' ; \
 	fi
 
 env_release_check:
 	@if test -z $(PS2SDK) ; \
 	then \
-	  $(ECHO) PS2SDK environment variable must be defined. ; \
+	  $(PRINTF) 'PS2SDK environment variable must be defined.\n' ; \
 	  exit 1; \
 	fi
 

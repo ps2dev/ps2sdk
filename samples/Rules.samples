@@ -13,10 +13,10 @@ TARGET = $(PS2SDK)/samples/$(SAMPLE_DIR)
 #
 
 all:
-	@$(ECHO) Nothing to do here.
+	@$(PRINTF) 'Nothing to do here.\n'
 
 clean:
-	@$(ECHO) Nothing to do here.
+	@$(PRINTF) 'Nothing to do here.\n'
 
 
 #
@@ -24,7 +24,7 @@ clean:
 #
 
 release: | sample-dir sample-files
-	@$(ECHO) Released: $(SAMPLE_DIR)
+	@$(PRINTF) 'Released: %s\n' $(SAMPLE_DIR)
 
 
 #
@@ -34,7 +34,7 @@ release: | sample-dir sample-files
 
 sample-dir:
 	@if test -z $(SAMPLE_DIR) ; then \
-	  $(ECHO) SAMPLE_DIR must define the target directory. ; \
+	  $(PRINTF) 'SAMPLE_DIR must define the target directory.\n' ; \
 	  exit 1; \
 	fi
 	$(MKDIR) -p $(TARGET)
@@ -48,13 +48,13 @@ sample-dir:
 sample-files: | sample-dir
 	@for file in *; do \
 	   if [ $$file = "Makefile" ] ; then \
-	      $(ECHO) Skipping Makefile. ; \
+	      $(PRINTF) 'Skipping Makefile.\n' ; \
 	   elif [ $$file = "Makefile.sample" ] ; then \
-	      $(ECHO) Installing $$file to $(TARGET)/Makefile ; \
+	      $(PRINTF) 'Installing %s to %s/Makefile\n' $$file $(TARGET) ; \
 	      cp -f $$file $(TARGET)/Makefile ; \
 	      chmod 644 $(TARGET)/Makefile ; \
 	   elif test -f $$file  ; then \
-	      $(ECHO) Installing $$file to $(TARGET) ; \
+	      $(PRINTF) 'Installing %s to %s\n' $$file $(TARGET) ; \
 	      cp -f $$file $(TARGET) ; \
 	      chmod 644 $(TARGET)/$$file ; \
 	   fi ; \
