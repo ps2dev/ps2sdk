@@ -66,10 +66,10 @@ void __fdman_init()
 	__libcglue_init_stdio(&(__descriptormap[STDIN_FILENO]->info), 0);
 
 	__descriptormap[STDOUT_FILENO] = &__descriptor_data_pool[STDOUT_FILENO];
-	__libcglue_init_stdio(&(__descriptormap[0]->info), 1);
+	__libcglue_init_stdio(&(__descriptormap[STDOUT_FILENO]->info), 1);
 
 	__descriptormap[STDERR_FILENO] = &__descriptor_data_pool[STDERR_FILENO];
-	__libcglue_init_stdio(&(__descriptormap[0]->info), 1 /* ioman doesn't have 2 (stderr) by default, so just use 1 (stdout) */);
+	__libcglue_init_stdio(&(__descriptormap[STDERR_FILENO]->info), 1 /* ioman doesn't have 2 (stderr) by default, so just use 1 (stdout) */);
 }
 #endif
 
