@@ -12,7 +12,7 @@ ifeq (x$(PS2SDKSRC), x)
   export PS2SDKSRC=$(shell pwd)
 endif
 
-SUBDIRS = tools iop ee common samples
+SUBDIRS = tools common iop ee samples
 
 all: build
 	@$(PRINTF) '.\n.PS2SDK Built.\n.\n'
