@@ -355,8 +355,7 @@ static int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEn
 	int intStatus;	// interrupt status - for dis/en-abling interrupts
 	struct t_SifDmaTransfer dmaStruct;
 
-	M_DEBUG("GetDir Request\n");
-	M_DEBUG("dirname: %s\n",pathname);
+	M_DEBUG("GetDir Request '%s'\n",pathname);
 
 	matched_entries = 0;
 
@@ -414,8 +413,7 @@ static int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEn
 static int fileXio_Mount_RPC(const char* mountstring, const char* mountpoint, int flag)
 {
 	int res=0;
-	M_DEBUG("Mount Request\n");
-	M_DEBUG("mountpoint: %s - %s - %d\n",mountpoint,mountstring,flag);
+	M_DEBUG("Mount Request mountpoint:'%s' - '%s' - %d\n",mountpoint,mountstring,flag);
 	res = iomanX_mount(mountpoint, mountstring, flag, NULL, 0);
 	return(res);
 }
@@ -662,7 +660,7 @@ static void* fileXioRpc_ReadLink(unsigned int* sbuff)
 void* fileXioRpc_ChDir(unsigned int* sbuff)
 {
 	int ret;
-	M_DEBUG("ChDir Request\n");
+	M_DEBUG("ChDir Request '%s'\n", (char*)sbuff);
 	ret=iomanX_chdir((char*)sbuff);
 	sbuff[0] = ret;
 	return sbuff;
@@ -677,7 +675,7 @@ static void* fileXioRpc_Open(unsigned int* sbuff)
 	int ret;
 	struct fxio_open_packet *packet=(struct fxio_open_packet*)sbuff;
 
-	M_DEBUG("Open Request\n");
+	M_DEBUG("Open Request '%s' f:0x%x m:0x%x\n", packet->pathname, packet->flags, packet->mode);
 	ret=iomanX_open(packet->pathname, packet->flags, packet->mode);
 	sbuff[0] = ret;
 	return sbuff;
@@ -690,7 +688,7 @@ static void* fileXioRpc_Close(unsigned int* sbuff)
 	int ret;
 	struct fxio_close_packet *packet=(struct fxio_close_packet*)sbuff;
 
-	M_DEBUG("Close Request\n");
+	M_DEBUG("Close Request fd:%d\n", packet->fd);
 	ret=iomanX_close(packet->fd);
 	sbuff[0] = ret;
 	return sbuff;
@@ -705,7 +703,7 @@ static void* fileXioRpc_Read(unsigned int* sbuff)
 	int ret;
 	struct fxio_read_packet *packet=(struct fxio_read_packet*)sbuff;
 
-	M_DEBUG("Read Request\n");
+	M_DEBUG("Read Request fd:%d, size:%d\n", packet->fd, packet->size);
 	ret=fileXio_Read_RPC(packet->fd, packet->buffer, packet->size, packet->intrData);
 	sbuff[0] = ret;
 	return sbuff;
@@ -721,7 +719,7 @@ static void* fileXioRpc_Write(unsigned int* sbuff)
 	int ret;
 	struct fxio_write_packet *packet=(struct fxio_write_packet*)sbuff;
 
-	M_DEBUG("Write Request\n");
+	M_DEBUG("Write Request fd:%d, size:%d\n", packet->fd, packet->size);
 	ret=fileXio_Write_RPC(packet->fd, packet->buffer, packet->size,
                             packet->unalignedDataLen, packet->unalignedData);
 	sbuff[0] = ret;
@@ -737,7 +735,7 @@ static void* fileXioRpc_Lseek(unsigned int* sbuff)
 	int ret;
 	struct fxio_lseek_packet *packet=(struct fxio_lseek_packet*)sbuff;
 
-	M_DEBUG("Lseek Request\n");
+	M_DEBUG("Lseek Request fd:%d off:%d mode:%d\n", packet->fd, packet->offset, packet->whence);
 	ret=iomanX_lseek(packet->fd, (long int)packet->offset, packet->whence);
 	sbuff[0] = ret;
 	return sbuff;
@@ -753,7 +751,7 @@ static void* fileXioRpc_Lseek64(unsigned int* sbuff)
 	struct fxio_lseek64_packet *packet=(struct fxio_lseek64_packet*)sbuff;
 	struct fxio_lseek64_return_pkt *ret_packet=(struct fxio_lseek64_return_pkt*)sbuff;
 
-	M_DEBUG("Lseek64 Request\n");
+	M_DEBUG("Lseek64 Request fd:%d off:%lld, mode:%d\n", packet->fd, offset, packet->whence);
 
 	long long offsetHI = packet->offset_hi;
 	offsetHI = offsetHI << 32;
@@ -775,7 +773,7 @@ static void* fileXioRpc_ChStat(unsigned int* sbuff)
 	int ret=-1;
 	struct fxio_chstat_packet *packet=(struct fxio_chstat_packet*)sbuff;
 
-	M_DEBUG("ChStat Request\n");
+	M_DEBUG("ChStat Request '%s'\n", packet->pathname);
     ret=fileXio_chstat_RPC(packet->pathname, packet->stat, packet->mask);
 	sbuff[0] = ret;
 	return sbuff;
@@ -789,7 +787,7 @@ static void* fileXioRpc_GetStat(unsigned int* sbuff)
 	int ret=-1;
 	struct fxio_getstat_packet *packet=(struct fxio_getstat_packet*)sbuff;
 
-	M_DEBUG("GetStat Request\n");
+	M_DEBUG("GetStat Request '%s'\n", packet->pathname);
 	ret=fileXio_getstat_RPC(packet->pathname, packet->stat);
 	sbuff[0] = ret;
 	return sbuff;
@@ -805,7 +803,7 @@ static void* fileXioRpc_Format(unsigned int* sbuff)
 	int ret;
 	struct fxio_format_packet *packet=(struct fxio_format_packet*)sbuff;
 
-	M_DEBUG("Format Request\n");
+	M_DEBUG("Format Request dev:'%s' bd:'%s'\n", packet->device, packet->blockDevice);
 	ret=iomanX_format(packet->device, packet->blockDevice, packet->args, packet->arglen);
 	sbuff[0] = ret;
 	return sbuff;
@@ -856,7 +854,7 @@ static void* fileXioRpc_Devctl(unsigned int* sbuff)
 	int intStatus;
 	int ret;
 
-	M_DEBUG("Devctl Request\n");
+	M_DEBUG("Devctl Request '%s' cmd:%d\n", packet->name, packet->cmd);
 
 	ret = iomanX_devctl(packet->name, packet->cmd, packet->arg, packet->arglen, ret_buf->buf, packet->buflen);
 
@@ -891,7 +889,7 @@ static void* fileXioRpc_Ioctl(unsigned int* sbuff)
 	struct fxio_ioctl_packet *packet = (struct fxio_ioctl_packet *)sbuff;
 	int ret;
 
-	M_DEBUG("Ioctl Request\n");
+	M_DEBUG("Ioctl Request fd:%d cmd:%d\n", packet->fd, packet->cmd);
 
 	//	BODY
 	ret=iomanX_ioctl(packet->fd, packet->cmd, packet->arg);
@@ -908,7 +906,7 @@ static void* fileXioRpc_Ioctl2(unsigned int* sbuff)
 	int intStatus;
 	int ret;
 
-	M_DEBUG("ioctl2 Request\n");
+	M_DEBUG("ioctl2 Request fd:%d cmd:%d\n", packet->fd, packet->cmd);
 
 	ret = iomanX_ioctl2(packet->fd, packet->cmd, packet->arg, packet->arglen, ret_buf->buf, packet->buflen);
 
@@ -942,7 +940,7 @@ static void* fileXioRpc_Dopen(unsigned int* sbuff)
 	int ret;
 	struct fxio_pathsel_packet *packet=(struct fxio_pathsel_packet*)sbuff;
 
-	M_DEBUG("Dopen Request\n");
+	M_DEBUG("Dopen Request '%s'\n", packet->pathname);
 	ret=iomanX_dopen(packet->pathname);
 	sbuff[0] = ret;
 	return sbuff;
@@ -953,7 +951,7 @@ static void* fileXioRpc_Dread(unsigned int* sbuff)
 	int ret=-1;
 	struct fxio_dread_packet *packet=(struct fxio_dread_packet*)sbuff;
 
-	M_DEBUG("Dread Request\n");
+	M_DEBUG("Dread Request fd:%d\n", packet->fd);
 	ret=fileXio_dread_RPC(packet->fd, packet->dirent);
 	sbuff[0] = ret;
 	return sbuff;
@@ -964,7 +962,7 @@ static void* fileXioRpc_Dclose(unsigned int* sbuff)
 	int ret;
 	struct fxio_close_packet *packet=(struct fxio_close_packet*)sbuff;
 
-	M_DEBUG("Dclose Request\n");
+	M_DEBUG("Dclose Request fd:%d\n", packet->fd);
 	ret=iomanX_dclose(packet->fd);
 	sbuff[0] = ret;
 	return sbuff;
