@@ -24,6 +24,9 @@ release-bin:
 	 @if test $(TOOLS_BIN) ; then \
 	    $(PRINTF) 'Installing %s to %s\n' $(TOOLS_BIN) $(PS2SDK) ; \
 	    cp -f $(TOOLS_BIN) $(RELEASE_TOOLS_DIRS) ; \
+	       for file in $(TOOLS_BIN_ALTNAMES); do \
+	          ln -sf $$(basename $(TOOLS_BIN)) $(RELEASE_TOOLS_DIRS)/$$file; \
+	       done; \
 	 fi;
 
 release: release-dirs release-bin
