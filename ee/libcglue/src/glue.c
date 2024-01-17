@@ -150,7 +150,7 @@ int _open(const char *buf, int flags, ...) {
 	}
 
 	info = &(__descriptormap[fd]->info);
-	iop_fd = _libcglue_fdman_path_ops->open(info, buf, flags, mode);
+	iop_fd = _libcglue_fdman_path_ops->open(info, t_fname, flags, mode);
 	if (iop_fd < 0)
 	{
 		__fdman_release_descriptor(fd);
