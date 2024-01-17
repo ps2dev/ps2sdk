@@ -12,7 +12,7 @@ ifeq (x$(PS2SDKSRC), x)
   export PS2SDKSRC=$(shell pwd)
 endif
 
-SUBDIRS = tools iop ee common samples
+SUBDIRS = tools common iop ee samples
 
 all: build
 	@$(PRINTF) '.\n.PS2SDK Built.\n.\n'
@@ -34,6 +34,10 @@ $(subdir_clean): dummy
 $(subdir_release): dummy
 	$(MAKEREC) $(patsubst release-%,%,$@) release
 
+# Directory-level parallelism has been disabled due to issues with
+# multiple Make instances running inside a directory at once
+# and causing output file corruption
+.NOTPARALLEL: $(subdir_list) $(subdir_clean) $(subdir_release)
 
 build: $(subdir_list) | env_build_check download_dependencies
 

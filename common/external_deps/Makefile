@@ -11,4 +11,7 @@ clean:
 	@$(PRINTF) 'Cleaning lwip.\n'
 	rm -rf $(LWIP) $(LWIP)_inprogress
 
+release:
+	@cd .
+
 include $(PS2SDKSRC)/Defs.make
