@@ -751,11 +751,12 @@ static void* fileXioRpc_Lseek64(unsigned int* sbuff)
 	struct fxio_lseek64_packet *packet=(struct fxio_lseek64_packet*)sbuff;
 	struct fxio_lseek64_return_pkt *ret_packet=(struct fxio_lseek64_return_pkt*)sbuff;
 
-	M_DEBUG("Lseek64 Request fd:%d off:%lld, mode:%d\n", packet->fd, offset, packet->whence);
+	M_DEBUG("Lseek64 Request...\n");
 
 	long long offsetHI = packet->offset_hi;
 	offsetHI = offsetHI << 32;
 	long long offset = offsetHI | packet->offset_lo;
+	M_DEBUG("Lseek64 Request fd:%d off:%lld, mode:%d\n", packet->fd, offset, packet->whence);
 
 	ret=iomanX_lseek64(packet->fd, offset, packet->whence);
 	ret_packet->pos_lo = (u32)(ret & 0xffffffff);
