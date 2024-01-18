@@ -92,3 +92,12 @@ $(EE_ERL): $(EE_OBJS)
 $(EE_LIB): $(EE_OBJS)
 	$(DIR_GUARD)
 	$(EE_AR) cru $(EE_LIB) $(EE_OBJS)
+
+$(IOPRP_BIN): $(IOPRP_CONTENTS)
+ifeq (_$(IOPRP_CONTENTS)_,__)
+	$(error Cannot generate IOPRP if 'IOPRP_CONTENTS' variable is empty)
+else
+	$(DIR_GUARD)
+	romimg -c $@ $<
+endif
+
