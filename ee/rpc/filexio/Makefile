@@ -31,6 +31,7 @@ FILEXIO_PS2SDK_OBJS = \
 	__fileXioLseek64Helper.o \
 	__fileXioWriteHelper.o \
 	__fileXioIoctlHelper.o \
+	__fileXioIoctl2Helper.o \
 	__fileXioDreadHelper.o \
 	__fileXioLseekDirHelper.o \
 	__fileXioOpsInitializeImpl.o \

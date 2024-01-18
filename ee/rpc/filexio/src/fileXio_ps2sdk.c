@@ -348,6 +348,25 @@ int __fileXioIoctlHelper(void *userdata, int request, void *data)
 int __fileXioIoctlHelper(void *userdata, int request, void *data);
 #endif
 
+#ifdef F___fileXioIoctl2Helper
+int __fileXioIoctl2Helper(void *userdata, int request, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
+{
+    int rv;
+    int fd;
+
+    fd = __fileXioGetFdHelper(userdata);
+    if (fd < 0)
+    {
+        return fd;
+    }
+
+    rv = fileXioIoctl2(fd, request, arg, arglen, buf, buflen);
+    return rv;
+}
+#else
+int __fileXioIoctl2Helper(void *userdata, int request, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
+#endif
+
 #ifdef F___fileXioDreadHelper
 int __fileXioDreadHelper(void *userdata, struct dirent *dir)
 {
@@ -486,6 +505,7 @@ extern void __fileXioOpsInitializeImpl(void)
     if (&_write) __fileXio_fdman_ops_file.write = __fileXioWriteHelper;
     // cppcheck-suppress knownConditionTrueFalse
     if (&_ioctl) __fileXio_fdman_ops_file.ioctl = __fileXioIoctlHelper;
+    __fileXio_fdman_ops_file.ioctl2 = __fileXioIoctl2Helper;
 
     memset(&__fileXio_fdman_ops_dir, 0, sizeof(__fileXio_fdman_ops_dir));
     __fileXio_fdman_ops_dir.getfd = __fileXioGetFdHelper;

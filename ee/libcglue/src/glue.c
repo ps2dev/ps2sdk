@@ -1037,6 +1037,23 @@ int _ps2sdk_ioctl(int fd, int request, void *data)
 }
 #endif
 
+#ifdef F__ps2sdk_ioctl2
+int _ps2sdk_ioctl2(int fd, int request, void *arg, unsigned int arglen, void *buf, unsigned int buflen)
+{
+	_libcglue_fdman_fd_info_t *fdinfo;
+	fdinfo = libcglue_get_fd_info(fd);
+	if (fdinfo == NULL)
+	{
+		return -EBADF;
+	}
+	if (fdinfo->ops == NULL || fdinfo->ops->ioctl == NULL)
+	{
+		return -ENOSYS;
+	}
+	return fdinfo->ops->ioctl2(fdinfo->userdata, request, arg, arglen, buf, buflen);
+}
+#endif
+
 #ifdef F__ps2sdk_dread
 int _ps2sdk_dread(int fd, struct dirent *dir)
 {

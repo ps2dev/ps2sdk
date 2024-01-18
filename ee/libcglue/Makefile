@@ -106,6 +106,7 @@ GLUE_OBJS = \
 	_ps2sdk_lseek64.o \
 	_ps2sdk_write.o \
 	_ps2sdk_ioctl.o \
+	_ps2sdk_ioctl2.o \
 	_ps2sdk_dread.o
 
 LOCK_OBJS = __retarget_lock_init.o __retarget_lock_acquire.o __retarget_lock_release.o __retarget_lock_try_acquire.o __retarget_lock_close.o \

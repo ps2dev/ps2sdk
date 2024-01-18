@@ -30,6 +30,7 @@ typedef int (*_libcglue_fdman_lseek_cb_t)(void *userdata, int offset, int whence
 typedef int64_t (*_libcglue_fdman_lseek64_cb_t)(void *userdata, int64_t offset, int whence);
 typedef int (*_libcglue_fdman_write_cb_t)(void *userdata, const void *buf, int nbytes);
 typedef int (*_libcglue_fdman_ioctl_cb_t)(void *userdata, int request, void *data);
+typedef int (*_libcglue_fdman_ioctl2_cb_t)(void *userdata, int request, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 typedef int (*_libcglue_fdman_dread_cb_t)(void *userdata, struct dirent *dir);
 typedef int (*_libcglue_fdman_fcntl_f_setfl_cb_t)(void *userdata, int newfl);
 typedef int (*_libcglue_fdman_accept_cb_t)(void *userdata, struct _libcglue_fdman_fd_info_ *info, struct sockaddr *addr, socklen_t *addrlen);
@@ -56,6 +57,7 @@ typedef struct _libcglue_fdman_fd_ops_
 	_libcglue_fdman_lseek64_cb_t lseek64;
 	_libcglue_fdman_write_cb_t write;
 	_libcglue_fdman_ioctl_cb_t ioctl;
+	_libcglue_fdman_ioctl2_cb_t ioctl2;
 	_libcglue_fdman_dread_cb_t dread;
 	_libcglue_fdman_fcntl_f_setfl_cb_t fcntl_f_setfl;
 	_libcglue_fdman_accept_cb_t accept;
@@ -191,6 +193,7 @@ extern int _ps2sdk_lseek(int fd, int offset, int whence);
 extern int64_t _ps2sdk_lseek64(int fd, int64_t offset, int whence);
 extern int _ps2sdk_write(int fd, const void *buf, int nbytes);
 extern int _ps2sdk_ioctl(int fd, int request, void *data);
+extern int _ps2sdk_ioctl2(int fd, int request, void *arg, unsigned int arglen, void *buf, unsigned int buflen);
 extern int _ps2sdk_dread(int fd, struct dirent *dir);
 
 #endif /* __PS2SDKAPI_H__ */
