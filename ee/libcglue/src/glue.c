@@ -893,3 +893,163 @@ _libcglue_fdman_fd_info_t *libcglue_get_fd_info(int fd) {
 	return &(__descriptormap[fd]->info);
 }
 #endif
+
+#ifdef F_ps2sdk_get_iop_fd
+int ps2sdk_get_iop_fd(int fd)
+{
+	_libcglue_fdman_fd_info_t *fdinfo;
+	fdinfo = libcglue_get_fd_info(fd);
+	if (fdinfo == NULL)
+	{
+		return -EBADF;
+	}
+	if (fdinfo->ops == NULL || fdinfo->ops->getfd == NULL)
+	{
+		return -ENOSYS;
+	}
+	return fdinfo->ops->getfd(fdinfo->userdata);
+}
+#endif
+
+#ifdef F_ps2sdk_get_iop_filename
+char *ps2sdk_get_iop_filename(int fd)
+{
+	_libcglue_fdman_fd_info_t *fdinfo;
+	fdinfo = libcglue_get_fd_info(fd);
+	if (fdinfo == NULL)
+	{
+		return NULL;
+	}
+	if (fdinfo->ops == NULL || fdinfo->ops->getfilename == NULL)
+	{
+		return NULL;
+	}
+	return fdinfo->ops->getfilename(fdinfo->userdata);
+}
+#endif
+
+#ifdef F__ps2sdk_close
+int _ps2sdk_close(int fd)
+{
+	_libcglue_fdman_fd_info_t *fdinfo;
+	fdinfo = libcglue_get_fd_info(fd);
+	if (fdinfo == NULL)
+	{
+		return -EBADF;
+	}
+	if (fdinfo->ops == NULL || fdinfo->ops->close == NULL)
+	{
+		return -ENOSYS;
+	}
+	return fdinfo->ops->close(fdinfo->userdata);
+}
+#endif
+
+#ifdef F__ps2sdk_dclose
+int _ps2sdk_dclose(int fd)
+{
+	return _ps2sdk_close(fd);
+}
+#endif
+
+#ifdef F__ps2sdk_read
+int _ps2sdk_read(int fd, void *buf, int nbytes)
+{
+	_libcglue_fdman_fd_info_t *fdinfo;
+	fdinfo = libcglue_get_fd_info(fd);
+	if (fdinfo == NULL)
+	{
+		return -EBADF;
+	}
+	if (fdinfo->ops == NULL || fdinfo->ops->read == NULL)
+	{
+		return -ENOSYS;
+	}
+	return fdinfo->ops->read(fdinfo->userdata, buf, nbytes);
+}
+#endif
+
+#ifdef F__ps2sdk_lseek
+int _ps2sdk_lseek(int fd, int offset, int whence)
+{
+	_libcglue_fdman_fd_info_t *fdinfo;
+	fdinfo = libcglue_get_fd_info(fd);
+	if (fdinfo == NULL)
+	{
+		return -EBADF;
+	}
+	if (fdinfo->ops == NULL || fdinfo->ops->lseek == NULL)
+	{
+		return -ENOSYS;
+	}
+	return fdinfo->ops->lseek(fdinfo->userdata, offset, whence);
+}
+#endif
+
+#ifdef F__ps2sdk_lseek64
+int64_t _ps2sdk_lseek64(int fd, int64_t offset, int whence)
+{
+	_libcglue_fdman_fd_info_t *fdinfo;
+	fdinfo = libcglue_get_fd_info(fd);
+	if (fdinfo == NULL)
+	{
+		return -EBADF;
+	}
+	if (fdinfo->ops == NULL || fdinfo->ops->lseek64 == NULL)
+	{
+		return -ENOSYS;
+	}
+	return fdinfo->ops->lseek64(fdinfo->userdata, offset, whence);
+}
+#endif
+
+#ifdef F__ps2sdk_write
+int _ps2sdk_write(int fd, const void *buf, int nbytes)
+{
+	_libcglue_fdman_fd_info_t *fdinfo;
+	fdinfo = libcglue_get_fd_info(fd);
+	if (fdinfo == NULL)
+	{
+		return -EBADF;
+	}
+	if (fdinfo->ops == NULL || fdinfo->ops->write == NULL)
+	{
+		return -ENOSYS;
+	}
+	return fdinfo->ops->write(fdinfo->userdata, buf, nbytes);
+}
+#endif
+
+#ifdef F__ps2sdk_ioctl
+int _ps2sdk_ioctl(int fd, int request, void *data)
+{
+	_libcglue_fdman_fd_info_t *fdinfo;
+	fdinfo = libcglue_get_fd_info(fd);
+	if (fdinfo == NULL)
+	{
+		return -EBADF;
+	}
+	if (fdinfo->ops == NULL || fdinfo->ops->ioctl == NULL)
+	{
+		return -ENOSYS;
+	}
+	return fdinfo->ops->ioctl(fdinfo->userdata, request, data);
+}
+#endif
+
+#ifdef F__ps2sdk_dread
+int _ps2sdk_dread(int fd, struct dirent *dir)
+{
+	_libcglue_fdman_fd_info_t *fdinfo;
+	fdinfo = libcglue_get_fd_info(fd);
+	if (fdinfo == NULL)
+	{
+		return -EBADF;
+	}
+	if (fdinfo->ops == NULL || fdinfo->ops->dread == NULL)
+	{
+		return -ENOSYS;
+	}
+	return fdinfo->ops->dread(fdinfo->userdata, dir);
+}
+#endif
