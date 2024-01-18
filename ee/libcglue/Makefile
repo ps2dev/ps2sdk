@@ -21,7 +21,7 @@ SLEEP_OBJS = nanosleep.o
 
 SJIS_OBJS = isSpecialSJIS.o isSpecialASCII.o strcpy_ascii.o strcpy_sjis.o
 
-CWD_OBJS = __cwd.o __get_drive.o getcwd.o __path_absolute.o __init_cwd.o
+CWD_OBJS = __cwd.o __cwd_len.o __get_drive.o getcwd.o __path_absolute.o __init_cwd.o
 
 PS2SDKAPI_OBJS = \
 	__fioOpsInitialize.o \

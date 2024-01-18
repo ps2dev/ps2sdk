@@ -45,6 +45,7 @@
 
 /* Functions from cwd.c */
 extern char __cwd[MAXNAMLEN + 1];
+extern size_t __cwd_len;
 int __path_absolute(const char *in, char *out, int len);
 
 extern void * _end;
@@ -434,6 +435,7 @@ int chdir(const char *path) {
 	}
 
 	strncpy(__cwd, dest, sizeof(__cwd));
+	__cwd_len = strnlen(__cwd, sizeof(__cwd));
 	return 0;
 }
 #endif
