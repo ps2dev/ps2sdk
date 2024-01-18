@@ -244,14 +244,7 @@ int _stat(const char *path, struct stat *buf) {
 
 #ifdef F_lstat
 int lstat(const char *path, struct stat *buf) {
-	char dest[MAXNAMLEN + 1];
-
-	if(__path_absolute(path, dest, MAXNAMLEN) < 0) {
-		errno = ENAMETOOLONG;
-		return -1;
-	}
-	
-	return __transform_errno(stat(dest, buf));
+	return stat(path, buf);
 }
 #endif
 
@@ -277,7 +270,14 @@ int _fstat(int fd, struct stat *buf) {
 		errno = ENOENT;
 		return -1;
 	}
-	return stat(filename, buf);
+
+	if (_libcglue_fdman_path_ops == NULL || _libcglue_fdman_path_ops->stat == NULL)
+	{
+		errno = ENOSYS;
+		return -1;
+	}
+
+	return __transform_errno(_libcglue_fdman_path_ops->stat(filename, buf));
 }
 #endif
 
