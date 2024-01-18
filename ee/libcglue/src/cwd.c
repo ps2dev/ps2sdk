@@ -22,6 +22,13 @@ char __cwd[MAXNAMLEN + 1] = { 0 };
 extern char __cwd[MAXNAMLEN + 1];
 #endif
 
+#ifdef F___cwd_len
+/* the length of the present working directory variable. */
+size_t __cwd_len = 0;
+#else
+extern size_t __cwd_len;
+#endif
+
 #define defaultCWD "host:"
 
 enum SeparatorType {
@@ -71,12 +78,13 @@ char *getcwd(char *buf, size_t size)
 		return NULL;
 	}		
 
-	if(strlen(__cwd) >= size) {
+	if(__cwd_len >= size) {
 		errno = ERANGE;
 		return NULL;
 	}
 
-	strncpy(buf, __cwd, size);
+	memcpy(buf, __cwd, __cwd_len);
+	buf[__cwd_len] = '\x00';
 	return buf;
 }
 #endif
@@ -89,22 +97,24 @@ static int __path_normalize(char *out, int len, int posixSeparator)
 	int i, j;
 	int first, next;
 	char separator = posixSeparator ? '/' : '\\';
+	size_t out_len = strnlen(out, len);
+
+	out_len += 2;
+	if (out_len >= len) return -10;
+
+	/* First append "/" to make the rest easier */
+	out[out_len - 1] = separator;
+	out[out_len] = 0;
 
 	// Convert separators to the specified one
-    for (size_t i = 0; i < len; i++) {
+    for (size_t i = 0; i < out_len; i++) {
         if (out[i] == '/' || out[i] == '\\') {
             out[i] = separator;
         }
     }
 
-	/* First append "/" to make the rest easier */
-	if (strlen(out) + 1 >= len) return -10;
-	out[strlen(out)] = separator;
-	out[strlen(out)] = 0;
-
-
 	/* Convert "//" to "/" */
-	for(i = 0; out[i+1]; i++) {
+	for(i = 0; (i < out_len) && out[i+1]; i++) {
 		if(out[i] == separator && out[i+1] == separator) {
 			for(j=i+1; out[j]; j++)
 				out[j] = out[j+1];
@@ -113,7 +123,7 @@ static int __path_normalize(char *out, int len, int posixSeparator)
 	}
 
 	/* Convert "/./" to "/" */
-	for(i = 0; out[i] && out[i+1] && out[i+2]; i++) {
+	for(i = 0; (i < out_len) && out[i] && out[i+1] && out[i+2]; i++) {
 		if(out[i] == separator && out[i+1] == '.' && out[i+2] == separator) {
 			for(j = i+1; out[j]; j++)
 				out[j] = out[j+2];
@@ -124,7 +134,7 @@ static int __path_normalize(char *out, int len, int posixSeparator)
 	/* Convert "/asdf/../" to "/" until we can't anymore.  Also
 	 * convert leading "/../" to "/" */
 	first = next = 0;
-	while(1) {
+	while((first < out_len) && (next < out_len)) {
 		/* If a "../" follows, remove it and the parent */
 		if(out[next+1] && out[next+1] == '.' && 
 		   out[next+2] && out[next+2] == '.' &&
@@ -143,7 +153,7 @@ static int __path_normalize(char *out, int len, int posixSeparator)
 	}
 
 	/* Remove trailing "/" just if it's not the root */
-	for(i = 1; out[i]; i++)
+	for(i = 1; (i < out_len) && out[i]; i++)
 		continue;
 	if(i > 1 && out[i-1] == separator) 
 		out[i-1] = 0;
@@ -156,33 +166,38 @@ int __path_absolute(const char *in, char *out, int len)
 {
 	int dr;
 	enum SeparatorType separatorType;
+	size_t in_len;
 
+	in_len = strlen(in);
 	/* See what the relative URL starts with */
 	dr = __get_drive(in, &separatorType);
 	char separator = separatorType == SeparatorTypePOSIX ? '/' : '\\';
 
 	if(dr > 0 && (separatorType == SeparatorTypeNone || in[dr] == separator)) {
 		/* It starts with "drive:" and has no separator or "drive:/", so it's already absolute */
-		if (strlen(in) >= len) return -1;
+		if (in_len >= len) return -1;
 		strncpy(out, in, len);
 	} else if(dr > 0 && in[dr - 1] == ':') {
 		/* It starts with "drive:", so it's already absoulte, however it misses the "/" after unit */
-		if (strlen(in) + 1 >= len) return -2;
+		if (in_len + 1 >= len) return -2;
 		strncpy(out, in, dr);
 		out[dr] = separator;
 		strncpy(out + dr + 1, in + dr, len - dr - 1);
 	} else if(in[0] == '\\' || in[0] == '/') {
 		/* It's absolute, but missing the drive, so use cwd's drive */
-		if(strlen(__cwd) + strlen(in) >= len) return -3;
-		strncpy(out, __cwd, len);
+		if(__cwd_len + in_len >= len) return -3;
+		memcpy(out, __cwd, __cwd_len);
+		out[__cwd_len] = '\x00';
 		dr = __get_drive(out, &separatorType);
+		if(dr < 0) dr = 0;
 		out[dr] = 0;
 		strncat(out, in, len);
 	} else {
 		/* It's not absolute, so append it to the current cwd */
-		if(strlen(__cwd) + 1 + strlen(in) >= len) return -5;
-		strncpy(out, __cwd, len);
-		strncat(out, &separator, 1); 
+		if(__cwd_len + 1 + in_len >= len) return -5;
+		memcpy(out, __cwd, __cwd_len);
+		out[__cwd_len] = separator;
+		out[__cwd_len + 1] = '\x00';
 		strncat(out, in, len);
 	}
 
