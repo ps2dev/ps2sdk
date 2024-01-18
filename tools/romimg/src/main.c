@@ -27,7 +27,7 @@ static void DisplayROMImgDetails(const ROMIMG *ROMImg)
         printf(GREEN"%-10s"DEFCOL"\t%u\n", filename, file->RomDir.size);
     }
 
-    printf("\nTotal size: %d bytes.\n", TotalSize);
+    printf("\nTotal size: %u bytes.\n", TotalSize);
 }
 
 static void DisplaySyntaxHelp(void)

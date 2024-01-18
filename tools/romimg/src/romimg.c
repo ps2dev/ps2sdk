@@ -55,14 +55,13 @@ static int OpenRomDirFile(const struct ROMImgStat *ImageStat, const char *file, 
 {
 	const struct RomDirEntry *RomDirEntry;
 	int result;
-	unsigned int offset;
 
 	memset(fd, 0, sizeof(struct RomDirFileFd));
 
 	RomDirEntry = ImageStat->ROMFS_start;
 	result = ENOENT;
 	if (GetRomDirExtInfoOffset(ImageStat, fd) == 0) {
-		offset = 0;
+		unsigned int offset = 0;
 		while (RomDirEntry->name[0] != '\0') {
 			if (strncmp(file, RomDirEntry->name, sizeof(RomDirEntry->name)) == 0) {
 				fd->FileOffset = offset;
@@ -86,12 +85,11 @@ static int GetExtInfoStat(const struct ROMImgStat *ImageStat, struct RomDirFileF
 {
 	int result;
 	unsigned int offset, BytesToCopy;
-	struct ExtInfoFieldEntry *ExtInfoEntry;
 
 	result = ENOENT;
 	offset = 0;
 	while (offset < fd->ExtInfoEntrySize) {
-		ExtInfoEntry = (struct ExtInfoFieldEntry *)((RMIMG_PTRCAST)ImageStat->image + fd->ExtInfoOffset);
+		struct ExtInfoFieldEntry *ExtInfoEntry = (struct ExtInfoFieldEntry *)((RMIMG_PTRCAST)ImageStat->image + fd->ExtInfoOffset);
 
 		if (ExtInfoEntry->type == EXTINFO_FIELD_TYPE_DATE || ExtInfoEntry->type == EXTINFO_FIELD_TYPE_COMMENT) {
 			if (type == ExtInfoEntry->type) {
@@ -155,7 +153,7 @@ int CreateBlankROMImg(const char *filename, ROMIMG *ROMImg)
 
 	ROMImg->date = GetSystemDate();
 #if defined(_WIN32) || defined(WIN32)
-	int x = GetUsername(UserName, sizeof(UserName));
+	GetUsername(UserName, sizeof(UserName));
 #else
 	UserName = getenv("USER");
 #endif
@@ -187,12 +185,10 @@ int CreateBlankROMImg(const char *filename, ROMIMG *ROMImg)
 
 int WriteROMImg(const char *file, const ROMIMG *ROMImg)
 {
-	int result, FileAlignMargin;
-	FILE *OutputFile;
+	int result;
 	unsigned char *extinfo;
 	struct RomDirEntry ROMDIR_romdir, EXTINFO_romdir, NULL_romdir;
 	unsigned int i, TotalExtInfoSize, ExtInfoOffset, CommentLengthRounded;
-	struct ExtInfoFieldEntry *ExtInfoEntry;
 
 	result = 0;
 	ExtInfoOffset = 0;
@@ -201,7 +197,7 @@ int WriteROMImg(const char *file, const ROMIMG *ROMImg)
 	for (i = 0, TotalExtInfoSize = 0; i < ROMImg->NumFiles; i++) {
 		TotalExtInfoSize += ROMImg->files[i].RomDir.ExtInfoEntrySize;
 		if (ROMImg->files[i].RomDir.ExtInfoEntrySize % 4 != 0) {
-			WARNING("ASSERT ROMImg->files[%d].RomDir.ExtInfoEntrySize%%4==0\n", i);
+			WARNING("ASSERT ROMImg->files[%u].RomDir.ExtInfoEntrySize%%4==0\n", i);
 			abort();
 		}
 	}
@@ -219,7 +215,7 @@ int WriteROMImg(const char *file, const ROMIMG *ROMImg)
 		strcpy(ROMDIR_romdir.name, "ROMDIR");
 		ROMDIR_romdir.size = (ROMImg->NumFiles + 3) * sizeof(struct RomDirEntry);  // Number of files (Including RESET) + one ROMDIR and one EXTINFO entries... and one NULL entry.
 		ROMDIR_romdir.ExtInfoEntrySize = sizeof(struct ExtInfoFieldEntry) + CommentLengthRounded;
-		ExtInfoEntry = (struct ExtInfoFieldEntry *)(extinfo + ExtInfoOffset);
+		struct ExtInfoFieldEntry *ExtInfoEntry = (struct ExtInfoFieldEntry *)(extinfo + ExtInfoOffset);
 		ExtInfoEntry->value = 0;
 		ExtInfoEntry->ExtLength = CommentLengthRounded;
 		ExtInfoEntry->type = EXTINFO_FIELD_TYPE_COMMENT;
@@ -232,14 +228,16 @@ int WriteROMImg(const char *file, const ROMIMG *ROMImg)
 
 		for (i = 1; i < ROMImg->NumFiles; i++) {
 			if (ExtInfoOffset % 4 != 0) {
-				printf("ASSERT: ExtInfoOffset[%d]%%4==0: %d\n", i, ExtInfoOffset);
+				WARNING("ASSERT: ExtInfoOffset[%u]%%4==0: %u\n", i, ExtInfoOffset);
 				abort();
 			}
 			memcpy(&extinfo[ExtInfoOffset], ROMImg->files[i].ExtInfoData, ROMImg->files[i].RomDir.ExtInfoEntrySize);
 			ExtInfoOffset += ROMImg->files[i].RomDir.ExtInfoEntrySize;
 		}
 
+		FILE *OutputFile;
 		if ((OutputFile = fopen(file, "wb")) != NULL) {
+			int FileAlignMargin;
 			// Write the content of RESET (The bootstrap program, if it exists).
 			fwrite(ROMImg->files[0].FileData, 1, ROMImg->files[0].RomDir.size, OutputFile);  // It will be aligned to 16 byte units in size.
 
@@ -279,8 +277,7 @@ int LoadROMImg(ROMIMG *ROMImg, const char *path)
 {
 	FILE *InputFile;
 	int result;
-	unsigned int i, offset, ExtInfoOffset, DataStartOffset, ScanLimit, CommentLength;
-	struct RomDirEntry *RomDir;
+	unsigned int ExtInfoOffset, DataStartOffset, ScanLimit, CommentLength;
 	struct RomDirFileFd RomDirFileFd;
 	struct ROMImgStat ImageStat;
 	struct FileEntry *file;
@@ -297,6 +294,7 @@ int LoadROMImg(ROMIMG *ROMImg, const char *path)
 				DataStartOffset = 0;
 
 				// Scan for the start of the image, which is after the end of the bootstrap program. All regular IOPRP images don't have one (The image begins immediately at the start of the file).
+				unsigned int i;
 				for (i = 0, result = -EIO, ScanLimit = 0x40000 < ImageStat.size ? 0x40000 : ImageStat.size; i < ScanLimit; i++) {
 
 					if (((const char *)ImageStat.image)[i] == 'R' &&
@@ -336,8 +334,8 @@ int LoadROMImg(ROMIMG *ROMImg, const char *path)
 					ROMImg->comment = NULL;
 					GetExtInfoStat(&ImageStat, &RomDirFileFd, EXTINFO_FIELD_TYPE_COMMENT, &ROMImg->comment, 0);
 
-					RomDir = (struct RomDirEntry *)ImageStat.ROMFS_start;
-					offset = 0;
+					struct RomDirEntry * RomDir = (struct RomDirEntry *)ImageStat.ROMFS_start;
+					unsigned int offset = 0;
 					ExtInfoOffset = 0;
 					GetRomDirExtInfoOffset(&ImageStat, &RomDirFileFd);
 					while (RomDir->name[0] != '\0') {
@@ -363,19 +361,19 @@ int LoadROMImg(ROMIMG *ROMImg, const char *path)
 					result = EINVAL;
 				}
 			} else {
-				DPRINTF("failed to read %d bytes\n", ImageStat.size);
+				ERROR("failed to read %u bytes\n", ImageStat.size);
 				result = EIO;
 			}
 
 			free(ImageStat.image);
 		} else {
-			ERROR("failed to malloc %d bytes\n", ImageStat.size);
+			ERROR("failed to malloc %u bytes\n", ImageStat.size);
 			result = ENOMEM;
 		}
 
 		fclose(InputFile);
 	} else {
-		DPRINTF("cant open '%s'\n", path);
+		ERROR("cant open '%s'\n", path);
 		result = ENOENT;
 	}
 
@@ -385,12 +383,12 @@ int LoadROMImg(ROMIMG *ROMImg, const char *path)
 void UnloadROMImg(ROMIMG *ROMImg)
 {
 	DPRINTF("start...\n");
-	unsigned int i;
 
 	if (ROMImg->comment != NULL) {
 		free(ROMImg->comment);
 	}
 	if (ROMImg->files != NULL) {
+		unsigned int i;
 		for (i = 0; i < ROMImg->NumFiles; i++) {
 			if (ROMImg->files[i].ExtInfoData != NULL)
 				free(ROMImg->files[i].ExtInfoData);
@@ -458,16 +456,16 @@ static int AddExtInfoStat(struct FileEntry *file, unsigned char type, void *data
 int AddFile(ROMIMG *ROMImg, const char *path)
 {
 	FILE *InputFile;
-	int result, size;
+	int result;
 	unsigned int FileDateStamp;
 	unsigned short FileVersion;
-	char ModuleDescription[32];
-	struct FileEntry *file;
 	if ((InputFile = fopen(path, "rb")) != NULL) {
+		int size;
 		fseek(InputFile, 0, SEEK_END);
 		size = ftell(InputFile);
 		rewind(InputFile);
 
+		struct FileEntry *file;
 		// Files cannot exist more than once in an image. The RESET entry is special here because all images will have a RESET entry, but it might be empty (If it has no content, allow the user to add in content).
 		if (strcmp(path, "RESET")) {
 			if (!IsFileExists(ROMImg, path)) {
@@ -484,6 +482,7 @@ int AddFile(ROMIMG *ROMImg, const char *path)
 					AddExtInfoStat(&ROMImg->files[ROMImg->NumFiles - 1], EXTINFO_FIELD_TYPE_DATE, &FileDateStamp, 4);
 
 					if (IsSonyRXModule(path)) {
+						char ModuleDescription[32];
 						if ((result = GetSonyRXModInfo(path, ModuleDescription, sizeof(ModuleDescription), &FileVersion)) == 0) {
 							AddExtInfoStat(&ROMImg->files[ROMImg->NumFiles - 1], EXTINFO_FIELD_TYPE_VERSION, &FileVersion, 2);
 							AddExtInfoStat(&ROMImg->files[ROMImg->NumFiles - 1], EXTINFO_FIELD_TYPE_COMMENT, ModuleDescription, strlen(ModuleDescription) + 1);
@@ -521,11 +520,11 @@ int AddFile(ROMIMG *ROMImg, const char *path)
 int DeleteFile(ROMIMG *ROMImg, const char *filename)
 {
 	int result;
-	unsigned int i;
 	struct FileEntry *file;
 
-	// The RESET entry cannot be detected, but its content will be.
+	// The RESET entry cannot be deleted, but its content will be.
 	if (strcmp("RESET", filename)) {
+		unsigned int i;
 		for (result = ENOENT, i = 0, file = ROMImg->files; i < ROMImg->NumFiles; i++, file++) {
 			if (strncmp(file->RomDir.name, filename, sizeof(file->RomDir.name)) == 0) {
 				if (file->FileData != NULL)

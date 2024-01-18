@@ -16,12 +16,12 @@ int IsSonyRXModule(const char *path)
 	elf_header_t header;
 	elf_shdr_t SectionHeader;
 	int result;
-	unsigned int i;
 
 	result = 0;
 	if ((file = fopen(path, "rb")) != NULL) {
 		fread(&header, 1, sizeof(elf_header_t), file);
 		if (*(u32 *)header.ident == ELF_MAGIC && (header.type == ELF_TYPE_ERX2 || header.type == ELF_TYPE_IRX)) {
+			unsigned int i;
 			for (i = 0; i < header.shnum; i++) {
 				fseek(file, header.shoff + i * header.shentsize, SEEK_SET);
 				fread(&SectionHeader, 1, sizeof(elf_shdr_t), file);
@@ -43,20 +43,20 @@ int GetSonyRXModInfo(const char *path, char *description, unsigned int MaxLength
 {
 	FILE *file;
 	int result;
-	unsigned int i;
 	elf_header_t header;
 	elf_shdr_t SectionHeader;
-	void *buffer;
 
 	result = ENOENT;
 	if ((file = fopen(path, "rb")) != NULL) {
 		fread(&header, 1, sizeof(elf_header_t), file);
 		if (*(u32 *)header.ident == ELF_MAGIC && (header.type == ELF_TYPE_ERX2 || header.type == ELF_TYPE_IRX)) {
+			unsigned int i;
 			for (i = 0; i < header.shnum; i++) {
 				fseek(file, header.shoff + i * header.shentsize, SEEK_SET);
 				fread(&SectionHeader, 1, sizeof(elf_shdr_t), file);
 
 				if (SectionHeader.type == (SHT_LOPROC | SHT_LOPROC_EEMOD_TAB) || SectionHeader.type == (SHT_LOPROC | SHT_LOPROC_IOPMOD_TAB)) {
+					void *buffer;
 					if ((buffer = malloc(SectionHeader.size)) != NULL) {
 						fseek(file, SectionHeader.offset, SEEK_SET);
 						fread(buffer, 1, SectionHeader.size, file);
