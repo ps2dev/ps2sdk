@@ -95,7 +95,7 @@ int __fioOpenHelper(_libcglue_fdman_fd_info_t *info, const char *buf, int flags,
             return -ENOMEM;
         }
         userdata->fd = iop_fd;
-        memcpy(userdata, buf, buf_len);
+        memcpy(userdata->filename, buf, buf_len);
         userdata->filename[buf_len] = '\x00';
         info->userdata = (void *)userdata;
         info->ops = is_dir ? &__fio_fdman_ops_dir : &__fio_fdman_ops_file;
