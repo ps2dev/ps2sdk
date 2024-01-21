@@ -6,18 +6,13 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_BIN_ALTNAMES ?= timemani.irx
+IOP_BIN_ALTNAMES ?= timemanp.irx
 
-# Enable compatibility with PS1 mode?
-TIMRMAN_PS1 ?= 0
+IOP_BIN ?= timrmanp.irx
 
-IOP_OBJS = timrman.o imports.o exports.o
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/system/timrman/src/
+IOP_INC_DIR = $(PS2SDKSRC)/iop/system/timrman/include/
 
-ifneq (x$(TIMRMAN_PS1),x0)
-IOP_CFLAGS += -DBUILDING_TIMRMANP
-endif
+TIMRMAN_PS1 ?= 1
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/iop/Rules.bin.make
-include $(PS2SDKSRC)/iop/Rules.make
-include $(PS2SDKSRC)/iop/Rules.release
+include $(PS2SDKSRC)/iop/system/timrman/Makefile

@@ -21,20 +21,26 @@ extern struct irx_export_table _exp_timrman;
 
 #define mfc0(reg) _mfc0(reg)
 
-enum {
-    NUM_TIMERS = 6,
+#ifdef BUILDING_TIMRMANP
+#define NUM_TIMERS 3
+#else
+#define NUM_TIMERS 6
+#endif
 
+enum {
     TMR0_COUNT = 0xBF801100,
     TMR1_COUNT = 0xBF801110,
     TMR2_COUNT = 0xBF801120,
+#if NUM_TIMERS > 3
     TMR3_COUNT = 0xBF801480,
     TMR4_COUNT = 0xBF801490,
     TMR5_COUNT = 0xBF8014A0,
+#endif
 
     TMR_CTRL_OFFSET = 4,
     TMR_CMP_OFFSET  = 8,
 
-    TMR_UNK = 0xBF801450,
+    TMR_IN_PS1_MODE = 0xBF801450,
 
     TMR_HOLD_REG  = 0xBF8014B0,
     TMR_HOLD_MODE = 0xBF8014C0,
@@ -97,6 +103,7 @@ static struct Timer sTimerTable[NUM_TIMERS] = {
         .max_prescale = 8,
         .irq          = 6,
     },
+#if NUM_TIMERS > 3
     {
         .addr         = TMR3_COUNT,
         .sources      = 5,
@@ -118,33 +125,62 @@ static struct Timer sTimerTable[NUM_TIMERS] = {
         .max_prescale = 256,
         .irq          = 0x10,
     },
+#endif
 };
 
-static int sIndexMap[NUM_TIMERS] = {2, 5, 4, 3, 0, 1};
+static int sIndexMap[NUM_TIMERS] = {
+    2,
+#if NUM_TIMERS > 3
+    5,
+    4,
+    3,
+#endif
+    0,
+    1,
+};
 
 u32 timer0() { return _lh(TMR0_COUNT); }
 u32 timer1() { return _lh(TMR1_COUNT); }
 u32 timer2() { return _lh(TMR2_COUNT); }
+#if NUM_TIMERS > 3
 u32 timer3() { return _lw(TMR3_COUNT); }
 u32 timer4() { return _lw(TMR4_COUNT); }
 u32 timer5() { return _lw(TMR5_COUNT); }
+#endif
 
-static u32 (*sTimerCountFun[NUM_TIMERS])() = {timer0, timer1, timer2, timer3, timer4, timer5};
+static u32 (*sTimerCountFun[NUM_TIMERS])() = {
+    timer0,
+    timer1,
+    timer2,
+#if NUM_TIMERS > 3
+    timer3,
+    timer4,
+    timer5,
+#endif
+};
 
 int _start(int argc, char **argv)
 {
     int prid, ret;
     prid = mfc0(PRID);
 
+#ifdef BUILDING_TIMRMANP
+    if (prid >= 16) {
+        if ((_lw(TMR_IN_PS1_MODE) & 8) == 0) {
+            return MODULE_NO_RESIDENT_END;
+        }
+    }
+#else
     if (prid < 16) {
         return MODULE_NO_RESIDENT_END;
     }
 
-    if ((_lw(TMR_UNK) & 8) != 0) {
+    if ((_lw(TMR_IN_PS1_MODE) & 8) != 0) {
         return MODULE_NO_RESIDENT_END;
     }
+#endif
 
-    for (int i = 5; i >= 0; i--) {
+    for (int i = 0; i < NUM_TIMERS; i++) {
         sTimerTable[i].users = 0;
     }
 
@@ -358,20 +394,30 @@ u32 GetTimerCompare(int timid)
 
 void SetHoldMode(int holdnum, int mode)
 {
+#ifndef BUILDING_TIMRMANP
     u32 hold = _lw(TMR_HOLD_MODE);
     hold &= ~(0xF << (4 * holdnum));
     hold |= (mode & 0xF) << (4 * holdnum);
     _sw(TMR_HOLD_MODE, hold);
+#endif
 }
 
 u32 GetHoldMode(int holdnum)
 {
+#ifdef BUILDING_TIMRMANP
+    return 0;
+#else
     return _lw(TMR_HOLD_MODE >> (holdnum * 4)) & 0xF;
+#endif
 }
 
 u32 GetHoldReg(int holdnum)
 {
+#ifdef BUILDING_TIMRMANP
+    return 0;
+#else
     return _lw(TMR_HOLD_REG + (holdnum * 4));
+#endif
 }
 
 int GetHardTimerIntrCode(int timid)
@@ -555,9 +601,14 @@ int SetupHardTimer(int timid, int source, int mode, int prescale)
 
     switch (prescale) {
         case 8:
-            if (timer_idx >= 3) {
+#if NUM_TIMERS > 3
+            if (timer_idx >= 3)
+            {
                 new_mode |= 0x2000;
-            } else {
+            }
+            else
+#endif
+            {
                 new_mode |= 0x200;
             }
             break;
@@ -601,9 +652,14 @@ int StartHardTimer(int timid)
     _sh(0, timer->addr + TMR_CTRL_OFFSET);
 
     if (timer->timeup_flags) {
-        if (timer_idx > 3) {
+#if NUM_TIMERS > 3
+        if (timer_idx > 3)
+        {
             _sw(timer->compare_value, timer->addr + TMR_CMP_OFFSET);
-        } else {
+        }
+        else
+#endif
+        {
             _sh(timer->compare_value, timer->addr + TMR_CMP_OFFSET);
         }
     }
