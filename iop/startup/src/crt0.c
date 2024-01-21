@@ -1,6 +1,7 @@
 #include <stdio.h>
 typedef void (*func_ptr)(void);
 extern func_ptr __CTOR_END__[];
+extern func_ptr __DTOR_LIST__[];
 extern func_ptr __DTOR_END__[];
 
 static void __do_global_ctors(void)
@@ -16,12 +17,12 @@ static void __do_global_ctors(void)
 
 static void __do_global_dtors(void)
 {
-    func_ptr *p = __DTOR_END__ - 1;
+    int num = __DTOR_END__ - __DTOR_LIST__ - 1;
+    int idx = 0;
 
-    if (*(int *)p != -1) {
-        for (; *(int *)p != -1; p--) {
-            (*p)();
-        }
+    while (idx < num) {
+        idx++;
+        __DTOR_LIST__[idx]();
     }
 }
 
