@@ -375,7 +375,7 @@ static void _request_call(SifRpcCallPkt_t *request, void *data)
     (void)data;
 
     if (base->start)
-        base->end->link = server;
+        base->end->next = server;
     else
         base->start = server;
 
@@ -492,11 +492,11 @@ SifRegisterRpc(SifRpcServerData_t *sd,
     if (!(server = qd->link)) {
         qd->link = sd;
     } else {
-        while (server->next != NULL) {
-            server = server->next;
+        while (server->link != NULL) {
+            server = server->link;
         }
 
-        server->next = sd;
+        server->link = sd;
     }
 
     EI();
