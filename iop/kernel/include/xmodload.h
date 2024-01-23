@@ -85,11 +85,11 @@ int SetModuleFlags(int modid, int flag);
 #define I_UnloadModule DECLARE_IMPORT(21, UnloadModule)
 #define I_SearchModuleByName DECLARE_IMPORT(22, SearchModuleByName)
 #define I_SearchModuleByAddress DECLARE_IMPORT(23, SearchModuleByAddress)
-#define I_SelfStopModule DECLARE_IMPORT(24, SelfStopModule)
-#define I_SelfUnloadModule DECLARE_IMPORT(25, SelfUnloadModule)
-#define I_AllocLoadMemory DECLARE_IMPORT(26, AllocLoadMemory)
-#define I_FreeLoadMemory DECLARE_IMPORT(27, FreeLoadMemory)
-#define I_SetModuleFlags DECLARE_IMPORT(28, SetModuleFlags)
+#define I_SelfStopModule DECLARE_IMPORT(26, SelfStopModule)
+#define I_SelfUnloadModule DECLARE_IMPORT(27, SelfUnloadModule)
+#define I_AllocLoadMemory DECLARE_IMPORT(28, AllocLoadMemory)
+#define I_FreeLoadMemory DECLARE_IMPORT(29, FreeLoadMemory)
+#define I_SetModuleFlags DECLARE_IMPORT(30, SetModuleFlags)
 
 #ifdef __cplusplus
 }
