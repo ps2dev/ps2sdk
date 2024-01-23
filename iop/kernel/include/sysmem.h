@@ -64,8 +64,10 @@ void * AllocSysMemory(int mode, int size, void *ptr);
 int FreeSysMemory(void *ptr);
 
 u32 QueryMemSize();
+// In liberx, the following is QueryFreeMemSize
 u32 QueryMaxFreeMemSize();
 u32 QueryTotalFreeMemSize();
+// In liberx, the following is QueryBlockInfo
 void * QueryBlockTopAddress(void *address);
 int QueryBlockSize(void *address);
 

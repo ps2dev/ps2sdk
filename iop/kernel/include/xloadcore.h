@@ -26,11 +26,16 @@ extern "C" {
 #define xloadcore_IMPORTS_end END_IMPORT_TABLE
 
 void ApplyElfRelSection(void *buffer, const void *module, int element_count);
-#define I_ApplyElfRelSection DECLARE_IMPORT(25, ApplyElfRelSection)
-void InitLoadedModInfo(FileInfo_t *ModuleInfo, ModuleInfo_t *ModInfo);
-#define I_InitLoadedModInfo DECLARE_IMPORT(26, InitLoadedModInfo)
+void CopyModInfo(FileInfo_t *ModuleInfo, ModuleInfo_t *ModInfo);
 int SetRebootTimeLibraryHandlingMode(struct irx_export_table *exports, int mode);
+
+#define I_ApplyElfRelSection DECLARE_IMPORT(25, ApplyElfRelSection)
+#define I_CopyModInfo DECLARE_IMPORT(26, CopyModInfo)
 #define I_SetRebootTimeLibraryHandlingMode DECLARE_IMPORT(27, SetRebootTimeLibraryHandlingMode)
+
+// For backwards compatibility
+#define InitLoadedModInfo(...) CopyModInfo(__VA_ARGS__)
+#define I_InitLoadedModInfo I_CopyModInfo
 
 #ifdef __cplusplus
 }
