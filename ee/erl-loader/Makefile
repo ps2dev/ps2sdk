@@ -27,7 +27,7 @@ clean:
 	rm -f -r $(EE_OBJS_DIR) $(EE_BIN_DIR) $(EE_SRC_DIR)exports.c
 
 release:
-	$(ECHO) Installing $(LOADER_BIN) to $(PS2SDK)/ee/bin/ ;
+	@$(ECHO) 'Installing %s to %s/ee/bin/\n' $(LOADER_BIN) $(PS2SDK) ;
 	cp -f $(LOADER_BIN) $(PS2SDK)/ee/bin/
 	chmod 644 $(PS2SDK)/ee/bin/erl-loader.elf
 

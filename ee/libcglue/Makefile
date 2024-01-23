@@ -21,7 +21,7 @@ SLEEP_OBJS = nanosleep.o
 
 SJIS_OBJS = isSpecialSJIS.o isSpecialASCII.o strcpy_ascii.o strcpy_sjis.o
 
-CWD_OBJS = __cwd.o __get_drive.o getcwd.o __path_absolute.o __init_cwd.o
+CWD_OBJS = __cwd.o __cwd_len.o __get_drive.o getcwd.o __path_absolute.o __init_cwd.o
 
 PS2SDKAPI_OBJS = \
 	__fioOpsInitialize.o \
@@ -96,7 +96,18 @@ GLUE_OBJS = \
 	geteuid.o \
 	getpwuid.o \
 	getpwnam.o \
-	libcglue_get_fd_info.o
+	libcglue_get_fd_info.o \
+	ps2sdk_get_iop_fd.o \
+	ps2sdk_get_iop_filename.o \
+	_ps2sdk_close.o \
+	_ps2sdk_dclose.o \
+	_ps2sdk_read.o \
+	_ps2sdk_lseek.o \
+	_ps2sdk_lseek64.o \
+	_ps2sdk_write.o \
+	_ps2sdk_ioctl.o \
+	_ps2sdk_ioctl2.o \
+	_ps2sdk_dread.o
 
 LOCK_OBJS = __retarget_lock_init.o __retarget_lock_acquire.o __retarget_lock_release.o __retarget_lock_try_acquire.o __retarget_lock_close.o \
 	__retarget_lock_init_recursive.o __retarget_lock_acquire_recursive.o __retarget_lock_release_recursive.o __retarget_lock_try_acquire_recursive.o __retarget_lock_close_recursive.o

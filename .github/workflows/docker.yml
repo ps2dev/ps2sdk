@@ -23,12 +23,12 @@ jobs:
     - name: Extract DOCKER_TAG using tag name
       if: startsWith(github.ref, 'refs/tags/')
       run: |
-        echo "DOCKER_TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
+        printf '%s\n' "DOCKER_TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
 
     - name: Use default DOCKER_TAG
       if: startsWith(github.ref, 'refs/tags/') != true
       run: |
-        echo "DOCKER_TAG=latest" >> $GITHUB_ENV
+        printf '%s\n' "DOCKER_TAG=latest" >> $GITHUB_ENV
 
     - name: Login to DockerHub
       uses: docker/login-action@v2
@@ -47,12 +47,12 @@ jobs:
     - name: Set docker tag list to include DockerHub if credentials available
       if: env.DOCKER_USERNAME != null
       run: |
-        echo "DOCKER_TAG_LIST=ghcr.io/${{ github.repository }}:${{ env.DOCKER_TAG }},${{ github.repository }}:${{ env.DOCKER_TAG }}" >> $GITHUB_ENV
+        printf '%s\n' "DOCKER_TAG_LIST=ghcr.io/${{ github.repository }}:${{ env.DOCKER_TAG }},${{ github.repository }}:${{ env.DOCKER_TAG }}" >> $GITHUB_ENV
 
     - name: Set docker tag list to not include DockerHub if credentials not available
       if: env.DOCKER_USERNAME == null
       run: |
-        echo "DOCKER_TAG_LIST=ghcr.io/${{ github.repository }}:${{ env.DOCKER_TAG }}" >> $GITHUB_ENV
+        printf '%s\n' "DOCKER_TAG_LIST=ghcr.io/${{ github.repository }}:${{ env.DOCKER_TAG }}" >> $GITHUB_ENV
 
     - name: Build and Push to container registry
       uses: docker/build-push-action@v3
@@ -64,8 +64,8 @@ jobs:
 
     - name: Send Compile action
       run: |
-        export DISPATCH_ACTION="$(echo run_build)"
-        echo "NEW_DISPATCH_ACTION=$DISPATCH_ACTION" >> $GITHUB_ENV
+        export DISPATCH_ACTION="$(printf '%s\n' run_build)"
+        printf '%s\n' "NEW_DISPATCH_ACTION=$DISPATCH_ACTION" >> $GITHUB_ENV
 
     - name: Repository Dispatch to ps2sdk-ports
       uses: peter-evans/repository-dispatch@v2

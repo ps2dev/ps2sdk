@@ -12,12 +12,10 @@ ifeq (x$(PS2SDKSRC), x)
   export PS2SDKSRC=$(shell pwd)
 endif
 
-SUBDIRS = tools iop ee common samples
+SUBDIRS = tools common iop ee samples
 
 all: build
-	@$(ECHO) .;
-	@$(ECHO) .PS2SDK Built.;
-	@$(ECHO) .;
+	@$(PRINTF) '.\n.PS2SDK Built.\n.\n'
 
 # Common rules shared by all build targets.
 
@@ -36,6 +34,10 @@ $(subdir_clean): dummy
 $(subdir_release): dummy
 	$(MAKEREC) $(patsubst release-%,%,$@) release
 
+# Directory-level parallelism has been disabled due to issues with
+# multiple Make instances running inside a directory at once
+# and causing output file corruption
+.NOTPARALLEL: $(subdir_list) $(subdir_clean) $(subdir_release)
 
 build: $(subdir_list) | env_build_check download_dependencies
 
@@ -84,13 +86,13 @@ release_base: | env_release_check
 env_build_check:
 	@if test -z $(PS2SDKSRC) ; \
 	then \
-	  $(ECHO) PS2SDKSRC environment variable should be defined. ; \
+	  $(PRINTF) 'PS2SDKSRC environment variable should be defined.\n' ; \
 	fi
 
 env_release_check:
 	@if test -z $(PS2SDK) ; \
 	then \
-	  $(ECHO) PS2SDK environment variable must be defined. ; \
+	  $(PRINTF) 'PS2SDK environment variable must be defined.\n' ; \
 	  exit 1; \
 	fi
 

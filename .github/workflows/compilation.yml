@@ -20,11 +20,10 @@ jobs:
         run: |
           apk add build-base git bash
 
-      # Still compilation is not fully compatible with multi-thread
       - name: Compile project ${{ matrix.debug }}
         run: |
           make -j $(getconf _NPROCESSORS_ONLN) clean
-          make -j 1 ${{ matrix.debug }}
+          make -j $(getconf _NPROCESSORS_ONLN) ${{ matrix.debug }}
           make -j $(getconf _NPROCESSORS_ONLN) install
           ln -sf "$PS2SDK/ee/lib/libcglue.a" "$PS2DEV/ee/mips64r5900el-ps2-elf/lib/libcglue.a"
           ln -sf "$PS2SDK/ee/lib/libpthreadglue.a" "$PS2DEV/ee/mips64r5900el-ps2-elf/lib/libpthreadglue.a"
@@ -39,7 +38,7 @@ jobs:
 
       - name: Get short SHA
         id: slug
-        run: echo "sha8=$(echo ${GITHUB_SHA} | cut -c1-8)" >> $GITHUB_OUTPUT
+        run: printf '%s\n' "sha8=$(printf '%s\n' ${GITHUB_SHA} | cut -c1-8)" >> $GITHUB_OUTPUT
 
       - name: Upload artifacts
         if: ${{ success() }}

@@ -9,7 +9,7 @@ RUN apk add build-base git bash
 # Still compilation is not fully compatible with multi-thread
 RUN cd /src && \
     make -j $(getconf _NPROCESSORS_ONLN) clean && \
-    make -j 1 && \
+    make -j $(getconf _NPROCESSORS_ONLN) && \
     make -j $(getconf _NPROCESSORS_ONLN) install
 RUN ln -sf "$PS2SDK/ee/lib/libcglue.a" "$PS2DEV/ee/mips64r5900el-ps2-elf/lib/libcglue.a"
 RUN ln -sf "$PS2SDK/ee/lib/libpthreadglue.a" "$PS2DEV/ee/mips64r5900el-ps2-elf/lib/libpthreadglue.a"

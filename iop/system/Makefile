@@ -13,6 +13,7 @@ SUBDIRS = \
 	eesync-nano \
 	threadman \
 	timrman \
+	timrmanp \
 	ioman \
 	iomanx \
 	iopmgr \

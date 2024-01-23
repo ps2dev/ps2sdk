@@ -6,9 +6,13 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-TOOLS_OBJS = bin2o.o
+IOP_BIN_ALTNAMES ?= timemanp.irx
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/tools/Rules.bin.make
-include $(PS2SDKSRC)/tools/Rules.make
-include $(PS2SDKSRC)/tools/Rules.release
+IOP_BIN ?= timrmanp.irx
+
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/system/timrman/src/
+IOP_INC_DIR = $(PS2SDKSRC)/iop/system/timrman/include/
+
+TIMRMAN_PS1 ?= 1
+
+include $(PS2SDKSRC)/iop/system/timrman/Makefile
