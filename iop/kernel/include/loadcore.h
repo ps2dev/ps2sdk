@@ -82,6 +82,11 @@ typedef struct tag_LC_internals {
 	ModuleInfo_t *image_info;
 	int	module_count;
 	int	module_index;
+	/* The following members may change depending on the version of the module. */
+	void *reboot_handlers;
+	void *intr_suspend_tbl;
+	int bootmodes[16];
+	int bootmodes_size;
 } lc_internals_t;
 
 typedef struct {
