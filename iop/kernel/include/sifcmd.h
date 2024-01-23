@@ -67,12 +67,19 @@ typedef struct t_SifCmdHandlerData {
 	void		*harg;
 } SifCmdHandlerData_t;
 
+typedef struct t_SifCmdSysHandlerData
+{
+    SifCmdHandler_t handler;
+    void *harg;
+    void *unknown08;
+} SifCmdSysHandlerData_t;
+
 void sceSifInitCmd(void);
 void sceSifExitCmd(void);
 void sceSifGetSreg(int index);
 void sceSifSetSreg(int index, unsigned int value);
 void sceSifSetCmdBuffer(SifCmdHandlerData_t *cmdBuffer, int size);
-void sceSifSetSysCmdBuffer(SifCmdHandlerData_t *sysCmdBuffer, int size);
+void sceSifSetSysCmdBuffer(SifCmdSysHandlerData_t *sysCmdBuffer, int size);
 void sceSifAddCmdHandler(int cid, SifCmdHandler_t handler, void *harg);
 
 /* SIF RPC.  */
