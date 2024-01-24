@@ -67,12 +67,19 @@ typedef struct t_SifCmdHandlerData {
 	void		*harg;
 } SifCmdHandlerData_t;
 
+typedef struct t_SifCmdSysHandlerData
+{
+    SifCmdHandler_t handler;
+    void *harg;
+    void *unknown08;
+} SifCmdSysHandlerData_t;
+
 void sceSifInitCmd(void);
 void sceSifExitCmd(void);
 void sceSifGetSreg(int index);
 void sceSifSetSreg(int index, unsigned int value);
 void sceSifSetCmdBuffer(SifCmdHandlerData_t *cmdBuffer, int size);
-void sceSifSetSysCmdBuffer(SifCmdHandlerData_t *sysCmdBuffer, int size);
+void sceSifSetSysCmdBuffer(SifCmdSysHandlerData_t *sysCmdBuffer, int size);
 void sceSifAddCmdHandler(int cid, SifCmdHandler_t handler, void *harg);
 
 /* SIF RPC.  */
@@ -172,10 +179,10 @@ SifRpcServerData_t *sceSifRemoveRpc(SifRpcServerData_t *sd, SifRpcDataQueue_t *q
 SifRpcDataQueue_t *sceSifRemoveRpcQueue(SifRpcDataQueue_t *qd);
 void sceSifSetSif1CB(void *func, int param);
 void sceSifClearSif1CB(void);
-unsigned int sceSifSendCmdIntr(unsigned int, void *, int, void *, void *, int,
-	void (*func)(), void *);
-unsigned int isceSifSendCmdIntr(unsigned int, void *, int, void *, void *, int,
-	void (*func)(), void *);
+unsigned int sceSifSendCmdIntr(int cmd, void *packet, int packet_size, void *src_extra,
+	void *dest_extra, int size_extra, void (*completioncb)(void *userdata), void *userdata);
+unsigned int isceSifSendCmdIntr(int cmd, void *packet, int packet_size, void *src_extra,
+	void *dest_extra, int size_extra, void (*completioncb)(void *userdata), void *userdata);
 
 /* Compatibility names for use with ps2lib.  */
 #define SifInitRpc sceSifInitRpc
