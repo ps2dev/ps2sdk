@@ -82,6 +82,11 @@ typedef struct tag_LC_internals {
 	ModuleInfo_t *image_info;
 	int	module_count;
 	int	module_index;
+	/* The following members may change depending on the version of the module. */
+	void *reboot_handlers;
+	void *intr_suspend_tbl;
+	int bootmodes[16];
+	int bootmodes_size;
 } lc_internals_t;
 
 typedef struct {
@@ -118,28 +123,31 @@ void FlushDcache(void);
 int RegisterLibraryEntries(struct irx_export_table *exports);
 int ReleaseLibraryEntries(struct irx_export_table *exports);
 
-int LinkImports(void* addr, int size);
-int UnlinkImports(void* addr, int size);
+// In liberx, the following is LinkLibraryClients
+int LinkLibraryEntries(void* addr, int size);
+// In liberx, the following is UnLinkLibraryClients
+int UnLinkLibraryEntries(void* addr, int size);
 
 int RegisterNonAutoLinkEntries(struct irx_export_table *exports);
 
+// In liberx, the following is SearchLibraryEntries
 void *QueryLibraryEntryTable(iop_library_t *library);
 int * QueryBootMode(int mode);
 void RegisterBootMode(iop_bootmode_t *b);
 
-int SetNonAutoLinkFlag(struct irx_export_table *export);
-int UnsetNonAutoLinkFlag(struct irx_export_table *export);
+int LockLibraryClient(struct irx_export_table *export);
+int UnLockLibraryClient(struct irx_export_table *export);
 
-void LinkModule(ModuleInfo_t *mi);
-void UnlinkModule(ModuleInfo_t *mi);
+void RegisterModule(ModuleInfo_t *mi);
+void ReleaseModule(ModuleInfo_t *mi);
 
-int RegisterPostBootCallback(BootupCallback_t func, int priority, int *stat);
+int AddRebootNotifyHandler(BootupCallback_t func, int priority, int *stat);
 
 void SetCacheCtrl(u32 val);
 
-int ReadModuleHeader(void* image, FileInfo_t *result);
-int LoadModuleImage(void* image, FileInfo_t *fi);
-ModuleInfo_t *FindImageInfo(void* addr);
+int ProbeExecutableObject(void* image, FileInfo_t *result);
+int LoadExecutableObject(void* image, FileInfo_t *fi);
+ModuleInfo_t *SearchModuleCBByAddr(void* addr);
 
 #define loadcore_IMPORTS \
 	loadcore_IMPORTS_start \
@@ -166,21 +174,43 @@ ModuleInfo_t *FindImageInfo(void* addr);
 #define I_FlushDcache DECLARE_IMPORT(5, FlushDcache)
 #define I_RegisterLibraryEntries DECLARE_IMPORT(6, RegisterLibraryEntries)
 #define I_ReleaseLibraryEntries DECLARE_IMPORT(7, ReleaseLibraryEntries)
-#define I_LinkImports DECLARE_IMPORT(8, LinkImports)
-#define I_UnlinkImports DECLARE_IMPORT(9, UnlinkImports)
+#define I_LinkLibraryEntries DECLARE_IMPORT(8, LinkLibraryEntries)
+#define I_UnLinkLibraryEntries DECLARE_IMPORT(9, UnLinkLibraryEntries)
 #define I_RegisterNonAutoLinkEntries DECLARE_IMPORT(10, RegisterNonAutoLinkEntries)
 #define I_QueryLibraryEntryTable DECLARE_IMPORT(11, QueryLibraryEntryTable)
 #define I_QueryBootMode DECLARE_IMPORT(12, QueryBootMode)
 #define I_RegisterBootMode DECLARE_IMPORT(13, RegisterBootMode)
-#define I_SetNonAutoLinkFlag DECLARE_IMPORT(14, SetNonAutoLinkFlag)
-#define I_UnsetNonAutoLinkFlag DECLARE_IMPORT(15, UnsetNonAutoLinkFlag)
-#define I_LinkModule DECLARE_IMPORT(16, LinkModule)
-#define I_UnlinkModule DECLARE_IMPORT(17, UnlinkModule)
-#define I_RegisterPostBootCallback DECLARE_IMPORT(20, RegisterPostBootCallback)
+#define I_LockLibraryClient DECLARE_IMPORT(14, LockLibraryClient)
+#define I_UnLockLibraryClient DECLARE_IMPORT(15, UnLockLibraryClient)
+#define I_RegisterModule DECLARE_IMPORT(16, RegisterModule)
+#define I_ReleaseModule DECLARE_IMPORT(17, ReleaseModule)
+#define I_AddRebootNotifyHandler DECLARE_IMPORT(20, AddRebootNotifyHandler)
 #define I_SetCacheCtrl DECLARE_IMPORT(21, SetCacheCtrl)
-#define I_ReadModuleHeader DECLARE_IMPORT(22, ReadModuleHeader)
-#define I_LoadModuleImage DECLARE_IMPORT(23, LoadModuleImage)
-#define I_FindImageInfo DECLARE_IMPORT(24, FindImageInfo)
+#define I_ProbeExecutableObject DECLARE_IMPORT(22, ProbeExecutableObject)
+#define I_LoadExecutableObject DECLARE_IMPORT(23, LoadExecutableObject)
+#define I_SearchModuleCBByAddr DECLARE_IMPORT(24, SearchModuleCBByAddr)
+
+// For backwards compatibility
+#define LinkImports(...) LinkLibraryEntries(__VA_ARGS__)
+#define UnlinkImports(...) UnLinkLibraryEntries(__VA_ARGS__)
+#define SetNonAutoLinkFlag(...) LockLibraryClient(__VA_ARGS__)
+#define UnsetNonAutoLinkFlag(...) UnLockLibraryClient(__VA_ARGS__)
+#define LinkModule(...) RegisterModule(__VA_ARGS__)
+#define UnlinkModule(...) ReleaseModule(__VA_ARGS__)
+#define RegisterPostBootCallback(...) AddRebootNotifyHandler(__VA_ARGS__)
+#define ReadModuleHeader(...) ProbeExecutableObject(__VA_ARGS__)
+#define LoadModuleImage(...) LoadExecutableObject(__VA_ARGS__)
+#define FindImageInfo(...) SearchModuleCBByAddr(__VA_ARGS__)
+#define I_LinkImports I_LinkLibraryEntries
+#define I_UnlinkImports I_UnLinkLibraryEntries
+#define I_SetNonAutoLinkFlag I_LockLibraryClient
+#define I_UnsetNonAutoLinkFlag I_UnLockLibraryClient
+#define I_LinkModule I_RegisterModule
+#define I_UnlinkModule I_ReleaseModule
+#define I_RegisterPostBootCallback I_AddRebootNotifyHandler
+#define I_ReadModuleHeader I_ProbeExecutableObject
+#define I_LoadModuleImage I_LoadExecutableObject
+#define I_FindImageInfo I_SearchModuleCBByAddr
 
 #ifdef __cplusplus
 }

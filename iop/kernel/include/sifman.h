@@ -141,7 +141,7 @@ int sceSifCheckInit();
 void sceSifSetDmaIntrHandler(void (*handler)(void *), void *arg);
 void sceSifResetDmaIntrHandler();
 
-unsigned int sceSifSetDmaIntr(SifDmaTransfer_t *dmat, int len, void (*func)(), void *data);
+unsigned int sceSifSetDmaIntr(SifDmaTransfer_t *dmat, int count, void (*completioncb)(void *userdata), void *userdata);
 
 #define sifman_IMPORTS_start DECLARE_IMPORT_TABLE(sifman, 1, 1)
 #define sifman_IMPORTS_end END_IMPORT_TABLE
