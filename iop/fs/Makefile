@@ -10,8 +10,6 @@ SUBDIRS = \
 	adddrv \
 	addrom2 \
 	bdm \
-	bdm/bdm_fatfs \
-	bdm/bdm_vfat \
 	devfs \
 	fakehost \
 	fileio \

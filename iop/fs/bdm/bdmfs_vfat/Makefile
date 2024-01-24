@@ -6,17 +6,21 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
+VFAT_PATH = $(PS2SDKSRC)/iop/fs/vfat/
+
+VFAT_SRC_DIR = $(VFAT_PATH)/src/
+
 # IOP_CFLAGS += -DDEBUG -DDEBUG_EXTREME
 
-IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
-IOP_CFLAGS += -Wno-error -Wno-strict-aliasing
+IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/bdm_core/include -I$(VFAT_SRC_DIR)/include
 
-IOP_BIN ?= bdmfs_fatfs.irx
-
-IOP_OBJS = ff.o ffsystem.o ffunicode.o fs_driver.o diskio.o main.o imports.o
-IOP_LIBS = -static-libgcc -lgcc
+IOP_OBJS = fs_driver.o fat_driver.o fat_write.o scache.o main.o imports.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make
 include $(PS2SDKSRC)/iop/Rules.make
 include $(PS2SDKSRC)/iop/Rules.release
+
+$(IOP_OBJS_DIR)%.o: $(VFAT_SRC_DIR)%.c
+	$(DIR_GUARD)
+	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@

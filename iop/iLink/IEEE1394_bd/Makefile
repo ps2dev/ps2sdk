@@ -11,7 +11,7 @@
 IOP_CFLAGS += -mno-check-zero-division -Wno-strict-aliasing # -DSIF_CALLBACKS_12_13
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/iLink/iLinkman/include
-IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
+IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/bdm_core/include
 
 IOP_OBJS = sbp2_driver.o imports.o main.o scsi.o
 

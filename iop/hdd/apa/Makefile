@@ -43,7 +43,7 @@ endif
 
 ifneq (x$(APA_USE_BDM),x0)
 IOP_CFLAGS += -DAPA_USE_BDM
-IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
+IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/bdm_core/include
 endif
 
 ifneq (x$(APA_USE_IOMANX),x0)

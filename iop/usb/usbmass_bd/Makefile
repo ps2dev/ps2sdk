@@ -9,7 +9,7 @@
 # IOP_CFLAGS += -DDEBUG
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/usb/usbd/include
-IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
+IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/bdm_core/include
 
 IOP_CFLAGS += -Wno-strict-aliasing
 

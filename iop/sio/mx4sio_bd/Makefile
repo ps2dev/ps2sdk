@@ -6,7 +6,7 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include -I$(PS2SDKSRC)/iop/system/sio2man/include
+IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/bdm_core/include -I$(PS2SDKSRC)/iop/system/sio2man/include
 
 IOP_OBJS += spi_sdcard_crc7.o spi_sdcard_driver.o crc16.o ioplib.o sio2man_hook.o mx4sio.o imports.o
 
