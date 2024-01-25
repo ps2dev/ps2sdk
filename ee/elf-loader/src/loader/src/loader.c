@@ -45,6 +45,7 @@
 //--------------------------------------------------------------
    void _libcglue_init() {}
    void _libcglue_deinit() {}
+   void _libcglue_args_parse(int argc, char **argv) {}
 
    DISABLE_PATCHED_FUNCTIONS();
    DISABLE_EXTRA_TIMERS_FUNCTIONS();
