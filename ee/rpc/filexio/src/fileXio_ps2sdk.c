@@ -294,7 +294,6 @@ int __fileXioLseekHelper(void *userdata, int offset, int whence);
 #ifdef F___fileXioLseek64Helper
 int64_t __fileXioLseek64Helper(void *userdata, int64_t offset, int whence)
 {
-    int rv;
     int fd;
 
     fd = __fileXioGetFdHelper(userdata);
@@ -303,8 +302,7 @@ int64_t __fileXioLseek64Helper(void *userdata, int64_t offset, int whence)
         return fd;
     }
 
-    rv = fileXioLseek64(fd, offset, whence);
-    return rv;
+    return fileXioLseek64(fd, offset, whence);
 }
 #else
 int64_t __fileXioLseek64Helper(void *userdata, int64_t offset, int whence);
