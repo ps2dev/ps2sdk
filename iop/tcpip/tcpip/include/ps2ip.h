@@ -111,7 +111,7 @@ struct pbuf*     pbuf_coalesce(struct pbuf *p, pbuf_layer layer);
 #define inet_ntoa_r(addr, buf, buflen)  ip4addr_ntoa_r((const ip4_addr_t*)&(addr), buf, buflen)
 
 u32        ipaddr_addr(const char *cp);
-int        ipaddr4_aton(const char *cp, ip4_addr_t *addr);
+int        ip4addr_aton(const char *cp, ip4_addr_t *addr);
 /** returns ptr to static buffer; not reentrant! */
 char       *ip4addr_ntoa(const ip4_addr_t *addr);
 char       *ip4addr_ntoa_r(const ip4_addr_t *addr, char *buf, int buflen);
@@ -159,6 +159,8 @@ const ip_addr_t* dns_getserver(u8 numdns);
 #define getpeername		lwip_getpeername
 #define getsockopt		lwip_getsockopt
 #define setsockopt		lwip_setsockopt
+
+#define ipaddr4_aton(...) ip4addr_aton(__VA_ARGS__)
 
 #define ps2ip_IMPORTS_start DECLARE_IMPORT_TABLE(ps2ip, 2, 6)
 #define ps2ip_IMPORTS_end END_IMPORT_TABLE
@@ -208,18 +210,20 @@ const ip_addr_t* dns_getserver(u8 numdns);
 #define I_pbuf_take DECLARE_IMPORT(42, pbuf_take)
 #define I_pbuf_coalesce DECLARE_IMPORT(57, pbuf_coalesce)
 #define I_ipaddr_addr DECLARE_IMPORT(24, ipaddr_addr)
-#define I_inet_addr DECLARE_IMPORT(24, ipaddr_addr)
-#define I_ipaddr4_aton DECLARE_IMPORT(43, ipaddr4_aton)
-#define I_inet_aton DECLARE_IMPORT(43, ip4addr_aton)
+#define I_ip4addr_aton DECLARE_IMPORT(43, ip4addr_aton)
 #define I_ip4addr_ntoa DECLARE_IMPORT(44, ip4addr_ntoa)
-#define I_inet_ntoa DECLARE_IMPORT(44, ip4addr_ntoa)
 #define I_ip4addr_ntoa_r DECLARE_IMPORT(45, ip4addr_ntoa_r)
-#define I_inet_ntoa_r DECLARE_IMPORT(45, ip4addr_ntoa_r)
 #define I_lwip_gethostbyname DECLARE_IMPORT(48, lwip_gethostbyname)
 #define I_lwip_gethostbyname_r DECLARE_IMPORT(49, lwip_gethostbyname_r)
 #define I_lwip_freeaddrinfo DECLARE_IMPORT(50, lwip_freeaddrinfo)
 #define I_lwip_getaddrinfo DECLARE_IMPORT(51, lwip_getaddrinfo)
 #define I_dns_setserver DECLARE_IMPORT(52, dns_setserver)
 #define I_dns_getserver DECLARE_IMPORT(53, dns_getserver)
+
+#define I_inet_addr I_ipaddr_addr
+#define I_ipaddr4_aton I_ip4addr_aton
+#define I_inet_aton I_ip4addr_aton
+#define I_inet_ntoa I_ip4addr_ntoa
+#define I_inet_ntoa_r I_ip4addr_ntoa_r
 
 #endif /* __PS2IP_H__ */
