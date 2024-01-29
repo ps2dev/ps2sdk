@@ -763,7 +763,7 @@ int WakeupThread(int thid)
         return thread_start(thread, state);
     }
 
-    thread->wakeup_count--;
+    thread->wakeup_count++;
 
     CpuResumeIntr(state);
 

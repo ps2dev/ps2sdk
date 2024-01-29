@@ -15,7 +15,7 @@ int CreateMbx(iop_mbx_t *mbx_param)
         return KE_ILLEGAL_CONTEXT;
     }
 
-    if (mbx_param->attr & ~(MBA_MSFIFO | MBA_THPRI | MBA_MSFIFO | MBA_MSPRI)) {
+    if (mbx_param->attr & ~(MBA_THFIFO | MBA_THPRI | MBA_MSFIFO | MBA_MSPRI)) {
         return KE_ILLEGAL_ATTR;
     }
 
