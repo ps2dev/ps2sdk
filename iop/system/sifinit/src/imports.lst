@@ -1,0 +1,12 @@
+
+loadcore_IMPORTS_start
+I_QueryBootMode
+loadcore_IMPORTS_end
+
+stdio_IMPORTS_start
+I_printf
+stdio_IMPORTS_end
+
+sifman_IMPORTS_start
+I_sceSifInit
+sifman_IMPORTS_end
