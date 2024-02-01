@@ -40,13 +40,14 @@ typedef struct t_SifCmdHeader {
 /* System functions */
 #define	SIF_CMD_ID_SYSTEM	0x80000000
 
-#define SIF_CMD_SET_SREG	(SIF_CMD_ID_SYSTEM | 1)
-#define SIF_CMD_INIT_CMD	(SIF_CMD_ID_SYSTEM | 2)
-#define SIF_CMD_RESET_CMD	(SIF_CMD_ID_SYSTEM | 3)
-#define SIF_CMD_RPC_END		(SIF_CMD_ID_SYSTEM | 8)
-#define SIF_CMD_RPC_BIND	(SIF_CMD_ID_SYSTEM | 9)
-#define SIF_CMD_RPC_CALL	(SIF_CMD_ID_SYSTEM | 10)
-#define SIF_CMD_RPC_RDATA	(SIF_CMD_ID_SYSTEM | 12)
+#define SIF_CMD_CHANGE_SADDR (SIF_CMD_ID_SYSTEM | 0)
+#define SIF_CMD_SET_SREG	 (SIF_CMD_ID_SYSTEM | 1)
+#define SIF_CMD_INIT_CMD	 (SIF_CMD_ID_SYSTEM | 2)
+#define SIF_CMD_RESET_CMD	 (SIF_CMD_ID_SYSTEM | 3)
+#define SIF_CMD_RPC_END		 (SIF_CMD_ID_SYSTEM | 8)
+#define SIF_CMD_RPC_BIND	 (SIF_CMD_ID_SYSTEM | 9)
+#define SIF_CMD_RPC_CALL	 (SIF_CMD_ID_SYSTEM | 10)
+#define SIF_CMD_RPC_RDATA	 (SIF_CMD_ID_SYSTEM | 12)
 
 //System SREG
 #define SIF_SREG_RPCINIT	0
@@ -92,6 +93,66 @@ void sceSifAddCmdHandler(int cid, SifCmdHandler_t handler, void *harg);
 
 typedef void * (*SifRpcFunc_t)(int fno, void *buffer, int length);
 typedef void (*SifRpcEndFunc_t)(void *end_param);
+
+typedef struct t_SifRpcPktHeader
+{
+    struct t_SifCmdHeader sifcmd;
+    int rec_id;
+    void *pkt_addr;
+    int rpc_id;
+} SifRpcPktHeader_t;
+
+typedef struct t_SifRpcRendPkt
+{
+    struct t_SifCmdHeader sifcmd;
+    int rec_id;     /* 04 */
+    void *pkt_addr; /* 05 */
+    int rpc_id;     /* 06 */
+
+    struct t_SifRpcClientData *client; /* 7 */
+    u32 cid;                           /* 8 */
+    struct t_SifRpcServerData *server; /* 9 */
+    void *buff,                        /* 10 */
+        *cbuff;                        /* 11 */
+} SifRpcRendPkt_t;
+
+typedef struct t_SifRpcOtherDataPkt
+{
+    struct t_SifCmdHeader sifcmd;
+    int rec_id;     /* 04 */
+    void *pkt_addr; /* 05 */
+    int rpc_id;     /* 06 */
+
+    struct t_SifRpcReceiveData *receive; /* 07 */
+    void *src;                           /* 08 */
+    void *dest;                          /* 09 */
+    int size;                            /* 10 */
+} SifRpcOtherDataPkt_t;
+
+typedef struct t_SifRpcBindPkt
+{
+    struct t_SifCmdHeader sifcmd;
+    int rec_id;                        /* 04 */
+    void *pkt_addr;                    /* 05 */
+    int rpc_id;                        /* 06 */
+    struct t_SifRpcClientData *client; /* 07 */
+    int sid;                           /* 08 */
+} SifRpcBindPkt_t;
+
+typedef struct t_SifRpcCallPkt
+{
+    struct t_SifCmdHeader sifcmd;
+    int rec_id;                        /* 04 */
+    void *pkt_addr;                    /* 05 */
+    int rpc_id;                        /* 06 */
+    struct t_SifRpcClientData *client; /* 07 */
+    int rpc_number;                    /* 08 */
+    int send_size;                     /* 09 */
+    void *receive;                     /* 10 */
+    int recv_size;                     /* 11 */
+    int rmode;                         /* 12 */
+    struct t_SifRpcServerData *server; /* 13 */
+} SifRpcCallPkt_t;
 
 typedef struct t_SifRpcServerData {
 	int	sid;
