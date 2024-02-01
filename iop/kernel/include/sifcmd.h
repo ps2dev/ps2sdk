@@ -77,7 +77,7 @@ typedef struct t_SifCmdSysHandlerData
 
 void sceSifInitCmd(void);
 void sceSifExitCmd(void);
-void sceSifGetSreg(int index);
+unsigned int sceSifGetSreg(int index);
 void sceSifSetSreg(int index, unsigned int value);
 void sceSifSetCmdBuffer(SifCmdHandlerData_t *cmdBuffer, int size);
 void sceSifSetSysCmdBuffer(SifCmdSysHandlerData_t *sysCmdBuffer, int size);
@@ -238,7 +238,7 @@ int sceSifGetOtherData(SifRpcReceiveData_t *rd, void *src, void *dest, int size,
 
 SifRpcServerData_t *sceSifRemoveRpc(SifRpcServerData_t *sd, SifRpcDataQueue_t *qd);
 SifRpcDataQueue_t *sceSifRemoveRpcQueue(SifRpcDataQueue_t *qd);
-void sceSifSetSif1CB(void *func, int param);
+void sceSifSetSif1CB(void (*func)(void *userdata), void *userdata);
 void sceSifClearSif1CB(void);
 unsigned int sceSifSendCmdIntr(int cmd, void *packet, int packet_size, void *src_extra,
 	void *dest_extra, int size_extra, void (*completioncb)(void *userdata), void *userdata);
