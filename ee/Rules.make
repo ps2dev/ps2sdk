@@ -106,6 +106,11 @@ $(EE_BIN): $(EE_OBJS) $(EE_LIB_ARCHIVES) $(EE_ADDITIONAL_DEPS) $(PS2SDK_CRT0)
 	$(EE_CC) -T$(EE_LINKFILE) -Wl,-Map,$(EE_BIN_MAPFILE) $(EE_OPTFLAGS) \
 		-o $(EE_BIN) -nostartfiles $(PS2SDK_CRT0) $(EE_OBJS) $(EE_LDFLAGS) $(EE_LIB_ARCHIVES) $(EE_LIBS)
 
+$(EE_ERL) : $(EE_OBJS)
+	$(DIR_GUARD)
+	$(EE_CC) -nostdlib -o $(EE_ERL) $(EE_OBJS) $(EE_CFLAGS) $(EE_LDFLAGS) -Wl,-r -Wl,-d
+	$(EE_STRIP) --strip-unneeded -R .mdebug.eabi64 -R .reginfo -R .comment $(EE_ERL)
+
 $(EE_LIB): $(EE_OBJS) $(EE_LIB:%.a=%.erl)
 	$(DIR_GUARD)
 	$(EE_AR) cru $(EE_LIB) $(EE_OBJS)
