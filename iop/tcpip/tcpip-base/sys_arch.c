@@ -204,6 +204,8 @@ static u32_t sys_arch_mbox_fetch_internal(sys_mbox_t pMBox, void** ppvMSG, u32_t
 	iop_sys_clock_t	End;
 	int result;
 
+	pmsg = 0;
+	result = -1;
 	if(block){
 		int iPID;
 
@@ -231,8 +233,11 @@ static u32_t sys_arch_mbox_fetch_internal(sys_mbox_t pMBox, void** ppvMSG, u32_t
 	}
 
 	if(result==0){
-		*ppvMSG = ((arch_message *)pmsg)->sys_msg;
-		free_msg((arch_message *) pmsg);
+		if (pmsg != NULL)
+		{
+			*ppvMSG = ((arch_message *)pmsg)->sys_msg;
+			free_msg((arch_message *) pmsg);
+		}
 	}
 
 	//Return the number of msec waited.
