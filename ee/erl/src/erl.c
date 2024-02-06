@@ -188,6 +188,7 @@ static char * reloc_types[] = {
 #define PROGBITS 1
 #define NOBITS 8
 #define REL 9
+#define RELA 4
 #define GLOBAL 1
 #define WEAK 2
 #define NOTYPE 0
@@ -256,6 +257,9 @@ struct elf_reloc_t {
     u32 r_offset, r_info;
 };
 
+struct elf_rela_t {
+    u32 r_offset, r_info, r_addend;
+};
 
 /* Our internal structures. */
 
@@ -808,12 +812,12 @@ return code
 
    // Parsing sections to find relocation sections.
     for (i = 0; i < head.e_shnum; i++) {
-	if (sec[i].sh_type != REL)
+	if (sec[i].sh_type != REL && sec[i].sh_type != RELA)
 	    continue;
 	dprintf("Section %i (%s) contains relocations for section %i (%s):\n",
 		i, names + sec[i].sh_name, sec[i].sh_info, names + sec[sec[i].sh_info].sh_name);
 
-	if (sec[i].sh_entsize != sizeof(struct elf_reloc_t)) {
+	if (sec[i].sh_entsize != sizeof(struct elf_reloc_t) && sec[i].sh_entsize != sizeof(struct elf_rela_t)) {
 	    dprintf("Warning: inconsistancy in relocation table.\n");
 	    free_and_return(-1);
 	}
