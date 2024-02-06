@@ -458,6 +458,7 @@ int __attribute__((weak)) _rename(const char *old, const char *new);
 int __attribute__((weak)) mkdir(const char *path, mode_t mode);
 int __attribute__((weak)) rmdir(const char *path);
 int __attribute__((weak)) _stat(const char *path, struct stat *buf);
+int __attribute__((weak)) _fstat(int fd, struct stat *buf);
 ssize_t __attribute__((weak)) readlink(const char *path, char *buf, size_t bufsiz);
 int __attribute__((weak)) symlink(const char *target, const char *linkpath);
 int __attribute__((weak)) _close(int fd);
@@ -482,7 +483,7 @@ extern void __fileXioOpsInitializeImpl(void)
     // cppcheck-suppress knownConditionTrueFalse
     if (&rmdir) __fileXio_fdman_path_ops.rmdir = fileXioRmdir;
     // cppcheck-suppress knownConditionTrueFalse
-    if (&_stat) __fileXio_fdman_path_ops.stat = __fileXioGetstatHelper;
+    if ((&_stat) || (&_fstat)) __fileXio_fdman_path_ops.stat = __fileXioGetstatHelper;
     // cppcheck-suppress knownConditionTrueFalse
     if (&readlink) __fileXio_fdman_path_ops.readlink = fileXioReadlink;
     // cppcheck-suppress knownConditionTrueFalse
