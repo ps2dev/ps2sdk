@@ -197,7 +197,7 @@ static void RetrieveMbxInternal(sys_mbox_t mBox, arch_message **message)
 	*message=mBox->FirstMessage;	//Take first message in mbox
 
 	//The next message is next. If there is no next message, NULL is assigned,
-	NextMessage=(unsigned int)(*message)->next!=0xFFFFFFFF?(*message)->next:NULL;
+	NextMessage=((*message != NULL) && ((unsigned int)(*message)->next!=0xFFFFFFFF))?(*message)->next:NULL;
 
 	//if the mbox only had one message, then update LastMessage as well.
 	if(mBox->FirstMessage == mBox->LastMessage)
@@ -275,6 +275,8 @@ static u32_t sys_arch_mbox_fetch_internal(sys_mbox_t pMBox, void** ppvMSG, u32_t
 	unsigned int TimeElasped;
 	int result;
 
+	pmsg = NULL;
+	result = -1;
 	TimeElasped=0;
 	if(block){
 		int start;
@@ -292,8 +294,11 @@ static u32_t sys_arch_mbox_fetch_internal(sys_mbox_t pMBox, void** ppvMSG, u32_t
 	}
 
 	if(result==0){
-		if(ppvMSG!=NULL) *ppvMSG = pmsg->sys_msg;
-		free_msg(pmsg);
+		if (pmsg != NULL)
+		{
+			if(ppvMSG!=NULL) *ppvMSG = pmsg->sys_msg;
+			free_msg(pmsg);
+		}
 	}
 
 	//Return the number of msec waited.
