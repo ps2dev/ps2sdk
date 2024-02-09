@@ -217,12 +217,17 @@ void __init_cwd(int argc, char ** argv)
 		return;
 	}
     
-	char * p, * s = 0;
+	char * p, * s = NULL;
 	// let's find the last slash, or at worst, the :
 	for (p = argv[0]; *p; p++) {
 	    if ((*p == '/') || (*p == '\\') || (*p == ':')) {
 			s = p;
 	    }
+	}
+	if (s == NULL)
+	{
+		chdir("host:");
+		return;
 	}
     char backup = *(++s);
 	*s = 0;
