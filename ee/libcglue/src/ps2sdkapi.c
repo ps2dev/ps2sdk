@@ -452,6 +452,7 @@ int __attribute__((weak)) _unlink(const char *path);
 int __attribute__((weak)) mkdir(const char *path, mode_t mode);
 int __attribute__((weak)) rmdir(const char *path);
 int __attribute__((weak)) _stat(const char *path, struct stat *buf);
+int __attribute__((weak)) _fstat(int fd, struct stat *buf);
 int __attribute__((weak)) _close(int fd);
 int __attribute__((weak)) _read(int fd, void *buf, size_t nbytes);
 off_t __attribute__((weak)) _lseek(int fd, off_t offset, int whence);
@@ -471,7 +472,7 @@ void __fioOpsInitializeImpl(void)
     // cppcheck-suppress knownConditionTrueFalse
     if (&rmdir) __fio_fdman_path_ops.rmdir = fioRmdir;
     // cppcheck-suppress knownConditionTrueFalse
-    if (&_stat) __fio_fdman_path_ops.stat = __fioGetstatHelper;
+    if ((&_stat) || (&_fstat)) __fio_fdman_path_ops.stat = __fioGetstatHelper;
 
     memset(&__fio_fdman_ops_file, 0, sizeof(__fio_fdman_ops_file));
     __fio_fdman_ops_file.getfd = __fioGetFdHelper;
