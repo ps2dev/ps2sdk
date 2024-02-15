@@ -294,7 +294,7 @@ void SetNextComp(u64 time_now)
         }
         timer_current = timer_current->timer_next;
     }
-    if ((a0 - time_now) < 0x7333)
+    if ((s64)(a0 - time_now) < (s64)0x7333)
     {
         SetT2_COMP((*T2_COUNT) + (0x7333 >> (((*T2_MODE) & 3) << 2)));
         SetT2_MODE((*T2_MODE) & (~(1 << 11)));
