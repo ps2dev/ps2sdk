@@ -9,8 +9,8 @@
 SUBDIRS = \
 	adpenc \
 	bin2c \
-	ps2-irxgen \
 	ps2adpcm \
+	srxfixup \
 #	  gensymtab
 
 include $(PS2SDKSRC)/Defs.make
