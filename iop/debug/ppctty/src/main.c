@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <loadcore.h>
 #include <excepman.h>
+#include <stdio.h>
 #include "tty.h"
 
 IRX_ID(MODNAME, 1, 0);
