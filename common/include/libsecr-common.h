@@ -78,4 +78,6 @@ extern int SecrDownloadGetKbit(int port, int slot, void *kbit);
 extern int SecrDownloadGetKc(int port, int slot, void *kbit);
 extern int SecrDownloadGetICVPS2(void *icvps2);
 
+/* FOLLOWING EXPORTS ARE ONLY AVAILABLE IN ARCADE SECRMAN */
+extern int SecrAuthDongle(int port,int slot,int cnum);
 #endif /* __LIBSECR_COMMON_H__ */
