@@ -57,6 +57,9 @@ extern void SecrResetAuthCard(int port, int slot, int cnum);
 #define I_SecrDownloadGetKc DECLARE_IMPORT(18, SecrDownloadGetKc)
 #define I_SecrDownloadGetICVPS2 DECLARE_IMPORT(19, SecrDownloadGetICVPS2)
 
+/* FOLLOWING EXPORTS ARE ONLY AVAILABLE IN ARCADE SECRMAN */
+#define I_SecrAuthDongle DECLARE_IMPORT(20, SecrAuthDongle)
+
 #ifdef __cplusplus
 }
 #endif
