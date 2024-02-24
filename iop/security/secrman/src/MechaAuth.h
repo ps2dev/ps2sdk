@@ -9,6 +9,9 @@ int mechacon_auth_85(void *buffer, void *buffer2);
 int mechacon_auth_86(void *buffer, void *buffer2);
 int mechacon_auth_87(void *buffer);
 int mechacon_auth_88(void);
+#ifdef BUILDING_SYSTEM2x6_SECRMAN
+int mechacon_auth_8F(void);
+#endif
 
 int write_HD_start(unsigned char mode, int cnum, int arg2, unsigned short int HeaderLength);
 int write_data(const void *buffer, unsigned short int length);

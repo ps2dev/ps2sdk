@@ -1,0 +1,1 @@
+int SecrAuthDongle(int port,int slot,int cnum);

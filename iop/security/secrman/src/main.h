@@ -6,13 +6,21 @@
   */
 
 #ifdef DEBUG
-#define _printf(args...) printf("SECRMAN: "args)
-#define _printf2(args...) printf("SECRMAN: "args)
-#define _printf3(args...) printf("SECRMAN: "args)
-#define _printf4(args...) printf("SECRMAN: "args)
+#ifdef BUILDING_SYSTEM2x6_SECRMAN
+#define LOGMODNAME "ARCADE_SECRMAN: "
+#else
+#define LOGMODNAME "SECRMAN: "
+#endif
+
+#define _printf(args...) printf(LOGMODNAME args)
+#define _printf2(args...) printf(LOGMODNAME args)
+#define _printf3(args...) printf(LOGMODNAME args)
+#define _printf4(args...) printf(LOGMODNAME args)
+#define _arcade_printf(args...) printf(LOGMODNAME args)
 #else
 #define _printf(args...)
 #define _printf2(args...)
 #define _printf3(args...)
 #define _printf4(args...)
+#define _arcade_printf(args...)
 #endif
