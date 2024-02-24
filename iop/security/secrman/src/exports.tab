@@ -21,4 +21,7 @@ DECLARE_EXPORT_TABLE(secrman, 0x01, 0x03)
 	DECLARE_EXPORT(SecrDownloadGetKbit)		/* 017 */
 	DECLARE_EXPORT(SecrDownloadGetKc)		/* 018 */
 	DECLARE_EXPORT(SecrDownloadGetICVPS2)		/* 019 */
+#ifdef BUILDING_SYSTEM2x6_SECRMAN
+	DECLARE_EXPORT(SecrAuthDongle)		/* 020 */
+#endif
 END_EXPORT_TABLE
