@@ -89,7 +89,7 @@ int SecrAuthDongle(int port,int slot,int cnum)
                                         _arcade_printf("dongle auth 0x09\n");
                                         x = card_auth(port,slot,0xf0,10);
                                         if (x != 0) {
-                                          _arcade_printf(0x3ff8);
+                                        _arcade_printf("dongle auth 0x10\n");
                                           x = card_auth_write(port,slot,MechaChallenge1,0xf0,0xb);
                                           if (x != 0) {
                                             _arcade_printf("dongle auth 0x0b\n");
