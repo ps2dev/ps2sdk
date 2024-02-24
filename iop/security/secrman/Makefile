@@ -12,9 +12,14 @@ IOP_OBJS = secrman.o MechaAuth.o CardAuth.o keyman.o imports.o exports.o
 
 # Define to 1, to enable runtime support for both CEX and DEX units.
 DEX_SUPPORT ?= 1
+COH_SUPPORT ?= 0
 
 ifneq (x$(DEX_SUPPORT),x9)
 IOP_CFLAGS += -DDEX_SUPPORT=1
+endif
+ifeq ($(COH_SUPPORT),1)
+IOP_CFLAGS += -DBUILDING_SYSTEM2x6_SECRMAN=1
+IOP_OBJS += DongleAuth.o
 endif
 
 include $(PS2SDKSRC)/Defs.make
