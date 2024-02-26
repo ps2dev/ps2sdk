@@ -582,7 +582,11 @@ int SecrAuthCard(int port, int slot, int cnum)
 #ifdef DEX_SUPPORT
             IsDEX ||
 #endif
+#ifdef BUILDING_SYSTEM2x6_SECRMAN
+            card_auth_key_change(port, slot, 3)) == 0) {
+#else
             card_auth_key_change(port, slot, 1)) == 0) {
+#endif
         card_auth_60(port, slot);
         return 0;
     }
