@@ -211,7 +211,7 @@ int  mcman_probePS2Card(int port, int slot);
 int  mcman_probeSecurityDongle(int port, int slot);
 #define GET_MCDEVINFO(port, slot) mcman_devinfos[port*2][slot]
 #else
-#define GET_MCDEVINFO(port, slot) GET_MCDEVINFO(port, slot)
+#define GET_MCDEVINFO(port, slot) mcman_devinfos[port][slot]
 #endif
 
 #if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
