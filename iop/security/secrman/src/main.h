@@ -17,10 +17,12 @@
 #define _printf3(args...) printf(LOGMODNAME args)
 #define _printf4(args...) printf(LOGMODNAME args)
 #define _arcade_printf(args...) printf(LOGMODNAME args)
+#define _printf_no_modname(args...) printf(args)
 #else
 #define _printf(args...)
 #define _printf2(args...)
 #define _printf3(args...)
 #define _printf4(args...)
 #define _arcade_printf(args...)
+#define _printf_no_modname(args...)
 #endif
