@@ -429,21 +429,3 @@ int func_00001ed8(void *icvps2)
 
     return 1;
 }
-
-/*
- El_isra: amongst all the calls to 'SendMechaCommand' inside arcade SECRMAN. 
- this 0x8f mecha command is the only one done from a do{}while()
- */
-int mechacon_auth_8F(void)
-{
-  int iVar1;
-  char out[16];
-
-  do {
-    iVar1 = SendMechaCommand(0x8f, NULL, 0, out);
-    if (iVar1 == 0) {
-      return 0;
-    }
-  } while (out[0] == 1);
-  return out[0] == 0;
-}
