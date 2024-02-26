@@ -66,7 +66,7 @@ int SecrAuthDongle(int port,int slot,int cnum)
                         x = card_auth(port,slot,0xf0,5);
                         if (x != 0) {
                           _arcade_printf("dongle auth 0x05\n");
-                          x = mechacon_auth_8F();
+                          x = pol_cal_cmplt();
                           if (x != 0) {
                             _arcade_printf("mechacon auth 0x8f\n");
                             x = mechacon_auth_84(MechaChallenge1,MechaChallenge2 + 1);
@@ -124,7 +124,7 @@ int SecrAuthDongle(int port,int slot,int cnum)
                                                               x = mechacon_auth_87(CardResponse3);
                                                               if (x != 0) {
                                                                 _arcade_printf("mechacon auth 0x87\n");
-                                                                x = mechacon_auth_8F();
+                                                                x = pol_cal_cmplt();
                                                                 if (x != 0) {
                                                                   _arcade_printf("mechacon auth 0x8f\n");
                                                                   x = card_auth(port,slot,0xf0,0x14);
