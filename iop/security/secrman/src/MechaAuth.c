@@ -25,9 +25,9 @@ int SendMechaCommand(int command, const void *input, unsigned short int length, 
 
     _printf3("mecha command:%02x param:", (unsigned char)command);
     for (i = 0; i < length; i++) {
-        _printf3(" %02x", ((unsigned char *)input)[i]);
+        _printf_no_modname(" %02x", ((unsigned char *)input)[i]);
     }
-    _printf3("\n");
+    _printf_no_modname("\n");
 
     return sceCdApplySCmd((unsigned char)command, (void *)input, length, output);
 }
