@@ -206,6 +206,14 @@ int  mcman_cardchanged(int port, int slot);
 int  mcman_resetauth(int port, int slot);
 int  mcman_probePS2Card2(int port, int slot);
 int  mcman_probePS2Card(int port, int slot);
+
+#ifdef BUILDING_DONGLEMAN
+int  mcman_probeSecurityDongle(int port, int slot);
+#define GET_MCDEVINFO(port, slot) mcman_devinfos[port*2][slot]
+#else
+#define GET_MCDEVINFO(port, slot) GET_MCDEVINFO(port, slot)
+#endif
+
 #if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 int  secrman_mc_command(int port, int slot, sio2_transfer_data_t *sio2data);
 #endif

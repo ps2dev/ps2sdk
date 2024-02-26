@@ -109,7 +109,11 @@ static MC_IO_DEV_T mcman_mcdev = {
 	,
 	1,
 #if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
-	"Memory Card",
+	"Memory Card"
+#ifdef BUILDING_DONGLEMAN
+" (arcade)"
+#endif
+,
 #elif defined(BUILDING_VMCMAN)
 	"Virtual Memory Card",
 #elif defined(BUILDING_XFROMMAN)

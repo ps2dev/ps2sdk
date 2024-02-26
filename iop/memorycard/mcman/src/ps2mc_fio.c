@@ -23,7 +23,7 @@ int mcman_format2(int port, int slot)
 	register int r, i, size, ifc_index, indirect_offset, allocatable_clusters_per_card;
 	register int ifc_length, fat_length, fat_entry, alloc_offset;
 	register int j = 0, z = 0;
-	MCDevInfo *mcdi = &mcman_devinfos[port][slot];
+	MCDevInfo *mcdi = &GET_MCDEVINFO(port, slot);
 	McCacheEntry *mce;
 
 	DPRINTF("mcman_format2 port%d, slot%d cardform %d\n", port, slot, mcdi->cardform);
@@ -680,7 +680,7 @@ int mcman_open2(int port, int slot, const char *filename, int flags)
 
 	mcman_wmemset((void *)fh, sizeof (MC_FHANDLE), 0);
 
-	mcdi = (MCDevInfo *)&mcman_devinfos[port][slot]; // s3
+	mcdi = (MCDevInfo *)&GET_MCDEVINFO(port, slot); // s3
 
 	if ((flags & (sceMcFileCreateFile | sceMcFileCreateDir)) == 0)
 		cacheDir.maxent = -1; //sp20
@@ -1026,7 +1026,7 @@ int mcman_open2(int port, int slot, const char *filename, int flags)
 int mcman_chdir(int port, int slot, const char *newdir, char *currentdir)
 {
 	register int r, len, len2, cluster;
-	register MCDevInfo *mcdi = &mcman_devinfos[port][slot];
+	register MCDevInfo *mcdi = &GET_MCDEVINFO(port, slot);
 	McCacheDir cacheDir;
 	McFsEntry *fse;
 
@@ -1118,7 +1118,7 @@ lbl1:
 int mcman_getdir2(int port, int slot, const char *dirname, int flags, int maxent, sceMcTblGetDir *info)
 {
 	register int r, nument;
-	register MCDevInfo *mcdi = &mcman_devinfos[port][slot];
+	register MCDevInfo *mcdi = &GET_MCDEVINFO(port, slot);
 	McFsEntry *fse;
 	char *p;
 
@@ -1318,7 +1318,7 @@ int mcman_unformat2(int port, int slot)
 {
 	register int r, i, j, z, l, pageword_cnt, page, blocks_on_card, erase_byte, err_cnt;
 	register u32 erase_value;
-	register MCDevInfo *mcdi = &mcman_devinfos[port][slot];
+	register MCDevInfo *mcdi = &GET_MCDEVINFO(port, slot);
 
 	DPRINTF("mcman_unformat2 port%d slot%d\n", port, slot);
 

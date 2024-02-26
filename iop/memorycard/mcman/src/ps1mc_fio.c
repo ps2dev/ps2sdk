@@ -18,7 +18,7 @@ static char mcman_PS1curdir[64];
 int mcman_format1(int port, int slot)
 {
 	register int r, i;
-	register MCDevInfo *mcdi = &mcman_devinfos[port][slot];
+	register MCDevInfo *mcdi = &GET_MCDEVINFO(port, slot);
 
 	DPRINTF("mcman_format1 port%d slot%d\n", port, slot);
 
