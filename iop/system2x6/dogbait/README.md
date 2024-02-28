@@ -2,7 +2,7 @@
 
 This module provides a thread to trick the namco arcade system 246/256 watchdog, to avoit it from shutting down the machine if security dongle is not connected for some time.
 
-its implementation could be considered a fussion of `rom0:LED` and `rom0:DAEMON` (without dongle spamming)
+its implementation could be considered a fusion of `rom0:LED` and `rom0:DAEMON` (without dongle spamming)
 
 ## How to use this module in your program
 
