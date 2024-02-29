@@ -1286,7 +1286,9 @@ int mcman_probeSecurityDongle(int port,int slot)
   	sio2packet_add(port, slot, 0xffffffff, 0);
   	sio2packet_add(port, slot, 0x9,0);
   	sio2packet_add(port, slot, 0xfffffffe, 0);
-  	mcsio2_transfer(port, slot, &mcman_sio2packet);
+  	mcsio2_transfer(port, slot, &mcman_sio2packet);                                         
+    sio2_transfer(&mcman_sio2packet);
+    sio2_transfer_reset();
   	if (((mcman_sio2packet.stat6c & 0xf000) == 0x1000) && (mcman_rdmabufs[4] != 0x66)) break;
   	x = x + 1;
   } while (x < 5);
