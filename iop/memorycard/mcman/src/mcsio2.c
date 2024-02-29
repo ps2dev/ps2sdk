@@ -1273,7 +1273,7 @@ int mcman_probeSecurityDongle(int port,int slot)
   int iVar3;
   
   iVar3 = sceMcResFailResetAuth;
-  if (mcman_resetauth(port, slot) == 0) {
+  if (mcman_resetauth(port, slot) != sceMcResSucceed) {
     DPRINTF("%s: mcman_resetauth failed\n", FUNC);
 	return sceMcResFailResetAuth;
   }
