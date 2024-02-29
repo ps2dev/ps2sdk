@@ -423,6 +423,9 @@ int mcman_detectcard(int port, int slot)
 #if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 	if ((mcdi->cardtype == sceMcTypeNoCard) || (mcdi->cardtype == sceMcTypePS2)) {
 		r = mcman_probePS2Card2(port, slot);
+#ifdef BUILDING_DONGLEMAN
+		if (r < -9) r = mcman_probeSecurityDongle(port, slot);
+#endif
 		if (r < -9) {
 			r = mcman_probePS1Card2(port, slot);
 			if (!(r < -9)) {
@@ -446,6 +449,9 @@ int mcman_detectcard(int port, int slot)
 		if (r) {
 			if ((r < -9) || (r >= 0)) {
 				r = mcman_probePS2Card2(port, slot);
+#ifdef BUILDING_DONGLEMAN
+				if (r < -9) r = mcman_probeSecurityDongle(port, slot);
+#endif
 				if (!(r < -9)) {
 					mcdi->cardtype = sceMcTypePS2;
 					return r;
@@ -2347,6 +2353,10 @@ int McCheckBlock(int port, int slot, int block)
 	if (r != sceMcResSucceed) {
 		r = mcman_probePS2Card2(port, slot);
 		if (r != sceMcResSucceed)
+#ifdef BUILDING_DONGLEMAN
+		if (r != sceMcResSucceed) r = mcman_probeSecurityDongle(port, slot);
+#endif
+		if (r != sceMcResSucceed)
 			return -45;
 		flag = -1;
 		goto lbl_8764;
@@ -2356,6 +2366,9 @@ int McCheckBlock(int port, int slot, int block)
 		r = McWritePage(port, slot, page + i, &mcman_pagebuf, mcman_eccdata);
 		if (r != sceMcResSucceed) {
 			r = mcman_probePS2Card2(port, slot);
+#ifdef BUILDING_DONGLEMAN
+			if (r != sceMcResSucceed) r = mcman_probeSecurityDongle(port, slot);
+#endif
 			if (r != sceMcResSucceed)
 				return -44;
 			flag = -1;
@@ -2392,6 +2405,9 @@ int McCheckBlock(int port, int slot, int block)
 	r = mcman_eraseblock(port, slot, block, NULL, NULL);
 	if (r != sceMcResSucceed) {
 		r = mcman_probePS2Card2(port, slot);
+#ifdef BUILDING_DONGLEMAN
+		if (r != sceMcResSucceed) r = mcman_probeSecurityDongle(port, slot);
+#endif
 		if (r != sceMcResSucceed)
 			return -42;
 		flag = -1;
@@ -2402,6 +2418,9 @@ int McCheckBlock(int port, int slot, int block)
 		r = McWritePage(port, slot, page + i, &mcman_pagebuf, mcman_eccdata);
 		if (r != sceMcResSucceed) {
 			r = mcman_probePS2Card2(port, slot);
+#ifdef BUILDING_DONGLEMAN
+			if (r != sceMcResSucceed) r = mcman_probeSecurityDongle(port, slot);
+#endif
 			if (r != sceMcResSucceed)
 				return -46;
 			flag = -1;
@@ -2449,6 +2468,9 @@ lbl_8764:
 		r = McWritePage(port, slot, page + i, &mcman_pagebuf, mcman_eccdata);
 		if (r != sceMcResSucceed) {
 			r = mcman_probePS2Card2(port, slot);
+#ifdef BUILDING_DONGLEMAN
+			if (r != sceMcResSucceed) r = mcman_probeSecurityDongle(port, slot);
+#endif
 			if (r != sceMcResSucceed)
 				return -48;
 		}
