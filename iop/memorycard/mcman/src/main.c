@@ -1212,7 +1212,11 @@ void McDataChecksum(void *buf, void *ecc) // Export #20
 //--------------------------------------------------------------
 int mcman_getcnum(int port, int slot)
 {
+#ifdef BUILDING_DONGLEMAN
+	return  0xf;
+#else
 	return ((port & 1) << 3) + slot;
+#endif
 }
 
 //--------------------------------------------------------------

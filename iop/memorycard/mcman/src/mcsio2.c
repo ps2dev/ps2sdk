@@ -1320,6 +1320,7 @@ int mcman_probeSecurityDongle(int port,int slot)
       }
     }
   }
+  DPRINTF("%s: returning %d\n", FUNC, iVar3);
   return iVar3;
 }
 #endif
