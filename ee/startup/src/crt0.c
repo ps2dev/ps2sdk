@@ -44,6 +44,7 @@ void __start(struct sargs_start *pargs)
 {
     asm volatile(
         "# Clear bss area       \n"
+        ".set noat              \n"
         "la   $2, _fbss         \n"
         "la   $3, _end          \n"
         "1:                     \n"
@@ -73,6 +74,7 @@ void __start(struct sargs_start *pargs)
         "                       \n"
         "# Jump to _main        \n"
         "j      %2              \n"
+        ".set at              \n"
         : /* No outputs. */
         : "R"(args_start), "R"(args), "Csy"(_main));
 }
