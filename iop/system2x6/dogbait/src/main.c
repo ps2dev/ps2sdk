@@ -1,14 +1,16 @@
 #include "irx_imports.h"
 
 #define MODNAME "dogbait"
+#define MAJOR 1
+#define MINOR 0
+
 #ifdef DEBUG
 #define DPRINTF(fmt, x...) printf(MODNAME ": " fmt, ##x)
 #else
 #define DPRINTF(x...)
 #endif
 
-IRX_ID(MODNAME, 2, 11);
-//thanks uyjulian for the idea
+IRX_ID(MODNAME, MAJOR, MINOR);
 char rdata[16];
 char wdata[2] = {0x42, (char)(1 << 8)};
 
@@ -16,11 +18,12 @@ char wdata[2] = {0x42, (char)(1 << 8)};
 void bait(void*)
 {
   int x;
-  printf("fake check card routine start\n");
+  printf("DOGBAIT v%d.%d   by El_isra\n", MAJOR, MINOR);
   do {
 #ifdef DEBUG
     x =
 #endif
+    //thanks uyjulian for the idea. arcade CDVDMAN has the blue led control export stubbed so directly calling the CMD was the only choice
     sceCdApplySCmd(0x1c, wdata, sizeof(wdata), rdata);
     DPRINTF("sceCdApplySCmd() ret %d\n", x);
     x = 0x3c;
