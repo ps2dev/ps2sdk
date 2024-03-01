@@ -22,6 +22,7 @@ SUBDIRS = \
 	sound \
 	startup \
 	system \
+	system2x6 \
 	tcpip \
 	usb
 
