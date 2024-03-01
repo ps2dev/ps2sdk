@@ -401,6 +401,14 @@ int McCloseAll(void) // Export #25 XMCMAN only
 }
 
 //--------------------------------------------------------------
+#if defined(BUILDING_DONGLEMAN)
+void mcman_export_26(u32 port) { //El_isra: i'm not sure if this appears on other MCMAN's, but I found this implementation on DONGLEMAN from BR3
+	sio2_mtap_get_slot_max2((port & 1) | 2); //export 59 of XSIO2MAN?
+	return;
+}
+#endif
+
+//--------------------------------------------------------------
 int McDetectCard(int port, int slot) // Export #5
 {
 #ifdef BUILDING_XMCMAN
@@ -415,7 +423,7 @@ int mcman_detectcard(int port, int slot)
 {
 	register int r;
 	register MCDevInfo *mcdi;
-
+	DONGLEMAN_WAIT_SEMA();
 	DPRINTF("mcman_detectcard port%d slot%d\n", port, slot);
 	mcdi = (MCDevInfo *)&mcman_devinfos[port][slot];
 
@@ -427,16 +435,19 @@ int mcman_detectcard(int port, int slot)
 			if (!(r < -9)) {
 				if (mcman_probePDACard(port, slot)) {
 					mcdi->cardtype = sceMcTypePS1;
+					DONGLEMAN_SIGN_SEMA();
 					return (!PS1CardFlag) ? sceMcResDeniedPS1Permit : r;
 				}
 				else {
 					mcdi->cardtype = sceMcTypePDA;
+					DONGLEMAN_SIGN_SEMA();
 					return r;
 				}
 			}
 		}
 		else {
 			mcdi->cardtype = sceMcTypePS2;
+			DONGLEMAN_SIGN_SEMA();
 			return r;
 		}
 	}
@@ -447,25 +458,33 @@ int mcman_detectcard(int port, int slot)
 				r = mcman_probePS2Card2(port, slot);
 				if (!(r < -9)) {
 					mcdi->cardtype = sceMcTypePS2;
+					DONGLEMAN_SIGN_SEMA();
 					return r;
 				}
 			}
 			else {
 				if (mcman_probePDACard(port, slot)) {
 					mcdi->cardtype = sceMcTypePS1;
+					DONGLEMAN_SIGN_SEMA();
 					return (!PS1CardFlag) ? sceMcResDeniedPS1Permit : r;
 				}
 				else {
 					mcdi->cardtype = sceMcTypePDA;
+					DONGLEMAN_SIGN_SEMA();
 					return r;
 				}
 			}
 		}
 		else {
-			if (PS1CardFlag)
+			if (PS1CardFlag) {
+				DONGLEMAN_SIGN_SEMA();
 				return sceMcResSucceed;
-			if (mcdi->cardtype == sceMcTypePS1)
+			}
+			if (mcdi->cardtype == sceMcTypePS1) {
+				DONGLEMAN_SIGN_SEMA();
 				return sceMcResDeniedPS1Permit;
+			}
+			DONGLEMAN_SIGN_SEMA();
 			return sceMcResSucceed;
 		}
 	}
@@ -481,7 +500,7 @@ int mcman_detectcard(int port, int slot)
 	mcdi->cardform = 0;
 	mcman_invhandles(port, slot);
 	mcman_clearcache(port, slot);
-
+	DONGLEMAN_SIGN_SEMA();
 	return r;
 }
 
@@ -1109,7 +1128,11 @@ int McEraseBlock(int port, int block, void **pagebuf, void *eccbuf) // Export #1
 //--------------------------------------------------------------
 int McEraseBlock2(int port, int slot, int block, void **pagebuf, void *eccbuf) // Export #17 in XMCMAN
 {
-	return mcman_eraseblock(port, slot, block, (void **)pagebuf, eccbuf);
+	int x;
+	DONGLEMAN_WAIT_SEMA();
+	x = mcman_eraseblock(port, slot, block, (void **)pagebuf, eccbuf);
+	DONGLEMAN_SIGN_SEMA();
+	return x;
 }
 
 //--------------------------------------------------------------

@@ -44,7 +44,11 @@ DECLARE_EXPORT_TABLE(mcman, 1, 1)
 	DECLARE_EXPORT(_dummy)
 	DECLARE_EXPORT(_dummy)
 #endif
+#if defined(BUILDING_DONGLEMAN)
+	DECLARE_EXPORT(mcman_export_26)
+#else
 	DECLARE_EXPORT(_dummy)
+#endif
 	DECLARE_EXPORT(_dummy)
 	DECLARE_EXPORT(_dummy)
 	DECLARE_EXPORT(McReadPS1PDACard)

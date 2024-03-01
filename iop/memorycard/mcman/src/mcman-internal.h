@@ -57,12 +57,14 @@
 #endif
 #endif
 
-#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN) && !defined(BUILDING_DONGLEMAN)
 #define MODNAME "mcman_cex"
 #elif defined(BUILDING_VMCMAN)
 #define MODNAME "vmcman"
 #elif defined(BUILDING_XFROMMAN)
 #define MODNAME "xfromman"
+#elif defined(BUILDING_DONGLEMAN)
+#define MODNAME "dongleman"
 #endif
 #define MODVER  0x20b
 
@@ -359,5 +361,15 @@ extern u8 mcman_eccdata[512]; // size for 32 ecc
 
 // Defined in mcsio2.c
 extern u8 mcman_sio2outbufs_PS1PDA[0x90];
+
+#if defined(BUILDING_DONGLEMAN) && defined(DONGLEMAN_USE_SEMAPHORE)
+/// probably they added this to avoid `rom0:DAEMON` from accessing the card at the same time than something else
+extern int sema_hakama;
+#define DONGLEMAN_WAIT_SEMA() WaitSema(sema_hakama)
+#define DONGLEMAN_SIGN_SEMA() SignalSema(sema_hakama)
+#else
+#define DONGLEMAN_WAIT_SEMA()
+#define DONGLEMAN_SIGN_SEMA()
+#endif
 
 #endif	// __MCMAN_INTERNAL_H__

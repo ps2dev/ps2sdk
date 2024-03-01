@@ -13,6 +13,9 @@ sior_IMPORTS_end
 #if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 #ifndef BUILDING_XFROMMAN
 #ifdef BUILDING_XMCMAN
+#ifdef BUILDING_DONGLEMAN
+I_sio2_mtap_get_slot_max2
+#endif
 #ifndef SIO2MAN_V2
 xsio2man_IMPORTS_start
 #else
@@ -105,6 +108,9 @@ I_SecrSetMcCommandHandler
 I_SecrSetMcDevIDHandler
 I_SecrAuthCard
 secrman_IMPORTS_end
+#ifdef BUILDING_DONGLEMAN
+I_SecrAuthDongle
+#endif
 #endif
 
 cdvdman_IMPORTS_start

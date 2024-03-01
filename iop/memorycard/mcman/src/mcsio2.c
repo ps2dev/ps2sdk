@@ -19,7 +19,9 @@ static flash_info_t dev9_flash_info;
 static sio2_transfer_data_t mcman_sio2packet;	// buffer for mcman sio2 packet
 static u8 mcman_wdmabufs[0x0b * 0x90];		// buffer array for SIO2 DMA I/O (write)
 static u8 mcman_rdmabufs[0x0b * 0x90];		// not sure here for size, buffer array for SIO2 DMA I/O (read)
-
+#if defined(BUILDING_DONGLEMAN) && defined(DONGLEMAN_USE_SEMAPHORE)//placed it here because on decomp it's under mcman_rdmabufs
+int sema_hakama;
+#endif
 static sio2_transfer_data_t mcman_sio2packet_PS1PDA;
 static u8 mcman_sio2inbufs_PS1PDA[0x90];
 u8 mcman_sio2outbufs_PS1PDA[0x90];
@@ -351,6 +353,15 @@ void mcman_initPS2com(void)
 	flash_detect();
 	flash_get_info(&dev9_flash_info);
 #endif
+#if defined(BUILDING_DONGLEMAN) && defined(DONGLEMAN_USE_SEMAPHORE)
+	DPRINTF("create sema hakama\n");
+	iop_sema_t S;
+	S.attr = 1;
+	S.initial = 1;
+	S.max = 1;
+	S.option = 0;
+	sema_hakama = CreateSema(&S);
+#endif
 }
 
 //--------------------------------------------------------------
@@ -525,6 +536,8 @@ int McWritePage(int port, int slot, int page, void *pagebuf, void *eccbuf) // Ex
 	u8 *p = mcman_sio2packet.out_dma.addr;
 #endif
 
+    DONGLEMAN_WAIT_SEMA();
+
 #ifdef BUILDING_XFROMMAN
 	(void)port;
 	(void)slot;
@@ -596,14 +609,17 @@ int McWritePage(int port, int slot, int page, void *pagebuf, void *eccbuf) // Ex
 		if (flash_page_write(&dev9_flash_info, page, page_buf))
 			continue;
 #endif
+        DONGLEMAN_SIGN_SEMA();
 		return sceMcResSucceed;
 
 	} while (++retries < 5);
 
 #if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
-	if (p[3] == 0x66)
+	if (p[3] == 0x66) {
+        DONGLEMAN_SIGN_SEMA();
 		return sceMcResFailReplace;
-
+    }
+    DONGLEMAN_SIGN_SEMA();
 	return sceMcResNoFormat;
 #else
 	return sceMcResFailReplace;
@@ -614,6 +630,7 @@ int McWritePage(int port, int slot, int page, void *pagebuf, void *eccbuf) // Ex
 int mcman_readpage(int port, int slot, int page, void *buf, void *eccbuf)
 {
 #if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
+    DONGLEMAN_WAIT_SEMA();
 	register int index, count, retries, r, i;
 	register MCDevInfo *mcdi = &mcman_devinfos[port][slot];
 	u8 *pbuf = (u8 *)buf;
@@ -678,8 +695,10 @@ int mcman_readpage(int port, int slot, int page, void *buf, void *eccbuf)
 
 	} while (++retries < 5);
 
-	if (retries < 5)
+	if (retries < 5) {
+        DONGLEMAN_SIGN_SEMA();
 		return sceMcResSucceed;
+    }
 #elif defined(BUILDING_VMCMAN)
 	if (!mcman_iomanx_backing_read(port, slot, page, buf, eccbuf)) {
 		return sceMcResSucceed;
@@ -702,6 +721,8 @@ int mcman_readpage(int port, int slot, int page, void *buf, void *eccbuf)
 		return sceMcResSucceed;
 	}
 #endif
+
+    DONGLEMAN_SIGN_SEMA();
 	return sceMcResChangedCard;
 }
 
@@ -711,7 +732,8 @@ int McGetCardSpec(int port, int slot, s16 *pagesize, u16 *blocksize, int *cardsi
 #if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 	register int retries, r;
 	u8 *p = mcman_sio2packet.out_dma.addr;
-
+    
+    DONGLEMAN_WAIT_SEMA();
 	DPRINTF("McGetCardSpec sio2cmd port%d slot%d\n", port, slot);
 
 	sio2packet_add(port, slot, 0xffffffff, NULL);
@@ -731,8 +753,10 @@ int McGetCardSpec(int port, int slot, s16 *pagesize, u16 *blocksize, int *cardsi
 		}
 	} while (++retries < 5);
 
-	if (retries >= 5)
+	if (retries >= 5) {
+        DONGLEMAN_SIGN_SEMA();
 		return sceMcResChangedCard;
+    }
 
 	*pagesize = (p[4] << 8) + p[3];
 	*blocksize = (p[6] << 8) + p[5];
@@ -754,7 +778,7 @@ int McGetCardSpec(int port, int slot, s16 *pagesize, u16 *blocksize, int *cardsi
 #endif
 
 	DPRINTF("McGetCardSpec sio2cmd pagesize=%d blocksize=%u cardsize=%d flags%x\n", *pagesize, *blocksize, *cardsize, *flags);
-
+    DONGLEMAN_SIGN_SEMA();
 	return sceMcResSucceed;
 }
 
@@ -849,7 +873,6 @@ int mcman_probePS2Card2(int port, int slot)
 
 	return sceMcResFailDetect2;
 }
-
 //--------------------------------------------------------------
 int mcman_probePS2Card(int port, int slot) //2
 {
@@ -858,12 +881,22 @@ int mcman_probePS2Card(int port, int slot) //2
 	register int retries;
 	u8 *p = mcman_sio2packet.out_dma.addr;
 #endif
-
+  	DONGLEMAN_WAIT_SEMA();
 	DPRINTF("mcman_probePS2Card sio2cmd port%d slot%d\n", port, slot);
 
 	r = mcman_cardchanged(port, slot);
 	if (r == sceMcResSucceed) {
-		r = McGetFormat(port, slot);
+        r = McGetFormat(port, slot);
+#if defined(BUILDING_DONGLEMAN)
+		if (r != sceMcTypeNoCard) {
+    		if (port == 0) {
+                DPRINTF("SecrAuthDongle()\n");
+    			SecrAuthDongle(2, slot, mcman_getcnum(0,slot));
+    		}
+    		DONGLEMAN_SIGN_SEMA();
+    		return sceMcResSucceed;
+		}
+#else
 		if (r > 0)
 		{
 			DPRINTF("mcman_probePS2Card sio2cmd succeeded\n");
@@ -876,18 +909,27 @@ int mcman_probePS2Card(int port, int slot) //2
 
 			return sceMcResNoFormat;
 		}
+#endif
 	}
 
 #if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 	if (mcman_resetauth(port, slot) != sceMcResSucceed) {
 		DPRINTF("mcman_probePS2Card sio2cmd failed (auth reset failed)\n");
-
+		DONGLEMAN_SIGN_SEMA();
 		return sceMcResFailResetAuth;
 	}
-
+#if defined(BUILDING_DONGLEMAN)                 
+    if (port == 0) {
+        DPRINTF("SecrAuthDongle()\n");
+        if (SecrAuthDongle(2, slot, mcman_getcnum(0, slot)) == 0) {
+            DONGLEMAN_SIGN_SEMA();
+	        return sceMcResFailAuth;
+	    }
+    }
+#endif
 	if (SecrAuthCard(port + 2, slot, mcman_getcnum(port, slot)) == 0) {
 		DPRINTF("mcman_probePS2Card sio2cmd failed (auth failed)\n");
-
+        DONGLEMAN_SIGN_SEMA();
 		return sceMcResFailAuth;
 	}
 
@@ -905,6 +947,7 @@ int mcman_probePS2Card(int port, int slot) //2
 
 	if (retries >= 5) {
 		DPRINTF("mcman_probePS2Card sio2cmd failed (mc detection failed)\n");
+		DONGLEMAN_SIGN_SEMA();
 		return sceMcResFailDetect;
 	}
 #endif
@@ -929,7 +972,7 @@ int mcman_probePS2Card(int port, int slot) //2
 
 	if (retries >= 5) {
 		DPRINTF("mcman_probePS2Card sio2cmd failed (mc detection failed)\n");
-
+		DONGLEMAN_SIGN_SEMA();
 		return sceMcResFailDetect2;
 	}
 #endif
@@ -937,15 +980,18 @@ int mcman_probePS2Card(int port, int slot) //2
 	r = mcman_setdevinfos(port, slot);
 	if (r == 0) {
 		DPRINTF("mcman_probePS2Card sio2cmd card changed!\n");
+		DONGLEMAN_SIGN_SEMA();
 		return sceMcResChangedCard;
 	}
 	if (r != sceMcResNoFormat) {
 		DPRINTF("mcman_probePS2Card sio2cmd failed (mc detection failed)\n");
+		DONGLEMAN_SIGN_SEMA();
 		return sceMcResFailDetect2;
 	}
 
 	DPRINTF("mcman_probePS2Card sio2cmd succeeded\n");
 
+	DONGLEMAN_SIGN_SEMA();
 	return r;
 }
 
