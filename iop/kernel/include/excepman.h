@@ -69,11 +69,11 @@ typedef exception_handler_struct_t* exception_handler_t;
 void* GetExHandlersTable();
 
 /** will call RegisterPriorityExceptionHandler with prio = 2 */
-int RegisterExceptionHandler(int exception, exception_handler_t);
-int RegisterPriorityExceptionHandler(int exception, int priority, exception_handler_t);
-int RegisterDefaultExceptionHandler(exception_handler_t);
-int ReleaseExceptionHandler(int exception, exception_handler_t);
-int ReleaseDefaultExceptionHandler(exception_handler_t);
+int RegisterExceptionHandler(int exception, exception_handler_t handler);
+int RegisterPriorityExceptionHandler(int exception, int priority, exception_handler_t handler);
+int RegisterDefaultExceptionHandler(exception_handler_t handler);
+int ReleaseExceptionHandler(int exception, exception_handler_t handler);
+int ReleaseDefaultExceptionHandler(exception_handler_t handler);
 
 #define excepman_IMPORTS_start DECLARE_IMPORT_TABLE(excepman, 1, 2)
 #define excepman_IMPORTS_end END_IMPORT_TABLE
