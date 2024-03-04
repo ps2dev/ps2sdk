@@ -94,6 +94,22 @@ enum iop_irq_list {
     IOP_IRQ_SW2
 };
 
+typedef struct intrman_intr_handler_data_
+{
+    int (*handler)(void *userdata);
+    void *userdata;
+} intrman_intr_handler_data_t;
+
+typedef struct intrman_internals_
+{
+    intrman_intr_handler_data_t *interrupt_handler_table;
+    int masked_icr_1;
+    int masked_icr_2;
+    int dmac2_interrupt_handler_mask;
+} intrman_internals_t;
+
+intrman_internals_t *GetIntrmanInternalData(void);
+
 /**
  * Register an interrupt handler for the specified interrupt.
  * @param irq Interrupt cause to register an interrupt handler for.
