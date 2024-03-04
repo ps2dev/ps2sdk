@@ -59,7 +59,7 @@ extern "C" {
 
 typedef struct _exception_handler_struct_t
 {
-	void* next;
+	struct _exception_handler_struct_t* next;
 	int info;
 	u32 funccode[];
 } exception_handler_struct_t;
