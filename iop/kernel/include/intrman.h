@@ -203,8 +203,10 @@ int iCatchMultiIntr(void);
  * These set callback functions for thread support
  * Only the thread manager should set these
  */
-int SetNewCtxCb(void *cb);
-int SetShouldPreemptCb(void *cb);
+void SetNewCtxCb(void *cb);
+void ResetNewCtxCb(void);
+void SetShouldPreemptCb(void *cb);
+void ResetShouldPreemptCb(void);
 
 #define intrman_IMPORTS_start DECLARE_IMPORT_TABLE(intrman, 1, 2)
 #define intrman_IMPORTS_end   END_IMPORT_TABLE
