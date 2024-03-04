@@ -25,9 +25,7 @@ extern "C" {
 
 enum iop_irq_list {
     IOP_IRQ_VBLANK = 0,
-    /** INUM_GM */
     IOP_IRQ_SBUS,
-    /** INUM_CDROM */
     IOP_IRQ_CDVD,
     /** Original DMA controller interrupt (DMA channels 0-6) */
     IOP_IRQ_DMA,
@@ -41,7 +39,6 @@ enum iop_irq_list {
     IOP_IRQ_EVBLANK,
     /** Not sure what this is, if INUM_CDROM is the interrupt CDVDMAN uses. */
     IOP_IRQ_DVD,
-    /** INUM_PCMCIA */
     IOP_IRQ_DEV9,
     IOP_IRQ_RTC3,
     IOP_IRQ_RTC4,
@@ -54,38 +51,24 @@ enum iop_irq_list {
     IOP_IRQ_USB,
     /** Expansion interface on the mainboard. Unused (and unpopulated) on most retail mainboards, but used by DECI2 in the TOOL unit as the MRP interface. In PS mode, INUM_PIO seems to be triggered instead.	*/
     IOP_IRQ_EXTR,
-    /** INUM_FWRE */
     IOP_IRQ_ILINK,
     /** Firewire DMA */
     IOP_IRQ_FDMA,
 
-    /** INUM_DMA_0 */
     IOP_IRQ_DMA_MDEC_IN = 0x20,
-    /** INUM_DMA_1 */
     IOP_IRQ_DMA_MDEC_OUT,
-    /** INUM_DMA_2 */
     IOP_IRQ_DMA_SIF2,
-    /** INUM_DMA_3 */
     IOP_IRQ_DMA_CDVD,
-    /** INUM_DMA_4 */
     IOP_IRQ_DMA_SPU,
-    /** INUM_DMA_5 */
     IOP_IRQ_DMA_PIO,
-    /** INUM_DMA_6 */
     IOP_IRQ_DMA_GPU_OTC,
-    /** INUM_DMA_BERR (DMA bus error) */
+    /** DMA bus error */
     IOP_IRQ_DMA_BERR,
-    /** INUM_DMA_7 */
     IOP_IRQ_DMA_SPU2,
-    /** INUM_DMA_8 */
     IOP_IRQ_DMA_DEV9,
-    /** INUM_DMA_9 */
     IOP_IRQ_DMA_SIF0,
-    /** INUM_DMA_10 */
     IOP_IRQ_DMA_SIF1,
-    /** INUM_DMA_11 */
     IOP_IRQ_DMA_SIO2_IN,
-    /** INUM_DMA_12 */
     IOP_IRQ_DMA_SIO2_OUT,
 
     /** R3000A Software Interrupt 1 (Used by DECI2). */
@@ -243,6 +226,53 @@ void ResetShouldPreemptCb(void);
 #define I_iCatchMultiIntr     DECLARE_IMPORT(25, iCatchMultiIntr)
 #define I_SetNewCtxCb         DECLARE_IMPORT(28, SetNewCtxCb)
 #define I_SetShouldPreemptCb  DECLARE_IMPORT(30, SetShouldPreemptCb)
+
+/* For compatibility purposes */
+#define INUM_VBLANK IOP_IRQ_VBLANK
+#define INUM_GM IOP_IRQ_SBUS
+#define INUM_CDROM IOP_IRQ_CDVD
+#define INUM_DMA IOP_IRQ_DMA
+#define INUM_RTC0 IOP_IRQ_RTC0
+#define INUM_RTC1 IOP_IRQ_RTC1
+#define INUM_RTC2 IOP_IRQ_RTC2
+#define INUM_SIO0 IOP_IRQ_SIO0
+#define INUM_SIO1 IOP_IRQ_SIO1
+#define INUM_SPU IOP_IRQ_SPU
+#define INUM_PIO IOP_IRQ_PIO
+#define INUM_EVBLANK IOP_IRQ_EVBLANK
+#define INUM_DVD IOP_IRQ_DVD
+#define INUM_PCMCIA IOP_IRQ_DEV9
+#define INUM_RTC3 IOP_IRQ_RTC3
+#define INUM_RTC4 IOP_IRQ_RTC4
+#define INUM_RTC5 IOP_IRQ_RTC5
+#define INUM_SIO2 IOP_IRQ_SIO2
+#define INUM_HTR0 IOP_IRQ_HTR0
+#define INUM_HTR1 IOP_IRQ_HTR1
+#define INUM_HTR2 IOP_IRQ_HTR2
+#define INUM_HTR3 IOP_IRQ_HTR3
+#define INUM_USB IOP_IRQ_USB
+#define INUM_EXTR IOP_IRQ_EXTR
+#define INUM_FWRE IOP_IRQ_ILINK
+#define INUM_FDMA IOP_IRQ_FDMA
+#define INUM_DMA_0 IOP_IRQ_DMA_MDEC_IN
+#define INUM_DMA_1 IOP_IRQ_DMA_MDEC_OUT
+#define INUM_DMA_2 IOP_IRQ_DMA_SIF2
+#define INUM_DMA_3 IOP_IRQ_DMA_CDVD
+#define INUM_DMA_4 IOP_IRQ_DMA_SPU
+#define INUM_DMA_5 IOP_IRQ_DMA_PIO
+#define INUM_DMA_6 IOP_IRQ_DMA_GPU_OTC
+#define INUM_DMA_BERR IOP_IRQ_DMA_BERR
+#define INUM_DMA_7 IOP_IRQ_DMA_SPU2
+#define INUM_DMA_8 IOP_IRQ_DMA_DEV9
+#define INUM_DMA_9 IOP_IRQ_DMA_SIF0
+#define INUM_DMA_10 IOP_IRQ_DMA_SIF1
+#define INUM_DMA_11 IOP_IRQ_DMA_SIO2_IN
+#define INUM_DMA_12 IOP_IRQ_DMA_SIO2_OUT
+
+#define SetCtxSwitchHandler(...) SetNewCtxCb(__VA_ARGS__)
+#define ResetCtxSwitchHandler(...) ResetNewCtxCb(__VA_ARGS__)
+#define SetCtxSwitchReqHandler(...) SetShouldPreemptCb(__VA_ARGS__)
+#define ResetCtxSwitchReqHandler(...) ResetShouldPreemptCb(__VA_ARGS__)
 
 #ifdef __cplusplus
 }
