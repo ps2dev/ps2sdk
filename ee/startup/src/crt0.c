@@ -43,21 +43,22 @@ static struct sargs_start *args_start;
 void __start(struct sargs_start *pargs)
 {
     asm volatile(
-   		"# Clear bss area"
-   		"la   $2, _fbss"
-   		"la   $3, _end"
-		"1:"
-   		"sltu   $1, $2, $3"
-   		"beq   $1, $0, 2f"
-   		"nop"
-   		"sq   $0, ($2)"
-   		"addiu   $2, $2, 16"
-   		"j   1b"
-   		"nop"
-		"2:"
-		"                       \n"
+        "# Clear bss area       \n"
+        ".set noat              \n"
+        "la   $2, _fbss         \n"
+        "la   $3, _end          \n"
+        "1:                     \n"
+        "sltu   $1, $2, $3      \n"
+        "beq   $1, $0, 2f       \n"
+        "nop                    \n"
+        "sq   $0, ($2)          \n"
+        "addiu   $2, $2, 16     \n"
+        "j   1b                 \n"
+        "nop                    \n"
+        "2:                     \n"
+        "                       \n"
         "# Save first argument  \n"
-        "la     $2, %0 \n"
+        "la     $2, %0          \n"
         "sw     $4, ($2)        \n"
         "                       \n"
         "# SetupThread          \n"
@@ -71,10 +72,11 @@ void __start(struct sargs_start *pargs)
         "syscall                \n"
         "move   $sp, $2         \n"
         "                       \n"
-        "# Jump to _main      	\n"
-        "j      %2           \n"
-		: /* No outputs. */
-		: "R"(args_start), "R"(args), "Csy"(_main));
+        "# Jump to _main        \n"
+        "j      %2              \n"
+        ".set at              \n"
+        : /* No outputs. */
+        : "R"(args_start), "R"(args), "Csy"(_main));
 }
 
 /*
@@ -95,14 +97,14 @@ static void _main()
     // NOTE: this call can restart the application
     if (_ps2sdk_memory_init)
         _ps2sdk_memory_init();
-    
+
     // Use arguments sent through start if sent (by ps2link for instance)
     pa = &args;
     if (args.argc == 0 && args_start != NULL && args_start->args.argc != 0)
         pa = &args_start->args;
 
     // call libcglue argument parsing
-	_libcglue_args_parse(pa->argc, pa->argv);
+    _libcglue_args_parse(pa->argc, pa->argv);
 
     // initialize libcglue
     _libcglue_init();
@@ -133,7 +135,7 @@ static void _main()
 
 noreturn void _exit(int status)
 {
-	// call global destructors (weak)
+    // call global destructors (weak)
     if (_fini)
         _fini();
 
