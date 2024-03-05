@@ -708,10 +708,10 @@ int mcman_open2(int port, int slot, const char *filename, int flags)
 			pfsentry += 16;
 			pcache += 16;
 		} while (pfsentry < pfseend);
-	}
 
-	if ((flags == 0) && ((fse1->mode & sceMcFileAttrExists) == 0))
-		r = 1;
+		if ((flags == 0) && ((fse1->mode & sceMcFileAttrExists) == 0))
+			r = 1;
+	}
 
 	if (r == 2)
 		return sceMcResNoEntry;
