@@ -611,7 +611,7 @@ int mcman_close2(int fd)
 
 	DPRINTF("mcman_close2 fd %d\n", fd);
 
-	r = McReadDirEntry(fh->port, fh->slot, fh->field_20, fh->field_24, &fse1);
+	r = McReadDirEntry(fh->port, fh->slot, fh->cluster, fh->fsindex, &fse1);
 	if (r != sceMcResSucceed)
 		return -31;
 
@@ -632,7 +632,7 @@ int mcman_close2(int fd)
 
 	mcman_fsmodtime = fse1->modified;
 
-	r = McReadDirEntry(fh->port, fh->slot, fh->field_28, fh->field_2C, &fse2);
+	r = McReadDirEntry(fh->port, fh->slot, fh->parent_cluster, fh->parent_fsindex, &fse2);
 	if (r != sceMcResSucceed)
 		return r;
 
@@ -738,8 +738,8 @@ int mcman_open2(int port, int slot, const char *filename, int flags)
 	fh->rdflag = rdflag;
 	fh->wrflag = wrflag;
 	fh->unknown1 = 0;
-	fh->field_20 = cacheDir.cluster;
-	fh->field_24 = cacheDir.fsindex;
+	fh->cluster = cacheDir.cluster;
+	fh->fsindex = cacheDir.fsindex;
 
 	// fse2 = sp2c
 
@@ -758,8 +758,8 @@ int mcman_open2(int port, int slot, const char *filename, int flags)
 		if (r != sceMcResSucceed)
 			return r;
 
-		fh->field_28 = fse2->cluster;
-		fh->field_2C = fse2->dir_entry;
+		fh->parent_cluster = fse2->cluster;
+		fh->parent_fsindex = fse2->dir_entry;
 
 		if ((mcman_dircache[1].mode & sceMcFileAttrSubdir) != 0) {
 			if ((mcman_dircache[1].mode & sceMcFileAttrReadable) == 0)
@@ -785,7 +785,7 @@ int mcman_open2(int port, int slot, const char *filename, int flags)
 				fh2 = (MC_FHANDLE *)&mcman_fdhandles[i];
 
 				if ((fh2->status == 0) || (fh2->port != port) || (fh2->slot != slot) \
-					|| (fh2->field_20 != (u32)(cacheDir.cluster)) || (fh2->field_24 != (u32)(cacheDir.fsindex)))
+					|| (fh2->cluster != (u32)(cacheDir.cluster)) || (fh2->fsindex != (u32)(cacheDir.fsindex)))
 					continue;
 
 				if (fh2->wrflag != 0)
@@ -825,11 +825,11 @@ int mcman_open2(int port, int slot, const char *filename, int flags)
 		}
 	}
 	else {
-		fh->field_28 = cacheDir.cluster;
-		fh->field_2C = cacheDir.fsindex;
+		fh->parent_cluster = cacheDir.cluster;
+		fh->parent_fsindex = cacheDir.fsindex;
 	}
 
-	r = McReadDirEntry(port, slot, fh->field_28, fh->field_2C, &fse1);
+	r = McReadDirEntry(port, slot, fh->parent_cluster, fh->parent_fsindex, &fse1);
 	if (r != sceMcResSucceed)
 		return r;
 
@@ -960,7 +960,7 @@ int mcman_open2(int port, int slot, const char *filename, int flags)
 		if (r != sceMcResSucceed)
 			return -46;
 
-		r = McReadDirEntry(port, slot, fh->field_28, fh->field_2C, &fse1);
+		r = McReadDirEntry(port, slot, fh->parent_cluster, fh->parent_fsindex, &fse1);
 		if (r != sceMcResSucceed)
 			return r;
 
@@ -991,11 +991,11 @@ int mcman_open2(int port, int slot, const char *filename, int flags)
 					| (flags & (sceMcFileAttrPS1 | sceMcFileAttrPDAExec));
 
 		fse2->cluster = -1;
-		fh->field_20 = mcman_dircache[2].cluster;
+		fh->cluster = mcman_dircache[2].cluster;
 		fh->status = 1;
-		fh->field_24 = cacheDir.maxent;
+		fh->fsindex = cacheDir.maxent;
 
-		r = McReadDirEntry(port, slot, fh->field_28, fh->field_2C, &fse1);
+		r = McReadDirEntry(port, slot, fh->parent_cluster, fh->parent_fsindex, &fse1);
 		if (r != sceMcResSucceed)
 			return r;
 

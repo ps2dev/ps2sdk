@@ -135,10 +135,10 @@ typedef struct {  // size = 48
 	u32 freeclink; // 20 link to next free cluster
 	u32 clink;	  // 24  link to next cluster
 	u32 clust_offset;// 28
-	u32 field_20; // 32
-	u32 field_24; // 36
-	u32 field_28; // 40
-	u32 field_2C; // 44
+	u32 cluster; // 32
+	u32 fsindex; // 36
+	u32 parent_cluster; // 40
+	u32 parent_fsindex; // 44
 } MC_FHANDLE;
 
 #define MAX_FDHANDLES 		3
