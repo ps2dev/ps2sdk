@@ -6,6 +6,12 @@
 
 [PS2SDK Documentation](https://ps2dev.github.io/ps2sdk/)
 
+## Tutorial Installation
+
+* Languages
+  * [English](https://www.youtube.com/playlist?list=PLeIaNbfDd3faJ6HsjfZfyLgsZLSMcxaUt)
+  * [Portuguese Brazilian](https://www.youtube.com/playlist?list=PLeIaNbfDd3fYj3fwXQNdg3kCrcYmJIS_A)
+
 Copyright 2001-2004, ps2dev - <http://www.ps2dev.org>
 All rights reserved.
 
