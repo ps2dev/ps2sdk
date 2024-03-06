@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if ((dst_fd = open(argv[2], O_RDWR | O_CREAT | O_TRUNC)) == -1) {
+    if ((dst_fd = open(argv[2], O_RDWR | O_CREAT | O_TRUNC, (mode_t)0644)) == -1) {
         printf("Failed to open/create %s.\n", argv[2]);
         return 1;
     }
