@@ -43,20 +43,6 @@ static struct sargs_start *args_start;
 void __start(struct sargs_start *pargs)
 {
     asm volatile(
-        "# Clear bss area       \n"
-        ".set noat              \n"
-        "la   $2, _fbss         \n"
-        "la   $3, _end          \n"
-        "1:                     \n"
-        "sltu   $1, $2, $3      \n"
-        "beq   $1, $0, 2f       \n"
-        "nop                    \n"
-        "sq   $0, ($2)          \n"
-        "addiu   $2, $2, 16     \n"
-        "j   1b                 \n"
-        "nop                    \n"
-        "2:                     \n"
-        "                       \n"
         "# Save first argument  \n"
         "la     $2, %0          \n"
         "sw     $4, ($2)        \n"
@@ -74,7 +60,6 @@ void __start(struct sargs_start *pargs)
         "                       \n"
         "# Jump to _main        \n"
         "j      %2              \n"
-        ".set at              \n"
         : /* No outputs. */
         : "R"(args_start), "R"(args), "Csy"(_main));
 }
@@ -86,6 +71,9 @@ static void _main()
 {
     int retval;
     struct sargs *pa;
+
+    // Clear sbss and bss secions
+    memset(_fbss, 0, _end - _fbss);
 
     // initialize heap
     SetupHeap(&_end, (int)&_heap_size);
