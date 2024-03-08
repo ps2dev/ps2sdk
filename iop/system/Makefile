@@ -11,6 +11,8 @@ SUBDIRS = \
 	dmacman \
 	eesync \
 	eesync-nano \
+	intrman \
+	intrmanp \
 	ioman \
 	iomanx \
 	iopmgr \
