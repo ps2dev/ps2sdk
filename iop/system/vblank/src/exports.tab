@@ -1,0 +1,15 @@
+
+DECLARE_EXPORT_TABLE(vblank, 1, 1)
+DECLARE_EXPORT(_start)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(GetVblankInternalData)
+DECLARE_EXPORT(WaitVblankStart)
+DECLARE_EXPORT(WaitVblankEnd)
+DECLARE_EXPORT(WaitVblank)
+DECLARE_EXPORT(WaitNonVblank)
+DECLARE_EXPORT(RegisterVblankHandler)
+DECLARE_EXPORT(ReleaseVblankHandler)
+END_EXPORT_TABLE
+
+void _retonly() {}

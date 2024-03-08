@@ -43,7 +43,8 @@ SUBDIRS = \
 	timrman \
 	timrmanp \
 	udnl \
-	udnl-t300
+	udnl-t300 \
+	vblank
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
