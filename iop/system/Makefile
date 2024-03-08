@@ -12,6 +12,7 @@ SUBDIRS = \
 	eesync \
 	eesync-nano \
 	excepman \
+	heaplib \
 	intrman \
 	intrmanp \
 	ioman \
