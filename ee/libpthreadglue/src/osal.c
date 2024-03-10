@@ -26,7 +26,7 @@
 
 #define POLLING_DELAY_IN_us	100
 
-#if F___threadInfo
+#ifdef F___threadInfo
 struct OsalThreadInfo __threadInfo[MAX_THREADS];
 #endif
 

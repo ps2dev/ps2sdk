@@ -8,191 +8,111 @@
 
 #include "rpc_client.h"
 
-static SifRpcClientData_t NETMAN_rpc_cd;
-extern void *_gp;
-
-static union {
+typedef union {
 	s32 mode;
 	struct NetManIoctl IoctlArgs;
 	char netifName[NETMAN_NETIF_NAME_MAX_LEN];
 	struct NetManRegNetworkStack NetStack;
 	u8 buffer[128];
-}TransmitBuffer ALIGNED(64);
+} __attribute__((packed,aligned(64))) trasnmit_buffer_t;
 
-static union {
+typedef union {
 	s32 result;
 	struct NetManRegNetworkStackResult NetStackResult;
 	struct NetManIoctlResult IoctlResult;
 	struct NetManQueryMainNetIFResult QueryMainNetIFResult;
 	u8 buffer[128];
-}ReceiveBuffer ALIGNED(64);
+} __attribute__((packed,aligned(64))) receive_buffer_t;
 
-static int NetManIOSemaID = -1, NETMAN_Tx_threadID = -1;
+extern void *_gp;
+
+#ifdef F___rpc_client_TransmitBuffer
+trasnmit_buffer_t __rpc_client_TransmitBuffer;
+#else
+extern trasnmit_buffer_t __rpc_client_TransmitBuffer;
+#endif
+
+#ifdef F___rpc_client_ReceiveBuffer
+receive_buffer_t __rpc_client_ReceiveBuffer;
+#else
+extern receive_buffer_t __rpc_client_ReceiveBuffer;
+#endif
+
+#ifdef F___NETMAN_rpc_cd
+SifRpcClientData_t __NETMAN_rpc_cd;
+#else
+extern SifRpcClientData_t __NETMAN_rpc_cd;
+#endif
+
+#ifdef F___NetManIOSemaID
+int __NetManIOSemaID = -1;
+#else
+extern int __NetManIOSemaID;
+#endif
+
+#ifdef F___NETMAN_Tx_threadID
+int __NETMAN_Tx_threadID = -1;
+#else
+extern int __NETMAN_Tx_threadID;
+#endif
+
+#ifdef F___netman_IOPFrameBufferWrPtr
+unsigned short int __netman_IOPFrameBufferWrPtr;
+#else
+extern unsigned short int __netman_IOPFrameBufferWrPtr;
+#endif
+
+#ifdef F___netman_IOPFrameBuffer
+u8 *__netman_IOPFrameBuffer = NULL;	/* On the IOP side. */
+#else
+extern u8 *__netman_IOPFrameBuffer;
+#endif
+
+#ifdef F___netman_IOPFrameBufferStatus
+struct NetManBD *__netman_IOPFrameBufferStatus = NULL;
+#else
+extern struct NetManBD *__netman_IOPFrameBufferStatus;
+#endif
+
+#ifdef F___netman_FrameBufferStatus
+struct NetManBD *__netman_FrameBufferStatus = NULL;
+#else
+extern struct NetManBD *__netman_FrameBufferStatus;
+#endif
+
+#ifdef F___netman_rpc_client_IsInitialized
+unsigned char __netman_rpc_client_IsInitialized=0;
+#else
+extern unsigned char __netman_rpc_client_IsInitialized;
+#endif
+
+#ifdef F___netman_rpc_client_IIsProcessingTx
+unsigned char __netman_rpc_client_IIsProcessingTx;
+#else
+extern unsigned char __netman_rpc_client_IIsProcessingTx;
+#endif
+
+#ifdef F___rpc_client_deinitCleanup
+void __rpc_client_deinitCleanup(void)
+{
+	if(__NetManIOSemaID >= 0)
+	{
+		DeleteSema(__NetManIOSemaID);
+		__NetManIOSemaID = -1;
+	}
+	if(__NETMAN_Tx_threadID >= 0)
+	{
+		TerminateThread(__NETMAN_Tx_threadID);
+		DeleteThread(__NETMAN_Tx_threadID);
+		__NETMAN_Tx_threadID = -1;
+	}
+}
+#else
+extern void __rpc_client_deinitCleanup(void);
+#endif
+
+#ifdef F_NetManInitRPCClient
 static unsigned char NETMAN_Tx_ThreadStack[0x1000] ALIGNED(16);
-
-static unsigned short int IOPFrameBufferWrPtr;
-static u8 *IOPFrameBuffer = NULL;	/* On the IOP side. */
-static struct NetManBD *IOPFrameBufferStatus = NULL;
-static struct NetManBD *FrameBufferStatus = NULL;
-
-static unsigned char IsInitialized=0, IsProcessingTx;
-
-static void deinitCleanup(void)
-{
-	if(NetManIOSemaID >= 0)
-	{
-		DeleteSema(NetManIOSemaID);
-		NetManIOSemaID = -1;
-	}
-	if(NETMAN_Tx_threadID >= 0)
-	{
-		TerminateThread(NETMAN_Tx_threadID);
-		DeleteThread(NETMAN_Tx_threadID);
-		NETMAN_Tx_threadID = -1;
-	}
-}
-
-static void NETMAN_TxThread(void *arg);
-
-int NetManInitRPCClient(void){
-	static const char NetManID[]="NetMan";
-	int result;
-	ee_sema_t SemaData;
-	ee_thread_t thread;
-
-	if(!IsInitialized)
-	{
-		SemaData.max_count=1;
-		SemaData.init_count=1;
-		SemaData.option=(u32)NetManID;
-		SemaData.attr=0;
-		if((NetManIOSemaID=CreateSema(&SemaData)) < 0)
-		{
-			deinitCleanup();
-			return NetManIOSemaID;
-		}
-
-		thread.func=&NETMAN_TxThread;
-		thread.stack=NETMAN_Tx_ThreadStack;
-		thread.stack_size=sizeof(NETMAN_Tx_ThreadStack);
-		thread.gp_reg=&_gp;
-		thread.initial_priority=0x56;	/* Should be given a higher priority than the protocol stack, so that it can dump frames in the EE and return. */
-		thread.attr=thread.option=0;
-
-		if((NETMAN_Tx_threadID=CreateThread(&thread)) >= 0)
-		{
-			IsProcessingTx = 0;
-			StartThread(NETMAN_Tx_threadID, NULL);
-		} else {
-			deinitCleanup();
-			return NETMAN_Tx_threadID;
-		}
-
-		while((SifBindRpc(&NETMAN_rpc_cd, NETMAN_RPC_NUMBER, 0)<0)||(NETMAN_rpc_cd.server==NULL))
-			nopdelay();
-
-		if((result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_INIT, 0, NULL, 0, &ReceiveBuffer, sizeof(s32), NULL, NULL))>=0)
-		{
-			if((result=ReceiveBuffer.result) == 0)
-				IsInitialized=1;
-			else
-				deinitCleanup();
-		}else{
-			deinitCleanup();
-		}
-	}
-	else result=0;
-
-	return result;
-}
-
-int NetManRPCRegisterNetworkStack(void)
-{
-	int result;
-
-	WaitSema(NetManIOSemaID);
-
-	if(FrameBufferStatus == NULL) FrameBufferStatus = memalign(64, NETMAN_RPC_BLOCK_SIZE * sizeof(struct NetManBD));
-
-	if(FrameBufferStatus != NULL)
-	{
-		memset(UNCACHED_SEG(FrameBufferStatus), 0, NETMAN_RPC_BLOCK_SIZE * sizeof(struct NetManBD));
-		TransmitBuffer.NetStack.FrameBufferStatus = FrameBufferStatus;
-		IOPFrameBufferWrPtr = 0;
-
-		if((result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_REG_NETWORK_STACK, 0, &TransmitBuffer, sizeof(struct NetManRegNetworkStack), &ReceiveBuffer, sizeof(struct NetManRegNetworkStackResult), NULL, NULL))>=0)
-		{
-			if((result=ReceiveBuffer.NetStackResult.result) == 0)
-			{
-				IOPFrameBuffer = ReceiveBuffer.NetStackResult.FrameBuffer;
-				IOPFrameBufferStatus = ReceiveBuffer.NetStackResult.FrameBufferStatus;
-			}
-		}
-	}
-	else
-	{
-		result = -ENOMEM;
-	}
-
-	SignalSema(NetManIOSemaID);
-
-	return result;
-}
-
-int NetManRPCUnregisterNetworkStack(void)
-{
-	int result;
-
-	WaitSema(NetManIOSemaID);
-
-	result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_UNREG_NETWORK_STACK, 0, NULL, 0, NULL, 0, NULL, NULL);
-	IOPFrameBuffer = NULL;
-	IOPFrameBufferWrPtr = 0;
-
-	free(FrameBufferStatus);
-	FrameBufferStatus = NULL;
-
-	SignalSema(NetManIOSemaID);
-
-	return result;
-}
-
-void NetManDeinitRPCClient(void)
-{
-	if(IsInitialized)
-	{
-		WaitSema(NetManIOSemaID);
-
-		SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_DEINIT, 0, NULL, 0, NULL, 0, NULL, NULL);
-		deinitCleanup();
-
-		IsInitialized=0;
-	}
-}
-
-int NetManRpcIoctl(unsigned int command, void *args, unsigned int args_len, void *output, unsigned int length)
-{
-	int result;
-	struct NetManIoctl *IoctlArgs=&TransmitBuffer.IoctlArgs;
-
-	WaitSema(NetManIOSemaID);
-
-	IoctlArgs->command=command;
-	memcpy(IoctlArgs->args, args, args_len);
-	IoctlArgs->args_len=args_len;
-	IoctlArgs->output=output;
-	IoctlArgs->length=length;
-
-	if((result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_IOCTL, 0, &TransmitBuffer, sizeof(struct NetManIoctl), &ReceiveBuffer, sizeof(struct NetManIoctlResult), NULL, NULL))>=0)
-	{
-		result=ReceiveBuffer.IoctlResult.result;
-		memcpy(output, ReceiveBuffer.IoctlResult.output, length);
-	}
-
-	SignalSema(NetManIOSemaID);
-
-	return result;
-}
 
 static void NETMAN_TxThread(void *arg)
 {
@@ -213,7 +133,7 @@ static void NETMAN_TxThread(void *arg)
 		NumTx = 0;
 		while((length = NetManTxPacketNext(&payload)) > 0)
 		{
-			IsProcessingTx = 1;
+			__netman_rpc_client_IIsProcessingTx = 1;
 
 			//Write back D-cache, before performing a DMA transfer.
 			unaligned = (int)((u32)payload & 15);
@@ -224,12 +144,12 @@ static void NETMAN_TxThread(void *arg)
 
 			do {
 				//Wait for a spot to be freed up.
-				bd = UNCACHED_SEG(&FrameBufferStatus[IOPFrameBufferWrPtr]);
+				bd = UNCACHED_SEG(&__netman_FrameBufferStatus[__netman_IOPFrameBufferWrPtr]);
 				while(bd->length != 0){}
 
 				//Transfer to IOP RAM
 				//Determine mode of transfer.
-				bdNext = UNCACHED_SEG(&FrameBufferStatus[(IOPFrameBufferWrPtr + 1) % NETMAN_RPC_BLOCK_SIZE]);
+				bdNext = UNCACHED_SEG(&__netman_FrameBufferStatus[(__netman_IOPFrameBufferWrPtr + 1) % NETMAN_RPC_BLOCK_SIZE]);
 				if((NumTx + 1) >= NETMAN_FRAME_GROUP_SIZE || bdNext->length == 0)
 				{
 					//Prepare SIFCMD packet
@@ -237,11 +157,11 @@ static void NETMAN_TxThread(void *arg)
 					npcmd = (struct NetManPktCmd*)&cmd.opt;
 					npcmd->length = length;
 					npcmd->offset = unaligned;
-					npcmd->id = IOPFrameBufferWrPtr;
+					npcmd->id = __netman_IOPFrameBufferWrPtr;
 
 					while((dmat_id = SifSendCmd(NETMAN_SIFCMD_ID, &cmd, sizeof(SifCmdHeader_t),
 									(void*)payloadAligned,
-									(void*)&IOPFrameBuffer[IOPFrameBufferWrPtr * NETMAN_MAX_FRAME_SIZE],
+									(void*)&__netman_IOPFrameBuffer[__netman_IOPFrameBufferWrPtr * NETMAN_MAX_FRAME_SIZE],
 									(length + unaligned + 15) & ~15)) == 0){ };
 				} else {
 					//Record the frame length.
@@ -250,11 +170,11 @@ static void NETMAN_TxThread(void *arg)
 
 					//Normal DMA transfer
 					dmat[0].src = (void*)payloadAligned;
-					dmat[0].dest = (void*)&IOPFrameBuffer[IOPFrameBufferWrPtr * NETMAN_MAX_FRAME_SIZE];
+					dmat[0].dest = (void*)&__netman_IOPFrameBuffer[__netman_IOPFrameBufferWrPtr * NETMAN_MAX_FRAME_SIZE];
 					dmat[0].size = (length + unaligned + 15) & ~15;
 					dmat[0].attr = 0;
-					dmat[1].src = (void*)&FrameBufferStatus[IOPFrameBufferWrPtr];
-					dmat[1].dest = (void*)&IOPFrameBufferStatus[IOPFrameBufferWrPtr];
+					dmat[1].src = (void*)&__netman_FrameBufferStatus[__netman_IOPFrameBufferWrPtr];
+					dmat[1].dest = (void*)&__netman_IOPFrameBufferStatus[__netman_IOPFrameBufferWrPtr];
 					dmat[1].size = sizeof(struct NetManBD);
 					dmat[1].attr = 0;
 
@@ -262,7 +182,7 @@ static void NETMAN_TxThread(void *arg)
 				}
 
 				//Increase write pointer by one position.
-				IOPFrameBufferWrPtr = (IOPFrameBufferWrPtr + 1) % NETMAN_RPC_BLOCK_SIZE;
+				__netman_IOPFrameBufferWrPtr = (__netman_IOPFrameBufferWrPtr + 1) % NETMAN_RPC_BLOCK_SIZE;
 
 				if((length = NetManTxPacketAfter(&payload)) > 0)
 				{	//Write back the cache of the next packet, while waiting.
@@ -279,73 +199,230 @@ static void NETMAN_TxThread(void *arg)
 				NetManTxPacketDeQ();
 			} while(length > 0);
 
-			IsProcessingTx = 0;
+			__netman_rpc_client_IIsProcessingTx = 0;
 		}
 	}
 }
 
+int NetManInitRPCClient(void){
+	static const char NetManID[]="NetMan";
+	int result;
+	ee_sema_t SemaData;
+	ee_thread_t thread;
+
+	if(!__netman_rpc_client_IsInitialized)
+	{
+		SemaData.max_count=1;
+		SemaData.init_count=1;
+		SemaData.option=(u32)NetManID;
+		SemaData.attr=0;
+		if((__NetManIOSemaID=CreateSema(&SemaData)) < 0)
+		{
+			__rpc_client_deinitCleanup();
+			return __NetManIOSemaID;
+		}
+
+		thread.func=&NETMAN_TxThread;
+		thread.stack=NETMAN_Tx_ThreadStack;
+		thread.stack_size=sizeof(NETMAN_Tx_ThreadStack);
+		thread.gp_reg=&_gp;
+		thread.initial_priority=0x56;	/* Should be given a higher priority than the protocol stack, so that it can dump frames in the EE and return. */
+		thread.attr=thread.option=0;
+
+		if((__NETMAN_Tx_threadID=CreateThread(&thread)) >= 0)
+		{
+			__netman_rpc_client_IIsProcessingTx = 0;
+			StartThread(__NETMAN_Tx_threadID, NULL);
+		} else {
+			__rpc_client_deinitCleanup();
+			return __NETMAN_Tx_threadID;
+		}
+
+		while((SifBindRpc(&__NETMAN_rpc_cd, NETMAN_RPC_NUMBER, 0)<0)||(__NETMAN_rpc_cd.server==NULL))
+			nopdelay();
+
+		if((result=SifCallRpc(&__NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_INIT, 0, NULL, 0, &__rpc_client_ReceiveBuffer, sizeof(s32), NULL, NULL))>=0)
+		{
+			if((result=__rpc_client_ReceiveBuffer.result) == 0)
+				__netman_rpc_client_IsInitialized=1;
+			else
+				__rpc_client_deinitCleanup();
+		}else{
+			__rpc_client_deinitCleanup();
+		}
+	}
+	else result=0;
+
+	return result;
+}
+#endif
+
+#ifdef F_NetManRPCRegisterNetworkStack
+int NetManRPCRegisterNetworkStack(void)
+{
+	int result;
+
+	WaitSema(__NetManIOSemaID);
+
+	if(__netman_FrameBufferStatus == NULL) __netman_FrameBufferStatus = memalign(64, NETMAN_RPC_BLOCK_SIZE * sizeof(struct NetManBD));
+
+	if(__netman_FrameBufferStatus != NULL)
+	{
+		memset(UNCACHED_SEG(__netman_FrameBufferStatus), 0, NETMAN_RPC_BLOCK_SIZE * sizeof(struct NetManBD));
+		__rpc_client_TransmitBuffer.NetStack.FrameBufferStatus = __netman_FrameBufferStatus;
+		__netman_IOPFrameBufferWrPtr = 0;
+
+		if((result=SifCallRpc(&__NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_REG_NETWORK_STACK, 0, &__rpc_client_TransmitBuffer, sizeof(struct NetManRegNetworkStack), &__rpc_client_ReceiveBuffer, sizeof(struct NetManRegNetworkStackResult), NULL, NULL))>=0)
+		{
+			if((result=__rpc_client_ReceiveBuffer.NetStackResult.result) == 0)
+			{
+				__netman_IOPFrameBuffer = __rpc_client_ReceiveBuffer.NetStackResult.FrameBuffer;
+				__netman_IOPFrameBufferStatus = __rpc_client_ReceiveBuffer.NetStackResult.FrameBufferStatus;
+			}
+		}
+	}
+	else
+	{
+		result = -ENOMEM;
+	}
+
+	SignalSema(__NetManIOSemaID);
+
+	return result;
+}
+#endif
+
+#ifdef F_NetManRPCUnregisterNetworkStack
+int NetManRPCUnregisterNetworkStack(void)
+{
+	int result;
+
+	WaitSema(__NetManIOSemaID);
+
+	result=SifCallRpc(&__NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_UNREG_NETWORK_STACK, 0, NULL, 0, NULL, 0, NULL, NULL);
+	__netman_IOPFrameBuffer = NULL;
+	__netman_IOPFrameBufferWrPtr = 0;
+
+	free(__netman_FrameBufferStatus);
+	__netman_FrameBufferStatus = NULL;
+
+	SignalSema(__NetManIOSemaID);
+
+	return result;
+}
+#endif
+
+#ifdef F_NetManDeinitRPCClient
+void NetManDeinitRPCClient(void)
+{
+	if(__netman_rpc_client_IsInitialized)
+	{
+		WaitSema(__NetManIOSemaID);
+
+		SifCallRpc(&__NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_DEINIT, 0, NULL, 0, NULL, 0, NULL, NULL);
+		__rpc_client_deinitCleanup();
+
+		__netman_rpc_client_IsInitialized=0;
+	}
+}
+#endif
+
+#ifdef F_NetManRpcIoctl
+int NetManRpcIoctl(unsigned int command, void *args, unsigned int args_len, void *output, unsigned int length)
+{
+	int result;
+	struct NetManIoctl *IoctlArgs=&__rpc_client_TransmitBuffer.IoctlArgs;
+
+	WaitSema(__NetManIOSemaID);
+
+	IoctlArgs->command=command;
+	memcpy(IoctlArgs->args, args, args_len);
+	IoctlArgs->args_len=args_len;
+	IoctlArgs->output=output;
+	IoctlArgs->length=length;
+
+	if((result=SifCallRpc(&__NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_IOCTL, 0, &__rpc_client_TransmitBuffer, sizeof(struct NetManIoctl), &__rpc_client_ReceiveBuffer, sizeof(struct NetManIoctlResult), NULL, NULL))>=0)
+	{
+		result=__rpc_client_ReceiveBuffer.IoctlResult.result;
+		memcpy(output, __rpc_client_ReceiveBuffer.IoctlResult.output, length);
+	}
+
+	SignalSema(__NetManIOSemaID);
+
+	return result;
+}
+#endif
+
+#ifdef F_NetManRpcNetIFXmit
 void NetManRpcNetIFXmit(void)
 {
-	if(!IsProcessingTx)
-		WakeupThread(NETMAN_Tx_threadID);
+	if(!__netman_rpc_client_IIsProcessingTx)
+		WakeupThread(__NETMAN_Tx_threadID);
 }
+#endif
 
+#ifdef F_NetManSetMainIF
 int NetManSetMainIF(const char *name)
 {
 	int result;
 
-	if (!IsInitialized)
+	if (!__netman_rpc_client_IsInitialized)
 		return -1;
 
-	WaitSema(NetManIOSemaID);
+	WaitSema(__NetManIOSemaID);
 
-	strncpy(TransmitBuffer.netifName, name, NETMAN_NETIF_NAME_MAX_LEN);
-	TransmitBuffer.netifName[NETMAN_NETIF_NAME_MAX_LEN-1] = '\0';
-	if((result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_SET_MAIN_NETIF, 0, &TransmitBuffer, NETMAN_NETIF_NAME_MAX_LEN, &ReceiveBuffer, sizeof(s32), NULL, NULL))>=0)
-		result=ReceiveBuffer.result;
+	strncpy(__rpc_client_TransmitBuffer.netifName, name, NETMAN_NETIF_NAME_MAX_LEN);
+	__rpc_client_TransmitBuffer.netifName[NETMAN_NETIF_NAME_MAX_LEN-1] = '\0';
+	if((result=SifCallRpc(&__NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_SET_MAIN_NETIF, 0, &__rpc_client_TransmitBuffer, NETMAN_NETIF_NAME_MAX_LEN, &__rpc_client_ReceiveBuffer, sizeof(s32), NULL, NULL))>=0)
+		result=__rpc_client_ReceiveBuffer.result;
 
-	SignalSema(NetManIOSemaID);
+	SignalSema(__NetManIOSemaID);
 
 	return result;
 }
+#endif
 
+#ifdef F_NetManQueryMainIF
 int NetManQueryMainIF(char *name)
 {
 	int result;
 	
-	if (!IsInitialized)
+	if (!__netman_rpc_client_IsInitialized)
 		return -1;
 
-	WaitSema(NetManIOSemaID);
+	WaitSema(__NetManIOSemaID);
 
-	if((result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_QUERY_MAIN_NETIF, 0, NULL, 0, &ReceiveBuffer, sizeof(struct NetManQueryMainNetIFResult), NULL, NULL))>=0)
+	if((result=SifCallRpc(&__NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_QUERY_MAIN_NETIF, 0, NULL, 0, &__rpc_client_ReceiveBuffer, sizeof(struct NetManQueryMainNetIFResult), NULL, NULL))>=0)
 	{
-		if((result=ReceiveBuffer.QueryMainNetIFResult.result) == 0)
+		if((result=__rpc_client_ReceiveBuffer.QueryMainNetIFResult.result) == 0)
 		{
-			strncpy(name, ReceiveBuffer.QueryMainNetIFResult.name, NETMAN_NETIF_NAME_MAX_LEN);
+			strncpy(name, __rpc_client_ReceiveBuffer.QueryMainNetIFResult.name, NETMAN_NETIF_NAME_MAX_LEN);
 			name[NETMAN_NETIF_NAME_MAX_LEN-1] = '\0';
 		}
 	}
 
-	SignalSema(NetManIOSemaID);
+	SignalSema(__NetManIOSemaID);
 
 	return result;
 }
+#endif
 
+#ifdef F_NetManSetLinkMode
 int NetManSetLinkMode(int mode)
 {
 	int result;
 	
-	if (!IsInitialized)
+	if (!__netman_rpc_client_IsInitialized)
 		return -1;
 
-	WaitSema(NetManIOSemaID);
+	WaitSema(__NetManIOSemaID);
 
-	TransmitBuffer.mode = mode;
-	if((result=SifCallRpc(&NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_SET_LINK_MODE, 0, &TransmitBuffer, sizeof(s32), &ReceiveBuffer, sizeof(s32), NULL, NULL))>=0)
-		result=ReceiveBuffer.result;
+	__rpc_client_TransmitBuffer.mode = mode;
+	if((result=SifCallRpc(&__NETMAN_rpc_cd, NETMAN_IOP_RPC_FUNC_SET_LINK_MODE, 0, &__rpc_client_TransmitBuffer, sizeof(s32), &__rpc_client_ReceiveBuffer, sizeof(s32), NULL, NULL))>=0)
+		result=__rpc_client_ReceiveBuffer.result;
 
-	SignalSema(NetManIOSemaID);
+	SignalSema(__NetManIOSemaID);
 
 	return result;
 }
+#endif
