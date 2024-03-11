@@ -568,6 +568,13 @@ pid_t _wait(int *unused) {
 }
 #endif
 
+#ifdef F__execve
+int _execve(const char *name, char *const argv[], char *const env[]) {
+	errno = ENOSYS;
+	return (pid_t) -1; /* not supported */
+}
+#endif
+
 #ifdef F__sbrk
 void * _sbrk(size_t incr) {
 	static void * _heap_ptr = &_end;

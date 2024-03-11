@@ -72,6 +72,7 @@ GLUE_OBJS = \
 	_kill.o \
 	_fork.o \
 	_wait.o \
+	_execve.o \
 	_sbrk.o \
 	_gettimeofday.o \
 	_times.o \
