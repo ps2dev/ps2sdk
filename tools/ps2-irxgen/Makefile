@@ -7,6 +7,7 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 TOOLS_OBJS = ps2-irxgen.o
+TOOLS_CFLAGS += -Wno-unused-result
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/tools/Rules.bin.make
