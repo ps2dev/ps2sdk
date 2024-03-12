@@ -435,4 +435,13 @@
 #define IOP_I_STAT_VB   (1 << 0)
 #define IOP_I_STAT_SBUS (1 << 1)
 
+//Borrowed from XPARAM patch applier by krat0s
+//Bit 31 of GM_IF is for the IOP type.
+#define GM_IF ((vu32 *)0x1F801450) 
+#define GM_IOP_TYPE (0x80000000)
+
+#define IOP_CPU_TYPE (*GM_IF & GM_IOP_TYPE)
+#define IOP_TYPE_MIPSR3000 0
+#define IOP_TYPE_POWERPC   1
+
 #endif /* __IOP_REGS_H__ */
