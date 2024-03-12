@@ -5,12 +5,12 @@
 #include <errno.h>
 #include <stdlib.h>
 #include "dprintf.h"
-#ifdef __unix__
+#if defined(_WIN32) || defined(WIN32)
+#include <windows.h>
+#else
 #include <sys/stat.h>
 #include <unistd.h>
 #include <time.h>
-#elif defined(_WIN32) || defined(WIN32)
-#include <windows.h>
 #endif
 
 #include "platform.h"

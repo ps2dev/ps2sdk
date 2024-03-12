@@ -5,6 +5,8 @@
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "romimg.h"
 
@@ -141,7 +143,7 @@ int main(int argc, char **argv)
             if (argc == 3) {
                 char FOLDER[256] = "ext_";
                 strcat(FOLDER, argv[2]);
-                mkdir(FOLDER);
+                mkdir(FOLDER, 0755);
                 chdir(FOLDER);
 
                 printf("File list:\n"
