@@ -58,14 +58,13 @@ void __start(struct sargs_start *pargs)
         "2:                     \n"
         "                       \n"
         "# Save first argument  \n"
-        "la     $2, %0          \n"
-        "sw     $4, ($2)        \n"
+        "sw     %1, %0          \n"
         "                       \n"
         "# SetupThread          \n"
         "la     $4, _gp         \n"
         "la     $5, _stack      \n"
         "la     $6, _stack_size \n"
-        "la     $7, %1	        \n"
+        "la     $7, args	    \n"
         "la     $8, ExitThread  \n"
         "move   $gp, $4         \n"
         "addiu  $3, $0, 60      \n"
@@ -76,7 +75,8 @@ void __start(struct sargs_start *pargs)
         "j      %2              \n"
         ".set at              \n"
         : /* No outputs. */
-        : "R"(args_start), "R"(args), "Csy"(_main));
+        : "m"(args_start), "r"(pargs), "Csy"(_main)
+        : "1", "2", "3", "4", "5", "6", "7", "8");
 }
 
 /*
