@@ -76,8 +76,8 @@ int __get_drive(const char *dev, enum SeparatorType *usePOSIXSeparator)
 	{
 		*usePOSIXSeparator = SeparatorTypeWindows;
 	}
-	/* We need to check if drive is rom because those one don't have separator */
-	else if (devname_len == 3 && (memcmp(d, "rom", 3) == 0))
+	/* We need to check if drive is rom or hdd because those one don't have separator */
+	else if (devname_len == 3 && ((memcmp(d, "rom", 3) == 0) || (memcmp(d, "hdd", 3) == 0)))
 	{
 		*usePOSIXSeparator = SeparatorTypeNone;
 	}
