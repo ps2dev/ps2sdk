@@ -151,11 +151,8 @@ static char * find_iop_device(const char *dev, int *unit, iomanX_iop_device_t **
 	char *filename, *tail, *d = (char *)dev;
 	int i, len, num = 0;
 
-	if (*d == ' ') {
-		while (*d == ' ')
-			d++;
-		d--;
-	}
+	while (*d == ' ')
+		d += 1;
 
 	if ((tail = index(d, ':')) == NULL)
 		return (char *)-1;
