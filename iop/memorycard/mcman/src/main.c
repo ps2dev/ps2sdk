@@ -2154,10 +2154,10 @@ int McSetDirEntryState(int port, int slot, int cluster, int fsindex, int flags)
 		if ((mcman_fdhandles[i].port != port) || (mcman_fdhandles[i].slot != slot))
 			continue;
 
-		if (mcman_fdhandles[i].field_20 != (u32)cluster)
+		if (mcman_fdhandles[i].cluster != (u32)cluster)
 			continue;
 
-		if (mcman_fdhandles[i].field_24 == (u32)fsindex)
+		if (mcman_fdhandles[i].fsindex == (u32)fsindex)
 			return sceMcResDeniedPermit;
 
 	} while (++i < MAX_FDHANDLES);
