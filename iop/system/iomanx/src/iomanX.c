@@ -158,6 +158,8 @@ static char * find_iop_device(const char *dev, int *unit, iomanX_iop_device_t **
 		return (char *)-1;
 
 	len = (int)(tail - d);
+	if ((unsigned int)len > (sizeof(canon) - 1))
+		return (char *)-1;
 	strncpy(canon, d, len);
 	canon[len] = '\0';
 
