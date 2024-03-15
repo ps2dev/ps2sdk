@@ -30,8 +30,8 @@
 #include <errno.h>
 #include <fileXio.h>
 
-#define MODNAME "IOX/File_Manager_Rpc"
-IRX_ID(MODNAME, 1, 2);
+#define MODNAME "fileXio"
+IRX_ID("IOX/File_Manager_Rpc", 1, 2);
 
 #define M_PRINTF(format, args...) \
     printf(MODNAME ": " format, ##args)
