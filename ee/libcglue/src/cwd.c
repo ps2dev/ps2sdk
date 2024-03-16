@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <string.h>
+#include <ctype.h>
 #include <sys/param.h>
 #include <dirent.h>
 #include <errno.h>
@@ -37,37 +38,64 @@ enum SeparatorType {
 	SeparatorTypeWindows
 };
 
+#define isnum(c) ((c) >= '0' && (c) <= '9')
+
 #ifdef F___get_drive
 /* Return the number of bytes taken up by the "drive:" prefix,
    or -1 if it's not found */
-int __get_drive(const char *d, enum SeparatorType *usePOSIXSeparator)
+int __get_drive(const char *dev, enum SeparatorType *usePOSIXSeparator)
 {
-	int i;
-	for(i=0; d[i]; i++) {
-		if(! ((d[i] >= 'a' && d[i] <= 'z') ||
-			  (d[i] >= 'A' && d[i] <= 'Z') ||
-		      (d[i] >= '0' && d[i] <= '9') ))
-			break;
-	}
-	/* We need to check if driver is cdrom: cdrom0: ... cdrom9: because those one use \ as separator */
-	if ((i >= 5 && strncmp(d, "cdrom", 5) == 0) &&
-		((d[5] == ':') ||
-		(d[5] >= '0' && d[5] <= '9' && d[6] == ':'))) {
-		*usePOSIXSeparator = SeparatorTypeWindows;
-	/* We need to check if drive is rom: rom0: ... rom9: because those one don't have separator */
-	} else if ((i >= 3 && strncmp(d, "rom", 3) == 0) &&
-		((d[3] == ':') ||
-		(d[3] >= '0' && d[3] <= '9' && d[4] == ':'))) {
-		*usePOSIXSeparator = SeparatorTypeNone;
-	} else {
-		*usePOSIXSeparator = 1;
+	const char *tail;
+	const char *d;
+	int devname_len;
+
+	/* Skip leading spaces */
+	d = dev;
+	while (*d == ' ')
+	{
+		d += 1;
 	}
 
-	if(d[i] == ':') return i+1;
-	return -1;
+	/* Get colon position */
+	tail = strchr(d, ':');
+	if (tail == NULL)
+	{
+		return -1;
+	}
+
+	devname_len = (int)(tail - d);
+
+	/* Reduce length to not include index */
+	while (isnum(tail[devname_len - 1]))
+	{
+		devname_len -= 1;
+	}
+
+	/* We need to check if driver is cdrom because those one use \ as separator */
+	if (devname_len == 5 && (memcmp(d, "cdrom", 5) == 0))
+	{
+		*usePOSIXSeparator = SeparatorTypeWindows;
+	}
+	/* We need to check if drive is rom or hdd because those one don't have separator */
+	else if (devname_len == 3 && ((memcmp(d, "rom", 3) == 0) || (memcmp(d, "hdd", 3) == 0)))
+	{
+		*usePOSIXSeparator = SeparatorTypeNone;
+	}
+	else
+	{
+		*usePOSIXSeparator = SeparatorTypePOSIX;
+	}
+
+	/* Return the length of the whole device name portion, including:
+	 * - leading spaces
+	 * - device name
+	 * - device index
+	 * - colon
+	 */
+	return (tail - dev) + 1;
 }
 #else 
-int __get_drive(const char *d, enum SeparatorType *usePOSIXSeparator);
+int __get_drive(const char *dev, enum SeparatorType *usePOSIXSeparator);
 #endif
 
 #ifdef F_getcwd
