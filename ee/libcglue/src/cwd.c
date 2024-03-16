@@ -66,7 +66,7 @@ int __get_drive(const char *dev, enum SeparatorType *usePOSIXSeparator)
 	devname_len = (int)(tail - d);
 
 	/* Reduce length to not include index */
-	while (isnum(tail[devname_len - 1]))
+	while (isnum(d[devname_len - 1]))
 	{
 		devname_len -= 1;
 	}
