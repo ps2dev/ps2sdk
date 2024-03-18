@@ -17,7 +17,15 @@
 // CRC32: EC5F33F9
 // Note: currently is based on the last XMCMAN from BOOTROM:
 // 0x02,0x0a (looks like mistake, cause last XMCMAN is 0x02,0x09)
-IRX_ID(MODNAME, 2, 11);
+
+#define MAJOR 2
+#if !defined(BUILDING_DONGLEMAN) //dongleman version is 0x204
+#define MINOR 11
+#else
+#define MINOR 4
+#endif
+
+IRX_ID(MODNAME, MAJOR, MINOR);
 
 char SUPERBLOCK_MAGIC[] = "Sony PS2 Memory Card Format ";
 char SUPERBLOCK_VERSION[] = "1.2.0.0";
