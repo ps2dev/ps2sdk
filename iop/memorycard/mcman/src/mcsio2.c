@@ -988,6 +988,11 @@ int mcman_probePS2Card(int port, int slot) //2
 		DONGLEMAN_SIGN_SEMA();
 		return sceMcResFailDetect2;
 	}
+#if !defined(BUILDING_DONGLEMAN)
+	else {
+		mcman_devinfos[port][slot].cardform = sceMcResNoFormat; // aditional step on dongleman? or its not set somewhere else unlike our implementation?
+	}
+#endif
 
 	DPRINTF("mcman_probePS2Card sio2cmd succeeded\n");
 
