@@ -1211,7 +1211,12 @@ void McDataChecksum(void *buf, void *ecc) // Export #20
 //--------------------------------------------------------------
 int mcman_getcnum(int port, int slot)
 {
+#if defined(BUILDING_DONGLEMAN)
+	DPRINTF("%s: port %d slot %d original ret would be 0x%x\n", __FUNCTION__, port, slot, (((port & 1) << 3) + slot))
+	return 0xf;
+#else
 	return ((port & 1) << 3) + slot;
+#endif
 }
 
 //--------------------------------------------------------------
