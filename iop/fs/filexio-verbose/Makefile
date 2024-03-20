@@ -6,21 +6,11 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = \
-	adddrv \
-	addrom2 \
-	bdm \
-	bdmfs_fatfs \
-	bdmfs_vfat \
-	devfs \
-	fakehost \
-	fileio \
-	filexio \
-	filexio-verbose \
-	http \
-	libbdm \
-	netfs \
-	romdrv
+IOP_PAR_DIR = $(PS2SDKSRC)/iop/fs/filexio
+IOP_SRC_DIR = $(IOP_PAR_DIR)/src/
+IOP_INC_DIR = $(IOP_PAR_DIR)/src/
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+IOP_BIN ?= fileXio_verbose.irx
+
+DEBUG = 1
+include $(IOP_PAR_DIR)/Makefile
