@@ -459,6 +459,8 @@ int AddFile(ROMIMG *ROMImg, const char *path)
 	unsigned int FileDateStamp;
 	unsigned short FileVersion;
 	if ((InputFile = fopen(path, "rb")) != NULL) {
+		const char* fname = strrchr(path, PATHSEP);
+		if (fname == NULL) fname = path; else fname++;
 		int size;
 		fseek(InputFile, 0, SEEK_END);
 		size = ftell(InputFile);
@@ -466,15 +468,15 @@ int AddFile(ROMIMG *ROMImg, const char *path)
 
 		struct FileEntry *file;
 		// Files cannot exist more than once in an image. The RESET entry is special here because all images will have a RESET entry, but it might be empty (If it has no content, allow the user to add in content).
-		if (strcmp(path, "RESET")) {
-			if (!IsFileExists(ROMImg, path)) {
+		if (strcmp(fname, "RESET")) {
+			if (!IsFileExists(ROMImg, fname)) {
 				ROMImg->NumFiles++;
 
 				if ((ROMImg->files = (ROMImg->files == NULL) ? malloc(sizeof(struct FileEntry)) : realloc(ROMImg->files, ROMImg->NumFiles * sizeof(struct FileEntry))) != NULL) {
 					file = &ROMImg->files[ROMImg->NumFiles - 1];
 					memset(&ROMImg->files[ROMImg->NumFiles - 1], 0, sizeof(struct FileEntry));
 
-					strncpy(file->RomDir.name, path, sizeof(file->RomDir.name));
+					strncpy(file->RomDir.name, fname, sizeof(file->RomDir.name));
 					file->RomDir.ExtInfoEntrySize = 0;
 
 					FileDateStamp = GetFileCreationDate(path);

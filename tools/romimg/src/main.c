@@ -87,10 +87,10 @@ int main(int argc, char **argv)
     if (argc >= 4 && strcmp(argv[1], "-c") == 0) {
         if ((result = CreateBlankROMImg(argv[2], &ROMImg)) == 0) {
             for (FilesAffected = 0, i = 0; i < argc - 3; i++) {
-                printf("Adding file %s... ", argv[3 + i]);
+                printf("Adding file '%s'", argv[3 + i]);
                 if ((result = AddFile(&ROMImg, argv[3 + i])) == 0)
                     FilesAffected++;
-                printf(result == 0 ? GRNBOLD"done!"DEFCOL"\n" : REDBOLD"failed!"DEFCOL"\n");
+                printf(result == 0 ? GRNBOLD" done!"DEFCOL"\n" : REDBOLD" failed!"DEFCOL"\n");
             }
 
             if (FilesAffected > 0) {
@@ -103,7 +103,7 @@ int main(int argc, char **argv)
     } else if (argc >= 4 && strcmp(argv[1], "-a") == 0) {
         if ((result = LoadROMImg(&ROMImg, argv[2])) == 0) {
             for (i = 0, FilesAffected = 0; i < argc - 3; i++) {
-                printf("Adding file %s... ", argv[3 + i]);
+                printf("Adding file '%s'", argv[3 + i]);
                 if ((result = AddFile(&ROMImg, argv[3 + i])) == 0)
                     FilesAffected++;
                 DisplayAddDeleteOperationResult(result, argv[3 + i]);
