@@ -30,6 +30,11 @@
 #define KE_NOTFOUND_HANDLER   -105
 #define KE_NO_TIMER           -150
 #define KE_ILLEGAL_TIMERID    -151
+#define KE_ILLEGAL_SOURCE     -152
+#define KE_ILLEGAL_PRESCALE   -153
+#define KE_TIMER_BUSY         -154
+#define KE_TIMER_NOT_SETUP    -155
+#define KE_TIMER_NOT_INUSE    -156
 #define KE_UNIT_USED          -160
 #define KE_UNIT_NOUSE         -161
 #define KE_NO_ROMDIR          -162
@@ -39,6 +44,21 @@
 #define KE_NOFILE             -203
 #define KE_FILEERR            -204
 #define KE_MEMINUSE           -205
+#define KE_ALREADY_STARTED    -206
+#define KE_NOT_STARTED        -207
+#define KE_ALREADY_STOPPED    -208
+#define KE_CAN_NOT_STOP       -209
+#define KE_NOT_STOPPED        -210
+#define KE_NOT_REMOVABLE      -211
+#define KE_LIBRARY_FOUND      -212
+#define KE_LIBRARY_NOTFOUND   -213
+#define KE_ILLEGAL_LIBRARY    -214
+#define KE_LIBRARY_INUSE      -215
+#define KE_ALREADY_STOPPING   -216
+#define KE_ILLEGAL_OFFSET     -217
+#define KE_ILLEGAL_POSITION   -218
+#define KE_ILLEGAL_ACCESS     -219
+#define KE_ILLEGAL_FLAG       -220
 #define KE_NO_MEMORY          -400
 #define KE_ILLEGAL_ATTR       -401
 #define KE_ILLEGAL_ENTRY      -402
@@ -67,6 +87,9 @@
 #define KE_WAIT_DELETE        -425
 #define KE_ILLEGAL_MEMBLOCK   -426
 #define KE_ILLEGAL_MEMSIZE    -427
+#define KE_ILLEGAL_SPADADDR   -428
+#define KE_SPAD_INUSE         -429
+#define KE_SPAD_NOT_INUSE     -430
 #define KE_ILLEGAL_TYPE       -431
 #define KE_ILLEGAL_SIZE       -432
 
