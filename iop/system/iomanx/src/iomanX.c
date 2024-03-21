@@ -149,18 +149,17 @@ static char * find_iop_device(const char *dev, int *unit, iomanX_iop_device_t **
 {
 	char canon[16];
 	char *filename, *tail, *d = (char *)dev;
-	int i, len, num = 0;
+	int i, len;
 
-	if (*d == ' ') {
-		while (*d == ' ')
-			d++;
-		d--;
-	}
+	while (*d == ' ')
+		d += 1;
 
 	if ((tail = index(d, ':')) == NULL)
 		return (char *)-1;
 
 	len = (int)(tail - d);
+	if ((unsigned int)len > (sizeof(canon) - 1))
+		return (char *)-1;
 	strncpy(canon, d, len);
 	canon[len] = '\0';
 
@@ -168,14 +167,17 @@ static char * find_iop_device(const char *dev, int *unit, iomanX_iop_device_t **
 	filename = d + len + 1;
 
 	/* Search backward for the unit number.  */
-	if (isnum(canon[len - 1])) {
-		while (isnum(canon[len - 1]))
-			len--;
+	while (isnum(canon[len - 1]))
+		len -= 1;
+	if (unit) {
+		int num;
 
-		num = strtol(canon + len, 0, 10);
-	}
-	if (unit)
+		num = 0;
+		if (isnum(canon[len])) {
+			num = strtol(canon + len, 0, 10);
+		}
 		*unit = num;
+	}
 
 	/* Find the actual device.  */
 	canon[len] = '\0';
