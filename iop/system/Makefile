@@ -17,6 +17,7 @@ SUBDIRS = \
 	ioman \
 	iomanx \
 	iopmgr \
+	loadcore \
 	loadfile \
 	modload \
 	mtapman \
