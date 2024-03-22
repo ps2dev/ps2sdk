@@ -651,8 +651,8 @@ int _start(int argc, char **argv)
     idle->saved_regs    = idle->stack_top + (((idle->stack_size << 2) >> 2) - RESERVED_REGCTX_SIZE);
     memset(idle->saved_regs, 0, RESERVED_REGCTX_SIZE);
 
-    asm __volatile__("sw $gp, 0(%0)\n"
-                     : "=r"(idle->gp)::);
+    asm __volatile__("sw $gp, %0\n"
+                     : "=m"(idle->gp)::);
 
     idle->saved_regs->unk = -2;
     idle->saved_regs->sp  = (u32)&idle->saved_regs[1];
@@ -680,8 +680,8 @@ int _start(int argc, char **argv)
     current->attr          = TH_C;
     current->status        = THS_RUN;
 
-    asm __volatile__("sw $gp, 0(%0)\n"
-                     : "=r"(current->gp)::);
+    asm __volatile__("sw $gp, %0\n"
+                     : "=m"(current->gp)::);
 
     list_insert(&thctx.thread_list, &current->thread_list);
     thctx.current_thread = current;
