@@ -505,36 +505,6 @@ int start_module(ModuleInfo_t *module_info, const char *data, size_t arglen, con
 
 int IsIllegalBootDevice(const char *arg1)
 {
-	// Pulled from UDNL
-#if 0
-    // Eliminate spaces from the path.
-    if (arg1[0] == ' ') {
-        arg1++;
-        do {
-            arg1++;
-        } while (arg1[0] == ' ');
-
-        arg1--;
-    }
-
-    if (((arg1[0] | 0x20) == 'm') && ((arg1[1] | 0x20) == 'c')) { //"mc"
-        arg1 += 2;
-        goto end_func1;
-    } else if (((arg1[0] | 0x20) == 'h') && ((arg1[1] | 0x20) == 'd')) { //"hd"
-        arg1 += 2;
-        goto end_func1;
-    } else if (((arg1[0] | 0x20) == 'n') && ((arg1[1] | 0x20) == 'e') && ((arg1[2] | 0x20) == 't')) { //"net"
-        arg1 += 3;
-        goto end_func1;
-    } else if (((arg1[0] | 0x20) == 'd') && ((arg1[1] | 0x20) == 'e') && ((arg1[2] | 0x20) == 'v')) { //"dev"
-        arg1 += 3;
-        goto end_func1;
-    } else
-        return 0;
-
-end_func1:
-    return ((*arg1 - 0x30 < 0x0b) ? 1 : 0); // '0' to '9' and ':'
-#endif
 	// Unofficial: Always succeed
 	return 0;
 }
@@ -547,6 +517,7 @@ ModuleInfo_t *do_load(char *filename, void *buffer, void *addr, int offset, int 
 	int state;
 
 	*result_out = 0;
+	// cppcheck-suppress knownConditionTrueFalse
 	if ( IsIllegalBootDevice(filename) )
 	{
 		*result_out = KE_ILLEGAL_OBJECT;
