@@ -22,6 +22,8 @@ static int *allocate_heap_buffer(unsigned int lower_bound, unsigned int upper_bo
 {
 	unsigned int upper_bound_rounded;
 
+	(void)lower_bound;
+
 	upper_bound_rounded = upper_bound;
 	// Align to 4 bytes
 	if ( (upper_bound_rounded & 3) != 0 )
@@ -306,6 +308,8 @@ static int fileio_reader_function(int fd, loadfile_allocate_handler_struct_t *al
 	loadfile_ee_elf_ringbuffer_content_t *rbc;
 	int read_res;
 
+	(void)userdata;
+
 	read_buffer_offset = allocate_info->read_buffer_offset;
 	rbc = &allocate_info->ring_buffer_contents[allocate_info->ring_buffer_index];
 	rbc->buffer_offset = read_buffer_offset;
@@ -414,6 +418,8 @@ static int elf_load_single_section(
 	loadfile_ee_elf_ringbuffer_content_t *rbc;
 	SifDmaTransfer_t dmat;
 	int state;
+
+	(void)epc;
 
 	shdr = NULL;
 	if ( read(flhs->fd, &flhs->elf_header, 0x34) != 0x34 )

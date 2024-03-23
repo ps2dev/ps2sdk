@@ -26,6 +26,9 @@ int _start(int argc, char *argv[])
 	int thid;
 	iop_thread_t thparam;
 
+	(void)argc;
+	(void)argv;
+
 	FlushDcache();
 	BootMode_3 = QueryBootMode(3);
 	if ( BootMode_3 )
@@ -63,6 +66,8 @@ static int *loadfile_modload(const struct _lf_module_load_arg *in_packet, int le
 {
 	const char *path;
 
+	(void)length;
+
 	path = in_packet->path;
 	if ( IsIllegalBootDevice(path) )
 	{
@@ -82,6 +87,8 @@ static int *loadfile_elfload(const struct _lf_elf_load_arg *in_packet, int lengt
 	const char *path;
 	int result_out;
 	int result_module_out;
+
+	(void)length;
 
 	path = in_packet->path;
 	if ( IsIllegalBootDevice(path) )
@@ -113,6 +120,8 @@ static int *loadfile_setaddr(const struct _lf_iop_val_arg *in_packet, int length
 	void *iop_addr;
 	int type;
 
+	(void)length;
+
 	iop_addr = (void *)in_packet->p.iop_addr;
 	type = in_packet->type;
 	printf("set val add %p type %x ", iop_addr, type);
@@ -139,6 +148,8 @@ static int *loadfile_getaddr(const struct _lf_iop_val_arg *in_packet, int length
 	void *iop_addr;
 	int type;
 
+	(void)length;
+
 	iop_addr = (void *)in_packet->p.iop_addr;
 	type = in_packet->type;
 	printf("get val add %p type %x ", iop_addr, type);
@@ -162,6 +173,8 @@ static int *loadfile_getaddr(const struct _lf_iop_val_arg *in_packet, int length
 
 static int *loadfile_mg_modload(const struct _lf_module_load_arg *in_packet, int length, int *outbuffer)
 {
+	(void)length;
+
 	outbuffer[0] = LoadStartKelfModule(in_packet->path, in_packet->p.arg_len, in_packet->args, &outbuffer[1]);
 	return outbuffer;
 }
@@ -170,6 +183,8 @@ static int *loadfile_mg_elfload(const struct _lf_elf_load_arg *in_packet, int le
 {
 	int result_out;
 	int result_module_out;
+
+	(void)length;
 
 	outbuffer[0] =
 		loadfile_mg_elfload_proc(in_packet->path, in_packet->epc, in_packet->secname, &result_out, &result_module_out);
@@ -190,6 +205,8 @@ static int *loadfile_mg_elfload(const struct _lf_elf_load_arg *in_packet, int le
 static int *loadfile_loadmodulebuffer(const struct _lf_module_buffer_load_arg *in_packet, int length, int *outbuffer)
 {
 	int ModuleBuffer;
+
+	(void)length;
 
 	printf("loadbuffer: addrres %x args %d arg %s\n", in_packet->p.result, in_packet->q.arg_len, in_packet->args);
 	ModuleBuffer = LoadModuleBuffer(in_packet->p.ptr);
