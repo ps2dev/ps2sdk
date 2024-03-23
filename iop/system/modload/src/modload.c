@@ -49,7 +49,7 @@ extern int ModuleLoaderThread(module_thread_args_t *mltargs);
 extern void *do_load_seek(const char *filename, int *result_out);
 extern ModuleInfo_t *do_load(const char *filename, void *buffer, void *addr, int offset, int *result_out);
 extern ModuleInfo_t *SearchModuleCBByID(int modid);
-extern int start_module(ModuleInfo_t *module_info, const char *data, size_t arglen, const char *args, int *result_out);
+extern int start_module(ModuleInfo_t *module_info, const char *data, int arglen, const char *args, int *result_out);
 extern ModuleInfo_t *allocate_link_module_info(void *buffer, void *addr, int offset, int *result_out);
 
 int _start(int argc, char *argv[])
@@ -447,7 +447,7 @@ int modload_post_boot_callback(iop_init_entry_t *next, int delayed)
 	return 0;
 }
 
-int start_module(ModuleInfo_t *module_info, const char *data, size_t arglen, const char *args, int *result_out)
+int start_module(ModuleInfo_t *module_info, const char *data, int arglen, const char *args, int *result_out)
 {
 	const char *args_ptr;
 	char *in_argv_strs_ptr;
@@ -616,7 +616,7 @@ ModuleInfo_t *allocate_link_module_info(void *buffer, void *addr, int offset, in
 		}
 		if ( addr && offset )
 		{
-			if ( QueryBlockTopAddress(addr) == addr && QueryBlockSize(addr) >= (unsigned int)(offset + 48) )
+			if ( QueryBlockTopAddress(addr) == addr && (unsigned int)QueryBlockSize(addr) >= (unsigned int)(offset + 48) )
 			{
 				fi.text_start = addr;
 			}
