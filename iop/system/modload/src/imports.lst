@@ -12,15 +12,15 @@ loadcore_IMPORTS_start
 I_GetLoadcoreInternalData
 I_FlushIcache
 I_RegisterLibraryEntries
-I_LinkImports
-I_UnlinkImports
+I_LinkLibraryEntries
+I_UnLinkLibraryEntries
 I_QueryBootMode
-I_LinkModule
-I_UnlinkModule
-I_RegisterPostBootCallback
+I_RegisterModule
+I_ReleaseModule
+I_AddRebootNotifyHandler
 I_SetCacheCtrl
-I_ReadModuleHeader
-I_LoadModuleImage
+I_ProbeExecutableObject
+I_LoadExecutableObject
 loadcore_IMPORTS_end
 
 sysclib_IMPORTS_start
