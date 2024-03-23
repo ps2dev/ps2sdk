@@ -443,10 +443,10 @@ static int modload_post_boot_callback(iop_init_entry_t *next, int delayed)
 			module_result =
 				((int (*)(int, char **, u32, ModuleInfo_t *))module_info->entry)(updater_argc, updater_argv, 0, module_info);
 			printf("return from updater '%s' return value = %d\n", updater_argv[0], module_result);
-			__asm("break\n");
+			__asm__ __volatile__("\tbreak\n");
 		}
 		printf("updater '%s' can't load\n", updater_argv[0]);
-		__asm("break\n");
+		__asm__ __volatile__("\tbreak\n");
 	}
 	printf("Reboot fail! need file name argument\n");
 	return 0;
