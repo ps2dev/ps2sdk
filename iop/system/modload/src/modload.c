@@ -39,93 +39,93 @@ typedef struct module_thread_args_
 	void *addr;
 	int offset;
 	int *result;
-	int *module_id;
+	int *ret_ptr;
 	s32 thread_ef;
 } module_thread_args_t;
 
 extern int modload_post_boot_callback(iop_init_entry_t *next, int delayed);
-extern void get_updater_boot_argument(char *a1, int *updater_argc, char **updater_argv, int updater_argv_count);
-extern int ModuleLoaderThread(module_thread_args_t *a1);
+extern void get_updater_boot_argument(char *str, int *updater_argc, char **updater_argv, int updater_argv_count);
+extern int ModuleLoaderThread(module_thread_args_t *mltargs);
 extern void *do_load_seek(const char *filename, int *result_out);
-extern ModuleInfo_t *do_load(char *filename, void *buffer, void *addr, int offset, int *result_out);
+extern ModuleInfo_t *do_load(const char *filename, void *buffer, void *addr, int offset, int *result_out);
 extern ModuleInfo_t *SearchModuleCBByID(int modid);
-extern int start_module(ModuleInfo_t *module_info, const char *data, size_t arglen, const char *args, int *result_2);
-extern ModuleInfo_t *do_load_noseek(void *buffer, void *addr, int offset, int *result_out);
+extern int start_module(ModuleInfo_t *module_info, const char *data, size_t arglen, const char *args, int *result_out);
+extern ModuleInfo_t *allocate_link_module_info(void *buffer, void *addr, int offset, int *result_out);
 
 int _start(int argc, char *argv[])
 {
-	iop_thread_t v3;
-	iop_sema_t v4;
-	iop_event_t v5;
+	iop_thread_t thparam;
+	iop_sema_t semaparam;
+	iop_event_t efparam;
 
 	if ( RegisterLibraryEntries(&_exp_modload) < 0 )
 	{
 		return 1;
 	}
 	{
-		int *BootMode;
+		int *BootMode_4;
 
-		BootMode = QueryBootMode(4);
-		if ( BootMode )
+		BootMode_4 = QueryBootMode(4);
+		if ( BootMode_4 )
 		{
-			if ( (((u32 *)BootMode)[0] & 0xff) == 2 )
+			if ( (((u32 *)BootMode_4)[0] & 0xff) == 2 )
 			{
 				RegisterPostBootCallback((BootupCallback_t)modload_post_boot_callback, 1, 0);
 			}
 		}
 	}
-	v3.attr = 0x2000000;
-	v3.thread = (void (*)(void *))ModuleLoaderThread;
-	v3.priority = 8;
-	v3.stacksize = 2048;
-	v3.option = 0;
-	modLoadCB = CreateThread(&v3);
-	v4.attr = 0;
-	v4.initial = 1;
-	v4.max = 1;
-	v4.option = 0;
-	ModuleLoaderMutex = CreateSema(&v4);
-	memset(&v5, 0, sizeof(v5));
-	ModuleLoaderSync = CreateEventFlag(&v5);
+	thparam.attr = 0x2000000;
+	thparam.thread = (void (*)(void *))ModuleLoaderThread;
+	thparam.priority = 8;
+	thparam.stacksize = 2048;
+	thparam.option = 0;
+	modLoadCB = CreateThread(&thparam);
+	semaparam.attr = 0;
+	semaparam.initial = 1;
+	semaparam.max = 1;
+	semaparam.option = 0;
+	ModuleLoaderMutex = CreateSema(&semaparam);
+	memset(&efparam, 0, sizeof(efparam));
+	ModuleLoaderSync = CreateEventFlag(&efparam);
 	return 0;
 }
 
-s32 ModuleThreadCmd(int command, void *data, void *buffer, void *addr, int offset)
+int ModuleThreadCmd(int command, void *data, void *buffer, void *addr, int offset)
 {
-	s32 result;
-	module_thread_args_t v10;
-	int v11;
-	u32 v12;
+	int retval;
+	module_thread_args_t mltargs;
+	int ret_tmp;
+	u32 efbits;
 
-	result = GetThreadId();
-	if ( result >= 0 )
+	retval = GetThreadId();
+	if ( retval < 0 )
 	{
-		v10.command = command;
-		v10.data = data;
-		v10.buffer = buffer;
-		v10.addr = addr;
-		v10.offset = offset;
-		v10.module_id = &v11;
-		if ( result == modLoadCB )
-		{
-			v10.thread_ef = 0;
-			ModuleLoaderThread(&v10);
-		}
-		else
-		{
-			v10.thread_ef = ModuleLoaderSync;
-			result = WaitSema(ModuleLoaderMutex);
-			if ( result < 0 )
-			{
-				return result;
-			}
-			StartThread(modLoadCB, &v10);
-			WaitEventFlag(ModuleLoaderSync, 1u, 17, &v12);
-			SignalSema(ModuleLoaderMutex);
-		}
-		return v11;
+		return retval;
 	}
-	return result;
+	mltargs.command = command;
+	mltargs.data = data;
+	mltargs.buffer = buffer;
+	mltargs.addr = addr;
+	mltargs.offset = offset;
+	mltargs.ret_ptr = &ret_tmp;
+	if ( retval == modLoadCB )
+	{
+		mltargs.thread_ef = 0;
+		ModuleLoaderThread(&mltargs);
+	}
+	else
+	{
+		mltargs.thread_ef = ModuleLoaderSync;
+		retval = WaitSema(ModuleLoaderMutex);
+		if ( retval < 0 )
+		{
+			return retval;
+		}
+		StartThread(modLoadCB, &mltargs);
+		WaitEventFlag(ModuleLoaderSync, 1u, 17, &efbits);
+		SignalSema(ModuleLoaderMutex);
+	}
+	return ret_tmp;
 }
 
 int LoadModuleAddress(const char *name, void *addr, int offset)
@@ -150,198 +150,200 @@ int LoadModuleBuffer(void *buffer)
 
 int LoadStartModule(const char *name, int arglen, const char *args, int *result)
 {
-	int ThreadId;
-	module_thread_args_t v9;
-	int v10;
-	u32 v11;
+	int retval;
+	module_thread_args_t mltargs;
+	int ret_tmp;
+	u32 efbits;
 
-	ThreadId = GetThreadId();
-	if ( ThreadId < 0 )
+	retval = GetThreadId();
+	if ( retval < 0 )
 	{
-		return ThreadId;
+		return retval;
 	}
-	v9.data = (void *)name;
-	v9.command = 3;
-	v9.buffer = 0;
-	v9.addr = 0;
-	v9.offset = 0;
-	v9.arglen = arglen;
-	v9.args = args;
-	v9.result = result;
-	v9.module_id = &v10;
-	if ( ThreadId == modLoadCB )
+	mltargs.data = (void *)name;
+	mltargs.command = 3;
+	mltargs.buffer = 0;
+	mltargs.addr = 0;
+	mltargs.offset = 0;
+	mltargs.arglen = arglen;
+	mltargs.args = args;
+	mltargs.result = result;
+	mltargs.ret_ptr = &ret_tmp;
+	if ( retval == modLoadCB )
 	{
-		v9.thread_ef = 0;
-		ModuleLoaderThread(&v9);
+		mltargs.thread_ef = 0;
+		ModuleLoaderThread(&mltargs);
 	}
 	else
 	{
-		v9.thread_ef = ModuleLoaderSync;
-		ThreadId = WaitSema(ModuleLoaderMutex);
-		if ( ThreadId < 0 )
+		mltargs.thread_ef = ModuleLoaderSync;
+		retval = WaitSema(ModuleLoaderMutex);
+		if ( retval < 0 )
 		{
-			return ThreadId;
+			return retval;
 		}
-		StartThread(modLoadCB, &v9);
-		WaitEventFlag(ModuleLoaderSync, 1u, 17, &v11);
+		StartThread(modLoadCB, &mltargs);
+		WaitEventFlag(ModuleLoaderSync, 1u, 17, &efbits);
 		SignalSema(ModuleLoaderMutex);
 	}
-	return v10;
+	return ret_tmp;
 }
 
 int StartModule(int modid, const char *name, int arglen, const char *args, int *result)
 {
-	int ThreadId;
-	module_thread_args_t v10;
-	int v11;
-	u32 v12;
+	int retval;
+	module_thread_args_t mltargs;
+	int ret_tmp;
+	u32 efbits;
 
-	ThreadId = GetThreadId();
-	if ( ThreadId < 0 )
+	retval = GetThreadId();
+	if ( retval < 0 )
 	{
-		return ThreadId;
+		return retval;
 	}
-	v10.command = 2;
-	v10.modid = modid;
-	v10.data = (void *)name;
-	v10.arglen = arglen;
-	v10.args = args;
-	v10.result = result;
-	v10.module_id = &v11;
-	if ( ThreadId == modLoadCB )
+	mltargs.command = 2;
+	mltargs.modid = modid;
+	mltargs.data = (void *)name;
+	mltargs.arglen = arglen;
+	mltargs.args = args;
+	mltargs.result = result;
+	mltargs.ret_ptr = &ret_tmp;
+	if ( retval == modLoadCB )
 	{
-		v10.thread_ef = 0;
-		ModuleLoaderThread(&v10);
+		mltargs.thread_ef = 0;
+		ModuleLoaderThread(&mltargs);
 	}
 	else
 	{
-		v10.thread_ef = ModuleLoaderSync;
-		ThreadId = WaitSema(ModuleLoaderMutex);
-		if ( ThreadId < 0 )
+		mltargs.thread_ef = ModuleLoaderSync;
+		retval = WaitSema(ModuleLoaderMutex);
+		if ( retval < 0 )
 		{
-			return ThreadId;
+			return retval;
 		}
-		StartThread(modLoadCB, &v10);
-		WaitEventFlag(ModuleLoaderSync, 1u, 17, &v12);
+		StartThread(modLoadCB, &mltargs);
+		WaitEventFlag(ModuleLoaderSync, 1u, 17, &efbits);
 		SignalSema(ModuleLoaderMutex);
 	}
-	return v11;
+	return ret_tmp;
 }
 
 int LoadStartKelfModule(const char *name, int arglen, const char *args, int *result)
 {
-	void *v8;
-	void *v9;
+	void *iop_exec_buffer;
+	void *iop_exec_encrypted_buffer;
 	int ModuleBuffer;
 	int started;
-	int v13;
-	int v14;
+	int card_port;
+	int card_slot;
 	int state;
 
-	v8 = 0;
-	v9 = do_load_seek(name, &started);
-	if ( v9 == 0 )
+	iop_exec_buffer = 0;
+	iop_exec_encrypted_buffer = do_load_seek(name, &started);
+	if ( iop_exec_encrypted_buffer == 0 )
 	{
 		return started;
 	}
-	if ( CheckKelfPath_func_ptr && CheckKelfPath_func_ptr(name, &v13, &v14) )
+	if ( CheckKelfPath_func_ptr && CheckKelfPath_func_ptr(name, &card_port, &card_slot) )
 	{
 		if ( SecrCardBootFile_func_ptr )
 		{
-			v8 = SecrCardBootFile_func_ptr(v13, v14, v9);
+			iop_exec_buffer = SecrCardBootFile_func_ptr(card_port, card_slot, iop_exec_encrypted_buffer);
 		}
 	}
 	else if ( SecrDiskBootFile_func_ptr )
 	{
-		v8 = SecrDiskBootFile_func_ptr(v9);
+		iop_exec_buffer = SecrDiskBootFile_func_ptr(iop_exec_encrypted_buffer);
 	}
-	if ( !v8 )
+	if ( !iop_exec_buffer )
 	{
 		CpuSuspendIntr(&state);
-		FreeSysMemory(v9);
+		FreeSysMemory(iop_exec_encrypted_buffer);
 		CpuResumeIntr(state);
 		return KE_ILLEGAL_OBJECT;
 	}
-	ModuleBuffer = LoadModuleBuffer(v8);
+	ModuleBuffer = LoadModuleBuffer(iop_exec_buffer);
 	started = ModuleBuffer;
 	if ( ModuleBuffer > 0 )
 	{
 		started = StartModule(ModuleBuffer, name, arglen, args, result);
 	}
 	CpuSuspendIntr(&state);
-	FreeSysMemory(v9);
+	FreeSysMemory(iop_exec_encrypted_buffer);
 	CpuResumeIntr(state);
 	return started;
 }
 
-int ModuleLoaderThread(module_thread_args_t *a1)
+int ModuleLoaderThread(module_thread_args_t *mltargs)
 {
-	int command;
-	ModuleInfo_t *v3;
-	int v4;
-	ModuleInfo_t *v5;
-	ModuleInfo_t *v6;
-	int v8[2];
+	ModuleInfo_t *mi;
+	int res_tmp;
 
-	command = a1->command;
-	if ( command == 1 )
+	switch ( mltargs->command )
 	{
-		v3 = do_load((char *)a1->data, 0, a1->addr, a1->offset, v8);
-		v4 = v8[0];
-		if ( v8[0] )
+		case 1:
 		{
-			*a1->module_id = v4;
+			mi = do_load((char *)mltargs->data, 0, mltargs->addr, mltargs->offset, &res_tmp);
+			if ( res_tmp )
+			{
+				*mltargs->ret_ptr = res_tmp;
+			}
+			else
+			{
+				*mltargs->ret_ptr = mi->id;
+			}
+			break;
 		}
-		else
+		case 2:
 		{
-			*a1->module_id = v3->id;
+			mi = SearchModuleCBByID(mltargs->modid);
+			if ( !mi )
+			{
+				*mltargs->ret_ptr = KE_UNKNOWN_MODULE;
+			}
+			else
+			{
+				*mltargs->ret_ptr = mi->id;
+				start_module(mi, (const char *)mltargs->data, mltargs->arglen, mltargs->args, mltargs->result);
+			}
+			break;
+		}
+		case 3:
+		{
+			mi = do_load((char *)mltargs->data, 0, mltargs->addr, mltargs->offset, &res_tmp);
+			if ( res_tmp )
+			{
+				*mltargs->ret_ptr = res_tmp;
+			}
+			else
+			{
+				*mltargs->ret_ptr = mi->id;
+				start_module(mi, (const char *)mltargs->data, mltargs->arglen, mltargs->args, mltargs->result);
+			}
+			break;
+		}
+		case 4:
+		{
+			mi = do_load(0, mltargs->buffer, mltargs->addr, mltargs->offset, &res_tmp);
+			if ( res_tmp )
+			{
+				*mltargs->ret_ptr = res_tmp;
+			}
+			else
+			{
+				*mltargs->ret_ptr = mi->id;
+			}
+			break;
+		}
+		default:
+		{
+			break;
 		}
 	}
-	if ( command == 2 )
-	{
-		v5 = SearchModuleCBByID(a1->modid);
-		if ( !v5 )
-		{
-			*a1->module_id = KE_UNKNOWN_MODULE;
-		}
-		else
-		{
-			*a1->module_id = v5->id;
-			start_module(v5, (const char *)a1->data, a1->arglen, a1->args, a1->result);
-		}
-	}
-	if ( command == 3 )
-	{
-		v6 = do_load((char *)a1->data, 0, a1->addr, a1->offset, v8);
-		v4 = v8[0];
-		v5 = v6;
-		if ( v8[0] )
-		{
-			*a1->module_id = v4;
-		}
-		else
-		{
-			*a1->module_id = v5->id;
-			start_module(v5, (const char *)a1->data, a1->arglen, a1->args, a1->result);
-		}
-	}
-	if ( command == 4 )
-	{
-		v3 = do_load(0, a1->buffer, a1->addr, a1->offset, v8);
-		v4 = v8[0];
-		if ( v8[0] )
-		{
-			*a1->module_id = v4;
-		}
-		else
-		{
-			*a1->module_id = v3->id;
-		}
-	}
-	if ( a1->thread_ef )
+	if ( mltargs->thread_ef )
 	{
 		ChangeThreadPriority(0, 1);
-		SetEventFlag(a1->thread_ef, 1u);
+		SetEventFlag(mltargs->thread_ef, 1u);
 	}
 	return 0;
 }
@@ -365,25 +367,25 @@ ModuleInfo_t *SearchModuleCBByID(int modid)
 int modload_post_boot_callback(iop_init_entry_t *next, int delayed)
 {
 	void *iop_exec_buffer;
-	int v3;
-	int *BootMode;
-	int *v5;
+	int reboot_type;
+	int *BootMode_4;
+	int *BootMode_5;
 	int updater_argc;
-	int v11;
-	int v12;
-	int v13;
+	int module_result;
+	int card_port;
+	int card_slot;
 	int state;
 
 	iop_exec_buffer = 0;
-	v3 = 0;
-	BootMode = QueryBootMode(4);
-	if ( BootMode )
+	reboot_type = 0;
+	BootMode_4 = QueryBootMode(4);
+	if ( BootMode_4 )
 	{
 		// See reboot_start_proc for when this variable gets set
-		v3 = (((u32 *)BootMode)[0] >> 8) & 0xff;
+		reboot_type = (((u32 *)BootMode_4)[0] >> 8) & 0xff;
 	}
-	v5 = QueryBootMode(5);
-	if ( v5 )
+	BootMode_5 = QueryBootMode(5);
+	if ( BootMode_5 )
 	{
 		ModuleInfo_t *module_info;
 		char *updater_argv[16];
@@ -391,23 +393,23 @@ int modload_post_boot_callback(iop_init_entry_t *next, int delayed)
 		memset(updater_argv, 0, sizeof(updater_argv));
 		module_info = 0;
 		get_updater_boot_argument(
-			(char *)v5[1], &updater_argc, updater_argv, (sizeof(updater_argv) / sizeof(updater_argv[0])) - 1);
-		if ( v3 == 0 )
+			(char *)BootMode_5[1], &updater_argc, updater_argv, (sizeof(updater_argv) / sizeof(updater_argv[0])) - 1);
+		if ( reboot_type == 0 )
 		{
-			module_info = do_load(updater_argv[0], 0, (void *)0x100000, 0, &v11);
+			module_info = do_load(updater_argv[0], 0, (void *)0x100000, 0, &module_result);
 		}
-		else if ( v3 == 1 )
+		else if ( reboot_type == 1 )
 		{
 			void *iop_exec_encrypted_buffer;
 
-			iop_exec_encrypted_buffer = do_load_seek(updater_argv[0], &v11);
+			iop_exec_encrypted_buffer = do_load_seek(updater_argv[0], &module_result);
 			if ( iop_exec_encrypted_buffer )
 			{
-				if ( CheckKelfPath_func_ptr && CheckKelfPath_func_ptr(updater_argv[0], &v12, &v13) )
+				if ( CheckKelfPath_func_ptr && CheckKelfPath_func_ptr(updater_argv[0], &card_port, &card_slot) )
 				{
 					if ( SecrCardBootFile_func_ptr )
 					{
-						iop_exec_buffer = SecrCardBootFile_func_ptr(v12, v13, iop_exec_encrypted_buffer);
+						iop_exec_buffer = SecrCardBootFile_func_ptr(card_port, card_slot, iop_exec_encrypted_buffer);
 					}
 				}
 				else if ( SecrDiskBootFile_func_ptr )
@@ -416,11 +418,11 @@ int modload_post_boot_callback(iop_init_entry_t *next, int delayed)
 				}
 				if ( iop_exec_buffer )
 				{
-					module_info = do_load_noseek(iop_exec_buffer, (void *)0x100000, 0, &v11);
+					module_info = allocate_link_module_info(iop_exec_buffer, (void *)0x100000, 0, &module_result);
 				}
 				else
 				{
-					v11 = -1;
+					module_result = -1;
 				}
 				CpuSuspendIntr(&state);
 				FreeSysMemory(iop_exec_encrypted_buffer);
@@ -429,13 +431,13 @@ int modload_post_boot_callback(iop_init_entry_t *next, int delayed)
 		}
 		else
 		{
-			v11 = -1;
+			module_result = -1;
 		}
-		if ( v11 == 0 )
+		if ( module_result == 0 )
 		{
-			v11 =
+			module_result =
 				((int (*)(int, char **, u32, ModuleInfo_t *))module_info->entry)(updater_argc, updater_argv, 0, module_info);
-			printf("return from updater '%s' return value = %d\n", updater_argv[0], v11);
+			printf("return from updater '%s' return value = %d\n", updater_argv[0], module_result);
 			__asm("break\n");
 		}
 		printf("updater '%s' can't load\n", updater_argv[0]);
@@ -445,12 +447,12 @@ int modload_post_boot_callback(iop_init_entry_t *next, int delayed)
 	return 0;
 }
 
-int start_module(ModuleInfo_t *module_info, const char *data, size_t arglen, const char *args, int *result_2)
+int start_module(ModuleInfo_t *module_info, const char *data, size_t arglen, const char *args, int *result_out)
 {
-	const char *v9;
-	char *v10;
+	const char *args_ptr;
+	char *in_argv_strs_ptr;
 	int in_argc;
-	int v17;
+	int module_result;
 	int data_strlen;
 	int in_argv_size_strs;
 	char *in_argv_strs;
@@ -460,11 +462,11 @@ int start_module(ModuleInfo_t *module_info, const char *data, size_t arglen, con
 	in_argc = 1;
 	data_strlen = strlen(data) + 1;
 	in_argv_size_strs = data_strlen;
-	for ( v9 = args; v9 < &args[arglen]; )
+	for ( args_ptr = args; args_ptr < &args[arglen]; )
 	{
-		int str_len = strlen(v9) + 1;
+		int str_len = strlen(args_ptr) + 1;
 		in_argv_size_strs += str_len;
-		v9 += str_len;
+		args_ptr += str_len;
 		in_argc += 1;
 	}
 	if ( in_argv_size_strs < data_strlen + arglen )
@@ -475,29 +477,30 @@ int start_module(ModuleInfo_t *module_info, const char *data, size_t arglen, con
 	memcpy(in_argv_strs, data, data_strlen);
 	memcpy(in_argv_strs + data_strlen, args, arglen);
 	in_argv_ptrs = __builtin_alloca((in_argc + 1) * sizeof(char *));
-	for ( i = 0, v10 = in_argv_strs; i < in_argc && v10 < &in_argv_strs[in_argv_size_strs]; )
+	for ( i = 0, in_argv_strs_ptr = in_argv_strs; i < in_argc && in_argv_strs_ptr < &in_argv_strs[in_argv_size_strs]; )
 	{
-		int str_len = strlen(v10) + 1;
-		in_argv_ptrs[i] = v10;
+		int str_len = strlen(in_argv_strs_ptr) + 1;
+		in_argv_ptrs[i] = in_argv_strs_ptr;
 		i += 1;
-		v10 += str_len;
+		in_argv_strs_ptr += str_len;
 	}
 	in_argv_ptrs[in_argc] = NULL;
-	v17 = ((int (*)(int, char **, u32, ModuleInfo_t *))module_info->entry)(in_argc, in_argv_ptrs, 0, module_info);
+	module_result =
+		((int (*)(int, char **, u32, ModuleInfo_t *))module_info->entry)(in_argc, in_argv_ptrs, 0, module_info);
 	ChangeThreadPriority(0, 8);
-	if ( result_2 )
+	if ( result_out )
 	{
-		*result_2 = v17;
+		*result_out = module_result;
 	}
-	if ( (v17 & 3) != 0 )
+	if ( (module_result & 3) != 0 )
 	{
-		int last_intr;
+		int state;
 
-		CpuSuspendIntr(&last_intr);
+		CpuSuspendIntr(&state);
 		UnlinkImports((void *)module_info->text_start, module_info->text_size);
 		UnlinkModule(module_info);
 		FreeSysMemory((void *)((unsigned int)module_info >> 8 << 8));
-		CpuResumeIntr(last_intr);
+		CpuResumeIntr(state);
 		return 0;
 	}
 	return 0;
@@ -509,10 +512,10 @@ int IsIllegalBootDevice(const char *arg1)
 	return 0;
 }
 
-ModuleInfo_t *do_load(char *filename, void *buffer, void *addr, int offset, int *result_out)
+ModuleInfo_t *do_load(const char *filename, void *buffer, void *addr, int offset, int *result_out)
 {
 	void *seek;
-	void *v11;
+	void *iop_exec_buffer;
 	ModuleInfo_t *ExecutableObject;
 	int state;
 
@@ -527,17 +530,17 @@ ModuleInfo_t *do_load(char *filename, void *buffer, void *addr, int offset, int 
 	if ( filename )
 	{
 		seek = do_load_seek(filename, result_out);
-		v11 = seek;
+		iop_exec_buffer = seek;
 	}
 	else
 	{
-		v11 = buffer;
+		iop_exec_buffer = buffer;
 	}
-	if ( v11 == 0 )
+	if ( iop_exec_buffer == 0 )
 	{
 		return 0;
 	}
-	ExecutableObject = do_load_noseek(v11, addr, offset, result_out);
+	ExecutableObject = allocate_link_module_info(iop_exec_buffer, addr, offset, result_out);
 	if ( seek )
 	{
 		CpuSuspendIntr(&state);
@@ -549,199 +552,166 @@ ModuleInfo_t *do_load(char *filename, void *buffer, void *addr, int offset, int 
 
 void *do_load_seek(const char *filename, int *result_out)
 {
-	int v3;
-	int v4;
-	void *v6;
-	int state[2];
+	int fd;
+	int file_size;
+	void *buffer;
+	int state;
 
 	*result_out = 0;
-	v3 = open(filename, 1);
-	if ( v3 < 0 )
+	fd = open(filename, 1);
+	if ( fd < 0 )
 	{
 		*result_out = KE_NOFILE;
 		return 0;
 	}
-	v4 = lseek(v3, 0, 2);
-	if ( v4 <= 0 )
+	file_size = lseek(fd, 0, 2);
+	if ( file_size <= 0 )
 	{
 		*result_out = KE_FILEERR;
-		close(v3);
+		close(fd);
 		return 0;
 	}
-	CpuSuspendIntr(state);
-	v6 = AllocSysMemory(1, v4, 0);
-	CpuResumeIntr(state[0]);
-	if ( !v6 )
+	CpuSuspendIntr(&state);
+	buffer = AllocSysMemory(1, file_size, 0);
+	CpuResumeIntr(state);
+	if ( !buffer )
 	{
 		*result_out = KE_NO_MEMORY;
-		close(v3);
+		close(fd);
 		return 0;
 	}
-	lseek(v3, 0, 0);
-	if ( read(v3, v6, v4) == v4 )
+	lseek(fd, 0, 0);
+	if ( read(fd, buffer, file_size) != file_size )
 	{
-		close(v3);
-		return v6;
+		*result_out = KE_FILEERR;
+		close(fd);
+		CpuSuspendIntr(&state);
+		FreeSysMemory(buffer);
+		CpuResumeIntr(state);
+		return 0;
 	}
-	*result_out = KE_FILEERR;
-	close(v3);
-	CpuSuspendIntr(state);
-	FreeSysMemory(v6);
-	CpuResumeIntr(state[0]);
-	return 0;
+	close(fd);
+	return buffer;
 }
 
-ModuleInfo_t *do_load_noseek(void *buffer, void *addr, int offset, int *result_out)
+ModuleInfo_t *allocate_link_module_info(void *buffer, void *addr, int offset, int *result_out)
 {
-	ModuleInfo_t *v8;
-	int v9;
-	char *v10;
-	void *v11;
-	void *v12;
-	int v13;
-	u32 MemSize;
-	void *v15;
-	FileInfo_t v17;
+	ModuleInfo_t *mi;
+	int executable_type;
+	char *allocaddr1;
+	FileInfo_t fi;
 	int state;
 
-	v8 = 0;
 	CpuSuspendIntr(&state);
-	v9 = ReadModuleHeader(buffer, &v17);
-	if ( v9 == 2 || v9 == 4 )
+	executable_type = ReadModuleHeader(buffer, &fi);
+	if ( executable_type == 2 || executable_type == 4 )
 	{
+		int position;
+
 		// Relocatable IRX.
-		v13 = 0;
+		position = 0;
 		if ( addr )
 		{
-			v13 = 2;
-			if ( offset )
+			position = 2;
+		}
+		if ( addr && offset )
+		{
+			if ( QueryBlockTopAddress(addr) == addr && QueryBlockSize(addr) >= (unsigned int)(offset + 48) )
 			{
-				if ( QueryBlockTopAddress(addr) == addr && QueryBlockSize(addr) >= (unsigned int)(offset + 48) )
-				{
-					v17.text_start = addr;
-				}
-				else
-				{
-					v17.text_start = 0;
-				}
-				goto LABEL_20;
+				fi.text_start = addr;
 			}
-			MemSize = v17.MemSize;
-			v15 = addr;
+			else
+			{
+				fi.text_start = 0;
+			}
 		}
 		else
 		{
-			MemSize = v17.MemSize;
-			v15 = 0;
+			fi.text_start = AllocSysMemory(position, fi.MemSize + 0x30, addr);
 		}
-		v17.text_start = AllocSysMemory(v13, MemSize + 0x30, v15);
-	LABEL_20:
-		if ( !v17.text_start )
+		if ( !fi.text_start )
 		{
 			*result_out = KE_NO_MEMORY;
-			goto LABEL_26;
+			CpuResumeIntr(state);
+			return NULL;
 		}
-		v17.text_start = (char *)v17.text_start + 0x30;
-		v12 = buffer;
+		fi.text_start = (char *)fi.text_start + 0x30;
 	}
-	else if ( v9 == 1 || v9 == 3 )
+	else if ( executable_type == 1 || executable_type == 3 )
 	{
 		// Fixed COFF or ELF.
-		v10 = (char *)((((unsigned int)v17.text_start - 48) >> 8 << 8) & 0x1FFFFFFF);
-		v11 = AllocSysMemory(2, (char *)v17.text_start + v17.MemSize - v10, v10);
-		v12 = buffer;
-		if ( !v11 )
+		allocaddr1 = (char *)((((unsigned int)fi.text_start - 48) >> 8 << 8) & 0x1FFFFFFF);
+		if ( AllocSysMemory(2, (char *)fi.text_start + fi.MemSize - allocaddr1, allocaddr1) == NULL )
 		{
-			if ( (int)QueryBlockTopAddress(v10) > 0 )
+			if ( (int)QueryBlockTopAddress(allocaddr1) > 0 )
 			{
 				*result_out = KE_MEMINUSE;
-				goto LABEL_26;
+				CpuResumeIntr(state);
+				return NULL;
 			}
 			*result_out = KE_NO_MEMORY;
-			goto LABEL_26;
+			CpuResumeIntr(state);
+			return NULL;
 		}
 	}
 	else
 	{
 		*result_out = KE_ILLEGAL_OBJECT;
-		goto LABEL_26;
+		CpuResumeIntr(state);
+		return NULL;
 	}
-	LoadModuleImage(v12, &v17);
-	if ( LinkImports(v17.text_start, v17.text_size) >= 0 )
+	LoadModuleImage(buffer, &fi);
+	if ( LinkImports(fi.text_start, fi.text_size) < 0 )
 	{
-		FlushIcache();
-		v8 = (ModuleInfo_t *)((char *)v17.text_start - 48);
-		LinkModule((ModuleInfo_t *)v17.text_start - 1);
-	}
-	else
-	{
-		FreeSysMemory((void *)(((unsigned int)v17.text_start - 48) >> 8 << 8));
+		FreeSysMemory((void *)(((unsigned int)fi.text_start - 48) >> 8 << 8));
 		*result_out = KE_LINKERR;
+		CpuResumeIntr(state);
+		return NULL;
 	}
-LABEL_26:
+	FlushIcache();
+	mi = (ModuleInfo_t *)((char *)fi.text_start - 48);
+	LinkModule((ModuleInfo_t *)fi.text_start - 1);
 	CpuResumeIntr(state);
-	return v8;
+	return mi;
 }
 
-char *get_next_non_whitespace_string(char *a1)
+char *get_next_non_whitespace_string(char *str)
 {
 	for ( ;; )
 	{
-		if ( *a1 != ' ' && *a1 != '\t' )
+		if ( *str != ' ' && *str != '\t' && *str != '\n' )
 		{
-			if ( *a1 != '\n' )
-			{
-				return a1;
-			}
+			return str;
 		}
-		*a1++ = 0;
+		*str = 0;
+		str += 1;
 	}
 }
 
-char *get_non_null_string(char *a1)
+char *get_non_null_string(char *str)
 {
-	if ( *a1 && *a1 != ' ' && *a1 != '\t' )
+	while ( *str && *str != ' ' && *str != '\t' && *str != '\n' )
 	{
-		int v3;
-
-		do
-		{
-			if ( *a1 == '\n' )
-			{
-				break;
-			}
-			v3 = *++a1;
-			if ( !*a1 )
-			{
-				break;
-			}
-			if ( v3 == ' ' )
-			{
-				break;
-			}
-		} while ( v3 != '\t' );
+		str += 1;
 	}
-	return a1;
+	return str;
 }
 
-void get_updater_boot_argument(char *a1, int *updater_argc, char **updater_argv, int updater_argv_count)
+void get_updater_boot_argument(char *str, int *updater_argc, char **updater_argv, int updater_argv_count)
 {
 	char *next_non_whitespace_string;
-	int v9;
+	int updater_argc_cur;
 
-	next_non_whitespace_string = get_next_non_whitespace_string(a1);
-	v9 = 0;
-	while ( *next_non_whitespace_string )
+	next_non_whitespace_string = get_next_non_whitespace_string(str);
+	updater_argc_cur = 0;
+	while ( *next_non_whitespace_string && updater_argc_cur < updater_argv_count )
 	{
 		char *non_null_string;
 
-		if ( v9 >= updater_argv_count )
-		{
-			break;
-		}
-		*updater_argv++ = next_non_whitespace_string;
+		*updater_argv = next_non_whitespace_string;
+		updater_argv += 1;
 		non_null_string = get_non_null_string(next_non_whitespace_string);
-		++v9;
+		updater_argc_cur += 1;
 		if ( !*non_null_string )
 		{
 			break;
@@ -749,7 +719,7 @@ void get_updater_boot_argument(char *a1, int *updater_argc, char **updater_argv,
 		*non_null_string = 0;
 		next_non_whitespace_string = get_next_non_whitespace_string(non_null_string + 1);
 	}
-	*updater_argc = v9;
+	*updater_argc = updater_argc_cur;
 }
 
 void SetSecrmanCallbacks(
@@ -791,6 +761,7 @@ static struct ssbus_regs ssbus_regs[] = {
 	{NULL, NULL}};
 
 // Pulled from UDNL
+// cppcheck-suppress constParameterPointer
 static volatile unsigned int *func_00000f80(volatile unsigned int *address)
 {
 	struct ssbus_regs *pSSBUS_regs;
@@ -808,7 +779,7 @@ static volatile unsigned int *func_00000f80(volatile unsigned int *address)
 
 static const void *GetFileDataFromImage(const void *start, const void *end, const char *filename);
 
-static void my_strcpy(char *dst, const char *src)
+static void ml_strcpy(char *dst, const char *src)
 {
 	while ( *src )
 	{
@@ -821,7 +792,7 @@ static int reboot_start_proc(const char *command, unsigned int flags)
 {
 	// Pulled from UDNL
 	{
-		lc_internals_t *LoadcoreData;
+		const lc_internals_t *LoadcoreData;
 		iop_library_t *ModuleData, *NextModule;
 		void **ExportTable;
 		unsigned int enable_debug;
@@ -885,25 +856,25 @@ static int reboot_start_proc(const char *command, unsigned int flags)
 	{
 		const char *iopboot_entrypoint;
 		u32 ram_size_in_mb;
-		int v18;
+		int flagstmp;
 		char *command_ptr;
 
 		iopboot_entrypoint = GetFileDataFromImage((const void *)0xBFC00000, (const void *)0xBFC10000, "IOPBOOT");
 		// Unofficial: Check if command is NULL befire checking its contents
 		if ( command && command[0] )
 		{
-			my_strcpy((char *)0x480, command);
+			ml_strcpy((char *)0x480, command);
 			ram_size_in_mb = (QueryMemSize() + 0x100) >> 20;
-			v18 = (flags & 0xFF00) | 2;
+			flagstmp = (flags & 0xFF00) | 2;
 			command_ptr = (char *)0x480;
 		}
 		else
 		{
 			ram_size_in_mb = (QueryMemSize() + 0x100) >> 20;
-			v18 = 1;
+			flagstmp = 1;
 			command_ptr = 0;
 		}
-		return ((int (*)(u32, int, char *, u32))iopboot_entrypoint)(ram_size_in_mb, v18, command_ptr, 0);
+		return ((int (*)(u32, int, char *, u32))iopboot_entrypoint)(ram_size_in_mb, flagstmp, command_ptr, 0);
 	}
 }
 
