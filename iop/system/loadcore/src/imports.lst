@@ -1,0 +1,8 @@
+
+sysmem_IMPORTS_start
+I_AllocSysMemory
+I_FreeSysMemory
+I_QueryMemSize
+I_QueryBlockTopAddress
+I_QueryBlockSize
+sysmem_IMPORTS_end

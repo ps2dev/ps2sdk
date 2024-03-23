@@ -135,8 +135,8 @@ void *QueryLibraryEntryTable(iop_library_t *library);
 int * QueryBootMode(int mode);
 void RegisterBootMode(iop_bootmode_t *b);
 
-int LockLibraryClient(struct irx_export_table *export);
-int UnLockLibraryClient(struct irx_export_table *export);
+void LockLibraryClient(struct irx_export_table *export);
+void UnLockLibraryClient(struct irx_export_table *export);
 
 void RegisterModule(ModuleInfo_t *mi);
 void ReleaseModule(ModuleInfo_t *mi);
