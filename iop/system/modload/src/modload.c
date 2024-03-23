@@ -73,7 +73,7 @@ int _start(int argc, char *argv[])
 		{
 			if ( (((u32 *)BootMode_4)[0] & 0xff) == 2 )
 			{
-				RegisterPostBootCallback((BootupCallback_t)modload_post_boot_callback, 1, 0);
+				AddRebootNotifyHandler((BootupCallback_t)modload_post_boot_callback, 1, 0);
 			}
 		}
 	}
@@ -502,8 +502,8 @@ static void start_module(ModuleInfo_t *module_info, const char *data, int arglen
 		int state;
 
 		CpuSuspendIntr(&state);
-		UnlinkImports((void *)module_info->text_start, module_info->text_size);
-		UnlinkModule(module_info);
+		UnLinkLibraryEntries((void *)module_info->text_start, module_info->text_size);
+		ReleaseModule(module_info);
 		FreeSysMemory((void *)((unsigned int)module_info >> 8 << 8));
 		CpuResumeIntr(state);
 	}
@@ -608,7 +608,7 @@ static ModuleInfo_t *allocate_link_module_info(void *buffer, void *addr, int off
 	int state;
 
 	CpuSuspendIntr(&state);
-	executable_type = ReadModuleHeader(buffer, &fi);
+	executable_type = ProbeExecutableObject(buffer, &fi);
 	if ( executable_type == 2 || executable_type == 4 )
 	{
 		int position;
@@ -665,8 +665,8 @@ static ModuleInfo_t *allocate_link_module_info(void *buffer, void *addr, int off
 		CpuResumeIntr(state);
 		return NULL;
 	}
-	LoadModuleImage(buffer, &fi);
-	if ( LinkImports(fi.text_start, fi.text_size) < 0 )
+	LoadExecutableObject(buffer, &fi);
+	if ( LinkLibraryEntries(fi.text_start, fi.text_size) < 0 )
 	{
 		FreeSysMemory((void *)(((unsigned int)fi.text_start - 48) >> 8 << 8));
 		*result_out = KE_LINKERR;
@@ -675,7 +675,7 @@ static ModuleInfo_t *allocate_link_module_info(void *buffer, void *addr, int off
 	}
 	FlushIcache();
 	mi = (ModuleInfo_t *)((char *)fi.text_start - 48);
-	LinkModule((ModuleInfo_t *)fi.text_start - 1);
+	RegisterModule((ModuleInfo_t *)fi.text_start - 1);
 	CpuResumeIntr(state);
 	return mi;
 }
