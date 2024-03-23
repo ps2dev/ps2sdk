@@ -8,7 +8,7 @@
 
 IOP_BIN ?= modload.irx
 
-IOP_OBJS = modload.o modload_asm.o imports.o exports.o
+IOP_OBJS = modload.o imports.o exports.o
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make

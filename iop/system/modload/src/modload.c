@@ -884,8 +884,21 @@ static int reboot_start_proc(const char *command, unsigned int flags)
 }
 
 // Exactly the same function as INTRMAN's export 14.
-// Defined in modload_asm.S
 extern int CpuExecuteKmode(void *func, ...);
+
+// clang-format off
+__asm__ (
+	"\t" ".set push" "\n"
+	"\t" ".set noat" "\n"
+	"\t" ".set noreorder" "\n"
+	"\t" "CpuExecuteKmode:" "\n"
+	"\t" "  addiu       $v0, $zero, 0x0C" "\n"
+	"\t" "  syscall     0" "\n"
+	"\t" "  jr          $ra" "\n"
+	"\t" "   nop" "\n"
+	"\t" ".set pop" "\n"
+);
+// clang-format on
 
 int ReBootStart(const char *command, unsigned int flags)
 {
