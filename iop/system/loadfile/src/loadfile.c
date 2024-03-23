@@ -18,50 +18,50 @@ IRX_ID("LoadModuleByEE", 0, 0);
 #endif
 // Mostly based on the module from SCE SDK 1.3.4, with additions from 110U ROM.
 
-static void loadfile_rpc_start_thread(void *param);
+static void loadfile_rpc_service_thread(void *param);
 
 int _start(int argc, char *argv[])
 {
-	int *BootMode;
-	int thread_id;
-	iop_thread_t thread_param;
+	const int *BootMode_3;
+	int thid;
+	iop_thread_t thparam;
 
 	FlushDcache();
-	BootMode = QueryBootMode(3);
-	if ( BootMode )
+	BootMode_3 = QueryBootMode(3);
+	if ( BootMode_3 )
 	{
-		int iop_boot_param;
+		int BootMode_3_1;
 
-		iop_boot_param = BootMode[1];
-		if ( (iop_boot_param & 1) != 0 )
+		BootMode_3_1 = BootMode_3[1];
+		if ( (BootMode_3_1 & 1) != 0 )
 		{
 			printf(" No SIF service(loadfile)\n");
 			return MODULE_NO_RESIDENT_END;
 		}
-		if ( (iop_boot_param & 2) != 0 )
+		if ( (BootMode_3_1 & 2) != 0 )
 		{
 			printf(" No LoadFile service\n");
 			return MODULE_NO_RESIDENT_END;
 		}
 	}
 	CpuEnableIntr();
-	thread_param.attr = 0x2000000;
-	thread_param.thread = loadfile_rpc_start_thread;
-	thread_param.priority = 88;
-	thread_param.stacksize = 4096;
-	thread_param.option = 0;
-	thread_id = CreateThread(&thread_param);
-	if ( thread_id <= 0 )
+	thparam.attr = 0x2000000;
+	thparam.thread = loadfile_rpc_service_thread;
+	thparam.priority = 88;
+	thparam.stacksize = 4096;
+	thparam.option = 0;
+	thid = CreateThread(&thparam);
+	if ( thid <= 0 )
 	{
 		return MODULE_NO_RESIDENT_END;
 	}
-	StartThread(thread_id, 0);
+	StartThread(thid, 0);
 	return MODULE_RESIDENT_END;
 }
 
-static int *loadfile_modload(struct _lf_module_load_arg *in_packet, int length, int *outbuffer)
+static int *loadfile_modload(const struct _lf_module_load_arg *in_packet, int length, int *outbuffer)
 {
-	char *path;
+	const char *path;
 
 	path = in_packet->path;
 	if ( IsIllegalBootDevice(path) )
@@ -77,11 +77,11 @@ static int *loadfile_modload(struct _lf_module_load_arg *in_packet, int length, 
 	return outbuffer;
 }
 
-static int *loadfile_elfload(struct _lf_elf_load_arg *in_packet, int length, int *outbuffer)
+static int *loadfile_elfload(const struct _lf_elf_load_arg *in_packet, int length, int *outbuffer)
 {
-	char *path;
-	int v5;
-	int v6;
+	const char *path;
+	int result_out;
+	int result_module_out;
 
 	path = in_packet->path;
 	if ( IsIllegalBootDevice(path) )
@@ -90,27 +90,25 @@ static int *loadfile_elfload(struct _lf_elf_load_arg *in_packet, int length, int
 	}
 	else
 	{
-		int v4;
-
 		printf("loadelf: fname %s secname %s\n", path, in_packet->secname);
-		v4 = loadfile_elfload_innerproc(path, in_packet->epc, in_packet->secname, &v5, &v6);
-		outbuffer[0] = v4;
-		if ( v4 >= 0 )
+		outbuffer[0] =
+			loadfile_elfload_innerproc(path, in_packet->epc, in_packet->secname, &result_out, &result_module_out);
+		if ( outbuffer[0] >= 0 )
 		{
 			outbuffer[2] = 0;
-			outbuffer[0] = v5;
-			outbuffer[1] = v6;
+			outbuffer[0] = result_out;
+			outbuffer[1] = result_module_out;
 		}
 		else
 		{
-			outbuffer[3] = v4;
+			outbuffer[3] = outbuffer[0];
 			outbuffer[0] = 0;
 		}
 	}
 	return outbuffer;
 }
 
-static int *loadfile_setaddr(struct _lf_iop_val_arg *in_packet, int length, int *outbuffer)
+static int *loadfile_setaddr(const struct _lf_iop_val_arg *in_packet, int length, int *outbuffer)
 {
 	void *iop_addr;
 	int type;
@@ -136,7 +134,7 @@ static int *loadfile_setaddr(struct _lf_iop_val_arg *in_packet, int length, int 
 	return outbuffer;
 }
 
-static int *loadfile_getaddr(struct _lf_iop_val_arg *in_packet, int length, int *outbuffer)
+static int *loadfile_getaddr(const struct _lf_iop_val_arg *in_packet, int length, int *outbuffer)
 {
 	void *iop_addr;
 	int type;
@@ -162,23 +160,24 @@ static int *loadfile_getaddr(struct _lf_iop_val_arg *in_packet, int length, int 
 	return outbuffer;
 }
 
-static int *loadfile_mg_modload(struct _lf_module_load_arg *in_packet, int length, int *outbuffer)
+static int *loadfile_mg_modload(const struct _lf_module_load_arg *in_packet, int length, int *outbuffer)
 {
 	outbuffer[0] = LoadStartKelfModule(in_packet->path, in_packet->p.arg_len, in_packet->args, &outbuffer[1]);
 	return outbuffer;
 }
 
-static int *loadfile_mg_elfload(struct _lf_elf_load_arg *in_packet, int length, int *outbuffer)
+static int *loadfile_mg_elfload(const struct _lf_elf_load_arg *in_packet, int length, int *outbuffer)
 {
-	int v2;
-	int v3;
+	int result_out;
+	int result_module_out;
 
-	outbuffer[0] = loadfile_mg_elfload_proc(in_packet->path, in_packet->epc, in_packet->secname, &v2, &v3);
+	outbuffer[0] =
+		loadfile_mg_elfload_proc(in_packet->path, in_packet->epc, in_packet->secname, &result_out, &result_module_out);
 	if ( outbuffer[0] >= 0 )
 	{
 		outbuffer[2] = 0;
-		outbuffer[0] = v2;
-		outbuffer[1] = v3;
+		outbuffer[0] = result_out;
+		outbuffer[1] = result_module_out;
 	}
 	else
 	{
@@ -188,7 +187,7 @@ static int *loadfile_mg_elfload(struct _lf_elf_load_arg *in_packet, int length, 
 }
 
 // The following function was added in 110U ROM.
-static int *loadfile_loadmodulebuffer(struct _lf_module_buffer_load_arg *in_packet, int length, int *outbuffer)
+static int *loadfile_loadmodulebuffer(const struct _lf_module_buffer_load_arg *in_packet, int length, int *outbuffer)
 {
 	int ModuleBuffer;
 
@@ -235,7 +234,7 @@ static SifRpcDataQueue_t loadfile_rpc_service_queue __attribute__((aligned(16)))
 static SifRpcServerData_t loadfile_rpc_service_data __attribute__((aligned(16)));
 static int loadfile_rpc_service_in_buf[0x112] __attribute__((aligned(16)));
 
-static void loadfile_rpc_start_thread(void *param)
+static void loadfile_rpc_service_thread(void *param)
 {
 	(void)param;
 
