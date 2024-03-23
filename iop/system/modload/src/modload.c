@@ -45,7 +45,7 @@ typedef struct module_thread_args_
 
 extern int modload_post_boot_callback(iop_init_entry_t *next, int delayed);
 extern void get_updater_boot_argument(char *str, int *updater_argc, char **updater_argv, int updater_argv_count);
-extern int ModuleLoaderThread(module_thread_args_t *mltargs);
+extern void ModuleLoaderThread(module_thread_args_t *mltargs);
 extern void *do_load_seek(const char *filename, int *result_out);
 extern ModuleInfo_t *do_load(const char *filename, void *buffer, void *addr, int offset, int *result_out);
 extern ModuleInfo_t *SearchModuleCBByID(int modid);
@@ -277,7 +277,7 @@ int LoadStartKelfModule(const char *name, int arglen, const char *args, int *res
 	return started;
 }
 
-int ModuleLoaderThread(module_thread_args_t *mltargs)
+void ModuleLoaderThread(module_thread_args_t *mltargs)
 {
 	ModuleInfo_t *mi;
 	int res_tmp;
@@ -348,7 +348,6 @@ int ModuleLoaderThread(module_thread_args_t *mltargs)
 		ChangeThreadPriority(0, 1);
 		SetEventFlag(mltargs->thread_ef, 1u);
 	}
-	return 0;
 }
 
 ModuleInfo_t *SearchModuleCBByID(int modid)
