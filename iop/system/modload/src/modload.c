@@ -58,6 +58,9 @@ int _start(int argc, char *argv[])
 	iop_sema_t semaparam;
 	iop_event_t efparam;
 
+	(void)argc;
+	(void)argv;
+
 	if ( RegisterLibraryEntries(&_exp_modload) < 0 )
 	{
 		return 1;
@@ -376,6 +379,9 @@ int modload_post_boot_callback(iop_init_entry_t *next, int delayed)
 	int card_slot;
 	int state;
 
+	(void)next;
+	(void)delayed;
+
 	iop_exec_buffer = 0;
 	reboot_type = 0;
 	BootMode_4 = QueryBootMode(4);
@@ -508,6 +514,8 @@ int start_module(ModuleInfo_t *module_info, const char *data, int arglen, const 
 
 int IsIllegalBootDevice(const char *arg1)
 {
+	(void)arg1;
+
 	// Unofficial: Always succeed
 	return 0;
 }
