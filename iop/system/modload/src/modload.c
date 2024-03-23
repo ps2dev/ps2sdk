@@ -19,14 +19,14 @@ IRX_ID("Moldule_File_loader", 1, 1);
 
 extern struct irx_export_table _exp_modload;
 
-SecrCardBootFile_callback_t SecrCardBootFile_func_ptr;
-SecrDiskBootFile_callback_t SecrDiskBootFile_func_ptr;
-SetLoadfileCallbacks_callback_t SetLoadfileCallbacks_func_ptr;
-CheckKelfPath_callback_t CheckKelfPath_func_ptr;
+static SecrCardBootFile_callback_t SecrCardBootFile_func_ptr;
+static SecrDiskBootFile_callback_t SecrDiskBootFile_func_ptr;
+static SetLoadfileCallbacks_callback_t SetLoadfileCallbacks_func_ptr;
+static CheckKelfPath_callback_t CheckKelfPath_func_ptr;
 
-int modLoadCB;
-int ModuleLoaderMutex;
-int ModuleLoaderSync;
+static int modLoadCB;
+static int ModuleLoaderMutex;
+static int ModuleLoaderSync;
 
 typedef struct module_thread_args_
 {
@@ -43,14 +43,14 @@ typedef struct module_thread_args_
 	s32 thread_ef;
 } module_thread_args_t;
 
-extern int modload_post_boot_callback(iop_init_entry_t *next, int delayed);
-extern void get_updater_boot_argument(char *str, int *updater_argc, char **updater_argv, int updater_argv_count);
-extern void ModuleLoaderThread(module_thread_args_t *mltargs);
-extern void *do_load_seek(const char *filename, int *result_out);
-extern ModuleInfo_t *do_load(const char *filename, void *buffer, void *addr, int offset, int *result_out);
-extern ModuleInfo_t *SearchModuleCBByID(int modid);
-extern int start_module(ModuleInfo_t *module_info, const char *data, int arglen, const char *args, int *result_out);
-extern ModuleInfo_t *allocate_link_module_info(void *buffer, void *addr, int offset, int *result_out);
+static int modload_post_boot_callback(iop_init_entry_t *next, int delayed);
+static void get_updater_boot_argument(char *str, int *updater_argc, char **updater_argv, int updater_argv_count);
+static void ModuleLoaderThread(module_thread_args_t *mltargs);
+static void *do_load_seek(const char *filename, int *result_out);
+static ModuleInfo_t *do_load(const char *filename, void *buffer, void *addr, int offset, int *result_out);
+static ModuleInfo_t *SearchModuleCBByID(int modid);
+static void start_module(ModuleInfo_t *module_info, const char *data, int arglen, const char *args, int *result_out);
+static ModuleInfo_t *allocate_link_module_info(void *buffer, void *addr, int offset, int *result_out);
 
 int _start(int argc, char *argv[])
 {
@@ -93,7 +93,7 @@ int _start(int argc, char *argv[])
 	return 0;
 }
 
-int ModuleThreadCmd(int command, void *data, void *buffer, void *addr, int offset)
+static int ModuleThreadCmd(int command, void *data, void *buffer, void *addr, int offset)
 {
 	int retval;
 	module_thread_args_t mltargs;
@@ -277,7 +277,7 @@ int LoadStartKelfModule(const char *name, int arglen, const char *args, int *res
 	return started;
 }
 
-void ModuleLoaderThread(module_thread_args_t *mltargs)
+static void ModuleLoaderThread(module_thread_args_t *mltargs)
 {
 	ModuleInfo_t *mi;
 	int res_tmp;
@@ -350,7 +350,7 @@ void ModuleLoaderThread(module_thread_args_t *mltargs)
 	}
 }
 
-ModuleInfo_t *SearchModuleCBByID(int modid)
+static ModuleInfo_t *SearchModuleCBByID(int modid)
 {
 	ModuleInfo_t *image_info;
 
@@ -366,7 +366,7 @@ ModuleInfo_t *SearchModuleCBByID(int modid)
 	return NULL;
 }
 
-int modload_post_boot_callback(iop_init_entry_t *next, int delayed)
+static int modload_post_boot_callback(iop_init_entry_t *next, int delayed)
 {
 	void *iop_exec_buffer;
 	int reboot_type;
@@ -452,7 +452,7 @@ int modload_post_boot_callback(iop_init_entry_t *next, int delayed)
 	return 0;
 }
 
-int start_module(ModuleInfo_t *module_info, const char *data, int arglen, const char *args, int *result_out)
+static void start_module(ModuleInfo_t *module_info, const char *data, int arglen, const char *args, int *result_out)
 {
 	const char *args_ptr;
 	char *in_argv_strs_ptr;
@@ -506,9 +506,7 @@ int start_module(ModuleInfo_t *module_info, const char *data, int arglen, const 
 		UnlinkModule(module_info);
 		FreeSysMemory((void *)((unsigned int)module_info >> 8 << 8));
 		CpuResumeIntr(state);
-		return 0;
 	}
-	return 0;
 }
 
 int IsIllegalBootDevice(const char *arg1)
@@ -519,7 +517,7 @@ int IsIllegalBootDevice(const char *arg1)
 	return 0;
 }
 
-ModuleInfo_t *do_load(const char *filename, void *buffer, void *addr, int offset, int *result_out)
+static ModuleInfo_t *do_load(const char *filename, void *buffer, void *addr, int offset, int *result_out)
 {
 	void *seek;
 	void *iop_exec_buffer;
@@ -557,7 +555,7 @@ ModuleInfo_t *do_load(const char *filename, void *buffer, void *addr, int offset
 	return ExecutableObject;
 }
 
-void *do_load_seek(const char *filename, int *result_out)
+static void *do_load_seek(const char *filename, int *result_out)
 {
 	int fd;
 	int file_size;
@@ -601,7 +599,7 @@ void *do_load_seek(const char *filename, int *result_out)
 	return buffer;
 }
 
-ModuleInfo_t *allocate_link_module_info(void *buffer, void *addr, int offset, int *result_out)
+static ModuleInfo_t *allocate_link_module_info(void *buffer, void *addr, int offset, int *result_out)
 {
 	ModuleInfo_t *mi;
 	int executable_type;
@@ -682,7 +680,7 @@ ModuleInfo_t *allocate_link_module_info(void *buffer, void *addr, int offset, in
 	return mi;
 }
 
-char *get_next_non_whitespace_string(char *str)
+static char *get_next_non_whitespace_string(char *str)
 {
 	for ( ;; )
 	{
@@ -695,7 +693,7 @@ char *get_next_non_whitespace_string(char *str)
 	}
 }
 
-char *get_non_null_string(char *str)
+static char *get_non_null_string(char *str)
 {
 	while ( *str && *str != ' ' && *str != '\t' && *str != '\n' )
 	{
@@ -704,7 +702,7 @@ char *get_non_null_string(char *str)
 	return str;
 }
 
-void get_updater_boot_argument(char *str, int *updater_argc, char **updater_argv, int updater_argv_count)
+static void get_updater_boot_argument(char *str, int *updater_argc, char **updater_argv, int updater_argv_count)
 {
 	char *next_non_whitespace_string;
 	int updater_argc_cur;
