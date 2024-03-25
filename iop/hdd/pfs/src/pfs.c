@@ -111,6 +111,12 @@ static int allocateMountBuffer(int size)
 	return 0;
 }
 
+static int freeMountBuffer()
+{
+	pfsFreeMem(pfsMountBuf);
+	return 0;
+}
+
 void pfsClearMount(pfs_mount_t *pfsMount)
 {
 	memset(pfsMount, 0, sizeof(pfs_mount_t));
@@ -127,13 +133,40 @@ pfs_mount_t *pfsGetMountedUnit(s32 unit)
 	return &pfsMountBuf[unit];
 }
 
+#ifdef _IOP
+int PFS_ENTRYPOINT(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
+#else
 int PFS_ENTRYPOINT(int argc, char *argv[])
+#endif
 {
 	char *filename;
 	int number;
 	int numBuf = 8;
 	int reqBuf;
 	int size, ret;
+
+#ifdef _IOP
+	(void)startaddr;
+	if (argc < 0)
+	{
+		int i;
+
+		for ( i = 0; i < pfsConfig.maxOpen; i += 1 )
+		{
+			if ( pfsFileSlots[i].clink )
+			{
+				PFS_PRINTF(PFS_DRV_NAME": error: can't stop module(fd busy)\n");
+				return MODULE_REMOVABLE_END;
+			}
+		}
+		iomanX_DelDrv(pfsFioDev.name);
+		freeMountBuffer();
+		pfsFreeMem(pfsFileSlots);
+		pfsCacheDeinit();
+		PFS_PRINTF(PFS_DRV_NAME": stopped module\n");
+		return MODULE_NO_RESIDENT_END;
+	}
+#endif
 
 	PFS_PRINTF(PFS_DRV_NAME" Playstation Filesystem Driver v%d.%d\nps2fs: (c) 2003 Sjeep, Vector and Florin Sasu\n", PFS_MAJOR, PFS_MINOR);
 
@@ -232,6 +265,10 @@ int PFS_ENTRYPOINT(int argc, char *argv[])
 		PFS_PRINTF(PFS_DRV_NAME" version %04x driver start. This is OSD version!\n", IRX_VER(PFS_MAJOR, PFS_MINOR));
 #else
 		PFS_PRINTF(PFS_DRV_NAME" version %04x driver start.\n", IRX_VER(PFS_MAJOR, PFS_MINOR));
+#endif
+#ifdef _IOP
+		if (mi && ((mi->newflags & 2) != 0))
+			mi->newflags |= 0x10;
 #endif
 		return MODULE_RESIDENT_END;
 	}
