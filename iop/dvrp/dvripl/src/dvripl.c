@@ -27,8 +27,8 @@
 #define DPRINTF(x...)
 #endif
 
-extern int module_start();
-extern int module_stop();
+extern int module_start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi);
+extern int module_stop(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi);
 extern int dvripl_df_init(iomanX_iop_device_t *dev);
 extern int dvripl_df_exit(iomanX_iop_device_t *dev);
 extern int dvripl_df_ioctl(iomanX_iop_file_t *f, int cmd, void *param);
@@ -82,29 +82,38 @@ char SBUF[32768];
 // Based off of DESR / PSX DVR system software version 1.31.
 IRX_ID(MODNAME, 1, 1);
 
-int _start(int argc, char *argv[])
+int _start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 {
-    (void)argv;
-
     if (argc >= 0)
-        return module_start();
+        return module_start(argc, argv, startaddr, mi);
     else
-        return module_stop();
+        return module_stop(argc, argv, startaddr, mi);
 }
 
-int module_start()
+int module_start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 {
+    (void)argc;
+    (void)argv;
+    (void)startaddr;
+
     if (iomanX_AddDrv(&DVRMAN) != 0)
         return MODULE_NO_RESIDENT_END;
 #if 0
     return MODULE_REMOVABLE_END;
 #else
+    if (mi && ((mi->newflags & 2) != 0))
+        mi->newflags |= 0x10;
     return MODULE_RESIDENT_END;
 #endif
 }
 
-int module_stop()
+int module_stop(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 {
+    (void)argc;
+    (void)argv;
+    (void)startaddr;
+    (void)mi;
+
     if (iomanX_DelDrv(DVRMAN.name) != 0)
         return MODULE_REMOVABLE_END;
     return MODULE_NO_RESIDENT_END;
