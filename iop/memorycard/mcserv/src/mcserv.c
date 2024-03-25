@@ -95,6 +95,7 @@ static void *rpc_funcs_array[21] = {
 };
 
 static int mcserv_tidS_0400;
+static int mcserv_in_rpc_0400 = 0;
 
 static SifRpcDataQueue_t mcserv_qdS_0400 __attribute__((aligned(16)));
 static SifRpcServerData_t mcserv_sdS_0400 __attribute__((aligned(16)));
@@ -108,18 +109,43 @@ static u8 mcserv_buf[MCSERV_BUFSIZE] __attribute__((aligned(16)));
 extern struct irx_export_table _exp_mcserv;
 
 //--------------------------------------------------------------
-int _start(int argc, char *argv[])
+int _start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 {
 	iop_thread_t thread_param;
 	register int thread_id;
 
 	(void)argc;
 	(void)argv;
+	(void)startaddr;
 
 #ifdef SIO_DEBUG
 	sio_init(38400, 0, 0, 0, 0);
 #endif
 	DPRINTF("_start...\n");
+
+	if (argc < 0)
+	{
+		int release_res;
+		int state;
+
+		if (mcserv_in_rpc_0400)
+		{
+			return MODULE_REMOVABLE_END;
+		}
+
+		CpuSuspendIntr(&state);
+		release_res = ReleaseLibraryEntries(&_exp_mcserv);
+		CpuResumeIntr(state);
+		if (release_res == 0 || release_res == -213)
+		{
+			TerminateThread(mcserv_tidS_0400);
+			DeleteThread(mcserv_tidS_0400);
+			sceSifRemoveRpc(&mcserv_sdS_0400, &mcserv_qdS_0400);
+			sceSifRemoveRpcQueue(&mcserv_qdS_0400);
+			return MODULE_NO_RESIDENT_END;
+		}
+		return MODULE_REMOVABLE_END;
+	}
 
 	// Register mcserv dummy export table
 	DPRINTF("registering exports...\n");
@@ -142,6 +168,8 @@ int _start(int argc, char *argv[])
 
 	DPRINTF("_start returns MODULE_RESIDENT_END...\n");
 
+	if (mi && ((mi->newflags & 2) != 0))
+		mi->newflags |= 0x10;
 	return MODULE_RESIDENT_END;
 
 err_out:
@@ -196,10 +224,14 @@ void *cb_rpc_S_0400(u32 fno, void *buf, int size)
 	// Get function pointer
 	rpc_func = (void *)rpc_funcs_array[fno];
 
+	mcserv_in_rpc_0400 = 1;
+
 	// Call needed rpc func
 	rpc_stat.result = rpc_func();
 
 	McReplaceBadBlock();
+
+	mcserv_in_rpc_0400 = 0;
 
 	return (void *)&rpc_stat;
 }

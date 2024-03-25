@@ -12,6 +12,7 @@ sior_IMPORTS_end
 
 loadcore_IMPORTS_start
 I_RegisterLibraryEntries
+I_ReleaseLibraryEntries
 I_GetLoadcoreInternalData
 loadcore_IMPORTS_end
 
@@ -100,6 +101,8 @@ I_sceSifRegisterRpc
 I_sceSifSetRpcQueue
 I_sceSifRpcLoop
 I_sceSifGetOtherData
+I_sceSifRemoveRpc
+I_sceSifRemoveRpcQueue
 sifcmd_IMPORTS_end
 
 thbase_IMPORTS_start
@@ -107,6 +110,8 @@ I_CreateThread
 I_StartThread
 I_GetThreadId
 I_DelayThread
+I_TerminateThread
+I_DeleteThread
 thbase_IMPORTS_end
 
 stdio_IMPORTS_start
