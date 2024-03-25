@@ -21,6 +21,7 @@ static void *heap_buffer_end = NULL;
 static int *allocate_heap_buffer(unsigned int lower_bound, unsigned int upper_bound)
 {
 	unsigned int upper_bound_rounded;
+	int state;
 
 	(void)lower_bound;
 
@@ -30,9 +31,9 @@ static int *allocate_heap_buffer(unsigned int lower_bound, unsigned int upper_bo
 	{
 		upper_bound_rounded += (4 - (upper_bound_rounded & 3));
 	}
-	CpuDisableIntr();
+	CpuSuspendIntr(&state);
 	heap_buffer_base = AllocSysMemory(ALLOC_LAST, upper_bound_rounded, NULL);
-	CpuEnableIntr();
+	CpuResumeIntr(state);
 	if ( heap_buffer_base != NULL )
 	{
 		heap_buffer = heap_buffer_base;
@@ -583,9 +584,11 @@ static int elf_load_common(
 	read_buffer = NULL;
 	while ( read_buffer == NULL )
 	{
-		CpuDisableIntr();
+		int state;
+
+		CpuSuspendIntr(&state);
 		read_buffer = (char *)AllocSysMemory(ALLOC_LAST, bufsz, NULL);
-		CpuEnableIntr();
+		CpuResumeIntr(state);
 		if ( read_buffer )
 			break;
 		bufsz /= 2;
