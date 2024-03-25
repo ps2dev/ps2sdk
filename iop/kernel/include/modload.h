@@ -121,7 +121,7 @@ typedef void *(*SecrDiskBootFile_callback_t)(void *buffer);
 typedef void (*SetLoadfileCallbacks_callback_t)(SetLoadfileCallbacks_struct_t *callbackinfo);
 typedef int (*CheckKelfPath_callback_t)(const char *filename, int *port, int *slot);
 
-void *GetModloadInternalData(void **pInternalData);
+void GetModloadInternalData(void **pInternalData);
 
 int ReBootStart(const char *command, unsigned int flags);
 int LoadModuleAddress(const char *name, void *addr, int offset);

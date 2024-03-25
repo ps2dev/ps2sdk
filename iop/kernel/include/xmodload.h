@@ -38,7 +38,7 @@ typedef struct {
 	u32 lreserve[2];
 } ModuleStatus;
 
-int ReferModuleStatus(int, ModuleStatus *status);
+int ReferModuleStatus(int modid, ModuleStatus *status);
 int GetModuleIdListByName(const char *name, int *readbuf, int readbufsize, int *modulecount);
 
 typedef struct {
@@ -70,7 +70,7 @@ int SearchModuleByName(const char *name);
 int SearchModuleByAddress(const void *addr);
 int SelfStopModule(int arglen, const char *args, int *result);
 void SelfUnloadModule(void);
-void *AllocLoadMemory(int type, unsigned long size, void *addr);
+void *AllocLoadMemory(int type, unsigned int size, void *addr);
 int FreeLoadMemory(void *area);
 int SetModuleFlags(int modid, int flag);
 
