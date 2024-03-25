@@ -74,7 +74,7 @@ void *AllocLoadMemory(int type, unsigned int size, void *addr);
 int FreeLoadMemory(void *area);
 int SetModuleFlags(int modid, int flag);
 
-#define xmodload_IMPORTS_start DECLARE_IMPORT_TABLE(modload, 1, 1)
+#define xmodload_IMPORTS_start DECLARE_IMPORT_TABLE(modload, 1, 7)
 #define xmodload_IMPORTS_end END_IMPORT_TABLE
 
 #define I_GetModuleIdList DECLARE_IMPORT(16, GetModuleIdList)
