@@ -124,7 +124,6 @@ static int *loadfile_setaddr(const struct _lf_iop_val_arg *in_packet, int length
 
 	iop_addr = (void *)in_packet->p.iop_addr;
 	type = in_packet->type;
-	printf("set val add %p type %x ", iop_addr, type);
 	switch ( type )
 	{
 		case LF_VAL_BYTE:
@@ -152,7 +151,6 @@ static int *loadfile_getaddr(const struct _lf_iop_val_arg *in_packet, int length
 
 	iop_addr = (void *)in_packet->p.iop_addr;
 	type = in_packet->type;
-	printf("get val add %p type %x ", iop_addr, type);
 	switch ( type )
 	{
 		case LF_VAL_BYTE:
@@ -167,7 +165,6 @@ static int *loadfile_getaddr(const struct _lf_iop_val_arg *in_packet, int length
 		default:
 			break;
 	}
-	printf("ret %x\n", outbuffer[0]);
 	return outbuffer;
 }
 
@@ -208,7 +205,6 @@ static int *loadfile_loadmodulebuffer(const struct _lf_module_buffer_load_arg *i
 
 	(void)length;
 
-	printf("loadbuffer: addrres %x args %d arg %s\n", in_packet->p.result, in_packet->q.arg_len, in_packet->args);
 	ModuleBuffer = LoadModuleBuffer(in_packet->p.ptr);
 	if ( ModuleBuffer >= 0 )
 	{
@@ -218,7 +214,6 @@ static int *loadfile_loadmodulebuffer(const struct _lf_module_buffer_load_arg *i
 	{
 		outbuffer[0] = ModuleBuffer;
 	}
-	printf("loadbuffer: id %d, ret %d\n", outbuffer[0], outbuffer[1]);
 	return outbuffer;
 }
 
