@@ -14,9 +14,9 @@
 #include <loadfile-common.h>
 
 #ifdef _IOP
-IRX_ID("LoadModuleByEE", 0, 0);
+IRX_ID("LoadModuleByEE", 2, 2);
 #endif
-// Mostly based on the module from SCE SDK 1.3.4, with additions from 110U ROM.
+// Mostly based on the module from SCE SDK 3.1.0
 
 static void loadfile_rpc_service_thread(void *param);
 
@@ -201,7 +201,7 @@ static int *loadfile_mg_elfload(const struct _lf_elf_load_arg *in_packet, int le
 	return outbuffer;
 }
 
-// The following function was added in 110U ROM.
+// The following function was added at some point between SDK 1.3 (exclusive) and SDK 1.6 (inclusive).
 static int *loadfile_loadmodulebuffer(const struct _lf_module_buffer_load_arg *in_packet, int length, int *outbuffer)
 {
 	int ModuleBuffer;
@@ -219,6 +219,53 @@ static int *loadfile_loadmodulebuffer(const struct _lf_module_buffer_load_arg *i
 		outbuffer[0] = ModuleBuffer;
 	}
 	printf("loadbuffer: id %d, ret %d\n", outbuffer[0], outbuffer[1]);
+	return outbuffer;
+}
+
+// The following function was added at some point between SDK 1.6 (exclusive) and SDK 3.1.0 (inclusive).
+static int *loadfile_stopmodule(struct _lf_module_stop_arg *in_packet, int length, int *outbuffer)
+{
+	(void)length;
+
+	outbuffer[0] = StopModule(in_packet->p.id, in_packet->q.arg_len, in_packet->args, &outbuffer[1]);
+	return outbuffer;
+}
+
+// The following function was added at some point between SDK 1.6 (exclusive) and SDK 3.1.0 (inclusive).
+static int *loadfile_unloadmodule(union _lf_module_unload_arg *in_packet, int length, int *outbuffer)
+{
+	(void)length;
+
+	outbuffer[0] = UnloadModule(in_packet->id);
+	return outbuffer;
+}
+
+// The following function was added at some point between SDK 1.6 (exclusive) and SDK 3.1.0 (inclusive).
+static int *loadfile_searchmodulebyname(struct _lf_search_module_by_name_arg *in_packet, int length, int *outbuffer)
+{
+	(void)length;
+
+	outbuffer[0] = SearchModuleByName(in_packet->name);
+	return outbuffer;
+}
+
+// The following function was added at some point between SDK 1.6 (exclusive) and SDK 3.1.0 (inclusive).
+static int *
+loadfile_searchmodulebyaddress(struct _lf_search_module_by_address_arg *in_packet, int length, int *outbuffer)
+{
+	(void)length;
+
+	outbuffer[0] = SearchModuleByAddress(in_packet->p.ptr);
+	return outbuffer;
+}
+
+// The following function was added at some point between SDK 1.6 (exclusive) and SDK 3.1.0 (inclusive).
+static int *loadfile_get_version(void *in_packet, int length, int *outbuffer)
+{
+	(void)in_packet;
+	(void)length;
+
+	((u32 *)(outbuffer))[0] = 0x30303133;
 	return outbuffer;
 }
 
@@ -242,6 +289,17 @@ static int *loadfile_rpc_service_handler(int fno, void *buffer, int length)
 			return loadfile_mg_elfload((struct _lf_elf_load_arg *)buffer, length, loadfile_rpc_outbuf);
 		case LF_F_MOD_BUF_LOAD:
 			return loadfile_loadmodulebuffer((struct _lf_module_buffer_load_arg *)buffer, length, loadfile_rpc_outbuf);
+		case LF_F_MOD_STOP:
+			return loadfile_stopmodule((struct _lf_module_stop_arg *)buffer, length, loadfile_rpc_outbuf);
+		case LF_F_MOD_UNLOAD:
+			return loadfile_unloadmodule((union _lf_module_unload_arg *)buffer, length, loadfile_rpc_outbuf);
+		case LF_F_SEARCH_MOD_BY_NAME:
+			return loadfile_searchmodulebyname((struct _lf_search_module_by_name_arg *)buffer, length, loadfile_rpc_outbuf);
+		case LF_F_SEARCH_MOD_BY_ADDRESS:
+			return loadfile_searchmodulebyaddress(
+				(struct _lf_search_module_by_address_arg *)buffer, length, loadfile_rpc_outbuf);
+		case LF_F_GET_VERSION:
+			return loadfile_get_version((void *)buffer, length, loadfile_rpc_outbuf);
 		default:
 			return NULL;
 	}

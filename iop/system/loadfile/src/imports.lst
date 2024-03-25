@@ -10,7 +10,6 @@ I_QueryBootMode
 loadcore_IMPORTS_end
 
 intrman_IMPORTS_start
-I_CpuDisableIntr
 I_CpuEnableIntr
 I_CpuSuspendIntr
 I_CpuResumeIntr
@@ -19,7 +18,6 @@ intrman_IMPORTS_end
 sysclib_IMPORTS_start
 I_memcpy
 I_strcmp
-I_strncmp
 sysclib_IMPORTS_end
 
 stdio_IMPORTS_start
@@ -31,7 +29,6 @@ I_open
 I_close
 I_read
 I_lseek
-I_ioctl
 ioman_IMPORTS_end
 
 sifman_IMPORTS_start
@@ -46,14 +43,18 @@ I_sceSifSetRpcQueue
 I_sceSifRpcLoop
 sifcmd_IMPORTS_end
 
-modload_IMPORTS_start
+xmodload_IMPORTS_start
 I_LoadStartModule
 I_StartModule
 I_LoadModuleBuffer
 I_LoadStartKelfModule
 I_GetLoadfileCallbacks
 I_IsIllegalBootDevice
-modload_IMPORTS_end
+I_StopModule
+I_UnloadModule
+I_SearchModuleByName
+I_SearchModuleByAddress
+xmodload_IMPORTS_end
 
 thbase_IMPORTS_start
 I_CreateThread

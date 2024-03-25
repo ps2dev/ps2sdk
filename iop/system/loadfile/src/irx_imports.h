@@ -20,12 +20,12 @@
 #include <intrman.h>
 #include <ioman.h>
 #include <loadcore.h>
-#include <modload.h>
 #include <sifcmd.h>
 #include <sifman.h>
 #include <stdio.h>
 #include <sysclib.h>
 #include <sysmem.h>
 #include <thbase.h>
+#include <xmodload.h>
 
 #endif /* IOP_IRX_IMPORTS_H */
