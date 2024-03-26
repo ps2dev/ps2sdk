@@ -48,8 +48,8 @@ typedef struct struct_dvrdrv_
     u16 dvr_ready;
 } struct_dvrdrv;
 
-int module_start();
-int module_stop();
+int module_start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi);
+int module_stop(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi);
 int DvrdrvInit();
 int DvrdrvSendCmdAck(struct_itr_sema *itrsema, u16 command, u16 *input_word, s32 input_word_count, u16 *status_4220, u16 *ack_status, u32 *status_4228);
 int DvrdrvSetDmaDirection(u32 arg);
@@ -93,50 +93,44 @@ void *intrhandler_callbacksarg[32];
 struct_itr_sid_tbl itrsid_table[3][32];
 struct_itr_sema itr_sema_table[32];
 
-int _start(int argc, char *argv[])
+int _start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 {
-    int result;
-
-    (void)argv;
-
     if (argc >= 0)
-        result = module_start();
+        return module_start(argc, argv, startaddr, mi);
     else
-        result = module_stop();
-    return result;
+        return module_stop(argc, argv, startaddr, mi);
 }
 
-int module_start()
+int module_start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 {
-    int result = MODULE_NO_RESIDENT_END;
-
+    (void)argc;
+    (void)argv;
+    (void)startaddr;
     if (DvrdrvInit() != -1) {
         if (RegisterLibraryEntries(&_exp_pvrdrv) == 0) {
 #if 0
-            result = MODULE_REMOVABLE_END;
+            return MODULE_REMOVABLE_END;
 #else
-            result = MODULE_RESIDENT_END;
+            if (mi && ((mi->newflags & 2) != 0))
+                mi->newflags |= 0x10;
+            return MODULE_RESIDENT_END;
 #endif
         }
     }
-    return result;
+    return MODULE_NO_RESIDENT_END;
 }
 
-int module_stop()
+int module_stop(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 {
-    bool v0;
-    int result;
+    (void)argc;
+    (void)argv;
+    (void)startaddr;
+    (void)mi;
 
     ReleaseLibraryEntries(&_exp_pvrdrv);
-    v0 = DvrdrvEnd() == 0;
-#if 0
-    result = MODULE_NO_RESIDENT_END;
-#else
-    result = MODULE_RESIDENT_END;
-#endif
-    if (!v0)
-        result = MODULE_REMOVABLE_END;
-    return result;
+    if (DvrdrvEnd() != 0)
+        return MODULE_REMOVABLE_END;
+    return MODULE_NO_RESIDENT_END;
 }
 
 int DvrdrvInit()

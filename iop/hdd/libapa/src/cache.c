@@ -52,6 +52,26 @@ int apaCacheInit(u32 size)
 	return 0;
 }
 
+int apaCacheDeinit(void)
+{
+#if 0
+	unsigned int i;
+
+	for(i=1; i<cacheSize+1;i++){
+		// !!! This code performs multiple frees
+		apaFreeMem(cacheBuf[i].header);
+	}
+#else
+	// Unofficial: Free once at the head of the list
+	if (cacheSize > 1)
+	{
+		apaFreeMem(cacheBuf[1].header);
+	}
+#endif
+	apaFreeMem(cacheBuf);
+	return 0;
+}
+
 void apaCacheLink(apa_cache_t *clink, apa_cache_t *cnew)
 {
 	cnew->tail=clink;

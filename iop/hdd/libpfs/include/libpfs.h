@@ -243,6 +243,7 @@ pfs_cache_t *pfsCacheGetData(pfs_mount_t *pfsMount, u16 sub, u32 block, int flag
 pfs_cache_t *pfsCacheAllocClean(int *result);
 int pfsCacheIsFull(void);
 int pfsCacheInit(u32 numBuf, u32 bufSize);
+int pfsCacheDeinit(void);
 void pfsCacheClose(pfs_mount_t *pfsMount);
 void pfsCacheMarkClean(const pfs_mount_t *pfsMount, u32 subpart, u32 blockStart, u32 blockEnd);
 

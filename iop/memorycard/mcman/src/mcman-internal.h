@@ -197,6 +197,7 @@ int  mcman_dread(int fd, MC_IO_DRE_T *dirent);
 int  mcman_getstat(int port, int slot, const char *filename, MC_IO_STA_T *stat);
 int  mcman_getmcrtime(sceMcStDateTime *tm);
 void mcman_initPS2com(void);
+void mcman_deinitPS2com(void);
 #if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 void sio2packet_add(int port, int slot, int cmd, u8 *buf);
 #endif
@@ -236,6 +237,7 @@ int  mcman_delete2(int port, int slot, const char *filename, int flags);
 int  mcman_checkBackupBlocks(int port, int slot);
 int  mcman_unformat2(int port, int slot);
 void mcman_initPS1PDAcom(void);
+void mcman_deinitPS1PDAcom(void);
 int  mcman_probePS1Card2(int port, int slot);
 int  mcman_probePS1Card(int port, int slot);
 int  mcman_probePDACard(int port, int slot);
@@ -277,6 +279,7 @@ int  mcman_ioerrcode(int errcode);
 int  mcman_modloadcb(const char *filename, int *port, int *slot); // used as callback by modload
 void mcman_unit2card(u32 unit);
 int  mcman_initdev(void);
+void mcman_deinitdev(void);
 
 #if defined(BUILDING_VMCMAN)
 int mcman_iomanx_backing_mount(int port, int slot, const char *filename);
