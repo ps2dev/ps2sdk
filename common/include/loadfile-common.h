@@ -46,6 +46,8 @@ enum _lf_functions {
 
     LF_F_SEARCH_MOD_BY_NAME,
     LF_F_SEARCH_MOD_BY_ADDRESS,
+
+    LF_F_GET_VERSION = 0xFF,
 };
 
 typedef struct
