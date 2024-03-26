@@ -17,7 +17,15 @@
 // CRC32: EC5F33F9
 // Note: currently is based on the last XMCMAN from BOOTROM:
 // 0x02,0x0a (looks like mistake, cause last XMCMAN is 0x02,0x09)
-IRX_ID(MODNAME, 2, 11);
+
+#define MAJOR 2
+#if !defined(BUILDING_DONGLEMAN) //dongleman version is 0x204
+#define MINOR 11
+#else
+#define MINOR 4
+#endif
+
+IRX_ID(MODNAME, MAJOR, MINOR);
 
 char SUPERBLOCK_MAGIC[] = "Sony PS2 Memory Card Format ";
 char SUPERBLOCK_VERSION[] = "1.2.0.0";
@@ -443,6 +451,14 @@ int McCloseAll(void) // Export #25 XMCMAN only
 }
 
 //--------------------------------------------------------------
+#if defined(BUILDING_DONGLEMAN)
+void mcman_export_26(u32 port) { //El_isra: i'm not sure if this appears on other MCMAN's, but I found this implementation on DONGLEMAN from BR3
+	sio2_mtap_get_slot_max2((port & 1) | 2); //export 59 of XSIO2MAN?
+	return;
+}
+#endif
+
+//--------------------------------------------------------------
 int McDetectCard(int port, int slot) // Export #5
 {
 #ifdef BUILDING_XMCMAN
@@ -457,7 +473,6 @@ int mcman_detectcard(int port, int slot)
 {
 	register int r;
 	register MCDevInfo *mcdi;
-
 	DPRINTF("mcman_detectcard port%d slot%d\n", port, slot);
 	mcdi = (MCDevInfo *)&mcman_devinfos[port][slot];
 
@@ -504,10 +519,12 @@ int mcman_detectcard(int port, int slot)
 			}
 		}
 		else {
-			if (PS1CardFlag)
+			if (PS1CardFlag) {
 				return sceMcResSucceed;
-			if (mcdi->cardtype == sceMcTypePS1)
+			}
+			if (mcdi->cardtype == sceMcTypePS1) {
 				return sceMcResDeniedPS1Permit;
+			}
 			return sceMcResSucceed;
 		}
 	}
@@ -523,7 +540,6 @@ int mcman_detectcard(int port, int slot)
 	mcdi->cardform = 0;
 	mcman_invhandles(port, slot);
 	mcman_clearcache(port, slot);
-
 	return r;
 }
 
@@ -1151,7 +1167,11 @@ int McEraseBlock(int port, int block, void **pagebuf, void *eccbuf) // Export #1
 //--------------------------------------------------------------
 int McEraseBlock2(int port, int slot, int block, void **pagebuf, void *eccbuf) // Export #17 in XMCMAN
 {
-	return mcman_eraseblock(port, slot, block, (void **)pagebuf, eccbuf);
+	int x;
+	DONGLEMAN_WAIT_SEMA();
+	x = mcman_eraseblock(port, slot, block, (void **)pagebuf, eccbuf);
+	DONGLEMAN_SIGN_SEMA();
+	return x;
 }
 
 //--------------------------------------------------------------
@@ -1241,7 +1261,12 @@ void McDataChecksum(void *buf, void *ecc) // Export #20
 //--------------------------------------------------------------
 int mcman_getcnum(int port, int slot)
 {
+#if defined(BUILDING_DONGLEMAN)
+	DPRINTF("%s: port %d slot %d original ret would be 0x%x\n", __FUNCTION__, port, slot, (((port & 1) << 3) + slot))
+	return 0xf;
+#else
 	return ((port & 1) << 3) + slot;
+#endif
 }
 
 //--------------------------------------------------------------
