@@ -1,0 +1,13 @@
+<map id="ee/kernel/include/fileio.h" name="ee/kernel/include/fileio.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="347,5,507,31"/>
+<area shape="rect" id="Node000002" href="$ee_2kernel_2src_2fileio_8c.html" title=" " alt="" coords="5,87,142,112"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="355,37,154,82,124,88,123,83,153,76,354,32"/>
+<area shape="rect" id="Node000003" href="$osd__config_8c.html" title=" " alt="" coords="166,87,338,112"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="387,40,280,88,278,84,385,35"/>
+<area shape="rect" id="Node000004" href="$rom0__info_8c.html" title=" " alt="" coords="362,79,492,120"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="430,46,430,79,424,79,424,46"/>
+<area shape="rect" id="Node000005" href="$ps2sdkapi_8c.html" title=" " alt="" coords="515,87,693,112"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="469,35,578,84,576,88,467,40"/>
+<area shape="rect" id="Node000006" href="$file_xio__ps2sdk_8c.html" title=" " alt="" coords="718,79,837,120"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="503,32,706,76,718,79,717,85,705,82,502,37"/>
+</map>

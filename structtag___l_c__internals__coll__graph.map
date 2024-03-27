@@ -1,0 +1,12 @@
+<map id="tag_LC_internals" name="tag_LC_internals">
+<area shape="rect" id="Node000001" title=" " alt="" coords="85,228,204,253"/>
+<area shape="rect" id="Node000002" href="$loadcore_8h.html#struct__iop__library" title=" " alt="" coords="18,94,105,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="79,132,123,202,138,226,134,229,118,205,74,134"/>
+<area shape="poly" id="edge2_Node000002_Node000002" title=" " alt="" coords="121,98,131,107,123,115,105,118,104,112,121,111,126,107,118,102"/>
+<area shape="rect" id="Node000003" href="$irx_8h.html#structirx__import__table" title=" " alt="" coords="5,5,118,31"/>
+<area shape="poly" id="edge3_Node000002_Node000003" title=" " alt="" coords="64,47,64,94,59,94,59,47"/>
+<area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="134,10,144,18,136,26,118,29,118,24,134,21,139,18,131,14"/>
+<area shape="rect" id="Node000004" href="$loadcore_8h.html#struct___module_info" title=" " alt="" coords="181,94,273,120"/>
+<area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="218,135,202,169,180,205,159,229,155,226,175,202,197,167,214,133"/>
+<area shape="poly" id="edge6_Node000004_Node000004" title=" " alt="" coords="290,98,300,107,291,115,274,118,273,112,289,110,294,107,287,102"/>
+</map>

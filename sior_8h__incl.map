@@ -1,0 +1,16 @@
+<map id="iop/kernel/include/sior.h" name="iop/kernel/include/sior.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="58,5,180,46"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,94,73,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="101,48,64,85,60,81,97,45"/>
+<area shape="rect" id="Node000003" href="$irx_8h.html" title=" " alt="" coords="97,94,141,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="122,46,122,78,116,78,116,46"/>
+<area shape="rect" id="Node000007" href="$sior-common_8h.html" title=" " alt="" coords="162,168,268,193"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="133,45,202,153,197,156,129,48"/>
+<area shape="rect" id="Node000004" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="76,168,138,193"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="120,120,114,153,109,152,114,119"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="73,241,141,267"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="110,194,110,226,104,226,104,194"/>
+<area shape="rect" id="Node000006" href="$tamtypes_8h.html" title=" " alt="" coords="169,241,253,267"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="126,192,182,230,179,235,123,196"/>
+<area shape="poly" id="edge7_Node000007_Node000006" title=" " alt="" coords="217,194,215,226,210,226,212,193"/>
+</map>

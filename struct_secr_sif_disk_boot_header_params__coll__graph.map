@@ -1,0 +1,9 @@
+<map id="SecrSifDiskBootHeaderParams" name="SecrSifDiskBootHeaderParams">
+<area shape="rect" id="Node000001" title=" " alt="" coords="50,183,254,208"/>
+<area shape="rect" id="Node000002" href="$libsecr-common_8h.html#struct_secr_bit_table" title=" " alt="" coords="104,94,200,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="155,135,155,182,149,182,149,135"/>
+<area shape="rect" id="Node000003" href="$libsecr-common_8h.html#struct_secr_bit_table_header" title=" " alt="" coords="5,5,144,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="97,41,143,92,139,95,94,45"/>
+<area shape="rect" id="Node000004" href="$libsecr-common_8h.html#struct_secr_bit_block_data" title=" " alt="" coords="168,5,293,31"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="212,44,165,95,161,92,208,41"/>
+</map>

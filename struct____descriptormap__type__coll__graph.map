@@ -1,0 +1,12 @@
+<map id="__descriptormap_type" name="__descriptormap_type">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,184,154,210"/>
+<area shape="rect" id="Node000002" href="$struct__libcglue__fdman__fd__info__.html" title=" " alt="" coords="68,5,201,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="92,58,83,71,74,101,72,132,79,183,74,184,67,133,69,100,78,69,88,55"/>
+<area shape="rect" id="Node000003" href="$struct__libcglue__fdman__fd__ops__.html" title=" " alt="" coords="178,184,346,210"/>
+<area shape="poly" id="edge4_Node000003_Node000002" title=" " alt="" coords="125,61,120,85,118,111,122,136,133,158,154,171,188,181,186,186,151,176,129,162,117,138,113,111,115,84,120,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="240,173,231,161,204,116,176,72,154,48,158,45,180,68,209,113,235,159,244,170"/>
+<area shape="rect" id="Node000004" href="$thread_8c.html#structrequest" title=" " alt="" coords="230,13,294,39"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="265,54,265,183,260,183,260,54"/>
+<area shape="rect" id="Node000005" href="$tcpip_8h.html#structsockaddr" title=" " alt="" coords="318,13,393,39"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="350,54,330,106,300,162,279,185,275,182,296,158,326,103,345,53"/>
+</map>

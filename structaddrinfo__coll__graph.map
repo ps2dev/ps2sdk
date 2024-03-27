@@ -1,0 +1,6 @@
+<map id="addrinfo" name="addrinfo">
+<area shape="rect" id="Node000001" title=" " alt="" coords="9,94,76,120"/>
+<area shape="poly" id="edge2_Node000001_Node000001" title=" " alt="" coords="93,98,103,107,94,116,77,118,76,112,92,111,98,107,90,102"/>
+<area shape="rect" id="Node000002" href="$tcpip_8h.html#structsockaddr" title=" " alt="" coords="5,5,80,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="45,47,45,94,40,94,40,47"/>
+</map>

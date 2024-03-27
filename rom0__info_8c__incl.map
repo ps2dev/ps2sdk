@@ -1,0 +1,13 @@
+<map id="ee/kernel/src/rom0_info.c" name="ee/kernel/src/rom0_info.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="33,5,162,46"/>
+<area shape="rect" id="Node000002" href="$rom0__info_8h.html" title=" " alt="" coords="5,94,94,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="88,48,67,82,62,79,83,45"/>
+<area shape="rect" id="Node000003" href="$fileio_8h.html" title=" " alt="" coords="118,94,176,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="112,45,133,79,129,82,107,48"/>
+<area shape="rect" id="Node000004" href="$io__common_8h.html" title=" " alt="" coords="98,168,196,193"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="150,120,150,152,144,152,144,120"/>
+<area shape="rect" id="Node000005" href="$fcntl_8h_source.html" title=" " alt="" coords="52,241,132,267"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="140,195,113,231,108,227,136,192"/>
+<area shape="rect" id="Node000006" href="$unistd_8h_source.html" title=" " alt="" coords="156,241,247,267"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="158,192,185,227,181,231,154,195"/>
+</map>

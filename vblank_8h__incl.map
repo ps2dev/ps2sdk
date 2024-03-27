@@ -1,0 +1,11 @@
+<map id="iop/kernel/include/vblank.h" name="iop/kernel/include/vblank.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="27,5,150,46"/>
+<area shape="rect" id="Node000002" href="$irx_8h.html" title=" " alt="" coords="66,94,111,120"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,46,91,78,86,78,86,46"/>
+<area shape="rect" id="Node000003" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="57,168,120,193"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="91,120,91,152,86,152,86,120"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="5,241,73,267"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="82,195,58,230,54,227,78,192"/>
+<area shape="rect" id="Node000005" href="$tamtypes_8h.html" title=" " alt="" coords="97,241,181,267"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="99,192,124,227,120,230,95,195"/>
+</map>

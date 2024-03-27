@@ -1,0 +1,19 @@
+<map id="ee/rpc/memorycard" name="ee/rpc/memorycard">
+<area shape="rect" id="node2" href="dir_76c0ea988611758bf556e82d119dc5f5.html" title="include" alt="" coords="37,137,99,162"/>
+<area shape="rect" id="node4" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html" title="common" alt="" coords="66,210,137,236"/>
+<area shape="poly" id="edge1" href="dir_000102_000022.html" alt="" coords="76,161,92,195,87,197,71,164"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000102_000022.html" title="1" alt="" coords="92,182,99,197"/>
+<area shape="rect" id="node3" href="dir_caf0af085a7c65a631c06dc345ebd7aa.html" title="src" alt="" coords="38,63,77,89"/>
+<area shape="poly" id="edge3" href="dir_000288_000102.html" alt="" coords="62,88,67,121,61,122,56,89"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000288_000102.html" title="1" alt="" coords="68,110,75,125"/>
+<area shape="poly" id="edge5" href="dir_000288_000022.html" alt="" coords="75,87,96,108,113,136,118,167,113,196,108,195,112,167,108,138,92,111,71,91"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000288_000022.html" title="1" alt="" coords="116,187,123,202"/>
+<area shape="rect" id="node5" href="dir_a0a8ac7efb6662b749c1285408048e6d.html" title="erl" alt="" coords="225,137,263,162"/>
+<area shape="poly" id="edge4" href="dir_000288_000044.html" alt="" coords="79,82,211,133,209,138,77,87"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000288_000044.html" title="1" alt="" coords="207,119,214,134"/>
+<area shape="rect" id="node6" href="dir_694ec83a64f58cbdefbefce65cd1011c.html" title="kernel" alt="" coords="288,137,344,162"/>
+<area shape="poly" id="edge2" href="dir_000288_000173.html" alt="" coords="78,83,89,86,179,111,274,134,272,139,178,116,87,91,76,88"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000288_000173.html" title="1" alt="" coords="269,120,276,135"/>
+<area shape="rect" id="clust2" href="dir_52af18bf396be92337d4eeddb9a1740b.html" alt="" coords="27,52,204,173"/>
+<area shape="rect" id="clust1" href="dir_5b119dc963fa9b25ef41951231899460.html" title="rpc" alt="" coords="16,16,215,184"/>
+</map>

@@ -1,0 +1,27 @@
+<map id="ee/libcglue/src/sleep.c" name="ee/libcglue/src/sleep.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="232,5,382,31"/>
+<area shape="rect" id="Node000002" href="$kernel_8h.html" title=" " alt="" coords="51,79,118,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="270,34,133,78,131,73,268,29"/>
+<area shape="rect" id="Node000007" href="$unistd_8h_source.html" title=" " alt="" coords="142,79,208,105"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="286,34,212,74,209,69,283,29"/>
+<area shape="rect" id="Node000008" href="$stdint_8h.html" title=" " alt="" coords="233,79,296,105"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="302,33,282,67,277,64,298,30"/>
+<area shape="rect" id="Node000009" href="$errno_8h.html" title=" " alt="" coords="320,79,380,105"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="316,30,337,64,332,67,312,33"/>
+<area shape="rect" id="Node000010" href="$time_8h.html" title=" " alt="" coords="404,79,461,105"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="330,29,399,69,397,73,327,34"/>
+<area shape="rect" id="Node000011" href="$timer__alarm_8h_source.html" title=" " alt="" coords="484,79,583,105"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="346,29,481,71,480,76,345,34"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="5,153,73,178"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="79,106,57,141,52,138,75,103"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="97,153,165,178"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="94,103,117,138,113,141,90,106"/>
+<area shape="rect" id="Node000005" href="$sifdma_8h.html" title=" " alt="" coords="275,153,345,178"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="119,101,260,146,259,151,117,106"/>
+<area shape="rect" id="Node000006" href="$tamtypes_8h.html" title=" " alt="" coords="424,226,508,252"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="337,176,426,217,424,222,335,181"/>
+<area shape="poly" id="edge11_Node000011_Node000006" title=" " alt="" coords="525,107,509,128,493,154,482,183,474,212,469,211,477,182,489,151,505,125,521,104"/>
+<area shape="rect" id="Node000012" href="$timer_8h.html" title=" " alt="" coords="504,153,564,178"/>
+<area shape="poly" id="edge12_Node000011_Node000012" title=" " alt="" coords="536,105,536,137,531,137,531,105"/>
+<area shape="poly" id="edge13_Node000012_Node000006" title=" " alt="" coords="524,180,489,217,485,213,521,177"/>
+</map>

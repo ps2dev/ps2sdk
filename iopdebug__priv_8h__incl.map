@@ -1,0 +1,15 @@
+<map id="iop/debug/iopdebug/src/iopdebug_priv.h" name="iop/debug/iopdebug/src/iopdebug_priv.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="16,5,154,46"/>
+<area shape="rect" id="Node000002" href="$tamtypes_8h.html" title=" " alt="" coords="5,315,90,341"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="84,47,75,94,52,300,47,299,70,94,78,46"/>
+<area shape="rect" id="Node000003" href="$intrman_8h.html" title=" " alt="" coords="85,94,159,120"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="96,45,112,78,107,81,92,48"/>
+<area shape="rect" id="Node000004" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="100,241,163,267"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="126,120,132,226,127,226,120,120"/>
+<area shape="rect" id="Node000006" href="$irx_8h.html" title=" " alt="" coords="144,168,188,193"/>
+<area shape="poly" id="edge6_Node000003_Node000006" title=" " alt="" coords="132,118,153,153,148,156,127,121"/>
+<area shape="poly" id="edge5_Node000004_Node000002" title=" " alt="" coords="119,270,75,307,72,303,116,266"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="114,315,181,341"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="137,267,144,299,139,300,132,268"/>
+<area shape="poly" id="edge7_Node000006_Node000004" title=" " alt="" coords="163,195,146,228,142,226,158,192"/>
+</map>

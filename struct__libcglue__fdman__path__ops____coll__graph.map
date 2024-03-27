@@ -1,0 +1,12 @@
+<map id="_libcglue_fdman_path_ops_" name="_libcglue_fdman_path_ops_">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,184,188,210"/>
+<area shape="rect" id="Node000002" href="$struct__libcglue__fdman__fd__info__.html" title=" " alt="" coords="102,5,235,46"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="121,58,110,71,99,101,95,132,97,183,92,184,89,132,94,99,106,69,117,54"/>
+<area shape="rect" id="Node000003" href="$struct__libcglue__fdman__fd__ops__.html" title=" " alt="" coords="212,184,381,210"/>
+<area shape="poly" id="edge4_Node000003_Node000002" title=" " alt="" coords="159,61,154,85,153,111,156,136,167,158,188,171,222,181,221,186,186,176,163,162,151,138,147,111,149,84,154,60"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="274,173,265,161,238,116,210,72,189,48,193,45,215,68,243,113,269,159,278,170"/>
+<area shape="rect" id="Node000004" href="$thread_8c.html#structrequest" title=" " alt="" coords="264,13,329,39"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="299,54,299,183,294,183,294,54"/>
+<area shape="rect" id="Node000005" href="$tcpip_8h.html#structsockaddr" title=" " alt="" coords="353,13,427,39"/>
+<area shape="poly" id="edge5_Node000003_Node000005" title=" " alt="" coords="384,54,365,106,335,162,313,185,309,182,330,158,360,103,379,53"/>
+</map>

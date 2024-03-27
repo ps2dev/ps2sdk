@@ -1,0 +1,26 @@
+<map id="iop/usb/usbd/src/mem.c" name="iop/usb/usbd/src/mem.c">
+<area shape="rect" id="Node000001" title=" " alt="" coords="32,5,192,31"/>
+<area shape="rect" id="Node000002" href="$usbdpriv_8h.html" title=" " alt="" coords="5,153,86,178"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="104,33,87,54,72,80,61,110,53,138,48,137,56,108,67,78,83,51,100,30"/>
+<area shape="rect" id="Node000009" href="$mem_8h.html" title=" " alt="" coords="82,79,142,105"/>
+<area shape="poly" id="edge9_Node000001_Node000009" title=" " alt="" coords="115,31,115,63,110,63,110,31"/>
+<area shape="rect" id="Node000010" href="$stdio_8h.html" title=" " alt="" coords="167,79,226,105"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="128,30,172,67,169,71,125,34"/>
+<area shape="rect" id="Node000003" href="$usbd_8h.html" title=" " alt="" coords="56,226,115,252"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="54,177,74,212,69,214,50,180"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="16,300,78,326"/>
+<area shape="poly" id="edge8_Node000002_Node000004" title=" " alt="" coords="48,179,47,252,48,284,43,285,42,252,42,179"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="81,253,63,287,58,285,77,251"/>
+<area shape="rect" id="Node000005" href="$irx_8h.html" title=" " alt="" coords="115,300,160,326"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="96,251,122,286,118,289,92,254"/>
+<area shape="rect" id="Node000006" href="$iop_2kernel_2include_2types_8h_source.html" title=" " alt="" coords="106,374,169,399"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="140,326,140,358,135,358,135,326"/>
+<area shape="rect" id="Node000007" title=" " alt="" coords="55,447,122,473"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="132,401,107,436,103,433,127,398"/>
+<area shape="rect" id="Node000008" href="$tamtypes_8h.html" title=" " alt="" coords="146,447,230,473"/>
+<area shape="poly" id="edge7_Node000006_Node000008" title=" " alt="" coords="148,398,173,433,169,436,144,401"/>
+<area shape="poly" id="edge10_Node000009_Node000002" title=" " alt="" coords="103,107,69,143,65,139,99,103"/>
+<area shape="poly" id="edge13_Node000010_Node000005" title=" " alt="" coords="195,106,180,153,146,285,141,284,175,152,190,104"/>
+<area shape="rect" id="Node000011" title=" " alt="" coords="189,153,257,178"/>
+<area shape="poly" id="edge12_Node000010_Node000011" title=" " alt="" coords="203,104,216,137,211,139,198,106"/>
+</map>

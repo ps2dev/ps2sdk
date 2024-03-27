@@ -1,0 +1,37 @@
+<map id="common/include/speedregs.h" name="common/include/speedregs.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="838,5,1029,31"/>
+<area shape="rect" id="Node000002" href="$atahw_8h.html" title=" " alt="" coords="197,87,363,112"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="823,34,415,82,364,89,363,83,414,76,822,29"/>
+<area shape="rect" id="Node000003" href="$ps2atad_8c.html" title=" " alt="" coords="5,175,187,201"/>
+<area shape="poly" id="edge8_Node000001_Node000003" title=" " alt="" coords="823,26,452,46,281,62,221,71,187,81,158,102,134,128,104,176,100,173,130,125,155,98,184,77,220,66,281,57,452,41,823,21"/>
+<area shape="rect" id="Node000005" href="$smapregs_8h.html" title=" " alt="" coords="470,87,658,112"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="862,37,622,89,620,83,861,32"/>
+<area shape="rect" id="Node000006" href="$ps2dev9_8c.html" title=" " alt="" coords="373,175,560,201"/>
+<area shape="poly" id="edge9_Node000001_Node000006" title=" " alt="" coords="823,28,600,48,507,63,477,72,461,81,450,103,450,128,456,153,463,174,458,176,450,155,445,129,445,102,457,77,475,67,506,58,599,43,822,23"/>
+<area shape="rect" id="Node000007" href="$smap_8c_source.html" title=" " alt="" coords="584,168,731,208"/>
+<area shape="poly" id="edge18_Node000001_Node000007" title=" " alt="" coords="862,38,810,56,760,81,734,102,709,125,673,169,669,166,706,121,730,97,757,77,808,51,860,33"/>
+<area shape="rect" id="Node000008" href="$xfer_8c_source.html" title=" " alt="" coords="755,168,901,208"/>
+<area shape="poly" id="edge19_Node000001_Node000008" title=" " alt="" coords="831,39,798,56,773,81,768,91,767,102,774,124,789,146,807,165,803,169,784,150,769,127,761,102,763,89,768,77,795,51,828,34"/>
+<area shape="rect" id="Node000009" href="$extflash_8c_source.html" title=" " alt="" coords="783,79,924,120"/>
+<area shape="poly" id="edge10_Node000001_Node000009" title=" " alt="" coords="912,44,875,81,871,77,909,40"/>
+<area shape="rect" id="Node000010" href="$dvrdrv_8c_source.html" title=" " alt="" coords="947,79,1080,120"/>
+<area shape="poly" id="edge11_Node000001_Node000010" title=" " alt="" coords="958,40,995,77,992,81,954,44"/>
+<area shape="rect" id="Node000011" href="$dvr_8c_source.html" title=" " alt="" coords="1103,87,1246,112"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="985,34,1138,83,1137,88,984,39"/>
+<area shape="rect" id="Node000012" href="$dvrav_8c_source.html" title=" " alt="" coords="1271,79,1396,120"/>
+<area shape="poly" id="edge13_Node000001_Node000012" title=" " alt="" coords="1023,32,1259,76,1271,79,1270,84,1258,82,1022,37"/>
+<area shape="rect" id="Node000013" href="$dvrdv_8c_source.html" title=" " alt="" coords="1420,79,1545,120"/>
+<area shape="poly" id="edge14_Node000001_Node000013" title=" " alt="" coords="1044,27,1216,46,1408,76,1420,79,1419,84,1408,82,1215,52,1044,32"/>
+<area shape="rect" id="Node000014" href="$dvrfile_8c_source.html" title=" " alt="" coords="1570,79,1697,120"/>
+<area shape="poly" id="edge15_Node000001_Node000014" title=" " alt="" coords="1045,22,1281,41,1420,56,1558,76,1570,79,1569,84,1557,82,1419,61,1281,46,1044,28"/>
+<area shape="rect" id="Node000015" href="$dvripl_8c_source.html" title=" " alt="" coords="1721,79,1845,120"/>
+<area shape="poly" id="edge16_Node000001_Node000015" title=" " alt="" coords="1044,19,1179,25,1346,35,1528,52,1710,76,1721,78,1720,84,1709,82,1527,57,1345,40,1179,30,1044,25"/>
+<area shape="rect" id="Node000016" href="$dvrmisc_8c_source.html" title=" " alt="" coords="1869,79,2008,120"/>
+<area shape="poly" id="edge17_Node000001_Node000016" title=" " alt="" coords="1044,18,1204,22,1407,32,1632,50,1858,76,1869,78,1868,84,1857,82,1632,55,1407,38,1204,28,1044,23"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="241,122,123,177,121,172,239,117"/>
+<area shape="rect" id="Node000004" href="$hdproatad_8c_source.html" title=" " alt="" coords="211,168,349,208"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="283,128,283,168,277,168,277,128"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="541,125,482,177,478,173,537,121"/>
+<area shape="poly" id="edge6_Node000005_Node000007" title=" " alt="" coords="590,121,638,165,634,169,586,125"/>
+<area shape="poly" id="edge7_Node000005_Node000008" title=" " alt="" coords="616,115,769,165,767,170,614,120"/>
+</map>

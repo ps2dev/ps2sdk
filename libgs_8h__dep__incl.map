@@ -1,0 +1,23 @@
+<map id="ee/libgs/include/libgs.h" name="ee/libgs/include/libgs.h">
+<area shape="rect" id="Node000001" title=" " alt="" coords="736,5,888,31"/>
+<area shape="rect" id="Node000002" href="$_double_buff_8c_source.html" title=" " alt="" coords="5,79,171,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="720,30,183,82,171,83,171,78,182,76,720,25"/>
+<area shape="rect" id="Node000003" href="$_zbuffer_8c_source.html" title=" " alt="" coords="194,79,337,105"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="720,34,348,82,337,83,337,78,348,76,720,28"/>
+<area shape="rect" id="Node000004" href="$libgs_2src_2dma_8c_source.html" title=" " alt="" coords="360,79,488,105"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="731,37,489,81,488,76,730,32"/>
+<area shape="rect" id="Node000005" href="$libgs_2src_2draw_8c_source.html" title=" " alt="" coords="512,79,643,105"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="759,38,618,81,617,76,757,33"/>
+<area shape="rect" id="Node000006" href="$libgs_8c_source.html" title=" " alt="" coords="666,79,795,105"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="789,43,746,81,743,77,785,39"/>
+<area shape="rect" id="Node000007" href="$lowlevel_8c_source.html" title=" " alt="" coords="820,79,969,105"/>
+<area shape="poly" id="edge6_Node000001_Node000007" title=" " alt="" coords="839,39,883,77,879,81,836,44"/>
+<area shape="rect" id="Node000008" href="$packets_8c_source.html" title=" " alt="" coords="994,79,1142,105"/>
+<area shape="poly" id="edge7_Node000001_Node000008" title=" " alt="" coords="871,33,1025,76,1024,81,869,38"/>
+<area shape="rect" id="Node000009" href="$primitives_8c_source.html" title=" " alt="" coords="1166,79,1325,105"/>
+<area shape="poly" id="edge8_Node000001_Node000009" title=" " alt="" coords="901,31,1172,76,1171,81,901,37"/>
+<area shape="rect" id="Node000010" href="$sync_8c_source.html" title=" " alt="" coords="1349,79,1478,105"/>
+<area shape="poly" id="edge9_Node000001_Node000010" title=" " alt="" coords="904,26,1336,76,1349,78,1348,83,1336,82,903,32"/>
+<area shape="rect" id="Node000011" href="$texture_8c_source.html" title=" " alt="" coords="1503,79,1644,105"/>
+<area shape="poly" id="edge10_Node000001_Node000011" title=" " alt="" coords="904,23,1168,45,1491,76,1502,78,1502,83,1490,82,1167,50,903,29"/>
+</map>

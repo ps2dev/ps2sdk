@@ -1,0 +1,28 @@
+<map id="iop/system/sysclib/src" name="iop/system/sysclib/src">
+<area shape="rect" id="node8" href="dir_9be0baa3d4a3e9f480a9ee70594037fa.html" title="kernel" alt="" coords="347,137,403,162"/>
+<area shape="poly" id="edge1" href="dir_000381_000174.html" alt="" coords="633,90,622,102,608,112,560,132,509,143,460,150,419,152,418,146,460,144,508,138,558,127,605,108,619,98,629,86"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000381_000174.html" title="78" alt="" coords="414,150,428,165"/>
+<area shape="rect" id="node2" href="dir_76f6712385aad5f71054d252dc76d79e.html" title="embeddedartistry_libc" alt="" coords="448,63,595,89"/>
+<area shape="poly" id="edge2" href="dir_000043_000174.html" alt="" coords="498,92,415,132,412,127,495,87"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000043_000174.html" title="8" alt="" coords="416,128,423,143"/>
+<area shape="rect" id="node3" href="dir_bd62be9475ca4f332fbf19becd78d95e.html" title="eyalroz_printf" alt="" coords="326,63,423,89"/>
+<area shape="poly" id="edge3" href="dir_000048_000174.html" alt="" coords="377,89,377,121,372,121,372,89"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000048_000174.html" title="3" alt="" coords="380,111,387,126"/>
+<area shape="rect" id="node4" href="dir_950112c2cce41ca0fe6d06ee08cf690a.html" title="musl" alt="" coords="253,63,302,89"/>
+<area shape="poly" id="edge4" href="dir_000203_000174.html" alt="" coords="292,87,316,108,343,126,340,131,313,112,288,91"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000203_000174.html" title="44" alt="" coords="336,112,350,127"/>
+<area shape="rect" id="node5" href="dir_5e6d19e02aff7b7ecdcee2b32d4e4d69.html" title="newlib" alt="" coords="683,63,741,89"/>
+<area shape="poly" id="edge5" href="dir_000211_000174.html" alt="" coords="702,91,672,112,623,125,555,136,419,148,418,143,554,130,622,120,670,108,699,87"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000211_000174.html" title="2" alt="" coords="418,146,425,161"/>
+<area shape="rect" id="node9" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html" title="common" alt="" coords="676,137,748,162"/>
+<area shape="poly" id="edge6" href="dir_000211_000022.html" alt="" coords="715,89,715,121,709,121,709,89"/>
+<area shape="rect" id="edge6-headlabel" href="dir_000211_000022.html" title="1" alt="" coords="717,111,724,126"/>
+<area shape="rect" id="node6" href="dir_e27c3ee1507bfb964a7b3cbac14762a5.html" title="nonstd" alt="" coords="38,63,98,89"/>
+<area shape="poly" id="edge7" href="dir_000212_000174.html" alt="" coords="81,87,112,108,169,126,228,138,331,146,331,151,228,143,168,131,109,112,78,91"/>
+<area shape="rect" id="edge7-headlabel" href="dir_000212_000174.html" title="4" alt="" coords="325,133,332,148"/>
+<area shape="rect" id="node7" href="dir_0beacc05ac1d7f4fed3f447a40616c4b.html" title="size_optimized" alt="" coords="123,63,229,89"/>
+<area shape="poly" id="edge8" href="dir_000249_000174.html" alt="" coords="198,87,242,108,332,135,331,141,240,112,196,92"/>
+<area shape="rect" id="edge8-headlabel" href="dir_000249_000174.html" title="15" alt="" coords="324,122,338,137"/>
+<area shape="rect" id="clust2" href="dir_6b3a3a5d267f0fea31b7a7f9b7d2beaf.html" alt="" coords="27,52,752,99"/>
+<area shape="rect" id="clust1" href="dir_1bd32d4ef826aeeda00870843eb45c97.html" title="sysclib" alt="" coords="16,16,763,110"/>
+</map>

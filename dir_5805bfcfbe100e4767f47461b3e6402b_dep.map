@@ -1,0 +1,19 @@
+<map id="iop/memorycard" name="iop/memorycard">
+<area shape="rect" id="node1" href="dir_9be0baa3d4a3e9f480a9ee70594037fa.html" title="kernel" alt="" coords="41,210,98,236"/>
+<area shape="rect" id="node2" href="dir_40ac35421bc63b72c26b6c69b1517fd6.html" title="system" alt="" coords="122,210,185,236"/>
+<area shape="rect" id="node4" href="dir_ae48e1b29bfa2db4ecbd893188b24955.html" title="mcman" alt="" coords="108,137,172,162"/>
+<area shape="poly" id="edge1" href="dir_000192_000174.html" alt="" coords="130,164,94,201,90,197,126,161"/>
+<area shape="rect" id="edge1-headlabel" href="dir_000192_000174.html" title="24" alt="" coords="93,195,107,210"/>
+<area shape="poly" id="edge3" href="dir_000192_000412.html" alt="" coords="145,162,151,194,146,195,140,163"/>
+<area shape="rect" id="edge3-headlabel" href="dir_000192_000412.html" title="2" alt="" coords="153,183,160,198"/>
+<area shape="rect" id="node6" href="dir_bdd9a5d540de89e9fe90efdfc6973a4f.html" title="common" alt="" coords="251,210,322,236"/>
+<area shape="poly" id="edge2" href="dir_000192_000022.html" alt="" coords="166,160,249,201,247,205,164,165"/>
+<area shape="rect" id="edge2-headlabel" href="dir_000192_000022.html" title="2" alt="" coords="246,187,253,202"/>
+<area shape="rect" id="node5" href="dir_841d05e6e469c6e67dc741c932691089.html" title="mcserv" alt="" coords="37,63,102,89"/>
+<area shape="poly" id="edge4" href="dir_000193_000174.html" alt="" coords="72,89,72,195,67,195,67,89"/>
+<area shape="rect" id="edge4-headlabel" href="dir_000193_000174.html" title="13" alt="" coords="71,184,85,199"/>
+<area shape="poly" id="edge5" href="dir_000193_000192.html" alt="" coords="83,87,119,124,116,127,79,91"/>
+<area shape="rect" id="edge5-headlabel" href="dir_000193_000192.html" title="2" alt="" coords="118,110,125,125"/>
+<area shape="rect" id="clust2" href="dir_5805bfcfbe100e4767f47461b3e6402b.html" alt="" coords="27,52,229,173"/>
+<area shape="rect" id="clust1" href="dir_0981ace215aa2029f526b70c145b9fbe.html" title="iop" alt="" coords="16,16,240,247"/>
+</map>

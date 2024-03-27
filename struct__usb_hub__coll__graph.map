@@ -1,0 +1,34 @@
+<map id="_usbHub" name="_usbHub">
+<area shape="rect" id="Node000001" title=" " alt="" coords="740,488,813,513"/>
+<area shape="poly" id="edge1_Node000001_Node000001" title=" " alt="" coords="821,484,834,489,840,500,837,510,828,515,805,517,804,511,826,510,832,506,835,501,831,493,819,489"/>
+<area shape="rect" id="Node000002" href="$usbdpriv_8h.html#struct__endpoint" title=" " alt="" coords="361,219,438,245"/>
+<area shape="poly" id="edge2_Node000001_Node000002" title=" " alt="" coords="454,235,556,247,676,267,734,280,786,297,827,316,855,338,865,358,866,380,860,402,850,423,820,461,792,489,788,486,816,458,845,420,855,400,861,379,859,360,850,342,824,320,784,302,733,286,675,272,555,252,453,240"/>
+<area shape="poly" id="edge3_Node000002_Node000002" title=" " alt="" coords="455,220,462,225,464,232,456,243,439,246,438,241,454,238,459,232,458,228,452,225"/>
+<area shape="rect" id="Node000003" href="$usbdpriv_8h.html#struct__device" title=" " alt="" coords="209,488,275,513"/>
+<area shape="poly" id="edge6_Node000003_Node000002" title=" " alt="" coords="396,261,379,320,366,354,349,386,327,418,302,447,258,489,254,485,299,443,323,415,345,384,361,352,374,318,391,259"/>
+<area shape="rect" id="Node000006" href="$usbdpriv_8h.html#struct__io_request" title=" " alt="" coords="500,350,586,375"/>
+<area shape="poly" id="edge13_Node000006_Node000002" title=" " alt="" coords="453,247,484,263,512,284,533,317,543,348,538,350,528,319,508,288,481,267,451,252"/>
+<area shape="poly" id="edge4_Node000002_Node000003" title=" " alt="" coords="236,472,238,409,245,373,259,339,283,306,313,280,372,243,375,248,316,284,287,310,263,341,250,374,243,409,242,472"/>
+<area shape="poly" id="edge5_Node000003_Node000003" title=" " alt="" coords="284,484,296,489,302,500,299,510,290,515,268,517,268,511,289,510,294,506,296,501,293,493,282,489"/>
+<area shape="rect" id="Node000004" href="$struct___usb_driver.html" title=" " alt="" coords="5,350,92,375"/>
+<area shape="poly" id="edge7_Node000003_Node000004" title=" " alt="" coords="64,387,82,413,106,437,131,454,158,468,209,488,208,493,156,473,128,459,102,441,78,416,60,390"/>
+<area shape="poly" id="edge8_Node000004_Node000004" title=" " alt="" coords="108,351,115,355,118,363,110,373,92,377,91,371,107,369,113,362,111,359,105,356"/>
+<area shape="rect" id="Node000005" href="$usbdpriv_8h.html#struct__timer_cb_struct" title=" " alt="" coords="169,111,277,137"/>
+<area shape="poly" id="edge16_Node000002_Node000005" title=" " alt="" coords="257,143,381,216,378,221,255,147"/>
+<area shape="poly" id="edge9_Node000003_Node000005" title=" " alt="" coords="226,153,228,277,236,439,243,487,237,488,231,439,223,277,221,153"/>
+<area shape="poly" id="edge10_Node000005_Node000005" title=" " alt="" coords="295,115,304,124,296,132,278,135,278,130,294,128,299,124,291,120"/>
+<area shape="poly" id="edge21_Node000001_Node000006" title=" " alt="" coords="578,381,757,485,755,489,575,385"/>
+<area shape="poly" id="edge15_Node000002_Node000006" title=" " alt="" coords="494,347,420,318,408,300,401,280,396,245,402,245,406,279,413,298,423,314,495,342"/>
+<area shape="poly" id="edge11_Node000003_Node000006" title=" " alt="" coords="509,386,396,441,276,490,274,485,394,437,506,381"/>
+<area shape="poly" id="edge12_Node000006_Node000006" title=" " alt="" coords="603,351,610,355,613,363,605,373,587,377,586,371,602,369,608,362,606,359,600,356"/>
+<area shape="rect" id="Node000007" href="$usbd_8h.html#struct_usb_device_request" title=" " alt="" coords="866,219,999,245"/>
+<area shape="poly" id="edge14_Node000006_Node000007" title=" " alt="" coords="882,253,581,352,579,347,880,248"/>
+<area shape="rect" id="Node000008" href="$usbdpriv_8h.html#struct__hc_ed" title=" " alt="" coords="371,111,428,137"/>
+<area shape="poly" id="edge17_Node000002_Node000008" title=" " alt="" coords="402,153,402,219,397,219,397,153"/>
+<area shape="poly" id="edge20_Node000008_Node000008" title=" " alt="" coords="445,115,454,124,446,133,429,135,428,130,444,129,449,124,442,119"/>
+<area shape="rect" id="Node000009" href="$usbdpriv_8h.html#struct__hc_td" title=" " alt="" coords="371,5,428,31"/>
+<area shape="poly" id="edge18_Node000008_Node000009" title=" " alt="" coords="402,46,402,111,397,111,397,46"/>
+<area shape="poly" id="edge19_Node000009_Node000009" title=" " alt="" coords="445,8,452,11,454,19,446,28,429,30,428,25,444,24,449,18,448,15,442,12"/>
+<area shape="rect" id="Node000010" href="$usbd_8h.html#struct_usb_hub_descriptor" title=" " alt="" coords="712,350,841,375"/>
+<area shape="poly" id="edge22_Node000001_Node000010" title=" " alt="" coords="779,391,779,487,774,487,774,391"/>
+</map>
