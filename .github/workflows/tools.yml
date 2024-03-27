@@ -44,7 +44,7 @@ jobs:
 
     - name: Upload artifacts
       if: ${{ success() }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ps2sdk-tools-${{ matrix.debug }}-${{ matrix.os[0] }}
         path: ps2dev/ps2sdk/bin/*
