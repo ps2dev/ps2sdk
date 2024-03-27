@@ -6,12 +6,30 @@
 #include <thbase.h>
 #include <thevent.h>
 #include <vblank.h>
+#ifdef BUILDING_RMMAN2
+#ifdef BUILDING_RMMANX
+#include <iomanX.h>
+#else
+#include <cdvdman.h>
+#endif
+#else
 #include <rsio2man.h>
+#endif
 #include <irx.h>
 
 #include "rmman.h"
 
+#ifdef BUILDING_RMMAN2
+#ifdef BUILDING_RMMANX
+IRX_ID("rmmanx", 2, 4);
+// Based off the module from XOSD 2.14
+#else
+IRX_ID("rmman2", 2, 4);
+// Based off the module from DVD Player 3.10
+#endif
+#else
 IRX_ID("rmman", 1, 16);
+#endif
 
 #ifdef DEBUG
 #define DPRINTF(x...) printf("RMMAN: "x)
@@ -24,37 +42,80 @@ IRX_ID("rmman", 1, 16);
 #define RM_EF_CLOSE_PORT		4
 #define RM_EF_CLOSE_PORT_DONE		8
 
+#ifdef BUILDING_RMMAN2
+#define RM_MAX_PORT 1
+#define RM_MAX_SLOT 1
+#define RM_EE_DATA_TYPE struct rmEEData2
+#define RM_RPCFUNC_END RMMAN2_RPCFUNC_END
+#define RM_RPCFUNC_INIT RMMAN2_RPCFUNC_INIT
+#define RM_RPCFUNC_CLOSE RMMAN2_RPCFUNC_CLOSE
+#define RM_RPCFUNC_OPEN RMMAN2_RPCFUNC_OPEN
+#define RM_RPCFUNC_VERSION RMMAN2_RPCFUNC_VERSION
+#define RM_RPCFUNC_REMOTE2_6 RMMAN2_RPCFUNC_REMOTE2_6
+#ifdef BUILDING_RMMANX
+#define RM_RPC_ID RMMANX_RPC_ID
+#else
+#define RM_RPC_ID RMMAN2_RPC_ID
+#endif
+#define RM_PACKET_CMD(packet) (packet->cmd.u.cmd2)
+#else
+#define RM_MAX_PORT 2
+#define RM_MAX_SLOT 4
+#define RM_EE_DATA_TYPE struct rmEEData
+#define RM_RPCFUNC_END RMMAN_RPCFUNC_END
+#define RM_RPCFUNC_INIT RMMAN_RPCFUNC_INIT
+#define RM_RPCFUNC_CLOSE RMMAN_RPCFUNC_CLOSE
+#define RM_RPCFUNC_OPEN RMMAN_RPCFUNC_OPEN
+#define RM_RPCFUNC_VERSION RMMAN_RPCFUNC_VERSION
+#define RM_RPC_ID RMMAN_RPC_ID
+#define RM_PACKET_CMD(packet) (packet->cmd.u.cmd1)
+#endif
+
 enum RM_TASK {
 	RM_TASK_QUERY = 0,
 	RM_TASK_INIT,
 	RM_TASK_POLL
 };
 
-struct RmData{				//size = 316
-	struct rmEEData eeData;		//0x000
-	u32 unused1;			//0x030
-	u8 inBuffer[32];		//0x034
-	u8 outBuffer[32];		//0x054
-	u32 state;			//0x074
-	u32 reqState;			//0x078
-	u32 frame;			//0x07C
-	struct rmEEData *eeBuffer;	//0x080
-	s32 port;			//0x084
-	s32 slot;			//0x088
-	u32 currentTask;		//0x08C
-	u32 counter;			//0x090
-	u32 powerMode;			//0x094
-	u32 closed;			//0x098
-	u32 connected;			//0x09C
-	u32 eventFlagID;		//0x0a0
-	u32 unused2;			//0x0a4
-	sio2_transfer_data_t sio2Data;	//0x0a8
+struct RmData {
+	RM_EE_DATA_TYPE eeData;
+#ifndef BUILDING_RMMAN2
+	u32 unused1;
+	u8 inBuffer[32];
+#endif
+	u8 outBuffer[32];
+	u32 state;
+	u32 reqState;
+	u32 frame;
+	RM_EE_DATA_TYPE *eeBuffer;
+#ifndef BUILDING_RMMAN2
+	s32 port;
+	s32 slot;
+	u32 currentTask;
+	u32 counter;
+	u32 powerMode;
+	u32 closed;
+#endif
+	u32 connected;
+#ifndef BUILDING_RMMAN2
+	u32 eventFlagID;
+	u32 unused2;
+	sio2_transfer_data_t sio2Data;
+#endif
 };
 
+#ifdef BUILDING_RMMAN2
+#ifdef BUILDING_RMMANX
+extern struct irx_export_table _exp_rmmanx;
+#else
+extern struct irx_export_table _exp_rmman2;
+#endif
+#else
 extern struct irx_export_table _exp_rmman;
+#endif
 
-static struct RmData RmData[2][4];
-static int portStatus[2];
+static struct RmData RmData[RM_MAX_PORT][RM_MAX_SLOT];
+static int portStatus[RM_MAX_PORT];
 static int eventFlagID;
 static int MainThreadID;
 static int IsInitialized;
@@ -66,24 +127,41 @@ static struct rmRpcPacket RpcDataBuffer __attribute__((__aligned__(4)));
 static int CreateMainThread(void);
 static void MainThread(void *arg);
 static int HandleTasks(struct RmData *RmData);
+#ifndef BUILDING_RMMAN2
 static int FindRemote(struct RmData *RmData);
 static int InitFindRmCmd(struct RmData *RmData);
+#endif
 static int PollRemote(struct RmData *RmData);
+#ifndef BUILDING_RMMAN2
 static int InitPollRmCmd(struct RmData *RmData);
 static int RmExecute(struct RmData *RmData);
+#endif
 static int DmaSendEE(struct RmData *RmData);
+#ifndef BUILDING_RMMAN2
 static int HandleRmTaskFailed(struct RmData *RmData);
 static int InitRemote(struct RmData *RmData);
 static int InitInitRmCmd(struct RmData *RmData);
+#endif
 
 int _start(int argc, char *argv[])
 {
 	int result;
+	struct irx_export_table *export_table;
 
 	(void)argc;
 	(void)argv;
 
-	if(RegisterLibraryEntries(&_exp_rmman) == 0)
+#ifdef BUILDING_RMMAN2
+#ifdef BUILDING_RMMANX
+	export_table = &_exp_rmmanx;
+#else
+	export_table = &_exp_rmman2;
+#endif
+#else
+	export_table = &_exp_rmman;
+#endif
+
+	if(RegisterLibraryEntries(export_table) == 0)
 	{
 		result = CreateMainThread() <= 0 ? MODULE_NO_RESIDENT_END : MODULE_RESIDENT_END;
 	}
@@ -97,9 +175,12 @@ int rmmanInit(void)
 	iop_event_t EventFlagData;
 	iop_thread_t ThreadData;
 	int result;
+	int i;
 
-	portStatus[0] = 0;
-	portStatus[1] = 0;
+	for (i = 0; i < RM_MAX_PORT; i += 1)
+	{
+		portStatus[i] = 0;
+	}
 	IsInitialized = 1;
 	EventFlagData.attr = 2;
 	EventFlagData.bits = 0;
@@ -123,22 +204,34 @@ int rmmanInit(void)
 
 int rmmanOpen(int port, int slot, void *buffer)
 {
-	iop_event_t evf;
 	int result;
+
+	if ((port >= RM_MAX_PORT) || (slot >= RM_MAX_SLOT))
+	{
+		return 0;
+	}
 
 	if(!((portStatus[port] >> slot) & 1))
 	{
 		struct RmData *pRmData;
+#ifndef BUILDING_RMMAN2
+		iop_event_t evf;
+#endif
 
 		pRmData = &RmData[port][slot];
+#ifndef BUILDING_RMMAN2
 		pRmData->port = port;
 		pRmData->slot = slot;
+#endif
 		pRmData->state = RM_STATE_EXECCMD;
 		pRmData->reqState = RM_RSTATE_COMPLETE;
 		pRmData->eeBuffer = buffer;
+#ifndef BUILDING_RMMAN2
 		pRmData->currentTask = RM_TASK_QUERY;
 		pRmData->counter = 0;
+#endif
 
+#ifndef BUILDING_RMMAN2
 		evf.attr = EA_MULTI;
 		evf.bits = 0;
 
@@ -149,6 +242,9 @@ int rmmanOpen(int port, int slot, void *buffer)
 			result = 1;
 		} else
 			result = 0;
+#else
+		result = 1;
+#endif
 	} else
 		result = 0;
 
@@ -158,11 +254,17 @@ int rmmanOpen(int port, int slot, void *buffer)
 int rmmanClose(int port, int slot)
 {
 	int result;
-	u32 bits;
+
+	if ((port >= RM_MAX_PORT) || (slot >= RM_MAX_SLOT))
+	{
+		return 0;
+	}
 
 	if((portStatus[port] >> slot) & 1)
 	{
+#ifndef BUILDING_RMMAN2
 		struct RmData *pRmData;
+		u32 bits;
 
 		pRmData = &RmData[port][slot];
 
@@ -182,6 +284,10 @@ int rmmanClose(int port, int slot)
 			portStatus[port] ^= (1 << slot);
 			result = 1;
 		}
+#else
+		portStatus[port] ^= (1 << slot);
+		result = 1;
+#endif
 	} else
 		result = 0;
 
@@ -196,10 +302,10 @@ int rmmanEnd(void)
 	if(IsInitialized != 0)
 	{
 		int port;
-		for(port = 0; port < 2; port++)
+		for(port = 0; port < RM_MAX_PORT; port++)
 		{
 			int slot;
-			for(slot = 0; slot < 4; slot++)
+			for(slot = 0; slot < RM_MAX_SLOT; slot++)
 			{	//If port,slot is opened, close it.
 				if((portStatus[port] >> slot) & 1)
 					rmmanClose(port, slot);
@@ -243,12 +349,13 @@ static void MainThread(void *arg)
 			ExitThread();
 		}
 
-		for(port = 0; port < 2; port++)
+		for(port = 0; port < RM_MAX_PORT; port++)
 		{
-			for(slot = 0; slot < 4; slot++)
+			for(slot = 0; slot < RM_MAX_SLOT; slot++)
 			{
 				if((portStatus[port] >> slot) & 1)
 				{
+#ifndef BUILDING_RMMAN2
 					ReferEventFlagStatus(RmData[port][slot].eventFlagID, &evfInfo);
 
 					if(evfInfo.currBits == RM_EF_CLOSE_PORT)
@@ -263,6 +370,9 @@ static void MainThread(void *arg)
 					} else {
 						HandleTasks(&RmData[port][slot]);
 					}
+#else
+					HandleTasks(&RmData[port][slot]);
+#endif
 				}
 			}
 		}
@@ -271,6 +381,7 @@ static void MainThread(void *arg)
 
 static int HandleTasks(struct RmData *RmData)
 {
+#ifndef BUILDING_RMMAN2
 	switch(RmData->currentTask)
 	{
 		case RM_TASK_QUERY:
@@ -312,12 +423,16 @@ static int HandleTasks(struct RmData *RmData)
 			}
 			break;
 	}
+#else
+	RmData->connected = PollRemote(RmData);
+#endif
 
 	DmaSendEE(RmData);
 
 	return 1;
 }
 
+#ifndef BUILDING_RMMAN2
 static int FindRemote(struct RmData *RmData)
 {
 	int result;
@@ -325,7 +440,7 @@ static int FindRemote(struct RmData *RmData)
 	InitFindRmCmd(RmData);
 	if(RmExecute(RmData) != 0)
 	{
-		if(RmData->port < 2)
+		if(RmData->port < RM_MAX_PORT)
 		{
 			switch(RmData->outBuffer[1])
 			{
@@ -376,13 +491,45 @@ static int InitFindRmCmd(struct RmData *RmData)
 
 	return 1;
 }
+#endif
 
 static int PollRemote(struct RmData *RmData)
 {
+#ifndef BUILDING_RMMAN2
 	InitPollRmCmd(RmData);
 	return(RmExecute(RmData) > 0);
+#else
+	int i;
+	char rmbuf[16];
+
+#ifdef BUILDING_RMMANX
+	if (iomanX_devctl("dvr_misc:", 0x5668, 0, 0, rmbuf, 0xA) < 0)
+#else
+	if (sceCdApplySCmd(0x1E, 0, 0, rmbuf) && (rmbuf[0] & 0x80) != 0)
+#endif
+	{
+		RmData->state = RM_STATE_DISCONN;
+		return 0;
+	}
+#ifdef BUILDING_RMMANX
+	RmData->outBuffer[0] = rmbuf[0];
+	for (i = 1; i < 4; i += 1)
+	{
+		RmData->outBuffer[i] = rmbuf[(i - 1) * 2];
+	}
+	RmData->outBuffer[4] = rmbuf[8];
+#else
+	for (i = 1; i < 4; i += 1)
+	{
+		RmData->outBuffer[(i - 1)] = rmbuf[i];
+	}
+#endif
+	RmData->state = RM_STATE_STABLE;
+	return 1;
+#endif
 }
 
+#ifndef BUILDING_RMMAN2
 static int InitPollRmCmd(struct RmData *RmData)
 {
 	int i;
@@ -426,6 +573,7 @@ static int HandleRmTaskFailed(struct RmData *RmData)
 		return 0;
 	}
 }
+#endif
 
 static int DmaSendEE(struct RmData *RmData)
 {
@@ -452,6 +600,7 @@ static int DmaSendEE(struct RmData *RmData)
 	return(dmatID > 0);
 }
 
+#ifndef BUILDING_RMMAN2
 static int InitRemote(struct RmData *RmData)
 {
 	InitInitRmCmd(RmData);
@@ -471,41 +620,80 @@ static int InitInitRmCmd(struct RmData *RmData)
 
 	return 1;
 }
+#endif
 
 static int rmmanVersion(void)
 {
 	return _irx_id.v;
 }
 
+#ifdef BUILDING_RMMAN2
+static int rmmanRemote2_6(u8 *res)
+{
+#ifdef BUILDING_RMMANX
+	*res = 1;
+	return 1;
+#else
+	char scmdbuf[16];
+
+	if (sceCdApplySCmd(0x20, 0, 0, scmdbuf) != 0)
+	{
+		if ((scmdbuf[0] & 0x80) == 0)
+		{
+			*res = scmdbuf[1];
+			return 1;
+		}
+	}
+	return 0;
+#endif
+}
+#endif
+
 static void *RmmanRpc_init(struct rmRpcPacket *packet)
 {
-	packet->cmd.result = rmmanInit();
+	RM_PACKET_CMD(packet).result = rmmanInit();
 	return packet;
 }
 
 static void *RmmanRpc_version(struct rmRpcPacket *packet)
 {
-	packet->cmd.result = rmmanVersion();
+	RM_PACKET_CMD(packet).result = rmmanVersion();
 	return packet;
 }
 
 static void *RmmanRpc_open(struct rmRpcPacket *packet)
 {
-	packet->cmd.result = rmmanOpen(packet->cmd.port, packet->cmd.slot, packet->cmd.data);
+#ifndef BUILDING_RMMAN2
+	RM_PACKET_CMD(packet).result = rmmanOpen(RM_PACKET_CMD(packet).port, RM_PACKET_CMD(packet).slot, RM_PACKET_CMD(packet).data);
+#else
+	RM_PACKET_CMD(packet).result = rmmanOpen(0, 0, RM_PACKET_CMD(packet).data);
+#endif
 	return packet;
 }
 
 static void *RmmanRpc_end(struct rmRpcPacket *packet)
 {
-	packet->cmd.result = rmmanEnd();
+	RM_PACKET_CMD(packet).result = rmmanEnd();
 	return packet;
 }
 
 static void *RmmanRpc_close(struct rmRpcPacket *packet)
 {
-	packet->cmd.result = rmmanClose(packet->cmd.port, packet->cmd.slot);
+#ifndef BUILDING_RMMAN2
+	RM_PACKET_CMD(packet).result = rmmanClose(RM_PACKET_CMD(packet).port, RM_PACKET_CMD(packet).slot);
+#else
+	RM_PACKET_CMD(packet).result = rmmanClose(0, 0);
+#endif
 	return packet;
 }
+
+#ifdef BUILDING_RMMAN2
+static void *RmmanRpc_remote2_6(struct rmRpcPacket *packet)
+{
+	RM_PACKET_CMD(packet).result = rmmanRemote2_6((u8 *)&(RM_PACKET_CMD(packet).data));
+	return packet;
+}
+#endif
 
 static void *RpcHandler(int fno, void *buffer, int len)
 {
@@ -516,21 +704,26 @@ static void *RpcHandler(int fno, void *buffer, int len)
 
 	switch(((struct rmRpcPacket *)buffer)->cmd.command)
 	{
-		case RMMAN_RPCFUNC_END:
+		case RM_RPCFUNC_END:
 			retBuff = RmmanRpc_end((struct rmRpcPacket *)buffer);
 			break;
-		case RMMAN_RPCFUNC_INIT:
+		case RM_RPCFUNC_INIT:
 			retBuff = RmmanRpc_init((struct rmRpcPacket *)buffer);
 			break;
-		case RMMAN_RPCFUNC_CLOSE:
+		case RM_RPCFUNC_CLOSE:
 			retBuff = RmmanRpc_close((struct rmRpcPacket *)buffer);
 			break;
-		case RMMAN_RPCFUNC_OPEN:
+		case RM_RPCFUNC_OPEN:
 			retBuff = RmmanRpc_open((struct rmRpcPacket *)buffer);
 			break;
-		case RMMAN_RPCFUNC_VERSION:
+		case RM_RPCFUNC_VERSION:
 			retBuff = RmmanRpc_version((struct rmRpcPacket *)buffer);
 			break;
+#ifdef BUILDING_RMMAN2
+		case RM_RPCFUNC_REMOTE2_6:
+			retBuff = RmmanRpc_remote2_6((struct rmRpcPacket *)buffer);
+			break;
+#endif
 		default:
 			DPRINTF("invalid function code (%03x)\n", (unsigned int)((struct rmRpcPacket *)buffer)->cmd.command);
 			retBuff = buffer;
@@ -552,7 +745,7 @@ static void RpcThread(void *arg)
 	sceSifInitRpc(0);
 
 	sceSifSetRpcQueue(&RpcDataQueue, GetThreadId());
-	sceSifRegisterRpc(&RpcServerData, RMMAN_RPC_ID, &RpcHandler, &RpcDataBuffer, NULL, NULL, &RpcDataQueue);
+	sceSifRegisterRpc(&RpcServerData, RM_RPC_ID, &RpcHandler, &RpcDataBuffer, NULL, NULL, &RpcDataQueue);
 	sceSifRpcLoop(&RpcDataQueue);
 }
 

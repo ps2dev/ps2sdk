@@ -22,7 +22,7 @@
 
 static SifRpcClientData_t rmmanif __attribute__((aligned(64)));
 static struct rmRpcPacket buffer __attribute__((aligned(64)));
-static int rmman_init = 0;
+static int rmman_type = 0;
 
 struct port_state
 {
@@ -55,7 +55,7 @@ static struct rmEEData *rmGetDmaStr(int port, int slot)
 
 int RMMan_Init(void)
 {
-    if (rmman_init)
+    if (rmman_type)
     {
         printf("RMMan Library already initialised\n");
         return 0;
@@ -63,19 +63,41 @@ int RMMan_Init(void)
 
     rmmanif.server = NULL;
 
-    do
+    while (rmmanif.server == NULL)
     {
-        if (SifBindRpc(&rmmanif, RMMAN_RPC_ID, 0) < 0)
+        rmman_type = 2;
+        if ((SifBindRpc(&rmmanif, RMMANX_RPC_ID, 0) < 0))
         {
-            return -1;
+            break;
         }
         nopdelay();
-    } while (!rmmanif.server);
+    }
 
-    buffer.cmd.command = RMMAN_RPCFUNC_INIT;
-
-    if (SifCallRpc(&rmmanif, 0, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
+    while (rmmanif.server == NULL)
     {
+        rmman_type = 2;
+        if ((SifBindRpc(&rmmanif, RMMAN2_RPC_ID, 0) < 0))
+        {
+            break;
+        }
+        nopdelay();
+    }
+
+    while (rmmanif.server == NULL)
+    {
+        rmman_type = 1;
+        if ((SifBindRpc(&rmmanif, RMMAN_RPC_ID, 0) < 0))
+        {
+            break;
+        }
+        nopdelay();
+    }
+
+    buffer.cmd.command = (rmman_type == 2) ? RMMAN2_RPCFUNC_INIT : RMMAN_RPCFUNC_INIT;
+
+    if (rmmanif.server == NULL || (SifCallRpc(&rmmanif, 0, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0))
+    {
+        rmman_type = 0;
         return -1;
     }
 
@@ -84,21 +106,35 @@ int RMMan_Init(void)
     ports[1].opened = 1;
     ports[1].rmData = NULL;
 
-    rmman_init      = 1;
-
-    return buffer.cmd.result;
+    switch (rmman_type)
+    {
+        case 1:
+            return buffer.cmd.u.cmd1.result;
+        case 2:
+            return buffer.cmd.u.cmd2.result;
+        default:
+            return 0;
+    }
 }
 
 u32 RMMan_GetModuleVersion(void)
 {
-    buffer.cmd.command = RMMAN_RPCFUNC_VERSION;
+    buffer.cmd.command = (rmman_type == 2) ? RMMAN2_RPCFUNC_VERSION : RMMAN_RPCFUNC_VERSION;
 
     if (SifCallRpc(&rmmanif, 0, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     {
         return 0;
     }
 
-    return buffer.cmd.result;
+    switch (rmman_type)
+    {
+        case 1:
+            return buffer.cmd.u.cmd1.result;
+        case 2:
+            return buffer.cmd.u.cmd2.result;
+        default:
+            return 0;
+    }
 }
 
 int RMMan_Open(int port, int slot, void *pData)
@@ -115,10 +151,31 @@ int RMMan_Open(int port, int slot, void *pData)
         return 0;
     }
 
-    buffer.cmd.command = RMMAN_RPCFUNC_OPEN;
-    buffer.cmd.port    = port;
-    buffer.cmd.slot    = slot;
-    buffer.cmd.data    = pData;
+    if (rmman_type != 1 && port != 0)
+    {
+        return 0;
+    }
+
+    buffer.cmd.command = (rmman_type == 2) ? RMMAN2_RPCFUNC_OPEN : RMMAN_RPCFUNC_OPEN;
+    switch (rmman_type)
+    {
+        case 1:
+        {
+            buffer.cmd.u.cmd1.port    = port;
+            buffer.cmd.u.cmd1.slot    = slot;
+            buffer.cmd.u.cmd1.data    = pData;
+            break;
+        }
+        case 2:
+        {
+            buffer.cmd.u.cmd2.data    = pData;
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
 
     if (SifCallRpc(&rmmanif, 0, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     {
@@ -128,19 +185,35 @@ int RMMan_Open(int port, int slot, void *pData)
     ports[port].opened = 1;
     ports[port].rmData = pData;
 
-    return buffer.cmd.result;
+    switch (rmman_type)
+    {
+        case 1:
+            return buffer.cmd.u.cmd1.result;
+        case 2:
+            return buffer.cmd.u.cmd2.result;
+        default:
+            return 0;
+    }
 }
 
 int RMMan_End(void)
 {
-    buffer.cmd.command = RMMAN_RPCFUNC_END;
+    buffer.cmd.command = (rmman_type == 2) ? RMMAN2_RPCFUNC_END : RMMAN_RPCFUNC_END;
 
     if (SifCallRpc(&rmmanif, 0, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     {
         return 0;
     }
 
-    return buffer.cmd.result;
+    switch (rmman_type)
+    {
+        case 1:
+            return buffer.cmd.u.cmd1.result;
+        case 2:
+            return buffer.cmd.u.cmd2.result;
+        default:
+            return 0;
+    }
 }
 
 int RMMan_Close(int port, int slot)
@@ -156,16 +229,35 @@ int RMMan_Close(int port, int slot)
         return 0;
     }
 
-    buffer.cmd.command = RMMAN_RPCFUNC_CLOSE;
-    buffer.cmd.port    = port;
-    buffer.cmd.slot    = slot;
+    buffer.cmd.command = (rmman_type == 2) ? RMMAN2_RPCFUNC_CLOSE : RMMAN_RPCFUNC_CLOSE;
+    switch (rmman_type)
+    {
+        case 1:
+        {
+            buffer.cmd.u.cmd1.port    = port;
+            buffer.cmd.u.cmd1.slot    = slot;
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
 
     if (SifCallRpc(&rmmanif, 0, 0, &buffer, 128, &buffer, 128, NULL, NULL) < 0)
     {
         return 0;
     }
 
-    return buffer.cmd.result;
+    switch (rmman_type)
+    {
+        case 1:
+            return buffer.cmd.u.cmd1.result;
+        case 2:
+            return buffer.cmd.u.cmd2.result;
+        default:
+            return 0;
+    }
 }
 
 void RMMan_Read(int port, int slot, struct remote_data *data)
