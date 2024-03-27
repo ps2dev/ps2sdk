@@ -297,7 +297,7 @@ int RMMan_Close(int port, int slot)
 
 void RMMan_Read(int port, int slot, struct remote_data *data)
 {
-    struct rmEEData *pdata;
+    const struct rmEEData *pdata;
 
     if ((port < 0) || (port > 1) || (slot != 0))
     {
