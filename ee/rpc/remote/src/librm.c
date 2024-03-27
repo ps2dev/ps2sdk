@@ -55,6 +55,8 @@ static struct rmEEData *rmGetDmaStr(int port, int slot)
 
 int RMMan_Init(void)
 {
+    int i;
+
     if (rmman_type)
     {
         printf("RMMan Library already initialised\n");
@@ -128,10 +130,11 @@ int RMMan_Init(void)
         return -1;
     }
 
-    ports[0].opened = 0;
-    ports[0].rmData = NULL;
-    ports[1].opened = 1;
-    ports[1].rmData = NULL;
+    for (i = 0; i < (int)(sizeof(ports)/sizeof(ports[0])); i += 1)
+    {
+        ports[i].opened = 0;
+        ports[i].rmData = NULL;
+    }
 
     switch (rmman_type)
     {
