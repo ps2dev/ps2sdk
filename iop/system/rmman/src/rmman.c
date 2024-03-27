@@ -243,6 +243,7 @@ int rmmanOpen(int port, int slot, void *buffer)
 		} else
 			result = 0;
 #else
+		portStatus[port] |= (1 << slot);
 		result = 1;
 #endif
 	} else
@@ -505,7 +506,7 @@ static int PollRemote(struct RmData *RmData)
 #ifdef BUILDING_RMMANX
 	if (iomanX_devctl("dvr_misc:", 0x5668, 0, 0, rmbuf, 0xA) < 0)
 #else
-	if (sceCdApplySCmd(0x1E, 0, 0, rmbuf) && (rmbuf[0] & 0x80) != 0)
+	if (sceCdApplySCmd(0x1E, 0, 0, rmbuf) == 0 || (rmbuf[0] & 0x80) != 0)
 #endif
 	{
 		RmData->state = RM_STATE_DISCONN;
@@ -513,15 +514,15 @@ static int PollRemote(struct RmData *RmData)
 	}
 #ifdef BUILDING_RMMANX
 	RmData->outBuffer[0] = rmbuf[0];
-	for (i = 1; i < 4; i += 1)
+	for (i = 1; i < 5; i += 1)
 	{
 		RmData->outBuffer[i] = rmbuf[(i - 1) * 2];
 	}
 	RmData->outBuffer[4] = rmbuf[8];
 #else
-	for (i = 1; i < 4; i += 1)
+	for (i = 0; i < 4; i += 1)
 	{
-		RmData->outBuffer[(i - 1)] = rmbuf[i];
+		RmData->outBuffer[i] = rmbuf[i + 1];
 	}
 #endif
 	RmData->state = RM_STATE_STABLE;
