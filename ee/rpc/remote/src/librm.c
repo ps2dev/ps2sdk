@@ -41,8 +41,6 @@ static struct rmEEData *rmGetDmaStr(int port, int slot)
     pdata = ports[port].rmData;
     SyncDCache(pdata, (u8 *)pdata + 256);
 
-    return pdata;
-
     if (pdata[0].frame < pdata[1].frame)
     {
         return &pdata[1];
