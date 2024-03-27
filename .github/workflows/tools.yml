@@ -1,0 +1,40 @@
+name: Tools
+
+on:
+  push:
+  pull_request:
+  repository_dispatch:
+    types: [run_build]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os[0] }}
+    strategy:
+      matrix:
+        os: [[macos-latest, bash], [ubuntu-latest, bash], [windows-latest, msys2]]
+        debug: [all, debug]
+      fail-fast: false
+    defaults:
+     run:
+      shell: ${{ matrix.os[1] }} {0}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install MSYS2 packages
+      if: matrix.os[0] == 'windows-latest'
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: MINGW32
+        install: |
+          base-devel mingw-w64-i686-gcc
+        update: true
+
+    - name: Compile tools
+      run: |
+        export PS2DEV=$PWD/ps2dev
+        export PS2SDK=$PS2DEV/ps2sdk
+        make -j $(getconf _NPROCESSORS_ONLN) ONLY_HOST_TOOLS=1 clean
+        make -j $(getconf _NPROCESSORS_ONLN) ONLY_HOST_TOOLS=1 ${{ matrix.debug }}
+        make -j $(getconf _NPROCESSORS_ONLN) ONLY_HOST_TOOLS=1 install

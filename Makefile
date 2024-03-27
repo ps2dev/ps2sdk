@@ -7,12 +7,18 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 DEBUG ?= 0
+ONLY_HOST_TOOLS ?= 0
 
 ifeq (x$(PS2SDKSRC), x)
   export PS2SDKSRC=$(shell pwd)
 endif
 
-SUBDIRS = tools common iop ee samples
+# If ONLY_HOST_TOOLS is set, only build the host tools.
+ifeq ($(ONLY_HOST_TOOLS), 1)
+  SUBDIRS = tools
+else
+  SUBDIRS = tools common iop ee samples
+endif
 
 all: build
 	@$(PRINTF) '.\n.PS2SDK Built.\n.\n'
@@ -96,11 +102,19 @@ env_release_check:
 	  exit 1; \
 	fi
 
+# Don't do anything if ONLY_HOST_TOOLS is set.
 download_dependencies:
-	$(MAKEREC) $(PS2SDKSRC)/common/external_deps all
-
+	@if test $(ONLY_HOST_TOOLS) -eq 0 ; \
+	then \
+	  $(MAKEREC) $(PS2SDKSRC)/common/external_deps all ; \
+	fi
+	
+# Don't do anything if ONLY_HOST_TOOLS is set.
 clean_dependencies:
-	$(MAKEREC) $(PS2SDKSRC)/common/external_deps clean
+	@if test $(ONLY_HOST_TOOLS) -eq 0 ; \
+	then \
+	  $(MAKEREC) $(PS2SDKSRC)/common/external_deps clean ; \
+	fi
 
 docs:
 	doxygen

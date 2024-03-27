@@ -143,7 +143,7 @@ int main(int argc, char **argv)
             if (argc == 3) {
                 char FOLDER[256] = "ext_";
                 strcat(FOLDER, argv[2]);
-#ifdef __MINGW32__
+#if defined(_WIN32) || defined(WIN32)
                 mkdir(FOLDER);
 #else
                 mkdir(FOLDER, 0755);
