@@ -19,7 +19,7 @@ TOOLS_INCS := $(TOOLS_INCS) -I$(TOOLS_SRC_DIR) -I$(TOOLS_SRC_DIR)include -I$(TOO
 TOOLS_OPTFLAGS ?= -O2
 
 # Warning compiler flags
-TOOLS_WARNFLAGS ?= -Wall
+TOOLS_WARNFLAGS ?= -Wall -Werror
 
 # C compiler flags
 TOOLS_CFLAGS := $(TOOLS_OPTFLAGS) $(TOOLS_WARNFLAGS) $(TOOLS_INCS) $(TOOLS_CFLAGS)

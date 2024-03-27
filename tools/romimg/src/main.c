@@ -148,7 +148,11 @@ int main(int argc, char **argv)
 #else
                 mkdir(FOLDER, 0755);
 #endif
-                chdir(FOLDER);
+                if (chdir(FOLDER)) {
+                    ERROR("Can't change directory to %s\n", FOLDER);
+                    UnloadROMImg(&ROMImg);
+                    return EINVAL;
+                }
 
                 printf("File list:\n"
            			   GREEN"Name"DEFCOL"      \tSize\n"
