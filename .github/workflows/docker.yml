@@ -18,7 +18,7 @@ jobs:
       DISPATCH_TOKEN: ${{ secrets.DISPATCH_TOKEN }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Extract DOCKER_TAG using tag name
       if: startsWith(github.ref, 'refs/tags/')
@@ -31,14 +31,14 @@ jobs:
         printf '%s\n' "DOCKER_TAG=latest" >> $GITHUB_ENV
 
     - name: Login to DockerHub
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       if: env.DOCKER_USERNAME != null
       with:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}
 
     - name: Login to Github Container Registry
-      uses: docker/login-action@v2
+      uses: docker/login-action@v3
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
@@ -55,7 +55,7 @@ jobs:
         printf '%s\n' "DOCKER_TAG_LIST=ghcr.io/${{ github.repository }}:${{ env.DOCKER_TAG }}" >> $GITHUB_ENV
 
     - name: Build and Push to container registry
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v5
       with:
         push: true
         tags: ${{ env.DOCKER_TAG_LIST }}
@@ -68,7 +68,7 @@ jobs:
         printf '%s\n' "NEW_DISPATCH_ACTION=$DISPATCH_ACTION" >> $GITHUB_ENV
 
     - name: Repository Dispatch to ps2sdk-ports
-      uses: peter-evans/repository-dispatch@v2
+      uses: peter-evans/repository-dispatch@v3
       if: env.DISPATCH_TOKEN != null
       with:
         repository: ${{ github.repository_owner }}/ps2sdk-ports
@@ -77,7 +77,7 @@ jobs:
         client-payload: '{"ref": "${{ github.ref }}"}'
 
     - name: Repository Dispatch to ps2-packer
-      uses: peter-evans/repository-dispatch@v2
+      uses: peter-evans/repository-dispatch@v3
       if: env.DISPATCH_TOKEN != null
       with:
         repository: ${{ github.repository_owner }}/ps2-packer
