@@ -98,7 +98,14 @@ int main(int argc, char *argv[])
     size_t dst_total_size = size_prologue + size_epilogue + (src_stat.st_size * 6) + (src_stat.st_size / 16 * 2) + ((src_stat.st_size % 16) ? 2 : 0);
 
     lseek(dst_fd, dst_total_size - 1, SEEK_SET);
-    write(dst_fd, "", 1);
+    if(write(dst_fd, "", 1) == -1)
+    {
+        printf("Failed to write to output file.\n");
+        close(dst_fd);
+        close(src_fd);
+        return 1;
+    }
+
     lseek(dst_fd, 0, SEEK_SET);
 
 #ifdef USE_MMAP
@@ -108,6 +115,7 @@ int main(int argc, char *argv[])
     {
         printf("Failed to map output file.\n");
         close(dst_fd);
+        close(src_fd);
         return 1;
     }
 
