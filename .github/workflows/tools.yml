@@ -47,4 +47,4 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: ps2sdk-tools-${{ matrix.debug }}-${{ steps.slug.outputs.sha8 }}
-        path: $(PS2SDK)/bin/*
+        path: ps2dev/ps2sdk/bin/*
