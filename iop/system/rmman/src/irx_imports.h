@@ -16,14 +16,22 @@
 #include <irx.h>
 
 /* Please keep these in alphabetical order!  */
+#if defined(BUILDING_RMMAN2) && !defined(BUILDING_RMMANX)
+#include <cdvdman.h>
+#endif
 #include <intrman.h>
+#ifdef BUILDING_RMMANX
+#include <iomanX.h>
+#endif
 #include <loadcore.h>
+#ifndef BUILDING_RMMAN2
+#include <rsio2man.h>
+#endif
 #include <sifcmd.h>
 #include <sifman.h>
 #include <stdio.h>
 #include <thbase.h>
 #include <thevent.h>
 #include <vblank.h>
-#include <rsio2man.h>
 
 #endif /* IOP_IRX_IMPORTS_H */

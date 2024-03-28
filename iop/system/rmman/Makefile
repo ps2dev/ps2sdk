@@ -10,6 +10,19 @@ IOP_INCS += -I$(PS2SDKSRC)/iop/system/sio2man/include/ -I$(PS2SDKSRC)/iop/system
 
 IOP_OBJS = rmman.o exports.o imports.o
 
+# Build the version of the rmman module that uses the SIRCS receiver connected to the Mechacon instead of the SIO2 dongle?
+RMMAN_BUILDING_RMMAN2 ?= 0
+
+# Build the version of the rmman module that uses the SIRCS receiver connected to the DVRP instead of the Mechacon?
+RMMAN_BUILDING_RMMANX ?= 0
+
+ifneq (x$(RMMAN_BUILDING_RMMAN2),x0)
+IOP_CFLAGS += -DBUILDING_RMMAN2
+endif
+
+ifneq (x$(RMMAN_BUILDING_RMMANX),x0)
+IOP_CFLAGS += -DBUILDING_RMMANX
+endif
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make
 include $(PS2SDKSRC)/iop/Rules.make
