@@ -927,11 +927,12 @@ int sceCdRE(unsigned long int lsn, unsigned long int sectors, void *buf, sceCdRM
  */
 int sceCdReadGUID(u64 *guid);
 
-/** Controls remote-control bypass
+/** Controls whether SIRCS remote control input should be translated to SIO2 pad input.
+ * This corresponds to the "Remote Control" "Gameplay Function On/Off" option in OSDSYS.
  * Minimum Mechacon firmware version: 50000
- * SUPPORTED BY ONLY DESR/PSX DVR CDVDMAN MODULES
+ * SUPPORTED BY ONLY NEWER CDVDMAN MODULES INCLUDED WITHIN OSD ONLY
  *
- * @param mode 0 = Bypass, 1 = Normal
+ * @param mode 0 = SIRCS->SIO2 conversion enabled, 1 = SIRCS->SIO2 conversion disabled
  * @param status Result code.
  * @return 1 on success, 0 on failure
  */
