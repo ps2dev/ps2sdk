@@ -26,6 +26,8 @@ SUBDIRS = \
 	padman-old \
 	reboot \
 	rmman \
+	rmman2 \
+	rmmanx \
 	rmtapman \
 	rpadman \
 	rsio2man \
