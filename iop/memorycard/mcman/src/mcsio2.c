@@ -354,6 +354,15 @@ void mcman_initPS2com(void)
 }
 
 //--------------------------------------------------------------
+void mcman_deinitPS2com(void)
+{
+#if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
+	SecrSetMcCommandHandler(0);
+	SecrSetMcDevIDHandler(0);
+#endif
+}
+
+//--------------------------------------------------------------
 void mcman_initPS1PDAcom(void)
 {
 #if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
@@ -372,6 +381,12 @@ void mcman_initPS1PDAcom(void)
 	mcman_sio2packet_PS1PDA.in = (u8 *)&mcman_sio2inbufs_PS1PDA;
 	mcman_sio2packet_PS1PDA.out = (u8 *)&mcman_sio2outbufs_PS1PDA;
 #endif
+}
+
+//--------------------------------------------------------------
+void mcman_deinitPS1PDAcom(void)
+{
+	// For now, stubbed. Semaphore was created somewhere between 1.6.0 (exclusive) and 3.1.0 (inclusive)
 }
 
 #if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)

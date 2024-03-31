@@ -135,10 +135,10 @@ typedef struct {  // size = 48
 	u32 freeclink; // 20 link to next free cluster
 	u32 clink;	  // 24  link to next cluster
 	u32 clust_offset;// 28
-	u32 field_20; // 32
-	u32 field_24; // 36
-	u32 field_28; // 40
-	u32 field_2C; // 44
+	u32 cluster; // 32
+	u32 fsindex; // 36
+	u32 parent_cluster; // 40
+	u32 parent_fsindex; // 44
 } MC_FHANDLE;
 
 #define MAX_FDHANDLES 		3
@@ -197,6 +197,7 @@ int  mcman_dread(int fd, MC_IO_DRE_T *dirent);
 int  mcman_getstat(int port, int slot, const char *filename, MC_IO_STA_T *stat);
 int  mcman_getmcrtime(sceMcStDateTime *tm);
 void mcman_initPS2com(void);
+void mcman_deinitPS2com(void);
 #if !defined(BUILDING_XFROMMAN) && !defined(BUILDING_VMCMAN)
 void sio2packet_add(int port, int slot, int cmd, u8 *buf);
 #endif
@@ -236,6 +237,7 @@ int  mcman_delete2(int port, int slot, const char *filename, int flags);
 int  mcman_checkBackupBlocks(int port, int slot);
 int  mcman_unformat2(int port, int slot);
 void mcman_initPS1PDAcom(void);
+void mcman_deinitPS1PDAcom(void);
 int  mcman_probePS1Card2(int port, int slot);
 int  mcman_probePS1Card(int port, int slot);
 int  mcman_probePDACard(int port, int slot);
@@ -277,6 +279,7 @@ int  mcman_ioerrcode(int errcode);
 int  mcman_modloadcb(const char *filename, int *port, int *slot); // used as callback by modload
 void mcman_unit2card(u32 unit);
 int  mcman_initdev(void);
+void mcman_deinitdev(void);
 
 #if defined(BUILDING_VMCMAN)
 int mcman_iomanx_backing_mount(int port, int slot, const char *filename);

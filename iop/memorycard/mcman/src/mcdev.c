@@ -284,12 +284,23 @@ int mcman_initdev(void)
 }
 
 //--------------------------------------------------------------
+void mcman_deinitdev(void)
+{
+	WaitSema(mcman_io_sema);
+#if MCMAN_ENABLE_EXTENDED_DEV_OPS
+	iomanX_DelDrv(mcman_mcdev.name);
+#else
+	DelDrv(mcman_mcdev.name);
+#endif
+}
+
+//--------------------------------------------------------------
 int mc_deinit(MC_IO_DEV_T *dev)
 {
 	(void)dev;
 
-	DeleteSema(mcman_io_sema);
 	McCloseAll();
+	DeleteSema(mcman_io_sema);
 
 	return 0;
 }

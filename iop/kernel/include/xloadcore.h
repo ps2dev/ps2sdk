@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-#define xloadcore_IMPORTS_start DECLARE_IMPORT_TABLE(loadcore, 1, 1)
+#define xloadcore_IMPORTS_start DECLARE_IMPORT_TABLE(loadcore, 1, 3)
 #define xloadcore_IMPORTS_end END_IMPORT_TABLE
 
 void ApplyElfRelSection(void *buffer, const void *module, int element_count);

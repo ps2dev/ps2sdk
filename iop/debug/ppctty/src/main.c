@@ -2,17 +2,11 @@
 #include <stdio.h>
 #include <loadcore.h>
 #include <excepman.h>
+#include <ioman.h>
+#include <iop_regs.h>
 #include "tty.h"
 
 IRX_ID(MODNAME, 1, 0);
-
-#define IS_DECKARD() \
-({ \
-    u16 iop_revision; \
-    asm("mfc0 %0, $15\n" \
-        : "=r"(iop_revision):); \
-    iop_revision == 0x30; \
-})
 
 volatile uint8_t *PPC_UART_TX = (volatile uint8_t *) 0x1F80380C;
 
@@ -27,7 +21,7 @@ int _start(int argc, char *argv[])
 {
     (void)argc;
     (void)argv;
-    if (!IS_DECKARD())
+    if (IOP_CPU_TYPE == IOP_TYPE_MIPSR3000)
     {
         printf(MODNAME ": THIS PS2 IS NOT DECKARD\n");
         return MODULE_NO_RESIDENT_END;

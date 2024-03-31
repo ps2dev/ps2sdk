@@ -1,0 +1,10 @@
+
+sysmem_IMPORTS_start
+I_AllocSysMemory
+I_FreeSysMemory
+I_QueryBlockSize
+sysmem_IMPORTS_end
+
+loadcore_IMPORTS_start
+I_RegisterLibraryEntries
+loadcore_IMPORTS_end

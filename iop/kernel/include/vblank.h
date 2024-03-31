@@ -22,6 +22,32 @@
 extern "C" {
 #endif
 
+typedef struct vblank_ll_
+{
+	struct vblank_ll_ *next;
+	struct vblank_ll_ *prev;
+} vblank_ll_t;
+
+typedef struct vblank_item_
+{
+	vblank_ll_t ll;
+	int priority;
+	int (*callback)(void *userdata);
+	void *userdata;
+} vblank_item_t;
+
+typedef struct vblank_internals_
+{
+	int ef;
+	int item_count;
+	vblank_ll_t list_00;
+	vblank_ll_t list_11;
+	vblank_ll_t list_free;
+	vblank_item_t list_items[16];
+} vblank_internals_t;
+
+vblank_internals_t *GetVblankInternalData(void);
+
 void WaitVblankStart();
 void WaitVblankEnd();
 void WaitVblank();

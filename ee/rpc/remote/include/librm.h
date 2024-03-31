@@ -122,6 +122,132 @@ struct remote_data
 #define RM_PS2_SQUARE    0x00F0D5DA
 /** @} */
 
+/** @name Additional DVD remote commands (from RMT-D105A)
+ */
+/** @{ */
+#define RM_DVD_OPEN_CLOSE      0x0060D149
+#define RM_DVD_POWER           0x0050D149
+#define RM_DVD_SEARCH_MODE     0x00B0D449
+#define RM_DVD_SUBTITLE_ON_OFF 0x0020D649
+#define RM_DVD_STEP_BACK       0x00A0D349
+#define RM_DVD_STEP_FORWARD    0x00B0D349
+#define RM_DVD_SET_UP          0x0030D549
+/** @} */
+
+/** @name Additional DESR remote commands (from RMT-P001 when mode switch is in "1" position)
+ */
+/** @{ */
+#define RM_DESR_EJECT           0x0060D193
+#define RM_DESR_G_GUIDE         0x0050D493
+#define RM_DESR_QUIT_GAME       0x0010D693
+#define RM_DESR_POWER           0x0050D193
+#define RM_DESR_1               0x0000D093
+#define RM_DESR_2               0x0010D093
+#define RM_DESR_3               0x0020D093
+#define RM_DESR_4               0x0030D093
+#define RM_DESR_5               0x0040D093
+#define RM_DESR_6               0x0050D093
+#define RM_DESR_7               0x0060D093
+#define RM_DESR_8               0x0070D093
+#define RM_DESR_9               0x0080D093
+#define RM_DESR_10              0x0090D093
+#define RM_DESR_11              0x00A0D093
+#define RM_DESR_12              0x00B0D093
+#define RM_DESR_BS_7            0x00D0D093
+#define RM_DESR_BS_11           0x00E0D093
+#define RM_DESR_CLEAR           0x00F0D093
+#define RM_DESR_TOP_MENU        0x00C0D293
+#define RM_DESR_MENU            0x0090D293
+#define RM_DESR_RETURN          0x0030D493
+#define RM_DESR_TRIANGLE_OPTION 0x00C0D593
+#define RM_DESR_CIRCLE          0x00D0D593
+#define RM_DESR_SQUARE_VIEW     0x00F0D593
+#define RM_DESR_CROSS_BACK      0x00E0D593
+#define RM_DESR_UP              0x0040D593
+#define RM_DESR_LEFT            0x0070D593
+#define RM_DESR_RIGHT           0x0050D593
+#define RM_DESR_DOWN            0x0060D593
+#define RM_DESR_ENTER           0x0000D693
+#define RM_DESR_PROGRAM         0x00A0D293
+#define RM_DESR_HOME            0x0020D493
+#define RM_DESR_DISPLAY         0x0050D293
+#define RM_DESR_L1_PREV         0x00A0D593
+#define RM_DESR_L3              0x0010D593
+#define RM_DESR_R3              0x0020D593
+#define RM_DESR_R1_NEXT         0x00B0D593
+#define RM_DESR_L2_SCAN_BACK    0x0080D593
+#define RM_DESR_SELECT          0x0000D593
+#define RM_DESR_START           0x0030D593
+#define RM_DESR_R2_SCAN_FORW    0x0090D593
+#define RM_DESR_PLAY            0x00A0D193
+#define RM_DESR_PAUSE           0x0090D193
+#define RM_DESR_STOP            0x0080D193
+#define RM_DESR_RECORDING_MODE  0x0060D293
+#define RM_DESR_RECORD_START    0x00D0D193
+#define RM_DESR_RECORD_PAUSE    0x00E0D193
+#define RM_DESR_RECORD_STOP     0x00F0D193
+#define RM_DESR_DELETE          0x0020D693
+/** @} */
+
+/** @name Additional DESR remote commands (from RMT-P002J when mode switch is in "1" position)
+ */
+/** @{ */
+#define RM_DESR_G_GUIDE2   0x0010D493
+#define RM_DESR_FLASH_BACK 0x0060D793
+#define RM_DESR_FLASH_FORW 0x0050D793
+/** @} */
+
+/** @name Different modes depending on the switch for RMT-Pxxx
+ */
+/** @{ */
+#define RM_DESR_MODE_1 0x00000093
+#define RM_DESR_MODE_2 0x0000009B
+#define RM_DESR_MODE_3 0x000000A3
+/** @} */
+
+/** @name Additional BD remote commands (from RMT-B119A)
+ */
+/** @{ */
+#define RM_BD_EJECT       0x0060D1E2
+#define RM_BD_POWER       0x0050D1E2
+#define RM_BD_1           0x0000D0E2
+#define RM_BD_2           0x0010D0E2
+#define RM_BD_3           0x0020D0E2
+#define RM_BD_4           0x0030D0E2
+#define RM_BD_5           0x0040D0E2
+#define RM_BD_6           0x0050D0E2
+#define RM_BD_7           0x0060D0E2
+#define RM_BD_8           0x0070D0E2
+#define RM_BD_9           0x0080D0E2
+#define RM_BD_AUDIO       0x0040D6E2
+#define RM_BD_0           0x0090D0E2
+#define RM_BD_SUBTITLE    0x0030D6E2
+#define RM_BD_DISPLAY     0x0010D4E2
+#define RM_BD_YELLOW      0x0090D6E2
+#define RM_BD_BLUE        0x0060D6E2
+#define RM_BD_RED         0x0070D6E2
+#define RM_BD_GREEN       0x0080D6E2
+#define RM_BD_TOP_MENU    0x00C0D2E2
+#define RM_BD_POP_UP_MENU 0x0090D2E2
+#define RM_BD_RETURN      0x0030D4E2
+#define RM_BD_OPTIONS     0x00F0D3E2
+#define RM_BD_UP          0x0090D3E2
+#define RM_BD_RIGHT       0x00C0D3E2
+#define RM_BD_DOWN        0x00A0D3E2
+#define RM_BD_LEFT        0x00B0D3E2
+#define RM_BD_ENTER       0x00D0D3E2
+#define RM_BD_HOME        0x0020D4E2
+#define RM_BD_PREV        0x0070D5E2
+#define RM_BD_PAUSE       0x0090D1E2
+#define RM_BD_NEXT        0x0060D5E2
+#define RM_BD_RWD         0x00B0D1E2
+#define RM_BD_PLAY        0x00A0D1E2
+#define RM_BD_FF          0x00C0D1E2
+#define RM_BD_NETFLIX     0x00B0D4E2
+#define RM_BD_STOP        0x0080D1E2
+#define RM_BD_SEN         0x00C0D4E2
+/** @} */
+
 #ifdef _cplusplus
 extern "C" {
 #endif

@@ -1,4 +1,16 @@
 
+#ifdef BUILDING_RMMAN2
+#ifdef BUILDING_RMMANX
+iomanX_IMPORTS_start
+I_iomanX_devctl
+iomanX_IMPORTS_end
+#else
+cdvdman_IMPORTS_start
+I_sceCdApplySCmd
+cdvdman_IMPORTS_end
+#endif
+#endif
+
 intrman_IMPORTS_start
 I_CpuSuspendIntr
 I_CpuResumeIntr
@@ -41,11 +53,13 @@ I_sceSifSetRpcQueue
 I_sceSifRpcLoop
 sifcmd_IMPORTS_end
 
+#ifndef BUILDING_RMMAN2
 rsio2man_IMPORTS_start
 I_sio2_rm_transfer_init
 I_sio2_transfer
 I_sio2_transfer_reset
 rsio2man_IMPORTS_end
+#endif
 
 vblank_IMPORTS_start
 I_WaitVblankStart

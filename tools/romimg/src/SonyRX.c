@@ -4,7 +4,7 @@
 
 #include <errno.h>
 #include <stdio.h>
-#include <malloc.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include "ELF.h"
@@ -19,19 +19,20 @@ int IsSonyRXModule(const char *path)
 
 	result = 0;
 	if ((file = fopen(path, "rb")) != NULL) {
-		fread(&header, 1, sizeof(elf_header_t), file);
-		if (*(u32 *)header.ident == ELF_MAGIC && (header.type == ELF_TYPE_ERX2 || header.type == ELF_TYPE_IRX)) {
-			unsigned int i;
-			for (i = 0; i < header.shnum; i++) {
-				fseek(file, header.shoff + i * header.shentsize, SEEK_SET);
-				fread(&SectionHeader, 1, sizeof(elf_shdr_t), file);
-
-				if ((SectionHeader.type == (SHT_LOPROC | SHT_LOPROC_EEMOD_TAB)) || (SectionHeader.type == (SHT_LOPROC | SHT_LOPROC_IOPMOD_TAB))) {
-					result = 1;
-					break;
-				}
-			}
-		}
+		if (fread(&header, 1, sizeof(elf_header_t), file) != 0) {
+            if (*(u32 *)header.ident == ELF_MAGIC && (header.type == ELF_TYPE_ERX2 || header.type == ELF_TYPE_IRX)) {
+                unsigned int i;
+                for (i = 0; i < header.shnum; i++) {
+                    fseek(file, header.shoff + i * header.shentsize, SEEK_SET);
+                    if (fread(&SectionHeader, 1, sizeof(elf_shdr_t), file) != 0) {
+                        if ((SectionHeader.type == (SHT_LOPROC | SHT_LOPROC_EEMOD_TAB)) || (SectionHeader.type == (SHT_LOPROC | SHT_LOPROC_IOPMOD_TAB))) {
+                            result = 1;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
 
 		fclose(file);
 	}
@@ -48,39 +49,42 @@ int GetSonyRXModInfo(const char *path, char *description, unsigned int MaxLength
 
 	result = ENOENT;
 	if ((file = fopen(path, "rb")) != NULL) {
-		fread(&header, 1, sizeof(elf_header_t), file);
-		if (*(u32 *)header.ident == ELF_MAGIC && (header.type == ELF_TYPE_ERX2 || header.type == ELF_TYPE_IRX)) {
-			unsigned int i;
-			for (i = 0; i < header.shnum; i++) {
-				fseek(file, header.shoff + i * header.shentsize, SEEK_SET);
-				fread(&SectionHeader, 1, sizeof(elf_shdr_t), file);
+		if (fread(&header, 1, sizeof(elf_header_t), file) != 0) {
+            if (*(u32 *)header.ident == ELF_MAGIC && (header.type == ELF_TYPE_ERX2 || header.type == ELF_TYPE_IRX)) {
+                unsigned int i;
+                for (i = 0; i < header.shnum; i++) {
+                    fseek(file, header.shoff + i * header.shentsize, SEEK_SET);
+                    if (fread(&SectionHeader, 1, sizeof(elf_shdr_t), file) != 0) {
 
-				if (SectionHeader.type == (SHT_LOPROC | SHT_LOPROC_EEMOD_TAB) || SectionHeader.type == (SHT_LOPROC | SHT_LOPROC_IOPMOD_TAB)) {
-					void *buffer;
-					if ((buffer = malloc(SectionHeader.size)) != NULL) {
-						fseek(file, SectionHeader.offset, SEEK_SET);
-						fread(buffer, 1, SectionHeader.size, file);
+                        if (SectionHeader.type == (SHT_LOPROC | SHT_LOPROC_EEMOD_TAB) || SectionHeader.type == (SHT_LOPROC | SHT_LOPROC_IOPMOD_TAB)) {
+                            void *buffer;
+                            if ((buffer = malloc(SectionHeader.size)) != NULL) {
+                                fseek(file, SectionHeader.offset, SEEK_SET);
+                                if (fread(buffer, 1, SectionHeader.size, file) != 0) {
 
-						if (SectionHeader.type == (SHT_LOPROC | SHT_LOPROC_IOPMOD_TAB)) {
-							*version = ((iopmod_t *)buffer)->version;
-							strncpy(description, ((iopmod_t *)buffer)->modname, MaxLength - 1);
-							description[MaxLength - 1] = '\0';
-						} else if (SectionHeader.type == (SHT_LOPROC | SHT_LOPROC_EEMOD_TAB)) {
-							*version = ((eemod_t *)buffer)->version;
-							strncpy(description, ((eemod_t *)buffer)->modname, MaxLength - 1);
-							description[MaxLength - 1] = '\0';
-						}
+                                    if (SectionHeader.type == (SHT_LOPROC | SHT_LOPROC_IOPMOD_TAB)) {
+                                        *version = ((iopmod_t *)buffer)->version;
+                                        strncpy(description, ((iopmod_t *)buffer)->modname, MaxLength - 1);
+                                        description[MaxLength - 1] = '\0';
+                                    } else if (SectionHeader.type == (SHT_LOPROC | SHT_LOPROC_EEMOD_TAB)) {
+                                        *version = ((eemod_t *)buffer)->version;
+                                        strncpy(description, ((eemod_t *)buffer)->modname, MaxLength - 1);
+                                        description[MaxLength - 1] = '\0';
+                                    }
+                                }
 
-						result = 0;
+                                result = 0;
 
-						free(buffer);
-					} else
-						result = ENOMEM;
-					break;
-				}
-			}
-		} else
-			result = EINVAL;
+                                free(buffer);
+                            } else
+                                result = ENOMEM;
+                            break;
+                        }
+                    }
+                }
+            } else
+                result = EINVAL;
+        }
 
 		fclose(file);
 	} else

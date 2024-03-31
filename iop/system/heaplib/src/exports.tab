@@ -1,0 +1,23 @@
+
+DECLARE_EXPORT_TABLE(heaplib, 1, 1)
+DECLARE_EXPORT(_start)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(CreateHeap)
+DECLARE_EXPORT(DeleteHeap)
+DECLARE_EXPORT(AllocHeapMemory)
+DECLARE_EXPORT(FreeHeapMemory)
+DECLARE_EXPORT(HeapTotalFreeSize)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(HeapPrepare)
+DECLARE_EXPORT(heaplib_12_chunk_is_valid)
+DECLARE_EXPORT(heaplib_13_chunk_do_allocate)
+DECLARE_EXPORT(heaplib_14_chunk_do_iterate)
+DECLARE_EXPORT(HeapChunkSize)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+END_EXPORT_TABLE
+
+void _retonly() {}

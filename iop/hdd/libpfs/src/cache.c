@@ -232,6 +232,26 @@ int pfsCacheInit(u32 numBuf, u32 bufSize)
 	return 0;
 }
 
+int pfsCacheDeinit(void)
+{
+#if 0
+	unsigned int i;
+
+	for(i = 1; i < pfsCacheNumBuffers + 1; i++){
+		// !!! This code performs multiple frees
+		apaFreeMem(pfsCacheBuf[i].u.data);
+	}
+#else
+	// Unofficial: Free once at the head of the list
+	if (pfsCacheNumBuffers > 1)
+	{
+		pfsFreeMem(pfsCacheBuf[1].u.data);
+	}
+#endif
+	pfsFreeMem(pfsCacheBuf);
+	return 0;
+}
+
 void pfsCacheClose(pfs_mount_t *pfsMount)
 {
 	unsigned int i;

@@ -1,0 +1,8 @@
+
+sysmem_IMPORTS_start
+I_AllocSysMemory
+sysmem_IMPORTS_end
+
+loadcore_IMPORTS_start
+I_RegisterLibraryEntries
+loadcore_IMPORTS_end

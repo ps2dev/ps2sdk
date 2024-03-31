@@ -16,6 +16,7 @@ SUBDIRS = \
 	fakehost \
 	fileio \
 	filexio \
+	filexio-verbose \
 	http \
 	libbdm \
 	netfs \

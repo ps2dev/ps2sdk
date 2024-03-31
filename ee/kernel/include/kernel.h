@@ -284,6 +284,35 @@ enum CPU_CONFIG {
 #define CPU_DATA_CACHE        1
 #define CPU_INSTRUCTION_CACHE 2
 
+/** Cop0 Register for (i)GetCop0 and (i)SetCop0 */
+enum {
+    COP0_INDEX,
+    COP0_RANDOM,
+    COP0_ENTRYLO0,
+    COP0_ENTRYLO1,
+    COP0_CONTEXT,
+    COP0_PAGEMASK,
+    COP0_WIRED,
+    // 7 reserved
+    COP0_BADVADDR = 8,
+    COP0_COUNT,
+    COP0_ENTRYHI,
+    COP0_COMPARE,
+    COP0_STATUS,
+    COP0_CAUSE,
+    COP0_EPC,
+    COP0_PRID,
+    COP0_CONFIG,
+    // 17-22 reserved
+    COP0_BADPADDR = 23,
+    COP0_DEBUG,
+    COP0_PERF,
+    // 26-27 reserved
+    COP0_TAGLO = 28,
+    COP0_TAGHI,
+    COP0_ERROREPC,
+};
+
 #ifdef __cplusplus
 extern "C" {
 #endif
