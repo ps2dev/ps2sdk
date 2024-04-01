@@ -344,6 +344,19 @@ int _fcntl(int fd, int cmd, ...)
 			}
 			return rv;
 		}
+		case F_SETFD:
+		{
+			int newfl;
+			va_list args;
+	
+			va_start (args, cmd);         /* Initialize the argument list. */
+			newfl =  va_arg(args, int);
+			va_end (args);                /* Clean up. */
+
+			__descriptormap[fd]->flags = newfl;
+			return 0;
+			break;
+		}
 	}
 
 	errno = EBADF;
@@ -844,13 +857,6 @@ int fchmod(int fd, mode_t mode)
 }
 #endif
 
-#ifdef F_fchmodat
-int fchmodat(int fd, const char *path, mode_t mode, int flag)
-{
-	return chmod(path, mode);
-}
-#endif
-
 #ifdef F_pathconf
 long int pathconf(const char *path, int name)
 {
@@ -1079,3 +1085,109 @@ int _ps2sdk_dread(int fd, struct dirent *dir)
 	return fdinfo->ops->dread(fdinfo->userdata, dir);
 }
 #endif
+
+/* ATFILE functions */
+
+#ifdef F_openat
+int openat(int dirfd, const char *pathname, int flags, ...)
+{
+	// TODO: Do better implementation following https://linux.die.net/man/2/openat
+	// for now use the same as open
+	
+	// Extract mode from variable arguments
+    va_list args;
+    va_start(args, flags);
+
+    // Get the mode argument
+    int mode = va_arg(args, int);
+
+    // Clean up the va_list
+    va_end(args);
+	return open(pathname, flags, mode);
+}
+#endif /* F_openat  */
+
+#ifdef F_renameat
+int renameat(int olddirfd, const char *oldpath, int newdirfd, const char *newpath)
+{
+	// TODO: Do better implementation following https://linux.die.net/man/2/renameat
+	// for now use the same as rename
+	return rename(oldpath, newpath);
+}
+#endif /* F_renameat  */
+
+#ifdef F_fchmodat
+int fchmodat(int dirfd, const char *pathname, mode_t mode, int flags)
+{
+	// TODO: Do better implementation following https://linux.die.net/man/2/fchmodat
+	// for now use the same as chmod
+	return chmod(pathname, mode);
+}
+#endif /* F_fchmodat  */
+
+#ifdef F_fstatat
+int fstatat(int dirfd, const char *pathname, struct stat *buf, int flags)
+{
+	// TODO: Do better implementation following https://linux.die.net/man/2/fstatat
+	// for now use the same as stat
+	return stat(pathname, buf);
+}
+#endif /* F_fstatat  */
+
+#ifdef F_mkdirat
+int mkdirat(int dirfd, const char *pathname, mode_t mode)
+{
+	// TODO: Do better implementation following https://linux.die.net/man/2/mkdirat
+	// for now use the same as mkdir
+	return mkdir(pathname, mode);
+}
+#endif /* F_mkdirat  */
+
+#ifdef F_faccessat
+int faccessat(int dirfd, const char *pathname, int mode, int flags)
+{
+	// TODO: Do better implementation following https://linux.die.net/man/2/faccessat
+	// for now use the same as access
+	return access(pathname, mode);
+}
+#endif /* F_faccessat  */
+
+#ifdef F_fchownat
+int fchownat(int dirfd, const char *pathname, uid_t owner, gid_t group, int flags)
+{
+	// TODO: Do better implementation following https://linux.die.net/man/2/fchownat
+	// for now use the same as chown
+	return chown(pathname, owner, group);
+}
+#endif /* F_fchownat  */
+
+#ifdef F_linkat
+int linkat(int olddirfd, const char *oldpath, int newdirfd, const char *newpath, int flags) {
+	// TODO: Do better implementation following https://linux.die.net/man/2/linkat
+	// for now use the same as link
+	return link(oldpath, newpath);
+}
+#endif /* F_linkat  */
+
+#ifdef F_readlinkat
+int readlinkat(int dirfd, const char *pathname, char *buf, size_t bufsiz)
+{
+	// TODO: Do better implementation following https://linux.die.net/man/2/linkat
+	// for now use the same as readlink
+	return readlink(pathname, buf, bufsiz);
+}
+#endif /* F_readlinkat  */
+
+#ifdef F_unlinkat
+int unlinkat(int dirfd, const char *pathname, int flags)
+{
+	// If flags contains AT_REMOVEDIR, then the path refers to a directory.
+	// Otherwise, the path refers to a file.
+	if (flags & AT_REMOVEDIR) {
+		return rmdir(pathname);
+	}
+	else {
+		return unlink(pathname);
+	}
+}
+#endif /* F_unlinkat  */

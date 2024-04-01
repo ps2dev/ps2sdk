@@ -90,7 +90,6 @@ GLUE_OBJS = \
 	_isatty.o \
 	chmod.o \
 	fchmod.o \
-	fchmodat.o \
 	pathconf.o \
 	fsync.o \
 	getuid.o \
@@ -108,7 +107,17 @@ GLUE_OBJS = \
 	_ps2sdk_write.o \
 	_ps2sdk_ioctl.o \
 	_ps2sdk_ioctl2.o \
-	_ps2sdk_dread.o
+	_ps2sdk_dread.o \
+	openat.o \
+	renameat.o \
+	fchmodat.o \
+	fstatat.o \
+	mkdirat.o \
+	faccessat.o \
+	fchownat.o \
+	linkat.o \
+	readlinkat.o \
+	unlinkat.o
 
 LOCK_OBJS = __retarget_lock_init.o __retarget_lock_acquire.o __retarget_lock_release.o __retarget_lock_try_acquire.o __retarget_lock_close.o \
 	__retarget_lock_init_recursive.o __retarget_lock_acquire_recursive.o __retarget_lock_release_recursive.o __retarget_lock_try_acquire_recursive.o __retarget_lock_close_recursive.o
