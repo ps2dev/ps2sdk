@@ -179,6 +179,12 @@ pte_osResult pte_osTerminate(void) {
  * Threads
  *
  ***************************************************************************/
+
+static inline int invert_priority(int priority)
+{
+	return (pte_osThreadGetMinPriority() - priority) + pte_osThreadGetMaxPriority();
+}
+
 #ifdef F_pte_osThreadCreate
 pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
                                 int stackSize,
@@ -247,7 +253,7 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
 	eethread.stack = stack;
 	eethread.stack_size = stackSize;
 	eethread.gp_reg = &_gp;
-	eethread.initial_priority = initialPriority;
+	eethread.initial_priority = invert_priority(initialPriority);
 	threadId = CreateThread(&eethread);
   
   /* In order to emulate TLS functionality, we append the address of the TLS structure that we
@@ -403,14 +409,14 @@ int pte_osThreadGetPriority(pte_osThreadHandle threadHandle)
 
   ReferThreadStatus(threadHandle, &thinfo);
 
-  return thinfo.current_priority;
+  return invert_priority(thinfo.current_priority);
 }
 #endif
 
 #ifdef F_pte_osThreadSetPriority
 pte_osResult pte_osThreadSetPriority(pte_osThreadHandle threadHandle, int newPriority)
 {
-  ChangeThreadPriority(threadHandle, newPriority);
+  ChangeThreadPriority(threadHandle, invert_priority(newPriority));
   return PTE_OS_OK;
 }
 #endif
@@ -476,21 +482,21 @@ void pte_osThreadSleep(unsigned int msecs)
 #ifdef  F_pte_osThreadGetMinPriority
 int pte_osThreadGetMinPriority()
 {
-  return 17;
+  return pte_osThreadGetDefaultPriority() - 32;
 }
 #endif
 
 #ifdef F_pte_osThreadGetMaxPriority
 int pte_osThreadGetMaxPriority()
 {
-  return 30;
+  return pte_osThreadGetDefaultPriority() + 32;
 }
 #endif
 
 #ifdef F_pte_osThreadGetDefaultPriority
 int pte_osThreadGetDefaultPriority()
 {
-  return 18;
+  return 60;
 }
 #endif
 
