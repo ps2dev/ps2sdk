@@ -76,31 +76,24 @@ ps2ThreadData *__getThreadData(s32 threadHandle)
 ps2ThreadData *__getThreadData(s32 threadHandle);
 #endif
 
-static inline int SemWaitTimeout(s32 semHandle, uint32_t timeout)
+static inline int32_t SemWaitTimeout(s32 semHandle, uint32_t timeout)
 {
-    int ret;
     u64 timeoutUsec;
     u64 *timeoutPtr;
 
     if (timeout == 0) {
-        if (PollSema(semHandle) < 0) {
-            return -1;
-        }
-        return 0;
+        return PollSema(semHandle);
     }
 
     timeoutPtr = NULL;
 
     if (timeout > 0 && timeout != UINT32_MAX) {
-        timeoutUsec = timeout * 1000;
+        timeoutUsec = timeout;
         timeoutPtr = &timeoutUsec;
+        return WaitSemaEx(semHandle, 1, timeoutPtr);
     }
 
-    ret = WaitSemaEx(semHandle, 1, timeoutPtr);
-
-    if (ret < 0)
-        return -2;
-    return 0; //Wait condition satisfied.
+    return WaitSema(semHandle);
 }
 
 /* A new thread's stub entry point.  It retrieves the real entry point from the per thread control
@@ -186,6 +179,12 @@ pte_osResult pte_osTerminate(void) {
  * Threads
  *
  ***************************************************************************/
+
+static inline int invert_priority(int priority)
+{
+	return (pte_osThreadGetMinPriority() - priority) + pte_osThreadGetMaxPriority();
+}
+
 #ifdef F_pte_osThreadCreate
 pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
                                 int stackSize,
@@ -254,7 +253,7 @@ pte_osResult pte_osThreadCreate(pte_osThreadEntryPoint entryPoint,
 	eethread.stack = stack;
 	eethread.stack_size = stackSize;
 	eethread.gp_reg = &_gp;
-	eethread.initial_priority = initialPriority;
+	eethread.initial_priority = invert_priority(initialPriority);
 	threadId = CreateThread(&eethread);
   
   /* In order to emulate TLS functionality, we append the address of the TLS structure that we
@@ -410,14 +409,14 @@ int pte_osThreadGetPriority(pte_osThreadHandle threadHandle)
 
   ReferThreadStatus(threadHandle, &thinfo);
 
-  return thinfo.current_priority;
+  return invert_priority(thinfo.current_priority);
 }
 #endif
 
 #ifdef F_pte_osThreadSetPriority
 pte_osResult pte_osThreadSetPriority(pte_osThreadHandle threadHandle, int newPriority)
 {
-  ChangeThreadPriority(threadHandle, newPriority);
+  ChangeThreadPriority(threadHandle, invert_priority(newPriority));
   return PTE_OS_OK;
 }
 #endif
@@ -483,21 +482,21 @@ void pte_osThreadSleep(unsigned int msecs)
 #ifdef  F_pte_osThreadGetMinPriority
 int pte_osThreadGetMinPriority()
 {
-  return 17;
+  return pte_osThreadGetDefaultPriority() - 32;
 }
 #endif
 
 #ifdef F_pte_osThreadGetMaxPriority
 int pte_osThreadGetMaxPriority()
 {
-  return 30;
+  return pte_osThreadGetDefaultPriority() + 32;
 }
 #endif
 
 #ifdef F_pte_osThreadGetDefaultPriority
 int pte_osThreadGetDefaultPriority()
 {
-  return 18;
+  return 60;
 }
 #endif
 
@@ -556,13 +555,14 @@ pte_osResult pte_osMutexLock(pte_osMutexHandle handle)
 pte_osResult pte_osMutexTimedLock(pte_osMutexHandle handle, unsigned int timeoutMsecs)
 {
   pte_osResult result;
-
-  int status = SemWaitTimeout(handle, timeoutMsecs);
-  if (status < 0) {
-    // Assume that any error from SemWaitTimeout was due to a timeout
+  int32_t timeout = timeoutMsecs * 1000;
+  int status = SemWaitTimeout(handle, timeout);
+  if (status > 0) {
+    result = PTE_OS_OK;
+  } else if (status == -1) {
     result = PTE_OS_TIMEOUT;
   } else {
-    result = PTE_OS_OK;
+    result = PTE_OS_GENERAL_FAILURE;
   }
 
   return result;
@@ -626,19 +626,19 @@ pte_osResult pte_osSemaphorePost(pte_osSemaphoreHandle handle, int count)
 pte_osResult pte_osSemaphorePend(pte_osSemaphoreHandle handle, unsigned int *pTimeoutMsecs)
 {
   uint32_t timeout;
-  uint32_t result;
+  int32_t result;
   pte_osResult osResult;
   
   if (pTimeoutMsecs == NULL) {
     timeout = UINT32_MAX;
   } else {
-    timeout = *pTimeoutMsecs;
+    timeout = *pTimeoutMsecs * 1000;
   }
 
   result = SemWaitTimeout(handle, timeout);
-  if (result == 0) {
+  if (result > 0) {
     osResult = PTE_OS_OK;
-  } else if (result == -2) {
+  } else if (result == -1) {
     osResult = PTE_OS_TIMEOUT;
   } else {
     osResult = PTE_OS_GENERAL_FAILURE;
@@ -664,31 +664,27 @@ pte_osResult pte_osSemaphoreCancellablePend(pte_osSemaphoreHandle semHandle, uns
 
   clock_t start_time;
   pte_osResult result =  PTE_OS_OK;
-  unsigned int timeout;
-  unsigned char timeoutEnabled;
+  uint32_t timeout;
 
   start_time = clock();
 
   // clock() is in microseconds, timeout as passed in was in milliseconds
   if (pTimeout == NULL) {
     timeout = 0;
-    timeoutEnabled = 0;
   } else {
-    timeout = *pTimeout * 1000;
-    timeoutEnabled = 1;
+    timeout = *pTimeout;
   }
 
   while (1) {
-    int status;
+    int32_t status;
 
     /* Poll semaphore */
-    status = SemWaitTimeout(semHandle, UINT32_MAX);
-
-    if (status == 0) {
+    status = SemWaitTimeout(semHandle, 0);
+    if (status > 0) {
       /* User semaphore posted to */
       result = PTE_OS_OK;
       break;
-    } else if ((timeoutEnabled) && ((clock() - start_time) > timeout)) {
+    } else if ((pTimeout != NULL) && ((clock() - start_time) > timeout)) {
       /* Timeout expired */
       result = PTE_OS_TIMEOUT;
       break;
