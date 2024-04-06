@@ -637,7 +637,7 @@ int _gettimeofday(struct timeval *tv, struct timezone *tz)
 
 #ifdef F__times
 clock_t _times(struct tms *buffer) {
-	clock_t clk = GetTimerSystemTime() / (kBUSCLK / CLOCKS_PER_SEC);
+	clock_t clk = GetTimerSystemTime() / (kBUSCLK / (1000 * 1000));
 
 	if (buffer != NULL) {
 		buffer->tms_utime  = clk;
