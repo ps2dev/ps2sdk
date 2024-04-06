@@ -672,7 +672,7 @@ pte_osResult pte_osSemaphoreCancellablePend(pte_osSemaphoreHandle semHandle, uns
   if (pTimeout == NULL) {
     timeout = 0;
   } else {
-    timeout = *pTimeout;
+    timeout = *pTimeout * 1000;
   }
 
   while (1) {
