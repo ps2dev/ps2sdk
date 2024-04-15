@@ -9,6 +9,7 @@
 
 #include <bdm.h>
 #include <cdvdman.h>
+#include <sysclib.h>
 
 #include "ff.h"     /* Obtains integer types */
 #include "diskio.h" /* Declarations of disk functions */
@@ -69,7 +70,37 @@ DRESULT disk_read(
         return RES_NOTRDY;
     }
 
-    res = mounted_bd->read(mounted_bd, sector, buff, count);
+    if (((uiptr)buff & 3) != 0)
+    {
+        /* Slow misalignment workaround */
+        BYTE *tmp_buff;
+        UINT i;
+        unsigned int sectorSize;
+
+        sectorSize = mounted_bd->sectorSize;
+
+        tmp_buff = __builtin_alloca(sectorSize + 4);
+
+        if (((uiptr)tmp_buff & 3) != 0)
+        {
+            tmp_buff += 4 - ((uiptr)tmp_buff & 3);
+        }
+
+        for (i = 0; i < count; i += 1)
+        {
+            res = mounted_bd->read(mounted_bd, sector + i, tmp_buff, 1);
+            if (res != 1)
+            {
+                return RES_ERROR;
+            }
+            memcpy(buff + (i * sectorSize), tmp_buff, sectorSize);
+        }
+        return RES_OK;
+    }
+    else
+    {
+        res = mounted_bd->read(mounted_bd, sector, buff, count);
+    }
 
     return (res == count) ? RES_OK : RES_ERROR;
 }
@@ -98,7 +129,37 @@ DRESULT disk_write(
         return RES_NOTRDY;
     }
 
-    res = mounted_bd->write(mounted_bd, sector, buff, count);
+    if (((uiptr)buff & 3) != 0)
+    {
+        /* Slow misalignment workaround */
+        BYTE *tmp_buff;
+        UINT i;
+        unsigned int sectorSize;
+
+        sectorSize = mounted_bd->sectorSize;
+
+        tmp_buff = __builtin_alloca(sectorSize + 4);
+
+        if (((uiptr)tmp_buff & 3) != 0)
+        {
+            tmp_buff += 4 - ((uiptr)tmp_buff & 3);
+        }
+
+        for (i = 0; i < count; i += 1)
+        {
+            memcpy(tmp_buff, buff + (i * sectorSize), sectorSize);
+            res = mounted_bd->write(mounted_bd, sector + i, tmp_buff, 1);
+            if (res != 1)
+            {
+                return RES_ERROR;
+            }
+        }
+        return RES_OK;
+    }
+    else
+    {
+        res = mounted_bd->write(mounted_bd, sector, buff, count);
+    }
 
     return (res == count) ? RES_OK : RES_ERROR;
 }
