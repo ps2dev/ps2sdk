@@ -25,8 +25,8 @@
 #define DPRINTF(x...)
 #endif
 
-extern int module_start(int argc, char *argv[]);
-extern int module_stop(int argc, char *argv[]);
+extern int module_start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi);
+extern int module_stop(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi);
 extern int dvrf_df_init(iomanX_iop_device_t *f);
 extern int dvrf_df_exit(iomanX_iop_device_t *f);
 extern int dvrf_df_chdir(iomanX_iop_file_t *f, const char *name);
@@ -255,18 +255,20 @@ int SBUF[32768];
 // Based off of DESR / PSX DVR system software version 1.31.
 IRX_ID(MODNAME, 1, 1);
 
-int _start(int argc, char *argv[])
+int _start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 {
     if (argc >= 0)
-        return module_start(argc, argv);
+        return module_start(argc, argv, startaddr, mi);
     else
-        return module_stop(argc, argv);
+        return module_stop(argc, argv, startaddr, mi);
 }
 
-int module_start(int argc, char *argv[])
+int module_start(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 {
     int i;
     USE_SPD_REGS;
+
+    (void)startaddr;
 
     for (i = 0; i < 30000; i += 1) {
         if ((SPD_REG16(0x4230) & 0x20) != 0) {
@@ -291,6 +293,8 @@ int module_start(int argc, char *argv[])
 #if 0
     return MODULE_REMOVABLE_END;
 #else
+    if (mi && ((mi->newflags & 2) != 0))
+        mi->newflags |= 0x10;
     return MODULE_RESIDENT_END;
 #endif
 setup_fschk:
@@ -311,6 +315,8 @@ setup_fschk:
 #if 0
     return MODULE_REMOVABLE_END;
 #else
+    if (mi && ((mi->newflags & 2) != 0))
+        mi->newflags |= 0x10;
     return MODULE_RESIDENT_END;
 #endif
 fail:
@@ -322,10 +328,13 @@ fail:
     return MODULE_NO_RESIDENT_END;
 }
 
-int module_stop(int argc, char *argv[])
+int module_stop(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
 {
     (void)argc;
     (void)argv;
+    (void)startaddr;
+    (void)mi;
+
 
     if (iomanX_DelDrv(dvrpfs_drv.name) || iomanX_DelDrv(dvrhdd_drv.name)) {
 #if 0

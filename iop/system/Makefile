@@ -12,11 +12,13 @@ SUBDIRS = \
 	eesync \
 	eesync-nano \
 	excepman \
+	heaplib \
 	intrman \
 	intrmanp \
 	ioman \
 	iomanx \
 	iopmgr \
+	loadcore \
 	loadfile \
 	modload \
 	mtapman \
@@ -24,6 +26,8 @@ SUBDIRS = \
 	padman-old \
 	reboot \
 	rmman \
+	rmman2 \
+	rmmanx \
 	rmtapman \
 	rpadman \
 	rsio2man \

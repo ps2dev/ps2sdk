@@ -80,13 +80,6 @@ static void free_msg(arch_message *msg)
 	SignalSema(MsgCountSema);
 }
 
-static inline u32_t ComputeTimeDiff(u32 start, u32 end)
-{
-	u32 NumTicksElasped=(end<start)?UINT_MAX-start+end:start-end;
-
-	return(NumTicksElasped/295000);
-}
-
 //Create a new thread.
 sys_thread_t sys_thread_new(const char *name, lwip_thread_fn thread, void *arg, int stacksize, int prio)
 {
@@ -280,10 +273,10 @@ static u32_t sys_arch_mbox_fetch_internal(sys_mbox_t pMBox, void** ppvMSG, u32_t
 	TimeElasped=0;
 	if(block){
 		int start;
-		start=clock()/(CLOCKS_PER_SEC/1000);
+		start=clock();
 
 		if((result=ReceiveMbx(&pmsg, pMBox, u32Timeout))==0){
-			TimeElasped = ComputeTimeDiff(start, clock()/(CLOCKS_PER_SEC/1000));
+			TimeElasped = (clock() - start) / (1000);
 		}
 		else{
 			return SYS_ARCH_TIMEOUT;
@@ -392,10 +385,10 @@ u32_t sys_arch_sem_wait(sys_sem_t *sema, u32_t timeout)
 		unsigned int start;
 		u32_t	WaitTime;
 
-		start=clock()/(CLOCKS_PER_SEC/1000);
+		start=clock();
 		if(WaitSemaTimeout(*sema, timeout) == *sema)
 		{
-			WaitTime=ComputeTimeDiff(start, clock()/(CLOCKS_PER_SEC/1000));
+			WaitTime=(clock()-start)/(1000);
 			result=(WaitTime <= timeout ? WaitTime : timeout);
 		}
 		else result=SYS_ARCH_TIMEOUT;
@@ -450,7 +443,7 @@ void sys_init(void)
 
 u32_t sys_now(void)
 {
-	return(clock()/(CLOCKS_PER_SEC/1000));
+	return(clock()/1000);
 }
 
 sys_prot_t sys_arch_protect(void)

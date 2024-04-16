@@ -32,7 +32,7 @@ static int GetRomDirExtInfoOffset(const struct ROMImgStat *ImageStat, struct Rom
 	const struct RomDirEntry *RomDirEntry;
 	int result;
 	unsigned int offset;
-	RomDirEntry = ImageStat->ROMFS_start;  //(struct RomDirEntry*)
+	RomDirEntry = (const struct RomDirEntry *)ImageStat->ROMFS_start; // (struct RomDirEntry *)
 	result = ENOENT;
 	offset = 0;
 	while (RomDirEntry->name[0] != '\0') {
@@ -57,7 +57,7 @@ static int OpenRomDirFile(const struct ROMImgStat *ImageStat, const char *file, 
 
 	memset(fd, 0, sizeof(struct RomDirFileFd));
 
-	RomDirEntry = ImageStat->ROMFS_start;
+	RomDirEntry = (const struct RomDirEntry *)ImageStat->ROMFS_start;
 	result = ENOENT;
 	if (GetRomDirExtInfoOffset(ImageStat, fd) == 0) {
 		unsigned int offset = 0;
@@ -141,7 +141,7 @@ int CreateBlankROMImg(const char *filename, ROMIMG *ROMImg)
 	unsigned int CommentLength;
 	char LocalhostName[32], cwd[128];
 #if defined(_WIN32) || defined(WIN32)
-	char UserName[32];
+	char UserName[32] = "";
 #else
 	char* UserName;
 #endif
@@ -160,19 +160,19 @@ int CreateBlankROMImg(const char *filename, ROMIMG *ROMImg)
 	GetCurrentWorkingDirectory(cwd, sizeof(cwd));
 	/* Comment format: YYYYMMDD-XXXYYY,conffile,<filename>,<user>@<localhost>/<image path> */
 	CommentLength = 31 + strlen(filename) + strlen(UserName) + strlen(LocalhostName) + strlen(cwd);
-	ROMImg->comment = malloc(CommentLength);
-	sprintf(ROMImg->comment, "%08x,conffile,%s,%s@%s/%s", ROMImg->date, filename, (UserName == NULL)?"":UserName, LocalhostName, cwd);
+	ROMImg->comment = (char *)malloc(CommentLength);
+	sprintf(ROMImg->comment, "%08x,conffile,%s,%s@%s/%s", ROMImg->date, filename, (UserName[0] =='\0')?"":UserName, LocalhostName, cwd);
 
 	// Create a blank RESET file.
 	ROMImg->NumFiles = 1;
-	ResetFile = ROMImg->files = malloc(sizeof(struct FileEntry));
+	ResetFile = ROMImg->files = (struct FileEntry *)malloc(sizeof(struct FileEntry));
 
 	memset(ResetFile->RomDir.name, 0, sizeof(ResetFile->RomDir.name));
 	strcpy(ResetFile->RomDir.name, "RESET");
 	ResetFile->RomDir.ExtInfoEntrySize = sizeof(ROMImg->date) + sizeof(struct ExtInfoFieldEntry);
 	ResetFile->RomDir.size = 0;
 	ResetFile->FileData = NULL;
-	ResetFile->ExtInfoData = malloc(ResetFile->RomDir.ExtInfoEntrySize);
+	ResetFile->ExtInfoData = (unsigned char *)malloc(ResetFile->RomDir.ExtInfoEntrySize);
 	ExtInfoEntry = (struct ExtInfoFieldEntry *)ResetFile->ExtInfoData;
 	ExtInfoEntry->value = 0;
 	ExtInfoEntry->ExtLength = sizeof(ROMImg->date);
@@ -201,7 +201,7 @@ int WriteROMImg(const char *file, const ROMIMG *ROMImg)
 		}
 	}
 	TotalExtInfoSize += CommentLengthRounded + 2 * sizeof(struct ExtInfoFieldEntry);
-	if ((extinfo = malloc(TotalExtInfoSize)) != NULL) {
+	if ((extinfo = (unsigned char *)malloc(TotalExtInfoSize)) != NULL) {
 		memset(&NULL_romdir, 0, sizeof(NULL_romdir));
 		memset(&ROMDIR_romdir, 0, sizeof(ROMDIR_romdir));
 		memset(&EXTINFO_romdir, 0, sizeof(EXTINFO_romdir));
@@ -276,7 +276,7 @@ int LoadROMImg(ROMIMG *ROMImg, const char *path)
 {
 	FILE *InputFile;
 	int result;
-	unsigned int ExtInfoOffset, DataStartOffset, ScanLimit, CommentLength;
+	unsigned int ExtInfoOffset, DataStartOffset, ScanLimit;
 	struct RomDirFileFd RomDirFileFd;
 	struct ROMImgStat ImageStat;
 	struct FileEntry *file;
@@ -331,7 +331,7 @@ int LoadROMImg(ROMIMG *ROMImg, const char *path)
 					}
 
 					ROMImg->comment = NULL;
-					GetExtInfoStat(&ImageStat, &RomDirFileFd, EXTINFO_FIELD_TYPE_COMMENT, &ROMImg->comment, 0);
+					GetExtInfoStat(&ImageStat, &RomDirFileFd, EXTINFO_FIELD_TYPE_COMMENT, (void **)&ROMImg->comment, 0);
 
 					struct RomDirEntry * RomDir = (struct RomDirEntry *)ImageStat.ROMFS_start;
 					unsigned int offset = 0;
@@ -341,11 +341,11 @@ int LoadROMImg(ROMIMG *ROMImg, const char *path)
 						if (strncmp(RomDir->name, "ROMDIR", sizeof(RomDir->name)) != 0 && strncmp(RomDir->name, "EXTINFO", sizeof(RomDir->name)) != 0) {
 							ROMImg->NumFiles++;
 
-							ROMImg->files = (ROMImg->files == NULL) ? malloc(sizeof(struct FileEntry)) : realloc(ROMImg->files, ROMImg->NumFiles * sizeof(struct FileEntry));
+							ROMImg->files = (ROMImg->files == NULL) ? (struct FileEntry *)malloc(sizeof(struct FileEntry)) : (struct FileEntry *)realloc(ROMImg->files, ROMImg->NumFiles * sizeof(struct FileEntry));
 							file = &ROMImg->files[ROMImg->NumFiles - 1];
 
 							memcpy(&file->RomDir, RomDir, sizeof(struct RomDirEntry));
-							file->ExtInfoData = malloc(RomDir->ExtInfoEntrySize);
+							file->ExtInfoData = (unsigned char *)malloc(RomDir->ExtInfoEntrySize);
 							memcpy(file->ExtInfoData, (void *)((RMIMG_PTRCAST)ImageStat.image + RomDirFileFd.ExtInfoOffset + ExtInfoOffset), RomDir->ExtInfoEntrySize);
 							file->FileData = malloc(RomDir->size);
 							memcpy(file->FileData, (void *)((RMIMG_PTRCAST)ImageStat.image + offset), RomDir->size);
@@ -403,7 +403,7 @@ void UnloadROMImg(ROMIMG *ROMImg)
 
 static void *ReallocExtInfoArea(struct FileEntry *file, unsigned short int nbytes)
 {
-	return (file->ExtInfoData = (file->ExtInfoData == NULL) ? malloc(nbytes + sizeof(struct ExtInfoFieldEntry)) : realloc(file->ExtInfoData, file->RomDir.ExtInfoEntrySize + nbytes + sizeof(struct ExtInfoFieldEntry)));
+	return (file->ExtInfoData = (file->ExtInfoData == NULL) ? (unsigned char *)malloc(nbytes + sizeof(struct ExtInfoFieldEntry)) : (unsigned char *)realloc(file->ExtInfoData, file->RomDir.ExtInfoEntrySize + nbytes + sizeof(struct ExtInfoFieldEntry)));
 }
 
 static int AddExtInfoStat(struct FileEntry *file, unsigned char type, void *data, unsigned char nbytes)
@@ -459,6 +459,8 @@ int AddFile(ROMIMG *ROMImg, const char *path)
 	unsigned int FileDateStamp;
 	unsigned short FileVersion;
 	if ((InputFile = fopen(path, "rb")) != NULL) {
+		const char* fname = strrchr(path, PATHSEP);
+		if (fname == NULL) fname = path; else fname++;
 		int size;
 		fseek(InputFile, 0, SEEK_END);
 		size = ftell(InputFile);
@@ -466,15 +468,16 @@ int AddFile(ROMIMG *ROMImg, const char *path)
 
 		struct FileEntry *file;
 		// Files cannot exist more than once in an image. The RESET entry is special here because all images will have a RESET entry, but it might be empty (If it has no content, allow the user to add in content).
-		if (strcmp(path, "RESET")) {
-			if (!IsFileExists(ROMImg, path)) {
+		if (strcmp(fname, "RESET")) {
+			if (!IsFileExists(ROMImg, fname)) {
 				ROMImg->NumFiles++;
 
-				if ((ROMImg->files = (ROMImg->files == NULL) ? malloc(sizeof(struct FileEntry)) : realloc(ROMImg->files, ROMImg->NumFiles * sizeof(struct FileEntry))) != NULL) {
+				if ((ROMImg->files = (ROMImg->files == NULL) ? (struct FileEntry *)malloc(sizeof(struct FileEntry)) : (struct FileEntry *)realloc(ROMImg->files, ROMImg->NumFiles * sizeof(struct FileEntry))) != NULL) {
 					file = &ROMImg->files[ROMImg->NumFiles - 1];
 					memset(&ROMImg->files[ROMImg->NumFiles - 1], 0, sizeof(struct FileEntry));
 
-					strncpy(file->RomDir.name, path, sizeof(file->RomDir.name));
+					strncpy(file->RomDir.name, fname, sizeof(file->RomDir.name) - 1);
+                    file->RomDir.name[sizeof(file->RomDir.name) - 1] = '\0';
 					file->RomDir.ExtInfoEntrySize = 0;
 
 					FileDateStamp = GetFileCreationDate(path);
@@ -492,7 +495,10 @@ int AddFile(ROMIMG *ROMImg, const char *path)
 					if (result == 0) {
 						file->RomDir.size = size;
 						file->FileData = malloc(size);
-						fread(file->FileData, 1, size, InputFile);
+						if (fread(file->FileData, 1, size, InputFile) != size) {
+							ERROR("failed to read %d bytes\n", size);
+							result = EIO;
+						}
 					}
 				} else
 					result = ENOMEM;
@@ -503,8 +509,11 @@ int AddFile(ROMIMG *ROMImg, const char *path)
 				file = &ROMImg->files[0];
 				file->RomDir.size = size;
 				file->FileData = malloc(size);
-				fread(file->FileData, 1, size, InputFile);
-				result = 0;
+				if (fread(file->FileData, 1, size, InputFile) != file->RomDir.size) {
+					ERROR("failed to read %u bytes\n", file->RomDir.size);
+					result = EIO;
+				} else
+					result = 0;
 			} else
 				result = EEXIST;
 		}
@@ -533,7 +542,7 @@ int DeleteFile(ROMIMG *ROMImg, const char *filename)
 					free(file->ExtInfoData);
 				for (; i < ROMImg->NumFiles; i++)
 					memcpy(&ROMImg->files[i], &ROMImg->files[i + 1], sizeof(struct FileEntry));
-				ROMImg->files = realloc(ROMImg->files, (--ROMImg->NumFiles) * sizeof(struct FileEntry));
+				ROMImg->files = (struct FileEntry *)realloc(ROMImg->files, (--ROMImg->NumFiles) * sizeof(struct FileEntry));
 				result = 0;
 				break;
 			}

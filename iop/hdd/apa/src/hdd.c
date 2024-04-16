@@ -202,7 +202,11 @@ static int unlockDrive(s32 device)
 }
 #endif
 
+#ifdef _IOP
+int APA_ENTRYPOINT(int argc, char *argv[], void *startaddr, ModuleInfo_t *mi)
+#else
 int APA_ENTRYPOINT(int argc, char *argv[])
+#endif
 {
 	int 	i, ret;
 	char	*input;
@@ -210,6 +214,35 @@ int APA_ENTRYPOINT(int argc, char *argv[])
 	apa_ps2time_t tm;
 #ifdef APA_USE_ATAD
 	ata_devinfo_t *hddInfo;
+#endif
+
+#ifdef _IOP
+	(void)startaddr;
+	if (argc < 0)
+	{
+		for ( i = 0; i < apaMaxOpen; i += 1 )
+		{
+			if ( hddFileSlots[i].f )
+			{
+				APA_PRINTF(APA_DRV_NAME": error: can't stop module(fd busy)\n");
+				return MODULE_REMOVABLE_END;
+			}
+		}
+#ifdef APA_USE_DEV9
+		dev9RegisterShutdownCb(0, NULL);
+#endif
+		iomanX_DelDrv(hddFioDev.name);
+#ifdef APA_SUPPORT_BHDD
+		iomanX_DelDrv(bhddFioDev.name);
+#endif
+		if (hddFileSlots)
+		{
+			apaFreeMem(hddFileSlots);
+		}
+		apaCacheDeinit();
+		APA_PRINTF(APA_DRV_NAME": stopped module\n");
+		return MODULE_NO_RESIDENT_END;
+	}
 #endif
 
 	printStartup();
@@ -332,6 +365,10 @@ int APA_ENTRYPOINT(int argc, char *argv[])
 			APA_PRINTF(APA_DRV_NAME": version %04x driver start. This is OSD version!\n", IRX_VER(APA_MODVER_MAJOR, APA_MODVER_MINOR));
 #else
 			APA_PRINTF(APA_DRV_NAME": version %04x driver start.\n", IRX_VER(APA_MODVER_MAJOR, APA_MODVER_MINOR));
+#endif
+#ifdef _IOP
+			if (mi && ((mi->newflags & 2) != 0))
+				mi->newflags |= 0x10;
 #endif
 			return MODULE_RESIDENT_END;
 		}

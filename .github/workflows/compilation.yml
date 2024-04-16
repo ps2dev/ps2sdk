@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     container: ps2dev/ps2toolchain:latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Install dependencies
         run: |
@@ -44,7 +44,7 @@ jobs:
 
       - name: Upload artifacts
         if: ${{ success() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ps2sdk-samples-${{ matrix.debug }}-${{ steps.slug.outputs.sha8 }}
           path: ~/samples

@@ -162,6 +162,7 @@ apa_cache_t *apaGetNextHeader(apa_cache_t *clink, int *err);
 ///////////////////////////////////////////////////////////////////////////////
 
 int apaCacheInit(u32 size);
+int apaCacheDeinit(void);
 void apaCacheLink(apa_cache_t *clink, apa_cache_t *cnew);
 apa_cache_t *apaCacheUnLink(apa_cache_t *clink);
 int apaCacheTransfer(apa_cache_t *clink, int type);
