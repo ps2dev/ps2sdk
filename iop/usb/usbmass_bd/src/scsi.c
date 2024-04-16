@@ -214,15 +214,34 @@ static int scsi_write(struct block_device *bd, u64 sector, const void *buffer, u
 {
     struct scsi_interface *scsi = (struct scsi_interface *)bd->priv;
     u16 sc_remaining            = count;
+    unsigned int sectorSize     = bd->sectorSize;
+    void *misalign_buffer       = NULL;
     int retries;
 
     M_DEBUG("%s: sector=0x%08x%08x, count=%d\n", __func__, U64_2XU32(&sector), count);
 
+    if (((uiptr)buffer & 3) != 0) {
+        /* Slow misalignment workaround */
+        misalign_buffer = __builtin_alloca(sectorSize + 4);
+
+        if (((uiptr)misalign_buffer & 3) != 0)
+        {
+            misalign_buffer = (u8 *)misalign_buffer + (4 - ((uiptr)misalign_buffer & 3));
+        }
+    }
+
     while (sc_remaining > 0) {
         u16 sc = sc_remaining > scsi->max_sectors ? scsi->max_sectors : sc_remaining;
+        const void *dst_buffer = buffer;
+
+        if (misalign_buffer != NULL) {
+            memcpy(misalign_buffer, buffer, sectorSize);
+            dst_buffer = misalign_buffer;
+            sc = 1;
+        }
 
         for (retries = SCSI_MAX_RETRIES; retries > 0; retries--) {
-            if (scsi_cmd_rw_sector(bd, sector, buffer, sc, 1) == 0)
+            if (scsi_cmd_rw_sector(bd, sector, dst_buffer, sc, 1) == 0)
                 break;
         }
 
@@ -233,7 +252,7 @@ static int scsi_write(struct block_device *bd, u64 sector, const void *buffer, u
 
         sc_remaining -= sc;
         sector += sc;
-        buffer = (u8 *)buffer + (sc * bd->sectorSize);
+        buffer = (u8 *)buffer + (sc * sectorSize);
     }
 
     return count;
