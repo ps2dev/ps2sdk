@@ -5,30 +5,37 @@
 #include <stdio.h>
 #include <errno.h>
 
-#include "HDDSupport.h"
+#include "hdd_boot.h"
 
 static volatile unsigned int HDDLoadStatArea[4] ALIGNED(16);
 static unsigned char IsHddSupportEnabled=0, HddSupportStatus=0;
+char CmdStr[34];
 
-void CheckHDDUpdate(int device, const char *SysExecFolder){
-	char CmdStr[34], ModulePath[40];
+static void construct_params() {
+	memset(&CmdStr, 0, sizeof(CmdStr));
+	strcpy(CmdStr, "-osd");
+	strcpy(&CmdStr[5], "0x00100000");
+	strcpy(&CmdStr[16], "-stat");
+	sprintf(&CmdStr[22], "%p", HDDLoadStatArea);
+	CmdStr[sizeof(CmdStr)-1]='\0';
+}
 
-	sprintf(ModulePath, "mc%u:/%s/dev9.irx", device, SysExecFolder);
-	if(SifLoadModule(ModulePath, 0, NULL)>=0){
-		sprintf(ModulePath, "mc%u:/%s/atad.irx", device, SysExecFolder);
-		if(SifLoadModule(ModulePath, 0, NULL)>=0){
-			strcpy(CmdStr, "-osd");
-			strcpy(&CmdStr[5], "0x00100000");
-			strcpy(&CmdStr[16], "-stat");
-			sprintf(&CmdStr[22], "%p", HDDLoadStatArea);
-			CmdStr[sizeof(CmdStr)-1]='\0';
+int BootHDDLoadBuffer(void* irx, unsigned int size, int* ret){
+	int id, rett;
+	construct_params();
+	id = SifExecModuleBuffer(irx, size, sizeof(CmdStr), CmdStr, &rett);
+	if (id > 0 && rett != 1) IsHddSupportEnabled = 1;
+	if (ret != NULL) *ret = rett;
+	return id;
+}
 
-			sprintf(ModulePath, "mc%u:/%s/hddload.irx", device, SysExecFolder);
-			if(SifLoadModule(ModulePath, sizeof(CmdStr), CmdStr)>=0){
-				IsHddSupportEnabled = 1;
-			}
-		}
-	}
+int BootHDDLoadFile(char* path, int* ret){
+	int id, rett;
+	construct_params();
+	id = SifLoadStartModule(path, sizeof(CmdStr), CmdStr, &rett);
+	if (id > 0 && rett != 1) IsHddSupportEnabled = 1;
+	if (ret != NULL) *ret = rett;
+	return id;
 }
 
 int GetHddSupportEnabledStatus(void){
