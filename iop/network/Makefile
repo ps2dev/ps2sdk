@@ -14,6 +14,7 @@ SUBDIRS = \
 	smap-none \
 	smap-ps2ip \
 	smbman \
+	spduart \
 	udptty
 
 include $(PS2SDKSRC)/Defs.make
