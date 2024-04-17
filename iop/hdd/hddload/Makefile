@@ -8,6 +8,7 @@
 
 IOP_BIN ?= hddload.irx
 IOP_OBJS = hddload.o imports.o exports.o
+IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/iop/Rules.bin.make
