@@ -2,20 +2,14 @@
 #  ____|   |    ____|   |        | |____|
 # |     ___|   |____ ___|    ____| |    \    PS2DEV Open Source Project.
 #-----------------------------------------------------------------------
-# Copyright 2001-2004, ps2dev - http://www.ps2dev.org
+# Copyright ps2dev - http://www.ps2dev.org
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = \
-	netman \
-	smap \
-	smap-modular-netman \
-	smap-modular-none \
-	smap-none \
-	smap-ps2ip \
-	smbman \
-	spduart \
-	udptty
+IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include
+IOP_OBJS = spduart.o imports.o exports.o
 
 include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+include $(PS2SDKSRC)/iop/Rules.bin.make
+include $(PS2SDKSRC)/iop/Rules.make
+include $(PS2SDKSRC)/iop/Rules.release
