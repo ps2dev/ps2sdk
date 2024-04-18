@@ -3289,6 +3289,9 @@ static UINT find_volume (	/* Returns BS status found in the hosting drive */
 
 
 	fmt = check_fs(fs, 0);				/* Load sector 0 and check if it is an FAT VBR as SFD format */
+#if !FF_FS_MBR
+	return fmt;	/* No MBR available to check the partitioning */
+#endif
 	if (fmt != 2 && (fmt >= 3 || part == 0)) return fmt;	/* Returns if it is an FAT VBR as auto scan, not a BS or disk error */
 
 	/* Sector 0 is not an FAT VBR or forced partition number wants a partition */
@@ -3325,6 +3328,8 @@ static UINT find_volume (	/* Returns BS status found in the hosting drive */
 	} while (part == 0 && fmt >= 2 && ++i < 4);
 	return fmt;
 }
+
+
 
 
 /*-----------------------------------------------------------------------*/
@@ -3387,8 +3392,8 @@ static FRESULT mount_volume (	/* FR_OK(0): successful, !=0: an error occurred */
 	if (SS(fs) > FF_MAX_SS || SS(fs) < FF_MIN_SS || (SS(fs) & (SS(fs) - 1))) return FR_DISK_ERR;
 #endif
 
-	/* Check for a valid file system on the device. */
-	fmt = check_fs(fs, 0);
+	/* Find an FAT volume on the drive */
+	fmt = find_volume(fs, LD2PT(vol));
 	M_DEBUG("check_fs returned %d at LBA 0x%08x%08x\n", fmt, U64_2XU32(&fs->winsect));
 	if (fmt == 4) return FR_DISK_ERR;		/* An error occured in the disk I/O layer */
 	if (fmt >= 2) return FR_NO_FILESYSTEM;	/* No FAT volume is found */
