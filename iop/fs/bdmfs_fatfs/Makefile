@@ -9,7 +9,7 @@
 # IOP_CFLAGS += -DDEBUG -DDEBUG_EXTREME
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/fs/bdm/include
-IOP_CFLAGS += -Wno-error -Wno-strict-aliasing
+IOP_CFLAGS += -Wno-strict-aliasing
 
 IOP_OBJS = ff.o ffsystem.o ffunicode.o fs_driver.o diskio.o main.o imports.o
 IOP_LIBS = -static-libgcc -lgcc
