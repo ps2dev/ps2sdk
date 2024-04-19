@@ -55,29 +55,6 @@ int ff_cre_syncobj (	/* 1:Function succeeded, 0:Could not create the sync object
 	FF_SYNC_t* sobj		/* Pointer to return the created sync object */
 )
 {
-#if 0
-	/* Win32 */
-	*sobj = CreateMutex(NULL, FALSE, NULL);
-	return (int)(*sobj != INVALID_HANDLE_VALUE);
-
-	/* uITRON */
-//	T_CSEM csem = {TA_TPRI,1,1};
-//	*sobj = acre_sem(&csem);
-//	return (int)(*sobj > 0);
-
-	/* uC/OS-II */
-//	OS_ERR err;
-//	*sobj = OSMutexCreate(0, &err);
-//	return (int)(err == OS_NO_ERR);
-
-	/* FreeRTOS */
-//	*sobj = xSemaphoreCreateMutex();
-//	return (int)(*sobj != NULL);
-
-	/* CMSIS-RTOS */
-//	*sobj = osMutexCreate(&Mutex[vol]);
-//	return (int)(*sobj != NULL);
-#endif
 	/* IOP kernel */
     iop_sema_t sp;
 
@@ -105,28 +82,8 @@ int ff_del_syncobj (	/* 1:Function succeeded, 0:Could not delete due to an error
 	FF_SYNC_t sobj		/* Sync object tied to the logical drive to be deleted */
 )
 {
-#if 0
-	/* Win32 */
-	return (int)CloseHandle(sobj);
-
-	/* uITRON */
-//	return (int)(del_sem(sobj) == E_OK);
-
-	/* uC/OS-II */
-//	OS_ERR err;
-//	OSMutexDel(sobj, OS_DEL_ALWAYS, &err);
-//	return (int)(err == OS_NO_ERR);
-
-	/* FreeRTOS */
-//  vSemaphoreDelete(sobj);
-//	return 1;
-
-	/* CMSIS-RTOS */
-//	return (int)(osMutexDelete(sobj) == osOK);
-#endif
 	/* IOP kernel */
-    if (sobj >= 0) {
-        DeleteSema(sobj);
+    if (DeleteSema(sobj) == 0) {
         return 1;
     }
     return 0;
@@ -144,26 +101,12 @@ int ff_req_grant (	/* 1:Got a grant to access the volume, 0:Could not get a gran
 	FF_SYNC_t sobj	/* Sync object to wait */
 )
 {
-#if 0
-	/* Win32 */
-	return (int)(WaitForSingleObject(sobj, FF_FS_TIMEOUT) == WAIT_OBJECT_0);
-
-	/* uITRON */
-//	return (int)(wai_sem(sobj) == E_OK);
-
-	/* uC/OS-II */
-//	OS_ERR err;
-//	OSMutexPend(sobj, FF_FS_TIMEOUT, &err));
-//	return (int)(err == OS_NO_ERR);
-
-	/* FreeRTOS */
-//	return (int)(xSemaphoreTake(sobj, FF_FS_TIMEOUT) == pdTRUE);
-
-	/* CMSIS-RTOS */
-//	return (int)(osMutexWait(sobj, FF_FS_TIMEOUT) == osOK);
-#endif
-	WaitSema(sobj);
-	return 1;
+	/* IOP kernel */
+	/* TODO: Use the timeout value from the configuration file */
+	if (WaitSema(sobj) == 0) {
+		return 1;
+	}
+	return 0;
 }
 
 
@@ -177,22 +120,7 @@ void ff_rel_grant (
 	FF_SYNC_t sobj	/* Sync object to be signaled */
 )
 {
-#if 0
-	/* Win32 */
-	ReleaseMutex(sobj);
-
-	/* uITRON */
-//	sig_sem(sobj);
-
-	/* uC/OS-II */
-//	OSMutexPost(sobj);
-
-	/* FreeRTOS */
-//	xSemaphoreGive(sobj);
-
-	/* CMSIS-RTOS */
-//	osMutexRelease(sobj);
-#endif
+	/* IOP kernel */
 	SignalSema(sobj);
 }
 

@@ -278,9 +278,6 @@
 /* #include <somertos.h>	// O/S definitions */
 #define FF_FS_REENTRANT	1
 #define FF_FS_TIMEOUT	1000
-#if 0
-#define FF_SYNC_t		HANDLE
-#endif
 #define FF_SYNC_t		int
 /* The option FF_FS_REENTRANT switches the re-entrancy (thread safe) of the FatFs
 /  module itself. Note that regardless of this option, file access to different
@@ -300,5 +297,7 @@
 /  included somewhere in the scope of ff.h. */
 
 
+#define FF_FS_MBR 0
+/* This option switches support for MBR partition table. (0:Disable or 1:Enable) */
 
 /*--- End of configuration options ---*/
