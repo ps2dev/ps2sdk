@@ -6,6 +6,9 @@ on:
       - 'tools/**'
       - '.github/workflows/tools.yml'
   pull_request:
+    paths:
+      - 'tools/**'
+      - '.github/workflows/tools.yml'
   repository_dispatch:
     types: [run_build]
   workflow_dispatch: {}

@@ -34,7 +34,7 @@ s32 WaitSemaEx(s32 semaid, int signal, u64 *timeout)
     // TODO: other values NYI
     if (signal != 1)
     {
-        return -1;
+        return -100;
     }
 
     if (timeout != NULL && *timeout == 0)
@@ -54,16 +54,11 @@ s32 WaitSemaEx(s32 semaid, int signal, u64 *timeout)
 
     ret = WaitSema(semaid);
 
-    if (ret < 0)
-    {
-        return ret;
-    }
-
     if (timerid >= 0)
     {
         ReleaseTimerAlarm(timerid);
     }
 
-    return semaid;
+    return ret;
 }
 #endif

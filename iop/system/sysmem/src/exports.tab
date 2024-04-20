@@ -1,0 +1,21 @@
+
+DECLARE_EXPORT_TABLE(sysmem, 1, 2)
+DECLARE_EXPORT(_start)
+DECLARE_EXPORT(sysmem_reinit)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(GetSysmemInternalData)
+DECLARE_EXPORT(AllocSysMemory)
+DECLARE_EXPORT(FreeSysMemory)
+DECLARE_EXPORT(QueryMemSize)
+DECLARE_EXPORT(QueryMaxFreeMemSize)
+DECLARE_EXPORT(QueryTotalFreeMemSize)
+DECLARE_EXPORT(QueryBlockTopAddress)
+DECLARE_EXPORT(QueryBlockSize)
+DECLARE_EXPORT(GetSysMemoryInfo)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(Kprintf)
+DECLARE_EXPORT(KprintfSet)
+END_EXPORT_TABLE
+
+void _retonly() {}
