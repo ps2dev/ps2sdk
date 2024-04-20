@@ -64,7 +64,7 @@ static rests_pkt rests;
 static int fileXio_GetDeviceList_RPC(struct fileXioDevice* ee_devices, int eecount);
 static int fileXio_CopyFile_RPC(const char *src, const char *dest, int mode);
 static int fileXio_Read_RPC(int infd, char *read_buf, int read_size, void *intr_data);
-static int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size, int mis,u8 *misbuf);
+static int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size);
 static int fileXio_GetDir_RPC(const char* pathname, struct fileXioDirEntry dirEntry[], unsigned int req_entries);
 static int fileXio_Mount_RPC(const char* mountstring, const char* mountpoint, int flag);
 static int fileXio_chstat_RPC(char *filename, void* eeptr, int mask);
@@ -302,7 +302,7 @@ EXIT:
 	return (total);
 }
 
-static int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size, int mis,u8 *misbuf)
+static int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size)
 {
      SifRpcReceiveData_t rdata;
      int left;
@@ -312,20 +312,8 @@ static int fileXio_Write_RPC(int outfd, const char *write_buf, int write_size, i
 
 	left  = write_size;
 	total = 0;
-	if (mis > 0)
-      {
-		wlen=iomanX_write(outfd, misbuf, mis);
-		if (wlen != mis)
-            {
-			if (wlen > 0)
-				total += wlen;
-			return (total);
-		}
-		total += wlen;
-	}
 
-	left-=mis;
-	pos=(int)write_buf+mis;
+	pos=(int)write_buf;
 	while(left){
 		int writelen;
 		writelen = MIN(RWBufferSize, (unsigned int)left);
@@ -720,8 +708,7 @@ static void* fileXioRpc_Write(unsigned int* sbuff)
 	struct fxio_write_packet *packet=(struct fxio_write_packet*)sbuff;
 
 	M_DEBUG("Write Request fd:%d, size:%d\n", packet->fd, packet->size);
-	ret=fileXio_Write_RPC(packet->fd, packet->buffer, packet->size,
-                            packet->unalignedDataLen, packet->unalignedData);
+	ret=fileXio_Write_RPC(packet->fd, packet->buffer, packet->size);
 	sbuff[0] = ret;
 	return sbuff;
 }

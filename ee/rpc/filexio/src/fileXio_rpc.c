@@ -615,7 +615,6 @@ int fileXioRead(int fd, void *buf, int size)
 #ifdef F_fileXioWrite
 int fileXioWrite(int fd, const void *buf, int size)
 {
-	unsigned int miss;
 	int rv;
 	struct fxio_write_packet *packet=(struct fxio_write_packet*)__sbuff;
 
@@ -625,20 +624,9 @@ int fileXioWrite(int fd, const void *buf, int size)
 	_lock();
 	WaitSema(__fileXioCompletionSema);
 
-	if((unsigned int)buf & 0x3F)
-	{
-		miss = 64 - ((unsigned int)buf & 0x3F);
-		if(miss > (unsigned int)size) miss = size;
-	} else {
-		miss = 0;
-	}
-
 	packet->fd = fd;
 	packet->buffer = buf;
 	packet->size = size;
-	packet->unalignedDataLen = miss;
-
-	memcpy(packet->unalignedData, buf, miss);
 
 	if(!IS_UNCACHED_SEG(buf))
 		SifWriteBackDCache((void*)buf, size);
