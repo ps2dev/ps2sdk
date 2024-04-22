@@ -195,6 +195,8 @@ struct fxio_write_packet
     int fd;
     const void *buffer;
     int size;
+    unsigned int unalignedDataLen;
+    unsigned char unalignedData[64];
 };
 
 struct fxio_lseek_packet
