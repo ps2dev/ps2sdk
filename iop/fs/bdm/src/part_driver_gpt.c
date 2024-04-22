@@ -9,8 +9,6 @@
 
 #include "module_debug.h"
 
-#define U64_2XU32(val)  ((u32*)val)[1], ((u32*)val)[0]
-
 void GetGPTPartitionNameAscii(gpt_partition_table_entry* pPartition, char* pAsciiBuffer)
 {
     // Loop and perform the world's worst unicode -> ascii string conversion.
@@ -83,7 +81,8 @@ int part_connect_gpt(struct block_device *bd)
                 // Failed to read the next sector from the drive.
 #ifdef DEBUG
                 u64 lba = pGptHeader->partition_table_lba + (i / entriesPerSector);
-                M_DEBUG("Failed to read next partition table entry sector lba=0x%08x%08x\n", U64_2XU32(&lba));
+                DEBUG_U64_2XU32(lba);
+                M_DEBUG("Failed to read next partition table entry sector lba=0x%08x%08x\n", lba_u32[1], lba_u32[0]);
 #endif
                 FreeSysMemory(buffer);
                 return -1;
@@ -111,8 +110,14 @@ int part_connect_gpt(struct block_device *bd)
 
                 // Print the partition info and create a pseudo block device for it.
                 GetGPTPartitionNameAscii(&pGptPartitionEntry[x], partName);
-                printf("Found partition '%s' type=%08x unique=%08x start=0x%08x%08x end=0x%08x%08x attr=0x%08x%08x\n", partName, *(u32*)&pGptPartitionEntry[x].partition_type_guid,
-                    *(u32*)&pGptPartitionEntry[x].partition_unique_guid, U64_2XU32(&pGptPartitionEntry[x].first_lba), U64_2XU32(&pGptPartitionEntry[x].last_lba), U64_2XU32(&pGptPartitionEntry[x].attribute_flags));
+                u64 first_lba = pGptPartitionEntry[x].first_lba;
+                u64 last_lba = pGptPartitionEntry[x].last_lba;
+                u64 attribute_flags = pGptPartitionEntry[x].attribute_flags;
+                U64_2XU32(first_lba);
+                U64_2XU32(last_lba);
+                U64_2XU32(attribute_flags);
+                M_PRINTF("Found partition '%s' type=%08x unique=%08x start=0x%08x%08x end=0x%08x%08x attr=0x%08x%08x\n", partName, *(u32*)&pGptPartitionEntry[x].partition_type_guid,
+                    *(u32*)&pGptPartitionEntry[x].partition_unique_guid, first_lba_u32[1], first_lba_u32[0], last_lba_u32[1], last_lba_u32[0], attribute_flags_u32[1], attribute_flags_u32[0]);
 
                 // Check for specific GPT partition types we should ignore.
                 if (memcmp(pGptPartitionEntry[x].partition_type_guid, MS_RESERVED_PARTITION_GUID, sizeof(MS_RESERVED_PARTITION_GUID)) == 0 ||

@@ -56,7 +56,8 @@ static int _read(struct block_device *bd, u64 sector, void *buffer, u16 count)
 {
     struct bd_cache *c = bd->priv;
 
-    //M_DEBUG("%s(%d, %d)\n", __FUNCTION__, sector, count);
+    DEBUG_U64_2XU32(sector);
+    M_DEBUG("%s(0x%08x%08x, %d)\n", __FUNCTION__, sector_u32[1], sector_u32[0], count);
 
     if (count >= SECTORS_PER_BLOCK) {
         // Do a direct read
@@ -127,7 +128,8 @@ static int _write(struct block_device *bd, u64 sector, const void *buffer, u16 c
 {
     struct bd_cache *c = bd->priv;
 
-    M_DEBUG("%s(%d, %d)\n", __FUNCTION__, sector, count);
+    DEBUG_U64_2XU32(sector);
+    M_DEBUG("%s(0x%08x%08x, %d)\n", __FUNCTION__, sector_u32[1], sector_u32[0], count);
 
     _invalidate(c, sector, count);
 
