@@ -46,8 +46,6 @@ IRX_ID(MODNAME, 2, 7);
 #define M_PRINTF(format, args...) \
     printf(MODNAME ": " format, ##args)
 
-#define U64_2XU32(val) ((u32 *)val)[1], ((u32 *)val)[0]
-
 #define BANNER  "ATA device driver %s - Copyright (c) 2003 Marcus R. Brown\n"
 #define VERSION "v1.2"
 
