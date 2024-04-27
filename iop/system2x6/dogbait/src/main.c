@@ -12,7 +12,7 @@
 
 IRX_ID(MODNAME, MAJOR, MINOR);
 char rdata[16];
-char wdata[2] = {0x42, (char)(1 << 8)};
+char wdata[1] = {0x0};
 
 //the loop waiting was made to mirror what rom0:DAEMON did
 void bait(void*)
@@ -20,12 +20,13 @@ void bait(void*)
   int x;
   printf("DOGBAIT v%d.%d   by El_isra\n", MAJOR, MINOR);
   do {
+    wdata[0] = !wdata[0];
 #ifdef DEBUG
     x =
 #endif
     //thanks uyjulian for the idea. arcade CDVDMAN has the blue led control export stubbed so directly calling the CMD was the only choice
     sceCdApplySCmd(0x1c, wdata, sizeof(wdata), rdata);
-    DPRINTF("sceCdApplySCmd() ret %d\n", x);
+    DPRINTF("sceCdApplySCmd(0x1c, %x) ret %d\n", wdata[0], x);
     x = 0x3c;
     while (0 < x) {
       DelayThread(1000000);
