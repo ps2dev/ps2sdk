@@ -2645,7 +2645,8 @@ lbl0:
 		fse->mode = temp;
 		fse->edc = mcman_calcEDC((void *)fse, 127);
 
-		if (fse->linked_block < 0) {
+		// Unofficial: upper bounds check linked_block
+		if (fse->linked_block < 0 || fse->linked_block >= 15) {
 			//cluster = 0;
 			goto lbl1;
 		}
@@ -2813,7 +2814,8 @@ int mcman_FNC8ca4(int port, int slot, MC_FHANDLE *fh)
 	j = -1;
 
 	{
-		while (i >= 0) {
+		// Unofficial: upper bounds check i
+		while (i >= 0 && i < 15) {
 			if (mcfree < i) {
 				u8 *pfsentry, *pfsee, *pfseend;
 
@@ -3047,29 +3049,23 @@ int mcman_cachePS1dirs(int port, int slot)
 		cluster_t[i] = i;
 
 		linked_block = fs_t[i]->linked_block;
-		if (linked_block >= 0) {
-			do {
-				if ((fs_t[linked_block]->mode & 0xf0) != temp1)
-					temp1 = 0;
+		// Unofficial: upper bounds check linked_block
+		while (linked_block >= 0 && linked_block < 15) {
+			if ((fs_t[linked_block]->mode & 0xf0) != temp1)
+				temp1 = 0;
 
-				if (fs_t[linked_block]->mode == 0xa0)
-					break;
+			if (fs_t[linked_block]->mode == 0xa0)
+				break;
 
-				if (cluster_t[linked_block] != -1)
-					break;
+			if (cluster_t[linked_block] != -1)
+				break;
 
-				cluster_t[linked_block] = i;
-				linked_block = fs_t[linked_block]->linked_block;
-
-			} while (linked_block >= 0);
-
-			if ((linked_block < 0) && (temp1 != 0))
-				continue;
+			cluster_t[linked_block] = i;
+			linked_block = fs_t[linked_block]->linked_block;
 		}
-		else {
-			if (temp1 != 0)
-				continue;
-		}
+
+		if ((linked_block < 0 || linked_block >= 15) && (temp1 != 0))
+			continue;
 
 		j = 0;
 		do {
@@ -3815,7 +3811,8 @@ int mcman_readdirentryPS1(int port, int slot, int cluster, McFsEntryPS1 **pfse)
 	McCacheEntry *mce;
 	register MCDevInfo *mcdi = &mcman_devinfos[port][slot];
 
-	if (cluster >= 15)
+	// Unofficial: lower bounds check cluster
+	if (cluster < 0 || cluster >= 15)
 		return -73;
 
 	pages_per_fatclust = MCMAN_CLUSTERSIZE / mcdi->pagesize;
