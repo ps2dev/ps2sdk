@@ -1313,7 +1313,7 @@ static void loadrelelf(const void *module, FileInfo_t *ModuleInfo)
 			u32 entsize;
 			entsize = CurrentELF_shdr->entsize;
 			if ( !entsize )
-				__asm__ __volatile__("\tbreak\n");
+				__builtin_trap();
 			NumRelocs = CurrentELF_shdr->size / entsize;
 			ApplyElfRelSection(ModuleInfo->text_start, (const elf_rel *)((u8 *)module + CurrentELF_shdr->offset), NumRelocs);
 		}

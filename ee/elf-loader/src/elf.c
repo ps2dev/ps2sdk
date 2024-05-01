@@ -77,7 +77,7 @@ int LoadELFFromFileWithPartition(const char *filename, const char *partition, in
 	boot_elf = (u8 *)loader_elf;
 	eh = (elf_header_t *)boot_elf;
 	if (_lw((u32)&eh->ident) != ELF_MAGIC)
-		asm volatile("break\n");
+		__builtin_trap();
 
 	eph = (elf_pheader_t *)(boot_elf + eh->phoff);
 

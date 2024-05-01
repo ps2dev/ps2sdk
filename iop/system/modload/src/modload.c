@@ -1018,10 +1018,10 @@ static int modload_post_boot_callback(iop_init_entry_t *next, int delayed)
 			module_result =
 				((int (*)(int, char **, u32, ModuleInfo_t *))module_info->entry)(updater_argc, updater_argv, 0, module_info);
 			printf("return from updater '%s' return value = %d\n", updater_argv[0], module_result);
-			__asm__ __volatile__("\tbreak\n");
+			__builtin_trap();
 		}
 		printf("updater '%s' can't load\n", updater_argv[0]);
-		__asm__ __volatile__("\tbreak\n");
+		__builtin_trap();
 	}
 	printf("Reboot fail! need file name argument\n");
 	return 0;
@@ -1404,7 +1404,7 @@ do_load_seek(module_thread_args_t *mltargs, int module_fd, FileInfo_t *fi, int *
 						break;
 					entsize = elfshdr[i].entsize;
 					if ( !entsize )
-						__asm__ __volatile__("\tbreak\n");
+						__builtin_trap();
 					ApplyElfRelSection(fi->text_start, modulearea, elfshdr[i].size / entsize);
 				}
 				break;

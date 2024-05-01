@@ -287,7 +287,7 @@ static void ScanImagesForFile(const struct ImageData *ImageDataBuffer, unsigned 
 #else
     printf("panic ! \'%s\' not found\n", filename);
 #endif
-    __asm("break\n");
+    __builtin_trap();
 }
 
 #ifdef UDNL_T300
@@ -982,7 +982,7 @@ static void ParseIOPBTCONF(const struct ImageData *ImageDataBuffer, unsigned int
                     DisplayModuleName(ResetData->NumModules, ptr); // Code for debugging only - not originally present.
 #endif
                     if (SelectModuleFromImages(ImageDataBuffer, NumFiles, ptr, &ModuleFileStat) == NULL) {
-                        __asm("break\n");
+                        __builtin_trap();
                     }
 
                     ModList[NumModules] = ModuleFileStat.data;
@@ -1102,7 +1102,7 @@ int _start(int argc, char *argv[])
                 }
 #endif
                 SleepThread();
-                __asm("break");
+                __builtin_trap();
             }
             }
             */
@@ -1119,7 +1119,7 @@ int _start(int argc, char *argv[])
                 }
 #endif
                 SleepThread();
-                __asm("break");
+                __builtin_trap();
             }
 
             file_sz = lseek(fd, 0, SEEK_END);
@@ -1159,7 +1159,7 @@ int _start(int argc, char *argv[])
         }
 #endif
         SleepThread();
-        __asm("break");
+        __builtin_trap();
     }
 
     ResetData = buffer;
