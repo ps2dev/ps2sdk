@@ -18,12 +18,17 @@ jobs:
     runs-on: ${{ matrix.os[0] }}
     strategy:
       matrix:
-        os: [[macos-latest, bash], [ubuntu-latest, bash], [windows-latest, msys2]]
+        os: [
+          [macos-latest, arm64, bash],
+          [macos-13, x86_64, bash],
+          [ubuntu-latest, x86_64, bash],
+          [windows-latest, x86_64, msys2]
+        ]
         debug: [all, debug]
       fail-fast: false
     defaults:
      run:
-      shell: ${{ matrix.os[1] }} {0}
+      shell: ${{ matrix.os[2] }} {0}
 
     steps:
     - uses: actions/checkout@v4
@@ -49,5 +54,5 @@ jobs:
       if: ${{ success() }}
       uses: actions/upload-artifact@v4
       with:
-        name: ps2sdk-tools-${{ matrix.debug }}-${{ matrix.os[0] }}
+        name: ps2sdk-tools-${{ matrix.debug }}-${{ matrix.os[0] }}-${{ matrix.os[1] }}
         path: ps2dev/ps2sdk/bin/*
