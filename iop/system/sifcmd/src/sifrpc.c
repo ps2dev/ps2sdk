@@ -178,7 +178,7 @@ static void *sif_rpc_get_fpacket(sif_rpc_data_t *rpc_data)
 	rdata_table_len = rpc_data->rdata_table_len;
 	index_calc = rdata_table_idx % rdata_table_len;
 	if ( rdata_table_len == -1 && (u32)rdata_table_idx == 0x80000000 )
-		__asm__("break\n");
+		__builtin_trap();
 	rpc_data->rdata_table_idx = index_calc + 1;
 	return &rpc_data->rdata_table[64 * index_calc];
 }
