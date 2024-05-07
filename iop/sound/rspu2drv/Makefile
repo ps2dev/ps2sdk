@@ -28,3 +28,7 @@ $(PS2SDKSRC)/iop/sound/libspu2/lib/libspu2.a:
 
 $(PS2SDKSRC)/iop/sound/libsnd2/lib/libsnd2.a:
 	$(MAKEREC) $(PS2SDKSRC)/iop/sound/libsnd2
+
+.NOTPARALLEL:: \
+	$(PS2SDKSRC)/iop/sound/libspu2/lib/libspu2.a \
+	$(PS2SDKSRC)/iop/sound/libsnd2/lib/libsnd2.a
