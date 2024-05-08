@@ -25,7 +25,7 @@ pad_t *pad_open(unsigned int port, unsigned int slot, unsigned int mode, unsigne
 	}
 
 #ifdef _XINPUT
-	if (mtapGetConnection(pad->port))
+	if (mtapGetConnection(port))
 	{
 		// there are only four slots
 		if (slot > 3)
