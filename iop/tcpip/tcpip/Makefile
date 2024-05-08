@@ -166,3 +166,5 @@ $(IOP_OBJS_DIR)udp.o: $(LWIP)/src/core/udp.c
 $(IOP_OBJS_DIR)sys_arch.o: $(PS2IP_BASE)/sys_arch.c
 	$(IOP_CC) $(IOP_CFLAGS) -c $< -o $@
 
+.NOTPARALLEL:: \
+	$(LWIP)

@@ -36,3 +36,7 @@ $(EE_OBJS_DIR)imgdrv_irx.c: $(EE_SRC_DIR)imgdrv/irx/imgdrv.irx $(PS2SDKSRC)/tool
 
 clean::
 	$(MAKEREC) $(EE_SRC_DIR)imgdrv clean
+
+.NOTPARALLEL:: \
+	$(PS2SDKSRC)/tools/bin2c/bin/bin2c \
+	$(EE_SRC_DIR)imgdrv/irx/imgdrv.irx

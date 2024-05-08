@@ -19,3 +19,6 @@ include $(PS2SDKSRC)/iop/Rules.release
 
 $(PS2SDKSRC)/iop/fs/libbdm/lib/libbdm.a:
 	$(MAKEREC) $(PS2SDKSRC)/iop/fs/libbdm
+
+.NOTPARALLEL:: \
+	$(PS2SDKSRC)/iop/fs/libbdm/lib/libbdm.a
