@@ -4,11 +4,11 @@ I_bdm_disconnect_bd
 bdm_IMPORTS_end
 
 dmacman_IMPORTS_start
-I_dmac_request
-I_dmac_transfer
-I_dmac_ch_set_dpcr
-I_dmac_enable
-//I_dmac_disable
+I_sceSetSliceDMA
+I_sceStartDMA
+I_sceSetDMAPriority
+I_sceEnableDMAChannel
+//I_sceDisableDMAChannel
 dmacman_IMPORTS_end
 
 intrman_IMPORTS_start

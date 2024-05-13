@@ -27,8 +27,8 @@ cdvdman_IMPORTS_end
 
 #ifdef APA_USE_DEV9
 dev9_IMPORTS_start
-I_dev9Shutdown
-I_dev9RegisterShutdownCb
+I_Dev9CardStop
+I_Dev9RegisterPowerOffHandler
 dev9_IMPORTS_end
 #endif
 

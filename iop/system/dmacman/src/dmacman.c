@@ -496,7 +496,7 @@ int dmacman_deinit()
     return 1;
 }
 
-int dmac_request(u32 channel, void *addr, u32 size, u32 count, int dir)
+int sceSetSliceDMA(u32 channel, void *addr, u32 size, u32 count, int dir)
 {
     if (channel >= 0xD || channel == IOP_DMAC_OTC) {
         return 0;
@@ -539,14 +539,14 @@ int dmac_set_dma_sif1(u32 ch, u32 size)
     return 1;
 }
 
-void dmac_transfer(u32 channel)
+void sceStartDMA(u32 channel)
 {
     if (channel < 0xF) {
         dmac_ch_set_chcr(channel, dmac_ch_get_chcr(channel) | 0x1000000);
     }
 }
 
-void dmac_ch_set_dpcr(u32 channel, u32 val)
+void sceSetDMAPriority(u32 channel, u32 val)
 {
     int state;
 
@@ -612,7 +612,7 @@ void dmac_ch_set_dpcr(u32 channel, u32 val)
     CpuResumeIntr(state);
 }
 
-void dmac_enable(u32 channel)
+void sceEnableDMAChannel(u32 channel)
 {
     int state;
 
@@ -675,7 +675,7 @@ void dmac_enable(u32 channel)
     CpuResumeIntr(state);
 }
 
-void dmac_disable(u32 channel)
+void sceDisableDMAChannel(u32 channel)
 {
     int state;
 

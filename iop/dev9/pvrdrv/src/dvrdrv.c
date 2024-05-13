@@ -174,7 +174,7 @@ int DvrdrvInit()
             ClearItrSidTbl(&itrsid_table[i][j]);
         }
     }
-    dev9RegisterIntrCb(9, DVR_INTR_HANDLER);
+    SpdRegisterIntrHandler(9, DVR_INTR_HANDLER);
     DvrdrvRegisterIntrHandler(1, &DVRDRV, INTR_DVRRDY_HANDLER);
     DvrdrvRegisterIntrHandler(2, &DVRDRV, INTR_CMD_ACK_HANDLER);
     DvrdrvRegisterIntrHandler(4, &DVRDRV, INTR_CMD_COMP_HANDLER);
@@ -388,7 +388,7 @@ int DvrdrvTransferDma(u8 *output_buffer, int a2)
             return -1;
         default:
         LABEL_7:
-            dev9DmaTransfer(2, output_buffer, (v6 << 16) | 0x20, v4);
+            SpdDmaTransfer(2, output_buffer, (v6 << 16) | 0x20, v4);
             if (v7 > 0) {
                 do {
                     v7 -= 4;
@@ -606,7 +606,7 @@ int DvrdrvEnableIntr(u16 a1)
 
     CpuSuspendIntr(&state);
     SPD_REG16(0x4208) |= a1;
-    dev9IntrEnable(0x200);
+    SpdIntrEnable(0x200);
     CpuResumeIntr(state);
     return 0;
 }
@@ -620,7 +620,7 @@ int DvrdrvDisableIntr(s16 a1)
     SPD_REG16(0x4208) &= ~a1;
     SPD_REG16(0x4204) = a1;
     if (!SPD_REG16(0x4208))
-        dev9IntrDisable(0x200);
+        SpdIntrDisable(0x200);
     CpuResumeIntr(state);
     return 0;
 }

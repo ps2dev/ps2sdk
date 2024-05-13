@@ -682,7 +682,7 @@ static void spduart_thread_proc(struct spduart_internals_ *priv)
 	{
 		if ( (v12 & 2) != 0 && !priv->spduart_start_flag )
 		{
-			dev9IntrDisable(4096);
+			SpdIntrDisable(4096);
 			if ( priv->spduart_alarm_1e4_flag )
 			{
 				CancelAlarm((unsigned int (*)(void *))alarm_cb_1e4, priv);
@@ -788,7 +788,7 @@ static void spduart_thread_proc(struct spduart_internals_ *priv)
 			priv->spduart_start_flag = 0;
 			SetAlarm(&priv->spduart_clock_1e6, (unsigned int (*)(void *))alarm_cb_1e6, priv);
 			priv->spduart_alarm_1e6_flag = 1;
-			dev9IntrEnable(4096);
+			SpdIntrEnable(4096);
 		}
 	}
 }
@@ -1261,7 +1261,7 @@ static int module_start(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 			if ( (spduart_internals.spduart_msr_cached & 0x20) != 0 )
 			{
 				sceInetPrintf("spduart: Modem module detected\n");
-				dev9RegisterShutdownCb(1, shutdown_cb);
+				Dev9RegisterPowerOffHandler(1, shutdown_cb);
 				memset(&v17, 0, sizeof(v17));
 				spduart_internals.spduart_ef = CreateEventFlag(&v17);
 				if ( spduart_internals.spduart_ef > 0 )
@@ -1277,8 +1277,8 @@ static int module_start(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 						spduart_internals.spduart_thread = v16;
 						if ( !StartThread(v16, &spduart_internals) )
 						{
-							dev9IntrDisable(4096);
-							dev9RegisterIntrCb(12, (dev9_intr_cb_t)spduart_dev9_intr_cb);
+							SpdIntrDisable(4096);
+							SpdRegisterIntrHandler(12, (dev9_intr_cb_t)spduart_dev9_intr_cb);
 							USec2SysClock(10000u, &spduart_internals.spduart_clock_1e4);
 							USec2SysClock(1000000u, &spduart_internals.spduart_clock_1e6);
 							bzero(&spduart_internals.spduart_modem_ops, 108);
@@ -1344,9 +1344,9 @@ static int module_stop(int ac, char *av[], void *startaddr, ModuleInfo_t *mi)
 		CancelAlarm((unsigned int (*)(void *))alarm_cb_1e4, &spduart_internals);
 	if ( spduart_internals.spduart_alarm_1e6_flag )
 		CancelAlarm((unsigned int (*)(void *))alarm_cb_1e6, &spduart_internals);
-	dev9RegisterShutdownCb(1, 0);
+	Dev9RegisterPowerOffHandler(1, 0);
 	ReleaseLibraryEntries(&_exp_spduart);
-	dev9IntrDisable(4096);
+	SpdIntrDisable(4096);
 	spduart_deinit();
 	return MODULE_NO_RESIDENT_END;
 }
