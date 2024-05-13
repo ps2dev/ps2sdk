@@ -119,20 +119,20 @@ u32 dmac_get_BF801578(void);
 
 /* Initialize the given channel and start the transfer.  Returns 1 if the
    transfer was started, and 0 on error.  */
-int dmac_request(u32 channel, void * addr, u32 size, u32 count, int dir);	//sceSetSliceDMA
+int sceSetSliceDMA(u32 channel, void * addr, u32 size, u32 count, int dir);
 
 int dmac_set_dma_chained_spu_sif0(u32 channel, u32 size, u32 tadr);
 int dmac_set_dma_sif0(u32 channel, u32 size, u32 tadr);
 int dmac_set_dma_sif1(u32 ch, u32 size);
 
 /* Start a transfer on the given channel.  */
-void dmac_transfer(u32 channel);	//sceStartDMA
+void sceStartDMA(u32 channel);
 
 /* Set the DPCRn value for a specific channel.  */
-void dmac_ch_set_dpcr(u32 channel, u32 val);	//sceSetDMAPriority
+void sceSetDMAPriority(u32 channel, u32 val);
 
-void dmac_enable(u32 channel);	//sceEnableDMAChannel
-void dmac_disable(u32 channel);	//sceDisableDMAChannel
+void sceEnableDMAChannel(u32 channel);
+void sceDisableDMAChannel(u32 channel);
 
 #define dmacman_IMPORTS_start DECLARE_IMPORT_TABLE(dmacman, 1, 1)
 #define dmacman_IMPORTS_end END_IMPORT_TABLE
@@ -161,14 +161,28 @@ void dmac_disable(u32 channel);	//sceDisableDMAChannel
 #define I_dmac_get_BF80157C DECLARE_IMPORT(25, dmac_get_BF80157C)
 #define I_dmac_set_BF801578 DECLARE_IMPORT(26, dmac_set_BF801578)
 #define I_dmac_get_BF801578 DECLARE_IMPORT(27, dmac_get_BF801578)
-#define I_dmac_request DECLARE_IMPORT(28, dmac_request)
+#define I_sceSetSliceDMA DECLARE_IMPORT(28, sceSetSliceDMA)
 #define I_dmac_set_dma_chained_spu_sif0 DECLARE_IMPORT(29, dmac_set_dma_chained_spu_sif0)
 #define I_dmac_set_dma_sif0 DECLARE_IMPORT(30, dmac_set_dma_sif0)
 #define I_dmac_set_dma_sif1 DECLARE_IMPORT(31, dmac_set_dma_sif1)
-#define I_dmac_transfer DECLARE_IMPORT(32, dmac_transfer)
-#define I_dmac_ch_set_dpcr DECLARE_IMPORT(33, dmac_ch_set_dpcr)
-#define I_dmac_enable DECLARE_IMPORT(34, dmac_enable)
-#define I_dmac_disable DECLARE_IMPORT(35, dmac_disable)
+#define I_sceStartDMA DECLARE_IMPORT(32, sceStartDMA)
+#define I_sceSetDMAPriority DECLARE_IMPORT(33, sceSetDMAPriority)
+#define I_sceEnableDMAChannel DECLARE_IMPORT(34, sceEnableDMAChannel)
+#define I_sceDisableDMAChannel DECLARE_IMPORT(35, sceDisableDMAChannel)
+
+// Backwards-compatibility defines
+
+#define dmac_request(...) sceSetSliceDMA(__VA_ARGS__)
+#define dmac_transfer(...) sceStartDMA(__VA_ARGS__)
+#define dmac_ch_set_dpcr(...) sceSetDMAPriority(__VA_ARGS__)
+#define dmac_enable(...) sceEnableDMAChannel(__VA_ARGS__)
+#define dmac_disable(...) sceDisableDMAChannel(__VA_ARGS__)
+
+#define I_dmac_request I_sceSetSliceDMA
+#define I_dmac_transfer I_sceStartDMA
+#define I_dmac_ch_set_dpcr I_sceSetDMAPriority
+#define I_dmac_enable I_sceEnableDMAChannel
+#define I_dmac_disable I_sceDisableDMAChannel
 
 #ifdef __cplusplus
 }
