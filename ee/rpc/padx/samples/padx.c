@@ -1,3 +1,4 @@
+#include <malloc.h>
 #include <tamtypes.h>
 #include <kernel.h>
 #include <loadfile.h>
