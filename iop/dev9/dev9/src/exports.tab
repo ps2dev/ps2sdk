@@ -19,4 +19,22 @@ DECLARE_EXPORT_TABLE(dev9, 1, 9)
 	DECLARE_EXPORT(dev9LED2Ctl)
 END_EXPORT_TABLE
 
+#ifdef DEV9_ENABLE_AIF
+DECLARE_EXPORT_TABLE(aifdev9, 1, 1)
+	DECLARE_EXPORT(_start)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+	DECLARE_EXPORT(_retonly)
+
+	/* 4 */
+	DECLARE_EXPORT(aifIsDetected)
+	DECLARE_EXPORT(aifIntrEnable)
+	DECLARE_EXPORT(aifIntrDisable)
+	DECLARE_EXPORT(aifRegisterIntrCb)
+	DECLARE_EXPORT(aifRegisterShutdownCb)
+	DECLARE_EXPORT(aifRTCReadData)
+	DECLARE_EXPORT(aifRTCWriteData)
+END_EXPORT_TABLE
+#endif
+
 void _retonly() {}
