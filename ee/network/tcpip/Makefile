@@ -164,6 +164,3 @@ endif
 $(EE_OBJS_DIR)udp.o: $(LWIP)/src/core/udp.c
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
-.NOTPARALLEL:: \
-	$(LWIP)
-

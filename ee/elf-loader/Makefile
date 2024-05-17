@@ -28,7 +28,3 @@ $(EE_OBJS_DIR)loader.o: $(EE_OBJS_DIR)loader.c
 
 clean::
 	$(MAKEREC) src/loader clean
-
-.NOTPARALLEL:: \
-	$(PS2SDKSRC)/tools/bin2c/bin/bin2c \
-	src/loader/bin/loader.elf
