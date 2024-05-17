@@ -6,16 +6,11 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = \
-	aifatad \
-	aifdev9 \
-	ata_bd \
-	atad \
-	dev9 \
-	extflash \
-	hdpro_atad \
-	poweroff \
-	pvrdrv
+IOP_SRC_DIR = $(PS2SDKSRC)/iop/dev9/dev9/src/
+IOP_INC_DIR = $(PS2SDKSRC)/iop/dev9/dev9/include/
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
+DEV9_ENABLE_AIF ?= 1
+
+IOP_BIN ?= aifdev9.irx
+
+include $(PS2SDKSRC)/iop/dev9/dev9/Makefile

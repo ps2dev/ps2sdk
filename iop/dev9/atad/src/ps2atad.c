@@ -27,14 +27,21 @@
 #include <thevent.h>
 #include <stdio.h>
 #include <sysclib.h>
+#ifdef ATA_USE_DEV9
 #include <dev9.h>
+#endif
+#ifdef ATA_USE_AIFDEV9
+#include <aifdev9.h>
+#endif
 #include <atad.h>
 #ifdef ATA_ENABLE_BDM
 #include <bdm.h>
 #include <errno.h>
 #endif
 
+#ifdef ATA_USE_DEV9
 #include <speedregs.h>
+#endif
 #include <atahw.h>
 
 #define MODNAME "atad"
@@ -63,8 +70,10 @@ static int ata_evflg        = -1;
 
 // Workarounds
 static u8 ata_dvrp_workaround = 0; // Please read the comments in _start().
+#ifdef ATA_USE_DEV9
 #ifdef ATA_GAMESTAR_WORKAROUND
 static u8 ata_gamestar_workaround = 0;
+#endif
 #endif
 
 /* Local device info kept for drives 0 and 1.  */
@@ -185,9 +194,19 @@ static ata_cmd_state_t atad_cmd_state;
 static struct block_device g_ata_bd[NUM_DEVICES];
 #endif
 
+#ifdef ATA_USE_DEV9
 static int ata_intr_cb(int flag);
+#endif
+#ifdef ATA_USE_AIFDEV9
+static int ata_intr_cb(void);
+#endif
 static unsigned int ata_alarm_cb(void *unused);
 
+#ifdef ATA_USE_AIFDEV9
+static void aif_tune_drive(int unit, int mode);
+#endif
+
+#ifdef ATA_USE_DEV9
 static void ata_set_dir(int dir);
 
 static void ata_pio_mode(int mode);
@@ -195,6 +214,7 @@ static void ata_pio_mode(int mode);
 static void ata_multiword_dma_mode(int mode);
 #endif
 static void ata_ultra_dma_mode(int mode);
+#endif
 static void ata_shutdown_cb(void);
 
 int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir);
@@ -208,6 +228,7 @@ static int ata_bd_stop(struct block_device *bd);
 
 extern struct irx_export_table _exp_atad;
 
+#ifdef ATA_USE_DEV9
 // In v1.04, DMA was enabled in ata_set_dir() instead.
 static void ata_pre_dma_cb(int bcr, int dir)
 {
@@ -228,6 +249,7 @@ static void ata_post_dma_cb(int bcr, int dir)
 
     SPD_REG16(SPD_R_XFR_CTRL) &= ~0x80;
 }
+#endif
 
 static int ata_create_event_flag(void)
 {
@@ -240,7 +262,12 @@ static int ata_create_event_flag(void)
 
 int _start(int argc, char *argv[])
 {
+#ifdef ATA_USE_DEV9
     USE_SPD_REGS;
+#endif
+#ifdef ATA_USE_AIFDEV9
+    USE_AIF_REGS;
+#endif
     int res;
 
     (void)argc;
@@ -250,6 +277,7 @@ int _start(int argc, char *argv[])
 
     res = MODULE_NO_RESIDENT_END;
 
+#ifdef ATA_USE_DEV9
     if (!(SPD_REG16(SPD_R_REV_3) & SPD_CAPS_ATA) || !(SPD_REG16(SPD_R_REV_8) & 0x02)) {
         M_PRINTF("HDD is not connected, exiting.\n");
         goto out;
@@ -267,7 +295,17 @@ int _start(int argc, char *argv[])
 
         The workaround here is to return the 28-bit LBA as the total size and only use 48-bit LBA commands when required. */
     ata_dvrp_workaround = (SPD_REG16(SPD_R_REV_3) & SPD_CAPS_DVR) ? 1 : 0;
+#endif
 
+#ifdef ATA_USE_AIFDEV9
+    if (!aifIsDetected()) {
+        M_PRINTF("AIF HDD: controller not found.\n");
+        goto out;
+    }
+    aif_regs[AIF_ATA_TCFG] = 0; // Clear ATA timing configuration.
+#endif
+
+#ifdef ATA_USE_DEV9
 #ifdef ATA_GAMESTAR_WORKAROUND
     /*  Some compatible adaptors may malfunction if transfers are not done according to the old ps2atad design.
         Official adaptors appear to have a 0x0001 set for this register, but not compatibles.
@@ -280,12 +318,14 @@ int _start(int argc, char *argv[])
         ata_gamestar_workaround = 0;
     }
 #endif
+#endif
 
     if ((ata_evflg = ata_create_event_flag()) < 0) {
         M_PRINTF("Couldn't create event flag, exiting.\n");
         goto out;
     }
 
+#ifdef ATA_USE_DEV9
     /* In v1.04, PIO mode 0 was set here. In late versions, it is set in ata_init_devices(). */
     SpdRegisterIntrHandler(1, &ata_intr_cb);
     SpdRegisterIntrHandler(0, &ata_intr_cb);
@@ -299,6 +339,14 @@ int _start(int argc, char *argv[])
 #endif
     /* Register this at the last position, as it should be the last thing done before shutdown. */
     Dev9RegisterPowerOffHandler(15, &ata_shutdown_cb);
+#endif
+
+#ifdef ATA_USE_AIFDEV9
+    aifRegisterIntrCb(AIF_INUM_ATA0, &ata_intr_cb);
+    aifRegisterShutdownCb(AIF_INUM_ATA0, &ata_shutdown_cb);
+
+    M_PRINTF("AIF HDD initialized.\n");
+#endif
 
 #ifdef ATA_ENABLE_BDM
     {
@@ -338,6 +386,7 @@ out:
 
 int _exit(void) { return MODULE_RESIDENT_END; }
 
+#ifdef ATA_USE_DEV9
 static int ata_intr_cb(int flag)
 {
     if (flag == 1) { /* New card, invalidate device info.  */
@@ -349,6 +398,17 @@ static int ata_intr_cb(int flag)
 
     return 1;
 }
+#endif
+
+#ifdef ATA_USE_AIFDEV9
+static int ata_intr_cb(void)
+{
+    aifIntrDisable(AIF_INTR_ATA0);
+    iSetEventFlag(ata_evflg, ATA_EV_COMPLETE);
+
+    return 1;
+}
+#endif
 
 static unsigned int ata_alarm_cb(void *unused)
 {
@@ -361,7 +421,12 @@ static unsigned int ata_alarm_cb(void *unused)
 /* Export 8 */
 int sceAtaGetError(void)
 {
+#ifdef ATA_USE_DEV9
     USE_ATA_REGS;
+#endif
+#ifdef ATA_USE_AIFDEV9
+    USE_AIF_ATA_REGS;
+#endif
     return ata_hwport->r_error & 0xff;
 }
 
@@ -375,7 +440,12 @@ int sceAtaGetError(void)
    In the original ATAD, the busy and bus-busy functions were separate, but similar.  */
 static int gen_ata_wait_busy(int bits)
 {
+#ifdef ATA_USE_DEV9
     USE_ATA_REGS;
+#endif
+#ifdef ATA_USE_AIFDEV9
+    USE_AIF_ATA_REGS;
+#endif
     int i, delay;
 
     for (i = 0; i < 80; i++) {
@@ -413,7 +483,12 @@ static int gen_ata_wait_busy(int bits)
 
 static int ata_device_select(int device)
 {
+#ifdef ATA_USE_DEV9
     USE_ATA_REGS;
+#endif
+#ifdef ATA_USE_AIFDEV9
+    USE_AIF_ATA_REGS;
+#endif
     int res;
 
     if ((res = ata_wait_bus_busy()) < 0)
@@ -443,7 +518,12 @@ static int ata_device_select(int device)
 */
 int sceAtaExecCmd(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, u16 lcyl, u16 hcyl, u16 select, u16 command)
 {
+#ifdef ATA_USE_DEV9
     USE_ATA_REGS;
+#endif
+#ifdef ATA_USE_AIFDEV9
+    USE_AIF_ATA_REGS;
+#endif
     iop_sys_clock_t cmd_timeout;
     const ata_cmd_info_t *cmd_table;
     int i, res, type, cmd_table_size;
@@ -529,8 +609,14 @@ int sceAtaExecCmd(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector,
     }
 
     /* Enable the command completion interrupt.  */
-    if ((type & 0x7F) == 1)
+    if ((type & 0x7F) == 1) {
+#ifdef ATA_USE_DEV9
         SpdIntrEnable(SPD_INTR_ATA0);
+#endif
+#ifdef ATA_USE_AIFDEV9
+        aifIntrEnable(AIF_INTR_ATA0);
+#endif
+    }
 
     /* Finally!  We send off the ATA command with arguments.  */
     ata_hwport->r_control = (using_timeout == 0) << 1;
@@ -555,8 +641,10 @@ int sceAtaExecCmd(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector,
     ata_hwport->r_select  = (select | ATA_SEL_LBA) & 0xff; // In v1.04, LBA was enabled in the sceAtaDmaTransfer function.
     ata_hwport->r_command = command & 0xff;
 
+#ifdef ATA_USE_DEV9
     /* Turn on the LED.  */
     SpdSetLED(1);
+#endif
 
     return 0;
 }
@@ -564,7 +652,12 @@ int sceAtaExecCmd(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector,
 /* Do a PIO transfer, to or from the device.  */
 static int ata_pio_transfer(ata_cmd_state_t *cmd_state)
 {
+#ifdef ATA_USE_DEV9
     USE_ATA_REGS;
+#endif
+#ifdef ATA_USE_AIFDEV9
+    USE_AIF_ATA_REGS;
+#endif
     u16 *buf16;
     int i, type;
     u16 status = ata_hwport->r_status & 0xff;
@@ -608,6 +701,7 @@ static int ata_pio_transfer(ata_cmd_state_t *cmd_state)
     return 0;
 }
 
+#ifdef ATA_USE_DEV9
 /* Complete a DMA transfer, to or from the device.  */
 static int ata_dma_complete(void *buf, u32 blkcount, int dir)
 {
@@ -660,15 +754,21 @@ static int ata_dma_complete(void *buf, u32 blkcount, int dir)
 
     return 0;
 }
+#endif
 
 /* Export 7 */
 int sceAtaWaitResult(void)
 {
+#ifdef ATA_USE_DEV9
     USE_SPD_REGS;
     USE_ATA_REGS;
+#endif
+#ifdef ATA_USE_AIFDEV9
+    USE_AIF_ATA_REGS;
+#endif
     ata_cmd_state_t *cmd_state = &atad_cmd_state;
     u32 bits;
-    int i, res = 0, type = cmd_state->type;
+    int res = 0, type = cmd_state->type;
     u16 stat;
 
     if (type == 1 || type == 6) { /* Non-data commands.  */
@@ -678,6 +778,9 @@ int sceAtaWaitResult(void)
             return ATA_RES_ERR_TIMEOUT;
         }
     } else if (type == 4) { /* DMA.  */
+#ifdef ATA_USE_DEV9
+        int i;
+
         if ((res = ata_dma_complete(cmd_state->buf, cmd_state->blkcount,
                                     cmd_state->dir)) < 0)
             goto finish;
@@ -694,6 +797,10 @@ int sceAtaWaitResult(void)
                 res = ATA_RES_ERR_TIMEOUT;
             }
         }
+#endif
+#ifdef ATA_USE_AIFDEV9
+        res = -1;
+#endif
     } else { /* PIO transfers.  */
         stat = ata_hwport->r_control;
         if ((res = ata_wait_busy()) < 0)
@@ -723,8 +830,10 @@ int sceAtaWaitResult(void)
 finish:
     /* The command has completed (with an error or not), so clean things up.  */
     CancelAlarm(&ata_alarm_cb, NULL);
+#ifdef ATA_USE_DEV9
     /* Turn off the LED.  */
     SpdSetLED(0);
+#endif
 
     if (res)
         M_PRINTF("error: ATA failed, %d\n", res);
@@ -735,19 +844,26 @@ finish:
 /* Reset the ATA controller/bus.  */
 static int ata_bus_reset(void)
 {
+#ifdef ATA_USE_DEV9
     USE_SPD_REGS;
     SPD_REG16(SPD_R_IF_CTRL) = SPD_IF_ATA_RESET;
     DelayThread(100);
     SPD_REG16(SPD_R_IF_CTRL) = 0; // Not present in v1.04.
     SPD_REG16(SPD_R_IF_CTRL) = 0x48;
     DelayThread(3000);
+#endif
     return ata_wait_busy();
 }
 
 /* Export 5 */
 int sceAtaSoftReset(void)
 {
+#ifdef ATA_USE_DEV9
     USE_ATA_REGS;
+#endif
+#ifdef ATA_USE_AIFDEV9
+    USE_AIF_ATA_REGS;
+#endif
 
     if (ata_hwport->r_control & 0x80)
         return ATA_RES_ERR_NOTREADY;
@@ -874,6 +990,7 @@ static int ata_device_set_transfer_mode(int device, int type, int mode)
         return res;
 
     switch (type) {
+#ifdef ATA_USE_DEV9
 #ifdef ATA_MWDMA_MODES
         case ATA_XFER_MODE_MDMA:
             ata_multiword_dma_mode(mode);
@@ -885,6 +1002,12 @@ static int ata_device_set_transfer_mode(int device, int type, int mode)
         case ATA_XFER_MODE_PIO:
             ata_pio_mode(mode);
             break;
+#endif
+#ifdef ATA_USE_AIFDEV9
+        case ATA_XFER_MODE_PIO:
+            aif_tune_drive(0, mode);
+            break;
+#endif
     }
 
     return 0;
@@ -930,21 +1053,25 @@ int ata_device_sector_io64(int device, void *buf, u64 lba, u32 nsectors, int dir
         }
 
         for (retries = 3; retries > 0; retries--) {
+#ifdef ATA_USE_DEV9
 #ifdef ATA_GAMESTAR_WORKAROUND
             /* Due to the retry loop, put this call (for the GameStar workaround) here instead of the old location. */
             if (ata_gamestar_workaround)
                 ata_set_dir(dir);
 #endif
+#endif
 
             if ((res = sceAtaExecCmd(buf, len, 0, len, sector, lcyl, hcyl, select, command)) != 0)
                 break;
 
+#ifdef ATA_USE_DEV9
 #ifdef ATA_GAMESTAR_WORKAROUND
             if (!ata_gamestar_workaround)
                 ata_set_dir(dir);
 #else
             /* Set up (part of) the transfer here. In v1.04, this was called at the top of the outer loop. */
             ata_set_dir(dir);
+#endif
 #endif
 
             res = sceAtaWaitResult();
@@ -1042,7 +1169,12 @@ finish:
 
 static void ata_device_probe(ata_devinfo_t *devinfo)
 {
+#ifdef ATA_USE_DEV9
     USE_ATA_REGS;
+#endif
+#ifdef ATA_USE_AIFDEV9
+    USE_AIF_ATA_REGS;
+#endif
     u16 nsector, sector, lcyl, hcyl;
 
     devinfo->exists     = 0;
@@ -1079,7 +1211,12 @@ static void ata_device_probe(ata_devinfo_t *devinfo)
 
 static int ata_init_devices(ata_devinfo_t *devinfo)
 {
+#ifdef ATA_USE_DEV9
     USE_ATA_REGS;
+#endif
+#ifdef ATA_USE_AIFDEV9
+    USE_AIF_ATA_REGS;
+#endif
     int i, res;
     u32 total_sectors_nonlba48, total_sectors_lba48;
 
@@ -1101,7 +1238,9 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
     else
         devinfo[1].exists = 0;
 
+#ifdef ATA_USE_DEV9
     ata_pio_mode(0); // PIO mode is set here, in late ATAD versions.
+#endif
 
     for (i = 0; i < 2; i++) {
         if (!devinfo[i].exists)
@@ -1140,6 +1279,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 
         devinfo[i].security_status = ata_param[ATA_ID_SECURITY_STATUS];
 
+#ifdef ATA_USE_DEV9
         u8 maxUDMA = 4;
 #ifdef ATA_ENABLE_MAXUDMA
         maxUDMA = 6;
@@ -1156,6 +1296,11 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
             }
         }
         ata_device_set_transfer_mode(i, ATA_XFER_MODE_UDMA, udmaMode);
+#endif
+#ifdef ATA_USE_AIFDEV9
+        /* PIO mode 4.  */
+        ata_device_set_transfer_mode(i, ATA_XFER_MODE_PIO, 4);
+#endif
         ata_device_smart_enable(i);
         /* Set standby timer to 21min 15s.  */
         sceAtaIdle(i, 0xff);
@@ -1201,6 +1346,7 @@ ata_devinfo_t *sceAtaInit(int device)
     return &atad_devinfo[device];
 }
 
+#ifdef ATA_USE_DEV9
 static void ata_set_dir(int dir)
 {
     USE_SPD_REGS;
@@ -1295,6 +1441,28 @@ static void ata_ultra_dma_mode(int mode)
     SPD_REG16(SPD_R_UDMA_MODE) = val;
     SPD_REG16(SPD_R_IF_CTRL) |= 0x49;
 }
+#endif
+
+#ifdef ATA_USE_AIFDEV9
+static void aif_tune_drive(int unit, int mode)
+{
+    USE_AIF_REGS;
+    unsigned int use_iordy, value;
+
+    use_iordy = 1;
+    value     = (use_iordy << 3) | mode;
+    M_PRINTF("AIF HDD: tune unit%d, mode=%u\n", unit, value);
+
+    switch (unit) {
+        case 0:
+            aif_regs[AIF_ATA_TCFG] = (aif_regs[AIF_ATA_TCFG] & 0xf0) + value;
+            break;
+        case 1:
+            aif_regs[AIF_ATA_TCFG] = (aif_regs[AIF_ATA_TCFG] & 0x0f) + (value << 4);
+            break;
+    }
+}
+#endif
 
 /* Export 18 */
 int sceAtaIdleImmediate(int device)

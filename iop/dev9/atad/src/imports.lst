@@ -25,6 +25,7 @@ I_memcpy
 I_memset
 sysclib_IMPORTS_end
 
+#ifdef ATA_USE_DEV9
 dev9_IMPORTS_start
 I_SpdRegisterIntrHandler
 I_SpdDmaTransfer
@@ -35,6 +36,17 @@ I_Dev9RegisterPowerOffHandler
 I_dev9RegisterPreDmaCb
 I_dev9RegisterPostDmaCb
 dev9_IMPORTS_end
+#endif
+
+#ifdef ATA_USE_AIFDEV9
+aifdev9_IMPORTS_start
+I_aifIsDetected
+I_aifRegisterIntrCb
+I_aifIntrEnable
+I_aifIntrDisable
+I_aifRegisterShutdownCb
+aifdev9_IMPORTS_end
+#endif
 
 #ifdef ATA_ENABLE_BDM
 bdm_IMPORTS_start

@@ -24,6 +24,12 @@ ATA_ENABLE_BDM ?= 0
 # Enable to enable support for the BDM interface.
 ATA_ENABLE_MAXUDMA ?= 0
 
+# Enable to use the dev9/SPEED interface
+ATA_USE_DEV9 ?= 1
+
+# Enable to use the dev9/AIF interface
+ATA_USE_AIFDEV9 ?= 0
+
 IOP_BIN ?= ps2atad.irx
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/dev9/include
@@ -52,6 +58,14 @@ endif
 
 ifeq ($(ATA_ENABLE_MAXUDMA),1)
 IOP_CFLAGS += -DATA_ENABLE_MAXUDMA=1
+endif
+
+ifeq ($(ATA_USE_DEV9),1)
+IOP_CFLAGS += -DATA_USE_DEV9=1
+endif
+
+ifeq ($(ATA_USE_AIFDEV9),1)
+IOP_CFLAGS += -DATA_USE_AIFDEV9=1
 endif
 
 include $(PS2SDKSRC)/Defs.make
