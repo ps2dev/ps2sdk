@@ -846,7 +846,7 @@ int sceCdForbidRead(u32 *result);
  * @param mode mode to read in
  * @return 1 on success, 0 on failure.
  */
-int sceCdReadFull(unsigned long int lsn, unsigned long int sectors, void *buf, sceCdRMode *mode);
+int sceCdReadFull(unsigned int lsn, unsigned int sectors, void *buf, sceCdRMode *mode);
 
 /** Seeks to a given position
  * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
@@ -854,7 +854,7 @@ int sceCdReadFull(unsigned long int lsn, unsigned long int sectors, void *buf, s
  * @param lsn sector location to seek to
  * @return 1 on success, 0 on failure.
  */
-int sceCdStSeekF(unsigned long int lsn);
+int sceCdStSeekF(unsigned int lsn);
 
 /** Sets a handler for the power-off event which will be called before the console switches off.
  * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
@@ -880,7 +880,7 @@ int sceCdSetTimeout(int param, int timeout);
  * @param id integer where the Model ID is stored.
  * @return 1 on success, 0 on failure.
  */
-int sceCdReadModelID(unsigned long int *id);
+int sceCdReadModelID(unsigned int *id);
 
 /** Reads the information about DVD disk.
  * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
@@ -889,7 +889,7 @@ int sceCdReadModelID(unsigned long int *id);
  * @param layer1_start pointer to variable where the address of the second layer of a dual-layer DVD disc is returned.
  * @return 1 on success, 0 on failure.
  */
-int sceCdReadDvdDualInfo(int *on_dual, unsigned long int *layer1_start);
+int sceCdReadDvdDualInfo(int *on_dual, unsigned int *layer1_start);
 
 /** Retrieves basic information about a file on CD or the specified layer of DVD media.
  * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN NEWER IOPRP ONLY
@@ -917,7 +917,7 @@ int sceCdStatus2(void);
  * @param mode mode to read in
  * @return 1 on success, 0 on failure.
  */
-int sceCdRE(unsigned long int lsn, unsigned long int sectors, void *buf, sceCdRMode *mode);
+int sceCdRE(unsigned int lsn, unsigned int sectors, void *buf, sceCdRMode *mode);
 
 /** Reads a GUID.
  * SUPPORTED IN NEWER CDVDMAN MODULES INCLUDED WITHIN DNAS IOPRP ONLY
