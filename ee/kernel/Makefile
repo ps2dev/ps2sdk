@@ -364,3 +364,10 @@ clean::
 	$(MAKEREC) $(EE_SRC_DIR)tlbsrc clean
 	$(MAKEREC) $(EE_SRC_DIR)srcfile clean
 	$(MAKEREC) $(EE_SRC_DIR)eenull clean
+
+.NOTPARALLEL:: \
+	$(PS2SDKSRC)/tools/bin2c/bin/bin2c \
+	$(EE_SRC_DIR)osdsrc/bin/osdsrc.bin \
+	$(EE_SRC_DIR)tlbsrc/bin/tlbsrc.bin \
+	$(EE_SRC_DIR)srcfile/bin/srcfile.bin \
+	$(EE_SRC_DIR)eenull/bin/eenull.bin
