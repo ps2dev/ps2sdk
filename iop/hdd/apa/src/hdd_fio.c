@@ -1036,7 +1036,7 @@ int hddDevctl(iomanX_iop_file_t *f, const char *devname, int cmd, void *arg,
         case HDIOC_DEV9OFF:
             // Early versions called sceAtaSmartSaveAttr() here, when their old dev9 versions did not support the pre-shutdown callback.
 #ifdef APA_USE_DEV9
-            dev9Shutdown();
+            Dev9CardStop();
 #else
             blkIoSmartSaveAttr(f->unit);
 #endif

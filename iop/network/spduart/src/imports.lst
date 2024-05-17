@@ -5,10 +5,10 @@ I_sceModemUnregisterDevice
 modem_IMPORTS_end
 
 dev9_IMPORTS_start
-I_dev9RegisterIntrCb
-I_dev9IntrEnable
-I_dev9IntrDisable
-I_dev9RegisterShutdownCb
+I_SpdRegisterIntrHandler
+I_SpdIntrEnable
+I_SpdIntrDisable
+I_Dev9RegisterPowerOffHandler
 dev9_IMPORTS_end
 
 intrman_IMPORTS_start

@@ -149,7 +149,7 @@ static const ata_cmd_info_t smart_cmd_table[] = {
     {ATA_S_SMART_RETURN_STATUS, 1}};
 #define SMART_CMD_TABLE_SIZE (sizeof smart_cmd_table / sizeof(ata_cmd_info_t))
 
-/* This is the state info tracked between ata_io_start() and ata_io_finish().  */
+/* This is the state info tracked between sceAtaExecCmd() and sceAtaWaitResult().  */
 typedef struct _ata_cmd_state
 {
     s32 type; /* The ata_cmd_info_t type field. */
@@ -252,7 +252,7 @@ int shutdown(void)
 }
 
 /* Export 8 */
-int ata_get_error(void)
+int sceAtaGetError(void)
 {
     return hdpro_io_read(ATAreg_ERROR_RD) & 0xff;
 }
@@ -448,7 +448,7 @@ static int ata_device_select(int device)
 }
 
 /* Export 6 */
-int ata_io_start(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, u16 lcyl, u16 hcyl, u16 select, u16 command)
+int sceAtaExecCmd(void *buf, u32 blkcount, u16 feature, u16 nsector, u16 sector, u16 lcyl, u16 hcyl, u16 select, u16 command)
 {
     iop_sys_clock_t cmd_timeout;
     const ata_cmd_info_t *cmd_table;
@@ -567,7 +567,7 @@ static int ata_pio_transfer(ata_cmd_state_t *cmd_state)
     u16 status = hdpro_io_read(ATAreg_STATUS_RD);
 
     if (status & ATA_STAT_ERR) {
-        M_PRINTF("Error: Command error: status 0x%02x, error 0x%02x.\n", status, ata_get_error());
+        M_PRINTF("Error: Command error: status 0x%02x, error 0x%02x.\n", status, sceAtaGetError());
         return ATA_RES_ERR_IO;
     }
 
@@ -644,7 +644,7 @@ static int ata_pio_transfer(ata_cmd_state_t *cmd_state)
 }
 
 /* Export 5 */
-int ata_reset_devices(void)
+int sceAtaSoftReset(void)
 {
     if (hdpro_io_read(ATAreg_CONTROL_RD) & 0x80)
         return ATA_RES_ERR_NOTREADY;
@@ -715,8 +715,8 @@ int sceAtaFlushCache(int device)
     if (!hdpro_io_start())
         return -1;
 
-    if (!(res = ata_io_start(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, atad_devinfo[device].lba48 ? ATA_C_FLUSH_CACHE_EXT : ATA_C_FLUSH_CACHE)))
-        res = ata_io_finish();
+    if (!(res = sceAtaExecCmd(NULL, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, atad_devinfo[device].lba48 ? ATA_C_FLUSH_CACHE_EXT : ATA_C_FLUSH_CACHE)))
+        res = sceAtaWaitResult();
 
     if (!hdpro_io_finish())
         return -2;
@@ -729,11 +729,11 @@ int ata_device_idle(int device, int period)
 {
     int res;
 
-    res = ata_io_start(NULL, 1, 0, period & 0xff, 0, 0, 0, (device << 4) & 0xffff, ATA_C_IDLE);
+    res = sceAtaExecCmd(NULL, 1, 0, period & 0xff, 0, 0, 0, (device << 4) & 0xffff, ATA_C_IDLE);
     if (res)
         return res;
 
-    return ata_io_finish();
+    return sceAtaWaitResult();
 }
 
 /* Set features - set transfer mode.  */
@@ -741,11 +741,11 @@ static int ata_device_set_transfer_mode(int device, int type, int mode)
 {
     int res;
 
-    res = ata_io_start(NULL, 1, 3, (type | mode) & 0xff, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SET_FEATURES);
+    res = sceAtaExecCmd(NULL, 1, 3, (type | mode) & 0xff, 0, 0, 0, (device << 4) & 0xffff, ATA_C_SET_FEATURES);
     if (res)
         return res;
 
-    res = ata_io_finish();
+    res = sceAtaWaitResult();
     if (res)
         return res;
 
@@ -756,19 +756,19 @@ static int ata_device_identify(int device, void *info)
 {
     int res;
 
-    res = ata_io_start(info, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_IDENTIFY_DEVICE);
+    res = sceAtaExecCmd(info, 1, 0, 0, 0, 0, 0, (device << 4) & 0xffff, ATA_C_IDENTIFY_DEVICE);
     if (res)
         return res;
 
-    return ata_io_finish();
+    return sceAtaWaitResult();
 }
 
 static int ata_device_smart_enable(int device)
 {
     int res;
 
-    if (!(res = ata_io_start(NULL, 1, ATA_S_SMART_ENABLE_OPERATIONS, 0, 0, 0x4f, 0xc2, (device << 4) & 0xffff, ATA_C_SMART)))
-        res = ata_io_finish();
+    if (!(res = sceAtaExecCmd(NULL, 1, ATA_S_SMART_ENABLE_OPERATIONS, 0, 0, 0x4f, 0xc2, (device << 4) & 0xffff, ATA_C_SMART)))
+        res = sceAtaWaitResult();
 
     return res;
 }
@@ -777,7 +777,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 {
     int i, res;
 
-    if ((res = ata_reset_devices()) != 0)
+    if ((res = sceAtaSoftReset()) != 0)
         return res;
 
     ata_device_probe(&devinfo[0]);
@@ -810,7 +810,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
             /*  Packet devices are not supported:
 
                 The original HDPro driver issues the IDENTIFY PACKET DEVICE command,
-                but does not export ata_io_start and ata_io_finish.
+                but does not export sceAtaExecCmd and sceAtaWaitResult.
                 This makes packet device support impossible. */
             res               = -1;
             devinfo[i].exists = (res == 0);
@@ -852,7 +852,7 @@ static int ata_init_devices(ata_devinfo_t *devinfo)
 }
 
 /* Export 7 */
-int ata_io_finish(void)
+int sceAtaWaitResult(void)
 {
     ata_cmd_state_t *cmd_state = &atad_cmd_state;
     u32 bits;
@@ -912,7 +912,7 @@ int ata_io_finish(void)
     if (hdpro_io_read(ATAreg_STATUS_RD) & ATA_STAT_BUSY)
         res = ata_wait_busy();
     if ((stat = hdpro_io_read(ATAreg_STATUS_RD)) & ATA_STAT_ERR) {
-        M_PRINTF("Error: Command error: status 0x%02x, error 0x%02x.\n", stat, ata_get_error());
+        M_PRINTF("Error: Command error: status 0x%02x, error 0x%02x.\n", stat, sceAtaGetError());
         res = ATA_RES_ERR_IO;
     }
 
@@ -955,10 +955,10 @@ int sceAtaDmaTransfer(int device, void *buf, u32 lba, u32 nsectors, int dir)
         }
 
         // Unlike ATAD, retry indefinitely until the I/O operation succeeds.
-        if ((res = ata_io_start(buf, len, 0, len, sector, lcyl,
+        if ((res = sceAtaExecCmd(buf, len, 0, len, sector, lcyl,
                                 hcyl, select, command)) != 0)
             continue;
-        if ((res = ata_io_finish()) != 0)
+        if ((res = sceAtaWaitResult()) != 0)
             continue;
 
         buf = (void *)((u8 *)buf + len * 512);

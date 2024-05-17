@@ -129,7 +129,7 @@ static int dev9x_devctl(iop_file_t *f, const char *name, int cmd, void *args, un
         case DDIOC_MODEL:
             return dev9type;
         case DDIOC_OFF:
-            dev9Shutdown();
+            Dev9CardStop();
             return 0;
         case DDIOC_SETPIO3:
             dev9ControlPIO3(((u32 *)args)[0]);
@@ -261,7 +261,7 @@ int _start(int argc, char *argv[])
 int _exit(void) { return MODULE_RESIDENT_END; }
 
 /* Export 4 */
-void dev9RegisterIntrCb(int intr, dev9_intr_cb_t cb)
+void SpdRegisterIntrHandler(int intr, dev9_intr_cb_t cb)
 {
     dev9_intr_cbs[intr] = cb;
 }
@@ -354,7 +354,7 @@ static int dev9_device_reset(void)
 }
 
 /* Export 6 */
-void dev9Shutdown(void)
+void Dev9CardStop(void)
 {
     int idx;
     USE_DEV9_REGS;
@@ -389,7 +389,7 @@ static int dev9_card_find_manfid(u32 manfid)
 }
 
 /* Export 7 */
-void dev9IntrEnable(int mask)
+void SpdIntrEnable(int mask)
 {
     USE_SPD_REGS;
     int flags;
@@ -400,7 +400,7 @@ void dev9IntrEnable(int mask)
 }
 
 /* Export 8 */
-void dev9IntrDisable(int mask)
+void SpdIntrDisable(int mask)
 {
     USE_SPD_REGS;
     int flags;
@@ -411,7 +411,7 @@ void dev9IntrDisable(int mask)
 }
 
 /* Export 5 */
-int dev9DmaTransfer(int device, void *buf, int bcr, int dir)
+int SpdDmaTransfer(int device, void *buf, int bcr, int dir)
 {
     USE_SPD_REGS;
     volatile iop_dmac_chan_t *dev9_chan = (iop_dmac_chan_t *)DEV9_DMAC_BASE;
@@ -540,7 +540,7 @@ out:
 }
 
 /* Export 9 */
-int dev9GetEEPROM(u16 *buf)
+int SpdGetEthernetID(u16 *buf)
 {
     int i;
 
@@ -568,7 +568,7 @@ int dev9GetEEPROM(u16 *buf)
 // The specific LED part used is the Citizen CITILED CL-200TLY-C, which has a "Lemon Yellow" color.
 
 /* Export 10 */
-void dev9LEDCtl(int ctl)
+void SpdSetLED(int ctl)
 {
     USE_SPD_REGS;
     if (dev9_has_dvr_capability) {
@@ -613,7 +613,7 @@ static void dev9RegisterIntrDispatchCb(dev9IntrDispatchCb_t callback)
 }
 
 /* Export 11 */
-int dev9RegisterShutdownCb(int idx, dev9_shutdown_cb_t cb)
+int Dev9RegisterPowerOffHandler(int idx, dev9_shutdown_cb_t cb)
 {
     if (idx < 16) {
         dev9_shutdown_cbs[idx] = cb;
@@ -642,7 +642,7 @@ static int dev9_init(int sema_attr)
     dev9_set_stat(0x103);
 
     /* Disable all device interrupts.  */
-    dev9IntrDisable(0xffff);
+    SpdIntrDisable(0xffff);
 
     /* Register interrupt dispatch callback handler. */
     dev9RegisterIntrDispatchCb(&dev9_intr_dispatch);
@@ -663,7 +663,7 @@ static int dev9_init(int sema_attr)
     dev9ControlPIO3(0);
 
     /* Turn the LED off.  */
-    dev9LEDCtl(0);
+    SpdSetLED(0);
     return 0;
 }
 
@@ -867,7 +867,7 @@ static int speed_device_init(void)
             M_PRINTF("Unable to change SSBUS mode.\n");
 
         if (res) {
-            dev9Shutdown();
+            Dev9CardStop();
             return -1;
         }
 
@@ -876,7 +876,7 @@ static int speed_device_init(void)
             break;
         }
 
-        dev9Shutdown();
+        Dev9CardStop();
         DelayThread(4500000);
     }
 
