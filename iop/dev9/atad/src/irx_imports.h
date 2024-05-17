@@ -16,10 +16,15 @@
 #include <irx.h>
 
 /* Please keep these in alphabetical order!  */
+#ifdef ATA_USE_AIFDEV9
+#include <aifdev9.h>
+#endif
 #ifdef ATA_ENABLE_BDM
 #include <bdm.h>
 #endif
+#ifdef ATA_USE_DEV9
 #include <dev9.h>
+#endif
 #include <loadcore.h>
 #include <stdio.h>
 #include <sysclib.h>
