@@ -6,7 +6,15 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = libsd ahx audsrv ps2snd
+SUBDIRS = \
+	ahx \
+	audsrv \
+	clearspu \
+	libsd \
+	libsnd2 \
+	libspu2 \
+	ps2snd \
+	rspu2drv
 
 include $(PS2SDKSRC)/Defs.make
 include $(PS2SDKSRC)/Rules.make
