@@ -180,7 +180,7 @@ static iop_device_t dev9x_device =
         1,
         "DEV9",
         &dev9x_ops,
-    };
+};
 
 static int print_help(void)
 { // The original made a printf() call for each line.
