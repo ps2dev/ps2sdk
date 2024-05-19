@@ -7,6 +7,8 @@
 # Review ps2sdk README & LICENSE files for further details.
 
 SUBDIRS = \
+	aifatad \
+	aifdev9 \
 	ata_bd \
 	atad \
 	dev9 \

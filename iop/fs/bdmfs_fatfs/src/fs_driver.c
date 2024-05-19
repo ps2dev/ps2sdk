@@ -28,8 +28,6 @@
 //#define DEBUG  //comment out this line when not debugging
 #include "module_debug.h"
 
-#define U64_2XU32(val)  ((u32*)val)[1], ((u32*)val)[0]
-
 fatfs_fs_driver_mount_info fs_driver_mount_info[FF_VOLUMES];
 
 #define FATFS_FS_DRIVER_MOUNT_INFO_MAX ((int)(sizeof(fs_driver_mount_info) / sizeof(fs_driver_mount_info[0])))
@@ -639,9 +637,11 @@ static int get_frag_list(FIL *file, void *rdata, unsigned int rdatalen)
             // Fragment or file end
             M_DEBUG("fragment: %uc - %uc + 1\n", iClusterStart, iClusterCurrent + 1);
             if (iFragCount < iMaxFragments) {
-                f[iFragCount].sector = clst2sect(file->obj.fs, iClusterStart) + bd->sectorOffset;
+                u64 sector = clst2sect(file->obj.fs, iClusterStart) + bd->sectorOffset;
+                f[iFragCount].sector = sector;
                 f[iFragCount].count  = clst2sect(file->obj.fs, iClusterCurrent) - clst2sect(file->obj.fs, iClusterStart) + file->obj.fs->csize;
-                M_DEBUG(" - sectors: 0x%08x%08x count %u\n", U64_2XU32(&f[iFragCount].sector), f[iFragCount].count);
+                DEBUG_U64_2XU32(sector);
+                M_DEBUG(" - sectors: 0x%08x%08x count %u\n", sector_u32[1], sector_u32[0], f[iFragCount].count);
             }
             iFragCount++;
             iClusterStart = iClusterNext;

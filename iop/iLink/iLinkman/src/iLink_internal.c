@@ -112,9 +112,9 @@ static void ShutDownDMAChannels(void)
 
     /* Disable all DMAC channels connected to the i.Link hardware.
         (Disable DMA channels 13, 14 and 15) */
-    dmac_disable(IOP_DMAC_FDMA0);
-    dmac_disable(IOP_DMAC_FDMA1);
-    dmac_disable(IOP_DMAC_FDMA2);
+    sceDisableDMAChannel(IOP_DMAC_FDMA0);
+    sceDisableDMAChannel(IOP_DMAC_FDMA1);
+    sceDisableDMAChannel(IOP_DMAC_FDMA2);
 }
 
 int iLinkResetHW(void)
@@ -164,8 +164,8 @@ void iLinkHWInitialize(void)
     iLinkWritePhy(5, iLinkReadPhy(5) | REG05_EN_ACCL | REG05_EN_MULTI); /* Enable supported P1394A-2000 enhancements. */
 
     /* Enable DMA channels 13 and 15. */
-    dmac_enable(IOP_DMAC_FDMA0);
-    dmac_enable(IOP_DMAC_FDMA2);
+    sceEnableDMAChannel(IOP_DMAC_FDMA0);
+    sceEnableDMAChannel(IOP_DMAC_FDMA2);
 
     GenerationNumber = 0;
     NodeCapabilities = 0;

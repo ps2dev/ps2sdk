@@ -15,6 +15,9 @@ DEV9_PSX_SUPPORT ?= 1
 # Disable to disable the workaround (skip SMAP initialization) for bad GameStar compatible adaptors.
 DEV9_GAMESTAR_WORKAROUND ?= 1
 
+# Enable to enable support for AIF specific functions
+DEV9_ENABLE_AIF ?= 0
+
 IOP_BIN ?= ps2dev9.irx
 
 IOP_INCS += -I$(PS2SDKSRC)/iop/dev9/poweroff/include
@@ -30,6 +33,10 @@ endif
 
 ifeq ($(DEV9_GAMESTAR_WORKAROUND),1)
 IOP_CFLAGS += -DDEV9_GAMESTAR_WORKAROUND=1
+endif
+
+ifeq ($(DEV9_ENABLE_AIF),1)
+IOP_CFLAGS += -DDEV9_ENABLE_AIF=1
 endif
 
 include $(PS2SDKSRC)/Defs.make

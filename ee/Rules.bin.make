@@ -26,4 +26,9 @@ $(PS2SDKSRC)/ee/rpc/cdvd/lib/libcdvd.a:
 
 $(PS2SDKSRC)/ee/libcglue/lib/libcglue.a:
 	$(MAKEREC) $(PS2SDKSRC)/ee/libcglue
+
+.NOTPARALLEL:: \
+	$(PS2SDKSRC)/ee/kernel/lib/libkernel.a \
+	$(PS2SDKSRC)/ee/rpc/cdvd/lib/libcdvd.a \
+	$(PS2SDKSRC)/ee/libcglue/lib/libcglue.a
 endif
