@@ -6,11 +6,14 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-SUBDIRS = \
-	secrman \
-	secrman_arcade \
-	secrsif
+IOP_PARENT_DIR = $(PS2SDKSRC)/iop/security/secrman
+IOP_SRC_DIR = $(IOP_PARENT_DIR)/src/
+IOP_INC_DIR = $(IOP_PARENT_DIR)/include/
 
-include $(PS2SDKSRC)/Defs.make
-include $(PS2SDKSRC)/Rules.make
-include $(PS2SDKSRC)/iop/Rules.release
+IOP_BIN = secrman_arcade.irx
+
+BUILDING_ARCADE_SECRMAN = 1
+DEX_SUPPORT = 0
+IOP_CFLAGS += -DBUILDING_ARCADE_SECRMAN
+
+include $(IOP_PARENT_DIR)/Makefile
