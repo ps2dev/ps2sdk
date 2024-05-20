@@ -49,7 +49,7 @@ static loadfile_elf_load_alloc_buffer_from_heap_callback_t loadfile_elf_load_all
 static loadfile_elf_load_dealloc_buffer_from_heap_callback_t loadfile_elf_load_dealloc_buffer_from_heap; // 0x00003d30
 
 // Function prototypes.
-static int func_0000077c(int port, int slot, void *buffer);
+static int card_decrypt(int port, int slot, void *buffer);
 static int func_00000bfc(void *dest, unsigned int size);
 static int func_00002eb0(struct ModloadBitTableDescriptor *ModloadBitTableDescriptor, int fd, int port, int slot, int device);
 static int secrman_loadfile_read_callback_common(int fd, loadfile_allocate_handler_struct_t *allocate_info, const struct ModloadBitTableDescriptor *ModloadBitTableDescriptor, int (*DecryptBlockFunction)(void *src, void *dest, unsigned int size));
@@ -79,7 +79,7 @@ static void _printf(const char *format, ...){
 #endif
 
 // 0x0000077c
-static int func_0000077c(int port, int slot, void *buffer)
+static int card_decrypt(int port, int slot, void *buffer)
 {
     if (GetMcCommandHandler() == NULL) {
         return 0;
@@ -129,19 +129,19 @@ int SecrCardBootHeader(int port, int slot, void *buffer, SecrBitTable_t *BitTabl
     get_Kbit(buffer, Kbit);
     get_Kc(buffer, Kc);
 
-    if (func_0000077c(port, slot, Kbit) == 0) {
+    if (card_decrypt(port, slot, Kbit) == 0) {
         return 0;
     }
 
-    if (func_0000077c(port, slot, &Kbit[8]) == 0) {
+    if (card_decrypt(port, slot, &Kbit[8]) == 0) {
         return 0;
     }
 
-    if (func_0000077c(port, slot, Kc) == 0) {
+    if (card_decrypt(port, slot, Kc) == 0) {
         return 0;
     }
 
-    if (func_0000077c(port, slot, &Kc[8]) == 0) {
+    if (card_decrypt(port, slot, &Kc[8]) == 0) {
         return 0;
     }
 
