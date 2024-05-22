@@ -1,0 +1,15 @@
+
+DECLARE_EXPORT_TABLE(actimer, 1, 1)
+DECLARE_EXPORT(_start)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(acTimerModuleStart)
+DECLARE_EXPORT(acTimerModuleRestart)
+DECLARE_EXPORT(acTimerModuleStop)
+DECLARE_EXPORT(acTimerModuleStatus)
+DECLARE_EXPORT(acTimerAdd)
+DECLARE_EXPORT(acTimerRemove)
+END_EXPORT_TABLE
+
+void _retonly() {}

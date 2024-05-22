@@ -1,0 +1,19 @@
+
+DECLARE_EXPORT_TABLE(acmem, 1, 1)
+DECLARE_EXPORT(_start)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(acMemModuleRestart)
+DECLARE_EXPORT(acMemModuleStart)
+DECLARE_EXPORT(acMemModuleStatus)
+DECLARE_EXPORT(acMemModuleStop)
+DECLARE_EXPORT(acMemSetup)
+DECLARE_EXPORT(acMemSend)
+DECLARE_EXPORT(acMemReceive)
+DECLARE_EXPORT(acMemWait)
+DECLARE_EXPORT(_retonly)
+DECLARE_EXPORT(_retonly)
+END_EXPORT_TABLE
+
+void _retonly() {}

@@ -1,0 +1,12 @@
+
+loadcore_IMPORTS_start
+I_RegisterLibraryEntries
+loadcore_IMPORTS_end
+
+stdio_IMPORTS_start
+I_printf
+stdio_IMPORTS_end
+
+thbase_IMPORTS_start
+I_DelayThread
+thbase_IMPORTS_end
