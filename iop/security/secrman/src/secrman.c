@@ -15,7 +15,14 @@
 
 // Based on the module from DVD Player Installer 2.14
 
+#ifdef BUILDING_ARCADE_SECRMAN
+#define CARD_AUTH_KEY_CHANGE_CMDNUM 3 // cmd number for `card_auth_key_change()`. arcade SECRMAN uses `3` for this
+#define MODNAME "secrman_for_arcade"
+#else
+#define CARD_AUTH_KEY_CHANGE_CMDNUM 1 // cmd number for `card_auth_key_change()`. arcade SECRMAN uses `3` for this
 #define MODNAME "secrman_special"
+#endif
+
 IRX_ID(MODNAME, 1, 4);
 
 #ifdef DEX_SUPPORT
@@ -42,7 +49,7 @@ static loadfile_elf_load_alloc_buffer_from_heap_callback_t loadfile_elf_load_all
 static loadfile_elf_load_dealloc_buffer_from_heap_callback_t loadfile_elf_load_dealloc_buffer_from_heap; // 0x00003d30
 
 // Function prototypes.
-static int func_0000077c(int port, int slot, void *buffer);
+static int card_decrypt(int port, int slot, void *buffer);
 static int func_00000bfc(void *dest, unsigned int size);
 static int func_00002eb0(struct ModloadBitTableDescriptor *ModloadBitTableDescriptor, int fd, int port, int slot, int device);
 static int secrman_loadfile_read_callback_common(int fd, loadfile_allocate_handler_struct_t *allocate_info, const struct ModloadBitTableDescriptor *ModloadBitTableDescriptor, int (*DecryptBlockFunction)(void *src, void *dest, unsigned int size));
@@ -72,7 +79,7 @@ static void _printf(const char *format, ...){
 #endif
 
 // 0x0000077c
-static int func_0000077c(int port, int slot, void *buffer)
+static int card_decrypt(int port, int slot, void *buffer)
 {
     if (GetMcCommandHandler() == NULL) {
         return 0;
@@ -122,19 +129,19 @@ int SecrCardBootHeader(int port, int slot, void *buffer, SecrBitTable_t *BitTabl
     get_Kbit(buffer, Kbit);
     get_Kc(buffer, Kc);
 
-    if (func_0000077c(port, slot, Kbit) == 0) {
+    if (card_decrypt(port, slot, Kbit) == 0) {
         return 0;
     }
 
-    if (func_0000077c(port, slot, &Kbit[8]) == 0) {
+    if (card_decrypt(port, slot, &Kbit[8]) == 0) {
         return 0;
     }
 
-    if (func_0000077c(port, slot, Kc) == 0) {
+    if (card_decrypt(port, slot, Kc) == 0) {
         return 0;
     }
 
-    if (func_0000077c(port, slot, &Kc[8]) == 0) {
+    if (card_decrypt(port, slot, &Kc[8]) == 0) {
         return 0;
     }
 
@@ -576,13 +583,16 @@ int SecrAuthCard(int port, int slot, int cnum)
 
     _printf("mechacon auth 0x80\n");
 
-    /*  The normal secrman_for_dex module does not have this step. With this step, card authentication does not work on a DEX.
-        On a CEX, it appears that card authentication still works without this step, but I don't know whether there are any side-effects.   */
+    /*  sp193: The normal secrman_for_dex module does not have this step. With this step, card authentication does not work on a DEX.
+        On a CEX, it appears that card authentication still works without this step, but I don't know whether there are any side-effects.
+
+        El_isra: arcade SECRMAN uses CMD number 3 here, unlike our homebrew one, that uses 1.
+    */
     if ((
 #ifdef DEX_SUPPORT
             IsDEX ||
 #endif
-            card_auth_key_change(port, slot, 1)) == 0) {
+            card_auth_key_change(port, slot, CARD_AUTH_KEY_CHANGE_CMDNUM)) == 0) {
         card_auth_60(port, slot);
         return 0;
     }
@@ -1123,3 +1133,244 @@ void *SecrDownloadFile(int port, int slot, void *buffer)
 
     return buffer;
 }
+
+#ifdef BUILDING_ARCADE_SECRMAN
+// Authentication routine for COH-H10020 security dongles
+// Only useful for namco system 246/256
+int SecrAuthDongle(int port, int slot, int cnum)
+{
+    unsigned char
+    MechaChallenge2[8],
+    CardIV[8],
+    CardMaterial[8],
+    CardNonce[8],
+    MechaChallenge1[8],
+    MechaChallenge3[8],
+    CardResponse1[8],
+    CardResponse2[8],
+    CardResponse3[8];
+
+    if (GetMcCommandHandler() == NULL) {
+        _printf("mcCommand isn't assigned\n");
+        return 0;
+    }
+
+    _printf("SecrAuthDongle start\n");
+
+    memset(MechaChallenge1, 0, sizeof(MechaChallenge1));
+
+    if (card_auth_60(port, slot) == 0) {
+        return 0;
+    }
+
+    _printf("dongle auth 0x60\n");
+
+    if (mechacon_auth_80(cnum) == 0) {
+        return 0;
+    }
+
+    _printf("mechacon auth 0x80\n");
+
+    /* El_isra:
+     *  SecrAuthDongle does not perform the card_auth_key_change that should be here
+     *  Is this what makes COH-H models only accept one dongle per boot session?
+     */
+
+    if (card_auth(port, slot, 0xF0, 0x00) == 0) {
+        card_auth_60(port, slot);
+        return 0;
+    }
+
+    _printf("dongle auth 0x00\n");
+
+    if (mechacon_auth_81(cnum | 0x40) == 0) { // SecrAuthCard passes the cnum as-is, no xoring.
+        card_auth_60(port, slot);
+        return 0;
+    }
+
+    _printf("mechacon auth 0x81\n");
+
+    if (card_auth_read(port, slot, CardIV, 0xF0, 0x01) == 0) {
+        goto Error2_end;
+    }
+
+    _printf("dongle auth 0x01\n");
+
+    if (card_auth_read(port, slot, CardMaterial, 0xF0, 0x02) == 0) {
+        goto Error2_end;
+    }
+
+    _printf("dongle auth 0x02\n");
+
+    if (mechacon_auth_82(CardIV, CardMaterial) == 0) {
+        goto Error2_end;
+    }
+
+    _printf("mechacon auth 0x82\n");
+
+    if (card_auth(port, slot, 0xF0, 0x03) == 0) {
+        goto Error2_end;
+    }
+
+    _printf("dongle auth 0x03\n");
+
+    if (card_auth_read(port, slot, CardNonce, 0xF0, 0x04) == 0) {
+        goto Error2_end;
+    }
+
+    _printf("dongle auth 0x04\n");
+
+    if (mechacon_auth_83(CardNonce) == 0) {
+        goto Error2_end;
+    }
+
+    _printf("mechacon auth 0x83\n");
+
+    if (card_auth(port, slot, 0xF0, 0x05) == 0) {
+        goto Error2_end;
+    }
+
+    _printf("dongle auth 0x05\n");
+
+    if (pol_cal_cmplt() == 0) {
+        goto Error2_end;
+    }
+
+    _printf("mechacon auth 0x8f\n");
+
+    if (mechacon_auth_84(MechaChallenge1, MechaChallenge2) == 0) {
+        goto Error2_end;
+    }
+
+    _printf("mechacon auth 0x84\n");
+
+    if (mechacon_auth_85(&MechaChallenge2[4], MechaChallenge3) == 0) {
+        goto Error2_end;
+    }
+
+    _printf("mechacon auth 0x85\n");
+
+    if (card_auth_write(port, slot, MechaChallenge3, 0xF0, 0x06) == 0) {
+        goto Error2_end;
+    }
+
+    _printf("dongle auth 0x06\n");
+
+    if (card_auth_write(port, slot, MechaChallenge2, 0xF0, 0x07) == 0) {
+        goto Error2_end;
+    }
+
+    _printf("dongle auth 0x07\n");
+
+    if (card_auth(port, slot, 0xF0, 0x08) == 0) {
+        goto Error2_end;
+    }
+
+    _printf("dongle auth 0x08\n");
+
+    if (card_auth2(port, slot, 0xF0, 0x09) == 0) {
+        goto Error2_end;
+    }
+
+    _printf("dongle auth 0x09\n");
+
+    if (card_auth(port, slot, 0xF0, 0x0A) == 0) {
+        goto Error2_end;
+    }
+
+    _printf("dongle auth 0x0a\n");
+
+    if (card_auth_write(port, slot, MechaChallenge1, 0xF0, 0x0B) == 0) {
+        goto Error2_end;
+    }
+
+    _printf("dongle auth 0x0b\n");
+
+    if (card_auth(port, slot, 0xF0, 0x0C) == 0) {//
+        goto Error2_end;
+    }
+
+    _printf("dongle auth 0x0c\n");
+
+    if (card_auth2(port, slot, 0xF0, 0x0D) == 0) {//
+        goto Error2_end;
+    }
+
+    _printf("dongle auth 0x0d\n");
+
+    if (card_auth(port, slot, 0xF0, 0x0E) == 0) {//
+        goto Error2_end;
+    }
+
+    _printf("dongle auth 0x0e\n");
+    //sp193 comment on SecrAuthCard for the following function call: Originally, it used the same region as CardNonce. But that might have just been a result of compiler code optimization.
+    //El_isra: contrary to what sp193 comments about this, ghidra shows this as a separate buffer than CardNonce. on both SecrAuthCard and SecrAuthDongle. maybe error, or an actual diff on the SECRMAN version sp193 reversed? who knows...
+    if (card_auth_read(port, slot, CardResponse1, 0xF0, 0x0F) == 0) { 
+        goto Error2_end;
+    }
+
+    _printf("dongle auth 0x0f\n");
+
+    if (card_auth(port, slot, 0xF0, 0x10) == 0) {
+        goto Error2_end;
+    }
+
+    _printf("dongle auth 0x10\n");
+
+    if (card_auth_read(port, slot, CardResponse2, 0xF0, 0x11) == 0) {
+        goto Error2_end;
+    }
+
+    _printf("dongle auth 0x11\n");
+
+    if (mechacon_auth_86(CardResponse1, CardResponse2) == 0) {
+        goto Error2_end;
+    }
+
+    _printf("mechacon auth 0x86\n");
+
+    if (card_auth(port, slot, 0xF0, 0x12) == 0) {
+        goto Error2_end;
+    }
+
+    _printf("dongle auth 0x12\n");
+
+    if (card_auth_read(port, slot, CardResponse3, 0xF0, 0x13) == 0) {
+        goto Error2_end;
+    }
+
+    _printf("dongle auth 0x13\n");
+
+    if (mechacon_auth_87(CardResponse3) == 0) {
+        goto Error2_end;
+    }
+
+    _printf("mechacon auth 0x87\n");
+
+    if (pol_cal_cmplt() == 0) {
+        goto Error2_end;
+    }
+
+    _printf("mechacon auth 0x8f\n");
+
+    if (card_auth(port, slot, 0xF0, 0x14) == 0) {//
+        goto Error2_end;
+    }
+
+    _printf("card auth 0x14\n");
+
+    if (mechacon_auth_88() == 0) {
+        goto Error2_end;
+    }
+
+    _printf("mechacon auth 0x88!\n");
+
+    return 1;
+
+Error2_end:
+    card_auth_60(port, slot);
+    mechacon_auth_80(cnum);
+
+    return 0;
+}
+#endif
